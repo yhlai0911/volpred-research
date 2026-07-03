@@ -619,6 +619,57 @@ def test_host_cron_fail_quota_window_is_self_recovering(tmp_path: Path):
     assert r["breached"] is True and r["level"] == "critical"
 
 
+def test_host_cron_fail_git_push_held_is_benign(tmp_path: Path):
+    """2026-07-03: cron_git_push_backup.sh HOLDS a push (distinct exit 120) when HEAD
+    carries a NEW silent fallback, and self-sends its own targeted WARN. That hold is
+    the guard working as designed — NOT a cron infra failure. It must be fully exempt
+    from host_cron_fail (no CRITICAL), while its REAL failures (origin divergence /
+    real push failure = exit 1) still escalate. Root cause guard for the 4-day 28x
+    false-CRITICAL cascade (a single line-38 false-positive silent-fallback flag)."""
+    from datetime import datetime, timezone
+
+    from volpred.ops.alerts import _parse_host_cron_state
+
+    storage = tmp_path / "storage"
+    _write_json(
+        storage / "ops" / "scheduler_state.json",
+        {"last_tick_at": "2026-07-03T00:00:00+00:00", "last_status": "ok"},
+    )
+    now = datetime.now(timezone.utc)
+
+    def write_push_exits(codes):
+        lines = []
+        for i, c in enumerate(codes):
+            lines.append(f"=== [git_push_backup] fire run {i} ===")
+            lines.append(
+                f"=== [git_push_backup] exit {c} at Fri Jul 3 1{i}:00:00 CST 2026 ==="
+            )
+        _write_text(storage / "logs" / "cron" / "git_push_backup.log", "\n".join(lines))
+
+    # 1) lone held push (latest=120) → NOT breached (benign, self-reported WARN)
+    write_push_exits([0, 0, 120])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is False
+
+    # 2) sustained held pushes (many 120 in a row, the 4-day cascade shape) → still
+    #    NOT breached: no matter how long a hold persists, it is never host_cron_fail
+    write_push_exits([120, 120, 120, 120])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is False
+
+    # 3) a REAL push failure (latest=1) still fires CRITICAL — the held exemption must
+    #    not mask genuine backup failures (credential/network/divergence)
+    write_push_exits([0, 120, 1])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is True and r["level"] == "critical"
+
+    # 4) held push breaks the consecutive-failure chain: [1, 1, 120] latest is benign
+    #    → not breached (current state is a benign hold, past failures superseded)
+    write_push_exits([1, 1, 120])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is False
+
+
 def test_findings_exit_logs_from_schedule_config():
     from volpred.ops.alerts import _findings_exit_logs_from_schedule_config
 

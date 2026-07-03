@@ -810,6 +810,26 @@ def _findings_exit_logs_from_schedule_config(config: dict[str, Any] | None = Non
 _QUOTA_EXHAUSTED_EXIT_CODE = 75
 _SELF_RECOVERING_EXIT_CODES = frozenset({142, _QUOTA_EXHAUSTED_EXIT_CODE})
 
+# 2026-07-03 (host_cron_fail false-critical on git_push_backup held push — same
+# class as the 2026-06-20 STRIKE-3 exit-as-findings false-critical, new instance):
+# cron_git_push_backup.sh protectively HOLDS a push when HEAD carries a NEW silent
+# fallback (audit_silent_fallbacks new>0) so red code never reaches origin and CI
+# never goes red. That hold is the guard WORKING AS DESIGNED — the wrapper RAN FINE
+# and self-sends its own targeted WARN ("push held — N new silent fallbacks: <list>").
+# It is NOT a cron infra failure. But the wrapper previously exit 1'd the hold, which
+# is indistinguishable from its REAL failures (origin divergence, real push failure),
+# so host_cron_fail escalated to CRITICAL after 2 fires — a single line-38 false-
+# positive silent-fallback flag on _claude_project_dir.py cascaded into 28x CRITICAL
+# over 4 days (2026-06-29 → 07-03). Per-log findings exemption (_is_audit_signal_log)
+# is too coarse here because the OTHER exit-1 paths are genuine failures we DO want to
+# alert on. So the wrapper now emits a distinct code 120 for the held path only, and
+# that code is treated as a benign, self-reported findings signal: fully exempt from
+# host_cron_fail (job self-reports via its own WARN), while exit 1 (divergence / real
+# push failure) still fires CRITICAL. Global sentinel like 75/142, not a hardcoded
+# log-name registry.
+_PUSH_HELD_EXIT_CODE = 120
+_BENIGN_FINDINGS_EXIT_CODES = frozenset({_PUSH_HELD_EXIT_CODE})
+
 
 def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     logs_dir = _cron_logs_dir(storage_dir)
@@ -857,13 +877,21 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
                 continue
             latest = _latest_cron_exit(log_path)
             if latest and int(latest.get("exit_code", 0)) != 0:
+                # Benign, self-reported findings signal (e.g. git_push_backup HELD a
+                # push due to a new silent fallback and self-sent its own WARN). The
+                # cron ran fine and made a correct protective decision — not an infra
+                # failure. Fully exempt from host_cron_fail so the job's own targeted
+                # WARN is the single signal (avoids redundant + misleading CRITICAL).
+                if int(latest.get("exit_code", 0)) in _BENIGN_FINDINGS_EXIT_CODES:
+                    continue
                 failing_logs.append(latest)
                 codes = _trailing_authoritative_exit_codes(log_path)
                 # Quota-window fires (exit=75) break the consecutive-failure chain:
                 # a Claude Max session-limit gap spanning >=2 fires is expected, not
                 # a sustained outage. A 142 hang chain is still counted (stuck != gap).
                 consec = _trailing_consecutive_failures(
-                    codes, ignore_codes=(_QUOTA_EXHAUSTED_EXIT_CODE,)
+                    codes,
+                    ignore_codes=(_QUOTA_EXHAUSTED_EXIT_CODE, *_BENIGN_FINDINGS_EXIT_CODES),
                 )
                 max_consec_fail = max(max_consec_fail, consec)
                 latest_code = int(latest.get("exit_code", 0))

@@ -46055,7 +46055,7 @@
     "description": "Gmail UID: 12549\nMessage-ID: <78AE8D4D-698F-41BB-BC4F-F35CB86EB25C@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Fri, 3 Jul 2026 10:29:12 +0800\nSubject: Re: [VolPred Alert][CRITICAL] Host cron failure detected\n\n--- 用戶回信內容 ---\n立刻處理\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月3日 07:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Host cron failure detected\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> 偵測到 host cron 失敗（最新 exit code != 0）。severity=critical（max_consecutive_failures=2；non_hang_failure=True）。\r\n> 註：exit=142 = SIGALRM hang-kill，單次會由下一輪 hourly fire 自我恢復（→warn）；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手，永遠 warn 且不累積連續 critical）；≥2 連續失敗或非-{142,75} 失敗才升 critical。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\r\n> \r\n> scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\r\n> scheduler_last_status: ok\r\n> scheduler_age_minutes: 107655.3\r\n> failing_logs:\r\n> storage/logs/cron/git_push_backup.log exit=1 at 2026-07-02T23:00:33.389565+00:00\r\n> 影響\r\n> \r\n> 資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\r\n> Supabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\r\n> release_pool_gap alert，發文節奏中斷。\r\n> \r\n> 建議行動\r\n> \r\n> 查失敗 log： tail -20 <failing_log 路徑>\r\n> 權限問題（exit=126）： chmod +x scripts/<script>.sh\r\n> macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\r\n> System Settings > Privacy & Security > Full Disk Access 加 script 路徑\r\n> 手動跑 failed command 驗證修復： uv run <command>\r\n> 比對 canonical schedule： crontab -l vs config/runtime_schedules.json\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -46081,8 +46081,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-03T02:42:25.020480+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-claude"
       }
     ],
-    "started_at": "2026-07-03T02:31:28.125528+00:00"
+    "started_at": "2026-07-03T02:31:28.125528+00:00",
+    "completed_at": "2026-07-03T02:42:25.020162+00:00",
+    "result": "Host cron CRITICAL 已解決：git_push_backup held-push false-positive 兩層修（line-38 audit + exit-120 流程區分）；push 18 commit、breaches=0；close email+Telegram 已寄"
   }
 ]

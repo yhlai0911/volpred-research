@@ -69,7 +69,16 @@ if [ "$AUDIT_RC" -ne 0 ] && [ -n "$NEW_COUNT" ] && [ "$NEW_COUNT" -gt 0 ]; then
     --title "git-push-backup: push held — ${NEW_COUNT} new silent fallback(s)" \
     --body "本地領先 ${ahead} commit 但 HEAD 帶 ${NEW_COUNT} 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push（紅碼不上 origin、CI 不會紅）。下一班 hourly dispatch 必須先修（每處加 'from volpred.ops.diagnostics import warn' 再 fallback，或標 '# silent-ok: 理由'）再讓 push 恢復。新發現：
 ${NEWLINES}" >> "$LOG" 2>&1 || true
-  exit 1
+  # 2026-07-03: distinct exit 120 (NOT 1) for the held path. The guard ran fine and
+  # made a correct protective decision + self-sent its own targeted WARN above — it is
+  # NOT a cron infra failure. alerts.py `_BENIGN_FINDINGS_EXIT_CODES` treats 120 as a
+  # benign, self-reported findings signal (exempt from host_cron_fail), while the real
+  # failure paths below (divergence line ~52, push failure line ~103) keep exit 1 →
+  # host_cron_fail CRITICAL. Root cause of the 4-day 28x false-CRITICAL: a single
+  # false-positive line-38 silent-fallback flag held every fire, each exit 1'd, and
+  # host_cron_fail could not tell a benign hold from a real failure. See error_log
+  # 2026-07-03 + alerts.py _PUSH_HELD_EXIT_CODE comment.
+  exit 120
 elif [ "$AUDIT_RC" -ne 0 ]; then
   echo "[$(ts)] WARN audit rc=$AUDIT_RC new=${NEW_COUNT:-?} — audit error not a fallback breach, pushing anyway (backup priority)" >> "$LOG"
 fi

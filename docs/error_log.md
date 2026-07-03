@@ -12,6 +12,17 @@
 
 **教訓**：`audit_silent_fallbacks` 判 silent 只看 except block 內是否 co-located trace，「except 外面有 print」不算 —— 寫 fail-open fallback 一律把 log/print 放進 except 內。另：cron exit≠0 未必是 job 掛，可能是 guard 故意擋 —— alert 敘述宜區分「job 失敗」vs「guard 主動 hold」。
 
+### 流程修正（2026-07-03 10:40 互動 session，回應老闆 email-12549「立刻處理」）— **FIXED（機械化上一條教訓）**
+
+**為何只修 line-38 不夠（永遠修流程不修資料 + 三振同 class）**：line-38 只解掉「這一次」的 false-positive。但 `cron_git_push_backup.sh` 的 held-push 用 `exit 1`，與它的**真失敗**（origin 分岔 line~52、真 push 失敗 line~103）**同碼不可分**。只要下次任何 codex/agent commit 帶新 silent fallback（6/28 note 記「反覆」），held-push 又 exit 1 → host_cron_fail 再累積 4 天 CRITICAL。這正是 `alerts.py` 2026-06-20 **STRIKE-3** 已識別的同一 class（「RAN FINE 但回非零 signal benign finding」的 false-critical），held-push 是新 instance。只修 line-38 = 被禁止的「再 patch 一次」表面修法。
+
+**解決（給 guard-hold 專屬 exit code，讓 alert 層能區分）**：
+1. `cron_git_push_backup.sh` held 路徑 `exit 1` → **`exit 120`**（專屬碼；divergence / 真 push 失敗保持 exit 1）。runtime copy 同步 `~/.volpred/bin/`，`bash -n` 兩份通過。
+2. `src/volpred/ops/alerts.py` 新增 `_PUSH_HELD_EXIT_CODE=120` + `_BENIGN_FINDINGS_EXIT_CODES`：`_parse_host_cron_state` 遇此碼**完全豁免** host_cron_fail（job 已自寄更精準的 held WARN，避免冗餘+誤導的 CRITICAL）+ 加入 consec chain-breaker（held 夾在真失敗間不算連續失敗）。全域 sentinel（同 75/142 慣例），非硬編 log-name registry — real failure 仍照常 alert。
+3. Regression test `tests/test_alerts.py::test_host_cron_fail_git_push_held_is_benign`（4 case：單次 held / 連日 held 皆 not-breached、真失敗 exit 1 仍 CRITICAL、held 破連續鏈）。24 tests pass。
+
+**教訓（PDCA Act）**：overloaded exit code（同碼表 benign finding + real failure）是 alert 誤判溫床。guard 主動 hold 是**成功的保護動作**（如同 `nothing-to-push → exit 0`），語意上不是 cron 失敗 → 該有專屬碼讓 alert 層區分。散文教訓（「alert 宜區分」）要在同一 incident 內升級成機械 gate，不留給下次。
+
 ## 2026-07-03 06:07 換機備份快照失效 = `ops/claude_user_backup/memory` 被改成 symlink + backup script hardcode 舊 Desktop 路徑 — **FIXED（動態推導路徑 + 恢復真實快照）**
 
 **現象**：hourly-06 fire 巡檢 `git status` 見 `ops/claude_user_backup/memory/` 下 40 檔標 deleted（未 commit），但 `ls` 顯示 105 檔實體存在 — git 與 FS 矛盾。`git add` 該路徑回 `致命錯誤: 路徑規格 ... 位於符號連結中`。
