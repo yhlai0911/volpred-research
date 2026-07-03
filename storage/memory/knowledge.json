@@ -37335,5 +37335,20 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-07-03T14:00:00.751111"
+  },
+  {
+    "item_id": "af275214",
+    "category": "experiment",
+    "content": "research_etf_dose_response (2026-07-03) public proxy diagnostic verdict PARTIAL_PUBLIC_PROXY_DOSE_RESPONSE. Data: yfinance PCG/EIX/SRE/XLU/DBA/CORN/WEAT/SPY 2011-01-03..2026-07-02, CAL FIRE California Fire Perimeters 5,774 fire rows (237 events with acres >=5,000), and USDM California weekly rows 2010-12-28..2026-06-30. Wildfire final-acre dose has 0/4 formal passes despite 4/4 positive directional coefficients; strongest utility 5d RV cell beta_log_acres=0.1089, t=1.47, p=0.141. Drought has 1/8 formal passes: 4-week California DSCI increase predicts 5d agriculture ETF RV with beta=0.00325, HAC t=3.5355, p=0.000407, high-minus-low=0.000286, Welch t=6.59. Lookahead controls: wildfire targets start on the first trading day strictly after CAL FIRE alarm_date; final acres are ex-post physical-dose labels, not tradable real-time signals; USDM validStart is treated as observable after +2 calendar days and then shifted one trading day. Conclusion must remain narrow: rapid CA drought deterioration is linked to near-term agriculture ETF RV in this proxy; there is no broad utility-volatility drought/wildfire pass.",
+    "evidence": [
+      "experiments/research_etf_dose_response/research_etf_dose_response.py",
+      "experiments/research_etf_dose_response/research_etf_dose_response_results.json",
+      "experiments/research_etf_dose_response/README.md",
+      "experiments/research_etf_dose_response/codex_review.md",
+      "https://gis.data.cnra.ca.gov/api/download/v1/items/c3c10388e3b24cec8a954ba10458039d/csv?layers=0",
+      "https://usdmdataservices.unl.edu/api/StateStatistics/GetDroughtSeverityStatisticsByAreaPercent"
+    ],
+    "confidence": 0.74,
+    "created_at": "2026-07-03T15:13:50.629737"
   }
 ]

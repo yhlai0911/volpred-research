@@ -46205,7 +46205,7 @@
     "title": "研究 backlog fallback: 加州野火/西部乾旱物理氣候風險對電力公用事業負債股與農業 ETF 的 dose-response",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 加州野火/西部乾旱物理氣候風險對電力公用事業負債股與農業 ETF 的 dose-response — NOAA/Cal Fire 公開野火事件資料庫 + US Drought Monitor（USDA/NOAA 免費）+ yfinance PCG/EIX/SRE（西岸電力公司）、DBA/CORN/WEAT（農業），檢定野火宣告/乾旱等級升高後 t+1..t+22 idiosyncratic RV、left-tail 是否對高曝險公司單調放大；與既有東岸颶風/cat bond 再保險題正交——這裡是西岸野火/乾旱對電力負債公司與農業（來源：QJE/AER/JPE 2025-26 physical | 來源 section: 期刊主題挖掘 batch 2026-07-03（journal_discovery_20260702_3；websearch joe/jbes/jbf/jfm/jpm/faj/jcommmkt/qje/aer/jpe/aej-macro 2025-26 趨勢層級；硬約束避開 vt/vix/garch-har 賽馬/etf fragility/cre/nbfi/stablecoin/ai concentration/labor-shortage/deposit-flightiness/market-to-book/thematic-concentration/data-driven-vc/blockbuster 等 06-30~07-02 已飽和 cluster；selectivity gate 後 10→9 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -46214,7 +46214,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-03T04:08:50+00:00"
+    "created_at": "2026-07-03T04:08:50+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-03T07:02:30.207504+00:00",
+    "claim_session_id": "817ce2af6595",
+    "status_history": [
+      {
+        "ts": "2026-07-03T07:02:30.207797+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T07:02:39.697084+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T07:14:31.916440+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-03T07:02:39.696781+00:00",
+    "completed_at": "2026-07-03T07:14:31.916141+00:00",
+    "result": "Completed public-proxy dose-response experiment with CAL FIRE, USDM, and yfinance data. Verdict PARTIAL_PUBLIC_PROXY_DOSE_RESPONSE: wildfire acreage dose 0/4 formal passes; drought 4-week DSCI increase passes only for ag ETF 5d RV (beta=0.00325, HAC t=3.5355, p=0.000407). Wrote experiment triplet, figure, Codex review, knowledge item af275214, and research_program backlog update."
   },
   {
     "id": "K1611_article_research",
