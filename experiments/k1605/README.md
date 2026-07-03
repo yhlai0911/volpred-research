@@ -145,7 +145,9 @@ Phase-1 "signal/weak" is only a *screen*, never a publication claim.
   bootstrap inference and to the filing-lag assumption.
 - **(B) OOS expanding-window DM test** (M/B-augmented forecast vs RV-only HAR-lite;
   `target_end < forecast_origin` enforced by `df.iloc[: i - h]`): M/B does **NOT**
-  improve OOS forecasts. **Every** `rmse_improve_pct` is negative; Diebold–Mariano
+  improve OOS forecasts. **Nearly every** `rmse_improve_pct` is negative — the only
+  positive is a trivial `q60_a90 / KBE_h22` = +0.0179% with DM `p=0.990` (no economic
+  or statistical meaning); Diebold–Mariano
   (Harvey) **|t| never exceeds 3**, and the only *significant* effects are in the
   **M/B-hurts** direction at short horizon h5 (q45 KRE t=−2.42; KBE t=−2.38; q60
   KRE t=−2.08). h22 all NS.

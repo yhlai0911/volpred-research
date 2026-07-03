@@ -46789,7 +46789,7 @@
     "title": "Paper review (Codex 24h-rule): K1605：區域銀行 M/B 折價與後續波動，橫斷面穩健、OOS 不過關",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_80cae4cb needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_80cae4cb",
@@ -46797,14 +46797,40 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-03T10:09:01+00:00"
+    "created_at": "2026-07-03T10:09:01+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-07-03T13:09:03.089235+00:00",
+    "claim_session_id": "ac7197607a79",
+    "status_history": [
+      {
+        "ts": "2026-07-03T13:09:03.089540+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-03T13:09:09.770618+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-03T13:16:55.243244+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-21"
+      }
+    ],
+    "started_at": "2026-07-03T13:09:09.770319+00:00",
+    "completed_at": "2026-07-03T13:16:55.243019+00:00",
+    "result": "Codex 24h-review CONDITIONAL_PASS: lookahead/DM-Harvey/FMB/seed 全 PASS；唯一必修=README:148 improve_pct 措辭已修正（唯一微幅正值 q60_a90/KBE_h22 +0.0179% p=0.990 無意義）；發佈文章敘述本就正確無需改"
   },
   {
     "id": "paper_review_mile_c1ce6550",
     "title": "Paper review (Codex 24h-rule): USDC 脫鉤那 5 天：1-3 年短券波動率飆 2.8 倍，1-3 個月卻沒事",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c1ce6550 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c1ce6550",
@@ -46812,7 +46838,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-03T10:09:01+00:00"
+    "created_at": "2026-07-03T10:09:01+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-07-03T13:17:10.953997+00:00",
+    "claim_session_id": "37093ad590ce",
+    "status_history": [
+      {
+        "ts": "2026-07-03T13:17:10.954286+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-03T13:17:11.177419+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-03T13:21:46.326988+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-21"
+      }
+    ],
+    "started_at": "2026-07-03T13:17:11.177135+00:00",
+    "completed_at": "2026-07-03T13:21:46.326701+00:00",
+    "result": "Codex 24h-review CONDITIONAL_PASS: K1586 code/results reproducible and SHY 2.83x / BIL 1.17x match JSON; 必修=發佈文把 ED±5 交易日(11筆)寫成『那5天』，並需軟化 USDC reserve/fire-sale 因果語言為 single-event association"
   },
   {
     "id": "email-12564-6107c0",
@@ -46899,5 +46951,21 @@
     "started_at": "2026-07-03T12:12:11.615524+00:00",
     "completed_at": "2026-07-03T12:22:10.077042+00:00",
     "result": "期刊挖掘 agent 產 13 方向，selectivity gate 13→10 入單 research_program.md batch 2026-07-03b（gate 掉 人口結構/buyback blackout/Basel III）；8 高信心+2 中信心⚠️"
+  },
+  {
+    "id": "research_staleness_bias_rv_har",
+    "title": "研究 backlog fallback: 非流動性資產「staleness bias」修正版 RV 估計量對 HAR 預測力的增量",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 非流動性資產「staleness bias」修正版 RV 估計量對 HAR 預測力的增量 — 用 yfinance 5-min 片段建 zero-return-run-length staleness proxy（低流動 small-cap ETF / ADR），實作 staleness-adjusted RV（staleness-weighted realized kernel）vs 標準 5-min RV，HAR OOS QLIKE + DM 檢定是否改善低流動標的預測；與 line 1400（noise-robust kernel/MedRV，今日已入單）正交——那是「微結構量測誤差」， | 來源 section: 期刊主題挖掘 batch 2026-07-03b（journal_discovery_20260703_2；websearch jbf/jfe/rfs/joe/jfqa/jfm + jpm/faj/j.alt inv/j.fixed income/j.futures markets + qje/aer/jpe/aej + jfec/jbes/jae 2025-26 趨勢層級；selectivity gate 後 13→10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "staleness_bias_rv_har",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-03T13:07:48+00:00"
   }
 ]
