@@ -12,8 +12,9 @@ Sub-modules:
   scheduler — asyncio tick → enqueue (croniter-driven)
   alerts    — send-alert shim with per-class dedup
 
-Status: Deliverable 4/8 — modules integrated + regression tests + ops CLI.
-Remaining: Codex review gate (6), shadow run (5), cutover, deprecate.
+Status: Deliverable 5/8 — Codex review CONDITIONAL_PASS (2026-07-04, 2 rounds);
+shadow run started (dry-run LaunchAgent, `ops/launchd/com.volpred.dispatch-supervisor.plist`).
+Remaining: 7-day shadow observation, cutover, deprecate legacy shell, retro.
 """
 
-__version__ = "0.3.0-d4"
+__version__ = "0.4.0-d5"
