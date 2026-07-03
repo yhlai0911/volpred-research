@@ -45802,5 +45802,111 @@
     "started_at": "2026-07-03T00:42:06.183662+00:00",
     "completed_at": "2026-07-03T00:51:09.542734+00:00",
     "result": "K1609 completed: CME warehouse stock endpoints timed out/0 bytes in this runtime, so the experiment is marked DATA_LIMITATION_PROXY_NULL rather than COMEX evidence. Fallback yfinance/FRED ETF-futures proxy 2006-2026 found no strict |t|>=3 RV/correlation signal; artifacts under experiments/K1609/."
+  },
+  {
+    "id": "K1610",
+    "title": "K1610: Frontier markets（FM ETF）與 EM 危機相關性收斂是否侵蝕分散效益** — yfinance FM (iShares MSCI Frontier and Select EM) + EEM/VWO + VNM 等成分代理",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1385). Original: Frontier markets（FM ETF）與 EM 危機相關性收斂是否侵蝕分散效益** — yfinance FM (iShares MSCI Frontier and Select EM) + EEM/VWO + VNM 等成分代理，計算 rolling 63d/252d FM-EM 相關係數與 FM own RV，檢定近期 EM 貨幣/信用壓力事件窗後 FM-EM 相關是否結構性上升、傳統「frontier markets 分散 EM risk」論述是否鬆動（來源：JPM/FAJ 2025-26 討論 frontier markets 逐漸被納入 broader EM beta，分散效益存疑）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1610.py with signal.shift(1) + seed=42, (c) K1610_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1385,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-03T00:00:01Z"
+  },
+  {
+    "id": "K1611",
+    "title": "K1611: Giacomini-White conditional predictive ability 檢定重驗 HAR vs GARCH 賽馬是否 regime-dependent** — 用既有 SPY/TAIEX HAR-RV vs GJR-G",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1387). Original: Giacomini-White conditional predictive ability 檢定重驗 HAR vs GARCH 賽馬是否 regime-dependent** — 用既有 SPY/TAIEX HAR-RV vs GJR-GARCH forecast loss differential，不只做 unconditional DM，改跑 Giacomini-White (2006) conditional predictive ability test，以滯後 VIX regime / high-vs-low vol state 當 conditioning instrument，誠實檢定「哪個模型贏」是否只在特定狀態成立而非全樣本單一贏家（來源：Journal of Econometrics/JBES 2025-26 對 unconditional DM 侷限性與 conditional forecast evaluation 方法論重新強調）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1611.py with signal.shift(1) + seed=42, (c) K1611_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "succeeded",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1387,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-03T00:00:02Z",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-07-03T00:10:23.295565+00:00",
+    "claim_session_id": "37f94eaa5b5c",
+    "status_history": [
+      {
+        "ts": "2026-07-03T00:10:23.295847+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-03T00:11:46.732232+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-03T00:56:01.948096+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-08"
+      }
+    ],
+    "started_at": "2026-07-03T00:11:46.731988+00:00",
+    "completed_at": "2026-07-03T00:56:01.947744+00:00",
+    "result": "GW(2006) conditional predictive ability test: HAR-RV vs GJR-GARCH winner NOT regime-dependent (SPY 4156 + 0050 1212 OOS days). GJR small consistent edge in both VIX regimes but not Harvey-sig; direct regime-slope NS all 4 cells. +proxy-validity & data-integrity guardrails. CONDITIONAL_PASS (Codex R1 all-addressed + mainthread audit; R2 pending). knowledge item bfbe4fc9."
+  },
+  {
+    "id": "K1612",
+    "title": "K1612: FOMC 聲明/會議紀要語言複雜度（可讀性/避險語氣）對會後 vol 持續性與 VIX 期限結構的預測力** — Fed 公開 FOMC statement/minutes 全文 + 免費可讀性指標（Flesch-Kincaid/詞彙多樣性",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1397). Original: FOMC 聲明/會議紀要語言複雜度（可讀性/避險語氣）對會後 vol 持續性與 VIX 期限結構的預測力** — Fed 公開 FOMC statement/minutes 全文 + 免費可讀性指標（Flesch-Kincaid/詞彙多樣性）與簡易 hedging-word lexicon（\"however\"、\"uncertain\" 等詞頻）建 complexity/tone score，release-lag 後 `shift(1)`，檢定其對會後 t+1..t+5 SPY RV persistence 與 VIX/VIX3M term-structure slope 變化的增量預測力；與既有 generic FOMC event dummy 研究正交——這裡是文本複雜度而非事件本身（來源：JBES/Journal of Econometrics 2025-26 央行溝通文本複雜度與市場反應的 NLP-in-macro 熱點）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1612.py with signal.shift(1) + seed=42, (c) K1612_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1397,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-03T00:00:02Z"
+  },
+  {
+    "id": "K1613",
+    "title": "K1613: 雜訊穩健已實現波動率估計量（Realized Kernel / Two-Scale RV / MedRV）對 HAR 預測力的增量：本機 5-min 資料重估** — 用本機已有 TAIFEX/SPY 5-min tick-derived ",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1399). Original: 雜訊穩健已實現波動率估計量（Realized Kernel / Two-Scale RV / MedRV）對 HAR 預測力的增量：本機 5-min 資料重估** — 用本機已有 TAIFEX/SPY 5-min tick-derived 資料，實作 jump-robust MedRV 與 noise-robust Realized Kernel / Two-Scale RV，取代標準 5-min RV 作 HAR 輸入，OOS QLIKE/DM/Harvey 對比標準 RV-HAR baseline；與既有 OHLC candlestick estimator 題（line 1291）正交——這裡是 tick/5-min noise-robust kernel 估計量（來源：JBES/Journal of Econometrics 長期熱點 realized-measure microstructure noise correction，2025-26 仍持續有新 kernel 變體研究）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1613.py with signal.shift(1) + seed=42, (c) K1613_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1399,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-03T00:00:02Z"
+  },
+  {
+    "id": "research_reit_land_fpi_wy_ryn_etf_pho_cgw_fiw_vol",
+    "title": "研究 backlog fallback: 天然資源實質資產籃（農地 REIT LAND/FPI、林地 WY/RYN、水資源 ETF PHO/CGW/FIW）的通膨避險與氣候風險 vol 因子",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 天然資源實質資產籃（農地 REIT LAND/FPI、林地 WY/RYN、水資源 ETF PHO/CGW/FIW）的通膨避險與氣候風險 vol 因子 — yfinance LAND/FPI/WY/RYN/PHO/CGW/FIW + CPI/PPI surprise、breakeven inflation、SPY，檢定 inflation-shock 與 drought/climate event window 下 RV、downside semivariance、與大盤相關性是否真正較低；與既有 listed-infrastructure（PAVE/IFRA/IGF/GRID）題正交，這裡是農 | 來源 section: 期刊主題挖掘 batch 2026-07-03（journal_discovery_20260702_3；websearch joe/jbes/jbf/jfm/jpm/faj/jcommmkt/qje/aer/jpe/aej-macro 2025-26 趨勢層級；硬約束避開 vt/vix/garch-har 賽馬/etf fragility/cre/nbfi/stablecoin/ai concentration/labor-shortage/deposit-flightiness/market-to-book/thematic-concentration/data-driven-vc/blockbuster 等 06-30~07-02 已飽和 cluster；selectivity gate 後 10→9 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "reit_land_fpi_wy_ryn_etf_pho_cgw_fiw_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-03T00:08:46+00:00"
   }
 ]

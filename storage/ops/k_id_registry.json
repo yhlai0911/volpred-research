@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1588,
+  "last_k_id": 1613,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -280,8 +280,58 @@
       "status": "reserved",
       "topic": "Social Connectedness → 財報 vol 反應**（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性。全免費數千事件。",
       "topic_hash": "4d33512e6aa8dd35"
+    },
+    {
+      "claimed_at": "2026-07-03T00:00:01.835462+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1609",
+      "number": 1609,
+      "source_max": 1608,
+      "status": "reserved",
+      "topic": "COMEX 黃金/白銀倉儲存量與物理稀缺 proxy 對貴金屬 vol 與實質利率外溢** — CME 每日 COMEX registered/eligible gold/silver warehouse stock 公開報表 + yfinance GLD/SLV/GC=F/SI=F + FRED 10Y TIPS real yield（DFII10），以 registered-inventory depletion rate 與 GLD/SLV AUM 變化作 lease-rate 緊俏度 public proxy（無法取得 LBMA lease rate，明確標 proxy diagnostic），檢定 depletion regime 是否領先貴金屬 RV 與其與實質利率相關性的 flip（來源：JBF/JFM 2025-26 金價創高背景下 physical scarcity / lease-rate 風險溢酬文獻回溫）。",
+      "topic_hash": "d20b4790eb4fb6c8"
+    },
+    {
+      "claimed_at": "2026-07-03T00:00:01.927558+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1610",
+      "number": 1610,
+      "source_max": 1609,
+      "status": "reserved",
+      "topic": "Frontier markets（FM ETF）與 EM 危機相關性收斂是否侵蝕分散效益** — yfinance FM (iShares MSCI Frontier and Select EM) + EEM/VWO + VNM 等成分代理，計算 rolling 63d/252d FM-EM 相關係數與 FM own RV，檢定近期 EM 貨幣/信用壓力事件窗後 FM-EM 相關是否結構性上升、傳統「frontier markets 分散 EM risk」論述是否鬆動（來源：JPM/FAJ 2025-26 討論 frontier markets 逐漸被納入 broader EM beta，分散效益存疑）。",
+      "topic_hash": "79aa6a0f7a972543"
+    },
+    {
+      "claimed_at": "2026-07-03T00:00:02.012553+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1611",
+      "number": 1611,
+      "source_max": 1610,
+      "status": "reserved",
+      "topic": "Giacomini-White conditional predictive ability 檢定重驗 HAR vs GARCH 賽馬是否 regime-dependent** — 用既有 SPY/TAIEX HAR-RV vs GJR-GARCH forecast loss differential，不只做 unconditional DM，改跑 Giacomini-White (2006) conditional predictive ability test，以滯後 VIX regime / high-vs-low vol state 當 conditioning instrument，誠實檢定「哪個模型贏」是否只在特定狀態成立而非全樣本單一贏家（來源：Journal of Econometrics/JBES 2025-26 對 unconditional DM 侷限性與 conditional forecast evaluation 方法論重新強調）。",
+      "topic_hash": "91d4e9c07236b8fe"
+    },
+    {
+      "claimed_at": "2026-07-03T00:00:02.108564+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1612",
+      "number": 1612,
+      "source_max": 1611,
+      "status": "reserved",
+      "topic": "FOMC 聲明/會議紀要語言複雜度（可讀性/避險語氣）對會後 vol 持續性與 VIX 期限結構的預測力** — Fed 公開 FOMC statement/minutes 全文 + 免費可讀性指標（Flesch-Kincaid/詞彙多樣性）與簡易 hedging-word lexicon（\"however\"、\"uncertain\" 等詞頻）建 complexity/tone score，release-lag 後 `shift(1)`，檢定其對會後 t+1..t+5 SPY RV persistence 與 VIX/VIX3M term-structure slope 變化的增量預測力；與既有 generic FOMC event dummy 研究正交——這裡是文本複雜度而非事件本身（來源：JBES/Journal of Econometrics 2025-26 央行溝通文本複雜度與市場反應的 NLP-in-macro 熱點）。",
+      "topic_hash": "5096bfc34835a338"
+    },
+    {
+      "claimed_at": "2026-07-03T00:00:02.177363+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1613",
+      "number": 1613,
+      "source_max": 1612,
+      "status": "reserved",
+      "topic": "雜訊穩健已實現波動率估計量（Realized Kernel / Two-Scale RV / MedRV）對 HAR 預測力的增量：本機 5-min 資料重估** — 用本機已有 TAIFEX/SPY 5-min tick-derived 資料，實作 jump-robust MedRV 與 noise-robust Realized Kernel / Two-Scale RV，取代標準 5-min RV 作 HAR 輸入，OOS QLIKE/DM/Harvey 對比標準 RV-HAR baseline；與既有 OHLC candlestick estimator 題（line 1291）正交——這裡是 tick/5-min noise-robust kernel 估計量（來源：JBES/Journal of Econometrics 長期熱點 realized-measure microstructure noise correction，2025-26 仍持續有新 kernel 變體研究）。",
+      "topic_hash": "5878bfece27f670f"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-06-30T00:00:02.537978+00:00"
+  "updated_at": "2026-07-03T00:00:02.177363+00:00"
 }

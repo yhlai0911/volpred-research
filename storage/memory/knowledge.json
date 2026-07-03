@@ -37261,5 +37261,28 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-07-03T04:48:51.704195"
+  },
+  {
+    "item_id": "bfbe4fc9",
+    "category": "methodology",
+    "content": "K1611 (Giacomini-White 2006 conditional predictive ability test): 重驗 SPY/TAIEX HAR-RV vs GJR-GARCH 賽馬勝者是否 regime-dependent。結論 = 勝者不隨 lagged-VIX regime flip（no robust regime-dependence）。GJR-GARCH 在 high 與 low VIX regime 都小幅一致地贏 HAR-RV（both assets, both proxies, no sign flip），但 unconditional 不 Harvey-significant （|HAC-DM t|=1.0-2.1<3）。GW conditional test 只在 one proxy each reject （SPY r² p=3.6e-13；0050 rsov p=3.0e-5），另一 proxy 不 reject（proxy-sensitive）— reflect 兩 regime 都有的一致小 GJR edge 而非 regime flip。直接 regime-slope test （regime-dependence 的正確檢定）在兩資產兩 proxy 全不顯著（|t|=0.20-1.00, p>0.3），3/4 cell point estimate 甚至微負（與『GJR 危機時發光』相反）。樣本：SPY OOS 4156 天（2009-2026 含 2020/2022）、0050.TW OOS 1212 天（2017-2021 含 2020）。方法論護城河兩則：(1) daily variance-forecast 賽馬必用 close-to-close-consistent proxy — naive pure-Parkinson omit overnight variance → 產生 spurious |DM t|=49 artifact（已排除，改用 r² primary + range+overnight rsov robust）；(2) 單一 vendor bad-tick（0050 2014-01-02 adj-close -139%）污染 GJR variance recursion → 產生 spurious 'robust regime-dependent' 假結論 且 non-reproducible → 加 price-limit data gate + GJR alignment-tolerance guard 後 bit-for-bit 可復現（identical MD5）。lookahead 全防：HAR shift(1)、GJR align='target'（K445）、lagged-VIX vs expanding(past-only) median instrument、per-asset 無 asset-day pooling（K1355）。Extends unconditional-DM 賽馬 K1049/k1054/k1057/k1063：GW 框架確認舊賽馬並未 mask regime flip，single-winner ambiguity 是真的、非隱藏 state 效應。",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K1611",
+    "experiment_id": "K1611",
+    "experiment_path": "experiments/K1611",
+    "reviewer": "Codex round-1 (gpt-5.4, codex exec) verdict MAJOR_ISSUES — all 5 issues addressed (GW over-interpretation gate, 0050 bad-tick, DM HAC labeling, proxy docstring, singular-HAC pinv); + main-thread independent numeric audit (results.json matches README to 3 sig-figs, regime_dependent_robust=false both assets); round-2 confirmatory Codex re-review pending",
+    "reviewer_source": "codex_round1_plus_mainthread_audit",
+    "evidence": [
+      "experiments/K1611/K1611_results.json",
+      "SPY r²: uncond HAC-DM t=2.117 (NS Harvey), GW HAC p=3.57e-13, regime-slope b=0.163 t=0.861 (NS)",
+      "SPY rsov: DM t=1.196, GW p=0.081, slope t=-0.520 (NS)",
+      "0050.TW r²: DM t=1.251, GW p=0.065, slope b=-0.050 t=-1.00 (NS)",
+      "0050.TW rsov: DM t=1.013, GW p=3.0e-5, slope t=-0.203 (NS)",
+      "regime_dependent_robust=false on both assets",
+      "pure-Parkinson proxy bias diagnostic: |DM t|=49 artifact when overnight omitted",
+      "0050 2014-01-02 bad-tick (-139%) → price-limit gate + GJR_DISC_TOL abort restore reproducibility"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-07-03T08:55:39.778993"
   }
 ]
