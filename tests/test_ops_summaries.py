@@ -98,6 +98,77 @@ def test_build_continue_task_maintenance_skips_when_no_work(monkeypatch):
     assert result["reason"] == "no_work"
     assert result["busy_agent_count"] == 0
     assert result["queued_count"] == 0
+    assert result["auto_remediation"] == {}
+
+
+def test_build_continue_task_maintenance_auto_remediates_publish_drought(monkeypatch):
+    monkeypatch.setattr(
+        summaries,
+        "build_control_plane_snapshot",
+        lambda storage_dir="storage": {
+            "agents": [{"session_key": "claude-worker", "status": "idle"}],
+            "pending_user_tasks": 0,
+            "discovery_allowed": True,
+        },
+    )
+    preview_calls: list[str] = []
+
+    def _fake_preview(storage_dir="storage"):
+        preview_calls.append(storage_dir)
+        return {
+            "queued_count": 0,
+            "queue_snapshot": [],
+            "decision": None,
+        }
+
+    monkeypatch.setattr(summaries, "scheduler_preview", _fake_preview)
+    monkeypatch.setattr(
+        summaries,
+        "_runtime_idle_policy",
+        lambda: {"source_label": "test", "max_concurrent_agents": 4},
+    )
+    reports = iter(
+        [
+            {
+                "conditions": [
+                    {
+                        "id": "publishing_freshness",
+                        "level": "critical",
+                        "title": "發文脫班",
+                        "body": "gap exceeded",
+                        "details": {"publish_gap_hours": 9.0},
+                        "breached": True,
+                    }
+                ]
+            },
+            {"conditions": []},
+        ]
+    )
+    monkeypatch.setattr(
+        summaries,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": next(reports),
+    )
+    remediation_calls: list[str] = []
+
+    def _fake_remediate(storage_dir: str):
+        remediation_calls.append(storage_dir)
+        return {
+            "attempted": True,
+            "ok": True,
+            "steps": [{"step": "force_release", "released": 1}],
+        }
+
+    monkeypatch.setattr(summaries, "_run_publish_drought_remediation", _fake_remediate)
+
+    result = summaries.build_continue_task_maintenance()
+
+    assert remediation_calls == ["storage"]
+    assert preview_calls == ["storage", "storage"]
+    assert result["auto_remediation"]["publish_drought"]["attempted"] is True
+    assert result["alerts"]["breach_count"] == 0
+    assert result["skip"] is True
+    assert result["reason"] == "no_work"
 
 
 def test_build_continue_task_maintenance_skips_when_slot_full(monkeypatch):
@@ -135,6 +206,11 @@ def test_build_continue_task_maintenance_skips_when_slot_full(monkeypatch):
         summaries,
         "_runtime_idle_policy",
         lambda: {"source_label": "test", "max_concurrent_agents": 2},
+    )
+    monkeypatch.setattr(
+        summaries,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": []},
     )
 
     result = summaries.build_continue_task_maintenance()
@@ -183,6 +259,11 @@ def test_build_continue_task_maintenance_returns_next_decision(monkeypatch):
         summaries,
         "_runtime_idle_policy",
         lambda: {"source_label": "test", "max_concurrent_agents": 4},
+    )
+    monkeypatch.setattr(
+        summaries,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": []},
     )
 
     result = summaries.build_continue_task_maintenance()

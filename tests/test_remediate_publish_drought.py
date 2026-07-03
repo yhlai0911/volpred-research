@@ -12,6 +12,7 @@ email the boss a to-do list. These tests assert the ladder in
 """
 from __future__ import annotations
 
+import fcntl
 import importlib.util
 import sys
 from pathlib import Path
@@ -118,3 +119,25 @@ def test_dry_run_takes_no_action(mod, monkeypatch):
     res = mod.remediate(apply=False)
     assert res["attempted"] is True
     assert res["steps"][0]["dry_run"] is True
+
+
+def test_apply_skips_when_remediation_lock_is_held(mod, monkeypatch, tmp_path: Path):
+    _patch_freshness(monkeypatch, breached=True, gap=9.0)
+    import volpred.ops as ops
+
+    def _boom_release(**kw):  # pragma: no cover - asserts it is never reached
+        raise AssertionError("force release should not run while lock is held")
+
+    monkeypatch.setattr(ops, "release_pool_by_settings", _boom_release)
+
+    lock_path = tmp_path / "ops" / "remediate_publish_drought.lock"
+    lock_path.parent.mkdir(parents=True)
+    with lock_path.open("a+", encoding="utf-8") as lock_fh:
+        fcntl.flock(lock_fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        try:
+            res = mod.remediate(apply=True, storage_dir=str(tmp_path))
+        finally:
+            fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
+
+    assert res["attempted"] is False
+    assert res["reason"] == "remediation_already_running"

@@ -47281,10 +47281,36 @@
     "task_type": "platform_ops",
     "priority": "P2",
     "source": "telegram-responder",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-03T14:53:44.805372+00:00",
     "title": "收緊發文脫班 remediation 觸發時機（破門檻即補，不等整點）",
-    "description": "老闆 telegram-86 抱怨發文脫班。root cause 已確認：remediation(remediate_publish_drought.py) 目前只掛在 check_alerts 每小時整點 fire 前跑，若 gap 剛好在整點後才破 6h 門檻，需等下一整點才自動補（本次 22:29 破門檻、等到 23:07，卡 ~40min）。優化方向（遵 anti-stacking single-owner，不新增平行 watchdog）：評估 (a) check_alerts 提高頻率 vs (b) 在既有高頻 job（compute-worker */15）piggy-back 一個 drought-only 輕量 check 委派回 single owner。實作前先讀 .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md §Enforcement Layer Map 確認不疊床架屋。"
+    "description": "老闆 telegram-86 抱怨發文脫班。root cause 已確認：remediation(remediate_publish_drought.py) 目前只掛在 check_alerts 每小時整點 fire 前跑，若 gap 剛好在整點後才破 6h 門檻，需等下一整點才自動補（本次 22:29 破門檻、等到 23:07，卡 ~40min）。優化方向（遵 anti-stacking single-owner，不新增平行 watchdog）：評估 (a) check_alerts 提高頻率 vs (b) 在既有高頻 job（compute-worker */15）piggy-back 一個 drought-only 輕量 check 委派回 single owner。實作前先讀 .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md §Enforcement Layer Map 確認不疊床架屋。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-03T21:12:14.385758+00:00",
+    "claim_session_id": "70091a7c4dcc",
+    "status_history": [
+      {
+        "ts": "2026-07-03T21:12:14.386050+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T21:12:24.879865+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T21:18:50.861888+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-03T21:12:24.879587+00:00",
+    "completed_at": "2026-07-03T21:18:50.861618+00:00",
+    "result": "continue-task heartbeat now invokes publish-drought remediation on critical publishing_freshness breach; remediation ladder has non-blocking lock to avoid hourly/heartbeat double action; regression tests added."
   },
   {
     "id": "telegram-89",

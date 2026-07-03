@@ -53,6 +53,115 @@ def _compact_decision(decision: dict[str, Any] | None) -> dict[str, Any] | None:
     }
 
 
+def _extract_breached_alerts(alert_report: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "id": cond.get("id"),
+            "level": cond.get("level"),
+            "title": cond.get("title"),
+            "body": cond.get("body", ""),
+            "details": cond.get("details", {}),
+        }
+        for cond in alert_report.get("conditions", [])
+        if isinstance(cond, dict) and cond.get("breached")
+    ]
+
+
+def _alert_breach_counts(breached_alerts: list[dict[str, Any]]) -> tuple[int, int]:
+    critical_count = sum(
+        1 for a in breached_alerts if str(a.get("level") or "").lower() == "critical"
+    )
+    warn_count = sum(
+        1 for a in breached_alerts if str(a.get("level") or "").lower() == "warn"
+    )
+    return critical_count, warn_count
+
+
+def _has_critical_publish_drought(breached_alerts: list[dict[str, Any]]) -> bool:
+    return any(
+        str(alert.get("id") or "") == "publishing_freshness"
+        and str(alert.get("level") or "").lower() == "critical"
+        for alert in breached_alerts
+    )
+
+
+def _tail_text(value: object, limit: int = 2000) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        text = value.decode("utf-8", errors="replace")
+    else:
+        text = str(value)
+    return text[-limit:]
+
+
+def _run_publish_drought_remediation(storage_dir: str) -> dict[str, Any]:
+    cmd = [
+        sys.executable,
+        str(project_path("scripts", "remediate_publish_drought.py")),
+        "--apply",
+        "--json",
+        "--storage-dir",
+        storage_dir,
+    ]
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=str(project_path()),
+            capture_output=True,
+            text=True,
+            timeout=240,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "attempted": False,
+            "ok": False,
+            "reason": "timeout",
+            "timeout_seconds": 240,
+            "stdout_tail": _tail_text(exc.stdout),
+            "stderr_tail": _tail_text(exc.stderr),
+        }
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "attempted": False,
+            "ok": False,
+            "reason": "subprocess_error",
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+
+    stdout = proc.stdout or ""
+    stderr = proc.stderr or ""
+    payload: dict[str, Any] | None = None
+    for line in reversed(stdout.splitlines()):
+        line = line.strip()
+        if not line or not line.startswith("{"):
+            continue
+        try:
+            parsed = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(parsed, dict):
+            payload = parsed
+            break
+
+    if payload is None:
+        return {
+            "attempted": False,
+            "ok": False,
+            "reason": "invalid_json",
+            "returncode": proc.returncode,
+            "stdout_tail": stdout[-2000:],
+            "stderr_tail": stderr[-2000:],
+        }
+
+    payload.setdefault("ok", proc.returncode == 0)
+    payload["returncode"] = proc.returncode
+    if proc.returncode != 0 and stderr:
+        payload["stderr_tail"] = stderr[-2000:]
+    return payload
+
+
 def _runtime_idle_policy() -> dict[str, Any]:
     payload = _read_json_dict(project_path("config", "runtime_schedules.json")) or {}
     idle = payload.get("idle_policy") if isinstance(payload.get("idle_policy"), dict) else {}
@@ -146,24 +255,39 @@ def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, A
     # and silent-skipped 7 consecutive slots while draft_pool=0 burned for ~10h.
     # Mission-critical alerts must surface as actionable, not be elided by
     # queue-only skip logic. See `docs/error_log.md` 2026-04-29 alert-action gap.
+    auto_remediation: dict[str, Any] = {}
     alert_report = build_alert_condition_report(storage_dir=storage_dir)
-    breached_alerts = [
-        {
-            "id": cond.get("id"),
-            "level": cond.get("level"),
-            "title": cond.get("title"),
-            "body": cond.get("body", ""),
-            "details": cond.get("details", {}),
-        }
-        for cond in alert_report.get("conditions", [])
-        if cond.get("breached")
-    ]
-    critical_alert_count = sum(
-        1 for a in breached_alerts if str(a.get("level") or "").lower() == "critical"
-    )
-    warn_alert_count = sum(
-        1 for a in breached_alerts if str(a.get("level") or "").lower() == "warn"
-    )
+    breached_alerts = _extract_breached_alerts(alert_report)
+    critical_alert_count, warn_alert_count = _alert_breach_counts(breached_alerts)
+
+    if _has_critical_publish_drought(breached_alerts):
+        remediation = _run_publish_drought_remediation(storage_dir)
+        auto_remediation["publish_drought"] = remediation
+
+        # The remediation ladder can publish a draft or refill task supply.
+        # Re-read state so the heartbeat reflects the system after action,
+        # not the stale pre-remediation breach that triggered it.
+        alert_report = build_alert_condition_report(storage_dir=storage_dir)
+        breached_alerts = _extract_breached_alerts(alert_report)
+        critical_alert_count, warn_alert_count = _alert_breach_counts(breached_alerts)
+        if remediation.get("attempted"):
+            preview = scheduler_preview(storage_dir=storage_dir)
+            queued_count = int(preview.get("queued_count", 0) or 0)
+            next_decision = _compact_decision(preview.get("decision"))
+            queue_head = []
+            for row in (preview.get("queue_snapshot") or [])[:3]:
+                if not isinstance(row, dict):
+                    continue
+                queue_head.append(
+                    {
+                        "task_id": row.get("task_id"),
+                        "title": row.get("title"),
+                        "target_agent": row.get("target_agent"),
+                        "runnable": row.get("runnable"),
+                        "blocked_reason": row.get("blocked_reason"),
+                        "brief_status": row.get("brief_status"),
+                    }
+                )
     has_actionable_alert = bool(breached_alerts)
 
     skip = False
@@ -219,6 +343,7 @@ def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, A
             "warn_count": warn_alert_count,
             "items": breached_alerts,
         },
+        "auto_remediation": auto_remediation,
         "followup_commands": followup_commands,
         "detail_hints": {
             "maintain": "uv run volpred ops continue-task-maintain --stub-if-no-work",
