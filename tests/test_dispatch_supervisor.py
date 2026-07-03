@@ -4,12 +4,13 @@ import asyncio
 import json
 import logging
 import resource
+import signal
 import subprocess
 from pathlib import Path
 
 import pytest
 
-from scripts.dispatch_supervisor import health, scheduler, state, supervisor, worker
+from scripts.dispatch_supervisor import health, procutil, scheduler, state, supervisor, worker
 
 
 def _tmp_state(tmp_path: Path) -> Path:
@@ -261,7 +262,7 @@ def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
         "send_hang_alert",
         lambda **kwargs: alerts_called.append(kwargs) or True,
     )
-    monkeypatch.setattr(health.procutil, "pid_identity_matches", lambda pid, started_wall: True)
+    monkeypatch.setattr(health.procutil, "check_identity", lambda pid, started_wall: procutil.IDENTITY_MATCH)
     monkeypatch.setattr(
         state,
         "get_current_job",
@@ -306,7 +307,7 @@ def test_health_check_kills_overdue_job_skips_kill_on_identity_mismatch(
         "send_hang_alert",
         lambda **kwargs: alerts_called.append(kwargs) or True,
     )
-    monkeypatch.setattr(health.procutil, "pid_identity_matches", lambda pid, started_wall: False)
+    monkeypatch.setattr(health.procutil, "check_identity", lambda pid, started_wall: procutil.IDENTITY_MISMATCH)
     monkeypatch.setattr(
         state,
         "get_current_job",
@@ -325,6 +326,46 @@ def test_health_check_kills_overdue_job_skips_kill_on_identity_mismatch(
     assert state.read_state(state_path)["completions"][-1]["outcome"] == "silent_death"
 
 
+def test_health_check_kills_overdue_job_skips_kill_when_unverified(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """2026-07-04 gate-blocking fix #4: a missing fingerprint (attach raced
+    ahead of a slow/failed `ps` call) must NOT be treated as "assume it's the
+    same process and kill" — that was the exact backwards behavior Codex
+    flagged. It must record a distinct `timeout_unverified` outcome and skip
+    the kill, same spirit as a confirmed mismatch but distinguishably logged."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log", started_wall=None,
+    )
+    kills: list[int] = []
+    alerts_called: list[dict] = []
+
+    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(
+        health.alerts,
+        "send_hang_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+    monkeypatch.setattr(health.procutil, "check_identity", lambda pid, started_wall: procutil.IDENTITY_UNVERIFIED)
+    monkeypatch.setattr(
+        state,
+        "get_current_job",
+        lambda path=state_path: state.CurrentJob(
+            pid=123, pgid=456, schedule_id="hourly_dispatch",
+            started_at="2026-01-01T00:00:00+00:00", attempt=1, model="opus",
+            log_path="/tmp/x.log", started_wall=None, age_seconds=4000,
+        ),
+    )
+
+    action = health.check_once(state_path=state_path, max_age_s=3000)
+
+    assert action == "timeout_unverified"
+    assert kills == [], "must not signal a pid with no recorded fingerprint to verify against"
+    assert state.read_state(state_path)["completions"][-1]["outcome"] == "timeout_unverified"
+
+
 def test_health_check_marks_silent_death(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
     _begin_fire(
@@ -333,7 +374,7 @@ def test_health_check_marks_silent_death(tmp_path: Path, monkeypatch) -> None:
     )
     alerts_called: list[dict] = []
 
-    monkeypatch.setattr(health.procutil, "pid_identity_matches", lambda pid, started_wall: False)
+    monkeypatch.setattr(health.procutil, "check_identity", lambda pid, started_wall: procutil.IDENTITY_MISMATCH)
     monkeypatch.setattr(
         health.alerts,
         "send_silent_death_alert",
@@ -348,6 +389,25 @@ def test_health_check_marks_silent_death(tmp_path: Path, monkeypatch) -> None:
     assert completions[-1]["outcome"] == "failure"
 
 
+def test_health_check_leaves_unverified_job_alone_when_not_overdue(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Within budget + unverified fingerprint must NOT be misdiagnosed as
+    silent_death — the job may well be running fine; we just haven't (yet)
+    recorded a fingerprint for it."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log", started_wall=None,
+    )
+    monkeypatch.setattr(health.procutil, "check_identity", lambda pid, started_wall: procutil.IDENTITY_UNVERIFIED)
+
+    action = health.check_once(state_path=state_path, max_age_s=3000)
+
+    assert action is None
+    assert state.read_state(state_path)["current_job"] is not None
+
+
 def test_force_kill_pgid_tolerates_process_lookup_races(monkeypatch) -> None:
     calls: list[int] = []
 
@@ -355,12 +415,12 @@ def test_force_kill_pgid_tolerates_process_lookup_races(monkeypatch) -> None:
         calls.append(sig)
         raise ProcessLookupError
 
-    monkeypatch.setattr(health.os, "killpg", missing_pgid)
-    monkeypatch.setattr(health.time, "sleep", lambda seconds: None)
+    monkeypatch.setattr(procutil.os, "killpg", missing_pgid)
+    monkeypatch.setattr(procutil.time, "sleep", lambda seconds: None)
 
     health._force_kill_pgid(456)
 
-    assert calls == [health.signal.SIGTERM]
+    assert calls == [signal.SIGTERM]
 
 
 def test_force_kill_pgid_tolerates_exit_between_term_and_probe(monkeypatch) -> None:
@@ -371,12 +431,12 @@ def test_force_kill_pgid_tolerates_exit_between_term_and_probe(monkeypatch) -> N
         if sig == 0:
             raise ProcessLookupError
 
-    monkeypatch.setattr(health.os, "killpg", exits_after_term)
-    monkeypatch.setattr(health.time, "sleep", lambda seconds: None)
+    monkeypatch.setattr(procutil.os, "killpg", exits_after_term)
+    monkeypatch.setattr(procutil.time, "sleep", lambda seconds: None)
 
     health._force_kill_pgid(456)
 
-    assert calls == [health.signal.SIGTERM, 0]
+    assert calls == [signal.SIGTERM, 0]
 
 
 def test_supervisor_set_runtime_env_raises_soft_limit(monkeypatch) -> None:
@@ -639,7 +699,7 @@ def test_handle_restart_orphan_kills_live_identity_matched_job(tmp_path: Path, m
     kills: list[int] = []
     alerts_called: list[dict] = []
     monkeypatch.setattr(supervisor.worker, "_kill_pgid", lambda pgid: kills.append(pgid))
-    monkeypatch.setattr(supervisor.procutil, "pid_identity_matches", lambda pid, wall: True)
+    monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_MATCH)
     monkeypatch.setattr(
         supervisor.alerts, "send_orphan_restart_alert",
         lambda **kwargs: alerts_called.append(kwargs) or True,
@@ -666,7 +726,7 @@ def test_handle_restart_orphan_skips_kill_on_identity_mismatch(tmp_path: Path, m
     kills: list[int] = []
     alerts_called: list[dict] = []
     monkeypatch.setattr(supervisor.worker, "_kill_pgid", lambda pgid: kills.append(pgid))
-    monkeypatch.setattr(supervisor.procutil, "pid_identity_matches", lambda pid, wall: False)
+    monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_MISMATCH)
     monkeypatch.setattr(
         supervisor.alerts, "send_orphan_restart_alert",
         lambda **kwargs: alerts_called.append(kwargs) or True,
@@ -681,6 +741,36 @@ def test_handle_restart_orphan_skips_kill_on_identity_mismatch(tmp_path: Path, m
     assert snap["completions"][-1]["outcome"] == "orphan_gone_or_reused"
 
 
+def test_handle_restart_orphan_skips_kill_when_unverified(tmp_path: Path, monkeypatch) -> None:
+    """2026-07-04 gate-blocking fix #4: no fingerprint recorded must NOT
+    degrade to "assume same process, kill it" — that reopens the exact
+    PID-reuse risk the fingerprint mechanism exists to close."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=999, pgid=888, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/orphan.log",
+        started_wall=None,
+    )
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    kills: list[int] = []
+    alerts_called: list[dict] = []
+    monkeypatch.setattr(supervisor.worker, "_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_UNVERIFIED)
+    monkeypatch.setattr(
+        supervisor.alerts, "send_orphan_restart_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+
+    supervisor._handle_restart_orphan()
+
+    assert kills == [], "must not signal a pid with no recorded fingerprint to verify against"
+    assert len(alerts_called) == 1
+    assert alerts_called[0]["killed"] is False
+    snap = state.read_state(state_path)
+    assert snap["current_job"] is None
+    assert snap["completions"][-1]["outcome"] == "orphan_unverified_not_killed"
+
+
 def test_handle_restart_orphan_noop_when_no_stale_job(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
     monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
@@ -693,6 +783,83 @@ def test_handle_restart_orphan_noop_when_no_stale_job(tmp_path: Path, monkeypatc
     supervisor._handle_restart_orphan()
 
     assert alerts_called == []
+
+
+def test_handle_restart_orphan_clears_abandoned_pid_none_reservation(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """2026-07-04 gate-blocking fix #2: supervisor crashed between
+    reserve_fire() and attach_process() — current_job has pid=None forever
+    under the old code. Restart must clear this stuck slot (so the scheduler
+    isn't wedged) and record + alert distinctly rather than silently return."""
+    state_path = _tmp_state(tmp_path)
+    state.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/x.log", path=state_path,
+    )
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    kills: list[int] = []
+    alerts_called: list[dict] = []
+    monkeypatch.setattr(supervisor.worker, "_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(
+        supervisor.alerts, "send_orphan_restart_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+
+    supervisor._handle_restart_orphan()
+
+    assert kills == [], "no pid was ever recorded — nothing to identity-check or kill"
+    assert len(alerts_called) == 1
+    assert alerts_called[0]["killed"] is False
+    snap = state.read_state(state_path)
+    assert snap["current_job"] is None, "slot must not stay wedged forever"
+    assert snap["completions"][-1]["outcome"] == "reservation_abandoned_no_pid"
+    # scheduler must be able to fire again immediately after
+    state.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/next.log", path=state_path,
+    )
+
+
+def test_handle_restart_orphan_retries_after_partial_crash_mid_cleanup(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """2026-07-04 gate-blocking fix #3: the OLD claim_and_clear_current_job()
+    cleared current_job to None in the SAME step as returning it — a second
+    crash between that clear and kill/record finishing lost the orphan
+    entirely. The new mark_restart_orphan_pending() does NOT clear until
+    finalize_restart_orphan_cleanup() runs, so simulating "restart happened
+    mid-cleanup" (call mark_restart_orphan_pending() directly, as if a first
+    _handle_restart_orphan() call crashed right after) must still let a
+    SECOND _handle_restart_orphan() call find and process the same orphan."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=999, pgid=888, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/orphan.log",
+        started_wall="Wed Jan  1 00:00:00 2026",
+    )
+    # Simulate a first restart attempt that flagged cleanup-pending and then
+    # crashed before it could kill/record/finalize.
+    state.mark_restart_orphan_pending(state_path)
+    assert state.read_state(state_path)["current_job"] is not None
+
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    kills: list[int] = []
+    alerts_called: list[dict] = []
+    monkeypatch.setattr(supervisor.worker, "_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_MATCH)
+    monkeypatch.setattr(
+        supervisor.alerts, "send_orphan_restart_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+
+    supervisor._handle_restart_orphan()
+
+    assert kills == [888], "second restart must still find and kill the same orphan"
+    assert len(alerts_called) == 1
+    snap = state.read_state(state_path)
+    assert snap["current_job"] is None
+    assert snap["completions"][-1]["outcome"] == "killed_supervisor_restart"
 
 
 # ---------------------------------------------------------------------------

@@ -24,7 +24,6 @@ from __future__ import annotations
 import logging
 import os
 import re
-import signal
 import subprocess
 import time
 from dataclasses import dataclass
@@ -118,39 +117,15 @@ def _read_tail(path: Path, max_bytes: int = 2048) -> str:
 
 
 def _kill_pgid(pgid: int, *, grace_s: float = GRACE_PERIOD_S) -> None:
-    """SIGTERM whole process group; SIGKILL after grace_s if still alive."""
-    try:
-        os.killpg(pgid, signal.SIGTERM)
-    except ProcessLookupError:
-        return
-    except PermissionError as exc:
-        LOG.warning("killpg SIGTERM denied pgid=%d: %s", pgid, exc)
-    deadline = time.time() + grace_s
-    while time.time() < deadline:
-        try:
-            os.killpg(pgid, 0)  # liveness probe
-        except ProcessLookupError:
-            return
-        except PermissionError as exc:
-            # Found live via a real smoke test under launchd/sandboxed
-            # execution: signal-0 liveness probes can themselves raise
-            # PermissionError even though the SIGTERM above (or an eventual
-            # SIGKILL below) is separately permission-checked by the OS. This
-            # was uncaught here — pre-existing gap, not one of the Codex
-            # review's 4 numbered items — and crashed the whole kill routine
-            # (and therefore the caller, including orphan-restart cleanup).
-            # We can't confirm liveness this way; stop polling and fall
-            # through to attempt SIGKILL (which has its own PermissionError
-            # handling and won't raise).
-            LOG.warning("killpg liveness probe denied pgid=%d: %s", pgid, exc)
-            break
-        time.sleep(0.5)
-    try:
-        os.killpg(pgid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass
-    except PermissionError as exc:
-        LOG.warning("killpg SIGKILL denied pgid=%d: %s", pgid, exc)
+    """SIGTERM whole process group; SIGKILL after grace_s if still alive.
+
+    Codex review fix #5 (2026-07-04): the actual implementation moved to
+    `procutil.kill_pgid()` — health.py had its own near-duplicate copy that
+    missed a PermissionError fix applied here (found via a live smoke test),
+    so both now share one implementation. Kept as a thin wrapper so existing
+    callers/tests referencing `worker._kill_pgid` by name are unaffected.
+    """
+    procutil.kill_pgid(pgid, grace_s=grace_s)
 
 
 def _spawn(*, argv: Sequence[str], log_path: Path) -> subprocess.Popen:
@@ -202,11 +177,19 @@ def _run_one_attempt(
         state.release_reservation(path=state_path)
         raise
     pgid = os.getpgid(proc.pid)
+    # Attach pid+pgid IMMEDIATELY (fast — os.getpgid() is a plain syscall) so
+    # the pid=None reservation window (a supervisor crash here would strand
+    # current_job forever — see supervisor._handle_restart_orphan's
+    # pid-is-None branch, Codex review fix #2, 2026-07-04) is narrowed down
+    # to the Popen() call itself, not the slower `ps`-based fingerprint call
+    # that used to run first and be attached in the same step.
+    state.attach_process(pid=proc.pid, pgid=pgid, started_wall=None, path=state_path)
     # Codex review §10 #2: fingerprint the process's OS start time so later
     # identity checks (health.py polling, restart orphan cleanup) can detect
     # PID reuse instead of trusting a bare `os.kill(pid, 0)`.
     started_wall = procutil.get_process_start_wall(proc.pid)
-    state.attach_process(pid=proc.pid, pgid=pgid, started_wall=started_wall, path=state_path)
+    if started_wall:
+        state.update_started_wall(pid=proc.pid, started_wall=started_wall, path=state_path)
     try:
         exit_code = proc.wait(timeout=timeout_s)
     except subprocess.TimeoutExpired:

@@ -200,8 +200,9 @@ def send_orphan_restart_alert(
     """Supervisor boot found a stale `current_job` from a crashed prior
     instance (Codex review §10 #3). `killed=True` means the orphan process
     was still alive and identity-verified before being force-killed;
-    `killed=False` means it was already gone or the pid had been reused (no
-    kill issued — see `procutil.pid_identity_matches`)."""
+    `killed=False` covers every other case — already gone, pid reused, no
+    fingerprint ever recorded (unverified), or the reservation never even
+    reached a real pid before the crash (see `procutil.check_identity`)."""
     key = "orphan_restart"
     if state.should_dedup_alert(key, window_s=60, path=state_path):
         return False

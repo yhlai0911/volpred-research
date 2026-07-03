@@ -7,7 +7,8 @@ verifies:
     claim replaced the old single-call begin_fire)
   * reserve_fire refuses when current_job in-flight
   * mark_supervisor_started no longer clears current_job (§10 #3); orphan
-    handling is claim_and_clear_current_job() + append_completion_entry()
+    handling is mark_restart_orphan_pending() + append_completion_entry() +
+    finalize_restart_orphan_cleanup() (two-phase — 2026-07-04 gate-blocking fix)
   * heartbeat updates last_heartbeat_at
   * completions ring buffer caps at COMPLETIONS_MAX
   * auth-blocked toggle
@@ -63,7 +64,7 @@ def test_mark_supervisor_started_sets_timestamps(tmp_state: Path) -> None:
 
 def test_mark_supervisor_started_no_longer_clears_current_job(tmp_state: Path) -> None:
     """§10 #3 fix: mark_supervisor_started must NOT silently discard a stale
-    current_job — that responsibility moved to claim_and_clear_current_job()
+    current_job — that responsibility moved to mark_restart_orphan_pending()
     so the caller can identity-check + kill + record before losing it."""
     _begin_fire(
         tmp_state, pid=12345, pgid=12345, schedule_id="hourly_dispatch",
@@ -75,26 +76,57 @@ def test_mark_supervisor_started_no_longer_clears_current_job(tmp_state: Path) -
     assert snap["current_job"]["pid"] == 12345
 
 
-def test_claim_and_clear_current_job_pops_orphan(tmp_state: Path) -> None:
+def test_mark_restart_orphan_pending_flags_without_clearing(tmp_state: Path) -> None:
+    """2026-07-04 gate-blocking fix #3: unlike the old claim_and_clear_current_job()
+    (removed), current_job must stay non-null (with restart_cleanup_pending=True)
+    until finalize_restart_orphan_cleanup() explicitly runs — so a second crash
+    mid-cleanup can retry against the SAME orphan instead of losing it."""
     _begin_fire(
         tmp_state, pid=12345, pgid=12345, schedule_id="hourly_dispatch",
         attempt=1, model="opus", log_path="/tmp/x.log",
     )
-    orphan = st.claim_and_clear_current_job(tmp_state)
+    orphan = st.mark_restart_orphan_pending(tmp_state)
     assert orphan is not None
     assert orphan["pid"] == 12345
+    assert orphan["restart_cleanup_pending"] is True
+    # NOT cleared yet — current_job must still reflect the same orphan.
+    snap = st.read_state(tmp_state)
+    assert snap["current_job"] is not None
+    assert snap["current_job"]["pid"] == 12345
+    assert snap["current_job"]["restart_cleanup_pending"] is True
+    # Re-entrant: a second call (simulating a retry after a crash mid-cleanup)
+    # must see the SAME orphan again, not None.
+    again = st.mark_restart_orphan_pending(tmp_state)
+    assert again is not None
+    assert again["pid"] == 12345
+
+
+def test_mark_restart_orphan_pending_none_when_idle(tmp_state: Path) -> None:
+    assert st.mark_restart_orphan_pending(tmp_state) is None
+
+
+def test_finalize_restart_orphan_cleanup_clears_slot(tmp_state: Path) -> None:
+    _begin_fire(
+        tmp_state, pid=12345, pgid=12345, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
+    )
+    st.mark_restart_orphan_pending(tmp_state)
+    st.finalize_restart_orphan_cleanup(tmp_state)
     snap = st.read_state(tmp_state)
     assert snap["current_job"] is None
-    # idempotent: second claim on an already-clear slot returns None
-    assert st.claim_and_clear_current_job(tmp_state) is None
+    # slot is free again — a fresh reserve must succeed
+    st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/next.log", path=tmp_state,
+    )
 
 
-def test_append_completion_entry_for_claimed_orphan(tmp_state: Path) -> None:
+def test_append_completion_entry_for_pending_orphan(tmp_state: Path) -> None:
     _begin_fire(
         tmp_state, pid=777, pgid=777, schedule_id="hourly_dispatch",
         attempt=2, model="opus", log_path="/tmp/orphan.log",
     )
-    orphan = st.claim_and_clear_current_job(tmp_state)
+    orphan = st.mark_restart_orphan_pending(tmp_state)
     entry = st.append_completion_entry(
         orphan, exit_code=-9, outcome="killed_supervisor_restart",
         final_model="opus", path=tmp_state,
@@ -105,6 +137,9 @@ def test_append_completion_entry_for_claimed_orphan(tmp_state: Path) -> None:
     snap = st.read_state(tmp_state)
     assert len(snap["completions"]) == 1
     assert snap["completions"][0]["outcome"] == "killed_supervisor_restart"
+    # append_completion_entry alone must NOT have cleared current_job —
+    # finalize_restart_orphan_cleanup() is the only thing that does.
+    assert snap["current_job"] is not None
 
 
 def test_reserve_fire_records_job(tmp_state: Path) -> None:
@@ -146,6 +181,30 @@ def test_attach_process_fills_identity(tmp_state: Path) -> None:
 def test_attach_process_raises_without_reservation(tmp_state: Path) -> None:
     with pytest.raises(RuntimeError, match="no active reservation"):
         st.attach_process(pid=1, pgid=1, started_wall=None, path=tmp_state)
+
+
+def test_update_started_wall_fills_fingerprint_after_attach(tmp_state: Path) -> None:
+    """2026-07-04 gate-blocking fix #2: attach_process() now attaches pid/pgid
+    with started_wall=None immediately after Popen() returns; the (slower,
+    `ps`-based) fingerprint is filled in afterwards via update_started_wall()
+    so the pid=None crash-recovery blind spot is as small as possible."""
+    st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a.log", path=tmp_state,
+    )
+    st.attach_process(pid=555, pgid=555, started_wall=None, path=tmp_state)
+    assert st.read_state(tmp_state)["current_job"]["started_wall"] is None
+    st.update_started_wall(pid=555, started_wall="Wed Jan  1 00:00:00 2026", path=tmp_state)
+    snap = st.read_state(tmp_state)
+    assert snap["current_job"]["started_wall"] == "Wed Jan  1 00:00:00 2026"
+
+
+def test_update_started_wall_noop_if_pid_no_longer_current(tmp_state: Path) -> None:
+    """If the job already completed (or was replaced) by the time the slow
+    `ps` fingerprint call returns, updating a stale pid must not resurrect or
+    corrupt whatever current_job is now."""
+    st.update_started_wall(pid=999, started_wall="irrelevant", path=tmp_state)
+    assert st.read_state(tmp_state)["current_job"] is None  # still idle, no crash
 
 
 def test_release_reservation_frees_slot(tmp_state: Path) -> None:
@@ -549,3 +608,66 @@ def test_concurrent_writes_serialized_under_lock(tmp_state: Path) -> None:
     assert snap["version"] == st.SCHEMA_VERSION
     assert snap["supervisor_started_at"] is not None
     assert snap["last_heartbeat_at"] is not None
+
+
+# ---------------------------------------------------------------------------
+# Codex review fix #1 (2026-07-04, gate-blocking) — lockfile TOCTOU regression
+# ---------------------------------------------------------------------------
+
+
+def test_lock_path_is_stable_sibling_never_the_replaced_file(tmp_state: Path) -> None:
+    """The old design flocked `path` itself, which `os.replace()` swaps to a
+    new inode every write — a second writer that had already `open()`ed the
+    OLD inode before the replace could then flock it (uncontended, since the
+    real mutex moved to the new inode) and clobber the first writer's update.
+    Codex reproduced this with two overlapping `_locked_state()` writers. The
+    fix locks a dedicated sibling file that is opened in append mode and NEVER
+    unlinked/replaced, so every contender always flocks the same inode."""
+    lock_path = st._lock_path(tmp_state)
+    assert lock_path != tmp_state
+    assert lock_path.name == tmp_state.name + ".lock"
+    st.mark_supervisor_started(tmp_state)
+    assert lock_path.exists()
+    # the lockfile itself must never be the thing os.replace() swaps —
+    # confirm its inode is stable across a write cycle.
+    inode_before = lock_path.stat().st_ino
+    st.heartbeat(tmp_state)
+    assert lock_path.stat().st_ino == inode_before
+
+
+def test_no_lost_updates_under_concurrent_read_modify_write(tmp_state: Path) -> None:
+    """Codex review fix #1 regression: stress many threads each doing a full
+    `_locked_state()` read-increment-write cycle. Under the old bug (flock on
+    the canonical file that `os.replace()` swaps out from under the lock),
+    some increments could be silently lost because a second writer could read
+    stale pre-write content and clobber the first writer's replace. Every
+    increment must be observed exactly once with the new stable-lockfile design.
+    """
+    import threading
+
+    st.mark_supervisor_started(tmp_state)
+    n_threads, n_iters = 8, 25
+    errors: list[BaseException] = []
+
+    def bump():
+        with st._locked_state(tmp_state) as (_fh, data):
+            dedup = data.get("alerts_dedup") or {}
+            dedup["stress_counter"] = str(int(dedup.get("stress_counter", "0")) + 1)
+            data["alerts_dedup"] = dedup
+
+    def run():
+        try:
+            for _ in range(n_iters):
+                bump()
+        except BaseException as exc:  # noqa: BLE001
+            errors.append(exc)
+
+    threads = [threading.Thread(target=run) for _ in range(n_threads)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert not errors, f"concurrent bump raised: {errors}"
+    snap = st.read_state(tmp_state)
+    assert int(snap["alerts_dedup"]["stress_counter"]) == n_threads * n_iters

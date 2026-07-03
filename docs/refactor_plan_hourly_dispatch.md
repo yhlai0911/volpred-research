@@ -256,3 +256,30 @@ Review 抓到 7 個真 bug（**這就是它停 18 天的真因：本來就還沒
 - `scripts/tests/test_dispatch_state.py` — 5 regression tests
 
 *Updated 2026-06-15 ~20:10 台灣時間 by interactive-20 main thread (email-11745-9834c9 follow-on) — Deliverable 5 fix #4 (state atomic write) landed; 4 must-fix remaining.*
+
+### Deliverable 5 收尾（interactive main thread，2026-07-04，commit `68d4a6d5c`）
+
+**觸發**：用戶再問一次「定時任務有脫班？為什麼？」。查證發現這個 refactor 在 fix #4/#1/#6 之後又停滯了 **19 天**（2026-06-15 → 2026-07-04）——正是 CLAUDE.md Three-Strike Rule 講的「同一處卡住不准再拖」情境。這次不再分批推進，一次做完剩下全部 4 個 must-fix。
+
+**完成 fix #2 — PID-reuse identity**：新增 `scripts/dispatch_supervisor/procutil.py`：`get_process_start_wall(pid)` 用 `ps -o lstart=`（macOS 無 `/proc`）取 process 啟動時間戳；`pid_identity_matches(pid, expected_start_wall)` 比對 fingerprint，legacy entry（無 fingerprint）degrade 成純 liveness check。`health.py` 的 kill 決策與 restart-orphan 路徑都改用這個，取代原本裸的 `os.kill(pid, 0)`（會被 pid 回收誤判活著）。
+
+**完成 fix #3 — restart orphan cleanup**：`state.mark_supervisor_started()` 不再靜默清掉 stale `current_job`（worker 用 `start_new_session=True`，supervisor crash 後 worker 可能仍存活變孤兒）。新增 `state.claim_and_clear_current_job()` + `state.append_completion_entry()`，交給新的 `supervisor._handle_restart_orphan()`：identity 驗證過（fingerprint 匹配）才真的 kill process group，並無論 kill 與否都記錄 completion entry + 發 `alerts.send_orphan_restart_alert()`。
+
+**完成 fix #5 — fire-claim atomicity**：新增 `state.reserve_fire()`，在 Popen **spawn 之前**就原子性 claim job slot（若 `current_job` 已非 None 直接 raise，取代原本 spawn **之後**才呼叫的 `begin_fire()` —— 舊版理論上兩個 overlapping caller 都可能在各自 spawn 前通過「current_job is None」檢查而 double-dispatch）。`state.attach_process()` 在真正 spawn 成功後補上 pid/pgid/fingerprint；`state.release_reservation()` 在 spawn 本身失敗（`OSError`）時釋放 slot，不留假占用。`begin_fire()` 整個移除，無相容 shim。
+
+**完成 fix #7 — broad-except 吞例外**：`scheduler.scheduler_loop()` / `health.health_loop()` 的最外層 `except Exception` 現在除了 `LOG.exception(...)` 之外，還呼叫新的 `alerts.send_loop_crash(component, traceback_text)`（同 component 300s dedup, critical level）；`supervisor.main()` 的頂層 crash handler同樣接上。原本 belt-and-suspenders 的獨立 hang-detector 若自己 crash 會零可見度，現在會主動報警。
+
+**額外發現並修的 bug（非原 7 項之一）**：寫 real（非 mock）smoke test 時，真的 spawn 一個孤兒 `sleep 30` process 跑 `_handle_restart_orphan()`，發現 `worker._kill_pgid()` 的 liveness-probe loop 只 catch `ProcessLookupError`，這次 sandbox 環境下 `os.killpg(pgid, 0)` 丟出未捕捉的 `PermissionError`，讓整個 orphan-kill 流程直接 crash。已加 `except PermissionError` fallback 到最終 SIGKILL 嘗試，並補 regression test `test_kill_pgid_survives_permission_error_on_liveness_probe`。這證明了「先跑真實 smoke test 再信 mock 測試」的價值 —— 這個 bug mock 測試永遠測不出來。
+
+**Regression tests**：`scripts/tests/test_dispatch_state.py`（`reserve_fire`/`attach_process`/`release_reservation`/`claim_and_clear_current_job`/`append_completion_entry` 全覆蓋）+ `tests/test_dispatch_supervisor.py`（新增 orphan-restart 3 tests + loop-crash-escalation 3 tests + kill_pgid PermissionError 1 test）+ 新檔 `tests/test_dispatch_supervisor_procutil.py`（8 tests）。**73/73 全數通過**。另外跑了兩個 REAL（非 mock）end-to-end smoke test：(1) 完整 reserve→spawn→attach→complete worker 生命週期用真實 Popen child；(2) 真實孤兒 process 的 identity-verified kill 路徑（kill 本身在這個特定 sandbox 被 signal 權限擋下 —— 另外用 `kill -TERM` 對照組證實這是**執行環境的 artifact**、不是程式碼缺陷；crash-avoidance fix 才是重點且已驗證）。
+
+**剩餘 must-fix：0 個。** Deliverable 5 完整關閉。
+
+**檔案改動**：
+- 新增 `scripts/dispatch_supervisor/procutil.py`
+- `scripts/dispatch_supervisor/{state,worker,health,scheduler,supervisor,alerts}.py`
+- `scripts/tests/test_dispatch_state.py`、`tests/test_dispatch_supervisor.py`、新增 `tests/test_dispatch_supervisor_procutil.py`
+
+**下一步**：提交 Codex review gate（§6，要求 ≥ CONDITIONAL_PASS）→ 通過後啟動 Deliverable 6 shadow run。
+
+*Updated 2026-07-04 台灣時間 by interactive main thread — Deliverable 5 全部 7 個 must-fix 關閉；等待本次 Codex review verdict。*

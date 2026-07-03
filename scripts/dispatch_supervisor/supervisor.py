@@ -87,43 +87,83 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def _handle_restart_orphan() -> None:
-    """Codex review §10 #3 fix — identity-verified orphan cleanup on boot.
+    """Identity-verified orphan cleanup on boot (Codex review §10 #3, #2, #4
+    fixes — 2026-06-15 original + 2026-07-04 gate-blocking follow-ups).
 
     `state.mark_supervisor_started()` no longer silently discards a stale
-    `current_job` (see its docstring). This claims it, and — ONLY if the pid
-    still exists AND its `ps`-derived start-time fingerprint still matches
-    what was recorded at spawn (i.e. it is definitely the same process, not a
-    reused pid) — force-kills its process group and records the outcome.
-    Runs before `send_supervisor_restart()` so the restart alert body would
-    reflect it if we later want to fold this in; kept as its own alert for
-    now since it's a materially different event (an actual orphan found).
+    `current_job` (see its docstring). This flags it via
+    `mark_restart_orphan_pending()` (NOT cleared yet — see that function's
+    docstring for why: a second crash mid-cleanup must be able to retry the
+    same orphan, not lose it), and — ONLY if the pid still exists AND its
+    `ps`-derived start-time fingerprint still matches what was recorded at
+    spawn (`procutil.IDENTITY_MATCH`; a `ps` failure yielding
+    `IDENTITY_UNVERIFIED` does NOT count — do not kill an unverified target)
+    — force-kills its process group. `finalize_restart_orphan_cleanup()` is
+    the last call in every branch, only after the outcome is recorded, so a
+    crash before that point leaves the slot intact for the next restart to
+    retry. Runs before `send_supervisor_restart()` so the restart alert body
+    would reflect it if we later want to fold this in; kept as its own alert
+    for now since it's a materially different event (an actual orphan found).
     """
     # NOTE: read `state.STATE_PATH` here (call-time attribute lookup) rather
     # than relying on downstream functions' own `path=STATE_PATH` defaults —
     # those defaults bind at function-DEFINITION time, so monkeypatching
     # `state.STATE_PATH` in a test would silently not apply to them.
     state_path = state.STATE_PATH
-    orphan = state.claim_and_clear_current_job(state_path)
-    if orphan is None or orphan.get("pid") is None:
+    orphan = state.mark_restart_orphan_pending(state_path)
+    if orphan is None:
+        return
+    if orphan.get("pid") is None:
+        # Codex review fix #2 (2026-07-04): supervisor crashed between
+        # reserve_fire() (writes the pid=None placeholder) and worker.py's
+        # attach_process() call, which now runs immediately after Popen()
+        # returns (narrowed to just that syscall — see worker.py). We cannot
+        # identify or kill a child we were never told the pid of; the best
+        # we can do is stop this slot from being wedged forever and make the
+        # gap loudly visible instead of silently swallowing it.
+        logging.warning(
+            "restart: abandoned pid=None reservation (schedule_id=%s attempt=%s) — "
+            "clearing stuck slot; if Popen had already succeeded before the crash, "
+            "that child is now untracked and will only be found by max-age/health checks "
+            "once/if it (re)acquires a pid we happen to observe",
+            orphan.get("schedule_id"), orphan.get("attempt"),
+        )
+        state.append_completion_entry(
+            orphan, exit_code=-1, outcome="reservation_abandoned_no_pid",
+            final_model=str(orphan.get("model", "?")), path=state_path,
+        )
+        alerts.send_orphan_restart_alert(job=orphan, killed=False, state_path=state_path)
+        state.finalize_restart_orphan_cleanup(state_path)
         return
     pid = int(orphan["pid"])
     started_wall = orphan.get("started_wall")
-    identity_ok = procutil.pid_identity_matches(pid, started_wall)
-    if identity_ok:
+    identity = procutil.check_identity(pid, started_wall)
+    if identity == procutil.IDENTITY_MATCH:
         pgid = int(orphan.get("pgid") or pid)
         logging.warning(
             "restart: orphan job pid=%d pgid=%d still alive (identity-verified) — killing", pid, pgid,
         )
         worker._kill_pgid(pgid)
-        exit_code, outcome = -9, "killed_supervisor_restart"
+        exit_code, outcome, killed = -9, "killed_supervisor_restart", True
+    elif identity == procutil.IDENTITY_UNVERIFIED:
+        # Codex review fix #4: no fingerprint was recorded (attach raced
+        # ahead of a slow/failed `ps` call). Do NOT kill an unverified
+        # target — record distinctly so ops can check by hand instead of
+        # trusting a bare "pid is alive" as proof it's ours.
+        logging.warning(
+            "restart: orphan job pid=%d alive but NO identity fingerprint recorded — "
+            "NOT killing (unverified target), recording for manual check", pid,
+        )
+        exit_code, outcome, killed = -1, "orphan_unverified_not_killed", False
     else:
         logging.info("restart: stale current_job pid=%d already gone / pid reused — no kill needed", pid)
-        exit_code, outcome = -1, "orphan_gone_or_reused"
+        exit_code, outcome, killed = -1, "orphan_gone_or_reused", False
     state.append_completion_entry(
         orphan, exit_code=exit_code, outcome=outcome,
         final_model=str(orphan.get("model", "?")), path=state_path,
     )
-    alerts.send_orphan_restart_alert(job=orphan, killed=identity_ok, state_path=state_path)
+    alerts.send_orphan_restart_alert(job=orphan, killed=killed, state_path=state_path)
+    state.finalize_restart_orphan_cleanup(state_path)
 
 
 async def _run_async(*, dry_run: bool) -> int:

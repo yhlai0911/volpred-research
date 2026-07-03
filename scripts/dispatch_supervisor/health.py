@@ -16,16 +16,17 @@ Codex review §10 #2 fix (2026-06-15): both branches used to trust a bare
 `os.kill(pid, 0)` check. Across a 30s poll interval the OS can recycle a pid
 to an unrelated process — killing/misreporting on that stale pid would hit
 the WRONG process. Every identity-sensitive decision below goes through
-`procutil.pid_identity_matches()`, which compares the `ps`-derived start-time
-fingerprint captured at spawn.
+`procutil.check_identity()`, which compares the `ps`-derived start-time
+fingerprint captured at spawn and returns one of MATCH / MISMATCH / DEAD /
+UNVERIFIED (Codex review fix #4, 2026-07-04 — a bare-bool version of this
+check used to *degrade to "assume same process"* when no fingerprint had
+been recorded, which is backwards for a kill decision; UNVERIFIED forces
+this module to decide explicitly rather than kill on unverified evidence).
 """
 from __future__ import annotations
 
 import asyncio
 import logging
-import os
-import signal
-import time
 import traceback
 from pathlib import Path
 
@@ -38,24 +39,15 @@ MAX_JOB_AGE_S = 3000  # 50min — matches worker DEFAULT_TIMEOUT_S
 
 
 def _force_kill_pgid(pgid: int) -> None:
-    if pgid <= 0:
-        return
-    try:
-        os.killpg(pgid, signal.SIGTERM)
-        time.sleep(2)
-        try:
-            os.killpg(pgid, 0)
-            os.killpg(pgid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass  # silent-ok: process group exited between SIGTERM and probe.
-    except ProcessLookupError:
-        pass  # silent-ok: process group was already gone before SIGTERM.
-    except PermissionError as exc:
-        LOG.warning("force_kill pgid=%d denied: %s", pgid, exc)
+    """Codex review fix #5 (2026-07-04): this used to be a near-duplicate of
+    worker.py's kill routine and missed a PermissionError fix applied there
+    (found via a live smoke test) — now both share `procutil.kill_pgid()`."""
+    procutil.kill_pgid(pgid)
 
 
 def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JOB_AGE_S) -> str | None:
-    """Single non-async health pass. Returns action taken ('killed' | 'silent_death' | None).
+    """Single non-async health pass. Returns action taken
+    ('killed' | 'silent_death' | 'timeout_unverified' | None).
 
     Extracted as sync function so tests (and CLI smoke checks) can call without
     spinning up asyncio.
@@ -63,33 +55,48 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
     job = state.get_current_job(state_path)
     if job is None:
         return None
-    identity_ok = procutil.pid_identity_matches(job.pid, job.started_wall)
+    identity = procutil.check_identity(job.pid, job.started_wall)
     if job.age_seconds > max_age_s:
-        if identity_ok:
+        if identity == procutil.IDENTITY_MATCH:
             LOG.warning("health: worker pgid=%d age=%.0fs > %.0fs cap — force-killing", job.pgid, job.age_seconds, max_age_s)
             _force_kill_pgid(job.pgid)
             exit_code, outcome = -9, "killed_timeout"
-        else:
-            # Codex review §10 #2: pid/pgid no longer matches the fingerprint
-            # captured at spawn — either already gone or recycled to an
-            # unrelated process. Do NOT signal it; record as silent death
-            # instead of a (potentially wrong-target) kill.
+            log_tail = "(killed by health monitor — see worker log_path)"
+        elif identity == procutil.IDENTITY_UNVERIFIED:
+            # Codex review fix #4: no fingerprint was ever recorded for this
+            # job — we cannot confirm this pid is still our worker and not a
+            # PID-reuse collision, so we must NOT signal it. Clear the slot
+            # (via record_completion below) so the scheduler isn't wedged
+            # forever, but flag it distinctly so ops knows to check by hand.
             LOG.warning(
-                "health: worker pid=%d aged out but identity mismatch (pgid=%d reused/gone) — skipping kill",
-                job.pid, job.pgid,
+                "health: worker pid=%d aged out with NO identity fingerprint recorded — "
+                "NOT killing (unverified target), recording for manual check",
+                job.pid,
+            )
+            exit_code, outcome = -1, "timeout_unverified"
+            log_tail = "(aged out but no fingerprint recorded — NOT killed, needs manual check)"
+        else:
+            # IDENTITY_MISMATCH or IDENTITY_DEAD — confirmed NOT our process
+            # (already gone, or the OS recycled the pid to something else).
+            LOG.warning(
+                "health: worker pid=%d aged out but identity=%s (pgid=%d) — skipping kill",
+                job.pid, identity, job.pgid,
             )
             exit_code, outcome = -1, "silent_death"
+            log_tail = "(identity mismatch/dead at max-age check — not killed, recorded as silent_death)"
         state.record_completion(exit_code=exit_code, outcome=outcome, final_model=job.model, path=state_path)
         alerts.send_hang_alert(
             job={"pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
                  "attempt": job.attempt, "model": job.model},
-            log_tail="(killed by health monitor — see worker log_path)" if identity_ok
-                     else "(identity mismatch at max-age check — not killed, recorded as silent_death)",
+            log_tail=log_tail,
             state_path=state_path,
         )
-        return "killed" if identity_ok else "silent_death"
-    if not identity_ok:
-        LOG.warning("health: worker pid=%d dead/reused but state has current_job — recording silent failure", job.pid)
+        return "killed" if identity == procutil.IDENTITY_MATCH else outcome
+    if identity in (procutil.IDENTITY_MISMATCH, procutil.IDENTITY_DEAD):
+        LOG.warning(
+            "health: worker pid=%d dead/reused (identity=%s) but state has current_job — recording silent failure",
+            job.pid, identity,
+        )
         state.record_completion(
             exit_code=-1, outcome="failure", final_model=job.model,
             path=state_path,
@@ -100,6 +107,9 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
             state_path=state_path,
         )
         return "silent_death"
+    # IDENTITY_MATCH, or IDENTITY_UNVERIFIED while still within budget — leave
+    # it alone. An unverified fingerprint here just means it hasn't been
+    # captured yet, not that anything is actually wrong.
     return None
 
 

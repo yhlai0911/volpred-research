@@ -55,6 +55,27 @@ from typing import Any, Iterator
 ROOT = Path(__file__).resolve().parents[2]
 STATE_PATH = ROOT / "storage" / "ops" / "dispatch_state.json"
 
+
+def _lock_path(state_path: Path) -> Path:
+    """Stable sibling lockfile — NEVER replaced/renamed, unlike `state_path` itself.
+
+    Codex review fix #1 (2026-07-04, gate-blocking finding): the previous
+    design flocked the canonical state file's own inode and then persisted
+    via `os.replace()`. That is a TOCTOU race — process B can `open()` the
+    canonical path (getting the OLD inode) *before* process A's
+    `os.replace()` swaps in a new inode; B then blocks on `flock` against
+    that old inode until A closes its fd, acquires the lock on the
+    now-detached old inode, reads A's pre-write content, and on its own
+    `os.replace()` clobbers whatever A just wrote. Reproduced with two
+    overlapping `_locked_state()` writers; the first writer's `current_job`
+    was silently lost — this reopens the exact double-dispatch race
+    `reserve_fire()` was built to close. Locking a lockfile that is opened
+    in append mode and NEVER unlinked/replaced guarantees every contender
+    flocks the same inode, so the mutex is real regardless of what happens
+    to the data file underneath it.
+    """
+    return state_path.with_name(state_path.name + ".lock")
+
 SCHEMA_VERSION = 1
 COMPLETIONS_MAX = 100  # ring buffer cap
 LOG = logging.getLogger(__name__)
@@ -132,63 +153,78 @@ def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
 
 @contextmanager
 def _locked_state(path: Path = STATE_PATH) -> Iterator[tuple[Any, dict[str, Any]]]:
-    """Open state file under LOCK_EX, yield (fh, data). Writes atomically on context exit.
+    """Lock the sibling lockfile under LOCK_EX, yield (lock_fh, data). Writes
+    atomically on context exit.
 
-    Lock is held on the original inode for the full read-modify-write cycle so
-    concurrent _locked_state() / read_state() callers serialize correctly. The
-    persist step goes through `_atomic_write_json` (temp file + os.replace) so
-    a crash mid-write never leaves a partial/empty canonical file. After
-    os.replace() the path points at a new inode — the next _locked_state()
-    call will open & lock that new inode, which is the intended semantics.
+    The lock is held on `_lock_path(path)` — a file that is opened in append
+    mode and never unlinked or replaced — for the full read-modify-write
+    cycle, so concurrent `_locked_state()` / `read_state()` callers actually
+    serialize (see `_lock_path()` docstring for why locking `path` itself,
+    which DOES get replaced, was unsafe). The persist step still goes through
+    `_atomic_write_json` (temp file + os.replace) so a crash mid-write never
+    leaves a partial/empty canonical file.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    if not path.exists():
-        _atomic_write_json(path, _empty_state())
-    fh = path.open("r+", encoding="utf-8")
-    fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+    lock_fh = _lock_path(path).open("a+", encoding="utf-8")
     try:
+        fcntl.flock(lock_fh.fileno(), fcntl.LOCK_EX)
         try:
-            data = json.load(fh)
-        except json.JSONDecodeError as exc:
-            _warn_state_reset(path, "json_decode_failed", f"{type(exc).__name__}: {exc}")
-            data = _empty_state()
-        if not isinstance(data, dict) or data.get("version") != SCHEMA_VERSION:
-            _warn_state_reset(
-                path,
-                "schema_invalid",
-                _state_schema_detail(data),
-            )
-            data = _empty_state()
-        yield fh, data
-        _atomic_write_json(path, data)
+            if not path.exists():
+                _atomic_write_json(path, _empty_state())
+            with path.open("r", encoding="utf-8") as data_fh:
+                try:
+                    data = json.load(data_fh)
+                except json.JSONDecodeError as exc:
+                    _warn_state_reset(path, "json_decode_failed", f"{type(exc).__name__}: {exc}")
+                    data = _empty_state()
+            if not isinstance(data, dict) or data.get("version") != SCHEMA_VERSION:
+                _warn_state_reset(
+                    path,
+                    "schema_invalid",
+                    _state_schema_detail(data),
+                )
+                data = _empty_state()
+            yield lock_fh, data
+            _atomic_write_json(path, data)
+        finally:
+            fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
     finally:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
-        fh.close()
+        lock_fh.close()
 
 
 def read_state(path: Path = STATE_PATH) -> dict[str, Any]:
-    """Snapshot read (no write). Safe under concurrent writers (LOCK_SH)."""
+    """Snapshot read (no write). Takes LOCK_SH on the sibling lockfile so a
+    read can never observe a writer's data file mid read-modify-write cycle
+    (belt-and-suspenders — `os.replace()` already makes any plain read of
+    `path` atomic on its own, but this keeps read/write serialization
+    reasoning in one place)."""
     if not path.exists():
         return _empty_state()
-    fh = path.open("r", encoding="utf-8")
-    fcntl.flock(fh.fileno(), fcntl.LOCK_SH)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_fh = _lock_path(path).open("a+", encoding="utf-8")
     try:
+        fcntl.flock(lock_fh.fileno(), fcntl.LOCK_SH)
         try:
-            data = json.load(fh)
-        except json.JSONDecodeError as exc:
-            _warn_state_reset(path, "json_decode_failed", f"{type(exc).__name__}: {exc}")
-            return _empty_state()
-        if not isinstance(data, dict) or data.get("version") != SCHEMA_VERSION:
-            _warn_state_reset(
-                path,
-                "schema_invalid",
-                _state_schema_detail(data),
-            )
-            return _empty_state()
-        return data
+            if not path.exists():
+                return _empty_state()
+            with path.open("r", encoding="utf-8") as data_fh:
+                try:
+                    data = json.load(data_fh)
+                except json.JSONDecodeError as exc:
+                    _warn_state_reset(path, "json_decode_failed", f"{type(exc).__name__}: {exc}")
+                    return _empty_state()
+            if not isinstance(data, dict) or data.get("version") != SCHEMA_VERSION:
+                _warn_state_reset(
+                    path,
+                    "schema_invalid",
+                    _state_schema_detail(data),
+                )
+                return _empty_state()
+            return data
+        finally:
+            fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
     finally:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
-        fh.close()
+        lock_fh.close()
 
 
 def mark_supervisor_started(path: Path = STATE_PATH) -> None:
@@ -201,26 +237,52 @@ def mark_supervisor_started(path: Path = STATE_PATH) -> None:
     clearing it here meant the next tick would spawn a brand-new worker on
     top of the still-alive orphan (double execution) with zero record of what
     happened to the old one. Orphan detection/kill/recording is now the
-    caller's job via `claim_and_clear_current_job()` (needs `procutil` identity
-    checks that this module deliberately does not depend on).
+    caller's job via `mark_restart_orphan_pending()` (needs `procutil`
+    identity checks that this module deliberately does not depend on).
     """
     with _locked_state(path) as (_fh, data):
         data["supervisor_started_at"] = _now()
         data["last_heartbeat_at"] = _now()
 
 
-def claim_and_clear_current_job(path: Path = STATE_PATH) -> dict[str, Any] | None:
-    """Atomically pop `current_job` (used at supervisor boot for orphan handling).
+def mark_restart_orphan_pending(path: Path = STATE_PATH) -> dict[str, Any] | None:
+    """Read `current_job` at boot and flag it for orphan investigation —
+    WITHOUT clearing it. Returns a copy of the job dict (or None if idle).
 
-    Returns the popped dict (or None if there was none) so the caller can
-    identity-check the pid, kill it if still alive, and record a completion
-    entry via `append_completion_entry()`. See `mark_supervisor_started` for
-    why this is a separate step (Codex review §10 #3).
+    Codex review fix #3 (2026-07-04, gate-blocking finding): the prior
+    `claim_and_clear_current_job()` popped `current_job` to `None` in the
+    same atomic step as handing it to the caller, *before* the caller had
+    actually killed/recorded anything. A second supervisor crash between
+    that pop and `_handle_restart_orphan()` finishing lost the orphan's
+    record entirely — and worse, if the orphan was still alive and not yet
+    killed, the *next* restart would see `current_job=None` and never look
+    for it again, permanently losing track of a live untracked process.
+
+    Marking (not clearing) means: while `restart_cleanup_pending` is set,
+    `current_job` stays non-null, so (a) `reserve_fire()` still correctly
+    refuses new dispatches during cleanup, and (b) if THIS restart crashes
+    mid-cleanup too, the next restart calls this again, sees the same job
+    still present, and retries the identical cleanup — idempotently. Only
+    `finalize_restart_orphan_cleanup()` (called after kill + record are both
+    done) actually clears the slot.
     """
     with _locked_state(path) as (_fh, data):
         job = data.get("current_job")
+        if job is None:
+            return None
+        job["restart_cleanup_pending"] = True
+        data["current_job"] = job
+        return dict(job)
+
+
+def finalize_restart_orphan_cleanup(path: Path = STATE_PATH) -> None:
+    """Clear `current_job` — call ONLY after the orphan flagged by
+    `mark_restart_orphan_pending()` has been identity-checked, killed (if
+    warranted), and its outcome recorded via `append_completion_entry()`.
+    This is the sole point a restart-orphan's slot transitions back to None;
+    see `mark_restart_orphan_pending()` for why clearing is deferred this far."""
+    with _locked_state(path) as (_fh, data):
         data["current_job"] = None
-        return job
 
 
 def append_completion_entry(
@@ -230,9 +292,9 @@ def append_completion_entry(
     """Append a completion entry for a job dict that is no longer `current_job`.
 
     Mirrors `record_completion`'s ring-buffer append but takes the job
-    explicitly — used for orphans claimed via `claim_and_clear_current_job()`,
-    where `current_job` has already been cleared by the time we know the
-    outcome (kill succeeded / pid already gone / identity mismatch).
+    explicitly — used for orphans flagged via `mark_restart_orphan_pending()`,
+    where `current_job` is not cleared until `finalize_restart_orphan_cleanup()`
+    runs, so this call happens *before* the slot is actually freed.
     """
     with _locked_state(path) as (_fh, data):
         started_at = job.get("started_at")
@@ -310,16 +372,45 @@ def reserve_fire(
 def attach_process(
     *, pid: int, pgid: int, started_wall: str | None, path: Path = STATE_PATH,
 ) -> None:
-    """Fill in real pid/pgid/identity fingerprint after a successful spawn
-    following `reserve_fire()`. Raises if the reservation is missing (should
-    be unreachable under correct single-writer-per-slot discipline; guards
-    against a supervisor bug silently corrupting job identity)."""
+    """Fill in real pid/pgid (and identity fingerprint, if already known)
+    after a successful spawn following `reserve_fire()`. Raises if the
+    reservation is missing (should be unreachable under correct
+    single-writer-per-slot discipline; guards against a supervisor bug
+    silently corrupting job identity).
+
+    Callers should pass `started_wall=None` and call this IMMEDIATELY after
+    `Popen()` returns (before the slower `ps`-based fingerprint lookup), then
+    fill the fingerprint in separately via `update_started_wall()` once it's
+    available. See that function's docstring for why (Codex review fix #2,
+    2026-07-04) — this narrows the "current_job.pid is None" crash-recovery
+    blind spot in `mark_restart_orphan_pending()` down to just the `Popen()`
+    syscall itself, rather than spanning the whole fingerprint subprocess call.
+    """
     with _locked_state(path) as (_fh, data):
         job = data.get("current_job")
         if job is None:
             raise RuntimeError("attach_process called with no active reservation")
         job["pid"] = pid
         job["pgid"] = pgid
+        job["started_wall"] = started_wall
+        data["current_job"] = job
+
+
+def update_started_wall(*, pid: int, started_wall: str, path: Path = STATE_PATH) -> None:
+    """Fill in the identity fingerprint after `attach_process()` already
+    recorded pid/pgid without one (Codex review fix #2, 2026-07-04).
+
+    Fingerprinting requires a `ps` subprocess call — slower than the pid/pgid
+    attach itself — so it is captured in this separate follow-up step to keep
+    the "reservation has a pid but no fingerprint yet" window as small as
+    possible. No-ops (does not raise) if `current_job`'s pid no longer
+    matches `pid` — the job may have already completed (or been replaced by
+    a subsequent fire) by the time the `ps` call returned.
+    """
+    with _locked_state(path) as (_fh, data):
+        job = data.get("current_job")
+        if job is None or job.get("pid") != pid:
+            return
         job["started_wall"] = started_wall
         data["current_job"] = job
 
