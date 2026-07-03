@@ -195,7 +195,7 @@ def _auto_remediate_publish_drought() -> dict:
                     summary = json.loads(line)
                     break
                 except json.JSONDecodeError:
-                    continue
+                    continue  # silent-ok: scanning stdout in reverse for last valid JSON line; non-JSON candidates expected
         summary["returncode"] = proc.returncode
         summary["ran_at"] = start.isoformat()
         if not summary.get("attempted"):

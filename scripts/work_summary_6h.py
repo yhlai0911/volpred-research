@@ -110,7 +110,8 @@ def _work_log_entries() -> list[dict]:
             dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=timezone.utc)
-        except Exception:
+        except Exception as exc:
+            _warn_summary("work_log entry has unparseable timestamp; skipping", exc=exc)
             continue
         if dt >= SINCE:
             out.append(entry)
@@ -128,7 +129,7 @@ def _new_notifications() -> list[dict]:
         try:
             mtime = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
         except OSError:
-            continue
+            continue  # silent-ok: stat race — notification file removed between glob and stat
         if mtime < SINCE:
             continue
         try:

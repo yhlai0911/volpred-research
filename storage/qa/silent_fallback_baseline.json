@@ -1,7 +1,7 @@
 {
   "schema": "silent_fallback_baseline.v1",
   "description": "Known silent-fallback audit findings. CI strict mode fails only when current findings introduce keys absent from this baseline.",
-  "count": 75,
+  "count": 72,
   "findings": [
     {
       "path": "scripts/backtest_3yr_final.py",
@@ -220,12 +220,6 @@
       "action": "return None"
     },
     {
-      "path": "scripts/supabase_sync.py",
-      "line": 678,
-      "exception": "Exception",
-      "action": "return None"
-    },
-    {
       "path": "scripts/validate_garch_midas_cross_asset.py",
       "line": 171,
       "exception": "Exception",
@@ -241,18 +235,6 @@
       "path": "scripts/var_report.py",
       "line": 113,
       "exception": "Exception",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/work_summary_6h.py",
-      "line": 111,
-      "exception": "Exception",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/work_summary_6h.py",
-      "line": 128,
-      "exception": "OSError",
       "action": "continue"
     },
     {
