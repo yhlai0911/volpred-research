@@ -1698,6 +1698,14 @@ class Publisher:
                 details_clean['experiment_refs'] = merged
             else:
                 details_clean['experiment_refs'] = experiment_refs
+        # Event article metadata is needed by refill/coverage gates as top-level
+        # fields, not only nested under details, so reaction coverage can use an
+        # exact event match instead of title/tag fuzzy fallback.
+        event_metadata = {
+            key: details_clean[key]
+            for key in ("event_key", "event_type", "event_date", "event_series_slot")
+            if details_clean.get(key) not in (None, "")
+        }
         item = {
             'id': pub_id,
             'title': title,
@@ -1715,6 +1723,7 @@ class Publisher:
             'published_at': publish_at or now,
             'status': normalized_status,
         }
+        item.update(event_metadata)
         if content_audit_flagged:
             # Tier-2 (LLM conclusion-consistency) flagged a possible contradiction.
             # Non-blocking, but visible to dashboard / audit / boss inbox.

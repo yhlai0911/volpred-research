@@ -177,3 +177,47 @@ def test_publish_milestone_auto_uploads_markdown_and_details_charts(tmp_path: Pa
         "https://supabase.test/chart_b.png",
     ]
     assert calls == [str(chart_a), str(chart_b)]
+
+
+def test_publish_milestone_stamps_event_metadata_top_level(tmp_path: Path, monkeypatch):
+    _install_test_stubs(monkeypatch)
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
+    monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+    monkeypatch.setattr(Publisher, "_sync_to_remote", lambda self, *a, **kw: None, raising=False)
+    monkeypatch.setattr(Publisher, "_find_similar_articles", lambda self, *a, **kw: [], raising=False)
+    monkeypatch.setattr(
+        "volpred.publisher.publisher.cluster_gate_status",
+        lambda cluster: {"count": 0, "cap": 999, "ratio": 0.0, "blocked": False},
+    )
+    monkeypatch.setattr(
+        "volpred.publisher.publisher.classify_topic_cluster",
+        lambda title, tags, description: None,
+    )
+
+    pub = Publisher(storage_dir=str(tmp_path))
+    pub_id = pub.publish_milestone(
+        title="NFP reaction article",
+        description="event-driven analysis",
+        phase="event_article",
+        details={
+            "content_type": "event_article",
+            "event_key": "NFP_US_2026_07_03",
+            "event_type": "NFP_US",
+            "event_date": "2026-07-03",
+            "event_series_slot": "T+0",
+        },
+        tags=["event_article", "NFP"],
+        audience="event",
+        category="event_article",
+        audit_strict=False,
+    )
+
+    feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
+    item = next(x for x in feed if x["id"] == pub_id)
+
+    assert item["event_key"] == "NFP_US_2026_07_03"
+    assert item["event_type"] == "NFP_US"
+    assert item["event_date"] == "2026-07-03"
+    assert item["event_series_slot"] == "T+0"
+    assert item["details"]["event_key"] == "NFP_US_2026_07_03"

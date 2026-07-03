@@ -47367,10 +47367,36 @@
     "description": "Part (b) of slot-aware coverage (parent: platform_ops_event_refill_slot_aware_coverage, done 2026-07-03). 現況 feed event 文章全無 event_key/event_type/event_date/event_series_slot metadata（全 null），refill 的 reaction coverage 只能靠 title/entity fuzzy match（已上線, 見 refill_reader_facing_pool._reaction_already_covered）。正解: publisher publish_milestone 走 event_article 路徑時，把 originating event task 的 event_key/event_type/event_date/event_series_slot 寫進 feed report entry（頂層欄位）。落地後 coverage 的 metadata-exact 分支 會自動生效，降低對 fuzzy 的依賴。注意: 需可靠地把 task metadata 穿到 publish 呼叫（agent brief 或 publish payload），delicate + 需測試。Skill: feed-publisher。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-03T15:23:45+00:00",
     "source": "hourly_dispatch_pdca",
-    "parent_task_id": "platform_ops_event_refill_slot_aware_coverage"
+    "parent_task_id": "platform_ops_event_refill_slot_aware_coverage",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-03T19:04:27.218167+00:00",
+    "claim_session_id": "d32eb042ec50",
+    "status_history": [
+      {
+        "ts": "2026-07-03T19:04:27.218460+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T19:04:41.686804+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T19:07:52.583577+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-03T19:04:41.686513+00:00",
+    "completed_at": "2026-07-03T19:07:52.583305+00:00",
+    "result": "publish_milestone 現在會把 event_key/event_type/event_date/event_series_slot 從 details 同步到 feed entry 頂層，讓 reaction coverage 可用 metadata exact match。新增 publisher 與 reader-facing refill regression；pytest tests/test_event_jobs.py tests/test_reader_facing_refill.py tests/test_publisher_provenance.py -q 通過。"
   },
   {
     "id": "platform_ops_check_arc_dedup_fuzzy_legacy",

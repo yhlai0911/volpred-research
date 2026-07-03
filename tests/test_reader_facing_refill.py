@@ -316,6 +316,44 @@ def test_reaction_already_covered_fuzzy_early_release():
     assert hit["match"] == "fuzzy"
 
 
+def test_reaction_already_covered_exact_event_metadata():
+    """New publisher writes top-level event metadata, so coverage can be exact."""
+    feed = [{
+        "id": "mile_exact",
+        "status": "published",
+        "title": "Unrelated title that should not matter",
+        "tags": [],
+        "event_key": "NFP_US_2026_07_03",
+        "event_type": "NFP_US",
+        "event_date": "2026-07-03",
+        "event_series_slot": "T+0",
+        "published_at": "2026-06-01T00:00:00+00:00",
+    }]
+
+    hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
+
+    assert hit is not None
+    assert hit["id"] == "mile_exact"
+    assert hit["match"] == "metadata"
+
+
+def test_reaction_metadata_forward_slot_does_not_cover_reaction():
+    feed = [{
+        "id": "mile_forward_metadata",
+        "status": "published",
+        "title": "NFP T-2 preview",
+        "tags": ["NFP"],
+        "event_type": "NFP_US",
+        "event_date": "2026-07-03",
+        "event_series_slot": "T-2",
+        "published_at": "2026-07-01T00:00:00+00:00",
+    }]
+
+    hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
+
+    assert hit is None
+
+
 def test_reaction_coverage_excludes_forward_preview():
     """A forward preview (前7天) must NOT count as reaction coverage."""
     feed = [{
