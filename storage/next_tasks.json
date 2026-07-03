@@ -45436,7 +45436,7 @@
     "title": "研究 backlog fallback: Data-driven VC screening shock 對 public innovation-stock volatility 的融資閘門效應",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Data-driven VC screening shock 對 public innovation-stock volatility 的融資閘門效應 — 用 RFS data-driven investor adoption source 只作機制；實證端用 SEC S-1 / IPO calendar、VC-backed public-company cohort、listed innovation ETF（ARKK/IPO/IGV/SOXX/AIQ）與 public funding/news counts 建粗 proxy，檢定 algorithmic-screening / AI-fu | 來源 section: 期刊主題挖掘 batch 2026-07-02（journal_discovery_20260702_0；websearch rfs/restud/rof/jfec/cfa/fed 2025-26 趨勢層級；硬約束避開 off-exchange short-volume、graph/gnn、thematic etf coherence、cre/nbfi、stablecoin、ai concentration 等已覆蓋 cluster；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -45445,7 +45445,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-02T16:08:47+00:00"
+    "created_at": "2026-07-02T16:08:47+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-03T05:26:42.026917+00:00",
+    "claim_session_id": "09fe74c1c374",
+    "status_history": [
+      {
+        "ts": "2026-07-03T05:26:42.027211+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T05:26:51.625189+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T06:00:58.266455+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-03T05:26:51.624874+00:00",
+    "completed_at": "2026-07-03T06:00:58.266173+00:00",
+    "result": "Completed SEC/yfinance public-proxy diagnostic for data-driven VC screening spillover. Verdict NULL_PUBLIC_PROXY_DIAGNOSTIC: 10 OOS cells, 0 Harvey pass, 6 directional improvements; strongest IGV 21d +3.21% QLIKE improvement with DM t=-1.69. Wrote experiment triplet, figure, Codex review, knowledge item dcd925ba, and research_program completion note."
   },
   {
     "id": "research_blockbuster_movie_entertainment_attention_shock",

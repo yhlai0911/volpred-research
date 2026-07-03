@@ -37323,5 +37323,17 @@
     ],
     "confidence": 0.68,
     "created_at": "2026-07-03T12:23:47.592759"
+  },
+  {
+    "item_id": "dcd925ba",
+    "category": "experiment",
+    "content": "Experiment research_data_driven_vc_screening_shock_public_innovation (Codex reviewed, 2026-07-03) tested whether lagged public financing-window attention predicts listed innovation ETF volatility. Proxy: SEC EDGAR daily S-1/S-1/A/F-1/F-1/A registration counts normalized by all EDGAR filings; prices: yfinance adjusted close for ARKK/IPO/IGV/SOXX/AIQ with QQQ/SPY controls, 2018-01-02 to 2026-07-02. Lookahead controls: attention_z_lag1 = SEC registration attention shifted one trading day; forward 5d/21d targets use embargo target_end_pos < prediction_pos; seed=42. Verdict: NULL_PUBLIC_PROXY_DIAGNOSTIC. OOS cells=10, Harvey pass count=0, directionally better count=6. Strongest directional cells: IGV 21d QLIKE improvement +3.21%, DM t=-1.69; IGV 5d +2.22%, DM t=-2.08; both fail t<=-3. Aggregate HAC diagnostics also fail positive-volatility gate: all attention betas are negative; closest is innovation_dispersion_21d beta=-0.0155, HAC t=-1.94. Top-decile SEC attention contrast is opposite-sign for 5d innovation basket RV (shock mean 0.00119 vs non-shock 0.00194, Welch t=-6.87). Interpretation: under this reproducible SEC public proxy, there is no publication-strength evidence that financing-gate attention or data-driven VC screening spillover improves public innovation ETF volatility forecasts. This does not refute Bonelli's private-market VC mechanism; it only limits claims possible with free SEC/yfinance proxies.",
+    "evidence": [
+      "experiments/research_data_driven_vc_screening_shock_public_innovation/research_data_driven_vc_screening_shock_public_innovation_results.json",
+      "experiments/research_data_driven_vc_screening_shock_public_innovation/README.md",
+      "experiments/research_data_driven_vc_screening_shock_public_innovation/codex_review.md"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-07-03T14:00:00.751111"
   }
 ]
