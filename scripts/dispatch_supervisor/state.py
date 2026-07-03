@@ -8,20 +8,25 @@ Schema (version 1)::
       "last_heartbeat_at": "<ISO>",              # scheduler tick heartbeat (every 60s)
       "last_fire_at": "<ISO|null>",              # last time a worker was actually spawned
       "current_job": null | {                    # in-flight worker (None when idle)
-        "pid": int,
-        "pgid": int,
+        "pid": int | null,                       # null during the reserve_fire()..attach_process() window
+        "pgid": int | null,
+        "started_wall": str | null,               # `ps -o lstart=` fingerprint (may lag pid/pgid — see update_started_wall)
         "schedule_id": "hourly_dispatch",
         "started_at": "<ISO>",
         "attempt": int,                          # 1..3
         "model": "opus" | "sonnet",
-        "log_path": str
+        "log_path": str,
+        "restart_cleanup_pending": true           # only present while a restart-orphan investigation is in flight
       },
       "completions": [                           # ring buffer (max 100 entries)
         {
           "fire_at": "<ISO>", "completed_at": "<ISO>",
           "exit_code": int, "duration_s": float,
           "attempts": int, "final_model": str,
-          "outcome": "success" | "failure" | "killed_timeout" | "killed_supervisor"
+          "outcome": "success" | "failure" | "killed_timeout" | "silent_death" |
+                     "timeout_unverified" | "killed_supervisor_restart" |
+                     "orphan_gone_or_reused" | "orphan_unverified_not_killed" |
+                     "reservation_abandoned_no_pid"
         }
       ],
       "auth_blocked": false,                      # set true on 'Not logged in' — halts ticks
@@ -31,11 +36,15 @@ Schema (version 1)::
       }
     }
 
-Lock semantics mirror `scripts/task_pool_claim.py`: `fcntl.LOCK_EX` for the
-duration of any read-modify-write cycle. Atomic rename on persist.
+Lock semantics: `fcntl.LOCK_EX` on a dedicated sibling lockfile
+(`_lock_path()`) for the duration of any read-modify-write cycle — NOT on
+`dispatch_state.json` itself, which is replaced (new inode) on every persist
+(Codex review fix #1, 2026-07-04, gate-blocking: locking the replaced file
+directly is a TOCTOU race — see `_lock_path()`'s docstring). Persist is an
+atomic `os.replace()` via `_atomic_write_json()`.
 
 Used by:
-  - supervisor.py  (scheduler tick, fire decision, completion record)
+  - supervisor.py  (scheduler tick, fire decision, completion record, restart-orphan cleanup)
   - health.py      (read current_job to verify worker liveness)
   - check_alerts.py (read last_heartbeat_at to detect supervisor death)
 """

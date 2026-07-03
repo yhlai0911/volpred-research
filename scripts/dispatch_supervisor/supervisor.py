@@ -132,7 +132,9 @@ def _handle_restart_orphan() -> None:
             orphan, exit_code=-1, outcome="reservation_abandoned_no_pid",
             final_model=str(orphan.get("model", "?")), path=state_path,
         )
-        alerts.send_orphan_restart_alert(job=orphan, killed=False, state_path=state_path)
+        alerts.send_orphan_restart_alert(
+            job=orphan, killed=False, outcome="reservation_abandoned_no_pid", state_path=state_path,
+        )
         state.finalize_restart_orphan_cleanup(state_path)
         return
     pid = int(orphan["pid"])
@@ -162,7 +164,7 @@ def _handle_restart_orphan() -> None:
         orphan, exit_code=exit_code, outcome=outcome,
         final_model=str(orphan.get("model", "?")), path=state_path,
     )
-    alerts.send_orphan_restart_alert(job=orphan, killed=killed, state_path=state_path)
+    alerts.send_orphan_restart_alert(job=orphan, killed=killed, outcome=outcome, state_path=state_path)
     state.finalize_restart_orphan_cleanup(state_path)
 
 

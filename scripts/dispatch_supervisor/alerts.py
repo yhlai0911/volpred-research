@@ -195,14 +195,16 @@ def send_loop_crash(component: str, traceback_text: str, *, state_path: Path = s
 
 
 def send_orphan_restart_alert(
-    *, job: dict[str, Any], killed: bool, state_path: Path = state.STATE_PATH,
+    *, job: dict[str, Any], killed: bool, outcome: str = "", state_path: Path = state.STATE_PATH,
 ) -> bool:
     """Supervisor boot found a stale `current_job` from a crashed prior
     instance (Codex review §10 #3). `killed=True` means the orphan process
     was still alive and identity-verified before being force-killed;
     `killed=False` covers every other case — already gone, pid reused, no
     fingerprint ever recorded (unverified), or the reservation never even
-    reached a real pid before the crash (see `procutil.check_identity`)."""
+    reached a real pid before the crash (see `procutil.check_identity` and
+    the `outcome` string, which names the exact case — passed straight from
+    `supervisor._handle_restart_orphan()`'s completion-entry outcome)."""
     key = "orphan_restart"
     if state.should_dedup_alert(key, window_s=60, path=state_path):
         return False
@@ -211,7 +213,8 @@ def send_orphan_restart_alert(
         f"- pid: {job.get('pid')} pgid: {job.get('pgid')}\n"
         f"- schedule_id: {job.get('schedule_id')} attempt: {job.get('attempt')} model: {job.get('model')}\n"
         f"- started_at: {job.get('started_at')}\n"
-        f"- action: {'identity-verified SIGKILL issued' if killed else '已不存在 / pid 已被回收，未發送 kill signal'}\n\n"
+        f"- outcome: {outcome or '(unspecified)'}\n"
+        f"- action: {'identity-verified SIGKILL issued' if killed else '未發送 kill signal'}\n\n"
         "## 影響\n"
         "- 前一個 supervisor process 非正常結束（crash / OOM-kill / manual kill -9）；"
         "worker 因 `start_new_session=True` 不會隨 supervisor 一起死，此次是補做清理\n"
