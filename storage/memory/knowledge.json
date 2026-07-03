@@ -37297,5 +37297,18 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-07-03T10:01:52.989538"
+  },
+  {
+    "item_id": "6ba303d3",
+    "category": "monetary_policy_volatility",
+    "content": "K1612 weak mixed result: official Fed FOMC statement/minutes text (87 documents, 44 statements and 43 minutes, release-aligned 2021-01-27 to 2026-06-17) does not robustly predict post-release SPY realized-volatility persistence, but shows hypothesis-generating links to VIX term structure. Forward targets start on the next trading day after public release; minutes use the Fed calendar Released date, not the earlier meeting date; lagged RV control is shifted. Pooled release-aligned regressions: complexity_z does not predict fwd5 SPY RV (coef 0.0101, HAC t=0.71, p=0.477, n=86) or fwd22 SPY RV (coef 0.0020, t=0.16, p=0.876); hedged_risk_tone_z also does not predict fwd5/fwd22 RV (p=0.794 and p=0.256). Complexity_z is positive for 22-day VIX/VIX3M change (coef 0.0414, HAC t=2.58, p=0.0099, n=86); statement-only hedged_risk_tone_z is negative for 22-day VIX/VIX3M change (coef -0.0420, t=-2.37, p=0.0176, n=43). Bootstrap terciles show descriptive RV contrasts, but adjusted regressions are weaker/non-significant, so conclusion is: track FOMC readability/tone as event-context features, not standalone forecasting signals. reviewer=Codex self-review CONDITIONAL_PASS; experiment_id=K1612.",
+    "evidence": [
+      "experiments/K1612/README.md",
+      "experiments/K1612/K1612.py",
+      "experiments/K1612/K1612_results.json",
+      "experiments/K1612/codex_review.md"
+    ],
+    "confidence": 0.64,
+    "created_at": "2026-07-03T11:14:35.000431"
   }
 ]

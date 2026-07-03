@@ -1,0 +1,976 @@
+{
+  "experiment_id": "K1612",
+  "generated_at": "2026-07-03T03:12:01.800776+00:00",
+  "seed": 42,
+  "bootstrap_reps": 3000,
+  "fed_calendar_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+  "market_data_source": "yfinance adjusted close via yf.download(auto_adjust=True)",
+  "market_start": "2020-12-15",
+  "market_end": "2026-07-03",
+  "literature": [
+    {
+      "citation": "Hansen, McMahon, and Prat (2018), Quarterly Journal of Economics, 'Transparency and Deliberation Within the FOMC'",
+      "url": "https://doi.org/10.1093/qje/qjx045",
+      "use_in_design": "Motivates treating FOMC text as measurable communication rather than only a policy-rate event."
+    },
+    {
+      "citation": "Rosa (2013), Federal Reserve Bank of New York Economic Policy Review, 'Do FOMC minutes matter to markets?'",
+      "url": "https://www.newyorkfed.org/research/epr/2013/1212rosa.html",
+      "use_in_design": "Motivates a separate minutes-release event window instead of assigning minutes information to the earlier meeting day."
+    },
+    {
+      "citation": "Doh, Kim, and Yang (2020), Federal Reserve Bank of Kansas City, 'How You Say It Matters: Text Analysis of FOMC Statements Using Natural Language Processing'",
+      "url": "https://www.kansascityfed.org/research/economic-bulletin/how-you-say-it-matters-text-analysis-fomc-statements-using-natural-language-processing-2020/",
+      "use_in_design": "Motivates tone / uncertainty dictionaries as public-text predictors."
+    },
+    {
+      "citation": "St. Louis Fed Economic Synopses (2014), 'The Rising Complexity of the FOMC Statement'",
+      "url": "https://fraser.stlouisfed.org/title/economic-synopses-6715/rising-complexity-fomc-statement-624437",
+      "use_in_design": "Motivates measuring readability and length as first-order statement characteristics."
+    }
+  ],
+  "lookahead_policy": {
+    "documents_are_observed_at": "release_date",
+    "statements_release_date": "meeting_date from official Fed statement URL",
+    "minutes_release_date": "official Fed calendar 'Released Month DD, YYYY' parent text",
+    "forward_targets_start": "next trading day after event_market_date",
+    "lagged_vol_control": "22-trading-day SPY realized volatility shifted by one day"
+  },
+  "sample_counts": {
+    "calendar_documents": 87,
+    "statement_documents": 44,
+    "minutes_documents": 43,
+    "event_panel_rows": 87,
+    "rows_with_fwd5_rv": 87,
+    "rows_with_fwd22_rv": 86,
+    "first_release_date": "2021-01-27",
+    "last_release_date": "2026-06-17"
+  },
+  "market_coverage": {
+    "SPY": {
+      "n_obs": 1392,
+      "first_date": "2020-12-15",
+      "last_date": "2026-07-02"
+    },
+    "^VIX": {
+      "n_obs": 1393,
+      "first_date": "2020-12-15",
+      "last_date": "2026-07-02"
+    },
+    "^VIX3M": {
+      "n_obs": 1389,
+      "first_date": "2020-12-15",
+      "last_date": "2026-07-02"
+    },
+    "^VIX9D": {
+      "n_obs": 1389,
+      "first_date": "2020-12-15",
+      "last_date": "2026-07-02"
+    }
+  },
+  "text_metric_summary": [
+    {
+      "document_type": "minutes",
+      "n": 43,
+      "median_word_count": 7509.0,
+      "median_flesch_kincaid_grade": 15.638099426907765,
+      "median_hedge_per_1000": 16.87365010799136,
+      "median_risk_uncertainty_per_1000": 20.362290096522543
+    },
+    {
+      "document_type": "statement",
+      "n": 44,
+      "median_word_count": 365.0,
+      "median_flesch_kincaid_grade": 11.287502472905782,
+      "median_hedge_per_1000": 12.257725246656985,
+      "median_risk_uncertainty_per_1000": 36.87781437940101
+    }
+  ],
+  "regressions": [
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 86,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix",
+        "is_minutes"
+      ],
+      "coef": 0.010091633727293752,
+      "hac_t": 0.7114726153396,
+      "p_value": 0.4767914146809288,
+      "r2": 0.43184959998948447,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 86,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix",
+        "is_minutes"
+      ],
+      "coef": 0.0020378319548656153,
+      "hac_t": 0.1565665767066821,
+      "p_value": 0.875586445543511,
+      "r2": 0.3733445322280883,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "complexity_z",
+      "n": 86,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix",
+        "is_minutes"
+      ],
+      "coef": -0.011447236107313664,
+      "hac_t": -0.6336254760270766,
+      "p_value": 0.526325270738202,
+      "r2": 0.5318197466761951,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "complexity_z",
+      "n": 86,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix",
+        "is_minutes"
+      ],
+      "coef": 0.04144704471721764,
+      "hac_t": 2.580812400715385,
+      "p_value": 0.009856812898075601,
+      "r2": 0.31519725478833704,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 86,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix",
+        "is_minutes"
+      ],
+      "coef": -0.001778238974647651,
+      "hac_t": -0.26111665758176394,
+      "p_value": 0.7940025462852667,
+      "r2": 0.42837927788220176,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 86,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix",
+        "is_minutes"
+      ],
+      "coef": -0.009352939474163538,
+      "hac_t": -1.1358074206462465,
+      "p_value": 0.256037170724876,
+      "r2": 0.38157072004364734,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "hedged_risk_tone_z",
+      "n": 86,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix",
+        "is_minutes"
+      ],
+      "coef": -0.011753129049387296,
+      "hac_t": -1.0731864997569032,
+      "p_value": 0.28318744667205464,
+      "r2": 0.5358041360107818,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "hedged_risk_tone_z",
+      "n": 86,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix",
+        "is_minutes"
+      ],
+      "coef": -0.01949469846025825,
+      "hac_t": -1.5631666479373794,
+      "p_value": 0.11801340263848567,
+      "r2": 0.29523712688254933,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": 0.025830075035672376,
+      "hac_t": 1.8007136526243186,
+      "p_value": 0.0717480246058806,
+      "r2": 0.5054152907677151,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": 0.002850572393080182,
+      "hac_t": 0.14962334395042903,
+      "p_value": 0.881061789700185,
+      "r2": 0.30230628427235984,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "complexity_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": 0.007444980815458099,
+      "hac_t": 0.2801233031038856,
+      "p_value": 0.7793829068286624,
+      "r2": 0.5357261966889539,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "complexity_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": 0.0306823721125895,
+      "hac_t": 1.2955420025318296,
+      "p_value": 0.19513332160818708,
+      "r2": 0.34535642159673086,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": -0.010755694104782406,
+      "hac_t": -1.0412798464940354,
+      "p_value": 0.2977456873587182,
+      "r2": 0.48527656838339406,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": -0.02253052200549572,
+      "hac_t": -1.3964256181434977,
+      "p_value": 0.1625863650542323,
+      "r2": 0.33276909463256765,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": -0.0021623364355943184,
+      "hac_t": -0.09628396456431094,
+      "p_value": 0.9232950463361644,
+      "r2": 0.5350032408925194,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": -0.041998438386692524,
+      "hac_t": -2.373752389610367,
+      "p_value": 0.017608354282907263,
+      "r2": 0.40948579212399383,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": -0.008529422477061573,
+      "hac_t": -0.34813373761844324,
+      "p_value": 0.727739748250178,
+      "r2": 0.4246548637513582,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": 0.009097077846834768,
+      "hac_t": 0.590708731200158,
+      "p_value": 0.5547155967692486,
+      "r2": 0.526253057695171,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "complexity_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": -0.025457701078784988,
+      "hac_t": -1.084125094994399,
+      "p_value": 0.27830933749762,
+      "r2": 0.5119872525793678,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "complexity_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": 0.053525415978133206,
+      "hac_t": 2.448064946175154,
+      "p_value": 0.014362576392516667,
+      "r2": 0.3139579243692261,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": 0.0013239142030420648,
+      "hac_t": 0.13663836857331013,
+      "p_value": 0.8913166471795022,
+      "r2": 0.42267338565821455,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": -0.0028268974024054858,
+      "hac_t": -0.3050003069378724,
+      "p_value": 0.7603659185487976,
+      "r2": 0.5235387647183225,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": -0.017596183870644183,
+      "hac_t": -1.5346500960333664,
+      "p_value": 0.12486980018991847,
+      "r2": 0.5188023895464036,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "controls": [
+        "lag_rv22_ann",
+        "vix_dec",
+        "vix9d_vix"
+      ],
+      "coef": -0.0033111320286343554,
+      "hac_t": -0.2275435373941296,
+      "p_value": 0.8200011190057042,
+      "r2": 0.2437858895803563,
+      "status": "ok"
+    }
+  ],
+  "bootstrap_high_low": [
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 87,
+      "n_low": 29,
+      "n_high": 29,
+      "low_tercile_mean": 0.11426292108719278,
+      "high_tercile_mean": 0.16892071309142095,
+      "high_minus_low": 0.05465779200422817,
+      "ci95": [
+        0.019403664977891016,
+        0.08976731565657359
+      ],
+      "p_two_sided": 0.0013333333333333333,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 86,
+      "n_low": 29,
+      "n_high": 29,
+      "low_tercile_mean": 0.13722372604719868,
+      "high_tercile_mean": 0.17095396347134978,
+      "high_minus_low": 0.0337302374241511,
+      "ci95": [
+        -0.0048285153884475235,
+        0.06872908231664485
+      ],
+      "p_two_sided": 0.07933333333333334,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "complexity_z",
+      "n": 87,
+      "n_low": 29,
+      "n_high": 29,
+      "low_tercile_mean": -0.023500081823585962,
+      "high_tercile_mean": -0.04741675160129705,
+      "high_minus_low": -0.023916669777711085,
+      "ci95": [
+        -0.07859450674046439,
+        0.03181393458094345
+      ],
+      "p_two_sided": 0.406,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "complexity_z",
+      "n": 86,
+      "n_low": 29,
+      "n_high": 29,
+      "low_tercile_mean": -0.0062425648098783275,
+      "high_tercile_mean": -0.01197687677648271,
+      "high_minus_low": -0.005734311966604383,
+      "ci95": [
+        -0.054176443876215556,
+        0.040626313982288415
+      ],
+      "p_two_sided": 0.8273333333333334,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 87,
+      "n_low": 29,
+      "n_high": 29,
+      "low_tercile_mean": 0.1404346113712187,
+      "high_tercile_mean": 0.1236022187193768,
+      "high_minus_low": -0.016832392651841915,
+      "ci95": [
+        -0.04585710004866443,
+        0.011669483947615382
+      ],
+      "p_two_sided": 0.264,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 86,
+      "n_low": 29,
+      "n_high": 29,
+      "low_tercile_mean": 0.17390175218782541,
+      "high_tercile_mean": 0.1287632378268222,
+      "high_minus_low": -0.04513851436100322,
+      "ci95": [
+        -0.08125335098645153,
+        -0.01246732508684984
+      ],
+      "p_two_sided": 0.007333333333333333,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "hedged_risk_tone_z",
+      "n": 87,
+      "n_low": 29,
+      "n_high": 29,
+      "low_tercile_mean": -0.02675317385800168,
+      "high_tercile_mean": -0.04534677622206335,
+      "high_minus_low": -0.018593602364061674,
+      "ci95": [
+        -0.07674071381716427,
+        0.03879991677336433
+      ],
+      "p_two_sided": 0.5286666666666666,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "all_documents_release_aligned",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "hedged_risk_tone_z",
+      "n": 86,
+      "n_low": 29,
+      "n_high": 29,
+      "low_tercile_mean": -0.002824982016235975,
+      "high_tercile_mean": -0.008339066473177916,
+      "high_minus_low": -0.005514084456941942,
+      "ci95": [
+        -0.051054237955854,
+        0.039416041548492174
+      ],
+      "p_two_sided": 0.8113333333333334,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 44,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.12245425287974127,
+      "high_tercile_mean": 0.18413512861024256,
+      "high_minus_low": 0.061680875730501294,
+      "ci95": [
+        0.01648732754159113,
+        0.10552822544797782
+      ],
+      "p_two_sided": 0.005333333333333333,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.1480457693051641,
+      "high_tercile_mean": 0.17460441039845384,
+      "high_minus_low": 0.02655864109328973,
+      "ci95": [
+        -0.037344914592798185,
+        0.07980569209625772
+      ],
+      "p_two_sided": 0.3566666666666667,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "complexity_z",
+      "n": 44,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": -0.0463479107013744,
+      "high_tercile_mean": -0.058512910031305924,
+      "high_minus_low": -0.012164999329931522,
+      "ci95": [
+        -0.09222819511275762,
+        0.08277107365693041
+      ],
+      "p_two_sided": 0.7446666666666667,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "complexity_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": -0.0062060186373380805,
+      "high_tercile_mean": -0.010205402332457954,
+      "high_minus_low": -0.003999383695119874,
+      "ci95": [
+        -0.07041846494487841,
+        0.06375562068806606
+      ],
+      "p_two_sided": 0.92,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 44,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.16458232334709905,
+      "high_tercile_mean": 0.13036439539106917,
+      "high_minus_low": -0.034217927956029875,
+      "ci95": [
+        -0.06882512218717585,
+        0.002651838767329997
+      ],
+      "p_two_sided": 0.066,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.19101463849158512,
+      "high_tercile_mean": 0.128165758564797,
+      "high_minus_low": -0.06284887992678811,
+      "ci95": [
+        -0.11932674210656337,
+        -0.017028602662610658
+      ],
+      "p_two_sided": 0.004666666666666667,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "hedged_risk_tone_z",
+      "n": 44,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": -0.056256671729134365,
+      "high_tercile_mean": -0.05091025379581117,
+      "high_minus_low": 0.005346417933323196,
+      "ci95": [
+        -0.0871069497183059,
+        0.08323763862637126
+      ],
+      "p_two_sided": 0.8626666666666667,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "statement_only_meeting_day",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.005336385818590817,
+      "high_tercile_mean": -0.011507985911177824,
+      "high_minus_low": -0.01684437172976864,
+      "ci95": [
+        -0.08261124701064455,
+        0.046457400636567565
+      ],
+      "p_two_sided": 0.6073333333333333,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.11476254808093928,
+      "high_tercile_mean": 0.14998430251197456,
+      "high_minus_low": 0.035221754431035285,
+      "ci95": [
+        -0.01585780388239969,
+        0.09071146002686174
+      ],
+      "p_two_sided": 0.188,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "complexity_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.13827551934030963,
+      "high_tercile_mean": 0.16617189316003467,
+      "high_minus_low": 0.02789637381972504,
+      "ci95": [
+        -0.017940921641825775,
+        0.0734714966111593
+      ],
+      "p_two_sided": 0.22866666666666666,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "complexity_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.0001629178048857538,
+      "high_tercile_mean": -0.03203631622579057,
+      "high_minus_low": -0.03219923403067632,
+      "ci95": [
+        -0.10062433361067485,
+        0.032492311313062565
+      ],
+      "p_two_sided": 0.336,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "complexity_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": -0.004620018078831323,
+      "high_tercile_mean": -0.010541680252363647,
+      "high_minus_low": -0.005921662173532324,
+      "ci95": [
+        -0.06992393610137977,
+        0.05279805825389986
+      ],
+      "p_two_sided": 0.8906666666666667,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "fwd5_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.12164989011090528,
+      "high_tercile_mean": 0.11812679167090064,
+      "high_minus_low": -0.003523098440004646,
+      "ci95": [
+        -0.04564068185712191,
+        0.035708327053155194
+      ],
+      "p_two_sided": 0.9006666666666666,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "fwd22_spy_rv_ann",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.15884293964986415,
+      "high_tercile_mean": 0.13022776773179032,
+      "high_minus_low": -0.028615171918073834,
+      "ci95": [
+        -0.06847139878617589,
+        0.011952151327569585
+      ],
+      "p_two_sided": 0.182,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "delta_vix9d_vix_5d",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": 0.0011014188845919425,
+      "high_tercile_mean": -0.02553869492316124,
+      "high_minus_low": -0.02664011380775318,
+      "ci95": [
+        -0.097168232511315,
+        0.04210739187120179
+      ],
+      "p_two_sided": 0.43266666666666664,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    },
+    {
+      "sample": "minutes_only_release_day",
+      "target": "delta_vix_vix3m_22d",
+      "metric": "hedged_risk_tone_z",
+      "n": 43,
+      "n_low": 15,
+      "n_high": 15,
+      "low_tercile_mean": -0.007855668257004315,
+      "high_tercile_mean": -0.00421979586897141,
+      "high_minus_low": 0.0036358723880329053,
+      "ci95": [
+        -0.05238928240431159,
+        0.06808432792101837
+      ],
+      "p_two_sided": 0.93,
+      "p_is_upper_bound": false,
+      "status": "ok"
+    }
+  ],
+  "significance_summary": {
+    "verdict": "WEAK_MIXED_SIGNAL_NEEDS_CONFIRMATION",
+    "n_primary_tests": 8,
+    "n_primary_p_lt_0_05": 2,
+    "primary_p_lt_0_05": [
+      {
+        "sample": "all_documents_release_aligned",
+        "target": "delta_vix_vix3m_22d",
+        "metric": "complexity_z",
+        "n": 86,
+        "controls": [
+          "lag_rv22_ann",
+          "vix_dec",
+          "vix9d_vix",
+          "is_minutes"
+        ],
+        "coef": 0.04144704471721764,
+        "hac_t": 2.580812400715385,
+        "p_value": 0.009856812898075601,
+        "r2": 0.31519725478833704,
+        "status": "ok"
+      },
+      {
+        "sample": "statement_only_meeting_day",
+        "target": "delta_vix_vix3m_22d",
+        "metric": "hedged_risk_tone_z",
+        "n": 43,
+        "controls": [
+          "lag_rv22_ann",
+          "vix_dec",
+          "vix9d_vix"
+        ],
+        "coef": -0.041998438386692524,
+        "hac_t": -2.373752389610367,
+        "p_value": 0.017608354282907263,
+        "r2": 0.40948579212399383,
+        "status": "ok"
+      }
+    ]
+  },
+  "verdict": "WEAK_MIXED_SIGNAL_NEEDS_CONFIRMATION",
+  "output_files": {
+    "calendar_csv": "/Users/yhlai0911/volpred-research/experiments/K1612/data/fed_document_calendar.csv",
+    "text_metrics_csv": "/Users/yhlai0911/volpred-research/experiments/K1612/data/fed_document_text_metrics.csv",
+    "event_panel_csv": "/Users/yhlai0911/volpred-research/experiments/K1612/data/event_panel.csv",
+    "regression_csv": "/Users/yhlai0911/volpred-research/experiments/K1612/data/regression_results.csv",
+    "bootstrap_csv": "/Users/yhlai0911/volpred-research/experiments/K1612/data/bootstrap_high_low_results.csv",
+    "figures": [
+      "/Users/yhlai0911/volpred-research/experiments/K1612/figures/fig1_text_metrics_by_release.png",
+      "/Users/yhlai0911/volpred-research/experiments/K1612/figures/fig2_regression_tstats.png",
+      "/Users/yhlai0911/volpred-research/experiments/K1612/figures/fig3_bootstrap_high_low.png"
+    ]
+  },
+  "limitations": [
+    "The official calendar page available in this runtime provides HTML statement/minutes links for 2021-2026, so sample size is modest.",
+    "Minutes are tested at their public release dates, not at the earlier meeting dates; this avoids lookahead but differs from a pure meeting-day event study.",
+    "Readability metrics are deterministic public-text proxies, not a structural model of Federal Reserve intent.",
+    "HAC maxlags=1 and bootstrap terciles are low-power safeguards for an event-level sample, not proof of absence."
+  ]
+}

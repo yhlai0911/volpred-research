@@ -45892,7 +45892,7 @@
     "title": "K1612: FOMC 聲明/會議紀要語言複雜度（可讀性/避險語氣）對會後 vol 持續性與 VIX 期限結構的預測力** — Fed 公開 FOMC statement/minutes 全文 + 免費可讀性指標（Flesch-Kincaid/詞彙多樣性",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1397). Original: FOMC 聲明/會議紀要語言複雜度（可讀性/避險語氣）對會後 vol 持續性與 VIX 期限結構的預測力** — Fed 公開 FOMC statement/minutes 全文 + 免費可讀性指標（Flesch-Kincaid/詞彙多樣性）與簡易 hedging-word lexicon（\"however\"、\"uncertain\" 等詞頻）建 complexity/tone score，release-lag 後 `shift(1)`，檢定其對會後 t+1..t+5 SPY RV persistence 與 VIX/VIX3M term-structure slope 變化的增量預測力；與既有 generic FOMC event dummy 研究正交——這裡是文本複雜度而非事件本身（來源：JBES/Journal of Econometrics 2025-26 央行溝通文本複雜度與市場反應的 NLP-in-macro 熱點）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1612.py with signal.shift(1) + seed=42, (c) K1612_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -45901,7 +45901,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-03T00:00:02Z"
+    "created_at": "2026-07-03T00:00:02Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-03T03:04:38.551411+00:00",
+    "claim_session_id": "104f1d281491",
+    "status_history": [
+      {
+        "ts": "2026-07-03T03:04:38.551692+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T03:04:52.467634+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T03:14:50.846729+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-03T03:04:52.467406+00:00",
+    "completed_at": "2026-07-03T03:14:50.846477+00:00",
+    "result": "K1612 completed: release-aligned official Fed statement/minutes text study (87 docs, 2021-2026) against SPY RV and VIX term-structure targets. Result is WEAK_MIXED_SIGNAL_NEEDS_CONFIRMATION: realized-vol regressions mostly non-significant; isolated VIX/VIX3M 22d text links are hypothesis-generating. Added experiment files, self-review, figures, and knowledge item 6ba303d3."
   },
   {
     "id": "K1613",
