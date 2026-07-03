@@ -47687,13 +47687,58 @@
     "description": "聚焦四大科技股2026年預估8000億美元的基建投入。量化指標：追蹤隱含波動率偏斜度（Skewness）與各廠AI營收佔比、CapEx/營收比率的關聯，評估市場對「AI變現不及預期」的防禦成本。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-07-03T22:00:20+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-03T23:11:05+00:00",
+    "blocked_note": "Arc-saturated: AI capex×skew 防禦成本 arc 近8天已覆蓋5+篇(mile_f5f4cb43 6/30 AI變現IV拐點 / mile_a30cfe89 7/03 偏斜三讀替恐懼定價 / mile_8a5e80b0 6/27 AI資本支出裂縫 / mile_0941e2f0 6/28 選擇權偏斜 / mile_4901f7bc 7/01 AI capex digest). 同邏輯arc換外殼=鬼打牆反模式,不重寫."
+  },
+  {
+    "id": "journal_discovery_20260703_3",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
+    "description": "Article candidate pool + research-backlog 都 dry (refill no_new_candidates_passing_filter). 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。 24h 內 idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "tier3-fallback"
+    ],
+    "created_at": "2026-07-03T23:10:28+00:00",
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-07-03T23:12:12.848603+00:00",
+    "claim_session_id": "c99840844bf6",
+    "status_history": [
+      {
+        "ts": "2026-07-03T23:12:12.848893+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-03T23:12:13.073697+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-03T23:25:02.719322+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-07"
+      }
+    ],
+    "started_at": "2026-07-03T23:12:13.073406+00:00",
+    "completed_at": "2026-07-03T23:25:02.719033+00:00",
+    "result": "第13批 journal-discovery，刻意挖 under-mined 策略/變現軸；agent 誠實回報策略軸5/6子軸已飽和，只回2高信心+2中信心不硬湊；主線程 selectivity gate 掉2中信心(buffer ETF 非期刊驅動 / VRP circuit-breaker 同殼不同題)，保留2條 dedup-verified 入 research_program.md batch 2026-07-04：(1)選擇權賣方overlay vol-regime擇時 BXM/PUT/CLL/CNDR 直服Mission#4 (2)crypto low-vol anomaly regime依賴 FRL2026"
   }
 ]
