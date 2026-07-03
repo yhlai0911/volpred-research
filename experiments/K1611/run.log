@@ -1,0 +1,26 @@
+
+===== SPY (2005-01-01 -> 2026-07-01) =====
+  fitting GJR-GARCH monthly refit ...
+  GJR arch cross-val max rel discrepancy = 3.69e-16
+  [r2] fitting HAR expanding OLS ...
+    [r2] n=4156  uncond DM t_hln=2.105 (p=0.035) | GW chi2=57.324 (p=0.0000) | regime b=0.1629 t=0.861 (p=0.3891)
+      high-regime mean_d=0.2725 (winner GJR, n=1932) | low-regime mean_d=0.1096 (winner GJR, n=2224)
+  [rsov] fitting HAR expanding OLS ...
+    [rsov] n=4156  uncond DM t_hln=1.239 (p=0.215) | GW chi2=5.017 (p=0.0814) | regime b=-0.0107 t=-0.520 (p=0.6029)
+      high-regime mean_d=0.0062 (winner GJR, n=1932) | low-regime mean_d=0.0169 (winner GJR, n=2224)
+
+===== 0050.TW (2014-01-06 -> 2021-12-31) =====
+  fitting GJR-GARCH monthly refit ...
+  GJR arch cross-val max rel discrepancy = 3.22e-16
+  [r2] fitting HAR expanding OLS ...
+    [r2] n=1212  uncond DM t_hln=1.337 (p=0.181) | GW chi2=5.471 (p=0.0649) | regime b=-0.0505 t=-1.002 (p=0.3165)
+      high-regime mean_d=0.0197 (winner GJR, n=807) | low-regime mean_d=0.0702 (winner GJR, n=405)
+  [rsov] fitting HAR expanding OLS ...
+    [rsov] n=1212  uncond DM t_hln=1.131 (p=0.258) | GW chi2=20.833 (p=0.0000) | regime b=-0.0194 t=-0.203 (p=0.8391)
+      high-regime mean_d=0.0578 (winner GJR, n=807) | low-regime mean_d=0.0773 (winner GJR, n=405)
+  saved /Users/yhlai0911/volpred-research/.claude/worktrees/agent-a6610388be73a9fac/experiments/K1611/K1611_SPY_gw.png
+  saved /Users/yhlai0911/volpred-research/.claude/worktrees/agent-a6610388be73a9fac/experiments/K1611/K1611_0050_TW_gw.png
+
+saved /Users/yhlai0911/volpred-research/.claude/worktrees/agent-a6610388be73a9fac/experiments/K1611/K1611_results.json  (runtime 5.2s)
+VERDICT SPY: weak/proxy-sensitive conditional difference: GW rejects on one proxy only; no significant regime slope; no unconditional winner.
+VERDICT 0050.TW: weak/proxy-sensitive conditional difference: GW rejects on one proxy only; no significant regime slope; no unconditional winner.
