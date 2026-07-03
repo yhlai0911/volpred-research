@@ -2,6 +2,20 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-03 22:07 `event_article` T+0 stale duplicate = refill 用排程預估公佈日排 slot，事件提前公佈+已發文仍生成 — **INTERCEPTED（出池）+ fix queued**
+
+**現象**：hourly-22 fire 從 dispatch main-thread queue 撈到最高優先 P1 `event_article_nfp_us_2026-07-03_tplus0`（今天 22:08 由 refill 生成）。人工查重發現 6月NFP(57K、失業率 4.2%) 的 T+0 波動率文章已由 `mile_35eef830`（2026-07-01 發佈）**完整**涵蓋 —— 含正式數據 / NFP日 vs 週五基準 1.17x / VIX regime 2.17x(k528,k513) / 7-2 實際反應 SPY 0.13% VIX 16.15 + 真圖表。硬寫必然是 arc dup（同事件同 57K 同 VIX regime 結論同 SPY/VIX 資產）。
+
+**根因（兩層）**：
+1. `refill_reader_facing_pool.py::refill_event_candidates` 對 event_jobs 每個 horizon 內 event 生成 T+X task，只靠 `_task_exists(task_id)` 冪等，**無 slot-aware coverage 檢查**。event_job 用排程**預估**公佈日 2026-07-03 排 T+0 slot，但 6月NFP 因獨立紀念日(7/4 週六→7/3 觀察日)提前到 7/2 晚間公佈、已於 mile_35eef830 發文 → refill 仍生成 stale T+0 task。
+2. `check_arc_dedup.py` gate 對 `arc_signature=None` 的舊文章有比對盲區（mile_35eef830 arc_signature=None、experiment_refs=[k528,k513] 無 event_key）→ automated gate exit=0 `arc_duplicates=[]` 沒攔到，靠主線程人工查重(feed grep「非農」+ 讀單篇確認正式數據非預測)才發現。
+
+**處置**：NFP task `complete --status succeeded`（result=arc-covered，誠實註明已被 mile_35eef830 涵蓋、不重複發文）。保護 Mission #1 內容回訪率。短期此 task_id 留 next_tasks.json 被 `_task_exists` 冪等擋住不會重生成；中期 event_ledger `gc_after`(deadline+7d) 清理。
+
+**fix queued（`platform_ops_event_refill_slot_aware_coverage` P2，留 clean context + 完整測試，headless 不草率改核心派工/gate — 錯了會漏發真 event 文章比原問題更糟）**：正解需 (a) slot-aware coverage — T-7 前瞻 vs T+0 反應是**不同內容**，不能「event_key 有文就 skip」否則漏發 T+0；(b) 發文時回寫 event_key metadata 到 feed 讓 coverage 可靠比對（現 feed 文章無 event_key，只能脆弱 title match）；(c) arc-dedup gate 補 arc_signature=None 舊文的 title/entity fuzzy fallback；(d) T+0/T-0「結果已知才寫」slot 生成前查該 event 是否已有反應文。
+
+**教訓（PDCA）**：event slot 用「預估公佈日」排程，實際公佈日可能因假期/提前偏移 → 「結果反應型」slot(T+0/T-0) 需在生成/派工時檢查該 event 是否已有反應文覆蓋，不能只靠 task_id 冪等。automated arc-dedup gate 非 canonical，reader-facing 派工前主線程人工查重(3-layer)仍是最後防線。
+
 ## 2026-07-03 10:31 `git_push_backup` 連日 HELD（「Host cron failure」28×）= `_claude_project_dir._warn` 新增 silent-fallback 卡 pre-push guard — **FIXED**
 
 **現象**：dreaming 2026-07-02 把 `persistent_alert Host cron failure detected`（28× / 73.7d）標 CRITICAL；老闆 Telegram 追問「到底有什麼問題」。實查 `git_push_backup.log`：每小時 `exit 1`，但內容是 `HELD: 1 new silent fallback(s) at HEAD — NOT pushing (CI would go red)` → `NEW scripts/_claude_project_dir.py:38 except Exception: pass`。即 guard 正常運作、故意擋推送，cron 把「擋下」記成 exit 1 被誤讀成 host cron 掛掉。
