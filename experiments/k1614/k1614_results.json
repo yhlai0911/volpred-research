@@ -1,0 +1,560 @@
+{
+  "experiment_id": "k1614",
+  "title": "Descriptive Volatility-Structure Diagnostic of Natural-Resource Real Assets",
+  "claim_type": "DESCRIPTIVE / CROSS-SECTIONAL — non-tradable, no signal claim",
+  "metadata": {
+    "data_source": "yfinance (auto_adjust=True, adjusted close)",
+    "period": {
+      "start": "2015-01-01",
+      "end": "2026-07-01"
+    },
+    "generated_by": "experiments/k1614/k1614.py",
+    "generated_at_utc": "2026-07-03T07:25:52.029097+00:00",
+    "seed": 42,
+    "trading_days_per_year": 252,
+    "rv_windows": {
+      "rv21": 21,
+      "rv63": 63
+    },
+    "primary_rv_window": "rv21",
+    "n_obs_per_asset": {
+      "LAND": 2889,
+      "FPI": 2889,
+      "WY": 2889,
+      "RYN": 2889,
+      "PHO": 2889,
+      "CGW": 2889,
+      "FIW": 2889,
+      "SPY": 2889,
+      "TIP": 2889,
+      "DBC": 2889
+    },
+    "real_asset_basket": [
+      "LAND",
+      "FPI",
+      "WY",
+      "RYN",
+      "PHO",
+      "CGW",
+      "FIW"
+    ],
+    "subgroups": {
+      "farmland": [
+        "LAND",
+        "FPI"
+      ],
+      "timber": [
+        "WY",
+        "RYN"
+      ],
+      "water": [
+        "PHO",
+        "CGW",
+        "FIW"
+      ]
+    },
+    "control_proxies": [
+      "SPY",
+      "TIP",
+      "DBC"
+    ]
+  },
+  "data_provenance_notes": {
+    "FPI_2018_short_attack": "FPI 最大單日 log-return = 2018-07-11 −0.4936 (~−39%)，為 Rota Fortunae 做空報告攻擊之真實公司特定事件（非資料 artifact），驅動 FPI RV max≈1.87、低 regime 敏感度與低 vol-beta R²，強化 farmland idiosyncratic 之發現。"
+  },
+  "a_descriptive_stats_rv21": {
+    "LAND": {
+      "n": 2868,
+      "mean": 0.27010388522456147,
+      "median": 0.24864946848032954,
+      "std": 0.11627897388605063,
+      "min": 0.07878752764711973,
+      "max": 1.0367280179689702,
+      "current": 0.22993992170690886,
+      "current_date": "2026-06-30",
+      "current_percentile": 38.53
+    },
+    "FPI": {
+      "n": 2868,
+      "mean": 0.30430075892471814,
+      "median": 0.2608786930778446,
+      "std": 0.19030188620538635,
+      "min": 0.06950329497405919,
+      "max": 1.870217147598279,
+      "current": 0.23536878935009165,
+      "current_date": "2026-06-30",
+      "current_percentile": 36.61
+    },
+    "WY": {
+      "n": 2868,
+      "mean": 0.26199807109877443,
+      "median": 0.23517238350481018,
+      "std": 0.1734401478478833,
+      "min": 0.053954923087577204,
+      "max": 1.8528197611575987,
+      "current": 0.3102140615745421,
+      "current_date": "2026-06-30",
+      "current_percentile": 81.0
+    },
+    "RYN": {
+      "n": 2868,
+      "mean": 0.24197207505283166,
+      "median": 0.21709493652722636,
+      "std": 0.1445225786129936,
+      "min": 0.06492183345268844,
+      "max": 1.6186784034574606,
+      "current": 0.27411097681896673,
+      "current_date": "2026-06-30",
+      "current_percentile": 75.94
+    },
+    "PHO": {
+      "n": 2868,
+      "mean": 0.16998499416992963,
+      "median": 0.15174646465175196,
+      "std": 0.09488911770365836,
+      "min": 0.058706085079112985,
+      "max": 1.0126215210518268,
+      "current": 0.17786463797934432,
+      "current_date": "2026-06-30",
+      "current_percentile": 65.86
+    },
+    "CGW": {
+      "n": 2868,
+      "mean": 0.1508319933103425,
+      "median": 0.1350794886882895,
+      "std": 0.0892112433888508,
+      "min": 0.044610634098079284,
+      "max": 0.9493091261355685,
+      "current": 0.15768233771066012,
+      "current_date": "2026-06-30",
+      "current_percentile": 69.87
+    },
+    "FIW": {
+      "n": 2868,
+      "mean": 0.17330189484275121,
+      "median": 0.15477306351624742,
+      "std": 0.09339653350761153,
+      "min": 0.05730990268321682,
+      "max": 1.0088692748968202,
+      "current": 0.18847333655695403,
+      "current_date": "2026-06-30",
+      "current_percentile": 70.61
+    },
+    "SPY": {
+      "n": 2868,
+      "mean": 0.14853438110663575,
+      "median": 0.12388884681760667,
+      "std": 0.09769462687448131,
+      "min": 0.034157193340984326,
+      "max": 0.9366826776798021,
+      "current": 0.17901696755545896,
+      "current_date": "2026-06-30",
+      "current_percentile": 74.58
+    },
+    "TIP": {
+      "n": 2868,
+      "mean": 0.04994446878825723,
+      "median": 0.04239650628828151,
+      "std": 0.02784105521358753,
+      "min": 0.018140129760755616,
+      "max": 0.280157455885897,
+      "current": 0.045017506942293326,
+      "current_date": "2026-06-30",
+      "current_percentile": 56.42
+    },
+    "DBC": {
+      "n": 2868,
+      "mean": 0.16763129997687198,
+      "median": 0.15704509685312168,
+      "std": 0.06381683857846605,
+      "min": 0.06158639690135654,
+      "max": 0.5034104998447946,
+      "current": 0.18344829215734432,
+      "current_date": "2026-06-30",
+      "current_percentile": 69.87
+    }
+  },
+  "b_cluster_consistency": {
+    "n_common_obs": 2868,
+    "corr_matrix": {
+      "LAND": {
+        "LAND": 1.0,
+        "FPI": 0.3545,
+        "WY": 0.7217,
+        "RYN": 0.7172,
+        "PHO": 0.7577,
+        "CGW": 0.755,
+        "FIW": 0.747
+      },
+      "FPI": {
+        "LAND": 0.3545,
+        "FPI": 1.0,
+        "WY": 0.4249,
+        "RYN": 0.3891,
+        "PHO": 0.3868,
+        "CGW": 0.3772,
+        "FIW": 0.3977
+      },
+      "WY": {
+        "LAND": 0.7217,
+        "FPI": 0.4249,
+        "WY": 1.0,
+        "RYN": 0.9112,
+        "PHO": 0.8781,
+        "CGW": 0.8758,
+        "FIW": 0.8959
+      },
+      "RYN": {
+        "LAND": 0.7172,
+        "FPI": 0.3891,
+        "WY": 0.9112,
+        "RYN": 1.0,
+        "PHO": 0.8634,
+        "CGW": 0.8505,
+        "FIW": 0.8636
+      },
+      "PHO": {
+        "LAND": 0.7577,
+        "FPI": 0.3868,
+        "WY": 0.8781,
+        "RYN": 0.8634,
+        "PHO": 1.0,
+        "CGW": 0.963,
+        "FIW": 0.9835
+      },
+      "CGW": {
+        "LAND": 0.755,
+        "FPI": 0.3772,
+        "WY": 0.8758,
+        "RYN": 0.8505,
+        "PHO": 0.963,
+        "CGW": 1.0,
+        "FIW": 0.9637
+      },
+      "FIW": {
+        "LAND": 0.747,
+        "FPI": 0.3977,
+        "WY": 0.8959,
+        "RYN": 0.8636,
+        "PHO": 0.9835,
+        "CGW": 0.9637,
+        "FIW": 1.0
+      }
+    },
+    "avg_pairwise_corr": 0.718,
+    "within_subgroup_avg_corr": {
+      "farmland": 0.3545,
+      "timber": 0.9112,
+      "water": 0.9701
+    },
+    "between_subgroup_avg_corr": {
+      "farmland_vs_timber": 0.5632,
+      "farmland_vs_water": 0.5702,
+      "timber_vs_water": 0.8712
+    },
+    "diff_rv_avg_pairwise_corr": 0.3882,
+    "diff_rv_note": "ΔRV(一階差分)相關去除共同 vol 趨勢，反映短期波動衝擊的真實共動；遠低於 level 相關代表 level 相關多來自共同市場趨勢而非同步 shock。"
+  },
+  "c_regime_analysis": {
+    "regime_definition": "SPY 21d RV full-sample tertiles (low/mid/high)",
+    "spy_rv_tertile_cutoffs": {
+      "q33": 0.1015,
+      "q67": 0.1547
+    },
+    "regime_counts": {
+      "high": 956,
+      "mid": 956,
+      "low": 956
+    },
+    "n_aligned_obs": 2868,
+    "caveat_overlapping_windows": "21d rolling RV 每日值高度自相關 → 標準 Welch t-test 的有效樣本量遠小於 n，p-value 被系統性高估。請以 Cohen's d 效果量與非重疊子樣本 robustness t-test 為準。",
+    "per_asset": {
+      "LAND": {
+        "full_mean_rv": 0.2701,
+        "by_regime": {
+          "low": {
+            "mean_rv": 0.216,
+            "ratio_to_own_full_mean": 0.7995,
+            "n": 956
+          },
+          "mid": {
+            "mean_rv": 0.2503,
+            "ratio_to_own_full_mean": 0.9265,
+            "n": 956
+          },
+          "high": {
+            "mean_rv": 0.3441,
+            "ratio_to_own_full_mean": 1.274,
+            "n": 956
+          }
+        },
+        "high_vs_low_welch_t": 24.3183,
+        "high_vs_low_welch_p": 7.212569704542807e-109,
+        "cohens_d_high_vs_low": 1.1123,
+        "high_low_ratio": 1.5931,
+        "nonoverlap_robustness_welch": {
+          "t": 5.2417,
+          "p": 2e-06,
+          "n_high": 45,
+          "n_low": 50
+        }
+      },
+      "FPI": {
+        "full_mean_rv": 0.3043,
+        "by_regime": {
+          "low": {
+            "mean_rv": 0.2807,
+            "ratio_to_own_full_mean": 0.9223,
+            "n": 956
+          },
+          "mid": {
+            "mean_rv": 0.2793,
+            "ratio_to_own_full_mean": 0.9177,
+            "n": 956
+          },
+          "high": {
+            "mean_rv": 0.353,
+            "ratio_to_own_full_mean": 1.1599,
+            "n": 956
+          }
+        },
+        "high_vs_low_welch_t": 7.2696,
+        "high_vs_low_welch_p": 5.41403587849535e-13,
+        "cohens_d_high_vs_low": 0.3325,
+        "high_low_ratio": 1.2576,
+        "nonoverlap_robustness_welch": {
+          "t": 1.7121,
+          "p": 0.090353,
+          "n_high": 45,
+          "n_low": 50
+        }
+      },
+      "WY": {
+        "full_mean_rv": 0.262,
+        "by_regime": {
+          "low": {
+            "mean_rv": 0.1901,
+            "ratio_to_own_full_mean": 0.7258,
+            "n": 956
+          },
+          "mid": {
+            "mean_rv": 0.2254,
+            "ratio_to_own_full_mean": 0.8605,
+            "n": 956
+          },
+          "high": {
+            "mean_rv": 0.3704,
+            "ratio_to_own_full_mean": 1.4138,
+            "n": 956
+          }
+        },
+        "high_vs_low_welch_t": 21.183,
+        "high_vs_low_welch_p": 2.751223749860453e-83,
+        "cohens_d_high_vs_low": 0.9689,
+        "high_low_ratio": 1.9484,
+        "nonoverlap_robustness_welch": {
+          "t": 4.4136,
+          "p": 5.8e-05,
+          "n_high": 45,
+          "n_low": 50
+        }
+      },
+      "RYN": {
+        "full_mean_rv": 0.242,
+        "by_regime": {
+          "low": {
+            "mean_rv": 0.1852,
+            "ratio_to_own_full_mean": 0.7653,
+            "n": 956
+          },
+          "mid": {
+            "mean_rv": 0.2212,
+            "ratio_to_own_full_mean": 0.9142,
+            "n": 956
+          },
+          "high": {
+            "mean_rv": 0.3195,
+            "ratio_to_own_full_mean": 1.3205,
+            "n": 956
+          }
+        },
+        "high_vs_low_welch_t": 18.8339,
+        "high_vs_low_welch_p": 7.563741469104122e-69,
+        "cohens_d_high_vs_low": 0.8614,
+        "high_low_ratio": 1.7252,
+        "nonoverlap_robustness_welch": {
+          "t": 3.9002,
+          "p": 0.000289,
+          "n_high": 45,
+          "n_low": 50
+        }
+      },
+      "PHO": {
+        "full_mean_rv": 0.17,
+        "by_regime": {
+          "low": {
+            "mean_rv": 0.1109,
+            "ratio_to_own_full_mean": 0.6524,
+            "n": 956
+          },
+          "mid": {
+            "mean_rv": 0.15,
+            "ratio_to_own_full_mean": 0.8827,
+            "n": 956
+          },
+          "high": {
+            "mean_rv": 0.249,
+            "ratio_to_own_full_mean": 1.4649,
+            "n": 956
+          }
+        },
+        "high_vs_low_welch_t": 33.4096,
+        "high_vs_low_welch_p": 4.536926863315786e-167,
+        "cohens_d_high_vs_low": 1.5281,
+        "high_low_ratio": 2.2453,
+        "nonoverlap_robustness_welch": {
+          "t": 6.9748,
+          "p": 0.0,
+          "n_high": 45,
+          "n_low": 50
+        }
+      },
+      "CGW": {
+        "full_mean_rv": 0.1508,
+        "by_regime": {
+          "low": {
+            "mean_rv": 0.0989,
+            "ratio_to_own_full_mean": 0.656,
+            "n": 956
+          },
+          "mid": {
+            "mean_rv": 0.1327,
+            "ratio_to_own_full_mean": 0.8799,
+            "n": 956
+          },
+          "high": {
+            "mean_rv": 0.2208,
+            "ratio_to_own_full_mean": 1.4641,
+            "n": 956
+          }
+        },
+        "high_vs_low_welch_t": 30.4399,
+        "high_vs_low_welch_p": 2.7957307984807075e-146,
+        "cohens_d_high_vs_low": 1.3923,
+        "high_low_ratio": 2.2326,
+        "nonoverlap_robustness_welch": {
+          "t": 6.3348,
+          "p": 0.0,
+          "n_high": 45,
+          "n_low": 50
+        }
+      },
+      "FIW": {
+        "full_mean_rv": 0.1733,
+        "by_regime": {
+          "low": {
+            "mean_rv": 0.1171,
+            "ratio_to_own_full_mean": 0.6756,
+            "n": 956
+          },
+          "mid": {
+            "mean_rv": 0.1537,
+            "ratio_to_own_full_mean": 0.8871,
+            "n": 956
+          },
+          "high": {
+            "mean_rv": 0.2491,
+            "ratio_to_own_full_mean": 1.4373,
+            "n": 956
+          }
+        },
+        "high_vs_low_welch_t": 32.0501,
+        "high_vs_low_welch_p": 1.169671135462809e-157,
+        "cohens_d_high_vs_low": 1.4659,
+        "high_low_ratio": 2.1272,
+        "nonoverlap_robustness_welch": {
+          "t": 6.6377,
+          "p": 0.0,
+          "n_high": 45,
+          "n_low": 50
+        }
+      }
+    }
+  },
+  "d_vol_beta": {
+    "spec": "OLS: RV_asset_t ~ 1 + RV_SPY_t (contemporaneous 21d RV, 描述性非預測)",
+    "hac_note": "Newey-West HAC SE 校正重疊窗口 residual 自相關（OLS SE 會低估）",
+    "per_asset": {
+      "LAND": {
+        "vol_beta_slope": 0.8652,
+        "intercept": 0.1416,
+        "r_squared": 0.5284,
+        "hac_se_slope": 0.0546,
+        "hac_t_slope": 15.85,
+        "hac_lag": 8,
+        "n": 2868,
+        "interpretation": "beta<1 = vol 對市場 vol 反應弱（較大盤鈍）"
+      },
+      "FPI": {
+        "vol_beta_slope": 0.7407,
+        "intercept": 0.1943,
+        "r_squared": 0.1446,
+        "hac_se_slope": 0.129,
+        "hac_t_slope": 5.74,
+        "hac_lag": 8,
+        "n": 2868,
+        "interpretation": "beta<1 = vol 對市場 vol 反應弱（較大盤鈍）"
+      },
+      "WY": {
+        "vol_beta_slope": 1.4522,
+        "intercept": 0.0463,
+        "r_squared": 0.6691,
+        "hac_se_slope": 0.165,
+        "hac_t_slope": 8.8,
+        "hac_lag": 8,
+        "n": 2868,
+        "interpretation": "beta>1 = vol 對市場 vol 反應強（放大大盤 vol 變動）"
+      },
+      "RYN": {
+        "vol_beta_slope": 1.1694,
+        "intercept": 0.0683,
+        "r_squared": 0.6249,
+        "hac_se_slope": 0.165,
+        "hac_t_slope": 7.09,
+        "hac_lag": 8,
+        "n": 2868,
+        "interpretation": "beta>1 = vol 對市場 vol 反應強（放大大盤 vol 變動）"
+      },
+      "PHO": {
+        "vol_beta_slope": 0.9214,
+        "intercept": 0.0331,
+        "r_squared": 0.9,
+        "hac_se_slope": 0.0463,
+        "hac_t_slope": 19.89,
+        "hac_lag": 8,
+        "n": 2868,
+        "interpretation": "beta<1 = vol 對市場 vol 反應弱（較大盤鈍）"
+      },
+      "CGW": {
+        "vol_beta_slope": 0.8425,
+        "intercept": 0.0257,
+        "r_squared": 0.8511,
+        "hac_se_slope": 0.0543,
+        "hac_t_slope": 15.53,
+        "hac_lag": 8,
+        "n": 2868,
+        "interpretation": "beta<1 = vol 對市場 vol 反應弱（較大盤鈍）"
+      },
+      "FIW": {
+        "vol_beta_slope": 0.8948,
+        "intercept": 0.0404,
+        "r_squared": 0.876,
+        "hac_se_slope": 0.0484,
+        "hac_t_slope": 18.49,
+        "hac_lag": 8,
+        "n": 2868,
+        "interpretation": "beta<1 = vol 對市場 vol 反應弱（較大盤鈍）"
+      }
+    }
+  }
+}
