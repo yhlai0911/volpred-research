@@ -36,12 +36,12 @@ def _warn(tag: str, msg: str, **ctx) -> None:
         _diag_warn(tag, msg, **ctx)
         return
     except Exception:
-        pass
-    extra = " | ".join(f"{k}={v}" for k, v in ctx.items())
-    line = f"[{tag}] WARN {msg}"
-    if extra:
-        line += f" | {extra}"
-    print(line, file=sys.stderr)
+        # diagnostics 模組 import 不到時退回 stderr —— warning 不 silent-drop
+        extra = " | ".join(f"{k}={v}" for k, v in ctx.items())
+        line = f"[{tag}] WARN {msg}"
+        if extra:
+            line += f" | {extra}"
+        print(line, file=sys.stderr)
 
 
 def repo_root() -> Path:
