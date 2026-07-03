@@ -46693,5 +46693,76 @@
     "started_at": "2026-07-03T09:08:00.323174+00:00",
     "completed_at": "2026-07-03T09:21:14.324373+00:00",
     "result": "boss 糾正 alert 該直接行動非建議。已 wire publishing_freshness dead-man switch auto-remediation（remediate_publish_drought.py force-release→refill fresh 供下班 dispatch）+ 改 alert body 為已自動修復框架 + alert.md 補列與通則 + memory feedback_alerts_auto_act_not_suggest + 4 tests 綠。眼前脫班早於 16:29 由 hourly-16 補上（gap 現 0.8h）。已寄 close email/telegram + commit 推主線 + 標 P1 platform_ops_drought_auto_refresh_wiring succeeded"
+  },
+  {
+    "id": "paper_review_mile_55f3ef61",
+    "title": "Paper review (Codex 24h-rule): K1582：HARQ / SHARK-style 測量誤差修正 HAR-RV 的台指期日盤試驗",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_55f3ef61 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_55f3ef61",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-03T10:09:01+00:00",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-07-03T10:10:08.027839+00:00",
+    "claim_session_id": "e0d058780bc6",
+    "status_history": [
+      {
+        "ts": "2026-07-03T10:10:08.028134+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-03T10:10:08.251392+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-03T10:14:25.150090+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-18"
+      }
+    ],
+    "started_at": "2026-07-03T10:10:08.251091+00:00",
+    "completed_at": "2026-07-03T10:14:25.149798+00:00",
+    "result": "Codex 24h post-publish review K1582/mile_55f3ef61: VERDICT=CONDITIONAL_PASS. Lookahead CLEAN (shift(1)+iloc[:pos] OOS). 1 MED (DM 無 HLN 短樣本修正, 文章已降級流程檢查) + 2 LOW (roll rule / MCS 命名). Article 宣稱範圍與 DIRECTIONAL_ONLY 一致, 無需更正. Review 存 experiments/k1582/CODEX_REVIEW.md"
+  },
+  {
+    "id": "paper_review_mile_80cae4cb",
+    "title": "Paper review (Codex 24h-rule): K1605：區域銀行 M/B 折價與後續波動，橫斷面穩健、OOS 不過關",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_80cae4cb needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_80cae4cb",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-03T10:09:01+00:00"
+  },
+  {
+    "id": "paper_review_mile_c1ce6550",
+    "title": "Paper review (Codex 24h-rule): USDC 脫鉤那 5 天：1-3 年短券波動率飆 2.8 倍，1-3 個月卻沒事",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c1ce6550 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_c1ce6550",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-03T10:09:01+00:00"
   }
 ]
