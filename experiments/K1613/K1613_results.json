@@ -1,0 +1,342 @@
+{
+  "experiment_id": "K1613",
+  "generated_at": "2026-07-03T04:22:09.320333+00:00",
+  "seed": 42,
+  "references": [
+    {
+      "key": "barndorff_nielsen_hansen_lunde_shephard_2008",
+      "citation": "Barndorff-Nielsen, Hansen, Lunde, and Shephard (2008), Econometrica, 'Designing Realized Kernels to Measure the Ex-Post Variation of Equity Prices in the Presence of Noise'",
+      "role": "realized-kernel motivation for microstructure-noise robust integrated-variance estimation",
+      "url": "https://doi.org/10.3982/ECTA6495"
+    },
+    {
+      "key": "zhang_mykland_ait_sahalia_2005",
+      "citation": "Zhang, Mykland, and Ait-Sahalia (2005), JASA, 'A Tale of Two Time Scales: Determining Integrated Volatility with Noisy High-Frequency Data'",
+      "role": "two-scale realized volatility estimator",
+      "url": "https://doi.org/10.1198/016214505000000169"
+    },
+    {
+      "key": "andersen_dobrev_schaumburg_2012",
+      "citation": "Andersen, Dobrev, and Schaumburg (2012), Journal of Econometrics, 'Jump-Robust Volatility Estimation Using Nearest Neighbor Truncation'",
+      "role": "MedRV jump-robust realized-volatility estimator",
+      "url": "https://doi.org/10.1016/j.jeconom.2012.01.011"
+    },
+    {
+      "key": "corsi_2009",
+      "citation": "Corsi (2009), Journal of Financial Econometrics, 'A Simple Approximate Long-Memory Model of Realized Volatility'",
+      "role": "HAR-RV benchmark",
+      "url": "https://academic.oup.com/jfec/article-abstract/7/2/174/787440"
+    },
+    {
+      "key": "patton_2011",
+      "citation": "Patton (2011), Journal of Econometrics, 'Volatility forecast comparison using imperfect volatility proxies'",
+      "role": "QLIKE volatility forecast comparison",
+      "url": "https://doi.org/10.1016/j.jeconom.2010.03.034"
+    }
+  ],
+  "task": "Replace standard 5-minute RV HAR inputs with MedRV / realized-kernel / TSRV inputs and compare OOS QLIKE/DM/Harvey against standard RV-HAR.",
+  "lookahead_policy": {
+    "target": "next-day standard 5-minute realized variance",
+    "feature_timing": "all HAR daily/weekly/monthly features are computed from measure.shift(1)",
+    "training_rule": "expanding OOS train rows strictly before forecast row",
+    "why_same_target": "prevents robust estimator self-target alignment from creating a mechanical advantage"
+  },
+  "estimator_specs": {
+    "rv": "sum of squared 5-minute log returns",
+    "medrv": "Andersen-Dobrev-Schaumburg nearest-neighbor median realized variance",
+    "rk_bartlett_h5": "Bartlett realized kernel / HAC variance estimator with bandwidth 5",
+    "tsrv_k5": "two-scale realized variance with 5 sparse subgrids"
+  },
+  "markets": [
+    {
+      "market": "TAIFEX_TX_day_K1100h",
+      "role": "formal_primary",
+      "source": "experiments/k1100h/data/_taifex_5min_2017-2021.parquet; TX1 day-session cache rebuilt after endpoint bin fix; K1613 drops third-Wednesday settlement days before forecasting",
+      "date_range_raw": [
+        "2017-05-16",
+        "2021-12-30"
+      ],
+      "n_daily_raw": 1082,
+      "n_feature_rows": 1060,
+      "n_oos": 464,
+      "oos_start_date": "2020-01-02",
+      "oos_end_date": "2021-12-30",
+      "min_train": 500,
+      "gateable_min_oos": 252,
+      "gateable": true,
+      "median_n_returns_per_day": 59.0,
+      "measure_correlations": {
+        "rv": {
+          "rv": 1.0,
+          "medrv": 0.991476,
+          "rk_bartlett_h5": 0.968771,
+          "tsrv_k5": 0.961861
+        },
+        "medrv": {
+          "rv": 0.991476,
+          "medrv": 1.0,
+          "rk_bartlett_h5": 0.949228,
+          "tsrv_k5": 0.946835
+        },
+        "rk_bartlett_h5": {
+          "rv": 0.968771,
+          "medrv": 0.949228,
+          "rk_bartlett_h5": 1.0,
+          "tsrv_k5": 0.995738
+        },
+        "tsrv_k5": {
+          "rv": 0.961861,
+          "medrv": 0.946835,
+          "rk_bartlett_h5": 0.995738,
+          "tsrv_k5": 1.0
+        }
+      },
+      "measure_ratios_to_standard_rv": {
+        "medrv": {
+          "mean_ratio_to_rv": 0.9461461096668172,
+          "median_ratio_to_rv": 0.9499353734758595,
+          "p05_ratio_to_rv": 0.6598106074965605,
+          "p95_ratio_to_rv": 1.2236558609318224
+        },
+        "rk_bartlett_h5": {
+          "mean_ratio_to_rv": 0.9685945093621048,
+          "median_ratio_to_rv": 0.9237020924397159,
+          "p05_ratio_to_rv": 0.5149871194566835,
+          "p95_ratio_to_rv": 1.5479413734264837
+        },
+        "tsrv_k5": {
+          "mean_ratio_to_rv": 0.8714160343532973,
+          "median_ratio_to_rv": 0.8345025123184782,
+          "p05_ratio_to_rv": 0.3873650713564267,
+          "p95_ratio_to_rv": 1.4888463405864145
+        }
+      },
+      "models": {
+        "HAR_RV": {
+          "qlike": 0.24427157032861394,
+          "mse_level": 2.5321028715660848e-08,
+          "r2_oos_level": 0.24390895154367043,
+          "mean_forecast_rv": 7.530351324380411e-05
+        },
+        "HAR_MedRV_input": {
+          "qlike": 0.23797007678194376,
+          "mse_level": 2.5467099922637637e-08,
+          "r2_oos_level": 0.2395472357037427,
+          "mean_forecast_rv": 7.457842520914376e-05
+        },
+        "HAR_RK_input": {
+          "qlike": 0.2427669162687121,
+          "mse_level": 2.5129029091532874e-08,
+          "r2_oos_level": 0.24964209922658254,
+          "mean_forecast_rv": 7.425677057013895e-05
+        },
+        "HAR_TSRV_input": {
+          "qlike": 0.24631049825828366,
+          "mse_level": 2.534053476657387e-08,
+          "r2_oos_level": 0.24332649691073727,
+          "mean_forecast_rv": 7.474419728472442e-05
+        }
+      },
+      "pairwise_vs_standard_har": {
+        "HAR_MedRV_input": {
+          "dm_t_model_minus_har": -0.7866061136313259,
+          "dm_p": 0.4319149010022587,
+          "qlike_improvement_pct": 2.5797081249336107,
+          "harvey_pass_model_better": false,
+          "interpretation": "negative DM t means candidate has lower QLIKE than standard RV-HAR"
+        },
+        "HAR_RK_input": {
+          "dm_t_model_minus_har": -0.2418142546675253,
+          "dm_p": 0.809031156416022,
+          "qlike_improvement_pct": 0.6159759229768921,
+          "harvey_pass_model_better": false,
+          "interpretation": "negative DM t means candidate has lower QLIKE than standard RV-HAR"
+        },
+        "HAR_TSRV_input": {
+          "dm_t_model_minus_har": 0.36983479104017547,
+          "dm_p": 0.7116746934084826,
+          "qlike_improvement_pct": -0.8346971884312181,
+          "harvey_pass_model_better": false,
+          "interpretation": "negative DM t means candidate has lower QLIKE than standard RV-HAR"
+        }
+      },
+      "mcs": {
+        "members": [
+          "HAR_RV",
+          "HAR_MedRV_input",
+          "HAR_RK_input",
+          "HAR_TSRV_input"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "HAR_RV": 0.427,
+          "HAR_MedRV_input": 0.427,
+          "HAR_RK_input": 0.427,
+          "HAR_TSRV_input": 0.427
+        },
+        "method": "HLN2011_stationary_bootstrap",
+        "alpha": 0.1,
+        "n_boot": 1000,
+        "seed": 42
+      },
+      "best_model_by_qlike": "HAR_MedRV_input",
+      "verdict": "DIRECTIONAL_ONLY",
+      "daily_measure_file": "experiments/K1613/data/TAIFEX_TX_day_K1100h_daily_measures.csv",
+      "oos_forecast_file": "experiments/K1613/data/TAIFEX_TX_day_K1100h_oos_forecasts.csv"
+    },
+    {
+      "market": "SPY_2026_local_5min",
+      "role": "diagnostic_short_sample",
+      "source": "data/intraday/SPY_5min_2026-*.csv collected by local yfinance cron",
+      "date_range_raw": [
+        "2026-01-14",
+        "2026-07-02"
+      ],
+      "n_daily_raw": 116,
+      "n_feature_rows": 94,
+      "n_oos": 49,
+      "oos_start_date": "2026-04-23",
+      "oos_end_date": "2026-07-02",
+      "min_train": 45,
+      "gateable_min_oos": 252,
+      "gateable": false,
+      "median_n_returns_per_day": 77.0,
+      "measure_correlations": {
+        "rv": {
+          "rv": 1.0,
+          "medrv": 0.969475,
+          "rk_bartlett_h5": 0.925806,
+          "tsrv_k5": 0.900527
+        },
+        "medrv": {
+          "rv": 0.969475,
+          "medrv": 1.0,
+          "rk_bartlett_h5": 0.901967,
+          "tsrv_k5": 0.874346
+        },
+        "rk_bartlett_h5": {
+          "rv": 0.925806,
+          "medrv": 0.901967,
+          "rk_bartlett_h5": 1.0,
+          "tsrv_k5": 0.988713
+        },
+        "tsrv_k5": {
+          "rv": 0.900527,
+          "medrv": 0.874346,
+          "rk_bartlett_h5": 0.988713,
+          "tsrv_k5": 1.0
+        }
+      },
+      "measure_ratios_to_standard_rv": {
+        "medrv": {
+          "mean_ratio_to_rv": 0.9221568129003752,
+          "median_ratio_to_rv": 0.910581871324551,
+          "p05_ratio_to_rv": 0.6910343556321572,
+          "p95_ratio_to_rv": 1.1597364857585468
+        },
+        "rk_bartlett_h5": {
+          "mean_ratio_to_rv": 0.9373191754358345,
+          "median_ratio_to_rv": 0.9466633305321055,
+          "p05_ratio_to_rv": 0.5246770273742694,
+          "p95_ratio_to_rv": 1.5832378891276377
+        },
+        "tsrv_k5": {
+          "mean_ratio_to_rv": 0.8251493593562111,
+          "median_ratio_to_rv": 0.7827281825034422,
+          "p05_ratio_to_rv": 0.39203674028114743,
+          "p95_ratio_to_rv": 1.4395954738656278
+        }
+      },
+      "models": {
+        "HAR_RV": {
+          "qlike": 0.3368161340811425,
+          "mse_level": 2.2856848379623088e-09,
+          "r2_oos_level": 0.1322623527276503,
+          "mean_forecast_rv": 4.1492825918832405e-05
+        },
+        "HAR_MedRV_input": {
+          "qlike": 0.33818277304230054,
+          "mse_level": 2.19655161435404e-09,
+          "r2_oos_level": 0.16610089969749064,
+          "mean_forecast_rv": 3.859307286796221e-05
+        },
+        "HAR_RK_input": {
+          "qlike": 0.37361655240586444,
+          "mse_level": 2.31007952468201e-09,
+          "r2_oos_level": 0.1230011511356709,
+          "mean_forecast_rv": 3.8491661004222374e-05
+        },
+        "HAR_TSRV_input": {
+          "qlike": 0.40581449386838425,
+          "mse_level": 2.3802638632656475e-09,
+          "r2_oos_level": 0.0963563609938134,
+          "mean_forecast_rv": 3.640812128745818e-05
+        }
+      },
+      "pairwise_vs_standard_har": {
+        "HAR_MedRV_input": {
+          "dm_t_model_minus_har": 0.15447193289672023,
+          "dm_p": 0.8778853308837888,
+          "qlike_improvement_pct": -0.4057522258802424,
+          "harvey_pass_model_better": false,
+          "interpretation": "negative DM t means candidate has lower QLIKE than standard RV-HAR"
+        },
+        "HAR_RK_input": {
+          "dm_t_model_minus_har": 1.37193135722467,
+          "dm_p": 0.1764631974905284,
+          "qlike_improvement_pct": -10.92596660344552,
+          "harvey_pass_model_better": false,
+          "interpretation": "negative DM t means candidate has lower QLIKE than standard RV-HAR"
+        },
+        "HAR_TSRV_input": {
+          "dm_t_model_minus_har": 1.5710189585425298,
+          "dm_p": 0.12274752994053806,
+          "qlike_improvement_pct": -20.485467531261225,
+          "harvey_pass_model_better": false,
+          "interpretation": "negative DM t means candidate has lower QLIKE than standard RV-HAR"
+        }
+      },
+      "mcs": {
+        "members": [
+          "HAR_RV",
+          "HAR_MedRV_input",
+          "HAR_RK_input",
+          "HAR_TSRV_input"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "HAR_RV": 0.217,
+          "HAR_MedRV_input": 0.217,
+          "HAR_RK_input": 0.217,
+          "HAR_TSRV_input": 0.217
+        },
+        "method": "HLN2011_stationary_bootstrap",
+        "alpha": 0.1,
+        "n_boot": 1000,
+        "seed": 42
+      },
+      "best_model_by_qlike": "HAR_RV",
+      "verdict": "INSUFFICIENT_DATA",
+      "daily_measure_file": "experiments/K1613/data/SPY_2026_local_5min_daily_measures.csv",
+      "oos_forecast_file": "experiments/K1613/data/SPY_2026_local_5min_oos_forecasts.csv"
+    }
+  ],
+  "formal_market": "TAIFEX_TX_day_K1100h",
+  "formal_verdict": "DIRECTIONAL_ONLY",
+  "verdict": "DIRECTIONAL_ONLY_NO_HARVEY_PASS",
+  "harvey_threshold_abs_t": 3.0,
+  "mcs_alpha": 0.1,
+  "mcs_boot": 1000,
+  "limitations": [
+    "Primary TAIFEX cache is the K1100h 2017-2021 day-session TX1-derived 5-minute bar cache after the endpoint bin fix; K1613 drops third-Wednesday settlement days before forecasting, but it is still not the newer K1582 full-TX active-contract 2017-2026 aggregate cache because K1582 does not retain intraday return paths needed for RK/TSRV/MedRV.",
+    "SPY local 5-minute data are a 2026 snapshot and remain below the 252-OOS gate.",
+    "Realized-kernel and TSRV settings are transparent fixed-parameter implementations, not fully optimal bandwidth/noise-variance estimation.",
+    "The primary target is standard RV; results answer input-substitution value, not which realized measure is the best ex-post integrated-variance estimator."
+  ],
+  "figures": [
+    "experiments/K1613/figures/TAIFEX_TX_day_K1100h_realized_measures.png",
+    "experiments/K1613/figures/SPY_2026_local_5min_realized_measures.png",
+    "experiments/K1613/figures/taifex_qlike_improvement_vs_har.png",
+    "experiments/K1613/figures/taifex_cumulative_loss_difference.png"
+  ]
+}

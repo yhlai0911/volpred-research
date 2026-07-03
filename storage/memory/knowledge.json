@@ -37310,5 +37310,18 @@
     ],
     "confidence": 0.64,
     "created_at": "2026-07-03T11:14:35.000431"
+  },
+  {
+    "item_id": "95d2b941",
+    "category": "realized_volatility_forecasting",
+    "content": "K1613 directional-only result: replacing standard 5-min RV-HAR inputs with noise/jump-robust realized measures (MedRV, Bartlett realized kernel H=5, TSRV K=5) does not produce a Harvey/MCS-confirmed forecasting edge. Primary TAIFEX test uses K1100h tick-derived 5-min day-session bars, drops third-Wednesday settlement days, and forecasts next-day standard RV with all HAR features built via measure.shift(1). Sample 2017-05-16..2021-12-30; n_daily=1082, feature rows=1060, OOS=464 from 2020-01-02..2021-12-30. Baseline HAR_RV QLIKE=0.2443. HAR_MedRV_input is best by mean QLIKE=0.2380 (+2.58%) but DM t=-0.79, p=0.432 and fails Harvey |t|>3; HAR_RK_input QLIKE=0.2428 (+0.62%), DM t=-0.24; HAR_TSRV_input QLIKE=0.2463 (-0.83%), DM t=+0.37. MCS alpha=0.10/bootstrap=1000 retains all four models (shared p=0.427). SPY 2026 local 5-min diagnostic has only OOS=49 and favors baseline HAR_RV, so it is non-gateable. Conclusion: robust realized measures remain useful measurement diagnostics, but K1613 finds no statistically robust replacement for standard RV-HAR inputs; MedRV is only hypothesis-generating. reviewer=Codex self-review CONDITIONAL_PASS; experiment_id=K1613.",
+    "evidence": [
+      "experiments/K1613/README.md",
+      "experiments/K1613/K1613.py",
+      "experiments/K1613/K1613_results.json",
+      "experiments/K1613/codex_review.md"
+    ],
+    "confidence": 0.68,
+    "created_at": "2026-07-03T12:23:47.592759"
   }
 ]

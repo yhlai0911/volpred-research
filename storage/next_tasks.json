@@ -45934,7 +45934,7 @@
     "title": "K1613: 雜訊穩健已實現波動率估計量（Realized Kernel / Two-Scale RV / MedRV）對 HAR 預測力的增量：本機 5-min 資料重估** — 用本機已有 TAIFEX/SPY 5-min tick-derived ",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1399). Original: 雜訊穩健已實現波動率估計量（Realized Kernel / Two-Scale RV / MedRV）對 HAR 預測力的增量：本機 5-min 資料重估** — 用本機已有 TAIFEX/SPY 5-min tick-derived 資料，實作 jump-robust MedRV 與 noise-robust Realized Kernel / Two-Scale RV，取代標準 5-min RV 作 HAR 輸入，OOS QLIKE/DM/Harvey 對比標準 RV-HAR baseline；與既有 OHLC candlestick estimator 題（line 1291）正交——這裡是 tick/5-min noise-robust kernel 估計量（來源：JBES/Journal of Econometrics 長期熱點 realized-measure microstructure noise correction，2025-26 仍持續有新 kernel 變體研究）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1613.py with signal.shift(1) + seed=42, (c) K1613_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -45943,7 +45943,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-03T00:00:02Z"
+    "created_at": "2026-07-03T00:00:02Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-03T04:16:06.880739+00:00",
+    "claim_session_id": "d7f1dfc4f310",
+    "status_history": [
+      {
+        "ts": "2026-07-03T04:16:06.881048+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T04:16:07.103506+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T04:24:06.360038+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-03T04:16:07.103195+00:00",
+    "completed_at": "2026-07-03T04:24:06.359746+00:00",
+    "result": "K1613 completed: MedRV / Bartlett RK / TSRV HAR-input replacement test on local 5-min data. Formal TAIFEX K1100h day-session sample after settlement-day drop has n_daily=1082, OOS=464; result DIRECTIONAL_ONLY_NO_HARVEY_PASS: MedRV input QLIKE +2.58% vs RV-HAR but DM t=-0.79, MCS retains all models. Added experiment files, figures, self-review, and knowledge item 95d2b941."
   },
   {
     "id": "research_reit_land_fpi_wy_ryn_etf_pho_cgw_fiw_vol",
