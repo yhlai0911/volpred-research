@@ -11,11 +11,13 @@ Retry ladder (refactor_plan §3 retry policy)::
     auth-class error  → NO retry; set_auth_blocked(True); send_auth_alert; abort
     hang (SIGKILL'd)  → NO retry; record killed_timeout; alert
 
-Each attempt records `begin_fire` BEFORE Popen.wait + `record_completion`
-AFTER. Health monitor (health.py) reads `current_job.age_seconds` from the
-same state file to independently detect frozen workers if THIS process itself
-hangs inside `wait()` (shouldn't happen with `timeout=` but health is the
-belt-and-suspenders layer).
+Each attempt calls `state.reserve_fire()` BEFORE Popen spawn (atomic slot
+claim — Codex review §10 #5), `state.attach_process()` right after (records
+pid/pgid + a `ps`-derived start-time fingerprint for PID-reuse-safe identity
+checks — §10 #2), then `record_completion` AFTER. Health monitor (health.py)
+reads `current_job.age_seconds` from the same state file to independently
+detect frozen workers if THIS process itself hangs inside `wait()` (shouldn't
+happen with `timeout=` but health is the belt-and-suspenders layer).
 """
 from __future__ import annotations
 
@@ -29,7 +31,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
-from . import alerts, state
+from . import alerts, procutil, state
 
 LOG = logging.getLogger(__name__)
 
@@ -129,6 +131,19 @@ def _kill_pgid(pgid: int, *, grace_s: float = GRACE_PERIOD_S) -> None:
             os.killpg(pgid, 0)  # liveness probe
         except ProcessLookupError:
             return
+        except PermissionError as exc:
+            # Found live via a real smoke test under launchd/sandboxed
+            # execution: signal-0 liveness probes can themselves raise
+            # PermissionError even though the SIGTERM above (or an eventual
+            # SIGKILL below) is separately permission-checked by the OS. This
+            # was uncaught here — pre-existing gap, not one of the Codex
+            # review's 4 numbered items — and crashed the whole kill routine
+            # (and therefore the caller, including orphan-restart cleanup).
+            # We can't confirm liveness this way; stop polling and fall
+            # through to attempt SIGKILL (which has its own PermissionError
+            # handling and won't raise).
+            LOG.warning("killpg liveness probe denied pgid=%d: %s", pgid, exc)
+            break
         time.sleep(0.5)
     try:
         os.killpg(pgid, signal.SIGKILL)
@@ -172,14 +187,26 @@ def _run_one_attempt(
         claude_bin, "-p", "--dangerously-skip-permissions",
         "--model", model, prompt_text,
     ]
-    started = time.time()
-    proc = _spawn(argv=argv, log_path=log_path)
-    pgid = os.getpgid(proc.pid)
-    state.begin_fire(
-        pid=proc.pid, pgid=pgid, schedule_id=schedule_id,
-        attempt=attempt, model=model, log_path=str(log_path),
-        path=state_path,
+    # Codex review §10 #5: reserve the state slot BEFORE spawning so no other
+    # caller can pass a concurrent "current_job is None" check while we spawn.
+    state.reserve_fire(
+        schedule_id=schedule_id, attempt=attempt, model=model,
+        log_path=str(log_path), path=state_path,
     )
+    started = time.time()
+    try:
+        proc = _spawn(argv=argv, log_path=log_path)
+    except OSError:
+        # Spawn itself failed (e.g. claude_bin missing) — free the slot we
+        # just reserved so it doesn't wedge forever with no process behind it.
+        state.release_reservation(path=state_path)
+        raise
+    pgid = os.getpgid(proc.pid)
+    # Codex review §10 #2: fingerprint the process's OS start time so later
+    # identity checks (health.py polling, restart orphan cleanup) can detect
+    # PID reuse instead of trusting a bare `os.kill(pid, 0)`.
+    started_wall = procutil.get_process_start_wall(proc.pid)
+    state.attach_process(pid=proc.pid, pgid=pgid, started_wall=started_wall, path=state_path)
     try:
         exit_code = proc.wait(timeout=timeout_s)
     except subprocess.TimeoutExpired:

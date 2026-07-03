@@ -3,13 +3,21 @@
 Runs as asyncio task inside supervisor.py main loop. Polls
 `state.get_current_job()` every CHECK_INTERVAL_S seconds:
 
-  - job.age_seconds > MAX_JOB_AGE_S    → SIGKILL pgid, record killed_timeout, alert
-  - PID dead but state.current_job set → record silent_failure, alert
+  - job.age_seconds > MAX_JOB_AGE_S    → identity-verified SIGKILL pgid, record
+                                          killed_timeout, alert
+  - PID dead/reused but state has job  → record silent_death / silent_failure, alert
 
 This is the belt-and-suspenders layer behind worker.py's own
 `Popen.wait(timeout=)`. If worker.py itself hangs inside `wait()` (shouldn't,
 but Python signal handling on macOS can surprise), health.py rescues from
 outside via state-file inspection.
+
+Codex review §10 #2 fix (2026-06-15): both branches used to trust a bare
+`os.kill(pid, 0)` check. Across a 30s poll interval the OS can recycle a pid
+to an unrelated process — killing/misreporting on that stale pid would hit
+the WRONG process. Every identity-sensitive decision below goes through
+`procutil.pid_identity_matches()`, which compares the `ps`-derived start-time
+fingerprint captured at spawn.
 """
 from __future__ import annotations
 
@@ -18,27 +26,15 @@ import logging
 import os
 import signal
 import time
+import traceback
 from pathlib import Path
 
-from . import alerts, state
+from . import alerts, procutil, state
 
 LOG = logging.getLogger(__name__)
 
 CHECK_INTERVAL_S = 30
 MAX_JOB_AGE_S = 3000  # 50min — matches worker DEFAULT_TIMEOUT_S
-
-
-def _pid_alive(pid: int) -> bool:
-    if pid <= 0:
-        return False
-    try:
-        os.kill(pid, 0)
-        return True
-    except ProcessLookupError:
-        return False  # silent-ok: kill(pid, 0) reports missing processes this way.
-    except PermissionError:
-        # Process exists but we lack signal permission — still "alive" for monitoring
-        return True  # silent-ok: permission denial confirms the PID exists.
 
 
 def _force_kill_pgid(pgid: int) -> None:
@@ -67,22 +63,33 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
     job = state.get_current_job(state_path)
     if job is None:
         return None
+    identity_ok = procutil.pid_identity_matches(job.pid, job.started_wall)
     if job.age_seconds > max_age_s:
-        LOG.warning("health: worker pgid=%d age=%.0fs > %.0fs cap — force-killing", job.pgid, job.age_seconds, max_age_s)
-        _force_kill_pgid(job.pgid)
-        entry = state.record_completion(
-            exit_code=-9, outcome="killed_timeout", final_model=job.model,
-            path=state_path,
-        )
+        if identity_ok:
+            LOG.warning("health: worker pgid=%d age=%.0fs > %.0fs cap — force-killing", job.pgid, job.age_seconds, max_age_s)
+            _force_kill_pgid(job.pgid)
+            exit_code, outcome = -9, "killed_timeout"
+        else:
+            # Codex review §10 #2: pid/pgid no longer matches the fingerprint
+            # captured at spawn — either already gone or recycled to an
+            # unrelated process. Do NOT signal it; record as silent death
+            # instead of a (potentially wrong-target) kill.
+            LOG.warning(
+                "health: worker pid=%d aged out but identity mismatch (pgid=%d reused/gone) — skipping kill",
+                job.pid, job.pgid,
+            )
+            exit_code, outcome = -1, "silent_death"
+        state.record_completion(exit_code=exit_code, outcome=outcome, final_model=job.model, path=state_path)
         alerts.send_hang_alert(
             job={"pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
                  "attempt": job.attempt, "model": job.model},
-            log_tail="(killed by health monitor — see worker log_path)",
+            log_tail="(killed by health monitor — see worker log_path)" if identity_ok
+                     else "(identity mismatch at max-age check — not killed, recorded as silent_death)",
             state_path=state_path,
         )
-        return "killed"
-    if not _pid_alive(job.pid):
-        LOG.warning("health: worker pid=%d dead but state has current_job — recording silent failure", job.pid)
+        return "killed" if identity_ok else "silent_death"
+    if not identity_ok:
+        LOG.warning("health: worker pid=%d dead/reused but state has current_job — recording silent failure", job.pid)
         state.record_completion(
             exit_code=-1, outcome="failure", final_model=job.model,
             path=state_path,
@@ -107,5 +114,10 @@ async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: 
             LOG.info("health_loop cancelled")
             raise
         except Exception as exc:  # noqa: BLE001
+            # Codex review §10 #7 fix: this used to only LOG.exception — a
+            # crash-looping health monitor (the belt-and-suspenders layer
+            # behind worker.py's own timeout) would silently stop protecting
+            # against hangs with zero visibility to the boss.
             LOG.exception("health_loop unexpected error: %s", exc)
+            alerts.send_loop_crash("health_loop", traceback.format_exc(), state_path=state_path)
             # don't die — sleep and continue

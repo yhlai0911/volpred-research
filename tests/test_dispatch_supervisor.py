@@ -7,6 +7,8 @@ import resource
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from scripts.dispatch_supervisor import health, scheduler, state, supervisor, worker
 
 
@@ -233,16 +235,22 @@ def test_due_to_fire_warns_on_invalid_last_fire_at(capsys) -> None:
     assert "raw=not-a-date" in err
 
 
+def _begin_fire(
+    path: Path, *, pid: int, pgid: int, schedule_id: str, attempt: int,
+    model: str, log_path: str, started_wall: str | None = "Wed Jan  1 00:00:00 2026",
+) -> None:
+    """Mirrors worker.py's reserve_fire()+attach_process() pair — see the
+    identical helper in scripts/tests/test_dispatch_state.py for why the old
+    single-call `begin_fire` was replaced (§10 #5 atomic fire-claim fix)."""
+    state.reserve_fire(schedule_id=schedule_id, attempt=attempt, model=model, log_path=log_path, path=path)
+    state.attach_process(pid=pid, pgid=pgid, started_wall=started_wall, path=path)
+
+
 def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
-    state.begin_fire(
-        pid=123,
-        pgid=456,
-        schedule_id="hourly_dispatch",
-        attempt=1,
-        model="opus",
-        log_path="/tmp/x.log",
-        path=state_path,
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
     )
     kills: list[int] = []
     alerts_called: list[dict] = []
@@ -253,6 +261,7 @@ def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
         "send_hang_alert",
         lambda **kwargs: alerts_called.append(kwargs) or True,
     )
+    monkeypatch.setattr(health.procutil, "pid_identity_matches", lambda pid, started_wall: True)
     monkeypatch.setattr(
         state,
         "get_current_job",
@@ -264,6 +273,7 @@ def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
             attempt=1,
             model="opus",
             log_path="/tmp/x.log",
+            started_wall="Wed Jan  1 00:00:00 2026",
             age_seconds=4000,
         ),
     )
@@ -276,20 +286,54 @@ def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
     assert state.read_state(state_path)["current_job"] is None
 
 
+def test_health_check_kills_overdue_job_skips_kill_on_identity_mismatch(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """§10 #2 regression: an aged-out job whose pid/pgid fingerprint no longer
+    matches (already gone, or the OS recycled the pid to an unrelated
+    process) must NOT be signalled — recorded as silent_death instead."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
+    )
+    kills: list[int] = []
+    alerts_called: list[dict] = []
+
+    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(
+        health.alerts,
+        "send_hang_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+    monkeypatch.setattr(health.procutil, "pid_identity_matches", lambda pid, started_wall: False)
+    monkeypatch.setattr(
+        state,
+        "get_current_job",
+        lambda path=state_path: state.CurrentJob(
+            pid=123, pgid=456, schedule_id="hourly_dispatch",
+            started_at="2026-01-01T00:00:00+00:00", attempt=1, model="opus",
+            log_path="/tmp/x.log", started_wall="Wed Jan  1 00:00:00 2026",
+            age_seconds=4000,
+        ),
+    )
+
+    action = health.check_once(state_path=state_path, max_age_s=3000)
+
+    assert action == "silent_death"
+    assert kills == [], "must not signal a pid whose identity no longer matches"
+    assert state.read_state(state_path)["completions"][-1]["outcome"] == "silent_death"
+
+
 def test_health_check_marks_silent_death(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
-    state.begin_fire(
-        pid=123,
-        pgid=456,
-        schedule_id="hourly_dispatch",
-        attempt=1,
-        model="opus",
-        log_path="/tmp/x.log",
-        path=state_path,
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
     )
     alerts_called: list[dict] = []
 
-    monkeypatch.setattr(health, "_pid_alive", lambda pid: False)
+    monkeypatch.setattr(health.procutil, "pid_identity_matches", lambda pid, started_wall: False)
     monkeypatch.setattr(
         health.alerts,
         "send_silent_death_alert",
@@ -302,20 +346,6 @@ def test_health_check_marks_silent_death(tmp_path: Path, monkeypatch) -> None:
     assert len(alerts_called) == 1
     completions = state.read_state(state_path)["completions"]
     assert completions[-1]["outcome"] == "failure"
-
-
-def test_pid_alive_handles_process_lookup_and_permission(monkeypatch) -> None:
-    def missing_pid(pid: int, sig: int) -> None:
-        raise ProcessLookupError
-
-    monkeypatch.setattr(health.os, "kill", missing_pid)
-    assert health._pid_alive(123) is False
-
-    def permission_denied(pid: int, sig: int) -> None:
-        raise PermissionError("denied")
-
-    monkeypatch.setattr(health.os, "kill", permission_denied)
-    assert health._pid_alive(123) is True
 
 
 def test_force_kill_pgid_tolerates_process_lookup_races(monkeypatch) -> None:
@@ -398,15 +428,18 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
             raise subprocess.TimeoutExpired(cmd="claude", timeout=timeout)
 
     kills: list[int] = []
-    begin_calls: list[dict] = []
+    reserve_calls: list[dict] = []
+    attach_calls: list[dict] = []
 
     monkeypatch.setattr(worker, "_spawn", lambda **kwargs: StuckProc())
     monkeypatch.setattr(worker.os, "getpgid", lambda pid: 456)
     monkeypatch.setattr(worker, "_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(worker.procutil, "get_process_start_wall", lambda pid: "Wed Jan  1 00:00:00 2026")
     monkeypatch.setattr(
-        worker.state,
-        "begin_fire",
-        lambda **kwargs: begin_calls.append(kwargs),
+        worker.state, "reserve_fire", lambda **kwargs: reserve_calls.append(kwargs),
+    )
+    monkeypatch.setattr(
+        worker.state, "attach_process", lambda **kwargs: attach_calls.append(kwargs),
     )
 
     with caplog.at_level(logging.WARNING, logger=worker.__name__):
@@ -424,7 +457,9 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
     assert exit_code == worker.TIMEOUT_KILLED_SENTINEL
     assert duration >= 0
     assert kills == [456]
-    assert begin_calls and begin_calls[0]["pid"] == 123
+    assert reserve_calls, "reserve_fire must be called before spawn (§10 #5)"
+    assert attach_calls and attach_calls[0]["pid"] == 123
+    assert attach_calls[0]["started_wall"] == "Wed Jan  1 00:00:00 2026"
     assert "still alive after SIGKILL grace" in caplog.text
 
 
@@ -470,8 +505,9 @@ def test_worker_timeout_path_short_circuits_retry(tmp_path: Path, monkeypatch) -
     # internal sentinel — external observers/state readers see a real POSIX code.
     assert result.exit_code == 137
     # Note: record_completion no-ops if `current_job` is absent (the mocked
-    # `_run_one_attempt` skips `state.begin_fire`); WorkerResult.exit_code is
-    # the authoritative check for sentinel→137 sanitisation.
+    # `_run_one_attempt` skips `state.reserve_fire`/`attach_process`);
+    # WorkerResult.exit_code is the authoritative check for sentinel→137
+    # sanitisation.
 
 
 def test_worker_signal_killed_outside_timeout_also_classified_as_hang(
@@ -585,3 +621,200 @@ def test_cli_unblock_auth_and_status(tmp_path: Path, capsys) -> None:
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["auth_blocked"] is False
+
+
+# ---------------------------------------------------------------------------
+# Codex review §10 #3 — restart orphan cleanup (supervisor._handle_restart_orphan)
+# ---------------------------------------------------------------------------
+
+
+def test_handle_restart_orphan_kills_live_identity_matched_job(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=999, pgid=888, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/orphan.log",
+        started_wall="Wed Jan  1 00:00:00 2026",
+    )
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    kills: list[int] = []
+    alerts_called: list[dict] = []
+    monkeypatch.setattr(supervisor.worker, "_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(supervisor.procutil, "pid_identity_matches", lambda pid, wall: True)
+    monkeypatch.setattr(
+        supervisor.alerts, "send_orphan_restart_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+
+    supervisor._handle_restart_orphan()
+
+    assert kills == [888]
+    assert len(alerts_called) == 1
+    assert alerts_called[0]["killed"] is True
+    snap = state.read_state(state_path)
+    assert snap["current_job"] is None
+    assert snap["completions"][-1]["outcome"] == "killed_supervisor_restart"
+
+
+def test_handle_restart_orphan_skips_kill_on_identity_mismatch(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=999, pgid=888, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/orphan.log",
+        started_wall="Wed Jan  1 00:00:00 2026",
+    )
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    kills: list[int] = []
+    alerts_called: list[dict] = []
+    monkeypatch.setattr(supervisor.worker, "_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(supervisor.procutil, "pid_identity_matches", lambda pid, wall: False)
+    monkeypatch.setattr(
+        supervisor.alerts, "send_orphan_restart_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+
+    supervisor._handle_restart_orphan()
+
+    assert kills == [], "must not signal a pid whose identity no longer matches"
+    assert len(alerts_called) == 1
+    assert alerts_called[0]["killed"] is False
+    snap = state.read_state(state_path)
+    assert snap["completions"][-1]["outcome"] == "orphan_gone_or_reused"
+
+
+def test_handle_restart_orphan_noop_when_no_stale_job(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    alerts_called: list[dict] = []
+    monkeypatch.setattr(
+        supervisor.alerts, "send_orphan_restart_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+
+    supervisor._handle_restart_orphan()
+
+    assert alerts_called == []
+
+
+# ---------------------------------------------------------------------------
+# Codex review §10 #7 — broad-except loops must escalate, not just log
+# ---------------------------------------------------------------------------
+
+
+def test_scheduler_loop_crash_sends_escalation_alert(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    crash_calls: list[tuple[str, str]] = []
+    tick_calls: list[int] = []
+
+    async def fake_sleep(_secs):
+        return None
+
+    async def fake_tick_once(**kwargs):
+        tick_calls.append(1)
+        if len(tick_calls) == 1:
+            raise ValueError("boom")
+        raise asyncio.CancelledError()
+
+    monkeypatch.setattr(scheduler.asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(scheduler, "_tick_once", fake_tick_once)
+    monkeypatch.setattr(scheduler, "load_cron_expr", lambda **kwargs: "7 * * * *")
+    monkeypatch.setattr(
+        scheduler.alerts, "send_loop_crash",
+        lambda component, tb, **kwargs: crash_calls.append((component, tb)) or True,
+    )
+
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(scheduler.scheduler_loop(state_path=state_path))
+
+    assert tick_calls == [1, 1]
+    assert len(crash_calls) == 1
+    assert crash_calls[0][0] == "scheduler_loop"
+    assert "boom" in crash_calls[0][1]
+
+
+def test_health_loop_crash_sends_escalation_alert(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    crash_calls: list[tuple[str, str]] = []
+    check_calls: list[int] = []
+
+    async def fake_sleep(_secs):
+        return None
+
+    def fake_check_once(**kwargs):
+        check_calls.append(1)
+        if len(check_calls) == 1:
+            raise ValueError("health boom")
+        raise asyncio.CancelledError()
+
+    monkeypatch.setattr(health.asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(health, "check_once", fake_check_once)
+    monkeypatch.setattr(
+        health.alerts, "send_loop_crash",
+        lambda component, tb, **kwargs: crash_calls.append((component, tb)) or True,
+    )
+
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(health.health_loop(state_path=state_path))
+
+    assert check_calls == [1, 1]
+    assert len(crash_calls) == 1
+    assert crash_calls[0][0] == "health_loop"
+    assert "health boom" in crash_calls[0][1]
+
+
+def test_supervisor_main_top_level_crash_sends_alert_and_reraises(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    crash_calls: list[tuple[str, str]] = []
+
+    monkeypatch.setattr(supervisor, "_set_runtime_env", lambda: None)
+    monkeypatch.setattr(supervisor, "_setup_logging", lambda level: None)
+    monkeypatch.setattr(supervisor, "_handle_restart_orphan", lambda: None)
+    monkeypatch.setattr(supervisor.alerts, "send_supervisor_restart", lambda **kwargs: True)
+
+    def boom_asyncio_run(coro):
+        coro.close()  # avoid "coroutine was never awaited" warning
+        raise RuntimeError("gather exploded")
+
+    monkeypatch.setattr(supervisor.asyncio, "run", boom_asyncio_run)
+    monkeypatch.setattr(
+        supervisor.alerts, "send_loop_crash",
+        lambda component, tb, **kwargs: crash_calls.append((component, tb)) or True,
+    )
+
+    with pytest.raises(RuntimeError, match="gather exploded"):
+        supervisor.main([])
+
+    assert len(crash_calls) == 1
+    assert crash_calls[0][0] == "supervisor_main"
+    assert "gather exploded" in crash_calls[0][1]
+
+
+# ---------------------------------------------------------------------------
+# worker._kill_pgid — liveness-probe PermissionError (found via a REAL smoke
+# test spawning a genuine `sleep 30` process under this sandboxed environment;
+# not one of the Codex review's 4 numbered items, but a real crash: the
+# liveness-probe poll loop only caught ProcessLookupError, so a sandboxed
+# `os.killpg(pgid, 0)` raising PermissionError propagated all the way out of
+# `_kill_pgid()` — which `supervisor._handle_restart_orphan()` calls directly
+# with no caller-side try/except, so this crashed orphan cleanup on boot.
+# ---------------------------------------------------------------------------
+
+
+def test_kill_pgid_survives_permission_error_on_liveness_probe(monkeypatch) -> None:
+    calls: list[tuple[str, int]] = []
+
+    def fake_killpg(pgid, sig):
+        calls.append(("SIGTERM" if sig == 15 else ("PROBE" if sig == 0 else "SIGKILL"), pgid))
+        if sig == 0:
+            raise PermissionError("sandbox denied signal-0 probe")
+        return None
+
+    monkeypatch.setattr(worker.os, "killpg", fake_killpg)
+    monkeypatch.setattr(worker.time, "sleep", lambda s: None)
+
+    worker._kill_pgid(999, grace_s=1)
+
+    kinds = [c[0] for c in calls]
+    assert "SIGTERM" in kinds
+    assert "PROBE" in kinds
+    assert "SIGKILL" in kinds, "must fall through to SIGKILL after the probe is denied, not crash"

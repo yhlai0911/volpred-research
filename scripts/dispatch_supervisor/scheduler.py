@@ -23,6 +23,7 @@ import json
 import logging
 import os
 import sys
+import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -34,7 +35,7 @@ if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
-from . import state, worker
+from . import alerts, state, worker
 
 LOG = logging.getLogger(__name__)
 
@@ -154,7 +155,13 @@ async def scheduler_loop(
             LOG.info("scheduler_loop cancelled")
             raise
         except Exception as exc:  # noqa: BLE001
+            # Codex review §10 #7 fix: this used to only LOG.exception — a
+            # crash-looping scheduler (the ONLY thing that ever fires
+            # hourly-dispatch) would silently stop dispatching with zero
+            # alert. Escalate so the boss sees it instead of discovering a
+            # dispatch drought hours later.
             LOG.exception("scheduler tick crashed: %s", exc)
+            alerts.send_loop_crash("scheduler_loop", traceback.format_exc(), state_path=state_path)
 
 
 async def _tick_once(

@@ -1,10 +1,13 @@
 """Unit tests for `scripts.dispatch_supervisor.state`.
 
-Covers Deliverable 2 scaffold state module — verifies:
+Covers Deliverable 2 scaffold + Deliverable 5 Codex-review-fix state module —
+verifies:
   * empty-state bootstrap & schema version
-  * begin_fire → record_completion lifecycle
-  * begin_fire refuses when current_job in-flight
-  * orphan cleanup on mark_supervisor_started (simulates supervisor restart)
+  * reserve_fire → attach_process → record_completion lifecycle (§10 #5 atomic
+    claim replaced the old single-call begin_fire)
+  * reserve_fire refuses when current_job in-flight
+  * mark_supervisor_started no longer clears current_job (§10 #3); orphan
+    handling is claim_and_clear_current_job() + append_completion_entry()
   * heartbeat updates last_heartbeat_at
   * completions ring buffer caps at COMPLETIONS_MAX
   * auth-blocked toggle
@@ -31,6 +34,18 @@ def tmp_state(tmp_path: Path) -> Path:
     return tmp_path / "dispatch_state.json"
 
 
+def _begin_fire(
+    path: Path, *, pid: int, pgid: int, schedule_id: str, attempt: int,
+    model: str, log_path: str, started_wall: str | None = "Wed Jan  1 00:00:00 2026",
+) -> None:
+    """Test helper mirroring worker.py's reserve_fire()+attach_process() pair
+    (the old single-call `begin_fire` was removed as part of the §10 #5 atomic
+    fire-claim fix — production code now reserves the slot BEFORE Popen spawn
+    and attaches the real pid/pgid/identity-fingerprint after)."""
+    st.reserve_fire(schedule_id=schedule_id, attempt=attempt, model=model, log_path=log_path, path=path)
+    st.attach_process(pid=pid, pgid=pgid, started_wall=started_wall, path=path)
+
+
 def test_read_state_bootstraps_empty(tmp_state: Path) -> None:
     snap = st.read_state(tmp_state)
     assert snap["version"] == st.SCHEMA_VERSION
@@ -46,49 +61,112 @@ def test_mark_supervisor_started_sets_timestamps(tmp_state: Path) -> None:
     assert snap["last_heartbeat_at"] is not None
 
 
-def test_mark_supervisor_started_clears_orphan_job(tmp_state: Path) -> None:
-    # Simulate: previous supervisor died mid-job, current_job stuck in state.
-    st.begin_fire(
-        pid=12345, pgid=12345, schedule_id="hourly_dispatch",
-        attempt=1, model="opus", log_path="/tmp/x.log", path=tmp_state,
+def test_mark_supervisor_started_no_longer_clears_current_job(tmp_state: Path) -> None:
+    """§10 #3 fix: mark_supervisor_started must NOT silently discard a stale
+    current_job — that responsibility moved to claim_and_clear_current_job()
+    so the caller can identity-check + kill + record before losing it."""
+    _begin_fire(
+        tmp_state, pid=12345, pgid=12345, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
     )
-    snap = st.read_state(tmp_state)
-    assert snap["current_job"] is not None
-    # Restart supervisor → orphan cleaned.
     st.mark_supervisor_started(tmp_state)
     snap = st.read_state(tmp_state)
+    assert snap["current_job"] is not None
+    assert snap["current_job"]["pid"] == 12345
+
+
+def test_claim_and_clear_current_job_pops_orphan(tmp_state: Path) -> None:
+    _begin_fire(
+        tmp_state, pid=12345, pgid=12345, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
+    )
+    orphan = st.claim_and_clear_current_job(tmp_state)
+    assert orphan is not None
+    assert orphan["pid"] == 12345
+    snap = st.read_state(tmp_state)
     assert snap["current_job"] is None
+    # idempotent: second claim on an already-clear slot returns None
+    assert st.claim_and_clear_current_job(tmp_state) is None
 
 
-def test_begin_fire_records_job(tmp_state: Path) -> None:
-    st.begin_fire(
-        pid=9999, pgid=9999, schedule_id="hourly_dispatch",
-        attempt=1, model="opus", log_path="/tmp/h.log", path=tmp_state,
+def test_append_completion_entry_for_claimed_orphan(tmp_state: Path) -> None:
+    _begin_fire(
+        tmp_state, pid=777, pgid=777, schedule_id="hourly_dispatch",
+        attempt=2, model="opus", log_path="/tmp/orphan.log",
+    )
+    orphan = st.claim_and_clear_current_job(tmp_state)
+    entry = st.append_completion_entry(
+        orphan, exit_code=-9, outcome="killed_supervisor_restart",
+        final_model="opus", path=tmp_state,
+    )
+    assert entry["exit_code"] == -9
+    assert entry["outcome"] == "killed_supervisor_restart"
+    assert entry["attempts"] == 2
+    snap = st.read_state(tmp_state)
+    assert len(snap["completions"]) == 1
+    assert snap["completions"][0]["outcome"] == "killed_supervisor_restart"
+
+
+def test_reserve_fire_records_job(tmp_state: Path) -> None:
+    st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/h.log", path=tmp_state,
     )
     snap = st.read_state(tmp_state)
     job = snap["current_job"]
-    assert job["pid"] == 9999
+    assert job["pid"] is None  # not yet attached
     assert job["model"] == "opus"
     assert job["attempt"] == 1
     assert snap["last_fire_at"] is not None
 
 
-def test_begin_fire_refuses_when_in_flight(tmp_state: Path) -> None:
-    st.begin_fire(
-        pid=1, pgid=1, schedule_id="hourly_dispatch",
-        attempt=1, model="opus", log_path="/tmp/a.log", path=tmp_state,
+def test_reserve_fire_refuses_when_in_flight(tmp_state: Path) -> None:
+    st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a.log", path=tmp_state,
     )
     with pytest.raises(RuntimeError, match="current_job in-flight"):
-        st.begin_fire(
-            pid=2, pgid=2, schedule_id="hourly_dispatch",
-            attempt=1, model="opus", log_path="/tmp/b.log", path=tmp_state,
+        st.reserve_fire(
+            schedule_id="hourly_dispatch", attempt=1, model="opus",
+            log_path="/tmp/b.log", path=tmp_state,
         )
 
 
+def test_attach_process_fills_identity(tmp_state: Path) -> None:
+    st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a.log", path=tmp_state,
+    )
+    st.attach_process(pid=555, pgid=555, started_wall="Wed Jan  1 00:00:00 2026", path=tmp_state)
+    snap = st.read_state(tmp_state)
+    assert snap["current_job"]["pid"] == 555
+    assert snap["current_job"]["started_wall"] == "Wed Jan  1 00:00:00 2026"
+
+
+def test_attach_process_raises_without_reservation(tmp_state: Path) -> None:
+    with pytest.raises(RuntimeError, match="no active reservation"):
+        st.attach_process(pid=1, pgid=1, started_wall=None, path=tmp_state)
+
+
+def test_release_reservation_frees_slot(tmp_state: Path) -> None:
+    st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a.log", path=tmp_state,
+    )
+    st.release_reservation(tmp_state)
+    snap = st.read_state(tmp_state)
+    assert snap["current_job"] is None
+    # slot is free again — a fresh reserve must succeed
+    st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a2.log", path=tmp_state,
+    )
+
+
 def test_record_completion_moves_to_ring_buffer(tmp_state: Path) -> None:
-    st.begin_fire(
-        pid=1, pgid=1, schedule_id="hourly_dispatch",
-        attempt=1, model="opus", log_path="/tmp/c.log", path=tmp_state,
+    _begin_fire(
+        tmp_state, pid=1, pgid=1, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/c.log",
     )
     entry = st.record_completion(
         exit_code=0, outcome="success", final_model="opus", path=tmp_state,
@@ -102,14 +180,9 @@ def test_record_completion_moves_to_ring_buffer(tmp_state: Path) -> None:
 
 
 def test_record_completion_accepts_naive_started_at(tmp_state: Path) -> None:
-    st.begin_fire(
-        pid=1,
-        pgid=1,
-        schedule_id="hourly_dispatch",
-        attempt=1,
-        model="opus",
-        log_path="/tmp/c.log",
-        path=tmp_state,
+    _begin_fire(
+        tmp_state, pid=1, pgid=1, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/c.log",
     )
     snap = st.read_state(tmp_state)
     snap["current_job"]["started_at"] = (
@@ -128,14 +201,9 @@ def test_record_completion_accepts_naive_started_at(tmp_state: Path) -> None:
 def test_record_completion_warns_on_invalid_started_at(
     tmp_state: Path, caplog: pytest.LogCaptureFixture
 ) -> None:
-    st.begin_fire(
-        pid=1,
-        pgid=1,
-        schedule_id="hourly_dispatch",
-        attempt=1,
-        model="opus",
-        log_path="/tmp/c.log",
-        path=tmp_state,
+    _begin_fire(
+        tmp_state, pid=1, pgid=1, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/c.log",
     )
     snap = st.read_state(tmp_state)
     snap["current_job"]["started_at"] = "not-a-date"
@@ -162,9 +230,9 @@ def test_record_completion_noop_when_no_job(tmp_state: Path) -> None:
 def test_completions_ring_buffer_caps(tmp_state: Path) -> None:
     cap = st.COMPLETIONS_MAX
     for i in range(cap + 5):
-        st.begin_fire(
-            pid=i + 1, pgid=i + 1, schedule_id="hourly_dispatch",
-            attempt=1, model="opus", log_path=f"/tmp/{i}.log", path=tmp_state,
+        _begin_fire(
+            tmp_state, pid=i + 1, pgid=i + 1, schedule_id="hourly_dispatch",
+            attempt=1, model="opus", log_path=f"/tmp/{i}.log",
         )
         st.record_completion(
             exit_code=0, outcome="success", final_model="opus", path=tmp_state,
@@ -224,27 +292,35 @@ def test_alert_dedup_warns_on_invalid_timestamp(
 
 def test_get_current_job_returns_dataclass(tmp_state: Path) -> None:
     assert st.get_current_job(tmp_state) is None
-    st.begin_fire(
-        pid=42, pgid=42, schedule_id="hourly_dispatch",
-        attempt=2, model="sonnet", log_path="/tmp/d.log", path=tmp_state,
+    _begin_fire(
+        tmp_state, pid=42, pgid=42, schedule_id="hourly_dispatch",
+        attempt=2, model="sonnet", log_path="/tmp/d.log",
+        started_wall="Thu Jul  2 00:00:00 2026",
     )
     job = st.get_current_job(tmp_state)
     assert job is not None
     assert job.pid == 42
     assert job.attempt == 2
     assert job.model == "sonnet"
+    assert job.started_wall == "Thu Jul  2 00:00:00 2026"
     assert job.age_seconds >= 0
 
 
+def test_get_current_job_returns_none_while_reserved_only(tmp_state: Path) -> None:
+    """§10 #5: between reserve_fire() and attach_process() pid is None — the
+    reservation window is real (spans the Popen() call) but must never crash
+    get_current_job()'s int(pid) conversion; treat as "nothing to inspect"."""
+    st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/d.log", path=tmp_state,
+    )
+    assert st.get_current_job(tmp_state) is None
+
+
 def test_get_current_job_accepts_naive_started_at(tmp_state: Path) -> None:
-    st.begin_fire(
-        pid=42,
-        pgid=42,
-        schedule_id="hourly_dispatch",
-        attempt=1,
-        model="opus",
-        log_path="/tmp/d.log",
-        path=tmp_state,
+    _begin_fire(
+        tmp_state, pid=42, pgid=42, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/d.log",
     )
     snap = st.read_state(tmp_state)
     snap["current_job"]["started_at"] = (
@@ -261,14 +337,9 @@ def test_get_current_job_accepts_naive_started_at(tmp_state: Path) -> None:
 def test_get_current_job_warns_on_invalid_started_at(
     tmp_state: Path, caplog: pytest.LogCaptureFixture
 ) -> None:
-    st.begin_fire(
-        pid=42,
-        pgid=42,
-        schedule_id="hourly_dispatch",
-        attempt=1,
-        model="opus",
-        log_path="/tmp/d.log",
-        path=tmp_state,
+    _begin_fire(
+        tmp_state, pid=42, pgid=42, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/d.log",
     )
     snap = st.read_state(tmp_state)
     snap["current_job"]["started_at"] = "not-a-date"
@@ -397,14 +468,9 @@ def test_write_failure_does_not_corrupt_existing_state(tmp_state: Path, monkeypa
     """
     # Bootstrap with a non-empty state so we can detect corruption.
     st.mark_supervisor_started(tmp_state)
-    st.begin_fire(
-        pid=4242,
-        pgid=4242,
-        schedule_id="hourly_dispatch",
-        attempt=1,
-        model="opus",
-        log_path="/tmp/log",
-        path=tmp_state,
+    _begin_fire(
+        tmp_state, pid=4242, pgid=4242, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/log",
     )
     before = st.read_state(tmp_state)
     assert before["current_job"]["pid"] == 4242

@@ -12,6 +12,8 @@ Dedup windows match `refactor_plan_hourly_dispatch.md §3.3 alerts dedup table`:
   silent_death         : 600s
   completion_failure   : 0s     (no dedup — every final failure is visible)
   supervisor_restart   : 60s
+  loop_crash           : 300s   (per-component key; crash-loop must not spam)
+  orphan_restart       : 60s
 """
 from __future__ import annotations
 
@@ -165,5 +167,54 @@ def send_supervisor_restart(*, prev_started: str | None, state_path: Path = stat
         "- 若短時間內反覆 restart，檢查 `~/.volpred/logs/dispatch_supervisor.log` 找 crash trace\n"
     )
     _send("info", "supervisor restart", body)
+    state.mark_alert_sent(key, path=state_path)
+    return True
+
+
+def send_loop_crash(component: str, traceback_text: str, *, state_path: Path = state.STATE_PATH) -> bool:
+    """A supervisor async loop (scheduler_loop / health_loop / main) crashed on
+    an exception the loop's own broad `except` caught. Dedup 5min per
+    component so a crash-loop doesn't spam — but unlike the old
+    `LOG.exception`-only behaviour (Codex review §10 #7), this is now
+    ALWAYS visible outside the log file at least once per window."""
+    key = f"loop_crash:{component}"
+    if state.should_dedup_alert(key, window_s=300, path=state_path):
+        return False
+    body = (
+        f"# Supervisor `{component}` crashed on an unhandled exception\n\n"
+        "## 影響\n"
+        f"- `{component}` 的 broad except 接住了，loop 沒死（下一 tick 會繼續），但這代表"
+        "該保護層剛才有一段時間沒在運作 — 若是 health_loop，代表 hang 偵測暫時失效；"
+        "若是 scheduler_loop，代表本輪 fire 決策被跳過。\n\n"
+        "## Traceback\n\n"
+        "```\n" + traceback_text[-3000:] + "\n```\n"
+    )
+    _send("critical", f"supervisor loop_crash {component}", body)
+    state.mark_alert_sent(key, path=state_path)
+    return True
+
+
+def send_orphan_restart_alert(
+    *, job: dict[str, Any], killed: bool, state_path: Path = state.STATE_PATH,
+) -> bool:
+    """Supervisor boot found a stale `current_job` from a crashed prior
+    instance (Codex review §10 #3). `killed=True` means the orphan process
+    was still alive and identity-verified before being force-killed;
+    `killed=False` means it was already gone or the pid had been reused (no
+    kill issued — see `procutil.pid_identity_matches`)."""
+    key = "orphan_restart"
+    if state.should_dedup_alert(key, window_s=60, path=state_path):
+        return False
+    body = (
+        "# Supervisor restart found an orphaned job from a crashed prior instance\n\n"
+        f"- pid: {job.get('pid')} pgid: {job.get('pgid')}\n"
+        f"- schedule_id: {job.get('schedule_id')} attempt: {job.get('attempt')} model: {job.get('model')}\n"
+        f"- started_at: {job.get('started_at')}\n"
+        f"- action: {'identity-verified SIGKILL issued' if killed else '已不存在 / pid 已被回收，未發送 kill signal'}\n\n"
+        "## 影響\n"
+        "- 前一個 supervisor process 非正常結束（crash / OOM-kill / manual kill -9）；"
+        "worker 因 `start_new_session=True` 不會隨 supervisor 一起死，此次是補做清理\n"
+    )
+    _send("warn", "supervisor orphan_restart", body)
     state.mark_alert_sent(key, path=state_path)
     return True
