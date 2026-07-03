@@ -46513,7 +46513,7 @@
     "title": "研究 backlog fallback: 演算法定價反壟斷執法（RealPage 式租金演算法案件）事件窗對房東 REIT 與旅遊定價股 vol 的影響",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 演算法定價反壟斷執法（RealPage 式租金演算法案件）事件窗對房東 REIT 與旅遊定價股 vol 的影響 — DOJ/FTC 公開反壟斷訴訟/和解公告日曆（RealPage、機票/飯店動態定價案件）+ yfinance 公寓 REIT（AVB/EQR/UDR/ESS）+ JETS/旅遊訂價股籃，檢定執法公告 t-1..t+10 RV、downside、超額報酬是否顯著；與 RL market-maker 流動性不對稱指紋題（line 1156）正交（那是證券市場微結構價差，這裡是租賃/旅遊業演算法定價的反壟斷法律風險）、與 M&A HSR 反壟斷 overhang 題正交（那是併購審查， | 來源 section: 期刊主題挖掘 batch 2026-07-03（journal_discovery_20260702_3；websearch joe/jbes/jbf/jfm/jpm/faj/jcommmkt/qje/aer/jpe/aej-macro 2025-26 趨勢層級；硬約束避開 vt/vix/garch-har 賽馬/etf fragility/cre/nbfi/stablecoin/ai concentration/labor-shortage/deposit-flightiness/market-to-book/thematic-concentration/data-driven-vc/blockbuster 等 06-30~07-02 已飽和 cluster；selectivity gate 後 10→9 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -46522,7 +46522,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-03T08:04:16+00:00"
+    "created_at": "2026-07-03T08:04:16+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-03T10:52:51.708956+00:00",
+    "claim_session_id": "f8548fce28d4",
+    "status_history": [
+      {
+        "ts": "2026-07-03T10:52:51.709197+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T10:53:01.044088+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T11:03:34.402971+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-03T10:53:01.041238+00:00",
+    "completed_at": "2026-07-03T11:03:34.402661+00:00",
+    "result": "K1615 completed: DOJ/FTC algorithmic-pricing enforcement event-window diagnostic on apartment REIT/travel pricing baskets. Verdict DIRECTIONAL_ONLY: apartment REIT residential windows coef=0.3655, HAC t=2.05, Holm p=0.0799; travel has only one official event and is non-gateable. Artifacts, Codex review, knowledge entry, and research_program update written."
   },
   {
     "id": "daily_market_vol_snapshot_20260703",

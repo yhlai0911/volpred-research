@@ -37382,5 +37382,21 @@
     ],
     "confidence": 0.76,
     "created_at": "2026-07-03T16:41:37.978243"
+  },
+  {
+    "item_id": "9b57fd63",
+    "category": "experiment",
+    "content": "K1615 algorithmic-pricing antitrust enforcement event-window diagnostic verdict DIRECTIONAL_ONLY. Data: yfinance adjusted closes 2022-01-03..2026-07-03 for apartment REIT basket AVB/EQR/UDR/ESS/CPT/MAA, travel-pricing basket JETS/MAR/HLT/H/ABNB/BKNG/EXPE, and controls SPY/VNQ/XLY/^VIX; official DOJ/FTC event calendar has 8 residential RealPage-style milestones and 1 hotel/travel algorithmic-pricing statement. Direct primary tests use log daily RV event-window regressions with Newey-West HAC maxlags=10 and Holm correction over two basket tests. Apartment REIT residential windows are directionally positive but fail the project gate: coef=0.3655, HAC t=2.0543, raw p=0.0399, Holm p=0.0799, median event/pre RV ratio=1.03x. Travel-pricing basket has only 1 official event and is non-gateable: coef=0.0806, t=0.3122, Holm p=0.7549, median RV ratio=1.19x. Conclusion: preserve as a weak legal-risk proxy lead for follow-up exposure mapping, but do not claim significant RealPage legal-risk premium, causality, cross-sector spillover, or trading signal.",
+    "evidence": [
+      "experiments/k1615/K1615.py",
+      "experiments/k1615/K1615_results.json",
+      "experiments/k1615/README.md",
+      "experiments/k1615/codex_review.md",
+      "https://www.justice.gov/archives/opa/pr/justice-department-sues-realpage-algorithmic-pricing-scheme-harms-millions-american-renters",
+      "https://www.justice.gov/archives/opa/pr/justice-department-sues-six-large-landlords-algorithmic-pricing-scheme-harms-millions",
+      "https://www.ftc.gov/news-events/news/press-releases/2024/03/ftc-doj-file-statement-interest-hotel-room-algorithmic-price-fixing-case"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-07-03T19:00:24.510054"
   }
 ]
