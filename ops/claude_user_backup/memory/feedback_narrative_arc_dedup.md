@@ -22,3 +22,5 @@ type: feedback
 4. Post-publish 才發現 dup：標 `status=retracted` + `retracted_reason="logical_dup_with_prior"` + `retracted_dup_of=[mile_xxx]`，feed.json 保留 entry 做 audit trail
 
 **2026-06-10 升級為 code hard gate**（strike 3：K1449/K1091 銅 arc dup，用戶抓到）：soft memory 自律已證明擋不住 — 現在 `src/volpred/publisher/arc_dedup.py`（資產 entity×結論 class domain model）在三個 choke point 強制執法：publisher publish_milestone HARD BLOCK、refill 方向源頭 filter、`scripts/check_arc_dedup.py` 寫前 CLI（hourly prompt b2）。本 memory 降級為背景脈絡；執法以 code gate 為準。Regression: `tests/test_arc_dedup.py`。
+
+**2026-07-04 邊界校準（老闆 Telegram msg95）**：不要把「結論句式像」當成不寫/不發理由。release layer 的 hard block 只應給強證據：同一 K / 同一明確 data source / near-identical same-ref recycle。不同 K、不同研究、不同數據，只是同為 NULL/positive 或同類敘事，最多是 warn-only + audit trail；尤其發文脫班時，dedup/cluster filter 不得用 fuzzy arc 阻擋釋出。reader 版 vs research 版若不是 near-identical recycle，視為互補，不算重複。

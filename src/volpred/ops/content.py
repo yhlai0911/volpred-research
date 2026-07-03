@@ -291,6 +291,27 @@ _RELEASE_LAST_N_CLUSTER_THRESHOLD = 2
 # publishing-freshness dead-man critical (alerts.PUBLISH_FRESHNESS_CRITICAL_HOURS)
 # so the breaker self-remediates BEFORE that alert fires, with buffer.
 _RELEASE_DROUGHT_HOURS = 4.0
+_RELEASE_SOURCE_KEYS = {
+    "data_source",
+    "data_sources",
+    "dataset",
+    "dataset_id",
+    "event_key",
+    "source_ref",
+    "source_refs",
+    "source_url",
+    "source_urls",
+}
+_GENERIC_RELEASE_SOURCE_VALUES = {
+    "yfinance",
+    "fred",
+    "cboe",
+    "sec",
+    "bls",
+    "bea",
+    "federal reserve",
+    "supabase",
+}
 
 _NARRATIVE_CLUSTER_PATTERNS = {
     "garch": re.compile(r"\b(ST)?GARCH\b|GJR|EGARCH|GARCH-MIDAS|MF-GJR|EWMA", re.I),
@@ -437,6 +458,116 @@ def _extract_k_ids_from_item(item: dict) -> set[str]:
     if isinstance(raw_tags, list):
         refs.update(str(t).upper() for t in raw_tags if re.fullmatch(r"K\d+", str(t).upper()))
     return refs
+
+
+def _release_source_token(raw: object) -> str | None:
+    """Normalize explicit source metadata for release-time arc blocking.
+
+    The release gate must not block merely because two articles have the same
+    conclusion class or mention the same broad provider. Only precise metadata
+    such as the same event key, source URL, dataset id, or non-generic data
+    source string can make an arc hit a hard release block.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, dict):
+        if set(raw) <= {"provider"}:
+            return None
+        text = json.dumps(raw, ensure_ascii=False, sort_keys=True)
+    else:
+        text = str(raw)
+    token = re.sub(r"\s+", " ", text.strip()).lower()
+    if not token or len(token) < 4:
+        return None
+    if token in _GENERIC_RELEASE_SOURCE_VALUES:
+        return None
+    return token
+
+
+def _release_iter_source_values(raw: object):
+    if isinstance(raw, dict):
+        yield raw
+        for value in raw.values():
+            yield from _release_iter_source_values(value)
+    elif isinstance(raw, (list, tuple, set)):
+        for value in raw:
+            yield from _release_iter_source_values(value)
+    else:
+        yield raw
+
+
+def _release_data_source_tokens(item: dict) -> set[str]:
+    """Return explicit data/event-source tokens suitable for hard blocking."""
+    tokens: set[str] = set()
+    containers = [item]
+    details = item.get("details")
+    if isinstance(details, dict):
+        containers.append(details)
+
+    for container in containers:
+        event_key = _release_source_token(container.get("event_key"))
+        if event_key:
+            tokens.add(f"event_key:{event_key}")
+        event_type = _release_source_token(container.get("event_type"))
+        event_date = _release_source_token(container.get("event_date"))
+        if event_type and event_date:
+            tokens.add(f"event:{event_type}:{event_date}")
+        for key in _RELEASE_SOURCE_KEYS:
+            if key == "event_key":
+                continue
+            if key not in container:
+                continue
+            for value in _release_iter_source_values(container.get(key)):
+                token = _release_source_token(value)
+                if token:
+                    tokens.add(f"{key}:{token}")
+    return tokens
+
+
+def _release_arc_block_reason(item: dict, blocker: dict | None, arc_dup: dict) -> str | None:
+    """Return why an arc-dup is strong enough to block release, else None."""
+    shared_refs = {
+        str(ref).upper()
+        for ref in (arc_dup.get("shared_experiment_refs") or [])
+        if str(ref).strip()
+    }
+    if blocker is not None:
+        shared_refs |= _extract_k_ids_from_item(item) & _extract_k_ids_from_item(blocker)
+    if shared_refs:
+        return f"shared_experiment_refs={sorted(shared_refs)}"
+
+    if blocker is None:
+        return None
+    shared_sources = _release_data_source_tokens(item) & _release_data_source_tokens(blocker)
+    if shared_sources:
+        return f"shared_data_sources={sorted(shared_sources)}"
+    return None
+
+
+def _log_release_dedup_decision(
+    storage_dir: str,
+    *,
+    target_id: object,
+    decision: str,
+    reason: str,
+    matched_id: object | None = None,
+) -> None:
+    """Append release gate decisions; logging is fail-open."""
+    try:
+        path = project_path(storage_dir, "logs", "dedup_decisions.jsonl")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        rec = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "gate": "release_pool_arc_dedup",
+            "target_id": target_id,
+            "matched_id": matched_id,
+            "decision": decision,
+            "reason": reason,
+        }
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception as exc:  # noqa: BLE001
+        _warn_release_pool("release arc-dedup audit log failed", exc)
 
 
 def _narrative_cluster_from_text(text: str) -> str | None:
@@ -1259,6 +1390,53 @@ def release_pool_articles(
             dup = _release_content_dup(item, recent_pub_for_dedup)
             flood = _release_theme_flood(item, recent_pub_for_dedup)
 
+            if arc_dups:
+                blocker_by_id = {
+                    str(a.get("id") or ""): a
+                    for a in recent_pub_for_dedup
+                    if isinstance(a, dict)
+                }
+                blocking_arc_dups = []
+                warn_arc_dups = []
+                for arc_dup in arc_dups:
+                    blocker = blocker_by_id.get(str(arc_dup.get("id") or ""))
+                    block_reason = _release_arc_block_reason(item, blocker, arc_dup)
+                    if block_reason:
+                        arc_dup = {**arc_dup, "release_block_reason": block_reason}
+                        blocking_arc_dups.append(arc_dup)
+                        _log_release_dedup_decision(
+                            storage_dir,
+                            target_id=item.get("id"),
+                            matched_id=arc_dup.get("id"),
+                            decision="block",
+                            reason=block_reason,
+                        )
+                    else:
+                        warn_arc_dups.append(arc_dup)
+                if warn_arc_dups:
+                    d = warn_arc_dups[0]
+                    print(
+                        f"  [release_pool] ARC-WARN {item.get('id')} — "
+                        f"arc-similar to {d.get('id')} ({d.get('conclusion_class')}) "
+                        "but no shared K/data source; releasing."
+                    )
+                    _log_release_dedup_decision(
+                        storage_dir,
+                        target_id=item.get("id"),
+                        matched_id=d.get("id"),
+                        decision="warn",
+                        reason="arc_similarity_without_shared_ref_or_data_source",
+                    )
+                    _d = item.get("details")
+                    if not isinstance(_d, dict):
+                        _d = {}
+                        item["details"] = _d
+                    _d["release_arc_warn_of"] = d.get("id")
+                    _d["release_arc_warn_class"] = d.get("conclusion_class")
+                    _d["release_arc_warn_reason"] = "no_shared_ref_or_data_source"
+                    _d["release_arc_warn_at"] = now.isoformat()
+                arc_dups = blocking_arc_dups
+
             # Narrative-axis waiver (2026-06-24): mirror arc_dedup v3 on the
             # release gate's surface-text checks. The Jaccard near-dup and the
             # theme-flood gate are blind to reader-facing narrative axis: a
@@ -1355,12 +1533,14 @@ def release_pool_articles(
                 if arc_dups:
                     _d["release_arc_dedup_of"] = arc_dups[0]["id"]
                     _d["release_arc_dedup_class"] = arc_dups[0]["conclusion_class"]
+                    _d["release_arc_dedup_reason"] = arc_dups[0].get("release_block_reason")
                 dedup_skipped.append(
                     {
                         "id": item.get("id"),
                         "title": item.get("title"),
                         "arc_dup_of": arc_dups[0]["id"] if arc_dups else None,
                         "arc_conclusion_class": arc_dups[0]["conclusion_class"] if arc_dups else None,
+                        "arc_block_reason": arc_dups[0].get("release_block_reason") if arc_dups else None,
                         "dup_of": dup["id"] if dup else None,
                         "jaccard": dup["jaccard"] if dup else None,
                         "theme_flood": flood["theme"] if flood else None,
@@ -1371,7 +1551,7 @@ def release_pool_articles(
                 # only for surface similarity / theme flood / arc overlap).
                 dedup_blocked_items.append(item)
                 reason = (
-                    f"arc-dup of {arc_dups[0]['id']} ({arc_dups[0]['conclusion_class']})" if arc_dups
+                    f"arc-dup of {arc_dups[0]['id']} ({arc_dups[0]['conclusion_class']}; {arc_dups[0].get('release_block_reason')})" if arc_dups
                     else f"near-dup of {dup['id']} (J={dup['jaccard']})" if dup
                     else f"theme '{flood['theme']}' saturated (recent={flood['recent_count']})"
                 )

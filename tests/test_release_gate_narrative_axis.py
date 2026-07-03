@@ -257,6 +257,178 @@ def test_axis_waiver_blocks_text_dup_when_axis_unspecified(tmp_path: Path, monke
     assert res["drought_override"] is None
 
 
+def test_release_arc_similarity_without_shared_ref_or_source_warns_and_releases(
+    tmp_path: Path, monkeypatch
+):
+    """Arc similarity alone is fuzzy. Without a shared K-id or explicit data
+    source, release_pool should warn/audit but must not block the draft."""
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 7, 3, 12, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+
+    blocker = {
+        "id": "mile_pub_arc",
+        "title": "舊文：VIX 對某資產沒有預測力",
+        "status": "published",
+        "audience": "general",
+        "published_at": (frozen_now - timedelta(minutes=45)).isoformat(),
+        "content": _BASE_BODY + _LZ,
+    }
+    draft = {
+        "id": "mile_draft_arc_only",
+        "title": "新文：另一個市場的平靜訊號",
+        "status": "draft",
+        "audience": "general",
+        "created_at": (frozen_now - timedelta(days=1)).isoformat(),
+        "content": _NOVEL_TAIL + _LZ,
+    }
+    monkeypatch.setattr(
+        content,
+        "find_arc_duplicates",
+        lambda *a, **k: [
+            {
+                "id": "mile_pub_arc",
+                "title": blocker["title"],
+                "conclusion_class": "null_no_info",
+                "shared_experiment_refs": [],
+            }
+        ],
+    )
+    _write_json(storage_dir / "reports" / "feed.json", [blocker, draft])
+
+    res = content.release_pool_articles(
+        limit=1, due_only=False, include_drafts=True, storage_dir=str(storage_dir)
+    )
+
+    assert [r["id"] for r in res["released"]] == ["mile_draft_arc_only"]
+    assert res["dedup_skipped"] == []
+    feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    released = next(a for a in feed_after if a["id"] == "mile_draft_arc_only")
+    assert released["status"] == "published"
+    assert released["details"]["release_arc_warn_of"] == "mile_pub_arc"
+    log = storage_dir / "logs" / "dedup_decisions.jsonl"
+    records = [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
+    assert any(
+        rec["gate"] == "release_pool_arc_dedup"
+        and rec["decision"] == "warn"
+        and rec["target_id"] == "mile_draft_arc_only"
+        for rec in records
+    )
+
+
+def test_release_arc_shared_experiment_ref_still_blocks(tmp_path: Path, monkeypatch):
+    """Same K-id + arc hit is a strong duplicate signal and remains blocked."""
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 7, 3, 12, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+
+    blocker = {
+        "id": "mile_pub_same_k",
+        "title": "K2001 舊文",
+        "status": "published",
+        "audience": "general",
+        "published_at": (frozen_now - timedelta(minutes=45)).isoformat(),
+        "content": _BASE_BODY + _LZ,
+        "details": {"experiment_refs": ["K2001"]},
+    }
+    draft = {
+        "id": "mile_draft_same_k",
+        "title": "K2001 新草稿",
+        "status": "draft",
+        "audience": "general",
+        "created_at": (frozen_now - timedelta(days=1)).isoformat(),
+        "content": _NOVEL_TAIL + _LZ,
+        "details": {"experiment_refs": ["K2001"]},
+    }
+    monkeypatch.setattr(
+        content,
+        "find_arc_duplicates",
+        lambda *a, **k: [
+            {
+                "id": "mile_pub_same_k",
+                "title": blocker["title"],
+                "conclusion_class": "null_no_info",
+                "shared_experiment_refs": ["K2001"],
+            }
+        ],
+    )
+    _write_json(storage_dir / "reports" / "feed.json", [blocker, draft])
+
+    res = content.release_pool_articles(
+        limit=1, due_only=False, include_drafts=True, storage_dir=str(storage_dir)
+    )
+
+    assert res["released"] == []
+    assert [s["id"] for s in res["dedup_skipped"]] == ["mile_draft_same_k"]
+    assert "shared_experiment_refs" in res["dedup_skipped"][0]["arc_block_reason"]
+    feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    blocked = next(a for a in feed_after if a["id"] == "mile_draft_same_k")
+    assert blocked["status"] == "draft"
+    assert blocked["details"]["release_dedup_skipped"] is True
+    assert "shared_experiment_refs" in blocked["details"]["release_arc_dedup_reason"]
+
+
+def test_release_arc_shared_explicit_data_source_still_blocks(tmp_path: Path, monkeypatch):
+    """Same explicit data source metadata is also a strong block signal."""
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 7, 3, 12, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+
+    source = "BLS CPI official release 2026-07-15"
+    blocker = {
+        "id": "mile_pub_same_source",
+        "title": "CPI 舊文",
+        "status": "published",
+        "audience": "general",
+        "published_at": (frozen_now - timedelta(minutes=45)).isoformat(),
+        "content": _BASE_BODY + _LZ,
+        "details": {"data_source": source},
+    }
+    draft = {
+        "id": "mile_draft_same_source",
+        "title": "CPI 新草稿",
+        "status": "draft",
+        "audience": "general",
+        "created_at": (frozen_now - timedelta(days=1)).isoformat(),
+        "content": _NOVEL_TAIL + _LZ,
+        "details": {"data_source": source},
+    }
+    monkeypatch.setattr(
+        content,
+        "find_arc_duplicates",
+        lambda *a, **k: [
+            {
+                "id": "mile_pub_same_source",
+                "title": blocker["title"],
+                "conclusion_class": "null_no_info",
+                "shared_experiment_refs": [],
+            }
+        ],
+    )
+    _write_json(storage_dir / "reports" / "feed.json", [blocker, draft])
+
+    res = content.release_pool_articles(
+        limit=1, due_only=False, include_drafts=True, storage_dir=str(storage_dir)
+    )
+
+    assert res["released"] == []
+    assert [s["id"] for s in res["dedup_skipped"]] == ["mile_draft_same_source"]
+    assert "shared_data_sources" in res["dedup_skipped"][0]["arc_block_reason"]
+
+
+def test_generic_provider_alone_is_not_release_arc_block_reason():
+    draft = {"details": {"data_source": "yfinance"}}
+    blocker = {"details": {"data_source": "yfinance"}}
+    assert content._release_arc_block_reason(
+        draft,
+        blocker,
+        {"shared_experiment_refs": []},
+    ) is None
+
+
 # ===========================================================================
 # Part 2 — drought circuit-breaker
 # ===========================================================================
