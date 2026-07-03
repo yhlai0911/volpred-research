@@ -792,3 +792,49 @@ def test_k1590_merger_arb_not_blocked_by_vt_event_study():
     assert "VOL_TARGETING" not in ents, "the 'vol target' noun must not extract the strategy"
     dups = find_arc_duplicates(k1590_title, k1590_content, existing, days=3650)
     assert not dups, "merger-arb deal-spread arc must not be blocked by a 台股 VT event-study piece"
+
+
+def test_legacy_none_arc_signature_title_entity_fuzzy_blocks_nfp_reaction():
+    """2026-07-03 NFP stale-duplicate incident: a legacy article with
+    details.arc_signature=None and only title-level metadata must still be
+    visible to check_arc_dedup's title/entity fallback.
+    """
+    existing = {
+        "id": "mile_legacy_nfp",
+        "status": "published",
+        "published_at": "2026-07-01T17:24:08+00:00",
+        "title": "6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%：讓市場抖動的從來不是「就業數字」本身",
+        "details": {"arc_signature": None},
+    }
+    new_title = "非農正式公布後，SPY 為什麼沒有抖？"
+    new_content = (
+        "NFP 2026-07-03 T+0 反應文：新增就業爆冷，但 SPY 波動不顯著，"
+        "VIX 體制才是主因。k528 事件研究顯示 NFP 無增量資訊。"
+    )
+
+    dups = find_arc_duplicates(new_title, new_content, [existing], days=90)
+
+    assert dups, "legacy arc_signature=None NFP coverage must not be invisible"
+    assert dups[0]["id"] == "mile_legacy_nfp"
+    assert dups[0]["match_reason"] == "legacy_title_entity_fuzzy"
+    assert "US_EQUITY" in dups[0]["shared_entities"]
+    assert dups[0]["shared_legacy_event_topics"] == ["NFP"]
+
+
+def test_legacy_none_arc_signature_fuzzy_does_not_block_core_market_only():
+    """The legacy fallback must require a specific event/topic entity, not only
+    ubiquitous SPY/VIX-style market overlap.
+    """
+    existing = {
+        "id": "mile_legacy_spy",
+        "status": "published",
+        "published_at": "2026-07-01T17:24:08+00:00",
+        "title": "SPY 只動 0.13%，市場沒有抖",
+        "details": {"arc_signature": None},
+    }
+    new_title = "非農正式公布後，SPY 為什麼沒有抖？"
+    new_content = "NFP 公布後 SPY 波動不顯著，VIX 體制才是主因，無增量資訊。"
+
+    dups = find_arc_duplicates(new_title, new_content, [existing], days=90)
+
+    assert dups == []

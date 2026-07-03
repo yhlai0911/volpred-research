@@ -128,6 +128,16 @@ _ENTITY_SURFACE: dict[str, str] = {
 _CORE_ENTITIES = {"US_EQUITY", "VIX", "TW_EQUITY"}
 _BROAD_MARKET_ENTITIES = {"NASDAQ", "US_SMALLCAP", "LONG_BOND", "US_BOND", "MID_BOND"}
 _MECHANISM_ENTITIES = {"INDEX_RECONSTITUTION", "VOL_TARGETING", "RISK_PARITY", "YIELD_CURVE", "FOMC"}
+_LEGACY_FUZZY_CONFIRM_ENTITIES = _CORE_ENTITIES | _BROAD_MARKET_ENTITIES | {
+    "USD", "RATES", "US_BOND", "LONG_BOND", "MID_BOND",
+}
+_EVENT_TOPIC_SURFACE: dict[str, str] = {
+    "nfp": "NFP", "非農": "NFP", "非農就業": "NFP", "nonfarm": "NFP",
+    "payroll": "NFP", "就業報告": "NFP",
+    "cpi": "CPI", "消費者物價": "CPI", "通膨數據": "CPI", "inflation data": "CPI",
+    "fomc": "FOMC", "fed": "FOMC", "點陣圖": "FOMC",
+}
+_EVENT_SURFACE_SORTED = sorted(_EVENT_TOPIC_SURFACE, key=len, reverse=True)
 
 # Longest-first surface forms for greedy Chinese matching.
 _SURFACE_SORTED = sorted(_ENTITY_SURFACE, key=len, reverse=True)
@@ -342,6 +352,26 @@ def extract_entities(text: str) -> set[str]:
     return found
 
 
+def _extract_event_topic_entities(text: str) -> set[str]:
+    """Extract event-topic labels for legacy fuzzy fallback only.
+
+    NFP/CPI are deliberately not part of the normal arc entity signature because
+    broad macro articles often mention several event types in passing. The legacy
+    fallback uses title-level event topics as corroboration for old rows whose
+    stored arc signature is explicitly missing/invalid.
+    """
+    found: set[str] = set()
+    lower = (text or "").lower()
+    for surface in _EVENT_SURFACE_SORTED:
+        if surface.isascii():
+            if re.search(rf"(?<![a-z0-9]){re.escape(surface)}(?![a-z0-9])", lower):
+                found.add(_EVENT_TOPIC_SURFACE[surface])
+        else:
+            if surface in (text or ""):
+                found.add(_EVENT_TOPIC_SURFACE[surface])
+    return found
+
+
 def classify_conclusion(text: str) -> str:
     """Classify the article's conclusion into a coarse class."""
     votes = {cls: 0 for cls in _CONCLUSION_KEYWORDS}
@@ -455,6 +485,53 @@ def arc_signature(title: str, content: str | None = "") -> dict:
     }
 
 
+def _feed_item_text(item: dict) -> str:
+    """Best-effort text for historical feed items that pre-date arc signatures."""
+    raw_tags = item.get("tags")
+    tags = (
+        " ".join(str(t) for t in raw_tags)
+        if isinstance(raw_tags, (list, tuple, set))
+        else ""
+    )
+    return "\n".join(
+        part for part in (
+            str(item.get("title") or ""),
+            str(item.get("content") or item.get("description") or ""),
+            tags,
+        )
+        if part
+    )
+
+
+def _has_valid_stored_v3_signature(item: dict) -> bool:
+    details = item.get("details") or {}
+    sig = details.get("arc_signature") if isinstance(details, dict) else None
+    return (
+        isinstance(sig, dict)
+        and sig.get("schema_version") == "arc_dedup_v3"
+        and isinstance(sig.get("entities"), list)
+        and isinstance(sig.get("conclusion_class"), str)
+        and isinstance(sig.get("narrative_axis"), str)
+        and isinstance(sig.get("entity_groups"), dict)
+    )
+
+
+def _has_legacy_arc_signature_marker(item: dict) -> bool:
+    """True for explicit legacy/invalid arc_signature metadata.
+
+    Missing details on synthetic callers/tests should use the normal recomputed
+    signature path. The fuzzy fallback is intentionally limited to articles that
+    carry an arc_signature field but not a valid v3 signature, especially
+    historical ``arc_signature=None`` rows.
+    """
+    details = item.get("details") or {}
+    return (
+        isinstance(details, dict)
+        and "arc_signature" in details
+        and not _has_valid_stored_v3_signature(item)
+    )
+
+
 def _signature_from_feed_item(item: dict) -> dict:
     details = item.get("details") or {}
     sig = details.get("arc_signature") if isinstance(details, dict) else None
@@ -490,8 +567,7 @@ def _signature_from_feed_item(item: dict) -> dict:
                 "mechanisms": sorted(_axis_values(mechanisms)),
                 "time_horizon": str(horizon or "unspecified"),
             }
-    text = f"{item.get('title', '')}\n{item.get('content') or item.get('description') or ''}"
-    return arc_signature("", text)
+    return arc_signature("", _feed_item_text(item))
 
 
 def _normalize_ref(raw: str) -> str:
@@ -602,6 +678,46 @@ def _title_jaccard(a: str, b: str) -> float:
     inter = len(ta & tb)
     union = len(ta | tb)
     return inter / union if union else 0.0
+
+
+def _legacy_title_entity_fuzzy_dup(
+    new_raw_ents: set[str],
+    old_raw_ents: set[str],
+    new_title: str,
+    old_title: str,
+    shared_refs: set[str],
+) -> bool:
+    """Conservative fallback for feed items with no stored v3 arc signature.
+
+    Historical articles can be too thin to reconstruct a full conclusion/mechanism
+    signature from content, especially when they only carry a title, tags, or a
+    short description. Use this only for legacy missing-signature items, and only
+    when a concrete event/topic entity is corroborated by a market entity or an
+    explicit shared K-ref. This closes the NFP T+0 stale-duplicate blind spot
+    without turning generic fuzzy similarity into a broad hard block.
+    """
+    shared = new_raw_ents & old_raw_ents
+    if not shared:
+        return False
+    distinctive_shared = shared - _CORE_ENTITIES
+    title_sim = _title_jaccard(new_title, old_title)
+    if shared_refs and (distinctive_shared or title_sim >= 0.18):
+        return True
+    if title_sim >= 0.35 and _is_significant_overlap(new_raw_ents, old_raw_ents):
+        return True
+    old_title_ents = extract_entities(old_title)
+    new_title_ents = extract_entities(new_title)
+    shared_title_events = (
+        _extract_event_topic_entities(old_title)
+        & _extract_event_topic_entities(new_title)
+    )
+    if (
+        shared_title_events
+        and (shared & _LEGACY_FUZZY_CONFIRM_ENTITIES)
+        and (old_title_ents or new_title_ents)
+    ):
+        return True
+    return False
 
 
 # Title-token Jaccard at/above this counts a descriptive pair as the same
@@ -747,6 +863,7 @@ def find_arc_duplicates(
                 exc,
             )
         ex_sig = _signature_from_feed_item(existing)
+        legacy_missing_sig = _has_legacy_arc_signature_marker(existing)
         ex_ents = _entities_for_matching(ex_sig)
         ex_raw_ents = set(ex_sig.get("entities") or [])
         ex_cls = str(ex_sig["conclusion_class"])
@@ -756,6 +873,7 @@ def find_arc_duplicates(
         ex_refs = _refs_from_feed_item(existing)
         shared_refs = new_ref_set & ex_refs
         axis_raw_backstop = False
+        legacy_fuzzy_match = False
 
         if descriptive_mode:
             # Stricter descriptive-path test (vuln 1 fix). Avoids the SpaceX
@@ -769,7 +887,16 @@ def find_arc_duplicates(
                 shared_refs,
             )
             if not match:
-                continue
+                legacy_fuzzy_match = (
+                    legacy_missing_sig
+                    and _legacy_title_entity_fuzzy_dup(
+                        new_raw_ents, ex_raw_ents,
+                        title, existing.get("title", ""),
+                        shared_refs,
+                    )
+                )
+                if not legacy_fuzzy_match:
+                    continue
         else:
             axes_compatible = _narrative_axes_compatible(new_axis, ex_axis)
             axis_raw_backstop = (
@@ -785,34 +912,80 @@ def find_arc_duplicates(
                 # this, a recycled K-article with only core entities would slip
                 # through the entity gate. Require same conclusion class so a
                 # genuine follow-up with a different verdict is still allowed.
-                if not (shared_refs and ex_cls == new_cls):
+                legacy_fuzzy_match = (
+                    legacy_missing_sig
+                    and _legacy_title_entity_fuzzy_dup(
+                        new_raw_ents, ex_raw_ents,
+                        title, existing.get("title", ""),
+                        shared_refs,
+                    )
+                )
+                if not ((shared_refs and ex_cls == new_cls) or legacy_fuzzy_match):
                     continue
-            if ex_cls != new_cls:
+            else:
+                legacy_fuzzy_match = (
+                    legacy_missing_sig
+                    and _legacy_title_entity_fuzzy_dup(
+                        new_raw_ents, ex_raw_ents,
+                        title, existing.get("title", ""),
+                        shared_refs,
+                    )
+                )
+            if ex_cls != new_cls and not legacy_fuzzy_match:
                 continue
-            if not axes_compatible and not axis_raw_backstop:
+            if not axes_compatible and not axis_raw_backstop and not legacy_fuzzy_match:
                 continue
-            if not _mechanisms_compatible(new_mechanisms, ex_mechanisms):
+            if (
+                not _mechanisms_compatible(new_mechanisms, ex_mechanisms)
+                and not legacy_fuzzy_match
+            ):
                 continue
-            if not _horizons_compatible(new_horizon, ex_horizon):
+            if (
+                not _horizons_compatible(new_horizon, ex_horizon)
+                and not legacy_fuzzy_match
+            ):
                 continue
         dups.append(
             {
                 "id": existing.get("id", "?"),
                 "title": existing.get("title", "?"),
-                "shared_entities": sorted((new_raw_ents & ex_raw_ents) if axis_raw_backstop else (new_ents & ex_ents)),
+                "shared_entities": sorted(
+                    (new_raw_ents & ex_raw_ents)
+                    if axis_raw_backstop
+                    else (new_ents & ex_ents)
+                ),
                 "conclusion_class": new_cls,
                 "narrative_axis": new_axis,
                 "existing_narrative_axis": ex_axis,
                 "shared_mechanisms": sorted(new_mechanisms & ex_mechanisms),
+                "shared_legacy_event_topics": (
+                    sorted(
+                        _extract_event_topic_entities(title)
+                        & _extract_event_topic_entities(existing.get("title", ""))
+                    )
+                    if legacy_fuzzy_match
+                    else []
+                ),
                 "new_mechanisms": sorted(new_mechanisms),
                 "existing_mechanisms": sorted(ex_mechanisms),
                 "time_horizon": new_horizon,
                 "existing_time_horizon": ex_horizon,
                 "shared_experiment_refs": sorted(shared_refs),
-                "match_reason": "descriptive_strict" if descriptive_mode else (
-                    "shared_experiment_ref"
-                    if (shared_refs and not _is_significant_overlap(new_ents, ex_ents))
-                    else "entity_conclusion_arc"
+                "match_reason": (
+                    "legacy_title_entity_fuzzy"
+                    if legacy_fuzzy_match
+                    else (
+                        "descriptive_strict"
+                        if descriptive_mode
+                        else (
+                            "shared_experiment_ref"
+                            if (
+                                shared_refs
+                                and not _is_significant_overlap(new_ents, ex_ents)
+                            )
+                            else "entity_conclusion_arc"
+                        )
+                    )
                 ),
             }
         )

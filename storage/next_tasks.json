@@ -47370,10 +47370,36 @@
     "description": "Part (c) of slot-aware coverage (parent: platform_ops_event_refill_slot_aware_coverage). check_arc_dedup.py / arc_dedup gate 現只比對有 arc_signature 的文章; 大量舊文 arc_signature=None 落在 gate 盲區。補 title/entity fuzzy fallback（比照 refill_reader_facing_pool 的 event alias + window 手法）讓舊文也能被 arc-dedup 兜底。fail-open + audit trail（dedup-gate-audit rule）。 Skill: feed-publisher + publishing rules。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-03T15:23:45+00:00",
     "source": "hourly_dispatch_pdca",
-    "parent_task_id": "platform_ops_event_refill_slot_aware_coverage"
+    "parent_task_id": "platform_ops_event_refill_slot_aware_coverage",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-03T17:54:17.555817+00:00",
+    "claim_session_id": "ae8b5fb1be81",
+    "status_history": [
+      {
+        "ts": "2026-07-03T17:54:17.556076+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T17:54:26.631169+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T18:01:59.049781+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-03T17:54:26.630875+00:00",
+    "completed_at": "2026-07-03T18:01:59.049506+00:00",
+    "result": "arc_dedup 補 details.arc_signature=None legacy title/entity fuzzy fallback；NFP/CPI/FOMC topic 僅限 legacy fallback，不污染 v3 arc signature。新增 NFP stale-duplicate 正反 regression，相關 pytest 79 passed。"
   },
   {
     "id": "platform_ops_test_draft_pool_refill_hermetic",

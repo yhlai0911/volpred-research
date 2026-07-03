@@ -23,7 +23,7 @@
 - **Real-feed smoke 驗證**：對 production feed，NFP 2026-07-03 T+0 → 命中 mile_35eef830（fuzzy），未來全新 NFP 2026-09-04 → None（照生成）。
 - **順帶修 latent bug**：`refill_reader_facing_pool._diag_warn` 全模組未定義（`_load_json` JSON 解析失敗會 NameError 而非 warn）→ 加 `from volpred.ops.diagnostics import warn as _diag_warn`（no-silent-fallback rule canonical helper）。同步修 3 個 stale 測試（斷言舊 stdout `; skipping event item` 格式 → 現行 stderr 結構化 `| field= | raw=`）。
 - 測試：`tests/test_reader_facing_refill.py` 15 passed（原 7 修綠 + 新增 8 coverage/helper/fail-open）。
-- **未做（另立 P3 follow-up）**：(b) `platform_ops_event_publisher_write_event_metadata`（publisher 發文回寫 event metadata → coverage 由 fuzzy 升 exact）；(c) `platform_ops_check_arc_dedup_fuzzy_legacy`（check_arc_dedup.py 補 arc_signature=None fuzzy fallback）。fuzzy coverage 已使系統對現況正確，(b)(c) 是 robustness 強化非阻塞。
+- **未做（另立 P3 follow-up）**：(b) `platform_ops_event_publisher_write_event_metadata`（publisher 發文回寫 event metadata → coverage 由 fuzzy 升 exact）。**已完成（2026-07-04 `platform_ops_check_arc_dedup_fuzzy_legacy`）**：(c) `check_arc_dedup.py` 透過 `arc_dedup.find_arc_duplicates` 支援 `details.arc_signature=None` 舊文的 title/entity fuzzy fallback；只針對顯式缺失/invalid arc signature 啟用，要求標題共享 NFP/CPI/FOMC 等事件 topic 且有市場實體 corroboration，避免污染標準 v3 arc signature。
 
 ## 2026-07-03 10:31 `git_push_backup` 連日 HELD（「Host cron failure」28×）= `_claude_project_dir._warn` 新增 silent-fallback 卡 pre-push guard — **FIXED**
 
