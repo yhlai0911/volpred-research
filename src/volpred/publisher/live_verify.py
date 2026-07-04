@@ -41,7 +41,7 @@ def _http_status(url: str, *, timeout_s: float = 10.0) -> int:
     except HTTPError as exc:
         return int(exc.code)
     except (URLError, TimeoutError, OSError):
-        return 0
+        return 0  # silent-ok: transient probe error in a poll-until-200 retry loop; 0 != 200 keeps polling / times out
 
 
 def verify_article_live(
