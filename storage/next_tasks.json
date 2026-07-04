@@ -1,5 +1,40 @@
 [
   {
+    "id": "platform_ops_dispatch_pool_dry_diagnostic_20260704",
+    "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
+    "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "succeeded",
+    "created_at": "2026-07-04T03:08:32.888814+00:00",
+    "source": "continue_task_dispatch_pool_dry_breaker",
+    "tags": [
+      "dispatch",
+      "refill",
+      "pool-dry",
+      "platform_ops"
+    ],
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-07-04T03:13:50.237954+00:00",
+    "claim_session_id": "d7642bddb10b",
+    "status_history": [
+      {
+        "ts": "2026-07-04T03:13:50.238244+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-04T03:13:50.464236+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-11"
+      }
+    ],
+    "completed_at": "2026-07-04T03:13:50.463947+00:00",
+    "result": "根因=讀者向候選池 arc-exhausted (K1513/K1611/K1572 全 narrative-arc dup, K1590 已有文章)。非生成器 bug — 是既有 K 池被 arc-dedup 正確去重耗盡。回應=派 fresh experiment K1621 (EM 主權 CDS proxy 跨資產前哨, 軸級全新 0 backlog mentions) 補充 fresh arc 材料, 而非 force-publish dup。"
+  },
+  {
     "id": "platform_ops_dispatch_pool_dry_diagnostic_20260625",
     "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
     "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
@@ -47897,5 +47932,41 @@
     "started_at": "2026-07-04T02:09:37.385918+00:00",
     "completed_at": "2026-07-04T02:20:23.779371+00:00",
     "result": "清除 mile_30438396 release-audit blocker：codex 額度用盡→改主線程自寫 matplotlib data-bound render (experiments/K1574/lazypack_render.py)，生 4-panel 懶人包圖組(框架/方法/結果/風險)，數字全對齊 K1574 results.json；上傳 Supabase(4×HTTP200)+install ## 懶人包圖組 section+sync。has_lazypack_section=True，arc-dedup clean，release_pool 下次 cadence(~05:28 UTC)自然釋出。"
+  },
+  {
+    "id": "experiment_k1621_em_sovereign_cds_emb_proxy_uncertainty",
+    "title": "K1621: EM 主權 CDS 波動率的美元債 ETF proxy 作為跨資產不確定性前哨",
+    "description": "yfinance EMB/PCY/VWOB (EM USD sovereign bond ETFs) + EEM/EWZ/EWY/EWT/INDA (EM equity) + ^VIX + FRED BAMLEMHBHYCRPIUSOAS (EMBI HY spread proxy). 以 EMB 日 RV 與 spread changes 作 sovereign-CDS-vol proxy，檢定其拐點是否領先 EM equity ETF RV 與 USD-vol regime。Lead-lag cross-correlation + DM-HLN cluster-robust。Phase-1 diagnostic. 軸級與 backlog 全新 (0 sovereign-CDS mentions)。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "in_progress",
+    "created_at": "2026-07-04T03:11:38.000000+00:00",
+    "source": "hourly_dispatch_11_fresh_direction_arc_dry_rootcause",
+    "tags": [
+      "experiment",
+      "EM",
+      "sovereign-cds",
+      "cross-asset",
+      "lead-lag",
+      "fresh-arc"
+    ],
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-07-04T03:11:38.542511+00:00",
+    "claim_session_id": "5f0ec95a5aa5",
+    "status_history": [
+      {
+        "ts": "2026-07-04T03:11:38.542798+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-04T03:11:38.770411+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-11"
+      }
+    ],
+    "started_at": "2026-07-04T03:11:38.770184+00:00"
   }
 ]
