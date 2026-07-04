@@ -4562,3 +4562,13 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 - **同類 incident**：2026-06 首次糾正（memory feedback_final_text_after_schedulewakeup）、2026-07-02 上午 strike 2（CLAUDE.md 已固化規則）、本次 strike 3。
 - **強制 reaction**：依 Three-Strike Rule 不可再靠「記得」— 需結構性 enforcement（候選：Stop hook 檢查 turn 最終輸出是否為 assistant text、或 turn-end checklist 進 harness config）。refactor plan 待 migration audit 收尾後立即補：docs/refactor_plan_turn_end_enforcement.md。
 - **本次補救**：即刻在本 turn 以正確順序回報（work → ScheduleWakeup → 最終文字）。
+
+## 2026-07-04 16:30 — dispatch_supervisor cutover 未完全退役 legacy hourly-dispatch（`launchctl disable` ≠ `bootout`）
+
+**Incident**：commit `260fac4f2`/`a6875480c` 執行 dispatch_supervisor real-run cutover（16:23-16:30 TPE），plist 註解宣稱「legacy com.volpred.hourly-dispatch was `launchctl disable`d at cutover」。但 telegram-132（老闆問「整個壞掉了嗎」，回覆 supervisor restart 通知）查證時發現：`launchctl print-disabled` 確認 disabled=true，但 `launchctl list` / `launchctl print` 顯示該 job **仍 active、仍在跑**（16:07 那次真派工，PID 31949 → 子行程 32280 claude opus，運行中）。
+
+**根因**：`launchctl disable` 只阻擋「未來 bootstrap」（下次開機/重新載入時不會載入），**不會 unload 一個已經 bootstrap 的 job**——已載入的 job 仍會照原本 `StartCalendarInterval` 繼續觸發。cutover 只做了 disable，沒做 `bootout`，導致 legacy 排程實際上沒退役，17:07 起會與新 supervisor 同時真派工（雙倍 token/agent 浪費，違反 one-dispatch-per-hour 治理）。
+
+**Fix**：telegram-132 回覆同時掛背景 watcher（nohup+disown，不受該次 session 結束影響）：等 legacy 16:07 那次真派工的 `cron_hourly_dispatch.sh` process 自然結束後（不中斷進行中的真實工作）立即 `launchctl bootout gui/<uid>/com.volpred.hourly-dispatch`，log 在 `~/.volpred/logs/dispatch_supervisor_cutover_fix.log`。另補 P1 驗證任務 `verify-legacy-hourly-dispatch-boot-out-20260704` 供下一輪 dispatch 覆核。
+
+**教訓（PDCA）**：任何「退役 LaunchAgent」的 cutover 步驟，若該 job **當下已是 loaded/active 狀態**，必須用 `launchctl bootout` 完整卸載（配合先 `disable` 防止重載），**只 `disable` 不 `bootout` = 沒退役，舊排程照樣觸發**。日後 plist 註解寫 rollback / cutover 步驟時，兩者都要列且要在完成後用 `launchctl list | grep <label>` 實際確認 job 已消失，不能只憑 `print-disabled` 的 disabled 狀態判斷「已經退役」。
