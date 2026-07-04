@@ -8,7 +8,8 @@ email the boss a to-do list. These tests assert the ladder in
   * no-op when the feed is NOT in an active-window drought;
   * on drought → force-release; if release publishes something, does NOT refill;
   * on drought → force-release returns 0 (empty pool / all arc-dup rehashes) →
-    refill fresh topics for the next hourly dispatch.
+    refill one emergency reader-facing daily_article for the next dispatcher;
+  * if force-release and reader-facing refill both return 0, send a critical alert.
 """
 from __future__ import annotations
 
@@ -89,8 +90,49 @@ def test_drought_release_success_skips_refill(mod, monkeypatch):
     assert "refill_fresh" not in steps
 
 
-def test_drought_release_empty_triggers_refill(mod, monkeypatch):
+def test_drought_release_empty_triggers_reader_facing_refill(mod, monkeypatch):
     _patch_freshness(monkeypatch, breached=True, gap=8.1)
+
+    import volpred.ops as ops
+
+    monkeypatch.setattr(
+        ops,
+        "release_pool_by_settings",
+        lambda **kw: {"released_count": 0, "released": []},
+    )
+    import refill_task_pool
+
+    calls = []
+
+    def fake_refill(target, dry_run=False, **kwargs):
+        calls.append({"target": target, "dry_run": dry_run, **kwargs})
+        return {
+            "added": 1,
+            "added_ids": ["K999_article_general"],
+            "reason": "ok",
+            "reader_facing_only": kwargs.get("reader_facing_only"),
+        }
+
+    monkeypatch.setattr(refill_task_pool, "refill", fake_refill)
+
+    res = mod.remediate(apply=True)
+    steps = {s["step"]: s for s in res["steps"]}
+    assert steps["force_release"]["released"] == 0
+    assert steps["refill_reader_facing"]["added"] == 1
+    assert steps["refill_reader_facing"]["added_ids"] == ["K999_article_general"]
+    assert calls == [
+        {
+            "target": 1,
+            "dry_run": False,
+            "reader_facing_only": True,
+            "emergency": True,
+        }
+    ]
+    assert "critical_alert" not in steps
+
+
+def test_drought_release_empty_and_refill_empty_sends_critical_alert(mod, monkeypatch):
+    _patch_freshness(monkeypatch, breached=True, gap=8.4)
 
     import volpred.ops as ops
 
@@ -104,14 +146,39 @@ def test_drought_release_empty_triggers_refill(mod, monkeypatch):
     monkeypatch.setattr(
         refill_task_pool,
         "refill",
-        lambda target, dry_run=False: {"added": 3, "added_ids": ["a", "b", "c"], "reason": "ok"},
+        lambda *args, **kwargs: {
+            "added": 0,
+            "added_ids": [],
+            "reason": "no_reader_facing_candidates_passing_filter",
+            "reader_facing_only": True,
+        },
     )
+
+    import volpred.ops.alerts as alerts
+
+    sent = []
+
+    def fake_send_alert(level, title, body, **kwargs):
+        sent.append({"level": level, "title": title, "body": body, **kwargs})
+        return {
+            "sent": True,
+            "alert_key": "critical:test",
+            "telegram": {"sent": True},
+        }
+
+    monkeypatch.setattr(alerts, "send_alert", fake_send_alert)
 
     res = mod.remediate(apply=True)
     steps = {s["step"]: s for s in res["steps"]}
     assert steps["force_release"]["released"] == 0
-    assert steps["refill_fresh"]["added"] == 3
-    assert steps["refill_fresh"]["added_ids"] == ["a", "b", "c"]
+    assert steps["refill_reader_facing"]["added"] == 0
+    assert steps["critical_alert"]["ok"] is True
+    assert res["escalated"] is True
+    assert res["reason"] == "force_release_and_reader_facing_refill_empty"
+    assert sent and sent[0]["level"] == "critical"
+    assert sent[0]["force_send"] is True
+    assert "force_release.released: 0" in sent[0]["body"]
+    assert "refill_reader_facing.added: 0" in sent[0]["body"]
 
 
 def test_dry_run_takes_no_action(mod, monkeypatch):

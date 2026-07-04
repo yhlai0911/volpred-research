@@ -725,7 +725,13 @@ def _is_research_saturated(cand: dict) -> bool:
     return research_count >= _SATURATION_THRESHOLD
 
 
-def _make_article_task(cand: dict, priority: int, retry_suffix: str = "") -> dict:
+def _make_article_task(
+    cand: dict,
+    priority: int,
+    retry_suffix: str = "",
+    *,
+    emergency: bool = False,
+) -> dict:
     k_id = cand["k_id"]
     audiences_covered = cand.get("audiences_covered") or []
     needed_audience = "general" if "general" not in audiences_covered else "research"
@@ -734,22 +740,28 @@ def _make_article_task(cand: dict, priority: int, retry_suffix: str = "") -> dic
         task_id = f"{task_id}_{retry_suffix}"
     title_prefix = f"{k_id}"
     retry_note = f" [retry-{retry_suffix}]" if retry_suffix else ""
+    source = "auto_publish_drought_emergency" if emergency else "auto_discovered"
+    tags = (cand.get("tags") or []) + ["auto-discovered", f"audience-{needed_audience}"]
+    if emergency:
+        tags.extend(["publish-drought-emergency", "reader-facing"])
+    if retry_suffix:
+        tags.append(f"retry-{retry_suffix}")
     return {
         "id": task_id,
         "title": f"{title_prefix}: write {needed_audience}-audience article{retry_note} (auto-discovered uncovered K)",
         "description": (
             f"K {k_id} has verdict signal (score={cand.get('score')}, reasons={cand.get('reasons')}) "
             f"but no {needed_audience} article in feed.json. "
+            f"{'Emergency reader-facing publish-drought remediation; dispatch immediately. ' if emergency else ''}"
             f"{'Prior task terminal but feed lacks coverage — retry.' if retry_suffix else ''} "
             f"Verdict preview: {(cand.get('verdict_preview') or '')[:280]}"
         ),
-        "priority": priority,
+        "priority": 1 if emergency else priority,
         "status": "pending",
         "task_type": "daily_article",
-        "source": "auto_discovered",
+        "source": source,
         "k_id": k_id,
-        "tags": (cand.get("tags") or []) + ["auto-discovered", f"audience-{needed_audience}"]
-              + ([f"retry-{retry_suffix}"] if retry_suffix else []),
+        "tags": tags,
         "topic_cluster": cand.get("topic_cluster"),
         "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
@@ -1189,7 +1201,13 @@ def _ensure_candidates_fresh(max_age_hours: float = CANDIDATES_STALE_HOURS) -> d
         }
 
 
-def refill(target: int, dry_run: bool = False) -> dict:
+def refill(
+    target: int,
+    dry_run: bool = False,
+    *,
+    reader_facing_only: bool = False,
+    emergency: bool = False,
+) -> dict:
     freshness = _ensure_candidates_fresh()
     if not CANDIDATES.exists():
         return {"ok": False, "reason": "publication_candidates.json missing", "added": 0}
@@ -1327,6 +1345,8 @@ def refill(target: int, dry_run: bool = False) -> dict:
         kid = cand["k_id"]
         audiences_covered = cand.get("audiences_covered") or []
         needed_audience = "general" if "general" not in audiences_covered else "research"
+        if reader_facing_only and needed_audience == "research":
+            continue
         if _is_invalidated_artifact_candidate(cand):
             continue
         # 2026-06-14 K1327 incident: publication_candidates can retain a stale
@@ -1408,7 +1428,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
             and kid.upper() in succeeded_general_kids
         ):
             continue
-        new_entries.append(_make_article_task(cand, priority, retry_suffix))
+        new_entries.append(_make_article_task(cand, priority, retry_suffix, emergency=emergency))
 
     # Fill remaining target from deferred dominant-cluster candidates only if the
     # contrarian/non-dominant pool was insufficient (avoid a dry pool).
@@ -1428,6 +1448,8 @@ def refill(target: int, dry_run: bool = False) -> dict:
             continue
         audiences_covered = cand.get("audiences_covered") or []
         needed_audience = "general" if "general" not in audiences_covered else "research"
+        if reader_facing_only and needed_audience == "research":
+            continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
         if (
@@ -1437,14 +1459,14 @@ def refill(target: int, dry_run: bool = False) -> dict:
             and kid.upper() in succeeded_general_kids
         ):
             continue
-        new_entries.append(_make_article_task(cand, priority, retry_suffix))
+        new_entries.append(_make_article_task(cand, priority, retry_suffix, emergency=emergency))
 
     # Research-backlog fallback (2026-06-08 boss mandate「徹底解決 warning」):
     # when the article candidate pool is exhausted (all uncovered K's are
     # research-saturated → 8th belt drops them), keep the pool flowing by queueing
     # NEW research directions from research_program.md instead of going idle.
     fallback_reason = None
-    if not new_entries:
+    if not new_entries and not reader_facing_only:
         # 2026-06-14 Three-Strike fix（pool-empty critical 反覆觸發根因）：原 cap
         # min(2, target) 讓 fallback 每次只補 2 個，低於 REFILL_FLOOR(4) → 即使
         # backlog 有 fresh 方向，pool 仍補不到健康水位、隔幾小時又 dry → 反覆 warn/
@@ -1462,7 +1484,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
     # is dry (e.g. 54/67 known directions are succeeded → slug-deduped), kick a
     # platform_ops task that dispatches a journal-discovery agent to populate
     # research_program.md from top-tier journals. 24h idempotent.
-    if not new_entries:
+    if not new_entries and not reader_facing_only:
         journal_tasks = _journal_discovery_dispatch_task(tasks, existing)
         if journal_tasks:
             new_entries.extend(journal_tasks)
@@ -1472,7 +1494,12 @@ def refill(target: int, dry_run: bool = False) -> dict:
         return {
             "ok": True,
             "added": 0,
-            "reason": "no_new_candidates_passing_filter",
+            "reason": (
+                "no_reader_facing_candidates_passing_filter"
+                if reader_facing_only
+                else "no_new_candidates_passing_filter"
+            ),
+            **({"reader_facing_only": True} if reader_facing_only else {}),
             **({"candidates_freshness": freshness} if freshness else {}),
         }
 

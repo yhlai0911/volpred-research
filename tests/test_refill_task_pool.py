@@ -102,6 +102,117 @@ def test_refill_skips_blank_title_candidates(tmp_path, monkeypatch):
     assert data == []
 
 
+def test_reader_facing_emergency_refill_only_adds_general_daily_article(tmp_path, monkeypatch):
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    candidates = tmp_path / "storage" / "publication_candidates.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    candidates.write_text(
+        json.dumps(
+            {
+                "top_10_uncovered": [
+                    {
+                        "k_id": "K2001",
+                        "title": "already has general, needs research only",
+                        "score": 4,
+                        "reasons": ["research gap"],
+                        "verdict_preview": "research-only follow-up",
+                        "audiences_covered": ["general"],
+                        "covered_by": [{"audience": "general", "status": "published"}],
+                    },
+                    {
+                        "k_id": "K2002",
+                        "title": "fresh reader-facing candidate",
+                        "score": 4,
+                        "reasons": ["general gap"],
+                        "verdict_preview": "reader-facing angle",
+                        "audiences_covered": [],
+                        "covered_by": [],
+                    },
+                ],
+                "missing_research_top5": [],
+                "missing_general_top5": [],
+                "candidates": [],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
+    monkeypatch.setattr(MODULE, "_kids_with_audience_article", lambda audience: set())
+    monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
+    monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+    monkeypatch.setattr(MODULE, "_is_arc_duplicate_candidate", lambda cand: False)
+    monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
+    monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
+
+    result = MODULE.refill(
+        target=2,
+        dry_run=False,
+        reader_facing_only=True,
+        emergency=True,
+    )
+
+    assert result["ok"] is True
+    assert result["added"] == 1
+    assert result["added_ids"] == ["K2002_article_general"]
+    data = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert [t["id"] for t in data] == ["K2002_article_general"]
+    task = data[0]
+    assert task["task_type"] == "daily_article"
+    assert task["priority"] == 1
+    assert task["source"] == "auto_publish_drought_emergency"
+    assert "publish-drought-emergency" in task["tags"]
+    assert "reader-facing" in task["tags"]
+
+
+def test_reader_facing_only_refill_does_not_fall_back_to_research_or_journal(tmp_path, monkeypatch):
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    candidates = tmp_path / "storage" / "publication_candidates.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    candidates.write_text(
+        json.dumps(
+            {
+                "top_10_uncovered": [],
+                "missing_research_top5": [],
+                "missing_general_top5": [],
+                "candidates": [],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    def fail_fallback(*_args, **_kwargs):  # pragma: no cover - asserts not reached
+        raise AssertionError("reader-facing drought refill must not use non-reader fallbacks")
+
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
+    monkeypatch.setattr(MODULE, "_kids_with_audience_article", lambda audience: set())
+    monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
+    monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+    monkeypatch.setattr(MODULE, "_research_backlog_candidates", fail_fallback)
+    monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", fail_fallback)
+
+    result = MODULE.refill(
+        target=2,
+        dry_run=False,
+        reader_facing_only=True,
+        emergency=True,
+    )
+
+    assert result["ok"] is True
+    assert result["added"] == 0
+    assert result["reader_facing_only"] is True
+    assert result["reason"] == "no_reader_facing_candidates_passing_filter"
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == []
+
+
 def test_refill_skips_failed_source_experiment_k(tmp_path, monkeypatch, capsys):
     """Regression: K1327 failed experiment must not become an article task.
 

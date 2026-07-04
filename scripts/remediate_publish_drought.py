@@ -16,8 +16,10 @@ rule）。由 `scripts/check_alerts.py` 每小時在寄出 publishing_freshness 
   2. force `release_pool_by_settings(force=True)` — 觸發 `_maybe_drought_release`
      circuit-breaker，釋出 least-dup-like 的 dedup-blocked 草稿。
   3. 若 released == 0（草稿池空 / 全是已發過主題的 arc-dup 重寫，breaker 無可釋出）→
-     `refill_task_pool.refill()` 補 fresh 研究主題進 task pool，下一班 hourly dispatch
-     （每小時 :07）自動生成並發佈。
+     `refill_task_pool.refill(reader_facing_only=True, emergency=True)` 立即補一篇
+     fresh reader-facing daily_article 進 task pool，下一班 dispatcher 優先生文。
+  4. 若 force-release 與 reader-facing refill 都是 0 → 直接升級 critical alert
+     （send_alert 會同步 Telegram mirror），禁止靜默 skip。
 
 每步結果寫入回傳 summary + `diagnostics.warn` log；publishing_freshness alert body
 讀「系統已自動修復」框架，不再對老闆下 imperative 指令。
@@ -68,6 +70,34 @@ def _release_apply_lock(handle) -> None:
         fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
     finally:
         handle.close()
+
+
+def _send_empty_ladder_alert(*, result: dict, storage_dir: str) -> dict:
+    """Escalate when drought remediation cannot publish or queue a reader piece."""
+    from volpred.ops.alerts import send_alert
+
+    force_step = next((s for s in result.get("steps", []) if s.get("step") == "force_release"), {})
+    refill_step = next((s for s in result.get("steps", []) if s.get("step") == "refill_reader_facing"), {})
+    body = "\n".join(
+        [
+            "Publishing-freshness dead-man switch attempted automatic remediation, but both live escape paths returned empty.",
+            "",
+            f"- publish_gap_hours: {result.get('gap_hours')}",
+            f"- threshold_hours: {result.get('threshold_hours')}",
+            f"- force_release.released: {force_step.get('released', 0)}",
+            f"- refill_reader_facing.added: {refill_step.get('added', 0)}",
+            f"- refill_reader_facing.reason: {refill_step.get('reason') or refill_step.get('error')}",
+            "",
+            "Required operator action: create or dispatch a fresh reader-facing article task; do not treat this as a no-op.",
+        ]
+    )
+    return send_alert(
+        "critical",
+        "發文脫班補救失敗：force-release/refill 皆為 0",
+        body,
+        storage_dir=storage_dir,
+        force_send=True,
+    )
 
 
 def remediate(*, apply: bool, storage_dir: str = "storage") -> dict:
@@ -153,27 +183,55 @@ def remediate(*, apply: bool, storage_dir: str = "storage") -> dict:
             result["steps"].append({"step": "force_release", "ok": False, "error": str(exc)})
 
         # Step 2: nothing published (empty pool / all drafts are arc-dup rehashes of
-        # live content → breaker withholds). Auto-supply fresh research topics so the
-        # NEXT hourly dispatch generates + publishes genuinely new content. This is
-        # the wire that was missing — previously the alert just emailed the boss a
-        # to-do list to "派 daily_article 補非飽和主題" (email-12559 complaint).
+        # live content → breaker withholds). Auto-supply ONE fresh reader-facing
+        # daily_article task. Generic refill can legitimately fall back to research
+        # experiments or journal-discovery platform_ops; those are useful for the
+        # long research pipeline but do not heal a reader-facing publish drought.
+        refill_added = None
         if released == 0:
             try:
                 from refill_task_pool import refill
 
-                rf = refill(4, dry_run=False)
+                rf = refill(
+                    1,
+                    dry_run=False,
+                    reader_facing_only=True,
+                    emergency=True,
+                )
+                refill_added = int(rf.get("added") or 0)
                 result["steps"].append(
                     {
-                        "step": "refill_fresh",
+                        "step": "refill_reader_facing",
                         "ok": True,
-                        "added": rf.get("added", 0),
+                        "added": refill_added,
                         "added_ids": rf.get("added_ids", []),
                         "reason": rf.get("reason"),
+                        "reader_facing_only": bool(rf.get("reader_facing_only")),
                     }
                 )
             except Exception as exc:  # noqa: BLE001
                 warn("remediate_drought", "refill_fresh failed", err=str(exc))
-                result["steps"].append({"step": "refill_fresh", "ok": False, "error": str(exc)})
+                result["steps"].append({"step": "refill_reader_facing", "ok": False, "error": str(exc)})
+
+            if not refill_added:
+                try:
+                    alert = _send_empty_ladder_alert(result=result, storage_dir=storage_dir)
+                    result["steps"].append(
+                        {
+                            "step": "critical_alert",
+                            "ok": True,
+                            "sent": alert.get("sent"),
+                            "telegram": alert.get("telegram"),
+                            "alert_key": alert.get("alert_key"),
+                        }
+                    )
+                    result["escalated"] = True
+                    result["reason"] = "force_release_and_reader_facing_refill_empty"
+                except Exception as exc:  # noqa: BLE001
+                    warn("remediate_drought", "empty-ladder critical alert failed", err=str(exc))
+                    result["steps"].append({"step": "critical_alert", "ok": False, "error": str(exc)})
+                    result["escalated"] = True
+                    result["reason"] = "empty_ladder_alert_failed"
     finally:
         _release_apply_lock(lock_handle)
 

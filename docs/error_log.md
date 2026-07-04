@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-04 13:15 發文脫班補救 force-release=0 + refill=0 仍靜默收場 — **FIXED（reader-facing emergency refill + critical escalation）**
+
+**現象**：publishing_freshness reader-facing 脫班時，`scripts/remediate_publish_drought.py` 會先 force `release_pool_by_settings(force=True)`；若 `_maybe_drought_release` 找不到「內容乾淨、僅因 dedup 擋住」的草稿，會回 released=0。舊 Step 2 接著呼叫 generic `refill_task_pool.refill(4)`，但該 refill 可合法退到 `experiment` / journal-discovery `platform_ops`，甚至 added=0。於是出現 `force_release=0` 且 `refill_fresh=0` 時仍只把步驟寫進 summary、無 critical / Telegram 升級，reader-facing drought 沒有被真正自癒。
+
+**根因**：把「研究供給補滿」誤當成「讀者可見發文 drought 補救」。兩者 output contract 不同：research fallback 對 Mission #2 有價值，但不能解除 Mission #1 的發文缺口。remediator 沒檢查 `added==0`，也沒要求 refill 只能產 `audience!=research` 的 daily_article。
+
+**解決**：(a) `scripts/refill_task_pool.py::refill()` 新增 `reader_facing_only` / `emergency` 模式，只允許 general-audience `daily_article`，禁止落到 research backlog 或 journal-discovery fallback；emergency 任務標 P1、`source=auto_publish_drought_emergency`、tags 含 `publish-drought-emergency` / `reader-facing`。(b) `scripts/remediate_publish_drought.py` 在 force-release=0 時改補 1 篇 emergency reader-facing article；若仍 added=0 或 refill 失敗，立即 `send_alert(level="critical", force_send=True)`，沿用既有 Telegram mirror，禁止 silent no-op。
+
+**驗證**：`uv run pytest tests/test_remediate_publish_drought.py tests/test_refill_task_pool.py -q` → 31 passed；`uv run pytest tests/test_draft_pool_refill.py tests/test_dispatch_type_rotation.py tests/test_content_release_pool.py -q` → 46 passed；`uv run python -m py_compile scripts/refill_task_pool.py scripts/remediate_publish_drought.py` PASS；`uv run python scripts/audit_silent_fallbacks.py --strict --baseline storage/qa/silent_fallback_baseline.json` → new=0；live dry-run `uv run python scripts/remediate_publish_drought.py --dry-run --json` 顯示目前 `reason=no_drought`、gap 3.78h，未觸發 apply side effect。
+
+**教訓（PDCA）**：outcome-level remediation 的每一層都要驗證「是否真的修到該 outcome」。補研究題、補平台任務、或回 0 都不能被算成 reader-facing drought 自癒；若 live escape path 全空，必須 loud critical，而不是把 0/0 藏在 JSON summary 裡。
+
 ## 2026-07-04 12:50 push 被 silent-fallback gate 連續 HELD 26 小時（47 commits 積壓）— gate 正確、escalation 缺席 — **FIXED（8 處修畢解封 + 新 `push_backlog` dead-man switch）**
 
 **現象**：`git_push_backup` 自 7/3 18:00（台灣時間）起連續 26 班 exit=120 `HELD: 8 new silent fallback(s) at HEAD — NOT pushing`，本機 47 commits 未上 GitHub。gate 本身是 7/3 才修好的正確設計（exit120 = benign hold、豁免 host_cron_fail）；但 hold 的 warn email 被 24h dedup 吞掉、hourly 班次看到也因 anti-clobber（live session 正在編輯那些檔案）合理不碰 → **無任何機制強迫在 N 班內解決**，26 小時全靠下一次互動 session 才發現。
