@@ -49405,7 +49405,7 @@
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「量先價行 / 爆量長黑是出貨」成交量能否預測隔日方向？",
     "description": "驗證技術分析最流行迷思之一。用 SPY/2330/^TWII 量價數據，檢定放量（volume z-score 高）+ 特定 K 棒型態是否對隔日報酬有預測力，訊號嚴格 shift(1) 避 lookahead，正式檢定勝率是否顯著優於基準。reader 超愛的技術分析破解。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49432,9 +49432,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T22:50:27.811203+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-04T22:41:56.520417+00:00"
+    "started_at": "2026-07-04T22:41:56.520417+00:00",
+    "completed_at": "2026-07-04T22:50:27.810881+00:00",
+    "result": "K1636 completed. Verdict: not_supported_as_next_day_direction_rule; 12 primary next-day direction tests have no BH-FDR downside support. High-volume down days raise forward 5d RV, so volume is risk-conditioning not direction edge."
   },
   {
     "id": "telegram-160",
