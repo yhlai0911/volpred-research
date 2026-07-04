@@ -48846,20 +48846,47 @@
     "task_type": "telegram_reply",
     "priority": "P1",
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-04T13:16:17.825190+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 141）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你他媽的不是說已經修好了嗎？\n你沒有一點邏輯概念可以修好這個東西嗎？\n判斷條件有問題，你不會改判斷嗎？\n立刻給我修好，不要再讓我看到一次這樣的結果\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你他媽的不是說已經修好了嗎？\n你沒有一點邏輯概念可以修好這個東西嗎？\n判斷條件有問題，你不會改判斷嗎？\n立刻給我修好，不要再讓我看到一次這樣的結果\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "completed_at": "2026-07-04T13:25:34.469348+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-04T13:25:34.469728+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "complete"
+      }
+    ]
   },
   {
     "id": "telegram-143",
     "task_type": "telegram_reply",
     "priority": "P1",
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-04T13:17:35.406595+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 143）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n然後你寫文章不能多寫一點嗎？你他媽的只能夠補一篇到草稿池嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n然後你寫文章不能多寫一點嗎？你他媽的只能夠補一篇到草稿池嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-04T13:26:06.137672+00:00",
+    "claim_session_id": "0d4f3704c964",
+    "status_history": [
+      {
+        "ts": "2026-07-04T13:26:06.138041+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-04T13:27:58.959000+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-04T13:27:58.958692+00:00"
   },
   {
     "id": "platform_ops_host_cron_recency_gate",
@@ -48870,5 +48897,15 @@
     "created_at": "2026-07-04T13:23:53.923838+00:00",
     "title": "host_cron_fail 加 recency gate（stale 非0 exit 不再每小時重判）",
     "description": "_latest_cron_exit 抓 log 最後一個 exit marker 無時效檢查：低頻 cron 幾天前失敗一次、之後沒再 log，會每小時被重判 breach。在 _parse_host_cron_state 加 recency gate：failing log 的 exited_at 超過該 cron cadence window（或無法解析 timestamp / at unknown）時不升 critical、cap 為 warn 或不 breach。注意 tests/test_alerts.py 的 write_exits 用過去日期（Jun 15 / Jul 2），加 gate 時 fixture 日期要改成相對 now 才不會誤 stale。root context: docs/error_log.md 2026-07-04 21:18 條「後續強化」。"
+  },
+  {
+    "id": "platform_ops_parallel_draft_writer_throughput",
+    "task_type": "platform_ops",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "pending",
+    "created_at": "2026-07-04T13:27:45.877580+00:00",
+    "title": "草稿池補救改並行多寫（池低時一次補到門檻，非每小時1篇）",
+    "description": "老闆 Telegram msg 143 動怒:「寫文章不能多寫一點嗎? 只能夠補一篇到草稿池嗎?」。現況機制: draft feed 池靠 daily_article writer 產出, 但 hourly dispatch 每小時只派 1 個 writer (feedback_one_dispatch_per_hour) -> 池 <4 時每小時只增 1 篇, 與 feedback_pool_fill_to_threshold (池低要並行派 floor-current 個 agent 補到滿) 衝突。要做: (1) draft_pool_low breach 時, 補救改成一次並行 dispatch (alert_floor - draft_count) 個 daily_article writer 把 draft 池一次補到門檻, 而非等 hourly 一小時一篇; (2) 各並行 writer 主題軸互不重複 (3-layer dedup + narrative-arc 飽和檢查, 見 feedback_dedup_3_layers_mainthread / feedback_refill_check_saturation_and_running_hourly); (3) 尊重 token budget 與 heavy compute 走 compute_queue; (4) 評估每篇長度是否可再厚 (老闆也嫌「多寫一點」= 篇幅/篇數都要). 驗收: 池 <4 時單一 remediation 週期把 draft 補到 >=4, 非 1/hour。"
   }
 ]
