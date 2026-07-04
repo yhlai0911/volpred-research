@@ -711,6 +711,76 @@ def _count_md_tables(content: str) -> int:
     return blocks
 
 
+def _audit_digest_archive_span(
+    details: dict | None,
+    published_at: str | None,
+    feed: list[dict],
+) -> tuple[list[str], list[str]]:
+    """Enforce that a daily_digest curates ACROSS THE ARCHIVE, not just recaps
+    the last week or two (boss requirement, corrected ≥3× on 2026-07-01, again
+    2026-07-05 — the requirement lived only in enqueue_daily_digest.py's prompt
+    string with NO governance rule and NO enforcement, so it kept recurring).
+
+    A digest's `details.digest_articles` are its source/evidence articles. If
+    they cluster in the last ~2 weeks the digest is a recent-recap, not a
+    theme-driven curation from the whole library. We measure the span of the
+    source articles' publish dates:
+      - span < 14 days                     → BLOCK (recent-recap)
+      - span < 45 days OR <2 sources >30d  → WARN  (reach deeper into the archive)
+
+    Fail-open (per .claude/rules/dedup-gate-audit.md): if slugs can't be
+    resolved to dates, WARN but never block — a broken lookup must not gap the
+    content pipeline. Returns (blocking_issues, warnings).
+    """
+    try:
+        slugs = (details or {}).get("digest_articles") or []
+        if not isinstance(slugs, list) or len(slugs) < 2:
+            return [], [
+                "digest_articles 少於 2 篇或缺失 — 精選導讀應從整庫策展 5-8 篇佐證文章"
+            ] if slugs is not None else []
+        by_id = {a.get("id"): a for a in feed}
+        dates: list[datetime] = []
+        unresolved = 0
+        for s in slugs:
+            a = by_id.get(s)
+            pub = (a or {}).get("published_at") if a else None
+            if pub:
+                try:
+                    dates.append(datetime.fromisoformat(str(pub).replace("Z", "+00:00")))
+                except ValueError:
+                    unresolved += 1
+            else:
+                unresolved += 1
+        if len(dates) < 2:
+            return [], [
+                f"digest 來源文章日期無法解析（unresolved={unresolved}）— 跳過 archive-span 檢查（fail-open）"
+            ]
+        try:
+            dg_date = datetime.fromisoformat(str(published_at).replace("Z", "+00:00")) if published_at else max(dates)
+        except (ValueError, TypeError):
+            dg_date = max(dates)
+        if dg_date.tzinfo is None:
+            dg_date = dg_date.replace(tzinfo=timezone.utc)
+        dates = [d if d.tzinfo else d.replace(tzinfo=timezone.utc) for d in dates]
+        span_days = (max(dates) - min(dates)).days
+        older_than_30 = sum(1 for d in dates if (dg_date - d).days > 30)
+        issues: list[str] = []
+        warnings: list[str] = []
+        if span_days < 14:
+            issues.append(
+                f"精選導讀來源文章跨度僅 {span_days} 天（全部集中在近兩週）— 這是本週 recap，"
+                f"不是跨整庫的主題策展。必須先由時事/宣告/現象訂主題，再從整個 archive 撈佐證文章。"
+            )
+        elif span_days < 45 or older_than_30 < 2:
+            warnings.append(
+                f"精選導讀來源跨度 {span_days} 天、僅 {older_than_30} 篇超過 30 天 — 建議更深入 archive "
+                f"（whole-library curation，非近期 recap）"
+            )
+        return issues, warnings
+    except Exception as exc:  # noqa: BLE001
+        return [], [f"digest archive-span 檢查異常（fail-open）: {exc}"]
+
+
 def _audit_content_depth(
     audience: str,
     content: str,
@@ -1632,6 +1702,36 @@ class Publisher:
                 )
             for issue in depth_issues:
                 print(f"  ⚠️ depth issue (audit_strict=False bypass): {issue}")
+
+        # 2026-07-05 (boss): daily_digest must curate ACROSS THE ARCHIVE by a
+        # current-event-driven theme, not recap the last week or two. This
+        # requirement previously lived only in enqueue_daily_digest.py's prompt
+        # (no rule, no gate) and kept recurring. Mechanical gate: source
+        # articles' publish-date span must not cluster in the last 2 weeks.
+        if _depth_ct == 'daily_digest':
+            try:
+                _digest_feed = self._load_feed()
+            except Exception:  # noqa: BLE001
+                _digest_feed = []  # silent-ok: gate fails open below on empty feed
+            span_issues, span_warnings = _audit_digest_archive_span(
+                details, publish_at or datetime.now(timezone.utc).isoformat(), _digest_feed,
+            )
+            for _sw in span_warnings:
+                print(f"  ⚠️ digest archive-span warning: {_sw}")
+            if span_issues:
+                _log_dedup_decision(
+                    str(self.reports_dir.parent),
+                    "block_digest_recap" if audit_strict else "warn_digest_recap",
+                    title, None, "; ".join(span_issues)[:300],
+                )
+                if audit_strict:
+                    issue_text = '\n  - '.join(span_issues)
+                    raise ValueError(
+                        f"daily_digest 是本週 recap 不是跨庫策展:\n  - {issue_text}\n"
+                        f"先由時事/宣告/現象訂主題，再從整個 archive 撈佐證；或 audit_strict=False 略過。"
+                    )
+                for issue in span_issues:
+                    print(f"  ⚠️ digest recap issue (audit_strict=False bypass): {issue}")
 
         # 2026-06-30 (boss): every general-audience reader article must carry a
         # 懶人包圖組 (lazypack) at the end. The publish_draft.py CLI gates this at

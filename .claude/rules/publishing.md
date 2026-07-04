@@ -42,6 +42,32 @@ paths:
 
 ## 發佈硬規則
 
+### 精選導讀 (daily_digest) 策展硬規則（2026-07-05 新增 — boss 反覆糾正 ≥4 次後升級為治理規則 + 機械 gate）
+
+**精選導讀不是本週研究 recap，是「先訂主題→從整庫找佐證」的主題策展。** 這條 boss 早就要求，
+但一直只寫在 `scripts/enqueue_daily_digest.py` 的 prompt 字串裡（沒進治理層、沒 enforcement），
+所以反覆被違反（2026-07-01 三次糾正 + 2026-07-05 再犯）。現升級為規則 + 機械 gate。
+
+**兩段流程（順序不可顛倒）**：
+1. **先由時事訂主題**：主題必須由『當下時事 / 重要宣告 / 熱門現象 / 熱門標的 / 一個具體投資議題』
+   驅動（例：「AI 資本支出爆增，選擇權市場怎麼定價？」「Fed 新主席放鷹，利率-波動率怎麼讀？」）。
+   **不是**挑一個純研究/方法論主題當標的，**也不是**從近期發過的文章反推主題。
+2. **再從整個 archive 撈佐證**：從 `storage/reports/feed.json` **全部時間、跨全庫** grep/jq 出
+   5-8 篇與該主題相關的文章，用它們**論述、回答主題訂出來的問題**。**所有引用文章都是為了回答
+   主題** —— 不是「這篇講 X、那篇講 Y」的並列摘要。**嚴禁只把這一兩週剛發的研究拿出來湊。**
+
+**機械 gate（enforcement owner = `publisher._audit_digest_archive_span`，publish 路徑內）**：
+- 檢查 `details.digest_articles`（佐證文章 slug）的**發佈日期跨度**。
+- 來源全部集中在**近兩週內（span < 14 天）→ 硬擋**（`block_digest_recap`，audit_strict 下 raise）：這是本週 recap。
+- span < 45 天或深庫來源（>30 天）< 2 篇 → **warn**（鼓勵挖更深，不擋）。
+- fail-open：slug 解析不到日期只 warn 不擋（per `dedup-gate-audit.md`）。
+- 校準過最近 5 期真實導讀（span 24-98 天）皆不誤擋；test: `tests/test_digest_archive_span_gate.py`。
+- **gate 只能量測「跨度」這個可機械化的維度**；「主題是否由時事驅動」無法機械判定，靠此規則 + 
+  `enqueue_daily_digest.py` prompt 約束，寫作時自我檢查。
+
+**其餘 digest 規格**（具名可帶走方法、inline 引用標源、圖表分工、金標竿範例）詳見
+`scripts/enqueue_daily_digest.py` 的 `DESCRIPTION`（單一詳細來源，不在此重複）。
+
 ### Audience Gate（2026-05-26 新增 — mile_d0d66405 incident）
 
 **`_infer_audience` 是 source of truth，agent 提供的 audience 只是 hint。**
