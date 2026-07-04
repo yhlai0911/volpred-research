@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1613,
+  "last_k_id": 1633,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -330,8 +330,18 @@
       "status": "reserved",
       "topic": "雜訊穩健已實現波動率估計量（Realized Kernel / Two-Scale RV / MedRV）對 HAR 預測力的增量：本機 5-min 資料重估** — 用本機已有 TAIFEX/SPY 5-min tick-derived 資料，實作 jump-robust MedRV 與 noise-robust Realized Kernel / Two-Scale RV，取代標準 5-min RV 作 HAR 輸入，OOS QLIKE/DM/Harvey 對比標準 RV-HAR baseline；與既有 OHLC candlestick estimator 題（line 1291）正交——這裡是 tick/5-min noise-robust kernel 估計量（來源：JBES/Journal of Econometrics 長期熱點 realized-measure microstructure noise correction，2025-26 仍持續有新 kernel 變體研究）。",
       "topic_hash": "5878bfece27f670f"
+    },
+    {
+      "claimed_at": "2026-07-04T21:11:16.857322+00:00",
+      "claimed_by": "hourly-05",
+      "k_id": "K1633",
+      "number": 1633,
+      "source_max": 1632,
+      "status": "reserved",
+      "topic": "VIX 破 30/40 抄底訊號迷思驗證（事件研究 SPY 前瞻報酬 vs baseline）",
+      "topic_hash": "599263e103c9e81a"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-03T00:00:02.177363+00:00"
+  "updated_at": "2026-07-04T21:11:16.857322+00:00"
 }

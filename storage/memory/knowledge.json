@@ -37659,5 +37659,27 @@
     "reviewer": "Codex CLI primary-path self-review PASS_WITH_LIMITATION",
     "source_task_id": "newroute_intraday_first_hour_myth",
     "feed_article_id": "mile_467226e7"
+  },
+  {
+    "item_id": "30b89038",
+    "category": "market_structure",
+    "content": "K1633：「VIX 破 30/40 就是抄底訊號」投資迷思驗證 = half_true_qualified。資料 SPY + ^VIX（yfinance，Close，SPY auto_adjust），1993-01-29..2026-07-02 共 8,413 交易日；VIX 由下往上首次穿越 30/35/40、距上一事件 >=20 交易日去叢集後 50/25/17 個事件。事件後前瞻報酬 excess（vs 無條件 baseline，同 H、同價格序列、同報酬定義）12 個 cell 中 11 個為正（方向近乎一致）；raw 5% HAC 顯著 4 個（thr30_H5, thr30_H60, thr35_H60, thr40_H60）。BH-FDR-5% 無任何 cell 個別存活；FDR-10% 存活 3 個（thr30_H5, thr35_H60, thr40_H60）。真正穩定的是 H60 三個月反轉溢酬且恐慌越深溢酬越大（+2.55% -> +4.89% -> +6.19%），而非散戶想像的短天期立刻反彈（H5/H10 除門檻30外多不顯著）；大半優勢來自 SPY 底層漂移（baseline H60 無條件勝率已 71.9%），恐慌帶來的增量真實但小。門檻 35/40 樣本小（25/17）統計脆弱，不可單挑最漂亮 cell。方法：HAC/Newey-West maxlags=H 主推論（K1355 重疊窗口穩健）+ lag0/lag1 雙進場防 lookahead + block bootstrap event-order placebo（次要診斷）+ BH-FDR 內建於 code；SEED=1629 逐位可復現。",
+    "evidence": [
+      "experiments/k1633/README.md",
+      "experiments/k1633/k1633.py",
+      "experiments/k1633/k1633_results.json",
+      "experiments/k1633/codex_review.md",
+      "experiments/k1633/fig1_forward_path.png",
+      "experiments/k1633/fig2_winrate.png",
+      "experiments/k1633/fig3_dist60.png"
+    ],
+    "confidence": 0.75,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1633",
+    "experiment_path": "experiments/k1633",
+    "k_id": "K1633",
+    "reviewer": "Codex (primary path) — CONDITIONAL_PASS; BH-FDR must-fix implemented in-code",
+    "source_task_id": "research_myth_vix_extreme_bottom_signal",
+    "created_at": "2026-07-05T05:22:53.617919"
   }
 ]

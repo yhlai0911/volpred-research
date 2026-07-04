@@ -1,0 +1,757 @@
+{
+  "experiment_id": "k1633",
+  "title": "VIX 破 30/40 是抄底訊號嗎 — 事件後 SPY 前瞻報酬 vs baseline",
+  "generated_at": "2026-07-04T21:19:54.215553+00:00",
+  "seed": 1629,
+  "data": {
+    "source": "yfinance ^VIX (Close, index level) + SPY (Close, auto_adjust=True div/split-adjusted)",
+    "period": "1993-01-29 .. 2026-07-02",
+    "n_trading_days": 8413,
+    "de_cluster_cooldown_trading_days": 20
+  },
+  "config": {
+    "thresholds": [
+      30,
+      35,
+      40
+    ],
+    "horizons": [
+      5,
+      10,
+      20,
+      60
+    ],
+    "n_bootstrap": 5000,
+    "entry": "signal-day close (lag0); robustness lag1",
+    "primary_inference": "HAC / Newey-West maxlags=H on event dummy (overlap-robust, K1355)",
+    "bootstrap_ci_note": "mean_boot95 and chart CI bands are event-ORDER resampling (block over the event series), secondary/diagnostic only; the overlap-robust primary inference is HAC, not the bootstrap CI",
+    "lag1_baseline_note": "robustness_entry_lag1.excess_mean_vs_baseline is measured against the lag0 unconditional baseline (baseline shifts <=1 trading day; difference negligible), used only as a same-close-artifact robustness check"
+  },
+  "baseline": {
+    "5": {
+      "n": 8408,
+      "win_rate": 0.5881303520456708,
+      "mean": 0.0023175221599379776,
+      "median": 0.0037574826311720377,
+      "std": 0.023779399885916448,
+      "p5": -0.03632217363367145,
+      "p95": 0.03661397463774569,
+      "mean_mdd": -0.015928977883611476,
+      "median_mdd": -0.010581985978573516
+    },
+    "10": {
+      "n": 8403,
+      "win_rate": 0.6185885993097703,
+      "mean": 0.004581012567149951,
+      "median": 0.007088351229238343,
+      "std": 0.03188868396430253,
+      "p5": -0.04780433410918362,
+      "p95": 0.049670689728816095,
+      "mean_mdd": -0.025858137272683008,
+      "median_mdd": -0.01873870403299538
+    },
+    "20": {
+      "n": 8393,
+      "win_rate": 0.65352079113547,
+      "mean": 0.009180765510891472,
+      "median": 0.014184124796597697,
+      "std": 0.04432099040207446,
+      "p5": -0.06552997376940713,
+      "p95": 0.06963105799941385,
+      "mean_mdd": -0.03922685334358685,
+      "median_mdd": -0.029255282651260983
+    },
+    "60": {
+      "n": 8353,
+      "win_rate": 0.7185442356039746,
+      "mean": 0.02736340298966155,
+      "median": 0.0356320464018971,
+      "std": 0.07291077005361418,
+      "p5": -0.10248318832065018,
+      "p95": 0.1262692817542344,
+      "mean_mdd": -0.07122952800527088,
+      "median_mdd": -0.055506128791589116
+    }
+  },
+  "events": {
+    "30": {
+      "n_events_raw_decluster": 50,
+      "event_dates": [
+        "1997-10-27",
+        "1997-12-24",
+        "1998-08-04",
+        "1998-12-14",
+        "1999-01-13",
+        "1999-02-17",
+        "2000-04-14",
+        "2000-10-12",
+        "2000-12-20",
+        "2001-03-12",
+        "2001-09-07",
+        "2001-10-29",
+        "2002-07-09",
+        "2002-08-27",
+        "2002-11-04",
+        "2002-12-05",
+        "2003-01-24",
+        "2003-03-03",
+        "2007-08-15",
+        "2007-11-12",
+        "2008-01-22",
+        "2008-03-14",
+        "2008-09-15",
+        "2009-05-21",
+        "2009-06-22",
+        "2009-10-30",
+        "2010-05-06",
+        "2010-06-04",
+        "2011-08-04",
+        "2011-10-17",
+        "2011-12-08",
+        "2015-08-24",
+        "2018-02-05",
+        "2018-12-21",
+        "2020-02-27",
+        "2020-05-12",
+        "2020-06-11",
+        "2020-07-13",
+        "2020-09-03",
+        "2020-10-26",
+        "2021-01-27",
+        "2021-12-01",
+        "2022-01-25",
+        "2022-02-23",
+        "2022-04-26",
+        "2022-06-13",
+        "2022-09-26",
+        "2024-08-05",
+        "2025-04-03",
+        "2026-03-27"
+      ],
+      "horizons": {
+        "5": {
+          "n_events": 50,
+          "win_rate": 0.7,
+          "win_rate_wilson95": [
+            0.562493877226366,
+            0.8089661091039063
+          ],
+          "baseline_win_rate": 0.5881303520456708,
+          "mean": 0.014922322509945594,
+          "mean_boot95": [
+            0.0027286095848163923,
+            0.024882830092516767
+          ],
+          "median": 0.023570608631114376,
+          "std": 0.033682846475118156,
+          "p5": -0.041809581929987114,
+          "p95": 0.05345249464392514,
+          "mean_mdd": -0.025512026558366402,
+          "median_mdd": -0.02216162347520445,
+          "baseline_mean": 0.0023175221599379776,
+          "excess_mean_vs_baseline": 0.012604800350007616,
+          "hac_coef_event_vs_nonevent": 0.012680205951527359,
+          "hac_tstat": 2.7079869259182634,
+          "hac_pvalue": 0.006769268902770464,
+          "placebo_p_one_sided_event_gt_random": 0.0,
+          "placebo_p_two_sided": 0.0002
+        },
+        "10": {
+          "n_events": 50,
+          "win_rate": 0.64,
+          "win_rate_wilson95": [
+            0.5014076201030195,
+            0.7586143703281711
+          ],
+          "baseline_win_rate": 0.6185885993097703,
+          "mean": 0.01106013622712855,
+          "mean_boot95": [
+            -0.002887238251664277,
+            0.023846909679025228
+          ],
+          "median": 0.026351683215950716,
+          "std": 0.05355204688007881,
+          "p5": -0.06204686743655427,
+          "p95": 0.08149656659606933,
+          "mean_mdd": -0.044205181043438554,
+          "median_mdd": -0.03631043668884698,
+          "baseline_mean": 0.004581012567149951,
+          "excess_mean_vs_baseline": 0.006479123659978599,
+          "hac_coef_event_vs_nonevent": 0.0065179068735545685,
+          "hac_tstat": 0.892174923479344,
+          "hac_pvalue": 0.3722991809342161,
+          "placebo_p_one_sided_event_gt_random": 0.0716,
+          "placebo_p_two_sided": 0.1452
+        },
+        "20": {
+          "n_events": 50,
+          "win_rate": 0.76,
+          "win_rate_wilson95": [
+            0.6258705062480763,
+            0.8570274759812779
+          ],
+          "baseline_win_rate": 0.65352079113547,
+          "mean": 0.022536643083420148,
+          "mean_boot95": [
+            0.009527978802701247,
+            0.03495952947872297
+          ],
+          "median": 0.0357303952964344,
+          "std": 0.05917522552836282,
+          "p5": -0.0975039975930665,
+          "p95": 0.0922149112713301,
+          "mean_mdd": -0.06194343022242249,
+          "median_mdd": -0.04738136709353258,
+          "baseline_mean": 0.009180765510891472,
+          "excess_mean_vs_baseline": 0.013355877572528676,
+          "hac_coef_event_vs_nonevent": 0.01343591998876106,
+          "hac_tstat": 1.7206548688094834,
+          "hac_pvalue": 0.08531347051123209,
+          "placebo_p_one_sided_event_gt_random": 0.0136,
+          "placebo_p_two_sided": 0.032
+        },
+        "60": {
+          "n_events": 50,
+          "win_rate": 0.74,
+          "win_rate_wilson95": [
+            0.6044657801100008,
+            0.8412862034863262
+          ],
+          "baseline_win_rate": 0.7185442356039746,
+          "mean": 0.052895029155122994,
+          "mean_boot95": [
+            0.033268007612564446,
+            0.07217456336797222
+          ],
+          "median": 0.06487632450506153,
+          "std": 0.09101640691914908,
+          "p5": -0.08841312496017516,
+          "p95": 0.1800143924269278,
+          "mean_mdd": -0.09257270478886875,
+          "median_mdd": -0.07325080844157655,
+          "baseline_mean": 0.02736340298966155,
+          "excess_mean_vs_baseline": 0.025531626165461445,
+          "hac_coef_event_vs_nonevent": 0.025685375570287813,
+          "hac_tstat": 2.096981155848325,
+          "hac_pvalue": 0.03599524351104364,
+          "placebo_p_one_sided_event_gt_random": 0.0036,
+          "placebo_p_two_sided": 0.011
+        }
+      }
+    },
+    "35": {
+      "n_events_raw_decluster": 25,
+      "event_dates": [
+        "1997-10-30",
+        "1998-08-27",
+        "1998-09-29",
+        "2001-09-17",
+        "2001-10-17",
+        "2002-07-15",
+        "2002-09-03",
+        "2002-10-02",
+        "2008-09-17",
+        "2009-04-20",
+        "2010-05-07",
+        "2011-08-08",
+        "2011-09-06",
+        "2011-11-09",
+        "2015-08-24",
+        "2018-02-05",
+        "2018-12-24",
+        "2020-02-27",
+        "2020-05-01",
+        "2020-06-11",
+        "2020-10-28",
+        "2021-01-27",
+        "2022-03-07",
+        "2024-08-05",
+        "2025-04-04"
+      ],
+      "horizons": {
+        "5": {
+          "n_events": 25,
+          "win_rate": 0.76,
+          "win_rate_wilson95": [
+            0.5656994004476144,
+            0.8850384226967327
+          ],
+          "baseline_win_rate": 0.5881303520456708,
+          "mean": 0.012173535446389492,
+          "mean_boot95": [
+            -0.00944644964792881,
+            0.03047258040651413
+          ],
+          "median": 0.023638291426008706,
+          "std": 0.04423684589042776,
+          "p5": -0.060677560689219125,
+          "p95": 0.06541938158915644,
+          "mean_mdd": -0.031214309637218357,
+          "median_mdd": -0.024356266158179873,
+          "baseline_mean": 0.0023175221599379776,
+          "excess_mean_vs_baseline": 0.009856013286451516,
+          "hac_coef_event_vs_nonevent": 0.009885406144874634,
+          "hac_tstat": 1.142924625981461,
+          "hac_pvalue": 0.25306988704516054,
+          "placebo_p_one_sided_event_gt_random": 0.0164,
+          "placebo_p_two_sided": 0.036
+        },
+        "10": {
+          "n_events": 25,
+          "win_rate": 0.68,
+          "win_rate_wilson95": [
+            0.48409913734576715,
+            0.8279501248310887
+          ],
+          "baseline_win_rate": 0.6185885993097703,
+          "mean": 0.013522411060295494,
+          "mean_boot95": [
+            -0.0006744610374449447,
+            0.028575311852209868
+          ],
+          "median": 0.0170202043803811,
+          "std": 0.056328774826445556,
+          "p5": -0.052996171180297647,
+          "p95": 0.09135475044763436,
+          "mean_mdd": -0.05677370512704653,
+          "median_mdd": -0.04273060480031976,
+          "baseline_mean": 0.004581012567149951,
+          "excess_mean_vs_baseline": 0.008941398493145543,
+          "hac_coef_event_vs_nonevent": 0.008968079677476919,
+          "hac_tstat": 0.8239285519024765,
+          "hac_pvalue": 0.40998015606497706,
+          "placebo_p_one_sided_event_gt_random": 0.0782,
+          "placebo_p_two_sided": 0.1596
+        },
+        "20": {
+          "n_events": 25,
+          "win_rate": 0.76,
+          "win_rate_wilson95": [
+            0.5656994004476144,
+            0.8850384226967327
+          ],
+          "baseline_win_rate": 0.65352079113547,
+          "mean": 0.027615439652158312,
+          "mean_boot95": [
+            0.0030764212795966013,
+            0.05155968473119989
+          ],
+          "median": 0.04213396722657059,
+          "std": 0.07738416536632363,
+          "p5": -0.1038786134320643,
+          "p95": 0.11423577444481035,
+          "mean_mdd": -0.07585231852530448,
+          "median_mdd": -0.06073389493630266,
+          "baseline_mean": 0.009180765510891472,
+          "excess_mean_vs_baseline": 0.01843467414126684,
+          "hac_coef_event_vs_nonevent": 0.01848974905206175,
+          "hac_tstat": 1.2613082406460157,
+          "hac_pvalue": 0.20719781335636678,
+          "placebo_p_one_sided_event_gt_random": 0.0134,
+          "placebo_p_two_sided": 0.0372
+        },
+        "60": {
+          "n_events": 25,
+          "win_rate": 0.84,
+          "win_rate_wilson95": [
+            0.6534598601976183,
+            0.9359665239142201
+          ],
+          "baseline_win_rate": 0.7185442356039746,
+          "mean": 0.0762223243616122,
+          "mean_boot95": [
+            0.05016932058041694,
+            0.10281979322230386
+          ],
+          "median": 0.09238568016913673,
+          "std": 0.10165022719988612,
+          "p5": -0.10466701736227227,
+          "p95": 0.193494582693217,
+          "mean_mdd": -0.09881383317295658,
+          "median_mdd": -0.06989493032051064,
+          "baseline_mean": 0.02736340298966155,
+          "excess_mean_vs_baseline": 0.04885892137195066,
+          "hac_coef_event_vs_nonevent": 0.049005592005271895,
+          "hac_tstat": 2.6162611581183612,
+          "hac_pvalue": 0.008889853429387097,
+          "placebo_p_one_sided_event_gt_random": 0.0002,
+          "placebo_p_two_sided": 0.0012
+        }
+      }
+    },
+    "40": {
+      "n_events_raw_decluster": 17,
+      "event_dates": [
+        "1998-08-31",
+        "1998-09-30",
+        "2001-09-17",
+        "2002-07-22",
+        "2002-09-19",
+        "2008-09-29",
+        "2009-01-07",
+        "2009-04-06",
+        "2010-05-07",
+        "2011-08-08",
+        "2011-09-22",
+        "2015-08-24",
+        "2020-02-28",
+        "2020-04-15",
+        "2020-06-11",
+        "2020-10-28",
+        "2025-04-04"
+      ],
+      "horizons": {
+        "5": {
+          "n_events": 17,
+          "win_rate": 0.7647058823529411,
+          "win_rate_wilson95": [
+            0.5273775411082839,
+            0.9044511092832406
+          ],
+          "baseline_win_rate": 0.5881303520456708,
+          "mean": 0.018174535769258027,
+          "mean_boot95": [
+            -0.0019198757781560905,
+            0.03597223377504789
+          ],
+          "median": 0.023638291426008706,
+          "std": 0.04745778493611708,
+          "p5": -0.06173265035699675,
+          "p95": 0.07799421338473243,
+          "mean_mdd": -0.03764513408488161,
+          "median_mdd": -0.030310939531377645,
+          "baseline_mean": 0.0023175221599379776,
+          "excess_mean_vs_baseline": 0.01585701360932005,
+          "hac_coef_event_vs_nonevent": 0.015889139605191453,
+          "hac_tstat": 1.4276228064131875,
+          "hac_pvalue": 0.1534004555992034,
+          "placebo_p_one_sided_event_gt_random": 0.0032,
+          "placebo_p_two_sided": 0.0092
+        },
+        "10": {
+          "n_events": 17,
+          "win_rate": 0.6470588235294118,
+          "win_rate_wilson95": [
+            0.4129996672121182,
+            0.826905138560951
+          ],
+          "baseline_win_rate": 0.6185885993097703,
+          "mean": 0.00414416191012872,
+          "mean_boot95": [
+            -0.020004279931716978,
+            0.027828556168957585
+          ],
+          "median": 0.0170202043803811,
+          "std": 0.05470489369159545,
+          "p5": -0.09022825977667807,
+          "p95": 0.08556196512218292,
+          "mean_mdd": -0.07565933787524581,
+          "median_mdd": -0.06332275595244208,
+          "baseline_mean": 0.004581012567149951,
+          "excess_mean_vs_baseline": -0.00043685065702123074,
+          "hac_coef_event_vs_nonevent": -0.00043773623550553774,
+          "hac_tstat": -0.034479842495997795,
+          "hac_pvalue": 0.9724945161476238,
+          "placebo_p_one_sided_event_gt_random": 0.5294,
+          "placebo_p_two_sided": 0.9608
+        },
+        "20": {
+          "n_events": 17,
+          "win_rate": 0.7647058823529411,
+          "win_rate_wilson95": [
+            0.5273775411082839,
+            0.9044511092832406
+          ],
+          "baseline_win_rate": 0.65352079113547,
+          "mean": 0.025499169659663975,
+          "mean_boot95": [
+            -0.005765657303546624,
+            0.057244265116799975
+          ],
+          "median": 0.04975362613425727,
+          "std": 0.1011863839859588,
+          "p5": -0.1609128217944739,
+          "p95": 0.12431134104791865,
+          "mean_mdd": -0.08733103332140381,
+          "median_mdd": -0.06380616982611709,
+          "baseline_mean": 0.009180765510891472,
+          "excess_mean_vs_baseline": 0.016318404148772503,
+          "hac_coef_event_vs_nonevent": 0.016351524118988846,
+          "hac_tstat": 0.6999079183092728,
+          "hac_pvalue": 0.4839848120396749,
+          "placebo_p_one_sided_event_gt_random": 0.0572,
+          "placebo_p_two_sided": 0.1222
+        },
+        "60": {
+          "n_events": 17,
+          "win_rate": 0.8823529411764706,
+          "win_rate_wilson95": [
+            0.6566315750229009,
+            0.967120919987079
+          ],
+          "baseline_win_rate": 0.7185442356039746,
+          "mean": 0.0893006909217245,
+          "mean_boot95": [
+            0.05228701486113304,
+            0.12315459832241435
+          ],
+          "median": 0.09238568016913673,
+          "std": 0.11297653455992643,
+          "p5": -0.09526596219171218,
+          "p95": 0.2332589775822711,
+          "mean_mdd": -0.11755912853742914,
+          "median_mdd": -0.08900053695492949,
+          "baseline_mean": 0.02736340298966155,
+          "excess_mean_vs_baseline": 0.061937287932062955,
+          "hac_coef_event_vs_nonevent": 0.06206359957971611,
+          "hac_tstat": 2.3432392869499625,
+          "hac_pvalue": 0.019117117880113076,
+          "placebo_p_one_sided_event_gt_random": 0.0,
+          "placebo_p_two_sided": 0.0008
+        }
+      }
+    }
+  },
+  "robustness_entry_lag1": {
+    "30": {
+      "5": {
+        "n_events": 50,
+        "win_rate": 0.72,
+        "mean": 0.013765705985622816,
+        "excess_mean_vs_baseline": 0.011448183825684837,
+        "placebo_p_one_sided_event_gt_random": 0.0
+      },
+      "10": {
+        "n_events": 50,
+        "win_rate": 0.6,
+        "mean": 0.012511730976541551,
+        "excess_mean_vs_baseline": 0.0079307184093916,
+        "placebo_p_one_sided_event_gt_random": 0.0412
+      },
+      "20": {
+        "n_events": 50,
+        "win_rate": 0.7,
+        "mean": 0.018430733302854586,
+        "excess_mean_vs_baseline": 0.009249967791963114,
+        "placebo_p_one_sided_event_gt_random": 0.0696
+      },
+      "60": {
+        "n_events": 50,
+        "win_rate": 0.76,
+        "mean": 0.04983643703168067,
+        "excess_mean_vs_baseline": 0.02247303404201912,
+        "placebo_p_one_sided_event_gt_random": 0.0158
+      }
+    },
+    "35": {
+      "5": {
+        "n_events": 25,
+        "win_rate": 0.6,
+        "mean": 0.002634853045721517,
+        "excess_mean_vs_baseline": 0.0003173308857835392,
+        "placebo_p_one_sided_event_gt_random": 0.4754
+      },
+      "10": {
+        "n_events": 25,
+        "win_rate": 0.64,
+        "mean": 0.009827098661528573,
+        "excess_mean_vs_baseline": 0.005246086094378622,
+        "placebo_p_one_sided_event_gt_random": 0.2044
+      },
+      "20": {
+        "n_events": 25,
+        "win_rate": 0.76,
+        "mean": 0.020162299640497906,
+        "excess_mean_vs_baseline": 0.010981534129606434,
+        "placebo_p_one_sided_event_gt_random": 0.103
+      },
+      "60": {
+        "n_events": 25,
+        "win_rate": 0.84,
+        "mean": 0.0703615856940055,
+        "excess_mean_vs_baseline": 0.04299818270434395,
+        "placebo_p_one_sided_event_gt_random": 0.001
+      }
+    },
+    "40": {
+      "5": {
+        "n_events": 17,
+        "win_rate": 0.47058823529411764,
+        "mean": -0.0016760241899251784,
+        "excess_mean_vs_baseline": -0.003993546349863156,
+        "placebo_p_one_sided_event_gt_random": 0.7588
+      },
+      "10": {
+        "n_events": 17,
+        "win_rate": 0.5882352941176471,
+        "mean": -0.006398661603058072,
+        "excess_mean_vs_baseline": -0.010979674170208023,
+        "placebo_p_one_sided_event_gt_random": 0.923
+      },
+      "20": {
+        "n_events": 17,
+        "win_rate": 0.7647058823529411,
+        "mean": 0.02983900852455906,
+        "excess_mean_vs_baseline": 0.020658243013667588,
+        "placebo_p_one_sided_event_gt_random": 0.0222
+      },
+      "60": {
+        "n_events": 17,
+        "win_rate": 0.7647058823529411,
+        "mean": 0.07772776052733466,
+        "excess_mean_vs_baseline": 0.050364357537673106,
+        "placebo_p_one_sided_event_gt_random": 0.0012
+      }
+    }
+  },
+  "verdict": {
+    "per_cell": {
+      "thr30_H5": {
+        "excess_mean": 0.012604800350007616,
+        "win_vs_base": 0.11186964795432919,
+        "hac_p": 0.006769268902770464,
+        "significant_5pct": true,
+        "direction": "higher",
+        "bh_qvalue": 0.05333912057632258,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": true
+      },
+      "thr30_H10": {
+        "excess_mean": 0.006479123659978599,
+        "win_vs_base": 0.02141140069022973,
+        "hac_p": 0.3722991809342161,
+        "significant_5pct": false,
+        "direction": "higher",
+        "bh_qvalue": 0.49197618727797254,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": false
+      },
+      "thr30_H20": {
+        "excess_mean": 0.013355877572528676,
+        "win_vs_base": 0.10647920886453,
+        "hac_p": 0.08531347051123209,
+        "significant_5pct": false,
+        "direction": "higher",
+        "bh_qvalue": 0.20475232922695702,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": false
+      },
+      "thr30_H60": {
+        "excess_mean": 0.025531626165461445,
+        "win_vs_base": 0.021455764396025367,
+        "hac_p": 0.03599524351104364,
+        "significant_5pct": true,
+        "direction": "higher",
+        "bh_qvalue": 0.10798573053313093,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": false
+      },
+      "thr35_H5": {
+        "excess_mean": 0.009856013286451516,
+        "win_vs_base": 0.17186964795432924,
+        "hac_p": 0.25306988704516054,
+        "significant_5pct": false,
+        "direction": "higher",
+        "bh_qvalue": 0.3796048305677408,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": false
+      },
+      "thr35_H10": {
+        "excess_mean": 0.008941398493145543,
+        "win_vs_base": 0.06141140069022977,
+        "hac_p": 0.40998015606497706,
+        "significant_5pct": false,
+        "direction": "higher",
+        "bh_qvalue": 0.49197618727797254,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": false
+      },
+      "thr35_H20": {
+        "excess_mean": 0.01843467414126684,
+        "win_vs_base": 0.10647920886453,
+        "hac_p": 0.20719781335636678,
+        "significant_5pct": false,
+        "direction": "higher",
+        "bh_qvalue": 0.35519625146805733,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": false
+      },
+      "thr35_H60": {
+        "excess_mean": 0.04885892137195066,
+        "win_vs_base": 0.12145576439602535,
+        "hac_p": 0.008889853429387097,
+        "significant_5pct": true,
+        "direction": "higher",
+        "bh_qvalue": 0.05333912057632258,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": true
+      },
+      "thr40_H5": {
+        "excess_mean": 0.01585701360932005,
+        "win_vs_base": 0.17657553030727036,
+        "hac_p": 0.1534004555992034,
+        "significant_5pct": false,
+        "direction": "higher",
+        "bh_qvalue": 0.3068009111984068,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": false
+      },
+      "thr40_H10": {
+        "excess_mean": -0.00043685065702123074,
+        "win_vs_base": 0.028470224219641516,
+        "hac_p": 0.9724945161476238,
+        "significant_5pct": false,
+        "direction": "lower",
+        "bh_qvalue": 0.9724945161476238,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": false
+      },
+      "thr40_H20": {
+        "excess_mean": 0.016318404148772503,
+        "win_vs_base": 0.11118509121747111,
+        "hac_p": 0.4839848120396749,
+        "significant_5pct": false,
+        "direction": "higher",
+        "bh_qvalue": 0.527983431316009,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": false
+      },
+      "thr40_H60": {
+        "excess_mean": 0.061937287932062955,
+        "win_vs_base": 0.16380870557249594,
+        "hac_p": 0.019117117880113076,
+        "significant_5pct": true,
+        "direction": "higher",
+        "bh_qvalue": 0.0764684715204523,
+        "bh_fdr_5pct": false,
+        "bh_fdr_10pct": true
+      }
+    },
+    "summary": {
+      "n_cells": 12,
+      "n_significant_5pct": 4,
+      "n_significant_positive": 4
+    },
+    "multiple_testing": {
+      "method": "Benjamini-Hochberg FDR over the 12 per-cell lag0 HAC p-values (3 thresholds x 4 horizons)",
+      "n_cells": 12,
+      "n_cells_positive_excess": 11,
+      "n_cells_raw_sig_5pct": 4,
+      "raw_sig_cells": [
+        "thr30_H5",
+        "thr30_H60",
+        "thr35_H60",
+        "thr40_H60"
+      ],
+      "bh_fdr_0.05_survivors": [],
+      "bh_fdr_0.10_survivors": [
+        "thr30_H5",
+        "thr35_H60",
+        "thr40_H60"
+      ],
+      "myth_verdict": "half_true_qualified",
+      "headline": "Direction is near-universal: 11/12 cells show positive forward excess return after a VIX spike. Raw 5% significance at 4 cells (thr30_H5, thr30_H60, thr35_H60, thr40_H60). Under strict FDR-5% multiple-testing correction NONE survive individually; under FDR-10% 3 survive (thr30_H5, thr35_H60, thr40_H60). The panic-entry edge is real in direction but small: it mostly rides SPY's baseline upward drift, and the durable component is a slow 3-month (H60) reversion premium that scales with panic depth, not an instant bounce. Statistically fragile at thresholds 35/40 where N is small (25 / 17 events).",
+      "note": "Baseline forward win-rates are already high (SPY drifts up: H5 58.8%, H60 71.9%), so 'buy the panic' mostly rides that drift; the incremental edge over random entry is real in direction but small and multiple-testing-fragile. Retail framing ('VIX>30 = instant bounce') is NOT supported at short horizons except threshold-30 H5; the durable pattern is a 3-month reversion premium that scales with panic depth."
+    }
+  }
+}

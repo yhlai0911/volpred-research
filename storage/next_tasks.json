@@ -49187,7 +49187,7 @@
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「VIX 破 30/40 就是抄底訊號」恐慌極值進場的後續勝率與報酬分布",
     "description": "驗證熱門說法「恐慌指數飆到 30/40 就該進場」。用 ^VIX + SPY，事件定義 VIX 首次突破 30 / 35 / 40 門檻日，計算進場後 5/10/20/60 日 SPY 報酬的勝率、平均、分布與最大回撤，對照無條件基準。reader-facing 極高辨識度；避免 lookahead，訊號 shift(1)。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49230,6 +49230,12 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-04T21:23:22.373491+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
       }
     ],
     "started_at": "2026-07-04T20:12:07.839333+00:00",
@@ -49237,14 +49243,16 @@
     "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "hourly-04",
     "claimed_at": "2026-07-04T20:11:57.639862+00:00",
-    "claim_session_id": "f057ed70de25"
+    "claim_session_id": "f057ed70de25",
+    "completed_at": "2026-07-04T21:23:22.373262+00:00",
+    "result": "K1633（原 worktree 誤用已占用的 k1629 編號，改分配 K1633）：VIX 破 30/40 抄底迷思驗證 half_true_qualified。Codex CONDITIONAL_PASS，BH-FDR 已內建於 code 自足復現。FDR-5% 無存活 / FDR-10% 3 存活；真正穩定的是 H60 三個月反轉溢酬非短彈。knowledge K1633 已寫。"
   },
   {
     "id": "research_myth_sell_in_may_tw_us",
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「Sell in May and go away」五月賣出效應近 15 年在台股/美股還成立嗎？",
     "description": "驗證經典季節性都市傳說。用 SPY/^TWII 近 15 年，比較 5-10 月 vs 11-4 月的月報酬與 Sharpe，做正式季節性檢定（不是看圖）。注意與已做過的 VT 季節性 NULL（K80）區隔 — 這是 calendar-month 買賣時點效應，非 VT 策略。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49256,9 +49264,6 @@
       "investment-urban-legend"
     ],
     "created_at": "2026-07-04T14:40:15+00:00",
-    "claimed_by": "hourly-02",
-    "claimed_at": "2026-07-04T18:09:54.616462+00:00",
-    "claim_session_id": "a8895ba62085",
     "status_history": [
       {
         "ts": "2026-07-04T18:09:54.616783+00:00",
@@ -49271,9 +49276,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-04T20:50:00.990305+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-02",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-04T18:10:14.565907+00:00"
+    "started_at": "2026-07-04T18:10:14.565907+00:00",
+    "last_released_at": "2026-07-04T20:50:00.990296+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "research_myth_tsmc_sneeze_market_cold",
