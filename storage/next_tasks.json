@@ -1,5 +1,15 @@
 [
   {
+    "id": "platform_ops-drought-hardening-20260704",
+    "task_type": "platform_ops",
+    "priority": "P1",
+    "source": "boss-telegram-msg110",
+    "status": "pending",
+    "created_at": "2026-07-04T04:51:09.550232+00:00",
+    "title": "硬化發文脫班補救：force-release 放 0 時不得靜默",
+    "description": "根因（2026-07-04 09:00 check_alerts.log line 30492）：reader-facing 脫班 8.49h，auto-remediation 觸發但 force_release=0 且 refill_fresh=0 — 靜默放 0，導致主線程只能拿「沒適合文章／主題重複／明早再補」當藉口（老闆 telegram msg 86/89/92/95/110 抱怨）。_maybe_drought_release 只釋出『內容乾淨、僅因相似度被 dedup 擋』的 reader-facing draft；當池裡只有 research 稿或 arc-dup 時回 None，refill 又回 0，整條 ladder 無聲失敗。\n\n硬化要求（single owner = scripts/remediate_publish_drought.py + src/volpred/ops/content.py._maybe_drought_release）：\n1. force_release==0 AND refill_fresh==0 時，不得回 no-op；改為 (a) 立即派一篇 fresh reader-facing daily_article（emergency 生文）或 (b) 若無法即時生文，升級成 CRITICAL alert（非 info）並 telegram-send 通知老闆，禁止靜默 skip。\n2. refill 目標補的必須是 reader-facing（audience!=research）題，否則 drought 補救永遠拿不到可放的稿。\n3. Regression test：模擬『池內只有 research draft + 脫班』→ 斷言 ladder 不回 0/0（tests/test_remediate_publish_drought.py 補 case）。\n研究誠實：改流程不改資料。完成含 build/test 通過 + 線上驗證下一次 drought 自癒。"
+  },
+  {
     "id": "platform_ops_dispatch_pool_dry_diagnostic_20260704",
     "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
     "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
@@ -47986,5 +47996,97 @@
     "description": "症狀:每次 publish 的 mirror sync 都回 HTTP 401 Unauthorized(feed.json + 逐篇文章;log 出現 44+ 次)。\n\n已完成診斷(2026-07-04 hourly-12):\n- OPS_ADMIN_TOKEN 在 .env.local 有設(已設定;不記錄任何 token 片段以免 secret 進 VCS),ops_admin_headers() 正確送 `x-ops-key`(src/volpred/mirror_auth.py)。\n- mirror URL = VOLPRED_MIRROR_URL = mirror-api.zeabur.app;PUT 到 /api/sync/feed.json 與 /api/sync/<article>。\n- server 對此 token 值回 401 → **token 值 drift**:本地 .env.local 的 OPS_ADMIN_TOKEN 與 mirror-api service 端 env 的值不一致(自 2026-06-11 fix 後某時點起漂移)。\n- 這是 2026-06-11 'mirror 靜默 401' 的復發(root cause 不同:6/11 是 caller 沒帶 token,現在是 token 值不符)。error_log 3957 行有背景。\n\n嚴重度:LOW。mirror API 只是 replica;前端 canonical 讀 Supabase(publish 時 Supabase sync 正常),live 站點與讀者端不受影響。\n\n修法(擇一,需 Zeabur service env 存取):\n(a) 讀 mirror-api service 當前 OPS_ADMIN_TOKEN → 寫回本地 .env.local(若 server 為 source of truth);或\n(b) 把 mirror-api service 的 Zeabur env OPS_ADMIN_TOKEN 設成 .env.local 的值(若本地為 source of truth)。\n驗證:帶 x-ops-key 對 /api/sync/feed.json 做 PUT → 200;重跑 `uv run volpred ops sync-all` 確認 articles synced。\n禁止:不 silent 吞 401(已 loud print),不手改歷史資料繞過。\n可用 zeabur MCP 讀/設 service env(審慎,確認 source of truth 方向再改)。",
     "source": "hourly-12_mirror_401_diagnosis",
     "created_at": "2026-07-04T04:30:09.707627+00:00"
+  },
+  {
+    "id": "telegram-110",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-04T04:45:11.058634+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 110）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻處理修正完成，不要再讓我看到這種錯誤\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-04T04:45:37.965470+00:00",
+    "claim_session_id": "a86c139135c0",
+    "status_history": [
+      {
+        "ts": "2026-07-04T04:45:37.965732+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-04T04:51:38.011202+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-04T04:51:38.010914+00:00"
+  },
+  {
+    "id": "research_rv_forecast_reconciliation_horizon_1d_5d_22d_por",
+    "title": "研究 backlog fallback: RV 預測的 forecast reconciliation：跨 horizon（1d/5d/22d）與跨截面（portfolio vs 成分）強制一致性是否免費改善全部預測",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: RV 預測的 forecast reconciliation：跨 horizon（1d/5d/22d）與跨截面（portfolio vs 成分）強制一致性是否免費改善全部預測 — 本機 5-min SPY/TAIFEX RV + yfinance ETF panel；各自跑 HAR@1d/5d/22d 與 portfolio/成分-level variance forecast，MinT/temporal-hierarchy reconciliation 調和後 DM per-horizon 檢定（IJF 2024 reconciliation review + JFEC intraday-d | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "rv_forecast_reconciliation_horizon_1d_5d_22d_por",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-04T04:52:57+00:00"
+  },
+  {
+    "id": "research_rv_long_memory_level_shifts_break_robust_vs_arfi",
+    "title": "研究 backlog fallback: RV 持續性是真 long memory 還是 level shifts 假象：break-robust 模型 vs ARFIMA/HAR/rough 的識別與預測含意",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: RV 持續性是真 long memory 還是 level shifts 假象：break-robust 模型 vs ARFIMA/HAR/rough 的識別與預測含意 — SPY 2000-2026 + TAIEX 長樣本 log-RV，估 random-level-shift + spurious-memory 檢定，shift-adjusted 預測 vs HAR/ARFIMA 對比；與 #131（roughness 穩定性）區分：問 persistence 來源識別非粗糙度估計（IJTAF 2025 rough vol survey + JoE spurious-long-memory | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "rv_long_memory_level_shifts_break_robust_vs_arfi",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-04T04:52:57+00:00"
+  },
+  {
+    "id": "research_n_partial_day_rv",
+    "title": "研究 backlog fallback: 部分日資訊的價值曲線：開盤後 N 小時的 partial-day RV 何時就「夠了」預測明天",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 部分日資訊的價值曲線：開盤後 N 小時的 partial-day RV 何時就「夠了」預測明天 — 本機 5-min SPY/TAIFEX，partial-day RV(10:30/12:00/14:00/收盤) 逐步 HAR nowcast，畫「資訊到達→OOS QLIKE 改善」曲線找邊際價值歸零點；直接回饋 VT 執行時點（IJF 2025 intraday spot vol + JFEC intraday-decomposition 線）。與 #24（跨資產 feature）/#166（乘法 intraday GARCH spec）不同——這是資訊時點 vs 預測價值的 timing  | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "n_partial_day_rv",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-04T04:52:57+00:00"
+  },
+  {
+    "id": "research_predictor_zoo_30_predictor_romano_wolf_fdr_oos",
+    "title": "研究 backlog fallback: 波動率 predictor zoo 多重檢定總清算：平台 30+ 已試外生 predictor 的 Romano-Wolf/FDR 統一 OOS 審計",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 波動率 predictor zoo 多重檢定總清算：平台 30+ 已試外生 predictor 的 Romano-Wolf/FDR 統一 OOS 審計 — 重用 1400+ K 中所有「外生變數→RV」實驗（AI 電力/PM2.5/GPR/EPU/credit spread/穩定幣…），統一 pipeline 重跑 + stepdown FWER/FDR，回答「校正後幾個倖存」；天然 methodology 論文素材（Goyal-Welch-Zafirov 2024 equity-premium 總清算 + JF/RFS multiple-testing 主流線；波動率端沒人做 Welch-G | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "predictor_zoo_30_predictor_romano_wolf_fdr_oos",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-04T04:52:57+00:00"
   }
 ]
