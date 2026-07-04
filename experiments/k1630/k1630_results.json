@@ -1,0 +1,593 @@
+{
+  "experiment_id": "k1630",
+  "title": "Sell in May / Halloween Indicator \u2014 TW & US, full sample vs last 15 years",
+  "generated_at": "2026-07-04T18:17:02.530725+00:00",
+  "seed": 1630,
+  "method": {
+    "return_type": "simple calendar-month returns (month-end resample, pct_change)",
+    "winter_half_months": [
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "last15y_start": "2011-01-01",
+    "hac": "Newey-West; primary lag = floor(4*(T/100)^(2/9)); robustness L=12",
+    "bootstrap": "circular block bootstrap, block=12 months, 2000 reps, seed=1630",
+    "strategy": "Halloween timing = hold index Nov-Apr, cash(0%) May-Oct; vs buy-and-hold; entry/exit at month-end close",
+    "cash_rate_note": "cash=0% (conservative for Halloween; using T-bill would raise Halloween-strategy return)"
+  },
+  "data_provenance": {
+    "US_SP500": "^GSPC daily Close, snapshot of experiments/k1410/data/GSPC.csv",
+    "TW_TAIEX": "^TWII daily Close, snapshot of experiments/k1410/data/TWII.csv",
+    "US_SPY_ETF": "SPY AdjClose from data/cache/price_cache.db (2016+ only)",
+    "TW_0050_ETF": "0050.TW AdjClose from data/cache/price_cache.db (2009+)"
+  },
+  "verdict": {
+    "US_SP500": {
+      "full": {
+        "beta_monthly_pp": 0.404,
+        "beta_ann_pp": 4.85,
+        "p_hac_auto": 0.141,
+        "significant_5pct_positive": false,
+        "boot_ci95_monthly_pp": [
+          -0.134,
+          0.9
+        ],
+        "boot_ci_excludes_zero": false
+      },
+      "last15y": {
+        "beta_monthly_pp": 0.235,
+        "beta_ann_pp": 2.82,
+        "p_hac_auto": 0.6695,
+        "significant_5pct_positive": false,
+        "boot_ci95_monthly_pp": [
+          -0.817,
+          1.181
+        ],
+        "boot_ci_excludes_zero": false
+      }
+    },
+    "TW_TAIEX": {
+      "full": {
+        "beta_monthly_pp": 2.089,
+        "beta_ann_pp": 25.07,
+        "p_hac_auto": 0.0049,
+        "significant_5pct_positive": true,
+        "boot_ci95_monthly_pp": [
+          0.572,
+          3.669
+        ],
+        "boot_ci_excludes_zero": true
+      },
+      "last15y": {
+        "beta_monthly_pp": 1.063,
+        "beta_ann_pp": 12.76,
+        "p_hac_auto": 0.1469,
+        "significant_5pct_positive": false,
+        "boot_ci95_monthly_pp": [
+          -0.441,
+          2.447
+        ],
+        "boot_ci_excludes_zero": false
+      }
+    },
+    "summary": "Halloween effect: sign (Nov-Apr minus May-Oct monthly mean) and 5% HAC significance per market/sample. See per-market blocks; 'significant_5pct_positive' is the primary verdict flag."
+  },
+  "results": {
+    "US_SP500": {
+      "asset": "US_SP500",
+      "series_label": "S&P 500 price index (^GSPC) daily Close",
+      "data_start": "1928-01-31",
+      "data_end": "2026-05-31",
+      "full": {
+        "period": "1928-01-31..2026-05-31",
+        "n_months_total": 1181,
+        "nov_apr": {
+          "n": 592,
+          "mean_monthly": 0.008587499832404128,
+          "std_monthly": 0.04870744551415585,
+          "mean_ann_pct": 10.304999798884953,
+          "sharpe_ann": 0.6107479405952563
+        },
+        "may_oct": {
+          "n": 589,
+          "mean_monthly": 0.004548855278508827,
+          "std_monthly": 0.05762234610065973,
+          "mean_ann_pct": 5.458626334210592,
+          "sharpe_ann": 0.27346503541843664
+        },
+        "hac_regression": {
+          "beta_mean_diff_monthly": 0.004038644553895296,
+          "beta_ann_pct": 4.846373464674356,
+          "nw_lag_auto": 6,
+          "se_hac_auto": 0.002743160141174066,
+          "t_hac_auto": 1.4722598558051248,
+          "p_hac_auto": 0.14095071940546183,
+          "se_hac_l12": 0.00274765872169779,
+          "t_hac_l12": 1.4698494110650686,
+          "p_hac_l12": 0.14160254342106807
+        },
+        "welch_ttest": {
+          "t": 1.3004429225727328,
+          "p": 0.19371082052277858
+        },
+        "block_bootstrap": {
+          "point_mean_diff": 0.004038644553895301,
+          "boot_median": 0.0040619667504052746,
+          "ci95_low": -0.0013379560833667037,
+          "ci95_high": 0.009004957273840023,
+          "reps_used": 2000,
+          "block_len": 12,
+          "ci_excludes_zero": false
+        },
+        "strategy": {
+          "halloween_timing": {
+            "cagr_pct": 4.533173567155968,
+            "ann_vol_pct": 12.033303481116095,
+            "sharpe_ann": 0.42927433780995583,
+            "mdd_pct": -71.36267461000992,
+            "final_wealth_mult": 78.51051716151383,
+            "n_months": 1181
+          },
+          "buy_and_hold": {
+            "cagr_pct": 6.353152324845279,
+            "ann_vol_pct": 18.482983319081303,
+            "sharpe_ann": 0.42676922649034704,
+            "mdd_pct": -86.02964378353498,
+            "final_wealth_mult": 429.22197758141914,
+            "n_months": 1181
+          }
+        },
+        "halloween_significant_5pct": false
+      },
+      "last15y": {
+        "period": "2011-01-31..2026-05-31",
+        "n_months_total": 185,
+        "nov_apr": {
+          "n": 94,
+          "mean_monthly": 0.011745469246340788,
+          "std_monthly": 0.042255413710263034,
+          "mean_ann_pct": 14.094563095608944,
+          "sharpe_ann": 0.9628943468826512
+        },
+        "may_oct": {
+          "n": 91,
+          "mean_monthly": 0.00939872356108716,
+          "std_monthly": 0.03971772329766692,
+          "mean_ann_pct": 11.278468273304593,
+          "sharpe_ann": 0.8197381613287943
+        },
+        "hac_regression": {
+          "beta_mean_diff_monthly": 0.0023467456852536246,
+          "beta_ann_pct": 2.8160948223043496,
+          "nw_lag_auto": 4,
+          "se_hac_auto": 0.005497540148010526,
+          "t_hac_auto": 0.42687195037636516,
+          "p_hac_auto": 0.6694725968396829,
+          "se_hac_l12": 0.005126033649570029,
+          "t_hac_l12": 0.4578092626158373,
+          "p_hac_l12": 0.6470894805821235
+        },
+        "welch_ttest": {
+          "t": 0.3893436911178822,
+          "p": 0.6974750025285892
+        },
+        "block_bootstrap": {
+          "point_mean_diff": 0.002346745685253627,
+          "boot_median": 0.0022429251473894216,
+          "ci95_low": -0.0081745980796326,
+          "ci95_high": 0.011810302953821256,
+          "reps_used": 2000,
+          "block_len": 12,
+          "ci_excludes_zero": false
+        },
+        "strategy": {
+          "halloween_timing": {
+            "cagr_pct": 6.8078402668207305,
+            "ann_vol_pct": 10.604515493374468,
+            "sharpe_ann": 0.6753313523465214,
+            "mdd_pct": -20.00105038246389,
+            "final_wealth_mult": 2.76035521895122,
+            "n_months": 185
+          },
+          "buy_and_hold": {
+            "cagr_pct": 12.357518355631525,
+            "ann_vol_pct": 14.17935071377388,
+            "sharpe_ann": 0.8963279872450562,
+            "mdd_pct": -24.76952223905885,
+            "final_wealth_mult": 6.0272096707361085,
+            "n_months": 185
+          }
+        },
+        "halloween_significant_5pct": false
+      }
+    },
+    "TW_TAIEX": {
+      "asset": "TW_TAIEX",
+      "series_label": "TAIEX price index (^TWII) daily Close",
+      "data_start": "1997-08-31",
+      "data_end": "2026-06-30",
+      "full": {
+        "period": "1997-08-31..2026-06-30",
+        "n_months_total": 347,
+        "nov_apr": {
+          "n": 174,
+          "mean_monthly": 0.016817225588646036,
+          "std_monthly": 0.06471925247557364,
+          "mean_ann_pct": 20.180670706375242,
+          "sharpe_ann": 0.9001429419437736
+        },
+        "may_oct": {
+          "n": 173,
+          "mean_monthly": -0.004070457217263686,
+          "std_monthly": 0.06241454903511643,
+          "mean_ann_pct": -4.884548660716423,
+          "sharpe_ann": -0.22591651527817466
+        },
+        "hac_regression": {
+          "beta_mean_diff_monthly": 0.020887682805909698,
+          "beta_ann_pct": 25.06521936709164,
+          "nw_lag_auto": 5,
+          "se_hac_auto": 0.007428169304191645,
+          "t_hac_auto": 2.8119556717861798,
+          "p_hac_auto": 0.004924128893953533,
+          "se_hac_l12": 0.008064232171886048,
+          "t_hac_l12": 2.5901638693798326,
+          "p_hac_l12": 0.009593025465523083
+        },
+        "welch_ttest": {
+          "t": 3.06015551329169,
+          "p": 0.002385717782238203
+        },
+        "block_bootstrap": {
+          "point_mean_diff": 0.020887682805909722,
+          "boot_median": 0.021029517882222258,
+          "ci95_low": 0.005721521553532186,
+          "ci95_high": 0.03668501197971251,
+          "reps_used": 2000,
+          "block_len": 12,
+          "ci_excludes_zero": true
+        },
+        "strategy": {
+          "halloween_timing": {
+            "cagr_pct": 9.246067320346029,
+            "ann_vol_pct": 16.119054624009234,
+            "sharpe_ann": 0.6277920365347472,
+            "mdd_pct": -23.961507187258956,
+            "final_wealth_mult": 12.899357067065623,
+            "n_months": 347
+          },
+          "buy_and_hold": {
+            "cagr_pct": 5.34224952850304,
+            "ann_vol_pct": 22.289570798524384,
+            "sharpe_ann": 0.34474320403362974,
+            "mdd_pct": -63.095301326681096,
+            "final_wealth_mult": 4.503928736558599,
+            "n_months": 347
+          }
+        },
+        "halloween_significant_5pct": true
+      },
+      "last15y": {
+        "period": "2011-01-31..2026-06-30",
+        "n_months_total": 186,
+        "nov_apr": {
+          "n": 94,
+          "mean_monthly": 0.015162414417089301,
+          "std_monthly": 0.052323738952832294,
+          "mean_ann_pct": 18.19489730050716,
+          "sharpe_ann": 1.0038301031769803
+        },
+        "may_oct": {
+          "n": 92,
+          "mean_monthly": 0.004532671202951319,
+          "std_monthly": 0.04399741057367148,
+          "mean_ann_pct": 5.439205443541583,
+          "sharpe_ann": 0.3568763122716153
+        },
+        "hac_regression": {
+          "beta_mean_diff_monthly": 0.010629743214137977,
+          "beta_ann_pct": 12.755691856965573,
+          "nw_lag_auto": 4,
+          "se_hac_auto": 0.007328662101834859,
+          "t_hac_auto": 1.4504343448276371,
+          "p_hac_auto": 0.14693743546568067,
+          "se_hac_l12": 0.007274427852734414,
+          "t_hac_l12": 1.4612480086859778,
+          "p_hac_l12": 0.14394739224524716
+        },
+        "welch_ttest": {
+          "t": 1.5007796786214473,
+          "p": 0.1351652422207377
+        },
+        "block_bootstrap": {
+          "point_mean_diff": 0.010629743214137982,
+          "boot_median": 0.010557935001643239,
+          "ci95_low": -0.004411681674938577,
+          "ci95_high": 0.02447493798983372,
+          "reps_used": 2000,
+          "block_len": 12,
+          "ci_excludes_zero": false
+        },
+        "strategy": {
+          "halloween_timing": {
+            "cagr_pct": 8.6941715004198,
+            "ann_vol_pct": 13.118223566833686,
+            "sharpe_ann": 0.7009539540093666,
+            "mdd_pct": -19.080215328018845,
+            "final_wealth_mult": 3.6408012937829852,
+            "n_months": 186
+          },
+          "buy_and_hold": {
+            "cagr_pct": 11.017213789554138,
+            "ann_vol_pct": 16.817398504247546,
+            "sharpe_ann": 0.7067460735678437,
+            "mdd_pct": -28.921105234686863,
+            "final_wealth_mult": 5.053008348681588,
+            "n_months": 186
+          }
+        },
+        "halloween_significant_5pct": false
+      }
+    },
+    "US_SPY_ETF_robustness": {
+      "asset": "US_SPY_ETF",
+      "series_label": "SPY ETF total-return (AdjClose) \u2014 2016+ only",
+      "data_start": "2016-02-29",
+      "data_end": "2026-07-31",
+      "full": {
+        "period": "2016-02-29..2026-07-31",
+        "n_months_total": 126,
+        "nov_apr": {
+          "n": 63,
+          "mean_monthly": 0.013169504354885755,
+          "std_monthly": 0.04852842219348775,
+          "mean_ann_pct": 15.803405225862905,
+          "sharpe_ann": 0.9400779840817791
+        },
+        "may_oct": {
+          "n": 63,
+          "mean_monthly": 0.012945679439581194,
+          "std_monthly": 0.03827870753068714,
+          "mean_ann_pct": 15.534815327497434,
+          "sharpe_ann": 1.171542926828382
+        },
+        "hac_regression": {
+          "beta_mean_diff_monthly": 0.00022382491530456442,
+          "beta_ann_pct": 0.2685898983654773,
+          "nw_lag_auto": 4,
+          "se_hac_auto": 0.007206144143537631,
+          "t_hac_auto": 0.031060288393660217,
+          "p_hac_auto": 0.9752214596484192,
+          "se_hac_l12": 0.00663981123893268,
+          "t_hac_l12": 0.03370952987219909,
+          "p_hac_l12": 0.9731087795536713
+        },
+        "welch_ttest": {
+          "t": 0.028742982672715536,
+          "p": 0.9771182881366859
+        },
+        "block_bootstrap": {
+          "point_mean_diff": 0.00022382491530456051,
+          "boot_median": 0.00012361749499315358,
+          "ci95_low": -0.013190765705985347,
+          "ci95_high": 0.013496579121126848,
+          "reps_used": 2000,
+          "block_len": 12,
+          "ci_excludes_zero": false
+        },
+        "strategy": {
+          "halloween_timing": {
+            "cagr_pct": 7.425178361719786,
+            "ann_vol_pct": 12.058804329686678,
+            "sharpe_ann": 0.655264186804892,
+            "mdd_pct": -19.447699117327176,
+            "final_wealth_mult": 2.1213575597017953,
+            "n_months": 126
+          },
+          "buy_and_hold": {
+            "cagr_pct": 15.547760653336407,
+            "ann_vol_pct": 15.079251285742668,
+            "sharpe_ann": 1.039117259853293,
+            "mdd_pct": -23.927178828328334,
+            "final_wealth_mult": 4.560328187312225,
+            "n_months": 126
+          }
+        },
+        "halloween_significant_5pct": false
+      },
+      "last15y": {
+        "period": "2016-02-29..2026-07-31",
+        "n_months_total": 126,
+        "nov_apr": {
+          "n": 63,
+          "mean_monthly": 0.013169504354885755,
+          "std_monthly": 0.04852842219348775,
+          "mean_ann_pct": 15.803405225862905,
+          "sharpe_ann": 0.9400779840817791
+        },
+        "may_oct": {
+          "n": 63,
+          "mean_monthly": 0.012945679439581194,
+          "std_monthly": 0.03827870753068714,
+          "mean_ann_pct": 15.534815327497434,
+          "sharpe_ann": 1.171542926828382
+        },
+        "hac_regression": {
+          "beta_mean_diff_monthly": 0.00022382491530456442,
+          "beta_ann_pct": 0.2685898983654773,
+          "nw_lag_auto": 4,
+          "se_hac_auto": 0.007206144143537631,
+          "t_hac_auto": 0.031060288393660217,
+          "p_hac_auto": 0.9752214596484192,
+          "se_hac_l12": 0.00663981123893268,
+          "t_hac_l12": 0.03370952987219909,
+          "p_hac_l12": 0.9731087795536713
+        },
+        "welch_ttest": {
+          "t": 0.028742982672715536,
+          "p": 0.9771182881366859
+        },
+        "block_bootstrap": {
+          "point_mean_diff": 0.00022382491530456051,
+          "boot_median": 0.00012361749499315358,
+          "ci95_low": -0.013190765705985347,
+          "ci95_high": 0.013496579121126848,
+          "reps_used": 2000,
+          "block_len": 12,
+          "ci_excludes_zero": false
+        },
+        "strategy": {
+          "halloween_timing": {
+            "cagr_pct": 7.425178361719786,
+            "ann_vol_pct": 12.058804329686678,
+            "sharpe_ann": 0.655264186804892,
+            "mdd_pct": -19.447699117327176,
+            "final_wealth_mult": 2.1213575597017953,
+            "n_months": 126
+          },
+          "buy_and_hold": {
+            "cagr_pct": 15.547760653336407,
+            "ann_vol_pct": 15.079251285742668,
+            "sharpe_ann": 1.039117259853293,
+            "mdd_pct": -23.927178828328334,
+            "final_wealth_mult": 4.560328187312225,
+            "n_months": 126
+          }
+        },
+        "halloween_significant_5pct": false
+      }
+    },
+    "TW_0050_ETF_robustness": {
+      "asset": "TW_0050_ETF",
+      "series_label": "0050.TW ETF total-return (AdjClose) \u2014 2009+",
+      "data_start": "2009-02-28",
+      "data_end": "2026-07-31",
+      "full": {
+        "period": "2009-02-28..2026-07-31",
+        "n_months_total": 210,
+        "nov_apr": {
+          "n": 105,
+          "mean_monthly": 0.012023001577028741,
+          "std_monthly": 0.09494193136310415,
+          "mean_ann_pct": 14.427601892434488,
+          "sharpe_ann": 0.43867760623599883
+        },
+        "may_oct": {
+          "n": 105,
+          "mean_monthly": 0.014003467641331502,
+          "std_monthly": 0.05423192124330194,
+          "mean_ann_pct": 16.804161169597805,
+          "sharpe_ann": 0.8944812162607464
+        },
+        "hac_regression": {
+          "beta_mean_diff_monthly": -0.0019804660643027595,
+          "beta_ann_pct": -2.3765592771633113,
+          "nw_lag_auto": 4,
+          "se_hac_auto": 0.010762652769868675,
+          "t_hac_auto": -0.1840128179037151,
+          "p_hac_auto": 0.8540033993955457,
+          "se_hac_l12": 0.01080792608642438,
+          "t_hac_l12": -0.18324200669639878,
+          "p_hac_l12": 0.8546081357506976
+        },
+        "welch_ttest": {
+          "t": -0.1856034153863163,
+          "p": 0.8529832773635587
+        },
+        "block_bootstrap": {
+          "point_mean_diff": -0.001980466064302761,
+          "boot_median": -0.001216322978320355,
+          "ci95_low": -0.02517055295270803,
+          "ci95_high": 0.018056319336477163,
+          "reps_used": 2000,
+          "block_len": 12,
+          "ci_excludes_zero": false
+        },
+        "strategy": {
+          "halloween_timing": {
+            "cagr_pct": 2.485065982829493,
+            "ann_vol_pct": 23.29394349092832,
+            "sharpe_ann": 0.30968568928771606,
+            "mdd_pct": -75.46847857019554,
+            "final_wealth_mult": 1.5365979115621715,
+            "n_months": 210
+          },
+          "buy_and_hold": {
+            "cagr_pct": 10.462440570801391,
+            "ann_vol_pct": 26.7205997156422,
+            "sharpe_ann": 0.5844135871649107,
+            "mdd_pct": -76.60479941593535,
+            "final_wealth_mult": 5.705005942358419,
+            "n_months": 210
+          }
+        },
+        "halloween_significant_5pct": false
+      },
+      "last15y": {
+        "period": "2011-01-31..2026-07-31",
+        "n_months_total": 187,
+        "nov_apr": {
+          "n": 94,
+          "mean_monthly": 0.008077944909692806,
+          "std_monthly": 0.09761841244278323,
+          "mean_ann_pct": 9.693533891631368,
+          "sharpe_ann": 0.28665516379978145
+        },
+        "may_oct": {
+          "n": 93,
+          "mean_monthly": 0.01303482985635929,
+          "std_monthly": 0.05121754788605117,
+          "mean_ann_pct": 15.64179582763115,
+          "sharpe_ann": 0.8816114207364756
+        },
+        "hac_regression": {
+          "beta_mean_diff_monthly": -0.004956884946666476,
+          "beta_ann_pct": -5.9482619359997715,
+          "nw_lag_auto": 4,
+          "se_hac_auto": 0.011693704331329416,
+          "t_hac_auto": -0.4238934734638485,
+          "p_hac_auto": 0.6716435041282042,
+          "se_hac_l12": 0.011830968904978527,
+          "t_hac_l12": -0.41897540146357715,
+          "p_hac_l12": 0.6752341098386441
+        },
+        "welch_ttest": {
+          "t": -0.4354465818682313,
+          "p": 0.6639045101343939
+        },
+        "block_bootstrap": {
+          "point_mean_diff": -0.004956884946666485,
+          "boot_median": -0.004532511174550503,
+          "ci95_low": -0.028378210322396777,
+          "ci95_high": 0.015113943942209438,
+          "reps_used": 2000,
+          "block_len": 12,
+          "ci_excludes_zero": false
+        },
+        "strategy": {
+          "halloween_timing": {
+            "cagr_pct": -0.2896055262134656,
+            "ann_vol_pct": 23.952647684895297,
+            "sharpe_ann": 0.20342993182777153,
+            "mdd_pct": -75.46847857019554,
+            "final_wealth_mult": 0.9558104394213459,
+            "n_months": 187
+          },
+          "buy_and_hold": {
+            "cagr_pct": 6.912927344046005,
+            "ann_vol_pct": 26.98525804083586,
+            "sharpe_ann": 0.4688397048791102,
+            "mdd_pct": -76.60479941593536,
+            "final_wealth_mult": 2.833920155999143,
+            "n_months": 187
+          }
+        },
+        "halloween_significant_5pct": false
+      }
+    }
+  }
+}
