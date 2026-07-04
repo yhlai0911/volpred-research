@@ -845,6 +845,11 @@ def parse_draft(path: Path, require_frontmatter: bool = True) -> dict:
         phase_fm = phase_fm[0] if phase_fm else ""
     phase_fm = str(phase_fm).strip().strip('"').strip("'")
 
+    content_type_fm = fm.get("content_type", "")
+    if isinstance(content_type_fm, list):
+        content_type_fm = content_type_fm[0] if content_type_fm else ""
+    content_type_fm = str(content_type_fm).strip().strip('"').strip("'")
+
     return {
         "title": fm.get("title", "").strip('"').strip("'"),
         "audience": fm.get("audience", "general"),
@@ -854,6 +859,12 @@ def parse_draft(path: Path, require_frontmatter: bool = True) -> dict:
         "description": description_fm,
         "image_url": image_url_fm,
         "phase": phase_fm,
+        # daily_digest metadata: content_type routes the frontend digest column
+        # + exempts the general-audience upcast (_infer_audience Rule 3);
+        # digest_articles is the side-panel「本期精選」source of truth. Only
+        # populated for digests — forwarded into details_payload when non-empty.
+        "content_type": content_type_fm,
+        "digest_articles": _list_from("digest_articles"),
         "body": body,
     }
 
@@ -1006,7 +1017,9 @@ def check_lazypack_gate(body: str, audience: str, bypass: bool,
     return 6
 
 
-def infer_publish_audience(title: str, body: str, publish_tags: list[str]) -> str:
+def infer_publish_audience(
+    title: str, body: str, publish_tags: list[str], content_type: str = "",
+) -> str:
     """Mirror publisher-side audience inference for preflight validation.
 
     `publish_draft.py` is the last deterministic checkpoint before invoking the
@@ -1024,7 +1037,11 @@ def infer_publish_audience(title: str, body: str, publish_tags: list[str]) -> st
         sys.path.insert(0, str(src_dir))
     from volpred.publisher.publisher import _infer_audience  # noqa: WPS433
 
-    return _infer_audience(title, body, publish_tags)
+    # Pass content_type so the mirror honors the publisher's daily_digest /
+    # member_qa / event_article exemptions (Rules 1-3). Without it, a general
+    # digest that legitimately cites bootstrap/Sharpe would be falsely upcast
+    # to research and the AUDIENCE GATE would block a valid publish.
+    return _infer_audience(title, body, publish_tags, content_type=content_type or None)
 
 
 def find_article_in_feed(feed: list, mile_id: str) -> int | None:
@@ -1559,6 +1576,7 @@ def main() -> int:
     if audience == "general":
         inferred_audience = infer_publish_audience(
             info["title"], body, publish_tag_list,
+            content_type=info.get("content_type", ""),
         )
         if inferred_audience != "general":
             print(
@@ -1619,6 +1637,13 @@ def main() -> int:
         # canonical URL (frontend reads this top-level field). Surfaces that
         # consume `details.image_url` also work via this nested copy.
         details_payload["image_url"] = image_url_field
+    # daily_digest routing: content_type drives the frontend digest column and
+    # the _infer_audience 'general' exemption; digest_articles feeds the
+    # side-panel「本期精選」. Forwarded from frontmatter only when present.
+    if info.get("content_type"):
+        details_payload["content_type"] = info["content_type"]
+    if info.get("digest_articles"):
+        details_payload["digest_articles"] = info["digest_articles"]
     if args.cluster_waiver:
         details_payload["cluster_waiver"] = args.cluster_waiver
     if args.dup_waiver:

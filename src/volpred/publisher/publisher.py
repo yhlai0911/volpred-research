@@ -1382,6 +1382,17 @@ class Publisher:
                     audit_k_ids.add(_rs.upper())
             for _m in _re_prov.findall(r'[Kk]\d{2,}[a-z]?', f"{title} {description or ''}"):
                 audit_k_ids.add(_m.upper())
+            # daily_digest exemption (mirrors the dup-gate `_is_digest` bypass and
+            # the depth-floor exemption): a digest is meta-curation that cites the
+            # numbers of MANY already-published (already-gated) source articles via
+            # inline links — it does not reproduce a single experiment's results.json.
+            # Auto-extracting the K-ids it mentions in prose (e.g. a footer "涵蓋
+            # K575、K1407 等") would force EVERY curated number to appear in those
+            # one or two results.json and hard-block a legitimate digest. Provenance
+            # for a digest is the cited source articles, verified by the main thread
+            # at curation time. Skip the single-experiment gate for digests.
+            if _is_digest:
+                audit_k_ids = set()
             prov_root = _publish_asset_root_from_storage_dir(self.reports_dir.parent)
             prov = audit_content_provenance(description or '', sorted(audit_k_ids), root=prov_root)
         except Exception as _prov_exc:
