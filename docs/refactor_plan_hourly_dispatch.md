@@ -309,10 +309,10 @@ Codex review（`codex exec`，覆蓋 commit `68d4a6d5c` 全部 8 個檔案）ver
 **第二輪 Codex review verdict：CONDITIONAL_PASS**（達到 §6 gate 門檻，可進 shadow run）。額外 3 個非 gate-blocking finding：
 
 1. **Medium（cutover 前必修）**：`get_process_start_wall()` 把「`ps` 探測本身失敗（OSError/timeout）」和「`ps` 正常執行但確認 pid 不存在」都回傳 `None`，導致 `check_identity()` 把單純的探測 hiccup 誤判成 `IDENTITY_DEAD`——health.py 可能因一次性 `ps` 失敗就把還活著的正常 job 判 `silent_death` 並清空 state。**已修復**（同一 session）：新增 `PROBE_FAILED` sentinel 區分兩種情況，`check_identity()` 把 `PROBE_FAILED` 對應到 `IDENTITY_UNVERIFIED` 而非 `IDENTITY_DEAD`。Regression: `test_check_identity_probe_failed_maps_to_unverified_not_dead`。**89/89 測試通過**。
-2. **Medium（shadow 可接受，production cutover 前需要 runbook）**：`IDENTITY_UNVERIFIED` 分支正確地不 kill,但 supervisor.py 與 health.py 都會清空 state（讓排程不卡死）——若真孤兒剛好 fingerprint 缺失,會變成「沒被 kill 但也沒人管」,只能靠 alert + completion history 追。Codex 明確認可這是 shadow 階段的合理 tradeoff,但 **Phase 3 cutover 前必須**針對 `orphan_unverified_not_killed` / `timeout_unverified` 兩個 outcome 補一份「需人工檢查」runbook。**尚未做**——排入 Deliverable 7（cutover）前置工作。
-3. **Low（非 gate-blocking）**：兩階段孤兒清理解決了「crash 遺失孤兒」,但還不是完全 idempotent——若 supervisor 在 `append_completion_entry()` 之後、`finalize_restart_orphan_cleanup()` 之前又崩潰,下次 restart 重跑同一個孤兒會在 completions ring buffer 留下重複紀錄(不影響即時運作,只影響稽核歷史乾淨度)。**尚未修**——非阻斷項,列入未來 polish backlog。
+2. **Medium（shadow 可接受，production cutover 前需要 runbook）**：`IDENTITY_UNVERIFIED` 分支正確地不 kill,但 supervisor.py 與 health.py 都會清空 state（讓排程不卡死）——若真孤兒剛好 fingerprint 缺失,會變成「沒被 kill 但也沒人管」,只能靠 alert + completion history 追。Codex 明確認可這是 shadow 階段的合理 tradeoff,但 **Phase 3 cutover 前必須**針對 `orphan_unverified_not_killed` / `timeout_unverified` 兩個 outcome 補一份「需人工檢查」runbook。**已完成（2026-07-04 12:40）**：新增 `docs/runbooks/dispatch-supervisor-unverified-orphan.md`（人工判定步驟：ps lstart 對照 job started_at ±2min → 確認是我們的 worker 才 kill pgid；月內 ≥3 次 unverified 即回頭修 fingerprint 抓取本身）；`alerts.send_orphan_restart_alert` 對 unverified outcome 的 email body 自動附 runbook 指引，health.py 的 `timeout_unverified` log_tail 同樣附。
+3. **Low（非 gate-blocking）**：兩階段孤兒清理解決了「crash 遺失孤兒」,但還不是完全 idempotent——若 supervisor 在 `append_completion_entry()` 之後、`finalize_restart_orphan_cleanup()` 之前又崩潰,下次 restart 重跑同一個孤兒會在 completions ring buffer 留下重複紀錄。**已修（2026-07-04 12:38）**：`append_completion_entry(mark_cleanup_recorded=True)` 在**同一個 locked transaction** 裡 append entry + 設 `current_job["cleanup_recorded"]=True`；`_handle_restart_orphan()` 開頭見到該 flag 即跳過 kill/append/alert 直接 finalize。殘餘視窗只剩「crash 在 mark_pending 與 append 之間 → 重跑 kill」——kill 本身冪等（process 已死時 killpg 是 no-op），可接受。Regression: `test_handle_restart_orphan_skips_duplicate_entry_when_cleanup_already_recorded` + `test_append_completion_entry_marks_cleanup_recorded_atomically`。
 
-**Codex 額外確認**：lockfile 方案在「`dispatch_state.json.lock` 永不被刪除」的前提下健全；並行 `mkdir(exist_ok=True)` 沒問題；若未來有清理流程誤刪 `*.lock` 才會重開風險（目前無此流程，非立即風險）。
+**Codex 額外確認**：lockfile 方案在「`dispatch_state.json.lock` 永不被刪除」的前提下健全；並行 `mkdir(exist_ok=True)` 沒問題；若未來有清理流程誤刪 `*.lock` 才會重開風險。**此 hardening 也已做（2026-07-04 12:38）**：新 `state._acquire_lock()` 在 flock 後比對 fstat(fd) vs stat(path) 的 inode，偵測到 lockfile 被刪除重建（fd 指向 detached inode = 鎖不再 serialize 任何人）就 release + reopen retry（上限 5 次後 raise）。Regression: `test_acquire_lock_retries_when_lockfile_replaced_under_us` + `test_acquire_lock_gives_up_after_max_attempts`。**測試累計 93/93 通過。**
 
 ### Deliverable 6 — Shadow run 已啟動（2026-07-04 02:35 台灣時間）
 
@@ -335,3 +335,11 @@ Phase 2 shadow run 啟動步驟：
 - git tag `pre-supervisor-refactor`
 
 *Updated 2026-07-04 02:35 台灣時間 by interactive main thread — Codex 第二輪 CONDITIONAL_PASS；probe-failed/dead 混淆 medium finding 已修（89/89 pass）；shadow run daemon 已啟動並驗證存活；7 天觀察期開始計時，下次 session 起持續巡檢 `~/.volpred/logs/dispatch_supervisor.log` + heartbeat age。*
+
+### Shadow run 首日觀察 + round-2 findings 全數關閉（2026-07-04 12:42 台灣時間）
+
+- **Shadow 排程保真度（§5 gate #8）首日實證**：daemon log 顯示 08:07 / 09:07 / 10:07 / 11:07 / 12:07 每小時準點記錄 `DRY-RUN would fire (prev_scheduled=...)`，與 legacy shell 開火時間完全對齊。
+- **Round-2 全部 3 個非阻斷 finding 已關**（見上方逐項更新）+ round-1 的 lockfile inode hardening 也已落地。93/93 tests。
+- **Daemon 已 `launchctl kickstart -k` 重啟載入新碼**（12:42:08 boot，heartbeat 正常）——舊 process 跑的是 02:35 版程式，重啟後才吃到 probe-failed sentinel / inode retry / 冪等 cleanup。此次 restart 觸發一封預期的 supervisor restart info email。
+- **Push gate 插曲（同日上午）**：dispatch_supervisor 重構期間引入的 8 個 silent-fallback 標記讓 `git_push_backup` 連續 26 班 exit=120 hold push（26 小時、47 commits 積壓）。全部 8 處已按 no-silent-fallback rule 修復/標註（2 處在本模組：state.py temp-cleanup `silent-ok`、worker.py `_read_tail` FileNotFoundError `silent-ok`），audit `--strict` new=0，baseline 72→63，push 已解封（origin/main 對齊）。
+- **第三輪 Codex review 已派出**（覆核 round-2→now 全部 delta），verdict 待收。

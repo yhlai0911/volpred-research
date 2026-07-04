@@ -834,6 +834,97 @@ _SELF_RECOVERING_EXIT_CODES = frozenset({142, _QUOTA_EXHAUSTED_EXIT_CODE})
 _PUSH_HELD_EXIT_CODE = 120
 _BENIGN_FINDINGS_EXIT_CODES = frozenset({_PUSH_HELD_EXIT_CODE})
 
+_PUSH_BACKLOG_WARN_HOURS = 3.0
+_PUSH_BACKLOG_CRITICAL_HOURS = 8.0
+
+
+def _parse_push_backlog_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """git-push-backup dead-man switch — watches UNPUSHED-BACKLOG AGE, not exit codes.
+
+    2026-07-04 incident: the pre-push silent-fallback gate correctly HELD pushes
+    (exit=120 — deliberately exempt from host_cron_fail as a benign self-reported
+    finding) for 26 consecutive hourly fires (~26h, 47-commit backlog). The gate
+    did its job; the gap was that nothing ESCALATED a persistent hold — the job's
+    own warn email was deduped for 24h, and each hourly session that saw it had
+    legitimate anti-clobber reasons not to touch mid-edit files. This condition
+    measures the harm directly (age of the oldest commit not on origin), so ANY
+    cause of a growing backlog — held gate, divergence, auth, network — surfaces
+    the same way without re-litigating exit-code semantics:
+      oldest unpushed >= 3h → warn (3+ consecutive held/failed hourly fires)
+      oldest unpushed >= 8h → critical (a working day of local-only work at risk)
+    """
+    import subprocess  # noqa: WPS433 — deferred; keeps module import light for offline tests
+
+    repo_root = _storage_root(storage_dir).parent
+    breached = False
+    level = "info"
+    ahead_count = 0
+    oldest_age_hours: float | None = None
+    note = ""
+    try:
+        rev_list = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-list", "--count", "origin/main..main"],
+            capture_output=True, text=True, timeout=15,
+        )
+        if rev_list.returncode != 0:
+            # No origin/main ref (fresh clone / detached test env) — nothing to measure.
+            note = f"rev-list unavailable: {rev_list.stderr.strip()[:120]}"
+        else:
+            ahead_count = int(rev_list.stdout.strip() or 0)
+            if ahead_count > 0:
+                log_ct = subprocess.run(
+                    ["git", "-C", str(repo_root), "log", "origin/main..main", "--format=%ct"],
+                    capture_output=True, text=True, timeout=15,
+                )
+                stamps = [int(s) for s in log_ct.stdout.split() if s.strip().isdigit()]
+                if stamps:
+                    oldest = datetime.fromtimestamp(min(stamps), tz=timezone.utc)
+                    oldest_age_hours = (now - oldest).total_seconds() / 3600.0
+    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+        warn("push_backlog", "git backlog probe failed", err=str(exc))
+        note = f"probe failed: {exc}"
+
+    if oldest_age_hours is not None and oldest_age_hours >= _PUSH_BACKLOG_WARN_HOURS:
+        breached = True
+        level = "critical" if oldest_age_hours >= _PUSH_BACKLOG_CRITICAL_HOURS else "warn"
+
+    if breached:
+        title = f"push_backlog: {ahead_count} 個 commit 已 {oldest_age_hours:.1f} 小時推不上 GitHub"
+        body = "\n".join([
+            "## 觸發條件",
+            f"- 未推上 GitHub 的 commit 數：{ahead_count}",
+            f"- 最老一筆已滯留：{oldest_age_hours:.1f} 小時（警戒 {_PUSH_BACKLOG_WARN_HOURS:.0f}h / 嚴重 {_PUSH_BACKLOG_CRITICAL_HOURS:.0f}h）",
+            "- 來源：`git rev-list origin/main..main`（每小時 check-alerts 巡檢）",
+            "",
+            "## 影響",
+            "每小時自動備份推送連續多班沒成功（品質關卡擋下 / 分岔 / 認證 / 網路）。"
+            "本機工作越久沒上雲端，機器故障時遺失的研究與程式就越多——直接威脅可復現性承諾。",
+            "",
+            "## 建議行動",
+            "1. `tail -40 storage/logs/cron/git_push_backup.log` 看最近被擋/失敗原因",
+            "2. 若是 `HELD: N new silent fallback(s)`：跑 `uv run python scripts/audit_silent_fallbacks.py"
+            " --strict --baseline storage/qa/silent_fallback_baseline.json`，把 NEW 位置按"
+            " `.claude/rules/no-silent-fallback.md` 修掉（加 log 或 `# silent-ok:` 標註）並 commit",
+            "3. 手動重跑解封：`bash scripts/cron_git_push_backup.sh`",
+            "4. 確認 `git rev-list --count origin/main..main` 回 0",
+        ])
+    else:
+        title = "push_backlog ok"
+        body = ""
+
+    return {
+        "id": "push_backlog",
+        "breached": breached,
+        "level": level,
+        "title": title,
+        "body": body,
+        "details": {
+            "ahead_count": ahead_count,
+            "oldest_unpushed_age_hours": round(oldest_age_hours, 2) if oldest_age_hours is not None else None,
+            "note": note,
+        },
+    }
+
 
 def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     logs_dir = _cron_logs_dir(storage_dir)
@@ -2280,6 +2371,7 @@ def build_alert_condition_report(
         _parse_dispatch_health_state(storage_dir, current),       # 2026-06-22 generator binary 源頭健康
         _parse_gmail_poll_freshness_state(storage_dir, current),  # 2026-06-22 boss-email pipeline dead-man switch
         _parse_host_cron_state(storage_dir, current),
+        _parse_push_backlog_state(storage_dir, current),          # 2026-07-04 26h push-hold incident: persistent unpushed-backlog escalation
         _parse_work_log_freshness_state(storage_dir, current),    # 2026-06-28 Codex/dispatch diversity dead-man switch
         _parse_member_qa_state(storage_dir, current),
         _parse_supabase_sync_state(storage_dir),

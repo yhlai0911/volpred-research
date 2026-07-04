@@ -867,3 +867,94 @@ def test_paper_website_drift_supabase_failure_is_fail_open(monkeypatch):
     r = _parse_paper_website_drift_state(datetime.now(timezone.utc))
     assert r["breached"] is False
     assert r["details"]["degraded"] is True
+
+
+# ---------------------------------------------------------------------------
+# push_backlog — 2026-07-04 26h push-hold incident: the silent-fallback gate
+# correctly held pushes but nothing escalated a PERSISTENT hold (the job's own
+# warn was deduped 24h). This condition watches the harm directly: the age of
+# the oldest commit not on origin/main.
+# ---------------------------------------------------------------------------
+
+
+class _FakeCompleted:
+    def __init__(self, returncode: int, stdout: str = "", stderr: str = "") -> None:
+        self.returncode = returncode
+        self.stdout = stdout
+        self.stderr = stderr
+
+
+def _patch_git(monkeypatch, *, ahead: int, oldest_epoch: int | None):
+    import subprocess as _sp
+
+    def fake_run(argv, **kwargs):
+        if "rev-list" in argv:
+            return _FakeCompleted(0, f"{ahead}\n")
+        if "log" in argv:
+            stamps = "\n".join(str(oldest_epoch + i * 60) for i in range(ahead)) if oldest_epoch else ""
+            return _FakeCompleted(0, stamps)
+        raise AssertionError(f"unexpected git argv: {argv}")
+
+    monkeypatch.setattr(_sp, "run", fake_run)
+
+
+def test_push_backlog_ok_when_nothing_unpushed(tmp_path: Path, monkeypatch):
+    from volpred.ops.alerts import _parse_push_backlog_state
+
+    _patch_git(monkeypatch, ahead=0, oldest_epoch=None)
+    now = datetime(2026, 7, 4, 12, 0, tzinfo=timezone.utc)
+    result = _parse_push_backlog_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is False
+    assert result["details"]["ahead_count"] == 0
+
+
+def test_push_backlog_warns_after_3h(tmp_path: Path, monkeypatch):
+    from volpred.ops.alerts import _parse_push_backlog_state
+
+    now = datetime(2026, 7, 4, 12, 0, tzinfo=timezone.utc)
+    oldest = int((now - timedelta(hours=4)).timestamp())
+    _patch_git(monkeypatch, ahead=5, oldest_epoch=oldest)
+    result = _parse_push_backlog_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is True
+    assert result["level"] == "warn"
+    assert result["details"]["ahead_count"] == 5
+    assert "建議行動" in result["body"]
+
+
+def test_push_backlog_critical_after_8h(tmp_path: Path, monkeypatch):
+    from volpred.ops.alerts import _parse_push_backlog_state
+
+    now = datetime(2026, 7, 4, 12, 0, tzinfo=timezone.utc)
+    oldest = int((now - timedelta(hours=26)).timestamp())
+    _patch_git(monkeypatch, ahead=47, oldest_epoch=oldest)
+    result = _parse_push_backlog_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is True
+    assert result["level"] == "critical"
+
+
+def test_push_backlog_recent_commits_within_grace_not_breached(tmp_path: Path, monkeypatch):
+    """Commits made minutes ago that simply haven't hit the next hourly push
+    yet must NOT breach — that's normal operation, not a stuck backlog."""
+    from volpred.ops.alerts import _parse_push_backlog_state
+
+    now = datetime(2026, 7, 4, 12, 0, tzinfo=timezone.utc)
+    oldest = int((now - timedelta(minutes=40)).timestamp())
+    _patch_git(monkeypatch, ahead=3, oldest_epoch=oldest)
+    result = _parse_push_backlog_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is False
+
+
+def test_push_backlog_probe_failure_is_logged_not_breached(tmp_path: Path, monkeypatch):
+    """A git probe failure must fail open (no false alarm) but leave a trace."""
+    import subprocess as _sp
+
+    from volpred.ops.alerts import _parse_push_backlog_state
+
+    def boom(argv, **kwargs):
+        raise OSError("git not found")
+
+    monkeypatch.setattr(_sp, "run", boom)
+    now = datetime(2026, 7, 4, 12, 0, tzinfo=timezone.utc)
+    result = _parse_push_backlog_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is False
+    assert "probe failed" in result["details"]["note"]

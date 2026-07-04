@@ -26,6 +26,7 @@ paths:
   3. `host_cron_fail` — **v12 後僅看** `storage/logs/cron/*.log` 最新 `=== exit N ===` 非 0 → critical。
      scheduler-tick staleness 在 v12 已降級為 advisory-only（body 內 readout 供參考，不貢獻 breach judgement）。
   4. `member_qa_stale` — `questions` 表 pending（status=`evaluating`/`pending`/未 ranked）`created_at` 距 now 超過 24h → warn / 超過 72h → critical（2026-04-26 新增；防 5 天 silent gap 再現）。
+  5. `push_backlog` — `git rev-list origin/main..main` 最老未推 commit 滯留 >3h → warn / >8h → critical（2026-07-04 新增；26h push-hold incident 教訓：silent-fallback gate 正確擋 push 但無機制強迫行動——此條件直接量測傷害「未推積壓年齡」，held/分岔/認證/網路任何原因同樣浮現，且不受該 job 自身 warn email 的 24h dedup 影響）。
 
 ## Alert 觸發 → 主線程 auto-remediation（2026-04-19 用戶要求）
 
@@ -37,6 +38,7 @@ paths:
 | `release_pool_gap > 2h` | `VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings` 手動釋出；同時查 cron 為何沒 fire |
 | `publishing_freshness`（發文脫班 dead-man switch） | **已全自動 wired**（2026-07-03 boss email-12559）：`scripts/check_alerts.py` 每小時在寄 alert email 前呼叫 `scripts/remediate_publish_drought.py --apply` → force-release（drought circuit-breaker 挑最不重複草稿）→ 若 released 0（池空 / 全 arc-dup 重寫）則 refill fresh 主題供下班 hourly dispatch 生成。**主線程/老闆都不需手動跑指令**；alert body 用「已自動修復」框架；只有連續 2 班 hourly dispatch 仍脫班才人工檢查 generator |
 | `host_cron_fail` | 查 `storage/logs/cron/<name>.log` error，修 script / 路徑 / FDA 權限 |
+| `push_backlog` (>3h/>8h) | 主線程**立即**：`tail -40 storage/logs/cron/git_push_backup.log` 查原因 → HELD 就跑 `audit_silent_fallbacks --strict` 修 NEW 位置（per no-silent-fallback rule）並 commit → `bash scripts/cron_git_push_backup.sh` 解封 → 驗證 ahead=0（per memory `feedback_fix_silent_fallback_immediately`：當場修，不留下一班）|
 | `Supabase sync fail` | 查 supabase_sync.py log，restart sync 或 manual reconcile |
 | `Agent task fail > 3` | 查 work_log outcome=failed pattern，派新 agent with better brief 或清 stale |
 | `Token 突增` | 檢 session_state + token_usage_report，降低派工頻率 or 派 compact |
