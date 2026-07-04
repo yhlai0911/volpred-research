@@ -345,3 +345,16 @@ Phase 2 shadow run 啟動步驟：
 - **第三輪 Codex review 結果：CONDITIONAL_PASS**（95/95 tests）。2 個 medium finding 已修：(1) `cleanup_recorded` crash-before-alert 視窗可能吞掉 not-killed unverified orphan 的 runbook 告警 → 現在把 outcome 存進 `current_job.cleanup_outcome`,retry 對非 killed outcome 重發告警(60s dedup 防快速重試 spam);(2) runbook 叫用戶從 completions 讀 pid/pgid 但 entry 沒存 → `append_completion_entry` 現在對 orphan/unverified outcome 保存 pid/pgid/started_wall,runbook jq 同步更正並指明 alert body 為權威來源。Codex 確認:PROBE_FAILED falsy sentinel 序列化路徑無 blocker、lockfile inode retry(含 shared mode)正確;唯一殘餘 caveat 是「lock 已取得後才被外部刪除」——此 pattern 本質無法完全防(除非 lockfile 永不清理),屬可接受風險。
 
 **Deliverable 5-6 完整關閉**:3 輪 Codex review(FAIL→CONDITIONAL_PASS→CONDITIONAL_PASS)全部 finding 已修;shadow run daemon 運行中(08:07-12:07 dry-run 與 legacy 準點對齊);95/95 tests。剩 Deliverable 7(7 天觀察期滿 → cutover)+ 8(deprecate legacy shell + retro)。
+
+### 老闆 Telegram 催 cutover（2026-07-04 15:16 台灣時間，telegram-121）
+
+- **觸發**：legacy shell 於 2026-07-04 **13:57 + 14:57 連續兩次 exit=142**（SIGALRM hang-kill），依 `alerts.py` `max_consecutive_failures=2` 升 **critical**；老闆經 Telegram reply 該 critical alert，措辭嚴厲（「第幾次」「頭痛醫頭腳痛醫腳」「立刻解決」）。
+- **回覆（telegram msg 123）**：已誠實澄清此非 patch — 根治 daemon 已完成、3 輪 Codex review 過、95/95 tests、shadow run 02:35→15:07 連續 8 小時零 hang；**剩唯一步驟 = cutover**。已向老闆呈報「建議提前 cutover」+ 理由（7 天觀察窗對 worker real-run 首跑這個唯一剩餘風險無降險作用；影子模式永不真 spawn claude；cutover 有一鍵回退 = re-enable legacy plist）。**等老闆回「切」/「等 7 天」的一句話裁決**。
+- **⚠️ HANDOFF — 老闆若回「切」，下一輪 session 執行 cutover（Deliverable 7 / Phase 3）**：
+  1. `launchctl bootout` / unload `com.volpred.hourly-dispatch`（或改 stub-only），確認 legacy 不再 spawn claude。
+  2. 把 `com.volpred.dispatch-supervisor` 從 `--dry-run` 切成 real-run（改 plist ProgramArguments 去掉 `--dry-run` → `launchctl kickstart -k`）。
+  3. **盯首輪 real fire（下一個 :07）**：確認 worker.py Popen 真 spawn claude、跑完 exit=0、state.json 正常更新、無孤兒 — 這是 dry-run 從未驗證過的路徑。
+  4. 首輪 OK → 更新本 plan 標 Deliverable 7 進行中（14 天觀察）；出問題 → 即刻 re-enable legacy plist（instant fallback，§7 已設計）。
+- 老闆若回「等 7 天」→ 維持 shadow，7/11 觀察期滿再 cutover。
+
+*Updated 2026-07-04 15:16 台灣時間 by telegram-responder (telegram-121) — 老闆催 cutover，已呈報提前 cutover 建議，待裁決。*
