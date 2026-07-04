@@ -48549,7 +48549,7 @@
     "title": "研究 backlog fallback: TSM ADR vs 2330.TW 波動傳導與創紀錄 ADR 溢價：AI 時代價格發現往哪邊移",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: TSM ADR vs 2330.TW 波動傳導與創紀錄 ADR 溢價：AI 時代價格發現往哪邊移 — yfinance TSM/2330.TW/TWD=X 日資料（可加本機日內），拆隔夜/日內段檢定 lead-lag 與溢價變動對雙邊 vol 預測力；2024-26 ADR 溢價歷史級高位是現成敘事鉤（JF/JFM cross-listing price-discovery 經典線）。與 #157（TAIEX 隔夜 VRP）不同——雙上市資訊份額弧，台灣讀者高共鳴。 | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48574,9 +48574,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-04T14:33:39.524174+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-22"
       }
     ],
-    "started_at": "2026-07-04T14:12:27.270558+00:00"
+    "started_at": "2026-07-04T14:12:27.270558+00:00",
+    "completed_at": "2026-07-04T14:33:39.523751+00:00",
+    "result": "K1626 完整實驗完成: TSM ADR 隔夜單向領先 2330.TW (HAC t=27.8, Granger US->TW p≈0 / TW->US NS), 波動雙向傳導 US 略占優, AI 時代 ADR 溢價創紀錄 +33.8%(2025-04-09). Codex CONDITIONAL_PASS, knowledge.json 已寫 (experiment_id=K1626). 必修 asof 對齊 → K1626f follow-up。"
   },
   {
     "id": "telegram-127",
@@ -48951,5 +48959,67 @@
     "created_at": "2026-07-04T13:27:45.877580+00:00",
     "title": "草稿池補救改並行多寫（池低時一次補到門檻，非每小時1篇）",
     "description": "老闆 Telegram msg 143 動怒:「寫文章不能多寫一點嗎? 只能夠補一篇到草稿池嗎?」。現況機制: draft feed 池靠 daily_article writer 產出, 但 hourly dispatch 每小時只派 1 個 writer (feedback_one_dispatch_per_hour) -> 池 <4 時每小時只增 1 篇, 與 feedback_pool_fill_to_threshold (池低要並行派 floor-current 個 agent 補到滿) 衝突。要做: (1) draft_pool_low breach 時, 補救改成一次並行 dispatch (alert_floor - draft_count) 個 daily_article writer 把 draft 池一次補到門檻, 而非等 hourly 一小時一篇; (2) 各並行 writer 主題軸互不重複 (3-layer dedup + narrative-arc 飽和檢查, 見 feedback_dedup_3_layers_mainthread / feedback_refill_check_saturation_and_running_hourly); (3) 尊重 token budget 與 heavy compute 走 compute_queue; (4) 評估每篇長度是否可再厚 (老闆也嫌「多寫一點」= 篇幅/篇數都要). 驗收: 池 <4 時單一 remediation 週期把 draft 補到 >=4, 非 1/hour。"
+  },
+  {
+    "id": "telegram-149",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "claimed",
+    "created_at": "2026-07-04T14:27:56.100981+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 149）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n現在這個是怎樣？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-04T14:31:48.542728+00:00",
+    "claim_session_id": "9de97058e3cf",
+    "status_history": [
+      {
+        "ts": "2026-07-04T14:31:48.543122+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      }
+    ]
+  },
+  {
+    "id": "telegram-151",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "claimed",
+    "created_at": "2026-07-04T14:28:20.368613+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 151）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nVOLPRED 管理通知\n發文脫班補救失敗：force-release/refill 皆為 0\nAlert level: critical\n✖\nCRITICAL\n白話結論\n系統偵測到讀者端內容更新可能中斷，需要先恢復發文節奏。\n影響\n影響文章品質、讀者信任與流量表現。\n行動\n先補一篇可發佈文章或觸發釋出流程，再追查為什麼排程沒接上。\n\nPublishing-freshness dead-man switch attempted automatic remediation, but both live escape paths returned empty.\npublish_gap_hours: 7.45\nthreshold_hours: 6.0\nforce_release.released: 0\nrefill_reader_facing.added: 0\nrefill_reader_facing.reason: no_reader_facing_candidates_passing_filter\nRequired operator action: create or dispatch a fresh reader-facing article task; do not treat this as a no-op.\n\n\n立刻處理\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-04T14:31:48.792163+00:00",
+    "claim_session_id": "e21bf49990fd",
+    "status_history": [
+      {
+        "ts": "2026-07-04T14:31:48.792553+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      }
+    ]
+  },
+  {
+    "id": "research_k1626f_tsm_adr_asof_alignment_gate",
+    "title": "K1626f robustness gate: TSM ADR vs 2330.TW 改 timestamp-asof event-time 對齊重跑 (Codex 必修)",
+    "description": "K1626 (TSM ADR vs 2330.TW 價格發現) 經 Codex gpt-5.5 xhigh CONDITIONAL_PASS，唯一必修 issue = 目前對齊為 common-date calendar inner-join 後 diff()，非 timestamp/asof event-time 對齊。台美假日不一致日，shift(1) 在交集 index 上可能漏 ADR-only 最新可用收盤、或把多日 return 聚成一格。K1626f: 用實際 Asia/Taipei close timestamp 做嚴格 asof merge (每個 TW close 對「嚴格早於它」最近 ADR close，反之亦然，取代 common intersection)，重跑 eqA/eqB/Granger/vol，量化多少列因假日不一致而改變，比較 beta/t-stat 前後差異。若方向結論 (US 隔夜領先次日 TW) 在 asof 下仍穩健，回填 K1626 README/knowledge「lookahead-safe / 完全乾淨」強 wording；若改變顯著則降級結論。順帶補 vol 的 HAC-lag / block-length sensitivity (t=3.25 較弱)。產出 experiments/k1626f_*/ 三件套；完成後 Codex review → knowledge.json。母實驗: experiments/k1626_tsm_adr_2330_price_discovery/。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "codex_review_followup",
+    "research_slug": "k1626f_tsm_adr_asof_alignment_gate",
+    "parent_experiment": "K1626",
+    "tags": [
+      "codex-review-followup",
+      "robustness-gate",
+      "K1626",
+      "asof-alignment",
+      "price-discovery"
+    ],
+    "created_at": "2026-07-04T14:34:05.460284+00:00"
   }
 ]

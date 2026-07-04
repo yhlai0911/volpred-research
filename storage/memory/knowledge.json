@@ -37567,5 +37567,37 @@
       "Granger-Hyung",
       "realized_volatility"
     ]
+  },
+  {
+    "experiment_id": "K1626",
+    "category": "price_discovery",
+    "title": "K1626 CONDITIONAL_PASS: TSM ADR 隔夜單向領先 2330.TW (return 價格發現偏 US)，波動雙向傳導 US 略占優，AI 時代 ADR 溢價創紀錄 +33.8%",
+    "content": "[提出: Claude, 執行: Claude opus, 審查: Codex gpt-5.5 xhigh CONDITIONAL_PASS] TSM ADR (NYSE) vs 2330.TW 雙時區價格發現/溢價/波動傳導，lookahead-safe 設計。資料 yfinance TSM/2330.TW/TWD=X，2004-03-24~2026-07-02，重疊 5616 交易日，seed=42，ADR ratio=5 (median implied 5.246)。**Q1 溢價 (描述性 POSITIVE)**: 全樣本平均 ADR 溢價 +7.1%；AI 時代(2023+) +15.6% vs 前 AI +5.6% (~2.8x)；全 22 年最高溢價 +33.8% 就在 AI 時代 (2025-04-09)；最新 (2026-07-02) +12.35%，expanding percentile 79.5%。屬 same-date-label 描述指標 (ADR 較 TW 收盤新 ~14.5h)，非同步可套利價差。**Q2 價格發現 (乾淨不對稱: US 領先)**: eqA US->TW 隔夜 r_2330(t)~r_ADR(t-1) beta=+0.360 HAC t=27.8, bootstrap CI[0.337,0.384] 不跨0；Granger US->TW p≈0 於 lag1-5，但 TW->US p=0.85/0.57/0.15/0.09/0.10 全不顯著 (null 如實報告)；CCF 主峰 k=-1 (ADR 領先)。隔夜 US ADR 領先次日 TW，TW 只在同日流入 ADR、不具預測性領先。**Q3 波動傳導 (雙向, US 邊際占優)**: Parkinson range proxy；eqVA US->TW rv_2330(t)~rv_ADR(t-1) beta=+0.134 HAC t=3.25 (modest)；Granger 雙向皆極顯著 (US->TW p 3.5e-57..1.7e-23; TW->US p 1.5e-49..9.6e-14)，US->TW 每 lag 略強。與 return 的單向 US->TW 形成對比: 波動叢聚雙向回饋。**K1108b confound 未重蹈**: 同 date 混用 r_ADR(t) 與 r_2330(t) 只以 labelled diagnostic eqC (legit=false, FORBIDDEN) 呈現 (t=23.2 spurious 顯著)，示範正確 lagged 檢定 + Granger TW->US null 才揭露真實單向價格發現。**Codex 必修 (→ K1626f robustness gate)**: 目前對齊為 common-date calendar inner-join 後 diff()，非 timestamp/asof event-time 對齊；台美假日不一致日 shift(1) 在交集 index 上可能漏 ADR-only 最新收盤或聚多日 return。K1626f 需改嚴格 asof merge 重跑並量化改變列數，通過後才可宣稱『完全 lookahead-safe』。次要: Granger p=0.0 讀作 p≈0 (數值下溢); vol t=3.25 較弱、稱 robust 前補 HAC-lag/block sensitivity。**限制**: 僅日資料 (無 5-min RV、無 Hasbrouck info share)；溢價 FX daily-close 噪音 (已濾 2 筆 TWD=X 壞值)。**Follow-up**: K1626b intraday info share, K1626c 溢價可交易信號, K1626d BEKK/DCC (>=100 multistart), K1626e AI-era regime split, K1626f asof 對齊 gate。",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex gpt-5.5 xhigh",
+    "reviewer_source": "codex exec read-only 2026-07-04",
+    "codex_review": "CONDITIONAL_PASS — 6 項逐查全 CONDITIONAL_PASS/PASS，核心 US-領先方向穩健；必修 = timestamp-asof 對齊 (K1626f)",
+    "codex_verdict": "CONDITIONAL_PASS",
+    "experiment_path": "experiments/k1626_tsm_adr_2330_price_discovery/",
+    "tags": [
+      "K1626",
+      "TSM-ADR",
+      "2330.TW",
+      "price-discovery",
+      "lead-lag",
+      "volatility-transmission",
+      "ADR-premium",
+      "AI-era",
+      "cross-timezone",
+      "lookahead-safe",
+      "HAC",
+      "Granger",
+      "conditional-pass",
+      "TSMC"
+    ],
+    "data_source": "yfinance TSM (ADR) + 2330.TW + TWD=X, 2004-03-24~2026-07-02, 5616 overlap days",
+    "confidence": 0.7,
+    "created_at": "2026-07-04T22:32:54.288765",
+    "updated_at": "2026-07-04T22:32:54.288774"
   }
 ]
