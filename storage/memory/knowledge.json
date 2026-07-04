@@ -37483,5 +37483,24 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-07-04T08:39:41.920768"
+  },
+  {
+    "item_id": "0a32fd33",
+    "category": "cross_asset_forecasting",
+    "content": "K1621 [NULL]: Free EM sovereign-credit *volatility* proxies do NOT lead or materially improve daily forecasts of EM equity realized vol (2015-2026). Tested EMB/PCY/VWOB realized vol + EM-HY-corp OAS change as HAR-augmenting features for EEM/EWZ/EWY/EWT/INDA 5-day RV. (1) CCF peaks at lag 0 for every equity ETF (contemporaneous co-movement, no lead/lag chain at daily freq). (2) PRIMARY date-aggregated cluster-robust (K1355) pooled DM-HLN t=0.41, p=0.68, gain +1.0% — indistinguishable from zero; no single equity Harvey-significant (|t|>3). (3) VIX-regime split shows a SUGGESTIVE but NOT-Harvey-significant sign flip: EMB-RV feature marginally hurts in calm (VIX<20: -2.3%, t=-2.96) and is positive-but-insignificant in stress (VIX>=20: +5.9%, t=1.0) — reported as a hypothesis, not a claim (small high-VIX subsample). (4) Secondary short-sample OAS-change (2024-07+, ~460d, underpowered) gives NO support (pooled -17.2%, t=-1.66, NS). Economic reading: EM sovereign-bond vol is a CONTEMPORANEOUS common-factor proxy for EM risk, not a daily forewarning indicator; consistent with a shared global risk factor (Pan-Singleton common sovereign-credit factor). Does not contradict the 'sovereign-CDS vol = uncertainty indicator' literature (contemporaneous/monthly) but does not extend it to a daily cross-asset LEAD. Proxy caveat: ETF/OAS are diagnostic proxies, NOT raw CDS.",
+    "evidence": [
+      "experiment_id=k1621",
+      "experiments/k1621/k1621_results.json",
+      "verdict=NULL; pooled_primary_dm_hln_t=0.4108 p=0.6813 gain%=+1.015 (date-aggregated K1355)",
+      "n_assets_individually_significant_t3=0; harvey_threshold=3.0",
+      "vix_below_20: gain%=-2.33 t=-2.96 p=0.0031 (n=1555); vix_above_20: gain%=+5.93 t=1.00 p=0.32 (n=777)",
+      "secondary_oas pooled gain%=-17.15 t=-1.66 p=0.097 (n_dates=460, short-sample underpowered)",
+      "CCF peak_lag=0 for EEM/EWZ/EWY/EWT/INDA",
+      "reviewer_source=feature-dev:code-reviewer fresh-context subagent (Codex quota-exhausted until 2026-07-07); verdict PASS 7/7 lookahead+QLIKE+K1355+seed all clean",
+      "disclosed caveats: EMB tail ~33d NaN gap -> oos_end 2026-05-15; OAS T+1 as-of only affects secondary",
+      "loss=QLIKE actual/predicted (Patton 2011) via volpred.stats.model_evaluation.qlike_pointwise; seed=42"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-07-04T12:18:11.784941"
   }
 ]

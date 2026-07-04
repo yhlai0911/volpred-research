@@ -171,6 +171,17 @@ a daily cross-asset *lead*.
 4. **Phase-1 diagnostic:** no GARCH/EGARCH MLE, no MCS, no bootstrap CIs; the
    regime hypothesis warrants a powered follow-up (e.g. threshold-HAR or interacted
    feature with more high-VIX data).
+5. **EMB tail data gap (disclosed post-review).** The primary OOS window ends
+   `2026-05-15`, not `2026-07-02`, because the augmented model's `EMB rv_d.rolling(5)`
+   feature has a ~33-trading-day NaN tail (yfinance bond-ETF availability quirk),
+   which `dropna` silently trims from the `base ∩ aug` intersection. This reduces
+   the OOS n but does **not** bias the sign of the null (fewer, not distorted,
+   observations).
+6. **OAS as-of dating (secondary test only).** The EM-HY-OAS series is
+   forward-filled on its FRED as-of date; ICE BofA OAS can publish with a T+1 lag,
+   a possible minor look-ahead confined to the **secondary, already-underpowered**
+   OAS test. Because that secondary result is already negative (−17.2%, NS), any
+   such leak would only flatter it — it cannot rescue the null.
 
 ## References (trend/concept-level)
 

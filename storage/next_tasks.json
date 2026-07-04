@@ -47939,7 +47939,7 @@
     "description": "yfinance EMB/PCY/VWOB (EM USD sovereign bond ETFs) + EEM/EWZ/EWY/EWT/INDA (EM equity) + ^VIX + FRED BAMLEMHBHYCRPIUSOAS (EMBI HY spread proxy). 以 EMB 日 RV 與 spread changes 作 sovereign-CDS-vol proxy，檢定其拐點是否領先 EM equity ETF RV 與 USD-vol regime。Lead-lag cross-correlation + DM-HLN cluster-robust。Phase-1 diagnostic. 軸級與 backlog 全新 (0 sovereign-CDS mentions)。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-04T03:11:38.000000+00:00",
     "source": "hourly_dispatch_11_fresh_direction_arc_dry_rootcause",
     "tags": [
@@ -47965,8 +47965,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-04T04:18:26.360250+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-11"
       }
     ],
-    "started_at": "2026-07-04T03:11:38.770184+00:00"
+    "started_at": "2026-07-04T03:11:38.770184+00:00",
+    "completed_at": "2026-07-04T04:18:26.359968+00:00",
+    "result": "K1621 NULL: EM sovereign-credit vol proxies (EMB/PCY/VWOB RV + EM-HY OAS chg) do NOT lead/improve EM equity RV forecasts 2015-2026. Pooled date-agg DM-HLN t=0.41 p=0.68; CCF peak lag0; no Harvey-sig. Suggestive-only VIX-regime sign flip (NS). Reviewer=code-reviewer subagent PASS 7/7 (Codex quota out). knowledge=0a32fd33"
   }
 ]
