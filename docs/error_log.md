@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-04 19:07 誤判「發文脫班 13h」深挖不存在的 release-layer bug — 根因是 UTC/台灣時區換算錯 — **CORRECTED（無 code 留存）**
+
+**現象**：hourly-19 fire 見 dashboard WARN production_throughput（3/6）+ 掃 feed 最新 published `published_at=2026-07-04T06:00`，**誤當台灣時間**算成「13h 沒發文 drought」，遂深挖 release-layer（drought breaker / dedup cooldown flag / arc-dedup over-match），並一度改 `content.py::_maybe_drought_release` 加 narrative-axis guard rescue 3 篇 draft + 寫 2 個 test。
+
+**根因**：feed `published_at` 是 **UTC**。`06:00 UTC = 14:00 台灣時間`（下午剛發，gap 僅 5.46h）。`remediate_publish_drought.py --dry-run` 回 `no drought (gap=5.45h)` 才戳破誤判 —— 系統 freshness 健康、無 drought、drought breaker/remediation 全部**正確運作**。連鎖誤導：(1) 時區換算錯 → 假 drought；(2) `check_arc_dedup.py --title`（只傳 title 沒傳 content）對 K1605/K1574 回 exit=0 → 假「false-positive over-match」；(3) `audit_arc_dedup_overmatches.py` 只比「記錄的 blocker」axis → 看似 over-match。用**完整 content** 跑 `find_arc_duplicates` vs published-only 才確認：**6 篇 draft 全是真 arc-dup**（e.g. mile_3a7bd6f6 區域銀行風險 = K1605 dup of 已發 mile_80cae4cb 同 K1605）。drought breaker withhold 是對的（boss anti-rehash）。
+
+**解決**：(a) 立即 revert `content.py` + test（axis-guard 會 rescue 真 dup → 發 rehash → 違反 anti-rehash + 研究誠實）—— git diff 確認零 code 留存；(b) 認清真相＝**內容飽和**：refill 補不出 fresh reader-facing（所有 uncovered K 皆 arc-dedup dup），reader-facing pending=0；(c) 正解＝派 journal-discovery agent 拓展研究疆域（13 個新 model-class/methodology 方向寫進 research_program.md），產生新 K = 新非 dup 內容源。
+
+**教訓**：(1) **feed `published_at`／所有 storage timestamp 是 UTC**；算 gap/drought 前先 `now_utc - published_at`，或直接信 `remediate_publish_drought.py --dry-run` 的 gap 數字，別用眼睛換算時區。(2) `check_arc_dedup.py` 判 arc-dup 必傳 `--text-file`（完整 content），只給 `--title` 會漏判（title 太短 → arc_signature entities/mechanisms 不足）。(3) dashboard 兩個指標別混：**publishing_freshness**（gap，drought remediation 管）≠ **production_throughput**（24h 累計量，反映內容飽和）。throughput 低 + freshness 健康 = 內容飽和，正解是 journal-discovery 拓疆非催產 dup（memory `feedback_journal_topic_discovery` + `feedback_recycling_is_release_layer_not_research`）。(4) 診斷方向錯時**及時 revert 不硬推**（研究誠實 > 沉沒成本）。
+
 ## 2026-07-04 14:30 `/api/sync/*` 持續 401：OPS_ADMIN_TOKEN 設錯 service + mirror-api image 過重 — **FIXED**
 
 **現象**：publisher / `sync-all` 的 article sync path 對 `https://volpred.zeabur.app/api/sync/reports/*.json` 回 401 `missing credentials`。先前診斷把問題描述成 mirror-api token drift，但真正的 `/api/sync/*` route 是 live frontend `volpred-v3` 的 Next.js route，不是 `mirror-api.zeabur.app` 的 `/api/mirror/*` FastAPI route。

@@ -48481,7 +48481,7 @@
     "title": "研究 backlog fallback: 台股漲跌幅限制 magnet effect 與 2015 年 7%→10% 放寬自然實驗：觸限/近限日的次日 vol 動態",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 台股漲跌幅限制 magnet effect 與 2015 年 7%→10% 放寬自然實驗：觸限/近限日的次日 vol 動態 — TWSE 免費日資料（全市場個股）+ 本機 TAIFEX tick，識別觸限/收在限價 ±1% 內的股票-日，檢定次日 RV continuation vs reversal，2015-06-01 放寬作 DiD（J. Empirical Finance magnet 經典 + PBFJ 2019 price-limit-change 線；台灣是文獻 canonical 市場，資料主場優勢）。新弧：交易制度約束→vol 動態，backlog 無此類。 | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48490,7 +48490,25 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-04T07:30:49+00:00"
+    "created_at": "2026-07-04T07:30:49+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-04T11:34:45.215174+00:00",
+    "claim_session_id": "27502bebbbd4",
+    "status_history": [
+      {
+        "ts": "2026-07-04T11:34:45.215443+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T11:35:04.102047+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-04T11:35:04.101735+00:00"
   },
   {
     "id": "research_tsm_adr_vs_2330_tw_adr_ai",
@@ -48679,7 +48697,7 @@
     "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
     "description": "Article candidate pool + research-backlog 都 dry (refill no_new_candidates_passing_filter). 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。 24h 內 idempotent；勿手動重派。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "source": "auto_journal_discovery_fallback",
@@ -48704,8 +48722,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-19"
+      },
+      {
+        "ts": "2026-07-04T11:41:45.083165+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-19"
       }
     ],
-    "started_at": "2026-07-04T11:31:12.648490+00:00"
+    "started_at": "2026-07-04T11:31:12.648490+00:00",
+    "completed_at": "2026-07-04T11:41:45.082878+00:00",
+    "result": "journal-discovery agent 挖 13 個新研究方向（4 vol-forecast method: GARCH-MIDAS/HARQ/MSM/SV + 5 tail-risk: GAS/EVT-ES/Expectile/CAViaR/GaR + 1 評估 meta: CRPS-MCS + 2 factor + 1 HRP）寫進 research_program.md，避開 2 個已飽和 NULL 弧，全免費資料。打破內容飽和（refill 補不出 fresh reader-facing）。"
   }
 ]

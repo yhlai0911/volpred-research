@@ -477,6 +477,32 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] 銅作為景氣領先的 vol 訊號：CPER/銅期貨代理 vol 與股市 vol 的 lead-lag，「銅博士」在 vol 維度成立嗎（yfinance，明確 lag）
 - [ ] REIT 波動率與利率敏感度：VNQ realized vol 在升息/降息 regime 下的差異，REIT 是股是債（yfinance）
 
+### 期刊主題挖掘 batch（2026-07-04；**內容飽和觸發** — refill 補不出 fresh reader-facing（所有 uncovered K 皆 arc-dedup 判 dup），hourly-19 派 journal-discovery agent 拓展疆域。刻意鎖 model-class / methodology 軸，避開兩個已飽和 NULL 弧：「獵奇外生 shock→次日 RV event-window」（K1602/K1604 ~15 連 NULL）與「新 covariate→HAR OOS 增量」（K1613/K1616-K1619 連 NULL）。全新模型家族 = 新 K = 非 arc-dup 新文章角度。）
+> 來源：journal-discovery agent（WebSearch 2025-26 趨勢層級，未捏造論文標題+作者+期號）。全免費資料 yfinance/FRED/Ken-French 或平台自有 5-min tick（realized-quarticity #HARQ、semibeta #semibeta 若無 5-min 降級日頻 proxy，已標注）。B 群（尾部/ES）對接 FRTB 2025 上路 + Basel IV ES 監理時效，monetization 最高（機構 premium/顧問 tier）。
+
+**A. 波動率預測方法（vol-forecast method）— 新模型類，非「加 covariate 進 HAR」**
+- [ ] GARCH-MIDAS 雙成分分解：長期波動成分是否在長 horizon 打敗單成分 GARCH/HAR — RV-MIDAS（低頻驅動用 RV 自身，免外生 covariate 避 NULL 弧）拆長/短期，22/66 日 horizon OOS QLIKE/DM（來源：J. Forecasting / QFE ~2025-26；GARCH-MIDAS mixed-frequency 大量新作）
+- [ ] HARQ 已實現四次矩測量誤差修正：本機 5-min 算 realized quarticity，HARQ（RV×√RQ 交互修正衰減偏誤）vs 標準 RV-HAR，OOS QLIKE/DM；與 line 1400 noise-robust kernel 正交（那是換 RV 估計量，這是回歸內修正）（來源：Bollerslev-Patton-Quaedvlieg HARQ 系列，2025 活躍延伸 HARQ-X）
+- [ ] Markov-switching multifractal（MSM）作 rough-vs-long-memory 辯論第三解 — GMM 估 Calvet-Fisher MSM（多頻成分生 long memory），OOS 對比 HAR/FIGARCH/MS-GARCH；接 line 1438（level-shift vs long-memory）但問「多重碎形能否更省參數複製 persistence」（來源：JBES MSM 經典 + 2025-26 rough-vol 辯論重燃）
+- [ ] 隨機波動率（threshold SV / realized-SV skew-t）模型類 vs GARCH 的 VaR/分位預測 — QML/Kalman 估 SV（平台幾乎全 GARCH/HAR，缺 SV 整類），一日 OOS QLIKE + quantile 損失；SV 是與 GARCH 平行的獨立生成機制（來源：arXiv 2024-26 Realized SV skew-t / threshold SV）
+
+**B. 尾部風險 / VaR-ES 方法（tail-risk method）— Basel IV/FRTB 2025 上路，ES 取代 VaR 最熱監理主題**
+- [ ] Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Christoffersen/e-backtest；平台無 score-driven 類（來源：J. Econometrics 2026 Catania 等 + IJASEIT 2025 GAS-1F）
+- [ ] EVT（POT/GPD 尾）× GARCH-filter 的 ES 估計 + e-backtesting 賽馬 — GARCH 濾殘差後 GPD 配尾算 ES，對比 FHS 與參數常態/t，用 e-backtest 評分；直服 Basel IV ES 監理時效（來源：Risks 2026 e-backtesting ES + FRTB 2025）
+- [ ] Expectile 型風險測度（EVaR / CARE）：唯一「同時 coherent + elicitable」的尾部量 — 非對稱最小平方估 expectile-VaR + CARE，對照 quantile-VaR 的 backtest 可檢定性（來源：ScienceDirect 2023 Basel III→IV expectile + 2025-26 elicitability）
+- [ ] CAViaR 直接動態分位數 VaR：不建波動模型也能報尾部 — Engle-Manganelli CAViaR（SAV/AS/IG 四式，內含 leverage）vs GARCH-VaR，OOS DQ test；direct-quantile 是完全不同 paradigm（來源：JTSA 2026 adaptive-Lasso CAViaR + JRSS-C 2024 long-range CAViaR）
+- [ ] Growth-at-Risk 搬到市場：以金融條件做「Equity/Vol-at-Risk」多 horizon 分位回歸 — FRED NFCI/信用利差 + yfinance，仿 Adrian et al. GaR，對 SPY 前瞻報酬/RV 的 5% 左尾分位 quantile regression（外生金融條件 conditioning + 對象是尾部而非均值，避 covariate→HAR-mean NULL 弧）（來源：Adrian et al. AER 2019 + IMF 2025 ML-GaR）
+
+**C. 方法論 / 評估 meta（cross-cutting）**
+- [ ] 分布式預測評估：用 CRPS / pinball / coverage + MCS 重排平台 1400+ K 模型 — 重用既有 K 的預測分布/損失序列，改用 proper scoring rules + Hansen-Lunde-Nason MCS 於分布度量而非平方誤差；零新資料的評估層升級 + methodology 素材（來源：arXiv 2025-26 CRPS/MCS）
+
+**D. 因子 / 策略（factor strategy）— 偏 contrarian，含誠實 OOS 反面**
+- [ ] Realized semibeta 截面定價：美股正結果 vs 澳洲反號的跨市場再驗證 — 5-min（或日頻 signed-covariation proxy）建四 semibeta，US + 跨市場 long-short 定價；文獻韓國成立、澳洲反號的誠實穩健題；與 line 1414/K1301 正交（截面報酬定價）（來源：JFE 2022 Bollerslev semibetas + 2024-26 韓/澳複製）
+- [ ] 波動率管理「整個因子動物園」的 OOS 崩潰再驗證 — Ken French 因子 + yfinance，Moreira-Muir vol-managing 套個別因子（SMB/HML/MOM/QMJ），誠實檢 Cederburg OOS 失效 + Barroso-Detzel 成本後不存活；與 line 50 正交（因子層 × 淨成本）（來源：DeMiguel et al. JF 2024）
+
+**E. 組合構建（portfolio construction / cross-asset）**
+- [ ] 階層式風險平價（HRP/NCO/HERC/Schur-complement）OOS vs 風險平價/最小變異 — 多資產 ETF panel，López de Prado HRP（相關聚類 + 準對角化）與變體對比 min-var/risk-parity 的 OOS 穩定性、換手、MDD；圖聚類配置法而非 vol-scaling（來源：JEA / arXiv 2025-26 HRP+DRL / Schur-complement）
+
 ### 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 QJE/AER/JPE/Econometrica/ReStud/JoE/JFE/Quantitative Economics/JFEC/JBES/NBER/AEJ，6 agents、dedup 2402 K，研究總監篩 31→11）
 
 **建模升級軸（直接精進 VolPred vol-forecast 核心，Mission 2+3）**
