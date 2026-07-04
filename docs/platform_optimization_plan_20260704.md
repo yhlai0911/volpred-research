@@ -23,7 +23,7 @@
 | B2 | 文章頁 og:image / twitter:image 缺失（社群分享無圖）| M5 | reports/[id]/page.tsx generateMetadata | ✅ 線上 og:image 生效 |
 | B3 | RSS feed + canonical URL 缺失 | M5 | 新增 rss.xml/route.ts + layout discovery link | ✅ /rss.xml 200 合法 XML |
 | B4 | /feed /papers /strategies 猜測路徑 404 → next.config redirects | M5 | next.config 308 redirects | ✅ /feed→308→首頁 |
-| B5 | Pool 衛生批次：2 筆 false-failed flip、K1330/K1258 closure、過時任務批次關閉 | M4 | 結構性 sync 擴充 + 執行（見 C 區降級為結構修法）| 🔄 進行中 |
+| B5 | Pool 衛生：blocked lane 永不被 sync 重掃的結構盲區（K1330 blocked 11 天） | M4 | **結構性修法**：sync_next_tasks_status 擴充掃 blocked review-gate + 2 tests；K1330 由 FLOW 自動關閉（下次非-hourly sync 執行）| ✅ code+test 完成，data 待下次 sync run |
 | B6 | collect_us 部署版 wrapper 漂移（exit banner 5/29 起消失 = host_cron_fail 盲區）— cp 同步 | M4 | 主線程 | ✅ 已同步部署 |
 | B7 | 2 個 stale memory 更新：strategy lookahead audit 已完成、papers submission framing 更正 | M2/M3 | 主線程 | ✅ 兩 memory + MEMORY.md 已更新 |
 | B8 | Paper stage tracker `stage_entered_at` 7/1 被 bulk 重設 — 依 git 證據回填真實日期 | M3 | 主線程 | 🔄 排入 C 區 |
@@ -60,11 +60,19 @@
 | D2 | 論文投稿 framing 更正 | 兩篇「submission-ready」其實都已被誠實 re-review 撤回 ready（prg 5/21+6/24 兩次、leverage 7/01-03 三連 FAIL）——目前卡點是 revision 工作不是投稿決策；revision 收斂後會再帶完整狀態請老闆做投稿決策 |
 | D3 | 雲端 agent git 分岔（6/24 已同步 0/0）| 建議：停掉雲端 push、改 email-only 報告（本地 push_backlog switch 現在已覆蓋備份監控）。等老闆點頭執行 |
 
-## E. 驗證 gate
+## E. 驗證 gate（本 session 達成情況）
 
-- 全量 pytest 綠（背景執行中）
-- 前端改動：build 過 + safe-deploy + 線上 curl 抽測 sitemap URL 200 + og tags 存在
-- pool 衛生：dashboard blocked/failed 計數下降且無誤關（抽查 3 筆）
-- 每項完成寫回本文件狀態欄
+- ✅ 全量 pytest：15 紅 → 全綠（修 17 個 stale/flaky 測試 + 1 個真 classification bug + live_verify hang）
+- ✅ 前端改動：node22 build 過 + safe-deploy + 線上抽測 sitemap 3 URL 全 200、RSS 200、og:image 存在、/feed→308；SEO commit 已 push GitHub
+- ✅ dispatch_supervisor：3 輪 Codex review 全 finding 修畢（95/95），shadow run live
+- ✅ pool 衛生：結構性 sync 盲區已修（code+test）；K1330 由 flow 自動關閉
+- 🔄 C 區 medium 項排入 task pool，由 hourly/compute worker 消化
 
-*Created 2026-07-04 13:20 台灣時間；owner = interactive main thread。*
+## F. 本 session 未做、明確交接（誠實列出）
+
+- **C 區 14 項** medium 優化排入 pool（event-receipt watchdog / blocked-lane terminal 遷移 / K506·K1380_v4 resurrect / analytics 回饋閉環 / newsletter Phase 1 / paper review 佇列等）
+- **D 區 policy 項**待老闆決策：金流接通（漏斗末端斷裂，pricing+gating 齊全但無付款路徑）、論文投稿（兩篇需先 revision 收斂）、雲端 agent git 分岔處置
+- **sync_next_tasks_status 自動排程化**：目前只手動跑；應 wire 進 ops 迴圈讓 blocked-lane 對帳自動化（C 區補充項）
+- **B8 paper stage_entered_at 回填**：排入 C 區
+
+*Created 2026-07-04 13:20；末次更新 14:23 台灣時間；owner = interactive main thread。*
