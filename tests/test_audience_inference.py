@@ -210,6 +210,7 @@ class TestInferAudiencePublishMilestoneIntegration:
                 audience="general",  # agent mis-tag — should be overridden
                 tags=["一般讀者", "波動率"],
                 status="draft",
+                audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests audience inference
             )
 
         feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
@@ -234,6 +235,7 @@ class TestInferAudiencePublishMilestoneIntegration:
             audience="research",
             tags=["研究", "波動率"],
             status="draft",
+            audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests audience inference
         )
         feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
         item = next(i for i in feed if i["id"] == pub_id)
@@ -253,6 +255,7 @@ class TestInferAudiencePublishMilestoneIntegration:
             audience="general",
             tags=["一般讀者", "定期定額"],
             status="draft",
+            audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests audience inference
         )
         feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
         item = next(i for i in feed if i["id"] == pub_id)

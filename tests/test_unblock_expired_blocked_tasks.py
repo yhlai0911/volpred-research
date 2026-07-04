@@ -37,9 +37,13 @@ def test_invalid_blocked_until_warns_and_stays_blocked(tmp_path, monkeypatch, ca
 
     assert rc == 0
     captured = capsys.readouterr()
-    assert "[unblock] WARN invalid blocked_until; keeping task blocked" in captured.err
+    # 2026-07-04: the warn was migrated to the shared structured `warn()`
+    # diagnostics helper (no-silent-fallback rule) — wording changed from
+    # "invalid blocked_until; keeping task blocked" to a structured line.
+    # Assert on the stable semantic fields, not the old prose.
+    assert "[unblock] WARN blocked_until parse failed" in captured.err
     assert "task_id=blocked_bad_until" in captured.err
-    assert "blocked_until='!!!'" in captured.err
+    assert "raw=!!!" in captured.err
     assert "[unblock] applied: 0 tasks" in captured.out
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "blocked"

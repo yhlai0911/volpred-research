@@ -11,6 +11,7 @@ This module owns the canonical public URL and the verify-after-publish gate.
 
 from __future__ import annotations
 
+import os
 import time
 from datetime import datetime, timezone
 from typing import Callable
@@ -57,9 +58,20 @@ def verify_article_live(
     Returns True on first HTTP 200, False if timeout elapses without 200.
 
     The `_http_check`, `_sleep`, `_now` hooks exist for deterministic testing.
+
+    2026-07-04: when `VOLPRED_NO_REMOTE_WRITE=1` (tests/conftest.py backstop —
+    nothing was synced to the live site, so polling it can NEVER succeed and
+    only burns the full `max_wait_s` per published-status fixture; found via
+    faulthandler after test_audience_inference.py hung a 3-min pytest run),
+    skip the poll entirely and return True WITHOUT hitting the network unless
+    the caller explicitly injected `_http_check` (deterministic unit tests of
+    this module keep exercising the real loop).
     """
     if not mile_id or not isinstance(mile_id, str):
         return False
+    if os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1" and _http_check is None:
+        print(f"  [live_verify] skipped (VOLPRED_NO_REMOTE_WRITE=1): {mile_id}")
+        return True
     url = public_url(mile_id)
     http_check = _http_check or _http_status
     sleeper = _sleep or time.sleep

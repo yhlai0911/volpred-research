@@ -32,6 +32,12 @@ def pub(tmp_path, monkeypatch):
     monkeypatch.setattr(live_verify, "verify_article_live", lambda *a, **kw: True)
     monkeypatch.setattr(live_verify, "stamp_verified", lambda *a, **kw: None)
     monkeypatch.setattr(live_verify, "emit_verify_alert", lambda *a, **kw: None)
+    # 2026-07-04: stub the 2026-06-30 pre-publish burst throttle — this file's
+    # tests publish several articles milliseconds apart, which the rhythm gate
+    # reads as a <30min burst. Cluster gating is what's under test, not the
+    # throttle (that has its own test file).
+    import volpred.publisher.throttle as _throttle
+    monkeypatch.setattr(_throttle, "check_publish_throttle", lambda *a, **kw: None, raising=False)
     for mod_name in ("supabase_sync", "scripts.supabase_sync"):
         try:
             mod = sys.modules.get(mod_name) or importlib.import_module(mod_name)
@@ -89,6 +95,7 @@ def _saturate_cluster(pub, cluster_keyword: str, n: int):
             tags=[cluster_keyword, "一般讀者"],
             status="published",
             details={"cluster_waiver": "test_saturation"},
+            audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests cluster gating
         )
 
 
@@ -133,6 +140,7 @@ class TestTypeLockedExemption:
             category="general",
             tags=["每日建議", "VIX", "策略配置"],
             status="published",
+            audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests cluster gating
         )
         assert pub_id.startswith("mile_")
 
@@ -145,6 +153,7 @@ class TestTypeLockedExemption:
             audience="member_qa",
             tags=["會員提問", "SPY"],
             status="published",
+            audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests cluster gating
         )
         assert pub_id.startswith("mile_")
 
@@ -158,6 +167,7 @@ class TestTypeLockedExemption:
             category="event_article",
             tags=["event_article", "VIX", "FOMC"],
             status="published",
+            audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests cluster gating
         )
         assert pub_id.startswith("mile_")
 
@@ -170,6 +180,7 @@ class TestTypeLockedExemption:
             audience="general",
             tags=["trending_repost", "VIX"],
             status="published",
+            audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests cluster gating
         )
         assert pub_id.startswith("mile_")
 
@@ -177,8 +188,15 @@ class TestTypeLockedExemption:
 class TestClusterCapEnforcement:
     """general/research must be blocked when over cap."""
 
-    def test_general_article_blocked_when_vix_cluster_saturated(self, pub):
-        _saturate_cluster(pub, "VIX", 16)  # over cap=15
+    def test_general_article_blocked_when_vix_cluster_saturated(self, pub, monkeypatch):
+        # 2026-07-04: vix's production hard cap was raised 15→80 ("vol is core
+        # for a vol platform", topic_clusters.py). Saturating to 81 would be
+        # slow and brittle; the gate SEMANTICS (general blocked at count>=cap)
+        # are what this test asserts, so pin a small deterministic cap and
+        # saturate just past it. _temp_cluster_gate_status reads tc.cluster_cap.
+        import volpred.topic_clusters as tc
+        monkeypatch.setattr(tc, "cluster_cap", lambda c: 3)
+        _saturate_cluster(pub, "VIX", 4)  # over pinned cap=3
         with pytest.raises(ValueError, match="topic_cluster_cooldown_blocked"):
             pub.publish_milestone(
                 title="VIX 散戶新解",
@@ -187,6 +205,7 @@ class TestClusterCapEnforcement:
                 audience="general",
                 tags=["VIX", "一般讀者"],
                 status="published",
+                audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests cluster gating
             )
 
     def test_explicit_cluster_waiver_allows_publish(self, pub):
@@ -199,6 +218,7 @@ class TestClusterCapEnforcement:
             tags=["VIX", "一般讀者"],
             status="published",
             details={"cluster_waiver": "rare market event — manual override"},
+            audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests cluster gating
         )
         assert pub_id.startswith("mile_")
 
@@ -212,6 +232,7 @@ class TestClusterCapEnforcement:
             audience="general",
             tags=["債券", "一般讀者"],
             status="published",
+            audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests cluster gating
         )
         assert pub_id.startswith("mile_")
 

@@ -9,6 +9,19 @@ from volpred.ops.scheduler import get_scheduler_state, scheduler_preview, schedu
 from volpred.ops.shared_lock import shared_state_lock
 
 
+@pytest.fixture(autouse=True)
+def _isolate_event_jobs(monkeypatch):
+    """2026-07-04: scheduler_tick → expand_due_event_jobs reads the REAL
+    config/runtime_schedules.json event_jobs even under a tmp storage_dir, so
+    whenever a live event window (CPI/NFP/FOMC) is due it materializes a queued
+    task into the test's store — flipping "no work → skipped" tests to 'ok'.
+    These tests exercise task-selection/skip logic, not event materialization
+    (no test here asserts on expansion), so stub it to an empty result for
+    deterministic isolation. Found when a due event window turned 3 tests red."""
+    empty = {"generated_at": "2026-01-01T00:00:00+00:00", "created": [], "skipped": [], "removed_ledgers": []}
+    monkeypatch.setattr("volpred.ops.scheduler.expand_due_event_jobs", lambda *a, **k: dict(empty))
+
+
 def _write_template(root: Path, name: str, body: str) -> None:
     root.mkdir(parents=True, exist_ok=True)
     (root / name).write_text(body, encoding="utf-8")
