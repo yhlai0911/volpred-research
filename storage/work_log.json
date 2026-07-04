@@ -13848,5 +13848,14 @@
     "owner": "codex",
     "backfilled_at": "2026-07-04T09:21:42.994114+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-04T18:52:09+08:00",
+    "task_type": "experiment",
+    "task_id": "research_rv_long_memory_level_shifts_break_robust_vs_arfi",
+    "outcome": "succeeded",
+    "summary": "k1624 RV apparent long memory is level-shift artifact not true fractional integration (5 spurious+1 mixed); ARFIMA never beats HAR OOS; Granger-Hyung 2004 replicated; Codex gpt-5.5 reviewed",
+    "commit": "955b0ed1a",
+    "owner": "hourly-18"
   }
 ]

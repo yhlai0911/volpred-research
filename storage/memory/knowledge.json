@@ -37535,5 +37535,37 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-07-04T15:54:25.986748"
+  },
+  {
+    "item_id": "faedf43c",
+    "category": "volatility_long_memory",
+    "content": "K1624：波動率的表觀長記憶（apparent long memory, d≈0.4）主要是 level-shift 假象，非真 fractional integration。資料 yfinance daily OHLC：SPY(N=8413, 1993+)、^GSPC(N=10455, 1985+)、0050.TW(N=4282, 2009+)；兩種 log-vol proxy = Garman-Klass range σ² 與 Granger-Hyung |r|(=r²)。Local Whittle d_pre≈0.35–0.56（|r| proxy d̂ 隨 bandwidth 下降＝經典 spurious 訊號）；對 Bai-Perron/PELT 偵測到的 mean level shifts demean 後重估 d_post 大幅崩落（range −0.19~−0.33、absret +0.04~+0.21）。識別用 true-LM parametric bootstrap(B=200) 校準 break-adjusted d_post／Shimotsu W／d-gap，因 break-detection/demean/Shimotsu 在真 LM 下皆 over-reject （已在 simulated true-I(0.4)→no-reject、short-memory+shifts→reject 上 method-validate 才用於資料）。verdict tally：5 spurious + 1 mixed（僅 SPY range 保留弱真 LM 成分）；|r| proxy 三市場一致 spurious → 複現 Granger-Hyung (2004)。OOS(expanding, 月度 refit, OOS=1000)：ARFIMA(0,d,0) 從不勝 HAR，於全部 |r| proxy 顯著更差（HLN-corrected DM t=+10.7~+13.3）且數值脆弱（TW0050 range QLIKE blow-up）；break-robust HAR 不系統性勝 plain HAR。含意：RV 建模用短記憶 HAR + 允許 level shifts，勝過假設 fractional integration 的 ARFIMA/FIGARCH（呼應 K442 FIGARCH d=0.61 無 OOS 增益）。與 rough-vol 線（K529/K806/K936/K1423/K1424）正交：那是 path roughness(H≈0.1)，此為 long-range dependence 的真假識別。",
+    "evidence": [
+      "k1624_rv_long_memory_vs_level_shifts",
+      "experiments/k1624_rv_long_memory_vs_level_shifts/",
+      "Local Whittle d_post: SPY range -0.334 (67 breaks), SPY absret +0.035, TW0050 range -0.187",
+      "true-LM bootstrap p_spurious(d_post): SPY range 0.0 (d_post far above null band [-0.49,-0.17])",
+      "OOS HLN-DM ARFIMA-HAR: SPY absret t=+10.72, GSPC absret t=+13.22, TW0050 absret t=+13.32 (ARFIMA worse)",
+      "seed=42; Granger-Hyung 2004 replication (|r| proxy spurious across 3 markets)",
+      "Codex CLI gpt-5.5 xhigh: 7/8 confirmed; 1 HIGH (Part2 full-sample floor lookahead) fixed + experiment re-run, verdicts robust"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-07-04T18:51:08.141074",
+    "verdict": "PASS",
+    "experiment_id": "k1624_rv_long_memory_vs_level_shifts",
+    "k_id": "k1624",
+    "reviewer": "Codex CLI (gpt-5.5, xhigh)",
+    "reviewer_source": "codex_cli_primary_path",
+    "codex_review": "7/8 sections confirmed; 1 HIGH (Part2 full-sample floor lookahead) fixed + re-run; verdicts robust",
+    "tags": [
+      "long_memory",
+      "spurious",
+      "level_shift",
+      "ARFIMA",
+      "HAR",
+      "identification",
+      "Granger-Hyung",
+      "realized_volatility"
+    ]
   }
 ]
