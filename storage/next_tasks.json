@@ -48549,7 +48549,7 @@
     "title": "研究 backlog fallback: TSM ADR vs 2330.TW 波動傳導與創紀錄 ADR 溢價：AI 時代價格發現往哪邊移",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: TSM ADR vs 2330.TW 波動傳導與創紀錄 ADR 溢價：AI 時代價格發現往哪邊移 — yfinance TSM/2330.TW/TWD=X 日資料（可加本機日內），拆隔夜/日內段檢定 lead-lag 與溢價變動對雙邊 vol 預測力；2024-26 ADR 溢價歷史級高位是現成敘事鉤（JF/JFM cross-listing price-discovery 經典線）。與 #157（TAIEX 隔夜 VRP）不同——雙上市資訊份額弧，台灣讀者高共鳴。 | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48558,7 +48558,25 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-04T07:30:49+00:00"
+    "created_at": "2026-07-04T07:30:49+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-07-04T14:11:16.387221+00:00",
+    "claim_session_id": "9e1f7cd4b9be",
+    "status_history": [
+      {
+        "ts": "2026-07-04T14:11:16.387494+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-04T14:12:27.270846+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-22"
+      }
+    ],
+    "started_at": "2026-07-04T14:12:27.270558+00:00"
   },
   {
     "id": "telegram-127",
@@ -48814,7 +48832,7 @@
     "title": "研究 backlog fallback: GARCH-MIDAS 雙成分分解：長期波動成分是否在長 horizon 打敗單成分 GARCH/HAR",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: GARCH-MIDAS 雙成分分解：長期波動成分是否在長 horizon 打敗單成分 GARCH/HAR — RV-MIDAS（低頻驅動用 RV 自身，免外生 covariate 避 NULL 弧）拆長/短期，22/66 日 horizon OOS QLIKE/DM（來源：J. Forecasting / QFE ~2025-26；GARCH-MIDAS mixed-frequency 大量新作） | 來源 section: 期刊主題挖掘 batch（2026-07-04；**內容飽和觸發** — refill 補不出 fresh reader-facing（所有 uncovered k 皆 arc-dedup 判 dup），hourly-19 派 journal-discovery agent 拓展疆域。刻意鎖 model-class / methodology 軸，避開兩個已飽和 null 弧：「獵奇外生 shock→次日 rv event-window」（k1602/k1604 ~15 連 null）與「新 covariate→har oos 增量」（k1613/k1616-k1619 連 null）。全新模型家族 = 新 k = 非 arc-dup 新文章角度。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48823,7 +48841,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-04T13:08:50+00:00"
+    "created_at": "2026-07-04T13:08:50+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-04T14:09:53.486080+00:00",
+    "claim_session_id": "d3f7f9248480",
+    "status_history": [
+      {
+        "ts": "2026-07-04T14:09:53.486362+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T14:09:59.718825+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T14:19:03.332226+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-04T14:09:59.718495+00:00",
+    "completed_at": "2026-07-04T14:19:03.331919+00:00",
+    "result": "完成 experiments/research_garch_midas_horizon_garch_har/ 三件套與 Codex review。SPY/QQQ/GLD daily proxy H=22/66 結果：HAR pooled QLIKE 最佳；Component_MIDAS/HAR_MIDAS 對 HAR 無 Harvey-pass 增量且平均 QLIKE 較差。"
   },
   {
     "id": "research_harq_5_min_realized_quarticity_harq_rv_rq_vs_rv",
