@@ -48965,7 +48965,7 @@
     "task_type": "telegram_reply",
     "priority": "P1",
     "source": "telegram",
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-07-04T14:27:56.100981+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 149）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n現在這個是怎樣？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
@@ -48978,15 +48978,22 @@
         "from": "pending",
         "to": "claimed",
         "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-04T14:35:27.177373+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
       }
-    ]
+    ],
+    "completed_at": "2026-07-04T14:35:27.177086+00:00"
   },
   {
     "id": "telegram-151",
     "task_type": "telegram_reply",
     "priority": "P1",
     "source": "telegram",
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-07-04T14:28:20.368613+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 151）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nVOLPRED 管理通知\n發文脫班補救失敗：force-release/refill 皆為 0\nAlert level: critical\n✖\nCRITICAL\n白話結論\n系統偵測到讀者端內容更新可能中斷，需要先恢復發文節奏。\n影響\n影響文章品質、讀者信任與流量表現。\n行動\n先補一篇可發佈文章或觸發釋出流程，再追查為什麼排程沒接上。\n\nPublishing-freshness dead-man switch attempted automatic remediation, but both live escape paths returned empty.\npublish_gap_hours: 7.45\nthreshold_hours: 6.0\nforce_release.released: 0\nrefill_reader_facing.added: 0\nrefill_reader_facing.reason: no_reader_facing_candidates_passing_filter\nRequired operator action: create or dispatch a fresh reader-facing article task; do not treat this as a no-op.\n\n\n立刻處理\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
@@ -48999,8 +49006,15 @@
         "from": "pending",
         "to": "claimed",
         "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-04T14:35:27.426491+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
       }
-    ]
+    ],
+    "completed_at": "2026-07-04T14:35:27.426130+00:00"
   },
   {
     "id": "research_k1626f_tsm_adr_asof_alignment_gate",
@@ -49021,5 +49035,23 @@
       "price-discovery"
     ],
     "created_at": "2026-07-04T14:34:05.460284+00:00"
+  },
+  {
+    "id": "daily_market_vol_snapshot_20260704",
+    "title": "今日市場波動率快照（2026-07-04）— 非農後 VIX/TAIEX/美股 vol 反應解讀",
+    "description": "發文脫班 remediation（telegram-149/151，root cause C = reader 題材池空）：正式 refill 撈不到候選（event out_of_horizon、member_qa 無 pending），draft 池 6 篇全 arc-dup。補一筆綁 LIVE 數據的即時市場波動率快照，天生非 arc-dup。內容：本週非農公佈後 VIX 收/盤中反應、TAIEX 已實現波動、美股 vol term structure。主線程/dispatch 用真 yfinance+FRED 數據寫，走 feed-publisher + anti-ai-style，含真圖表。禁 ASCII 圖、禁鬼打牆敘事。audience=general。",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "daily_article",
+    "dispatch_lane": "agent",
+    "source": "telegram_remediation",
+    "topic_cluster": "market_snapshot",
+    "tags": [
+      "telegram-remediation",
+      "publish-drought-fix",
+      "live-data",
+      "nfp"
+    ],
+    "created_at": "2026-07-04T14:34:47+00:00"
   }
 ]
