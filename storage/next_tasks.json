@@ -48124,7 +48124,7 @@
     "title": "研究 backlog fallback: RV 持續性是真 long memory 還是 level shifts 假象：break-robust 模型 vs ARFIMA/HAR/rough 的識別與預測含意",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: RV 持續性是真 long memory 還是 level shifts 假象：break-robust 模型 vs ARFIMA/HAR/rough 的識別與預測含意 — SPY 2000-2026 + TAIEX 長樣本 log-RV，估 random-level-shift + spurious-memory 檢定，shift-adjusted 預測 vs HAR/ARFIMA 對比；與 #131（roughness 穩定性）區分：問 persistence 來源識別非粗糙度估計（IJTAF 2025 rough vol survey + JoE spurious-long-memory | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48133,14 +48133,32 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-04T04:52:57+00:00"
+    "created_at": "2026-07-04T04:52:57+00:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-07-04T06:17:03.263675+00:00",
+    "claim_session_id": "22b68b0e423a",
+    "status_history": [
+      {
+        "ts": "2026-07-04T06:17:03.263942+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-14"
+      },
+      {
+        "ts": "2026-07-04T06:17:03.531150+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-14"
+      }
+    ],
+    "started_at": "2026-07-04T06:17:03.530859+00:00"
   },
   {
     "id": "research_n_partial_day_rv",
     "title": "研究 backlog fallback: 部分日資訊的價值曲線：開盤後 N 小時的 partial-day RV 何時就「夠了」預測明天",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 部分日資訊的價值曲線：開盤後 N 小時的 partial-day RV 何時就「夠了」預測明天 — 本機 5-min SPY/TAIFEX，partial-day RV(10:30/12:00/14:00/收盤) 逐步 HAR nowcast，畫「資訊到達→OOS QLIKE 改善」曲線找邊際價值歸零點；直接回饋 VT 執行時點（IJF 2025 intraday spot vol + JFEC intraday-decomposition 線）。與 #24（跨資產 feature）/#166（乘法 intraday GARCH spec）不同——這是資訊時點 vs 預測價值的 timing  | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48149,7 +48167,29 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-04T04:52:57+00:00"
+    "created_at": "2026-07-04T04:52:57+00:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-07-04T06:14:18.292739+00:00",
+    "claim_session_id": "6fe1e27fbb80",
+    "status_history": [
+      {
+        "ts": "2026-07-04T06:14:18.293020+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-14"
+      },
+      {
+        "ts": "2026-07-04T06:14:18.546172+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-14"
+      }
+    ],
+    "started_at": "2026-07-04T06:14:18.545856+00:00",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-07-04T06:17:02+00:00",
+    "blocked_note": "本機 intraday 5-min (SPY+0050) 僅 2026-01-14~07-02 ~115 交易日/資產；partial-day RV 資訊價值曲線需多年高頻做穩健 expanding-OOS。待長歷史 intraday 源(付費/自建 tick 累積>2年)後解封",
+    "blocked_until": "2026-10-01"
   },
   {
     "id": "research_predictor_zoo_30_predictor_romano_wolf_fdr_oos",
@@ -48166,5 +48206,63 @@
       "research-program-backlog"
     ],
     "created_at": "2026-07-04T04:52:57+00:00"
+  },
+  {
+    "id": "telegram-114",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-04T06:18:42.715346+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 114）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n這已經出現第幾次了？\n你他媽的再不立刻解決\n只是在那邊頭痛醫頭腳痛醫腳 那留你有什麼屁用？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "completed_at": "2026-07-04T06:26:54.237325+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-04T06:26:54.237618+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "complete"
+      }
+    ]
+  },
+  {
+    "id": "platform_ops-release-layer-deadlock-ROOTFIX-20260704",
+    "task_type": "platform_ops",
+    "priority": "P1",
+    "source": "boss-telegram-msg114",
+    "status": "pending_main_thread",
+    "created_at": "2026-07-04T06:26:11.002489+00:00",
+    "title": "根治釋出層 deadlock（不再靠臨時 release 打發脫班）— refactor plan 躺 10 天必落地",
+    "description": "老闆 telegram msg114（07-04 14:18）：『這已經出現第幾次了？頭痛醫頭腳痛醫腳』。事實：發文脫班 alert 7/3 觸發 30 次、7/4 15 次；今早 05:16 才又硬化一次 drought remediation (platform_ops-drought-hardening-20260704, source msg110) — 那是補救 ladder 疊第 N 層 patch，不是根治。真正根因在釋出層：docs/refactor_plan_release_layer_deadlock.md 於 2026-06-24 建、狀態至今仍『診斷完成待實作』，躺 10 天沒落地，期間每次脫班都靠臨時 force-release 一篇打發（= 老闆說的頭痛醫頭）。\n\n根治要求（大工程，主線程專屬，禁 background agent 半吊子）：\n1. 完整實作 refactor_plan_release_layer_deadlock.md 三層方案（cluster-cap / arc-dedup 卡死 draft 的釋出邏輯 + 生產→釋出 pacing 解耦）。\n2. 廢棄『靠臨時 remediation 補丁防脫班』的 reliance，降為 backstop；single owner 收編，不再疊新 gate。\n3. Regression：模擬 draft 池非空但被 cluster/arc dedup 全擋 → 斷言不再脫班。\n4. Codex review PASS + build/test 通過 + 部署上線 + 線上驗證下一次不再脫班 + telegram 回報老闆才算完成。\n研究誠實：改流程不改資料。Deadline：2026-07-04 今晚 23:00 前落地並回報。",
+    "deadline": "2026-07-04T15:00:00+00:00"
+  },
+  {
+    "id": "telegram-117",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-04T06:41:37.177127+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 117）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n不要忘記我們有兩個版本的網頁\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-04T06:42:14.215605+00:00",
+    "claim_session_id": "8173eb1be158",
+    "status_history": [
+      {
+        "ts": "2026-07-04T06:42:14.215951+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-04T06:44:07.721115+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-04T06:44:07.720777+00:00"
   }
 ]
