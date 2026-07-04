@@ -37693,5 +37693,22 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-07-05T05:37:28.747543"
+  },
+  {
+    "item_id": "3b38aaba",
+    "category": "myth_verification",
+    "content": "K1635 迷思驗證「台積電打噴嚏、台股重感冒」(2330.TW→^TWII, 2010-2026, N=4026, seed=42)。VERDICT=CONDITIONAL_PASS(部分成立). M1 集中度前提成立且強化: 2330 市值 1.68→63.4 兆(37.67x); 權重近似 ~5.4%→~36%(常數除數會誇大上升, 非官方 TWSE 權重). M2 傳導 同日成立/隔日被誇大: -3% 門檻 N=98 同日 P(TWII跌)=98.98% 均值 -2.62%(Welch t=-16.3,p≈0) vs 機械算術 ~權重×跌幅 -1.05% → 有超出機械的真實共動; 隔日 T+1 P(跌)=43.9%(略低於平常45.6%) 均值+0.078%(p=0.90 不顯著) → 「隔天繼續病」方向性拖累不成立(市場當日定價完). -5% 門檻 N=15 同日 100%下跌均值-4.22%, T+1 p=0.75 NS. M3 beta: 全期 β=0.537(HAC t=34.5,R²=0.66) >> 機械權重~0.35 → 真實全市場共動; rolling β 2014~0.35→2025~0.70(隨集中度升); downside β=0.645 > upside β=0.482 不對稱顯著(z=3.59,p=0.0003); 極端大跌交互項 p=0.11 不顯著(非大跌恐慌放大器, 一般性下跌共動). M4 波動傳導 成立顯著持續: -3% 事件後 fwd-5d RV=24.2% vs 14.2%(1.70x, Welch t=6.27 p≈0); -5% 32.3% vs 14.4%(2.25x, p=9e-4). 限制: 同日含機械成分; -5% N=15 power 有限(宜補 Fisher exact); M4 forward window 重疊使 p 偏樂觀(宜 block bootstrap/HAC dummy); 未控制美股隔夜/費半/匯率 → 條件關聯 event study 非因果識別; downside/upside z-test 為獨立估計近似. measured wording 約束: 不宣稱可交易 alpha, 不把同日傳導當純外溢因果. Reviewer: Codex gpt-5.5 xhigh CONDITIONAL_PASS 無 blocker (session 019f2f48, 2026-07-05). reader-facing angle: 同日一起感冒(部分是算術+真共動), 隔天不會繼續病, 但接下來一週波動明顯放大; 集中度使俗諺今天比十年前更貼切.",
+    "evidence": [
+      "experiment_id=k1635",
+      "k_id=k1635",
+      "experiment_path=experiments/k1635/",
+      "experiment_script=experiments/k1635/k1635.py",
+      "results=experiments/k1635/k1635_results.json",
+      "reviewer=Codex gpt-5.5 xhigh (session 019f2f48)",
+      "codex_verdict=CONDITIONAL_PASS",
+      "figs: k1635_fig1_concentration.png, fig2_transmission.png, fig3_rolling_beta.png, fig4_vol_transmission.png"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-07-05T06:43:05.158480"
   }
 ]

@@ -28,8 +28,8 @@
 - [project_platform_profitability_goal.md](project_platform_profitability_goal.md) — 平台 ultimate goal = 盈利；5-mission 是 means；task priority 加問「對 monetization 何貢獻」
 - [project_fb_page_operation.md](project_fb_page_operation.md) — VolPred 粉專(id 61590464616031)由 AI 全權經營+優化+固定巡檢；Chrome 發文個人優先於粉專；headless API 卡 App Review
 - [project_prepublish_content_gate.md](project_prepublish_content_gate.md) — 發佈前有 content-vs-source gate（prepublish_audit.py）；正確性驗證在 publish 之前；sync 改 hash-based
-- [project_papers_awaiting_submit_decision.md](project_papers_awaiting_submit_decision.md) — leverage-direction(JBF,13d)+prg-periodic-garch(FRL,63d) submission-ready 卡投稿決策；M3 真瓶頸=submit gate；paper_stale alert 兜底；boss 回前每隔幾 tick 重提
-- [project_strategy_lifecycle_standing_directive.md](project_strategy_lifecycle_standing_directive.md) — boss standing directive：策略持續增加，好的上架觀察壞的下架走既有 gate；3 檔高Sharpe inactive(tz_tw_jp/taiwan_spy_momentum/global_vt_tz)待 lookahead audit 不可盲目翻 active
+- [project_papers_awaiting_submit_decision.md](project_papers_awaiting_submit_decision.md) — 更正(7/4)：兩篇原 ready 論文均被誠實 re-review 撤回；M3 瓶頸=revision 收斂(prg=K1544 narrative、leverage=method-null rewrite)非投稿決策；停用「重提投稿」
+- [project_strategy_lifecycle_standing_directive.md](project_strategy_lifecycle_standing_directive.md) — boss standing directive：策略持續增加，好的上架觀察壞的下架走既有 gate；3 檔高Sharpe inactive 的 lookahead audit 已完成(6/21 全 reject：c2c artifact)維持 inactive
 - [project_cloud_agent_git_divergence.md](project_cloud_agent_git_divergence.md) — 雲端 Claude agent 每 6h push ops 報告到 origin/main 與本機研究線從 6/4 分岔；6/24 已同步(0/0)；待決定停掉或改 email-only；自動 push 待此決定後再建
 
 ## Feedback — Paper Submission
@@ -101,6 +101,7 @@
 - [feedback_trending_repost_route.md](feedback_trending_repost_route.md) — 第 11 類 trending_repost：熱門文章 VolPred 角度改寫，無抄襲無引用，每日 ≤2 篇，雙發佈 feed + Ivan Lai FB
 - [feedback_use_anti_ai_style.md](feedback_use_anti_ai_style.md) — 寫 zh-Hant reader-facing 文章必用 `.claude/skills/anti-ai-style/`：寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist
 - [feedback_reader_facing_3canon.md](feedback_reader_facing_3canon.md) — Reader-facing 文章（特別 trending_repost）開工前必讀 3 canonical（trending-repost SKILL + anti-ai-style SKILL + publishing rules）+ evidence package 先於 prose
+- [feedback_digest_theme_first_whole_archive.md](feedback_digest_theme_first_whole_archive.md) — 精選導讀先由時事訂主題→從整庫找佐證回答主題（非本週 recap）；反覆糾正後升級 publishing.md rule + 機械 gate（archive-span，span<14天硬擋）
 - [feedback_narrative_arc_dedup.md](feedback_narrative_arc_dedup.md) — Layer 4 dedup: 同邏輯 arc 不同外殼算 dup（N 換大、cut-point 變奏、proxy 換但同結論）
 - [feedback_fb_opening_no_friend_asked.md](feedback_fb_opening_no_friend_asked.md) — FB Ivan Lai 貼文 anti-AI-style 完整規則（禁朋友問我 hook + 禁列表 + 禁解釋語氣 + 7 條 self-check）
 - [feedback_autonomous_loop_email_summary.md](feedback_autonomous_loop_email_summary.md) — Autonomous ScheduleWakeup fire 結尾**必**寄 email summary 給老闆 + 排下次 wakeup（4-step protocol）
@@ -111,6 +112,7 @@
 - [feedback_lazypack_infographic.md](feedback_lazypack_infographic.md) — 一般讀者文章文末附懶人包圖組；NotebookLM 能生圖、多圖 poster、餵 evidence package 寫文中生、禁付費 API
 - [reference_frontend_nested_git_repo.md](reference_frontend_nested_git_repo.md) — frontend-v2-fix 是獨立巢狀 git repo（主 repo gitignore）；commit 前端要 cd 進去
 - [feedback_no_cd_into_worktree_before_merge.md](feedback_no_cd_into_worktree_before_merge.md) — merge worktree 前勿 cd 進 worktree（持久 cwd 汙染使 merge_worktree.sh 誤刪未合併工作；K1032/K1618 root cause，merge 後必驗檔案存在）
+- [feedback_worktree_stale_base_extract_by_path.md](feedback_worktree_stale_base_extract_by_path.md) — worktree 從 stale base 分出使 merge guard abort 時，用 `git checkout <branch> -- experiments/kXXXX/` path-scoped 抽取，勿硬 merge（K1619 實測零遺失）
 - [feedback_proactively_complete_red_alerts.md](feedback_proactively_complete_red_alerts.md) — 看到紅色/critical 主動完成或排程完成並告訴老闆，不被動回報
 - [feedback_continuous_work_and_read_mail.md](feedback_continuous_work_and_read_mail.md) — autonomous tick 要持續做實事不心跳空轉；mandate 直接讀 Gmail 最新信不靠 lagging task
 - [feedback_refill_check_saturation_and_running_hourly.md](feedback_refill_check_saturation_and_running_hourly.md) — 補池前必 pgrep hourly 避免 race + 判斷 K 可寫要查 narrative-arc 飽和不只 results.json

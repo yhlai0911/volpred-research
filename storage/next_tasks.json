@@ -49317,7 +49317,7 @@
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「台積電打噴嚏、台股重感冒」權值集中度與 2330 單日大跌對大盤的傳導",
     "description": "量化台股 reader 最有感的說法。用 2330.TW + ^TWII，量化 2330 權重集中度、2330 單日大跌（如 -3%/-5%）當日/隔日對大盤報酬與波動的傳導強度，條件機率與 beta。台股讀者高共鳴。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49328,7 +49328,33 @@
       "reader-facing",
       "investment-urban-legend"
     ],
-    "created_at": "2026-07-04T14:40:15+00:00"
+    "created_at": "2026-07-04T14:40:15+00:00",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-07-04T22:08:46.634488+00:00",
+    "claim_session_id": "350c91ea54ae",
+    "status_history": [
+      {
+        "ts": "2026-07-04T22:08:46.634864+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-06"
+      },
+      {
+        "ts": "2026-07-04T22:09:02.037561+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-06"
+      },
+      {
+        "ts": "2026-07-04T22:43:18.641999+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-06"
+      }
+    ],
+    "started_at": "2026-07-04T22:09:02.037181+00:00",
+    "completed_at": "2026-07-04T22:43:18.641696+00:00",
+    "result": "K1635 完成: 台積電傳導迷思 CONDITIONAL_PASS(部分成立). 同日成立(β0.54>機械0.35)+隔日不顯著(p0.90)+波動放大(1.70/2.25x)+集中度強化(6%→36%). Codex gpt-5.5 xhigh 無blocker. knowledge item 3b38aaba. 已排 reader-facing 文章 follow-up."
   },
   {
     "id": "research_myth_us_down_tw_gap_down_next_day",
@@ -49379,7 +49405,7 @@
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「量先價行 / 爆量長黑是出貨」成交量能否預測隔日方向？",
     "description": "驗證技術分析最流行迷思之一。用 SPY/2330/^TWII 量價數據，檢定放量（volume z-score 高）+ 特定 K 棒型態是否對隔日報酬有預測力，訊號嚴格 shift(1) 避 lookahead，正式檢定勝率是否顯著優於基準。reader 超愛的技術分析破解。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49390,7 +49416,25 @@
       "reader-facing",
       "investment-urban-legend"
     ],
-    "created_at": "2026-07-04T14:40:15+00:00"
+    "created_at": "2026-07-04T14:40:15+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-04T22:41:56.277634+00:00",
+    "claim_session_id": "0fade67978ba",
+    "status_history": [
+      {
+        "ts": "2026-07-04T22:41:56.277928+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T22:41:56.520699+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-04T22:41:56.520417+00:00"
   },
   {
     "id": "telegram-160",
@@ -49798,5 +49842,39 @@
       }
     ],
     "completed_at": "2026-07-04T17:11:26.577632+00:00"
+  },
+  {
+    "id": "trending_repost_2026_07_05_ai基建",
+    "title": "[trending_repost] 科技巨頭千億支出，AI波動率偏斜如何定價泡沫？",
+    "description": "從美股科技巨頭超預期的 AI 資本支出切入，探討市場對「變現期延遲」的定價。可量化角度：分析 Mag 7 隱含波動率偏斜（Skew）在財報公布前後的變化，驗證下檔風險溢價的攀升。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-04T22:00:26+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "daily_article_k1635_tsmc_sneeze_myth",
+    "title": "K1635 reader-facing 文章：台積電打噴嚏、台股重感冒？拆給你看（迷思驗證系列）",
+    "description": "把 K1635 迷思驗證寫成台股讀者向文章（天生高分享/高回訪, Mission #1/#5）。核心敘事三段: (1) 同日確實一起感冒——但有相當部分是台積電佔指數約三分之一的『算術』, β=0.54>機械0.35 證實仍有超出機械份額的真實全市場共動; (2) 『隔天繼續病』是迷思——市場當日就定價完, 隔日方向與平常無異甚至略偏(不顯著)反彈(p=0.90); (3) 真正該留意的是接下來一週波動明顯放大(-3%→1.70x, -5%→2.25x); 集中度從~6%升到~36%使俗諺今天比十年前更貼切。 硬約束(Codex CONDITIONAL_PASS + 研究誠實): 不宣稱可交易 alpha; 不把同日傳導當純外溢因果(未控美股隔夜/費半/匯率, 是條件關聯非因果); -5% N=15 標 suggestive; 用 experiments/k1635 的 4 張真圖。開工前讀 anti-ai-style SKILL + trending-repost SKILL + publishing.md 3 canonical + 跑 anti_ai_gate.py + check_arc_dedup.py。source K=k1635, knowledge item 3b38aaba。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "myth_series_k1635_followup",
+    "k_id": "k1635",
+    "tags": [
+      "reader-facing",
+      "myth-verification",
+      "tw-stock",
+      "audience-general",
+      "high-share"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-04T22:44:23+00:00"
   }
 ]
