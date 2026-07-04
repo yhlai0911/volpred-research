@@ -38,6 +38,7 @@ echo "=== telegram responder start $(date '+%F %T') ==="
 PROMPT='你是 VolPred 平台的 Telegram 即時回應者。唯一任務：處理老闆經 Telegram 傳來的待辦訊息，然後結束。
 
 流程（嚴格照做）：
+0. 先 `uv run python scripts/telegram_memory.py list` —— Telegram 專用長期記憶（老闆過去透過 Telegram 交代的長期偏好/指示）。處理任務時遵守這些偏好。若本次老闆訊息是「記住：…」「以後都…」類長期指示，用 `uv run python scripts/telegram_memory.py add "…"` 寫入後再回覆確認。
 1. 讀 storage/next_tasks.json，找出全部 status=="pending" 且 task_type=="telegram_reply" 的任務（可能多筆，全部處理）。沒有 → 直接結束，不做別的事。
 2. 逐筆：`uv run python scripts/task_pool_claim.py claim --id <id> --owner telegram-responder` → 完成任務要求的實事（查數據就真查、要修就真修小事；大工程不要在這裡做 — 先回覆老闆「已排入任務池，預計何時」並把後續工作留給 hourly dispatch，可用 refill 或直接 append 對應任務）→ 用 `uv run volpred ops telegram-send --text "..."` 回覆老闆 → `uv run python scripts/task_pool_claim.py complete --id <id>`。
 3. 回覆風格：短、直接、口語 — 這是即時聊天。結論先講；細節一行帶過或說在哪。禁止長報告。
