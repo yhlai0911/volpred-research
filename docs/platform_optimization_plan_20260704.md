@@ -56,9 +56,9 @@
 
 | # | 項目 | 現況與選項 |
 |---|---|---|
-| D1 | **金流接通**（變現漏斗末端斷裂：pricing 頁 + tier gating 齊備，但想付錢也無路可付）| 最小可行：Stripe Payment Links 或台灣在地 TapPay/藍新 + webhook 更新 role，先讓 Radar Plus 單一方案可付。需老闆決定：金流商選擇、定價、開收費的時點 |
-| D2 | 論文投稿 framing 更正 | 兩篇「submission-ready」其實都已被誠實 re-review 撤回 ready（prg 5/21+6/24 兩次、leverage 7/01-03 三連 FAIL）——目前卡點是 revision 工作不是投稿決策；revision 收斂後會再帶完整狀態請老闆做投稿決策 |
-| D3 | 雲端 agent git 分岔（6/24 已同步 0/0）| 建議：停掉雲端 push、改 email-only 報告（本地 push_backlog switch 現在已覆蓋備份監控）。等老闆點頭執行 |
+| D1 | **金流接通**（變現漏斗末端斷裂）| **後端骨架已建（2026-07-04，關閉狀態）**：`src/volpred/payments/` 綠界 adapter + CheckMacValue（官方向量驗證）+ PAYMENTS_ENABLED off，見 `docs/payments_go_live_checklist.md`。仍需老闆決定：達標時點、申請正式綠界商戶、開收費 |
+| D2 | 論文投稿 framing 更正 | 無立即待決策項——目前無任何論文 submission-ready（garch-x-vix 已投稿審查中，其餘皆 revision/draft）。將來會來的決策：(a) 7 篇 journal_target="decide" 的目標期刊（我提案、老闆核可）；(b) 某篇真正 ready 時的「投不投 X 期刊」（outward-facing 不自動投） |
+| D3 | ~~雲端 agent git 分岔~~ | **已於 2026-06-24 由老闆決定解決**（停雲端 push、4 routines disabled、本地 git_push_backup 接手）。我先前誤列為待決策——實際無待辦，唯一殘餘是 disabled routines 可到 claude.ai 完全刪除（非必要） |
 
 ## E. 驗證 gate（本 session 達成情況）
 
