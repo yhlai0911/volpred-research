@@ -48465,7 +48465,7 @@
     "title": "研究 backlog fallback: Perp funding rate 與槓桿清算循環：極端 funding 是否不對稱預示 BTC/ETH 高 RV regime",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Perp funding rate 與槓桿清算循環：極端 funding 是否不對稱預示 BTC/ETH 高 RV regime — Binance/Bybit/OKX 免費 public API 抓 2020-2026 funding 歷史（⚠️ 地區存取 dispatch 前驗證；fallback CoinGlass 免費層），檢定 funding 極端分位後 RV 上移的不對稱性，2025-10 $19B 清算事件做 OOS 錨（digital finance/JAI 方向 + 2025-10 史上最大清算 systemic-risk 檢討線）。與既有 crypto 弧（spillove | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48474,7 +48474,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-04T07:30:49+00:00"
+    "created_at": "2026-07-04T07:30:49+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-04T12:59:40.011837+00:00",
+    "claim_session_id": "0c6139070f48",
+    "status_history": [
+      {
+        "ts": "2026-07-04T12:59:40.012151+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T12:59:40.252750+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T13:07:26.510814+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-04T12:59:40.252468+00:00",
+    "completed_at": "2026-07-04T13:07:26.510510+00:00",
+    "result": "K1625 completed. Binance BTC/ETH perp funding experiment produced MIXED_WEAK_SINGLE_CELL: BTC funding_z predicts 5d high-RV (t=3.79) and log-RV (t=4.07), but ETH does not replicate and pos-vs-neg asymmetry fails; no broad funding/liquidation signal claim."
   },
   {
     "id": "research_magnet_effect_2015_7_10_vol",
@@ -48747,7 +48773,7 @@
     "title": "Paper review (Codex 24h-rule): 新興市場主權債的波動率,能提前預告 EM 股市風暴嗎?一次誠實的否定(K1621)",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_a656a042 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_a656a042",
@@ -48771,8 +48797,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-20"
+      },
+      {
+        "ts": "2026-07-04T12:59:33.495821+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-20"
       }
     ],
-    "started_at": "2026-07-04T12:11:23.509854+00:00"
+    "started_at": "2026-07-04T12:11:23.509854+00:00",
+    "completed_at": "2026-07-04T12:59:33.495473+00:00",
+    "result": "Codex 24h post-publication review completed. Verdict=CONDITIONAL_PASS: core K1621 numbers/methods match results/code; required fixes are VIX date table mismatch and clearer OAS OOS-window/min_train_short wording."
   }
 ]

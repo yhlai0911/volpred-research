@@ -1,0 +1,917 @@
+{
+  "experiment_id": "k1625",
+  "generated_at": "2026-07-04T13:06:52.400760+00:00",
+  "seed": 42,
+  "config": {
+    "data_source": "Binance USD-M futures public API (/fapi/v1/fundingRate, /fapi/v1/klines)",
+    "symbols": {
+      "BTC": "BTCUSDT",
+      "ETH": "ETHUSDT"
+    },
+    "start_date_requested": "2019-09-01",
+    "end_date_requested": "2026-07-04",
+    "funding_roll_days": 365,
+    "funding_min_days": 180,
+    "rv_threshold_roll_days": 365,
+    "rv_threshold_min_days": 180,
+    "horizons": [
+      1,
+      5
+    ],
+    "harvey_abs_t_threshold": 3.0,
+    "lookahead_control": "features use funding.shift(1); h=5 high-RV threshold uses labels shifted by h"
+  },
+  "data_provenance": {
+    "BTC": {
+      "funding_csv": "data/BTCUSDT_funding.csv",
+      "klines_csv": "data/BTCUSDT_klines_1d.csv",
+      "analysis_panel_csv": "data/BTC_analysis_panel.csv"
+    },
+    "ETH": {
+      "funding_csv": "data/ETHUSDT_funding.csv",
+      "klines_csv": "data/ETHUSDT_klines_1d.csv",
+      "analysis_panel_csv": "data/ETH_analysis_panel.csv"
+    }
+  },
+  "per_asset": {
+    "BTC": {
+      "symbol": "BTCUSDT",
+      "sample_start": "2019-09-10",
+      "sample_end": "2026-07-04",
+      "n_daily_rows_with_funding_and_rv": 2490,
+      "funding_observations": 7467,
+      "funding_days": 2490,
+      "funding_mean": 0.00010699759036144578,
+      "funding_std": 0.00019311798800971143,
+      "funding_p10": -1.2446999999999998e-05,
+      "funding_p90": 0.0002487849999999999,
+      "annualized_close_to_close_vol_pct": 62.03238155259332,
+      "regressions": {
+        "log_rv_fwd1": {
+          "n": 2310,
+          "r2": 0.03863671673656888,
+          "y_mean": -8.90446944991476,
+          "y_std": 2.5478303803162583,
+          "terms": {
+            "const": {
+              "coef": -6.43485729784065,
+              "se_hac": 0.3893966737931331,
+              "t": -16.525198418256565,
+              "p": 2.416433222703836e-61
+            },
+            "funding_z_lag1": {
+              "coef": 0.12140166565493563,
+              "se_hac": 0.07385226393007982,
+              "t": 1.6438448761689086,
+              "p": 0.10020824900110172
+            },
+            "pos_extreme_lag1": {
+              "coef": -0.24856885201970447,
+              "se_hac": 0.20828745048924513,
+              "t": -1.1933933198368054,
+              "p": 0.23271536996479003
+            },
+            "neg_extreme_lag1": {
+              "coef": 0.121210058924709,
+              "se_hac": 0.1931900294827587,
+              "t": 0.627413636455428,
+              "p": 0.5303881313217592
+            },
+            "log_trailing_rv5_lag1": {
+              "coef": 0.3388824236332547,
+              "se_hac": 0.04741047673187601,
+              "t": 7.147838346991565,
+              "p": 8.815503514136626e-13
+            },
+            "abs_ret_lag1": {
+              "coef": 5.908290169011323,
+              "se_hac": 2.282421067981234,
+              "t": 2.588606568654361,
+              "p": 0.009636512403428015
+            }
+          },
+          "asymmetry_pos_minus_neg": {
+            "coef_pos_minus_neg": -0.36977891094441345,
+            "t": -1.173854189663467,
+            "p": 0.24045343421480203
+          }
+        },
+        "high_rv1_lpm": {
+          "n": 2310,
+          "r2": 0.014164292727599892,
+          "y_mean": 0.19393939393939394,
+          "y_std": 0.3954675823776571,
+          "terms": {
+            "const": {
+              "coef": 0.36687609713334807,
+              "se_hac": 0.0645056845168159,
+              "t": 5.687500254922613,
+              "p": 1.2891241080853016e-08
+            },
+            "funding_z_lag1": {
+              "coef": 0.02024017448927539,
+              "se_hac": 0.012729615375056468,
+              "t": 1.5900067592722225,
+              "p": 0.11183328145030041
+            },
+            "pos_extreme_lag1": {
+              "coef": 0.004288083667509731,
+              "se_hac": 0.03194521594925811,
+              "t": 0.13423242072681363,
+              "p": 0.8932187898620244
+            },
+            "neg_extreme_lag1": {
+              "coef": 0.04534075595808868,
+              "se_hac": 0.030530212544114626,
+              "t": 1.4851110483614736,
+              "p": 0.13751440984972932
+            },
+            "log_trailing_rv5_lag1": {
+              "coef": 0.025307802167832162,
+              "se_hac": 0.00774355881549075,
+              "t": 3.268239161198684,
+              "p": 0.0010821887708149151
+            },
+            "abs_ret_lag1": {
+              "coef": 0.6936927743799242,
+              "se_hac": 0.3970089238097245,
+              "t": 1.7472976872237564,
+              "p": 0.08058571406947437
+            }
+          },
+          "asymmetry_pos_minus_neg": {
+            "coef_pos_minus_neg": -0.04105267229057895,
+            "t": -0.8577901864816369,
+            "p": 0.3910083295924478
+          }
+        },
+        "log_rv_fwd5": {
+          "n": 2306,
+          "r2": 0.15346222578833557,
+          "y_mean": -7.575322404077931,
+          "y_std": 1.1982812868978072,
+          "terms": {
+            "const": {
+              "coef": -4.804294699211796,
+              "se_hac": 0.2933760928799888,
+              "t": -16.37589025080202,
+              "p": 2.8431667581360405e-60
+            },
+            "funding_z_lag1": {
+              "coef": 0.15454944471879503,
+              "se_hac": 0.03796346301106207,
+              "t": 4.071004920540608,
+              "p": 4.6810760554927435e-05
+            },
+            "pos_extreme_lag1": {
+              "coef": -0.26520289249420553,
+              "se_hac": 0.13546503366223295,
+              "t": -1.9577221170996757,
+              "p": 0.050262628548012854
+            },
+            "neg_extreme_lag1": {
+              "coef": 0.1750457617756031,
+              "se_hac": 0.09590453456061365,
+              "t": 1.825208396845621,
+              "p": 0.06796958716423437
+            },
+            "log_trailing_rv5_lag1": {
+              "coef": 0.36598259610047035,
+              "se_hac": 0.036785593493367456,
+              "t": 9.949074116921834,
+              "p": 2.545403157305001e-23
+            },
+            "abs_ret_lag1": {
+              "coef": 1.355928154314479,
+              "se_hac": 0.8775557961225069,
+              "t": 1.5451190229791283,
+              "p": 0.12231747645684775
+            }
+          },
+          "asymmetry_pos_minus_neg": {
+            "coef_pos_minus_neg": -0.44024865426980864,
+            "t": -2.473286525088834,
+            "p": 0.013387676007291129
+          }
+        },
+        "high_rv5_lpm": {
+          "n": 2303,
+          "r2": 0.050532331491044524,
+          "y_mean": 0.1897524967433782,
+          "y_std": 0.39219035549703796,
+          "terms": {
+            "const": {
+              "coef": 0.49933938999981825,
+              "se_hac": 0.09931667080456927,
+              "t": 5.027749983508762,
+              "p": 4.962683178541075e-07
+            },
+            "funding_z_lag1": {
+              "coef": 0.06815229948565833,
+              "se_hac": 0.017986114445616756,
+              "t": 3.7891618944005527,
+              "p": 0.00015115638581883185
+            },
+            "pos_extreme_lag1": {
+              "coef": -0.0024377723922397627,
+              "se_hac": 0.05024651833322412,
+              "t": -0.048516244967919564,
+              "p": 0.9613048180748441
+            },
+            "neg_extreme_lag1": {
+              "coef": 0.10400344418767567,
+              "se_hac": 0.036595054465432986,
+              "t": 2.8420081813490783,
+              "p": 0.004483034112735891
+            },
+            "log_trailing_rv5_lag1": {
+              "coef": 0.04323275183926543,
+              "se_hac": 0.012197845154542407,
+              "t": 3.544294200452758,
+              "p": 0.0003936657022741752
+            },
+            "abs_ret_lag1": {
+              "coef": 0.5838777245891176,
+              "se_hac": 0.410795724892473,
+              "t": 1.4213334979129817,
+              "p": 0.1552198295681582
+            }
+          },
+          "asymmetry_pos_minus_neg": {
+            "coef_pos_minus_neg": -0.10644121657991543,
+            "t": -1.581174398004931,
+            "p": 0.11383816748848688
+          }
+        }
+      },
+      "conditional_high_rv_rates": {
+        "h1": {
+          "n": 2310,
+          "base_high_rv_rate": 0.19393939393939394,
+          "positive_funding_extreme": {
+            "n": 305,
+            "high_rv_rate": 0.22950819672131148,
+            "mean_rv": 0.001008201370118801,
+            "rate_minus_base": 0.03556880278191754
+          },
+          "negative_funding_extreme": {
+            "n": 256,
+            "high_rv_rate": 0.21875,
+            "mean_rv": 0.0010926542159054606,
+            "rate_minus_base": 0.02481060606060606
+          },
+          "absolute_funding_extreme": {
+            "n": 312,
+            "high_rv_rate": 0.2403846153846154,
+            "mean_rv": 0.0010620431853005136,
+            "rate_minus_base": 0.04644522144522145
+          },
+          "non_extreme": {
+            "n": 1749,
+            "high_rv_rate": 0.1841052029731275,
+            "mean_rv": 0.0010724646183987731,
+            "rate_minus_base": -0.009834190966266448
+          }
+        },
+        "h5": {
+          "n": 2303,
+          "base_high_rv_rate": 0.1897524967433782,
+          "positive_funding_extreme": {
+            "n": 304,
+            "high_rv_rate": 0.29605263157894735,
+            "mean_rv": 0.0010234509048934449,
+            "rate_minus_base": 0.10630013483556913
+          },
+          "negative_funding_extreme": {
+            "n": 256,
+            "high_rv_rate": 0.2109375,
+            "mean_rv": 0.0010730057808777142,
+            "rate_minus_base": 0.021185003256621787
+          },
+          "absolute_funding_extreme": {
+            "n": 311,
+            "high_rv_rate": 0.2990353697749196,
+            "mean_rv": 0.0010431354263243716,
+            "rate_minus_base": 0.10928287303154141
+          },
+          "non_extreme": {
+            "n": 1743,
+            "high_rv_rate": 0.168100975329891,
+            "mean_rv": 0.0009746662963256089,
+            "rate_minus_base": -0.021651521413487224
+          }
+        }
+      }
+    },
+    "ETH": {
+      "symbol": "ETHUSDT",
+      "sample_start": "2019-11-28",
+      "sample_end": "2026-07-04",
+      "n_daily_rows_with_funding_and_rv": 2411,
+      "funding_observations": 7233,
+      "funding_days": 2412,
+      "funding_mean": 0.00012873007048092868,
+      "funding_std": 0.0002509712179527987,
+      "funding_p10": -7.115999999999994e-06,
+      "funding_p90": 0.00031260733333333344,
+      "annualized_close_to_close_vol_pct": 82.8835982178779,
+      "regressions": {
+        "log_rv_fwd1": {
+          "n": 2232,
+          "r2": 0.05086199398333069,
+          "y_mean": -8.275804677043716,
+          "y_std": 2.5352063769174125,
+          "terms": {
+            "const": {
+              "coef": -5.473575157134401,
+              "se_hac": 0.39749255601770356,
+              "t": -13.770258270926258,
+              "p": 3.848349036314544e-43
+            },
+            "funding_z_lag1": {
+              "coef": -0.009626714345793985,
+              "se_hac": 0.06766117761486674,
+              "t": -0.14227825593858376,
+              "p": 0.8868602210347615
+            },
+            "pos_extreme_lag1": {
+              "coef": -0.022258339399947757,
+              "se_hac": 0.20113154433551894,
+              "t": -0.11066558193784541,
+              "p": 0.9118815399236215
+            },
+            "neg_extreme_lag1": {
+              "coef": 0.2003040977135695,
+              "se_hac": 0.17061362665981022,
+              "t": 1.1740216865148743,
+              "p": 0.24038633931312825
+            },
+            "log_trailing_rv5_lag1": {
+              "coef": 0.41690205409195635,
+              "se_hac": 0.05204571023597852,
+              "t": 8.01030579084609,
+              "p": 1.1442357533880925e-15
+            },
+            "abs_ret_lag1": {
+              "coef": 3.4877335791449613,
+              "se_hac": 1.9402531407743309,
+              "t": 1.7975662586754273,
+              "p": 0.07224576933437966
+            }
+          },
+          "asymmetry_pos_minus_neg": {
+            "coef_pos_minus_neg": -0.22256243711351725,
+            "t": -0.772728070413534,
+            "p": 0.4396833304209844
+          }
+        },
+        "high_rv1_lpm": {
+          "n": 2231,
+          "r2": 0.009606663470978827,
+          "y_mean": 0.1945316001792918,
+          "y_std": 0.39592842896408365,
+          "terms": {
+            "const": {
+              "coef": 0.32190926070461134,
+              "se_hac": 0.06645388702241155,
+              "t": 4.844099798045637,
+              "p": 1.2718699633341467e-06
+            },
+            "funding_z_lag1": {
+              "coef": 0.00831963392422603,
+              "se_hac": 0.01255427065254561,
+              "t": 0.6626935291170476,
+              "p": 0.5075268549369456
+            },
+            "pos_extreme_lag1": {
+              "coef": 0.027109994965426914,
+              "se_hac": 0.032432982707599776,
+              "t": 0.8358773292557651,
+              "p": 0.4032239174998935
+            },
+            "neg_extreme_lag1": {
+              "coef": 0.010209787196734014,
+              "se_hac": 0.02826334720271475,
+              "t": 0.361237723313725,
+              "p": 0.7179217442362624
+            },
+            "log_trailing_rv5_lag1": {
+              "coef": 0.02093445530498564,
+              "se_hac": 0.00834295448600713,
+              "t": 2.509237625603385,
+              "p": 0.012099206190904294
+            },
+            "abs_ret_lag1": {
+              "coef": 0.5402890165225126,
+              "se_hac": 0.37362222850865445,
+              "t": 1.446083705134791,
+              "p": 0.1481537255378379
+            }
+          },
+          "asymmetry_pos_minus_neg": {
+            "coef_pos_minus_neg": 0.0169002077686929,
+            "t": 0.3578845165727113,
+            "p": 0.7204297383205724
+          }
+        },
+        "log_rv_fwd5": {
+          "n": 2228,
+          "r2": 0.1401018697448866,
+          "y_mean": -7.022054408416024,
+          "y_std": 1.1811477758207343,
+          "terms": {
+            "const": {
+              "coef": -4.76854933363493,
+              "se_hac": 0.31353343506791126,
+              "t": -15.20906161922432,
+              "p": 3.079253083800453e-52
+            },
+            "funding_z_lag1": {
+              "coef": 0.030569004984616344,
+              "se_hac": 0.042644792849220736,
+              "t": 0.7168285490962337,
+              "p": 0.47347989370119536
+            },
+            "pos_extreme_lag1": {
+              "coef": -0.055706048229619914,
+              "se_hac": 0.12070958517494719,
+              "t": -0.4614881920841982,
+              "p": 0.6444483910573223
+            },
+            "neg_extreme_lag1": {
+              "coef": 0.1600983145406747,
+              "se_hac": 0.09293795478952473,
+              "t": 1.7226365149012273,
+              "p": 0.08495427739849704
+            },
+            "log_trailing_rv5_lag1": {
+              "coef": 0.33189156530073655,
+              "se_hac": 0.042449992604547335,
+              "t": 7.818412794380172,
+              "p": 5.3493524165805305e-15
+            },
+            "abs_ret_lag1": {
+              "coef": 2.3001602019570058,
+              "se_hac": 0.8691898003925393,
+              "t": 2.6463267296949624,
+              "p": 0.008137117990960183
+            }
+          },
+          "asymmetry_pos_minus_neg": {
+            "coef_pos_minus_neg": -0.2158043627702946,
+            "t": -1.346341960649245,
+            "p": 0.17819225934371363
+          }
+        },
+        "high_rv5_lpm": {
+          "n": 2223,
+          "r2": 0.03047675237304459,
+          "y_mean": 0.18533513270355376,
+          "y_std": 0.38865662453371425,
+          "terms": {
+            "const": {
+              "coef": 0.4547540618519427,
+              "se_hac": 0.08900076756892258,
+              "t": 5.109552133915915,
+              "p": 3.2292337794123927e-07
+            },
+            "funding_z_lag1": {
+              "coef": 0.02654938637435956,
+              "se_hac": 0.019494465389475163,
+              "t": 1.3618935345974281,
+              "p": 0.1732314869028403
+            },
+            "pos_extreme_lag1": {
+              "coef": 0.019060188010583123,
+              "se_hac": 0.045423861937392784,
+              "t": 0.4196073869028039,
+              "p": 0.6747722911562469
+            },
+            "neg_extreme_lag1": {
+              "coef": 0.04192039458385641,
+              "se_hac": 0.03602694174200061,
+              "t": 1.1635845996604577,
+              "p": 0.2445923954411955
+            },
+            "log_trailing_rv5_lag1": {
+              "coef": 0.04160970838227669,
+              "se_hac": 0.011555935726637486,
+              "t": 3.6007216868091882,
+              "p": 0.0003173351236085219
+            },
+            "abs_ret_lag1": {
+              "coef": 0.6023404053886716,
+              "se_hac": 0.36941969897005866,
+              "t": 1.6305042938099819,
+              "p": 0.10299495845183541
+            }
+          },
+          "asymmetry_pos_minus_neg": {
+            "coef_pos_minus_neg": -0.022860206573273284,
+            "t": -0.3693829206782547,
+            "p": 0.7118423265909184
+          }
+        }
+      },
+      "conditional_high_rv_rates": {
+        "h1": {
+          "n": 2231,
+          "base_high_rv_rate": 0.1945316001792918,
+          "positive_funding_extreme": {
+            "n": 309,
+            "high_rv_rate": 0.2297734627831715,
+            "mean_rv": 0.001480368596850032,
+            "rate_minus_base": 0.03524186260387971
+          },
+          "negative_funding_extreme": {
+            "n": 314,
+            "high_rv_rate": 0.2070063694267516,
+            "mean_rv": 0.0024677483529608763,
+            "rate_minus_base": 0.0124747692474598
+          },
+          "absolute_funding_extreme": {
+            "n": 326,
+            "high_rv_rate": 0.23006134969325154,
+            "mean_rv": 0.001573398414875462,
+            "rate_minus_base": 0.035529749513959735
+          },
+          "non_extreme": {
+            "n": 1608,
+            "high_rv_rate": 0.1853233830845771,
+            "mean_rv": 0.00155254843758839,
+            "rate_minus_base": -0.009208217094714699
+          }
+        },
+        "h5": {
+          "n": 2223,
+          "base_high_rv_rate": 0.18533513270355376,
+          "positive_funding_extreme": {
+            "n": 309,
+            "high_rv_rate": 0.23948220064724918,
+            "mean_rv": 0.001527844528314232,
+            "rate_minus_base": 0.05414706794369542
+          },
+          "negative_funding_extreme": {
+            "n": 314,
+            "high_rv_rate": 0.21656050955414013,
+            "mean_rv": 0.002287415057484043,
+            "rate_minus_base": 0.031225376850586378
+          },
+          "absolute_funding_extreme": {
+            "n": 326,
+            "high_rv_rate": 0.24539877300613497,
+            "mean_rv": 0.0015829437926435127,
+            "rate_minus_base": 0.06006364030258121
+          },
+          "non_extreme": {
+            "n": 1600,
+            "high_rv_rate": 0.16875,
+            "mean_rv": 0.001574835294396379,
+            "rate_minus_base": -0.016585132703553745
+          }
+        }
+      }
+    }
+  },
+  "primary_tstats": [
+    {
+      "asset": "BTC",
+      "model": "log_rv_fwd1",
+      "horizon": 1,
+      "is_regime_model": false,
+      "term": "funding_z_lag1",
+      "t": 1.6438448761689086,
+      "p": 0.10020824900110172,
+      "coef": 0.12140166565493563
+    },
+    {
+      "asset": "BTC",
+      "model": "log_rv_fwd1",
+      "horizon": 1,
+      "is_regime_model": false,
+      "term": "pos_extreme_lag1",
+      "t": -1.1933933198368054,
+      "p": 0.23271536996479003,
+      "coef": -0.24856885201970447
+    },
+    {
+      "asset": "BTC",
+      "model": "log_rv_fwd1",
+      "horizon": 1,
+      "is_regime_model": false,
+      "term": "neg_extreme_lag1",
+      "t": 0.627413636455428,
+      "p": 0.5303881313217592,
+      "coef": 0.121210058924709
+    },
+    {
+      "asset": "BTC",
+      "model": "log_rv_fwd1",
+      "horizon": 1,
+      "is_regime_model": false,
+      "term": "asymmetry_pos_minus_neg",
+      "t": -1.173854189663467,
+      "p": 0.24045343421480203,
+      "coef": -0.36977891094441345
+    },
+    {
+      "asset": "BTC",
+      "model": "high_rv1_lpm",
+      "horizon": 1,
+      "is_regime_model": true,
+      "term": "funding_z_lag1",
+      "t": 1.5900067592722225,
+      "p": 0.11183328145030041,
+      "coef": 0.02024017448927539
+    },
+    {
+      "asset": "BTC",
+      "model": "high_rv1_lpm",
+      "horizon": 1,
+      "is_regime_model": true,
+      "term": "pos_extreme_lag1",
+      "t": 0.13423242072681363,
+      "p": 0.8932187898620244,
+      "coef": 0.004288083667509731
+    },
+    {
+      "asset": "BTC",
+      "model": "high_rv1_lpm",
+      "horizon": 1,
+      "is_regime_model": true,
+      "term": "neg_extreme_lag1",
+      "t": 1.4851110483614736,
+      "p": 0.13751440984972932,
+      "coef": 0.04534075595808868
+    },
+    {
+      "asset": "BTC",
+      "model": "high_rv1_lpm",
+      "horizon": 1,
+      "is_regime_model": true,
+      "term": "asymmetry_pos_minus_neg",
+      "t": -0.8577901864816369,
+      "p": 0.3910083295924478,
+      "coef": -0.04105267229057895
+    },
+    {
+      "asset": "BTC",
+      "model": "log_rv_fwd5",
+      "horizon": 5,
+      "is_regime_model": false,
+      "term": "funding_z_lag1",
+      "t": 4.071004920540608,
+      "p": 4.6810760554927435e-05,
+      "coef": 0.15454944471879503
+    },
+    {
+      "asset": "BTC",
+      "model": "log_rv_fwd5",
+      "horizon": 5,
+      "is_regime_model": false,
+      "term": "pos_extreme_lag1",
+      "t": -1.9577221170996757,
+      "p": 0.050262628548012854,
+      "coef": -0.26520289249420553
+    },
+    {
+      "asset": "BTC",
+      "model": "log_rv_fwd5",
+      "horizon": 5,
+      "is_regime_model": false,
+      "term": "neg_extreme_lag1",
+      "t": 1.825208396845621,
+      "p": 0.06796958716423437,
+      "coef": 0.1750457617756031
+    },
+    {
+      "asset": "BTC",
+      "model": "log_rv_fwd5",
+      "horizon": 5,
+      "is_regime_model": false,
+      "term": "asymmetry_pos_minus_neg",
+      "t": -2.473286525088834,
+      "p": 0.013387676007291129,
+      "coef": -0.44024865426980864
+    },
+    {
+      "asset": "BTC",
+      "model": "high_rv5_lpm",
+      "horizon": 5,
+      "is_regime_model": true,
+      "term": "funding_z_lag1",
+      "t": 3.7891618944005527,
+      "p": 0.00015115638581883185,
+      "coef": 0.06815229948565833
+    },
+    {
+      "asset": "BTC",
+      "model": "high_rv5_lpm",
+      "horizon": 5,
+      "is_regime_model": true,
+      "term": "pos_extreme_lag1",
+      "t": -0.048516244967919564,
+      "p": 0.9613048180748441,
+      "coef": -0.0024377723922397627
+    },
+    {
+      "asset": "BTC",
+      "model": "high_rv5_lpm",
+      "horizon": 5,
+      "is_regime_model": true,
+      "term": "neg_extreme_lag1",
+      "t": 2.8420081813490783,
+      "p": 0.004483034112735891,
+      "coef": 0.10400344418767567
+    },
+    {
+      "asset": "BTC",
+      "model": "high_rv5_lpm",
+      "horizon": 5,
+      "is_regime_model": true,
+      "term": "asymmetry_pos_minus_neg",
+      "t": -1.581174398004931,
+      "p": 0.11383816748848688,
+      "coef": -0.10644121657991543
+    },
+    {
+      "asset": "ETH",
+      "model": "log_rv_fwd1",
+      "horizon": 1,
+      "is_regime_model": false,
+      "term": "funding_z_lag1",
+      "t": -0.14227825593858376,
+      "p": 0.8868602210347615,
+      "coef": -0.009626714345793985
+    },
+    {
+      "asset": "ETH",
+      "model": "log_rv_fwd1",
+      "horizon": 1,
+      "is_regime_model": false,
+      "term": "pos_extreme_lag1",
+      "t": -0.11066558193784541,
+      "p": 0.9118815399236215,
+      "coef": -0.022258339399947757
+    },
+    {
+      "asset": "ETH",
+      "model": "log_rv_fwd1",
+      "horizon": 1,
+      "is_regime_model": false,
+      "term": "neg_extreme_lag1",
+      "t": 1.1740216865148743,
+      "p": 0.24038633931312825,
+      "coef": 0.2003040977135695
+    },
+    {
+      "asset": "ETH",
+      "model": "log_rv_fwd1",
+      "horizon": 1,
+      "is_regime_model": false,
+      "term": "asymmetry_pos_minus_neg",
+      "t": -0.772728070413534,
+      "p": 0.4396833304209844,
+      "coef": -0.22256243711351725
+    },
+    {
+      "asset": "ETH",
+      "model": "high_rv1_lpm",
+      "horizon": 1,
+      "is_regime_model": true,
+      "term": "funding_z_lag1",
+      "t": 0.6626935291170476,
+      "p": 0.5075268549369456,
+      "coef": 0.00831963392422603
+    },
+    {
+      "asset": "ETH",
+      "model": "high_rv1_lpm",
+      "horizon": 1,
+      "is_regime_model": true,
+      "term": "pos_extreme_lag1",
+      "t": 0.8358773292557651,
+      "p": 0.4032239174998935,
+      "coef": 0.027109994965426914
+    },
+    {
+      "asset": "ETH",
+      "model": "high_rv1_lpm",
+      "horizon": 1,
+      "is_regime_model": true,
+      "term": "neg_extreme_lag1",
+      "t": 0.361237723313725,
+      "p": 0.7179217442362624,
+      "coef": 0.010209787196734014
+    },
+    {
+      "asset": "ETH",
+      "model": "high_rv1_lpm",
+      "horizon": 1,
+      "is_regime_model": true,
+      "term": "asymmetry_pos_minus_neg",
+      "t": 0.3578845165727113,
+      "p": 0.7204297383205724,
+      "coef": 0.0169002077686929
+    },
+    {
+      "asset": "ETH",
+      "model": "log_rv_fwd5",
+      "horizon": 5,
+      "is_regime_model": false,
+      "term": "funding_z_lag1",
+      "t": 0.7168285490962337,
+      "p": 0.47347989370119536,
+      "coef": 0.030569004984616344
+    },
+    {
+      "asset": "ETH",
+      "model": "log_rv_fwd5",
+      "horizon": 5,
+      "is_regime_model": false,
+      "term": "pos_extreme_lag1",
+      "t": -0.4614881920841982,
+      "p": 0.6444483910573223,
+      "coef": -0.055706048229619914
+    },
+    {
+      "asset": "ETH",
+      "model": "log_rv_fwd5",
+      "horizon": 5,
+      "is_regime_model": false,
+      "term": "neg_extreme_lag1",
+      "t": 1.7226365149012273,
+      "p": 0.08495427739849704,
+      "coef": 0.1600983145406747
+    },
+    {
+      "asset": "ETH",
+      "model": "log_rv_fwd5",
+      "horizon": 5,
+      "is_regime_model": false,
+      "term": "asymmetry_pos_minus_neg",
+      "t": -1.346341960649245,
+      "p": 0.17819225934371363,
+      "coef": -0.2158043627702946
+    },
+    {
+      "asset": "ETH",
+      "model": "high_rv5_lpm",
+      "horizon": 5,
+      "is_regime_model": true,
+      "term": "funding_z_lag1",
+      "t": 1.3618935345974281,
+      "p": 0.1732314869028403,
+      "coef": 0.02654938637435956
+    },
+    {
+      "asset": "ETH",
+      "model": "high_rv5_lpm",
+      "horizon": 5,
+      "is_regime_model": true,
+      "term": "pos_extreme_lag1",
+      "t": 0.4196073869028039,
+      "p": 0.6747722911562469,
+      "coef": 0.019060188010583123
+    },
+    {
+      "asset": "ETH",
+      "model": "high_rv5_lpm",
+      "horizon": 5,
+      "is_regime_model": true,
+      "term": "neg_extreme_lag1",
+      "t": 1.1635845996604577,
+      "p": 0.2445923954411955,
+      "coef": 0.04192039458385641
+    },
+    {
+      "asset": "ETH",
+      "model": "high_rv5_lpm",
+      "horizon": 5,
+      "is_regime_model": true,
+      "term": "asymmetry_pos_minus_neg",
+      "t": -0.3693829206782547,
+      "p": 0.7118423265909184,
+      "coef": -0.022860206573273284
+    }
+  ],
+  "verdict": "MIXED_WEAK_SINGLE_CELL",
+  "verdict_basis": {
+    "primary_scope": "h=5 high-RV regime LPM terms and positive-minus-negative asymmetry",
+    "n_all_primary_abs_t_ge_3": 2,
+    "n_h5_regime_abs_t_ge_3": 1,
+    "max_abs_t_any_test": 4.071004920540608,
+    "max_abs_t_row": {
+      "asset": "BTC",
+      "model": "log_rv_fwd5",
+      "horizon": 5,
+      "is_regime_model": false,
+      "term": "funding_z_lag1",
+      "t": 4.071004920540608,
+      "p": 4.6810760554927435e-05,
+      "coef": 0.15454944471879503,
+      "abs_t": 4.071004920540608
+    },
+    "interpretation_rule": "SIGNAL_CANDIDATE requires at least two h=5 high-RV regime cells at |t|>=3; one cell is MIXED_WEAK_SINGLE_CELL; zero is NULL."
+  }
+}
