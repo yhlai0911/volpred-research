@@ -4,6 +4,7 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import json
+import re
 import sys
 
 
@@ -127,9 +128,27 @@ def classify_topic_cluster(title: str, tags: list[str] | None = None, content: s
 
     for cluster, variants in CLUSTER_VARIANTS.items():
         for variant in variants:
-            if _normalize(variant) in haystack:
+            if _variant_matches(_normalize(variant), haystack):
                 return cluster
     return None
+
+
+def _variant_matches(variant_norm: str, haystack: str) -> bool:
+    """Return True if `variant_norm` (already lowercased) matches `haystack`.
+
+    2026-07-04 fix: plain substring matching over-fired for short ASCII
+    keywords — "es" (Expected Shortfall) matched inside "tim**es**tamp" /
+    "s**es**sion", "var" (VaR) matched inside "**var**iance" (a VOLATILITY term
+    that then wrongly counted toward risk_mgmt), silently corrupting cluster
+    counts / caps / dedup. For ≤3-char pure-ASCII-alpha keywords, require an
+    ASCII word boundary (no adjacent a–z) so they match as whole tokens.
+    CJK-adjacent text still matches (a Chinese char is not a–z, so "vix期限"
+    still hits "vix"); only spurious mid-English-word hits are suppressed.
+    Longer / non-ASCII keywords keep substring matching unchanged.
+    """
+    if len(variant_norm) <= 3 and variant_norm.isascii() and variant_norm.isalpha():
+        return re.search(r"(?<![a-z])" + re.escape(variant_norm) + r"(?![a-z])", haystack) is not None
+    return variant_norm in haystack
 
 
 def cluster_cap(cluster: str | None) -> int:

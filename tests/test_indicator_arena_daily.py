@@ -121,13 +121,19 @@ def _count_rows(dir_path: Path) -> int:
     return n
 
 
+# 2026-07-04: derive the expected-emitting set from the SAME registry the
+# pipeline iterates (storage/indicator_arena/registry.json), filtering to
+# non-delisted indicators. Previously this was a hardcoded set of 6; when
+# `har_qr_rv_q95_qqq_gld_tlt` was legitimately delisted (status='delisted'),
+# the pipeline correctly stopped emitting it but this constant still listed
+# it → the idempotency/isolation tests went red on a non-bug. Computing from
+# the live registry keeps the test correct across future list/delist changes.
+from volpred.indicators.registry import load_registry as _load_registry  # noqa: E402
+
 ALL_IDS = {
-    "us_tw_overnight_lead",
-    "vix_term_structure_vol_direction",
-    "garch_vix9d_spy_var25",
-    "har_qr_spy_var5",
-    "vix_crisis_alert_tw",
-    "har_qr_rv_q95_qqq_gld_tlt",
+    spec.indicator_id
+    for spec in _load_registry()
+    if spec.status != "delisted"
 }
 
 
@@ -142,7 +148,7 @@ class TestIdempotency:
         assert result1["failed"] == []
         n_sig_1 = _count_rows(sig_dir)
         n_rev_1 = _count_rows(rev_dir)
-        assert n_sig_1 == 6
+        assert n_sig_1 == len(ALL_IDS)
 
         result2 = iad.run_pipeline(
             now_utc=NOW,
@@ -221,12 +227,11 @@ class TestFailureIsolation:
         result, sig_dir, _ = _run(tmp_path, fail={"^VIX9D", "__CBOE_VIX9D__"})
 
         emitted_ids = {e["indicator_id"] for e in result["emitted"]}
-        assert emitted_ids == {
-            "us_tw_overnight_lead",
-            "har_qr_spy_var5",
-            "vix_crisis_alert_tw",
-            "har_qr_rv_q95_qqq_gld_tlt",
-        }
+        # The two vix9d-dependent indicators are blocked; everything else that
+        # is currently ACTIVE in the registry still emits. (har_qr_rv_q95 was
+        # in this set historically but is now delisted — see ALL_IDS note.)
+        vix9d_dependent = {"vix_term_structure_vol_direction", "garch_vix9d_spy_var25"}
+        assert emitted_ids == ALL_IDS - vix9d_dependent
         blocked = {
             f["indicator_id"]
             for f in result["failed"]
@@ -235,9 +240,9 @@ class TestFailureIsolation:
             for s in result["skipped"]
             if s["kind"] == "data_unavailable"
         }
-        assert blocked == {"vix_term_structure_vol_direction", "garch_vix9d_spy_var25"}
+        assert blocked == vix9d_dependent
         assert result["ok"] is False  # not fully successful
-        assert _count_rows(sig_dir) == 4
+        assert _count_rows(sig_dir) == len(ALL_IDS) - len(vix9d_dependent)
 
     def test_all_sources_down_yields_no_rows_and_not_ok(self, tmp_path, fast_a4f):
         all_tickers = set(make_prices().keys()) | {"__CBOE_VIX9D__"}

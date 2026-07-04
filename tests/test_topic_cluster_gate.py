@@ -123,6 +123,20 @@ class TestClusterClassification:
         )
         assert cluster == "factor_etf"
 
+    def test_short_ascii_keyword_no_substring_false_match(self):
+        """2026-07-04 regression: short ASCII keywords must match as whole
+        tokens, not substrings — "es" (Expected Shortfall) inside "timestamp"
+        and "var" (VaR) inside "variance" silently mis-routed articles to
+        risk_mgmt, corrupting cluster counts / caps / dedup."""
+        # "variance" is a volatility term — must NOT hit VaR→risk_mgmt.
+        assert classify_topic_cluster("SPY variance forecast", [], "") == "spy"
+        # "timestamp"/"series" must not hit ES→risk_mgmt.
+        assert classify_topic_cluster("SPY normal timestamp", [], "") == "spy"
+        assert classify_topic_cluster("美股 series 回顧", [], "") is None
+        # But the real keywords still classify, and CJK-adjacent still matches.
+        assert classify_topic_cluster("VaR 回測", [], "") == "risk_mgmt"
+        assert classify_topic_cluster("VIX期限結構", [], "") == "vix"
+
 
 class TestTypeLockedExemption:
     """daily / member_qa / event / trending_repost must bypass cluster cap
