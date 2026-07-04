@@ -1,6 +1,35 @@
 # Refactor Plan — Release-Layer Deadlock（發文脫班 root cause）
 
-**狀態**：診斷完成，待實作。2026-06-24 由發文脫班 CRITICAL 觸發。
+**狀態**：**2026-07-04 ROOTFIX LANDED（code-level 真根因已修 + Codex CONDITIONAL_PASS findings 全解 + 17 tests）**。原 2026-06-24「診斷完成待實作」的三層 plan **在過去 10 天其實已陸續實作完成**（見下方「2026-07-04 更正」），持續脫班的真因是三層 plan **沒涵蓋**的一個 code-level bug + 一個 content-supply gap。
+
+---
+
+## 2026-07-04 更正診斷（老闆 telegram msg114「頭痛醫頭腳痛醫腳」觸發，取代下方 stale framing）
+
+**關鍵更正**：refactor plan 原三層方案**都已實作**（不是躺 10 天沒動）：
+- **Layer 1（生產端 arc-dedup）**：`publisher.py:1212` `publish_milestone` 已跑 `find_arc_duplicates`；`refill_task_pool` 有 arc-dedup pre-check。（arc-dup 在 publish 端為 **WARN-only**，2026-06-23 從 hard-block 降級；擋在釋出端。）
+- **Layer 2（blocked-draft 退回）**：`content.py:851/1329/1335` `_next_release_audit_skip_count` + `_RELEASE_AUDIT_MATERIALIZE_THRESHOLD` → skip N 次自動 materialize rewrite/deprecate audit task。（實測 draft `mile_30438396` skip=3。）
+- **Layer 3（drought remediation → fresh-arc）**：`remediate_publish_drought.py:191` 已用 `refill(reader_facing_only=True, emergency=True)` 補 fresh reader task，非 force-rehash。
+
+**三層都在、drought 卻仍發生** → 這正是老闆「疊了 N 層仍頭痛醫頭」的真相。真因是：
+
+### 真根因 A（code-level bug，已修）— proactive draft-floor 對 releasability 盲
+`continue_task_dispatch.py::_draft_pool_deficit()`（2026-07-01 建的 proactive 池 floor）用 **原始 `status=="draft"` 計數** 判斷是否 refill。當池裡有 6 篇 draft 但 **全是 arc-dup / dedup-flagged（release 端 eligible=0）**，舊 code 讀 draft_count=6 ≥ FLOOR(6) → deficit=0 → **proactive refill 不觸發** → cadence 一篇都釋不出 → drought。07-03 log 坐實：`[release_drought] blocked_pool=6`；07-04 live 坐實：`pool_counts: draft=6, dedup_flagged=6, eligible=0`。
+**修**：`_draft_pool_deficit` 改用 release path 自己的 post-dedup `eligible` count（`preview_release_pool_by_settings().pool_counts.eligible`，single source of truth、零 drift、anti-stacking 不疊新 gate）+ in-flight `daily_article` 數（防 refill pile-up）。fail-open 回退 raw count（Codex finding：preview raise 也要降級 raw count，不可回 0）。
+
+### 真根因 B（cure 端 masking，已修）— refill 用 experiment fallback 遮蔽 drought
+`_maybe_refill_draft_pool` 呼叫通用 `refill()`（非 reader_facing_only）；當 reader-K 文章候選耗盡，refill fallback 到 `task_type=experiment` 並回 `added>0`「成功」，但 experiment task **不會變成 releasable draft** → deficit 沒關、drought 續。
+**修**：proactive refill 改 `reader_facing_only=True`（對齊 Layer 3）。reader 候選耗盡時**誠實**回 `added=0, reason=no_new_candidates`，surface 真正的 content-supply gap，不被 experiment 遮蔽。
+
+### 殘餘真因 C（content-supply，未修，spec 給後續）— reader-K 文章候選池耗盡
+Fix A/B 落地後 live run 顯示：`reader_facing_only` refill 回 `added=0`（K1513/K1611/K1572… 全 arc-dup）。**平台已發太多 research 文章，research backlog 產不出每日 6 篇 fresh-arc reader 文章**。這不是 release-layer bug，是**內容供給**問題。
+**Spec（後續 platform_ops）**：reader-K 池乾時，refill/生產應轉向**結構性 fresh 來源**——`event_article`（經濟行事曆 CPI/NFP/FOMC/財報，永不 arc-saturate）、`trending_repost`（時事）、`member_qa`。即 `_maybe_refill` 的 `refill_reader_facing_pool.refill_event_candidates` 路徑應在 reader-K 耗盡時優先觸發，把 fresh event/trending 排入生產。
+
+---
+
+<details><summary>原 2026-06-24 診斷（stale，保留供 audit；上方 2026-07-04 更正為準）</summary>
+
+**狀態（原）**：診斷完成，待實作。2026-06-24 由發文脫班 CRITICAL 觸發。
 **3-STRIKE TRIGGER**：脫班反覆（2026-06-22 整日脫班 + 2026-06-24 再現）+ 呼應 memory `feedback_recycling_is_release_layer_not_research`（文章鬼打牆根因在釋出端）。屬同根因重複 → 結構性重構，不再表面修補。
 
 ## 症狀
@@ -54,3 +83,5 @@
 
 ## 即時止血（正當，非 force）
 派一篇 fresh narrative-arc 的 daily_article（真新主題，過 arc-dedup）解當下脫班；治本走上述三層。
+
+</details>

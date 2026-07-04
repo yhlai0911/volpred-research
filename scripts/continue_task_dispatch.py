@@ -438,13 +438,23 @@ class ArticleRefillTimeoutError(TimeoutError):
     pass
 
 
-def _run_article_refill(target: int, *, dry_run: bool = False) -> dict:
-    """Run article refill with a hard timeout so dispatch cannot hang forever."""
+def _run_article_refill(
+    target: int, *, dry_run: bool = False, reader_facing_only: bool = False
+) -> dict:
+    """Run article refill with a hard timeout so dispatch cannot hang forever.
+
+    `reader_facing_only=True` (2026-07-04 ROOTFIX) makes refill produce ONLY
+    reader-facing article tasks and skip the `experiment` fallback that fires
+    when the uncovered-K article pool is exhausted — experiment tasks never
+    become releasable drafts, so letting refill "succeed" with them masks a real
+    reader-content drought (the draft-pool refill must heal reader throughput,
+    not the research backlog). Matches remediate_publish_drought.py's choice.
+    """
     from refill_task_pool import refill as _refill_fn  # type: ignore
 
     timeout_s = ARTICLE_REFILL_TIMEOUT_SECONDS
     if timeout_s <= 0:
-        return _refill_fn(target=target, dry_run=dry_run)
+        return _refill_fn(target=target, dry_run=dry_run, reader_facing_only=reader_facing_only)
 
     previous_handler = signal.getsignal(signal.SIGALRM)
 
@@ -454,32 +464,105 @@ def _run_article_refill(target: int, *, dry_run: bool = False) -> dict:
     signal.signal(signal.SIGALRM, _handle_timeout)
     signal.setitimer(signal.ITIMER_REAL, timeout_s)
     try:
-        return _refill_fn(target=target, dry_run=dry_run)
+        return _refill_fn(target=target, dry_run=dry_run, reader_facing_only=reader_facing_only)
     finally:
         signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, previous_handler)
 
 
-def _draft_pool_deficit() -> int:
-    """Return how many more draft articles feed.json needs to reach DRAFT_POOL_FLOOR.
+def _raw_draft_count() -> int:
+    """Raw status=="draft" count in feed.json (legacy signal / fail-open fallback)."""
+    if not FEED_PATH.exists():
+        _warn_dispatch(f"draft_pool_deficit: feed path missing at {FEED_PATH}")
+        return 0
+    feed = json.loads(FEED_PATH.read_text(encoding="utf-8"))
+    if not isinstance(feed, list):
+        _warn_dispatch(f"draft_pool_deficit: feed.json top-level is {type(feed).__name__}, expected list")
+        return 0
+    return sum(1 for item in feed if isinstance(item, dict) and item.get("status") == "draft")
 
-    Reads storage/reports/feed.json directly (source of truth for the
-    `draft_pool_low` alert), independent of next_tasks.json agentable count.
-    Fail-open: any read error returns 0 (no forced refill) rather than raising —
-    this helper runs on every dispatch tick and must never crash dispatch.
+
+def _releasable_draft_count() -> int | None:
+    """Count drafts that release_pool_by_settings can ACTUALLY release right now.
+
+    Reuses the release path's own post-dedup `eligible` count
+    (preview_release_pool_by_settings.pool_counts.eligible) so the draft-floor
+    signal cannot drift from what release actually publishes — single source of
+    truth, no new dedup heuristic (anti-stacking).
+
+    Returns None on ANY failure (import error, preview raise, or non-numeric
+    eligible) so `_draft_pool_deficit` falls back to the raw draft count rather
+    than mis-reading a preview failure as "0 releasable → deficit 0 → no refill"
+    (Codex CONDITIONAL_PASS finding, 2026-07-04: a raise here must degrade to
+    the raw-count path, not to a silent zero deficit that would re-drought).
     """
     try:
-        if not FEED_PATH.exists():
-            _warn_dispatch(f"draft_pool_deficit: feed path missing at {FEED_PATH}")
+        from volpred.ops.content import preview_release_pool_by_settings
+
+        counts = preview_release_pool_by_settings().get("pool_counts") or {}
+        eligible = counts.get("eligible")
+        return int(eligible) if isinstance(eligible, (int, float)) else None
+    except Exception as e:  # noqa: BLE001 — failure must degrade to raw-count fallback, not zero
+        _warn_dispatch(f"releasable_draft_count: preview failed ({e!r}); caller falls back to raw draft count")
+        return None
+
+
+def _in_flight_article_task_count() -> int:
+    """Reader-facing `daily_article` tasks already queued/running in next_tasks.json.
+
+    These are pipeline stock: a freshly-refilled daily_article task takes hours
+    to be dispatched into a published draft, during which `_releasable_draft_count`
+    stays low. Counting in-flight article tasks against the deficit makes the
+    refill self-limiting — without it the releasability-aware deficit would
+    re-fire every tick and pile up dozens of pending article tasks before the
+    first fresh draft lands. Fail-open to 0 (never crash dispatch).
+    """
+    try:
+        if not NEXT_TASKS.exists():
             return 0
-        feed = json.loads(FEED_PATH.read_text(encoding="utf-8"))
-        if not isinstance(feed, list):
-            _warn_dispatch(f"draft_pool_deficit: feed.json top-level is {type(feed).__name__}, expected list")
+        data = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
+        tasks = data.get("tasks", []) if isinstance(data, dict) else data
+        if not isinstance(tasks, list):
             return 0
-        draft_count = sum(1 for item in feed if isinstance(item, dict) and item.get("status") == "draft")
-        return max(0, DRAFT_POOL_FLOOR - draft_count)
+        active = {"pending", "pending_main_thread", "in_progress", "claimed", "running"}
+        return sum(
+            1
+            for t in tasks
+            if isinstance(t, dict)
+            and str(t.get("task_type") or "") == "daily_article"
+            and str(t.get("status") or "pending").lower() in active
+        )
+    except Exception as e:  # noqa: BLE001 — fail-open, but observable
+        _warn_dispatch(f"in_flight_article_task_count: read failed ({e!r}); treating as 0")
+        return 0
+
+
+def _draft_pool_deficit() -> int:
+    """Fresh reader-facing article tasks needed to keep the RELEASABLE draft
+    buffer at DRAFT_POOL_FLOOR.
+
+    2026-07-04 ROOTFIX (release-layer deadlock; boss telegram msg114
+    「頭痛醫頭腳痛醫腳」): publish throughput depends on drafts release can
+    ACTUALLY release, not the raw status=="draft" count. The prior raw-count
+    version was blind to releasability — a pool of 6 arc-dup / dedup-flagged
+    drafts (all unreleasable) read as fully stocked (deficit=0), so the
+    2026-07-01 proactive refill never fired, the release cadence released
+    nothing, and publishing droughted (07-03 blocked_pool=6, eligible=0). Root
+    fix: stock = release path's own post-dedup `eligible` count + in-flight
+    daily_article tasks (pipeline that becomes releasable drafts), so the
+    draft-floor signal agrees with what release can publish and self-limits
+    against re-refill pile-up. Fail-open to the legacy raw draft count on any
+    error (never crash dispatch).
+    """
+    try:
+        releasable = _releasable_draft_count()
+        if releasable is None:
+            _warn_dispatch("draft_pool_deficit: releasable count unavailable; falling back to raw draft count")
+            releasable = _raw_draft_count()
+        stock = releasable + _in_flight_article_task_count()
+        return max(0, DRAFT_POOL_FLOOR - stock)
     except Exception as e:  # noqa: BLE001 — fail-open by design, but must not be silent
-        _warn_dispatch(f"draft_pool_deficit: feed read/parse failed ({e!r}); treating as no deficit")
+        _warn_dispatch(f"draft_pool_deficit: compute failed ({e!r}); treating as no deficit")
         return 0
 
 
@@ -506,7 +589,13 @@ def _maybe_refill_draft_pool(*, auto_refill: bool) -> dict | None:
         return None
     sys.path.insert(0, str(ROOT / "scripts"))
     try:
-        article = _run_article_refill(target=deficit, dry_run=False)
+        # 2026-07-04 ROOTFIX: reader_facing_only so a releasable-draft deficit is
+        # healed with reader articles, not masked by the experiment fallback that
+        # fires when the uncovered-K article pool is exhausted (experiment tasks
+        # never become releasable drafts). When reader candidates ARE exhausted
+        # this now honestly returns added=0 (surfacing the real content-supply
+        # gap) instead of "succeeding" with useless experiment tasks.
+        article = _run_article_refill(target=deficit, dry_run=False, reader_facing_only=True)
         added_ids = article.get("added_ids") or []
         if article.get("added") and added_ids:
             # refill_task_pool.refill() falls back to task_type="experiment"
