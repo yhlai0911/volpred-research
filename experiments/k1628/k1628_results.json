@@ -1,0 +1,667 @@
+{
+  "experiment_id": "k1628",
+  "title": "黃金真的是股災避風港嗎？危機期間條件相關性",
+  "generated_at_utc": "2026-07-04T17:03:10.989810+00:00",
+  "seed": 42,
+  "data": {
+    "source": "data/cache/price_cache.db :: price_data",
+    "assets": {
+      "equity_proxy": "SPY",
+      "gold_proxy": "GLD",
+      "stress_proxy": "^VIX"
+    },
+    "return_definition": "adj_close close-to-close pct_change for SPY/GLD; VIX close used only for descriptive regimes",
+    "start_date": "2016-01-04",
+    "sample_start": "2016-01-05",
+    "sample_end": "2026-07-02",
+    "n_common_days": 2638,
+    "adj_close_nulls_checked": "SPY/GLD adj_close null count is 0 in this window"
+  },
+  "methodology": {
+    "type": "empirical descriptive same-day safe-haven test, not a trading backtest",
+    "lookahead_note": "Same-day SPY/GLD returns are used by design to test crisis co-movement. No trading signal or forecast is claimed; VIX same-day close appears only in descriptive regimes.",
+    "hac_lag": 5,
+    "bootstrap": {
+      "block": 5,
+      "n_boot": 2000,
+      "seed": 42
+    },
+    "literature": [
+      {
+        "citation": "Baur, D. G. and Lucey, B. M. (2010), Financial Review",
+        "title": "Is Gold a Hedge or a Safe Haven? An Analysis of Stocks, Bonds and Gold",
+        "design_use": "Defines hedge vs safe haven and motivates extreme-stock-return conditioning.",
+        "url": "https://doi.org/10.1111/j.1540-6288.2010.00244.x"
+      },
+      {
+        "citation": "Baur, D. G. and McDermott, T. K. (2010), Journal of Banking & Finance",
+        "title": "Is gold a safe haven? International evidence",
+        "design_use": "Warns that safe-haven behavior is market- and crisis-dependent.",
+        "url": "https://doi.org/10.1016/j.jbankfin.2009.12.008"
+      },
+      {
+        "citation": "Hood, M. and Malik, F. (2013), Review of Financial Economics",
+        "title": "Is gold the best hedge and a safe haven under changing stock market volatility?",
+        "design_use": "Motivates VIX high-volatility robustness and weak-vs-strong safe-haven distinction.",
+        "url": "https://doi.org/10.1016/j.rfe.2013.03.001"
+      }
+    ]
+  },
+  "verdict": {
+    "label": "WEAK_REGIME_DEPENDENT_SAFE_HAVEN_NOT_AUTOMATIC",
+    "one_sentence": "GLD 對 SPY 的平均相關很低，但在 2016-2026 的 SPY 大跌日並沒有穩定負相關；SPY<-2% 時 GLD 收紅率約 45.7%、同日相關 0.248，因此『有時能保護』成立，『股災一定抗跌』不成立。",
+    "safe_haven_gate": {
+      "strong_definition": "crash-bin SPY-GLD corr <= 0 and GLD mean >= 0",
+      "spy_below_minus_2pct_pass": false,
+      "spy_below_minus_3pct_pass": false,
+      "vix_top_10pct_and_spy_down_pass": false
+    }
+  },
+  "conditions": {
+    "all_days": {
+      "label": "all_days",
+      "definition": "All paired GLD/SPY trading days",
+      "n": 2638,
+      "spy_mean_return": 0.0006246401399769808,
+      "gld_mean_return": 0.0005458651522423201,
+      "gld_mean_return_hac": {
+        "mean": 0.0005458651522423203,
+        "se_hac": 0.00019520621520993057,
+        "t_hac": 2.796351292684409,
+        "p_hac": 0.005168318932270219
+      },
+      "spy_compound_return": 3.394720310751697,
+      "gld_compound_return": 2.6750899710944727,
+      "spy_ann_vol": 0.17839419060055053,
+      "gld_ann_vol": 0.16216961158922713,
+      "gld_positive_rate": 0.5382865807429871,
+      "gld_positive_rate_ci95": [
+        0.5192205811697718,
+        0.5572412365239258
+      ],
+      "gld_nonnegative_rate": 0.5413191811978771,
+      "spy_gld_corr": 0.07452102976449601,
+      "spy_gld_corr_ci95_fisher": [
+        0.03646134713007409,
+        0.11236484480904249
+      ],
+      "n_spy_down_inside_condition": 1170,
+      "gld_positive_when_spy_down_inside_condition": 0.5299145299145299,
+      "min_date": "2016-01-05",
+      "max_date": "2026-07-02"
+    },
+    "spy_down": {
+      "label": "spy_down",
+      "definition": "SPY return < 0",
+      "n": 1170,
+      "spy_mean_return": -0.0075266309562185985,
+      "gld_mean_return": 5.021227734880034e-05,
+      "gld_mean_return_hac": {
+        "mean": 5.021227734880034e-05,
+        "se_hac": 0.00038136214818844356,
+        "t_hac": 0.13166560338334576,
+        "p_hac": 0.8952487931271671
+      },
+      "spy_compound_return": -0.9998625330740708,
+      "gld_compound_return": -0.016027623339790353,
+      "spy_ann_vol": 0.147754639255423,
+      "gld_ann_vol": 0.1790475232678432,
+      "gld_positive_rate": 0.5299145299145299,
+      "gld_positive_rate_ci95": [
+        0.5012645860444515,
+        0.5583686799933029
+      ],
+      "gld_nonnegative_rate": 0.5333333333333333,
+      "spy_gld_corr": 0.032138461687301625,
+      "spy_gld_corr_ci95_fisher": [
+        -0.02521879227557536,
+        0.08928481362523237
+      ],
+      "n_spy_down_inside_condition": 1170,
+      "gld_positive_when_spy_down_inside_condition": 0.5299145299145299,
+      "min_date": "2016-01-06",
+      "max_date": "2026-07-02"
+    },
+    "spy_below_minus_1pct": {
+      "label": "spy_below_minus_1pct",
+      "definition": "SPY return < -1%",
+      "n": 290,
+      "spy_mean_return": -0.019519497189505394,
+      "gld_mean_return": 0.00025106800925197225,
+      "gld_mean_return_hac": {
+        "mean": 0.0002510680092519726,
+        "se_hac": 0.001058359744458081,
+        "t_hac": 0.23722369503058585,
+        "p_hac": 0.8124832549145613
+      },
+      "spy_compound_return": -0.9967783258986763,
+      "gld_compound_return": 0.04735518913224457,
+      "spy_ann_vol": 0.1858263470231886,
+      "gld_ann_vol": 0.2152193573771103,
+      "gld_positive_rate": 0.4793103448275862,
+      "gld_positive_rate_ci95": [
+        0.4224600230896202,
+        0.536701628066888
+      ],
+      "gld_nonnegative_rate": 0.4827586206896552,
+      "spy_gld_corr": 0.10341540970278922,
+      "spy_gld_corr_ci95_fisher": [
+        -0.011905992513213335,
+        0.2160218845543272
+      ],
+      "n_spy_down_inside_condition": 290,
+      "gld_positive_when_spy_down_inside_condition": 0.4793103448275862,
+      "min_date": "2016-01-06",
+      "max_date": "2026-06-23"
+    },
+    "spy_below_minus_2pct": {
+      "label": "spy_below_minus_2pct",
+      "definition": "SPY return < -2%",
+      "n": 92,
+      "spy_mean_return": -0.031245984495460254,
+      "gld_mean_return": 0.0006692543712491952,
+      "gld_mean_return_hac": {
+        "mean": 0.0006692543712491951,
+        "se_hac": 0.0019507486084565338,
+        "t_hac": 0.3430756625164125,
+        "p_hac": 0.7315415397411416
+      },
+      "spy_compound_return": -0.9466732981307476,
+      "gld_compound_return": 0.05173235872802895,
+      "spy_ann_vol": 0.23334403248834426,
+      "gld_ann_vol": 0.2488406168901268,
+      "gld_positive_rate": 0.45652173913043476,
+      "gld_positive_rate_ci95": [
+        0.35852667216525175,
+        0.5580021442943673
+      ],
+      "gld_nonnegative_rate": 0.45652173913043476,
+      "spy_gld_corr": 0.24821021319446407,
+      "spy_gld_corr_ci95_fisher": [
+        0.045716957434181145,
+        0.4311108997720947
+      ],
+      "n_spy_down_inside_condition": 92,
+      "gld_positive_when_spy_down_inside_condition": 0.45652173913043476,
+      "min_date": "2016-01-07",
+      "max_date": "2026-06-05"
+    },
+    "spy_below_minus_3pct": {
+      "label": "spy_below_minus_3pct",
+      "definition": "SPY return < -3%",
+      "n": 33,
+      "spy_mean_return": -0.04404380423297496,
+      "gld_mean_return": -0.0017977853270368298,
+      "gld_mean_return_hac": {
+        "mean": -0.001797785327036829,
+        "se_hac": 0.0029419664380290044,
+        "t_hac": -0.6110828810954317,
+        "p_hac": 0.541144712342143
+      },
+      "spy_compound_return": -0.7751825733228807,
+      "gld_compound_return": -0.06179947948732856,
+      "spy_ann_vol": 0.29056250856330285,
+      "gld_ann_vol": 0.2638044293229925,
+      "gld_positive_rate": 0.48484848484848486,
+      "gld_positive_rate_ci95": [
+        0.32504042108133696,
+        0.6478162455108585
+      ],
+      "gld_nonnegative_rate": 0.48484848484848486,
+      "spy_gld_corr": 0.3599405736120711,
+      "spy_gld_corr_ci95_fisher": [
+        0.018976520960260958,
+        0.6259058596449039
+      ],
+      "n_spy_down_inside_condition": 33,
+      "gld_positive_when_spy_down_inside_condition": 0.48484848484848486,
+      "min_date": "2016-06-24",
+      "max_date": "2025-04-10"
+    },
+    "spy_bottom_10pct": {
+      "label": "spy_bottom_10pct",
+      "definition": "SPY bottom 10% daily returns (<= -1.0942%)",
+      "n": 264,
+      "spy_mean_return": -0.020403444026392537,
+      "gld_mean_return": 0.00017051969507136987,
+      "gld_mean_return_hac": {
+        "mean": 0.00017051969507137006,
+        "se_hac": 0.0011978632382446776,
+        "t_hac": 0.1423532249985782,
+        "p_hac": 0.8868010070787735
+      },
+      "spy_compound_return": -0.9957560153882847,
+      "gld_compound_return": 0.02001784630416914,
+      "spy_ann_vol": 0.1890470802582198,
+      "gld_ann_vol": 0.2198304302923059,
+      "gld_positive_rate": 0.4810606060606061,
+      "gld_positive_rate_ci95": [
+        0.42149495496267053,
+        0.5411695255698429
+      ],
+      "gld_nonnegative_rate": 0.48484848484848486,
+      "spy_gld_corr": 0.104153855272989,
+      "spy_gld_corr_ci95_fisher": [
+        -0.01678420160333529,
+        0.2220882856734754
+      ],
+      "n_spy_down_inside_condition": 264,
+      "gld_positive_when_spy_down_inside_condition": 0.4810606060606061,
+      "min_date": "2016-01-06",
+      "max_date": "2026-06-23"
+    },
+    "spy_bottom_5pct": {
+      "label": "spy_bottom_5pct",
+      "definition": "SPY bottom 5% daily returns (<= -1.6766%)",
+      "n": 132,
+      "spy_mean_return": -0.027264583576076255,
+      "gld_mean_return": 0.0010831569414737913,
+      "gld_mean_return_hac": {
+        "mean": 0.0010831569414737913,
+        "se_hac": 0.0014842140264217435,
+        "t_hac": 0.7297848707744319,
+        "p_hac": 0.4655216937029544
+      },
+      "spy_compound_return": -0.9743257571167863,
+      "gld_compound_return": 0.137793946224525,
+      "spy_ann_vol": 0.2171247851588802,
+      "gld_ann_vol": 0.2310712828879464,
+      "gld_positive_rate": 0.48484848484848486,
+      "gld_positive_rate_ci95": [
+        0.4012326902717506,
+        0.5693212184191165
+      ],
+      "gld_nonnegative_rate": 0.49242424242424243,
+      "spy_gld_corr": 0.22058512570916108,
+      "spy_gld_corr_ci95_fisher": [
+        0.051659842557382096,
+        0.3772387163087953
+      ],
+      "n_spy_down_inside_condition": 132,
+      "gld_positive_when_spy_down_inside_condition": 0.48484848484848486,
+      "min_date": "2016-01-07",
+      "max_date": "2026-06-05"
+    },
+    "spy_bottom_1pct": {
+      "label": "spy_bottom_1pct",
+      "definition": "SPY bottom 1% daily returns (<= -3.2260%)",
+      "n": 27,
+      "spy_mean_return": -0.046989938047250095,
+      "gld_mean_return": -0.0014420824952960643,
+      "gld_mean_return_hac": {
+        "mean": -0.0014420824952960645,
+        "se_hac": 0.003465724365328618,
+        "t_hac": -0.41609843809934005,
+        "p_hac": 0.6773379728275
+      },
+      "spy_compound_return": -0.7287852907258662,
+      "gld_compound_return": -0.042095649098874977,
+      "spy_ann_vol": 0.3022969976143813,
+      "gld_ann_vol": 0.28027696360176224,
+      "gld_positive_rate": 0.48148148148148145,
+      "gld_positive_rate_ci95": [
+        0.3074322697621846,
+        0.6601438424504771
+      ],
+      "gld_nonnegative_rate": 0.48148148148148145,
+      "spy_gld_corr": 0.41684494027799857,
+      "spy_gld_corr_ci95_fisher": [
+        0.04376339870215988,
+        0.6878920583817871
+      ],
+      "n_spy_down_inside_condition": 27,
+      "gld_positive_when_spy_down_inside_condition": 0.48148148148148145,
+      "min_date": "2016-06-24",
+      "max_date": "2025-04-10"
+    },
+    "vix_top_20pct": {
+      "label": "vix_top_20pct",
+      "definition": "VIX top 20% days (>= 22.79)",
+      "n": 529,
+      "spy_mean_return": -0.0018816348905440156,
+      "gld_mean_return": 0.0006216387023285381,
+      "gld_mean_return_hac": {
+        "mean": 0.0006216387023285377,
+        "se_hac": 0.0005779119230368412,
+        "t_hac": 1.0756633970483231,
+        "p_hac": 0.2820778230410226
+      },
+      "spy_compound_return": -0.6688878170201616,
+      "gld_compound_return": 0.328381461310876,
+      "spy_ann_vol": 0.3218194561373142,
+      "gld_ann_vol": 0.2068004935739372,
+      "gld_positive_rate": 0.5255198487712666,
+      "gld_positive_rate_ci95": [
+        0.4829367542506297,
+        0.5677349785003419
+      ],
+      "gld_nonnegative_rate": 0.5255198487712666,
+      "spy_gld_corr": 0.11347972268126796,
+      "spy_gld_corr_ci95_fisher": [
+        0.02850442414958765,
+        0.19682662737595022
+      ],
+      "n_spy_down_inside_condition": 292,
+      "gld_positive_when_spy_down_inside_condition": 0.523972602739726,
+      "min_date": "2016-01-07",
+      "max_date": "2026-04-07"
+    },
+    "vix_top_10pct": {
+      "label": "vix_top_10pct",
+      "definition": "VIX top 10% days (>= 27.18)",
+      "n": 264,
+      "spy_mean_return": -0.0030478148384689638,
+      "gld_mean_return": 4.315261802836839e-05,
+      "gld_mean_return_hac": {
+        "mean": 4.315261802836839e-05,
+        "se_hac": 0.0008974071486635285,
+        "t_hac": 0.048085886202972425,
+        "p_hac": 0.9616477943722812
+      },
+      "spy_compound_return": -0.5895123287204453,
+      "gld_compound_return": -0.01192896648765951,
+      "spy_ann_vol": 0.4014616493998571,
+      "gld_ann_vol": 0.21195991310145815,
+      "gld_positive_rate": 0.4962121212121212,
+      "gld_positive_rate_ci95": [
+        0.4363884998376865,
+        0.5561443962688162
+      ],
+      "gld_nonnegative_rate": 0.4962121212121212,
+      "spy_gld_corr": 0.1771915595961333,
+      "spy_gld_corr_ci95_fisher": [
+        0.05769883264497431,
+        0.29167902736739537
+      ],
+      "n_spy_down_inside_condition": 154,
+      "gld_positive_when_spy_down_inside_condition": 0.4805194805194805,
+      "min_date": "2016-01-20",
+      "max_date": "2026-03-30"
+    },
+    "vix_top_5pct": {
+      "label": "vix_top_5pct",
+      "definition": "VIX top 5% days (>= 30.68)",
+      "n": 132,
+      "spy_mean_return": -0.0062834610189162355,
+      "gld_mean_return": 0.0006454052317846474,
+      "gld_mean_return_hac": {
+        "mean": 0.0006454052317846477,
+        "se_hac": 0.0016429726648072192,
+        "t_hac": 0.3928277357313047,
+        "p_hac": 0.6944467179086733
+      },
+      "spy_compound_return": -0.5922789294641374,
+      "gld_compound_return": 0.07221167305274512,
+      "spy_ann_vol": 0.49891798829679146,
+      "gld_ann_vol": 0.24423416029534284,
+      "gld_positive_rate": 0.5303030303030303,
+      "gld_positive_rate_ci95": [
+        0.44551449299365076,
+        0.6133776896246153
+      ],
+      "gld_nonnegative_rate": 0.5303030303030303,
+      "spy_gld_corr": 0.19331639397550338,
+      "spy_gld_corr_ci95_fisher": [
+        0.02321065695243261,
+        0.3525434634225898
+      ],
+      "n_spy_down_inside_condition": 83,
+      "gld_positive_when_spy_down_inside_condition": 0.5301204819277109,
+      "min_date": "2018-02-05",
+      "max_date": "2026-03-27"
+    },
+    "vix_top_10pct_and_spy_down": {
+      "label": "vix_top_10pct_and_spy_down",
+      "definition": "VIX top 10% (>= 27.18) and SPY return < 0",
+      "n": 154,
+      "spy_mean_return": -0.01852394101969187,
+      "gld_mean_return": -0.0005850358131096597,
+      "gld_mean_return_hac": {
+        "mean": -0.0005850358131096597,
+        "se_hac": 0.0012002078305567258,
+        "t_hac": -0.4874454225467653,
+        "p_hac": 0.6259427109244635
+      },
+      "spy_compound_return": -0.9451452262040353,
+      "gld_compound_return": -0.09979569626682672,
+      "spy_ann_vol": 0.2702269775454733,
+      "gld_ann_vol": 0.22239962755857,
+      "gld_positive_rate": 0.4805194805194805,
+      "gld_positive_rate_ci95": [
+        0.4030490437857395,
+        0.5589381296424033
+      ],
+      "gld_nonnegative_rate": 0.4805194805194805,
+      "spy_gld_corr": 0.13680599158785195,
+      "spy_gld_corr_ci95_fisher": [
+        -0.02182695251714291,
+        0.28871953972071607
+      ],
+      "n_spy_down_inside_condition": 154,
+      "gld_positive_when_spy_down_inside_condition": 0.4805194805194805,
+      "min_date": "2016-01-20",
+      "max_date": "2026-03-30"
+    }
+  },
+  "episodes": {
+    "2018Q4_selloff": {
+      "label": "2018Q4 sell-off",
+      "definition": "2018-10-01 to 2018-12-31",
+      "n": 63,
+      "spy_mean_return": -0.002195828948637494,
+      "gld_mean_return": 0.0011716093229115726,
+      "gld_mean_return_hac": {
+        "mean": 0.0011716093229115724,
+        "se_hac": 0.0006318696823992224,
+        "t_hac": 1.8541945523686898,
+        "p_hac": 0.06371133118772172
+      },
+      "spy_compound_return": -0.13532089680484183,
+      "gld_compound_return": 0.07529263659921237,
+      "spy_ann_vol": 0.23686009242379816,
+      "gld_ann_vol": 0.09808325638003984,
+      "gld_positive_rate": 0.5396825396825397,
+      "gld_positive_rate_ci95": [
+        0.4178925188089537,
+        0.6569113542395502
+      ],
+      "gld_nonnegative_rate": 0.5555555555555556,
+      "spy_gld_corr": -0.24426056642173777,
+      "spy_gld_corr_ci95_fisher": [
+        -0.46394783480670576,
+        0.003730216217759307
+      ],
+      "n_spy_down_inside_condition": 36,
+      "gld_positive_when_spy_down_inside_condition": 0.6944444444444444,
+      "min_date": "2018-10-01",
+      "max_date": "2018-12-31"
+    },
+    "covid_crash": {
+      "label": "COVID crash",
+      "definition": "2020-02-20 to 2020-04-30",
+      "n": 50,
+      "spy_mean_return": -0.0020712805430766145,
+      "gld_mean_return": 0.0010746196613305625,
+      "gld_mean_return_hac": {
+        "mean": 0.0010746196613305623,
+        "se_hac": 0.002820783621251838,
+        "t_hac": 0.38096493939994447,
+        "p_hac": 0.703229264565536
+      },
+      "spy_compound_return": -0.13640689250145832,
+      "gld_compound_return": 0.04618229182216815,
+      "spy_ann_vol": 0.6616330440350578,
+      "gld_ann_vol": 0.2970744623072499,
+      "gld_positive_rate": 0.56,
+      "gld_positive_rate_ci95": [
+        0.4230602802165686,
+        0.6883780078874284
+      ],
+      "gld_nonnegative_rate": 0.56,
+      "spy_gld_corr": 0.21653964987522858,
+      "spy_gld_corr_ci95_fisher": [
+        -0.06577238872241346,
+        0.4667545247335294
+      ],
+      "n_spy_down_inside_condition": 28,
+      "gld_positive_when_spy_down_inside_condition": 0.5714285714285714,
+      "min_date": "2020-02-20",
+      "max_date": "2020-04-30"
+    },
+    "rate_shock_2022": {
+      "label": "2022 rate-shock bear",
+      "definition": "2022-01-03 to 2022-10-31",
+      "n": 209,
+      "spy_mean_return": -0.0008161436318056742,
+      "gld_mean_return": -0.000522085031152424,
+      "gld_mean_return_hac": {
+        "mean": -0.000522085031152424,
+        "se_hac": 0.0006309672939701533,
+        "t_hac": -0.8274359640218059,
+        "p_hac": 0.40799000337131297
+      },
+      "spy_compound_return": -0.17744311776379573,
+      "gld_compound_return": -0.11142958764409305,
+      "spy_ann_vol": 0.24417966345641495,
+      "gld_ann_vol": 0.14753444031226207,
+      "gld_positive_rate": 0.49282296650717705,
+      "gld_positive_rate_ci95": [
+        0.42578703302134413,
+        0.5601179686798173
+      ],
+      "gld_nonnegative_rate": 0.49282296650717705,
+      "spy_gld_corr": 0.10168395653302603,
+      "spy_gld_corr_ci95_fisher": [
+        -0.03450685071606696,
+        0.23416706408460755
+      ],
+      "n_spy_down_inside_condition": 116,
+      "gld_positive_when_spy_down_inside_condition": 0.47413793103448276,
+      "min_date": "2022-01-03",
+      "max_date": "2022-10-31"
+    },
+    "apr_2025_shock": {
+      "label": "2025 April shock",
+      "definition": "2025-04-01 to 2025-04-30",
+      "n": 21,
+      "spy_mean_return": 9.952546820890529e-05,
+      "gld_mean_return": 0.0026797968471760185,
+      "gld_mean_return_hac": {
+        "mean": 0.0026797968471760176,
+        "se_hac": 0.0039227950191405596,
+        "t_hac": 0.6831345594405112,
+        "p_hac": 0.49452181933159034
+      },
+      "spy_compound_return": -0.00867005654418418,
+      "gld_compound_return": 0.05424437277239913,
+      "spy_ann_vol": 0.5269365271255132,
+      "gld_ann_vol": 0.2930583998008453,
+      "gld_positive_rate": 0.47619047619047616,
+      "gld_positive_rate_ci95": [
+        0.2834400610153417,
+        0.6763046541715557
+      ],
+      "gld_nonnegative_rate": 0.47619047619047616,
+      "spy_gld_corr": 0.21779776317921334,
+      "spy_gld_corr_ci95_fisher": [
+        -0.23608591169713922,
+        0.5936676626728543
+      ],
+      "n_spy_down_inside_condition": 8,
+      "gld_positive_when_spy_down_inside_condition": 0.625,
+      "min_date": "2025-04-01",
+      "max_date": "2025-04-30"
+    }
+  },
+  "safe_haven_regression": {
+    "spec": "r_gld = alpha + beta*r_spy + regime interaction slopes, HAC lag=5",
+    "n_obs": 2638,
+    "spy_quantiles": {
+      "q10": -0.010941799468214752,
+      "q05": -0.016766328747615623,
+      "q01": -0.0322600866251807
+    },
+    "params": {
+      "const": 0.0003598718463913216,
+      "r_spy_base": 0.09274460102957746,
+      "r_spy_x_q10_to_q05": 0.0044101882329664055,
+      "r_spy_x_q05_to_q01": -0.14462648822014548,
+      "r_spy_x_q01": -0.0068581583922267195
+    },
+    "se_hac": {
+      "const": 0.0002155627753631221,
+      "r_spy_base": 0.04671220605015116,
+      "r_spy_x_q10_to_q05": 0.0984471833485329,
+      "r_spy_x_q05_to_q01": 0.08133383889168765,
+      "r_spy_x_q01": 0.09258255559265
+    },
+    "t_hac": {
+      "const": 1.669452649164989,
+      "r_spy_base": 1.9854468215439236,
+      "r_spy_x_q10_to_q05": 0.04479750545379242,
+      "r_spy_x_q05_to_q01": -1.778183474319277,
+      "r_spy_x_q01": -0.07407614045999805
+    },
+    "p_hac": {
+      "const": 0.09502770698800204,
+      "r_spy_base": 0.04709478108809712,
+      "r_spy_x_q10_to_q05": 0.9642687134579879,
+      "r_spy_x_q05_to_q01": 0.0753737261867578,
+      "r_spy_x_q01": 0.9409498002449925
+    },
+    "r_squared": 0.008726053110798548,
+    "conditional_slopes": {
+      "normal_above_q10": 0.09274460102957746,
+      "q10_to_q05": 0.09715478926254387,
+      "q05_to_q01": -0.05188188719056802,
+      "q01": 0.08588644263735074
+    },
+    "strong_safe_haven_slope_nonpositive": {
+      "normal_above_q10": false,
+      "q10_to_q05": false,
+      "q05_to_q01": true,
+      "q01": false
+    },
+    "interpretation": "Nonpositive conditional slope in crash bins is consistent with the strong safe-haven definition; positive slopes imply gold tends to co-move with equities in that stress bin."
+  },
+  "bootstrap_ci": {
+    "spy_below_minus_2pct": {
+      "condition": "SPY<-2%",
+      "block": 5,
+      "n_boot": 2000,
+      "seed": 42,
+      "n_boot_effective": 2000,
+      "gld_mean_return_ci95": [
+        -0.0026651554488607942,
+        0.004112177292246403
+      ],
+      "gld_positive_rate_ci95": [
+        0.35134416331224844,
+        0.5618437180796729
+      ],
+      "spy_gld_corr_ci95": [
+        -0.014522906783114782,
+        0.4254385703283572
+      ]
+    },
+    "vix_top_10pct_and_spy_down": {
+      "condition": "VIX top 10% and SPY<0",
+      "block": 5,
+      "n_boot": 2000,
+      "seed": 43,
+      "n_boot_effective": 2000,
+      "gld_mean_return_ci95": [
+        -0.003026811229314899,
+        0.0019084746260304656
+      ],
+      "gld_positive_rate_ci95": [
+        0.3985445836403832,
+        0.5670807386265351
+      ],
+      "spy_gld_corr_ci95": [
+        -0.060347253210462914,
+        0.3205016868231372
+      ]
+    }
+  }
+}

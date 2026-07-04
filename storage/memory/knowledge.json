@@ -37614,5 +37614,26 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-07-05T00:28:40.332633"
+  },
+  {
+    "item_id": "c6d2fc41",
+    "category": "safe_haven_myth",
+    "content": "K1628：黃金作為股災避風港是弱且 regime-dependent，非自動保險。資料為本地 price_cache.db 的 SPY/GLD/^VIX，2016-01-05 至 2026-07-02，n=2638 共同交易日；SPY/GLD 各自用 adj_close close-to-close pct_change，VIX 僅作描述性高波動 regime。文獻口徑採 Baur-Lucey (2010) hedge/safe-haven 定義：平均低相關是 hedge，極端股市下跌時不相關/負相關才是 safe haven。結果：全樣本 SPY-GLD corr=0.075、GLD 收紅率 53.8%；但 SPY<-2% 時 n=92，GLD 收紅率 45.7%（bootstrap 95% CI [35.1%,56.2%]），GLD 平均日報酬 +0.067% 但 HAC p=0.732，SPY-GLD corr=+0.248（bootstrap CI [-0.015,+0.425]）；SPY<-3% 時 n=33，GLD 平均 -0.180%、corr=+0.360；VIX top10% 且 SPY<0 時 n=154，GLD 平均 -0.059%、corr=+0.137。Episode 顯示機制依危機類型切換：2018Q4 GLD +7.5% 且 corr=-0.244，像避風港；COVID GLD +4.6% 但 corr=+0.217；2022 升息熊市 GLD -11.1% 且 corr=+0.102，與股票同受傷。Strong safe-haven gate（crash-bin corr<=0 且 GLD mean>=0）在 SPY<-2%、SPY<-3%、VIX top10%&SPY<0 三個主壓力定義皆 FAIL。結論：黃金可作低相關分散資產與部分危機 hedge，但『股災一定抗跌/一定收紅』是迷思。Same-day design 是描述性共動檢定，不是 trading signal；不宣稱 lookahead-free 策略績效。",
+    "evidence": [
+      "experiments/k1628/README.md",
+      "experiments/k1628/k1628.py",
+      "experiments/k1628/k1628_results.json",
+      "experiments/k1628/codex_review.md",
+      "experiments/k1628/fig_safe_haven_conditions.png",
+      "experiments/k1628/fig_rolling_corr_episodes.png"
+    ],
+    "confidence": 0.84,
+    "created_at": "2026-07-05T00:55:25.702771",
+    "experiment_id": "k1628",
+    "k_id": "k1628",
+    "experiment_path": "experiments/k1628/",
+    "verdict": "WEAK_REGIME_DEPENDENT_SAFE_HAVEN_NOT_AUTOMATIC",
+    "reviewer": "Codex CLI primary-path self-review PASS",
+    "source_task_id": "newroute_gold_safe_haven_myth"
   }
 ]
