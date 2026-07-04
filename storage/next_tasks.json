@@ -49215,7 +49215,7 @@
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「美股大跌、台股隔天必補跌」隔夜傳導的實際條件機率",
     "description": "驗證熱門說法。用 SPY 隔夜 + ^TWII 開盤/日報酬，計算美股單日大跌（-1%/-2%/-3%）後台股隔日開低/收黑的條件機率與幅度，對照無條件基準。延伸既有 K1626（TSM ADR 隔夜單向領先 TW）基礎，reader 有感。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49226,7 +49226,33 @@
       "reader-facing",
       "investment-urban-legend"
     ],
-    "created_at": "2026-07-04T14:40:15+00:00"
+    "created_at": "2026-07-04T14:40:15+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-07-04T16:10:17.430929+00:00",
+    "claim_session_id": "d050a026f930",
+    "status_history": [
+      {
+        "ts": "2026-07-04T16:10:17.431318+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-00"
+      },
+      {
+        "ts": "2026-07-04T16:10:46.913885+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-00"
+      },
+      {
+        "ts": "2026-07-04T16:29:17.279908+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-00"
+      }
+    ],
+    "started_at": "2026-07-04T16:10:46.913647+00:00",
+    "completed_at": "2026-07-04T16:29:17.279619+00:00",
+    "result": "K1627 完成: 迷思『美股大跌台股隔天必補跌』隔夜傳導條件機率. SPY->0050.TW 2016-2026 n=2638. base rate 43.4%, P(TW跌|US<-1%)=74.5%/<-2%=81.5%/<-3%=81.8% 全顯著; 回歸 beta=0.485 (HAC, t=7.95, R2=0.152). verdict CONDITIONAL_PASS (Codex). 結論: 跟跌傾向真、必補跌假(US跌逾2%後TW次日仍~1/6不跌). knowledge item_id ca6558ea."
   },
   {
     "id": "research_myth_volume_leads_price",

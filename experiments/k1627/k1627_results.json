@@ -1,0 +1,338 @@
+{
+  "experiment_id": "k1627",
+  "title": "美股大跌、台股隔天必補跌？隔夜傳導的實際條件機率",
+  "generated_at_utc": "2026-07-04T16:26:52.184424+00:00",
+  "seed": 42,
+  "data": {
+    "us_ticker": "SPY",
+    "tw_ticker": "0050.TW",
+    "tw_proxy_note": "0050.TW 作為 TAIEX（台股大盤）proxy — 本系統慣例，非官方指數",
+    "source": "data/cache/price_cache.db :: price_data (adj_close close-to-close returns)",
+    "us_full_range": [
+      "2016-01-04",
+      "2026-07-02"
+    ],
+    "tw_full_range": [
+      "2009-01-02",
+      "2026-07-03"
+    ],
+    "analysis_start": "2016-01-04",
+    "n_us_days_2016plus": 2638,
+    "n_tw_days_2016plus": 2549,
+    "n_pairs": 2638,
+    "n_tw_unique_targets": 2466
+  },
+  "alignment": {
+    "rule": "US-forward: r_us(D) -> r_tw(T), T=min TW trading day strictly > D",
+    "no_lookahead_reason": "US close(D) 發生於 TW open(T) 之前（session-boundary timing）",
+    "many_to_one_diagnostic": {
+      "n_tw_days_shared_by_multiple_us_signals": 85,
+      "n_pairs_involved_in_sharing": 257,
+      "pct_pairs_in_sharing": 0.09742228961334344,
+      "note": "台股假日時多個 US 日對到同一 TW 日；robustness 版對每 TW 日只保留最新 US 訊號"
+    }
+  },
+  "base_rate": {
+    "definition_main": "P(TW next-day return < 0)  無條件",
+    "P_tw_down_main_unique_twdays": 0.4367396593673966,
+    "P_tw_down_strong_unique_twdays": 0.1330089213300892,
+    "n_unique_tw_days": 2466,
+    "P_tw_down_main_event_universe": 0.4336618650492798,
+    "P_tw_down_strong_event_universe": 0.13836239575435935
+  },
+  "control_us_nonneg": {
+    "definition": "P(TW down next | r_us(D) >= 0)  美股沒下跌時",
+    "n": 1468,
+    "P_tw_down_main": 0.2949591280653951,
+    "P_tw_down_strong": 0.05790190735694823
+  },
+  "by_threshold": {
+    "us_below_+0.00": {
+      "us_down_threshold": 0.0,
+      "n_event": 1170,
+      "small_sample_caveat": false,
+      "P_tw_down_given_event_main": 0.6076923076923076,
+      "P_tw_down_given_event_main_ci95": [
+        0.5794058731593975,
+        0.6352738845765177
+      ],
+      "P_tw_down_strong_given_event": 0.23931623931623933,
+      "P_tw_down_strong_given_event_ci95": [
+        0.215746474251955,
+        0.26459220741904377
+      ],
+      "P_tw_down_given_not_event_main": 0.2949591280653951,
+      "n_not_event": 1468,
+      "diff_in_prop_vs_not_event": {
+        "diff": 0.31273317962691255,
+        "z": 16.10196965062709,
+        "p_value": 0.0,
+        "ci95": [
+          0.2763061201156697,
+          0.3491602391381554
+        ]
+      },
+      "contingency_2x2": {
+        "table": [
+          [
+            711,
+            459
+          ],
+          [
+            433,
+            1035
+          ]
+        ],
+        "min_expected_count": 507.3843821076573,
+        "test_used": "chi2",
+        "fisher_odds_ratio": 3.7026219263686997,
+        "fisher_p_value": 8.839356789711614e-59,
+        "chi2_stat": 259.273426629716,
+        "chi2_p_value": 2.4711130880028402e-58,
+        "primary_p_value": 2.4711130880028402e-58
+      }
+    },
+    "us_below_-0.01": {
+      "us_down_threshold": -0.01,
+      "n_event": 290,
+      "small_sample_caveat": false,
+      "P_tw_down_given_event_main": 0.7448275862068966,
+      "P_tw_down_given_event_main_ci95": [
+        0.6916775575235945,
+        0.7915762371243904
+      ],
+      "P_tw_down_strong_given_event": 0.4413793103448276,
+      "P_tw_down_strong_given_event_ci95": [
+        0.3853656433674951,
+        0.49892570157594507
+      ],
+      "P_tw_down_given_not_event_main": 0.39522998296422485,
+      "n_not_event": 2348,
+      "diff_in_prop_vs_not_event": {
+        "diff": 0.34959760324267175,
+        "z": 11.33353986142802,
+        "p_value": 0.0,
+        "ci95": [
+          0.2956656022502171,
+          0.4035296042351264
+        ]
+      },
+      "contingency_2x2": {
+        "table": [
+          [
+            216,
+            74
+          ],
+          [
+            928,
+            1420
+          ]
+        ],
+        "min_expected_count": 125.76194086429113,
+        "test_used": "chi2",
+        "fisher_odds_ratio": 4.466449207828518,
+        "fisher_p_value": 7.519815930134862e-30,
+        "chi2_stat": 128.4491257905778,
+        "chi2_p_value": 8.951247477509391e-30,
+        "primary_p_value": 8.951247477509391e-30
+      }
+    },
+    "us_below_-0.02": {
+      "us_down_threshold": -0.02,
+      "n_event": 92,
+      "small_sample_caveat": false,
+      "P_tw_down_given_event_main": 0.8152173913043478,
+      "P_tw_down_given_event_main_ci95": [
+        0.7238594289322428,
+        0.8813066517355174
+      ],
+      "P_tw_down_strong_given_event": 0.5978260869565217,
+      "P_tw_down_strong_given_event_ci95": [
+        0.49565975089204156,
+        0.6921504120738151
+      ],
+      "P_tw_down_given_not_event_main": 0.41987431264728986,
+      "n_not_event": 2546,
+      "diff_in_prop_vs_not_event": {
+        "diff": 0.3953430786570579,
+        "z": 7.517030941667011,
+        "p_value": 5.595524044110789e-14,
+        "ci95": [
+          0.3137501495292529,
+          0.47693600778486295
+        ]
+      },
+      "contingency_2x2": {
+        "table": [
+          [
+            75,
+            17
+          ],
+          [
+            1069,
+            1477
+          ]
+        ],
+        "min_expected_count": 39.89689158453374,
+        "test_used": "chi2",
+        "fisher_odds_ratio": 6.0955813569581245,
+        "fisher_p_value": 3.7079459241064925e-14,
+        "chi2_stat": 56.505754177979234,
+        "chi2_p_value": 5.60341596817458e-14,
+        "primary_p_value": 5.60341596817458e-14
+      }
+    },
+    "us_below_-0.03": {
+      "us_down_threshold": -0.03,
+      "n_event": 33,
+      "small_sample_caveat": false,
+      "P_tw_down_given_event_main": 0.8181818181818182,
+      "P_tw_down_given_event_main_ci95": [
+        0.6561176836533009,
+        0.9138923179105933
+      ],
+      "P_tw_down_strong_given_event": 0.6060606060606061,
+      "P_tw_down_strong_given_event_ci95": [
+        0.43683440819940234,
+        0.7531689256552291
+      ],
+      "P_tw_down_given_not_event_main": 0.42879078694817657,
+      "n_not_event": 2605,
+      "diff_in_prop_vs_not_event": {
+        "diff": 0.38939103123364166,
+        "z": 4.485345096164598,
+        "p_value": 7.279601704990313e-06,
+        "ci95": [
+          0.25643218905561427,
+          0.522349873411669
+        ]
+      },
+      "contingency_2x2": {
+        "table": [
+          [
+            27,
+            6
+          ],
+          [
+            1117,
+            1488
+          ]
+        ],
+        "min_expected_count": 14.310841546626232,
+        "test_used": "chi2",
+        "fisher_odds_ratio": 5.994628469113698,
+        "fisher_p_value": 8.26161142770129e-06,
+        "chi2_stat": 20.118320631687798,
+        "chi2_p_value": 7.27960170509377e-06,
+        "primary_p_value": 7.27960170509377e-06
+      }
+    }
+  },
+  "regression": {
+    "spec": "r_tw(T) ~ alpha + beta * r_us(D)",
+    "n_obs": 2638,
+    "alpha": 0.0007594507107673665,
+    "beta": 0.4845018425494995,
+    "alpha_se_hac": 0.0003335024807229218,
+    "beta_se_hac": 0.06092511700142642,
+    "alpha_t_hac": 2.2771965867274253,
+    "beta_t_hac": 7.952415463365561,
+    "alpha_p_hac": 0.022774488880524257,
+    "beta_p_hac": 1.8290964232610334e-15,
+    "r_squared": 0.15190894842306357,
+    "hac_lag": 5,
+    "note": "beta>0 = 同向傳導強度：US 每跌 1%（r_us=-1）對應 TW 次日平均報酬 -beta%（beta=0.485 ⇒ 約 -0.485%）；斜率遠<1 代表非全額補跌；SE 用 Newey-West HAC lag=5"
+  },
+  "bootstrap_main_threshold": {
+    "point": 0.8152173913043478,
+    "ci95": [
+      0.7386079545454546,
+      0.8857363770250367
+    ],
+    "n_boot_effective": 2000,
+    "threshold": -0.02,
+    "definition": "P(TW<0 | US<-2%), block bootstrap"
+  },
+  "robustness_dedup_freshest_us_signal": {
+    "n_pairs_dedup": 2466,
+    "by_threshold": {
+      "us_below_+0.00": {
+        "n_event": 1091,
+        "P_tw_down_given_event_main": 0.614115490375802
+      },
+      "us_below_-0.01": {
+        "n_event": 267,
+        "P_tw_down_given_event_main": 0.7602996254681648
+      },
+      "us_below_-0.02": {
+        "n_event": 84,
+        "P_tw_down_given_event_main": 0.8214285714285714
+      },
+      "us_below_-0.03": {
+        "n_event": 29,
+        "P_tw_down_given_event_main": 0.8275862068965517
+      }
+    },
+    "base_rate_tw_down_main": 0.4367396593673966
+  },
+  "buckets_for_figure": [
+    {
+      "label": "US<-2%",
+      "n": 92,
+      "P_tw_down_next": 0.8152173913043478,
+      "ci95": [
+        0.7238594289322428,
+        0.8813066517355174
+      ]
+    },
+    {
+      "label": "-2%~-1%",
+      "n": 198,
+      "P_tw_down_next": 0.7121212121212122,
+      "ci95": [
+        0.6454905148416947,
+        0.7706777019894242
+      ]
+    },
+    {
+      "label": "-1%~0%",
+      "n": 880,
+      "P_tw_down_next": 0.5625,
+      "ci95": [
+        0.5295224493431963,
+        0.5949342605137644
+      ]
+    },
+    {
+      "label": "0%~+1%",
+      "n": 1123,
+      "P_tw_down_next": 0.3259127337488869,
+      "ci95": [
+        0.2991328841314856,
+        0.3538795277394758
+      ]
+    },
+    {
+      "label": "+1%~+2%",
+      "n": 278,
+      "P_tw_down_next": 0.20503597122302158,
+      "ci95": [
+        0.16175112871546932,
+        0.25636144887966783
+      ]
+    },
+    {
+      "label": "US>+2%",
+      "n": 67,
+      "P_tw_down_next": 0.14925373134328357,
+      "ci95": [
+        0.08314273433779819,
+        0.2534039604590851
+      ]
+    }
+  ],
+  "tw_down_definitions": {
+    "main": "r_tw(T) < 0 (下跌)",
+    "strong": "r_tw(T) < -1% (跌逾 1%)"
+  }
+}

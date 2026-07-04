@@ -37599,5 +37599,20 @@
     "confidence": 0.7,
     "created_at": "2026-07-04T22:32:54.288765",
     "updated_at": "2026-07-04T22:32:54.288774"
+  },
+  {
+    "item_id": "ca6558ea",
+    "category": "experiment",
+    "content": "K1627 台股散戶迷思「美股大跌台股隔天必補跌」隔夜傳導條件機率 diagnostic verdict CONDITIONAL_PASS (Codex primary-path review; 1 must-fix beta-sign output text fixed + re-run, core numbers unchanged). experiment_id=k1627. reviewer=Codex. Data: local price_cache.db adj_close, SPY(US proxy) + 0050.TW(TAIEX proxy), 2016-01-04..2026-07-02, n=2638 US->TW aligned pairs. Alignment: US close(D) -> next TW trading day T strictly>D (session-boundary, no lookahead; independently verified 0 violating pairs, COVID 2020-03-16 SPY -10.9% correctly maps to 0050.TW 2020-03-17). FINDINGS: base rate P(TW down next)=43.4%; control P(TW down|US>=0)=29.5%. Conditional P(TW down next | US big down): US<-1% ->74.5% (n=290), US<-2% ->81.5% (n=92), US<-3% ->81.8% (n=33). All thresholds chi2/Fisher p tiny (2.5e-58..7.3e-6); diff-in-prop +0.31..+0.40 all significant. Block bootstrap (block=5,n_boot=2000,seed=42) P(TW<0|US<-2%)=81.5% 95%CI[73.9,88.6] (upper bound <100%). Transmission regression r_tw(T)~a+b*r_us(D), b=0.485 (t=7.95, p=1.8e-15, R^2=0.152, Newey-West HAC lag=5): same-direction, US down 1% -> TW next-day avg -0.485% (slope<<1, NOT full catch-down; US explains only ~15% of TW next-day variance). VERDICT: 跟跌傾向真且高度顯著（方向/單調性/迴歸皆成立），但「必」補跌為假 — US 跌逾 2% 後台股次日仍約 1/6 機率不跌；較嚴格「跌逾 1%」定義下 P 僅 ~44%。一句話：跟跌傾向真、必補跌假。 Caveats: 0050.TW 為 TAIEX proxy、SPY 為美股 proxy；close-to-close 口徑（非開盤日內反應）；US<-3% n=33 偏小 CI 寬；單一 2016-2026 窗口未做跨期間 split（定位大眾信念驗證非穩健性 paper）. Task: research_myth_us_down_tw_gap_down_next_day (老闆 TG msg154 directive).",
+    "evidence": [
+      "experiments/k1627/k1627.py",
+      "experiments/k1627/k1627_results.json",
+      "experiments/k1627/README.md",
+      "experiments/k1627/codex_review.md",
+      "experiments/k1627/fig_conditional_prob.png",
+      "experiments/k1627/fig_transmission_scatter.png"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-07-05T00:28:40.332633"
   }
 ]
