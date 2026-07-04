@@ -1,0 +1,39 @@
+[
+  {
+    "name": "1_question",
+    "info": "concept",
+    "must_show": [
+      "核心問題：盤整越久，真的代表後面會噴更兇嗎？",
+      "白話拆解：要分清楚「盤整結束那天比較有動作」與「確認盤整後，未來 20 天更震」是兩件事。",
+      "一句話：迷思只有一半成立；結束日動作變大，但後續 20 天沒有更震。"
+    ],
+    "style": "professional, clean white background, dark title bar, large headline, two contrast blocks, no cartoon",
+    "alt": "懶人包1：盤整越久是否代表後面更容易大噴"
+  },
+  {
+    "name": "2_method",
+    "info": "method",
+    "must_show": [
+      "資料：SPY 與 0050.TW 調整收盤價。",
+      "SPY：2016-01-04 至 2026-07-02，共 N=2,639 筆；0050.TW：2009-01-02 至 2026-07-03，共 N=4,282 筆。",
+      "低波動盤整定義：20 日年化波動與 20 日價格區間，同時低於自己過去 252 日的 20% 分位門檻。",
+      "時間順序：門檻只用 t-1 以前資料；訊號在 t 日收盤後才知道；後續結果從 t+1 開始算，避免偷看同日報酬。",
+      "主檢定：盤整連續達 10 天後，看未來 20 天年化波動與絕對報酬。"
+    ],
+    "style": "professional, process diagram, clean corporate layout, data source strip, no cartoon",
+    "alt": "懶人包2：盤整越久迷思的資料與檢定方法"
+  },
+  {
+    "name": "3_results",
+    "info": "results",
+    "must_show": [
+      "盤整連續達 10 天後，未來 20 日年化波動：SPY 11.48% vs 其他日 14.85%，差 -3.37%；0050.TW 14.79% vs 17.81%，差 -3.03%。",
+      "SPY 差距 bootstrap 95% 區間 -5.77% 到 -1.04%；0050.TW 為 -4.81% 到 -0.80%。",
+      "盤整結束當天絕對報酬較大：SPY 1.11% vs 0.73%；0050.TW 1.74% vs 0.86%。",
+      "但盤整結束後 20 日年化波動仍較低：SPY 11.31% vs 14.85%；0050.TW 14.05% vs 17.82%。",
+      "一句話：可以把盤整當 watchlist 條件，但不能把它當成「後面必大噴」的證據。"
+    ],
+    "style": "professional, large numbers, side-by-side market comparison, chart-like blocks, clear takeaway, no cartoon",
+    "alt": "懶人包3：盤整達十天後與盤整結束後的主要結果"
+  }
+]

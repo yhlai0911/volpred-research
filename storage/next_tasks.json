@@ -49143,7 +49143,7 @@
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「盤整越久、噴得越兇」低波動盤整後是否真接大波動？",
     "description": "驗證網路常見說法「橫盤整理越久，突破後行情越大」。用 SPY/^TWII/2330 日 OHLC，定義低波動盤整 regime（如 rolling 20d realized vol 進入歷史低分位、或 Bollinger band 收窄），檢定盤整結束後 N 日 realized vol / abs return 是否顯著高於無條件基準。契合平台波動率專長（low-vol→high-vol regime transition / vol clustering），可延伸學術（regime-switching）。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49170,9 +49170,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T20:25:16.002513+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-04T20:09:35.623154+00:00"
+    "started_at": "2026-07-04T20:09:35.623154+00:00",
+    "completed_at": "2026-07-04T20:25:16.002238+00:00",
+    "result": "K1632 完成：SPY/0050 低波動盤整迷思檢定，主結果顯示盤整達 10 天後未來 20 日波動反而較低；盤整結束當天較易動但後續不更震。已產出實驗三件套、兩張圖、general draft mile_e082beb8，並排入 lazy pack async queue lazypack-mile_e082beb8。"
   },
   {
     "id": "research_myth_vix_extreme_bottom_signal",
