@@ -47766,5 +47766,47 @@
     "started_at": "2026-07-03T23:12:13.073406+00:00",
     "completed_at": "2026-07-03T23:25:02.719033+00:00",
     "result": "第13批 journal-discovery，刻意挖 under-mined 策略/變現軸；agent 誠實回報策略軸5/6子軸已飽和，只回2高信心+2中信心不硬湊；主線程 selectivity gate 掉2中信心(buffer ETF 非期刊驅動 / VRP circuit-breaker 同殼不同題)，保留2條 dedup-verified 入 research_program.md batch 2026-07-04：(1)選擇權賣方overlay vol-regime擇時 BXM/PUT/CLL/CNDR 直服Mission#4 (2)crypto low-vol anomaly regime依賴 FRL2026"
+  },
+  {
+    "id": "research_low_volatility_anomaly_regime",
+    "title": "研究 backlog fallback: 加密貨幣 low-volatility anomaly 的 regime 依賴性：低波動幣是否只在特定市場階段有溢酬",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 加密貨幣 low-volatility anomaly 的 regime 依賴性：低波動幣是否只在特定市場階段有溢酬 — 用 yfinance top-N 流動性加密貨幣（BTC/ETH + 主要 altcoin，資料範圍 = yfinance 可抓的 ~top 20-30 幣，proxy for FRL 原文 432 幣 Binance universe，須標 proxy diagnostic），仿股票 low-vol anomaly 建月度 realized-vol 排序組合，檢定低波動組合溢酬是否 regime-dependent（牛市早期 vs 修正期/高不確定期），與既有股票 low | 來源 section: 期刊主題挖掘 batch 2026-07-04（journal_discovery_20260703_3；websearch jpm/faj/cfa/jrfm(mdpi)/jfutmkt/frl/jai/jod/aqr 2025-26 趨勢層級；本批**刻意只挖 under-mined 的「交易/投資策略機制」軸**——前 12 批重壓 ml方法/realized-measures/har方法學/macro-shock；selectivity gate 後 4→2 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "low_volatility_anomaly_regime",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-04T00:08:25+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-07-04T00:18:42.443459+00:00",
+    "claim_session_id": "38f6e3246a65",
+    "status_history": [
+      {
+        "ts": "2026-07-04T00:18:42.443738+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-04T00:19:16.914167+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-04T00:39:56.287494+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-08"
+      }
+    ],
+    "started_at": "2026-07-04T00:19:16.913886+00:00",
+    "completed_at": "2026-07-04T00:39:56.287205+00:00",
+    "result": "k1620 crypto low-vol anomaly regime NULL：89月樣本 low-high premium -1.65%/月 p=0.478 不顯著；BTC trend/vol regime 差異皆不顯著(dummy p=0.807/0.489, boot 0.826/0.539)。Codex CONDITIONAL_PASS(lag/seed/iid PASS)+修partial-month重跑null穩健。knowledge 9dc25e35"
   }
 ]

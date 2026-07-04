@@ -1,23 +1,24 @@
 # Feed Index
 
-_Last built: 2026-07-03 13:25 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-04 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1730**  (with thumbnail: 71)
-- Last 30 days: **335**
-- Total chars (content): 5,210,231
+- Total articles: **1731**  (with thumbnail: 71)
+- Last 30 days: **330**
+- Total chars (content): 5,213,327
 
-**Status**: published=1529, archived=123, unpublished=59, retracted=12, draft=6, wont_fix=1
+**Status**: published=1530, archived=123, unpublished=59, retracted=12, draft=6, wont_fix=1
 
-**Audience**: research=1106, general=400, daily=130, unknown=77, member_qa=12, event=5
+**Audience**: research=1106, general=401, daily=130, unknown=77, member_qa=12, event=5
 
-**Category**: milestone=864, general=751, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
+**Category**: milestone=864, general=752, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
 
-## 最近 30 天 (335)
+## 最近 30 天 (330)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-03 | `mile_64c33170` | 夏天太平靜，是暴風雨前的寧靜嗎？我用 21 年 VIX 數據查了這個直覺 | general | general | published | 3096 |  | 一般讀者, VIX, 波動率季節性, 夏季波動, 波動率持續性, 尾部風險 |
 | 2026-07-03 | `mile_8bf06fde` | VIX 跌破 16 之後：三個波動率裂縫，比恐慌指數本身更值得留意 | general | general | published | 2626 |  | 一般讀者, VIX, 台股, 美股, 波動率快照, 市場觀察 |
 | 2026-07-03 | `mile_7f181e3a` | 危機來了要換模型嗎？GW(2006) 條件檢定實測 HAR-RV 與 GJR-GARCH 的贏家會不會隨行情翻盤 | research | milestone | draft | 7429 |  | 研究, GJR-GARCH, HAR-RV, Giacomini-White, 條件預測能力, VIX-regime |
 | 2026-07-03 | `mile_a30cfe89` | VIX 只有十幾點，選擇權市場卻在偏心加價：偏斜三讀法，讀懂它正替誰的恐懼定價 | general | general | published | 7127 |  | 一般讀者, 精選導讀, 選擇權偏斜, VIX, 半導體, 波動率 |
@@ -347,17 +348,17 @@ _Last built: 2026-07-03 13:25 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-04 | `mile_50e5d950` | 股指行、商品不行——同一條公式跨資產套用的結局 | general | general | unpublished | 2894 |  | 一般讀者, cross-asset, vix, volatility, etf, equity |
 | 2026-06-04 | `mile_8d9858f4` | Student-t DCC 比 Gaussian DCC 高級嗎？三資產風險平價的誠實答案 | research | milestone | published | 3732 |  | 研究, 風險平價, DCC-GARCH, 學生t分配, 資產配置, 多元配置 |
 | 2026-06-04 | `mile_4152e8c3` | 金融股先抖，台積電就會跟著抖嗎？資料給了一個不舒服的答案 | general | general | published | 2471 |  | 一般讀者, 台積電, 金融股, 波動率, 台股, 風險預警 |
+
+<details><summary>## 2026-Q2 (729)</summary>
+
+| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
+|---|---|---|---|---|---|---|---|---|
 | 2026-06-03 | `mile_2c4efefa` | 最貴的避險模型不一定最好：SPY 用 QQQ 對沖，花大力氣的複雜公式差多少？ | research | milestone | published | 4739 |  | 研究, volatility, hedging, copula, spy, qqq |
 | 2026-06-03 | `mile_b3e68ca2` | VIX 還不夠快？短端 VIX 比率替歷史波動模型多補了一點明日資訊 | general | general | unpublished | 2008 |  | 一般讀者, 波動率預測, VIX, SPY, 期限結構, 風險管理 |
 | 2026-06-03 | `mile_858690fd` | 13,261% 的財報驚喜，為什麼反而是壞訊號？ | general | general | published | 2130 |  | 一般讀者, 財報, 日本股市, 資料解讀, 波動率, 軟銀 |
 | 2026-06-03 | `mile_f1be9128` | 高收益債利差看起來很會預警，真正拿來預測波動卻幾乎沒多加幾分 | general | general | published | 2281 |  | 一般讀者, credit-spread, HY_OAS, FRED, VIX_sufficiency, null_result |
 | 2026-06-03 | `mile_ddd3d9dc` | K653 模擬：「不按表操課」反而贏過嚴格執行者？6 種行為偏差對 VIX 動態再平衡策略的成本量化 | research | milestone | unpublished | 6010 |  | 研究, behavioral-finance, vix-timing, simulation, vol-scaling, bootstrap |
 | 2026-06-03 | `mile_778a9b85` | 市場最恐慌那幾天，我們還是沒找到另類數據的增量價值 | general | general | published | 2153 |  | 一般讀者, 波動率預測, 另類數據, VIX, 跳躍事件, Paper4 |
-
-<details><summary>## 2026-Q2 (723)</summary>
-
-| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
-|---|---|---|---|---|---|---|---|---|
 | 2026-06-03 | `mile_6a4554d4` | K573：三種 VT 策略效率前緣——最低 MDD 不等於最佳風險管理 | research | research | unpublished | 6458 |  | 研究, VT策略, SPY, GLD, VIX, 波動率管理 |
 | 2026-06-03 | `mile_31b2b0bb` | AI 五層產業鏈，我們不講故事，看波動率怎麼說 | general | general | published | 3452 |  | 一般讀者, 波動率, 相關性, AI 產業鏈, 資料中心, 晶片 |
 | 2026-06-03 | `mile_96fb5f73` | 「Consistently outperforms」這句話的代價：GSP-HAR 在 5 檔美股 ETF 上的誠實複製 | research | milestone | published | 4730 |  | 研究, HAR-RV, GSP-HAR, graph-signal-processing, placebo-test, DM-test |

@@ -37470,5 +37470,18 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-07-04T06:35:29.734186"
+  },
+  {
+    "item_id": "9dc25e35",
+    "category": "crypto_low_vol_anomaly",
+    "content": "[k1620] 加密貨幣 low-volatility anomaly 的 regime 依賴性檢定：NULL。在 12 檔存活大市值幣（BTC/ETH/BNB/XRP/ADA/SOL/DOGE/LTC/LINK/DOT/AVAX/MATIC，2019-01 至 2026-06，89 個月度 rebalance）樣本內，low-vol tercile 減 high-vol tercile 的月度 premium = -1.65%/月（Newey-West HAC t=-0.71, p=0.478，不顯著且方向偏負）。以 BTC 200d SMA trend regime（bull/bear）與 BTC 30d vol regime（high/low，門檻用 expanding median 避 lookahead）分組，premium 的 regime 差異皆不顯著（trend: dummy HAC p=0.807, circular block-bootstrap p=0.826；vol: dummy p=0.489, boot p=0.539）。→ 不支持「crypto low-vol 溢酬可用 BTC regime 擇時」的可交易 insight。唯一與傳統 low-vol anomaly（Baker-Bradley-Wurgler 2011；Blitz-van Vliet 2007）相容的微弱訊號在風險調整/複利維度（low-vol tercile Sharpe 0.92 vs high 0.85、複利 62.6x vs 39.3x），但未達正式顯著、非本題主張，僅 descriptive。方法防錯：月頻 signal.shift(1) lag（排序窗口截至 t-1 月底、regime 訊號 t-1 評估）、seed 42、跨資產先組合層級等權聚合再對月序列做 HAC（K1355 rule，非 coin-month iid）、剔除末尾不完整月。Survivorship caveat：僅涵蓋當前存活大市值幣（中途停更如 MATIC 2025-03 終端損失未計）→ 向上偏誤，結論限樣本內。Provenance: experiment_id=k1620；reviewer=Codex CLI 0.142.3（ChatGPT auth）verdict=CONDITIONAL_PASS（core lookahead/seed/cross-asset-iid 皆 PASS；issue#1 partial-month 已修並重跑，null 穩健）。",
+    "evidence": [
+      "experiments/k1620/README.md",
+      "experiments/k1620/k1620.py",
+      "experiments/k1620/k1620_results.json",
+      "Codex CONDITIONAL_PASS (2026-07-04)"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-07-04T08:39:41.920768"
   }
 ]
