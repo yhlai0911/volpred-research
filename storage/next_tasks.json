@@ -49161,7 +49161,7 @@
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「VIX 破 30/40 就是抄底訊號」恐慌極值進場的後續勝率與報酬分布",
     "description": "驗證熱門說法「恐慌指數飆到 30/40 就該進場」。用 ^VIX + SPY，事件定義 VIX 首次突破 30 / 35 / 40 門檻日，計算進場後 5/10/20/60 日 SPY 報酬的勝率、平均、分布與最大回撤，對照無條件基準。reader-facing 極高辨識度；避免 lookahead，訊號 shift(1)。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49172,7 +49172,25 @@
       "reader-facing",
       "investment-urban-legend"
     ],
-    "created_at": "2026-07-04T14:40:15+00:00"
+    "created_at": "2026-07-04T14:40:15+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-07-04T17:09:08.002922+00:00",
+    "claim_session_id": "a4ed33b5406b",
+    "status_history": [
+      {
+        "ts": "2026-07-04T17:09:08.003208+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-04T17:09:11.384859+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-01"
+      }
+    ],
+    "started_at": "2026-07-04T17:09:11.384569+00:00"
   },
   {
     "id": "research_myth_sell_in_may_tw_us",
@@ -49598,5 +49616,33 @@
       }
     ],
     "completed_at": "2026-07-04T16:52:35.831265+00:00"
+  },
+  {
+    "id": "telegram-185",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-04T17:08:15.840686+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 185）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n可以有一個telegram專用的長期記憶嗎\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-04T17:08:42.778676+00:00",
+    "claim_session_id": "1db6e5c86fd5",
+    "status_history": [
+      {
+        "ts": "2026-07-04T17:08:42.779005+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-04T17:11:26.577896+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-04T17:11:26.577632+00:00"
   }
 ]
