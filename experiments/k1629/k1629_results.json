@@ -1,0 +1,424 @@
+{
+  "experiment_id": "k1629",
+  "created_at": "2026-07-04T18:21:14.647896+00:00",
+  "seed": 42,
+  "bootstrap_reps": 5000,
+  "verdict": "SUPPORTS_FIRST_HOUR_HIGHEST_ON_AVERAGE_LIMITED_SAMPLE",
+  "claim_strength": "descriptive 2026 local 5-minute snapshot; not paper-grade long-history inference",
+  "one_sentence": "在 114 個完整 SPY 5-min 交易日中，開盤第一小時的每根 5-min RV 強度約為全天平均的 2.13 倍，且 92/114 天為三段最高；因此『開盤平均最震』成立，但『每天都最危險』不成立。",
+  "data": {
+    "source": "local yfinance 5-minute SPY snapshots under data/intraday/SPY_5min_YYYY-MM-DD.csv",
+    "ticker": "SPY",
+    "raw_files": 117,
+    "raw_days": 117,
+    "complete_regular_days": 114,
+    "start_date": "2026-01-14",
+    "end_date": "2026-07-02",
+    "n_5min_bars": 8889,
+    "median_bars_per_day": 78.0,
+    "filter_diagnostics": {
+      "raw_days": 117,
+      "kept_days": 114,
+      "excluded_days": 3,
+      "day_filter": {
+        "min_bars": 75,
+        "first_time_ny_lte": "09:35",
+        "last_time_ny_gte": "15:55"
+      },
+      "excluded_day_details": [
+        {
+          "date": "2026-01-30",
+          "n_bars": 10,
+          "first_time_ny": "09:30",
+          "last_time_ny": "10:15",
+          "kept": false
+        },
+        {
+          "date": "2026-02-02",
+          "n_bars": 27,
+          "first_time_ny": "13:45",
+          "last_time_ny": "15:55",
+          "kept": false
+        },
+        {
+          "date": "2026-05-21",
+          "n_bars": 45,
+          "first_time_ny": "09:30",
+          "last_time_ny": "13:10",
+          "kept": false
+        }
+      ]
+    }
+  },
+  "method": {
+    "bar_return": "log(Close/Open) for each 5-minute bar",
+    "timezone": "America/New_York regular-session bar start time",
+    "segments": {
+      "open_60": "Open 09:30-10:30",
+      "midday": "Midday 10:30-15:00",
+      "close_60": "Close 15:00-16:00"
+    },
+    "main_metric": "segment realized variance per 5-minute bar divided by full-day realized variance per 5-minute bar",
+    "tail_metric": "pooled 5-minute bars flagged by full-sample 95th percentile absolute return and 5th percentile negative return; CIs use day-cluster bootstrap",
+    "hac_lag": 5
+  },
+  "tail_thresholds": {
+    "abs_tail_quantile": 0.95,
+    "abs_tail_threshold_return": 0.0017032458068233628,
+    "abs_tail_threshold_bp": 17.032458068233627,
+    "neg_tail_quantile": 0.05,
+    "neg_tail_threshold_return": -0.001297550005534901,
+    "neg_tail_threshold_bp": -12.975500055349011
+  },
+  "segment_summary": {
+    "open_60": {
+      "label": "Open 09:30-10:30",
+      "n_bars": 1368,
+      "mean_bars_per_day": 12.0,
+      "mean_rv_share": 0.32761524609272896,
+      "mean_rv_share_pct": 32.7615246092729,
+      "mean_rel_intensity": 2.1285739821346263,
+      "mean_rel_intensity_bootstrap_ci": [
+        1.960122140930147,
+        2.298617495717259
+      ],
+      "median_rel_intensity": 2.1403459047036764,
+      "mean_abs_5min_return_bp": 8.623430026827878,
+      "mean_5min_rv": 1.2924523985882663e-06,
+      "days_highest_intensity_count": 92,
+      "days_highest_intensity_rate": 0.8070175438596491,
+      "days_highest_max_abs_count": 63,
+      "days_highest_max_abs_rate": 0.5526315789473685,
+      "abs_tail_count": 171,
+      "abs_tail_rate": 0.125,
+      "abs_tail_rate_pct": 12.5,
+      "abs_tail_wilson_ci": [
+        0.10851791772818306,
+        0.1435822477807361
+      ],
+      "abs_tail_cluster_bootstrap_ci": [
+        0.10014619883040936,
+        0.15060307017543834
+      ],
+      "neg_tail_count": 157,
+      "neg_tail_rate": 0.11476608187134503,
+      "neg_tail_rate_pct": 11.476608187134502,
+      "neg_tail_wilson_ci": [
+        0.09894359056675828,
+        0.13274605314318402
+      ],
+      "neg_tail_cluster_bootstrap_ci": [
+        0.09283625730994152,
+        0.13742690058479531
+      ]
+    },
+    "midday": {
+      "label": "Midday 10:30-15:00",
+      "n_bars": 6153,
+      "mean_bars_per_day": 53.973684210526315,
+      "mean_rv_share": 0.5543135845901024,
+      "mean_rv_share_pct": 55.43135845901024,
+      "mean_rel_intensity": 0.800773184804745,
+      "mean_rel_intensity_bootstrap_ci": [
+        0.7617485335167979,
+        0.839200555214574
+      ],
+      "median_rel_intensity": 0.8016292791957418,
+      "mean_abs_5min_return_bp": 5.184627499314639,
+      "mean_5min_rv": 5.58876173856898e-07,
+      "days_highest_intensity_count": 11,
+      "days_highest_intensity_rate": 0.09649122807017543,
+      "days_highest_max_abs_count": 41,
+      "days_highest_max_abs_rate": 0.35964912280701755,
+      "abs_tail_count": 232,
+      "abs_tail_rate": 0.037705184462863646,
+      "abs_tail_rate_pct": 3.770518446286365,
+      "abs_tail_wilson_ci": [
+        0.03322689856817567,
+        0.042760352679042
+      ],
+      "abs_tail_cluster_bootstrap_ci": [
+        0.02862242389865759,
+        0.04777419393351316
+      ],
+      "neg_tail_count": 244,
+      "neg_tail_rate": 0.0396554526247359,
+      "neg_tail_rate_pct": 3.96554526247359,
+      "neg_tail_wilson_ci": [
+        0.03505967701002284,
+        0.044825676886178265
+      ],
+      "neg_tail_cluster_bootstrap_ci": [
+        0.03168143104624998,
+        0.04828502801448109
+      ]
+    },
+    "close_60": {
+      "label": "Close 15:00-16:00",
+      "n_bars": 1368,
+      "mean_bars_per_day": 12.0,
+      "mean_rv_share": 0.11807116931716871,
+      "mean_rv_share_pct": 11.807116931716871,
+      "mean_rel_intensity": 0.7671622018179592,
+      "mean_rel_intensity_bootstrap_ci": [
+        0.6737622408908363,
+        0.8684555940412245
+      ],
+      "median_rel_intensity": 0.6018190564553645,
+      "mean_abs_5min_return_bp": 4.935926407288852,
+      "mean_5min_rv": 5.228642741552953e-07,
+      "days_highest_intensity_count": 11,
+      "days_highest_intensity_rate": 0.09649122807017543,
+      "days_highest_max_abs_count": 10,
+      "days_highest_max_abs_rate": 0.08771929824561403,
+      "abs_tail_count": 42,
+      "abs_tail_rate": 0.03070175438596491,
+      "abs_tail_rate_pct": 3.070175438596491,
+      "abs_tail_wilson_ci": [
+        0.0227931403975642,
+        0.04123864567792528
+      ],
+      "abs_tail_cluster_bootstrap_ci": [
+        0.019005847953216373,
+        0.0445906432748538
+      ],
+      "neg_tail_count": 44,
+      "neg_tail_rate": 0.03216374269005848,
+      "neg_tail_rate_pct": 3.216374269005848,
+      "neg_tail_wilson_ci": [
+        0.024045906003687625,
+        0.04290166890022712
+      ],
+      "neg_tail_cluster_bootstrap_ci": [
+        0.021198830409356724,
+        0.0445906432748538
+      ]
+    }
+  },
+  "paired_intensity_tests": {
+    "open_60_minus_midday_rel_intensity": {
+      "metric": "daily paired difference in relative RV intensity per 5-min bar",
+      "hac": {
+        "n": 114,
+        "mean": 1.3278007973298815,
+        "se": 0.09873606890880435,
+        "t": 13.447981188680693,
+        "p": 3.163928240539349e-41,
+        "lag": 5
+      },
+      "bootstrap_ci": [
+        1.1260690001000149,
+        1.5350876279452188
+      ],
+      "median_diff": 1.3738701135876177,
+      "share_days_a_gt_b": 0.8771929824561403
+    },
+    "open_60_minus_close_60_rel_intensity": {
+      "metric": "daily paired difference in relative RV intensity per 5-min bar",
+      "hac": {
+        "n": 114,
+        "mean": 1.3614117803166672,
+        "se": 0.10291994645280791,
+        "t": 13.227871051613091,
+        "p": 6.05790743159447e-40,
+        "lag": 5
+      },
+      "bootstrap_ci": [
+        1.141553209349051,
+        1.5767631768434114
+      ],
+      "median_diff": 1.4036051092880828,
+      "share_days_a_gt_b": 0.8771929824561403
+    },
+    "close_60_minus_midday_rel_intensity": {
+      "metric": "daily paired difference in relative RV intensity per 5-min bar",
+      "hac": {
+        "n": 114,
+        "mean": -0.03361098298678586,
+        "se": 0.046156618133402064,
+        "t": -0.7281942296908158,
+        "p": 0.4664946976385447,
+        "lag": 5
+      },
+      "bootstrap_ci": [
+        -0.1443525442070993,
+        0.08429639586119393
+      ],
+      "median_diff": -0.1848216877847998,
+      "share_days_a_gt_b": 0.38596491228070173
+    }
+  },
+  "pairwise_tail_tests": {
+    "abs_tail_count_open_60_vs_midday": {
+      "table": [
+        [
+          171,
+          1197
+        ],
+        [
+          232,
+          5921
+        ]
+      ],
+      "method": "chi2_contingency_no_correction",
+      "min_expected_count": 73.30195452732349,
+      "statistic": 168.1754020279031,
+      "p": 1.8522056112965164e-38,
+      "rate_a": 0.125,
+      "rate_b": 0.037705184462863646,
+      "rate_diff_a_minus_b": 0.08729481553713636,
+      "rate_diff_cluster_bootstrap_ci": [
+        0.06634155960150662,
+        0.10995424425683094
+      ]
+    },
+    "abs_tail_count_open_60_vs_close_60": {
+      "table": [
+        [
+          171,
+          1197
+        ],
+        [
+          42,
+          1326
+        ]
+      ],
+      "method": "chi2_contingency_no_correction",
+      "min_expected_count": 106.5,
+      "statistic": 84.72247994506876,
+      "p": 3.433246666139654e-20,
+      "rate_a": 0.125,
+      "rate_b": 0.03070175438596491,
+      "rate_diff_a_minus_b": 0.09429824561403509,
+      "rate_diff_cluster_bootstrap_ci": [
+        0.070906432748538,
+        0.11988304093567251
+      ]
+    },
+    "abs_tail_count_close_60_vs_midday": {
+      "table": [
+        [
+          42,
+          1326
+        ],
+        [
+          232,
+          5921
+        ]
+      ],
+      "method": "chi2_contingency_no_correction",
+      "min_expected_count": 49.83805345033905,
+      "statistic": 1.5637285697945749,
+      "p": 0.21112012000017757,
+      "rate_a": 0.03070175438596491,
+      "rate_b": 0.037705184462863646,
+      "rate_diff_a_minus_b": -0.007003430076898735,
+      "rate_diff_cluster_bootstrap_ci": [
+        -0.020474492995282683,
+        0.00803766720392359
+      ]
+    },
+    "neg_tail_count_open_60_vs_midday": {
+      "table": [
+        [
+          157,
+          1211
+        ],
+        [
+          244,
+          5909
+        ]
+      ],
+      "method": "chi2_contingency_no_correction",
+      "min_expected_count": 72.93817311527722,
+      "statistic": 125.09127974061873,
+      "p": 4.860660134429586e-29,
+      "rate_a": 0.11476608187134503,
+      "rate_b": 0.0396554526247359,
+      "rate_diff_a_minus_b": 0.07511062924660913,
+      "rate_diff_cluster_bootstrap_ci": [
+        0.05448765553521981,
+        0.09648543831145695
+      ]
+    },
+    "neg_tail_count_open_60_vs_close_60": {
+      "table": [
+        [
+          157,
+          1211
+        ],
+        [
+          44,
+          1324
+        ]
+      ],
+      "method": "chi2_contingency_no_correction",
+      "min_expected_count": 100.5,
+      "statistic": 68.5644440519297,
+      "p": 1.2279833884604635e-16,
+      "rate_a": 0.11476608187134503,
+      "rate_b": 0.03216374269005848,
+      "rate_diff_a_minus_b": 0.08260233918128655,
+      "rate_diff_cluster_bootstrap_ci": [
+        0.06067251461988304,
+        0.10599415204678361
+      ]
+    },
+    "neg_tail_count_close_60_vs_midday": {
+      "table": [
+        [
+          44,
+          1324
+        ],
+        [
+          244,
+          5909
+        ]
+      ],
+      "method": "chi2_contingency_no_correction",
+      "min_expected_count": 52.384523334662944,
+      "statistic": 1.7056878511124638,
+      "p": 0.19154580697934104,
+      "rate_a": 0.03216374269005848,
+      "rate_b": 0.0396554526247359,
+      "rate_diff_a_minus_b": -0.007491709934677425,
+      "rate_diff_cluster_bootstrap_ci": [
+        -0.01865100136543269,
+        0.004108714193718524
+      ]
+    }
+  },
+  "figures": [
+    "experiments/k1629/fig_segment_rv_intensity.png",
+    "experiments/k1629/fig_daily_intensity_distribution.png",
+    "experiments/k1629/fig_tail_risk_by_segment.png"
+  ],
+  "literature": [
+    {
+      "citation": "Andersen and Bollerslev (1997), Journal of Empirical Finance",
+      "role": "intraday periodicity and volatility persistence; motivates time-of-day normalization",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0927539897000042"
+    },
+    {
+      "citation": "Madhavan, Richardson, and Roomans (1997), Review of Financial Studies",
+      "role": "market open information asymmetry / price discovery mechanism",
+      "url": "https://academic.oup.com/rfs/article-abstract/10/4/1035/1605749"
+    },
+    {
+      "citation": "Engle and Sokalska (2012), Journal of Financial Econometrics",
+      "role": "daily x diurnal x stochastic intraday volatility decomposition",
+      "url": "https://academic.oup.com/jfec/article-abstract/10/1/54/755620"
+    },
+    {
+      "citation": "Harris (1986), Journal of Financial Economics",
+      "role": "early evidence on intraday stock-return patterns near the open",
+      "url": "https://www.sciencedirect.com/science/article/pii/0304405X86900449"
+    }
+  ],
+  "limitations": [
+    "Local SPY 5-minute cache covers only 2026-01-14 to 2026-07-02 after filtering, so this is a short-sample myth test.",
+    "The test is descriptive, not a trading strategy; it does not estimate transaction costs or executable intraday alpha.",
+    "Pooled 5-minute tail rates are supplemented with day-cluster bootstrap because intraday bars are not independent.",
+    "The result says the first hour is highest on average, not that it is highest every day."
+  ]
+}

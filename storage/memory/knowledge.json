@@ -37635,5 +37635,29 @@
     "verdict": "WEAK_REGIME_DEPENDENT_SAFE_HAVEN_NOT_AUTOMATIC",
     "reviewer": "Codex CLI primary-path self-review PASS",
     "source_task_id": "newroute_gold_safe_haven_myth"
+  },
+  {
+    "item_id": "k1629_13f6",
+    "category": "market_structure",
+    "content": "K1629：SPY 開盤第一小時在 2026 本地 5-minute 快照中平均最危險，但不是每天都如此。資料為 data/intraday/SPY_5min_YYYY-MM-DD.csv，本地 yfinance 5-minute 快照，完整 regular session filter 後 2026-01-14 至 2026-07-02 共 114 天、8,889 根 5-minute bars；每根 bar 用 log(Close/Open) 計算，分段為 open_60(09:30-10:30)、midday(10:30-15:00)、close_60(15:00-16:00 NY time)。主指標為 segment RV per bar / full-day RV per bar，避免盤中因時間較長而機械性勝出。結果：open_60 平均 RV share 32.8%，relative intensity 2.13x（bootstrap 95% CI [1.96,2.30]），92/114 天為三段最高；midday intensity 0.80x、close_60 0.77x，兩者各 11/114 天最高。open-minus-midday daily paired diff +1.328（NW lag5 t=13.45，bootstrap CI [1.126,1.535]）；open-minus-close +1.361（t=13.23，CI [1.142,1.577]）。Tail event 也集中於開盤：top-5% absolute 5-min move threshold 17.0 bp，open_60 rate 12.5% vs midday 3.8% vs close 3.1%；worst-5% negative threshold about -13.0 bp，open_60 rate 11.5% vs midday 4.0% vs close 3.2%。結論：讀者迷思「開盤第一小時平均最震/尾部事件最多」在此短樣本中成立；但「每天都最危險」不成立，且本結果是 descriptive intraday risk slice，不是交易策略或長歷史 paper-grade claim。",
+    "evidence": [
+      "experiments/k1629/README.md",
+      "experiments/k1629/k1629.py",
+      "experiments/k1629/k1629_results.json",
+      "experiments/k1629/codex_review.md",
+      "experiments/k1629/fig_segment_rv_intensity.png",
+      "experiments/k1629/fig_daily_intensity_distribution.png",
+      "experiments/k1629/fig_tail_risk_by_segment.png",
+      "storage/reports/feed.json:mile_467226e7"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-07-05T02:20:57.717397",
+    "experiment_id": "k1629",
+    "k_id": "k1629",
+    "experiment_path": "experiments/k1629/",
+    "verdict": "SUPPORTS_FIRST_HOUR_HIGHEST_ON_AVERAGE_LIMITED_SAMPLE",
+    "reviewer": "Codex CLI primary-path self-review PASS_WITH_LIMITATION",
+    "source_task_id": "newroute_intraday_first_hour_myth",
+    "feed_article_id": "mile_467226e7"
   }
 ]
