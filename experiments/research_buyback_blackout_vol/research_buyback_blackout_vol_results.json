@@ -1,0 +1,180 @@
+{
+  "experiment_id": "research_buyback_blackout_vol",
+  "title": "Buyback-blackout coverage as a SPY volatility calendar factor",
+  "run_date": "2026-07-04T10:31:05.393197+00:00",
+  "seed": 42,
+  "verdict": "NULL_OR_PROXY_LIMITED",
+  "data": {
+    "price_source": "yfinance adjusted close via yf.download(auto_adjust=False), Adj Close field",
+    "earnings_source": "yfinance Ticker.get_earnings_dates(limit=50)",
+    "universe": "current top-50 large-cap S&P proxy reused from K1510; not historical S&P 500 constituents",
+    "period": {
+      "start": "2020-01-01",
+      "end_exclusive": "2026-07-05"
+    },
+    "blackout_window_calendar_days": {
+      "pre_earnings": 35,
+      "post_earnings": 2
+    },
+    "tickers": [
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "AMZN",
+      "GOOGL",
+      "META",
+      "BRK-B",
+      "TSLA",
+      "AVGO",
+      "LLY",
+      "JPM",
+      "V",
+      "WMT",
+      "XOM",
+      "UNH",
+      "MA",
+      "PG",
+      "JNJ",
+      "ORCL",
+      "HD",
+      "COST",
+      "ABBV",
+      "BAC",
+      "NFLX",
+      "KO",
+      "CRM",
+      "AMD",
+      "CVX",
+      "MRK",
+      "ADBE",
+      "TMO",
+      "ACN",
+      "LIN",
+      "PEP",
+      "MCD",
+      "CSCO",
+      "WFC",
+      "ABT",
+      "DHR",
+      "QCOM",
+      "TXN",
+      "DIS",
+      "INTU",
+      "VZ",
+      "AMGN",
+      "IBM",
+      "PM",
+      "CMCSA",
+      "NOW",
+      "PFE"
+    ],
+    "n_tickers": 50,
+    "valid_market_cap_tickers": 50,
+    "earnings_rows_total": 2500,
+    "earnings_rows_in_model_range": 1340,
+    "earnings_tickers_in_model_range": 50,
+    "top50_weight_with_earnings_in_range": 0.9999999999999998,
+    "yfinance_version": "1.2.0"
+  },
+  "coverage_summary": {
+    "start": "2020-01-02",
+    "end": "2026-07-02",
+    "trading_days": 1633,
+    "mean_coverage": 0.42350136676260075,
+    "median_coverage": 0.27694942696228697,
+    "p75_coverage": 0.7579861481760406,
+    "p90_coverage": 0.8306248671918766,
+    "max_coverage": 0.9319659602958024,
+    "mean_firm_count": 21.102878138395592,
+    "max_firm_count": 44
+  },
+  "tests": {
+    "hac_regressions": {
+      "same_day": {
+        "target": "log_r2",
+        "focal": "blackout_coverage",
+        "n": 1611,
+        "coef_log_variance_per_1_weight": -0.18050596423777604,
+        "coef_log_variance_per_10pp": -0.018050596423777605,
+        "se": 0.3085874844845332,
+        "t_stat": -0.5849425959037015,
+        "p_value": 0.5585863158501585,
+        "harvey_pass_abs_t_gt_3": false,
+        "r2_adj": 0.1397548581622058,
+        "hac_lags": 5
+      },
+      "predictive_1d": {
+        "target": "log_r2",
+        "focal": "blackout_coverage_lag1",
+        "n": 1611,
+        "coef_log_variance_per_1_weight": 0.047122476204057184,
+        "coef_log_variance_per_10pp": 0.004712247620405719,
+        "se": 0.3287121169982806,
+        "t_stat": 0.1433548499348555,
+        "p_value": 0.8860099391312436,
+        "harvey_pass_abs_t_gt_3": false,
+        "r2_adj": 0.13962438345637407,
+        "hac_lags": 5
+      },
+      "forward_5d": {
+        "target": "log_fwd5_var",
+        "focal": "blackout_coverage",
+        "n": 1606,
+        "coef_log_variance_per_1_weight": -0.3869975925297738,
+        "coef_log_variance_per_10pp": -0.03869975925297738,
+        "se": 0.2362032414660232,
+        "t_stat": -1.6384093212600628,
+        "p_value": 0.10133633599158677,
+        "harvey_pass_abs_t_gt_3": false,
+        "r2_adj": 0.43268077350802736,
+        "hac_lags": 10
+      }
+    },
+    "top_bottom_block_bootstrap": {
+      "n": 1632,
+      "q25_coverage": 0.14983371536740808,
+      "q75_coverage": 0.7579861481760406,
+      "high_n": 411,
+      "low_n": 408,
+      "high_mean_ann_abs_vol": 0.13204091391409567,
+      "low_mean_ann_abs_vol": 0.15382919797954384,
+      "diff_high_minus_low_ann_abs_vol": -0.021788284065448166,
+      "bootstrap_reps": 1000,
+      "block_len": 10,
+      "ci95": [
+        -0.07332413831943754,
+        0.02401816094509811
+      ],
+      "ci_excludes_zero": false
+    },
+    "expanding_oos_qlike": {
+      "n_oos": 1107,
+      "oos_start": "2022-02-02",
+      "oos_end": "2026-07-02",
+      "min_train": 504,
+      "baseline_qlike": 3.9216190698617006,
+      "augmented_qlike": 3.9174892730272317,
+      "improvement_pct": 0.10530846471568547,
+      "dm_t_aug_minus_base": -0.16871520984901522,
+      "dm_p": 0.8660515032978886,
+      "harvey_pass_aug_better": false
+    }
+  },
+  "interpretation": {
+    "primary_gate": "Treat as publishable only if predictive_1d and forward_5d coefficients are positive with Harvey |t|>3 and OOS QLIKE improves with DM t<-3.",
+    "limitations": [
+      "Current top-50 survivorship universe, not full historical S&P 500.",
+      "Current market-cap weights, not daily historical index weights.",
+      "Blackout window is inferred from earnings dates; no actual issuer repurchase suspension or 10b5-1 plan data.",
+      "SPY close-to-close r^2 is a daily proxy, not intraday realized variance.",
+      "Earnings calendar from yfinance may include revised or future expected dates."
+    ]
+  },
+  "artifacts": {
+    "figure": "blackout_coverage_vs_spy_rv.png",
+    "market_caps": "data/market_caps_top50_snapshot.csv",
+    "earnings_dates": "data/earnings_dates_yfinance.csv",
+    "coverage": "data/blackout_coverage_daily.csv",
+    "model_frame": "data/model_frame.csv"
+  }
+}
