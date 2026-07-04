@@ -49252,7 +49252,7 @@
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「Sell in May and go away」五月賣出效應近 15 年在台股/美股還成立嗎？",
     "description": "驗證經典季節性都市傳說。用 SPY/^TWII 近 15 年，比較 5-10 月 vs 11-4 月的月報酬與 Sharpe，做正式季節性檢定（不是看圖）。注意與已做過的 VT 季節性 NULL（K80）區隔 — 這是 calendar-month 買賣時點效應，非 VT 策略。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49283,11 +49283,26 @@
         "to": "pending",
         "by": "hourly-02",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-04T21:28:34.488258+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T21:28:39.023369+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-04T18:10:14.565907+00:00",
+    "started_at": "2026-07-04T21:28:39.023096+00:00",
     "last_released_at": "2026-07-04T20:50:00.990296+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-04T21:28:34.487894+00:00",
+    "claim_session_id": "ed26635a8816"
   },
   {
     "id": "research_myth_tsmc_sneeze_market_cold",
