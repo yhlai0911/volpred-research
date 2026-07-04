@@ -48548,5 +48548,15 @@
     "created_at": "2026-07-04T08:33:11.000000+00:00",
     "title": "驗證 dispatch_supervisor 首個 real production fire（17:07）落地",
     "description": "cutover 已於 2026-07-04 16:30 落地（見 docs/refactor_plan_hourly_dispatch.md §Deliverable 7）。此 followup 由下一班 hourly/互動 session 確認首個 real fire（17:07）clean：(1) jq storage/ops/dispatch_state.json 確認 last_fire_at 已前進到 ~17:07（不再是 16:07 dry-run 值）;(2) completions 有一筆 outcome=success/failure（非 killed_timeout/orphan）;(3) current_job=null 無殘留孤兒;(4) ~/.volpred/logs/dispatch_supervisor.log 有 firing worker + worker returned + phase_z outcome 三行;(5) 若 dirty tree 被 PHASE-Z 自動 commit,git log 應見 ops(dispatch-supervisor 17:07): PHASE-Z safety-net。全 PASS → 標 succeeded + 更新 plan Deliverable 7 標觀察中 + 回報老闆。任一 FAIL → 立即 rollback（launchctl enable gui/501/com.volpred.hourly-dispatch + bootout supervisor + plist re-add --dry-run）+ 回報。"
+  },
+  {
+    "id": "verify-legacy-hourly-dispatch-boot-out-20260704",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "telegram-132-followup",
+    "status": "pending",
+    "created_at": "2026-07-04T08:36:30.712531+00:00",
+    "title": "驗證 legacy com.volpred.hourly-dispatch 已 bootout（防雙派工）",
+    "description": "背景：dispatch_supervisor 2026-07-04 16:30 完成 real-run cutover（dry_run=False），但當時 legacy com.volpred.hourly-dispatch 只被 launchctl disable（阻擋未來 bootstrap），並未 bootout —— 已 bootstrap 的 job 仍會照 StartCalendarInterval 觸發，17:07 起會與新 supervisor 同時真派工（雙倍 token/agent 浪費，違反 one-dispatch-per-hour 治理）。已修：telegram-132 回覆時掛了背景 watcher（nohup, PID記於 /tmp、log 見 ~/.volpred/logs/dispatch_supervisor_cutover_fix.log）在 legacy 16:07 那次真派工跑完後自動 launchctl bootout com.volpred.hourly-dispatch。本任務：確認 (1) ~/.volpred/logs/dispatch_supervisor_cutover_fix.log 有 bootout 成功記錄 (2) `launchctl list | grep com.volpred.hourly-dispatch` 已無此 entry (3) 17:07 之後只有 dispatch_supervisor 一個真派工（檢查 storage/ops/dispatch_state.json last_fire_at 與 next_tasks claimed_by 沒有同時段兩個不同 owner）。若 watcher 未成功（背景 process 意外死掉），手動執行：`launchctl bootout gui/$(id -u)/com.volpred.hourly-dispatch`。"
   }
 ]
