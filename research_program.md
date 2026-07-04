@@ -1470,3 +1470,16 @@ Each cat needs dedicated session work; not iterative one-cycle fixes.
 - [ ] **Perp funding rate 與槓桿清算循環：極端 funding 是否不對稱預示 BTC/ETH 高 RV regime** — Binance/Bybit/OKX 免費 public API 抓 2020-2026 funding 歷史（⚠️ 地區存取 dispatch 前驗證；fallback CoinGlass 免費層），檢定 funding 極端分位後 RV 上移的不對稱性，2025-10 $19B 清算事件做 OOS 錨（digital finance/JAI 方向 + 2025-10 史上最大清算 systemic-risk 檢討線）。與既有 crypto 弧（spillover/vol-of-vol/stablecoin）不同——槓桿/持倉結構弧。
 - [x] **台股漲跌幅限制 magnet effect 與 2015 年 7%→10% 放寬自然實驗：觸限/近限日的次日 vol 動態** — `experiments/research_magnet_effect_2015_7_10_vol/` completed 2026-07-04，verdict **CONTINUATION_WEAKENED_DAILY_PROXY_NO_VOL_BREAK**：TWSE official MI_INDEX daily common-stock panel（2014-01-02 至 2016-12-30，726 trading days，615,567 valid stock-days）檢定 2015-06-01 7%→10% 放寬。固定 old-7% band robustness 下，次日 abs-return premium 沒有 Harvey-pass widening break（daily post-pre +0.244pp，t=1.23；cross-section event-post +1.190pp，t=0.85），但 side-adjusted next-day continuation 明顯下降（post-pre -0.859pp，t=-4.20）。結論限縮為 daily OHLC proxy：支持舊 7% 邊界解除後延遲 continuation 減弱，不可宣稱 intraday magnet effect；knowledge.json 寫入留待主線程 gate。
 - [ ] **TSM ADR vs 2330.TW 波動傳導與創紀錄 ADR 溢價：AI 時代價格發現往哪邊移** — yfinance TSM/2330.TW/TWD=X 日資料（可加本機日內），拆隔夜/日內段檢定 lead-lag 與溢價變動對雙邊 vol 預測力；2024-26 ADR 溢價歷史級高位是現成敘事鉤（JF/JFM cross-listing price-discovery 經典線）。與 #157（TAIEX 隔夜 VRP）不同——雙上市資訊份額弧，台灣讀者高共鳴。
+
+### 投資迷思 / 都市傳說驗證系列（2026-07-04；老闆 Telegram msg154 directive 開新軸）
+
+> **背景**：老闆 2026-07-04 糾正 — 研究做得太窄，都綁在既有學術主題裡；投資領域有大量「投資人未知的、似是而非的、網路傳言的、都市傳說的、熱門觀點」值得驗證。VolPred 不是純學術平台，但可從驗證素材中挑能寫成學術論文的發現。此軸刻意跳脫「期刊主題挖掘 batch」的自我封閉學術迴圈，改從**投資人真正好奇 + 網路熱門 + 高辨識度**切入 → 天生 reader-facing（高分享/高回訪，直接服務 Mission #1 文章 / #5 曝光 → monetization 漏斗）。純學術素材再回寫論文。
+> **原則**：每題仍走完整研究誠實流程（error_log + 相似 K + ≥3 文獻 + 正式檢定 + Codex review + knowledge.json）；訊號嚴格 shift(1) 避 lookahead；null 如實報告（「破解迷思」本身就是好文章）。避開已做過 NULL 的（K80 VT 季節性、K81 槓桿、K83 stop-loss）。
+> **首批 6 題已入 next_tasks.json（source=telegram_directive_msg154_myth_busting, P2）**：
+- [ ] **「盤整越久噴越兇」** 低波動盤整 regime 後是否真接大波動（契合波動率專長 low-vol→high-vol transition）
+- [ ] **「VIX 破 30/40 是抄底訊號」** 恐慌極值進場後 5/10/20/60 日勝率與報酬分布
+- [ ] **「Sell in May and go away」** 五月賣出效應近 15 年在台/美股是否成立（正式季節性檢定，與 K80 VT 季節性區隔）
+- [ ] **「台積電打噴嚏台股重感冒」** 權值集中度 + 2330 單日大跌對大盤傳導量化
+- [ ] **「美股跌台股隔天必補跌」** 隔夜傳導條件機率（延伸 K1626 ADR 隔夜領先基礎）
+- [ ] **「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）
+> **後續候選（待補）**：定期定額必贏 vs 一次投入、融資餘額/散戶多空比反指標、除權息填權息機率、黃金交叉/死亡交叉均線策略、新聞利多出盡、三大法人連買跟單、農曆年紅包行情、盤中急殺尾盤拉回、高股息 ETF vs 0050 長期報酬迷思。refill 時優先從此軸抽，不再一味回學術期刊 batch。
