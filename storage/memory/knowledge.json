@@ -37522,5 +37522,18 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-07-04T13:56:25.340786"
+  },
+  {
+    "item_id": "a2f3c62c",
+    "category": "methodology_audit",
+    "content": "research_predictor_zoo_30_predictor_romano_wolf_fdr_oos completed as a summary-stat multiple-testing meta-audit, not a formal Romano-Wolf claim. It scanned prior knowledge/experiment artifacts for external-predictor -> volatility tests, excluded knowledge-only text from primary correction plus diagnostics/intercepts/const/correlation/Granger/IS rows, and retained 67 primary source-family hypotheses across 62 K ids. Best-case correction counts: raw p<0.05 = 48/67, Harvey |t_or_z|>=3 = 35/67, BH q<=0.10 = 53/67, Holm 5% = 34/67, independent maxT-style 5% = 34/67. Scientific interpretation: many VIX/IV/VRP/macro-cross-asset reported cells remain statistically sharp, but survivors are statistical cells, not automatically useful positive predictor edges; direction/economic value still require source-level adjudication. Key infrastructure finding: formal Romano-Wolf stepdown is infeasible from many historical outputs because aligned pointwise loss differentials are not persisted. Codex review verdict CONDITIONAL_PASS as scoped methodology/infrastructure audit.",
+    "evidence": [
+      "experiments/research_predictor_zoo_30_predictor_romano_wolf_fdr_oos/README.md",
+      "experiments/research_predictor_zoo_30_predictor_romano_wolf_fdr_oos/research_predictor_zoo_30_predictor_romano_wolf_fdr_oos.py",
+      "experiments/research_predictor_zoo_30_predictor_romano_wolf_fdr_oos/research_predictor_zoo_30_predictor_romano_wolf_fdr_oos_results.json",
+      "experiments/research_predictor_zoo_30_predictor_romano_wolf_fdr_oos/codex_review.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-07-04T15:54:25.986748"
   }
 ]
