@@ -49,7 +49,7 @@ def _acquire_apply_lock(storage_dir: str):
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
         handle.close()
-        return None
+        return None  # silent-ok: lock held by concurrent run — single-flight by design
     handle.seek(0)
     handle.truncate()
     handle.write(

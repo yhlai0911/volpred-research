@@ -140,7 +140,7 @@ def _run_publish_drought_remediation(storage_dir: str) -> dict[str, Any]:
         try:
             parsed = json.loads(line)
         except json.JSONDecodeError:
-            continue
+            continue  # silent-ok: non-JSON log line — scanning for first JSON payload
         if isinstance(parsed, dict):
             payload = parsed
             break
@@ -452,7 +452,10 @@ def build_scheduler_summary(storage_dir: str = "storage") -> dict[str, Any]:
 def _read_json_dict(path: Path) -> dict[str, Any] | None:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+    except FileNotFoundError:
+        return None  # silent-ok: optional file absent
+    except (OSError, ValueError) as exc:
+        _warn_ops_summaries("read_json_dict failed; returning None", path, exc)
         return None
     return payload if isinstance(payload, dict) else None
 
@@ -460,7 +463,10 @@ def _read_json_dict(path: Path) -> dict[str, Any] | None:
 def _read_json_value(path: Path) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+    except FileNotFoundError:
+        return None  # silent-ok: optional file absent
+    except (OSError, ValueError) as exc:
+        _warn_ops_summaries("read_json_value failed; returning None", path, exc)
         return None
 
 
@@ -872,7 +878,7 @@ def _parse_month_period(value: str | None) -> tuple[int, int] | None:
         year = int(year_text)
         month = int(month_text)
     except ValueError:
-        return None
+        return None  # silent-ok: malformed period key — None is the validation verdict
     if month < 1 or month > 12:
         return None
     return year, month
@@ -1594,7 +1600,7 @@ def _parse_iso_datetime(value: Any) -> datetime | None:
     try:
         parsed = datetime.fromisoformat(value)
     except ValueError:
-        return None
+        return None  # silent-ok: malformed timestamp — None is the validation verdict
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)

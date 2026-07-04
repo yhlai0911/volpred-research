@@ -113,6 +113,18 @@ def _handle_restart_orphan() -> None:
     orphan = state.mark_restart_orphan_pending(state_path)
     if orphan is None:
         return
+    if orphan.get("cleanup_recorded"):
+        # Codex review round-2 low finding (2026-07-04): a prior restart's
+        # cleanup already appended this orphan's completion entry (the
+        # `cleanup_recorded` flag is set atomically WITH that append — see
+        # state.append_completion_entry) but crashed before finalize. Do not
+        # append a duplicate entry; just finish the deferred finalize.
+        logging.info(
+            "restart: orphan pid=%s cleanup already recorded by a prior attempt — finalizing only",
+            orphan.get("pid"),
+        )
+        state.finalize_restart_orphan_cleanup(state_path)
+        return
     if orphan.get("pid") is None:
         # Codex review fix #2 (2026-07-04): supervisor crashed between
         # reserve_fire() (writes the pid=None placeholder) and worker.py's
@@ -131,6 +143,7 @@ def _handle_restart_orphan() -> None:
         state.append_completion_entry(
             orphan, exit_code=-1, outcome="reservation_abandoned_no_pid",
             final_model=str(orphan.get("model", "?")), path=state_path,
+            mark_cleanup_recorded=True,
         )
         alerts.send_orphan_restart_alert(
             job=orphan, killed=False, outcome="reservation_abandoned_no_pid", state_path=state_path,
@@ -163,6 +176,7 @@ def _handle_restart_orphan() -> None:
     state.append_completion_entry(
         orphan, exit_code=exit_code, outcome=outcome,
         final_model=str(orphan.get("model", "?")), path=state_path,
+        mark_cleanup_recorded=True,
     )
     alerts.send_orphan_restart_alert(job=orphan, killed=killed, outcome=outcome, state_path=state_path)
     state.finalize_restart_orphan_cleanup(state_path)

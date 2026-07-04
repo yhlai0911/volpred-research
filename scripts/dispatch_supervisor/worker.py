@@ -110,7 +110,7 @@ def _read_tail(path: Path, max_bytes: int = 2048) -> str:
             f.seek(max(0, size - max_bytes))
             return f.read().decode("utf-8", errors="replace")
     except FileNotFoundError:
-        return ""
+        return ""  # silent-ok: log not created yet (spawn can fail before any output)
     except OSError as exc:
         LOG.warning("read_tail %s failed: %s", path, exc)
         return ""

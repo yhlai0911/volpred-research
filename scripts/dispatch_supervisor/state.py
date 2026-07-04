@@ -156,8 +156,49 @@ def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
         try:
             tmp_path.unlink()
         except FileNotFoundError:
-            pass
+            pass  # silent-ok: temp file already gone — cleanup race-safe
         raise
+
+
+def _acquire_lock(lock_path: Path, *, shared: bool = False, max_attempts: int = 5):
+    """Open + flock the sibling lockfile, then verify the locked fd still
+    refers to the inode currently at `lock_path`; retry on mismatch.
+
+    Codex review round-2 hardening (2026-07-04): the lockfile scheme is only
+    sound while every contender flocks the SAME inode. If an external cleanup
+    process (or a stray `rm *.lock`) deletes and recreates the lockfile
+    between our `open()` and `flock()`, we hold a lock on a detached inode
+    that serializes nothing — the TOCTOU race the lockfile was built to close
+    quietly reopens. Post-flock fstat-vs-stat inode comparison detects this
+    and retries against the file currently at the path. No VolPred process
+    deletes `*.lock` today (and `storage/ops/*.lock` is gitignored), so this
+    is belt-and-suspenders — but the failure mode is silent lost updates, so
+    it warrants the two extra syscalls per acquisition.
+    """
+    op = fcntl.LOCK_SH if shared else fcntl.LOCK_EX
+    for attempt in range(1, max_attempts + 1):
+        fh = lock_path.open("a+", encoding="utf-8")
+        try:
+            fcntl.flock(fh.fileno(), op)
+        except Exception:
+            fh.close()
+            raise
+        try:
+            path_ino = os.stat(lock_path).st_ino
+        except FileNotFoundError:
+            path_ino = None  # lockfile deleted after we opened it — fd is detached
+        if path_ino is not None and os.fstat(fh.fileno()).st_ino == path_ino:
+            return fh
+        LOG.warning(
+            "lockfile inode changed under us (attempt %d/%d) path=%s — releasing and retrying",
+            attempt, max_attempts, lock_path,
+        )
+        fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        fh.close()
+    raise RuntimeError(
+        f"could not acquire a stable lock on {lock_path} after {max_attempts} attempts "
+        "(lockfile keeps being deleted/recreated underneath us)"
+    )
 
 
 @contextmanager
@@ -169,14 +210,14 @@ def _locked_state(path: Path = STATE_PATH) -> Iterator[tuple[Any, dict[str, Any]
     mode and never unlinked or replaced — for the full read-modify-write
     cycle, so concurrent `_locked_state()` / `read_state()` callers actually
     serialize (see `_lock_path()` docstring for why locking `path` itself,
-    which DOES get replaced, was unsafe). The persist step still goes through
+    which DOES get replaced, was unsafe; `_acquire_lock()` for the
+    deleted-lockfile inode check). The persist step still goes through
     `_atomic_write_json` (temp file + os.replace) so a crash mid-write never
     leaves a partial/empty canonical file.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    lock_fh = _lock_path(path).open("a+", encoding="utf-8")
+    lock_fh = _acquire_lock(_lock_path(path), shared=False)
     try:
-        fcntl.flock(lock_fh.fileno(), fcntl.LOCK_EX)
         try:
             if not path.exists():
                 _atomic_write_json(path, _empty_state())
@@ -210,9 +251,8 @@ def read_state(path: Path = STATE_PATH) -> dict[str, Any]:
     if not path.exists():
         return _empty_state()
     path.parent.mkdir(parents=True, exist_ok=True)
-    lock_fh = _lock_path(path).open("a+", encoding="utf-8")
+    lock_fh = _acquire_lock(_lock_path(path), shared=True)
     try:
-        fcntl.flock(lock_fh.fileno(), fcntl.LOCK_SH)
         try:
             if not path.exists():
                 return _empty_state()
@@ -296,7 +336,7 @@ def finalize_restart_orphan_cleanup(path: Path = STATE_PATH) -> None:
 
 def append_completion_entry(
     job: dict[str, Any], *, exit_code: int, outcome: str, final_model: str,
-    path: Path = STATE_PATH,
+    path: Path = STATE_PATH, mark_cleanup_recorded: bool = False,
 ) -> dict[str, Any]:
     """Append a completion entry for a job dict that is no longer `current_job`.
 
@@ -304,6 +344,15 @@ def append_completion_entry(
     explicitly — used for orphans flagged via `mark_restart_orphan_pending()`,
     where `current_job` is not cleared until `finalize_restart_orphan_cleanup()`
     runs, so this call happens *before* the slot is actually freed.
+
+    `mark_cleanup_recorded=True` (Codex review round-2 low finding, 2026-07-04:
+    completion-entry idempotency): in the SAME locked transaction as the
+    append, also set `current_job["cleanup_recorded"] = True`. If the
+    supervisor crashes after this transaction but before
+    `finalize_restart_orphan_cleanup()`, the next restart's
+    `mark_restart_orphan_pending()` returns a job carrying that flag, and
+    `_handle_restart_orphan()` skips straight to finalize instead of
+    appending a duplicate completion entry for the same orphan.
     """
     with _locked_state(path) as (_fh, data):
         started_at = job.get("started_at")
@@ -330,6 +379,8 @@ def append_completion_entry(
         if len(completions) > COMPLETIONS_MAX:
             completions = completions[-COMPLETIONS_MAX:]
         data["completions"] = completions
+        if mark_cleanup_recorded and data.get("current_job") is not None:
+            data["current_job"]["cleanup_recorded"] = True
         return entry
 
 
