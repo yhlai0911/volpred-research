@@ -400,3 +400,5 @@ launchctl bootout gui/501/com.volpred.dispatch-supervisor # stop supervisor
 **剩 Deliverable 8**（deprecate）：數班 clean fire 後 → `launchctl bootout` legacy（那時已非其子孫）+ `mv scripts/cron_hourly_dispatch.sh scripts/_legacy/` + retro。**現在不做**（disable 已足夠 disarm；實體移除等觀察窗）。
 
 *Updated 2026-07-04 16:31 台灣時間 by hourly-16 — cutover 落地：PHASE-Z ported+reviewed、real-run smoke PASS、legacy disabled、supervisor real-run 驗證。首輪 17:07 由 health.py + followup 確認。*
+
+**首輪 17:07 real fire — STARTUP-SIDE 驗證 PASS（2026-07-04 17:xx 台灣，hourly-17 = 被驗證的 fire 本身，PID 64345）**：`last_fire_at=17:07:31`（離開 dry-run 值）✓、`current_job.pid=64345 model=claude-opus-4-8 attempt=1` ✓、supervisor 16:30 起 `dry_run=False` ✓、log 有 `firing worker`+`worker attempt=1/3`、launchd.err 全 INFO 無 error ✓、legacy `hourly-dispatch` NOT loaded（無雙 fire）✓、排程精準（17:07:31 對 17:07:00）✓。→ 新 supervisor 路徑「準點 fire 真 worker、不雙 fire、不 dry-run」**definitively PASS**。**COMPLETION-SIDE（completions[] success + current_job=null + log worker returned/phase_z）因驗證者=fire 本身，無法自證 → 由 18:07 tick 依 followup task 的 closure 指令收尾（`completions[]` outcome=success → 標 succeeded；killed_timeout/orphan → rollback）。**
