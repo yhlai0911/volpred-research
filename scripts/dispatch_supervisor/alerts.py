@@ -218,6 +218,12 @@ def send_orphan_restart_alert(
         "## 影響\n"
         "- 前一個 supervisor process 非正常結束（crash / OOM-kill / manual kill -9）；"
         "worker 因 `start_new_session=True` 不會隨 supervisor 一起死，此次是補做清理\n"
+        + (
+            "\n## ⚠️ 需人工檢查\n"
+            "- 這個 process 的身分指紋缺失，supervisor 拒絕對無法驗證的 pid 發 kill —— "
+            "它可能還活著。照 runbook 處理：`docs/runbooks/dispatch-supervisor-unverified-orphan.md`\n"
+            if "unverified" in (outcome or "") else ""
+        )
     )
     _send("warn", "supervisor orphan_restart", body)
     state.mark_alert_sent(key, path=state_path)

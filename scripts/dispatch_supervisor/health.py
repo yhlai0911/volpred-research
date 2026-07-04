@@ -74,7 +74,10 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
                 job.pid,
             )
             exit_code, outcome = -1, "timeout_unverified"
-            log_tail = "(aged out but no fingerprint recorded — NOT killed, needs manual check)"
+            log_tail = (
+                "(aged out but no fingerprint recorded — NOT killed; process may still be "
+                "alive. Manual check runbook: docs/runbooks/dispatch-supervisor-unverified-orphan.md)"
+            )
         else:
             # IDENTITY_MISMATCH or IDENTITY_DEAD — confirmed NOT our process
             # (already gone, or the OS recycled the pid to something else).

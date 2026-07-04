@@ -831,6 +831,46 @@ def test_handle_restart_orphan_clears_abandoned_pid_none_reservation(
     )
 
 
+def test_handle_restart_orphan_skips_duplicate_entry_when_cleanup_already_recorded(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Codex round-2 low finding (2026-07-04): crash AFTER append_completion_entry
+    but BEFORE finalize used to duplicate the completion entry on the next
+    restart. Now the append atomically sets `cleanup_recorded` on current_job,
+    and a retry sees the flag → finalizes without re-appending or re-killing."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=999, pgid=888, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/orphan.log",
+        started_wall="Wed Jan  1 00:00:00 2026",
+    )
+    # Simulate attempt #1 that appended + flagged, then crashed pre-finalize.
+    orphan = state.mark_restart_orphan_pending(state_path)
+    state.append_completion_entry(
+        orphan, exit_code=-9, outcome="killed_supervisor_restart",
+        final_model="opus", path=state_path, mark_cleanup_recorded=True,
+    )
+    assert len(state.read_state(state_path)["completions"]) == 1
+
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    kills: list[int] = []
+    alerts_called: list[dict] = []
+    monkeypatch.setattr(supervisor.worker, "_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_MATCH)
+    monkeypatch.setattr(
+        supervisor.alerts, "send_orphan_restart_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+
+    supervisor._handle_restart_orphan()  # attempt #2 (the retry)
+
+    snap = state.read_state(state_path)
+    assert len(snap["completions"]) == 1, "retry must NOT append a duplicate completion entry"
+    assert snap["current_job"] is None, "retry must still complete the deferred finalize"
+    assert kills == [], "retry must not re-kill an already-handled orphan"
+    assert alerts_called == [], "retry must not re-alert"
+
+
 def test_handle_restart_orphan_retries_after_partial_crash_mid_cleanup(
     tmp_path: Path, monkeypatch
 ) -> None:

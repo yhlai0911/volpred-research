@@ -121,6 +121,80 @@ def test_finalize_restart_orphan_cleanup_clears_slot(tmp_state: Path) -> None:
     )
 
 
+def test_append_completion_entry_marks_cleanup_recorded_atomically(tmp_state: Path) -> None:
+    """Codex round-2 low finding (2026-07-04): the append + `cleanup_recorded`
+    flag must land in ONE locked transaction, so a crash after it leaves a
+    retryable-but-deduplicated orphan (next restart sees the flag and skips
+    straight to finalize instead of appending a duplicate entry)."""
+    _begin_fire(
+        tmp_state, pid=777, pgid=777, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/orphan.log",
+    )
+    orphan = st.mark_restart_orphan_pending(tmp_state)
+    assert not orphan.get("cleanup_recorded")
+    st.append_completion_entry(
+        orphan, exit_code=-9, outcome="killed_supervisor_restart",
+        final_model="opus", path=tmp_state, mark_cleanup_recorded=True,
+    )
+    snap = st.read_state(tmp_state)
+    assert len(snap["completions"]) == 1
+    assert snap["current_job"]["cleanup_recorded"] is True
+    # A retry (simulating crash before finalize) must surface the flag.
+    again = st.mark_restart_orphan_pending(tmp_state)
+    assert again["cleanup_recorded"] is True
+
+
+def test_acquire_lock_retries_when_lockfile_replaced_under_us(tmp_state: Path, monkeypatch) -> None:
+    """Round-2 hardening: if the lockfile is deleted+recreated between our
+    open() and flock() (external cleanup / stray rm), the locked fd points at
+    a detached inode and serializes nothing — _acquire_lock must detect the
+    inode mismatch and retry against the file now at the path."""
+    lock_path = st._lock_path(tmp_state)
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path.touch()
+
+    real_flock = st.fcntl.flock
+    swapped = {"done": False}
+
+    def flock_with_swap(fd, op):
+        real_flock(fd, op)
+        # After the FIRST exclusive acquisition, simulate an external process
+        # deleting and recreating the lockfile — detaching our inode.
+        if not swapped["done"] and op == st.fcntl.LOCK_EX:
+            swapped["done"] = True
+            lock_path.unlink()
+            lock_path.touch()
+
+    monkeypatch.setattr(st.fcntl, "flock", flock_with_swap)
+    fh = st._acquire_lock(lock_path, shared=False)
+    try:
+        # The returned fd must match the CURRENT inode at the path.
+        import os as _os
+        assert _os.fstat(fh.fileno()).st_ino == _os.stat(lock_path).st_ino
+        assert swapped["done"] is True, "the swap scenario must actually have been exercised"
+    finally:
+        real_flock(fh.fileno(), st.fcntl.LOCK_UN)
+        fh.close()
+
+
+def test_acquire_lock_gives_up_after_max_attempts(tmp_state: Path, monkeypatch) -> None:
+    lock_path = st._lock_path(tmp_state)
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path.touch()
+
+    real_flock = st.fcntl.flock
+
+    def always_swap(fd, op):
+        real_flock(fd, op)
+        if op in (st.fcntl.LOCK_EX, st.fcntl.LOCK_SH):
+            lock_path.unlink()
+            lock_path.touch()
+
+    monkeypatch.setattr(st.fcntl, "flock", always_swap)
+    with pytest.raises(RuntimeError, match="stable lock"):
+        st._acquire_lock(lock_path, shared=False, max_attempts=3)
+
+
 def test_append_completion_entry_for_pending_orphan(tmp_state: Path) -> None:
     _begin_fire(
         tmp_state, pid=777, pgid=777, schedule_id="hourly_dispatch",
