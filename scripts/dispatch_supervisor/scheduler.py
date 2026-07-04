@@ -35,7 +35,7 @@ if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
-from . import alerts, state, worker
+from . import alerts, phase_z, state, worker
 
 LOG = logging.getLogger(__name__)
 
@@ -171,6 +171,7 @@ async def _tick_once(
     prompt_path: Path,
     log_path: Path,
     dry_run: bool,
+    repo_root: Path = ROOT,
 ) -> dict[str, Any]:
     """One tick. Returns a small dict describing the decision (for tests + audit log)."""
     state.heartbeat(path=state_path)
@@ -193,14 +194,35 @@ async def _tick_once(
         LOG.error("empty prompt — refusing to fire")
         return {"action": "skip", "reason": "empty_prompt"}
     LOG.info("firing worker prev_scheduled=%s log=%s", prev_fire.isoformat(), log_path)
-    # Block in thread so health_loop keeps running concurrently
-    result = await asyncio.to_thread(
-        worker.run_worker,
-        prompt_text=prompt, schedule_id=SCHEDULE_ID,
-        log_path=log_path, state_path=state_path,
-    )
-    LOG.info("worker returned outcome=%s attempts=%d duration=%.1fs", result.outcome, result.attempts, result.duration_s)
+    # PHASE-Z safety net (post-fire deterministic commit) — port of the legacy
+    # cron_hourly_dispatch.sh PHASE-Z block. Runs ONCE per real fire regardless
+    # of worker outcome — success / hang / failure AND the case where the worker
+    # call itself raises (Codex review #2): a crashed worker is exactly when the
+    # tree is most likely left dirty, so PHASE-Z lives in `finally`. The
+    # dispatched agent's own PHASE Z is prompt-discretion (~90% reliable), so
+    # this wrapper-level commit captures whatever it left. Run in a thread (git
+    # subprocess) so the event loop stays responsive; a git hiccup is logged,
+    # never crashes the tick (run_phase_z is itself no-raise, belt-and-suspenders
+    # here too). If the worker raised, PHASE-Z still runs, then the exception
+    # propagates to scheduler_loop's crash handler (which alerts).
+    phase_z_outcome: dict | None = None
+    try:
+        # Block in thread so health_loop keeps running concurrently
+        result = await asyncio.to_thread(
+            worker.run_worker,
+            prompt_text=prompt, schedule_id=SCHEDULE_ID,
+            log_path=log_path, state_path=state_path,
+        )
+        LOG.info("worker returned outcome=%s attempts=%d duration=%.1fs",
+                 result.outcome, result.attempts, result.duration_s)
+    finally:
+        try:
+            phase_z_outcome = await asyncio.to_thread(phase_z.run_phase_z, repo_root=repo_root)
+            LOG.info("phase_z outcome=%s", phase_z_outcome)
+        except Exception as exc:  # noqa: BLE001
+            LOG.warning("phase_z safety-net failed (non-fatal): %s", exc)
     return {
         "action": "fired", "outcome": result.outcome,
         "attempts": result.attempts, "exit_code": result.exit_code,
+        "phase_z": phase_z_outcome,
     }

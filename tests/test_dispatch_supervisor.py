@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.dispatch_supervisor import health, procutil, scheduler, state, supervisor, worker
+from scripts.dispatch_supervisor import health, phase_z, procutil, scheduler, state, supervisor, worker
 
 
 def _tmp_state(tmp_path: Path) -> Path:
@@ -215,11 +215,309 @@ def test_scheduler_fire_runs_worker_when_due(tmp_path: Path, monkeypatch) -> Non
         prompt_path=prompt_path,
         log_path=tmp_path / "worker.log",
         dry_run=False,
+        repo_root=tmp_path,  # non-git tmp → phase_z no-ops (status_error); never touch real repo
     ))
 
     assert decision["action"] == "fired"
     assert decision["outcome"] == "success"
     assert received and received[0]["prompt_text"] == "prompt-body"
+
+
+# ── PHASE-Z safety net (Deliverable 7 cutover port of cron_hourly_dispatch.sh) ──
+
+
+def _git_init_repo(root: Path) -> None:
+    """Init a hermetic git repo in `root` with one committed file + a .gitignore
+    that ignores the flat runtime-state paths PHASE-Z knows how to untrack."""
+    def g(*args: str) -> None:
+        cp = subprocess.run(
+            ["git", "-C", str(root), *args],
+            capture_output=True, text=True, check=True,
+        )
+        return cp
+    g("init", "-q")
+    g("config", "user.email", "test@volpred.local")
+    g("config", "user.name", "phase-z-test")
+    g("config", "commit.gpgsign", "false")
+    (root / ".gitignore").write_text(
+        "storage/.release_settings.json\n"
+        "storage/ops/dashboard_latest.json\n"
+        "storage/ops/dispatch_state.json\n",
+        encoding="utf-8",
+    )
+    (root / "seed.txt").write_text("seed\n", encoding="utf-8")
+    g("add", "-A")
+    g("commit", "-qm", "seed")
+
+
+def _git_head_subject(root: Path) -> str:
+    cp = subprocess.run(
+        ["git", "-C", str(root), "log", "-1", "--pretty=%s"],
+        capture_output=True, text=True, check=True,
+    )
+    return cp.stdout.strip()
+
+
+def _git_head_count(root: Path) -> int:
+    cp = subprocess.run(
+        ["git", "-C", str(root), "rev-list", "--count", "HEAD"],
+        capture_output=True, text=True, check=True,
+    )
+    return int(cp.stdout.strip())
+
+
+def test_phase_z_clean_tree_no_commit(tmp_path: Path) -> None:
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07")
+    assert out["committed"] is False
+    assert out["reason"] == "clean"
+    assert _git_head_count(tmp_path) == before  # no empty commit on clean tree
+
+
+def test_phase_z_dirty_tree_commits_with_correct_message(tmp_path: Path) -> None:
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    # Simulate an agent that produced real work but forgot to commit it.
+    (tmp_path / "experiments").mkdir()
+    (tmp_path / "experiments" / "k9999.py").write_text("print('result')\n", encoding="utf-8")
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07")
+    assert out["committed"] is True
+    assert out["reason"] == "committed"
+    assert _git_head_count(tmp_path) == before + 1
+    assert _git_head_subject(tmp_path) == (
+        "ops(dispatch-supervisor 16:07): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    )
+    # the real work is now tracked
+    tracked = subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "experiments/k9999.py"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    assert tracked == "experiments/k9999.py"
+
+
+def test_phase_z_untracks_leaked_ignored_state_file(tmp_path: Path) -> None:
+    _git_init_repo(tmp_path)
+    # A gitignored runtime-state file that has drifted back into tracking
+    # (force-added once) — the 2026-07-01 cadence-revert incident scenario.
+    (tmp_path / "storage").mkdir()
+    leaked = tmp_path / "storage" / ".release_settings.json"
+    leaked.write_text('{"interval_minutes": 60}\n', encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "add", "-f", "storage/.release_settings.json"],
+        capture_output=True, text=True, check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "commit", "-qm", "force-tracked leaked state"],
+        capture_output=True, text=True, check=True,
+    )
+    # Now the agent leaves BOTH a stale mutation to the leaked file AND real work.
+    leaked.write_text('{"interval_minutes": 999}\n', encoding="utf-8")
+    (tmp_path / "real_work.md").write_text("real\n", encoding="utf-8")
+
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07")
+
+    assert out["committed"] is True
+    assert "storage/.release_settings.json" in out["untracked"]
+    # leaked state file is no longer tracked (its stale mutation cannot be
+    # committed back over a canonical directive)
+    tracked = subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "storage/.release_settings.json"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    assert tracked == ""
+    # ...but the real work WAS committed
+    assert subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "real_work.md"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip() == "real_work.md"
+
+
+def test_phase_z_untracks_leaked_supervisor_dispatch_state(tmp_path: Path) -> None:
+    # Codex review #1: the supervisor's OWN runtime state file must be in the
+    # untrack list — PHASE-Z runs right after the supervisor mutates it, so a
+    # drift-into-tracking would commit heartbeat/last_fire_at every fire.
+    _git_init_repo(tmp_path)
+    (tmp_path / "storage" / "ops").mkdir(parents=True)
+    leaked = tmp_path / "storage" / "ops" / "dispatch_state.json"
+    leaked.write_text('{"last_fire_at": "old"}\n', encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "add", "-f", "storage/ops/dispatch_state.json"],
+        capture_output=True, text=True, check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "commit", "-qm", "force-tracked dispatch_state"],
+        capture_output=True, text=True, check=True,
+    )
+    leaked.write_text('{"last_fire_at": "new-heartbeat"}\n', encoding="utf-8")
+    (tmp_path / "work.md").write_text("real\n", encoding="utf-8")
+
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07")
+
+    assert out["committed"] is True
+    assert "storage/ops/dispatch_state.json" in out["untracked"]
+    assert subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "storage/ops/dispatch_state.json"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip() == ""
+
+
+class _FakeCompleted:
+    def __init__(self, returncode: int, stdout: str = "", stderr: str = "") -> None:
+        self.returncode = returncode
+        self.stdout = stdout
+        self.stderr = stderr
+
+
+def test_phase_z_add_failure_aborts_commit(tmp_path: Path) -> None:
+    # Codex review #3: a failed `git add -A` leaves the index in an unknown
+    # state — PHASE-Z must NOT proceed to commit a partial tree.
+    commits: list = []
+
+    def fake_runner(argv, **kwargs):
+        sub = argv[3]  # ["git", "-C", root, <subcommand>, ...]
+        if sub == "status":
+            return _FakeCompleted(0, stdout=" M dirty.txt\n")
+        if sub == "ls-files":
+            return _FakeCompleted(0, stdout="")
+        if sub == "add":
+            return _FakeCompleted(1, stderr="fatal: index lock held")
+        if sub == "commit":
+            commits.append(argv)
+            return _FakeCompleted(0)
+        return _FakeCompleted(0)
+
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner)
+    assert out["committed"] is False
+    assert out["reason"] == "add_error"
+    assert commits == []  # never reached commit
+
+
+def test_phase_z_lsfiles_failure_warns_but_still_commits(tmp_path: Path) -> None:
+    # Codex review #3: ls-files probe rc!=0 must not silently claim "no leaked
+    # paths and everything fine" — it warns but the real-work commit proceeds.
+    calls: list[str] = []
+
+    def fake_runner(argv, **kwargs):
+        sub = argv[3]
+        calls.append(sub)
+        if sub == "status":
+            return _FakeCompleted(0, stdout=" M work.txt\n")
+        if sub == "ls-files":
+            return _FakeCompleted(128, stderr="fatal: bad revision")
+        if sub == "add":
+            return _FakeCompleted(0)
+        if sub == "commit":
+            return _FakeCompleted(0, stdout="[main abc] PHASE-Z\n")
+        return _FakeCompleted(0)
+
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner)
+    assert out["committed"] is True
+    assert out["untracked"] == []  # could not untrack (ls-files failed)
+    assert "commit" in calls  # but real work was still committed
+
+
+def test_scheduler_phase_z_runs_even_if_worker_raises(tmp_path: Path, monkeypatch) -> None:
+    # Codex review #2: PHASE-Z lives in `finally`, so a worker that RAISES still
+    # gets the safety-net (and the exception propagates afterward).
+    state_path = _tmp_state(tmp_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt", encoding="utf-8")
+    ran = {"phase_z": 0}
+
+    def boom(**kwargs):
+        raise RuntimeError("worker exploded")
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", boom)
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_phase_z",
+        lambda **kwargs: ran.__setitem__("phase_z", ran["phase_z"] + 1) or {"committed": True},
+    )
+
+    with pytest.raises(RuntimeError, match="worker exploded"):
+        asyncio.run(scheduler._tick_once(
+            state_path=state_path,
+            cron_expr="7 * * * *",
+            prompt_path=prompt_path,
+            log_path=tmp_path / "worker.log",
+            dry_run=False,
+            repo_root=tmp_path,
+        ))
+
+    assert ran["phase_z"] == 1  # safety-net ran despite the worker crash
+
+
+def test_phase_z_non_git_dir_is_observable_noop(tmp_path: Path) -> None:
+    # repo_root that is not a git repo → git status rc!=0 → must be reported as
+    # status_error, NOT misreported as "clean" (which would silently skip a
+    # real safety-net if the tree were actually dirty).
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07")
+    assert out["committed"] is False
+    assert out["reason"] == "status_error"
+
+
+def test_phase_z_git_timeout_does_not_raise(tmp_path: Path) -> None:
+    def boom(*args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd="git", timeout=30)
+
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=boom)
+    assert out["committed"] is False
+    assert out["reason"] == "status_error"
+
+
+def test_scheduler_post_fire_hook_invokes_phase_z(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+
+    monkeypatch.setattr(
+        scheduler.worker, "run_worker",
+        lambda **kwargs: worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        ),
+    )
+    seen: list[Path] = []
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_phase_z",
+        lambda **kwargs: seen.append(kwargs["repo_root"]) or {"committed": True, "reason": "committed"},
+    )
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+    ))
+
+    assert decision["action"] == "fired"
+    assert decision["phase_z"] == {"committed": True, "reason": "committed"}
+    assert seen == [tmp_path]  # hook ran exactly once, against the given repo_root
+
+
+def test_scheduler_dry_run_skips_phase_z(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt", encoding="utf-8")
+    called = {"phase_z": 0}
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_phase_z",
+        lambda **kwargs: called.__setitem__("phase_z", called["phase_z"] + 1) or {},
+    )
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=True,
+        repo_root=tmp_path,
+    ))
+
+    assert decision["action"] == "dry_run_fire"
+    assert called["phase_z"] == 0  # dry-run never spawns an agent → nothing to commit
 
 
 def test_due_to_fire_warns_on_invalid_last_fire_at(capsys) -> None:
