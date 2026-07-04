@@ -1,9 +1,9 @@
 {
   "experiment_id": "research_magnet_effect_2015_7_10_vol",
   "title": "Taiwan price-limit magnet-effect daily proxy around 2015 widening",
-  "run_date": "2026-07-04T11:44:33.909866+00:00",
+  "run_date": "2026-07-04T11:56:21.626395+00:00",
   "seed": 42,
-  "verdict": "NULL_OR_DAILY_PROXY_LIMITED",
+  "verdict": "CONTINUATION_WEAKENED_DAILY_PROXY_NO_VOL_BREAK",
   "data": {
     "source": "TWSE official exchangeReport/MI_INDEX daily CSV, type=ALLBUT0999, response=csv",
     "period": {
@@ -17,76 +17,128 @@
     "event_definition": {
       "touch_tolerance": 0.0025,
       "near_close_band": 0.01,
-      "event_any": "intraday high/low touches applicable limit within tolerance OR close is within 1pp of applicable limit"
+      "event_any": "intraday high/low touches applicable limit within tolerance OR close is within 1pp of applicable limit",
+      "old7_event_any": "same rule but fixed at the old 7% band in both pre and post periods"
     },
     "fetch_meta": {
       "weekday_candidates": 783,
-      "trading_days_fetched": 731,
-      "no_data_dates_count": 52,
+      "trading_days_fetched": 726,
+      "no_data_dates_count": 57,
       "failed_dates": [],
       "first_trading_date": "2014-01-02",
       "last_trading_date": "2016-12-30"
     }
   },
   "event_summary": {
-    "total_valid_stock_days": 619903,
-    "total_event_stock_days": 15895,
-    "total_upper_event_stock_days": 10200,
-    "total_lower_event_stock_days": 5695,
-    "mean_stock_count_per_day": 852.6863823933975,
-    "mean_event_rate_pre": 0.03537642978043789,
-    "mean_event_rate_post": 0.017376864997183293,
-    "mean_event_count_pre": 29.811764705882354,
-    "mean_event_count_post": 14.881136950904393,
-    "days_with_min_events": 701
+    "total_valid_stock_days": 615567,
+    "total_event_stock_days": 18759,
+    "total_old7_event_stock_days": 28672,
+    "total_upper_event_stock_days": 11620,
+    "total_lower_event_stock_days": 7139,
+    "mean_stock_count_per_day": 852.5858725761773,
+    "mean_event_rate_pre": 0.03588334774806816,
+    "mean_event_rate_post": 0.026013815890882055,
+    "mean_event_count_pre": 30.240356083086052,
+    "mean_event_count_post": 22.254545454545454,
+    "days_with_min_events": 695
   },
   "tests": {
-    "daily_diff_abs_return_did": {
-      "target": "diff_next_abs",
-      "n_days": 701,
-      "pre_n_days": 340,
-      "post_n_days": 361,
-      "pre_mean": 0.01834237389301384,
-      "post_mean": 0.026518991126368897,
-      "post_minus_pre": 0.008176617233355095,
-      "se": 0.0007996754905280001,
-      "t_stat": 10.224919145585337,
-      "p_value": 1.5335587693291204e-24,
-      "harvey_pass_abs_t_gt_3": true,
-      "hac_lags": 5
+    "applicable_limit": {
+      "daily_diff_abs_return_did": {
+        "target": "diff_next_abs",
+        "n_days": 695,
+        "pre_n_days": 337,
+        "post_n_days": 358,
+        "pre_mean": 0.018322115716789534,
+        "post_mean": 0.029266896352882987,
+        "post_minus_pre": 0.01094478063609344,
+        "se": 0.0019395298757820553,
+        "t_stat": 5.643006984710816,
+        "p_value": 1.6710556454501684e-08,
+        "harvey_pass_abs_t_gt_3": true,
+        "hac_lags": 5
+      },
+      "daily_side_adjusted_continuation_did": {
+        "target": "event_side_adj_next_ret_mean",
+        "n_days": 695,
+        "pre_n_days": 337,
+        "post_n_days": 358,
+        "pre_mean": 0.008544593881549448,
+        "post_mean": 0.008330255671906692,
+        "post_minus_pre": -0.00021433820964277504,
+        "se": 0.0025089407807221704,
+        "t_stat": -0.08542976035531624,
+        "p_value": 0.9319197342976718,
+        "harvey_pass_abs_t_gt_3": false,
+        "hac_lags": 5
+      },
+      "cross_section_clustered_event_regression": {
+        "target": "next_abs_ret",
+        "event_col": "event_any",
+        "n_obs": 615567,
+        "n_dates": 722,
+        "coef_event_pre": 0.004532616943830432,
+        "coef_event_post_change": 0.027451537512488286,
+        "coef_event_post_total": 0.03198415445631872,
+        "t_event_pre": 4.720252887343066,
+        "p_event_pre": 2.355516114105081e-06,
+        "t_event_post_change": 0.9118543346640043,
+        "p_event_post_change": 0.36184540322827297,
+        "cluster_by": "date",
+        "harvey_pass_event_pre_abs_t_gt_3": true,
+        "harvey_pass_event_post_change_abs_t_gt_3": false
+      },
+      "note": "Post events are selected at +/-10% while pre events are selected at +/-7%; use old7_band_robustness for the cleaner natural-experiment comparison."
     },
-    "daily_side_adjusted_continuation_did": {
-      "target": "event_side_adj_next_ret_mean",
-      "n_days": 701,
-      "pre_n_days": 340,
-      "post_n_days": 361,
-      "pre_mean": 0.008703338807327678,
-      "post_mean": 0.011164892175587587,
-      "post_minus_pre": 0.0024615533682599247,
-      "se": 0.0010814578217206367,
-      "t_stat": 2.2761436635073835,
-      "p_value": 0.02283741246248175,
-      "harvey_pass_abs_t_gt_3": false,
-      "hac_lags": 5
-    },
-    "cross_section_clustered_event_regression": {
-      "target": "next_abs_ret",
-      "n_obs": 619903,
-      "n_dates": 727,
-      "coef_event_pre": 0.00733316026074971,
-      "coef_event_post_change": 0.002224714165360709,
-      "coef_event_post_total": 0.009557874426110419,
-      "t_event_pre": 2.971877240185353,
-      "p_event_pre": 0.002959850047912437,
-      "t_event_post_change": 1.5039736173542475,
-      "p_event_post_change": 0.13258815997047046,
-      "cluster_by": "date",
-      "harvey_pass_event_pre_abs_t_gt_3": false,
-      "harvey_pass_event_post_change_abs_t_gt_3": false
+    "old7_band_robustness": {
+      "daily_diff_abs_return_did": {
+        "target": "diff_next_abs",
+        "n_days": 722,
+        "pre_n_days": 337,
+        "post_n_days": 385,
+        "pre_mean": 0.018322115716789534,
+        "post_mean": 0.02075866867167113,
+        "post_minus_pre": 0.002436552954881578,
+        "se": 0.0019811138331657786,
+        "t_stat": 1.229890435416332,
+        "p_value": 0.2187381363573132,
+        "harvey_pass_abs_t_gt_3": false,
+        "hac_lags": 5
+      },
+      "daily_side_adjusted_continuation_did": {
+        "target": "event_side_adj_next_ret_mean",
+        "n_days": 722,
+        "pre_n_days": 337,
+        "post_n_days": 385,
+        "pre_mean": 0.008544593881549448,
+        "post_mean": -4.079739405391179e-05,
+        "post_minus_pre": -0.008585391275603328,
+        "se": 0.0020463162541944223,
+        "t_stat": -4.195534907180394,
+        "p_value": 2.7222835428374945e-05,
+        "harvey_pass_abs_t_gt_3": true,
+        "hac_lags": 5
+      },
+      "cross_section_clustered_event_regression": {
+        "target": "next_abs_ret",
+        "event_col": "old7_event_any",
+        "n_obs": 615567,
+        "n_dates": 722,
+        "coef_event_pre": 0.004291333020881591,
+        "coef_event_post_change": 0.011899623819923046,
+        "coef_event_post_total": 0.016190956840804637,
+        "t_event_pre": 3.8605735445901366,
+        "p_event_pre": 0.00011312118554832854,
+        "t_event_post_change": 0.8506803946427315,
+        "p_event_post_change": 0.39494691678494176,
+        "cluster_by": "date",
+        "harvey_pass_event_pre_abs_t_gt_3": true,
+        "harvey_pass_event_post_change_abs_t_gt_3": false
+      }
     }
   },
   "interpretation": {
-    "primary_gate": "A credible widening effect requires the daily event-minus-control next-day abs-return premium and the cross-sectional event_post interaction to pass Harvey |t|>3 in the same direction.",
+    "primary_gate": "Primary inference uses the fixed old7_band robustness, not the mechanically more extreme applicable-limit post events. A credible widening effect requires the daily event-minus-control next-day abs-return premium and the cross-sectional event_post interaction to pass Harvey |t|>3 in the same direction.",
     "limitations": [
       "Daily OHLC proxy only; cannot prove intraday magnet behavior.",
       "No trade-level order book, no true TAIFEX tick RV target, and no adjustment for intraday approach speed.",
@@ -98,6 +150,8 @@
   "artifacts": {
     "daily_summary": "data/daily_event_summary.csv",
     "event_rows": "data/event_rows.csv",
+    "old7_daily_summary": "data/old7_daily_event_summary.csv",
+    "old7_event_rows": "data/old7_event_rows.csv",
     "figure": "magnet_effect_daily_proxy.png"
   }
 }

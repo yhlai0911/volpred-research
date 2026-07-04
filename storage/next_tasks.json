@@ -48481,7 +48481,7 @@
     "title": "研究 backlog fallback: 台股漲跌幅限制 magnet effect 與 2015 年 7%→10% 放寬自然實驗：觸限/近限日的次日 vol 動態",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 台股漲跌幅限制 magnet effect 與 2015 年 7%→10% 放寬自然實驗：觸限/近限日的次日 vol 動態 — TWSE 免費日資料（全市場個股）+ 本機 TAIFEX tick，識別觸限/收在限價 ±1% 內的股票-日，檢定次日 RV continuation vs reversal，2015-06-01 放寬作 DiD（J. Empirical Finance magnet 經典 + PBFJ 2019 price-limit-change 線；台灣是文獻 canonical 市場，資料主場優勢）。新弧：交易制度約束→vol 動態，backlog 無此類。 | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48506,9 +48506,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T11:58:09.461472+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-04T11:35:04.101735+00:00"
+    "started_at": "2026-07-04T11:35:04.101735+00:00",
+    "completed_at": "2026-07-04T11:58:09.461197+00:00",
+    "result": "Completed daily TWSE price-limit widening diagnostic in experiments/research_magnet_effect_2015_7_10_vol/. Verdict CONTINUATION_WEAKENED_DAILY_PROXY_NO_VOL_BREAK: fixed old-7% band shows no Harvey-pass next-day abs-return premium break, but side-adjusted next-day continuation weakens after 2015-06-01 (post-pre -0.859pp, t=-4.20). Daily OHLC proxy only; no intraday magnet-effect claim and knowledge.json left to main-thread gate."
   },
   {
     "id": "research_tsm_adr_vs_2330_tw_adr_ai",

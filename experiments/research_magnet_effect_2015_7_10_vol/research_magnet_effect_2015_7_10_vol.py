@@ -243,16 +243,48 @@ def build_event_panel(panel: pd.DataFrame) -> pd.DataFrame:
     df["event_side"] = np.select([df["upper_event"], df["lower_event"]], [1.0, -1.0], default=np.nan)
     df["side_adjusted_next_ret"] = df["event_side"] * df["next_ret"]
     df["next_continues"] = df["side_adjusted_next_ret"] > 0
+
+    # Fixed old-7% band robustness. This is the cleaner natural-experiment
+    # comparison: after 2015-06-01, stocks can pass the old 7% boundary without
+    # being halted, so we avoid mechanically selecting only more extreme +/-10%
+    # post-widening observations.
+    old_upper_touch = df["ret_high"] >= (PRE_LIMIT - TOUCH_TOL)
+    old_lower_touch = df["ret_low"] <= (-PRE_LIMIT + TOUCH_TOL)
+    old_upper_near_close = df["ret_close"] >= (PRE_LIMIT - NEAR_CLOSE_BAND)
+    old_lower_near_close = df["ret_close"] <= (-PRE_LIMIT + NEAR_CLOSE_BAND)
+    old_ambiguous = (old_upper_touch | old_upper_near_close) & (old_lower_touch | old_lower_near_close)
+    df["old7_upper_event"] = comparable & ~old_ambiguous & (old_upper_touch | old_upper_near_close)
+    df["old7_lower_event"] = comparable & ~old_ambiguous & (old_lower_touch | old_lower_near_close)
+    df["old7_event_any"] = df["old7_upper_event"] | df["old7_lower_event"]
+    df["old7_touch_any"] = comparable & ~old_ambiguous & (old_upper_touch | old_lower_touch)
+    df["old7_near_close_any"] = comparable & ~old_ambiguous & (old_upper_near_close | old_lower_near_close)
+    df["old7_event_side"] = np.select(
+        [df["old7_upper_event"], df["old7_lower_event"]],
+        [1.0, -1.0],
+        default=np.nan,
+    )
+    df["old7_side_adjusted_next_ret"] = df["old7_event_side"] * df["next_ret"]
+    df["old7_next_continues"] = df["old7_side_adjusted_next_ret"] > 0
     df["valid_target"] = comparable
     return df
 
 
-def daily_event_summary(events: pd.DataFrame) -> pd.DataFrame:
+def daily_event_summary(
+    events: pd.DataFrame,
+    *,
+    event_col: str = "event_any",
+    upper_col: str = "upper_event",
+    lower_col: str = "lower_event",
+    touch_col: str = "touch_any",
+    near_col: str = "near_close_any",
+    side_adj_col: str = "side_adjusted_next_ret",
+    continuation_col: str = "next_continues",
+) -> pd.DataFrame:
     valid = events[events["valid_target"]].copy()
     rows = []
     for date, g in valid.groupby("date"):
-        event = g[g["event_any"]]
-        control = g[~g["event_any"]]
+        event = g[g[event_col]]
+        control = g[~g[event_col]]
         row = {
             "date": date,
             "post_widening": int(date >= CHANGE_DATE),
@@ -260,18 +292,18 @@ def daily_event_summary(events: pd.DataFrame) -> pd.DataFrame:
             "event_count": int(len(event)),
             "control_count": int(len(control)),
             "event_rate": float(len(event) / len(g)) if len(g) else np.nan,
-            "upper_event_count": int(g["upper_event"].sum()),
-            "lower_event_count": int(g["lower_event"].sum()),
-            "touch_count": int(g["touch_any"].sum()),
-            "near_close_count": int(g["near_close_any"].sum()),
+            "upper_event_count": int(g[upper_col].sum()),
+            "lower_event_count": int(g[lower_col].sum()),
+            "touch_count": int(g[touch_col].sum()),
+            "near_close_count": int(g[near_col].sum()),
         }
         if len(event) >= MIN_EVENT_STOCKS_PER_DAY and len(control) >= MIN_CONTROL_STOCKS_PER_DAY:
             row.update({
                 "event_next_abs_mean": float(event["next_abs_ret"].mean()),
                 "control_next_abs_mean": float(control["next_abs_ret"].mean()),
                 "diff_next_abs": float(event["next_abs_ret"].mean() - control["next_abs_ret"].mean()),
-                "event_side_adj_next_ret_mean": float(event["side_adjusted_next_ret"].mean()),
-                "event_continuation_share": float(event["next_continues"].mean()),
+                "event_side_adj_next_ret_mean": float(event[side_adj_col].mean()),
+                "event_continuation_share": float(event[continuation_col].mean()),
             })
         rows.append(row)
     out = pd.DataFrame(rows).sort_values("date")
@@ -302,35 +334,36 @@ def hac_regression_daily(summary: pd.DataFrame, y_col: str, hac_lags: int = 5) -
     }
 
 
-def cluster_cross_section_regression(events: pd.DataFrame) -> dict:
+def cluster_cross_section_regression(events: pd.DataFrame, event_col: str = "event_any") -> dict:
     use = events[events["valid_target"]].copy()
     use = use[[
         "date",
         "next_abs_ret",
-        "event_any",
+        event_col,
         "post_widening",
         "same_abs_ret",
         "log_turnover",
     ]].replace([np.inf, -np.inf], np.nan).dropna()
-    use["event_any"] = use["event_any"].astype(float)
-    use["event_post"] = use["event_any"] * use["post_widening"].astype(float)
-    x_cols = ["event_any", "post_widening", "event_post", "same_abs_ret", "log_turnover"]
+    use["event_indicator"] = use[event_col].astype(float)
+    use["event_post"] = use["event_indicator"] * use["post_widening"].astype(float)
+    x_cols = ["event_indicator", "post_widening", "event_post", "same_abs_ret", "log_turnover"]
     x = sm.add_constant(use[x_cols].astype(float), has_constant="add")
     y = use["next_abs_ret"].astype(float)
     model = sm.OLS(y, x).fit(cov_type="cluster", cov_kwds={"groups": use["date"]})
     return {
         "target": "next_abs_ret",
+        "event_col": event_col,
         "n_obs": int(model.nobs),
         "n_dates": int(use["date"].nunique()),
-        "coef_event_pre": float(model.params["event_any"]),
+        "coef_event_pre": float(model.params["event_indicator"]),
         "coef_event_post_change": float(model.params["event_post"]),
-        "coef_event_post_total": float(model.params["event_any"] + model.params["event_post"]),
-        "t_event_pre": float(model.tvalues["event_any"]),
-        "p_event_pre": float(model.pvalues["event_any"]),
+        "coef_event_post_total": float(model.params["event_indicator"] + model.params["event_post"]),
+        "t_event_pre": float(model.tvalues["event_indicator"]),
+        "p_event_pre": float(model.pvalues["event_indicator"]),
         "t_event_post_change": float(model.tvalues["event_post"]),
         "p_event_post_change": float(model.pvalues["event_post"]),
         "cluster_by": "date",
-        "harvey_pass_event_pre_abs_t_gt_3": bool(abs(float(model.tvalues["event_any"])) > 3.0),
+        "harvey_pass_event_pre_abs_t_gt_3": bool(abs(float(model.tvalues["event_indicator"])) > 3.0),
         "harvey_pass_event_post_change_abs_t_gt_3": bool(abs(float(model.tvalues["event_post"])) > 3.0),
     }
 
@@ -355,13 +388,15 @@ def make_figure(summary: pd.DataFrame, out_path: Path) -> None:
     plt.close(fig)
 
 
-def verdict_from_results(abs_did: dict, continuation_did: dict, xsec: dict) -> str:
-    if abs_did["harvey_pass_abs_t_gt_3"] and xsec["harvey_pass_event_post_change_abs_t_gt_3"]:
+def verdict_from_results(old7_abs_did: dict, old7_continuation_did: dict, old7_xsec: dict) -> str:
+    if old7_abs_did["harvey_pass_abs_t_gt_3"] and old7_xsec["harvey_pass_event_post_change_abs_t_gt_3"]:
         return "STRUCTURAL_BREAK_PASS"
-    if xsec["harvey_pass_event_pre_abs_t_gt_3"] and not abs_did["harvey_pass_abs_t_gt_3"]:
+    if old7_continuation_did["harvey_pass_abs_t_gt_3"] and old7_continuation_did["post_minus_pre"] < 0:
+        return "CONTINUATION_WEAKENED_DAILY_PROXY_NO_VOL_BREAK"
+    if old7_continuation_did["harvey_pass_abs_t_gt_3"] and old7_continuation_did["post_minus_pre"] > 0:
+        return "CONTINUATION_STRENGTHENED_DAILY_PROXY_NO_VOL_BREAK"
+    if old7_xsec["harvey_pass_event_pre_abs_t_gt_3"] and not old7_xsec["harvey_pass_event_post_change_abs_t_gt_3"]:
         return "EVENT_PREMIUM_NO_WIDENING_BREAK"
-    if continuation_did["harvey_pass_abs_t_gt_3"]:
-        return "CONTINUATION_BREAK_ONLY"
     return "NULL_OR_DAILY_PROXY_LIMITED"
 
 
@@ -375,19 +410,36 @@ def main() -> None:
 
     events = build_event_panel(panel)
     summary = daily_event_summary(events)
+    old7_summary = daily_event_summary(
+        events,
+        event_col="old7_event_any",
+        upper_col="old7_upper_event",
+        lower_col="old7_lower_event",
+        touch_col="old7_touch_any",
+        near_col="old7_near_close_any",
+        side_adj_col="old7_side_adjusted_next_ret",
+        continuation_col="old7_next_continues",
+    )
 
     event_rows = events[events["event_any"] & events["valid_target"]].copy()
+    old7_event_rows = events[events["old7_event_any"] & events["valid_target"]].copy()
     sample_cols = [
         "date", "ticker", "name", "limit_pct", "ret_close", "ret_high", "ret_low",
         "upper_event", "lower_event", "touch_any", "near_close_any", "next_ret",
-        "next_abs_ret", "side_adjusted_next_ret",
+        "next_abs_ret", "side_adjusted_next_ret", "old7_upper_event", "old7_lower_event",
+        "old7_touch_any", "old7_near_close_any", "old7_side_adjusted_next_ret",
     ]
     event_rows[sample_cols].to_csv(DATA_DIR / "event_rows.csv", index=False)
     summary.to_csv(DATA_DIR / "daily_event_summary.csv", index=False)
+    old7_event_rows[sample_cols].to_csv(DATA_DIR / "old7_event_rows.csv", index=False)
+    old7_summary.to_csv(DATA_DIR / "old7_daily_event_summary.csv", index=False)
 
     abs_did = hac_regression_daily(summary, "diff_next_abs", hac_lags=5)
     continuation_did = hac_regression_daily(summary, "event_side_adj_next_ret_mean", hac_lags=5)
     xsec = cluster_cross_section_regression(events)
+    old7_abs_did = hac_regression_daily(old7_summary, "diff_next_abs", hac_lags=5)
+    old7_continuation_did = hac_regression_daily(old7_summary, "event_side_adj_next_ret_mean", hac_lags=5)
+    old7_xsec = cluster_cross_section_regression(events, event_col="old7_event_any")
 
     fig_path = OUT_DIR / "magnet_effect_daily_proxy.png"
     make_figure(summary, fig_path)
@@ -397,6 +449,7 @@ def main() -> None:
     event_summary = {
         "total_valid_stock_days": int(events["valid_target"].sum()),
         "total_event_stock_days": int((events["event_any"] & events["valid_target"]).sum()),
+        "total_old7_event_stock_days": int((events["old7_event_any"] & events["valid_target"]).sum()),
         "total_upper_event_stock_days": int((events["upper_event"] & events["valid_target"]).sum()),
         "total_lower_event_stock_days": int((events["lower_event"] & events["valid_target"]).sum()),
         "mean_stock_count_per_day": float(summary["stock_count"].mean()),
@@ -410,9 +463,9 @@ def main() -> None:
     results = {
         "experiment_id": EXPERIMENT_ID,
         "title": "Taiwan price-limit magnet-effect daily proxy around 2015 widening",
-        "run_date": pd.Timestamp.utcnow().isoformat(),
+        "run_date": pd.Timestamp.now(tz="UTC").isoformat(),
         "seed": SEED,
-        "verdict": verdict_from_results(abs_did, continuation_did, xsec),
+        "verdict": verdict_from_results(old7_abs_did, old7_continuation_did, old7_xsec),
         "data": {
             "source": "TWSE official exchangeReport/MI_INDEX daily CSV, type=ALLBUT0999, response=csv",
             "period": {"start": START, "end": END},
@@ -424,20 +477,30 @@ def main() -> None:
                 "touch_tolerance": TOUCH_TOL,
                 "near_close_band": NEAR_CLOSE_BAND,
                 "event_any": "intraday high/low touches applicable limit within tolerance OR close is within 1pp of applicable limit",
+                "old7_event_any": "same rule but fixed at the old 7% band in both pre and post periods",
             },
             "fetch_meta": fetch_meta,
         },
         "event_summary": event_summary,
         "tests": {
-            "daily_diff_abs_return_did": abs_did,
-            "daily_side_adjusted_continuation_did": continuation_did,
-            "cross_section_clustered_event_regression": xsec,
+            "applicable_limit": {
+                "daily_diff_abs_return_did": abs_did,
+                "daily_side_adjusted_continuation_did": continuation_did,
+                "cross_section_clustered_event_regression": xsec,
+                "note": "Post events are selected at +/-10% while pre events are selected at +/-7%; use old7_band_robustness for the cleaner natural-experiment comparison.",
+            },
+            "old7_band_robustness": {
+                "daily_diff_abs_return_did": old7_abs_did,
+                "daily_side_adjusted_continuation_did": old7_continuation_did,
+                "cross_section_clustered_event_regression": old7_xsec,
+            },
         },
         "interpretation": {
             "primary_gate": (
-                "A credible widening effect requires the daily event-minus-control next-day "
-                "abs-return premium and the cross-sectional event_post interaction to pass "
-                "Harvey |t|>3 in the same direction."
+                "Primary inference uses the fixed old7_band robustness, not the mechanically "
+                "more extreme applicable-limit post events. A credible widening effect requires "
+                "the daily event-minus-control next-day abs-return premium and the cross-sectional "
+                "event_post interaction to pass Harvey |t|>3 in the same direction."
             ),
             "limitations": [
                 "Daily OHLC proxy only; cannot prove intraday magnet behavior.",
@@ -450,6 +513,8 @@ def main() -> None:
         "artifacts": {
             "daily_summary": "data/daily_event_summary.csv",
             "event_rows": "data/event_rows.csv",
+            "old7_daily_summary": "data/old7_daily_event_summary.csv",
+            "old7_event_rows": "data/old7_event_rows.csv",
             "figure": "magnet_effect_daily_proxy.png",
         },
     }
@@ -460,11 +525,12 @@ def main() -> None:
         "verdict": results["verdict"],
         "valid_stock_days": event_summary["total_valid_stock_days"],
         "event_stock_days": event_summary["total_event_stock_days"],
-        "daily_abs_did_t": abs_did["t_stat"],
-        "daily_abs_pre_mean": abs_did["pre_mean"],
-        "daily_abs_post_mean": abs_did["post_mean"],
-        "xsec_event_pre_t": xsec["t_event_pre"],
-        "xsec_event_post_change_t": xsec["t_event_post_change"],
+        "applicable_daily_abs_did_t": abs_did["t_stat"],
+        "old7_daily_abs_did_t": old7_abs_did["t_stat"],
+        "old7_daily_abs_pre_mean": old7_abs_did["pre_mean"],
+        "old7_daily_abs_post_mean": old7_abs_did["post_mean"],
+        "old7_xsec_event_pre_t": old7_xsec["t_event_pre"],
+        "old7_xsec_event_post_change_t": old7_xsec["t_event_post_change"],
         "results": str(out),
     }, indent=2))
 
