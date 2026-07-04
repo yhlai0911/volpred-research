@@ -37681,5 +37681,17 @@
     "reviewer": "Codex (primary path) — CONDITIONAL_PASS; BH-FDR must-fix implemented in-code",
     "source_task_id": "research_myth_vix_extreme_bottom_signal",
     "created_at": "2026-07-05T05:22:53.617919"
+  },
+  {
+    "item_id": "9f31a554",
+    "category": "market_seasonality_myth",
+    "content": "K1634 [NULL]: 'Sell in May and go away' is not supported as a robust recent-15-year rule for SPY/^TWII. Data: yfinance monthly closes, SPY adjusted close and ^TWII price index, 2011-07-31..2026-06-30, 180 complete months with 90 Nov-Apr and 90 May-Oct months per asset. Primary HAC monthly regression ret~winter_dummy (Newey-West maxlags=6) finds positive but non-significant Nov-Apr minus May-Oct effects: SPY +1.86% annualized, HAC p=0.776, BH q=0.776; ^TWII +12.59% annualized, HAC p=0.169, BH q=0.339. Year-block bootstrap CIs cross zero for both assets (SPY annualized CI [-10.09%, +13.38%], TWII [-5.97%, +28.38%]). Complete paired seasons n=14 show winter wins 10/14 for both, but paired tests remain non-significant (SPY p=0.816; TWII p=0.457; sign-test one-sided p=0.090). Simple Sell-in-May cash strategy with 10bp one-way switch cost does not beat buy-and-hold: SPY CAGR 7.12% vs BH 14.24%, Sharpe 0.696 vs 1.006, strategy-minus-BH HAC p=0.0005 in the wrong direction; TWII CAGR 8.75% vs BH 11.80%, Sharpe 0.702 vs 0.745, p=0.320. Conclusion: recent data may show directional seasonality, especially in Taiwan, but evidence is underpowered and fails formal HAC/FDR gates; do not claim the myth holds. experiment_id=K1634; experiment_path=experiments/k1634/; reviewer=Codex self-review; seed=1634.",
+    "evidence": [
+      "K1634",
+      "experiments/k1634/k1634_results.json",
+      "experiments/k1634/README.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-07-05T05:37:28.747543"
   }
 ]

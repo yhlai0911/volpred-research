@@ -1,0 +1,320 @@
+{
+  "experiment_id": "k1634",
+  "title": "Sell in May and go away: recent 15-year SPY/TWII myth test",
+  "generated_at": "2026-07-04T21:36:38.960206+00:00",
+  "seed": 1634,
+  "config": {
+    "download_start": "2010-10-01",
+    "download_end_exclusive": "2026-07-05",
+    "analysis_start": "2011-07-01",
+    "analysis_end_complete_month": "2026-06-30",
+    "winter_months": [
+      1,
+      2,
+      3,
+      4,
+      11,
+      12
+    ],
+    "summer_months": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "hac_maxlags_monthly": 6,
+    "n_bootstrap": 5000,
+    "transaction_cost_one_way": 0.001
+  },
+  "literature": [
+    {
+      "citation": "Bouman and Jacobsen (2002), American Economic Review",
+      "role": "canonical Halloween indicator / Sell in May evidence",
+      "doi": "10.1257/000282802762024683"
+    },
+    {
+      "citation": "Sullivan, Timmermann, and White (2001), Journal of Econometrics",
+      "role": "calendar effects data-snooping warning",
+      "doi": "10.1016/S0304-4076(01)00077-X"
+    },
+    {
+      "citation": "Zhang and Jacobsen (2021), Journal of International Money and Finance",
+      "role": "large international re-test of Halloween indicator",
+      "doi": "10.1016/j.jimonfin.2020.102268"
+    }
+  ],
+  "assets": {
+    "SPY": {
+      "symbol": "SPY",
+      "market": "US equity ETF",
+      "data_source": "cache:data/spy_close.csv",
+      "return_note": "SPY adjusted close, dividends/splits included via yfinance auto_adjust=True",
+      "daily_period": "2010-10-01 .. 2026-07-02",
+      "analysis_period": "2011-07-31 .. 2026-06-30",
+      "n_months": 180,
+      "n_winter_months": 90,
+      "n_summer_months": 90,
+      "descriptive": {
+        "Nov-Apr": {
+          "n_months": 90,
+          "mean_monthly": 0.01278179399186614,
+          "annualized_mean": 0.15338152790239368,
+          "monthly_std": 0.04306938347532176,
+          "annualized_vol": 0.14919672085984942,
+          "sharpe": 1.0280489210381194,
+          "median_monthly": 0.015332169365104287,
+          "positive_month_rate": 0.6777777777777778,
+          "p10": -0.04122541337276153,
+          "p90": 0.056219997119859276
+        },
+        "May-Oct": {
+          "n_months": 90,
+          "mean_monthly": 0.011231229950923271,
+          "annualized_mean": 0.13477475941107925,
+          "monthly_std": 0.039772208219677176,
+          "annualized_vol": 0.1377749707313788,
+          "sharpe": 0.9782238290135508,
+          "median_monthly": 0.019803678822969628,
+          "positive_month_rate": 0.7,
+          "p10": -0.046688448353294575,
+          "p90": 0.05928772976335576
+        },
+        "welch_winter_vs_summer": {
+          "t": 0.2509191521909606,
+          "p": 0.8021678560528143
+        }
+      },
+      "primary_hac_winter_minus_summer": {
+        "coef_monthly_winter_minus_summer": 0.001550564040942869,
+        "coef_annualized": 0.01860676849131443,
+        "hac_t": 0.28404158201838664,
+        "hac_p": 0.7763785145484896,
+        "hac_maxlags": 6
+      },
+      "year_block_bootstrap": {
+        "diff_monthly_ci95": [
+          -0.008407058942977398,
+          0.011153164659975312
+        ],
+        "diff_annualized_ci95": [
+          -0.10088470731572877,
+          0.13383797591970376
+        ],
+        "p_two_sided_centered_at_zero": 0.7612,
+        "p_one_sided_winter_gt_summer": 0.373,
+        "block": "calendar_year",
+        "n_boot": 5000
+      },
+      "paired_seasons": {
+        "n_complete_season_years": 14,
+        "mean_winter_minus_summer": 0.0069417110208472455,
+        "median_winter_minus_summer": 0.03359286498831204,
+        "win_rate_winter_gt_summer": 0.7142857142857143,
+        "paired_t": 0.2371323148933932,
+        "paired_p": 0.8162500805498627,
+        "sign_test_p_one_sided": 0.08978271484375,
+        "bootstrap_mean_ci95": [
+          -0.05025029121352766,
+          0.05807871828151236
+        ]
+      },
+      "strategy_metrics": {
+        "buy_and_hold": {
+          "n_months": 180,
+          "cagr": 0.142408831503831,
+          "annualized_mean": 0.1440781436567365,
+          "annualized_vol": 0.14322309544031972,
+          "sharpe": 1.0059700442431303,
+          "max_drawdown": -0.23927177194402816,
+          "positive_month_rate": 0.6888888888888889
+        },
+        "sell_in_may_cash_zero_cost": {
+          "n_months": 180,
+          "cagr": 0.07332947748765273,
+          "annualized_mean": 0.07669076395119684,
+          "annualized_vol": 0.10751982989758499,
+          "sharpe": 0.7132708824432338,
+          "max_drawdown": -0.1944769709437606,
+          "positive_month_rate": 0.3388888888888889
+        },
+        "sell_in_may_cash_after_10bps_switch_cost": {
+          "n_months": 180,
+          "cagr": 0.07121703376917776,
+          "annualized_mean": 0.07469076395119684,
+          "annualized_vol": 0.10733914540992796,
+          "sharpe": 0.6958390032448365,
+          "max_drawdown": -0.1944769709437606,
+          "positive_month_rate": 0.3388888888888889
+        },
+        "may_oct_only_cash_otherwise": {
+          "n_months": 180,
+          "cagr": 0.06435987780552965,
+          "annualized_mean": 0.06738737970553965,
+          "annualized_vol": 0.09908826751819445,
+          "sharpe": 0.680074254938064,
+          "max_drawdown": -0.12947580732442376,
+          "positive_month_rate": 0.35
+        },
+        "strategy_vs_buyhold_hac": {
+          "mean_diff_monthly_after_cost_minus_bh": -0.005782281642128304,
+          "mean_diff_annualized": -0.06938737970553965,
+          "hac_t": -3.468816734242967,
+          "hac_p": 0.0005227559199783317,
+          "hac_maxlags": 6,
+          "transaction_cost_one_way": 0.001
+        }
+      }
+    },
+    "TWII": {
+      "symbol": "^TWII",
+      "market": "Taiwan capitalization-weighted index",
+      "data_source": "cache:data/twii_close.csv",
+      "return_note": "^TWII price index close; dividends are not included",
+      "daily_period": "2010-10-01 .. 2026-07-03",
+      "analysis_period": "2011-07-31 .. 2026-06-30",
+      "n_months": 180,
+      "n_winter_months": 90,
+      "n_summer_months": 90,
+      "descriptive": {
+        "Nov-Apr": {
+          "n_months": 90,
+          "mean_monthly": 0.01576184873706863,
+          "annualized_mean": 0.18914218484482356,
+          "monthly_std": 0.052834364923178764,
+          "annualized_vol": 0.18302360886516109,
+          "sharpe": 1.0334305285400105,
+          "median_monthly": 0.015686065763111934,
+          "positive_month_rate": 0.6666666666666666,
+          "p10": -0.031974396452714264,
+          "p90": 0.07419132879182949
+        },
+        "May-Oct": {
+          "n_months": 90,
+          "mean_monthly": 0.005268240004571557,
+          "annualized_mean": 0.06321888005485868,
+          "monthly_std": 0.0443340883615687,
+          "annualized_vol": 0.15357778709897005,
+          "sharpe": 0.41164077988777487,
+          "median_monthly": 0.009031639533335523,
+          "positive_month_rate": 0.6111111111111112,
+          "p10": -0.04347924302160708,
+          "p90": 0.05062640246594665
+        },
+        "welch_winter_vs_summer": {
+          "t": 1.4433790256504087,
+          "p": 0.15072424031621612
+        }
+      },
+      "primary_hac_winter_minus_summer": {
+        "coef_monthly_winter_minus_summer": 0.010493608732497075,
+        "coef_annualized": 0.12592330478996488,
+        "hac_t": 1.3742328463686553,
+        "hac_p": 0.1693694066073912,
+        "hac_maxlags": 6
+      },
+      "year_block_bootstrap": {
+        "diff_monthly_ci95": [
+          -0.004978862459060907,
+          0.023651519517953305
+        ],
+        "diff_annualized_ci95": [
+          -0.05974634950873089,
+          0.2838182342154396
+        ],
+        "p_two_sided_centered_at_zero": 0.1524,
+        "p_one_sided_winter_gt_summer": 0.087,
+        "block": "calendar_year",
+        "n_boot": 5000
+      },
+      "paired_seasons": {
+        "n_complete_season_years": 14,
+        "mean_winter_minus_summer": 0.045080579269975864,
+        "median_winter_minus_summer": 0.07548256062541975,
+        "win_rate_winter_gt_summer": 0.7142857142857143,
+        "paired_t": 0.7665300935640774,
+        "paired_p": 0.4570555166430047,
+        "sign_test_p_one_sided": 0.08978271484375,
+        "bootstrap_mean_ci95": [
+          -0.07233749657215566,
+          0.1522526340701275
+        ]
+      },
+      "strategy_metrics": {
+        "buy_and_hold": {
+          "n_months": 180,
+          "cagr": 0.11802982572676379,
+          "annualized_mean": 0.12618053244984112,
+          "annualized_vol": 0.1694539174563664,
+          "sharpe": 0.7446303652574573,
+          "max_drawdown": -0.2892110523468686,
+          "positive_month_rate": 0.6388888888888888
+        },
+        "sell_in_may_cash_zero_cost": {
+          "n_months": 180,
+          "cagr": 0.08968060579879977,
+          "annualized_mean": 0.09457109242241178,
+          "annualized_vol": 0.1319269617131818,
+          "sharpe": 0.7168443144170619,
+          "max_drawdown": -0.19080215328018868,
+          "positive_month_rate": 0.3333333333333333
+        },
+        "sell_in_may_cash_after_10bps_switch_cost": {
+          "n_months": 180,
+          "cagr": 0.08751786228980452,
+          "annualized_mean": 0.09257109242241178,
+          "annualized_vol": 0.13191900651080335,
+          "sharpe": 0.7017267251389646,
+          "max_drawdown": -0.19080215328018857,
+          "positive_month_rate": 0.3333333333333333
+        },
+        "may_oct_only_cash_otherwise": {
+          "n_months": 180,
+          "cagr": 0.02601608193914995,
+          "annualized_mean": 0.03160944002742934,
+          "annualized_vol": 0.10867802674282888,
+          "sharpe": 0.29085401138381534,
+          "max_drawdown": -0.2560356860844718,
+          "positive_month_rate": 0.3055555555555556
+        },
+        "strategy_vs_buyhold_hac": {
+          "mean_diff_monthly_after_cost_minus_bh": -0.0028007866689524455,
+          "mean_diff_annualized": -0.03360944002742935,
+          "hac_t": -0.9949946681402222,
+          "hac_p": 0.31973885756724596,
+          "hac_maxlags": 6,
+          "transaction_cost_one_way": 0.001
+        }
+      }
+    }
+  },
+  "primary_tests_with_bh_fdr": [
+    {
+      "asset": "SPY",
+      "test": "HAC monthly return regression ret ~ const + winter_dummy",
+      "p": 0.7763785145484896,
+      "effect_annualized": 0.01860676849131443,
+      "bh_q": 0.7763785145484896,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    {
+      "asset": "TWII",
+      "test": "HAC monthly return regression ret ~ const + winter_dummy",
+      "p": 0.1693694066073912,
+      "effect_annualized": 0.12592330478996488,
+      "bh_q": 0.3387388132147824,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    }
+  ],
+  "verdict": {
+    "myth_verdict": "not_supported_recent_15y",
+    "n_primary_tests": 2,
+    "n_positive_effects": 2,
+    "n_bh_fdr_5pct": 0,
+    "n_bh_fdr_10pct": 0,
+    "interpretation_guardrail": "Primary claim requires Nov-Apr > May-Oct after HAC inference and BH-FDR across SPY and TWII; strategy metrics are secondary because lower exposure changes both return and volatility."
+  }
+}

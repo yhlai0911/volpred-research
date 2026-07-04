@@ -1478,7 +1478,7 @@ Each cat needs dedicated session work; not iterative one-cycle fixes.
 > **首批 6 題已入 next_tasks.json（source=telegram_directive_msg154_myth_busting, P2）**：
 - [ ] **「盤整越久噴越兇」** 低波動盤整 regime 後是否真接大波動（契合波動率專長 low-vol→high-vol transition）
 - [ ] **「VIX 破 30/40 是抄底訊號」** 恐慌極值進場後 5/10/20/60 日勝率與報酬分布
-- [ ] **「Sell in May and go away」** 五月賣出效應近 15 年在台/美股是否成立（正式季節性檢定，與 K80 VT 季節性區隔）
+- [x] **「Sell in May and go away」** → **K1634 completed 2026-07-05，NULL / not_supported_recent_15y**：SPY/^TWII yfinance monthly close，2011-07..2026-06 共 180 完整月（Nov-Apr / May-Oct 各 90 月）。Nov-Apr 點估計較高但正式不成立：SPY +1.86% annualized，HAC p=0.776，BH q=0.776；^TWII +12.59%，HAC p=0.169，BH q=0.339；year-block bootstrap CI 皆跨 0。完整 paired seasons n=14，兩市場 winter wins 10/14 但 paired p 仍不顯著。Sell-in-May 現金策略（10bp switch cost）不勝 buy-and-hold：SPY CAGR 7.12% vs 14.24% 且 strategy-minus-BH HAC p=0.0005（反向顯著），^TWII CAGR 8.75% vs 11.80%、Sharpe 0.702 vs 0.745。結論：近 15 年方向性可見，尤其台股，但未過 HAC/FDR gate，不可宣稱迷思成立；可寫 reader-facing「破解迷思」文章。
 - [ ] **「台積電打噴嚏台股重感冒」** 權值集中度 + 2330 單日大跌對大盤傳導量化
 - [ ] **「美股跌台股隔天必補跌」** 隔夜傳導條件機率（延伸 K1626 ADR 隔夜領先基礎）
 - [ ] **「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）
