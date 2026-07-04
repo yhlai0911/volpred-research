@@ -37502,5 +37502,25 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-07-04T12:18:11.784941"
+  },
+  {
+    "item_id": "79cf804c",
+    "category": "forecast_reconciliation",
+    "content": "K1622 (verdict=PASS_NULL): RV 預測的 forecast reconciliation 不是免費午餐. 測試 temporal-hierarchy(1d/5d/22d) + cross-sectional(SPY aggregate vs 6 sector ETF) MinT(Shrink, Wickramasuriya-Athanasopoulos-Hyndman 2019) reconciliation 是否 per-horizon DM-beat HAR-RV base forecast. 主樣本=Garman-Klass range-based RV proxy (2010-2026, SPY/6 sector ETF 各 4147 obs, 0050.TW 4013 obs; 明確揭露非 5-min RV, 以本機 5-min RV 115 重疊日做 cross-check log-Pearson 0.688). 結果: (1) Temporal reconciliation = PASS_NULL, pooled per-horizon 改善全 <0.03% (1d DM t=+2.14, 5d t=-0.09, 22d t=+2.02), per-asset 混合 (XLF 1d t=+4.04 / XLE 22d t=+3.07 佳; SPY 1d t=-4.96 / 0050 1d t=-3.29 差), net 近零. (2) Cross-sectional reconciliation 中性偏有害, 1d date-aggregated DM t=-3.70 (p=0.0002) FAIL, 傷害集中 SPY aggregate (per-asset t=-6.23, -6.16%), 且產生無效負變異數 預測. (3) Combined 繼承 cross-sectional 傷害 (1d t=-3.66 FAIL). 經濟根因: 變異數不可線性加總 (portfolio variance != sum of component variances), 故 cross-sectional coherence 是 misspecified 約束, 對 RV 注入誤差, 非改善. Temporal coherence 近乎中性. 含意: reconciliation 對均值型階層預測的 free-improvement 結論不外推到 variance/RV 預測; 跨資產 variance 需 covariance-aware (RCov) 聚合而非 linear coherence. 與 K1315/K1184 差異化: reconciliation=對不同但相關 target 施加一致性約束並投影, 非 combination 的同 target 加權平均.",
+    "evidence": [
+      "experiment_id=k1622",
+      "experiment_path=experiments/k1622/",
+      "results=experiments/k1622/k1622_results.json",
+      "reviewer=Codex gpt-5.5 independent main-thread review OVERALL PASS (lookahead/forward-label-slicing/per-horizon-DM/canonical-QLIKE 4 points all PASS) + agent-run Codex 4 concerns fixed",
+      "codex_verdict=PASS",
+      "verdict=PASS_NULL",
+      "lookahead_placebo_audit: corrupt future RV x1000 -> max|delta|=0.0 on 1727 safe origins (post-cut delta=742 confirms test valid)",
+      "methodology: per-horizon DM HAC lag=H-1 (1d/5d/22d not shared); cross-asset loss date-aggregated before DM (K1355); canonical QLIKE actual/predicted (K783c); MinT shrinkage seed=42",
+      "temporal pooled DM t: 1d=+2.14 5d=-0.09 22d=+2.02 (all improvement <0.03%)",
+      "cross_sectional 1d date-aggregated DM t=-3.70 p=0.0002 FAIL; SPY per-asset t=-6.23",
+      "5min crosscheck: n=115, log-Pearson 0.688, Spearman 0.692, mean ratio 0.918"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-07-04T13:56:25.340786"
   }
 ]
