@@ -123,6 +123,17 @@ def _handle_restart_orphan() -> None:
             "restart: orphan pid=%s cleanup already recorded by a prior attempt — finalizing only",
             orphan.get("pid"),
         )
+        # Codex review round-3 medium #1 (2026-07-04): the crash-before-alert
+        # gap could suppress the ONLY runbook prompt for an orphan we did NOT
+        # kill and cannot verify is dead. Re-emit the orphan alert here (its
+        # 60s dedup prevents spam on a fast retry, while a genuine restart
+        # minutes later re-surfaces a still-alive unverified orphan). Only
+        # re-alert for the not-killed outcomes — a killed orphan is resolved.
+        recorded_outcome = str(orphan.get("cleanup_outcome") or "")
+        if recorded_outcome and recorded_outcome != "killed_supervisor_restart":
+            alerts.send_orphan_restart_alert(
+                job=orphan, killed=False, outcome=recorded_outcome, state_path=state_path,
+            )
         state.finalize_restart_orphan_cleanup(state_path)
         return
     if orphan.get("pid") is None:

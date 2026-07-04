@@ -160,6 +160,30 @@ def is_review_gate_gap(task: dict, exp_dir: Path | None) -> bool:
     return not has_codex_review(exp_dir)
 
 
+def is_resolved_review_block(task: dict, exp_dir: Path | None) -> bool:
+    """Detect a task stuck in `blocked` on a review gate whose Codex review
+    artifact now EXISTS — i.e. the block condition is satisfied but nothing
+    re-scanned the blocked lane to release it.
+
+    2026-07-04 structural fix (audit finding): the prior scan only walked
+    `pending` tasks, so a K marked `blocked / awaiting_codex_review` whose
+    review landed later (e.g. K1330 reviewed 2026-06-23) stayed blocked
+    forever — the blocked lane was a permanent sync blind spot. This releases
+    it back to a completion status through the normal FLOW instead of a manual
+    JSON edit.
+    """
+    if exp_dir is None:
+        return False
+    if (task.get("status") or "").lower() != "blocked":
+        return False
+    reason = str(task.get("blocked_reason") or "").lower()
+    gate = str(task.get("review_gate_status") or "").lower()
+    is_review_block = "codex_review" in reason or "review" in gate or reason == "awaiting_codex_review"
+    if not is_review_block:
+        return False
+    return has_codex_review(exp_dir)
+
+
 def _followup_task_id(task_id: str) -> str:
     return f"{task_id}_codex_review_followup"
 
@@ -188,6 +212,7 @@ def main() -> int:
     tasks = load_tasks()
     candidates = []  # (idx, task, completion_info)
     review_gaps = []  # (idx, task, exp_dir)
+    resolved_blocks = []  # (idx, task, exp_dir, completion_info) — blocked review-gate now reviewed
     skipped_non_kid = 0
 
     for idx, task in enumerate(tasks):
@@ -195,6 +220,14 @@ def main() -> int:
         exp_dir = find_experiment_dir(tid) if tid else None
         if is_review_gate_gap(task, exp_dir):
             review_gaps.append((idx, task, exp_dir))
+        if is_resolved_review_block(task, exp_dir):
+            info = detect_completion(exp_dir) or {
+                "canonical_status": "succeeded",
+                "completed_at": None,
+                "summary": None,
+                "status_token": "REVIEWED",
+            }
+            resolved_blocks.append((idx, task, exp_dir, info))
 
         if (task.get("status") or "").lower() != "pending":
             continue
@@ -226,8 +259,14 @@ def main() -> int:
             f"  - {task.get('id')} P{task.get('priority')} missing Codex review "
             f"[exp_dir={_display_path(exp_dir)}]"
         )
+    print(f"[sync_next_tasks] resolved review-blocks (blocked→{{status}}): {len(resolved_blocks)}")
+    for _, task, exp_dir, info in resolved_blocks:
+        print(
+            f"  - {task.get('id')} P{task.get('priority')} blocked/{task.get('blocked_reason')} "
+            f"-> {info['canonical_status']} (review artifact present) [exp_dir={_display_path(exp_dir)}]"
+        )
 
-    if args.apply and (candidates or review_gaps):
+    if args.apply and (candidates or review_gaps or resolved_blocks):
         # Apply changes: mutate tasks list in-place
         now_iso = datetime.now(timezone.utc).isoformat()
         for idx, task, info, _ in candidates:
@@ -235,6 +274,16 @@ def main() -> int:
             tasks[idx]["completed_at"] = info["completed_at"]
             tasks[idx]["synced_from_experiments_at"] = now_iso
             if info["summary"]:
+                tasks[idx]["result_summary"] = info["summary"]
+        for idx, task, exp_dir, info in resolved_blocks:
+            tasks[idx]["status"] = info["canonical_status"]
+            tasks[idx]["completed_at"] = info.get("completed_at")
+            tasks[idx]["synced_from_experiments_at"] = now_iso
+            tasks[idx]["review_gate_status"] = "reviewed"
+            tasks[idx]["blocked_review_released_at"] = now_iso
+            tasks[idx]["blocked_review_released_from"] = task.get("blocked_reason")
+            # keep blocked_reason/blocked_note as audit trail; status now terminal
+            if info.get("summary"):
                 tasks[idx]["result_summary"] = info["summary"]
         review_followups_created = 0
         for idx, task, exp_dir in review_gaps:
@@ -280,9 +329,10 @@ def main() -> int:
         else:
             NEXT_TASKS.write_text(json.dumps(tasks, indent=2, ensure_ascii=False) + "\n")
         print(
-            f"[sync_next_tasks] APPLIED {len(candidates)} completion updates and "
+            f"[sync_next_tasks] APPLIED {len(candidates)} completion updates, "
             f"{len(review_gaps)} review-gate updates "
-            f"({review_followups_created} follow-ups created) to {NEXT_TASKS.relative_to(ROOT)}"
+            f"({review_followups_created} follow-ups created), and "
+            f"{len(resolved_blocks)} blocked-review releases to {NEXT_TASKS.relative_to(ROOT)}"
         )
     elif args.dry_run:
         print("[sync_next_tasks] dry-run only; rerun with --apply to write")

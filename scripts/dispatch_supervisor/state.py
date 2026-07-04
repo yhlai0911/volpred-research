@@ -374,6 +374,14 @@ def append_completion_entry(
             "final_model": final_model,
             "outcome": outcome,
         }
+        # Codex review round-3 medium #2 (2026-07-04): persist pid/pgid/fingerprint
+        # for orphan/unverified outcomes so the unverified-orphan runbook's
+        # `jq '.completions[-5:]'` actually yields the pid/pgid the operator
+        # needs to check by hand (current_job is cleared right after this).
+        if job.get("pid") is not None:
+            entry["pid"] = job.get("pid")
+            entry["pgid"] = job.get("pgid")
+            entry["started_wall"] = job.get("started_wall")
         completions = data.get("completions") or []
         completions.append(entry)
         if len(completions) > COMPLETIONS_MAX:
@@ -381,6 +389,9 @@ def append_completion_entry(
         data["completions"] = completions
         if mark_cleanup_recorded and data.get("current_job") is not None:
             data["current_job"]["cleanup_recorded"] = True
+            # Record the outcome so a crash-before-finalize retry knows whether
+            # to re-alert (Codex review round-3 #1) without re-appending.
+            data["current_job"]["cleanup_outcome"] = outcome
         return entry
 
 

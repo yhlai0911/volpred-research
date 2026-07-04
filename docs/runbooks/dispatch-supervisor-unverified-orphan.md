@@ -22,9 +22,12 @@ kill 決策點就**拒絕對無法驗證身分的 pid 發 signal**——這是�
 **人工處理步驟**（收到 alert 後盡快，worker cap 是 50 分鐘，放著不管最多浪費一個
 process 的 CPU/token，不會重複派工——slot 已清、新 fire 正常進行）：
 
-1. 從 alert body 或 state file 取得 pid / pgid / started_at：
+1. 從 alert email body 取得 pid / pgid / started_at（**alert body 是權威來源**）。
+   state file 的 completion entry 對 orphan/unverified outcome 也會保存
+   pid/pgid/started_wall（Codex review round-3 2026-07-04 補；一般 success/hang
+   outcome 的 entry 不含 pid）：
    ```bash
-   jq '.completions[-5:]' storage/ops/dispatch_state.json
+   jq '.completions[-5:] | map(select(.outcome | test("orphan|unverified")))' storage/ops/dispatch_state.json
    ```
 2. 檢查該 pid 現在是誰（**不要**直接 kill）：
    ```bash

@@ -868,7 +868,63 @@ def test_handle_restart_orphan_skips_duplicate_entry_when_cleanup_already_record
     assert len(snap["completions"]) == 1, "retry must NOT append a duplicate completion entry"
     assert snap["current_job"] is None, "retry must still complete the deferred finalize"
     assert kills == [], "retry must not re-kill an already-handled orphan"
-    assert alerts_called == [], "retry must not re-alert"
+    assert alerts_called == [], "killed orphan is resolved — retry must not re-alert"
+
+
+def test_handle_restart_orphan_re_alerts_unverified_on_cleanup_recorded_retry(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Codex round-3 medium #1 (2026-07-04): if the crash-before-finalize gap
+    happens for a NOT-killed unverified orphan (process may still be alive),
+    the retry must RE-EMIT the runbook alert — not silently finalize and drop
+    the only prompt. (Killed orphans are resolved and must NOT re-alert — see
+    the sibling test above.)"""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=999, pgid=888, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/orphan.log",
+        started_wall=None,
+    )
+    orphan = state.mark_restart_orphan_pending(state_path)
+    state.append_completion_entry(
+        orphan, exit_code=-1, outcome="orphan_unverified_not_killed",
+        final_model="opus", path=state_path, mark_cleanup_recorded=True,
+    )
+
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    alerts_called: list[dict] = []
+    monkeypatch.setattr(
+        supervisor.alerts, "send_orphan_restart_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+
+    supervisor._handle_restart_orphan()  # retry
+
+    snap = state.read_state(state_path)
+    assert snap["current_job"] is None
+    assert len(alerts_called) == 1, "unverified not-killed orphan must re-alert on retry"
+    assert alerts_called[0]["outcome"] == "orphan_unverified_not_killed"
+
+
+def test_completion_entry_persists_pid_pgid_for_orphan_outcomes(tmp_path: Path) -> None:
+    """Codex round-3 medium #2 (2026-07-04): the unverified-orphan runbook tells
+    the operator to read pid/pgid from completions — so orphan/unverified
+    entries must persist them (current_job is cleared right after)."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=4321, pgid=4321, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/orphan.log",
+        started_wall="Wed Jan  1 00:00:00 2026",
+    )
+    orphan = state.mark_restart_orphan_pending(state_path)
+    state.append_completion_entry(
+        orphan, exit_code=-1, outcome="orphan_unverified_not_killed",
+        final_model="opus", path=state_path, mark_cleanup_recorded=True,
+    )
+    entry = state.read_state(state_path)["completions"][-1]
+    assert entry["pid"] == 4321
+    assert entry["pgid"] == 4321
+    assert entry["started_wall"] == "Wed Jan  1 00:00:00 2026"
 
 
 def test_handle_restart_orphan_retries_after_partial_crash_mid_cleanup(

@@ -155,3 +155,87 @@ def test_load_tasks_warns_when_tasks_field_is_not_list(tmp_path, monkeypatch, ca
     assert "type=dict" in captured.err
     assert "[sync_next_tasks] mark-succeeded candidates: 0" in captured.out
     assert json.loads(next_tasks.read_text(encoding="utf-8")) == {"tasks": {"id": "K1"}}
+
+
+def test_apply_releases_blocked_task_when_codex_review_now_present(tmp_path, monkeypatch) -> None:
+    """2026-07-04 structural fix: a task stuck in `blocked / awaiting_codex_review`
+    whose review artifact has since landed must be released to a completion
+    status through the FLOW — the prior scan only walked `pending`, leaving the
+    blocked lane a permanent sync blind spot (K1330 stuck 11 days after review)."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    experiments = tmp_path / "experiments"
+    exp_dir = experiments / "k9999"
+    next_tasks.parent.mkdir(parents=True)
+    exp_dir.mkdir(parents=True)
+    (exp_dir / "README.md").write_text("# K9999\n\nStatus: PASS\n", encoding="utf-8")
+    (exp_dir / "codex_review.md").write_text("Verdict: CONDITIONAL_PASS\n", encoding="utf-8")
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "K9999",
+                    "task_type": "experiment",
+                    "status": "blocked",
+                    "blocked_reason": "awaiting_codex_review",
+                    "review_gate_status": "awaiting_review",
+                    "blocked_note": "keep audit trail",
+                    "priority": "P3",
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(sync_next_tasks_status, "ROOT", tmp_path)
+    monkeypatch.setattr(sync_next_tasks_status, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(sync_next_tasks_status, "EXPERIMENTS", experiments)
+    monkeypatch.setattr(sys, "argv", ["sync_next_tasks_status.py", "--apply"])
+
+    rc = sync_next_tasks_status.main()
+
+    assert rc == 0
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    t = next(x for x in saved if x["id"] == "K9999")
+    assert t["status"] == "succeeded"
+    assert t["review_gate_status"] == "reviewed"
+    assert t["blocked_review_released_from"] == "awaiting_codex_review"
+    # blocked_note preserved as audit trail
+    assert t["blocked_note"] == "keep audit trail"
+
+
+def test_blocked_review_task_without_review_artifact_stays_blocked(tmp_path, monkeypatch) -> None:
+    """A blocked review-gate task whose review has NOT landed must stay blocked."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    experiments = tmp_path / "experiments"
+    exp_dir = experiments / "k9998"
+    next_tasks.parent.mkdir(parents=True)
+    exp_dir.mkdir(parents=True)
+    (exp_dir / "README.md").write_text("# K9998\n\nStatus: PASS\n", encoding="utf-8")
+    # no codex_review.md
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "K9998",
+                    "task_type": "experiment",
+                    "status": "blocked",
+                    "blocked_reason": "awaiting_codex_review",
+                    "priority": "P3",
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(sync_next_tasks_status, "ROOT", tmp_path)
+    monkeypatch.setattr(sync_next_tasks_status, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(sync_next_tasks_status, "EXPERIMENTS", experiments)
+    monkeypatch.setattr(sys, "argv", ["sync_next_tasks_status.py", "--apply"])
+
+    rc = sync_next_tasks_status.main()
+    assert rc == 0
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    t = next(x for x in saved if x["id"] == "K9998")
+    assert t["status"] == "blocked"
