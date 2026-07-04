@@ -19,14 +19,19 @@
 
 | # | 項目 | Mission | 執行方式 | 狀態 |
 |---|---|---|---|---|
-| B1 | **Sitemap 1,000 篇 URL 全 404**（UUID 而非可解析路徑）— SEO 入口歸零，本次審計唯一 bug 級 | M5+盈利 | 前端 agent：實測正確 URL 形式 → 改 sitemap.ts → build → safe-deploy → curl 抽測 | 🔄 |
-| B2 | 文章頁 og:image / twitter:image 缺失（社群分享無圖）| M5 | 同 B1 agent 一次做 | 🔄 |
-| B3 | RSS feed + canonical URL 缺失 | M5 | 同 B1 agent | 🔄 |
-| B4 | /feed /papers /strategies 猜測路徑 404 → next.config redirects | M5 | 同 B1 agent | 🔄 |
-| B5 | Pool 衛生批次：2 筆 false-failed flip（artifacts 已驗證上線）、K1330 blocked→succeeded（Codex review 6/23 已 PASS）、K1258 receipt 71 天 awaiting_approval 關閉、過時任務批次關閉（TCC crontab / kid_collision K1414 / 2 筆 null-metadata trending / 6 筆 stale FB / K136 K628）| M4 | pool agent（CLI 寫入不手改 JSON）| 🔄 |
-| B6 | collect_us 部署版 wrapper 漂移（exit banner 5/29 起消失 = host_cron_fail 盲區）— cp 同步 | M4 | 主線程 | 🔄 |
-| B7 | 2 個 stale memory 更新：strategy lookahead audit 其實已完成（6/21 全 reject）、papers submission framing 已從「等投稿決策」變「revision 工作」 | M2/M3 | 主線程 | 🔄 |
-| B8 | Paper stage tracker `stage_entered_at` 7/1 被 bulk 重設 — 依 git 證據回填真實日期 | M3 | 主線程 | 🔄 |
+| B1 | **Sitemap 1,000 篇 URL 全 404**（UUID 而非可解析路徑）— SEO 入口歸零，本次審計唯一 bug 級 | M5+盈利 | sitemap.ts 改 slug → build(node22) → safe-deploy → 線上抽測 3 URL 全 200 | ✅ **已上線驗證** |
+| B2 | 文章頁 og:image / twitter:image 缺失（社群分享無圖）| M5 | reports/[id]/page.tsx generateMetadata | ✅ 線上 og:image 生效 |
+| B3 | RSS feed + canonical URL 缺失 | M5 | 新增 rss.xml/route.ts + layout discovery link | ✅ /rss.xml 200 合法 XML |
+| B4 | /feed /papers /strategies 猜測路徑 404 → next.config redirects | M5 | next.config 308 redirects | ✅ /feed→308→首頁 |
+| B5 | Pool 衛生批次：2 筆 false-failed flip、K1330/K1258 closure、過時任務批次關閉 | M4 | 結構性 sync 擴充 + 執行（見 C 區降級為結構修法）| 🔄 進行中 |
+| B6 | collect_us 部署版 wrapper 漂移（exit banner 5/29 起消失 = host_cron_fail 盲區）— cp 同步 | M4 | 主線程 | ✅ 已同步部署 |
+| B7 | 2 個 stale memory 更新：strategy lookahead audit 已完成、papers submission framing 更正 | M2/M3 | 主線程 | ✅ 兩 memory + MEMORY.md 已更新 |
+| B8 | Paper stage tracker `stage_entered_at` 7/1 被 bulk 重設 — 依 git 證據回填真實日期 | M3 | 主線程 | 🔄 排入 C 區 |
+
+**額外完成（體檢外，本 session 發現並修）**：
+- **分類 bug（真 product bug）**：`classify_topic_cluster` 裸子字串比對讓 2-3 字元 ASCII 關鍵詞誤中（`es`⊂timestamp、`var`⊂variance→誤入 risk_mgmt），silently 汙染 cluster 計數/caps/dedup。改 ASCII 詞界匹配 + regression test。✅
+- **17 個 stale/flaky 測試修復**：全套從 15 紅→綠（depth-gate 誤傷、cap 15→80 漂移、event-config/registry 真檔洩漏、warn 措辭升級、live_verify 對線上輪詢 hang）。✅
+- **live_verify test hang**：`VOLPRED_NO_REMOTE_WRITE=1` 時對線上站輪詢 120s/篇造成 3 分鐘 pytest hang，加 skip。✅
 
 ## C. 排入 task pool（medium — hourly dispatcher / compute worker 消化）
 
