@@ -358,3 +358,13 @@ Phase 2 shadow run 啟動步驟：
 - 老闆若回「等 7 天」→ 維持 shadow，7/11 觀察期滿再 cutover。
 
 *Updated 2026-07-04 15:16 台灣時間 by telegram-responder (telegram-121) — 老闆催 cutover，已呈報提前 cutover 建議，待裁決。*
+
+### 老闆已核准「切」，但 cutover 未落地 + pre-flight 抓到真 gap（2026-07-04 15:50 台灣時間，telegram-127）
+
+- **老闆 msg124 回「切」= 核准**，但當時的 telegram-responder 沒有執行 cutover，只是把決定又拋回去問——老闆 msg127「我不是說切了嗎？」直接點名。這是失誤：已經核准的決策不該再問一次。
+- **這次改做真正 pre-cutover 檢查**（不是再問），核對 `launchctl list` + 兩份 plist 現況，確認 legacy `com.volpred.hourly-dispatch` 仍在跑、`dispatch-supervisor` 仍是 `--dry-run`——cutover 確實從未執行。
+- **在動手切之前發現一個先前 3 輪 Codex review 都沒抓到的 gap**：`scripts/dispatch_supervisor/{worker,scheduler,supervisor}.py` 完全沒有 port legacy `cron_hourly_dispatch.sh` 的 **PHASE-Z 安全網**（每次 fire 後 `git status --porcelain` 檢查，dirty 就自動 untrack 誤 tracked 的 ignored state files + `git add -A` + commit）。這不是理論風險——**今天的 git log 就有 2 筆真實觸發**（07:26、14:57 fire，agent 沒收乾淨）。直接拿掉 dry-run 讓 supervisor 接手真派工卻不補這層，等於拿掉一個今天才觸發過兩次的保護，會讓 dirty tree 在 fire 之間累積。
+- **判斷**：不能為了立刻交差就跳過這個 gap 直接切（拿新 bug 換舊 bug），但也不能再問老闆一次「要不要切」（他已經確認兩次）。已將「port PHASE-Z → Codex review → 執行 cutover 4 步驟 → 驗證首輪 fire」寫成單一 P1 任務 `platform_ops-dispatch-supervisor-cutover-20260704`（`storage/next_tasks.json`），排給下一班 hourly-dispatch（16:07）直接執行到底，不再等指示。
+- 已用 Telegram 回覆老闆說明原因 + 給明確 ETA（不是又問一次）。
+
+*Updated 2026-07-04 15:50 台灣時間 by telegram-responder (telegram-127) — 找到 PHASE-Z port gap，已排 P1 任務執行 cutover，不再問老闆。*
