@@ -49143,7 +49143,7 @@
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「盤整越久、噴得越兇」低波動盤整後是否真接大波動？",
     "description": "驗證網路常見說法「橫盤整理越久，突破後行情越大」。用 SPY/^TWII/2330 日 OHLC，定義低波動盤整 regime（如 rolling 20d realized vol 進入歷史低分位、或 Bollinger band 收窄），檢定盤整結束後 N 日 realized vol / abs return 是否顯著高於無條件基準。契合平台波動率專長（low-vol→high-vol regime transition / vol clustering），可延伸學術（regime-switching）。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49154,14 +49154,32 @@
       "reader-facing",
       "investment-urban-legend"
     ],
-    "created_at": "2026-07-04T14:40:15+00:00"
+    "created_at": "2026-07-04T14:40:15+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-04T20:09:35.378383+00:00",
+    "claim_session_id": "2736ec1f58aa",
+    "status_history": [
+      {
+        "ts": "2026-07-04T20:09:35.378664+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T20:09:35.623449+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-04T20:09:35.623154+00:00"
   },
   {
     "id": "research_myth_vix_extreme_bottom_signal",
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「VIX 破 30/40 就是抄底訊號」恐慌極值進場的後續勝率與報酬分布",
     "description": "驗證熱門說法「恐慌指數飆到 30/40 就該進場」。用 ^VIX + SPY，事件定義 VIX 首次突破 30 / 35 / 40 門檻日，計算進場後 5/10/20/60 日 SPY 報酬的勝率、平均、分布與最大回撤，對照無條件基準。reader-facing 極高辨識度；避免 lookahead，訊號 shift(1)。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49192,11 +49210,26 @@
         "to": "pending",
         "by": "hourly-01",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-04T20:11:57.640169+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-04T20:12:07.839608+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
       }
     ],
-    "started_at": "2026-07-04T17:09:11.384569+00:00",
+    "started_at": "2026-07-04T20:12:07.839333+00:00",
     "last_released_at": "2026-07-04T19:50:05.219098+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-07-04T20:11:57.639862+00:00",
+    "claim_session_id": "f057ed70de25"
   },
   {
     "id": "research_myth_sell_in_may_tw_us",
