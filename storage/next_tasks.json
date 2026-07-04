@@ -48017,11 +48017,37 @@
     "id": "platform_ops_mirror_ops_admin_token_drift_realign",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "Mirror sync 401 復發:對齊 mirror-api Zeabur service 的 OPS_ADMIN_TOKEN 與本地 .env.local",
     "description": "症狀:每次 publish 的 mirror sync 都回 HTTP 401 Unauthorized(feed.json + 逐篇文章;log 出現 44+ 次)。\n\n已完成診斷(2026-07-04 hourly-12):\n- OPS_ADMIN_TOKEN 在 .env.local 有設(已設定;不記錄任何 token 片段以免 secret 進 VCS),ops_admin_headers() 正確送 `x-ops-key`(src/volpred/mirror_auth.py)。\n- mirror URL = VOLPRED_MIRROR_URL = mirror-api.zeabur.app;PUT 到 /api/sync/feed.json 與 /api/sync/<article>。\n- server 對此 token 值回 401 → **token 值 drift**:本地 .env.local 的 OPS_ADMIN_TOKEN 與 mirror-api service 端 env 的值不一致(自 2026-06-11 fix 後某時點起漂移)。\n- 這是 2026-06-11 'mirror 靜默 401' 的復發(root cause 不同:6/11 是 caller 沒帶 token,現在是 token 值不符)。error_log 3957 行有背景。\n\n嚴重度:LOW。mirror API 只是 replica;前端 canonical 讀 Supabase(publish 時 Supabase sync 正常),live 站點與讀者端不受影響。\n\n修法(擇一,需 Zeabur service env 存取):\n(a) 讀 mirror-api service 當前 OPS_ADMIN_TOKEN → 寫回本地 .env.local(若 server 為 source of truth);或\n(b) 把 mirror-api service 的 Zeabur env OPS_ADMIN_TOKEN 設成 .env.local 的值(若本地為 source of truth)。\n驗證:帶 x-ops-key 對 /api/sync/feed.json 做 PUT → 200;重跑 `uv run volpred ops sync-all` 確認 articles synced。\n禁止:不 silent 吞 401(已 loud print),不手改歷史資料繞過。\n可用 zeabur MCP 讀/設 service env(審慎,確認 source of truth 方向再改)。",
     "source": "hourly-12_mirror_401_diagnosis",
-    "created_at": "2026-07-04T04:30:09.707627+00:00"
+    "created_at": "2026-07-04T04:30:09.707627+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-04T06:19:35.144073+00:00",
+    "claim_session_id": "62116754eb2a",
+    "status_history": [
+      {
+        "ts": "2026-07-04T06:19:35.144326+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T06:19:39.935880+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T06:37:33.565772+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-04T06:19:39.935578+00:00",
+    "completed_at": "2026-07-04T06:37:33.565464+00:00",
+    "result": "已對齊 Zeabur volpred-v3 的 OPS_ADMIN_TOKEN 並重啟，/api/sync 單篇 PUT 回 200；補齊 frontend .env.production。\\n恢復 volpred-mirror：用 API-only Dockerfile.api 重新部署，mirror health 回 200 ready=true。\\n重跑 uv run volpred ops sync-all 成功，無 401。"
   },
   {
     "id": "telegram-110",

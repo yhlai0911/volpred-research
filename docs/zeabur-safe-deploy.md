@@ -41,11 +41,16 @@ Current project (new Tencent-Tokyo machine, after the 2026-06-02 server move):
 | **volpred-v3** | `…6854117` | **LIVE frontend (serves volpred.zeabur.app)** | ✅ volpred.zeabur.app | this CLI script |
 | volpred-web | `…6854116` | NOT in use (diff repo, no domain) | ❌ | GitHub yhlai0911/volpred-web |
 | volpred-v2 | `69b8ed89…` | legacy | ❌ | — |
-| volpred-mirror | `69c105e1…` | research-memory Mirror API | — | — |
+| volpred-mirror | `…6854119` | research-memory Mirror API (`mirror-api.zeabur.app`) | ✅ mirror-api.zeabur.app | root `Dockerfile.api` |
 
 (Old pre-move machine IDs preserved in `config .deploy._legacy_pre_20260602`.)
 Frontend source repo (for reference only; deploy does NOT use git push):
 `github.com/yhlai0911/volpred-v2`.
+
+`OPS_ADMIN_TOKEN` must be present on **volpred-v3** for `/api/sync/*` writes.
+The separate **volpred-mirror** service uses `RESEARCH_MIRROR_TOKEN` for
+`/api/mirror/*`; setting only the mirror service token does not authorize the
+frontend sync route.
 
 ## Server move (changing machines)
 

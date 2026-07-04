@@ -72,7 +72,7 @@ cp .env.example .env
 |---|---|---|
 | `.env` | SMTP（email 通知）+ GOOGLE_CLOUD_API_KEY + OPENAI_API_KEY + META_GRAPH_API + VOLPRED_REMOTE_URL | 舊主機既有 `.env` / 各服務後台 / 密碼管理器 |
 | `.env.local` | **SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY**（後端寫入）+ FRED_API_KEY + RESEARCH_MIRROR_TOKEN + VOLPRED_MIRROR_URL + OPS_ADMIN_TOKEN | Supabase 後台 → Settings → API；FRED 官網申請 |
-| `frontend-v2-fix/.env.local` | NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY + SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SITE_URL + OPS_ADMIN_EMAILS | 同上 Supabase；anon key 也在 Settings → API | 
+| `frontend-v2-fix/.env.local` / `.env.production` | NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY + SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SITE_URL + OPS_ADMIN_EMAILS + **OPS_ADMIN_TOKEN** | 同上 Supabase；anon key 也在 Settings → API；OPS_ADMIN_TOKEN 必須與根目錄 `.env.local` 相同 |
 
 > `frontend-v2-fix/` 此時還不存在（§4 bootstrap 才 clone）。可先把該檔內容記著，bootstrap clone 完前端後再建，或 bootstrap 後補。
 > **取得最快法**：若舊主機還在，直接把舊機的 `.env`、`.env.local`、`frontend-v2-fix/.env.local` 三檔 `scp`/`rsync` 過來，最不易漏。

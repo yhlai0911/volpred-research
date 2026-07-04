@@ -1,49 +1,20 @@
-import importlib.util
-import sys
-import types
 from pathlib import Path
 
 import pytest
 
-
-def _load_local_control_plane():
-    repo_root = Path(__file__).resolve().parents[1]
-    src_root = repo_root / "src" / "volpred"
-    ops_root = src_root / "ops"
-
-    if "volpred" not in sys.modules:
-        volpred_pkg = types.ModuleType("volpred")
-        volpred_pkg.__path__ = [str(src_root)]
-        sys.modules["volpred"] = volpred_pkg
-    if "volpred.ops" not in sys.modules:
-        ops_pkg = types.ModuleType("volpred.ops")
-        ops_pkg.__path__ = [str(ops_root)]
-        sys.modules["volpred.ops"] = ops_pkg
-
-    common_spec = importlib.util.spec_from_file_location(
-        "volpred.ops.common", ops_root / "common.py"
-    )
-    assert common_spec is not None and common_spec.loader is not None
-    common_module = importlib.util.module_from_spec(common_spec)
-    sys.modules["volpred.ops.common"] = common_module
-    common_spec.loader.exec_module(common_module)
-
-    plane_spec = importlib.util.spec_from_file_location(
-        "volpred.ops.local_control_plane", ops_root / "local_control_plane.py"
-    )
-    assert plane_spec is not None and plane_spec.loader is not None
-    plane_module = importlib.util.module_from_spec(plane_spec)
-    sys.modules["volpred.ops.local_control_plane"] = plane_module
-    plane_spec.loader.exec_module(plane_module)
-    return plane_module
-
-
-local_control_plane = _load_local_control_plane()
-claim_next_task = local_control_plane.claim_next_task
-create_task = local_control_plane.create_task
-get_task = local_control_plane.get_task
-heartbeat_agent = local_control_plane.heartbeat_agent
-release_task = local_control_plane.release_task
+# 2026-07-04: replaced hand-rolled importlib loading that overwrote
+# sys.modules["volpred.ops.local_control_plane"] at import time (a permanent,
+# session-wide side effect applied during pytest's collection phase, before
+# any test runs — it silently broke every later monkeypatch of that module,
+# e.g. test_dreaming_review's create_task stub). conftest.py puts src/ on the
+# path; import canonically. Same fix as test_claim_parent_subtasks.py.
+from volpred.ops.local_control_plane import (  # noqa: E402
+    claim_next_task,
+    create_task,
+    get_task,
+    heartbeat_agent,
+    release_task,
+)
 
 
 def test_release_task_returns_claimed_task_to_queue(tmp_path: Path):

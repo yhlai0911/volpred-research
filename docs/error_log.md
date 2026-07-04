@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-04 14:30 `/api/sync/*` 持續 401：OPS_ADMIN_TOKEN 設錯 service + mirror-api image 過重 — **FIXED**
+
+**現象**：publisher / `sync-all` 的 article sync path 對 `https://volpred.zeabur.app/api/sync/reports/*.json` 回 401 `missing credentials`。先前診斷把問題描述成 mirror-api token drift，但真正的 `/api/sync/*` route 是 live frontend `volpred-v3` 的 Next.js route，不是 `mirror-api.zeabur.app` 的 `/api/mirror/*` FastAPI route。
+
+**根因**：(1) Zeabur `volpred-v3` service 缺 `OPS_ADMIN_TOKEN`，所以 `authorizeOpsAdmin()` 沒有 expected secret，任何 `x-ops-key` 都不會通過；(2) `volpred-mirror` service 只需要 `RESEARCH_MIRROR_TOKEN` 保護 `/api/mirror/*`，把 `OPS_ADMIN_TOKEN` 只設到 mirror service 無法修 frontend sync；(3) 重啟 `volpred-mirror` 時暴露 `Dockerfile.api` 用 `uv sync --no-dev` 拉整套研究依賴（torch/CUDA 等），導致 mirror service 進 `PULL_FAILED`，API image 過重且脆弱。
+
+**解決**：(a) 以 Zeabur CLI 在 `volpred-v3` service 設定 `OPS_ADMIN_TOKEN`，並同步補到本機 `frontend-v2-fix/.env.production`（gitignored）避免下次 safe deploy 漏值；(b) 重啟 `volpred-v3` 後 authenticated single-report PUT 回 200；(c) `volpred-mirror` 重新用 root `Dockerfile.api` 部署，並把 `Dockerfile.api` 改成 API-only runtime（只裝 fastapi/pydantic/uvicorn，copy `src/` + `config/`），避免再拉完整研究依賴；(d) `config/project_targets.json` 登記 `volpred-mirror` service ID，文件修正新機器 mirror ID 與 token 分工。
+
+**驗證**：`https://mirror-api.zeabur.app/api/mirror/health` + `x-research-mirror-token` → HTTP 200、`ready=true`；`https://volpred.zeabur.app/api/sync/reports/mile_77795ca2.json` + `x-ops-key` → HTTP 200；`uv run volpred ops sync-all` → exit 0，articles=2、risk_forecast=1、knowledge=2，無 401。
+
+**教訓**：`VOLPRED_MIRROR_URL`（FastAPI `/api/mirror/*`, research-memory replica）和 `VOLPRED_REMOTE_URL` / site default（Next `/api/sync/*`, frontend/Supabase sync）是兩條不同控制面。處理 401 時先確認實際 failing URL 與 service ID，再改 env；部署 target 必須進 `config/project_targets.json`，不能只靠手上 console URL。
+
 ## 2026-07-04 13:15 發文脫班補救 force-release=0 + refill=0 仍靜默收場 — **FIXED（reader-facing emergency refill + critical escalation）**
 
 **現象**：publishing_freshness reader-facing 脫班時，`scripts/remediate_publish_drought.py` 會先 force `release_pool_by_settings(force=True)`；若 `_maybe_drought_release` 找不到「內容乾淨、僅因 dedup 擋住」的草稿，會回 released=0。舊 Step 2 接著呼叫 generic `refill_task_pool.refill(4)`，但該 refill 可合法退到 `experiment` / journal-discovery `platform_ops`，甚至 added=0。於是出現 `force_release=0` 且 `refill_fresh=0` 時仍只把步驟寫進 summary、無 critical / Telegram 升級，reader-facing drought 沒有被真正自癒。
