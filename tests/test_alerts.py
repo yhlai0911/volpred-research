@@ -544,9 +544,10 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
 
 
 def test_host_cron_fail_severity_calibration(tmp_path: Path):
-    """2026-06-15 email-11745: a single self-recovering SIGALRM hang (exit=142)
-    must be WARN, not CRITICAL noise; sustained (>=2 consec) or non-hang failure
-    stays CRITICAL."""
+    """2026-06-15 email-11745 + 2026-07-04 recalibration (boss Telegram msg 114/121/
+    141): a self-recovering SIGALRM hang (exit=142) is WARN, not CRITICAL noise —
+    including a consecutive-142 chain, which still self-recovers on the next fire.
+    Only a non-self-recovering hard failure (exit != {142,75}) stays CRITICAL."""
     from datetime import datetime, timezone
 
     from volpred.ops.alerts import _parse_host_cron_state
@@ -577,10 +578,14 @@ def test_host_cron_fail_severity_calibration(tmp_path: Path):
     r = _parse_host_cron_state(str(storage), now)
     assert r["breached"] is False
 
-    # 3) sustained (2 consecutive 142) → CRITICAL
+    # 3) sustained self-recovering hang (2 consecutive 142) → WARN, NOT CRITICAL
+    #    (2026-07-04 recalibration, boss Telegram msg 114/121/141): 142 self-recovers
+    #    on the next fire; consecutive hangs still self-recover, so they are noise at
+    #    CRITICAL. Real sustained outage is caught by the outcome-level dead-man
+    #    switches (release_pool_gap / publishing_freshness), not by paging on 142.
     write_exits([0, 142, 142])
     r = _parse_host_cron_state(str(storage), now)
-    assert r["breached"] is True and r["level"] == "critical"
+    assert r["breached"] is True and r["level"] == "warn"
 
     # 4) non-hang failure (exit 1: perm/path/FDA) even single → CRITICAL
     write_exits([0, 0, 1])
@@ -605,7 +610,8 @@ def test_host_cron_fail_quota_window_is_self_recovering(tmp_path: Path):
     is an expected, scheduled, self-resetting quota window — Codex failover covers
     the slot and Claude auth returns on its own at reset. It must never fire a
     CRITICAL host_cron_fail, even across >=2 consecutive fires (a quota window
-    legitimately spans multiple fires), while a 142 hang chain still escalates."""
+    legitimately spans multiple fires). Post-2026-07-04, a 142 hang chain is also
+    self-recovering → WARN (both codes are exempt from CRITICAL escalation)."""
     from datetime import datetime, timezone
 
     from volpred.ops.alerts import _parse_host_cron_state
@@ -654,11 +660,13 @@ def test_host_cron_fail_quota_window_is_self_recovering(tmp_path: Path):
     r = _parse_host_cron_state(str(storage), now)
     assert r["breached"] is True and r["level"] == "warn"
 
-    # 6) 142 hang chain still escalates (regression guard: excluding 75 from the
-    #    consecutive count must not weaken the 2x-142 → critical rule)
+    # 6) 142 hang chain is self-recovering → WARN, same as a 75 quota chain
+    #    (2026-07-04 recalibration): excluding 75 from the consecutive count must not
+    #    resurrect a 2x-142 → CRITICAL rule. Both 142 and 75 self-recover; only a
+    #    non-self-recovering hard failure escalates.
     write_exits([0, 142, 142])
     r = _parse_host_cron_state(str(storage), now)
-    assert r["breached"] is True and r["level"] == "critical"
+    assert r["breached"] is True and r["level"] == "warn"
 
 
 def test_host_cron_fail_git_push_held_is_benign(tmp_path: Path):

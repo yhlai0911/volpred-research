@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-04 21:18 `host_cron_fail` 對「連續 2 次 exit=142 自我恢復 hang」升 CRITICAL 反覆轟老闆 — 改判斷條件（自我恢復碼永不 critical）
+
+**現象**：老闆 Telegram msg 114/121/141 連續三次動怒（「這已經出現第幾次了…頭痛醫頭腳痛醫腳」「不是說修好了嗎？判斷條件有問題，你不會改判斷嗎？」）。今天 13:57 + 14:57 CST hourly_dispatch 連兩次 `exit=142`（SIGALRM hang），`_parse_host_cron_state` 依 `max_consec_fail >= 2` 判 **CRITICAL** 推 Telegram —— 但 15:47 CST 就 `exit=0` 自我恢復。142 本就是設計上會被下輪 hourly fire 自我恢復的碼。
+
+**根因**：2026-06-15 Strike #8 只止血「單次 142→warn」，卻保留「≥2 連續 142→critical」。連續 142 仍會自我恢復（實測），此升級條件本身錯 → 每逢兩次 transient hang 背靠背就假 CRITICAL。且與 outcome-level dead-man switch（`release_pool_gap` / `publishing_freshness`，抓「實際沒發文」不論成因）重複告警。142 hang *類別* 的結構根因另由 worker-daemon 重構處理（`docs/refactor_plan_hourly_dispatch.md`，2026-07-04 17:17 cutover），非每小時 CRITICAL page 的理由。
+
+**解決**：`src/volpred/ops/alerts.py::_parse_host_cron_state` 判斷改為 `host_cron_level = "critical" if any_non_hang_fail else "warn"` —— 自我恢復碼（142 SIGALRM / 75 Claude Max quota）**不論連幾次都只 warn**；只有非自我恢復硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才 CRITICAL。body 說明文同步更新。測試 `tests/test_alerts.py` 三處（2×142 → warn、regression guard、docstring）改對，30 passed。真函式驗證：2×142→warn、3×142→warn、exit=1→critical、142→0→not breached、142→1→critical 全對。**後續強化**（latent，未含本次）：`_latest_cron_exit` 對「最後 exit」無時效檢查，幾天前 stale 非 0 exit 會每小時重判 → 排入 hourly dispatch 加 recency gate。
+
 ## 2026-07-04 19:07 誤判「發文脫班 13h」深挖不存在的 release-layer bug — 根因是 UTC/台灣時區換算錯 — **CORRECTED（無 code 留存）**
 
 **現象**：hourly-19 fire 見 dashboard WARN production_throughput（3/6）+ 掃 feed 最新 published `published_at=2026-07-04T06:00`，**誤當台灣時間**算成「13h 沒發文 drought」，遂深挖 release-layer（drought breaker / dedup cooldown flag / arc-dedup over-match），並一度改 `content.py::_maybe_drought_release` 加 narrative-axis guard rescue 3 篇 draft + 寫 2 個 test。

@@ -1012,16 +1012,32 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
         scheduler_age_minutes = round(scheduler_age.total_seconds() / 60.0, 1)
 
     breached = bool(failing_logs)  # v12: 只看 cron log exit codes，不看 scheduler staleness
-    # Severity calibration (2026-06-15): a lone self-recovering SIGALRM hang → warn;
-    # sustained (>=2 consecutive) or any non-hang failure → critical.
-    host_cron_level = "critical" if (max_consec_fail >= 2 or any_non_hang_fail) else "warn"
+    # Severity calibration (2026-07-04, boss Telegram msg 114/121/141 — repeated
+    # CRITICAL noise on self-recovering hangs): a self-recovering exit code (142
+    # SIGALRM hang / 75 Claude Max quota window) NEVER escalates to CRITICAL, even
+    # consecutive. By definition these self-recover on the next hourly fire (proven
+    # 2026-07-04: 13:57+14:57 CST both exit=142 → 15:47 exit=0 recovered on its own).
+    # The 2026-06-15 calibration only downgraded a LONE 142→warn but kept
+    # 2x-consecutive-142→CRITICAL; that residual still paged the boss every time two
+    # transient hangs landed back-to-back before self-recovering. Genuine *sustained*
+    # outage (automation truly down for hours) is already covered by the outcome-level
+    # dead-man switches (release_pool_gap, publishing_freshness) which fire on ACTUAL
+    # stalled output regardless of cause — so a consecutive-142 CRITICAL here is pure
+    # redundant noise. The recurring 142 hang *class* itself is a structural problem
+    # tracked/fixed by the worker-daemon refactor (docs/refactor_plan_hourly_dispatch.md,
+    # cutover 2026-07-04 17:17), NOT an every-hour CRITICAL page. Rule now: ONLY a
+    # non-self-recovering hard failure (exit != {142,75}: permission/path/FDA/push
+    # error — these do not self-heal) fires CRITICAL. A self-recovering chain → WARN.
+    host_cron_level = "critical" if any_non_hang_fail else "warn"
     body_lines = [
         "## 觸發條件",
         f"偵測到 host cron 失敗（最新 exit code != 0）。severity={host_cron_level}"
         f"（max_consecutive_failures={max_consec_fail}；non_hang_failure={any_non_hang_fail}）。",
-        "註：exit=142 = SIGALRM hang-kill，單次會由下一輪 hourly fire 自我恢復（→warn）；"
-        "exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手，"
-        "永遠 warn 且不累積連續 critical）；≥2 連續失敗或非-{142,75} 失敗才升 critical。"
+        "註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；"
+        "exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；"
+        "這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／"
+        "release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗"
+        "（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。"
         "反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。",
         f"- scheduler_last_tick_at: {scheduler_last_tick_at.isoformat() if scheduler_last_tick_at else 'missing'}（僅供參考，v12 後不作為 breach 判準）",
         f"- scheduler_last_status: {scheduler_last_status}",
