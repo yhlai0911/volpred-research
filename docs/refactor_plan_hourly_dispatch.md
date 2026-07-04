@@ -1,6 +1,6 @@
 # Refactor Plan — hourly-dispatch worker daemon
 
-**Status**: TRIGGERED (3-strike threshold crossed). Deliverable 5/8 DONE (Codex CONDITIONAL_PASS, 2026-07-04). **Phase = SHADOW RUN (Deliverable 6/8), started 2026-07-04 02:35 台灣時間** — `com.volpred.dispatch-supervisor` LaunchAgent running `--dry-run` in parallel with legacy `com.volpred.hourly-dispatch`; 7-day observation window before Phase 3 cutover.
+**Status**: TRIGGERED (3-strike threshold crossed). Deliverables 5-6/8 DONE. **Phase = CUTOVER EXECUTED (Deliverable 7/8), 2026-07-04 16:30 台灣時間** — legacy `com.volpred.hourly-dispatch` `launchctl disable`d; `com.volpred.dispatch-supervisor` now real-run (`--dry-run` removed, `dry_run=False` confirmed in log). First real production fire = next `:07` (17:07), auto-monitored by health.py. Boss approved twice via Telegram msg124 + msg127. Instant rollback = re-enable legacy (one command, §7). See §Deliverable 7 cutover record below.
 **Authority**: `CLAUDE.md` Three-Strike Rule (commit `a55620b4`) — "strike 3 是 LATEST 觸發點不是 ONLY 觸發點；一旦看見結構性 root cause...就立刻三層重構".
 **Supersedes**: `docs/refactor_plan_cron_dispatch.md` (2026-05-14 pre-staged version, drafted for hang-class strikes only).
 **Parent task**: `platform_ops_refactor_hourly_dispatch_worker_daemon` (P2, `storage/next_tasks.json`).
@@ -368,3 +368,35 @@ Phase 2 shadow run 啟動步驟：
 - 已用 Telegram 回覆老闆說明原因 + 給明確 ETA（不是又問一次）。
 
 *Updated 2026-07-04 15:50 台灣時間 by telegram-responder (telegram-127) — 找到 PHASE-Z port gap，已排 P1 任務執行 cutover，不再問老闆。*
+
+### Deliverable 7 — CUTOVER EXECUTED（2026-07-04 16:30 台灣時間，hourly-16 / task `platform_ops-dispatch-supervisor-cutover-20260704`）
+
+老闆已二次核准「切」（Telegram msg124 + msg127）。本班 hourly-dispatch 執行到底，不再問。
+
+**1. PHASE-Z gap 補完（cutover 前的真 blocker）**：
+- 新 `scripts/dispatch_supervisor/phase_z.py`（port legacy `cron_hourly_dispatch.sh` PHASE-Z 區塊）+ wire 進 `scheduler._tick_once` 的 post-fire hook（`finally` 內，每次真 fire 跑一次，worker raise 也跑）。
+- `subprocess.run(timeout=)` 取代 perl alarm；untrack tracked-but-gitignored flat state 檔（含 supervisor 自己的 `storage/ops/dispatch_state.json`）；`git status`/`add` rc 檢查（非 git → status_error 不誤判 clean；add 失敗不 commit partial tree）。
+- 12 regression tests，`tests/test_dispatch_supervisor.py` 49/49 pass。
+- **Codex review = CONDITIONAL_PASS**，3 findings 全修（dispatch_state.json 入清單、finally 包 worker、ls-files/add rc check）。commit `260fac4f2`。
+
+**2. Real-run 路徑 smoke（dry-run 從未 spawn 過 claude 的唯一未驗證路徑）**：
+- 隔離 temp state/log 跑 `worker.run_worker`（trivial prompt）→ **PASS**：真 claude spawn、exit 0、8.7s、completion 記錄、`current_job=null` 無孤兒、log 回 `SMOKE_OK_42`。
+
+**3. Launchd cutover（16:30）**：
+- 兩份 plist（repo `ops/launchd/` + `~/Library/LaunchAgents/`）移除 `--dry-run` + 改寫註解為 real-run/rollback。`plutil -lint` OK。
+- Legacy disarm 用 **`launchctl disable gui/501/com.volpred.hourly-dispatch`**（**不是 bootout** — 本班 hourly fire 是 legacy wrapper `bash 31949` 的子孫，bootout 會連自己一起殺；disable 不殺 running instance，只擋 17:07 未來 fire）。verified `=> disabled`。
+- Supervisor `bootout` + `bootstrap` 吃新 args（supervisor PID 非本 session 祖先，安全）。**首次 bootstrap 撞 `error 5 I/O`（bootout teardown race）→ `enable` + 重試 bootstrap 成功**（PID 44957）。
+- 驗證：ps args 無 `--dry-run`；log `scheduler_loop start cron='7 * * * *' dry_run=False`；`health_loop start interval=30s`；RLIMIT_NOFILE 65536；`current_job=null`。
+
+**4. 首輪 real production fire = 17:07**（`last_fire_at=16:07` dry-run → croniter due 17:07）。本班是 16:07 fire（50min cap ~16:57 < 17:07），**物理上無法在本 session 盯 17:07**；改由 (a) health.py 連續監控（hang/orphan/completion-failure 自動 alert，session-independent under launchd KeepAlive）+ (b) followup task `platform_ops_verify_supervisor_first_real_fire_1707` 給下一班確認 `last_fire_at` 前進到 17:07 + completion 記錄 + 無孤兒 + PHASE-Z fire-or-skip。
+
+**INSTANT ROLLBACK（任一 real fire 出狀況）**：
+```
+launchctl enable  gui/501/com.volpred.hourly-dispatch    # re-arm legacy
+launchctl bootout gui/501/com.volpred.dispatch-supervisor # stop supervisor
+# 兩份 plist re-add <string>--dry-run</string> + bootstrap → 回 shadow
+```
+
+**剩 Deliverable 8**（deprecate）：數班 clean fire 後 → `launchctl bootout` legacy（那時已非其子孫）+ `mv scripts/cron_hourly_dispatch.sh scripts/_legacy/` + retro。**現在不做**（disable 已足夠 disarm；實體移除等觀察窗）。
+
+*Updated 2026-07-04 16:31 台灣時間 by hourly-16 — cutover 落地：PHASE-Z ported+reviewed、real-run smoke PASS、legacy disabled、supervisor real-run 驗證。首輪 17:07 由 health.py + followup 確認。*

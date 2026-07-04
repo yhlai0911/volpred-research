@@ -5,15 +5,16 @@
   <key>Label</key>
   <string>com.volpred.dispatch-supervisor</string>
 
-  <!-- Shadow run (docs/refactor_plan_hourly_dispatch.md §4 Phase 2): started
-       2026-07-04 in --dry-run mode. Runs in PARALLEL with the existing
-       com.volpred.hourly-dispatch (legacy shell+StartCalendarInterval)
-       LaunchAgent, which stays the real dispatcher until Phase 3 cutover.
-       --dry-run means this process logs what it WOULD enqueue and updates
-       its own state file, but never spawns a real `claude -p` worker — zero
-       interference with production dispatch. Remove --dry-run only at
-       Phase 3 cutover, after the 7-day shadow diff + Codex-reviewed fixes
-       are both satisfied. -->
+  <!-- REAL-RUN (Deliverable 7 cutover, 2026-07-04): --dry-run REMOVED. This is
+       now the sole real dispatcher — legacy com.volpred.hourly-dispatch was
+       `launchctl disable`d at cutover (boss approved twice via Telegram
+       msg124 + msg127). Real-run path verified by isolated worker smoke (real
+       claude spawn, exit 0) + PHASE-Z safety-net ported (phase_z.py, Codex
+       CONDITIONAL_PASS). History: docs/refactor_plan_hourly_dispatch.md
+       §Deliverable 7. INSTANT ROLLBACK if a real fire misbehaves:
+         launchctl enable  gui/<UID>/com.volpred.hourly-dispatch   # re-arm legacy
+         launchctl bootout gui/<UID>/com.volpred.dispatch-supervisor
+         # then re-add <string>--dry-run</string> here + bootstrap to shadow. -->
   <key>ProgramArguments</key>
   <array>
     <string>/opt/homebrew/bin/uv</string>
@@ -21,7 +22,6 @@
     <string>python</string>
     <string>-m</string>
     <string>scripts.dispatch_supervisor.supervisor</string>
-    <string>--dry-run</string>
   </array>
 
   <key>WorkingDirectory</key>
