@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-04 12:50 push 被 silent-fallback gate 連續 HELD 26 小時（47 commits 積壓）— gate 正確、escalation 缺席 — **FIXED（8 處修畢解封 + 新 `push_backlog` dead-man switch）**
+
+**現象**：`git_push_backup` 自 7/3 18:00（台灣時間）起連續 26 班 exit=120 `HELD: 8 new silent fallback(s) at HEAD — NOT pushing`，本機 47 commits 未上 GitHub。gate 本身是 7/3 才修好的正確設計（exit120 = benign hold、豁免 host_cron_fail）；但 hold 的 warn email 被 24h dedup 吞掉、hourly 班次看到也因 anti-clobber（live session 正在編輯那些檔案）合理不碰 → **無任何機制強迫在 N 班內解決**，26 小時全靠下一次互動 session 才發現。
+
+**8 個 fallback 來源**：dispatch_supervisor 重構（state.py temp-cleanup、worker.py `_read_tail`）+ remediate_publish_drought（BlockingIOError single-flight）+ summaries.py ×5（JSONL 掃描、`_read_json_dict/_value`、兩個格式驗證）。
+
+**處置**：(a) 8 處按 no-silent-fallback rule 分流修復——真 cleanup / by-design 過濾 / 輸入驗證加 `# silent-ok:` 標註；`_read_json_*` 拆 FileNotFoundError（silent-ok）與 OSError/ValueError（走既有 `_warn_ops_summaries` helper 留 trace）；audit `--strict` new=0；(b) `bash scripts/cron_git_push_backup.sh` 解封，47 commits 全推上，ahead=0；(c) baseline 72→63（`--write-baseline`）。
+
+**治本（enforcement owner = check_alerts，anti-stacking：收編進既有 `build_alert_condition_report`，非新 watchdog）**：新增 `_parse_push_backlog_state` 條件——直接量測傷害「最老未推 commit 的滯留年齡」（`git rev-list origin/main..main`），>3h warn / >8h critical。與 exit-code 語意脫鉤：held / 分岔 / 認證 / 網路任何原因造成積壓都同樣浮現，且獨立於該 job 自身 warn 的 24h dedup。5 個 unit tests + live 驗證（40min 內新 commit 不誤報）。`.claude/rules/alert.md` 條件清單 + auto-action 表已登記（action per memory `feedback_fix_silent_fallback_immediately`：當場修不留班）。
+
+**教訓（PDCA）**：寫 code 的 session 在 commit 前自跑 `audit_silent_fallbacks --strict` 可把發現時點從「下一班 push」提前到「當下」——但機械 enforcement 已由 pre-push gate + push_backlog escalation 雙層覆蓋，prose 提醒不再加層。
+
 ## 2026-07-04 04:25 `merge_worktree.sh` false-negative「0 commits」→ 未 merge 就移除 worktree（K1618 差點遺失）= **K1032 同 root-cause 第 2 次（STRIKE 2）** — **RECOVERED（檔案救回）+ 治本 queued P1**
 
 **現象**：hourly-04 派 K1618（realized semicovariance）worktree agent 完成並 commit（f14db3e91，7 檔 experiments/K1618/）。主線程跑 `bash scripts/merge_worktree.sh agent-a239cc7b982d98809` 合併，log 自相矛盾：先報「[OK] 沒有新的 commits（雙重確認 rev-list=0）+ experiments/ 也空，可安全移除」→「致命錯誤: 不能讀取目前工作目錄: No such file or directory」→「[WARN] branch -d 拒絕（branch 有未合併 commits），保留 branch」→「[DONE] 已移除 worktree」。結果 experiments/K1618/ **沒進 main**、worktree 被移除；所幸 branch `worktree-agent-a239cc7b982d98809` + commit f14db3e91 存活，`git checkout <branch> -- experiments/K1618/` 全數救回（7 檔 6770 行）。
