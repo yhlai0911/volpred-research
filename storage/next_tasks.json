@@ -48423,7 +48423,7 @@
     "title": "研究 backlog fallback: 回購靜默期（buyback blackout）覆蓋率作為市場層級 vol 日曆因子",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 回購靜默期（buyback blackout）覆蓋率作為市場層級 vol 日曆因子 — yfinance earnings_dates 建 S&P 500「處於 blackout 的市值占比」日序列（5 週前~2 日後窗），檢定高覆蓋期 SPY RV 是否系統性偏高、與 OPEX/月曆效應正交化後倖存（J. Accounting & Economics 2025 corporate calendar 與回購時點 + practitioner flow 線；「回購是最大單一買盤、blackout 同步消失」缺正式日頻檢定）。與 #174（盈餘 jump 截面）不同——aggregate 供需日曆 | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48448,9 +48448,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T11:33:10.399164+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-04T10:23:39.727767+00:00"
+    "started_at": "2026-07-04T10:23:39.727767+00:00",
+    "completed_at": "2026-07-04T11:33:10.398898+00:00",
+    "result": "Completed free-data diagnostic in experiments/research_buyback_blackout_vol: NULL_OR_PROXY_LIMITED. Lagged blackout coverage did not predict SPY r2 (t=0.14), 5d forward coefficient wrong-sign (t=-1.64), OOS QLIKE improvement only +0.105% with DM t=-0.17. Updated research_program; knowledge.json intentionally left to main-thread K1259 writer."
   },
   {
     "id": "research_perp_funding_rate_funding_btc_eth_rv_regime",
@@ -48665,5 +48673,39 @@
     "description": "背景：dispatch_supervisor 2026-07-04 16:30 完成 real-run cutover（dry_run=False），但當時 legacy com.volpred.hourly-dispatch 只被 launchctl disable（阻擋未來 bootstrap），並未 bootout —— 已 bootstrap 的 job 仍會照 StartCalendarInterval 觸發，17:07 起會與新 supervisor 同時真派工（雙倍 token/agent 浪費，違反 one-dispatch-per-hour 治理）。已修：telegram-132 回覆時掛了背景 watcher（nohup, PID記於 /tmp、log 見 ~/.volpred/logs/dispatch_supervisor_cutover_fix.log）在 legacy 16:07 那次真派工跑完後自動 launchctl bootout com.volpred.hourly-dispatch。本任務：確認 (1) ~/.volpred/logs/dispatch_supervisor_cutover_fix.log 有 bootout 成功記錄 (2) `launchctl list | grep com.volpred.hourly-dispatch` 已無此 entry (3) 17:07 之後只有 dispatch_supervisor 一個真派工（檢查 storage/ops/dispatch_state.json last_fire_at 與 next_tasks claimed_by 沒有同時段兩個不同 owner）。若 watcher 未成功（背景 process 意外死掉），手動執行：`launchctl bootout gui/$(id -u)/com.volpred.hourly-dispatch`。",
     "result": "已於 16:36:47 自動完成：legacy 16:07 那次真派工自然結束後，watcher 立即 launchctl bootout com.volpred.hourly-dispatch（rc=0）。確認 launchctl list 已無此 job，print-disabled 仍 disabled=true（不會在重開機時重新載入）。dispatch_supervisor 心跳 16:36 UTC+8 正常、dry_run=False、auth_blocked=false。17:07 起僅剩 dispatch_supervisor 一個真派工，雙派工風險已解除。",
     "resolved_at": "2026-07-04T08:37:32.164767+00:00"
+  },
+  {
+    "id": "journal_discovery_20260704_1",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
+    "description": "Article candidate pool + research-backlog 都 dry (refill no_new_candidates_passing_filter). 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。 24h 內 idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "in_progress",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "tier3-fallback"
+    ],
+    "created_at": "2026-07-04T11:30:57+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-07-04T11:31:12.404423+00:00",
+    "claim_session_id": "ca900bcbf626",
+    "status_history": [
+      {
+        "ts": "2026-07-04T11:31:12.404690+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-19"
+      },
+      {
+        "ts": "2026-07-04T11:31:12.648770+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-19"
+      }
+    ],
+    "started_at": "2026-07-04T11:31:12.648490+00:00"
   }
 ]
