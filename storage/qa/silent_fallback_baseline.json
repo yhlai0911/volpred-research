@@ -1,43 +1,13 @@
 {
   "schema": "silent_fallback_baseline.v1",
   "description": "Known silent-fallback audit findings. CI strict mode fails only when current findings introduce keys absent from this baseline.",
-  "count": 72,
+  "count": 63,
   "findings": [
     {
       "path": "scripts/backtest_3yr_final.py",
       "line": 44,
       "exception": "Exception",
       "action": "return None"
-    },
-    {
-      "path": "scripts/dispatch_supervisor/state.py",
-      "line": 128,
-      "exception": "FileNotFoundError",
-      "action": "pass"
-    },
-    {
-      "path": "scripts/dispatch_supervisor/worker.py",
-      "line": 111,
-      "exception": "FileNotFoundError",
-      "action": "return ''"
-    },
-    {
-      "path": "scripts/dispatch_supervisor/worker.py",
-      "line": 122,
-      "exception": "ProcessLookupError",
-      "action": "return None"
-    },
-    {
-      "path": "scripts/dispatch_supervisor/worker.py",
-      "line": 130,
-      "exception": "ProcessLookupError",
-      "action": "return None"
-    },
-    {
-      "path": "scripts/dispatch_supervisor/worker.py",
-      "line": 135,
-      "exception": "ProcessLookupError",
-      "action": "pass"
     },
     {
       "path": "scripts/email_fast_path.py",
@@ -350,30 +320,6 @@
       "line": 112,
       "exception": "OSError|UnicodeDecodeError",
       "action": "continue"
-    },
-    {
-      "path": "src/volpred/ops/summaries.py",
-      "line": 330,
-      "exception": "OSError|ValueError",
-      "action": "return None"
-    },
-    {
-      "path": "src/volpred/ops/summaries.py",
-      "line": 338,
-      "exception": "OSError|ValueError",
-      "action": "return None"
-    },
-    {
-      "path": "src/volpred/ops/summaries.py",
-      "line": 749,
-      "exception": "ValueError",
-      "action": "return None"
-    },
-    {
-      "path": "src/volpred/ops/summaries.py",
-      "line": 1471,
-      "exception": "ValueError",
-      "action": "return None"
     },
     {
       "path": "src/volpred/ops/supervisor.py",
