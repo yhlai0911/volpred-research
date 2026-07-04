@@ -49161,7 +49161,7 @@
     "title": "投資迷思驗證系列（老闆 TG msg154 directive）: 投資迷思驗證：「VIX 破 30/40 就是抄底訊號」恐慌極值進場的後續勝率與報酬分布",
     "description": "驗證熱門說法「恐慌指數飆到 30/40 就該進場」。用 ^VIX + SPY，事件定義 VIX 首次突破 30 / 35 / 40 門檻日，計算進場後 5/10/20/60 日 SPY 報酬的勝率、平均、分布與最大回撤，對照無條件基準。reader-facing 極高辨識度；避免 lookahead，訊號 shift(1)。 | 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻；訊號嚴格 lag/shift(1) 避 lookahead，隨機程序固定 seed；完成後 Codex review → knowledge.json → 排 reader-facing 文章（此系列天生高分享/高回訪，服務 Mission #1/#5）。若有純學術素材再寫論文。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "telegram_directive_msg154_myth_busting",
@@ -49173,9 +49173,6 @@
       "investment-urban-legend"
     ],
     "created_at": "2026-07-04T14:40:15+00:00",
-    "claimed_by": "hourly-01",
-    "claimed_at": "2026-07-04T17:09:08.002922+00:00",
-    "claim_session_id": "a4ed33b5406b",
     "status_history": [
       {
         "ts": "2026-07-04T17:09:08.003208+00:00",
@@ -49188,9 +49185,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-04T19:50:05.219107+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-01",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-04T17:09:11.384569+00:00"
+    "started_at": "2026-07-04T17:09:11.384569+00:00",
+    "last_released_at": "2026-07-04T19:50:05.219098+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "research_myth_sell_in_may_tw_us",
@@ -49495,7 +49501,7 @@
     "title": "新路線驗迷思：融資餘額創新高＝股市要見頂？（台股實證檢定）",
     "description": "網路熱門說法『融資餘額創高是見頂訊號』。用台股融資餘額 vs 後續 N 日報酬/波動做實證檢定（含 lag、去除 look-ahead、統計顯著性）。要有真數據 + 檢定 + 可複現。產出：general-audience 文章。老闆 2026-07-04 指令：reader-friendly + 有學理/實證，不要不科學。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "boss_telegram_2026-07-04",
     "tags": [
@@ -49520,9 +49526,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T20:08:07.333792+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-04T19:28:59.718133+00:00"
+    "started_at": "2026-07-04T19:28:59.718133+00:00",
+    "completed_at": "2026-07-04T20:08:07.333531+00:00",
+    "result": "完成 K1631 台股融資餘額創高迷思實證：日頻 TWSE 融資餘額 + 0050.TW，N=3,034，verdict=NULL_NO_ROBUST_TOP_SIGNAL；主結論是非可靠見頂訊號但後續波動升高。已建立 general draft mile_0f7d1501，並 enqueue lazypack-mile_0f7d1501。"
   },
   {
     "id": "newroute_gold_safe_haven_myth",
