@@ -686,31 +686,37 @@ def poll(max_messages: int = 20, dry_run: bool = False, since_days: int = 2) -> 
     return {"ok": True, "queued": queued, "skipped": skipped, "dry_run": dry_run}
 
 
-_DISPATCH_WRAPPER = "/Users/yhlai0911/.volpred/bin/cron_hourly_dispatch.sh"
 _TRIGGER_MARKER = ROOT / "storage" / "ops" / ".last_email_immediate_dispatch"
 _TRIGGER_MIN_GAP_SEC = 240  # don't immediate-fire more than once per 4 min
 
 
 def _trigger_immediate_dispatch(queued: list[dict[str, Any]]) -> dict[str, Any]:
-    """On a NEW owner reply, fire the dispatch wrapper NOW (its PHASE-0 handles
-    email_reply first) instead of waiting up to ~1h for the next hourly tick.
-    User directive 2026-06-07「收到信馬上啟動讀信」. Guarded so it never collides
-    with a running dispatch or double-fires.
+    """On a NEW owner reply, ask the dispatch SUPERVISOR to fire ASAP (next
+    ≤60s scheduler tick) instead of waiting up to ~1h. User directive
+    2026-06-07「收到信馬上啟動讀信」.
+
+    2026-07-05 rewrite (post-cutover double-dispatch race): this used to
+    `Popen` the LEGACY cron_hourly_dispatch.sh directly, with only a
+    pgrep-by-legacy-name guard — after the 07-04 cutover to the
+    dispatch-supervisor daemon that guard was blind to the supervisor's
+    in-flight worker, so one boss reply could spawn a second, completely
+    unmanaged dispatch agent in parallel (the exact double-dispatch race the
+    3-strike refactor exists to kill). Now we write a fire-request flag into
+    the supervisor's state file (same fcntl lock protocol via
+    dispatch_supervisor.state); the scheduler consumes it on its next tick and
+    fires through the normal reserve_fire() single-slot path. If a job is in
+    flight the request stays pending and fires right after — ASAP, never in
+    parallel. Deliberately NO fallback to the legacy wrapper (that path IS the
+    race): if the state write fails, the next hourly fire handles the email
+    via its PHASE-0 anyway.
     """
-    import subprocess, time
+    import time
     # only for genuine queued tasks that still need handling (fast-path already answered)
     pending = [q for q in queued if not q.get("fast_path")]
     if not pending:
         return {"fired": False, "reason": "no_pending_reply"}
-    # guard 1: a dispatch already running → it will pick up PHASE-0 email itself
-    try:
-        r = subprocess.run(["pgrep", "-f", "cron_hourly_dispatch.sh"],
-                           capture_output=True, text=True, timeout=10)
-        if r.returncode == 0 and r.stdout.strip():
-            return {"fired": False, "reason": "dispatch_already_running"}
-    except Exception as exc:
-        _warn_nonfatal("immediate dispatch pgrep guard failed; continuing", exc)
-    # guard 2: min-gap since last immediate fire
+    # min-gap since last immediate request (several replies in one poll window
+    # need only one fire — its PHASE-0 reads the whole inbox)
     try:
         if _TRIGGER_MARKER.exists():
             age = time.time() - _TRIGGER_MARKER.stat().st_mtime
@@ -718,19 +724,25 @@ def _trigger_immediate_dispatch(queued: list[dict[str, Any]]) -> dict[str, Any]:
                 return {"fired": False, "reason": f"min_gap_{int(age)}s"}
     except Exception as exc:
         _warn_nonfatal(f"immediate dispatch marker stat failed path={_TRIGGER_MARKER}", exc)
-    if not Path(_DISPATCH_WRAPPER).exists():
-        return {"fired": False, "reason": "wrapper_missing"}
     try:
+        if str(ROOT) not in sys.path:
+            sys.path.insert(0, str(ROOT))
+        from scripts.dispatch_supervisor import state as dispatch_state
+
+        snap = dispatch_state.read_state()
+        if snap.get("current_job"):
+            # Supervisor is mid-dispatch; that agent's PHASE-0 reads email
+            # first, so the reply is already about to be handled.
+            return {"fired": False, "reason": "dispatch_already_running"}
+        task_ids = [q["task_id"] for q in pending]
+        dispatch_state.request_fire(f"email_reply:{','.join(task_ids)[:150]}")
         _TRIGGER_MARKER.parent.mkdir(parents=True, exist_ok=True)
         _TRIGGER_MARKER.write_text(_now_iso(), encoding="utf-8")
-        subprocess.Popen(["/bin/bash", _DISPATCH_WRAPPER],
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                         start_new_session=True)
-        _log(f"  IMMEDIATE DISPATCH fired for {len(pending)} new reply(ies) "
-             f"(tasks: {[q['task_id'] for q in pending]})")
-        return {"fired": True, "count": len(pending)}
+        _log(f"  IMMEDIATE DISPATCH requested via supervisor fire-flag for "
+             f"{len(pending)} new reply(ies) (tasks: {task_ids}; fires on next ≤60s tick)")
+        return {"fired": True, "count": len(pending), "mode": "supervisor_fire_request"}
     except Exception as exc:
-        _log(f"  immediate dispatch FAILED: {exc!r}")
+        _log(f"  immediate dispatch request FAILED (hourly fire will pick it up): {exc!r}")
         return {"fired": False, "reason": f"error:{exc}"}
 
 

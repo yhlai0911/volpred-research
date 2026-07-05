@@ -401,6 +401,37 @@ def heartbeat(path: Path = STATE_PATH) -> None:
         data["last_heartbeat_at"] = _now()
 
 
+def request_fire(reason: str, path: Path = STATE_PATH) -> None:
+    """Ask the supervisor to fire ASAP (next 60s tick), outside the cron cadence.
+
+    2026-07-05 cutover follow-up: external triggers (e.g. gmail_inbox_poll's
+    boss-reply immediate dispatch) used to Popen the LEGACY shell wrapper
+    directly — after cutover that was a live double-dispatch race (its pgrep
+    guard couldn't see the supervisor's in-flight job, and the legacy wrapper
+    spawns its own claude + retry ladder outside dispatch_state control).
+    Writing a flag under the state lock and letting the scheduler consume it
+    keeps ALL fires on the single reserve_fire() slot path. If a job is
+    already in flight the request simply stays pending and fires right after —
+    "as soon as possible", never "in parallel".
+    """
+    with _locked_state(path) as (_fh, data):
+        data["fire_requested_at"] = _now()
+        data["fire_request_reason"] = str(reason)[:200]
+
+
+def consume_fire_request(path: Path = STATE_PATH) -> str | None:
+    """Atomically read-and-clear a pending fire request. Returns the reason
+    string if one was pending, else None. Scheduler-side counterpart of
+    `request_fire()` — called only when the tick is actually about to fire."""
+    with _locked_state(path) as (_fh, data):
+        if not data.get("fire_requested_at"):
+            return None
+        reason = str(data.get("fire_request_reason") or "unspecified")
+        data["fire_requested_at"] = None
+        data["fire_request_reason"] = None
+        return reason
+
+
 def reserve_fire(
     *,
     schedule_id: str,
@@ -571,6 +602,16 @@ def mark_alert_sent(alert_key: str, path: Path = STATE_PATH) -> None:
         dedup = data.get("alerts_dedup") or {}
         dedup[alert_key] = _now()
         data["alerts_dedup"] = dedup
+
+
+def clear_alert_dedup(alert_key: str, path: Path = STATE_PATH) -> None:
+    """Reset one alert's dedup window (e.g. quota outage ended → the NEXT
+    outage must email again even if the fixed window hasn't elapsed)."""
+    with _locked_state(path) as (_fh, data):
+        dedup = data.get("alerts_dedup") or {}
+        if alert_key in dedup:
+            del dedup[alert_key]
+            data["alerts_dedup"] = dedup
 
 
 # ---------------------------------------------------------------------------

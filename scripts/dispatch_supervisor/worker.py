@@ -132,6 +132,46 @@ def _read_tail(path: Path, max_bytes: int = 2048) -> str:
         return ""
 
 
+def _log_size(path: Path) -> int:
+    """Current byte size of the shared worker log (0 if absent)."""
+    try:
+        return path.stat().st_size
+    except FileNotFoundError:
+        return 0  # silent-ok: log not created yet — offset 0 is correct
+    except OSError as exc:
+        LOG.warning("log_size %s failed: %s", path, exc)
+        return 0
+
+
+def _read_since(path: Path, offset: int, max_bytes: int = 2048) -> str:
+    """Read what THIS attempt wrote: bytes from `offset` to EOF (tail-capped).
+
+    2026-07-05 (audit finding): the worker log is a shared, append-mode,
+    never-rotated file, and `_classify` used to look at the file's global last
+    2KB — which can be a PREVIOUS fire's output when the current attempt wrote
+    little (e.g. after a quota outage the tail held 15 old quota lines; a
+    later unrelated failure would misclassify as quota, or worse, a stale
+    'Not logged in' line would misclassify as auth and freeze the whole loop
+    behind a manual unblock). Classification must only ever see bytes written
+    after the spawn-time offset. Alert bodies may still use `_read_tail` for
+    human context.
+    """
+    try:
+        with path.open("rb") as f:
+            f.seek(0, os.SEEK_END)
+            end = f.tell()
+            if end <= offset:
+                return ""
+            start = max(offset, end - max_bytes)
+            f.seek(start)
+            return f.read(end - start).decode("utf-8", errors="replace")
+    except FileNotFoundError:
+        return ""  # silent-ok: log never created — nothing was written
+    except OSError as exc:
+        LOG.warning("read_since %s failed: %s", path, exc)
+        return ""
+
+
 def _kill_pgid(pgid: int, *, grace_s: float = GRACE_PERIOD_S) -> None:
     """SIGTERM whole process group; SIGKILL after grace_s if still alive.
 
@@ -169,7 +209,11 @@ def _run_one_attempt(
     state_path: Path,
     claude_bin: str = CLAUDE_BIN,
 ) -> tuple[int, float]:
-    """Single Popen attempt. Returns (exit_code, duration_s).
+    """Single Popen attempt. Returns (exit_code, duration_s, attempt_output).
+
+    `attempt_output` is ONLY the bytes this attempt appended to the shared
+    log (spawn-time offset → EOF, tail-capped 2KB) — the classification
+    input, immune to previous fires' leftovers (2026-07-05 fix).
 
     On timeout: SIGKILL whole PGID, return exit_code=-9 (mapped to killed_timeout
     upstream via HANG_EXIT_CODES + outcome classification).
@@ -184,6 +228,10 @@ def _run_one_attempt(
         schedule_id=schedule_id, attempt=attempt, model=model,
         log_path=str(log_path), path=state_path,
     )
+    # Record where the shared append-log ends BEFORE we spawn: classification
+    # must only ever see THIS attempt's bytes (2026-07-05 cross-fire
+    # contamination fix — see _read_since).
+    log_offset = _log_size(log_path)
     started = time.time()
     try:
         proc = _spawn(argv=argv, log_path=log_path)
@@ -225,9 +273,9 @@ def _run_one_attempt(
                 pgid,
             )
         duration = time.time() - started
-        return TIMEOUT_KILLED_SENTINEL, duration
+        return TIMEOUT_KILLED_SENTINEL, duration, _read_since(log_path, log_offset)
     duration = time.time() - started
-    return _normalize_signal_exit(exit_code), duration
+    return _normalize_signal_exit(exit_code), duration, _read_since(log_path, log_offset)
 
 
 def run_worker(
@@ -261,7 +309,7 @@ def run_worker(
         model = SONNET_MODEL if attempt == max_attempts else OPUS_MODEL
         final_model = model
         LOG.info("worker attempt=%d/%d model=%s", attempt, max_attempts, model)
-        exit_code, duration = _run_one_attempt(
+        exit_code, duration, attempt_output = _run_one_attempt(
             prompt_text=prompt_text, model=model, timeout_s=timeout_s,
             log_path=log_path, attempt=attempt, schedule_id=schedule_id,
             state_path=state_path, claude_bin=claude_bin,
@@ -269,8 +317,11 @@ def run_worker(
         total_duration += duration
         final_exit = exit_code
 
-        log_tail = _read_tail(log_path)
-        category = _classify(exit_code, log_tail)
+        # Classify + report on THIS attempt's output only — the shared log's
+        # global tail can contain a previous fire's quota/auth lines, and a
+        # stale 'Not logged in' match would freeze the loop (2026-07-05 fix).
+        log_tail = attempt_output
+        category = _classify(exit_code, attempt_output)
         LOG.info("worker attempt=%d exit=%d category=%s duration=%.1fs", attempt, exit_code, category, duration)
 
         if category == "success":

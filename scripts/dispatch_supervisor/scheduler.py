@@ -179,8 +179,24 @@ async def _tick_once(
     if snap.get("auth_blocked"):
         return {"action": "skip", "reason": "auth_blocked"}
     if snap.get("current_job"):
+        # NOTE: a pending fire_requested_at deliberately survives this skip —
+        # "fire ASAP" means right after the in-flight job, never in parallel.
         return {"action": "skip", "reason": "job_in_flight"}
     due, prev_fire = _due_to_fire(cron_expr=cron_expr, last_fire_at=snap.get("last_fire_at"))
+    fire_reason = "cron"
+    if not due:
+        # External ASAP trigger (e.g. boss replied to an email — see
+        # state.request_fire): fire now instead of waiting for the next cron
+        # slot. Consumed atomically so one request produces exactly one fire.
+        requested = state.consume_fire_request(state_path)
+        if requested is not None:
+            LOG.info("fire request consumed (reason=%s) — firing off-cadence", requested)
+            due = True
+            fire_reason = f"requested:{requested}"
+    else:
+        # Cron is due anyway — clear any pending request so it doesn't cause
+        # a SECOND fire right after this one (the request is satisfied).
+        state.consume_fire_request(state_path)
     if not due:
         return {"action": "skip", "reason": "not_due", "prev_fire": prev_fire.isoformat()}
     if dry_run:
@@ -224,5 +240,5 @@ async def _tick_once(
     return {
         "action": "fired", "outcome": result.outcome,
         "attempts": result.attempts, "exit_code": result.exit_code,
-        "phase_z": phase_z_outcome,
+        "phase_z": phase_z_outcome, "fire_reason": fire_reason,
     }

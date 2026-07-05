@@ -35,7 +35,7 @@ def test_worker_transient_retry_then_success(tmp_path: Path, monkeypatch) -> Non
         attempts.append((attempt, model))
         exit_code, text = outputs[attempt - 1]
         log_path.write_text(text, encoding="utf-8")
-        return exit_code, float(attempt)
+        return exit_code, float(attempt), text
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
     monkeypatch.setattr(
@@ -72,7 +72,7 @@ def test_worker_auth_blocks_without_retry(tmp_path: Path, monkeypatch) -> None:
     def fake_run_one_attempt(**kwargs):
         attempts.append(kwargs["attempt"])
         log_path.write_text("Not logged in. Please run /login", encoding="utf-8")
-        return 1, 1.0
+        return 1, 1.0, "Not logged in. Please run /login"
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
     monkeypatch.setattr(
@@ -105,7 +105,7 @@ def test_worker_hang_alert_and_no_retry(tmp_path: Path, monkeypatch) -> None:
     def fake_run_one_attempt(**kwargs):
         attempts.append(kwargs["attempt"])
         log_path.write_text("worker timed out", encoding="utf-8")
-        return 137, 12.0
+        return 137, 12.0, "worker timed out"
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
     monkeypatch.setattr(
@@ -134,7 +134,7 @@ def test_worker_refuses_when_auth_already_blocked(tmp_path: Path, monkeypatch) -
 
     def fake_run_one_attempt(**kwargs):
         called["spawn"] += 1
-        return 0, 1.0
+        return 0, 1.0, "ok"
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
 
@@ -805,7 +805,7 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
     )
 
     with caplog.at_level(logging.WARNING, logger=worker.__name__):
-        exit_code, duration = worker._run_one_attempt(
+        exit_code, duration, _attempt_output = worker._run_one_attempt(
             prompt_text="prompt",
             model=worker.OPUS_MODEL,
             timeout_s=1,
@@ -849,7 +849,7 @@ def test_worker_timeout_path_short_circuits_retry(tmp_path: Path, monkeypatch) -
         attempts.append(kwargs["attempt"])
         log_path.write_text("timed out — SIGKILL'd by watchdog", encoding="utf-8")
         # Simulate what real `_run_one_attempt` returns when our timeout fires
-        return worker.TIMEOUT_KILLED_SENTINEL, 12.0
+        return worker.TIMEOUT_KILLED_SENTINEL, 12.0, "timed out — SIGKILL'd by watchdog"
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
     monkeypatch.setattr(
@@ -895,7 +895,7 @@ def test_worker_signal_killed_outside_timeout_also_classified_as_hang(
         attempts.append(kwargs["attempt"])
         log_path.write_text("external SIGTERM (e.g. launchd kill)", encoding="utf-8")
         # Externally signal-killed → negative is normalized at the boundary
-        return worker._normalize_signal_exit(-15), 7.0  # → 143 SIGTERM
+        return worker._normalize_signal_exit(-15), 7.0, "external SIGTERM"  # → 143 SIGTERM
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
     monkeypatch.setattr(
@@ -1419,7 +1419,7 @@ def test_worker_quota_aborts_without_retry_and_without_auth_block(tmp_path: Path
     def fake_run_one_attempt(**kwargs):
         attempts.append(kwargs["attempt"])
         log_path.write_text("You've hit your weekly limit · resets 4pm", encoding="utf-8")
-        return 1, 1.0
+        return 1, 1.0, "You've hit your weekly limit · resets 4pm"
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
     monkeypatch.setattr(
