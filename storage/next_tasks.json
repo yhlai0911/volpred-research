@@ -49968,7 +49968,7 @@
     "title": "K1637: Markov-switching multifractal（MSM）作 rough-vs-long-memory 辯論第三解 — GMM 估 Calvet-Fisher MSM（多頻成分生 long memory），OOS 對比 HAR/F",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 486). Original: Markov-switching multifractal（MSM）作 rough-vs-long-memory 辯論第三解 — GMM 估 Calvet-Fisher MSM（多頻成分生 long memory），OOS 對比 HAR/FIGARCH/MS-GARCH；接 line 1438（level-shift vs long-memory）但問「多重碎形能否更省參數複製 persistence」（來源：JBES MSM 經典 + 2025-26 rough-vol 辯論重燃）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1637.py with signal.shift(1) + seed=42, (c) K1637_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -49977,7 +49977,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-05T00:00:00Z"
+    "created_at": "2026-07-05T00:00:00Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T03:39:25.630185+00:00",
+    "claim_session_id": "6773b68fe533",
+    "status_history": [
+      {
+        "ts": "2026-07-05T03:39:25.630464+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T03:39:25.863958+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T03:48:26.488298+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T03:39:25.863658+00:00",
+    "completed_at": "2026-07-05T03:48:26.488029+00:00",
+    "result": "完成 experiments/k1637 三件套與 Codex review：MSM_GMM daily proxy pooled QLIKE 1.7696，顯著勝 HAR 2.2671 (DM t=-7.32) 與 MS-vol-lite (t=-3.34)，但輸 EWMA(0.94) 1.5556 (MSM vs EWMA t=+3.70)，verdict=CONDITIONAL_NULL_MSM_BEATS_HAR_BUT_LOSES_TO_EWMA；research_program.md 已回寫，JSON/py_compile/lookahead audit 檢查完成。"
   },
   {
     "id": "K1638",

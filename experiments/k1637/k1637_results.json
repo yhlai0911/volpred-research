@@ -1,0 +1,992 @@
+{
+  "experiment_id": "k1637",
+  "generated_at": "2026-07-05T03:46:29.699996+00:00",
+  "seed": 42,
+  "question": "Does GMM-lite MSM volatility forecasting beat HAR / fractional / Markov-volatility baselines on one-day close-to-close variance?",
+  "data": {
+    "price_cache": "data/cache/price_cache.db",
+    "assets": {
+      "SPY": {
+        "source": "data/cache/price_cache.db",
+        "start": "2016-01-04",
+        "end": "2026-07-02",
+        "n_prices": 2639,
+        "clean_tw50_data": false
+      },
+      "QQQ": {
+        "source": "data/cache/price_cache.db",
+        "start": "2016-01-04",
+        "end": "2026-07-02",
+        "n_prices": 2639,
+        "clean_tw50_data": false
+      },
+      "GLD": {
+        "source": "data/cache/price_cache.db",
+        "start": "2016-01-04",
+        "end": "2026-07-02",
+        "n_prices": 2639,
+        "clean_tw50_data": false
+      },
+      "TLT": {
+        "source": "data/cache/price_cache.db",
+        "start": "2016-01-04",
+        "end": "2026-07-02",
+        "n_prices": 2639,
+        "clean_tw50_data": false
+      },
+      "0050.TW": {
+        "source": "data/cache/price_cache.db",
+        "start": "2016-01-04",
+        "end": "2026-07-03",
+        "n_prices": 2550,
+        "clean_tw50_data": true
+      }
+    },
+    "target": "one-day close-to-close squared log return r_t^2",
+    "sample_note": "US ETF cache begins 2016-01-04; 0050.TW begins 2009 but experiment uses common START_DATE lower bound where available."
+  },
+  "method": {
+    "oos_alignment": "Forecast for return day t uses features/latent posterior through t-1; HAR features explicitly use shift(1).",
+    "initial_train_rows": 750,
+    "har_refit_every_trading_days": 63,
+    "msm_components": 4,
+    "msm_estimator": "GMM-lite moment matching on log r^2 variance and autocorrelations, then exact finite-state filter for forecasts.",
+    "figarch_lite": "Fractional-decay log-variance baseline selected from d grid by in-sample QLIKE; not full FIGARCH MLE.",
+    "ms_vol_lite": "Two-state Gaussian HMM on log variance; not full MS-GARCH MLE.",
+    "constant_and_ewma_sanity": "Expanding constant variance and RiskMetrics EWMA(0.94) included to check whether HAR is merely weak on noisy r^2.",
+    "loss": "Patton QLIKE actual/predicted on r_t^2 plus MSE diagnostic.",
+    "inference": "DM-HAC max_lag=5; pooled tests aggregate loss differentials by date before testing.",
+    "harvey_threshold": "|t| > 3.0"
+  },
+  "asset_results": {
+    "SPY": {
+      "asset": "SPY",
+      "sample": {
+        "n_returns": 2638,
+        "return_start": "2016-01-05",
+        "return_end": "2026-07-02",
+        "n_oos_common": 1888,
+        "oos_start": "2018-12-27",
+        "oos_end": "2026-07-02"
+      },
+      "qlike": {
+        "CONST": 2.2416298351421173,
+        "EWMA_094": 1.5781413916554317,
+        "HAR": 2.188139306828656,
+        "FIGARCH_lite": 2.3009698688658333,
+        "MS_vol_lite": 1.8872187107970477,
+        "MSM_GMM": 1.6431996388564725
+      },
+      "mse": {
+        "CONST": 3.6949426706524454e-07,
+        "EWMA_094": 3.0538910024799783e-07,
+        "HAR": 7.752280051948935e-07,
+        "FIGARCH_lite": 8.282625517782445e-07,
+        "MS_vol_lite": 3.588941091646581e-07,
+        "MSM_GMM": 3.497186963902936e-07
+      },
+      "dm_vs_HAR": {
+        "CONST_vs_HAR": {
+          "n": 1888,
+          "mean_diff": 0.053490528313461204,
+          "t_stat": 0.17074501611283344,
+          "p_value": 0.8644425700854574,
+          "hac_lag": 5,
+          "harvey_pass": false,
+          "qlike_improvement_pct_vs_HAR": -2.4445668585418856
+        },
+        "EWMA_094_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.6099979151732244,
+          "t_stat": -12.872314955497277,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 27.877471661405085
+        },
+        "FIGARCH_lite_vs_HAR": {
+          "n": 1888,
+          "mean_diff": 0.11283056203717741,
+          "t_stat": 9.327866508711878,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": -5.156461550919562
+        },
+        "MS_vol_lite_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.30092059603160803,
+          "t_stat": -3.5627121113586266,
+          "p_value": 0.00037615496552612093,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 13.75235091717001
+        },
+        "MSM_GMM_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.5449396679721835,
+          "t_stat": -6.331945724209143,
+          "p_value": 3.0178237686584453e-10,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 24.904249298550504
+        }
+      },
+      "dm_MSM_GMM_vs_MS_vol_lite": {
+        "n": 1888,
+        "mean_diff": -0.24401907194057548,
+        "t_stat": -7.209105029582354,
+        "p_value": 8.111289417911394e-13,
+        "hac_lag": 5,
+        "harvey_pass": true,
+        "qlike_improvement_pct_vs_MS_vol_lite": 12.930089689367072
+      },
+      "dm_MSM_GMM_vs_EWMA_094": {
+        "n": 1888,
+        "mean_diff": 0.06505824720104081,
+        "t_stat": 1.0123949101349257,
+        "p_value": 0.3114790634543734,
+        "hac_lag": 5,
+        "harvey_pass": false,
+        "qlike_improvement_pct_vs_EWMA_094": -4.122459973804775
+      },
+      "model_params": {
+        "FIGARCH_lite": {
+          "d_grid": [
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5
+          ],
+          "n_refits": 30,
+          "selected_d_counts": {
+            "0.05": 28,
+            "0.1": 1,
+            "0.2": 1
+          },
+          "label": "FIGARCH-lite fractional-decay log-variance baseline; not full FIGARCH MLE"
+        },
+        "MS_vol_lite": {
+          "label": "two-state Markov log-variance HMM baseline; not full MS-GARCH MLE",
+          "transition": [
+            [
+              0.9569128418340014,
+              0.043087158165998715
+            ],
+            [
+              0.15566576199759785,
+              0.8443342380024023
+            ]
+          ],
+          "means": [
+            -12.38018874824786,
+            -9.55466745074989
+          ],
+          "vars": [
+            6.77199822172193,
+            2.6672636210791763
+          ],
+          "loglik_initial_train": -1773.4563324272879
+        },
+        "MSM_GMM": {
+          "k": 4,
+          "m0": 0.5926186489767435,
+          "m1": 1.4073813510232565,
+          "gamma_min": 0.0017896425174897302,
+          "b": 3.9999999999990954,
+          "gammas": [
+            0.0017896425174897302,
+            0.0071585700699573025,
+            0.028634280279822732,
+            0.11453712111926503
+          ],
+          "signal_share": 0.10902733989910843,
+          "objective": 0.0028232917179484263,
+          "observed_moments": {
+            "var_log_r2_winsorized": 6.861695879247466,
+            "acf": {
+              "1": 0.10752996119756675,
+              "5": 0.09664794563836222,
+              "22": 0.03779417164854265,
+              "66": 0.0696835634002163
+            }
+          },
+          "estimator": "GMM-lite moment matching on log r^2 variance and ACF lags 1/5/22/66",
+          "mu_initial_train": 0.00034930214097225157,
+          "sigma2_initial_train": 6.703957724746621e-05,
+          "state_count": 16
+        }
+      }
+    },
+    "QQQ": {
+      "asset": "QQQ",
+      "sample": {
+        "n_returns": 2638,
+        "return_start": "2016-01-05",
+        "return_end": "2026-07-02",
+        "n_oos_common": 1888,
+        "oos_start": "2018-12-27",
+        "oos_end": "2026-07-02"
+      },
+      "qlike": {
+        "CONST": 1.9266639224213802,
+        "EWMA_094": 1.5395155085435261,
+        "HAR": 2.111093309469491,
+        "FIGARCH_lite": 2.204588801004388,
+        "MS_vol_lite": 1.7501978941627303,
+        "MSM_GMM": 1.5525788947069168
+      },
+      "mse": {
+        "CONST": 4.930487068761937e-07,
+        "EWMA_094": 4.3007228617750324e-07,
+        "HAR": 9.247869138021727e-07,
+        "FIGARCH_lite": 1.153086029636323e-06,
+        "MS_vol_lite": 4.81254101793987e-07,
+        "MSM_GMM": 4.55881265457748e-07
+      },
+      "dm_vs_HAR": {
+        "CONST_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.1844293870481104,
+          "t_stat": -1.0249314387009085,
+          "p_value": 0.3055269076253031,
+          "hac_lag": 5,
+          "harvey_pass": false,
+          "qlike_improvement_pct_vs_HAR": 8.736202526948322
+        },
+        "EWMA_094_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.5715778009259642,
+          "t_stat": -14.212758359069412,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 27.074966244367467
+        },
+        "FIGARCH_lite_vs_HAR": {
+          "n": 1888,
+          "mean_diff": 0.09349549153489767,
+          "t_stat": 9.4614046405376,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": -4.428771154525243
+        },
+        "MS_vol_lite_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.3608954153067602,
+          "t_stat": -4.96026180637376,
+          "p_value": 7.671196597947016e-07,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 17.09519014095365
+        },
+        "MSM_GMM_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.5585144147625739,
+          "t_stat": -10.332397602893014,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 26.456169050288278
+        }
+      },
+      "dm_MSM_GMM_vs_MS_vol_lite": {
+        "n": 1888,
+        "mean_diff": -0.19761899945581363,
+        "t_stat": -4.6867710073925055,
+        "p_value": 2.9741261433624544e-06,
+        "hac_lag": 5,
+        "harvey_pass": true,
+        "qlike_improvement_pct_vs_MS_vol_lite": 11.291237414632567
+      },
+      "dm_MSM_GMM_vs_EWMA_094": {
+        "n": 1888,
+        "mean_diff": 0.01306338616339044,
+        "t_stat": 0.4196658025772652,
+        "p_value": 0.6747773839006772,
+        "hac_lag": 5,
+        "harvey_pass": false,
+        "qlike_improvement_pct_vs_EWMA_094": -0.8485387832013066
+      },
+      "model_params": {
+        "FIGARCH_lite": {
+          "d_grid": [
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5
+          ],
+          "n_refits": 30,
+          "selected_d_counts": {
+            "0.05": 29,
+            "0.1": 1
+          },
+          "label": "FIGARCH-lite fractional-decay log-variance baseline; not full FIGARCH MLE"
+        },
+        "MS_vol_lite": {
+          "label": "two-state Markov log-variance HMM baseline; not full MS-GARCH MLE",
+          "transition": [
+            [
+              0.928748157855804,
+              0.07125184214419603
+            ],
+            [
+              0.16845989931746475,
+              0.8315401006825353
+            ]
+          ],
+          "means": [
+            -11.839555259141392,
+            -9.181663006413586
+          ],
+          "vars": [
+            6.252531614664461,
+            2.3901143581609525
+          ],
+          "loglik_initial_train": -1731.5215561913637
+        },
+        "MSM_GMM": {
+          "k": 4,
+          "m0": 0.5763904147641682,
+          "m1": 1.4236095852358317,
+          "gamma_min": 0.03369897008581975,
+          "b": 1.100000000052841,
+          "gammas": [
+            0.03369897008581975,
+            0.03706886709618241,
+            0.040775753807759406,
+            0.04485332919068997
+          ],
+          "signal_share": 0.1309781447164085,
+          "objective": 0.0028736437471387414,
+          "observed_moments": {
+            "var_log_r2_winsorized": 6.241618477513504,
+            "acf": {
+              "1": 0.126030578846606,
+              "5": 0.09985431918795203,
+              "22": 0.0745698334958964,
+              "66": -0.021608506002314364
+            }
+          },
+          "estimator": "GMM-lite moment matching on log r^2 variance and ACF lags 1/5/22/66",
+          "mu_initial_train": 0.0004793902668937965,
+          "sigma2_initial_train": 0.00011811851627844568,
+          "state_count": 16
+        }
+      }
+    },
+    "GLD": {
+      "asset": "GLD",
+      "sample": {
+        "n_returns": 2638,
+        "return_start": "2016-01-05",
+        "return_end": "2026-07-02",
+        "n_oos_common": 1888,
+        "oos_start": "2018-12-27",
+        "oos_end": "2026-07-02"
+      },
+      "qlike": {
+        "CONST": 1.819392496794479,
+        "EWMA_094": 1.5394831700430958,
+        "HAR": 1.8727324892108925,
+        "FIGARCH_lite": 1.950309573507234,
+        "MS_vol_lite": 1.849673035204847,
+        "MSM_GMM": 1.957736613703617
+      },
+      "mse": {
+        "CONST": 1.4536618995482006e-07,
+        "EWMA_094": 1.3497134888264276e-07,
+        "HAR": 1.775467849529843e-07,
+        "FIGARCH_lite": 1.8836715028219802e-07,
+        "MS_vol_lite": 1.4589271044954005e-07,
+        "MSM_GMM": 1.4696554143353123e-07
+      },
+      "dm_vs_HAR": {
+        "CONST_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.05333999241641332,
+          "t_stat": -0.46024868179618056,
+          "p_value": 0.6453907602740645,
+          "hac_lag": 5,
+          "harvey_pass": false,
+          "qlike_improvement_pct_vs_HAR": 2.8482440884490248
+        },
+        "EWMA_094_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.33324931916779676,
+          "t_stat": -8.629456806386184,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 17.794816990023865
+        },
+        "FIGARCH_lite_vs_HAR": {
+          "n": 1888,
+          "mean_diff": 0.07757708429634147,
+          "t_stat": 6.935431368511249,
+          "p_value": 5.5431215173484816e-12,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": -4.142454127499539
+        },
+        "MS_vol_lite_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.023059454006045626,
+          "t_stat": -0.1826509930288917,
+          "p_value": 0.8550914910913407,
+          "hac_lag": 5,
+          "harvey_pass": false,
+          "qlike_improvement_pct_vs_HAR": 1.2313266384224517
+        },
+        "MSM_GMM_vs_HAR": {
+          "n": 1888,
+          "mean_diff": 0.08500412449272442,
+          "t_stat": 0.5820875429317369,
+          "p_value": 0.5605772510483065,
+          "hac_lag": 5,
+          "harvey_pass": false,
+          "qlike_improvement_pct_vs_HAR": -4.539042547851687
+        }
+      },
+      "dm_MSM_GMM_vs_MS_vol_lite": {
+        "n": 1888,
+        "mean_diff": 0.10806357849877003,
+        "t_stat": 4.972270686779723,
+        "p_value": 7.216577557755954e-07,
+        "hac_lag": 5,
+        "harvey_pass": true,
+        "qlike_improvement_pct_vs_MS_vol_lite": -5.842307069519573
+      },
+      "dm_MSM_GMM_vs_EWMA_094": {
+        "n": 1888,
+        "mean_diff": 0.4182534436605212,
+        "t_stat": 3.348589994666444,
+        "p_value": 0.0008282157352352826,
+        "hac_lag": 5,
+        "harvey_pass": true,
+        "qlike_improvement_pct_vs_EWMA_094": -27.16843235439935
+      },
+      "model_params": {
+        "FIGARCH_lite": {
+          "d_grid": [
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5
+          ],
+          "n_refits": 30,
+          "selected_d_counts": {
+            "0.05": 4,
+            "0.15": 2,
+            "0.2": 2,
+            "0.25": 18,
+            "0.3": 3,
+            "0.5": 1
+          },
+          "label": "FIGARCH-lite fractional-decay log-variance baseline; not full FIGARCH MLE"
+        },
+        "MS_vol_lite": {
+          "label": "two-state Markov log-variance HMM baseline; not full MS-GARCH MLE",
+          "transition": [
+            [
+              0.2507081453266288,
+              0.7492918546733712
+            ],
+            [
+              0.1838815562191734,
+              0.8161184437808267
+            ]
+          ],
+          "means": [
+            -13.866290326377374,
+            -10.638513241333401
+          ],
+          "vars": [
+            8.778095607409416,
+            2.339701056731676
+          ],
+          "loglik_initial_train": -1615.8060842179946
+        },
+        "MSM_GMM": {
+          "k": 4,
+          "m0": 0.7609299026859784,
+          "m1": 1.2390700973140216,
+          "gamma_min": 0.25,
+          "b": 4.0,
+          "gammas": [
+            0.25,
+            0.95,
+            0.95,
+            0.95
+          ],
+          "signal_share": 0.050000000000000204,
+          "objective": 0.011335745512072108,
+          "observed_moments": {
+            "var_log_r2_winsorized": 4.754591783356544,
+            "acf": {
+              "1": 0.0024172925039644562,
+              "5": -0.008609663886461005,
+              "22": 0.0665788904423671,
+              "66": 0.0320323676267406
+            }
+          },
+          "estimator": "GMM-lite moment matching on log r^2 variance and ACF lags 1/5/22/66",
+          "mu_initial_train": 0.00020132529081404938,
+          "sigma2_initial_train": 5.982568421072409e-05,
+          "state_count": 16
+        }
+      }
+    },
+    "TLT": {
+      "asset": "TLT",
+      "sample": {
+        "n_returns": 2638,
+        "return_start": "2016-01-05",
+        "return_end": "2026-07-02",
+        "n_oos_common": 1888,
+        "oos_start": "2018-12-27",
+        "oos_end": "2026-07-02"
+      },
+      "qlike": {
+        "CONST": 1.5773511863999163,
+        "EWMA_094": 1.2364306306515,
+        "HAR": 1.7000334798399612,
+        "FIGARCH_lite": 1.8014027914116695,
+        "MS_vol_lite": 1.6057710519409765,
+        "MSM_GMM": 1.4186962893911645
+      },
+      "mse": {
+        "CONST": 7.055449548081582e-08,
+        "EWMA_094": 6.026770470636937e-08,
+        "HAR": 1.1687039556819119e-07,
+        "FIGARCH_lite": 1.5816122611207523e-07,
+        "MS_vol_lite": 7.101316166578733e-08,
+        "MSM_GMM": 6.923671022025975e-08
+      },
+      "dm_vs_HAR": {
+        "CONST_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.12268229344004479,
+          "t_stat": -0.7302597622913884,
+          "p_value": 0.4653220674145868,
+          "hac_lag": 5,
+          "harvey_pass": false,
+          "qlike_improvement_pct_vs_HAR": 7.216463375273881
+        },
+        "EWMA_094_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.4636028491884611,
+          "t_stat": -14.744835490030264,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 27.270218774285794
+        },
+        "FIGARCH_lite_vs_HAR": {
+          "n": 1888,
+          "mean_diff": 0.10136931157170831,
+          "t_stat": 9.978350651607547,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": -5.9627832494952395
+        },
+        "MS_vol_lite_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.09426242789898465,
+          "t_stat": -0.6874308429322213,
+          "p_value": 0.4918957467406402,
+          "hac_lag": 5,
+          "harvey_pass": false,
+          "qlike_improvement_pct_vs_HAR": 5.544739501710195
+        },
+        "MSM_GMM_vs_HAR": {
+          "n": 1888,
+          "mean_diff": -0.2813371904487968,
+          "t_stat": -3.4041388958901884,
+          "p_value": 0.000677614387962322,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 16.548920582157088
+        }
+      },
+      "dm_MSM_GMM_vs_MS_vol_lite": {
+        "n": 1888,
+        "mean_diff": -0.18707476254981212,
+        "t_stat": -3.2470113623887094,
+        "p_value": 0.0011866893522465283,
+        "hac_lag": 5,
+        "harvey_pass": true,
+        "qlike_improvement_pct_vs_MS_vol_lite": 11.650151640464886
+      },
+      "dm_MSM_GMM_vs_EWMA_094": {
+        "n": 1888,
+        "mean_diff": 0.18226565873966435,
+        "t_stat": 2.1157237842931167,
+        "p_value": 0.03449898999949652,
+        "hac_lag": 5,
+        "harvey_pass": false,
+        "qlike_improvement_pct_vs_EWMA_094": -14.741276560224415
+      },
+      "model_params": {
+        "FIGARCH_lite": {
+          "d_grid": [
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5
+          ],
+          "n_refits": 30,
+          "selected_d_counts": {
+            "0.1": 13,
+            "0.15": 10,
+            "0.2": 2,
+            "0.25": 1,
+            "0.3": 2,
+            "0.35": 1,
+            "0.4": 1
+          },
+          "label": "FIGARCH-lite fractional-decay log-variance baseline; not full FIGARCH MLE"
+        },
+        "MS_vol_lite": {
+          "label": "two-state Markov log-variance HMM baseline; not full MS-GARCH MLE",
+          "transition": [
+            [
+              0.2712063352696897,
+              0.7287936647303103
+            ],
+            [
+              0.2663412740712729,
+              0.733658725928727
+            ]
+          ],
+          "means": [
+            -13.76358715047483,
+            -10.522440878591999
+          ],
+          "vars": [
+            7.899328196181196,
+            1.6290513256921786
+          ],
+          "loglik_initial_train": -1589.8785020681826
+        },
+        "MSM_GMM": {
+          "k": 4,
+          "m0": 0.757831782869724,
+          "m1": 1.242168217130276,
+          "gamma_min": 0.01007284861251143,
+          "b": 3.9998601206057267,
+          "gammas": [
+            0.01007284861251143,
+            0.04028998546608319,
+            0.1611543061255705,
+            0.6445946823355566
+          ],
+          "signal_share": 0.05,
+          "objective": 0.0002997036388516999,
+          "observed_moments": {
+            "var_log_r2_winsorized": 4.883885036592376,
+            "acf": {
+              "1": 0.037424334769012566,
+              "5": 0.034118753857259564,
+              "22": 0.006640088939782193,
+              "66": 0.012210084344621959
+            }
+          },
+          "estimator": "GMM-lite moment matching on log r^2 variance and ACF lags 1/5/22/66",
+          "mu_initial_train": 8.496291705923837e-05,
+          "sigma2_initial_train": 4.5981861571806716e-05,
+          "state_count": 16
+        }
+      }
+    },
+    "0050.TW": {
+      "asset": "0050.TW",
+      "sample": {
+        "n_returns": 2549,
+        "return_start": "2016-01-05",
+        "return_end": "2026-07-03",
+        "n_oos_common": 1799,
+        "oos_start": "2019-01-29",
+        "oos_end": "2026-07-03"
+      },
+      "qlike": {
+        "CONST": 2.1714962201635895,
+        "EWMA_094": 1.9007224853233669,
+        "HAR": 3.522826616037344,
+        "FIGARCH_lite": 3.2551374590865447,
+        "MS_vol_lite": 2.1398725229650304,
+        "MSM_GMM": 2.3008764097560164
+      },
+      "mse": {
+        "CONST": 2.984172915337514e-07,
+        "EWMA_094": 2.8137579251802675e-07,
+        "HAR": 5.638864591766558e-06,
+        "FIGARCH_lite": 3.1588311985506515e-06,
+        "MS_vol_lite": 2.9817587715181934e-07,
+        "MSM_GMM": 3.016070765216121e-07
+      },
+      "dm_vs_HAR": {
+        "CONST_vs_HAR": {
+          "n": 1799,
+          "mean_diff": -1.3513303958737541,
+          "t_stat": -8.611711288497844,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 38.35926496416109
+        },
+        "EWMA_094_vs_HAR": {
+          "n": 1799,
+          "mean_diff": -1.6221041307139767,
+          "t_stat": -22.829658285097096,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 46.04552842111211
+        },
+        "FIGARCH_lite_vs_HAR": {
+          "n": 1799,
+          "mean_diff": -0.2676891569507987,
+          "t_stat": -17.499062402207034,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 7.598703715140821
+        },
+        "MS_vol_lite_vs_HAR": {
+          "n": 1799,
+          "mean_diff": -1.3829540930723137,
+          "t_stat": -10.089744421905321,
+          "p_value": 0.0,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 39.25694460171677
+        },
+        "MSM_GMM_vs_HAR": {
+          "n": 1799,
+          "mean_diff": -1.2219502062813279,
+          "t_stat": -7.486484629439189,
+          "p_value": 1.1013412404281553e-13,
+          "hac_lag": 5,
+          "harvey_pass": true,
+          "qlike_improvement_pct_vs_HAR": 34.68664057204836
+        }
+      },
+      "dm_MSM_GMM_vs_MS_vol_lite": {
+        "n": 1799,
+        "mean_diff": 0.16100388679098587,
+        "t_stat": 4.986967621724345,
+        "p_value": 6.724336709673651e-07,
+        "hac_lag": 5,
+        "harvey_pass": true,
+        "qlike_improvement_pct_vs_MS_vol_lite": -7.523994306347618
+      },
+      "dm_MSM_GMM_vs_EWMA_094": {
+        "n": 1799,
+        "mean_diff": 0.4001539244326492,
+        "t_stat": 3.4875450744823375,
+        "p_value": 0.0004992010864788288,
+        "hac_lag": 5,
+        "harvey_pass": true,
+        "qlike_improvement_pct_vs_EWMA_094": -21.052727450876237
+      },
+      "model_params": {
+        "FIGARCH_lite": {
+          "d_grid": [
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5
+          ],
+          "n_refits": 29,
+          "selected_d_counts": {
+            "0.25": 18,
+            "0.3": 6,
+            "0.4": 1,
+            "0.45": 1,
+            "0.5": 3
+          },
+          "label": "FIGARCH-lite fractional-decay log-variance baseline; not full FIGARCH MLE"
+        },
+        "MS_vol_lite": {
+          "label": "two-state Markov log-variance HMM baseline; not full MS-GARCH MLE",
+          "transition": [
+            [
+              0.09375000000888994,
+              0.9062499999911101
+            ],
+            [
+              0.04044630402957205,
+              0.959553695970428
+            ]
+          ],
+          "means": [
+            -23.02585092994044,
+            -10.849134342440387
+          ],
+          "vars": [
+            0.0001,
+            3.77663530073299
+          ],
+          "loglik_initial_train": -1509.2768845564533
+        },
+        "MSM_GMM": {
+          "k": 4,
+          "m0": 0.6666956816940268,
+          "m1": 1.3333043183059732,
+          "gamma_min": 0.25,
+          "b": 2.4495024781317176,
+          "gammas": [
+            0.25,
+            0.6123756195329294,
+            0.95,
+            0.95
+          ],
+          "signal_share": 0.05000000000079149,
+          "objective": 0.004172699129732568,
+          "observed_moments": {
+            "var_log_r2_winsorized": 9.607250408670046,
+            "acf": {
+              "1": 0.0192184575778406,
+              "5": -0.03012901726809865,
+              "22": 0.031158281785663957,
+              "66": 0.0005458327108693316
+            }
+          },
+          "estimator": "GMM-lite moment matching on log r^2 variance and ACF lags 1/5/22/66",
+          "mu_initial_train": 0.00045501739924230604,
+          "sigma2_initial_train": 8.067676662760612e-05,
+          "state_count": 16
+        }
+      }
+    }
+  },
+  "pooled_results": {
+    "pooled_qlike": {
+      "CONST": 1.9451729641990372,
+      "EWMA_094": 1.5556048801608133,
+      "HAR": 2.2671263406469997,
+      "FIGARCH_lite": 2.2934146083390616,
+      "MS_vol_lite": 1.8437548556848962,
+      "MSM_GMM": 1.7696087962316007
+    },
+    "pooled_dm_vs_HAR_by_date": {
+      "CONST_vs_HAR": {
+        "n": 1948,
+        "mean_diff": -0.36502381124755384,
+        "t_stat": -2.424338271337435,
+        "p_value": 0.015426827475339966,
+        "hac_lag": 5,
+        "harvey_pass": false,
+        "qlike_improvement_pct_vs_HAR": 14.200945517490766
+      },
+      "EWMA_094_vs_HAR": {
+        "n": 1948,
+        "mean_diff": -0.7399623558590728,
+        "t_stat": -23.35273719654448,
+        "p_value": 0.0,
+        "hac_lag": 5,
+        "harvey_pass": true,
+        "qlike_improvement_pct_vs_HAR": 31.384288018246487
+      },
+      "FIGARCH_lite_vs_HAR": {
+        "n": 1948,
+        "mean_diff": 0.020285942446863735,
+        "t_stat": 2.727506739090033,
+        "p_value": 0.0064387818434543664,
+        "hac_lag": 5,
+        "harvey_pass": false,
+        "qlike_improvement_pct_vs_HAR": -1.1595413639170948
+      },
+      "MS_vol_lite_vs_HAR": {
+        "n": 1948,
+        "mean_diff": -0.46016389669261204,
+        "t_stat": -5.809207892883038,
+        "p_value": 7.315022809706306e-09,
+        "hac_lag": 5,
+        "harvey_pass": true,
+        "qlike_improvement_pct_vs_HAR": 18.67436663636842
+      },
+      "MSM_GMM_vs_HAR": {
+        "n": 1948,
+        "mean_diff": -0.5334832661734972,
+        "t_stat": -7.3207008792688395,
+        "p_value": 3.590461261637756e-13,
+        "hac_lag": 5,
+        "harvey_pass": true,
+        "qlike_improvement_pct_vs_HAR": 21.944853072167817
+      }
+    },
+    "pooled_dm_MSM_GMM_vs_MS_vol_lite_by_date": {
+      "n": 1948,
+      "mean_diff": -0.07331936948088513,
+      "t_stat": -3.344815494882799,
+      "p_value": 0.000839001087429736,
+      "hac_lag": 5,
+      "harvey_pass": true,
+      "qlike_improvement_pct_vs_MS_vol_lite": 4.021470599775182
+    },
+    "pooled_dm_MSM_GMM_vs_EWMA_094_by_date": {
+      "n": 1948,
+      "mean_diff": 0.2064790896855756,
+      "t_stat": 3.6985121478325067,
+      "p_value": 0.00022287679422761109,
+      "hac_lag": 5,
+      "harvey_pass": true,
+      "qlike_improvement_pct_vs_EWMA_094": -13.756958389630686
+    },
+    "best_pooled_model": "EWMA_094",
+    "verdict": "CONDITIONAL_NULL_MSM_BEATS_HAR_BUT_LOSES_TO_EWMA",
+    "n_pooled_rows": 9351,
+    "n_unique_dates": 1948
+  },
+  "figures": {
+    "qlike_improvement": "figures/k1637_qlike_improvement_vs_har.png",
+    "pooled_qlike": "figures/k1637_pooled_qlike.png"
+  },
+  "honesty": {
+    "lookahead_controls": [
+      "HAR d/w/m predictors are y.shift(1)-based.",
+      "MSM/HMM latent probabilities are forecast with posterior_{t-1} transition before observing r_t.",
+      "Parameters are fit on initial training rows only before OOS evaluation.",
+      "Pooled inference is by-date, not stacked asset-day iid."
+    ],
+    "limitations": [
+      "MSM estimator is transparent GMM-lite moment matching, not full Calvet-Fisher simulated GMM or exact MLE.",
+      "FIGARCH_lite and MS_vol_lite are mechanism baselines, not full production FIGARCH/MS-GARCH packages.",
+      "Daily close-to-close variance target avoids mixing model-native targets with intraday RV, but does not test high-frequency RV-MSM directly."
+    ]
+  }
+}
