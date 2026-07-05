@@ -118,32 +118,21 @@ def _handle_update(update: dict) -> None:
 
 
 def _pick_model(text: str) -> str:
-    """依訊息複雜度自選 model（owner 2026-07-02 指示「自己判斷要用什麼模型」）。
+    """TG responder model 選擇。
 
-    政策對齊 config/models.json：subagent 在 sonnet↔opus 二選。輕量狀態查詢走
-    sonnet-5（快、便宜）；分析/研究/決策/修改類或長訊息走 opus-4-8（品質優先）。
-    模糊時偏 opus — boss-facing 通道答錯的成本高於 token。responder 若發現任務
-    比預judge 重，本來就會 defer 到正規管線（opus tier），所以誤判 sonnet 有兜底。
+    Owner directive 2026-07-05：所有 subagent 一律用 opus（4.8）。responder 是
+    headless 派出的 subagent，故 default 固定 opus，不再依訊息輕重在 sonnet↔opus
+    二選（原 heuristic 已退役）。唯一例外：owner 在訊息裡**顯式**指名 model
+    （fable / sonnet / haiku）— 那是 owner 明確要求，尊重覆寫（2026-07-02 boss：
+    「在 telegram 要求該次派工用 fable 可行嗎」→ 可；fable headless 已實測）。
     """
-    t = text.strip()
-    # Owner 顯式指定 model 最優先（2026-07-02 boss：「在 telegram 要求該次派工用
-    # fable 可行嗎」→ 可。訊息含 model 名即覆寫 heuristic；fable headless 已實測）。
-    tl = t.lower()
+    tl = text.strip().lower()
     explicit = (("fable", "claude-fable-5"), ("opus", "claude-opus-4-8"),
                 ("sonnet", "claude-sonnet-5"), ("haiku", "claude-haiku-4-5-20251001"))
     for kw, model in explicit:
         if kw in tl:
             return model
-    heavy_kw = ("為什麼", "分析", "研究", "實驗", "論文", "策略", "設計", "評估",
-                "規劃", "審查", "比較", "診斷", "重構", "部署", "修復", "怎麼辦",
-                "建議", "深度", "寫", "改")
-    light_kw = ("狀態", "進度", "多少", "幾篇", "幾點", "有沒有", "是嗎", "了嗎",
-                "查一下", "看一下", "確認", "還好嗎", "正常")
-    if any(k in t for k in heavy_kw) or len(t) > 100:
-        return "claude-opus-4-8"
-    if any(k in t for k in light_kw) and len(t) <= 60:
-        return "claude-sonnet-5"
-    return "claude-opus-4-8"  # 模糊 → 品質優先
+    return "claude-opus-4-8"  # all-opus default（2026-07-05 directive）
 
 
 def _spawn_responder(model: str = "claude-opus-4-8") -> None:

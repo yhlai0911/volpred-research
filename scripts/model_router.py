@@ -27,30 +27,36 @@ import sys
 #   model_short: "opus" | "sonnet" | "haiku"
 #   effort:       "low" | "medium" | "high"
 
+# 2026-07-05 owner directive: ALL subagents use opus (4.8), superseding the
+# 2026-07-01 sonnet<->opus two-way pick. Model is now uniformly `opus`; only
+# `effort` still varies by task difficulty (orthogonal to model — a trivial
+# lookup on opus/low is cheaper than opus/high, no need to burn max reasoning
+# on a checklist). haiku/sonnet remain valid aliases in the roster but are OFF
+# the default subagent rotation.
 TASK_TYPE_TO_MODEL: dict[str, tuple[str, str]] = {
-    # Research & 高風險判斷 — opus
-    "experiment":         ("opus",   "high"),    # K-experiment 設計 / 結果判讀
-    "paper_decision":     ("opus",   "high"),    # narrative state machine / pivot
-    "paper_body":         ("opus",   "medium"),  # .tex rewrite (主線程才能跑)
-    "strategy_lifecycle": ("opus",   "high"),    # 策略上架 gate
+    # Research & 高風險判斷 — opus / high
+    "experiment":         ("opus", "high"),    # K-experiment 設計 / 結果判讀
+    "paper_decision":     ("opus", "high"),    # narrative state machine / pivot
+    "paper_body":         ("opus", "medium"),  # .tex rewrite (主線程才能跑)
+    "strategy_lifecycle": ("opus", "high"),    # 策略上架 gate
 
-    # 寫作 / 程序型 — sonnet medium
-    "paper_review":       ("sonnet", "medium"),  # latex-academic-reviewer + citation-verifier
-    "event_article":      ("sonnet", "medium"),  # 事件驅動文章 (時效但結構化)
-    "daily_article":      ("sonnet", "medium"),  # 日常文章 (feed-publisher 流程)
-    "daily_digest":       ("sonnet", "medium"),  # 每日精選導讀 (reader-facing article flow)
-    "trending_repost":    ("sonnet", "medium"),  # 熱門改寫 (style enforcement)
-    "member_qa":          ("sonnet", "medium"),  # 會員問題答覆
-    "email_reply":        ("sonnet", "medium"),  # 用戶回信處理
+    # 寫作 / 程序型 — opus / medium
+    "paper_review":       ("opus", "medium"),  # latex-academic-reviewer + citation-verifier
+    "event_article":      ("opus", "medium"),  # 事件驅動文章 (時效但結構化)
+    "daily_article":      ("opus", "medium"),  # 日常文章 (feed-publisher 流程)
+    "daily_digest":       ("opus", "medium"),  # 每日精選導讀 (reader-facing article flow)
+    "trending_repost":    ("opus", "medium"),  # 熱門改寫 (style enforcement)
+    "member_qa":          ("opus", "medium"),  # 會員問題答覆
+    "email_reply":        ("opus", "medium"),  # 用戶回信處理
 
-    # Ops / 驗證 / governance — sonnet low (短流程 + checklist 為主)
-    "platform_ops":       ("sonnet", "low"),     # bug fix / refactor / cron 修整
-    "governance":         ("sonnet", "low"),     # rules/skills/docs 修整
+    # Ops / 驗證 / governance — opus / low (短流程 + checklist，effort 低即可)
+    "platform_ops":       ("opus", "low"),     # bug fix / refactor / cron 修整
+    "governance":         ("opus", "low"),     # rules/skills/docs 修整
 
-    # Lookup / classification — haiku low (參考型，便宜快速)
-    "lookup":             ("haiku",  "low"),
-    "verify":             ("haiku",  "low"),
-    "classification":     ("haiku",  "low"),
+    # Lookup / classification — opus / low (參考型，effort 低但仍用 opus)
+    "lookup":             ("opus", "low"),
+    "verify":             ("opus", "low"),
+    "classification":     ("opus", "low"),
 }
 
 # Map to CLI flag (`claude -p --model <X>`)
@@ -60,7 +66,7 @@ MODEL_TO_CLI_FLAG: dict[str, str] = {
     "haiku":  "claude-haiku-4-5-20251001",
 }
 
-DEFAULT = ("sonnet", "medium")  # fallback for unknown task_type
+DEFAULT = ("opus", "medium")  # fallback for unknown task_type (2026-07-05: all-opus)
 
 # ─────────────────────────────────────────────────────────────────────────
 # Effort/model escalation ladder (2026-05-29 boss directive)
@@ -72,14 +78,12 @@ DEFAULT = ("sonnet", "medium")  # fallback for unknown task_type
 # Monotonic cost-ordered ladder. On a verifiable failure (test fail / verdict
 # FAIL / exception / non-convergence / reviewer reject), the dispatcher
 # re-dispatches at the NEXT rung above the task's current position.
+# 2026-07-05 all-opus: base tiers are now opus, so escalation is opus-effort-only
+# (low → medium → high). A verifiable failure re-dispatches at the next rung.
 ESCALATION_LADDER: list[tuple[str, str]] = [
-    ("haiku",  "low"),
-    ("haiku",  "medium"),
-    ("sonnet", "low"),
-    ("sonnet", "medium"),
-    ("sonnet", "high"),
-    ("opus",   "medium"),
-    ("opus",   "high"),     # ← CEILING. Beyond this: switch strategy, don't retry.
+    ("opus", "low"),
+    ("opus", "medium"),
+    ("opus", "high"),     # ← CEILING. Beyond this: switch strategy, don't retry.
 ]
 CEILING = ("opus", "high")
 

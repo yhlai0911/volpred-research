@@ -41,6 +41,9 @@ RETRY_BACKOFF_S = 90        # between transient-failure attempts
 MAX_ATTEMPTS = 3
 
 OPUS_MODEL = "claude-opus-4-8"
+# Retired 2026-07-05 (owner all-opus directive): the retry ladder no longer
+# drops to sonnet on the final attempt. Kept defined as a valid roster alias so
+# any external reference still resolves, but no dispatch path selects it.
 SONNET_MODEL = "claude-sonnet-5"
 
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "/Users/yhlai0911/.local/bin/claude")
@@ -306,7 +309,11 @@ def run_worker(
     attempt = 1
 
     while attempt <= max_attempts:
-        model = SONNET_MODEL if attempt == max_attempts else OPUS_MODEL
+        # 2026-07-05 owner directive: ALL dispatch attempts use opus (4.8). The
+        # previous ladder dropped to sonnet on the final attempt as a
+        # different-model fallback; that's retired — every attempt is opus, only
+        # RETRY_BACKOFF_S separates them.
+        model = OPUS_MODEL
         final_model = model
         LOG.info("worker attempt=%d/%d model=%s", attempt, max_attempts, model)
         exit_code, duration, attempt_output = _run_one_attempt(

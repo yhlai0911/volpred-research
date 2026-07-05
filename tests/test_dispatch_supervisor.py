@@ -53,12 +53,13 @@ def test_worker_transient_retry_then_success(tmp_path: Path, monkeypatch) -> Non
 
     assert result.outcome == "success"
     assert result.attempts == 3
-    assert result.final_model == worker.SONNET_MODEL
+    # 2026-07-05 all-opus directive: every retry attempt is opus (no sonnet drop).
+    assert result.final_model == worker.OPUS_MODEL
     assert sleeps == [worker.RETRY_BACKOFF_S, worker.RETRY_BACKOFF_S]
     assert attempts == [
         (1, worker.OPUS_MODEL),
         (2, worker.OPUS_MODEL),
-        (3, worker.SONNET_MODEL),
+        (3, worker.OPUS_MODEL),
     ]
     assert alerts_called == []
 

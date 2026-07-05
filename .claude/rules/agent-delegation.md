@@ -18,17 +18,18 @@ paths:
 
 **Single source of truth = `config/models.json`**（roster、版本、subagent policy、drift-check 全在那）。下表是摘要，派工前以 config 為準。
 
-**Owner directive 2026-07-01**：**主線 = `opus`（固定不可換）；subagent 依任務複雜度/難度在 `sonnet` ↔ `opus` 二選一**（不是舊 4-tier ladder）。**`haiku` 不進預設 rotation；`fable` 目前 unavailable，重新開放再評估。**
+**Owner directive 2026-07-05（取代 2026-07-01 二選一）**：**主線 = `opus`（固定）；所有 subagent 也一律用 `opus`（4.8）**。不再有 sonnet↔opus 選擇——每個 subagent 都是 opus，只有 `effort`（low/medium/high）依任務難度變化（opus/low 跑 checklist 仍比 opus/high 便宜）。**`sonnet` / `haiku` 退出預設 rotation（仍是合法 alias，不自動路由）；`fable` unavailable，重開再評估。**
 
-| 對象 / 難度 | 模型 | 原因 |
-|---|---|---|
-| 主線程（互動 session） | `opus`（固定） | owner directive；不能中途 hot-swap |
-| subagent — **高難度**：研究實驗設計/方法論決策/高風險論文判斷/研究誠實驗證 | `opus / high` | 精確性與專業性要求高，不可為省 token 降到 sonnet 以下 |
-| subagent — **中低難度**：平台 ops/發文/paper-update/瀏覽器自動化/驗證/merge/publication-scan/大搜尋/lookup | `sonnet`（effort 依 sub-task） | 結構化流程明確、省 token |
-| `fable` | **unavailable** — 開放後再評估為長時程自主頂層（大型遷移/多日 agentic/深度多階段研究） | 2026-07-01 Desktop 選單顯示 Currently unavailable |
-| `haiku` | 不進預設 rotation | owner 指定 subagent 用 sonnet/opus |
+| 對象 / 難度 | 模型 | effort | 原因 |
+|---|---|---|---|
+| 主線程（互動 session） | `opus`（固定） | — | owner directive；不能中途 hot-swap |
+| subagent — **高難度**：研究實驗設計/方法論/高風險論文判斷/策略 gate | `opus` | high | 精確性與專業性要求高 |
+| subagent — **寫作**：文章/digest/paper_review/member_qa/email_reply | `opus` | medium | 品質優先（2026-07-05 起全 opus） |
+| subagent — **ops/驗證/governance/lookup**：平台 ops/瀏覽器自動化/merge/scan/大搜尋 | `opus` | low | 流程明確、effort 低即可，但模型仍 opus |
+| `sonnet` / `haiku` | 退出預設 rotation | — | owner 2026-07-05 指定全 subagent 用 opus |
+| `fable` | **unavailable** — 開放後再評估為長時程自主頂層 | — | Desktop 選單 Currently unavailable |
 
-**規則**：先尊重 skill frontmatter；只有在 skill 沒定義或任務明顯升級時才手動覆寫。**程序型 side task（瀏覽器自動化、scan、大搜尋）不可 inline 在 opus 主線跑 → fork `sonnet` subagent**（2026-07-01 教訓：FB 發文整段 inline 在 opus）。
+**規則**：先尊重 skill frontmatter；只有 skill 沒定義或任務明顯升級時才手動覆寫 effort（模型固定 opus）。**程序型 side task（瀏覽器自動化、scan、大搜尋）仍要 fork subagent（不 inline 在主線）→ 現在 fork `opus / low`，不再是 sonnet**（2026-07-01 教訓：FB 發文整段 inline 在主線）。
 
 **Drift-check（roster 變動偵測）**：**可用性真相來源 = Claude Desktop 右下角模型選單**（老闆可截圖，含展開「More models ›」）。Agent/Workflow tool 的 `model` enum 只列「可派別名」，**不反映當下可用性**（如 fable 是合法別名卻 Currently unavailable）。主線程 computer-use 是 Chrome-scoped，**碰不到 native desktop UI → 此 reconcile 需老闆截圖或未來 OS-level computer-use**。無 cron 自動偵測（無 `ANTHROPIC_API_KEY`）；`scripts/check_model_roster.py` 在 `config/models.json` 過期時提醒。**新 model 先查定位再指派 tier（不猜）；available=false 的 model 一律走 fallback。**
 

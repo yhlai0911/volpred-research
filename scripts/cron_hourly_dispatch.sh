@@ -36,7 +36,9 @@ ZSHRC_PATH="${ZSHRC_PATH:-$HOME/.zshrc}"
 # Bumped to 120s for headroom; 3 attempts + backoff still fits comfortably
 # inside the 50min hourly-slot budget.
 AUTH_PREFLIGHT_TIMEOUT_SEC="${AUTH_PREFLIGHT_TIMEOUT_SEC:-120}"
-AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-sonnet-5}"
+# 2026-07-05 all-opus directive: preflight also on opus. This legacy wrapper is
+# launchctl-disabled (rollback-only artifact), but kept directive-compliant.
+AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-opus-4-8}"
 # Backoff before a 3rd preflight attempt — the first 2 attempts fire within
 # seconds (launchd-env + zshrc-source), so a transient Claude API blip
 # ("An unknown error occurred (Unexpected)") defeats both. ~8% of runs hit
@@ -635,11 +637,9 @@ ATTEMPT=1
 EXIT_CODE=1
 
 while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
-  if [ $ATTEMPT -eq 3 ]; then
-    DISPATCH_MODEL=claude-sonnet-5    # fallback (downgrade)
-  else
-    DISPATCH_MODEL=claude-opus-4-8    # primary
-  fi
+  # 2026-07-05 all-opus directive: every attempt on opus (retired the sonnet
+  # downgrade on attempt 3). Legacy wrapper is launchctl-disabled/rollback-only.
+  DISPATCH_MODEL=claude-opus-4-8
   echo "=== attempt $ATTEMPT/$MAX_ATTEMPTS model=$DISPATCH_MODEL at $(date '+%H:%M:%S') ==="
 
   run_one_attempt "$DISPATCH_MODEL"

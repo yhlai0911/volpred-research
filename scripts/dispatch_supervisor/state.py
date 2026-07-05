@@ -14,7 +14,7 @@ Schema (version 1)::
         "schedule_id": "hourly_dispatch",
         "started_at": "<ISO>",
         "attempt": int,                          # 1..3
-        "model": "opus" | "sonnet",
+        "model": "opus",                         # all attempts opus (2026-07-05 all-opus directive)
         "log_path": str,
         "restart_cleanup_pending": true           # only present while a restart-orphan investigation is in flight
       },

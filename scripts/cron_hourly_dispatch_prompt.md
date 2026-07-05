@@ -94,7 +94,7 @@ PHASE B-PARALLEL — 草稿池低水位並行補寫（boss msg143 2026-07-04 硬
 
 **觸發**：`continue_task_dispatch.py --report` 顯示 draft-pool deficit ≥ 2（releasable drafts < floor 且缺口 ≥2）。deficit ≤1 → 跳過本段走一般 PHASE B。
 
-**規則**：**一次補到門檻，不是每小時 1 篇** — 本班 fire 並行派 `min(deficit, 2)` 個 draft-writer subagents（sonnet，per task-routing daily_article 並行上限 =2），與 PHASE B 一般派工共用 total slot cap=4。
+**規則**：**一次補到門檻，不是每小時 1 篇** — 本班 fire 並行派 `min(deficit, 2)` 個 draft-writer subagents（`opus`，per task-routing daily_article 並行上限 =2），與 PHASE B 一般派工共用 total slot cap=4。
 
 **並行安全設計（必守）**：
 - 每個 writer **只寫 `storage/drafts/<kid>_<audience>_draft.md` + 圖表 assets，禁碰 feed.json / supabase**（feed 寫入無 per-writer lock，並行直發會 race）。
@@ -126,23 +126,23 @@ PHASE B — 派新工:
 4.5. **模型分流（2026-05-25 強制）**：派 subagent 前 query router 取 task-type-specific model：
    ```bash
    MODEL_INFO=$(uv run python scripts/model_router.py --task-type <task_type>)
-   MODEL=$(echo "$MODEL_INFO" | jq -r .agent_short)  # opus / sonnet / haiku
-   EFFORT=$(echo "$MODEL_INFO" | jq -r .effort)      # high / medium / low
+   MODEL=$(echo "$MODEL_INFO" | jq -r .agent_short)  # 一律 opus（2026-07-05 起）
+   EFFORT=$(echo "$MODEL_INFO" | jq -r .effort)      # high / medium / low（依難度）
    ```
-   分流原則（per `.claude/rules/agent-delegation.md` 模型選擇表）：
-   - **experiment / paper_decision / paper_body / strategy_lifecycle** → `opus`（研究與 narrative 必 opus）
-   - **paper_review / event_article / daily_article / trending_repost / member_qa / email_reply** → `sonnet medium`（程序型）
-   - **platform_ops / governance** → `sonnet low`（短流程 + checklist）
-   - **lookup / verify / classification** → `haiku low`（便宜快速）
-   - 派 Agent tool 時 `model: "<opus|sonnet|haiku>"`；派 `claude -p` 時 `--model <cli_flag>`（cli_flag 從 router output 取）
-   - Brief 必含一行 `**Model**: <picked> (per task_type routing)`，便於 audit
-   - 違反（例：experiment 派 sonnet）= 違反 CLAUDE.md 紀律，下次 boss_report 會抓
+   **分流原則（2026-07-05 owner directive：所有 subagent 一律 `opus` 4.8）**：模型不再有選擇，只有 `effort` 依難度變化（router 已內建）：
+   - **experiment / paper_decision / strategy_lifecycle** → `opus / high`（研究與 narrative）
+   - **paper_body** → `opus / medium`（主線程才能跑）
+   - **paper_review / event_article / daily_article / daily_digest / trending_repost / member_qa / email_reply** → `opus / medium`（寫作）
+   - **platform_ops / governance / lookup / verify / classification** → `opus / low`（短流程/checklist，effort 低但仍 opus）
+   - 派 Agent tool 時 `model: "opus"`；派 `claude -p` 時 `--model claude-opus-4-8`（cli_flag 從 router output 取，恆為 opus）
+   - Brief 必含一行 `**Model**: opus / <effort> (per task_type routing)`，便於 audit
+   - 違反（例：任何 subagent 派 sonnet/haiku）= 違反 owner directive，下次 boss_report 會抓
 
    **Effort escalation on failure（2026-05-29 boss directive）**：任務若**可驗證地失敗**（test fail / verdict FAIL / exception / 不收斂 / Codex reject），重派時調高 model/effort：
    ```bash
    # attempt 0 失敗 → attempt 1 重派（ladder 上爬一階）
    MODEL_INFO=$(uv run python scripts/model_router.py --task-type <type> --attempt <N>)
-   # ladder: haiku/low → haiku/med → sonnet/low → sonnet/med → sonnet/high → opus/med → opus/high
+   # ladder (2026-07-05 all-opus): opus/low → opus/med → opus/high（CEILING；到頂改策略不再重試）
    ```
    - `at_ceiling=true` → 已到 opus/high，這是最強 reasoning，無法再調高
    - `exhausted=true` → escalation 已超天花板 → **禁止繼續同法重試**，改觸發 **3-strike rule**：拆解問題 / 補文獻 context / 派 Codex 二審 / escalate email 給老闆（`--needs-reply`）

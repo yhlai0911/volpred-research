@@ -92,15 +92,17 @@ Sources: [Hwang & Valls Pereira 2006](https://www.tandfonline.com/doi/abs/10.108
 
 ## Claude Model / Agent 選擇原則
 
+**Owner directive 2026-07-05（取代 2026-07-01 二選一）**：**所有 subagent 一律用 `opus`（4.8）**。不再有 sonnet↔opus 選擇——每個 subagent 都是 opus，只有 `effort`（low/medium/high）依任務難度變化（opus/low 跑 checklist 仍比 opus/high 便宜）。`sonnet` / `haiku` 退出預設 rotation（仍是合法 alias，不自動路由）。canonical 來源 = `config/models.json` + `scripts/model_router.py`。
+
 | 任務類型 | 預設模型 / effort | 原因 |
 |---------|------|------|
 | **研究實驗 / 方法論 / 高風險論文判斷** | `opus / high` | 精確性與專業性要求高 |
-| **平台 ops / 發文 / paper-update 類程序型工作** | `sonnet / medium` | 流程明確，不必全程重模型 |
-| **驗證 / merge safety / publication scan** | `sonnet / low` | 以精準比對與 checklist 為主 |
-| **資料來源 lookup / stage 分類** | `haiku / low` | 參考型工作，優先便宜快速 |
-| **大量 docs / log / 無關 side task** | `forked subagent` | 先隔離 context，再把摘要帶回主線 |
+| **平台 ops / 發文 / paper-update 類程序型工作** | `opus / medium` | 品質優先（2026-07-05 起全 opus；發文/paper-update = medium）|
+| **驗證 / merge safety / publication scan** | `opus / low` | 以精準比對與 checklist 為主，effort 低即可 |
+| **資料來源 lookup / stage 分類** | `opus / low` | 參考型工作，effort 低但仍用 opus |
+| **大量 docs / log / 無關 side task** | `forked subagent`（`opus / low`）| 先隔離 context，再把摘要帶回主線 |
 
-**規則**：先看 `docs/workflow-index.md` 與 skill frontmatter，再決定要不要手動升級。高風險研究、統計與論文判斷不可為省 token 降到 Sonnet 以下。
+**規則**：先看 `docs/workflow-index.md` 與 skill frontmatter，再決定要不要手動升級 `effort`（模型固定 opus）。高風險研究、統計與論文判斷用 `opus / high`。
 
 ## 硬體資源
 

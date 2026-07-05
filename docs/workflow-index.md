@@ -27,28 +27,30 @@ Canonical source：`config/token_policy.json`
 
 ## Workflow 路由
 
+> **Owner directive 2026-07-05**：下表「預設 model」欄全部為 `opus`（4.8）；所有 subagent 一律用 opus，只有 `effort`（low/medium/high）依難度變化。canonical 來源 = `config/models.json` + `scripts/model_router.py`。`sonnet` / `haiku` 退出預設 rotation（仍是合法 alias，不自動路由）。
+
 | Workflow ID | 何時使用 | 執行模式 | 預設 model / effort | Detail Path | Compact 提示 |
 |---|---|---|---|---|---|
 | `research-design` | 新實驗、回測、方法論判斷、研究方向續跑 | inline；side task 再 fork | `opus / high` | `.claude/skills/autonomous-research/SKILL.md` | 新開實驗分支前若 `62%+` 先 compact |
-| `code-implement` | 程式實作、bug fix、focused code change | inline；大搜尋或大 logs 再 fork | `sonnet / medium` | `AGENTS.md` | 單檔小改留主線；跨模組再拆 |
-| `code-review` | review、風險盤點、回歸與缺測檢查 | inline | `sonnet / medium` | `AGENTS.md` | findings-first；不要把 review prompt 寫成長 SOP |
-| `agent-result-check` | agent / worktree 回報結果後驗數字 | inline | `sonnet / low` | `.claude/skills/agent-result-verification/SKILL.md` | 保留在主線做，不外包 |
-| `ops-triage` | admin、排程、release pool、策略 metadata、平台巡檢 | inline | `sonnet / medium` | `.claude/skills/admin-ops/SKILL.md` | log / docs 大搜尋可拆 fork |
-| `schedule-governance` | schedule / cron / control-plane 治理與 canonical 對齊 | inline | `sonnet / medium` | `.claude/rules/control-plane.md` | 先改 canonical config / wrapper，再談 install |
-| `feed-write` | 寫 reader-facing feed 文章 | inline | `sonnet / medium` | `.claude/skills/feed-publisher/SKILL.md` | 若研究 context 已重，先把查資料部分 fork |
-| `publication-scan` | 選題、補草稿池、事件候選掃描 | forked subagent | `sonnet / low` | `.claude/skills/publication-candidates/SKILL.md` | `55%+` 就優先 fork |
-| `member-qa` | 會員問題評分、rerank、candidate flow | forked subagent | `sonnet / low` | `.claude/skills/member-questions/SKILL.md` | 與主線研究無關時必隔離 |
-| `memory-health` | knowledge / thinking / experiment memory 健檢與去重 | forked subagent | `sonnet / medium` | `.claude/skills/memory-health/SKILL.md` | 大檔檢查優先用乾淨 context |
-| `citation-check` | citation bibliographic accuracy / DOI / 引文忠實度 | forked subagent | `sonnet / medium` | `.claude/skills/citation-verifier/SKILL.md` | 長文獻核對不要塞主線 |
+| `code-implement` | 程式實作、bug fix、focused code change | inline；大搜尋或大 logs 再 fork | `opus / medium` | `AGENTS.md` | 單檔小改留主線；跨模組再拆 |
+| `code-review` | review、風險盤點、回歸與缺測檢查 | inline | `opus / medium` | `AGENTS.md` | findings-first；不要把 review prompt 寫成長 SOP |
+| `agent-result-check` | agent / worktree 回報結果後驗數字 | inline | `opus / low` | `.claude/skills/agent-result-verification/SKILL.md` | 保留在主線做，不外包 |
+| `ops-triage` | admin、排程、release pool、策略 metadata、平台巡檢 | inline | `opus / medium` | `.claude/skills/admin-ops/SKILL.md` | log / docs 大搜尋可拆 fork |
+| `schedule-governance` | schedule / cron / control-plane 治理與 canonical 對齊 | inline | `opus / medium` | `.claude/rules/control-plane.md` | 先改 canonical config / wrapper，再談 install |
+| `feed-write` | 寫 reader-facing feed 文章 | inline | `opus / medium` | `.claude/skills/feed-publisher/SKILL.md` | 若研究 context 已重，先把查資料部分 fork |
+| `publication-scan` | 選題、補草稿池、事件候選掃描 | forked subagent | `opus / low` | `.claude/skills/publication-candidates/SKILL.md` | `55%+` 就優先 fork |
+| `member-qa` | 會員問題評分、rerank、candidate flow | forked subagent | `opus / low` | `.claude/skills/member-questions/SKILL.md` | 與主線研究無關時必隔離 |
+| `memory-health` | knowledge / thinking / experiment memory 健檢與去重 | forked subagent | `opus / medium` | `.claude/skills/memory-health/SKILL.md` | 大檔檢查優先用乾淨 context |
+| `citation-check` | citation bibliographic accuracy / DOI / 引文忠實度 | forked subagent | `opus / medium` | `.claude/skills/citation-verifier/SKILL.md` | 長文獻核對不要塞主線 |
 | `paper-quality` | claim-evidence、contribution framing、Harvey 標準 | inline | `opus / high` | `.claude/skills/finance-paper-quality/SKILL.md` | 高風險判斷，不為省 token 降級 |
 | `latex-review` | LaTeX 結構、review report、長論文審查 | forked subagent | `opus / high` | `.claude/skills/latex-academic-reviewer/SKILL.md` | 長文件審查優先 fresh context |
-| `paper-stage` | early/draft/review/ready/submitted 分類 | inline | `haiku / low` | `.claude/skills/paper-stage-classifier/SKILL.md` | 快速分類，不必重模型 |
-| `paper-review-round` | 發起一輪 review cycle、收集 reviewer 報告 | inline | `sonnet / medium` | `.claude/skills/paper-review-cycle/SKILL.md` | 真正 reviewer 可另外 fork |
-| `paper-update` | review 後修訂、compile、平台同步 | inline | `sonnet / medium` | `.claude/skills/paper-update/SKILL.md` | 與 stage / review 分開處理 |
-| `strategy-lifecycle` | 策略 registry、上架 gate、metadata / rollout 檢查 | inline | `sonnet / medium` | `docs/strategy-registry.md` | 牽涉 canonical metrics 時先驗來源 |
-| `data-source-lookup` | 外部資料來源操作、注意事項、選源導航 | inline | `haiku / low` | `.claude/skills/external-data-sources/SKILL.md` | 參考型工作，短查即走 |
-| `tw-macro-lookup` | DGBAS / NDC 台灣總體資料抓取與欄位 | inline | `haiku / low` | `.claude/skills/taiwan-macro-data/SKILL.md` | 不要把整份資料流程帶進主線 |
-| `worktree-merge-check` | merge worktree 後驗證檔案與 reflog 恢復 | inline | `sonnet / low` | `.claude/skills/worktree-merge-verification/SKILL.md` | merge 完立即做，不延後 |
+| `paper-stage` | early/draft/review/ready/submitted 分類 | inline | `opus / low` | `.claude/skills/paper-stage-classifier/SKILL.md` | 快速分類，不必重模型 |
+| `paper-review-round` | 發起一輪 review cycle、收集 reviewer 報告 | inline | `opus / medium` | `.claude/skills/paper-review-cycle/SKILL.md` | 真正 reviewer 可另外 fork |
+| `paper-update` | review 後修訂、compile、平台同步 | inline | `opus / medium` | `.claude/skills/paper-update/SKILL.md` | 與 stage / review 分開處理 |
+| `strategy-lifecycle` | 策略 registry、上架 gate、metadata / rollout 檢查 | inline | `opus / medium` | `docs/strategy-registry.md` | 牽涉 canonical metrics 時先驗來源 |
+| `data-source-lookup` | 外部資料來源操作、注意事項、選源導航 | inline | `opus / low` | `.claude/skills/external-data-sources/SKILL.md` | 參考型工作，短查即走 |
+| `tw-macro-lookup` | DGBAS / NDC 台灣總體資料抓取與欄位 | inline | `opus / low` | `.claude/skills/taiwan-macro-data/SKILL.md` | 不要把整份資料流程帶進主線 |
+| `worktree-merge-check` | merge worktree 後驗證檔案與 reflog 恢復 | inline | `opus / low` | `.claude/skills/worktree-merge-verification/SKILL.md` | merge 完立即做，不延後 |
 
 ## 何時才用 `agent team`
 
