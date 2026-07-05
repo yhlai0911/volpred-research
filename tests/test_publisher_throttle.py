@@ -175,6 +175,42 @@ def test_block_when_gap_below_threshold(tmp_path: Path):
     assert rec["previous_id"] == "mile_first"
 
 
+def test_draft_ingestion_bypasses_even_within_window(tmp_path: Path):
+    """Draft entering the pool is not reader-facing — release_pool gates its
+    release. A published rhythm article 5 min ago must NOT block a draft.
+    (2026-07-05: K1633 general draft blocked 13min after a publish, agent burned
+    ~700s waiting; throttle-on-draft is double-gating.)"""
+    now = datetime(2026, 7, 5, 12, 0, tzinfo=timezone.utc)
+    prev = _entry(id_="mile_published_recent", ts=now - timedelta(minutes=5))
+    draft = {"id": "mile_draft", "status": "draft", "audience": "general", "category": "general"}
+    # Must NOT raise — draft ingestion bypasses the burst gate.
+    check_publish_throttle(draft, [prev], storage_dir=tmp_path, now=now)
+    rec = json.loads((tmp_path / "logs" / "dedup_decisions.jsonl").read_text().strip().splitlines()[-1])
+    assert rec["decision"] == "pass"
+    assert rec["reason"].startswith("non_published_ingestion:draft")
+
+
+def test_scheduled_ingestion_bypasses(tmp_path: Path):
+    """status=scheduled is likewise not reader-facing at ingestion."""
+    now = datetime(2026, 7, 5, 12, 0, tzinfo=timezone.utc)
+    prev = _entry(id_="mile_pub", ts=now - timedelta(minutes=2))
+    sched = {"id": "mile_sched", "status": "scheduled", "audience": "research", "category": "milestone"}
+    check_publish_throttle(sched, [prev], storage_dir=tmp_path, now=now)
+    rec = json.loads((tmp_path / "logs" / "dedup_decisions.jsonl").read_text().strip().splitlines()[-1])
+    assert rec["decision"] == "pass"
+    assert rec["reason"].startswith("non_published_ingestion:scheduled")
+
+
+def test_missing_status_still_gated(tmp_path: Path):
+    """Missing status defaults to 'published' (codebase convention) so a
+    reader-facing publish attempt without an explicit status is still blocked."""
+    now = datetime(2026, 7, 5, 12, 0, tzinfo=timezone.utc)
+    prev = _entry(id_="prev_pub", ts=now - timedelta(minutes=3))
+    new = {"id": "new_no_status", "audience": "general", "category": "general"}  # no status
+    with pytest.raises(PublishThrottleError):
+        check_publish_throttle(new, [prev], storage_dir=tmp_path, now=now)
+
+
 def test_block_skipped_when_prev_is_non_rhythm(tmp_path: Path):
     """Trending fired 5 min ago does not block a subsequent research publish."""
     now = datetime(2026, 6, 30, 12, 0, tzinfo=timezone.utc)

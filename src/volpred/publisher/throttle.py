@@ -154,6 +154,16 @@ def check_publish_throttle(
     """Raise PublishThrottleError if publishing `item` violates the rhythm gap.
 
     Pass-through (no-op + audit `pass`) when:
+      * `item` is not being published now (status draft / scheduled / etc.) — a
+        draft is not reader-facing at ingestion; release_pool governs its release
+        cadence, and *that* flip re-enters this gate as status="published". Only a
+        published discretionary article can create a reader-facing burst, and this
+        gate only ever compares against published entries. Throttling draft
+        ingestion here double-gates and wedges draft-pool refill for up to the
+        burst window (2026-07-05: a K1633 general draft was blocked 13min after a
+        published article; the writer agent then burned ~700s waiting the window
+        out). Missing status defaults to "published" (codebase convention, see
+        publisher.py) so real publishes and existing unit tests stay fully gated.
       * item is NOT rhythm-controlled (fixture / event-driven / daily / digest)
       * feed has no recent rhythm-controlled publish to compare against
       * `item` and the previous publish share a `details.paired_sibling_group`
@@ -164,6 +174,17 @@ def check_publish_throttle(
     expected to defer / reschedule the publish (not retry immediately).
     """
     target_id = item.get("id")
+    status = str(item.get("status", "published") or "published").strip().lower()
+    if status != "published":
+        _log_throttle_decision(
+            storage_dir,
+            decision="pass",
+            target_id=target_id,
+            previous_id=None,
+            gap_minutes=None,
+            reason=f"non_published_ingestion:{status}",
+        )
+        return
     if not is_rhythm_controlled(item):
         _log_throttle_decision(
             storage_dir,

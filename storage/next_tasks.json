@@ -50109,7 +50109,7 @@
     "title": "K1633: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1633 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1633：「VIX 破 30/40 就是抄底訊號」投資迷思驗證 = half_true_qualified。資料 SPY + ^VIX（yfinance，Close，SPY auto_adjust），1993-01-29..2026-07-02 共 8,413 交易日；VIX 由下往上首次穿越 30/35/40、距上一事件 >=20 交易日去叢集後 50/25/17 個事件。事件後前瞻報酬 excess（vs 無條件 baseline，同 H、同價格序列、同報酬定義）12 個 cell 中 11 個為正（方向近乎一致）；raw 5% HAC 顯著 4 ",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1633",
@@ -50134,8 +50134,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-05T01:37:36.436841+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-09"
       }
     ],
-    "started_at": "2026-07-05T01:10:39.686911+00:00"
+    "started_at": "2026-07-05T01:10:39.686911+00:00",
+    "completed_at": "2026-07-05T01:37:36.436483+00:00",
+    "result": "K1633 VIX破30抄底迷思 reader-facing 文章發佈 draft=mile_4d67163f（33年SPY、verdict=half_true_qualified、3真圖、anti_ai_gate PASS、arc-dedup PASS）；lazypack async render 已 enqueue；順帶修 publish_throttle draft 雙重 gating flow bug（+3 tests，24 passed）"
   }
 ]

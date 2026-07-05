@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-05 09:2x publish_throttle 對 **draft ingestion** 雙重 gating，寫作 agent 空耗 ~700s 等窗口 — **FIXED**
+
+**現象**：hourly-09 派 sonnet agent 寫 K1633（VIX破30抄底迷思）reader-facing 文章，agent 正文/圖/anti_ai_gate 全做完（210K token、71 tool use），卻卡在「等一個背景 gap-clear job」無法 publish 而把控制權交回主線程。主線程接手直接 `publish_draft.py --status draft` 也被擋：`PublishThrottleError: would create burst — gap=13.4min < threshold=30min`。
+
+**根因**：`publisher._append_to_feed` → `throttle.check_publish_throttle` 的 burst gate 只判 `is_rhythm_controlled(item)`（audience/phase/category），**不看 item 的 status**。但 gate 本意（docstring）是「防兩篇 **published** discretionary 文章 clumping」，且 `find_most_recent_rhythm_published` 只比對 `status=="published"` 的 entry。draft 根本不 reader-facing（release_pool 才控 draft 釋出 cadence，flip published 時會**再進**這道 gate），在 draft ingestion 就被 13 分鐘前一篇 published 文章的時間戳擋 = **雙重 gating**。任何 draft 落在前一篇 publish 的 30min 窗內都會被 wedge，agent 只能空耗等窗口（本次 ~700s）。此即 handoff B 區早列的 delicate queued task `platform_ops_publish_rhythm_pre_publish_throttle`，但實際缺陷比「redesign throttle」窄且明確。
+
+**解決**：`check_publish_throttle` 開頭加 guard —— `status = str(item.get("status", "published") or "published").strip().lower()`；`status != "published"` → 記 audit `pass`（reason `non_published_ingestion:<status>`）直接 return。**missing status 依 codebase 慣例（publisher.py:2205/640）預設 "published"** → 真發佈與現有 unit test 全維持 gated，只放寬顯式 draft/scheduled/unpublished/archived。regression test +3（draft 豁免、scheduled 豁免、missing-status 仍 block），`tests/test_publisher_throttle.py` 24 passed。K1633 draft 隨即發佈成功 `mile_4d67163f`。
+
+**教訓**：(1) reader-facing burst gate 是「published 事件」的 cadence 控制，不該對 draft ingestion 生效（draft 的 cadence 由 release_pool 在 flip published 時負責，同 gate 會再跑一次）。(2) 這是「偵測/防護層對 domain state（draft vs published）粒度不足」的通例 —— 修法是在 canonical write-site 依 status 早退，非放寬 threshold 或加 flag。
+
 ## 2026-07-04 21:18 `host_cron_fail` 對「連續 2 次 exit=142 自我恢復 hang」升 CRITICAL 反覆轟老闆 — 改判斷條件（自我恢復碼永不 critical）
 
 **現象**：老闆 Telegram msg 114/121/141 連續三次動怒（「這已經出現第幾次了…頭痛醫頭腳痛醫腳」「不是說修好了嗎？判斷條件有問題，你不會改判斷嗎？」）。今天 13:57 + 14:57 CST hourly_dispatch 連兩次 `exit=142`（SIGALRM hang），`_parse_host_cron_state` 依 `max_consec_fail >= 2` 判 **CRITICAL** 推 Telegram —— 但 15:47 CST 就 `exit=0` 自我恢復。142 本就是設計上會被下輪 hourly fire 自我恢復的碼。
