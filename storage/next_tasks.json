@@ -50318,8 +50318,16 @@
       "research-honesty"
     ],
     "created_at": "2026-07-05T10:00:00Z",
-    "result": "Blocker provenance walk: 2383 blocker CLEARED (stale); 0050-gamma reduced to 1 residual HIGH (line457 untraceable) -> enqueued paper2_sec45_gamma_refit GJR re-fit + paper_body followup; tracker + review note updated.",
-    "completed_at": "2026-07-05T10:05:00Z"
+    "result": "Blocker provenance walk: 2383 blocker CLEARED (stale); 0050-gamma reduced to 1 residual HIGH (line457 untraceable) -> enqueued paper2_sec45_gamma_refit GJR re-fit + paper_body followup; tracker + review note updated.\n\nsec:tsmc line457 gamma provenance fixed (commit 7712d6127): table-consistent canonical + refit footnote, Codex CONDITIONAL_PASS. Residual divergence -> task paper2_taiwan_vt_body_main_version_divergence",
+    "completed_at": "2026-07-05T08:23:19.174031+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-05T08:23:19.174303+00:00",
+        "from": "succeeded",
+        "to": "succeeded",
+        "by": "complete"
+      }
+    ]
   },
   {
     "id": "paper2_taiwan_vt_body_main_version_divergence",
