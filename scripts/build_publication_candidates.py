@@ -29,10 +29,37 @@ ROOT = Path(__file__).parent.parent
 KNOWLEDGE_PATH = ROOT / "storage/memory/knowledge.json"
 FEED_PATH = ROOT / "storage/reports/feed.json"
 OUTPUT_PATH = ROOT / "storage/publication_candidates.json"
+READER_METRICS_LATEST_PATH = ROOT / "storage/analytics/latest.json"
 
 sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.topic_clusters import classify_topic_cluster, cluster_gate_status
+
+
+def _load_reader_signal_map() -> dict[str, dict]:
+    """slug -> reader engagement row, from scripts/pull_reader_metrics.py output.
+
+    Reader-metrics feedback loop (platform_ops_reader_metrics_feedback_loop_c9,
+    2026-07-05): a SOFT signal only. It attaches real, already-published reader
+    engagement data (impressions / read-completion proxy / reactions) onto
+    candidates whose K is already covered by one or more feed articles, so
+    future topic selection can see "which covered topics people actually
+    finished reading" — it does NOT change `score`/`adjusted_score` or the
+    sort key below, and it never affects `uncovered` candidates (no article
+    exists yet, so there is nothing to look up).
+
+    Fail-open: file missing/corrupt/stale -> empty map, candidates simply lack
+    the `reader_signal` field. Never fabricates a number.
+    """
+    if not READER_METRICS_LATEST_PATH.exists():
+        return {}
+    try:
+        data = json.loads(READER_METRICS_LATEST_PATH.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"WARN: reader metrics latest.json unreadable, skipping reader_signal: {exc}", file=sys.stderr)
+        return {}
+    rows = data.get("top_articles") or []
+    return {row.get("slug"): row for row in rows if isinstance(row, dict) and row.get("slug")}
 
 
 def extract_k_id(experiment_id: str) -> str | None:
@@ -218,6 +245,7 @@ def main():
     knowledge = json.loads(KNOWLEDGE_PATH.read_text())
     feed = json.loads(FEED_PATH.read_text())
     overturned_map = _extract_overturned_map(knowledge)
+    reader_signal_map = _load_reader_signal_map()
 
     # Deduplicate knowledge by experiment_id (keep latest)
     by_k: dict[str, dict] = {}
@@ -266,6 +294,29 @@ def main():
         if cluster and cluster_gate["count"] > cluster_gate["cap"]:
             adjusted_score = max(0, int(score * 0.5))
             reasons = reasons + [f"cluster cooldown penalty ({cluster} 30d={cluster_gate['count']}>{cluster_gate['cap']})"]
+        # Soft reader-engagement signal (metadata only — see
+        # _load_reader_signal_map docstring; never affects score/adjusted_score
+        # or the sort key). Matched via covering-article slug against
+        # storage/analytics/latest.json (scripts/pull_reader_metrics.py output).
+        reader_signal = None
+        matched_rows = [
+            reader_signal_map[a["id"]] for a in covering_articles
+            if a.get("id") in reader_signal_map
+        ]
+        if matched_rows:
+            completions = [
+                r.get("read_completion_rate_proxy") for r in matched_rows
+                if r.get("read_completion_rate_proxy") is not None
+            ]
+            reader_signal = {
+                "matched_slugs": [r.get("slug") for r in matched_rows],
+                "impressions_total": sum(r.get("impressions") or 0 for r in matched_rows),
+                "avg_read_completion_rate_proxy": (
+                    round(sum(completions) / len(completions), 4) if completions else None
+                ),
+                "read_time_is_proxy": True,
+                "source": "storage/analytics/latest.json",
+            }
         candidates.append({
             "k_id": k_id,
             "title": derive_title(entry),
@@ -293,6 +344,7 @@ def main():
             "updated_at": entry.get("updated_at", ""),
             "tags": entry.get("tags", []),
             "overturned_by": overturned_map.get(k_id, []),
+            "reader_signal": reader_signal,
         })
 
     # Sort: uncovered first, then by score desc, then by recency desc
@@ -417,6 +469,8 @@ def main():
             "already_covered_for": candidate["audiences_covered"],
         }
 
+    candidates_with_reader_signal = sum(1 for c in candidates if c.get("reader_signal"))
+
     output = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "notes": {
@@ -428,6 +482,14 @@ def main():
                 "Covered by at least one published article, but still missing "
                 "a research-audience article."
             ),
+            "reader_signal": (
+                "Soft metadata only (per-candidate `reader_signal`), sourced from "
+                "storage/analytics/latest.json (scripts/pull_reader_metrics.py). "
+                "Does NOT affect score/adjusted_score or candidate sort order — "
+                "only present when the K is already covered by an article with "
+                "measured reader activity. Absent (null) reader_signal_map or no "
+                "matching activity -> reader_signal stays null, never fabricated."
+            ),
         },
         "summary": {
             "total_k": total,
@@ -436,6 +498,7 @@ def main():
             "high_priority_uncovered": len(high_uncovered),
             "missing_general_audience": len(missing_general),
             "missing_research_audience": len(missing_research),
+            "candidates_with_reader_signal": candidates_with_reader_signal,
         },
         "overturned_kids": sorted(overturned_map.keys()),
         "top_10_uncovered": [
@@ -470,6 +533,7 @@ def main():
     print(f"  High-priority uncovered (score≥5): {len(high_uncovered)}")
     print(f"  Covered but missing general audience: {len(missing_general)}")
     print(f"  Covered but missing research audience: {len(missing_research)}")
+    print(f"  Candidates with reader_signal (soft engagement metadata): {candidates_with_reader_signal}")
     print(f"  Explicitly-overturned K's excluded from missing lists: {len(overturned_map)} ({sorted(overturned_map.keys())})")
     print()
     print("Top 5 uncovered candidates:")

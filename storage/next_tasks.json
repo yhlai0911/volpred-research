@@ -50624,11 +50624,37 @@
     "id": "platform_ops_reader_metrics_feedback_loop_c9",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C9: analytics 回饋閉環 — pull_reader_metrics.py 每日拉閱讀數據進選題",
-    "description": "建 scripts/pull_reader_metrics.py：每日從 Supabase 拉 top-N 文章 impressions/read-time/reactions 落 storage/analytics/，接進 publication-candidates 選題與 daily checkup 巡檢維度。Umami + 自建 impression pipeline 已存在，缺的是回饋到內容決策的閉環（monetization-direct：知道哪類主題真的有人讀完）。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "建 scripts/pull_reader_metrics.py：每日從 Supabase 拉 top-N 文章 impressions/read-time/reactions 落 storage/analytics/，接進 publication-candidates 選題與 daily checkup 巡檢維度。Umami + 自建 impression pipeline 已存在，缺的是回饋到內容決策的閉環（monetization-direct：知道哪類主題真的有人讀完）。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-07-05T12:10:12.238442+00:00",
+    "claim_session_id": "9ae57f228b79",
+    "status_history": [
+      {
+        "ts": "2026-07-05T12:10:12.238746+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-20"
+      },
+      {
+        "ts": "2026-07-05T12:11:03.963117+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-20"
+      },
+      {
+        "ts": "2026-07-05T12:23:26.309216+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-20"
+      }
+    ],
+    "started_at": "2026-07-05T12:11:03.962801+00:00",
+    "completed_at": "2026-07-05T12:23:26.308907+00:00",
+    "result": "新增 Supabase reader metrics 拉取腳本，落地 storage/analytics latest/daily snapshot。daily_checkup 加 reader_metrics freshness/top-3 維度；publication_candidates 加 reader_signal 軟 metadata（不改排序），並補回歸測試。"
   },
   {
     "id": "paper_review_queue_batch_c12",
@@ -50758,5 +50784,23 @@
     "created_at": "2026-07-05T11:33:02.518339+00:00",
     "title": "taiwan-vt body_v3 canonical 揭露修正：gamma SE 口徑（HAC vs arch MLE）+ TSMC zero-mean sensitivity",
     "description": "2026-07-05 hourly-19 版本 reconcile 後的 Codex review（CONDITIONAL_PASS）抓到兩個 canonical body_v3.tex 的投稿前研究誠實項：\n\n(1) SE 口徑標示不一致：body_v3.tex L60/L164 表註寫「$t(\\gamma)$ uses Newey-West HAC standard errors」，但 0050.TW / TSMC 全樣本 row 的 t 值來自 experiments/k892（arch_model(..., mean='Constant') GJR-GARCH MLE，t 是 arch 的 (Bollerslev-Wooldridge) robust MLE t，非 Newey-West HAC）。需先確認 K892 實際 SE type，再修正表註：full-sample MLE row 標 MLE/BW-robust t，rolling row 若真用 HAC 才標 HAC，不可一律 HAC。\n\n(2) 缺 zero-mean spec sensitivity 揭露：canonical 選常數均值 TSMC gamma=0.052/t=3.98（顯著）為 primary，但 zero-mean spec 給 0.039/t=0.87（不顯著）。reviewer 會質疑「是否挑了讓 TSMC 顯著的 spec」。需在表註或 supplement 明揭：primary=constant-mean K892；zero-mean 給 gamma=0.039/t=0.87，作為 spec-sensitivity（非主結論）。此即舊 body_v2 的 3-spec disambiguation footnote，v3 重構時未帶過來。\n\nroot context：Codex review 2026-07-05（/tmp/codex_review_taiwanvt_reconcile.txt）點 2+3。主線程做（禁 background agent 改 .tex）；改後 xelatex 重編 main_v3.pdf + reproduce gate + Codex re-review。研究誠實：不改數字，只補揭露。"
+  },
+  {
+    "id": "email-12632-5acf9a",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] git-push-backup: push held — 1 new silent fallback(s)",
+    "description": "Gmail UID: 12632\nMessage-ID: <F2092AAC-7C4D-4DEF-8AAE-F95E52742A9F@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 5 Jul 2026 20:04:42 +0800\nSubject: Re: [VolPred Alert][WARN] git-push-backup: push held — 1 new silent fallback(s)\n\n--- 用戶回信內容 ---\n不是說每次發現問題就在當班立刻修好再回報嗎\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月5日 20:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> git-push-backup: push held — 1 new silent fallback(s)\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> 本地領先 5 commit 但 HEAD 帶 1 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push（紅碼不上 origin、CI 不會紅）。下一班 hourly dispatch 必須先修（每處加 'from volpred.ops.diagnostics import warn' 再 fallback，或標 '# silent-ok: 理由'）再讓 push 恢復。新發現：\r\n> NEW src/volpred/ops/alerts.py:2243 except Exception: continue\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "pending",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-05T12:15:08.122234+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12632,
+    "email_message_id": "<F2092AAC-7C4D-4DEF-8AAE-F95E52742A9F@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] git-push-backup: push held — 1 new silent fallback(s)",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
   }
 ]

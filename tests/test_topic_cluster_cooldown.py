@@ -212,3 +212,102 @@ def test_build_publication_candidates_applies_cluster_penalty(tmp_path: Path, mo
     assert candidate["topic_cluster"] == "vix"
     assert candidate["base_score"] > candidate["score"]
     assert any("cluster cooldown penalty" in reason for reason in candidate["reasons"])
+
+
+def test_build_publication_candidates_attaches_reader_signal_without_rescoring(
+    tmp_path: Path, monkeypatch
+):
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "build_publication_candidates.py"
+    spec = importlib.util.spec_from_file_location("build_publication_candidates", script_path)
+    mod = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(mod)
+
+    knowledge_path = tmp_path / "knowledge.json"
+    feed_path = tmp_path / "feed.json"
+    output_path = tmp_path / "publication_candidates.json"
+    reader_metrics_path = tmp_path / "latest.json"
+    exp_dir = tmp_path / "experiments" / "k2001"
+    exp_dir.mkdir(parents=True)
+    (exp_dir / "k2001_results.json").write_text("{}", encoding="utf-8")
+
+    knowledge_path.write_text(
+        json.dumps(
+            [
+                {
+                    "experiment_id": "K2001",
+                    "title": "Covered VIX result",
+                    "content": "PASS robust reader-feedback candidate",
+                    "updated_at": "2026-07-05T00:00:00+00:00",
+                    "tags": ["VIX"],
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_hot",
+                    "title": "Covered K2001 article",
+                    "status": "published",
+                    "audience": "general",
+                    "tags": ["K2001", "VIX"],
+                    "description": "",
+                    "content": "",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    reader_metrics_path.write_text(
+        json.dumps(
+            {
+                "top_articles": [
+                    {
+                        "slug": "mile_hot",
+                        "impressions": 7,
+                        "read_completion_rate_proxy": 0.4286,
+                    }
+                ]
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(mod, "ROOT", tmp_path)
+    monkeypatch.setattr(mod, "KNOWLEDGE_PATH", knowledge_path)
+    monkeypatch.setattr(mod, "FEED_PATH", feed_path)
+    monkeypatch.setattr(mod, "OUTPUT_PATH", output_path)
+    monkeypatch.setattr(mod, "READER_METRICS_LATEST_PATH", reader_metrics_path)
+    monkeypatch.setattr(
+        mod,
+        "cluster_gate_status",
+        lambda cluster: {
+            "cluster": cluster,
+            "count": 0,
+            "cap": 15,
+            "total": 0,
+            "ratio": 0,
+            "blocked": False,
+            "dominant_ratio_breached": False,
+        },
+    )
+
+    mod.main()
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    candidate = payload["candidates"][0]
+    assert candidate["uncovered"] is False
+    assert candidate["score"] == candidate["base_score"]
+    assert candidate["reader_signal"] == {
+        "matched_slugs": ["mile_hot"],
+        "impressions_total": 7,
+        "avg_read_completion_rate_proxy": 0.4286,
+        "read_time_is_proxy": True,
+        "source": "storage/analytics/latest.json",
+    }
+    assert payload["summary"]["candidates_with_reader_signal"] == 1

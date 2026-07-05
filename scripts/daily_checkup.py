@@ -8,14 +8,15 @@
 靜默落後的資料（daily_update 卡 6/26、collect_us、twse_orderflow 死 12 天）、卡 1 年的
 頁面 cache，全部漏網，最後靠老闆當 QA 發現。本檢查補上 result-level 維度。
 
-七大維度（每個失敗都產生具體 finding，可被 alert 消費）：
+八大維度（每個失敗都產生具體 finding，可被 alert 消費）：
 1. data_freshness   — 所有資料收集 job 是否照排程跑 + 關鍵資料檔是否新鮮（時效性資料優先）
 2. cron_completion  — 所有排程 job 最近一輪是否真的 fire + exit0
 3. content_pipeline — 草稿池 ≥ 門檻、今日有產出、published 文章皆含真圖表+數據表（非純散文）
 4. live_freshness   — 線上 API 回傳的 data_date 是否 ≈ 最新交易日（抓「頁面卡舊資料」）
 5. live_cache       — data-bearing 頁面是否被設成長效靜態快取（抓「網頁卡 cache」）
 6. mission_progress — 研究 backlog / 實驗 / 論文是否在前進（非停滯）
-7. recovery_actions — 對可自動修復的 finding 列出建議 recovery 指令
+7. reader_metrics   — 讀者互動 metrics 是否已落地且足夠新鮮
+8. recovery_actions — 對可自動修復的 finding 列出建議 recovery 指令
 
 用法：
   uv run python scripts/daily_checkup.py            # 印報告
@@ -244,6 +245,61 @@ def check_mission_progress() -> list[dict]:
     return out
 
 
+# ── 7. reader_metrics ───────────────────────────────────────────────────────
+# 讀者互動回饋迴圈（platform_ops_reader_metrics_feedback_loop_c9，2026-07-05）：
+# scripts/pull_reader_metrics.py 每日落地 storage/analytics/latest.json；
+# 這裡只驗證「有沒有跑、跑得新不新鮮」，不重算 Supabase 查詢本身。
+READER_METRICS_STALE_H = 48
+
+
+def check_reader_metrics() -> list[dict]:
+    out = []
+    path = STORAGE / "analytics" / "latest.json"
+    if not path.exists():
+        out.append(_finding(
+            "reader_metrics", "warn",
+            "storage/analytics/latest.json 不存在 —— 讀者互動回饋迴圈尚未跑過",
+            recovery="uv run python scripts/pull_reader_metrics.py --top 20 --days 30",
+        ))
+        return out
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        out.append(_finding("reader_metrics", "warn", f"latest.json 讀取失敗: {exc}"))
+        return out
+    gen_at = data.get("generated_at")
+    age_h = None
+    try:
+        generated_at = datetime.datetime.fromisoformat(str(gen_at).replace("Z", "+00:00"))
+        if generated_at.tzinfo is None:
+            age_h = (_now - generated_at).total_seconds() / 3600
+        else:
+            age_h = (
+                datetime.datetime.now(datetime.timezone.utc)
+                - generated_at.astimezone(datetime.timezone.utc)
+            ).total_seconds() / 3600
+    except (ValueError, TypeError):
+        pass  # silent-ok: 缺/壞 timestamp 下面就地判 stale（age_h=None）
+    if age_h is None or age_h > READER_METRICS_STALE_H:
+        age_str = f"{age_h:.0f}h" if age_h is not None else "未知（timestamp 缺或壞）"
+        out.append(_finding(
+            "reader_metrics", "warn",
+            f"reader metrics 已 {age_str} 未更新（門檻 {READER_METRICS_STALE_H}h）",
+            recovery="uv run python scripts/pull_reader_metrics.py --top 20 --days 30",
+        ))
+        return out
+    top = data.get("top_articles") or []
+    if top:
+        top3 = "; ".join(
+            f"{(a.get('title') or a.get('slug') or '未命名')[:24]}(score={a.get('score')})"
+            for a in top[:3]
+        )
+        out.append(_finding("reader_metrics", "info", f"top-3 讀者互動: {top3}"))
+    else:
+        out.append(_finding("reader_metrics", "info", "近期無讀者互動資料（articles_with_activity=0）"))
+    return out
+
+
 def run_all() -> dict:
     dims = {
         "data_freshness": check_data_freshness,
@@ -252,6 +308,7 @@ def run_all() -> dict:
         "live_freshness": check_live_freshness,
         "live_cache": check_live_cache,
         "mission_progress": check_mission_progress,
+        "reader_metrics": check_reader_metrics,
     }
     findings = []
     for name, fn in dims.items():
@@ -285,8 +342,9 @@ def main() -> int:
     else:
         print(f"每日大體檢 {_now:%Y-%m-%d %H:%M} — overall={report['overall']} "
               f"(critical={report['critical_count']}, warn={report['warn_count']})")
+        _SEVERITY_MARK = {"critical": "🔴", "warn": "🟡", "info": "ℹ️"}
         for f in report["findings"]:
-            mark = "🔴" if f["severity"] == "critical" else "🟡"
+            mark = _SEVERITY_MARK.get(f["severity"], "🟡")
             print(f"  {mark} [{f['dimension']}] {f['message']}")
             if f["recovery"]:
                 print(f"      ↳ recovery: {f['recovery']}")
