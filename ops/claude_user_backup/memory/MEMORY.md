@@ -7,7 +7,7 @@
 - [reference_anthropic_cache_ttl.md](reference_anthropic_cache_ttl.md) — Claude Code cache TTL 依 tier（Max=1h, Pro/API=5min）；continue_task cron */30 對齊邏輯
 - [reference_notebooklm_rag_workflow.md](reference_notebooklm_rag_workflow.md) — NotebookLM 作為論文 / 文件 RAG 資料庫；cross-paper meta-eval / prior-art audit / reviewer R1 drafting 觸發時機
 - [reference_publisher_strict_audit_tag_rules.md](reference_publisher_strict_audit_tag_rules.md) — feed-publisher 自動 strip K-id 到 details.experiment_refs metadata；tag ≤8 + 禁統計術語
-- [reference_hourly_dispatch_via_os_cron.md](reference_hourly_dispatch_via_os_cron.md) — 每小時派工走 OS cron 不靠 ScheduleWakeup（unreliable）；crontab `7 * * * *` 觸發 `claude -p`
+- [reference_hourly_dispatch_via_os_cron.md](reference_hourly_dispatch_via_os_cron.md) — SUPERSEDED(7/4 cutover)：hourly dispatch 已改 com.volpred.dispatch-supervisor 常駐 daemon；in-flight 檢查=jq .current_job dispatch_state.json；OS-level trigger 原理仍成立
 - [reference_compute_queue_token_split.md](reference_compute_queue_token_split.md) — Compute queue 把 heavy CPU work 分流；~75% K-experiment token 節省 (`*/15` worker cron + 2-phase hourly dispatch)
 - [reference_dual_cli_availability.md](reference_dual_cli_availability.md) — Codex 0.130 ChatGPT auth + Gemini 0.42 `ideahub.everything` Pro 訂閱（2026-05-14 確認；Pro 可主力用 gemini-2.5-pro）
 - [reference_knowledge_wiki_and_context_economy.md](reference_knowledge_wiki_and_context_economy.md) — Karpathy LLM-Wiki 編譯式知識庫(concept pages 互連) + context 經濟(CLAUDE.md 精簡=每 token 每回合付費；progressive disclosure；過門檻寫 handoff)
@@ -115,7 +115,7 @@
 - [feedback_worktree_stale_base_extract_by_path.md](feedback_worktree_stale_base_extract_by_path.md) — worktree 從 stale base 分出使 merge guard abort 時，用 `git checkout <branch> -- experiments/kXXXX/` path-scoped 抽取，勿硬 merge（K1619 實測零遺失）
 - [feedback_proactively_complete_red_alerts.md](feedback_proactively_complete_red_alerts.md) — 看到紅色/critical 主動完成或排程完成並告訴老闆，不被動回報
 - [feedback_continuous_work_and_read_mail.md](feedback_continuous_work_and_read_mail.md) — autonomous tick 要持續做實事不心跳空轉；mandate 直接讀 Gmail 最新信不靠 lagging task
-- [feedback_refill_check_saturation_and_running_hourly.md](feedback_refill_check_saturation_and_running_hourly.md) — 補池前必 pgrep hourly 避免 race + 判斷 K 可寫要查 narrative-arc 飽和不只 results.json
+- [feedback_refill_check_saturation_and_running_hourly.md](feedback_refill_check_saturation_and_running_hourly.md) — 補池/動 next_tasks 前必查 dispatch_state.json 的 current_job（cutover 後 pgrep 失效）+ 寫入走 flock；判斷 K 可寫要查 narrative-arc 飽和
 - [feedback_journal_topic_discovery.md](feedback_journal_topic_discovery.md) — 研究方向自行從頂尖期刊(JBF/JFE/JPM/FAJ/CFA)挖不手寫;backlog 薄派 journal-discovery agent(週一/四 session_cron + prompt scripts/agent_prompts/journal_topic_scan.md)
 - [feedback_recycling_is_release_layer_not_research.md](feedback_recycling_is_release_layer_not_research.md) — 文章「鬼打牆」根因在釋出端(draft 積壓+釋出偏 vix/spy+cluster 錯標)非研究端;生產前先掃 draft backlog、釋出挑 fresh cluster
 - [reference_fb_chrome_browser_autoselect.md](reference_fb_chrome_browser_autoselect.md) — FB 發文固定自選 MAC STUDIO Chrome（deviceId bc09353b…）不問用戶；中文用 pbcopy+Cmd+V

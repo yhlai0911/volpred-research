@@ -4,6 +4,9 @@ description: 本地 session ScheduleWakeup 在 idle 不可靠地觸發；架構�
 type: reference
 originSessionId: 91283b9e-7227-43f5-88bb-9d92168d243a
 ---
+
+> **SUPERSEDED（2026-07-04 cutover）**：hourly dispatch 已由 `com.volpred.dispatch-supervisor` LaunchAgent（常駐 asyncio daemon，real-run）接管；legacy `com.volpred.hourly-dispatch` + cron wrapper 已 disabled。in-flight 檢查改讀 `storage/ops/dispatch_state.json` 的 `current_job`。本檔其餘內容僅存歷史脈絡（OS-level trigger 優於 ScheduleWakeup 的原理仍成立）。
+
 **Architectural fact**: Hourly dispatch trigger 由 **OS crontab** 負責，**不**靠 session-level ScheduleWakeup。
 
 **Why**:

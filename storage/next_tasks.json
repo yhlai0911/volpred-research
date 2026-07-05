@@ -48724,7 +48724,7 @@
     "title": "研究 backlog fallback: Volatility laundering 免費驗證：上市 private-credit 載體的申報波動 vs 去平滑後真波動",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Volatility laundering 免費驗證：上市 private-credit 載體的申報波動 vs 去平滑後真波動 — yfinance 上市 BDC（ARCC/BXSL/OBDC）+ BIZD + PRIV（2025 上市 private-credit ETF）+ interval fund NAV（⚠️ 覆蓋度 dispatch 前驗證），Getmansky-Lo-Makarov MA-unsmoothing 估平滑係數，對照 HYG/銀行股 proxy 量化「申報 vol 低估幾倍」（JPM 2024 Anson amortizing volatility + CFA Ins | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48734,9 +48734,6 @@
       "research-program-backlog"
     ],
     "created_at": "2026-07-04T07:30:49+00:00",
-    "claimed_by": "hourly-03",
-    "claimed_at": "2026-07-05T19:09:36.060443+00:00",
-    "claim_session_id": "a1ff82824706",
     "status_history": [
       {
         "ts": "2026-07-05T19:09:36.060710+00:00",
@@ -48749,9 +48746,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-05T21:50:05.851874+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-03",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-05T19:10:10.087384+00:00"
+    "started_at": "2026-07-05T19:10:10.087384+00:00",
+    "last_released_at": "2026-07-05T21:50:05.851868+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "research_buyback_blackout_vol",
@@ -51682,5 +51688,39 @@
       "c12-batch"
     ],
     "task_type": "paper_review"
+  },
+  {
+    "id": "trending_repost_2026_07_06_fed利率",
+    "title": "[trending_repost] 聯準會轉向不降息？美債隱含波動率的非對稱定價",
+    "description": "針對聯準會釋出「長期高利率」訊號，探討市場從降息預期轉向的利率風險。可量化：分析美債選擇權隱含波動率（MOVE 指數）與聯邦基金期貨利率尾部風險之相關性。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-07-05T22:00:17+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-07-05T22:08:40.228628+00:00",
+    "claim_session_id": "ca80d2d2a3a7",
+    "status_history": [
+      {
+        "ts": "2026-07-05T22:08:40.228908+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-06"
+      },
+      {
+        "ts": "2026-07-05T22:23:10.130605+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-06"
+      }
+    ],
+    "completed_at": "2026-07-05T22:23:10.130277+00:00",
+    "result": "trending 文章『同樣動一碼，債市只怕利率往上』發佈 scheduled (mile_d12825bb)；evidence=experiments/trending_2026_07_06_fed_move_asymmetry (MOVE 對殖利率上/下行非對稱反應, 4065 日, 上行+0.51% vs 下行-0.28%, t=5.52 p=3.6e-8, 控幅斜率1.47x, 近90日放大近6倍); anti-ai gate PASS; 2 主圖+3 懶人包; FB awaiting_interactive"
   }
 ]

@@ -34,3 +34,5 @@ originSessionId: 91283b9e-7227-43f5-88bb-9d92168d243a
 - 雲端 routine 仍 disabled
 - 完整完成 gate（4-hourly 時加入的 hard rule，hourly 期間繼續 enforce — 透過 scope 切小達成）
 - anti-ai-style skill 寫作任務必引用
+
+**例外（boss msg143 2026-07-04，2026-07-05 落地於 hourly prompt PHASE B-PARALLEL）**：draft-pool deficit ≥2 時，該班**並行**派 min(deficit, 2) 個 draft-writer（sonnet，daily_article 並行上限=2、total slot cap=4 內），一次補到門檻 — 不再受「每班 1 篇文章」節奏限制。並行安全：writers 只寫 storage/drafts/ 檔，發佈由主線程串行 publish_draft.py（feed.json 單線程）。一般非文章派工仍維持每班 1 個。

@@ -1,49 +1,49 @@
 {
   "schema": "dreaming_baseline.v1",
   "description": "Rolling per-signature consecutive-run strike counts. THREE_STRIKE consecutive runs escalate to critical.",
-  "updated_at": "2026-07-04T22:00:05.879699+00:00",
+  "updated_at": "2026-07-05T22:00:15.461485+00:00",
   "signatures": {
     "memory_skill_gap:uncodified_process": {
-      "strike_count": 7,
+      "strike_count": 8,
       "pattern_type": "memory_skill_gap",
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-04T22:00:05.879699+00:00"
+      "last_seen": "2026-07-05T22:00:15.461485+00:00"
     },
     "memory_hygiene:consolidation_review": {
-      "strike_count": 7,
+      "strike_count": 8,
       "pattern_type": "memory_hygiene",
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-04T22:00:05.879699+00:00"
+      "last_seen": "2026-07-05T22:00:15.461485+00:00"
     },
     "persistent_alert:a4a7ca551f8626b2": {
-      "strike_count": 7,
+      "strike_count": 8,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-04T22:00:05.879699+00:00"
-    },
-    "persistent_alert:3e4be94e4f191a69": {
-      "strike_count": 2,
-      "pattern_type": "persistent_alert",
-      "first_seen": "2026-07-03T22:00:05.211441+00:00",
-      "last_seen": "2026-07-04T22:00:05.879699+00:00"
-    },
-    "persistent_alert:5097a67e2f07ef14": {
-      "strike_count": 2,
-      "pattern_type": "persistent_alert",
-      "first_seen": "2026-07-03T22:00:05.211441+00:00",
-      "last_seen": "2026-07-04T22:00:05.879699+00:00"
-    },
-    "persistent_alert:7ecf96ae6fa61592": {
-      "strike_count": 2,
-      "pattern_type": "persistent_alert",
-      "first_seen": "2026-07-03T22:00:05.211441+00:00",
-      "last_seen": "2026-07-04T22:00:05.879699+00:00"
+      "last_seen": "2026-07-05T22:00:15.461485+00:00"
     },
     "persistent_alert:aa6c059b3dc7e00d": {
-      "strike_count": 1,
+      "strike_count": 2,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-04T22:00:05.879699+00:00",
-      "last_seen": "2026-07-04T22:00:05.879699+00:00"
+      "last_seen": "2026-07-05T22:00:15.461485+00:00"
+    },
+    "repeated_tool_failure:git_push_backup.log:exit120": {
+      "strike_count": 1,
+      "pattern_type": "repeated_tool_failure",
+      "first_seen": "2026-07-05T22:00:15.461485+00:00",
+      "last_seen": "2026-07-05T22:00:15.461485+00:00"
+    },
+    "persistent_alert:4415ad115dc02afc": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-05T22:00:15.461485+00:00",
+      "last_seen": "2026-07-05T22:00:15.461485+00:00"
+    },
+    "persistent_alert:1125366c27560e4e": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-05T22:00:15.461485+00:00",
+      "last_seen": "2026-07-05T22:00:15.461485+00:00"
     }
   }
 }

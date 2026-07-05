@@ -1,6 +1,6 @@
 ---
 name: feedback_refill_check_saturation_and_running_hourly
-description: 補池/refill 前必 pgrep hourly 避免 race + 判斷 K「可寫」要查 narrative-arc 飽和度不只 results.json
+description: 補池/refill 前必查 dispatch_state.json 的 current_job（cutover 後 pgrep hourly 已失效）避免 race + 判斷 K「可寫」要查 narrative-arc 飽和度不只 results.json
 metadata:
   node_type: memory
   type: feedback
@@ -17,7 +17,7 @@ metadata:
 
 ## 失誤 2：深層 pool 問題時沒先 pgrep hourly → 與正在跑的 hourly agent race
 - 我 00:18 refill 後，01:07 hourly agent（opus）獨立診斷同一 pool 根因、正在實作 8th belt。我的 refill 變成它要 reconcile 的 incident。
-- **How to apply**：補池 / 動 next_tasks.json / 大改 ops 共享狀態前，先 `pgrep -fl hourly`；若 hourly 在跑 → **stand down**，讓它完成再 review，不 race。
+- **How to apply**（2026-07-05 cutover 後更新）：補池 / 動 next_tasks.json / 大改 ops 共享狀態前，先 `jq '.current_job' storage/ops/dispatch_state.json`；非 null → **stand down**，讓該班完成再動。（舊法 `pgrep -fl hourly` 在 2026-07-04 dispatch-supervisor cutover 後失效——supervisor worker 是直接 spawn 的 claude -p，process 名稱不含 hourly。）寫入 next_tasks.json 一律走 fcntl flock 協議（task_pool_claim 同款），lock 下 race 也安全。
 
 ## 真結論（白天決策）
 易寫的 uncovered K 已大致寫完 → 池低的真需求是 **contrarian 新研究**（加密/HFT 微結構/options surface/總經/行為財務/EM ex-台），不是反覆 refill 既有 K。連結稍早「故步自封」糾正。

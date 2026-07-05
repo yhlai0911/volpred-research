@@ -13,7 +13,7 @@ metadata:
 
 **How to apply — backbone 必須 session-independent（OS cron / LaunchAgent，不依賴互動 session）**：
 - **定時任務**：OS crontab（17 行）+ LaunchAgent（collect/release/memory-health/fred-guard 等）— session-independent ✓
-- **非定時派工 + 巡檢**：`com.volpred.hourly-dispatch` LaunchAgent（`:07`）spawn headless `claude -p`（prompt = `scripts/cron_hourly_dispatch_prompt.md`）做 dispatch + ops cycle — session-independent ✓（per [[reference_hourly_dispatch_via_os_cron]]）
+- **非定時派工 + 巡檢**：`com.volpred.dispatch-supervisor` LaunchAgent（常駐 daemon，2026-07-04 cutover 取代 com.volpred.hourly-dispatch）每小時 :07 spawn headless `claude -p`（prompt = `scripts/cron_hourly_dispatch_prompt.md`）做 dispatch + ops cycle — session-independent ✓（RunAtLoad+KeepAlive，比舊 StartCalendarInterval 更強壯）
 - **巡檢**：`ops_dashboard`（:30 LaunchAgent+crontab）+ `check_alerts`（hourly LaunchAgent+crontab）獨立巡檢 — session-independent ✓。停掉雲端 patrol（[[project_cloud_agent_git_divergence]]）後，本地這兩個 cron + hourly-dispatch 主 agent 巡檢接手，不靠雲端。
 - **互動 autonomous loop**（ScheduleWakeup chain）= enhancement，session 開著時更頻繁；斷了有上述 OS backbone 兜底；下次開 session 由 CLAUDE.md「Session start 自動啟動」規則自動恢復（2026-06-24 驗證 CLAUDE.md 7 處提及該機制）。
 
