@@ -13,7 +13,7 @@ CLI:
 Output (--task-type): JSON with {model, effort, cli_flag, agent_short}.
 Library import:
   from model_router import pick_model
-  m = pick_model("experiment")  # → ("opus", "high")
+  m = pick_model("experiment")  # → ("opus", "xhigh")
 """
 from __future__ import annotations
 
@@ -25,20 +25,29 @@ import sys
 # Per CLAUDE.md table + .claude/rules/agent-delegation.md
 # Format: task_type → (model_short, reasoning_effort)
 #   model_short: "opus" | "sonnet" | "haiku"
-#   effort:       "low" | "medium" | "high"
+#   effort:       "low" | "medium" | "high" | "xhigh" | "max"  (max = ceiling)
 
 # 2026-07-05 owner directive: ALL subagents use opus (4.8), superseding the
 # 2026-07-01 sonnet<->opus two-way pick. Model is now uniformly `opus`; only
 # `effort` still varies by task difficulty (orthogonal to model — a trivial
-# lookup on opus/low is cheaper than opus/high, no need to burn max reasoning
+# lookup on opus/low is cheaper than opus/max, no need to burn max reasoning
 # on a checklist). haiku/sonnet remain valid aliases in the roster but are OFF
 # the default subagent rotation.
+#
+# 2026-07-05 (later, owner correction): the reasoning-effort scale is FIVE
+# tiers, matching the `claude --effort` CLI flag exactly:
+#     low < medium < high < xhigh < max
+# Earlier this file capped at "high" — WRONG (high is only rung 3/5). CEILING is
+# now opus/max. Research (experiment/paper_decision/strategy_lifecycle) starts at
+# xhigh and escalates to max. NOTE: effort is applied via `--effort` on the
+# spawned `claude -p` (wired 2026-07-05 into dispatch_supervisor/worker.py); the
+# CLI fail-opens on unknown values (warns + uses default), so it is safe.
 TASK_TYPE_TO_MODEL: dict[str, tuple[str, str]] = {
-    # Research & 高風險判斷 — opus / high
-    "experiment":         ("opus", "high"),    # K-experiment 設計 / 結果判讀
-    "paper_decision":     ("opus", "high"),    # narrative state machine / pivot
-    "paper_body":         ("opus", "medium"),  # .tex rewrite (主線程才能跑)
-    "strategy_lifecycle": ("opus", "high"),    # 策略上架 gate
+    # Research & 高風險判斷 — opus / xhigh (研究：xhigh 起，失敗升 max)
+    "experiment":         ("opus", "xhigh"),   # K-experiment 設計 / 結果判讀
+    "paper_decision":     ("opus", "xhigh"),   # narrative state machine / pivot
+    "paper_body":         ("opus", "high"),    # .tex rewrite (主線程才能跑; 升 medium→high)
+    "strategy_lifecycle": ("opus", "xhigh"),   # 策略上架 gate
 
     # 寫作 / 程序型 — opus / medium
     "paper_review":       ("opus", "medium"),  # latex-academic-reviewer + citation-verifier
@@ -71,21 +80,25 @@ DEFAULT = ("opus", "medium")  # fallback for unknown task_type (2026-07-05: all-
 # ─────────────────────────────────────────────────────────────────────────
 # Effort/model escalation ladder (2026-05-29 boss directive)
 # ─────────────────────────────────────────────────────────────────────────
-# "問題沒辦法解決就持續調高 effort" — but with a HARD CEILING (opus/high) and
+# "問題沒辦法解決就持續調高 effort" — but with a HARD CEILING (opus/max) and
 # a strategy-switch handoff once exhausted (→ 3-strike rule: decompose / add
 # context / second-opinion / human-escalate, NOT infinite retry).
 #
 # Monotonic cost-ordered ladder. On a verifiable failure (test fail / verdict
 # FAIL / exception / non-convergence / reviewer reject), the dispatcher
 # re-dispatches at the NEXT rung above the task's current position.
-# 2026-07-05 all-opus: base tiers are now opus, so escalation is opus-effort-only
-# (low → medium → high). A verifiable failure re-dispatches at the next rung.
+# 2026-07-05 (all-opus + full 5-tier scale): base tiers are opus, escalation is
+# opus-effort-only across the FULL `claude --effort` scale
+# (low → medium → high → xhigh → max). A verifiable failure re-dispatches at the
+# next rung; the previous 3-rung ladder wrongly stopped at high.
 ESCALATION_LADDER: list[tuple[str, str]] = [
     ("opus", "low"),
     ("opus", "medium"),
-    ("opus", "high"),     # ← CEILING. Beyond this: switch strategy, don't retry.
+    ("opus", "high"),
+    ("opus", "xhigh"),
+    ("opus", "max"),      # ← CEILING. Beyond this: switch strategy, don't retry.
 ]
-CEILING = ("opus", "high")
+CEILING = ("opus", "max")
 
 
 def pick_model(task_type: str | None) -> tuple[str, str]:
@@ -112,7 +125,7 @@ def pick_model_escalated(task_type: str | None, attempt: int = 0) -> dict:
     Used by the dispatch retry loop: on a verifiable failure, re-dispatch with
     attempt+1 so a harder problem gets a stronger model/effort. Returns:
       {model, effort, attempt, at_ceiling, exhausted}
-    - at_ceiling: this dispatch IS at opus/high (max reasoning available)
+    - at_ceiling: this dispatch IS at opus/max (highest reasoning available)
     - exhausted: caller requested escalation BEYOND ceiling → must switch
       strategy per 3-strike rule (decompose / +context / Codex 2nd-opinion /
       escalate to human), NOT keep retrying same approach.
@@ -120,8 +133,8 @@ def pick_model_escalated(task_type: str | None, attempt: int = 0) -> dict:
     base_model, base_effort = pick_model(task_type)
     base_idx = _ladder_index(base_model, base_effort)
     if base_idx < 0:
-        # Off-ladder base (shouldn't happen) → start from sonnet/medium rung
-        base_idx = _ladder_index("sonnet", "medium")
+        # Off-ladder base (shouldn't happen) → start from opus/medium rung
+        base_idx = _ladder_index("opus", "medium")
 
     target_idx = base_idx + max(0, attempt)
     exhausted = target_idx > (len(ESCALATION_LADDER) - 1)
@@ -151,7 +164,7 @@ def main() -> int:
     g.add_argument("--list", action="store_true", help="Show full mapping table")
     ap.add_argument(
         "--attempt", type=int, default=0,
-        help="Escalation attempt (0=base tier; N=N rungs higher on ladder, capped at opus/high). "
+        help="Escalation attempt (0=base tier; N=N rungs higher on ladder, capped at opus/max). "
              "Use in dispatch retry loop: bump on each verifiable failure.",
     )
     args = ap.parse_args()

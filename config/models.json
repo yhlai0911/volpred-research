@@ -2,7 +2,7 @@
   "_meta": {
     "purpose": "Single source of truth for Claude model roster + task-tier -> model mapping used when dispatching subagents. agent-delegation.md's model table points here.",
     "authoritative_availability_source": "The Claude Desktop model selector (bottom-right of the app) is the ground truth for which models are AVAILABLE right now. The Agent/Workflow tool `model` enum lists dispatchable ALIASES but does NOT reflect live availability (e.g. fable is a valid alias yet currently unavailable). When reconciling, trust the desktop selector for availability.",
-    "main_loop_policy": "Main-thread (interactive) model is fixed by the session and CANNOT be hot-swapped per task. Owner directive 2026-07-01: keep main loop on opus. Owner directive 2026-07-05: ALL SUBAGENTS also use opus (4.8) — the per-task sonnet<->opus pick is retired; only `effort` still varies by task difficulty.",
+    "main_loop_policy": "Main-thread (interactive) model is fixed by the session and CANNOT be hot-swapped per task. Owner directive 2026-07-01: keep main loop on opus. Owner directive 2026-07-05: ALL SUBAGENTS also use opus (4.8) — the per-task sonnet<->opus pick is retired; only `effort` still varies by task difficulty, across the full 5-tier `claude --effort` scale low<medium<high<xhigh<max (max = ceiling). effort is now actually applied via `--effort` on the spawned `claude -p` (it was inert before 2026-07-05).",
     "last_reconciled": "2026-07-02",
     "reconciled_via": "owner /model switch in live session + headless -p smoke test (both succeeded 2026-07-02)",
     "known_gaps": "The desktop selector shows a 'More models >' submenu that has not been enumerated — the roster below may be incomplete. Expand it (owner screenshot, since main thread cannot drive the native desktop UI) to complete."
@@ -44,11 +44,12 @@
     }
   },
   "subagent_policy": {
-    "_owner_directive_2026_07_05": "ALL subagents use opus (4.8). Supersedes the 2026-07-01 sonnet<->opus two-way pick — there is no longer a model choice; every subagent is opus. Only `effort` (low/medium/high) still varies by task difficulty, so opus/low on a checklist stays cheaper than opus/high on research. sonnet/haiku remain valid roster aliases but are OFF the default subagent rotation.",
+    "_owner_directive_2026_07_05": "ALL subagents use opus (4.8). Supersedes the 2026-07-01 sonnet<->opus two-way pick — there is no longer a model choice; every subagent is opus. Only `effort` varies by task difficulty, across the FULL 5-tier `claude --effort` scale: low < medium < high < xhigh < max (max = ceiling). opus/low on a checklist stays far cheaper than opus/max on research. sonnet/haiku remain valid roster aliases but are OFF the default subagent rotation.",
+    "_effort_wiring_2026_07_05": "effort is APPLIED via the `claude --effort <level>` flag on the spawned `claude -p` — wired into dispatch_supervisor/worker.py (DISPATCH_EFFORT, default high, VOLPRED_DISPATCH_EFFORT env) + telegram_responder.sh (RESPONDER_EFFORT, default high) + legacy cron. BEFORE 2026-07-05 the per-task effort tier was computed by model_router but NEVER passed to any dispatch — it was inert metadata. The CLI fail-opens on unknown values (warns + uses default), so wiring is safe. NOTE gap: the Agent/Task tool has no effort knob, so a heavy research SUBAGENT the hourly orchestrator spawns still needs to be launched via its own `claude -p --effort xhigh|max` to actually receive the higher tier.",
     "_superseded_2026_07_01": "Prior policy: main loop = opus, subagents chose between sonnet and opus by difficulty. Retired 2026-07-05.",
     "opus": {
-      "when": "ALL subagents (2026-07-05). effort by difficulty: high — research experiment design / methodology / high-risk paper judgment / strategy gate; medium — writing (articles, digest, paper_review, member_qa, email_reply); low — ops / governance / lookup / verify / classification (checklists & references).",
-      "effort": "high | medium | low by task difficulty"
+      "when": "ALL subagents (2026-07-05). effort by difficulty: xhigh (→ max on verifiable failure) — research experiment design / methodology / high-risk paper judgment / strategy gate; high — paper body (.tex rewrite); medium — writing (articles, digest, paper_review, member_qa, email_reply); low — ops / governance / lookup / verify / classification (checklists & references).",
+      "effort": "low | medium | high | xhigh | max by task difficulty (matches `claude --effort`; max = ceiling)"
     },
     "sonnet": {
       "status": "OFF the default subagent rotation (2026-07-05 all-opus). Valid alias if ever explicitly needed; not auto-routed."
@@ -62,7 +63,7 @@
   },
   "rules": [
     "Respect skill frontmatter model default first; override via Agent tool `model` param only when skill has none or the task clearly escalates.",
-    "ALL subagents use opus (owner directive 2026-07-05). Only `effort` varies by difficulty — never route a subagent to sonnet/haiku by default.",
+    "ALL subagents use opus (owner directive 2026-07-05). Only `effort` varies by difficulty across the 5-tier scale low<medium<high<xhigh<max (max = ceiling; matches `claude --effort`) — never route a subagent to sonnet/haiku by default. effort is applied via the `--effort` flag on the spawned `claude -p` (was inert before 2026-07-05).",
     "Procedural side-tasks (browser automation, scans, large search) still get FORKED to a subagent (context: fork) rather than run inline on the main loop — but that subagent is now opus/low, not sonnet. 2026-07-01 gap: FB posting ran inline on the main loop.",
     "Do NOT route to a model whose available=false (e.g. fable now)."
   ],

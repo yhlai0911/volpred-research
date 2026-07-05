@@ -591,10 +591,14 @@ PROMPT=$(cat "$PROMPT_FILE")
 # Returns claude's exit code via global EXIT_CODE. Sets CLAUDE_PID for trap.
 run_one_attempt() {
   local model=$1
+  # 2026-07-05: effort now wired via --effort (was inert). Legacy wrapper is
+  # launchctl-disabled/rollback-only, but kept consistent. Default high;
+  # DISPATCH_EFFORT env overrides. CLI fail-opens on unknown values.
+  local effort="${DISPATCH_EFFORT:-high}"
 
   /usr/bin/perl -e 'alarm shift; exec @ARGV' "$HOURLY_CAP_SEC" \
     "$CLAUDE_BIN" -p --dangerously-skip-permissions \
-    --model "$model" "$PROMPT" &
+    --effort "$effort" --model "$model" "$PROMPT" &
   CLAUDE_PID=$!
 
   (

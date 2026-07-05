@@ -27,11 +27,11 @@ Canonical source：`config/token_policy.json`
 
 ## Workflow 路由
 
-> **Owner directive 2026-07-05**：下表「預設 model」欄全部為 `opus`（4.8）；所有 subagent 一律用 opus，只有 `effort`（low/medium/high）依難度變化。canonical 來源 = `config/models.json` + `scripts/model_router.py`。`sonnet` / `haiku` 退出預設 rotation（仍是合法 alias，不自動路由）。
+> **Owner directive 2026-07-05**：下表「預設 model」欄全部為 `opus`（4.8）；所有 subagent 一律用 opus，只有 `effort` 依難度變化。**effort 是 5 檔**（對齊 `claude --effort`）：`low < medium < high < xhigh < max`（`max` 是天花板；owner 更正——原本錯把 high 當頂，研究類升 `xhigh`、失敗升 `max`）。effort 現在真的透過 `--effort` 套用（worker.py / telegram_responder.sh；2026-07-05 前 inert）。canonical 來源 = `config/models.json` + `scripts/model_router.py`。`sonnet` / `haiku` 退出預設 rotation（仍是合法 alias，不自動路由）。
 
 | Workflow ID | 何時使用 | 執行模式 | 預設 model / effort | Detail Path | Compact 提示 |
 |---|---|---|---|---|---|
-| `research-design` | 新實驗、回測、方法論判斷、研究方向續跑 | inline；side task 再 fork | `opus / high` | `.claude/skills/autonomous-research/SKILL.md` | 新開實驗分支前若 `62%+` 先 compact |
+| `research-design` | 新實驗、回測、方法論判斷、研究方向續跑 | inline；side task 再 fork | `opus / xhigh` | `.claude/skills/autonomous-research/SKILL.md` | 新開實驗分支前若 `62%+` 先 compact |
 | `code-implement` | 程式實作、bug fix、focused code change | inline；大搜尋或大 logs 再 fork | `opus / medium` | `AGENTS.md` | 單檔小改留主線；跨模組再拆 |
 | `code-review` | review、風險盤點、回歸與缺測檢查 | inline | `opus / medium` | `AGENTS.md` | findings-first；不要把 review prompt 寫成長 SOP |
 | `agent-result-check` | agent / worktree 回報結果後驗數字 | inline | `opus / low` | `.claude/skills/agent-result-verification/SKILL.md` | 保留在主線做，不外包 |
@@ -42,7 +42,7 @@ Canonical source：`config/token_policy.json`
 | `member-qa` | 會員問題評分、rerank、candidate flow | forked subagent | `opus / low` | `.claude/skills/member-questions/SKILL.md` | 與主線研究無關時必隔離 |
 | `memory-health` | knowledge / thinking / experiment memory 健檢與去重 | forked subagent | `opus / medium` | `.claude/skills/memory-health/SKILL.md` | 大檔檢查優先用乾淨 context |
 | `citation-check` | citation bibliographic accuracy / DOI / 引文忠實度 | forked subagent | `opus / medium` | `.claude/skills/citation-verifier/SKILL.md` | 長文獻核對不要塞主線 |
-| `paper-quality` | claim-evidence、contribution framing、Harvey 標準 | inline | `opus / high` | `.claude/skills/finance-paper-quality/SKILL.md` | 高風險判斷，不為省 token 降級 |
+| `paper-quality` | claim-evidence、contribution framing、Harvey 標準 | inline | `opus / xhigh` | `.claude/skills/finance-paper-quality/SKILL.md` | 高風險判斷，不為省 token 降級 |
 | `latex-review` | LaTeX 結構、review report、長論文審查 | forked subagent | `opus / high` | `.claude/skills/latex-academic-reviewer/SKILL.md` | 長文件審查優先 fresh context |
 | `paper-stage` | early/draft/review/ready/submitted 分類 | inline | `opus / low` | `.claude/skills/paper-stage-classifier/SKILL.md` | 快速分類，不必重模型 |
 | `paper-review-round` | 發起一輪 review cycle、收集 reviewer 報告 | inline | `opus / medium` | `.claude/skills/paper-review-cycle/SKILL.md` | 真正 reviewer 可另外 fork |

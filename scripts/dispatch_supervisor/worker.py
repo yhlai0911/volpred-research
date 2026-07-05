@@ -48,6 +48,18 @@ SONNET_MODEL = "claude-sonnet-5"
 
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "/Users/yhlai0911/.local/bin/claude")
 
+# Reasoning effort for the spawned orchestrator session (2026-07-05: effort was
+# previously computed by model_router but NEVER passed to any `claude -p` — it
+# was inert metadata. Now wired via `--effort`). This applies to the hourly
+# orchestrator session, which does triage/routing/brief-writing + inline
+# execution of light tasks; "high" is a strong-but-not-wasteful default (not
+# xhigh/max every hour). Heavy research SUBAGENTS the orchestrator spawns should
+# carry their own higher effort (xhigh/max per model_router) via their own
+# `claude -p --effort` — the Agent/Task tool has no effort knob. The claude CLI
+# fail-opens on unknown values (warns + uses default), so this is safe.
+# Valid values: low | medium | high | xhigh | max.
+DISPATCH_EFFORT = os.environ.get("VOLPRED_DISPATCH_EFFORT", "high")
+
 # Exit codes from `claude -p` that we recognise
 HANG_EXIT_CODES = {137, 142, 143}  # SIGKILL / SIGALRM / SIGTERM
 
@@ -211,6 +223,7 @@ def _run_one_attempt(
     schedule_id: str,
     state_path: Path,
     claude_bin: str = CLAUDE_BIN,
+    effort: str = DISPATCH_EFFORT,
 ) -> tuple[int, float]:
     """Single Popen attempt. Returns (exit_code, duration_s, attempt_output).
 
@@ -223,7 +236,7 @@ def _run_one_attempt(
     """
     argv = [
         claude_bin, "-p", "--dangerously-skip-permissions",
-        "--model", model, prompt_text,
+        "--effort", effort, "--model", model, prompt_text,
     ]
     # Codex review §10 #5: reserve the state slot BEFORE spawning so no other
     # caller can pass a concurrent "current_job is None" check while we spawn.
@@ -315,7 +328,7 @@ def run_worker(
         # RETRY_BACKOFF_S separates them.
         model = OPUS_MODEL
         final_model = model
-        LOG.info("worker attempt=%d/%d model=%s", attempt, max_attempts, model)
+        LOG.info("worker attempt=%d/%d model=%s effort=%s", attempt, max_attempts, model, DISPATCH_EFFORT)
         exit_code, duration, attempt_output = _run_one_attempt(
             prompt_text=prompt_text, model=model, timeout_s=timeout_s,
             log_path=log_path, attempt=attempt, schedule_id=schedule_id,

@@ -18,6 +18,10 @@ CAP_SEC=900  # 15 min hard cap — TG 是即時聊天，答不完的部分留 ho
 # 回答品質優先於 token — 與 hourly-dispatch 同款 opus primary；owner 若要降速換快，
 # 改 TELEGRAM_RESPONDER_MODEL env 或此 default。
 RESPONDER_MODEL="${TELEGRAM_RESPONDER_MODEL:-claude-opus-4-8}"
+# 2026-07-05: effort now actually wired via `--effort` (was inert everywhere).
+# boss-facing 通道，品質優先 → high 底線；owner 可用 TELEGRAM_RESPONDER_EFFORT env
+# 調 low|medium|high|xhigh|max（CLI fail-opens 亂值 → 警告後用 default，安全）。
+RESPONDER_EFFORT="${TELEGRAM_RESPONDER_EFFORT:-high}"
 
 mkdir -p "$(dirname "$LOCK_DIR")"
 if ! mkdir "$LOCK_DIR" 2>/dev/null; then
@@ -55,7 +59,7 @@ print(sum(1 for t in tasks if t.get('task_type')=='telegram_reply' and t.get('st
 run_claude_pass() {
     # watchdog：CAP_SEC 後殺 responder
     (
-        "$CLAUDE_BIN" -p --dangerously-skip-permissions --model "$RESPONDER_MODEL" "$PROMPT" 2>&1 &
+        "$CLAUDE_BIN" -p --dangerously-skip-permissions --effort "$RESPONDER_EFFORT" --model "$RESPONDER_MODEL" "$PROMPT" 2>&1 &
         CPID=$!
         (
             sleep "$CAP_SEC"

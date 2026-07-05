@@ -127,26 +127,27 @@ PHASE B — 派新工:
    ```bash
    MODEL_INFO=$(uv run python scripts/model_router.py --task-type <task_type>)
    MODEL=$(echo "$MODEL_INFO" | jq -r .agent_short)  # 一律 opus（2026-07-05 起）
-   EFFORT=$(echo "$MODEL_INFO" | jq -r .effort)      # high / medium / low（依難度）
+   EFFORT=$(echo "$MODEL_INFO" | jq -r .effort)      # low/medium/high/xhigh/max（5 檔，依難度）
    ```
-   **分流原則（2026-07-05 owner directive：所有 subagent 一律 `opus` 4.8）**：模型不再有選擇，只有 `effort` 依難度變化（router 已內建）：
-   - **experiment / paper_decision / strategy_lifecycle** → `opus / high`（研究與 narrative）
-   - **paper_body** → `opus / medium`（主線程才能跑）
+   **分流原則（2026-07-05 owner directive：所有 subagent 一律 `opus` 4.8）**：模型不再有選擇，只有 `effort` 依難度變化（router 已內建）。**effort 是 5 檔**（對齊 `claude --effort`）：`low < medium < high < xhigh < max`（`max` 是天花板）：
+   - **experiment / paper_decision / strategy_lifecycle** → `opus / xhigh`（研究與 narrative；失敗沿 ladder 升 max）
+   - **paper_body** → `opus / high`（主線程才能跑）
    - **paper_review / event_article / daily_article / daily_digest / trending_repost / member_qa / email_reply** → `opus / medium`（寫作）
    - **platform_ops / governance / lookup / verify / classification** → `opus / low`（短流程/checklist，effort 低但仍 opus）
-   - 派 Agent tool 時 `model: "opus"`；派 `claude -p` 時 `--model claude-opus-4-8`（cli_flag 從 router output 取，恆為 opus）
+   - 派 Agent tool 時 `model: "opus"`；派 `claude -p` 時 `--model claude-opus-4-8 --effort <EFFORT>`（cli_flag 從 router output 取，恆為 opus）
+   - **⚠️ effort 要真的生效必須傳 `--effort`**：Agent/Task tool **無 effort 旋鈕**，若任務 effort 是 `xhigh`/`max`（研究類），**必須用 `claude -p --effort <EFFORT> --model claude-opus-4-8` spawn** 而不是 Agent tool，否則 subagent 跑在 CLI 預設 effort、拿不到升級（2026-07-05 前 effort 全程 inert 的教訓）
    - Brief 必含一行 `**Model**: opus / <effort> (per task_type routing)`，便於 audit
    - 違反（例：任何 subagent 派 sonnet/haiku）= 違反 owner directive，下次 boss_report 會抓
 
-   **Effort escalation on failure（2026-05-29 boss directive）**：任務若**可驗證地失敗**（test fail / verdict FAIL / exception / 不收斂 / Codex reject），重派時調高 model/effort：
+   **Effort escalation on failure（2026-05-29 boss directive；2026-07-05 補滿 5 檔）**：任務若**可驗證地失敗**（test fail / verdict FAIL / exception / 不收斂 / Codex reject），重派時沿 ladder 調高 effort：
    ```bash
    # attempt 0 失敗 → attempt 1 重派（ladder 上爬一階）
    MODEL_INFO=$(uv run python scripts/model_router.py --task-type <type> --attempt <N>)
-   # ladder (2026-07-05 all-opus): opus/low → opus/med → opus/high（CEILING；到頂改策略不再重試）
+   # ladder (2026-07-05 全 5 檔): opus/low → opus/medium → opus/high → opus/xhigh → opus/max（CEILING；到頂改策略不再重試）
    ```
-   - `at_ceiling=true` → 已到 opus/high，這是最強 reasoning，無法再調高
+   - `at_ceiling=true` → 已到 opus/max，這是最強 reasoning，無法再調高
    - `exhausted=true` → escalation 已超天花板 → **禁止繼續同法重試**，改觸發 **3-strike rule**：拆解問題 / 補文獻 context / 派 Codex 二審 / escalate email 給老闆（`--needs-reply`）
-   - Attempt cap = ladder 長度（最多到 opus/high）；每個 task 的 escalation 次數記在 next_tasks task 的 `escalation_attempts` 欄位，避免無限重試 token 燒爆
+   - Attempt cap = ladder 長度（最多到 opus/max）；每個 task 的 escalation 次數記在 next_tasks task 的 `escalation_attempts` 欄位，避免無限重試 token 燒爆
 
 5. 分流決策（token 節省）:
    - heavy compute (GARCH MLE / Bootstrap / data fetch / 全期 backtest / pooled-MLE multistart) → 改 `uv run python scripts/compute_queue.py enqueue --script <path> --title <T> --result-artifact <path> --followup-brief 'brief' --followup-task-type paper_review --timeout 3600`。Compute worker cron */15 min 接手；下次 hourly 自動派 interpretation agent（省 60-70% tokens）。注意: 腳本必須完整已寫才能 enqueue。

@@ -18,12 +18,15 @@ paths:
 
 **Single source of truth = `config/models.json`**（roster、版本、subagent policy、drift-check 全在那）。下表是摘要，派工前以 config 為準。
 
-**Owner directive 2026-07-05（取代 2026-07-01 二選一）**：**主線 = `opus`（固定）；所有 subagent 也一律用 `opus`（4.8）**。不再有 sonnet↔opus 選擇——每個 subagent 都是 opus，只有 `effort`（low/medium/high）依任務難度變化（opus/low 跑 checklist 仍比 opus/high 便宜）。**`sonnet` / `haiku` 退出預設 rotation（仍是合法 alias，不自動路由）；`fable` unavailable，重開再評估。**
+**Owner directive 2026-07-05（取代 2026-07-01 二選一）**：**主線 = `opus`（固定）；所有 subagent 也一律用 `opus`（4.8）**。不再有 sonnet↔opus 選擇——每個 subagent 都是 opus，只有 `effort` 依任務難度變化。**effort 是 5 檔**（對齊 `claude --effort` 旗標）：`low < medium < high < xhigh < max`（`max` 是天花板；owner 2026-07-05 更正——原本錯把 high 當頂）。opus/low 跑 checklist 仍比 opus/max 便宜。**`sonnet` / `haiku` 退出預設 rotation（仍是合法 alias，不自動路由）；`fable` unavailable，重開再評估。**
+
+**effort 現在真的生效（wired 2026-07-05）**：透過 spawn `claude -p` 的 `--effort` 旗標套用（`dispatch_supervisor/worker.py` `DISPATCH_EFFORT` 預設 high + `telegram_responder.sh` 預設 high + legacy cron）。**2026-07-05 前 effort 只被 model_router 算出來、寫進 brief 當參考文字，從沒傳給任何 dispatch（inert）。** 缺口：Agent/Task tool 無 effort 旋鈕 → 研究 subagent 若要真吃到 xhigh/max，orchestrator 需改用 `claude -p --effort` spawn。
 
 | 對象 / 難度 | 模型 | effort | 原因 |
 |---|---|---|---|
 | 主線程（互動 session） | `opus`（固定） | — | owner directive；不能中途 hot-swap |
-| subagent — **高難度**：研究實驗設計/方法論/高風險論文判斷/策略 gate | `opus` | high | 精確性與專業性要求高 |
+| subagent — **研究/高風險**：實驗設計/方法論/高風險論文判斷/策略 gate | `opus` | **xhigh**（失敗升 max） | 研究品質為先、成本不設限 |
+| subagent — **paper body**：.tex rewrite（主線程才能跑） | `opus` | high | 論文寫作高風險 |
 | subagent — **寫作**：文章/digest/paper_review/member_qa/email_reply | `opus` | medium | 品質優先（2026-07-05 起全 opus） |
 | subagent — **ops/驗證/governance/lookup**：平台 ops/瀏覽器自動化/merge/scan/大搜尋 | `opus` | low | 流程明確、effort 低即可，但模型仍 opus |
 | `sonnet` / `haiku` | 退出預設 rotation | — | owner 2026-07-05 指定全 subagent 用 opus |
