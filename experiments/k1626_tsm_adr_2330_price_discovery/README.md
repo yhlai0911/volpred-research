@@ -102,6 +102,8 @@ K1108b 曾發現「extended foundry pool 加入 TSM ADR 得到 **t=-2.28 反向*
 
 **Codex review（gpt-5.5 xhigh, 2026-07-04）verdict = CONDITIONAL_PASS**（6 項逐查全 CONDITIONAL_PASS 或 PASS，無 FAIL）。核心方向結論穩健（US 隔夜領先次日 TW：HAC t=27.8、bootstrap CI 不跨 0、Granger 不對稱，Codex 判「方向不太可能只靠 HAC lag 選擇造成」）。**必修 issue（→ 具名 follow-up K1626f）**：目前對齊是 **common-date calendar inner-join 後 `.diff()`**，不是 **timestamp/asof event-time 對齊**——遇台美假日不一致日，`.shift(1)` 在交集 index 上可能漏掉 ADR-only 的最新可用收盤、或把多日 return 聚成一格。K1626f 需改用實際 Asia/Taipei close timestamp 做嚴格 asof merge（每個 TW close 對「嚴格早於它」最近 ADR close，反之亦然），重跑 eqA/eqB/Granger/vol，並量化多少列因假日不一致而改變；**通過後才可保留「lookahead-safe / 完全處理乾淨」這類強 wording**。次要修正（已反映在本 README）：Granger `p=0.0` 為數值下溢應讀作 `p≈0`；Q1 溢價是 **same-date-label 描述性指標**（ADR 較 TW 收盤新 ~14.5h），非同步可套利價差；Q3 vol「US→TW 略強」僅來自 p-value 比較、未做正式方向強度檢定，且 vol t=3.25 較弱，稱 robust 前應補 HAC-lag / block-length sensitivity。
 
+**K1626f closure（2026-07-05）**：timestamp/asof robustness gate 已完成於 `experiments/k1626f_tsm_adr_asof_alignment_gate/`。結果：asof 對齊後 eqA US→TW return β=0.366、HAC t=27.4，與母實驗 common-date β=0.360、t=27.8 幾乎一致；eqA 因假日不一致新增 190 個 loc-only target rows，且 common rows 中有 149 列的 ADR predictor date 改變。結論：K1626 的核心「ADR/US 資訊領先下一個台股收盤」通過 asof alignment gate；但 K1626f 也發現 asof Granger 的 TW→US 在較長 lag 有弱顯著，且 US→TW vol 的 HAC lag=1/40 低於 Harvey `|t|=3`。因此可升級為「timestamp/asof alignment check passed for the core US-leading conclusion」，但不要宣稱無條件 one-way Granger dominance 或 fully robust vol transmission。
+
 ## 可復現指令
 ```bash
 uv run python experiments/k1626_tsm_adr_2330_price_discovery/k1626.py
@@ -113,7 +115,7 @@ uv run python experiments/k1626_tsm_adr_2330_price_discovery/k1626.py
 - **K1626c**：ADR 溢價作為**可交易信號**——溢價是否 mean-revert？是否預測次日 2330 return？（premium-based strategy，接 Mission #1 策略線）。
 - **K1626d**：BEKK / DCC-GARCH 波動溢出正式 MLE（依 pooled-MLE 規則 ≥100 multistart）。
 - **K1626e**：regime split（AI 時代 vs 前 AI）的 lead-lag——US 價格發現優勢在 AI 時代是否**增強**？
-- **K1626f（Codex 必修 → robustness gate）**：timestamp/asof event-time 對齊——用實際 Asia/Taipei close timestamp 做嚴格 asof merge（取代 common-calendar inner-join），重跑 eqA/eqB/Granger/vol，量化台美假日不一致改變的列數；通過後回填「lookahead-safe / 完全乾淨」強 wording。
+- **K1626f（已完成，2026-07-05）**：timestamp/asof event-time 對齊 gate 通過核心 US-leading conclusion；詳見 `experiments/k1626f_tsm_adr_asof_alignment_gate/`。保留 caveat：asof Granger 不是無條件單向，vol robust wording 要保守。
 
 ## 檔案
 - `k1626.py` — 完整可復現腳本（fetch → align → premium → price discovery → vol transmission → tests → results.json + charts）

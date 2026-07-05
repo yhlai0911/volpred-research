@@ -93,3 +93,6 @@
 {"ts": "2026-07-04T20:22:57.278526+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_e082beb8", "previous_id": "mile_d1a83b4f", "gap_minutes": 55.35, "reason": "gap_above_threshold"}
 {"ts": "2026-07-04T23:18:07.530401+00:00", "action": "warn_arc_dup", "new_title": "台積電打噴嚏,台股真的重感冒?16年數據攤開來看", "matched_id": "mile_2ed9949e", "reason": "entities=['SEMIS', 'TSMC', 'TW_EQUITY'] class=null_no_info"}
 {"ts": "2026-07-04T23:18:27.820872+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_e7b6e075", "previous_id": "mile_d1a83b4f", "gap_minutes": 230.86, "reason": "gap_above_threshold"}
+{"ts": "2026-07-05T00:00:38.445557+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_af40e182", "matched_id": "mile_153d2908", "decision": "block", "reason": "shared_experiment_refs=['K1568']"}
+{"ts": "2026-07-05T00:00:39.256963+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_3a7bd6f6", "matched_id": "mile_80cae4cb", "decision": "block", "reason": "shared_experiment_refs=['K1605']"}
+{"ts": "2026-07-05T00:00:39.257238+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_3a7bd6f6", "matched_id": "mile_153d2908", "decision": "warn", "reason": "arc_similarity_without_shared_ref_or_data_source"}

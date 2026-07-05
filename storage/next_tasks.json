@@ -49021,7 +49021,7 @@
     "title": "K1626f robustness gate: TSM ADR vs 2330.TW 改 timestamp-asof event-time 對齊重跑 (Codex 必修)",
     "description": "K1626 (TSM ADR vs 2330.TW 價格發現) 經 Codex gpt-5.5 xhigh CONDITIONAL_PASS，唯一必修 issue = 目前對齊為 common-date calendar inner-join 後 diff()，非 timestamp/asof event-time 對齊。台美假日不一致日，shift(1) 在交集 index 上可能漏 ADR-only 最新可用收盤、或把多日 return 聚成一格。K1626f: 用實際 Asia/Taipei close timestamp 做嚴格 asof merge (每個 TW close 對「嚴格早於它」最近 ADR close，反之亦然，取代 common intersection)，重跑 eqA/eqB/Granger/vol，量化多少列因假日不一致而改變，比較 beta/t-stat 前後差異。若方向結論 (US 隔夜領先次日 TW) 在 asof 下仍穩健，回填 K1626 README/knowledge「lookahead-safe / 完全乾淨」強 wording；若改變顯著則降級結論。順帶補 vol 的 HAC-lag / block-length sensitivity (t=3.25 較弱)。產出 experiments/k1626f_*/ 三件套；完成後 Codex review → knowledge.json。母實驗: experiments/k1626_tsm_adr_2330_price_discovery/。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "codex_review_followup",
@@ -49034,7 +49034,33 @@
       "asof-alignment",
       "price-discovery"
     ],
-    "created_at": "2026-07-04T14:34:05.460284+00:00"
+    "created_at": "2026-07-04T14:34:05.460284+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-04T23:53:51.524046+00:00",
+    "claim_session_id": "2ca7e39c7e4c",
+    "status_history": [
+      {
+        "ts": "2026-07-04T23:53:51.524335+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-04T23:53:51.764800+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T00:04:06.762345+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-04T23:53:51.764506+00:00",
+    "completed_at": "2026-07-05T00:04:06.762081+00:00",
+    "result": "K1626f timestamp/asof gate completed: eqA US->TW beta=0.3661 HAC t=27.41 vs parent 0.3597/t=27.81; asof adds 190 TW-only target rows and changes 149 common-row ADR predictors. Overall CONDITIONAL_PASS: core US-leading conclusion passes asof gate; keep caveats for longer-lag Granger and vol HAC sensitivity."
   },
   {
     "id": "daily_market_vol_snapshot_20260704",
@@ -49910,5 +49936,101 @@
     "started_at": "2026-07-04T23:10:05.007259+00:00",
     "completed_at": "2026-07-04T23:22:17.773349+00:00",
     "result": "K1635 台積電迷思 reader 文章發佈 draft mile_e7b6e075 (audience=general, anti_ai_gate PASS/MUST=0, 4 真圖嵌入, experiment_refs=K1635, 數字對齊 results.json); 懶人包 lazypack-mile_e7b6e075 已 enqueue"
+  },
+  {
+    "id": "K1637",
+    "title": "K1637: Markov-switching multifractal（MSM）作 rough-vs-long-memory 辯論第三解 — GMM 估 Calvet-Fisher MSM（多頻成分生 long memory），OOS 對比 HAR/F",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 486). Original: Markov-switching multifractal（MSM）作 rough-vs-long-memory 辯論第三解 — GMM 估 Calvet-Fisher MSM（多頻成分生 long memory），OOS 對比 HAR/FIGARCH/MS-GARCH；接 line 1438（level-shift vs long-memory）但問「多重碎形能否更省參數複製 persistence」（來源：JBES MSM 經典 + 2025-26 rough-vol 辯論重燃）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1637.py with signal.shift(1) + seed=42, (c) K1637_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 486,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-05T00:00:00Z"
+  },
+  {
+    "id": "K1638",
+    "title": "K1638: 分布式預測評估：用 CRPS / pinball / coverage + MCS 重排平台 1400+ K 模型 — 重用既有 K 的預測分布/損失序列，改用 proper scoring rules + Hansen-Lunde-Nas",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 497). Original: 分布式預測評估：用 CRPS / pinball / coverage + MCS 重排平台 1400+ K 模型 — 重用既有 K 的預測分布/損失序列，改用 proper scoring rules + Hansen-Lunde-Nason MCS 於分布度量而非平方誤差；零新資料的評估層升級 + methodology 素材（來源：arXiv 2025-26 CRPS/MCS）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1638.py with signal.shift(1) + seed=42, (c) K1638_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 497,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-05T00:00:00Z"
+  },
+  {
+    "id": "K1639",
+    "title": "K1639: 階層式風險平價（HRP/NCO/HERC/Schur-complement）OOS vs 風險平價/最小變異 — 多資產 ETF panel，López de Prado HRP（相關聚類 + 準對角化）與變體對比 min-var/risk",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 504). Original: 階層式風險平價（HRP/NCO/HERC/Schur-complement）OOS vs 風險平價/最小變異 — 多資產 ETF panel，López de Prado HRP（相關聚類 + 準對角化）與變體對比 min-var/risk-parity 的 OOS 穩定性、換手、MDD；圖聚類配置法而非 vol-scaling（來源：JEA / arXiv 2025-26 HRP+DRL / Schur-complement）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1639.py with signal.shift(1) + seed=42, (c) K1639_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 504,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-05T00:00:00Z"
+  },
+  {
+    "id": "K1640",
+    "title": "K1640: 「VIX 破 30/40 是抄底訊號」** 恐慌極值進場後 5/10/20/60 日勝率與報酬分布",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1480). Original: 「VIX 破 30/40 是抄底訊號」** 恐慌極值進場後 5/10/20/60 日勝率與報酬分布\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1640.py with signal.shift(1) + seed=42, (c) K1640_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1480,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-05T00:00:00Z"
+  },
+  {
+    "id": "K1641",
+    "title": "K1641: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1484). Original: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1641.py with signal.shift(1) + seed=42, (c) K1641_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1484,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-05T00:00:01Z"
+  },
+  {
+    "id": "journal_discovery_20260705_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-07-05T00:00:06+00:00"
   }
 ]

@@ -37710,5 +37710,18 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-07-05T06:43:05.158480"
+  },
+  {
+    "item_id": "4a175f95",
+    "category": "cross_market_price_discovery",
+    "content": "[提出: Codex review follow-up, 執行/審查: Codex CLI] experiment_id=K1626f; reviewer=Codex CLI. TSM ADR vs 2330.TW timestamp/asof alignment robustness gate for parent K1626. Using actual close timestamps (2330.TW Asia/Taipei 13:30; TSM ADR NY 16:00 converted to Taipei) and strict merge_asof predictors earlier than target close, the core US->TW return result survives: eqA beta=0.3661, HAC t=27.41 vs K1626 common-date beta=0.3597, t=27.81. Alignment materially changes data usage: eqA adds 190 loc-only target rows and changes ADR predictor date on 149 common rows; eqB adds 296 ADR-only rows. Vol US->TW remains positive (eqVA beta=0.1413, HAC t=3.57; parent beta=0.1342, t=3.25), and block-bootstrap CIs for block 5/20/60 do not cross zero. Verdict=CONDITIONAL_PASS overall: asof_alignment_gate PASS for the core US-leading conclusion, but keep caveats: asof Granger TW->US has weak longer-lag significance (min p=0.0224), and vol HAC lag sensitivity falls below Harvey |t|>3 at lag 1 and 40. Recommended wording: K1626 common-calendar timing blocker is resolved for the main US-leading regression; do not claim unqualified one-way Granger dominance or fully robust vol transmission.",
+    "evidence": [
+      "experiments/k1626f_tsm_adr_asof_alignment_gate/k1626f_results.json",
+      "experiments/k1626f_tsm_adr_asof_alignment_gate/README.md",
+      "experiments/k1626f_tsm_adr_asof_alignment_gate/k1626f_tsm_adr_asof_alignment_gate.py",
+      "experiments/k1626_tsm_adr_2330_price_discovery/README.md"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-07-05T08:03:16.141558"
   }
 ]
