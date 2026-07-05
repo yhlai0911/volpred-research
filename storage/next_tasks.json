@@ -50052,7 +50052,7 @@
     "title": "K1639: 階層式風險平價（HRP/NCO/HERC/Schur-complement）OOS vs 風險平價/最小變異 — 多資產 ETF panel，López de Prado HRP（相關聚類 + 準對角化）與變體對比 min-var/risk",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 504). Original: 階層式風險平價（HRP/NCO/HERC/Schur-complement）OOS vs 風險平價/最小變異 — 多資產 ETF panel，López de Prado HRP（相關聚類 + 準對角化）與變體對比 min-var/risk-parity 的 OOS 穩定性、換手、MDD；圖聚類配置法而非 vol-scaling（來源：JEA / arXiv 2025-26 HRP+DRL / Schur-complement）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1639.py with signal.shift(1) + seed=42, (c) K1639_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -50061,7 +50061,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-05T00:00:00Z"
+    "created_at": "2026-07-05T00:00:00Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T05:58:22.030346+00:00",
+    "claim_session_id": "a62ebb0aa6af",
+    "status_history": [
+      {
+        "ts": "2026-07-05T05:58:22.030611+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T05:58:22.269016+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T06:06:58.291305+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T05:58:22.268745+00:00",
+    "completed_at": "2026-07-05T06:06:58.290997+00:00",
+    "result": "完成 experiments/k1639 三件套、Codex review、figures/CSV 與 knowledge entry。K1639 用 11 檔 ETF、2008-04-11 至 2026-07-02 OOS 4,585 天比較 ERC/inverse-vol/min-var vs HRP/HERC/NCO/Schur-block；ERC risk parity 淨 Sharpe 0.743 最高，HERC-ERC 0.685、HRP 0.643，min-var MDD 最小 -17.8%。結論 verdict=CONDITIONAL_PASS_NULL_HIERARCHICAL_DOES_NOT_BEAT_SIMPLE_BASELINES；hierarchy family 無 bootstrap-robust Sharpe win vs ERC，NCO/Schur-block 對 ERC 顯著較差。"
   },
   {
     "id": "K1640",

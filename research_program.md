@@ -501,7 +501,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] 波動率管理「整個因子動物園」的 OOS 崩潰再驗證 — Ken French 因子 + yfinance，Moreira-Muir vol-managing 套個別因子（SMB/HML/MOM/QMJ），誠實檢 Cederburg OOS 失效 + Barroso-Detzel 成本後不存活；與 line 50 正交（因子層 × 淨成本）（來源：DeMiguel et al. JF 2024）
 
 **E. 組合構建（portfolio construction / cross-asset）**
-- [ ] 階層式風險平價（HRP/NCO/HERC/Schur-complement）OOS vs 風險平價/最小變異 — 多資產 ETF panel，López de Prado HRP（相關聚類 + 準對角化）與變體對比 min-var/risk-parity 的 OOS 穩定性、換手、MDD；圖聚類配置法而非 vol-scaling（來源：JEA / arXiv 2025-26 HRP+DRL / Schur-complement）
+- [x] 階層式風險平價（HRP/NCO/HERC/Schur-complement）OOS vs 風險平價/最小變異 — K1639 completed 2026-07-05，CONDITIONAL_PASS_NULL：SPY/QQQ/IWM/EFA/EEM/TLT/IEF/LQD/HYG/GLD/DBC，2008-04-11 至 2026-07-02 OOS 4,585 天，月度再平衡、252d lagged covariance、5 bps cost。ERC risk parity 淨 Sharpe 0.743 最高；HERC-ERC 0.685、HRP 0.643；min-var MDD 最小 -17.8%，但 Sharpe 0.537。hierarchy family 沒有穩健贏過 ERC；NCO / Schur-block 對 ERC bootstrap Sharpe diff 顯著為負。見 `experiments/k1639/`。
 
 ### 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 QJE/AER/JPE/Econometrica/ReStud/JoE/JFE/Quantitative Economics/JFEC/JBES/NBER/AEJ，6 agents、dedup 2402 K，研究總監篩 31→11）
 

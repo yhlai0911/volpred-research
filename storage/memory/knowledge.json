@@ -37744,5 +37744,26 @@
       "experiments/k1638/codex_review.md",
       "experiments/k1638/data/k1638_model_score_table.csv"
     ]
+  },
+  {
+    "item_id": "k1639_hierarchical_portfolio_construction_null",
+    "category": "portfolio_construction",
+    "experiment_id": "k1639",
+    "k_id": "K1639",
+    "experiment_path": "experiments/k1639/",
+    "experiment_file": "experiments/k1639/k1639.py",
+    "results_file": "experiments/k1639/k1639_results.json",
+    "reviewer": "Codex self-review",
+    "codex_review": "experiments/k1639/codex_review.md",
+    "verdict": "CONDITIONAL_PASS_NULL",
+    "confidence": 0.78,
+    "created_at": "2026-07-05T06:06:37.044416+00:00",
+    "content": "K1639 completed 2026-07-05. Verdict=CONDITIONAL_PASS_NULL_HIERARCHICAL_DOES_NOT_BEAT_SIMPLE_BASELINES. Using yfinance adjusted-close ETF panel SPY/QQQ/IWM/EFA/EEM/TLT/IEF/LQD/HYG/GLD/DBC, common price period 2007-04-11 to 2026-07-02 and OOS 2008-04-11 to 2026-07-02 (4,585 days), the experiment compared equal weight, inverse vol, ERC risk parity, min variance, HRP, HERC-ERC, NCO minvar, and Schur-block MV. All strategies used the same monthly rebalance, 252-day lagged covariance window, long-only fully-invested weights, and 5 bps per dollar traded. ERC risk parity had the highest net Sharpe (0.743); inverse vol was 0.703; HERC-ERC was the best hierarchy method at 0.685; HRP was 0.643; min variance had the least severe MDD (-17.8%) but Sharpe only 0.537. Paired 21-day moving-block bootstrap found no hierarchy method with robust positive Sharpe difference versus ERC; NCO and Schur-block were significantly worse versus ERC. Interpretation: in this ETF panel, simple ERC/inverse-vol captures most covariance-only diversification; hierarchy helps presentation and sometimes drawdown but does not add robust OOS alpha over risk parity.",
+    "evidence": [
+      "experiments/k1639/k1639_results.json",
+      "experiments/k1639/README.md",
+      "experiments/k1639/codex_review.md",
+      "experiments/k1639/data/k1639_performance_table.csv"
+    ]
   }
 ]
