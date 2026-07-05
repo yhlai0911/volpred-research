@@ -1,8 +1,8 @@
 # k506
 
 - Experiment ID: `k506`
-- Status: retry_in_progress
-- Last updated: 2026-06-07
+- Status: reran_2026_07_05 — Codex FAIL（核心 null robust，精確數字未達發表級，見 `codex_review_20260705.md`）
+- Last updated: 2026-07-05
 
 ## 問題描述
 
@@ -15,15 +15,15 @@
 3. 對 5 段 + pooled 共 6 次 DM 檢定加上 Bonferroni 與 BH 校正。
 4. 禁止混用 K505 的數字；K506 的對外數字只能來自本實驗 `results.json`。
 
-## 目前狀態
+## 目前狀態（2026-07-05 rerun）
 
-- `k506_ewt_volspread_cross_oos.py` 已改為：
-  - `vix_signal = vix.shift(1)`
-  - `vol_ratio_signal = vol_ratio.shift(1)`
-  - 輸出 Bonferroni / Benjamini-Hochberg 校正後的 p-value
-  - 優先讀本地 cache（`data/cache/price_cache.db`）
-- **尚未重跑成功**：目前 workspace 有 `0050.TW` 與 `^VIX` 本地 cache，但缺少 2010-2021 的 `EWT` 原始價格；外網也被 sandbox 擋住，無法從 yfinance 補抓。
-- 現有 `k506_ewt_volspread_cross_oos_results.json` 為 **舊版失效輸出**，不可再引用於文章或知識庫。
+- **Data blocker 已解除**：repo 移出 Desktop 後 yfinance 不再被 sandbox 擋，EWT 2010-2021 已成功補抓（`data_inputs.EWT="yfinance"`，TW50/VIX 仍走 sqlite cache）。實驗重跑成功，`results.json` 為 2026-07-05 fresh 輸出（覆蓋舊失效版）。
+- **結果 = NULL/MARGINAL**：VT+VS wins 3/5（未過 ≥4/5 門檻）；pooled DM t=0.457, p=0.648；Bonferroni p=1.0；BH p=0.7313 — 全不顯著。
+- **Codex review = FAIL**（見 `codex_review_20260705.md`）：核心 null（overlay 無顯著改善）在 Codex 4-variant sanity rerun 下 robust（pooled DM p=0.25–0.65 全不顯著），但精確 3/5 win-count 受三項 code 議題影響、**未達發表級**：
+  1. rebalance timing：新權重套 close-to-close 報酬（應 open-to-close / 或標 non-tradable c2c）。
+  2. calendar as-of：台股假日訊號用舊值（~86 日；false-null 風險，非 lookahead）。
+  3. 成本口徑：round-trip 18.55bp 對每次 abs(Δw) 全額扣，label vs 套用倍率待釐清。
+- **未寫 knowledge.json**（守 Codex FAIL bar）。方法論硬化見「下一步」，改完 re-review 通過才寫 knowledge / 發文。
 
 ## 資料來源需求
 
@@ -31,8 +31,9 @@
 - `^VIX`: 本地 SQLite cache `data/cache/price_cache.db`
 - `EWT`: 需要 2010-01-01 至 2021-12-31 的日資料；目前 repo 只找到 `experiments/k1090/data/EWT.csv`（2018-01-02 至 2024-12-30），不足以支撐五段 OOS。
 
-## 下一步
+## 下一步（方法論硬化 → follow-up task）
 
-1. 補齊 `EWT` 2010-2021 本地快取。
-2. 重跑 `python experiments/k506/k506_ewt_volspread_cross_oos.py`。
-3. 由 Codex 再做一次 source-code-level review，確認 results/README/文章口徑一致後，才允許重新發布更正版文章。
+1. **Rebalance timing**：載入 `0050.TW` open 價，rebalance day 舊權重吃 overnight、新權重吃 open-to-close；或明確把 close-to-close 版標為 non-tradable diagnostic。
+2. **Calendar as-of**：改 timestamp-aware as-of merge（台股開盤前用最近可得的美股/VIX close），修 ~86 台股假日 stale-signal。
+3. **成本口徑審計**：釐清 18.55bp 是 round-trip（買+賣）還是 per-trade，對稱套用到 VT 與 VT+VS。
+4. 改完 → Codex re-review 通過（CONDITIONAL_PASS↑）→ 才寫 knowledge.json + 決定是否發文（若仍 null，寫 null-result knowledge）。

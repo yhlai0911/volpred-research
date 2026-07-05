@@ -1,10 +1,10 @@
 {
   "experiment": "K506",
   "title": "EWT-0050 Vol Spread Strategy \u2014 Cross-OOS Validation",
-  "date": "2026-03-26T15:25:44.854014+00:00",
+  "date": "2026-07-05T09:10:31.085546+00:00",
   "data_source": "yfinance (EWT, 0050.TW, ^VIX)",
-  "data_range": "2010-02-02 to 2021-12-30",
-  "n_total_days": 2923,
+  "data_range": "2010-02-03 to 2021-12-30",
+  "n_total_days": 2922,
   "strategy": {
     "base": "weight = min(8.63/VIX, 1.0)",
     "vol_spread_adjustment": {
@@ -15,8 +15,14 @@
       "adjust_up_multiplier": 1.2
     },
     "rebalancing": "monthly (1st trading day)",
-    "tx_cost_roundtrip": 0.00585,
-    "cash_rate_annual": 0.015
+    "tx_cost_roundtrip": 0.001855,
+    "cash_rate_annual": 0.015,
+    "signal_timing": "t-1 VIX and t-1 vol_ratio determine t return"
+  },
+  "data_inputs": {
+    "EWT": "yfinance",
+    "TW50": "sqlite:price_cache.db",
+    "VIX": "sqlite:price_cache.db"
   },
   "oos_periods": {
     "2012-2013": {
@@ -33,30 +39,35 @@
         "mdd_pct": -14.86
       },
       "vt_only": {
-        "sharpe": 0.5751,
-        "ann_ret_pct": 4.24,
-        "ann_vol_pct": 7.38,
-        "mdd_pct": -7.1,
-        "calmar": 0.597,
+        "sharpe": 0.5817,
+        "ann_ret_pct": 4.22,
+        "ann_vol_pct": 7.25,
+        "mdd_pct": -7.08,
+        "calmar": 0.596,
         "n_rebalances": 24,
-        "tx_total_pct": 1.193
+        "tx_total_pct": 0.42
       },
       "vt_volspread": {
-        "sharpe": 0.682,
-        "ann_ret_pct": 3.71,
-        "ann_vol_pct": 5.44,
-        "mdd_pct": -5.48,
-        "calmar": 0.677,
+        "sharpe": 0.6832,
+        "ann_ret_pct": 3.61,
+        "ann_vol_pct": 5.29,
+        "mdd_pct": -5.66,
+        "calmar": 0.638,
         "n_rebalances": 24,
-        "tx_total_pct": 1.82
+        "tx_total_pct": 0.502
       },
       "dm_test_vs_minus_vt": {
-        "t_stat": -0.3064,
-        "p_value": 0.7594,
+        "test_name": "2012-2013",
+        "t_stat": -0.3437,
+        "p_value": 0.7313,
         "significant_5pct": false,
-        "direction": "VT better"
+        "direction": "VT better",
+        "bonferroni_p_value": 1.0,
+        "bh_p_value": 0.7313,
+        "significant_5pct_bonferroni": false,
+        "significant_5pct_bh": false
       },
-      "sharpe_diff": 0.1069,
+      "sharpe_diff": 0.1015,
       "winner": "VT+VS"
     },
     "2014-2015": {
@@ -73,31 +84,36 @@
         "mdd_pct": -20.96
       },
       "vt_only": {
-        "sharpe": -0.7927,
-        "ann_ret_pct": -26.81,
-        "ann_vol_pct": 33.83,
-        "mdd_pct": -13.93,
-        "calmar": -1.925,
+        "sharpe": -0.7798,
+        "ann_ret_pct": -27.16,
+        "ann_vol_pct": 34.84,
+        "mdd_pct": -13.8,
+        "calmar": -1.968,
         "n_rebalances": 24,
-        "tx_total_pct": 2.069
+        "tx_total_pct": 0.639
       },
       "vt_volspread": {
-        "sharpe": -0.819,
-        "ann_ret_pct": -32.58,
-        "ann_vol_pct": 39.78,
-        "mdd_pct": -7.99,
-        "calmar": -4.079,
+        "sharpe": -0.5818,
+        "ann_ret_pct": -10.42,
+        "ann_vol_pct": 17.91,
+        "mdd_pct": -7.73,
+        "calmar": -1.348,
         "n_rebalances": 24,
-        "tx_total_pct": 2.885
+        "tx_total_pct": 0.825
       },
       "dm_test_vs_minus_vt": {
-        "t_stat": -0.6755,
-        "p_value": 0.4996,
+        "test_name": "2014-2015",
+        "t_stat": 1.1078,
+        "p_value": 0.2685,
         "significant_5pct": false,
-        "direction": "VT better"
+        "direction": "VT+VS better",
+        "bonferroni_p_value": 1.0,
+        "bh_p_value": 0.537,
+        "significant_5pct_bonferroni": false,
+        "significant_5pct_bh": false
       },
-      "sharpe_diff": -0.0263,
-      "winner": "VT"
+      "sharpe_diff": 0.198,
+      "winner": "VT+VS"
     },
     "2016-2017": {
       "period": "2016-2017",
@@ -113,30 +129,35 @@
         "mdd_pct": -8.58
       },
       "vt_only": {
-        "sharpe": 1.3633,
-        "ann_ret_pct": 11.17,
-        "ann_vol_pct": 8.19,
-        "mdd_pct": -5.39,
-        "calmar": 2.073,
+        "sharpe": 1.3655,
+        "ann_ret_pct": 11.25,
+        "ann_vol_pct": 8.24,
+        "mdd_pct": -5.07,
+        "calmar": 2.22,
         "n_rebalances": 24,
-        "tx_total_pct": 1.233
+        "tx_total_pct": 0.416
       },
       "vt_volspread": {
-        "sharpe": 1.1511,
-        "ann_ret_pct": 6.59,
-        "ann_vol_pct": 5.73,
-        "mdd_pct": -3.07,
-        "calmar": 2.15,
+        "sharpe": 1.3228,
+        "ann_ret_pct": 7.49,
+        "ann_vol_pct": 5.66,
+        "mdd_pct": -2.96,
+        "calmar": 2.528,
         "n_rebalances": 24,
-        "tx_total_pct": 2.733
+        "tx_total_pct": 0.912
       },
       "dm_test_vs_minus_vt": {
-        "t_stat": -1.7775,
-        "p_value": 0.0761,
+        "test_name": "2016-2017",
+        "t_stat": -1.4519,
+        "p_value": 0.1472,
         "significant_5pct": false,
-        "direction": "VT better"
+        "direction": "VT better",
+        "bonferroni_p_value": 0.883,
+        "bh_p_value": 0.4958,
+        "significant_5pct_bonferroni": false,
+        "significant_5pct_bh": false
       },
-      "sharpe_diff": -0.2122,
+      "sharpe_diff": -0.0427,
       "winner": "VT"
     },
     "2018-2019": {
@@ -153,30 +174,35 @@
         "mdd_pct": -18.23
       },
       "vt_only": {
-        "sharpe": 0.5032,
-        "ann_ret_pct": 4.51,
-        "ann_vol_pct": 8.96,
-        "mdd_pct": -12.11,
-        "calmar": 0.372,
+        "sharpe": 0.5849,
+        "ann_ret_pct": 5.18,
+        "ann_vol_pct": 8.86,
+        "mdd_pct": -10.94,
+        "calmar": 0.474,
         "n_rebalances": 24,
-        "tx_total_pct": 2.094
+        "tx_total_pct": 0.56
       },
       "vt_volspread": {
-        "sharpe": 0.1997,
-        "ann_ret_pct": 1.52,
+        "sharpe": 0.3383,
+        "ann_ret_pct": 2.58,
         "ann_vol_pct": 7.62,
-        "mdd_pct": -11.57,
-        "calmar": 0.132,
+        "mdd_pct": -10.4,
+        "calmar": 0.248,
         "n_rebalances": 24,
-        "tx_total_pct": 2.802
+        "tx_total_pct": 0.851
       },
       "dm_test_vs_minus_vt": {
-        "t_stat": -1.5349,
-        "p_value": 0.1255,
+        "test_name": "2018-2019",
+        "t_stat": -1.3897,
+        "p_value": 0.1653,
         "significant_5pct": false,
-        "direction": "VT better"
+        "direction": "VT better",
+        "bonferroni_p_value": 0.9915,
+        "bh_p_value": 0.4958,
+        "significant_5pct_bonferroni": false,
+        "significant_5pct_bh": false
       },
-      "sharpe_diff": -0.3035,
+      "sharpe_diff": -0.2466,
       "winner": "VT"
     },
     "2020-2021": {
@@ -193,53 +219,66 @@
         "mdd_pct": -30.48
       },
       "vt_only": {
-        "sharpe": 0.6414,
-        "ann_ret_pct": 4.98,
-        "ann_vol_pct": 7.76,
-        "mdd_pct": -12.75,
-        "calmar": 0.39,
+        "sharpe": 0.8356,
+        "ann_ret_pct": 6.32,
+        "ann_vol_pct": 7.57,
+        "mdd_pct": -11.18,
+        "calmar": 0.566,
         "n_rebalances": 24,
-        "tx_total_pct": 1.7
+        "tx_total_pct": 0.51
       },
       "vt_volspread": {
-        "sharpe": 0.6789,
-        "ann_ret_pct": 4.28,
-        "ann_vol_pct": 6.3,
-        "mdd_pct": -9.57,
-        "calmar": 0.447,
+        "sharpe": 0.8766,
+        "ann_ret_pct": 5.48,
+        "ann_vol_pct": 6.25,
+        "mdd_pct": -8.67,
+        "calmar": 0.632,
         "n_rebalances": 24,
-        "tx_total_pct": 2.229
+        "tx_total_pct": 0.67
       },
       "dm_test_vs_minus_vt": {
-        "t_stat": -0.3919,
-        "p_value": 0.6953,
+        "test_name": "2020-2021",
+        "t_stat": -0.481,
+        "p_value": 0.6307,
         "significant_5pct": false,
-        "direction": "VT better"
+        "direction": "VT better",
+        "bonferroni_p_value": 1.0,
+        "bh_p_value": 0.7313,
+        "significant_5pct_bonferroni": false,
+        "significant_5pct_bh": false
       },
-      "sharpe_diff": 0.0375,
+      "sharpe_diff": 0.0409,
       "winner": "VT+VS"
     }
   },
   "pooled_analysis": {
     "n_total_days": 2447,
     "n_years": 9.71,
-    "vt_only_pooled_sharpe": 0.0248,
-    "vt_volspread_pooled_sharpe": -0.1098,
-    "harvey_t_vt": 0.077,
-    "harvey_t_vs": -0.342,
+    "vt_only_pooled_sharpe": 0.0486,
+    "vt_volspread_pooled_sharpe": 0.2077,
+    "harvey_t_vt": 0.151,
+    "harvey_t_vs": 0.647,
     "harvey_threshold": 3.0,
     "pooled_dm_test": {
-      "t_stat": -1.8113,
-      "p_value": 0.0702,
-      "significant_5pct": false
-    }
+      "test_name": "pooled",
+      "t_stat": 0.4568,
+      "p_value": 0.6479,
+      "significant_5pct": false,
+      "direction": "VT+VS better",
+      "bonferroni_p_value": 1.0,
+      "bh_p_value": 0.7313,
+      "significant_5pct_bonferroni": false,
+      "significant_5pct_bh": false
+    },
+    "multiple_testing_family_size": 6,
+    "multiple_testing_method_note": "Reported both Bonferroni (FWER) and Benjamini-Hochberg (FDR) for 5 segment tests + pooled test."
   },
   "cross_oos_score": {
-    "vs_wins": 2,
-    "vt_wins": 3,
+    "vs_wins": 3,
+    "vt_wins": 2,
     "total_periods": 5,
     "pass_threshold": ">=4/5",
-    "verdict": "FAIL \u2014 VT+VolSpread does NOT consistently outperform. Do NOT deploy."
+    "verdict": "MARGINAL \u2014 Slight edge but not consistent enough. More testing needed."
   },
   "vol_ratio_diagnostics": {
     "full_sample_mean": 1.267,
@@ -249,7 +288,7 @@
     "pct_above_1.2": 58.0,
     "pct_below_0.8": 1.9
   },
-  "runtime_seconds": 1.09,
+  "runtime_seconds": 0.62,
   "references": [
     "Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF",
     "Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS",

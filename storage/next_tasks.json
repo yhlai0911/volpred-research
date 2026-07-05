@@ -50464,11 +50464,43 @@
     "id": "experiment_k506_resurrect_c4",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C4: K506 復活 — 補抓 EWT 2010-2021 資料後重跑（原 P1，邏輯已修只差資料）",
-    "description": "K506_retry_lookahead_fix 原 failed 僅因 local cache 缺 EWT 2010-2021 且當時 sandbox 擋 yfinance。code/README 已含 t-1 lag + Bonferroni/BH + cost=0.1855%。先用 compute queue 抓 EWT 資料，再重跑實驗 → Codex review → knowledge。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "K506_retry_lookahead_fix 原 failed 僅因 local cache 缺 EWT 2010-2021 且當時 sandbox 擋 yfinance。code/README 已含 t-1 lag + Bonferroni/BH + cost=0.1855%。先用 compute queue 抓 EWT 資料，再重跑實驗 → Codex review → knowledge。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-07-05T09:10:09.819275+00:00",
+    "claim_session_id": "bab56bd7216c",
+    "status_history": [
+      {
+        "ts": "2026-07-05T09:10:09.819583+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-05T09:10:29.296772+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-05T09:23:21.838902+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-05T09:23:26.069390+00:00",
+        "from": "succeeded",
+        "to": "succeeded",
+        "by": "hourly-17"
+      }
+    ],
+    "started_at": "2026-07-05T09:10:29.296481+00:00",
+    "completed_at": "2026-07-05T09:23:26.069076+00:00",
+    "result": "Data blocker 解除（repo 移出 Desktop→yfinance 補抓 EWT 2010-2021）+ 實驗重跑成功產出 fresh results.json（2010-2021, 2922d）。結果=NULL/MARGINAL：VT+VS 3/5、pooled DM p=0.648 Bonf p=1.0 不顯著。Codex review=FAIL：核心 null 在 4-variant sanity 下 robust（p=0.25-0.65 全不顯著）但精確數字受 rebalance timing/calendar as-of/成本口徑影響未達發表級→守 FAIL bar 未寫 knowledge，已建 follow-up experiment_k506_methodology_hardening (P2)。\n\nK506 data blocker cleared and rerun completed with EWT=yfinance; Codex review verdict FAIL; no knowledge write; follow-up task experiment_k506_methodology_hardening_followup created for timing/asof/cost hardening."
   },
   {
     "id": "experiment_k1380v4_rerun_atomic_results_c5",
@@ -50569,5 +50601,15 @@
     "source": "platform_optimization_plan_20260704_C",
     "title": "loop_health error_recurrence 加 dispatch_supervisor.log 為 signature 來源",
     "description": "loop-health 的 error_recurrence 只掃 storage/logs/cron/*.log；cutover 後 supervisor 失敗訊號在 ~/.volpred/logs/dispatch_supervisor*.log 與 dispatch_state.json completions。把 completions 的非 success outcome 納入 recurring-signature 統計，讓『同錯誤連續 N 班』的 three-strike 偵測繼續有效。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+  },
+  {
+    "id": "experiment_k506_methodology_hardening",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-05T09:23:07.176698+00:00",
+    "source": "k506_codex_review_20260705",
+    "title": "K506 方法論硬化 — rebalance open-to-close + calendar as-of + 成本口徑審計後 re-review",
+    "description": "K506 resurrect 已重跑成功但 Codex verdict=FAIL（見 experiments/k506/codex_review_20260705.md）。核心 null（overlay 無顯著改善，pooled DM p=0.25-0.65 4-variant 全不顯著）robust，但精確 3/5 win-count 未達發表級，需修三項：(1) rebalance timing — 載入 0050.TW open 價，rebalance day 舊權重吃 overnight、新權重吃 open-to-close，或標 non-tradable c2c diagnostic；(2) calendar as-of — timestamp-aware as-of merge，修 ~86 台股假日 stale-signal（false-null 風險）；(3) 成本口徑 — 釐清 18.55bp round-trip vs per-trade，對稱套用。改完 Codex re-review 通過（CONDITIONAL_PASS↑）才寫 knowledge.json（若仍 null 寫 null-result）。"
   }
 ]
