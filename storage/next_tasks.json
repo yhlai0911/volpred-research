@@ -50767,7 +50767,7 @@
     "title": "K1638: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1638 has verdict signal (score=7, reasons=['PASS/Harvey-significant', 'cross-market/universal', 'robust inference']) but no general article in feed.json.  Verdict preview: K1638 distributional scoring audit completed 2026-07-05. Verdict=CONDITIONAL_PASS_EVALUATION_LAYER_WORKS_COVERAGE_LIMITED. The experiment reused existing byte-traceable OOS forecast CSV artifacts and wrapped point variance forecasts into calibrated lognormal predictive distributi",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1638",
@@ -50776,7 +50776,33 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-05T08:30:03+00:00"
+    "created_at": "2026-07-05T08:30:03+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-07-05T15:10:52.470741+00:00",
+    "claim_session_id": "b8fe662bcab3",
+    "status_history": [
+      {
+        "ts": "2026-07-05T15:10:52.471373+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-05T15:13:38.130902+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-05T15:35:06.244985+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-23"
+      }
+    ],
+    "started_at": "2026-07-05T15:13:38.130604+00:00",
+    "completed_at": "2026-07-05T15:35:06.244687+00:00",
+    "result": "mile_77096634: 波動率模型說有九成把握，實際只中七成七 (research audience, draft, 分布評分 CRPS/coverage audit; 51/62 undercover)"
   },
   {
     "id": "platform_ops_event_receipt_watchdog_c1",
@@ -51218,5 +51244,65 @@
     "started_at": "2026-07-05T13:08:41.729566+00:00",
     "completed_at": "2026-07-05T13:14:42.282735+00:00",
     "result": "當班修好 silent fallback：alerts.py:2243 加 warn()（strict gate NEW 1→0）+ 解封 push（8 commit 上 origin, ahead=0, CI 綠）+ 措辭根治 HELD alert 改當班即修（commit b2f83b2fc + 5d8b784a2）。close email 已寄。"
+  },
+  {
+    "id": "K267_article_general_v2",
+    "title": "K267: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K267 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Method: Descriptive categorization of knowledge entries K183-K266",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K267",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-05T15:08:26+00:00"
+  },
+  {
+    "id": "K1624_article_general",
+    "title": "K1624: write general-audience article (spurious long memory / level shifts)",
+    "description": "K1624: apparent long memory (d-hat 0.4-0.6) in daily volatility proxies is predominantly SPURIOUS — artefact of occasional mean/level shifts (vol regimes), not genuine fractional integration. 5/6 asset-proxy cells spurious, 1 mixed. Replicates Granger-Hyung 2004 across SPY, ^GSPC, 0050.TW. Reader-facing general article.",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "phase_b_parallel_dispatch",
+    "k_id": "K1624",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "forecast_method",
+    "created_at": "2026-07-05T15:13:37.289257+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-07-05T15:13:37.582182+00:00",
+    "claim_session_id": "b3bda109f219",
+    "status_history": [
+      {
+        "ts": "2026-07-05T15:13:37.583911+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-05T15:13:37.858760+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-05T15:35:06.492660+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-23"
+      }
+    ],
+    "started_at": "2026-07-05T15:13:37.857864+00:00",
+    "completed_at": "2026-07-05T15:35:06.492362+00:00",
+    "result": "mile_c538af9e: 波動率的長記憶大多是假象 (general audience, draft, lazypack-mile_c538af9e queued; 5/6 spurious via level-shift)"
   }
 ]

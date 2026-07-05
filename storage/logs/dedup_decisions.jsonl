@@ -105,3 +105,7 @@
 {"ts": "2026-07-05T10:00:28.045359+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_7f181e3a", "matched_id": "mile_a95a2285", "decision": "block", "reason": "shared_experiment_refs=['K445']"}
 {"ts": "2026-07-05T14:19:57.399536+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_19e264ee", "previous_id": null, "gap_minutes": null, "reason": "non_published_ingestion:draft"}
 {"ts": "2026-07-05T14:20:01.946586+00:00", "action": "warn_semantic_dup", "new_title": "VIX 衝破 30 才進場，真的贏過隨機買嗎？33 年 50 次恐慌的答案", "matched_id": "mile_8bf06fde", "reason": "whole-topic semantic similarity 0.767 >= 0.74 vs mile_8bf06fde (gap=0.3h, threshold=0.74 (dynamic ladder); warn-only per dedup-gate-audit)"}
+{"ts": "2026-07-05T15:27:03.251502+00:00", "action": "allow_same_ref_companion", "new_title": "波動率模型說有九成把握，實際只中七成七", "matched_id": "mile_55f3ef61", "reason": "shared_refs=['K1582'] aud=research body_sim=0.04"}
+{"ts": "2026-07-05T15:27:04.437130+00:00", "action": "warn_arc_dup", "new_title": "波動率模型說有九成把握，實際只中七成七", "matched_id": "mile_55f3ef61", "reason": "entities=['TW_EQUITY', 'US_EQUITY'] class=descriptive"}
+{"ts": "2026-07-05T15:28:04.830838+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_77096634", "previous_id": null, "gap_minutes": null, "reason": "non_published_ingestion:draft"}
+{"ts": "2026-07-05T15:31:29.732519+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_c538af9e", "previous_id": null, "gap_minutes": null, "reason": "non_published_ingestion:draft"}
