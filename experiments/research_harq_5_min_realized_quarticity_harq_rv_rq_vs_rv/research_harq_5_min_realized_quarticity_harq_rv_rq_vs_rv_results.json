@@ -1,0 +1,96 @@
+{
+  "experiment_id": "research_harq_5_min_realized_quarticity_harq_rv_rq_vs_rv",
+  "generated_at": "2026-07-05T08:18:57.321078+00:00",
+  "verdict": "DUPLICATE_CLOSED_BY_K1582",
+  "canonical_experiment": "K1582",
+  "canonical_path": "experiments/k1582/",
+  "reason": "The pending backlog item is already fully covered by K1582: local 5-minute realized quarticity, HARQ/RQ measurement-error interaction, standard HAR baseline, OOS QLIKE/DM, MCS, Codex review, and knowledge entry.",
+  "task_match": {
+    "requested_realized_quarticity": "RQ_t = n/3 * sum intraday_returns^4",
+    "k1582_realized_quarticity_verified": true,
+    "requested_harq_rv_rq_vs_har": true,
+    "k1582_models": [
+      "HAR",
+      "HARQ",
+      "HARQ_full",
+      "SHARK_like"
+    ],
+    "requested_oos_qlike_dm": true,
+    "k1582_statistics": {
+      "primary_loss": "Patton QLIKE on RV_t",
+      "dm_test": "volpred.stats.model_evaluation.dm_test with h=1; negative t means candidate lower QLIKE than HAR",
+      "harvey_gate": "candidate better only if DM t < -3 and QLIKE improvement > 0",
+      "mcs": "volpred.stats.mcs.model_confidence_set alpha=0.1, n_boot=1000, seed=42"
+    },
+    "requested_shift1": true,
+    "source_checks": {
+      "realized_quarticity_formula_present": true,
+      "measurement_error_proxy_present": true,
+      "shift1_feature_lag_present": true,
+      "expanding_oos_train_before_forecast_present": true,
+      "qlike_pointwise_present": true,
+      "dm_test_present": true,
+      "mcs_present": true
+    }
+  },
+  "canonical_artifacts": {
+    "script": {
+      "path": "/Users/yhlai0911/volpred-research/experiments/k1582/K1582.py",
+      "exists": true,
+      "size_bytes": 25964
+    },
+    "results": {
+      "path": "/Users/yhlai0911/volpred-research/experiments/k1582/K1582_results.json",
+      "exists": true,
+      "size_bytes": 12550
+    },
+    "readme": {
+      "path": "/Users/yhlai0911/volpred-research/experiments/k1582/README.md",
+      "exists": true,
+      "size_bytes": 6097
+    },
+    "codex_review": {
+      "path": "/Users/yhlai0911/volpred-research/experiments/k1582/CODEX_REVIEW.md",
+      "exists": true,
+      "size_bytes": 2369
+    },
+    "tx_forecasts": {
+      "path": "/Users/yhlai0911/volpred-research/experiments/k1582/data/TX_active_oos_forecasts.csv",
+      "exists": true,
+      "size_bytes": 355715
+    },
+    "tx_daily_measures": {
+      "path": "/Users/yhlai0911/volpred-research/experiments/k1582/data/tx_active_daily_measures_2017_2026.parquet",
+      "exists": true,
+      "size_bytes": 194508
+    }
+  },
+  "canonical_key_result": {
+    "market": "TX_active",
+    "date_range_raw": [
+      "2017-05-16",
+      "2026-06-29"
+    ],
+    "n_daily_raw": 2219,
+    "n_oos": 1697,
+    "gateable": true,
+    "har_qlike": 0.16867692156792077,
+    "harq_qlike": 0.16540945963303924,
+    "harq_improvement_pct": 1.9371126200959452,
+    "harq_dm_t": -2.6005650624778234,
+    "shark_like_qlike": 0.1652264059931818,
+    "shark_like_improvement_pct": 2.0456358479067656,
+    "shark_like_dm_t": -1.7718496835397295,
+    "mcs_members": [
+      "HARQ",
+      "HARQ_full",
+      "SHARK_like"
+    ],
+    "k1582_verdict": "DIRECTIONAL_ONLY"
+  },
+  "closure_interpretation": "Do not rerun this as a fresh experiment without new data or a materially different estimator. K1582 found directional but non-Harvey-significant improvement: HARQ QLIKE +1.94% with DM t=-2.60 and SHARK_like QLIKE +2.05% with DM t=-1.77 on the only gateable TX_active panel.",
+  "outputs": {
+    "summary_csv": "/Users/yhlai0911/volpred-research/experiments/research_harq_5_min_realized_quarticity_harq_rv_rq_vs_rv/research_harq_5_min_realized_quarticity_harq_rv_rq_vs_rv_summary.csv",
+    "results_json": "/Users/yhlai0911/volpred-research/experiments/research_harq_5_min_realized_quarticity_harq_rv_rq_vs_rv/research_harq_5_min_realized_quarticity_harq_rv_rq_vs_rv_results.json"
+  }
+}
