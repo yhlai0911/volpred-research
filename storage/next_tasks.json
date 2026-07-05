@@ -50506,11 +50506,22 @@
     "id": "experiment_k1380v4_rerun_atomic_results_c5",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "claimed",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C5: K1380_v4 重跑（Paper 9 C3 SPA/RC test）+ 實驗 results 原子寫入",
-    "description": "K1380_v4 results.json 截斷（agent 中途死亡，jq parse error EOF line 51）。重派 agent 重跑；同時把實驗 results 寫檔慣例改 tmp+os.replace 原子寫入（防再截斷），寫進 experiment-preamble reference。compute_queue 對應 failed job 一併 re-enqueue。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "K1380_v4 results.json 截斷（agent 中途死亡，jq parse error EOF line 51）。重派 agent 重跑；同時把實驗 results 寫檔慣例改 tmp+os.replace 原子寫入（防再截斷），寫進 experiment-preamble reference。compute_queue 對應 failed job 一併 re-enqueue。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T09:24:37.695182+00:00",
+    "claim_session_id": "a1f7f72b956e",
+    "status_history": [
+      {
+        "ts": "2026-07-05T09:24:37.695470+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      }
+    ]
   },
   {
     "id": "platform_ops_daily_update_sync_calendar_aware_c6",
