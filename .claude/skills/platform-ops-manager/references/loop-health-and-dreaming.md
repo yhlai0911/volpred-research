@@ -60,7 +60,8 @@ repeated_tool_failure / recurring_error / stale_knowledge / missing_retry_strate
 | 層 | Owner 機制 | 管什麼 | 現駐 checks |
 |---|---|---|---|
 | **L1 機械不變量** | `.claude/settings.json` hooks + `scripts/git_hooks/pre-push`（單一 runner）+ `.github/workflows/` | 每 turn / 每 push 必須成立的格式性約束 | Stop: final-text、save_session_state；pre-push: encoding sweep + silent-fallback baseline；CI: provenance、encoding |
-| **L2 營運存活** | `check_alerts`（hourly piggy-back，單一 alert registry）+ email dedup | 「X 還活著/新鮮嗎」 | release gap / draft low / host cron fail / knowledge stale / paper stale |
+| **L2 營運存活** | `check_alerts`（hourly piggy-back，單一 alert registry）+ email dedup | 「X 還活著/新鮮嗎」 | release gap / draft low / host cron fail / knowledge stale / paper stale / push backlog |
+| **L2b 派工失敗** | `dispatch_supervisor/alerts.py`（daemon 內建，唯一 owner — 2026-07-05 明確化） | hourly dispatch 的失敗/掛/額度/認證 alert | completion_failure / hang / quota（outage-scoped，一次事故一信）/ auth / orphan / loop_crash。`host_cron_fail` **刻意不覆蓋** supervisor（legacy log 已凍結）；dashboard health_cron 只量 daemon 存活（dispatch_state.json mtime），不量成敗——成敗歸這層 |
 | **L3 改善迴圈** | `loop_health`（fast）+ `dreaming_review`（slow，propose-only） | 「loop 有沒有在變好」 | 4 指標 + 5 detector；事故經 error_log 結構化 entry 餵進來，不另建 watchdog |
 | **L4 行為指引** | CLAUDE.md（頂層 mandate）→ `.claude/rules/`（path 觸發）→ memory（背景 why）→ skills（SOP） | 需要判斷的行為 | 同一 concern 在 L4 內也只佔一個主位，其他位置放 pointer |
 

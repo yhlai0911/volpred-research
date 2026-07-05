@@ -129,6 +129,11 @@ def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     def _prio_key(x: dict[str, Any]) -> tuple[int, str]:
         p = x.get("priority")
         task_id = x.get("id") or "(missing-id)"
+        # 2026-07-05: coerce string "P<n>" first — 90 pool entries carry that
+        # form; ValueError→P9 buried a boss-assigned P1 at the queue tail.
+        s = str(p).strip()
+        if s.upper().startswith("P") and s[1:].isdigit():
+            return (int(s[1:]), task_id)
         try:
             return (int(p), task_id)
         except (TypeError, ValueError) as exc:

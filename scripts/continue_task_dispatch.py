@@ -29,6 +29,21 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+def _coerce_priority(v) -> int:
+    """Normalize priority to int: 1/"1"/"P1" → 1; unknown → 999 (queue tail).
+
+    2026-07-05: the pool has 90 string-form "P<n>" priorities written by
+    agents; every reader must coerce identically or P1 semantics silently
+    break (routing, sorting, handoff display).
+    """
+    s = str(v).strip()
+    if s.upper().startswith("P") and s[1:].isdigit():
+        return int(s[1:])
+    if s.isdigit():
+        return int(s)
+    return 999
+
+
 ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
@@ -318,7 +333,10 @@ def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> 
         # Legacy fallback still overrides via explicit task_type for known
         # agent-runnable auto flows when dispatch_lane is absent.
         priority = t.get("priority", 999)
-        is_p1 = priority == 1
+        # 2026-07-05 fix: agents sometimes write string "P1"/"P3" priorities;
+        # `priority == 1` missed "P1" so a boss-assigned P1 task leaked out of
+        # the conservative main-thread lane (msg143 task sat 27h). Coerce first.
+        is_p1 = _coerce_priority(priority) == 1
         # Explicit task_type overrides MAIN_THREAD_MARKERS regex false positives.
         # 2026-06-10 (strike 1): research backlog task descriptions contain
         # "主線程派 experiment agent 前先讀..." (= main thread DISPATCHES the
@@ -348,8 +366,7 @@ def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> 
             agentable.append(t)
 
     def _prio_key(v):
-        s = str(v)
-        return int(s[1:]) if s.startswith("P") and s[1:].isdigit() else (int(s) if str(s).isdigit() else 999)
+        return _coerce_priority(v)
 
     def _agentable_sort_key(task: dict) -> tuple[int, int, str]:
         task_type = str(task.get("task_type") or "").strip().lower()

@@ -14,7 +14,7 @@ Dedup windows match `refactor_plan_hourly_dispatch.md §3.3 alerts dedup table`:
   supervisor_restart   : 60s
   loop_crash           : 300s   (per-component key; crash-loop must not spam)
   orphan_restart       : 60s
-  quota_blocked        : 14400s (one email per quota outage, not per hourly fire)
+  quota_blocked        : outage-scoped (cleared on next success; 7d backstop window)
 """
 from __future__ import annotations
 
@@ -101,12 +101,16 @@ def send_auth_alert(*, log_tail: str = "", state_path: Path = state.STATE_PATH) 
 
 
 def send_quota_alert(*, log_tail: str = "", state_path: Path = state.STATE_PATH) -> bool:
-    """Claude Code quota exhausted. Dedup 4h — ONE email per outage, not one
-    per hourly fire (2026-07-05: a 5h weekly-quota outage would otherwise have
-    produced an email every hour). Level warn, not critical: the loop
-    self-resumes at the provider's reset time with no manual action."""
+    """Claude Code quota exhausted. ONE email per outage: the dedup key is
+    cleared by the worker on the next success (outage over), with a 7d window
+    as backstop. Level warn, not critical: the loop self-resumes at the
+    provider's reset time with no manual action."""
     key = "quota_blocked"
-    if state.should_dedup_alert(key, window_s=14400, path=state_path):
+    # Outage-scoped dedup: worker clears this key on the next SUCCESS (end of
+    # outage), so one outage = one email regardless of length. The 7d window is
+    # only a backstop against flapping — NOT the primary semantics (a fixed 4h
+    # window would re-email every 4h during a long weekly-quota outage).
+    if state.should_dedup_alert(key, window_s=7 * 86400, path=state_path):
         return False
     body = (
         "# Claude Code 額度已用完 — 排程派工自動暫停中\n\n"

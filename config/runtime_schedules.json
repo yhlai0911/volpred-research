@@ -1167,7 +1167,12 @@
       "description": "Hourly dispatch trigger — spawns fresh claude -p session for slot-aware dispatch with diversity + 1-agent-per-hour rule. Replaces unreliable session ScheduleWakeup.",
       "canonical_script": "scripts/cron_hourly_dispatch.sh",
       "tcc_bypass_copy": "~/.volpred/bin/cron_hourly_dispatch.sh",
-      "installed_at": "2026-05-12T06:18:11Z"
+      "installed_at": "2026-05-12T06:18:11Z",
+      "deprecated": true,
+      "deprecated_at": "2026-07-04T16:36:00+08:00",
+      "deprecated_reason": "Deliverable 7 cutover: replaced by com.volpred.dispatch-supervisor LaunchAgent (real-run daemon). Legacy LaunchAgent launchctl-disabled; shell wrapper kept on disk as the plan §7 one-command rollback artifact until Deliverable 8 archives it to scripts/_legacy/.",
+      "host_crontab_managed": false,
+      "note_schedule_still_canonical": "dispatch_supervisor/scheduler.py load_cron_expr() reads this entry's `schedule` field — keep it accurate even though the command is deprecated."
     },
     {
       "id": "volpred-compute-worker",
@@ -1184,6 +1189,20 @@
       "schedule": "*/30 * * * *",
       "script": "/Users/yhlai0911/.volpred/bin/cron_fred_backfill_guard.sh",
       "purpose": "self-healing FRED daily-rate backfill (2026-05-29 bot-block+504 incident); self-noops when fresh"
+    }
+  ],
+  "daemons": [
+    {
+      "id": "volpred-dispatch-supervisor",
+      "type": "launchd_keepalive_daemon",
+      "label": "com.volpred.dispatch-supervisor",
+      "plist": "ops/launchd/com.volpred.dispatch-supervisor.plist",
+      "entrypoint": "uv run python -m scripts.dispatch_supervisor.supervisor",
+      "state_file": "storage/ops/dispatch_state.json",
+      "log": "~/.volpred/logs/dispatch_supervisor.log",
+      "fires": "hourly worker per volpred-hourly-dispatch `schedule` (croniter) + ASAP on state.fire_requested_at",
+      "since": "2026-07-04T16:36:00+08:00",
+      "description": "Canonical hourly dispatcher after the 3-strike refactor cutover (docs/refactor_plan_hourly_dispatch.md). Long-lived asyncio supervisor: scheduler tick 60s + independent health monitor + retry ladder + PHASE-Z safety commit. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover it (single enforcement owner)."
     }
   ]
 }

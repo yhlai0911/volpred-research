@@ -329,6 +329,11 @@ def run_worker(
                 exit_code=exit_code, outcome="success", final_model=model,
                 path=state_path,
             )
+            # Outage-scoped quota-alert semantics (2026-07-05): a success marks
+            # the end of any quota outage — reset the dedup key so the NEXT
+            # outage sends its own email. The window itself (7d) is only a
+            # backstop against pathological flapping.
+            state.clear_alert_dedup("quota_blocked", path=state_path)
             return WorkerResult(
                 exit_code=0, outcome="success", final_model=model,
                 attempts=attempt, duration_s=total_duration, log_tail=log_tail,

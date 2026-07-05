@@ -48,7 +48,7 @@ Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup sel
 **Turn 最終輸出必須是給用戶的文字（與上一條同位階；enforcement owner = Stop hook）**：互動 turn 收尾 = 文字回報（結果 + 時間戳）；寫在 tool calls 之間的文字用戶看不到；email 不能替代 session 內回覆。2026-07-02 三犯後由 `scripts/hooks/enforce_final_text.py`（Stop hook）機械 enforce — 被擋下時直接補文字回報（why 與 incident 史見 error_log 2026-07-02 14:25、memory `feedback_final_text_after_schedulewakeup`）。
 
 **Session start 自動啟動**（2026-05-29 用戶補強）：
-新 interactive session 一開始（識別方式：第一個 user message 不是「停」、「結束」、「stop」等明確終止指令，且 `git log --since='30 min ago'` 或 `storage/ops/last_autonomous_fire.json` 顯示 autonomous loop 已斷 ≥10 min），確認 OS backbone 活著即可（hourly-dispatch LaunchAgent 為主）；**不在互動回應中排 ScheduleWakeup**（2026-07-02 五犯根治後，session 內 wakeup 僅限 autonomous fire turn）。
+新 interactive session 一開始（識別方式：第一個 user message 不是「停」、「結束」、「stop」等明確終止指令，且 `git log --since='30 min ago'` 或 `storage/ops/last_autonomous_fire.json` 顯示 autonomous loop 已斷 ≥10 min），確認 OS backbone 活著即可（主派工 = `com.volpred.dispatch-supervisor` 常駐 daemon，2026-07-04 cutover 取代舊 hourly-dispatch LaunchAgent；查法 `launchctl list | grep dispatch-supervisor` + `jq '.last_heartbeat_at' storage/ops/dispatch_state.json`；in-flight 檢查 = `jq '.current_job'` 非 null）；**不在互動回應中排 ScheduleWakeup**（2026-07-02 五犯根治後，session 內 wakeup 僅限 autonomous fire turn）。
 
 判斷流程（接收第一個 user message 時內建）：
 1. 用戶 message 含「停 loop / 結束 / stop autonomous / 暫停 autonomous」→ 不啟動

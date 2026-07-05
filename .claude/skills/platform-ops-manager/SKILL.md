@@ -95,12 +95,17 @@ etc — see crontab + `~/Library/LaunchAgents/com.volpred.*.plist`).
 - Tell boss explicitly when session restart is needed (don't pretend
   loop continued through `/exit`)
 
-### Rule 7 — Don't disturb running hourly fire (2026-05-29)
-If `ps aux | grep cron_hourly_dispatch` shows live PIDs from current
-hour's `:07` minute, the fire is mid-flight. State files (next_tasks.json,
-feed.json, paper_trading.json) and active task directories are being
-written. Don't commit/edit them — wait for `PHASE Z` to land + fire-end
-log entry. Only commit truly orphan files from PRIOR cycles.
+### Rule 7 — Don't disturb running hourly fire (2026-05-29; updated 2026-07-05 post-cutover)
+Check `jq '.current_job' storage/ops/dispatch_state.json` — non-null means
+a dispatched worker is mid-flight. State files (next_tasks.json, feed.json,
+paper_trading.json) and active task directories are being written. Don't
+commit/edit them — wait for the job to complete (current_job → null) +
+PHASE-Z to land. Only commit truly orphan files from PRIOR cycles.
+(The old `ps aux | grep cron_hourly_dispatch` check died with the 07-04
+cutover to the dispatch-supervisor daemon — the worker is a bare `claude -p`
+whose process name never contains "hourly". Writes to next_tasks.json should
+additionally use the fcntl flock protocol, which makes them race-safe even
+mid-fire.)
 
 ### Rule 6 — Boss-decision emails must be visually distinct (2026-05-29)
 When an email genuinely requires boss decision before progress can

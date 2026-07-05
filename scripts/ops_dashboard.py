@@ -397,7 +397,15 @@ def main():
     # cron_jobs-section jobs (LaunchAgent-fired) aren't in system_crontab.items
     # — seed their cron + log mappings explicitly so staleness math works.
     job_cron_map.setdefault("hourly_dispatch", "7 * * * *")
-    job_log_map.setdefault("hourly_dispatch", "storage/logs/cron/hourly_dispatch.log")
+    # 2026-07-05 (post-cutover fix): hourly dispatch moved from the legacy shell
+    # wrapper to the dispatch-supervisor daemon on 07-04. The legacy log
+    # (storage/logs/cron/hourly_dispatch.log) froze at cutover, so monitoring it
+    # produced a PERMANENT stale-warn regardless of real dispatcher health.
+    # Freshness evidence is now the supervisor state file — its mtime updates
+    # every ~60s scheduler heartbeat and on every fire. Fire success/failure
+    # alerting is the supervisor's own job (alerts.py completion_failure /
+    # quota / hang — the single enforcement owner for dispatch failures).
+    job_log_map["hourly_dispatch"] = "storage/ops/dispatch_state.json"
     job_cron_map.setdefault("compute_worker", "*/15 * * * *")
     job_log_map.setdefault("compute_worker", "storage/logs/cron/compute_worker.log")
     # handoff_regen: spec log_path (cron/handoff_regen.log) does not exist on
@@ -487,7 +495,14 @@ def main():
         "health_cron",
         "ok" if not stale else "warn" if len(stale) <= 2 else "critical",
         f"{len(stale)} cron jobs stale (over max-age)",
-        f"manual fire ~/.volpred/bin/cron_<id>.sh" if stale else None,
+        (
+            "hourly_dispatch stale → check supervisor: launchctl kickstart -k "
+            "gui/501/com.volpred.dispatch-supervisor + uv run python -m "
+            "scripts.dispatch_supervisor.cli status; other jobs → manual fire "
+            "~/.volpred/bin/cron_<id>.sh"
+            if any(s.get("job") == "hourly_dispatch" for s in stale)
+            else "manual fire ~/.volpred/bin/cron_<id>.sh"
+        ) if stale else None,
         stale=stale,
         warnings=cron_warnings[:10],
     ))

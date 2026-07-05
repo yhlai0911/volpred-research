@@ -1457,3 +1457,127 @@ def test_quota_alert_dedup_one_email_per_outage(tmp_path: Path, monkeypatch) -> 
     assert supervisor.alerts.send_quota_alert(log_tail="limit", state_path=state_path) is False
     assert supervisor.alerts.send_quota_alert(log_tail="limit", state_path=state_path) is False
     assert len(sends) == 1
+
+
+# ---------------------------------------------------------------------------
+# Cross-fire log contamination (2026-07-05 audit): the shared append-log's
+# global tail can hold a PREVIOUS fire's quota/auth lines; classification must
+# only see bytes THIS attempt wrote (offset-scoped _read_since), or a stale
+# 'Not logged in' would freeze the loop behind a manual unblock.
+# ---------------------------------------------------------------------------
+
+
+def test_read_since_returns_only_bytes_after_offset(tmp_path: Path) -> None:
+    log = tmp_path / "w.log"
+    log.write_bytes(b"OLD: Not logged in. Please run /login\n")
+    offset = worker._log_size(log)
+    with log.open("ab") as f:
+        f.write(b"NEW: some unrelated hard failure\n")
+    out = worker._read_since(log, offset)
+    assert "Not logged in" not in out
+    assert "unrelated hard failure" in out
+    # nothing new after EOF offset → empty
+    assert worker._read_since(log, worker._log_size(log)) == ""
+
+
+def test_stale_auth_line_in_shared_log_does_not_freeze_loop(tmp_path: Path, monkeypatch) -> None:
+    """End-to-end: previous fire left 'Not logged in' in the shared log; this
+    attempt fails with an unrelated error. Must classify hard_failure (retry),
+    NOT auth (which would set auth_blocked and halt all future fires)."""
+    state_path = _tmp_state(tmp_path)
+    log_path = tmp_path / "worker.log"
+    log_path.write_text("PREVIOUS FIRE: Not logged in. Please run /login\n", encoding="utf-8")
+
+    class FakeProc:
+        pid = 4242
+        def wait(self, timeout=None):
+            with log_path.open("ab") as f:
+                f.write(b"boom: unrelated crash\n")
+            return 1
+
+    monkeypatch.setattr(worker, "_spawn", lambda **kwargs: FakeProc())
+    monkeypatch.setattr(worker.os, "getpgid", lambda pid: 4242)
+    monkeypatch.setattr(worker.procutil, "get_process_start_wall", lambda pid: "Wed Jan  1 00:00:00 2026")
+
+    exit_code, _dur, attempt_output = worker._run_one_attempt(
+        prompt_text="p", model=worker.OPUS_MODEL, timeout_s=5,
+        log_path=log_path, attempt=1, schedule_id="hourly_dispatch",
+        state_path=state_path, claude_bin="/tmp/claude",
+    )
+    assert "Not logged in" not in attempt_output, "stale auth line must not leak into classification input"
+    assert worker._classify(exit_code, attempt_output) == "hard_failure"
+
+
+# ---------------------------------------------------------------------------
+# Fire request (2026-07-05 gmail double-dispatch race fix): external triggers
+# write a flag under the state lock; the scheduler consumes it and fires
+# through the normal single-slot path.
+# ---------------------------------------------------------------------------
+
+
+def test_fire_request_roundtrip(tmp_path: Path) -> None:
+    state_path = _tmp_state(tmp_path)
+    assert state.consume_fire_request(state_path) is None
+    state.request_fire("email_reply:task_x", path=state_path)
+    assert state.read_state(state_path)["fire_requested_at"] is not None
+    assert state.consume_fire_request(state_path) == "email_reply:task_x"
+    # consumed exactly once
+    assert state.consume_fire_request(state_path) is None
+    assert state.read_state(state_path)["fire_requested_at"] is None
+
+
+def test_scheduler_fires_off_cadence_on_fire_request(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    # make cron NOT due: last fire = now
+    state.reserve_fire(schedule_id="s", attempt=1, model="m", log_path="/tmp/x", path=state_path)
+    state.release_reservation(state_path)  # sets last_fire_at=now, slot free
+    fired: list[dict] = []
+
+    def fake_run_worker(**kwargs):
+        fired.append(kwargs)
+        return worker.WorkerResult(exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+                                   attempts=1, duration_s=1.0, log_tail="ok")
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+
+    # without a request → not_due skip
+    d1 = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+        log_path=tmp_path / "w.log", dry_run=False, repo_root=tmp_path,
+    ))
+    assert d1["action"] == "skip" and d1["reason"] == "not_due"
+
+    # with a request → fires immediately, request consumed
+    state.request_fire("email_reply:task_y", path=state_path)
+    d2 = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+        log_path=tmp_path / "w.log", dry_run=False, repo_root=tmp_path,
+    ))
+    assert d2["action"] == "fired"
+    assert d2["fire_reason"].startswith("requested:email_reply")
+    assert len(fired) == 1
+    assert state.read_state(state_path)["fire_requested_at"] is None
+
+
+def test_quota_dedup_cleared_on_next_success(tmp_path: Path, monkeypatch) -> None:
+    """Outage-scoped semantics: success ends the outage → next outage emails again."""
+    state_path = _tmp_state(tmp_path)
+    sends: list[str] = []
+    monkeypatch.setattr(supervisor.alerts, "_send", lambda level, title, body: sends.append(title) or 0)
+
+    assert supervisor.alerts.send_quota_alert(log_tail="limit", state_path=state_path) is True
+    assert supervisor.alerts.send_quota_alert(log_tail="limit", state_path=state_path) is False
+
+    # a successful fire ends the outage
+    def ok_attempt(**kwargs):
+        return 0, 1.0, "ok"
+    monkeypatch.setattr(worker, "_run_one_attempt", ok_attempt)
+    result = worker.run_worker(prompt_text="p", log_path=tmp_path / "w.log",
+                               state_path=state_path, sleep_fn=lambda s: None)
+    assert result.outcome == "success"
+
+    # NEXT outage must email again despite 7d backstop window
+    assert supervisor.alerts.send_quota_alert(log_tail="limit again", state_path=state_path) is True
+    assert len(sends) == 2

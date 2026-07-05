@@ -22,6 +22,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import re
 import sys
@@ -321,13 +322,27 @@ def main() -> int:
             tasks[idx]["review_gate_followup_task_id"] = followup_id
             review_followups_created += 1
 
-        # Write back (preserve original list/dict shape)
-        original = json.loads(NEXT_TASKS.read_text())
-        if isinstance(original, dict):
-            original["tasks"] = tasks
-            NEXT_TASKS.write_text(json.dumps(original, indent=2, ensure_ascii=False) + "\n")
-        else:
-            NEXT_TASKS.write_text(json.dumps(tasks, indent=2, ensure_ascii=False) + "\n")
+        # Write back (preserve original list/dict shape) under the SAME
+        # fcntl.LOCK_EX-on-file protocol task_pool_claim.py uses, so an apply
+        # can never interleave with a live dispatcher/agent's read-modify-write
+        # (2026-07-05: previously this was an unlocked read_text/write_text —
+        # racing an in-flight hourly worker could silently drop its update).
+        with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+            try:
+                original = json.load(fh)
+                if isinstance(original, dict):
+                    original["tasks"] = tasks
+                    payload = json.dumps(original, indent=2, ensure_ascii=False)
+                else:
+                    payload = json.dumps(tasks, indent=2, ensure_ascii=False)
+                payload.encode("utf-8")  # serialize-validate BEFORE truncate
+                fh.seek(0)
+                fh.truncate()
+                fh.write(payload)
+                fh.write("\n")
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
         print(
             f"[sync_next_tasks] APPLIED {len(candidates)} completion updates, "
             f"{len(review_gaps)} review-gate updates "

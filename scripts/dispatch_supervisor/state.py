@@ -26,7 +26,7 @@ Schema (version 1)::
           "outcome": "success" | "failure" | "killed_timeout" | "silent_death" |
                      "timeout_unverified" | "killed_supervisor_restart" |
                      "orphan_gone_or_reused" | "orphan_unverified_not_killed" |
-                     "reservation_abandoned_no_pid"
+                     "reservation_abandoned_no_pid" | "quota_blocked" | "auth_blocked"
         }
       ],
       "auth_blocked": false,                      # set true on 'Not logged in' — halts ticks

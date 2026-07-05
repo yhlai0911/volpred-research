@@ -2,6 +2,20 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-05 16:40 週額度耗盡 5 小時（11:07-16:00）— loop 自我恢復正常，但暴露 4 個結構缺口 — **FIXED（quota class + 3 個 cutover 殘留全修）**
+
+**現象**：Claude Code 週額度 11:07 耗盡（resets 4pm），5 班 hourly fire × 3 attempts = 15 連敗（「You've hit your weekly limit」無對應分類 → hard_failure → 白燒 opus→opus→sonnet ladder + 5 封 critical email）。16:00 重置後 16:07 班**自動復工**（real-run supervisor 如設計自我恢復）；發文 release_pool 不吃額度照常，無脫班；Telegram/Gmail 零積壓；codex-loop 中斷期間照常產出 K1637-K1640。
+
+**修復（同日）**：
+1. **quota 失敗類**（`worker._classify` 新增）：no-retry、不設 auth_blocked（額度自動恢復，人工 unblock 反而卡死 loop）、下一班單次輕量探測自動復工；alert 改 **outage-scoped**（worker 在下一次 success 清 dedup key → 一次事故一封信，7d 窗僅 backstop——固定 4h 窗在跨日 weekly outage 會每 4h 重寄）。
+2. **跨班 log 污染**（audit 抓到的 latent bug）：分類器原讀共用 append-log 的全域尾 2KB，前一班殘留的 quota/auth 字樣會誤分類本班——stale「Not logged in」誤判 auth 會凍結整個 loop。改 per-attempt offset 讀取（`_read_since`），分類只看本 attempt 寫入的 bytes。
+3. **gmail 立即派工雙派工 race（critical）**：cutover 後 `gmail_inbox_poll._trigger_immediate_dispatch` 仍直接 Popen 未 stub 的 legacy shell wrapper（guard 只 pgrep legacy 名，看不到 supervisor in-flight）——老闆一封回信就可能開出第二個脫離管控的 dispatch agent。改寫成 supervisor fire-request flag（state lock 下寫 `fire_requested_at`，scheduler 60s tick 消費、走 reserve_fire 單一 slot；in-flight 時 request 保留、班後補開，永不並行）。**無 legacy fallback**（那條路就是 race）。
+4. **dashboard 永久假 warn**：health_cron 監控仍讀 cutover 後凍結的 legacy log（23.4h stale ≠ 額度中斷 6h）且 remediation 提示教人手動 fire 已停用的 legacy wrapper（= 教人製造雙派工）。改讀 `dispatch_state.json` mtime（daemon 60s 心跳）+ 提示改 supervisor 指令。dashboard overall warn→ok。
+
+**同批收尾**：K1330 由 flow 解封（blocked 21 天）；sync_next_tasks_status 補 flock（原裸 write_text 會與 in-flight worker race）；priority "P1" 字串被 parser 降 P9 修 coercion（boss msg143 P1 任務沉底 27h 的根因，現已浮回 main-thread 隊首）；4 個 zombie event receipts 關閉；55 天 passive-terminal 任務 superseded；C 區 13 項這次**真的**寫入 pool（上輪計劃承諾排池但 24h 零落地）；6 處 cutover 過時文件/memory/規則批次更新；runtime_schedules.json 標 legacy deprecated + 新增 supervisor canonical daemon entry；enforcement map 明確化 L2b（派工失敗 alert owner = supervisor alerts，host_cron_fail 刻意不覆蓋）。
+
+**教訓（PDCA）**：(i) cutover checklist 必須包含「grep 全 repo 找誰還呼叫舊執行體」——gmail_inbox_poll 這個依賴漏在 refactor plan 之外；(ii) 「計劃說要排入 pool」不等於已排——排池要在同一 session 完成並驗證 pending 數，不留承諾斷鏈；(iii) 共用 append log 永不 rotate + 全域 tail 分類 = 跨班污染的結構性組合，任何以 log 內容做決策的機制都要 offset-scope。
+
 ## 2026-07-05 10:2x `task_pool_claim.py complete` 一次 routine call 寫壞 canonical pending queue（非 atomic write + argv lone-surrogate）— **FIXED**
 
 **現象**：hourly-10 收尾 paper_body task 跑 `task_pool_claim.py complete --id <id> --status succeeded --result "...→..."`，指令拋 `UnicodeEncodeError: 'utf-8' codec can't encode character '\udc97'` 並中途崩潰，`storage/next_tasks.json` 被截成 invalid JSON（JSONDecodeError line 50190），且該壞檔已被 PHASE Z auto-commit。從 HEAD~1 有效版還原 + Python 腳本重加 task 為 succeeded 復原（2121 tasks valid、in_progress=0）。
