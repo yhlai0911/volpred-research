@@ -190,6 +190,74 @@ def test_error_recurrence_skips_audit_logs(tmp_path):
     assert r["distinct_signatures"] == 0
 
 
+def _dispatch_completion(days_ago: float, outcome: str, exit_code: int = 1) -> dict:
+    ts = _iso(days_ago)
+    return {
+        "fire_at": ts,
+        "completed_at": ts,
+        "exit_code": exit_code,
+        "duration_s": 5.0,
+        "attempts": 1,
+        "final_model": "claude-opus-4-8",
+        "outcome": outcome,
+    }
+
+
+def test_error_recurrence_counts_dispatch_supervisor_completions(tmp_path):
+    storage = _storage(tmp_path)
+    _write(
+        storage / "ops" / "dispatch_state.json",
+        {"completions": [_dispatch_completion(t, "failure", 1) for t in [1, 2, 3, 4, 5]]},
+    )
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+    top = r["top_recurring"][0]
+    assert top["signature"] == "dispatch_supervisor:failure:exit1"
+    assert top["source"] == "dispatch_state.completions"
+    assert top["count"] == 5
+    assert r["status"] in ("warn", "degrading")
+
+
+def test_error_recurrence_dispatch_supervisor_success_marks_recovered(tmp_path):
+    storage = _storage(tmp_path)
+    failures = [_dispatch_completion(t, "failure", 1) for t in [8, 7, 6, 5, 4, 3, 2.5, 2]]
+    success = _dispatch_completion(1 / 24, "success", 0)
+    _write(storage / "ops" / "dispatch_state.json", {"completions": failures + [success]})
+
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+    top = r["top_recurring"][0]
+    assert top["signature"] == "dispatch_supervisor:failure:exit1"
+    assert top["recovered"] is True
+    assert r["status"] == "ok"
+
+
+def test_error_recurrence_dispatch_supervisor_log_fallback(tmp_path, monkeypatch):
+    storage = _storage(tmp_path)
+    home = tmp_path / "home"
+    log_dir = home / "logs"
+    log_dir.mkdir(parents=True)
+    lines = [
+        "2026-06-28 20:08:33,059 INFO [scripts.dispatch_supervisor.scheduler] "
+        "worker returned outcome=failure attempts=3 duration=13.8s",
+        "2026-06-29 20:08:33,059 INFO [scripts.dispatch_supervisor.scheduler] "
+        "worker returned outcome=failure attempts=3 duration=13.8s",
+        "2026-06-30 20:08:33,059 INFO [scripts.dispatch_supervisor.scheduler] "
+        "worker returned outcome=failure attempts=3 duration=13.8s",
+        "2026-07-01 20:08:33,059 INFO [scripts.dispatch_supervisor.scheduler] "
+        "worker returned outcome=failure attempts=3 duration=13.8s",
+        "2026-07-02 20:08:33,059 INFO [scripts.dispatch_supervisor.scheduler] "
+        "worker returned outcome=failure attempts=3 duration=13.8s",
+    ]
+    (log_dir / "dispatch_supervisor.log").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    monkeypatch.setenv("VOLPRED_HOME_DIR", str(home))
+
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+    top = r["top_recurring"][0]
+    assert top["signature"] == "dispatch_supervisor:failure"
+    assert top["source"] == "dispatch_supervisor.log"
+    assert top["count"] == 5
+    assert r["status"] == "warn"
+
+
 # ---------------------------------------------------------------------------
 # correction_trend
 # ---------------------------------------------------------------------------

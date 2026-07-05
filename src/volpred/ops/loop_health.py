@@ -45,6 +45,7 @@ content_quality_snapshot` so `alerts.py` and the dashboard consume it uniformly.
 from __future__ import annotations
 
 import json
+import os
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -105,6 +106,7 @@ _CORRECTION_OUTCOME_TOKENS = ("correction", "errata", "self_correction", "drift_
 _CORRECTION_KEY_FIELDS = ("fixed_in_article", "errors_found", "errata_count", "issues_fixed")
 
 _CRON_EXIT_RE = re.compile(r"===.*?\bexit\s+(\d+)\b", re.IGNORECASE)
+_DISPATCH_OUTCOME_RE = re.compile(r"\bworker returned outcome=(?P<outcome>[a-z_]+)\b", re.IGNORECASE)
 
 
 # ---------------------------------------------------------------------------
@@ -346,6 +348,26 @@ def compute_task_outcome(
 # ---------------------------------------------------------------------------
 # 3. error_recurrence
 # ---------------------------------------------------------------------------
+def _merge_signature(
+    sigs: dict[str, dict[str, Any]],
+    sig: str,
+    *,
+    seen_at: datetime | None,
+    source: str,
+) -> dict[str, Any]:
+    entry = sigs.setdefault(
+        sig,
+        {"count": 0, "first_seen": None, "last_seen": None, "source": source},
+    )
+    entry["count"] += 1
+    if seen_at is not None:
+        if entry["first_seen"] is None or seen_at < _parse_iso(entry["first_seen"]):
+            entry["first_seen"] = seen_at.isoformat()
+        if entry["last_seen"] is None or seen_at > _parse_iso(entry["last_seen"]):
+            entry["last_seen"] = seen_at.isoformat()
+    return entry
+
+
 def _scan_cron_exit_signatures(
     storage_dir: str, cutoff: datetime, now: datetime
 ) -> dict[str, dict[str, Any]]:
@@ -394,15 +416,9 @@ def _scan_cron_exit_signatures(
             if last_ts is not None and last_ts < cutoff:
                 continue
             sig = f"{log_path.name}:exit{code}"
-            entry = sigs.setdefault(sig, {"count": 0, "first_seen": None, "last_seen": None})
-            entry["count"] += 1
+            _merge_signature(sigs, sig, seen_at=last_ts, source="cron_log")
             if sig not in log_sigs:
                 log_sigs.append(sig)
-            if last_ts is not None:
-                if entry["first_seen"] is None or last_ts < _parse_iso(entry["first_seen"]):
-                    entry["first_seen"] = last_ts.isoformat()
-                if entry["last_seen"] is None or last_ts > _parse_iso(entry["last_seen"]):
-                    entry["last_seen"] = last_ts.isoformat()
         # Recovery: the job's latest fire succeeded AND its failures are old →
         # the underlying problem is fixed; clear the false-critical immediately.
         if last_exit_code == "0":
@@ -410,6 +426,132 @@ def _scan_cron_exit_signatures(
                 ls = _parse_iso(sigs[sig].get("last_seen"))
                 if ls is not None and (now - ls) >= timedelta(hours=RECOVERY_GRACE_HOURS):
                     sigs[sig]["recovered"] = True
+    return sigs
+
+
+def _normalise_dispatch_outcome(value: Any) -> str:
+    s = re.sub(r"[^a-z0-9_]+", "_", str(value or "").strip().lower()).strip("_")
+    return s or "non_success"
+
+
+def _dispatch_signature(outcome: Any, exit_code: Any = None) -> str:
+    norm = _normalise_dispatch_outcome(outcome)
+    try:
+        code = int(exit_code)
+    except (TypeError, ValueError):
+        code = None
+    if code is None:
+        return f"dispatch_supervisor:{norm}"
+    return f"dispatch_supervisor:{norm}:exit{code}"
+
+
+def _is_dispatch_success(entry: dict[str, Any]) -> bool:
+    outcome = _normalise_dispatch_outcome(entry.get("outcome"))
+    try:
+        exit_code = int(entry.get("exit_code", 0))
+    except (TypeError, ValueError):
+        exit_code = 1
+    return outcome == "success" and exit_code == 0
+
+
+def _scan_dispatch_supervisor_completion_signatures(
+    storage_dir: str, cutoff: datetime, now: datetime
+) -> dict[str, dict[str, Any]]:
+    """Count non-success dispatch supervisor completions from structured state.
+
+    `dispatch_state.json` is the canonical structured source for the launchd-era
+    hourly dispatcher. It records attempt-level completion outcomes even though
+    they no longer appear in `storage/logs/cron/*.log`.
+    """
+    sigs: dict[str, dict[str, Any]] = {}
+    state_path = project_path(storage_dir) / "ops" / "dispatch_state.json"
+    if not state_path.exists():
+        return sigs
+    try:
+        raw = json.loads(state_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        warn("loop_health_dispatch_state", "dispatch state read failed; skipping", path=str(state_path), err=str(exc))
+        return sigs
+    completions = raw.get("completions") if isinstance(raw, dict) else None
+    if not isinstance(completions, list):
+        return sigs
+
+    latest_success_ts: datetime | None = None
+    failure_sigs: list[str] = []
+    for rec in completions:
+        if not isinstance(rec, dict):
+            continue
+        ts = _parse_iso(rec.get("completed_at")) or _parse_iso(rec.get("fire_at"))
+        if _is_dispatch_success(rec):
+            if ts is not None and (latest_success_ts is None or ts > latest_success_ts):
+                latest_success_ts = ts
+            continue
+        if ts is not None and ts < cutoff:
+            continue
+        sig = _dispatch_signature(rec.get("outcome"), rec.get("exit_code"))
+        _merge_signature(sigs, sig, seen_at=ts, source="dispatch_state.completions")
+        if sig not in failure_sigs:
+            failure_sigs.append(sig)
+
+    if latest_success_ts is not None:
+        for sig in failure_sigs:
+            ls = _parse_iso(sigs[sig].get("last_seen"))
+            if ls is not None and latest_success_ts > ls and (now - ls) >= timedelta(hours=RECOVERY_GRACE_HOURS):
+                sigs[sig]["recovered"] = True
+    return sigs
+
+
+def _scan_dispatch_supervisor_log_signatures(
+    storage_dir: str, cutoff: datetime, now: datetime
+) -> dict[str, dict[str, Any]]:
+    """Fallback source when dispatch_state has no usable completion failures."""
+    sigs: dict[str, dict[str, Any]] = {}
+    if "VOLPRED_HOME_DIR" not in os.environ:
+        try:
+            if project_path(storage_dir).resolve() != project_path("storage").resolve():
+                return sigs
+        except OSError:
+            return sigs
+    home_dir = Path(os.environ.get("VOLPRED_HOME_DIR", str(Path.home() / ".volpred")))
+    logs_dir = home_dir / "logs"
+    if not logs_dir.exists():
+        return sigs
+
+    latest_success_ts: datetime | None = None
+    failure_sigs: list[str] = []
+    for log_path in sorted(logs_dir.glob("dispatch_supervisor*.log")):
+        try:
+            lines = log_path.read_text(errors="ignore").splitlines()
+        except OSError as exc:
+            warn(
+                "loop_health_dispatch_log",
+                "dispatch supervisor log read failed; skipping",
+                path=str(log_path),
+                err=str(exc),
+            )
+            continue
+        for ln in lines:
+            m = _DISPATCH_OUTCOME_RE.search(ln)
+            if not m:
+                continue
+            ts = _parse_banner_ts(ln)
+            outcome = _normalise_dispatch_outcome(m.group("outcome"))
+            if outcome == "success":
+                if ts is not None and (latest_success_ts is None or ts > latest_success_ts):
+                    latest_success_ts = ts
+                continue
+            if ts is not None and ts < cutoff:
+                continue
+            sig = _dispatch_signature(outcome)
+            _merge_signature(sigs, sig, seen_at=ts, source="dispatch_supervisor.log")
+            if sig not in failure_sigs:
+                failure_sigs.append(sig)
+
+    if latest_success_ts is not None:
+        for sig in failure_sigs:
+            ls = _parse_iso(sigs[sig].get("last_seen"))
+            if ls is not None and latest_success_ts > ls and (now - ls) >= timedelta(hours=RECOVERY_GRACE_HOURS):
+                sigs[sig]["recovered"] = True
     return sigs
 
 
@@ -463,13 +605,7 @@ def _scan_diagnostics_signatures(
             if ts is not None and ts < cutoff:
                 continue
             sig = f"diag:{rec.get('tag') or jl.stem}"
-            entry = sigs.setdefault(sig, {"count": 0, "first_seen": None, "last_seen": None})
-            entry["count"] += 1
-            if ts is not None:
-                if entry["first_seen"] is None or ts < _parse_iso(entry["first_seen"]):
-                    entry["first_seen"] = ts.isoformat()
-                if entry["last_seen"] is None or ts > _parse_iso(entry["last_seen"]):
-                    entry["last_seen"] = ts.isoformat()
+            _merge_signature(sigs, sig, seen_at=ts, source="diagnostics")
     return sigs
 
 
@@ -485,6 +621,10 @@ def compute_error_recurrence(
         cutoff = current - timedelta(days=window_days)
         sigs: dict[str, dict[str, Any]] = {}
         sigs.update(_scan_cron_exit_signatures(storage_dir, cutoff, current))
+        dispatch_sigs = _scan_dispatch_supervisor_completion_signatures(storage_dir, cutoff, current)
+        if not dispatch_sigs:
+            dispatch_sigs = _scan_dispatch_supervisor_log_signatures(storage_dir, cutoff, current)
+        sigs.update(dispatch_sigs)
         for sig, entry in _scan_diagnostics_signatures(storage_dir, cutoff).items():
             sigs[sig] = entry
 
