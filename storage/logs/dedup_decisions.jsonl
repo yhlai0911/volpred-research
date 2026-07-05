@@ -96,3 +96,5 @@
 {"ts": "2026-07-05T00:00:38.445557+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_af40e182", "matched_id": "mile_153d2908", "decision": "block", "reason": "shared_experiment_refs=['K1568']"}
 {"ts": "2026-07-05T00:00:39.256963+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_3a7bd6f6", "matched_id": "mile_80cae4cb", "decision": "block", "reason": "shared_experiment_refs=['K1605']"}
 {"ts": "2026-07-05T00:00:39.257238+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_3a7bd6f6", "matched_id": "mile_153d2908", "decision": "warn", "reason": "arc_similarity_without_shared_ref_or_data_source"}
+{"ts": "2026-07-05T00:30:00.437021+00:00", "gate": "publish_throttle", "decision": "block", "target_id": "mile_2ee90403", "previous_id": "mile_08820c3d", "gap_minutes": 29.38, "reason": "burst_gap_29.38min_lt_30min"}
+{"ts": "2026-07-05T00:30:44.590062+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_0fa841ed", "previous_id": "mile_08820c3d", "gap_minutes": 30.12, "reason": "gap_above_threshold"}
