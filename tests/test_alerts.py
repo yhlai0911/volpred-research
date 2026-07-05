@@ -592,12 +592,16 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     # it so this test isolates only the cron/pool set. (storage_dir bug tracked
     # separately — surfaced by the 2026-06-29 loop-health work.)
     monkeypatch.setattr("volpred.topic_clusters.recent_cluster_counts", lambda days=30: ({}, 0))
-    # exit 1 in the NEW canonical wrapper format (`=== [job] exit N at ... ===`) so
-    # both release_pool_gap (no recent fire) and host_cron_fail (non-zero exit) breach.
+    # Stale release_pool fire keeps release_pool_gap isolated; host_cron_fail now uses
+    # a separate fresh non-zero exit so the recency gate does not suppress this fixture.
     _write_text(
         storage_dir / "logs" / "cron" / "release_pool.log",
         "=== [release-pool] fire at Sun Apr 19 09:00:00 CST 2026 ===\n"
         "=== [release-pool] exit 1 at Sun Apr 19 09:00:02 CST 2026 ===\n",
+    )
+    _write_text(
+        storage_dir / "logs" / "cron" / "daily_update.log",
+        f"=== [daily_update] exit 1 at {(now - timedelta(minutes=5)).isoformat()} ===\n",
     )
     _write_json(
         storage_dir / "ops" / "scheduler_state.json",
@@ -646,7 +650,7 @@ def test_host_cron_fail_severity_calibration(tmp_path: Path):
     141): a self-recovering SIGALRM hang (exit=142) is WARN, not CRITICAL noise —
     including a consecutive-142 chain, which still self-recovers on the next fire.
     Only a non-self-recovering hard failure (exit != {142,75}) stays CRITICAL."""
-    from datetime import datetime, timezone
+    from datetime import datetime, timedelta, timezone
 
     from volpred.ops.alerts import _parse_host_cron_state
 
@@ -659,11 +663,11 @@ def test_host_cron_fail_severity_calibration(tmp_path: Path):
 
     def write_exits(codes):
         lines = []
+        base = now - timedelta(hours=max(len(codes) - 1, 0))
         for i, c in enumerate(codes):
+            ts = base + timedelta(hours=i)
             lines.append(f"=== [hourly_dispatch] fire run {i} ===")
-            lines.append(
-                f"=== [hourly_dispatch] exit {c} at Sun Jun 15 1{i}:00:00 CST 2026 ==="
-            )
+            lines.append(f"=== [hourly_dispatch] exit {c} at {ts.isoformat()} ===")
         _write_text(storage / "logs" / "cron" / "hourly_dispatch.log", "\n".join(lines))
 
     # 1) lone hang (latest=142, consec=1) → breached WARN
@@ -710,7 +714,7 @@ def test_host_cron_fail_quota_window_is_self_recovering(tmp_path: Path):
     CRITICAL host_cron_fail, even across >=2 consecutive fires (a quota window
     legitimately spans multiple fires). Post-2026-07-04, a 142 hang chain is also
     self-recovering → WARN (both codes are exempt from CRITICAL escalation)."""
-    from datetime import datetime, timezone
+    from datetime import datetime, timedelta, timezone
 
     from volpred.ops.alerts import _parse_host_cron_state
 
@@ -723,11 +727,11 @@ def test_host_cron_fail_quota_window_is_self_recovering(tmp_path: Path):
 
     def write_exits(codes):
         lines = []
+        base = now - timedelta(hours=max(len(codes) - 1, 0))
         for i, c in enumerate(codes):
+            ts = base + timedelta(hours=i)
             lines.append(f"=== [hourly_dispatch] fire run {i} ===")
-            lines.append(
-                f"=== [hourly_dispatch] exit {c} at Thu Jul 2 1{i}:00:00 CST 2026 ==="
-            )
+            lines.append(f"=== [hourly_dispatch] exit {c} at {ts.isoformat()} ===")
         _write_text(storage / "logs" / "cron" / "hourly_dispatch.log", "\n".join(lines))
 
     # 1) lone quota window (latest=75) → breached WARN, not critical
@@ -774,7 +778,7 @@ def test_host_cron_fail_git_push_held_is_benign(tmp_path: Path):
     from host_cron_fail (no CRITICAL), while its REAL failures (origin divergence /
     real push failure = exit 1) still escalate. Root cause guard for the 4-day 28x
     false-CRITICAL cascade (a single line-38 false-positive silent-fallback flag)."""
-    from datetime import datetime, timezone
+    from datetime import datetime, timedelta, timezone
 
     from volpred.ops.alerts import _parse_host_cron_state
 
@@ -787,11 +791,11 @@ def test_host_cron_fail_git_push_held_is_benign(tmp_path: Path):
 
     def write_push_exits(codes):
         lines = []
+        base = now - timedelta(hours=max(len(codes) - 1, 0))
         for i, c in enumerate(codes):
+            ts = base + timedelta(hours=i)
             lines.append(f"=== [git_push_backup] fire run {i} ===")
-            lines.append(
-                f"=== [git_push_backup] exit {c} at Fri Jul 3 1{i}:00:00 CST 2026 ==="
-            )
+            lines.append(f"=== [git_push_backup] exit {c} at {ts.isoformat()} ===")
         _write_text(storage / "logs" / "cron" / "git_push_backup.log", "\n".join(lines))
 
     # 1) lone held push (latest=120) → NOT breached (benign, self-reported WARN)
@@ -816,6 +820,131 @@ def test_host_cron_fail_git_push_held_is_benign(tmp_path: Path):
     write_push_exits([1, 1, 120])
     r = _parse_host_cron_state(str(storage), now)
     assert r["breached"] is False
+
+
+def test_host_cron_fail_ignores_stale_nonzero_exit(tmp_path: Path, monkeypatch):
+    """A non-zero exit older than the job's next scheduled fire is stale evidence."""
+    from datetime import datetime, timedelta, timezone
+
+    from volpred.ops.alerts import _parse_host_cron_state
+
+    storage = tmp_path / "storage"
+    _write_json(
+        storage / "ops" / "scheduler_state.json",
+        {"last_tick_at": "2026-07-06T00:00:00+00:00", "last_status": "ok"},
+    )
+    monkeypatch.setattr(
+        "volpred.ops.alerts.load_runtime_schedules",
+        lambda: {
+            "metadata": {},
+            "system_crontab": {
+                "items": [
+                    {
+                        "id": "daily_update",
+                        "cron": "0 * * * *",
+                        "log_path": "storage/logs/cron/daily_update.log",
+                    }
+                ]
+            },
+            "remote_triggers": {"items": []},
+            "session_crons": {"items": []},
+        },
+    )
+    now = datetime(2026, 7, 6, 1, 5, tzinfo=timezone.utc)
+    stale_exit = now - timedelta(hours=2)
+    _write_text(
+        storage / "logs" / "cron" / "daily_update.log",
+        f"=== [daily_update] exit 1 at {stale_exit.isoformat()} ===\n",
+    )
+
+    r = _parse_host_cron_state(str(storage), now)
+
+    assert r["breached"] is False
+    assert r["details"]["failing_logs"] == []
+    assert r["details"]["stale_logs"][0]["recency_status"] == "stale"
+
+
+def test_host_cron_fail_fresh_nonzero_exit_still_critical(tmp_path: Path, monkeypatch):
+    """The recency gate must not hide a current hard cron failure."""
+    from datetime import datetime, timedelta, timezone
+
+    from volpred.ops.alerts import _parse_host_cron_state
+
+    storage = tmp_path / "storage"
+    _write_json(
+        storage / "ops" / "scheduler_state.json",
+        {"last_tick_at": "2026-07-06T00:00:00+00:00", "last_status": "ok"},
+    )
+    monkeypatch.setattr(
+        "volpred.ops.alerts.load_runtime_schedules",
+        lambda: {
+            "metadata": {},
+            "system_crontab": {
+                "items": [
+                    {
+                        "id": "daily_update",
+                        "cron": "0 * * * *",
+                        "log_path": "storage/logs/cron/daily_update.log",
+                    }
+                ]
+            },
+            "remote_triggers": {"items": []},
+            "session_crons": {"items": []},
+        },
+    )
+    now = datetime(2026, 7, 6, 1, 5, tzinfo=timezone.utc)
+    fresh_exit = now - timedelta(minutes=35)
+    _write_text(
+        storage / "logs" / "cron" / "daily_update.log",
+        f"=== [daily_update] exit 1 at {fresh_exit.isoformat()} ===\n",
+    )
+
+    r = _parse_host_cron_state(str(storage), now)
+
+    assert r["breached"] is True
+    assert r["level"] == "critical"
+    assert r["details"]["failing_logs"][0]["recency_status"] == "fresh_or_unscheduled"
+
+
+def test_host_cron_fail_unknown_exit_timestamp_caps_at_warn(tmp_path: Path, monkeypatch):
+    """Malformed exit timestamps are noisy but should not escalate to critical."""
+    from datetime import datetime, timezone
+
+    from volpred.ops.alerts import _parse_host_cron_state
+
+    storage = tmp_path / "storage"
+    _write_json(
+        storage / "ops" / "scheduler_state.json",
+        {"last_tick_at": "2026-07-06T00:00:00+00:00", "last_status": "ok"},
+    )
+    monkeypatch.setattr(
+        "volpred.ops.alerts.load_runtime_schedules",
+        lambda: {
+            "metadata": {},
+            "system_crontab": {
+                "items": [
+                    {
+                        "id": "daily_update",
+                        "cron": "0 * * * *",
+                        "log_path": "storage/logs/cron/daily_update.log",
+                    }
+                ]
+            },
+            "remote_triggers": {"items": []},
+            "session_crons": {"items": []},
+        },
+    )
+    now = datetime(2026, 7, 6, 1, 5, tzinfo=timezone.utc)
+    _write_text(
+        storage / "logs" / "cron" / "daily_update.log",
+        "=== [daily_update] exit 1 at not-a-timestamp ===\n",
+    )
+
+    r = _parse_host_cron_state(str(storage), now)
+
+    assert r["breached"] is True
+    assert r["level"] == "warn"
+    assert r["details"]["failing_logs"][0]["recency_status"] == "unknown_exited_at"
 
 
 def test_findings_exit_logs_from_schedule_config():

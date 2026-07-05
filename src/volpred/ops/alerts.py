@@ -41,6 +41,7 @@ ALERT_DEDUP_WINDOW = timedelta(hours=24)
 TELEGRAM_ALERT_MAX_CHARS = 4096
 SCHEDULER_STALE_WINDOW = timedelta(minutes=30)
 RELEASE_POOL_GAP_BUFFER = timedelta(minutes=60)  # grace on top of configured interval
+HOST_CRON_RECENCY_GRACE = timedelta(minutes=10)
 WORK_LOG_STALE_WARN_HOURS = 24.0
 EVENT_RECEIPT_CLAIMED_WARN = timedelta(hours=24)
 EVENT_RECEIPT_TERMINAL_STATUSES = {
@@ -820,6 +821,84 @@ def _findings_exit_logs_from_schedule_config(config: dict[str, Any] | None = Non
     return logs
 
 
+def _iter_runtime_schedule_items(config: dict[str, Any]) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    for value in config.values():
+        if isinstance(value, dict) and isinstance(value.get("items"), list):
+            items.extend(item for item in value["items"] if isinstance(item, dict))
+    if isinstance(config.get("cron_jobs"), list):
+        items.extend(item for item in config["cron_jobs"] if isinstance(item, dict))
+    return items
+
+
+def _schedule_items_by_log_name(config: dict[str, Any] | None = None) -> dict[str, dict[str, Any]]:
+    if config is None:
+        try:
+            config = load_runtime_schedules()
+        except Exception:
+            return {}
+
+    by_log: dict[str, dict[str, Any]] = {}
+    for item in _iter_runtime_schedule_items(config):
+        for key in ("log_path", "log"):
+            raw = item.get(key)
+            if isinstance(raw, str) and raw.strip():
+                by_log[Path(raw).name] = item
+    return by_log
+
+
+def _parse_latest_exit_time(latest: dict[str, Any]) -> datetime | None:
+    raw = latest.get("exited_at")
+    if isinstance(raw, datetime):
+        return raw.astimezone(timezone.utc) if raw.tzinfo else raw.replace(tzinfo=timezone.utc)
+    if isinstance(raw, str):
+        return _parse_iso_datetime(raw)
+    return None
+
+
+def _stale_cron_exit_reason(
+    latest: dict[str, Any],
+    *,
+    now: datetime,
+    schedule_by_log: dict[str, dict[str, Any]],
+) -> str | None:
+    """Return a reason when a non-zero exit marker is too old to represent current state.
+
+    A low-frequency cron can fail once and then not write a new marker for days. Without
+    a recency gate, host_cron_fail re-alerts on that stale non-zero line every hour.
+    We suppress only when the schedule is known and at least one subsequent scheduled
+    fire should already have occurred.
+    """
+    exited_at = _parse_latest_exit_time(latest)
+    if exited_at is None:
+        return None
+
+    log_name = Path(str(latest.get("log_path") or "")).name
+    item = schedule_by_log.get(log_name)
+    cron_expr = item.get("cron") or item.get("schedule") if item else None
+    if not isinstance(cron_expr, str) or not cron_expr.strip():
+        return None
+
+    try:
+        from croniter import croniter
+
+        exited_local = exited_at.astimezone(_TAIPEI_TZ)
+        next_fire = croniter(cron_expr.strip(), exited_local).get_next(datetime)
+    except Exception:
+        return None
+
+    if next_fire.tzinfo is None:
+        next_fire = next_fire.replace(tzinfo=_TAIPEI_TZ)
+    stale_after = next_fire.astimezone(timezone.utc) + HOST_CRON_RECENCY_GRACE
+    if now.astimezone(timezone.utc) > stale_after:
+        return (
+            f"stale_exit_after_next_scheduled_fire: exited_at={exited_at.isoformat()} "
+            f"next_fire={next_fire.astimezone(timezone.utc).isoformat()} "
+            f"grace={HOST_CRON_RECENCY_GRACE}"
+        )
+    return None
+
+
 # 2026-07-02 (host_cron_fail false-critical on Claude Max quota window):
 # The hourly-dispatch auth-preflight probe returns exit=1 when the Claude Max
 # subscription hits its rolling 5h session limit ("You've hit your session limit
@@ -949,6 +1028,7 @@ def _parse_push_backlog_state(storage_dir: str, now: datetime) -> dict[str, Any]
 def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     logs_dir = _cron_logs_dir(storage_dir)
     failing_logs: list[dict[str, Any]] = []
+    stale_logs: list[dict[str, Any]] = []
     # 2026-06-15 (host_cron_fail severity calibration — email-11745 incident):
     # A single hourly-dispatch SIGALRM hang (exit=142) is killed by the perl-alarm
     # cap and the NEXT hourly cron self-recovers by design (no-retry abort). Firing
@@ -982,6 +1062,7 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     # host_cron_fail CRITICAL on them is a false-critical (email-noise → erodes trust
     # in alerting). Non-audit jobs now self-declare this via runtime_schedules.json.
     findings_exit_logs = _findings_exit_logs_from_schedule_config()
+    schedule_by_log = _schedule_items_by_log_name()
 
     def _is_audit_signal_log(name: str) -> bool:
         return name.startswith("audit_") or name in findings_exit_logs
@@ -992,6 +1073,23 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
                 continue
             latest = _latest_cron_exit(log_path)
             if latest and int(latest.get("exit_code", 0)) != 0:
+                latest_exit_time = _parse_latest_exit_time(latest)
+                if latest_exit_time is None:
+                    latest["recency_status"] = "unknown_exited_at"
+                    latest["recency_gate"] = "cap_warn"
+                else:
+                    stale_reason = _stale_cron_exit_reason(
+                        latest,
+                        now=now,
+                        schedule_by_log=schedule_by_log,
+                    )
+                    if stale_reason:
+                        latest["recency_status"] = "stale"
+                        latest["recency_gate"] = "ignored"
+                        latest["recency_reason"] = stale_reason
+                        stale_logs.append(latest)
+                        continue
+                    latest["recency_status"] = "fresh_or_unscheduled"
                 # Benign, self-reported findings signal (e.g. git_push_backup HELD a
                 # push due to a new silent fallback and self-sent its own WARN). The
                 # cron ran fine and made a correct protective decision — not an infra
@@ -1014,7 +1112,10 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
                 # next hourly fire); exit=75 = Claude Max quota window (self-resets on
                 # schedule, Codex covers the gap). A hard failure (126 perm / 1 error /
                 # FDA) does not self-heal.
-                if latest_code not in _SELF_RECOVERING_EXIT_CODES:
+                if (
+                    latest.get("recency_status") != "unknown_exited_at"
+                    and latest_code not in _SELF_RECOVERING_EXIT_CODES
+                ):
                     any_non_hang_fail = True
                 latest["trailing_exit_codes"] = codes
                 latest["consecutive_failures"] = consec
@@ -1102,6 +1203,8 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
             "scheduler_age_minutes": scheduler_age_minutes,
             "scheduler_issue": scheduler_issue,
             "failing_logs": failing_logs,
+            "stale_logs": stale_logs,
+            "host_cron_recency_grace_minutes": int(HOST_CRON_RECENCY_GRACE.total_seconds() // 60),
         },
     }
 

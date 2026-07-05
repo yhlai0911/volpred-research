@@ -49288,10 +49288,28 @@
     "task_type": "platform_ops",
     "priority": "P3",
     "source": "agent_discovered",
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-04T13:23:53.923838+00:00",
     "title": "host_cron_fail 加 recency gate（stale 非0 exit 不再每小時重判）",
-    "description": "_latest_cron_exit 抓 log 最後一個 exit marker 無時效檢查：低頻 cron 幾天前失敗一次、之後沒再 log，會每小時被重判 breach。在 _parse_host_cron_state 加 recency gate：failing log 的 exited_at 超過該 cron cadence window（或無法解析 timestamp / at unknown）時不升 critical、cap 為 warn 或不 breach。注意 tests/test_alerts.py 的 write_exits 用過去日期（Jun 15 / Jul 2），加 gate 時 fixture 日期要改成相對 now 才不會誤 stale。root context: docs/error_log.md 2026-07-04 21:18 條「後續強化」。"
+    "description": "_latest_cron_exit 抓 log 最後一個 exit marker 無時效檢查：低頻 cron 幾天前失敗一次、之後沒再 log，會每小時被重判 breach。在 _parse_host_cron_state 加 recency gate：failing log 的 exited_at 超過該 cron cadence window（或無法解析 timestamp / at unknown）時不升 critical、cap 為 warn 或不 breach。注意 tests/test_alerts.py 的 write_exits 用過去日期（Jun 15 / Jul 2），加 gate 時 fixture 日期要改成相對 now 才不會誤 stale。root context: docs/error_log.md 2026-07-04 21:18 條「後續強化」。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T18:07:03.689130+00:00",
+    "claim_session_id": "b4107286ac79",
+    "status_history": [
+      {
+        "ts": "2026-07-05T18:07:03.689411+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T18:07:03.922461+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T18:07:03.922188+00:00"
   },
   {
     "id": "platform_ops_parallel_draft_writer_throughput",
@@ -51028,7 +51046,7 @@
     "id": "paper_review_queue_batch_c12",
     "task_type": "paper_review",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C12: paper review cycle 佇列 — 6/11 batch 四篇 + 零 review 兩篇 + vt-insurance-cost 首輪",
@@ -51064,11 +51082,26 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-00"
+      },
+      {
+        "ts": "2026-07-05T18:09:41.761621+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-05T18:09:42.008937+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-02"
       }
     ],
     "last_released_at": "2026-07-05T11:10:42.137693+00:00",
-    "claim_session_id": "00e58cef34a6",
-    "notes": "vt-insurance-cost done 2026-07-06 (v2 review); remaining: btc-gas-negative, crypto-fear-channel, eav-universal-magnitude, vix-sufficiency"
+    "claim_session_id": "28a5b0099b9c",
+    "notes": "vt-insurance-cost done 2026-07-06 (v2 review); remaining: btc-gas-negative, crypto-fear-channel, eav-universal-magnitude, vix-sufficiency",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-07-05T18:09:41.761329+00:00",
+    "started_at": "2026-07-05T18:09:42.008647+00:00"
   },
   {
     "id": "experiment_ml_null_quartet_unfreeze_eval_c14",
