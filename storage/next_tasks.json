@@ -51067,11 +51067,37 @@
     "id": "paper_stage_entered_at_backfill_b8",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "B8: paper stage tracker stage_entered_at 依 git 證據回填",
-    "description": "storage/paper_pipeline_status.json 的 stage_entered_at 於 7/1 被 bulk baseline 重設，days_in_stage 全體低估、7 天 stall detector 對既有長期卡點暫時失明。用 git log 證據回填各 paper 真實 stage_entered_at（例：prg=2026-05-21），或至少在 _meta 註明 baseline 語意。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "storage/paper_pipeline_status.json 的 stage_entered_at 於 7/1 被 bulk baseline 重設，days_in_stage 全體低估、7 天 stall detector 對既有長期卡點暫時失明。用 git log 證據回填各 paper 真實 stage_entered_at（例：prg=2026-05-21），或至少在 _meta 註明 baseline 語意。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T15:54:06.891308+00:00",
+    "claim_session_id": "41f0600f2c26",
+    "status_history": [
+      {
+        "ts": "2026-07-05T15:54:06.891572+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T15:54:15.229290+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T15:57:15.865806+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T15:54:15.228967+00:00",
+    "completed_at": "2026-07-05T15:57:15.865516+00:00",
+    "result": "Backfilled paper_pipeline_status stage_entered_at from git evidence for 14 papers; added provenance/confidence metadata and baseline semantics. paper_pipeline_check now surfaces 12 stalled papers (findings exit=1, data_issues=[])."
   },
   {
     "id": "platform_ops_telegram_poll_heartbeat_freshness",
