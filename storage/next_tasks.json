@@ -48724,7 +48724,7 @@
     "title": "研究 backlog fallback: Volatility laundering 免費驗證：上市 private-credit 載體的申報波動 vs 去平滑後真波動",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Volatility laundering 免費驗證：上市 private-credit 載體的申報波動 vs 去平滑後真波動 — yfinance 上市 BDC（ARCC/BXSL/OBDC）+ BIZD + PRIV（2025 上市 private-credit ETF）+ interval fund NAV（⚠️ 覆蓋度 dispatch 前驗證），Getmansky-Lo-Makarov MA-unsmoothing 估平滑係數，對照 HYG/銀行股 proxy 量化「申報 vol 低估幾倍」（JPM 2024 Anson amortizing volatility + CFA Ins | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48753,11 +48753,26 @@
         "to": "pending",
         "by": "hourly-03",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-05T23:09:42.843149+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-05T23:09:53.515485+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-07"
       }
     ],
-    "started_at": "2026-07-05T19:10:10.087384+00:00",
+    "started_at": "2026-07-05T23:09:53.515204+00:00",
     "last_released_at": "2026-07-05T21:50:05.851868+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-07-05T23:09:42.842862+00:00",
+    "claim_session_id": "dd43900007f5"
   },
   {
     "id": "research_buyback_blackout_vol",
