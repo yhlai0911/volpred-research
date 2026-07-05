@@ -51028,7 +51028,7 @@
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C12: paper review cycle 佇列 — 6/11 batch 四篇 + 零 review 兩篇 + vt-insurance-cost 首輪",
-    "description": "排 paper-review-cycle：btc-gas-negative、crypto-fear-channel、eav-universal-magnitude、vix-sufficiency（6/11 batch，最舊 review 23 天前）+ forecast-tail-divergence、k189_audit（從未跑過 review cycle）+ vt-insurance-cost 首輪正式 latex+citation review。每篇獨立 session 逐篇跑，review 用 codex exec 省 token。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "description": "排 paper-review-cycle：btc-gas-negative、crypto-fear-channel、eav-universal-magnitude、vix-sufficiency（6/11 batch，最舊 review 23 天前）+ forecast-tail-divergence、k189_audit（此二篇僅 outline/audit md，無 body .tex → 非 latex review 對象，需先寫 body 再排 review）。每篇獨立 session 逐篇跑，review 用 codex exec 省 token。\n\n[進度 2026-07-06] vt-insurance-cost 首輪正式 review 已完成（review_history/v2/，verdict=Major revision，3 SEVERE 其中 2 為 code-drift）→ 已移出本 batch，剩餘 4 篇待 review（forecast-tail-divergence/k189_audit 需先補 body）。\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
     "status_history": [
       {
         "ts": "2026-07-05T10:11:08.512799+00:00",
@@ -51048,10 +51048,23 @@
         "to": "pending",
         "by": "hourly-18",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-05T16:10:02.975178+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-00"
+      },
+      {
+        "ts": "2026-07-05T16:10:03.220963+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-00"
       }
     ],
-    "started_at": "2026-07-05T10:11:08.753388+00:00",
-    "last_released_at": "2026-07-05T11:10:42.137693+00:00"
+    "last_released_at": "2026-07-05T11:10:42.137693+00:00",
+    "claim_session_id": "00e58cef34a6",
+    "notes": "vt-insurance-cost done 2026-07-06 (v2 review); remaining: btc-gas-negative, crypto-fear-channel, eav-universal-magnitude, vix-sufficiency"
   },
   {
     "id": "experiment_ml_null_quartet_unfreeze_eval_c14",
@@ -51346,5 +51359,14 @@
       "treadmill-root-cause"
     ],
     "created_at": "2026-07-05T15:37:56.827502+00:00"
+  },
+  {
+    "id": "paper2_vt_insurance_cost_v3_severe_fixes",
+    "task_type": "paper_body",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-06T00:22:00+08:00",
+    "description": "vt-insurance-cost v3 修訂：修 v2 review 3 個 SEVERE（主線程 only，禁 background agent 寫 .tex）。S-01: Table 1 標『50/50 monthly rebalancing』但 code 是每日連續零成本再平衡 → 修/改標 benchmark 並重跑相依數字（headline S2 Sharpe 0.63 vs 50/50 0.50 受影響，真月再平衡≈0.59）。S-03: S3 論文公式寫 z<1 固定 0.5 binary blend，code 是連續 clip(z,0,1) blend → 公式對齊 code，補 0.3/0.7 敏感度對應輸出。S-02: Cross-OOS 補跑 2017-18/2021-22 兩窗（heavy → 排 compute_queue）。+ C-01 citation：hasbrouck2009 不支撐 SPY 1-2bps spread 假設，換 source 或改述。報告：paper/vt-insurance-cost/review_history/v2/。",
+    "notes": "source: v2 latex+citation review 2026-07-06"
   }
 ]
