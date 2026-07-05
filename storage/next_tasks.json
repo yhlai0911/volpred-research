@@ -50582,11 +50582,29 @@
     "id": "paper_review_queue_batch_c12",
     "task_type": "paper_review",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C12: paper review cycle 佇列 — 6/11 batch 四篇 + 零 review 兩篇 + vt-insurance-cost 首輪",
-    "description": "排 paper-review-cycle：btc-gas-negative、crypto-fear-channel、eav-universal-magnitude、vix-sufficiency（6/11 batch，最舊 review 23 天前）+ forecast-tail-divergence、k189_audit（從未跑過 review cycle）+ vt-insurance-cost 首輪正式 latex+citation review。每篇獨立 session 逐篇跑，review 用 codex exec 省 token。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "排 paper-review-cycle：btc-gas-negative、crypto-fear-channel、eav-universal-magnitude、vix-sufficiency（6/11 batch，最舊 review 23 天前）+ forecast-tail-divergence、k189_audit（從未跑過 review cycle）+ vt-insurance-cost 首輪正式 latex+citation review。每篇獨立 session 逐篇跑，review 用 codex exec 省 token。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-07-05T10:11:08.512424+00:00",
+    "claim_session_id": "53f76f81e25a",
+    "status_history": [
+      {
+        "ts": "2026-07-05T10:11:08.512799+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-05T10:11:08.753762+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-18"
+      }
+    ],
+    "started_at": "2026-07-05T10:11:08.753388+00:00"
   },
   {
     "id": "experiment_ml_null_quartet_unfreeze_eval_c14",
@@ -50637,5 +50655,21 @@
     "source": "k506_codex_review_20260705",
     "title": "K506 方法論硬化 — rebalance open-to-close + calendar as-of + 成本口徑審計後 re-review",
     "description": "K506 resurrect 已重跑成功但 Codex verdict=FAIL（見 experiments/k506/codex_review_20260705.md）。核心 null（overlay 無顯著改善，pooled DM p=0.25-0.65 4-variant 全不顯著）robust，但精確 3/5 win-count 未達發表級，需修三項：(1) rebalance timing — 載入 0050.TW open 價，rebalance day 舊權重吃 overnight、新權重吃 open-to-close，或標 non-tradable c2c diagnostic；(2) calendar as-of — timestamp-aware as-of merge，修 ~86 台股假日 stale-signal（false-null 風險）；(3) 成本口徑 — 釐清 18.55bp round-trip vs per-trade，對稱套用。改完 Codex re-review 通過（CONDITIONAL_PASS↑）才寫 knowledge.json（若仍 null 寫 null-result）。"
+  },
+  {
+    "id": "K1640_article_general",
+    "title": "K1640: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1640 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1640 completed 2026-07-05. Verdict=CONDITIONAL_PASS_HALF_TRUE_QUALIFIED. The experiment tests whether SPY entry after VIX first crosses 30 or 40 beats unconditional random-day entry over 5/10/20/60 trading days. Data: yfinance ^VIX close + SPY adjusted close, 1993-01-29 to 2026-",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1640",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-05T10:08:17+00:00"
   }
 ]
