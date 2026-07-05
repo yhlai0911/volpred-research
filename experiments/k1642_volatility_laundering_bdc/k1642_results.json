@@ -1,0 +1,670 @@
+{
+  "experiment_id": "k1642_volatility_laundering_bdc",
+  "mode": "empirical_layer1",
+  "generated_utc": "2026-07-05T23:34:42.093227+00:00",
+  "seed": 42,
+  "data_provenance": {
+    "market_price": "yfinance Ticker.history(auto_adjust=True) daily close + raw dividends",
+    "reported_nav": "SEC EDGAR XBRL companyconcept us-gaap:NetAssetValuePerShare, 10-Q/10-K, originally reported (earliest-filed per period-end)",
+    "price_window": [
+      "2011-01-01",
+      "2026-06-30"
+    ],
+    "bdc_cik": {
+      "ARCC": "0001287750",
+      "BXSL": "0001736035",
+      "OBDC": "0001655888",
+      "FSK": "0001422183",
+      "PSEC": "0001287032",
+      "MAIN": "0001396440",
+      "GBDC": "0001476765"
+    },
+    "excluded": {
+      "BIZD": "ETF (daily-struck NAV, no appraisal smoothing to measure)"
+    }
+  },
+  "method": {
+    "nav_total_return": "(NAV_t - NAV_{t-1} + per-share distributions in (t-1,t]) / NAV_{t-1}",
+    "market_total_return": "adj_close(report_t)/adj_close(report_{t-1}) - 1 (auto-adjusted, dividends built in)",
+    "quarter_gap_filter_days": [
+      75,
+      125
+    ],
+    "annualization": "quarterly sigma * sqrt(4); daily reference sigma * sqrt(252) reported separately",
+    "glm": "Getmansky-Lo-Makarov (2004) MA(k), sum(theta)=1, theta>=0, exact Gaussian MLE, 120 random starts, seed 42",
+    "desmoothed_var": "de-smoothed variance = direct MLE sigma2_true (innovation variance under sum(theta)=1); equals Var(reported)/xi up to MA(k) model fit (agree to ~2%: median desmoothed/market 0.300 direct vs 0.307 via Var/xi), xi=sum(theta^2)",
+    "cross_section": "aggregate to one statistic per BDC, then Wilcoxon signed-rank across BDCs (no asset-quarter iid stacking, K1355)"
+  },
+  "hypotheses": {
+    "H1_reported_vol_below_market": true,
+    "H2_desmoothed_converges_to_market_strong": false,
+    "H2_desmoothed_directional": true,
+    "H3_nav_positive_ar1": true,
+    "H3_appraisal_specific_nav_ar1_gt_market": false
+  },
+  "hypotheses_detail": {
+    "H1_laundering_gap": "CONFIRMED",
+    "H2_desmoothing_explains_gap": "REJECTED_strong_form_only_directional",
+    "H3_nav_positive_ar1": "CONFIRMED",
+    "H3_appraisal_specific_fingerprint_nav_gt_market": "NOT_CONFIRMED_market_also_positive_ar1_diff_p~0.078"
+  },
+  "data_limitations": [
+    "SEC XBRL us-gaap:NetAssetValuePerShare is tagged QUARTERLY only from ~2021Q3; earlier 10-K filings tag it annually, so the continuous quarterly chain per BDC begins 2021Q3-Q4 (14-19 quarters). Sample is dominated by the 2022 bear market + 2023 regional-bank stress, where mark-to-market vs appraisal divergence is largest; the laundering ratio may overstate a full-cycle average.",
+    "Market price vol is an UPPER-bound proxy for true portfolio economic vol (it embeds BDC premium/discount, equity beta, and liquidity noise absent from NAV); reported NAV vol is a LOWER bound (appraisal-smoothed). True private-credit vol lies between de-smoothed NAV and market.",
+    "NAV/share is affected by share issuance/buybacks at premium/discount to NAV (accretion/dilution), a second-order contaminant to NAV total return not separated here.",
+    "BXSL AR(1) phi>1 is a small-sample explosive artifact (17 quarters, newer fund); its Geltner unsmoothing is unreliable and excluded from Geltner cross-section. GLM (bounded simplex) is robust there."
+  ],
+  "cross_section": {
+    "n_bdc": 7,
+    "tickers": [
+      "ARCC",
+      "BXSL",
+      "OBDC",
+      "FSK",
+      "PSEC",
+      "MAIN",
+      "GBDC"
+    ],
+    "laundering_ratio_mean": 0.21154052008287816,
+    "laundering_ratio_median": 0.19083197426087375,
+    "laundering_ratio_min": 0.09391985984335531,
+    "laundering_ratio_max": 0.4014851340864753,
+    "H1_wilcoxon_ratio_vs_1": {
+      "stat": 0.0,
+      "p": 0.015625,
+      "n": 7
+    },
+    "desmoothed_ratio_k2_median": 0.29979642657215133,
+    "desmoothed_ratio_k1_median": 0.2463596750434851,
+    "H2_wilcoxon_desmoothed_k2_vs_1": {
+      "stat": 0.0,
+      "p": 0.015625,
+      "n": 7
+    },
+    "H2_wilcoxon_desmoothed_vs_laundering_k2": {
+      "stat": 0.0,
+      "p": 0.015625,
+      "n": 7
+    },
+    "gap_closed_fraction_median_k2": 0.06588993983094497,
+    "geltner_desmoothed_ratio_median_ex_unreliable": 0.37037725141967465,
+    "geltner_gap_closed_fraction_median": 0.19001714918361884,
+    "n_bdc_ar1_unreliable": 1,
+    "phi_nav_median": 0.39027175348400756,
+    "phi_market_median": 0.20165346106332763,
+    "H3_wilcoxon_phi_nav_vs_0": {
+      "stat": 0.0,
+      "p": 0.015625,
+      "n": 7
+    },
+    "H3_wilcoxon_phi_market_vs_0": {
+      "stat": 0.0,
+      "p": 0.015625,
+      "n": 7
+    },
+    "H3_wilcoxon_phi_nav_gt_market": {
+      "stat": 3.0,
+      "p": 0.078125,
+      "n": 7
+    },
+    "n_bdc_phi_nav_positive": 7,
+    "n_bdc_phi_market_positive": 7,
+    "n_bdc_nav_ljungbox_sig_05": 1
+  },
+  "per_bdc": {
+    "ARCC": {
+      "status": "ok",
+      "n_quarters": 18,
+      "n_nav_filings_raw": 28,
+      "span": [
+        "2021-09-30",
+        "2026-03-31"
+      ],
+      "vol_reported_annual": 0.022848834433044533,
+      "vol_market_annual_quarterly_basis": 0.11973273620179292,
+      "vol_market_annual_daily_basis_reference": 0.20449274626352446,
+      "laundering_ratio": 0.19083197426087375,
+      "glm_k2": {
+        "k": 2,
+        "theta": [
+          0.3826648585055858,
+          0.3595167572315026,
+          0.2578183842629115
+        ],
+        "xi": 0.34215501192929343,
+        "sigma2_true": 0.0004364326261325458,
+        "var_reported": 0.00013051730873717038,
+        "vol_reported_q": 0.011424417216522266,
+        "vol_desmoothed_q": 0.020890969966292753,
+        "inflation_factor": 1.8286245652933377,
+        "converged": true,
+        "n_starts": 120
+      },
+      "glm_k1": {
+        "k": 1,
+        "theta": [
+          0.6274020643788534,
+          0.37259793562114674
+        ],
+        "xi": 0.5324625720159871,
+        "sigma2_true": 0.00021752294204373433,
+        "var_reported": 0.00013051730873717038,
+        "vol_reported_q": 0.011424417216522266,
+        "vol_desmoothed_q": 0.014748658991370515,
+        "inflation_factor": 1.2909769235353774,
+        "converged": true,
+        "n_starts": 120
+      },
+      "geltner_ar1": {
+        "phi": 0.5905066371972953,
+        "vol_desmoothed_q": 0.0217302200456361,
+        "valid": true
+      },
+      "vol_desmoothed_annual_k2": 0.041781939932585506,
+      "vol_desmoothed_annual_k1": 0.02949731798274103,
+      "desmoothed_market_ratio_k2": 0.34896003597685965,
+      "desmoothed_market_ratio_k1": 0.2463596750434851,
+      "ar1_nav": {
+        "phi": 0.5905066371972949,
+        "hac_t": 4.40631148152137,
+        "hac_p": 0.0005104163760585312,
+        "ljung_box_p": 0.18346236960414697,
+        "n": 17,
+        "hac_lag": 2
+      },
+      "ar1_market": {
+        "phi": 0.20165346106332763,
+        "hac_t": 1.2734738649242958,
+        "hac_p": 0.22223113534515315,
+        "ljung_box_p": 0.9324503504769444,
+        "n": 17,
+        "hac_lag": 2
+      },
+      "ar1_nav_reliable": true,
+      "bootstrap_ratio": {
+        "ratio_point": 0.19083197426087375,
+        "ratio_boot_median": 0.18815619830358934,
+        "ratio_ci95": [
+          0.11852587223522806,
+          0.35680410492002496
+        ],
+        "p_ratio_ge_1": 0.0
+      }
+    },
+    "BXSL": {
+      "status": "ok",
+      "n_quarters": 17,
+      "n_nav_filings_raw": 24,
+      "span": [
+        "2021-12-31",
+        "2026-03-31"
+      ],
+      "vol_reported_annual": 0.017801572455937033,
+      "vol_market_annual_quarterly_basis": 0.18954002365024256,
+      "vol_market_annual_daily_basis_reference": 0.22346133848509533,
+      "laundering_ratio": 0.09391985984335531,
+      "glm_k2": {
+        "k": 2,
+        "theta": [
+          0.4205163106698307,
+          0.15896737243533626,
+          0.42051631689483293
+        ],
+        "xi": 0.378938565813156,
+        "sigma2_true": 0.00017077023175275432,
+        "var_reported": 7.922399547599402e-05,
+        "vol_reported_q": 0.008900786227968516,
+        "vol_desmoothed_q": 0.013067908468946144,
+        "inflation_factor": 1.4681746234825277,
+        "converged": true,
+        "n_starts": 120
+      },
+      "glm_k1": {
+        "k": 1,
+        "theta": [
+          0.3749042709676627,
+          0.6250957290323372
+        ],
+        "xi": 0.5312978828442638,
+        "sigma2_true": 0.00012912909296520226,
+        "var_reported": 7.922399547599402e-05,
+        "vol_reported_q": 0.008900786227968516,
+        "vol_desmoothed_q": 0.011363498271448025,
+        "inflation_factor": 1.276684775974177,
+        "converged": true,
+        "n_starts": 120
+      },
+      "geltner_ar1": {
+        "phi": 1.051504721576764,
+        "vol_desmoothed_q": 0.008900786227968516,
+        "valid": false
+      },
+      "vol_desmoothed_annual_k2": 0.026135816937892287,
+      "vol_desmoothed_annual_k1": 0.02272699654289605,
+      "desmoothed_market_ratio_k2": 0.13789075486304997,
+      "desmoothed_market_ratio_k1": 0.11990605522364019,
+      "ar1_nav": {
+        "phi": 1.051504721576764,
+        "hac_t": 3.61823360000789,
+        "hac_p": 0.002795510284216318,
+        "ljung_box_p": 0.044151111379706176,
+        "n": 16,
+        "hac_lag": 2
+      },
+      "ar1_market": {
+        "phi": 0.3104786800677602,
+        "hac_t": 2.0921410257346915,
+        "hac_p": 0.05512845407070377,
+        "ljung_box_p": 0.7360186663953282,
+        "n": 16,
+        "hac_lag": 2
+      },
+      "ar1_nav_reliable": false,
+      "bootstrap_ratio": {
+        "ratio_point": 0.09391985984335531,
+        "ratio_boot_median": 0.06837037423825007,
+        "ratio_ci95": [
+          0.048895728010488165,
+          0.11920675150376497
+        ],
+        "p_ratio_ge_1": 0.0
+      }
+    },
+    "OBDC": {
+      "status": "ok",
+      "n_quarters": 18,
+      "n_nav_filings_raw": 25,
+      "span": [
+        "2021-09-30",
+        "2026-03-31"
+      ],
+      "vol_reported_annual": 0.026934518261883682,
+      "vol_market_annual_quarterly_basis": 0.16974246983060837,
+      "vol_market_annual_daily_basis_reference": 0.20928948750333526,
+      "laundering_ratio": 0.15867872247153308,
+      "glm_k2": {
+        "k": 2,
+        "theta": [
+          3.159942261417672e-15,
+          0.20435116177315046,
+          0.7956488382268463
+        ],
+        "xi": 0.6748164710897666,
+        "sigma2_true": 0.00025674472123656753,
+        "var_reported": 0.0001813670684999364,
+        "vol_reported_q": 0.013467259130941841,
+        "vol_desmoothed_q": 0.016023255637871086,
+        "inflation_factor": 1.189793370876535,
+        "converged": true,
+        "n_starts": 120
+      },
+      "glm_k1": {
+        "k": 1,
+        "theta": [
+          0.7956488332107026,
+          0.2043511667892974
+        ],
+        "xi": 0.6748164651576996,
+        "sigma2_true": 0.00025674471802002136,
+        "var_reported": 0.0001813670684999364,
+        "vol_reported_q": 0.013467259130941841,
+        "vol_desmoothed_q": 0.016023255537499906,
+        "inflation_factor": 1.1897933634235573,
+        "converged": true,
+        "n_starts": 120
+      },
+      "geltner_ar1": {
+        "phi": 0.24453603660531542,
+        "vol_desmoothed_q": 0.0178136581141903,
+        "valid": true
+      },
+      "vol_desmoothed_annual_k2": 0.03204651127574217,
+      "vol_desmoothed_annual_k1": 0.03204651107499981,
+      "desmoothed_market_ratio_k2": 0.1887948920957875,
+      "desmoothed_market_ratio_k1": 0.18879489091315854,
+      "ar1_nav": {
+        "phi": 0.24453603660531537,
+        "hac_t": 0.8097826400163505,
+        "hac_p": 0.43072456113252233,
+        "ljung_box_p": 0.91344253936159,
+        "n": 17,
+        "hac_lag": 2
+      },
+      "ar1_market": {
+        "phi": 0.29076325953742677,
+        "hac_t": 1.6703088786244373,
+        "hac_p": 0.11558699225495839,
+        "ljung_box_p": 0.738220711253897,
+        "n": 17,
+        "hac_lag": 2
+      },
+      "ar1_nav_reliable": true,
+      "bootstrap_ratio": {
+        "ratio_point": 0.15867872247153308,
+        "ratio_boot_median": 0.1430241093357998,
+        "ratio_ci95": [
+          0.09514045858790961,
+          0.17667988443530916
+        ],
+        "p_ratio_ge_1": 0.0
+      }
+    },
+    "FSK": {
+      "status": "ok",
+      "n_quarters": 14,
+      "n_nav_filings_raw": 20,
+      "span": [
+        "2022-09-30",
+        "2026-03-31"
+      ],
+      "vol_reported_annual": 0.06183777055172781,
+      "vol_market_annual_quarterly_basis": 0.24463759626402684,
+      "vol_market_annual_daily_basis_reference": 0.23490077382865981,
+      "laundering_ratio": 0.25277296497382584,
+      "glm_k2": {
+        "k": 2,
+        "theta": [
+          8.451533784085819e-16,
+          0.2017426254505544,
+          0.7982573745494447
+        ],
+        "xi": 0.6779149229462551,
+        "sigma2_true": 0.0013447430681917717,
+        "var_reported": 0.0009559774667020338,
+        "vol_reported_q": 0.030918885275863905,
+        "vol_desmoothed_q": 0.03667073858257796,
+        "inflation_factor": 1.1860304230050656,
+        "converged": true,
+        "n_starts": 120
+      },
+      "glm_k1": {
+        "k": 1,
+        "theta": [
+          0.20174261430977425,
+          0.7982573856902256
+        ],
+        "xi": 0.677914936237536,
+        "sigma2_true": 0.0013447430265996624,
+        "var_reported": 0.0009559774667020338,
+        "vol_reported_q": 0.030918885275863905,
+        "vol_desmoothed_q": 0.0366707380154758,
+        "inflation_factor": 1.1860304046634549,
+        "converged": true,
+        "n_starts": 120
+      },
+      "geltner_ar1": {
+        "phi": 0.3170747499925357,
+        "vol_desmoothed_q": 0.046209074854775344,
+        "valid": true
+      },
+      "vol_desmoothed_annual_k2": 0.07334147716515592,
+      "vol_desmoothed_annual_k1": 0.0733414760309516,
+      "desmoothed_market_ratio_k2": 0.29979642657215133,
+      "desmoothed_market_ratio_k1": 0.29979642193588796,
+      "ar1_nav": {
+        "phi": 0.31707474999253565,
+        "hac_t": 0.5683398669606795,
+        "hac_p": 0.581220760834178,
+        "ljung_box_p": 0.5501094385362211,
+        "n": 13,
+        "hac_lag": 2
+      },
+      "ar1_market": {
+        "phi": 0.014535969709249452,
+        "hac_t": 0.10347734428856055,
+        "hac_p": 0.9194465996698407,
+        "ljung_box_p": 0.13483127384798155,
+        "n": 13,
+        "hac_lag": 2
+      },
+      "ar1_nav_reliable": true,
+      "bootstrap_ratio": {
+        "ratio_point": 0.25277296497382584,
+        "ratio_boot_median": 0.23702901952414837,
+        "ratio_ci95": [
+          0.14015837872239834,
+          0.457084464864175
+        ],
+        "p_ratio_ge_1": 0.0
+      }
+    },
+    "PSEC": {
+      "status": "ok",
+      "n_quarters": 19,
+      "n_nav_filings_raw": 24,
+      "span": [
+        "2021-06-30",
+        "2026-03-31"
+      ],
+      "vol_reported_annual": 0.07216613220864378,
+      "vol_market_annual_quarterly_basis": 0.1797479559806068,
+      "vol_market_annual_daily_basis_reference": 0.2752534865420912,
+      "laundering_ratio": 0.4014851340864753,
+      "glm_k2": {
+        "k": 2,
+        "theta": [
+          0.5000000021842843,
+          0.49999999781571575,
+          3.711307731364921e-17
+        ],
+        "xi": 0.5,
+        "sigma2_true": 0.0032898076599791777,
+        "var_reported": 0.0013019876594888634,
+        "vol_reported_q": 0.03608306610432189,
+        "vol_desmoothed_q": 0.05735684492699348,
+        "inflation_factor": 1.5895779133947683,
+        "converged": true,
+        "n_starts": 120
+      },
+      "glm_k1": {
+        "k": 1,
+        "theta": [
+          0.49999999505370635,
+          0.5000000049462936
+        ],
+        "xi": 0.5,
+        "sigma2_true": 0.0032898077001332605,
+        "var_reported": 0.0013019876594888634,
+        "vol_reported_q": 0.03608306610432189,
+        "vol_desmoothed_q": 0.05735684527703089,
+        "inflation_factor": 1.589577923095646,
+        "converged": true,
+        "n_starts": 120
+      },
+      "geltner_ar1": {
+        "phi": 0.3902717534840076,
+        "vol_desmoothed_q": 0.05127024553983412,
+        "valid": true
+      },
+      "vol_desmoothed_annual_k2": 0.11471368985398696,
+      "vol_desmoothed_annual_k1": 0.11471369055406178,
+      "desmoothed_market_ratio_k2": 0.6381919017001981,
+      "desmoothed_market_ratio_k1": 0.6381919055949563,
+      "ar1_nav": {
+        "phi": 0.39027175348400756,
+        "hac_t": 2.035332370247519,
+        "hac_p": 0.05873017580202622,
+        "ljung_box_p": 0.2010438531881117,
+        "n": 18,
+        "hac_lag": 2
+      },
+      "ar1_market": {
+        "phi": 0.011106597573529104,
+        "hac_t": 0.10833972523813182,
+        "hac_p": 0.9150732317164494,
+        "ljung_box_p": 0.5984317810882132,
+        "n": 18,
+        "hac_lag": 2
+      },
+      "ar1_nav_reliable": true,
+      "bootstrap_ratio": {
+        "ratio_point": 0.4014851340864753,
+        "ratio_boot_median": 0.36485594239902314,
+        "ratio_ci95": [
+          0.2410973985867886,
+          0.4959662405726994
+        ],
+        "p_ratio_ge_1": 0.0
+      }
+    },
+    "MAIN": {
+      "status": "ok",
+      "n_quarters": 18,
+      "n_nav_filings_raw": 28,
+      "span": [
+        "2021-09-30",
+        "2026-03-31"
+      ],
+      "vol_reported_annual": 0.02804178284170508,
+      "vol_market_annual_quarterly_basis": 0.1710150024872426,
+      "vol_market_annual_daily_basis_reference": 0.21275591444838285,
+      "laundering_ratio": 0.1639726482113576,
+      "glm_k2": {
+        "k": 2,
+        "theta": [
+          2.2479723157959435e-16,
+          0.7197405115931796,
+          0.28025948840682013
+        ],
+        "xi": 0.5965717848704645,
+        "sigma2_true": 0.0003508555997353432,
+        "var_reported": 0.00019658539623533633,
+        "vol_reported_q": 0.01402089142085254,
+        "vol_desmoothed_q": 0.018731139840793012,
+        "inflation_factor": 1.3359450036775242,
+        "converged": true,
+        "n_starts": 120
+      },
+      "glm_k1": {
+        "k": 1,
+        "theta": [
+          0.7197405245762711,
+          0.2802594754237289
+        ],
+        "xi": 0.5965717962821097,
+        "sigma2_true": 0.00035085558239351716,
+        "var_reported": 0.00019658539623533633,
+        "vol_reported_q": 0.01402089142085254,
+        "vol_desmoothed_q": 0.018731139377878677,
+        "inflation_factor": 1.3359449706614825,
+        "converged": true,
+        "n_starts": 120
+      },
+      "geltner_ar1": {
+        "phi": 0.01091057570198003,
+        "vol_desmoothed_q": 0.014178944647233072,
+        "valid": true
+      },
+      "vol_desmoothed_annual_k2": 0.037462279681586025,
+      "vol_desmoothed_annual_k1": 0.037462278755757354,
+      "desmoothed_market_ratio_k2": 0.2190584401177355,
+      "desmoothed_market_ratio_k1": 0.21905843470400774,
+      "ar1_nav": {
+        "phi": 0.01091057570198024,
+        "hac_t": 0.13785280014602394,
+        "hac_p": 0.8921902422932866,
+        "ljung_box_p": 0.08662671942535016,
+        "n": 17,
+        "hac_lag": 2
+      },
+      "ar1_market": {
+        "phi": 0.14940397668212035,
+        "hac_t": 0.6321844856625962,
+        "hac_p": 0.5367839130707099,
+        "ljung_box_p": 0.9418205838181983,
+        "n": 17,
+        "hac_lag": 2
+      },
+      "ar1_nav_reliable": true,
+      "bootstrap_ratio": {
+        "ratio_point": 0.1639726482113576,
+        "ratio_boot_median": 0.17039664189256232,
+        "ratio_ci95": [
+          0.11313697362679964,
+          0.21487637086360337
+        ],
+        "p_ratio_ge_1": 0.0
+      }
+    },
+    "GBDC": {
+      "status": "ok",
+      "n_quarters": 18,
+      "n_nav_filings_raw": 23,
+      "span": [
+        "2021-09-30",
+        "2026-03-31"
+      ],
+      "vol_reported_annual": 0.027320809440462942,
+      "vol_market_annual_quarterly_basis": 0.12468290475465027,
+      "vol_market_annual_daily_basis_reference": 0.17244030573236074,
+      "laundering_ratio": 0.2191223367327265,
+      "glm_k2": {
+        "k": 2,
+        "theta": [
+          0.41193500104318165,
+          0.17612999200419852,
+          0.41193500695261975
+        ],
+        "xi": 0.3704026691209,
+        "sigma2_true": 0.0005518134666770383,
+        "var_reported": 0.00018660665712052227,
+        "vol_reported_q": 0.013660404720231471,
+        "vol_desmoothed_q": 0.023490710220788098,
+        "inflation_factor": 1.7196203701049684,
+        "converged": true,
+        "n_starts": 120
+      },
+      "glm_k1": {
+        "k": 1,
+        "theta": [
+          0.6599342310491703,
+          0.3400657689508296
+        ],
+        "xi": 0.5511579165225786,
+        "sigma2_true": 0.0003091268638867542,
+        "var_reported": 0.00018660665712052227,
+        "vol_reported_q": 0.013660404720231471,
+        "vol_desmoothed_q": 0.017582003978123602,
+        "inflation_factor": 1.287077823696111,
+        "converged": true,
+        "n_starts": 120
+      },
+      "geltner_ar1": {
+        "phi": 0.6880467891018368,
+        "vol_desmoothed_q": 0.03769377676833905,
+        "valid": true
+      },
+      "vol_desmoothed_annual_k2": 0.046981420441576195,
+      "vol_desmoothed_annual_k1": 0.035164007956247204,
+      "desmoothed_market_ratio_k2": 0.3768072337905966,
+      "desmoothed_market_ratio_k1": 0.282027500285164,
+      "ar1_nav": {
+        "phi": 0.6880467891018367,
+        "hac_t": 4.03323720854653,
+        "hac_p": 0.0010835717688075786,
+        "ljung_box_p": 0.2814730415033091,
+        "n": 17,
+        "hac_lag": 2
+      },
+      "ar1_market": {
+        "phi": 0.2296429058548811,
+        "hac_t": 2.0081416386326105,
+        "hac_p": 0.0629874963506789,
+        "ljung_box_p": 0.8835979667734133,
+        "n": 17,
+        "hac_lag": 2
+      },
+      "ar1_nav_reliable": true,
+      "bootstrap_ratio": {
+        "ratio_point": 0.2191223367327265,
+        "ratio_boot_median": 0.18693281979336598,
+        "ratio_ci95": [
+          0.13930231581297206,
+          0.2697327578221629
+        ],
+        "p_ratio_ge_1": 0.0
+      }
+    }
+  },
+  "verdict": "CONDITIONAL_PASS"
+}
