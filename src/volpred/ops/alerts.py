@@ -2241,6 +2241,12 @@ def _parse_event_receipt_state(storage_dir: str, now: datetime) -> dict[str, Any
             try:
                 task = json.loads(path.read_text(encoding="utf-8"))
             except Exception as exc:  # noqa: BLE001 - alert parser must stay non-fatal
+                warn(
+                    "event_receipt_parse",
+                    "task receipt json decode failed",
+                    path=_relative_repo_path(path),
+                    err=f"{type(exc).__name__}: {exc}",
+                )
                 read_errors.append(f"{_relative_repo_path(path)}: {type(exc).__name__}")
                 continue
             if not isinstance(task, dict):
