@@ -494,7 +494,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] Growth-at-Risk 搬到市場：以金融條件做「Equity/Vol-at-Risk」多 horizon 分位回歸 — FRED NFCI/信用利差 + yfinance，仿 Adrian et al. GaR，對 SPY 前瞻報酬/RV 的 5% 左尾分位 quantile regression（外生金融條件 conditioning + 對象是尾部而非均值，避 covariate→HAR-mean NULL 弧）（來源：Adrian et al. AER 2019 + IMF 2025 ML-GaR）
 
 **C. 方法論 / 評估 meta（cross-cutting）**
-- [ ] 分布式預測評估：用 CRPS / pinball / coverage + MCS 重排平台 1400+ K 模型 — 重用既有 K 的預測分布/損失序列，改用 proper scoring rules + Hansen-Lunde-Nason MCS 於分布度量而非平方誤差；零新資料的評估層升級 + methodology 素材（來源：arXiv 2025-26 CRPS/MCS）
+- [x] ~~分布式預測評估：用 CRPS / pinball / coverage + MCS 重排平台 1400+ K 模型~~ → **K1638 completed 2026-07-05，CONDITIONAL_PASS_EVALUATION_LAYER_WORKS_COVERAGE_LIMITED**：`experiments/k1638/` 重用 repo 內可 byte-trace 的 OOS forecast CSV，對 point variance forecast 加 lognormal distribution wrapper（校準段估 sigma，評估段算 CRPS / pinball / 90% coverage / interval score）+ MCS-lite range bootstrap。實際可評估 18 個 primary panels（declared specs 10；5 個短樣本 33-51 rows 被 skip），不是 1400+ K 全量重排。CRPS winner counts：`pred_baseline` 7、`EWMA_094` 5、`pred_augmented` 3、`HAR_RV_forecast` 1、`SHARK_like_forecast` 1、`VIX_forecast` 1；MCS 多數保留 baseline+augmented，支持既有 NULL / baseline-heavy 結論。產出 reusable evaluation layer，但不可宣稱 universal model leaderboard。
 
 **D. 因子 / 策略（factor strategy）— 偏 contrarian，含誠實 OOS 反面**
 - [ ] Realized semibeta 截面定價：美股正結果 vs 澳洲反號的跨市場再驗證 — 5-min（或日頻 signed-covariation proxy）建四 semibeta，US + 跨市場 long-short 定價；文獻韓國成立、澳洲反號的誠實穩健題；與 line 1414/K1301 正交（截面報酬定價）（來源：JFE 2022 Bollerslev semibetas + 2024-26 韓/澳複製）

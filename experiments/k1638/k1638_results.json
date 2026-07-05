@@ -1,0 +1,2399 @@
+{
+  "experiment_id": "k1638",
+  "generated_at": "2026-07-05T04:53:46.279230+00:00",
+  "seed": 42,
+  "question": "Can existing point-volatility OOS artifacts be re-evaluated with CRPS, pinball loss, coverage, and MCS?",
+  "scope": {
+    "claim": "coverage-limited evaluation-layer audit, not full 1400+ K re-ranking",
+    "panel_specs_declared": 10,
+    "scored_panels": 18,
+    "skipped_or_insufficient_panels": 5,
+    "primary_min_eval": 252,
+    "diagnostic_min_eval": 40
+  },
+  "method": {
+    "distribution_wrapper": "point variance forecast mu_t converted to mean-mu lognormal predictive distribution; sigma estimated on each panel/model calibration slice only",
+    "calibration": "first max(80, 25%) rows capped at half sample; evaluation uses later rows only",
+    "scores": [
+      "CRPS",
+      "mean pinball loss at 5/25/50/75/95%",
+      "90% empirical coverage",
+      "90% interval score"
+    ],
+    "mcs": "range-statistic MCS-lite, alpha=0.1, moving-block bootstrap B=500, block=10",
+    "lookahead_policy": "No new forecasts are fit; distribution dispersion is calibrated only on pre-evaluation OOS rows."
+  },
+  "aggregate": {
+    "n_scored_panels": 18,
+    "n_primary_panels": 18,
+    "n_diagnostic_panels": 0,
+    "primary_best_crps_counts": {
+      "pred_baseline": 7,
+      "EWMA_094": 5,
+      "pred_augmented": 3,
+      "HAR_RV_forecast": 1,
+      "SHARK_like_forecast": 1,
+      "VIX_forecast": 1
+    },
+    "primary_best_pinball_counts": {
+      "pred_baseline": 8,
+      "EWMA_094": 5,
+      "pred_augmented": 2,
+      "HAR_RV_forecast": 1,
+      "SHARK_like_forecast": 1,
+      "VIX_forecast": 1
+    },
+    "primary_mcs_crps_inclusion_counts": {
+      "pred_baseline": 10,
+      "pred_augmented": 10,
+      "EWMA_094": 5,
+      "MS_vol_lite": 1,
+      "MSM_GMM": 1,
+      "HAR_RV_forecast": 1,
+      "HAR_MedRV_input_forecast": 1,
+      "HAR_RK_input_forecast": 1,
+      "HARQ_forecast": 1,
+      "HARQ_full_forecast": 1,
+      "SHARK_like_forecast": 1,
+      "VIX_forecast": 1,
+      "VIX_SPF_forecast": 1
+    },
+    "primary_mcs_pinball_inclusion_counts": {
+      "pred_baseline": 10,
+      "pred_augmented": 10,
+      "EWMA_094": 5,
+      "MSM_GMM": 2,
+      "HAR_RV_forecast": 1,
+      "HAR_MedRV_input_forecast": 1,
+      "HAR_RK_input_forecast": 1,
+      "HARQ_forecast": 1,
+      "HARQ_full_forecast": 1,
+      "SHARK_like_forecast": 1,
+      "VIX_forecast": 1,
+      "VIX_SPF_forecast": 1
+    },
+    "score_table": "data/k1638_model_score_table.csv",
+    "verdict": "CONDITIONAL_PASS_EVALUATION_LAYER_WORKS_COVERAGE_LIMITED"
+  },
+  "panels": [
+    {
+      "panel_id": "K1637_daily_r2_by_asset__0050.TW",
+      "source_k": "K1637",
+      "path": "experiments/k1637/data/pooled_oos_forecasts.csv",
+      "note": "daily close-to-close r^2 forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1799,
+      "n_calibration": 449,
+      "n_eval": 1350,
+      "eval_start": "2020-12-08",
+      "eval_end": "2026-07-03",
+      "actual_scale_median": 5.088848912018556e-05,
+      "models": {
+        "CONST": {
+          "sigma_log_calibrated": 2.0825708499484294,
+          "mean_crps": 0.0001593746351382048,
+          "mean_crps_scaled": 3.1318405771844158,
+          "mean_pinball": 7.409596691963976e-05,
+          "mean_pinball_scaled": 1.456045722730028,
+          "coverage_90": 0.8207407407407408,
+          "coverage_error_90_abs": 0.07925925925925925,
+          "mean_interval_score_scaled": 38.921066326894106
+        },
+        "EWMA_094": {
+          "sigma_log_calibrated": 2.08863073691237,
+          "mean_crps": 0.0001514859388943654,
+          "mean_crps_scaled": 2.9768213109372232,
+          "mean_pinball": 6.910938959231763e-05,
+          "mean_pinball_scaled": 1.3580554421472206,
+          "coverage_90": 0.8444444444444444,
+          "coverage_error_90_abs": 0.05555555555555558,
+          "mean_interval_score_scaled": 32.384152360345475
+        },
+        "HAR": {
+          "sigma_log_calibrated": 2.0941014918323377,
+          "mean_crps": 0.00033245577104398517,
+          "mean_crps_scaled": 6.533024988397866,
+          "mean_pinball": 0.00017644926524590192,
+          "mean_pinball_scaled": 3.467370878887247,
+          "coverage_90": 0.7674074074074074,
+          "coverage_error_90_abs": 0.1325925925925926,
+          "mean_interval_score_scaled": 168.45095750340695
+        },
+        "FIGARCH_lite": {
+          "sigma_log_calibrated": 2.113758583674386,
+          "mean_crps": 0.0002690114376279676,
+          "mean_crps_scaled": 5.28629248537192,
+          "mean_pinball": 0.00014186991860385423,
+          "mean_pinball_scaled": 2.7878587290888883,
+          "coverage_90": 0.7918518518518518,
+          "coverage_error_90_abs": 0.10814814814814822,
+          "mean_interval_score_scaled": 132.30382761106904
+        },
+        "MS_vol_lite": {
+          "sigma_log_calibrated": 2.097436746629469,
+          "mean_crps": 0.00015980491062217832,
+          "mean_crps_scaled": 3.1402958387064723,
+          "mean_pinball": 7.43170533889017e-05,
+          "mean_pinball_scaled": 1.4603902507968725,
+          "coverage_90": 0.82,
+          "coverage_error_90_abs": 0.08000000000000007,
+          "mean_interval_score_scaled": 39.1714013664573
+        },
+        "MSM_GMM": {
+          "sigma_log_calibrated": 2.1065952058264488,
+          "mean_crps": 0.00016435725343231234,
+          "mean_crps_scaled": 3.2297530595601422,
+          "mean_pinball": 7.705946192405086e-05,
+          "mean_pinball_scaled": 1.5142807981989046,
+          "coverage_90": 0.774074074074074,
+          "coverage_error_90_abs": 0.125925925925926,
+          "mean_interval_score_scaled": 42.506077383164744
+        }
+      },
+      "best_by_crps": "EWMA_094",
+      "best_by_pinball": "EWMA_094",
+      "best_by_coverage_error": "EWMA_094",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "EWMA_094"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "HAR",
+            "obs_range_t": 17.942638938398005,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "FIGARCH_lite",
+            "obs_range_t": 11.418200935767874,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "MSM_GMM",
+            "obs_range_t": 0.8608613965544523,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MS_vol_lite"
+            ],
+            "worst_model": "MS_vol_lite",
+            "obs_range_t": 0.5613638832760304,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094"
+            ],
+            "worst_model": "CONST",
+            "obs_range_t": 0.5330600751287927,
+            "p_value": 0.002
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "EWMA_094"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "HAR",
+            "obs_range_t": 25.68206955841548,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "FIGARCH_lite",
+            "obs_range_t": 16.721534567196134,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "MSM_GMM",
+            "obs_range_t": 1.067768244974979,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MS_vol_lite"
+            ],
+            "worst_model": "MS_vol_lite",
+            "obs_range_t": 0.7084091251311218,
+            "p_value": 0.002
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094"
+            ],
+            "worst_model": "CONST",
+            "obs_range_t": 0.6795503766471707,
+            "p_value": 0.004
+          }
+        ]
+      },
+      "row_loss_file": "data/K1637_daily_r2_by_asset__0050.TW_distribution_scores.csv"
+    },
+    {
+      "panel_id": "K1637_daily_r2_by_asset__GLD",
+      "source_k": "K1637",
+      "path": "experiments/k1637/data/pooled_oos_forecasts.csv",
+      "note": "daily close-to-close r^2 forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1888,
+      "n_calibration": 472,
+      "n_eval": 1416,
+      "eval_start": "2020-11-10",
+      "eval_end": "2026-07-02",
+      "actual_scale_median": 3.363491309778245e-05,
+      "models": {
+        "CONST": {
+          "sigma_log_calibrated": 2.0166966073550148,
+          "mean_crps": 0.00010250446295059865,
+          "mean_crps_scaled": 3.0475614030159868,
+          "mean_pinball": 4.747309740212943e-05,
+          "mean_pinball_scaled": 1.4114232215827942,
+          "coverage_90": 0.8290960451977402,
+          "coverage_error_90_abs": 0.07090395480225986,
+          "mean_interval_score_scaled": 37.054257753128596
+        },
+        "EWMA_094": {
+          "sigma_log_calibrated": 1.9401059408475347,
+          "mean_crps": 9.459124639483348e-05,
+          "mean_crps_scaled": 2.812293467797599,
+          "mean_pinball": 4.293530703457638e-05,
+          "mean_pinball_scaled": 1.2765101223765942,
+          "coverage_90": 0.8580508474576272,
+          "coverage_error_90_abs": 0.04194915254237286,
+          "mean_interval_score_scaled": 29.351045111392647
+        },
+        "HAR": {
+          "sigma_log_calibrated": 1.9732172438709024,
+          "mean_crps": 9.691993357470056e-05,
+          "mean_crps_scaled": 2.8815276939452086,
+          "mean_pinball": 4.593788924674703e-05,
+          "mean_pinball_scaled": 1.3657799297176039,
+          "coverage_90": 0.8778248587570622,
+          "coverage_error_90_abs": 0.022175141242937846,
+          "mean_interval_score_scaled": 40.38930034828641
+        },
+        "FIGARCH_lite": {
+          "sigma_log_calibrated": 2.013982095948847,
+          "mean_crps": 9.897172766471883e-05,
+          "mean_crps_scaled": 2.942529608356385,
+          "mean_pinball": 4.7483764004443056e-05,
+          "mean_pinball_scaled": 1.411740350462617,
+          "coverage_90": 0.8785310734463276,
+          "coverage_error_90_abs": 0.021468926553672385,
+          "mean_interval_score_scaled": 44.01119771904126
+        },
+        "MS_vol_lite": {
+          "sigma_log_calibrated": 2.0120095531127893,
+          "mean_crps": 0.00010310820474416889,
+          "mean_crps_scaled": 3.0655112574370467,
+          "mean_pinball": 4.789788137098808e-05,
+          "mean_pinball_scaled": 1.4240524787960873,
+          "coverage_90": 0.8234463276836158,
+          "coverage_error_90_abs": 0.07655367231638421,
+          "mean_interval_score_scaled": 38.016599223085954
+        },
+        "MSM_GMM": {
+          "sigma_log_calibrated": 1.9965297400131874,
+          "mean_crps": 0.00010486447225961059,
+          "mean_crps_scaled": 3.1177268677564776,
+          "mean_pinball": 4.900424105357477e-05,
+          "mean_pinball_scaled": 1.4569456716332543,
+          "coverage_90": 0.7966101694915254,
+          "coverage_error_90_abs": 0.10338983050847461,
+          "mean_interval_score_scaled": 40.103120920812685
+        }
+      },
+      "best_by_crps": "EWMA_094",
+      "best_by_pinball": "EWMA_094",
+      "best_by_coverage_error": "FIGARCH_lite",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "EWMA_094"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "MSM_GMM",
+            "obs_range_t": 0.9781823696473027,
+            "p_value": 0.002
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite"
+            ],
+            "worst_model": "MS_vol_lite",
+            "obs_range_t": 0.8148554662444178,
+            "p_value": 0.004
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite"
+            ],
+            "worst_model": "CONST",
+            "obs_range_t": 0.7596710416881155,
+            "p_value": 0.018
+          },
+          {
+            "active_models": [
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite"
+            ],
+            "worst_model": "FIGARCH_lite",
+            "obs_range_t": 0.48631701552373835,
+            "p_value": 0.002
+          },
+          {
+            "active_models": [
+              "EWMA_094",
+              "HAR"
+            ],
+            "worst_model": "HAR",
+            "obs_range_t": 0.2582193226671401,
+            "p_value": 0.056
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "EWMA_094"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "MSM_GMM",
+            "obs_range_t": 1.16138876539991,
+            "p_value": 0.004
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite"
+            ],
+            "worst_model": "MS_vol_lite",
+            "obs_range_t": 1.0573182900433191,
+            "p_value": 0.014
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite"
+            ],
+            "worst_model": "FIGARCH_lite",
+            "obs_range_t": 1.0573182900433191,
+            "p_value": 0.012
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR"
+            ],
+            "worst_model": "CONST",
+            "obs_range_t": 0.8780571420955753,
+            "p_value": 0.014
+          },
+          {
+            "active_models": [
+              "EWMA_094",
+              "HAR"
+            ],
+            "worst_model": "HAR",
+            "obs_range_t": 0.6984286946543315,
+            "p_value": 0.0
+          }
+        ]
+      },
+      "row_loss_file": "data/K1637_daily_r2_by_asset__GLD_distribution_scores.csv"
+    },
+    {
+      "panel_id": "K1637_daily_r2_by_asset__QQQ",
+      "source_k": "K1637",
+      "path": "experiments/k1637/data/pooled_oos_forecasts.csv",
+      "note": "daily close-to-close r^2 forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1888,
+      "n_calibration": 472,
+      "n_eval": 1416,
+      "eval_start": "2020-11-10",
+      "eval_end": "2026-07-02",
+      "actual_scale_median": 5.863772444163132e-05,
+      "models": {
+        "CONST": {
+          "sigma_log_calibrated": 2.193497823261649,
+          "mean_crps": 0.00015176032528707524,
+          "mean_crps_scaled": 2.588100522866286,
+          "mean_pinball": 6.896778610247515e-05,
+          "mean_pinball_scaled": 1.1761675058029664,
+          "coverage_90": 0.8757062146892656,
+          "coverage_error_90_abs": 0.02429378531073445,
+          "mean_interval_score_scaled": 27.465449744998377
+        },
+        "EWMA_094": {
+          "sigma_log_calibrated": 2.0744636529822533,
+          "mean_crps": 0.00014533773355396602,
+          "mean_crps_scaled": 2.478570492595375,
+          "mean_pinball": 6.515315314478397e-05,
+          "mean_pinball_scaled": 1.1111132596838436,
+          "coverage_90": 0.865819209039548,
+          "coverage_error_90_abs": 0.03418079096045201,
+          "mean_interval_score_scaled": 23.48233354694036
+        },
+        "HAR": {
+          "sigma_log_calibrated": 2.0832783507245414,
+          "mean_crps": 0.0001585260198279482,
+          "mean_crps_scaled": 2.703481783058394,
+          "mean_pinball": 7.886990816604034e-05,
+          "mean_pinball_scaled": 1.345036986292815,
+          "coverage_90": 0.8721751412429378,
+          "coverage_error_90_abs": 0.0278248587570622,
+          "mean_interval_score_scaled": 49.94187486192831
+        },
+        "FIGARCH_lite": {
+          "sigma_log_calibrated": 2.0990409239064025,
+          "mean_crps": 0.0001651796266113095,
+          "mean_crps_scaled": 2.8169515134532763,
+          "mean_pinball": 8.29502684093686e-05,
+          "mean_pinball_scaled": 1.414622910408781,
+          "coverage_90": 0.865819209039548,
+          "coverage_error_90_abs": 0.03418079096045201,
+          "mean_interval_score_scaled": 54.772855671451445
+        },
+        "MS_vol_lite": {
+          "sigma_log_calibrated": 2.195759265147089,
+          "mean_crps": 0.0001486429880857774,
+          "mean_crps_scaled": 2.5349378663856297,
+          "mean_pinball": 6.723325053644097e-05,
+          "mean_pinball_scaled": 1.1465869655867316,
+          "coverage_90": 0.8891242937853108,
+          "coverage_error_90_abs": 0.010875706214689251,
+          "mean_interval_score_scaled": 25.96276529863569
+        },
+        "MSM_GMM": {
+          "sigma_log_calibrated": 2.0610242752762407,
+          "mean_crps": 0.00014645701903231214,
+          "mean_crps_scaled": 2.497658639159799,
+          "mean_pinball": 6.549790917655055e-05,
+          "mean_pinball_scaled": 1.116992683468608,
+          "coverage_90": 0.8587570621468926,
+          "coverage_error_90_abs": 0.0412429378531074,
+          "mean_interval_score_scaled": 23.235399997252873
+        }
+      },
+      "best_by_crps": "EWMA_094",
+      "best_by_pinball": "EWMA_094",
+      "best_by_coverage_error": "MS_vol_lite",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "EWMA_094"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "FIGARCH_lite",
+            "obs_range_t": 2.0170906932758697,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "HAR",
+            "obs_range_t": 1.359257641369121,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "CONST",
+            "obs_range_t": 0.529663463379444,
+            "p_value": 0.002
+          },
+          {
+            "active_models": [
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "MS_vol_lite",
+            "obs_range_t": 0.277751480376664,
+            "p_value": 0.016
+          },
+          {
+            "active_models": [
+              "EWMA_094",
+              "MSM_GMM"
+            ],
+            "worst_model": "MSM_GMM",
+            "obs_range_t": 0.09591265342717745,
+            "p_value": 0.054
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "EWMA_094",
+          "MSM_GMM"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "FIGARCH_lite",
+            "obs_range_t": 3.8349443911632726,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "HAR",
+            "obs_range_t": 3.061062543525219,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "CONST",
+            "obs_range_t": 0.644220996841939,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "MS_vol_lite",
+            "obs_range_t": 0.36097820825499394,
+            "p_value": 0.012
+          },
+          {
+            "active_models": [
+              "EWMA_094",
+              "MSM_GMM"
+            ],
+            "worst_model": "MSM_GMM",
+            "obs_range_t": 0.061260914851162626,
+            "p_value": 0.266
+          }
+        ]
+      },
+      "row_loss_file": "data/K1637_daily_r2_by_asset__QQQ_distribution_scores.csv"
+    },
+    {
+      "panel_id": "K1637_daily_r2_by_asset__SPY",
+      "source_k": "K1637",
+      "path": "experiments/k1637/data/pooled_oos_forecasts.csv",
+      "note": "daily close-to-close r^2 forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1888,
+      "n_calibration": 472,
+      "n_eval": 1416,
+      "eval_start": "2020-11-10",
+      "eval_end": "2026-07-02",
+      "actual_scale_median": 3.1047916263086294e-05,
+      "models": {
+        "CONST": {
+          "sigma_log_calibrated": 2.2436600335544807,
+          "mean_crps": 8.567866385767505e-05,
+          "mean_crps_scaled": 2.7595624495915283,
+          "mean_pinball": 3.937073481885231e-05,
+          "mean_pinball_scaled": 1.2680636756825205,
+          "coverage_90": 0.8877118644067796,
+          "coverage_error_90_abs": 0.012288135593220395,
+          "mean_interval_score_scaled": 31.721317052293568
+        },
+        "EWMA_094": {
+          "sigma_log_calibrated": 2.093116215007507,
+          "mean_crps": 8.294318302120162e-05,
+          "mean_crps_scaled": 2.6714573151504855,
+          "mean_pinball": 3.747975114497179e-05,
+          "mean_pinball_scaled": 1.207158342846102,
+          "coverage_90": 0.867231638418079,
+          "coverage_error_90_abs": 0.03276836158192098,
+          "mean_interval_score_scaled": 26.945486169232613
+        },
+        "HAR": {
+          "sigma_log_calibrated": 2.111193527178942,
+          "mean_crps": 9.180843874343585e-05,
+          "mean_crps_scaled": 2.956991959315137,
+          "mean_pinball": 4.563936334236078e-05,
+          "mean_pinball_scaled": 1.4699654223373,
+          "coverage_90": 0.8757062146892656,
+          "coverage_error_90_abs": 0.02429378531073445,
+          "mean_interval_score_scaled": 54.944827015613456
+        },
+        "FIGARCH_lite": {
+          "sigma_log_calibrated": 2.135273111718997,
+          "mean_crps": 9.532625150362868e-05,
+          "mean_crps_scaled": 3.07029465990169,
+          "mean_pinball": 4.792950288007966e-05,
+          "mean_pinball_scaled": 1.5437268792516143,
+          "coverage_90": 0.873587570621469,
+          "coverage_error_90_abs": 0.026412429378531055,
+          "mean_interval_score_scaled": 60.35267871105795
+        },
+        "MS_vol_lite": {
+          "sigma_log_calibrated": 2.2522328481475813,
+          "mean_crps": 8.373344571419745e-05,
+          "mean_crps_scaled": 2.6969103177384697,
+          "mean_pinball": 3.8425355806597075e-05,
+          "mean_pinball_scaled": 1.2376146431534285,
+          "coverage_90": 0.9032485875706214,
+          "coverage_error_90_abs": 0.0032485875706214085,
+          "mean_interval_score_scaled": 30.73155293587685
+        },
+        "MSM_GMM": {
+          "sigma_log_calibrated": 2.1243129185820564,
+          "mean_crps": 8.398004200818792e-05,
+          "mean_crps_scaled": 2.7048527603778054,
+          "mean_pinball": 3.788599236208172e-05,
+          "mean_pinball_scaled": 1.220242673970536,
+          "coverage_90": 0.8700564971751412,
+          "coverage_error_90_abs": 0.029943502824858803,
+          "mean_interval_score_scaled": 27.12230268084135
+        }
+      },
+      "best_by_crps": "EWMA_094",
+      "best_by_pinball": "EWMA_094",
+      "best_by_coverage_error": "MS_vol_lite",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "EWMA_094",
+          "MS_vol_lite",
+          "MSM_GMM"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "FIGARCH_lite",
+            "obs_range_t": 1.669608662096128,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "HAR",
+            "obs_range_t": 1.2291751264779998,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "CONST",
+            "obs_range_t": 0.31461753987115015,
+            "p_value": 0.034
+          },
+          {
+            "active_models": [
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "MSM_GMM",
+            "obs_range_t": 0.12191354247481477,
+            "p_value": 0.214
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "EWMA_094",
+          "MSM_GMM"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "FIGARCH_lite",
+            "obs_range_t": 2.9364846090241503,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "HAR",
+            "obs_range_t": 2.4277917539007645,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "CONST",
+            "obs_range_t": 0.4413380708637267,
+            "p_value": 0.006
+          },
+          {
+            "active_models": [
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "MS_vol_lite",
+            "obs_range_t": 0.2283413616913627,
+            "p_value": 0.056
+          },
+          {
+            "active_models": [
+              "EWMA_094",
+              "MSM_GMM"
+            ],
+            "worst_model": "MSM_GMM",
+            "obs_range_t": 0.09750452396784189,
+            "p_value": 0.216
+          }
+        ]
+      },
+      "row_loss_file": "data/K1637_daily_r2_by_asset__SPY_distribution_scores.csv"
+    },
+    {
+      "panel_id": "K1637_daily_r2_by_asset__TLT",
+      "source_k": "K1637",
+      "path": "experiments/k1637/data/pooled_oos_forecasts.csv",
+      "note": "daily close-to-close r^2 forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1888,
+      "n_calibration": 472,
+      "n_eval": 1416,
+      "eval_start": "2020-11-10",
+      "eval_end": "2026-07-02",
+      "actual_scale_median": 3.702250920446871e-05,
+      "models": {
+        "CONST": {
+          "sigma_log_calibrated": 1.869696837781017,
+          "mean_crps": 6.713277896778911e-05,
+          "mean_crps_scaled": 1.8132963002865834,
+          "mean_pinball": 3.0132330769403226e-05,
+          "mean_pinball_scaled": 0.8138921811859845,
+          "coverage_90": 0.875,
+          "coverage_error_90_abs": 0.025000000000000022,
+          "mean_interval_score_scaled": 17.10211268667355
+        },
+        "EWMA_094": {
+          "sigma_log_calibrated": 1.8550947580690615,
+          "mean_crps": 6.424861292355319e-05,
+          "mean_crps_scaled": 1.7353932595092232,
+          "mean_pinball": 2.865445309217318e-05,
+          "mean_pinball_scaled": 0.7739738258668463,
+          "coverage_90": 0.882768361581921,
+          "coverage_error_90_abs": 0.017231638418079065,
+          "mean_interval_score_scaled": 15.33214128643055
+        },
+        "HAR": {
+          "sigma_log_calibrated": 1.851221432895755,
+          "mean_crps": 7.049883595951022e-05,
+          "mean_crps_scaled": 1.904215502254527,
+          "mean_pinball": 3.422444498021319e-05,
+          "mean_pinball_scaled": 0.9244226206062286,
+          "coverage_90": 0.894774011299435,
+          "coverage_error_90_abs": 0.00522598870056501,
+          "mean_interval_score_scaled": 31.047050253946026
+        },
+        "FIGARCH_lite": {
+          "sigma_log_calibrated": 1.9036676904041063,
+          "mean_crps": 7.434394907983533e-05,
+          "mean_crps_scaled": 2.0080742952685076,
+          "mean_pinball": 3.6842078100973575e-05,
+          "mean_pinball_scaled": 0.9951264485478647,
+          "coverage_90": 0.8983050847457628,
+          "coverage_error_90_abs": 0.0016949152542372614,
+          "mean_interval_score_scaled": 36.55994316863242
+        },
+        "MS_vol_lite": {
+          "sigma_log_calibrated": 1.863732414156791,
+          "mean_crps": 7.019560377056824e-05,
+          "mean_crps_scaled": 1.8960250204244786,
+          "mean_pinball": 3.1785510871320204e-05,
+          "mean_pinball_scaled": 0.8585455592913623,
+          "coverage_90": 0.826271186440678,
+          "coverage_error_90_abs": 0.07372881355932204,
+          "mean_interval_score_scaled": 19.221965276213172
+        },
+        "MSM_GMM": {
+          "sigma_log_calibrated": 1.823138863609279,
+          "mean_crps": 6.82520675381793e-05,
+          "mean_crps_scaled": 1.8435289504888852,
+          "mean_pinball": 3.0616560082984765e-05,
+          "mean_pinball_scaled": 0.8269715030360306,
+          "coverage_90": 0.838276836158192,
+          "coverage_error_90_abs": 0.06172316384180798,
+          "mean_interval_score_scaled": 17.316682121263984
+        }
+      },
+      "best_by_crps": "EWMA_094",
+      "best_by_pinball": "EWMA_094",
+      "best_by_coverage_error": "FIGARCH_lite",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "EWMA_094"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "FIGARCH_lite",
+            "obs_range_t": 4.696749066406091,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "HAR",
+            "obs_range_t": 2.7569769213380533,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "MS_vol_lite",
+            "obs_range_t": 1.6896592574230762,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MSM_GMM"
+            ],
+            "worst_model": "MSM_GMM",
+            "obs_range_t": 1.168577468012591,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094"
+            ],
+            "worst_model": "CONST",
+            "obs_range_t": 0.8650421806585421,
+            "p_value": 0.0
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "EWMA_094"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "FIGARCH_lite",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "FIGARCH_lite",
+            "obs_range_t": 8.927946716386657,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "HAR",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "HAR",
+            "obs_range_t": 5.906368409078248,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MS_vol_lite",
+              "MSM_GMM"
+            ],
+            "worst_model": "MS_vol_lite",
+            "obs_range_t": 1.8647366694867749,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094",
+              "MSM_GMM"
+            ],
+            "worst_model": "MSM_GMM",
+            "obs_range_t": 1.21962018146226,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "CONST",
+              "EWMA_094"
+            ],
+            "worst_model": "CONST",
+            "obs_range_t": 0.9599366901957699,
+            "p_value": 0.0
+          }
+        ]
+      },
+      "row_loss_file": "data/K1637_daily_r2_by_asset__TLT_distribution_scores.csv"
+    },
+    {
+      "panel_id": "K1613_taifex_noise_robust_rv",
+      "source_k": "K1613",
+      "path": "experiments/K1613/data/TAIFEX_TX_day_K1100h_oos_forecasts.csv",
+      "note": "TAIFEX 5-min RV input-measure comparison",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 464,
+      "n_calibration": 116,
+      "n_eval": 348,
+      "eval_start": "2020-07-09",
+      "eval_end": "2021-12-30",
+      "actual_scale_median": 4.532647241022979e-05,
+      "models": {
+        "HAR_RV_forecast": {
+          "sigma_log_calibrated": 0.5690853232441831,
+          "mean_crps": 2.678854381848654e-05,
+          "mean_crps_scaled": 0.5910132069408649,
+          "mean_pinball": 1.2437468127702048e-05,
+          "mean_pinball_scaled": 0.2743974429586323,
+          "coverage_90": 0.9339080459770115,
+          "coverage_error_90_abs": 0.03390804597701147,
+          "mean_interval_score_scaled": 7.361333082975421
+        },
+        "HAR_MedRV_input_forecast": {
+          "sigma_log_calibrated": 0.5782896001980867,
+          "mean_crps": 2.6901256767221402e-05,
+          "mean_crps_scaled": 0.5934998983320401,
+          "mean_pinball": 1.2473643492158441e-05,
+          "mean_pinball_scaled": 0.27519554972787275,
+          "coverage_90": 0.9310344827586207,
+          "coverage_error_90_abs": 0.03103448275862064,
+          "mean_interval_score_scaled": 7.335979144295408
+        },
+        "HAR_RK_input_forecast": {
+          "sigma_log_calibrated": 0.5529796436820938,
+          "mean_crps": 2.701993452694418e-05,
+          "mean_crps_scaled": 0.5961181863525301,
+          "mean_pinball": 1.2546516765071622e-05,
+          "mean_pinball_scaled": 0.27680329171700513,
+          "coverage_90": 0.9195402298850575,
+          "coverage_error_90_abs": 0.019540229885057436,
+          "mean_interval_score_scaled": 7.399584235417301
+        },
+        "HAR_TSRV_input_forecast": {
+          "sigma_log_calibrated": 0.5581622996492446,
+          "mean_crps": 2.7338420986825205e-05,
+          "mean_crps_scaled": 0.6031446863854149,
+          "mean_pinball": 1.2689302118390962e-05,
+          "mean_pinball_scaled": 0.27995344538497763,
+          "coverage_90": 0.9224137931034483,
+          "coverage_error_90_abs": 0.022413793103448265,
+          "mean_interval_score_scaled": 7.477170596819874
+        }
+      },
+      "best_by_crps": "HAR_RV_forecast",
+      "best_by_pinball": "HAR_RV_forecast",
+      "best_by_coverage_error": "HAR_RK_input_forecast",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "HAR_RV_forecast",
+          "HAR_MedRV_input_forecast",
+          "HAR_RK_input_forecast"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "HAR_RV_forecast",
+              "HAR_MedRV_input_forecast",
+              "HAR_RK_input_forecast",
+              "HAR_TSRV_input_forecast"
+            ],
+            "worst_model": "HAR_TSRV_input_forecast",
+            "obs_range_t": 0.06951958156517313,
+            "p_value": 0.074
+          },
+          {
+            "active_models": [
+              "HAR_RV_forecast",
+              "HAR_MedRV_input_forecast",
+              "HAR_RK_input_forecast"
+            ],
+            "worst_model": "HAR_RK_input_forecast",
+            "obs_range_t": 0.02929850701665182,
+            "p_value": 0.426
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "HAR_RV_forecast",
+          "HAR_MedRV_input_forecast",
+          "HAR_RK_input_forecast"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "HAR_RV_forecast",
+              "HAR_MedRV_input_forecast",
+              "HAR_RK_input_forecast",
+              "HAR_TSRV_input_forecast"
+            ],
+            "worst_model": "HAR_TSRV_input_forecast",
+            "obs_range_t": 0.06411289184962968,
+            "p_value": 0.074
+          },
+          {
+            "active_models": [
+              "HAR_RV_forecast",
+              "HAR_MedRV_input_forecast",
+              "HAR_RK_input_forecast"
+            ],
+            "worst_model": "HAR_RK_input_forecast",
+            "obs_range_t": 0.02780572019833293,
+            "p_value": 0.406
+          }
+        ]
+      },
+      "row_loss_file": "data/K1613_taifex_noise_robust_rv_distribution_scores.csv"
+    },
+    {
+      "panel_id": "K1582_tx_active_harq",
+      "source_k": "K1582",
+      "path": "experiments/k1582/data/TX_active_oos_forecasts.csv",
+      "note": "TAIFEX HARQ/SHARK measurement-error comparison",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1697,
+      "n_calibration": 424,
+      "n_eval": 1273,
+      "eval_start": "2021-03-29",
+      "eval_end": "2026-06-29",
+      "actual_scale_median": 3.878846833056497e-05,
+      "models": {
+        "HAR_forecast": {
+          "sigma_log_calibrated": 0.48057623019622175,
+          "mean_crps": 2.02605617699798e-05,
+          "mean_crps_scaled": 0.5223346690906756,
+          "mean_pinball": 9.275402040440151e-06,
+          "mean_pinball_scaled": 0.23912782431605364,
+          "coverage_90": 0.8868813825608798,
+          "coverage_error_90_abs": 0.01311861743912024,
+          "mean_interval_score_scaled": 5.791213982226592
+        },
+        "HARQ_forecast": {
+          "sigma_log_calibrated": 0.4791549309147659,
+          "mean_crps": 2.0059476100510997e-05,
+          "mean_crps_scaled": 0.5171505079695118,
+          "mean_pinball": 9.182131706009879e-06,
+          "mean_pinball_scaled": 0.23672323505422976,
+          "coverage_90": 0.8892380204241949,
+          "coverage_error_90_abs": 0.010761979575805158,
+          "mean_interval_score_scaled": 5.725375248073051
+        },
+        "HARQ_full_forecast": {
+          "sigma_log_calibrated": 0.48009761018070746,
+          "mean_crps": 2.0078059443327508e-05,
+          "mean_crps_scaled": 0.5176296024946716,
+          "mean_pinball": 9.191289628173895e-06,
+          "mean_pinball_scaled": 0.23695933414651593,
+          "coverage_90": 0.8908091123330715,
+          "coverage_error_90_abs": 0.009190887666928549,
+          "mean_interval_score_scaled": 5.730264534511192
+        },
+        "SHARK_like_forecast": {
+          "sigma_log_calibrated": 0.48021558052199026,
+          "mean_crps": 2.0031814075650764e-05,
+          "mean_crps_scaled": 0.5164373572303671,
+          "mean_pinball": 9.162799626695924e-06,
+          "mean_pinball_scaled": 0.23622483745963532,
+          "coverage_90": 0.8931657501963864,
+          "coverage_error_90_abs": 0.006834249803613579,
+          "mean_interval_score_scaled": 5.668595466696091
+        }
+      },
+      "best_by_crps": "SHARK_like_forecast",
+      "best_by_pinball": "SHARK_like_forecast",
+      "best_by_coverage_error": "SHARK_like_forecast",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "HARQ_forecast",
+          "HARQ_full_forecast",
+          "SHARK_like_forecast"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "HAR_forecast",
+              "HARQ_forecast",
+              "HARQ_full_forecast",
+              "SHARK_like_forecast"
+            ],
+            "worst_model": "HAR_forecast",
+            "obs_range_t": 0.09147571336861188,
+            "p_value": 0.012
+          },
+          {
+            "active_models": [
+              "HARQ_forecast",
+              "HARQ_full_forecast",
+              "SHARK_like_forecast"
+            ],
+            "worst_model": "HARQ_full_forecast",
+            "obs_range_t": 0.018554828762229348,
+            "p_value": 0.468
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "HARQ_forecast",
+          "HARQ_full_forecast",
+          "SHARK_like_forecast"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "HAR_forecast",
+              "HARQ_forecast",
+              "HARQ_full_forecast",
+              "SHARK_like_forecast"
+            ],
+            "worst_model": "HAR_forecast",
+            "obs_range_t": 0.0912370110283019,
+            "p_value": 0.004
+          },
+          {
+            "active_models": [
+              "HARQ_forecast",
+              "HARQ_full_forecast",
+              "SHARK_like_forecast"
+            ],
+            "worst_model": "HARQ_full_forecast",
+            "obs_range_t": 0.02316223803052699,
+            "p_value": 0.296
+          }
+        ]
+      },
+      "row_loss_file": "data/K1582_tx_active_harq_distribution_scores.csv"
+    },
+    {
+      "panel_id": "K1601_agreed_disagreed_uncertainty_21d",
+      "source_k": "K1601",
+      "path": "experiments/k1601/data/k1601_oos_forecasts.csv",
+      "note": "21d forward RV forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 7116,
+      "n_calibration": 1779,
+      "n_eval": 5337,
+      "eval_start": "2005-03-14",
+      "eval_end": "2026-05-29",
+      "actual_scale_median": 0.0013831044633162,
+      "models": {
+        "VIX_forecast": {
+          "sigma_log_calibrated": 0.5081085414668124,
+          "mean_crps": 0.0013705805146384008,
+          "mean_crps_scaled": 0.9909450449984297,
+          "mean_pinball": 0.0006381221398249911,
+          "mean_pinball_scaled": 0.4613694458732334,
+          "coverage_90": 0.7937043282743114,
+          "coverage_error_90_abs": 0.10629567172568866,
+          "mean_interval_score_scaled": 12.480742007766743
+        },
+        "VIX_SPF_forecast": {
+          "sigma_log_calibrated": 0.5063618849168418,
+          "mean_crps": 0.0013802628541672859,
+          "mean_crps_scaled": 0.997945484795775,
+          "mean_pinball": 0.0006426296265059006,
+          "mean_pinball_scaled": 0.464628409169543,
+          "coverage_90": 0.7940790706389357,
+          "coverage_error_90_abs": 0.10592092936106434,
+          "mean_interval_score_scaled": 12.580258637682585
+        },
+        "VIX_SPF_JLN_forecast": {
+          "sigma_log_calibrated": 0.5188770101594617,
+          "mean_crps": 0.0014500099767124827,
+          "mean_crps_scaled": 1.04837343466875,
+          "mean_pinball": 0.0006726259239408679,
+          "mean_pinball_scaled": 0.48631606778865166,
+          "coverage_90": 0.8028855162076073,
+          "coverage_error_90_abs": 0.09711448379239274,
+          "mean_interval_score_scaled": 12.812242720597116
+        },
+        "JLN_SPF_forecast": {
+          "sigma_log_calibrated": 0.7887537416328624,
+          "mean_crps": 0.002328359351591484,
+          "mean_crps_scaled": 1.6834298589485377,
+          "mean_pinball": 0.0010770600025457099,
+          "mean_pinball_scaled": 0.7787264310920501,
+          "coverage_90": 0.8317406782836799,
+          "coverage_error_90_abs": 0.0682593217163201,
+          "mean_interval_score_scaled": 20.032718026111613
+        }
+      },
+      "best_by_crps": "VIX_forecast",
+      "best_by_pinball": "VIX_forecast",
+      "best_by_coverage_error": "JLN_SPF_forecast",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "VIX_forecast",
+          "VIX_SPF_forecast"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "VIX_forecast",
+              "VIX_SPF_forecast",
+              "VIX_SPF_JLN_forecast",
+              "JLN_SPF_forecast"
+            ],
+            "worst_model": "JLN_SPF_forecast",
+            "obs_range_t": 9.070877332613492,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "VIX_forecast",
+              "VIX_SPF_forecast",
+              "VIX_SPF_JLN_forecast"
+            ],
+            "worst_model": "VIX_SPF_JLN_forecast",
+            "obs_range_t": 1.1711860635200408,
+            "p_value": 0.062
+          },
+          {
+            "active_models": [
+              "VIX_forecast",
+              "VIX_SPF_forecast"
+            ],
+            "worst_model": "VIX_SPF_forecast",
+            "obs_range_t": 0.14311320381469575,
+            "p_value": 0.184
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "VIX_forecast",
+          "VIX_SPF_forecast"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "VIX_forecast",
+              "VIX_SPF_forecast",
+              "VIX_SPF_JLN_forecast",
+              "JLN_SPF_forecast"
+            ],
+            "worst_model": "JLN_SPF_forecast",
+            "obs_range_t": 8.750585796951212,
+            "p_value": 0.0
+          },
+          {
+            "active_models": [
+              "VIX_forecast",
+              "VIX_SPF_forecast",
+              "VIX_SPF_JLN_forecast"
+            ],
+            "worst_model": "VIX_SPF_JLN_forecast",
+            "obs_range_t": 1.047288287095725,
+            "p_value": 0.082
+          },
+          {
+            "active_models": [
+              "VIX_forecast",
+              "VIX_SPF_forecast"
+            ],
+            "worst_model": "VIX_SPF_forecast",
+            "obs_range_t": 0.1362175780072679,
+            "p_value": 0.248
+          }
+        ]
+      },
+      "row_loss_file": "data/K1601_agreed_disagreed_uncertainty_21d_distribution_scores.csv"
+    },
+    {
+      "panel_id": "research_data_driven_vc_screening__AIQ__5",
+      "source_k": "research_data_driven_vc_screening_shock_public_innovation",
+      "path": "experiments/research_data_driven_vc_screening_shock_public_innovation/data/oos_predictions.csv",
+      "note": "public innovation ETF 5d/21d variance forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1376,
+      "n_calibration": 344,
+      "n_eval": 1032,
+      "eval_start": "2022-05-16",
+      "eval_end": "2026-06-26",
+      "actual_scale_median": 0.00084540325762715,
+      "models": {
+        "pred_baseline": {
+          "sigma_log_calibrated": 0.7384648296155113,
+          "mean_crps": 0.0005941876379710953,
+          "mean_crps_scaled": 0.7028452192612098,
+          "mean_pinball": 0.00026941108990687383,
+          "mean_pinball_scaled": 0.3186776103312494,
+          "coverage_90": 0.8507751937984496,
+          "coverage_error_90_abs": 0.04922480620155045,
+          "mean_interval_score_scaled": 7.01485144502031
+        },
+        "pred_augmented": {
+          "sigma_log_calibrated": 0.717991382510288,
+          "mean_crps": 0.0005948931165866845,
+          "mean_crps_scaled": 0.7036797069559572,
+          "mean_pinball": 0.00026998314811248935,
+          "mean_pinball_scaled": 0.31935427936517446,
+          "coverage_90": 0.8323643410852714,
+          "coverage_error_90_abs": 0.06763565891472867,
+          "mean_interval_score_scaled": 7.091005976508323
+        }
+      },
+      "best_by_crps": "pred_baseline",
+      "best_by_pinball": "pred_baseline",
+      "best_by_coverage_error": "pred_baseline",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.016988313370988585,
+            "p_value": 0.804
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.028670728518493685,
+            "p_value": 0.672
+          }
+        ]
+      },
+      "row_loss_file": "data/research_data_driven_vc_screening__AIQ__5_distribution_scores.csv"
+    },
+    {
+      "panel_id": "research_data_driven_vc_screening__AIQ__21",
+      "source_k": "research_data_driven_vc_screening_shock_public_innovation",
+      "path": "experiments/research_data_driven_vc_screening_shock_public_innovation/data/oos_predictions.csv",
+      "note": "public innovation ETF 5d/21d variance forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1360,
+      "n_calibration": 340,
+      "n_eval": 1020,
+      "eval_start": "2022-05-10",
+      "eval_end": "2026-06-03",
+      "actual_scale_median": 0.00363623642307365,
+      "models": {
+        "pred_baseline": {
+          "sigma_log_calibrated": 0.6656166152116363,
+          "mean_crps": 0.0019277576673148217,
+          "mean_crps_scaled": 0.5301519051627893,
+          "mean_pinball": 0.0008681126578791089,
+          "mean_pinball_scaled": 0.23873933289115115,
+          "coverage_90": 0.9156862745098039,
+          "coverage_error_90_abs": 0.015686274509803866,
+          "mean_interval_score_scaled": 4.959210696488788
+        },
+        "pred_augmented": {
+          "sigma_log_calibrated": 0.6250858276877443,
+          "mean_crps": 0.0019374782942733059,
+          "mean_crps_scaled": 0.5328251710969849,
+          "mean_pinball": 0.0008732369933296512,
+          "mean_pinball_scaled": 0.24014857444047014,
+          "coverage_90": 0.9009803921568628,
+          "coverage_error_90_abs": 0.0009803921568627416,
+          "mean_interval_score_scaled": 5.03460275257989
+        }
+      },
+      "best_by_crps": "pred_baseline",
+      "best_by_pinball": "pred_baseline",
+      "best_by_coverage_error": "pred_augmented",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.09616188696199278,
+            "p_value": 0.538
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.10717268526001494,
+            "p_value": 0.498
+          }
+        ]
+      },
+      "row_loss_file": "data/research_data_driven_vc_screening__AIQ__21_distribution_scores.csv"
+    },
+    {
+      "panel_id": "research_data_driven_vc_screening__ARKK__5",
+      "source_k": "research_data_driven_vc_screening_shock_public_innovation",
+      "path": "experiments/research_data_driven_vc_screening_shock_public_innovation/data/oos_predictions.csv",
+      "note": "public innovation ETF 5d/21d variance forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1376,
+      "n_calibration": 344,
+      "n_eval": 1032,
+      "eval_start": "2022-05-16",
+      "eval_end": "2026-06-26",
+      "actual_scale_median": 0.0027580351398356,
+      "models": {
+        "pred_baseline": {
+          "sigma_log_calibrated": 0.617697074947205,
+          "mean_crps": 0.0015777175084040246,
+          "mean_crps_scaled": 0.5720440198952899,
+          "mean_pinball": 0.0007124211243411092,
+          "mean_pinball_scaled": 0.2583074863881447,
+          "coverage_90": 0.813953488372093,
+          "coverage_error_90_abs": 0.086046511627907,
+          "mean_interval_score_scaled": 5.533380999765143
+        },
+        "pred_augmented": {
+          "sigma_log_calibrated": 0.6197110770592282,
+          "mean_crps": 0.0015778856759449157,
+          "mean_crps_scaled": 0.5721049935712458,
+          "mean_pinball": 0.000712482721055144,
+          "mean_pinball_scaled": 0.258329819937542,
+          "coverage_90": 0.8091085271317829,
+          "coverage_error_90_abs": 0.09089147286821708,
+          "mean_interval_score_scaled": 5.534317773331874
+        }
+      },
+      "best_by_crps": "pred_baseline",
+      "best_by_pinball": "pred_baseline",
+      "best_by_coverage_error": "pred_baseline",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.002016248046428797,
+            "p_value": 0.96
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.0015557427843664652,
+            "p_value": 0.976
+          }
+        ]
+      },
+      "row_loss_file": "data/research_data_driven_vc_screening__ARKK__5_distribution_scores.csv"
+    },
+    {
+      "panel_id": "research_data_driven_vc_screening__ARKK__21",
+      "source_k": "research_data_driven_vc_screening_shock_public_innovation",
+      "path": "experiments/research_data_driven_vc_screening_shock_public_innovation/data/oos_predictions.csv",
+      "note": "public innovation ETF 5d/21d variance forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1360,
+      "n_calibration": 340,
+      "n_eval": 1020,
+      "eval_start": "2022-05-10",
+      "eval_end": "2026-06-03",
+      "actual_scale_median": 0.01354253122012025,
+      "models": {
+        "pred_baseline": {
+          "sigma_log_calibrated": 0.5434109720982621,
+          "mean_crps": 0.004969817533996659,
+          "mean_crps_scaled": 0.3669784808480234,
+          "mean_pinball": 0.002198090274255869,
+          "mean_pinball_scaled": 0.16231015003976126,
+          "coverage_90": 0.8607843137254902,
+          "coverage_error_90_abs": 0.039215686274509776,
+          "mean_interval_score_scaled": 2.8640710537207927
+        },
+        "pred_augmented": {
+          "sigma_log_calibrated": 0.5417580087363414,
+          "mean_crps": 0.0050085691485489805,
+          "mean_crps_scaled": 0.36983995585018165,
+          "mean_pinball": 0.00221450055157015,
+          "mean_pinball_scaled": 0.16352190853952386,
+          "coverage_90": 0.8627450980392157,
+          "coverage_error_90_abs": 0.03725490196078429,
+          "mean_interval_score_scaled": 2.882011003017063
+        }
+      },
+      "best_by_crps": "pred_baseline",
+      "best_by_pinball": "pred_baseline",
+      "best_by_coverage_error": "pred_augmented",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.2414297158545878,
+            "p_value": 0.126
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.23176852915521642,
+            "p_value": 0.114
+          }
+        ]
+      },
+      "row_loss_file": "data/research_data_driven_vc_screening__ARKK__21_distribution_scores.csv"
+    },
+    {
+      "panel_id": "research_data_driven_vc_screening__IGV__5",
+      "source_k": "research_data_driven_vc_screening_shock_public_innovation",
+      "path": "experiments/research_data_driven_vc_screening_shock_public_innovation/data/oos_predictions.csv",
+      "note": "public innovation ETF 5d/21d variance forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1376,
+      "n_calibration": 344,
+      "n_eval": 1032,
+      "eval_start": "2022-05-16",
+      "eval_end": "2026-06-26",
+      "actual_scale_median": 0.00097223358203815,
+      "models": {
+        "pred_baseline": {
+          "sigma_log_calibrated": 0.6960570882238487,
+          "mean_crps": 0.0006667208265580291,
+          "mean_crps_scaled": 0.6857619803261099,
+          "mean_pinball": 0.00030314286861266314,
+          "mean_pinball_scaled": 0.3118004502345692,
+          "coverage_90": 0.8197674418604651,
+          "coverage_error_90_abs": 0.08023255813953489,
+          "mean_interval_score_scaled": 6.983180472770818
+        },
+        "pred_augmented": {
+          "sigma_log_calibrated": 0.6858522493532092,
+          "mean_crps": 0.0006628035316253008,
+          "mean_crps_scaled": 0.6817328097593862,
+          "mean_pinball": 0.0003013100982207934,
+          "mean_pinball_scaled": 0.3099153370007437,
+          "coverage_90": 0.8178294573643411,
+          "coverage_error_90_abs": 0.08217054263565893,
+          "mean_interval_score_scaled": 6.952298312211647
+        }
+      },
+      "best_by_crps": "pred_augmented",
+      "best_by_pinball": "pred_augmented",
+      "best_by_coverage_error": "pred_baseline",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_baseline",
+            "obs_range_t": 0.09909640524034968,
+            "p_value": 0.164
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_baseline",
+            "obs_range_t": 0.09721185461377961,
+            "p_value": 0.156
+          }
+        ]
+      },
+      "row_loss_file": "data/research_data_driven_vc_screening__IGV__5_distribution_scores.csv"
+    },
+    {
+      "panel_id": "research_data_driven_vc_screening__IGV__21",
+      "source_k": "research_data_driven_vc_screening_shock_public_innovation",
+      "path": "experiments/research_data_driven_vc_screening_shock_public_innovation/data/oos_predictions.csv",
+      "note": "public innovation ETF 5d/21d variance forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1360,
+      "n_calibration": 340,
+      "n_eval": 1020,
+      "eval_start": "2022-05-10",
+      "eval_end": "2026-06-03",
+      "actual_scale_median": 0.0042744612244986005,
+      "models": {
+        "pred_baseline": {
+          "sigma_log_calibrated": 0.6509049468323348,
+          "mean_crps": 0.002068993531091841,
+          "mean_crps_scaled": 0.48403609775043327,
+          "mean_pinball": 0.0009210264851944595,
+          "mean_pinball_scaled": 0.2154719476493782,
+          "coverage_90": 0.9264705882352942,
+          "coverage_error_90_abs": 0.026470588235294135,
+          "mean_interval_score_scaled": 4.094976752531048
+        },
+        "pred_augmented": {
+          "sigma_log_calibrated": 0.6370009464626444,
+          "mean_crps": 0.002045001000159338,
+          "mean_crps_scaled": 0.4784231024108118,
+          "mean_pinball": 0.0009110413250084163,
+          "mean_pinball_scaled": 0.2131359432592075,
+          "coverage_90": 0.9215686274509803,
+          "coverage_error_90_abs": 0.021568627450980316,
+          "mean_interval_score_scaled": 4.0333181944901915
+        }
+      },
+      "best_by_crps": "pred_augmented",
+      "best_by_pinball": "pred_augmented",
+      "best_by_coverage_error": "pred_augmented",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_baseline",
+            "obs_range_t": 0.26886608801709866,
+            "p_value": 0.114
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_baseline",
+            "obs_range_t": 0.2468137003413984,
+            "p_value": 0.116
+          }
+        ]
+      },
+      "row_loss_file": "data/research_data_driven_vc_screening__IGV__21_distribution_scores.csv"
+    },
+    {
+      "panel_id": "research_data_driven_vc_screening__IPO__5",
+      "source_k": "research_data_driven_vc_screening_shock_public_innovation",
+      "path": "experiments/research_data_driven_vc_screening_shock_public_innovation/data/oos_predictions.csv",
+      "note": "public innovation ETF 5d/21d variance forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1376,
+      "n_calibration": 344,
+      "n_eval": 1032,
+      "eval_start": "2022-05-16",
+      "eval_end": "2026-06-26",
+      "actual_scale_median": 0.0015067942212536,
+      "models": {
+        "pred_baseline": {
+          "sigma_log_calibrated": 0.644469536383215,
+          "mean_crps": 0.0008714129649721219,
+          "mean_crps_scaled": 0.5783224760758219,
+          "mean_pinball": 0.0003917589681391585,
+          "mean_pinball_scaled": 0.2599950030424385,
+          "coverage_90": 0.8536821705426356,
+          "coverage_error_90_abs": 0.0463178294573644,
+          "mean_interval_score_scaled": 5.329561775780775
+        },
+        "pred_augmented": {
+          "sigma_log_calibrated": 0.6327451723991355,
+          "mean_crps": 0.000870832159081028,
+          "mean_crps_scaled": 0.5779370180730625,
+          "mean_pinball": 0.0003919355262108671,
+          "mean_pinball_scaled": 0.2601121776832874,
+          "coverage_90": 0.8439922480620154,
+          "coverage_error_90_abs": 0.05600775193798457,
+          "mean_interval_score_scaled": 5.398780162625998
+        }
+      },
+      "best_by_crps": "pred_augmented",
+      "best_by_pinball": "pred_baseline",
+      "best_by_coverage_error": "pred_baseline",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_baseline",
+            "obs_range_t": 0.011956176717995474,
+            "p_value": 0.858
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.007707779245351119,
+            "p_value": 0.902
+          }
+        ]
+      },
+      "row_loss_file": "data/research_data_driven_vc_screening__IPO__5_distribution_scores.csv"
+    },
+    {
+      "panel_id": "research_data_driven_vc_screening__IPO__21",
+      "source_k": "research_data_driven_vc_screening_shock_public_innovation",
+      "path": "experiments/research_data_driven_vc_screening_shock_public_innovation/data/oos_predictions.csv",
+      "note": "public innovation ETF 5d/21d variance forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1360,
+      "n_calibration": 340,
+      "n_eval": 1020,
+      "eval_start": "2022-05-10",
+      "eval_end": "2026-06-03",
+      "actual_scale_median": 0.0070356595313907505,
+      "models": {
+        "pred_baseline": {
+          "sigma_log_calibrated": 0.5678037144526669,
+          "mean_crps": 0.0028112509762948565,
+          "mean_crps_scaled": 0.3995717762850801,
+          "mean_pinball": 0.0012441369868592597,
+          "mean_pinball_scaled": 0.17683302912944238,
+          "coverage_90": 0.9147058823529411,
+          "coverage_error_90_abs": 0.014705882352941124,
+          "mean_interval_score_scaled": 3.1160633018795667
+        },
+        "pred_augmented": {
+          "sigma_log_calibrated": 0.5708675362020388,
+          "mean_crps": 0.002826742292186617,
+          "mean_crps_scaled": 0.40177360481624247,
+          "mean_pinball": 0.001251361255507585,
+          "mean_pinball_scaled": 0.1778598367252468,
+          "coverage_90": 0.9137254901960784,
+          "coverage_error_90_abs": 0.013725490196078383,
+          "mean_interval_score_scaled": 3.1240472285357233
+        }
+      },
+      "best_by_crps": "pred_baseline",
+      "best_by_pinball": "pred_baseline",
+      "best_by_coverage_error": "pred_augmented",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.1430646826129827,
+            "p_value": 0.23
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.14815225245832575,
+            "p_value": 0.158
+          }
+        ]
+      },
+      "row_loss_file": "data/research_data_driven_vc_screening__IPO__21_distribution_scores.csv"
+    },
+    {
+      "panel_id": "research_data_driven_vc_screening__SOXX__5",
+      "source_k": "research_data_driven_vc_screening_shock_public_innovation",
+      "path": "experiments/research_data_driven_vc_screening_shock_public_innovation/data/oos_predictions.csv",
+      "note": "public innovation ETF 5d/21d variance forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1376,
+      "n_calibration": 344,
+      "n_eval": 1032,
+      "eval_start": "2022-05-16",
+      "eval_end": "2026-06-26",
+      "actual_scale_median": 0.00175310022728795,
+      "models": {
+        "pred_baseline": {
+          "sigma_log_calibrated": 0.6875561086512005,
+          "mean_crps": 0.0014185439542491933,
+          "mean_crps_scaled": 0.8091630656187205,
+          "mean_pinball": 0.0006496592995023144,
+          "mean_pinball_scaled": 0.37057738593037476,
+          "coverage_90": 0.7664728682170543,
+          "coverage_error_90_abs": 0.13352713178294573,
+          "mean_interval_score_scaled": 8.888308486042128
+        },
+        "pred_augmented": {
+          "sigma_log_calibrated": 0.7017379541184037,
+          "mean_crps": 0.0014204591055138687,
+          "mean_crps_scaled": 0.8102555024542563,
+          "mean_pinball": 0.0006506606911742416,
+          "mean_pinball_scaled": 0.37114859780767645,
+          "coverage_90": 0.7742248062015504,
+          "coverage_error_90_abs": 0.1257751937984496,
+          "mean_interval_score_scaled": 8.876181037764638
+        }
+      },
+      "best_by_crps": "pred_baseline",
+      "best_by_pinball": "pred_baseline",
+      "best_by_coverage_error": "pred_augmented",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.01957048308981594,
+            "p_value": 0.824
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.021071386149381192,
+            "p_value": 0.806
+          }
+        ]
+      },
+      "row_loss_file": "data/research_data_driven_vc_screening__SOXX__5_distribution_scores.csv"
+    },
+    {
+      "panel_id": "research_data_driven_vc_screening__SOXX__21",
+      "source_k": "research_data_driven_vc_screening_shock_public_innovation",
+      "path": "experiments/research_data_driven_vc_screening_shock_public_innovation/data/oos_predictions.csv",
+      "note": "public innovation ETF 5d/21d variance forecasts",
+      "status": "scored",
+      "kind": "primary",
+      "n_total": 1360,
+      "n_calibration": 340,
+      "n_eval": 1020,
+      "eval_start": "2022-05-10",
+      "eval_end": "2026-06-03",
+      "actual_scale_median": 0.009317103013625101,
+      "models": {
+        "pred_baseline": {
+          "sigma_log_calibrated": 0.5461150517072145,
+          "mean_crps": 0.004231567001812738,
+          "mean_crps_scaled": 0.4541719669327042,
+          "mean_pinball": 0.0019249942715361967,
+          "mean_pinball_scaled": 0.20660867103445488,
+          "coverage_90": 0.8764705882352941,
+          "coverage_error_90_abs": 0.02352941176470591,
+          "mean_interval_score_scaled": 4.710950732776665
+        },
+        "pred_augmented": {
+          "sigma_log_calibrated": 0.5487492185748846,
+          "mean_crps": 0.004240238732343763,
+          "mean_crps_scaled": 0.45510269942738024,
+          "mean_pinball": 0.0019323074775724,
+          "mean_pinball_scaled": 0.20739359377551594,
+          "coverage_90": 0.8813725490196078,
+          "coverage_error_90_abs": 0.0186274509803922,
+          "mean_interval_score_scaled": 4.762779714071762
+        }
+      },
+      "best_by_crps": "pred_baseline",
+      "best_by_pinball": "pred_baseline",
+      "best_by_coverage_error": "pred_augmented",
+      "mcs_crps_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.03615143942864241,
+            "p_value": 0.798
+          }
+        ]
+      },
+      "mcs_pinball_alpha10": {
+        "status": "ok",
+        "alpha": 0.1,
+        "bootstrap": 500,
+        "block": 10,
+        "included": [
+          "pred_baseline",
+          "pred_augmented"
+        ],
+        "elimination_path": [
+          {
+            "active_models": [
+              "pred_baseline",
+              "pred_augmented"
+            ],
+            "worst_model": "pred_augmented",
+            "obs_range_t": 0.06327284457803803,
+            "p_value": 0.69
+          }
+        ]
+      },
+      "row_loss_file": "data/research_data_driven_vc_screening__SOXX__21_distribution_scores.csv"
+    }
+  ],
+  "skipped": [
+    {
+      "panel_id": "K1582_spy_harq_short",
+      "status": "skipped_too_short",
+      "n_total": 51,
+      "path": "experiments/k1582/data/SPY_oos_forecasts.csv"
+    },
+    {
+      "panel_id": "K1582_0050_harq_short",
+      "status": "skipped_too_short",
+      "n_total": 38,
+      "path": "experiments/k1582/data/0050_TW_oos_forecasts.csv"
+    },
+    {
+      "panel_id": "K1349_intraday_rv_short",
+      "status": "skipped_too_short",
+      "n_total": 34,
+      "path": "experiments/k1349/K1349_oos_forecasts_intraday_rv.csv"
+    },
+    {
+      "panel_id": "K1349_total_rv_short",
+      "status": "skipped_too_short",
+      "n_total": 33,
+      "path": "experiments/k1349/K1349_oos_forecasts_total_rv.csv"
+    },
+    {
+      "panel_id": "research_intraday_har_vs_seasonal",
+      "status": "skipped_too_short",
+      "n_total": 43,
+      "path": "experiments/research_intraday_garch_vs_har_rv_rv/research_intraday_garch_vs_har_rv_rv_oos_forecasts.csv"
+    }
+  ],
+  "figures": {
+    "best_crps_by_panel": "figures/k1638_best_crps_by_panel.png",
+    "crps_winner_counts": "figures/k1638_crps_winner_counts.png"
+  },
+  "honesty": {
+    "limitations": [
+      "Most historical K experiments do not store full predictive distributions or per-date loss rows.",
+      "Lognormal wrapper is a transparent post-processing proxy; it does not turn point forecasts into native probabilistic models.",
+      "Cross-panel aggregate rankings are descriptive because targets and horizons differ.",
+      "Primary inference is per panel; global winner counts are a platform audit signal, not a universal model theorem."
+    ]
+  }
+}

@@ -50010,7 +50010,7 @@
     "title": "K1638: 分布式預測評估：用 CRPS / pinball / coverage + MCS 重排平台 1400+ K 模型 — 重用既有 K 的預測分布/損失序列，改用 proper scoring rules + Hansen-Lunde-Nas",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 497). Original: 分布式預測評估：用 CRPS / pinball / coverage + MCS 重排平台 1400+ K 模型 — 重用既有 K 的預測分布/損失序列，改用 proper scoring rules + Hansen-Lunde-Nason MCS 於分布度量而非平方誤差；零新資料的評估層升級 + methodology 素材（來源：arXiv 2025-26 CRPS/MCS）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1638.py with signal.shift(1) + seed=42, (c) K1638_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -50019,7 +50019,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-05T00:00:00Z"
+    "created_at": "2026-07-05T00:00:00Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T04:49:44.687990+00:00",
+    "claim_session_id": "66db6b4bf035",
+    "status_history": [
+      {
+        "ts": "2026-07-05T04:49:44.688281+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T04:49:44.924966+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T04:55:55.543063+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T04:49:44.924651+00:00",
+    "completed_at": "2026-07-05T04:55:55.542777+00:00",
+    "result": "完成 experiments/k1638 三件套、Codex review 與 knowledge entry。K1638 對現有 OOS forecast artifacts 做 distributional scoring audit：10 declared specs -> 18 primary panels、5 short panels skipped；CRPS winners pred_baseline 7、EWMA_094 5、pred_augmented 3、HAR_RV/SHARK/VIX 各1；verdict=CONDITIONAL_PASS_EVALUATION_LAYER_WORKS_COVERAGE_LIMITED。已回寫 research_program.md，JSON/py_compile/knowledge gate 驗證完成。"
   },
   {
     "id": "K1639",

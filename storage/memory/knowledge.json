@@ -37723,5 +37723,26 @@
     ],
     "confidence": 0.88,
     "created_at": "2026-07-05T08:03:16.141558"
+  },
+  {
+    "item_id": "k1638_distributional_scoring_audit",
+    "category": "methodology_evaluation",
+    "experiment_id": "k1638",
+    "k_id": "K1638",
+    "experiment_path": "experiments/k1638/",
+    "experiment_file": "experiments/k1638/k1638.py",
+    "results_file": "experiments/k1638/k1638_results.json",
+    "reviewer": "Codex self-review",
+    "codex_review": "experiments/k1638/codex_review.md",
+    "verdict": "CONDITIONAL_PASS",
+    "confidence": 0.74,
+    "created_at": "2026-07-05T04:55:35.118435+00:00",
+    "content": "K1638 distributional scoring audit completed 2026-07-05. Verdict=CONDITIONAL_PASS_EVALUATION_LAYER_WORKS_COVERAGE_LIMITED. The experiment reused existing byte-traceable OOS forecast CSV artifacts and wrapped point variance forecasts into calibrated lognormal predictive distributions. Scores: CRPS, average pinball loss at 5/25/50/75/95%, 90% empirical coverage, interval score, plus MCS-lite range bootstrap. Coverage: 10 declared panel specs produced 18 primary panels (n_eval>=252); 5 short panels with 33-51 rows were skipped. Primary CRPS winners: pred_baseline 7 panels, EWMA_094 5, pred_augmented 3, HAR_RV_forecast 1, SHARK_like_forecast 1, VIX_forecast 1. MCS usually retained both baseline and augmented models in the data-driven VC panels, so this supports existing baseline-heavy/null conclusions rather than overturning them. Key limitation: this is an evaluation-layer proof-of-concept and coverage map, not a full 1400+ K universal leaderboard; the lognormal wrapper is a transparent bridge for point forecasts, not native probabilistic modeling.",
+    "evidence": [
+      "experiments/k1638/k1638_results.json",
+      "experiments/k1638/README.md",
+      "experiments/k1638/codex_review.md",
+      "experiments/k1638/data/k1638_model_score_table.csv"
+    ]
   }
 ]
