@@ -86,9 +86,21 @@ def _locked_load() -> Iterator[tuple[Any, list[dict[str, Any]]]]:
         if not isinstance(data, list):
             raise SystemExit("next_tasks.json is not a list")
         yield fh, data
+        # Serialize FIRST, then truncate+write. If serialization fails we must
+        # NOT have already truncated the canonical queue. Lone surrogates can
+        # arrive via non-UTF-8 locale argv (surrogateescape) and make an
+        # ensure_ascii=False UTF-8 write raise UnicodeEncodeError mid-write —
+        # which previously truncated next_tasks.json to a corrupted partial.
+        # (incident 2026-07-05: `complete --result` with a shell-mangled char)
+        payload = json.dumps(data, indent=2, ensure_ascii=False)
+        try:
+            payload.encode("utf-8")
+        except UnicodeEncodeError as exc:
+            _warn(f"scrubbed non-encodable char(s) before write: {exc}")
+            payload = payload.encode("utf-8", "replace").decode("utf-8")
         fh.seek(0)
         fh.truncate()
-        json.dump(data, fh, indent=2, ensure_ascii=False)
+        fh.write(payload)
         fh.write("\n")
     finally:
         fcntl.flock(fh.fileno(), fcntl.LOCK_UN)

@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-05 10:2x `task_pool_claim.py complete` 一次 routine call 寫壞 canonical pending queue（非 atomic write + argv lone-surrogate）— **FIXED**
+
+**現象**：hourly-10 收尾 paper_body task 跑 `task_pool_claim.py complete --id <id> --status succeeded --result "...→..."`，指令拋 `UnicodeEncodeError: 'utf-8' codec can't encode character '\udc97'` 並中途崩潰，`storage/next_tasks.json` 被截成 invalid JSON（JSONDecodeError line 50190），且該壞檔已被 PHASE Z auto-commit。從 HEAD~1 有效版還原 + Python 腳本重加 task 為 succeeded 復原（2121 tasks valid、in_progress=0）。
+
+**根因**：兩層結構缺陷。(1) `_locked_load` context manager **先 `fh.truncate()` 再 `json.dump(data, fh)`**（scripts/task_pool_claim.py:89-91）—— 非 atomic in-place write，dump 一旦拋例外，檔案已被 truncate 成 partial = canonical queue 損毀。(2) `--result` 含 `→`(U+2192)/中文，在非-UTF8 locale 的 exec context 下經 argv **surrogateescape** 解碼產生 lone surrogate `\udc97`，`ensure_ascii=False` 的 UTF-8 write 遇 lone surrogate 必拋 → 觸發 (1)。
+
+**解決**：`_locked_load` 改「**先序列化成字串再 truncate+write**」—— `payload = json.dumps(...)` 成功後才 `truncate()`；序列化階段用 `payload.encode('utf-8')` 探測，遇 lone surrogate → `_warn(...)`（observable，no-silent-fallback 合規）+ `encode('utf-8','replace').decode()` scrub 成 `?` 再寫。序列化失敗**不再** truncate → canonical queue 永不被 partial write 損毀。驗證：注入 incident 原毒字 `\udc97`，寫後檔案仍 valid JSON、status 正確、warn 有印。
+
+**教訓**：(1) 任何 canonical state 檔（pending queue / feed / paper trading）的 read-modify-write **必先序列化成可寫字串，再 truncate/replace**；「truncate 再逐步 dump」是 partial-corruption 地雷。(2) CLI `--result` 型自由文字經 shell/argv 可能挾帶 lone surrogate，write-site 要 surrogate-safe（不是靠 caller 保證乾淨）。(3) 這與 07-05 09:2x throttle 同屬「canonical write-site 對輸入/狀態韌性不足」通例 —— 修在 write-site 早期 sanitize，非靠上游。
+
 ## 2026-07-05 09:2x publish_throttle 對 **draft ingestion** 雙重 gating，寫作 agent 空耗 ~700s 等窗口 — **FIXED**
 
 **現象**：hourly-09 派 sonnet agent 寫 K1633（VIX破30抄底迷思）reader-facing 文章，agent 正文/圖/anti_ai_gate 全做完（210K token、71 tool use），卻卡在「等一個背景 gap-clear job」無法 publish 而把控制權交回主線程。主線程接手直接 `publish_draft.py --status draft` 也被擋：`PublishThrottleError: would create burst — gap=13.4min < threshold=30min`。
