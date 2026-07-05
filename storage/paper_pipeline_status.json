@@ -261,10 +261,10 @@
       "stage": "revision",
       "stage_entered_at": "2026-07-01T00:00:00+08:00",
       "last_advance_at": "2026-07-01T00:00:00+08:00",
-      "blocker": "sec:tsmc line457 concentration (gamma,t) provenance RESOLVED 2026-07-05 (hourly-16): body_v3.tex now cites tab:gamma canonical 0050 0.097/3.60 + TSMC 0.052/3.98 (both sig) w/ %source; refit paper2_sec45_gamma_refit common_vt (0.155/0.044, 2020-2026, insig) in footnote as ordering robustness; Codex CONDITIONAL_PASS->fixed SE-wording; main_v3.pdf recompiled 48pp clean. NEW residual (see task paper2_taiwan_vt_body_main_version_divergence, P2): body.tex(main.tex) vs body_v3.tex(main_v3.tex) diverge — Table TSMC gamma 0.039/0.87 (body) vs 0.052/3.98 (body_v3), significance OPPOSITE; body.tex:683 still holds old untraceable 0.124/2.46. Need canonical-version decision + reconcile before paper-update/sync.",
+      "blocker": "Version divergence RESOLVED 2026-07-05 (hourly-19, task paper2_taiwan_vt_body_main_version_divergence): canonical = main_v3.tex(\\input{body_v3}) → main_v3.pdf 48pp. Old monolithic main.tex/body.tex archived to paper/taiwan-vt/_superseded/ (carried mislabeled zero-mean TSMC gamma 0.039/0.87 cited to NONEXISTENT data/tsmc_canonical.json + old untraceable body.tex:683 0.124/2.46). Canonical TSMC full-sample gamma = 0.052/t=3.98 (constant-mean K892 .assets[2330.TW].full_sample, N=6525), consistent across body_v3 tab:gamma L54 + secondary L151 + sec:tsmc L457-458 provenance footnote. Archiving main.tex also made paper-update mtime resolution deterministic (only main_v3 remains as recent main* candidate). paper-guide.md updated to main_v3.tex/48pp. OPEN followups (filed): (1) reproduce.py + experiments.md still bound to old body/body_v2 architecture — rebind to body_v3 (paper_audit 2026-06-10 L234, JBF replication hard req); (2) body_v3.tex:152-154 individual-stock rolling-w2000 rows lack %source provenance. Codex review pending this fire.",
       "owner_decision_pending": false,
-      "blocker_verified_at": "2026-07-05T10:00:00+08:00",
-      "blocker_verified_by": "hourly-10 (main-thread provenance walk)"
+      "blocker_verified_at": "2026-07-05T19:20:00+08:00",
+      "blocker_verified_by": "hourly-19 (main-thread version reconcile)"
     },
     {
       "paper": "vix-sufficiency",

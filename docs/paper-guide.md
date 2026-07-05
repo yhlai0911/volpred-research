@@ -2,7 +2,7 @@
 
 ## 論文列表
 - **第一篇**：`paper/leverage-direction/main.tex`（60 頁，Leverage Direction Matters，目標 JBF）
-- **第二篇**：`paper/taiwan-vt/main.tex`（34 頁，Taiwan VT + TZ Information Transmission，目標 PBFJ）
+- **第二篇**：`paper/taiwan-vt/main_v3.tex`（48 頁，`\input{body_v3}`；Taiwan VT + TZ Information Transmission，目標 PBFJ）— 舊 `main.tex`/`body.tex` 單體版已封存 `paper/taiwan-vt/_superseded/`（2026-07-05 版本分岔 reconcile；canonical TSMC γ=0.052/t=3.98 常數均值 K892，非舊 body 的零均值 0.039/0.87）
 - **第三篇**：`paper/vt-trend-following/main.tex`（24 頁，Is VT Just Trend Following?，目標待定）
 - **第四篇**：`paper/vix-sufficiency/main_v2.tex`（39 頁，Can Anything Beat VIX?，目標 J. Forecasting）
 - **第五篇**：`paper/volatility-absorption/main_v2.tex`（Volatility Absorption）

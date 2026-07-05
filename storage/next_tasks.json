@@ -50357,12 +50357,38 @@
     "id": "paper2_taiwan_vt_body_main_version_divergence",
     "task_type": "paper_decision",
     "priority": "P2",
-    "status": "pending",
+    "status": "succeeded",
     "title": "[paper_decision] taiwan-vt body.tex vs body_v3.tex + main.tex vs main_v3.tex 版本分岔 reconcile",
     "description": "2026-07-05 hourly-16 修 sec:tsmc gamma provenance 時發現的結構性版本分岔（需主線程 paper_decision，勿丟 background agent 改 .tex）：\n\n1. main.tex \\input{body}（body.tex），main_v3.tex \\input{body_v3}（body_v3.tex）— 兩個 main 各自指向不同 body。\n2. Table gamma TSMC(2330) 全樣本值兩版不一致：\n   - body_v3.tex:151 → gamma=0.052, t=3.98（source: K892 canonical, N=6525）\n   - body.tex:152    → gamma=0.039, t=0.87（source: paper/taiwan-vt/data/tsmc_canonical.json）\n   顯著性結論相反（3.98 顯著 vs 0.87 不顯著）。\n3. body.tex:683 仍保有本次已在 body_v3 修掉的無來源數字（0.124/2.46 + 0.054/1.07 insignificant）。\n\n決策項：(a) 確認哪個 main/body 是投稿 canonical（pipeline_status 追 body_v3/K892 spec，但 paper-guide 列 main.tex；查 paper-update CLI 實際同步哪個 → 對齊 docs/paper-guide.md + 消除另一版或標 _archived）；(b) TSMC 全樣本 gamma 用哪個 canonical source（K892 0.052/3.98 vs data/tsmc_canonical.json 0.039/0.87）— 追兩者 spec/window 差異，擇一為準並全文一致；(c) 收斂後 body.tex:683 同步修（若 body.tex 保留為 canonical）或廢棄。\n\n研究誠實：兩版 TSMC 顯著性相反是投稿風險，reviewer 會抓。不可放著。\n驗證：reconcile 後 grep 全文 TSMC gamma 一致 + reproduce gate + Codex review。",
     "source": "agent_discovered",
     "created_at": "2026-07-05T08:19:31.684424+00:00",
-    "discovered_during": "paper2_sec45_gamma_refit followup (hourly-16 2026-07-05)"
+    "discovered_during": "paper2_sec45_gamma_refit followup (hourly-16 2026-07-05)",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-07-05T11:10:32.248602+00:00",
+    "claim_session_id": "c3b692acdf21",
+    "status_history": [
+      {
+        "ts": "2026-07-05T11:10:32.248936+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-19"
+      },
+      {
+        "ts": "2026-07-05T11:10:42.382582+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-19"
+      },
+      {
+        "ts": "2026-07-05T11:33:02.778550+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-19"
+      }
+    ],
+    "started_at": "2026-07-05T11:10:42.382246+00:00",
+    "completed_at": "2026-07-05T11:33:02.778202+00:00",
+    "result": "版本分岔 reconcile 完成：canonical=main_v3/body_v3（4方證據一致）；舊 main.tex+body.tex+pre_canonical_backup 封存 _superseded/；TSMC canonical=K892 常數均值 0.052/3.98（舊 body.tex 0.039/0.87 是零均值 spec+斷鏈引用+誤標）；paper-guide+pipeline_status 更新；canonical 全篇 TSMC 一致、reproduce.py archive 後 GREEN 96.7%、paper-update 現 deterministic；Codex CONDITIONAL_PASS（core sound）；3 followup filed（reproduce/experiments rebind P2、個股 rows provenance P3、SE口徑+zero-mean揭露 P2）"
   },
   {
     "id": "paper_review_mile_d30a3ede",
@@ -50608,14 +50634,11 @@
     "id": "paper_review_queue_batch_c12",
     "task_type": "paper_review",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C12: paper review cycle 佇列 — 6/11 batch 四篇 + 零 review 兩篇 + vt-insurance-cost 首輪",
     "description": "排 paper-review-cycle：btc-gas-negative、crypto-fear-channel、eav-universal-magnitude、vix-sufficiency（6/11 batch，最舊 review 23 天前）+ forecast-tail-divergence、k189_audit（從未跑過 review cycle）+ vt-insurance-cost 首輪正式 latex+citation review。每篇獨立 session 逐篇跑，review 用 codex exec 省 token。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
-    "claimed_by": "hourly-18",
-    "claimed_at": "2026-07-05T10:11:08.512424+00:00",
-    "claim_session_id": "53f76f81e25a",
     "status_history": [
       {
         "ts": "2026-07-05T10:11:08.512799+00:00",
@@ -50628,9 +50651,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-05T11:10:42.137986+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-18",
+        "note": "manual_release"
       }
     ],
-    "started_at": "2026-07-05T10:11:08.753388+00:00"
+    "started_at": "2026-07-05T10:11:08.753388+00:00",
+    "last_released_at": "2026-07-05T11:10:42.137693+00:00"
   },
   {
     "id": "experiment_ml_null_quartet_unfreeze_eval_c14",
@@ -50697,5 +50728,35 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-05T10:08:17+00:00"
+  },
+  {
+    "id": "platform_ops_taiwan_vt_reproduce_experiments_rebind_body_v3",
+    "task_type": "platform_ops",
+    "priority": "P2",
+    "source": "agent_discovered",
+    "status": "pending",
+    "created_at": "2026-07-05T11:25:47.021010+00:00",
+    "title": "taiwan-vt replication package rebind：reproduce.py + experiments.md 綁定舊 body/body_v2 → canonical body_v3",
+    "description": "2026-07-05 hourly-19 在 paper2_taiwan_vt_body_main_version_divergence reconcile 時發現：reproduce.py docstring 仍寫「compares against body_v2.tex / section5_hf_draft.tex」，程式碼內大量 comment 引用舊 body.tex / body_v2.tex 行號（L146/L147/L151/L164/L260/L201/L34/L51/L440/L444），而 canonical 已封存舊 body.tex 到 _superseded/、正式版是 body_v3.tex（main_v3.tex，7-table main + supplement 架構）。此即 paper_audit 2026-06-10 L234 標記的「experiments.md 表號對映舊 66pp 版（Table 1-14）、replication package canonical mapping 文件失準」— JBF/PBFJ replication package hard requirement。\n\n功能面 reproduce.py 現況 GREEN 96.7%（145/155 traceable，實際驗的多是 canonical K1302/K1302b/K1370/paper2_R1 值），問題在 (a) docstring + comment 行號引用過期、(b) experiments.md 的 Table 編號對映舊架構。\n\n工作：(1) reproduce.py docstring 改 body_v3.tex；comment 行號 re-map 到 body_v3.tex 對應行（或改成 section 引用降耦合）；(2) experiments.md Table 1-14 對映重寫成 body_v3 的 7-table main + supplement 架構；(3) 重跑 reproduce.py 確認仍 GREEN；(4) Codex review。研究誠實：不改任何數字，只修文件對映。"
+  },
+  {
+    "id": "paper2_taiwan_vt_body_v3_individual_stock_provenance",
+    "task_type": "paper_body",
+    "priority": "P3",
+    "source": "agent_discovered",
+    "status": "pending",
+    "created_at": "2026-07-05T11:25:47.021010+00:00",
+    "title": "taiwan-vt body_v3.tex:152-154 個股 rolling-w2000 rows 缺 %source provenance",
+    "description": "2026-07-05 hourly-19 reconcile 時發現：body_v3.tex 次表（tab 附近 L151-160）個股 rolling-window(w=2000) rows —— Hon Hai(2317) 0.052/1.14、MediaTek(2454) 0.044/0.96、Mega Financial(2886) 0.179/2.42 —— 缺 inline `% source:` binding。注意這些值與舊 body.tex 的 k1302/k1302b full-sample BW-robust 值不同（body.tex Hon Hai 0.032/1.74），疑為不同 spec/window（w=2000 rolling vs full-sample）。\n\nheadline claim 用的 9-stock average(0.054) 與 amplification 4.3× 已 sourced 至 K1302+K1302b（reproduce.py VERIFIED），但個股 rows 本身缺 traceable binding，屬 paper-workflow 硬規則 3（Table row → JSON source 必 traceable）殘留。\n\n工作：追這三 rows 值出自哪個 experiment JSON（K892 rolling? K1302?），補 `% source:` inline binding，或若無法追溯則改用可追溯的 spec 重估。研究誠實：不硬湊。Codex review。"
+  },
+  {
+    "id": "paper2_taiwan_vt_body_v3_se_method_and_zero_mean_disclosure",
+    "task_type": "paper_body",
+    "priority": "P2",
+    "source": "agent_discovered",
+    "status": "pending",
+    "created_at": "2026-07-05T11:33:02.518339+00:00",
+    "title": "taiwan-vt body_v3 canonical 揭露修正：gamma SE 口徑（HAC vs arch MLE）+ TSMC zero-mean sensitivity",
+    "description": "2026-07-05 hourly-19 版本 reconcile 後的 Codex review（CONDITIONAL_PASS）抓到兩個 canonical body_v3.tex 的投稿前研究誠實項：\n\n(1) SE 口徑標示不一致：body_v3.tex L60/L164 表註寫「$t(\\gamma)$ uses Newey-West HAC standard errors」，但 0050.TW / TSMC 全樣本 row 的 t 值來自 experiments/k892（arch_model(..., mean='Constant') GJR-GARCH MLE，t 是 arch 的 (Bollerslev-Wooldridge) robust MLE t，非 Newey-West HAC）。需先確認 K892 實際 SE type，再修正表註：full-sample MLE row 標 MLE/BW-robust t，rolling row 若真用 HAC 才標 HAC，不可一律 HAC。\n\n(2) 缺 zero-mean spec sensitivity 揭露：canonical 選常數均值 TSMC gamma=0.052/t=3.98（顯著）為 primary，但 zero-mean spec 給 0.039/t=0.87（不顯著）。reviewer 會質疑「是否挑了讓 TSMC 顯著的 spec」。需在表註或 supplement 明揭：primary=constant-mean K892；zero-mean 給 gamma=0.039/t=0.87，作為 spec-sensitivity（非主結論）。此即舊 body_v2 的 3-spec disambiguation footnote，v3 重構時未帶過來。\n\nroot context：Codex review 2026-07-05（/tmp/codex_review_taiwanvt_reconcile.txt）點 2+3。主線程做（禁 background agent 改 .tex）；改後 xelatex 重編 main_v3.pdf + reproduce gate + Codex re-review。研究誠實：不改數字，只補揭露。"
   }
 ]
