@@ -51680,14 +51680,40 @@
     "title": "eav-universal-magnitude v2 review（body.tex 2026-07-01 已改，last review v1=2026-05-18 過時）",
     "priority": 3,
     "description": "body.tex（1433 行，2026-07-01 修訂）僅有 v1 review（2026-05-18），需跑 v2 review round（codex exec latex-academic-reviewer + citation check，省 token）→ 歸檔 review_history/v2/ + round_readme。屬 C12 batch 延伸（vix-sufficiency v4 已於 2026-07-06 完成）。crypto-fear-channel body_v5 舊於 v5_independent review 無新 revision、btc-gas-negative 無 body .tex 皆非 review-eligible。",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T21:19:47.106824+00:00",
     "tags": [
       "paper_review",
       "eav-universal-magnitude",
       "c12-batch"
     ],
-    "task_type": "paper_review"
+    "task_type": "paper_review",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T22:34:26.289451+00:00",
+    "claim_session_id": "9953f1b80ee6",
+    "status_history": [
+      {
+        "ts": "2026-07-05T22:34:26.289751+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T22:34:26.526925+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T22:41:56.030203+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T22:34:26.526624+00:00",
+    "completed_at": "2026-07-05T22:41:56.029912+00:00",
+    "result": "Archived v2 review to paper/eav-universal-magnitude/review_history/v2/. Verdict: major revision / not submission-ready. Main blockers: PDF placeholders, K1470/Table 1 contradiction, mixed 12/13-market sample provenance, and citation fixes including Patell-Wolfson journal error."
   },
   {
     "id": "trending_repost_2026_07_06_fed利率",
