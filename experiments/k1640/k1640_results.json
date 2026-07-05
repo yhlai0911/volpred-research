@@ -1,0 +1,830 @@
+{
+  "experiment_id": "K1640",
+  "generated_at": "2026-07-05T07:11:27.219894+00:00",
+  "seed": 42,
+  "verdict": "CONDITIONAL_PASS_HALF_TRUE_QUALIFIED",
+  "research_question": "Does SPY entry after VIX first crosses 30 or 40 outperform unconditional random-day entry over 5/10/20/60 trading days?",
+  "data": {
+    "source": "yfinance ^VIX close + SPY adjusted close; K1640 cache copied from K1633 cache when present",
+    "period": "1993-01-29 .. 2026-07-02",
+    "n_trading_days": 8413,
+    "thresholds": [
+      30,
+      40
+    ],
+    "horizons": [
+      5,
+      10,
+      20,
+      60
+    ],
+    "cooldown_trading_days": 20
+  },
+  "literature_checked": [
+    {
+      "citation": "Whaley (2000), The Investor Fear Gauge",
+      "url": "https://pm-research.com/content/iijpormgmt/26/3/12.full.pdf",
+      "note": "VIX as investor fear gauge and market-implied volatility proxy."
+    },
+    {
+      "citation": "Giot (2005), Relationships Between Implied Volatility Indexes and Stock Index Returns",
+      "url": "https://www.pm-research.com/content/iijpormgmt/31/3/92",
+      "note": "Implied volatility indexes and future/spot stock-index return relationship."
+    },
+    {
+      "citation": "Bekaert and Hoerova (2014), The VIX, the Variance Premium and Stock Market Volatility",
+      "url": "https://www.ecb.europa.eu/pub/pdf/scpwps/ecbwp1675.pdf",
+      "note": "VIX reflects physical expected variance plus variance risk premium."
+    }
+  ],
+  "method": {
+    "primary_entry": "signal-day close; forward return uses only SPY[t+H]/SPY[t]-1 after the signal day",
+    "robustness_entry": "lag1 close using explicit signal.shift(1)",
+    "baseline": "every eligible trading day as an entry point, same SPY price series and same horizon",
+    "inference": "HAC/Newey-West fwd_return ~ event_dummy with maxlags=horizon; BH-FDR across 8 lag0 cells",
+    "placebo": "5000 random-entry draws per cell, seed-derived from SEED=42"
+  },
+  "event_counts": {
+    "30": 50,
+    "40": 17
+  },
+  "baseline_win_rates": {
+    "5": 0.58813,
+    "10": 0.618589,
+    "20": 0.653521,
+    "60": 0.718544
+  },
+  "cells": {
+    "thr30_H5_lag0": {
+      "threshold": 30,
+      "horizon": 5,
+      "entry_lag": 0,
+      "n_events": 50,
+      "first_event": "1997-10-27",
+      "last_event": "2026-03-27",
+      "event": {
+        "n": 50,
+        "win_rate": 0.7,
+        "mean": 0.01492232,
+        "median": 0.02357061,
+        "std": 0.03368285,
+        "p5": -0.04180958,
+        "p95": 0.05345249
+      },
+      "baseline": {
+        "n": 8408,
+        "win_rate": 0.58813,
+        "mean": 0.00231752,
+        "median": 0.00375748,
+        "std": 0.0237794,
+        "p5": -0.03632217,
+        "p95": 0.03661397
+      },
+      "excess_mean": 0.0126048,
+      "win_vs_base": 0.11187,
+      "event_window_mdd_mean": -0.02551203,
+      "hac": {
+        "event_vs_non_event_coef": 0.01268021,
+        "hac_t": 2.707987,
+        "hac_p": 0.00676927,
+        "maxlags": 5
+      },
+      "placebo": {
+        "null_mean": 0.0022926,
+        "p_one_sided_event_gt_random": 0.0,
+        "p_two_sided": 0.0002,
+        "null_p95": 0.00787082,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.05415416,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": true
+    },
+    "thr30_H10_lag0": {
+      "threshold": 30,
+      "horizon": 10,
+      "entry_lag": 0,
+      "n_events": 50,
+      "first_event": "1997-10-27",
+      "last_event": "2026-03-27",
+      "event": {
+        "n": 50,
+        "win_rate": 0.64,
+        "mean": 0.01106014,
+        "median": 0.02635168,
+        "std": 0.05355205,
+        "p5": -0.06204687,
+        "p95": 0.08149657
+      },
+      "baseline": {
+        "n": 8403,
+        "win_rate": 0.618589,
+        "mean": 0.00458101,
+        "median": 0.00708835,
+        "std": 0.03188868,
+        "p5": -0.04780433,
+        "p95": 0.04967069
+      },
+      "excess_mean": 0.00647912,
+      "win_vs_base": 0.021411,
+      "event_window_mdd_mean": -0.04420518,
+      "hac": {
+        "event_vs_non_event_coef": 0.00651791,
+        "hac_t": 0.892175,
+        "hac_p": 0.37229918,
+        "maxlags": 10
+      },
+      "placebo": {
+        "null_mean": 0.00453421,
+        "p_one_sided_event_gt_random": 0.0684,
+        "p_two_sided": 0.1416,
+        "null_p95": 0.01172437,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.49639891,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr30_H20_lag0": {
+      "threshold": 30,
+      "horizon": 20,
+      "entry_lag": 0,
+      "n_events": 50,
+      "first_event": "1997-10-27",
+      "last_event": "2026-03-27",
+      "event": {
+        "n": 50,
+        "win_rate": 0.76,
+        "mean": 0.02253664,
+        "median": 0.0357304,
+        "std": 0.05917523,
+        "p5": -0.097504,
+        "p95": 0.09221491
+      },
+      "baseline": {
+        "n": 8393,
+        "win_rate": 0.653521,
+        "mean": 0.00918077,
+        "median": 0.01418412,
+        "std": 0.04432099,
+        "p5": -0.06552997,
+        "p95": 0.06963106
+      },
+      "excess_mean": 0.01335588,
+      "win_vs_base": 0.106479,
+      "event_window_mdd_mean": -0.06194343,
+      "hac": {
+        "event_vs_non_event_coef": 0.01343592,
+        "hac_t": 1.720655,
+        "hac_p": 0.08531347,
+        "maxlags": 20
+      },
+      "placebo": {
+        "null_mean": 0.00927205,
+        "p_one_sided_event_gt_random": 0.0142,
+        "p_two_sided": 0.033,
+        "null_p95": 0.01943071,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.17062694,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr30_H60_lag0": {
+      "threshold": 30,
+      "horizon": 60,
+      "entry_lag": 0,
+      "n_events": 50,
+      "first_event": "1997-10-27",
+      "last_event": "2026-03-27",
+      "event": {
+        "n": 50,
+        "win_rate": 0.74,
+        "mean": 0.05289503,
+        "median": 0.06487632,
+        "std": 0.09101641,
+        "p5": -0.08841312,
+        "p95": 0.18001439
+      },
+      "baseline": {
+        "n": 8353,
+        "win_rate": 0.718544,
+        "mean": 0.0273634,
+        "median": 0.03563205,
+        "std": 0.07291077,
+        "p5": -0.10248319,
+        "p95": 0.12626928
+      },
+      "excess_mean": 0.02553163,
+      "win_vs_base": 0.021456,
+      "event_window_mdd_mean": -0.0925727,
+      "hac": {
+        "event_vs_non_event_coef": 0.02568538,
+        "hac_t": 2.096981,
+        "hac_p": 0.03599524,
+        "maxlags": 60
+      },
+      "placebo": {
+        "null_mean": 0.02767667,
+        "p_one_sided_event_gt_random": 0.0056,
+        "p_two_sided": 0.015,
+        "null_p95": 0.04400358,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.09598731,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": true
+    },
+    "thr40_H5_lag0": {
+      "threshold": 40,
+      "horizon": 5,
+      "entry_lag": 0,
+      "n_events": 17,
+      "first_event": "1998-08-31",
+      "last_event": "2025-04-04",
+      "event": {
+        "n": 17,
+        "win_rate": 0.764706,
+        "mean": 0.01817454,
+        "median": 0.02363829,
+        "std": 0.04745778,
+        "p5": -0.06173265,
+        "p95": 0.07799421
+      },
+      "baseline": {
+        "n": 8408,
+        "win_rate": 0.58813,
+        "mean": 0.00231752,
+        "median": 0.00375748,
+        "std": 0.0237794,
+        "p5": -0.03632217,
+        "p95": 0.03661397
+      },
+      "excess_mean": 0.01585701,
+      "win_vs_base": 0.176576,
+      "event_window_mdd_mean": -0.03764513,
+      "hac": {
+        "event_vs_non_event_coef": 0.01588914,
+        "hac_t": 1.427623,
+        "hac_p": 0.15340046,
+        "maxlags": 5
+      },
+      "placebo": {
+        "null_mean": 0.00234632,
+        "p_one_sided_event_gt_random": 0.003,
+        "p_two_sided": 0.0074,
+        "null_p95": 0.0114399,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.24544074,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr40_H10_lag0": {
+      "threshold": 40,
+      "horizon": 10,
+      "entry_lag": 0,
+      "n_events": 17,
+      "first_event": "1998-08-31",
+      "last_event": "2025-04-04",
+      "event": {
+        "n": 17,
+        "win_rate": 0.647059,
+        "mean": 0.00414416,
+        "median": 0.0170202,
+        "std": 0.05470489,
+        "p5": -0.09022826,
+        "p95": 0.08556197
+      },
+      "baseline": {
+        "n": 8403,
+        "win_rate": 0.618589,
+        "mean": 0.00458101,
+        "median": 0.00708835,
+        "std": 0.03188868,
+        "p5": -0.04780433,
+        "p95": 0.04967069
+      },
+      "excess_mean": -0.00043685,
+      "win_vs_base": 0.02847,
+      "event_window_mdd_mean": -0.07565934,
+      "hac": {
+        "event_vs_non_event_coef": -0.00043774,
+        "hac_t": -0.03448,
+        "hac_p": 0.97249452,
+        "maxlags": 10
+      },
+      "placebo": {
+        "null_mean": 0.00444284,
+        "p_one_sided_event_gt_random": 0.533,
+        "p_two_sided": 0.9672,
+        "null_p95": 0.0164931,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.97249452,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr40_H20_lag0": {
+      "threshold": 40,
+      "horizon": 20,
+      "entry_lag": 0,
+      "n_events": 17,
+      "first_event": "1998-08-31",
+      "last_event": "2025-04-04",
+      "event": {
+        "n": 17,
+        "win_rate": 0.764706,
+        "mean": 0.02549917,
+        "median": 0.04975363,
+        "std": 0.10118638,
+        "p5": -0.16091282,
+        "p95": 0.12431134
+      },
+      "baseline": {
+        "n": 8393,
+        "win_rate": 0.653521,
+        "mean": 0.00918077,
+        "median": 0.01418412,
+        "std": 0.04432099,
+        "p5": -0.06552997,
+        "p95": 0.06963106
+      },
+      "excess_mean": 0.0163184,
+      "win_vs_base": 0.111185,
+      "event_window_mdd_mean": -0.08733103,
+      "hac": {
+        "event_vs_non_event_coef": 0.01635152,
+        "hac_t": 0.699908,
+        "hac_p": 0.48398481,
+        "maxlags": 20
+      },
+      "placebo": {
+        "null_mean": 0.00932034,
+        "p_one_sided_event_gt_random": 0.0568,
+        "p_two_sided": 0.1218,
+        "null_p95": 0.02607553,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.5531255,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr40_H60_lag0": {
+      "threshold": 40,
+      "horizon": 60,
+      "entry_lag": 0,
+      "n_events": 17,
+      "first_event": "1998-08-31",
+      "last_event": "2025-04-04",
+      "event": {
+        "n": 17,
+        "win_rate": 0.882353,
+        "mean": 0.08930069,
+        "median": 0.09238568,
+        "std": 0.11297653,
+        "p5": -0.09526596,
+        "p95": 0.23325898
+      },
+      "baseline": {
+        "n": 8353,
+        "win_rate": 0.718544,
+        "mean": 0.0273634,
+        "median": 0.03563205,
+        "std": 0.07291077,
+        "p5": -0.10248319,
+        "p95": 0.12626928
+      },
+      "excess_mean": 0.06193729,
+      "win_vs_base": 0.163809,
+      "event_window_mdd_mean": -0.11755913,
+      "hac": {
+        "event_vs_non_event_coef": 0.0620636,
+        "hac_t": 2.343239,
+        "hac_p": 0.01911712,
+        "maxlags": 60
+      },
+      "placebo": {
+        "null_mean": 0.02747424,
+        "p_one_sided_event_gt_random": 0.0008,
+        "p_two_sided": 0.0012,
+        "null_p95": 0.05536108,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.07646848,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": true
+    },
+    "thr30_H5_lag1": {
+      "threshold": 30,
+      "horizon": 5,
+      "entry_lag": 1,
+      "n_events": 50,
+      "first_event": "1997-10-28",
+      "last_event": "2026-03-30",
+      "event": {
+        "n": 50,
+        "win_rate": 0.72,
+        "mean": 0.01376571,
+        "median": 0.01906143,
+        "std": 0.03477336,
+        "p5": -0.03398494,
+        "p95": 0.05785329
+      },
+      "baseline": {
+        "n": 8408,
+        "win_rate": 0.58813,
+        "mean": 0.00231752,
+        "median": 0.00375748,
+        "std": 0.0237794,
+        "p5": -0.03632217,
+        "p95": 0.03661397
+      },
+      "excess_mean": 0.01144818,
+      "win_vs_base": 0.13187,
+      "event_window_mdd_mean": -0.02505845,
+      "hac": {
+        "event_vs_non_event_coef": 0.01151667,
+        "hac_t": 2.380462,
+        "hac_p": 0.01729092,
+        "maxlags": 5
+      },
+      "placebo": {
+        "null_mean": 0.00221458,
+        "p_one_sided_event_gt_random": 0.0002,
+        "p_two_sided": 0.001,
+        "null_p95": 0.00760406,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.13832736,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr30_H10_lag1": {
+      "threshold": 30,
+      "horizon": 10,
+      "entry_lag": 1,
+      "n_events": 50,
+      "first_event": "1997-10-28",
+      "last_event": "2026-03-30",
+      "event": {
+        "n": 50,
+        "win_rate": 0.6,
+        "mean": 0.01251173,
+        "median": 0.00983269,
+        "std": 0.04460336,
+        "p5": -0.06052082,
+        "p95": 0.07761733
+      },
+      "baseline": {
+        "n": 8403,
+        "win_rate": 0.618589,
+        "mean": 0.00458101,
+        "median": 0.00708835,
+        "std": 0.03188868,
+        "p5": -0.04780433,
+        "p95": 0.04967069
+      },
+      "excess_mean": 0.00793072,
+      "win_vs_base": -0.018589,
+      "event_window_mdd_mean": -0.04382571,
+      "hac": {
+        "event_vs_non_event_coef": 0.00797819,
+        "hac_t": 1.314584,
+        "hac_p": 0.18864961,
+        "maxlags": 10
+      },
+      "placebo": {
+        "null_mean": 0.00457064,
+        "p_one_sided_event_gt_random": 0.0372,
+        "p_two_sided": 0.0842,
+        "null_p95": 0.011888,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.3519699,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr30_H20_lag1": {
+      "threshold": 30,
+      "horizon": 20,
+      "entry_lag": 1,
+      "n_events": 50,
+      "first_event": "1997-10-28",
+      "last_event": "2026-03-30",
+      "event": {
+        "n": 50,
+        "win_rate": 0.7,
+        "mean": 0.01843073,
+        "median": 0.02974261,
+        "std": 0.05772503,
+        "p5": -0.07551462,
+        "p95": 0.09664614
+      },
+      "baseline": {
+        "n": 8393,
+        "win_rate": 0.653521,
+        "mean": 0.00918077,
+        "median": 0.01418412,
+        "std": 0.04432099,
+        "p5": -0.06552997,
+        "p95": 0.06963106
+      },
+      "excess_mean": 0.00924997,
+      "win_vs_base": 0.046479,
+      "event_window_mdd_mean": -0.06320979,
+      "hac": {
+        "event_vs_non_event_coef": 0.0093054,
+        "hac_t": 1.226578,
+        "hac_p": 0.21998119,
+        "maxlags": 20
+      },
+      "placebo": {
+        "null_mean": 0.00911343,
+        "p_one_sided_event_gt_random": 0.064,
+        "p_two_sided": 0.1388,
+        "null_p95": 0.01916014,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.3519699,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr30_H60_lag1": {
+      "threshold": 30,
+      "horizon": 60,
+      "entry_lag": 1,
+      "n_events": 50,
+      "first_event": "1997-10-28",
+      "last_event": "2026-03-30",
+      "event": {
+        "n": 50,
+        "win_rate": 0.76,
+        "mean": 0.04983644,
+        "median": 0.06220257,
+        "std": 0.09572314,
+        "p5": -0.09975559,
+        "p95": 0.19529089
+      },
+      "baseline": {
+        "n": 8353,
+        "win_rate": 0.718544,
+        "mean": 0.0273634,
+        "median": 0.03563205,
+        "std": 0.07291077,
+        "p5": -0.10248319,
+        "p95": 0.12626928
+      },
+      "excess_mean": 0.02247303,
+      "win_vs_base": 0.041456,
+      "event_window_mdd_mean": -0.09313599,
+      "hac": {
+        "event_vs_non_event_coef": 0.02260836,
+        "hac_t": 1.784927,
+        "hac_p": 0.07427313,
+        "maxlags": 60
+      },
+      "placebo": {
+        "null_mean": 0.027305,
+        "p_one_sided_event_gt_random": 0.0122,
+        "p_two_sided": 0.0276,
+        "null_p95": 0.04430557,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.19806168,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr40_H5_lag1": {
+      "threshold": 40,
+      "horizon": 5,
+      "entry_lag": 1,
+      "n_events": 17,
+      "first_event": "1998-09-01",
+      "last_event": "2025-04-07",
+      "event": {
+        "n": 17,
+        "win_rate": 0.470588,
+        "mean": -0.00167602,
+        "median": -7.173e-05,
+        "std": 0.06573452,
+        "p5": -0.11774577,
+        "p95": 0.08259333
+      },
+      "baseline": {
+        "n": 8408,
+        "win_rate": 0.58813,
+        "mean": 0.00231752,
+        "median": 0.00375748,
+        "std": 0.0237794,
+        "p5": -0.03632217,
+        "p95": 0.03661397
+      },
+      "excess_mean": -0.00399355,
+      "win_vs_base": -0.117542,
+      "event_window_mdd_mean": -0.0460482,
+      "hac": {
+        "event_vs_non_event_coef": -0.00400164,
+        "hac_t": -0.25975,
+        "hac_p": 0.79505642,
+        "maxlags": 5
+      },
+      "placebo": {
+        "null_mean": 0.00230123,
+        "p_one_sided_event_gt_random": 0.765,
+        "p_two_sided": 0.4766,
+        "null_p95": 0.01170747,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.79505642,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr40_H10_lag1": {
+      "threshold": 40,
+      "horizon": 10,
+      "entry_lag": 1,
+      "n_events": 17,
+      "first_event": "1998-09-01",
+      "last_event": "2025-04-07",
+      "event": {
+        "n": 17,
+        "win_rate": 0.588235,
+        "mean": -0.00639866,
+        "median": 0.01911211,
+        "std": 0.08309965,
+        "p5": -0.15612219,
+        "p95": 0.07454787
+      },
+      "baseline": {
+        "n": 8403,
+        "win_rate": 0.618589,
+        "mean": 0.00458101,
+        "median": 0.00708835,
+        "std": 0.03188868,
+        "p5": -0.04780433,
+        "p95": 0.04967069
+      },
+      "excess_mean": -0.01097967,
+      "win_vs_base": -0.030354,
+      "event_window_mdd_mean": -0.07794905,
+      "hac": {
+        "event_vs_non_event_coef": -0.01100193,
+        "hac_t": -0.568882,
+        "hac_p": 0.56943591,
+        "maxlags": 10
+      },
+      "placebo": {
+        "null_mean": 0.00469616,
+        "p_one_sided_event_gt_random": 0.928,
+        "p_two_sided": 0.1402,
+        "null_p95": 0.01663804,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.6507839,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr40_H20_lag1": {
+      "threshold": 40,
+      "horizon": 20,
+      "entry_lag": 1,
+      "n_events": 17,
+      "first_event": "1998-09-01",
+      "last_event": "2025-04-07",
+      "event": {
+        "n": 17,
+        "win_rate": 0.764706,
+        "mean": 0.02983901,
+        "median": 0.03949747,
+        "std": 0.0982182,
+        "p5": -0.15713511,
+        "p95": 0.13890204
+      },
+      "baseline": {
+        "n": 8393,
+        "win_rate": 0.653521,
+        "mean": 0.00918077,
+        "median": 0.01418412,
+        "std": 0.04432099,
+        "p5": -0.06552997,
+        "p95": 0.06963106
+      },
+      "excess_mean": 0.02065824,
+      "win_vs_base": 0.111185,
+      "event_window_mdd_mean": -0.08694314,
+      "hac": {
+        "event_vs_non_event_coef": 0.02070017,
+        "hac_t": 0.914194,
+        "hac_p": 0.36061469,
+        "maxlags": 20
+      },
+      "placebo": {
+        "null_mean": 0.0090832,
+        "p_one_sided_event_gt_random": 0.0226,
+        "p_two_sided": 0.0598,
+        "null_p95": 0.02597237,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.48081959,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    },
+    "thr40_H60_lag1": {
+      "threshold": 40,
+      "horizon": 60,
+      "entry_lag": 1,
+      "n_events": 17,
+      "first_event": "1998-09-01",
+      "last_event": "2025-04-07",
+      "event": {
+        "n": 17,
+        "win_rate": 0.764706,
+        "mean": 0.07772776,
+        "median": 0.10014906,
+        "std": 0.11865894,
+        "p5": -0.1094798,
+        "p95": 0.24275323
+      },
+      "baseline": {
+        "n": 8353,
+        "win_rate": 0.718544,
+        "mean": 0.0273634,
+        "median": 0.03563205,
+        "std": 0.07291077,
+        "p5": -0.10248319,
+        "p95": 0.12626928
+      },
+      "excess_mean": 0.05036436,
+      "win_vs_base": 0.046162,
+      "event_window_mdd_mean": -0.11916819,
+      "hac": {
+        "event_vs_non_event_coef": 0.05046707,
+        "hac_t": 1.820683,
+        "hac_p": 0.06865502,
+        "maxlags": 60
+      },
+      "placebo": {
+        "null_mean": 0.02737233,
+        "p_one_sided_event_gt_random": 0.0014,
+        "p_two_sided": 0.0056,
+        "null_p95": 0.05498195,
+        "reps": 5000
+      },
+      "bh_qvalue": 0.19806168,
+      "bh_fdr_5pct": false,
+      "bh_fdr_10pct": false
+    }
+  },
+  "multiple_testing_lag0": {
+    "method": "Benjamini-Hochberg FDR over 8 lag0 HAC p-values",
+    "n_cells": 8,
+    "n_positive_excess": 7,
+    "raw_5pct_survivors": [
+      "thr30_H5_lag0",
+      "thr30_H60_lag0",
+      "thr40_H60_lag0"
+    ],
+    "bh_fdr_5pct_survivors": [],
+    "bh_fdr_10pct_survivors": [
+      "thr30_H5_lag0",
+      "thr30_H60_lag0",
+      "thr40_H60_lag0"
+    ]
+  },
+  "multiple_testing_lag1": {
+    "method": "Benjamini-Hochberg FDR over 8 lag1 HAC p-values",
+    "n_cells": 8,
+    "n_positive_excess": 6,
+    "raw_5pct_survivors": [
+      "thr30_H5_lag1"
+    ],
+    "bh_fdr_5pct_survivors": [],
+    "bh_fdr_10pct_survivors": []
+  },
+  "h60_pattern": {
+    "30": {
+      "excess_mean": 0.02553163,
+      "hac_p": 0.03599524,
+      "bh_qvalue": 0.09598731
+    },
+    "40": {
+      "excess_mean": 0.06193729,
+      "hac_p": 0.01911712,
+      "bh_qvalue": 0.07646848
+    }
+  },
+  "headline": "Half true: VIX 30/40 entries usually have positive excess returns over random entry, but strict FDR-5% leaves no individual lag0 cell. The durable pattern is H60 slow recovery, not an instant rebound; VIX>40 has only 17 events.",
+  "outputs": {
+    "cell_summary_csv": "/Users/yhlai0911/volpred-research/experiments/k1640/data/k1640_cell_summary.csv",
+    "event_returns_csv": "/Users/yhlai0911/volpred-research/experiments/k1640/data/k1640_event_returns.csv",
+    "fig_excess_returns": "/Users/yhlai0911/volpred-research/experiments/k1640/figures/k1640_excess_returns.png",
+    "fig_winrates": "/Users/yhlai0911/volpred-research/experiments/k1640/figures/k1640_winrates.png"
+  },
+  "limitations": [
+    "Lag0 is an event-study timing convention, not guaranteed same-close executable trading.",
+    "VIX>40 has small sample size (17 accepted events), so single-cell estimates are fragile.",
+    "This is SPY-only and does not model transaction costs, cash yields, taxes, or execution slippage.",
+    "K1640 intentionally focuses on thresholds 30 and 40; K1633 contains the broader 30/35/40 version."
+  ]
+}

@@ -50094,7 +50094,7 @@
     "title": "K1640: 「VIX 破 30/40 是抄底訊號」** 恐慌極值進場後 5/10/20/60 日勝率與報酬分布",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1480). Original: 「VIX 破 30/40 是抄底訊號」** 恐慌極值進場後 5/10/20/60 日勝率與報酬分布\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1640.py with signal.shift(1) + seed=42, (c) K1640_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -50119,9 +50119,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T07:13:41.062878+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-05T07:08:28.742772+00:00"
+    "started_at": "2026-07-05T07:08:28.742772+00:00",
+    "completed_at": "2026-07-05T07:13:41.062617+00:00",
+    "result": "完成 experiments/k1640 三件套、Codex review、CSV/PNG 與 knowledge entry。K1640 對 VIX 破 30/40 做 5/10/20/60 日 SPY panic-entry event study：1993-01-29 至 2026-07-02 共 8,413 交易日；破30事件50次、破40事件17次。結論 verdict=CONDITIONAL_PASS_HALF_TRUE_QUALIFIED：lag0 8格中7格正 excess，FDR 5% 無存活、FDR 10% 存活 thr30_H5/thr30_H60/thr40_H60；H60 excess 破30 +2.55%、破40 +6.19%；lag1 robustness FDR 10% 無存活。"
   },
   {
     "id": "K1641",

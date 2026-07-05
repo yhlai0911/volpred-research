@@ -1489,7 +1489,7 @@ Each cat needs dedicated session work; not iterative one-cycle fixes.
 > **原則**：每題仍走完整研究誠實流程（error_log + 相似 K + ≥3 文獻 + 正式檢定 + Codex review + knowledge.json）；訊號嚴格 shift(1) 避 lookahead；null 如實報告（「破解迷思」本身就是好文章）。避開已做過 NULL 的（K80 VT 季節性、K81 槓桿、K83 stop-loss）。
 > **首批 6 題已入 next_tasks.json（source=telegram_directive_msg154_myth_busting, P2）**：
 - [ ] **「盤整越久噴越兇」** 低波動盤整 regime 後是否真接大波動（契合波動率專長 low-vol→high-vol transition）
-- [ ] **「VIX 破 30/40 是抄底訊號」** 恐慌極值進場後 5/10/20/60 日勝率與報酬分布
+- [x] **「VIX 破 30/40 是抄底訊號」** → **K1640 completed 2026-07-05，CONDITIONAL_PASS_HALF_TRUE_QUALIFIED**：yfinance `^VIX` close + SPY adjusted close，1993-01-29 至 2026-07-02 共 8,413 交易日；VIX 由下往上首次穿越門檻並 20 日去叢集，破 30 有 50 次、破 40 有 17 次。baseline 隨機進場勝率本來就高：H5 58.8%、H60 71.9%。lag0 主結果 8 格中 7 格正 excess，但 FDR 5% 無單格存活；FDR 10% 存活 thr30_H5、thr30_H60、thr40_H60。H60 是較耐久 pattern：破 30 excess +2.55%、破 40 +6.19%；lag1 robustness 更弱，FDR 10% 無存活。結論：迷思半真，恐慌後進場有方向性增量，但不是可強宣稱的立即反彈訊號，且破 40 樣本小。見 `experiments/k1640/`。
 - [x] **「Sell in May and go away」** → **K1634 completed 2026-07-05，NULL / not_supported_recent_15y**：SPY/^TWII yfinance monthly close，2011-07..2026-06 共 180 完整月（Nov-Apr / May-Oct 各 90 月）。Nov-Apr 點估計較高但正式不成立：SPY +1.86% annualized，HAC p=0.776，BH q=0.776；^TWII +12.59%，HAC p=0.169，BH q=0.339；year-block bootstrap CI 皆跨 0。完整 paired seasons n=14，兩市場 winter wins 10/14 但 paired p 仍不顯著。Sell-in-May 現金策略（10bp switch cost）不勝 buy-and-hold：SPY CAGR 7.12% vs 14.24% 且 strategy-minus-BH HAC p=0.0005（反向顯著），^TWII CAGR 8.75% vs 11.80%、Sharpe 0.702 vs 0.745。結論：近 15 年方向性可見，尤其台股，但未過 HAC/FDR gate，不可宣稱迷思成立；可寫 reader-facing「破解迷思」文章。
 - [ ] **「台積電打噴嚏台股重感冒」** 權值集中度 + 2330 單日大跌對大盤傳導量化
 - [ ] **「美股跌台股隔天必補跌」** 隔夜傳導條件機率（延伸 K1626 ADR 隔夜領先基礎）

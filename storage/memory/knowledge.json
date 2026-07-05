@@ -37765,5 +37765,26 @@
       "experiments/k1639/codex_review.md",
       "experiments/k1639/data/k1639_performance_table.csv"
     ]
+  },
+  {
+    "item_id": "k1640_vix_panic_entry_half_true",
+    "category": "myth_busting_event_study",
+    "experiment_id": "k1640",
+    "k_id": "K1640",
+    "experiment_path": "experiments/k1640/",
+    "experiment_file": "experiments/k1640/k1640.py",
+    "results_file": "experiments/k1640/k1640_results.json",
+    "reviewer": "Codex self-review",
+    "codex_review": "experiments/k1640/codex_review.md",
+    "verdict": "CONDITIONAL_PASS",
+    "confidence": 0.8,
+    "created_at": "2026-07-05T07:13:20.927542+00:00",
+    "content": "K1640 completed 2026-07-05. Verdict=CONDITIONAL_PASS_HALF_TRUE_QUALIFIED. The experiment tests whether SPY entry after VIX first crosses 30 or 40 beats unconditional random-day entry over 5/10/20/60 trading days. Data: yfinance ^VIX close + SPY adjusted close, 1993-01-29 to 2026-07-02, 8,413 trading days. Events are first upward crossings de-clustered by 20 trading days: VIX>30 has 50 events, VIX>40 has 17. Baseline win rates are already high because SPY drifts upward: H5 58.8%, H10 61.9%, H20 65.4%, H60 71.9%. Lag0 primary results have positive excess in 7/8 cells; raw 5% survivors are VIX>30/H5, VIX>30/H60, VIX>40/H60, but strict BH-FDR 5% has no individual survivor. FDR 10% keeps those three. H60 is the durable pattern: VIX>30 H60 excess +2.55%, VIX>40 H60 excess +6.19%. Explicit signal.shift(1) robustness is weaker: no FDR 10% survivor. Interpretation: the VIX panic-entry myth is half true. Panic entry has directional incremental return over random entry, but most win-rate comes from unconditional SPY drift; evidence supports slow 60-day recovery more than instant bounce, and VIX>40 has small-sample fragility.",
+    "evidence": [
+      "experiments/k1640/k1640_results.json",
+      "experiments/k1640/README.md",
+      "experiments/k1640/codex_review.md",
+      "experiments/k1640/data/k1640_cell_summary.csv"
+    ]
   }
 ]
