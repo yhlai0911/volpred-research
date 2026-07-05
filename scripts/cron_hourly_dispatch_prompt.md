@@ -90,6 +90,21 @@ PHASE A — 檢查 compute queue 有無 completed 待 followup:
 2. 若有 entries → 優先處理: 對最舊一條讀 result_artifact 路徑 + agent claude_followup.brief 文字，派 Claude interpretation agent 解讀（~25K tokens, light），不再做 compute。派完跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。本小時派工結束。
 3. 若無待 followup → 進 PHASE B。
 
+PHASE B-PARALLEL — 草稿池低水位並行補寫（boss msg143 2026-07-04 硬性要求；2026-07-05 落地）:
+
+**觸發**：`continue_task_dispatch.py --report` 顯示 draft-pool deficit ≥ 2（releasable drafts < floor 且缺口 ≥2）。deficit ≤1 → 跳過本段走一般 PHASE B。
+
+**規則**：**一次補到門檻，不是每小時 1 篇** — 本班 fire 並行派 `min(deficit, 2)` 個 draft-writer subagents（sonnet，per task-routing daily_article 並行上限 =2），與 PHASE B 一般派工共用 total slot cap=4。
+
+**並行安全設計（必守）**：
+- 每個 writer **只寫 `storage/drafts/<kid>_<audience>_draft.md` + 圖表 assets，禁碰 feed.json / supabase**（feed 寫入無 per-writer lock，並行直發會 race）。
+- 主線程（你）在所有 writers 完成後**串行**跑 `uv run python scripts/publish_draft.py`（發佈本身數秒，串行無瓶頸；每篇過既有 gates：anti-ai / arc-dedup / depth / lazypack async enqueue）。
+- 選題：主線程先做 3-layer 查重 + narrative-arc 檢查（per publishing.md），給每個 writer **不同主題軸**（跨 cluster），brief 寫死「不要做以下變奏：[list]」。
+- 每 writer brief 含 reader-facing 3 canonical paths + evidence-package 先於 prose（同 PHASE B 6(a)(b) 規則）。
+- 全部完成後在 work_log 記 N 筆（每篇一筆），PHASE Z 一次 commit。
+
+**Why**：refill 機制會把 deficit 個 daily_article **任務**一次補進 pool，但舊節奏每班只消化 1 篇 → 池低時要 deficit 個小時才回滿，期間 release 節奏斷檔（boss 多次點名）。寫作（20-40min）並行、發佈（秒級）串行 = 吞吐 ×N 而 feed 寫入仍單線程。
+
 PHASE B — 派新工:
 
 1. 跑 `uv run python scripts/continue_task_dispatch.py --report` 看 dispatch state + agentable candidates。

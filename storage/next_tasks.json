@@ -48986,10 +48986,29 @@
     "task_type": "platform_ops",
     "priority": "P1",
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-04T13:27:45.877580+00:00",
     "title": "草稿池補救改並行多寫（池低時一次補到門檻，非每小時1篇）",
-    "description": "老闆 Telegram msg 143 動怒:「寫文章不能多寫一點嗎? 只能夠補一篇到草稿池嗎?」。現況機制: draft feed 池靠 daily_article writer 產出, 但 hourly dispatch 每小時只派 1 個 writer (feedback_one_dispatch_per_hour) -> 池 <4 時每小時只增 1 篇, 與 feedback_pool_fill_to_threshold (池低要並行派 floor-current 個 agent 補到滿) 衝突。要做: (1) draft_pool_low breach 時, 補救改成一次並行 dispatch (alert_floor - draft_count) 個 daily_article writer 把 draft 池一次補到門檻, 而非等 hourly 一小時一篇; (2) 各並行 writer 主題軸互不重複 (3-layer dedup + narrative-arc 飽和檢查, 見 feedback_dedup_3_layers_mainthread / feedback_refill_check_saturation_and_running_hourly); (3) 尊重 token budget 與 heavy compute 走 compute_queue; (4) 評估每篇長度是否可再厚 (老闆也嫌「多寫一點」= 篇幅/篇數都要). 驗收: 池 <4 時單一 remediation 週期把 draft 補到 >=4, 非 1/hour。"
+    "description": "老闆 Telegram msg 143 動怒:「寫文章不能多寫一點嗎? 只能夠補一篇到草稿池嗎?」。現況機制: draft feed 池靠 daily_article writer 產出, 但 hourly dispatch 每小時只派 1 個 writer (feedback_one_dispatch_per_hour) -> 池 <4 時每小時只增 1 篇, 與 feedback_pool_fill_to_threshold (池低要並行派 floor-current 個 agent 補到滿) 衝突。要做: (1) draft_pool_low breach 時, 補救改成一次並行 dispatch (alert_floor - draft_count) 個 daily_article writer 把 draft 池一次補到門檻, 而非等 hourly 一小時一篇; (2) 各並行 writer 主題軸互不重複 (3-layer dedup + narrative-arc 飽和檢查, 見 feedback_dedup_3_layers_mainthread / feedback_refill_check_saturation_and_running_hourly); (3) 尊重 token budget 與 heavy compute 走 compute_queue; (4) 評估每篇長度是否可再厚 (老闆也嫌「多寫一點」= 篇幅/篇數都要). 驗收: 池 <4 時單一 remediation 週期把 draft 補到 >=4, 非 1/hour。",
+    "claimed_by": "interactive-main",
+    "claimed_at": "2026-07-05T08:41:59.194734+00:00",
+    "claim_session_id": "014c2390398f",
+    "status_history": [
+      {
+        "ts": "2026-07-05T08:41:59.195028+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-main"
+      },
+      {
+        "ts": "2026-07-05T08:41:59.441164+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "interactive-main"
+      }
+    ],
+    "completed_at": "2026-07-05T08:41:59.440714+00:00",
+    "result": "PHASE B-PARALLEL 落地於 scripts/cron_hourly_dispatch_prompt.md：deficit>=2 時並行派 min(deficit,2) 個 draft-writer（sonnet），writers 只寫 storage/drafts/ 檔、主線程串行 publish_draft.py 發佈（feed 單線程無 race）。搭配既有 refill（任務端已一次補 deficit）。memory feedback_one_dispatch_per_hour 已記例外。下一班 deficit>=2 時生效。"
   },
   {
     "id": "telegram-149",
