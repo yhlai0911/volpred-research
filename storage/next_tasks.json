@@ -50145,5 +50145,46 @@
     "started_at": "2026-07-05T01:10:39.686911+00:00",
     "completed_at": "2026-07-05T01:37:36.436483+00:00",
     "result": "K1633 VIX破30抄底迷思 reader-facing 文章發佈 draft=mile_4d67163f（33年SPY、verdict=half_true_qualified、3真圖、anti_ai_gate PASS、arc-dedup PASS）；lazypack async render 已 enqueue；順帶修 publish_throttle draft 雙重 gating flow bug（+3 tests，24 passed）"
-  }
-]
+  },
+  {
+    "id": "paper2_taiwan_vt_concentration_gamma_refit",
+    "title": "taiwan-vt §sec:tsmc concentration γ 可溯化 + 清除 stale 2383 blocker",
+    "priority": 2,
+    "description": "paper/taiwan-vt (body_v3.tex active 投稿版) revision blocker 收斂。驗證結論：(1) blocker『2383.TW in Table 2 not in data description』= STALE — 2383.TW 已在 §2.1 data description line 35，且 tab:gamma 不含 2383 個股列（僅 body.tex 長版 line 156 有）。(2) blocker『0050 gamma 3-way』縮成殘留：body_v3.tex 全站 canonical 0.097 已一致（D3 errata），但 §sec:tsmc line 457 的 (0050 γ=0.124,t=2.46)、(TSMC γ=0.054,t=1.07) 不可溯 — 0.124 巧合等於 K900 amplification.gamma_0050.median_gamma=0.1248（rolling252d，真 hac_t=19.857），t=2.46/1.07 無任何 results JSON 來源（paper2_sec45_tsmc_vt 未存 γ）。誠實解法：GJR-GARCH(1,1) Normal Constant-mean MLE（K892 canonical spec）重估 0050.TW+2330.TW 於 concentration 窗，產 coherent (γ,t) → 改 line 457 為可溯值+source comment → 更新 footnote → xelatex 重編 → 更新 pipeline tracker。重估已 enqueue compute_queue（GARCH MLE 依 hourly 硬規則走 async），下班 interpretation agent 接手改 body。",
+    "status": "succeeded",
+    "task_type": "paper_body",
+    "dispatch_lane": "main_thread",
+    "source": "hourly_dispatch_self_generated",
+    "tags": [
+      "paper_body",
+      "taiwan-vt",
+      "provenance",
+      "research-honesty"
+    ],
+    "created_at": "2026-07-05T10:00:00Z",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-07-05T02:19:17.946276+00:00",
+    "claim_session_id": "1cff01b27ec4",
+    "status_history": [
+      {
+        "ts": "2026-07-05T02:19:17.946581+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-10"
+      },
+      {
+        "ts": "2026-07-05T02:19:18.200102+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-10"
+      },
+      {
+        "ts": "2026-07-05T02:23:24.096802+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-10"
+      }
+    ],
+    "started_at": "2026-07-05T02:19:18.199826+00:00",
+    "completed_at": "2026-07-05T02:23:24.096506+00:00",
+    "result": 

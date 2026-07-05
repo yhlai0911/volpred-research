@@ -1,0 +1,23 @@
+{
+  "id": "paper2_sec45_gamma_refit",
+  "title": "taiwan-vt sec:tsmc concentration gamma 可溯化重估 (0050/TSMC GJR MLE)",
+  "script_path": "experiments/paper2_sec45_gamma_refit/refit_concentration_gamma.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-05T02:22:09Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/paper2_sec45_gamma_refit.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/paper2_sec45_gamma_refit.stderr",
+  "result_artifact": "experiments/paper2_sec45_gamma_refit/refit_concentration_gamma_results.json",
+  "claude_followup": {
+    "brief": "讀 refit_concentration_gamma_results.json：挑與 sec:tsmc『sub-period concentration』意圖一致且 converged 的窗，取 coherent (gamma,t) 取代 body_v3.tex:457 目前不可溯的 (0050 0.124/2.46)+(TSMC 0.054/1.07)。改前先 Codex 審腳本+數字(boss 硬規則:paper review 走 codex exec)。改 body_v3.tex line 457 數值+footnote 加 % source 註解指向本實驗，xelatex 重編 main_v3.tex 驗無 undefined ref，更新 paper_pipeline_status blocker。研究誠實:若重估 t 使『TSMC 子期不顯著』narrative 需調整就如實改敘事(qualitative 主張 index>constituent 由 Table2 full-sample 也成立)。勿捏造。",
+    "task_type": "paper_body",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 1800
+}

@@ -261,8 +261,10 @@
       "stage": "revision",
       "stage_entered_at": "2026-07-01T00:00:00+08:00",
       "last_advance_at": "2026-07-01T00:00:00+08:00",
-      "blocker": "2 HIGH: 0050.TW gamma 3-way inconsistency; 2383.TW in Table 2 not in data description",
-      "owner_decision_pending": false
+      "blocker": "1 residual HIGH (re-fit enqueued): sec:tsmc line457 concentration (gamma,t) untraceable — 0050 (0.124/2.46) & TSMC (0.054/1.07) have no source JSON [0.124=K900 rolling-252d median but its true hac_t=19.857; t=2.46/1.07 unsaved]. compute_queue paper2_sec45_gamma_refit re-estimates coherent GJR (K892 spec) -> followup paper_body edits line457+footnote w/ %source, Codex-reviewed. CLEARED (stale): '2383 in Table2 not in data desc' -> body_v3.tex active submission version lists 2383.TW in data desc (line35) and tab:gamma has no 2383 row (that finding was against deprecated long body.tex). Canonical 0050 gamma=0.097 now consistent across abstract/Table1/Table2/§3 (D3 errata applied).",
+      "owner_decision_pending": false,
+      "blocker_verified_at": "2026-07-05T10:00:00+08:00",
+      "blocker_verified_by": "hourly-10 (main-thread provenance walk)"
     },
     {
       "paper": "vix-sufficiency",
@@ -385,5 +387,5 @@
       }
     ]
   },
-  "last_update": "2026-07-02T12:47:33+08:00"
+  "last_update": "2026-07-05T10:00:00+08:00"
 }
