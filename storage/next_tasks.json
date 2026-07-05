@@ -50094,7 +50094,7 @@
     "title": "K1640: 「VIX 破 30/40 是抄底訊號」** 恐慌極值進場後 5/10/20/60 日勝率與報酬分布",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1480). Original: 「VIX 破 30/40 是抄底訊號」** 恐慌極值進場後 5/10/20/60 日勝率與報酬分布\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1640.py with signal.shift(1) + seed=42, (c) K1640_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -50103,7 +50103,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-05T00:00:00Z"
+    "created_at": "2026-07-05T00:00:00Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T07:08:28.507235+00:00",
+    "claim_session_id": "3c0d535b7052",
+    "status_history": [
+      {
+        "ts": "2026-07-05T07:08:28.507509+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T07:08:28.743060+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T07:08:28.742772+00:00"
   },
   {
     "id": "K1641",
