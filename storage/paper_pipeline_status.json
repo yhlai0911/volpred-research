@@ -261,7 +261,7 @@
       "stage": "revision",
       "stage_entered_at": "2026-07-01T00:00:00+08:00",
       "last_advance_at": "2026-07-01T00:00:00+08:00",
-      "blocker": "1 residual HIGH (re-fit enqueued): sec:tsmc line457 concentration (gamma,t) untraceable — 0050 (0.124/2.46) & TSMC (0.054/1.07) have no source JSON [0.124=K900 rolling-252d median but its true hac_t=19.857; t=2.46/1.07 unsaved]. compute_queue paper2_sec45_gamma_refit re-estimates coherent GJR (K892 spec) -> followup paper_body edits line457+footnote w/ %source, Codex-reviewed. CLEARED (stale): '2383 in Table2 not in data desc' -> body_v3.tex active submission version lists 2383.TW in data desc (line35) and tab:gamma has no 2383 row (that finding was against deprecated long body.tex). Canonical 0050 gamma=0.097 now consistent across abstract/Table1/Table2/§3 (D3 errata applied).",
+      "blocker": "sec:tsmc line457 concentration (gamma,t) provenance RESOLVED 2026-07-05 (hourly-16): body_v3.tex now cites tab:gamma canonical 0050 0.097/3.60 + TSMC 0.052/3.98 (both sig) w/ %source; refit paper2_sec45_gamma_refit common_vt (0.155/0.044, 2020-2026, insig) in footnote as ordering robustness; Codex CONDITIONAL_PASS->fixed SE-wording; main_v3.pdf recompiled 48pp clean. NEW residual (see task paper2_taiwan_vt_body_main_version_divergence, P2): body.tex(main.tex) vs body_v3.tex(main_v3.tex) diverge — Table TSMC gamma 0.039/0.87 (body) vs 0.052/3.98 (body_v3), significance OPPOSITE; body.tex:683 still holds old untraceable 0.124/2.46. Need canonical-version decision + reconcile before paper-update/sync.",
       "owner_decision_pending": false,
       "blocker_verified_at": "2026-07-05T10:00:00+08:00",
       "blocker_verified_by": "hourly-10 (main-thread provenance walk)"

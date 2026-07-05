@@ -50320,5 +50320,16 @@
     "created_at": "2026-07-05T10:00:00Z",
     "result": "Blocker provenance walk: 2383 blocker CLEARED (stale); 0050-gamma reduced to 1 residual HIGH (line457 untraceable) -> enqueued paper2_sec45_gamma_refit GJR re-fit + paper_body followup; tracker + review note updated.",
     "completed_at": "2026-07-05T10:05:00Z"
+  },
+  {
+    "id": "paper2_taiwan_vt_body_main_version_divergence",
+    "task_type": "paper_decision",
+    "priority": "P2",
+    "status": "pending",
+    "title": "[paper_decision] taiwan-vt body.tex vs body_v3.tex + main.tex vs main_v3.tex 版本分岔 reconcile",
+    "description": "2026-07-05 hourly-16 修 sec:tsmc gamma provenance 時發現的結構性版本分岔（需主線程 paper_decision，勿丟 background agent 改 .tex）：\n\n1. main.tex \\input{body}（body.tex），main_v3.tex \\input{body_v3}（body_v3.tex）— 兩個 main 各自指向不同 body。\n2. Table gamma TSMC(2330) 全樣本值兩版不一致：\n   - body_v3.tex:151 → gamma=0.052, t=3.98（source: K892 canonical, N=6525）\n   - body.tex:152    → gamma=0.039, t=0.87（source: paper/taiwan-vt/data/tsmc_canonical.json）\n   顯著性結論相反（3.98 顯著 vs 0.87 不顯著）。\n3. body.tex:683 仍保有本次已在 body_v3 修掉的無來源數字（0.124/2.46 + 0.054/1.07 insignificant）。\n\n決策項：(a) 確認哪個 main/body 是投稿 canonical（pipeline_status 追 body_v3/K892 spec，但 paper-guide 列 main.tex；查 paper-update CLI 實際同步哪個 → 對齊 docs/paper-guide.md + 消除另一版或標 _archived）；(b) TSMC 全樣本 gamma 用哪個 canonical source（K892 0.052/3.98 vs data/tsmc_canonical.json 0.039/0.87）— 追兩者 spec/window 差異，擇一為準並全文一致；(c) 收斂後 body.tex:683 同步修（若 body.tex 保留為 canonical）或廢棄。\n\n研究誠實：兩版 TSMC 顯著性相反是投稿風險，reviewer 會抓。不可放著。\n驗證：reconcile 後 grep 全文 TSMC gamma 一致 + reproduce gate + Codex review。",
+    "source": "agent_discovered",
+    "created_at": "2026-07-05T08:19:31.684424+00:00",
+    "discovered_during": "paper2_sec45_gamma_refit followup (hourly-16 2026-07-05)"
   }
 ]
