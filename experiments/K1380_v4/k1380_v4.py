@@ -65,6 +65,10 @@ print("\n[1] Loading snapshot CSV...")
 df_raw = pd.read_csv(SNAPSHOT_CSV, parse_dates=['date'], index_col='date')
 df_raw.index = pd.to_datetime(df_raw.index)
 df_raw = df_raw.sort_index()
+duplicate_date_rows = int(df_raw.index.duplicated(keep='last').sum())
+if duplicate_date_rows:
+    print(f"  WARNING: dropped {duplicate_date_rows} duplicate date rows from snapshot (kept last)")
+    df_raw = df_raw[~df_raw.index.duplicated(keep='last')]
 
 prices = df_raw['spy_close'].dropna()
 log_ret = np.log(prices / prices.shift(1))
@@ -644,8 +648,8 @@ print("\n[3] Computing QLIKE losses...")
 r2_oos = r2[oos_indices]
 
 def qlike(sigma2_hat, rv_proxy):
-    """Patton (2011) proxy-robust QLIKE: σ̂²/r² - log(σ̂²/r²) - 1."""
-    ratio = np.maximum(sigma2_hat, 1e-16) / np.maximum(rv_proxy, 1e-16)
+    """Patton (2011) proxy-robust QLIKE: r²/σ̂² - log(r²/σ̂²) - 1."""
+    ratio = np.maximum(rv_proxy, 1e-16) / np.maximum(sigma2_hat, 1e-16)
     return ratio - np.log(ratio) - 1.0
 
 qlike_matrix = np.full((17, n_oos), np.nan)
@@ -823,6 +827,8 @@ results = {
         "bootstrap_seed": BOOTSTRAP_SEED,
         "harvey_threshold": HARVEY_THRESHOLD,
         "qlike_proxy": "r_squared (Patton 2011 proxy-robust)",
+        "qlike_formula": "actual_r2 / forecast_variance - log(actual_r2 / forecast_variance) - 1",
+        "duplicate_snapshot_rows_dropped": duplicate_date_rows,
         "coverage_threshold": COV_THRESHOLD,
         "n_eligible_specs": len(eligible_non_bm),
         "eligible_specs": eligible_non_bm,
@@ -841,7 +847,7 @@ results = {
     },
     "per_model_coverage": {sn: {"n_valid": int(per_model_valid[sn].sum()),
                                  "coverage": round(per_model_coverage[sn], 4),
-                                 "eligible": per_model_coverage[sn] >= COV_THRESHOLD}
+                                 "eligible": bool(per_model_coverage[sn] >= COV_THRESHOLD)}
                            for sn in SPEC_LABELS},
     "mean_qlike_ranking": [
         {"rank": r+1, "spec": sn, "mean_qlike": float(ql)}
@@ -888,8 +894,13 @@ results = {
 }
 
 out_path = os.path.join(SCRIPT_DIR, 'k1380_v4_results.json')
-with open(out_path, 'w') as f:
+tmp_path = f"{out_path}.tmp"
+with open(tmp_path, 'w') as f:
     json.dump(results, f, indent=2)
+    f.write("\n")
+with open(tmp_path) as f:
+    json.load(f)
+os.replace(tmp_path, out_path)
 print(f"\n[5] Results saved to {out_path}")
 print(f"    Loss matrix saved to k1380_v4_losses_all.npy")
 print(f"\nTotal elapsed: {elapsed:.0f}s")

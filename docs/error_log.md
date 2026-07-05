@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-05 K1380_v4 results.json 截斷、snapshot 重複日期與本地 QLIKE 方向不一致 — **FIXED**
+
+**現象**：`experiments/K1380_v4/k1380_v4_results.json` 因 agent 中途死亡留下截斷 JSON（`jq` EOF around line 51），Paper 9 C3 的 SPA/RC 實驗無法被可靠讀取。重新跑時又先撞到 `paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv` 有 2026-05-04 至 2026-05-15 的重複日期列，造成 `reindex` 失敗。審查時同時發現 K1380_v4 本地 `qlike()` 用 `forecast_variance / actual_r2`，與專案 canonical Patton QLIKE `actual_r2 / forecast_variance - log(...) - 1` 方向相反。
+
+**根因**：(1) 實驗 results 檔直接 `open(..., "w")` 後 `json.dump`，沒有 tmp + parse validation + atomic replace，中斷即會留下 partial JSON；(2) snapshot CSV 允許日期重複但 load path 未檢查 index uniqueness；(3) K1380_v4 複製了一份局部 QLIKE helper，未共用或比對 `src/volpred/stats/model_evaluation.py` 的 canonical 定義。
+
+**解決**：K1380_v4 改為先寫 `k1380_v4_results.json.tmp`、`json.load` 驗證、再 `os.replace` 原子替換 final；load snapshot 後檢查重複日期並保留最後一列，同時把 dropped row 數寫進 metadata；QLIKE 修成 canonical `actual_r2 / forecast_variance - log(actual_r2 / forecast_variance) - 1` 並寫入 metadata。`.claude/skills/autonomous-research/references/experiment-preamble.md` 新增 results JSON atomic-write 強制規則。fresh rerun 完成：drop duplicate rows=10、`n_valid_spa=1879`、eligible specs=15、Hansen SPA p=0.2886、A4f White RC p=0.0000，verdict 仍為 `C3 MIXED`。
+
+**教訓**：(1) 實驗 results JSON 也屬研究證據，必須採 tmp + validation + atomic replace；(2) 長期 snapshot 合併後必查日期唯一性，否則重複列會在 rerun/reindex 時變成非決定性 blocker；(3) loss function 不應在單一實驗中手抄一份無檢查的方向，特別是 QLIKE 這類方向反了仍會產生看似合理 ranking 的指標。
+
 ## 2026-07-05 16:40 週額度耗盡 5 小時（11:07-16:00）— loop 自我恢復正常，但暴露 4 個結構缺口 — **FIXED（quota class + 3 個 cutover 殘留全修）**
 
 **現象**：Claude Code 週額度 11:07 耗盡（resets 4pm），5 班 hourly fire × 3 attempts = 15 連敗（「You've hit your weekly limit」無對應分類 → hard_failure → 白燒 opus→opus→sonnet ladder + 5 封 critical email）。16:00 重置後 16:07 班**自動復工**（real-run supervisor 如設計自我恢復）；發文 release_pool 不吃額度照常，無脫班；Telegram/Gmail 零積壓；codex-loop 中斷期間照常產出 K1637-K1640。

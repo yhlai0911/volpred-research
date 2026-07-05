@@ -51,6 +51,25 @@ Column k = lag k+1: `tr_lv[K-1-k : ntr-1-k]`. No wrapping, correct `ntr-K` rows.
 - `≥ 12/17 models with coverage ≥ 95%`
 - Script completes without `n_valid=0` error
 
+## 2026-07-05 rerun
+
+Task `experiment_k1380v4_rerun_atomic_results_c5` reran v4 after fixing the
+truncated-results failure mode:
+
+- Results JSON now writes to `k1380_v4_results.json.tmp`, validates with
+  `json.load`, then atomically replaces the final file with `os.replace`.
+- Snapshot duplicate dates are de-duplicated at load time (`10` duplicate rows
+  dropped, keep last).
+- QLIKE direction now matches the project canonical Patton form:
+  `actual_r2 / forecast_variance - log(actual_r2 / forecast_variance) - 1`.
+- Fresh rerun completed in `934.5s`; `n_valid_spa=1879`, `15` non-benchmark
+  specs met the 95% coverage threshold; C1 remained ineligible at 0% coverage.
+- Hansen SPA: `p=0.2886`, so the joint data-snooping null is not rejected.
+- A4f White RC: `t=4.1335`, `p=0.0000`, so A4f beats GJR in the targeted RC
+  comparison.
+- Verdict remains `C3 MIXED`: the paper needs nuanced data-snooping discussion,
+  not a blanket claim that the full 17-spec horse race survives SPA.
+
 ## Output
 
 - `k1380_v4_results.json` — SPA/RC test results + per-model coverage

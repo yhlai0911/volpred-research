@@ -73,6 +73,7 @@
 - **Student-t**：考慮 scale term sqrt((df-2)/df)
 - **Basel/統計檢定**：用標準實作，不自定義閾值
 - **TAIFEX 期貨轉倉**：不要直接用 TX1（近月），要用 **TX（全合約）數據，每日按成交量選最活躍的合約月份**。結算日（每月第三個週三）TX1 自動切換合約月份會有 roll gap（~0.5-1.0%）。正確做法：讀 TX 檔案 → 按「到期月份」分組計算成交量 → 選當日成交量最大的合約 → 只用該合約的 tick 計算 return/RV。這樣在流動性自然轉移時平滑切換，不會有假波動
+- **Results JSON 寫入**：結果檔必須先寫到同目錄暫存檔、`json.load` 驗證可解析，再用 `os.replace(tmp, final)` 原子替換；禁止直接 `open(results.json, "w")` 後 `json.dump`，避免 agent 中途死亡留下截斷 JSON。
 
 ## 5. 結果自我質疑（實驗完成後必做）
 

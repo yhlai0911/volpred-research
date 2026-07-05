@@ -50506,7 +50506,7 @@
     "id": "experiment_k1380v4_rerun_atomic_results_c5",
     "task_type": "experiment",
     "priority": 2,
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C5: K1380_v4 重跑（Paper 9 C3 SPA/RC test）+ 實驗 results 原子寫入",
@@ -50520,8 +50520,23 @@
         "from": "pending",
         "to": "claimed",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T09:24:47.381456+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T10:01:03.473182+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
-    ]
+    ],
+    "started_at": "2026-07-05T09:24:47.381132+00:00",
+    "completed_at": "2026-07-05T10:01:03.472892+00:00",
+    "result": "K1380_v4 rerun completed; results JSON atomic write added; duplicate snapshot dates deduped; QLIKE canonicalized; JSON valid; SPA p=0.2886; A4f RC p=0.0000; verdict C3 MIXED."
   },
   {
     "id": "platform_ops_daily_update_sync_calendar_aware_c6",

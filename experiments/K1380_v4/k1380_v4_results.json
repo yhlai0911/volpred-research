@@ -10,6 +10,8 @@
     "bootstrap_seed": 42,
     "harvey_threshold": 3.0,
     "qlike_proxy": "r_squared (Patton 2011 proxy-robust)",
+    "qlike_formula": "actual_r2 / forecast_variance - log(actual_r2 / forecast_variance) - 1",
+    "duplicate_snapshot_rows_dropped": 10,
     "coverage_threshold": 0.95,
     "n_eligible_specs": 15,
     "eligible_specs": [
@@ -32,9 +34,9 @@
     "ineligible_specs": [
       "C1"
     ],
-    "n_valid_spa": 1854,
-    "elapsed_seconds": 949.6,
-    "timestamp": "2026-05-22T06:45:56.567003+00:00",
+    "n_valid_spa": 1879,
+    "elapsed_seconds": 934.5,
+    "timestamp": "2026-07-05T09:58:26.922887+00:00",
     "lookahead_free": "signal.shift(1): vix[abs_idx-1] for t-1 VIX lag",
     "c3_critical_addressed": true,
     "v4_fixes": [
@@ -46,6 +48,298 @@
   },
   "per_model_coverage": {
     "A1": {
-      "n_valid": 1854,
-      "coverage": 0.9936,
-      "eligible": 
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "A2": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "A3": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "A4": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "A5": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "A2f": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "A4f": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "A3f": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "A2n": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "A4n": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "B1": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "B2": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "B3": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "C1": {
+      "n_valid": 0,
+      "coverage": 0.0,
+      "eligible": false
+    },
+    "C2": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "C3": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    },
+    "B0": {
+      "n_valid": 1879,
+      "coverage": 0.9989,
+      "eligible": true
+    }
+  },
+  "mean_qlike_ranking": [
+    {
+      "rank": 1,
+      "spec": "A4f",
+      "mean_qlike": 1.400742651220228
+    },
+    {
+      "rank": 2,
+      "spec": "A4",
+      "mean_qlike": 1.402380092145802
+    },
+    {
+      "rank": 3,
+      "spec": "A4n",
+      "mean_qlike": 1.402380092145802
+    },
+    {
+      "rank": 4,
+      "spec": "A2",
+      "mean_qlike": 1.4100358605324808
+    },
+    {
+      "rank": 5,
+      "spec": "A2n",
+      "mean_qlike": 1.4100358605324808
+    },
+    {
+      "rank": 6,
+      "spec": "A1",
+      "mean_qlike": 1.4124864675089948
+    },
+    {
+      "rank": 7,
+      "spec": "A3",
+      "mean_qlike": 1.4124864675089948
+    },
+    {
+      "rank": 8,
+      "spec": "A2f",
+      "mean_qlike": 1.419897459823416
+    },
+    {
+      "rank": 9,
+      "spec": "B1",
+      "mean_qlike": 1.4244408056937412
+    },
+    {
+      "rank": 10,
+      "spec": "A3f",
+      "mean_qlike": 1.426068987172809
+    },
+    {
+      "rank": 11,
+      "spec": "B3",
+      "mean_qlike": 1.4344615973830803
+    },
+    {
+      "rank": 12,
+      "spec": "B2",
+      "mean_qlike": 1.4607308954990694
+    },
+    {
+      "rank": 13,
+      "spec": "B0",
+      "mean_qlike": 1.4868685281055762
+    },
+    {
+      "rank": 14,
+      "spec": "A5",
+      "mean_qlike": 2.1440331559534704
+    },
+    {
+      "rank": 15,
+      "spec": "C1",
+      "mean_qlike": NaN
+    },
+    {
+      "rank": 16,
+      "spec": "C3",
+      "mean_qlike": 1.9684178424002818
+    },
+    {
+      "rank": 17,
+      "spec": "C2",
+      "mean_qlike": 2.3917803830860462
+    }
+  ],
+  "hansen_spa_test": {
+    "stat": 4.204654737813586,
+    "pval": 0.28857715430861725,
+    "reject_h0_p10": false,
+    "n_specs_tested": 15,
+    "interpretation": "Cannot reject H0: no eligible model significantly beats GJR (SPA p=0.289)",
+    "superior_set_nominal": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A2f",
+      "A4f",
+      "A3f",
+      "A2n",
+      "A4n",
+      "B1",
+      "B2",
+      "B3"
+    ]
+  },
+  "white_rc_test": {
+    "spec": "A4f",
+    "eligible": true,
+    "t_stat": 4.1334667187930885,
+    "pval": 0.0,
+    "reject_h0_p10": true,
+    "interpretation": "A4f significantly beats GJR after RC correction (p=0.000)"
+  },
+  "individual_dm_stats": {
+    "A1": {
+      "t_stat": 3.126631716534911,
+      "d_bar": 0.07438206059658156,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "A2": {
+      "t_stat": 3.28170901162484,
+      "d_bar": 0.0768326675730953,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "A3": {
+      "t_stat": 3.126631716534911,
+      "d_bar": 0.07438206059658156,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "A4": {
+      "t_stat": 4.041648788367642,
+      "d_bar": 0.08448843595977416,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "A5": {
+      "t_stat": -11.20900929230887,
+      "d_bar": -0.6571646278478944,
+      "harvey_pass": false,
+      "included_in_spa": true
+    },
+    "A2f": {
+      "t_stat": 3.0634940289277237,
+      "d_bar": 0.06697106828216035,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "A4f": {
+      "t_stat": 4.1334667187930885,
+      "d_bar": 0.0861258768853484,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "A3f": {
+      "t_stat": 3.303230399388028,
+      "d_bar": 0.060799540932767224,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "A2n": {
+      "t_stat": 3.28170901162484,
+      "d_bar": 0.0768326675730953,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "A4n": {
+      "t_stat": 4.041648788367642,
+      "d_bar": 0.08448843595977416,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "B1": {
+      "t_stat": 4.204654737813586,
+      "d_bar": 0.06242772241183504,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "B2": {
+      "t_stat": 1.3886952615606116,
+      "d_bar": 0.02613763260650694,
+      "harvey_pass": false,
+      "included_in_spa": true
+    },
+    "B3": {
+      "t_stat": 3.771057291507994,
+      "d_bar": 0.05240693072249591,
+      "harvey_pass": true,
+      "included_in_spa": true
+    },
+    "C2": {
+      "t_stat": -21.06651358551618,
+      "d_bar": -0.9049118549804696,
+      "harvey_pass": false,
+      "included_in_spa": true
+    },
+    "C3": {
+      "t_stat": -9.963159160313067,
+      "d_bar": -0.48154931429470554,
+      "harvey_pass": false,
+      "included_in_spa": true
+    }
+  },
+  "c3_verdict": "C3 MIXED: SPA/RC results require nuanced discussion of data snooping in paper body"
+}
