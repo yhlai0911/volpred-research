@@ -51032,11 +51032,37 @@
     "id": "platform_ops_daily_update_sync_calendar_aware_c6",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C6: daily_update sync-health 改 calendar-aware（消『2 tables drifted』假日噪音）",
-    "description": "daily_update.py 的 sync-health 比對改 calendar-aware：remote 領先 local ≤1 日曆日或落在 exchange holiday/週末邊界不記 drift；只在 remote 落後或缺 row 時 warn。順手統一 local/remote trade_date accessor 口徑。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "daily_update.py 的 sync-health 比對改 calendar-aware：remote 領先 local ≤1 日曆日或落在 exchange holiday/週末邊界不記 drift；只在 remote 落後或缺 row 時 warn。順手統一 local/remote trade_date accessor 口徑。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T20:20:28.918027+00:00",
+    "claim_session_id": "dbba2cee19fc",
+    "status_history": [
+      {
+        "ts": "2026-07-05T20:20:28.918295+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T20:20:36.700676+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T20:26:18.691414+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T20:20:36.700360+00:00",
+    "completed_at": "2026-07-05T20:26:18.691135+00:00",
+    "result": "daily_update sync-health 改為 calendar-aware freshness：date-indexed 表以本地 data_date/NYSE 日曆映射判斷，strategy_signals 改用 updated_at freshness；補週末/假日回歸測試。驗證：pytest daily_update sync-health/staleness 17 passed；py_compile passed；ruff 未安裝。"
   },
   {
     "id": "platform_ops_indicator_arena_holiday_calendar_c7",

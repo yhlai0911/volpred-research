@@ -9,7 +9,7 @@ import json
 import os
 import shutil
 import sys
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import numpy as np
@@ -46,6 +46,142 @@ def _load_json_retry(path: Path, default, retries: int = 4, delay: float = 0.25)
     else:
         _warn_daily_update(f"{path} empty after {retries} tries — using default")
     return default
+
+
+def _iso_date(value) -> str | None:
+    if not isinstance(value, str):
+        return None
+    candidate = value[:10]
+    try:
+        date.fromisoformat(candidate)
+    except ValueError:
+        return None
+    return candidate
+
+
+def _previous_or_same_us_trading_day(date_str: str) -> str | None:
+    """Return the nearest NYSE session on or before date_str."""
+    try:
+        cursor = date.fromisoformat(date_str)
+    except ValueError:
+        return None
+    try:
+        from volpred.market_calendar import get_market_status
+        for _ in range(14):
+            status = get_market_status(cursor, "us")
+            if status.get("is_open"):
+                return cursor.isoformat()
+            prev_day = status.get("prev_trading_day")
+            if prev_day:
+                return prev_day
+            cursor -= timedelta(days=1)
+    except Exception:
+        # Health checks must never fail the daily update; weekday fallback is
+        # conservative enough to keep drift alerts useful if calendar import fails.
+        for _ in range(14):
+            if cursor.weekday() < 5:
+                return cursor.isoformat()
+            cursor -= timedelta(days=1)
+    return None
+
+
+def _build_sync_health_local_state(pt: dict) -> dict:
+    """Summarize local paper-trading dates for calendar-aware sync checks."""
+    trade_dates: set[str] = set()
+    data_dates: set[str] = set()
+    trade_date_to_data_date: dict[str, str] = {}
+
+    def collect(obj):
+        if isinstance(obj, dict):
+            trade_date = _iso_date(obj.get("trade_date"))
+            data_date = _iso_date(obj.get("data_date"))
+            if trade_date:
+                trade_dates.add(trade_date)
+            if data_date:
+                data_dates.add(data_date)
+            if trade_date and data_date:
+                trade_date_to_data_date[trade_date] = max(
+                    trade_date_to_data_date.get(trade_date, data_date),
+                    data_date,
+                )
+            for v in obj.values():
+                collect(v)
+        elif isinstance(obj, list):
+            for item in obj:
+                collect(item)
+
+    collect(pt)
+
+    market_daily = pt.get("_market_daily", {})
+    market_daily_dates = {
+        d for d in (_iso_date(k) for k in market_daily.keys())
+        if d is not None
+    } if isinstance(market_daily, dict) else set()
+
+    latest_trade_date = max(trade_dates) if trade_dates else None
+    latest_data_date = (
+        max(data_dates)
+        if data_dates
+        else _previous_or_same_us_trading_day(latest_trade_date)
+        if latest_trade_date
+        else None
+    )
+    latest_market_daily_date = max(market_daily_dates) if market_daily_dates else None
+    calendar_dates = trade_dates | market_daily_dates
+    latest_calendar_date = max(calendar_dates) if calendar_dates else latest_trade_date
+
+    return {
+        "latest_trade_date": latest_trade_date,
+        "latest_data_date": latest_data_date,
+        "latest_market_daily_date": latest_market_daily_date,
+        "latest_calendar_date": latest_calendar_date,
+        "trade_date_to_data_date": trade_date_to_data_date,
+    }
+
+
+def _sync_health_effective_data_date(calendar_date: str | None, state: dict) -> str | None:
+    """Map a paper-trading calendar row to the SPY data date it represents."""
+    d = _iso_date(calendar_date)
+    if not d:
+        return None
+    mapped = state.get("trade_date_to_data_date", {}).get(d)
+    if mapped:
+        return mapped
+
+    latest_data_date = state.get("latest_data_date")
+    latest_calendar_date = state.get("latest_calendar_date")
+    if latest_data_date and latest_calendar_date and latest_data_date <= d <= latest_calendar_date:
+        # daily_update may still write _market_daily on no-new-data runs. Those
+        # calendar rows represent the same latest SPY close, not a true drift.
+        return latest_data_date
+
+    return _previous_or_same_us_trading_day(d)
+
+
+def _sync_health_date_table_is_fresh(
+    remote_date: str | None,
+    state: dict,
+) -> tuple[bool, str | None, str | None]:
+    expected_data_date = state.get("latest_data_date")
+    effective_data_date = _sync_health_effective_data_date(remote_date, state)
+    if not expected_data_date or not effective_data_date:
+        return False, effective_data_date, expected_data_date
+    return effective_data_date >= expected_data_date, effective_data_date, expected_data_date
+
+
+def _sync_health_timestamp_is_fresh(
+    remote_date: str | None,
+    state: dict,
+) -> tuple[bool, str | None, str | None]:
+    expected_update_date = (
+        state.get("latest_calendar_date")
+        or state.get("latest_trade_date")
+        or state.get("latest_data_date")
+    )
+    d = _iso_date(remote_date)
+    if not expected_update_date or not d:
+        return False, d, expected_update_date
+    return d >= expected_update_date, d, expected_update_date
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -1228,7 +1364,7 @@ def main():
 
 
 def _run_sync_health_check() -> None:
-    """Query Supabase max(trade_date) on critical tables vs local. Prints drift alerts."""
+    """Query Supabase freshness on critical tables vs local. Prints drift alerts."""
     import json
     import sys as _sys
     from urllib.request import Request, urlopen
@@ -1241,33 +1377,23 @@ def _run_sync_health_check() -> None:
     print("\n--- Sync health check ---")
     try:
         pt = json.loads(Path("storage/paper_trading.json").read_text())
-        local_dates: set[str] = set()
-
-        def collect(obj):
-            if isinstance(obj, dict):
-                if "trade_date" in obj and isinstance(obj.get("trade_date"), str):
-                    local_dates.add(obj["trade_date"])
-                else:
-                    for v in obj.values():
-                        collect(v)
-            elif isinstance(obj, list):
-                for item in obj:
-                    collect(item)
-
-        collect(pt)
-        local_max = max(local_dates) if local_dates else None
+        local_state = _build_sync_health_local_state(pt)
     except Exception as e:
         print(f"  [health] cannot read local paper_trading: {e}")
         return
 
-    if not local_max:
-        print("  [health] no local trade_date — skipping")
+    if not local_state.get("latest_data_date"):
+        print("  [health] no local data_date/trade_date — skipping")
         return
 
     alerts = []
     # Each table's freshness column differs:
     # paper_trades + market_daily have trade_date (date-indexed rows)
-    # strategy_signals is upsert-keyed by strategy, so compare updated_at date
+    # strategy_signals is upsert-keyed by strategy, so compare updated_at date.
+    # Calendar-aware note: daily_update can write local calendar rows on weekends
+    # or exchange holidays while SPY data_date has not advanced. For date-indexed
+    # tables, compare the effective SPY data date represented by the row instead
+    # of requiring raw calendar-date equality.
     table_specs = [
         ("paper_trades", "trade_date", "date"),
         ("market_daily", "trade_date", "date"),
@@ -1281,11 +1407,35 @@ def _run_sync_health_check() -> None:
                 rows = json.loads(resp.read().decode())
             raw = rows[0].get(col) if rows else None
             remote_date = raw[:10] if isinstance(raw, str) else None
-            if remote_date == local_max:
-                print(f"  {table}: OK ({col}={raw})")
+            if kind == "timestamp":
+                ok, observed, expected = _sync_health_timestamp_is_fresh(remote_date, local_state)
+                if ok:
+                    print(f"  {table}: OK ({col}={raw}; expected_update_date>={expected})")
+                else:
+                    alerts.append(
+                        f"{table}: remote {col}={raw} observed_update_date={observed} "
+                        f"expected_update_date>={expected}"
+                    )
+                    print(
+                        f"  ⚠️  {table}: remote {col}={raw} observed_update_date={observed} "
+                        f"expected_update_date>={expected}"
+                    )
             else:
-                alerts.append(f"{table}: remote {col}={raw} local trade_date={local_max}")
-                print(f"  ⚠️  {table}: remote {col}={raw} local trade_date={local_max}")
+                ok, observed, expected = _sync_health_date_table_is_fresh(remote_date, local_state)
+                if ok:
+                    print(
+                        f"  {table}: OK ({col}={raw}; "
+                        f"effective_data_date={observed}, expected_data_date>={expected})"
+                    )
+                else:
+                    alerts.append(
+                        f"{table}: remote {col}={raw} effective_data_date={observed} "
+                        f"expected_data_date>={expected}"
+                    )
+                    print(
+                        f"  ⚠️  {table}: remote {col}={raw} effective_data_date={observed} "
+                        f"expected_data_date>={expected}"
+                    )
         except Exception as e:
             alerts.append(f"{table}: query failed {e}")
             print(f"  ⚠️  {table}: query failed — {e}")
