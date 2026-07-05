@@ -1,53 +1,105 @@
 {
-  "generated_at": "2026-06-27T18:16:29.912588+00:00",
+  "generated_at": "2026-07-05T01:19:50.171899+00:00",
   "publish_rhythm": {
-    "status": "inactive_window",
-    "in_active_window": false,
-    "tpe_hour": 2,
+    "status": "ok",
+    "in_active_window": true,
+    "tpe_hour": 9,
     "recent_count": 10,
-    "newest_published_at": "2026-06-27T17:06:47.826009+00:00",
-    "age_since_newest_min": 69.7,
+    "newest_published_at": "2026-07-05T01:13:05.428005+00:00",
+    "age_since_newest_min": 6.75,
     "gaps_min_newest_first": [
-      126.43,
-      324.1,
-      155.95,
-      417.01,
-      0.15,
-      1082.84,
-      0.0,
-      180.02,
-      0.0
+      42.35,
+      30.12,
+      273.02,
+      234.28,
+      30.46,
+      62.39,
+      479.98,
+      272.39,
+      536.73
     ],
-    "burst_pairs": [
-      {
-        "newer_id": "mile_8cafdb97",
-        "older_id": "mile_892a02ee",
-        "gap_minutes": 0.15
-      },
-      {
-        "newer_id": "mile_02c9eb89",
-        "older_id": "mile_59f60989",
-        "gap_minutes": 0.0
-      },
-      {
-        "newer_id": "mile_2657bb72",
-        "older_id": "mile_3607af6a",
-        "gap_minutes": 0.0
-      }
-    ],
+    "burst_pairs": [],
     "burst_gap_threshold_min": 30,
-    "drought_gap_threshold_hours": 3.0
+    "drought_gap_threshold_hours": 6.0
   },
   "daily_digest_uniqueness": {
     "status": "ok",
-    "date_tpe": "2026-06-28",
-    "published_count": 0,
-    "items": []
+    "date_tpe": "2026-07-05",
+    "published_count": 1,
+    "items": [
+      {
+        "id": "mile_c5bc3eb1",
+        "title": "股災保險不要只買一個商品：黃金、VIX 與尾部煞車的三道安檢",
+        "published_at": "2026-07-05T01:13:05.428005+00:00"
+      }
+    ]
   },
   "title_format": {
     "status": "ok",
     "scanned": 30,
     "lookback": 30,
     "findings": []
+  },
+  "arc_diversity": {
+    "status": "ok",
+    "sample": 20,
+    "distinct_axes": 18,
+    "top_axis": "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive",
+    "top_share": 0.1,
+    "threshold": 0.5,
+    "distribution": {
+      "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive": 2,
+      "TW_EQUITY|US_EQUITY::null_no_info": 2,
+      "GOLD|LONG_BOND|RISK_PARITY|US_EQUITY|VIX::null_no_info": 1,
+      "USD|US_EQUITY|VIX::null_no_info": 1,
+      "GOLD|USD|US_EQUITY|VIX::null_no_info": 1,
+      "COPPER|TW_EQUITY|US_EQUITY::descriptive": 1,
+      "TW_EQUITY|US_EQUITY|VIX::descriptive": 1,
+      "COMMODITY_BROAD|GOLD|LONG_BOND|US_BOND|US_EQUITY|VOL_TARGETING::null_no_info": 1,
+      "TW_EQUITY::null_no_info": 1,
+      "CREDIT_SPREAD|USD|US_BOND|VIX::null_no_info": 1,
+      "GOLD|TW_EQUITY|USD|US_EQUITY|VIX::null_no_info": 1,
+      "JPY|US_EQUITY|VIX::systemic_crowding": 1,
+      "SEMIS|TW_EQUITY|US_EQUITY|VIX|VVIX::descriptive": 1,
+      "SEMIS|TSMC|TW_EQUITY|US_EQUITY|VIX|YIELD_CURVE::descriptive": 1,
+      "MOMENTUM|SILVER::null_no_info": 1,
+      "SILVER|USD|US_BOND::null_no_info": 1,
+      "GOLD|HIGH_YIELD|LONG_BOND|NASDAQ|US_BOND|US_EQUITY|US_SMALLCAP::null_no_info": 1,
+      "GOLD|LONG_BOND|OIL|US_EQUITY|VIX|VOL_TARGETING::descriptive": 1
+    }
+  },
+  "content_completeness": {
+    "status": "incomplete",
+    "scanned": 12,
+    "findings": [
+      {
+        "id": "mile_0fa841ed",
+        "missing_chart": false,
+        "missing_source": true,
+        "title": "燒最多錢的科技巨頭，選擇權市場現在沒有多收「下跌保費」"
+      }
+    ],
+    "lazypack": {
+      "general_total": 11,
+      "with_lazypack": 11,
+      "coverage": 1.0,
+      "threshold": 0.6,
+      "below_threshold": false,
+      "missing_examples": []
+    }
+  },
+  "release_deadlock": {
+    "status": "ok",
+    "exists": true,
+    "candidate_counts": {
+      "candidates": 682,
+      "top_10_uncovered": 6
+    },
+    "total": 688
+  },
+  "frontend_render": {
+    "status": "unknown",
+    "probed": false,
+    "note": "probe disabled"
   }
 }

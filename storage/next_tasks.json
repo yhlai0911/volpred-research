@@ -50032,7 +50032,7 @@
     "title": "K1641: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1484). Original: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1641.py with signal.shift(1) + seed=42, (c) K1641_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -50041,7 +50041,10 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-05T00:00:01Z"
+    "created_at": "2026-07-05T00:00:01Z",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-05T01:09:54+00:00",
+    "blocked_note": "同題已由 K1636 完成（量先價行/爆量長黑隔日方向迷思，Codex CONDITIONAL_PASS）；此為 research_program.md 自動生成重複 experiment task"
   },
   {
     "id": "journal_discovery_20260705_0",
@@ -50058,5 +50061,81 @@
       "all-covered-fallback"
     ],
     "created_at": "2026-07-05T00:00:06+00:00"
+  },
+  {
+    "id": "daily_digest_20260705",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-05T09:00:05.071629+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T01:06:02.400498+00:00",
+    "claim_session_id": "cd75c4035cd2",
+    "status_history": [
+      {
+        "ts": "2026-07-05T01:06:02.400764+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T01:06:02.644621+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T01:20:04.904385+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T01:06:02.644205+00:00",
+    "completed_at": "2026-07-05T01:20:04.904099+00:00",
+    "result": "Published daily digest mile_c5bc3eb1: 股災保險三道安檢；curated 8 archive articles across 2026-05-25..2026-07-05 with source charts + 2 lazypack PNGs. Verified local feed metadata, single-article Supabase sync ok, live /v3/reports HTTP 200, content-quality digest/title/rhythm ok."
+  },
+  {
+    "id": "K1633_article_general",
+    "title": "K1633: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1633 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1633：「VIX 破 30/40 就是抄底訊號」投資迷思驗證 = half_true_qualified。資料 SPY + ^VIX（yfinance，Close，SPY auto_adjust），1993-01-29..2026-07-02 共 8,413 交易日；VIX 由下往上首次穿越 30/35/40、距上一事件 >=20 交易日去叢集後 50/25/17 個事件。事件後前瞻報酬 excess（vs 無條件 baseline，同 H、同價格序列、同報酬定義）12 個 cell 中 11 個為正（方向近乎一致）；raw 5% HAC 顯著 4 ",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1633",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-05T01:08:13+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-07-05T01:10:39.436708+00:00",
+    "claim_session_id": "2523a5dfdaf1",
+    "status_history": [
+      {
+        "ts": "2026-07-05T01:10:39.436993+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-05T01:10:39.687199+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-09"
+      }
+    ],
+    "started_at": "2026-07-05T01:10:39.686911+00:00"
   }
 ]
