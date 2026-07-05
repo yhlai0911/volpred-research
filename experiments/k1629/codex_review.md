@@ -44,3 +44,22 @@ None.
 ## Gate Decision
 
 K1629 can be recorded in knowledge and used for a general-audience draft, provided the sample limitation remains explicit.
+
+---
+
+## Post-Publish Article Review (K1018 24h rule) — 2026-07-06
+
+**Article**: `mile_467226e7` — 「開盤第一小時真的最危險嗎？」(published 2026-07-05 06:00 UTC; reviewed within 24h window)
+
+**Method**: Full article-vs-source number audit (main thread) + focused Codex overclaim/lookahead pass (session 019f33e8).
+
+**Number audit**: 20+ published figures all match `k1629_results.json` exactly —
+period 2026-01-14~07-02, 117→114 days, 8889 bars; open 2.13x / 32.8% share / 92-of-114 days;
+tail thresholds 17.03bp / -12.98bp; segment tail rates 12.5/11.5, 3.77/3.97, 3.07/3.22. No discrepancy.
+
+**Codex verdict**: PASS_WITH_NOTE. No lookahead (descriptive slice, no signal×future return), no DM/Harvey
+or predictive overclaim. Soft note: limit-order-at-open advice slightly exceeds descriptive evidence.
+
+**Disposition**: PASS. No correction needed — article already hedges the execution advice with
+「通常…更合理」and explicitly states 「本文是描述性日內風險切片，不是交易策略回測」. Codex's note is
+covered by existing framing; no research-honesty violation.

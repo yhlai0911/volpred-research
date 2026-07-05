@@ -50785,7 +50785,7 @@
     "title": "Paper review (Codex 24h-rule): 開盤第一小時真的最危險嗎？這次答案接近「對」，但不是你想的那種對",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_467226e7 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_467226e7",
@@ -50793,7 +50793,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-05T08:30:01+00:00"
+    "created_at": "2026-07-05T08:30:01+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-07-05T20:10:09.132434+00:00",
+    "claim_session_id": "572e2444eb1b",
+    "status_history": [
+      {
+        "ts": "2026-07-05T20:10:09.132709+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-05T20:10:09.376409+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-05T20:12:10.912702+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
+      }
+    ],
+    "started_at": "2026-07-05T20:10:09.376023+00:00",
+    "completed_at": "2026-07-05T20:12:10.912391+00:00",
+    "result": "K1018 24h 文章審查: mile_467226e7 (開盤第一小時) — 20+ 數字全符 k1629_results.json, Codex PASS_WITH_NOTE, 無 lookahead/overclaim, 文章已妥適 hedge, 無需更正"
   },
   {
     "id": "governance_error_log_review_320",
