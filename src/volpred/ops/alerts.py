@@ -835,7 +835,8 @@ def _schedule_items_by_log_name(config: dict[str, Any] | None = None) -> dict[st
     if config is None:
         try:
             config = load_runtime_schedules()
-        except Exception:
+        except Exception as e:
+            warn("alerts_schedule_by_log", "load_runtime_schedules failed", err=str(e))
             return {}
 
     by_log: dict[str, dict[str, Any]] = {}
@@ -884,7 +885,8 @@ def _stale_cron_exit_reason(
 
         exited_local = exited_at.astimezone(_TAIPEI_TZ)
         next_fire = croniter(cron_expr.strip(), exited_local).get_next(datetime)
-    except Exception:
+    except Exception as e:
+        warn("alerts_host_cron_recency", "croniter next-fire calc failed", cron=cron_expr, err=str(e))
         return None
 
     if next_fire.tzinfo is None:
