@@ -1389,3 +1389,71 @@ def test_kill_pgid_survives_permission_error_on_liveness_probe(monkeypatch) -> N
     assert "SIGTERM" in kinds
     assert "PROBE" in kinds
     assert "SIGKILL" in kinds, "must fall through to SIGKILL after the probe is denied, not crash"
+
+
+# ---------------------------------------------------------------------------
+# quota class — 2026-07-05 weekly-quota outage: "You've hit your weekly limit ·
+# resets 4pm" matched no class → hard_failure → the full retry ladder burned on
+# every hourly fire for 5h (15 wasted attempts). Quota is its own class:
+# no-retry, NO auth_blocked (auto-resolves at reset; next hourly fire's single
+# attempt self-resumes), one warn email per outage (4h dedup).
+# ---------------------------------------------------------------------------
+
+
+def test_classify_quota_messages() -> None:
+    assert worker._classify(1, "You've hit your weekly limit · resets 4pm") == "quota"
+    assert worker._classify(1, "You've hit your 5-hour limit") == "quota"
+    assert worker._classify(1, "usage limit reached") == "quota"
+    # rate-limit (transient) must NOT be swallowed by quota
+    assert worker._classify(1, "429 rate limit exceeded, retry soon") == "transient"
+    # auth still wins over quota-ish text
+    assert worker._classify(1, "Not logged in. Please run /login") == "auth"
+
+
+def test_worker_quota_aborts_without_retry_and_without_auth_block(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    log_path = tmp_path / "worker.log"
+    attempts: list[int] = []
+    quota_alerts: list[dict] = []
+
+    def fake_run_one_attempt(**kwargs):
+        attempts.append(kwargs["attempt"])
+        log_path.write_text("You've hit your weekly limit · resets 4pm", encoding="utf-8")
+        return 1, 1.0
+
+    monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
+    monkeypatch.setattr(
+        worker.alerts, "send_quota_alert",
+        lambda **kwargs: quota_alerts.append(kwargs) or True,
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt", log_path=log_path, state_path=state_path,
+        sleep_fn=lambda sec: None,
+    )
+
+    snap = state.read_state(state_path)
+    assert result.outcome == "quota_blocked"
+    assert result.attempts == 1, "quota must NOT trigger the retry ladder"
+    assert attempts == [1]
+    assert snap["auth_blocked"] is False, (
+        "quota must NOT set auth_blocked — it auto-resolves at reset; "
+        "a manual unblock requirement would strand the loop"
+    )
+    assert len(quota_alerts) == 1
+    # Note: record_completion no-ops when current_job is absent (the mocked
+    # _run_one_attempt skips reserve_fire/attach_process) — same caveat as the
+    # timeout-path test above; WorkerResult.outcome is the authoritative check.
+
+
+def test_quota_alert_dedup_one_email_per_outage(tmp_path: Path, monkeypatch) -> None:
+    """During a multi-hour outage, hourly fires each hit quota — only the FIRST
+    should email (4h dedup); the rest silently dedup."""
+    state_path = _tmp_state(tmp_path)
+    sends: list[str] = []
+    monkeypatch.setattr(supervisor.alerts, "_send", lambda level, title, body: sends.append(title) or 0)
+
+    assert supervisor.alerts.send_quota_alert(log_tail="limit", state_path=state_path) is True
+    assert supervisor.alerts.send_quota_alert(log_tail="limit", state_path=state_path) is False
+    assert supervisor.alerts.send_quota_alert(log_tail="limit", state_path=state_path) is False
+    assert len(sends) == 1

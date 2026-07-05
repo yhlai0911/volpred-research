@@ -14,6 +14,7 @@ Dedup windows match `refactor_plan_hourly_dispatch.md §3.3 alerts dedup table`:
   supervisor_restart   : 60s
   loop_crash           : 300s   (per-component key; crash-loop must not spam)
   orphan_restart       : 60s
+  quota_blocked        : 14400s (one email per quota outage, not per hourly fire)
 """
 from __future__ import annotations
 
@@ -95,6 +96,30 @@ def send_auth_alert(*, log_tail: str = "", state_path: Path = state.STATE_PATH) 
         "```\n" + (log_tail[-2000:] if log_tail else "(empty)") + "\n```\n"
     )
     _send("critical", "supervisor auth_blocked", body)
+    state.mark_alert_sent(key, path=state_path)
+    return True
+
+
+def send_quota_alert(*, log_tail: str = "", state_path: Path = state.STATE_PATH) -> bool:
+    """Claude Code quota exhausted. Dedup 4h — ONE email per outage, not one
+    per hourly fire (2026-07-05: a 5h weekly-quota outage would otherwise have
+    produced an email every hour). Level warn, not critical: the loop
+    self-resumes at the provider's reset time with no manual action."""
+    key = "quota_blocked"
+    if state.should_dedup_alert(key, window_s=14400, path=state_path):
+        return False
+    body = (
+        "# Claude Code 額度已用完 — 排程派工自動暫停中\n\n"
+        "## 觸發條件\n"
+        "- 排程派工的 Claude 回覆「usage limit / weekly limit」類訊息\n"
+        "- 額度類錯誤**不會**重試（重試無用），本班直接結束\n\n"
+        "## 影響\n"
+        "- 每小時派工會持續以「單次輕量嘗試」自動探測；**額度一恢復下一班就自動復工，無需人工處理**\n"
+        "- 發文釋出（release pool）不吃 Claude 額度，照常運作\n\n"
+        "## 訊息片段\n\n"
+        "```\n" + (log_tail[-500:] if log_tail else "(empty)") + "\n```\n"
+    )
+    _send("warn", "supervisor quota_blocked（額度恢復後自動復工）", body)
     state.mark_alert_sent(key, path=state_path)
     return True
 

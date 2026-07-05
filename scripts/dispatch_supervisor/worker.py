@@ -60,6 +60,18 @@ TIMEOUT_KILLED_SENTINEL = -1000
 # stderr/stdout regex classifiers
 _AUTH_RE = re.compile(r"(Not logged in|Please run /login|invalid_api_key|authentication)", re.I)
 _TRANSIENT_RE = re.compile(r"(529|Overloaded|ECONNRESET|ETIMEDOUT|Connection reset|rate.?limit)", re.I)
+# 2026-07-05 incident: the weekly Claude Code quota ran out 11:07-16:00 and
+# "You've hit your weekly limit · resets 4pm" matched NO class → hard_failure →
+# the full retry ladder (opus→opus→sonnet) burned on every hourly fire (15
+# wasted attempts + completion noise over 5h). Quota exhaustion is neither
+# transient (retrying in 90s cannot help) nor auth (it auto-resolves at the
+# reset time; requiring a manual unblock would strand the loop). Its own class:
+# abort THIS fire without retries, do NOT set auth_blocked — the next hourly
+# fire is a single cheap attempt that self-resumes the moment quota resets.
+_QUOTA_RE = re.compile(
+    r"(hit your (?:weekly|5.?hour|monthly|usage|session) limit|usage limit (?:reached|exceeded))",
+    re.I,
+)
 
 
 @dataclass
@@ -87,7 +99,7 @@ def _normalize_signal_exit(exit_code: int) -> int:
 
 
 def _classify(exit_code: int, output: str) -> str:
-    """Return one of: success | hang | auth | transient | hard_failure."""
+    """Return one of: success | hang | auth | quota | transient | hard_failure."""
     if exit_code == TIMEOUT_KILLED_SENTINEL:
         return "hang"
     if exit_code == 0:
@@ -96,6 +108,10 @@ def _classify(exit_code: int, output: str) -> str:
         return "hang"
     if _AUTH_RE.search(output or ""):
         return "auth"
+    # quota BEFORE transient: both are "come back later", but transient's 90s
+    # backoff is pointless against an hours-long quota window.
+    if _QUOTA_RE.search(output or ""):
+        return "quota"
     if _TRANSIENT_RE.search(output or ""):
         return "transient"
     return "hard_failure"
@@ -294,6 +310,23 @@ def run_worker(
             alerts.send_auth_alert(log_tail=log_tail, state_path=state_path)
             return WorkerResult(
                 exit_code=exit_code, outcome="auth_blocked", final_model=model,
+                attempts=attempt, duration_s=total_duration, log_tail=log_tail,
+            )
+
+        if category == "quota":
+            # 2026-07-05 incident fix: quota exhaustion aborts THIS fire without
+            # retries (retrying in 90s against an hours-long window is waste),
+            # but deliberately does NOT set auth_blocked — quota auto-resolves
+            # at the provider's reset time, so the next hourly fire's single
+            # attempt self-resumes the loop with zero manual intervention.
+            # One warn email per outage (4h dedup in send_quota_alert).
+            state.record_completion(
+                exit_code=exit_code, outcome="quota_blocked", final_model=model,
+                path=state_path,
+            )
+            alerts.send_quota_alert(log_tail=log_tail, state_path=state_path)
+            return WorkerResult(
+                exit_code=exit_code, outcome="quota_blocked", final_model=model,
                 attempts=attempt, duration_s=total_duration, log_tail=log_tail,
             )
 
