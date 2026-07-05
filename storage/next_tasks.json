@@ -49288,7 +49288,7 @@
     "task_type": "platform_ops",
     "priority": "P3",
     "source": "agent_discovered",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-04T13:23:53.923838+00:00",
     "title": "host_cron_fail 加 recency gate（stale 非0 exit 不再每小時重判）",
     "description": "_latest_cron_exit 抓 log 最後一個 exit marker 無時效檢查：低頻 cron 幾天前失敗一次、之後沒再 log，會每小時被重判 breach。在 _parse_host_cron_state 加 recency gate：failing log 的 exited_at 超過該 cron cadence window（或無法解析 timestamp / at unknown）時不升 critical、cap 為 warn 或不 breach。注意 tests/test_alerts.py 的 write_exits 用過去日期（Jun 15 / Jul 2），加 gate 時 fixture 日期要改成相對 now 才不會誤 stale。root context: docs/error_log.md 2026-07-04 21:18 條「後續強化」。",
@@ -49307,9 +49307,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T18:12:47.173891+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-05T18:07:03.922188+00:00"
+    "started_at": "2026-07-05T18:07:03.922188+00:00",
+    "completed_at": "2026-07-05T18:12:47.173615+00:00",
+    "result": "Added host_cron_fail recency gate: scheduled logs with stale non-zero exit markers after the next expected fire + 10m grace are ignored, unknown timestamps cap at warn, and fresh hard failures still go critical. Verified tests/test_alerts.py: 36 passed; check_alerts --dry-run: breaches=0."
   },
   {
     "id": "platform_ops_parallel_draft_writer_throughput",

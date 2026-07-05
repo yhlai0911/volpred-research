@@ -875,7 +875,7 @@ def _stale_cron_exit_reason(
 
     log_name = Path(str(latest.get("log_path") or "")).name
     item = schedule_by_log.get(log_name)
-    cron_expr = item.get("cron") or item.get("schedule") if item else None
+    cron_expr = (item.get("cron") or item.get("schedule")) if item else None
     if not isinstance(cron_expr, str) or not cron_expr.strip():
         return None
 
@@ -1159,6 +1159,8 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
         "這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／"
         "release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗"
         "（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。"
+        f"若非零 exit 已超過下一個預定 fire + {HOST_CRON_RECENCY_GRACE}，視為 stale marker，"
+        "不再每小時重判。"
         "反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。",
         f"- scheduler_last_tick_at: {scheduler_last_tick_at.isoformat() if scheduler_last_tick_at else 'missing'}（僅供參考，v12 後不作為 breach 判準）",
         f"- scheduler_last_status: {scheduler_last_status}",
@@ -1171,6 +1173,7 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
         for row in failing_logs:
             body_lines.append(
                 f"  - {row['log_path']} exit={row['exit_code']} at {row.get('exited_at') or 'unknown'}"
+                f" recency={row.get('recency_status', 'unknown')}"
             )
 
     body_lines.extend(
