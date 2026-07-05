@@ -49,6 +49,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS  # noqa: E402
 from volpred.ops.blocked_reasons import is_valid as _valid_blocked_reason  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 
 DEFAULT_BLOCKED_UNTIL_DAYS = 14
@@ -117,6 +118,7 @@ def _load() -> tuple[dict | list, list]:
 
 
 def _save(payload: dict | list, tasks: list) -> None:
+    normalize_task_priorities(tasks)
     if isinstance(payload, dict) and "tasks" in payload:
         payload["tasks"] = tasks
         out = payload

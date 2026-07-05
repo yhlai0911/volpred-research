@@ -41,6 +41,7 @@ sys.path.insert(0, str(ROOT / "src"))
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 from kid_reserve import reserve_k_id  # noqa: E402
 JOURNAL_DISCOVERY_LIVE_STATUSES = {"pending", "claimed", "in_progress", "blocked", "pending_main_thread"}
 JOURNAL_DISCOVERY_COOLDOWN_HOURS = 6
@@ -94,6 +95,7 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
 
 
 def _save_tasks(payload: dict | list, tasks: list) -> None:
+    normalize_task_priorities(tasks)
     if isinstance(payload, dict) and "tasks" in payload:
         payload["tasks"] = tasks
         out = payload
@@ -213,7 +215,7 @@ def already_in_next_tasks(item: dict, existing_tasks: list) -> bool:
 
 def build_experiment_brief(item: dict, k_id: int) -> dict:
     """Convert an open research item into a K-experiment brief."""
-    return {
+    task = {
         "id": f"K{k_id}",
         "title": f"K{k_id}: {item['text'][:120]}",
         "priority": 3,
@@ -235,6 +237,8 @@ def build_experiment_brief(item: dict, k_id: int) -> dict:
         "tags": ["experiment", "autonomous-research"],
         "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
+    normalize_task_priority(task)
+    return task
 
 
 def _reserve_backlog_k_id(item: dict) -> int:

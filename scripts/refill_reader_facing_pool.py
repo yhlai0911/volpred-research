@@ -29,6 +29,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
+from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 
 _diag_warn = warn  # legacy alias used by _warn_refill_reader (was undefined -> NameError)
 
@@ -74,6 +75,7 @@ def _load_next_tasks() -> list[dict[str, Any]]:
 
 
 def _append_task(task: dict[str, Any]) -> bool:
+    normalize_task_priority(task)
     NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
     if not NEXT_TASKS.exists():
         NEXT_TASKS.write_text("[]\n", encoding="utf-8")
@@ -86,6 +88,7 @@ def _append_task(task: dict[str, Any]) -> bool:
             if any(isinstance(item, dict) and item.get("id") == task["id"] for item in data):
                 return False
             data.append(task)
+            normalize_task_priorities(data)
             fh.seek(0)
             fh.truncate()
             json.dump(data, fh, ensure_ascii=False, indent=2)

@@ -153,7 +153,9 @@ def test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task(tmp_pat
     assert "K2001_codex_review_followup" in source["failure_reason"]
     assert "unmatched refit cadence" in source["failure_reason"]
     assert review["status"] == "succeeded"
+    assert review["priority"] == 3
     assert v2["status"] == "pending"
+    assert v2["priority"] == 3
     assert v2["task_type"] == "experiment"
     assert v2["predecessor"] == "K2001"
     assert v2["predecessor_codex_review_task"] == "K2001_codex_review_followup"
@@ -345,6 +347,36 @@ def test_list_does_not_rewrite_next_tasks_file(tmp_path, monkeypatch, capsys) ->
     payload = json.loads(capsys.readouterr().out)
     assert payload["count"] == 1
     assert next_tasks.read_text(encoding="utf-8") == original
+
+
+def test_normalize_priorities_command_sweeps_legacy_string_values(
+    tmp_path,
+    monkeypatch,
+    capsys,
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {"id": "p3", "status": "pending", "priority": "P3"},
+                {"id": "pp1", "status": "pending", "priority": "PP1"},
+                {"id": "int2", "status": "pending", "priority": 2},
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(sys, "argv", ["task_pool_claim.py", "normalize-priorities"])
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["changed"] == 2
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert [task["priority"] for task in saved] == [3, 1, 2]
 
 
 def test_legacy_task_id_field_is_claimable_and_listed(tmp_path, monkeypatch, capsys) -> None:

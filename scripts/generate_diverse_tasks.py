@@ -33,6 +33,8 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 FEED = ROOT / "storage" / "reports" / "feed.json"
 CRON_LAST_RUN = ROOT / "storage" / "ops" / "cron_last_run.json"
@@ -59,6 +61,8 @@ CORRECTIVE_ERRATA_TOKENS = (
 EXPERIMENTS_DIR = ROOT / "experiments"
 RESEARCH_PROGRAM = ROOT / "research_program.md"
 
+from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
+
 
 def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list, list]:
     if not NEXT_TASKS.exists():
@@ -83,6 +87,7 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
 
 
 def _save_tasks(payload: dict | list, tasks: list) -> None:
+    normalize_task_priorities(tasks)
     if isinstance(payload, dict) and "tasks" in payload:
         payload["tasks"] = tasks
         out = payload

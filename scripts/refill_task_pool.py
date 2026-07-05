@@ -45,6 +45,7 @@ CANDIDATES = ROOT / "storage" / "publication_candidates.json"
 
 sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 
@@ -83,6 +84,7 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
 
 
 def _save_tasks(payload: dict | list, tasks: list) -> None:
+    normalize_task_priorities(tasks)
     if isinstance(payload, dict) and "tasks" in payload:
         payload["tasks"] = tasks
         out = payload

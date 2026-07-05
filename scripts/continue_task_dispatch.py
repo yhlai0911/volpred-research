@@ -45,6 +45,8 @@ def _coerce_priority(v) -> int:
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
 WORKTREES_DIR = ROOT / ".claude" / "worktrees"
@@ -52,6 +54,8 @@ AGENTS_DIR = ROOT / "storage" / "ops" / "agents"
 REPORT_PATH = ROOT / "storage" / "ops" / "dispatch_report_latest.json"
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 SLOT_CAP = 4
+
+from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 # 2026-07-01 3-STRIKE fix (dreaming persistent_alert draft_pool_low, 5x/73d):
 # `draft_pool_low` alert (src/volpred/ops/alerts.py::_parse_draft_pool_state)
 # measures feed.json `status=="draft"` article count directly — a DIFFERENT
@@ -415,6 +419,7 @@ def _materialize_pool_dry_diagnostic_task(now: datetime | None = None) -> dict:
         "source": "continue_task_dispatch_pool_dry_breaker",
         "tags": ["dispatch", "refill", "pool-dry", "platform_ops"],
     }
+    normalize_task_priority(task)
 
     NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
     if not NEXT_TASKS.exists():
@@ -437,6 +442,7 @@ def _materialize_pool_dry_diagnostic_task(now: datetime | None = None) -> dict:
                 }
 
             tasks.insert(0, task)
+            normalize_task_priorities(tasks)
             fh.seek(0)
             fh.truncate()
             json.dump(payload if isinstance(payload, dict) else tasks, fh, indent=2, ensure_ascii=False)

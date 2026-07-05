@@ -49,6 +49,12 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 
+from volpred.ops.next_tasks import (  # noqa: E402
+    normalize_priority,
+    normalize_task_priority,
+    normalize_task_priorities,
+    priority_sort_key,
+)
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -92,6 +98,7 @@ def _locked_load() -> Iterator[tuple[Any, list[dict[str, Any]]]]:
         # ensure_ascii=False UTF-8 write raise UnicodeEncodeError mid-write —
         # which previously truncated next_tasks.json to a corrupted partial.
         # (incident 2026-07-05: `complete --result` with a shell-mangled char)
+        normalize_task_priorities(data)
         payload = json.dumps(data, indent=2, ensure_ascii=False)
         try:
             payload.encode("utf-8")
@@ -338,11 +345,11 @@ def _apply_codex_review_followup_fail(
         effect["v2_task"] = "already_exists"
         return effect
 
-    tasks.append({
+    new_task = {
         "id": v2_id,
         "task_type": "experiment",
         "status": "pending",
-        "priority": review_task.get("priority") or "P3",
+        "priority": normalize_priority(review_task.get("priority"), default=3),
         "title": f"{k_id}-v2: fix methodology after Codex review FAIL",
         "description": (
             f"{k_id} Codex review follow-up task {task_id} returned verdict=FAIL. "
@@ -355,7 +362,9 @@ def _apply_codex_review_followup_fail(
         "predecessor": k_id,
         "predecessor_codex_review_task": task_id,
         "dispatch_lane": "agent",
-    })
+    }
+    normalize_task_priority(new_task)
+    tasks.append(new_task)
     effect["v2_task"] = "created"
     effect["v2_task_id"] = v2_id
     return effect
@@ -518,16 +527,20 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
                 "claimed_at": t.get("claimed_at"),
                 "dispatch_lane": t.get("dispatch_lane"),
             })
-        def _prio_key(x: dict[str, Any]) -> tuple[int, str]:
-            p = x.get("priority")
-            try:
-                return (int(p), x.get("id") or "")
-            except (TypeError, ValueError):
-                return (9, x.get("id") or "")
-        out.sort(key=_prio_key)
+        out.sort(key=lambda x: (priority_sort_key(x.get("priority"), default=999), x.get("id") or ""))
         if args.limit:
             out = out[: args.limit]
         return {"ok": True, "count": len(out), "tasks": out}
+
+
+def cmd_normalize_priorities(args: argparse.Namespace) -> dict[str, Any]:
+    if args.dry_run:
+        with _locked_readonly() as tasks:
+            changed = normalize_task_priorities(tasks, mutate=False)
+            return {"ok": True, "dry_run": True, "would_change": changed}
+    with _locked_load() as (_fh, tasks):
+        changed = normalize_task_priorities(tasks)
+        return {"ok": True, "changed": changed}
 
 
 def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
@@ -592,6 +605,9 @@ def main() -> int:
     )
     p.set_defaults(fn=cmd_list)
     p = sub.add_parser("cleanup"); p.add_argument("--stale-hours", type=int, default=DEFAULT_STALE_HOURS); p.set_defaults(fn=cmd_cleanup)
+    p = sub.add_parser("normalize-priorities")
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(fn=cmd_normalize_priorities)
 
     args = ap.parse_args()
     result = args.fn(args)

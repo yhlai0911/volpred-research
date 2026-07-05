@@ -24,6 +24,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
+from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 PATH = Path("storage/next_tasks.json")
 BLOCKED_FIELDS = ("blocked_reason", "blocked_at", "blocked_until", "blocked_note")
@@ -76,6 +77,7 @@ def main(apply: bool) -> int:
                 t.pop(k, None)
 
     if apply:
+        normalize_task_priorities(tasks)
         PATH.write_text(json.dumps(tasks, indent=2, ensure_ascii=False) + "\n")
         print(f"[unblock] applied: {len(swept)} tasks → status=pending")
     else:

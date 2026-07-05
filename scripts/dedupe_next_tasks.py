@@ -24,7 +24,11 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
+
+from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 STATUS_RANK = {
     "succeeded": 60,
@@ -154,6 +158,7 @@ def main() -> int:
                 "apply": args.apply,
             }
             if args.apply and dropped:
+                normalize_task_priorities(deduped)
                 fh.seek(0)
                 fh.truncate()
                 json.dump(deduped, fh, ensure_ascii=False, indent=2)

@@ -23,12 +23,16 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 DEFAULT_OUT = ROOT / "storage" / "ops" / "graphify_codeonly"
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 TOKEN_USAGE_DIR = ROOT / "storage" / "reports" / "token_usage"
 TASK_ID = "platform_ops_graphify_codeonly_pilot_20260702"
 FOLLOWUP_ID = "platform_ops_graphify_codeonly_14d_verdict_20260716"
 FOLLOWUP_BLOCKED_UNTIL = "2026-07-16T00:00:00+00:00"
+
+from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 
 
 def _now() -> str:
@@ -197,6 +201,7 @@ def _ensure_followup_task() -> dict[str, Any]:
         "parent_task_id": TASK_ID,
         "dispatch_lane": "agent",
     }
+    normalize_task_priority(task)
 
     NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
     if not NEXT_TASKS.exists():
@@ -211,6 +216,7 @@ def _ensure_followup_task() -> dict[str, Any]:
             if existing:
                 return {"created": False, "id": FOLLOWUP_ID, "status": existing.get("status")}
             data.append(task)
+            normalize_task_priorities(data)
             fh.seek(0)
             fh.truncate()
             json.dump(data, fh, indent=2, ensure_ascii=False)

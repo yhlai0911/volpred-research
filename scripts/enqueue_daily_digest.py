@@ -23,9 +23,13 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 FEED = ROOT / "storage" / "reports" / "feed.json"
 TPE = ZoneInfo("Asia/Taipei")
+
+from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 DESCRIPTION = (
     "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。"
@@ -173,8 +177,9 @@ def main() -> int:
         return 0
 
     tasks.append(task)
+    normalize_task_priorities(tasks)
     tmp = NEXT_TASKS.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=2))
+    tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=2) + "\n")
     tmp.replace(NEXT_TASKS)
     print(f"[digest-enqueue] added {task_id} (P1 daily_digest); pool now {len(tasks)} tasks")
     return 0

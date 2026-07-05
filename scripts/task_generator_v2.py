@@ -30,6 +30,8 @@ from typing import Any
 # Paths
 # ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 RESEARCH_PROGRAM = ROOT / "research_program.md"
 FEED_JSON = ROOT / "storage" / "reports" / "feed.json"
@@ -44,6 +46,8 @@ DEFAULT_DISPATCH_LANES = {
     "paper_body": "main_thread",
     "event_article": "main_thread",
 }
+
+from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -177,6 +181,7 @@ def make_task(
         t["dispatch_lane"] = DEFAULT_DISPATCH_LANES[task_type]
     if extra:
         t.update(extra)
+    normalize_task_priority(t)
     return t
 
 
@@ -838,6 +843,7 @@ def main() -> None:
         new_tasks = [t for tasks in all_generated.values() for t in tasks]
         original = load_next_tasks()
         combined = original + new_tasks
+        normalize_task_priorities(combined)
         with open(NEXT_TASKS, "w", encoding="utf-8") as f:
             json.dump(combined, f, ensure_ascii=False, indent=2)
         print(f"[task_generator_v2] Wrote {total} new tasks to {NEXT_TASKS}")

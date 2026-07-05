@@ -39,10 +39,14 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 STATE_PATH = ROOT / "storage" / "ops" / "gmail_inbox_state.json"
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 LOG_PATH = ROOT / "storage" / "logs" / "cron" / "gmail_poll.log"
 TAIPEI = ZoneInfo("Asia/Taipei")
+
+from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 
 # Quoted-reply markers (Gmail / Apple Mail / Outlook common forms)
 QUOTE_MARKERS = [
@@ -376,6 +380,7 @@ def _send_fast_path_answer(task: dict[str, Any], answer_md: str, pattern_id: str
 
 def _append_task(task: dict[str, Any], dry_run: bool) -> str:
     """Atomically append task to next_tasks.json (file lock + read-modify-write)."""
+    normalize_task_priority(task)
     if dry_run:
         return task["id"]
     import fcntl
@@ -391,6 +396,7 @@ def _append_task(task: dict[str, Any], dry_run: bool) -> str:
             if not isinstance(data, list):
                 raise ValueError("next_tasks.json is not a list")
             data.append(task)
+            normalize_task_priorities(data)
             fh.seek(0)
             fh.truncate()
             json.dump(data, fh, indent=2, ensure_ascii=False)

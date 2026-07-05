@@ -30,8 +30,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 EXPERIMENTS = ROOT / "experiments"
+
+from volpred.ops.next_tasks import normalize_priority, normalize_task_priorities  # noqa: E402
 
 K_ID_RE = re.compile(r"^K\d+[a-z_]*$")
 REVIEW_GATE_K_ID_RE = re.compile(r"^K\d{2,5}[A-Z]?$", re.IGNORECASE)
@@ -304,7 +308,7 @@ def main() -> int:
                 "id": followup_id,
                 "task_type": "experiment",
                 "status": "pending",
-                "priority": task.get("priority") or "P3",
+                "priority": normalize_priority(task.get("priority"), default=3),
                 "title": f"{task_id} Codex review follow-up (missing review gate)",
                 "description": (
                     f"{task_id} was marked {previous_status} by codex-desktop, "
@@ -331,6 +335,7 @@ def main() -> int:
             fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
             try:
                 original = json.load(fh)
+                normalize_task_priorities(tasks)
                 if isinstance(original, dict):
                     original["tasks"] = tasks
                     payload = json.dumps(original, indent=2, ensure_ascii=False)

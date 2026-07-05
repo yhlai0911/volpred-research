@@ -39,6 +39,7 @@ from volpred.ops.telegram import (  # noqa: E402
     save_state,
     send_telegram,
 )
+from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 INBOX = ROOT / "storage" / "ops" / "telegram_inbox.jsonl"
@@ -67,7 +68,7 @@ def _append_task(text: str, msg_id: int, sender: str, reply_context: str = "") -
     tasks.append({
         "id": task_id,
         "task_type": "telegram_reply",
-        "priority": "P1",
+        "priority": 1,
         "source": "telegram",
         "status": "pending",
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -80,8 +81,9 @@ def _append_task(text: str, msg_id: int, sender: str, reply_context: str = "") -
             "這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
         ),
     })
+    normalize_task_priorities(tasks)
     tmp = NEXT_TASKS.with_suffix(".tmp")
-    tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=1), encoding="utf-8")
+    tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     tmp.replace(NEXT_TASKS)
     return task_id
 

@@ -2,7 +2,7 @@
   {
     "id": "platform_ops-drought-hardening-20260704",
     "task_type": "platform_ops",
-    "priority": "P1",
+    "priority": 1,
     "source": "boss-telegram-msg110",
     "status": "succeeded",
     "created_at": "2026-07-04T04:51:09.550232+00:00",
@@ -94,7 +94,7 @@
   },
   {
     "id": "paper_decision_leverage_direction_jbf_submission_356440a2d6dd",
-    "priority": "P1",
+    "priority": 1,
     "task_type": "paper_decision",
     "title": "[paper_decision] leverage-direction JBF submission package final prep",
     "description": "老闆 2026-06-24 08:34 回信 email-11958 \"你決定\" → 自主決定投 JBF。\n\n任務範圍（本任務為 final-prep，不含 online submission，後者需 boss JBF account 登入）：\n1. 確認 paper/leverage-direction/main.pdf 是最新版（v13 confirmation post-fix），sha256 + filesize 寫入 result\n2. 重新編譯 cover_letter.tex → cover_letter.pdf，verify metadata (target = JBF, addressed to editor-in-chief)\n3. Suggested reviewers 名單（3-5 人）— 從 paper bibliography 高引用作者挑出 (avoid co-author conflict)\n4. Excluded reviewers 名單（如有）— 競爭 lab / personal conflict\n5. JBF online submission checklist（cover letter / main PDF / figures / data availability statement / declarations）逐項打勾\n6. 整合所有 artifact 路徑寫成 /tmp/jbf_submission_package_leverage_direction.md 給 boss 一次性參考\n7. 寄 alert email 給 boss：「submission package ready, 請於 JBF Elsevier 系統登入後依清單上傳 (URL: https://www.editorialmanager.com/jbf/)」\n\n注意：實際 click-submit by boss，不由 agent 執行。本任務只負責準備到「boss 可一鍵 submit」狀態。\n",
@@ -329,7 +329,7 @@
     "title": "K1377: HAR 組合預測（Inverse-QLIKE 加權）— SPY / GLD / 0050.TW",
     "description": "測試以 rolling inverse-QLIKE 加權組合 HAR / HAR-ABS / HAR-VIX 三個模型，是否能以 DM-Harvey |t|>3 顯著勝過最佳單一模型 HAR-VIX（K530 結果）。對應 research_program.md 面向 A「組合預測（反 QLIKE 加權）」方向。",
     "task_type": "experiment",
-    "priority": "P3",
+    "priority": 3,
     "status": "succeeded",
     "created_at": "2026-05-19T11:13:23.368781",
     "tags": [
@@ -10763,7 +10763,7 @@
     "task_type": "daily_article",
     "title": "K1372: BTC 半減期前後波動率模式分析 — 文章草稿",
     "description": "基於 K1372 (BTC halving event study, GJR-GARCH) 結果撰寫 reader-facing 文章。重點：個別半減期 MW 顯著但集合 Wilcoxon p=0.25 (N=3)；IGARCH 特性；槓桿效應不顯著；caveat: H3 COVID 污染。status=draft。",
-    "priority": "P4",
+    "priority": 4,
     "status": "succeeded",
     "experiment_ref": "K1372",
     "results_path": "experiments/k1372/k1372_results.json",
@@ -11132,7 +11132,7 @@
     "id": "fix_mile_a8ac2ae4_sample_period",
     "title": "Fix mile_a8ac2ae4: 修正樣本期間標示（2008-2026 → 2009-2026）",
     "type": "platform_ops",
-    "priority": "P2",
+    "priority": 2,
     "status": "succeeded",
     "created_at": "2026-05-18T21:31:34.810573",
     "description": "mile_a8ac2ae4 (台股大盤集中度) 文章中寫「完整樣本 2008-2026 n=4,227」，但 CSV 核查確認 0050/TSMC 共同有效資料從 2009-01-02 起，2008 全年無共同樣本。應修正為「2009-2026，共 4,227 個報酬觀察值」。Source: codex_24h_review_20260518.json",
@@ -11154,7 +11154,7 @@
     "id": "fix_mile_ae145f60_citation",
     "title": "Fix mile_ae145f60: 替換 Bauer & Swanson 2023 錯引（CPI 非線性反應需正確文獻）",
     "type": "platform_ops",
-    "priority": "P2",
+    "priority": 2,
     "status": "succeeded",
     "created_at": "2026-05-18T21:31:34.810573",
     "description": "mile_ae145f60 (CPI 倒數文) 引用 Bauer & Swanson (2023) 支持「CPI surprise 非線性反應」，但該文討論 FOMC 貨幣政策高頻識別，不是 CPI surprise 股票反應。應替換為研究 inflation surprise 與 equity 非線性反應的文獻（如 Bernanke & Kuttner 2005 JF，或 Cieslak & Schrimpf 2019）。注意：本文時效已過（2026-05-12 CPI 已公佈），修正優先級 P2。Source: codex_24h_review_20260518.json",
@@ -11302,7 +11302,7 @@
     "id": "platform_ops_tw50_staleness_api",
     "task_type": "platform_ops",
     "status": "succeeded",
-    "priority": "P1",
+    "priority": 1,
     "title": "Fix broken tw50-staleness test files: add tw50_date param + build_milestone_description",
     "description": "Two untracked test files reference non-existent API: (1) tests/test_daily_update_tw_staleness.py calls generate_daily_article(..., tw50_date=...) but tw50_date param does not exist in scripts/daily_update.py; (2) tests/test_daily_update_tw_staleness_milestone.py imports build_milestone_description from scripts/daily_update.py — function does not exist. Fix: implement tw50_date optional param and build_milestone_description in scripts/daily_update.py, then verify tests pass.",
     "created_at": "2026-05-19T15:21:06.176471",
@@ -12176,7 +12176,7 @@
   {
     "id": "fb_post_trending_etf_dividend_2026_05_26",
     "task_type": "platform_ops",
-    "priority": "P2",
+    "priority": 2,
     "title": "FB Ivan Lai dual-publish: ETF 配息潮 vol-adjusted 視角 (mile_5b3569c3)",
     "description": "FB Ivan Lai dual-publish: 配息數字背後的風險帳 (mile_5b3569c3). Draft at storage/ops/fb_draft_mile_5b3569c3.md. URL in 1st comment: https://volpred.zeabur.app/v3/reports/mile_5b3569c3. Anti-AI PASS. Do NOT put link in main post body.",
     "status": "failed",
@@ -12243,7 +12243,7 @@
   {
     "id": "fb_post_trending_silicon_layoffs_2026_05_27",
     "task_type": "platform_ops",
-    "priority": "P2",
+    "priority": 2,
     "title": "FB Ivan Lai dual-publish: 矽谷大裁員 × Mag7 CapEx (mile_89889d46)",
     "description": "FB Ivan Lai dual-publish: 裁員八千人，同一季燒掉 $680 億 (mile_89889d46). Draft at storage/ops/fb_draft_mile_89889d46.md (272 字, anti_ai_gate PASS warn=0/3). URL in 1st comment: https://volpred.zeabur.app/v3/reports/mile_89889d46. Do NOT put link in main post body. Need /mcp claude-in-chrome auth session.",
     "status": "blocked",
@@ -12409,7 +12409,7 @@
   {
     "id": "governance_add_awaiting_interactive_session_vocab",
     "task_type": "governance",
-    "priority": "P3",
+    "priority": 3,
     "title": "[governance] Add awaiting_interactive_session to BLOCKED_REASONS vocab",
     "description": "scripts/mark_task_blocked.py::VALID_REASONS 加 awaiting_interactive_session 作 controlled reason，semantic: 任務需要 chrome MCP / FB MCP / 其他 interactive-only auth，hourly cron 無法執行需 user interactive session 接手。同時更新 .claude/rules/control-plane.md 的 Controlled vocabulary 區段。Reason: 2026-05-27 hourly-02 將 2 個 fb_post task mark awaiting_external_data 屬 loose interpretation；future-proof 需正式 vocab。",
     "status": "succeeded",
@@ -15893,7 +15893,7 @@
   {
     "id": "fb_post_pending_mile_1b0477a8",
     "task_type": "platform_ops",
-    "priority": "P2",
+    "priority": 2,
     "title": "FB Ivan Lai dual-publish: AI 集中度 vs VIX 個股波動率 (mile_1b0477a8)",
     "description": "FB Ivan Lai 雙發布 trending 文 mile_1b0477a8: 「VIX 15，個股波動率卻是兩倍半：期權市場在定價什麼？」. 改寫 200-400 字 Ivan Lai 口吻 FB 版（不貼 VolPred 內文），主貼文不放連結，VolPred URL 放第一則留言 https://volpred.zeabur.app/v3/reports/mile_1b0477a8 . 走 .claude/skills/trending-repost/references/fb-ivanlai-tone.md SOP + anti_ai_gate.py。",
     "status": "blocked",
@@ -19119,7 +19119,7 @@
   {
     "id": "paper_review_mile_5f46ac4e",
     "task_type": "paper_review",
-    "priority": "P4",
+    "priority": 4,
     "title": "Paper review (Codex 24h-rule): K1374 除息日台股波動 mile_5f46ac4e",
     "description": "Codex 24h-rule review of published draft mile_5f46ac4e (K1374 除息日台股波動). Check claim-evidence match, anti-AI style, citation/data accuracy, statistical interpretation. Article: /tmp/k1374_article.md; experiment: experiments/k1374/k1374_results.json",
     "status": "succeeded",
@@ -20842,7 +20842,7 @@
     "id": "K1415_vix9d_term_ratio_har",
     "task_type": "experiment",
     "status": "succeeded",
-    "priority": "P3",
+    "priority": 3,
     "title": "K1415: VIX9D/VIX term ratio as marginal predictor of next-day RV (HAR-RV baseline)",
     "description": "OLS-based experiment evaluating short-end VIX term structure (VIX9D/VIX ratio) as marginal predictor of next-day SPY realized variance over HAR-RV baseline. Non-ML novel method (avoids quartet diversity block). Scope: SPY daily 2014-2026, OOS 2020-2026 expanding window, QLIKE + DM(HAC) test. Monetization angle: if marginal R²≥1% confirmed, VIX9D/VIX serves as intraday vol-regime gate for existing conservative VT strategy.",
     "source": "main_thread_autonomous",
@@ -21245,7 +21245,7 @@
     "id": "gen_article_k1151_general",
     "title": "K1151 general-audience: earnings surprise 越大波動越大？跨美日驗證的反直覺結論",
     "task_type": "daily_article",
-    "priority": "P3",
+    "priority": 3,
     "status": "succeeded",
     "source": "hourly-14-discovered",
     "description": "K1151 跨市場結論: earnings binary（有/無 announcement）顯著預測波動率，但 continuous surprise size（actual vs estimate 差距大小）統計上完全無效。US K1147+K1151 + JP K1150+K1157 兩次 replication 一致：binary θ bootstrap t≈+4.49 至 +13.03 PASS；continuous θ t≈+1.11 至 +1.32 NS。ΔAIC binary - continuous = -5479 (US) / -2551 (JP) 強烈偏好 binary。機制：attention spike、options IV crush unwind、scheduled hedging — 非 surprise-size scaling。寫 general-audience 文章解釋此反直覺結論。",
@@ -21311,7 +21311,7 @@
     "id": "K1414_paper3_hln_retrofit",
     "title": "K1414: Paper 3 HLN small-sample DM correction retrofit (TW0050-N225 唯一 Harvey sig)",
     "task_type": "experiment",
-    "priority": "P2",
+    "priority": 2,
     "status": "blocked",
     "description": "Paper 3 (DCC-Clayton) submission blocker per research_program.md open question. K1412 partial update 跑了 5 OOS starts (2014-2018) Student-t DM_t=3.04-3.89 raw `|t|>3` PASS，但 Codex review FAIL: 自製判定非 HLN small-sample correction。需做：(a) 對 5 OOS starts 應用 HLN (1997) correction: t_HLN = t * sqrt((n+1-2h+h(h-1)/n)/n), h=horizon=1 → t/sqrt((n-1)/n) ≈ t for n large；但對 small-sample OOS 仍須正式套用 (b) 三因子 driver identification: λ_L_clayton=0.444 vs full_sample_corr=0.586 vs Asian trading-hour overlap (CLOSE-to-CLOSE vs OPEN-to-CLOSE) (c) 若 HLN-retrofit 仍 robust → Paper 3 submission OK；若 fail → 撤回 唯一 Harvey sig 主張。Main thread only (paper methodology decision)，禁 background agent。實驗目錄 experiments/k1414/。",
     "source": "research_program_open_question",
@@ -21329,7 +21329,7 @@
     "id": "K1416_paper3_hln_retrofit",
     "title": "K1416: Paper 3 HLN small-sample DM correction retrofit (TW0050-N225 唯一 Harvey sig) [renamed from K1414 — kid_collision]",
     "task_type": "experiment",
-    "priority": "P2",
+    "priority": 2,
     "status": "succeeded",
     "description": "Paper 3 (DCC-Clayton) submission blocker per research_program.md open question. K1412 partial update 跑了 5 OOS starts (2014-2018) Student-t DM_t=3.04-3.89 raw `|t|>3` PASS，但 Codex review FAIL: 自製判定非 HLN small-sample correction。需做：(a) 對 5 OOS starts 應用 HLN (1997) correction: t_HLN = t * sqrt((n+1-2h+h(h-1)/n)/n), h=horizon=1 → t/sqrt((n-1)/n) ≈ t for n large；但對 small-sample OOS 仍須正式套用 (b) 三因子 driver identification: λ_L_clayton=0.444 vs full_sample_corr=0.586 vs Asian trading-hour overlap (CLOSE-to-CLOSE vs OPEN-to-CLOSE) (c) 若 HLN-retrofit 仍 robust → Paper 3 submission OK；若 fail → 撤回 唯一 Harvey sig 主張。Main thread only (paper methodology decision)，禁 background agent。實驗目錄 experiments/k1416/ (k1414 已被 SPY r² QLIKE Meta-Analysis 占用，已 rename)。",
     "source": "research_program_open_question",
@@ -22357,7 +22357,7 @@
     "task_type": "daily_article",
     "title": "K562 general-audience 發佈：類股輪動加波動目標的八關體檢",
     "description": "Draft (storage/drafts/k562_general_draft.md, 14KB May 18) 既有但未發布到 feed。anti_ai_gate FAIL 2 hits 套路句，需 inline 修正後 publish via publish_draft.py。",
-    "priority": "P2",
+    "priority": 2,
     "status": "succeeded",
     "source": "hourly_dispatch_autogen",
     "created_at": "2026-06-06T00:11:23+08:00",
@@ -23100,7 +23100,7 @@
     "id": "fb-friday-crash-event-1780744835",
     "task_type": "platform_ops",
     "status": "succeeded",
-    "priority": "P3",
+    "priority": 3,
     "title": "FB Ivan Lai 雙發佈: Friday 06-05 vol-crash event article (mile_f900a8c5)",
     "description": "VolPred article mile_f900a8c5 已 publish；改寫 FB 版本（重組 200-400 字，主貼文不放連結，VolPred URL 放第一則留言：https://volpred.zeabur.app/v3/reports/mile_f900a8c5）並走 Claude in Chrome 推送。SOP: .claude/skills/trending-repost/references/fb-ivanlai-tone.md。必跑 anti_ai_gate.py FB mode。",
     "created_at": "2026-06-06T11:17:54+00:00",
@@ -23137,7 +23137,7 @@
   {
     "task_id": "task-k1303-v2-codex-review",
     "task_type": "paper_review",
-    "priority": "P2",
+    "priority": 2,
     "status": "succeeded",
     "title": "K1303-v2 Codex primary-path re-review (post ABD revision)",
     "description": "Codex primary-path review of K1303-v2 code after 3-defect ABD revision. Check: (1) BNS 3-sigma jump threshold correctly identifies jump days; (2) HAC DM test via dm_test() from model_evaluation.py; (3) standard 1-step lag. Blocking knowledge.json entry for K1303 NULL result.",
@@ -23148,7 +23148,7 @@
   {
     "task_id": "task-k1137-v2-codex-review",
     "task_type": "paper_review",
-    "priority": "P2",
+    "priority": 2,
     "status": "succeeded",
     "title": "K1137-v2 Codex re-review (post regime window fix)",
     "description": "Codex re-review of K1137-v2 after regime window off-by-one fix. Check: vix_series[i-w:i] (unshifted) used for quantile window; vix_lag1 used for regime-label comparison only. Also verify 10% guard is now hard skip. If PASS, enables K1137 knowledge.json entry.",
@@ -23159,7 +23159,7 @@
   {
     "task_id": "task-k1138-v2-codex-review",
     "task_type": "paper_review",
-    "priority": "P2",
+    "priority": 2,
     "status": "succeeded",
     "title": "K1138-v2 Codex re-review (post BH-FDR fix)",
     "description": "Codex re-review of K1138-v2 after BH-FDR enforcement fix at asset/model summary level. Check: asset_pass = any(c[DM_HLN_t]>2.0 AND c[DM_HLN_p_BH]<0.05 for c in asset_cells). IWM correctly NULL. If PASS, enables K1138 knowledge.json entry.",
@@ -25778,7 +25778,7 @@
     "id": "K1403_daily_article_cross_asset_quantile",
     "title": "K1403 daily_article: HAR-RV Quantile 跨資產 robustness — 中位數輸 OLS、尾端覆蓋率可信",
     "task_type": "daily_article",
-    "priority": "P2",
+    "priority": 2,
     "status": "succeeded",
     "source": "main_thread_promoted",
     "description": "Promote K1403 cross-asset robustness 結果寫成 daily_article。Layer 4 dedup: 與 K1313 single-asset SPY 全通過 arc 區隔（mixed-result mid-vs-tail 新 arc）。Audience=research（含 K-id/Kupiec/QLIKE/DM stats）。Brief 詳見 agent dispatch prompt。",
@@ -25835,7 +25835,7 @@
   {
     "id": "platform_ops_worktree_audit_20260608_1507",
     "task_type": "platform_ops",
-    "priority": "P2",
+    "priority": 2,
     "title": "Worktree state audit + orphan policy",
     "description": "Audit all git worktrees: list every worktree, cross-check against active task claims (storage/next_tasks.json in_progress + agent sessions), check lock-holder PID liveness (etime), document orphans. Goal: confirm only living agents hold worktrees. Do NOT force-remove locked worktrees. Output: storage/ops/worktree_audit_$(date +%Y%m%d_%H%M).md with table {worktree_path, branch, locked_by, pid_alive, claim_match, recommended_action}.",
     "created_at": "2026-06-08T07:08:00+00:00",
@@ -27304,7 +27304,7 @@
   {
     "id": "platform_ops_orphan_branch_audit_20260610",
     "task_type": "platform_ops",
-    "priority": "P3",
+    "priority": 3,
     "status": "succeeded",
     "title": "Orphan worktree branch audit (K1423/K1427/K1431)",
     "description": "Three orphan worktree branches not merged to main:\n  - worktree-agent-a984dee3c1e31ca5c (K1423 PCA factor regression, d15e5726) — main has NO experiments/k1423/ but knowledge.json has 1 K1423 entry → branch content likely orphaned, needs cherry-pick or branch delete after verification\n  - worktree-agent-add8052fcf1842aba (K1427 sector dispersion, 4d3381dd + 3dcace48 IS PoC MIXED) — main has experiments/k1427/ but missing results.json; branch has more complete content\n  - worktree-agent-a446f906b29eeb057 (K1431 VIX9D HAR-RV OOS, c924f2b8 NULL p=0.54) — main has complete experiments/k1431/ AND main commit 644aa538 message says 'cherry-pick'; safe to delete branch but verify content parity first\n\nAction: for each branch, diff vs main to determine if branch content is (a) already cherry-picked (safe delete) or (b) orphaned (needs merge or archive). Use `git log --oneline main..<branch>` + `git diff main..<branch> -- experiments/`.\n\nReferences: ops audit triggered by K1439 worktree cleanup on 2026-06-10 hourly-02 fire.",
@@ -30090,7 +30090,7 @@
   {
     "id": "K1439_article_research",
     "task_type": "daily_article",
-    "priority": "P3",
+    "priority": 3,
     "status": "succeeded",
     "title": "K1439: research-audience article on USD regime conditioning of cross-asset RV",
     "description": "Write research-audience feed article based on K1439 experiment (DXY/UUP regime conditioning, 5 assets EEM/GLD/DBC/USO/DBB, 2010-2026 N=4131, PASS verdict 4/5 Bonferroni-sig). Evidence package: results table + figure refs at experiments/k1439/. Audience=research. Style: anti-AI; must include ≥3 verifiable numbers + table + figure ref + interpretation.",
@@ -31149,7 +31149,7 @@
     "id": "K1328_v2_fix_methodology",
     "task_type": "experiment",
     "status": "succeeded",
-    "priority": "P3",
+    "priority": 3,
     "title": "K1328-v2: 修正 HAR ceiling validation methodology (Codex FAIL → matched refit + nested OOS)",
     "description": "K1328 v1 Codex review FAIL (experiments/k1328/codex_review.md). 修正兩處：(1) HAR 與 ML 同 refit cadence（建議都 21d 或都 1d），不可不對稱。(2) Stage A 在 burn-in/holdout 期間選 best HAR scheme（≤ 2020-12-31），Stage B 才用 2021-01-04+ 獨立 OOS evaluate ceiling claim。修完 re-run + 重跑 Codex review，PASS 才寫 knowledge.json。",
     "created_at": "2026-06-14T05:19:45+00:00",
@@ -31166,7 +31166,7 @@
     "id": "K1327_codex_review_followup",
     "task_type": "experiment",
     "status": "succeeded",
-    "priority": "P3",
+    "priority": 3,
     "title": "K1327 補 Codex review (codex_loop daemon 跳過 review gate)",
     "description": "K1327 (Adaptive Multi-Factor HAR) 被 codex-desktop daemon mark succeeded 但 experiments/k1327/codex_review.md 不存在 — daemon 跳過 .claude/rules/experiments.md 強制 Codex review gate（K1328 同 pattern 已 hourly-13 catch FAIL）。補 review 重點：(1) lookahead safety (156 shifted daily features), (2) seed 固定, (3) HAR vs adaptive multi-factor 公平比較 (same window + cadence), (4) verdict 是否如實. 若 PASS 才寫 knowledge.json；FAIL 同 K1328 處理（revert status + 開 v2 fix task）。完整 SOP: hourly-13 fire K1328 範例 (experiments/k1328/codex_review.md)。",
     "created_at": "2026-06-14T05:21:24+00:00",
@@ -31182,7 +31182,7 @@
   {
     "id": "hourly_14_k1327_codex_fail_closure",
     "task_type": "platform_ops",
-    "priority": "P2",
+    "priority": 2,
     "status": "succeeded",
     "title": "K1327 Codex review FAIL closure + same-root extension of K1328 lesson",
     "description": "codex_loop daemon 在 K1327_codex_review_followup 跑 Codex review → verdict=FAIL（baseline vs challenger 沒有 matched training/refit cadence + 結論 overstates）。Followup task succeeded（review 完成）但**源頭 K1327 仍 succeeded**未 revert，與 hourly-13 K1328 同 root cause 的延伸 pattern。本 fire 補：(1) K1327 status → failed (2) K1327-v2 開 fix task (3) commit experiments/k1327/codex_review.md (4) error_log 補 K1327 case 到 hourly-13 entry。Source codex_review.md verdict=FAIL 載入 audit。",
@@ -31198,7 +31198,7 @@
   {
     "id": "K1327_v2_fix_methodology",
     "task_type": "experiment",
-    "priority": "P3",
+    "priority": 3,
     "status": "succeeded",
     "title": "K1327-v2: Adaptive Multi-Factor HAR — matched training/refit + 修正 summary overstating",
     "description": "K1327 Codex review FAIL → 修正：(1) baseline HAR3 與 challenger 跑相同 rolling/window/refit_every（推薦 rolling=True, window=1000, refit_every=21 for all）；或同跑 static expanding for both. (2) 若多 challenger 必須有不同 refit cadence，至少做 ablation 分離 model class effect / sample effect / refit effect. (3) Summary 改寫：明確點出 CONDITIONAL_PASS 是「在當前 setup 下 multifactor 略優但 not Harvey |t|>3」，**不宣稱**「Cinquetti 因子賽贏 HAR」(4) 重跑後寫 results + 重新 Codex review.",
@@ -31345,7 +31345,7 @@
   {
     "id": "k1095_article_correction_codex_fail_20260614",
     "task_type": "governance",
-    "priority": "P2",
+    "priority": 2,
     "title": "K1095 mile_c11a2ced 文章修正: Codex FAIL → 軟化 DM/causal claim + pre-event 加 ex-post disclaimer + 重命名 dm_test→hac_diff_test + README 單位修正",
     "description": "對應 storage/ops/paper_reviews/mile_c11a2ced_codex_review.md (verdict=FAIL)。修 4 點: (1) feed.json 10758 改 DM 描述→「以 HAC t-test 比較日報酬差」+ 軟化 causal claim「整體預測準確度」→ 「樣本內觀察到」; (2) experiments/k1095/k1095.py:541 函式 dm_test rename → hac_diff_return_test 並更新 docstring; (3) experiments/k1095/README.md:85 Table 2 column rename + line 87 unit 改 bp/y 或 daily 對應; (4) 加 disclaimer: pre-event window 使用 ex-post 公告日, 不視為已 verified tradable signal; 後續若無 known-in-advance schedule source 需重 frame 為 descriptive partition. 另排 K1095-v2 follow-up task: rebuild event overlay with known-in-advance schedule.",
     "source": "auto_discovered_from_codex_review",
@@ -31362,7 +31362,7 @@
   {
     "id": "k1095_v2_known_in_advance_schedule",
     "task_type": "experiment",
-    "priority": "P3",
+    "priority": 3,
     "title": "K1095-v2: 用 known-in-advance schedule 重做台股事件切換 VT (修 lookahead + T+1 mapping)",
     "description": "對應 K1095 Codex review (mile_c11a2ced) FAIL 後續. 目標: (1) 找 known-in-advance schedule source (FinMind earnings_announcement_schedule 或 TWSE 預告 RSS, 不可用事後 announce date); (2) 將 announcement-day mapping 改為 T+1 (台股盤後揭露慣例); (3) 重跑 K1095 流程 + Sharpe / HAC t-test / event-window decomposition; (4) 比較 v2 結論是否仍為 switch 輸給純 A4f, 若是則升格為 tradable claim, 若否則維持 descriptive 結論. 完成後更新 mile_c11a2ced corrections 或發 v2 mile article.",
     "source": "auto_discovered_from_k1095_correction",
@@ -33816,7 +33816,7 @@
   {
     "id": "trending_repost_20260617_1211",
     "task_type": "trending_repost",
-    "priority": "P3",
+    "priority": 3,
     "title": "Trending repost — FOMC 決議日 / 市場波動率主題（hourly-12 自選）",
     "description": "掃 trending sources（havingchien / Stratechery / 凱基/Ranger/元大 / 國外 forums / X / 高頻論壇），結合 FOMC 6/17 決議日語境，挑 1 篇有 VolPred angle 的主題改寫。避開 AI capex / 大型科技股 vol / MOVE-VIX CPI / FOMC 點陣圖（近期已 cover）。Daily cap 0/2 today。",
     "status": "succeeded",
@@ -37869,7 +37869,7 @@
     "id": "platform_ops_arc_dedup_gate_v3_entity_granularity_20260624",
     "task_type": "platform_ops",
     "status": "succeeded",
-    "priority": "P2",
+    "priority": 2,
     "title": "[platform_ops] arc_dedup gate v3 — narrative_axis 與 entity 粒度區分（治本 release 飽和）",
     "description": "## 根因\n\narc_dedup gate v2 用 (entities + conclusion_class + mechanisms) 三元組判 dup，過粗。本日（2026-06-24）K1547 (CTA crisis alpha) 被 mile_2849a7b5 (K1417 paper3 H2 bootstrap) 誤判同 arc — 兩篇 reader-facing narrative 完全不同（投資商品反迷思 vs paper methodology 統計穩健性）但 entities/conclusion/mechanisms 三元組全 match。已在 docs/error_log.md 2026-06-24 entry 記載 strike 2 證據（strike 1 = mile_bb520db8 over-match 週期）。\n\n## 任務\n\nRefactor src/volpred/publisher/arc_dedup.py（或同義路徑）至 v3：\n\n1. entities 細分兩集合：paper_methodology_entities（PAPER_N, BOOTSTRAP_TEST, MCS, HAC, DM, ROBUSTNESS 等）vs reader_narrative_entities（CTA_ETF, DBMF, KMLM, STRESS_REGIME, CRISIS_ALPHA, MOMENTUM 等）\n2. 加 narrative_axis 維度：commodity_myth / methodology_robustness / event_window / regime_signal / portfolio_strategy / risk_metric / structural_etf 等\n3. 判 dup 規則：shared_entities ≥3 但 narrative_axis 不同 → 不算 dup\n4. 加 unit test 用 K1547 vs K1417 作 known false-positive 反例（必須 NOT dup）\n5. 同時加 dup_audit script — 掃近 30 天 publish skip 中 narrative_axis 不同的 case，產出 dup_waiver candidate list（給互動 session 審）\n\n## 派工建議\n\n- 模型：sonnet medium（refactor + test）或 codex（second opinion）\n- 不走 worktree（單一 publisher path edit），主目錄 direct edit\n- 完成後跑 publisher unit tests 全綠 + arc_dedup regression test\n- 完成後 dry-run `scripts/refill_task_pool.py --dry-run --target 8` 看 candidates 通過率是否回升\n\n## 不可\n\n- 不可放寬到「所有 narrative_axis 不同都不算 dup」— 留 entity overlap >=5 仍判 dup 的兜底\n- 不可移除 K1054-style same-K-id 硬 gate（KEEP block 鬼打牆 fix）\n",
     "created_at": "2026-06-24T15:15:00+08:00",
@@ -40926,7 +40926,7 @@
     "task_type": "trending_repost",
     "title": "FB 發文：科技巨頭 AI CapEx 變現缺口 + IV skew 拐點",
     "description": "發佈 FB Ivan Lai 貼文（草稿在 /tmp/fb_post_trending_ai_capex.md）。需要 Chrome MCP。mile_id: mile_f5f4cb43。主貼文不放連結，VolPred 連結放第一則留言：https://volpred.zeabur.app/v3/reports/mile_f5f4cb43",
-    "priority": "P2",
+    "priority": 2,
     "status": "blocked",
     "requires_interactive": true,
     "requires_chrome_mcp": true,
@@ -42284,7 +42284,7 @@
   {
     "id": "paper_compliance_scrub_vt_trend_body_v3_kid_remove",
     "task_type": "paper_body",
-    "priority": "P1",
+    "priority": 1,
     "status": "succeeded",
     "title": "[論文管線] vt-trend-following body_v3.tex K-id scrub（11 unique visible Internal experiment tags 移除）",
     "description": "Per paper_pipeline_status.json vt-trend-following blocker：codex gate confirms body_v3.tex has 11 unique visible K-ids in abstract/body/conclusion (K1192/K1178/K1376/K1417/K898/K1193/K1457/K1458 等). 機械清掉 K-id phrasings (e.g. 'K1192 canonical', 'K1178 canonical:', 'K1376 task audit') 保留數字。xelatex 重編 → compliance gate verify clean → update paper_pipeline_status.json compliance_scrub_done=true. 老闆 KEEP block 列 P1 queued.",
@@ -45202,7 +45202,7 @@
   {
     "id": "telegram-4",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T07:50:55.628130+00:00",
@@ -45230,7 +45230,7 @@
   {
     "id": "telegram-5",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T07:52:21.052185+00:00",
@@ -45258,7 +45258,7 @@
   {
     "id": "telegram-e2e-test",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T07:58:19.697644+00:00",
@@ -45286,7 +45286,7 @@
   {
     "id": "telegram-11",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T08:03:11.817774+00:00",
@@ -45314,7 +45314,7 @@
   {
     "id": "telegram-13",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T08:05:26.614988+00:00",
@@ -45342,7 +45342,7 @@
   {
     "id": "telegram-19",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T08:31:32.816113+00:00",
@@ -45370,7 +45370,7 @@
   {
     "id": "telegram-23",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T09:34:47.337672+00:00",
@@ -45398,7 +45398,7 @@
   {
     "id": "telegram-26",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T10:09:04.623454+00:00",
@@ -45426,7 +45426,7 @@
   {
     "id": "telegram-33",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T12:22:10.726576+00:00",
@@ -45668,7 +45668,7 @@
   {
     "id": "telegram-41",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T14:00:57.695588+00:00",
@@ -45687,7 +45687,7 @@
   {
     "id": "telegram-45",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T14:34:49.853090+00:00",
@@ -45715,7 +45715,7 @@
   {
     "id": "platform-ops-tg-emoji-mirror",
     "task_type": "platform_ops",
-    "priority": "P3",
+    "priority": 3,
     "source": "telegram-45-followup",
     "status": "succeeded",
     "created_at": "2026-07-02T14:40:00.000000+00:00",
@@ -45751,7 +45751,7 @@
   {
     "id": "telegram-49",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-02T15:02:10.533257+00:00",
@@ -45780,7 +45780,7 @@
   {
     "id": "platform-ops-draft-alert-noise-quiet-20260702",
     "task_type": "platform_ops",
-    "priority": "P3",
+    "priority": 3,
     "source": "telegram-responder",
     "status": "succeeded",
     "dispatch_lane": "agent",
@@ -46582,7 +46582,7 @@
   {
     "id": "telegram-57",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T02:25:35.157714+00:00",
@@ -46610,7 +46610,7 @@
   {
     "id": "telegram-59",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T02:26:24.732774+00:00",
@@ -46682,7 +46682,7 @@
   {
     "id": "telegram-64",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T03:56:09.413731+00:00",
@@ -46795,7 +46795,7 @@
   {
     "id": "telegram-67",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T04:51:50.688147+00:00",
@@ -46823,7 +46823,7 @@
   {
     "id": "fix-nfp-date-mile_35eef830",
     "task_type": "event_article",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram-67-followup",
     "status": "succeeded",
     "created_at": "2026-07-03T04:54:19.750628+00:00",
@@ -46859,7 +46859,7 @@
   {
     "id": "telegram-70",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T07:51:23.474976+00:00",
@@ -46887,7 +46887,7 @@
   {
     "id": "telegram-75",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T08:01:16.025219+00:00",
@@ -46915,7 +46915,7 @@
   {
     "id": "telegram-77",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T08:02:05.649415+00:00",
@@ -47628,7 +47628,7 @@
   {
     "id": "telegram-86",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T14:50:21.801833+00:00",
@@ -47740,7 +47740,7 @@
   {
     "id": "ops-drought-trigger-tighten",
     "task_type": "platform_ops",
-    "priority": "P2",
+    "priority": 2,
     "source": "telegram-responder",
     "status": "succeeded",
     "created_at": "2026-07-03T14:53:44.805372+00:00",
@@ -47776,7 +47776,7 @@
   {
     "id": "telegram-89",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T15:01:43.924075+00:00",
@@ -47847,7 +47847,7 @@
   {
     "id": "telegram-92",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T15:08:09.518288+00:00",
@@ -47875,7 +47875,7 @@
   {
     "id": "telegram-95",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-03T15:22:39.989760+00:00",
@@ -48368,7 +48368,7 @@
   {
     "id": "telegram-110",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T04:45:11.058634+00:00",
@@ -48582,7 +48582,7 @@
   {
     "id": "telegram-114",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T06:18:42.715346+00:00",
@@ -48601,7 +48601,7 @@
   {
     "id": "platform_ops-release-layer-deadlock-ROOTFIX-20260704",
     "task_type": "platform_ops",
-    "priority": "P1",
+    "priority": 1,
     "source": "boss-telegram-msg114",
     "status": "succeeded",
     "created_at": "2026-07-04T06:26:11.002489+00:00",
@@ -48638,7 +48638,7 @@
   {
     "id": "telegram-117",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T06:41:37.177127+00:00",
@@ -48666,7 +48666,7 @@
   {
     "id": "telegram-121",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T07:15:45.071573+00:00",
@@ -48694,7 +48694,7 @@
   {
     "id": "telegram-124",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T07:23:19.972770+00:00",
@@ -48945,7 +48945,7 @@
   {
     "id": "telegram-127",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T07:45:47.196827+00:00",
@@ -48974,7 +48974,7 @@
   {
     "id": "platform_ops-dispatch-supervisor-cutover-20260704",
     "task_type": "platform_ops",
-    "priority": "P1",
+    "priority": 1,
     "source": "boss-telegram-msg127",
     "status": "succeeded",
     "created_at": "2026-07-04T07:51:01.043150+00:00",
@@ -49010,7 +49010,7 @@
   {
     "id": "telegram-132",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T08:31:45.413044+00:00",
@@ -49039,7 +49039,7 @@
   {
     "id": "platform_ops_verify_supervisor_first_real_fire_1707",
     "task_type": "platform_ops",
-    "priority": "PP1",
+    "priority": 1,
     "source": "cutover-followup",
     "status": "succeeded",
     "created_at": "2026-07-04T08:33:11.000000+00:00",
@@ -49278,7 +49278,7 @@
   {
     "id": "telegram-141",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T13:16:17.825190+00:00",
@@ -49297,7 +49297,7 @@
   {
     "id": "telegram-143",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T13:17:35.406595+00:00",
@@ -49325,7 +49325,7 @@
   {
     "id": "platform_ops_host_cron_recency_gate",
     "task_type": "platform_ops",
-    "priority": "P3",
+    "priority": 3,
     "source": "agent_discovered",
     "status": "succeeded",
     "created_at": "2026-07-04T13:23:53.923838+00:00",
@@ -49361,7 +49361,7 @@
   {
     "id": "platform_ops_parallel_draft_writer_throughput",
     "task_type": "platform_ops",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T13:27:45.877580+00:00",
@@ -49390,7 +49390,7 @@
   {
     "id": "telegram-149",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T14:27:56.100981+00:00",
@@ -49418,7 +49418,7 @@
   {
     "id": "telegram-151",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T14:28:20.368613+00:00",
@@ -49536,7 +49536,7 @@
   {
     "id": "telegram-154",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T14:37:44.555345+00:00",
@@ -49565,7 +49565,7 @@
   {
     "id": "telegram-156",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T14:38:02.512450+00:00",
@@ -49900,7 +49900,7 @@
   {
     "id": "telegram-160",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T14:54:25.823687+00:00",
@@ -49928,7 +49928,7 @@
   {
     "id": "telegram-163",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T15:00:50.753070+00:00",
@@ -49956,7 +49956,7 @@
   {
     "id": "telegram-165",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T15:01:13.336155+00:00",
@@ -49984,7 +49984,7 @@
   {
     "id": "telegram-167",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T15:01:35.437720+00:00",
@@ -50012,7 +50012,7 @@
   {
     "id": "telegram-169",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T15:02:52.468906+00:00",
@@ -50167,7 +50167,7 @@
   {
     "id": "telegram-173",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T15:18:36.686477+00:00",
@@ -50195,7 +50195,7 @@
   {
     "id": "telegram-176",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T15:24:56.342877+00:00",
@@ -50223,7 +50223,7 @@
   {
     "id": "telegram-179",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T15:37:07.013729+00:00",
@@ -50251,7 +50251,7 @@
   {
     "id": "telegram-182",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T16:50:51.739766+00:00",
@@ -50279,7 +50279,7 @@
   {
     "id": "telegram-185",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-04T17:08:15.840686+00:00",
@@ -50737,7 +50737,7 @@
   {
     "id": "paper2_taiwan_vt_body_main_version_divergence",
     "task_type": "paper_decision",
-    "priority": "P2",
+    "priority": 2,
     "status": "succeeded",
     "title": "[paper_decision] taiwan-vt body.tex vs body_v3.tex + main.tex vs main_v3.tex 版本分岔 reconcile",
     "description": "2026-07-05 hourly-16 修 sec:tsmc gamma provenance 時發現的結構性版本分岔（需主線程 paper_decision，勿丟 background agent 改 .tex）：\n\n1. main.tex \\input{body}（body.tex），main_v3.tex \\input{body_v3}（body_v3.tex）— 兩個 main 各自指向不同 body。\n2. Table gamma TSMC(2330) 全樣本值兩版不一致：\n   - body_v3.tex:151 → gamma=0.052, t=3.98（source: K892 canonical, N=6525）\n   - body.tex:152    → gamma=0.039, t=0.87（source: paper/taiwan-vt/data/tsmc_canonical.json）\n   顯著性結論相反（3.98 顯著 vs 0.87 不顯著）。\n3. body.tex:683 仍保有本次已在 body_v3 修掉的無來源數字（0.124/2.46 + 0.054/1.07 insignificant）。\n\n決策項：(a) 確認哪個 main/body 是投稿 canonical（pipeline_status 追 body_v3/K892 spec，但 paper-guide 列 main.tex；查 paper-update CLI 實際同步哪個 → 對齊 docs/paper-guide.md + 消除另一版或標 _archived）；(b) TSMC 全樣本 gamma 用哪個 canonical source（K892 0.052/3.98 vs data/tsmc_canonical.json 0.039/0.87）— 追兩者 spec/window 差異，擇一為準並全文一致；(c) 收斂後 body.tex:683 同步修（若 body.tex 保留為 canonical）或廢棄。\n\n研究誠實：兩版 TSMC 顯著性相反是投稿風險，reviewer 會抓。不可放著。\n驗證：reconcile 後 grep 全文 TSMC gamma 一致 + reproduce gate + Codex review。",
@@ -51125,11 +51125,37 @@
     "id": "platform_ops_priority_type_normalize_c8",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C8: priority 型別統一 — 寫入端 normalize + 存量 90 筆字串 sweep",
-    "description": "讀取端 coercion 已修（2026-07-05：continue_task_dispatch._coerce_priority + generate_handoff）。剩：(1) 追出寫入字串 priority 的來源（agent 手寫 entry / refill scripts）在寫入端 normalize+validate；(2) 一次性 sweep 把存量 90 筆 'P<n>' 字串轉 int（flock 協議）。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "讀取端 coercion 已修（2026-07-05：continue_task_dispatch._coerce_priority + generate_handoff）。剩：(1) 追出寫入字串 priority 的來源（agent 手寫 entry / refill scripts）在寫入端 normalize+validate；(2) 一次性 sweep 把存量 90 筆 'P<n>' 字串轉 int（flock 協議）。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T23:43:08.767089+00:00",
+    "claim_session_id": "075693bf47c0",
+    "status_history": [
+      {
+        "ts": "2026-07-05T23:43:08.767395+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T23:43:09.003205+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T23:53:55.219686+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T23:43:09.002921+00:00",
+    "completed_at": "2026-07-05T23:53:55.219405+00:00",
+    "result": "Added shared volpred.ops.next_tasks priority normalizer/validator and wired next_tasks writers/materializers to normalize before write. Swept storage/next_tasks.json from 95 legacy string priorities (P<n>/PP1) to all-int priorities; verification shows 2155/2155 priorities are int. Tests: py_compile targeted scripts; pytest next_tasks/task_pool/sync/refill/generator/digest/dedupe/block/content/question groups passed."
   },
   {
     "id": "platform_ops_reader_metrics_feedback_loop_c9",
@@ -51455,7 +51481,7 @@
   {
     "id": "platform_ops_taiwan_vt_reproduce_experiments_rebind_body_v3",
     "task_type": "platform_ops",
-    "priority": "P2",
+    "priority": 2,
     "source": "agent_discovered",
     "status": "succeeded",
     "created_at": "2026-07-05T11:25:47.021010+00:00",
@@ -51491,7 +51517,7 @@
   {
     "id": "paper2_taiwan_vt_body_v3_individual_stock_provenance",
     "task_type": "paper_body",
-    "priority": "P3",
+    "priority": 3,
     "source": "agent_discovered",
     "status": "pending",
     "created_at": "2026-07-05T11:25:47.021010+00:00",
@@ -51501,7 +51527,7 @@
   {
     "id": "paper2_taiwan_vt_body_v3_se_method_and_zero_mean_disclosure",
     "task_type": "paper_body",
-    "priority": "P2",
+    "priority": 2,
     "source": "agent_discovered",
     "status": "pending",
     "created_at": "2026-07-05T11:33:02.518339+00:00",
@@ -51649,7 +51675,7 @@
   {
     "id": "telegram-203",
     "task_type": "telegram_reply",
-    "priority": "P1",
+    "priority": 1,
     "source": "telegram",
     "status": "succeeded",
     "created_at": "2026-07-05T19:03:49.586942+00:00",

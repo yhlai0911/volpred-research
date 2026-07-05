@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import fcntl
 import json
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,7 +20,11 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
+
+from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 CLAIM_FIELDS = ("claimed_by", "claimed_at", "claim_session_id")
 
@@ -128,6 +133,7 @@ def _load_tasks(handle) -> list[Any]:
 
 
 def _write_tasks(handle, tasks: list[Any]) -> None:
+    normalize_task_priorities(tasks)
     payload = json.dumps(tasks, ensure_ascii=False, indent=2)
     payload.encode("utf-8")
     handle.seek(0)

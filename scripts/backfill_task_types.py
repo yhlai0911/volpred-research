@@ -26,7 +26,11 @@ from pathlib import Path
 from collections import Counter
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
+
+from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 # Two-stage classifier:
 #  Stage 1 — paper-related (highest priority, action-verb decides sub-type)
@@ -127,6 +131,7 @@ def main() -> int:
                         })
 
             if args.apply:
+                normalize_task_priorities(tasks)
                 fh.seek(0); fh.truncate()
                 json.dump(tasks, fh, indent=2, ensure_ascii=False)
         finally:
