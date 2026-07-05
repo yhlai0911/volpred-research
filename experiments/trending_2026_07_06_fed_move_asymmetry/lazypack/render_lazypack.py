@@ -379,7 +379,7 @@ def render_panel_2(data: dict, fonts: FontBook) -> Path:
         RED,
     )
 
-    rounded(draw, (618, 568, 1504, 842), fill=CARD, outline=GRID)
+    rounded(draw, (618, 568, 1504, 892), fill=CARD, outline=GRID)
     draw_text(draw, (662, 608), "殖利率 realized semivariance", fonts.bold(34), fill=INK)
     draw_text(draw, (662, 660), "若只是利率上行日自己更劇烈，這裡的比值應該也很大。", fonts.regular(25), fill=MUTED)
     max_sv = max(
