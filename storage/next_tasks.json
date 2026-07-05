@@ -51215,10 +51215,36 @@
     "task_type": "platform_ops",
     "priority": "P2",
     "source": "agent_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T11:25:47.021010+00:00",
     "title": "taiwan-vt replication package rebind：reproduce.py + experiments.md 綁定舊 body/body_v2 → canonical body_v3",
-    "description": "2026-07-05 hourly-19 在 paper2_taiwan_vt_body_main_version_divergence reconcile 時發現：reproduce.py docstring 仍寫「compares against body_v2.tex / section5_hf_draft.tex」，程式碼內大量 comment 引用舊 body.tex / body_v2.tex 行號（L146/L147/L151/L164/L260/L201/L34/L51/L440/L444），而 canonical 已封存舊 body.tex 到 _superseded/、正式版是 body_v3.tex（main_v3.tex，7-table main + supplement 架構）。此即 paper_audit 2026-06-10 L234 標記的「experiments.md 表號對映舊 66pp 版（Table 1-14）、replication package canonical mapping 文件失準」— JBF/PBFJ replication package hard requirement。\n\n功能面 reproduce.py 現況 GREEN 96.7%（145/155 traceable，實際驗的多是 canonical K1302/K1302b/K1370/paper2_R1 值），問題在 (a) docstring + comment 行號引用過期、(b) experiments.md 的 Table 編號對映舊架構。\n\n工作：(1) reproduce.py docstring 改 body_v3.tex；comment 行號 re-map 到 body_v3.tex 對應行（或改成 section 引用降耦合）；(2) experiments.md Table 1-14 對映重寫成 body_v3 的 7-table main + supplement 架構；(3) 重跑 reproduce.py 確認仍 GREEN；(4) Codex review。研究誠實：不改任何數字，只修文件對映。"
+    "description": "2026-07-05 hourly-19 在 paper2_taiwan_vt_body_main_version_divergence reconcile 時發現：reproduce.py docstring 仍寫「compares against body_v2.tex / section5_hf_draft.tex」，程式碼內大量 comment 引用舊 body.tex / body_v2.tex 行號（L146/L147/L151/L164/L260/L201/L34/L51/L440/L444），而 canonical 已封存舊 body.tex 到 _superseded/、正式版是 body_v3.tex（main_v3.tex，7-table main + supplement 架構）。此即 paper_audit 2026-06-10 L234 標記的「experiments.md 表號對映舊 66pp 版（Table 1-14）、replication package canonical mapping 文件失準」— JBF/PBFJ replication package hard requirement。\n\n功能面 reproduce.py 現況 GREEN 96.7%（145/155 traceable，實際驗的多是 canonical K1302/K1302b/K1370/paper2_R1 值），問題在 (a) docstring + comment 行號引用過期、(b) experiments.md 的 Table 編號對映舊架構。\n\n工作：(1) reproduce.py docstring 改 body_v3.tex；comment 行號 re-map 到 body_v3.tex 對應行（或改成 section 引用降耦合）；(2) experiments.md Table 1-14 對映重寫成 body_v3 的 7-table main + supplement 架構；(3) 重跑 reproduce.py 確認仍 GREEN；(4) Codex review。研究誠實：不改任何數字，只修文件對映。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T16:59:52.167505+00:00",
+    "claim_session_id": "57fdedbf32c3",
+    "status_history": [
+      {
+        "ts": "2026-07-05T16:59:52.167797+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T16:59:52.403640+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T17:05:50.770618+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T16:59:52.403323+00:00",
+    "completed_at": "2026-07-05T17:05:50.770292+00:00",
+    "result": "Rebound taiwan-vt replication docs from stale body/body_v2 line refs to canonical main_v3/body_v3 labels. Rewrote experiments.md around the v3 7-table + supplement map and reran reproduce.py: green pass_with_untraceable, 0 mismatches, 96.7% traceable match rate."
   },
   {
     "id": "paper2_taiwan_vt_body_v3_individual_stock_provenance",

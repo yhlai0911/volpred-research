@@ -2,8 +2,10 @@
 """
 reproduce.py — Paper 2 (taiwan-vt) Number Verification Script
 
-Loads experiment result JSONs and compares them against values claimed in
-body_v2.tex / section5_hf_draft.tex.  Flags mismatches and untraceable items.
+Loads experiment result JSONs and compares them against values claimed in the
+canonical manuscript (`main_v3.tex` / `body_v3.tex`).  Flags mismatches and
+untraceable items.  Bindings use section/table labels where possible instead of
+fragile line numbers.
 
 Key experiments checked:
   K892  – Gamma verification (resolves N120 vs paper conflict)
@@ -189,11 +191,11 @@ if k892:
 
     # 2026-04-19: Paper 0.272 is from 1997-2026 long-sample specification
     # (captures Asian Financial Crisis + Dot-Com); K892 2008-2026 subset rolling
-    # max=0.236. body_v2.tex L146 `^{\P}` footnote documents the fit-window
-    # disambiguation. Reclassified NOTE.
+    # max=0.236. body_v3.tex Table~\ref{tab:gamma} Notes document the
+    # fit-window disambiguation. Reclassified NOTE.
     if rolling_twii['gamma_max'] < 0.272:
         add("Table 2 (gamma)", "TWII gamma=0.272 (1997-2026 long-sample)", "0.272",
-            "K892", f"2008-2026 subset rolling max={rolling_twii['gamma_max']:.4f} (footnote P body_v2 L146)",
+            "K892", f"2008-2026 subset rolling max={rolling_twii['gamma_max']:.4f} (body_v3 Table tab:gamma note)",
             "NOTE")
         print(f"  NOTE: Paper 0.272 is 1997-2026 long-sample; K892 2008-2026 subset rolling max {rolling_twii['gamma_max']:.4f}. Disambiguated via footnote.")
     else:
@@ -232,10 +234,10 @@ if k892:
     print(f"  N121 knowledge: gamma=0.057")
 
     # 2026-04-19: TSMC γ 0.039 is Zero-mean GJR 2008-26 full sample spec;
-    # K892 0.0525 is Constant-mean pooled. body_v2.tex L151 `^{\ddagger}` footnote
-    # disambiguates 3-spec (Zero-mean / Constant-mean / K892 canonical).
+    # K892 0.0525 is Constant-mean pooled. body_v3.tex Table~\ref{tab:gamma}
+    # Notes disambiguate the 3-spec lineage.
     add("Table 2 (gamma)", "TSMC gamma=0.039 (Table 2 Zero-mean GJR 2008-26)", "0.039",
-        "K892", f"Constant-mean={tsmc_full['gamma']:.4f} (body_v2 L151 ddagger footnote)",
+        "K892", f"Constant-mean={tsmc_full['gamma']:.4f} (body_v3 Table tab:gamma note)",
         "NOTE")
     add("Sec 4.5", "TSMC gamma=0.054 (Sec 4.5)", "0.054",
         "K892", f"full={tsmc_full['gamma']:.4f}, rolling_mean={tsmc_rolling['gamma_mean']:.4f}",
@@ -247,18 +249,20 @@ if k892:
     print(f"    K892 first-2000 (early) gamma={tw50_first2000['gamma']:.4f}")
     print(f"    K892 full-sample gamma={tw50_full['gamma']:.4f}")
     print(f"    K892 rolling mean gamma={tw50_rolling_stats['gamma_mean']:.4f}")
-    # 2026-04-19: body_v2 L147 `^{\S}` + L164 Notes 3-spec footnote 已 disambiguate
+    # 2026-04-19: body_v3.tex Table~\ref{tab:gamma} Notes disambiguate the
+    # zero-mean / constant-mean / K892 canonical specifications.
     # 0050.TW γ Zero-mean 2008-26 0.087 vs Constant-mean full 0.124 vs K892 0.097/0.080.
     add("Internal", "0050 gamma: Table 2 (0.087) vs Sec 4.5 (0.124) — 3-spec disambiguated", "disambiguated",
-        "K892", f"Zero-mean=0.087, Constant-mean=0.124, K892 full={tw50_full['gamma']:.4f}/rolling_mean={tw50_rolling_stats['gamma_mean']:.4f} (body_v2 L147 S footnote)",
+        "K892", f"Zero-mean=0.087, Constant-mean=0.124, K892 full={tw50_full['gamma']:.4f}/rolling_mean={tw50_rolling_stats['gamma_mean']:.4f} (body_v3 Table tab:gamma note)",
         "NOTE")
 
     print(f"\n  TSMC: Table 2 gamma=0.039 vs Sec 4.5 gamma=0.054")
     print(f"    K892 full sample gamma={tsmc_full['gamma']:.4f}")
-    # 2026-04-19: body_v2 L151 `^{\ddagger}` + L164 Notes 3-spec footnote 已 disambiguate
+    # 2026-04-19: body_v3.tex Table~\ref{tab:gamma} Notes disambiguate the
+    # zero-mean / constant-mean / K892 canonical specifications.
     # TSMC γ Zero-mean 2008-26 0.039 vs Constant-mean 0.054 vs K892 canonical 0.0525.
     add("Internal", "TSMC gamma: Table 2 (0.039) vs Sec 4.5 (0.054) — 3-spec disambiguated", "disambiguated",
-        "K892", f"Zero-mean=0.039, Constant-mean=0.054, K892={tsmc_full['gamma']:.4f} (body_v2 L151 ddagger footnote)",
+        "K892", f"Zero-mean=0.039, Constant-mean=0.054, K892={tsmc_full['gamma']:.4f} (body_v3 Table tab:gamma note)",
         "NOTE")
 
 else:
@@ -382,11 +386,12 @@ k553 = load_json("k553_leveraged_vt_taiwan_results.json")
 if k553:
     base = k553["k551_replication"]["base"]
     print(f"\n  K553 base (BH 0050.TW 2010-2026): Sharpe={base['sharpe']}, MDD={base['mdd']}%")
-    print(f"  *** K553 base now informational (deprecated 0.729/-41.3% claim removed 2026-05-11; body.tex L260 K1175 canonical 0.799/-33.8%)")
+    print(f"  *** K553 base now informational (deprecated 0.729/-41.3% claim removed 2026-05-11; body_v3 Table tab:vt_results K1175 canonical 0.799/-33.8%)")
 
-# Table 4 (VT) checks now bound to K1175 canonical replication (promoted to body.tex 2026-05-10).
+# Table 4 (VT) checks now bound to K1175 canonical replication
+# (body_v3.tex Table~\ref{tab:vt_results}).
 # 2026-05-11 binding fix: Read K1175 results JSON directly so BH/EWMA/GARCH/GJR/8.63VIX
-# Sharpe + MDD figures match body.tex line 260-264.
+# Sharpe + MDD figures match body_v3.tex Table~\ref{tab:vt_results}.
 import json as _json
 from pathlib import Path as _Path
 _k1175_path = _Path(__file__).resolve().parent.parent.parent / "experiments" / "k1175" / "k1175_results.json"
@@ -399,7 +404,7 @@ if _k1175_path.exists():
         if not s:
             add("Table 4 (vt_results)", f"{label} not in K1175", body_sharpe, "K1175", "MISSING", "MISMATCH")
             return
-        # Compare body.tex value vs k1175 ground truth (rounded to 3 decimals for sharpe, 1 for mdd)
+        # Compare manuscript value vs K1175 ground truth (rounded to 3 decimals for Sharpe, 1 for MDD).
         gt_sharpe = round(s.get("sharpe", 0.0), 3)
         gt_mdd = round(s.get("mdd_pct", 0.0), 1)
         body_s = float(body_sharpe)
@@ -447,7 +452,7 @@ else:
     print("  WARN: K1181 results JSON not found at", _k1181_path)
 
 # Paper2-Sec3 TWD/USD nested F-test binding (2026-05-12).
-# Paper claims body.tex L201: "TWD/USD ... does not add significant explanatory
+# Paper claims body_v3.tex Section~\ref{sec:spillover}: "TWD/USD ... does not add significant explanatory
 # power after controlling for VIX (p = 0.08)". Reproduction across 13 defensible
 # specs all yields p > 0.6 — qualitative direction PASSES (TWD/USD genuinely
 # not significant) but the specific number 0.08 is unsupported. We bind the
@@ -484,7 +489,7 @@ else:
     print("  WARN: paper2_sec3_twd_usd_test results JSON not found at", _p2_twd_path)
 
 # Paper2-Table1 TWII summary stats binding (2026-05-12).
-# Paper claims body.tex L34+L51: TWII (1997-2026) | mean=0.019, std=1.45,
+# Paper claims body_v3.tex Table~\ref{tab:summary_stats}: TWII (1997-2026) | mean=0.019, std=1.45,
 # skew=-0.31, kurt=5.82, gamma=0.272, t=3.18, n=7148.
 # Reproduction with pinned yfinance ^TWII (1997-07-02..2026-05-08, N=7067):
 #   - mean (0.022) byte-matches within ±0.005 tol → VERIFIED
@@ -583,9 +588,9 @@ if _k558:
 
 
 # Paper2 Sec 4.5 TSMC VT + variance share binding (2026-05-12).
-# Paper claims body.tex L440 + L444:
-#   (A) "TSMC VT achieves a Sharpe ratio of 1.121"  (L440)
-#   (B) "TSMC explains 52.5% of 0050.TW return variance over the full sample" (L444)
+# Paper claims body_v3.tex Section~\ref{sec:tsmc}:
+#   (A) "TSMC VT achieves a Sharpe ratio of 1.121"
+#   (B) "TSMC explains 52.5% of 0050.TW return variance over the full sample"
 # Reproduction in experiments/paper2_sec45_tsmc_vt/ with pinned snapshot CSV,
 # K1175-aligned spec (GARCH(1,1) VT 10% OOS 2020-2026, mean='Zero' dist='normal',
 # window=2000, refit=21, tx_cost=5bps, simple returns via pct_change,
@@ -594,8 +599,8 @@ if _k558:
 # Number A closest spec GJR VT 10% = 1.130 (delta +0.009) — robust to spec choice
 # Number B (variance share) OLS R² full 2008-2026 log returns = 0.5213 (paper 0.525,
 # delta -0.0037, tol ±0.02) → PASS. Window dependence reported in sweep (0.521→0.836
-# across 2008-2026 → 2020-2026), consistent with paper's own admission that TSMC's
-# rolling beta has doubled over the sample period (body.tex L444).
+# across 2008-2026 → 2020-2026), consistent with paper's own admission in
+# Section~\ref{sec:tsmc} that TSMC's rolling beta has doubled over the sample period.
 _p2_s45_path = _Path(__file__).resolve().parent.parent.parent / "experiments" / "paper2_sec45_tsmc_vt" / "tsmc_vt_strategy_results.json"
 if _p2_s45_path.exists():
     _p2_s45 = _json.loads(_p2_s45_path.read_text(encoding="utf-8"))
@@ -1257,7 +1262,7 @@ untraceable_items = [
     # Sec 4.4 0056.TW robustness — bound to K558 test_8 inline check above (2026-05-11).
     # Table 2 individual gamma (Hon Hai/MediaTek/0056.TW) now CONFLICT_RESOLVED via K1302:
     # paper values use rolling w=2000 NW-HAC; K1302 canonical uses full-sample BW-robust.
-    # Both methodologies are documented in body.tex Table 2 Notes (2026-05-15).
+    # Both methodologies are documented in body_v3.tex Table~\ref{tab:gamma} Notes (2026-05-15).
 ]
 
 for table, claim, note in untraceable_items:
@@ -1265,7 +1270,7 @@ for table, claim, note in untraceable_items:
     print(f"  [{table}] {claim} -- {note}")
 
 # Table 2 individual stock gamma — VERIFIED via K1302+K1302b canonical (2026-05-16)
-# Paper body.tex commit ae93e44e adopts K1302+K1302b full-sample BW-robust as canonical.
+# Canonical manuscript commit ae93e44e adopts K1302+K1302b full-sample BW-robust as canonical.
 # Each row binds to per_stock entry in respective results.json.
 try:
     # load_json searches EXP_DIR/REPO_EXP_DIR (= experiments/); subdir relative.
