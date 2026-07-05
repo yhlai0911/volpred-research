@@ -1,5 +1,5 @@
 """Regression: pending `*_article_<audience>` tasks already covered in feed
-must be retired (blocked=deprecated) so the dispatcher never offers a duplicate.
+must be retired as terminal superseded rows so the dispatcher never offers a duplicate.
 
 Root incident (2026-07-01): K1590_article_general created 11:23Z, article
 mile_4518e9d8 (audience=general, refs=['K1590']) written 11:30Z (7-min race).
@@ -7,6 +7,7 @@ The stale task stayed pending and was still an agentable candidate at 20:08.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 import importlib.util
 from pathlib import Path
 
@@ -89,3 +90,30 @@ def test_non_article_task_ignored(monkeypatch):
     _patch_coverage(monkeypatch, general=["K1590"])
     hits = mod.find_covered([_task("experiment_har_gnn"), _task("paper_body_x")])
     assert hits == []
+
+
+def test_sweep_apply_marks_covered_task_superseded(monkeypatch):
+    _patch_coverage(monkeypatch, general=["K1590"], mile_maps={"general": {"K1590": "mile_4518e9d8"}})
+    payload = [_task("K1590_article_general")]
+
+    @contextmanager
+    def fake_lock(_name):
+        yield
+
+    def fake_load():
+        return payload, payload
+
+    def fake_save(_payload, _tasks):
+        return None
+
+    monkeypatch.setattr(mod, "shared_state_lock", fake_lock)
+    monkeypatch.setattr(mod, "_load", fake_load)
+    monkeypatch.setattr(mod, "_save", fake_save)
+
+    result = mod.sweep(apply=True)
+
+    assert result["count"] == 1
+    assert payload[0]["status"] == "superseded"
+    assert payload[0]["blocked_reason"] == "deprecated"
+    assert payload[0]["terminalized_reason"] == "deprecated"
+    assert payload[0]["status_history"][-1]["to"] == "superseded"

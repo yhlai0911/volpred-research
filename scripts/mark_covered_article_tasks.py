@@ -149,7 +149,7 @@ def find_covered(tasks: list) -> list[dict]:
 
 
 def sweep(apply: bool) -> dict:
-    """Mark covered pending article tasks blocked=deprecated. Idempotent."""
+    """Retire covered pending article tasks as terminal superseded rows. Idempotent."""
     with shared_state_lock("control_plane"):
         payload, tasks = _load()
         hits = find_covered(tasks)
@@ -163,13 +163,15 @@ def sweep(apply: bool) -> dict:
                     + (f" ({mile})" if mile else "")
                     + "; auto-retired to prevent duplicate dispatch"
                 )
-                t["status"] = "blocked"
+                t["status"] = "superseded"
                 t["blocked_reason"] = "deprecated"
                 t["blocked_at"] = now
                 t["blocked_note"] = note
-                t.pop("blocked_until", None)  # deprecated = permanent, no recheck
+                t["terminalized_at"] = now
+                t["terminalized_reason"] = "deprecated"
+                t.pop("blocked_until", None)  # deprecated = terminal; no recheck
                 t.setdefault("status_history", []).append(
-                    {"at": now, "from": "pending", "to": "blocked", "reason": note}
+                    {"at": now, "from": "pending", "to": "superseded", "reason": note}
                 )
             _save(payload, tasks)
     return {
@@ -186,7 +188,7 @@ def sweep(apply: bool) -> dict:
 
 def main(apply: bool) -> int:
     result = sweep(apply=apply)
-    verb = "blocked" if apply else "would block"
+    verb = "retired" if apply else "would retire"
     print(f"[covered-article-dedup] {verb} {result['count']} task(s)")
     for d in result["details"]:
         print(

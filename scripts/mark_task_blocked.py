@@ -38,7 +38,7 @@ import fcntl
 import json
 import sys
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,7 +47,28 @@ LOCK_DIR = ROOT / "storage" / "ops" / "locks"
 
 sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS  # noqa: E402
+from volpred.ops.blocked_reasons import is_valid as _valid_blocked_reason  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+
+
+DEFAULT_BLOCKED_UNTIL_DAYS = 14
+TERMINAL_INTENT_REASONS = {"deprecated"}
+CANONICAL_STATUSES = {
+    "pending",
+    "pending_main_thread",
+    "claimed",
+    "in_progress",
+    "compute_queued",
+    "blocked",
+    "blocked_on_user",
+    "succeeded",
+    "succeeded_null_result",
+    "failed",
+    "cancelled",
+    "closed",
+    "closed_no_action",
+    "superseded",
+}
 
 
 def _warn_block_cli(message: str) -> None:
@@ -107,6 +128,24 @@ def _save(payload: dict | list, tasks: list) -> None:
     tmp.replace(NEXT_TASKS)
 
 
+def _default_blocked_until() -> str:
+    return (datetime.now(timezone.utc) + timedelta(days=DEFAULT_BLOCKED_UNTIL_DAYS)).isoformat(timespec="seconds")
+
+
+def _validate_task_schema(task: dict) -> None:
+    status = str(task.get("status") or "").strip().lower()
+    if status not in CANONICAL_STATUSES:
+        raise ValueError(f"task status is not canonical: {status!r}")
+    if status != "blocked":
+        return
+
+    reason = str(task.get("blocked_reason") or "").strip().lower()
+    if not _valid_blocked_reason(reason):
+        raise ValueError("status=blocked requires a valid blocked_reason")
+    if reason not in TERMINAL_INTENT_REASONS and not task.get("blocked_until"):
+        raise ValueError("non-terminal blocked task requires blocked_until")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--id", required=True, help="task id to mark")
@@ -142,26 +181,38 @@ def main() -> int:
             return 1
 
         if args.unblock:
-            if (matched.get("status") or "").lower() == "blocked":
+            status_before = (matched.get("status") or "").lower()
+            if status_before in {"blocked", "closed_no_action", "superseded"}:
                 matched["status"] = "pending"
-            for k in ("blocked_reason", "blocked_at", "blocked_until", "blocked_note"):
+            for k in (
+                "blocked_reason",
+                "blocked_at",
+                "blocked_until",
+                "blocked_note",
+                "terminalized_at",
+                "terminalized_reason",
+            ):
                 matched.pop(k, None)
+            _validate_task_schema(matched)
             print(f"[mark_task_blocked] unblocked id={args.id}")
         else:
-            matched["status"] = "blocked"
+            reason = str(args.reason or "").strip().lower()
+            if reason in TERMINAL_INTENT_REASONS:
+                matched["status"] = "closed_no_action"
+                matched["terminalized_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+                matched["terminalized_reason"] = reason
+                matched.pop("blocked_until", None)
+            else:
+                matched["status"] = "blocked"
+                matched["blocked_until"] = args.until or _default_blocked_until()
             matched["blocked_reason"] = args.reason
             matched["blocked_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
             if args.note:
                 matched["blocked_note"] = args.note
-            if args.until:
-                matched["blocked_until"] = args.until
-            elif args.reason == "deprecated":
-                # Deprecated = permanent retire; no auto-recheck window.
-                # Clear stale blocked_until so sweep scripts don't mis-pick it.
-                matched.pop("blocked_until", None)
+            _validate_task_schema(matched)
             print(
-                f"[mark_task_blocked] id={args.id} reason={args.reason}"
-                + (f" until={args.until}" if args.until else "")
+                f"[mark_task_blocked] id={args.id} status={matched['status']} reason={args.reason}"
+                + (f" until={matched.get('blocked_until')}" if matched.get("blocked_until") else "")
             )
 
         _save(payload, tasks)

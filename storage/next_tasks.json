@@ -1642,13 +1642,14 @@
     "created_at": "2026-05-12T02:47:48Z",
     "blocked_reason": "paid_data_source_decision_pending",
     "blocked_note": "Task brief itself says VIX futures history is required and unavailable from yfinance, and there is no experiments/k1310/ workspace yet. Blocking until paid/approved historical VIX futures data source is selected, rather than leaving an unexecutable experiment in pending.",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-05-27T01:56:22.983420+00:00",
-    "claim_session_id": "8784b078d9e9",
     "started_at": "2026-05-27T01:56:32.322236+00:00",
     "completed_at": "2026-05-27T01:56:32.392058+00:00",
     "result": "Marked blocked because the task requires historical VIX futures data not available from current free sources (the brief itself says yfinance is insufficient), and no experiments/k1310 workspace exists yet. Queue state now matches the real blocker: paid/approved data-source decision pending before any reproducible experiment can begin.",
-    "blocked_at": "2026-05-27T01:56:32+00:00"
+    "blocked_at": "2026-05-27T01:56:32+00:00",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-cli",
+    "stale_claim_previous_claimed_at": "2026-05-27T01:56:22.983420+00:00",
+    "stale_claim_previous_claim_session_id": "8784b078d9e9"
   },
   {
     "id": "K1311",
@@ -1885,7 +1886,7 @@
     "title": "K267: write general-audience article (auto-discovered uncovered K)",
     "description": "K K267 has verdict signal (score=0, reasons=None) but no general article. Verdict preview: ",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K267",
@@ -1897,12 +1898,17 @@
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-26T22:49:34+00:00",
     "blocked_note": "Auto-discovered stale task: experiments/k267 remains planning-shell with noncanonical result filename, and same-family day-of-week article already exists in feed; remove from pending queue as duplicate/noise.",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-05-26T22:48:53.579078+00:00",
-    "claim_session_id": "0a80a46a81b6",
     "started_at": "2026-05-26T22:48:59.603450+00:00",
     "completed_at": "2026-05-26T22:49:12.636765+00:00",
-    "result": "Marked deprecated/blocklisted from pending queue. Evidence: experiments/k267 is still planning-shell with noncanonical result filename only, and feed already contains same-family day-of-week article ('禮拜一是不是最危險？跨三市場 day-of-week 大檢驗：幾乎全軍覆沒'), so this auto-discovered general-article task is duplicate/noise rather than a fresh publication candidate."
+    "result": "Marked deprecated/blocklisted from pending queue. Evidence: experiments/k267 is still planning-shell with noncanonical result filename only, and feed already contains same-family day-of-week article ('禮拜一是不是最危險？跨三市場 day-of-week 大檢驗：幾乎全軍覆沒'), so this auto-discovered general-article task is duplicate/noise rather than a fresh publication candidate.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-cli",
+    "stale_claim_previous_claimed_at": "2026-05-26T22:48:53.579078+00:00",
+    "stale_claim_previous_claim_session_id": "0a80a46a81b6"
   },
   {
     "id": "K274_article_general",
@@ -9958,7 +9964,7 @@
     "description": "K521 has a non-null verdict in experiments/k521/ but no published feed article and no existing task. Verdict: {'is_2d_artifact': False, 'is_data_alignment_bug': True, 'bug_type': 'K519/K520 . Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9968,15 +9974,20 @@
     "created_at": "2026-05-13T05:53:00.467174+00:00",
     "generated_at": "2026-05-13T05:53:00.467176+00:00",
     "k_id": "K521",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-05-26T22:51:30.146904+00:00",
-    "claim_session_id": "20c7d6ee8fc7",
     "started_at": "2026-05-26T22:51:36.768625+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-26T22:51:37+00:00",
     "blocked_note": "Auto-discovered stale daily_article: experiments/k521 remains planning-shell, while feed already contains published K521-related reader-facing coverage (mile_6ba3e0bf, mile_bdf55e0d); keep out of pending queue as duplicate/noise.",
     "completed_at": "2026-05-26T22:51:46.549389+00:00",
-    "result": "Marked deprecated/blocklisted from pending queue. Evidence: experiments/k521 is still a planning-shell README, while feed already contains published K521-related reader-facing coverage ('94 個策略實驗，只有 1 個半成功——投資策略的殘酷現實' and '數據分析最常犯的錯——我們差點把錯誤策略推薦給你'); this auto-discovered general-article task is duplicate/noise rather than a fresh publication candidate."
+    "result": "Marked deprecated/blocklisted from pending queue. Evidence: experiments/k521 is still a planning-shell README, while feed already contains published K521-related reader-facing coverage ('94 個策略實驗，只有 1 個半成功——投資策略的殘酷現實' and '數據分析最常犯的錯——我們差點把錯誤策略推薦給你'); this auto-discovered general-article task is duplicate/noise rather than a fresh publication candidate.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-cli",
+    "stale_claim_previous_claimed_at": "2026-05-26T22:51:30.146904+00:00",
+    "stale_claim_previous_claim_session_id": "20c7d6ee8fc7"
   },
   {
     "id": "gen_article_k524",
@@ -10393,7 +10404,7 @@
     "description": "K816 has a non-null verdict in experiments/k816/ but no published feed article and no existing task. Verdict: MARGINAL: GINN-VIX has lowest QLIKE but difference not significant (Harvey t>3.0. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -10403,14 +10414,19 @@
     "created_at": "2026-05-13T05:53:00.503913+00:00",
     "generated_at": "2026-05-13T05:53:00.503915+00:00",
     "k_id": "K816",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-05-27T00:55:15.787164+00:00",
-    "claim_session_id": "749cd6e8bec3",
     "completed_at": "2026-05-27T00:55:39.481022+00:00",
     "result": "Marked deprecated/blocklisted from pending queue. Evidence: experiments/k816 is still a planning-shell README, while feed already contains published same-family reader-facing coverage for the K816/K816v2/K1263 ML-ceiling line ('AI 的第 7 次失敗：KAN 神經網路挑戰 GJR-GARCH，再度確認 ML 天花板', 'K816v2：GJR Bug 修正後 ML Ceiling 第 6 次確認——DM 從 2.96 跌至 0.64', 'K1263：把 2024 諾獎熱門架構 KAN 接上宏觀基本面 MIDAS，QLIKE 反而比 30 年前 GJR-GARCH 差 33%'); this auto-discovered task is duplicate/noise rather than a fresh publication candidate.",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-27T00:55:39+00:00",
-    "blocked_note": "Auto-discovered stale daily_article: experiments/k816 remains planning-shell, while feed already contains published same-family reader-facing coverage around the K816/K816v2/K1263 ML-ceiling line (mile_ae416dff, mile_c72ba620, mile_1e57c478); keep out of pending queue as duplicate/noise rather than generating another overlapping article shell."
+    "blocked_note": "Auto-discovered stale daily_article: experiments/k816 remains planning-shell, while feed already contains published same-family reader-facing coverage around the K816/K816v2/K1263 ML-ceiling line (mile_ae416dff, mile_c72ba620, mile_1e57c478); keep out of pending queue as duplicate/noise rather than generating another overlapping article shell.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-cli",
+    "stale_claim_previous_claimed_at": "2026-05-27T00:55:15.787164+00:00",
+    "stale_claim_previous_claim_session_id": "749cd6e8bec3"
   },
   {
     "id": "gen_article_k816v2",
@@ -10418,7 +10434,7 @@
     "description": "K816V2 has a non-null verdict in experiments/k816v2/ but no published feed article and no existing task. Verdict: MARGINAL: GINN-VIX has lowest QLIKE but difference not significant (Harvey t>3.0. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -10428,15 +10444,20 @@
     "created_at": "2026-05-13T05:53:00.504008+00:00",
     "generated_at": "2026-05-13T05:53:00.504009+00:00",
     "k_id": "K816V2",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-05-26T23:54:06.844235+00:00",
-    "claim_session_id": "abc59386c688",
     "started_at": "2026-05-26T23:54:06.890513+00:00",
     "completed_at": "2026-05-26T23:54:20.656331+00:00",
     "result": "Marked deprecated/blocklisted from pending queue. Evidence: experiments/k816v2 is still a planning-shell README, while feed already contains published same-K reader-facing coverage ('K816v2：GJR Bug 修正後 ML Ceiling 第 6 次確認——DM 從 2.96 跌至 0.64', mile_c72ba620); this auto-discovered general-article task is duplicate/noise rather than a fresh publication candidate.",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-26T23:54:20+00:00",
-    "blocked_note": "Auto-discovered stale daily_article: experiments/k816v2 remains planning-shell, while feed already contains published same-K reader-facing coverage (mile_c72ba620, 'K816v2：GJR Bug 修正後 ML Ceiling 第 6 次確認——DM 從 2.96 跌至 0.64'); keep out of pending queue as duplicate/noise."
+    "blocked_note": "Auto-discovered stale daily_article: experiments/k816v2 remains planning-shell, while feed already contains published same-K reader-facing coverage (mile_c72ba620, 'K816v2：GJR Bug 修正後 ML Ceiling 第 6 次確認——DM 從 2.96 跌至 0.64'); keep out of pending queue as duplicate/noise.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-cli",
+    "stale_claim_previous_claimed_at": "2026-05-26T23:54:06.844235+00:00",
+    "stale_claim_previous_claim_session_id": "abc59386c688"
   },
   {
     "id": "gen_article_k820",
@@ -12227,12 +12248,13 @@
     "blocked_at": "2026-05-26T20:40:00+00:00",
     "blocked_note": "Needs interactive Chrome MCP / logged-in FB session for manual post + comment writeback",
     "last_released_at": "2026-05-26T18:14:00.178912+00:00",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-05-26T20:39:29.519220+00:00",
-    "claim_session_id": "ea293b5d31d6",
     "started_at": "2026-05-26T20:39:37.742262+00:00",
     "completed_at": "2026-05-26T20:40:49.819655+00:00",
-    "result": "Interactive-only FB post task: queue semantics fixed so blocked tasks now move to status=blocked; this item remains awaiting_interactive_session with feed/log handoff metadata already written."
+    "result": "Interactive-only FB post task: queue semantics fixed so blocked tasks now move to status=blocked; this item remains awaiting_interactive_session with feed/log handoff metadata already written.",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-cli",
+    "stale_claim_previous_claimed_at": "2026-05-26T20:39:29.519220+00:00",
+    "stale_claim_previous_claim_session_id": "ea293b5d31d6"
   },
   {
     "id": "platform_ops_daily_update_root_cause_fix",
@@ -12288,7 +12310,7 @@
     "description": "Auto-generated by refill_reader_facing_pool.py from event_jobs.\nref_event_job_id: nfp-2026-06-05-t2\nevent_key: NFP_2026_06_05\nevent_type: nfp_us\nevent_date: 2026-06-05\nevent_series_slot: T-2\n\nNFP T-2: payroll consensus scenarios (cool / in-line / hot) + SPY/VIX 1-day move grid + position sizing. status=published immediate. audience=general. 3-layer dedup.",
     "task_type": "event_article",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-05-26T17:27:02+00:00",
     "source": "reader_facing_refill",
     "ref_event_job_id": "nfp-2026-06-05-t2",
@@ -12304,7 +12326,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-09T05:11:03+00:00",
-    "blocked_note": "NFP 2026-06-05 已過期 T-2 window；事件已過，無 T+0/T+5 文章需求（hourly-13 governance cleanup）"
+    "blocked_note": "NFP 2026-06-05 已過期 T-2 window；事件已過，無 T+0/T+5 文章需求（hourly-13 governance cleanup）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "event_article_nfp_us_2026-06-05_tplus0",
@@ -12991,7 +13017,7 @@
     "description": "Auto-generated by refill_reader_facing_pool.py from event_jobs.\nref_event_job_id: cpi-us-2026-06-11-t0\nevent_key: CPI_US_2026_06_11\nevent_type: cpi_us\nevent_date: 2026-06-11\nevent_series_slot: T+0\n\nAuto-populated by populate_upcoming_events.py. CPI_US 2026-06-11 T+0 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
     "task_type": "event_article",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-05-27T16:09:48+00:00",
     "source": "reader_facing_refill",
     "ref_event_job_id": "cpi-us-2026-06-11-t0",
@@ -13008,7 +13034,11 @@
     "not_before": "2026-06-11T12:00:00+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-09T05:11:04+00:00",
-    "blocked_note": "CPI 2026-06-11 event 已由 mile_0fa9c7f5 (T-2, 2026-06-09 08:17 published) covered；T+0 重複，不再產出（hourly-13 governance cleanup）"
+    "blocked_note": "CPI 2026-06-11 event 已由 mile_0fa9c7f5 (T-2, 2026-06-09 08:17 published) covered；T+0 重複，不再產出（hourly-13 governance cleanup）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "platform_ops_install_reader_facing_crontab",
@@ -15161,7 +15191,7 @@
     "title": "K1108: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1108 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'paradigm/decisive null', 'robust inference', 'inconclusive (data limit)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1108 TSMC-only 48 events diff=+8.0e-5 Wald t=+0.94 INCONCLUSIVE (可能 direction-only)。K1108b 擴 5-stock foundry pool: TSMC+UMC+TSM ADR+GFS+SMIC, primary pool 4 firms (exclude TSM ADR due local-listing trading-day mismatch) = 9844 obs, 63 change + 73 stable ",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1108",
@@ -15180,7 +15210,11 @@
     "created_at": "2026-05-30T01:09:05+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-30T03:18:17+00:00",
-    "blocked_note": "Already covered by mile_fe578587 (晶圓代工財報日波動率謎題 — K1108 系列六層機制 NULL 全記錄). Auto-discovery missed because experiment_refs is empty in that feed entry."
+    "blocked_note": "Already covered by mile_fe578587 (晶圓代工財報日波動率謎題 — K1108 系列六層機制 NULL 全記錄). Auto-discovery missed because experiment_refs is empty in that feed entry.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K1109_article_general",
@@ -15498,14 +15532,15 @@
     "email_message_id": "<92EE6045-BEC9-40A1-820D-6C8B14F796FC@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] 自主 loop fire 17:07 — Paper3 D2 errata verify-and-close",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-05-30T10:11:07.863693+00:00",
-    "claim_session_id": "61c1ba18db8b",
     "blocked_reason": "awaiting_external_data",
     "blocked_at": "2026-05-30T10:14:34+00:00",
     "blocked_note": "等老闆補 ChatGPT 對話分享連結才能做模擬+寫文章；已回信請求",
     "completed_at": "2026-05-30T10:14:42.005753+00:00",
-    "result": "請求補 ChatGPT 對話連結（信中只有 chatgpt.com 字樣無實際分享連結）；已回信(d1f9e60e)。拿到連結後做 VolPred 模擬+寫 trending 文章。"
+    "result": "請求補 ChatGPT 對話連結（信中只有 chatgpt.com 字樣無實際分享連結）；已回信(d1f9e60e)。拿到連結後做 VolPred 模擬+寫 trending 文章。",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "interactive-claude",
+    "stale_claim_previous_claimed_at": "2026-05-30T10:11:07.863693+00:00",
+    "stale_claim_previous_claim_session_id": "61c1ba18db8b"
   },
   {
     "id": "K492_article_general",
@@ -15806,7 +15841,7 @@
     "title": "K708: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K708 has verdict signal (score=2, reasons=['paradigm/decisive null']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: session 收尾, 執行: Claude] 7 settled(不再重訪), 7 actionable(下週), 8 unexplored(新方向)。Tier 1: messaging fixes + papers + NFP。Tier 2: HAR-RV 5min + TSMC + /guide。Tier 3: intraday alpha + conditional corr + bond VT。5 efficiency lessons: Codex mandatory, cross-OOS, smooth weights, stop ",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K708",
@@ -15824,7 +15859,11 @@
     "created_at": "2026-05-30T19:08:28+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-30T20:09:28+00:00",
-    "blocked_note": "K708 內容為 'Next Session Roadmap' meta-planning（task 列表/lesson 整理），非可發表 research result。v1 已 retry 失敗根因即此。改標 deprecated，不再重派。"
+    "blocked_note": "K708 內容為 'Next Session Roadmap' meta-planning（task 列表/lesson 整理），非可發表 research result。v1 已 retry 失敗根因即此。改標 deprecated，不再重派。",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "trending_repost_2026_05_31_ai擁擠度",
@@ -16070,7 +16109,7 @@
     "title": "K460: write general-audience article (auto-discovered uncovered K)",
     "description": "K K460 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: title: Semivariance Cross-OOS Validation (5 Periods × 2 Assets) publication_verdict: PUBLICATION READY: Semivariance finding is robust across periods and assets",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K460",
@@ -16083,7 +16122,11 @@
     "created_at": "2026-05-31T03:08:14+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-31T04:10:42+00:00",
-    "blocked_note": "Already covered by mile_d610cb89 (2026-03-26 K459 vs K460): same 5-period cross-OOS framework, explicitly states K460 Semivariance 5/5 wins. Narrative arc fully subsumed."
+    "blocked_note": "Already covered by mile_d610cb89 (2026-03-26 K459 vs K460): same 5-period cross-OOS framework, explicitly states K460 Semivariance 5/5 wins. Narrative arc fully subsumed.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K465_article_general",
@@ -16686,7 +16729,7 @@
     "title": "K274: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K274 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: experiment_id: K274 title: Paper Contribution Mapping — Which Findings Are Novel vs Known? date: 2026-03-24T19:44:08.819103",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K274",
@@ -16700,7 +16743,11 @@
     "created_at": "2026-05-31T15:08:25+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-31T15:10:43+00:00",
-    "blocked_note": "refill 重複：對應 K 已有 published general article (feed grep verified)"
+    "blocked_note": "refill 重複：對應 K 已有 published general article (feed grep verified)",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K286_article_general",
@@ -16730,7 +16777,7 @@
     "title": "K288: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K288 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Cross-Period Stability of Major Findings. Data: yfinance (SPY, GLD, VIX). F1: VIX sufficient: stability=0. F2: GJR best/tied: stability=3. F3: 50/50 > SPY: stability=2. F4: VT reduces MDD: stability=4. F5: K insensitive: stability=4. F6: Monthly >= Quarterly: stability=2. F7: SPY",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K288",
@@ -16744,14 +16791,18 @@
     "created_at": "2026-05-31T15:08:25+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-31T15:10:43+00:00",
-    "blocked_note": "refill 重複：對應 K 已有 published general article (feed grep verified)"
+    "blocked_note": "refill 重複：對應 K 已有 published general article (feed grep verified)",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K319_article_general_v2",
     "title": "K319: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K319 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: title: Decade-by-Decade Performance — The Complete Historical Record",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K319",
@@ -16765,7 +16816,11 @@
     "created_at": "2026-05-31T15:08:25+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-31T15:10:44+00:00",
-    "blocked_note": "refill 重複：對應 K 已有 published general article (feed grep verified)"
+    "blocked_note": "refill 重複：對應 K 已有 published general article (feed grep verified)",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "paper_review_mile_7dd6a0fd",
@@ -17270,7 +17325,7 @@
     "title": "K888: write general-audience article (auto-discovered uncovered K)",
     "description": "K K888 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 會員yihao.lai, 執行: Claude] 14,127 House trades, 46 tickers. Copy: -0.294%/trade t=-1.81 NS. Contrarian: -0.147% t=-0.91 NS. Large-trade: -0.100% t=-0.25 NS. 28-day disclosure lag makes signals stale. Consistent with Eggers & Hainmueller (2013).",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K888",
@@ -17288,7 +17343,11 @@
     "last_released_at": "2026-06-01T05:46:05.858456+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-01T06:13:26+00:00",
-    "blocked_note": "K888 Congressional contrarian 已 cover in mile_9795c0a9 (member_qa audience). Auto-discovery 把 audience-variant 算 uncovered 不正確; Layer 3 narrative-arc dedup 視為 dup."
+    "blocked_note": "K888 Congressional contrarian 已 cover in mile_9795c0a9 (member_qa audience). Auto-discovery 把 audience-variant 算 uncovered 不正確; Layer 3 narrative-arc dedup 視為 dup.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K905_article_general",
@@ -17323,7 +17382,7 @@
     "title": "K932: write general-audience article (auto-discovered uncovered K)",
     "description": "K K932 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] 5 methods (50/50, Min-Var, Min-CVaR, Max CRRA gamma=5, Risk Parity) on SPY/GLD/TLT. OOS 2016-2026. Static 50/50 Sharpe 1.216 beats all. Min-CVaR≈Min-Var (Normal CVaR→variance). Max CRRA≈Min-Var (return unpredictable→utility=risk). Turnover kills dynamic. 50/5",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K932",
@@ -17340,7 +17399,11 @@
     "created_at": "2026-06-01T05:11:33+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-01T06:13:27+00:00",
-    "blocked_note": "K932 Utility allocation NULL 已 cover in mile_2afae61b (research audience). Same audience-variant 誤判."
+    "blocked_note": "K932 Utility allocation NULL 已 cover in mile_2afae61b (research audience). Same audience-variant 誤判.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K969_article_general",
@@ -17375,7 +17438,7 @@
     "title": "K470: write general-audience article (auto-discovered uncovered K)",
     "description": "K K470 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: HAR-VT shows significant improvement at 5% level but does NOT pass Harvey t>3.0 threshold Reference: Corsi (2009) J Financial Econometrics — HAR-RV model Reference: Alizadeh, Brandt & Diebold (2002) JFE — Range-based vol estimation",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K470",
@@ -17389,7 +17452,11 @@
     "created_at": "2026-06-01T06:13:31+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-01T06:14:37+00:00",
-    "blocked_note": "Substring false-positive: feed match 是 K470 字串巧合而非 experiment_refs; 此 K 無真正 general-audience gap, 但 refill 邏輯需修。"
+    "blocked_note": "Substring false-positive: feed match 是 K470 字串巧合而非 experiment_refs; 此 K 無真正 general-audience gap, 但 refill 邏輯需修。",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K536_article_general",
@@ -17425,7 +17492,7 @@
     "title": "K543: write general-audience article (auto-discovered uncovered K)",
     "description": "K K543 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] Drawdown 深度作 VT 調節信號。5090 天，5 期 cross-OOS。VIX-drawdown corr=-0.77（高度冗餘）。\n\nSharpe: 最佳 DD-Enhanced +0.012 (t=1.79, NS)。Harvey 全未通過。\n\n但 MDD 顯著改善：DD-Conditional -15.4% vs baseline -28.6%（幾乎減半）。Combined -17.4%。代價是 return 從 6.76% 降到 5.00%。\n\n結論：drawdown 調節不產生 al",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K543",
@@ -17442,7 +17509,11 @@
     "created_at": "2026-06-01T06:13:31+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-01T06:14:38+00:00",
-    "blocked_note": "Substring false-positive: 同 K470 — feed cover=2 為巧合字串非 exp_refs;refill 邏輯改善前先 block。"
+    "blocked_note": "Substring false-positive: 同 K470 — feed cover=2 為巧合字串非 exp_refs;refill 邏輯改善前先 block。",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K991_article_general",
@@ -18184,7 +18255,7 @@
     "description": "從新任聯準會主席首場會議與 4 月 CPI 升至 3.8% 切入，分析債券選擇權隱含波動率（MOVE）的非對稱偏斜。可量化：比較歷次 Fed 主席更迭前後的 MOVE 指數均值回歸速度，以及利率期貨隱含波動率對「再升息」機率的定價。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "closed_no_action",
     "created_at": "2026-06-01T21:11:12+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -18194,7 +18265,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-09T05:11:34+00:00",
-    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_02_fed新局 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）"
+    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_02_fed新局 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "paper_review_mile_95f49685",
@@ -18893,7 +18968,7 @@
     "title": "K1301: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1301 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1301",
@@ -18913,14 +18988,18 @@
     "created_at": "2026-06-02T12:08:59+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-02T15:09:37+00:00",
-    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)"
+    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K1303_article_general",
     "title": "K1303: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1303 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1303",
@@ -18942,14 +19021,18 @@
     "created_at": "2026-06-02T12:08:59+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-02T15:09:37+00:00",
-    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)"
+    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K1309_article_general",
     "title": "K1309: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1309 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1309",
@@ -18970,14 +19053,18 @@
     "created_at": "2026-06-02T12:08:59+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-02T15:09:38+00:00",
-    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)"
+    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K1375_article_general",
     "title": "K1375: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1375 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: K1374 個股峰季 d=0.305 在高股息 ETF 層級降至 d=0.055（全 NULL）。\n0056(年配, n=21, d=-0.015, p=0.927)、00878(季配, n=22, d=+0.343, p=0.179)、00919(月配, n=12, d=-0.147, p=0.285)。\nPooled n=55, d=+0.055, p=0.617。ETF 多成份股分散弱化個股除息日特有風險。\n投資人執行高股息 ETF 除息日附近操作無需擔心特別 vol spike。\n00878 邊際方向性正確但樣本不足（需 ≈68 事件達 80% ",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1375",
@@ -18994,14 +19081,18 @@
     "created_at": "2026-06-02T12:08:59+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-02T15:09:38+00:00",
-    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)"
+    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K472_article_general",
     "title": "K472: write general-audience article (auto-discovered uncovered K)",
     "description": "K K472 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: Asset: 0050.TW   ≈ EWMA (λ=0.94): QLIKE +1.85%, DM p=0.3659 → not significant   ≈ HAR log-range: QLIKE +16.23%, DM p=0.0611 → not significant   ≈ Semivariance RS⁻: QLIKE +1.20%, DM p=0.5925 → not significant   ≈ Rolling kurtosis: QLIKE +5.92%, DM p=0.1005 → not significant   ✗ HA",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K472",
@@ -19015,7 +19106,11 @@
     "created_at": "2026-06-02T12:08:59+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-02T15:09:39+00:00",
-    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)"
+    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "paper_review_mile_5f46ac4e",
@@ -19385,7 +19480,7 @@
     "title": "K906: write general-audience article (auto-discovered uncovered K)",
     "description": "K K906 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] PRELIMINARY (29 OOS days). SPY 5-min data (55 days, Jan-Apr 2026). HAR-RV vs GJR-GARCH fair comparison using Patton (2011) QLIKE on r² and Hansen & Lunde (2005) RV_total. GJR wins both unified targets by enormous margin: QLIKE on r² = 1.14 vs HAR 41,845; ",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K906",
@@ -19406,14 +19501,18 @@
     "created_at": "2026-06-02T20:09:07+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-02T20:11:01+00:00",
-    "blocked_note": "Already published: mile_83a21599"
+    "blocked_note": "Already published: mile_83a21599",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K934_article_general",
     "title": "K934: write general-audience article (auto-discovered uncovered K)",
     "description": "K K934 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] CARR(1,1) conditional autoregressive range model (Chou 2005) 用 high-low range 預測波動率。SPY 2006-2026, OOS 2016-2025 (2514天)。5模型比較：GARCH/GJR/MF-GJR(VIX)/CARR/CARR-MF(VIX)。QLIKE on r² 排名：MF-GJR(1.475) > GJR(1.562) > GARCH(1.602) > CARR-MF(1.699) > CARR(1.815)。",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K934",
@@ -19433,7 +19532,11 @@
     "created_at": "2026-06-02T20:10:42+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-02T20:11:02+00:00",
-    "blocked_note": "Already published: mile_dc22093c"
+    "blocked_note": "Already published: mile_dc22093c",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K941_article_general",
@@ -19520,7 +19623,7 @@
     "description": "探討台灣投資人習慣用美股 VIX 衡量台股風險的盲點。從實證切入，量化說明美股 VIX 對台股的預測力在 HLN 檢定下顯著為 NULL。建議改以台指期 VIXTWN 進行 localized 波動率定價。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "closed_no_action",
     "created_at": "2026-06-02T22:00:46+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -19528,15 +19631,20 @@
       "reader_facing",
       "auto_refill"
     ],
-    "claimed_by": "hourly-06",
-    "claimed_at": "2026-06-02T22:10:08.296068+00:00",
-    "claim_session_id": "2ca26a29e585",
     "started_at": "2026-06-02T22:10:12.818982+00:00",
     "completed_at": "2026-06-02T22:18:05.098654+00:00",
     "result": "Hard arc-dup: K1098 已被 mile_81b4713f (2026-04-19 research audience) 完整覆蓋，內含同樣 OOS 數字 + Harvey + DM。Publisher dup gate 拒絕；且 narrative-arc 與 mile_609d9ff3 (2026-05-16 trending VIXTWN/VIX divergence) 屬同 cluster。標 failed-dup 不重派。",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-09T05:11:35+00:00",
-    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_03_跨市場風險 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）"
+    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_03_跨市場風險 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "hourly-06",
+    "stale_claim_previous_claimed_at": "2026-06-02T22:10:08.296068+00:00",
+    "stale_claim_previous_claim_session_id": "2ca26a29e585"
   },
   {
     "id": "paper_review_mile_31529fdf",
@@ -20119,7 +20227,7 @@
     "title": "K1008: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1008 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] RWC（regime-weighted conformal）vs 標準 conformal vs parametric。核心發現：(1) RWC 主要優勢在高 VIX regime——GJR 2.5% VaR 高 VIX violation: parametric 9.17% → std conformal 6.03% → RWC(h=5) 4.02%；(2) A4f 也受益——std conformal 無改善（5.46% vs 5.44%），但 RWC(h=5) 降至 4.02%；(3) h=3 過窄會 o",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1008",
@@ -20138,14 +20246,18 @@
     "created_at": "2026-06-03T10:08:18+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-03T10:10:02+00:00",
-    "blocked_note": "已 published in feed (mile_9b7793a6/f0ddde60/be686b18) — refill 漏看 title-match dedup"
+    "blocked_note": "已 published in feed (mile_9b7793a6/f0ddde60/be686b18) — refill 漏看 title-match dedup",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K1016_article_general",
     "title": "K1016: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1016 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude (K1014 衍生), 執行: Claude] K1016 測試 HAR(1,5,22)+vix_gap 簡約模型。vix_gap = implied vol(VIX) - realized vol。核心發現：(1) In-sample vix_gap t=18.43，100% rolling refits 係數為正 (2) 但 OOS QLIKE(r²) 反而惡化：1.831 vs HAR baseline 1.616，DM t=+1.583 (3) |r| target 上 MSE 改善（DM t=-2.869 接近 Harv",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1016",
@@ -20163,14 +20275,18 @@
     "created_at": "2026-06-03T10:08:18+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-03T10:10:03+00:00",
-    "blocked_note": "已 published in feed (mile_9b7793a6/f0ddde60/be686b18) — refill 漏看 title-match dedup"
+    "blocked_note": "已 published in feed (mile_9b7793a6/f0ddde60/be686b18) — refill 漏看 title-match dedup",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K1030_article_general",
     "title": "K1030: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1030 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] US VIX 對歐洲股市波動率也有顯著預測力！STOXX50E: A4f-VIX QLIKE=1.513 vs GJR 1.565（DM t=-3.64, Harvey PASS）。FEZ: A4f-VIX QLIKE=1.371 vs GJR 1.422（DM t=-3.45, Harvey PASS）。Own RV20 均不顯著。VIX vs RV20 head-to-head: VIX 顯著勝出（t=3.56/3.27）。驚人發現：不需要 VSTOXX，US VIX 就足夠——可能因為全球恐慌同步（",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1030",
@@ -20188,7 +20304,11 @@
     "created_at": "2026-06-03T10:08:18+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-03T10:10:04+00:00",
-    "blocked_note": "已 published in feed (mile_9b7793a6/f0ddde60/be686b18) — refill 漏看 title-match dedup"
+    "blocked_note": "已 published in feed (mile_9b7793a6/f0ddde60/be686b18) — refill 漏看 title-match dedup",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K1097_article_general",
@@ -22403,7 +22523,7 @@
     "title": "K597: write general-audience article (auto-discovered uncovered K)",
     "description": "K K597 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] 5 個核心美股策略在 5 個極端情境的壓力測試（2005-2026, yfinance SPY+GLD+VIX, 5342 交易日）。結果：保守型VT(Piecewise) PASS 4/5 情境——GFC 全現金(MDD=0%)、2022慢熊 MDD僅-0.9%、閃崩保護最佳，但犧牲 V 型反彈上行（COVID 期 return=0%）。自適應三階VT PASS 3/5——GFC 退出（return=0%）、2022 大幅勝出(+10.1% vs B&H)，但年均 27.3 次 regime switch、77",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K597",
@@ -22425,14 +22545,18 @@
     "created_at": "2026-06-06T02:08:01+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-06T02:09:22+00:00",
-    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated"
+    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K682_article_general",
     "title": "K682: write general-audience article (auto-discovered uncovered K)",
     "description": "K K682 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: [提出: K679 簡化, 執行: Claude] Percentile-inspired lookup table。VIX percentile thresholds: 25th=13.7, 50th=17.1, 75th=22.5, 90th=28.8（但 CV=16.7% 不夠穩定）。7 個 table 排名：K665 Table A(5-row) Sharpe 0.74 最佳，P3-AGG(3-row <15→80%, 15-25→45%, >25→10%) 0.73 第二。True percentile 在同框架下其實 0.64 < 12/VI",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K682",
@@ -22449,14 +22573,18 @@
     "created_at": "2026-06-06T02:08:01+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-06T02:09:22+00:00",
-    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated"
+    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K204_article_general",
     "title": "K204: write general-audience article (auto-discovered uncovered K)",
     "description": "K K204 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: verdict: NULL: GLD momentum does NOT significantly improve 12/VIX VT",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K204",
@@ -22469,14 +22597,18 @@
     "created_at": "2026-06-06T02:08:01+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-06T02:09:20+00:00",
-    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated"
+    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K275_article_general",
     "title": "K275: write general-audience article (auto-discovered uncovered K)",
     "description": "K K275 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: title: The Complete Case for 50/50 SPY/GLD + 12/VIX — Synthesizing All Evidence type: SYNTHESIS (no new data analysis) data_sources: All prior experiments (K1-K274, J1-J18, N1-N176, Phases P/Q/R/T/U/G/I). Original data from yfinance, FRED, CBOE. Periods: 1948-2026.",
     "priority": 4,
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K275",
@@ -22490,7 +22622,11 @@
     "created_at": "2026-06-06T02:08:01+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-06T02:09:21+00:00",
-    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated"
+    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K1056b_refit_tau_alignment_fix",
@@ -23470,7 +23606,7 @@
     "description": "從最新 AI 晶片出貨指引切入，分析市場對科技龍頭股的高估值定價容錯率。可量化：SOXX 隱含偏斜度（Skew）與供應鏈量產延遲事件的相關性。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "closed_no_action",
     "created_at": "2026-06-06T22:00:19+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -23480,7 +23616,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-09T05:11:35+00:00",
-    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_07_ai晶片 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）"
+    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_07_ai晶片 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "trending_repost_2026_06_07_台股集中度",
@@ -23488,7 +23628,7 @@
     "description": "從台積電權重過高切入，分析台股波動率是否被單一股票綁架。可量化：檢定台積電隱含波動率與 VIXTWN 的共變關係，並驗證美股 VIX 預測台指期波動的跨市場失效邊界。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "closed_no_action",
     "created_at": "2026-06-06T22:00:23+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -23498,7 +23638,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-09T05:11:36+00:00",
-    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_07_台股集中度 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）"
+    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_07_台股集中度 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "K1046_article_general_v2",
@@ -23823,7 +23967,7 @@
     "title": "K1135: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1135 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude followup K1129, 執行: compute-queue + Claude] 4 commodity × 3 models OOS (2010-2020 IS, 2020-2026 test, n=1576, seed=42). Treatment: USO(skew=-0.578), GLD(-0.310), SLV(-1.064); Control: UNG(+0.103). **Scenario B 確認**: H1(QLIKE DM BH-FDR) 0/4 NULL — USO raw DM_p=0.046 但 ",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1135",
@@ -23847,7 +23991,11 @@
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-07T11:10:36+00:00",
     "blocked_note": "Narrative-arc dup with mile_1a5263af; layer-4 dedup hygiene fix",
-    "last_released_at": "2026-06-07T05:29:37.149411+00:00"
+    "last_released_at": "2026-06-07T05:29:37.149411+00:00",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K195_article_general_v2",
@@ -24415,7 +24563,7 @@
     "title": "K506: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K506 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Reference: Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF Reference: Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K506",
@@ -24441,7 +24589,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-07-01T11:13:33+00:00",
-    "blocked_note": "arc-dedup FAIL descriptive_strict: dup of mile_d8e36bcb (在VT加訊號反而輸了, shared K1090). Arc already covered."
+    "blocked_note": "arc-dedup FAIL descriptive_strict: dup of mile_d8e36bcb (在VT加訊號反而輸了, shared K1090). Arc already covered.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K676_article_general_v2",
@@ -24477,7 +24629,7 @@
     "title": "K678: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K678 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: K643 延伸, 執行: Claude] 14 策略完整相關矩陣（91 pairs）。Avg corr=0.417（比 K643 的 0.72 低因包含台灣策略）。Most corr: GARCH VT x 12/VIX r=0.991。Least corr: Taiwan VT x Taiwan Hybrid r=0.019。Most independent: Taiwan Hybrid（avg r=0.208）。Best 2-combo: TW+JP TZ + Adaptive Tier Sharpe=4.14 r=0.133——低相關不等",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K678",
@@ -24495,7 +24647,11 @@
     "created_at": "2026-06-07T15:35:31+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-07T15:36:00+00:00",
-    "blocked_note": "K678 已有 draft mile_a0ac369d（experiment_refs=[K678], status=draft, 21:07 hourly 產出）；candidates uncovered 偵測未認列 draft → stale。此任務重複。"
+    "blocked_note": "K678 已有 draft mile_a0ac369d（experiment_refs=[K678], status=draft, 21:07 hourly 產出）；candidates uncovered 偵測未認列 draft → stale。此任務重複。",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K696_article_general_v2",
@@ -25913,7 +26069,7 @@
     "title": "leverage-direction ready_for_submission → 投稿包製備",
     "description": "leverage-direction v10 = ready_for_submission（per v10 README.md Stage Assessment）。製備投稿包: (1) cover letter draft (target journal e.g. JFE/RFS, 推薦 reviewers 3-5) (2) page count check (JFE/RFS limit) + 若超頁 propose trim sections (3) journal-specific formatting (line spacing, figure resolution, bibliography style) (4) submission checklist (anonymization, data availability statement, code availability via reproduce.py, conflict-of-interest) (5) submission zip in storage/paper_submission_pkgs/leverage-direction-v10/。Output: 該 dir + paper/leverage-direction/submission_plan_v10.md。",
     "priority": 3,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "paper_body",
     "source": "paper_portfolio_audit_2026-06-08",
     "tags": [
@@ -25926,7 +26082,11 @@
     "last_released_at": "2026-06-08T15:11:21.659914+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-08T15:11:29+00:00",
-    "blocked_note": "Duplicate of canonical Paper1_jbf_submission_prep (per paper/leverage-direction/decision_2026_06_05.md); same scope. Use Paper1_jbf_submission_prep instead."
+    "blocked_note": "Duplicate of canonical Paper1_jbf_submission_prep (per paper/leverage-direction/decision_2026_06_05.md); same scope. Use Paper1_jbf_submission_prep instead.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "research_partial_cointegration_hedging_oos",
@@ -26686,15 +26846,16 @@
       "funding_rate"
     ],
     "monetization_angle": "direct_paid_strategy + crypto_research_credibility",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-06-09T11:28:49.004257+00:00",
-    "claim_session_id": "a055007291ad",
     "started_at": "2026-06-09T11:29:16.273039+00:00",
     "completed_at": "2026-06-09T11:32:12.414708+00:00",
     "result": "Created experiments/k1436 feasibility audit: repo has BTC daily OHLCV CSVs but no canonical Binance funding-rate series and no local BTC intraday cache for HAR-RV target construction, so HAR-RV+funding cannot be run honestly yet. Added README + script + results.json documenting the double data gap; git commit blocked in this sandbox because .git is read-only (index.lock operation not permitted).",
     "blocked_reason": "awaiting_external_data",
     "blocked_at": "2026-06-17T21:11:08+00:00",
-    "blocked_note": "Binance funding-rate + BTC intraday RV target not locally materialized; results.json verdict BLOCKED_DATA_UNAVAILABLE"
+    "blocked_note": "Binance funding-rate + BTC intraday RV target not locally materialized; results.json verdict BLOCKED_DATA_UNAVAILABLE",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-cli",
+    "stale_claim_previous_claimed_at": "2026-06-09T11:28:49.004257+00:00",
+    "stale_claim_previous_claim_session_id": "a055007291ad"
   },
   {
     "id": "K1437_usdtwd_twii_vol_spillover",
@@ -26737,15 +26898,16 @@
       "VIX1D"
     ],
     "monetization_angle": "direct_intraday_strategy + hft_traffic",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-06-09T10:22:23.274146+00:00",
-    "claim_session_id": "e9262abf8e75",
     "started_at": "2026-06-09T10:22:38.410321+00:00",
     "completed_at": "2026-06-09T10:28:11.725039+00:00",
     "result": "Created experiments/k1438 feasibility audit: local SPY 5-min sample has 100 days but no canonical local VIX1D series/snapshot column, so HAR-RV+VIX1D cannot be run honestly. Added README + script + results.json documenting the data gap; git commit blocked in this sandbox because .git is read-only (index.lock operation not permitted).",
     "blocked_reason": "awaiting_external_data",
     "blocked_at": "2026-06-17T21:11:08+00:00",
-    "blocked_note": "VIX1D + SPY intraday data gap; feasibility audit recorded no forecasting evidence yet"
+    "blocked_note": "VIX1D + SPY intraday data gap; feasibility audit recorded no forecasting evidence yet",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-cli",
+    "stale_claim_previous_claimed_at": "2026-06-09T10:22:23.274146+00:00",
+    "stale_claim_previous_claim_session_id": "e9262abf8e75"
   },
   {
     "id": "daily_article_k1432_oos_overfitting",
@@ -27223,7 +27385,7 @@
     "description": "K1431 has a non-null verdict in experiments/k1431/ but no published feed article and no existing task. Verdict: NULL. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -27233,13 +27395,18 @@
     "created_at": "2026-06-10T00:30:51.560954+00:00",
     "generated_at": "2026-06-10T00:30:51.562478+00:00",
     "k_id": "K1431",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-06-10T00:31:03.717139+00:00",
-    "claim_session_id": "48bccf74e038",
     "started_at": "2026-06-10T00:31:18.193216+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-10T00:34:22+00:00",
-    "blocked_note": "VIX cluster cooldown blocked publish (cluster=vix count_30d=158>15); do not re-dispatch while cluster saturated"
+    "blocked_note": "VIX cluster cooldown blocked publish (cluster=vix count_30d=158>15); do not re-dispatch while cluster saturated",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-cli",
+    "stale_claim_previous_claimed_at": "2026-06-10T00:31:03.717139+00:00",
+    "stale_claim_previous_claim_session_id": "48bccf74e038"
   },
   {
     "id": "gen_article_k1439",
@@ -28150,7 +28317,7 @@
     "description": "從5月CPI年增率衝高至4.2%與中東能源危機切入，分析市場對新任Fed主席Warsh首秀可能重燃升息預期的恐慌。可量化：SOFR選擇權隱含波動率Skew與泰勒法則偏差值的回測分析。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "closed_no_action",
     "created_at": "2026-06-10T21:13:10+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -28160,7 +28327,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-10T22:09:41+00:00",
-    "blocked_note": "auto-refill 產生未驗證/虛構前提：5月CPI 4.2% 未公布（今晚 20:30 台灣才釋出）、Warsh首秀未確認、中東能源危機虛構。違反研究誠實原則，不可作為文章基礎。"
+    "blocked_note": "auto-refill 產生未驗證/虛構前提：5月CPI 4.2% 未公布（今晚 20:30 台灣才釋出）、Warsh首秀未確認、中東能源危機虛構。違反研究誠實原則，不可作為文章基礎。",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "closed_no_action"
   },
   {
     "id": "paper_review_mile_9a5c1ea4",
@@ -28192,7 +28363,7 @@
     "description": "Auto-generated by refill_reader_facing_pool.py from event_jobs.\nref_event_job_id: cpi-us-2026-06-13-t2\nevent_key: CPI_US_2026_06_13\nevent_type: cpi_us\nevent_date: 2026-06-13\nevent_series_slot: T-2\n\nAuto-populated by populate_upcoming_events.py. CPI_US 2026-06-13 T-2 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
     "task_type": "event_article",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-11T00:08:01+00:00",
     "source": "reader_facing_refill",
     "ref_event_job_id": "cpi-us-2026-06-13-t2",
@@ -28210,7 +28381,11 @@
     "handoff_at": "2026-06-11T00:09:53.873537+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-11T00:09:54+00:00",
-    "blocked_note": "stale event_jobs config: 6/13 週六非 US CPI 真實 release date; mile_307 T-7 + mile_0fa9c7f5 T-2 已覆蓋此 CPI cycle; runtime_schedules.json event_jobs cpi-us-2026-06-13-* 兩條應 review 移除"
+    "blocked_note": "stale event_jobs config: 6/13 週六非 US CPI 真實 release date; mile_307 T-7 + mile_0fa9c7f5 T-2 已覆蓋此 CPI cycle; runtime_schedules.json event_jobs cpi-us-2026-06-13-* 兩條應 review 移除",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "paper_review_mile_6a601155",
@@ -29377,7 +29552,7 @@
     "description": "K1443 has a non-null verdict in experiments/k1443/ but no published feed article and no existing task. Verdict: {'lead_lag_classification': 'mixed_or_no_clear_leader', 'pairwise_p_values': {'B. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -29387,15 +29562,20 @@
     "created_at": "2026-06-12T18:31:36.497853+00:00",
     "generated_at": "2026-06-12T18:31:36.497858+00:00",
     "k_id": "K1443",
-    "claimed_by": "codex-desktop",
-    "claimed_at": "2026-06-12T21:26:07.669811+00:00",
-    "claim_session_id": "50aaae86f78c",
     "started_at": "2026-06-12T21:26:21.048073+00:00",
     "completed_at": "2026-06-12T21:28:14.971581+00:00",
     "result": "Publisher narrative-arc dedup blocked K1443 article as too close to existing mile_872abdc3 (BTC vs US equity vol, same descriptive conclusion).\nReviewed existing article and confirmed overlap is reader-visible, so no dup_waiver applied.\nTask should be rewritten with a materially different angle or retired from queue.",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-17T21:11:09+00:00",
-    "blocked_note": "arc duplicate (mile_f8af30d0 covers BITCOIN/ETHEREUM/US_EQUITY null arc)"
+    "blocked_note": "arc duplicate (mile_f8af30d0 covers BITCOIN/ETHEREUM/US_EQUITY null arc)",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-desktop",
+    "stale_claim_previous_claimed_at": "2026-06-12T21:26:07.669811+00:00",
+    "stale_claim_previous_claim_session_id": "50aaae86f78c"
   },
   {
     "id": "gen_article_k1444",
@@ -29403,7 +29583,7 @@
     "description": "K1444 has a non-null verdict in experiments/k1444/ but no published feed article and no existing task. Verdict: PRELIMINARY. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -29413,15 +29593,20 @@
     "created_at": "2026-06-12T18:31:36.498750+00:00",
     "generated_at": "2026-06-12T18:31:36.498764+00:00",
     "k_id": "K1444",
-    "claimed_by": "codex-desktop",
-    "claimed_at": "2026-06-12T20:25:09.759105+00:00",
-    "claim_session_id": "15292d953b30",
     "started_at": "2026-06-12T20:25:26.591219+00:00",
     "completed_at": "2026-06-12T20:28:30.968840+00:00",
     "result": "完成 K1444 general draft 並通過 audience/image dry-run。正式 publish 被 narrative-arc duplicate gate 擋下，對應既有 mile_37df0259；草稿保留於 storage/drafts/k1444_general_draft.md，若要上線需改角度或加 dup_waiver。",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-17T21:11:10+00:00",
-    "blocked_note": "arc duplicate per check_arc_dedup"
+    "blocked_note": "arc duplicate per check_arc_dedup",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-desktop",
+    "stale_claim_previous_claimed_at": "2026-06-12T20:25:09.759105+00:00",
+    "stale_claim_previous_claim_session_id": "15292d953b30"
   },
   {
     "id": "paper_review_mile_9d646fae",
@@ -29555,7 +29740,7 @@
     "description": "K1446 has a non-null verdict in experiments/k1446/ but no published feed article and no existing task. Verdict: PASS. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -29565,15 +29750,20 @@
     "created_at": "2026-06-13T03:54:35.380282+00:00",
     "generated_at": "2026-06-13T03:54:35.380543+00:00",
     "k_id": "K1446",
-    "claimed_by": "codex-hourly",
-    "claimed_at": "2026-06-13T03:54:44.733334+00:00",
-    "claim_session_id": "fa4d74ad189c",
     "started_at": "2026-06-13T03:54:51.288544+00:00",
     "completed_at": "2026-06-13T03:58:20.759741+00:00",
     "result": "Generated K1446 general draft and ran formal publish_draft gates. Anti-AI gate PASS and image/audience checks PASS, but publisher blocked publication: narrative duplicate gate was a false positive vs K699 and required dup_waiver; after waiver, topic_cluster_cooldown blocked cluster=spy (98 articles in 30d, cap=10). No feed draft was created; local draft retained at storage/drafts/k1446_general_draft.md for future cooldown/waiver decision.",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-17T21:11:10+00:00",
-    "blocked_note": "arc duplicate per check_arc_dedup"
+    "blocked_note": "arc duplicate per check_arc_dedup",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-hourly",
+    "stale_claim_previous_claimed_at": "2026-06-13T03:54:44.733334+00:00",
+    "stale_claim_previous_claim_session_id": "fa4d74ad189c"
   },
   {
     "id": "platform_ops_k1446_cluster_waiver_decision",
@@ -29645,7 +29835,7 @@
     "title": "研究 backlog fallback: GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測 — Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，檢定對 SPY/GLD/XLE/ITA 不同 horizon 預測力（來源：AER 2022 + IMF GFSR 2025-04 Ch.2） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "gpr_acts_vs_threats_vol",
@@ -29654,22 +29844,27 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-13T04:36:15+00:00",
-    "claimed_by": "codex-desktop",
-    "claimed_at": "2026-06-13T06:10:41.500774+00:00",
-    "claim_session_id": "4212799ba898",
     "started_at": "2026-06-13T06:10:58.763749+00:00",
     "completed_at": "2026-06-13T06:15:27.015796+00:00",
     "result": "Created experiments/k1489 feasibility-audit three-piece set for GPR Acts vs Threats HAR-RV design.\nVerdict BLOCKED_ON_DATA: no local canonical GPRD_ACT/GPRD_THREAT raw file, official GPR/yfinance downloads fail DNS, and local reusable snapshots lack XLE/ITA prices.\nNo regression claims produced; results specify pinned data artifacts required to unlock the full experiment.",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-17T21:11:09+00:00",
-    "blocked_note": "Research-backlog fallback covered by existing GPR experiments; no new arc"
+    "blocked_note": "Research-backlog fallback covered by existing GPR experiments; no new arc",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-desktop",
+    "stale_claim_previous_claimed_at": "2026-06-13T06:10:41.500774+00:00",
+    "stale_claim_previous_claim_session_id": "4212799ba898"
   },
   {
     "id": "research_rp_3871387caf",
     "title": "研究 backlog fallback: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JPM The Impact of Volatility Targeting + Man Group 2025） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "rp_3871387caf",
@@ -29678,15 +29873,20 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-13T04:36:15+00:00",
-    "claimed_by": "hourly-13",
-    "claimed_at": "2026-06-13T05:08:43.657081+00:00",
-    "claim_session_id": "323820c5649f",
     "started_at": "2026-06-13T05:08:49.999827+00:00",
     "completed_at": "2026-06-13T05:09:26.487156+00:00",
     "result": "研究高度飽和：K21 commodity null + K33 MOVE bond mixed + K549 5-asset VT Harvey NS + K774 5-ETF VT mixed 皆已覆蓋此 cross-asset VT 命題。再派 = 重複工作 violate 研究誠實。Suggest deprecated",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-13T05:09:27+00:00",
-    "blocked_note": "K21+K33+K549+K774 已覆蓋 cross-asset VT 命題"
+    "blocked_note": "K21+K33+K549+K774 已覆蓋 cross-asset VT 命題",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "hourly-13",
+    "stale_claim_previous_claimed_at": "2026-06-13T05:08:43.657081+00:00",
+    "stale_claim_previous_claim_session_id": "323820c5649f"
   },
   {
     "id": "paper_review_mile_1b56cf6b",
@@ -31572,7 +31772,7 @@
     "description": "分析 AI 巨頭高集中度與指數低波動的背後成因。可量化：利用 HHI 指數與成份股動態相關性 breakdown 早期指標，評估 SPY 的隱含尾部風險與實際 VaR 的偏離程度。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-14T21:08:52+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -31584,7 +31784,11 @@
     "result": "arc-dup with mile_123a3855 (6/4 published, S&P 500 集中度突破 32%，指數波動率卻跌到 14%): 同 narrative arc (HHI + VIX low + tail-risk gap) 10 天內已覆蓋。skip per CLAUDE.md feedback_narrative_arc_dedup.",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-17T21:11:10+00:00",
-    "blocked_note": "mile_123a3855 (S&P 500 集中度 32%) already published 2026-06-05"
+    "blocked_note": "mile_123a3855 (S&P 500 集中度 32%) already published 2026-06-05",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "paper_review_mile_1b511caa",
@@ -32436,7 +32640,7 @@
     "description": "分析新任 Fed 主席可能改革前瞻指引與點陣圖的市場衝擊。從利率期權隱含波動率切入，探討政策不確定性溢價的上升空間。可量化：美債 MOVE 指數與 VIX 在政策轉折期的相關性變化。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-15T22:00:50+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -32454,7 +32658,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-23T03:10:04+00:00",
-    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "trending_repost_2026_06_16_fed點陣圖",
@@ -33351,7 +33559,7 @@
     "description": "從 Kevin Warsh 首場 FOMC 的鷹派預期切入，探討市場重新定價升息風險對債市波動率的衝擊。可量化：追蹤 MOVE 與 VIX 的發散程度，驗證跨資產波動率套利策略。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-16T22:00:45+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -33361,7 +33569,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-16T23:10:39+00:00",
-    "blocked_note": "Merged into trending_repost_2026_06_17_聯準會首秀 (主題重疊：Warsh 首秀 + MOVE/VIX + 升息預期)"
+    "blocked_note": "Merged into trending_repost_2026_06_17_聯準會首秀 (主題重疊：Warsh 首秀 + MOVE/VIX + 升息預期)",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "trending_repost_2026_06_17_聯準會首秀",
@@ -34780,7 +34992,7 @@
     "description": "分析 2026 年 6 月 FOMC 點陣圖轉鷹對美債與美股波動率的衝擊。可量化：計算 MOVE 指數與聯邦基金利率期貨隱含升息機率的跨期相關性，評估利率尾部風險對沖成本。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-18T22:00:27+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -34790,7 +35002,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-23T03:10:05+00:00",
-    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "email-11794-e3826f",
@@ -35023,7 +35239,7 @@
     "description": "從超大型科技股 Capex 暴增 70% 但現金流僅增 23% 的背離切入，探討市場對 AI 泡沫破裂的隱含波動率定價。可量化：分析科技巨頭遠期 IV 偏斜度（Skewness）與 Capex/OCF 缺口的領先相關性。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-19T22:00:30+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -35033,7 +35249,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-23T03:10:22+00:00",
-    "blocked_note": "arc_dedup: 與 trending_repost_2026_06_21_ai營收缺口 同 arc (AI capex/revenue gap → tail risk)，留最新一篇即可"
+    "blocked_note": "arc_dedup: 與 trending_repost_2026_06_21_ai營收缺口 同 arc (AI capex/revenue gap → tail risk)，留最新一篇即可",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "trending_repost_2026_06_20_ai營收缺口",
@@ -35041,7 +35261,7 @@
     "description": "從各大雲端服務商持續擴大資本支出但軟體端營收尚未跟上切入。量化指標：分析科技巨頭的偏斜度與資本支出公布前後的隱含波動率變化，驗證市場對尾部風險定價是否偏低。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-19T22:00:36+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -35051,7 +35271,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-23T03:10:22+00:00",
-    "blocked_note": "arc_dedup: 與 trending_repost_2026_06_21_ai營收缺口 同 arc (AI capex/revenue gap → tail risk)，留最新一篇即可"
+    "blocked_note": "arc_dedup: 與 trending_repost_2026_06_21_ai營收缺口 同 arc (AI capex/revenue gap → tail risk)，留最新一篇即可",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K1354",
@@ -35193,7 +35417,7 @@
     "description": "從 CapEx 高達 7250 億美元與實際 AI 營收的 6000 億缺口切入，分析超大型科技股的尾部風險。可量化：科技巨頭 implied vol skew 與 CapEx 修正預期的動態關聯。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-20T22:00:26+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -35201,14 +35425,18 @@
       "reader_facing",
       "auto_refill"
     ],
-    "claimed_by": null,
-    "claimed_at": "2026-06-23T03:10:23.516791+00:00",
-    "claim_session_id": "d8412d56d0bb",
     "started_at": "2026-06-23T03:10:27.664294+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-23T03:12:46+00:00",
     "blocked_note": "arc_dedup: AI capex 故事已被 mile_49616ac2 + 2 existing 覆蓋（過去 20 日 06-03/06-06 兩篇）; release-layer recycling root cause 待修",
-    "claimed_by_session": null
+    "claimed_by_session": null,
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_at": "2026-06-23T03:10:23.516791+00:00",
+    "stale_claim_previous_claim_session_id": "d8412d56d0bb"
   },
   {
     "id": "trending_repost_2026_06_21_fed鷹派",
@@ -35216,7 +35444,7 @@
     "description": "分析新任Fed主席Warsh棄用前瞻指引並改採數據依賴對隱含波動率期限結構的衝擊。透過研究FOMC會議前後短天期與長天期VIX及MOVE溢價的斜率轉變，量化政策不確定性。可驗證點：短端波動率敏感度跳升與長端風險溢價的重估。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-20T22:00:27+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -35226,7 +35454,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-23T03:10:05+00:00",
-    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "email-11851-ecf2e3",
@@ -35486,7 +35718,7 @@
     "description": "分析美聯儲新主席停止前瞻指引對市場波動的衝擊。可量化角度：藉由測算美債隱含波動率期限結構漂移，以及 VIX 指數對政策意外度的敏感度，建立動態波動率溢價避險模型。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-21T22:00:36+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -35496,7 +35728,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-23T03:10:05+00:00",
-    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K1361",
@@ -35676,7 +35912,7 @@
     "description": "新主席 Warsh 改變溝通政策，不再提供明確的前瞻指引。我們可分析 FOMC 會後 VIX 期限結構的短端波動跳躍，量化市場對總經數據敏感度上升的風險。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-22T22:00:21+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -35686,7 +35922,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-23T03:10:05+00:00",
-    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "trending_repost_2026_06_23_fed換帥",
@@ -35694,7 +35934,7 @@
     "description": "分析 Kevin Warsh 上任後淡化前瞻指引，如何因政策透明度下降而推升債市與貨幣市場隱含波動率。可量化：Fed 會議前後 MOVE 指數的變動幅度，與市場利率預期落差（Surprise Index）的實證關聯。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-22T22:00:23+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -35704,7 +35944,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-23T03:10:05+00:00",
-    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K1363",
@@ -36511,12 +36755,13 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-23T10:42:07+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-06-23T10:45:45.883878+00:00",
-    "claim_session_id": "e9ce8fa643ab",
     "started_at": "2026-06-23T10:45:46.082364+00:00",
     "completed_at": "2026-06-23T10:46:24.756531+00:00",
-    "result": "Blocked as stale/unsafe scaffold request. research_program.md already marks K1537 completed on 2026-06-23 as biodiversity transition-risk commodity proxy NULL_PROXY, while docs/error_log.md records a same-day K1537/K1536 K-id collision and quarantine for duplicate biodiversity experiments. Creating a fresh experiments/k1537 scaffold would re-open an already completed/collided K-id and risk false provenance. No experiment files were created; generator should ignore completed [x] K entries or reserved/collided K-ids."
+    "result": "Blocked as stale/unsafe scaffold request. research_program.md already marks K1537 completed on 2026-06-23 as biodiversity transition-risk commodity proxy NULL_PROXY, while docs/error_log.md records a same-day K1537/K1536 K-id collision and quarantine for duplicate biodiversity experiments. Creating a fresh experiments/k1537 scaffold would re-open an already completed/collided K-id and risk false provenance. No experiment files were created; generator should ignore completed [x] K entries or reserved/collided K-ids.",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-vscode",
+    "stale_claim_previous_claimed_at": "2026-06-23T10:45:45.883878+00:00",
+    "stale_claim_previous_claim_session_id": "e9ce8fa643ab"
   },
   {
     "id": "paper_review_mile_0908542b",
@@ -37231,12 +37476,13 @@
     "created_at": "2026-06-24T06:15:00+08:00",
     "source": "codex_v5_independent_round1_split",
     "parent_task_id": "paper_body_prg_v6_major_fixes",
-    "claimed_by": "claude-standin",
-    "claimed_at": "2026-06-25T02:50:06.893575+00:00",
-    "claim_session_id": "744e45fecb3b",
     "started_at": "2026-06-25T02:50:07.094710+00:00",
     "completed_at": "2026-06-25T02:50:07.297282+00:00",
-    "result": "Blocked by post-K1544 narrative state: adding mechanism citations to §4/Discussion would reinforce the old PRG bridge/dominance story before forecast-timing decision. K1544 (2026-06-24) shows current-overnight GJR-X beats canonical PRG in all six markets; paper body integration must wait for user-confirmed convention/narrative rewrite. Existing main.tex already cites Todorova2014/Linton2020/Opschoor2021 for session-aware overnight mechanisms."
+    "result": "Blocked by post-K1544 narrative state: adding mechanism citations to §4/Discussion would reinforce the old PRG bridge/dominance story before forecast-timing decision. K1544 (2026-06-24) shows current-overnight GJR-X beats canonical PRG in all six markets; paper body integration must wait for user-confirmed convention/narrative rewrite. Existing main.tex already cites Todorova2014/Linton2020/Opschoor2021 for session-aware overnight mechanisms.",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "claude-standin",
+    "stale_claim_previous_claimed_at": "2026-06-25T02:50:06.893575+00:00",
+    "stale_claim_previous_claim_session_id": "744e45fecb3b"
   },
   {
     "id": "paper_body_prg_v6_minor10_economic_value_formal_test",
@@ -37248,12 +37494,13 @@
     "created_at": "2026-06-24T06:15:00+08:00",
     "source": "codex_v5_independent_round1_split",
     "parent_task_id": "paper_body_prg_v6_major_fixes",
-    "claimed_by": "claude-standin",
-    "claimed_at": "2026-06-25T02:50:20.218028+00:00",
-    "claim_session_id": "7e6b5ccc6f6a",
     "started_at": "2026-06-25T02:50:20.427320+00:00",
     "completed_at": "2026-06-25T02:50:20.626406+00:00",
-    "result": "Blocked by K1544 / paper narrative gate. Economic-value formal tests for the existing TAIFEX VT section would validate a canonical PRG timing convention that K1544 has just challenged: current-overnight GJR-X beats canonical PRG across all six markets, while PRG only regains advantage under full-day-at-open x_overnight+h_intraday convention. Need user/narrative decision and likely new economic-value evaluation under the chosen convention before Sharpe diff/bootstrap/TC table can be added to main.tex."
+    "result": "Blocked by K1544 / paper narrative gate. Economic-value formal tests for the existing TAIFEX VT section would validate a canonical PRG timing convention that K1544 has just challenged: current-overnight GJR-X beats canonical PRG across all six markets, while PRG only regains advantage under full-day-at-open x_overnight+h_intraday convention. Need user/narrative decision and likely new economic-value evaluation under the chosen convention before Sharpe diff/bootstrap/TC table can be added to main.tex.",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "claude-standin",
+    "stale_claim_previous_claimed_at": "2026-06-25T02:50:20.218028+00:00",
+    "stale_claim_previous_claim_session_id": "7e6b5ccc6f6a"
   },
   {
     "id": "paper_review_prg_v6_major4_verify",
@@ -37585,11 +37832,12 @@
     "last_released_at": "2026-06-24T10:50:05.505769+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "started_at": "2026-06-25T02:44:41.942322+00:00",
-    "claimed_by": "claude-standin",
-    "claimed_at": "2026-06-25T02:44:41.741566+00:00",
-    "claim_session_id": "f8e6825f382c",
     "completed_at": "2026-06-25T02:48:06.639017+00:00",
-    "result": "Close email sent (notification f70cd41e). Chrome tabs confirmed open for Meta Developers and Ivan FB. Meta tab claim timed out; Facebook content read blocked by browser-use enterprise policy. No Meta form/FB post side effects performed; task blocked until user provides screenshot/status or an allowed interactive environment."
+    "result": "Close email sent (notification f70cd41e). Chrome tabs confirmed open for Meta Developers and Ivan FB. Meta tab claim timed out; Facebook content read blocked by browser-use enterprise policy. No Meta form/FB post side effects performed; task blocked until user provides screenshot/status or an allowed interactive environment.",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "claude-standin",
+    "stale_claim_previous_claimed_at": "2026-06-25T02:44:41.741566+00:00",
+    "stale_claim_previous_claim_session_id": "f8e6825f382c"
   },
   {
     "id": "research_short_interest_borrow_rate_proxy_squeeze_risk_sm",
@@ -37672,12 +37920,13 @@
       "reader_facing",
       "auto_refill"
     ],
-    "claimed_by": "claude-standin",
-    "claimed_at": "2026-06-25T02:39:35.745320+00:00",
-    "claim_session_id": "7164b3f5c47e",
     "started_at": "2026-06-25T02:39:47.496936+00:00",
     "completed_at": "2026-06-25T02:43:25.370916+00:00",
-    "result": "Blocked by trending_repost dedup gate: topic overlaps recent AI CapEx/options/skew posts (6/2 mile_49616ac2, 6/23 mile_057f178b, 6/24 mile_b221e550). Fresh yfinance check also did not support a new downside-skew thesis for SMH/SOXX, so publishing would be low-incremental repackage."
+    "result": "Blocked by trending_repost dedup gate: topic overlaps recent AI CapEx/options/skew posts (6/2 mile_49616ac2, 6/23 mile_057f178b, 6/24 mile_b221e550). Fresh yfinance check also did not support a new downside-skew thesis for SMH/SOXX, so publishing would be low-incremental repackage.",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "claude-standin",
+    "stale_claim_previous_claimed_at": "2026-06-25T02:39:35.745320+00:00",
+    "stale_claim_previous_claim_session_id": "7164b3f5c47e"
   },
   {
     "id": "trending_repost_2026_06_25_套利交易",
@@ -37693,12 +37942,13 @@
       "reader_facing",
       "auto_refill"
     ],
-    "claimed_by": "claude-standin",
-    "claimed_at": "2026-06-25T02:43:40.604882+00:00",
-    "claim_session_id": "4d1e4eeda1ab",
     "started_at": "2026-06-25T02:43:40.802027+00:00",
     "completed_at": "2026-06-25T02:44:06.789073+00:00",
-    "result": "Blocked by ARC/topic dedup: 2026-06-17 mile_19fa8ca1 already covers JPY carry-trade crowding, 9-year-high yen shorts, and VIX tail-risk underpricing; check_arc_dedup also exited 1 for JPY/VIX systemic-crowding arc. No genuinely new angle in task brief."
+    "result": "Blocked by ARC/topic dedup: 2026-06-17 mile_19fa8ca1 already covers JPY carry-trade crowding, 9-year-high yen shorts, and VIX tail-risk underpricing; check_arc_dedup also exited 1 for JPY/VIX systemic-crowding arc. No genuinely new angle in task brief.",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "claude-standin",
+    "stale_claim_previous_claimed_at": "2026-06-25T02:43:40.604882+00:00",
+    "stale_claim_previous_claim_session_id": "4d1e4eeda1ab"
   },
   {
     "id": "journal_discovery_20260625_0",
@@ -37903,7 +38153,7 @@
     "description": "探討科技巨頭擴大資本支出但營收回報放緩的市場定價。可量化：比較 Nasdaq 100 偏斜度（Skew）與 AI 資本支出指引的變動相關性，評估市場對科技股下檔風險的隱含定價。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-25T22:00:12+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -37913,7 +38163,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-28T10:35:09+00:00",
-    "blocked_note": "AI/科技股 IV cluster saturated (6 P1 trending 全同 arc，發出會被 dedup 擋 + 違反 narrative-arc diversity)。保留 2026_06_26_台股ai險(台股 angle) + 2026_06_28_ai修正(半導體巨頭千億具體 angle) 即可。本批 deprecate by hourly-18 dispatcher 2026-06-28 18:30."
+    "blocked_note": "AI/科技股 IV cluster saturated (6 P1 trending 全同 arc，發出會被 dedup 擋 + 違反 narrative-arc diversity)。保留 2026_06_26_台股ai險(台股 angle) + 2026_06_28_ai修正(半導體巨頭千億具體 angle) 即可。本批 deprecate by hourly-18 dispatcher 2026-06-28 18:30.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "trending_repost_2026_06_26_台股ai險",
@@ -37921,7 +38175,7 @@
     "description": "針對AI半導體板塊回檔，分析外資在台指期與選擇權市場的波動率佈局。可量化：追蹤台股隱含波動率（Taiex VI）與外資台指選擇權未平倉量（OI）偏斜度，驗證波動率均值回歸的交易策略。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-25T22:00:20+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -37931,7 +38185,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-28T10:50:23+00:00",
-    "blocked_note": "Arc dup: mile_02c71e74 '別再把美國 VIX 直接乘 1.4 來看台股風險了' 已 cover TW_EQUITY+TSMC+VIX descriptive arc。check_arc_dedup.py 主線程 2026-06-28 18:50 verify。"
+    "blocked_note": "Arc dup: mile_02c71e74 '別再把美國 VIX 直接乘 1.4 來看台股風險了' 已 cover TW_EQUITY+TSMC+VIX descriptive arc。check_arc_dedup.py 主線程 2026-06-28 18:50 verify。",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "journal_discovery_20260626_0",
@@ -37983,7 +38241,7 @@
     "description": "從科技廠資本支出攀升但股價回檔切入，分析市場對AI回報週期的質疑。可量化：大型科技股隱含波動率與資本支出指引修正之相關性，以及偏斜度如何反映下行風險。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-26T22:00:22+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -37993,7 +38251,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-28T10:35:09+00:00",
-    "blocked_note": "AI/科技股 IV cluster saturated (6 P1 trending 全同 arc，發出會被 dedup 擋 + 違反 narrative-arc diversity)。保留 2026_06_26_台股ai險(台股 angle) + 2026_06_28_ai修正(半導體巨頭千億具體 angle) 即可。本批 deprecate by hourly-18 dispatcher 2026-06-28 18:30."
+    "blocked_note": "AI/科技股 IV cluster saturated (6 P1 trending 全同 arc，發出會被 dedup 擋 + 違反 narrative-arc diversity)。保留 2026_06_26_台股ai險(台股 angle) + 2026_06_28_ai修正(半導體巨頭千億具體 angle) 即可。本批 deprecate by hourly-18 dispatcher 2026-06-28 18:30.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "event_article_nfp_us_2026-07-03_tminus7",
@@ -38001,7 +38263,7 @@
     "description": "Auto-generated by refill_reader_facing_pool.py from event_jobs.\nref_event_job_id: nfp-2026-07-03-t7\nevent_key: NFP_US_2026_07_03\nevent_type: nfp_us\nevent_date: 2026-07-03\nevent_series_slot: T-7\n\nAuto-populated by populate_upcoming_events.py. NFP_US 2026-07-03 T-7 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
     "task_type": "event_article",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-26T22:00:22+00:00",
     "source": "reader_facing_refill",
     "ref_event_job_id": "nfp-2026-07-03-t7",
@@ -38017,7 +38279,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-28T10:35:36+00:00",
-    "blocked_note": "NFP T-7 from 7/3 = 6/26 已過期 2 天 (今天 6/28)，T-2 (7/1) / T-1 (7/2) 由 event_jobs schedule 自動 materialize 不用此 task。Deprecate by hourly-18 dispatcher 2026-06-28 18:35."
+    "blocked_note": "NFP T-7 from 7/3 = 6/26 已過期 2 天 (今天 6/28)，T-2 (7/1) / T-1 (7/2) 由 event_jobs schedule 自動 materialize 不用此 task。Deprecate by hourly-18 dispatcher 2026-06-28 18:35.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "trending_repost_2026_06_27_ai資本支出",
@@ -38025,7 +38291,7 @@
     "description": "探討 Hyperscaler 近兆美元 AI Capex 與獲利變現脫節引發的科技股劇烈震盪。可量化：分析 Nasdaq 100 隱含波動率（VXN）對 Capex 指引修正的彈性，以及科技巨頭隱含波動率溢價（IV Premium）的均值回歸特徵。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-26T22:00:23+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -38035,7 +38301,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-28T10:35:09+00:00",
-    "blocked_note": "AI/科技股 IV cluster saturated (6 P1 trending 全同 arc，發出會被 dedup 擋 + 違反 narrative-arc diversity)。保留 2026_06_26_台股ai險(台股 angle) + 2026_06_28_ai修正(半導體巨頭千億具體 angle) 即可。本批 deprecate by hourly-18 dispatcher 2026-06-28 18:30."
+    "blocked_note": "AI/科技股 IV cluster saturated (6 P1 trending 全同 arc，發出會被 dedup 擋 + 違反 narrative-arc diversity)。保留 2026_06_26_台股ai險(台股 angle) + 2026_06_28_ai修正(半導體巨頭千億具體 angle) 即可。本批 deprecate by hourly-18 dispatcher 2026-06-28 18:30.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "daily_digest_20260627",
@@ -38089,7 +38359,7 @@
     "description": "從科技巨頭高達8000億美元的CapEx切入，探討市場對AI回報週期的定價分歧。可量化角度：分析晶片硬體股與AI軟體服務股隱含波動率之差（IV Spread）的擴大，並檢驗其與下季財測修正的相關性。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-27T22:00:26+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -38099,7 +38369,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-28T10:35:10+00:00",
-    "blocked_note": "AI/科技股 IV cluster saturated (6 P1 trending 全同 arc，發出會被 dedup 擋 + 違反 narrative-arc diversity)。保留 2026_06_26_台股ai險(台股 angle) + 2026_06_28_ai修正(半導體巨頭千億具體 angle) 即可。本批 deprecate by hourly-18 dispatcher 2026-06-28 18:30."
+    "blocked_note": "AI/科技股 IV cluster saturated (6 P1 trending 全同 arc，發出會被 dedup 擋 + 違反 narrative-arc diversity)。保留 2026_06_26_台股ai險(台股 angle) + 2026_06_28_ai修正(半導體巨頭千億具體 angle) 即可。本批 deprecate by hourly-18 dispatcher 2026-06-28 18:30.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K1553",
@@ -41319,7 +41593,7 @@
     "title": "K1583: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1583 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1380_v4 17 個 SPY vol forecast spec（GARCH-X A1-A5/A2f/A4f/A3f/A2n/A4n + MIDAS B1-B3/C2-C3/B0；C1 因 0 valid 排除→16 specs）在 Model Confidence Set 三層分析全 retained：\n1. Unconditional MCS (B=1000, α=0.10)：16/16 全保留，p_set=0.438\n2. Conditional MCS (VIX high≥20 / mid / low<15)：每 regime 同樣 16/",
     "priority": 4,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1583",
@@ -41342,9 +41616,6 @@
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-30T22:10:42+00:00",
     "blocked_note": "arc-dedup gate exit-message: 3 existing articles tell same MCS/methodology_robustness story (entities GOLD/NASDAQ/TW_EQUITY/US_EQUITY/VIX, conclusion_class=descriptive); writing new general piece would repeat narrative arc. K1583 verdict surface (16/16 MCS retained NULL) is methodology-only, not reader-facing news worthy. Per CLAUDE.md arc-dedup hard rule.",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-06-30T22:42:09.681937+00:00",
-    "claim_session_id": "77c980023546",
     "status_history": [
       {
         "ts": "2026-06-30T22:42:09.682409+00:00",
@@ -41367,7 +41638,15 @@
     ],
     "started_at": "2026-06-30T22:42:09.900419+00:00",
     "completed_at": "2026-06-30T22:43:15.177521+00:00",
-    "result": "Did not write article: task record already carried blocked_reason=deprecated and blocked_note from arc-dedup gate saying three existing articles cover the same MCS/methodology_robustness narrative; K1583 is methodology-only and not reader-facing news-worthy. Preserved gate by marking blocked."
+    "result": "Did not write article: task record already carried blocked_reason=deprecated and blocked_note from arc-dedup gate saying three existing articles cover the same MCS/methodology_robustness narrative; K1583 is methodology-only and not reader-facing news-worthy. Preserved gate by marking blocked.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "codex-cli",
+    "stale_claim_previous_claimed_at": "2026-06-30T22:42:09.681937+00:00",
+    "stale_claim_previous_claim_session_id": "77c980023546"
   },
   {
     "id": "email-12322-bf6984",
@@ -42078,7 +42357,7 @@
     "description": "從科技巨頭2026年預估7000億美元資本支出切入，探討市場對AI變現速度的焦慮。這有助於釐清科技股近期隱含波動率飆升的底層邏輯。可量化：Nasdaq-100偏斜度與巨頭Capex變現率的背離。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-06-30T22:00:19+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -42088,7 +42367,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-07-01T07:04:24+00:00",
-    "blocked_note": "同 narrative arc 與今日 digest mile_4901f7bc AI-capex 專欄撞題（feedback_narrative_arc_dedup）— 資產(科技巨頭)×結論(vol/skew 隱含焦慮)同構"
+    "blocked_note": "同 narrative arc 與今日 digest mile_4901f7bc AI-capex 專欄撞題（feedback_narrative_arc_dedup）— 資產(科技巨頭)×結論(vol/skew 隱含焦慮)同構",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "paper_leverage_direction_reframing_decision",
@@ -42994,7 +43277,7 @@
     "title": "K1590: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1590 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1590 merger-arbitrage deal-spread volatility diagnostic is a GO for Phase 2, with Codex review verdict CONDITIONAL_PASS. Data: yfinance adjusted closes (auto_adjust=False) for MNA/SPY/IWM/HYG/^VIX, price range 2020-01-02 to 2026-06-30, MNA return sample N=1629. Core gate evidenc",
     "priority": 3,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1590",
@@ -43014,7 +43297,11 @@
         "to": "blocked",
         "reason": "general-audience article for K1590 already in feed (mile_4518e9d8); auto-retired to prevent duplicate dispatch"
       }
-    ]
+    ],
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "research_harq_shark_har_bollerslev_patton_quaedvlieg_joe",
@@ -43820,7 +44107,7 @@
     "description": "從科技巨頭 CapEx 與營收回報率的缺口切入，分析市場是否低估了 AI 基建投資的執行風險。可量化：分析科技股隱含波動率（IV）與 CapEx 占營收比重、自由現金流指引修正的相關性，探討波動率溢價是否合理。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-07-01T22:00:24+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -43830,7 +44117,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-07-02T03:12:10+00:00",
-    "blocked_note": "arc-covered by today's digest mile_4901f7bc (AI 資本支出專欄 v2 已涵蓋『科技股波動率/選擇權怎麼定價』同邏輯 arc); per feedback_narrative_arc_dedup 同日不同外殼同 arc=dup; 換 fresh trending topic"
+    "blocked_note": "arc-covered by today's digest mile_4901f7bc (AI 資本支出專欄 v2 已涵蓋『科技股波動率/選擇權怎麼定價』同邏輯 arc); per feedback_narrative_arc_dedup 同日不同外殼同 arc=dup; 換 fresh trending topic",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "journal_discovery_20260702_0",
@@ -44133,7 +44424,7 @@
     "id": "daily_article_k1316_vix_taiwan_null_20260702",
     "task_type": "daily_article",
     "priority": 2,
-    "status": "blocked",
+    "status": "superseded",
     "title": "[daily_article] K1316: 美國 VIX 能預測台股波動嗎?誠實的 NULL — HAR-VIX vs HAR-RV 跨市場檢定",
     "description": "把 K1316 (NULL finding) 寫成一般讀者向 draft。核心:在 HAR-RV 台指期波動模型加入美國 VIX,DM QLIKE t=1.04 p=0.298 (NS,未過 Harvey 3σ),MSE t=-0.73 p=0.463 (NS) → 美 VIX 對台股波動預測無額外幫助,台股自身 RV 已含大部分資訊。arc-dedup 已通過(arc_duplicates=[])。證據:experiments/k1316/",
     "source": "draft_pool_refill",
@@ -44164,14 +44455,18 @@
     "last_release_reason": "auto_release_stale_2h",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-07-02T06:12:00+00:00",
-    "blocked_note": "arc 已被 5 篇 feed 文章覆蓋，其中 mile_b46e313f (626天台指期實測, 2026-05-21 published) experiment_refs=[K1315,K1316] 即本實驗本身。再寫=第6篇同結論鬼打牆。arc-dedup gate false-negative 需另修。"
+    "blocked_note": "arc 已被 5 篇 feed 文章覆蓋，其中 mile_b46e313f (626天台指期實測, 2026-05-21 published) experiment_refs=[K1315,K1316] 即本實驗本身。再寫=第6篇同結論鬼打牆。arc-dedup gate false-negative 需另修。",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "research_social_connectedness_vol_hirshleifer_peng_wang_r",
     "title": "研究 backlog fallback: Social Connectedness → 財報 vol 反應（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Social Connectedness → 財報 vol 反應（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性。全免費數千事件。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -44207,7 +44502,11 @@
     "last_release_reason": "auto_release_stale_2h",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-07-02T14:20:23+00:00",
-    "blocked_note": "重複：主題已由 K1588 完成為誠實 NULL（2026-06-30，SCI→財報RV jump p=0.743/decay p=0.712，112 tickers/2663 events, rerun verified）。孤兒 worktree agent 用 K1603 重跑同假說（dedup gap，不知 K1588）→ 已清。p=0.74 null 無法靠更花俏 SE 翻案，deprecate 不再派。"
+    "blocked_note": "重複：主題已由 K1588 完成為誠實 NULL（2026-06-30，SCI→財報RV jump p=0.743/decay p=0.712，112 tickers/2663 events, rerun verified）。孤兒 worktree agent 用 K1603 重跑同假說（dedup gap，不知 K1588）→ 已清。p=0.74 null 無法靠更花俏 SE 翻案，deprecate 不再派。",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "research_direct_indexing_tax_loss_harvesting_crowding_sin",
@@ -45819,7 +46118,7 @@
     "description": "從市場質疑科技巨頭 AI 資本支出回報率與高集中度切入。可量化：分析 mega-cap 個股的 IV Skew 與 Put/Call Ratio 變化，驗證市場對巨頭獲利不如預期之尾部風險的定價程度。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-07-02T22:00:17+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -45871,7 +46170,11 @@
     "last_released_at": "2026-07-02T23:19:07.897912+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-07-02T23:19:08+00:00",
-    "blocked_note": "arc-covered by mile_49616ac2/mile_f5f4cb43/mile_8a5e80b0 (mega-cap skew 指數vs個股, 同metric); cluster 近5週4篇飽和; 07-03 fresh data + migration finding 記錄於 storage/drafts/trending_ai_capex_skew/FINDINGS.md 留待趨勢確認"
+    "blocked_note": "arc-covered by mile_49616ac2/mile_f5f4cb43/mile_8a5e80b0 (mega-cap skew 指數vs個股, 同metric); cluster 近5週4篇飽和; 07-03 fresh data + migration finding 記錄於 storage/drafts/trending_ai_capex_skew/FINDINGS.md 留待趨勢確認",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "K1605_article_research",
@@ -47789,7 +48092,7 @@
     "description": "聚焦四大科技股2026年預估8000億美元的基建投入。量化指標：追蹤隱含波動率偏斜度（Skewness）與各廠AI營收佔比、CapEx/營收比率的關聯，評估市場對「AI變現不及預期」的防禦成本。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "superseded",
     "created_at": "2026-07-03T22:00:20+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -47799,7 +48102,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-07-03T23:11:05+00:00",
-    "blocked_note": "Arc-saturated: AI capex×skew 防禦成本 arc 近8天已覆蓋5+篇(mile_f5f4cb43 6/30 AI變現IV拐點 / mile_a30cfe89 7/03 偏斜三讀替恐懼定價 / mile_8a5e80b0 6/27 AI資本支出裂縫 / mile_0941e2f0 6/28 選擇權偏斜 / mile_4901f7bc 7/01 AI capex digest). 同邏輯arc換外殼=鬼打牆反模式,不重寫."
+    "blocked_note": "Arc-saturated: AI capex×skew 防禦成本 arc 近8天已覆蓋5+篇(mile_f5f4cb43 6/30 AI變現IV拐點 / mile_a30cfe89 7/03 偏斜三讀替恐懼定價 / mile_8a5e80b0 6/27 AI資本支出裂縫 / mile_0941e2f0 6/28 選擇權偏斜 / mile_4901f7bc 7/01 AI capex digest). 同邏輯arc換外殼=鬼打牆反模式,不重寫.",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "journal_discovery_20260703_3",
@@ -48202,9 +48509,6 @@
       "research-program-backlog"
     ],
     "created_at": "2026-07-04T04:52:57+00:00",
-    "claimed_by": "hourly-14",
-    "claimed_at": "2026-07-04T06:14:18.292739+00:00",
-    "claim_session_id": "6fe1e27fbb80",
     "status_history": [
       {
         "ts": "2026-07-04T06:14:18.293020+00:00",
@@ -48223,7 +48527,11 @@
     "blocked_reason": "awaiting_external_data",
     "blocked_at": "2026-07-04T06:17:02+00:00",
     "blocked_note": "本機 intraday 5-min (SPY+0050) 僅 2026-01-14~07-02 ~115 交易日/資產；partial-day RV 資訊價值曲線需多年高頻做穩健 expanding-OOS。待長歷史 intraday 源(付費/自建 tick 累積>2年)後解封",
-    "blocked_until": "2026-10-01"
+    "blocked_until": "2026-10-01",
+    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
+    "stale_claim_previous_claimed_by": "hourly-14",
+    "stale_claim_previous_claimed_at": "2026-07-04T06:14:18.292739+00:00",
+    "stale_claim_previous_claim_session_id": "6fe1e27fbb80"
   },
   {
     "id": "research_predictor_zoo_30_predictor_romano_wolf_fdr_oos",
@@ -50186,7 +50494,7 @@
     "title": "K1641: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1484). Original: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1641.py with signal.shift(1) + seed=42, (c) K1641_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "blocked",
+    "status": "superseded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -50198,7 +50506,11 @@
     "created_at": "2026-07-05T00:00:01Z",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-07-05T01:09:54+00:00",
-    "blocked_note": "同題已由 K1636 完成（量先價行/爆量長黑隔日方向迷思，Codex CONDITIONAL_PASS）；此為 research_program.md 自動生成重複 experiment task"
+    "blocked_note": "同題已由 K1636 完成（量先價行/爆量長黑隔日方向迷思，Codex CONDITIONAL_PASS）；此為 research_program.md 自動生成重複 experiment task",
+    "terminal_migration_at": "2026-07-05T14:44:25+00:00",
+    "terminal_migration_from_status": "blocked",
+    "terminal_migration_from_reason": "deprecated",
+    "terminal_migration_target_status": "superseded"
   },
   {
     "id": "journal_discovery_20260705_0",
@@ -50506,7 +50818,7 @@
     "id": "platform_ops_blocked_lane_terminal_migration_c2",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C2: blocked lane 衛生 — deprecated(86筆)→terminal 遷移 + mark_task_blocked schema guard",
@@ -50526,9 +50838,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T14:47:08.627772+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-05T14:38:43.266072+00:00"
+    "started_at": "2026-07-05T14:38:43.266072+00:00",
+    "completed_at": "2026-07-05T14:47:08.627449+00:00",
+    "result": "Implemented C2 blocked-lane hygiene: migrated 72 deprecated blocked rows to terminal statuses (55 superseded, 17 closed_no_action) and cleared 25 stale blocked claim fields. Added mark_task_blocked schema guard/default blocked_until and covered-article writer fix; tests 19 passed."
   },
   {
     "id": "experiment_k506_resurrect_c4",

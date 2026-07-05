@@ -5,6 +5,8 @@ import sys
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "mark_task_blocked.py"
 SPEC = importlib.util.spec_from_file_location("mark_task_blocked", MODULE_PATH)
@@ -59,6 +61,7 @@ def test_mark_task_blocked_sets_awaiting_interactive_session(
     assert saved[0]["status"] == "blocked"
     assert saved[0]["blocked_reason"] == "awaiting_interactive_session"
     assert saved[0]["blocked_note"] == "Needs logged-in Chrome session"
+    assert saved[0]["blocked_until"]
     out = capsys.readouterr().out
     assert "awaiting_interactive_session" in out
 
@@ -158,3 +161,55 @@ def test_mark_task_blocked_skips_bad_entries_and_updates_valid(
     err = capsys.readouterr().err
     assert "[mark_task_blocked] WARN next_tasks entry schema invalid; skipping" in err
     assert "index=0" in err
+
+
+def test_deprecated_reason_terminalizes_instead_of_blocking(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "duplicate_article",
+                    "status": "pending",
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(mark_task_blocked, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mark_task_blocked.py",
+            "--id",
+            "duplicate_article",
+            "--reason",
+            "deprecated",
+            "--note",
+            "Already covered by a published article",
+        ],
+    )
+
+    rc = mark_task_blocked.main()
+
+    assert rc == 0
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "closed_no_action"
+    assert saved[0]["blocked_reason"] == "deprecated"
+    assert saved[0]["blocked_note"] == "Already covered by a published article"
+    assert "blocked_until" not in saved[0]
+    assert saved[0]["terminalized_reason"] == "deprecated"
+
+
+def test_schema_guard_rejects_blocked_without_reason() -> None:
+    with pytest.raises(ValueError, match="blocked_reason"):
+        mark_task_blocked._validate_task_schema({"id": "bad", "status": "blocked"})
+
+
+def test_schema_guard_rejects_unknown_status() -> None:
+    with pytest.raises(ValueError, match="not canonical"):
+        mark_task_blocked._validate_task_schema({"id": "bad", "status": "surprise"})

@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-05 blocked lane 長期堆積 deprecated 與 stale claim metadata — **FIXED**
+
+**現象**：`storage/next_tasks.json` 有 72 筆 `status=blocked` 且 `blocked_reason=deprecated` 的任務，語意上已不需再等待解除，卻仍佔 blocked lane；另有 25 筆 blocked row 殘留 `claimed_by` / `claimed_at` / `claim_session_id`，使非 active 任務看起來仍被舊 session 持有。
+
+**根因**：`deprecated` 同時被當成 block reason 與 terminal intent；`mark_task_blocked.py` 過去對非 terminal block 不強制 `blocked_until`，也沒有寫入端 schema guard。部分 writer（例如 covered-article dedup）直接寫 `blocked_reason=deprecated`，繞過 CLI 語意，導致退休任務留在 blocked lane。
+
+**解決**：新增 `scripts/migrate_blocked_lane_terminal.py`，在 snapshot commit 後將 72 筆 deprecated blocked row 遷到終態（55 `superseded`、17 `closed_no_action`），保留 `blocked_reason` / `blocked_note` 與 migration metadata 作 audit trail，並清 25 筆 blocked stale claim metadata。`mark_task_blocked.py` 新增 schema guard：`status=blocked` 必須有合法 reason，非 terminal reason 自動補 `blocked_until=now+14d`，`--reason deprecated` 直接寫 `closed_no_action` 而非 blocked。`mark_covered_article_tasks.py` 同步改為把已覆蓋文章任務標 `superseded`，避免新 deprecated 再進 blocked lane。
+
+**驗證**：migration apply 後 `blocked_deprecated=0`、`blocked_with_claim_fields=0`；重跑 dry-run 顯示 0 待處理。`uv run pytest tests/test_mark_task_blocked.py tests/test_blocked_lane_terminal_migration.py tests/test_covered_article_dedup.py -q`：19 passed；`py_compile` 通過。
+
+**教訓**：blocked lane 只能表示「等待外部條件或定期重審」，不可拿來存放永久退休任務；terminal intent 必須在 writer 層轉成 terminal status。claim metadata 是 active ownership 訊號，blocked row 若保留舊 claim 欄位會污染控制面觀測。
+
 ## 2026-07-05 K1380_v4 results.json 截斷、snapshot 重複日期與本地 QLIKE 方向不一致 — **FIXED**
 
 **現象**：`experiments/K1380_v4/k1380_v4_results.json` 因 agent 中途死亡留下截斷 JSON（`jq` EOF around line 51），Paper 9 C3 的 SPA/RC 實驗無法被可靠讀取。重新跑時又先撞到 `paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv` 有 2026-05-04 至 2026-05-15 的重複日期列，造成 `reindex` 失敗。審查時同時發現 K1380_v4 本地 `qlike()` 用 `forecast_variance / actual_r2`，與專案 canonical Patton QLIKE `actual_r2 / forecast_variance - log(...) - 1` 方向相反。
