@@ -8,6 +8,8 @@ Gate requirements:
      recorded as a failure, never written.
   3. Failure isolation — one indicator's data source failing does not block
      the others; run summary reflects partial success (ok=False).
+  4. Market-calendar gate — US exchange holidays/weekends are benign skips, not
+     stale-data failures or duplicate signal emissions.
 
 All network access is mocked via fetch_fn injection; Supabase sync disabled.
 """
@@ -38,6 +40,7 @@ spec.loader.exec_module(iad)
 # ---------------------------------------------------------------------------
 
 NOW = datetime(2026, 6, 11, 9, 40, tzinfo=timezone.utc)  # 17:40 Taipei 2026-06-11
+US_HOLIDAY_NOW = datetime(2026, 7, 3, 23, 0, tzinfo=timezone.utc)  # 07:00 Taipei 2026-07-04
 
 US_DATES = pd.bdate_range("2024-01-02", "2026-06-10")
 TW_DATES = pd.bdate_range("2024-01-02", "2026-06-11")
@@ -169,6 +172,27 @@ class TestIdempotency:
         result, sig_dir, _ = _run(tmp_path)
         for e in result["emitted"]:
             assert e["signal_id"] == f"{e['indicator_id']}:{e['target_date']}"
+
+
+# ---------------------------------------------------------------------------
+# Market-calendar gate
+# ---------------------------------------------------------------------------
+
+class TestMarketCalendarGate:
+    def test_us_holiday_skips_are_benign_and_do_not_emit(self, tmp_path):
+        result, sig_dir, _ = _run(tmp_path, now=US_HOLIDAY_NOW)
+
+        us_status = result["market_calendar"]["us_emit_session"]
+        assert us_status["date"] == "2026-07-03"
+        assert us_status["is_open"] is False
+        assert result["emitted"] == []
+        assert result["failed"] == []
+        assert result["reviews_done"] == []
+        assert result["review_failures"] == []
+        assert {s["indicator_id"] for s in result["skipped"]} == ALL_IDS
+        assert {s["kind"] for s in result["skipped"]} == {"market_holiday"}
+        assert result["ok"] is True
+        assert _count_rows(sig_dir) == 0
 
 
 # ---------------------------------------------------------------------------

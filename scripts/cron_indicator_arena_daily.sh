@@ -11,8 +11,8 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/indicator_arena_dail
 # Indicator Arena daily pipeline (task indicator_arena_phase1d_cron_job_2026_06_11):
 # emit 6 indicator signals (ex-ante, idempotent) + resolve due outcome reviews
 # + sync Supabase. 07:00 Taipei Mon-Sat (after US close ~05:00, before TW open
-# 09:00). Non-zero exit (fetch failure / stale-data skip / sync fail) fires a
-# warn alert — §4.5 skips must be visible, never silent.
+# 09:00). Non-zero exit (fetch failure / open-market stale-data skip / sync
+# fail) fires a warn alert; exchange-holiday and duplicate skips are benign.
 cd /Users/yhlai0911/volpred-research || exit 1
 source scripts/cron_lib.sh
 _start=$SECONDS
@@ -23,7 +23,7 @@ echo "$RESULT"
 if [ "$_ec" -ne 0 ]; then
   /opt/homebrew/bin/uv run volpred ops send-alert \
     --level warn \
-    --title "Indicator Arena daily pipeline: exit=$_ec (skip/failure present)" \
+    --title "Indicator Arena daily pipeline: exit=$_ec (non-benign skip/failure present)" \
     --body "$(echo "$RESULT" | tail -c 4000)"
 fi
 cron_emit_exit "indicator_arena_daily" "$_ec" "$_start"

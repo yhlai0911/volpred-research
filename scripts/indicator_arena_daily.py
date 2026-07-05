@@ -22,11 +22,11 @@ Honesty discipline (研究誠實原則 — highest priority):
     (equivalent of signal.shift(1)).
   - Idempotent: signal_id = "<indicator_id>:<target_date>"; an existing
     signal_id is skipped, never re-appended or rewritten.
-  - Stale data (§4.5): if a required series has not updated, the indicator is
-    SKIPPED for the day (recorded in the run summary) — stale values are never
-    passed off as fresh.
+  - Stale data (§4.5): if a required series has not updated on an open market
+    day, the indicator is SKIPPED and the run exits nonzero — stale values are
+    never passed off as fresh. Exchange holidays/weekends are benign skips.
   - Failure isolation: one indicator failing (fetch error etc.) does not block
-    the others; the exit code reflects whether the run was fully successful.
+    the others; the exit code reflects whether the run has non-benign issues.
 
 Model specs mirror the source experiments exactly:
   - garch_vix9d_spy_var25      -> experiments/k1004 (A4f-VIX9D-t, window=2000)
@@ -76,6 +76,7 @@ from volpred.indicators.reviews import (  # noqa: E402
     read_reviews,
 )
 from volpred.indicators.supabase_sync import sync_indicator_arena  # noqa: E402
+from volpred.market_calendar import get_market_status  # noqa: E402
 
 np.random.seed(42)  # all stochastic procedures fixed-seed (rule §5)
 
@@ -105,10 +106,24 @@ HAR_MIN_OBS = 250     # min obs for HAR / QuantReg fits
 class IndicatorSkip(Exception):
     """Raised when an indicator must be skipped today (stale/missing data)."""
 
+    def __init__(self, message: str, *, kind: str = "data_unavailable"):
+        super().__init__(message)
+        self.kind = kind
+
+
+BENIGN_SKIP_KINDS = {"duplicate", "market_holiday"}
+
 
 # ---------------------------------------------------------------------------
 # Session-time helpers (explicit timezones; DST handled by zoneinfo)
 # ---------------------------------------------------------------------------
+
+def us_signal_session_date(now_utc: datetime):
+    """US market date whose close should feed this Taipei-morning run."""
+    if now_utc.tzinfo is None:
+        now_utc = now_utc.replace(tzinfo=timezone.utc)
+    return now_utc.astimezone(ET).date()
+
 
 def us_close_utc(d, minute_offset: int = 0) -> datetime:
     """US equity close 16:00 ET on date d, in UTC."""
@@ -828,6 +843,8 @@ BUILDERS: dict[str, Callable[[MarketData, datetime, Any], dict[str, Any]]] = {
     "har_qr_rv_q95_qqq_gld_tlt": build_har_q95,
 }
 
+US_SOURCED_SIGNAL_IDS = set(BUILDERS)
+
 
 # ---------------------------------------------------------------------------
 # Review resolvers — realized outcomes for due signals (ex-post data only)
@@ -965,6 +982,18 @@ def _load_reviewed_ids(reviews_dir: Path) -> set[str]:
     return ids
 
 
+def _market_holiday_skip(indicator_id: str, status: dict[str, Any]) -> dict[str, str]:
+    reason = status.get("reason") or status.get("reason_en") or "closed"
+    return {
+        "indicator_id": indicator_id,
+        "reason": (
+            f"US market closed on {status.get('date')} ({reason}); "
+            "no new completed US session to emit"
+        ),
+        "kind": "market_holiday",
+    }
+
+
 def run_pipeline(
     now_utc: datetime | None = None,
     fetch_fn: Callable[[str, str], pd.Series] | None = None,
@@ -982,6 +1011,8 @@ def run_pipeline(
     specs = [s for s in load_registry(registry_path) if s.status != "delisted"]
     existing = {row.get("signal_id") for row in _load_all_signals(sig_dir)}
     mkt = MarketData(fetch_fn or yf_fetch, now)
+    us_emit_status = get_market_status(us_signal_session_date(now), "us")
+    market_calendar = {"us_emit_session": us_emit_status}
 
     emitted: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []
@@ -992,6 +1023,9 @@ def run_pipeline(
         builder = BUILDERS.get(spec.indicator_id)
         if builder is None:
             failed.append({"indicator_id": spec.indicator_id, "error": "no builder registered"})
+            continue
+        if spec.indicator_id in US_SOURCED_SIGNAL_IDS and not us_emit_status["is_open"]:
+            skipped.append(_market_holiday_skip(spec.indicator_id, us_emit_status))
             continue
         try:
             draft = builder(mkt, now, spec)
@@ -1027,7 +1061,7 @@ def run_pipeline(
             skipped.append({
                 "indicator_id": spec.indicator_id,
                 "reason": str(exc),
-                "kind": "data_unavailable",
+                "kind": getattr(exc, "kind", "data_unavailable"),
             })
         except Exception as exc:
             failed.append({
@@ -1084,7 +1118,7 @@ def run_pipeline(
         except Exception as exc:
             sync_summary = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 
-    data_skips = [s for s in skipped if s.get("kind") != "duplicate"]
+    data_skips = [s for s in skipped if s.get("kind") not in BENIGN_SKIP_KINDS]
     ok = (
         not failed
         and not data_skips
@@ -1098,6 +1132,7 @@ def run_pipeline(
         "emitted": emitted,
         "skipped": skipped,
         "failed": failed,
+        "market_calendar": market_calendar,
         "reviews_done": reviews_done,
         "review_failures": review_failures,
         "sync": sync_summary,

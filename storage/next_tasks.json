@@ -51068,11 +51068,37 @@
     "id": "platform_ops_indicator_arena_holiday_calendar_c7",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C7: indicator_arena 假日日曆降噪",
-    "description": "arena 的 VIX/SPY basis stale 判斷加美股假日日曆（market_calendar_sync 已有 calendar 資料）：mismatch 落在 exchange holiday 邊界時 downgrade 成 info-level skip，不觸發 exit 1 / warn email。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "arena 的 VIX/SPY basis stale 判斷加美股假日日曆（market_calendar_sync 已有 calendar 資料）：mismatch 落在 exchange holiday 邊界時 downgrade 成 info-level skip，不觸發 exit 1 / warn email。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T21:27:36.601588+00:00",
+    "claim_session_id": "515cf48bf621",
+    "status_history": [
+      {
+        "ts": "2026-07-05T21:27:36.601875+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T21:27:46.701116+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T21:32:38.951425+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T21:27:46.700875+00:00",
+    "completed_at": "2026-07-05T21:32:38.951127+00:00",
+    "result": "Added NYSE calendar gate for Indicator Arena daily emission. Exchange-holiday skips now use market_holiday and are benign; open-market stale/fetch/sync failures still exit nonzero. Tests: uv run pytest tests/test_indicator_arena_daily.py tests/test_alerts.py -q (45 passed)."
   },
   {
     "id": "platform_ops_priority_type_normalize_c8",

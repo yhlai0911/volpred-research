@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-06 Indicator Arena 把美股假日 stale skip 當失敗 WARN — **FIXED**
+
+**現象**：`indicator_arena_daily` 在 2026-07-04 台北 07:00 執行時，對應美東 2026-07-03 NYSE 因 Independence Day observed 休市；pipeline 仍進入 US-sourced signal builders，部分指標因 `^VIX` / SPY basis 不一致被記為 `data_unavailable`，整體 `ok=false` / exit 1，wrapper 送出 WARN。更糟的是 `vix_crisis_alert_tw` 可在沒有新美股 session 的情況下用上一筆 VIX 資料發出新台股訊號。
+
+**根因**：host-cron 層已用 `exit_semantics=findings` 避免把 exit 1 誤判成 infra failure，但 pipeline 本身缺少 exchange-calendar gate；所有 stale skip 都被視為 non-benign，未區分「開市日資料未更新」與「交易所休市本來沒有新 session」。
+
+**解決**：`scripts/indicator_arena_daily.py` 在 Phase 1 emission 前用 `volpred.market_calendar.get_market_status()` 檢查這次台北早晨 run 對應的美東交易日；若 NYSE 休市，所有目前 active 的 US-sourced indicators 記錄 `kind=market_holiday` 並跳過 emission。`BENIGN_SKIP_KINDS` 納入 `duplicate` / `market_holiday`，因此休市與冪等 skip 不再使 `ok=false`；真正 open-market stale data、fetch failure、review failure、sync failure 仍維持 nonzero exit。cron wrapper 與 `runtime_schedules.json` 同步更新告警語意，實際 cron wrapper 已同步到 `~/.volpred/bin/cron_indicator_arena_daily.sh`。
+
+**驗證**：新增 2026-07-03 NYSE 休市 regression test，確認 `emitted=[]`、所有 active indicator 皆 `market_holiday` skip、`ok=True`、不寫 signal rows；`uv run pytest tests/test_indicator_arena_daily.py tests/test_alerts.py -q`：45 passed。
+
+**教訓**：signal freshness 檢查必須先過交易日曆 gate；休市日「沒有新資料」是正常狀態，不可和開市日 feed stale 混為一談。任何會觸發 alert 的 skip 類型都要有明確 taxonomy，避免用單一 `data_unavailable` 同時承載 benign calendar state 與真正資料異常。
+
 ## 2026-07-05 blocked lane 長期堆積 deprecated 與 stale claim metadata — **FIXED**
 
 **現象**：`storage/next_tasks.json` 有 72 筆 `status=blocked` 且 `blocked_reason=deprecated` 的任務，語意上已不需再等待解除，卻仍佔 blocked lane；另有 25 筆 blocked row 殘留 `claimed_by` / `claimed_at` / `claim_session_id`，使非 active 任務看起來仍被舊 session 持有。
