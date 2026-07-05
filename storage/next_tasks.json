@@ -50733,11 +50733,37 @@
     "id": "experiment_k506_methodology_hardening",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T09:23:07.176698+00:00",
     "source": "k506_codex_review_20260705",
     "title": "K506 方法論硬化 — rebalance open-to-close + calendar as-of + 成本口徑審計後 re-review",
-    "description": "K506 resurrect 已重跑成功但 Codex verdict=FAIL（見 experiments/k506/codex_review_20260705.md）。核心 null（overlay 無顯著改善，pooled DM p=0.25-0.65 4-variant 全不顯著）robust，但精確 3/5 win-count 未達發表級，需修三項：(1) rebalance timing — 載入 0050.TW open 價，rebalance day 舊權重吃 overnight、新權重吃 open-to-close，或標 non-tradable c2c diagnostic；(2) calendar as-of — timestamp-aware as-of merge，修 ~86 台股假日 stale-signal（false-null 風險）；(3) 成本口徑 — 釐清 18.55bp round-trip vs per-trade，對稱套用。改完 Codex re-review 通過（CONDITIONAL_PASS↑）才寫 knowledge.json（若仍 null 寫 null-result）。"
+    "description": "K506 resurrect 已重跑成功但 Codex verdict=FAIL（見 experiments/k506/codex_review_20260705.md）。核心 null（overlay 無顯著改善，pooled DM p=0.25-0.65 4-variant 全不顯著）robust，但精確 3/5 win-count 未達發表級，需修三項：(1) rebalance timing — 載入 0050.TW open 價，rebalance day 舊權重吃 overnight、新權重吃 open-to-close，或標 non-tradable c2c diagnostic；(2) calendar as-of — timestamp-aware as-of merge，修 ~86 台股假日 stale-signal（false-null 風險）；(3) 成本口徑 — 釐清 18.55bp round-trip vs per-trade，對稱套用。改完 Codex re-review 通過（CONDITIONAL_PASS↑）才寫 knowledge.json（若仍 null 寫 null-result）。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T13:24:54.903772+00:00",
+    "claim_session_id": "ea55d9551c46",
+    "status_history": [
+      {
+        "ts": "2026-07-05T13:24:54.904094+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T13:24:55.133643+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T13:36:46.753359+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T13:24:55.133320+00:00",
+    "completed_at": "2026-07-05T13:36:46.753068+00:00",
+    "result": "K506 methodology hardening completed: rebalance day now uses old-weight overnight/new-weight open-to-close, US signals use strict as-of, K625 costs are side-aware, and 0050.TW 2014 split artifact is repaired. Hardened rerun uses repo-local EWT snapshot; VT+VS wins 2/5, pooled DM p=0.0569, Bonferroni p=0.3414/BH p=0.1818, verdict no-deploy/null-result; Codex re-review PASS added."
   },
   {
     "id": "K1640_article_general",

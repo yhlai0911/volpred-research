@@ -14,7 +14,7 @@ Strategy:
     if ratio < 0.8 → weight *= 1.2  (increase: TW50 stable relative to EWT)
     else: no adjustment
   Monthly rebalancing (K499: monthly optimal for high TX cost)
-  TX: 0.1855% round-trip (Taiwan ETF, corrected in K625)
+  TX: side-aware K625 schedule (buy 4.275bp, sell 14.275bp; round-trip 18.55bp)
   Cash earns 1.5% annual (Taiwan short-term deposit proxy)
 
 Comparison:
@@ -36,7 +36,7 @@ Evaluation:
   - ≥4/5 OOS periods VT+VS beats VT → consider deployment
   - ≤2/5 → do NOT deploy
 
-Data: yfinance (EWT, 0050.TW, ^VIX) — real market data
+Data: repo-local cache / yfinance fallback (EWT, 0050.TW, ^VIX) — real market data
 References:
   - Moreira & Muir (2017) "Volatility-Managed Portfolios" JF
   - Harvey, Liu, Zhu (2016) "...and the Cross-Section of Expected Returns" RFS
@@ -51,6 +51,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import json
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -65,13 +66,21 @@ RESULTS_PATH = Path(__file__).parent / "k506_ewt_volspread_cross_oos_results.jso
 EXPERIMENT_DIR = Path(__file__).parent
 DATA_DIR = EXPERIMENT_DIR / "data"
 LOCAL_PRICE_CACHE_DB = Path(__file__).resolve().parents[2] / "data" / "cache" / "price_cache.db"
-EWT_FALLBACK_CSV = Path(__file__).resolve().parents[1] / "k1090" / "data" / "EWT.csv"
+K506_EWT_SNAPSHOT_CSV = DATA_DIR / "EWT_2010_2021_yfinance.csv"
+K1090_EWT_FALLBACK_CSV = Path(__file__).resolve().parents[1] / "k1090" / "data" / "EWT.csv"
 
 # ============================================================
 # Configuration
 # ============================================================
-# ⚠️ CORRECTED (K625): ETF tax=0.1%, commission=0.04275%/side (3折)
-TX_ROUNDTRIP = 0.001855      # 0.1855% round-trip (was 0.585% — WRONG)
+# Corrected K625 cost schedule:
+#   buy  = commission only = 0.04275%
+#   sell = commission + securities transaction tax = 0.04275% + 0.10%
+# The old K506 rerun applied the full round-trip cost to every abs(delta weight).
+# This hardening uses side-aware per-dollar-traded costs as the primary tradable
+# specification, while still reporting the round-trip total for provenance.
+TX_BUY_ONEWAY = 0.0004275
+TX_SELL_ONEWAY = 0.0014275
+TX_ROUNDTRIP = TX_BUY_ONEWAY + TX_SELL_ONEWAY
 CASH_RATE_ANNUAL = 0.015     # 1.5% Taiwan short-term deposit
 VT_SCALAR = 8.63             # 12/(1.39) adjusted for VIXTWN
 MAX_WEIGHT = 1.0             # cap at 100% equity
@@ -140,14 +149,16 @@ def load_from_sqlite_cache(ticker):
     )
 
 
-def load_ewt_fallback_csv():
-    """Load the repo-local EWT CSV snapshot if it covers the required range."""
-    if not EWT_FALLBACK_CSV.exists():
+def load_ewt_csv(path):
+    """Load a repo-local EWT CSV snapshot if it covers the required range."""
+    if not path.exists():
         return None
 
-    df = pd.read_csv(EWT_FALLBACK_CSV, parse_dates=["Date"]).set_index("Date")
+    df = pd.read_csv(path, parse_dates=["Date"]).set_index("Date")
     df.index.name = None
-    if df.index.min() > pd.Timestamp(DATA_START) or df.index.max() < pd.Timestamp(DATA_END) - pd.Timedelta(days=1):
+    start_required = pd.Timestamp(DATA_START) + pd.Timedelta(days=7)
+    end_required = pd.Timestamp(DATA_END) - pd.Timedelta(days=1)
+    if df.index.min() > start_required or df.index.max() < end_required:
         return None
     return df.sort_index()
 
@@ -160,15 +171,23 @@ def load_market_data(name, ticker):
             return cached, f"sqlite:{LOCAL_PRICE_CACHE_DB.name}"
 
     if ticker == "EWT":
-        cached = load_ewt_fallback_csv()
+        cached = load_ewt_csv(K506_EWT_SNAPSHOT_CSV)
         if cached is not None and not cached.empty:
-            return cached, f"csv:{EWT_FALLBACK_CSV.relative_to(Path(__file__).resolve().parents[2])}"
+            return cached, f"csv:{K506_EWT_SNAPSHOT_CSV.relative_to(Path(__file__).resolve().parents[2])}"
+
+        cached = load_ewt_csv(K1090_EWT_FALLBACK_CSV)
+        if cached is not None and not cached.empty:
+            return cached, f"csv:{K1090_EWT_FALLBACK_CSV.relative_to(Path(__file__).resolve().parents[2])}"
 
     df = yf.download(ticker, start=DATA_START, end=DATA_END, progress=False, auto_adjust=False)
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
     if df.empty:
         return None, "download_failed"
+    if ticker == "EWT":
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        df.to_csv(K506_EWT_SNAPSHOT_CSV, index_label="Date")
+        return df, f"yfinance_saved:{K506_EWT_SNAPSHOT_CSV.relative_to(Path(__file__).resolve().parents[2])}"
     return df, "yfinance"
 
 
@@ -190,56 +209,133 @@ for name, ticker in tickers.items():
 # ============================================================
 print("\n[2/5] Preparing data...")
 
-# Close prices
-ewt_close = raw["EWT"]["Close"].squeeze()
-tw50_close = raw["TW50"]["Close"].squeeze()
+# Adjusted price helpers. 0050.TW has a 2014 split in this sample; strategy P&L
+# and realized-vol inputs must use adjusted close/open rather than raw close.
+def adjusted_close(df: pd.DataFrame) -> pd.Series:
+    if "Adj Close" in df and df["Adj Close"].notna().any():
+        return df["Adj Close"].squeeze()
+    return df["Close"].squeeze()
+
+
+def adjusted_open(df: pd.DataFrame) -> pd.Series:
+    if {"Open", "Close", "Adj Close"}.issubset(df.columns) and df["Adj Close"].notna().any():
+        factor = df["Adj Close"] / df["Close"]
+        return (df["Open"] * factor).squeeze()
+    return df["Open"].squeeze()
+
+
+def repair_discrete_price_splits(open_series: pd.Series, close_series: pd.Series):
+    """Repair split-like jumps that remain in the cache's adjusted prices."""
+    repaired_open = open_series.astype(float).copy()
+    repaired_close = close_series.astype(float).copy()
+    raw_ratios = (close_series / close_series.shift(1)).dropna()
+    split_events = []
+
+    for date, ratio in raw_ratios.items():
+        ratio = float(ratio)
+        if ratio <= 0:
+            continue
+
+        prior_scale = None
+        split_label = None
+        if ratio < 0.5:
+            divisor = int(round(1 / ratio))
+            implied_ratio = 1 / divisor if divisor else np.nan
+            if divisor >= 2 and abs(ratio / implied_ratio - 1) <= 0.08:
+                prior_scale = implied_ratio
+                split_label = f"{divisor}-for-1"
+        elif ratio > 2:
+            multiplier = int(round(ratio))
+            if multiplier >= 2 and abs(ratio / multiplier - 1) <= 0.08:
+                prior_scale = float(multiplier)
+                split_label = f"1-for-{multiplier} reverse"
+
+        if prior_scale is None:
+            continue
+
+        mask = repaired_close.index < date
+        repaired_close.loc[mask] *= prior_scale
+        repaired_open.loc[mask] *= prior_scale
+        split_events.append({
+            "date": pd.Timestamp(date).date().isoformat(),
+            "raw_close_ratio": round(ratio, 6),
+            "prior_price_scale": prior_scale,
+            "detected_split": split_label,
+        })
+
+    return repaired_open, repaired_close, split_events
+
+
+def asof_to_tw_calendar(signal: pd.Series, tw_dates: pd.DatetimeIndex, name: str) -> pd.Series:
+    """Latest signal strictly before each Taiwan trading date.
+
+    A US close labelled date D is known before Taiwan opens on D+1, not before
+    Taiwan opens on D. `allow_exact_matches=False` prevents same-calendar-day
+    US closes from leaking into that Taiwan day, while still allowing US-only
+    holiday observations between two Taiwan sessions to update the next TW open.
+    """
+    left = pd.DataFrame({"tw_date": pd.DatetimeIndex(tw_dates).sort_values()})
+    right = signal.dropna().sort_index().rename(name).reset_index()
+    right.columns = ["signal_date", name]
+    left["tw_date"] = pd.to_datetime(left["tw_date"]).astype("datetime64[ns]")
+    right["signal_date"] = pd.to_datetime(right["signal_date"]).astype("datetime64[ns]")
+    merged = pd.merge_asof(
+        left,
+        right,
+        left_on="tw_date",
+        right_on="signal_date",
+        direction="backward",
+        allow_exact_matches=False,
+    ).set_index("tw_date")
+    out = merged[name]
+    out.index.name = None
+    return out
+
+
+ewt_close = adjusted_close(raw["EWT"])
+tw50_close_base = adjusted_close(raw["TW50"])
+tw50_open_base = adjusted_open(raw["TW50"])
+tw50_open, tw50_close, tw50_split_adjustments = repair_discrete_price_splits(tw50_open_base, tw50_close_base)
+if tw50_split_adjustments:
+    print(f"  Split-like 0050.TW adjustments: {tw50_split_adjustments}")
 vix_close = raw["VIX"]["Close"].squeeze()
 
-# Align on common trading days
-# Note: EWT trades on US calendar, TW50 on Taiwan calendar, VIX on US calendar
-# We use forward-fill to handle calendar mismatches
-all_dates = ewt_close.index.union(tw50_close.index).union(vix_close.index)
-ewt_aligned = ewt_close.reindex(all_dates).ffill()
-tw50_aligned = tw50_close.reindex(all_dates).ffill()
-vix_aligned = vix_close.reindex(all_dates).ffill()
+# Native-calendar returns and volatility inputs.
+ewt_logret = np.log(ewt_close / ewt_close.shift(1))
+ewt_vol = ewt_logret.rolling(VOL_WINDOW).std() * np.sqrt(TRADING_DAYS)
+tw50_logret = np.log(tw50_close / tw50_close.shift(1))
+tw50_vol_signal_native = tw50_logret.rolling(VOL_WINDOW).std().shift(1) * np.sqrt(TRADING_DAYS)
 
-# Use TW50 trading calendar as base (strategy trades 0050.TW)
+# Use TW50 trading calendar as base (strategy trades 0050.TW).
 tw_dates = tw50_close.dropna().index
-ewt_on_tw = ewt_aligned.reindex(tw_dates)
-tw50_on_tw = tw50_aligned.reindex(tw_dates)
-vix_on_tw = vix_aligned.reindex(tw_dates)
+ewt_vol_on_tw = asof_to_tw_calendar(ewt_vol, tw_dates, "ewt_vol")
+vix_on_tw = asof_to_tw_calendar(vix_close, tw_dates, "vix_signal")
 
-# Build master dataframe
 data = pd.DataFrame({
-    "ewt_close": ewt_on_tw,
-    "tw50_close": tw50_on_tw,
-    "vix": vix_on_tw,
+    "tw50_close": tw50_close.reindex(tw_dates),
+    "tw50_open": tw50_open.reindex(tw_dates),
+    "tw50_vol_signal": tw50_vol_signal_native.reindex(tw_dates),
+    "ewt_vol_signal": ewt_vol_on_tw,
+    "vix_signal": vix_on_tw,
 })
-data = data.dropna()
 
-# Returns (log returns for vol, simple returns for P&L)
-data["ewt_logret"] = np.log(data["ewt_close"] / data["ewt_close"].shift(1))
-data["tw50_logret"] = np.log(data["tw50_close"] / data["tw50_close"].shift(1))
+# Tradable return decomposition. On a rebalance day, the old weight earns
+# close(t-1)->open(t); the newly chosen weight earns open(t)->close(t).
 data["tw50_ret"] = data["tw50_close"] / data["tw50_close"].shift(1) - 1
-data = data.dropna()
+data["tw50_overnight_ret"] = data["tw50_open"] / data["tw50_close"].shift(1) - 1
+data["tw50_open_to_close_ret"] = data["tw50_close"] / data["tw50_open"] - 1
+data["vol_ratio_signal"] = data["ewt_vol_signal"] / data["tw50_vol_signal"]
 
-# Rolling realized volatility (annualized, using only information available by t close)
-data["ewt_vol"] = data["ewt_logret"].rolling(VOL_WINDOW).std() * np.sqrt(TRADING_DAYS)
-data["tw50_vol"] = data["tw50_logret"].rolling(VOL_WINDOW).std() * np.sqrt(TRADING_DAYS)
-data["vol_ratio"] = data["ewt_vol"] / data["tw50_vol"]
-data["vix_signal"] = data["vix"].shift(1)
-data["vol_ratio_signal"] = data["vol_ratio"].shift(1)
-
-# Drop NaN from rolling window + lagged signal construction
+# Drop NaN from rolling windows, strict as-of signals, and return construction.
 data = data.dropna()
 
 print(f"  Final aligned dataset: {data.index[0].date()} to {data.index[-1].date()}")
 print(f"  Total trading days: {len(data)}")
-print(f"  Vol ratio stats: mean={data['vol_ratio'].mean():.3f}, "
-      f"std={data['vol_ratio'].std():.3f}, "
-      f"min={data['vol_ratio'].min():.3f}, max={data['vol_ratio'].max():.3f}")
-print(f"  Ratio > {RATIO_HIGH}: {(data['vol_ratio'] > RATIO_HIGH).mean()*100:.1f}% of days")
-print(f"  Ratio < {RATIO_LOW}: {(data['vol_ratio'] < RATIO_LOW).mean()*100:.1f}% of days")
+print(f"  Vol ratio signal stats: mean={data['vol_ratio_signal'].mean():.3f}, "
+      f"std={data['vol_ratio_signal'].std():.3f}, "
+      f"min={data['vol_ratio_signal'].min():.3f}, max={data['vol_ratio_signal'].max():.3f}")
+print(f"  Ratio > {RATIO_HIGH}: {(data['vol_ratio_signal'] > RATIO_HIGH).mean()*100:.1f}% of days")
+print(f"  Ratio < {RATIO_LOW}: {(data['vol_ratio_signal'] < RATIO_LOW).mean()*100:.1f}% of days")
 
 # ============================================================
 # 3. STRATEGY FUNCTIONS (vectorized)
@@ -288,6 +384,8 @@ def backtest_vt(data_slice, use_volspread=False):
     """
     dates = data_slice.index
     tw50_ret = data_slice["tw50_ret"].values
+    tw50_overnight_ret = data_slice["tw50_overnight_ret"].values
+    tw50_open_to_close_ret = data_slice["tw50_open_to_close_ret"].values
     vix_signal = data_slice["vix_signal"].values
     vol_ratio_signal = data_slice["vol_ratio_signal"].values
 
@@ -297,16 +395,38 @@ def backtest_vt(data_slice, use_volspread=False):
     n = len(dates)
     portfolio_ret = np.empty(n)
     daily_cash_ret = CASH_RATE_ANNUAL / TRADING_DAYS
+    half_cash_ret = daily_cash_ret / 2
 
     # Track state
     current_weight = 0.0
     n_rebalances = 0
     tx_total = 0.0
 
+    def transaction_cost(old_weight, new_weight):
+        delta = new_weight - old_weight
+        if delta > 0:
+            return delta * TX_BUY_ONEWAY
+        if delta < 0:
+            return -delta * TX_SELL_ONEWAY
+        return 0.0
+
     for i in range(n):
         # Check if rebalance day (first day or month start)
         if i == 0 or month_starts[i]:
-            # Compute target weight
+            old_weight = current_weight
+
+            # Old close-to-close position earns the overnight gap before the
+            # opening trade can be executed.
+            overnight_leg = (
+                old_weight * tw50_overnight_ret[i]
+                + (1 - old_weight) * half_cash_ret
+            )
+            if 1 + overnight_leg > 0:
+                pretrade_weight = old_weight * (1 + tw50_overnight_ret[i]) / (1 + overnight_leg)
+            else:
+                pretrade_weight = old_weight
+
+            # Compute target weight using only signals known before the Taiwan open.
             target_w = min(VT_SCALAR / vix_signal[i], MAX_WEIGHT) if vix_signal[i] > 0 else 0
 
             if use_volspread:
@@ -317,19 +437,28 @@ def backtest_vt(data_slice, use_volspread=False):
                     target_w *= ADJUST_UP
                 target_w = min(target_w, MAX_WEIGHT)
 
-            # Transaction cost on weight change
-            weight_change = abs(target_w - current_weight)
-            tx_cost = weight_change * TX_ROUNDTRIP
+            # Side-aware per-dollar-traded cost at the rebalance open.
+            tx_cost = transaction_cost(pretrade_weight, target_w)
             tx_total += tx_cost
 
-            current_weight = target_w
             n_rebalances += 1
 
-            # Rebalance at t open using only t-1 information, then earn t close-to-close return.
-            day_ret = current_weight * tw50_ret[i] + (1 - current_weight) * daily_cash_ret - tx_cost
+            # New target earns only open-to-close on the rebalance day. Between
+            # monthly rebalances, portfolio weights drift with asset returns.
+            intraday_leg = (
+                target_w * tw50_open_to_close_ret[i]
+                + (1 - target_w) * half_cash_ret
+            )
+            day_ret = (1 + overnight_leg) * (1 - tx_cost) * (1 + intraday_leg) - 1
+            if 1 + intraday_leg > 0:
+                current_weight = target_w * (1 + tw50_open_to_close_ret[i]) / (1 + intraday_leg)
+            else:
+                current_weight = target_w
         else:
-            # Normal day: hold current weight
+            # Normal day: no trade; close-to-close position drifts naturally.
             day_ret = current_weight * tw50_ret[i] + (1 - current_weight) * daily_cash_ret
+            if 1 + day_ret > 0:
+                current_weight = current_weight * (1 + tw50_ret[i]) / (1 + day_ret)
 
         portfolio_ret[i] = day_ret
 
@@ -432,10 +561,10 @@ for oos_start, oos_end, label in OOS_PERIODS:
         continue
 
     print(f"    Trading days: {len(oos_data)}")
-    print(f"    Vol ratio: mean={oos_data['vol_ratio'].mean():.3f}, "
-          f"std={oos_data['vol_ratio'].std():.3f}")
-    print(f"    VIX: mean={oos_data['vix'].mean():.1f}, "
-          f"min={oos_data['vix'].min():.1f}, max={oos_data['vix'].max():.1f}")
+    print(f"    Vol ratio signal: mean={oos_data['vol_ratio_signal'].mean():.3f}, "
+          f"std={oos_data['vol_ratio_signal'].std():.3f}")
+    print(f"    VIX signal: mean={oos_data['vix_signal'].mean():.1f}, "
+          f"min={oos_data['vix_signal'].min():.1f}, max={oos_data['vix_signal'].max():.1f}")
 
     # 1. Buy & Hold
     bh = backtest_buyhold(oos_data["tw50_ret"])
@@ -467,11 +596,11 @@ for oos_start, oos_end, label in OOS_PERIODS:
     period_result = {
         "period": label,
         "n_days": len(oos_data),
-        "vix_mean": round(oos_data["vix"].mean(), 1),
-        "vol_ratio_mean": round(oos_data["vol_ratio"].mean(), 3),
-        "vol_ratio_std": round(oos_data["vol_ratio"].std(), 3),
-        "pct_high_ratio": round((oos_data["vol_ratio"] > RATIO_HIGH).mean() * 100, 1),
-        "pct_low_ratio": round((oos_data["vol_ratio"] < RATIO_LOW).mean() * 100, 1),
+        "vix_mean": round(oos_data["vix_signal"].mean(), 1),
+        "vol_ratio_mean": round(oos_data["vol_ratio_signal"].mean(), 3),
+        "vol_ratio_std": round(oos_data["vol_ratio_signal"].std(), 3),
+        "pct_high_ratio": round((oos_data["vol_ratio_signal"] > RATIO_HIGH).mean() * 100, 1),
+        "pct_low_ratio": round((oos_data["vol_ratio_signal"] < RATIO_LOW).mean() * 100, 1),
         "buy_hold": {
             "sharpe": round(bh["sharpe"], 4),
             "ann_ret_pct": round(bh["ann_ret"] * 100, 2),
@@ -614,7 +743,7 @@ output = {
     "experiment": "K506",
     "title": "EWT-0050 Vol Spread Strategy — Cross-OOS Validation",
     "date": datetime.now(timezone.utc).isoformat(),
-    "data_source": "yfinance (EWT, 0050.TW, ^VIX)",
+    "data_source": "repo-local cache preferred, yfinance fallback; adjusted OHLC used for 0050.TW split safety",
     "data_range": f"{data.index[0].date()} to {data.index[-1].date()}",
     "n_total_days": len(data),
     "strategy": {
@@ -624,14 +753,28 @@ output = {
             "ratio_high_threshold": RATIO_HIGH,
             "ratio_low_threshold": RATIO_LOW,
             "adjust_down_multiplier": ADJUST_DOWN,
-        "adjust_up_multiplier": ADJUST_UP,
+            "adjust_up_multiplier": ADJUST_UP,
         },
         "rebalancing": "monthly (1st trading day)",
-        "tx_cost_roundtrip": TX_ROUNDTRIP,
+        "return_channel": "tradable rebalance-open channel: old weight earns close-to-open gap; new target earns open-to-close; weights drift between monthly rebalances",
+        "tx_costs": {
+            "buy_oneway": TX_BUY_ONEWAY,
+            "sell_oneway": TX_SELL_ONEWAY,
+            "roundtrip_reference": TX_ROUNDTRIP,
+            "application": "side-aware per dollar traded at rebalance open",
+        },
         "cash_rate_annual": CASH_RATE_ANNUAL,
-        "signal_timing": "t-1 VIX and t-1 vol_ratio determine t return",
+        "signal_timing": "strict as-of: latest US EWT/VIX close strictly before Taiwan trading date; 0050 realized vol through prior TW close",
     },
     "data_inputs": data_sources,
+    "methodology_hardening_2026_07_05": {
+        "rebalance_timing": "fixed close-to-close mismatch by decomposing rebalance-day 0050 return into close-to-open and open-to-close legs",
+        "calendar_asof": "fixed row-shift stale signal risk with merge_asof(allow_exact_matches=False) from US calendars to Taiwan trading dates",
+        "price_adjustment": "uses adjusted close/open and repairs split-like jumps that remain in the local cache",
+        "detected_tw50_split_adjustments": tw50_split_adjustments,
+        "transaction_cost": "fixed full-round-trip-on-every-delta overcharge; now uses K625 buy/sell one-way schedule",
+        "knowledge_write": "deferred to the formal knowledge writer/gate; this Codex task only refreshes the experiment artifact",
+    },
     "oos_periods": {label: all_results.get(label, "skipped") for _, _, label in OOS_PERIODS},
     "pooled_analysis": {
         "n_total_days": n_total,
@@ -663,12 +806,12 @@ output = {
         "verdict": verdict,
     },
     "vol_ratio_diagnostics": {
-        "full_sample_mean": round(data["vol_ratio"].mean(), 3),
-        "full_sample_std": round(data["vol_ratio"].std(), 3),
-        "full_sample_min": round(data["vol_ratio"].min(), 3),
-        "full_sample_max": round(data["vol_ratio"].max(), 3),
-        "pct_above_1.2": round((data["vol_ratio"] > RATIO_HIGH).mean() * 100, 1),
-        "pct_below_0.8": round((data["vol_ratio"] < RATIO_LOW).mean() * 100, 1),
+        "full_sample_mean": round(data["vol_ratio_signal"].mean(), 3),
+        "full_sample_std": round(data["vol_ratio_signal"].std(), 3),
+        "full_sample_min": round(data["vol_ratio_signal"].min(), 3),
+        "full_sample_max": round(data["vol_ratio_signal"].max(), 3),
+        "pct_above_1.2": round((data["vol_ratio_signal"] > RATIO_HIGH).mean() * 100, 1),
+        "pct_below_0.8": round((data["vol_ratio_signal"] < RATIO_LOW).mean() * 100, 1),
     },
     "runtime_seconds": round(elapsed, 2),
     "references": [
@@ -681,7 +824,11 @@ output = {
     ],
 }
 
-RESULTS_PATH.write_text(json.dumps(output, indent=2, default=str))
+results_payload = json.dumps(output, indent=2, default=str)
+tmp_results_path = RESULTS_PATH.with_suffix(".tmp")
+tmp_results_path.write_text(results_payload)
+json.loads(tmp_results_path.read_text())
+os.replace(tmp_results_path, RESULTS_PATH)
 print(f"\nResults saved to {RESULTS_PATH}")
 print(f"Runtime: {elapsed:.1f}s")
 print(f"\nFINAL VERDICT: {verdict}")

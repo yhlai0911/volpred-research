@@ -1,10 +1,10 @@
 {
   "experiment": "K506",
   "title": "EWT-0050 Vol Spread Strategy \u2014 Cross-OOS Validation",
-  "date": "2026-07-05T09:10:31.085546+00:00",
-  "data_source": "yfinance (EWT, 0050.TW, ^VIX)",
-  "data_range": "2010-02-03 to 2021-12-30",
-  "n_total_days": 2922,
+  "date": "2026-07-05T13:36:27.894611+00:00",
+  "data_source": "repo-local cache preferred, yfinance fallback; adjusted OHLC used for 0050.TW split safety",
+  "data_range": "2010-02-04 to 2021-12-30",
+  "n_total_days": 2921,
   "strategy": {
     "base": "weight = min(8.63/VIX, 1.0)",
     "vol_spread_adjustment": {
@@ -15,258 +15,279 @@
       "adjust_up_multiplier": 1.2
     },
     "rebalancing": "monthly (1st trading day)",
-    "tx_cost_roundtrip": 0.001855,
+    "return_channel": "tradable rebalance-open channel: old weight earns close-to-open gap; new target earns open-to-close; weights drift between monthly rebalances",
+    "tx_costs": {
+      "buy_oneway": 0.0004275,
+      "sell_oneway": 0.0014275,
+      "roundtrip_reference": 0.0018549999999999999,
+      "application": "side-aware per dollar traded at rebalance open"
+    },
     "cash_rate_annual": 0.015,
-    "signal_timing": "t-1 VIX and t-1 vol_ratio determine t return"
+    "signal_timing": "strict as-of: latest US EWT/VIX close strictly before Taiwan trading date; 0050 realized vol through prior TW close"
   },
   "data_inputs": {
-    "EWT": "yfinance",
+    "EWT": "csv:experiments/k506/data/EWT_2010_2021_yfinance.csv",
     "TW50": "sqlite:price_cache.db",
     "VIX": "sqlite:price_cache.db"
+  },
+  "methodology_hardening_2026_07_05": {
+    "rebalance_timing": "fixed close-to-close mismatch by decomposing rebalance-day 0050 return into close-to-open and open-to-close legs",
+    "calendar_asof": "fixed row-shift stale signal risk with merge_asof(allow_exact_matches=False) from US calendars to Taiwan trading dates",
+    "price_adjustment": "uses adjusted close/open and repairs split-like jumps that remain in the local cache",
+    "detected_tw50_split_adjustments": [
+      {
+        "date": "2014-01-02",
+        "raw_close_ratio": 0.249361,
+        "prior_price_scale": 0.25,
+        "detected_split": "4-for-1"
+      }
+    ],
+    "transaction_cost": "fixed full-round-trip-on-every-delta overcharge; now uses K625 buy/sell one-way schedule",
+    "knowledge_write": "deferred to the formal knowledge writer/gate; this Codex task only refreshes the experiment artifact"
   },
   "oos_periods": {
     "2012-2013": {
       "period": "2012-2013",
       "n_days": 492,
       "vix_mean": 16.0,
-      "vol_ratio_mean": 1.273,
-      "vol_ratio_std": 0.186,
-      "pct_high_ratio": 62.8,
-      "pct_low_ratio": 0.0,
+      "vol_ratio_mean": 1.272,
+      "vol_ratio_std": 0.207,
+      "pct_high_ratio": 64.0,
+      "pct_low_ratio": 0.8,
       "buy_hold": {
-        "sharpe": 0.6217,
-        "ann_ret_pct": 8.78,
+        "sharpe": 0.7177,
+        "ann_ret_pct": 10.08,
         "mdd_pct": -14.86
       },
       "vt_only": {
-        "sharpe": 0.5817,
-        "ann_ret_pct": 4.22,
-        "ann_vol_pct": 7.25,
-        "mdd_pct": -7.08,
-        "calmar": 0.596,
+        "sharpe": 0.6918,
+        "ann_ret_pct": 4.99,
+        "ann_vol_pct": 7.21,
+        "mdd_pct": -7.2,
+        "calmar": 0.693,
         "n_rebalances": 24,
-        "tx_total_pct": 0.42
+        "tx_total_pct": 0.155
       },
       "vt_volspread": {
-        "sharpe": 0.6832,
-        "ann_ret_pct": 3.61,
-        "ann_vol_pct": 5.29,
-        "mdd_pct": -5.66,
-        "calmar": 0.638,
+        "sharpe": 0.8072,
+        "ann_ret_pct": 4.2,
+        "ann_vol_pct": 5.2,
+        "mdd_pct": -5.57,
+        "calmar": 0.754,
         "n_rebalances": 24,
-        "tx_total_pct": 0.502
+        "tx_total_pct": 0.273
       },
       "dm_test_vs_minus_vt": {
         "test_name": "2012-2013",
-        "t_stat": -0.3437,
-        "p_value": 0.7313,
+        "t_stat": -0.4246,
+        "p_value": 0.6713,
         "significant_5pct": false,
         "direction": "VT better",
         "bonferroni_p_value": 1.0,
-        "bh_p_value": 0.7313,
+        "bh_p_value": 0.8056,
         "significant_5pct_bonferroni": false,
         "significant_5pct_bh": false
       },
-      "sharpe_diff": 0.1015,
+      "sharpe_diff": 0.1154,
       "winner": "VT+VS"
     },
     "2014-2015": {
       "period": "2014-2015",
       "n_days": 494,
       "vix_mean": 15.4,
-      "vol_ratio_mean": 1.212,
-      "vol_ratio_std": 0.329,
-      "pct_high_ratio": 56.5,
-      "pct_low_ratio": 5.5,
+      "vol_ratio_mean": 1.277,
+      "vol_ratio_std": 0.282,
+      "pct_high_ratio": 58.7,
+      "pct_low_ratio": 4.3,
       "buy_hold": {
-        "sharpe": -0.896,
-        "ann_ret_pct": -49.83,
+        "sharpe": 0.5724,
+        "ann_ret_pct": 8.8,
         "mdd_pct": -20.96
       },
       "vt_only": {
-        "sharpe": -0.7798,
-        "ann_ret_pct": -27.16,
-        "ann_vol_pct": 34.84,
-        "mdd_pct": -13.8,
-        "calmar": -1.968,
+        "sharpe": 0.4411,
+        "ann_ret_pct": 3.87,
+        "ann_vol_pct": 8.77,
+        "mdd_pct": -13.63,
+        "calmar": 0.284,
         "n_rebalances": 24,
-        "tx_total_pct": 0.639
+        "tx_total_pct": 0.305
       },
       "vt_volspread": {
-        "sharpe": -0.5818,
-        "ann_ret_pct": -10.42,
-        "ann_vol_pct": 17.91,
-        "mdd_pct": -7.73,
-        "calmar": -1.348,
+        "sharpe": 0.7027,
+        "ann_ret_pct": 4.3,
+        "ann_vol_pct": 6.13,
+        "mdd_pct": -7.51,
+        "calmar": 0.573,
         "n_rebalances": 24,
-        "tx_total_pct": 0.825
+        "tx_total_pct": 0.413
       },
       "dm_test_vs_minus_vt": {
         "test_name": "2014-2015",
-        "t_stat": 1.1078,
-        "p_value": 0.2685,
+        "t_stat": 0.0847,
+        "p_value": 0.9326,
         "significant_5pct": false,
         "direction": "VT+VS better",
         "bonferroni_p_value": 1.0,
-        "bh_p_value": 0.537,
+        "bh_p_value": 0.9326,
         "significant_5pct_bonferroni": false,
         "significant_5pct_bh": false
       },
-      "sharpe_diff": 0.198,
+      "sharpe_diff": 0.2615,
       "winner": "VT+VS"
     },
     "2016-2017": {
       "period": "2016-2017",
       "n_days": 487,
-      "vix_mean": 13.3,
-      "vol_ratio_mean": 1.372,
-      "vol_ratio_std": 0.274,
-      "pct_high_ratio": 71.3,
-      "pct_low_ratio": 0.0,
+      "vix_mean": 13.4,
+      "vol_ratio_mean": 1.343,
+      "vol_ratio_std": 0.241,
+      "pct_high_ratio": 65.9,
+      "pct_low_ratio": 0.4,
       "buy_hold": {
-        "sharpe": 1.3147,
-        "ann_ret_pct": 16.9,
+        "sharpe": 1.5417,
+        "ann_ret_pct": 19.61,
         "mdd_pct": -8.58
       },
       "vt_only": {
-        "sharpe": 1.3655,
-        "ann_ret_pct": 11.25,
-        "ann_vol_pct": 8.24,
-        "mdd_pct": -5.07,
-        "calmar": 2.22,
+        "sharpe": 1.6077,
+        "ann_ret_pct": 13.04,
+        "ann_vol_pct": 8.11,
+        "mdd_pct": -5.06,
+        "calmar": 2.576,
         "n_rebalances": 24,
-        "tx_total_pct": 0.416
+        "tx_total_pct": 0.166
       },
       "vt_volspread": {
-        "sharpe": 1.3228,
-        "ann_ret_pct": 7.49,
-        "ann_vol_pct": 5.66,
-        "mdd_pct": -2.96,
-        "calmar": 2.528,
+        "sharpe": 1.4144,
+        "ann_ret_pct": 8.48,
+        "ann_vol_pct": 6.0,
+        "mdd_pct": -4.45,
+        "calmar": 1.904,
         "n_rebalances": 24,
-        "tx_total_pct": 0.912
+        "tx_total_pct": 0.435
       },
       "dm_test_vs_minus_vt": {
         "test_name": "2016-2017",
-        "t_stat": -1.4519,
-        "p_value": 0.1472,
+        "t_stat": -1.8807,
+        "p_value": 0.0606,
         "significant_5pct": false,
         "direction": "VT better",
-        "bonferroni_p_value": 0.883,
-        "bh_p_value": 0.4958,
+        "bonferroni_p_value": 0.3637,
+        "bh_p_value": 0.1818,
         "significant_5pct_bonferroni": false,
         "significant_5pct_bh": false
       },
-      "sharpe_diff": -0.0427,
+      "sharpe_diff": -0.1933,
       "winner": "VT"
     },
     "2018-2019": {
       "period": "2018-2019",
       "n_days": 486,
-      "vix_mean": 16.0,
-      "vol_ratio_mean": 1.234,
-      "vol_ratio_std": 0.302,
-      "pct_high_ratio": 47.9,
-      "pct_low_ratio": 0.6,
+      "vix_mean": 15.9,
+      "vol_ratio_mean": 1.214,
+      "vol_ratio_std": 0.29,
+      "pct_high_ratio": 47.5,
+      "pct_low_ratio": 5.8,
       "buy_hold": {
-        "sharpe": 0.5972,
-        "ann_ret_pct": 8.97,
-        "mdd_pct": -18.23
+        "sharpe": 0.8906,
+        "ann_ret_pct": 13.16,
+        "mdd_pct": -17.53
       },
       "vt_only": {
-        "sharpe": 0.5849,
-        "ann_ret_pct": 5.18,
-        "ann_vol_pct": 8.86,
-        "mdd_pct": -10.94,
-        "calmar": 0.474,
+        "sharpe": 0.8815,
+        "ann_ret_pct": 7.65,
+        "ann_vol_pct": 8.68,
+        "mdd_pct": -10.35,
+        "calmar": 0.74,
         "n_rebalances": 24,
-        "tx_total_pct": 0.56
+        "tx_total_pct": 0.23
       },
       "vt_volspread": {
-        "sharpe": 0.3383,
-        "ann_ret_pct": 2.58,
-        "ann_vol_pct": 7.62,
-        "mdd_pct": -10.4,
-        "calmar": 0.248,
+        "sharpe": 0.7101,
+        "ann_ret_pct": 5.23,
+        "ann_vol_pct": 7.37,
+        "mdd_pct": -9.72,
+        "calmar": 0.538,
         "n_rebalances": 24,
-        "tx_total_pct": 0.851
+        "tx_total_pct": 0.423
       },
       "dm_test_vs_minus_vt": {
         "test_name": "2018-2019",
-        "t_stat": -1.3897,
-        "p_value": 0.1653,
+        "t_stat": -1.1957,
+        "p_value": 0.2324,
         "significant_5pct": false,
         "direction": "VT better",
-        "bonferroni_p_value": 0.9915,
-        "bh_p_value": 0.4958,
+        "bonferroni_p_value": 1.0,
+        "bh_p_value": 0.355,
         "significant_5pct_bonferroni": false,
         "significant_5pct_bh": false
       },
-      "sharpe_diff": -0.2466,
+      "sharpe_diff": -0.1714,
       "winner": "VT"
     },
     "2020-2021": {
       "period": "2020-2021",
       "n_days": 488,
       "vix_mean": 24.4,
-      "vol_ratio_mean": 1.178,
-      "vol_ratio_std": 0.302,
-      "pct_high_ratio": 38.1,
-      "pct_low_ratio": 5.1,
+      "vol_ratio_mean": 1.154,
+      "vol_ratio_std": 0.284,
+      "pct_high_ratio": 34.0,
+      "pct_low_ratio": 4.7,
       "buy_hold": {
-        "sharpe": 1.1127,
-        "ann_ret_pct": 23.32,
-        "mdd_pct": -30.48
+        "sharpe": 1.3202,
+        "ann_ret_pct": 27.42,
+        "mdd_pct": -28.22
       },
       "vt_only": {
-        "sharpe": 0.8356,
-        "ann_ret_pct": 6.32,
-        "ann_vol_pct": 7.57,
-        "mdd_pct": -11.18,
-        "calmar": 0.566,
+        "sharpe": 1.0779,
+        "ann_ret_pct": 7.94,
+        "ann_vol_pct": 7.36,
+        "mdd_pct": -9.45,
+        "calmar": 0.84,
         "n_rebalances": 24,
-        "tx_total_pct": 0.51
+        "tx_total_pct": 0.235
       },
       "vt_volspread": {
-        "sharpe": 0.8766,
-        "ann_ret_pct": 5.48,
-        "ann_vol_pct": 6.25,
-        "mdd_pct": -8.67,
-        "calmar": 0.632,
+        "sharpe": 0.9421,
+        "ann_ret_pct": 6.01,
+        "ann_vol_pct": 6.38,
+        "mdd_pct": -9.45,
+        "calmar": 0.635,
         "n_rebalances": 24,
-        "tx_total_pct": 0.67
+        "tx_total_pct": 0.35
       },
       "dm_test_vs_minus_vt": {
         "test_name": "2020-2021",
-        "t_stat": -0.481,
-        "p_value": 0.6307,
+        "t_stat": -1.1848,
+        "p_value": 0.2367,
         "significant_5pct": false,
         "direction": "VT better",
         "bonferroni_p_value": 1.0,
-        "bh_p_value": 0.7313,
+        "bh_p_value": 0.355,
         "significant_5pct_bonferroni": false,
         "significant_5pct_bh": false
       },
-      "sharpe_diff": 0.0409,
-      "winner": "VT+VS"
+      "sharpe_diff": -0.1359,
+      "winner": "VT"
     }
   },
   "pooled_analysis": {
     "n_total_days": 2447,
     "n_years": 9.71,
-    "vt_only_pooled_sharpe": 0.0486,
-    "vt_volspread_pooled_sharpe": 0.2077,
-    "harvey_t_vt": 0.151,
-    "harvey_t_vs": 0.647,
+    "vt_only_pooled_sharpe": 0.9315,
+    "vt_volspread_pooled_sharpe": 0.9079,
+    "harvey_t_vt": 2.903,
+    "harvey_t_vs": 2.829,
     "harvey_threshold": 3.0,
     "pooled_dm_test": {
       "test_name": "pooled",
-      "t_stat": 0.4568,
-      "p_value": 0.6479,
+      "t_stat": -1.905,
+      "p_value": 0.0569,
       "significant_5pct": false,
-      "direction": "VT+VS better",
-      "bonferroni_p_value": 1.0,
-      "bh_p_value": 0.7313,
+      "direction": "VT better",
+      "bonferroni_p_value": 0.3414,
+      "bh_p_value": 0.1818,
       "significant_5pct_bonferroni": false,
       "significant_5pct_bh": false
     },
@@ -274,21 +295,21 @@
     "multiple_testing_method_note": "Reported both Bonferroni (FWER) and Benjamini-Hochberg (FDR) for 5 segment tests + pooled test."
   },
   "cross_oos_score": {
-    "vs_wins": 3,
-    "vt_wins": 2,
+    "vs_wins": 2,
+    "vt_wins": 3,
     "total_periods": 5,
     "pass_threshold": ">=4/5",
-    "verdict": "MARGINAL \u2014 Slight edge but not consistent enough. More testing needed."
+    "verdict": "FAIL \u2014 VT+VolSpread does NOT consistently outperform. Do NOT deploy."
   },
   "vol_ratio_diagnostics": {
-    "full_sample_mean": 1.267,
-    "full_sample_std": 0.28,
-    "full_sample_min": 0.031,
-    "full_sample_max": 2.563,
-    "pct_above_1.2": 58.0,
-    "pct_below_0.8": 1.9
+    "full_sample_mean": 1.264,
+    "full_sample_std": 0.263,
+    "full_sample_min": 0.493,
+    "full_sample_max": 2.583,
+    "pct_above_1.2": 56.9,
+    "pct_below_0.8": 2.8
   },
-  "runtime_seconds": 0.62,
+  "runtime_seconds": 0.05,
   "references": [
     "Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF",
     "Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS",
