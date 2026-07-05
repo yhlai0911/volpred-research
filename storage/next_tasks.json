@@ -10846,8 +10846,9 @@
       "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
     },
     "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-05-27T00:10:30+00:00",
-    "blocked_note": "ML novel-method NULL-quartet skip per CLAUDE.md hourly dispatch rule"
+    "blocked_at": "2026-07-05T17:13:30+00:00",
+    "blocked_note": "C14 eval: architecture-repeat of saturated daily-RV ML arc (K1312 GARCH-LSTM NULL; K1380/K1386 daily ML-vs-HAR saturated). Re-eval after K1389(KAN/VIX) water-test verdict.",
+    "blocked_until": "2026-09-04"
   },
   {
     "id": "K1313",
@@ -10902,8 +10903,9 @@
       "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
     },
     "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-05-27T00:10:28+00:00",
-    "blocked_note": "ML novel-method NULL-quartet skip per CLAUDE.md hourly dispatch rule"
+    "blocked_at": "2026-07-05T17:13:30+00:00",
+    "blocked_note": "C14 eval: architecture-repeat of saturated daily-RV ML arc (K1312 GARCH-LSTM NULL; K1380/K1386 daily ML-vs-HAR saturated). Re-eval after K1389(KAN/VIX) water-test verdict.",
+    "blocked_until": "2026-09-04"
   },
   {
     "id": "K1389",
@@ -10923,9 +10925,10 @@
       "at": "2026-05-20",
       "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
     },
+    "blocked_until": "2026-09-04",
     "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-05-27T00:10:30+00:00",
-    "blocked_note": "ML novel-method NULL-quartet skip per CLAUDE.md hourly dispatch rule"
+    "blocked_at": "2026-07-05T17:15:06+00:00",
+    "blocked_note": "C14 eval REVISED: KAN already NULL (K1263, QLIKE +23.7% worse than GJR, 'ML ceiling 7th confirmation'); daily-vol ML ceiling 9x-confirmed (research_program.md:805). VIX-target is only novelty but prior strongly NULL. No water-test warranted — arc saturated. Future ML effort → NEW problem class via research-topic-discovery, not architecture-repeat."
   },
   {
     "id": "K1391",
@@ -11320,13 +11323,14 @@
     ],
     "created_at": "2026-05-12T04:08:13Z",
     "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_note": "ML novel-method NULL-quartet skip per CLAUDE.md hourly dispatch rule",
+    "blocked_note": "C14 eval: architecture-repeat of saturated daily-RV ML arc (K1312 GARCH-LSTM NULL; K1380/K1386 daily ML-vs-HAR saturated). Re-eval after K1389(KAN/VIX) water-test verdict.",
     "kid_reassigned": {
       "from": "K1308",
       "at": "2026-05-20",
       "reason": "kid_collision resolved — K1308 retained by 台灣 5-min HAR-RV task"
     },
-    "blocked_at": "2026-05-27T00:10:27+00:00"
+    "blocked_at": "2026-07-05T17:13:30+00:00",
+    "blocked_until": "2026-09-04"
   },
   {
     "id": "K1308",
@@ -51070,11 +51074,37 @@
     "id": "experiment_ml_null_quartet_unfreeze_eval_c14",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C14: diversity_rule NULL-quartet 冷卻 38 天 → 評估解封 1 筆 ML 實驗試水",
-    "description": "K1383/K1385/K1388/K1389 四筆 ML 實驗因 NULL-quartet diversity rule 自 5/27 冷卻至今無到期日。評估其中 1 筆（挑方法論差異最大的）是否解封試水；其餘補 blocked_until。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "K1383/K1385/K1388/K1389 四筆 ML 實驗因 NULL-quartet diversity rule 自 5/27 冷卻至今無到期日。評估其中 1 筆（挑方法論差異最大的）是否解封試水；其餘補 blocked_until。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-07-05T17:10:15.416008+00:00",
+    "claim_session_id": "0f60e34d13c3",
+    "status_history": [
+      {
+        "ts": "2026-07-05T17:10:15.416317+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-05T17:13:29.565057+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-05T17:16:59.800904+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-01"
+      }
+    ],
+    "started_at": "2026-07-05T17:13:29.564753+00:00",
+    "completed_at": "2026-07-05T17:16:59.800593+00:00",
+    "result": "C14 diversity-rule 冷卻評估完成。決策(研究誠實 override task『解封1筆』預設)：4筆ML(K1383/85/88/89)全在日頻vol ML ceiling 9x飽和弧(KAN=K1263 NULL, GARCH-LSTM=K1312 NULL)，無一值得試水→全補 blocked_until=2026-09-04(季度re-eval非永久凍)。記 research_program.md line410-415。修永久凍結治理gap。未來ML→新問題類別非架構重複。"
   },
   {
     "id": "paper_stage_entered_at_backfill_b8",
@@ -51394,5 +51424,14 @@
     "created_at": "2026-07-06T00:22:00+08:00",
     "description": "vt-insurance-cost v3 修訂：修 v2 review 3 個 SEVERE（主線程 only，禁 background agent 寫 .tex）。S-01: Table 1 標『50/50 monthly rebalancing』但 code 是每日連續零成本再平衡 → 修/改標 benchmark 並重跑相依數字（headline S2 Sharpe 0.63 vs 50/50 0.50 受影響，真月再平衡≈0.59）。S-03: S3 論文公式寫 z<1 固定 0.5 binary blend，code 是連續 clip(z,0,1) blend → 公式對齊 code，補 0.3/0.7 敏感度對應輸出。S-02: Cross-OOS 補跑 2017-18/2021-22 兩窗（heavy → 排 compute_queue）。+ C-01 citation：hasbrouck2009 不支撐 SPY 1-2bps spread 假設，換 source 或改述。報告：paper/vt-insurance-cost/review_history/v2/。",
     "notes": "source: v2 latex+citation review 2026-07-06"
+  },
+  {
+    "id": "platform_ops_null_id_task_hygiene",
+    "task_type": "platform_ops",
+    "priority": 4,
+    "status": "pending",
+    "source": "auto_discovered",
+    "title": "next_tasks.json 有 10 筆 id=null 的 task → jq test() 報錯 + 追蹤困難",
+    "description": "C14 fire (2026-07-06) 發現 storage/next_tasks.json 有 10 筆 .id==null 的 task，導致 jq test()/select() 需 (.id//\"\") 保護否則報錯。查產生源(哪個 writer 沒填 id) → 修 writer 端補 id 或清理殘留 → 加 schema guard 防再現。永遠修流程不修資料：追到產生 null id 的 code path。50min cap, main-thread 或 codex。"
   }
 ]
