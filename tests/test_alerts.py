@@ -8,6 +8,7 @@ from volpred.ops.alerts import (
     _format_telegram_alert_text,
     _parse_content_quality_state,
     _parse_draft_pool_state,
+    _parse_event_receipt_state,
     _parse_loop_health_state,
     _parse_paper_website_drift_state,
     build_alert_condition_report,
@@ -25,6 +26,103 @@ def _write_text(path: Path, content: str) -> None:
 def _write_json(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def test_parse_event_receipt_state_breaches_on_claimed_zombie(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 5, 12, 0, tzinfo=timezone.utc)
+    _write_json(
+        storage_dir / "ops" / "tasks" / "task_fomc.json",
+        {
+            "id": "task_fomc",
+            "title": "Event article: FOMC T+0",
+            "status": "claimed",
+            "claimed_at": (now - timedelta(hours=25, minutes=5)).isoformat(),
+            "payload": {"event_key": "FOMC_2026_07_05"},
+        },
+    )
+
+    result = _parse_event_receipt_state(str(storage_dir), now)
+
+    assert result["breached"] is True
+    assert result["level"] == "warn"
+    assert "claimed_over_24h" in result["title"]
+    stale = result["details"]["stale"]
+    assert len(stale) == 1
+    assert stale[0]["task_id"] == "task_fomc"
+    assert stale[0]["reasons"] == ["claimed_over_24h"]
+    assert stale[0]["claimed_age_hours"] > 24
+
+
+def test_parse_event_receipt_state_breaches_on_queued_past_ledger_deadline(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 5, 12, 0, tzinfo=timezone.utc)
+    _write_json(
+        storage_dir / "ops" / "tasks" / "task_nfp.json",
+        {
+            "id": "task_nfp",
+            "title": "Event article: NFP T+0",
+            "status": "queued",
+            "payload": {"event_key": "NFP_2026_07_05"},
+        },
+    )
+    _write_json(
+        storage_dir / "ops" / "event_ledger" / "nfp.json",
+        {
+            "task_id": "task_nfp",
+            "event_key": "NFP_2026_07_05",
+            "deadline": (now - timedelta(hours=2)).isoformat(),
+        },
+    )
+
+    result = _parse_event_receipt_state(str(storage_dir), now)
+
+    assert result["breached"] is True
+    assert "queued_past_deadline" in result["title"]
+    stale = result["details"]["stale"]
+    assert len(stale) == 1
+    assert stale[0]["task_id"] == "task_nfp"
+    assert stale[0]["reasons"] == ["queued_past_deadline"]
+    assert stale[0]["deadline_overdue_hours"] == 2.0
+
+
+def test_parse_event_receipt_state_ignores_terminal_and_non_event_tasks(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 5, 12, 0, tzinfo=timezone.utc)
+    _write_json(
+        storage_dir / "ops" / "tasks" / "task_expired.json",
+        {
+            "id": "task_expired",
+            "title": "Event article: FOMC T+0",
+            "status": "expired",
+            "claimed_at": (now - timedelta(days=10)).isoformat(),
+            "payload": {"event_key": "FOMC_2026_06_17"},
+        },
+    )
+    _write_json(
+        storage_dir / "ops" / "event_ledger" / "expired.json",
+        {
+            "task_id": "task_expired",
+            "deadline": (now - timedelta(days=9)).isoformat(),
+        },
+    )
+    _write_json(
+        storage_dir / "ops" / "tasks" / "task_review.json",
+        {
+            "id": "task_review",
+            "title": "Codex review awaiting approval",
+            "status": "awaiting_approval",
+            "created_at": (now - timedelta(days=30)).isoformat(),
+            "payload": {},
+        },
+    )
+
+    result = _parse_event_receipt_state(str(storage_dir), now)
+
+    assert result["breached"] is False
+    assert result["title"] == "event_receipt_watchdog ok"
+    assert result["details"]["checked_event_receipts"] == 1
+    assert result["details"]["stale"] == []
 
 
 def test_parse_loop_health_breaches_on_task_outcome_with_stable_title(tmp_path: Path):

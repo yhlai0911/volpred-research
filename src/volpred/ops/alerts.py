@@ -42,6 +42,26 @@ TELEGRAM_ALERT_MAX_CHARS = 4096
 SCHEDULER_STALE_WINDOW = timedelta(minutes=30)
 RELEASE_POOL_GAP_BUFFER = timedelta(minutes=60)  # grace on top of configured interval
 WORK_LOG_STALE_WARN_HOURS = 24.0
+EVENT_RECEIPT_CLAIMED_WARN = timedelta(hours=24)
+EVENT_RECEIPT_TERMINAL_STATUSES = {
+    "succeeded",
+    "failed",
+    "cancelled",
+    "expired",
+    "done",
+    "retracted",
+    "skipped",
+    "superseded",
+    "wont_fix",
+}
+EVENT_RECEIPT_CLAIMED_STATUSES = {"claimed", "running", "in_progress"}
+EVENT_RECEIPT_QUEUE_STATUSES = {
+    "queued",
+    "pending",
+    "pending_main_thread",
+    "awaiting_approval",
+    "blocked",
+}
 # 2026-05-17 bump 30→60min: piggy-back release fires only on check_alerts
 # hourly cron tick (`0 * * * *`). With 180min interval + 30min buffer = 210min
 # threshold, normal cycle could routinely hit 210-240min (release at HH:XX,
@@ -2147,6 +2167,184 @@ def _parse_content_quality_state(
     }
 
 
+def _event_receipt_deadlines(storage_dir: str) -> dict[str, datetime]:
+    ledger_root = _ops_path(storage_dir, "event_ledger")
+    deadlines: dict[str, datetime] = {}
+    if not ledger_root.exists():
+        return deadlines
+
+    for path in sorted(ledger_root.glob("*.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001 - alert parser must stay non-fatal
+            warn("alerts", "event ledger read failed; skipping", path=str(path), err=str(exc))
+            continue
+        if not isinstance(payload, dict):
+            continue
+        task_id = str(payload.get("task_id") or "").strip()
+        deadline = _parse_iso_datetime(payload.get("deadline"))
+        if not task_id or deadline is None:
+            continue
+        current = deadlines.get(task_id)
+        if current is None or deadline < current:
+            deadlines[task_id] = deadline
+    return deadlines
+
+
+def _is_event_receipt_task(task: dict[str, Any], *, ledger_task_ids: set[str]) -> bool:
+    task_id = str(task.get("id") or "")
+    if task_id in ledger_task_ids:
+        return True
+
+    payload = task.get("payload")
+    if isinstance(payload, dict) and (
+        payload.get("event_key") or payload.get("event_job_id") or payload.get("event_type")
+    ):
+        return True
+
+    title = str(task.get("title") or "").lower()
+    return title.startswith("event article:") or "event article" in title
+
+
+def _event_receipt_deadline(task: dict[str, Any], deadlines: dict[str, datetime]) -> datetime | None:
+    task_id = str(task.get("id") or "").strip()
+    direct = _parse_iso_datetime(task.get("deadline"))
+    if direct is not None:
+        return direct
+
+    payload = task.get("payload")
+    if isinstance(payload, dict):
+        for key in ("deadline", "event_deadline"):
+            parsed = _parse_iso_datetime(payload.get(key))
+            if parsed is not None:
+                return parsed
+
+    return deadlines.get(task_id)
+
+
+def _parse_event_receipt_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Warn on event receipts stuck after claim or past event deadline.
+
+    This folds the detector into the existing check_alerts owner instead of
+    adding another watchdog. It catches the two 2026-07-05 incident classes:
+    a claimed FOMC T+0 zombie and queued NFP tasks whose deadline passed.
+    """
+    tasks_root = _ops_path(storage_dir, "tasks")
+    deadlines = _event_receipt_deadlines(storage_dir)
+    ledger_task_ids = set(deadlines)
+    stale: list[dict[str, Any]] = []
+    checked = 0
+    read_errors: list[str] = []
+
+    if tasks_root.exists():
+        for path in sorted(tasks_root.glob("*.json")):
+            try:
+                task = json.loads(path.read_text(encoding="utf-8"))
+            except Exception as exc:  # noqa: BLE001 - alert parser must stay non-fatal
+                read_errors.append(f"{_relative_repo_path(path)}: {type(exc).__name__}")
+                continue
+            if not isinstance(task, dict):
+                continue
+            if not _is_event_receipt_task(task, ledger_task_ids=ledger_task_ids):
+                continue
+            checked += 1
+
+            status = str(task.get("status") or "").strip().lower()
+            if status in EVENT_RECEIPT_TERMINAL_STATUSES:
+                continue
+
+            task_id = str(task.get("id") or path.stem)
+            title = str(task.get("title") or task_id)
+            claimed_at = _parse_iso_datetime(task.get("claimed_at")) or _parse_iso_datetime(
+                task.get("started_at")
+            )
+            deadline = _event_receipt_deadline(task, deadlines)
+
+            reasons: list[str] = []
+            age_hours: float | None = None
+            if status in EVENT_RECEIPT_CLAIMED_STATUSES and claimed_at is not None:
+                age_hours = round((now - claimed_at).total_seconds() / 3600.0, 2)
+                if now - claimed_at > EVENT_RECEIPT_CLAIMED_WARN:
+                    reasons.append("claimed_over_24h")
+
+            if status in EVENT_RECEIPT_QUEUE_STATUSES and deadline is not None and now > deadline:
+                reasons.append("queued_past_deadline")
+
+            if reasons:
+                overdue_hours = (
+                    round((now - deadline).total_seconds() / 3600.0, 2)
+                    if deadline is not None and now > deadline
+                    else None
+                )
+                stale.append(
+                    {
+                        "task_id": task_id,
+                        "status": status,
+                        "title": title,
+                        "reasons": reasons,
+                        "claimed_at": claimed_at.isoformat() if claimed_at else None,
+                        "claimed_age_hours": age_hours,
+                        "deadline": deadline.isoformat() if deadline else None,
+                        "deadline_overdue_hours": overdue_hours,
+                        "path": _relative_repo_path(path),
+                    }
+                )
+
+    breached = bool(stale)
+    reason_names = sorted({reason for item in stale for reason in item["reasons"]})
+    lines = [
+        "## 觸發條件",
+        "掃描 `storage/ops/tasks/*.json` event receipts；claimed/running 超過 "
+        "24h 或 queued/blocked/awaiting_approval 超過 event deadline 即 warn。",
+        f"- checked_event_receipts: {checked}",
+        f"- stale_count: {len(stale)}",
+    ]
+    for item in stale[:10]:
+        lines.append(
+            f"- {item['task_id']} [{item['status']}]: {', '.join(item['reasons'])}; "
+            f"claimed_age_h={item['claimed_age_hours']}; "
+            f"deadline_overdue_h={item['deadline_overdue_hours']}; "
+            f"title={item['title']}"
+        )
+    if len(stale) > 10:
+        lines.append(f"- ... {len(stale) - 10} more")
+    if read_errors:
+        lines.append(f"- read_errors: {len(read_errors)}")
+
+    lines.extend(
+        [
+            "",
+            "## 影響",
+            "事件型文章/任務有時效性；claimed zombie 會佔用 ownership，queued "
+            "past-deadline 會讓市場事件過期後仍留在任務池，造成 dispatch 噪音與錯過發文窗口。",
+            "",
+            "## 建議行動",
+            "1. 若仍有時效價值：立即接手完成或重派。",
+            "2. 若已過時：用正式 task close / expire 流程關閉，不要手改 JSON。",
+            "3. 檢查 event_jobs / event_ledger 是否缺 deadline 或 close path。",
+        ]
+    )
+
+    return {
+        "id": "event_receipt_watchdog",
+        "breached": breached,
+        "level": "warn" if breached else "info",
+        "title": (
+            "Event receipt watchdog stale (" + " / ".join(reason_names) + ")"
+            if breached
+            else "event_receipt_watchdog ok"
+        ),
+        "body": "\n".join(lines) if breached else "",
+        "details": {
+            "checked_event_receipts": checked,
+            "stale_count": len(stale),
+            "stale": stale,
+            "read_errors": read_errors,
+            "claimed_warn_hours": EVENT_RECEIPT_CLAIMED_WARN.total_seconds() / 3600.0,
+        },
+    }
+
+
 def _parse_loop_health_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     """Loop-health regression breach (2026-06-29 loop-engineering layer).
 
@@ -2389,6 +2587,7 @@ def build_alert_condition_report(
         _parse_host_cron_state(storage_dir, current),
         _parse_push_backlog_state(storage_dir, current),          # 2026-07-04 26h push-hold incident: persistent unpushed-backlog escalation
         _parse_work_log_freshness_state(storage_dir, current),    # 2026-06-28 Codex/dispatch diversity dead-man switch
+        _parse_event_receipt_state(storage_dir, current),         # 2026-07-05 event jobs: claimed zombie / queued past deadline
         _parse_member_qa_state(storage_dir, current),
         _parse_supabase_sync_state(storage_dir),
         _parse_knowledge_stale_state(storage_dir, current),

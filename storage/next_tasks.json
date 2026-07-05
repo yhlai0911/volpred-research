@@ -50444,11 +50444,37 @@
     "id": "platform_ops_event_receipt_watchdog_c1",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C1: event-receipt watchdog — check_alerts 加 detector（claimed>24h / queued 過 deadline）",
-    "description": "在 src/volpred/ops/alerts.py 的 build_alert_condition_report 加 _parse_event_receipt_state：掃 storage/ops/tasks/*.json 非 terminal receipt（claimed>24h 或 queued 過 event deadline）→ warn。收編既有 check_alerts owner（anti-stacking，不另開 watchdog）。活證據：FOMC T+0 claimed 17 天 zombie + 3 筆 NFP 過期 queued（已於 2026-07-05 手動關閉，此任務是防再犯的 detector）。附 unit tests 比照 test_alerts.py 條件測試慣例。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "在 src/volpred/ops/alerts.py 的 build_alert_condition_report 加 _parse_event_receipt_state：掃 storage/ops/tasks/*.json 非 terminal receipt（claimed>24h 或 queued 過 event deadline）→ warn。收編既有 check_alerts owner（anti-stacking，不另開 watchdog）。活證據：FOMC T+0 claimed 17 天 zombie + 3 筆 NFP 過期 queued（已於 2026-07-05 手動關閉，此任務是防再犯的 detector）。附 unit tests 比照 test_alerts.py 條件測試慣例。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T11:09:51.406233+00:00",
+    "claim_session_id": "e7bc5f613f94",
+    "status_history": [
+      {
+        "ts": "2026-07-05T11:09:51.406604+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T11:09:55.603233+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T11:16:33.576072+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T11:09:55.602933+00:00",
+    "completed_at": "2026-07-05T11:16:33.575794+00:00",
+    "result": "check_alerts 新增 event_receipt_watchdog，掃 storage/ops/tasks event receipts；claimed/running >24h 或 queued/blocked/awaiting_approval 過 event deadline 觸發 warn。已加 tests 並驗證 live storage stale_count=0。"
   },
   {
     "id": "platform_ops_blocked_lane_terminal_migration_c2",
