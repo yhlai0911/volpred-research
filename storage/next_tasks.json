@@ -50506,11 +50506,29 @@
     "id": "platform_ops_blocked_lane_terminal_migration_c2",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C2: blocked lane 衛生 — deprecated(86筆)→terminal 遷移 + mark_task_blocked schema guard",
-    "description": "一次性遷移 script 把 blocked_reason=deprecated 的 ~86 筆遷到終態（superseded/closed_no_action，保留 blocked_note 審計軌跡）+ 清 stale claimed_by（25 筆 5-6 週前 claim）。mark_task_blocked.py 加 schema guard：status=blocked 必附 reason（擋 null）、非 terminal-intent reason 強制 blocked_until（預設 +14d）、status 屬封閉枚舉。遷移前先 commit snapshot（per feedback_snapshot_before_refactor）。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "一次性遷移 script 把 blocked_reason=deprecated 的 ~86 筆遷到終態（superseded/closed_no_action，保留 blocked_note 審計軌跡）+ 清 stale claimed_by（25 筆 5-6 週前 claim）。mark_task_blocked.py 加 schema guard：status=blocked 必附 reason（擋 null）、非 terminal-intent reason 強制 blocked_until（預設 +14d）、status 屬封閉枚舉。遷移前先 commit snapshot（per feedback_snapshot_before_refactor）。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-05T14:38:28.174007+00:00",
+    "claim_session_id": "87d9a2ff2dc8",
+    "status_history": [
+      {
+        "ts": "2026-07-05T14:38:28.174325+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-05T14:38:43.266365+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-05T14:38:43.266072+00:00"
   },
   {
     "id": "experiment_k506_resurrect_c4",
