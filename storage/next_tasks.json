@@ -51124,7 +51124,7 @@
     "id": "paper_review_queue_batch_c12",
     "task_type": "paper_review",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "C12: paper review cycle 佇列 — 6/11 batch 四篇 + 零 review 兩篇 + vt-insurance-cost 首輪",
@@ -51172,14 +51172,42 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-05T20:50:01.015421+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-02",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-05T21:09:34.850503+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-05T21:09:39.862724+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-05T21:19:57.808213+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-05"
       }
     ],
-    "last_released_at": "2026-07-05T11:10:42.137693+00:00",
-    "claim_session_id": "28a5b0099b9c",
+    "last_released_at": "2026-07-05T20:50:01.015413+00:00",
     "notes": "vt-insurance-cost done 2026-07-06 (v2 review); remaining: btc-gas-negative, crypto-fear-channel, eav-universal-magnitude, vix-sufficiency",
-    "claimed_by": "hourly-02",
-    "claimed_at": "2026-07-05T18:09:41.761329+00:00",
-    "started_at": "2026-07-05T18:09:42.008647+00:00"
+    "started_at": "2026-07-05T21:09:39.862437+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-07-05T21:09:34.850211+00:00",
+    "claim_session_id": "d58ddf85028a",
+    "completed_at": "2026-07-05T21:19:57.807914+00:00",
+    "result": "vix-sufficiency v4 review round 完成（Codex，verdict=REJECT，3 SEVERE：Table6/K752 衝突+nested DM 缺 Clark-West+lag convention 不一致；8 MAJOR）→ review_history/v4/。登記 follow-up: paper_body_vix_sufficiency_v5_severe_fixes(P2) + paper_review_eav_universal_magnitude_v2(P3)。crypto-fear-channel(body 舊於 review)/btc-gas-negative(無 body tex) 非 review-eligible。agy 二審因 macOS 缺 timeout 失敗。"
   },
   {
     "id": "experiment_ml_null_quartet_unfreeze_eval_c14",
@@ -51598,5 +51626,35 @@
       }
     ],
     "completed_at": "2026-07-05T19:06:40.007173+00:00"
+  },
+  {
+    "id": "paper_body_vix_sufficiency_v5_severe_fixes",
+    "title": "vix-sufficiency v5: 修 v4 review 3 SEVERE（主線程 only，禁 background agent 寫 .tex）",
+    "priority": 2,
+    "description": "v4 review (review_history/v4/, Codex, verdict=REJECT) 3 SEVERE：(1) 研究誠實 critical — Table 6（main_v4.tex:640-649）報 0/5 Harvey pass + 'no signal in any era' 與自家 K752 (k752_...results.json:489-490 any_competing_signal_harvey=true, vix_sufficient_all_eras=false, 多筆 harvey_pass=true vol momentum GFC/COVID) 直接衝突 → reconcile spec 或改敘事，禁 overclaim all-era sufficiency。(2) nested forecast inference 用普通 DM 缺 Clark-West correction。(3) publication-delay/lag convention 前後不一致（Table1 note 197 vs pub-delay 340 vs method 359 vs robustness 851 shift(1)/shift(2) 混），Family10 overnight VIX 用 VIX_open,t (240) forecast origin 需明示。另 8 MAJOR 見 round_readme.md。paper_body = 主線程 only。",
+    "status": "pending",
+    "created_at": "2026-07-05T21:19:47.106824+00:00",
+    "tags": [
+      "paper_body",
+      "vix-sufficiency",
+      "severe-fix",
+      "research-honesty",
+      "review-v4"
+    ],
+    "task_type": "paper_body"
+  },
+  {
+    "id": "paper_review_eav_universal_magnitude_v2",
+    "title": "eav-universal-magnitude v2 review（body.tex 2026-07-01 已改，last review v1=2026-05-18 過時）",
+    "priority": 3,
+    "description": "body.tex（1433 行，2026-07-01 修訂）僅有 v1 review（2026-05-18），需跑 v2 review round（codex exec latex-academic-reviewer + citation check，省 token）→ 歸檔 review_history/v2/ + round_readme。屬 C12 batch 延伸（vix-sufficiency v4 已於 2026-07-06 完成）。crypto-fear-channel body_v5 舊於 v5_independent review 無新 revision、btc-gas-negative 無 body .tex 皆非 review-eligible。",
+    "status": "pending",
+    "created_at": "2026-07-05T21:19:47.106824+00:00",
+    "tags": [
+      "paper_review",
+      "eav-universal-magnitude",
+      "c12-batch"
+    ],
+    "task_type": "paper_review"
   }
 ]
