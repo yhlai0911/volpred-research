@@ -51853,7 +51853,7 @@
     "title": "vix-sufficiency v5: 修 v4 review 3 SEVERE（主線程 only，禁 background agent 寫 .tex）",
     "priority": 2,
     "description": "v4 review (review_history/v4/, Codex, verdict=REJECT) 3 SEVERE：(1) 研究誠實 critical — Table 6（main_v4.tex:640-649）報 0/5 Harvey pass + 'no signal in any era' 與自家 K752 (k752_...results.json:489-490 any_competing_signal_harvey=true, vix_sufficient_all_eras=false, 多筆 harvey_pass=true vol momentum GFC/COVID) 直接衝突 → reconcile spec 或改敘事，禁 overclaim all-era sufficiency。(2) nested forecast inference 用普通 DM 缺 Clark-West correction。(3) publication-delay/lag convention 前後不一致（Table1 note 197 vs pub-delay 340 vs method 359 vs robustness 851 shift(1)/shift(2) 混），Family10 overnight VIX 用 VIX_open,t (240) forecast origin 需明示。另 8 MAJOR 見 round_readme.md。paper_body = 主線程 only。",
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-05T21:19:47.106824+00:00",
     "tags": [
       "paper_body",
@@ -51901,12 +51901,27 @@
         "to": "pending",
         "by": "hourly-18",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-06T14:09:53.826932+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-06T14:09:54.068267+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-22"
       }
     ],
-    "started_at": "2026-07-06T10:09:06.640034+00:00",
+    "started_at": "2026-07-06T14:09:54.067995+00:00",
     "progress": "SEVERE-1(K752/Table6) FIXED hourly-12; SEVERE-3(lag convention→corrected variant reconciliation, 8 spots + M5/M3 number fix + Family10 origin) FIXED hourly-18 2026-07-06, main_v5.tex compiles 0-undefined 61pp; PENDING: SEVERE-2(Clark-West nested-MSFE) + 8 MAJOR; NO paper-update until all done (still REJECT)",
     "last_released_at": "2026-07-06T10:17:15.196808+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-07-06T14:09:53.826692+00:00",
+    "claim_session_id": "38f62eeebeee"
   },
   {
     "id": "paper_review_eav_universal_magnitude_v2",
@@ -52369,7 +52384,7 @@
     "title": "Paper review (Codex 24h-rule): VIX 破 30 就該進場抄底？33 年數據拆解恐慌溢酬的真相",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4d67163f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_4d67163f",
@@ -52377,7 +52392,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-06T07:07:58+00:00"
+    "created_at": "2026-07-06T07:07:58+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T14:08:13.232355+00:00",
+    "claim_session_id": "9ae6e9167261",
+    "status_history": [
+      {
+        "ts": "2026-07-06T14:08:13.232727+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T14:08:22.370808+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T14:13:51.077232+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T14:08:22.370500+00:00",
+    "completed_at": "2026-07-06T14:13:51.076953+00:00",
+    "result": "Codex 24h review completed for mile_4d67163f / K1633. Verdict PASS_AFTER_TEXT_FIX: numbers and event-study code match k1633_results.json; no lookahead or DM/Harvey overclaim found. Corrected public FDR wording so 3 cells are described as FDR 10% survivors and none as FDR 5% survivors; synced single article and curl-verified live page."
   },
   {
     "id": "paper_review_mile_4518e9d8",
