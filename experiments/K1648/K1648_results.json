@@ -2,7 +2,7 @@
   "experiment_id": "K1648",
   "title": "QML/Kalman stochastic-volatility class vs GARCH baselines",
   "seed": 42,
-  "verdict": "NULL_NO_SV_CLASS_EDGE_VS_GARCH",
+  "verdict": "WEAK_SV_AVERAGE_QLIKE_EDGE_NO_HARVEY_WIN",
   "data": {
     "source": "yfinance daily OHLC, auto_adjust=True",
     "assets": [
@@ -21,7 +21,1499 @@
         "oos_start": "2018-01-02",
         "oos_end": "2026-07-02",
         "fit_error_count": 0,
-        "fit_errors_sample": []
+        "fit_errors_sample": [],
+        "sv_fit_summary": {
+          "fit_count": 27,
+          "chosen_success_count": 27,
+          "chosen_success_rate": 1.0,
+          "threshold": 0.95,
+          "passes_threshold": true,
+          "fallback_count": 0,
+          "bound_hit_fit_count": 0,
+          "by_model": {
+            "RSV_KF": {
+              "fit_count": 9,
+              "chosen_success_count": 9,
+              "chosen_success_rate": 1.0,
+              "fallback_count": 0,
+              "bound_hit_fit_count": 0
+            },
+            "SV_KF": {
+              "fit_count": 9,
+              "chosen_success_count": 9,
+              "chosen_success_rate": 1.0,
+              "fallback_count": 0,
+              "bound_hit_fit_count": 0
+            },
+            "TSV_KF": {
+              "fit_count": 9,
+              "chosen_success_count": 9,
+              "chosen_success_rate": 1.0,
+              "fallback_count": 0,
+              "bound_hit_fit_count": 0
+            }
+          }
+        },
+        "sv_fit_diagnostics": [
+          {
+            "model": "SV_KF",
+            "n_train": 2012,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -4945.374627582723,
+            "chosen_fun": 4945.374627582723,
+            "params": {
+              "mu": -0.8989475617019305,
+              "phi": 0.3239777089189063,
+              "q": 2.7194537389377156,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.8989475617019305,
+              "phi": 0.3239777089189063,
+              "log_q": 1.0004310288657068
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 4945.374632882663,
+                "loglik": -4945.374632882663,
+                "nit": 18,
+                "nfev": 96,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 4945.374627582723,
+                "loglik": -4945.374627582723,
+                "nit": 18,
+                "nfev": 100,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2018-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2012,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -4936.578163366954,
+            "chosen_fun": 4936.578163366954,
+            "params": {
+              "mu": -1.285334318841088,
+              "phi": 0.4034845009742212,
+              "q": 2.3684441092328083,
+              "gamma": 0.5226420689119743,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -1.285334318841088,
+              "phi": 0.4034845009742212,
+              "log_q": 0.8622332455659023,
+              "gamma": 0.5226420689119743
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 4936.578163366954,
+                "loglik": -4936.578163366954,
+                "nit": 27,
+                "nfev": 160,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 4936.57832918708,
+                "loglik": -4936.57832918708,
+                "nit": 30,
+                "nfev": 210,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2018-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2012,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -7376.88618582627,
+            "chosen_fun": 7376.88618582627,
+            "params": {
+              "mu": -0.9064362599304202,
+              "phi": 0.8976126047197881,
+              "q": 0.18641318564819245,
+              "gamma": 0.0,
+              "c2": -0.4335173155956415,
+              "r2_meas": 0.4076615298041213,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.9064362599304202,
+              "phi": 0.8976126047197881,
+              "log_q": -1.6797896407765247,
+              "c2": -0.4335173155956415,
+              "log_r2_meas": -0.8973180326864829
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7410.88514761836,
+                "loglik": -7410.88514761836,
+                "nit": 12,
+                "nfev": 96,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7376.88618582627,
+                "loglik": -7376.88618582627,
+                "nit": 28,
+                "nfev": 240,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2018-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 2263,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -5588.597628488253,
+            "chosen_fun": 5588.597628488253,
+            "params": {
+              "mu": -0.870260517095226,
+              "phi": 0.27969124712330523,
+              "q": 2.995404531669684,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.870260517095226,
+              "phi": 0.27969124712330523,
+              "log_q": 1.0970792914513188
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5588.597628488253,
+                "loglik": -5588.597628488253,
+                "nit": 22,
+                "nfev": 132,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5588.597637926408,
+                "loglik": -5588.597637926408,
+                "nit": 23,
+                "nfev": 144,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2019-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2263,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -5577.947783820194,
+            "chosen_fun": 5577.947783820194,
+            "params": {
+              "mu": -1.2411814890504906,
+              "phi": 0.3396597471063012,
+              "q": 2.7180624096575654,
+              "gamma": 0.5511870417679979,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -1.2411814890504906,
+              "phi": 0.3396597471063012,
+              "log_q": 0.9999192770759215,
+              "gamma": 0.5511870417679979
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5577.947798090043,
+                "loglik": -5577.947798090043,
+                "nit": 24,
+                "nfev": 165,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5577.947783820194,
+                "loglik": -5577.947783820194,
+                "nit": 45,
+                "nfev": 285,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2019-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2263,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -8390.004729167647,
+            "chosen_fun": 8390.004729167647,
+            "params": {
+              "mu": -3.178427954260452,
+              "phi": 0.9909277868279,
+              "q": 0.1140313736859322,
+              "gamma": 0.0,
+              "c2": -0.4215398151082916,
+              "r2_meas": 0.466207216033222,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -3.178427954260452,
+              "phi": 0.9909277868279,
+              "log_q": -2.1712816606790186,
+              "c2": -0.4215398151082916,
+              "log_r2_meas": -0.7631250740935299
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8391.21539677131,
+                "loglik": -8391.21539677131,
+                "nit": 16,
+                "nfev": 114,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8390.004729167647,
+                "loglik": -8390.004729167647,
+                "nit": 17,
+                "nfev": 114,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2019-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 2515,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -6174.867417690379,
+            "chosen_fun": 6174.867417690379,
+            "params": {
+              "mu": -0.8788425806826303,
+              "phi": 0.3118252154774788,
+              "q": 2.706739495773428,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.8788425806826303,
+              "phi": 0.3118252154774788,
+              "log_q": 0.9957447724489356
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6174.86755556573,
+                "loglik": -6174.86755556573,
+                "nit": 19,
+                "nfev": 112,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6174.867417690379,
+                "loglik": -6174.867417690379,
+                "nit": 23,
+                "nfev": 116,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2020-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2515,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -6158.844332606227,
+            "chosen_fun": 6158.844332606227,
+            "params": {
+              "mu": -1.362938830873399,
+              "phi": 0.42910573419337206,
+              "q": 2.1935412819569176,
+              "gamma": 0.626927365413241,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -1.362938830873399,
+              "phi": 0.42910573419337206,
+              "log_q": 0.7855172615778386,
+              "gamma": 0.626927365413241
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6158.844332606227,
+                "loglik": -6158.844332606227,
+                "nit": 28,
+                "nfev": 185,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6161.804390884332,
+                "loglik": -6161.804390884332,
+                "nit": 31,
+                "nfev": 190,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2020-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2515,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -9272.008356805283,
+            "chosen_fun": 9272.008356805283,
+            "params": {
+              "mu": -3.173686052411997,
+              "phi": 0.990120710802808,
+              "q": 0.11780017973894644,
+              "gamma": 0.0,
+              "c2": -0.43812211994240774,
+              "r2_meas": 0.4623282999129224,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -3.173686052411997,
+              "phi": 0.990120710802808,
+              "log_q": -2.138765481968307,
+              "c2": -0.43812211994240774,
+              "log_r2_meas": -0.7714800343890789
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9273.60100564079,
+                "loglik": -9273.60100564079,
+                "nit": 15,
+                "nfev": 108,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9272.008356805283,
+                "loglik": -9272.008356805283,
+                "nit": 12,
+                "nfev": 96,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2020-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 2768,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -6771.324766640757,
+            "chosen_fun": 6771.324766640757,
+            "params": {
+              "mu": -0.7435004158868984,
+              "phi": 0.9015089388352843,
+              "q": 0.3258910823002773,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.7435004158868984,
+              "phi": 0.9015089388352843,
+              "log_q": -1.1211920568137785
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6771.326595730004,
+                "loglik": -6771.326595730004,
+                "nit": 15,
+                "nfev": 80,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6771.324766640757,
+                "loglik": -6771.324766640757,
+                "nit": 16,
+                "nfev": 84,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2021-01-04"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2768,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -6735.942955710475,
+            "chosen_fun": 6735.942955710475,
+            "params": {
+              "mu": -3.2129476612319423,
+              "phi": 0.9141181130077857,
+              "q": 0.21210484562840323,
+              "gamma": 0.48601866760896373,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -3.2129476612319423,
+              "phi": 0.9141181130077857,
+              "log_q": -1.550674571711111,
+              "gamma": 0.48601866760896373
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6735.942955710475,
+                "loglik": -6735.942955710475,
+                "nit": 23,
+                "nfev": 145,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6735.942980369776,
+                "loglik": -6735.942980369776,
+                "nit": 24,
+                "nfev": 155,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2021-01-04"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2768,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -10120.588858696945,
+            "chosen_fun": 10120.588858696945,
+            "params": {
+              "mu": -0.7442662611259964,
+              "phi": 0.9019462981733504,
+              "q": 0.21197223894841866,
+              "gamma": 0.0,
+              "c2": -0.4972672112004825,
+              "r2_meas": 0.39840187295894364,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.7442662611259964,
+              "phi": 0.9019462981733504,
+              "log_q": -1.551299961241125,
+              "c2": -0.4972672112004825,
+              "log_r2_meas": -0.9202940520805767
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10167.950764964751,
+                "loglik": -10167.950764964751,
+                "nit": 14,
+                "nfev": 108,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10120.588858696945,
+                "loglik": -10120.588858696945,
+                "nit": 20,
+                "nfev": 168,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2021-01-04"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3020,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -7323.263087225697,
+            "chosen_fun": 7323.263087225697,
+            "params": {
+              "mu": -0.7293605278713362,
+              "phi": 0.9006339871705514,
+              "q": 0.31059252691846106,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.7293605278713362,
+              "phi": 0.9006339871705514,
+              "log_q": -1.1692734287036164
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7323.263501941524,
+                "loglik": -7323.263501941524,
+                "nit": 14,
+                "nfev": 72,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7323.263087225697,
+                "loglik": -7323.263087225697,
+                "nit": 16,
+                "nfev": 76,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2022-01-03"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3020,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -7282.051664284108,
+            "chosen_fun": 7282.051664284108,
+            "params": {
+              "mu": -3.1676158087834274,
+              "phi": 0.9096888253340423,
+              "q": 0.21188132454287917,
+              "gamma": 0.506294973689774,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -3.1676158087834274,
+              "phi": 0.9096888253340423,
+              "log_q": -1.551728950943063,
+              "gamma": 0.506294973689774
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7282.052636321014,
+                "loglik": -7282.052636321014,
+                "nit": 25,
+                "nfev": 150,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7282.051664284108,
+                "loglik": -7282.051664284108,
+                "nit": 23,
+                "nfev": 180,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2022-01-03"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3020,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -10972.589838561891,
+            "chosen_fun": 10972.589838561891,
+            "params": {
+              "mu": -0.7311320821962602,
+              "phi": 0.8831871602587462,
+              "q": 0.2497887713057908,
+              "gamma": 0.0,
+              "c2": -0.522395981878177,
+              "r2_meas": 0.37318070052086205,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.7311320821962602,
+              "phi": 0.8831871602587462,
+              "log_q": -1.3871396330384012,
+              "c2": -0.522395981878177,
+              "log_r2_meas": -0.9856925248486508
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 11035.843001510168,
+                "loglik": -11035.843001510168,
+                "nit": 7,
+                "nfev": 60,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10972.589838561891,
+                "loglik": -10972.589838561891,
+                "nit": 27,
+                "nfev": 228,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2022-01-03"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3271,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -7919.806465582,
+            "chosen_fun": 7919.806465582,
+            "params": {
+              "mu": -0.6114813555979695,
+              "phi": 0.9347002076878624,
+              "q": 0.201051884037444,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.6114813555979695,
+              "phi": 0.9347002076878624,
+              "log_q": -1.6041922746932364
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7919.806465582,
+                "loglik": -7919.806465582,
+                "nit": 13,
+                "nfev": 72,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7919.904801675212,
+                "loglik": -7919.904801675212,
+                "nit": 6,
+                "nfev": 36,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2023-01-03"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3271,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -7875.1939567854,
+            "chosen_fun": 7875.1939567854,
+            "params": {
+              "mu": -3.421757033956009,
+              "phi": 0.9256491224501497,
+              "q": 0.16634309804773575,
+              "gamma": 0.47058096945238465,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -3.421757033956009,
+              "phi": 0.9256491224501497,
+              "log_q": -1.79370276792403,
+              "gamma": 0.47058096945238465
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7875.1939567854,
+                "loglik": -7875.1939567854,
+                "nit": 20,
+                "nfev": 135,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7875.194529154414,
+                "loglik": -7875.194529154414,
+                "nit": 23,
+                "nfev": 145,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2023-01-03"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3271,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -11892.807657084166,
+            "chosen_fun": 11892.807657084166,
+            "params": {
+              "mu": -1.1087936214484364,
+              "phi": 0.9361059613971777,
+              "q": 0.15160078381015527,
+              "gamma": 0.0,
+              "c2": -0.5362567926048558,
+              "r2_meas": 0.37540754642359087,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -1.1087936214484364,
+              "phi": 0.9361059613971777,
+              "log_q": -1.8865046355355477,
+              "c2": -0.5362567926048558,
+              "log_r2_meas": -0.9797430526780466
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 11921.25706742414,
+                "loglik": -11921.25706742414,
+                "nit": 14,
+                "nfev": 108,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 11892.807657084166,
+                "loglik": -11892.807657084166,
+                "nit": 23,
+                "nfev": 174,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2023-01-03"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3521,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -8522.591524903764,
+            "chosen_fun": 8522.591524903764,
+            "params": {
+              "mu": -0.6214109872524378,
+              "phi": 0.93045232999379,
+              "q": 0.20554765833763722,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.6214109872524378,
+              "phi": 0.93045232999379,
+              "log_q": -1.5820773578819918
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8523.019065781215,
+                "loglik": -8523.019065781215,
+                "nit": 7,
+                "nfev": 44,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8522.591524903764,
+                "loglik": -8522.591524903764,
+                "nit": 11,
+                "nfev": 68,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2024-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3521,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -8474.292187530895,
+            "chosen_fun": 8474.292187530895,
+            "params": {
+              "mu": -3.409749993787095,
+              "phi": 0.9260651962075667,
+              "q": 0.15501681406760917,
+              "gamma": 0.4656890782008059,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -3.409749993787095,
+              "phi": 0.9260651962075667,
+              "log_q": -1.8642216900906445,
+              "gamma": 0.4656890782008059
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8474.292190817414,
+                "loglik": -8474.292190817414,
+                "nit": 28,
+                "nfev": 170,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8474.292187530895,
+                "loglik": -8474.292187530895,
+                "nit": 27,
+                "nfev": 185,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2024-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3521,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -12751.190438022095,
+            "chosen_fun": 12751.190438022095,
+            "params": {
+              "mu": -0.6157889466172956,
+              "phi": 0.9025026290330487,
+              "q": 0.20873823465039218,
+              "gamma": 0.0,
+              "c2": -0.5391505970703361,
+              "r2_meas": 0.3928127037503885,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.6157889466172956,
+              "phi": 0.9025026290330487,
+              "log_q": -1.5666742777957157,
+              "c2": -0.5391505970703361,
+              "log_r2_meas": -0.9344223615014097
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 12810.934233651984,
+                "loglik": -12810.934233651984,
+                "nit": 13,
+                "nfev": 102,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 12751.190438022095,
+                "loglik": -12751.190438022095,
+                "nit": 34,
+                "nfev": 240,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2024-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3773,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -9107.793607558779,
+            "chosen_fun": 9107.793607558779,
+            "params": {
+              "mu": -0.6086827587909522,
+              "phi": 0.9431602285186211,
+              "q": 0.15025442566157798,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.6086827587909522,
+              "phi": 0.9431602285186211,
+              "log_q": -1.8954252506822968
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9107.793607558779,
+                "loglik": -9107.793607558779,
+                "nit": 7,
+                "nfev": 44,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9107.874408821102,
+                "loglik": -9107.874408821102,
+                "nit": 12,
+                "nfev": 84,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2025-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3773,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -9054.306461362909,
+            "chosen_fun": 9054.306461362909,
+            "params": {
+              "mu": -3.396423272545249,
+              "phi": 0.9254951170383953,
+              "q": 0.1453770900237883,
+              "gamma": 0.46797268377569623,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -3.396423272545249,
+              "phi": 0.9254951170383953,
+              "log_q": -1.9284242914708096,
+              "gamma": 0.46797268377569623
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9054.306461362909,
+                "loglik": -9054.306461362909,
+                "nit": 26,
+                "nfev": 165,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9054.463639216674,
+                "loglik": -9054.463639216674,
+                "nit": 17,
+                "nfev": 105,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2025-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3773,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -13638.188675700096,
+            "chosen_fun": 13638.188675700096,
+            "params": {
+              "mu": -0.6256867259999547,
+              "phi": 0.8948881518480898,
+              "q": 0.2176425055464449,
+              "gamma": 0.0,
+              "c2": -0.542836694517676,
+              "r2_meas": 0.3874213284209357,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.6256867259999547,
+              "phi": 0.8948881518480898,
+              "log_q": -1.5249014450871534,
+              "c2": -0.542836694517676,
+              "log_r2_meas": -0.9482424742306251
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 13706.303241531494,
+                "loglik": -13706.303241531494,
+                "nit": 14,
+                "nfev": 102,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 13638.188675700096,
+                "loglik": -13638.188675700096,
+                "nit": 28,
+                "nfev": 198,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2025-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 4023,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -9702.556729556314,
+            "chosen_fun": 9702.556729556314,
+            "params": {
+              "mu": -0.6207007819421564,
+              "phi": 0.9363029745011235,
+              "q": 0.1677432198182942,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.6207007819421564,
+              "phi": 0.9363029745011235,
+              "log_q": -1.7853209223180146
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9702.641841091174,
+                "loglik": -9702.641841091174,
+                "nit": 7,
+                "nfev": 44,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9702.556729556314,
+                "loglik": -9702.556729556314,
+                "nit": 12,
+                "nfev": 56,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2026-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 4023,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -9639.976711678537,
+            "chosen_fun": 9639.976711678537,
+            "params": {
+              "mu": -3.471799213837167,
+              "phi": 0.9241503155424702,
+              "q": 0.14215577697709628,
+              "gamma": 0.4910314087334394,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -3.471799213837167,
+              "phi": 0.9241503155424702,
+              "log_q": -1.950831801703199,
+              "gamma": 0.4910314087334394
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9639.976711678537,
+                "loglik": -9639.976711678537,
+                "nit": 24,
+                "nfev": 150,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9639.977583608455,
+                "loglik": -9639.977583608455,
+                "nit": 31,
+                "nfev": 210,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2026-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 4023,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -14519.86407683767,
+            "chosen_fun": 14519.86407683767,
+            "params": {
+              "mu": -0.6219044272332294,
+              "phi": 0.8891548300727294,
+              "q": 0.2304778321496692,
+              "gamma": 0.0,
+              "c2": -0.5446180760043089,
+              "r2_meas": 0.3757242940115659,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.6219044272332294,
+              "phi": 0.8891548300727294,
+              "log_q": -1.4676005940568102,
+              "c2": -0.5446180760043089,
+              "log_r2_meas": -0.9788996651668294
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 14519.864792458846,
+                "loglik": -14519.864792458846,
+                "nit": 24,
+                "nfev": 198,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 14519.86407683767,
+                "loglik": -14519.86407683767,
+                "nit": 29,
+                "nfev": 228,
+                "bound_hits": []
+              }
+            ],
+            "asset": "SPY",
+            "refit_date": "2026-01-02"
+          }
+        ]
       },
       "TLT": {
         "asset": "TLT",
@@ -30,7 +1522,1534 @@
         "oos_start": "2018-01-02",
         "oos_end": "2026-07-02",
         "fit_error_count": 0,
-        "fit_errors_sample": []
+        "fit_errors_sample": [],
+        "sv_fit_summary": {
+          "fit_count": 27,
+          "chosen_success_count": 27,
+          "chosen_success_rate": 1.0,
+          "threshold": 0.95,
+          "passes_threshold": true,
+          "fallback_count": 0,
+          "bound_hit_fit_count": 0,
+          "by_model": {
+            "RSV_KF": {
+              "fit_count": 9,
+              "chosen_success_count": 9,
+              "chosen_success_rate": 1.0,
+              "fallback_count": 0,
+              "bound_hit_fit_count": 0
+            },
+            "SV_KF": {
+              "fit_count": 9,
+              "chosen_success_count": 9,
+              "chosen_success_rate": 1.0,
+              "fallback_count": 0,
+              "bound_hit_fit_count": 0
+            },
+            "TSV_KF": {
+              "fit_count": 9,
+              "chosen_success_count": 9,
+              "chosen_success_rate": 1.0,
+              "fallback_count": 0,
+              "bound_hit_fit_count": 0
+            }
+          }
+        },
+        "sv_fit_diagnostics": [
+          {
+            "model": "SV_KF",
+            "n_train": 2012,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -4735.584492911937,
+            "chosen_fun": 4735.584492911937,
+            "params": {
+              "mu": -0.28222595201846223,
+              "phi": 0.9784772277631297,
+              "q": 0.016194779836402492,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.28222595201846223,
+              "phi": 0.9784772277631297,
+              "log_q": -4.123066320992622
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 4735.584492911937,
+                "loglik": -4735.584492911937,
+                "nit": 13,
+                "nfev": 100,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 4739.977398143422,
+                "loglik": -4739.977398143422,
+                "nit": 9,
+                "nfev": 56,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2018-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2012,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -4734.550580648828,
+            "chosen_fun": 4734.550580648828,
+            "params": {
+              "mu": 0.37363586660451076,
+              "phi": 0.9812099553957279,
+              "q": 0.013644672168403893,
+              "gamma": -0.032016490616800515,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": 0.37363586660451076,
+              "phi": 0.9812099553957279,
+              "log_q": -4.294406150877854,
+              "gamma": -0.032016490616800515
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 4734.550580648828,
+                "loglik": -4734.550580648828,
+                "nit": 29,
+                "nfev": 190,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 4735.230975114806,
+                "loglik": -4735.230975114806,
+                "nit": 21,
+                "nfev": 150,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2018-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2012,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -7072.732897095938,
+            "chosen_fun": 7072.732897095938,
+            "params": {
+              "mu": -0.37851791398506135,
+              "phi": 0.9765161752156385,
+              "q": 0.013854525529060616,
+              "gamma": 0.0,
+              "c2": -1.0835146059498675,
+              "r2_meas": 0.5394665951022968,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.37851791398506135,
+              "phi": 0.9765161752156385,
+              "log_q": -4.279143346720159,
+              "c2": -1.0835146059498675,
+              "log_r2_meas": -0.6171744144543506
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7072.732897095938,
+                "loglik": -7072.732897095938,
+                "nit": 29,
+                "nfev": 240,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7084.808901792947,
+                "loglik": -7084.808901792947,
+                "nit": 13,
+                "nfev": 90,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "upper",
+                    "value": 0.995,
+                    "bound": 0.995
+                  }
+                ]
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2018-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 2263,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -5379.5859518920415,
+            "chosen_fun": 5379.5859518920415,
+            "params": {
+              "mu": -0.457691096695823,
+              "phi": 0.9831540245061264,
+              "q": 0.015172402193617299,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.457691096695823,
+              "phi": 0.9831540245061264,
+              "log_q": -4.188277146568184
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5384.4672685904015,
+                "loglik": -5384.4672685904015,
+                "nit": 7,
+                "nfev": 44,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5379.5859518920415,
+                "loglik": -5379.5859518920415,
+                "nit": 5,
+                "nfev": 36,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2019-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2263,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -5378.598887587158,
+            "chosen_fun": 5378.598887587158,
+            "params": {
+              "mu": 0.4349050117221139,
+              "phi": 0.9861869616138446,
+              "q": 0.01127878882837988,
+              "gamma": -0.028886918335633872,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": 0.4349050117221139,
+              "phi": 0.9861869616138446,
+              "log_q": -4.484831412047735,
+              "gamma": -0.028886918335633872
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5387.527753875391,
+                "loglik": -5387.527753875391,
+                "nit": 3,
+                "nfev": 30,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5378.598887587158,
+                "loglik": -5378.598887587158,
+                "nit": 19,
+                "nfev": 145,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2019-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2263,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -8002.095315597969,
+            "chosen_fun": 8002.095315597969,
+            "params": {
+              "mu": -0.46748240332237234,
+              "phi": 0.978035574701314,
+              "q": 0.014377326575169746,
+              "gamma": 0.0,
+              "c2": -1.0538808532871156,
+              "r2_meas": 0.5348135529659193,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.46748240332237234,
+              "phi": 0.978035574701314,
+              "log_q": -4.242102856687351,
+              "c2": -1.0538808532871156,
+              "log_r2_meas": -0.6258370919551872
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8025.7724701869565,
+                "loglik": -8025.7724701869565,
+                "nit": 14,
+                "nfev": 102,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "upper",
+                    "value": 0.995,
+                    "bound": 0.995
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8002.095315597969,
+                "loglik": -8002.095315597969,
+                "nit": 27,
+                "nfev": 192,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2019-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 2515,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -5969.323955218553,
+            "chosen_fun": 5969.323955218553,
+            "params": {
+              "mu": -0.4945641969903176,
+              "phi": 0.9032754577715074,
+              "q": 0.1182015149434426,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.4945641969903176,
+              "phi": 0.9032754577715074,
+              "log_q": -2.1353643573118792
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5969.50986606752,
+                "loglik": -5969.50986606752,
+                "nit": 7,
+                "nfev": 44,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5969.323955218553,
+                "loglik": -5969.323955218553,
+                "nit": 7,
+                "nfev": 44,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2020-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2515,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -5963.271354710764,
+            "chosen_fun": 5963.271354710764,
+            "params": {
+              "mu": 0.40570208368035593,
+              "phi": 0.9872312776644196,
+              "q": 0.008887762854749686,
+              "gamma": -0.026309322316265687,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": 0.40570208368035593,
+              "phi": 0.9872312776644196,
+              "log_q": -4.723079908509577,
+              "gamma": -0.026309322316265687
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5963.271354710764,
+                "loglik": -5963.271354710764,
+                "nit": 40,
+                "nfev": 250,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5963.274457753692,
+                "loglik": -5963.274457753692,
+                "nit": 19,
+                "nfev": 125,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2020-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2515,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -8887.937578414525,
+            "chosen_fun": 8887.937578414525,
+            "params": {
+              "mu": -0.48799176708343744,
+              "phi": 0.9728471909229307,
+              "q": 0.018951357202203496,
+              "gamma": 0.0,
+              "c2": -1.0768663722742722,
+              "r2_meas": 0.5274063520863304,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.48799176708343744,
+              "phi": 0.9728471909229307,
+              "log_q": -3.9658797298492536,
+              "c2": -1.0768663722742722,
+              "log_r2_meas": -0.6397839609824086
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8887.937578414525,
+                "loglik": -8887.937578414525,
+                "nit": 24,
+                "nfev": 186,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8887.965047006735,
+                "loglik": -8887.965047006735,
+                "nit": 18,
+                "nfev": 144,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2020-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 2768,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -6561.534961109686,
+            "chosen_fun": 6561.534961109686,
+            "params": {
+              "mu": -0.4533756804972832,
+              "phi": 0.8978662911390178,
+              "q": 0.1494016081230727,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.4533756804972832,
+              "phi": 0.8978662911390178,
+              "log_q": -1.9011172424653615
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6561.534961109686,
+                "loglik": -6561.534961109686,
+                "nit": 7,
+                "nfev": 44,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6561.539010458921,
+                "loglik": -6561.539010458921,
+                "nit": 7,
+                "nfev": 44,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2021-01-04"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2768,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -6566.682177068553,
+            "chosen_fun": 6566.682177068553,
+            "params": {
+              "mu": -1.614375415954499,
+              "phi": 0.9603812166568318,
+              "q": 0.054711012572274204,
+              "gamma": 0.09387777727994223,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -1.614375415954499,
+              "phi": 0.9603812166568318,
+              "log_q": -2.9056902630850905,
+              "gamma": 0.09387777727994223
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6566.682177068553,
+                "loglik": -6566.682177068553,
+                "nit": 3,
+                "nfev": 30,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6567.400730483331,
+                "loglik": -6567.400730483331,
+                "nit": 8,
+                "nfev": 55,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2021-01-04"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2768,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -9788.898652609692,
+            "chosen_fun": 9788.898652609692,
+            "params": {
+              "mu": -0.45220604960752103,
+              "phi": 0.9511865780764889,
+              "q": 0.04394520220868758,
+              "gamma": 0.0,
+              "c2": -1.0907042054130265,
+              "r2_meas": 0.49331963022896363,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.45220604960752103,
+              "phi": 0.9511865780764889,
+              "log_q": -3.12481182557237,
+              "c2": -1.0907042054130265,
+              "log_r2_meas": -0.7065979778407734
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9788.898652609692,
+                "loglik": -9788.898652609692,
+                "nit": 27,
+                "nfev": 222,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9810.612423021932,
+                "loglik": -9810.612423021932,
+                "nit": 15,
+                "nfev": 102,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2021-01-04"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3020,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -7105.959042185812,
+            "chosen_fun": 7105.959042185812,
+            "params": {
+              "mu": -0.4239765105932015,
+              "phi": 0.971554702474077,
+              "q": 0.027212101386178945,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.4239765105932015,
+              "phi": 0.971554702474077,
+              "log_q": -3.6040935007169446
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7105.959042185812,
+                "loglik": -7105.959042185812,
+                "nit": 16,
+                "nfev": 88,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7105.960589245552,
+                "loglik": -7105.960589245552,
+                "nit": 21,
+                "nfev": 108,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2022-01-03"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3020,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -7107.086474605463,
+            "chosen_fun": 7107.086474605463,
+            "params": {
+              "mu": -0.24544387448643987,
+              "phi": 0.9282142124059996,
+              "q": 0.08949873533803657,
+              "gamma": -0.0291841127896717,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -0.24544387448643987,
+              "phi": 0.9282142124059996,
+              "log_q": -2.4135307841024285,
+              "gamma": -0.0291841127896717
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7107.086474605463,
+                "loglik": -7107.086474605463,
+                "nit": 16,
+                "nfev": 100,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7107.17667168544,
+                "loglik": -7107.17667168544,
+                "nit": 24,
+                "nfev": 175,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2022-01-03"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3020,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -10629.155738085401,
+            "chosen_fun": 10629.155738085401,
+            "params": {
+              "mu": -0.426960530319575,
+              "phi": 0.9479584996086808,
+              "q": 0.04464121382067721,
+              "gamma": 0.0,
+              "c2": -1.1064486799393187,
+              "r2_meas": 0.49380271114773344,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.426960530319575,
+              "phi": 0.9479584996086808,
+              "log_q": -3.1090977699553446,
+              "c2": -1.1064486799393187,
+              "log_r2_meas": -0.7056192117099991
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10629.155738085401,
+                "loglik": -10629.155738085401,
+                "nit": 27,
+                "nfev": 198,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10657.069360389323,
+                "loglik": -10657.069360389323,
+                "nit": 10,
+                "nfev": 84,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "upper",
+                    "value": 0.995,
+                    "bound": 0.995
+                  }
+                ]
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2022-01-03"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3271,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -7630.7032402448995,
+            "chosen_fun": 7630.7032402448995,
+            "params": {
+              "mu": -0.3223079908804684,
+              "phi": 0.9879647584052603,
+              "q": 0.011453647205251672,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.3223079908804684,
+              "phi": 0.9879647584052603,
+              "log_q": -4.469447066493068
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7630.7032402448995,
+                "loglik": -7630.7032402448995,
+                "nit": 18,
+                "nfev": 112,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7637.648901236589,
+                "loglik": -7637.648901236589,
+                "nit": 14,
+                "nfev": 92,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2023-01-03"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3271,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -7633.231791517657,
+            "chosen_fun": 7633.231791517657,
+            "params": {
+              "mu": -1.630454240409157,
+              "phi": 0.990959631096984,
+              "q": 0.009762082343495458,
+              "gamma": 0.024721663245934382,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -1.630454240409157,
+              "phi": 0.990959631096984,
+              "log_q": -4.629249546447711,
+              "gamma": 0.024721663245934382
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7633.231791517657,
+                "loglik": -7633.231791517657,
+                "nit": 15,
+                "nfev": 95,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7638.467092598522,
+                "loglik": -7638.467092598522,
+                "nit": 6,
+                "nfev": 45,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2023-01-03"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3271,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -11422.230827685835,
+            "chosen_fun": 11422.230827685835,
+            "params": {
+              "mu": -0.33396745337682043,
+              "phi": 0.9579756637898538,
+              "q": 0.039423890785545014,
+              "gamma": 0.0,
+              "c2": -1.1214016589842901,
+              "r2_meas": 0.4912518842378465,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.33396745337682043,
+              "phi": 0.9579756637898538,
+              "log_q": -3.2333832813279377,
+              "c2": -1.1214016589842901,
+              "log_r2_meas": -0.7107982802073523
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 11422.230827685835,
+                "loglik": -11422.230827685835,
+                "nit": 28,
+                "nfev": 210,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 11446.52197187818,
+                "loglik": -11446.52197187818,
+                "nit": 15,
+                "nfev": 120,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2023-01-03"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3521,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -8198.021667184512,
+            "chosen_fun": 8198.021667184512,
+            "params": {
+              "mu": -0.2703072197995113,
+              "phi": 0.9896027985459818,
+              "q": 0.00989537661944403,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.2703072197995113,
+              "phi": 0.9896027985459818,
+              "log_q": -4.615687639060822
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8198.021667184512,
+                "loglik": -8198.021667184512,
+                "nit": 16,
+                "nfev": 100,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8198.256858592978,
+                "loglik": -8198.256858592978,
+                "nit": 12,
+                "nfev": 60,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2024-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3521,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -8201.708563104983,
+            "chosen_fun": 8201.708563104983,
+            "params": {
+              "mu": -2.0834344639316744,
+              "phi": 0.991035045665752,
+              "q": 0.010544337643234312,
+              "gamma": 0.033661464424004264,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.0834344639316744,
+              "phi": 0.991035045665752,
+              "log_q": -4.55216627942491,
+              "gamma": 0.033661464424004264
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8201.708563104983,
+                "loglik": -8201.708563104983,
+                "nit": 15,
+                "nfev": 100,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8206.411403198985,
+                "loglik": -8206.411403198985,
+                "nit": 12,
+                "nfev": 85,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2024-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3521,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -12277.712212265513,
+            "chosen_fun": 12277.712212265513,
+            "params": {
+              "mu": -0.2852878834979777,
+              "phi": 0.9589424989282226,
+              "q": 0.03811398821656177,
+              "gamma": 0.0,
+              "c2": -1.1394259984580999,
+              "r2_meas": 0.4912350937833423,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.2852878834979777,
+              "phi": 0.9589424989282226,
+              "log_q": -3.2671739194389913,
+              "c2": -1.1394259984580999,
+              "log_r2_meas": -0.7108324597026157
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 12277.712212265513,
+                "loglik": -12277.712212265513,
+                "nit": 29,
+                "nfev": 222,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 12303.724226156854,
+                "loglik": -12303.724226156854,
+                "nit": 14,
+                "nfev": 96,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "upper",
+                    "value": 0.995,
+                    "bound": 0.995
+                  }
+                ]
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2024-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3773,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -8781.429148876923,
+            "chosen_fun": 8781.429148876923,
+            "params": {
+              "mu": -0.28130435282390254,
+              "phi": 0.9891340921061038,
+              "q": 0.00952324847050646,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.28130435282390254,
+              "phi": 0.9891340921061038,
+              "log_q": -4.654019262489642
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8781.429148876923,
+                "loglik": -8781.429148876923,
+                "nit": 18,
+                "nfev": 104,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8781.84611850389,
+                "loglik": -8781.84611850389,
+                "nit": 5,
+                "nfev": 48,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2025-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3773,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -8792.927034836597,
+            "chosen_fun": 8792.927034836597,
+            "params": {
+              "mu": -1.4558917654238337,
+              "phi": 0.960766647121944,
+              "q": 0.05443293738754121,
+              "gamma": 0.09179702718436447,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -1.4558917654238337,
+              "phi": 0.960766647121944,
+              "log_q": -2.910785841658497,
+              "gamma": 0.09179702718436447
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8792.927034836597,
+                "loglik": -8792.927034836597,
+                "nit": 3,
+                "nfev": 30,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8793.040275795773,
+                "loglik": -8793.040275795773,
+                "nit": 8,
+                "nfev": 55,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2025-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3773,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -13144.16442196011,
+            "chosen_fun": 13144.16442196011,
+            "params": {
+              "mu": -0.28016512469687155,
+              "phi": 0.9576933677391252,
+              "q": 0.03720653409080083,
+              "gamma": 0.0,
+              "c2": -1.1493930631319247,
+              "r2_meas": 0.4901453923465512,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.28016512469687155,
+              "phi": 0.9576933677391252,
+              "log_q": -3.291270885525097,
+              "c2": -1.1493930631319247,
+              "log_r2_meas": -0.7130532128152691
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 13144.16442196011,
+                "loglik": -13144.16442196011,
+                "nit": 29,
+                "nfev": 228,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 13144.16456846224,
+                "loglik": -13144.16456846224,
+                "nit": 30,
+                "nfev": 240,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2025-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 4023,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -9345.529140572466,
+            "chosen_fun": 9345.529140572466,
+            "params": {
+              "mu": -0.31664339188327645,
+              "phi": 0.9896655030718566,
+              "q": 0.009029762172112129,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -0.31664339188327645,
+              "phi": 0.9896655030718566,
+              "log_q": -4.707229249429193
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9345.529140572466,
+                "loglik": -9345.529140572466,
+                "nit": 18,
+                "nfev": 100,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9351.033415264745,
+                "loglik": -9351.033415264745,
+                "nit": 16,
+                "nfev": 108,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2026-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 4023,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -9351.312921604362,
+            "chosen_fun": 9351.312921604362,
+            "params": {
+              "mu": -2.4846304600229008,
+              "phi": 0.9928983277469944,
+              "q": 0.009146671203031965,
+              "gamma": 0.031533677932392826,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.4846304600229008,
+              "phi": 0.9928983277469944,
+              "log_q": -4.69436526883438,
+              "gamma": 0.031533677932392826
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9359.008679132618,
+                "loglik": -9359.008679132618,
+                "nit": 4,
+                "nfev": 35,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9351.312921604362,
+                "loglik": -9351.312921604362,
+                "nit": 18,
+                "nfev": 125,
+                "bound_hits": []
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2026-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 4023,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -13985.479892578449,
+            "chosen_fun": 13985.479892578449,
+            "params": {
+              "mu": -0.305384899573869,
+              "phi": 0.9578007080328536,
+              "q": 0.03703717436082013,
+              "gamma": 0.0,
+              "c2": -1.1439540733637366,
+              "r2_meas": 0.4862496624013978,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -0.305384899573869,
+              "phi": 0.9578007080328536,
+              "log_q": -3.295833158269059,
+              "c2": -1.1439540733637366,
+              "log_r2_meas": -0.7210330783399066
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 13985.479892578449,
+                "loglik": -13985.479892578449,
+                "nit": 31,
+                "nfev": 228,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 14022.855574820445,
+                "loglik": -14022.855574820445,
+                "nit": 16,
+                "nfev": 120,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "upper",
+                    "value": 0.995,
+                    "bound": 0.995
+                  }
+                ]
+              }
+            ],
+            "asset": "TLT",
+            "refit_date": "2026-01-02"
+          }
+        ]
       },
       "HYG": {
         "asset": "HYG",
@@ -39,7 +3058,1773 @@
         "oos_start": "2018-01-02",
         "oos_end": "2026-07-02",
         "fit_error_count": 0,
-        "fit_errors_sample": []
+        "fit_errors_sample": [],
+        "sv_fit_summary": {
+          "fit_count": 27,
+          "chosen_success_count": 27,
+          "chosen_success_rate": 1.0,
+          "threshold": 0.95,
+          "passes_threshold": true,
+          "fallback_count": 0,
+          "bound_hit_fit_count": 12,
+          "by_model": {
+            "RSV_KF": {
+              "fit_count": 9,
+              "chosen_success_count": 9,
+              "chosen_success_rate": 1.0,
+              "fallback_count": 0,
+              "bound_hit_fit_count": 0
+            },
+            "SV_KF": {
+              "fit_count": 9,
+              "chosen_success_count": 9,
+              "chosen_success_rate": 1.0,
+              "fallback_count": 0,
+              "bound_hit_fit_count": 5
+            },
+            "TSV_KF": {
+              "fit_count": 9,
+              "chosen_success_count": 9,
+              "chosen_success_rate": 1.0,
+              "fallback_count": 0,
+              "bound_hit_fit_count": 7
+            }
+          }
+        },
+        "sv_fit_diagnostics": [
+          {
+            "model": "SV_KF",
+            "n_train": 2012,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -5415.72359734786,
+            "chosen_fun": 5415.72359734786,
+            "params": {
+              "mu": -2.411953142889652,
+              "phi": 0.2,
+              "q": 7.38905609893065,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -2.411953142889652,
+              "phi": 0.2,
+              "log_q": 2.0
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              },
+              {
+                "param": "log_q",
+                "side": "upper",
+                "value": 2.0,
+                "bound": 2.0
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5415.72359734786,
+                "loglik": -5415.72359734786,
+                "nit": 16,
+                "nfev": 188,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  },
+                  {
+                    "param": "log_q",
+                    "side": "upper",
+                    "value": 2.0,
+                    "bound": 2.0
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5415.723597348718,
+                "loglik": -5415.723597348718,
+                "nit": 4,
+                "nfev": 20,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  },
+                  {
+                    "param": "log_q",
+                    "side": "upper",
+                    "value": 2.0,
+                    "bound": 2.0
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2018-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2012,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -5409.974204158964,
+            "chosen_fun": 5409.974204158964,
+            "params": {
+              "mu": -2.7063494962537944,
+              "phi": 0.2,
+              "q": 7.38905609893065,
+              "gamma": 0.5333704634468288,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.7063494962537944,
+              "phi": 0.2,
+              "log_q": 2.0,
+              "gamma": 0.5333704634468288
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              },
+              {
+                "param": "log_q",
+                "side": "upper",
+                "value": 2.0,
+                "bound": 2.0
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5409.974204158964,
+                "loglik": -5409.974204158964,
+                "nit": 20,
+                "nfev": 145,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  },
+                  {
+                    "param": "log_q",
+                    "side": "upper",
+                    "value": 2.0,
+                    "bound": 2.0
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 5409.974208434478,
+                "loglik": -5409.974208434478,
+                "nit": 21,
+                "nfev": 175,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  },
+                  {
+                    "param": "log_q",
+                    "side": "upper",
+                    "value": 2.0,
+                    "bound": 2.0
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2018-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2012,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -8283.430192455846,
+            "chosen_fun": 8283.430192455846,
+            "params": {
+              "mu": -2.4137074808095833,
+              "phi": 0.8567356677663827,
+              "q": 0.3299092522497778,
+              "gamma": 0.0,
+              "c2": -0.40085673900962177,
+              "r2_meas": 0.33725394828846206,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -2.4137074808095833,
+              "phi": 0.8567356677663827,
+              "log_q": -1.108937655521661,
+              "c2": -0.40085673900962177,
+              "log_r2_meas": -1.0869190766582442
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8283.430192455846,
+                "loglik": -8283.430192455846,
+                "nit": 26,
+                "nfev": 234,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8327.516079065039,
+                "loglik": -8327.516079065039,
+                "nit": 18,
+                "nfev": 126,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2018-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 2263,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -6049.912193546411,
+            "chosen_fun": 6049.912193546411,
+            "params": {
+              "mu": -2.459320716061084,
+              "phi": 0.2,
+              "q": 7.129486027972885,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -2.459320716061084,
+              "phi": 0.2,
+              "log_q": 1.9642391459895907
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6244.5331008444855,
+                "loglik": -6244.5331008444855,
+                "nit": 10,
+                "nfev": 72,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6049.912193546411,
+                "loglik": -6049.912193546411,
+                "nit": 11,
+                "nfev": 76,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2019-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2263,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -6042.235534600596,
+            "chosen_fun": 6042.235534600596,
+            "params": {
+              "mu": -2.7782297980479878,
+              "phi": 0.2,
+              "q": 7.028862484210887,
+              "gamma": 0.5732621381989015,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.7782297980479878,
+              "phi": 0.2,
+              "log_q": 1.9500248839407714,
+              "gamma": 0.5732621381989015
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6042.235534600596,
+                "loglik": -6042.235534600596,
+                "nit": 22,
+                "nfev": 160,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6042.235534862851,
+                "loglik": -6042.235534862851,
+                "nit": 19,
+                "nfev": 140,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2019-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2263,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -9201.645570400571,
+            "chosen_fun": 9201.645570400571,
+            "params": {
+              "mu": -2.45674270982886,
+              "phi": 0.8719298941341398,
+              "q": 0.29791066282678735,
+              "gamma": 0.0,
+              "c2": -0.431549073722864,
+              "r2_meas": 0.3428156451852806,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -2.45674270982886,
+              "phi": 0.8719298941341398,
+              "log_q": -1.210961626594344,
+              "c2": -0.431549073722864,
+              "log_r2_meas": -1.0705624539029899
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9201.645570400571,
+                "loglik": -9201.645570400571,
+                "nit": 29,
+                "nfev": 252,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9201.645672034396,
+                "loglik": -9201.645672034396,
+                "nit": 26,
+                "nfev": 192,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2019-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 2515,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -6646.968280137692,
+            "chosen_fun": 6646.968280137692,
+            "params": {
+              "mu": -2.487134185560422,
+              "phi": 0.2,
+              "q": 6.41641665887232,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -2.487134185560422,
+              "phi": 0.2,
+              "log_q": 1.8588598090529709
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6646.968379920636,
+                "loglik": -6646.968379920636,
+                "nit": 15,
+                "nfev": 104,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6646.968280137692,
+                "loglik": -6646.968280137692,
+                "nit": 16,
+                "nfev": 108,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2020-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2515,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -6638.939522840593,
+            "chosen_fun": 6638.939522840593,
+            "params": {
+              "mu": -2.785114924660008,
+              "phi": 0.2,
+              "q": 6.325981882871076,
+              "gamma": 0.539481532678161,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.785114924660008,
+              "phi": 0.2,
+              "log_q": 1.8446652609639398,
+              "gamma": 0.539481532678161
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6638.939522840593,
+                "loglik": -6638.939522840593,
+                "nit": 22,
+                "nfev": 165,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 6638.9395944904245,
+                "loglik": -6638.9395944904245,
+                "nit": 23,
+                "nfev": 155,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2020-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2515,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -10094.021612928227,
+            "chosen_fun": 10094.021612928227,
+            "params": {
+              "mu": -2.4888089380108136,
+              "phi": 0.8768421660699461,
+              "q": 0.28167252004795573,
+              "gamma": 0.0,
+              "c2": -0.4794020649286074,
+              "r2_meas": 0.3623297363573211,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -2.4888089380108136,
+              "phi": 0.8768421660699461,
+              "log_q": -1.267010159273654,
+              "c2": -0.4794020649286074,
+              "log_r2_meas": -1.0152006078350164
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10094.021612928227,
+                "loglik": -10094.021612928227,
+                "nit": 26,
+                "nfev": 240,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10094.0216238411,
+                "loglik": -10094.0216238411,
+                "nit": 32,
+                "nfev": 228,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2020-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 2768,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -7333.6093108649,
+            "chosen_fun": 7333.6093108649,
+            "params": {
+              "mu": -2.3996801814123834,
+              "phi": 0.2,
+              "q": 6.592480352695464,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -2.3996801814123834,
+              "phi": 0.2,
+              "log_q": 1.8859296589898913
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7333.609311022982,
+                "loglik": -7333.609311022982,
+                "nit": 20,
+                "nfev": 116,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7333.6093108649,
+                "loglik": -7333.6093108649,
+                "nit": 17,
+                "nfev": 100,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2021-01-04"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 2768,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -7324.458048971372,
+            "chosen_fun": 7324.458048971372,
+            "params": {
+              "mu": -2.7048371946322556,
+              "phi": 0.2,
+              "q": 6.498410910747334,
+              "gamma": 0.5538272425922708,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.7048371946322556,
+              "phi": 0.2,
+              "log_q": 1.8715576717430003,
+              "gamma": 0.5538272425922708
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7324.458062888276,
+                "loglik": -7324.458062888276,
+                "nit": 23,
+                "nfev": 155,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7324.458048971372,
+                "loglik": -7324.458048971372,
+                "nit": 19,
+                "nfev": 155,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2021-01-04"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 2768,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -11127.256859848476,
+            "chosen_fun": 11127.256859848476,
+            "params": {
+              "mu": -2.401244096692734,
+              "phi": 0.8990136756837429,
+              "q": 0.2602983689009551,
+              "gamma": 0.0,
+              "c2": -0.4896282932903195,
+              "r2_meas": 0.37903178905806284,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -2.401244096692734,
+              "phi": 0.8990136756837429,
+              "log_q": -1.3459267332288527,
+              "c2": -0.4896282932903195,
+              "log_r2_meas": -0.9701352012744717
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 11127.257205536123,
+                "loglik": -11127.257205536123,
+                "nit": 23,
+                "nfev": 186,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 11127.256859848476,
+                "loglik": -11127.256859848476,
+                "nit": 23,
+                "nfev": 192,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2021-01-04"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3020,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -7948.041199122442,
+            "chosen_fun": 7948.041199122442,
+            "params": {
+              "mu": -2.4437429498726617,
+              "phi": 0.2,
+              "q": 6.188057467491404,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -2.4437429498726617,
+              "phi": 0.2,
+              "log_q": 1.8226212195926164
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7948.041199122442,
+                "loglik": -7948.041199122442,
+                "nit": 18,
+                "nfev": 128,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7948.041201026351,
+                "loglik": -7948.041201026351,
+                "nit": 6,
+                "nfev": 32,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2022-01-03"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3020,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -7937.895903554139,
+            "chosen_fun": 7937.895903554139,
+            "params": {
+              "mu": -2.746773911315367,
+              "phi": 0.2,
+              "q": 6.095331355826341,
+              "gamma": 0.5482570652227247,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.746773911315367,
+              "phi": 0.2,
+              "log_q": 1.8075231266444007,
+              "gamma": 0.5482570652227247
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 7937.895903554139,
+                "loglik": -7937.895903554139,
+                "nit": 21,
+                "nfev": 150,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8127.893525140037,
+                "loglik": -8127.893525140037,
+                "nit": 19,
+                "nfev": 165,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2022-01-03"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3020,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -12008.382808602266,
+            "chosen_fun": 12008.382808602266,
+            "params": {
+              "mu": -2.4463887364523917,
+              "phi": 0.8993499855463801,
+              "q": 0.2588721251200507,
+              "gamma": 0.0,
+              "c2": -0.5199779232417445,
+              "r2_meas": 0.3662268090132416,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -2.4463887364523917,
+              "phi": 0.8993499855463801,
+              "log_q": -1.3514210646103293,
+              "c2": -0.5199779232417445,
+              "log_r2_meas": -1.0045024407560263
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 12008.382924291638,
+                "loglik": -12008.382924291638,
+                "nit": 25,
+                "nfev": 204,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 12008.382808602266,
+                "loglik": -12008.382808602266,
+                "nit": 25,
+                "nfev": 198,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2022-01-03"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3271,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -8580.027716224484,
+            "chosen_fun": 8580.027716224484,
+            "params": {
+              "mu": -2.3039838960785666,
+              "phi": 0.21102741930964844,
+              "q": 6.011613536252509,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -2.3039838960785666,
+              "phi": 0.21102741930964844,
+              "log_q": 1.793693187764087
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8580.027746566133,
+                "loglik": -8580.027746566133,
+                "nit": 19,
+                "nfev": 104,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8580.027716224484,
+                "loglik": -8580.027716224484,
+                "nit": 18,
+                "nfev": 116,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2023-01-03"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3271,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -8568.252934884255,
+            "chosen_fun": 8568.252934884255,
+            "params": {
+              "mu": -2.6214888938869083,
+              "phi": 0.20000396982065718,
+              "q": 5.943012928573633,
+              "gamma": 0.56349561812415,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.6214888938869083,
+              "phi": 0.20000396982065718,
+              "log_q": 1.7822162318110035,
+              "gamma": 0.56349561812415
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.20000396982065718,
+                "bound": 0.2
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8568.253057488382,
+                "loglik": -8568.253057488382,
+                "nit": 25,
+                "nfev": 165,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 8568.252934884255,
+                "loglik": -8568.252934884255,
+                "nit": 25,
+                "nfev": 160,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.20000396982065718,
+                    "bound": 0.2
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2023-01-03"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3271,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -12919.430226588343,
+            "chosen_fun": 12919.430226588343,
+            "params": {
+              "mu": -2.298651811157914,
+              "phi": 0.9141138046837252,
+              "q": 0.23259176773195264,
+              "gamma": 0.0,
+              "c2": -0.5510214115628255,
+              "r2_meas": 0.3843980720726925,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -2.298651811157914,
+              "phi": 0.9141138046837252,
+              "log_q": -1.458470431905873,
+              "c2": -0.5510214115628255,
+              "log_r2_meas": -0.9560766173182114
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 12965.497742689478,
+                "loglik": -12965.497742689478,
+                "nit": 14,
+                "nfev": 102,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 12919.430226588343,
+                "loglik": -12919.430226588343,
+                "nit": 22,
+                "nfev": 174,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2023-01-03"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3521,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -9201.544399535464,
+            "chosen_fun": 9201.544399535464,
+            "params": {
+              "mu": -2.2631491462126982,
+              "phi": 0.20831143310973813,
+              "q": 5.805525915573831,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -2.2631491462126982,
+              "phi": 0.20831143310973813,
+              "log_q": 1.7588102080442707
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9201.544399535464,
+                "loglik": -9201.544399535464,
+                "nit": 16,
+                "nfev": 104,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9475.335783634924,
+                "loglik": -9475.335783634924,
+                "nit": 11,
+                "nfev": 64,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2024-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3521,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -9188.961456429159,
+            "chosen_fun": 9188.961456429159,
+            "params": {
+              "mu": -2.577827730075233,
+              "phi": 0.2,
+              "q": 5.730420855578382,
+              "gamma": 0.5553969112602046,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.577827730075233,
+              "phi": 0.2,
+              "log_q": 1.745788975774413,
+              "gamma": 0.5553969112602046
+            },
+            "bound_hits": [
+              {
+                "param": "phi",
+                "side": "lower",
+                "value": 0.2,
+                "bound": 0.2
+              }
+            ],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9188.961456429159,
+                "loglik": -9188.961456429159,
+                "nit": 27,
+                "nfev": 185,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9188.961473811089,
+                "loglik": -9188.961473811089,
+                "nit": 9,
+                "nfev": 55,
+                "bound_hits": [
+                  {
+                    "param": "phi",
+                    "side": "lower",
+                    "value": 0.2,
+                    "bound": 0.2
+                  }
+                ]
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2024-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3521,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -13845.524919098216,
+            "chosen_fun": 13845.524919098216,
+            "params": {
+              "mu": -2.259840766178416,
+              "phi": 0.9160317682288049,
+              "q": 0.2167246695656881,
+              "gamma": 0.0,
+              "c2": -0.5572929827239848,
+              "r2_meas": 0.3919095514575878,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -2.259840766178416,
+              "phi": 0.9160317682288049,
+              "log_q": -1.5291275348995466,
+              "c2": -0.5572929827239848,
+              "log_r2_meas": -0.9367242018929207
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 13845.524934506506,
+                "loglik": -13845.524934506506,
+                "nit": 23,
+                "nfev": 174,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 13845.524919098216,
+                "loglik": -13845.524919098216,
+                "nit": 27,
+                "nfev": 180,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2024-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 3773,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -9799.527737555612,
+            "chosen_fun": 9799.527737555612,
+            "params": {
+              "mu": -2.2854948954704737,
+              "phi": 0.21355438411480862,
+              "q": 5.455916705936548,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -2.2854948954704737,
+              "phi": 0.21355438411480862,
+              "log_q": 1.6967006539173957
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9799.527748266777,
+                "loglik": -9799.527748266777,
+                "nit": 20,
+                "nfev": 116,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9799.527737555612,
+                "loglik": -9799.527737555612,
+                "nit": 20,
+                "nfev": 108,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2025-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 3773,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -9786.827407632065,
+            "chosen_fun": 9786.827407632065,
+            "params": {
+              "mu": -2.5880658204771105,
+              "phi": 0.20536643798258858,
+              "q": 5.389393276141374,
+              "gamma": 0.5309195440377273,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.5880658204771105,
+              "phi": 0.20536643798258858,
+              "log_q": 1.6844328138617146,
+              "gamma": 0.5309195440377273
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9786.827611872452,
+                "loglik": -9786.827611872452,
+                "nit": 28,
+                "nfev": 185,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 9786.827407632065,
+                "loglik": -9786.827407632065,
+                "nit": 26,
+                "nfev": 185,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2025-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 3773,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -14720.385067611925,
+            "chosen_fun": 14720.385067611925,
+            "params": {
+              "mu": -2.28510946392675,
+              "phi": 0.9187805436316412,
+              "q": 0.2006342905813093,
+              "gamma": 0.0,
+              "c2": -0.5713305264637109,
+              "r2_meas": 0.4007430088898829,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -2.28510946392675,
+              "phi": 0.9187805436316412,
+              "log_q": -1.606271477976606,
+              "c2": -0.5713305264637109,
+              "log_r2_meas": -0.914434932710436
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 14720.385067611925,
+                "loglik": -14720.385067611925,
+                "nit": 33,
+                "nfev": 246,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 14720.385426139686,
+                "loglik": -14720.385426139686,
+                "nit": 25,
+                "nfev": 174,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2025-01-02"
+          },
+          {
+            "model": "SV_KF",
+            "n_train": 4023,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -10438.983571322346,
+            "chosen_fun": 10438.983571322346,
+            "params": {
+              "mu": -2.3265466397257595,
+              "phi": 0.2178793790672179,
+              "q": 5.398002276741286,
+              "gamma": 0.0,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "SV_KF"
+            },
+            "theta": {
+              "mu": -2.3265466397257595,
+              "phi": 0.2178793790672179,
+              "log_q": 1.6860289363706935
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10438.983571322346,
+                "loglik": -10438.983571322346,
+                "nit": 17,
+                "nfev": 92,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10438.983612854063,
+                "loglik": -10438.983612854063,
+                "nit": 9,
+                "nfev": 60,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2026-01-02"
+          },
+          {
+            "model": "TSV_KF",
+            "n_train": 4023,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 1,
+            "chosen_loglik": -10425.219496003478,
+            "chosen_fun": 10425.219496003478,
+            "params": {
+              "mu": -2.6320495802487325,
+              "phi": 0.210207188673412,
+              "q": 5.328894982270252,
+              "gamma": 0.5334006001570032,
+              "c2": 0.0,
+              "r2_meas": 1.0,
+              "model": "TSV_KF"
+            },
+            "theta": {
+              "mu": -2.6320495802487325,
+              "phi": 0.210207188673412,
+              "log_q": 1.6731438962843308,
+              "gamma": 0.5334006001570032
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10425.219581429397,
+                "loglik": -10425.219581429397,
+                "nit": 25,
+                "nfev": 150,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 10425.219496003478,
+                "loglik": -10425.219496003478,
+                "nit": 31,
+                "nfev": 195,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2026-01-02"
+          },
+          {
+            "model": "RSV_KF",
+            "n_train": 4023,
+            "start_count": 2,
+            "success_count": 2,
+            "success_any": true,
+            "chosen_success": true,
+            "fallback_used": false,
+            "chosen_start_id": 0,
+            "chosen_loglik": -15668.584143003947,
+            "chosen_fun": 15668.584143003947,
+            "params": {
+              "mu": -2.3290775406856734,
+              "phi": 0.9195250053952766,
+              "q": 0.20112743161555052,
+              "gamma": 0.0,
+              "c2": -0.5839445892419699,
+              "r2_meas": 0.39648538463230537,
+              "model": "RSV_KF"
+            },
+            "theta": {
+              "mu": -2.3290775406856734,
+              "phi": 0.9195250053952766,
+              "log_q": -1.6038165836715714,
+              "c2": -0.5839445892419699,
+              "log_r2_meas": -0.9251160995391876
+            },
+            "bound_hits": [],
+            "optimizer_records": [
+              {
+                "start_id": 0,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 15668.584143003947,
+                "loglik": -15668.584143003947,
+                "nit": 28,
+                "nfev": 216,
+                "bound_hits": []
+              },
+              {
+                "start_id": 1,
+                "success": true,
+                "status": 0,
+                "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+                "fun": 15668.585246678871,
+                "loglik": -15668.585246678871,
+                "nit": 35,
+                "nfev": 246,
+                "bound_hits": []
+              }
+            ],
+            "asset": "HYG",
+            "refit_date": "2026-01-02"
+          }
+        ]
       }
     }
   },
@@ -47,10 +4832,46 @@
     "forecast_horizon": "one trading day",
     "oos_start": "2018-01-02",
     "refit_cadence": "first available trading day of each calendar year",
+    "sv_variance_forecast": "log-normal Kalman mean exp(h_pred + 0.5 * p_pred)",
+    "sv_convergence_threshold": 0.95,
     "lookahead_policy": "Forecasts for t are produced from state through t-1; day-t returns/range update the state only after forecast recording. Equivalent to signal.shift(1).",
     "primary_loss": "Patton QLIKE on close-to-close r_t^2",
     "var_loss": "Empirical standardized-residual quantiles at 5% and 1%; pinball + Kupiec/CC",
     "sv_qml_note": "SV variants are QML/Kalman approximations on log(r_t^2); RSV_KF adds Parkinson range log-variance as a second measurement. This is not a full Bayesian realized-SV skew-t implementation."
+  },
+  "diagnostics": {
+    "sv_convergence": {
+      "fit_count": 81,
+      "chosen_success_count": 81,
+      "chosen_success_rate": 1.0,
+      "threshold": 0.95,
+      "passes_threshold": true,
+      "fallback_count": 0,
+      "bound_hit_fit_count": 12,
+      "by_model": {
+        "RSV_KF": {
+          "fit_count": 27,
+          "chosen_success_count": 27,
+          "chosen_success_rate": 1.0,
+          "fallback_count": 0,
+          "bound_hit_fit_count": 0
+        },
+        "SV_KF": {
+          "fit_count": 27,
+          "chosen_success_count": 27,
+          "chosen_success_rate": 1.0,
+          "fallback_count": 0,
+          "bound_hit_fit_count": 5
+        },
+        "TSV_KF": {
+          "fit_count": 27,
+          "chosen_success_count": 27,
+          "chosen_success_rate": 1.0,
+          "fallback_count": 0,
+          "bound_hit_fit_count": 7
+        }
+      }
+    }
   },
   "literature_used": [
     {
@@ -124,15 +4945,15 @@
           "asset": "HYG",
           "model": "RSV_KF",
           "n": 2136,
-          "qlike": 1.4347501618172973,
-          "qlike_rel_vs_garch_n": -0.06773656264483727,
-          "dm_t_vs_garch_n": 2.316486436343568,
-          "dm_p_vs_garch_n": 0.020625969274935985,
-          "pinball_5pct": 0.04885532932844312,
+          "qlike": 1.3502477008861171,
+          "qlike_rel_vs_garch_n": -0.004850096714487009,
+          "dm_t_vs_garch_n": 0.0817372152292496,
+          "dm_p_vs_garch_n": 0.934863345450818,
+          "pinball_5pct": 0.04885532318933356,
           "viol_rate_5pct": 0.04541198501872659,
           "kupiec_p_5pct": 0.3233507413176331,
           "cc_p_5pct": 0.29858592029080055,
-          "pinball_1pct": 0.014215439597940988,
+          "pinball_1pct": 0.01421543959794099,
           "viol_rate_1pct": 0.00749063670411985,
           "kupiec_p_1pct": 0.22256227524022942,
           "cc_p_1pct": 0.1307165175570586
@@ -141,11 +4962,11 @@
           "asset": "HYG",
           "model": "SV_KF",
           "n": 2136,
-          "qlike": 2.9506434298496704,
-          "qlike_rel_vs_garch_n": -1.1958595699949115,
-          "dm_t_vs_garch_n": 2.4766302701848204,
-          "dm_p_vs_garch_n": 0.01333987195469577,
-          "pinball_5pct": 0.06276647145448727,
+          "qlike": 3.340362497781383,
+          "qlike_rel_vs_garch_n": -1.4858872759081767,
+          "dm_t_vs_garch_n": 23.853970497203694,
+          "dm_p_vs_garch_n": 0.0,
+          "pinball_5pct": 0.06276647145448724,
           "viol_rate_5pct": 0.04868913857677903,
           "kupiec_p_5pct": 0.780136039858283,
           "cc_p_5pct": 0.0005840697853215504,
@@ -158,10 +4979,10 @@
           "asset": "HYG",
           "model": "TSV_KF",
           "n": 2136,
-          "qlike": 3.1107272393708927,
-          "qlike_rel_vs_garch_n": -1.3149934380801946,
-          "dm_t_vs_garch_n": 2.3303370360645803,
-          "dm_p_vs_garch_n": 0.019881081717796123,
+          "qlike": 3.323782539284813,
+          "qlike_rel_vs_garch_n": -1.473548522886885,
+          "dm_t_vs_garch_n": 23.944502837656714,
+          "dm_p_vs_garch_n": 0.0,
           "pinball_5pct": 0.06378266119991782,
           "viol_rate_5pct": 0.05149812734082397,
           "kupiec_p_5pct": 0.7518468948850849,
@@ -228,15 +5049,15 @@
           "asset": "SPY",
           "model": "RSV_KF",
           "n": 2136,
-          "qlike": 1.5567047756831098,
-          "qlike_rel_vs_garch_n": -0.021723596380782573,
-          "dm_t_vs_garch_n": 1.203686073444337,
-          "dm_p_vs_garch_n": 0.22884437782437517,
-          "pinball_5pct": 0.125798828361406,
+          "qlike": 1.488923000185167,
+          "qlike_rel_vs_garch_n": 0.022764119281580557,
+          "dm_t_vs_garch_n": -1.6471872861766659,
+          "dm_p_vs_garch_n": 0.09966671575194774,
+          "pinball_5pct": 0.1257988283572782,
           "viol_rate_5pct": 0.05383895131086142,
           "kupiec_p_5pct": 0.42109854312573547,
           "cc_p_5pct": 0.5513526279339124,
-          "pinball_1pct": 0.038091440924202885,
+          "pinball_1pct": 0.03809144092420288,
           "viol_rate_1pct": 0.012172284644194757,
           "kupiec_p_1pct": 0.3291680872067333,
           "cc_p_1pct": 0.07482747843070847
@@ -245,10 +5066,10 @@
           "asset": "SPY",
           "model": "SV_KF",
           "n": 2136,
-          "qlike": 2.3130253996663876,
-          "qlike_rel_vs_garch_n": -0.5181251235194498,
-          "dm_t_vs_garch_n": 2.7366227203039086,
-          "dm_p_vs_garch_n": 0.006258765294448798,
+          "qlike": 1.7719551558343607,
+          "qlike_rel_vs_garch_n": -0.1630004755719311,
+          "dm_t_vs_garch_n": 4.080782651563274,
+          "dm_p_vs_garch_n": 4.653475842442134e-05,
           "pinball_5pct": 0.14663839471547474,
           "viol_rate_5pct": 0.060393258426966294,
           "kupiec_p_5pct": 0.03257039284525076,
@@ -262,10 +5083,10 @@
           "asset": "SPY",
           "model": "TSV_KF",
           "n": 2136,
-          "qlike": 2.053737395271463,
-          "qlike_rel_vs_garch_n": -0.3479447036434161,
-          "dm_t_vs_garch_n": 2.8885840022774527,
-          "dm_p_vs_garch_n": 0.003908794775155933,
+          "qlike": 1.6865774248615832,
+          "qlike_rel_vs_garch_n": -0.10696387588843749,
+          "dm_t_vs_garch_n": 3.380956938231464,
+          "dm_p_vs_garch_n": 0.0007353471372282261,
           "pinball_5pct": 0.14360461320173207,
           "viol_rate_5pct": 0.05711610486891386,
           "kupiec_p_5pct": 0.13967428712264962,
@@ -332,15 +5153,15 @@
           "asset": "TLT",
           "model": "RSV_KF",
           "n": 2136,
-          "qlike": 1.1969896223548662,
-          "qlike_rel_vs_garch_n": 0.02680217404350922,
-          "dm_t_vs_garch_n": -1.9947433917910629,
-          "dm_p_vs_garch_n": 0.04619780770522519,
-          "pinball_5pct": 0.09621765572227635,
+          "qlike": 1.1934523808701387,
+          "qlike_rel_vs_garch_n": 0.029678085127890615,
+          "dm_t_vs_garch_n": -2.160163073485664,
+          "dm_p_vs_garch_n": 0.030871011579228336,
+          "pinball_5pct": 0.0962158849999656,
           "viol_rate_5pct": 0.054307116104868915,
           "kupiec_p_5pct": 0.3673940723994725,
           "cc_p_5pct": 0.6624517315734051,
-          "pinball_1pct": 0.025268783754557576,
+          "pinball_1pct": 0.02526878375455758,
           "viol_rate_1pct": 0.013108614232209739,
           "kupiec_p_1pct": 0.1681675184996948,
           "cc_p_1pct": 0.38689510600276644
@@ -349,15 +5170,15 @@
           "asset": "TLT",
           "model": "SV_KF",
           "n": 2136,
-          "qlike": 1.2429692519495557,
-          "qlike_rel_vs_garch_n": -0.010581003491316984,
-          "dm_t_vs_garch_n": 0.9792845824244554,
-          "dm_p_vs_garch_n": 0.3275503371381898,
-          "pinball_5pct": 0.10055592591317412,
+          "qlike": 1.2370830147581144,
+          "qlike_rel_vs_garch_n": -0.00579527007242145,
+          "dm_t_vs_garch_n": 0.7298559078019748,
+          "dm_p_vs_garch_n": 0.4655583347765826,
+          "pinball_5pct": 0.10055592591317349,
           "viol_rate_5pct": 0.04962546816479401,
           "kupiec_p_5pct": 0.9366217668318567,
           "cc_p_5pct": 0.28965829840205104,
-          "pinball_1pct": 0.028191860713126172,
+          "pinball_1pct": 0.028191860691147607,
           "viol_rate_1pct": 0.010767790262172285,
           "kupiec_p_1pct": 0.7246449855088252,
           "cc_p_1pct": 0.48174744393303603
@@ -366,15 +5187,15 @@
           "asset": "TLT",
           "model": "TSV_KF",
           "n": 2136,
-          "qlike": 1.2734260707017515,
-          "qlike_rel_vs_garch_n": -0.035343548831413926,
-          "dm_t_vs_garch_n": 1.6044652624058087,
-          "dm_p_vs_garch_n": 0.10875943761865958,
-          "pinball_5pct": 0.10318093315247663,
+          "qlike": 1.2670355265758464,
+          "qlike_rel_vs_garch_n": -0.030147794804929906,
+          "dm_t_vs_garch_n": 1.6341492105748994,
+          "dm_p_vs_garch_n": 0.1023749560353664,
+          "pinball_5pct": 0.10317360035719736,
           "viol_rate_5pct": 0.05149812734082397,
           "kupiec_p_5pct": 0.7518468948850849,
           "cc_p_5pct": 0.2053078843433105,
-          "pinball_1pct": 0.02989574474014326,
+          "pinball_1pct": 0.02989265482398623,
           "viol_rate_1pct": 0.010767790262172285,
           "kupiec_p_1pct": 0.7246449855088252,
           "cc_p_1pct": 0.07237729624849698
@@ -433,12 +5254,12 @@
           "SPY",
           "TLT"
         ],
-        "mean_qlike": 1.3961481866184247,
-        "mean_qlike_rel_vs_garch_n": -0.02088599499403687,
+        "mean_qlike": 1.3442076939804741,
+        "mean_qlike_rel_vs_garch_n": 0.015864035898328053,
         "harvey_wins_vs_garch_n": 0,
         "harvey_losses_vs_garch_n": 0,
-        "mean_pinball_5pct": 0.09029060447070848,
-        "mean_pinball_1pct": 0.02585855475890048,
+        "mean_pinball_5pct": 0.09029001218219246,
+        "mean_pinball_1pct": 0.025858554758900486,
         "kupiec_pass_5pct": 3,
         "kupiec_pass_1pct": 3
       },
@@ -448,12 +5269,12 @@
           "SPY",
           "TLT"
         ],
-        "mean_qlike": 2.168879360488538,
-        "mean_qlike_rel_vs_garch_n": -0.5748552323352262,
+        "mean_qlike": 2.116466889457953,
+        "mean_qlike_rel_vs_garch_n": -0.5515610071841764,
         "harvey_wins_vs_garch_n": 0,
-        "harvey_losses_vs_garch_n": 0,
-        "mean_pinball_5pct": 0.10332026402771205,
-        "mean_pinball_1pct": 0.03356020140356842,
+        "harvey_losses_vs_garch_n": 2,
+        "mean_pinball_5pct": 0.10332026402771183,
+        "mean_pinball_1pct": 0.03356020139624223,
         "kupiec_pass_5pct": 2,
         "kupiec_pass_1pct": 3
       },
@@ -463,12 +5284,12 @@
           "SPY",
           "TLT"
         ],
-        "mean_qlike": 2.145963568448036,
-        "mean_qlike_rel_vs_garch_n": -0.5660938968516749,
+        "mean_qlike": 2.0924651635740807,
+        "mean_qlike_rel_vs_garch_n": -0.5368867311934175,
         "harvey_wins_vs_garch_n": 0,
-        "harvey_losses_vs_garch_n": 0,
-        "mean_pinball_5pct": 0.1035227358513755,
-        "mean_pinball_1pct": 0.033645760556772465,
+        "harvey_losses_vs_garch_n": 2,
+        "mean_pinball_5pct": 0.10352029158628241,
+        "mean_pinball_1pct": 0.033644730584720124,
         "kupiec_pass_5pct": 3,
         "kupiec_pass_1pct": 2
       }
@@ -479,12 +5300,12 @@
         "qlike": 1.2991153239857773
       },
       "SPY": {
-        "model": "GJR_T",
-        "qlike": 1.502047455670895
+        "model": "RSV_KF",
+        "qlike": 1.488923000185167
       },
       "TLT": {
         "model": "RSV_KF",
-        "qlike": 1.1969896223548662
+        "qlike": 1.1934523808701387
       }
     }
   },
@@ -494,21 +5315,22 @@
   },
   "summary": {
     "best_sv_model_by_mean_qlike_rel": "RSV_KF",
-    "best_sv_mean_qlike_rel_vs_garch_n": -0.02088599499403687,
+    "best_sv_mean_qlike_rel_vs_garch_n": 0.015864035898328053,
     "sv_harvey_wins_vs_garch_n_total": 0,
-    "sv_harvey_losses_vs_garch_n_total": 0,
+    "sv_harvey_losses_vs_garch_n_total": 4,
+    "sv_convergence_passes_threshold": true,
     "asset_qlike_winners": {
       "HYG": {
         "model": "GJR_T",
         "qlike": 1.2991153239857773
       },
       "SPY": {
-        "model": "GJR_T",
-        "qlike": 1.502047455670895
+        "model": "RSV_KF",
+        "qlike": 1.488923000185167
       },
       "TLT": {
         "model": "RSV_KF",
-        "qlike": 1.1969896223548662
+        "qlike": 1.1934523808701387
       }
     }
   }

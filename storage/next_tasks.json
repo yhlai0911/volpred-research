@@ -52427,7 +52427,7 @@
     "id": "k1648_sv_lognormal_convergence_rerun",
     "task_type": "experiment",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "title": "K1648 SV re-run: log-normal variance 修正 + 收斂稽核（Codex 2 MAJOR）",
     "source": "codex_review_k1648_2026-07-06",
     "created_at": "2026-07-06T08:23:51+00:00",
@@ -52435,8 +52435,8 @@
     "claimed_at": "2026-07-06T08:25:41.163122+00:00",
     "claim_session_id": "ee95e537fc6c",
     "started_at": "2026-07-06T08:25:46.827684+00:00",
-    "completed_at": null,
-    "result": null,
+    "completed_at": "2026-07-06T08:35:13.742579+00:00",
+    "result": "K1648 v2 rerun completed: SV forecast uses log-normal mean exp(h+0.5p), convergence diagnostics recorded (81/81 chosen success, fallback=0). Result changed from clean NULL to WEAK_SV_AVERAGE_QLIKE_EDGE_NO_HARVEY_WIN: RSV_KF mean QLIKE +1.59% vs GARCH_N but no Harvey |t|>3 win.",
     "tags": [
       "k1648",
       "stochastic-volatility",
@@ -52454,6 +52454,12 @@
         "ts": "2026-07-06T08:25:46.827980+00:00",
         "from": "claimed",
         "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T08:35:13.742887+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
         "by": "codex-cli"
       }
     ]

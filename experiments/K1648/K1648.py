@@ -58,10 +58,13 @@ OOS_START = pd.Timestamp("2018-01-02")
 MIN_TRAIN = 1000
 ALPHAS = [0.05, 0.01]
 MODELS = ["EWMA_094", "GARCH_N", "GJR_T", "SV_KF", "TSV_KF", "RSV_KF"]
+SV_MODELS = {"SV_KF", "TSV_KF", "RSV_KF"}
+SV_CONVERGENCE_THRESHOLD = 0.95
 
 LOG_CHI2_MEAN = -1.2703628454614782
 LOG_CHI2_VAR = math.pi**2 / 2.0
 EPS_VAR = 1e-10
+BOUND_TOL = 1e-5
 
 
 def warn(msg: str) -> None:
@@ -170,6 +173,7 @@ class SvState:
     p_filt: float
     last_ret: float
     q_emp: dict[str, float]
+    fit_info: dict[str, Any]
 
 
 def ewma_train_variance(ret: np.ndarray, lam: float = 0.94) -> np.ndarray:
@@ -277,6 +281,33 @@ def _sv_bounds(model: str) -> list[tuple[float, float]]:
     raise ValueError(f"unknown SV model: {model}")
 
 
+def _sv_param_names(model: str) -> list[str]:
+    if model == "SV_KF":
+        return ["mu", "phi", "log_q"]
+    if model == "TSV_KF":
+        return ["mu", "phi", "log_q", "gamma"]
+    if model == "RSV_KF":
+        return ["mu", "phi", "log_q", "c2", "log_r2_meas"]
+    raise ValueError(f"unknown SV model: {model}")
+
+
+def _sv_bound_hits(theta: np.ndarray, model: str) -> list[dict[str, Any]]:
+    hits: list[dict[str, Any]] = []
+    for name, value, (lower, upper) in zip(_sv_param_names(model), theta, _sv_bounds(model), strict=True):
+        if abs(float(value) - lower) <= BOUND_TOL:
+            hits.append({"param": name, "side": "lower", "value": float(value), "bound": float(lower)})
+        if abs(float(value) - upper) <= BOUND_TOL:
+            hits.append({"param": name, "side": "upper", "value": float(value), "bound": float(upper)})
+    return hits
+
+
+def lognormal_variance_mean(h: np.ndarray | float, p: np.ndarray | float) -> np.ndarray:
+    """Conditional mean E[exp(h_t)] under the Gaussian Kalman state approximation."""
+    h_arr = np.asarray(h, dtype=float)
+    p_arr = np.maximum(np.asarray(p, dtype=float), 0.0)
+    return np.exp(np.clip(h_arr + 0.5 * p_arr, -20.0, 10.0))
+
+
 def _sv_start(train: pd.DataFrame, model: str) -> np.ndarray:
     mu0 = float(np.nanmean(train["log_r2"].to_numpy(float)))
     if model == "SV_KF":
@@ -302,7 +333,7 @@ def _kalman_update(h: float, p: float, z: float, c: float, r: float) -> tuple[fl
 def kalman_filter_sv(
     train: pd.DataFrame,
     params: SvParams,
-) -> tuple[float, np.ndarray, float, float]:
+) -> tuple[float, np.ndarray, np.ndarray, float, float]:
     y1 = train["log_r2"].to_numpy(float)
     y2 = train["log_range_var"].to_numpy(float)
     ret = train["ret"].to_numpy(float)
@@ -313,11 +344,13 @@ def kalman_filter_sv(
     prev_neg = 0.0
     ll = 0.0
     h_forecasts = np.empty(n)
+    p_forecasts = np.empty(n)
 
     for i in range(n):
         h_pred = params.mu + params.phi * (h - params.mu) + params.gamma * prev_neg
         p_pred = params.phi**2 * p + params.q
         h_forecasts[i] = h_pred
+        p_forecasts[i] = p_pred
 
         h_upd, p_upd, ll1 = _kalman_update(h_pred, p_pred, y1[i], LOG_CHI2_MEAN, LOG_CHI2_VAR)
         ll += ll1
@@ -327,7 +360,7 @@ def kalman_filter_sv(
         h, p = h_upd, p_upd
         prev_neg = 1.0 if ret[i] < 0 else 0.0
 
-    return float(ll), h_forecasts, float(h), float(p)
+    return float(ll), h_forecasts, p_forecasts, float(h), float(p)
 
 
 def fit_sv_state(train: pd.DataFrame, model: str) -> SvState:
@@ -337,18 +370,19 @@ def fit_sv_state(train: pd.DataFrame, model: str) -> SvState:
         jitter = RNG.normal(0.0, 0.15, size=len(base))
         starts.append(base + jitter)
 
-    best: tuple[float, np.ndarray | None] = (np.inf, None)
+    records: list[dict[str, Any]] = []
+    candidates: list[tuple[dict[str, Any], np.ndarray]] = []
 
     def obj(theta: np.ndarray) -> float:
         params = _sv_unpack(theta, model)
-        ll, _, _, _ = kalman_filter_sv(train, params)
+        ll, _, _, _, _ = kalman_filter_sv(train, params)
         penalty = 0.0
         if not np.isfinite(ll):
             penalty = 1e9
         return float(-ll + penalty)
 
     bounds = _sv_bounds(model)
-    for start in starts:
+    for start_id, start in enumerate(starts):
         try:
             res = optimize.minimize(
                 obj,
@@ -357,29 +391,79 @@ def fit_sv_state(train: pd.DataFrame, model: str) -> SvState:
                 bounds=bounds,
                 options={"maxiter": 300, "ftol": 1e-6},
             )
-            if np.isfinite(res.fun) and res.fun < best[0]:
-                best = (float(res.fun), np.asarray(res.x, dtype=float))
+            theta_res = np.asarray(res.x, dtype=float)
+            fun = float(res.fun) if np.isfinite(res.fun) else None
+            record = {
+                "start_id": start_id,
+                "success": bool(res.success),
+                "status": int(res.status),
+                "message": str(res.message),
+                "fun": fun,
+                "loglik": float(-res.fun) if np.isfinite(res.fun) else None,
+                "nit": int(getattr(res, "nit", 0)),
+                "nfev": int(getattr(res, "nfev", 0)),
+                "bound_hits": _sv_bound_hits(theta_res, model),
+            }
+            records.append(record)
+            if fun is not None:
+                candidates.append((record, theta_res))
         except Exception as exc:  # noqa: BLE001
             warn(f"{model} optimizer start failed: {type(exc).__name__}: {exc}")
+            records.append(
+                {
+                    "start_id": start_id,
+                    "success": False,
+                    "status": None,
+                    "message": f"{type(exc).__name__}: {exc}",
+                    "fun": None,
+                    "loglik": None,
+                    "nit": 0,
+                    "nfev": 0,
+                    "bound_hits": [],
+                }
+            )
 
-    if best[1] is None:
+    successful_candidates = [item for item in candidates if item[0]["success"]]
+    candidate_pool = successful_candidates or candidates
+    fallback_used = False
+    chosen_record: dict[str, Any] | None = None
+    if not candidate_pool:
         warn(f"{model} optimizer failed for all starts; using deterministic start")
         theta = starts[0]
+        fallback_used = True
     else:
-        theta = best[1]
+        chosen_record, theta = min(candidate_pool, key=lambda item: item[0]["fun"])
 
     params = _sv_unpack(theta, model)
-    _, h_fore, h_filt, p_filt = kalman_filter_sv(train, params)
-    var_fore = np.exp(np.clip(h_fore, -20, 10))
+    ll, h_fore, p_fore, h_filt, p_filt = kalman_filter_sv(train, params)
+    var_fore = lognormal_variance_mean(h_fore, p_fore)
     ret = train["ret"].to_numpy(float)
     std = ret / np.sqrt(np.maximum(var_fore, EPS_VAR))
     q_emp = {str(a): float(np.nanquantile(std[np.isfinite(std)], a)) for a in ALPHAS}
+    chosen_success = bool(chosen_record and chosen_record["success"])
+    fit_info = {
+        "model": model,
+        "n_train": int(len(train)),
+        "start_count": len(starts),
+        "success_count": int(sum(bool(record["success"]) for record in records)),
+        "success_any": bool(any(bool(record["success"]) for record in records)),
+        "chosen_success": chosen_success,
+        "fallback_used": fallback_used,
+        "chosen_start_id": chosen_record["start_id"] if chosen_record else None,
+        "chosen_loglik": float(ll),
+        "chosen_fun": float(-ll),
+        "params": asdict(params),
+        "theta": {name: float(value) for name, value in zip(_sv_param_names(model), theta, strict=True)},
+        "bound_hits": _sv_bound_hits(theta, model),
+        "optimizer_records": records,
+    }
     return SvState(
         params=params,
         h_filt=h_filt,
         p_filt=p_filt,
         last_ret=float(ret[-1]),
         q_emp=q_emp,
+        fit_info=fit_info,
     )
 
 
@@ -388,7 +472,7 @@ def sv_forecast_update(state: SvState, obs: pd.Series) -> float:
     prev_neg = 1.0 if state.last_ret < 0 else 0.0
     h_pred = params.mu + params.phi * (state.h_filt - params.mu) + params.gamma * prev_neg
     p_pred = params.phi**2 * state.p_filt + params.q
-    forecast = float(np.exp(np.clip(h_pred, -20, 10)))
+    forecast = float(lognormal_variance_mean(h_pred, p_pred))
 
     h_upd, p_upd, _ = _kalman_update(h_pred, p_pred, float(obs["log_r2"]), LOG_CHI2_MEAN, LOG_CHI2_VAR)
     if params.model == "RSV_KF":
@@ -421,6 +505,36 @@ def forecast_update(state: Any, model: str, obs: pd.Series) -> float:
     return sv_forecast_update(state, obs)
 
 
+def summarize_sv_diagnostics(diagnostics: list[dict[str, Any]]) -> dict[str, Any]:
+    total = len(diagnostics)
+    chosen_success_count = sum(1 for item in diagnostics if item.get("chosen_success"))
+    fallback_count = sum(1 for item in diagnostics if item.get("fallback_used"))
+    bound_hit_fit_count = sum(1 for item in diagnostics if item.get("bound_hits"))
+    by_model: dict[str, dict[str, Any]] = {}
+    for model in sorted(SV_MODELS):
+        model_items = [item for item in diagnostics if item.get("model") == model]
+        model_total = len(model_items)
+        model_success = sum(1 for item in model_items if item.get("chosen_success"))
+        by_model[model] = {
+            "fit_count": model_total,
+            "chosen_success_count": model_success,
+            "chosen_success_rate": float(model_success / model_total) if model_total else None,
+            "fallback_count": sum(1 for item in model_items if item.get("fallback_used")),
+            "bound_hit_fit_count": sum(1 for item in model_items if item.get("bound_hits")),
+        }
+    chosen_success_rate = float(chosen_success_count / total) if total else None
+    return {
+        "fit_count": total,
+        "chosen_success_count": chosen_success_count,
+        "chosen_success_rate": chosen_success_rate,
+        "threshold": SV_CONVERGENCE_THRESHOLD,
+        "passes_threshold": bool(chosen_success_rate is not None and chosen_success_rate >= SV_CONVERGENCE_THRESHOLD),
+        "fallback_count": fallback_count,
+        "bound_hit_fit_count": bound_hit_fit_count,
+        "by_model": by_model,
+    }
+
+
 def run_asset(panel: pd.DataFrame, asset: str) -> tuple[pd.DataFrame, dict[str, Any]]:
     idx = panel.index
     oos_idx = idx[idx >= OOS_START]
@@ -428,6 +542,7 @@ def run_asset(panel: pd.DataFrame, asset: str) -> tuple[pd.DataFrame, dict[str, 
     states: dict[str, Any] = {}
     rows: list[dict[str, Any]] = []
     fit_errors: list[str] = []
+    sv_fit_diagnostics: list[dict[str, Any]] = []
 
     for dt in oos_idx:
         train = panel.loc[panel.index < dt]
@@ -441,6 +556,12 @@ def run_asset(panel: pd.DataFrame, asset: str) -> tuple[pd.DataFrame, dict[str, 
             for model in MODELS:
                 try:
                     states[model] = fit_model_state(train, model)
+                    if model in SV_MODELS:
+                        fit_info = dict(states[model].fit_info)
+                        fit_info["asset"] = asset
+                        fit_info["refit_date"] = str(dt.date())
+                        fit_info["n_train"] = int(len(train))
+                        sv_fit_diagnostics.append(fit_info)
                 except Exception as exc:  # noqa: BLE001
                     msg = f"{asset} {dt.date()} {model} fit failed: {type(exc).__name__}: {exc}"
                     warn(msg)
@@ -477,6 +598,8 @@ def run_asset(panel: pd.DataFrame, asset: str) -> tuple[pd.DataFrame, dict[str, 
         "oos_end": str(forecasts.index.max().date()) if not forecasts.empty else None,
         "fit_error_count": len(fit_errors),
         "fit_errors_sample": fit_errors[:10],
+        "sv_fit_summary": summarize_sv_diagnostics(sv_fit_diagnostics),
+        "sv_fit_diagnostics": sv_fit_diagnostics,
     }
     return forecasts, meta
 
@@ -627,6 +750,12 @@ def main() -> None:
     forecasts.to_parquet(forecast_path)
     evaluation = evaluate_forecasts(forecasts)
     figures = make_figures(evaluation)
+    all_sv_diagnostics = [
+        item
+        for meta in data_meta.values()
+        for item in meta.get("sv_fit_diagnostics", [])
+    ]
+    sv_convergence = summarize_sv_diagnostics(all_sv_diagnostics)
 
     aggregate = evaluation["aggregate"]
     sv_models = ["SV_KF", "TSV_KF", "RSV_KF"]
@@ -635,7 +764,9 @@ def main() -> None:
     harvey_sv_wins = sum(aggregate[m]["harvey_wins_vs_garch_n"] for m in sv_models)
     harvey_sv_losses = sum(aggregate[m]["harvey_losses_vs_garch_n"] for m in sv_models)
 
-    if harvey_sv_wins > 0:
+    if not sv_convergence["passes_threshold"]:
+        verdict = "UNRELIABLE_SV_CONVERGENCE_BELOW_THRESHOLD"
+    elif harvey_sv_wins > 0:
         verdict = "CONDITIONAL_PASS_SV_HAS_AT_LEAST_ONE_HARVEY_WIN"
     elif sv_best_rel > 0:
         verdict = "WEAK_SV_AVERAGE_QLIKE_EDGE_NO_HARVEY_WIN"
@@ -659,6 +790,8 @@ def main() -> None:
             "forecast_horizon": "one trading day",
             "oos_start": str(OOS_START.date()),
             "refit_cadence": "first available trading day of each calendar year",
+            "sv_variance_forecast": "log-normal Kalman mean exp(h_pred + 0.5 * p_pred)",
+            "sv_convergence_threshold": SV_CONVERGENCE_THRESHOLD,
             "lookahead_policy": (
                 "Forecasts for t are produced from state through t-1; day-t returns/range "
                 "update the state only after forecast recording. Equivalent to signal.shift(1)."
@@ -670,6 +803,9 @@ def main() -> None:
                 "Parkinson range log-variance as a second measurement. This is not a full "
                 "Bayesian realized-SV skew-t implementation."
             ),
+        },
+        "diagnostics": {
+            "sv_convergence": sv_convergence,
         },
         "literature_used": [
             {
@@ -692,6 +828,7 @@ def main() -> None:
             "best_sv_mean_qlike_rel_vs_garch_n": float(sv_best_rel),
             "sv_harvey_wins_vs_garch_n_total": int(harvey_sv_wins),
             "sv_harvey_losses_vs_garch_n_total": int(harvey_sv_losses),
+            "sv_convergence_passes_threshold": bool(sv_convergence["passes_threshold"]),
             "asset_qlike_winners": evaluation["asset_qlike_winners"],
         },
     }
