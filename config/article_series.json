@@ -56,7 +56,18 @@
       "prefix": "💬 會員提問｜",
       "no_episode_numbers": true,
       "definition": "會員提問經 4 維度評分 → research → 回答文章。既有慣例。",
-      "membership_criteria": "task_type / content_type == 'member_qa'"
+      "membership_criteria": "task_type / content_type == 'member_qa'（既有標題格式雜亂：會員提問｜/【會員提問】/會員提問解答：/無前綴 → 已由 legacy_prefixes 統一遷移為 💬 會員提問｜）。",
+      "legacy_prefixes": ["【會員提問】", "會員提問解答："],
+      "members_published": [
+        "mile_eba82c94",
+        "mile_e4002f4f",
+        "mile_9b76989e",
+        "mile_42ee876c",
+        "mile_e88aa3eb",
+        "mile_a76cdeb5",
+        "mile_560bf8bc"
+      ],
+      "note": "going-forward：新 member_qa 發佈時把 id 加進 members_published 後跑 --apply；或直接以 💬 會員提問｜ 命名。"
     },
     "event_thermometer": {
       "display_name": "事件溫度計",

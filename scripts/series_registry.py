@@ -102,12 +102,15 @@ def audit(series: dict, feed: list) -> list[dict]:
     return findings
 
 
-def _strip_existing_prefix(title: str, display_name: str, emoji: str) -> str:
+def _strip_existing_prefix(title: str, display_name: str, emoji: str,
+                           legacy_prefixes: list[str] | None = None) -> str:
     """Return the base title with any leading series prefix removed, tolerant of
-    emoji variants — so changing the registry prefix (e.g. adding/removing/moving
-    the emoji) MIGRATES cleanly instead of double-prefixing.
+    emoji variants AND legacy prefix formats — so changing the registry prefix
+    (add/remove/move emoji) or migrating an old format MIGRATES cleanly instead of
+    double-prefixing.
 
-    Handles: `<emoji> <name>｜`, `<emoji><name>｜`, `<name> <emoji>｜`, `<name>｜`.
+    Standard: `<emoji> <name>｜`, `<emoji><name>｜`, `<name> <emoji>｜`, `<name>｜`.
+    Legacy: any string in `legacy_prefixes` (e.g. `【會員提問】`, `會員提問解答：`).
     """
     e = emoji or ""
     variants = [
@@ -116,8 +119,9 @@ def _strip_existing_prefix(title: str, display_name: str, emoji: str) -> str:
         f"{display_name} {e}｜",
         f"{display_name}｜",
     ]
+    variants += list(legacy_prefixes or [])
     for v in variants:
-        if v.strip() and title.startswith(v):
+        if v and title.startswith(v):
             return title[len(v):]
     return title
 
@@ -135,13 +139,14 @@ def apply(series: dict, feed: list) -> tuple[int, list[str]]:
         prefix = s["prefix"]
         display_name = s.get("display_name", "")
         emoji = s.get("emoji", "")
+        legacy = s.get("legacy_prefixes", [])
         for aid in list(s.get("members_published", [])) + list(s.get("members_draft", [])):
             art = by_id.get(aid)
             if art is None:
                 log.append(f"  !! {key}/{aid} not in feed")
                 continue
             title = art.get("title") or ""
-            base = _strip_existing_prefix(title, display_name, emoji)
+            base = _strip_existing_prefix(title, display_name, emoji, legacy)
             new_title = prefix + base
             if new_title == title:
                 continue
