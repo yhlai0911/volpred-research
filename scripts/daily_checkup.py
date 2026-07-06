@@ -242,6 +242,14 @@ def check_mission_progress() -> list[dict]:
         out.append(_finding("mission_progress", "warn",
                             f"pending 任務僅 {len(pending)} 件 —— backlog 偏薄，需主動生研究議題/派工",
                             recovery="派 journal-discovery / autonomous-research 生新方向"))
+    # id 完整性 invariant（2026-07-07 platform_ops_null_id_task_hygiene）：
+    # 某些 receipt writer 曾 append id=null 的 row，導致 jq test() 報錯 + 無法追蹤。
+    # 零額外 IO（tasks 已 load）；未來若再生 null-id 這裡自動 surface + 附 recovery。
+    null_id = [t for t in tasks if isinstance(t, dict) and t.get("id") is None]
+    if null_id:
+        out.append(_finding("mission_progress", "warn",
+                            f"next_tasks.json 有 {len(null_id)} 筆 id=null —— jq test() 報錯 + 無法追蹤",
+                            recovery="uv run python scripts/backfill_null_task_ids.py --apply"))
     return out
 
 

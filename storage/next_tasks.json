@@ -23143,7 +23143,15 @@
     "description": "Codex primary-path review of K1303-v2 code after 3-defect ABD revision. Check: (1) BNS 3-sigma jump threshold correctly identifies jump days; (2) HAC DM test via dm_test() from model_evaluation.py; (3) standard 1-step lag. Blocking knowledge.json entry for K1303 NULL result.",
     "created_at": "2026-05-13T06:11:32.457685Z",
     "notes": [],
-    "completed_at": "2026-05-13T06:20:35.580175+00:00"
+    "completed_at": "2026-05-13T06:20:35.580175+00:00",
+    "id": "paper_review_receipt_bf478e944d8a",
+    "hygiene_log": [
+      {
+        "action": "backfill_null_id",
+        "new_id": "paper_review_receipt_bf478e944d8a",
+        "at": "2026-07-07"
+      }
+    ]
   },
   {
     "task_id": "task-k1137-v2-codex-review",
@@ -23154,7 +23162,15 @@
     "description": "Codex re-review of K1137-v2 after regime window off-by-one fix. Check: vix_series[i-w:i] (unshifted) used for quantile window; vix_lag1 used for regime-label comparison only. Also verify 10% guard is now hard skip. If PASS, enables K1137 knowledge.json entry.",
     "created_at": "2026-05-13T06:11:32.457685Z",
     "notes": [],
-    "completed_at": "2026-05-13T06:20:35.580175+00:00"
+    "completed_at": "2026-05-13T06:20:35.580175+00:00",
+    "id": "paper_review_receipt_4fcbffc2f622",
+    "hygiene_log": [
+      {
+        "action": "backfill_null_id",
+        "new_id": "paper_review_receipt_4fcbffc2f622",
+        "at": "2026-07-07"
+      }
+    ]
   },
   {
     "task_id": "task-k1138-v2-codex-review",
@@ -23165,7 +23181,15 @@
     "description": "Codex re-review of K1138-v2 after BH-FDR enforcement fix at asset/model summary level. Check: asset_pass = any(c[DM_HLN_t]>2.0 AND c[DM_HLN_p_BH]<0.05 for c in asset_cells). IWM correctly NULL. If PASS, enables K1138 knowledge.json entry.",
     "created_at": "2026-05-13T06:11:32.457685Z",
     "notes": [],
-    "completed_at": "2026-05-13T06:20:35.580175+00:00"
+    "completed_at": "2026-05-13T06:20:35.580175+00:00",
+    "id": "paper_review_receipt_7ff6ed7ccac4",
+    "hygiene_log": [
+      {
+        "action": "backfill_null_id",
+        "new_id": "paper_review_receipt_7ff6ed7ccac4",
+        "at": "2026-07-07"
+      }
+    ]
   },
   {
     "id": "paper_review_mile_7d0eb239",
@@ -40848,7 +40872,15 @@
     "source": "main_thread_discovered_2026-06-30",
     "created_at": "2026-06-30T00:39:20.263830+00:00",
     "resolution": "策略卡加 VIX 情景軌跡，揭露 recommended_5050/vix_cond_leverage/adaptive_tier 在 VIX17 相同但低/高 VIX 分歧。frontend 40d86fa deploy 上線，live 驗證 11 卡全渲染。",
-    "completed_at": "2026-06-30T02:05:50.940288+00:00"
+    "completed_at": "2026-06-30T02:05:50.940288+00:00",
+    "id": "platform_ops_receipt_b366a197cab6",
+    "hygiene_log": [
+      {
+        "action": "backfill_null_id",
+        "new_id": "platform_ops_receipt_b366a197cab6",
+        "at": "2026-07-07"
+      }
+    ]
   },
   {
     "id": "daily_digest_20260630",
@@ -41309,12 +41341,26 @@
     "status": "succeeded",
     "source": "main_thread_discovered_2026-06-30",
     "created_at": "2026-06-30T08:24:22.389171+00:00",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-06-30T12:18:55.351249+00:00",
-    "claim_session_id": "94b8421d7f1f",
     "started_at": "2026-06-30T12:18:59.246268+00:00",
     "completed_at": "2026-06-30T12:23:36.727419+00:00",
-    "result": "Centralized release cadence policy in volpred.ops.release_cadence and rewired content_quality, alerts, and publisher throttle. Added regression coverage that mock interval changes move drought/freshness/release_pool thresholds together; focused tests 69 passed."
+    "result": "Centralized release cadence policy in volpred.ops.release_cadence and rewired content_quality, alerts, and publisher throttle. Added regression coverage that mock interval changes move drought/freshness/release_pool thresholds together; focused tests 69 passed.",
+    "id": "platform_ops_receipt_b2666b408d2f",
+    "hygiene_log": [
+      {
+        "action": "backfill_null_id",
+        "new_id": "platform_ops_receipt_b2666b408d2f",
+        "at": "2026-07-07"
+      },
+      {
+        "action": "strip_stale_claim_terminal_row",
+        "fields": [
+          "claimed_by",
+          "claimed_at",
+          "claim_session_id"
+        ],
+        "at": "2026-07-07"
+      }
+    ]
   },
   {
     "id": "email-12296-0e7d60",
@@ -41370,14 +41416,28 @@
     "status": "succeeded",
     "source": "main_thread_discovered_2026-06-30",
     "created_at": "2026-06-30T09:18:06.634814+00:00",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-06-30T10:42:31.621113+00:00",
-    "claim_session_id": "5998d3b44258",
     "started_at": "2026-06-30T10:42:31.829520+00:00",
     "completed_at": "2026-06-30T10:51:28.069707+00:00",
     "result": "ENFORCE 完成（主線程，commits de92bb067 + cd6f55ac7）：(1) 共用 has_lazypack_section() helper（單一 source）；(2) publish_draft.py CLI check_lazypack_gate rc=6 + --no-lazypack-gate；(3) publish_milestone chokepoint raise ValueError（covers 直接 Python 路徑）；(4) content_quality coverage 對齊同 helper；(5) feed-publisher SKILL §6 文件化 + gen 指令；74 tests green。NotebookLM auth 已驗證可用。注意：18:42 codex-cli orphaned claim（無 lazypack 活動）。BACKFILL 另開任務：實測 327/333 published general 缺 lazypack（遠多於預估 7），屬重 NotebookLM 批次需主線程驗圖品質 → scoped 子任務。",
     "dedup_kept_at": "2026-06-30T13:32:17.709613Z",
-    "dedup_kept_reason": "kept among 2 duplicates by status/receipt precedence; statuses=['succeeded', 'pending']"
+    "dedup_kept_reason": "kept among 2 duplicates by status/receipt precedence; statuses=['succeeded', 'pending']",
+    "id": "platform_ops_receipt_60936880cf67",
+    "hygiene_log": [
+      {
+        "action": "backfill_null_id",
+        "new_id": "platform_ops_receipt_60936880cf67",
+        "at": "2026-07-07"
+      },
+      {
+        "action": "strip_stale_claim_terminal_row",
+        "fields": [
+          "claimed_by",
+          "claimed_at",
+          "claim_session_id"
+        ],
+        "at": "2026-07-07"
+      }
+    ]
   },
   {
     "task_id": "platform_ops_lazypack_codex_redo_and_backfill",
@@ -41389,12 +41449,26 @@
     "dispatch_lane": "main_thread",
     "source": "main_thread_quality_review",
     "created_at": "2026-06-30T11:57:55.011847+00:00",
-    "claimed_by": "interactive",
-    "claimed_at": "2026-06-30T12:30:46.653312+00:00",
-    "claim_session_id": "d0472b1cda9a",
     "started_at": "2026-06-30T12:30:46.870163+00:00",
     "completed_at": "2026-06-30T13:49:44.569554+00:00",
-    "result": "Phase 1 完成：8 篇 prose-dump 文章全部用 codex-exec 重做 lazypack（mile_68285aa0/9839822d/dc4035e4/7b95b816/082f0578/71dd116b/f5f4cb43/819af916），每篇 3 panel 數字逐一驗證對齊 results.json 或文章內容（無臆造），live 已 sync。commits 5cfc1a6e5→(8 commits)。Phase 2（320 篇全缺 backfill）需 boss scale 裁示（已 email），暫不啟動避免燒 codex quota 在低 ROI 舊文。"
+    "result": "Phase 1 完成：8 篇 prose-dump 文章全部用 codex-exec 重做 lazypack（mile_68285aa0/9839822d/dc4035e4/7b95b816/082f0578/71dd116b/f5f4cb43/819af916），每篇 3 panel 數字逐一驗證對齊 results.json 或文章內容（無臆造），live 已 sync。commits 5cfc1a6e5→(8 commits)。Phase 2（320 篇全缺 backfill）需 boss scale 裁示（已 email），暫不啟動避免燒 codex quota 在低 ROI 舊文。",
+    "id": "platform_ops_receipt_141c5b5b1dd5",
+    "hygiene_log": [
+      {
+        "action": "backfill_null_id",
+        "new_id": "platform_ops_receipt_141c5b5b1dd5",
+        "at": "2026-07-07"
+      },
+      {
+        "action": "strip_stale_claim_terminal_row",
+        "fields": [
+          "claimed_by",
+          "claimed_at",
+          "claim_session_id"
+        ],
+        "at": "2026-07-07"
+      }
+    ]
   },
   {
     "id": "email-12310-611a8d",
@@ -41706,9 +41780,6 @@
     "dispatch_lane": "agent",
     "source": "main_thread_followup",
     "created_at": "2026-06-30T15:05:28.647821+00:00",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-06-30T15:20:40.910155+00:00",
-    "claim_session_id": "41c796f121cf",
     "status_history": [
       {
         "ts": "2026-06-30T15:20:40.910435+00:00",
@@ -41731,7 +41802,24 @@
     ],
     "started_at": "2026-06-30T15:20:41.115985+00:00",
     "completed_at": "2026-06-30T15:24:43.875172+00:00",
-    "result": "Audit completed: audit_publish_sync was the missing findings-as-exit cron; added exit_semantics=findings and documented gmail_poll/git_push_backup as intentionally unmarked. Validation: jq config/runtime_schedules.json and uv run pytest tests/test_alerts.py (12 passed)."
+    "result": "Audit completed: audit_publish_sync was the missing findings-as-exit cron; added exit_semantics=findings and documented gmail_poll/git_push_backup as intentionally unmarked. Validation: jq config/runtime_schedules.json and uv run pytest tests/test_alerts.py (12 passed).",
+    "id": "platform_ops_receipt_d11c4c91e40f",
+    "hygiene_log": [
+      {
+        "action": "backfill_null_id",
+        "new_id": "platform_ops_receipt_d11c4c91e40f",
+        "at": "2026-07-07"
+      },
+      {
+        "action": "strip_stale_claim_terminal_row",
+        "fields": [
+          "claimed_by",
+          "claimed_at",
+          "claim_session_id"
+        ],
+        "at": "2026-07-07"
+      }
+    ]
   },
   {
     "id": "email-12327-a0e126",
@@ -41896,9 +41984,6 @@
     "dispatch_lane": "main_thread",
     "source": "paper_compliance_workflow",
     "created_at": "2026-06-30T17:15:57.821300+00:00",
-    "claimed_by": "hourly-02",
-    "claimed_at": "2026-06-30T18:09:05.273920+00:00",
-    "claim_session_id": "968dfab9a77b",
     "status_history": [
       {
         "ts": "2026-06-30T18:09:05.274178+00:00",
@@ -41921,7 +42006,24 @@
     ],
     "started_at": "2026-06-30T18:09:16.430463+00:00",
     "completed_at": "2026-06-30T18:13:26.489873+00:00",
-    "result": "Submission scope (main.tex + body.tex + tables_main.tex + cover_letter + supplementary) verified CLEAN via scripts/check_paper_compliance.py — no VolPred/K1092 hits. Prior commit 89a795b70 already achieved compliance scrub on submission set; main_v3.tex bibitem K1092 is in version archive (scope boundary: archives must NOT be scrubbed — they document honest AI-system provenance). Task description (body.tex:231) outdated post-89a795b70. Next stage: multi_round_review (codex exec)."
+    "result": "Submission scope (main.tex + body.tex + tables_main.tex + cover_letter + supplementary) verified CLEAN via scripts/check_paper_compliance.py — no VolPred/K1092 hits. Prior commit 89a795b70 already achieved compliance scrub on submission set; main_v3.tex bibitem K1092 is in version archive (scope boundary: archives must NOT be scrubbed — they document honest AI-system provenance). Task description (body.tex:231) outdated post-89a795b70. Next stage: multi_round_review (codex exec).",
+    "id": "paper_review_receipt_ad0888a15bfb",
+    "hygiene_log": [
+      {
+        "action": "backfill_null_id",
+        "new_id": "paper_review_receipt_ad0888a15bfb",
+        "at": "2026-07-07"
+      },
+      {
+        "action": "strip_stale_claim_terminal_row",
+        "fields": [
+          "claimed_by",
+          "claimed_at",
+          "claim_session_id"
+        ],
+        "at": "2026-07-07"
+      }
+    ]
   },
   {
     "task_id": "paper_compliance_scrub_vt_trend_following",
@@ -42197,9 +42299,6 @@
     "created_at": "2026-07-01T02:15:00+08:00",
     "blocked_until": null,
     "preferred_agent": "codex",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-06-30T18:42:46.671683+00:00",
-    "claim_session_id": "f82382f3ea0b",
     "status_history": [
       {
         "ts": "2026-06-30T18:42:46.671938+00:00",
@@ -42222,7 +42321,24 @@
     ],
     "started_at": "2026-06-30T18:42:46.875799+00:00",
     "completed_at": "2026-06-30T18:52:12.635517+00:00",
-    "result": "Ran three Codex review passes for leverage-direction: latex academic, citation verification, and JBF submission gate. All three returned FAIL_MAJOR_REVISION; paper remains revision/not arXiv-ready, with reports under paper/leverage-direction/review_history/multi_round_20260701/."
+    "result": "Ran three Codex review passes for leverage-direction: latex academic, citation verification, and JBF submission gate. All three returned FAIL_MAJOR_REVISION; paper remains revision/not arXiv-ready, with reports under paper/leverage-direction/review_history/multi_round_20260701/.",
+    "id": "paper_review_receipt_2ca7fc555879",
+    "hygiene_log": [
+      {
+        "action": "backfill_null_id",
+        "new_id": "paper_review_receipt_2ca7fc555879",
+        "at": "2026-07-07"
+      },
+      {
+        "action": "strip_stale_claim_terminal_row",
+        "fields": [
+          "claimed_by",
+          "claimed_at",
+          "claim_session_id"
+        ],
+        "at": "2026-07-07"
+      }
+    ]
   },
   {
     "id": "K1586_article_research",
@@ -51815,10 +51931,36 @@
     "id": "platform_ops_null_id_task_hygiene",
     "task_type": "platform_ops",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
     "title": "next_tasks.json 有 10 筆 id=null 的 task → jq test() 報錯 + 追蹤困難",
-    "description": "C14 fire (2026-07-06) 發現 storage/next_tasks.json 有 10 筆 .id==null 的 task，導致 jq test()/select() 需 (.id//\"\") 保護否則報錯。查產生源(哪個 writer 沒填 id) → 修 writer 端補 id 或清理殘留 → 加 schema guard 防再現。永遠修流程不修資料：追到產生 null id 的 code path。50min cap, main-thread 或 codex。"
+    "description": "C14 fire (2026-07-06) 發現 storage/next_tasks.json 有 10 筆 .id==null 的 task，導致 jq test()/select() 需 (.id//\"\") 保護否則報錯。查產生源(哪個 writer 沒填 id) → 修 writer 端補 id 或清理殘留 → 加 schema guard 防再現。永遠修流程不修資料：追到產生 null id 的 code path。50min cap, main-thread 或 codex。",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-07-06T16:09:15.903082+00:00",
+    "claim_session_id": "297da43d3309",
+    "status_history": [
+      {
+        "ts": "2026-07-06T16:09:15.903452+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-00"
+      },
+      {
+        "ts": "2026-07-06T16:09:47.011692+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-00"
+      },
+      {
+        "ts": "2026-07-06T16:12:08.271663+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-00"
+      }
+    ],
+    "started_at": "2026-07-06T16:09:47.011392+00:00",
+    "completed_at": "2026-07-06T16:12:08.271284+00:00",
+    "result": "10 筆 id=null task 補 deterministic id (backfill_null_task_ids.py, sha1-based, collision-checked); 6 筆 terminal row 清 stale claim metadata; daily_checkup 加 null-id detection invariant. 驗證: null-id=0, total 2175 無遺失, 無 dup id"
   },
   {
     "id": "telegram-203",
