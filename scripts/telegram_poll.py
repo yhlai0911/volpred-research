@@ -43,10 +43,40 @@ from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 INBOX = ROOT / "storage" / "ops" / "telegram_inbox.jsonl"
+HEARTBEAT_LOG_INTERVAL_SECONDS = 3600
 
 
 def _log(msg: str) -> None:
     print(f"[{datetime.now(timezone.utc).isoformat(timespec='seconds')}] {msg}", flush=True)
+
+
+def _parse_state_datetime(raw: object) -> datetime | None:
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def _record_poll_success() -> None:
+    """Persist a successful getUpdates heartbeat without clobbering state."""
+    now = datetime.now(timezone.utc)
+    state = load_state()
+    state["last_success_at"] = now.isoformat()
+
+    last_log_at = _parse_state_datetime(state.get("last_heartbeat_log_at"))
+    if (
+        last_log_at is None
+        or (now - last_log_at).total_seconds() >= HEARTBEAT_LOG_INTERVAL_SECONDS
+    ):
+        _log(f"poll ok offset={state.get('update_offset')}")
+        state["last_heartbeat_log_at"] = now.isoformat()
+
+    save_state(state)
 
 
 def _archive(update: dict) -> None:
@@ -179,6 +209,7 @@ def poll_pass(timeout: int = 25) -> int:
         state = load_state()
         state["update_offset"] = u["update_id"] + 1
         save_state(state)
+    _record_poll_success()
     return len(updates)
 
 

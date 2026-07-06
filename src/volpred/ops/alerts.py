@@ -1824,6 +1824,8 @@ def _parse_dispatch_health_state(storage_dir: str, now: datetime) -> dict[str, A
 
 GMAIL_POLL_STALE_WARN_HOURS = 2.0
 GMAIL_POLL_STALE_CRITICAL_HOURS = 6.0
+TELEGRAM_POLL_STALE_WARN_HOURS = 2.0
+TELEGRAM_POLL_STALE_CRITICAL_HOURS = 6.0
 
 
 def _parse_gmail_poll_freshness_state(storage_dir: str, now: datetime) -> dict[str, Any]:
@@ -1889,6 +1891,91 @@ def _parse_gmail_poll_freshness_state(storage_dir: str, now: datetime) -> dict[s
             "age_hours": age_hours,
             "warn_hours": GMAIL_POLL_STALE_WARN_HOURS,
             "critical_hours": GMAIL_POLL_STALE_CRITICAL_HOURS,
+        },
+    }
+
+
+def _parse_telegram_poll_freshness_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Dead-man switch for Telegram inbound polling (2026-07-06).
+
+    scripts/telegram_poll.py writes storage/ops/telegram_state.json:last_success_at
+    after each successful getUpdates call, including empty polls. Missing
+    last_success_at means an older state file has not observed the new heartbeat
+    yet, so it stays informational to avoid a first-deploy false alarm.
+    """
+    state_path = Path(storage_dir) / "ops" / "telegram_state.json"
+    age_hours: float | None = None
+    last_success_raw: str | None = None
+    read_error: str | None = None
+
+    try:
+        raw_state = json.loads(state_path.read_text(encoding="utf-8"))
+        if not isinstance(raw_state, dict):
+            read_error = f"expected dict, got {type(raw_state).__name__}"
+            raw_state = {}
+    except FileNotFoundError:
+        read_error = "missing_state_file"
+        raw_state = {}
+    except (OSError, ValueError) as exc:
+        read_error = str(exc)
+        raw_state = {}
+
+    candidate = raw_state.get("last_success_at")
+    if isinstance(candidate, str):
+        last_success_raw = candidate
+    last_success_at = _parse_iso_datetime(last_success_raw)
+    invalid_timestamp = bool(last_success_raw and last_success_at is None)
+    if last_success_at is not None:
+        age_hours = round((now - last_success_at).total_seconds() / 3600.0, 2)
+
+    is_critical = age_hours is not None and age_hours > TELEGRAM_POLL_STALE_CRITICAL_HOURS
+    breached = invalid_timestamp or (
+        age_hours is not None and age_hours > TELEGRAM_POLL_STALE_WARN_HOURS
+    )
+    level = "critical" if is_critical else ("warn" if breached else "info")
+
+    if invalid_timestamp:
+        trigger_line = "Telegram 訊息輪詢的成功心跳時間無法解析。"
+    elif age_hours is None:
+        trigger_line = "Telegram 訊息輪詢尚未觀測到成功心跳。"
+    else:
+        trigger_line = f"Telegram 訊息輪詢 {age_hours} 小時沒有成功回應。"
+
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            trigger_line,
+            f"- state 檔: {state_path}",
+            f"- last_success_at: {last_success_raw or '缺失'}",
+            f"- 門檻: warn>{TELEGRAM_POLL_STALE_WARN_HOURS}h / critical>{TELEGRAM_POLL_STALE_CRITICAL_HOURS}h",
+            "",
+            "## 影響",
+            "Telegram 即時訊息入口可能已經停擺；老闆傳來的訊息可能不會自動進任務池。",
+            "",
+            "## 建議行動",
+            "1. 看 Telegram poller log 是否有 getUpdates failed 或 poll_pass error。",
+            "2. 手動跑：uv run python scripts/telegram_poll.py --once。",
+            "3. 若 token/API/network 正常但心跳仍不更新，檢查 LaunchAgent / daemon 是否還在跑。",
+        ]
+    )
+    return {
+        "id": "telegram_poll_freshness",
+        "breached": breached,
+        "level": level,
+        "title": (
+            "Telegram 訊息輪詢停擺（成功心跳過期）"
+            if breached
+            else "telegram_poll_freshness ok"
+        ),
+        "body": body if breached else "",
+        "details": {
+            "state_path": str(state_path),
+            "last_success_at": last_success_raw,
+            "age_hours": age_hours,
+            "warn_hours": TELEGRAM_POLL_STALE_WARN_HOURS,
+            "critical_hours": TELEGRAM_POLL_STALE_CRITICAL_HOURS,
+            "read_error": read_error,
+            "invalid_timestamp": invalid_timestamp,
         },
     }
 
@@ -2698,6 +2785,7 @@ def build_alert_condition_report(
         _parse_publishing_freshness_state(storage_dir, current),  # 2026-06-22 outcome dead-man switch (禁止脫班)
         _parse_dispatch_health_state(storage_dir, current),       # 2026-06-22 generator binary 源頭健康
         _parse_gmail_poll_freshness_state(storage_dir, current),  # 2026-06-22 boss-email pipeline dead-man switch
+        _parse_telegram_poll_freshness_state(storage_dir, current),  # 2026-07-06 boss-request: Telegram poller dead-man switch
         _parse_host_cron_state(storage_dir, current),
         _parse_push_backlog_state(storage_dir, current),          # 2026-07-04 26h push-hold incident: persistent unpushed-backlog escalation
         _parse_work_log_freshness_state(storage_dir, current),    # 2026-06-28 Codex/dispatch diversity dead-man switch

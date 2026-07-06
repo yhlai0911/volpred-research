@@ -51366,11 +51366,37 @@
     "id": "platform_ops_telegram_poll_heartbeat_freshness",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-05T08:32:47.373352+00:00",
     "source": "platform_optimization_plan_20260704_C",
     "title": "Telegram poller 心跳 + telegram_poll_freshness alert condition",
-    "description": "telegram_poll.py --daemon 只 log 失敗不記心跳（API 故障後靜默 7h 無法正向確認健康）。加低頻心跳（每小時一行 poll ok offset=N 或寫 telegram_state.json last_success_at）+ check_alerts 加 telegram_poll_freshness condition（比照 gmail_poll_freshness，warn 2h / critical 6h）。收編 check_alerts owner。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。"
+    "description": "telegram_poll.py --daemon 只 log 失敗不記心跳（API 故障後靜默 7h 無法正向確認健康）。加低頻心跳（每小時一行 poll ok offset=N 或寫 telegram_state.json last_success_at）+ check_alerts 加 telegram_poll_freshness condition（比照 gmail_poll_freshness，warn 2h / critical 6h）。收編 check_alerts owner。\n\n計劃出處：docs/platform_optimization_plan_20260704.md C 區。",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-07-06T06:09:28.877287+00:00",
+    "claim_session_id": "58861e0a596e",
+    "status_history": [
+      {
+        "ts": "2026-07-06T06:09:28.877597+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-14"
+      },
+      {
+        "ts": "2026-07-06T06:09:29.117301+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-14"
+      },
+      {
+        "ts": "2026-07-06T06:17:56.883362+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-14"
+      }
+    ],
+    "started_at": "2026-07-06T06:09:29.117007+00:00",
+    "completed_at": "2026-07-06T06:17:56.882993+00:00",
+    "result": "telegram_poll.py 加 last_success_at 心跳(空poll也寫,API失敗不寫)+每小時throttle log; alerts.py 加 telegram_poll_freshness condition (warn 2h/critical 6h, 缺欄位視 not-yet-observed info); 4 regression tests; 76 passed; live check 不誤報; anti-stacking 收編 check_alerts owner 無新 watchdog"
   },
   {
     "id": "platform_ops_loop_health_supervisor_log_source",

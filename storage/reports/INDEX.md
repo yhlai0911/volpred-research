@@ -1,24 +1,25 @@
 # Feed Index
 
-_Last built: 2026-07-06 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-06 06:02 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1748**  (with thumbnail: 71)
-- Last 30 days: **324**
-- Total chars (content): 5,277,372
+- Total articles: **1749**  (with thumbnail: 71)
+- Last 30 days: **323**
+- Total chars (content): 5,285,894
 
-**Status**: published=1544, archived=123, unpublished=59, retracted=12, draft=8, scheduled=1, wont_fix=1
+**Status**: published=1546, archived=123, unpublished=59, retracted=12, draft=8, wont_fix=1
 
-**Audience**: research=1108, general=416, daily=130, unknown=77, member_qa=12, event=5
+**Audience**: research=1108, general=417, daily=130, unknown=77, member_qa=12, event=5
 
-**Category**: milestone=865, general=767, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, experiment=4, event_article=3, diary=1
+**Category**: milestone=865, general=768, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, experiment=4, event_article=3, diary=1
 
-## 最近 30 天 (324)
+## 最近 30 天 (323)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
-| 2026-07-05 | `mile_d12825bb` | 同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感 | general | general | scheduled | 2619 |  | 一般讀者, Fed, MOVE, rates, bond-volatility, trending |
+| 2026-07-06 | `mile_d12825bb` | 同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感 | general | general | published | 2619 |  | 一般讀者, Fed, MOVE, rates, bond-volatility, trending |
+| 2026-07-06 | `mile_35875d6f` | Fed 放鷹、VIX 卻破 16：這種平靜，先問它三個問題再決定信不信 | general | general | published | 8522 |  | 一般讀者, 精選導讀, VIX, MOVE, 選擇權偏斜, Fed |
 | 2026-07-05 | `mile_4d67163f` | VIX 破 30 就該進場抄底？33 年數據拆解恐慌溢酬的真相 | general | general | published | 4275 |  | 一般讀者, VIX, 投資迷思, 事件研究, 恐慌指數, 波動率 |
 | 2026-07-05 | `mile_4518e9d8` | 併購案宣布之後，真正該盯的不是股價，是這檔基金的心跳 | general | milestone | published | 2939 |  | 一般讀者, 併購套利, 風險套利, ETF, VIX, 波動率 |
 | 2026-07-05 | `mile_c538af9e` | 波動率的「長記憶」大多是假象：市場變盤如何騙過統計模型 | general | general | draft | 3579 |  | 一般讀者, 波動率, 長記憶, 市場變盤, 統計陷阱, 研究誠實 |
@@ -340,13 +341,13 @@ _Last built: 2026-07-06 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-06 | `mile_f900a8c5` | 台股日盤裝沒事，夜盤直接崩 3000 點——週一要面對的是補跌 | event | milestone | published | 2133 |  | 研究, VIX, SPY, QQQ, GLD, TLT |
 | 2026-06-06 | `mile_90f2f916` | 銀行規定要算 10 天的風險值，但業界偷懶用的公式，其實跟嚴格算法一樣準 | research | milestone | published | 3029 |  | 研究, SPY, QQQ, 風險管理, VaR, CF-Rolling |
 | 2026-06-06 | `mile_e38c9656` | 同一個公式，兩種用法，差距天壤之別：VaR 的「記憶長度」決定你的風險計算準不準 | research | milestone | published | 4262 |  | 研究, 風險管理, SPY, QQQ, GLD, VaR |
-| 2026-06-06 | `mile_f484adf4` | GJR 在三個資產上的 VaR 是壞的，A4f 補上了那個缺口——但統計門檻沒給它金牌 | research | milestone | published | 4330 |  | 研究, GARCH, VaR, A4f, 跨資產, Student-t |
-| 2026-06-06 | `mile_bcdd203c` | 五個市場時代、從沒輸過：A4f 波動率預測的跨時間穩健性驗證 | research | milestone | published | 4531 |  | 研究, A4f, GJR-GARCH, SPY, 波動率預測, 穩健性 |
 
-<details><summary>## 2026-Q2 (752)</summary>
+<details><summary>## 2026-Q2 (754)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-06 | `mile_f484adf4` | GJR 在三個資產上的 VaR 是壞的，A4f 補上了那個缺口——但統計門檻沒給它金牌 | research | milestone | published | 4330 |  | 研究, GARCH, VaR, A4f, 跨資產, Student-t |
+| 2026-06-06 | `mile_bcdd203c` | 五個市場時代、從沒輸過：A4f 波動率預測的跨時間穩健性驗證 | research | milestone | published | 4531 |  | 研究, A4f, GJR-GARCH, SPY, 波動率預測, 穩健性 |
 | 2026-06-06 | `mile_83e2d415` | 每日策略建議：VIX 21.51（偏高）— 2026-06-06 | daily | general | published | 1656 | Y | 每日建議, VIX, 策略配置 |
 | 2026-06-05 | `mile_d1609f75` | 五家公司砸了四千四百億，波動率卻睡著了 | general | general | published | 2386 |  | 一般讀者, trending_repost, AI, CapEx, implied-vol, realized-vol |
 | 2026-06-05 | `mile_67c5ec83` | 我們花了四個月每天收 SPY 五分鐘報酬——八十八天後的結論是：還不夠 | research | milestone | published | 3813 |  | 研究, HAR-RV, realized-variance, SPY, 0050.TW, 波動率預測 |

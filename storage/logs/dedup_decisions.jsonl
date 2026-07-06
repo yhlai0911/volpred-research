@@ -115,3 +115,4 @@
 {"ts": "2026-07-05T22:19:47.698871+00:00", "action": "warn_arc_dup", "new_title": "同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感", "matched_id": "mile_35eef830", "reason": "entities=['FOMC', 'VIX'] class=descriptive"}
 {"ts": "2026-07-05T22:19:48.046133+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_d12825bb", "previous_id": null, "gap_minutes": null, "reason": "non_published_ingestion:scheduled"}
 {"ts": "2026-07-06T01:27:25.721335+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_35875d6f", "previous_id": "mile_4d67163f", "gap_minutes": 204.69, "reason": "gap_above_threshold"}
+{"ts": "2026-07-06T06:00:32.337936+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_d12825bb", "matched_id": "mile_35875d6f", "decision": "warn", "reason": "arc_similarity_without_shared_ref_or_data_source"}
