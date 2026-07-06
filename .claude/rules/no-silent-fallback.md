@@ -73,6 +73,27 @@ except Exception as e:
 - **Baseline 機制**：既有 127 instances 凍結為 baseline（不強制即時清理，避免 big-bang）；新增 silent fallback 必 fail。
 - **Baseline 縮減 SOP**：每月 governance task 排一次 `audit --strict --reduce-by 20`，把 baseline 從 127 → 107 → 87 → ... 漸進降到 0。
 
+## Governance sweep usage（2026-07-06 error-log 320 sweep）
+
+When an error-log bucket review task is opened:
+
+1. Read the recent 20 top-level entries from `docs/error_log.md`.
+2. If the cluster contains fallback, guard-held, alert-severity, or hidden
+   diagnostic failures, run:
+   ```bash
+   uv run python scripts/audit_silent_fallbacks.py --json
+   uv run python scripts/audit_silent_fallbacks.py --strict --baseline storage/qa/silent_fallback_baseline.json --limit 20
+   ```
+3. If strict audit reports `new > 0`, fix the new finding in the same turn or
+   explicitly block with the exact path and reason. Do not just write a report.
+4. If strict audit reports `new=0`, record the current finding count, baseline
+   count, and dominant clusters in the governance sweep report.
+
+Fail-open guard paths should emit stable machine-readable context where
+possible: `kind`, `reason`, `exit_semantics`, `dedupe_key`, or an audit JSONL
+record. A fallback that "probably happened" but cannot be searched or counted
+is still operationally silent.
+
 ## 共用 helper
 
 統一使用 `src/volpred/ops/diagnostics.py`（**已建立**，2026-06-23 `platform_ops_build_diagnostics_module`）的 `warn(tag, msg, **ctx)`：

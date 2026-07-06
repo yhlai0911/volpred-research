@@ -28,6 +28,38 @@ paths:
   4. `member_qa_stale` — `questions` 表 pending（status=`evaluating`/`pending`/未 ranked）`created_at` 距 now 超過 24h → warn / 超過 72h → critical（2026-04-26 新增；防 5 天 silent gap 再現）。
   5. `push_backlog` — `git rev-list origin/main..main` 最老未推 commit 滯留 >3h → warn / >8h → critical（2026-07-04 新增；26h push-hold incident 教訓：silent-fallback gate 正確擋 push 但無機制強迫行動——此條件直接量測傷害「未推積壓年齡」，held/分岔/認證/網路任何原因同樣浮現，且不受該 job 自身 warn email 的 24h dedup 影響）。
 
+## Severity taxonomy before escalation（2026-07-06 error-log 320 sweep）
+
+Recent incidents showed repeated false-critical and false-warn alerts from
+overloaded exit codes and coarse skip reasons. Before adding or modifying an
+alert condition, classify the state into one of these buckets:
+
+- **Benign scheduled absence**：market holiday, duplicate/idempotent skip, or
+  task already covered. These need an explicit `kind` such as
+  `market_holiday` / `duplicate` and should not count as failure.
+- **Self-recovering scheduled state**：quota windows, bounded timeout/hang codes
+  with a known next-fire recovery path, or temporary guard states. These are at
+  most warn unless an outcome dead-man switch shows real damage.
+- **Guard-held success**：a quality/safety gate intentionally held push,
+  publish, or dispatch. Use a distinct exit code / `exit_semantics` and alert
+  the actionable backlog or held reason, not generic `host_cron_fail`.
+- **Findings-only nonzero**：audits that return nonzero because they found
+  issues must declare `exit_semantics=findings`; host-cron infra alerts should
+  not treat them as process failure.
+- **Outcome damage**：published gap, push backlog age, stale queue, lost sync, or
+  user-facing freshness breach. Outcome damage should alert even if the lower
+  level guard behaved correctly.
+
+Additional invariants:
+
+- Do not overload exit `1` for both benign findings and hard infra failure. Add
+  a specific code or `exit_semantics` when the caller can recover or when the
+  job intentionally held.
+- Freshness checks must pass the relevant calendar / trading-day gate first and
+  use effective execution cadence, not just ideal cron expressions.
+- Alert body should describe what the system already did for automatable cases;
+  reserve boss-facing decision language for actual policy decisions.
+
 ## Alert 觸發 → 主線程 auto-remediation（2026-04-19 用戶要求）
 
 **硬規則**：Alert 寄出**不只是通知**，主線程**必立即採取對應 action** 解 breach。email 給用戶是 log，不是責任轉移。

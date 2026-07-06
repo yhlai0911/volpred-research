@@ -20,6 +20,40 @@ paths:
 - Session cron 與 system crontab **需與 canonical runtime schedule 一致**
 - Admin UI 目前是 **observer**；UI 與 canonical spec 不一致時以 canonical spec / local state 為準
 
+## Error-log 320 sweep control-plane invariants（2026-07-06）
+
+`docs/governance/2026-07/error_log_review_320_2026-07-06.md` reviewed the
+latest 20 error-log entries and found the same control-plane failures recurring.
+Treat these as standing rules:
+
+- **Reusable entity identity needs a machine-readable source of truth.** Series,
+  strategy registry state, event slots, paper status, runtime schedules, and
+  other cross-session entities must be read from `config/`, registry files, or
+  canonical local state. Do not infer identity from title text, K-id naming,
+  old handoffs, or conversation memory when a registry/config exists or should
+  exist.
+- **Content/state changes must verify the canonical status field first.**
+  `published_at` is not proof of `published`; stale single-report JSON is not
+  canonical feed; mirror API ownership is not frontend sync ownership. Load the
+  current source and exact `status` / owner field before retitle, unpublish,
+  dedup, sync, or audit decisions.
+- **Canonical JSON writes must be pre-serializable and recoverable.** For
+  `storage/next_tasks.json`, feed, paper-trading state, queue records, and other
+  control-plane files, serialize/validate the whole payload before truncate or
+  replace; free-text CLI result fields must be surrogate-safe. A writer failure
+  must not leave partial JSON.
+- **Claim metadata is active ownership only.** `claimed_by`, `claimed_at`, and
+  `claim_session_id` belong on active claimed/in-progress rows. Terminal rows,
+  deprecated rows, and true blocked rows must not retain stale claim metadata.
+- **Historical verification must not leave main detached.** Prefer a temporary
+  worktree for historical commit checks. If the main worktree is detached for
+  any reason, reattach with `git checkout main` before committing, and verify
+  `HEAD == refs/heads/main` before push/commit closeout.
+- **Worktree merge/remove paths fail closed.** Ambiguous "0 commits", git-log
+  errors, dropped modified files, or branch/self-compare anomalies must preserve
+  the worktree/branch and surface a fatal error. Never remove a worktree after a
+  fallback comparison.
+
 ## Task pool 三軌：agentable / main_thread / blocked（2026-05-04 修流程）
 
 **問題**：dispatcher 原本只分 `agentable / main_thread`，stale candidates（auth-blocked / prior-failure / self-optional）反覆被推薦、main thread 反覆 silent skip → slot 永遠空、pool 看似有工實際無工可派。
