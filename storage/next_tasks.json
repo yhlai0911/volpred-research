@@ -50915,7 +50915,7 @@
     "title": "Paper review (Codex 24h-rule): 美股大跌，台股隔天真的會補跌嗎？我查了兩千六百多天的數據",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d1a83b4f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d1a83b4f",
@@ -50923,7 +50923,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-05T08:30:01+00:00"
+    "created_at": "2026-07-05T08:30:01+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T16:25:14.745657+00:00",
+    "claim_session_id": "fc2ab87602b6",
+    "status_history": [
+      {
+        "ts": "2026-07-06T16:25:14.745978+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T16:25:14.980545+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T16:28:35.581532+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T16:25:14.980280+00:00",
+    "completed_at": "2026-07-06T16:28:35.581248+00:00",
+    "result": "Codex 24h review completed for mile_d1a83b4f / K1627. Verdict: PASS WITH NON-BLOCKING NOTE; no public correction required. Lookahead alignment, conditional probabilities, regression, bootstrap, and dedup robustness match source results."
   },
   {
     "id": "paper_review_mile_467226e7",
