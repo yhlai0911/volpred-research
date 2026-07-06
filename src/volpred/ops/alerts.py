@@ -2772,6 +2772,69 @@ def _parse_cluster_cap_drift_state(storage_dir: str) -> dict[str, Any]:
     }
 
 
+def _parse_series_registry_state(storage_dir: str) -> dict[str, Any]:
+    """Article-series registry drift → warn (2026-07-06 added).
+
+    Why: the 迷思實驗室 incident (wrong name / under-scope / bogus EP numbers /
+    wrong dedup keeper — 4 mistakes same root cause) happened because series
+    identity was IMPLICIT (title conventions + internal codenames + Telegram
+    chat), so every session re-derived it from titles and guessed wrong. Fix =
+    a machine-readable registry `config/article_series.json` as single source of
+    truth + `scripts/series_registry.py` audit. This condition runs that audit
+    hourly so drift surfaces automatically: a registered member that lost its
+    prefix, an excluded dup that became visible again, an orphan-branded article
+    (prefix but unregistered), or a digest title that double-headers the masthead.
+
+    Warn-only — series branding is a content-quality issue, not an outage.
+    """
+    try:
+        import importlib.util
+        repo_root = Path(__file__).resolve().parents[3]
+        spec = importlib.util.spec_from_file_location(
+            "_series_registry_audit", str(repo_root / "scripts" / "series_registry.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        findings = mod.audit(mod._load_registry(), mod._load_feed())
+    except Exception as exc:
+        return {
+            "id": "series_registry", "breached": False, "level": "info",
+            "title": "series_registry audit unavailable", "body": "",
+            "details": {"error": str(exc)},
+        }
+    if not findings:
+        return {
+            "id": "series_registry", "breached": False, "level": "info",
+            "title": "series_registry ok", "body": "", "details": {"drift": 0},
+        }
+    kinds: dict[str, int] = {}
+    for f in findings:
+        kinds[f["kind"]] = kinds.get(f["kind"], 0) + 1
+    lines = [
+        "## 觸發條件",
+        f"config/article_series.json 登記的系列與 feed.json 有 {len(findings)} 處漂移：",
+    ]
+    for f in findings[:10]:
+        lines.append(f"- [{f['kind']}] {f['series']}/{f.get('id')}: {f['detail']}")
+    lines += [
+        "",
+        "## 影響",
+        "系列品牌（迷思實驗室｜等）是讀者辨識與回訪的錨（Mission #1 內容 + #5 流量）；"
+        "member 掉前綴／下架的 dup 重新可見／orphan brand 會讓系列看起來散亂或重複。",
+        "",
+        "## 系統已自動可修",
+        "主線程收到後：`uv run python scripts/series_registry.py --apply` 自動補回缺失前綴；"
+        "`dup_still_visible` → 設該文 status='unpublished'（非 draft）；`orphan_brand` → "
+        "把該文加進 registry 或改標題。根因＋schema 見 config/article_series.json + "
+        "docs/error_log.md 2026-07-06 series 條目。",
+    ]
+    return {
+        "id": "series_registry", "breached": True, "level": "warn",
+        "title": f"文章系列品牌漂移（{len(findings)} 處）",
+        "body": "\n".join(lines),
+        "details": {"drift": len(findings), "kinds": kinds, "findings": findings[:20]},
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -2801,6 +2864,7 @@ def build_alert_condition_report(
         _parse_content_quality_state(storage_dir, current),       # 2026-06-24 meta-fix: content patrol layer
         _parse_cluster_cap_drift_state(storage_dir),              # 2026-06-29 K1333 publish discovered vix 6.1x / spy 8.3x overshoot
         _parse_loop_health_state(storage_dir, current),           # 2026-06-29 loop-engineering: is the loop improving?
+        _parse_series_registry_state(storage_dir),                # 2026-07-06 迷思實驗室 4-mistake incident: series-brand drift detector (SoT = config/article_series.json)
     ]
     return {
         "generated_at": current.isoformat(),

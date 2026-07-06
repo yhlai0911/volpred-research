@@ -70,6 +70,10 @@ paths:
 
 ### 系列/專題標題前綴慣例（2026-07-06 新增 — boss 指令）
 
+> **Single source of truth = `config/article_series.json`**（machine-readable registry）。**查系列有哪些、成員是誰、什麼格式，一律讀 registry，禁止從標題／代號重新推導**（2026-07-06 迷思實驗室 4-連錯的根因就是無 SoT — 見 `docs/error_log.md`）。下方 prose 是 human-readable 摘要，**成員與規格以 registry 為準**。稽核 `scripts/series_registry.py --audit`；補前綴 `--apply`；drift 每小時由 `check_alerts` 的 `series_registry` 條件自動告警。
+>
+> **鐵律**：(1) 分隔符恆全形 `｜`；(2) 同一主題多篇留 1 篇 `published`、其餘 `unpublished`（**不可 `draft`** — release-pool 會重發）；(3) **動任何文章（retitle / unpublish / dedup）前先讀該文 `status` 驗 ground truth，不可憑 `published_at` 假設已發佈**（draft 也可能帶 published_at）。
+
 **成系列的專題文章，標題前面冠系列名：`系列名｜實際標題`**（boss 2026-07-06 要求）。目的：讓讀者
 一眼看出這篇屬於哪個系列，累積系列辨識度、驅動回訪（服務 Mission #1 內容 + #5 流量）。
 

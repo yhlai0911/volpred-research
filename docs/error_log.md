@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-06 文章系列身分無 single-source-of-truth → 同一系列反覆搞錯（**3-STRIKE STRUCTURAL FIX**）
+
+**現象**：處理「迷思實驗室」系列時，主線程在**同一件事上連續 4 次出錯**：(1) 系列名猜成「迷思破解」（實際 boss 早在 Telegram 定名「迷思實驗室」）；(2) 只認 3 篇、漏掉同系列 ~6 篇（整條 `research_myth_*` 線）；(3) 自己發明 `EP.X` 集數（boss 要純前綴不要集數）；(4) VIX 兩篇重複挑錯留哪篇——比內容品質前**沒先查 `status`**，把線上的 K1633 下架、留了從來沒公開的 draft K1640，一瞬間讓 VIX 迷思沒有任何公開文章。
+
+**根因（單一結構性缺陷，非 4 個獨立 bug）**：**「系列」在系統裡沒有 first-class 資料模型**。系列身分只存在於 (a) 標題慣例、(b) 內部實驗代號、(c) Telegram 對話——沒有任何 machine-readable 的權威來源。於是每個 session 都得「從標題／代號重新推導」系列是什麼、有哪些成員、什麼格式，必然 lossy、必然猜錯。錯誤 (4) 另有一條 process 根因：**憑 `published_at` 假設文章已發佈，未驗 `status` ground truth**（draft 也可帶 `published_at`）。
+
+**解決（三層翻修，per CLAUDE.md Three-Strike）**：
+- **資料模型**：新增 `config/article_series.json` —— 系列的 **single source of truth**（每個系列的 display_name / emoji / branding 機制（`title_prefix` vs `frontend_masthead`）/ prefix / 定義 / 成員 id 清單 / dedup 規則 / 被排除的重複）。以後查系列一律讀此檔，**禁止再從標題推導**。
+- **流程**：`config/article_series.json._meta.hard_rules` 明訂：分隔符恆全形 `｜`；同迷思多篇留 1 篇 `published` 其餘 `unpublished`（**不可 `draft`**，release-pool 會重發）；**動文章前必驗 `status` 不可憑 `published_at`**。
+- **程式架構**：`scripts/series_registry.py` —— `--audit`（drift 偵測：member 掉前綴 / dup 又可見 / orphan brand / digest double-header / wrong status；exit 1）＋ `--apply`（idempotent 依 registry 補前綴，byte-exact indent=2 round-trip）。品牌化從「手動改標題」變成「registry 驅動的機械操作」。
+- **Enforcement（anti-stacking，收編既有 owner）**：`src/volpred/ops/alerts.py::_parse_series_registry_state` 把 audit 收進**每小時 check_alerts 告警鏈**（warn-only），drift 自動浮現寄信，不必等人發現。
+
+**驗證**：`scripts/series_registry.py` audit = CLEAN（8 篇 published 迷思實驗室 + 1 draft 台積電 + K1640 dup unpublished，全部對齊 registry）；`check_alerts` 顯示 `[ok] series_registry`；線上 Supabase 驗證 8 篇 published 帶 `迷思實驗室｜`、dup 不可見。
+
+**教訓**：凡是「跨 session 需要一致認定的實體」（系列、策略、論文狀態、事件檔期），只要它只存在於慣例／對話／代號而無 machine-readable SoT，就會被反覆重推導而反覆出錯 —— 必須建 registry。且**任何 content 操作（retitle / unpublish / dedup）前，先讀該資料的 `status` 欄位驗 ground truth，不可從 `published_at` 等旁證推斷狀態**。
+
 ## 2026-07-06 Indicator Arena 把美股假日 stale skip 當失敗 WARN — **FIXED**
 
 **現象**：`indicator_arena_daily` 在 2026-07-04 台北 07:00 執行時，對應美東 2026-07-03 NYSE 因 Independence Day observed 休市；pipeline 仍進入 US-sourced signal builders，部分指標因 `^VIX` / SPY basis 不一致被記為 `data_unavailable`，整體 `ok=false` / exit 1，wrapper 送出 WARN。更糟的是 `vix_crisis_alert_tw` 可在沒有新美股 session 的情況下用上一筆 VIX 資料發出新台股訊號。
