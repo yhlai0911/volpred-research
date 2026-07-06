@@ -37839,5 +37839,18 @@
       "DY total 46.5%, net all within +/-1.5%; contemp corr CL-XLE 0.68"
     ],
     "created_at": "2026-07-06T13:25:29.629461"
+  },
+  {
+    "item_id": "0b7124ad",
+    "category": "experiment",
+    "content": "K1651 CAViaR direct dynamic-quantile VaR vs GJR-GARCH skew-t VaR completed. experiment_id=K1651; experiment_path=experiments/k1651/; reviewer=independent fresh-context Codex CONDITIONAL_PASS. Data: Yahoo Finance adjusted close SPY/HYG, daily log returns 2007-04-12..2026-07-02, OOS from 2015-01-01, n_oos=2,891 per asset-alpha cell, seed=42. Models: HS250, CAViaR-SAV/AS/IG/AD, GJR-GARCH-SkewT; alphas 5% and 1%; annual expanding refit with daily recursion. Lookahead policy: forecast at t uses only fits on index<t and r[t-1]; HS uses y.shift(1).rolling(250).quantile(alpha); CAViaR-IG explicitly returns negative left-tail VaR via -sqrt(...). Results: overall verdict CONDITIONAL_CAVIAR_COMPETITIVE_NO_HARVEY_EDGE. GJR-GARCH-SkewT wins mean pinball in 3/4 cells and is the only full VaR+DQ gate pass in SPY 5% and HYG 5%; it also passes SPY 1% alongside CAViaR-AS. CAViaR-AS is best and gate-passing for SPY 1% (pinball 0.000357 vs GARCH 0.000369), but DM-HAC vs GARCH t=-1.78, below Harvey |t|>3. HYG 1% has no full gate-pass model; GARCH has best pinball but Kupiec p=0.048. Adaptive CAViaR is unstable and over-violates. Conclusion: CAViaR-AS is a competitive direct-quantile challenger, but this sample does not support claiming CAViaR systematically beats GARCH-VaR. Vanilla CAViaR is VaR-only; no ES superiority claim.",
+    "evidence": [
+      "experiments/k1651/README.md",
+      "experiments/k1651/k1651.py",
+      "experiments/k1651/k1651_results.json",
+      "experiments/k1651/k1651_forecasts.parquet"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-07-06T14:02:25.842474"
   }
 ]

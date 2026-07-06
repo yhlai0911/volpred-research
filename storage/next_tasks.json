@@ -52021,7 +52021,7 @@
     "title": "K1651: CAViaR 直接動態分位數 VaR：不建波動模型也能報尾部 — Engle-Manganelli CAViaR（SAV/AS/IG 四式，內含 leverage）vs GARCH-VaR，OOS DQ test；direct-quanti",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 495). Original: CAViaR 直接動態分位數 VaR：不建波動模型也能報尾部 — Engle-Manganelli CAViaR（SAV/AS/IG 四式，內含 leverage）vs GARCH-VaR，OOS DQ test；direct-quantile 是完全不同 paradigm（來源：JTSA 2026 adaptive-Lasso CAViaR + JRSS-C 2024 long-range CAViaR）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1651.py with signal.shift(1) + seed=42, (c) K1651_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -52030,7 +52030,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-06T00:00:01Z"
+    "created_at": "2026-07-06T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T05:43:38.801754+00:00",
+    "claim_session_id": "726d025b2e8f",
+    "status_history": [
+      {
+        "ts": "2026-07-06T05:43:38.802037+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T05:43:44.886935+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T06:03:44.049550+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T05:43:44.886621+00:00",
+    "completed_at": "2026-07-06T06:03:44.049260+00:00",
+    "result": "K1651 completed: CAViaR-SAV/AS/IG/AD vs GJR-GARCH-SkewT on SPY/HYG 1%/5% VaR, OOS 2015-2026. Verdict CONDITIONAL_CAVIAR_COMPETITIVE_NO_HARVEY_EDGE; independent Codex review CONDITIONAL_PASS; artifacts in experiments/k1651/, knowledge item 0b7124ad."
   },
   {
     "id": "K1652",

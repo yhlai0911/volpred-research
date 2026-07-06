@@ -1,0 +1,1235 @@
+{
+  "meta": {
+    "experiment_id": "K1651",
+    "seed": 42,
+    "data_source": "Yahoo Finance adjusted close via yfinance",
+    "price_cache": "k1651_prices.parquet",
+    "data_start": "2007-04-12",
+    "data_end": "2026-07-02",
+    "oos_start": "2015-01-01",
+    "assets": [
+      "SPY",
+      "HYG"
+    ],
+    "alphas": [
+      0.05,
+      0.01
+    ],
+    "models": [
+      "HS250",
+      "CAViaR-SAV",
+      "CAViaR-AS",
+      "CAViaR-IG",
+      "CAViaR-AD",
+      "GJR-GARCH-SkewT"
+    ],
+    "refit_cadence": "year_expanding",
+    "lookahead_policy": "Forecast at t uses model fit on index < t and recursion from r[t-1]; HS250 uses y.shift(1).rolling(250).quantile(alpha).",
+    "dq_lags": 4,
+    "harvey_abs_t_threshold": 3.0,
+    "literature_used": [
+      "Engle and Manganelli (2004), CAViaR: Conditional Autoregressive Value at Risk by Regression Quantiles.",
+      "Dumitrescu, Hurlin, Pham (2012), Backtesting Value-at-Risk: From Dynamic Quantile to Dynamic Binary Tests.",
+      "Cai et al. (2026), CAViaR Model Selection via Adaptive Lasso.",
+      "Forecasting Expected Shortfall and Value-at-Risk With Cross-Sectional Aggregation CAViaR-FZ (2025)."
+    ],
+    "es_scope_note": "This experiment is VaR-only because vanilla CAViaR has no native ES forecast. No ES superiority claim is made; CAViaR-FZ/RES-CAViaR is the correct extension for joint VaR-ES."
+  },
+  "panels": {
+    "SPY": {
+      "rows": 4837,
+      "first": "2007-04-12",
+      "last": "2026-07-02",
+      "oos_rows_available": 2891
+    },
+    "HYG": {
+      "rows": 4837,
+      "first": "2007-04-12",
+      "last": "2026-07-02",
+      "oos_rows_available": 2891
+    }
+  },
+  "by_asset_alpha": {
+    "SPY_VaR05": {
+      "asset": "SPY",
+      "alpha": 0.05,
+      "per_model": {
+        "HS250": {
+          "obs": 2891,
+          "mean_pinball": 0.0013965187310904005,
+          "violation_rate": 0.05292286406087859,
+          "fit_failures": 0,
+          "refits": 0,
+          "kupiec": {
+            "n": 2891,
+            "violations": 153,
+            "rate": 0.05292286406087859,
+            "expected_rate": 0.05,
+            "stat": 0.5106354071276655,
+            "p": 0.4748639225081994,
+            "pass": true
+          },
+          "christoffersen_independence": {
+            "n00": 2609,
+            "n01": 128,
+            "n10": 128,
+            "n11": 25,
+            "stat": 26.765578539620037,
+            "p": 2.296925021294527e-07,
+            "pass": false
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": true
+          },
+          "dq": {
+            "stat": 115.90087790300518,
+            "p": 0.0,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-SAV": {
+          "obs": 2891,
+          "mean_pinball": 0.0012179442190499107,
+          "violation_rate": 0.04116222760290557,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 119,
+            "rate": 0.04116222760290557,
+            "expected_rate": 0.05,
+            "stat": 5.045485769958532,
+            "p": 0.02469018370155962,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2658,
+            "n01": 113,
+            "n10": 113,
+            "n11": 6,
+            "stat": 0.25202447809704154,
+            "p": 0.615653173918671,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": true
+          },
+          "dq": {
+            "stat": 15.029018174249524,
+            "p": 0.02003221571687408,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-AS": {
+          "obs": 2891,
+          "mean_pinball": 0.0011784791167716844,
+          "violation_rate": 0.039778623313732275,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 115,
+            "rate": 0.039778623313732275,
+            "expected_rate": 0.05,
+            "stat": 6.817336213544536,
+            "p": 0.009027712468980265,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2668,
+            "n01": 107,
+            "n10": 107,
+            "n11": 8,
+            "stat": 2.30862690248739,
+            "p": 0.12865765803510054,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": true
+          },
+          "dq": {
+            "stat": 15.999640285775136,
+            "p": 0.013755898605096073,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-IG": {
+          "obs": 2891,
+          "mean_pinball": 0.0012136414583247485,
+          "violation_rate": 0.043237634036665515,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 125,
+            "rate": 0.043237634036665515,
+            "expected_rate": 0.05,
+            "stat": 2.910900554549926,
+            "p": 0.08798273374304177,
+            "pass": true
+          },
+          "christoffersen_independence": {
+            "n00": 2649,
+            "n01": 116,
+            "n10": 116,
+            "n11": 9,
+            "stat": 2.2091270149485354,
+            "p": 0.13719628914182525,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": true
+          },
+          "dq": {
+            "stat": 13.097269172135553,
+            "p": 0.041517047717064215,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": true,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-AD": {
+          "obs": 2891,
+          "mean_pinball": 0.0015982195570851208,
+          "violation_rate": 0.10826703562781044,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 313,
+            "rate": 0.10826703562781044,
+            "expected_rate": 0.05,
+            "stat": 157.28327216815978,
+            "p": 0.0,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2321,
+            "n01": 256,
+            "n10": 256,
+            "n11": 57,
+            "stat": 17.205040440738685,
+            "p": 3.355448915487447e-05,
+            "pass": false
+          },
+          "basel_binomial": {
+            "zone": "red",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": false
+          },
+          "dq": {
+            "stat": 455.75157091413007,
+            "p": 0.0,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "GJR-GARCH-SkewT": {
+          "obs": 2891,
+          "mean_pinball": 0.0011617142106503185,
+          "violation_rate": 0.04289173296437219,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 124,
+            "rate": 0.04289173296437219,
+            "expected_rate": 0.05,
+            "stat": 3.224093054478658,
+            "p": 0.0725619808810688,
+            "pass": true
+          },
+          "christoffersen_independence": {
+            "n00": 2649,
+            "n01": 117,
+            "n10": 117,
+            "n11": 7,
+            "stat": 0.5306847367733099,
+            "p": 0.4663191241430369,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": true
+          },
+          "dq": {
+            "stat": 7.186720847455353,
+            "p": 0.30392416786759746,
+            "df": 6,
+            "lags": 4,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "var_dq_gate_pass": true
+        }
+      },
+      "dm_vs_garch": {
+        "HS250_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 0.0002348045204400821,
+          "stat": 2.4945482682094537,
+          "p": 0.01266719198525279,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-SAV_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 5.623000839959231e-05,
+          "stat": 3.375697653113636,
+          "p": 0.0007460128295220247,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": true
+        },
+        "CAViaR-AS_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 1.6764906121365905e-05,
+          "stat": 1.358518858764031,
+          "p": 0.17440513016056536,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-IG_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 5.1927247674430084e-05,
+          "stat": 2.778240946142244,
+          "p": 0.00550070808347547,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-AD_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 0.0004365053464348025,
+          "stat": 3.0813451478358487,
+          "p": 0.0020800883296765438,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": true
+        }
+      },
+      "best_mean_pinball_model": "GJR-GARCH-SkewT",
+      "var_dq_gate_pass_models": [
+        "GJR-GARCH-SkewT"
+      ]
+    },
+    "SPY_VaR01": {
+      "asset": "SPY",
+      "alpha": 0.01,
+      "per_model": {
+        "HS250": {
+          "obs": 2891,
+          "mean_pinball": 0.0004923561431451383,
+          "violation_rate": 0.016257350397786235,
+          "fit_failures": 0,
+          "refits": 0,
+          "kupiec": {
+            "n": 2891,
+            "violations": 47,
+            "rate": 0.016257350397786235,
+            "expected_rate": 0.01,
+            "stat": 9.61482481060159,
+            "p": 0.0019301287451727323,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2803,
+            "n01": 40,
+            "n10": 40,
+            "n11": 7,
+            "stat": 20.31051055358853,
+            "p": 6.583792209746697e-06,
+            "pass": false
+          },
+          "basel_binomial": {
+            "zone": "yellow",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": false
+          },
+          "dq": {
+            "stat": 193.11367292687967,
+            "p": 0.0,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-SAV": {
+          "obs": 2891,
+          "mean_pinball": 0.0003746460626295758,
+          "violation_rate": 0.012106537530266344,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 35,
+            "rate": 0.012106537530266344,
+            "expected_rate": 0.01,
+            "stat": 1.214202980633786,
+            "p": 0.27050132695292173,
+            "pass": true
+          },
+          "christoffersen_independence": {
+            "n00": 2823,
+            "n01": 32,
+            "n10": 32,
+            "n11": 3,
+            "stat": 6.985449127435402,
+            "p": 0.008217502943636878,
+            "pass": false
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": true
+          },
+          "dq": {
+            "stat": 41.854742781793554,
+            "p": 1.9642807114195193e-07,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-AS": {
+          "obs": 2891,
+          "mean_pinball": 0.0003571510974046947,
+          "violation_rate": 0.008301625735039779,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 24,
+            "rate": 0.008301625735039779,
+            "expected_rate": 0.01,
+            "stat": 0.8939996048367789,
+            "p": 0.34439574948344687,
+            "pass": true
+          },
+          "christoffersen_independence": {
+            "n00": 2843,
+            "n01": 23,
+            "n10": 23,
+            "n11": 1,
+            "stat": 1.6791372337306143,
+            "p": 0.19503913330146438,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": true
+          },
+          "dq": {
+            "stat": 7.960592496599463,
+            "p": 0.2410046448442541,
+            "df": 6,
+            "lags": 4,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "var_dq_gate_pass": true
+        },
+        "CAViaR-IG": {
+          "obs": 2891,
+          "mean_pinball": 0.0003990454432663216,
+          "violation_rate": 0.012106537530266344,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 35,
+            "rate": 0.012106537530266344,
+            "expected_rate": 0.01,
+            "stat": 1.214202980633786,
+            "p": 0.27050132695292173,
+            "pass": true
+          },
+          "christoffersen_independence": {
+            "n00": 2823,
+            "n01": 32,
+            "n10": 32,
+            "n11": 3,
+            "stat": 6.985449127435402,
+            "p": 0.008217502943636878,
+            "pass": false
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": true
+          },
+          "dq": {
+            "stat": 46.54894556872859,
+            "p": 2.3016056838187637e-08,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-AD": {
+          "obs": 2891,
+          "mean_pinball": 0.0006800738974945879,
+          "violation_rate": 0.039778623313732275,
+          "fit_failures": 1,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 115,
+            "rate": 0.039778623313732275,
+            "expected_rate": 0.01,
+            "stat": 148.00715029234686,
+            "p": 0.0,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2678,
+            "n01": 97,
+            "n10": 97,
+            "n11": 18,
+            "stat": 25.927186688971688,
+            "p": 3.545406175309296e-07,
+            "pass": false
+          },
+          "basel_binomial": {
+            "zone": "red",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": false
+          },
+          "dq": {
+            "stat": 889.7241297080931,
+            "p": 0.0,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "GJR-GARCH-SkewT": {
+          "obs": 2891,
+          "mean_pinball": 0.000369072487559782,
+          "violation_rate": 0.010377032168799724,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 30,
+            "rate": 0.010377032168799724,
+            "expected_rate": 0.01,
+            "stat": 0.041004706968180926,
+            "p": 0.8395288366503384,
+            "pass": true
+          },
+          "christoffersen_independence": {
+            "n00": 2831,
+            "n01": 29,
+            "n10": 29,
+            "n11": 1,
+            "stat": 0.9884299469939606,
+            "p": 0.3201264121440106,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": true
+          },
+          "dq": {
+            "stat": 10.804265268264224,
+            "p": 0.09461752473883656,
+            "df": 6,
+            "lags": 4,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "var_dq_gate_pass": true
+        }
+      },
+      "dm_vs_garch": {
+        "HS250_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 0.00012328365558535623,
+          "stat": 1.7878435156608055,
+          "p": 0.07390599786055496,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-SAV_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 5.57357506979385e-06,
+          "stat": 0.35028499985796013,
+          "p": 0.7261503486015397,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-AS_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": -1.1921390155087272e-05,
+          "stat": -1.776613600777838,
+          "p": 0.07573700895666913,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-IG_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 2.9972955706539583e-05,
+          "stat": 0.6709085056981134,
+          "p": 0.5023324316301974,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-AD_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 0.0003110014099348058,
+          "stat": 2.4191604717686332,
+          "p": 0.015617747365384016,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        }
+      },
+      "best_mean_pinball_model": "CAViaR-AS",
+      "var_dq_gate_pass_models": [
+        "CAViaR-AS",
+        "GJR-GARCH-SkewT"
+      ]
+    },
+    "HYG_VaR05": {
+      "asset": "HYG",
+      "alpha": 0.05,
+      "per_model": {
+        "HS250": {
+          "obs": 2891,
+          "mean_pinball": 0.0006008642071894143,
+          "violation_rate": 0.0588031822898651,
+          "fit_failures": 0,
+          "refits": 0,
+          "kupiec": {
+            "n": 2891,
+            "violations": 170,
+            "rate": 0.0588031822898651,
+            "expected_rate": 0.05,
+            "stat": 4.475373782409406,
+            "p": 0.034386680168716155,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2581,
+            "n01": 139,
+            "n10": 139,
+            "n11": 31,
+            "stat": 34.08959297182446,
+            "p": 5.2632004310382285e-09,
+            "pass": false
+          },
+          "basel_binomial": {
+            "zone": "yellow",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": false
+          },
+          "dq": {
+            "stat": 128.64546523457815,
+            "p": 0.0,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-SAV": {
+          "obs": 2891,
+          "mean_pinball": 0.00048381383056506365,
+          "violation_rate": 0.03770321687997233,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 109,
+            "rate": 0.03770321687997233,
+            "expected_rate": 0.05,
+            "stat": 10.021672092113704,
+            "p": 0.0015470895354672276,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2679,
+            "n01": 102,
+            "n10": 102,
+            "n11": 7,
+            "stat": 1.837048571680839,
+            "p": 0.17529726699988624,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": true
+          },
+          "dq": {
+            "stat": 12.631177959231989,
+            "p": 0.04928142056565232,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-AS": {
+          "obs": 2891,
+          "mean_pinball": 0.0004783382052493492,
+          "violation_rate": 0.03216879972327914,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 93,
+            "rate": 0.03216879972327914,
+            "expected_rate": 0.05,
+            "stat": 22.030748303254768,
+            "p": 2.6831740143062888e-06,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2705,
+            "n01": 92,
+            "n10": 92,
+            "n11": 1,
+            "stat": 1.8821529809006279,
+            "p": 0.17008964906462098,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": true
+          },
+          "dq": {
+            "stat": 21.901846964225722,
+            "p": 0.001261471534119818,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-IG": {
+          "obs": 2891,
+          "mean_pinball": 0.00048335276175139833,
+          "violation_rate": 0.03631961259079903,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 105,
+            "rate": 0.03631961259079903,
+            "expected_rate": 0.05,
+            "stat": 12.537146949429257,
+            "p": 0.0003989409669776789,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2687,
+            "n01": 98,
+            "n10": 98,
+            "n11": 7,
+            "stat": 2.334214848748161,
+            "p": 0.12655878785371988,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": true
+          },
+          "dq": {
+            "stat": 14.916491794497247,
+            "p": 0.020916260132615605,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-AD": {
+          "obs": 2891,
+          "mean_pinball": 0.0007653869067937031,
+          "violation_rate": 0.13075060532687652,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 378,
+            "rate": 0.13075060532687652,
+            "expected_rate": 0.05,
+            "stat": 280.24997764263617,
+            "p": 0.0,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2235,
+            "n01": 277,
+            "n10": 277,
+            "n11": 101,
+            "stat": 59.48886557409105,
+            "p": 1.2323475573339238e-14,
+            "pass": false
+          },
+          "basel_binomial": {
+            "zone": "red",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": false
+          },
+          "dq": {
+            "stat": 927.8596403182664,
+            "p": 0.0,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "GJR-GARCH-SkewT": {
+          "obs": 2891,
+          "mean_pinball": 0.0004745476797883951,
+          "violation_rate": 0.04289173296437219,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 124,
+            "rate": 0.04289173296437219,
+            "expected_rate": 0.05,
+            "stat": 3.224093054478658,
+            "p": 0.0725619808810688,
+            "pass": true
+          },
+          "christoffersen_independence": {
+            "n00": 2650,
+            "n01": 116,
+            "n10": 116,
+            "n11": 8,
+            "stat": 1.2917069368744478,
+            "p": 0.2557336220991334,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 164,
+            "yellow_cutoff": 190,
+            "pass": true
+          },
+          "dq": {
+            "stat": 9.932081270567853,
+            "p": 0.12754151781397483,
+            "df": 6,
+            "lags": 4,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "var_dq_gate_pass": true
+        }
+      },
+      "dm_vs_garch": {
+        "HS250_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 0.00012631652740101914,
+          "stat": 2.3168936591994065,
+          "p": 0.020579103579336344,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-SAV_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 9.266150776668561e-06,
+          "stat": 2.0362116380237727,
+          "p": 0.04182010914857637,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-AS_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 3.790525460954162e-06,
+          "stat": 0.5089353960768022,
+          "p": 0.6108363599015807,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-IG_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 8.805081963003175e-06,
+          "stat": 1.6752167926634696,
+          "p": 0.09399988744165055,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-AD_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 0.000290839227005308,
+          "stat": 3.5753425903129488,
+          "p": 0.0003554992528576051,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": true
+        }
+      },
+      "best_mean_pinball_model": "GJR-GARCH-SkewT",
+      "var_dq_gate_pass_models": [
+        "GJR-GARCH-SkewT"
+      ]
+    },
+    "HYG_VaR01": {
+      "asset": "HYG",
+      "alpha": 0.01,
+      "per_model": {
+        "HS250": {
+          "obs": 2891,
+          "mean_pinball": 0.00021934530696843352,
+          "violation_rate": 0.016257350397786235,
+          "fit_failures": 0,
+          "refits": 0,
+          "kupiec": {
+            "n": 2891,
+            "violations": 47,
+            "rate": 0.016257350397786235,
+            "expected_rate": 0.01,
+            "stat": 9.61482481060159,
+            "p": 0.0019301287451727323,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2803,
+            "n01": 40,
+            "n10": 40,
+            "n11": 7,
+            "stat": 20.31051055358853,
+            "p": 6.583792209746697e-06,
+            "pass": false
+          },
+          "basel_binomial": {
+            "zone": "yellow",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": false
+          },
+          "dq": {
+            "stat": 265.58934372491206,
+            "p": 0.0,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-SAV": {
+          "obs": 2891,
+          "mean_pinball": 0.00015157396446241323,
+          "violation_rate": 0.0041508128675198895,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 12,
+            "rate": 0.0041508128675198895,
+            "expected_rate": 0.01,
+            "stat": 12.816970909483615,
+            "p": 0.0003434893784594051,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2866,
+            "n01": 12,
+            "n10": 12,
+            "n11": 0,
+            "stat": 0.100069782636524,
+            "p": 0.7517459082289,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": true
+          },
+          "dq": {
+            "stat": 10.078960201285515,
+            "p": 0.12136597623841938,
+            "df": 6,
+            "lags": 4,
+            "pass": true
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-AS": {
+          "obs": 2891,
+          "mean_pinball": 0.00015897521294480564,
+          "violation_rate": 0.0041508128675198895,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 12,
+            "rate": 0.0041508128675198895,
+            "expected_rate": 0.01,
+            "stat": 12.816970909483615,
+            "p": 0.0003434893784594051,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2866,
+            "n01": 12,
+            "n10": 12,
+            "n11": 0,
+            "stat": 0.100069782636524,
+            "p": 0.7517459082289,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": true
+          },
+          "dq": {
+            "stat": 10.300455215011807,
+            "p": 0.11255619153086838,
+            "df": 6,
+            "lags": 4,
+            "pass": true
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-IG": {
+          "obs": 2891,
+          "mean_pinball": 0.00017424597457260955,
+          "violation_rate": 0.007263922518159807,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 21,
+            "rate": 0.007263922518159807,
+            "expected_rate": 0.01,
+            "stat": 2.4159059025165845,
+            "p": 0.12010847023347282,
+            "pass": true
+          },
+          "christoffersen_independence": {
+            "n00": 2849,
+            "n01": 20,
+            "n10": 20,
+            "n11": 1,
+            "stat": 2.135219677932639,
+            "p": 0.14394983896689229,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": true
+          },
+          "dq": {
+            "stat": 26.054618019351054,
+            "p": 0.00021748629512097217,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": true,
+          "var_dq_gate_pass": false
+        },
+        "CAViaR-AD": {
+          "obs": 2891,
+          "mean_pinball": 0.0004917919878926823,
+          "violation_rate": 0.09373919059149083,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 271,
+            "rate": 0.09373919059149083,
+            "expected_rate": 0.01,
+            "stat": 749.8590242531247,
+            "p": 0.0,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2424,
+            "n01": 195,
+            "n10": 195,
+            "n11": 76,
+            "stat": 88.85243247556764,
+            "p": 0.0,
+            "pass": false
+          },
+          "basel_binomial": {
+            "zone": "red",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": false
+          },
+          "dq": {
+            "stat": 5159.813211522685,
+            "p": 0.0,
+            "df": 6,
+            "lags": 4,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        },
+        "GJR-GARCH-SkewT": {
+          "obs": 2891,
+          "mean_pinball": 0.00014470829578487572,
+          "violation_rate": 0.006572120373573158,
+          "fit_failures": 0,
+          "refits": 12,
+          "kupiec": {
+            "n": 2891,
+            "violations": 19,
+            "rate": 0.006572120373573158,
+            "expected_rate": 0.01,
+            "stat": 3.9038279655231634,
+            "p": 0.04817621987246268,
+            "pass": false
+          },
+          "christoffersen_independence": {
+            "n00": 2852,
+            "n01": 19,
+            "n10": 19,
+            "n11": 0,
+            "stat": 0.25148215610562374,
+            "p": 0.6160333740104542,
+            "pass": true
+          },
+          "basel_binomial": {
+            "zone": "green",
+            "green_cutoff": 38,
+            "yellow_cutoff": 51,
+            "pass": true
+          },
+          "dq": {
+            "stat": 3.7962902627729473,
+            "p": 0.704221090238754,
+            "df": 6,
+            "lags": 4,
+            "pass": true
+          },
+          "trinity_pass": false,
+          "var_dq_gate_pass": false
+        }
+      },
+      "dm_vs_garch": {
+        "HS250_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 7.463701118355781e-05,
+          "stat": 2.115604766772928,
+          "p": 0.0344637612524914,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-SAV_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 6.865668677537534e-06,
+          "stat": 1.9565625553768458,
+          "p": 0.05049509168203037,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-AS_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 1.4266917159929923e-05,
+          "stat": 5.400803807499664,
+          "p": 7.17292887308929e-08,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": true
+        },
+        "CAViaR-IG_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 2.953767878773385e-05,
+          "stat": 1.456443043596965,
+          "p": 0.1453788138062686,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": false
+        },
+        "CAViaR-AD_vs_GJR-GARCH-SkewT": {
+          "n": 2891,
+          "dbar": 0.00034708369210780654,
+          "stat": 3.5734514369950494,
+          "p": 0.0003580663675586404,
+          "nw_lag": 21,
+          "harvey_abs_t_gt_3": true
+        }
+      },
+      "best_mean_pinball_model": "GJR-GARCH-SkewT",
+      "var_dq_gate_pass_models": []
+    }
+  },
+  "overall": {
+    "best_mean_pinball_counts": {
+      "GJR-GARCH-SkewT": 3,
+      "CAViaR-AS": 1
+    },
+    "var_dq_gate_pass_counts": {
+      "GJR-GARCH-SkewT": 3,
+      "CAViaR-AS": 1
+    },
+    "caviar_best_cells": 1,
+    "caviar_harvey_wins_vs_garch": 0,
+    "harvey_abs_t_threshold": 3.0,
+    "verdict": "CONDITIONAL_CAVIAR_COMPETITIVE_NO_HARVEY_EDGE"
+  }
+}
