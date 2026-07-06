@@ -51643,7 +51643,7 @@
     "title": "K267: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K267 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Method: Descriptive categorization of knowledge entries K183-K266",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K267",
@@ -51654,7 +51654,17 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-05T15:08:26+00:00"
+    "created_at": "2026-07-05T15:08:26+00:00",
+    "completed_at": "2026-07-06T07:10:38.346203+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-06T07:10:38.346530+00:00",
+        "from": "pending",
+        "to": "failed",
+        "by": "complete"
+      }
+    ],
+    "result": "K267 是 meta 分類型知識條目(Descriptive categorization of K183-K266, score=0)非研究發現，無 ≥3 可驗證數字/表/圖，不符 evidence-package 硬規則，禁強推寫成一般讀者文章。v1 已失敗同因。"
   },
   {
     "id": "K1624_article_general",
@@ -51744,10 +51754,28 @@
     "id": "paper2_vt_insurance_cost_v3_severe_fixes",
     "task_type": "paper_body",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-06T00:22:00+08:00",
     "description": "vt-insurance-cost v3 修訂：修 v2 review 3 個 SEVERE（主線程 only，禁 background agent 寫 .tex）。S-01: Table 1 標『50/50 monthly rebalancing』但 code 是每日連續零成本再平衡 → 修/改標 benchmark 並重跑相依數字（headline S2 Sharpe 0.63 vs 50/50 0.50 受影響，真月再平衡≈0.59）。S-03: S3 論文公式寫 z<1 固定 0.5 binary blend，code 是連續 clip(z,0,1) blend → 公式對齊 code，補 0.3/0.7 敏感度對應輸出。S-02: Cross-OOS 補跑 2017-18/2021-22 兩窗（heavy → 排 compute_queue）。+ C-01 citation：hasbrouck2009 不支撐 SPY 1-2bps spread 假設，換 source 或改述。報告：paper/vt-insurance-cost/review_history/v2/。",
-    "notes": "source: v2 latex+citation review 2026-07-06"
+    "notes": "source: v2 latex+citation review 2026-07-06",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-07-06T07:11:12.941947+00:00",
+    "claim_session_id": "f110f96d7ca0",
+    "status_history": [
+      {
+        "ts": "2026-07-06T07:11:12.942201+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-15"
+      },
+      {
+        "ts": "2026-07-06T07:11:19.011137+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-15"
+      }
+    ],
+    "started_at": "2026-07-06T07:11:19.010852+00:00"
   },
   {
     "id": "platform_ops_null_id_task_hygiene",
@@ -51791,7 +51819,7 @@
     "title": "vix-sufficiency v5: 修 v4 review 3 SEVERE（主線程 only，禁 background agent 寫 .tex）",
     "priority": 2,
     "description": "v4 review (review_history/v4/, Codex, verdict=REJECT) 3 SEVERE：(1) 研究誠實 critical — Table 6（main_v4.tex:640-649）報 0/5 Harvey pass + 'no signal in any era' 與自家 K752 (k752_...results.json:489-490 any_competing_signal_harvey=true, vix_sufficient_all_eras=false, 多筆 harvey_pass=true vol momentum GFC/COVID) 直接衝突 → reconcile spec 或改敘事，禁 overclaim all-era sufficiency。(2) nested forecast inference 用普通 DM 缺 Clark-West correction。(3) publication-delay/lag convention 前後不一致（Table1 note 197 vs pub-delay 340 vs method 359 vs robustness 851 shift(1)/shift(2) 混），Family10 overnight VIX 用 VIX_open,t (240) forecast origin 需明示。另 8 MAJOR 見 round_readme.md。paper_body = 主線程 only。",
-    "status": "in_progress",
+    "status": "pending",
     "created_at": "2026-07-05T21:19:47.106824+00:00",
     "tags": [
       "paper_body",
@@ -51801,9 +51829,6 @@
       "review-v4"
     ],
     "task_type": "paper_body",
-    "claimed_by": "hourly-12",
-    "claimed_at": "2026-07-06T04:09:51.851169+00:00",
-    "claim_session_id": "95ea88347e9e",
     "status_history": [
       {
         "ts": "2026-07-06T04:09:51.851532+00:00",
@@ -51816,10 +51841,19 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-12"
+      },
+      {
+        "ts": "2026-07-06T06:50:05.480892+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-12",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-06T04:09:58.107983+00:00",
-    "progress": "SEVERE-1 (research-honesty Table6/K752 conflict) FIXED 2026-07-06 hourly-12; main_v5.tex compiles clean 60pp; SEVERE-2(Clark-West)+SEVERE-3(lag convention)+8 MAJOR pending; see review_history/v5_progress.md; NO paper-update until all done (still REJECT)"
+    "progress": "SEVERE-1 (research-honesty Table6/K752 conflict) FIXED 2026-07-06 hourly-12; main_v5.tex compiles clean 60pp; SEVERE-2(Clark-West)+SEVERE-3(lag convention)+8 MAJOR pending; see review_history/v5_progress.md; NO paper-update until all done (still REJECT)",
+    "last_released_at": "2026-07-06T06:50:05.480883+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "paper_review_eav_universal_magnitude_v2",
@@ -52089,7 +52123,7 @@
     "title": "K1652: Wrapped-token price discovery / tokenization spillover 對 crypto vol regime 的預警力** — 用 wBTC / cbBTC / stETH 等 wrapped-tok",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1483). Original: Wrapped-token price discovery / tokenization spillover 對 crypto vol regime 的預警力** — 用 wBTC / cbBTC / stETH 等 wrapped-token 與 native BTC/ETH 的價格、liquidity、bridge-supply 或 DEX pool depth 公開資料，估 information share、basis widening 與 price-discovery latency，檢定 wrapped-token stress 是否領先 BTC/ETH RV regime；與 tokenised Treasury/MMF AUM shock 題正交——那是 T-bill ETF liquidity-vol，這裡是 crypto-native token wrapper basis（來源：SSRN 2025 wrapped-token price-discovery stream + 2026 DeFi/tokenization review）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1652.py with signal.shift(1) + seed=42, (c) K1652_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -52098,7 +52132,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-06T00:00:02Z"
+    "created_at": "2026-07-06T00:00:02Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T07:06:41.798959+00:00",
+    "claim_session_id": "182eead6af40",
+    "status_history": [
+      {
+        "ts": "2026-07-06T07:06:41.799243+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T07:06:55.524754+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T07:06:55.524438+00:00"
   },
   {
     "id": "daily_digest_20260706",
@@ -52235,5 +52287,64 @@
     "started_at": "2026-07-06T02:08:24.930888+00:00",
     "completed_at": "2026-07-06T02:12:23.969608+00:00",
     "result": "audit_silent_fallbacks baseline diff 改為 v2 line-insensitive signature + multiset matching，避免無害行位移造成 NEW。\\n重建 storage/qa/silent_fallback_baseline.json：64/64 findings 皆有 signature；production strict gate new=0/resolved=0。\\n驗證：pytest tests/test_silent_fallback_audit.py 與相關 import tests 共 25 passed。"
+  },
+  {
+    "id": "paper_review_mile_e082beb8",
+    "title": "Paper review (Codex 24h-rule): 盤整越久，真的會噴越兇嗎？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e082beb8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_e082beb8",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-06T07:07:58+00:00"
+  },
+  {
+    "id": "paper_review_mile_4d67163f",
+    "title": "Paper review (Codex 24h-rule): VIX 破 30 就該進場抄底？33 年數據拆解恐慌溢酬的真相",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4d67163f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_4d67163f",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-06T07:07:58+00:00"
+  },
+  {
+    "id": "paper_review_mile_4518e9d8",
+    "title": "Paper review (Codex 24h-rule): 併購案宣布之後，真正該盯的不是股價，是這檔基金的心跳",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4518e9d8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_4518e9d8",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-06T07:07:58+00:00"
+  },
+  {
+    "id": "paper2_vt_insurance_cost_s02_cross_oos_rerun",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-07-06T07:17:56+00:00",
+    "claimed_by": null,
+    "claimed_at": null,
+    "claim_session_id": null,
+    "started_at": null,
+    "status_history": [],
+    "notes": "v3 fix followup (S-02). Parent: paper2_vt_insurance_cost_v3_severe_fixes",
+    "description": "vt-insurance-cost S-02: cross-OOS 補 2017-18/2021-22 兩窗達 6/6。(1) 用 pinned snapshot (auto_adjust=False raw-Close, per project reproduce rule) 改造 cross-OOS runner，window grid 由 4→6：experiments/k811v2/k811v2_insurance_premium_vov_fixed.py line 705-708 加 (\"2017-01-01\",\"2018-12-31\") 與 (\"2021-01-01\",\"2022-12-31\")。(2) 禁 live-fetch yfinance(line 73)+禁覆寫 archived k811v2_..._results.json(line 972)→輸出寫新 JSON。heavy→排 compute_queue。(3) Codex code review 後才採信。(4) 依 6/6 結果更新 main.tex §sec:results/Discussion/abstract success-rate framing：若仍弱則把 S2 降級為 hypothesis-generating in-sample accounting result、移出 contribution tier，只留 threshold-invariant decomposition。報告寫 review_history/v3/。main.tex line194/211 已誠實揭露 provisional，補完後升級 framing 並可推進 submission-ready。"
   }
 ]

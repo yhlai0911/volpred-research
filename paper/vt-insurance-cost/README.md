@@ -1,7 +1,7 @@
 # Paper 4: The True Cost of Volatility Targeting — Insurance Premium Decomposition
 
 **Target Journal**: Finance Research Letters (FRL)
-**Status**: `MAJOR_REVISION` after 2026-06-10 audit. The three HIGH findings are now applied in `main.tex` and logged in `review_history/audit_2026-06-10/fix_log.md`, but the package is **not submission-ready yet** because (a) cross-OOS still covers only 4 of 6 complete two-year windows, and (b) reproduce gate reaches 100% only by widening claim #9 tolerance from 5 to 10 bps. Treat the current state as `body fixed / compute follow-up pending`.
+**Status**: `MAJOR_REVISION`. v3 text fixes applied 2026-07-06 (`review_history/v3/fix_log.md`): **S-01** 50/50 (S4) benchmark relabelled to daily constant-weight (matches code; no reported numbers changed), **S-03** S3 Smooth-VoV equation rewritten to the continuous-clip form actually used in code (unsubstantiated 0.3/0.7 claim removed), **C-01** hasbrouck2009 citation restated to what it supports. Package is **not submission-ready yet** because (a) **S-02**: cross-OOS still covers only 4 of 6 complete two-year windows — 2017–18 / 2021–22 re-runs pending (compute follow-up `paper2_vt_insurance_cost_s02_cross_oos_rerun`), and (b) reproduce gate reaches 100% only by widening claim #9 tolerance from 5 to 10 bps. Current state: `body fixed (S-01/S-03/C-01) / S-02 compute follow-up pending`.
 **Pages**: 14 | **Citations**: 17
 
 ## Data Sources
