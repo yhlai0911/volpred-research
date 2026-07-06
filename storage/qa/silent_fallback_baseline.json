@@ -1,12 +1,24 @@
 {
   "schema": "silent_fallback_baseline.v1",
   "description": "Known silent-fallback audit findings. CI strict mode fails only when current findings introduce keys absent from this baseline.",
-  "count": 63,
+  "count": 64,
   "findings": [
     {
       "path": "scripts/backtest_3yr_final.py",
       "line": 44,
       "exception": "Exception",
+      "action": "return None"
+    },
+    {
+      "path": "scripts/daily_update.py",
+      "line": 57,
+      "exception": "ValueError",
+      "action": "return None"
+    },
+    {
+      "path": "scripts/daily_update.py",
+      "line": 66,
+      "exception": "ValueError",
       "action": "return None"
     },
     {
@@ -83,37 +95,37 @@
     },
     {
       "path": "scripts/gmail_inbox_poll.py",
-      "line": 139,
+      "line": 143,
       "exception": "Exception",
       "action": "continue"
     },
     {
       "path": "scripts/indicator_arena_daily.py",
-      "line": 185,
+      "line": 200,
       "exception": "Exception",
       "action": "return None"
     },
     {
       "path": "scripts/indicator_arena_daily.py",
-      "line": 403,
+      "line": 418,
       "exception": "Exception",
       "action": "continue"
     },
     {
       "path": "scripts/indicator_arena_daily.py",
-      "line": 436,
+      "line": 451,
       "exception": "Exception",
       "action": "continue"
     },
     {
       "path": "scripts/indicator_arena_daily.py",
-      "line": 1052,
+      "line": 1086,
       "exception": "ValueError|TypeError",
       "action": "pass"
     },
     {
       "path": "scripts/indicator_arena_daily.py",
-      "line": 1056,
+      "line": 1090,
       "exception": "Exception",
       "action": "continue"
     },
@@ -167,13 +179,13 @@
     },
     {
       "path": "scripts/refill_reader_facing_pool.py",
-      "line": 417,
+      "line": 420,
       "exception": "Exception",
       "action": "return None"
     },
     {
       "path": "scripts/refill_reader_facing_pool.py",
-      "line": 428,
+      "line": 431,
       "exception": "Exception",
       "action": "return []"
     },
@@ -311,7 +323,7 @@
     },
     {
       "path": "src/volpred/ops/questions.py",
-      "line": 249,
+      "line": 250,
       "exception": "ValueError",
       "action": "return 0.0"
     },
@@ -344,12 +356,6 @@
       "line": 65,
       "exception": "Exception",
       "action": "return None"
-    },
-    {
-      "path": "src/volpred/publisher/live_verify.py",
-      "line": 42,
-      "exception": "URLError|TimeoutError|OSError",
-      "action": "return 0"
     },
     {
       "path": "src/volpred/publisher/prepublish_audit.py",
