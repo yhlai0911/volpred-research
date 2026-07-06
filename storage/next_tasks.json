@@ -52597,7 +52597,7 @@
     "title": "Paper review (Codex 24h-rule): 盤整越久，真的會噴越兇嗎？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e082beb8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_e082beb8",
@@ -52605,7 +52605,25 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-06T07:07:58+00:00"
+    "created_at": "2026-07-06T07:07:58+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-07-06T21:10:20.912681+00:00",
+    "claim_session_id": "fc37f8775601",
+    "status_history": [
+      {
+        "ts": "2026-07-06T21:10:20.912965+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-06T21:10:21.150289+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-05"
+      }
+    ],
+    "started_at": "2026-07-06T21:10:21.150012+00:00"
   },
   {
     "id": "paper_review_mile_4d67163f",
@@ -53209,7 +53227,7 @@
     "title": "研究 backlog fallback: EVT（POT/GPD 尾）× GARCH-filter 的 ES 估計 + e-backtesting 賽馬",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: EVT（POT/GPD 尾）× GARCH-filter 的 ES 估計 + e-backtesting 賽馬 — GARCH 濾殘差後 GPD 配尾算 ES，對比 FHS 與參數常態/t，用 e-backtest 評分；直服 Basel IV ES 監理時效（來源：Risks 2026 e-backtesting ES + FRTB 2025） | 來源 section: 期刊主題挖掘 batch（2026-07-04；**內容飽和觸發** — refill 補不出 fresh reader-facing（所有 uncovered k 皆 arc-dedup 判 dup），hourly-19 派 journal-discovery agent 拓展疆域。刻意鎖 model-class / methodology 軸，避開兩個已飽和 null 弧：「獵奇外生 shock→次日 rv event-window」（k1602/k1604 ~15 連 null）與「新 covariate→har oos 增量」（k1613/k1616-k1619 連 null）。全新模型家族 = 新 k = 非 arc-dup 新文章角度。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -53218,7 +53236,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-06T20:09:02+00:00"
+    "created_at": "2026-07-06T20:09:02+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T20:59:03.318667+00:00",
+    "claim_session_id": "54674d3e3df0",
+    "status_history": [
+      {
+        "ts": "2026-07-06T20:59:03.318946+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T20:59:07.616183+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T21:11:46.079251+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T20:59:07.615909+00:00",
+    "completed_at": "2026-07-06T21:11:46.078975+00:00",
+    "result": "Completed SPY/HYG GJR-filtered EVT-GPD VaR/ES experiment with true ES e-backtesting. Verdict: EVT_GPD_COMPETITIVE_NOT_DOMINANT — EVT wins SPY FZ cells and reduces e-detections, Student-t wins HYG. Artifacts, Codex review, knowledge, work_log, research_program updated."
   },
   {
     "id": "paper2_taiwan_vt_rolling_block_reestimate",
@@ -53228,5 +53272,21 @@
     "created_at": "2026-07-07T04:31:09.399347",
     "title": "taiwan-vt tab:gamma rolling-block: integrate reproducible re-estimates + rewrite 0056 sensitivity prose",
     "description": "Holistic correction of body_v3.tex tab:gamma rolling-window (w=2000) block, now that the legacy N121 values are proven NON-REPRODUCIBLE (experiments/paper2_taiwan_indiv_rolling_gamma, Codex CONDITIONAL_PASS). Reproducible values (recompute FIRST on calendar-aligned snapshots per Codex caveat — 2886 snapshot currently ends 2025-01): 2317 0.032/0.92, 2454 0.045/1.54, 2886 0.054/1.41, 0056 0.310/3.92, 9-stock rolling avg 0.037 (ratio 7.4x), 10-security 0.064 (ratio 4.3x). TASKS: (1) re-run experiment on calendar-aligned (uniform end-date) snapshots for all 10 securities; (2) update the 3 displayed individual rows + 0056 row + both rolling averages + footnote ratios to reproducible values with %source binding; (3) REWRITE the 0056-inclusion sensitivity paragraph — 0056 is no longer 'second-highest 0.112' but the HIGHEST (0.310, above index 0.272), which STRENGTHENS the diversification-amplification thesis (ETF-internal aggregation -> strongest leverage) but changes the prose logic and requires author sign-off; (4) resolve TWII rolling gamma provenance (0.272 untraceable N120) and 0050 rows if touched; (5) main_v3.tex recompile + reproduce.py rebind + paper-update. MAIN-THREAD ONLY (narrative decision). PRIMARY full-sample claim (gamma_bar=0.027, 4.3x, K1302+K1302b VERIFIED) is UNAFFECTED. Parent: paper2_taiwan_vt_body_v3_individual_stock_provenance. Paper gated do_not_advance=true until done."
+  },
+  {
+    "id": "research_growth_at_risk_equity_vol_at_risk_horizon",
+    "title": "研究 backlog fallback: Growth-at-Risk 搬到市場：以金融條件做「Equity/Vol-at-Risk」多 horizon 分位回歸",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Growth-at-Risk 搬到市場：以金融條件做「Equity/Vol-at-Risk」多 horizon 分位回歸 — FRED NFCI/信用利差 + yfinance，仿 Adrian et al. GaR，對 SPY 前瞻報酬/RV 的 5% 左尾分位 quantile regression（外生金融條件 conditioning + 對象是尾部而非均值，避 covariate→HAR-mean NULL 弧）（來源：Adrian et al. AER 2019 + IMF 2025 ML-GaR） | 來源 section: 期刊主題挖掘 batch（2026-07-04；**內容飽和觸發** — refill 補不出 fresh reader-facing（所有 uncovered k 皆 arc-dedup 判 dup），hourly-19 派 journal-discovery agent 拓展疆域。刻意鎖 model-class / methodology 軸，避開兩個已飽和 null 弧：「獵奇外生 shock→次日 rv event-window」（k1602/k1604 ~15 連 null）與「新 covariate→har oos 增量」（k1613/k1616-k1619 連 null）。全新模型家族 = 新 k = 非 arc-dup 新文章角度。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "growth_at_risk_equity_vol_at_risk_horizon",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-06T21:08:57+00:00"
   }
 ]
