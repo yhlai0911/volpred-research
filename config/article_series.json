@@ -57,6 +57,22 @@
       "no_episode_numbers": true,
       "definition": "會員提問經 4 維度評分 → research → 回答文章。既有慣例。",
       "membership_criteria": "task_type / content_type == 'member_qa'"
+    },
+    "event_thermometer": {
+      "display_name": "事件溫度計",
+      "emoji": "🌡️",
+      "branding": "title_prefix",
+      "prefix": "事件溫度計｜",
+      "no_episode_numbers": true,
+      "definition": "即期事件（FOMC / CPI / 非農 / 財報 / 重大宣告）的前後分析：事件前市場定位 vs 事件後實際反應，量『市場預期 vs 真實波動』的落差。boss 2026-07-06 定名。",
+      "membership_criteria": "timely event before/after analysis；權威標記 = details.event_series_slot（event_jobs slot）；going-forward 新 event_article 一律掛前綴。研究-about-events 的一般統計文章（如 K185 FOMC效應 / K617 台積電營收）不屬本系列。",
+      "members_published": [
+        "mile_0e1eb5aa",
+        "mile_ebb5d6f5",
+        "mile_91692461",
+        "mile_fef2e0b2"
+      ],
+      "note": "帶 event_series_slot 標記者 4 篇（皆 published）已納入。更早的 event-flavored 文章（NFP/CPI 預告/盤後）未帶 marker → 未溯及品牌化；如需擴大 scope boss 指示即可。going-forward：event_article 發佈時把 id 加進 members_published 後跑 scripts/series_registry.py --apply。"
     }
   }
 }

@@ -96,6 +96,10 @@ paths:
     **同一迷思若有多篇（如 VIX K1633 `mile_4d67163f` vs K1640 `mile_19e264ee`）→ 留 1 篇 published、
     其餘 `unpublished`**（不可用 `draft`，draft 會被 release-pool 重發）。
   - **會員提問｜** — member_qa 既有慣例（member-questions skill 已在用）。
+  - **事件溫度計｜** 🌡️（boss 2026-07-06 定名）— 即期事件（FOMC/CPI/非農/財報/重大宣告）**前後分析**：
+    事件前市場定位 vs 事件後實際反應。權威 marker = `details.event_series_slot`；已品牌化 4 篇，
+    **going-forward event_article 一律掛前綴**（發佈時加進 registry members + `series_registry.py --apply`）。
+    研究-about-events 的一般統計文（K185 FOMC效應 / K617 台積電營收）**不屬**本系列。
 
   **機制 B — 前端專屬區塊品牌化（標題本身不加前綴）**：
   - **每日精選導讀**（daily_digest）— **是正式系列**，但品牌化在前端元件而非標題：
