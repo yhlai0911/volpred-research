@@ -68,6 +68,35 @@ paths:
 **其餘 digest 規格**（具名可帶走方法、inline 引用標源、圖表分工、金標竿範例）詳見
 `scripts/enqueue_daily_digest.py` 的 `DESCRIPTION`（單一詳細來源，不在此重複）。
 
+### 系列/專題標題前綴慣例（2026-07-06 新增 — boss 指令）
+
+**成系列的專題文章，標題前面冠系列名：`系列名｜實際標題`**（boss 2026-07-06 要求）。目的：讓讀者
+一眼看出這篇屬於哪個系列，累積系列辨識度、驅動回訪（服務 Mission #1 內容 + #5 流量）。
+
+**硬規則**：
+- **分隔符一律用全形 `｜`（U+FF5C），禁用半形 `|`。** 半形 `|` 在本平台標題保留給數學絕對值
+  （`|t|`、`|OFI|`、`|報酬|`、`|偏態|`）與 Markdown 表格 —— 用半形當系列前綴會與絕對值 notation
+  碰撞（見本檔 §「Markdown 表格 cell 內 `|` 必跳脫」）。
+- 系列名短（≤6 字理想），放最前；`｜` 後接原本的爆款標題（標題其餘部分照 4 維度品質要求）。
+- **只有 recurring 成系列的專題才加前綴**；一次性研究/事件文章**不加**（不是每篇都要前綴）。
+- **已註冊系列 canonical list**（新增系列在此登記：系列名 + 一句定義 + 首篇範例）：
+  - **迷思破解｜** — 破除市場 / 投資常見迷思的系列。既有 4 篇 mid-title「迷思」文章屬此系列
+    （`Sell in May…5 個月份迷思`、`財報季選股的迷思…`、`64% 準確率的美股跟單幻覺…迷思`、
+    `「策略越簡單越好」是個迷思…`）。範例：`迷思破解｜Sell in May 真能避風險？33 年數據打臉`。
+  - **會員提問｜** — member_qa 既有慣例（沿用；member-questions skill 已在用）。
+- 系列名可由 boss 隨時 rename / 增列（口頭一句即改此清單）。
+
+**例外（不加系列前綴）**：
+- **daily_digest（精選導讀）**：title **不可**以 `每日精選導讀｜` 起頭 —— 前端已顯示此區塊標頭，
+  重複贅字（見 task-routing.md daily_digest 列）。digest 用專題式標題，不套系列前綴。
+- 一次性文章（單一 K 研究、單次事件）。
+
+**寫作 agent 適用**：派 daily_article / trending_repost / event_article agent 時，若該篇屬已註冊系列，
+brief 必明寫「標題格式 `系列名｜<你的標題>`，分隔符用全形 `｜` 不是半形 `|`」。
+
+**未來可機械化（尚未做）**：若文章在 `details.series` 宣告所屬系列，publisher 可 gate「title 是否以
+`<series>｜` 起頭」。目前是 prose 慣例；等 series 成為結構化欄位再升級成 gate（避免現在憑猜測擋文章）。
+
 ### Audience Gate（2026-05-26 新增 — mile_d0d66405 incident）
 
 **`_infer_audience` 是 source of truth，agent 提供的 audience 只是 hint。**
