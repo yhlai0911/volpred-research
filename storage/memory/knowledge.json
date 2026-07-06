@@ -37852,5 +37852,18 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-07-06T14:02:25.842474"
+  },
+  {
+    "item_id": "38f01e7b",
+    "category": "research_findings",
+    "content": "K1652 completed 2026-07-06. experiment_id=k1652; experiment_path=experiments/k1652/; reviewer=Codex primary path; verdict=CONDITIONAL_PASS_MIXED. Question: do daily wrapped-token basis/liquidity proxies (BTC/WBTC, ETH/stETH, ETH/cbETH, ETH/WETH) add OOS predictive value for native BTC/ETH next-day squared returns beyond lagged native-vol baselines? Data: Yahoo Finance daily adjusted close+volume, 2019-01-01..2026-07-04, effective samples: BTC/WBTC n=2460 (OOS 984), ETH/stETH n=1767 (OOS 707), ETH/cbETH n=1158 (OOS 464), ETH/WETH n=2489 (OOS 996). Method: chronological 60/40 split; baseline Ridge on lagged log RV / 7d RV / 30d RV / abs return; augmented adds lagged wrapped/native basis, abs basis, widening, basis z-score, large-basis indicator, volume ratio, wrapped abs return; all features use signal.shift(1) equivalent via raw_features.shift(1); high-vol labels use expanding 75th percentile threshold shifted by one day; seed=42; QLIKE/DM via volpred.stats.model_evaluation with Harvey |t|>3. Findings: QLIKE improves for all 4 pairs; Harvey-significant augmented QLIKE wins in BTC/WBTC (t=-4.23, +2.14% QLIKE), ETH/cbETH (t=-5.93, +56.51%), and ETH/WETH (t=-3.37, +3.06%); ETH/stETH improves +8.16% but t=-1.95, not Harvey. Stress-only robustness excluding basis level and wrapped abs return still passes BTC/WBTC (t=-4.06), ETH/cbETH (t=-5.94), and ETH/WETH (t=-3.16). However MSE never passes Harvey and high-vol classification AUC is flat or worse (cbETH AUC delta -0.053). Interpretation: daily wrapped-token stress has conditional variance-loss information, especially BTC/WBTC, but this is NOT a clean vol-regime classifier and NOT high-frequency price discovery evidence. cbETH basis is structurally large due liquid-staking economics; Yahoo volume is not DEX depth/bridge supply. Next step: high-frequency BTC/WBTC CEX/DEX information-share + on-chain liquidity/bridge data.",
+    "evidence": [
+      "experiments/k1652/README.md",
+      "experiments/k1652/k1652.py",
+      "experiments/k1652/k1652_results.json",
+      "experiments/k1652/codex_review.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-07-06T15:23:05.730460"
   }
 ]

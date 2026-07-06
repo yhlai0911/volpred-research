@@ -52131,7 +52131,7 @@
     "title": "K1652: Wrapped-token price discovery / tokenization spillover 對 crypto vol regime 的預警力** — 用 wBTC / cbBTC / stETH 等 wrapped-tok",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1483). Original: Wrapped-token price discovery / tokenization spillover 對 crypto vol regime 的預警力** — 用 wBTC / cbBTC / stETH 等 wrapped-token 與 native BTC/ETH 的價格、liquidity、bridge-supply 或 DEX pool depth 公開資料，估 information share、basis widening 與 price-discovery latency，檢定 wrapped-token stress 是否領先 BTC/ETH RV regime；與 tokenised Treasury/MMF AUM shock 題正交——那是 T-bill ETF liquidity-vol，這裡是 crypto-native token wrapper basis（來源：SSRN 2025 wrapped-token price-discovery stream + 2026 DeFi/tokenization review）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1652.py with signal.shift(1) + seed=42, (c) K1652_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -52156,9 +52156,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T07:23:29.443945+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-06T07:06:55.524438+00:00"
+    "started_at": "2026-07-06T07:06:55.524438+00:00",
+    "completed_at": "2026-07-06T07:23:29.443655+00:00",
+    "result": "K1652 completed: daily BTC/WBTC and ETH wrapped-token basis features improve QLIKE in 3/4 pairs under Harvey gate, but MSE/classification weak; verdict CONDITIONAL_MIXED_DAILY_PROXY; outputs in experiments/k1652 and knowledge item 38f01e7b."
   },
   {
     "id": "daily_digest_20260706",
