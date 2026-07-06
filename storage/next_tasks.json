@@ -53077,5 +53077,63 @@
     "started_at": "2026-07-06T18:39:31.973396+00:00",
     "completed_at": "2026-07-06T18:51:19.521339+00:00",
     "result": "Published K1640 research-audience draft as mile_c0aaf4e5 in storage/reports/feed.json; added source draft storage/drafts/K1640_research_draft.md with two Supabase-hosted K1640 figures. Passed publish_draft dry-run and anti_ai_gate; feed-sync --apply was attempted but interrupted after full-reconcile hang, so canonical local feed is updated while remote projection may wait for the scheduled sync."
+  },
+  {
+    "id": "K1590_article_research",
+    "title": "K1590: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1590 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no research article in feed.json.  Verdict preview: K1590 merger-arbitrage deal-spread volatility diagnostic is a GO for Phase 2, with Codex review verdict CONDITIONAL_PASS. Data: yfinance adjusted closes (auto_adjust=False) for MNA/SPY/IWM/HYG/^VIX, price range 2020-01-02 to 2026-06-30, MNA return sample N=1629. Core gate evidenc",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1590",
+    "tags": [
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-06T19:08:02+00:00"
+  },
+  {
+    "id": "K1653",
+    "title": "K1653: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1498). Original: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1653.py with signal.shift(1) + seed=42, (c) K1653_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "succeeded",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1498,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-06T19:08:05Z",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-07-06T19:09:48.396146+00:00",
+    "claim_session_id": "91e979048143",
+    "status_history": [
+      {
+        "ts": "2026-07-06T19:09:48.396465+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-06T19:11:22.686277+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-06T19:36:48.819855+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-03"
+      }
+    ],
+    "started_at": "2026-07-06T19:11:22.685991+00:00",
+    "completed_at": "2026-07-06T19:36:48.819477+00:00",
+    "result": "K1653 experiment done: NULL — 兩迷思(量先價行/爆量長黑出貨)皆破解跨市場一致(TW0050 n=2796+SPY n=3645, seed=42, shift(1)); code-reviewer subagent PASS(Codex 2x timeout fallback); knowledge 7a51bb69"
   }
 ]
