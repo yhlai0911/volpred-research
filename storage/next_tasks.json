@@ -51950,7 +51950,7 @@
     "title": "K1649: Expectile 型風險測度（EVaR / CARE）：唯一「同時 coherent + elicitable」的尾部量 — 非對稱最小平方估 expectile-VaR + CARE，對照 quantile-VaR 的 backtest",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 494). Original: Expectile 型風險測度（EVaR / CARE）：唯一「同時 coherent + elicitable」的尾部量 — 非對稱最小平方估 expectile-VaR + CARE，對照 quantile-VaR 的 backtest 可檢定性（來源：ScienceDirect 2023 Basel III→IV expectile + 2025-26 elicitability）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1649.py with signal.shift(1) + seed=42, (c) K1649_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -51959,7 +51959,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-06T00:00:01Z"
+    "created_at": "2026-07-06T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T04:31:22.005533+00:00",
+    "claim_session_id": "0549f0d51de1",
+    "status_history": [
+      {
+        "ts": "2026-07-06T04:31:22.005819+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T04:31:27.683429+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T04:42:20.930396+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T04:31:27.683116+00:00",
+    "completed_at": "2026-07-06T04:42:20.930103+00:00",
+    "result": "K1649 completed. Built reproducible expectile-VaR/CARE vs quantile-VaR backtest on TLT/HYG with seed=42, strict t-1 lag, quarterly expanding refit, JSON/parquet/figures/README outputs. Verdict: NULL_NO_EXPECTILE_EDGE_VS_LINEARQR; no expectile-vs-LinearQR DM comparison passed Harvey |t|>3."
   },
   {
     "id": "K1651",
