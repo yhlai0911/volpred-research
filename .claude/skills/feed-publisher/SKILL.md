@@ -41,7 +41,7 @@ Do **not** use this skill for：
 
 1. **深度**：解釋 mechanism（不只描述結果）；≥1 個 counter-intuitive insight 或方法論教訓；cross-reference ≥3 個相關 K；無廢話段落
 2. **可讀性**：punchy title（避免「K908: ...」式命名）；hook 式 intro；段落 ≤5 句；專有名詞首次定義；結尾一句話 take-away
-   - **系列前綴**：若該篇屬**已註冊系列**（如 `迷思實驗室 EP.X｜` 🧪、`會員提問｜`），標題格式為 `系列名｜實際標題`（迷思實驗室要掛集數 `迷思實驗室 EP.X｜<標題>`），**分隔符用全形 `｜` 不是半形 `|`**（半形保留給絕對值 `|t|` 與表格）。系列 canonical list + EP 編號 + 例外（digest 不加前綴）見 `.claude/rules/publishing.md` §「系列/專題標題前綴慣例」。一次性文章不加前綴。
+   - **系列前綴**：若該篇屬**已註冊系列**（如 `迷思實驗室｜` 🧪、`會員提問｜`），標題格式為 `系列名｜實際標題`（迷思實驗室**不掛集數、純前綴** `迷思實驗室｜<標題>`），**分隔符用全形 `｜` 不是半形 `|`**（半形保留給絕對值 `|t|` 與表格）。系列 canonical list + 兩種品牌化機制（A 標題前綴 / B 前端 masthead 如 daily_digest 不加前綴）見 `.claude/rules/publishing.md` §「系列/專題標題前綴慣例」。一次性文章不加前綴。
 3. **資訊性**：真實圖表 ≥2 張（matplotlib PNG，禁 ASCII）；具體數字（不寫「顯著改善」空話）；標明資料來源 + 統計方法（Harvey/Kupiec/DM 等）+ 樣本數與期間
 4. **參考性**：cross-link ≥3 個相關 K/paper/experiment；延伸閱讀段落；reproduce method 簡述（script + results.json 路徑）；文末標 K 編號 + 資料來源
 
