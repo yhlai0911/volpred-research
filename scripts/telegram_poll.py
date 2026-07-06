@@ -40,6 +40,7 @@ from volpred.ops.telegram import (  # noqa: E402
     send_telegram,
 )
 from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
+from volpred.ops.diagnostics import warn  # noqa: E402
 
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 INBOX = ROOT / "storage" / "ops" / "telegram_inbox.jsonl"
@@ -55,7 +56,11 @@ def _parse_state_datetime(raw: object) -> datetime | None:
         return None
     try:
         parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-    except ValueError:
+    except ValueError as exc:
+        # Only genuine corruption reaches here (absent/empty caught above); a
+        # bad self-written timestamp → None (caller self-heals) but must be
+        # visible per no-silent-fallback rule.
+        warn("telegram_poll_state", "unparseable state datetime", raw=raw[:40], err=str(exc))
         return None
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
