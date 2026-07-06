@@ -52384,7 +52384,7 @@
     "title": "Paper review (Codex 24h-rule): 併購案宣布之後，真正該盯的不是股價，是這檔基金的心跳",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4518e9d8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_4518e9d8",
@@ -52412,11 +52412,34 @@
         "to": "pending",
         "by": "hourly-17",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-06T13:02:59.961404+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T13:03:04.987703+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T13:06:25.538168+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-06T09:08:52.606054+00:00",
+    "started_at": "2026-07-06T13:03:04.987339+00:00",
     "last_released_at": "2026-07-06T11:50:03.912068+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T13:02:59.961137+00:00",
+    "claim_session_id": "90c98e5c48ed",
+    "completed_at": "2026-07-06T13:06:25.537859+00:00",
+    "result": "Codex 24h review completed for mile_4518e9d8 / K1590. Verdict PASS_WITH_CAVEATS: article numbers match k1590_diagnostic_results.json and no forecast/trading/DM-Harvey overclaim found. Review recorded at experiments/k1590/reviews/paper_review_mile_4518e9d8_codex_20260706.md and feed metadata updated."
   },
   {
     "id": "paper2_vt_insurance_cost_s02_cross_oos_rerun",
