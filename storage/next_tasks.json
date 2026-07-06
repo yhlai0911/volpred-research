@@ -51937,5 +51937,73 @@
       }
     ],
     "started_at": "2026-07-06T01:10:59.271489+00:00"
+  },
+  {
+    "id": "telegram-213",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-06T01:35:11.481974+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 213）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nPush再不修好 立刻去死\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-06T01:36:19.692786+00:00",
+    "claim_session_id": "2f1eb2772cc7",
+    "status_history": [
+      {
+        "ts": "2026-07-06T01:36:19.693095+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-06T01:47:59.543536+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-06T01:47:59.543238+00:00",
+    "result": "silent-fallback baseline 刷新(new=0)+重跑 wrapper 解封，push 0/0 已同步；排 P2 結構性修正任務"
+  },
+  {
+    "id": "telegram-215",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-06T01:35:46.289702+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 215）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nDreaming再不修好 立刻去死\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-06T01:36:19.936179+00:00",
+    "claim_session_id": "e887c96d150f",
+    "status_history": [
+      {
+        "ts": "2026-07-06T01:36:19.936500+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-06T01:47:59.785843+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-06T01:47:59.785564+00:00",
+    "result": "loop_health._scan_cron_exit_signatures 加 _BENIGN_CRON_EXIT_CODES(120)，error_recurrence warn->ok，17 tests 綠，已推"
+  },
+  {
+    "id": "platform_ops_silent_fallback_gate_churn",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "auto_discovered",
+    "status": "pending",
+    "created_at": "2026-07-06T01:47:22.424509+00:00",
+    "title": "silent-fallback push gate 反覆卡 push（strike 2）— 讓 gate 對良性 guard churn 免疫",
+    "description": "根因：scripts/audit_silent_fallbacks.py 的 baseline 以 (file,line,pattern) 為 key，任何 agent 編輯這些 script 造成行位移或新增良性 parse/multistart/decode guard，就被 strict gate 標為 NEW → cron_git_push_backup.sh HELD push → 每次都要人工 refresh baseline + 重跑 wrapper 解封。已發生 ≥2 次（commit 148117352 + 2026-07-06 telegram-responder 手動解封），屬 3-strike 前兆。\n\n目標：讓 gate 只擋『真正新的、未標記的 silent fallback』，對良性 guard 的行位移/等價重寫免疫。候選方案（擇一或組合，需先診斷）：(a) baseline key 改成行位移不敏感（file+pattern+normalized-context hash，不含絕對行號）；(b) 白名單良性 pattern class（isoformat ValueError→return None、multistart MLE except→continue、decode/import guard）自動不 flag；(c) push wrapper HELD 時自動判斷 delta 是否全屬良性 pattern class，是則自動 refresh baseline + push（附 audit log），只有非良性才 hold+alert。\n\n驗證 gate：(1) 對這些 script 做無害行位移，gate 不再報 NEW；(2) 真新增一個未標記 bare except: pass 仍被擋；(3) tests/test_silent_fallback_audit.py 綠。\n\n相關：.claude/rules/no-silent-fallback.md、memory feedback_fix_silent_fallback_immediately、docs/error_log.md 2026-07-03 exit120 entry。"
   }
 ]
