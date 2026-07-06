@@ -51874,7 +51874,7 @@
     "title": "K1647: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 468). Original: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1647.py with signal.shift(1) + seed=42, (c) K1647_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -51884,9 +51884,6 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-06T00:00:01Z",
-    "claimed_by": "hourly-10",
-    "claimed_at": "2026-07-06T02:11:22.011922+00:00",
-    "claim_session_id": "bea7fcbc4c21",
     "status_history": [
       {
         "ts": "2026-07-06T02:11:22.012269+00:00",
@@ -51899,9 +51896,41 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-10"
+      },
+      {
+        "ts": "2026-07-06T04:50:05.008012+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-10",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-06T05:10:15.141521+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-06T05:10:15.388091+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-06T05:26:54.375316+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-13"
       }
     ],
-    "started_at": "2026-07-06T02:11:22.257772+00:00"
+    "started_at": "2026-07-06T05:10:15.387706+00:00",
+    "last_released_at": "2026-07-06T04:50:05.008002+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-07-06T05:10:15.141217+00:00",
+    "claim_session_id": "bcf58ab80865",
+    "completed_at": "2026-07-06T05:26:54.375047+00:00",
+    "result": "salvaged orphan-worktree script, fixed int64 json bug, ran full analysis (N=4104, 2010-2026). CONDITIONAL_PASS_NULL: oil RV has no incremental lag-1 predictive power for equity RV (VIX-controlled, bootstrap-confirmed, Parkinson-robust); reverse equity->oil sig. code-reviewer fallback (Codex hung). knowledge K1647 written, README Granger-reconciliation overclaim corrected."
   },
   {
     "id": "K1648",

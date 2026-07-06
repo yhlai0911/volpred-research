@@ -37819,5 +37819,25 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-07-06T11:21:51.306720"
+  },
+  {
+    "item_id": "25c96cde",
+    "k_id": "K1647",
+    "experiment_id": "k1647",
+    "experiment_path": "experiments/k1647/",
+    "category": "methodology",
+    "verdict": "CONDITIONAL_PASS_NULL",
+    "reviewer": "feature-dev:code-reviewer subagent fallback (Codex companion runtime hung; per experiments.md fallback)",
+    "confidence": 0.82,
+    "content": "K1647 (oil realized-vol -> equity realized-vol spillover, CL=F/USO -> SPY/XLE, bidirectional, VIX-controlled; yfinance daily 2010-02-03..2026-07-02, N=4104): CONDITIONAL_PASS directional NULL. Core finding: oil RV has NO incremental lag-1 predictive power for equity RV. One-step HAC(21) predictive regression eq_logRV[t] ~ oil_logRV[t-1] + eq_logRV[t-1] (+ VIX_logRV[t-1]): all 4 pairs (CL/USO -> SPY/XLE) non-significant, b in [0.0001,0.0007], HAC p 0.88-0.98, stationary-bootstrap 95% CI straddles 0 BEFORE and AFTER VIX control; Parkinson range-vol robustness also null (p 0.12-0.37). REVERSE direction equity->oil IS significant: SPY->CL b=+0.0099 p=0.008, SPY->USO b=+0.0088 p=0.012, XLE->CL b=+0.0111 p=0.024, XLE->USO p=0.053 (marginal). Diebold-Yilmaz generalized FEVD: total spillover 46.5% (VAR lag 5) but net magnitudes tiny (CL +0.1, USO +1.5, SPY -0.9, XLE -0.7 %); coupling is mostly CONTEMPORANEOUS (contemp corr CL-XLE 0.68, CL-SPY 0.52). Oil share of equity FEV higher for XLE (11-13%) than SPY (5-6%) but energy stocks are still net RECEIVERS not senders. All series ADF stationary. Extends/generalizes K422 (which found oil->SPX Granger sig but oil->equity-vol NS after VIX): K1647 adds XLE energy-sector target, dual CL=F vs USO oil proxy, reverse-direction test, and shows the lag-1 RV->RV null holds even WITHOUT VIX control. CAVEAT (reviewer required, research-honesty): Granger F-test shows CL/USO->SPY sig at lag 4-5 while lag-1 one-step reg is null; this is NOT a 'own-AR control on/off' contrast (Granger already includes own lags; no no-control spec was run). Honest reconciliation: classical Granger F is not HAC-robust (can be inflated by overlapping-window MA(20) residual autocorrelation) and/or reflects multi-day lag-4-5 dynamics outside the lag-1 core spec's scope; mechanism NOT directly tested. Implication: crude-oil vol is not a tradable leading signal for equity vol; lead-lag runs equity->oil.",
+    "evidence": [
+      "experiments/k1647/k1647_results.json",
+      "experiments/k1647/k1647.py",
+      "experiments/k1647/README.md",
+      "predictive oil->equity: HAC p in [0.88,0.98], boot CI straddles 0 (raw & +VIX)",
+      "equity->oil: SPY->CL p=0.008, SPY->USO p=0.012, XLE->CL p=0.024",
+      "DY total 46.5%, net all within +/-1.5%; contemp corr CL-XLE 0.68"
+    ],
+    "created_at": "2026-07-06T13:25:29.629461"
   }
 ]

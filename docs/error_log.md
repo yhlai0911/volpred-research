@@ -4658,3 +4658,8 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 **Fix**：telegram-132 回覆同時掛背景 watcher（nohup+disown，不受該次 session 結束影響）：等 legacy 16:07 那次真派工的 `cron_hourly_dispatch.sh` process 自然結束後（不中斷進行中的真實工作）立即 `launchctl bootout gui/<uid>/com.volpred.hourly-dispatch`，log 在 `~/.volpred/logs/dispatch_supervisor_cutover_fix.log`。另補 P1 驗證任務 `verify-legacy-hourly-dispatch-boot-out-20260704` 供下一輪 dispatch 覆核。
 
 **教訓（PDCA）**：任何「退役 LaunchAgent」的 cutover 步驟，若該 job **當下已是 loaded/active 狀態**，必須用 `launchctl bootout` 完整卸載（配合先 `disable` 防止重載），**只 `disable` 不 `bootout` = 沒退役，舊排程照樣觸發**。日後 plist 註解寫 rollback / cutover 步驟時，兩者都要列且要在完成後用 `launchctl list | grep <label>` 實際確認 job 已消失，不能只憑 `print-disabled` 的 disabled 狀態判斷「已經退役」。
+
+## 2026-07-06 13:2x — Codex companion runtime 掛住零 output（observability note，非 3-strike）
+- **症狀**：K1647 code review 三次呼叫 `codex exec`（背景 + 同步），wrapper 進程（`CODEX_COMPANION_SESSION`）活著但 output file 0 bytes 數分鐘不動，未報錯亦無結果。task-notification 最終回 exit 144（被我 pkill）。
+- **處置**：依 `.claude/rules/experiments.md` fallback 條款，pkill 掛住進程 → 改派 `feature-dev:code-reviewer` subagent 做 independent fresh-context review（258s 完成，CONDITIONAL_PASS，且抓到 README Granger reconciliation 過度宣稱 → 已修）。
+- **判定**：單次 hang，記為 strike 1（observability）。Codex diagnostic 5 步未跑（因 fallback 已解決當次任務）；若下次再現先跑 `codex --version` / `codex login status` / config model 檢查。fallback path 有效，未 block 研究誠實 gate。
