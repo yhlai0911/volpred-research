@@ -52358,7 +52358,7 @@
     "title": "Paper review (Codex 24h-rule): 併購案宣布之後，真正該盯的不是股價，是這檔基金的心跳",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4518e9d8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_4518e9d8",
@@ -52367,9 +52367,6 @@
       "codex-24h-rule"
     ],
     "created_at": "2026-07-06T07:07:58+00:00",
-    "claimed_by": "hourly-17",
-    "claimed_at": "2026-07-06T09:08:52.361602+00:00",
-    "claim_session_id": "7d5941e06744",
     "status_history": [
       {
         "ts": "2026-07-06T09:08:52.361892+00:00",
@@ -52382,9 +52379,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-06T11:50:03.912078+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-17",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-06T09:08:52.606054+00:00"
+    "started_at": "2026-07-06T09:08:52.606054+00:00",
+    "last_released_at": "2026-07-06T11:50:03.912068+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "paper2_vt_insurance_cost_s02_cross_oos_rerun",
