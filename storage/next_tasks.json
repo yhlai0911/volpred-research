@@ -51765,7 +51765,7 @@
     "title": "vix-sufficiency v5: 修 v4 review 3 SEVERE（主線程 only，禁 background agent 寫 .tex）",
     "priority": 2,
     "description": "v4 review (review_history/v4/, Codex, verdict=REJECT) 3 SEVERE：(1) 研究誠實 critical — Table 6（main_v4.tex:640-649）報 0/5 Harvey pass + 'no signal in any era' 與自家 K752 (k752_...results.json:489-490 any_competing_signal_harvey=true, vix_sufficient_all_eras=false, 多筆 harvey_pass=true vol momentum GFC/COVID) 直接衝突 → reconcile spec 或改敘事，禁 overclaim all-era sufficiency。(2) nested forecast inference 用普通 DM 缺 Clark-West correction。(3) publication-delay/lag convention 前後不一致（Table1 note 197 vs pub-delay 340 vs method 359 vs robustness 851 shift(1)/shift(2) 混），Family10 overnight VIX 用 VIX_open,t (240) forecast origin 需明示。另 8 MAJOR 見 round_readme.md。paper_body = 主線程 only。",
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-05T21:19:47.106824+00:00",
     "tags": [
       "paper_body",
@@ -51774,7 +51774,26 @@
       "research-honesty",
       "review-v4"
     ],
-    "task_type": "paper_body"
+    "task_type": "paper_body",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-07-06T04:09:51.851169+00:00",
+    "claim_session_id": "95ea88347e9e",
+    "status_history": [
+      {
+        "ts": "2026-07-06T04:09:51.851532+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-12"
+      },
+      {
+        "ts": "2026-07-06T04:09:58.108234+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-12"
+      }
+    ],
+    "started_at": "2026-07-06T04:09:58.107983+00:00",
+    "progress": "SEVERE-1 (research-honesty Table6/K752 conflict) FIXED 2026-07-06 hourly-12; main_v5.tex compiles clean 60pp; SEVERE-2(Clark-West)+SEVERE-3(lag convention)+8 MAJOR pending; see review_history/v5_progress.md; NO paper-update until all done (still REJECT)"
   },
   {
     "id": "paper_review_eav_universal_magnitude_v2",
