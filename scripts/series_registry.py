@@ -102,8 +102,29 @@ def audit(series: dict, feed: list) -> list[dict]:
     return findings
 
 
+def _strip_existing_prefix(title: str, display_name: str, emoji: str) -> str:
+    """Return the base title with any leading series prefix removed, tolerant of
+    emoji variants — so changing the registry prefix (e.g. adding/removing/moving
+    the emoji) MIGRATES cleanly instead of double-prefixing.
+
+    Handles: `<emoji> <name>｜`, `<emoji><name>｜`, `<name> <emoji>｜`, `<name>｜`.
+    """
+    e = emoji or ""
+    variants = [
+        f"{e} {display_name}｜",
+        f"{e}{display_name}｜",
+        f"{display_name} {e}｜",
+        f"{display_name}｜",
+    ]
+    for v in variants:
+        if v.strip() and title.startswith(v):
+            return title[len(v):]
+    return title
+
+
 def apply(series: dict, feed: list) -> tuple[int, list[str]]:
-    """Idempotently prefix registered title_prefix members. Returns (n_changed, log)."""
+    """Idempotently apply the registry prefix to title_prefix members, MIGRATING
+    any existing series prefix variant (emoji add/remove/move). Returns (n_changed, log)."""
     by_id = {a.get("id"): a for a in feed}
     log: list[str] = []
     changed = 0
@@ -112,18 +133,22 @@ def apply(series: dict, feed: list) -> tuple[int, list[str]]:
         if s.get("branding") != "title_prefix" or not s.get("prefix"):
             continue
         prefix = s["prefix"]
+        display_name = s.get("display_name", "")
+        emoji = s.get("emoji", "")
         for aid in list(s.get("members_published", [])) + list(s.get("members_draft", [])):
             art = by_id.get(aid)
             if art is None:
                 log.append(f"  !! {key}/{aid} not in feed")
                 continue
             title = art.get("title") or ""
-            if title.startswith(prefix):
+            base = _strip_existing_prefix(title, display_name, emoji)
+            new_title = prefix + base
+            if new_title == title:
                 continue
-            art["title"] = prefix + title
-            report_updates[aid] = art["title"]
+            art["title"] = new_title
+            report_updates[aid] = new_title
             changed += 1
-            log.append(f"  + {key}/{aid}: prefixed")
+            log.append(f"  ~ {key}/{aid}: {title[:24]}… -> {new_title[:24]}…")
     if changed:
         FEED.write_text(json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8")
         for aid, new_title in report_updates.items():
