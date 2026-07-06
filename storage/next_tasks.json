@@ -52362,5 +52362,86 @@
     "status_history": [],
     "notes": "v3 fix followup (S-02). Parent: paper2_vt_insurance_cost_v3_severe_fixes",
     "description": "vt-insurance-cost S-02: cross-OOS 補 2017-18/2021-22 兩窗達 6/6。(1) 用 pinned snapshot (auto_adjust=False raw-Close, per project reproduce rule) 改造 cross-OOS runner，window grid 由 4→6：experiments/k811v2/k811v2_insurance_premium_vov_fixed.py line 705-708 加 (\"2017-01-01\",\"2018-12-31\") 與 (\"2021-01-01\",\"2022-12-31\")。(2) 禁 live-fetch yfinance(line 73)+禁覆寫 archived k811v2_..._results.json(line 972)→輸出寫新 JSON。heavy→排 compute_queue。(3) Codex code review 後才採信。(4) 依 6/6 結果更新 main.tex §sec:results/Discussion/abstract success-rate framing：若仍弱則把 S2 降級為 hypothesis-generating in-sample accounting result、移出 contribution tier，只留 threshold-invariant decomposition。報告寫 review_history/v3/。main.tex line194/211 已誠實揭露 provisional，補完後升級 framing 並可推進 submission-ready。"
+  },
+  {
+    "id": "K1647_article_general",
+    "title": "K1647: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1647 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: K1647 (oil realized-vol -> equity realized-vol spillover, CL=F/USO -> SPY/XLE, bidirectional, VIX-controlled; yfinance daily 2010-02-03..2026-07-02, N=4104): CONDITIONAL_PASS directional NULL. Core finding: oil RV has NO incremental lag-1 predictive power for equity RV. One-step ",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1647",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-06T08:08:00+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-07-06T08:10:06.805977+00:00",
+    "claim_session_id": "e4e7ef49a674",
+    "status_history": [
+      {
+        "ts": "2026-07-06T08:10:06.806259+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-06T08:11:41.769232+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-06T08:22:53.870398+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-16"
+      }
+    ],
+    "started_at": "2026-07-06T08:11:41.768960+00:00",
+    "completed_at": "2026-07-06T08:22:53.870140+00:00",
+    "result": "發佈 mile_69524f14 (draft池, 迷思實驗室｜原油波動NULL); 懶人包 enqueue lazypack-mile_69524f14; 2圖上傳Supabase"
+  },
+  {
+    "id": "K267_article_general_v3",
+    "title": "K267: write general-audience article [retry-v3] (auto-discovered uncovered K)",
+    "description": "K K267 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Method: Descriptive categorization of knowledge entries K183-K266",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K267",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general",
+      "retry-v3"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-06T08:08:05+00:00"
+  },
+  {
+    "id": "k1648_sv_lognormal_convergence_rerun",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "title": "K1648 SV re-run: log-normal variance 修正 + 收斂稽核（Codex 2 MAJOR）",
+    "source": "codex_review_k1648_2026-07-06",
+    "created_at": "2026-07-06T08:23:51+00:00",
+    "claimed_by": null,
+    "claimed_at": null,
+    "claim_session_id": null,
+    "started_at": null,
+    "completed_at": null,
+    "result": null,
+    "tags": [
+      "k1648",
+      "stochastic-volatility",
+      "codex-followup"
+    ],
+    "description": "K1648 Codex review=CONDITIONAL_PASS 但 2 MAJOR 指向 SV variance 被低估→可能假 NULL。修:(1) SV forecast 改 exp(h+0.5*p_pred) log-normal mean(k1648.py:390-391 丟棄 p_pred);(2) 記錄 res.success/params/loglik+收斂率門檻(k1648.py:351-361)後重跑 DM。clean NULL 前不得寫成文章;heavy compute 走 compute_queue。"
   }
 ]
