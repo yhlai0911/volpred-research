@@ -37893,5 +37893,18 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-07-07T03:36:31.092702"
+  },
+  {
+    "item_id": "8f6368ba",
+    "category": "methodology",
+    "content": "paper2_taiwan_indiv_rolling_gamma: Taiwan-VT Paper 2 tab:gamma rolling-window (w=2000) individual-stock rows trace ONLY to knowledge N121 (from deleted K530), no source JSON (paper/taiwan-vt/reviews/audit_step1_2.md). Reproducible re-estimation under documented K892 arch-MLE GJR(1,1) rolling last-window spec (all 10 securities, offline snapshots) shows LEGACY VALUES NON-REPRODUCIBLE: 2317 0.052->0.032, 2454 0.044->0.045, 2886 0.179->0.054 (3x off), 0056 0.112->0.310 (flips 'second-highest' -> HIGHEST, above index 0.272), 9-stock rolling avg 0.054->0.037 (ratio 5.0x->7.4x), 10-security 0.060->0.064 (4.5x->4.3x). Reviewer=Codex CONDITIONAL_PASS (GJR spec/persistence/log-ret/last-window all correct; caveat: per-stock windows NOT calendar-aligned, 2886 snapshot ends 2025-01 -> recompute on aligned snapshots before adopting as canonical). Rendered paper numbers NOT changed (0056 correction entangles narrative rewrite -> routed to main-thread paper flow via follow-up paper_body task). PRIMARY full-sample claim gamma_bar=0.027, ratio 4.3x (K1302+K1302b, VERIFIED) is UNAFFECTED. experiment_id=paper2_taiwan_indiv_rolling_gamma.",
+    "evidence": [
+      "experiments/paper2_taiwan_indiv_rolling_gamma/paper2_taiwan_indiv_rolling_gamma_results.json",
+      "experiments/paper2_taiwan_indiv_rolling_gamma/README.md",
+      "paper/taiwan-vt/reviews/audit_step1_2.md",
+      "Codex review CONDITIONAL_PASS 2026-07-07"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-07-07T04:29:33.897854"
   }
 ]

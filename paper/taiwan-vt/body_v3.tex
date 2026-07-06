@@ -147,17 +147,44 @@ TWII (TAIEX) & 0.272 & 3.18 & 0.012 & 0.870 & 0.990 \\
 0050.TW & 0.097 & 3.60 & 0.032 & 0.893 & 0.973 \\
 SPY & 0.211 & 5.79 & 0.000 & 0.897 & 0.993 \\
 \midrule
+% ===================== PROVENANCE (2026-07-07) =====================
+% The rolling-window (w=2000) individual-stock rows below (Hon Hai 2317,
+% MediaTek 2454, Mega 2886), the ETF 0056 row, and the 9-stock /
+% 10-security ROLLING averages (0.054 / 0.060) + rolling ratios (5.0x /
+% 4.5x in the footnote) trace ONLY to knowledge entry N121 (from a
+% since-deleted K530 run) with NO surviving source JSON.
+% See paper/taiwan-vt/reviews/audit_step1_2.md.
+% Reproducible re-estimation (documented K892 arch-MLE GJR(1,1) rolling
+% last-window spec, all 10 securities, offline snapshots) is now the
+% traceable source and shows the LEGACY VALUES ARE NON-REPRODUCIBLE:
+%   % source: experiments/paper2_taiwan_indiv_rolling_gamma
+%   2317 legacy 0.052/1.14 -> reproducible 0.032/0.92
+%   2454 legacy 0.044/0.96 -> reproducible 0.045/1.54
+%   2886 legacy 0.179/2.42 -> reproducible 0.054/1.41  (3x off)
+%   0056 legacy 0.112/1.87 -> reproducible 0.310/3.92  (flips "second-highest" -> HIGHEST, above index 0.272)
+%   9-stock rolling avg 0.054 -> 0.037 ; ratio 5.0x -> 7.4x
+%   10-security rolling avg 0.060 -> 0.064 ; ratio 4.5x -> 4.3x
+% RENDERED NUMBERS ARE INTENTIONALLY NOT CHANGED IN THIS COMMIT: the 0056
+% correction entangles a rewrite of the 0056-inclusion sensitivity
+% paragraph, which must go through the main-thread paper revision flow
+% with author sign-off (CLAUDE.md paper narrative state machine).
+% Follow-up: paper_body task paper2_taiwan_vt_rolling_block_reestimate.
+% Caveat: reproducible per-stock windows are NOT calendar-aligned (2886
+% snapshot ends 2025-01) -> recompute on aligned snapshots before adopting
+% as canonical. PRIMARY full-sample BW-robust claim (gamma_bar=0.027,
+% ratio 4.3x, K1302+K1302b, VERIFIED) is UNAFFECTED.
+% ===================================================================
 \multicolumn{6}{l}{\textit{Individual Taiwan Stocks}} \\
-TSMC (2330) & 0.052 & 3.98 & 0.032 & 0.930 & 0.989 \\
-Hon Hai (2317) & 0.052 & 1.14 & 0.028 & 0.939 & 0.985 \\
-MediaTek (2454) & 0.044 & 0.96 & 0.033 & 0.935 & 0.984 \\
-Mega Financial (2886) & 0.179 & 2.42 & 0.015 & 0.901 & 0.977 \\
+TSMC (2330) & 0.052 & 3.98 & 0.032 & 0.930 & 0.989 \\ % source: experiments/paper2_tsmc_gamma_zeromean_sens (full-sample, VERIFIED)
+Hon Hai (2317) & 0.052 & 1.14 & 0.028 & 0.939 & 0.985 \\ % source: N121 NON-REPRODUCIBLE; reproducible=0.032/0.92 -> experiments/paper2_taiwan_indiv_rolling_gamma
+MediaTek (2454) & 0.044 & 0.96 & 0.033 & 0.935 & 0.984 \\ % source: N121 NON-REPRODUCIBLE; reproducible=0.045/1.54 -> experiments/paper2_taiwan_indiv_rolling_gamma
+Mega Financial (2886) & 0.179 & 2.42 & 0.015 & 0.901 & 0.977 \\ % source: N121 NON-REPRODUCIBLE; reproducible=0.054/1.41 -> experiments/paper2_taiwan_indiv_rolling_gamma
 \midrule
 \multicolumn{6}{l}{\textit{ETF (excluded from individual-stock average)}} \\
-0056.TW (Yuanta High Div.\ ETF) & 0.112 & 1.87 & 0.021 & 0.922 & 0.982 \\
+0056.TW (Yuanta High Div.\ ETF) & 0.112 & 1.87 & 0.021 & 0.922 & 0.982 \\ % source: N121 NON-REPRODUCIBLE; reproducible=0.310/3.92 (HIGHEST, contradicts prose) -> experiments/paper2_taiwan_indiv_rolling_gamma
 \midrule
-9-stock average (excl.\ 2330 \& 0056) & 0.054 & --- & 0.028 & 0.935 & 0.984 \\
-10-security average (incl.\ 0056; excl.\ 2330) & 0.060 & --- & 0.027 & 0.933 & 0.984 \\
+9-stock average (excl.\ 2330 \& 0056) & 0.054 & --- & 0.028 & 0.935 & 0.984 \\ % source: N121 NON-REPRODUCIBLE; reproducible rolling avg=0.037 -> experiments/paper2_taiwan_indiv_rolling_gamma
+10-security average (incl.\ 0056; excl.\ 2330) & 0.060 & --- & 0.027 & 0.933 & 0.984 \\ % source: N121 NON-REPRODUCIBLE; reproducible rolling avg=0.064 -> experiments/paper2_taiwan_indiv_rolling_gamma
 \bottomrule
 \end{tabular}
 \begin{flushleft}

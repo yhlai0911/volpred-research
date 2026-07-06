@@ -301,6 +301,15 @@
         "commit_date": "2026-05-23",
         "confidence": "earliest_git_evidence_for_current_stage_or_blocker",
         "basis": "formal review cycle v1 found 2 HIGH issues; subsequent commits keep the paper in revision/blocker cleanup"
+      },
+      "do_not_advance": true,
+      "rolling_block_provenance": {
+        "date": "2026-07-07",
+        "task_id": "paper2_taiwan_vt_body_v3_individual_stock_provenance",
+        "finding": "body_v3.tex tab:gamma rolling-w2000 individual/ETF/avg rows trace only to deleted-K530 knowledge N121, no source JSON. Reproducible re-estimation (experiments/paper2_taiwan_indiv_rolling_gamma, Codex CONDITIONAL_PASS) shows LEGACY NON-REPRODUCIBLE: 2317 0.052->0.032, 2454 0.044->0.045, 2886 0.179->0.054, 0056 0.112->0.310 (flips second-highest->HIGHEST above index), 9-stock avg 0.054->0.037 (5.0x->7.4x), 10-sec 0.060->0.064 (4.5x->4.3x).",
+        "action": "tex bound with %source + %PROVENANCE flags (rendered numbers unchanged); rolling-block correction (numbers + 0056 sensitivity prose rewrite) routed to follow-up paper_body task paper2_taiwan_vt_rolling_block_reestimate.",
+        "caveat": "reproducible windows NOT calendar-aligned (2886 snapshot ends 2025-01); recompute aligned before adopting canonical.",
+        "primary_unaffected": "full-sample BW-robust gamma_bar=0.027, ratio 4.3x (K1302+K1302b VERIFIED)"
       }
     },
     {
