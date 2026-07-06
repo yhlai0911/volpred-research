@@ -50900,7 +50900,7 @@
     "title": "Paper review (Codex 24h-rule): 台股波動率是美股的 2.3 倍：這個差距，大半不是恐慌",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d30a3ede needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d30a3ede",
@@ -50908,7 +50908,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-05T08:30:01+00:00"
+    "created_at": "2026-07-05T08:30:01+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-07-06T17:09:07.618514+00:00",
+    "claim_session_id": "5c356ebef4a7",
+    "status_history": [
+      {
+        "ts": "2026-07-06T17:09:07.618827+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-06T17:09:13.290236+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-06T17:10:55.807766+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-01"
+      }
+    ],
+    "started_at": "2026-07-06T17:09:13.289931+00:00",
+    "completed_at": "2026-07-06T17:10:55.807484+00:00",
+    "result": "Codex 24h-rule review: CONDITIONAL_PASS。全數字對得上 results.json (ratio 2.34/pctile 96.5/gap 21.67/VRP tw+3.74 us-1.83/NFP各值)。2 個 framing 建議皆輕微且原文已 hedged：一大半量化=74% RV解釋(站得住)、選擇權便宜已寫明相對已實現。無事實錯誤、無需更正。"
   },
   {
     "id": "paper_review_mile_d1a83b4f",
@@ -52926,5 +52952,21 @@
     "started_at": "2026-07-06T15:15:15.558523+00:00",
     "completed_at": "2026-07-06T15:24:05.185863+00:00",
     "result": "Codex 24h review completed: found ^TNX bp conversion scale bug in magnitude-control section (diff()*10 should be diff()*100). Corrected experiment/results/article slopes 4.01/2.74 -> 0.40/0.27; main same-day asymmetry unchanged. Public article updated via publish_draft errata and single-article Supabase sync verified."
+  },
+  {
+    "id": "K1647_article_research",
+    "title": "K1647: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1647 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no research article in feed.json.  Verdict preview: K1647 (oil realized-vol -> equity realized-vol spillover, CL=F/USO -> SPY/XLE, bidirectional, VIX-controlled; yfinance daily 2010-02-03..2026-07-02, N=4104): CONDITIONAL_PASS directional NULL. Core finding: oil RV has NO incremental lag-1 predictive power for equity RV. One-step ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1647",
+    "tags": [
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-06T17:07:31+00:00"
   }
 ]

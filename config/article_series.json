@@ -30,11 +30,10 @@
         "mile_4d67163f",
         "mile_d1a83b4f",
         "mile_4fe0a026",
-        "mile_bd564eb7"
-      ],
-      "members_draft": [
+        "mile_bd564eb7",
         "mile_e7b6e075"
       ],
+      "members_draft": [],
       "excluded_dups": {
         "mile_19e264ee": "VIX K1640 — same myth as mile_4d67163f (K1633); K1633 was the live one, kept; this one set to 'unpublished'."
       }
@@ -57,7 +56,10 @@
       "no_episode_numbers": true,
       "definition": "會員提問經 4 維度評分 → research → 回答文章。既有慣例。",
       "membership_criteria": "task_type / content_type == 'member_qa'（既有標題格式雜亂：會員提問｜/【會員提問】/會員提問解答：/無前綴 → 已由 legacy_prefixes 統一遷移為 💬 會員提問｜）。",
-      "legacy_prefixes": ["【會員提問】", "會員提問解答："],
+      "legacy_prefixes": [
+        "【會員提問】",
+        "會員提問解答："
+      ],
       "members_published": [
         "mile_eba82c94",
         "mile_e4002f4f",
