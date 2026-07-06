@@ -30,6 +30,7 @@ KNOWLEDGE_PATH = ROOT / "storage/memory/knowledge.json"
 FEED_PATH = ROOT / "storage/reports/feed.json"
 OUTPUT_PATH = ROOT / "storage/publication_candidates.json"
 READER_METRICS_LATEST_PATH = ROOT / "storage/analytics/latest.json"
+NEXT_TASKS_PATH = ROOT / "storage/next_tasks.json"
 
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -180,6 +181,78 @@ def k_covered_by_article(k_id: str, article: dict) -> bool:
     return False
 
 
+_ARTICLE_TASK_ID_RE = re.compile(
+    r"^(?P<kid>K\d{2,5}[A-Za-z0-9_]*)_article_(?P<audience>general|research)(?:_|$)",
+    re.IGNORECASE,
+)
+
+
+def _load_next_tasks() -> list[dict]:
+    if not NEXT_TASKS_PATH.exists():
+        return []
+    try:
+        data = json.loads(NEXT_TASKS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"WARN: next_tasks.json unreadable, skipping task coverage: {exc}", file=sys.stderr)
+        return []
+    return data if isinstance(data, list) else []
+
+
+def _succeeded_article_task_coverage(tasks: list[dict]) -> dict[str, list[dict]]:
+    """K-family -> synthetic coverage rows from completed article tasks.
+
+    2026-07-06 C8 follow-up: publication_candidates could keep treating a K as
+    uncovered/missing-general even after the article task had succeeded, when
+    feed metadata lagged or the article was later reclassified. The task receipt
+    is not a content source, but it is a release-layer coverage signal that must
+    stop refill treadmill loops.
+    """
+    coverage: dict[str, list[dict]] = {}
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        if str(task.get("task_type") or "") != "daily_article":
+            continue
+        if str(task.get("status") or "").lower() != "succeeded":
+            continue
+        task_id = str(task.get("id") or task.get("task_id") or "")
+        match = _ARTICLE_TASK_ID_RE.match(task_id)
+        if not match:
+            continue
+        kid = match.group("kid").upper()
+        audience = match.group("audience").lower()
+        coverage.setdefault(_k_id_family(kid), []).append({
+            "id": task_id,
+            "title": str(task.get("title") or ""),
+            "status": "succeeded_task",
+            "audience": audience,
+            "source": "next_tasks_succeeded_daily_article",
+        })
+    return coverage
+
+
+def _feed_experiment_ref_families(feed: list[dict]) -> set[str]:
+    """K-families that have structured feed coverage via details.experiment_refs."""
+    families: set[str] = set()
+    for article in feed:
+        if not isinstance(article, dict):
+            continue
+        details = article.get("details") or {}
+        if not isinstance(details, dict):
+            continue
+        refs = details.get("experiment_refs") or []
+        if not isinstance(refs, list):
+            continue
+        status = str(article.get("status") or "").lower()
+        if status in {"unpublished", "retracted"}:
+            continue
+        for ref in refs:
+            ref_s = str(ref or "").strip()
+            if ref_s:
+                families.add(_k_id_family(ref_s))
+    return families
+
+
 def _extract_overturned_map(knowledge: list) -> dict[str, list[str]]:
     """Map of overturned K-id → sorted list of overturning K-ids.
 
@@ -244,6 +317,9 @@ def main():
 
     knowledge = json.loads(KNOWLEDGE_PATH.read_text())
     feed = json.loads(FEED_PATH.read_text())
+    next_tasks = _load_next_tasks()
+    task_coverage_by_family = _succeeded_article_task_coverage(next_tasks)
+    release_layer_covered_families = _feed_experiment_ref_families(feed) | set(task_coverage_by_family)
     overturned_map = _extract_overturned_map(knowledge)
     reader_signal_map = _load_reader_signal_map()
 
@@ -283,6 +359,7 @@ def main():
                     "status": article.get("status"),
                     "audience": article.get("audience"),
                 })
+        covering_articles.extend(task_coverage_by_family.get(_k_id_family(k_id), []))
         score, reasons = score_priority(entry)
         cluster = classify_topic_cluster(
             entry.get("title", ""),
@@ -345,6 +422,7 @@ def main():
             "tags": entry.get("tags", []),
             "overturned_by": overturned_map.get(k_id, []),
             "reader_signal": reader_signal,
+            "release_layer_covered": _k_id_family(k_id) in release_layer_covered_families,
         })
 
     # Sort: uncovered first, then by score desc, then by recency desc
@@ -445,6 +523,7 @@ def main():
         if c["covered_by"]
         and "general" not in c["audiences_covered"]
         and c["score"] >= 4
+        and not c["release_layer_covered"]
         and not c["topic_family_collisions"]["general"]  # exclude topic-family clashes
         and not c["overturned_by"]  # 2026-06-06: skip explicitly-overturned K's
         and not _self_overturned(c)
@@ -470,13 +549,16 @@ def main():
         }
 
     candidates_with_reader_signal = sum(1 for c in candidates if c.get("reader_signal"))
+    release_layer_covered_count = sum(1 for c in candidates if c.get("release_layer_covered"))
 
     output = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "notes": {
             "missing_general_top5": (
                 "Covered by at least one published article, but still missing "
-                "a general-audience article."
+                "a general-audience article; excludes K's already covered at "
+                "the release layer by structured feed experiment_refs or a "
+                "succeeded daily_article task."
             ),
             "missing_research_top5": (
                 "Covered by at least one published article, but still missing "
@@ -490,6 +572,13 @@ def main():
                 "measured reader activity. Absent (null) reader_signal_map or no "
                 "matching activity -> reader_signal stays null, never fabricated."
             ),
+            "release_layer_covered": (
+                "True when storage/reports/feed.json carries structured "
+                "details.experiment_refs for the K-family, or storage/next_tasks.json "
+                "has a succeeded *_article_general/research daily_article task. "
+                "These K's are excluded from top_10_uncovered and missing_general_top5 "
+                "to avoid refill treadmill loops."
+            ),
         },
         "summary": {
             "total_k": total,
@@ -499,11 +588,13 @@ def main():
             "missing_general_audience": len(missing_general),
             "missing_research_audience": len(missing_research),
             "candidates_with_reader_signal": candidates_with_reader_signal,
+            "release_layer_covered": release_layer_covered_count,
         },
         "overturned_kids": sorted(overturned_map.keys()),
         "top_10_uncovered": [
             {"k_id": c["k_id"], "score": c["score"], "title": c["title"][:120]}
-            for c in candidates[:10] if c["uncovered"] and not c["overturned_by"]
+            for c in candidates[:10]
+            if c["uncovered"] and not c["overturned_by"] and not c["release_layer_covered"]
         ],
         "missing_general_top5": [
             _audience_gap_row(c, "general")
