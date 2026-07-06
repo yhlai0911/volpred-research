@@ -52723,7 +52723,7 @@
     "title": "Paper review (Codex 24h-rule): 同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d12825bb needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d12825bb",
@@ -52747,8 +52747,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T15:24:05.186147+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-06T15:15:15.558523+00:00"
+    "started_at": "2026-07-06T15:15:15.558523+00:00",
+    "completed_at": "2026-07-06T15:24:05.185863+00:00",
+    "result": "Codex 24h review completed: found ^TNX bp conversion scale bug in magnitude-control section (diff()*10 should be diff()*100). Corrected experiment/results/article slopes 4.01/2.74 -> 0.40/0.27; main same-day asymmetry unchanged. Public article updated via publish_draft errata and single-article Supabase sync verified."
   }
 ]
