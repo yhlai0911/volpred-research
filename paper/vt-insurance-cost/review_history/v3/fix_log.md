@@ -2,7 +2,7 @@
 
 **日期**：2026-07-06（台灣時間）
 **依據**：`review_history/v2/latex_review_report.md`（3 SEVERE / 7 MODERATE / 4 MINOR）
-**修訂範圍（本輪）**：3 SEVERE 中 2 個 text-resolvable + C-01 citation，於主線程直接改 `main.tex`。S-02（heavy cross-OOS 重跑）拆為 compute followup。
+**修訂範圍（本輪）**：3 SEVERE 中 2 個 text-resolvable + C-01 citation，於主線程直接改 `main.tex`。S-02（heavy cross-OOS 重跑）已於 follow-up 完成。
 
 ## 已修（main.tex，pdflatex 三 pass 乾淨、無 undefined ref/citation）
 
@@ -23,17 +23,15 @@
 - **原問題**：line 108 用 `\citep{hasbrouck2009}` 支撐「SPY typical bid-ask spread of 1–2 bps」，但 Hasbrouck (2009, JF) 估的是 US 股票整體 effective trading cost（daily-data 估法），非 SPY 特定 quoted spread。
 - **修法**：改述為「exceeds the small effective trading costs documented for liquid U.S. equities \citep{hasbrouck2009}」（此為該文真正支撐的論點）+「well above SPY's quoted bid-ask spread — on the order of 1–2 bps for this exceptionally liquid ETF」（市場事實陳述，不掛在 Hasbrouck）。hasbrouck2009 bibitem 保留（仍被正確引用，非 orphan）。
 
-## 待辦（compute followup — 見 next_tasks）
+## Compute follow-up completed
 
-### S-02 — Cross-OOS 只有 4/6 windows，需補 2017–18 / 2021–22
-- **為何不在本 fire 做**：主腳本 `k811v2_insurance_premium_vov_fixed.py` (a) live-fetch yfinance（line 73，非 pinned snapshot，違 reproduce 規則）、(b) 覆寫 archived `k811v2_..._results.json`（line 972，blast radius）。倉促重跑不符研究誠實。
-- **followup 任務**（`paper2_vt_insurance_cost_s02_cross_oos_rerun`）：
-  1. 用 pinned snapshot（`auto_adjust=False` raw-Close，per project reproduce rule）改造 cross-OOS runner，window grid 由 4 → 6（加 `("2017-01-01","2018-12-31")`、`("2021-01-01","2022-12-31")`，見 script line 705–708）。
-  2. 輸出寫**新** JSON（不覆蓋 archived）。
-  3. Codex code review 後才採信。
-  4. 依 6/6 結果更新 main.tex §4.5 / Discussion / abstract 的 success-rate framing：若仍弱，把 S2 降級為「hypothesis-generating in-sample accounting result」、移出 contribution tier，只留 threshold-invariant decomposition 這條 robust 貢獻（review S-02 fix 指示）。
-- **注意**：main.tex line 194 / 211 已誠實揭露此 4/6 incompleteness 為 provisional / pending re-runs，故現版仍為投稿誠實狀態，S-02 補完後再升級 framing。
+### S-02 — Cross-OOS window completeness resolved
+- **狀態**：2026-07-06 follow-up completed（task `paper2_vt_insurance_cost_s02_cross_oos_rerun`）。
+- **修法**：主腳本 `k811v2_insurance_premium_vov_fixed.py` 改為讀 pinned raw-Close CSVs（`auto_adjust=False` reproduction bundle），不再 live-fetch yfinance；window grid 由 4 → 6；輸出寫新 `*_cross_oos6_results.json`，不覆寫 archived `k811v2_..._results.json`。
+- **結果**：S2 只在 `2/6` windows 勝過 S0（2017–18、2019–20）；S3 也是 `2/6`；S4 50/50 是 `3/6`。Full-sample DM 仍未過 Harvey `|t|>3`（S2 vs S0 `t=0.7487`）。
+- **paper action**：`main.tex` 已更新 abstract / introduction / Cross-OOS / Discussion / limitations / conclusion：S2 降級為 `hypothesis-generating in-sample accounting result`，移出 contribution tier；robust contribution 保留為 opportunity/direct cost decomposition。
+- **報告**：`review_history/v3/s02_cross_oos_rerun_report.md`
 
 ## 版本狀態
-- `body fixed (S-01/S-03/C-01) / S-02 compute follow-up pending`
+- `body fixed (S-01/S-03/C-01) / S-02 compute follow-up completed: weak 2/6, S2 downgraded`
 - 目標期刊：FRL（est. 3.5★ once S-01/S-02/S-03 resolved per reviewer prediction）

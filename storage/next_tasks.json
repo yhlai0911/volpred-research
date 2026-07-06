@@ -52371,15 +52371,36 @@
     "id": "paper2_vt_insurance_cost_s02_cross_oos_rerun",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-06T07:17:56+00:00",
-    "claimed_by": null,
-    "claimed_at": null,
-    "claim_session_id": null,
-    "started_at": null,
-    "status_history": [],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T09:37:01.444537+00:00",
+    "claim_session_id": "f62765dc2f87",
+    "started_at": "2026-07-06T09:37:12.720403+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-06T09:37:01.444827+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T09:37:12.721872+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T09:47:23.226350+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
     "notes": "v3 fix followup (S-02). Parent: paper2_vt_insurance_cost_v3_severe_fixes",
-    "description": "vt-insurance-cost S-02: cross-OOS 補 2017-18/2021-22 兩窗達 6/6。(1) 用 pinned snapshot (auto_adjust=False raw-Close, per project reproduce rule) 改造 cross-OOS runner，window grid 由 4→6：experiments/k811v2/k811v2_insurance_premium_vov_fixed.py line 705-708 加 (\"2017-01-01\",\"2018-12-31\") 與 (\"2021-01-01\",\"2022-12-31\")。(2) 禁 live-fetch yfinance(line 73)+禁覆寫 archived k811v2_..._results.json(line 972)→輸出寫新 JSON。heavy→排 compute_queue。(3) Codex code review 後才採信。(4) 依 6/6 結果更新 main.tex §sec:results/Discussion/abstract success-rate framing：若仍弱則把 S2 降級為 hypothesis-generating in-sample accounting result、移出 contribution tier，只留 threshold-invariant decomposition。報告寫 review_history/v3/。main.tex line194/211 已誠實揭露 provisional，補完後升級 framing 並可推進 submission-ready。"
+    "description": "vt-insurance-cost S-02: cross-OOS 補 2017-18/2021-22 兩窗達 6/6。(1) 用 pinned snapshot (auto_adjust=False raw-Close, per project reproduce rule) 改造 cross-OOS runner，window grid 由 4→6：experiments/k811v2/k811v2_insurance_premium_vov_fixed.py line 705-708 加 (\"2017-01-01\",\"2018-12-31\") 與 (\"2021-01-01\",\"2022-12-31\")。(2) 禁 live-fetch yfinance(line 73)+禁覆寫 archived k811v2_..._results.json(line 972)→輸出寫新 JSON。heavy→排 compute_queue。(3) Codex code review 後才採信。(4) 依 6/6 結果更新 main.tex §sec:results/Discussion/abstract success-rate framing：若仍弱則把 S2 降級為 hypothesis-generating in-sample accounting result、移出 contribution tier，只留 threshold-invariant decomposition。報告寫 review_history/v3/。main.tex line194/211 已誠實揭露 provisional，補完後升級 framing 並可推進 submission-ready。",
+    "completed_at": "2026-07-06T09:47:23.226029+00:00",
+    "result": "S-02 cross-OOS rerun completed with pinned raw-Close CSVs and six 2-year windows. Result weak: S2 2/6, S3 2/6, S4 3/6; S2 vs S0 DM t=0.7487. main.tex downgraded S2 to hypothesis-generating and v3 report written."
   },
   {
     "id": "K1647_article_general",

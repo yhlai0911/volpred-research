@@ -28,11 +28,12 @@ References:
   - Huang & Shaliastovich (2015) "Volatility-of-Volatility Risk"
   - Harvey, Liu, Zhu (2016) t>3.0 threshold
 
-Data: SPY, GLD, ^VIX, ^VVIX from yfinance
+Data: pinned raw-Close snapshot for SPY, GLD, ^VIX, ^VVIX
 Period: 2012-01-01 ~ 2024-12-31 (VVIX reliable era only)
 """
 
 import json
+import os
 import warnings
 from datetime import datetime
 from pathlib import Path
@@ -43,7 +44,27 @@ from scipy import stats
 
 warnings.filterwarnings("ignore")
 
-PROJECT = Path(__file__).resolve().parent.parent
+OUT = Path(__file__).resolve().parent
+
+
+def find_repo_root(start: Path) -> Path:
+    for p in [start, *start.parents]:
+        if (p / "paper").exists() and (p / "config").exists():
+            return p
+    raise RuntimeError(f"Cannot locate repo root from {start}")
+
+
+REPO_ROOT = find_repo_root(OUT)
+DATA_DIR = REPO_ROOT / "paper" / "vt-insurance-cost" / "data"
+PINNED_CLOSE_FILES = {
+    "SPY": DATA_DIR / "spy_2012_2024.csv",
+    "GLD": DATA_DIR / "gld_2012_2024.csv",
+    "VIX": DATA_DIR / "vix_2012_2024.csv",
+    "VVIX": DATA_DIR / "vvix_2012_2024.csv",
+}
+SNAPSHOT_PATH = DATA_DIR / "spy_gld_vix_vvix_2012-2024_snapshot.csv"
+K811_ORIGINAL_RESULTS = REPO_ROOT / "paper" / "vt-insurance-cost" / "experiments" / "k811_insurance_premium_vov_results.json"
+OUTPUT_PATH = OUT / "k811v2_insurance_premium_vov_fixed_cross_oos6_results.json"
 TX_COST_BPS = 5
 RF_ANNUAL = 0.02
 RF_DAILY = RF_ANNUAL / 252
@@ -60,22 +81,53 @@ print("\nBUG FIXES:")
 print("  1. VVIX data restricted to 2012+ (reliable era only)")
 print("  2. Insurance cost decomposed: opportunity cost vs direct cost")
 print()
-print("PART A: Data Download & Descriptive Statistics")
+print("PART A: Pinned Snapshot Load & Descriptive Statistics")
 print("-" * 60)
 
-import yfinance as yf
 
-# Download data -- start from 2011 for enough warm-up (expanding z-score needs 60 days)
-tickers = {"SPY": "SPY", "GLD": "GLD", "VIX": "^VIX", "VVIX": "^VVIX"}
-raw = {}
+def load_single_ticker_close_csv(path: Path, name: str) -> pd.DataFrame:
+    """Load one pinned yfinance CSV and return its raw Close series."""
+    # Files were saved from yfinance with a two-line ticker header plus a blank
+    # Date row. Skipping rows 1 and 2 leaves a normal Price/Close CSV.
+    df = pd.read_csv(path, skiprows=[1, 2], parse_dates=["Price"]).set_index("Price").sort_index()
+    if "Close" not in df.columns:
+        raise RuntimeError(f"{path} has no raw Close column")
+    s = pd.to_numeric(df["Close"], errors="coerce")
+    print(f"  {name}: {s.notna().sum()} rows from pinned CSV ({s.index[0].date()} to {s.index[-1].date()})")
+    return s.to_frame(name.lower())
 
-for name, ticker in tickers.items():
-    df = yf.download(ticker, start="2011-01-01", end="2025-01-01",
-                     progress=False, auto_adjust=False)
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
-    raw[name] = df[["Close"]].rename(columns={"Close": name.lower()})
-    print(f"  {name}: {len(df)} days ({df.index[0].date()} to {df.index[-1].date()})")
+
+def load_pinned_data() -> pd.DataFrame:
+    """Load the paper reproduction snapshot.
+
+    The canonical paper package uses raw Close columns generated with
+    yfinance auto_adjust=False. This runner intentionally does not live-fetch.
+    """
+    if all(path.exists() for path in PINNED_CLOSE_FILES.values()):
+        return {name: load_single_ticker_close_csv(path, name) for name, path in PINNED_CLOSE_FILES.items()}
+
+    path = SNAPSHOT_PATH
+    if not path.exists():
+        raise FileNotFoundError(f"Missing pinned snapshot: {path}")
+    snap = pd.read_csv(path, parse_dates=["date"]).set_index("date").sort_index()
+    cols = {
+        "SPY": "spy_close",
+        "GLD": "gld_close",
+        "VIX": "vix_close",
+        "VVIX": "vvix_close",
+    }
+    missing = [col for col in cols.values() if col not in snap.columns]
+    if missing:
+        raise RuntimeError(f"Snapshot missing columns: {missing}")
+    raw_frames = {}
+    for name, col in cols.items():
+        s = pd.to_numeric(snap[col], errors="coerce")
+        raw_frames[name] = s.to_frame(name.lower())
+        print(f"  {name}: {s.notna().sum()} rows from snapshot ({s.index[0].date()} to {s.index[-1].date()})")
+    return raw_frames
+
+
+raw = load_pinned_data()
 
 # Merge all four -- inner join to keep only dates with ALL data
 data = raw["SPY"].join(raw["GLD"], how="inner") \
@@ -120,6 +172,7 @@ n_years = n / 252
 print(f"\n  Backtest: {data.index[0].date()} to {data.index[-1].date()}")
 print(f"  Trading days: {n}, Years: {n_years:.1f}")
 print(f"  VoV source: VVIX (real data only, no proxy)")
+print(f"  Pinned files: {', '.join(str(p) for p in PINNED_CLOSE_FILES.values())}")
 
 # Descriptive statistics
 print(f"\n  Descriptive Statistics:")
@@ -139,6 +192,8 @@ RESULTS["data"] = {
     "vov_source": "VVIX (real data only, no proxy filling)",
     "vvix_reliable_era": "2012-01-01 onwards",
     "bug1_fix": "Excluded all pre-2012 VVIX data; inner join requires real VVIX",
+    "snapshot_paths": {name: str(path) for name, path in PINNED_CLOSE_FILES.items()},
+    "close_basis": "raw Close from pinned yfinance auto_adjust=False CSVs",
 }
 
 
@@ -694,27 +749,30 @@ RESULTS["rolling_2yr_insurance_cost"] = rolling_cost_stats
 
 
 # ============================================================
-# PART J: Cross-OOS Validation (4 non-overlapping 2-year periods)
+# PART J: Cross-OOS Validation (6 non-overlapping 2-year periods)
 # ============================================================
 print("\n" + "=" * 80)
-print("PART J: Cross-OOS Validation (4 periods, 2012-2024)")
+print("PART J: Cross-OOS Validation (6 periods, 2012-2024)")
 print("-" * 60)
 
 # BUG 1 FIX: adjusted periods -- no pre-2012 data
 oos_periods = [
     ("2013-01-01", "2014-12-31"),
     ("2015-01-01", "2016-12-31"),
+    ("2017-01-01", "2018-12-31"),
     ("2019-01-01", "2020-12-31"),
+    ("2021-01-01", "2022-12-31"),
     ("2023-01-01", "2024-12-31"),
 ]
 
 cross_oos = {}
 print(f"\n  {'Period':<22} {'S0 Sharpe':>10} {'S1 Sharpe':>10} {'S2 Sharpe':>10} "
-      f"{'S3 Sharpe':>10} {'S4 Sharpe':>10} {'S3 beats S0':>12}")
-print(f"  {'-'*85}")
+      f"{'S3 Sharpe':>10} {'S4 Sharpe':>10} {'S2>S0':>7} {'S3>S0':>7} {'S4>S0':>7}")
+print(f"  {'-'*105}")
 
 s2_wins_s0 = 0
 s3_wins_s0 = 0
+s4_wins_s0 = 0
 
 for period_start, period_end in oos_periods:
     p_mask = (data.index >= period_start) & (data.index <= period_end)
@@ -731,29 +789,46 @@ for period_start, period_end in oos_periods:
     period_label = f"{period_start}~{period_end}"
     s2_better = p_metrics["S2_VoV_Conditional"]["sharpe"] > p_metrics["S0_BH_SPY"]["sharpe"]
     s3_better = p_metrics["S3_Smooth_VoV"]["sharpe"] > p_metrics["S0_BH_SPY"]["sharpe"]
+    s4_better = p_metrics["S4_5050_SPY_GLD"]["sharpe"] > p_metrics["S0_BH_SPY"]["sharpe"]
     if s2_better:
         s2_wins_s0 += 1
     if s3_better:
         s3_wins_s0 += 1
+    if s4_better:
+        s4_wins_s0 += 1
 
-    cross_oos[period_label] = {name: m["sharpe"] for name, m in p_metrics.items()}
+    cross_oos[period_label] = {
+        "n_days": int(p_n),
+        "years": round(p_years, 3),
+        "sharpe": {name: m["sharpe"] for name, m in p_metrics.items()},
+        "beats_s0": {
+            "S2_VoV_Conditional": bool(s2_better),
+            "S3_Smooth_VoV": bool(s3_better),
+            "S4_5050_SPY_GLD": bool(s4_better),
+        },
+    }
 
     print(f"  {period_label:<22} {p_metrics['S0_BH_SPY']['sharpe']:>10.4f} "
           f"{p_metrics['S1_Always_12VIX']['sharpe']:>10.4f} "
           f"{p_metrics['S2_VoV_Conditional']['sharpe']:>10.4f} "
           f"{p_metrics['S3_Smooth_VoV']['sharpe']:>10.4f} "
           f"{p_metrics['S4_5050_SPY_GLD']['sharpe']:>10.4f} "
-          f"{'YES' if s3_better else 'NO':>12}")
+          f"{'YES' if s2_better else 'NO':>7} "
+          f"{'YES' if s3_better else 'NO':>7} "
+          f"{'YES' if s4_better else 'NO':>7}")
 
-print(f"\n  S2 beats S0: {s2_wins_s0}/4 periods")
-print(f"  S3 beats S0: {s3_wins_s0}/4 periods")
+print(f"\n  S2 beats S0: {s2_wins_s0}/{len(cross_oos)} periods")
+print(f"  S3 beats S0: {s3_wins_s0}/{len(cross_oos)} periods")
+print(f"  S4 beats S0: {s4_wins_s0}/{len(cross_oos)} periods")
 
 RESULTS["cross_oos"] = {
     "periods": cross_oos,
-    "n_periods": 4,
+    "n_periods": len(cross_oos),
     "s2_wins_s0": s2_wins_s0,
     "s3_wins_s0": s3_wins_s0,
-    "note": "4 periods (not 5) since backtest starts 2012, not 2006",
+    "s4_wins_s0": s4_wins_s0,
+    "window_grid": oos_periods,
+    "note": "6 complete non-overlapping 2-year windows within the 2012-2024 VVIX-reliable sample.",
 }
 
 
@@ -799,7 +874,7 @@ print("PART L: K811v2 vs K811 Original Comparison")
 print("-" * 60)
 
 # Load K811 original results for comparison
-k811_path = PROJECT / "experiments" / "k811_insurance_premium_vov_results.json"
+k811_path = K811_ORIGINAL_RESULTS
 k811_comparison = {}
 
 if k811_path.exists():
@@ -913,9 +988,9 @@ print(f"""
     VIX level -> forward 30d MDD:   Spearman r = {corr_vix_sp:.4f} (p={vix_sp_pval:.2e})
     Monotonicity: {'YES' if monotone else 'NO'}
 
-  CROSS-OOS STABILITY (4 periods, 2012-2024):
-    S2 beats BH SPY: {s2_wins_s0}/4 periods
-    S3 beats BH SPY: {s3_wins_s0}/4 periods
+  CROSS-OOS STABILITY (6 periods, 2012-2024):
+    S2 beats BH SPY: {s2_wins_s0}/{len(cross_oos)} periods
+    S3 beats BH SPY: {s3_wins_s0}/{len(cross_oos)} periods
 
   KEY INSIGHT:
     After fixing VVIX data period and decomposing costs, the core
@@ -932,7 +1007,7 @@ RESULTS["experiment"] = "K811v2"
 RESULTS["title"] = "Convexity-Adjusted Insurance Premium -- VoV-Conditional VT (Bug-Fixed)"
 RESULTS["proposed_by"] = "Gemini #2 (original K811)"
 RESULTS["executed_by"] = "Claude (K811v2 fix)"
-RESULTS["data_source"] = "yfinance (SPY, GLD, ^VIX, ^VVIX daily)"
+RESULTS["data_source"] = "pinned raw-Close CSVs: paper/vt-insurance-cost/data/{spy,gld,vix,vvix}_2012_2024.csv"
 RESULTS["period"] = "2012-01-01 ~ 2024-12-31 (VVIX reliable era)"
 RESULTS["bugs_fixed"] = [
     {
@@ -957,6 +1032,7 @@ RESULTS["methodology"] = {
     "tx_cost": "5 bps per unit weight change",
     "vt_target": "12/VIX",
     "cost_decomposition": "opportunity_cost = BH_ret - strategy_ret_before_TX; direct_cost = TX",
+    "cross_oos_window_grid": "6 complete non-overlapping 2-year windows: 2013-14, 2015-16, 2017-18, 2019-20, 2021-22, 2023-24",
 }
 RESULTS["references"] = [
     "K811: Original VoV-conditional VT (had 2 HIGH bugs)",
@@ -969,9 +1045,23 @@ RESULTS["references"] = [
 ]
 RESULTS["insurance_cost_summary"] = insurance_summary
 
-output_path = PROJECT / "experiments" / "k811v2_insurance_premium_vov_fixed_results.json"
-with open(output_path, "w") as f:
-    json.dump(RESULTS, f, indent=2, default=str, ensure_ascii=False)
+RESULTS["archival_note"] = {
+    "old_archived_results_preserved": "k811v2_insurance_premium_vov_fixed_results.json",
+    "this_file_purpose": "S-02 cross-OOS six-window rerun using pinned raw-Close reproduction CSVs.",
+}
+
+
+def atomic_write_json(payload: dict, output_path: Path) -> None:
+    tmp_path = output_path.with_suffix(output_path.suffix + ".tmp")
+    with tmp_path.open("w") as f:
+        json.dump(payload, f, indent=2, default=str, ensure_ascii=False)
+    with tmp_path.open() as f:
+        json.load(f)
+    os.replace(tmp_path, output_path)
+
+
+output_path = OUTPUT_PATH
+atomic_write_json(RESULTS, output_path)
 
 print(f"\nResults saved to: {output_path}")
 print(f"\n{'='*80}")
