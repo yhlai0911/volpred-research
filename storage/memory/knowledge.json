@@ -37804,5 +37804,20 @@
     "experiment_path": "experiments/k1642_volatility_laundering_bdc/",
     "reviewer": "Codex gpt-5.5 xhigh (CONDITIONAL_PASS)",
     "reviewer_source": "codex_review"
+  },
+  {
+    "item_id": "f85dc745",
+    "category": "methodology",
+    "content": "[提出+執行: Claude hourly-11 2026-07-06｜審查: Codex CLI PASS] TSMC (2330.TW) GJR-GARCH leverage gamma 對 mean-spec robust: 同一 K892 canonical full sample (n=6525, auto_adjust=True adj-close, arch BW-robust cov)，Constant-mean gamma=0.0525/t=3.98（canonical）、Zero-mean gamma=0.0593/t=4.25，兩者皆顯著且 zero-mean 更強。推翻 taiwan-vt body_v2 legacy 的『zero-mean 0.039/t=0.87 不顯著』說法 —— 該 (0.039,0.87) 經 gamma_unification_proposal.md:45 證實 UNTRACEABLE（no single spec reproduces），已被本估計取代。結論: TSMC leverage 顯著性非 cherry-pick constant-mean 造成，body_v3 表註已補正 SE 口徑(K892 rows=BW-robust MLE 非 Newey-West HAC) + mean-spec sensitivity 揭露。",
+    "evidence": [
+      "experiment_id: paper2_tsmc_gamma_zeromean_sens",
+      "experiment_path: experiments/paper2_tsmc_gamma_zeromean_sens/paper2_tsmc_gamma_zeromean_sens_results.json",
+      "reviewer: Codex CLI (verdict=PASS, 2026-07-06; independent no-write rerun reproduced n=6525/0.0525/3.98)",
+      "canonical_source: experiments/k892/k892_verify_tw_gamma_results.json full_sample 2330.TW",
+      "refuted: gamma_unification_proposal.md:45 untraceable 0.039/0.87",
+      "paper: taiwan-vt body_v3.tex tab:gamma notes (L60, L164)"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-07-06T11:21:51.306720"
   }
 ]

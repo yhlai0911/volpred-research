@@ -57,7 +57,7 @@ TSMC (2330.TW) & 0.051 & 1.92 & $-0.18$ & 3.41 & 0.052 & 3.98 \\
 \bottomrule
 \end{tabular}
 \begin{flushleft}
-\small \textit{Notes:} $\gamma_{\text{GJR}}$ is the asymmetric leverage parameter from GJR-GARCH(1,1). 0050.TW and TSMC values use full-sample MLE; other rows use rolling window $w = 2000$. $t(\gamma)$ uses Newey-West HAC standard errors. The primary 9-stock average excludes both TSMC (2330.TW) and 0056.TW: TSMC is reported separately because of its dominant benchmark weight, and 0056.TW is a diversified ETF rather than an individual stock. The 10-security average adds 0056.TW back in for sensitivity, while still excluding TSMC.
+\small \textit{Notes:} $\gamma_{\text{GJR}}$ is the asymmetric leverage parameter from GJR-GARCH(1,1). 0050.TW and TSMC values use full-sample MLE; other rows use rolling window $w = 2000$. The $t$-statistics for the full-sample 0050.TW and TSMC rows are based on Bollerslev--Wooldridge robust (quasi-)maximum-likelihood standard errors from the GJR-GARCH estimation \citep{bollerslev1992}; the rolling-window TWII and individual-stock rows use Newey--West HAC standard errors. The primary 9-stock average excludes both TSMC (2330.TW) and 0056.TW: TSMC is reported separately because of its dominant benchmark weight, and 0056.TW is a diversified ETF rather than an individual stock. The 10-security average adds 0056.TW back in for sensitivity, while still excluding TSMC.
 \end{flushleft}
 \end{table}
 
@@ -161,7 +161,7 @@ Mega Financial (2886) & 0.179 & 2.42 & 0.015 & 0.901 & 0.977 \\
 \bottomrule
 \end{tabular}
 \begin{flushleft}
-\small \textit{Notes:} GJR-GARCH(1,1) with rolling window $w = 2000$ except where noted. 0050.TW and TSMC use full-sample MLE estimation. $t$-statistics use Newey-West HAC standard errors. Persistence $= \alpha + \beta + \gamma/2$. Individual stocks use the full available sample (2008--2026). The primary 9-stock average excludes both TSMC (2330.TW) and 0056.TW; the former is reported separately because of its dominant benchmark role, and the latter is a diversified ETF rather than an individual stock.
+\small \textit{Notes:} GJR-GARCH(1,1) with rolling window $w = 2000$ except where noted. 0050.TW and TSMC use full-sample MLE estimation, and their $t$-statistics are based on Bollerslev--Wooldridge robust maximum-likelihood standard errors \citep{bollerslev1992}; the rolling-window TWII and individual-stock rows use Newey--West HAC standard errors. Persistence $= \alpha + \beta + \gamma/2$. Individual stocks use the full available sample (2008--2026). The primary 9-stock average excludes both TSMC (2330.TW) and 0056.TW; the former is reported separately because of its dominant benchmark role, and the latter is a diversified ETF rather than an individual stock. TSMC's leverage parameter is robust to the mean specification: on the canonical full sample ($N=6{,}525$), the constant-mean estimate is $\gamma = 0.052$ ($t = 3.98$) and the zero-mean estimate is $\gamma = 0.059$ ($t = 4.25$), both significant (source: \texttt{experiments/paper2\_tsmc\_gamma\_zeromean\_sens}); the constant-mean spec was therefore not chosen to manufacture significance.
 \end{flushleft}
 \end{table}
 

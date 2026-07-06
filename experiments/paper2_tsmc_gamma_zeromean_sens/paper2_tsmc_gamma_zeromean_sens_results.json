@@ -1,0 +1,39 @@
+{
+  "experiment_id": "paper2_tsmc_gamma_zeromean_sens",
+  "purpose": "Traceable mean-spec sensitivity for TSMC gamma (taiwan-vt body_v3 disclosure); replaces untraceable legacy 0.039/0.87 with real zero-mean estimate.",
+  "ticker": "2330.TW",
+  "sample_start": "2000-01-05",
+  "sample_end": "2026-04-02",
+  "n_obs": 6525,
+  "download_window": {
+    "start": "2000-01-01",
+    "end": "2026-04-05"
+  },
+  "method": "GJR-GARCH(1,1) MLE via arch, Normal innovations, robust (BW) cov; returns = Close pct_change * 100",
+  "canonical_reference": "experiments/k892 full_sample Constant-mean: gamma=0.0525, t=3.98, n=6525",
+  "specs": {
+    "constant_mean": {
+      "mean_spec": "Constant",
+      "gamma": 0.05249605083224137,
+      "gamma_se": 0.013189872850680837,
+      "gamma_t": 3.9800270576172854,
+      "alpha": 0.032179572080479814,
+      "beta": 0.9304055999034043,
+      "convergence_flag": 0,
+      "loglik": -13048.482947033039,
+      "cov_type": "robust (Bollerslev-Wooldridge)"
+    },
+    "zero_mean": {
+      "mean_spec": "Zero",
+      "gamma": 0.05929772805577626,
+      "gamma_se": 0.013962578298767995,
+      "gamma_t": 4.246903887443802,
+      "alpha": 0.029933559532833533,
+      "beta": 0.930498559615686,
+      "convergence_flag": 0,
+      "loglik": -13057.056650270531,
+      "cov_type": "robust (Bollerslev-Wooldridge)"
+    }
+  },
+  "untraceable_number_note": "Legacy 'zero-mean 0.039 / t=0.87' is UNTRACEABLE per gamma_unification_proposal.md:45; superseded by this real estimate."
+}

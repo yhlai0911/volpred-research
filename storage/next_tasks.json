@@ -51537,10 +51537,28 @@
     "task_type": "paper_body",
     "priority": 2,
     "source": "agent_discovered",
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-05T11:33:02.518339+00:00",
     "title": "taiwan-vt body_v3 canonical 揭露修正：gamma SE 口徑（HAC vs arch MLE）+ TSMC zero-mean sensitivity",
-    "description": "2026-07-05 hourly-19 版本 reconcile 後的 Codex review（CONDITIONAL_PASS）抓到兩個 canonical body_v3.tex 的投稿前研究誠實項：\n\n(1) SE 口徑標示不一致：body_v3.tex L60/L164 表註寫「$t(\\gamma)$ uses Newey-West HAC standard errors」，但 0050.TW / TSMC 全樣本 row 的 t 值來自 experiments/k892（arch_model(..., mean='Constant') GJR-GARCH MLE，t 是 arch 的 (Bollerslev-Wooldridge) robust MLE t，非 Newey-West HAC）。需先確認 K892 實際 SE type，再修正表註：full-sample MLE row 標 MLE/BW-robust t，rolling row 若真用 HAC 才標 HAC，不可一律 HAC。\n\n(2) 缺 zero-mean spec sensitivity 揭露：canonical 選常數均值 TSMC gamma=0.052/t=3.98（顯著）為 primary，但 zero-mean spec 給 0.039/t=0.87（不顯著）。reviewer 會質疑「是否挑了讓 TSMC 顯著的 spec」。需在表註或 supplement 明揭：primary=constant-mean K892；zero-mean 給 gamma=0.039/t=0.87，作為 spec-sensitivity（非主結論）。此即舊 body_v2 的 3-spec disambiguation footnote，v3 重構時未帶過來。\n\nroot context：Codex review 2026-07-05（/tmp/codex_review_taiwanvt_reconcile.txt）點 2+3。主線程做（禁 background agent 改 .tex）；改後 xelatex 重編 main_v3.pdf + reproduce gate + Codex re-review。研究誠實：不改數字，只補揭露。"
+    "description": "2026-07-05 hourly-19 版本 reconcile 後的 Codex review（CONDITIONAL_PASS）抓到兩個 canonical body_v3.tex 的投稿前研究誠實項：\n\n(1) SE 口徑標示不一致：body_v3.tex L60/L164 表註寫「$t(\\gamma)$ uses Newey-West HAC standard errors」，但 0050.TW / TSMC 全樣本 row 的 t 值來自 experiments/k892（arch_model(..., mean='Constant') GJR-GARCH MLE，t 是 arch 的 (Bollerslev-Wooldridge) robust MLE t，非 Newey-West HAC）。需先確認 K892 實際 SE type，再修正表註：full-sample MLE row 標 MLE/BW-robust t，rolling row 若真用 HAC 才標 HAC，不可一律 HAC。\n\n(2) 缺 zero-mean spec sensitivity 揭露：canonical 選常數均值 TSMC gamma=0.052/t=3.98（顯著）為 primary，但 zero-mean spec 給 0.039/t=0.87（不顯著）。reviewer 會質疑「是否挑了讓 TSMC 顯著的 spec」。需在表註或 supplement 明揭：primary=constant-mean K892；zero-mean 給 gamma=0.039/t=0.87，作為 spec-sensitivity（非主結論）。此即舊 body_v2 的 3-spec disambiguation footnote，v3 重構時未帶過來。\n\nroot context：Codex review 2026-07-05（/tmp/codex_review_taiwanvt_reconcile.txt）點 2+3。主線程做（禁 background agent 改 .tex）；改後 xelatex 重編 main_v3.pdf + reproduce gate + Codex re-review。研究誠實：不改數字，只補揭露。",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-07-06T03:09:15.147486+00:00",
+    "claim_session_id": "85f0c8ada8ca",
+    "status_history": [
+      {
+        "ts": "2026-07-06T03:09:15.147792+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-06T03:09:15.393459+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-11"
+      }
+    ],
+    "started_at": "2026-07-06T03:09:15.393153+00:00"
   },
   {
     "id": "email-12632-5acf9a",
@@ -51863,7 +51881,7 @@
     "title": "K1648: 隨機波動率（threshold SV / realized-SV skew-t）模型類 vs GARCH 的 VaR/分位預測 — QML/Kalman 估 SV（平台幾乎全 GARCH/HAR，缺 SV 整類），一日 OOS QLIKE ",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 489). Original: 隨機波動率（threshold SV / realized-SV skew-t）模型類 vs GARCH 的 VaR/分位預測 — QML/Kalman 估 SV（平台幾乎全 GARCH/HAR，缺 SV 整類），一日 OOS QLIKE + quantile 損失；SV 是與 GARCH 平行的獨立生成機制（來源：arXiv 2024-26 Realized SV skew-t / threshold SV）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1648.py with signal.shift(1) + seed=42, (c) K1648_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -51872,7 +51890,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-06T00:00:01Z"
+    "created_at": "2026-07-06T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T03:14:55.261659+00:00",
+    "claim_session_id": "16ef9635c387",
+    "status_history": [
+      {
+        "ts": "2026-07-06T03:14:55.261954+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T03:14:59.288187+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T03:14:59.287905+00:00"
   },
   {
     "id": "K1649",
