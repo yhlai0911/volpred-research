@@ -151,7 +151,19 @@ def estimate_gjr(returns: pd.Series) -> dict:
     }
 
 
-def rolling_last_window(returns: pd.Series, window: int = WINDOW) -> dict:
+def rolling_last_window(
+    returns: pd.Series, window: int = WINDOW, end_cutoff: pd.Timestamp | None = None
+) -> dict:
+    """Last 2000-obs window ending on/before `end_cutoff` (calendar alignment).
+
+    Codex CONDITIONAL_PASS caveat: the per-stock last-2000-obs windows must be
+    calendar-aligned (share a common end date) before becoming the paper's
+    canonical rolling numbers. `end_cutoff` truncates the return series to a
+    common terminal date first, so every security's window ends on the same
+    (or nearest prior) trading day.
+    """
+    if end_cutoff is not None:
+        returns = returns[returns.index <= end_cutoff]
     if len(returns) < window:
         raise ValueError(f"only {len(returns)} obs < window {window}")
     last = returns.iloc[-window:]
@@ -163,11 +175,28 @@ def rolling_last_window(returns: pd.Series, window: int = WINDOW) -> dict:
 
 
 def main() -> None:
+    # --- Calendar alignment (Codex CONDITIONAL_PASS caveat) ---------------
+    # Pre-load every return series, then derive the COMMON terminal date as the
+    # earliest last-obs date across all 10 securities. This is the latest end
+    # date achievable from the offline snapshots without any network re-fetch,
+    # so the "fully reproducible, no network" guarantee is preserved. It is
+    # bound by the k1302 snapshots for 2383/2886 (end 2025-01-22). Every
+    # security's last-2000-obs window is then taken ending on/before this date.
+    et_ticker, et_name, et_src, et_col = ETF_0056
+    returns_cache: dict[str, pd.Series] = {}
+    for ticker, (name, src, col) in NINE_STOCKS.items():
+        returns_cache[ticker] = log_returns(_load_prices(ticker, src, col))
+    returns_cache[et_ticker] = log_returns(
+        _load_prices(et_ticker, et_src, et_col)
+    )
+    common_end = min(r.index[-1] for r in returns_cache.values())
+    print(f"[calendar-align] COMMON_END = {common_end.date()} "
+          f"(min last-obs across all 10 securities)")
+
     per_stock = {}
     for ticker, (name, src, col) in NINE_STOCKS.items():
-        prices = _load_prices(ticker, src, col)
-        r = log_returns(prices)
-        est = rolling_last_window(r)
+        r = returns_cache[ticker]
+        est = rolling_last_window(r, end_cutoff=common_end)
         est["name"] = name
         est["ticker"] = ticker
         est["price_source"] = f"{src}:{col}"
@@ -189,9 +218,8 @@ def main() -> None:
             f"a={est['alpha']:.4f} b={est['beta']:.4f} pers={est['persistence']:.4f}  {legtxt}"
         )
 
-    # 0056 ETF (separate row + included in 10-security avg)
-    et_ticker, et_name, et_src, et_col = ETF_0056
-    et_est = rolling_last_window(log_returns(_load_prices(et_ticker, et_src, et_col)))
+    # 0056 ETF (separate row + included in 10-security avg); calendar-aligned
+    et_est = rolling_last_window(returns_cache[et_ticker], end_cutoff=common_end)
     et_est["name"] = et_name
     et_est["ticker"] = et_ticker
     et_est["price_source"] = f"{et_src}:{et_col}"
@@ -257,13 +285,18 @@ def main() -> None:
         "arch_version": arch.__version__,
         "covariance_type": "arch default robust (White/Bollerslev-Wooldridge); gamma point estimates unaffected by SE choice",
         "codex_caveat_calendar_alignment": (
-            "CONDITIONAL_PASS (Codex): the per-stock last-2000-obs windows are NOT "
-            "calendar-aligned -- 2317/2454 end 2026-04-17, 2886 (k1302 snapshot) ends "
-            "2025-01-22, k1302b stocks end 2026-05-15. See per_stock.window_end. The "
-            "'legacy non-reproducible' conclusion is robust, but these reproducible "
-            "values must be recomputed on calendar-aligned snapshots before becoming "
-            "the paper's canonical rolling numbers."
+            "RESOLVED (2026-07-07): the Codex CONDITIONAL_PASS caveat required "
+            "recomputing on calendar-aligned snapshots. All 10 securities' last-"
+            "2000-obs windows are now truncated to a COMMON terminal date = "
+            f"{str(common_end.date())}, the earliest last-obs across all offline "
+            "snapshots (bound by the k1302 2383/2886 snapshots ending 2025-01-22). "
+            "This is the latest common end date achievable offline with no network "
+            "re-fetch, preserving the 'fully reproducible, no network' guarantee. "
+            "See per_stock.window_end -- all rows now share this end date (or the "
+            "nearest prior trading day per security). These are the paper's "
+            "canonical calendar-aligned rolling numbers."
         ),
+        "calendar_alignment_common_end": str(common_end.date()),
         "rolling_averages_and_ratio": avg,
         "etf_0056": result_etf,
         "displayed_rows_match_legacy_rounded": all_match,
