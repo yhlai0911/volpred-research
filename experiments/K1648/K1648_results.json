@@ -1,0 +1,515 @@
+{
+  "experiment_id": "K1648",
+  "title": "QML/Kalman stochastic-volatility class vs GARCH baselines",
+  "seed": 1648,
+  "verdict": "NULL_NO_SV_CLASS_EDGE_VS_GARCH",
+  "data": {
+    "source": "yfinance daily OHLC, auto_adjust=True",
+    "assets": [
+      "SPY",
+      "TLT",
+      "HYG"
+    ],
+    "start": "2010-01-01",
+    "end": "2026-07-07",
+    "cache": "K1648_ohlc_cache.parquet",
+    "metadata_by_asset": {
+      "SPY": {
+        "asset": "SPY",
+        "n_total": 4148,
+        "n_oos_dates": 2136,
+        "oos_start": "2018-01-02",
+        "oos_end": "2026-07-02",
+        "fit_error_count": 0,
+        "fit_errors_sample": []
+      },
+      "TLT": {
+        "asset": "TLT",
+        "n_total": 4148,
+        "n_oos_dates": 2136,
+        "oos_start": "2018-01-02",
+        "oos_end": "2026-07-02",
+        "fit_error_count": 0,
+        "fit_errors_sample": []
+      },
+      "HYG": {
+        "asset": "HYG",
+        "n_total": 4148,
+        "n_oos_dates": 2136,
+        "oos_start": "2018-01-02",
+        "oos_end": "2026-07-02",
+        "fit_error_count": 0,
+        "fit_errors_sample": []
+      }
+    }
+  },
+  "methods": {
+    "forecast_horizon": "one trading day",
+    "oos_start": "2018-01-02",
+    "refit_cadence": "first available trading day of each calendar year",
+    "lookahead_policy": "Forecasts for t are produced from state through t-1; day-t returns/range update the state only after forecast recording. Equivalent to signal.shift(1).",
+    "primary_loss": "Patton QLIKE on close-to-close r_t^2",
+    "var_loss": "Empirical standardized-residual quantiles at 5% and 1%; pinball + Kupiec/CC",
+    "sv_qml_note": "SV variants are QML/Kalman approximations on log(r_t^2); RSV_KF adds Parkinson range log-variance as a second measurement. This is not a full Bayesian realized-SV skew-t implementation."
+  },
+  "literature_used": [
+    {
+      "name": "Threshold stochastic volatility: properties and forecasting",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0169207017300717"
+    },
+    {
+      "name": "Realized Stochastic Volatility Model with Skew-t Distributions",
+      "url": "https://arxiv.org/abs/2401.13179"
+    },
+    {
+      "name": "Patton (2011) volatility forecast comparison with imperfect proxies",
+      "url": "https://public.econ.duke.edu/~ap172/Patton_vol_proxies_JoE_2011.pdf"
+    }
+  ],
+  "evaluation": {
+    "by_asset": {
+      "HYG": {
+        "EWMA_094": {
+          "asset": "HYG",
+          "model": "EWMA_094",
+          "n": 2136,
+          "qlike": 1.3950175306664236,
+          "qlike_rel_vs_garch_n": -0.03816766337659565,
+          "dm_t_vs_garch_n": 1.9976831443842036,
+          "dm_p_vs_garch_n": 0.04587769781443929,
+          "pinball_5pct": 0.05262671499579668,
+          "viol_rate_5pct": 0.046348314606741575,
+          "kupiec_p_5pct": 0.43328390781545345,
+          "cc_p_5pct": 0.0064753263670698225,
+          "pinball_1pct": 0.016480701389920548,
+          "viol_rate_1pct": 0.008426966292134831,
+          "kupiec_p_1pct": 0.4526535642815225,
+          "cc_p_1pct": 0.25656509136972505
+        },
+        "GARCH_N": {
+          "asset": "HYG",
+          "model": "GARCH_N",
+          "n": 2136,
+          "qlike": 1.3437304781090842,
+          "qlike_rel_vs_garch_n": 0.0,
+          "dm_t_vs_garch_n": 0.0,
+          "dm_p_vs_garch_n": 1.0,
+          "pinball_5pct": 0.049855177524591815,
+          "viol_rate_5pct": 0.04353932584269663,
+          "kupiec_p_5pct": 0.16162360810039977,
+          "cc_p_5pct": 0.23901633256281318,
+          "pinball_1pct": 0.015488805917790388,
+          "viol_rate_1pct": 0.008426966292134831,
+          "kupiec_p_1pct": 0.4526535642815225,
+          "cc_p_1pct": 0.7542741625064742
+        },
+        "GJR_T": {
+          "asset": "HYG",
+          "model": "GJR_T",
+          "n": 2136,
+          "qlike": 1.2991153239857773,
+          "qlike_rel_vs_garch_n": 0.03320245752413825,
+          "dm_t_vs_garch_n": -4.069060373447218,
+          "dm_p_vs_garch_n": 4.8919711916894926e-05,
+          "pinball_5pct": 0.04840689416072482,
+          "viol_rate_5pct": 0.04447565543071161,
+          "kupiec_p_5pct": 0.23289565089898268,
+          "cc_p_5pct": 0.45612298425313813,
+          "pinball_1pct": 0.014969574575653127,
+          "viol_rate_1pct": 0.006086142322097378,
+          "kupiec_p_1pct": 0.04997880332471083,
+          "cc_p_1pct": 0.1464479934919679
+        },
+        "RSV_KF": {
+          "asset": "HYG",
+          "model": "RSV_KF",
+          "n": 2136,
+          "qlike": 1.4362630377876833,
+          "qlike_rel_vs_garch_n": -0.0688624401887588,
+          "dm_t_vs_garch_n": 2.3690761357657766,
+          "dm_p_vs_garch_n": 0.01792110214864362,
+          "pinball_5pct": 0.048955096225625064,
+          "viol_rate_5pct": 0.0449438202247191,
+          "kupiec_p_5pct": 0.27567072597101283,
+          "cc_p_5pct": 0.2525882742029667,
+          "pinball_1pct": 0.01425102560716663,
+          "viol_rate_1pct": 0.00749063670411985,
+          "kupiec_p_1pct": 0.22256227524022942,
+          "cc_p_1pct": 0.1307165175570586
+        },
+        "SV_KF": {
+          "asset": "HYG",
+          "model": "SV_KF",
+          "n": 2136,
+          "qlike": 2.9505825760938222,
+          "qlike_rel_vs_garch_n": -1.195814282821003,
+          "dm_t_vs_garch_n": 2.4767497840462895,
+          "dm_p_vs_garch_n": 0.013335419346142352,
+          "pinball_5pct": 0.06276633326570626,
+          "viol_rate_5pct": 0.04868913857677903,
+          "kupiec_p_5pct": 0.780136039858283,
+          "cc_p_5pct": 0.0005840697853215504,
+          "pinball_1pct": 0.023498350454434384,
+          "viol_rate_1pct": 0.008895131086142321,
+          "kupiec_p_1pct": 0.6009579390955357,
+          "cc_p_1pct": 1.2321266831261113e-06
+        },
+        "TSV_KF": {
+          "asset": "HYG",
+          "model": "TSV_KF",
+          "n": 2136,
+          "qlike": 3.1108901590583575,
+          "qlike_rel_vs_garch_n": -1.3151146823997357,
+          "dm_t_vs_garch_n": 2.3305405486314124,
+          "dm_p_vs_garch_n": 0.019870314302361747,
+          "pinball_5pct": 0.06378296418297062,
+          "viol_rate_5pct": 0.05149812734082397,
+          "kupiec_p_5pct": 0.7518468948850849,
+          "cc_p_5pct": 0.006220594760847908,
+          "pinball_1pct": 0.023460853953115382,
+          "viol_rate_1pct": 0.009363295880149813,
+          "kupiec_p_1pct": 0.7649861686476692,
+          "cc_p_1pct": 0.0025448499040708894
+        }
+      },
+      "SPY": {
+        "EWMA_094": {
+          "asset": "SPY",
+          "model": "EWMA_094",
+          "n": 2136,
+          "qlike": 1.5986473213682546,
+          "qlike_rel_vs_garch_n": -0.04925205860958664,
+          "dm_t_vs_garch_n": 2.98903462180182,
+          "dm_p_vs_garch_n": 0.002830548427977142,
+          "pinball_5pct": 0.13689577834743238,
+          "viol_rate_5pct": 0.05571161048689138,
+          "kupiec_p_5pct": 0.23391409294595777,
+          "cc_p_5pct": 0.31990605378682724,
+          "pinball_1pct": 0.04209581084899926,
+          "viol_rate_1pct": 0.010299625468164793,
+          "kupiec_p_1pct": 0.88984870880986,
+          "cc_p_1pct": 0.06456248259278641
+        },
+        "GARCH_N": {
+          "asset": "SPY",
+          "model": "GARCH_N",
+          "n": 2136,
+          "qlike": 1.5236065616937626,
+          "qlike_rel_vs_garch_n": 0.0,
+          "dm_t_vs_garch_n": 0.0,
+          "dm_p_vs_garch_n": 1.0,
+          "pinball_5pct": 0.1293337388973024,
+          "viol_rate_5pct": 0.05945692883895131,
+          "kupiec_p_5pct": 0.05119258291999207,
+          "cc_p_5pct": 0.09907584767434208,
+          "pinball_1pct": 0.039238901020196754,
+          "viol_rate_1pct": 0.010767790262172285,
+          "kupiec_p_1pct": 0.7246449855088252,
+          "cc_p_1pct": 0.48174744393303603
+        },
+        "GJR_T": {
+          "asset": "SPY",
+          "model": "GJR_T",
+          "n": 2136,
+          "qlike": 1.502047455670895,
+          "qlike_rel_vs_garch_n": 0.014150048027425715,
+          "dm_t_vs_garch_n": -0.6698131600934365,
+          "dm_p_vs_garch_n": 0.5030493366766127,
+          "pinball_5pct": 0.1256447070479187,
+          "viol_rate_5pct": 0.0552434456928839,
+          "kupiec_p_5pct": 0.27383549825710196,
+          "cc_p_5pct": 0.4434205920309444,
+          "pinball_1pct": 0.03975489139474372,
+          "viol_rate_1pct": 0.013576779026217229,
+          "kupiec_p_1pct": 0.11510938989678543,
+          "cc_p_1pct": 0.205999935678289
+        },
+        "RSV_KF": {
+          "asset": "SPY",
+          "model": "RSV_KF",
+          "n": 2136,
+          "qlike": 1.5714779826194984,
+          "qlike_rel_vs_garch_n": -0.03141980490850481,
+          "dm_t_vs_garch_n": 1.5040779866933134,
+          "dm_p_vs_garch_n": 0.1327091944951062,
+          "pinball_5pct": 0.12726520538405534,
+          "viol_rate_5pct": 0.054307116104868915,
+          "kupiec_p_5pct": 0.3673940723994725,
+          "cc_p_5pct": 0.6388800522836451,
+          "pinball_1pct": 0.03932036366516464,
+          "viol_rate_1pct": 0.012640449438202247,
+          "kupiec_p_1pct": 0.23871507021284433,
+          "cc_p_1pct": 0.06877045066306064
+        },
+        "SV_KF": {
+          "asset": "SPY",
+          "model": "SV_KF",
+          "n": 2136,
+          "qlike": 2.313923738297552,
+          "qlike_rel_vs_garch_n": -0.5187147367790341,
+          "dm_t_vs_garch_n": 2.7374563828271357,
+          "dm_p_vs_garch_n": 0.006242980730427172,
+          "pinball_5pct": 0.14662485576332823,
+          "viol_rate_5pct": 0.060393258426966294,
+          "kupiec_p_5pct": 0.03257039284525076,
+          "cc_p_5pct": 0.019013207493133844,
+          "pinball_1pct": 0.04898403973248351,
+          "viol_rate_1pct": 0.013108614232209739,
+          "kupiec_p_1pct": 0.1681675184996948,
+          "cc_p_1pct": 0.06045755809259101
+        },
+        "TSV_KF": {
+          "asset": "SPY",
+          "model": "TSV_KF",
+          "n": 2136,
+          "qlike": 2.0538174024307105,
+          "qlike_rel_vs_garch_n": -0.34799721533590877,
+          "dm_t_vs_garch_n": 2.8888582066048745,
+          "dm_p_vs_garch_n": 0.0039054015102433226,
+          "pinball_5pct": 0.143608287742399,
+          "viol_rate_5pct": 0.05711610486891386,
+          "kupiec_p_5pct": 0.13967428712264962,
+          "cc_p_5pct": 0.24711271578098026,
+          "pinball_1pct": 0.04758604605636514,
+          "viol_rate_1pct": 0.01638576779026217,
+          "kupiec_p_1pct": 0.006609507110523882,
+          "cc_p_1pct": 0.008070046201499759
+        }
+      },
+      "TLT": {
+        "EWMA_094": {
+          "asset": "TLT",
+          "model": "EWMA_094",
+          "n": 2136,
+          "qlike": 1.2236799616559555,
+          "qlike_rel_vs_garch_n": 0.005101918922867469,
+          "dm_t_vs_garch_n": -0.7812467989911415,
+          "dm_p_vs_garch_n": 0.43474397257875563,
+          "pinball_5pct": 0.0983092901583924,
+          "viol_rate_5pct": 0.05337078651685393,
+          "kupiec_p_5pct": 0.47931727447527295,
+          "cc_p_5pct": 0.39127888242365594,
+          "pinball_1pct": 0.0263576966890436,
+          "viol_rate_1pct": 0.011704119850187267,
+          "kupiec_p_1pct": 0.4408535032626726,
+          "cc_p_1pct": 0.7430217994741274
+        },
+        "GARCH_N": {
+          "asset": "TLT",
+          "model": "GARCH_N",
+          "n": 2136,
+          "qlike": 1.2299550928182823,
+          "qlike_rel_vs_garch_n": 0.0,
+          "dm_t_vs_garch_n": 0.0,
+          "dm_p_vs_garch_n": 1.0,
+          "pinball_5pct": 0.09914627789137188,
+          "viol_rate_5pct": 0.05337078651685393,
+          "kupiec_p_5pct": 0.47931727447527295,
+          "cc_p_5pct": 0.39127888242365594,
+          "pinball_1pct": 0.027244514048919227,
+          "viol_rate_1pct": 0.012172284644194757,
+          "kupiec_p_1pct": 0.3291680872067333,
+          "cc_p_1pct": 0.6212113256330614
+        },
+        "GJR_T": {
+          "asset": "TLT",
+          "model": "GJR_T",
+          "n": 2136,
+          "qlike": 1.2324364865907687,
+          "qlike_rel_vs_garch_n": -0.002017466968489524,
+          "dm_t_vs_garch_n": 0.5266165732964427,
+          "dm_p_vs_garch_n": 0.5985145853331855,
+          "pinball_5pct": 0.0996794468656345,
+          "viol_rate_5pct": 0.05337078651685393,
+          "kupiec_p_5pct": 0.47931727447527295,
+          "cc_p_5pct": 0.23479234009200645,
+          "pinball_1pct": 0.027529502390068527,
+          "viol_rate_1pct": 0.013108614232209739,
+          "kupiec_p_1pct": 0.1681675184996948,
+          "cc_p_1pct": 0.26359891657934875
+        },
+        "RSV_KF": {
+          "asset": "TLT",
+          "model": "RSV_KF",
+          "n": 2136,
+          "qlike": 1.1970254053926095,
+          "qlike_rel_vs_garch_n": 0.02677308108072362,
+          "dm_t_vs_garch_n": -1.9930885909176843,
+          "dm_p_vs_garch_n": 0.04637882556496198,
+          "pinball_5pct": 0.09621845123336548,
+          "viol_rate_5pct": 0.054307116104868915,
+          "kupiec_p_5pct": 0.3673940723994725,
+          "cc_p_5pct": 0.6624517315734051,
+          "pinball_1pct": 0.025268643392537034,
+          "viol_rate_1pct": 0.013108614232209739,
+          "kupiec_p_1pct": 0.1681675184996948,
+          "cc_p_1pct": 0.38689510600276644
+        },
+        "SV_KF": {
+          "asset": "TLT",
+          "model": "SV_KF",
+          "n": 2136,
+          "qlike": 1.2837151174734025,
+          "qlike_rel_vs_garch_n": -0.043708932926921816,
+          "dm_t_vs_garch_n": 1.2456142165580144,
+          "dm_p_vs_garch_n": 0.2130427390052736,
+          "pinball_5pct": 0.10222258298761056,
+          "viol_rate_5pct": 0.04868913857677903,
+          "kupiec_p_5pct": 0.780136039858283,
+          "cc_p_5pct": 0.23703906493600058,
+          "pinball_1pct": 0.03054409987972909,
+          "viol_rate_1pct": 0.010767790262172285,
+          "kupiec_p_1pct": 0.7246449855088252,
+          "cc_p_1pct": 0.07237729624849698
+        },
+        "TSV_KF": {
+          "asset": "TLT",
+          "model": "TSV_KF",
+          "n": 2136,
+          "qlike": 1.2604636991549902,
+          "qlike_rel_vs_garch_n": -0.02480465060460169,
+          "dm_t_vs_garch_n": 1.130787190586534,
+          "dm_p_vs_garch_n": 0.2582716804336549,
+          "pinball_5pct": 0.10151564873642778,
+          "viol_rate_5pct": 0.05149812734082397,
+          "kupiec_p_5pct": 0.7518468948850849,
+          "cc_p_5pct": 0.5891823827370908,
+          "pinball_1pct": 0.02975266130675549,
+          "viol_rate_1pct": 0.012172284644194757,
+          "kupiec_p_1pct": 0.3291680872067333,
+          "cc_p_1pct": 0.07482747843070847
+        }
+      }
+    },
+    "aggregate": {
+      "EWMA_094": {
+        "assets": [
+          "HYG",
+          "SPY",
+          "TLT"
+        ],
+        "mean_qlike": 1.4057816045635445,
+        "mean_qlike_rel_vs_garch_n": -0.027439267687771603,
+        "harvey_wins_vs_garch_n": 0,
+        "harvey_losses_vs_garch_n": 0,
+        "mean_pinball_5pct": 0.09594392783387383,
+        "mean_pinball_1pct": 0.028311402975987804,
+        "kupiec_pass_5pct": 3,
+        "kupiec_pass_1pct": 3
+      },
+      "GARCH_N": {
+        "assets": [
+          "HYG",
+          "SPY",
+          "TLT"
+        ],
+        "mean_qlike": 1.3657640442070431,
+        "mean_qlike_rel_vs_garch_n": 0.0,
+        "harvey_wins_vs_garch_n": 0,
+        "harvey_losses_vs_garch_n": 0,
+        "mean_pinball_5pct": 0.09277839810442202,
+        "mean_pinball_1pct": 0.027324073662302124,
+        "kupiec_pass_5pct": 3,
+        "kupiec_pass_1pct": 3
+      },
+      "GJR_T": {
+        "assets": [
+          "HYG",
+          "SPY",
+          "TLT"
+        ],
+        "mean_qlike": 1.344533088749147,
+        "mean_qlike_rel_vs_garch_n": 0.015111679527691478,
+        "harvey_wins_vs_garch_n": 1,
+        "harvey_losses_vs_garch_n": 0,
+        "mean_pinball_5pct": 0.091243682691426,
+        "mean_pinball_1pct": 0.02741798945348846,
+        "kupiec_pass_5pct": 3,
+        "kupiec_pass_1pct": 2
+      },
+      "RSV_KF": {
+        "assets": [
+          "HYG",
+          "SPY",
+          "TLT"
+        ],
+        "mean_qlike": 1.4015888085999304,
+        "mean_qlike_rel_vs_garch_n": -0.024503054672179992,
+        "harvey_wins_vs_garch_n": 0,
+        "harvey_losses_vs_garch_n": 0,
+        "mean_pinball_5pct": 0.09081291761434862,
+        "mean_pinball_1pct": 0.026280010888289435,
+        "kupiec_pass_5pct": 3,
+        "kupiec_pass_1pct": 3
+      },
+      "SV_KF": {
+        "assets": [
+          "HYG",
+          "SPY",
+          "TLT"
+        ],
+        "mean_qlike": 2.182740477288259,
+        "mean_qlike_rel_vs_garch_n": -0.5860793175089863,
+        "harvey_wins_vs_garch_n": 0,
+        "harvey_losses_vs_garch_n": 0,
+        "mean_pinball_5pct": 0.10387125733888168,
+        "mean_pinball_1pct": 0.034342163355548995,
+        "kupiec_pass_5pct": 2,
+        "kupiec_pass_1pct": 3
+      },
+      "TSV_KF": {
+        "assets": [
+          "HYG",
+          "SPY",
+          "TLT"
+        ],
+        "mean_qlike": 2.14172375354802,
+        "mean_qlike_rel_vs_garch_n": -0.5626388494467488,
+        "harvey_wins_vs_garch_n": 0,
+        "harvey_losses_vs_garch_n": 0,
+        "mean_pinball_5pct": 0.1029689668872658,
+        "mean_pinball_1pct": 0.03359985377207867,
+        "kupiec_pass_5pct": 3,
+        "kupiec_pass_1pct": 2
+      }
+    },
+    "asset_qlike_winners": {
+      "HYG": {
+        "model": "GJR_T",
+        "qlike": 1.2991153239857773
+      },
+      "SPY": {
+        "model": "GJR_T",
+        "qlike": 1.502047455670895
+      },
+      "TLT": {
+        "model": "RSV_KF",
+        "qlike": 1.1970254053926095
+      }
+    }
+  },
+  "figures": {
+    "mean_qlike": "fig_k1648_mean_qlike.png",
+    "relative_vs_garch": "fig_k1648_rel_vs_garch.png"
+  },
+  "summary": {
+    "best_sv_model_by_mean_qlike_rel": "RSV_KF",
+    "best_sv_mean_qlike_rel_vs_garch_n": -0.024503054672179992,
+    "sv_harvey_wins_vs_garch_n_total": 0,
+    "sv_harvey_losses_vs_garch_n_total": 0,
+    "asset_qlike_winners": {
+      "HYG": {
+        "model": "GJR_T",
+        "qlike": 1.2991153239857773
+      },
+      "SPY": {
+        "model": "GJR_T",
+        "qlike": 1.502047455670895
+      },
+      "TLT": {
+        "model": "RSV_KF",
+        "qlike": 1.1970254053926095
+      }
+    }
+  }
+}
