@@ -51889,7 +51889,7 @@
     "title": "K1648: 隨機波動率（threshold SV / realized-SV skew-t）模型類 vs GARCH 的 VaR/分位預測 — QML/Kalman 估 SV（平台幾乎全 GARCH/HAR，缺 SV 整類），一日 OOS QLIKE ",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 489). Original: 隨機波動率（threshold SV / realized-SV skew-t）模型類 vs GARCH 的 VaR/分位預測 — QML/Kalman 估 SV（平台幾乎全 GARCH/HAR，缺 SV 整類），一日 OOS QLIKE + quantile 損失；SV 是與 GARCH 平行的獨立生成機制（來源：arXiv 2024-26 Realized SV skew-t / threshold SV）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1648.py with signal.shift(1) + seed=42, (c) K1648_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -51914,9 +51914,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T03:30:03.674613+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-06T03:14:59.287905+00:00"
+    "started_at": "2026-07-06T03:14:59.287905+00:00",
+    "completed_at": "2026-07-06T03:30:03.674332+00:00",
+    "result": "K1648 QML/Kalman SV vs GARCH 類實驗完成。資料 yfinance daily OHLC SPY/TLT/HYG 2010-2026，OOS 2018+，seed=42，forecast state 嚴格 t-1（code 註明 signal.shift(1) 等價）。\\n結果 verdict=NULL_NO_SV_CLASS_EDGE_VS_GARCH；GJR_T mean QLIKE=1.3445 最佳，RSV_KF 為最佳 SV 但 mean rel vs GARCH_N=-2.09%，SV 類無 Harvey |t|>3 win；TLT 的 RSV_KF raw edge t=-1.99 未過強 evidence bar。\\nArtifacts: README, K1648.py, K1648_results.json, forecast/data parquet, 2 PNG；驗證 py_compile + JSON parse + artifact nonempty PASS。"
   },
   {
     "id": "K1649",

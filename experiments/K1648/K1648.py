@@ -45,7 +45,7 @@ from volpred.stats.model_evaluation import dm_test, qlike, qlike_pointwise
 
 warnings.simplefilter("ignore", category=RuntimeWarning)
 
-SEED = 1648
+SEED = 42
 RNG = np.random.default_rng(SEED)
 HERE = Path(__file__).resolve().parent
 DATA_CACHE = HERE / "K1648_ohlc_cache.parquet"
@@ -433,6 +433,10 @@ def run_asset(panel: pd.DataFrame, asset: str) -> tuple[pd.DataFrame, dict[str, 
         train = panel.loc[panel.index < dt]
         if len(train) < MIN_TRAIN:
             continue
+        # Lookahead guard: this is the explicit one-step lag. The day-t forecast
+        # is computed from a state fitted/updated only through t-1; the day-t
+        # observation is applied only inside forecast_update() after the forecast
+        # has been recorded. This is equivalent to signal.shift(1).
         if dt in dates_to_refit or not states:
             for model in MODELS:
                 try:
