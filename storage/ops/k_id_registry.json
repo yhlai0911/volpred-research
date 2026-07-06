@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1641,
+  "last_k_id": 1652,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -390,8 +390,108 @@
       "status": "reserved",
       "topic": "「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
       "topic_hash": "a8c7ecdaedd943ab"
+    },
+    {
+      "claimed_at": "2026-07-06T00:00:01.052665+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1643",
+      "number": 1643,
+      "source_max": 1642,
+      "status": "reserved",
+      "topic": "原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
+      "topic_hash": "59d2bd9781daf9fd"
+    },
+    {
+      "claimed_at": "2026-07-06T00:00:01.148690+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1644",
+      "number": 1644,
+      "source_max": 1643,
+      "status": "reserved",
+      "topic": "隨機波動率（threshold SV / realized-SV skew-t）模型類 vs GARCH 的 VaR/分位預測 — QML/Kalman 估 SV（平台幾乎全 GARCH/HAR，缺 SV 整類），一日 OOS QLIKE + quantile 損失；SV 是與 GARCH 平行的獨立生成機制（來源：arXiv 2024-26 Realized SV skew-t / threshold SV）",
+      "topic_hash": "3f6edfb1cbf81835"
+    },
+    {
+      "claimed_at": "2026-07-06T00:00:01.243369+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1645",
+      "number": 1645,
+      "source_max": 1644,
+      "status": "reserved",
+      "topic": "Expectile 型風險測度（EVaR / CARE）：唯一「同時 coherent + elicitable」的尾部量 — 非對稱最小平方估 expectile-VaR + CARE，對照 quantile-VaR 的 backtest 可檢定性（來源：ScienceDirect 2023 Basel III→IV expectile + 2025-26 elicitability）",
+      "topic_hash": "7db5e54c028aae08"
+    },
+    {
+      "claimed_at": "2026-07-06T00:00:01.344794+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1646",
+      "number": 1646,
+      "source_max": 1645,
+      "status": "reserved",
+      "topic": "CAViaR 直接動態分位數 VaR：不建波動模型也能報尾部 — Engle-Manganelli CAViaR（SAV/AS/IG 四式，內含 leverage）vs GARCH-VaR，OOS DQ test；direct-quantile 是完全不同 paradigm（來源：JTSA 2026 adaptive-Lasso CAViaR + JRSS-C 2024 long-range CAViaR）",
+      "topic_hash": "b1967b9060f1c182"
+    },
+    {
+      "claimed_at": "2026-07-06T00:00:01.462897+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1647",
+      "number": 1647,
+      "source_max": 1646,
+      "status": "reserved",
+      "topic": "原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
+      "topic_hash": "59d2bd9781daf9fd"
+    },
+    {
+      "claimed_at": "2026-07-06T00:00:01.583918+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1648",
+      "number": 1648,
+      "source_max": 1647,
+      "status": "reserved",
+      "topic": "隨機波動率（threshold SV / realized-SV skew-t）模型類 vs GARCH 的 VaR/分位預測 — QML/Kalman 估 SV（平台幾乎全 GARCH/HAR，缺 SV 整類），一日 OOS QLIKE + quantile 損失；SV 是與 GARCH 平行的獨立生成機制（來源：arXiv 2024-26 Realized SV skew-t / threshold SV）",
+      "topic_hash": "3f6edfb1cbf81835"
+    },
+    {
+      "claimed_at": "2026-07-06T00:00:01.683173+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1649",
+      "number": 1649,
+      "source_max": 1648,
+      "status": "reserved",
+      "topic": "Expectile 型風險測度（EVaR / CARE）：唯一「同時 coherent + elicitable」的尾部量 — 非對稱最小平方估 expectile-VaR + CARE，對照 quantile-VaR 的 backtest 可檢定性（來源：ScienceDirect 2023 Basel III→IV expectile + 2025-26 elicitability）",
+      "topic_hash": "7db5e54c028aae08"
+    },
+    {
+      "claimed_at": "2026-07-06T00:00:01.764910+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1650",
+      "number": 1650,
+      "source_max": 1649,
+      "status": "reserved",
+      "topic": "Wrapped-token price discovery / tokenization spillover 對 crypto vol regime 的預警力** — 用 wBTC / cbBTC / stETH 等 wrapped-token 與 native BTC/ETH 的價格、liquidity、bridge-supply 或 DEX pool depth 公開資料，估 information share、basis widening 與 price-discovery latency，檢定 wrapped-token stress 是否領先 BTC/ETH RV regime；與 tokenised Treasury/MMF AUM shock 題正交——那是 T-bill ETF liquidity-vol，這裡是 crypto-native token wrapper basis（來源：SSRN 2025 wrapped-token price-discovery stream + 2026 DeFi/tokenization review）。",
+      "topic_hash": "dd7d46581a4fc37b"
+    },
+    {
+      "claimed_at": "2026-07-06T00:00:01.823199+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1651",
+      "number": 1651,
+      "source_max": 1650,
+      "status": "reserved",
+      "topic": "CAViaR 直接動態分位數 VaR：不建波動模型也能報尾部 — Engle-Manganelli CAViaR（SAV/AS/IG 四式，內含 leverage）vs GARCH-VaR，OOS DQ test；direct-quantile 是完全不同 paradigm（來源：JTSA 2026 adaptive-Lasso CAViaR + JRSS-C 2024 long-range CAViaR）",
+      "topic_hash": "b1967b9060f1c182"
+    },
+    {
+      "claimed_at": "2026-07-06T00:00:02.098923+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1652",
+      "number": 1652,
+      "source_max": 1651,
+      "status": "reserved",
+      "topic": "Wrapped-token price discovery / tokenization spillover 對 crypto vol regime 的預警力** — 用 wBTC / cbBTC / stETH 等 wrapped-token 與 native BTC/ETH 的價格、liquidity、bridge-supply 或 DEX pool depth 公開資料，估 information share、basis widening 與 price-discovery latency，檢定 wrapped-token stress 是否領先 BTC/ETH RV regime；與 tokenised Treasury/MMF AUM shock 題正交——那是 T-bill ETF liquidity-vol，這裡是 crypto-native token wrapper basis（來源：SSRN 2025 wrapped-token price-discovery stream + 2026 DeFi/tokenization review）。",
+      "topic_hash": "dd7d46581a4fc37b"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-05T00:00:01.070284+00:00"
+  "updated_at": "2026-07-06T00:00:02.098923+00:00"
 }

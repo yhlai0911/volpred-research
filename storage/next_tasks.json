@@ -48724,7 +48724,7 @@
     "title": "研究 backlog fallback: Volatility laundering 免費驗證：上市 private-credit 載體的申報波動 vs 去平滑後真波動",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Volatility laundering 免費驗證：上市 private-credit 載體的申報波動 vs 去平滑後真波動 — yfinance 上市 BDC（ARCC/BXSL/OBDC）+ BIZD + PRIV（2025 上市 private-credit ETF）+ interval fund NAV（⚠️ 覆蓋度 dispatch 前驗證），Getmansky-Lo-Makarov MA-unsmoothing 估平滑係數，對照 HYG/銀行股 proxy 量化「申報 vol 低估幾倍」（JPM 2024 Anson amortizing volatility + CFA Ins | 來源 section: 期刊主題挖掘 batch 2026-07-04b（interactive 主線程派 journal-topic-scan agent；websearch ijf/jfec/joe + jpm/faj/jai/morningstar + fed/arxiv/cepr + pbfj/jfm 2024-26 趨勢層級；硬約束避開兩個 null 飽和弧——「獵奇外生 shock → 次日 rv event-window」（k1602/k1604 等 ~15 連 null）與「新 covariate → har oos 增量」（k1613/k1616-k1619 連 null）；agent 產 12 條、主線程 selectivity gate 後 11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -48765,6 +48765,12 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-06T00:11:45.825782+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-07"
       }
     ],
     "started_at": "2026-07-05T23:09:53.515204+00:00",
@@ -48772,7 +48778,9 @@
     "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "hourly-07",
     "claimed_at": "2026-07-05T23:09:42.842862+00:00",
-    "claim_session_id": "dd43900007f5"
+    "claim_session_id": "dd43900007f5",
+    "completed_at": "2026-07-06T00:11:45.825420+00:00",
+    "result": "k1642_volatility_laundering_bdc: 7 BDC 申報 NAV vs 市場波動 laundering ratio 中位 0.19 (H1 CONFIRMED), 去平滑僅補 6.6% 缺口 (H2 strong REJECTED), NAV 正 AR(1) 但非 appraisal-specific (H3 partial). Codex CONDITIONAL_PASS. worktree merged, knowledge item 54079c20."
   },
   {
     "id": "research_buyback_blackout_vol",
@@ -51789,5 +51797,85 @@
     ],
     "completed_at": "2026-07-05T22:23:10.130277+00:00",
     "result": "trending 文章『同樣動一碼，債市只怕利率往上』發佈 scheduled (mile_d12825bb)；evidence=experiments/trending_2026_07_06_fed_move_asymmetry (MOVE 對殖利率上/下行非對稱反應, 4065 日, 上行+0.51% vs 下行-0.28%, t=5.52 p=3.6e-8, 控幅斜率1.47x, 近90日放大近6倍); anti-ai gate PASS; 2 主圖+3 懶人包; FB awaiting_interactive"
+  },
+  {
+    "id": "K1647",
+    "title": "K1647: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 468). Original: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1647.py with signal.shift(1) + seed=42, (c) K1647_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 468,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-06T00:00:01Z"
+  },
+  {
+    "id": "K1648",
+    "title": "K1648: 隨機波動率（threshold SV / realized-SV skew-t）模型類 vs GARCH 的 VaR/分位預測 — QML/Kalman 估 SV（平台幾乎全 GARCH/HAR，缺 SV 整類），一日 OOS QLIKE ",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 489). Original: 隨機波動率（threshold SV / realized-SV skew-t）模型類 vs GARCH 的 VaR/分位預測 — QML/Kalman 估 SV（平台幾乎全 GARCH/HAR，缺 SV 整類），一日 OOS QLIKE + quantile 損失；SV 是與 GARCH 平行的獨立生成機制（來源：arXiv 2024-26 Realized SV skew-t / threshold SV）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1648.py with signal.shift(1) + seed=42, (c) K1648_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 489,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-06T00:00:01Z"
+  },
+  {
+    "id": "K1649",
+    "title": "K1649: Expectile 型風險測度（EVaR / CARE）：唯一「同時 coherent + elicitable」的尾部量 — 非對稱最小平方估 expectile-VaR + CARE，對照 quantile-VaR 的 backtest",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 494). Original: Expectile 型風險測度（EVaR / CARE）：唯一「同時 coherent + elicitable」的尾部量 — 非對稱最小平方估 expectile-VaR + CARE，對照 quantile-VaR 的 backtest 可檢定性（來源：ScienceDirect 2023 Basel III→IV expectile + 2025-26 elicitability）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1649.py with signal.shift(1) + seed=42, (c) K1649_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 494,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-06T00:00:01Z"
+  },
+  {
+    "id": "K1651",
+    "title": "K1651: CAViaR 直接動態分位數 VaR：不建波動模型也能報尾部 — Engle-Manganelli CAViaR（SAV/AS/IG 四式，內含 leverage）vs GARCH-VaR，OOS DQ test；direct-quanti",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 495). Original: CAViaR 直接動態分位數 VaR：不建波動模型也能報尾部 — Engle-Manganelli CAViaR（SAV/AS/IG 四式，內含 leverage）vs GARCH-VaR，OOS DQ test；direct-quantile 是完全不同 paradigm（來源：JTSA 2026 adaptive-Lasso CAViaR + JRSS-C 2024 long-range CAViaR）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1651.py with signal.shift(1) + seed=42, (c) K1651_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 495,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-06T00:00:01Z"
+  },
+  {
+    "id": "K1652",
+    "title": "K1652: Wrapped-token price discovery / tokenization spillover 對 crypto vol regime 的預警力** — 用 wBTC / cbBTC / stETH 等 wrapped-tok",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1483). Original: Wrapped-token price discovery / tokenization spillover 對 crypto vol regime 的預警力** — 用 wBTC / cbBTC / stETH 等 wrapped-token 與 native BTC/ETH 的價格、liquidity、bridge-supply 或 DEX pool depth 公開資料，估 information share、basis widening 與 price-discovery latency，檢定 wrapped-token stress 是否領先 BTC/ETH RV regime；與 tokenised Treasury/MMF AUM shock 題正交——那是 T-bill ETF liquidity-vol，這裡是 crypto-native token wrapper basis（來源：SSRN 2025 wrapped-token price-discovery stream + 2026 DeFi/tokenization review）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1652.py with signal.shift(1) + seed=42, (c) K1652_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1483,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-06T00:00:02Z"
   }
 ]

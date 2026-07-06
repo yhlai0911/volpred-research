@@ -37786,5 +37786,23 @@
       "experiments/k1640/codex_review.md",
       "experiments/k1640/data/k1640_cell_summary.csv"
     ]
+  },
+  {
+    "item_id": "54079c20",
+    "category": "risk_measurement",
+    "content": "K1642 Volatility laundering（申報波動洗白）實證：7 檔上市 BDC (ARCC/BXSL/OBDC/FSK/PSEC/MAIN/GBDC) 的申報 NAV 波動 vs 市場總報酬波動。H1 CONFIRMED：laundering ratio 中位數 0.19（mean 0.21，range 0.09-0.40），7/7 皆 <1，cross-section Wilcoxon p=0.0156 → 申報 NAV 波動僅市場約 1/5。H2 REJECTED（strong form）：GLM (Getmansky-Lo-Makarov MA(k)) 去平滑只填補約 6.6% 缺口（Geltner 法約 19%）；波動缺口主要是經濟性（mark-to-market vs mark-to-model 估值差），非 MA 平滑造成 → 去平滑不足以解釋 laundering。H3：NAV 有正 AR(1)（phi 中位 0.39，p=0.0156）CONFIRMED；但 appraisal-specific fingerprint（NAV phi > market phi）NOT confirmed — 市場報酬也有正 AR(1)（phi 0.20），NAV>market 差異 p=0.078 borderline。方法：資料 = SEC EDGAR XBRL us-gaap:NetAssetValuePerShare (10-Q/10-K originally reported) vs yfinance auto_adjust 總報酬；先聚合每 BDC 一統計量再跨 BDC Wilcoxon signed-rank（遵 K1355：不做 asset-quarter iid stacking）；GLM 120 random starts, seed 42。Codex review CONDITIONAL_PASS (gpt-5.5, xhigh)，4 issues（1 med H3 overclaim + 3 low）已修。",
+    "evidence": [
+      "experiments/k1642_volatility_laundering_bdc/k1642_results.json",
+      "H1 Wilcoxon p=0.015625, laundering_ratio_median=0.191",
+      "H2 gap_closed_fraction_median_k2=0.066, Geltner=0.190",
+      "H3 phi_nav_median=0.390, phi_market_median=0.202, NAV>market p=0.078"
+    ],
+    "confidence": 0.6,
+    "created_at": "2026-07-06T08:11:32.874973",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1642_volatility_laundering_bdc",
+    "experiment_path": "experiments/k1642_volatility_laundering_bdc/",
+    "reviewer": "Codex gpt-5.5 xhigh (CONDITIONAL_PASS)",
+    "reviewer_source": "codex_review"
   }
 ]
