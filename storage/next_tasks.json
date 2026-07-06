@@ -53041,7 +53041,7 @@
     "title": "K1640: write research-audience article (auto-discovered uncovered K)",
     "description": "K K1640 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no research article in feed.json.  Verdict preview: K1640 completed 2026-07-05. Verdict=CONDITIONAL_PASS_HALF_TRUE_QUALIFIED. The experiment tests whether SPY entry after VIX first crosses 30 or 40 beats unconditional random-day entry over 5/10/20/60 trading days. Data: yfinance ^VIX close + SPY adjusted close, 1993-01-29 to 2026-",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1640",
@@ -53050,6 +53050,32 @@
       "audience-research"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-06T18:08:14+00:00"
+    "created_at": "2026-07-06T18:08:14+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T18:39:22.044897+00:00",
+    "claim_session_id": "271def92feb3",
+    "status_history": [
+      {
+        "ts": "2026-07-06T18:39:22.045199+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T18:39:31.973686+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T18:51:19.521641+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T18:39:31.973396+00:00",
+    "completed_at": "2026-07-06T18:51:19.521339+00:00",
+    "result": "Published K1640 research-audience draft as mile_c0aaf4e5 in storage/reports/feed.json; added source draft storage/drafts/K1640_research_draft.md with two Supabase-hosted K1640 figures. Passed publish_draft dry-run and anti_ai_gate; feed-sync --apply was attempted but interrupted after full-reconcile hang, so canonical local feed is updated while remote projection may wait for the scheduled sync."
   }
 ]
