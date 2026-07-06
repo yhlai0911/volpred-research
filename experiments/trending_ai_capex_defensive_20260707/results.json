@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "generated": "2026-07-07",
+    "data_source": "yfinance (Yahoo Finance) daily adjusted close",
+    "period": "2025-10-01 to 2026-07-06",
+    "trading_days": 191,
+    "seed": 42,
+    "rv_method": "20-day rolling std of log returns, annualized sqrt(252), in percent",
+    "def_basket": "equal-weight XLV/XLP/XLU"
+  },
+  "latest_rv20_pct": {
+    "QQQ": 35.28,
+    "XLK": 45.69,
+    "XLV": 19.73,
+    "XLP": 18.68,
+    "XLU": 17.01,
+    "DEF_BASKET": 16.02
+  },
+  "rv20_1m_ago_pct": {
+    "QQQ": 15.55,
+    "XLV": 16.4,
+    "XLP": 15.19,
+    "XLU": 18.14,
+    "DEF_BASKET": 14.4
+  },
+  "cumulative_return_pct": {
+    "1M": {
+      "QQQ": -2.77,
+      "XLK": -6.34,
+      "XLV": 10.25,
+      "XLP": 3.07,
+      "XLU": 4.3
+    },
+    "3M": {
+      "QQQ": 23.7,
+      "XLK": 35.15,
+      "XLV": 10.81,
+      "XLP": 3.41,
+      "XLU": -1.62
+    }
+  },
+  "qqq_minus_defensive_rv_spread": {
+    "now": 19.27,
+    "1m_ago": 1.15,
+    "3m_ago": 3.94,
+    "window_max": 20.54,
+    "window_min": 0.94,
+    "window_mean": 7.62
+  },
+  "rolling60_corr_qqq_vs_defensive": {
+    "now": 0.308,
+    "3m_ago": -0.03
+  },
+  "vix": {
+    "now": 15.57,
+    "1m_ago": 16.06,
+    "3m_ago": 24.17,
+    "3m_mean": 17.95
+  },
+  "skew_index": {
+    "now": 145.38,
+    "1m_ago": 136.86,
+    "3m_ago": 146.95,
+    "3m_mean": 142.39,
+    "3m_max": 156.93
+  }
+}

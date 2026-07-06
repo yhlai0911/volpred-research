@@ -53296,5 +53296,76 @@
       "research-program-backlog"
     ],
     "created_at": "2026-07-06T21:08:57+00:00"
+  },
+  {
+    "id": "trending_repost_2026_07_07_台股波動",
+    "title": "[trending_repost] 地緣政治與 AI 需求共振，台積電期權隱含波動率溢酬解密",
+    "description": "探討 AI 晶片需求與地緣政治敏感時期，台積電 ADR 與現股波動率的套利空間。可量化：建立台美兩地台積電選擇權隱含波動率價差的 Z-score 模型，尋找跨市場波動率偏離的交易機會。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-06T22:00:25+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_07_07_ai資本支出",
+    "title": "[trending_repost] AI基建變現疑慮升溫，科技股與防禦板塊的隱波黃金交叉",
+    "description": "從科技巨頭 CapEx 變現率疑慮切入，分析資金流向防禦性板塊的避險路徑。可量化：追蹤 Nasdaq 100 指數偏度（Skew）與防禦性板塊 ETF 選擇權買權的相對溢價變化。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-07-06T22:00:28+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-07-06T22:10:14.642012+00:00",
+    "claim_session_id": "261a2e9dddd8",
+    "status_history": [
+      {
+        "ts": "2026-07-06T22:10:14.642322+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-06"
+      },
+      {
+        "ts": "2026-07-06T22:10:14.882805+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-06"
+      },
+      {
+        "ts": "2026-07-06T22:21:36.761928+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-06"
+      }
+    ],
+    "started_at": "2026-07-06T22:10:14.882451+00:00",
+    "completed_at": "2026-07-06T22:21:36.761626+00:00",
+    "result": "published mile_08fefa59 (VolPred feed, phase=trending_repost); QQQ RV20 35.28% vs 防禦籃 16.02%, 利差 19.27pp, VIX 15.57 低檔, SKEW 145; 3 圖+懶人包3張; FB awaiting_interactive"
+  },
+  {
+    "id": "paper_review_mile_f5912072",
+    "title": "Paper review (Codex 24h-rule): K1647: 原油已實現波動率對股市波動率的一階預測力檢定",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_f5912072 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_f5912072",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-06T22:08:17+00:00"
   }
 ]

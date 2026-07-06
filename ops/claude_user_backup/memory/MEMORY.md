@@ -17,6 +17,7 @@
 - [reference_trending_blog_sources.md](reference_trending_blog_sources.md) — trending_repost 強制掃描清單（havingchien + Stratechery + 凱基/Ranger/元大 + 國外 forums）+ high-viral 3 類 (AI 發展/token maxxing/矽谷裁員)
 
 ## Projects
+- [project_myth_lab_series.md](project_myth_lab_series.md) — 文章系列「迷思實驗室 EP.X｜」🧪 定名/格式(全形｜)/首發3集；舊「迷思」文不算本系列
 - [project_repo_moved_out_of_desktop.md](project_repo_moved_out_of_desktop.md) — 2026-07-02 repo 搬到 ~/volpred-research 根除 TCC；舊 Desktop 路徑=symlink
 - [project_platform_vision_full.md](project_platform_vision_full.md) — 用戶 2026-05-29 完整願景：全自動不間斷自我運營（研究→論文/多元策略/文章→曝光→獲利），所有結果可復現，email 回報+回信指示
 - [project_loop_engineering_layer.md](project_loop_engineering_layer.md) — 2026-06-29 上線 loop-engineering 閉環：loop-health 指標(fast loop)+dreaming 慢 loop(每日 propose-only)+內容巡檢補完；治理檔不自動改
