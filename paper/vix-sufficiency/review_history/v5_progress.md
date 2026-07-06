@@ -30,7 +30,9 @@
 
 **SEVERE-2**：Nested forecast inference（VIX-only vs VIX+signal）用普通 DM，缺 Clark-West / West nested-MSFE correction；主段缺 HLN small-sample correction。→ 需 recompute（走 compute_queue）或引用既有 nested-CW 結果。
 
-**SEVERE-3**：Publication-delay / lag convention 前後不一致（Table1 note 197 shift(2)/shift(1) 混、pub-delay 340、method 359、robustness 851）；Family 10 overnight VIX 用 VIX_open,t (240) 需明示 forecast origin。→ 逐 signal 鎖定 lag 表 + 統一敘事。
+**SEVERE-3**：✅ 已修（2026-07-06 hourly-18）。核心發現比原描述更深 —— 對 `experiments/k1116b/k1116b_results.json` 三 variant 交叉核對後，reported headline 數字唯一自洽於 **"corrected" variant**（EPU@shift(1) weekly + FinStress@shift(2) weekly），非 prose 多處誤稱的 uniform shift(2)。證據：FinStress M4=-3.61（排除 original -3.00）、M5=1.0（排除 conservative -3.34/p=0.001）→ 交集只有 corrected。已統一 8 處敘述（197 Table1 note、250 Family12 段、340-341 calendar 表 Required-shift 欄、359 method δ、494 Table note、496 Family13 note、851 robustness intro、361 + 890 措辭 variant-name 撞名），並把 M5 數字由 original 值(1.01/p=0.315)校正到 corrected 值(**1.00/p=0.319**)、EPU M3 由 -2.55 校正到 corrected -2.54。Family 10 overnight VIX 補明示 forecast origin = day-t 開盤 auction（唯一 intraday-origin family，非前收 shift(1)），VIX_open,t 與 VIX_close,t-1 皆 ≤ day-t open 觀測、target 嚴格在 open 後累積 → 無 lookahead。**驗證**：`xelatex ×3`（含 ref 解析）0 undefined citation/ref、61 頁 PDF。
+
+**⏳ 剩餘（下班 fire 接續，勿重做 SEVERE-1/3）**：
 
 **8 MAJOR**（見 `review_history/v4/round_readme.md`）：Holm/DM/MCS family 不一致、Harvey over-attribution、VaR/ES Basel 口徑、CRRA welfare overclaim、abstract time-invariance 措辭、41.8% QLIKE 方向、pre-spec registry、citation gaps（Clark-West/West/HLN/Acerbi-Szekely 等）。
 

@@ -51856,11 +51856,30 @@
         "to": "pending",
         "by": "hourly-12",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-06T10:08:45.159906+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-06T10:09:06.640284+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-06T10:17:15.197086+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-18",
+        "note": "manual_release"
       }
     ],
-    "started_at": "2026-07-06T04:09:58.107983+00:00",
-    "progress": "SEVERE-1 (research-honesty Table6/K752 conflict) FIXED 2026-07-06 hourly-12; main_v5.tex compiles clean 60pp; SEVERE-2(Clark-West)+SEVERE-3(lag convention)+8 MAJOR pending; see review_history/v5_progress.md; NO paper-update until all done (still REJECT)",
-    "last_released_at": "2026-07-06T06:50:05.480883+00:00",
+    "started_at": "2026-07-06T10:09:06.640034+00:00",
+    "progress": "SEVERE-1(K752/Table6) FIXED hourly-12; SEVERE-3(lag convention→corrected variant reconciliation, 8 spots + M5/M3 number fix + Family10 origin) FIXED hourly-18 2026-07-06, main_v5.tex compiles 0-undefined 61pp; PENDING: SEVERE-2(Clark-West nested-MSFE) + 8 MAJOR; NO paper-update until all done (still REJECT)",
+    "last_released_at": "2026-07-06T10:17:15.196808+00:00",
     "last_release_reason": "auto_release_stale_2h"
   },
   {
