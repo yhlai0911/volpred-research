@@ -52597,7 +52597,7 @@
     "title": "Paper review (Codex 24h-rule): 盤整越久，真的會噴越兇嗎？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e082beb8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_e082beb8",
@@ -52621,9 +52621,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-06T21:14:05.374041+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-05"
       }
     ],
-    "started_at": "2026-07-06T21:10:21.150012+00:00"
+    "started_at": "2026-07-06T21:10:21.150012+00:00",
+    "completed_at": "2026-07-06T21:14:05.373679+00:00",
+    "result": "Codex 24h-rule review PASS: lookahead clean (.shift(1)/.shift(-i)), all article numbers tie to K1632 results JSON, small-n null honestly hedged, no overclaim. Review: experiments/k1632/article_review_mile_e082beb8.md"
   },
   {
     "id": "paper_review_mile_4d67163f",
