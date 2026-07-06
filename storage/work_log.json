@@ -14677,5 +14677,13 @@
     "outcome": "succeeded",
     "owner": "hourly-22",
     "summary": "vix-sufficiency v5 SEVERE-2 fixed: Clark-West(2007)+HLN(1997) nested correction. New methodology subsec+eq:clark_west+2 citations; weekly F12/F13 nested increment CW computed (k1116c_clark_west.py): CW t=+0.12/-0.56/+0.14 all<<3.0, null robust under more-powerful nested test; DM-MSFE -2.5/-2.8/-2.6 collapse to ~0 => estimation noise not active harm. Reconciled M3/M4 non-nested vs nested, fixed active-harm overclaim 4 spots. main_v5.pdf 63pp 0 undefined. All 3 SEVERE done; daily-family CW->followup; 8 MAJOR pending."
+  },
+  {
+    "timestamp": "2026-07-06T23:19:11+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_69524f14",
+    "outcome": "succeeded",
+    "owner": "hourly-23",
+    "summary": "Codex 24h-rule review of mile_69524f14 (K1647 oil-vol->stock-vol spillover article): CONDITIONAL_PASS. Lookahead PASS (proper .shift(1)). Fixed 4 overclaims in PUBLISHED content: (1) Granger para removed unsupported \"failed robustness test/noise coincidence\" -> honest different-specification framing (no HAC/DM run on lag-5); (2) sample-size 4104 aligned vs 4103 regression obs disambiguated; (3) softened causal language (spillover/true-lead -> in-sample statistical lead); (4) README L23 fixed inverted DY-net reading (oil is NOT net receiver; net=to-from, CL +0.1% weak sender, magnitudes ~0). feed.json+Supabase synced, em-dash cleared to 0, anti-ai gate PASS."
   }
 ]

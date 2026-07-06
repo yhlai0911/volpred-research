@@ -52661,5 +52661,94 @@
     "description": "SEVERE-2 carve-out (from paper_body_vix_sufficiency_v5_severe_fixes, 2026-07-06). Weekly families 12/13 nested CW 已完成 (experiments/k1116c/k1116c_clark_west.py; 全部 CW|t|<0.6, null 穩健). 待做: daily families 1-11 是真 nested (RV=a+b1*VIX+b2*signal, eq:incremental). 各 family 腳本散落 experiments/k730-k1201, 無統一 harness -> 主線程忠實重建 OOS forecasts (pinned data, 對齊各 family lag/signal 構造), 算 DM-MSFE + Clark-West + HLN, 整合成 Table 3 新 CW 欄. 風險: CW 更 powerful, 可能把 F2(term struct R2oos=.010)/F4(VRP)/F10(overnight) 從不顯著推向顯著 -> 必真算, 禁 bounding argument. 主線程 only, 禁 background agent 寫 .tex. reproduce 需驗 DM 重現主表 |t|.",
     "created_by": "hourly-22",
     "created_at": "2026-07-06T14:20:00+00:00"
+  },
+  {
+    "id": "paper_review_mile_69524f14",
+    "title": "Paper review (Codex 24h-rule): 迷思實驗室｜原油狂飆狂跌，股市波動真的會跟著抖嗎？4103 天數據給了反直覺答案",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_69524f14 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_69524f14",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-06T15:07:47+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-07-06T15:09:21.988972+00:00",
+    "claim_session_id": "570c659b36f1",
+    "status_history": [
+      {
+        "ts": "2026-07-06T15:09:21.989287+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-06T15:09:28.038190+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-06T15:18:24.194930+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-23"
+      }
+    ],
+    "started_at": "2026-07-06T15:09:28.037822+00:00",
+    "completed_at": "2026-07-06T15:18:24.194639+00:00",
+    "result": "Codex 24h-rule review of mile_69524f14 (K1647 油vol→股vol溢出文): CONDITIONAL_PASS. Lookahead PASS (proper shift(1)). 修正 4 overclaim: (1) Granger 段刪「撐不過穩健檢定/撿雜訊巧合」→改口徑差異誠實框架(未跑HAC/DM於lag-5); (2) 樣本數區分4104對齊/4103迴歸; (3) 降因果語氣(外溢/真正領先→樣本內統計領先); (4) README line23修net反向解讀(油非淨接收方,net≈0). feed.json+Supabase已同步, em-dash清零, anti-ai PASS."
+  },
+  {
+    "id": "paper_review_mile_e7b6e075",
+    "title": "Paper review (Codex 24h-rule): 🧪 迷思實驗室｜台積電打噴嚏,台股真的重感冒?16年數據攤開來看",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e7b6e075 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_e7b6e075",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-06T15:07:47+00:00"
+  },
+  {
+    "id": "paper_review_mile_d12825bb",
+    "title": "Paper review (Codex 24h-rule): 同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d12825bb needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_d12825bb",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-06T15:07:47+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T15:15:11.203122+00:00",
+    "claim_session_id": "465e7bf3ea61",
+    "status_history": [
+      {
+        "ts": "2026-07-06T15:15:11.203399+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T15:15:15.558815+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T15:15:15.558523+00:00"
   }
 ]

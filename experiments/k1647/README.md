@@ -20,7 +20,7 @@
 - **油 vol → 股 vol：四組全不顯著**（CL/USO → SPY/XLE），b≈0（0.0001–0.0007），HAC p=0.88–0.98，bootstrap 95% CI 全跨 0。**控制 VIX 前後皆 null**。Parkinson 穩健性同樣全 null（p=0.12–0.37）。
 - **反向 股 vol → 油 vol：顯著**。SPY→CL b=+0.0099 p=0.008；SPY→USO b=+0.0088 p=0.012；XLE→CL b=+0.0111 p=0.024；XLE→USO b=+0.0090 p=0.053（邊際）。
 - **Granger 對比（誠實 reconciliation）**：Granger 層 CL→SPY（p=0.0026，best lag 5）、USO→SPY（p=0.0022，best lag 5）看似顯著，但核心 lag-1 HAC-robust predictive regression 為 null。兩者差異**並非**「有無 own-AR 控制」（statsmodels Granger F-test 已內含 effect 變數自身 lag）——本實驗也未跑「無 own-control」對照，故不宣稱該機制。可與 code 一致的合理解釋：(a) Granger 古典 F-test 非 HAC-robust，會被 overlapping 21d RV window 誘發的 ~MA(20) 殘差自相關**膨脹**；(b) 顯著的 Granger lag order 落在 4-5，反映**多日長滯後動態**，是 lag-1-only 核心設定結構上無法捕捉的層面（口徑不同，非同一檢定的前後對照）。此機制差異**未直接檢定**。無論如何，核心 NULL（HAC-robust + bootstrap + VIX 控制 + 雙油代理 + 雙 target + Parkinson 穩健）不受影響：油對股市 vol 在 **lag-1 傳導**上無增量預測力。
-- **Diebold-Yilmaz**：total spillover 46.5%（VAR lag 5），但 net 溢出量級都很小（CL +0.1%、USO +1.5%、SPY −0.9%、XLE −0.7%）→ 耦合主要是**同期的**（contemp corr：CL-XLE 0.68、CL-SPY 0.52），方向性 net 微向 oil 傾（油稍為淨接收方）。油佔股市 FEV 份額：對 XLE 11–13% > 對 SPY 5–6%（能源股確較敏感，但仍是接收非發送）。
+- **Diebold-Yilmaz**：total spillover 46.5%（VAR lag 5），但 net 溢出量級都很小（net = to − from：CL +0.1%、USO +1.5%、SPY −0.9%、XLE −0.7%）→ 耦合主要是**同期的**（contemp corr：CL-XLE 0.68、CL-SPY 0.52）。net 量級都接近零，**不宜做方向解讀**；若硬看符號，油（CL +0.1%、USO +1.5%）為極弱淨發送、股（SPY/XLE 為負）為極弱淨接收，但差異微小、無實質意義。油佔股市 FEV 份額：對 XLE 11–13% > 對 SPY 5–6%（能源股確較敏感）。
 
 ## 結論
 與「油價波動帶動股市恐慌」的直覺相反：在乾淨的 RV→RV predictive 設定下，**原油已實現波動率對股市已實現波動率沒有增量領先力**（VIX 控制前就已 null），而**股市波動反而領先油市波動**。這強化了 K422 的方向，並用 XLE + 反向檢定 + 雙油代理將其推廣。實務含義：想用油 vol 當股市 vol 的早期預警訊號，缺乏可交易的領先關係。
