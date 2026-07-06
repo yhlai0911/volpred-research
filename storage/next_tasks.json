@@ -51754,7 +51754,7 @@
     "id": "paper2_vt_insurance_cost_v3_severe_fixes",
     "task_type": "paper_body",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-06T00:22:00+08:00",
     "description": "vt-insurance-cost v3 修訂：修 v2 review 3 個 SEVERE（主線程 only，禁 background agent 寫 .tex）。S-01: Table 1 標『50/50 monthly rebalancing』但 code 是每日連續零成本再平衡 → 修/改標 benchmark 並重跑相依數字（headline S2 Sharpe 0.63 vs 50/50 0.50 受影響，真月再平衡≈0.59）。S-03: S3 論文公式寫 z<1 固定 0.5 binary blend，code 是連續 clip(z,0,1) blend → 公式對齊 code，補 0.3/0.7 敏感度對應輸出。S-02: Cross-OOS 補跑 2017-18/2021-22 兩窗（heavy → 排 compute_queue）。+ C-01 citation：hasbrouck2009 不支撐 SPY 1-2bps spread 假設，換 source 或改述。報告：paper/vt-insurance-cost/review_history/v2/。",
     "notes": "source: v2 latex+citation review 2026-07-06",
@@ -51773,9 +51773,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-15"
+      },
+      {
+        "ts": "2026-07-06T07:19:34.637869+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-15"
       }
     ],
-    "started_at": "2026-07-06T07:11:19.010852+00:00"
+    "started_at": "2026-07-06T07:11:19.010852+00:00",
+    "completed_at": "2026-07-06T07:19:34.637593+00:00",
+    "result": "主線程完成 3 SEVERE 中 text-resolvable 2 個 + C-01：S-01 relabel S4 為 daily-constant-weight(對齊 code，0.50 不變)、S-03 S3 公式改成 code 實用的 continuous-clip(移除無輸出的 0.3/0.7 宣稱)、C-01 hasbrouck2009 改述。pdflatex 三 pass 乾淨、無 undefined ref/citation。paper-update 已 sync 到平台(updated_at 07:18Z, PDF 上 Supabase)。commit 6f109399f。S-02(heavy cross-OOS 補 2017-18/2021-22)依其自身 'heavy→compute_queue' spec 拆為 followup task paper2_vt_insurance_cost_s02_cross_oos_rerun(需 pinned snapshot+新輸出檔+Codex 審)。fix log: review_history/v3/fix_log.md。main.tex line194/211 已誠實揭露 4/6 provisional，投稿誠實狀態維持。"
   },
   {
     "id": "platform_ops_null_id_task_hygiene",
