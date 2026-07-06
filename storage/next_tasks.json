@@ -51853,7 +51853,7 @@
     "title": "vix-sufficiency v5: 修 v4 review 3 SEVERE（主線程 only，禁 background agent 寫 .tex）",
     "priority": 2,
     "description": "v4 review (review_history/v4/, Codex, verdict=REJECT) 3 SEVERE：(1) 研究誠實 critical — Table 6（main_v4.tex:640-649）報 0/5 Harvey pass + 'no signal in any era' 與自家 K752 (k752_...results.json:489-490 any_competing_signal_harvey=true, vix_sufficient_all_eras=false, 多筆 harvey_pass=true vol momentum GFC/COVID) 直接衝突 → reconcile spec 或改敘事，禁 overclaim all-era sufficiency。(2) nested forecast inference 用普通 DM 缺 Clark-West correction。(3) publication-delay/lag convention 前後不一致（Table1 note 197 vs pub-delay 340 vs method 359 vs robustness 851 shift(1)/shift(2) 混），Family10 overnight VIX 用 VIX_open,t (240) forecast origin 需明示。另 8 MAJOR 見 round_readme.md。paper_body = 主線程 only。",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-05T21:19:47.106824+00:00",
     "tags": [
       "paper_body",
@@ -51913,6 +51913,12 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-06T14:25:20.388970+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-22"
       }
     ],
     "started_at": "2026-07-06T14:09:54.067995+00:00",
@@ -51921,7 +51927,9 @@
     "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "hourly-22",
     "claimed_at": "2026-07-06T14:09:53.826692+00:00",
-    "claim_session_id": "38f62eeebeee"
+    "claim_session_id": "38f62eeebeee",
+    "completed_at": "2026-07-06T14:25:20.388686+00:00",
+    "result": "3 SEVERE 全修畢: S1(Table6/K752 reconcile)+S3(lag convention)+S2(Clark-West/HLN nested correction). S2: 新方法論子節+eq+2 citations(clark2007/harvey1997), weekly F12/F13 nested CW 實算(t=+0.12/-0.56/+0.14 全<3.0, null 穩健, DM-MSFE -2.5~-2.8 系估計噪音非 active harm), 修正 active-harm overclaim 4 處, 澄清 M3/M4 non-nested vs nested. main_v5.pdf 63pp 0 undefined. daily-family CW carve to followup. 8 MAJOR pending."
   },
   {
     "id": "paper_review_eav_universal_magnitude_v2",
@@ -52643,5 +52651,15 @@
         "by": "codex-cli"
       }
     ]
+  },
+  {
+    "id": "paper_body_vix_sufficiency_daily_family_clark_west",
+    "task_type": "paper_body",
+    "priority": 3,
+    "status": "pending",
+    "title": "vix-sufficiency: 為 daily families 1-11 (nested VIX+signal) 算 Clark-West/HLN 並整合進 Table 3",
+    "description": "SEVERE-2 carve-out (from paper_body_vix_sufficiency_v5_severe_fixes, 2026-07-06). Weekly families 12/13 nested CW 已完成 (experiments/k1116c/k1116c_clark_west.py; 全部 CW|t|<0.6, null 穩健). 待做: daily families 1-11 是真 nested (RV=a+b1*VIX+b2*signal, eq:incremental). 各 family 腳本散落 experiments/k730-k1201, 無統一 harness -> 主線程忠實重建 OOS forecasts (pinned data, 對齊各 family lag/signal 構造), 算 DM-MSFE + Clark-West + HLN, 整合成 Table 3 新 CW 欄. 風險: CW 更 powerful, 可能把 F2(term struct R2oos=.010)/F4(VRP)/F10(overnight) 從不顯著推向顯著 -> 必真算, 禁 bounding argument. 主線程 only, 禁 background agent 寫 .tex. reproduce 需驗 DM 重現主表 |t|.",
+    "created_by": "hourly-22",
+    "created_at": "2026-07-06T14:20:00+00:00"
   }
 ]

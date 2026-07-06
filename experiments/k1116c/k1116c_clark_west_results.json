@@ -1,0 +1,100 @@
+{
+  "experiment_id": "k1116c_clark_west",
+  "title": "Clark-West nested increment test (VIX+signal vs VIX) \u2014 weekly alt-data families",
+  "variant": "corrected_shift2",
+  "loss": "squared realized-vol forecast error (MSFE)",
+  "baseline": "AR(1)+VIX (M2)",
+  "is_end": "2022-12-31",
+  "oos_start": "2023-01-01",
+  "h": 1,
+  "references": [
+    "Clark-West (2007) JoE 138:291-311",
+    "Harvey-Leybourne-Newbold (1997) IJF 13:281-291",
+    "Diebold-Mariano (1995) JBES 13:253-263"
+  ],
+  "harvey_threshold": 3.0,
+  "specs": {
+    "vix_epu": {
+      "signals_added": [
+        "USEPU_signal",
+        "WLEMU_signal"
+      ],
+      "n_oos": 170,
+      "mspe_baseline": 0.00010252021440416223,
+      "mspe_augmented": 0.00013185141208694933,
+      "mspe_adjustment_mean": 3.06966635347321e-05,
+      "dm_mspe": {
+        "t": -2.506127100599925,
+        "p_two": 0.013151488771138142,
+        "n": 170,
+        "note": "standard DM on squared errors; positive t = augmented beats baseline"
+      },
+      "clark_west": {
+        "t": 0.11976297440824528,
+        "p_one_greater": 0.4524065826267356,
+        "p_two": 0.9048131652534712,
+        "hln_factor": 0.9970544855015816,
+        "mspe_adjusted_mean": 1.3654658519449847e-06,
+        "note": "one-sided H1: VIX+signal improves on VIX; |t|>3.0 = Harvey pass"
+      },
+      "harvey_pass_cw": false,
+      "verdict": "CW FAILS to reject: no incremental value beyond VIX (sufficiency holds under nested CW test)"
+    },
+    "vix_finstress": {
+      "signals_added": [
+        "NFCI_signal",
+        "ANFCI_signal",
+        "STLFSI_signal"
+      ],
+      "n_oos": 170,
+      "mspe_baseline": 0.00010252021440416223,
+      "mspe_augmented": 0.0001144316255144735,
+      "mspe_adjustment_mean": 9.558221745055098e-06,
+      "dm_mspe": {
+        "t": -2.8160015380356023,
+        "p_two": 0.00544119848294522,
+        "n": 170,
+        "note": "standard DM on squared errors; positive t = augmented beats baseline"
+      },
+      "clark_west": {
+        "t": -0.5610487014009152,
+        "p_one_greater": 0.7122462622181486,
+        "p_two": 0.5755074755637029,
+        "hln_factor": 0.9970544855015816,
+        "mspe_adjusted_mean": -2.353189365256152e-06,
+        "note": "one-sided H1: VIX+signal improves on VIX; |t|>3.0 = Harvey pass"
+      },
+      "harvey_pass_cw": false,
+      "verdict": "CW FAILS to reject: no incremental value beyond VIX (sufficiency holds under nested CW test)"
+    },
+    "vix_all": {
+      "signals_added": [
+        "USEPU_signal",
+        "WLEMU_signal",
+        "NFCI_signal",
+        "ANFCI_signal",
+        "STLFSI_signal"
+      ],
+      "n_oos": 170,
+      "mspe_baseline": 0.00010252021440416223,
+      "mspe_augmented": 0.00013831459450161108,
+      "mspe_adjustment_mean": 3.758099339217623e-05,
+      "dm_mspe": {
+        "t": -2.6215526486615497,
+        "p_two": 0.009551735045807197,
+        "n": 170,
+        "note": "standard DM on squared errors; positive t = augmented beats baseline"
+      },
+      "clark_west": {
+        "t": 0.1352752541540453,
+        "p_one_greater": 0.4462776173378816,
+        "p_two": 0.8925552346757633,
+        "hln_factor": 0.9970544855015816,
+        "mspe_adjusted_mean": 1.7866132947273698e-06,
+        "note": "one-sided H1: VIX+signal improves on VIX; |t|>3.0 = Harvey pass"
+      },
+      "harvey_pass_cw": false,
+      "verdict": "CW FAILS to reject: no incremental value beyond VIX (sufficiency holds under nested CW test)"
+    }
+  }
+}

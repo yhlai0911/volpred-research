@@ -49,3 +49,13 @@ Campbell-Thompson、Patton、Harvey、Diebold-Mariano、Hansen MCS、Newey-West�
 
 - `codex_latex_review.md` — Codex 全文 review
 - 本檔 — round README + verdict
+
+---
+## SEVERE-2 resolution (2026-07-06, hourly-22)
+Clark-West + HLN nested-model correction added to main_v5.tex:
+- New §Nested-Model Correction (\ref{sec:clark_west}) + eq:clark_west; cites Clark-West(2007)+Harvey-Leybourne-Newbold(1997).
+- Weekly families 12/13 NESTED increment (VIX+signal vs VIX) computed: `experiments/k1116c/k1116c_clark_west.py` → CW t = +0.12 (EPU) / −0.56 (FinStress) / +0.14 (all); all ≪ 3.0, null robust under the more-powerful nested test. Standard DM-MSFE t = −2.5/−2.8/−2.6 collapse to ~0 under CW ⇒ apparent underperformance is estimation noise, not active harm.
+- Discovered: main-table F12/F13 use pure alt-data M3/M4 (replace VIX) = NON-nested → CW inapplicable there; narrative reconciled (standalone-worse-than-VIX vs nested-redundant). Fixed "active harm" overclaim at 4 spots (§EPU, §FinStress, results intro, footnote ‡).
+- Daily families 1-11 nested CW integration carved to followup task `paper_body_vix_sufficiency_daily_family_clark_west` (scattered per-family scripts, main-thread reproduction needed).
+- Compiles clean: main_v5.pdf 63pp, 0 undefined refs/citations.
+- Remaining v4 review items: SEVERE-1 ✓ (12:16), SEVERE-3 ✓ (18:17), SEVERE-2 ✓ (this fire); 8 MAJOR pending.
