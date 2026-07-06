@@ -108,6 +108,101 @@ def test_baseline_diff_reports_only_new_findings() -> None:
     assert resolved_findings == []
 
 
+def test_baseline_diff_ignores_line_shift_when_signature_matches() -> None:
+    before = audit_silent_fallbacks.Finding(
+        "scripts/a.py",
+        10,
+        "ValueError",
+        "return None",
+        signature="v1:stable",
+    )
+    after = audit_silent_fallbacks.Finding(
+        "scripts/a.py",
+        25,
+        "ValueError",
+        "return None",
+        signature="v1:stable",
+    )
+
+    new_findings, resolved_findings = audit_silent_fallbacks.diff_against_baseline(
+        [after],
+        [before],
+    )
+
+    assert new_findings == []
+    assert resolved_findings == []
+
+
+def test_baseline_diff_counts_duplicate_stable_findings() -> None:
+    existing = audit_silent_fallbacks.Finding(
+        "scripts/a.py",
+        10,
+        "ValueError",
+        "return None",
+        signature="v1:stable",
+    )
+    duplicate = audit_silent_fallbacks.Finding(
+        "scripts/a.py",
+        20,
+        "ValueError",
+        "return None",
+        signature="v1:stable",
+    )
+
+    new_findings, resolved_findings = audit_silent_fallbacks.diff_against_baseline(
+        [existing, duplicate],
+        [existing],
+    )
+
+    assert new_findings == [duplicate]
+    assert resolved_findings == []
+
+
+def test_signature_survives_line_shift_but_new_bare_pass_is_new(tmp_path: Path) -> None:
+    source = tmp_path / "sample.py"
+    source.write_text(
+        """
+def parse_value():
+    try:
+        risky()
+    except ValueError:
+        return None
+""",
+        encoding="utf-8",
+    )
+    baseline = audit_silent_fallbacks.audit_file(source, root=tmp_path)
+
+    source.write_text(
+        """
+
+
+def parse_value():
+    try:
+        risky()
+    except ValueError:
+        return None
+
+def cleanup():
+    try:
+        remove_temp()
+    except:
+        pass
+""",
+        encoding="utf-8",
+    )
+    current = audit_silent_fallbacks.audit_file(source, root=tmp_path)
+
+    new_findings, resolved_findings = audit_silent_fallbacks.diff_against_baseline(
+        current,
+        baseline,
+    )
+
+    assert baseline[0].line != current[0].line
+    assert baseline[0].stable_key() == current[0].stable_key()
+    assert [(item.exception, item.action) for item in new_findings] == [("bare", "pass")]
+    assert resolved_findings == []
+
+
 def test_human_report_prints_summary(capsys) -> None:
     findings = [
         audit_silent_fallbacks.Finding("scripts/a.py", 10, "Exception", "return None"),
@@ -149,6 +244,28 @@ def test_load_baseline_accepts_metadata_object(tmp_path: Path) -> None:
     assert baseline == [
         audit_silent_fallbacks.Finding("scripts/a.py", 10, "Exception", "return None")
     ]
+
+
+def test_write_baseline_persists_line_insensitive_signatures(tmp_path: Path) -> None:
+    source = tmp_path / "sample.py"
+    source.write_text(
+        """
+def parse_value():
+    try:
+        risky()
+    except ValueError:
+        return None
+""",
+        encoding="utf-8",
+    )
+    baseline_path = tmp_path / "baseline.json"
+    findings = audit_silent_fallbacks.audit_file(source, root=tmp_path)
+
+    audit_silent_fallbacks.write_baseline(baseline_path, findings)
+
+    raw = baseline_path.read_text(encoding="utf-8")
+    assert '"schema": "silent_fallback_baseline.v2"' in raw
+    assert '"signature": "v1:' in raw
 
 
 def test_main_strict_with_baseline_fails_for_new_finding(

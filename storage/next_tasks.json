@@ -52001,9 +52001,35 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-06T01:47:22.424509+00:00",
     "title": "silent-fallback push gate 反覆卡 push（strike 2）— 讓 gate 對良性 guard churn 免疫",
-    "description": "根因：scripts/audit_silent_fallbacks.py 的 baseline 以 (file,line,pattern) 為 key，任何 agent 編輯這些 script 造成行位移或新增良性 parse/multistart/decode guard，就被 strict gate 標為 NEW → cron_git_push_backup.sh HELD push → 每次都要人工 refresh baseline + 重跑 wrapper 解封。已發生 ≥2 次（commit 148117352 + 2026-07-06 telegram-responder 手動解封），屬 3-strike 前兆。\n\n目標：讓 gate 只擋『真正新的、未標記的 silent fallback』，對良性 guard 的行位移/等價重寫免疫。候選方案（擇一或組合，需先診斷）：(a) baseline key 改成行位移不敏感（file+pattern+normalized-context hash，不含絕對行號）；(b) 白名單良性 pattern class（isoformat ValueError→return None、multistart MLE except→continue、decode/import guard）自動不 flag；(c) push wrapper HELD 時自動判斷 delta 是否全屬良性 pattern class，是則自動 refresh baseline + push（附 audit log），只有非良性才 hold+alert。\n\n驗證 gate：(1) 對這些 script 做無害行位移，gate 不再報 NEW；(2) 真新增一個未標記 bare except: pass 仍被擋；(3) tests/test_silent_fallback_audit.py 綠。\n\n相關：.claude/rules/no-silent-fallback.md、memory feedback_fix_silent_fallback_immediately、docs/error_log.md 2026-07-03 exit120 entry。"
+    "description": "根因：scripts/audit_silent_fallbacks.py 的 baseline 以 (file,line,pattern) 為 key，任何 agent 編輯這些 script 造成行位移或新增良性 parse/multistart/decode guard，就被 strict gate 標為 NEW → cron_git_push_backup.sh HELD push → 每次都要人工 refresh baseline + 重跑 wrapper 解封。已發生 ≥2 次（commit 148117352 + 2026-07-06 telegram-responder 手動解封），屬 3-strike 前兆。\n\n目標：讓 gate 只擋『真正新的、未標記的 silent fallback』，對良性 guard 的行位移/等價重寫免疫。候選方案（擇一或組合，需先診斷）：(a) baseline key 改成行位移不敏感（file+pattern+normalized-context hash，不含絕對行號）；(b) 白名單良性 pattern class（isoformat ValueError→return None、multistart MLE except→continue、decode/import guard）自動不 flag；(c) push wrapper HELD 時自動判斷 delta 是否全屬良性 pattern class，是則自動 refresh baseline + push（附 audit log），只有非良性才 hold+alert。\n\n驗證 gate：(1) 對這些 script 做無害行位移，gate 不再報 NEW；(2) 真新增一個未標記 bare except: pass 仍被擋；(3) tests/test_silent_fallback_audit.py 綠。\n\n相關：.claude/rules/no-silent-fallback.md、memory feedback_fix_silent_fallback_immediately、docs/error_log.md 2026-07-03 exit120 entry。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T02:08:21.666295+00:00",
+    "claim_session_id": "cfbd2702a5b9",
+    "status_history": [
+      {
+        "ts": "2026-07-06T02:08:21.666554+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T02:08:24.931176+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T02:12:23.969907+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T02:08:24.930888+00:00",
+    "completed_at": "2026-07-06T02:12:23.969608+00:00",
+    "result": "audit_silent_fallbacks baseline diff 改為 v2 line-insensitive signature + multiset matching，避免無害行位移造成 NEW。\\n重建 storage/qa/silent_fallback_baseline.json：64/64 findings 皆有 signature；production strict gate new=0/resolved=0。\\n驗證：pytest tests/test_silent_fallback_audit.py 與相關 import tests 共 25 passed。"
   }
 ]

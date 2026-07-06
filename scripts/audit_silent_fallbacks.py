@@ -22,9 +22,10 @@ from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
 import json
 import sys
-from collections import Counter
+from collections import Counter, defaultdict, deque
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -54,9 +55,15 @@ class Finding:
     line: int
     exception: str
     action: str
+    signature: str | None = None
 
     def key(self) -> tuple[str, int, str, str]:
         return (self.path, self.line, self.exception, self.action)
+
+    def stable_key(self) -> tuple[str, str, str, str] | None:
+        if not self.signature:
+            return None
+        return (self.path, self.exception, self.action, self.signature)
 
 
 def _relative(path: Path, root: Path = ROOT) -> str:
@@ -164,10 +171,57 @@ def _has_silent_ok_comment(source_lines: list[str], stmt: ast.stmt) -> bool:
     return False
 
 
+def _scope_name(node: ast.ExceptHandler, parent_map: dict[ast.AST, ast.AST]) -> str:
+    scopes: list[str] = []
+    current: ast.AST | None = node
+    while current is not None:
+        parent = parent_map.get(current)
+        if isinstance(parent, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            scopes.append(parent.name)
+        current = parent
+    return ".".join(reversed(scopes)) if scopes else "<module>"
+
+
+def _normalized_stmt(stmt: ast.stmt) -> str:
+    return ast.dump(stmt, annotate_fields=True, include_attributes=False)
+
+
+def _finding_signature(
+    node: ast.ExceptHandler,
+    *,
+    exception: str,
+    action: str,
+    parent_map: dict[ast.AST, ast.AST],
+) -> str:
+    """Return a line-insensitive signature for one silent fallback finding.
+
+    The signature intentionally excludes absolute line numbers. It uses the
+    enclosing scope plus the normalized handler body, and baseline diffing treats
+    the key as a multiset so adding a second identical fallback in the same scope
+    still produces a new finding.
+    """
+
+    payload = {
+        "schema": "silent-fallback-signature.v1",
+        "scope": _scope_name(node, parent_map),
+        "exception": exception,
+        "action": action,
+        "handler_body": [_normalized_stmt(stmt) for stmt in node.body],
+    }
+    raw = json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:20]
+    return f"v1:{digest}"
+
+
 def audit_file(path: Path, *, root: Path = ROOT) -> list[Finding]:
     source = path.read_text(encoding="utf-8")
     source_lines = source.splitlines()
     tree = ast.parse(source, filename=str(path))
+    parent_map = {
+        child: parent
+        for parent in ast.walk(tree)
+        for child in ast.iter_child_nodes(parent)
+    }
     findings: list[Finding] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.ExceptHandler):
@@ -180,12 +234,19 @@ def audit_file(path: Path, *, root: Path = ROOT) -> list[Finding]:
                 continue
             if _has_silent_ok_comment(source_lines, stmt):
                 continue
+            exception = _exception_name(node)
             findings.append(
                 Finding(
                     path=_relative(path, root),
                     line=node.lineno,
-                    exception=_exception_name(node),
+                    exception=exception,
                     action=action,
+                    signature=_finding_signature(
+                        node,
+                        exception=exception,
+                        action=action,
+                        parent_map=parent_map,
+                    ),
                 )
             )
             break
@@ -213,6 +274,7 @@ def _finding_from_raw(raw: dict[str, Any], *, baseline_path: Path) -> Finding:
             line=int(raw["line"]),
             exception=str(raw["exception"]),
             action=str(raw["action"]),
+            signature=str(raw["signature"]) if raw.get("signature") else None,
         )
     except (KeyError, TypeError, ValueError) as exc:
         raise ValueError(f"invalid baseline finding in {baseline_path}: {raw!r}") from exc
@@ -242,24 +304,59 @@ def diff_against_baseline(
     findings: list[Finding],
     baseline: list[Finding],
 ) -> tuple[list[Finding], list[Finding]]:
-    current_by_key = {item.key(): item for item in findings}
-    baseline_by_key = {item.key(): item for item in baseline}
-    new_findings = [current_by_key[key] for key in sorted(current_by_key.keys() - baseline_by_key.keys())]
-    resolved_findings = [
-        baseline_by_key[key] for key in sorted(baseline_by_key.keys() - current_by_key.keys())
-    ]
+    current_unmatched = set(range(len(findings)))
+    baseline_unmatched = set(range(len(baseline)))
+
+    def match_by_key(key_fn: Any) -> None:
+        baseline_by_key: dict[Any, deque[int]] = defaultdict(deque)
+        for idx in sorted(baseline_unmatched):
+            key = key_fn(baseline[idx])
+            if key is not None:
+                baseline_by_key[key].append(idx)
+        for idx in sorted(list(current_unmatched)):
+            key = key_fn(findings[idx])
+            if key is None:
+                continue
+            candidates = baseline_by_key.get(key)
+            if not candidates:
+                continue
+            baseline_idx = candidates.popleft()
+            current_unmatched.remove(idx)
+            baseline_unmatched.remove(baseline_idx)
+
+    # Prefer line-insensitive signatures. Fall back to legacy exact keys so old
+    # test fixtures and hand-written baselines remain readable.
+    match_by_key(lambda item: item.stable_key())
+    if any(item.signature is None for item in findings) or any(
+        item.signature is None for item in baseline
+    ):
+        match_by_key(lambda item: ("legacy", *item.key()))
+
+    new_findings = sorted((findings[idx] for idx in current_unmatched), key=lambda item: item.key())
+    resolved_findings = sorted(
+        (baseline[idx] for idx in baseline_unmatched),
+        key=lambda item: item.key(),
+    )
     return new_findings, resolved_findings
+
+
+def _finding_to_raw(item: Finding) -> dict[str, Any]:
+    raw = asdict(item)
+    if raw.get("signature") is None:
+        raw.pop("signature", None)
+    return raw
 
 
 def write_baseline(path: Path, findings: list[Finding]) -> None:
     payload = {
-        "schema": "silent_fallback_baseline.v1",
+        "schema": "silent_fallback_baseline.v2",
         "description": (
             "Known silent-fallback audit findings. CI strict mode fails only when "
-            "current findings introduce keys absent from this baseline."
+            "current findings introduce line-insensitive signatures absent from "
+            "this baseline."
         ),
         "count": len(findings),
-        "findings": [asdict(item) for item in findings],
+        "findings": [_finding_to_raw(item) for item in findings],
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
