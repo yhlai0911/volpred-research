@@ -52427,14 +52427,14 @@
     "id": "k1648_sv_lognormal_convergence_rerun",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "title": "K1648 SV re-run: log-normal variance 修正 + 收斂稽核（Codex 2 MAJOR）",
     "source": "codex_review_k1648_2026-07-06",
     "created_at": "2026-07-06T08:23:51+00:00",
-    "claimed_by": null,
-    "claimed_at": null,
-    "claim_session_id": null,
-    "started_at": null,
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T08:25:41.163122+00:00",
+    "claim_session_id": "ee95e537fc6c",
+    "started_at": "2026-07-06T08:25:46.827684+00:00",
     "completed_at": null,
     "result": null,
     "tags": [
@@ -52442,6 +52442,20 @@
       "stochastic-volatility",
       "codex-followup"
     ],
-    "description": "K1648 Codex review=CONDITIONAL_PASS 但 2 MAJOR 指向 SV variance 被低估→可能假 NULL。修:(1) SV forecast 改 exp(h+0.5*p_pred) log-normal mean(k1648.py:390-391 丟棄 p_pred);(2) 記錄 res.success/params/loglik+收斂率門檻(k1648.py:351-361)後重跑 DM。clean NULL 前不得寫成文章;heavy compute 走 compute_queue。"
+    "description": "K1648 Codex review=CONDITIONAL_PASS 但 2 MAJOR 指向 SV variance 被低估→可能假 NULL。修:(1) SV forecast 改 exp(h+0.5*p_pred) log-normal mean(k1648.py:390-391 丟棄 p_pred);(2) 記錄 res.success/params/loglik+收斂率門檻(k1648.py:351-361)後重跑 DM。clean NULL 前不得寫成文章;heavy compute 走 compute_queue。",
+    "status_history": [
+      {
+        "ts": "2026-07-06T08:25:41.163434+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T08:25:46.827980+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ]
   }
 ]
