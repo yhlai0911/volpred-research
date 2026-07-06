@@ -52468,7 +52468,7 @@
     "title": "K267: write general-audience article [retry-v3] (auto-discovered uncovered K)",
     "description": "K K267 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Method: Descriptive categorization of knowledge entries K183-K266",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K267",
@@ -52479,7 +52479,33 @@
       "retry-v3"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-06T08:08:05+00:00"
+    "created_at": "2026-07-06T08:08:05+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T10:48:38.363889+00:00",
+    "claim_session_id": "1177e68619fa",
+    "status_history": [
+      {
+        "ts": "2026-07-06T10:48:38.364188+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T10:48:38.607359+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T10:56:07.261342+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T10:48:38.607036+00:00",
+    "completed_at": "2026-07-06T10:56:07.260786+00:00",
+    "result": "Published general-audience draft mile_736c76d3 for K267 via publish_draft.py with two JSON-derived charts. Enqueued async lazypack job lazypack-mile_736c76d3; article remains draft until release/lazypack gate."
   },
   {
     "id": "k1648_sv_lognormal_convergence_rerun",
