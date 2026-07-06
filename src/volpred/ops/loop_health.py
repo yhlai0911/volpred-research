@@ -105,6 +105,16 @@ _SUCCESS_TOKENS = ("succeed", "completed", "published", "done")
 _CORRECTION_OUTCOME_TOKENS = ("correction", "errata", "self_correction", "drift_fix")
 _CORRECTION_KEY_FIELDS = ("fixed_in_article", "errors_found", "errata_count", "issues_fixed")
 
+# 2026-07-06 (boss demand "Dreaming再不修好"): cron exit codes that are a BENIGN
+# self-reported FINDINGS signal, not an execution failure — mirrors alerts.py
+# `_BENIGN_FINDINGS_EXIT_CODES`. exit120 = cron_git_push_backup.sh protectively HELD
+# a push because HEAD carries a NEW silent fallback (CI-red protection); the guard
+# ran fine and self-sent its own targeted WARN. Counting it as a recurring error
+# double-flags noise the push-held alert already tracks, and (worse) makes the job's
+# latest fire read non-zero so genuinely-recovered exit1 failures never clear. So we
+# neither count exit120 as a failure signature NOR let it block recovery detection.
+_BENIGN_CRON_EXIT_CODES = frozenset({"120"})
+
 _CRON_EXIT_RE = re.compile(r"===.*?\bexit\s+(\d+)\b", re.IGNORECASE)
 _DISPATCH_OUTCOME_RE = re.compile(r"\bworker returned outcome=(?P<outcome>[a-z_]+)\b", re.IGNORECASE)
 
@@ -411,7 +421,7 @@ def _scan_cron_exit_signatures(
                 continue
             code = m.group(1)
             last_exit_code = code  # track recovery: latest fire's exit code
-            if code == "0":
+            if code == "0" or code in _BENIGN_CRON_EXIT_CODES:
                 continue
             if last_ts is not None and last_ts < cutoff:
                 continue
@@ -421,7 +431,7 @@ def _scan_cron_exit_signatures(
                 log_sigs.append(sig)
         # Recovery: the job's latest fire succeeded AND its failures are old →
         # the underlying problem is fixed; clear the false-critical immediately.
-        if last_exit_code == "0":
+        if last_exit_code == "0" or last_exit_code in _BENIGN_CRON_EXIT_CODES:
             for sig in log_sigs:
                 ls = _parse_iso(sigs[sig].get("last_seen"))
                 if ls is not None and (now - ls) >= timedelta(hours=RECOVERY_GRACE_HOURS):
