@@ -53083,7 +53083,7 @@
     "title": "K1590: write research-audience article (auto-discovered uncovered K)",
     "description": "K K1590 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no research article in feed.json.  Verdict preview: K1590 merger-arbitrage deal-spread volatility diagnostic is a GO for Phase 2, with Codex review verdict CONDITIONAL_PASS. Data: yfinance adjusted closes (auto_adjust=False) for MNA/SPY/IWM/HYG/^VIX, price range 2020-01-02 to 2026-06-30, MNA return sample N=1629. Core gate evidenc",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1590",
@@ -53092,7 +53092,33 @@
       "audience-research"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-06T19:08:02+00:00"
+    "created_at": "2026-07-06T19:08:02+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-06T19:52:43.250578+00:00",
+    "claim_session_id": "c46093de4b0b",
+    "status_history": [
+      {
+        "ts": "2026-07-06T19:52:43.250886+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T19:52:55.135502+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-06T19:57:48.579637+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-06T19:52:55.135219+00:00",
+    "completed_at": "2026-07-06T19:57:48.579307+00:00",
+    "result": "Published research-audience draft article mile_8f14e28a for K1590. Framing is descriptive diagnostic only: lookahead caveat preserved, no DM/Harvey/OOS/trading overclaim, and existing general article mile_4518e9d8 treated as related but distinct audience."
   },
   {
     "id": "K1653",

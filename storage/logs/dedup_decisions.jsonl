@@ -128,3 +128,5 @@
 {"ts": "2026-07-06T18:44:38.416131+00:00", "action": "allow_same_ref_companion", "new_title": "K1640：VIX 30/40 恐慌進場的事件研究，半真但不能當即時交易規則", "matched_id": "mile_c5127413", "reason": "shared_refs=['K571'] aud=research body_sim=0.05"}
 {"ts": "2026-07-06T18:45:39.965554+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_c0aaf4e5", "previous_id": null, "gap_minutes": null, "reason": "non_published_ingestion:draft"}
 {"ts": "2026-07-06T18:45:42.357208+00:00", "action": "warn_semantic_dup", "new_title": "K1640：VIX 30/40 恐慌進場的事件研究，半真但不能當即時交易規則", "matched_id": "mile_4d67163f", "reason": "whole-topic semantic similarity 0.755 >= 0.74 vs mile_4d67163f (gap=0.8h, threshold=0.74 (dynamic ladder); warn-only per dedup-gate-audit)"}
+{"ts": "2026-07-06T19:57:11.073910+00:00", "action": "warn_arc_dup", "new_title": "K1590：MNA 併購套利波動 proxy 的描述性診斷", "matched_id": "mile_4518e9d8", "reason": "entities=['MERGER_ARB', 'US_EQUITY', 'VIX'] class=descriptive"}
+{"ts": "2026-07-06T19:57:11.421068+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_8f14e28a", "previous_id": null, "gap_minutes": null, "reason": "non_published_ingestion:draft"}
