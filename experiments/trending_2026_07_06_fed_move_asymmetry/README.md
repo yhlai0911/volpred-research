@@ -12,7 +12,7 @@
   已過 `check_arc_dedup.py`（exit 0，narrative_axis 不同）。
 
 ## 資料
-- Yahoo Finance `^MOVE`（ICE BofA MOVE Index）、`^TNX`（CBOE 10Y Treasury yield ×10）
+- Yahoo Finance `^MOVE`（ICE BofA MOVE Index）、`^TNX`（10Y Treasury yield, percent）
 - 期間 2010-01-05 ~ 2026-07-02，4,065 交易日（上行 1,968 / 下行 2,032）
 
 ## 方法
@@ -26,8 +26,8 @@
 | 指標 | 上行日 | 下行日 | 差異 |
 |---|---:|---:|---:|
 | MOVE 當日平均變動 | +0.510% | −0.280% | +0.79pp（t=5.52, p=3.6e-08） |
-| 每 bp 斜率（控制幅度） | 4.01%/bp | 2.74%/bp | 比值 1.465 |
-| 殖利率半變異數 | 604 bp² | 582 bp² | 比值 1.038（近對稱） |
+| 每 bp 斜率（控制幅度） | 0.401%/bp | 0.274%/bp | 比值 1.465 |
+| 殖利率半變異數 | 60,396 bp² | 58,182 bp² | 比值 1.038（近對稱） |
 | 近 90 日均變動 | +2.15% | −2.39% | +4.53pp（regime 放大） |
 
 Bootstrap 95% CI（上−下）= [+0.50, +1.07] pp，不含 0。

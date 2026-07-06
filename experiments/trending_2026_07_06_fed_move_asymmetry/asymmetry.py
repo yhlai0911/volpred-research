@@ -5,7 +5,7 @@ trending_2026_07_06_fed_move_asymmetry
 角度差異化：不是 6/12 的 MOVE/VIX 跨資產比值，也不是 6/22 的 MOVE-VIX 滾動相關，
 而是「higher-for-longer regime 下，債市波動率定價是否對利率上行 shock 更敏感」。
 
-資料：Yahoo Finance ^MOVE（ICE BofA MOVE Index）、^TNX（CBOE 10Y Treasury yield ×10）。
+資料：Yahoo Finance ^MOVE（ICE BofA MOVE Index）、^TNX（10Y Treasury yield, percent）。
 方法：
   1. 同日條件化：以 10Y 殖利率日變動方向分組，比較當日 MOVE 日變動百分比（Welch t-test）。
   2. 殖利率半變異數非對稱（realized semivariance ratio）。
@@ -40,7 +40,9 @@ def fetch():
 def main():
     df = fetch()
     df["move_ret"] = df["MOVE"].pct_change() * 100.0        # MOVE 日變動 %
-    df["yld_chg_bp"] = df["TNX"].diff() * 10.0              # 10Y 殖利率日變動 (TNX 已 ×10 → diff×10 = bp)
+    # yfinance returns ^TNX in percentage-point yield units (e.g. 4.485 for 4.485%).
+    # A 0.01 percentage-point move is 1 bp, hence diff * 100.
+    df["yld_chg_bp"] = df["TNX"].diff() * 100.0             # 10Y 殖利率日變動 (bp)
     d = df.dropna().copy()
 
     up = d[d["yld_chg_bp"] > 0]     # 殖利率上行日
