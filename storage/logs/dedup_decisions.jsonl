@@ -144,3 +144,5 @@
 {"ts": "2026-07-07T06:00:29.432695+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_3a7bd6f6", "matched_id": "mile_153d2908", "decision": "warn", "reason": "arc_similarity_without_shared_ref_or_data_source"}
 {"ts": "2026-07-07T14:00:31.069535+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_77096634", "matched_id": "mile_55f3ef61", "decision": "block", "reason": "shared_experiment_refs=['K1582']"}
 {"ts": "2026-07-07T14:00:31.069822+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_77096634", "matched_id": "mile_b88ee7bc", "decision": "block", "reason": "shared_experiment_refs=['K1582']"}
+{"ts": "2026-07-07T17:57:13.589054+00:00", "action": "allow_same_ref_companion", "new_title": "金融情勢一收緊，就能提前看到股市崩跌嗎？", "matched_id": "mile_73161403", "reason": "shared_refs=['K503'] aud=research body_sim=0.05"}
+{"ts": "2026-07-07T17:58:15.097519+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_9c211681", "previous_id": null, "gap_minutes": null, "reason": "non_published_ingestion:draft"}
