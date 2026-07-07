@@ -504,6 +504,39 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
             return 6
         print(f"[INFO] 主文已填入 composer 並驗證一致（{len(composed)} 字），截圖 {shot}")
 
+        # 2.5) 附圖（主貼文必附圖：結果圖 + 懶人包，老闆硬規則 2026-07-07）。
+        #      下載圖 → composer 的 input[type=file] set_input_files（隱藏 input 也可）。
+        if images:
+            local = _download_images(images)
+            if not local:
+                print("[ABORT] 附圖全下載失敗 → 不發（主貼文必附圖）")
+                browser.close()
+                return 8
+            try:
+                finp = page.locator("div[role='dialog'] input[type='file']").first
+                if finp.count() == 0:
+                    finp = page.locator("input[type='file']").first
+                finp.set_input_files(local)
+                page.wait_for_timeout(3_000 + 1_500 * len(local))  # 等縮圖上傳
+                thumbs = page.locator(
+                    "div[role='dialog'] img[src^='blob:'], div[role='dialog'] img[src^='data:']"
+                ).count()
+                shot = SHOT_DIR / f"post_with_images_{int(time.time())}.png"
+                page.screenshot(path=str(shot))
+                print(f"[INFO] 已附 {len(local)} 張圖（縮圖偵測 {thumbs}），截圖 {shot}")
+                if thumbs == 0:
+                    print("[ABORT] 附圖後偵測不到縮圖 → 不發（主貼文必附圖）")
+                    browser.close()
+                    return 8
+            except Exception as e:  # noqa: BLE001
+                shot = SHOT_DIR / f"post_image_fail_{int(time.time())}.png"
+                page.screenshot(path=str(shot))
+                print(f"[ABORT] 附圖失敗 → 不發（主貼文必附圖）: {e}；截圖 {shot}")
+                browser.close()
+                return 8
+        else:
+            print("[WARN] draft 無 ## 圖片 → 純文字貼文（老闆規則：主貼文應附圖，建議補圖）")
+
         if dry_run:
             print("[DRY-RUN] 停在送出前一步，不按「發佈」。人工看截圖確認 composer 正確。")
             browser.close()
