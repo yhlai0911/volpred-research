@@ -53320,14 +53320,40 @@
     "description": "探討 AI 晶片需求與地緣政治敏感時期，台積電 ADR 與現股波動率的套利空間。可量化：建立台美兩地台積電選擇權隱含波動率價差的 Z-score 模型，尋找跨市場波動率偏離的交易機會。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-06T22:00:25+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-07-07T00:08:20.492863+00:00",
+    "claim_session_id": "b6b71a5d5d70",
+    "status_history": [
+      {
+        "ts": "2026-07-07T00:08:20.493249+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-07T00:08:42.298161+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-07T00:15:32.347241+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-08"
+      }
+    ],
+    "started_at": "2026-07-07T00:08:42.297858+00:00",
+    "completed_at": "2026-07-07T00:15:32.346964+00:00",
+    "result": "發佈 mile_0fd1f831 台積電 ADR vs 現股 RV 價差 Z=+2.8 99th pct；2 圖+3 懶人包+線上200驗證；FB 草稿備妥待Chrome"
   },
   {
     "id": "trending_repost_2026_07_07_ai資本支出",
@@ -53384,5 +53410,21 @@
       "codex-24h-rule"
     ],
     "created_at": "2026-07-06T22:08:17+00:00"
+  },
+  {
+    "id": "journal_discovery_20260707_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-07-07T00:00:01+00:00"
   }
 ]
