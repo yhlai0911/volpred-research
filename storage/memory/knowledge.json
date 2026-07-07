@@ -37924,5 +37924,26 @@
       "HYG"
     ],
     "created_at": "2026-07-06T21:10:52.381622+00:00"
+  },
+  {
+    "item_id": "e0336434",
+    "k_id": "K1654",
+    "experiment_id": "k1654",
+    "experiment_path": "experiments/k1654/",
+    "category": "methodology",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "feature-dev:code-reviewer subagent fallback (Codex quota-blocked 至 2026-07-11; per experiments.md fallback). CONDITIONAL_PASS: lookahead/QLIKE方向/Student-t VaR unit-var scaling/DM-HLN/BH/100-multistart 全 PASS 高信心; 唯一 bug=seed hash()→zlib.crc32 已修並重跑 verdict 不變.",
+    "confidence": 0.82,
+    "content": "K1654 (Skew-t GAS 尾端 rescue — equity 延伸 K1135 commodity 發現). 資產 SPY/QQQ/^TWII/^N225, yfinance 日報酬, expanding rolling refit + 63 日 warm-start refit, 100-random-multistart MLE (K1213), numba JIT NLL + fail-closed parity 斷言. 模型 M0=Gaussian GARCH, M1=Student-t GAS, M2=Hansen(1994) skew-t GAS. Scenario B — QLIKE 點預測全 null: DM/HLN (h=1, BH-FDR 校正) 4 資產 H1 0/4, skew-t 尾部不改善條件變異數點預測. 但下尾風險覆蓋顯著改善: skew-t ES rescue H3 (Z1+Z2) 4/4 @1% 且 4/4 @5% vs M0 baseline 0/4; VaR Trinity 2/4 @1%, 1/4 @5% (K802 unit-variance scaling sqrt((nu-2)/nu)). 結論: K1135 商品 tail-rescue EXTENDS 到 equity — 加 skew-t 尾部不改善點預測, 但實質改善左尾 VaR/ES 覆蓋. 研究誠實: 這是誠實回報的 null-on-QLIKE / positive-on-tail 混合結果, 不過度宣稱點預測優勢.",
+    "evidence": [
+      "experiments/k1654/k1654_results.json",
+      "experiments/k1654/k1654.py",
+      "experiments/k1654/README.md",
+      "experiments/k1654/var_es_backtest.png",
+      "experiments/k1654/equity_skew_vs_gauss.png",
+      "H1 QLIKE DM 0/4; H3 ES Z1+Z2 4/4@1% & 4/4@5% (M0 baseline 0/4); H2 VaR 2/4@1%",
+      "延伸自 K1135 (commodity skew-t tail rescue)"
+    ],
+    "created_at": "2026-07-07T18:22:18.068076"
   }
 ]
