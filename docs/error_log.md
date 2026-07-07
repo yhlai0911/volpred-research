@@ -4768,6 +4768,12 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 
 **Follow-up（next_tasks fb_writer_persist_canonical_draft）**：修 FB 稿寫手 — 產 awaiting_interactive_session 時**強制**同步寫 `storage/drafts/fb_mile_<id>.md`；audit_fb_pipeline 加 invariant：awaiting 狀態但無對應 draft 檔 → warn。避免復發。
 
+**RESOLVED 2026-07-08 02:20（hourly-02）**：
+- **Enforcement owner = `scripts/mark_fb_post_status.py`**（設狀態的唯一 canonical writer，符合 anti-stacking「一個 concern 一個 owner」）：新增 `canonical_fb_draft_path()` + `DraftRequiredError`。設 `awaiting_interactive_session` 時 (a) 帶 `--draft-file` → 寫 canonical 稿；(b) 已有 canonical 稿 → OK；(c) 無稿且沒帶 → **fail-closed 拒絕**（raise/exit 1，feed 不動）。
+- **Backstop = `scripts/audit_fb_pipeline.py`** `_scan_missing_drafts()`：awaiting 但缺 canonical 稿 → `missing_draft` 進 report + warn alert（與年齡無關）。
+- **SOP**：`.claude/skills/fb-publishing/SKILL.md` 加「Handoff 持久化」段，標 handoff 一律 `--draft-file`。
+- **Regression**：`tests/test_mark_fb_post_status_draft_persist.py`（6 tests：canonical 命名 / 帶稿持久化 / 無稿拒絕 fail-closed / 既有稿 OK / 非 handoff status 不需稿 / audit 偵測缺檔）+ 既有 `test_fb_pipeline_status.py` 更新符合新契約。33 fb tests pass。Live audit missing_draft=0（現有 handoff 皆有稿），silent-fallback new=0。
+
 ## 2026-07-07 11:23 — FB real-Chrome CDP-attach 接的其實是假 profile，非老闆真 Chrome
 
 **症狀**：老闆 telegram msg253 回「我現在是登入狀態啊」，回應昨日（platform-ops-fb-realchrome-autopost）宣稱「底層機制完全可行，只差登入」的通知。重跑 `scripts/fb_realchrome_post.py --check` 仍回 `login_wall`。

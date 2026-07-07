@@ -49,6 +49,22 @@ https://.../<懶人包 concept>.png
 https://.../<懶人包 results-*>.png
 ```
 
+## Handoff 持久化（awaiting_interactive_session 硬規則，2026-07-07）
+
+背景排程無 Chrome → 完稿要交給互動 session 發時，**完稿必須先落在 canonical 位置
+`storage/drafts/fb_mile_<id>.md`**，否則稿與狀態 decouple → 稿遺失（error_log 2026-07-07）。
+
+`mark_fb_post_status.py` 是 enforcement owner：設 `awaiting_interactive_session` 時
+**強制**有 canonical 稿，否則拒絕（exit 1）。標 handoff 一律帶 `--draft-file`：
+
+```bash
+uv run python scripts/mark_fb_post_status.py --mile-id mile_<id> \
+  --status awaiting_interactive_session --draft-file /tmp/fb_<id>.md
+#   → 同步把完稿寫進 storage/drafts/fb_mile_<id>.md（含主貼文+留言連結）
+```
+
+`audit_fb_pipeline.py` 加了 backstop invariant：awaiting 但缺 canonical 稿 → warn。
+
 ## 執行流程（風控 gate，逐步不可跳）
 
 ```bash

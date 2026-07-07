@@ -21,6 +21,11 @@ from volpred.ops.shared_lock import shared_state_lock
 
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 TRENDING_LOG_PATH = ROOT / "storage" / "reports" / "trending_repost_log.json"
+DRAFTS_DIR = ROOT / "storage" / "drafts"
+# 2026-07-07 教訓（docs/error_log.md「FB 完稿未持久化」）：進 awaiting_interactive_session
+# handoff 時，完稿必須同步落在 canonical draft 位置，否則稿與狀態 decouple → 稿遺失。
+# 此入口是設狀態的唯一 canonical writer → 設為 enforcement owner。
+DRAFT_REQUIRED_STATUSES = {"awaiting_interactive_session"}
 VALID_STATUSES = {
     "pending",
     "success",
@@ -66,7 +71,57 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def update_fb_status(mile_id: str, *, status: str, note: str | None = None) -> dict[str, int | str]:
+def canonical_fb_draft_path(mile_id: str) -> Path:
+    """Canonical location for the finished FB post an interactive session reads.
+
+    feed id `mile_08fefa59` → `storage/drafts/fb_mile_08fefa59.md`.
+    """
+    mid = (mile_id or "").strip()
+    if not mid.startswith("mile_"):
+        mid = f"mile_{mid}"
+    return DRAFTS_DIR / f"fb_{mid}.md"
+
+
+class DraftRequiredError(ValueError):
+    """Raised when an awaiting_interactive_session handoff has no persisted draft."""
+
+
+def _persist_or_require_draft(mile_id: str, *, status: str, draft_text: str | None) -> str | None:
+    """Enforce the canonical-draft invariant for handoff statuses.
+
+    - draft_text given → write it to the canonical path (idempotent overwrite).
+    - draft_text absent but canonical draft already on disk → OK (already persisted).
+    - draft_text absent and no canonical draft → refuse (DraftRequiredError).
+
+    Returns the canonical draft path (str) when a draft is involved, else None.
+    """
+    if status not in DRAFT_REQUIRED_STATUSES:
+        return None
+    draft_path = canonical_fb_draft_path(mile_id)
+    if draft_text is not None:
+        DRAFTS_DIR.mkdir(parents=True, exist_ok=True)
+        body = draft_text if draft_text.endswith("\n") else draft_text + "\n"
+        draft_path.write_text(body, encoding="utf-8")
+        return str(draft_path)
+    if draft_path.exists():
+        return str(draft_path)
+    raise DraftRequiredError(
+        f"status={status} 需要 canonical 完稿在 {draft_path}，但檔案不存在且未提供 "
+        "--draft-file。FB 稿寫手在進 interactive handoff 前必須先持久化完稿 "
+        "（見 docs/error_log.md 2026-07-07 FB 完稿未持久化）。"
+    )
+
+
+def update_fb_status(
+    mile_id: str,
+    *,
+    status: str,
+    note: str | None = None,
+    draft_text: str | None = None,
+) -> dict[str, int | str]:
+    # Enforce the draft invariant BEFORE mutating feed/log so state never gets
+    # marked awaiting without a persisted draft (fail-closed on the writer path).
+    draft_path = _persist_or_require_draft(mile_id, status=status, draft_text=draft_text)
     updated_feed = 0
     updated_log = 0
     now_iso = _now_iso()
@@ -93,12 +148,15 @@ def update_fb_status(mile_id: str, *, status: str, note: str | None = None) -> d
                 updated_log += 1
         _write_json(TRENDING_LOG_PATH, log)
 
-    return {
+    result: dict[str, int | str] = {
         "mile_id": mile_id,
         "status": status,
         "updated_feed": updated_feed,
         "updated_log": updated_log,
     }
+    if draft_path is not None:
+        result["draft_path"] = draft_path
+    return result
 
 
 def _parse_iso_naive(value: str) -> datetime | None:
@@ -250,6 +308,15 @@ def main() -> int:
     parser.add_argument("--status", choices=sorted(VALID_STATUSES))
     parser.add_argument("--note")
     parser.add_argument(
+        "--draft-file",
+        metavar="PATH",
+        help=(
+            "進 awaiting_interactive_session 時，把此檔完稿持久化到 canonical "
+            "位置 storage/drafts/fb_<mile_id>.md（含主貼文+留言連結）。"
+            "handoff 狀態未提供且無既有 canonical 稿 → 拒絕。"
+        ),
+    )
+    parser.add_argument(
         "--auto-expire",
         type=int,
         nargs="?",
@@ -282,7 +349,33 @@ def main() -> int:
     if not args.mile_id or not args.status:
         parser.error("--mile-id and --status are required (or use --auto-expire)")
 
-    result = update_fb_status(args.mile_id, status=args.status, note=args.note)
+    draft_text: str | None = None
+    if args.draft_file:
+        draft_path = Path(args.draft_file)
+        if not draft_path.exists():
+            print(
+                json.dumps(
+                    {"ok": False, "error": f"--draft-file not found: {draft_path}"},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            return 1
+        draft_text = draft_path.read_text(encoding="utf-8")
+
+    try:
+        result = update_fb_status(
+            args.mile_id, status=args.status, note=args.note, draft_text=draft_text
+        )
+    except DraftRequiredError as exc:
+        print(
+            json.dumps(
+                {"ok": False, "error": str(exc), "mile_id": args.mile_id, "status": args.status},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 1
     if result["updated_feed"] == 0 and result["updated_log"] == 0:
         print(json.dumps({"ok": False, **result}, ensure_ascii=False, indent=2))
         return 1

@@ -16,6 +16,7 @@ from pathlib import Path
 
 REPO = Path(__file__).parent.parent
 LOG = REPO / "storage" / "reports" / "trending_repost_log.json"
+DRAFTS_DIR = REPO / "storage" / "drafts"
 # 2026-06-10 process-audit CRITICAL #2: event_article FB statuses live as
 # top-level fb_post_status on feed.json entries (publishing.md canonical),
 # NOT in trending_repost_log.json — this audit was blind to them (6 awaiting,
@@ -123,6 +124,49 @@ def _collect_pending_by_age(
     return pending
 
 
+def _canonical_fb_draft_path(mile_id: str) -> Path:
+    """feed id `mile_08fefa59` → storage/drafts/fb_mile_08fefa59.md.
+
+    Mirror of mark_fb_post_status.canonical_fb_draft_path — audit-side backstop
+    for the 2026-07-07 invariant (awaiting handoff must carry a persisted draft).
+    """
+    mid = str(mile_id or "").strip()
+    if not mid.startswith("mile_"):
+        mid = f"mile_{mid}"
+    return DRAFTS_DIR / f"fb_{mid}.md"
+
+
+def _scan_missing_drafts(data: list) -> list[dict]:
+    """awaiting_interactive_session entries whose canonical draft file is absent.
+
+    This catches the failure mode where a writer marked the handoff status but
+    never persisted the finished post to storage/drafts/fb_<mile_id>.md, so an
+    interactive session has no reference copy to publish from."""
+    missing = []
+    seen: set[str] = set()
+    for e in data:
+        s = str(e.get("fb_post_status", "")).strip().lower()
+        if s not in HANDOFF_STATUSES:
+            continue
+        mile_id = e.get("mile_id")
+        if not mile_id or mile_id in seen:
+            continue
+        seen.add(mile_id)
+        draft_path = _canonical_fb_draft_path(mile_id)
+        if not draft_path.exists():
+            try:
+                expected = str(draft_path.relative_to(REPO))
+            except ValueError:
+                expected = str(draft_path)  # silent-ok: DRAFTS_DIR patched outside REPO in tests
+            missing.append({
+                "mile_id": mile_id,
+                "fb_post_status": s,
+                "date": e.get("date") or e.get("created_at") or e.get("timestamp", ""),
+                "expected_draft": expected,
+            })
+    return missing
+
+
 def _load_entries() -> list:
     """Merge trending log entries with feed.json top-level fb_post_status
     entries (event_article path). Feed entries are normalized to carry
@@ -197,6 +241,10 @@ def main():
         newer_or_equal_iso=stale_cutoff_iso,
     )
 
+    # 3) Invariant: awaiting_interactive_session 但 canonical 完稿檔缺 → 稿遺失風險
+    #    （docs/error_log.md 2026-07-07 FB 完稿未持久化）。與年齡無關，只要缺就 warn。
+    missing_drafts = _scan_missing_drafts(data)
+
     report = {
         "audit": "fb_pipeline",
         "early_warn_hours": EARLY_WARN_HOURS,
@@ -208,11 +256,13 @@ def main():
         "stale_pending": pending,
         "auto_expired_count": len(auto_expired),
         "auto_expired": auto_expired,
+        "missing_draft_count": len(missing_drafts),
+        "missing_draft": missing_drafts,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
-    if len(early_warning) >= 2 or len(pending) >= 2 or len(auto_expired) >= 1:
+    if len(early_warning) >= 2 or len(pending) >= 2 or len(auto_expired) >= 1 or missing_drafts:
         sections = []
         if len(early_warning) >= 2:
             sections.append(
@@ -235,6 +285,16 @@ def main():
                 f"## Auto-expired（pending/awaiting >{AUTO_EXPIRE_HOURS}h → expired_skip）{len(auto_expired)} 篇\n"
                 + "\n".join(f"- {p['mile_id']} ({p['date']})" for p in auto_expired)
             )
+        if missing_drafts:
+            sections.append(
+                f"## ⚠️ Handoff 缺 canonical 完稿檔 {len(missing_drafts)} 篇\n"
+                "awaiting_interactive_session 但 storage/drafts/fb_<mile_id>.md 不存在 —— "
+                "互動 session 找不到稿。稿寫手應在 mark_fb_post_status 傳 --draft-file 持久化。\n"
+                + "\n".join(
+                    f"- {p['mile_id']} status={p['fb_post_status']} 缺檔={p['expected_draft']}"
+                    for p in missing_drafts
+                )
+            )
         sections.append(
             "## 根因\n個人 FB 帳號無 headless API。stale 累積 = 等不到 interactive session。\n"
             "## 永久規則\n見 `docs/fb_pipeline_permanent_fix.md`（個人帳號 + Claude-in-Chrome；Page/Graph API 已撤回）。"
@@ -242,7 +302,7 @@ def main():
         body = "\n\n".join(sections)
         try:
             from volpred.ops.alerts import send_alert
-            level = "warn" if pending or auto_expired else "info"
+            level = "warn" if pending or auto_expired or missing_drafts else "info"
             send_alert(
                 level=level,
                 title=(

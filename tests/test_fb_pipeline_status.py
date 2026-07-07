@@ -552,17 +552,23 @@ def test_mark_fb_post_status_updates_feed_and_log(tmp_path, monkeypatch) -> None
         encoding="utf-8",
     )
 
+    drafts_dir = tmp_path / "drafts"
+    drafts_dir.mkdir()
     monkeypatch.setattr(mark_fb_post_status, "FEED_PATH", feed_path)
     monkeypatch.setattr(mark_fb_post_status, "TRENDING_LOG_PATH", log_path)
+    monkeypatch.setattr(mark_fb_post_status, "DRAFTS_DIR", drafts_dir)
 
+    # 2026-07-07 invariant: awaiting handoff must persist a canonical draft.
     result = mark_fb_post_status.update_fb_status(
         "mile_abc",
         status="awaiting_interactive_session",
         note="Needs Chrome MCP session",
+        draft_text="## 主貼文\n測試\n\n## 第一則留言\nhttps://volpred.zeabur.app/v3/reports/mile_abc",
     )
 
     assert result["updated_feed"] == 1
     assert result["updated_log"] == 1
+    assert (drafts_dir / "fb_mile_abc.md").exists()
     feed = json.loads(feed_path.read_text(encoding="utf-8"))
     log = json.loads(log_path.read_text(encoding="utf-8"))
     assert feed[0]["fb_post_status"] == "awaiting_interactive_session"
