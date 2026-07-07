@@ -37968,5 +37968,18 @@
       "K828"
     ],
     "created_at": "2026-07-07T22:22:21.975257"
+  },
+  {
+    "item_id": "dcdeb8b3",
+    "category": "strategy_cost",
+    "content": "K1656 [experiment_path=experiments/k1656/ | verdict=CONDITIONAL_PASS | reviewer=feature-dev:code-reviewer subagent fallback (Codex 用量達上限至 2026-07-11)] 淨成本波動率目標：no-trade band 與訊號平滑降換手，淨 Sharpe 效益完全取決於市場交易成本水準。低成本美股 (SPY, Adj Close 總報酬)：baseline 日頻 VT 淨 Sharpe 0.891 (turnover ~1105%/yr)；best no-trade band (band_5) 淨 Sharpe 0.895，turnover 僅降 15.4%，diff +0.004 p=0.49 (null)；21 日訊號平滑淨 Sharpe 0.852 p=0.60 (惡化不顯著) → 確認 K48/K125『低成本市場換手降低對淨績效無顯著助益』。高成本台股 (^TWII proxy, 含證交稅、賣出非對稱成本第一原理建模)：baseline 淨 Sharpe 0.530；best plain band (band_15) 淨 Sharpe 0.592，turnover 減半 (1110%→588%, -47%)，diff +0.061 p=0.003 顯著；訊號平滑+band 組合最優 (淨 Sharpe 提升 +0.143, p=0.028)；21日平滑單獨 0.639 p=0.054 (邊際)。結論：no-trade band/平滑降 VT 換手的淨效益是市場成本水準的函數 — 高成本市場成立、低成本市場不成立；且 plain no-trade band 並非高成本市場最優手段，日曆月頻/rebalance-to-edge/平滑+band 在同等或更低換手率下更好。方法：vol_signal shift(1) 明確 lag、bootstrap seed=1656、block bootstrap DM 檢定 turnover-matched 對照。差異化 vs K48 (月頻 boundary)/K499/K604-625 (台股成本)/K125 (美股散戶成本可忽略邊界量化)。",
+    "evidence": [
+      "experiments/k1656/k1656_results.json",
+      "SPY best_band diff=+0.0042 p=0.4906 CI95[-0.0078,0.0164]",
+      "TAIEX band_15 diff=+0.0612 p=0.003 CI95[0.0233,0.0991] turnover -47%",
+      "Bai et al. (2025) FMPM DOI 10.1007/s11408-025-00486-5; Leland (2000) no-trade region"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-07-08T01:09:38.493900"
   }
 ]
