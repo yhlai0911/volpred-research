@@ -175,6 +175,42 @@ def _login_state(page) -> str:
     return "unknown"
 
 
+def _add_first_comment(page, body: str, link: str) -> None:
+    """在剛發的貼文底下補第一則留言（連結）。用主文第一行前段當 anchor，在 timeline
+    以 JS innerText 比對定位「該貼文」的留言 textbox（profile 頁 div[role='article']
+    不穩，2026-07-07 改此法驗證可行），type URL（ASCII 不亂碼）+ Enter 送出。"""
+    anchor = body.strip().splitlines()[0][:12]
+    page.goto(FB_PROFILE_URL, wait_until="domcontentloaded", timeout=60_000)
+    page.wait_for_timeout(3_500)
+    page.mouse.wheel(0, 1250)  # 捲過置頂貼文，露出最新貼文
+    page.wait_for_timeout(2_500)
+    js = """
+    (anchor) => {
+      const boxes = Array.from(document.querySelectorAll('div'));
+      for (const box of boxes) {
+        const t = box.innerText || '';
+        if (t.includes(anchor) && t.includes('的身分留言') && t.length < 1400) {
+          const cb = box.querySelector('div[role="textbox"]');
+          if (cb) return cb;
+        }
+      }
+      return null;
+    }
+    """
+    handle = page.evaluate_handle(js, anchor)
+    el = handle.as_element()
+    if not el:
+        raise RuntimeError(f"找不到含「{anchor}」貼文的留言框")
+    el.scroll_into_view_if_needed()
+    el.click()
+    page.wait_for_timeout(800)
+    page.keyboard.type(link, delay=12)
+    page.wait_for_timeout(3_500)  # 等連結預覽
+    page.keyboard.press("Enter")
+    page.wait_for_timeout(4_500)
+    print(f"[OK] 第一則留言已送出：{link}")
+
+
 def cmd_check() -> int:
     ver = ensure_fb_chrome()
     if not ver:
@@ -324,29 +360,42 @@ def cmd_post(draft_path: Path, dry_run: bool) -> int:
             browser.close()
             return 7
 
-        # 3) 送出：按「發佈」
-        posted = False
-        for sel in ["[aria-label='發佈']", "text=發佈"]:
-            try:
-                el = page.locator(sel).first
-                if el.count() > 0:
-                    el.click(timeout=8_000)
-                    posted = True
-                    break
-            except Exception:
-                continue
+        # 3) 送出：FB 個人頁 composer 是兩段式 — 先「繼續」進「貼文設定」步驟再「發佈」
+        #    （2026-07-07 實測 profile composer 走兩段）；相容單段式（直接有「發佈」）。
+        def _click_dialog_btn(aria_labels, timeout=8_000):
+            for al in aria_labels:
+                try:
+                    el = page.locator(f"div[role='dialog'] [aria-label='{al}']").first
+                    if el.count() > 0 and el.is_visible():
+                        el.click(timeout=timeout)
+                        return True
+                except Exception as e:  # noqa: BLE001
+                    print(f"[WARN] 點「{al}」失敗: {e}")
+            return False
+
+        posted = _click_dialog_btn(["發佈"])
+        if not posted and _click_dialog_btn(["繼續"]):
+            page.wait_for_timeout(2_500)  # 進「貼文設定」步驟
+            posted = _click_dialog_btn(["發佈"])
         if not posted:
             shot = SHOT_DIR / f"post_no_publish_{int(time.time())}.png"
             page.screenshot(path=str(shot))
-            print(f"[ABORT] 找不到「發佈」鈕，截圖 {shot}")
+            print(f"[ABORT] 找不到「發佈」鈕（繼續後也沒有），截圖 {shot}")
             browser.close()
             return 5
-        page.wait_for_timeout(6_000)
+        page.wait_for_timeout(7_000)  # 等貼文送出
         shot = SHOT_DIR / f"post_done_{int(time.time())}.png"
         page.screenshot(path=str(shot))
         print(f"[OK] 主文已送出，截圖 {shot}")
-        print(f"[TODO] 第一則留言補連結需在貼文出現後定位留言框 — 見人工步驟 / 下版")
-        # 留言補連結留待驗證後版本（需貼文 permalink 定位留言框），先確保主文發出
+
+        # 4) 第一則留言補連結（主文不放連結 → 連結進留言引流）。2026-07-07 驗證可行。
+        if link:
+            try:
+                _add_first_comment(page, body, link)
+            except Exception as e:  # noqa: BLE001
+                shot = SHOT_DIR / f"comment_fail_{int(time.time())}.png"
+                page.screenshot(path=str(shot))
+                print(f"[WARN] 第一則留言補連結失敗（主文已發，連結需手動補）: {e}；截圖 {shot}")
         browser.close()
         return 0
 

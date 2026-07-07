@@ -1,5 +1,10 @@
 # FB 個人帳號自動發文 — real-Chrome CDP-attach 底層修復
 
+> ## ✅ RESOLVED 2026-07-07（首篇真發成功）
+> 底層路徑打通：**專用持久 profile Chrome**（`~/.volpred/fb_chrome_profile`，非 headless、非 /tmp）老闆登入一次 FB → `fb_realchrome_post.py` CDP-attach 驅動。首篇 `fb_mile_08fefa59`（VIX/AI 基建）主文 + 第一則留言連結**已上線** Ivan Lai 個人頁。worker 修好：dialog-scoped composer editor、貼上前 pbcopy+pbpaste 驗證（防剪貼簿被搶）、清空+移除殘留連結預覽卡、發佈前無預覽 gate、兩段式 `繼續→發佈`、第一則留言 JS-locator。下一步：LaunchAgent 常駐 dedicated Chrome + wire 進 hourly。
+> 舊 `/tmp/cdp_profile` wrong-profile bug（下方 CORRECTION）已由持久 profile 取代解決。
+
+
 **Task**: `platform-ops-fb-realchrome-autopost`（boss Telegram msg 237：「我就要你自動發，那能怎麼立刻從底層修復處理？」）
 
 **Worker**: `scripts/fb_realchrome_post.py`

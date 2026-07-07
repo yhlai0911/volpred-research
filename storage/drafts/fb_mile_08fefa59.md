@@ -1,6 +1,6 @@
 # FB Ivan Lai 個人貼文 draft
 # mile_id: mile_08fefa59
-# 狀態: awaiting_interactive_session
+# 狀態: posted (2026-07-07 CDP-attach real-Chrome，主文+留言連結已上線)
 # 主貼文: 不放連結（連結放第一則留言）
 # 留言連結: https://volpred.zeabur.app/v3/reports/mile_08fefa59
 # 過 anti-AI gate: ✅（hourly-09 2026-07-07）
