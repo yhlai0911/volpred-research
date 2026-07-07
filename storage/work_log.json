@@ -14856,5 +14856,13 @@
     "summary": "K1647(原油RV->股市RV溢出 NULL) 24h-rule 獨立二審: Codex primary-path 撞用量上限(reset Jul11)、agy掛住零output,依experiments.md fallback鏈改派feature-dev:code-reviewer fresh-context subagent。逐項核對: lookahead(.shift(1)確認)/HAC(maxlags=21對齊MA20,SPY-XLE分開估未pool)/bootstrap(seed=42)/overclaim(README數字與results.json逐一吻合,Granger未誤稱predictive)皆PASS;唯一CONCERN=2020-04-20負油價drop後positional-diff之不改方向為assertion未量化 -> non-blocking建議補equity_to_oil sensitivity run。VERDICT確認 CONDITIONAL_PASS_NULL(不改既有knowledge verdict)。primary-path Codex二審遞延>=Jul11額度重置。",
     "verdict": "succeeded",
     "owner": "hourly-21"
+  },
+  {
+    "timestamp": "2026-07-07T22:23:35+0800",
+    "task_type": "experiment",
+    "task_id": "research_growth_at_risk_equity_vol_at_risk_horizon",
+    "summary": "K1655 Growth-at-Risk 搬到市場: Equity/Vol-at-Risk 多 horizon (1/4/12w) quantile regression (Adrian-Boyarchenko-Giannone 2019 skeleton). 週度 W-FRI n=1383 (2000-2026 含GFC+COVID). 上一班 worktree agent 完成+commit; 本班驗證->code-reviewer subagent審(Codex CLI timeout x2撞額度)->merge->修README不可驗證收斂數字->寫knowledge(item 274f2886, provenance完整). 結果: in-sample NFCI slope 複製教科書GaR fan(左尾強負/中位~0/右尾正, 3H boot p<.05); OOS僅H=1w顯著(+6.74% pinball, DM_HLN t=-2.74 p=.006), 4-12w衰減, 無Harvey|t|>3, VIX主導. CONDITIONAL_PASS: GaR是equity條件分佈的真描述但非強OOS預測edge, VIX吸收金融條件壓力信號, 確認/延伸K503/K828到tail-quantile domain. Codex primary-path二審遞延(額度reset~Jul11).",
+    "verdict": "succeeded",
+    "owner": "hourly-22"
   }
 ]

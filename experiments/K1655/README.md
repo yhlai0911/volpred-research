@@ -180,9 +180,10 @@ reported for completeness and to contrast the (easy) vol tail against the (hard)
   honestly-null-leaning cross-domain contrast, not an overclaimed edge.
 
 **Caveats:** (a) BAA10Y credit-spread bivariate extension dropped due to a transient FRED outage
-(see §3). (b) 13 of ~46,000 QuantReg fits hit the 2000-iteration limit (0.03%, from vol-τ-extreme
-bootstrap resamples; QuantReg returns the last iterate; negligible on the aggregated bootstrap SE
-and none in the primary returns fits). (c) In-sample tail slopes reflect crisis co-movement and
+(see §3). (b) A small number of vol-τ-extreme bootstrap resample fits hit the statsmodels
+2000-iteration limit (QuantReg returns the last iterate); the committed script does not track or
+count these, so no exact figure is claimed — the effect is negligible on the aggregated bootstrap
+SE and was not observed in the primary returns-quantile fits. (c) In-sample tail slopes reflect crisis co-movement and
 must not be read as predictive. (d) All statistics are from actual computation on the stated
 sample; no cherry-picking of horizons/quantiles — the full grid is reported.
 

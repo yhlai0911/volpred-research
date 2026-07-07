@@ -37945,5 +37945,28 @@
       "延伸自 K1135 (commodity skew-t tail rescue)"
     ],
     "created_at": "2026-07-07T18:22:18.068076"
+  },
+  {
+    "item_id": "274f2886",
+    "category": "growth_at_risk_equity_tail",
+    "content": "K1655 Growth-at-Risk moved to markets (Equity/Vol-at-Risk multi-horizon quantile regression). Cross-domain test of Adrian-Boyarchenko-Giannone (2019) 'Vulnerable Growth': does the Chicago Fed NFCI condition the 5% left tail of SPY forward returns (and 95% right tail of forward realized vol) over/above an unconditional benchmark, OOS? Weekly W-FRI panel n=1383 (2000-01..2026-07, incl 2008 GFC + 2020 COVID). Method: statsmodels QuantReg tau in {.05,.25,.5,.75,.95}, H in {1,4,12}w; single-var specs NFCI vs VIX. Release-aware point-in-time NFCI (+3 biz-day publication lag); forward-label embargo j+H<i (strict) with identical admissible rows for unconditional benchmark; HLN(1997) horizon-specific DM (NW lag=H-1, separate h per target); in-sample inference via moving-block bootstrap (block=H, B=500, seed=1655) — iid QuantReg SE reported diagnostic-only. FINDINGS: (in-sample) NFCI slope on SPY forward returns replicates the textbook GaR fan — strongly negative at 5% left tail, ~0 at median, positive at 95% right tail, all 3 horizons (boot p<0.05). (OOS) conditional pinball beats unconditional only at H=1w (NFCI +6.74% reduction, DM_HLN t=-2.74 p=0.006), decays to insignificant at 4w (+3.51%, t=-0.87) and negative at 12w (-3.32%). NO horizon reaches Harvey |t|>3 bar; VIX dominates (H=1w VIX Harvey-significant). CONCLUSION: GaR is a real conditional-distribution DESCRIPTION for equities in-sample, but NOT a strong OOS predictive edge for efficient equity return tails — VIX absorbs the financial-conditions stress signal. Confirms/extends K503/K828 (STLFSI4 VIX-absorbs-stress prior) into the tail-quantile domain. Caveats: BAA10Y bivariate extension dropped (transient FRED outage); NFCI/VIXCLS reused from prior in-repo FRED snapshots (verified identical to fresh fetch). Verdict CONDITIONAL_PASS.",
+    "evidence": [
+      "experiments/K1655/K1655_results.json",
+      "experiments/K1655/README.md",
+      "IS NFCI slope@0.05: H1=-0.02192(p.014) H4=-0.06605(p.035) H12=-0.14720(p.023)",
+      "OOS pinball reduction: H1=+6.74%(DM_HLN t=-2.74 p=.006) H4=+3.51%(ns) H12=-3.32%(ns)",
+      "oos_harvey_significant_any_H=false; VIX H1 Harvey-significant"
+    ],
+    "confidence": 0.8,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1655",
+    "experiment_path": "experiments/K1655/",
+    "reviewer": "code-reviewer subagent fallback (Codex CLI timed out x2 this run; 5/5 methodology invariants PASS: release-aware PIT, j+H<i embargo, HLN horizon-specific DM, moving-block bootstrap inference, pinball sign+seed)",
+    "reviewer_source": "code-reviewer_subagent",
+    "related_experiments": [
+      "K503",
+      "K828"
+    ],
+    "created_at": "2026-07-07T22:22:21.975257"
   }
 ]
