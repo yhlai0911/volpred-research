@@ -14840,5 +14840,13 @@
     "task_type": "experiment",
     "task_id": "k1654_skewt_gas_equity_tail_rescue",
     "summary": "K1654 Skew-t GAS equity tail-rescue (延伸 K1135 commodity): merge orphan worktree + code-reviewer CONDITIONAL_PASS (Codex quota-blocked til 7/11) + 修 seed hash()→zlib.crc32 可復現 bug 並重跑 verdict 不變 (Scenario B EXTENDS: QLIKE null 0/4, ES rescue 4/4 vs M0 0/4) + 寫 knowledge K1654. 另釋放 orphan gasdcs task 回 pending + 清空 worktree."
+  },
+  {
+    "timestamp": "2026-07-07T20:18:47+08:00",
+    "task_type": "platform_ops",
+    "task_id": "journal_discovery_20260707_0",
+    "summary": "Journal-discovery batch 2026-07-07: research_backlog all-covered fallback -> agent 掃 8 期刊群提 14 條, 主線程 grep 去重砍 5 條(VT歸因/naive期貨/crypto funding/台海GPR/氣候商品 皆撞既有或飽和NULL弧), 存活 9 條正交入庫。4 條零額外資料成本方法學護城河。",
+    "verdict": "succeeded",
+    "owner": "hourly-20"
   }
 ]
