@@ -53488,7 +53488,7 @@
     "title": "Paper review (Codex 24h-rule): K1647: 原油已實現波動率對股市波動率的一階預測力檢定",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_f5912072 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_f5912072",
@@ -53496,7 +53496,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-06T22:08:17+00:00"
+    "created_at": "2026-07-06T22:08:17+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-07-07T13:09:32.163472+00:00",
+    "claim_session_id": "399a6df4c37e",
+    "status_history": [
+      {
+        "ts": "2026-07-07T13:09:32.163817+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-07T13:09:39.834576+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-07T13:32:38.889873+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-21"
+      }
+    ],
+    "started_at": "2026-07-07T13:09:39.834218+00:00",
+    "completed_at": "2026-07-07T13:32:38.889474+00:00",
+    "result": "K1647 24h-rule 獨立二審: Codex撞額度(Jul11)+agy掛住→fallback code-reviewer subagent確認 CONDITIONAL_PASS_NULL; lookahead/HAC/bootstrap/overclaim 4項PASS, 1 non-blocking建議(2020負油價positional-diff sensitivity); Codex二審遞延Jul11"
   },
   {
     "id": "journal_discovery_20260707_0",
@@ -54228,5 +54254,35 @@
       }
     ],
     "completed_at": "2026-07-07T07:24:15.311895+00:00"
+  },
+  {
+    "id": "paper_review_mile_7f181e3a",
+    "title": "Paper review (Codex 24h-rule): 危機來了要換模型嗎？GW(2006) 條件檢定實測 HAR-RV 與 GJR-GARCH 的贏家會不會隨行情翻盤",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7f181e3a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_7f181e3a",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-07T13:08:12+00:00"
+  },
+  {
+    "id": "paper_review_mile_c0aaf4e5",
+    "title": "Paper review (Codex 24h-rule): K1640：VIX 30/40 恐慌進場的事件研究，半真但不能當即時交易規則",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c0aaf4e5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_c0aaf4e5",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-07T13:08:12+00:00"
   }
 ]
