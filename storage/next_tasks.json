@@ -54748,14 +54748,40 @@
     "description": "從英格蘭銀行警告AI估值過高切入，分析科技股期權偏斜度的異常。可量化：追蹤美股科技巨頭Implied Vol Skew與大盤回撤的歷史相關性。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-07T22:00:18+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-07-07T23:10:38.322891+00:00",
+    "claim_session_id": "c4980dcf8f43",
+    "status_history": [
+      {
+        "ts": "2026-07-07T23:10:38.323232+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-07T23:10:38.571300+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-07T23:31:03.529378+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-07"
+      }
+    ],
+    "started_at": "2026-07-07T23:10:38.570940+00:00",
+    "completed_at": "2026-07-07T23:31:03.528986+00:00",
+    "result": "發佈 trending_repost mile_e1ff7ef9『監管警告AI估值，選擇權市場怕不怕』audience=general published；2 圖表+3 懶人包海報全 data-bound(SKEW 145.74/VIX 16.13/SOX偏態-0.79 等)；anti-ai gate PASS；arc-dedup warn放行(結論異於台積篇)。誠實敘事:SKEW非低估(46.7pct)、真訊號=大盤已實現偏態翻負 vs 龍頭偏正的離散度。feed-sync 進行中。FB 因 residual-photo 偵測器誤判 abort→記 fb_post_failed+followup修復任務。"
   },
   {
     "id": "trending_repost_2026_07_08_台積法說",
@@ -54771,5 +54797,30 @@
       "reader_facing",
       "auto_refill"
     ]
+  },
+  {
+    "id": "research_giacomini_rossi_fluctuation_test_volpred_dm_ledg",
+    "title": "研究 backlog fallback: Giacomini-Rossi fluctuation test 回溯 VolPred 既有 DM ledger",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Giacomini-Rossi fluctuation test 回溯 VolPred 既有 DM ledger — 對 A4f/CF-Rolling vs HAR 的既有 2718-row loss differential 序列跑時變相對績效（fluctuation test），找出優勢是否集中特定 regime；純內部資料零額外成本（來源：Giacomini-Rossi 波動檢定成為 2025-26 forecast-eval 標配）。差異化：把庫內靜態 DM 升級為時變 inference，強化方法學護城河。 | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "giacomini_rossi_fluctuation_test_volpred_dm_ledg",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-07T23:08:25+00:00"
+  },
+  {
+    "id": "fix_fb_realchrome_residual_photo_detector",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "title": "修 fb_realchrome_post residual-photo 偵測器誤判（縮圖 count mismatch 連 4 次 abort）",
+    "description": "fb_realchrome_post.py 的 composer 殘留照片偵測 selector 在 FB 新 DOM 下恆誤計 1 個非照片元素為 thumbnail，導致附圖後 count!=附圖數 而 ABORT（reload/discard 無效）。需 dump composer DOM 找出縮圖 selector 實際命中的節點、排除 link-preview 卡片/編輯按鈕，改成只計真實 attached photo。regression：附 N 圖須偵測恰 N。incident=work_log fb_mile_e1ff7ef9_ai_skew / error_log 2026-07-08。draft 待此修好後重發 storage/drafts/fb_mile_e1ff7ef9.md。",
+    "created_at": "2026-07-08T07:27:01+08:00"
   }
 ]

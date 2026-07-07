@@ -146,3 +146,6 @@
 {"ts": "2026-07-07T14:00:31.069822+00:00", "gate": "release_pool_arc_dedup", "target_id": "mile_77096634", "matched_id": "mile_b88ee7bc", "decision": "block", "reason": "shared_experiment_refs=['K1582']"}
 {"ts": "2026-07-07T17:57:13.589054+00:00", "action": "allow_same_ref_companion", "new_title": "金融情勢一收緊，就能提前看到股市崩跌嗎？", "matched_id": "mile_73161403", "reason": "shared_refs=['K503'] aud=research body_sim=0.05"}
 {"ts": "2026-07-07T17:58:15.097519+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_9c211681", "previous_id": null, "gap_minutes": null, "reason": "non_published_ingestion:draft"}
+{"ts": "2026-07-07T23:15:23.552464+00:00", "action": "warn_arc_dup", "new_title": "監管警告 AI 估值太貴，那選擇權市場自己怕不怕？一個反直覺的答案", "matched_id": "mile_76679cd3", "reason": "entities=['NASDAQ', 'SILVER', 'TW_EQUITY', 'US_EQUITY', 'VIX'] class=descriptive"}
+{"ts": "2026-07-07T23:18:04.615885+00:00", "action": "warn_arc_dup", "new_title": "監管警告 AI 估值太貴，那選擇權市場自己怕不怕？一個反直覺的答案", "matched_id": "mile_76679cd3", "reason": "entities=['NASDAQ', 'SILVER', 'TW_EQUITY', 'US_EQUITY', 'VIX'] class=descriptive"}
+{"ts": "2026-07-07T23:18:04.972698+00:00", "gate": "publish_throttle", "decision": "pass", "target_id": "mile_e1ff7ef9", "previous_id": "mile_c538af9e", "gap_minutes": 557.58, "reason": "gap_above_threshold"}

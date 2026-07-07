@@ -1,0 +1,38 @@
+{
+  "skew_last": 145.74,
+  "skew_date": "2026-07-07",
+  "vix_last": 16.13,
+  "skew_pctile_2y": 46.7,
+  "vix_pctile_2y": 27.9,
+  "skew_mean_2y": 148.16,
+  "vix_mean_2y": 18.68,
+  "skew_gt145_last60": 11,
+  "tech": {
+    "NVDA": {
+      "realized_skew_63d": -0.056,
+      "realized_skew_252d": 0.004,
+      "ann_vol_63d_pct": 39.3
+    },
+    "AMD": {
+      "realized_skew_63d": 0.246,
+      "realized_skew_252d": 0.397,
+      "ann_vol_63d_pct": 82.1
+    },
+    "QQQ": {
+      "realized_skew_63d": -0.634,
+      "realized_skew_252d": -0.402,
+      "ann_vol_63d_pct": 24.2
+    },
+    "^SOX": {
+      "realized_skew_63d": -0.785,
+      "realized_skew_252d": -0.563,
+      "ann_vol_63d_pct": 59.5
+    },
+    "^GSPC": {
+      "realized_skew_63d": -0.446,
+      "realized_skew_252d": -0.303,
+      "ann_vol_63d_pct": 13.6
+    }
+  },
+  "note_skew_formula": "CBOE SKEW=100-10*skewness_coef; 100=normal, higher=fatter left tail"
+}

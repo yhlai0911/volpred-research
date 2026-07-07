@@ -4785,3 +4785,11 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 **本次處置**：telegram-253 回覆更正說明；append 修正任務 `platform-ops-fb-realchrome-wrong-profile-20260707`（next_tasks.json）列兩條候選修法（quit+relaunch 真 Chrome 帶 debug port ｜ 改用 AppleScript 驅動真 Chrome 免 debug port），修正需重新走風控 gate。
 
 **教訓**：「CDP port 開著」不等於「attach 到使用者的真實瀏覽器」——驗證 attach 對象前必須先確認 debug port 是誰開的（`ps aux` 查 user-data-dir），不能只驗 `/json/version` 有回應就宣稱「已 attach 到真 Chrome」。
+
+## 2026-07-08 07:27 — FB fb_realchrome_post residual-photo 偵測器結構性誤判（trending mile_e1ff7ef9）
+
+**症狀**：hourly-07 發 trending_repost（AI估值/偏斜度）到 Ivan Lai FB，`fb_realchrome_post --post --dry-run` 連 4 次在 composer-open 就偵測「1 張殘留照片」，附 2 圖後縮圖數變 3 → count mismatch ABORT。CDP reload FB 分頁 + 開 composer 按「捨棄」清 server-side draft 皆無效，殘留恆為 1。
+
+**判定**：非暫態 state（reload/discard 無效），是 residual-photo 偵測 selector 對 FB 新 DOM 誤計一個非照片 UI 元素（或 link-preview 卡片）為 thumbnail。同症狀 ≥4 次 = 結構性。
+
+**處置**：未用 `--force` 繞過 guard（guard 目的即防重複圖對外公開發文，不可逆，研究誠實+反破壞原則優先）。feed 主通路已 published+sync（core deliverable 完成）。FB 記 work_log `fb_post_failed` + draft 保留 `storage/drafts/fb_mile_e1ff7ef9.md` 待修後重發。建 followup platform_ops 任務修 residual 偵測器（分析縮圖 selector 實際命中的 DOM 節點，排除 link-preview / edit-button 誤計），**不在本 fire 盲改 DOM 邏輯**（超 50min cap + 對外自動化盲改風險）。

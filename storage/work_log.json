@@ -14893,5 +14893,16 @@
     "task_id": "k1624_add_validation_harness",
     "summary": "K1624 validation harness --full (40 reps/DGP, B=200, n=4000, seeded): true-I(0.4) 82.5% correct/5.0% false-positive; AR+level-shift 100% correct reject. Corrected README+results.json 'no reject' claim to honest finite-sample rates. Closes Codex mile_c538af9e reproducibility residual #1.",
     "owner": "hourly-06"
+  },
+  {
+    "timestamp": "2026-07-08T07:26:33+08:00",
+    "task_type": "fb_post_failed",
+    "task_id": "fb_mile_e1ff7ef9_ai_skew",
+    "article_id": "mile_e1ff7ef9",
+    "status": "failed",
+    "reason": "composer_residual_photo_count_mismatch",
+    "details": "fb_realchrome_post 連 4 次於 composer-open 偵測 1 張殘留照片（縮圖數 3 != 附圖 2），reload + discard 皆無效 → residual 偵測器結構性誤判/DOM 變動。未 --force 繞過（對外公開發文防重複圖）。feed 主通路已 published+待sync。draft 保留待修後重發。",
+    "article_url": "https://volpred.zeabur.app/v3/reports/mile_e1ff7ef9",
+    "fb_draft_path": "storage/drafts/fb_mile_e1ff7ef9.md"
   }
 ]
