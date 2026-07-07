@@ -37981,5 +37981,19 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-07-08T01:09:38.493900"
+  },
+  {
+    "item_id": "65703115",
+    "category": "volatility_risk_premium",
+    "content": "K1657 VRP 交易時段 vs 隔夜分解（免付費代理）— verdict=CONDITIONAL_PASS（主 claim NULL）。SPY+^VIX 日 OHLC yfinance 2004-01-05~2026-07-07, N=5661 (VIX+target N=5635), seed=42, ann=252, RV 22 日窗. Q1: 全期隔夜 variance 佔比 37.4% (bootstrap CI95 [32.9%,43.1%]), 逐年 13.9%~62.5% (2020 COVID 峰), corr(var_day,var_on)=0.207. 修正既有 K 的 43-44%: 那是 2020-2026 子樣本偏誤 (完整 2004 起樣本為 37.4%). Q2: 平均 IV=0.0432 RV=0.0352 VRP_total=+0.0080 (正 86.2%), VIX 系統性高估變異數 (合經典文獻). Q3 (主 claim): (a) 唯一顯著—季度 H66 日盤 realized var 顯著比隔夜更能預測未來 var (rv_day t=4.52 vs rv_on t=0.66); 短 horizon H5 in-sample diff_day-on t=0.53 p=0.598 無差異. (b) NULL: day-VRP vs on-VRP 預測內容差異全 horizon 皆不顯著 (diff p=0.25/0.18/0.69). (c) NULL: OOS DM full-vs-baseline 全部低於 Harvey |t|>3.0 (DM t=2.31/0.39/0.56, H5 p=0.021 但 verdict_full_better=false); QLIKE 改善正向但不 robust. 結論: 把 VRP 拆時段賺不到穩健 edge, 與既有大量 VRP null 一致. 隔夜波動雖佔近四成但長期預測力近零, 日盤波動才是持續性來源. 建模假設 (明示): day/on-VRP 依 realized share 比例分配 implied (VIX 不分時段定價), 故兩者同號量級比=rv_day/rv_on; 交叉項僅占 var_cc 3.9%. TWN 次要 (TW0050/VIXTWN N=142 2025-12 起, 已明標禁顯著性): 隔夜佔比 59.3% 遠高於美股 (承接美股 session), VRP proxy +0.021 正 82.6%, 僅 forward-looking 觀察. Guards: lookahead=predictors trailing end@t/targets[t+1,t+H]/OOS embargo j<=i-H; VIX 口徑一致 IV=(VIX/100)^2 vs RV=(252/22)sum22(r^2); HAC/DM per-H lag=H; seed=42; canonical QLIKE actual/predicted. Reviewer: feature-dev:code-reviewer subagent (fresh-context) PASS; Codex CLI quota-out until 2026-07-11 (fallback per .claude/rules/experiments.md); Codex 恢復後建議二次驗證再立正式 closure (K1259 教訓).",
+    "evidence": [
+      "experiments/k1657/README.md",
+      "experiments/k1657/k1657_results.json",
+      "experiments/k1657/k1657.py",
+      "k1657",
+      "CONDITIONAL_PASS"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-07-08T05:28:13.371055"
   }
 ]
