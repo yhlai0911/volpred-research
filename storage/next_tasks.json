@@ -54664,7 +54664,7 @@
     "title": "K1624 補 validation harness：把 README 聲稱的 true-I(0.4)/AR+shift 校驗落地成可重跑腳本",
     "description": "K1624 24h review (mile_c538af9e, CONDITIONAL_PASS) 抓到可復現性落差：README §9 + results.json methodology 聲稱 'Validated on simulated true-I(0.4) (no reject) and short-memory+level-shift (strong reject)'，但交付的 .py 只有 simulate_fracint（供 bootstrap null），無獨立 validation harness 把這兩個 DGP 跑完整 identification pipeline 驗證誤判率。補一份 k1624_validation.py：(1) 模擬 true-I(0.4) N 條 → 確認 bootstrap verdict 不誤判 spurious；(2) 模擬 AR(0.3)+level-shift → 確認正確判 spurious。固定 seed，輸出誤判率表。不改已發佈結果（自洽），純補可復現性。source=k1624 review residual concern #1.",
     "priority": 4,
-    "status": "pending",
+    "status": "in_progress",
     "source": "auto_discovered",
     "tags": [
       "k1624",
@@ -54673,11 +54673,25 @@
       "review_followup"
     ],
     "created_at": "2026-07-07T19:16:30.524138+00:00",
-    "claimed_by": null,
-    "claimed_at": null,
-    "claim_session_id": null,
-    "started_at": null,
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-07-07T20:10:10.491372+00:00",
+    "claim_session_id": "ae718a863eb2",
+    "started_at": "2026-07-07T20:10:10.743034+00:00",
     "completed_at": null,
-    "result": null
+    "result": null,
+    "status_history": [
+      {
+        "ts": "2026-07-07T20:10:10.491718+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-07T20:10:10.743351+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      }
+    ]
   }
 ]

@@ -1,0 +1,230 @@
+{
+  "experiment_id": "k1624_rv_long_memory_vs_level_shifts",
+  "artifact": "k1624_validation.py",
+  "purpose": "reproducibility harness for the identification pipeline's claimed error properties (README \u00a74.5 / checklist; results.json methodology.identification_rationale)",
+  "does_not_change_published_results": true,
+  "seed_base": 20260708,
+  "seed_stride": 100000,
+  "config": "smoke",
+  "params": {
+    "N_per_dgp": 6,
+    "B_inner_bootstrap": 60,
+    "n_series_len": 2000,
+    "d_true": 0.4
+  },
+  "run_utc": "2026-07-07T20:13:19.084746+00:00",
+  "elapsed_sec": 20.6,
+  "results": {
+    "true_lm": {
+      "dgp": "true_I(d)",
+      "N": 6,
+      "B": 60,
+      "n": 2000,
+      "correct_verdict": "true long memory",
+      "misjudge_verdicts": [
+        "spurious (level-shift-induced)"
+      ],
+      "verdict_counts": {
+        "true long memory": 6
+      },
+      "correct_rate": 1.0,
+      "misjudgment_rate": 0.0,
+      "n_sig_of_3": {
+        "mean": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      "boot_p_mean": {
+        "d_post": 0.5611111111111111,
+        "W4": 0.5166666666666667,
+        "dfull_minus_dbar": 0.4694444444444445
+      },
+      "boot_p_median": {
+        "d_post": 0.5,
+        "W4": 0.4916666666666667,
+        "dfull_minus_dbar": 0.4916666666666667
+      },
+      "d_pre": {
+        "mean": 0.4187914765572047,
+        "min": 0.369486072202947,
+        "max": 0.45198720749217386
+      },
+      "d_post": {
+        "mean": -0.15712132675774163,
+        "min": -0.228769768952771,
+        "max": -0.11189944409049862
+      },
+      "per_rep": [
+        {
+          "rep": 0,
+          "verdict": "true long memory",
+          "n_sig": 0,
+          "d_pre": 0.43,
+          "d_post": -0.112,
+          "p_dpost": 0.433,
+          "p_W4": 0.467,
+          "p_gap": 0.133
+        },
+        {
+          "rep": 1,
+          "verdict": "true long memory",
+          "n_sig": 0,
+          "d_pre": 0.435,
+          "d_post": -0.142,
+          "p_dpost": 0.55,
+          "p_W4": 0.367,
+          "p_gap": 0.517
+        },
+        {
+          "rep": 2,
+          "verdict": "true long memory",
+          "n_sig": 0,
+          "d_pre": 0.417,
+          "d_post": -0.125,
+          "p_dpost": 0.25,
+          "p_W4": 0.517,
+          "p_gap": 0.2
+        },
+        {
+          "rep": 3,
+          "verdict": "true long memory",
+          "n_sig": 0,
+          "d_pre": 0.409,
+          "d_post": -0.194,
+          "p_dpost": 0.783,
+          "p_W4": 0.783,
+          "p_gap": 0.617
+        },
+        {
+          "rep": 4,
+          "verdict": "true long memory",
+          "n_sig": 0,
+          "d_pre": 0.452,
+          "d_post": -0.14,
+          "p_dpost": 0.45,
+          "p_W4": 0.767,
+          "p_gap": 0.883
+        },
+        {
+          "rep": 5,
+          "verdict": "true long memory",
+          "n_sig": 0,
+          "d_pre": 0.369,
+          "d_post": -0.229,
+          "p_dpost": 0.9,
+          "p_W4": 0.2,
+          "p_gap": 0.467
+        }
+      ]
+    },
+    "spurious_ar_level_shift": {
+      "dgp": "AR(0.3)+level_shift",
+      "N": 6,
+      "B": 60,
+      "n": 2000,
+      "correct_verdict": "spurious (level-shift-induced)",
+      "misjudge_verdicts": [
+        "true long memory"
+      ],
+      "verdict_counts": {
+        "spurious (level-shift-induced)": 5,
+        "mixed": 1
+      },
+      "correct_rate": 0.8333333333333334,
+      "misjudgment_rate": 0.0,
+      "n_sig_of_3": {
+        "mean": 1.8333333333333333,
+        "min": 1,
+        "max": 2
+      },
+      "boot_p_mean": {
+        "d_post": 0.41944444444444445,
+        "W4": 0.013888888888888888,
+        "dfull_minus_dbar": 0.0
+      },
+      "boot_p_median": {
+        "d_post": 0.375,
+        "W4": 0.0,
+        "dfull_minus_dbar": 0.0
+      },
+      "d_pre": {
+        "mean": 0.5614814612502309,
+        "min": 0.3986889706967975,
+        "max": 0.6903641316291111
+      },
+      "d_post": {
+        "mean": -0.08031852709730519,
+        "min": -0.18645654230145747,
+        "max": 0.06322985690751497
+      },
+      "per_rep": [
+        {
+          "rep": 0,
+          "verdict": "spurious (level-shift-induced)",
+          "n_sig": 2,
+          "d_pre": 0.69,
+          "d_post": -0.147,
+          "p_dpost": 0.883,
+          "p_W4": 0.0,
+          "p_gap": 0.0
+        },
+        {
+          "rep": 1,
+          "verdict": "spurious (level-shift-induced)",
+          "n_sig": 2,
+          "d_pre": 0.576,
+          "d_post": -0.11,
+          "p_dpost": 0.583,
+          "p_W4": 0.0,
+          "p_gap": 0.0
+        },
+        {
+          "rep": 2,
+          "verdict": "spurious (level-shift-induced)",
+          "n_sig": 2,
+          "d_pre": 0.453,
+          "d_post": -0.081,
+          "p_dpost": 0.133,
+          "p_W4": 0.0,
+          "p_gap": 0.0
+        },
+        {
+          "rep": 3,
+          "verdict": "spurious (level-shift-induced)",
+          "n_sig": 2,
+          "d_pre": 0.643,
+          "d_post": 0.063,
+          "p_dpost": 0.05,
+          "p_W4": 0.0,
+          "p_gap": 0.0
+        },
+        {
+          "rep": 4,
+          "verdict": "spurious (level-shift-induced)",
+          "n_sig": 2,
+          "d_pre": 0.607,
+          "d_post": -0.021,
+          "p_dpost": 0.167,
+          "p_W4": 0.0,
+          "p_gap": 0.0
+        },
+        {
+          "rep": 5,
+          "verdict": "mixed",
+          "n_sig": 1,
+          "d_pre": 0.399,
+          "d_post": -0.186,
+          "p_dpost": 0.7,
+          "p_W4": 0.083,
+          "p_gap": 0.0
+        }
+      ]
+    }
+  },
+  "claim_reproduced": {
+    "true_I(0.4)_no_false_reject": true,
+    "true_I(0.4)_misjudgment_rate": 0.0,
+    "ar_level_shift_correct_reject": true,
+    "ar_level_shift_misjudgment_rate": 0.0
+  }
+}
