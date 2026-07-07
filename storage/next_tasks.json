@@ -54289,7 +54289,7 @@
     "title": "Paper review (Codex 24h-rule): 危機來了要換模型嗎？GW(2006) 條件檢定實測 HAR-RV 與 GJR-GARCH 的贏家會不會隨行情翻盤",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7f181e3a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_7f181e3a",
@@ -54297,14 +54297,40 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-07T13:08:12+00:00"
+    "created_at": "2026-07-07T13:08:12+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-07-07T15:08:19.456933+00:00",
+    "claim_session_id": "7af9f51b08e1",
+    "status_history": [
+      {
+        "ts": "2026-07-07T15:08:19.457264+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-07T15:08:19.716996+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-07T15:12:59.151772+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-23"
+      }
+    ],
+    "started_at": "2026-07-07T15:08:19.716671+00:00",
+    "completed_at": "2026-07-07T15:12:59.151400+00:00",
+    "result": "24h-rule review (Codex撞額度Jul11→code-reviewer subagent fallback一審): CONDITIONAL_PASS. 5項不變量全PASS(無lookahead: HAR.shift(1) L243-245+GJR每月refit只用origin前+regime instrument F_{t-1}無前視; QLIKE canonical actual/pred K783c; arch target-aligned相對誤差3.7e-16 K445; GW df=2卡方+NW-HAC正確; 文章數字逐格對齊無overclaim). 2非阻塞建議(subsample DM非連續序列僅diagnostic未進表格; full-sample median secondary robustness已揭露). Codex二審遞延Jul11(文章已如實記CONDITIONAL)."
   },
   {
     "id": "paper_review_mile_c0aaf4e5",
     "title": "Paper review (Codex 24h-rule): K1640：VIX 30/40 恐慌進場的事件研究，半真但不能當即時交易規則",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c0aaf4e5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c0aaf4e5",
@@ -54312,7 +54338,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-07T13:08:12+00:00"
+    "created_at": "2026-07-07T13:08:12+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-07-07T15:12:59.398946+00:00",
+    "claim_session_id": "df9b12077ebb",
+    "status_history": [
+      {
+        "ts": "2026-07-07T15:12:59.399373+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-07T15:12:59.646221+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-07T15:14:08.358372+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-23"
+      }
+    ],
+    "started_at": "2026-07-07T15:12:59.645778+00:00",
+    "completed_at": "2026-07-07T15:14:08.358074+00:00",
+    "result": "24h-rule article verification (Codex�??�?度Jul11�??主�?�?�?�?� + �?��??�?碼codex_review.md): PASS. �?碼�?� codex_review.md 已�?(�?��?��?/seed42/lag1 signal.shift(1)/HAC maxlags=H/forward window�?�?�). �??章prose�??格�?�?�results.json�?��?��??: thr40_H60 excess+6.19%(0.06194)/hac_p0.0191/bh_q0.076/placebo0.0012; thr30_H5 hac_p0.0068/placebo0.0002; baseline�??�??58.8/61.9/65.4/71.9%�??; �?件�?�50/17�??. 宣稱極�?�?: DM/Harvey�??度宣稱段主�??�??�?+�??�?�5�?�?�?�+lag1�??�?�?實(FDR10 lag0=3�??lag1=0)+baseline drift caveat. �?�overclaim/uniqueness�?大."
   },
   {
     "id": "telegram-278",
