@@ -53245,7 +53245,7 @@
     "title": "研究 backlog fallback: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Christoffersen/e-backtest；平台無 score-driven 類（來源：J. Econometrics 2026 Catania 等 + IJASEIT 2025 GAS-1F） | 來源 section: 期刊主題挖掘 batch（2026-07-04；**內容飽和觸發** — refill 補不出 fresh reader-facing（所有 uncovered k 皆 arc-dedup 判 dup），hourly-19 派 journal-discovery agent 拓展疆域。刻意鎖 model-class / methodology 軸，避開兩個已飽和 null 弧：「獵奇外生 shock→次日 rv event-window」（k1602/k1604 ~15 連 null）與「新 covariate→har oos 增量」（k1613/k1616-k1619 連 null）。全新模型家族 = 新 k = 非 arc-dup 新文章角度。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -53274,11 +53274,26 @@
         "to": "pending",
         "by": "hourly-13",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-07T09:11:58.214129+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-07T09:11:58.458549+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-17"
       }
     ],
-    "started_at": "2026-07-07T05:09:51.024333+00:00",
+    "started_at": "2026-07-07T09:11:58.458188+00:00",
     "last_released_at": "2026-07-07T07:50:03.717792+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-07-07T09:11:58.213763+00:00",
+    "claim_session_id": "5965b4b08cff"
   },
   {
     "id": "research_evt_pot_gpd_garch_filter_es_e_backtesting",
