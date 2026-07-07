@@ -76,6 +76,7 @@ import os
 import time
 import json
 import math
+import zlib
 import warnings
 from datetime import datetime, timezone
 
@@ -846,9 +847,16 @@ GLOBAL_SEED = 42
 
 
 def _seed_for(ticker, model_idx, refit_idx):
-    """Deterministic per (asset, model, refit) seed for reproducible multistart."""
+    """Deterministic per (asset, model, refit) seed for reproducible multistart.
+
+    Uses zlib.crc32 (process-stable) instead of the built-in hash(), whose str
+    hashing is randomized per process unless PYTHONHASHSEED is pinned — the
+    previous abs(hash(ticker)) broke the documented seed=42 reproducibility
+    claim across runs (K1654 code-review fix, 2026-07-07).
+    """
+    ticker_hash = zlib.crc32(str(ticker).encode("utf-8"))
     base = (GLOBAL_SEED * 100003
-            + (abs(hash(ticker)) % 100000) * 997
+            + (ticker_hash % 100000) * 997
             + model_idx * 131
             + refit_idx)
     return int(base % (2**31 - 1))
