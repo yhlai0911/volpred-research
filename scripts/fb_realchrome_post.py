@@ -58,7 +58,7 @@ def cdp_alive() -> dict | None:
         r.raise_for_status()
         return r.json()
     except Exception:
-        return None
+        return None  # silent-ok: CDP probe — None=port 未開，caller 皆檢查處理
 
 
 def ensure_fb_chrome(wait_s: int = 25) -> dict | None:
@@ -171,7 +171,7 @@ def _login_state(page) -> str:
         if any(k in body_txt for k in ["在想些什麼", "限時動態", "建立貼文", "個人檔案"]):
             return "logged_in"
     except Exception:
-        pass
+        pass  # silent-ok: 登入態偵測 best-effort，例外→'unknown' 由 caller WARN 處理
     return "unknown"
 
 
@@ -280,7 +280,7 @@ def cmd_post(draft_path: Path, dry_run: bool) -> int:
                     opened = True
                     break
             except Exception:
-                continue
+                continue  # silent-ok: 逐一試 composer selector，全失敗由 opened=False→ABORT
         if not opened:
             shot = SHOT_DIR / f"post_no_composer_{int(time.time())}.png"
             page.screenshot(path=str(shot))
