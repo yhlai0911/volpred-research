@@ -14820,5 +14820,13 @@
     "summary": "FB CDP-attach 根因: 接到 /tmp headless 空白 profile → 改 dedicated 持久 profile (~/.volpred/fb_chrome_profile) 真 GUI Chrome + ensure_fb_chrome() 自癒。--check/--dry-run PASS，端到端驗證 kill→auto-relaunch→logged_in。第一次真發待老闆風控 gate 確認(email+TG260)。",
     "claimed_by": "hourly-12",
     "outcome": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-07T15:28:16+0800",
+    "task_type": "platform_ops",
+    "task_id": "fb-move-repost-d12825bb",
+    "outcome": "succeeded",
+    "owner": "hourly-15",
+    "summary": "FB MOVE貼文撤掉重發:刪舊5圖(結果圖+懶人包重複觀感)→乾淨重發3懶人包panel。根因修fb_realchrome_post:(1)set_input_files新增非取代→附圖前清既存照片,(2)加thumbs==len(local)斷言擋殘留重複,(3)新增--delete-matching幾何定位(貼文正文上方⋯鈕)刪貼能力+兩段式風控(截圖驗證後--confirm-delete)。線上驗證photo_links=3無+N overlay。"
   }
 ]

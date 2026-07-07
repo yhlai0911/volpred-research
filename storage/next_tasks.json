@@ -53985,5 +53985,153 @@
     "started_at": "2026-07-07T04:31:23.109901+00:00",
     "completed_at": "2026-07-07T04:50:46.745538+00:00",
     "result": "老闆回信『發』→ 真發第一篇 FB (mile_08fefa59 AI基建波動率利差) 到個人頁+留言連結。發現同 mile 被雙 session 重發(2篇)→ CDP 刪重複保留1篇+加 idempotency guard(fb_realchrome_post 讀寫 canonical fb_post_status，端到端驗證擋下重發)。close email+telegram 已寄。未接自動排程(待觀察)。"
+  },
+  {
+    "id": "telegram-264",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-07T06:31:14.347242+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 264）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n圖片為什麼會重複？\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n發了。MOVE 指數方向感那篇剛貼上你的 Ivan Lai 塗鴉牆，主文＋4 張圖（結果圖＋懶人包），連結放第一則留言。\n另一篇 AI 資本支出（黃金交叉）稍早已經發過了，所以現在只補這篇。兩篇都完成。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-07T06:31:55.082612+00:00",
+    "claim_session_id": "fb281ed9e445",
+    "status_history": [
+      {
+        "ts": "2026-07-07T06:31:55.082917+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-07T06:34:56.404939+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-07T06:34:56.404665+00:00"
+  },
+  {
+    "id": "telegram-268",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-07T06:37:21.971576+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 268）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n撤掉重發\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\nℹ️ [INFO] Skill 修改通知: fb-publishing（結果圖 vs 懶人包 內容查重）\n\n📌 白話結論\n一般讀者文章缺少快速理解圖組，會降低閱讀與分享效果。\n\n📌 影響\n影響文章品質、讀者信任與流量表現。\n\n🛠️ 行動\n先替缺圖的文章補懶人包，再確認新文章的發佈 gate 會擋住同類問題。\n\n---\n觸發 incident: 老闆 Telegram msg 264「圖片為什麼會重複」（MOVE 方向感 FB 貼文 mile_d12825bb）。\n\n根因: 4 張附圖 md5 全不同（非重貼），但結果圖 fig_move_asymmetry.png 的兩根長條（全期 +0.51/-0.28、近90日 +2.15/-2.39）= 懶人包 panel1 + panel3 的同一組數字 → 視覺上讀者覺得重複。為湊「結果圖+懶人包」硬塞了內容重疊的圖。\n\ndiff 摘要: fb-publishing/SKILL.md 第 2 條「必附圖」下新增『結果圖 vs 懶人包 內容查重』子項——附圖前先看一眼，若結果圖已被某張懶人包 panel 以更完整形式呈現，就拿掉獨立結果圖只貼懶人包，或改挑懶人包沒畫到的結果圖。\n\n影響範圍: 之後所有 FB 雙發佈附圖前多一道內容查重，避免重複觀感。已 Telegram 回覆老闆並詢問這篇是否要撤掉重複圖重排。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-07T06:38:35.221530+00:00",
+    "claim_session_id": "9a55bf408666",
+    "status_history": [
+      {
+        "ts": "2026-07-07T06:38:35.221796+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-07T06:43:10.609566+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-07T06:43:10.609243+00:00"
+  },
+  {
+    "id": "fb-move-repost-d12825bb",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "telegram-268 (boss 撤掉重發)",
+    "status": "succeeded",
+    "created_at": "2026-07-07T06:42:53.250628+00:00",
+    "title": "撤掉重發 MOVE FB 貼文（mile_d12825bb）— 刪舊圖重複篇 + 用修好的3-panel懶人包重發",
+    "description": "老闆 Telegram msg268「撤掉重發」：MOVE 方向感 FB 貼文（mile_d12825bb，2026-07-07 06:13 發）的獨立結果圖 fig_move_asymmetry.png 與懶人包 panel1/panel3 內容重複，讀者覺得同張圖貼兩次。\n\n已完成：draft storage/drafts/fb_mile_d12825bb.md 圖片區已移除 fig_move_asymmetry.png，只留 1/2/3_panel.png（3張懶人包）。\n\n待做（本任務）：\n1. 目前 repo 無 FB 刪文工具（scripts/fb_realchrome_post.py 只發不刪）→ 需在 fb_realchrome_post 加 --delete-post <mile_id> 能力：CDP-attach 登入的 Chrome → 用貼文『MOVE 指數』關鍵字定位到該篇（不可用『最上面那篇』，時間軸最上是 0050 工具貼文 mile_08fefa59，會誤刪）→ 開 ⋯ 選單 → 移除/刪除 → 確認 → 每步 screenshot 驗證。\n2. 刪掉舊 MOVE 篇後，`uv run python scripts/fb_realchrome_post.py --post storage/drafts/fb_mile_d12825bb.md --force` 用修好的3-panel圖重發。\n3. 重發後 mark_fb_post_status，並 Telegram 回報老闆完成。\n\n研究誠實：刪前必 screenshot 確認是該篇（skill fb-publishing 硬規則：勿誤刪置頂/他篇）。",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-07-07T07:08:54.271258+00:00",
+    "claim_session_id": "70d52fbd7715",
+    "status_history": [
+      {
+        "ts": "2026-07-07T07:08:54.271541+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-15"
+      },
+      {
+        "ts": "2026-07-07T07:09:22.331020+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-15"
+      },
+      {
+        "ts": "2026-07-07T07:28:16.815126+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-15"
+      }
+    ],
+    "started_at": "2026-07-07T07:09:22.330678+00:00",
+    "completed_at": "2026-07-07T07:28:16.814713+00:00",
+    "result": "刪除舊5圖重複貼文+乾淨重發3懶人包panel(縮圖偵測3=3);根因修:set_input_files是新增非取代→加清除既存照片+thumbs==len斷言;新增fb_realchrome_post.py --delete-matching 幾何定位刪貼工具"
+  },
+  {
+    "id": "telegram-271",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-07T06:46:10.508840+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 271）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n發乾淨版 \n另外 錯文能刪了嗎\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-07T06:47:51.913910+00:00",
+    "claim_session_id": "85a1383b4cdb",
+    "status_history": [
+      {
+        "ts": "2026-07-07T06:47:51.914274+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-07T06:58:59.330297+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-07T06:58:59.329972+00:00"
+  },
+  {
+    "id": "telegram-274",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-07T07:18:39.976054+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 274）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nmove那邊的圖還是有重複啊\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-07T07:19:05.310296+00:00",
+    "claim_session_id": "e4b675e7aed0",
+    "status_history": [
+      {
+        "ts": "2026-07-07T07:19:05.310593+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-07T07:24:15.312198+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-07T07:24:15.311895+00:00"
   }
 ]

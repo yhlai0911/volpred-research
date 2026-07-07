@@ -32,9 +32,8 @@
 
 https://volpred.zeabur.app/v3/reports/mile_d12825bb
 
-## 圖片（結果圖 + 懶人包，依序）
+## 圖片（懶人包 3 panel；已移除獨立結果圖 fig_move_asymmetry.png — 其兩根 bar 已被 panel1 全期 + panel3 近90日 完整涵蓋，避免重複觀感，2026-07-07 老闆「撤掉重發」）
 
-https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig_move_asymmetry.png
 https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/1_panel.png
 https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/2_panel.png
 https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/3_panel.png

@@ -25,6 +25,10 @@ description: >
 2. **主貼文一定要附圖（結果圖 + 懶人包圖）** — 純文字貼文違反規則（2026-07-07 老闆糾正）。draft 的
    `## 圖片` 區塊列圖 URL（結果圖 e.g. `*_rv_divergence` + 懶人包 e.g. `*_concept/results-*`）；worker 會
    下載 + `set_input_files` 上傳 + 驗證縮圖數>0，**0 張則 ABORT 不發**。
+   - **結果圖 vs 懶人包 內容查重（2026-07-07 老闆 Telegram「圖片為什麼會重複」）**：懶人包的 results/近期 panel
+     常已完整涵蓋結果圖的同一組數字（如 mile_d12825bb：結果圖兩根 bar = 懶人包 panel1 全期 + panel3 近90日，
+     4 張 md5 不同但視覺上讀者會覺得「同一張圖貼兩次」）。**附圖前先看一眼**：若結果圖的圖表已被某張懶人包 panel
+     以更完整形式呈現 → **拿掉獨立結果圖，只貼懶人包**；或改挑一張懶人包沒畫到的結果圖。不要為湊「結果圖+懶人包」硬塞重複內容。
 3. **主貼文不放連結；連結進第一則留言**（引流；主文放連結會被 FB 降觸及 + 生錯誤預覽卡）。
 4. **全形 emoji / 中文用剪貼簿**：中文用 `pbcopy`+`Cmd+V`（`type` 會亂碼）；worker 已內建「貼上前一刻
    pbcopy + pbpaste 驗證 + composer 回讀驗證」防剪貼簿被搶（2026-07-07 差點貼成別的 URL 的教訓）。
@@ -58,6 +62,27 @@ uv run python scripts/fb_realchrome_post.py --post storage/drafts/fb_mile_<id>.m
 uv run python scripts/fb_realchrome_post.py --post storage/drafts/fb_mile_<id>.md
 #   --force 只在確認要覆蓋（例如刪掉舊版重發）時用
 ```
+
+**⚠️ 撤掉重發不要先 --dry-run 再 --force（2026-07-07 T2 教訓）**：`--dry-run` 會把附圖留在 composer
+草稿裡，緊接的 `--force` `set_input_files` 是「**新增**」不是「取代」→ 舊圖 + 新圖疊加（實測 2 舊 + 3 新
+= 5 張，重現老闆「圖片重複」）。已加防護：附圖前自動清既存照片 + `縮圖數 != 附圖數` 直接 ABORT 不發。
+撤掉重發時**直接 `--force` 一次到位**，看 log `已附 N 張圖（縮圖偵測 N）` 兩數必須相等。
+
+### 撤掉舊貼文（重發前刪除）— `--delete-matching`
+
+老闆要求「撤掉重發」時，先刪舊貼文再 `--post --force`。刪除是對外破壞性動作，走兩段式風控：
+
+```bash
+# 段 1：定位 + 截圖目標貼文（不刪）。幾何定位：捲到含 ANCHOR 的正文 → 取其正上方
+#        aria-label「對<名字>的這則貼文採取的動作」⋯ 鈕（非「最小容器」heuristic，會誤配）。
+uv run python scripts/fb_realchrome_post.py --delete-matching "<貼文正文前幾字>"
+#   → 人工看 /tmp/fb_realchrome/delete_target_*.png 確認是「該篇」（勿誤刪置頂/他篇）
+
+# 段 2：確認後真刪（⋯ → 移到垃圾桶 → 確認鈕「移動」）
+uv run python scripts/fb_realchrome_post.py --delete-matching "<貼文正文前幾字>" --confirm-delete
+```
+ANCHOR 用主貼文開頭純文字（避免用被 FB 截斷/「查看更多」的尾段）。FB 虛擬捲動會 unmount
+捲太遠的貼文 → 定位用「漸進小捲 + scrollIntoView 保持 mounted」，不要一次捲過頭。
 
 發文兩段式（worker 已處理）：composer → **繼續** → 貼文設定 → **發佈** → 自動補第一則留言連結 →
 `mark_fb_post_status.py --status success`。

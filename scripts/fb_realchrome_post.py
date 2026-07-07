@@ -352,6 +352,109 @@ def _add_first_comment(page, body: str, link: str) -> None:
     print(f"[OK] 第一則留言已送出：{link}")
 
 
+def cmd_delete_matching(anchor: str, confirm: bool) -> int:
+    """在 Ivan Lai 個人 timeline 找含 `anchor` 的最新貼文並（可選）刪除。
+
+    兩段式風控（撤掉重發用；SKILL §誠實邊界「刪除既有貼文是對外破壞性動作」）：
+      - 無 --confirm-delete：只定位 + 截圖目標貼文，人工/回讀驗證是「該篇」，不刪。
+      - 有 --confirm-delete：截圖後開該貼文 ⋯ 選單 → 移至垃圾桶 → 確認，並截圖後狀態。
+    """
+    from playwright.sync_api import sync_playwright
+
+    ver = ensure_fb_chrome()
+    if not ver:
+        print(f"[FAIL] CDP port {CDP_PORT} 沒開且自動啟動失敗 — 見 docs/fb_realchrome_setup.md")
+        return 2
+    SHOT_DIR.mkdir(parents=True, exist_ok=True)
+    with sync_playwright() as pw:
+        browser = _connect(pw)
+        page = _get_or_open_fb_page(browser)
+        if _login_state(page) == "login_wall":
+            print("[FAIL] FB 未登入 — 只有老闆能在 dedicated Chrome 手動登入")
+            return 2
+        page.goto(FB_PROFILE_URL, wait_until="domcontentloaded", timeout=60_000)
+        page.wait_for_timeout(6_000)  # profile 貼文 render 較慢
+        # 漸進小捲直到 anchor 進 DOM，並把它捲進視窗中央（FB 虛擬捲動：捲太多會 unmount
+        # 目標貼文 → 幾何定位失敗，2026-07-07 T2 教訓）。找到就 scrollIntoView 保持 mounted。
+        found = False
+        for _ in range(8):
+            hit = page.evaluate("""(anchor)=>{
+              const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+              let n; while(n=w.nextNode()){ if((n.nodeValue||'').includes(anchor)){
+                n.parentElement.scrollIntoView({block:'center'}); return true; } }
+              return false; }""", anchor)
+            if hit:
+                found = True
+                break
+            page.mouse.wheel(0, 700)
+            page.wait_for_timeout(1_800)
+        if not found:
+            print(f"[FAIL] 捲動 8 次仍找不到含「{anchor}」的貼文（可能已刪 / anchor 不符）")
+            return 3
+        page.wait_for_timeout(1_500)
+        # 幾何定位（2026-07-07 T2：舊「最小容器」heuristic 誤配 → 改用「貼文正文位置 +
+        # 該貼文動作選單 ⋯ 按鈕正上方」幾何鎖定，可驗證）：
+        #   1) 找含 anchor 的正文 text node bounding box
+        #   2) FB 每則貼文 ⋯ 的 aria-label = 「對<名字>的這則貼文採取的動作」
+        #   3) 取「y 在正文之上、且最接近正文」的那顆 ⋯ = 該貼文 header 的動作鈕
+        find_js = """
+        (anchor) => {
+          const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+          let node, bodyEl = null;
+          while (node = walk.nextNode()) {
+            if ((node.nodeValue || '').includes(anchor)) { bodyEl = node.parentElement; break; }
+          }
+          if (!bodyEl) return null;
+          const br = bodyEl.getBoundingClientRect();
+          const btns = Array.from(document.querySelectorAll('[aria-label*="這則貼文採取的動作"],[aria-label*="更多選項"]'))
+            .filter(e => e.getBoundingClientRect().width > 0);
+          let best = null, bestGap = 1e9;
+          for (const e of btns) {
+            const r = e.getBoundingClientRect();
+            const gap = br.y - r.y;                 // 正文在下、⋯ 在上 → gap>0
+            if (gap >= 0 && gap < 200 && gap < bestGap) { best = e; bestGap = gap; }
+          }
+          if (!best) return null;
+          best.setAttribute('data-vp-target', '1');
+          return JSON.stringify({body: (bodyEl.innerText||'').slice(0,40), gap: Math.round(bestGap), al: best.getAttribute('aria-label')});
+        }
+        """
+        matched = page.evaluate(find_js, anchor)
+        if not matched:
+            print(f"[FAIL] timeline 找不到含「{anchor}」的貼文或其動作鈕（可能已捲不到 / 已刪 / anchor 不符）")
+            return 3
+        print(f"[OK] 幾何定位到目標貼文的 ⋯：{matched}")
+        target_btn = page.locator("div[data-vp-target='1']").first
+        target_btn.scroll_into_view_if_needed()
+        page.wait_for_timeout(600)
+        shot = SHOT_DIR / f"delete_target_{int(page.evaluate('Date.now()'))}.png"
+        page.screenshot(path=str(shot))
+        print(f"[INFO] 目標貼文截圖：{shot}")
+        if not confirm:
+            print("[DRY] 未帶 --confirm-delete → 只定位+截圖，未刪除。人工驗證截圖是「該篇」後再帶 --confirm-delete 重跑。")
+            return 0
+        # 執行刪除：⋯ → 移到垃圾桶 → 確認（FB zh-TW 用字為「移到垃圾桶」，非「移至」）
+        target_btn.click()
+        page.wait_for_timeout(1_800)
+        trash = page.get_by_text("移到垃圾桶", exact=False).first
+        if trash.count() == 0:
+            print("[FAIL] ⋯ 選單沒出現「移到垃圾桶」項 — FB UI 可能改版，未刪除")
+            return 4
+        trash.click()
+        page.wait_for_timeout(2_000)
+        # 確認 dialog：標題「移到垃圾桶？」，確認鈕文字/aria-label = 「移動」（不是「移到垃圾桶」）
+        confirm_btn = page.locator("div[role='dialog'] [aria-label='移動'], div[role='dialog'] [role='button']:has-text('移動')").first
+        if confirm_btn.count() == 0:
+            print("[FAIL] 確認 dialog 找不到「移動」鈕 — 未完成刪除")
+            return 4
+        confirm_btn.click()
+        page.wait_for_timeout(4_000)
+        after = SHOT_DIR / f"delete_after_{int(page.evaluate('Date.now()'))}.png"
+        page.screenshot(path=str(after))
+        print(f"[OK] 已送出刪除，事後截圖：{after}")
+        return 0
+
+
 def cmd_check() -> int:
     ver = ensure_fb_chrome()
     if not ver:
@@ -513,6 +616,22 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
                 browser.close()
                 return 8
             try:
+                # 2026-07-07 T2 fix：set_input_files 是「新增」不是「取代」— 若 composer
+                # 已還原上一輪 dry-run 的照片（FB 自動存草稿），會 2 舊 + 3 新 = 5 張，
+                # 重現老闆「圖片重複」抱怨。附圖前先清掉所有既存照片縮圖。
+                for _ in range(12):
+                    rm = page.locator(
+                        "div[role='dialog'] [aria-label^='移除相片'], div[role='dialog'] [aria-label^='移除照片'], div[role='dialog'] [aria-label^='Remove photo']"
+                    ).first
+                    if rm.count() == 0 or not rm.is_visible():
+                        break
+                    rm.click(timeout=4_000)
+                    page.wait_for_timeout(500)
+                pre = page.locator(
+                    "div[role='dialog'] img[src^='blob:'], div[role='dialog'] img[src^='data:']"
+                ).count()
+                if pre > 0:
+                    print(f"[INFO] 清除既存 composer 照片後仍偵測 {pre} 張殘留（將於附圖後校驗總數）")
                 finp = page.locator("div[role='dialog'] input[type='file']").first
                 if finp.count() == 0:
                     finp = page.locator("input[type='file']").first
@@ -526,6 +645,11 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
                 print(f"[INFO] 已附 {len(local)} 張圖（縮圖偵測 {thumbs}），截圖 {shot}")
                 if thumbs == 0:
                     print("[ABORT] 附圖後偵測不到縮圖 → 不發（主貼文必附圖）")
+                    browser.close()
+                    return 8
+                if thumbs != len(local):
+                    print(f"[ABORT] 縮圖數 {thumbs} ≠ 附圖數 {len(local)}（有殘留/重複照片）→ 不發，"
+                          "避免重現「圖片重複」；截圖 {shot}")
                     browser.close()
                     return 8
             except Exception as e:  # noqa: BLE001
@@ -600,6 +724,10 @@ def main() -> int:
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--check", action="store_true", help="安全模式：驗 attach + 登入狀態")
     g.add_argument("--post", metavar="DRAFT", help="發文：FB draft .md 路徑")
+    g.add_argument("--delete-matching", metavar="ANCHOR",
+                   help="撤掉重發用：定位 timeline 含此文字的最新貼文並刪除（預設只截圖，需 --confirm-delete 才真刪）")
+    ap.add_argument("--confirm-delete", action="store_true",
+                    help="搭配 --delete-matching：截圖驗證後真的移至垃圾桶（對外破壞性動作）")
     ap.add_argument("--dry-run", action="store_true", help="搭配 --post：停在送出前")
     ap.add_argument("--force", action="store_true",
                     help="繞過 idempotency guard 強制重發（已發過的 mile 也重貼；慎用）")
@@ -607,6 +735,8 @@ def main() -> int:
 
     if args.check:
         return cmd_check()
+    if args.delete_matching:
+        return cmd_delete_matching(args.delete_matching, confirm=args.confirm_delete)
     return cmd_post(Path(args.post), args.dry_run, force=args.force)
 
 
