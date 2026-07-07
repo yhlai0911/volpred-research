@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-07 首頁 feed「7/5 文章排在 7/6 之後」看似排序壞掉 → diversify 無界時序重排；改 day-bucket 修復
+
+**現象**：老闆回報 `https://volpred.zeabur.app/reports/mile_e082beb8`（🧪 迷思實驗室｜盤整，published_at=2026-07-05 22:00 台北）「7/5 的文章排序為什麼會在 7/6 之後？排序機制是不是壞了？」。實查線上 feed：#13=7/5 22:00（mile_e082beb8）、#14=**7/6 06:02**（mile_4d67163f）——一篇 **7/6** 的文章排在一篇 **7/5** 文章**下面**，首頁日期跳來跳去。
+
+**根因（結構性，非資料/快取/published_at 錯）**：首頁 `page.tsx:24` 用 `getFeed({diversify:'cluster'})`，feed **不是純時序**排序，而是走 `frontend-v2-fix/src/lib/feed-diversify.mjs` 的 `diversifyFeedItems`。舊版把**整個 feed 攤平**後做 cluster interleave（`minGap=3`：VIX/SPY/GARCH/VT/台股 等 cluster 不連續出現），這是**無界的時序重排**——為讓過度出現的 cluster 隔開，會把一篇較新（7/6）但屬該 cluster 的文章往下推，被較舊（7/5）的其他 cluster 文章超車。mile_4d67163f 屬 **vix** cluster（標題含 VIX），被 minGap 往下推 → 落到 7/5 singletons 之後。查證：feed 排序機制（Supabase order by published_at desc、force-dynamic 無快取、FeedBrowser 卡片日期=published_at、無 client 端 re-sort）**全部正確**，唯一變數就是 diversify 的無界重排。
+
+**解決（修底層邏輯）**：`diversifyFeedItems` 改成**先按台北日曆日分桶**（`taipeiDayKey`，跨日一律嚴格新到舊），只在**同一天之內**跑原本的 cluster interleave（抽成 `diversifyWithinGroup`）。→ 跨日永遠 chronological（老闆要的「最新那天先看到」），日內仍保留「不看連續同主題」的讀者體驗。這是 diversify feature 的價值與時序可預期性的平衡點，不是砍掉 diversify（砍掉會退回「5 篇 VIX 連發」）。
+
+**驗證**：新增 `tests/feed-diversify-chronology.test.mjs`（15 assertions：重現 mile_e082beb8/mile_4d67163f 倒置並驗證修復 + day-monotonicity + 無 3-in-a-row + degenerate input）PASS；typecheck + full build PASS；deploy-zeabur-safe.sh 上線後線上 feed 前 20 篇**跨日倒置數=0**，#13 已變 7/6 06:02、#14 才是 7/5 22:00。
+
+**教訓**：任何「重排 feed 順序」的機制（diversify / 推薦 / boost）必須**有界**——不能允許跨任意時間距離把舊的排到新的上面。人類讀 feed 的心智模型是「最新的日期在最上面」，違反它就算演算法本意良善也會被讀成 bug。有序性約束（此處=日曆日單調）要當**硬 invariant** 寫進 regression test，不能只靠人工目視。另注意到次要資料衛生問題：少數 published_at 存成不帶時區的 naive 格式（mile_69524f14/e7b6e075），與其他帶 Z 的 UTC 格式混用——不影響本次排序（同屬 7/6 正確歸位），但值得日後統一。
+
 ## 2026-07-07 FB 同一 mile 雙 session 重複發文（老闆個人頁 2 篇相同貼文）→ fb_realchrome_post 加 idempotency guard
 
 **現象**：老闆 email-12697 回信「發」，授權真發第一篇 FB 貼文（AI 基建波動率利差 = mile_08fefa59）。interactive-claude 執行後在老闆個人頁發現**同內容 2 篇**（相隔 ~11 分鐘：早前 ~12:22 一篇 + hourly 12:32 一篇），兩篇都帶了 volpred 連結留言——正是老闆擔心的「被 FB 判機器人」訊號。

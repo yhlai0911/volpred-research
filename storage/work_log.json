@@ -14828,5 +14828,11 @@
     "outcome": "succeeded",
     "owner": "hourly-15",
     "summary": "FB MOVE貼文撤掉重發:刪舊5圖(結果圖+懶人包重複觀感)→乾淨重發3懶人包panel。根因修fb_realchrome_post:(1)set_input_files新增非取代→附圖前清既存照片,(2)加thumbs==len(local)斷言擋殘留重複,(3)新增--delete-matching幾何定位(貼文正文上方⋯鈕)刪貼能力+兩段式風控(截圖驗證後--confirm-delete)。線上驗證photo_links=3無+N overlay。"
+  },
+  {
+    "timestamp": "2026-07-07T08:17:13Z",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_e7b6e075",
+    "summary": "K1635 24h-rule review via code-reviewer subagent (Codex quota-blocked til 7/11): CONDITIONAL_PASS, fixed 1 MINOR baseline relabel, synced supabase"
   }
 ]

@@ -52954,7 +52954,7 @@
     "title": "Paper review (Codex 24h-rule): 🧪 迷思實驗室｜台積電打噴嚏,台股真的重感冒?16年數據攤開來看",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e7b6e075 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_e7b6e075",
@@ -52962,7 +52962,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-06T15:07:47+00:00"
+    "created_at": "2026-07-06T15:07:47+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-07-07T08:08:38.824573+00:00",
+    "claim_session_id": "05da6ebfef0c",
+    "status_history": [
+      {
+        "ts": "2026-07-07T08:08:38.824908+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-07T08:08:39.073379+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-07T08:17:13.077814+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-16"
+      }
+    ],
+    "started_at": "2026-07-07T08:08:39.073014+00:00",
+    "completed_at": "2026-07-07T08:17:13.077495+00:00",
+    "result": "code-reviewer subagent fallback 審 K1635(Codex撞usage-limit,reset7/11): VERDICT=CONDITIONAL_PASS,無BLOCKING,lookahead乾淨(shift(-1)隔日/window t+1..t+5/beta contemporaneous)、seed=42固定、數字與results.json全對齊、因果免責到位。1 MINOR已修:文章'對照組平常沒有台積電大跌事件的交易日45.59%'實引用unconditional全樣本,relabel為'全樣本平常水準'並補註嚴格complement約44%,已sync supabase"
   },
   {
     "id": "paper_review_mile_d12825bb",
@@ -53219,7 +53245,7 @@
     "title": "研究 backlog fallback: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Christoffersen/e-backtest；平台無 score-driven 類（來源：J. Econometrics 2026 Catania 等 + IJASEIT 2025 GAS-1F） | 來源 section: 期刊主題挖掘 batch（2026-07-04；**內容飽和觸發** — refill 補不出 fresh reader-facing（所有 uncovered k 皆 arc-dedup 判 dup），hourly-19 派 journal-discovery agent 拓展疆域。刻意鎖 model-class / methodology 軸，避開兩個已飽和 null 弧：「獵奇外生 shock→次日 rv event-window」（k1602/k1604 ~15 連 null）與「新 covariate→har oos 增量」（k1613/k1616-k1619 連 null）。全新模型家族 = 新 k = 非 arc-dup 新文章角度。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -53229,9 +53255,6 @@
       "research-program-backlog"
     ],
     "created_at": "2026-07-06T20:09:02+00:00",
-    "claimed_by": "hourly-13",
-    "claimed_at": "2026-07-07T05:09:41.064496+00:00",
-    "claim_session_id": "f6bcb0bc6c4e",
     "status_history": [
       {
         "ts": "2026-07-07T05:09:41.064819+00:00",
@@ -53244,9 +53267,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-07T07:50:03.717800+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-13",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-07T05:09:51.024333+00:00"
+    "started_at": "2026-07-07T05:09:51.024333+00:00",
+    "last_released_at": "2026-07-07T07:50:03.717792+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "research_evt_pot_gpd_garch_filter_es_e_backtesting",
