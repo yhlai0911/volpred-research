@@ -53468,5 +53468,49 @@
     "started_at": "2026-07-07T01:08:04.069896+00:00",
     "completed_at": "2026-07-07T01:32:08.980339+00:00",
     "result": "每日精選導讀第16期 mile_76679cd3『一家台積電，決定整片台股的天氣』7270字，8篇佐證跨21天，anti-ai PASS，framework=單點風向球體檢表"
+  },
+  {
+    "id": "email-12690-fa311c",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] FB pipeline: 0 stale + 1 early + 1 auto-expired",
+    "description": "Gmail UID: 12690\nMessage-ID: <FD9B2A88-00C8-485E-927C-9D04A05246B8@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 7 Jul 2026 09:41:32 +0800\nSubject: Re: [VolPred Alert][WARN] FB pipeline: 0 stale + 1 early + 1 auto-expired\n\n--- 用戶回信內容 ---\n立刻處理\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月7日 08:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> FB pipeline: 0 stale + 1 early + 1 auto-expired\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> Auto-expired（pending/awaiting >48h → expired_skip）1 篇\r\n> \r\n> mile_0fa841ed (2026-07-05)\r\n> 根因\r\n> \r\n> 個人 FB 帳號無 headless API。stale 累積 = 等不到 interactive session。\r\n> \r\n> 永久規則\r\n> \r\n> 見 docs/fb_pipeline_permanent_fix.md（個人帳號 + Claude-in-Chrome；Page/Graph API 已撤回）。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-07T01:45:08.175888+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12690,
+    "email_message_id": "<FD9B2A88-00C8-485E-927C-9D04A05246B8@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] FB pipeline: 0 stale + 1 early + 1 auto-expired",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-07T01:46:13.175358+00:00",
+    "claim_session_id": "519a1d54d8c8",
+    "status_history": [
+      {
+        "ts": "2026-07-07T01:46:13.175622+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-07T01:46:13.420704+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-07T01:51:04.922411+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-claude"
+      }
+    ],
+    "started_at": "2026-07-07T01:46:13.420341+00:00",
+    "completed_at": "2026-07-07T01:51:04.922104+00:00",
+    "result": "FB pipeline 處理: FOMC 6/17舊文(mile_a5e79b07)過期3週標expired_skip清queue; 2篇新鮮篇(mile_08fefa59 AI基建/mile_d12825bb MOVE)FB稿備妥+過anti_ai_gate; 個人FB物理限制只能Chrome session發, 已寄close email含可直接貼上完稿+連結給老闆(2路: 等我發 or 他秒貼)"
   }
 ]
