@@ -2,6 +2,21 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-07 FB CDP-attach 接錯 profile（/tmp headless 空白 profile）→ 永遠 login_wall；改 dedicated 持久 profile + self-heal
+
+**現象**：老闆 telegram msg253「我現在是登入狀態啊」，但 `fb_realchrome_post.py --check` 仍回 `login_wall`。POC 一度宣稱「底層 CDP-attach 完全可行」並標 PASS，實際發不出文。
+
+**根因（結構性）**：worker 只做 `connect_over_cdp` **attach**，attach 對象由「誰開了 9222 port」決定——當時 9222 是一個 `--headless=new --user-data-dir=/tmp/cdp_profile` 的**獨立空白 headless 進程**開的，跟老闆已登入 FB 的真 GUI Chrome（另一 PID、無 debug port）是**完全不同 profile**。/tmp profile 每次重開就清空、永遠不會有登入態。POC「附掛老闆真 Chrome」的描述從一開始就與現況不符——這違反老闆硬約束「不用 headless 假瀏覽器」。且 worker 沒有 launch 邏輯 → port 一旦沒開就永久卡死，無自癒。
+
+**解決（修流程，非修資料）**：
+- **改 attach 對象**：用**專用持久 profile 的真 GUI Chrome**（`~/.volpred/fb_chrome_profile`，非 headless、非 /tmp、非老闆主 Chrome，各自 user-data-dir 不互擾）。老闆在該可見視窗登入一次，cookie 持久化，reboot 後仍在。尊重「不用假瀏覽器」約束（是真 Chrome window）且不會關到老闆主 Chrome 分頁。
+- **自癒**：`fb_realchrome_post.py::ensure_fb_chrome()` — `--check`/`--post` 若偵測 CDP port 沒開，自動用該 profile 啟動 dedicated Chrome、poll 到 CDP 就緒再 attach。→ crash/reboot/老闆手動關掉視窗後 hourly tick 不再永久卡「port 沒開 / login_wall」。
+- **doc 更正**：`docs/fb_realchrome_setup.md` 撤回 /tmp CORRECTION，記錄 dedicated-profile 為最終方案。
+
+**驗證（端到端，非假設）**：kill 掉 dedicated Chrome（PID 28262，不碰老闆主 Chrome）→ port 關 → `--check` 觸發 `ensure_fb_chrome` 自動重啟 → **從持久 cookie 恢復 logged_in** → `[PASS]`（截圖確認 Ivan Lai profile）。`--post --dry-run` composer 正確填入 348 字主文、停在送出前。**唯一剩下的 irreversible step**（第一次真發 + wire 進 hourly）走老闆風控 gate 確認（帳號鎖風險）。
+
+**教訓**：CDP `connect_over_cdp` 的 attach 對象由「誰持有 debug port」決定，不由你想 attach 誰決定——POC 宣稱 attach 到 X 時**必先 `ps aux` 查證 9222 到底是哪個 profile/進程開的**，profile 對不對是 PASS 的前提。凡「attach 既有進程」型自動化都要 (a) 驗 attach 對象身分、(b) 有 ensure/launch 自癒（不能只 attach 不 launch，否則 port 一斷永久卡）。
+
 ## 2026-07-07 dreaming three-strike 把「已靜默、正在 auto-clear 的 alert」誤 escalate 成 CRITICAL 寄信（boss email-12688）
 
 **現象**：老闆早上收到 `[VolPred Alert][CRITICAL] Dreaming review 2026-07-06 — 0 new / 1 escalations`，內容 escalation = `git-push-backup: push held — 1 new silent fallback(s)`。但該 alert **已 34h 沒 fire、48h 會 auto-clear**，底層 git-push-backup 每小時 exit 0 正常 push（早已在 email-12564 修好）。老闆回信：「又出現這種錯誤立刻解決你他媽的幾次了」——同一封 CRITICAL 天天出現卻沒被根治。
@@ -4713,3 +4728,15 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 - 回填 `storage/drafts/fb_mile_08fefa59.md` + `fb_mile_d12825bb.md`（canonical 格式，含主貼文+留言連結）。
 
 **Follow-up（next_tasks fb_writer_persist_canonical_draft）**：修 FB 稿寫手 — 產 awaiting_interactive_session 時**強制**同步寫 `storage/drafts/fb_mile_<id>.md`；audit_fb_pipeline 加 invariant：awaiting 狀態但無對應 draft 檔 → warn。避免復發。
+
+## 2026-07-07 11:23 — FB real-Chrome CDP-attach 接的其實是假 profile，非老闆真 Chrome
+
+**症狀**：老闆 telegram msg253 回「我現在是登入狀態啊」，回應昨日（platform-ops-fb-realchrome-autopost）宣稱「底層機制完全可行，只差登入」的通知。重跑 `scripts/fb_realchrome_post.py --check` 仍回 `login_wall`。
+
+**根因**：`ps aux | grep 'Google Chrome'` 發現 9222 debug port 是**另一個獨立 headless 進程**開的 —— `Google Chrome --headless=new --remote-debugging-port=9222 --user-data-dir=/tmp/cdp_profile`（PID 80924），跟老闆平常在用、已登入 FB 的真 GUI Chrome（PID 1536，一般啟動、無 debug port）是完全不同的 profile。不管老闆在真 Chrome 登入幾次 FB，`/tmp/cdp_profile` 這個空白 profile 永遠不會有登入態 —— 這是結構性 bug，不是「老闆還沒登入」。
+
+**與 docs/fb_realchrome_setup.md 的落差**：該文件宣稱「附掛既有真 Chrome、不 launch 任何新瀏覽器實例」，但實測環境根本沒有這樣 attach，而是另開了一個帶暫時 profile 的 headless Chrome —— 違反老闆硬性約束「不用 headless Playwright（假瀏覽器）」。POC 的 PASS 結論需更正（machinery 可行是真的，但 attach 對象是錯的）。
+
+**本次處置**：telegram-253 回覆更正說明；append 修正任務 `platform-ops-fb-realchrome-wrong-profile-20260707`（next_tasks.json）列兩條候選修法（quit+relaunch 真 Chrome 帶 debug port ｜ 改用 AppleScript 驅動真 Chrome 免 debug port），修正需重新走風控 gate。
+
+**教訓**：「CDP port 開著」不等於「attach 到使用者的真實瀏覽器」——驗證 attach 對象前必須先確認 debug port 是誰開的（`ps aux` 查 user-data-dir），不能只驗 `/json/version` 有回應就宣稱「已 attach 到真 Chrome」。

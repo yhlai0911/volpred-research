@@ -6,13 +6,15 @@
 巡檢連不到 Chrome → 每次卡 pending/awaiting。老闆釘死：不用 Graph API、不用粉專、
 不用 headless Playwright（假瀏覽器）。
 
-本 worker 走唯一尊重上述約束的 path = **attach 到老闆已開著、已登入的真實 Chrome**
-（真 profile、真 session）經 CDP remote-debugging-port 驅動貼文。這不是 headless
-Playwright — 是 `connect_over_cdp` 附掛到既有的、可見的、已登入的真 Chrome，不 launch
-任何新瀏覽器實例。
+本 worker 走唯一尊重上述約束的 path = 用**專用持久 profile 的真 GUI Chrome**
+（`~/.volpred/fb_chrome_profile`，非 headless、非老闆主 Chrome、非 /tmp 暫時 profile），
+老闆登入一次後 cookie 持久化，經 CDP `connect_over_cdp` 附掛驅動貼文。這是可見的真
+Chrome window，不是 headless 假瀏覽器；跟老闆主 Chrome 各自 user-data-dir 不互擾。
 
-前置需求：老闆的 Chrome 以 `--remote-debugging-port=9222` 啟動（見
-`docs/fb_realchrome_setup.md`）。本機已驗證 9222 開著。
+自癒：`ensure_fb_chrome()` 在 --check / --post 時若發現 CDP port 沒開，會自動用上述
+profile 啟動 dedicated Chrome 再 attach → reboot/crash/老闆關掉視窗後 hourly tick 不再
+永久卡死。前置需求（一次性）：老闆在該 dedicated 視窗登入 facebook.com/yihao.lai。
+（演進史 + 為何不 attach 老闆主 Chrome：見 `docs/fb_realchrome_setup.md`。）
 
 模式：
   --check          安全模式：attach → 開 FB 個人頁 → 截圖 + 探測登入狀態，不發文
@@ -28,6 +30,7 @@ CDP-attach 若觸 FB 風控 → 誠實回報物理上限，不硬繞。
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -42,6 +45,11 @@ FB_PROFILE_URL = "https://www.facebook.com/yihao.lai"
 SHOT_DIR = Path("/tmp/fb_realchrome")
 SHOT_DIR.mkdir(parents=True, exist_ok=True)
 
+# 專用持久 profile（登入態持久化，reboot 後仍在）— 不是老闆的主 Chrome，
+# 是獨立第二個真 GUI Chrome 實例，各自 user-data-dir 不互擾（見 docs/fb_realchrome_setup.md）。
+CHROME_BIN = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+FB_PROFILE_DIR = os.path.expanduser("~/.volpred/fb_chrome_profile")
+
 
 def cdp_alive() -> dict | None:
     """回傳 /json/version 或 None（port 沒開）。"""
@@ -51,6 +59,49 @@ def cdp_alive() -> dict | None:
         return r.json()
     except Exception:
         return None
+
+
+def ensure_fb_chrome(wait_s: int = 25) -> dict | None:
+    """確保 dedicated persistent-profile Chrome 開著並掛 CDP。
+
+    已開 → 直接回 /json/version。沒開 → 用專用 profile 啟動一個真 GUI Chrome
+    （非 headless、非老闆主 Chrome），poll 到 CDP 起來為止。回 version dict 或 None。
+
+    這是 hourly tick 自癒的關鍵：reboot / crash / 老闆關掉 dedicated Chrome 後，
+    tick 不再永久卡「port 沒開」，會自動重啟該 profile（登入 cookie 已持久化）。
+    """
+    ver = cdp_alive()
+    if ver:
+        return ver
+    if not Path(CHROME_BIN).exists():
+        print(f"[WARN] ensure_fb_chrome: 找不到 Chrome binary {CHROME_BIN}", file=sys.stderr)
+        return None
+    print(f"[INFO] CDP port {CDP_PORT} 沒開 → 啟動 dedicated profile Chrome（{FB_PROFILE_DIR}）")
+    try:
+        subprocess.Popen(
+            [
+                CHROME_BIN,
+                f"--remote-debugging-port={CDP_PORT}",
+                f"--user-data-dir={FB_PROFILE_DIR}",
+                "--no-first-run",
+                "--no-default-browser-check",
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"[WARN] ensure_fb_chrome: 啟動失敗 {e}", file=sys.stderr)
+        return None
+    deadline = time.time() + wait_s
+    while time.time() < deadline:
+        time.sleep(1.5)
+        ver = cdp_alive()
+        if ver:
+            print(f"[OK] dedicated Chrome 已就緒（{ver.get('Browser')}）")
+            return ver
+    print(f"[WARN] ensure_fb_chrome: 等 {wait_s}s CDP 仍未起", file=sys.stderr)
+    return None
 
 
 def parse_draft(path: Path) -> tuple[str, str]:
@@ -125,10 +176,9 @@ def _login_state(page) -> str:
 
 
 def cmd_check() -> int:
-    ver = cdp_alive()
+    ver = ensure_fb_chrome()
     if not ver:
-        print(f"[FAIL] CDP port {CDP_PORT} 沒開 — Chrome 未以 --remote-debugging-port 啟動")
-        print("       修復：見 docs/fb_realchrome_setup.md")
+        print(f"[FAIL] CDP port {CDP_PORT} 沒開且自動啟動失敗 — 見 docs/fb_realchrome_setup.md")
         return 2
     print(f"[OK] CDP alive: {ver.get('Browser')}")
     from playwright.sync_api import sync_playwright
@@ -160,8 +210,8 @@ def cmd_post(draft_path: Path, dry_run: bool) -> int:
     body, link = parse_draft(draft_path)
     print(f"[INFO] draft: {draft_path.name}")
     print(f"[INFO] 主貼文 {len(body)} 字；留言連結: {link or '(無)'}")
-    if not cdp_alive():
-        print(f"[FAIL] CDP port {CDP_PORT} 沒開")
+    if not ensure_fb_chrome():
+        print(f"[FAIL] CDP port {CDP_PORT} 沒開且自動啟動失敗")
         return 2
 
     # 中文輸入用系統剪貼簿 + Cmd+V（type 會中文亂碼，見 memory
@@ -203,21 +253,76 @@ def cmd_post(draft_path: Path, dry_run: bool) -> int:
             return 4
         page.wait_for_timeout(2_500)
 
-        # 2) 貼主文：聚焦 composer 的 contenteditable → Cmd+V
-        editor = page.locator("div[role='textbox'][contenteditable='true']").first
+        # 2) 貼主文：聚焦 composer DIALOG 內的 contenteditable → Cmd+V
+        # 2026-07-07 fix：`.first` 原本會抓到背景 profile 頁的留言框
+        # （aria-label='以 Ivan Lai 的身分留言'），被 composer modal overlay 攔截 →
+        # click timeout。scope 到 div[role='dialog'] 只剩 composer 那一個 textbox。
+        editor = page.locator(
+            "div[role='dialog'] div[role='textbox'][contenteditable='true']"
+        ).first
+        editor.wait_for(state="visible", timeout=8_000)
         editor.click(timeout=8_000)
         page.wait_for_timeout(500)
+
+        # 清掉任何被 FB 自動還原的舊草稿（上一輪殘留 / link preview），確保從空白開始，
+        # 否則 paste 會 append 在舊內容後面（例如上一輪那條 life.tw URL）。
+        page.keyboard.press("Meta+A")
+        page.keyboard.press("Delete")
+        page.wait_for_timeout(400)
+
+        # 移除任何被還原的連結預覽卡（主文不放連結 → 連結進第一則留言）。Meta+A+Delete
+        # 只清文字，附著的 link preview 卡要另外按「移除貼文的連結預覽」/「全部移除」。
+        for rm_label in ["移除貼文的連結預覽", "全部移除"]:
+            try:
+                rm = page.locator(f"div[role='dialog'] [aria-label='{rm_label}']").first
+                if rm.count() > 0:
+                    rm.click(timeout=4_000)
+                    page.wait_for_timeout(800)
+                    print(f"[INFO] 已移除殘留附件卡（{rm_label}）")
+            except Exception as e:  # noqa: BLE001
+                print(f"[WARN] 移除附件卡失敗（{rm_label}，可能本來就沒有）: {e}")
+
+        # 2026-07-07 fix：剪貼簿是共享、易被搶的資源。開場的 pbcopy 到這裡已隔 ~10s，
+        # 期間老闆/系統/Universal Clipboard 可能覆蓋（dry-run 實測貼到一條 life.tw URL）。
+        # 改成「貼上前一刻」再 pbcopy，並用 pbpaste 驗證剪貼簿 == 主文，錯了就 abort。
+        subprocess.run(["pbcopy"], input=body.encode("utf-8"), check=True)
+        clip = subprocess.run(["pbpaste"], capture_output=True, text=True).stdout
+        if clip.strip() != body.strip():
+            shot = SHOT_DIR / f"post_clip_mismatch_{int(time.time())}.png"
+            page.screenshot(path=str(shot))
+            print(f"[ABORT] 剪貼簿驗證失敗（pbcopy 後 pbpaste != 主文）→ 不貼；截圖 {shot}")
+            browser.close()
+            return 5
         page.keyboard.press("Meta+V")
         page.wait_for_timeout(2_000)
 
+        # 貼上後回讀 composer 內容，確認真的是主文（防剪貼簿在貼上瞬間又被搶）。
+        # 不符 → abort，即使 dry-run 也標紅，絕不讓髒資料進到「可發佈」狀態。
+        composed = editor.inner_text(timeout=5_000)
         shot = SHOT_DIR / f"post_composed_{int(time.time())}.png"
         page.screenshot(path=str(shot))
-        print(f"[INFO] 主文已填入 composer，截圖 {shot}")
+        head = body.strip()[:16]
+        if head not in composed:
+            print(f"[ABORT] composer 內容與主文不符（剪貼簿可能被搶）→ 不貼；截圖 {shot}")
+            print(f"        期望開頭: {head!r}")
+            print(f"        實際開頭: {composed.strip()[:60]!r}")
+            browser.close()
+            return 6
+        print(f"[INFO] 主文已填入 composer 並驗證一致（{len(composed)} 字），截圖 {shot}")
 
         if dry_run:
             print("[DRY-RUN] 停在送出前一步，不按「發佈」。人工看截圖確認 composer 正確。")
             browser.close()
             return 0
+
+        # 發佈前最終安全檢查：主文不放連結，若還殘留任何連結預覽卡（移除失敗）→ abort，
+        # 絕不帶著錯圖真發（老闆 2026-07-07「圖不對」教訓）。
+        if page.locator("div[role='dialog'] [aria-label='移除貼文的連結預覽']").count() > 0:
+            shot = SHOT_DIR / f"post_preview_stuck_{int(time.time())}.png"
+            page.screenshot(path=str(shot))
+            print(f"[ABORT] 發佈前仍偵測到連結預覽卡（移除失敗）→ 不發；截圖 {shot}")
+            browser.close()
+            return 7
 
         # 3) 送出：按「發佈」
         posted = False

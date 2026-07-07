@@ -19,38 +19,47 @@
 **附掛**既有真 Chrome — 不 launch headless、不開假瀏覽器，就是驅動老闆那台真的、
 可見的、已登入的 Chrome。
 
-## POC 結果（2026-07-07 hourly-11）
+## 演進史 + 最終方案（2026-07-07）
 
-| 檢查項 | 結果 |
-|---|---|
-| CDP port 9222 開著 | ✅ Chrome/149.0.7827.155 |
-| `connect_over_cdp` attach 成功 | ✅ contexts=1 |
-| headless 能開 FB 頁 + 截圖 + 讀 DOM | ✅（**證明 headless 不是盲貼，看得到結果**）|
-| 該 Chrome profile 是否登入 FB | ❌ **login wall**（截圖 `/tmp/fb_realchrome/check_*.png`）|
+三個階段：
 
-**結論**：底層 CDP-attach 機制**完全可行且已建好** — headless tick 可以 attach 真 Chrome、
-導航、填 composer、截圖驗證。**唯一卡點**：目前開著 debug port（9222）的那台 Chrome 的
-profile **沒登入 facebook.com/yihao.lai**（顯示登入牆）。而 AI **不能替老闆輸入 FB 密碼**
-（硬規則，即使老闆說「妳幫我做」）。
+1. **11:00 POC（原始）**：以為 attach 到「老闆主 Chrome」。實際 9222 port 是一個 headless
+   `--user-data-dir=/tmp/cdp_profile` 空白 profile → login wall。
+2. **11:23 CORRECTION**：`ps aux` 查證確認 attach 對象是 `/tmp/cdp_profile`（空白且每次
+   重開就清空），跟老闆已登入的主 Chrome 是不同 profile → PASS 撤回，開 follow-up task
+   `platform-ops-fb-realchrome-wrong-profile-20260707`。
+3. **12:00 最終解（現行）**：改用**專用持久 profile 的真 GUI Chrome**（非 headless、非
+   /tmp、非老闆主 Chrome），老闆登入一次後 cookie 持久化。已 `--check` PASS。
 
-## 讓它全自動的唯一剩餘步驟（一次性，需老闆做）
+### 最終方案：dedicated persistent-profile 真 GUI Chrome
 
-在**開著 remote-debugging-port 9222 的那台 Chrome**（= 目前主 Chrome，PID 見
-`pgrep "Google Chrome"`）裡，**登入一次** facebook.com/yihao.lai。Cookie 會持久化，
-之後任何 headless tick 都能自動發文，不再需要 interactive session。
+啟動一個**獨立第二個** Chrome 實例（跟老闆主 Chrome PID 1536 各自 user-data-dir，
+互不干擾、不會關到老闆分頁）：
 
-驗證登入成功：
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$HOME/.volpred/fb_chrome_profile" \
+  --no-first-run --no-default-browser-check
+```
+
+- **非 headless**：是可見的真 GUI Chrome window（尊重老闆「不用假瀏覽器」硬約束）。
+- **持久 profile**：`~/.volpred/fb_chrome_profile` 不是 /tmp，登入 cookie reboot 後仍在。
+- **一次性登入**：老闆在這個視窗登入 `facebook.com/yihao.lai` 一次即可（已完成，
+  `--check` 回 `logged_in` + `[PASS]`）。
+
+### 自癒：worker 會自動確保這台 Chrome 開著
+
+`scripts/fb_realchrome_post.py` 的 `ensure_fb_chrome()`（2026-07-07 加）：`--check` / `--post`
+呼叫時先檢查 CDP port，**沒開就自動用上述指令啟動** dedicated profile Chrome，poll 到 CDP
+就緒再 attach。→ reboot / crash / 老闆手動關掉該視窗後，下一次 hourly tick 會自動重啟它
+（登入 cookie 已持久化），不再永久卡「port 沒開 / login_wall」。
+
+驗證：
 ```bash
 uv run python scripts/fb_realchrome_post.py --check
 # 期望 [PASS] 這台 Chrome 已登入 FB，CDP-attach 可行
 ```
-
-若主 Chrome 沒開 debug port，用以下方式啟動（保留真 profile）：
-```bash
-# 先完全退出 Chrome，再：
-open -a "Google Chrome" --args --remote-debugging-port=9222
-```
-（本機目前 9222 已經開著，不需重啟 — 只差登入。）
 
 ## 發文流程（登入後）
 
