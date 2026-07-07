@@ -2,6 +2,21 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-07 dreaming three-strike 把「已靜默、正在 auto-clear 的 alert」誤 escalate 成 CRITICAL 寄信（boss email-12688）
+
+**現象**：老闆早上收到 `[VolPred Alert][CRITICAL] Dreaming review 2026-07-06 — 0 new / 1 escalations`，內容 escalation = `git-push-backup: push held — 1 new silent fallback(s)`。但該 alert **已 34h 沒 fire、48h 會 auto-clear**，底層 git-push-backup 每小時 exit 0 正常 push（早已在 email-12564 修好）。老闆回信：「又出現這種錯誤立刻解決你他媽的幾次了」——同一封 CRITICAL 天天出現卻沒被根治。
+
+**根因（結構性，非資料問題）**：`scripts/dreaming_review.py::reconcile` 的 three-strike 計數**只要 signature 這輪出現就 +1 strike**，不分辨 alert 是「仍在 fire」還是「已靜默但還在 48h recovered window 內」。`detect_persistent_alerts` 的 recovered guard 是 `last_sent < now-48h` 才 drop——所以一波 fire（06-30→07-05）停止後，落在 24–48h 的衰減期仍被每日 dreaming run 偵測到。三個連續 daily run 各 +1 → strike 到 3 → escalate CRITICAL，即使 alert 早就不 fire。email level 純由 `escalations` 決定（`level = "critical" if c["escalations"]`），所以假 escalation = 假 CRITICAL 信。
+
+**解決（root-cause，per Three-Strike）**：
+- **資料模型**：`DreamFinding` 新增 `activity_marker`（帶底層信號的最新活動時戳，persistent_alert 帶 alert 的 `last_sent_at`）。
+- **邏輯**：`reconcile` 只在 marker **前進**（真有新 fire）時才 +strike / 才可 escalate；marker 凍結（alert 停 fire、衰減中）→ hold strike、不 escalate。用 `_MARKER_MISSING` sentinel 讓 legacy baseline entry（無 marker key）在 deploy 邊界保守視為 quiescent，避免一次性假 escalation。
+- **通用性**：只影響帶 marker 的 detector；`detect_repeated_tool_failures` 等無 marker 者行為不變。
+
+**驗證**：`tests/test_dreaming_review.py` 加 3 條 regression（quiescent hold / advancing 仍 escalate / legacy 邊界保守）；26 passed。非-dry run 實測 `escalations=0` → email guard（`if new_findings or escalations`）不觸發，不再寄 CRITICAL 信；baseline 記錄 marker、strike hold=3、>48h 後自然 resolve。
+
+**教訓**：three-strike escalation 必須以「**信號是否仍在活動**」計數，不是「signal 是否仍落在 recovery window 內」——recovery window（48h）> 偵測 cadence（daily）時，單一 burst 會橫跨多個 run 而假裝成 persistence。凡 detector 有 recovery grace window 又靠連續 run 累積 strike，都要用 activity marker 區分「持續發生」與「衰減中」。
+
 ## 2026-07-06 文章系列身分無 single-source-of-truth → 同一系列反覆搞錯（**3-STRIKE STRUCTURAL FIX**）
 
 **現象**：處理「迷思實驗室」系列時，主線程在**同一件事上連續 4 次出錯**：(1) 系列名猜成「迷思破解」（實際 boss 早在 Telegram 定名「迷思實驗室」）；(2) 只認 3 篇、漏掉同系列 ~6 篇（整條 `research_myth_*` 線）；(3) 自己發明 `EP.X` 集數（boss 要純前綴不要集數）；(4) VIX 兩篇重複挑錯留哪篇——比內容品質前**沒先查 `status`**，把線上的 K1633 下架、留了從來沒公開的 draft K1640，一瞬間讓 VIX 迷思沒有任何公開文章。

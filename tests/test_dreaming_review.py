@@ -284,6 +284,70 @@ def test_three_strike_escalates_to_critical(tmp_path):
     assert baseline["sig:persist"]["strike_count"] == dr.THREE_STRIKE
 
 
+def test_quiescent_activity_marker_holds_strike_no_escalation(tmp_path):
+    """Regression (boss email-12688): a persistent_alert that fired a burst then
+    went quiet still appears across daily runs inside the 48h auto-clear window,
+    but its last_sent_at (activity_marker) is frozen. It must NOT accumulate
+    strikes to critical — a decaying alert is resolving itself, not persisting."""
+    baseline: dict = {}
+    esc_final = []
+    frozen_marker = "2026-07-05T12:00:18+00:00"
+    # Same frozen marker across THREE_STRIKE+1 daily runs (alert stopped firing).
+    for _ in range(dr.THREE_STRIKE + 1):
+        f = dr.DreamFinding(
+            pattern_type="persistent_alert",
+            signature="persistent_alert:quiet",
+            severity="warn",
+            activity_marker=frozen_marker,
+        )
+        _, _, esc = dr.reconcile([f], baseline, NOW)
+        esc_final = esc
+    assert esc_final == []  # never escalates while quiescent
+    assert baseline["persistent_alert:quiet"]["strike_count"] == 1  # held at first sight
+
+
+def test_advancing_activity_marker_still_escalates(tmp_path):
+    """An alert that keeps firing (marker advances each run) is genuinely
+    persistent and MUST still reach three-strike critical."""
+    baseline: dict = {}
+    esc_final = []
+    for i in range(dr.THREE_STRIKE):
+        f = dr.DreamFinding(
+            pattern_type="persistent_alert",
+            signature="persistent_alert:live",
+            severity="warn",
+            activity_marker=f"2026-07-0{i + 1}T00:00:00+00:00",  # advances each run
+        )
+        _, _, esc = dr.reconcile([f], baseline, NOW)
+        esc_final = esc
+    assert any(f.signature == "persistent_alert:live" and f.severity == "critical" for f in esc_final)
+    assert baseline["persistent_alert:live"]["strike_count"] == dr.THREE_STRIKE
+
+
+def test_legacy_baseline_entry_no_marker_stays_conservative(tmp_path):
+    """A pre-existing baseline entry (written before activity_marker existed) at
+    strike>=THREE_STRIKE must not false-escalate on the first run after deploy;
+    the missing marker is treated as 'advance unknown' → quiescent → hold."""
+    baseline = {
+        "persistent_alert:legacy": {
+            "strike_count": dr.THREE_STRIKE,
+            "pattern_type": "persistent_alert",
+            "first_seen": "2026-07-01T00:00:00+00:00",
+            "last_seen": "2026-07-05T22:00:00+00:00",
+            # NOTE: no "activity_marker" key — legacy schema
+        }
+    }
+    f = dr.DreamFinding(
+        pattern_type="persistent_alert",
+        signature="persistent_alert:legacy",
+        severity="warn",
+        activity_marker="2026-07-05T12:00:18+00:00",
+    )
+    _, _, esc = dr.reconcile([f], baseline, NOW)
+    assert esc == []  # no false escalation on the migration boundary
+    assert baseline["persistent_alert:legacy"]["activity_marker"] == f.activity_marker
+
+
 def test_reconcile_resolved_when_absent(tmp_path):
     baseline = {"sig:gone": {"strike_count": 2, "pattern_type": "x"}}
     new, resolved, esc = dr.reconcile([], baseline, NOW)

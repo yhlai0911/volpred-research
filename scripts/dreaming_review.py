@@ -159,6 +159,14 @@ class DreamFinding:
     occurrences: int = 1
     first_seen: str | None = None
     last_seen: str | None = None
+    # ISO timestamp of the underlying signal's latest activity (e.g. an alert's
+    # last_sent_at). When set, reconcile() only advances the three-strike counter
+    # if this marker ADVANCED since the previous dreaming run — a signature that
+    # is decaying toward its auto-clear window (marker frozen) must not keep
+    # accumulating strikes and false-escalate to critical (boss email-12688:
+    # git-push-backup fired a burst 06-30→07-05 then went quiet, yet three daily
+    # dreaming runs still saw it inside the 48h window and escalated to CRITICAL).
+    activity_marker: str | None = None
 
     def key(self) -> str:
         return self.signature
@@ -616,6 +624,9 @@ def detect_persistent_alerts(
                     f"(Three-Strike)."
                 ),
                 governance_target="docs/error_log.md",
+                # Freeze the strike counter once the alert stops firing: only an
+                # advancing last_sent_at counts as an ACTIVE recurrence.
+                activity_marker=str(entry.get("last_sent_at") or "") or None,
             )
         )
     return out
@@ -664,6 +675,11 @@ def write_baseline(storage_dir: str, baseline: dict[str, dict[str, Any]], now: d
     tmp.replace(path)
 
 
+# Sentinel distinguishing a legacy baseline entry (no activity_marker key) from
+# one that explicitly stored `None`.
+_MARKER_MISSING = object()
+
+
 def reconcile(
     findings: list[DreamFinding],
     baseline: dict[str, dict[str, Any]],
@@ -687,18 +703,40 @@ def reconcile(
                 "pattern_type": f.pattern_type,
                 "first_seen": iso,
                 "last_seen": iso,
+                "activity_marker": f.activity_marker,
             }
             f.occurrences = 1
             f.first_seen = iso
             f.last_seen = iso
             new_findings.append(f)
         else:
-            prev["strike_count"] = int(prev.get("strike_count", 0)) + 1
+            # A finding that carries an activity_marker only counts as an ACTIVE
+            # recurrence when that marker advanced since we last recorded it. If it
+            # is frozen (the underlying alert stopped firing and is decaying toward
+            # its auto-clear window), hold the strike — do not increment, do not
+            # escalate. Prevents a single burst from false-escalating to critical
+            # just because it lingers across daily runs inside the 48h window.
+            prev_marker = prev.get("activity_marker", _MARKER_MISSING)
+            # quiescent when the marker did not demonstrably advance:
+            #   - same marker as last run → alert stopped firing, decaying
+            #   - legacy baseline entry (no marker key yet) → advance unknown,
+            #     stay conservative on the deploy boundary rather than count a
+            #     spurious strike; next run records the marker and self-corrects.
+            quiescent = f.activity_marker is not None and (
+                prev_marker == f.activity_marker or prev_marker is _MARKER_MISSING
+            )
+            if not quiescent:
+                prev["strike_count"] = int(prev.get("strike_count", 0)) + 1
             prev["last_seen"] = iso
+            prev["activity_marker"] = f.activity_marker
             f.occurrences = prev["strike_count"]
             f.first_seen = prev.get("first_seen")
             f.last_seen = iso
-            if prev["strike_count"] >= THREE_STRIKE and f.pattern_type not in NEVER_CRITICAL_PATTERN_TYPES:
+            if (
+                not quiescent
+                and prev["strike_count"] >= THREE_STRIKE
+                and f.pattern_type not in NEVER_CRITICAL_PATTERN_TYPES
+            ):
                 f.severity = "critical"
                 escalations.append(f)
 
