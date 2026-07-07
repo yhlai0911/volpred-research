@@ -50,7 +50,7 @@ Novel contribution = a **formal, self-calibrating identification** of true-vs-sp
    - Shimotsu `W`: spurious ⇒ **larger** `W`. `p = P(null ≥ obs)` (self-calibrates Shimotsu's size distortion).
    - `d_full − d_bar`: level shifts inflate full-sample `d` above subsample `d`.
    - **Verdict rule:** # significant (p < 0.05) among `{d_post, W4, d_full−d_bar}` → ≥2 = spurious, 0 = true LM, 1 = mixed.
-   - **Method validation** (before touching real data): simulated true `I(0.4)` → all bootstrap p large (correctly "true LM"); short-memory AR(0.3) + level shifts → `p_dpost = p_W4 = p_gap = 0.000` (correctly "spurious"). See `k1624...py` validation reproduced in the agent log.
+   - **Method validation** (before touching real data): now landed as a re-runnable Monte-Carlo harness `k1624_validation.py` (`--full` = 40 reps/DGP, B=200, n=4000; seeded; imports the *identical* `bootstrap_identification` pipeline). Full-run misjudgment rates (`k1624_validation_results_full.json`): simulated true `I(0.4)` → **82.5% correctly "true LM", 5.0% false-positive** (2/40 finite-sample false rejects — the smoke run's 0.0 was small-N luck); short-memory AR(0.3) + level shifts → **100% correctly "spurious"** (mean `p_dpost≈W4≈gap≈0.000`). The property the real-data verdict depends on — power to reject *spurious* long memory — is 100% at N=40; the 5% false-positive on genuine LM is an honest finite-sample Type-I-like rate that does not weaken the "spurious" call on real data (when the pipeline says spurious, it rarely mislabels true LM).
 
 ### Part 2 — Forecasting implication
 
@@ -118,7 +118,7 @@ Reading:
 - [x] **QLIKE direction** — canonical `actual/predicted − log(actual/predicted) − 1` via volpred helper (Codex-verified not inverted); bias correction applied **consistently** to all 3 models.
 - [x] **No conclusions from eyeballing** — every verdict backed by a bootstrap-calibrated p-value; every forecast claim by HLN-corrected DM.
 - [x] **Package-limitation ≠ model-invalidity (K1213)** — GPH/LW/Shimotsu/fractional weights hand-coded (scipy/numpy), validated on simulated ground truth.
-- [x] **Method pre-validated** on simulated true-`I(d)` (no false reject) and short-memory+shift (correct reject) before touching real data.
+- [x] **Method validated via re-runnable harness** (`k1624_validation.py --full`, results in `k1624_validation_results_full.json`): simulated true-`I(d)` → 82.5% correct, **5.0% finite-sample false-positive** (2/40, not "no reject" — corrected 2026-07-08 after full Monte-Carlo); short-memory+shift → **100% correct reject** (the property the real-data "spurious" verdict relies on). Closes Codex 24h-review (mile_c538af9e) reproducibility residual #1.
 - [x] **Null / mixed reported honestly**, strength not overstated; SPY-range "mixed" and the ARFIMA blow-up disclosed rather than hidden.
 
 ## 8. Limitations

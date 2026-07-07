@@ -14886,5 +14886,12 @@
     "task_id": "research_vrp_vs_realized_vol_vix_vixtwn_gap_vrp_proxy_vrp",
     "summary": "k1657 VRP 交易時段 vs 隔夜分解(免付費代理). CONDITIONAL_PASS(主claim NULL). SPY+VIX 2004-2026 N=5661 seed42. 隔夜var佔37.4%(修正舊K 43-44%=2020+子樣本偏誤,corr .207); day-VRP vs on-VRP 預測差異全horizon不顯著; OOS DM full-vs-base全<Harvey|t|3.0(2.31/0.39/0.56); 唯H66日盤rv較隔夜顯著(t4.52 vs .66). 拆VRP時段賺不到穩健edge,合既有VRP null. TWN N=142僅描述. reviewer=code-reviewer subagent PASS(Codex quota-out 7/11). knowledge 65703115. 適合寫daily_article(反直覺+誠實NULL教育價值).",
     "verdict": "CONDITIONAL_PASS"
+  },
+  {
+    "timestamp": "2026-07-08T06:28",
+    "task_type": "experiment",
+    "task_id": "k1624_add_validation_harness",
+    "summary": "K1624 validation harness --full (40 reps/DGP, B=200, n=4000, seeded): true-I(0.4) 82.5% correct/5.0% false-positive; AR+level-shift 100% correct reject. Corrected README+results.json 'no reject' claim to honest finite-sample rates. Closes Codex mile_c538af9e reproducibility residual #1.",
+    "owner": "hourly-06"
   }
 ]

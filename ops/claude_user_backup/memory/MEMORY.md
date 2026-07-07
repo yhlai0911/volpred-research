@@ -17,7 +17,7 @@
 - [reference_trending_blog_sources.md](reference_trending_blog_sources.md) — trending_repost 強制掃描清單（havingchien + Stratechery + 凱基/Ranger/元大 + 國外 forums）+ high-viral 3 類 (AI 發展/token maxxing/矽谷裁員)
 
 ## Projects
-- [project_myth_lab_series.md](project_myth_lab_series.md) — 文章系列「迷思實驗室 EP.X｜」🧪 定名/格式(全形｜)/首發3集；舊「迷思」文不算本系列
+- [project_myth_lab_series.md](project_myth_lab_series.md) — 文章系列「迷思實驗室｜」🧪 純前綴(無EP)/全形｜/已上線8篇；舊「迷思」文不算本系列
 - [project_repo_moved_out_of_desktop.md](project_repo_moved_out_of_desktop.md) — 2026-07-02 repo 搬到 ~/volpred-research 根除 TCC；舊 Desktop 路徑=symlink
 - [project_platform_vision_full.md](project_platform_vision_full.md) — 用戶 2026-05-29 完整願景：全自動不間斷自我運營（研究→論文/多元策略/文章→曝光→獲利），所有結果可復現，email 回報+回信指示
 - [project_loop_engineering_layer.md](project_loop_engineering_layer.md) — 2026-06-29 上線 loop-engineering 閉環：loop-health 指標(fast loop)+dreaming 慢 loop(每日 propose-only)+內容巡檢補完；治理檔不自動改
@@ -106,7 +106,7 @@
 - [feedback_narrative_arc_dedup.md](feedback_narrative_arc_dedup.md) — Layer 4 dedup: 同邏輯 arc 不同外殼算 dup（N 換大、cut-point 變奏、proxy 換但同結論）
 - [feedback_fb_opening_no_friend_asked.md](feedback_fb_opening_no_friend_asked.md) — FB Ivan Lai 貼文 anti-AI-style 完整規則（禁朋友問我 hook + 禁列表 + 禁解釋語氣 + 7 條 self-check）
 - [feedback_autonomous_loop_email_summary.md](feedback_autonomous_loop_email_summary.md) — Autonomous ScheduleWakeup fire 結尾**必**寄 email summary 給老闆 + 排下次 wakeup（4-step protocol）
-- [feedback_fb_personal_account_chrome_only.md](feedback_fb_personal_account_chrome_only.md) — FB 個人帳號只能走 Claude in Chrome，無 Graph API headless；trending 掃描用免費 agy
+- [feedback_fb_personal_account_chrome_only.md](feedback_fb_personal_account_chrome_only.md) — FB 個人帳號無 Graph API/粉專(釘死)；2026-07-07 更正：fb_realchrome_post CDP-attach(port9222)可從 headless hourly 發，不再限互動 session；trending 掃描用免費 agy
 - [feedback_audit_no_passive_terminal.md](feedback_audit_no_passive_terminal.md) — Audit terminal set 不可含 awaiting_*/pending_* 被動狀態；否則 silent failure（2026-06-03 FB pipeline 4 天 100% 失敗 root cause）
 - [reference_work_dashboard.md](reference_work_dashboard.md) — AI 工作監控 dashboard（常駐 LaunchAgent，http://127.0.0.1:8787）
 - [feedback_cross_machine_file_links.md](feedback_cross_machine_file_links.md) — Mac Studio 遠端機；給用戶看的圖/檔/連結用 SendUserFile 或 Tailscale URL，不丟本機路徑
@@ -129,3 +129,4 @@
 - [feedback_plain_language_boss_facing.md](feedback_plain_language_boss_facing.md) — 給老闆看的描述(alert/email/telegram/報告)用白話，不堆專有名詞；術語就地翻譯或替換
 - [feedback_alerts_auto_act_not_suggest.md](feedback_alerts_auto_act_not_suggest.md) — 有 auto-remediation 的 alert body 寫「已自動修復+結果」不是「建議老闆行動」；發文脫班已 wire remediate_publish_drought.py（email-12559）
 - [feedback_fix_silent_fallback_immediately.md](feedback_fix_silent_fallback_immediately.md) — git-push-backup 因 silent fallback hold push 時當場立刻修（warn/silent-ok + strict gate new=0 + 重跑 wrapper 解封），不丟給下一班 hourly（老闆 email-12564「以後自己立刻修」）
+- [feedback_fb_post_idempotency_guard.md](feedback_fb_post_idempotency_guard.md) — FB/多入口 outward-facing 動作必須有 idempotency guard；fb_realchrome_post 已加 _claim_fb_post 讀 canonical fb_post_status（2026-07-07 雙 session 重發 incident）

@@ -1,33 +1,33 @@
 {
   "schema": "dreaming_review.v1",
-  "generated_at": "2026-07-07T02:05:59.251267+00:00",
+  "generated_at": "2026-07-07T22:00:04.722774+00:00",
   "window_days": 14,
   "dry_run": false,
   "loop_health": {
-    "generated_at": "2026-07-07T02:05:59.251267+00:00",
+    "generated_at": "2026-07-07T22:00:04.722774+00:00",
     "window_days": 14,
     "overall": "ok",
     "first_pass_success": {
       "status": "ok",
       "signal": "derived",
       "window_days": 14,
-      "total_succeeded": 522,
-      "traced": 355,
-      "coverage": 0.68,
-      "first_pass": 341,
+      "total_succeeded": 503,
+      "traced": 376,
+      "coverage": 0.748,
+      "first_pass": 362,
       "retried": 14,
-      "first_pass_rate": 0.961,
-      "retry_rate": 0.039
+      "first_pass_rate": 0.963,
+      "retry_rate": 0.037
     },
     "task_outcome": {
       "status": "ok",
       "signal": "supported",
       "window_days": 14,
-      "success": 522,
+      "success": 503,
       "fail": 3,
       "blocked": 10,
-      "other": 25,
-      "success_rate": 0.976
+      "other": 21,
+      "success_rate": 0.975
     },
     "error_recurrence": {
       "status": "ok",
@@ -96,10 +96,10 @@
       "weekly_counts_recent_first": [
         0,
         0,
-        1,
-        2
+        0,
+        3
       ],
-      "slope_per_week": -0.7,
+      "slope_per_week": -0.9,
       "trend": "improving",
       "current_correction_report_high": null,
       "current_correction_report_medium": null
@@ -122,9 +122,9 @@
       "remediation_ref": null,
       "proposal": "這些記憶描述 recurring process/cadence 但無對應 skill；評估 promote 成 skill 或加排程/cadence（見 pdca-operations 技能治理 + operations-cadence）。",
       "governance_target": ".claude/skills/",
-      "occurrences": 10,
+      "occurrences": 11,
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-07T02:05:59.251267+00:00",
+      "last_seen": "2026-07-07T22:00:04.722774+00:00",
       "activity_marker": null
     },
     {
@@ -132,76 +132,50 @@
       "signature": "memory_hygiene:consolidation_review",
       "severity": "info",
       "evidence": [
-        "76 條 feedback 記憶（>=45，疑有重疊）"
+        "77 條 feedback 記憶（>=45，疑有重疊）"
       ],
       "remediation": "propose_only",
       "remediation_ref": null,
       "proposal": "feedback 記憶量大：月度做整併/去重/澄清，讓記憶更清楚易用（避免垃圾桶化）。",
       "governance_target": "memory/",
-      "occurrences": 10,
+      "occurrences": 11,
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-07T02:05:59.251267+00:00",
+      "last_seen": "2026-07-07T22:00:04.722774+00:00",
       "activity_marker": null
     },
     {
       "pattern_type": "persistent_alert",
-      "signature": "persistent_alert:4415ad115dc02afc",
+      "signature": "persistent_alert:7ecf96ae6fa61592",
       "severity": "warn",
       "evidence": [
-        "alert_key=4415ad115dc02afc title='git-push-backup: push held — 2 new silent fallback(s)' send_count=3 span=6.7d (first 2026-06-29T02:17:03.756492+00:00 → last 2026-07-05T19:00:22.192477+00:00) — no fire in 31.1h (auto-clears at 48h if it stays clean)"
+        "alert_key=7ecf96ae6fa61592 title='git-push-backup: push held — 4 new silent fallback(s)' send_count=4 span=7.2d (first 2026-06-29T23:00:31.047400+00:00 → last 2026-07-07T04:00:30.203226+00:00) — no fire in 18.0h (auto-clears at 48h if it stays clean)"
       ],
       "remediation": "propose_only",
       "remediation_ref": null,
-      "proposal": "Alert `git-push-backup: push held — 2 new silent fallback(s)` fired 3× over 6.7d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "proposal": "Alert `git-push-backup: push held — 4 new silent fallback(s)` fired 4× over 7.2d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
       "governance_target": "docs/error_log.md",
-      "occurrences": 2,
-      "first_seen": "2026-07-05T22:00:15.461485+00:00",
-      "last_seen": "2026-07-07T02:05:59.251267+00:00",
-      "activity_marker": "2026-07-05T19:00:22.192477+00:00"
-    },
-    {
-      "pattern_type": "persistent_alert",
-      "signature": "persistent_alert:aa6c059b3dc7e00d",
-      "severity": "warn",
-      "evidence": [
-        "alert_key=aa6c059b3dc7e00d title='git-push-backup: push held — 1 new silent fallback(s)' send_count=5 span=5.2d (first 2026-06-30T06:17:03.289879+00:00 → last 2026-07-05T12:00:18.390486+00:00) — no fire in 38.1h (auto-clears at 48h if it stays clean)"
-      ],
-      "remediation": "propose_only",
-      "remediation_ref": null,
-      "proposal": "Alert `git-push-backup: push held — 1 new silent fallback(s)` fired 5× over 5.2d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
-      "governance_target": "docs/error_log.md",
-      "occurrences": 3,
-      "first_seen": "2026-07-04T22:00:05.879699+00:00",
-      "last_seen": "2026-07-07T02:05:59.251267+00:00",
-      "activity_marker": "2026-07-05T12:00:18.390486+00:00"
-    },
-    {
-      "pattern_type": "persistent_alert",
-      "signature": "persistent_alert:1125366c27560e4e",
-      "severity": "warn",
-      "evidence": [
-        "alert_key=1125366c27560e4e title='[ACK] Re: Re: [VolPred Alert][WARN] git-push-backup: push held — 1 new silent fa' send_count=3 span=5.2d (first 2026-06-30T07:00:07.603860+00:00 → last 2026-07-05T12:15:08.386429+00:00) — no fire in 37.8h (auto-clears at 48h if it stays clean)"
-      ],
-      "remediation": "propose_only",
-      "remediation_ref": null,
-      "proposal": "Alert `[ACK] Re: Re: [VolPred Alert][WARN] git-push-backup: push held — 1 new silent fa` fired 3× over 5.2d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
-      "governance_target": "docs/error_log.md",
-      "occurrences": 2,
-      "first_seen": "2026-07-05T22:00:15.461485+00:00",
-      "last_seen": "2026-07-07T02:05:59.251267+00:00",
-      "activity_marker": "2026-07-05T12:15:08.386429+00:00"
+      "occurrences": 1,
+      "first_seen": "2026-07-07T22:00:04.722774+00:00",
+      "last_seen": "2026-07-07T22:00:04.722774+00:00",
+      "activity_marker": "2026-07-07T04:00:30.203226+00:00"
     }
   ],
-  "new_findings": [],
-  "resolved_findings": [],
+  "new_findings": [
+    "persistent_alert:7ecf96ae6fa61592"
+  ],
+  "resolved_findings": [
+    "persistent_alert:aa6c059b3dc7e00d",
+    "persistent_alert:4415ad115dc02afc",
+    "persistent_alert:1125366c27560e4e"
+  ],
   "escalations": [],
   "auto_remediation": [],
   "counts": {
-    "findings": 5,
-    "new": 0,
-    "resolved": 0,
+    "findings": 3,
+    "new": 1,
+    "resolved": 3,
     "escalations": 0,
-    "propose_only": 5,
+    "propose_only": 3,
     "auto_dispatch_eligible": 0
   }
 }

@@ -1,6 +1,6 @@
 ---
 name: feedback_fb_personal_account_chrome_only
-description: FB 是用戶個人帳號 → 只能走 Claude in Chrome / computer use，沒有 Graph API headless 選項
+description: FB 個人帳號無 Graph API/粉專(釘死)；發文走真 GUI Chrome，2026-07-07 起 fb_realchrome_post CDP-attach(port 9222)可從 headless hourly 發，不再限互動 session
 metadata: 
   node_type: memory
   type: feedback
@@ -28,4 +28,12 @@ metadata:
 - 不再承諾 24/7 FB 自動化 — 改成「有互動 session 才發,沒有就 expired_skip」
 - docs/fb_pipeline_permanent_fix.md 已撤回 Page 提案
 
-關聯:[[feedback_trending_repost_route]]、[[reference_antigravity_cli]]、[[project_platform_vision_full]]、[[feedback_dont_ask_do]]。
+**2026-07-07 機制更正(實證推翻「非互動 session 無法發 FB」)**:
+本日 headless hourly-14 dispatch fire **成功發 FB**（mile_d12825bb MOVE 文），用 `scripts/fb_realchrome_post.py` **CDP-attach 到專用持久 profile 的真 GUI Chrome**（`~/.volpred/fb_chrome_profile`，port 9222）。
+- **不變(釘死)**:個人帳號無 Graph API / 無粉專 / 無 headless 假瀏覽器 — 上面 6/3 boss override 全部仍成立,禁止任何 Page/Graph API 提案。
+- **更正**:「必須互動 session + Claude in Chrome MCP」的假設**過時**。CDP-attach 是 scriptable,**任何 session(含 headless hourly cron)都能發**,前提 = 老闆那台 dedicated Chrome(port 9222)開著且已一次性登入 FB(密碼只能老闆輸)。所以 FB 發文**不再是「非 24/7」的物理限制** — 只要 dedicated Chrome 常駐登入,hourly 即可自主發。
+- **awaiting_interactive_session 的正確處理**:先跑 `fb_realchrome_post.py --check`;PASS(port 9222 登入)→ 直接發,不要標 awaiting 堆積。draft 缺 `## 圖片` 時先 `upload_chart(png, bucket='article-images')` 上傳 lazypack 再補圖(worker 只吃 URL、0 圖 ABORT)。
+- SOP 正典 = skill `fb-publishing`(唯一機制 fb_realchrome_post + 硬規則:發前查重/主文必附圖/連結進留言/中文剪貼簿)。
+- 老闆 msg229「你立刻發 明明就有開著的Chrome」= 正是這條認知落差的 incident。
+
+關聯:[[feedback_trending_repost_route]]、[[reference_antigravity_cli]]、[[project_platform_vision_full]]、[[feedback_dont_ask_do]]、[[feedback_fb_post_idempotency_guard]]。
