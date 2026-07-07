@@ -1,29 +1,31 @@
 # Feed Index
 
-_Last built: 2026-07-07 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-07 06:01 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1757**  (with thumbnail: 72)
-- Last 30 days: **320**
-- Total chars (content): 5,317,140
+- Total articles: **1759**  (with thumbnail: 72)
+- Last 30 days: **315**
+- Total chars (content): 5,327,012
 
-**Status**: published=1553, archived=123, unpublished=60, retracted=12, draft=8, wont_fix=1
+**Status**: published=1556, archived=123, unpublished=60, retracted=12, draft=7, wont_fix=1
 
-**Audience**: research=1111, general=420, daily=132, unknown=77, member_qa=12, event=5
+**Audience**: research=1111, general=422, daily=132, unknown=77, member_qa=12, event=5
 
-**Category**: milestone=869, general=772, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, experiment=4, event_article=3, diary=1
+**Category**: milestone=869, general=774, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, experiment=4, event_article=3, diary=1
 
-## 最近 30 天 (320)
+## 最近 30 天 (315)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-07 | `mile_c0aaf4e5` | K1640：VIX 30/40 恐慌進場的事件研究，半真但不能當即時交易規則 | research | milestone | published | 5810 |  | 研究, VIX, SPY, 事件研究, 恐慌進場, 多重檢定 |
+| 2026-07-07 | `mile_76679cd3` | 一家台積電，決定整片台股的天氣：單點風向球體檢表，四欄讀懂該慌還是被嚇 | general | general | published | 7260 |  | 一般讀者, 精選導讀, 台積電, 台股, 波動率, 集中度 |
+| 2026-07-07 | `mile_0fd1f831` | 一家台積電，兩個波動率：美股在狂跳，台股卻很淡定 | general | general | published | 2612 |  | 一般讀者, trending, 台積電, ADR, 波動率, 跨市場 |
 | 2026-07-07 | `mile_4a2b9d17` | 每日策略建議：VIX 15.57（正常）— 2026-07-07 | daily | general | published | 1461 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-07 | `mile_f119e075` | 2026-07-07 本日持倉比率建議（依據 2026-07-06 收盤數據） | daily | milestone | published | 859 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-06 | `mile_08fefa59` | AI 基建變現疑慮升溫，科技股與防禦板塊的波動率黃金交叉 | general | general | published | 3465 |  | 一般讀者, trending, AI, 資本支出, 板塊輪動, 波動率 |
 | 2026-07-06 | `mile_f5912072` | K1647: 原油已實現波動率對股市波動率的一階預測力檢定 | research | milestone | published | 6845 |  | 研究, 原油, 波動率, spillover, SPY, XLE |
 | 2026-07-06 | `mile_8f14e28a` | K1590：MNA 併購套利波動 proxy 的描述性診斷 | research | milestone | draft | 6190 |  | 研究, 併購套利, MNA, VIX, proxy, Welch |
-| 2026-07-06 | `mile_c0aaf4e5` | K1640：VIX 30/40 恐慌進場的事件研究，半真但不能當即時交易規則 | research | milestone | draft | 5810 |  | 研究, VIX, SPY, 事件研究, 恐慌進場, 多重檢定 |
 | 2026-07-06 | `mile_736c76d3` | 84 個實驗後，最有用的結論是哪些路該停 | general | general | published | 2994 |  | 一般讀者, 研究誠實, 策略篩選, 風險管理, 波動率預測, 資產配置 |
 | 2026-07-06 | `mile_69524f14` | 迷思實驗室｜原油狂飆狂跌，股市波動真的會跟著抖嗎？4103 天數據給了反直覺答案 | general | general | published | 3440 |  | 一般讀者, 原油, 波動率, 溢出, 能源股, 標普500 |
 | 2026-07-06 | `mile_e7b6e075` | 🧪 迷思實驗室｜台積電打噴嚏,台股真的重感冒?16年數據攤開來看 | general | general | published | 3790 |  | 一般讀者, 台積電, 加權指數, 集中度風險, 風險管理, 台股 |
@@ -331,6 +333,11 @@ _Last built: 2026-07-07 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-07 | `mile_cc403018` | 同一把扳手，鎖螺絲沒用、拆水管卻很順：油金銀的「歪掉分布」模型實測（一般讀者版） | research | milestone | unpublished | 4016 |  | 研究, 商品, 風險管理, GARCH, 尾端風險, 實務應用 |
 | 2026-06-07 | `mile_b028d767` | 同一把扳手，鎖螺絲沒用、拆水管卻很順 — 油金銀的『歪掉分布』模型實測 | research | milestone | unpublished | 3955 |  | 研究, 商品, 風險管理, GARCH, 尾端風險, 實務應用 |
 | 2026-06-07 | `mile_811bfc61` | VIX 平方加進模型，新興市場波動率預測也跟著改善了 | research | milestone | published | 2656 |  | 研究, EEM, 新興市場, 波動率預測, VIX, 跨資產 |
+
+<details><summary>## 2026-Q2 (772)</summary>
+
+| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
+|---|---|---|---|---|---|---|---|---|
 | 2026-06-07 | `mile_42ec17f0` | 同一個恐慌指標，搬到不同市場就會失靈嗎？我們最後得到的是更刺耳的答案 | general | general | unpublished | 2175 |  | 一般讀者, VIX, 全球市場, 台股, 研究更正 |
 | 2026-06-07 | `mile_59e04317` | 崩跌時比上漲時更容易同步：66對資產的尾端不對稱實驗 | general | general | unpublished | 3007 |  | 一般讀者, copula-tail-dependence, multi-pair, asymmetry |
 | 2026-06-07 | `mile_bd2d1056` | 台積電財報後買 0050，你以為贏了，其實是牛市的功勞 | general | general | unpublished | 4346 |  | 一般讀者, TSMC, 0050, 財報事件, vol-crush, 策略檢驗 |
@@ -338,11 +345,6 @@ _Last built: 2026-07-07 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-07 | `mile_fbc8af54` | 兩個都有用的指標，加在一起卻沒更厲害 | research | milestone | published | 2482 |  | 研究, VRP, 波動率預測, SPY, QQQ, 維度詛咒 |
 | 2026-06-07 | `mile_001458ce` | 你量對了方向，卻選錯了尺：波動率預測中的工具陷阱 | research | milestone | archived | 2461 |  | 研究, 波動率預測, 高階動差, SPY, 半變異數, 風險管理 |
 | 2026-06-07 | `mile_c481c8cf` | 同一個模型，換一把尺子量還是贏，這才叫真的贏 | research | milestone | unpublished | 3148 |  | 研究, SPY, 波動率預測, 風險管理, 模型比較, proxy-robust |
-
-<details><summary>## 2026-Q2 (765)</summary>
-
-| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
-|---|---|---|---|---|---|---|---|---|
 | 2026-06-07 | `mile_5f57d3f9` | 恐慌剛過，市場最安靜：VRP 極端低點後的波動率規律 | research | milestone | published | 3086 |  | 研究, VRP, SPY, 波動率預測, 不對稱訊號, 波動率風險溢酬 |
 | 2026-06-06 | `mile_0d68e13b` | 有時候風險模型不用更聰明，只要少一點自作聰明 | general | general | unpublished | 1733 |  | 一般讀者, 風險管理, SPY, QQQ, GLD, VaR |
 | 2026-06-06 | `mile_faaddb06` | 預測波動率該回望多久？五段歷史告訴我們：沒有萬靈丹 | research | milestone | published | 7461 |  | 研究, 波動率預測, 滾動視窗, 模型驗證, 跨期穩健性, 投資決策 |

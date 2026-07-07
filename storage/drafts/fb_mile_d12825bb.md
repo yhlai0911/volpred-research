@@ -31,3 +31,10 @@
 ## 第一則留言（貼連結）
 
 https://volpred.zeabur.app/v3/reports/mile_d12825bb
+
+## 圖片（結果圖 + 懶人包，依序）
+
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig_move_asymmetry.png
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/1_panel.png
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/2_panel.png
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/3_panel.png
