@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-08 boss report 假紅色告警「hourly_dispatch 已 miss 79.5h」→ cron_review 漏跟 7/4 daemon cutover
+
+**現象**：老闆 email-11870 回信引用 boss report（01:00）的 🔴「hourly_dispatch: 上次完成 80.4h 前；預期 2026-07-08 00:07 該 fire（已 miss 79.5h）」，問「這個不立即處理嗎？」。實查 dispatch backbone：`com.volpred.dispatch-supervisor` daemon 活著（PID 89010），此刻正在跑 current_job，`dispatch_state.json` 94 筆 completions、最近一班 01:07 fire→01:11 完成 exit 0 success——**dispatch 100% 健康，告警是假的**。
+
+**根因（監控 drift，非 dispatch 故障）**：7/4 cutover 把 hourly dispatch 從 LaunchAgent `com.volpred.hourly-dispatch` + shell wrapper 換成常駐 daemon `dispatch-supervisor`。舊 LaunchAgent 已不存在、舊 log `storage/logs/cron/hourly_dispatch.log` 的 mtime 在 cutover 當下（~80h 前）凍結。但 boss report 的 `cron_review.py` 的 `JOBS["hourly_dispatch"]` 仍指向那個死 label + 停更 log，`is_stale` 拿凍結的 last_end 對比 croniter expected fire → 每小時報「miss 80h+」的永久假 stale。`ops_dashboard.py` 早在 **7/5 已修**（改讀 dispatch_state.json mtime），但 **cron_review.py 是那次 cutover fix 漏掉的第二個監控**——同一 cutover、兩個監控、只修了一個。
+
+**解決（修流程，對齊已修的 ops_dashboard）**：`cron_review.py` 對 `hourly_dispatch` job 特判——改讀 canonical daemon state（`scripts/cron_review.py:dispatch_supervisor_state`）：(a) daemon 活性 = `launchctl` 有 `dispatch-supervisor` process；(b) 最後完成班 = `dispatch_state.json` 的 `last_completion`（transient，新 fire 啟動時清 null）優先，fall back 到 append-only `completions[]` 末筆；(c) 本班 `current_job` 非 null（running）時不判 stale（last_completion 是上一班，gap 必小）；(d) daemon down / >2h 無完成班且非 running 仍會標 🔴（監控沒被關成永遠綠燈）。
+
+**驗證**：修後 `cron_review.py` 輸出 `hourly_dispatch daemon=alive exit=0 running | last: 2026-07-08 01:11:50 (daemon-state)`，整體 `✅ 所有 cron 排程器：無逾時`。新增 4 個 regression test（`tests/test_cron_review.py`：健康 daemon 無假 stale / last_completion transient-null fall back completions[] / daemon down 標旗 / 真 5h stale 仍報）+ 既有 9 test 全 PASS。
+
+**教訓**：backbone cutover（換派工引擎 / LaunchAgent→daemon / 換 log 路徑）時，**所有監控該 backbone 的 checker 要一次全部改**，不能改一個漏一個——漏掉的那個會產生「監控說掛了但其實好好的」假告警，比沒監控更糟（老闆被迫花注意力查一個不存在的問題）。cutover PR 應附「哪些 monitor 引用舊 label/log」的 grep 清單當 checklist。次要：`last_completion` 這種 transient 欄位不可當唯一真相源，canonical 是 append-only 的 `completions[]`。
+
 ## 2026-07-07 首頁 feed「7/5 文章排在 7/6 之後」看似排序壞掉 → diversify 無界時序重排；改 day-bucket 修復
 
 **現象**：老闆回報 `https://volpred.zeabur.app/reports/mile_e082beb8`（🧪 迷思實驗室｜盤整，published_at=2026-07-05 22:00 台北）「7/5 的文章排序為什麼會在 7/6 之後？排序機制是不是壞了？」。實查線上 feed：#13=7/5 22:00（mile_e082beb8）、#14=**7/6 06:02**（mile_4d67163f）——一篇 **7/6** 的文章排在一篇 **7/5** 文章**下面**，首頁日期跳來跳去。

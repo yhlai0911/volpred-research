@@ -150,3 +150,89 @@ def test_is_stale_flags_when_missing_expected_weekday_fire():
 
     assert stale is True
     assert flag is not None
+
+
+# --- dispatch-supervisor state regression (email-11870, 2026-07-08) -----------
+# 7/4 cutover 把 hourly dispatch 從 LaunchAgent `com.volpred.hourly-dispatch` 換成
+# 常駐 daemon。cron_review v-pre 仍讀死掉的 label + 停更的 hourly_dispatch.log
+# (cutover 後 mtime 凍結) → 對健康的 daemon 永遠報 80h+ 假 stale 紅色告警，老闆收到
+# boss report 誤以為 dispatch 掛了。修正：hourly_dispatch 改讀 dispatch_state.json。
+
+dispatch_supervisor_state = cron_review.dispatch_supervisor_state
+
+
+def _write_state(tmp_path, monkeypatch, payload, *, daemon_running=True):
+    state_file = tmp_path / "dispatch_state.json"
+    state_file.write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(cron_review, "DISPATCH_STATE_PATH", state_file)
+    monkeypatch.setattr(
+        cron_review, "launchctl_state",
+        lambda label: {"runs": 1, "last_exit": "(never exited)",
+                       "running": daemon_running},
+    )
+    return state_file
+
+
+def test_dispatch_supervisor_healthy_no_false_stale(tmp_path, monkeypatch):
+    """核心 regression：daemon 活著 + 近期成功完成班 → 不得報 stale。"""
+    now = datetime(2026, 7, 8, 1, 35, tzinfo=TPE)
+    _write_state(tmp_path, monkeypatch, {
+        "current_job": {"pid": 123},  # 本班正在跑
+        "last_completion": None,       # transient 被清 null
+        "completions": [
+            {"completed_at": "2026-07-07T17:11:50.714155+00:00", "exit_code": 0},
+        ],
+    })
+    ds = dispatch_supervisor_state(now)
+    assert ds["daemon_alive"] is True
+    assert ds["running"] is True
+    assert ds["last_exit"] == "0"
+    assert ds["end"] is not None  # 從 completions[] 末筆抓到，非 None
+    # 01:11 完成 → 相對 01:35 gap 極小，is_stale 不觸發
+    stale, _ = is_stale(now=now, last_end=ds["end"], cron_expr="7 * * * *",
+                        fallback_max_gap_h=2)
+    assert stale is False
+
+
+def test_dispatch_supervisor_prefers_last_completion_when_present(tmp_path, monkeypatch):
+    now = datetime(2026, 7, 8, 1, 35, tzinfo=TPE)
+    _write_state(tmp_path, monkeypatch, {
+        "current_job": None,
+        "last_completion": {"completed_at": "2026-07-08T00:11:00+00:00",
+                            "exit_code": 0},
+        "completions": [
+            {"completed_at": "2026-07-07T17:11:50+00:00", "exit_code": 0},
+        ],
+    })
+    ds = dispatch_supervisor_state(now)
+    # last_completion 較新 → 勝出（00:11 UTC = 08:11 TPE），非 completions 末筆
+    assert ds["end"].hour == 8 and ds["end"].minute == 11
+
+
+def test_dispatch_supervisor_daemon_down_flags(tmp_path, monkeypatch):
+    now = datetime(2026, 7, 8, 1, 35, tzinfo=TPE)
+    _write_state(tmp_path, monkeypatch, {
+        "current_job": None,
+        "last_completion": {"completed_at": "2026-07-08T00:11:00+00:00",
+                            "exit_code": 0},
+        "completions": [],
+    }, daemon_running=False)
+    ds = dispatch_supervisor_state(now)
+    assert ds["daemon_alive"] is False  # main() 會據此標 🔴 daemon DOWN
+
+
+def test_dispatch_supervisor_truly_stale_still_flagged(tmp_path, monkeypatch):
+    """反向保護：daemon 活著但最後完成班在 5h 前且無 current_job → 真 stale 必報，
+    確認修正沒把監控關成永遠綠燈。"""
+    now = datetime(2026, 7, 8, 6, 0, tzinfo=TPE)
+    _write_state(tmp_path, monkeypatch, {
+        "current_job": None,
+        "last_completion": {"completed_at": "2026-07-07T17:11:50+00:00",
+                            "exit_code": 0},  # 01:11 TPE, ~5h 前
+        "completions": [],
+    })
+    ds = dispatch_supervisor_state(now)
+    assert ds["running"] is False
+    stale, flag = is_stale(now=now, last_end=ds["end"], cron_expr="7 * * * *",
+                           fallback_max_gap_h=2)
+    assert stale is True and flag is not None

@@ -31,6 +31,13 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 LOGS = REPO / "storage" / "logs" / "cron"
 LAST_RUN_PATH = REPO / "storage" / "ops" / "cron_last_run.json"
+DISPATCH_STATE_PATH = REPO / "storage" / "ops" / "dispatch_state.json"
+# 2026-07-04 cutover: hourly dispatch 從 LaunchAgent `com.volpred.hourly-dispatch`
+# 換成常駐 daemon `com.volpred.dispatch-supervisor`。cron_review 對此 job 不再看死掉
+# 的舊 LaunchAgent label / 停更的 hourly_dispatch.log（cutover 後 mtime 凍結 → 假
+# stale 紅色告警，見 email-11870 事故），改讀 daemon canonical state
+# (dispatch_state.json) 判活性與最後完成班。
+DISPATCH_SUPERVISOR_LABEL = "com.volpred.dispatch-supervisor"
 TPE = timezone(timedelta(hours=8))
 
 sys.path.insert(0, str(REPO / "src"))
@@ -143,6 +150,50 @@ def launchctl_state(label: str) -> dict:
         "runs": int(runs.group(1)) if runs else None,
         "last_exit": last_exit.group(1) if last_exit else None,
         "running": bool(pid),
+    }
+
+
+def dispatch_supervisor_state(now: datetime) -> dict:
+    """Canonical hourly-dispatch health from the常駐 daemon (post-7/4 cutover).
+
+    Reads `dispatch_state.json` written by the supervisor每次 fire/heartbeat.
+    Returns the same shape main() expects so the hourly_dispatch row can be
+    computed without touching the dead LaunchAgent / stale log:
+      - daemon_alive: launchctl 有 dispatch-supervisor process
+      - end:          last_completion.completed_at (TPE) — 最後完成班
+      - running:      current_job 非 null (本班正在跑)
+      - last_exit:    last_completion.exit_code (str) — 非 0 → 標紅
+      - error:        state 讀取失敗訊息 (None = ok)
+    """
+    launch = launchctl_state(DISPATCH_SUPERVISOR_LABEL)
+    daemon_alive = bool(launch.get("running")) and launch.get("error") is None
+    if not DISPATCH_STATE_PATH.exists():
+        return {"daemon_alive": daemon_alive, "end": None, "running": False,
+                "last_exit": None, "error": "dispatch_state.json missing"}
+    try:
+        state = json.loads(DISPATCH_STATE_PATH.read_text())
+    except Exception as exc:  # noqa: BLE001
+        _warn_cron_review("dispatch_state.json parse failed", DISPATCH_STATE_PATH, exc)
+        return {"daemon_alive": daemon_alive, "end": None, "running": False,
+                "last_exit": None, "error": f"state parse failed: {str(exc)[:120]}"}
+    running = state.get("current_job") is not None
+    # last_completion 是 transient（新 fire 啟動時清 null）；canonical 最後完成班取
+    # append-only completions[] 末筆，last_completion 僅作 freshest override。
+    comp = state.get("last_completion")
+    if not comp:
+        completions = state.get("completions") or []
+        comp = completions[-1] if completions else {}
+    end = None
+    completed_raw = comp.get("completed_at")
+    if completed_raw:
+        end = _parse_ts(completed_raw)
+    last_exit = comp.get("exit_code")
+    return {
+        "daemon_alive": daemon_alive,
+        "end": end,
+        "running": running,
+        "last_exit": str(last_exit) if last_exit is not None else None,
+        "error": None,
     }
 
 
@@ -259,6 +310,37 @@ def main() -> int:
                 f"canonical cron not found for config_job_id={config_job_id!r}; "
                 f"using max-gap fallback (max_gap_h={max_gap_h})"
             )
+        # hourly_dispatch: 7/4 cutover 後由常駐 daemon 派工，看 canonical state 而非
+        # 死掉的 LaunchAgent / 停更的 log（否則永遠假 stale — email-11870 事故）。
+        if job == "hourly_dispatch":
+            ds = dispatch_supervisor_state(now)
+            flags = []
+            if not ds["daemon_alive"]:
+                flags.append("🔴 dispatch-supervisor daemon 未在 launchctl 運行")
+            le = ds["last_exit"]
+            if le not in (None, "0", 0):
+                flags.append(f"🔴 last exit {le}")
+            end = ds["end"]
+            when = "?"
+            if end:
+                when = end.strftime("%Y-%m-%d %H:%M:%S") + " (daemon-state)"
+                # 本班正在跑時不判 stale（last_completion 是上一班，gap 必小）。
+                if not ds["running"]:
+                    stale, stale_flag = is_stale(
+                        now=now, last_end=end, cron_expr=cron_expr,
+                        fallback_max_gap_h=max_gap_h,
+                    )
+                    if stale and stale_flag:
+                        flags.append(stale_flag)
+            elif ds["error"]:
+                flags.append(f"🔴 {ds['error']}")
+            status = "running" if ds["running"] else "idle"
+            line = f"{job:17} daemon={'alive' if ds['daemon_alive'] else 'DOWN'} exit={le} {status} | last: {when}"
+            if flags:
+                line += "  " + " ".join(flags)
+                attention.append(f"{job}: {' '.join(flags)}")
+            print("  " + line)
+            continue
         st = launchctl_state(label)
         lg = last_log_run(LOGS / logname)
         flags = []
