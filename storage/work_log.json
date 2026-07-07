@@ -14812,5 +14812,13 @@
     "summary": "台積電 ADR(67%) vs 現股(35%) RV 價差 +32pp Z=+2.8 99th percentile；VIX 15.57 冷靜=個股特定波動；發佈 mile_0fd1f831 (2圖+3懶人包)，FB 草稿備妥",
     "claimed_by": "hourly-08",
     "outcome": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-07T04:21:40Z",
+    "task_type": "platform_ops",
+    "task_id": "platform-ops-fb-realchrome-wrong-profile-20260707",
+    "summary": "FB CDP-attach 根因: 接到 /tmp headless 空白 profile → 改 dedicated 持久 profile (~/.volpred/fb_chrome_profile) 真 GUI Chrome + ensure_fb_chrome() 自癒。--check/--dry-run PASS，端到端驗證 kill→auto-relaunch→logged_in。第一次真發待老闆風控 gate 確認(email+TG260)。",
+    "claimed_by": "hourly-12",
+    "outcome": "succeeded"
   }
 ]

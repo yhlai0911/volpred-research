@@ -53835,7 +53835,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "boss-telegram-msg253",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-07T03:23:40.636208+00:00",
     "title": "FB CDP-attach 根因：worker 接的是暫時 headless profile 不是老闆真 Chrome",
     "description": "老闆 telegram msg253 回報「我現在是登入狀態啊」，重跑 `uv run python scripts/fb_realchrome_post.py --check` 仍回 login_wall。查 `ps aux | grep 'Google Chrome'` 發現 9222 port 是由**另一個獨立 headless 進程**開的：`--headless=new --remote-debugging-port=9222 --user-data-dir=/tmp/cdp_profile`（PID 80924），跟老闆平常在用、已登入 FB 的真 Chrome（PID 1536，一般 GUI 啟動、無 debug port）完全是兩個不同 profile/進程。docs/fb_realchrome_setup.md 寫的『附掛既有真 Chrome』與現況不符 —— 老闆不管在哪裡登入 FB，這個 /tmp/cdp_profile 的空白 profile 永遠不會有登入態。這違反老闆硬性約束『不用 headless Playwright（假瀏覽器）』，POC 的 PASS 結論需更正。\n\n修正方向（擇一，需 codex/claude 評估後落地）：\n1. 讓老闆的真 GUI Chrome（PID 1536）本身帶 --remote-debugging-port 啟動 —— 但 Chrome 執行中無法動態加旗標，需先完全 quit 再用 `open -a 'Google Chrome' --args --remote-debugging-port=9222` 重開（**會關掉老闆現有分頁/視窗，需先取得同意或挑老闆離線時段做**，不可自行 kill 他正在用的 Chrome）。\n2. 或改用 AppleScript / System Events 驅動老闆真正在跑的那個 Chrome 視窗執行 JS （不需 debug port、不需重開，避開撞到他現有 session），評估可行性。\n3. 無論哪條路，落地後必須重新走風控 gate：--check 顯示 logged_in → --post --dry-run → 單篇小樣本真發確認不觸發鎖帳，才可 wire 進 hourly dispatch。\n\n同步更新 docs/fb_realchrome_setup.md 的 POC 結論（目前寫的『底層機制完全可行』需更正為『機制可行但 attach 到錯誤 profile，需改接老闆真 Chrome』）與 docs/error_log.md 補一筆 lesson。",
@@ -53854,9 +53854,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-12"
+      },
+      {
+        "ts": "2026-07-07T04:19:41.501084+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-12"
       }
     ],
-    "started_at": "2026-07-07T04:08:48.564827+00:00"
+    "started_at": "2026-07-07T04:08:48.564827+00:00",
+    "completed_at": "2026-07-07T04:19:41.500768+00:00",
+    "result": "根因: attach 到 /tmp headless 空白 profile → 改 dedicated 持久 profile (~/.volpred/fb_chrome_profile) 真 GUI Chrome + ensure_fb_chrome() 自癒。--check PASS(logged_in), --dry-run PASS(348字composer). 端到端驗證 kill→auto-relaunch→logged_in. 第一次真發+wire hourly 待老闆風控 gate 確認. commit + error_log + setup doc 更正."
   },
   {
     "id": "telegram-256",
