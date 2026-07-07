@@ -2,6 +2,21 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-07 FB 同一 mile 雙 session 重複發文（老闆個人頁 2 篇相同貼文）→ fb_realchrome_post 加 idempotency guard
+
+**現象**：老闆 email-12697 回信「發」，授權真發第一篇 FB 貼文（AI 基建波動率利差 = mile_08fefa59）。interactive-claude 執行後在老闆個人頁發現**同內容 2 篇**（相隔 ~11 分鐘：早前 ~12:22 一篇 + hourly 12:32 一篇），兩篇都帶了 volpred 連結留言——正是老闆擔心的「被 FB 判機器人」訊號。
+
+**根因（結構性，非資料問題）**：存在 canonical 單源 `fb_post_status`（feed.json by id/mile_id + trending_repost_log by mile_id，`mark_fb_post_status.py` 維護，狀態含 `success`），但 `fb_realchrome_post.py --post` **從不讀也不寫它**。mile_08fefa59 在 **12:31:42 已被早前 session 標 `success`**，但 hourly session 12:32 的 `--post` 盲目重發（不檢查 status）→ 兩條路徑（早前 email close + hourly email_reply dispatch）各發一次，無跨 session 互斥。等同「dual writer 無 lock / 無 idempotency key」的經典 race。
+
+**解決（修流程，非修資料）**：
+- **清理 live 狀態**：CDP-attach 進老闆真 Chrome，定位兩篇重複 → 保留有互動（1讚1留言）的較新篇、刪掉無互動的較早篇（移到垃圾桶 30天後永刪）→ 驗證時間軸只剩 1 篇。達成老闆「一篇測試貼文」意圖。
+- **加 idempotency guard**（`scripts/fb_realchrome_post.py`）：`--post` 發文前 `_claim_fb_post(mile_id)`——(a) canonical `fb_post_status==success` → SKIP 不重發；(b) `storage/ops/fb_post_claims.json` ledger 有 <5min in-flight claim（另一 session 正在發）→ SKIP；(c) 否則寫 in-flight claim 放行。全程 held `shared_state_lock("fb_post_claim")` 跨 process 原子。發文成功後 `_finalize_fb_post` 自動標 canonical `fb_post_status=success` + ledger done。`--force` 可繞過（慎用）。`--dry-run` 不 claim（不改狀態）。
+- **mile_id 抽取**：優先讀 draft「# mile_id: mile_XXX」註解，退回檔名 `fb_mile_XXX.md`。
+
+**驗證（端到端）**：對已 `success` 的 mile_08fefa59 再跑 `--post` → `[SKIP] 不重發：canonical fb_post_status=success`（正確擋下）。此 guard 若早存在，12:32 那次重發會被 12:31:42 的 success flag 擋住。
+
+**教訓**：凡「多入口都能觸發的 outward-facing 動作」（發文/寄信/下單/發佈）必須有 idempotency key + 跨 process 原子 claim，不能假設只有一條路徑會執行。已有 canonical 狀態源時，**執行端必須讀它當 pre-action gate**——狀態源存在但執行端不讀 = 形同沒有。FB 個人頁是老闆對外門面，重複發文的 reputation/鎖帳成本遠高於加一個 guard。
+
 ## 2026-07-07 FB CDP-attach 接錯 profile（/tmp headless 空白 profile）→ 永遠 login_wall；改 dedicated 持久 profile + self-heal
 
 **現象**：老闆 telegram msg253「我現在是登入狀態啊」，但 `fb_realchrome_post.py --check` 仍回 `login_wall`。POC 一度宣稱「底層 CDP-attach 完全可行」並標 PASS，實際發不出文。

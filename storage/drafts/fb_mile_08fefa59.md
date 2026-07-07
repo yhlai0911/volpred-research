@@ -29,3 +29,10 @@ AI 蓋了這麼多資料中心，市場現在問的是同一句話：這些錢�
 ## 第一則留言（貼連結）
 
 https://volpred.zeabur.app/v3/reports/mile_08fefa59
+
+## 圖片（主貼文附圖：結果圖 + 懶人包，依序）
+
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/ai_capex_rv_divergence_20260707.png
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/aicapex_concept_20260707.png
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/aicapex_results-rv_20260707.png
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/aicapex_results-return_20260707.png
