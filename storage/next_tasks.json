@@ -53539,10 +53539,36 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-07T01:59:57.175469+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 231）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你立刻發\n明明就有開著的Chrome\n你自己要去切換不同的Chrome實體 我同時開了三個登入 一定有一個可以發Ivan Facebook\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\nℹ️ [INFO] FB pipeline 已處理：2 篇備妥待 Chrome session、FOMC 舊文已清\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響文章品質、讀者信任與流量表現。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🛠️ FB pipeline 已處理 — 2 篇備妥、1 篇過期清掉\n\n您回「立刻處理」後，我在這班（headless 巡檢，無 Chrome）把能做的全做完了。\n\n📌 ✅ 已完成\n\n• 項目: 動作\n• FOMC 6/17 舊文（mile_a5e79b07）: 事件已過 3 週，補發無意義 → 標 expired_skip 清出佇列\n• AI 基建波動率黃金交叉（mile_08fefa59）: FB 稿備妥、過 anti-AI gate ✅\n• MOVE 債市方向感（mile_d12825bb）: 原本缺 FB 稿 → 我補寫、過 anti-AI gate ✅\n\n📌 ⚠️ 剩下唯一卡點（物理限制，非流程漏洞）\n\n您個人 FB 帳號沒有 headless API，只能透過 Claude-in-Chrome 互動 session 發文（這是您 6/03 親自釘死的永久政策）。這班 hourly 巡檢是背景排程、連不到 Chrome，所以我發不出去。\n\n兩條路，您挑一條：\n\n1. 等我發：下一個您開著的互動 session（有連 Chrome）我就把這 2 篇貼上去 + 第一則留言補連結，全自動。\n2. 您想現在就上線：下面兩段是完稿、可直接複製貼到 facebook.com/yihao.lai（主貼文不放連結），發完在第一則留言貼對應網址即可。\n\n---\n\n📎 📄 貼文 1：AI 基建波動率（連結 https://volpred.zeabur.app/v3/reports/mile_08f\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你立刻發\n明明就有開著的Chrome\n你自己要去切換不同的Chrome實體 我同時開了三個登入 一定有一個可以發Ivan Facebook\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\nℹ️ [INFO] FB pipeline 已處理：2 篇備妥待 Chrome session、FOMC 舊文已清\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響文章品質、讀者信任與流量表現。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🛠️ FB pipeline 已處理 — 2 篇備妥、1 篇過期清掉\n\n您回「立刻處理」後，我在這班（headless 巡檢，無 Chrome）把能做的全做完了。\n\n📌 ✅ 已完成\n\n• 項目: 動作\n• FOMC 6/17 舊文（mile_a5e79b07）: 事件已過 3 週，補發無意義 → 標 expired_skip 清出佇列\n• AI 基建波動率黃金交叉（mile_08fefa59）: FB 稿備妥、過 anti-AI gate ✅\n• MOVE 債市方向感（mile_d12825bb）: 原本缺 FB 稿 → 我補寫、過 anti-AI gate ✅\n\n📌 ⚠️ 剩下唯一卡點（物理限制，非流程漏洞）\n\n您個人 FB 帳號沒有 headless API，只能透過 Claude-in-Chrome 互動 session 發文（這是您 6/03 親自釘死的永久政策）。這班 hourly 巡檢是背景排程、連不到 Chrome，所以我發不出去。\n\n兩條路，您挑一條：\n\n1. 等我發：下一個您開著的互動 session（有連 Chrome）我就把這 2 篇貼上去 + 第一則留言補連結，全自動。\n2. 您想現在就上線：下面兩段是完稿、可直接複製貼到 facebook.com/yihao.lai（主貼文不放連結），發完在第一則留言貼對應網址即可。\n\n---\n\n📎 📄 貼文 1：AI 基建波動率（連結 https://volpred.zeabur.app/v3/reports/mile_08f\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-07-07T02:11:54.278139+00:00",
+    "claim_session_id": "17134a0ec8fb",
+    "status_history": [
+      {
+        "ts": "2026-07-07T02:11:54.278423+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-10"
+      },
+      {
+        "ts": "2026-07-07T02:11:54.533813+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-10"
+      },
+      {
+        "ts": "2026-07-07T02:14:18.955371+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-10"
+      }
+    ],
+    "started_at": "2026-07-07T02:11:54.533513+00:00",
+    "completed_at": "2026-07-07T02:14:18.954788+00:00",
+    "result": "Telegram 回覆老闆(msg235/236)：背景排程 process 未 load Chrome 工具無法發FB(物理限制非流程漏洞)；已把兩篇完稿(AI基建波動率 mile_08fefa59 + MOVE債市 mile_d12825bb)直接貼進 Telegram 讓老闆可一鍵複製發佈，附各自留言連結 + 提供互動session自動發選項"
   },
   {
     "id": "email-12688-d5b40c",
@@ -53587,5 +53613,54 @@
     "started_at": "2026-07-07T02:01:11.863102+00:00",
     "completed_at": "2026-07-07T02:08:39.541062+00:00",
     "result": "root-cause fix: dreaming reconcile activity-marker guard — quiescent alert no longer false-escalates to CRITICAL. +3 regression tests (26 pass), error_log entry, close email sent. commit 56d588198"
+  },
+  {
+    "id": "telegram-237",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-07T02:14:44.772730+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 237）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我就要你自動發\n那能怎麼立刻從底層修復處理？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-07T02:15:58.973847+00:00",
+    "claim_session_id": "8642955f75fc",
+    "status_history": [
+      {
+        "ts": "2026-07-07T02:15:58.974133+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-07T02:18:12.589159+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-07T02:18:12.588880+00:00",
+    "result": "已回覆老闆(msg 239):FB自動發底層修法=CDP-attach真Chrome worker由排程驅動;已排P1任務platform-ops-fb-realchrome-autopost留給下個Chrome-capable tick做POC驗證不鎖帳"
+  },
+  {
+    "id": "platform-ops-fb-realchrome-autopost",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "telegram-237-boss-directive",
+    "status": "pending",
+    "created_at": "2026-07-07T02:17:33.259825+00:00",
+    "title": "FB 個人帳號自動發文：real-Chrome CDP-attach worker（底層修復）",
+    "description": "老闆 Telegram msg 237 硬性指令：'我就要你自動發，那能怎麼立刻從底層修復處理？'。\n背景：現況 FB 個人帳號發文只能靠 interactive Claude-in-Chrome session；hourly headless 巡檢連不到 Chrome → 每次卡 pending/awaiting。老闆已釘死不用 Graph API / 不用粉專 / 不用 headless Playwright（見 docs/fb_pipeline_permanent_fix.md + memory feedback_fb_personal_account_chrome_only）。\n\n唯一未試過且尊重上述約束的底層 path = attach 到老闆『已開著、已登入 facebook.com/yihao.lai 的真實 Chrome』（真 profile、真 session，非 headless Playwright），用 CDP remote-debugging-port 由排程 worker 驅動貼文，不再等 interactive session。要件：(1) MAC STUDIO Chrome 以 --remote-debugging-port 啟動或改用既有已登入 profile (deviceId bc09353b… per memory reference_fb_chrome_browser_autoselect)；(2) 寫 fb_realchrome_post.py：讀已備妥 FB draft → CDP 連線 → 貼主文（不放連結）→ 第一則留言補網址；(3) hourly dispatch 在有 draft 時呼叫；(4) 風控驗證：先手動小樣本測 1 篇確認不觸發 FB 自動化鎖帳，PASS 才 wire 進排程。\n\n先做 spike/POC 驗證 CDP-attach 可行性 + 不鎖帳，再決定是否全自動化。若 CDP 仍觸風控 → 誠實回報物理上限、不硬繞。主線程 / 下個 Chrome-capable interactive tick 執行，不在 headless responder 做。\n\n待處理已備妥 2 篇：mile_08fefa59（AI 基建波動率）、mile_d12825bb（MOVE 債市方向感）。"
+  },
+  {
+    "id": "fb_writer_persist_canonical_draft",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "hourly-10-rootcause",
+    "created_at": "2026-07-07T02:18:25+00:00",
+    "title": "FB 稿寫手強制持久化 canonical draft + audit invariant",
+    "description": "根因見 docs/error_log.md 2026-07-07 FB 完稿未持久化(text-only-in-tmp)。修 FB 稿寫手:產 awaiting_interactive_session 時強制同步寫 storage/drafts/fb_mile_<id>.md(主貼文+留言連結 canonical 格式);audit_fb_pipeline.py 加 invariant:awaiting_interactive_session 但無對應 fb_mile_<id>.md → warn。找寫手=grep awaiting_interactive_session 設定點。測試覆蓋缺檔偵測。"
   }
 ]

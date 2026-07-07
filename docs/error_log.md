@@ -4694,3 +4694,22 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 - **症狀**：K1647 code review 三次呼叫 `codex exec`（背景 + 同步），wrapper 進程（`CODEX_COMPANION_SESSION`）活著但 output file 0 bytes 數分鐘不動，未報錯亦無結果。task-notification 最終回 exit 144（被我 pkill）。
 - **處置**：依 `.claude/rules/experiments.md` fallback 條款，pkill 掛住進程 → 改派 `feature-dev:code-reviewer` subagent 做 independent fresh-context review（258s 完成，CONDITIONAL_PASS，且抓到 README Granger reconciliation 過度宣稱 → 已修）。
 - **判定**：單次 hang，記為 strike 1（observability）。Codex diagnostic 5 步未跑（因 fallback 已解決當次任務）；若下次再現先跑 `codex --version` / `codex login status` / config model 檢查。fallback path 有效，未 block 研究誠實 gate。
+
+---
+
+## 2026-07-07 10:18 — FB 完稿未持久化到 canonical draft 位置（text-only-in-tmp）
+
+**症狀**：老闆 Telegram msg（telegram-231）催發 2 篇備妥 FB 稿。查發現 mile_08fefa59 / mile_d12825bb 皆 `fb_post_status=awaiting_interactive_session`，但：
+- `feed.json` 的 `details.fb_post_text` = 空（Graph API 已 withdrawn，此欄形同 dead）
+- `storage/drafts/fb_mile_<id>.md`（互動 session 發文參考稿的 canonical 位置，其他篇都有）**兩篇都缺檔**
+- 完稿只活在上一班產的 `/tmp/fb_close_email.md`（ephemeral）
+
+**影響**：未來互動 session（Claude-in-Chrome）要發這 2 篇時，canonical draft 位置找不到稿 → 需重新 derive 或直接漏發。老闆體感 = 「你說备妥了怎麼發不出來」。
+
+**根因**：FB 稿寫手（產 awaiting_interactive_session 狀態的流程）**只寫狀態、沒把 gate-passed 完稿持久化到 `storage/drafts/fb_mile_<id>.md`**。稿與狀態 decouple → 稿易遺失。
+
+**本班處置（hourly-10）**：
+- Telegram 回老闆 msg235/236：說明背景排程無 Chrome（物理限制），並把兩篇完稿直接貼進 Telegram 供一鍵複製 + 附留言連結。
+- 回填 `storage/drafts/fb_mile_08fefa59.md` + `fb_mile_d12825bb.md`（canonical 格式，含主貼文+留言連結）。
+
+**Follow-up（next_tasks fb_writer_persist_canonical_draft）**：修 FB 稿寫手 — 產 awaiting_interactive_session 時**強制**同步寫 `storage/drafts/fb_mile_<id>.md`；audit_fb_pipeline 加 invariant：awaiting 狀態但無對應 draft 檔 → warn。避免復發。
