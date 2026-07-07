@@ -54425,7 +54425,7 @@
     "title": "Paper review (Codex 24h-rule): 波動率的「長記憶」大多是假象：市場變盤如何騙過統計模型",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c538af9e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c538af9e",
@@ -54433,7 +54433,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-07T16:07:25+00:00"
+    "created_at": "2026-07-07T16:07:25+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-07-07T19:08:49.579526+00:00",
+    "claim_session_id": "74a7cf6a51c0",
+    "status_history": [
+      {
+        "ts": "2026-07-07T19:08:49.579831+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-07T19:08:55.641134+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-07T19:16:40.011665+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-03"
+      }
+    ],
+    "started_at": "2026-07-07T19:08:55.640772+00:00",
+    "completed_at": "2026-07-07T19:16:40.011327+00:00",
+    "result": "K1624 mile_c538af9e 24h review (Codex quota-out Jul11 -> code-reviewer subagent fallback). CONDITIONAL_PASS: 逐行無 lookahead(所有 forecast 用 y[:t]/y[t-k]), QLIKE canonical actual/predicted, HLN 公式正確, DM 方向正確(neg t=>m1 better, ARFIMA QLIKE 高->t_hln 正=顯著更差), 6 格 d/位移/判定與 results.json 完全一致, mixed 未灌成 spurious. 不需勘誤/下架. Residual: README 聲稱 validation 未落地成腳本 -> 建 P4 k1624_add_validation_harness."
   },
   {
     "id": "research_net_of_cost_no_trade_band",
@@ -54615,5 +54641,43 @@
       "research-program-backlog"
     ],
     "created_at": "2026-07-07T18:07:58+00:00"
+  },
+  {
+    "id": "research_vrp_vs_realized_vol_vix_vixtwn_gap_vrp_proxy_vrp",
+    "title": "研究 backlog fallback: VRP 的交易時段 vs 非交易時段拆解（免付費代理版）— 用 realized vol 對 VIX/VIXTWN 的 gap 當 VRP proxy，拆成日盤段與隔夜段，檢定兩段 VRP 的可預測性與對後續波動的資訊含量差異；yfinance + FRED VIX（來源：JFM 2025「VRP over trading and nontrading periods」）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: VRP 的交易時段 vs 非交易時段拆解（免付費代理版）— 用 realized vol 對 VIX/VIXTWN 的 gap 當 VRP proxy，拆成日盤段與隔夜段，檢定兩段 VRP 的可預測性與對後續波動的資訊含量差異；yfinance + FRED VIX（來源：JFM 2025「VRP over trading and nontrading periods」）。差異化：聚焦 VRP 時段結構而非 RV 時段動能（庫內 overnight/intraday 多談 RV 動能）。 | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "vrp_vs_realized_vol_vix_vixtwn_gap_vrp_proxy_vrp",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-07T19:07:56+00:00"
+  },
+  {
+    "id": "k1624_add_validation_harness",
+    "task_type": "experiment",
+    "title": "K1624 補 validation harness：把 README 聲稱的 true-I(0.4)/AR+shift 校驗落地成可重跑腳本",
+    "description": "K1624 24h review (mile_c538af9e, CONDITIONAL_PASS) 抓到可復現性落差：README §9 + results.json methodology 聲稱 'Validated on simulated true-I(0.4) (no reject) and short-memory+level-shift (strong reject)'，但交付的 .py 只有 simulate_fracint（供 bootstrap null），無獨立 validation harness 把這兩個 DGP 跑完整 identification pipeline 驗證誤判率。補一份 k1624_validation.py：(1) 模擬 true-I(0.4) N 條 → 確認 bootstrap verdict 不誤判 spurious；(2) 模擬 AR(0.3)+level-shift → 確認正確判 spurious。固定 seed，輸出誤判率表。不改已發佈結果（自洽），純補可復現性。source=k1624 review residual concern #1.",
+    "priority": 4,
+    "status": "pending",
+    "source": "auto_discovered",
+    "tags": [
+      "k1624",
+      "reproducibility",
+      "validation",
+      "review_followup"
+    ],
+    "created_at": "2026-07-07T19:16:30.524138+00:00",
+    "claimed_by": null,
+    "claimed_at": null,
+    "claim_session_id": null,
+    "started_at": null,
+    "completed_at": null,
+    "result": null
   }
 ]
