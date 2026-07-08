@@ -55560,7 +55560,7 @@
     "id": "content_erratum_vrp_autocorr_74b80c0d_8fc743b5",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "paper_review_24h_finding",
     "created_at": "2026-07-08T20:20:38+00:00",
     "title": "Content erratum: VRP 日自相關 0.20 vs K913 0.93 跨篇矛盾 + 2 個數字可追溯性 (mile_74b80c0d / mile_8fc743b5)",
@@ -55590,9 +55590,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-08T21:26:26.970166+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-05"
       }
     ],
-    "started_at": "2026-07-08T21:08:33.832114+00:00"
+    "started_at": "2026-07-08T21:08:33.832114+00:00",
+    "completed_at": "2026-07-08T21:26:26.969823+00:00",
+    "result": "3項勘誤全修+線上驗證: (1)VRP自相關 level 0.93/change -0.21 重算(K913精確重現)修正2篇隨機遊走誤述 (2)K833波動點改straddle pnl (3)QQQ 81%->78%; 附帶治本_select_rows 1000列cap假diff bug+3測試. commit f420133d4"
   },
   {
     "id": "K1660_article_general",
