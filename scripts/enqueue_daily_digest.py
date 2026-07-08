@@ -126,6 +126,41 @@ def _digest_task_exists_today(tasks: list, task_id: str) -> bool:
     return False
 
 
+def _reconcile_stale_digest_task(task_id: str) -> None:
+    """今日 digest 已發佈時，若同 id 的 daily_digest task 仍是未完成狀態，標 succeeded。
+
+    根因（2026-07-08 fire 發現）：digest 於某小時發佈後，enqueue 的雙發防護只 skip 建新 task，
+    但既有 pending/in_progress task 不會關閉 → 每天浪費一次 hourly dispatch cycle 才被人工對帳。
+    本函式收編進 daily_digest 生命週期 owner（enqueue script），非新增 watchdog。
+    fail-open：任何讀寫失敗只 warn 不 raise（不阻塞主流程）。
+    """
+    open_states = {"pending", "pending_main_thread", "in_progress", "claimed"}
+    tasks = _load_json(NEXT_TASKS, source_name="next_tasks")
+    if not isinstance(tasks, list):
+        _warn_digest_enqueue("reconcile skip: next_tasks unreadable/非 list", NEXT_TASKS)
+        return
+    changed = False
+    for t in tasks:
+        if not isinstance(t, dict):
+            continue
+        if t.get("id") == task_id and str(t.get("status")) in open_states:
+            t["status"] = "succeeded"
+            t["result"] = (
+                "auto-reconcile: 今日 digest 已發佈（feed content_type=daily_digest），"
+                "stale task 由 enqueue_daily_digest 自動關閉，避免佔 hourly dispatch slot。"
+            )
+            changed = True
+    if not changed:
+        return
+    try:
+        tmp = NEXT_TASKS.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=2) + "\n")
+        tmp.replace(NEXT_TASKS)
+        print(f"[digest-enqueue] reconciled stale task {task_id} → succeeded")
+    except OSError as exc:
+        _warn_digest_enqueue("reconcile write failed", NEXT_TASKS, exc)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
@@ -140,6 +175,7 @@ def main() -> int:
         return 1
     if digest_published:
         print(f"[digest-enqueue] skip: 今日({today}) digest 已發佈")
+        _reconcile_stale_digest_task(task_id)
         return 0
 
     tasks = _load_json(NEXT_TASKS, source_name="next_tasks")
