@@ -4819,3 +4819,13 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 **判定**：非暫態 state（reload/discard 無效），是 residual-photo 偵測 selector 對 FB 新 DOM 誤計一個非照片 UI 元素（或 link-preview 卡片）為 thumbnail。同症狀 ≥4 次 = 結構性。
 
 **處置**：未用 `--force` 繞過 guard（guard 目的即防重複圖對外公開發文，不可逆，研究誠實+反破壞原則優先）。feed 主通路已 published+sync（core deliverable 完成）。FB 記 work_log `fb_post_failed` + draft 保留 `storage/drafts/fb_mile_e1ff7ef9.md` 待修後重發。建 followup platform_ops 任務修 residual 偵測器（分析縮圖 selector 實際命中的 DOM 節點，排除 link-preview / edit-button 誤計），**不在本 fire 盲改 DOM 邏輯**（超 50min cap + 對外自動化盲改風險）。
+
+## 2026-07-08 19:23（台灣時間）— content-audit heuristic 欄位匹配過寬（false-positive）
+
+**現象**：發佈 K1661 迷思文（mile_30a2379e）時 content-audit 拋 3 旗標，經逐項核對 results.json 全為 false-positive：
+1. 相關 0.938 被判「實際 0.59」— audit 抓到 `corr_sqrtRQ_sm_RVd`（平滑版）而非文章用的 `corr_sqrtRQ_RVd`（原始版）
+2. t=0.49（`dm_hln` 統計量）被誤判為 p 值
+3. HARQ-smooth +0.63%（`qlike_improve_HARQ_smooth_pct`）被對成絕對 QLIKE 差 -0.00615
+
+**根因**：audit 用數值近似+關鍵詞比對，同一 JSON 內存在相似欄位（raw vs smoothed corr、t vs p、% vs abs）時會抓錯欄位比對。非 blocking（flag 未持久化到 feed 條目），文章數字實際全部逐字對齊 results.json。
+**教訓/待辦**：audit 比對應綁欄位語義（例：文章講 corr 就只比 `corr_*` 且區分 raw/smoothed），非全檔數值 fuzzy match。若再發生（strike 2）→ 收斂進 prepublish_audit.py 的欄位感知比對。本次僅記錄，未改 audit（advisory、未擋發佈）。

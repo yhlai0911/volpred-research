@@ -1,0 +1,619 @@
+{
+  "experiment_id": "research_giacomini_rossi_fluctuation_test_volpred_dm_ledg",
+  "task_id": "research_giacomini_rossi_fluctuation_test_volpred_dm_ledg",
+  "title": "Giacomini-Rossi fluctuation-test feasibility audit for VolPred's K1259 DM ledger",
+  "seed": 42,
+  "generated_at": "2026-07-08",
+  "data": {
+    "ledger_path": "experiments/k1259/dm_ledger.json",
+    "ledger_n_rows": 2718,
+    "ledger_phase": "1.5_asset_backfill",
+    "source_scope": "K1259 Phase 1.5 DM summary ledger; no historical JSON edited."
+  },
+  "literature": [
+    {
+      "reference": "Giacomini and Rossi (2010), Forecast comparisons in unstable environments, Journal of Applied Econometrics.",
+      "role": "Defines fluctuation tests for local out-of-sample relative forecast performance."
+    },
+    {
+      "reference": "Diebold and Mariano (1995), Comparing predictive accuracy, Journal of Business & Economic Statistics.",
+      "role": "Base equal-predictive-accuracy test on loss differentials."
+    },
+    {
+      "reference": "Harvey, Leybourne, and Newbold (1997), Testing the equality of prediction mean squared errors, International Journal of Forecasting.",
+      "role": "Small-sample modification used by many project DM-HLN tests."
+    },
+    {
+      "reference": "Hansen, Lunde, and Nason (2011), Model Confidence Set, Econometrica.",
+      "role": "Context for K1259's MCS extension and why raw loss vectors matter."
+    }
+  ],
+  "formal_gr_precondition_audit": {
+    "strict_gr_status": "not_run_preconditions_failed",
+    "required_inputs": [
+      "date-indexed out-of-sample loss differential d_t for a fixed model pair",
+      "at least 252 chronological observations",
+      "consistent loss function and forecast target across the whole path"
+    ],
+    "raw_loss_series_found": 0,
+    "candidate_rows_with_pair_node_found": 20,
+    "reason": "K1259 stores pairwise DM summary statistics. The requested A4f/HAR rows do not expose pair-level date-indexed loss differentials or sidecar forecast/loss files, and the ledger contains zero CF-Rolling rows."
+  },
+  "coverage": {
+    "n_total_ledger_rows": 2718,
+    "n_a4f_rows_any_pair": 416,
+    "n_har_rows_any_pair": 595,
+    "n_a4f_har_rows": 20,
+    "n_cf_related_rows": 0,
+    "candidate_k_ids": [
+      "K1002",
+      "K1014",
+      "K1054",
+      "K1057",
+      "K1063",
+      "K1072"
+    ],
+    "candidate_source_files": [
+      "experiments/k1002/k1002_results.json",
+      "experiments/k1014/k1014_results.json",
+      "experiments/k1054/k1054_results.json",
+      "experiments/k1057/k1057_results.json",
+      "experiments/k1063/k1063_results.json",
+      "experiments/k1072/k1072_results.json"
+    ],
+    "rows_with_calendar_period": 2,
+    "candidate_rows": [
+      {
+        "k_id": "K1002",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "A4f_N",
+        "model_b": "HAR_ABS",
+        "dm_stat": -6.194726,
+        "p_value": 0.0,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1002/k1002_results.json",
+        "source_field_path": "dm_matrix.A4f_N_vs_HAR_ABS"
+      },
+      {
+        "k_id": "K1002",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "A4f_t",
+        "model_b": "HAR_ABS",
+        "dm_stat": -6.131194,
+        "p_value": 0.0,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1002/k1002_results.json",
+        "source_field_path": "dm_matrix.A4f_t_vs_HAR_ABS"
+      },
+      {
+        "k_id": "K1014",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR",
+        "model_b": "A4f-N",
+        "dm_stat": -8.780688,
+        "p_value": 0.0,
+        "sample_n": 1824,
+        "period": "2005-01-04 to 2026-04-07",
+        "source_file": "experiments/k1014/k1014_results.json",
+        "source_field_path": "dm_tests.HAR vs A4f-N"
+      },
+      {
+        "k_id": "K1014",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-PD",
+        "model_b": "A4f-N",
+        "dm_stat": 2.988062,
+        "p_value": 0.00284503,
+        "sample_n": 1824,
+        "period": "2005-01-04 to 2026-04-07",
+        "source_file": "experiments/k1014/k1014_results.json",
+        "source_field_path": "dm_tests.HAR-PD vs A4f-N"
+      },
+      {
+        "k_id": "K1054",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-RV",
+        "model_b": "A4f-VIX²",
+        "dm_stat": 2.558874,
+        "p_value": 0.01598296,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1054/k1054_results.json",
+        "source_field_path": "dm_tests.RV (5-min).HAR-RV_vs_A4f-VIX²"
+      },
+      {
+        "k_id": "K1054",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-RV",
+        "model_b": "A4f-VIX²",
+        "dm_stat": 1.449426,
+        "p_value": 0.15794753,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1054/k1054_results.json",
+        "source_field_path": "dm_tests.r² (daily).HAR-RV_vs_A4f-VIX²"
+      },
+      {
+        "k_id": "K1057",
+        "asset": "SPY|VIX",
+        "loss_fn": "MSE",
+        "model_a": "HAR-CJ",
+        "model_b": "A4f-VIX²_r2",
+        "dm_stat": 0.435755,
+        "p_value": 0.66624082,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1057/k1057_results.json",
+        "source_field_path": "dm_tests.HAR-CJ_vs_A4f-VIX²_r2"
+      },
+      {
+        "k_id": "K1057",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-CJ",
+        "model_b": "A4f-VIX²_rv",
+        "dm_stat": -3.949563,
+        "p_value": 0.00045871,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1057/k1057_results.json",
+        "source_field_path": "dm_tests.HAR-CJ_vs_A4f-VIX²_rv"
+      },
+      {
+        "k_id": "K1057",
+        "asset": "SPY|VIX",
+        "loss_fn": "MSE",
+        "model_a": "HAR-C",
+        "model_b": "A4f-VIX²_r2",
+        "dm_stat": 0.378826,
+        "p_value": 0.70757644,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1057/k1057_results.json",
+        "source_field_path": "dm_tests.HAR-C_vs_A4f-VIX²_r2"
+      },
+      {
+        "k_id": "K1057",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-C",
+        "model_b": "A4f-VIX²_rv",
+        "dm_stat": -5.257989,
+        "p_value": 1.238e-05,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1057/k1057_results.json",
+        "source_field_path": "dm_tests.HAR-C_vs_A4f-VIX²_rv"
+      },
+      {
+        "k_id": "K1057",
+        "asset": "SPY|VIX",
+        "loss_fn": "MSE",
+        "model_a": "HAR-RV",
+        "model_b": "A4f-VIX²_r2",
+        "dm_stat": 0.342706,
+        "p_value": 0.73429154,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1057/k1057_results.json",
+        "source_field_path": "dm_tests.HAR-RV_vs_A4f-VIX²_r2"
+      },
+      {
+        "k_id": "K1057",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-RV",
+        "model_b": "A4f-VIX²_rv",
+        "dm_stat": -5.969152,
+        "p_value": 1.73e-06,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1057/k1057_results.json",
+        "source_field_path": "dm_tests.HAR-RV_vs_A4f-VIX²_rv"
+      },
+      {
+        "k_id": "K1063",
+        "asset": "0050.TW|SPY|VIX",
+        "loss_fn": "MSE",
+        "model_a": "HAR-RV",
+        "model_b": "A4f-VIX²_r2",
+        "dm_stat": 0.342706,
+        "p_value": 0.73429154,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1063/k1063_results.json",
+        "source_field_path": "dm_tests.HAR-RV_vs_A4f-VIX²_r2"
+      },
+      {
+        "k_id": "K1063",
+        "asset": "0050.TW|SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-RV",
+        "model_b": "A4f-VIX²_rv",
+        "dm_stat": -5.969152,
+        "p_value": 1.73e-06,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1063/k1063_results.json",
+        "source_field_path": "dm_tests.HAR-RV_vs_A4f-VIX²_rv"
+      },
+      {
+        "k_id": "K1063",
+        "asset": "0050.TW|SPY|VIX",
+        "loss_fn": "MSE",
+        "model_a": "HAR-SV",
+        "model_b": "A4f-VIX²_r2",
+        "dm_stat": 0.408463,
+        "p_value": 0.68593426,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1063/k1063_results.json",
+        "source_field_path": "dm_tests.HAR-SV_vs_A4f-VIX²_r2"
+      },
+      {
+        "k_id": "K1063",
+        "asset": "0050.TW|SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-SV",
+        "model_b": "A4f-VIX²_rv",
+        "dm_stat": -5.82533,
+        "p_value": 2.57e-06,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1063/k1063_results.json",
+        "source_field_path": "dm_tests.HAR-SV_vs_A4f-VIX²_rv"
+      },
+      {
+        "k_id": "K1072",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-RV",
+        "model_b": "A4f-VIX²",
+        "dm_stat": -2.863517,
+        "p_value": 0.00800652,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1072/k1072_results.json",
+        "source_field_path": "a4f_proxy_sensitivity.dm_tests.RK.HAR-RV_vs_A4f-VIX²"
+      },
+      {
+        "k_id": "K1072",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-RV",
+        "model_b": "A4f-VIX²",
+        "dm_stat": -3.497917,
+        "p_value": 0.00164226,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1072/k1072_results.json",
+        "source_field_path": "a4f_proxy_sensitivity.dm_tests.RV_5min.HAR-RV_vs_A4f-VIX²"
+      },
+      {
+        "k_id": "K1072",
+        "asset": "SPY|VIX",
+        "loss_fn": "QLIKE",
+        "model_a": "HAR-RV",
+        "model_b": "A4f-VIX²",
+        "dm_stat": -3.307564,
+        "p_value": 0.00266913,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1072/k1072_results.json",
+        "source_field_path": "a4f_proxy_sensitivity.dm_tests.RV_sub.HAR-RV_vs_A4f-VIX²"
+      },
+      {
+        "k_id": "K1072",
+        "asset": "SPY|VIX",
+        "loss_fn": "MSE",
+        "model_a": "HAR-RV",
+        "model_b": "A4f-VIX²",
+        "dm_stat": 1.511205,
+        "p_value": 0.1423529,
+        "sample_n": null,
+        "period": "",
+        "source_file": "experiments/k1072/k1072_results.json",
+        "source_field_path": "a4f_proxy_sensitivity.dm_tests.r2_daily.HAR-RV_vs_A4f-VIX²"
+      }
+    ]
+  },
+  "source_audit": [
+    {
+      "source_file": "experiments/k1002/k1002_results.json",
+      "source_field_path": "dm_matrix.A4f_N_vs_HAR_ABS",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1002/k1002_results.json",
+      "source_field_path": "dm_matrix.A4f_t_vs_HAR_ABS",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1014/k1014_results.json",
+      "source_field_path": "dm_tests.HAR vs A4f-N",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "har_better",
+      "winner_raw": "HAR",
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1014/k1014_results.json",
+      "source_field_path": "dm_tests.HAR-PD vs A4f-N",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "a4f_better",
+      "winner_raw": "A4f-N",
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1054/k1054_results.json",
+      "source_field_path": "dm_tests.RV (5-min).HAR-RV_vs_A4f-VIX²",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "a4f_better",
+      "winner_raw": null,
+      "direction_raw": "A4f-VIX² better"
+    },
+    {
+      "source_file": "experiments/k1054/k1054_results.json",
+      "source_field_path": "dm_tests.r² (daily).HAR-RV_vs_A4f-VIX²",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "a4f_better",
+      "winner_raw": null,
+      "direction_raw": "A4f-VIX² better"
+    },
+    {
+      "source_file": "experiments/k1057/k1057_results.json",
+      "source_field_path": "dm_tests.HAR-CJ_vs_A4f-VIX²_r2",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1057/k1057_results.json",
+      "source_field_path": "dm_tests.HAR-CJ_vs_A4f-VIX²_rv",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1057/k1057_results.json",
+      "source_field_path": "dm_tests.HAR-C_vs_A4f-VIX²_r2",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1057/k1057_results.json",
+      "source_field_path": "dm_tests.HAR-C_vs_A4f-VIX²_rv",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1057/k1057_results.json",
+      "source_field_path": "dm_tests.HAR-RV_vs_A4f-VIX²_r2",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1057/k1057_results.json",
+      "source_field_path": "dm_tests.HAR-RV_vs_A4f-VIX²_rv",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1063/k1063_results.json",
+      "source_field_path": "dm_tests.HAR-RV_vs_A4f-VIX²_r2",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1063/k1063_results.json",
+      "source_field_path": "dm_tests.HAR-RV_vs_A4f-VIX²_rv",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1063/k1063_results.json",
+      "source_field_path": "dm_tests.HAR-SV_vs_A4f-VIX²_r2",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1063/k1063_results.json",
+      "source_field_path": "dm_tests.HAR-SV_vs_A4f-VIX²_rv",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "unknown",
+      "winner_raw": null,
+      "direction_raw": null
+    },
+    {
+      "source_file": "experiments/k1072/k1072_results.json",
+      "source_field_path": "a4f_proxy_sensitivity.dm_tests.RK.HAR-RV_vs_A4f-VIX²",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "har_better",
+      "winner_raw": null,
+      "direction_raw": "HAR-RV better"
+    },
+    {
+      "source_file": "experiments/k1072/k1072_results.json",
+      "source_field_path": "a4f_proxy_sensitivity.dm_tests.RV_5min.HAR-RV_vs_A4f-VIX²",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "har_better",
+      "winner_raw": null,
+      "direction_raw": "HAR-RV better"
+    },
+    {
+      "source_file": "experiments/k1072/k1072_results.json",
+      "source_field_path": "a4f_proxy_sensitivity.dm_tests.RV_sub.HAR-RV_vs_A4f-VIX²",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "har_better",
+      "winner_raw": null,
+      "direction_raw": "HAR-RV better"
+    },
+    {
+      "source_file": "experiments/k1072/k1072_results.json",
+      "source_field_path": "a4f_proxy_sensitivity.dm_tests.r2_daily.HAR-RV_vs_A4f-VIX²",
+      "source_exists": true,
+      "pair_node_found": true,
+      "pair_temporal_series": [],
+      "source_temporal_series": [],
+      "sidecar_files": [],
+      "direction_label": "a4f_better",
+      "winner_raw": null,
+      "direction_raw": "A4f-VIX² better"
+    }
+  ],
+  "ledger_proxy_diagnostic": {
+    "status": "descriptive_only_not_formal_gr",
+    "n_rows": 20,
+    "abs_dm_mean": 3.40814075,
+    "abs_dm_median": 3.147813,
+    "abs_dm_max": 8.780688,
+    "share_abs_dm_gt_3": 0.5,
+    "dm_stat_sign_counts_unstandardized": {
+      "negative": 11,
+      "positive": 9
+    },
+    "direction_metadata_counts": {
+      "unknown": 12,
+      "har_better": 4,
+      "a4f_better": 4
+    },
+    "loss_fn_counts": {
+      "QLIKE": 14,
+      "MSE": 6
+    },
+    "rows_by_k_id": {
+      "K1002": 2,
+      "K1014": 2,
+      "K1054": 2,
+      "K1057": 6,
+      "K1063": 4,
+      "K1072": 4
+    },
+    "period_counts": {
+      "(blank)": 18,
+      "2005-01-04 to 2026-04-07": 2
+    },
+    "warning": "DM-stat signs are not normalized across source experiments; this block is a coverage/instability diagnostic, not a Giacomini-Rossi fluctuation test."
+  },
+  "conclusion": {
+    "verdict": "METHOD_DIAGNOSIS_NULL",
+    "claim": "The current VolPred DM ledger cannot support a formal Giacomini-Rossi fluctuation test for A4f/CF-Rolling vs HAR. It supports only a summary-stat coverage audit.",
+    "not_supported": [
+      "No claim about regime concentration of A4f or CF-Rolling superiority.",
+      "No claim that the observed DM-stat clustering is a formal instability rejection.",
+      "No publication claim beyond a data-infrastructure diagnosis."
+    ]
+  },
+  "next_steps": [
+    "Extend future DM-producing experiments to save date, model_a_loss, model_b_loss, and loss_diff sidecars.",
+    "Add an optional loss_series_uri field to a future K1259-style ledger schema.",
+    "Re-run the strict Giacomini-Rossi fluctuation test only after raw d_t coverage exists for the target model pair."
+  ],
+  "figure": "experiments/research_giacomini_rossi_fluctuation_test_volpred_dm_ledg/ledger_fluctuation_precondition_audit.png"
+}
