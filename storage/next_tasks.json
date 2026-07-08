@@ -55607,7 +55607,7 @@
     "title": "K1660: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1660 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1660 MZ 校準審計（VolPred HAR/GARCH 預測庫，84 檔 OOS 預測、7 資產、4 家族；realized target = r²（close-to-close），非 Parkinson）。結論（null-adjacent）：(1) 非全面失敗 — 約 31% 預測 well-calibrated，GJR-GARCH 最佳（15/38=39%），level bias 溫和（家族 median fc/r² 1.02–1.13）。(2) 溫和 unconditional over-forecast，與 GARCH 慢速 mean-r",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1660",
@@ -55616,7 +55616,33 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-08T21:07:58+00:00"
+    "created_at": "2026-07-08T21:07:58+00:00",
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-07-08T23:08:49.183942+00:00",
+    "claim_session_id": "ad48dd2013c3",
+    "status_history": [
+      {
+        "ts": "2026-07-08T23:08:49.184251+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-08T23:09:11.947757+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-08T23:18:27.746783+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-07"
+      }
+    ],
+    "started_at": "2026-07-08T23:09:11.947400+00:00",
+    "completed_at": "2026-07-08T23:18:27.746368+00:00",
+    "result": "K1660 MZ 校準審計文章發佈為 draft (mile_836ff0dd, audience=research per content-inference, 2 真圖表, anti-ai PASS)"
   },
   {
     "id": "trending_repost_2026_07_09_七巨頭回檔",
