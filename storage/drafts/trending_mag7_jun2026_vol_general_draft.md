@@ -27,7 +27,7 @@ description: "2026 年 6 月科技七巨頭回檔，用真實收盤價拆給你�
 
 資料來源：yfinance 日收盤價，2026 年 1 月至 7 月 9 日。
 
-![QQQ 2026 走勢與 6 月回檔](../../experiments/trending_mag7_jun2026_vol/fig1_qqq_drawdown.png)
+![QQQ 2026 走勢與 6 月回檔](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mag7jun26_fig1_qqq_drawdown.png)
 
 QQQ 從高點到低點掉 7%，聽起來像小感冒。可是同一段時間，微軟自己跌掉將近四分之一，輝達、META、亞馬遜、蘋果都在 12% 到 14% 之間。指數的 7% 是把這些個股的傷口跟其他一百檔權值攪拌後的結果。
 
@@ -41,7 +41,7 @@ VIX 這段時間的走法是：回檔前大約在 16 點附近晃，6 月 10 日
 
 問題來了。VIX 在 6 月 10 日就見高回落，可是七巨頭大部分在 6 月 25 日才落底。如果你 6 月中看到 VIX 開始降，就判斷「警報解除」，那你會在後半段最難熬的殺盤裡，被自己的持股修理。
 
-![QQQ 已實現波動率 vs VIX](../../experiments/trending_mag7_jun2026_vol/fig2_rv_vs_vix.png)
+![QQQ 已實現波動率 vs VIX](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mag7jun26_fig2_rv_vs_vix.png)
 
 我算了另一個更貼近體感的東西：已實現波動率。白話講，就是「過去這 20 個交易日，價格實際上抖得多厲害」，把它換算成年化的百分比。VIX 是市場對未來的猜測，已實現波動率是實際發生過的事實。
 
@@ -57,7 +57,7 @@ QQQ 的已實現波動率，回檔前是 16.0%，壓力段升到 25.2%，等到 
 
 第三件事，也是我覺得最實用的一點。大家講「科技七巨頭」的時候，語氣好像它們是一個整體。真的把個股的波動攤開來看，它們的差異大到不該被綁在一起討論。
 
-![七巨頭回檔期間已實現波動率排序](../../experiments/trending_mag7_jun2026_vol/fig3_mag7_cross_section.png)
+![七巨頭回檔期間已實現波動率排序](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mag7jun26_fig3_mag7_cross_section.png)
 
 回檔壓力段裡，這七檔的年化已實現波動率是這樣排的：
 
@@ -84,3 +84,13 @@ QQQ 的已實現波動率，回檔前是 16.0%，壓力段升到 25.2%，等到 
 第二，VIX 降下來不等於你的持股不抖了。VIX 講的是市場對未來的預期，通常在殺盤最猛那幾天就見高回落；你帳戶實際感受到的已實現波動率，會拖到價格落底之後才見頂，然後才慢慢退燒。判斷「風暴過了沒」的時候，這兩個時間差值得你多想一步。
 
 六月這波過去了，數字留了下來。指數會說一個溫和的故事，個股會說另一個。信哪個，取決於你手上真正拿著什麼。
+
+## 懶人包圖組
+
+![一句話看懂](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mag7jun26_lp_1_framework.png)
+
+![真實回檔幅度](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mag7jun26_lp_2_drawdown.png)
+
+![時間差陷阱](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mag7jun26_lp_3_timing.png)
+
+![七巨頭離散度](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mag7jun26_lp_4_dispersion.png)

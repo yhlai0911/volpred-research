@@ -1,3 +1,7 @@
+# mile_id: mile_2e91f5bb
+
+## 主貼文
+
 六月那波科技股回檔，我看帳戶的人常有個困惑。
 
 新聞說那斯達克只是小回檔，可是自己的持股跌得很有感。
@@ -19,3 +23,12 @@
 看指數量自己的部位風險，每次都會低估。
 
 你手上拿的是具體幾檔，不是指數。
+
+## 第一則留言（貼連結）
+
+https://volpred.zeabur.app/v3/reports/mile_2e91f5bb
+
+## 圖片
+
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mag7jun26_lp_2_drawdown.png
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mag7jun26_lp_4_dispersion.png

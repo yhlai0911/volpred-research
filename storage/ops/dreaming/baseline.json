@@ -1,28 +1,42 @@
 {
   "schema": "dreaming_baseline.v1",
   "description": "Rolling per-signature consecutive-run strike counts. THREE_STRIKE consecutive runs escalate to critical.",
-  "updated_at": "2026-07-07T22:00:04.722774+00:00",
+  "updated_at": "2026-07-08T22:00:03.711969+00:00",
   "signatures": {
     "memory_skill_gap:uncodified_process": {
-      "strike_count": 11,
+      "strike_count": 12,
       "pattern_type": "memory_skill_gap",
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-07T22:00:04.722774+00:00",
+      "last_seen": "2026-07-08T22:00:03.711969+00:00",
       "activity_marker": null
     },
     "memory_hygiene:consolidation_review": {
-      "strike_count": 11,
+      "strike_count": 12,
       "pattern_type": "memory_hygiene",
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-07T22:00:04.722774+00:00",
+      "last_seen": "2026-07-08T22:00:03.711969+00:00",
       "activity_marker": null
     },
     "persistent_alert:7ecf96ae6fa61592": {
       "strike_count": 1,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-07T22:00:04.722774+00:00",
-      "last_seen": "2026-07-07T22:00:04.722774+00:00",
+      "last_seen": "2026-07-08T22:00:03.711969+00:00",
       "activity_marker": "2026-07-07T04:00:30.203226+00:00"
+    },
+    "persistent_alert:542378afb7b6a3b9": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-08T22:00:03.711969+00:00",
+      "last_seen": "2026-07-08T22:00:03.711969+00:00",
+      "activity_marker": "2026-07-08T11:00:45.159044+00:00"
+    },
+    "persistent_alert:e1aa596aac4a2172": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-08T22:00:03.711969+00:00",
+      "last_seen": "2026-07-08T22:00:03.711969+00:00",
+      "activity_marker": "2026-07-08T11:12:49.817312+00:00"
     }
   }
 }
