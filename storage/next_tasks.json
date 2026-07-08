@@ -54896,5 +54896,181 @@
       "all-covered-fallback"
     ],
     "created_at": "2026-07-08T00:00:03+00:00"
+  },
+  {
+    "id": "daily_digest_20260708",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-08T09:00:06.300456+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ],
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-07-08T01:08:45.447961+00:00",
+    "claim_session_id": "4589355aebf8",
+    "status_history": [
+      {
+        "ts": "2026-07-08T01:08:45.448251+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-08T01:09:00.916697+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-09"
+      }
+    ],
+    "started_at": "2026-07-08T01:09:00.916391+00:00"
+  },
+  {
+    "id": "telegram-289",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-08T01:07:24.505407+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 289）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n稿件不夠，你什麼時候才要寫稿？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-08T01:07:46.144398+00:00",
+    "claim_session_id": "9ad6642af1f8",
+    "status_history": [
+      {
+        "ts": "2026-07-08T01:07:46.144722+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-08T01:09:47.003582+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-08T01:09:47.003288+00:00"
+  },
+  {
+    "id": "research_harq_ohlc",
+    "title": "研究 backlog fallback: 反直覺：HARQ 測量誤差加權在「高噪音日頻 OHLC 代理」下是否反效果？",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 反直覺：HARQ 測量誤差加權在「高噪音日頻 OHLC 代理」下是否反效果？ — 用 Garman-Klass range 近似 realized quarticity，檢定當 proxy 測量誤差本身很大時誤差加權是幫助還是傷害 OOS（HARQ vs HAR，DM-HLN，SPY/0050.TW/TX）；yfinance OHLC（來源：BPQ JoE HARQ 家族仍為 RV 建模主流）。差異化：庫內 HARQ 未落地實作，且此題是 contrarian「代理噪音下反轉」角度。 | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "harq_ohlc",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-08T01:09:00+00:00"
+  },
+  {
+    "id": "research_rp_967c76ba5f",
+    "title": "研究 backlog fallback: 已實現共變異數 HAR → 最小變異組合的樣本外檢定",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 已實現共變異數 HAR → 最小變異組合的樣本外檢定 — 對多資產（TW0050/TSMC/金融股 或 SPY/QQQ/GLD/TLT）用 HAR 直接建模 realized covariance 矩陣（Cholesky/log-matrix 參數化），比對 shrinkage/EWMA 共變異數在 GMV 組合的 OOS 波動與換手；yfinance 日資料（來源：2024-26 HAR-type realized covariance forecasting）。差異化：庫內幾乎全單變量，realized-cov-matrix→組合是新面向，直接服務組合構建產品。 | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "rp_967c76ba5f",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-08T01:09:00+00:00"
+  },
+  {
+    "id": "research_conditional_regime_gated_regime",
+    "title": "研究 backlog fallback: Conditional（regime-gated）波動率目標：只在高波動 regime 才縮曝險",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Conditional（regime-gated）波動率目標：只在高波動 regime 才縮曝險 — 對比「永遠 VT」與「僅在偵測到高波動 regime 時啟動 VT」的淨成本績效，檢定關掉平靜期無謂換手能否改善淨 Sharpe/Calmar；yfinance + 既有 regime 偵測（來源：FAJ Conditional Volatility Targeting）。差異化：與庫內 CED（backward-looking scaler, NULL, line 611）不同——本題是 regime on/off 開關而非連續 tail scaler。 | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "conditional_regime_gated_regime",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-08T01:09:00+00:00"
+  },
+  {
+    "id": "research_volpred_har_garch_mincer_zarnowitz",
+    "title": "研究 backlog fallback: VolPred 自家 HAR/GARCH 預測庫的 Mincer-Zarnowitz 校準審計",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: VolPred 自家 HAR/GARCH 預測庫的 Mincer-Zarnowitz 校準審計 — 對現有模型輸出跑 MZ 迴歸（斜率=1、截距=0）與 forecast-efficiency 檢定，系統性找出哪些模型有系統性高估/低估偏誤並提出 bias-correction；純內部資料零額外成本（來源：Mincer-Zarnowitz 檢驗預測效率為 forecast-eval 標配）。差異化：庫內從未做 calibration 層審計，直接提升所有既有預測可信度。 | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "volpred_har_garch_mincer_zarnowitz",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-08T01:09:00+00:00"
+  },
+  {
+    "id": "research_rp_a02d0a5f75",
+    "title": "研究 backlog fallback: 波動率管理「整個因子動物園」的 OOS 崩潰再驗證",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 波動率管理「整個因子動物園」的 OOS 崩潰再驗證 — Ken French 因子 + yfinance，Moreira-Muir vol-managing 套個別因子（SMB/HML/MOM/QMJ），誠實檢 Cederburg OOS 失效 + Barroso-Detzel 成本後不存活；與 line 50 正交（因子層 × 淨成本）（來源：DeMiguel et al. JF 2024） | 來源 section: 期刊主題挖掘 batch（2026-07-04；**內容飽和觸發** — refill 補不出 fresh reader-facing（所有 uncovered k 皆 arc-dedup 判 dup），hourly-19 派 journal-discovery agent 拓展疆域。刻意鎖 model-class / methodology 軸，避開兩個已飽和 null 弧：「獵奇外生 shock→次日 rv event-window」（k1602/k1604 ~15 連 null）與「新 covariate→har oos 增量」（k1613/k1616-k1619 連 null）。全新模型家族 = 新 k = 非 arc-dup 新文章角度。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "rp_a02d0a5f75",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-08T01:09:00+00:00"
+  },
+  {
+    "id": "research_hedge_fund_treasury_crowding",
+    "title": "研究 backlog fallback: Hedge-fund Treasury crowding 風險定價",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Hedge-fund Treasury crowding 風險定價 — 用 Fed FEDS 2026 hedge-fund U.S. Treasury exposure（大戶 gross exposure 2023→2025 倍增）+ CFTC Treasury futures positioning、FRED rates、TLT/IEF/ZN=F 建 crowding proxy，所有 positioning/funding signals release-lag 後 `shift(1)`，檢定是否領先 Treasury RV、yield jump 與 SPY-TLT correlatio | 來源 section: 期刊主題挖掘 batch 2026-07-05（journal_discovery_20260705_0；websearch fed/feds/imf gfsr/faj/cfa/ssrn 2025-26 趨勢層級；task pool json 修復後派 fresh-context general-purpose agent；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "hedge_fund_treasury_crowding",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-08T01:09:00+00:00"
+  },
+  {
+    "id": "email-11887-f2c177",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] FB 發文修復 + AI估值文補發成功（連4次卡關已根治）",
+    "description": "Gmail UID: 11887\nMessage-ID: <16F276A0-6A84-464B-8E65-278EEDEB648B@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 8 Jul 2026 09:08:33 +0800\nSubject: Re: [VolPred Alert][INFO] FB 發文修復 + AI估值文補發成功（連4次卡關已根治）\n\n--- 用戶回信內容 ---\n立刻解決\r\n\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月8日 08:24 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> FB 發文修復 + AI估值文補發成功（連4次卡關已根治）\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> FB 附圖偵測器修復 + AI估值文 FB 補發成功\r\n> \r\n> 一句話\r\n> \r\n> 昨晚連 4 次 卡住 FB 發文的「附圖數對不上」bug 找到並根治，AI估值×偏斜度那篇已補發到你個人 FB（含 2 張圖 + VolPred 連結）。\r\n> \r\n> 問題（連 4 次 abort，屬 3-strike）\r\n> \r\n> 發文腳本附圖後會數「composer 裡有幾張照片」跟「該附幾張」比對，數不對就中止。這個數法壞了，每次都多算 → 永遠中止。\r\n> \r\n> 真正原因（實地 dump 網頁才看到，之前 4 次都在猜）\r\n> \r\n> 算錯範圍：FB 頁面同時開好幾個彈窗（右上角通知面板 + 發文視窗），舊程式把通知面板裡的小縮圖也一起數進去，所以永遠多 1 張。\r\n> 清照片的按鈕早就失效：舊程式想先清掉殘留照片，但它找的「移除相片」按鈕在 FB 新版介面根本不存在，等於沒清，殘留照片一直疊加。\r\n> 修法\r\n> \r\n> 只數「真正的發文視窗」裡的照片（用「有檔案上傳框＋內文編輯區」精準鎖定那一個視窗），排除通知面板。\r\n> 清照片改點 FB 現有的「移除貼文附件」鈕。\r\n> 現場實測：清空前偵測 4 張 → 清空後 0 → 附 2 張後正好 2 ✓。\r\n> 結果\r\n> \r\n> 試發（不真送）通過、正式發送成功：主文 + 第一則留言（VolPred 連結）都上了，貼文已在你 FB 時間軸。\r\n> 已記 error_log（3-strike 根因）＋ commit。以後 FB 發文不會再被這個假警報擋。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "pending",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-08T01:15:07.162217+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11887,
+    "email_message_id": "<16F276A0-6A84-464B-8E65-278EEDEB648B@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] FB 發文修復 + AI估值文補發成功（連4次卡關已根治）",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
   }
 ]
