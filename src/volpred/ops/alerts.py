@@ -237,7 +237,7 @@ def _format_telegram_alert_text(
     *, level: str, title: str, body: str, max_chars: int = TELEGRAM_ALERT_MAX_CHARS
 ) -> str:
     """Format the Telegram mirror from the same boss-facing alert text as email."""
-    title, body = boss_facing_alert(title, body)
+    title, body = boss_facing_alert(title, body, level)
     level_emoji = _TELEGRAM_LEVEL_EMOJI.get(level, "🔔")
     lines: list[str] = [f"{level_emoji} [{level.upper()}] {title.strip()}"]
 
@@ -304,7 +304,7 @@ def _dispatch_alert_email(
     storage_dir: str,
 ) -> dict[str, Any]:
     notifier = EmailNotifier(storage_dir=storage_dir)
-    display_title, display_body = boss_facing_alert(title, body)
+    display_title, display_body = boss_facing_alert(title, body, level)
     subject = f"[VolPred Alert][{level.upper()}] {display_title}"
     text_body = "\n".join(
         [

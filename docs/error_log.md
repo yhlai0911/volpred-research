@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-08 INFO 完成通知套危機模板 → 老闆讀成 pending 問題回「立刻解決」（boss_facing 不分等級）
+
+**現象**：昨晚 08:24 寄出的 INFO alert「FB 發文修復 + AI估值文補發成功（連4次卡關已根治）」——**內容全是好消息**（bug 已根治、文章已成功發到個人 FB），老闆卻回信「立刻解決」（email-11887）。查 canonical：文章今早 08:20 確實發成功（`fb_post_status=success` + `post_done` 截圖 + claim ledger `state=done`），**通知沒謊報**，事情也沒卡住。
+
+**根因（模板不分 severity）**：`src/volpred/ops/boss_facing.py:boss_facing_alert` 對**所有** alert body 無條件套「## 白話結論 / ## 影響 / ## 行動」三段 prefix，且 fallback 文字全是危機語——`_infer_plain_summary` fallback=「系統偵測到需要處理的**營運風險**」、`_infer_plain_impact` fallback=「**影響**文章品質、讀者信任與流量表現」、`_infer_plain_action` fallback=「依下方**行動清單**處理，完成後讓下一輪巡檢自動解除警報」。INFO 級的「已完成」好消息被包成危機待辦 → 老闆自然回「立刻解決」。違反 `.claude/rules/alert.md` severity taxonomy（INFO 非 breach bucket）+「reserve boss-facing decision language for actual policy decisions」。
+
+**解決（修流程）**：`boss_facing_alert(title, body, level="warn")` 加 `level` 參數；`level=="info"` 時**不套**危機三段 prefix，只保留 jargon→白話翻譯（warn/critical 危機框架完全不變）。兩個 caller（`alerts.py:_format_telegram_alert_text` + `_dispatch_alert_email`）都把 `level` 傳進去。回歸測試：改既有 `test_send_alert_telegram_mirror...`（原斷言 info 有危機 prefix = 錯誤行為，改為斷言無）+ 新增 `test_boss_facing_alert_info_level_skips_crisis_prefix`（warn 保留 / info 跳過）；`test_alerts.py` 37 項全綠。close email 本身走新路徑實測（info 級無危機 prefix）。
+
+**教訓**：(1) 白話化/framing 模組必須吃 severity——同一段「營運風險/行動清單」boilerplate 對 warn/critical 合理、對 info 就是誤導。(2) **我查證時一度誤判成「假宣告」**：先查 `feed.json .details.fb_post_status`（null）就差點下結論「根本沒發」，實際 canonical guard 讀的是**頂層** `.fb_post_status`（success）。→ 驗證 outward-facing 狀態要查「idempotency guard 實際讀的那個欄位」，不是望文生義挑一個同名 nested 欄位；查錯欄位比不查更危險（會產生自信的錯誤結論）。
+
 ## 2026-07-08 fb_realchrome_post 附圖偵測器連 4 次假 ABORT（縮圖 count mismatch）→ 跨 dialog 洩漏 + cleanup selector 失效
 
 **現象**：`fb_realchrome_post.py` 附圖後偵測「縮圖數 thumbs ≠ 附圖數 N」→ ABORT，連 4 次擋住 FB 雙發佈（incident=work_log `fb_mile_e1ff7ef9_ai_skew` 07:26 `fb_post_failed`）。reload/discard 無效。屬同處連續 hang → **3-STRIKE TRIGGER**（第 4 次觸發根因重構，非再 patch）。

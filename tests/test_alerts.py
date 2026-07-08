@@ -301,8 +301,11 @@ def test_send_alert_telegram_mirror_formats_markdown_without_mutating_email_body
     tg_text = str(telegram_calls[0]["text"])
     assert telegram_calls[0]["disable_notification"] is True
     assert tg_text.startswith("ℹ️ [INFO] tg mirror format")
-    assert "📌 白話結論" in tg_text
-    assert "系統偵測到需要處理的營運風險" in tg_text
+    # INFO = 純資訊/完成通知 → 不套「營運風險/行動清單」危機 prefix（2026-07-08 incident）
+    assert "白話結論" not in tg_text
+    assert "系統偵測到需要處理的營運風險" not in tg_text
+    # 真正的 body 內容仍完整流過（白話化翻譯 + 表格保留）
+    assert "觸發條件" in tg_text
     assert "📌 Hourly-22 發送警報 smoke" in tg_text
     assert "🚦 觸發條件" in tg_text
     assert "• queue mirror check" in tg_text
@@ -333,6 +336,34 @@ def test_boss_facing_alert_plainifies_jargon_and_keeps_commands():
     assert "同一天出現超過一篇每日精選導讀" in plain_body
     assert "content_completeness:lazypack_gap" not in plain_body
     assert "uv run volpred ops release-pool-by-settings" in plain_body
+
+
+def test_boss_facing_alert_info_level_skips_crisis_prefix():
+    """INFO 完成/好消息通知不套「營運風險/行動清單」危機 prefix（2026-07-08 incident）。
+
+    昨晚一封 INFO「FB 修復 + 補發成功」通知被套上危機 boilerplate，老闆讀成
+    pending 問題回「立刻解決」。info-level 只保留白話化翻譯，warn/critical 不變。
+    """
+    title = "FB 發文修復 + AI估值文補發成功"
+    body = "\n".join(
+        [
+            "## 一句話",
+            "連 4 次卡關的 FB 發文 bug 已根治，文章已補發。",
+        ]
+    )
+
+    # warn（預設）→ 仍套危機 prefix（既有行為）
+    _, warn_body = boss_facing_alert(title, body, "warn")
+    assert "## 白話結論" in warn_body
+    assert "系統偵測到需要處理的營運風險" in warn_body
+
+    # info → 不套危機 prefix，但白話化仍生效、原始內容完整保留
+    plain_title, info_body = boss_facing_alert(title, body, "info")
+    assert "白話結論" not in info_body
+    assert "系統偵測到需要處理的營運風險" not in info_body
+    assert "依下方行動清單處理" not in info_body
+    assert "一句話" in info_body
+    assert "已根治" in info_body
 
 
 def test_plainify_boss_text_replaces_known_terms_without_touching_paths():

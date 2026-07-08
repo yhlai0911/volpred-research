@@ -55061,7 +55061,7 @@
     "description": "Gmail UID: 11887\nMessage-ID: <16F276A0-6A84-464B-8E65-278EEDEB648B@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 8 Jul 2026 09:08:33 +0800\nSubject: Re: [VolPred Alert][INFO] FB 發文修復 + AI估值文補發成功（連4次卡關已根治）\n\n--- 用戶回信內容 ---\n立刻解決\r\n\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月8日 08:24 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> FB 發文修復 + AI估值文補發成功（連4次卡關已根治）\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> FB 附圖偵測器修復 + AI估值文 FB 補發成功\r\n> \r\n> 一句話\r\n> \r\n> 昨晚連 4 次 卡住 FB 發文的「附圖數對不上」bug 找到並根治，AI估值×偏斜度那篇已補發到你個人 FB（含 2 張圖 + VolPred 連結）。\r\n> \r\n> 問題（連 4 次 abort，屬 3-strike）\r\n> \r\n> 發文腳本附圖後會數「composer 裡有幾張照片」跟「該附幾張」比對，數不對就中止。這個數法壞了，每次都多算 → 永遠中止。\r\n> \r\n> 真正原因（實地 dump 網頁才看到，之前 4 次都在猜）\r\n> \r\n> 算錯範圍：FB 頁面同時開好幾個彈窗（右上角通知面板 + 發文視窗），舊程式把通知面板裡的小縮圖也一起數進去，所以永遠多 1 張。\r\n> 清照片的按鈕早就失效：舊程式想先清掉殘留照片，但它找的「移除相片」按鈕在 FB 新版介面根本不存在，等於沒清，殘留照片一直疊加。\r\n> 修法\r\n> \r\n> 只數「真正的發文視窗」裡的照片（用「有檔案上傳框＋內文編輯區」精準鎖定那一個視窗），排除通知面板。\r\n> 清照片改點 FB 現有的「移除貼文附件」鈕。\r\n> 現場實測：清空前偵測 4 張 → 清空後 0 → 附 2 張後正好 2 ✓。\r\n> 結果\r\n> \r\n> 試發（不真送）通過、正式發送成功：主文 + 第一則留言（VolPred 連結）都上了，貼文已在你 FB 時間軸。\r\n> 已記 error_log（3-strike 根因）＋ commit。以後 FB 發文不會再被這個假警報擋。\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -55071,6 +55071,42 @@
     "email_uid": 11887,
     "email_message_id": "<16F276A0-6A84-464B-8E65-278EEDEB648B@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] FB 發文修復 + AI估值文補發成功（連4次卡關已根治）",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-08T02:08:03.307702+00:00",
+    "claim_session_id": "fe290de1c6bd",
+    "status_history": [
+      {
+        "ts": "2026-07-08T02:08:03.308069+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-08T02:10:40.844761+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-08T02:18:19.744204+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-claude"
+      }
+    ],
+    "started_at": "2026-07-08T02:10:40.844366+00:00",
+    "completed_at": "2026-07-08T02:18:19.743886+00:00",
+    "result": "查證: AI估值文(mile_e1ff7ef9)今早08:20確實已成功發到個人FB(fb_post_status=success+post_done截圖+ledger done)，昨晚通知非假宣告。老闆回信立刻解決之根因=INFO完成通知被boss_facing套危機模板(營運風險/行動清單)讀成pending問題。修BOSS_FACING加level參數(info跳過危機prefix)+2回歸test(37綠)+error_log+已寄close email。建followup platform_ops_fb_permalink_capture補url/posted_at。"
+  },
+  {
+    "id": "platform_ops_fb_permalink_capture",
+    "task_type": "platform_ops",
+    "priority": 4,
+    "status": "pending",
+    "source": "agent_discovered",
+    "title": "fb_realchrome_post 發文成功時抓 permalink + posted_at 回寫 canonical（並回補 mile_e1ff7ef9）",
+    "description": "fb_realchrome_post 發文成功後只寫 fb_post_status=success，未抓貼文 permalink 與 posted_at （mile_e1ff7ef9 今早 08:20 已成功發出但 fb_post_url/fb_posted_at 仍 null）。改法：發文送出後定位剛發出的貼文永久連結（timeline 最新自己貼文的 permalink），連同 posted_at 一併寫進 mark_fb_post_status.update_fb_status；並回補 mile_e1ff7ef9。來源 incident：email-11887 / error_log 2026-07-08 INFO 模板誤導條目末段。",
+    "created_at": "2026-07-08T10:16:00+08:00"
   }
 ]

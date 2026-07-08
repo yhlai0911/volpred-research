@@ -168,11 +168,28 @@ def _infer_plain_action(title: str, body: str) -> str:
     return "依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。"
 
 
-def boss_facing_alert(title: object, body: object) -> tuple[str, str]:
-    """Return plain title/body for alert email and Telegram."""
+def boss_facing_alert(
+    title: object, body: object, level: object = "warn"
+) -> tuple[str, str]:
+    """Return plain title/body for alert email and Telegram.
+
+    ``level`` gates the crisis three-section prefix (## 白話結論 / ## 影響 /
+    ## 行動). Per the alert severity taxonomy INFO is not a breach bucket — an
+    info-level message is an informational / completion notice, not "需要處理的
+    營運風險". Forcing the crisis boilerplate ("依下方行動清單處理，完成後讓下一輪
+    巡檢自動解除警報") onto a good-news notice misleads the boss into thinking a
+    completed task still needs action (2026-07-08 incident: FB-fix success email
+    read as a pending problem → boss replied 「立刻解決」). So info skips the
+    prefix and keeps only jargon→plain translation; warn/critical keep the
+    actionable framing.
+    """
     plain_title = plainify_boss_text(title)
     plain_body = plainify_boss_text(body)
     if not plain_body.strip() or "## 白話結論" in plain_body:
+        return plain_title, plain_body
+
+    if str(level or "").strip().lower() == "info":
+        # INFO = 純資訊/完成通知 → 不套危機 prefix，只保留白話化翻譯
         return plain_title, plain_body
 
     summary = _infer_plain_summary(plain_title, plain_body)
