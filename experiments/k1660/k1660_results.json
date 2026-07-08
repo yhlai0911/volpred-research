@@ -1,0 +1,506 @@
+{
+  "experiment_id": "k1660",
+  "title": "Conditional (regime-gated) volatility targeting vs always-VT: net-of-cost performance",
+  "run_utc": "2026-07-08T09:28:27.744540+00:00",
+  "seed": 42,
+  "lag_convention": "exposure computed at close t (up-to-t info), pos_t=exposure.shift(1) earns ret_t; turnover=|pos.diff()|; no lookahead",
+  "cost_model": "per-turnover single-sided: net = pos*ret - (bps/1e4)*|pos.diff()|",
+  "fairness": "baseline(always-VT) and gated share identical vol forecast, cap, floor, cost, lag; gated only forces exposure=1 in low-vol regime",
+  "assets": {
+    "SPY": {
+      "ticker": "SPY",
+      "period": "2010-01-05 .. 2026-06-30",
+      "n_return_days": 4146,
+      "data_source": "yfinance auto_adjust close",
+      "data_cleaning": {
+        "daily_return_limit": null,
+        "rationale": "none (no price-limit market)",
+        "removed_count": 0,
+        "removed": []
+      },
+      "primary_spec": {
+        "target_vol": 0.15,
+        "exposure_cap": 1.5,
+        "regime_quantile": 0.6,
+        "regime_window": 252,
+        "vol_forecast": "rolling20",
+        "cost_bps": 5.0,
+        "results": {
+          "always_vt": {
+            "ann_return": 0.14362289948408846,
+            "ann_vol": 0.1531877544706434,
+            "sharpe": 0.9531428786628016,
+            "mdd": -0.1901596214607525,
+            "calmar": 0.7552754805716267,
+            "ann_turnover": 6.604027960903707,
+            "n_days": 4125
+          },
+          "buy_hold": {
+            "ann_return": 0.14451065769550153,
+            "ann_vol": 0.1713083597628758,
+            "sharpe": 0.8739901946632062,
+            "mdd": -0.33717262742331944,
+            "calmar": 0.42859546102498036,
+            "ann_turnover": 0.0,
+            "n_days": 4125
+          },
+          "gated_vt": {
+            "ann_return": 0.1304149120575142,
+            "ann_vol": 0.13577373898907905,
+            "sharpe": 0.9711306548436841,
+            "mdd": -0.18907901054013787,
+            "calmar": 0.6897376482189154,
+            "ann_turnover": 3.884831984178838,
+            "n_days": 4125
+          },
+          "tests_gated_vs_alwaysvt": {
+            "mean_daily_net_return_diff": -5.6173719115078105e-05,
+            "nw_hac_tstat": -1.7439470661339678,
+            "nw_hac_pvalue": 0.08116832049387068,
+            "bootstrap_sharpe_diff": {
+              "sharpe_diff_point": 0.017987776180882542,
+              "ci95_lo": -0.08717951407095048,
+              "ci95_hi": 0.125350168064862,
+              "boot_p_two_sided": 0.7172,
+              "B": 10000,
+              "block": 20,
+              "seed": 42
+            },
+            "regime_frac_high": 0.3563636363636364
+          }
+        }
+      },
+      "cost_sensitivity": {
+        "1bps": {
+          "always_vt": {
+            "sharpe": 0.9704043885585141,
+            "calmar": 0.7788477697953109,
+            "mdd": -0.1882870430359862,
+            "ann_turnover": 6.604027960903707
+          },
+          "gated_vt": {
+            "sharpe": 0.98259345817203,
+            "calmar": 0.7058746257051444,
+            "mdd": -0.1872464705379212,
+            "ann_turnover": 3.884831984178838
+          },
+          "buy_hold": {
+            "sharpe": 0.8739901946632062,
+            "calmar": 0.42859546102498036,
+            "mdd": -0.33717262742331944,
+            "ann_turnover": 0.0
+          },
+          "sharpe_diff_gated_minus_vt": 0.012189069613515957,
+          "boot_ci95": {
+            "sharpe_diff_point": 0.012189069613515957,
+            "ci95_lo": -0.09273333958262728,
+            "ci95_hi": 0.11948081614234768,
+            "boot_p_two_sided": 0.7938,
+            "B": 10000,
+            "block": 20,
+            "seed": 42
+          }
+        },
+        "5bps": {
+          "always_vt": {
+            "sharpe": 0.9531428786628016,
+            "calmar": 0.7552754805716267,
+            "mdd": -0.1901596214607525,
+            "ann_turnover": 6.604027960903707
+          },
+          "gated_vt": {
+            "sharpe": 0.9711306548436841,
+            "calmar": 0.6897376482189154,
+            "mdd": -0.18907901054013787,
+            "ann_turnover": 3.884831984178838
+          },
+          "buy_hold": {
+            "sharpe": 0.8739901946632062,
+            "calmar": 0.42859546102498036,
+            "mdd": -0.33717262742331944,
+            "ann_turnover": 0.0
+          },
+          "sharpe_diff_gated_minus_vt": 0.017987776180882542,
+          "boot_ci95": {
+            "sharpe_diff_point": 0.017987776180882542,
+            "ci95_lo": -0.08717951407095048,
+            "ci95_hi": 0.125350168064862,
+            "boot_p_two_sided": 0.7172,
+            "B": 10000,
+            "block": 20,
+            "seed": 42
+          }
+        },
+        "10bps": {
+          "always_vt": {
+            "sharpe": 0.9315614240440224,
+            "calmar": 0.72653488341917,
+            "mdd": -0.19249434544361577,
+            "ann_turnover": 6.604027960903707
+          },
+          "gated_vt": {
+            "sharpe": 0.9567948134719421,
+            "calmar": 0.6700398855514443,
+            "mdd": -0.1913640350002318,
+            "ann_turnover": 3.884831984178838
+          },
+          "buy_hold": {
+            "sharpe": 0.8739901946632062,
+            "calmar": 0.42859546102498036,
+            "mdd": -0.33717262742331944,
+            "ann_turnover": 0.0
+          },
+          "sharpe_diff_gated_minus_vt": 0.02523338942791964,
+          "boot_ci95": {
+            "sharpe_diff_point": 0.02523338942791964,
+            "ci95_lo": -0.07994354869509752,
+            "ci95_hi": 0.1327442913470731,
+            "boot_p_two_sided": 0.6236,
+            "B": 10000,
+            "block": 20,
+            "seed": 42
+          }
+        },
+        "20bps": {
+          "always_vt": {
+            "sharpe": 0.8883848876489834,
+            "calmar": 0.6713489663913891,
+            "mdd": -0.19714386777708848,
+            "ann_turnover": 6.604027960903707
+          },
+          "gated_vt": {
+            "sharpe": 0.9281001831293774,
+            "calmar": 0.632145186542579,
+            "mdd": -0.19591531236076387,
+            "ann_turnover": 3.884831984178838
+          },
+          "buy_hold": {
+            "sharpe": 0.8739901946632062,
+            "calmar": 0.42859546102498036,
+            "mdd": -0.33717262742331944,
+            "ann_turnover": 0.0
+          },
+          "sharpe_diff_gated_minus_vt": 0.039715295480393986,
+          "boot_ci95": {
+            "sharpe_diff_point": 0.039715295480393986,
+            "ci95_lo": -0.06522906253407998,
+            "ci95_hi": 0.14776798743133682,
+            "boot_p_two_sided": 0.4512,
+            "B": 10000,
+            "block": 20,
+            "seed": 42
+          }
+        }
+      },
+      "regime_quantile_sensitivity": {
+        "q0.5": {
+          "regime_frac_high": 0.43927272727272726,
+          "gated_sharpe": 0.9631021377532085,
+          "always_vt_sharpe": 0.9531428786628016,
+          "sharpe_diff": 0.009959259090406958,
+          "gated_turnover": 4.975595750664212,
+          "always_vt_turnover": 6.604027960903707
+        },
+        "q0.6": {
+          "regime_frac_high": 0.3563636363636364,
+          "gated_sharpe": 0.9711306548436841,
+          "always_vt_sharpe": 0.9531428786628016,
+          "sharpe_diff": 0.017987776180882542,
+          "gated_turnover": 3.884831984178838,
+          "always_vt_turnover": 6.604027960903707
+        },
+        "q0.7": {
+          "regime_frac_high": 0.26836363636363636,
+          "gated_sharpe": 0.9765700826932985,
+          "always_vt_sharpe": 0.9531428786628016,
+          "sharpe_diff": 0.023427204030496918,
+          "gated_turnover": 2.938582266738551,
+          "always_vt_turnover": 6.604027960903707
+        },
+        "q0.8": {
+          "regime_frac_high": 0.1823030303030303,
+          "gated_sharpe": 0.9519925743361288,
+          "always_vt_sharpe": 0.9531428786628016,
+          "sharpe_diff": -0.0011503043266727353,
+          "gated_turnover": 2.2234294635742584,
+          "always_vt_turnover": 6.604027960903707
+        }
+      },
+      "cap_volmethod_robustness": {
+        "cap1_rolling20": {
+          "gated_sharpe": 0.9652180836747669,
+          "always_vt_sharpe": 0.9700205769840683,
+          "sharpe_diff": -0.004802493309301381,
+          "gated_calmar": 0.6757480954499265,
+          "always_vt_calmar": 0.6500886473052239
+        },
+        "cap1.5_ewma94": {
+          "gated_sharpe": 0.9442114144371375,
+          "always_vt_sharpe": 0.870312815674118,
+          "sharpe_diff": 0.07389859876301952,
+          "gated_calmar": 0.6640516319959866,
+          "always_vt_calmar": 0.6583538476579934
+        },
+        "cap2_rolling20": {
+          "gated_sharpe": 0.9681981196105961,
+          "always_vt_sharpe": 0.9054299452476516,
+          "sharpe_diff": 0.06276817436294446,
+          "gated_calmar": 0.6886105249999961,
+          "always_vt_calmar": 0.7221000431067277
+        }
+      },
+      "figures": [
+        "equity_curve.png",
+        "exposure_regime.png"
+      ]
+    },
+    "0050.TW": {
+      "ticker": "0050.TW",
+      "period": "2010-01-05 .. 2026-06-30",
+      "n_return_days": 4028,
+      "data_source": "yfinance auto_adjust close",
+      "data_cleaning": {
+        "daily_return_limit": 0.11,
+        "rationale": "TW \u00b17%/\u00b110% price limit \u2192 |ret|>0.11 = yfinance adjustment glitch",
+        "removed_count": 1,
+        "removed": [
+          {
+            "date": "2014-01-02",
+            "ret": -0.7506388772197433
+          }
+        ]
+      },
+      "primary_spec": {
+        "target_vol": 0.15,
+        "exposure_cap": 1.5,
+        "regime_quantile": 0.6,
+        "regime_window": 252,
+        "vol_forecast": "rolling20",
+        "cost_bps": 5.0,
+        "results": {
+          "always_vt": {
+            "ann_return": 0.1465089313482335,
+            "ann_vol": 0.16501508155064892,
+            "sharpe": 0.9114244525498919,
+            "mdd": -0.29456837200862207,
+            "calmar": 0.4973681673602934,
+            "ann_turnover": 8.551911120109283,
+            "n_days": 4007
+          },
+          "buy_hold": {
+            "ann_return": 0.1772329173351772,
+            "ann_vol": 0.18490454452740804,
+            "sharpe": 0.9751836886800783,
+            "mdd": -0.3382762437134267,
+            "calmar": 0.5239295416952822,
+            "ann_turnover": 0.0,
+            "n_days": 4007
+          },
+          "gated_vt": {
+            "ann_return": 0.1350204885528281,
+            "ann_vol": 0.15415827479799205,
+            "sharpe": 0.8990603726657277,
+            "mdd": -0.2940780442006953,
+            "calmar": 0.4591314830041599,
+            "ann_turnover": 4.564290510683135,
+            "n_days": 4007
+          },
+          "tests_gated_vs_alwaysvt": {
+            "mean_daily_net_return_diff": -4.683009672772842e-05,
+            "nw_hac_tstat": -1.5063510339562678,
+            "nw_hac_pvalue": 0.13197708365869665,
+            "bootstrap_sharpe_diff": {
+              "sharpe_diff_point": -0.012364079884164214,
+              "ci95_lo": -0.10843526354905662,
+              "ci95_hi": 0.08684592445786797,
+              "boot_p_two_sided": 0.8228,
+              "B": 10000,
+              "block": 20,
+              "seed": 42
+            },
+            "regime_frac_high": 0.41327676566009486
+          }
+        }
+      },
+      "cost_sensitivity": {
+        "1bps": {
+          "always_vt": {
+            "sharpe": 0.9321280774277898,
+            "calmar": 0.5134879024090839,
+            "mdd": -0.2929665194748502,
+            "ann_turnover": 8.551911120109283
+          },
+          "gated_vt": {
+            "sharpe": 0.9109622904018502,
+            "calmar": 0.46914357116756744,
+            "mdd": -0.2922251053935725,
+            "ann_turnover": 4.564290510683135
+          },
+          "buy_hold": {
+            "sharpe": 0.9751836886800783,
+            "calmar": 0.5239295416952822,
+            "mdd": -0.3382762437134267,
+            "ann_turnover": 0.0
+          },
+          "sharpe_diff_gated_minus_vt": -0.02116578702593963,
+          "boot_ci95": {
+            "sharpe_diff_point": -0.02116578702593963,
+            "ci95_lo": -0.11735171052451909,
+            "ci95_hi": 0.07759070858948533,
+            "boot_p_two_sided": 0.6842,
+            "B": 10000,
+            "block": 20,
+            "seed": 42
+          }
+        },
+        "5bps": {
+          "always_vt": {
+            "sharpe": 0.9114244525498919,
+            "calmar": 0.4973681673602934,
+            "mdd": -0.29456837200862207,
+            "ann_turnover": 8.551911120109283
+          },
+          "gated_vt": {
+            "sharpe": 0.8990603726657277,
+            "calmar": 0.4591314830041599,
+            "mdd": -0.2940780442006953,
+            "ann_turnover": 4.564290510683135
+          },
+          "buy_hold": {
+            "sharpe": 0.9751836886800783,
+            "calmar": 0.5239295416952822,
+            "mdd": -0.3382762437134267,
+            "ann_turnover": 0.0
+          },
+          "sharpe_diff_gated_minus_vt": -0.012364079884164214,
+          "boot_ci95": {
+            "sharpe_diff_point": -0.012364079884164214,
+            "ci95_lo": -0.10843526354905662,
+            "ci95_hi": 0.08684592445786797,
+            "boot_p_two_sided": 0.8228,
+            "B": 10000,
+            "block": 20,
+            "seed": 42
+          }
+        },
+        "10bps": {
+          "always_vt": {
+            "sharpe": 0.8855370990877046,
+            "calmar": 0.47753400912755345,
+            "mdd": -0.29656565149037706,
+            "ann_turnover": 8.551911120109283
+          },
+          "gated_vt": {
+            "sharpe": 0.8841791043784214,
+            "calmar": 0.4468197668184571,
+            "mdd": -0.2963875282487993,
+            "ann_turnover": 4.564290510683135
+          },
+          "buy_hold": {
+            "sharpe": 0.9751836886800783,
+            "calmar": 0.5239295416952822,
+            "mdd": -0.3382762437134267,
+            "ann_turnover": 0.0
+          },
+          "sharpe_diff_gated_minus_vt": -0.0013579947092832167,
+          "boot_ci95": {
+            "sharpe_diff_point": -0.0013579947092832167,
+            "ci95_lo": -0.09756340267635098,
+            "ci95_hi": 0.09805244718934937,
+            "boot_p_two_sided": 0.9956,
+            "B": 10000,
+            "block": 20,
+            "seed": 42
+          }
+        },
+        "20bps": {
+          "always_vt": {
+            "sharpe": 0.8337385995757406,
+            "calmar": 0.4388855090194524,
+            "mdd": -0.3005434817795204,
+            "ann_turnover": 8.551911120109283
+          },
+          "gated_vt": {
+            "sharpe": 0.8544049607339252,
+            "calmar": 0.42285084207155477,
+            "mdd": -0.30098428697089175,
+            "ann_turnover": 4.564290510683135
+          },
+          "buy_hold": {
+            "sharpe": 0.9751836886800783,
+            "calmar": 0.5239295416952822,
+            "mdd": -0.3382762437134267,
+            "ann_turnover": 0.0
+          },
+          "sharpe_diff_gated_minus_vt": 0.020666361158184654,
+          "boot_ci95": {
+            "sharpe_diff_point": 0.020666361158184654,
+            "ci95_lo": -0.07675942939332363,
+            "ci95_hi": 0.12092459577963904,
+            "boot_p_two_sided": 0.6594,
+            "B": 10000,
+            "block": 20,
+            "seed": 42
+          }
+        }
+      },
+      "regime_quantile_sensitivity": {
+        "q0.5": {
+          "regime_frac_high": 0.49263788370351885,
+          "gated_sharpe": 0.9139723152919845,
+          "always_vt_sharpe": 0.9114244525498919,
+          "sharpe_diff": 0.0025478627420926214,
+          "gated_turnover": 5.203482938209384,
+          "always_vt_turnover": 8.551911120109283
+        },
+        "q0.6": {
+          "regime_frac_high": 0.41327676566009486,
+          "gated_sharpe": 0.8990603726657277,
+          "always_vt_sharpe": 0.9114244525498919,
+          "sharpe_diff": -0.012364079884164214,
+          "gated_turnover": 4.564290510683135,
+          "always_vt_turnover": 8.551911120109283
+        },
+        "q0.7": {
+          "regime_frac_high": 0.33216870476665833,
+          "gated_sharpe": 0.892195060425957,
+          "always_vt_sharpe": 0.9114244525498919,
+          "sharpe_diff": -0.01922939212393493,
+          "gated_turnover": 3.821282500719452,
+          "always_vt_turnover": 8.551911120109283
+        },
+        "q0.8": {
+          "regime_frac_high": 0.24282505615173447,
+          "gated_sharpe": 0.8870274622788772,
+          "always_vt_sharpe": 0.9114244525498919,
+          "sharpe_diff": -0.024396990271014718,
+          "gated_turnover": 3.4514798134036138,
+          "always_vt_turnover": 8.551911120109283
+        }
+      },
+      "cap_volmethod_robustness": {
+        "cap1_rolling20": {
+          "gated_sharpe": 0.9118627811486755,
+          "always_vt_sharpe": 0.9280559789905389,
+          "sharpe_diff": -0.01619319784186346,
+          "gated_calmar": 0.4610562320054728,
+          "always_vt_calmar": 0.46138196251298547
+        },
+        "cap1.5_ewma94": {
+          "gated_sharpe": 0.8708622558362542,
+          "always_vt_sharpe": 0.8327704541695279,
+          "sharpe_diff": 0.03809180166672632,
+          "gated_calmar": 0.4417338635151525,
+          "always_vt_calmar": 0.4271462941214371
+        },
+        "cap2_rolling20": {
+          "gated_sharpe": 0.8990603726657277,
+          "always_vt_sharpe": 0.9030737238655654,
+          "sharpe_diff": -0.0040133511998377,
+          "gated_calmar": 0.4591314830041599,
+          "always_vt_calmar": 0.5010637220890471
+        }
+      }
+    }
+  }
+}
