@@ -54818,9 +54818,83 @@
     "id": "fix_fb_realchrome_residual_photo_detector",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "title": "修 fb_realchrome_post residual-photo 偵測器誤判（縮圖 count mismatch 連 4 次 abort）",
     "description": "fb_realchrome_post.py 的 composer 殘留照片偵測 selector 在 FB 新 DOM 下恆誤計 1 個非照片元素為 thumbnail，導致附圖後 count!=附圖數 而 ABORT（reload/discard 無效）。需 dump composer DOM 找出縮圖 selector 實際命中的節點、排除 link-preview 卡片/編輯按鈕，改成只計真實 attached photo。regression：附 N 圖須偵測恰 N。incident=work_log fb_mile_e1ff7ef9_ai_skew / error_log 2026-07-08。draft 待此修好後重發 storage/drafts/fb_mile_e1ff7ef9.md。",
-    "created_at": "2026-07-08T07:27:01+08:00"
+    "created_at": "2026-07-08T07:27:01+08:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-07-08T00:07:39.812788+00:00",
+    "claim_session_id": "7d79d40fc112",
+    "status_history": [
+      {
+        "ts": "2026-07-08T00:07:39.813066+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-08T00:07:45.613598+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-08T00:23:30.693046+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-08"
+      }
+    ],
+    "started_at": "2026-07-08T00:07:45.613173+00:00",
+    "completed_at": "2026-07-08T00:23:30.692646+00:00",
+    "result": "3-strike fix: 附圖偵測跨 dialog 洩漏(通知 dialog 縮圖被計)+cleanup selector 失效(移除相片 label current DOM 不存在)。改 _composer_photo_count 鎖定唯一 file-input+editor composer dialog 計 blob img≥60px + cleanup 用移除貼文附件單鈕。live 驗證 清空前4→cleanup後0→附2後2；dry-run 無 abort；--force 真發成功 fb_mile_e1ff7ef9 雙發佈 canonical→success"
+  },
+  {
+    "id": "K1658",
+    "title": "K1658: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Tre",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1492). Original: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Treasury futures event windows，分離 statement shock 與 press-conference shock，檢定二者對 TLT/IEF/ZN=F 次日 RV、rate-vol skew proxy、tail jump 的不同影響；與 line 1425「聲明/紀要語言複雜度」正交——這裡是同日兩階段 market-reaction 分解，不是文本可讀性 level（來源：Fed FEDS 2026-029 “Coarse Statements and Predictive Pressers”）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1658.py with signal.shift(1) + seed=42, (c) K1658_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1492,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-08T00:00:01Z"
+  },
+  {
+    "id": "K1659",
+    "title": "K1659: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1510). Original: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1659.py with signal.shift(1) + seed=42, (c) K1659_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1510,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-08T00:00:01Z"
+  },
+  {
+    "id": "journal_discovery_20260708_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-07-08T00:00:03+00:00"
   }
 ]

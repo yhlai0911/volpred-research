@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-08 fb_realchrome_post 附圖偵測器連 4 次假 ABORT（縮圖 count mismatch）→ 跨 dialog 洩漏 + cleanup selector 失效
+
+**現象**：`fb_realchrome_post.py` 附圖後偵測「縮圖數 thumbs ≠ 附圖數 N」→ ABORT，連 4 次擋住 FB 雙發佈（incident=work_log `fb_mile_e1ff7ef9_ai_skew` 07:26 `fb_post_failed`）。reload/discard 無效。屬同處連續 hang → **3-STRIKE TRIGGER**（第 4 次觸發根因重構，非再 patch）。
+
+**根因（實地 DOM dump 證實兩個結構性缺陷）**：舊偵測 `page.locator("div[role='dialog'] img[src^='blob:'], ...img[src^='data:']").count()` 有兩致命問題——
+1. **`div[role='dialog']` 不唯一**：FB 頁面同時開多個 dialog（通知面板 `aria=通知` + composer `aria=建立貼文`）。舊 selector 跨**所有** dialog 累加 blob/data img → 通知 dialog 的縮圖被計進來（+1），thumbs 恆 > N（實測附 2 圖：通知 dialog blob=1 + composer 內 4 = 累加後恆 mismatch）。
+2. **cleanup selector 早已失效**：清殘留照片用 `移除相片`/`移除照片`/`Remove photo` aria-label，但 current FB DOM **無此 label**（每張照片無獨立 remove 鈕）→ cleanup 空操作 → dry-run 累積的殘留照片一直疊加（composer 內累到 4 張）。
+
+**解決（修流程 + 3 層根因，已 live-composer 端到端驗證）**：
+- 新增 module-level `_composer_photo_count(page)`：JS 先鎖定**唯一**同時有 `input[type='file']` + `div[role='textbox'][contenteditable='true']` 的 composer dialog（排除通知/其他 dialog），只計其中 `blob:` img 且渲染尺寸 ≥60px（排除 0×0 svg/data 圖示）= 真實照片 tile 數。
+- cleanup 改點單一「移除貼文附件」(`aria-label='移除貼文附件'` / `Remove attachment`) 鈕——current DOM 的「移除全部附件」按鈕，一次清空。
+- 附圖後 poll ≤6s 至 count 達 N（吸收 tile render 延遲）。
+- 驗證序列（同一 live composer）：清空前偵測 4 → 點移除附件後 **0** → 附 2 張後 **2** ✓；`--post --dry-run` 端到端抵達 DRY-RUN stop 無 ABORT；`--force` 真發成功（composer 照片偵測 2、主文+第一則留言送出、canonical fb_post_status→success、profile timeline body 確認含貼文文字）。
+
+**教訓**：(1) FB DOM 的 `div[role='dialog']` **從來不是單一**——任何 composer 內元素計數必先 scope 到「有 file input + editor」的那個 dialog，`div[role='dialog'] X` 會跨通知/留言/其他彈窗誤計。(2) 依賴 aria-label 的 selector 是 FB 改版最脆弱點；count-based gate 失效時先 dump DOM 確認 selector 實際命中什麼節點（本案 4 次 patch 前都沒 dump，只在猜 selector）。(3) cleanup 空操作是 silent 的——殘留累積無 trace；改用「移除全部附件」單鈕 + 計數 log 讓殘留可觀測。
+
 ## 2026-07-08 boss report 假紅色告警「hourly_dispatch 已 miss 79.5h」→ cron_review 漏跟 7/4 daemon cutover
 
 **現象**：老闆 email-11870 回信引用 boss report（01:00）的 🔴「hourly_dispatch: 上次完成 80.4h 前；預期 2026-07-08 00:07 該 fire（已 miss 79.5h）」，問「這個不立即處理嗎？」。實查 dispatch backbone：`com.volpred.dispatch-supervisor` daemon 活著（PID 89010），此刻正在跑 current_job，`dispatch_state.json` 94 筆 completions、最近一班 01:07 fire→01:11 完成 exit 0 success——**dispatch 100% 健康，告警是假的**。

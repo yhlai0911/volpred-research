@@ -281,6 +281,28 @@ def _connect(pw):
     return pw.chromium.connect_over_cdp(CDP_BASE)
 
 
+# 2026-07-08 3-strike fix — 真實 attached-photo 計數（fb_mile_e1ff7ef9 連 4 次 ABORT root cause）。
+# 舊做法 `div[role='dialog'] img[blob/data]` 跨所有 dialog 累加（含通知 dialog 的縮圖）→ 恆 >N。
+# 正解：scope 到唯一同時有 file input + contenteditable editor 的 composer dialog，計其中 blob:
+# img 且渲染尺寸 ≥60px（排除 0×0 svg/data 圖示）。live DOM 驗證：清空前 4→cleanup 後 0→附 2 後 2。
+_COMPOSER_PHOTO_COUNT_JS = """() => {
+  const dlgs = [...document.querySelectorAll("div[role='dialog']")];
+  const comp = dlgs.find(d =>
+    d.querySelector("input[type='file']") &&
+    d.querySelector("div[role='textbox'][contenteditable='true']"));
+  if (!comp) return -1;
+  return [...comp.querySelectorAll("img[src^='blob:']")].filter(img => {
+    const r = img.getBoundingClientRect();
+    return r.width >= 60 && r.height >= 60;
+  }).length;
+}"""
+
+
+def _composer_photo_count(page) -> int:
+    """回 composer dialog 內真實 attached photo 數；找不到 composer 回 -1。"""
+    return page.evaluate(_COMPOSER_PHOTO_COUNT_JS)
+
+
 def _get_or_open_fb_page(browser):
     """在既有 context 找 facebook.com 分頁；沒有就開新分頁導到個人頁。
 
@@ -616,40 +638,54 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
                 browser.close()
                 return 8
             try:
-                # 2026-07-07 T2 fix：set_input_files 是「新增」不是「取代」— 若 composer
-                # 已還原上一輪 dry-run 的照片（FB 自動存草稿），會 2 舊 + 3 新 = 5 張，
-                # 重現老闆「圖片重複」抱怨。附圖前先清掉所有既存照片縮圖。
-                for _ in range(12):
+                # 2026-07-08 3-strike fix（fb_mile_e1ff7ef9 連 4 次 ABORT root cause）：
+                # 舊偵測 `div[role='dialog'] img[blob/data]` 有兩個致命缺陷，實 DOM dump 證實：
+                #   (1) `div[role='dialog']` 不唯一 — 頁面同時有通知/其他 dialog，其 blob 縮圖
+                #       被跨 dialog 累加（notif dialog=+1）→ thumbs 恆 > N。
+                #   (2) 舊 cleanup 用 `移除相片`/`Remove photo` aria-label，但 current DOM 無此
+                #       label（每張照片無獨立 remove 鈕），cleanup 空操作 → 殘留照片累積。
+                # 修法（已 live-composer 驗證：清空前 4 → cleanup 後 0 → 附 2 後 2）：
+                #   - scope 到唯一同時有 file input + editor 的 composer dialog（排除通知 dialog）
+                #   - cleanup 點單一「移除貼文附件」鈕（一次清空全部附件）
+                #   - 計 composer 內 blob: img 且渲染尺寸≥60px（排除 0×0 svg/data 圖示）= 真實張數
+                for _ in range(6):
                     rm = page.locator(
-                        "div[role='dialog'] [aria-label^='移除相片'], div[role='dialog'] [aria-label^='移除照片'], div[role='dialog'] [aria-label^='Remove photo']"
+                        "div[role='dialog'] [aria-label='移除貼文附件'], "
+                        "div[role='dialog'] [aria-label='Remove attachment']"
                     ).first
                     if rm.count() == 0 or not rm.is_visible():
                         break
                     rm.click(timeout=4_000)
-                    page.wait_for_timeout(500)
-                pre = page.locator(
-                    "div[role='dialog'] img[src^='blob:'], div[role='dialog'] img[src^='data:']"
-                ).count()
+                    page.wait_for_timeout(700)
+                pre = _composer_photo_count(page)
                 if pre > 0:
                     print(f"[INFO] 清除既存 composer 照片後仍偵測 {pre} 張殘留（將於附圖後校驗總數）")
+                elif pre < 0:
+                    print("[ABORT] 找不到 composer dialog（無 file input + editor）→ 不發")
+                    browser.close()
+                    return 8
                 finp = page.locator("div[role='dialog'] input[type='file']").first
                 if finp.count() == 0:
                     finp = page.locator("input[type='file']").first
                 finp.set_input_files(local)
                 page.wait_for_timeout(3_000 + 1_500 * len(local))  # 等縮圖上傳
-                thumbs = page.locator(
-                    "div[role='dialog'] img[src^='blob:'], div[role='dialog'] img[src^='data:']"
-                ).count()
+                # 照片 tile 可能稍晚 render；poll 至達 N 或穩定（≤6s 額外等待）
+                thumbs = _composer_photo_count(page)
+                for _ in range(6):
+                    if thumbs >= len(local):
+                        break
+                    page.wait_for_timeout(1_000)
+                    thumbs = _composer_photo_count(page)
                 shot = SHOT_DIR / f"post_with_images_{int(time.time())}.png"
                 page.screenshot(path=str(shot))
-                print(f"[INFO] 已附 {len(local)} 張圖（縮圖偵測 {thumbs}），截圖 {shot}")
+                print(f"[INFO] 已附 {len(local)} 張圖（composer 照片偵測 {thumbs}），截圖 {shot}")
                 if thumbs == 0:
-                    print("[ABORT] 附圖後偵測不到縮圖 → 不發（主貼文必附圖）")
+                    print("[ABORT] 附圖後 composer 偵測不到照片 → 不發（主貼文必附圖）")
                     browser.close()
                     return 8
                 if thumbs != len(local):
-                    print(f"[ABORT] 縮圖數 {thumbs} ≠ 附圖數 {len(local)}（有殘留/重複照片）→ 不發，"
-                          "避免重現「圖片重複」；截圖 {shot}")
+                    print(f"[ABORT] composer 照片數 {thumbs} ≠ 預期 {len(local)}（有殘留/重複照片）→ 不發，"
+                          f"避免重現「圖片重複」；截圖 {shot}")
                     browser.close()
                     return 8
             except Exception as e:  # noqa: BLE001
