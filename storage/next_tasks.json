@@ -53268,7 +53268,7 @@
     "title": "研究 backlog fallback: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Christoffersen/e-backtest；平台無 score-driven 類（來源：J. Econometrics 2026 Catania 等 + IJASEIT 2025 GAS-1F） | 來源 section: 期刊主題挖掘 batch（2026-07-04；**內容飽和觸發** — refill 補不出 fresh reader-facing（所有 uncovered k 皆 arc-dedup 判 dup），hourly-19 派 journal-discovery agent 拓展疆域。刻意鎖 model-class / methodology 軸，避開兩個已飽和 null 弧：「獵奇外生 shock→次日 rv event-window」（k1602/k1604 ~15 連 null）與「新 covariate→har oos 增量」（k1613/k1616-k1619 連 null）。全新模型家族 = 新 k = 非 arc-dup 新文章角度。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -53316,11 +53316,26 @@
         "to": "pending",
         "by": "hourly-17",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-08T15:11:55.520863+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-08T15:12:16.225707+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-23"
       }
     ],
-    "started_at": "2026-07-07T09:11:58.458188+00:00",
+    "started_at": "2026-07-08T15:12:16.225299+00:00",
     "last_released_at": "2026-07-07T10:18:05.065945+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-07-08T15:11:55.520515+00:00",
+    "claim_session_id": "8d34ddc39093"
   },
   {
     "id": "research_evt_pot_gpd_garch_filter_es_e_backtesting",
@@ -54949,7 +54964,7 @@
     "title": "K1658: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Tre",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1492). Original: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Treasury futures event windows，分離 statement shock 與 press-conference shock，檢定二者對 TLT/IEF/ZN=F 次日 RV、rate-vol skew proxy、tail jump 的不同影響；與 line 1425「聲明/紀要語言複雜度」正交——這裡是同日兩階段 market-reaction 分解，不是文本可讀性 level（來源：Fed FEDS 2026-029 “Coarse Statements and Predictive Pressers”）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1658.py with signal.shift(1) + seed=42, (c) K1658_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -54958,7 +54973,11 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-08T00:00:01Z"
+    "created_at": "2026-07-08T00:00:01Z",
+    "blocked_until": "2026-07-22T15:11:22+00:00",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-07-08T15:11:22+00:00",
+    "blocked_note": "需 intraday FOMC statement(14:00 ET) vs press-conference(14:30 ET) 兩階段分割 + 多年 Treasury futures event-window intraday 資料；data/ 無此資料，日頻無法分離兩階段 shock，核心假設不可測。待取得 intraday 資料源再解封。"
   },
   {
     "id": "K1659",
