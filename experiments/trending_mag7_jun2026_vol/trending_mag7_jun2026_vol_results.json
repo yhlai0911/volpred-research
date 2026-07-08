@@ -1,0 +1,244 @@
+{
+  "meta": {
+    "data_source": "yfinance (auto_adjust=True, close-to-close)",
+    "period": "2026-01-01 ~ 2026-07-09",
+    "tickers_requested": [
+      "QQQ",
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "GOOGL",
+      "AMZN",
+      "META",
+      "TSLA",
+      "^VIX",
+      "^VVIX"
+    ],
+    "tickers_available": [
+      "QQQ",
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "GOOGL",
+      "AMZN",
+      "META",
+      "TSLA",
+      "^VIX",
+      "^VVIX"
+    ],
+    "tickers_missing": [],
+    "rv_method": "20d rolling std of daily log return x sqrt(252), percent",
+    "n_trading_days": 129
+  },
+  "drawdown_june2026": {
+    "QQQ": {
+      "peak_date": "2026-06-02",
+      "peak": 745.34,
+      "trough_date": "2026-06-10",
+      "trough": 692.93,
+      "drawdown_pct": -7.03
+    },
+    "AAPL": {
+      "peak_date": "2026-06-02",
+      "peak": 315.2,
+      "trough_date": "2026-06-25",
+      "trough": 275.15,
+      "drawdown_pct": -12.71
+    },
+    "MSFT": {
+      "peak_date": "2026-06-01",
+      "peak": 460.52,
+      "trough_date": "2026-06-25",
+      "trough": 352.83,
+      "drawdown_pct": -23.38
+    },
+    "NVDA": {
+      "peak_date": "2026-06-01",
+      "peak": 224.36,
+      "trough_date": "2026-06-26",
+      "trough": 192.53,
+      "drawdown_pct": -14.19
+    },
+    "GOOGL": {
+      "peak_date": "2026-06-01",
+      "peak": 376.15,
+      "trough_date": "2026-06-26",
+      "trough": 337.39,
+      "drawdown_pct": -10.3
+    },
+    "AMZN": {
+      "peak_date": "2026-06-01",
+      "peak": 261.26,
+      "trough_date": "2026-06-25",
+      "trough": 227.01,
+      "drawdown_pct": -13.11
+    },
+    "META": {
+      "peak_date": "2026-06-04",
+      "peak": 626.99,
+      "trough_date": "2026-06-25",
+      "trough": 542.87,
+      "drawdown_pct": -13.42
+    },
+    "TSLA": {
+      "peak_date": "2026-06-02",
+      "peak": 423.74,
+      "trough_date": "2026-06-25",
+      "trough": 375.12,
+      "drawdown_pct": -11.47
+    }
+  },
+  "drawdown_mid_may_to_jul": {
+    "QQQ": {
+      "peak_date": "2026-06-02",
+      "peak": 745.34,
+      "trough_date": "2026-06-10",
+      "trough": 692.93,
+      "drawdown_pct": -7.03
+    },
+    "AAPL": {
+      "peak_date": "2026-06-02",
+      "peak": 315.2,
+      "trough_date": "2026-06-25",
+      "trough": 275.15,
+      "drawdown_pct": -12.71
+    },
+    "MSFT": {
+      "peak_date": "2026-06-01",
+      "peak": 460.52,
+      "trough_date": "2026-06-25",
+      "trough": 352.83,
+      "drawdown_pct": -23.38
+    },
+    "NVDA": {
+      "peak_date": "2026-05-15",
+      "peak": 225.32,
+      "trough_date": "2026-06-26",
+      "trough": 192.53,
+      "drawdown_pct": -14.55
+    },
+    "GOOGL": {
+      "peak_date": "2026-05-18",
+      "peak": 396.7,
+      "trough_date": "2026-06-26",
+      "trough": 337.39,
+      "drawdown_pct": -14.95
+    },
+    "AMZN": {
+      "peak_date": "2026-05-28",
+      "peak": 274.0,
+      "trough_date": "2026-06-25",
+      "trough": 227.01,
+      "drawdown_pct": -17.15
+    },
+    "META": {
+      "peak_date": "2026-05-28",
+      "peak": 634.7,
+      "trough_date": "2026-06-25",
+      "trough": 542.87,
+      "drawdown_pct": -14.47
+    },
+    "TSLA": {
+      "peak_date": "2026-05-28",
+      "peak": 442.1,
+      "trough_date": "2026-06-25",
+      "trough": 375.12,
+      "drawdown_pct": -15.15
+    }
+  },
+  "regime_note": "regime cut points = Mag7 consensus: peak 2026-06-01, trough 2026-06-25. QQQ index bottomed earlier (2026-06-10, -7%) then chopped; single names fell deeper and bottomed 2026-06-25/26.",
+  "realized_vol_segments": {
+    "QQQ": {
+      "before_peak": 16.0,
+      "during_selloff": 25.18,
+      "after_trough": 33.12
+    },
+    "AAPL": {
+      "before_peak": 22.25,
+      "during_selloff": 22.57,
+      "after_trough": 36.2
+    },
+    "MSFT": {
+      "before_peak": 29.89,
+      "during_selloff": 36.91,
+      "after_trough": 39.77
+    },
+    "NVDA": {
+      "before_peak": 39.95,
+      "during_selloff": 44.78,
+      "after_trough": 41.86
+    },
+    "GOOGL": {
+      "before_peak": 38.54,
+      "during_selloff": 29.62,
+      "after_trough": 34.42
+    },
+    "AMZN": {
+      "before_peak": 22.62,
+      "during_selloff": 29.88,
+      "after_trough": 36.99
+    },
+    "META": {
+      "before_peak": 38.66,
+      "during_selloff": 38.3,
+      "after_trough": 48.52
+    },
+    "TSLA": {
+      "before_peak": 39.32,
+      "during_selloff": 47.03,
+      "after_trough": 58.26
+    }
+  },
+  "segment_dates": {
+    "before_peak": [
+      "2026-04-30",
+      "2026-06-01"
+    ],
+    "during_selloff": [
+      "2026-06-01",
+      "2026-06-25"
+    ],
+    "after_trough": [
+      "2026-06-25",
+      "2026-07-09"
+    ]
+  },
+  "vix": {
+    "level_at_peak": 16.05,
+    "avg_before": 16.24,
+    "peak_during_selloff": 22.22,
+    "peak_during_selloff_date": "2026-06-10",
+    "level_at_trough": 18.89,
+    "latest": 16.9,
+    "latest_date": "2026-07-08",
+    "ytd_min": 14.49,
+    "ytd_max": 31.05
+  },
+  "vvix": {
+    "level_at_peak": 91.6,
+    "peak_during_selloff": 108.16,
+    "latest": 91.38
+  },
+  "cross_section_rv_during_selloff": {
+    "TSLA": 47.03,
+    "NVDA": 44.78,
+    "META": 38.3,
+    "MSFT": 36.91,
+    "AMZN": 29.88,
+    "GOOGL": 29.62,
+    "AAPL": 22.57
+  },
+  "cross_section_stats": {
+    "highest": {
+      "ticker": "TSLA",
+      "rv": 47.03
+    },
+    "lowest": {
+      "ticker": "AAPL",
+      "rv": 22.57
+    },
+    "spread": 24.46,
+    "mean": 35.58,
+    "std_across_names": 8.78
+  }
+}
