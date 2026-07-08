@@ -38126,5 +38126,20 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-07-09T03:51:56.561522"
+  },
+  {
+    "item_id": "e3063187",
+    "category": "methodology",
+    "content": "VRP 的『水位 (level)』與『變化 (change/innovation)』自相關必須分開講，否則會誤把持續的 level 說成隨機遊走。重算 K913 VRP (= iv-rv_22d, variance-space, N=5112, SPY 2005-2026): level ACF(1)=0.9267 (精確重現 K913 acf_1=0.9267，高度持續)；Δvrp (一階差分) ACF(1)=-0.2128 (輕微均值回歸，非隨機遊走)。教訓：文章寫 VRP『日自相關 0.20、接近隨機遊走、今天告訴不了明天』是把 change ACF 的絕對值誤植且詮釋錯——level 0.93 代表今天保費水位高度預示明天 (這也是 K913 GARCH 溫度計 level 相關 0.82 有效的原因)。正確框架：水位高度持續、變化近均值回歸、飆升時機難擇時。verdict=CONDITIONAL_PASS (reviewer=code-reviewer subagent fallback, Codex quota reset 7/11 後可依 K1259 教訓二次驗證)。",
+    "evidence": [
+      "experiment: experiments/k913/k913_erratum_vrp_change_acf.py",
+      "results: experiments/k913/k913_erratum_vrp_change_acf_results.json (level_acf.lag_1=0.926699, change_acf.lag_1=-0.212853)",
+      "source K: K913 (vrp_autocorrelation.acf_1=0.9267585)",
+      "reviewer: code-reviewer subagent fallback (Codex down until 7/11) — verdict PASS on verification script",
+      "erratum task: content_erratum_vrp_autocorr_74b80c0d_8fc743b5",
+      "fixed articles: mile_8fc743b5, mile_74b80c0d, mile_b1b1d928"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-07-09T05:25:31.474298"
   }
 ]

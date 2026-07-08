@@ -130,5 +130,54 @@ def test_sync_full_ignores_stale_single_report_content(tmp_path, monkeypatch):
     assert synced[0]["content"] != "STALE SINGLE CONTENT"
 
 
+def _capture_select_rows(monkeypatch, total_rows: int):
+    """Mock _request_json so _select_rows pages over `total_rows` synthetic rows.
+
+    Returns (rows, urls) after invoking _select_rows("articles", order_by="id").
+    """
+    all_rows = [{"id": i, "slug": f"mile_{i:04d}"} for i in range(total_rows)]
+    urls: list[str] = []
+
+    def fake_request_json(url, method="GET", data=None):
+        urls.append(url)
+        # Parse limit/offset out of the URL to serve the right slice.
+        import urllib.parse as _up
+
+        q = _up.parse_qs(_up.urlparse(url).query)
+        limit = int(q["limit"][0])
+        offset = int(q["offset"][0])
+        return all_rows[offset : offset + limit]
+
+    monkeypatch.setattr(supabase_sync, "_request_json", fake_request_json)
+    rows = supabase_sync._select_rows("articles", select="id,slug", order_by="id")
+    return rows, urls
+
+
+def test_select_rows_paginates_beyond_1000(monkeypatch):
+    # 1966 rows (the real articles-table count that exposed the cap bug) must
+    # all be returned, not just the first PostgREST page of 1000.
+    rows, urls = _capture_select_rows(monkeypatch, 1966)
+    assert len(rows) == 1966
+    assert [r["id"] for r in rows] == list(range(1966))  # no gaps / dupes
+    assert len(urls) == 2  # page0 (1000) + page1 (966, short → stop)
+    # Race-safe ordering must be present on every paged request.
+    assert all("order=id" in u for u in urls)
+
+
+def test_select_rows_exact_1000_boundary(monkeypatch):
+    # Exactly page_size rows: first full page, then one empty page terminates
+    # the loop — no infinite loop, no dropped rows.
+    rows, urls = _capture_select_rows(monkeypatch, 1000)
+    assert len(rows) == 1000
+    assert len(urls) == 2  # full page + empty page
+    assert urls[1].endswith("offset=1000")
+
+
+def test_select_rows_single_short_page(monkeypatch):
+    rows, urls = _capture_select_rows(monkeypatch, 137)
+    assert len(rows) == 137
+    assert len(urls) == 1  # short first page stops immediately
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))

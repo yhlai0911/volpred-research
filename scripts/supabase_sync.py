@@ -182,13 +182,46 @@ def _request_json(url: str, method: str = "GET", data: list | dict | None = None
         return json.loads(body)
 
 
-def _select_rows(table: str, *, select: str = "*", **filters: object) -> list[dict]:
+def _select_rows(
+    table: str,
+    *,
+    select: str = "*",
+    order_by: str | None = None,
+    **filters: object,
+) -> list[dict]:
+    # PostgREST caps a single response at max-rows (default 1000). Without
+    # pagination, tables larger than the cap silently return only the first
+    # page — which made feed_sync.compute_diff() treat every article beyond
+    # row 1000 as a spurious INSERT and every real DB row missing from the
+    # truncated view as a false DELETE (2026-07-09 content-erratum incident:
+    # feed=1766 db=1000 → 892 fake inserts / 126 fake deletes). Page through
+    # with limit/offset until a short page signals the end.
+    #
+    # order_by: stable sort key(s) for race-safe offset pagination. Without a
+    # deterministic ORDER BY, a concurrent insert/delete before the current
+    # offset boundary can silently skip or duplicate exactly one row across
+    # page requests — reintroducing the same "row missing from DB view" symptom
+    # this fix targets. Multi-page callers MUST pass a primary/unique key
+    # (e.g. "id", or composite "article_id,tag_id"). Single-page tables
+    # (<1000 rows) are unaffected either way.
     query = _build_filter_query(filters)
-    url = f"{SUPABASE_URL}/rest/v1/{table}?select={quote(select, safe=',*')}"
+    base = f"{SUPABASE_URL}/rest/v1/{table}?select={quote(select, safe=',*')}"
     if query:
-        url = f"{url}&{query}"
-    data = _request_json(url, method="GET")
-    return data if isinstance(data, list) else []
+        base = f"{base}&{query}"
+    if order_by:
+        base = f"{base}&order={quote(order_by, safe=',.')}"
+    page_size = 1000
+    offset = 0
+    rows: list[dict] = []
+    while True:
+        url = f"{base}&limit={page_size}&offset={offset}"
+        data = _request_json(url, method="GET")
+        page = data if isinstance(data, list) else []
+        rows.extend(page)
+        if len(page) < page_size:
+            break
+        offset += page_size
+    return rows
 
 
 def _select_rows_in(table: str, column: str, values: list[str], *, select: str = "*") -> list[dict]:

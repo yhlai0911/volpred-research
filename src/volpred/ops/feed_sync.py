@@ -59,7 +59,7 @@ def _fetch_supabase_article_tags() -> dict[str, list[str]]:
     2026-04-26 moved K-ids from tags into details.experiment_refs but
     feed-sync reported update=0 because no projected field changed).
     """
-    article_rows = _select_rows("articles", select="id,slug")
+    article_rows = _select_rows("articles", select="id,slug", order_by="id")
     article_id_to_slug: dict[str, str] = {
         str(row["id"]): row["slug"]
         for row in article_rows
@@ -68,8 +68,10 @@ def _fetch_supabase_article_tags() -> dict[str, list[str]]:
     if not article_id_to_slug:
         return {}
 
-    join_rows = _select_rows("article_tags", select="article_id,tag_id")
-    tag_rows = _select_rows("tags", select="id,name")
+    join_rows = _select_rows(
+        "article_tags", select="article_id,tag_id", order_by="article_id,tag_id"
+    )
+    tag_rows = _select_rows("tags", select="id,name", order_by="id")
     tag_id_to_name: dict[str, str] = {
         str(row["id"]): str(row["name"])
         for row in tag_rows
@@ -125,6 +127,7 @@ def _fetch_supabase_articles() -> dict[str, dict]:
     rows = _select_rows(
         "articles",
         select="slug,status,title,published_at,updated_at,content,details",
+        order_by="id",
     )
     return {r["slug"]: r for r in rows if r.get("slug")}
 

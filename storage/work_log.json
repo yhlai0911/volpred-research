@@ -15016,5 +15016,17 @@
     "verdict": "CONDITIONAL_PASS",
     "summary": "Codex quota 用盡(reset 7/11)→fallback code-reviewer subagent 獨立審+主線程核對。驗證通過: K913 skew-7.17/pct+85.7%/N5091, K1452 隔夜+.00252/盤中+.00679, K833 SPY sharpe3.69/win76%. 3 findings→建 content_erratum follow-up: (1)VRP日自相關para54寫0.20隨機遊走 vs K913 acf_1=0.93持續(邏輯矛盾,需查源實驗確認level/change) (2)para28波動點+8.4/9.2/7.1 K833無此欄位 (3)para26 QQQ81% vs K833 77-78%(引scope外mile_b1b1d928). 無造假,忠實引用來源.",
     "claimed_by": "hourly-04"
+  },
+  {
+    "timestamp": "2026-07-08T21:25:51Z",
+    "task_type": "platform_ops",
+    "summary": "Content erratum: VRP 日自相關 0.20 vs K913 0.93 矛盾修正 (level 0.93 / Δvrp −0.21) + K833 波動點/QQQ 81% 可追溯性；分頁 bug 治本 (_select_rows 無分頁→假 diff)",
+    "artifacts": [
+      "experiments/k913/k913_erratum_vrp_change_acf.py",
+      "scripts/supabase_sync.py",
+      "mile_8fc743b5",
+      "mile_74b80c0d",
+      "mile_b1b1d928"
+    ]
   }
 ]

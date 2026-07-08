@@ -55560,7 +55560,7 @@
     "id": "content_erratum_vrp_autocorr_74b80c0d_8fc743b5",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "paper_review_24h_finding",
     "created_at": "2026-07-08T20:20:38+00:00",
     "title": "Content erratum: VRP 日自相關 0.20 vs K913 0.93 跨篇矛盾 + 2 個數字可追溯性 (mile_74b80c0d / mile_8fc743b5)",
@@ -55574,6 +55574,40 @@
       "mile_8fc743b5",
       "K913",
       "K833"
-    ]
+    ],
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-07-08T21:08:33.585240+00:00",
+    "claim_session_id": "1bc81766c838",
+    "status_history": [
+      {
+        "ts": "2026-07-08T21:08:33.585545+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-08T21:08:33.832474+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-05"
+      }
+    ],
+    "started_at": "2026-07-08T21:08:33.832114+00:00"
+  },
+  {
+    "id": "K1660_article_general",
+    "title": "K1660: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1660 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1660 MZ 校準審計（VolPred HAR/GARCH 預測庫，84 檔 OOS 預測、7 資產、4 家族；realized target = r²（close-to-close），非 Parkinson）。結論（null-adjacent）：(1) 非全面失敗 — 約 31% 預測 well-calibrated，GJR-GARCH 最佳（15/38=39%），level bias 溫和（家族 median fc/r² 1.02–1.13）。(2) 溫和 unconditional over-forecast，與 GARCH 慢速 mean-r",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1660",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-08T21:07:58+00:00"
   }
 ]

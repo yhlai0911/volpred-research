@@ -90,3 +90,18 @@ Combined VRP+12/VIX (Sharpe 0.39) does WORSE than plain 12/VIX (0.59) -- adding 
 - VIX daily close: yfinance (^VIX)
 - Period: 2006-01-03 to 2026-03-30 (5,091 observations)
 - Realized Variance: 22-day rolling sum of squared daily returns (annualized)
+
+---
+
+## 2026-07-09 Erratum addendum — VRP level vs change ACF
+
+`k913_erratum_vrp_change_acf.py` 為內容勘誤驗證（task `content_erratum_vrp_autocorr_74b80c0d_8fc743b5`）。
+
+已發佈文章寫「VRP 日自相關只有 0.20、接近隨機遊走」，與本實驗 `vrp_autocorrelation.acf_1=0.9267`（高度持續）矛盾。重算確認：
+
+| 量 | ACF(1) | 詮釋 |
+|---|---|---|
+| VRP level | **0.9267**（精確重現主結果） | 高度持續，今天水位高度預示明天 |
+| Δvrp（一階差分/innovation） | **−0.2128** | 輕微均值回歸，非隨機遊走 |
+
+文章的「0.20」= Δvrp ACF 絕對值誤植 + 詮釋錯（把 change 說成 level、把 −0.21 均值回歸說成隨機遊走）。已修 `mile_8fc743b5` / `mile_74b80c0d` / `mile_b1b1d928`（feed + supabase）。reviewer=code-reviewer subagent fallback（Codex quota reset 7/11）。
