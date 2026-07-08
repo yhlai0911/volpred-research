@@ -38110,5 +38110,21 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-07-09T02:22:51.388049"
+  },
+  {
+    "item_id": "fcb159fb",
+    "category": "experiment_result",
+    "content": "K1663 [NULL] 已實現共變異數 HAR → GMV 最小變異組合 OOS 檢定。對 SPY/QQQ/GLD/TLT/IWM 日資料（2004-2026，OOS 4,684 日含 GFC/COVID/2022 熊市），以 22 日 rolling 樣本共變異數作『日頻 RCov proxy』（誠實揭露：非高頻 RCov，測量誤差大），對 Cholesky 因子逐元素做 Corsi HAR（結構性保證正定），重估 GMV 權重。結果：HAR-Cholesky 只贏過自己的建構原料（naive 22d rolling cov；DM Engle-Colacito -5.23, p<0.001），但顯著輸給 EWMA(λ=0.94)（DM +7.69, p<1e-13，EWMA 年化 OOS 波動 8.58% < HAR 9.03%），與 Ledoit-Wolf shrinkage 打平（DM +0.86, NS），且 Ledoit-Wolf 換手率低 18 倍（0.0149 vs 0.268），取得壓倒性實務優勢。no-short robustness 結論一致。與庫內先驗 K444/K737/K1028 完全一致：日頻可得資料下，動態共變異數在 GMV 組合層打不贏簡單強 baseline。組合構建產品化角度 → HAR-RCov 無增量價值，Ledoit-Wolf 是務實首選。審查：worktree agent 跑 feature-dev:code-reviewer PASS（無 lookahead）+ 主線程獨立稽核 lookahead 防線（shift(1) 全 HAR 特徵、origin tau=t-1、train<=tau、w@R[t] 一日 lag、baseline 同慣例）與 DM 口徑（Engle-Colacito 單一組合平方報酬序列、NW+HLN、無 asset-day pooling，避開 K1355）皆通過；Codex primary review 於本班收尾時 in-flight（companion runtime 未回，NULL 結果 bar 已達）。",
+    "evidence": [
+      "experiment_id=K1663_rcov_har_gmv",
+      "experiments/K1663_rcov_har_gmv/K1663_rcov_har_gmv_results.json",
+      "reviewer=feature-dev:code-reviewer (agent, PASS) + main-thread independent lookahead/DM audit",
+      "commit=d398f288f (worktree agent-k1663-rcov)",
+      "OOS=4684 days 2007-11-21..2026-07-08; tickers=SPY,QQQ,GLD,TLT,IWM; seed=20260709",
+      "DM long-short: HAR_vs_EWMA +7.69 p=1.8e-14; HAR_vs_LW +0.86 p=0.39; HAR_vs_rolling -5.23 p<1e-6",
+      "cross-ref: K444 K737 K1028 (dynamic cov loses to simple baseline in portfolio layer)"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-07-09T03:51:56.561522"
   }
 ]

@@ -14997,5 +14997,15 @@
     "owner": "codex",
     "backfilled_at": "2026-07-08T19:43:40.775108+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-09T03:52",
+    "task_type": "experiment",
+    "task_id": "research_rp_967c76ba5f",
+    "k_id": "K1663",
+    "title": "K1663 RCov-HAR → GMV 最小變異組合 OOS 檢定",
+    "verdict": "NULL",
+    "summary": "HAR-Cholesky RCov 打不贏 EWMA(DM+7.69,p<1e-13)/Ledoit-Wolf(NS,換手率低18x); 4684 OOS日(GFC/COVID/2022); 與 K444/K737/K1028 一致; code-reviewer PASS + 主線程 lookahead/DM 稽核; knowledge fcb159fb",
+    "claimed_by": "hourly-03"
   }
 ]
