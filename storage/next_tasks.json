@@ -55091,7 +55091,7 @@
     "title": "研究 backlog fallback: 反直覺：HARQ 測量誤差加權在「高噪音日頻 OHLC 代理」下是否反效果？",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 反直覺：HARQ 測量誤差加權在「高噪音日頻 OHLC 代理」下是否反效果？ — 用 Garman-Klass range 近似 realized quarticity，檢定當 proxy 測量誤差本身很大時誤差加權是幫助還是傷害 OOS（HARQ vs HAR，DM-HLN，SPY/0050.TW/TX）；yfinance OHLC（來源：BPQ JoE HARQ 家族仍為 RV 建模主流）。差異化：庫內 HARQ 未落地實作，且此題是 contrarian「代理噪音下反轉」角度。 | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -55100,7 +55100,25 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-08T01:09:00+00:00"
+    "created_at": "2026-07-08T01:09:00+00:00",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-07-08T10:10:57.224147+00:00",
+    "claim_session_id": "cfdf53a9c289",
+    "status_history": [
+      {
+        "ts": "2026-07-08T10:10:57.224476+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-08T10:11:07.694743+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-18"
+      }
+    ],
+    "started_at": "2026-07-08T10:11:07.694391+00:00"
   },
   {
     "id": "research_rp_967c76ba5f",
@@ -55123,7 +55141,7 @@
     "title": "研究 backlog fallback: Conditional（regime-gated）波動率目標：只在高波動 regime 才縮曝險",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Conditional（regime-gated）波動率目標：只在高波動 regime 才縮曝險 — 對比「永遠 VT」與「僅在偵測到高波動 regime 時啟動 VT」的淨成本績效，檢定關掉平靜期無謂換手能否改善淨 Sharpe/Calmar；yfinance + 既有 regime 偵測（來源：FAJ Conditional Volatility Targeting）。差異化：與庫內 CED（backward-looking scaler, NULL, line 611）不同——本題是 regime on/off 開關而非連續 tail scaler。 | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -55148,9 +55166,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-08T10:10:01.026727+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-17"
       }
     ],
-    "started_at": "2026-07-08T09:09:09.178775+00:00"
+    "started_at": "2026-07-08T09:09:09.178775+00:00",
+    "completed_at": "2026-07-08T10:10:01.026411+00:00",
+    "result": "K1660 regime-gated VT vs always-VT 淨成本檢定 NULL（省換手 SPY-41%/0050-47% 但 Sharpe 無顯著改善、符號翻轉、CI 跨0）；code-reviewer PASS；knowledge 90f4f74c；worktree merged"
   },
   {
     "id": "research_volpred_har_garch_mincer_zarnowitz",

@@ -38009,5 +38009,21 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-07-08T16:10:14.496508"
+  },
+  {
+    "item_id": "90f4f74c",
+    "category": "volatility_targeting",
+    "content": "K1660: Regime-gated VT（只在高波動 regime 才啟動 volatility targeting、平靜期 buy-and-hold）vs Always-VT 的淨成本績效檢定為 NULL。gated 大幅省換手（SPY 年換手 6.60→3.88 −41%、0050.TW 8.55→4.56 −47%），但淨成本後 Sharpe 改善無統計顯著且符號跨資產翻轉（SPY 0.953→0.971 微升、0050.TW 0.911→0.899 反降），所有 block-bootstrap 95% CI 皆跨 0（SPY sharpe_diff CI[-0.087,0.125] boot_p=0.717；HAC t=-1.74 p=0.081，gated 淨報酬反略低）。省下的換手成本被平靜期放棄槓桿的報酬損失抵消 —— practitioner 的『省成本』賣點在成本納入後不成立。",
+    "evidence": [
+      "experiment_id: K1660",
+      "experiment_path: experiments/k1660/",
+      "results: experiments/k1660/k1660_results.json",
+      "period: 2010-01..2026-06 (SPY 4146d, 0050.TW)",
+      "cost_bps: 5.0 單邊; block bootstrap B=10000 block=20 seed=42; Newey-West HAC",
+      "reviewer_source: feature-dev:code-reviewer subagent fallback (VERDICT PASS; Codex 額度用盡 7/11 恢復後 primary-path 二審待補)",
+      "verdict: NULL (no statistically significant net-cost improvement; sign flips across assets)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-07-08T18:09:49.868448"
   }
 ]
