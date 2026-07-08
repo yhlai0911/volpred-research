@@ -118,6 +118,9 @@ def update_fb_status(
     status: str,
     note: str | None = None,
     draft_text: str | None = None,
+    post_url: str | None = None,
+    posted_at: str | None = None,
+    clear_fields: list[str] | None = None,
 ) -> dict[str, int | str]:
     # Enforce the draft invariant BEFORE mutating feed/log so state never gets
     # marked awaiting without a persisted draft (fail-closed on the writer path).
@@ -125,15 +128,28 @@ def update_fb_status(
     updated_feed = 0
     updated_log = 0
     now_iso = _now_iso()
+    clear = set(clear_fields or ())
+
+    def _apply_fields(item: dict) -> None:
+        item["fb_post_status"] = status
+        item["fb_post_status_updated_at"] = now_iso
+        if note:
+            item["fb_post_note"] = note
+        # permalink / posted_at 只在提供時寫入，不覆蓋既有非空值為 None
+        if post_url:
+            item["fb_post_url"] = post_url
+        if posted_at:
+            item["fb_posted_at"] = posted_at
+        # clear_fields：把指定欄位設回 None（修正錯誤 capture 的正式途徑，
+        # 例如誤抓別篇貼文的 permalink 需撤回，2026-07-09 review finding 1）
+        for f in clear:
+            item[f] = None
 
     with shared_state_lock("publisher_feed", storage_dir="storage"):
         feed = _load_json(FEED_PATH, [])
         for item in feed:
             if isinstance(item, dict) and item.get("id") == mile_id:
-                item["fb_post_status"] = status
-                item["fb_post_status_updated_at"] = now_iso
-                if note:
-                    item["fb_post_note"] = note
+                _apply_fields(item)
                 updated_feed += 1
         _write_json(FEED_PATH, feed)
 
@@ -141,10 +157,7 @@ def update_fb_status(
         log = _load_json(TRENDING_LOG_PATH, [])
         for item in log:
             if isinstance(item, dict) and item.get("mile_id") == mile_id:
-                item["fb_post_status"] = status
-                item["fb_post_status_updated_at"] = now_iso
-                if note:
-                    item["fb_post_note"] = note
+                _apply_fields(item)
                 updated_log += 1
         _write_json(TRENDING_LOG_PATH, log)
 
@@ -156,6 +169,10 @@ def update_fb_status(
     }
     if draft_path is not None:
         result["draft_path"] = draft_path
+    if post_url:
+        result["fb_post_url"] = post_url
+    if posted_at:
+        result["fb_posted_at"] = posted_at
     return result
 
 
@@ -317,6 +334,22 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--post-url",
+        metavar="URL",
+        help="發文成功後的貼文永久連結，寫入 fb_post_url（回補歷史或手動 recapture 用）。",
+    )
+    parser.add_argument(
+        "--posted-at",
+        metavar="ISO",
+        help="貼文實際發出時間（ISO8601），寫入 fb_posted_at。",
+    )
+    parser.add_argument(
+        "--clear-field",
+        action="append",
+        metavar="FIELD",
+        help="把指定欄位設回 None（可重複；修正錯誤 capture 用，如撤回誤抓的 fb_post_url）。",
+    )
+    parser.add_argument(
         "--auto-expire",
         type=int,
         nargs="?",
@@ -365,7 +398,13 @@ def main() -> int:
 
     try:
         result = update_fb_status(
-            args.mile_id, status=args.status, note=args.note, draft_text=draft_text
+            args.mile_id,
+            status=args.status,
+            note=args.note,
+            draft_text=draft_text,
+            post_url=args.post_url,
+            posted_at=args.posted_at,
+            clear_fields=args.clear_field,
         )
     except DraftRequiredError as exc:
         print(

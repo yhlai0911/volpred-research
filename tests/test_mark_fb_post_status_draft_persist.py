@@ -86,6 +86,43 @@ def test_nonhandoff_status_does_not_require_draft(fb_paths):
     assert not (fb_paths["drafts"] / "fb_mile_abc123.md").exists()
 
 
+def test_success_writes_permalink_and_posted_at(fb_paths):
+    # 發文成功時把抓到的 permalink + posted_at 一併寫進 canonical
+    url = "https://www.facebook.com/yihao.lai/posts/pfbid0TEST"
+    ts = "2026-07-08T00:21:01+00:00"
+    result = mark_fb.update_fb_status(
+        "mile_abc123", status="success", post_url=url, posted_at=ts
+    )
+    assert result["fb_post_url"] == url
+    assert result["fb_posted_at"] == ts
+    feed = json.loads(fb_paths["feed"].read_text(encoding="utf-8"))
+    assert feed[0]["fb_post_url"] == url
+    assert feed[0]["fb_posted_at"] == ts
+
+
+def test_success_without_permalink_does_not_null_existing(fb_paths):
+    # permalink 抓不到（None）時，不可把既有非空 fb_post_url 覆蓋成 None
+    url = "https://www.facebook.com/yihao.lai/posts/pfbidPREEXIST"
+    feed_data = [{"id": "mile_abc123", "fb_post_status": "success", "fb_post_url": url}]
+    fb_paths["feed"].write_text(json.dumps(feed_data), encoding="utf-8")
+    result = mark_fb.update_fb_status("mile_abc123", status="success")  # 無 post_url
+    assert "fb_post_url" not in result  # None 不進 result
+    feed = json.loads(fb_paths["feed"].read_text(encoding="utf-8"))
+    assert feed[0]["fb_post_url"] == url  # 既有值保留
+
+
+def test_clear_fields_nulls_wrong_capture(fb_paths):
+    # 撤回誤抓的 permalink：clear_fields 把欄位設回 None（修正錯誤 capture 的正式途徑）
+    feed_data = [{"id": "mile_abc123", "fb_post_status": "success",
+                  "fb_post_url": "https://fb.com/wrong/pfbidWRONG",
+                  "fb_posted_at": "2026-07-08T00:21:01+00:00"}]
+    fb_paths["feed"].write_text(json.dumps(feed_data), encoding="utf-8")
+    mark_fb.update_fb_status("mile_abc123", status="success", clear_fields=["fb_post_url"])
+    feed = json.loads(fb_paths["feed"].read_text(encoding="utf-8"))
+    assert feed[0]["fb_post_url"] is None       # 撤回
+    assert feed[0]["fb_posted_at"] == "2026-07-08T00:21:01+00:00"  # 不動其他欄位
+
+
 def test_audit_flags_missing_draft(tmp_path, monkeypatch):
     drafts = tmp_path / "drafts"
     drafts.mkdir()

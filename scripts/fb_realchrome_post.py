@@ -127,9 +127,11 @@ def _claim_fb_post(mile_id: str, *, force: bool) -> tuple[bool, str]:
     return True, "claimed"
 
 
-def _finalize_fb_post(mile_id: str, *, ok: bool) -> None:
+def _finalize_fb_post(mile_id: str, *, ok: bool,
+                      post_url: str | None = None, posted_at: str | None = None) -> None:
     """發文結束標記：ok=True → canonical fb_post_status=success + ledger done；
-    ok=False → ledger 清 in-flight（讓下次能重試），不動 canonical status。"""
+    ok=False → ledger 清 in-flight（讓下次能重試），不動 canonical status。
+    post_url / posted_at 若抓到則一併寫入 canonical（feed + trending log）。"""
     try:
         from volpred.ops.shared_lock import shared_state_lock
     except Exception:
@@ -142,8 +144,11 @@ def _finalize_fb_post(mile_id: str, *, ok: bool) -> None:
             from mark_fb_post_status import update_fb_status  # type: ignore
         try:
             res = update_fb_status(mile_id, status="success",
-                                   note="fb_realchrome_post 發文成功自動標記")
-            print(f"[OK] canonical fb_post_status→success（feed={res['updated_feed']} log={res['updated_log']}）")
+                                   note="fb_realchrome_post 發文成功自動標記",
+                                   post_url=post_url, posted_at=posted_at)
+            print(f"[OK] canonical fb_post_status→success（feed={res['updated_feed']} log={res['updated_log']}）"
+                  f"{' url✓' if post_url else ' url✗(未抓到)'}"
+                  f"{' posted_at✓' if posted_at else ''}")
         except Exception as e:  # noqa: BLE001
             print(f"[WARN] 標記 fb_post_status=success 失敗（貼文已發，需手動 mark）: {e}", file=sys.stderr)
     # 更新 ledger
@@ -338,6 +343,50 @@ def _login_state(page) -> str:
     return "unknown"
 
 
+def _post_anchor(body: str) -> str:
+    """主貼文第一行前 12 字當 timeline 定位 anchor（與 _add_first_comment 一致）。"""
+    s = (body or "").strip()
+    return s.splitlines()[0][:12] if s else ""
+
+
+def _capture_permalink(page, anchor: str) -> str | None:
+    """在 profile timeline 抓「含 anchor 文字之貼文」的永久連結。策略：掃所有
+    permalink-shaped <a>，往上找 ≤8 層祖先其 innerText 含 anchor（= 確定是該貼文）
+    才回該連結；**anchor 完全沒匹配任何連結祖先 → 回 None**（誠實：不猜、不用 DOM
+    第一個連結頂替，避免把別篇貼文的 permalink 誤寫進 canonical，2026-07-09 review
+    finding 1）。回傳去掉 query string 的乾淨 URL。抓不到只回 None（非阻塞，主文已發）。"""
+    if not anchor:
+        return None
+    js = r"""
+    (anchor) => {
+      const links = Array.from(document.querySelectorAll('a[href]')).filter(a => {
+        const h = a.href || '';
+        return h.includes('/posts/') || h.includes('story_fbid') ||
+               h.includes('/permalink/') || h.includes('/pfbid');
+      });
+      for (const a of links) {
+        let node = a;
+        for (let i = 0; i < 8 && node; i++) {
+          if ((node.innerText || '').includes(anchor)) return a.href.split('?')[0];
+          node = node.parentElement;
+        }
+      }
+      return null;  // anchor 沒匹配任何 permalink 連結的祖先 → 不猜（誠實 fail）
+    }
+    """
+    try:
+        url = page.evaluate(js, anchor)
+        if url:
+            print(f"[OK] 抓到貼文永久連結（anchor 比對命中）：{url}")
+        else:
+            print(f"[WARN] 抓 permalink：timeline 找不到含「{anchor}」的貼文永久連結"
+                  "（可能已捲太下 / 已刪 / anchor 不符）→ 不寫 URL（非阻塞）", file=sys.stderr)
+        return url or None
+    except Exception as e:  # noqa: BLE001
+        print(f"[WARN] 抓 permalink 失敗（非阻塞）: {e}", file=sys.stderr)
+        return None
+
+
 def _add_first_comment(page, body: str, link: str) -> None:
     """在剛發的貼文底下補第一則留言（連結）。用主文第一行前段當 anchor，在 timeline
     以 JS innerText 比對定位「該貼文」的留言 textbox（profile 頁 div[role='article']
@@ -506,6 +555,67 @@ def cmd_check() -> int:
             return 3
         print("[WARN] 登入狀態 unknown — 看截圖人工判斷")
         return 1
+
+
+def cmd_recapture_permalink(mile_id: str, posted_at: str | None = None) -> int:
+    """回補既有已發貼文的 permalink（+ 選填 posted_at）：讀 canonical FB 稿取 anchor →
+    導 timeline 抓永久連結 → 走正式 writer update_fb_status 回寫 canonical。
+    給「發文成功但 fb_post_url 仍 null」的歷史 mile 補救用（不修資料、走流程）。"""
+    try:
+        from mark_fb_post_status import canonical_fb_draft_path, update_fb_status  # type: ignore
+    except Exception:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from mark_fb_post_status import canonical_fb_draft_path, update_fb_status  # type: ignore
+
+    # 前置檢查：只回補「已成功發文」的 mile — 避免對從未發過的 mile（pending /
+    # wont_fix / reject）抓到別篇貼文連結並誤標 success 污染 canonical（2026-07-09 review finding 2）。
+    st = _fb_post_status(mile_id)
+    if st != "success":
+        print(f"[FAIL] {mile_id} canonical fb_post_status={st or '(無)'} ≠ success → "
+              "recapture 只回補已成功發文的 mile；請先確認該貼文確實已發出")
+        return 2
+
+    draft_path = canonical_fb_draft_path(mile_id)
+    if not draft_path.exists():
+        print(f"[FAIL] 找不到 canonical FB 稿 {draft_path} → 無 anchor 可定位貼文")
+        return 2
+    body, _link, _images = parse_draft(draft_path)
+    anchor = _post_anchor(body)
+    if not anchor:
+        print(f"[FAIL] 稿 {draft_path} 主貼文為空 → 無 anchor")
+        return 2
+
+    ver = ensure_fb_chrome()
+    if not ver:
+        print(f"[FAIL] CDP port {CDP_PORT} 沒開且自動啟動失敗 — 見 docs/fb_realchrome_setup.md")
+        return 2
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as pw:
+        browser = _connect(pw)
+        page = _get_or_open_fb_page(browser)
+        page.goto(FB_PROFILE_URL, wait_until="domcontentloaded", timeout=60_000)
+        page.wait_for_timeout(3_500)
+        # 漸進捲動找較舊貼文：每捲一段就試抓；anchor 命中即停（_capture_permalink
+        # anchor 沒命中回 None，不會誤抓別篇）。最多 6 段涵蓋 timeline 前段。
+        post_url = None
+        for i in range(6):
+            page.mouse.wheel(0, 1250)
+            page.wait_for_timeout(2_200)
+            post_url = _capture_permalink(page, anchor)
+            if post_url:
+                break
+        browser.close()
+
+    if not post_url:
+        print(f"[FAIL] timeline 定位不到含「{anchor}」貼文的永久連結（可能已捲太下 / 已刪）")
+        return 1
+    res = update_fb_status(mile_id, status="success",
+                           note="permalink recapture 回補", post_url=post_url, posted_at=posted_at)
+    print(f"[OK] {mile_id} 回補 fb_post_url={post_url}"
+          f"{f' fb_posted_at={posted_at}' if posted_at else ''}"
+          f"（feed={res['updated_feed']} log={res['updated_log']}）")
+    return 0 if (res["updated_feed"] or res["updated_log"]) else 1
 
 
 def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
@@ -735,11 +845,15 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
             browser.close()
             return 5
         page.wait_for_timeout(7_000)  # 等貼文送出
+        posted_at_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")  # 真發文時間戳
         shot = SHOT_DIR / f"post_done_{int(time.time())}.png"
         page.screenshot(path=str(shot))
         print(f"[OK] 主文已送出，截圖 {shot}")
 
         # 4) 第一則留言補連結（主文不放連結 → 連結進留言引流）。2026-07-07 驗證可行。
+        #    _add_first_comment 已導到 timeline 定位貼文 → 順手抓 permalink（同一次載入）。
+        anchor = _post_anchor(body)
+        post_url: str | None = None
         if link:
             try:
                 _add_first_comment(page, body, link)
@@ -747,11 +861,22 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
                 shot = SHOT_DIR / f"comment_fail_{int(time.time())}.png"
                 page.screenshot(path=str(shot))
                 print(f"[WARN] 第一則留言補連結失敗（主文已發，連結需手動補）: {e}；截圖 {shot}")
+            post_url = _capture_permalink(page, anchor)  # 留言後仍在 timeline
+        else:
+            # 無留言 → 主動導到 timeline 抓 permalink
+            try:
+                page.goto(FB_PROFILE_URL, wait_until="domcontentloaded", timeout=60_000)
+                page.wait_for_timeout(3_500)
+                page.mouse.wheel(0, 1250)
+                page.wait_for_timeout(2_000)
+                post_url = _capture_permalink(page, anchor)
+            except Exception as e:  # noqa: BLE001
+                print(f"[WARN] 導 timeline 抓 permalink 失敗（非阻塞）: {e}", file=sys.stderr)
         browser.close()
-        # 發文成功 → 標 canonical fb_post_status=success + ledger done，
+        # 發文成功 → 標 canonical fb_post_status=success + ledger done + permalink/posted_at，
         # 之後任何 session/tick 再發同一 mile 會被 idempotency guard 擋下。
         if not dry_run and mile_id:
-            _finalize_fb_post(mile_id, ok=True)
+            _finalize_fb_post(mile_id, ok=True, post_url=post_url, posted_at=posted_at_iso)
         return 0
 
 
@@ -762,6 +887,10 @@ def main() -> int:
     g.add_argument("--post", metavar="DRAFT", help="發文：FB draft .md 路徑")
     g.add_argument("--delete-matching", metavar="ANCHOR",
                    help="撤掉重發用：定位 timeline 含此文字的最新貼文並刪除（預設只截圖，需 --confirm-delete 才真刪）")
+    g.add_argument("--recapture-permalink", metavar="MILE_ID",
+                   help="回補既有已發貼文的 fb_post_url（導 timeline 抓永久連結，走正式 writer 回寫 canonical）")
+    ap.add_argument("--posted-at", metavar="ISO",
+                    help="搭配 --recapture-permalink：一併回補 fb_posted_at（ISO8601）")
     ap.add_argument("--confirm-delete", action="store_true",
                     help="搭配 --delete-matching：截圖驗證後真的移至垃圾桶（對外破壞性動作）")
     ap.add_argument("--dry-run", action="store_true", help="搭配 --post：停在送出前")
@@ -773,6 +902,8 @@ def main() -> int:
         return cmd_check()
     if args.delete_matching:
         return cmd_delete_matching(args.delete_matching, confirm=args.confirm_delete)
+    if args.recapture_permalink:
+        return cmd_recapture_permalink(args.recapture_permalink, posted_at=args.posted_at)
     return cmd_post(Path(args.post), args.dry_run, force=args.force)
 
 

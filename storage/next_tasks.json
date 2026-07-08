@@ -55384,11 +55384,30 @@
     "id": "platform_ops_fb_permalink_capture",
     "task_type": "platform_ops",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent_discovered",
     "title": "fb_realchrome_post 發文成功時抓 permalink + posted_at 回寫 canonical（並回補 mile_e1ff7ef9）",
     "description": "fb_realchrome_post 發文成功後只寫 fb_post_status=success，未抓貼文 permalink 與 posted_at （mile_e1ff7ef9 今早 08:20 已成功發出但 fb_post_url/fb_posted_at 仍 null）。改法：發文送出後定位剛發出的貼文永久連結（timeline 最新自己貼文的 permalink），連同 posted_at 一併寫進 mark_fb_post_status.update_fb_status；並回補 mile_e1ff7ef9。來源 incident：email-11887 / error_log 2026-07-08 INFO 模板誤導條目末段。",
-    "created_at": "2026-07-08T10:16:00+08:00"
+    "created_at": "2026-07-08T10:16:00+08:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-07-08T17:08:39.377426+00:00",
+    "claim_session_id": "82b7f1e2cba8",
+    "status_history": [
+      {
+        "ts": "2026-07-08T17:08:39.377835+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-08T17:26:44.878759+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-01"
+      }
+    ],
+    "completed_at": "2026-07-08T17:26:44.878438+00:00",
+    "result": "fb_realchrome_post 發文後抓 permalink+posted_at 寫 canonical；加 --recapture-permalink 回補工具+update_fb_status post_url/posted_at/clear_fields；code-reviewer 攔到 fallback 抓錯貼文 bug→修為 anchor-only match+success 前置檢查→誠實撤回 mile_e1ff7ef9 誤寫 URL(回 null,posted_at 保留);12 tests pass"
   },
   {
     "id": "daily_article_k1661_harq_daily_myth",

@@ -2,6 +2,20 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-09 permalink 抓取 fallback 靜默寫入「別篇貼文」連結到 canonical（review 攔截 + 誠實撤回）
+
+**現象**：實作 `fb_realchrome_post` 發文後抓貼文 permalink 功能（task `platform_ops_fb_permalink_capture`）。首版 `_capture_permalink` 的 DOM-walk 找不到 anchor 匹配時，fallback 回 `links[0]`（timeline 第一個 permalink 連結）。回補歷史貼文 `mile_e1ff7ef9` 時，該貼文已被捲到 timeline 深處（今早發、之後有新貼文），anchor walk 未命中 → fallback 抓到**當下最新的別篇貼文** URL，印 `[OK]` 誤導成功並寫進 canonical `fb_post_url`。
+
+**根因**：fallback「找不到就用畫面第一個連結頂替」把「anchor 未匹配」誤當「找到了」——靜默產生錯誤 provenance。code-reviewer subagent（Codex/agy 皆不可用時的 fallback reviewer）標為 High finding 1；直接造訪寫入的 URL 核對，貼文內容 `ANCHOR_IN_POST=False` 證實是別篇。
+
+**解決（修流程 + 誠實撤回資料）**：
+1. `_capture_permalink` 移除 `links[0]` fallback → anchor 沒匹配任何 permalink 連結祖先就回 `None`（誠實 fail，不猜）。
+2. `cmd_recapture_permalink` 加前置檢查（canonical `fb_post_status` 必須 `success` 才回補，finding 2）+ 漸進捲動 6 段找較舊貼文（anchor 命中才停）。
+3. `update_fb_status` 加 `clear_fields` 通用能力（+ CLI `--clear-field`）走正式 writer 把誤寫的 `fb_post_url` 設回 None；`fb_posted_at`（= success-mark 時間戳，合法 proxy）保留。
+4. 回歸測試：`test_success_writes_permalink_and_posted_at` / `test_success_without_permalink_does_not_null_existing` / `test_clear_fields_nulls_wrong_capture`。
+
+**教訓**：(1) 「找不到就用第一個頂替」型 fallback 在寫 canonical 的路徑上是**製造假資料的入口**——寧可回 None 讓上層知道抓不到，也不要猜一個看似合理的值。(2) capture 類工具寫入前，成功訊息要能區分「精確命中」vs「fallback 猜測」，否則事後無法辨別 provenance。(3) 抓到的 URL/ID 要能獨立驗證（本案：造訪 URL 核對內容含 anchor）才可信；未驗證的外部識別碼不比 null 好。(4) 對外識別碼的 recapture 工具必須先驗證主體狀態（已發文才回補），否則工具本身會污染 canonical。
+
 ## 2026-07-08 INFO 完成通知套危機模板 → 老闆讀成 pending 問題回「立刻解決」（boss_facing 不分等級）
 
 **現象**：昨晚 08:24 寄出的 INFO alert「FB 發文修復 + AI估值文補發成功（連4次卡關已根治）」——**內容全是好消息**（bug 已根治、文章已成功發到個人 FB），老闆卻回信「立刻解決」（email-11887）。查 canonical：文章今早 08:20 確實發成功（`fb_post_status=success` + `post_done` 截圖 + claim ledger `state=done`），**通知沒謊報**，事情也沒卡住。
