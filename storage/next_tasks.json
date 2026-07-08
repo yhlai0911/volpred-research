@@ -55240,7 +55240,7 @@
     "title": "研究 backlog fallback: VolPred 自家 HAR/GARCH 預測庫的 Mincer-Zarnowitz 校準審計",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: VolPred 自家 HAR/GARCH 預測庫的 Mincer-Zarnowitz 校準審計 — 對現有模型輸出跑 MZ 迴歸（斜率=1、截距=0）與 forecast-efficiency 檢定，系統性找出哪些模型有系統性高估/低估偏誤並提出 bias-correction；純內部資料零額外成本（來源：Mincer-Zarnowitz 檢驗預測效率為 forecast-eval 標配）。差異化：庫內從未做 calibration 層審計，直接提升所有既有預測可信度。 | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -55249,7 +55249,25 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-08T01:09:00+00:00"
+    "created_at": "2026-07-08T01:09:00+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-07-08T13:10:06.370034+00:00",
+    "claim_session_id": "90932e1a5516",
+    "status_history": [
+      {
+        "ts": "2026-07-08T13:10:06.370402+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-08T13:10:20.058559+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-21"
+      }
+    ],
+    "started_at": "2026-07-08T13:10:20.058148+00:00"
   },
   {
     "id": "research_rp_a02d0a5f75",
