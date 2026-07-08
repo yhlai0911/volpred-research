@@ -1,23 +1,25 @@
 # Feed Index
 
-_Last built: 2026-07-08 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-08 06:01 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1763**  (with thumbnail: 73)
+- Total articles: **1765**  (with thumbnail: 73)
 - Last 30 days: **305**
-- Total chars (content): 5,334,630
+- Total chars (content): 5,342,550
 
-**Status**: published=1561, archived=123, unpublished=60, retracted=12, draft=6, wont_fix=1
+**Status**: published=1563, archived=123, unpublished=60, retracted=12, draft=6, wont_fix=1
 
-**Audience**: research=1112, general=423, daily=134, unknown=77, member_qa=12, event=5
+**Audience**: research=1112, general=425, daily=134, unknown=77, member_qa=12, event=5
 
-**Category**: milestone=871, general=776, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, experiment=4, event_article=3, diary=1
+**Category**: milestone=872, general=777, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, experiment=4, event_article=3, diary=1
 
 ## 最近 30 天 (305)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-08 | `mile_aee1c78c` | 台積電法說會前，選擇權市場替『法說行情』加了多少價？答案：幾乎沒有 | general | general | published | 2429 |  | 一般讀者, 台積電, 法說會, 隱含波動率, 選擇權, 波動率溢價 |
+| 2026-07-08 | `mile_74b80c0d` | VIX 剩十幾點，賣波動收保費最誘人：當『波動保險公司』前，先過四道生存體檢 | general | milestone | published | 5491 |  | 一般讀者, 精選導讀, 波動率風險溢酬, VIX, 選擇權, 波動率 |
 | 2026-07-08 | `mile_b06b9599` | 每日策略建議：VIX 16.13（正常）— 2026-07-08 | daily | general | published | 1651 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-08 | `mile_88af37d0` | 2026-07-08 本日持倉比率建議（依據 2026-07-07 收盤數據） | daily | milestone | published | 1048 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-07 | `mile_e1ff7ef9` | 監管警告 AI 估值太貴，那選擇權市場自己怕不怕？一個反直覺的答案 | general | general | published | 2539 |  | 一般讀者, AI, 波動率, 選擇權, 尾部風險, VIX |
@@ -321,13 +323,13 @@ _Last built: 2026-07-08 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-08 | `mile_4642e259` | 你買的保險，真的賠得到嗎？用 19 年 SPY 數據測一件事 | research | milestone | unpublished | 3195 |  | 研究, VaR, ES, 風險管理, 波動率模型, SPY |
 | 2026-06-08 | `mile_2ed9949e` | 財報日前，分析師說「IC 設計股波動較小」— 背後只有 4 家公司，其中 2 家數字截然相反 | general | general | published | 2678 |  | 一般讀者, IC設計, 財報, 波動率, 半導體, 事件研究 |
 | 2026-06-08 | `mile_2673f6c4` | K1403：HAR-RV 分位數迴歸跨資產驗證 — QQQ/GLD/TLT 的分裂結論 | research | milestone | unpublished | 8706 |  | 研究, HAR-RV, quantile-regression, VaR, QQQ, GLD |
-| 2026-06-08 | `mile_22d9d2a5` | 定期定額的報酬率，什麼時候被高估、什麼時候被低估 | general | general | published | 2626 |  | 一般讀者, 定期定額, IRR, TWR, 投資績效, 0050 |
-| 2026-06-08 | `mile_96093433` | K893：VIX 政體加權 Conformal VaR（RWC）vs 歷史模擬法——λ=0.05 值得 3–4% 更緊的區間嗎？ | research | milestone | published | 10151 |  | 研究, VaR, conformal, VIX-regime, risk-management, HistSim |
 
-<details><summary>## 2026-Q2 (786)</summary>
+<details><summary>## 2026-Q2 (788)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-08 | `mile_22d9d2a5` | 定期定額的報酬率，什麼時候被高估、什麼時候被低估 | general | general | published | 2626 |  | 一般讀者, 定期定額, IRR, TWR, 投資績效, 0050 |
+| 2026-06-08 | `mile_96093433` | K893：VIX 政體加權 Conformal VaR（RWC）vs 歷史模擬法——λ=0.05 值得 3–4% 更緊的區間嗎？ | research | milestone | published | 10151 |  | 研究, VaR, conformal, VIX-regime, risk-management, HistSim |
 | 2026-06-07 | `mile_22d52561` | Broadcom 指引的風波，市場為什麼突然開始定價尾端風險 | general | general | published | 3188 |  | 一般讀者, trending_repost, reader_facing, 半導體, 波動率, 對沖 |
 | 2026-06-07 | `mile_a1507cf2` | K951：Copula-GARCH 在高相關 ETF 配對避險上全面落敗 Rolling OLS — 尾部結構缺失是根本原因 | research | milestone | published | 6149 |  | 研究, Copula-GARCH, SPY, QQQ, GLD, SLV |
 | 2026-06-07 | `mile_3f18cb8e` | 分析師跟了 64 個人的股票，和只有 3 個人跟的股票，財報對波動率的作用一模一樣 | research | milestone | published | 3754 |  | 研究, analyst-coverage, binary-fundamental, K1151-K1157-followup, mechanism-confirmed, earnings-announcement |
