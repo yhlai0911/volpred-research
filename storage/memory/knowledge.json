@@ -38025,5 +38025,19 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-07-08T18:09:49.868448"
+  },
+  {
+    "item_id": "74a85b45",
+    "category": "experiment_result",
+    "content": "K1661（NULL / contrarian 方向支持但未達顯著）：日頻 OHLC 代理下 HARQ 測量誤差加權對 OOS 波動率預測無益甚至傷害。設計：rolling W=1000、one-step、daily refit；RV=Garman-Klass daily range，RQ=range-based quarticity((ln H/L)^4)；QLIKE(actual/predicted, Patton 2011) + DM-HLN(Harvey-Leybourne-Newbold 1997, h=1)，Harvey gate |t|>3。三資產 SPY/0050.TW/TWII。結果：HARQ vs HAR QLIKE 改善 SPY -2.08%（DM-HLN t=0.49, p=0.62）、三資產皆為負或近零；HARQ-F 更差（SPY -11.67%, t=1.54）；HARQ-smooth（平滑 √RQ）SPY +0.63%(t=-0.15) 近乎打平。3/3 資產同向傷害僅 suggestive（binomial p=0.125），無一達 Harvey |t|>3 → 判 NULL。機制：日頻 OHLC 缺日內平均，√RQ 與 RV_d 高度共線（SPY corr=0.938），測量誤差加權訊號被噪音淹沒，故 BPQ(2016) 高頻 HARQ 增益在日頻代理下消失。跨資產未做 iid pooling（守 K1355）。Reviewer=code-reviewer subagent（Codex CLI 額度用盡 fallback）VERDICT=PASS；依 K1259『subagent fallback PASS ≠ primary-path Codex PASS』，此條以 NULL 記錄，待 2026-07-11 Codex 額度恢復後 primary-path 二審。",
+    "evidence": [
+      "experiments/k1661/",
+      "experiments/k1661/k1661_results.json",
+      "experiments/k1661/k1661_harq_ohlc.py",
+      "experiments/k1661/reviews/codex_review.md",
+      "reviewer_source=code-reviewer subagent fallback (Codex quota exhausted; primary-path re-verify pending 2026-07-11)"
+    ],
+    "confidence": 0.6,
+    "created_at": "2026-07-08T19:09:45.791568"
   }
 ]
