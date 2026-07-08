@@ -1,0 +1,93 @@
+{
+  "experiment_id": "k1116e",
+  "title": "Nested Clark-West increment test \u2014 highest-risk DAILY signal families (F2 VIX term structure, F4 VRP) of the vix-sufficiency paper",
+  "baseline": "fwd_rv22 ~ 1 + VIX_level (M2, restricted)",
+  "augmented": "fwd_rv22 ~ 1 + VIX_level + signal_j (nests baseline)",
+  "target": "22-day FORWARD realized vol of SPY (annualized, x100)",
+  "horizon_H": 22,
+  "inference_nw_lag": 21,
+  "is_end": "2018-12-31",
+  "oos_start": "2019-01-01",
+  "embargo_days": 22,
+  "harvey_threshold": 3.0,
+  "lag_convention": "features = close-of-day-t info set (VIX_t, signals from data observed by close of t); target accumulates over (t, t+H] strictly after the forecast origin -> no lookahead; same IS/OOS rows for both nested models",
+  "references": [
+    "Clark-West (2007) JoE 138:291-311",
+    "Harvey-Leybourne-Newbold (1997) IJF 13:281-291",
+    "Harvey-Liu-Zhu (2016) RFS 29:5-68",
+    "Diebold-Mariano (1995) JBES 13:253-263"
+  ],
+  "families_covered": [
+    "F2_vix_term_structure",
+    "F4_variance_risk_premium"
+  ],
+  "families_deferred": [
+    "F1_cross_asset_vol_momentum",
+    "F3_behavioral_pcr",
+    "F8_yield_curve_slope",
+    "F9_google_trends",
+    "F10_overnight_vix",
+    "F11_calendar"
+  ],
+  "deferred_reason": "F1/F8/F11 stable-data but deferred to keep this run scoped; F3/F9/F10 require fragile external data (CBOE put-call, pytrends, intraday VIX open) \u2014 follow-up run.",
+  "specs": {
+    "F2_vix_term_structure": {
+      "signal_col": "sig_F2_vixratio",
+      "n_oos": 1861,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-05-28",
+      "mspe_baseline_vixonly": 82.12645647550298,
+      "mspe_augmented_vixplus": 77.62014496559237,
+      "mspe_adjustment_mean": 1.5948731252106532,
+      "dm_mspe": {
+        "t": 1.2955052773368203,
+        "p_two": 0.1953067368360506,
+        "p_one_greater": 0.0976533684180253,
+        "n": 1861,
+        "hln_factor": 0.9884470349525796,
+        "nw_lag": 21,
+        "note": "standard DM on squared fwd-RV errors; +t => augmented beats VIX-only"
+      },
+      "clark_west": {
+        "t": 1.6942458713482196,
+        "p_one_greater": 0.04519299095903773,
+        "p_two": 0.09038598191807545,
+        "hln_factor": 0.9884470349525796,
+        "nw_lag": 21,
+        "mspe_adjusted_mean": 6.101184635121269,
+        "note": "one-sided H1: VIX+signal improves on VIX; |t|>3.0 => Harvey pass"
+      },
+      "harvey_pass_cw": false,
+      "verdict": "CW FAILS to reject: no incremental value beyond VIX (sufficiency holds under the MORE-POWERFUL nested CW test)"
+    },
+    "F4_variance_risk_premium": {
+      "signal_col": "sig_F4_vrp",
+      "n_oos": 1861,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-05-28",
+      "mspe_baseline_vixonly": 81.63590382366942,
+      "mspe_augmented_vixplus": 82.5855769361716,
+      "mspe_adjustment_mean": 0.717503323362291,
+      "dm_mspe": {
+        "t": -0.7595168195367609,
+        "p_two": 0.44763970353722504,
+        "p_one_greater": 0.7761801482313875,
+        "n": 1861,
+        "hln_factor": 0.9884470349525796,
+        "nw_lag": 21,
+        "note": "standard DM on squared fwd-RV errors; +t => augmented beats VIX-only"
+      },
+      "clark_west": {
+        "t": -0.22081943323473113,
+        "p_one_greater": 0.5873713661929661,
+        "p_two": 0.8252572676140677,
+        "hln_factor": 0.9884470349525796,
+        "nw_lag": 21,
+        "mspe_adjusted_mean": -0.23216978913988753,
+        "note": "one-sided H1: VIX+signal improves on VIX; |t|>3.0 => Harvey pass"
+      },
+      "harvey_pass_cw": false,
+      "verdict": "CW FAILS to reject: no incremental value beyond VIX (sufficiency holds under the MORE-POWERFUL nested CW test)"
+    }
+  }
+}

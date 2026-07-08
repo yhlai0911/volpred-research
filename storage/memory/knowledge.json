@@ -38052,5 +38052,19 @@
     ],
     "confidence": 0.92,
     "created_at": "2026-07-08T19:25:35.163481"
+  },
+  {
+    "item_id": "0c6312aa",
+    "category": "vix_sufficiency",
+    "content": "K1116e (vix-sufficiency daily-family nested Clark-West): for the two highest-risk daily signal families — F2 VIX term structure (VIX/VIX3M) and F4 variance risk premium (VIX-backward_RV22) — the nested Clark-West (2007) MSPE-adjusted increment over a VIX-only forecast does NOT clear the Harvey (2016) |t|>3.0 threshold on 22-day forward SPY RV, OOS 2019-01..2026-05 (n=1861). F2 CW t=1.69 (DM t=1.30); F4 CW t=-0.22 (DM t=-0.76). F2 is the prime flip candidate (IS partial r|VIX=0.181, IS t=17.6) yet its OOS nested increment stays far below 3.0 even under the MORE-powerful CW test — VIX sufficiency is robust to Clark-West for these families, strengthening the paper's null. Same-sample nested OLS, contemporaneous close-of-t features, target strictly (t,t+H], HAC nw_lag=21/HLN h=22 for the overlapping-22d MA(21) errors, 22d IS/OOS embargo. Extends k1116c (weekly 12/13). Remaining daily regression families {F1,F3,F8,F9,F10,F11} deferred (F3/F9/F10 need fragile external data). NULL result.",
+    "evidence": [
+      "experiment_id=k1116e",
+      "experiments/k1116e/k1116e_results.json",
+      "reviewer=agy (Antigravity gemini-3.5) PASS — Codex CLI usage-limited until 2026-07-11 (experiments.md fallback)",
+      "F2 CW t=1.69 harvey_pass=False; F4 CW t=-0.22 harvey_pass=False; n_oos=1861",
+      "predecessor k1116c (weekly nested CW)"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-07-08T20:26:51.771171"
   }
 ]
