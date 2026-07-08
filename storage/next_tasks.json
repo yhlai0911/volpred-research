@@ -52904,7 +52904,7 @@
     "priority": 3,
     "status": "pending",
     "title": "vix-sufficiency: 為 daily families 1-11 (nested VIX+signal) 算 Clark-West/HLN 並整合進 Table 3",
-    "description": "SEVERE-2 carve-out (from paper_body_vix_sufficiency_v5_severe_fixes, 2026-07-06). Weekly families 12/13 nested CW 已完成 (experiments/k1116c/k1116c_clark_west.py; 全部 CW|t|<0.6, null 穩健). 待做: daily families 1-11 是真 nested (RV=a+b1*VIX+b2*signal, eq:incremental). 各 family 腳本散落 experiments/k730-k1201, 無統一 harness -> 主線程忠實重建 OOS forecasts (pinned data, 對齊各 family lag/signal 構造), 算 DM-MSFE + Clark-West + HLN, 整合成 Table 3 新 CW 欄. 風險: CW 更 powerful, 可能把 F2(term struct R2oos=.010)/F4(VRP)/F10(overnight) 從不顯著推向顯著 -> 必真算, 禁 bounding argument. 主線程 only, 禁 background agent 寫 .tex. reproduce 需驗 DM 重現主表 |t|. [PROGRESS 2026-07-08 k1116e]: F2 VIX-term-structure + F4 VRP (the two highest-IS-signal, prime CW-flip daily families) nested Clark-West DONE — both FAIL Harvey |t|>3.0 (F2 CW t=1.69, F4 CW t=-0.22), null robust to CW; agy-reviewed PASS (Codex usage-limited). REMAINING scope: daily regression families F1/F3/F8/F9/F10/F11 (F3/F9/F10 need fragile external data: CBOE put-call, pytrends, intraday VIX open) + integrate CW column into Table 3 (main_v5.tex) + reproduce.py rebind + paper-update. Reuse experiments/k1116e/k1116e.py harness pattern.",
+    "description": "SEVERE-2 carve-out (from paper_body_vix_sufficiency_v5_severe_fixes, 2026-07-06). Weekly families 12/13 nested CW 已完成 (experiments/k1116c/k1116c_clark_west.py; 全部 CW|t|<0.6, null 穩健). 待做: daily families 1-11 是真 nested (RV=a+b1*VIX+b2*signal, eq:incremental). 各 family 腳本散落 experiments/k730-k1201, 無統一 harness -> 主線程忠實重建 OOS forecasts (pinned data, 對齊各 family lag/signal 構造), 算 DM-MSFE + Clark-West + HLN, 整合成 Table 3 新 CW 欄. 風險: CW 更 powerful, 可能把 F2(term struct R2oos=.010)/F4(VRP)/F10(overnight) 從不顯著推向顯著 -> 必真算, 禁 bounding argument. 主線程 only, 禁 background agent 寫 .tex. reproduce 需驗 DM 重現主表 |t|. [PROGRESS 2026-07-08 k1116e]: F2 VIX-term-structure + F4 VRP (the two highest-IS-signal, prime CW-flip daily families) nested Clark-West DONE — both FAIL Harvey |t|>3.0 (F2 CW t=1.69, F4 CW t=-0.22), null robust to CW; agy-reviewed PASS (Codex usage-limited). REMAINING scope: daily regression families F1/F3/F8/F9/F10/F11 (F3/F9/F10 need fragile external data: CBOE put-call, pytrends, intraday VIX open) + integrate CW column into Table 3 (main_v5.tex) + reproduce.py rebind + paper-update. Reuse experiments/k1116e/k1116e.py harness pattern. [PROGRESS 2026-07-09 k1116g]: F1 cross-asset vol momentum + F8 yield-curve slope + F11 calendar/Halloween nested Clark-West DONE (the remaining STABLE-DATA daily families) — ALL FAIL Harvey |t|>3.0: F1 CW t=0.69, F8 CW t=0.11, F11 CW t=-1.50; null robust to more-powerful nested CW. code-reviewer subagent PASS (lookahead clean; Codex usage-limited to 07-11, agy timed out). knowledge=a779d721. Table-3 CW column now covers 5/8 nested-CW-applicable daily families (F2/F4/F1/F8/F11). REMAINING: F3(behavioral P/C)/F9(Google Trends)/F10(overnight VIX open) need fragile external data (CBOE put-call, pytrends, intraday VIX open) -> data-provisioning follow-up; then integrate CW column into Table 3 (main_v5.tex) + reproduce.py rebind + paper-update.",
     "created_by": "hourly-22",
     "created_at": "2026-07-06T14:20:00+00:00",
     "status_history": [
@@ -52926,10 +52926,23 @@
         "to": "pending",
         "by": "hourly-20",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-08T18:09:47.862958+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-08T18:23:32.383856+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "hourly-02",
+        "note": "manual_release"
       }
     ],
     "started_at": "2026-07-08T12:12:12.124367+00:00",
-    "last_released_at": "2026-07-08T12:27:46.756672+00:00"
+    "last_released_at": "2026-07-08T18:23:32.383507+00:00"
   },
   {
     "id": "paper_review_mile_69524f14",

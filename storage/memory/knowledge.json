@@ -38097,5 +38097,18 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-07-09T00:30:18.309483"
+  },
+  {
+    "item_id": "a779d721",
+    "category": "methodology",
+    "content": "K1116g NULL (robust): vix-sufficiency paper — remaining STABLE-DATA daily signal families F1 (cross-asset vol momentum), F8 (yield-curve slope TNX-IRX), F11 (calendar/Halloween) tested for incremental OOS forecast power beyond VIX via the MORE-POWERFUL nested Clark-West (2007) increment test on 22-day forward RV of SPY. All three FAIL the Harvey (2016) |t|>3.0 threshold: F1 CW t=0.69, F8 CW t=0.11, F11 CW t=-1.50 (max |CW t|=1.50). VIX sufficiency holds under the nested CW test for these daily families too, consistent with k1116e (F2 CW t=1.69, F4 CW t=-0.22) and k1116c (weekly F12/F13). Same harness as k1116e: fixed IS(<=2018)/OOS(2019-2026, n=1861) split with 22d embargo, same-sample nested OLS, close-of-day-t features / strictly-forward target (no extra shift, no lookahead), HAC nw_lag=21 + HLN h=22. Signals rebuilt faithfully from paper main_v5.tex prose (originals scattered k730-k1201, never consolidated). Fixed-split DM is a directional cross-check, NOT the exact Table-3 expanding-window DM (same caveat as k1116e). IS-signal-t magnitude/sign differs from Table 3 (fixed-split window + signal orientation) but CW/DM are orientation-invariant so the null is unaffected. Reviewer: feature-dev:code-reviewer subagent (fresh-context) VERDICT=PASS, lookahead clean, no blocking issues (Codex usage-limited to 2026-07-11, agy timed out). experiment_id=k1116g. Table-3 CW column now covers 5/8 nested-CW-applicable daily families (F2/F4 + F1/F8/F11); F3/F9/F10 deferred pending fragile external data (CBOE put-call, pytrends, intraday VIX open). Table-3 integration + reproduce.py rebind + paper-update remain blocked on those.",
+    "evidence": [
+      "experiments/k1116g/k1116g.py",
+      "experiments/k1116g/k1116g_results.json",
+      "experiments/k1116g/README.md",
+      "paper/vix-sufficiency/main_v5.tex Table 3 (tab:main_results)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-07-09T02:22:51.388049"
   }
 ]
