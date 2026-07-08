@@ -14968,5 +14968,11 @@
     "task_id": "research_volpred_har_garch_mincer_zarnowitz",
     "summary": "K1660 MZ calibration audit of HAR/GARCH forecast library (84 files, 7 assets, 4 families); ~31% well-calibrated, modest over-forecast, Parkinson proxy overstates over-forecast (fc/Park 1.73 vs fc/r2 1.07), bias-correction OOS null. reviewer=code-reviewer subagent PASS (Codex usage-limited). knowledge item 545fed15",
     "verdict": "PASS"
+  },
+  {
+    "timestamp": "2026-07-09T00:31:37+08:00",
+    "task_type": "experiment",
+    "task_id": "research_score_driven_gas_dcs_var_es",
+    "summary": "K1662 score-driven GAS-t/DCS-t VaR+ES tail-risk NULL (orphan adoption): competitive-but-not-superior to GARCH-family; DCS-t in-MCS everywhere but no edge, GAS-t weakest (SPY α=1% DM t=3.06), EWMA-N excluded everywhere; reviewer code-reviewer Round-2 PASS; knowledge e9d8fabd; worktree merged"
   }
 ]
