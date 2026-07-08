@@ -38039,5 +38039,18 @@
     ],
     "confidence": 0.6,
     "created_at": "2026-07-08T19:09:45.791568"
+  },
+  {
+    "item_id": "15ecaafb",
+    "category": "method_diagnosis",
+    "content": "research_giacomini_rossi_fluctuation_test_volpred_dm_ledg (2026-07-08) METHOD_DIAGNOSIS_NULL: K1259 dm_ledger.json has 2,718 pairwise DM summary rows, but it is not a chronological loss-differential ledger. The audit found 20 A4f/HAR rows across K1002/K1014/K1054/K1057/K1063/K1072, zero CF-Rolling rows, and zero pair-level date-indexed raw d_t series. A strict Giacomini-Rossi fluctuation test cannot be run from the current ledger; only a summary-stat coverage audit is supported. Future DM-producing experiments should persist date, model_a_loss, model_b_loss, and loss_diff sidecars or expose loss_series_uri in the ledger.",
+    "evidence": [
+      "experiments/research_giacomini_rossi_fluctuation_test_volpred_dm_ledg/README.md",
+      "experiments/research_giacomini_rossi_fluctuation_test_volpred_dm_ledg/research_giacomini_rossi_fluctuation_test_volpred_dm_ledg_results.json",
+      "experiments/research_giacomini_rossi_fluctuation_test_volpred_dm_ledg/codex_review.md",
+      "research_program.md:488"
+    ],
+    "confidence": 0.92,
+    "created_at": "2026-07-08T19:25:35.163481"
   }
 ]

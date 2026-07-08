@@ -54849,7 +54849,7 @@
     "title": "研究 backlog fallback: Giacomini-Rossi fluctuation test 回溯 VolPred 既有 DM ledger",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Giacomini-Rossi fluctuation test 回溯 VolPred 既有 DM ledger — 對 A4f/CF-Rolling vs HAR 的既有 2718-row loss differential 序列跑時變相對績效（fluctuation test），找出優勢是否集中特定 regime；純內部資料零額外成本（來源：Giacomini-Rossi 波動檢定成為 2025-26 forecast-eval 標配）。差異化：把庫內靜態 DM 升級為時變 inference，強化方法學護城河。 | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -54874,9 +54874,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-08T11:25:59.559641+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-08T11:16:56.256161+00:00"
+    "started_at": "2026-07-08T11:16:56.256161+00:00",
+    "completed_at": "2026-07-08T11:25:59.559326+00:00",
+    "result": "METHOD_DIAGNOSIS_NULL: K1259 ledger has 20 A4f/HAR rows, 0 CF-Rolling rows, and 0 raw date-indexed d_t series; strict Giacomini-Rossi fluctuation test is not runnable from current ledger. Artifacts in experiments/research_giacomini_rossi_fluctuation_test_volpred_dm_ledg; knowledge item 15ecaafb."
   },
   {
     "id": "fix_fb_realchrome_residual_photo_detector",
