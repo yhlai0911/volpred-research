@@ -55484,5 +55484,96 @@
     "claimed_by": "hourly-19",
     "created_at": "2026-07-08T19:13:42.669410",
     "result": "published mile_30a2379e 破發文脫班；3 audit 旗標經核對全 false-positive（heuristic 抓錯欄位）"
+  },
+  {
+    "id": "paper_review_mile_74b80c0d",
+    "title": "Paper review (Codex 24h-rule): VIX 剩十幾點，賣波動收保費最誘人：當『波動保險公司』前，先過四道生存體檢",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_74b80c0d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_74b80c0d",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-08T20:08:28+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-07-08T20:09:50.708769+00:00",
+    "claim_session_id": "aae2d68b2ad2",
+    "status_history": [
+      {
+        "ts": "2026-07-08T20:09:50.709123+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-08T20:09:50.951879+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-08T20:21:19.538006+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
+      }
+    ],
+    "started_at": "2026-07-08T20:09:50.951548+00:00",
+    "completed_at": "2026-07-08T20:21:19.537587+00:00",
+    "result": "24h review CONDITIONAL_PASS (fallback code-reviewer, Codex quota reset 7/11). 無造假忠實引用. 3 findings→content_erratum_vrp_autocorr_74b80c0d_8fc743b5 follow-up: VRP自相關0.20 vs K913 0.93矛盾/波動點欄位缺/QQQ81%對不上"
+  },
+  {
+    "id": "paper_review_mile_aee1c78c",
+    "title": "Paper review (Codex 24h-rule): 台積電法說會前，選擇權市場替『法說行情』加了多少價？答案：幾乎沒有",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_aee1c78c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_aee1c78c",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-08T20:08:28+00:00"
+  },
+  {
+    "id": "paper_review_mile_9c211681",
+    "title": "Paper review (Codex 24h-rule): 金融情勢一收緊，就能提前看到股市崩跌嗎？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_9c211681 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_9c211681",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-08T20:08:28+00:00"
+  },
+  {
+    "id": "content_erratum_vrp_autocorr_74b80c0d_8fc743b5",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "paper_review_24h_finding",
+    "created_at": "2026-07-08T20:20:38+00:00",
+    "title": "Content erratum: VRP 日自相關 0.20 vs K913 0.93 跨篇矛盾 + 2 個數字可追溯性 (mile_74b80c0d / mile_8fc743b5)",
+    "description": "來源=paper_review_mile_74b80c0d 24h review (fallback code-reviewer, Codex quota reset 7/11) 的驗證發現。主線程已核對，三項需修（都涉及已發佈 feed 文章，研究誠實）：\n(1) [最高] VRP 日自相關矛盾：mile_74b80c0d para54 + 首段 table row17 承接 mile_8fc743b5 line78「VRP 日自相關只有 0.20，接近隨機遊走；今天的保費幾乎告訴不了你明天的保費」。但 K913 vrp_autocorrelation.acf_1=0.9267（README: very persistent；Ljung-Box p=0）。VRP『水位』高度持續(0.93)，與『今天告訴不了明天』直接矛盾。假說：0.20 是 VRP『變化/innovation』autocorr（水位持續但變化近隨機，兩者可並存），但需找出 mile_8fc743b5 產生 0.20 的來源實驗確認定義後才可改 prose（未證實勿臆改）。修法=找根源實驗→確認 level vs change→同步修正 mile_8fc743b5 line78 + mile_74b80c0d para54/table17 措辭（保留『擇時飆升不可預測』訊息但改為水位持續、變化近隨機的正確框架）→ resync feed+reports+supabase。\n(2) mile_74b80c0d para28『年化保費 SPY +8.4 / QQQ +9.2 / GLD +7.1 個波動點』引用 mile_ff6d24a0(=K833)，但 k833_iv_straddle_results.json 無此欄位（僅 mean_iv_rv_ratio 1.77/1.64/1.52、mean_straddle_pnl）。查證此波動點差計算方式/來源，無法追溯則改用可追溯欄位。\n(3) mile_74b80c0d para26『QQQ 81%』引用 scope 外 mile_b1b1d928。K833 QQQ vrp_positive_frac=0.7749/iv_gt_rv_frac=0.7775 皆≠81%。核對 mile_b1b1d928 實際來源數字，若確為錯誤則統一口徑修正。\n驗證通過的數字(勿動)：K913 skew=-7.17、pct_positive=85.7%、N=5091；K1452 隔夜+0.00252/盤中+0.00679；K833 SPY sharpe3.69/win76%/24%輸錢週。\nreview verdict=CONDITIONAL_PASS (reviewer=code-reviewer subagent fallback；Codex primary 恢復後(7/11)依 K1259 教訓可二次驗證 autocorr 矛盾)。",
+    "tags": [
+      "content_erratum",
+      "research_honesty",
+      "vrp",
+      "autocorrelation",
+      "mile_74b80c0d",
+      "mile_8fc743b5",
+      "K913",
+      "K833"
+    ]
   }
 ]

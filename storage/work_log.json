@@ -15007,5 +15007,14 @@
     "verdict": "NULL",
     "summary": "HAR-Cholesky RCov 打不贏 EWMA(DM+7.69,p<1e-13)/Ledoit-Wolf(NS,換手率低18x); 4684 OOS日(GFC/COVID/2022); 與 K444/K737/K1028 一致; code-reviewer PASS + 主線程 lookahead/DM 稽核; knowledge fcb159fb",
     "claimed_by": "hourly-03"
+  },
+  {
+    "timestamp": "2026-07-09T04:21",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_74b80c0d",
+    "title": "24h review: VIX 剩十幾點賣波動收保費 — 波動保險公司四道生存體檢 (mile_74b80c0d)",
+    "verdict": "CONDITIONAL_PASS",
+    "summary": "Codex quota 用盡(reset 7/11)→fallback code-reviewer subagent 獨立審+主線程核對。驗證通過: K913 skew-7.17/pct+85.7%/N5091, K1452 隔夜+.00252/盤中+.00679, K833 SPY sharpe3.69/win76%. 3 findings→建 content_erratum follow-up: (1)VRP日自相關para54寫0.20隨機遊走 vs K913 acf_1=0.93持續(邏輯矛盾,需查源實驗確認level/change) (2)para28波動點+8.4/9.2/7.1 K833無此欄位 (3)para26 QQQ81% vs K833 77-78%(引scope外mile_b1b1d928). 無造假,忠實引用來源.",
+    "claimed_by": "hourly-04"
   }
 ]
