@@ -54950,7 +54950,7 @@
     "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
     "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "source": "auto_journal_discovery_fallback",
@@ -54959,7 +54959,33 @@
       "research-backlog-refresh",
       "all-covered-fallback"
     ],
-    "created_at": "2026-07-08T00:00:03+00:00"
+    "created_at": "2026-07-08T00:00:03+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-07-08T07:08:23.854615+00:00",
+    "claim_session_id": "fa8353733f3a",
+    "status_history": [
+      {
+        "ts": "2026-07-08T07:08:23.854968+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-15"
+      },
+      {
+        "ts": "2026-07-08T07:08:28.878716+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-15"
+      },
+      {
+        "ts": "2026-07-08T07:17:34.772119+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-15"
+      }
+    ],
+    "started_at": "2026-07-08T07:08:28.878418+00:00",
+    "completed_at": "2026-07-08T07:17:34.771770+00:00",
+    "result": "掃 RFS/JoE/JFEC/IJF/JPM/FAJ/AER/QJE/J.Forecasting 2025-26；agent 誠實回 7 條(backlog 高度飽和不硬湊)；主線程 dedup 掉 2(60/20/20黃金 dup line561/617、jump-recapture dup line563)；5 條入 research_program.md batch 2026-07-08(TVP-HAR/GNAR-HARX/EUA-ETS2/Realized-GARCH-lite/PDV分解)"
   },
   {
     "id": "daily_digest_20260708",
