@@ -14961,5 +14961,12 @@
     "outcome": "succeeded",
     "summary": "k1116e: nested Clark-West for 2 highest-risk daily families (F2 VIX-term-structure, F4 VRP) of vix-sufficiency paper — both FAIL Harvey |t|>3.0 (F2 CW t=1.69, F4 -0.22), null robust to more-powerful CW; agy-reviewed PASS; parent released with remaining scope",
     "owner": "hourly-20"
+  },
+  {
+    "timestamp": "2026-07-08T22:15",
+    "task_type": "experiment",
+    "task_id": "research_volpred_har_garch_mincer_zarnowitz",
+    "summary": "K1660 MZ calibration audit of HAR/GARCH forecast library (84 files, 7 assets, 4 families); ~31% well-calibrated, modest over-forecast, Parkinson proxy overstates over-forecast (fc/Park 1.73 vs fc/r2 1.07), bias-correction OOS null. reviewer=code-reviewer subagent PASS (Codex usage-limited). knowledge item 545fed15",
+    "verdict": "PASS"
   }
 ]

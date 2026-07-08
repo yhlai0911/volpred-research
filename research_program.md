@@ -116,6 +116,7 @@
 - 平台操作層（`/admin/*`、`/api/admin/*`、`uv run volpred ops ...`）
 - 讀者分析回饋（analytics summary → 研究與發文方向）
 - 會員問題排行與研究候選池
+- [ ] **評估 pipeline follow-up（K1660 MZ audit 2026-07-08）**：GARCH 家族的 stored evaluation 目前用 Parkinson-based `mean_actual_var`（`rv_proxy=rv_parkinson`），對 close-to-close conditional variance forecast 是錯尺度且系統性誇大 over-forecast（K1660：median fc/Parkinson=1.73 vs fc/r²=1.07）。建議 GARCH/GJR/EGARCH/CGARCH 家族改用 r²（或 5-min RV）作 realized target，Parkinson 保留給 range/HAR 類原生 target。屬 eval 度量修正，非 model 問題。
 
 ### 面向 G: 跳躍式探索（全新方向線）
 **這些方向與現有 VT/GARCH 研究顯著不同，目的是打破舒適區。**

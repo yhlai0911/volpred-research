@@ -38066,5 +38066,22 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-07-08T20:26:51.771171"
+  },
+  {
+    "category": "calibration_audit",
+    "content": "K1660 MZ 校準審計（VolPred HAR/GARCH 預測庫，84 檔 OOS 預測、7 資產、4 家族；realized target = r²（close-to-close），非 Parkinson）。結論（null-adjacent）：(1) 非全面失敗 — 約 31% 預測 well-calibrated，GJR-GARCH 最佳（15/38=39%），level bias 溫和（家族 median fc/r² 1.02–1.13）。(2) 溫和 unconditional over-forecast，與 GARCH 慢速 mean-reversion 一致（2022 高波動訓練→2023-24 平靜期降不夠快）。(3) 穩健 conditional over-dispersion：log-space median b̂≈0.75<1，且獨立複現 SPY GJR w=504 舊 K（log b̂=0.68 vs 舊 0.67）。(4) 最 actionable = 尺度診斷：pipeline 的 Parkinson-based 評估誇大 over-forecast（median fc/Parkinson=1.73 vs fc/r²=1.07；median b̂ Parkinson=0.42 vs r²=0.51）— GARCH 家族 stored 評估應改用 r²（或 5-min RV），Parkinson 留給 range/HAR 原生 target。(5) Bias-correction null：naive 線性 MZ 校正 OOS 不顯著改善（flagship SPY GARCH QLIKE 改善僅 0.42%，DM p=0.68），呼應既有 complexity-ceiling 主題。方法：per-file MZ（HAC-NW，lag=5），time-dim HAC 不把 asset-day 當 iid（K1355），joint Wald H0:a=0∧b=1，log-space robust slope，expanding-window OOS-valid 校正，seed=42。資料 gate：重建 Parkinson vs pipeline stored median ratio=1.0000（84 檔），OHLC 與 pipeline 完全一致。Caveat：r² 是 noisy proxy（比 5-min RV 噪~8x），calm 期 R²=0.01–0.05 是 proxy 特性非模型無效，calibration 訊號在 slope 推論非 R²。",
+    "evidence": [
+      "experiments/k1660_mz_calibration_audit/k1660_mz_calibration_audit_results.json",
+      "experiments/k1660_mz_calibration_audit/README.md",
+      "Mincer & Zarnowitz (1969); Patton (2011 JoE); Andersen & Bollerslev (1998 IER)"
+    ],
+    "confidence": 0.85,
+    "verdict": "PASS",
+    "experiment_id": "k1660_mz_calibration_audit",
+    "k_id": "K1660_mz",
+    "experiment_path": "experiments/k1660_mz_calibration_audit",
+    "reviewer_source": "feature-dev:code-reviewer subagent fallback (Codex usage-limited until 2026-07-11); VERDICT PASS, upstream date-alignment+scale traced, 1 non-blocking OHLC-cache-staleness note",
+    "created_at": "2026-07-08T22:15:17.791980",
+    "item_id": "545fed15"
   }
 ]
