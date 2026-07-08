@@ -37995,5 +37995,19 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-07-08T05:28:13.371055"
+  },
+  {
+    "item_id": "6b8f8416",
+    "category": "investment_myth",
+    "content": "K1659（迷思實驗室）: 「量先價行 / 爆量長黑是出貨」隔日方向迷思在 SPY/QQQ/0050.TW/2330.TW (2010-2026) 均 not_supported。13 個 primary 檢定 BH-FDR 後無任何迷思一致格通過 (q>=0.39)；跨市場正確聚合 (K1355: 先按日期 equal-weight 再 Newey-West HAC) 延續性下注平均 -1.2bps, t=-0.19, p=0.85, n=543 事件日 = 完全 null。經濟價值: 等權四資產量先價行 next-day long/short 淨 5bps 成本後 Sharpe=-0.47 (買進持有 1.32)，出貨放空 Sharpe=-0.58 — 迷思拿去交易虧錢。穩健性 k×N grid 12 格全 |t|<1.96。誠實反向 nuance: 美股大型股爆量價漲日隔日偏跌 (QQQ 續漲率 lift=-24pp raw p=0.030 但 BH q=0.39 未存活)，呈輕微隔日均值回歸 (與 Campbell-Grossman-Wang 1993 一致)，非延續。延伸並強化 K1636。Reviewer=code-reviewer subagent fallback PASS (Codex 額度 2026-07-11 恢復後建議 primary-path 二審再標最終 closure，per K1259 教訓)。seed=42, lookahead-clean (signal.shift(1) 明確 + 逐 row 確認)。",
+    "evidence": [
+      "experiment_id: K1659",
+      "experiment_path: experiments/k1659/",
+      "results: experiments/k1659/k1659_results.json",
+      "reviewer_source: code-reviewer subagent fallback (PASS-with-caveats; Codex 二審待 2026-07-11)",
+      "verdict: not_supported_as_next_day_direction_rule (NULL)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-07-08T16:10:14.496508"
   }
 ]

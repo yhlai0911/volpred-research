@@ -54916,7 +54916,7 @@
     "title": "K1659: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1510). Original: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1659.py with signal.shift(1) + seed=42, (c) K1659_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -54941,9 +54941,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-14"
+      },
+      {
+        "ts": "2026-07-08T08:10:23.749512+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-14"
       }
     ],
-    "started_at": "2026-07-08T06:09:01.405009+00:00"
+    "started_at": "2026-07-08T06:09:01.405009+00:00",
+    "completed_at": "2026-07-08T08:10:23.749182+00:00",
+    "result": "迷思實驗室 K1659 收尾: 量先價行/爆量長黑隔日方向迷思 4 資產(SPY/QQQ/0050/2330 2010-2026)全 not_supported; BH-FDR 無格通過, K1355跨市場聚合 p=0.85 null, 策略 Sharpe -0.47/-0.58 虧錢, grid 12格全不顯著; 反向nuance=美股大型股隔日均值回歸. reviewer subagent PASS(Codex二審待7/11). knowledge=6b8f8416. worktree stale-base 用 path-scoped extract 零遺失."
   },
   {
     "id": "journal_discovery_20260708_0",
