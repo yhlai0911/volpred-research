@@ -5,11 +5,11 @@
   "interpreter": "uv run python",
   "args": [],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queued_at": "2026-07-09T18:13:54Z",
   "started_at": "2026-07-09T18:15:04Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-09T18:39:28Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-garch-x-vix-a4f-dm-t-paper-4-03-vs-stored-json-4-148-2-9-can-1783620834.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-garch-x-vix-a4f-dm-t-paper-4-03-vs-stored-json-4-148-2-9-can-1783620834.stderr",
   "result_artifact": "paper/garch-x-vix/mcs_dm_results.json",
@@ -18,6 +18,8 @@
     "task_type": "paper_review",
     "priority": 3
   },
-  "followup_dispatched": false,
-  "timeout_seconds": 3600
+  "followup_dispatched": true,
+  "timeout_seconds": 3600,
+  "followup_dispatched_at": "2026-07-09T19:15:09Z",
+  "followup_next_task_id": "provenance-audit-4p03-resolved-inline"
 }

@@ -70,6 +70,14 @@ print("=" * 70)
 # ============================================================
 # 1. DATA LOADING
 # ============================================================
+# ⚠️ NON-CANONICAL LIVE PATH: this script live-downloads yfinance, which
+# retroactively re-adjusts historical prices → SPY A4f DM t drifts across
+# reruns (4.03 draft → 4.148 2026-04-19 pinned → 4.293 2026-07-09 live).
+# Harvey |t|>3 conclusion is invariant, but the CANONICAL reproducible value
+# comes from reproduce.py (pinned snapshot in data/), NOT this script.
+# Do NOT let this script's mcs_dm_results.json overwrite the pinned canonical.
+# For provenance reruns use: uv run python paper/garch-x-vix/reproduce.py
+# See errata_pending.md (2026-07-09 entry) + .claude/rules/paper-workflow.md #1.
 print("\n[1] Loading data...")
 import yfinance as yf
 

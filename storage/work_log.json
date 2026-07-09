@@ -15083,5 +15083,13 @@
     "summary": "Paper2 台股滾動γ表 provenance 更正 step1: calendar-aligned 重算 + 新增可追溯 index rows (TWII 0.158/0050 0.079, legacy 0.272 non-reproducible); 發現任務描述 0.310 是 stale own-window, canonical 0056=0.202 為全表最高且高於指數→擴大論成立且可追溯; README 回溯更正; body 改寫等 owner sign-off (email 9adb9e49, 任務轉 blocked_on_user)",
     "verdict": "STEP1_DONE_AWAITING_SIGNOFF",
     "reviewer": "main-thread (in-sample descriptive, lookahead-free; index γ matches independent recompute)"
+  },
+  {
+    "timestamp": "2026-07-10T03:15",
+    "task_type": "paper_review",
+    "task_id": "provenance-audit-garchxvix-a4f-dm-4p03",
+    "summary": "Compute followup 解讀: garch-x-vix A4f DM t 復現稽核。今日 live compute_mcs_dm.py 跑出 t=4.293 (第三個 drift 值: 4.03 draft→4.148 Apr-pinned→4.293 Jul-live)，全 Harvey |t|>3 invariant。判定: 這是 errata_pending.md 已記錄的 yfinance retroactive-adjustment 已知問題; canonical=4.148 (pinned reproduce.py)，非 live。已 revert live-4.293 對 mcs_dm_results.json 的覆寫以保 pinned canonical; errata_pending 補第三資料點; compute_mcs_dm.py 加 non-canonical header 警示防復發。政策不變: R1 前不動 body，shelf-ready errata 已涵蓋。",
+    "verdict": "RESOLVED_KNOWN_ISSUE_NO_BODY_CHANGE",
+    "reviewer": "main-thread (cross-checked reproduce_report.json stored=4.148 + errata_pending framework)"
   }
 ]

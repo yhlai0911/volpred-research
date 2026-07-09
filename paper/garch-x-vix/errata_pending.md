@@ -193,3 +193,22 @@ Key results:
 5. Record diff under `review_history/v8/wording_patch_diff.md` for reviewer-response packet.
 
 **Status**: PREPARED, NOT DEPLOYED. Next trigger: R1 reviewer response.
+
+## 2026-07-09 live-recompute data point (SPY A4f DM t drift confirmed, no action)
+
+**Trigger**: Provenance sweep (`provenance-sweep-legacy-paper-numbers` batch1) enqueued a compute job to re-verify the "paper 4.03 vs stored JSON 4.148" gap. The job ran `compute_mcs_dm.py` (the **live-yfinance** generator, not the pinned `reproduce.py`) on 2026-07-09 and produced **SPY A4f DM t = 4.293** (n=1825, same OOS 2019–2026-04-08).
+
+**Third drift observation** — the SPY A4f-vs-GJR full-OOS DM t now has three vintages:
+
+| Vintage | Source | SPY A4f DM t | Harvey \|t\|>3 |
+|---|---|---|---|
+| Drafting (pre-2026-04-19, K997/K1085) | paper body `main.tex` | **4.030** | ✅ |
+| 2026-04-19 pinned snapshot | `reproduce.py` + `data/`, canonical `mcs_dm_results.json` | **4.148** | ✅ |
+| 2026-07-09 live yfinance | `compute_mcs_dm.py` (non-canonical) | **4.293** | ✅ |
+
+**Findings**:
+1. Same yfinance retroactive-adjustment drift family as the rest of this document. Monotone upward (4.03 → 4.148 → 4.293); each ~1.4–3% relative. **Harvey qualitative conclusion invariant** — all three comfortably clear the |t|>3 threshold and the Bonferroni ≈2.95 critical value; conclusions unchanged.
+2. **Canonical = 4.148 (pinned snapshot via `reproduce.py`), NOT the live recompute.** The 2026-07-09 live run's `mcs_dm_results.json` overwrite (4.293) was **reverted** to preserve the pinned-snapshot canonical that this errata framework and `reproduce_report.json` (`stored_source_value=4.148`) depend on. Live-drift artifacts must never replace the pinned canonical.
+3. **Process note**: provenance reruns of this paper's numbers must invoke `reproduce.py` (snapshot-first), **not** `compute_mcs_dm.py` (live download). A header warning was added to `compute_mcs_dm.py` to prevent recurrence.
+
+**Action**: none to paper body (policy: frozen until R1). The existing shelf-ready errata footnote (line 45 above) already covers "0–11% relative drift, Harvey invariant" and now has a third confirming data point.
