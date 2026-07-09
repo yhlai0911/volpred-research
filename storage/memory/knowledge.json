@@ -38209,5 +38209,20 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-07-10T07:06:57.734143"
+  },
+  {
+    "item_id": "06430647",
+    "category": "experiment",
+    "content": "K1664 completed. experiment_id=K1664; experiment_path=experiments/k1664/; reviewer=Codex self-review primary path; review_file=experiments/k1664/codex_review.md; verdict=PILOT_DIRECTIONAL_HAR_EDGE_NO_HARVEY_PASS with methodology review CONDITIONAL_PASS. Data: local yfinance-style 0050.TW 5-minute CSV snapshots data/intraday/0050_TW_5min_*.csv, 108 valid days from 2026-01-20 to 2026-07-08, rows/day min 53 median 53 max 54. RV definition: intraday RV=sum squared 5-minute close-to-close log returns inside Taiwan regular session, excluding overnight returns. Method: lag-clean design with raw_signal.shift(1), log-HAR OLS one-step expanding OOS, 22d HAR lag, min_train=60, n_oos=26; Patton QLIKE via volpred.stats.model_evaluation.qlike_pointwise and DM/HAC h=1. Findings: mean annualized intraday vol 15.33%, median 14.74%, max 34.78% on 2026-05-28, lag1 RV autocorr 0.287. OOS QLIKE: Persistence 0.1933, EWMA20 0.1424 (+26.3%, DM t=-1.09), HAR_DW_log 0.1333 (+31.0%, DM t=-1.64), HAR_DWM_log 0.1577 (+18.4%, DM t=-1.03). No model passes Harvey t<-3, so conclusion is data-ready pilot and directional HAR(d,w) edge only, not a formal Taiwan HAR-RV victory. Continue accumulating 5-minute data to >=252 trading days before formal gate.",
+    "evidence": [
+      "experiments/k1664/K1664.py",
+      "experiments/k1664/K1664_results.json",
+      "experiments/k1664/README.md",
+      "experiments/k1664/codex_review.md",
+      "experiments/k1664/data/K1664_daily_5min_rv.csv",
+      "experiments/k1664/data/K1664_oos_forecasts.csv"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-07-10T07:16:57.076475"
   }
 ]

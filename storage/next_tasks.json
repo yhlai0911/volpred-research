@@ -55808,7 +55808,7 @@
     "title": "K1664: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 358). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1664.py with signal.shift(1) + seed=42, (c) K1664_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -55833,9 +55833,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-09T23:17:38.786045+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-09T23:11:15.409332+00:00"
+    "started_at": "2026-07-09T23:11:15.409332+00:00",
+    "completed_at": "2026-07-09T23:17:38.785637+00:00",
+    "result": "完成 K1664 0050.TW 5-minute HAR-RV pilot。108 valid days, OOS n=26; HAR_DW_log QLIKE 0.1333 vs persistence 0.1933 (+31.0%), DM t=-1.64, no Harvey pass。Knowledge 06430647；結論是 data-ready pilot, not formal HAR-RV victory。"
   },
   {
     "id": "K1665",
