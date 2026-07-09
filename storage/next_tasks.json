@@ -56061,19 +56061,38 @@
     "id": "taiwan_drone_industry_series_kickoff",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "boss-telegram-msg302",
     "not_before": "2026-07-13T00:00:00+08:00",
     "created_at": "2026-07-09T12:10:53+08:00",
     "title": "台灣無人機產業投資專題系列 — kickoff（產業總覽 PEST/SWOT + 供應鏈公司盤點）",
     "description": "老闆 Telegram msg302 指派。下週一起一整週系列。詳細規格與原始報導見 storage/pending_series/taiwan_drone_industry_series_brief.md。此 kickoff 任務：(1) 真查台灣無人機上市櫃公司名單並繪產業鏈地圖 (2) 產出總覽文(PEST+SWOT+鏈地圖) (3) decompose 出逐鏈逐公司後續 daily_article 任務排入池。個股六面向分析(經營/財務/市場/籌碼/技術/心理)走方法透明線+免責。走 feed-publisher + anti-ai-style + external-data-sources。",
-    "status_history": [],
-    "claimed_by": null,
-    "claim_session_id": null,
-    "claimed_at": null,
-    "started_at": null,
-    "completed_at": null,
-    "result": null
+    "status_history": [
+      {
+        "ts": "2026-07-09T08:09:24.631233+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-09T08:09:24.895591+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-09T08:20:43.727466+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-16"
+      }
+    ],
+    "claimed_by": "hourly-16",
+    "claim_session_id": "e3640f346835",
+    "claimed_at": "2026-07-09T08:09:24.630835+00:00",
+    "started_at": "2026-07-09T08:09:24.895299+00:00",
+    "completed_at": "2026-07-09T08:20:43.727109+00:00",
+    "result": "Kickoff Phase1 done: 派研究 agent 建真查來源公司名冊(29家已驗證上市櫃,更正經緯航太/千附/中光電等起點錯誤)+產業鏈三層地圖+PEST/SWOT骨架,staged 至 storage/pending_series/taiwan_drone_series_ep0_research.md(未發佈)。Decompose 6 個 EP daily_article 任務(EP0總覽~EP-Final組合)入池,blocked_until 2026-07-13 09:00 週一窗口。總覽文 EP0 於週一發佈,尊重老闆下週一節奏。"
   },
   {
     "id": "k1655_codex_primary_reverify",
@@ -56083,5 +56102,131 @@
     "task_type": "paper_review",
     "description": "K1259 lesson: mile_9c211681/K1655 24h-review passed via code-reviewer subagent FALLBACK (Codex quota exhausted 2026-07-09 til Jul 11). Once Codex quota recovers, run primary-path `codex exec` re-verify of K1655.py OOS embargo (line ~389) + HLN horizon-specific DM (line ~459) before final closure. Subagent verdict=PASS no corrections; article stays published meanwhile.",
     "created_at": "2026-07-09"
+  },
+  {
+    "id": "drone_series_ep0_overview",
+    "title": "無人機系列 EP0 產業總覽：PEST/SWOT + 台灣無人機產業鏈地圖",
+    "description": "系列開篇總覽文。用研究地基把台灣無人機產業鏈三層地圖（上/中/下游）、PEST、SWOT 組成一篇廣泛、可信賴的產業總覽，帶出「台灣能否複製半導體劇本接住無人機供應鏈移轉」主題。附產業鏈地圖圖表 + 上市櫃公司分佈。 研究地基（已驗證公司名冊/產業鏈地圖/PEST/SWOT）見 storage/pending_series/taiwan_drone_series_ep0_research.md。走 feed-publisher + anti-ai-style（寫前讀 3 canonical + evidence-package 先於 prose，寫後跑 anti_ai_gate.py + arc-dedup gate）。個股面向數據走 external-data-sources（yfinance/TWSE 真查真算，標來源與日期）。個股分析用方法透明線：真數據 + 假設 + 不確定性 + 免責聲明 + 可複現，不做保證報酬/內線式宣稱。",
+    "priority": 1,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "boss-telegram-msg302-series-decompose",
+    "series": "taiwan_drone_industry",
+    "series_order": 0,
+    "tags": [
+      "series-taiwan-drone",
+      "reader-facing",
+      "investment-thematic"
+    ],
+    "blocked_reason": "awaiting_event_window",
+    "blocked_at": "2026-07-09T08:20:31+00:00",
+    "blocked_until": "2026-07-13T09:00:00+08:00",
+    "blocked_note": "老闆指派系列，執行窗口 2026-07-13（下週一）起一整週；unblock_expired 於窗口開啟時自動 flip 回 pending",
+    "created_at": "2026-07-09T08:20:31+00:00"
+  },
+  {
+    "id": "drone_series_ep1_upstream",
+    "title": "無人機系列 EP1 上游深度：晶片/飛控/感測/通訊/射頻",
+    "description": "聚焦上游環節與代表上市櫃公司（如全訊5222、立積4968、新唐4919、義隆2458、亞光3019、邑錡7402、千附精密6829、昇達科3491、聯發科2454/聯詠3034 題材性）。逐環節說明技術壁壘與台廠定位，附真財務/股價數據。 研究地基（已驗證公司名冊/產業鏈地圖/PEST/SWOT）見 storage/pending_series/taiwan_drone_series_ep0_research.md。走 feed-publisher + anti-ai-style（寫前讀 3 canonical + evidence-package 先於 prose，寫後跑 anti_ai_gate.py + arc-dedup gate）。個股面向數據走 external-data-sources（yfinance/TWSE 真查真算，標來源與日期）。個股分析用方法透明線：真數據 + 假設 + 不確定性 + 免責聲明 + 可複現，不做保證報酬/內線式宣稱。",
+    "priority": 1,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "boss-telegram-msg302-series-decompose",
+    "series": "taiwan_drone_industry",
+    "series_order": 1,
+    "tags": [
+      "series-taiwan-drone",
+      "reader-facing",
+      "investment-thematic"
+    ],
+    "blocked_reason": "awaiting_event_window",
+    "blocked_at": "2026-07-09T08:20:31+00:00",
+    "blocked_until": "2026-07-13T09:00:00+08:00",
+    "blocked_note": "老闆指派系列，執行窗口 2026-07-13（下週一）起一整週；unblock_expired 於窗口開啟時自動 flip 回 pending",
+    "created_at": "2026-07-09T08:20:31+00:00"
+  },
+  {
+    "id": "drone_series_ep2_midstream",
+    "title": "無人機系列 EP2 中游深度：機體/複合材料/電池/動力",
+    "description": "聚焦中游環節與代表上市櫃公司（如碳基7719、永虹先進6618、加百裕3323、系統電5309、力山1515、富田4590、寶一8222、晟田4541）。談複材/電池/動力供應能力與訂單能見度。 研究地基（已驗證公司名冊/產業鏈地圖/PEST/SWOT）見 storage/pending_series/taiwan_drone_series_ep0_research.md。走 feed-publisher + anti-ai-style（寫前讀 3 canonical + evidence-package 先於 prose，寫後跑 anti_ai_gate.py + arc-dedup gate）。個股面向數據走 external-data-sources（yfinance/TWSE 真查真算，標來源與日期）。個股分析用方法透明線：真數據 + 假設 + 不確定性 + 免責聲明 + 可複現，不做保證報酬/內線式宣稱。",
+    "priority": 1,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "boss-telegram-msg302-series-decompose",
+    "series": "taiwan_drone_industry",
+    "series_order": 2,
+    "tags": [
+      "series-taiwan-drone",
+      "reader-facing",
+      "investment-thematic"
+    ],
+    "blocked_reason": "awaiting_event_window",
+    "blocked_at": "2026-07-09T08:20:31+00:00",
+    "blocked_until": "2026-07-13T09:00:00+08:00",
+    "blocked_note": "老闆指派系列，執行窗口 2026-07-13（下週一）起一整週；unblock_expired 於窗口開啟時自動 flip 回 pending",
+    "created_at": "2026-07-09T08:20:31+00:00"
+  },
+  {
+    "id": "drone_series_ep3_downstream",
+    "title": "無人機系列 EP3 下游深度：整機整合/系統商/地面站/無人艇",
+    "description": "聚焦下游整機與系統整合上市櫃公司（如雷虎8033、漢翔2634、亞航2630、長榮航太2645、中光電5371、神基3005、融程電3416）＋無人艇邊界（龍德6753、台船2208、中信造船2644）。整合國防採購與海外訂單題材。無人艇是否納入系列需在文中標明邊界。 研究地基（已驗證公司名冊/產業鏈地圖/PEST/SWOT）見 storage/pending_series/taiwan_drone_series_ep0_research.md。走 feed-publisher + anti-ai-style（寫前讀 3 canonical + evidence-package 先於 prose，寫後跑 anti_ai_gate.py + arc-dedup gate）。個股面向數據走 external-data-sources（yfinance/TWSE 真查真算，標來源與日期）。個股分析用方法透明線：真數據 + 假設 + 不確定性 + 免責聲明 + 可複現，不做保證報酬/內線式宣稱。",
+    "priority": 1,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "boss-telegram-msg302-series-decompose",
+    "series": "taiwan_drone_industry",
+    "series_order": 3,
+    "tags": [
+      "series-taiwan-drone",
+      "reader-facing",
+      "investment-thematic"
+    ],
+    "blocked_reason": "awaiting_event_window",
+    "blocked_at": "2026-07-09T08:20:31+00:00",
+    "blocked_until": "2026-07-13T09:00:00+08:00",
+    "blocked_note": "老闆指派系列，執行窗口 2026-07-13（下週一）起一整週；unblock_expired 於窗口開啟時自動 flip 回 pending",
+    "created_at": "2026-07-09T08:20:31+00:00"
+  },
+  {
+    "id": "drone_series_ep4_core_stocks_six_dim",
+    "title": "無人機系列 EP4 核心個股六面向：龍頭深度投資分析",
+    "description": "對高信心龍頭（雷虎8033、漢翔2634、亞航2630 等）逐檔做六面向分析：經營/財務/市場/籌碼/技術/心理。真查財務與股價數據，方法透明 + 免責。檔數多可再 decompose 成逐檔子任務。 研究地基（已驗證公司名冊/產業鏈地圖/PEST/SWOT）見 storage/pending_series/taiwan_drone_series_ep0_research.md。走 feed-publisher + anti-ai-style（寫前讀 3 canonical + evidence-package 先於 prose，寫後跑 anti_ai_gate.py + arc-dedup gate）。個股面向數據走 external-data-sources（yfinance/TWSE 真查真算，標來源與日期）。個股分析用方法透明線：真數據 + 假設 + 不確定性 + 免責聲明 + 可複現，不做保證報酬/內線式宣稱。",
+    "priority": 1,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "boss-telegram-msg302-series-decompose",
+    "series": "taiwan_drone_industry",
+    "series_order": 4,
+    "tags": [
+      "series-taiwan-drone",
+      "reader-facing",
+      "investment-thematic"
+    ],
+    "blocked_reason": "awaiting_event_window",
+    "blocked_at": "2026-07-09T08:20:31+00:00",
+    "blocked_until": "2026-07-13T09:00:00+08:00",
+    "blocked_note": "老闆指派系列，執行窗口 2026-07-13（下週一）起一整週；unblock_expired 於窗口開啟時自動 flip 回 pending",
+    "created_at": "2026-07-09T08:20:31+00:00"
+  },
+  {
+    "id": "drone_series_ep_final_portfolio",
+    "title": "無人機系列 EP-Final 收尾：投資組合角度 + 風險 + 台灣競爭定位",
+    "description": "系列收尾。從投資組合視角綜整全鏈，談曝險/分散/風險（政策不確定、訂單能見度、估值題材化），總結台灣在全球無人機供應鏈的競爭定位與「下一座護國神山」命題的證據強弱。 研究地基（已驗證公司名冊/產業鏈地圖/PEST/SWOT）見 storage/pending_series/taiwan_drone_series_ep0_research.md。走 feed-publisher + anti-ai-style（寫前讀 3 canonical + evidence-package 先於 prose，寫後跑 anti_ai_gate.py + arc-dedup gate）。個股面向數據走 external-data-sources（yfinance/TWSE 真查真算，標來源與日期）。個股分析用方法透明線：真數據 + 假設 + 不確定性 + 免責聲明 + 可複現，不做保證報酬/內線式宣稱。",
+    "priority": 1,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "boss-telegram-msg302-series-decompose",
+    "series": "taiwan_drone_industry",
+    "series_order": 5,
+    "tags": [
+      "series-taiwan-drone",
+      "reader-facing",
+      "investment-thematic"
+    ],
+    "blocked_reason": "awaiting_event_window",
+    "blocked_at": "2026-07-09T08:20:31+00:00",
+    "blocked_until": "2026-07-13T09:00:00+08:00",
+    "blocked_note": "老闆指派系列，執行窗口 2026-07-13（下週一）起一整週；unblock_expired 於窗口開啟時自動 flip 回 pending",
+    "created_at": "2026-07-09T08:20:31+00:00"
   }
 ]
