@@ -56388,13 +56388,10 @@
     "task_type": "governance",
     "priority": 2,
     "source": "telegram-312-followup",
-    "status": "in_progress",
+    "status": "pending",
     "created_at": "2026-07-09T11:21:38.647135+00:00",
     "title": "論文數字舊帳復現稽核：掃 pre-2026-05-17 gate 的論文引用數字有無錯掛/無 JSON 來源",
     "description": "起因 telegram-312：Paper2 台股滾動 γ 表 TWII 0.272 掛錯來源(指向 K530=HAR 實驗，非 γ 來源)，屬 provenance gate(2026-05-17)上線前的舊帳。任務：對 paper/*/body*.tex 內每個實證數字，抽查是否能追溯到活的 experiments/<id>/results.json；重點掃 gate 上線前寫入的知識條目(N-series)所支撐的表格。發現無來源者：能重估就用可離線重現視窗重估，不能就標記等 sign-off。禁造假湊舊值。產出 audit 報告 + 修正清單。scope ≤50min/次，跨論文可分批。",
-    "claimed_by": "hourly-20",
-    "claimed_at": "2026-07-09T12:08:47.362204+00:00",
-    "claim_session_id": "ac3f745783d3",
     "status_history": [
       {
         "ts": "2026-07-09T12:08:47.362564+00:00",
@@ -56407,8 +56404,27 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-20"
+      },
+      {
+        "ts": "2026-07-09T14:50:00.626471+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-20",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-09T12:08:47.612367+00:00"
+    "started_at": "2026-07-09T12:08:47.612367+00:00",
+    "last_released_at": "2026-07-09T14:50:00.626460+00:00",
+    "last_release_reason": "auto_release_stale_2h"
+  },
+  {
+    "id": "telegram-321",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "pending",
+    "created_at": "2026-07-09T14:08:55.019502+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 321）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n待token額度在7/12 16：00恢復後 立刻排程解決以上問題\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
   }
 ]
