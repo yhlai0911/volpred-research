@@ -1,3 +1,26 @@
+---
+title: "VIX 掉回 16.9 的假平靜：科技股才回檔逾一成，該盯的其實是這四件事"
+audience: general
+status: published
+phase: daily_digest
+content_type: daily_digest
+tags:
+  - 精選導讀
+  - VIX
+  - 波動率
+  - 科技股
+  - 風險管理
+  - 選擇權
+description: "VIX 掉回 16.9，教科書會說偏低，帳戶卻剛挨了科技股回檔一頓打。這期精選導讀提出『平靜四診』——天期、分散、形狀、時間軸四個角度，把被 VIX 平均掉的風險一項項拆回來，給投資人一套當天就能套用的檢查法。"
+image_url: "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/vol_snapshot_fig1_vix_and_crossindex_20260703.png"
+digest_articles:
+  - mile_8bf06fde
+  - mile_64c33170
+  - mile_2e91f5bb
+  - mile_0fa841ed
+  - mile_5f57d3f9
+---
+
 # VIX 掉回 16.9 的假平靜：科技股才回檔逾一成，該盯的其實是這四件事
 
 七月第二週，恐慌指數 VIX 收在 16.9，落在教科書會標成「正常偏低」的區間。盤面安靜。但翻開帳戶的人不見得同意這份安靜：六月那波科技股回檔，微軟高點到低點掉掉將近四分之一，輝達、META、亞馬遜、蘋果都在一成到一成四之間，指數卻只掉了 7%。一個數字說天下太平，帳戶說剛挨了一頓打。誰在騙人？
@@ -120,8 +143,6 @@ VIX 衡量的是未來 30 天的預期波動。市場對三個月、半年後的
 | [六月科技股回檔實錄：QQQ 只跌 7%，持股卻感覺跌更兇](https://volpred.zeabur.app/v3/reports/mile_2e91f5bb) | 指數與個股的分散、VIX 與已實現波動的時間差，四診②④核心 |
 | [燒最多錢的科技巨頭，沒有多收「下跌保費」](https://volpred.zeabur.app/v3/reports/mile_0fa841ed) | 下檔偏斜的形狀診，資本支出與下跌保費反直覺的關係 |
 | [恐慌剛過，市場最安靜：VRP 極端低點後的波動率規律](https://volpred.zeabur.app/v3/reports/mile_5f57d3f9) | 訊號在極端值才可靠，VRP 五分位的方向準確率 |
-| [你買的保險，真的賠得到嗎？19 年 SPY 數據](https://volpred.zeabur.app/v3/reports/mile_4642e259) | 風控模型的高下在平靜市況就分出來，FZ 聯合分數實測 |
-| [你的 VIX 策略，用哪種邏輯扣板機？19 年實測](https://volpred.zeabur.app/v3/reports/mile_d5746aab) | 百分位派與分段保守派的報酬與回撤取捨 |
 
 *本文為多篇 VolPred 研究的策展導讀，所有數字均可追溯至各來源文章與其對應實驗（K430、K1076、K683 等）之 results.json 及公開資料源（yfinance、FRED）。本文為市場觀察與資料整理，非投資建議。波動率會隨市場變動，請勿以本文作為交易決策的唯一依據。*
 
