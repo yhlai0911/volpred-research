@@ -56481,10 +56481,36 @@
     "task_type": "governance",
     "priority": 2,
     "source": "provenance-sweep-batch2",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-09T18:15:31.702949+00:00",
     "title": "Provenance Batch2: taiwan-vt 23 untraceable — 建 Table1/4/5 dedicated JSON + 統一 γ estimation",
-    "description": "承 paper/PROVENANCE_SWEEP_20260710.md Finding 2。taiwan-vt 23 個數字無活 JSON：Table1 summary stats、Table4 VT Sharpe、Table5 common-period、Table2 個股 γ(鴻海/聯發科/0056 靠 N121 pre-gate averages)、Sec6 macro corr、Appendix TZ、Sec3 TWD/USD。動作：(1)為 Table1/4/5 建 dedicated experiments/<id>/results.json 重現論文值(可離線重現視窗，禁湊值)；(2)統一所有 0050/TSMC γ 到單一 estimation(現混 full-sample/rolling/w=2000)並記錄每個 γ 出自哪個 K892 window/spec。不能重估者標 sign-off。scope 可再拆。"
+    "description": "承 paper/PROVENANCE_SWEEP_20260710.md Finding 2。taiwan-vt 23 個數字無活 JSON：Table1 summary stats、Table4 VT Sharpe、Table5 common-period、Table2 個股 γ(鴻海/聯發科/0056 靠 N121 pre-gate averages)、Sec6 macro corr、Appendix TZ、Sec3 TWD/USD。動作：(1)為 Table1/4/5 建 dedicated experiments/<id>/results.json 重現論文值(可離線重現視窗，禁湊值)；(2)統一所有 0050/TSMC γ 到單一 estimation(現混 full-sample/rolling/w=2000)並記錄每個 γ 出自哪個 K892 window/spec。不能重估者標 sign-off。scope 可再拆。",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-07-09T20:10:57.405046+00:00",
+    "claim_session_id": "dc6f4967de93",
+    "status_history": [
+      {
+        "ts": "2026-07-09T20:10:57.405360+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-09T20:11:12.613131+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-09T20:25:50.849821+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
+      }
+    ],
+    "started_at": "2026-07-09T20:11:12.612771+00:00",
+    "completed_at": "2026-07-09T20:25:50.849464+00:00",
+    "result": "Table 1 summary-stats 子範圍完成: experiments/paper2_table1_summary_stats_provenance/ 重現 TWII/0050/SPY/TSMC mean/std/skew/kurt → verdict NOT_REPRODUCIBLE (matched 3/16); 發現 0050_tw_adj_close 資料 bug + TSMC mean 無法重現; escalate owner sign-off, 未改論文數字. 剩餘子項拆到 batch2b. knowledge d0c521d8, reviewer=code-reviewer subagent."
   },
   {
     "id": "provenance-sweep-garchxvix-nullcheck-batch3",
@@ -56495,5 +56521,15 @@
     "created_at": "2026-07-09T18:15:31.702949+00:00",
     "title": "Provenance Batch3: garch-x-vix 6 null-check extractor 修復",
     "description": "承 paper/PROVENANCE_SWEEP_20260710.md Finding 1。reproduce.py 6 個 check(K1085 GLD+GVZ、K1088 USO+OVX、K1098 0050.TW×3、four-market DM>3 count) paper_value 與 stored 皆 null=extractor 在 main.tex/JSON 都抓不到。動作：確認這些數字是否仍在現行 main.tex(可能改版移除)→ 若在則修 check 的 regex/JSON path；若已移除則從 reproduce.py check list 刪除該 check 並註記。目標:reproduce_report 不再有 null-value false mismatch。"
+  },
+  {
+    "id": "provenance-sweep-taiwan-vt-untraceable-batch2b",
+    "task_type": "governance",
+    "priority": 3,
+    "status": "pending",
+    "source": "provenance_sweep_batch2_split",
+    "created_at": "2026-07-09T20:25:43.010922+00:00",
+    "title": "Provenance Batch2b: taiwan-vt 剩餘 untraceable — Table4/5 Sharpe + γ 統一 + Sec3/6 + Appendix TZ",
+    "description": "承 provenance-sweep-taiwan-vt-untraceable-batch2 拆分。Batch2 的 Table 1 summary-stats 子項已於 2026-07-10 完成 (experiments/paper2_table1_summary_stats_provenance/, verdict NOT_REPRODUCIBLE + escalate sign-off; 另發現 0050_tw_adj_close 資料 bug)。本 task 收剩餘 untraceable: (1) Table 4 VT 策略 Sharpe (BH/EWMA/GARCH/GJR) 建 dedicated JSON; (2) Table 5 common-period 值; (3) Table 2 個股 γ (鴻海2317/聯發科2454/0056) 統一到單一 estimation 並記 K892 window/spec; (4) Sec 6 macro corr; (5) Sec 4.5 TSMC VT Sharpe; (6) Appendix TZ (c2c Sharpe, TW+JP blend); (7) Sec 3 TWD/USD 檢定。重 compute (VT backtest / γ MLE) 走 compute_queue。禁湊值; 不能重估標 sign-off。scope 可再拆。"
   }
 ]

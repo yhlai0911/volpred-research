@@ -55,7 +55,9 @@ leverage-direction / eav-universal-magnitude / prg-periodic-garch / volatility-a
 ## 批次計畫（跨論文分批，每批 ≤50min）
 
 - **Batch 1（本輪 2026-07-10 完成）**：garch-x-vix 深度稽核 + live 重運算 enqueue ✅；5 artifact + 6 null 分類釐清 ✅
-- **Batch 2**：taiwan-vt 23 untraceable — 建 Table 1/4/5 dedicated JSON + 統一 γ estimation（followup task 已建）
+- **Batch 2**：taiwan-vt 23 untraceable — 建 Table 1/4/5 dedicated JSON + 統一 γ estimation
+  - **2a Table 1 summary stats（2026-07-10 04:xx hourly 完成 ⚠️ NOT_REPRODUCIBLE）**：`experiments/paper2_table1_summary_stats_provenance/`。從 pinned 快照重現 TWII/0050/SPY/TSMC 的 mean/std/skew/kurt → **僅 matched 3/16**。核心：(1) 只有 mean 部分對上，skew/kurt 系統性不符（0050+TSMC skew 翻號）；(2) **發現資料 bug — `data/0050_..._2008-2026.csv` 的 `0050_tw_adj_close` 欄損毀**（2013-12-31→2014-01-02 split-adj 斷點 −138.9%，剔後 kurt 仍 17.8）；(3) TSMC mean 0.051 無法重現（子期間 0.092-0.119，暗示用 pre-2008 較長期間）。→ **escalate owner sign-off**（取回原始 vintage OR 乾淨資料重估發 errata），未改任何論文數字。knowledge item d0c521d8，reviewer=code-reviewer subagent（Codex 額度用盡至 7/11）。
+  - **2b 剩餘子項（followup task `provenance-sweep-taiwan-vt-untraceable-batch2b` 已建）**：Table 4 VT Sharpe、Table 5 common-period、Table 2 個股 γ 統一、Sec 6 macro corr、Sec 4.5 TSMC VT Sharpe、Appendix TZ、Sec 3 TWD/USD。
 - **Batch 3**：garch-x-vix 6 null-check extractor config 修復 + 確認數字仍在現行 main.tex
 - **Batch 4**：vix-sufficiency 2 untraceable + garch-x-vix live 結果 reconcile errata sign-off
 

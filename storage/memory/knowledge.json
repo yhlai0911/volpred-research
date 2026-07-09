@@ -38183,5 +38183,18 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-07-09T20:20:29.725942"
+  },
+  {
+    "item_id": "d0c521d8",
+    "category": "provenance_audit",
+    "content": "[Provenance/Governance — NOT_REPRODUCIBLE] taiwan-vt 論文 Table 1 (Summary Statistics for Key Assets) 的 mean/std/skew/kurt 四欄無法從論文 pinned 快照重現 (matched 3/16 checks). experiment_id=paper2_table1_summary_stats_provenance. 核心發現: (1) 只有 mean 部分重現 (SPY 準, 0050/TWII 近); skew/kurt 系統性不符, 0050 與 TSMC skew 正負號翻轉 (paper 負, 重現正). (2) paper/taiwan-vt/data/0050_..._2008-2026.csv 的 0050_tw_adj_close 欄損毀: 2013-12-31=37.41→2014-01-02=9.33 split-adjustment 斷點 (單日 -138.9% log return); 剔該 row 後 kurtosis 仍 ~17.8 (paper 4.73), 此欄不可靠. (3) TSMC mean 0.051 無法重現 (子期間 mean 0.092-0.119), 暗示 paper 用了此 CSV 未涵蓋的 pre-2008 較長期間. 推論: Table 1 原始估計用了與 pinned CSV 不同的 vintage/期間. 處置: 未修改論文任何數字; escalate owner sign-off (取回原始 vintage 重現 OR 乾淨資料重估發 errata). 禁 sign-off 前 silently 改寫 Table 1. reviewer=feature-dev:code-reviewer subagent (Codex 額度用盡至 2026-07-11, 走 fallback; 確認核心統計機制正確、verdict 成立、兩 traceability 修正已套用).",
+    "evidence": [
+      "experiments/paper2_table1_summary_stats_provenance/results.json",
+      "experiments/paper2_table1_summary_stats_provenance/README.md",
+      "experiments/paper2_table1_summary_stats_provenance/reproduce_table1_summary.py",
+      "paper/PROVENANCE_SWEEP_20260710.md Finding 2"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-07-10T04:24:14.535752"
   }
 ]

@@ -1,0 +1,322 @@
+{
+  "experiment_id": "paper2_table1_summary_stats_provenance",
+  "title": "taiwan-vt Table 1 summary-stats (mean/std/skew/kurt) provenance reproduction",
+  "generated_at": "2026-07-09T20:23:16.060304+00:00",
+  "source_doc": "paper/PROVENANCE_SWEEP_20260710.md Finding 2",
+  "data_sources": {
+    "main_csv": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+    "twii_1997_snapshot": "paper/taiwan-vt/data/_twii_1997_2007_snapshot.csv",
+    "note": "論文 pinned 快照; 未 live-fetch, 無 yfinance vintage drift."
+  },
+  "method": {
+    "log_returns": "r_t = ln(P_t/P_{t-1}) * 100 (body_v3.tex L41)",
+    "price_col": "adj_close for stocks/SPY; close for TWII index (adj==close for index)",
+    "std": "sample std ddof=1",
+    "skew_kurt_convention": "per-asset best-matching variant reported explicitly in row.*_variant_matched",
+    "tolerance": {
+      "mean_abs": 0.005,
+      "rel_others": 0.05
+    }
+  },
+  "scope_note": "本 JSON 只覆蓋 Table 1 的 4 個直接可重現資產列 (TWII/0050.TW/SPY/TSMC) 的 mean/std/skew/kurt. Table 1 的 '9-stock average' / '10-security average' 需完整 9-10 檔個股 panel, 此 pinned CSV 僅含 2317/2454/0056 三檔個股 → 標 needs_signoff, 待補完整 panel 或 sign-off. γ 欄另有 provenance (k892 / TWII γ disputed).",
+  "summary": {
+    "total_checks": 16,
+    "matched": 3,
+    "drift": 7,
+    "mismatch": 6,
+    "verdict": "NOT_REPRODUCIBLE_FROM_PINNED_SNAPSHOT"
+  },
+  "data_quality_issues": {
+    "dropped_impossible_returns": {
+      "0050.TW (2009-2026)": [
+        {
+          "date": "2014-01-02",
+          "log_ret_pct": -138.89
+        }
+      ]
+    },
+    "note": "剔除 |log return| > 40% 的物理不可能單日報酬 (資料錯誤, 非真實波動)."
+  },
+  "tsmc_subperiod_scan": {
+    "2008-2026": {
+      "mean": 0.092,
+      "n": 4478
+    },
+    "2012-2026": {
+      "mean": 0.1058,
+      "n": 3482
+    },
+    "2015-2026": {
+      "mean": 0.1086,
+      "n": 2742
+    },
+    "2018-2026": {
+      "mean": 0.1188,
+      "n": 2009
+    }
+  },
+  "findings": [
+    "只有 mean 部分重現 (SPY mean 準; 0050/TWII mean 近); std 部分 within-tol; skew/kurt 系統性不符 — 0050 與 TSMC skew 正負號翻轉 (paper 負, 重現正).",
+    "0050_tw_adj_close 欄損毀: 2013-12-31=37.41 → 2014-01-02=9.33 的 split-adjustment 斷點 (單日 -138.9% log return, 物理不可能); 剔除該 row 後 kurtosis 仍達 ~17.8 (paper 4.73), 顯示 adj_close 尚有殘留 adjustment artifacts, 此欄不可靠.",
+    "TSMC (2330.TW) mean 0.051 無法從 pinned 2008-2026 快照重現 (所有子期間 mean=0.092-0.119, 見 tsmc_subperiod_scan); paper 值更低 → 暗示 paper 的 TSMC 列用了此 CSV 未涵蓋的 pre-2008 較長期間資料.",
+    "推論: Table 1 summary stats 的原始估計用了與此 pinned CSV 不同的資料 vintage / 期間 (較長 TSMC 史 + 未損毀的 0050 序列), 現有 pinned 快照不足以重現高階矩."
+  ],
+  "honest_conclusion": "本輪未能從論文 pinned 快照重現 Table 1 的 mean/std/skew/kurt (僅 mean 部分對上). 此為研究誠實揭露: 這些數字仍屬 untraceable, 且 pinned CSV 的 0050 adj_close 有資料品質 bug. 未修改論文任何數字. 後續需 owner sign-off: (a) 取回原始估計 vintage 資料重現, 或 (b) 決定用乾淨資料重估並發 errata 更新 Table 1 (manuscript change, 需 sign-off).",
+  "next_actions": [
+    "escalate owner sign-off: Table 1 summary stats 無 reproducible pinned 來源.",
+    "followup (compute_queue): 用乾淨 vintage 重抓 TSMC(pre-2008) + 修復 0050 adj 序列後重估, 作 errata 候選值.",
+    "禁: 於 sign-off 前 silently 改寫 Table 1 任何數字."
+  ],
+  "rows": {
+    "TWII (1997-2026)": {
+      "n_obs": 7106,
+      "date_start": "1997-07-03",
+      "date_end": "2026-07-03",
+      "computed": {
+        "mean": 0.0232,
+        "std": 1.362,
+        "skew": -0.2792,
+        "kurt": 7.2351
+      },
+      "paper": {
+        "mean": 0.019,
+        "std": 1.45,
+        "skew": -0.31,
+        "kurt": 5.82
+      },
+      "skew_variant_matched": "skew_unbiased",
+      "kurt_variant_matched": "kurt_pearson_biased",
+      "all_variants": {
+        "mean": 0.0232,
+        "std_ddof1": 1.362,
+        "std_ddof0": 1.3619,
+        "skew_biased": -0.2791,
+        "skew_unbiased": -0.2792,
+        "kurt_excess_biased": 4.2351,
+        "kurt_excess_unbiased": 4.239,
+        "kurt_pearson_biased": 7.2351,
+        "kurt_pearson_unbiased": 7.239
+      }
+    },
+    "0050.TW (2009-2026)": {
+      "n_obs": 4227,
+      "date_start": "2009-01-05",
+      "date_end": "2026-04-17",
+      "computed": {
+        "mean": 0.0663,
+        "std": 1.3458,
+        "skew": 0.0775,
+        "kurt": 17.8481
+      },
+      "paper": {
+        "mean": 0.034,
+        "std": 1.38,
+        "skew": -0.47,
+        "kurt": 4.73
+      },
+      "skew_variant_matched": "skew_biased",
+      "kurt_variant_matched": "kurt_excess_biased",
+      "all_variants": {
+        "mean": 0.0663,
+        "std_ddof1": 1.3458,
+        "std_ddof0": 1.3456,
+        "skew_biased": 0.0775,
+        "skew_unbiased": 0.0775,
+        "kurt_excess_biased": 17.8481,
+        "kurt_excess_unbiased": 17.8707,
+        "kurt_pearson_biased": 20.8481,
+        "kurt_pearson_unbiased": 20.8707
+      }
+    },
+    "SPY (2008-2026)": {
+      "n_obs": 4663,
+      "date_start": "2008-01-03",
+      "date_end": "2026-07-02",
+      "computed": {
+        "mean": 0.0423,
+        "std": 1.2477,
+        "skew": -0.2945,
+        "kurt": 14.1099
+      },
+      "paper": {
+        "mean": 0.042,
+        "std": 1.18,
+        "skew": -0.52,
+        "kurt": 12.3
+      },
+      "skew_variant_matched": "skew_unbiased",
+      "kurt_variant_matched": "kurt_excess_biased",
+      "all_variants": {
+        "mean": 0.0423,
+        "std_ddof1": 1.2477,
+        "std_ddof0": 1.2476,
+        "skew_biased": -0.2944,
+        "skew_unbiased": -0.2945,
+        "kurt_excess_biased": 14.1099,
+        "kurt_excess_unbiased": 14.1263,
+        "kurt_pearson_biased": 17.1099,
+        "kurt_pearson_unbiased": 17.1263
+      }
+    },
+    "TSMC (2330.TW)": {
+      "n_obs": 4478,
+      "date_start": "2008-01-03",
+      "date_end": "2026-04-17",
+      "computed": {
+        "mean": 0.092,
+        "std": 1.7378,
+        "skew": 0.0702,
+        "kurt": 3.1133
+      },
+      "paper": {
+        "mean": 0.051,
+        "std": 1.92,
+        "skew": -0.18,
+        "kurt": 3.41
+      },
+      "skew_variant_matched": "skew_biased",
+      "kurt_variant_matched": "kurt_excess_unbiased",
+      "all_variants": {
+        "mean": 0.092,
+        "std_ddof1": 1.7378,
+        "std_ddof0": 1.7376,
+        "skew_biased": 0.0702,
+        "skew_unbiased": 0.0702,
+        "kurt_excess_biased": 3.1085,
+        "kurt_excess_unbiased": 3.1133,
+        "kurt_pearson_biased": 6.1085,
+        "kurt_pearson_unbiased": 6.1133
+      }
+    }
+  },
+  "checks": [
+    {
+      "asset": "TWII (1997-2026)",
+      "metric": "mean",
+      "paper": 0.019,
+      "computed": 0.0232,
+      "err": 0.0042,
+      "status": "matched"
+    },
+    {
+      "asset": "TWII (1997-2026)",
+      "metric": "std",
+      "paper": 1.45,
+      "computed": 1.362,
+      "err": 0.0607,
+      "status": "drift"
+    },
+    {
+      "asset": "TWII (1997-2026)",
+      "metric": "skew",
+      "paper": -0.31,
+      "computed": -0.2792,
+      "err": 0.0995,
+      "status": "drift"
+    },
+    {
+      "asset": "TWII (1997-2026)",
+      "metric": "kurt",
+      "paper": 5.82,
+      "computed": 7.2351,
+      "err": 0.2432,
+      "status": "drift"
+    },
+    {
+      "asset": "0050.TW (2009-2026)",
+      "metric": "mean",
+      "paper": 0.034,
+      "computed": 0.0663,
+      "err": 0.0323,
+      "status": "mismatch"
+    },
+    {
+      "asset": "0050.TW (2009-2026)",
+      "metric": "std",
+      "paper": 1.38,
+      "computed": 1.3458,
+      "err": 0.0248,
+      "status": "matched"
+    },
+    {
+      "asset": "0050.TW (2009-2026)",
+      "metric": "skew",
+      "paper": -0.47,
+      "computed": 0.0775,
+      "err": 1.1648,
+      "status": "mismatch_signflip"
+    },
+    {
+      "asset": "0050.TW (2009-2026)",
+      "metric": "kurt",
+      "paper": 4.73,
+      "computed": 17.8481,
+      "err": 2.7734,
+      "status": "mismatch"
+    },
+    {
+      "asset": "SPY (2008-2026)",
+      "metric": "mean",
+      "paper": 0.042,
+      "computed": 0.0423,
+      "err": 0.0003,
+      "status": "matched"
+    },
+    {
+      "asset": "SPY (2008-2026)",
+      "metric": "std",
+      "paper": 1.18,
+      "computed": 1.2477,
+      "err": 0.0574,
+      "status": "drift"
+    },
+    {
+      "asset": "SPY (2008-2026)",
+      "metric": "skew",
+      "paper": -0.52,
+      "computed": -0.2945,
+      "err": 0.4336,
+      "status": "mismatch"
+    },
+    {
+      "asset": "SPY (2008-2026)",
+      "metric": "kurt",
+      "paper": 12.3,
+      "computed": 14.1099,
+      "err": 0.1471,
+      "status": "drift"
+    },
+    {
+      "asset": "TSMC (2330.TW)",
+      "metric": "mean",
+      "paper": 0.051,
+      "computed": 0.092,
+      "err": 0.041,
+      "status": "mismatch"
+    },
+    {
+      "asset": "TSMC (2330.TW)",
+      "metric": "std",
+      "paper": 1.92,
+      "computed": 1.7378,
+      "err": 0.0949,
+      "status": "drift"
+    },
+    {
+      "asset": "TSMC (2330.TW)",
+      "metric": "skew",
+      "paper": -0.18,
+      "computed": 0.0702,
+      "err": 1.3899,
+      "status": "mismatch_signflip"
+    },
+    {
+      "asset": "TSMC (2330.TW)",
+      "metric": "kurt",
+      "paper": 3.41,
+      "computed": 3.1133,
+      "err": 0.087,
+      "status": "drift"
+    }
+  ]
+}
