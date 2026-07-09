@@ -38155,5 +38155,20 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-07-09T14:09:33.003758"
+  },
+  {
+    "item_id": "47f5b5a0",
+    "category": "myth_busting",
+    "content": "K1667 [CONDITIONAL_PASS] 成交量隔日方向預測迷思破解（迷思實驗室）。資料 yfinance daily OHLCV auto_adjust，5 資產（0050.TW/2330.TW/2317.TW/SPY/QQQ），期間 2005-01-01~2026-07-01，每資產樣本≥500，seed=42，訊號 signal.shift(1) 昨訊號→今報酬。\n迷思B『爆量長黑是出貨→隔日續跌』= 破解 FALSE（強）：5資產×2門檻 0 個顯著續跌，方向偏反彈。2330.TW 爆量長黑後隔日下跌率 31.0%（無條件 43.8%），隔日均報酬 +1.06%（boot95CI[+0.42%,+1.58%]），n=71。Pooled diagnostic（日聚合+Newey-West HAC，非 asset-day iid，K1355 合規）隔日 +0.39%/day HAC t=2.47 p=0.014（反彈）。與 Campbell-Grossman-Wang(1993) 高量下跌傾向反轉一致。\n迷思A『量先價行→隔日易漲』= 部分成立非普世：顯著正向僅 2/5，皆台股個股（2330.TW 隔日上漲率 60.4% vs base 48.4% two-prop p=0.001 n=192；2317.TW 54.4% vs 46.4% p=0.013 n=250），三個 ETF（0050.TW/SPY/QQQ）全不顯著。個股解讀 attention/PEAD(GKM 2001)。Pooled A HAC t=3.80 p=0.00015。效果偏小（均差 +0.2~0.5%/日）。\nReviewer: Codex 主路徑額度不可用（7/11 恢復）→ feature-dev:code-reviewer subagent fallback CONDITIONAL_PASS（lookahead 對齊/pooled K1355/atomic write/seed 均判正確；抓修 1 個 close_pos split-adjust 混用 bug，primary ret 版不受影響）。Caveat: subagent PASS ≠ primary-path Codex PASS（K1259 教訓）— Codex 額度 7/11 恢復後需 codex exec 二審再標 closure。",
+    "evidence": [
+      "experiments/K1667/K1667_results.json",
+      "experiments/K1667/README.md",
+      "experiments/K1667/K1667.py",
+      "experiments/K1667/K1667_hitrate.png",
+      "experiments/K1667/K1667_black_meanret.png",
+      "reviewer=feature-dev:code-reviewer subagent (Codex quota blocked, re-verify pending 2026-07-11)"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-07-09T18:31:42.311061"
   }
 ]

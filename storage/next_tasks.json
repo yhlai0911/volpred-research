@@ -55901,7 +55901,7 @@
     "title": "K1667: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1519). Original: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1667.py with signal.shift(1) + seed=42, (c) K1667_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -55910,7 +55910,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-09T00:00:01Z"
+    "created_at": "2026-07-09T00:00:01Z",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-07-09T10:10:52.096060+00:00",
+    "claim_session_id": "38d4d0282386",
+    "status_history": [
+      {
+        "ts": "2026-07-09T10:10:52.096428+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-09T10:11:26.202554+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-09T10:31:58.105149+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-18"
+      }
+    ],
+    "started_at": "2026-07-09T10:11:26.202115+00:00",
+    "completed_at": "2026-07-09T10:31:58.104805+00:00",
+    "result": "迷思B(爆量長黑續跌)破解FALSE強;迷思A(量先價行)台股個股部分成立ETF無效;code-reviewer CONDITIONAL_PASS(Codex 7/11二審);knowledge 47f5b5a0"
   },
   {
     "id": "journal_discovery_20260709_0",
