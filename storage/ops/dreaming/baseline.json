@@ -1,42 +1,63 @@
 {
   "schema": "dreaming_baseline.v1",
   "description": "Rolling per-signature consecutive-run strike counts. THREE_STRIKE consecutive runs escalate to critical.",
-  "updated_at": "2026-07-08T22:00:03.711969+00:00",
+  "updated_at": "2026-07-09T22:00:03.400177+00:00",
   "signatures": {
     "memory_skill_gap:uncodified_process": {
-      "strike_count": 12,
+      "strike_count": 13,
       "pattern_type": "memory_skill_gap",
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-08T22:00:03.711969+00:00",
+      "last_seen": "2026-07-09T22:00:03.400177+00:00",
       "activity_marker": null
     },
     "memory_hygiene:consolidation_review": {
-      "strike_count": 12,
+      "strike_count": 13,
       "pattern_type": "memory_hygiene",
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-08T22:00:03.711969+00:00",
+      "last_seen": "2026-07-09T22:00:03.400177+00:00",
       "activity_marker": null
     },
-    "persistent_alert:7ecf96ae6fa61592": {
-      "strike_count": 1,
-      "pattern_type": "persistent_alert",
-      "first_seen": "2026-07-07T22:00:04.722774+00:00",
-      "last_seen": "2026-07-08T22:00:03.711969+00:00",
-      "activity_marker": "2026-07-07T04:00:30.203226+00:00"
-    },
     "persistent_alert:542378afb7b6a3b9": {
-      "strike_count": 1,
+      "strike_count": 2,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-08T22:00:03.711969+00:00",
-      "last_seen": "2026-07-08T22:00:03.711969+00:00",
-      "activity_marker": "2026-07-08T11:00:45.159044+00:00"
+      "last_seen": "2026-07-09T22:00:03.400177+00:00",
+      "activity_marker": "2026-07-09T14:00:39.037170+00:00"
     },
     "persistent_alert:e1aa596aac4a2172": {
-      "strike_count": 1,
+      "strike_count": 2,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-08T22:00:03.711969+00:00",
-      "last_seen": "2026-07-08T22:00:03.711969+00:00",
-      "activity_marker": "2026-07-08T11:12:49.817312+00:00"
+      "last_seen": "2026-07-09T22:00:03.400177+00:00",
+      "activity_marker": "2026-07-09T14:00:29.338548+00:00"
+    },
+    "repeated_tool_failure:dispatch_supervisor:quota_blocked:exit1": {
+      "strike_count": 1,
+      "pattern_type": "repeated_tool_failure",
+      "first_seen": "2026-07-09T22:00:03.400177+00:00",
+      "last_seen": "2026-07-09T22:00:03.400177+00:00",
+      "activity_marker": null
+    },
+    "persistent_alert:a4a7ca551f8626b2": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-09T22:00:03.400177+00:00",
+      "last_seen": "2026-07-09T22:00:03.400177+00:00",
+      "activity_marker": "2026-07-09T21:00:43.285065+00:00"
+    },
+    "persistent_alert:739fcf1bb7ffd6f1": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-09T22:00:03.400177+00:00",
+      "last_seen": "2026-07-09T22:00:03.400177+00:00",
+      "activity_marker": "2026-07-09T16:00:34.409527+00:00"
+    },
+    "persistent_alert:2d99bdcd3277e3cc": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-09T22:00:03.400177+00:00",
+      "last_seen": "2026-07-09T22:00:03.400177+00:00",
+      "activity_marker": "2026-07-09T14:00:45.588654+00:00"
     }
   }
 }

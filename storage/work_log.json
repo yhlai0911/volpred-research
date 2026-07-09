@@ -15099,5 +15099,16 @@
     "summary": "Provenance Batch3: garch-x-vix reproduce.py 6 null-check 修復。診斷: 原 audit 誤判 extractor 缺口 (用錯 jq 欄位名讀成兩側皆 null); 真 root cause = --skip-live 模式把 live-dependent check 標 mismatch 而非 skipped → false-RED 7.7%。修法 (統一 root cause): compare_three_way 無 live 時 fall back paper<->stored provenance; compare_expected_vs_live 純 live-only check 標 status=skipped 排除 match_rate; 條件用 not live_mode 一併修好 default 模式讀空 cache 同 bug (code-reviewer 抓到)。結果: skip-live 與 default 皆 85.7% yellow, 6 skipped, 唯一 divergence=A4f (已 escalate errata, 非本 scope)。未動任何論文數字/JSON 值。",
     "verdict": "PASS_MEASUREMENT_BUG_FIXED_NO_DATA_CHANGE",
     "reviewer": "code-reviewer subagent (Codex 兩次超時 fallback; review confirmed no masking of real mismatch + flagged default-mode collateral bug which was then fixed)"
+  },
+  {
+    "timestamp": "2026-07-10T06:31",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_10_台股避險",
+    "summary": "台美 VIX 恐慌背離：feed mile_3e11060d + FB 雙發佈",
+    "artifacts": [
+      "storage/reports/feed.json#mile_3e11060d",
+      "storage/reports/assets/twvix_*_20260710.png"
+    ],
+    "verdict": "published_live"
   }
 ]
