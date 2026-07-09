@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-09 已發佈文章 rv5=83% 不可複現（同篇多 RV 窗 annualization 口徑不一致）
+
+**現象**：24h paper_review（`mile_aee1c78c` 台積電法說會 IV）發現文章寫「最近 5 日已實現波動率 83%」，但對應實驗 `tsmc_earnings_iv.py` 只計算 rv20/rv60（無 rv5），results.json 也無 `rv5_pct`。主線程從價格史（as-of 2026-07-08）重算 rv5=**69.9%**（√252），與 83% 差 13pp。
+
+**根因**：code-reviewer 指出 83%≈**84.2%（√365 曆日年化）** — 同一篇文章 rv20/rv60 用 √252、rv5 疑似誤用 √365，annualization 口徑不一致。非虛構，是口徑混用 + 未落地實驗產出（雙重問題）。
+
+**教訓（reusable）**：**同一篇文章/實驗的多個 RV 窗（rv5/rv20/rv60…）必須用同一 annualization 口徑（√252 交易日），不可混 √365**；且每個 reader-facing 數字都必須存進 results.json（rv5 未存 = 無法在 review 時對齊）。
+
+**解決（修流程不修資料）**：(1) `backfill_provenance.py` reproducer 從可複現資料補 rv5(√252)+earnings_day_move(variance decomposition)+公式文件進 results.json；(2) feed.json 更正 83%→約70%（√252，與 rv20 內部一致）+ Supabase 同步；(3) 核心結論（IV63.5%≈RV20 64%、無 lookahead、無 overclaim）不受影響。earnings-day 4.0% 與月內 5 個日跳動數字均複現通過。Reviewer 的「5 跳動不可追溯」為 false positive（僅拿到 5 日清單非整月，實測 −7.2/+6.7/−6.9/+5.1/+4.8 全對應 6/5~7/1 真實交易日）。
+
 ## 2026-07-09 permalink 抓取 fallback 靜默寫入「別篇貼文」連結到 canonical（review 攔截 + 誠實撤回）
 
 **現象**：實作 `fb_realchrome_post` 發文後抓貼文 permalink 功能（task `platform_ops_fb_permalink_capture`）。首版 `_capture_permalink` 的 DOM-walk 找不到 anchor 匹配時，fallback 回 `links[0]`（timeline 第一個 permalink 連結）。回補歷史貼文 `mile_e1ff7ef9` 時，該貼文已被捲到 timeline 深處（今早發、之後有新貼文），anchor walk 未命中 → fallback 抓到**當下最新的別篇貼文** URL，印 `[OK]` 誤導成功並寫進 canonical `fb_post_url`。

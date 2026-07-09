@@ -55554,7 +55554,7 @@
     "title": "Paper review (Codex 24h-rule): 台積電法說會前，選擇權市場替『法說行情』加了多少價？答案：幾乎沒有",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_aee1c78c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_aee1c78c",
@@ -55562,7 +55562,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-08T20:08:28+00:00"
+    "created_at": "2026-07-08T20:08:28+00:00",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-07-09T03:23:51.078059+00:00",
+    "claim_session_id": "944843f2a83d",
+    "status_history": [
+      {
+        "ts": "2026-07-09T03:23:51.078463+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-09T03:23:57.829750+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-09T03:35:15.001493+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-11"
+      }
+    ],
+    "started_at": "2026-07-09T03:23:57.829355+00:00",
+    "completed_at": "2026-07-09T03:35:15.001157+00:00",
+    "result": "24h Codex-rule review (Codex usage-limited→code-reviewer fallback). 核心結論 sound(IV63.5%≈RV20 64%, 無lookahead/無overclaim). 發現1個非load-bearing次要數字 rv5=83% 不可複現(√365曆日誤用；√252正確=70%)→已更正feed.json+backfill JSON rv5/earnings_day_move+provenance script. earnings-day 4.0%與月內5跳動數字均可複現✓. Supabase已同步."
   },
   {
     "id": "paper_review_mile_9c211681",
@@ -55744,7 +55770,7 @@
     "title": "K1665: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 469). Original: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1665.py with signal.shift(1) + seed=42, (c) K1665_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -55753,7 +55779,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-09T00:00:01Z"
+    "created_at": "2026-07-09T00:00:01Z",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-07-09T03:10:10.604677+00:00",
+    "claim_session_id": "801922e17355",
+    "status_history": [
+      {
+        "ts": "2026-07-09T03:10:10.605013+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-09T03:10:10.847289+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-11"
+      }
+    ],
+    "started_at": "2026-07-09T03:10:10.846947+00:00"
   },
   {
     "id": "K1666",

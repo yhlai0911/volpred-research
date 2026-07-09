@@ -154,5 +154,14 @@
   },
   "earnings_isolated_implied_move_pct": 3.98,
   "earnings_isolated_note": "variance decomposition: sqrt((back_iv^2 - front_iv^2)*T_back), front(Jul10, no earnings) as diffusion base — cleaner than raw 9-day straddle 8.39%",
-  "hist_vs_isolated_ratio": 0.81
+  "hist_vs_isolated_ratio": 0.81,
+  "rv5_pct": 69.93,
+  "earnings_day_implied_move_pct": 3.98,
+  "provenance_backfill": {
+    "added": "2026-07-09 (24h paper_review, task paper_review_mile_aee1c78c)",
+    "rv5_formula": "tail(5) daily logret std * sqrt(252) * 100, as-of price history",
+    "earnings_day_formula": "sqrt((IV_back^2 - IV_front^2) * days_back/252) * 100",
+    "note": "文章原載 rv5=83%（不可複現，重算≈70%）已更正；earnings-day 4.0% 與重算一致。 rv5 從價格史可複現（過去價格固定）；options 快照為 point-in-time 不可重跑。",
+    "recompute_caveat": "重算 rv20=63.42 vs committed 64.04（yfinance 股息調整漂移 ~0.6pp）"
+  }
 }
