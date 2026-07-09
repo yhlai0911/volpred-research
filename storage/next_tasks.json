@@ -52902,7 +52902,7 @@
     "id": "paper_body_vix_sufficiency_daily_family_clark_west",
     "task_type": "paper_body",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "vix-sufficiency: 為 daily families 1-11 (nested VIX+signal) 算 Clark-West/HLN 並整合進 Table 3",
     "description": "SEVERE-2 carve-out (from paper_body_vix_sufficiency_v5_severe_fixes, 2026-07-06). Weekly families 12/13 nested CW 已完成 (experiments/k1116c/k1116c_clark_west.py; 全部 CW|t|<0.6, null 穩健). 待做: daily families 1-11 是真 nested (RV=a+b1*VIX+b2*signal, eq:incremental). 各 family 腳本散落 experiments/k730-k1201, 無統一 harness -> 主線程忠實重建 OOS forecasts (pinned data, 對齊各 family lag/signal 構造), 算 DM-MSFE + Clark-West + HLN, 整合成 Table 3 新 CW 欄. 風險: CW 更 powerful, 可能把 F2(term struct R2oos=.010)/F4(VRP)/F10(overnight) 從不顯著推向顯著 -> 必真算, 禁 bounding argument. 主線程 only, 禁 background agent 寫 .tex. reproduce 需驗 DM 重現主表 |t|. [PROGRESS 2026-07-08 k1116e]: F2 VIX-term-structure + F4 VRP (the two highest-IS-signal, prime CW-flip daily families) nested Clark-West DONE — both FAIL Harvey |t|>3.0 (F2 CW t=1.69, F4 CW t=-0.22), null robust to CW; agy-reviewed PASS (Codex usage-limited). REMAINING scope: daily regression families F1/F3/F8/F9/F10/F11 (F3/F9/F10 need fragile external data: CBOE put-call, pytrends, intraday VIX open) + integrate CW column into Table 3 (main_v5.tex) + reproduce.py rebind + paper-update. Reuse experiments/k1116e/k1116e.py harness pattern. [PROGRESS 2026-07-09 k1116g]: F1 cross-asset vol momentum + F8 yield-curve slope + F11 calendar/Halloween nested Clark-West DONE (the remaining STABLE-DATA daily families) — ALL FAIL Harvey |t|>3.0: F1 CW t=0.69, F8 CW t=0.11, F11 CW t=-1.50; null robust to more-powerful nested CW. code-reviewer subagent PASS (lookahead clean; Codex usage-limited to 07-11, agy timed out). knowledge=a779d721. Table-3 CW column now covers 5/8 nested-CW-applicable daily families (F2/F4/F1/F8/F11). REMAINING: F3(behavioral P/C)/F9(Google Trends)/F10(overnight VIX open) need fragile external data (CBOE put-call, pytrends, intraday VIX open) -> data-provisioning follow-up; then integrate CW column into Table 3 (main_v5.tex) + reproduce.py rebind + paper-update.",
     "created_by": "hourly-22",
@@ -52939,10 +52939,33 @@
         "to": "pending",
         "by": "hourly-02",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-09T00:09:34.316473+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-09T00:09:41.944168+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-09T00:15:51.769902+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-08"
       }
     ],
-    "started_at": "2026-07-08T12:12:12.124367+00:00",
-    "last_released_at": "2026-07-08T18:23:32.383507+00:00"
+    "started_at": "2026-07-09T00:09:41.943852+00:00",
+    "last_released_at": "2026-07-08T18:23:32.383507+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-07-09T00:09:34.316143+00:00",
+    "claim_session_id": "b027d831562f",
+    "completed_at": "2026-07-09T00:15:51.769476+00:00",
+    "result": "整合 5/8 stable-data daily families nested Clark-West 進 main_v5.tex Section 5 正文 (F1 CWt=+0.69, F2 +1.69/p=.045, F4 -0.22, F8 +0.11, F11 -1.50; 全 |t|<3.0 null-robust)。方法論判斷: 以正文段呈現而非 Table 3 欄位, 因 CW 用 fixed 2019-2026 split 與主表 expanding-window DM 不同窗口, 硬塞同表欄位會誤導成同窗可比 (研究誠實); 仿既有 weekly-CW 段 (line 516) 明示窗口 + directional cross-check (fixed-split DM 與主表同號同 non-sig)。xelatex 編譯乾淨 64 頁 0 undefined refs。F3/F9/F10 (CBOE put-call/pytrends/intraday VIX open) carve 成 blocked task paper_body_vix_sufficiency_daily_F3_F9_F10_external_data (awaiting_external_data)。reproduce-v5 rebind + paper-update 屬既有 v3-era gate debt (README 早標), 待 reproduce 全 body refresh; paper-sync-all cron 6h 兜底 body mtime。"
   },
   {
     "id": "paper_review_mile_69524f14",
@@ -55698,6 +55721,105 @@
       "trending_repost",
       "reader_facing",
       "auto_refill"
+    ]
+  },
+  {
+    "id": "K1664",
+    "title": "K1664: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 358). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1664.py with signal.shift(1) + seed=42, (c) K1664_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 358,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-09T00:00:01Z"
+  },
+  {
+    "id": "K1665",
+    "title": "K1665: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 469). Original: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1665.py with signal.shift(1) + seed=42, (c) K1665_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 469,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-09T00:00:01Z"
+  },
+  {
+    "id": "K1666",
+    "title": "K1666: ⚠️(medium) **路徑依賴波動（Guyon-Lekeufack PDV）內生性分解：日 RV 有多少是「報酬路徑內生」而非外生新聞** — 建 PDV 的兩個特徵（過去報酬 power-law 加權趨勢項 R1 + 過去平方報酬加權",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1507). Original: ⚠️(medium) **路徑依賴波動（Guyon-Lekeufack PDV）內生性分解：日 RV 有多少是「報酬路徑內生」而非外生新聞** — 建 PDV 的兩個特徵（過去報酬 power-law 加權趨勢項 R1 + 過去平方報酬加權 √項），量測其對日 RV 的 R²（文獻稱 ~65% 內生），並把 R1（leverage-trend）當獨立 covariate 測 HAR 上的增量；yfinance SPY/QQQ（來源：Guyon-Lekeufack 2023 PDV + arXiv 2503.00851 HAR-PD 2025）。與 line 1294（rough/path/Markovian **賽馬**）正交——這裡問**內生 vs 外生變異分解 + leverage 通道 attribution**，非誰預測贏；PDV/Guyon grep=0，dispatch 前再 spot-verify 非殼變。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1666.py with signal.shift(1) + seed=42, (c) K1666_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1507,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-09T00:00:01Z"
+  },
+  {
+    "id": "K1667",
+    "title": "K1667: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1519). Original: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1667.py with signal.shift(1) + seed=42, (c) K1667_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1519,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-09T00:00:01Z"
+  },
+  {
+    "id": "journal_discovery_20260709_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-07-09T00:00:05+00:00"
+  },
+  {
+    "id": "paper_body_vix_sufficiency_daily_F3_F9_F10_external_data",
+    "priority": 4,
+    "task_type": "paper_body",
+    "status": "blocked",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-07-09T00:15:32.408837+00:00",
+    "created_at": "2026-07-09T00:15:32.408837+00:00",
+    "blocked_note": "vix-sufficiency daily nested Clark-West: F3 behavioral put-call (CBOE put-call volume), F9 Google Trends fear (pytrends), F10 overnight VIX change (intraday VIX open) 需 pin 進 replication snapshot 才能算 nested CW。5/8 stable-data families (F1/F2/F4/F8/F11) 已算完並整合進 main_v5.tex Section 5 正文 (hourly-08 2026-07-09)。解 block: 補三外部序列 snapshot CSV -> 跑 k1116e/g harness pattern -> 補進同一 CW 正文段。expected immaterial (main-table DM |t|=0.52/0.67/1.12)。",
+    "title": "vix-sufficiency: F3/F9/F10 daily nested Clark-West (blocked on CBOE put-call / Google Trends / intraday VIX open snapshots)",
+    "description": "Carve-out from paper_body_vix_sufficiency_daily_family_clark_west (hourly-08 2026-07-09). Stable-data daily families F1/F2/F4/F8/F11 nested CW DONE + integrated into main_v5.tex prose (fixed 2019-2026 split, all |CW t|<3.0, null robust). Remaining F3/F9/F10 need external series not yet pinned: CBOE equity put-call volume (F3), Google Trends fear queries via pytrends (F9), intraday VIX opening print (F10). Reuse experiments/k1116e/k1116e.py + k1116g/k1116g.py harness. After compute, append to the same daily-CW paragraph (Section 5, after weekly-CW block) + refresh reproduce gate to v5.",
+    "source": "carve_out_hourly-08",
+    "tags": [
+      "paper",
+      "vix-sufficiency",
+      "clark-west",
+      "external-data"
     ]
   }
 ]

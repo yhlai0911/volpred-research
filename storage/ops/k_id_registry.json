@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1662,
+  "last_k_id": 1667,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -530,8 +530,48 @@
       "status": "reserved",
       "topic": "score-driven GAS/DCS VaR+ES",
       "topic_hash": "8727bcb6fcbf78a9"
+    },
+    {
+      "claimed_at": "2026-07-09T00:00:01.164040+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1664",
+      "number": 1664,
+      "source_max": 1663,
+      "status": "reserved",
+      "topic": "台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+      "topic_hash": "9574d335290c4455"
+    },
+    {
+      "claimed_at": "2026-07-09T00:00:01.258439+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1665",
+      "number": 1665,
+      "source_max": 1664,
+      "status": "reserved",
+      "topic": "原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
+      "topic_hash": "59d2bd9781daf9fd"
+    },
+    {
+      "claimed_at": "2026-07-09T00:00:01.572542+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1666",
+      "number": 1666,
+      "source_max": 1665,
+      "status": "reserved",
+      "topic": "⚠️(medium) **路徑依賴波動（Guyon-Lekeufack PDV）內生性分解：日 RV 有多少是「報酬路徑內生」而非外生新聞** — 建 PDV 的兩個特徵（過去報酬 power-law 加權趨勢項 R1 + 過去平方報酬加權 √項），量測其對日 RV 的 R²（文獻稱 ~65% 內生），並把 R1（leverage-trend）當獨立 covariate 測 HAR 上的增量；yfinance SPY/QQQ（來源：Guyon-Lekeufack 2023 PDV + arXiv 2503.00851 HAR-PD 2025）。與 line 1294（rough/path/Markovian **賽馬**）正交——這裡問**內生 vs 外生變異分解 + leverage 通道 attribution**，非誰預測贏；PDV/Guyon grep=0，dispatch 前再 spot-verify 非殼變。",
+      "topic_hash": "6305206d1be522ad"
+    },
+    {
+      "claimed_at": "2026-07-09T00:00:01.662389+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1667",
+      "number": 1667,
+      "source_max": 1666,
+      "status": "reserved",
+      "topic": "「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
+      "topic_hash": "a8c7ecdaedd943ab"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-08T15:12:16.012411+00:00"
+  "updated_at": "2026-07-09T00:00:01.662389+00:00"
 }
