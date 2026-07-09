@@ -189,19 +189,20 @@ if k892:
     rolling_twii = get_nested(k892, "assets", "^TWII", "rolling_w2000", "rolling_stats")
     print(f"  Rolling mean: gamma={rolling_twii['gamma_mean']:.4f}, range=[{rolling_twii['gamma_min']:.4f}, {rolling_twii['gamma_max']:.4f}]")
 
-    # 2026-04-19: Paper 0.272 is from 1997-2026 long-sample specification
-    # (captures Asian Financial Crisis + Dot-Com); K892 2008-2026 subset rolling
-    # max=0.236. body_v3.tex Table~\ref{tab:gamma} Notes document the
-    # fit-window disambiguation. Reclassified NOTE.
-    if rolling_twii['gamma_max'] < 0.272:
-        add("Table 2 (gamma)", "TWII gamma=0.272 (1997-2026 long-sample)", "0.272",
-            "K892", f"2008-2026 subset rolling max={rolling_twii['gamma_max']:.4f} (body_v3 Table tab:gamma note)",
-            "NOTE")
-        print(f"  NOTE: Paper 0.272 is 1997-2026 long-sample; K892 2008-2026 subset rolling max {rolling_twii['gamma_max']:.4f}. Disambiguated via footnote.")
-    else:
-        add("Table 2 (gamma)", "TWII gamma=0.272", "0.272",
-            "K892", f"within rolling range",
-            "VERIFIED")
+    # 2026-07-09 (telegram-312 / provenance-sweep): the prior "0.272 = 1997-2026
+    # long-sample" NOTE rationalization is FACTUALLY FALSE and is retracted. The
+    # full-sample 1997-2026 GJR gamma was directly re-estimated from the committed
+    # 1997-2007 snapshot + 2008-2026 CSVs -> gamma=0.105, t=5.31
+    # (experiments/paper2_twii_fullsample_gamma_provenance/results.json), which
+    # matches K892's own full_sample gamma=0.109 (t=5.62). Paper's 0.272 is an
+    # untraceable legacy value that reproduces under NO documented spec/window.
+    # Classified MISMATCH until body headline is corrected to the reproducible
+    # ~0.105-0.109 (awaiting owner sign-off; do not fake old value).
+    add("Table 2 (gamma)", "TWII gamma=0.272 (UNTRACEABLE legacy)", "0.272",
+        "paper2_twii_fullsample_gamma_provenance + K892",
+        "full-sample 1997-2026 re-estimate=0.105 (t=5.31); K892 full_sample=0.109 (t=5.62)",
+        "MISMATCH")
+    print(f"  MISMATCH: paper 0.272 UNTRACEABLE; full-sample re-estimate=0.105 (K892=0.109). Awaiting owner sign-off for headline fix.")
 
     # SPY gamma
     spy_full = get_nested(k892, "assets", "SPY", "full_sample")

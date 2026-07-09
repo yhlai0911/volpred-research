@@ -38170,5 +38170,18 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-07-09T18:31:42.311061"
+  },
+  {
+    "item_id": "80ad6656",
+    "category": "provenance",
+    "content": "Paper2 (taiwan-vt) headline TWII (TAIEX) full-sample 1997-2026 GJR gamma=0.272, t=3.18 is UNTRACEABLE and contradicts the papers own cited experiment K892 (full_sample gamma=0.109). Direct full-sample re-estimate from committed 1997-2007 snapshot + 2008-2026 CSVs yields gamma=0.105, t=5.31 (experiment paper2_twii_fullsample_gamma_provenance), matching K892s 0.109 across two independent pipelines. reproduce.pys prior \"0.272 = 1997-2026 long-sample\" rationalization was factually false (long-sample = 0.109). Lesson: when reproduce_report flags a headline number HIGH severity source-unidentified, re-estimate rather than paper over it with a footnote NOTE. Correction (0.272 -> ~0.109) awaits owner sign-off (narrative-affecting: abstract + Table 1/2 + amplification ratio 4.3x/5.0x downshift, qualitatively still holds). verdict=CONDITIONAL_PASS; reviewer=code-reviewer subagent (PASS); k_id=paper2_twii_fullsample_gamma_provenance.",
+    "evidence": [
+      "experiments/paper2_twii_fullsample_gamma_provenance/results.json (gamma=0.1047, t=5.31, n=7106)",
+      "experiments/k892/k892_verify_tw_gamma_results.json (.assets[^TWII].full_sample gamma=0.10899, t=5.62, n=7044)",
+      "code-reviewer subagent verdict=PASS (2026-07-09)",
+      "trigger: telegram-312 / provenance-sweep-legacy-paper-numbers"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-07-09T20:20:29.725942"
   }
 ]

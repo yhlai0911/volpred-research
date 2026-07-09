@@ -4853,3 +4853,21 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 
 **根因**：audit 用數值近似+關鍵詞比對，同一 JSON 內存在相似欄位（raw vs smoothed corr、t vs p、% vs abs）時會抓錯欄位比對。非 blocking（flag 未持久化到 feed 條目），文章數字實際全部逐字對齊 results.json。
 **教訓/待辦**：audit 比對應綁欄位語義（例：文章講 corr 就只比 `corr_*` 且區分 raw/smoothed），非全檔數值 fuzzy match。若再發生（strike 2）→ 收斂進 prepublish_audit.py 的欄位感知比對。本次僅記錄，未改 audit（advisory、未擋發佈）。
+
+## 2026-07-09 20:20 — Paper2 (taiwan-vt) headline TWII γ=0.272 UNTRACEABLE，實際 ≈0.109（telegram-312 / provenance-sweep）
+
+**症狀**：telegram-312 指 Paper2 滾動 γ 表 TWII 0.272 掛錯來源。稽核發現 headline
+TWII (TAIEX) full-sample 1997–2026 GJR γ=0.272, t=3.18 **無任何活 experiment 重現**，
+且與論文自身引用的 K892（full_sample γ=0.109, t=5.62）**矛盾**。
+**驗證**：從已 commit 的 1997-2007 snapshot + 2008-2026 CSV 拼全樣本重估 →
+γ=0.105, t=5.31（experiments/paper2_twii_fullsample_gamma_provenance），與 K892 獨立一致。
+code-reviewer subagent verdict=PASS（CSV 邊界無重疊、GJR spec 正確、無 lookahead）。
+**根因**：0.272 為 provenance gate（2026-05-17）上線前寫入的 orphan legacy 值；
+reproduce.py 曾以「0.272 = 1997-2026 long-sample」NOTE 辯解掩蓋，但該辯解 factually false
+（long-sample 實測 = 0.109）。此為 gate 前舊帳的典型：數字進 body 但無 JSON binding。
+**已修**：(a) body_v3.tex Table 1/2 TWII 行加 DISPUTED PROVENANCE 註解（不擅改 headline，等 owner sign-off）；
+(b) reproduce.py 撤回 false NOTE，重分類 MISMATCH 指向新 experiment；(c) audit 報告 + 修正清單；(d) 通知 owner。
+**待 owner sign-off**：0.272 → 0.109 影響 abstract + Table 1/2 + 放大倍數（4.3×/5.0× 需下修，質性仍成立），
+屬 narrative-affecting change，依 narrative state machine 不由單一 fire 擅改 body。
+**教訓**：uniqueness/headline 數字若 reproduce_report 已標 HIGH severity「source unidentified」，
+不可用 footnote NOTE 辯解粉飾 —— 必回頭重估。能重現就用可重現值，禁湊舊值。

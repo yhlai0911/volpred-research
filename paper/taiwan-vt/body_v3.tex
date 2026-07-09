@@ -49,6 +49,10 @@ Log returns are computed as $r_t = \ln(P_t / P_{t-1}) \times 100$. Table~\ref{ta
 & Mean (\%) & Std (\%) & Skewness & Kurtosis & $\gamma_{\text{GJR}}$ & $t(\gamma)$ \\
 \midrule
 TWII (1997--2026) & 0.019 & 1.45 & $-0.31$ & 5.82 & 0.272 & 3.18 \\
+% DISPUTED PROVENANCE (2026-07-09, telegram-312 / provenance-sweep): gamma=0.272,t=3.18 UNTRACEABLE.
+% Full-sample 1997-2026 re-estimate -> gamma=0.105,t=5.31 (experiments/paper2_twii_fullsample_gamma_provenance/results.json),
+% corroborated by K892 full_sample gamma=0.109,t=5.62 (experiments/k892/k892_verify_tw_gamma_results.json).
+% reproduce.py's "0.272 = 1997-2026 long-sample" NOTE is factually false (long-sample = 0.109). AWAITING OWNER SIGN-OFF before headline change; do NOT silently rewrite.
 0050.TW (2009--2026) & 0.034 & 1.38 & $-0.47$ & 4.73 & 0.097 & 3.60 \\% source: experiments/k892/k892_verify_tw_gamma_results.json .summary.assets["0050.TW"].full_sample (gamma=0.0970, gamma_t=3.5965, n_obs=4219; D3 errata fix 2026-05-26 — sample period aligned to yfinance availability 2009-01-02 onward)
 SPY (2008--2026) & 0.042 & 1.18 & $-0.52$ & 12.30 & 0.211 & 5.79 \\
 TSMC (2330.TW) & 0.051 & 1.92 & $-0.18$ & 3.41 & 0.052 & 3.98 \\
@@ -144,6 +148,7 @@ Table~\ref{tab:gamma} reports GJR-GARCH $\gamma$ estimates for the TAIEX, 0050.T
 Asset & $\gamma$ & $t$-stat & $\alpha$ & $\beta$ & Persistence \\
 \midrule
 TWII (TAIEX) & 0.272 & 3.18 & 0.012 & 0.870 & 0.990 \\
+% DISPUTED PROVENANCE (2026-07-09, telegram-312): gamma=0.272,t=3.18 UNTRACEABLE. Canonical full-sample 1997-2026 re-estimate = gamma=0.105,t=5.31 (experiments/paper2_twii_fullsample_gamma_provenance), corroborated by K892 full_sample gamma=0.109,t=5.62. Amplification ratio (0.272/stock-avg) must be recomputed from 0.109. AWAITING OWNER SIGN-OFF before headline change.
 0050.TW & 0.097 & 3.60 & 0.032 & 0.893 & 0.973 \\
 SPY & 0.211 & 5.79 & 0.000 & 0.897 & 0.993 \\
 \midrule
