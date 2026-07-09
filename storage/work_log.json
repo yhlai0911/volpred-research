@@ -15075,5 +15075,13 @@
     "summary": "成交量隔日方向預測迷思破解: B(爆量長黑續跌)FALSE強/A(量先價行)台股個股部分成立ETF無效; code-reviewer CONDITIONAL_PASS(Codex 7/11二審); knowledge 47f5b5a0",
     "verdict": "CONDITIONAL_PASS",
     "reviewer": "feature-dev:code-reviewer subagent fallback"
+  },
+  {
+    "timestamp": "2026-07-09T19:16",
+    "task_type": "paper_body",
+    "task_id": "paper2_taiwan_vt_rolling_block_reestimate",
+    "summary": "Paper2 台股滾動γ表 provenance 更正 step1: calendar-aligned 重算 + 新增可追溯 index rows (TWII 0.158/0050 0.079, legacy 0.272 non-reproducible); 發現任務描述 0.310 是 stale own-window, canonical 0056=0.202 為全表最高且高於指數→擴大論成立且可追溯; README 回溯更正; body 改寫等 owner sign-off (email 9adb9e49, 任務轉 blocked_on_user)",
+    "verdict": "STEP1_DONE_AWAITING_SIGNOFF",
+    "reviewer": "main-thread (in-sample descriptive, lookahead-free; index γ matches independent recompute)"
   }
 ]

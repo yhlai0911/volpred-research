@@ -101,8 +101,19 @@ DISPLAYED = ["2317.TW", "2454.TW", "2886.TW"]  # rows shown in the paper table
 # but included in the 10-security average. Data is in the paper CSV. Legacy
 # rolling gamma = 0.112 (t=1.87), also untraceable.
 ETF_0056 = ("0056.TW", "Yuanta High Div. ETF", "paper_csv", "0056_tw_adj_close")
-TWII_ROLLING_GAMMA_TABLE = 0.272  # body_v3.tex TWII rolling row; untraceable (N120),
-# provenance tracked separately; used here only to recompute the rolling ratio.
+
+# Index rows for the rolling ratio base. body_v3.tex currently carries an
+# untraceable TWII rolling gamma = 0.272 (N120); the 0050 row was also
+# untraceable. Both are now RECOMPUTED on the SAME calendar-aligned window
+# (common_end below) so the amplification ratio has a fully reproducible base.
+# 2026-07-09: calendar-aligned recompute gives TWII gamma=0.158 (t=2.57),
+# 0050 gamma=0.079 (t=1.90) -- the legacy 0.272 does NOT reproduce.
+INDEX_ROWS = {
+    "TWII": ("Taiwan Weighted Index", "paper_csv", "twii_adj_close"),
+    "0050.TW": ("Yuanta Taiwan 50 ETF", "paper_csv", "0050_tw_adj_close"),
+}
+TWII_ROLLING_GAMMA_LEGACY = 0.272  # body_v3.tex TWII rolling row; untraceable (N120),
+# does NOT reproduce under calendar-aligned recompute; retained only for comparison.
 
 
 def _load_prices(ticker: str, src: str, col: str) -> pd.Series:
@@ -231,11 +242,30 @@ def main() -> None:
         f"| legacy g=0.112 t=1.87 (ETF)"
     )
 
+    # --- Index rows (0050 / TWII) recomputed on the SAME calendar-aligned window
+    # so the amplification ratio has a fully reproducible base (replaces the
+    # untraceable body_v3.tex TWII 0.272 / 0050 rows). ------------------------
+    index_rows = {}
+    for idx_key, (idx_name, idx_src, idx_col) in INDEX_ROWS.items():
+        idx_ret = log_returns(_load_prices(idx_key, idx_src, idx_col))
+        iest = rolling_last_window(idx_ret, end_cutoff=common_end)
+        iest["name"] = idx_name
+        iest["ticker"] = idx_key
+        iest["price_source"] = f"{idx_src}:{idx_col}"
+        index_rows[idx_key] = iest
+        print(
+            f"[index] {idx_key} {idx_name:24s} gamma={iest['gamma']:.4f} (t={iest['gamma_t']:.2f})  "
+            f"a={iest['alpha']:.4f} b={iest['beta']:.4f} pers={iest['persistence']:.4f}"
+        )
+    twii_gamma = float(index_rows["TWII"]["gamma"])  # reproducible base
+
     gammas = [per_stock[t]["gamma"] for t in NINE_STOCKS]
     g9 = float(np.mean(gammas))
     g10 = float(np.mean(gammas + [et_est["gamma"]]))
-    ratio9 = TWII_ROLLING_GAMMA_TABLE / g9
-    ratio10 = TWII_ROLLING_GAMMA_TABLE / g10
+    # Ratio now uses the REPRODUCIBLE calendar-aligned TWII gamma, not the
+    # untraceable legacy 0.272.
+    ratio9 = twii_gamma / g9
+    ratio10 = twii_gamma / g10
     avg = {
         "gamma_mean_9stock": g9,
         "alpha_mean_9stock": float(np.mean([per_stock[t]["alpha"] for t in NINE_STOCKS])),
@@ -245,8 +275,14 @@ def main() -> None:
         "legacy_gamma_mean_9stock": LEGACY_ROLLING_9STOCK_AVG_GAMMA,
         "legacy_gamma_mean_10security": 0.060,
         "gamma_mean_9stock_abs_diff_vs_legacy": abs(g9 - LEGACY_ROLLING_9STOCK_AVG_GAMMA),
-        "twii_rolling_gamma_used": TWII_ROLLING_GAMMA_TABLE,
-        "twii_rolling_gamma_note": "from body_v3.tex TWII row (untraceable N120); provenance tracked separately",
+        "twii_rolling_gamma_reproducible": twii_gamma,
+        "twii_rolling_gamma_legacy_untraceable": TWII_ROLLING_GAMMA_LEGACY,
+        "twii_rolling_gamma_note": (
+            "TWII rolling gamma RECOMPUTED on the calendar-aligned window "
+            f"(gamma={twii_gamma:.4f}); the legacy body_v3.tex value 0.272 (N120) "
+            "does NOT reproduce and is retained only for comparison."
+        ),
+        "ratio_base": "reproducible calendar-aligned TWII gamma",
         "amplification_ratio_9stock": ratio9,
         "amplification_ratio_10security": ratio10,
         "legacy_ratio_9stock": 5.0,
@@ -298,6 +334,7 @@ def main() -> None:
         ),
         "calendar_alignment_common_end": str(common_end.date()),
         "rolling_averages_and_ratio": avg,
+        "index_rows": index_rows,
         "etf_0056": result_etf,
         "displayed_rows_match_legacy_rounded": all_match,
         "lookahead_free_certification": (

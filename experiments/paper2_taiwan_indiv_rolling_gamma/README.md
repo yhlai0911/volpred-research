@@ -53,8 +53,15 @@ first-pass non-aligned column is shown for transparency (superseded).
 Aggregates (rolling w=2000, calendar-aligned):
 - **9-stock avg γ**: legacy 0.054 → **0.024** (non-aligned 0.037)
 - **10-security avg γ** (incl 0056): legacy 0.060 → **0.042** (non-aligned 0.064)
-- **9-stock amplification ratio** (TWII 0.272 / avg): legacy 5.0× → **11.3×**
-- **10-security ratio**: legacy 4.5× → **6.5×**
+- **9-stock amplification ratio** (reproducible TWII 0.158 / avg): legacy 5.0× → **6.5×**
+- **10-security ratio**: legacy 4.5× → **3.8×**
+
+**Reproducible index rows (2026-07-09, same calendar-aligned window):**
+TWII γ=**0.158** (t=2.57), 0050 γ=**0.079** (t=1.90). The legacy body_v3.tex
+TWII 0.272 (N120) does **not** reproduce — the ratio base above uses the
+recomputed 0.158. On this base **0056 (0.202) is the HIGHEST row, above both
+indices** → strengthens the diversification-amplification thesis on fully
+traceable ground (supersedes any earlier "0056 below index" wording).
 
 Notes:
 - The legacy N121 rolling numbers are non-reproducible under the documented
@@ -79,8 +86,9 @@ Notes:
 
 ## Scope decision (research-honesty × narrative state machine)
 Because the reproducible values materially change narrative-adjacent claims
-(0056 "second-highest" → highest individual but below index, rolling
-amplification 5.0×→11.3×, Mega 0.179→0.054), the rendered `body_v3.tex`
+(0056 "second-highest 0.112" → **highest row 0.202, above the reproducible
+index** — see 2026-07-09 addendum above; rolling amplification base corrected
+to reproducible TWII 0.158 → 6.5×/3.8×; Mega 0.179→0.054), the rendered `body_v3.tex`
 table/prose is **NOT** rewritten in this run. Per CLAUDE.md paper narrative state
 machine, such a rewrite goes through the main-thread paper revision flow. This
 run delivers **step 1 (calendar-aligned recompute)** of the parent task:
