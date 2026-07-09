@@ -3,46 +3,46 @@
   "source": "claude_code_jsonl",
   "week_range": "2026-07-05 → 2026-07-12",
   "totals": {
-    "input_tokens": 3097160,
-    "output_tokens": 3988426,
-    "cache_read_tokens": 809156237,
-    "cache_create_tokens": 28035309,
-    "billable_total": 35120895,
-    "assistant_messages": 4979,
-    "unique_sessions": 230,
-    "estimated_cost_usd": 1959.0932
+    "input_tokens": 3338457,
+    "output_tokens": 4130839,
+    "cache_read_tokens": 831928759,
+    "cache_create_tokens": 29285726,
+    "billable_total": 36755022,
+    "assistant_messages": 5201,
+    "unique_sessions": 243,
+    "estimated_cost_usd": 2030.0794
   },
   "by_model": {
     "claude-opus-4-7": {
-      "input_tokens": 653,
-      "output_tokens": 124004,
-      "cache_read_tokens": 7010628,
-      "cache_create_tokens": 3406655,
-      "messages": 172,
-      "estimated_cost_usd": 83.7008
-    },
-    "claude-sonnet-5": {
-      "input_tokens": 447333,
-      "output_tokens": 62674,
-      "cache_read_tokens": 62504714,
-      "cache_create_tokens": 2783895,
-      "messages": 441,
-      "estimated_cost_usd": 31.4731
+      "input_tokens": 668,
+      "output_tokens": 127107,
+      "cache_read_tokens": 7171162,
+      "cache_create_tokens": 3525559,
+      "messages": 177,
+      "estimated_cost_usd": 86.404
     },
     "claude-opus-4-8": {
-      "input_tokens": 2583539,
-      "output_tokens": 3715697,
-      "cache_read_tokens": 651993361,
-      "cache_create_tokens": 20855527,
-      "messages": 4234,
-      "estimated_cost_usd": 1686.4615
+      "input_tokens": 2808890,
+      "output_tokens": 3855003,
+      "cache_read_tokens": 674567501,
+      "cache_create_tokens": 21941605,
+      "messages": 4447,
+      "estimated_cost_usd": 1754.5149
+    },
+    "claude-sonnet-5": {
+      "input_tokens": 463264,
+      "output_tokens": 62678,
+      "cache_read_tokens": 62542562,
+      "cache_create_tokens": 2829330,
+      "messages": 443,
+      "estimated_cost_usd": 31.7027
     },
     "<synthetic>": {
       "input_tokens": 0,
       "output_tokens": 0,
       "cache_read_tokens": 0,
       "cache_create_tokens": 0,
-      "messages": 18,
+      "messages": 20,
       "estimated_cost_usd": 0.0
     },
     "claude-fable-5": {
@@ -56,46 +56,46 @@
   },
   "by_category": {
     "bash_other": {
-      "input_tokens": 2190488,
-      "output_tokens": 2329724,
-      "cache_read_tokens": 441334471,
-      "cache_create_tokens": 16950262,
-      "messages": 3016,
-      "billable_total": 21470474,
-      "estimated_cost_usd": 1187.4057,
+      "input_tokens": 2365734,
+      "output_tokens": 2423020,
+      "cache_read_tokens": 456139320,
+      "cache_create_tokens": 17763544,
+      "messages": 3161,
+      "billable_total": 22552298,
+      "estimated_cost_usd": 1234.4879,
       "emoji": "💭",
       "description": "其他 Bash 操作"
     },
     "investigation": {
-      "input_tokens": 600733,
-      "output_tokens": 259192,
-      "cache_read_tokens": 92291622,
-      "cache_create_tokens": 5906529,
-      "messages": 623,
-      "billable_total": 6766454,
-      "estimated_cost_usd": 277.6352,
+      "input_tokens": 647126,
+      "output_tokens": 268988,
+      "cache_read_tokens": 94724005,
+      "cache_create_tokens": 6231972,
+      "messages": 651,
+      "billable_total": 7148086,
+      "estimated_cost_usd": 288.8165,
       "emoji": "🔍",
       "description": "閱讀 / 搜尋檔案"
     },
     "text_only": {
-      "input_tokens": 40989,
-      "output_tokens": 419601,
-      "cache_read_tokens": 89380212,
-      "cache_create_tokens": 2298370,
-      "messages": 407,
-      "billable_total": 2758960,
-      "estimated_cost_usd": 209.2497,
+      "input_tokens": 41960,
+      "output_tokens": 438706,
+      "cache_read_tokens": 91117021,
+      "cache_create_tokens": 2325215,
+      "messages": 424,
+      "billable_total": 2805881,
+      "estimated_cost_usd": 213.8057,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
     "file_edit": {
-      "input_tokens": 39117,
-      "output_tokens": 317611,
-      "cache_read_tokens": 47659152,
-      "cache_create_tokens": 452176,
-      "messages": 246,
-      "billable_total": 808904,
-      "estimated_cost_usd": 104.3746,
+      "input_tokens": 41720,
+      "output_tokens": 324006,
+      "cache_read_tokens": 50012906,
+      "cache_create_tokens": 507626,
+      "messages": 264,
+      "billable_total": 873352,
+      "estimated_cost_usd": 109.4636,
       "emoji": "📄",
       "description": "其他檔案編輯"
     },
@@ -111,35 +111,35 @@
       "description": "腳本開發（scripts/ *.py）"
     },
     "git_sync": {
-      "input_tokens": 3832,
-      "output_tokens": 107223,
-      "cache_read_tokens": 29497500,
-      "cache_create_tokens": 297606,
-      "messages": 152,
-      "billable_total": 408661,
-      "estimated_cost_usd": 57.9256,
+      "input_tokens": 3967,
+      "output_tokens": 109130,
+      "cache_read_tokens": 29900467,
+      "cache_create_tokens": 299949,
+      "messages": 155,
+      "billable_total": 413046,
+      "estimated_cost_usd": 58.719,
       "emoji": "🔄",
       "description": "Git commit / pull / push"
     },
     "experiment": {
-      "input_tokens": 49938,
-      "output_tokens": 183819,
-      "cache_read_tokens": 13090829,
-      "cache_create_tokens": 570456,
-      "messages": 110,
-      "billable_total": 804213,
-      "estimated_cost_usd": 44.8678,
+      "input_tokens": 49940,
+      "output_tokens": 186645,
+      "cache_read_tokens": 13176549,
+      "cache_create_tokens": 571398,
+      "messages": 111,
+      "billable_total": 807983,
+      "estimated_cost_usd": 45.226,
       "emoji": "🔬",
       "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
     },
     "agent_delegation": {
-      "input_tokens": 30476,
-      "output_tokens": 13710,
-      "cache_read_tokens": 4011410,
-      "cache_create_tokens": 296756,
-      "messages": 38,
-      "billable_total": 340942,
-      "estimated_cost_usd": 13.0667,
+      "input_tokens": 46407,
+      "output_tokens": 14905,
+      "cache_read_tokens": 4172371,
+      "cache_create_tokens": 305099,
+      "messages": 40,
+      "billable_total": 366411,
+      "estimated_cost_usd": 13.7931,
       "emoji": "🤖",
       "description": "Agent 派送（非實驗）"
     },
@@ -155,37 +155,37 @@
       "description": "ToolSearch 載入工具"
     },
     "paper_work": {
-      "input_tokens": 9591,
-      "output_tokens": 48810,
-      "cache_read_tokens": 4669429,
-      "cache_create_tokens": 74157,
-      "messages": 35,
-      "billable_total": 132558,
-      "estimated_cost_usd": 12.1992,
+      "input_tokens": 9593,
+      "output_tokens": 52396,
+      "cache_read_tokens": 4798807,
+      "cache_create_tokens": 80652,
+      "messages": 36,
+      "billable_total": 142641,
+      "estimated_cost_usd": 12.784,
       "emoji": "📝",
       "description": "論文撰寫/審查（paper/ *.tex 編輯）"
     },
-    "platform_ops": {
-      "input_tokens": 15104,
-      "output_tokens": 25524,
-      "cache_read_tokens": 5862287,
-      "cache_create_tokens": 49488,
-      "messages": 35,
-      "billable_total": 90116,
-      "estimated_cost_usd": 11.8622,
-      "emoji": "🛡️",
-      "description": "平台運維（Supabase sync / daily_update）"
-    },
     "worktree_merge": {
-      "input_tokens": 40459,
-      "output_tokens": 29660,
-      "cache_read_tokens": 4499778,
-      "cache_create_tokens": 119301,
-      "messages": 44,
-      "billable_total": 189420,
-      "estimated_cost_usd": 11.8179,
+      "input_tokens": 40465,
+      "output_tokens": 31718,
+      "cache_read_tokens": 4736300,
+      "cache_create_tokens": 122829,
+      "messages": 47,
+      "billable_total": 195012,
+      "estimated_cost_usd": 12.3933,
       "emoji": "🔀",
       "description": "Worktree 合併與分支管理"
+    },
+    "platform_ops": {
+      "input_tokens": 15108,
+      "output_tokens": 26266,
+      "cache_read_tokens": 6096333,
+      "cache_create_tokens": 52207,
+      "messages": 37,
+      "billable_total": 93581,
+      "estimated_cost_usd": 12.32,
+      "emoji": "🛡️",
+      "description": "平台運維（Supabase sync / daily_update）"
     },
     "task_management": {
       "input_tokens": 379,
@@ -199,13 +199,13 @@
       "description": "任務管理（TaskCreate/Update）"
     },
     "chart_generation": {
-      "input_tokens": 4200,
-      "output_tokens": 25653,
-      "cache_read_tokens": 4275144,
-      "cache_create_tokens": 70595,
-      "messages": 34,
-      "billable_total": 100448,
-      "estimated_cost_usd": 9.7233,
+      "input_tokens": 4204,
+      "output_tokens": 27160,
+      "cache_read_tokens": 4470277,
+      "cache_create_tokens": 75622,
+      "messages": 36,
+      "billable_total": 106986,
+      "estimated_cost_usd": 10.2234,
       "emoji": "📊",
       "description": "圖表生成（matplotlib / upload_chart）"
     },
@@ -317,7 +317,7 @@
       "cache_create_tokens": 7733664,
       "messages": 1246,
       "billable_total": 9479867,
-      "estimated_cost_usd": 528.8004
+      "estimated_cost_usd": 523.5987
     },
     "2026-07-06": {
       "input_tokens": 594310,
@@ -326,7 +326,7 @@
       "cache_create_tokens": 6350375,
       "messages": 1152,
       "billable_total": 7943565,
-      "estimated_cost_usd": 443.1033
+      "estimated_cost_usd": 438.7446
     },
     "2026-07-07": {
       "input_tokens": 1052535,
@@ -335,37 +335,46 @@
       "cache_create_tokens": 8940407,
       "messages": 1555,
       "billable_total": 11220750,
-      "estimated_cost_usd": 625.9093
+      "estimated_cost_usd": 619.7524
     },
     "2026-07-08": {
-      "input_tokens": 680804,
-      "output_tokens": 785046,
-      "cache_read_tokens": 111142462,
-      "cache_create_tokens": 5010863,
-      "messages": 1026,
-      "billable_total": 6476713,
-      "estimated_cost_usd": 361.2802
+      "input_tokens": 733263,
+      "output_tokens": 813191,
+      "cache_read_tokens": 116366133,
+      "cache_create_tokens": 5301060,
+      "messages": 1081,
+      "billable_total": 6847514,
+      "estimated_cost_usd": 378.2067
+    },
+    "2026-07-09": {
+      "input_tokens": 188838,
+      "output_tokens": 114268,
+      "cache_read_tokens": 17548851,
+      "cache_create_tokens": 960220,
+      "messages": 167,
+      "billable_total": 1263326,
+      "estimated_cost_usd": 69.7769
     }
   },
   "drilldown": {
     "text_only": {
-      "messages": 6001,
-      "billable_total": 49474952,
+      "messages": 6231,
+      "billable_total": 51209130,
       "length_buckets": [
         {
           "name": "<200 chars",
-          "messages": 5171,
-          "billable_total": 44162487
+          "messages": 5370,
+          "billable_total": 45746777
         },
         {
           "name": "200-800 chars",
-          "messages": 602,
-          "billable_total": 4267478
+          "messages": 622,
+          "billable_total": 4386224
         },
         {
           "name": "800-2000 chars",
-          "messages": 221,
-          "billable_total": 844048
+          "messages": 232,
+          "billable_total": 875190
         },
         {
           "name": "2000+ chars",
@@ -376,60 +385,60 @@
       "reason_groups": [
         {
           "name": "non-text assistant message",
-          "messages": 3277,
-          "billable_total": 28595032
+          "messages": 3402,
+          "billable_total": 29548255
         },
         {
           "name": "other",
-          "messages": 1478,
-          "billable_total": 11765058
+          "messages": 1536,
+          "billable_total": 12252020
         },
         {
           "name": "status/summary",
-          "messages": 195,
-          "billable_total": 3134870
+          "messages": 204,
+          "billable_total": 3264340
         },
         {
           "name": "reviews/findings",
-          "messages": 501,
-          "billable_total": 2487155
+          "messages": 518,
+          "billable_total": 2591601
         },
         {
           "name": "experiment/result narration",
-          "messages": 219,
-          "billable_total": 1256522
+          "messages": 224,
+          "billable_total": 1268425
         },
         {
           "name": "quota/rate-limit",
-          "messages": 145,
-          "billable_total": 1069027
+          "messages": 147,
+          "billable_total": 1073662
         },
         {
           "name": "paper prose",
-          "messages": 101,
-          "billable_total": 708438
+          "messages": 112,
+          "billable_total": 741007
         },
         {
           "name": "setup/auth",
-          "messages": 57,
-          "billable_total": 367137
+          "messages": 58,
+          "billable_total": 369108
         },
         {
           "name": "planning/follow-up",
-          "messages": 28,
-          "billable_total": 91713
+          "messages": 30,
+          "billable_total": 100712
         }
       ],
       "top_signatures": [
         {
           "name": "(content types: thinking)",
-          "messages": 3149,
-          "billable_total": 26518494
+          "messages": 3272,
+          "billable_total": 27463660
         },
         {
           "name": "(content types: tool_use)",
-          "messages": 128,
-          "billable_total": 2076538
+          "messages": 130,
+          "billable_total": 2084595
         },
         {
           "name": "收到——把所有 subagent 的模型統一改成 opus 4.8。先找 single source of truth（`config/models.json`）與衍生的 routing 檔，全面改。",
@@ -484,38 +493,38 @@
       ]
     },
     "bash_other": {
-      "messages": 3238,
-      "billable_total": 27871343,
+      "messages": 3391,
+      "billable_total": 29302075,
       "family_breakdown": [
         {
           "name": "repo navigation",
-          "messages": 2185,
-          "billable_total": 11483345
+          "messages": 2272,
+          "billable_total": 11843945
         },
         {
           "name": "other bash",
-          "messages": 577,
-          "billable_total": 10605622
+          "messages": 609,
+          "billable_total": 11381257
         },
         {
           "name": "inline parsing/json inspection",
-          "messages": 156,
-          "billable_total": 1617661
+          "messages": 170,
+          "billable_total": 1754387
         },
         {
           "name": "shell glue",
-          "messages": 112,
-          "billable_total": 1601886
+          "messages": 121,
+          "billable_total": 1660393
         },
         {
           "name": "file dumps",
-          "messages": 41,
-          "billable_total": 1370889
+          "messages": 44,
+          "billable_total": 1433809
         },
         {
           "name": "log tailing",
-          "messages": 133,
-          "billable_total": 863673
+          "messages": 141,
+          "billable_total": 900017
         },
         {
           "name": "git inspection",
@@ -536,23 +545,23 @@
       "prefix_breakdown": [
         {
           "name": "cd /Users/yhlai0911/volpred-research",
-          "messages": 1899,
-          "billable_total": 10431371
+          "messages": 1981,
+          "billable_total": 10781713
         },
         {
           "name": "TZ='Asia/Taipei'",
-          "messages": 162,
-          "billable_total": 5265458
+          "messages": 175,
+          "billable_total": 5754774
         },
         {
           "name": "uv run python",
-          "messages": 198,
-          "billable_total": 3925300
+          "messages": 213,
+          "billable_total": 4102242
         },
         {
           "name": "cat storage/ops/handoff_latest.md 2>/dev/null",
-          "messages": 25,
-          "billable_total": 863361
+          "messages": 26,
+          "billable_total": 918307
         },
         {
           "name": "python3 -c \"",
@@ -570,6 +579,16 @@
           "billable_total": 308353
         },
         {
+          "name": "head -80 storage/ops/handoff_latest.md",
+          "messages": 5,
+          "billable_total": 273102
+        },
+        {
+          "name": "launchctl",
+          "messages": 6,
+          "billable_total": 246969
+        },
+        {
           "name": "cd /Users/yhlai0911/volpred-research; echo",
           "messages": 35,
           "billable_total": 243875
@@ -580,41 +599,31 @@
           "billable_total": 219402
         },
         {
-          "name": "head -80 storage/ops/handoff_latest.md",
-          "messages": 4,
-          "billable_total": 218248
-        },
-        {
           "name": "OUT=/private/tmp/claude-501/-Users-yhlai0911-volpred-research/7cbcc582-12aa-40c3-bcb3-be5b279321c5/t",
           "messages": 2,
           "billable_total": 211825
-        },
-        {
-          "name": "which",
-          "messages": 18,
-          "billable_total": 200486
         }
       ],
       "top_first_lines": [
         {
           "name": "cd /Users/yhlai0911/volpred-research",
-          "messages": 1899,
-          "billable_total": 10431371
+          "messages": 1981,
+          "billable_total": 10781713
         },
         {
           "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
-          "messages": 84,
-          "billable_total": 2076132
+          "messages": 91,
+          "billable_total": 2289990
         },
         {
           "name": "uv run python scripts/unblock_expired_blocked_tasks.py --apply 2>&1 | head -5",
-          "messages": 37,
-          "billable_total": 1791358
+          "messages": 39,
+          "billable_total": 1888060
         },
         {
           "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'; echo \"---handoff---\"; cat storage/ops/handoff_latest.md 2>/dev/null | head -80",
-          "messages": 17,
-          "billable_total": 922914
+          "messages": 19,
+          "billable_total": 1032683
         },
         {
           "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'; echo \"---HANDOFF---\"; cat storage/ops/handoff_latest.md 2>/dev/null | head -80",
@@ -627,19 +636,24 @@
           "billable_total": 412045
         },
         {
+          "name": "head -80 storage/ops/handoff_latest.md 2>/dev/null",
+          "messages": 5,
+          "billable_total": 273102
+        },
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'; echo \"---unblock---\"; uv run python scripts/unblock_expired_blocked_tasks.py --apply 2>&1 | head -5",
+          "messages": 5,
+          "billable_total": 272971
+        },
+        {
           "name": "uv run python scripts/telegram_memory.py list",
           "messages": 6,
           "billable_total": 234803
         },
         {
-          "name": "head -80 storage/ops/handoff_latest.md 2>/dev/null",
-          "messages": 4,
-          "billable_total": 218248
-        },
-        {
-          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'; echo \"---unblock---\"; uv run python scripts/unblock_expired_blocked_tasks.py --apply 2>&1 | head -5",
-          "messages": 4,
-          "billable_total": 218025
+          "name": "cat storage/ops/handoff_latest.md 2>/dev/null | head -80",
+          "messages": 5,
+          "billable_total": 231930
         },
         {
           "name": "OUT=/private/tmp/claude-501/-Users-yhlai0911-volpred-research/7cbcc582-12aa-40c3-bcb3-be5b279321c5/tasks/btpszlgc0.output; until [ -s \"$OUT\" ] || ! pgrep -f 'codex exec --skip-git-",
@@ -650,19 +664,14 @@
           "name": "until [ -f /tmp/mag7_skew_poster/3_results.png ] || grep -qE \"ERROR|Traceback|missing PNG|done|saved|complete\" /tmp/lazypack_codex_run.log 2>/dev/null; do sleep 5; done; echo \"WAIT",
           "messages": 1,
           "billable_total": 197385
-        },
-        {
-          "name": "uv run python scripts/continue_task_dispatch.py --report 2>&1 | tail -40",
-          "messages": 9,
-          "billable_total": 178641
         }
       ]
     },
     "cache_diagnostics": {
-      "sessions_in_window": 230,
-      "cache_create_tokens": 82293562,
-      "billable_total": 104165885,
-      "cache_create_share_pct": 79.0,
+      "sessions_in_window": 243,
+      "cache_create_tokens": 86556528,
+      "billable_total": 109828615,
+      "cache_create_share_pct": 78.8,
       "top_sessions_by_cache_create": [
         {
           "session_id": "f8812992-1d97-4a32-b431-990f67a8d709",
