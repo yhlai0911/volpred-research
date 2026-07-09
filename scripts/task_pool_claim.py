@@ -61,6 +61,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
 DEFAULT_STALE_HOURS = 6  # Claim older than this with no completion -> auto-release
+TERMINAL_STATUSES = {"succeeded", "failed", "blocked"}
 CODEX_ELIGIBLE_TASK_TYPES = {
     "platform_ops",
     "experiment",
@@ -465,6 +466,13 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
         prev_status = (task.get("status") or "").lower() or "in_progress"
+        if prev_status in TERMINAL_STATUSES and prev_status == args.status:
+            return {
+                "ok": True,
+                "task_id": args.id,
+                "status": prev_status,
+                "already_completed": True,
+            }
         task["status"] = args.status
         task["completed_at"] = _now()
         _record_status_history(
