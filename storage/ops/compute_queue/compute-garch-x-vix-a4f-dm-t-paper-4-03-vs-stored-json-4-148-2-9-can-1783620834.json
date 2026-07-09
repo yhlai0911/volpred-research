@@ -1,0 +1,23 @@
+{
+  "id": "compute-garch-x-vix-a4f-dm-t-paper-4-03-vs-stored-json-4-148-2-9-can-1783620834",
+  "title": "garch-x-vix A4f DM t 復現稽核: paper 4.03 vs stored JSON 4.148 (2.9% 差)判定 canonical",
+  "script_path": "paper/garch-x-vix/compute_mcs_dm.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-09T18:13:54Z",
+  "started_at": "2026-07-09T18:15:04Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-garch-x-vix-a4f-dm-t-paper-4-03-vs-stored-json-4-148-2-9-can-1783620834.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-garch-x-vix-a4f-dm-t-paper-4-03-vs-stored-json-4-148-2-9-can-1783620834.stderr",
+  "result_artifact": "paper/garch-x-vix/mcs_dm_results.json",
+  "claude_followup": {
+    "brief": "比對新算出的 a4f_pairwise_dm.B0_GJR_vs_A4f_vix2_free_omega.t_stat 與 main.tex 全篇的 t=4.03。若 live≈4.148 → main.tex 4.03 為 stale，需全篇 errata 更新(摘要/Table1/main_results/Finding3/robustness line723 全部)並確認 harvey threshold 敘述不變；若 live≈4.03 → mcs_dm_results.json stored 值 stale 需重寫。禁造假湊值。產出 errata 清單交主線程 sign-off。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}

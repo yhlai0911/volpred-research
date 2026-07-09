@@ -56388,7 +56388,7 @@
     "task_type": "governance",
     "priority": 2,
     "source": "telegram-312-followup",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-09T11:21:38.647135+00:00",
     "title": "論文數字舊帳復現稽核：掃 pre-2026-05-17 gate 的論文引用數字有無錯掛/無 JSON 來源",
     "description": "起因 telegram-312：Paper2 台股滾動 γ 表 TWII 0.272 掛錯來源(指向 K530=HAR 實驗，非 γ 來源)，屬 provenance gate(2026-05-17)上線前的舊帳。任務：對 paper/*/body*.tex 內每個實證數字，抽查是否能追溯到活的 experiments/<id>/results.json；重點掃 gate 上線前寫入的知識條目(N-series)所支撐的表格。發現無來源者：能重估就用可離線重現視窗重估，不能就標記等 sign-off。禁造假湊舊值。產出 audit 報告 + 修正清單。scope ≤50min/次，跨論文可分批。",
@@ -56411,20 +56411,89 @@
         "to": "pending",
         "by": "hourly-20",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-09T18:09:19.767577+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-09T18:09:20.031644+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-09T18:15:52.309747+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-02"
       }
     ],
-    "started_at": "2026-07-09T12:08:47.612367+00:00",
+    "started_at": "2026-07-09T18:09:20.031315+00:00",
     "last_released_at": "2026-07-09T14:50:00.626460+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-07-09T18:09:19.767280+00:00",
+    "claim_session_id": "44788e754af8",
+    "completed_at": "2026-07-09T18:15:52.309414+00:00",
+    "result": "Batch1 �?�??: 7 �? reproduce report �?��??�??garch-x-vix �??�?� 1 �?? stale(A4f main.tex 4.03 vs JSON 4.148, line723 �??確宣稱�?�?�該 JSON=�?? telegram-312 �?��??�?)�??live �??�??�? enqueue+errata sign-off followup�?5 within-tol artifact + 6 null-check �??�?�??�?�??taiwan-vt 23 untraceable(�?� N121 pre-gate γ)�??batch2 task�??vix-suff 2 untraceable�??batch4�??�?��? 5 �? green�??報�?? paper/PROVENANCE_SWEEP_20260710.md�??�?�?�?�,�?��?�任�?�?��??�??"
   },
   {
     "id": "telegram-321",
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-09T14:08:55.019502+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 321）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n待token額度在7/12 16：00恢復後 立刻排程解決以上問題\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n待token額度在7/12 16：00恢復後 立刻排程解決以上問題\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-07-09T18:09:19.249717+00:00",
+    "claim_session_id": "c89d8e233899",
+    "status_history": [
+      {
+        "ts": "2026-07-09T18:09:19.250030+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-09T18:09:19.506658+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-09T18:15:52.556082+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-02"
+      }
+    ],
+    "started_at": "2026-07-09T18:09:19.506316+00:00",
+    "completed_at": "2026-07-09T18:15:52.555778+00:00",
+    "result": "已�??�?�??�??(msg324): quota 實�?? 81.6% remaining �?�?��??7/12,�?�已�??工復�?�稽核 batch1�??�?��?� garch-x-vix A4f �?��??�?��??(4.03 vs JSON 4.148)+taiwan-vt 23 �?��?�?,已�?? live �??�??�?+3 �?? followup batch�??"
+  },
+  {
+    "id": "provenance-sweep-taiwan-vt-untraceable-batch2",
+    "task_type": "governance",
+    "priority": 2,
+    "source": "provenance-sweep-batch2",
+    "status": "pending",
+    "created_at": "2026-07-09T18:15:31.702949+00:00",
+    "title": "Provenance Batch2: taiwan-vt 23 untraceable — 建 Table1/4/5 dedicated JSON + 統一 γ estimation",
+    "description": "承 paper/PROVENANCE_SWEEP_20260710.md Finding 2。taiwan-vt 23 個數字無活 JSON：Table1 summary stats、Table4 VT Sharpe、Table5 common-period、Table2 個股 γ(鴻海/聯發科/0056 靠 N121 pre-gate averages)、Sec6 macro corr、Appendix TZ、Sec3 TWD/USD。動作：(1)為 Table1/4/5 建 dedicated experiments/<id>/results.json 重現論文值(可離線重現視窗，禁湊值)；(2)統一所有 0050/TSMC γ 到單一 estimation(現混 full-sample/rolling/w=2000)並記錄每個 γ 出自哪個 K892 window/spec。不能重估者標 sign-off。scope 可再拆。"
+  },
+  {
+    "id": "provenance-sweep-garchxvix-nullcheck-batch3",
+    "task_type": "governance",
+    "priority": 3,
+    "source": "provenance-sweep-batch3",
+    "status": "pending",
+    "created_at": "2026-07-09T18:15:31.702949+00:00",
+    "title": "Provenance Batch3: garch-x-vix 6 null-check extractor 修復",
+    "description": "承 paper/PROVENANCE_SWEEP_20260710.md Finding 1。reproduce.py 6 個 check(K1085 GLD+GVZ、K1088 USO+OVX、K1098 0050.TW×3、four-market DM>3 count) paper_value 與 stored 皆 null=extractor 在 main.tex/JSON 都抓不到。動作：確認這些數字是否仍在現行 main.tex(可能改版移除)→ 若在則修 check 的 regex/JSON path；若已移除則從 reproduce.py check list 刪除該 check 並註記。目標:reproduce_report 不再有 null-value false mismatch。"
   }
 ]
