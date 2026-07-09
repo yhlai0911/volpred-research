@@ -55887,7 +55887,7 @@
     "title": "K1666: ⚠️(medium) **路徑依賴波動（Guyon-Lekeufack PDV）內生性分解：日 RV 有多少是「報酬路徑內生」而非外生新聞** — 建 PDV 的兩個特徵（過去報酬 power-law 加權趨勢項 R1 + 過去平方報酬加權",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1507). Original: ⚠️(medium) **路徑依賴波動（Guyon-Lekeufack PDV）內生性分解：日 RV 有多少是「報酬路徑內生」而非外生新聞** — 建 PDV 的兩個特徵（過去報酬 power-law 加權趨勢項 R1 + 過去平方報酬加權 √項），量測其對日 RV 的 R²（文獻稱 ~65% 內生），並把 R1（leverage-trend）當獨立 covariate 測 HAR 上的增量；yfinance SPY/QQQ（來源：Guyon-Lekeufack 2023 PDV + arXiv 2503.00851 HAR-PD 2025）。與 line 1294（rough/path/Markovian **賽馬**）正交——這裡問**內生 vs 外生變異分解 + leverage 通道 attribution**，非誰預測贏；PDV/Guyon grep=0，dispatch 前再 spot-verify 非殼變。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1666.py with signal.shift(1) + seed=42, (c) K1666_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -55896,7 +55896,39 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-09T00:00:01Z"
+    "created_at": "2026-07-09T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-09T22:56:05.020020+00:00",
+    "claim_session_id": "dcbd42cebd47",
+    "status_history": [
+      {
+        "ts": "2026-07-09T22:56:05.020343+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-09T22:56:10.717237+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-09T23:08:49.335586+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-09T23:08:59.219922+00:00",
+        "from": "succeeded",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-09T22:56:10.716903+00:00",
+    "completed_at": "2026-07-09T23:08:59.219583+00:00",
+    "result": "完成 K1666 PDV/HAR 實驗。GK range proxy: PDV R2 SPY 0.501/0.420, QQQ 0.551/0.345; HAR+R1+R2 date-clustered GK QLIKE +8.79%, DM t=-4.53。已寫 README/results/review/knowledge e4973432；caveat: daily OHLC proxy, not 5-min RV replication。\n\nPDV 內生性分解實驗完成；Codex CONDITIONAL_PASS（range-proxy GK 在 QLIKE 有 edge，C2C 非 headline，calm 期不達 Harvey t<-3）；knowledge 已寫 reviewer=Codex primary"
   },
   {
     "id": "K1667",

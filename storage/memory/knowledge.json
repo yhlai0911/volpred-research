@@ -38196,5 +38196,18 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-07-10T04:24:14.535752"
+  },
+  {
+    "item_id": "e4973432",
+    "category": "model_behavior",
+    "content": "K1666 completed. experiment_id=K1666; experiment_path=experiments/k1666/; reviewer=Codex primary path; review_file=experiments/k1666/codex_review.md; verdict=CONDITIONAL_PASS_RANGE_PROXY_PDV_EXPLAINS_AND_HAR_QLIKE_EDGE. Data: Yahoo Finance via yfinance auto_adjust daily OHLC for SPY and QQQ, 2000-01-03..2026-07-09, 6,668 rows per asset; usable rows after 252-day path/HAR lags 6,415; OOS HAR evaluation 2004-12-29..2026-07-09, n=5,415 dates per asset; seed=42. Method: PDV features R1=252d power-law weighted past returns (alpha=1.0) and R2=sqrt weighted past squared returns (alpha=0.5), explicitly lagged with signal.shift(1); primary target is Garman-Klass daily range variance proxy, C2C squared return variance is robustness; baseline is expanding log-variance HAR(d,w,m), compared with HAR+R1 and HAR+R1+R2 using canonical QLIKE and DM/HAC h=1. Findings: PDV-only GK volatility R2 is SPY 0.501 full / 0.420 chronological holdout and QQQ 0.551 full / 0.345 holdout; C2C R2 is lower (SPY 0.244/0.206, QQQ 0.232/0.135). Date-clustered SPY+QQQ GK OOS QLIKE improves vs HAR by +7.49% for HAR+R1 (DM t=-3.90) and +8.79% for HAR+R1+R2 (DM t=-4.53). Subperiod GK edge passes in 2005-2009 and 2020-2026 but not in calm 2010-2019 (HAR+R1+R2 t=-2.61). Caveats: this is daily OHLC proxy evidence, not a 5-minute RV replication; C2C QLIKE improves but MSE can worsen badly, and SPY GK MSE worsens, so the conclusion is QLIKE-specific and conditional. Interpretation: supports the PDV endogenous path channel for daily range-vol proxy, especially in stress/post-shock regimes, but does not justify a broad production claim without high-frequency RV validation.",
+    "evidence": [
+      "experiments/k1666/K1666_results.json",
+      "experiments/k1666/K1666.py",
+      "experiments/k1666/README.md",
+      "experiments/k1666/codex_review.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-07-10T07:06:57.734143"
   }
 ]
