@@ -55837,9 +55837,6 @@
       "reader_facing",
       "精選導讀"
     ],
-    "claimed_by": "hourly-09",
-    "claimed_at": "2026-07-09T01:08:50.991166+00:00",
-    "claim_session_id": "8a3f8f991883",
     "status_history": [
       {
         "ts": "2026-07-09T01:08:50.991485+00:00",
@@ -55852,8 +55849,31 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-09T02:08:49.756589+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-09",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-09T02:08:50.006795+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-10"
+      },
+      {
+        "ts": "2026-07-09T02:08:58.868667+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-10"
       }
     ],
-    "started_at": "2026-07-09T01:09:11.562944+00:00"
+    "started_at": "2026-07-09T02:08:58.868274+00:00",
+    "last_released_at": "2026-07-09T02:08:49.756263+00:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-07-09T02:08:50.006367+00:00",
+    "claim_session_id": "8d3a64a99f06"
   }
 ]
