@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 codex_work_log_backfill cron exit=1（str.splitlines() 在畸形 CJK commit subject 斷行）
+
+**現象**：`storage/logs/cron/codex_work_log_backfill.log` 從 2026-07-09T21:00 起連續 exit=1（先前一直 exit 0），check_alerts 升 critical「主機定時任務失敗」（24h dedup skip）。
+
+**過程**：手動重現 `backfill_work_log_from_commits.py --apply` → `ValueError: not enough values to unpack (expected 3, got 2)` at `git_log()` line 99 `line.split("|", 2)`。誤判方向排除：commit subject 含 `|`（`K1666 | ...`）→ 但 `split("|", 2)` maxsplit=2 能正確處理（切 3 段），非兇手。逐行比對發現真兇：近 2 天有損壞編碼的 CJK commit subject（agent 產生的 mojibake，如 `provenance-audit-...解�: ...`），其 bytes 解碼後含 Unicode 換行類字元（U+0085 NEL / U+2028 / U+2029）。Python `str.splitlines()` 會在這些字元上斷行（不只 `\n`），把單一 commit 的 subject 拆成多個 fragment，產生只有 1 個 pipe 的殘行 → 解包失敗 crash。
+
+**解決方法**：`git --pretty=format:` 只用 `\n` 分隔 commit，改 `out.splitlines()` → `out.split("\n")`（只切真 newline，不受 U+0085/U+2028/U+2029 影響）；並加防禦式 `len(parts)!=3 → WARN skip`（no-silent-fallback rule，畸形行不再整批 crash）。dry-run + `.sh` 端到端驗證 exit 0。教訓：解析外部工具輸出的多行文字時，若記錄分隔是已知的 `\n`，用 `split("\n")` 不用 `splitlines()` — 後者的額外 Unicode 換行邊界會被惡意/損壞資料觸發。
+
 ## 2026-07-09 已發佈文章 rv5=83% 不可複現（同篇多 RV 窗 annualization 口徑不一致）
 
 **現象**：24h paper_review（`mile_aee1c78c` 台積電法說會 IV）發現文章寫「最近 5 日已實現波動率 83%」，但對應實驗 `tsmc_earnings_iv.py` 只計算 rv20/rv60（無 rv5），results.json 也無 `rv5_pct`。主線程從價格史（as-of 2026-07-08）重算 rv5=**69.9%**（√252），與 83% 差 13pp。

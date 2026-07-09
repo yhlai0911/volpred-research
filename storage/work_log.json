@@ -15117,5 +15117,27 @@
     "task_id": "K1666",
     "notes": "PDV 路徑依賴波動內生性分解 (SPY/QQQ 2000-2026 daily OHLC proxy)；Codex CONDITIONAL_PASS；range-proxy GK QLIKE edge，conditional on stress/post-shock；calm 期不達 Harvey；knowledge 已寫",
     "verdict": "CONDITIONAL_PASS"
+  },
+  {
+    "timestamp": "2026-07-10T05:54:56+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-176c9a3b5",
+    "outcome": "succeeded",
+    "summary": "add taiwan vt provenance batch2b",
+    "commit": "176c9a3b5549e515a616245151ee862b05f93a8b",
+    "owner": "codex",
+    "backfilled_at": "2026-07-09T23:13:25.444774+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T07:10:45+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-971cb2866",
+    "outcome": "succeeded",
+    "summary": "Make task completion idempotent",
+    "commit": "971cb2866929a0f774e805831f994568ba1d46b8",
+    "owner": "codex",
+    "backfilled_at": "2026-07-09T23:13:25.444442+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]

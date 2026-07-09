@@ -93,10 +93,20 @@ def git_log(since: str, until: str) -> list[dict[str, str]]:
         text=True,
     ).stdout
     rows: list[dict[str, str]] = []
-    for line in out.splitlines():
+    # git --pretty=format: separates commits with "\n" only. Do NOT use
+    # str.splitlines(): it also breaks on U+0085/U+2028/U+2029, which corrupted
+    # CJK commit subjects can contain, splitting one commit into fragments and
+    # producing lines with too few "|" fields (2026-07-10 backfill crash root cause).
+    for line in out.split("\n"):
         if "|" not in line:
             continue
-        sha, iso_ts, subject = line.split("|", 2)
+        parts = line.split("|", 2)
+        if len(parts) != 3:
+            # Malformed record (should not happen with split("\n")); log and skip
+            # rather than crash the whole daily backfill cron.
+            print(f"[backfill] WARN skip malformed git-log line (fields={len(parts)}): {line[:120]!r}")
+            continue
+        sha, iso_ts, subject = parts
         if not CODEX_PREFIX.match(subject):
             continue
         rows.append({"sha": sha, "ts": iso_ts, "subject": subject})

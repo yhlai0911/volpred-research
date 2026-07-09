@@ -55808,7 +55808,7 @@
     "title": "K1664: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 358). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1664.py with signal.shift(1) + seed=42, (c) K1664_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -55817,7 +55817,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-09T00:00:01Z"
+    "created_at": "2026-07-09T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-09T23:11:15.171463+00:00",
+    "claim_session_id": "9412c17ab5c4",
+    "status_history": [
+      {
+        "ts": "2026-07-09T23:11:15.171792+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-09T23:11:15.409652+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-09T23:11:15.409332+00:00"
   },
   {
     "id": "K1665",
