@@ -55917,7 +55917,7 @@
     "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
     "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "source": "auto_journal_discovery_fallback",
@@ -55926,7 +55926,33 @@
       "research-backlog-refresh",
       "all-covered-fallback"
     ],
-    "created_at": "2026-07-09T00:00:05+00:00"
+    "created_at": "2026-07-09T00:00:05+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-07-09T09:08:29.534235+00:00",
+    "claim_session_id": "f8c96223cdd0",
+    "status_history": [
+      {
+        "ts": "2026-07-09T09:08:29.534579+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-09T09:08:29.782681+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-09T09:18:11.560103+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-17"
+      }
+    ],
+    "started_at": "2026-07-09T09:08:29.782365+00:00",
+    "completed_at": "2026-07-09T09:18:11.559759+00:00",
+    "result": "journal-discovery agent(opus) 掃 14 期刊源回 6 條正交研究方向(氣候CPU→商品RV/realized-beta避險/bottom-up-VaR/bear-beta下檔溢酬/動能崩盤vol-scaling/interval-valued RV)，spot-verify dedup 後全入 research_program.md 期刊挖掘 batch 2026-07-09"
   },
   {
     "id": "paper_body_vix_sufficiency_daily_F3_F9_F10_external_data",
