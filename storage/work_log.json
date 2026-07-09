@@ -15091,5 +15091,13 @@
     "summary": "Compute followup 解讀: garch-x-vix A4f DM t 復現稽核。今日 live compute_mcs_dm.py 跑出 t=4.293 (第三個 drift 值: 4.03 draft→4.148 Apr-pinned→4.293 Jul-live)，全 Harvey |t|>3 invariant。判定: 這是 errata_pending.md 已記錄的 yfinance retroactive-adjustment 已知問題; canonical=4.148 (pinned reproduce.py)，非 live。已 revert live-4.293 對 mcs_dm_results.json 的覆寫以保 pinned canonical; errata_pending 補第三資料點; compute_mcs_dm.py 加 non-canonical header 警示防復發。政策不變: R1 前不動 body，shelf-ready errata 已涵蓋。",
     "verdict": "RESOLVED_KNOWN_ISSUE_NO_BODY_CHANGE",
     "reviewer": "main-thread (cross-checked reproduce_report.json stored=4.148 + errata_pending framework)"
+  },
+  {
+    "timestamp": "2026-07-10T05:29",
+    "task_type": "governance",
+    "task_id": "provenance-sweep-garchxvix-nullcheck-batch3",
+    "summary": "Provenance Batch3: garch-x-vix reproduce.py 6 null-check 修復。診斷: 原 audit 誤判 extractor 缺口 (用錯 jq 欄位名讀成兩側皆 null); 真 root cause = --skip-live 模式把 live-dependent check 標 mismatch 而非 skipped → false-RED 7.7%。修法 (統一 root cause): compare_three_way 無 live 時 fall back paper<->stored provenance; compare_expected_vs_live 純 live-only check 標 status=skipped 排除 match_rate; 條件用 not live_mode 一併修好 default 模式讀空 cache 同 bug (code-reviewer 抓到)。結果: skip-live 與 default 皆 85.7% yellow, 6 skipped, 唯一 divergence=A4f (已 escalate errata, 非本 scope)。未動任何論文數字/JSON 值。",
+    "verdict": "PASS_MEASUREMENT_BUG_FIXED_NO_DATA_CHANGE",
+    "reviewer": "code-reviewer subagent (Codex 兩次超時 fallback; review confirmed no masking of real mismatch + flagged default-mode collateral bug which was then fixed)"
   }
 ]

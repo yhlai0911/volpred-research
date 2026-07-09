@@ -991,16 +991,32 @@ def compare_three_way(
 ) -> dict:
     live_rel = rel_diff(expected, live)
     stored_rel = rel_diff(expected, stored)
-    match = live is not None and live_rel is not None and live_rel <= tol
-    status = "match" if match else "mismatch"
     recommendation = None
-    if not match:
-        if stored is not None and stored_rel is not None and stored_rel <= tol:
-            recommendation = "(a) inspect live recomputation path / data alignment"
-        elif stored is not None and live is not None and rel_diff(stored, live) is not None and rel_diff(stored, live) <= tol:
-            recommendation = "(b) paper or README number is stale; update manuscript metadata"
-        else:
-            recommendation = "(c) issue errata and document the divergence explicitly"
+    if live is None and not live_mode:
+        # No live value was attempted this run (--skip-live, or default mode
+        # with an empty cached live_metrics). Verify the paper<->stored
+        # provenance chain instead (does the manuscript number match its stored
+        # JSON source?) rather than emitting a null-value false mismatch
+        # (2026-07-10 sweep). Only --live mode treats live==None as a real
+        # live-recomputation failure (handled by the else branch below).
+        match = stored is not None and stored_rel is not None and stored_rel <= tol
+        status = "match" if match else "mismatch"
+        if not match:
+            recommendation = (
+                "(c) issue errata and document the divergence explicitly"
+                if stored is None
+                else "(b) paper or README number is stale; update manuscript metadata"
+            )
+    else:
+        match = live is not None and live_rel is not None and live_rel <= tol
+        status = "match" if match else "mismatch"
+        if not match:
+            if stored is not None and stored_rel is not None and stored_rel <= tol:
+                recommendation = "(a) inspect live recomputation path / data alignment"
+            elif stored is not None and live is not None and rel_diff(stored, live) is not None and rel_diff(stored, live) <= tol:
+                recommendation = "(b) paper or README number is stale; update manuscript metadata"
+            else:
+                recommendation = "(c) issue errata and document the divergence explicitly"
     entry = {
         "metric": metric,
         "paper_value": safe_round(expected, 6),
@@ -1033,7 +1049,19 @@ def compare_expected_vs_live(
     note: str | None = None,
 ) -> dict:
     live_rel = rel_diff(expected, live)
-    match = live is not None and live_rel is not None and live_rel <= tol
+    if live is None and not live_mode:
+        # These checks are stored-JSON-vs-live-recomputation only (expected IS
+        # the stored value; there is no independent paper claim to verify).
+        # When no live value was attempted this run (--skip-live, or default
+        # mode with an empty cached live_metrics) there is nothing to compare,
+        # so mark skipped and exclude from match_rate rather than emitting a
+        # null-value false mismatch (2026-07-10 provenance sweep, Finding 1
+        # batch 3). Only --live mode treats live==None as a real failure below.
+        match = None
+        status = "skipped"
+    else:
+        match = live is not None and live_rel is not None and live_rel <= tol
+        status = "match" if match else "mismatch"
     entry = {
         "metric": metric,
         "expected_value": safe_round(expected, 6),
@@ -1041,13 +1069,15 @@ def compare_expected_vs_live(
         "rel_diff_pct_live_vs_expected": safe_round(live_rel * 100 if live_rel is not None else None, 3),
         "tol_pct": round(tol * 100, 2),
         "match": match,
-        "status": "match" if match else "mismatch",
+        "status": status,
         "expected_source": expected_source,
         "live_source": live_source,
     }
     if note:
         entry["note"] = note
-    if not match:
+    if status == "skipped":
+        entry["note"] = ((note + " ") if note else "") + "requires --live / default mode to verify"
+    elif not match:
         entry["recommendation"] = "(a) verify live recomputation and experiment config"
     return entry
 
@@ -1594,11 +1624,14 @@ def main() -> int:
         )
     )
 
+    scored_checks = [item for item in checks if item.get("status") != "skipped"]
     total_checks = len(checks)
-    total_match = sum(1 for item in checks if item.get("match"))
-    match_rate = total_match / total_checks if total_checks else 0.0
+    total_scored = len(scored_checks)
+    total_skipped = total_checks - total_scored
+    total_match = sum(1 for item in scored_checks if item.get("match"))
+    match_rate = total_match / total_scored if total_scored else 0.0
 
-    divergences = [item for item in checks if not item.get("match")]
+    divergences = [item for item in scored_checks if not item.get("match")]
     if match_rate >= 0.95 and not divergences:
         alert_level = "green"
     elif match_rate >= 0.80:
@@ -1621,6 +1654,8 @@ def main() -> int:
         "warnings": warnings_out,
         "divergences": divergences,
         "total_checks": total_checks,
+        "total_scored": total_scored,
+        "total_skipped": total_skipped,
         "total_match": total_match,
         "match_rate": round(match_rate, 4),
         "alert_level": alert_level,

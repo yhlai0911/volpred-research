@@ -56517,10 +56517,36 @@
     "task_type": "governance",
     "priority": 3,
     "source": "provenance-sweep-batch3",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-09T18:15:31.702949+00:00",
     "title": "Provenance Batch3: garch-x-vix 6 null-check extractor 修復",
-    "description": "承 paper/PROVENANCE_SWEEP_20260710.md Finding 1。reproduce.py 6 個 check(K1085 GLD+GVZ、K1088 USO+OVX、K1098 0050.TW×3、four-market DM>3 count) paper_value 與 stored 皆 null=extractor 在 main.tex/JSON 都抓不到。動作：確認這些數字是否仍在現行 main.tex(可能改版移除)→ 若在則修 check 的 regex/JSON path；若已移除則從 reproduce.py check list 刪除該 check 並註記。目標:reproduce_report 不再有 null-value false mismatch。"
+    "description": "承 paper/PROVENANCE_SWEEP_20260710.md Finding 1。reproduce.py 6 個 check(K1085 GLD+GVZ、K1088 USO+OVX、K1098 0050.TW×3、four-market DM>3 count) paper_value 與 stored 皆 null=extractor 在 main.tex/JSON 都抓不到。動作：確認這些數字是否仍在現行 main.tex(可能改版移除)→ 若在則修 check 的 regex/JSON path；若已移除則從 reproduce.py check list 刪除該 check 並註記。目標:reproduce_report 不再有 null-value false mismatch。",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-07-09T21:08:00.775938+00:00",
+    "claim_session_id": "1a5ed92e714d",
+    "status_history": [
+      {
+        "ts": "2026-07-09T21:08:00.776249+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-09T21:08:10.377107+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-09T21:29:27.885434+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-05"
+      }
+    ],
+    "started_at": "2026-07-09T21:08:10.376752+00:00",
+    "completed_at": "2026-07-09T21:29:27.885031+00:00",
+    "result": "reproduce.py skip-live/default false-RED 修復: live-dependent check 改 skipped/stored-fallback (not live_mode), match_rate 7.7%→85.7% yellow, 6 skipped, 唯一 divergence=A4f 已 escalate errata. code-reviewer review PASS. 未動論文數字。"
   },
   {
     "id": "provenance-sweep-taiwan-vt-untraceable-batch2b",
