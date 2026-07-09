@@ -38141,5 +38141,19 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-07-09T05:25:31.474298"
+  },
+  {
+    "item_id": "ffe8e593",
+    "category": "volatility_spillover",
+    "content": "K1665 [verdict=NULL] 原油→股市 vol spillover 增量檢定（vol-of-vol 傳導）。樣本 CL=F/USO/SPY/XLE/^VIX 2012-02-02~2026-07-08, n=3498 日, RV 21d annualized。PRIMARY (first-order RV level)：naive ssr F 4/4 顯著(p 低至 4.5e-19) 但 proper Newey-West HAC-Wald Bonferroni-sig 0/4、Harvey |t|>3 0/4 —— 差距全來自重疊 21d 窗的 MA(21) 自相關造成 plain-F 系統性過度拒絕。控制 VIX 指數水準後 survive 0/4 (max oil-coef |t|=1.89)；OOS expanding-window HAC-DM 增量 edge 0/4。SECONDARY (std-of-RV vov, K1444 之物件)：naive ssr F 4/4 → HAC-Wald Harvey survive 2/4 (僅 CL=F, robust to nw=42) → survive-VIX-level 0/4、survive-vol-of-VIX 0/4。殘餘期貨-vov lead 純統計、無 VIX 以外增量內容 = K1444 plain-F count 的部分更正非全崩。重現 K1329/K1351（統計 spillover≠增量 forecast 價值），再確認 VIX sufficient-statistic (K422/K148) 對 VIX 水準亦成立。XLE 對油 t 略強於 SPY(CL=F: xle_t=2.28>spy_t=2.11) 符合能源股經濟直覺。**無可交易價值。** Provenance: experiment_id=K1665, reviewer=Codex CLI (CONDITIONAL_PASS→fixes applied, commit a78823b6c), lookahead 明確 lag。",
+    "evidence": [
+      "experiments/K1665/K1665_results.json",
+      "experiments/K1665/README.md",
+      "experiments/K1665/K1665.py",
+      "experiments/K1665/K1665_fig1_rv_overlay.png",
+      "experiments/K1665/K1665_fig2_hac_coefficients.png"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-07-09T14:09:33.003758"
   }
 ]

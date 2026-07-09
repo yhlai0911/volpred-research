@@ -55796,7 +55796,7 @@
     "title": "K1665: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 469). Original: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1665.py with signal.shift(1) + seed=42, (c) K1665_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -55806,9 +55806,6 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-09T00:00:01Z",
-    "claimed_by": "hourly-11",
-    "claimed_at": "2026-07-09T03:10:10.604677+00:00",
-    "claim_session_id": "801922e17355",
     "status_history": [
       {
         "ts": "2026-07-09T03:10:10.605013+00:00",
@@ -55821,9 +55818,41 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-09T05:50:05.819722+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-11",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-09T06:08:16.273042+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-14"
+      },
+      {
+        "ts": "2026-07-09T06:08:16.524133+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-14"
+      },
+      {
+        "ts": "2026-07-09T06:09:47.898164+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-14"
       }
     ],
-    "started_at": "2026-07-09T03:10:10.846947+00:00"
+    "started_at": "2026-07-09T06:08:16.523774+00:00",
+    "last_released_at": "2026-07-09T05:50:05.819713+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-07-09T06:08:16.272671+00:00",
+    "claim_session_id": "08312bf1835d",
+    "completed_at": "2026-07-09T06:09:47.897739+00:00",
+    "result": "K1665 oil→equity vol spillover NULL: HAC-Wald Bonferroni 0/4, VIX-control survive 0/4, OOS edge 0/4; vov 2/4 Harvey but 0/4 survive VIX; K1444 plain-F partial correction; no tradable value. Codex CONDITIONAL_PASS. knowledge=ffe8e593"
   },
   {
     "id": "K1666",
