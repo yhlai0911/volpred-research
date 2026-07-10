@@ -57333,20 +57333,41 @@
     "task_type": "platform_ops",
     "priority": 3,
     "source": "telegram-responder",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-10T05:57:27.852587+00:00",
     "title": "抑制 supervisor『restart』INFO alert 的部署噪音（deploy-aware）",
     "description": "背景：老闆 Telegram msg 352 抱怨『supervisor restart』INFO 一直出現。查證：非 crash（無 traceback，每次都乾淨重入 scheduler_loop，launchd 退碼 143=SIGTERM=kickstart -k）。根因=今日 12:28–13:48 對 scripts/dispatch_supervisor/** 連續 commit ~10 次修 bug（pregate orphan、ghost-field gate、git_conflict_guard、heartbeat dead-man switch 等），daemon code 改動必 kickstart 重載才生效，每次重載 alerts.send_supervisor_restart() 就發一則 INFO → 5 次重載=5 則噪音。\n\n改善：讓 restart alert deploy-aware。做法建議：kickstart 前（或 deploy wrapper）在 storage/ops/ 落一個 restart_marker（含 reason='deploy' + expiry ~120s）；supervisor.main() 的 send_supervisor_restart() 讀 marker 若新鮮則降級為 debug/不寄（planned reload），marker 過期或不存在才照舊 INFO（真正 KeepAlive 意外重啟才吵老闆）。務必保留『非預期重啟仍要 alert』的能力。加 unit test 覆蓋 planned-vs-unexpected 兩路徑。落地後 kickstart -k 生效（重載前查 current_job==idle）。",
-    "claimed_by": null,
-    "claimed_at": null,
-    "claim_session_id": null,
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-10T09:17:40.329329+00:00",
+    "claim_session_id": "f3ceb7963da3",
     "status_history": [
       {
         "status": "pending",
         "at": "2026-07-10T05:57:27.852587+00:00",
         "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T09:17:40.329640+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-10T09:17:40.601831+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-10T09:17:40.862610+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-claude"
       }
-    ]
+    ],
+    "started_at": "2026-07-10T09:17:40.601527+00:00",
+    "completed_at": "2026-07-10T09:17:40.862230+00:00",
+    "result": "deploy-aware restart-alert suppression: planned-restart marker (state.write/consume_planned_restart_marker) + send_supervisor_restart(planned_reason) log-only + reload wrapper scripts/reload_dispatch_supervisor.sh (in-flight guard + marker + kickstart). 5 unit tests, 77 pass. error_log + control-plane.md updated."
   },
   {
     "id": "email-11950-60628a",
@@ -57354,7 +57375,7 @@
     "description": "Gmail UID: 11950\nMessage-ID: <3F40D5DE-5E3E-4CA6-B1F9-B163D24F3CC8@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 10 Jul 2026 13:46:59 +0800\nSubject: Re: [VolPred Alert][INFO] supervisor restart\n\n--- 用戶回信內容 ---\n立刻檢查這是什麼情況 並徹底解決\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月10日 13:39 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> supervisor restart\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> Supervisor restarted under launchd KeepAlive\r\n> \r\n> previous_started_at: 2026-07-10T05:22:09.580937+00:00\r\n> now: 2026-07-10T05:39:53.258148+00:00\r\n> 若短時間內反覆 restart，檢查 ~/.volpred/logs/dispatch_supervisor.log 找 crash trace\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "pending",
+    "status": "claimed",
     "tags": [
       "email_reply",
       "user_input"
@@ -57364,6 +57385,45 @@
     "email_uid": 11950,
     "email_message_id": "<3F40D5DE-5E3E-4CA6-B1F9-B163D24F3CC8@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] supervisor restart",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-10T09:08:13.345068+00:00",
+    "claim_session_id": "0ea011977daf",
+    "status_history": [
+      {
+        "ts": "2026-07-10T09:08:13.345412+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      }
+    ]
+  },
+  {
+    "id": "telegram-359",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T09:02:27.773439+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 359）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n剛剛今天額度不夠，現在已經時間開放你可以重新把所有有問題的部分立刻解決\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T09:03:12.354244+00:00",
+    "claim_session_id": "e7faa5612728",
+    "status_history": [
+      {
+        "ts": "2026-07-10T09:03:12.354582+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T09:07:47.613423+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-10T09:07:47.613081+00:00"
   }
 ]

@@ -234,7 +234,11 @@ def main(argv: list[str] | None = None) -> int:
     prev_started = state.read_state(state_path).get("supervisor_started_at")
     state.mark_supervisor_started(state_path)
     _handle_restart_orphan()
-    alerts.send_supervisor_restart(prev_started=prev_started)
+    # Deploy-aware restart alert (2026-07-10): a fresh marker means this boot is
+    # a deliberate `kickstart -k` reload (supervisor code change) → suppress the
+    # INFO alert. No marker → genuine/unexpected KeepAlive respawn → alert.
+    planned_reason = state.consume_planned_restart_marker()
+    alerts.send_supervisor_restart(prev_started=prev_started, planned_reason=planned_reason)
     try:
         if args.once:
             return asyncio.run(_run_once_async(dry_run=args.dry_run))

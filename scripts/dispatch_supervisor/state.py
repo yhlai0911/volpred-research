@@ -93,7 +93,7 @@ import os
 import tempfile
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -685,6 +685,93 @@ def clear_alert_dedup(alert_key: str, path: Path = STATE_PATH) -> None:
         if alert_key in dedup:
             del dedup[alert_key]
             data["alerts_dedup"] = dedup
+
+
+# ---------------------------------------------------------------------------
+# Planned-restart marker (deploy-aware restart-alert suppression, 2026-07-10)
+#
+# A restart under launchd KeepAlive is normally worth an INFO breadcrumb to the
+# owner — an *unexpected* KeepAlive respawn means the daemon crashed. But a
+# restart caused by a *deliberate* `launchctl kickstart -k` after editing the
+# supervisor's own code (its memory image is frozen at boot, so a code change
+# only takes effect on reload) is pure deploy noise. On 2026-07-10 a dev session
+# reloaded the daemon 5× in 80min while fixing supervisor bugs → 5 INFO restart
+# emails (Telegram msg 352 complaint).
+#
+# The reloader drops a short-lived marker BEFORE kickstart; the fresh boot
+# consumes it and downgrades its restart alert to a log-only breadcrumb. The
+# marker lives in its OWN file (not `dispatch_state.json`) so it never contends
+# for the hot state lock and a schema-version bump can never wipe it. It is
+# consume-once: a crash *right after* a planned reload has no marker on the
+# KeepAlive respawn → that (genuinely unexpected) restart still alerts.
+# ---------------------------------------------------------------------------
+RESTART_MARKER_PATH = ROOT / "storage" / "ops" / "supervisor_restart_marker.json"
+_RESTART_MARKER_DEFAULT_TTL_S = 120
+
+
+def write_planned_restart_marker(
+    reason: str = "deploy",
+    ttl_s: int = _RESTART_MARKER_DEFAULT_TTL_S,
+    path: Path = RESTART_MARKER_PATH,
+) -> str:
+    """Record that the *next* supervisor boot is a planned reload, not a crash.
+
+    Called by the reload wrapper immediately before `launchctl kickstart -k`.
+    Returns the ISO `expires_at` so the caller can log it. The marker is a
+    single small JSON written atomically; TTL bounds how long a stale marker
+    can mask a real crash (default 120s covers kickstart + boot comfortably).
+    """
+    now = datetime.now(timezone.utc)
+    expires_at = (now + timedelta(seconds=max(1, int(ttl_s)))).isoformat()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_write_json(
+        path,
+        {"reason": str(reason), "written_at": now.isoformat(), "expires_at": expires_at},
+    )
+    return expires_at
+
+
+def consume_planned_restart_marker(path: Path = RESTART_MARKER_PATH) -> str | None:
+    """Return the planned-restart reason if a FRESH marker exists, else None.
+
+    Consume-once: the marker file is always removed after being read, whether
+    fresh or stale, so it can only suppress the single boot it was written for.
+    A corrupt or expired marker returns None (→ the restart alert fires as an
+    unexpected event) and is logged, never silently swallowed."""
+    if not path.exists():
+        return None
+    try:
+        raw = path.read_text(encoding="utf-8")
+        marker = json.loads(raw)
+    except (OSError, ValueError) as exc:
+        LOG.warning(
+            "planned_restart_marker unreadable — treating restart as unexpected: %s (%s)",
+            exc, path,
+        )
+        _unlink_quiet(path)
+        return None
+    _unlink_quiet(path)  # consume-once regardless of freshness
+    try:
+        expires_at = _parse_state_timestamp(marker.get("expires_at"))
+    except (TypeError, ValueError) as exc:
+        LOG.warning("planned_restart_marker bad expires_at %r (%s)", marker.get("expires_at"), exc)
+        return None
+    if datetime.now(timezone.utc) >= expires_at:
+        LOG.info(
+            "planned_restart_marker expired (expires_at=%s) — restart treated as unexpected",
+            marker.get("expires_at"),
+        )
+        return None
+    return str(marker.get("reason") or "deploy")
+
+
+def _unlink_quiet(path: Path) -> None:
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass  # silent-ok: consume-once race — another boot already removed it
+    except OSError as exc:
+        LOG.warning("planned_restart_marker unlink failed: %s (%s)", exc, path)
 
 
 # ---------------------------------------------------------------------------

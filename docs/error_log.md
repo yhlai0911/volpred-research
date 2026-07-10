@@ -2,6 +2,21 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 supervisor『restart』INFO alert 部署噪音 → deploy-aware marker 抑制
+
+**現象**：老闆收到多則「supervisor restart」INFO email（Telegram msg 352 抱怨）並回信「立刻檢查這是什麼情況 並徹底解決」。
+
+**查證（非 crash）**：`launchctl list` 退碼 143（=SIGTERM，即 `kickstart -k`），`dispatch_supervisor.log` 每次都乾淨重入 `scheduler_loop`、無 traceback。restart burst 集中在 **2026-07-10 12:28 / 12:59 / 13:22 / 13:39 / 13:48（80 分鐘 5 次）**，之後穩定跑 3.5h；07-05 至 07-10 中間 5 天零 restart。對照 git log：同一時段對 `scripts/dispatch_supervisor/**` 連續 commit ~10 次修 bug（pregate orphan、ghost-field gate、git_conflict_guard、topology-audit 等）。daemon 程式凍結於開機 image，改 code 必 `kickstart -k` 重載才生效 → 每次重載 `alerts.send_supervisor_restart()` 就發一則 INFO → 5 次重載 = 5 則噪音。**這是部署噪音，非故障**。（附帶查到 worker 14:00–17:00 連續 `category=quota` exit，根因=Max session 額度用罄、5pm reset，屬 worker.py 既有 cheap-single-attempt 自動 resume 設計，非 bug；17:07 fire 額度恢復後已正常運作。）
+
+**解決方法（marker-based deploy-aware suppression）**：
+1. `state.write_planned_restart_marker(reason, ttl_s=120)` 寫獨立檔 `storage/ops/supervisor_restart_marker.json`（不進 `dispatch_state.json`，避開熱路徑 lock 與 schema-version 清洗）。
+2. `state.consume_planned_restart_marker()` 在 `supervisor.main()` 開機時 **consume-once** 讀取：fresh → 回 reason；expired/corrupt/absent → 回 None（皆記錄，非 silent）。consume-once 保證只抑制它被寫入的那一次開機——planned reload 後若立刻 crash，KeepAlive 重生時已無 marker → 那次（真正意外的）restart 仍會 alert。
+3. `alerts.send_supervisor_restart(planned_reason=...)`：`planned_reason` 非 None → log-only breadcrumb、不寄信；None → 照舊 INFO（保留「非預期重啟仍 alert」能力）。
+4. **reload wrapper** `scripts/reload_dispatch_supervisor.sh`：reload 前 (a) 查 `current_job==null`（in-flight worker 保護，per control-plane.md）否則拒絕（`--force` 才覆蓋）、(b) 寫 marker、(c) `kickstart -k`。往後所有 supervisor code 重載走此 wrapper，噪音自動消除。
+5. 5 個 unit test 覆蓋 planned/unexpected/expired/corrupt/consume-once（`tests/test_dispatch_supervisor.py`）。
+
+**anti-stacking**：未新增 watchdog／第二 hook；抑制邏輯收編進既有 `send_supervisor_restart` 這個 alert 的單一 owner，reload 收編進單一 wrapper。task `ops-superv-restart-noise-20260710`。
+
 ## 2026-07-10 git_conflict_guard 在 7/4 supervisor cutover 時孤兒化（同類第 4 次）→ 收編進 phase_z + 立機械 gate
 
 **現象**：`scripts/git_conflict_guard.py` 自 2026-07-04 dispatch-supervisor cutover 後**六天未曾執行**。它唯一的 caller 是 `scripts/cron_hourly_dispatch.sh:104`，而該 shell 的 LaunchAgent（`com.volpred.hourly-dispatch`）已在 cutover 時 unload（`launchctl list | grep hourly-dispatch` 為空）。
