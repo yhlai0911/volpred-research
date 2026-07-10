@@ -1,8 +1,42 @@
-"""Helpers for the legacy ``storage/next_tasks.json`` pending queue."""
+"""Helpers for the legacy ``storage/next_tasks.json`` pending queue.
+
+Single enforcement owner for two invariants on the canonical queue:
+
+1. **Status controlled vocabulary** (``TASK_STATUSES`` / ``validate_task_status``).
+   Before this module owned it, 15 writers each ``json.dump``-ed the queue with no
+   shared status check, so 27 out-of-vocab rows accumulated from ad-hoc jq/Edit
+   hand-writes and one-off scripts: ``completed`` (x11),
+   ``superseded_audience_null_fix`` (x5), ``partially_completed`` (x2), plus a long
+   one-off tail (``completed_local`` / ``completed_null`` / ``partial`` /
+   ``partial_success`` / ``dropped_false_positive`` /
+   ``fail_no_data_data_source_blocker`` /
+   ``partially_resolved_K1180_done_awaiting_K1179`` /
+   ``phase1_failed_codex_review_superseded_by_v2`` /
+   ``setup_done_superseded_by_v2``, one each). Those 27 legacy rows are frozen as
+   the baseline (永遠修流程，不修資料); the regression stop lives in
+   ``scripts/validate_next_tasks_status.py``. New writes route through
+   ``write_tasks_to_handle`` / ``write_tasks_locked`` here.
+
+2. **Corruption-safe writes** (serialize-first-then-truncate). ``content.py`` and
+   ``questions.py`` previously did ``fh.seek(0); fh.truncate(); json.dump(...)`` --
+   truncate BEFORE serialize. A mid-serialize failure (e.g. a lone surrogate from
+   surrogateescape argv raising ``UnicodeEncodeError``) then left the queue
+   truncated to invalid JSON, and PHASE-Z auto-committed the wreck to main
+   (incident 2026-07-05, docs/error_log.md:329). ``write_tasks_to_handle`` builds
+   the full payload FIRST and only truncates once serialization has succeeded --
+   the same hardening ``scripts/task_pool_claim.py`` grew inline in 2026-07-05,
+   now shared here so every writer inherits it.
+"""
 from __future__ import annotations
 
+import fcntl
+import json
 import re
-from typing import Any
+from collections import Counter
+from pathlib import Path
+from typing import IO, Any
+
+from .diagnostics import warn
 
 
 class InvalidTaskPriority(ValueError):
@@ -104,3 +138,166 @@ def priority_sort_key(value: Any, *, default: int = 999) -> int:
         return normalize_priority(value, default=default)
     except InvalidTaskPriority:
         return default
+
+
+class InvalidTaskStatus(ValueError):
+    """Raised when a task status is not in the controlled vocabulary."""
+
+
+# Canonical status vocabulary. Mirrors the shape of ``blocked_reasons.py``:
+# adding a status here is the only sanctioned way to extend it. Any status not
+# listed is an out-of-vocab pollutant counted by the CI baseline gate.
+TASK_STATUSES: frozenset[str] = frozenset(
+    {
+        "pending",                              # queued, agent-dispatchable
+        "pending_main_thread",                  # queued, main-thread only
+        "claimed",                              # claimed by a session, not started
+        "in_progress",                          # started
+        "succeeded",                            # done, real result
+        "succeeded_null_result",                # done; null/negative result (terminal per sync_next_tasks_status.py:160)
+        "failed",                               # genuine failure
+        "blocked",                              # hard/soft blocked (paired with blocked_reason)
+        "blocked_on_user",                      # awaiting an owner decision (distinct from blocked)
+        "superseded",                           # replaced by another task
+        "closed_no_action",                     # closed, nothing to do
+        "decision_made_awaiting_body_rewrite",  # paper narrative state (CLAUDE.md)
+        "cancelled",                            # explicitly cancelled
+        "expired",                              # aged out past its window
+    }
+)
+
+# Frozen count of pre-2026-07 rows whose status predates the vocabulary above.
+# Per "永遠修流程，不修資料" these rows are never rewritten; the write path stays
+# quiet at or below this line and CI fails above it.
+# MIRRORED in scripts/validate_next_tasks_status.py::DEFAULT_BASELINE, which
+# cannot import this module (it runs on a deps-free CI runner).
+# tests/test_task_status_vocab.py asserts the two stay equal.
+LEGACY_OUT_OF_VOCAB_BASELINE = 27
+
+
+def is_valid_status(status: str | None) -> bool:
+    """Return True iff ``status`` is a registered task status."""
+    if not status:
+        return False
+    return status.strip().lower() in TASK_STATUSES
+
+
+def validate_task_status(status: str | None) -> str:
+    """Return the normalized status, or raise ``InvalidTaskStatus``.
+
+    Strict raise for callers that set a NEW status (writers building a task,
+    scripts/migrate_blocked_lane_terminal.py). The whole-file write path
+    (``write_tasks_to_handle``) deliberately does NOT raise on the 27 frozen
+    legacy rows -- see module docstring -- it surfaces them observably instead.
+    """
+    if not is_valid_status(status):
+        raise InvalidTaskStatus(
+            f"task status {status!r} not in TASK_STATUSES; add it to "
+            "src/volpred/ops/next_tasks.py if it is a real new state"
+        )
+    return str(status).strip().lower()
+
+
+def _audit_task_statuses(tasks: list[Any]) -> int:
+    """Surface out-of-vocab statuses (observable, non-fatal); return the count.
+
+    Non-fatal by design: the canonical queue still carries the legacy rows we are
+    forbidden to rewrite, and a raise here would brick every task materializer.
+    New pollution is hard-stopped by scripts/validate_next_tasks_status.py's
+    baseline gate.
+
+    Warns only ABOVE the baseline. Warning on every write would put a
+    known-and-frozen fact on the hot dispatch path (claim/complete/materialize
+    all pass through here), training the reader to ignore the tag -- so the one
+    time it means "someone just added new pollution" it reads like the usual noise.
+    """
+    bad: list[str] = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        status = task.get("status")
+        if status is not None and not is_valid_status(status):
+            bad.append(str(status))
+    if len(bad) > LEGACY_OUT_OF_VOCAB_BASELINE:
+        warn(
+            "next_tasks_status",
+            "out-of-vocab task status(es) ABOVE frozen baseline -- new pollution",
+            count=len(bad),
+            baseline=LEGACY_OUT_OF_VOCAB_BASELINE,
+            distinct=dict(Counter(bad)),
+        )
+    return len(bad)
+
+
+def _normalize_priorities_tolerant(tasks: list[Any]) -> int:
+    """Normalize priorities across a whole-file payload without bricking it.
+
+    The strict `normalize_task_priorities` is correct for a row a caller just
+    built -- fail before the bad value reaches disk. It is wrong for a whole-file
+    rewrite: one malformed legacy priority would make EVERY materializer write
+    raise (content, questions, task_pool_claim claim/complete), which is exactly
+    the bricking `_audit_task_statuses` is written to avoid. Leave the bad row's
+    priority untouched, keep it visible, and let the row through.
+    """
+    changed = 0
+    skipped: list[str] = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        try:
+            if normalize_task_priority(task):
+                changed += 1
+        except InvalidTaskPriority as exc:
+            skipped.append(f"{task.get('id', '<no-id>')}: {exc}")
+    if skipped:
+        warn(
+            "next_tasks_write",
+            "left malformed priority row(s) untouched rather than failing the write",
+            count=len(skipped),
+            examples=skipped[:3],
+        )
+    return changed
+
+
+def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
+    """Serialize ``tasks`` to an already-open, ``LOCK_EX``-held handle.
+
+    Serialize-FIRST-then-truncate: build the full UTF-8 payload before touching
+    the file, so a serialization failure cannot leave the canonical queue
+    truncated to invalid JSON (incident 2026-07-05). Lone surrogates arriving via
+    surrogateescape argv (e.g. a shell-mangled ``--result`` char) are scrubbed
+    with an observable warning rather than raising mid-write.
+    """
+    _normalize_priorities_tolerant(tasks)
+    _audit_task_statuses(tasks)
+    payload = json.dumps(tasks, indent=2, ensure_ascii=False)
+    try:
+        payload.encode("utf-8")
+    except UnicodeEncodeError as exc:
+        warn("next_tasks_write", "scrubbed non-encodable char(s) before write", err=str(exc))
+        payload = payload.encode("utf-8", "replace").decode("utf-8")
+    fh.seek(0)
+    fh.truncate()
+    fh.write(payload)
+    fh.write("\n")
+
+
+def write_tasks_locked(path: str | Path, tasks: list[Any]) -> None:
+    """Atomically replace the task file at ``path`` with ``tasks`` under LOCK_EX.
+
+    One-shot writer for callers that already hold the full list (e.g.
+    scripts/migrate_blocked_lane_terminal.py). Callers doing a read-modify-write
+    that must stay atomic against concurrent writers should instead hold the lock
+    across load+mutate and call ``write_tasks_to_handle`` on that same handle --
+    opening a second descriptor here would deadlock on the same-process flock.
+    """
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    if not p.exists():
+        p.write_text("[]\n", encoding="utf-8")
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            write_tasks_to_handle(fh, tasks)
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)

@@ -49,9 +49,12 @@ Differences from legacy (deliberate, same behaviour):
 """
 from __future__ import annotations
 
+import json
 import logging
+import os
 import subprocess
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -106,6 +109,127 @@ _LEAKED_STATE_PATHSPECS = (
 )
 
 
+# ── ownership: what did THIS fire produce? ───────────────────────────────────
+# `git add -A` has no notion of authorship. It stages whatever is dirty, and the
+# main checkout has several concurrent writers (the dispatched agent, an
+# interactive session landing a worktree, codex_loop, cron jobs). Three separate
+# incidents came out of that one assumption (docs/error_log.md 2026-07-10):
+#   1. a `next_tasks.json` truncated mid-write by a crashed command was committed
+#      as valid history;
+#   2. `dab3baa12` swept a gmail_inbox_poll rewrite into main past the test gate
+#      — red for 5 days;
+#   3. an interactive session's half-finished `merge_worktree.sh` edits were
+#      committed under an unrelated agent's message.
+# Same root cause each time: the safety net cannot tell "the agent left this"
+# from "someone is still typing this".
+#
+# The fix gives it that signal. `run_pre_fire_guard` runs BEFORE the worker, so
+# it snapshots the dirty set at fire start; whatever is dirty at PHASE-Z time and
+# was NOT dirty then is what this fire produced. Anything else belongs to another
+# writer and is left alone — surfaced as an alert, never adopted. Auto-adoption is
+# precisely what produced all three incidents, and it is the same hazard the
+# orphan-branch alert already refuses to automate: a non-conflicting file is
+# silently plausible and therefore silently wrong.
+_PRE_FIRE_SNAPSHOT_RELPATH = ("storage", "ops", "phase_z_pre_fire_dirty.json")
+# A fire is bounded by the worker timeout (~50min). A snapshot older than this is
+# from a fire whose PHASE-Z never ran (daemon killed mid-fire); trusting it would
+# mean judging today's dirt against yesterday's baseline.
+_SNAPSHOT_MAX_AGE_S = 6 * 3600
+
+
+def _porcelain_paths(raw: str) -> set[str]:
+    """Parse `git status --porcelain -z -uall` into a path set.
+
+    NUL-delimited because paths may contain spaces or quotes (`core.quotePath`
+    would otherwise hand back C-escaped octal that no `git add --` would match).
+    Rename/copy entries carry a second, NUL-separated original path — both sides
+    matter: the delete half and the add half are one edit by one author.
+    """
+    parts = raw.split("\0")
+    paths: set[str] = set()
+    i = 0
+    while i < len(parts):
+        entry = parts[i]
+        i += 1
+        if len(entry) < 4:  # "XY path" — shorter means the trailing empty field
+            continue
+        xy, path = entry[:2], entry[3:]
+        paths.add(path)
+        if ("R" in xy or "C" in xy) and i < len(parts) and parts[i]:
+            paths.add(parts[i])
+            i += 1
+    return paths
+
+
+def _dirty_paths(repo_root: Path, runner) -> set[str] | None:
+    """Current dirty set, or None if git could not tell us (never an empty set —
+    "clean" and "we don't know" must not collapse into the same value)."""
+    try:
+        proc = _git(repo_root, "status", "--porcelain", "-z", "--untracked-files=all",
+                    timeout_s=_SHORT_TIMEOUT_S, runner=runner)
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        LOG.warning("phase_z: dirty-set probe failed (%s)", exc)
+        return None
+    if proc.returncode != 0:
+        LOG.warning("phase_z: dirty-set probe rc=%d: %s",
+                    proc.returncode, (proc.stderr or "").strip()[:200])
+        return None
+    return _porcelain_paths(proc.stdout or "")
+
+
+def _write_pre_fire_snapshot(repo_root: Path, paths: set[str]) -> bool:
+    dest = repo_root.joinpath(*_PRE_FIRE_SNAPSHOT_RELPATH)
+    payload = {"taken_at": datetime.now().timestamp(), "paths": sorted(paths)}
+    try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = dest.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(payload), encoding="utf-8")
+        tmp.replace(dest)  # atomic: PHASE-Z must never read a half-written baseline
+        return True
+    except OSError as exc:
+        LOG.warning("phase_z: cannot persist pre-fire snapshot (%s) — PHASE-Z will "
+                    "not know what it owns and will decline to commit", exc)
+        return False
+
+
+def _read_pre_fire_snapshot(repo_root: Path, now: float | None = None) -> set[str] | None:
+    """The fire-start baseline, or None when it is missing/stale/corrupt.
+
+    None means "ownership unknown", and run_phase_z declines to commit on it.
+    Fail-closed on purpose: a wrong baseline commits other people's work, while
+    no commit merely leaves the work dirty and alerted — recoverable either way,
+    but only one of the two rewrites someone else's history.
+    """
+    src = repo_root.joinpath(*_PRE_FIRE_SNAPSHOT_RELPATH)
+    try:
+        payload = json.loads(src.read_text(encoding="utf-8"))
+        taken_at = float(payload["taken_at"])
+        paths = payload["paths"]
+        if not isinstance(paths, list):
+            raise TypeError("paths is not a list")
+    except FileNotFoundError:
+        LOG.warning("phase_z: no pre-fire snapshot — pre-fire guard did not run this fire")
+        return None
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        LOG.warning("phase_z: pre-fire snapshot unreadable (%s)", exc)
+        return None
+
+    age = (now if now is not None else datetime.now().timestamp()) - taken_at
+    if age > _SNAPSHOT_MAX_AGE_S or age < 0:
+        LOG.warning("phase_z: pre-fire snapshot is %.0fs old — refusing a stale baseline", age)
+        return None
+    return set(paths)
+
+
+def _consume_pre_fire_snapshot(repo_root: Path) -> None:
+    """One snapshot, one fire. Leaving it behind would let the next fire judge its
+    own output against a baseline taken before someone else's edits."""
+    try:
+        repo_root.joinpath(*_PRE_FIRE_SNAPSHOT_RELPATH).unlink(missing_ok=True)
+    except OSError as exc:  # pragma: no cover — unlink of our own file
+        LOG.warning("phase_z: cannot remove pre-fire snapshot (%s)", exc)
+
+
 # ── pre-fire guard ───────────────────────────────────────────────────────────
 # Byte-for-byte the legacy ceiling: cron_hourly_dispatch.sh:76 wrapped the guard
 # in `perl -e 'alarm 30; exec'` after 2026-07-02, when `uv` hung >6min inside
@@ -118,6 +242,7 @@ def run_pre_fire_guard(
     *,
     repo_root: Path,
     runner=subprocess.run,
+    git_runner=subprocess.run,
 ) -> dict:
     """Run the conflict-marker / orphaned-AUTO_MERGE guard before a fire.
 
@@ -144,15 +269,36 @@ def run_pre_fire_guard(
     guard is pure-stdlib, so no venv resolution is needed, and this sidesteps
     the `uv` cwd-resolution hang above entirely.
 
+    Also snapshots the dirty set at fire start — see the ownership block above.
+    That happens FIRST, before the guard repairs anything: the guard's own
+    restorations are this fire's output and must be committable, and a snapshot
+    taken after them would strand the repaired files as permanently "foreign".
+    The snapshot is taken on every path out of this function (a missing guard
+    script must not also cost PHASE-Z its baseline).
+
     Returns an observability dict: ``ran`` (bool — did the guard execute),
-    ``reason`` (str), plus ``guard_output`` when it printed anything. Never
-    raises.
+    ``reason`` (str), ``dirty_at_fire_start`` (int — baseline size, -1 if the
+    probe failed), plus ``guard_output`` when it printed anything. Never raises.
     """
     repo_root = Path(repo_root)
+
+    # `git_runner` is separate from `runner`: the latter fakes the guard
+    # subprocess in tests, and a fake that answers `[sys.executable, guard]`
+    # cannot also answer `git status`.
+    baseline = _dirty_paths(repo_root, git_runner)
+    if baseline is None or not _write_pre_fire_snapshot(repo_root, baseline):
+        # No baseline → PHASE-Z will decline to commit and say so. Fail-open for
+        # the fire itself (this function may never veto a dispatch), fail-closed
+        # for the commit that follows it.
+        snapshot_size = -1
+    else:
+        snapshot_size = len(baseline)
+        LOG.info("pre_fire_guard: baselined %d dirty path(s) at fire start", snapshot_size)
+
     script = repo_root.joinpath(*_GUARD_SCRIPT_RELPATH)
     if not script.exists():
         LOG.warning("pre_fire_guard: %s missing — no conflict backstop this fire", script)
-        return {"ran": False, "reason": "guard_missing"}
+        return {"ran": False, "reason": "guard_missing", "dirty_at_fire_start": snapshot_size}
 
     try:
         proc = runner(
@@ -165,10 +311,10 @@ def run_pre_fire_guard(
         )
     except subprocess.TimeoutExpired:
         LOG.warning("pre_fire_guard: timeout after %ss — fail-open, firing anyway", _GUARD_TIMEOUT_S)
-        return {"ran": False, "reason": "timeout"}
+        return {"ran": False, "reason": "timeout", "dirty_at_fire_start": snapshot_size}
     except OSError as exc:
         LOG.warning("pre_fire_guard: spawn failed (%s) — fail-open, firing anyway", exc)
-        return {"ran": False, "reason": "spawn_error"}
+        return {"ran": False, "reason": "spawn_error", "dirty_at_fire_start": snapshot_size}
 
     # `--quiet` keeps the guard silent on a clean tree, so any output means it
     # acted (or warned). Forward it: the guard's own stdout is the only record
@@ -181,9 +327,10 @@ def run_pre_fire_guard(
         # The guard's main() returns 0 on every path, so this is a crash. Not
         # silent (see .claude/rules/no-silent-fallback.md) — but not a veto.
         LOG.warning("pre_fire_guard: exit=%d — fail-open, firing anyway", proc.returncode)
-        return {"ran": True, "reason": "nonzero_exit", "exit_code": proc.returncode}
+        return {"ran": True, "reason": "nonzero_exit", "exit_code": proc.returncode,
+                "dirty_at_fire_start": snapshot_size}
 
-    result = {"ran": True, "reason": "ok"}
+    result = {"ran": True, "reason": "ok", "dirty_at_fire_start": snapshot_size}
     if out:
         result["guard_output"] = out[-500:]
     return result
@@ -402,6 +549,7 @@ def run_phase_z(
     runner=subprocess.run,
     test_runner=None,
     alert_fn=None,
+    pre_fire_dirty: set[str] | list[str] | None = None,
 ) -> dict:
     """Deterministic post-fire commit. Returns an observability dict.
 
@@ -425,25 +573,78 @@ def run_phase_z(
     """
     repo_root = Path(repo_root)
     hhmm = now_hhmm or datetime.now().strftime("%H:%M")
-    try:
-        status = _git(repo_root, "status", "--porcelain", timeout_s=_SHORT_TIMEOUT_S, runner=runner)
-    except (subprocess.TimeoutExpired, OSError) as exc:
-        LOG.warning("phase_z: git status failed (%s) — skipping safety-net this fire", exc)
+    alert_fn = alert_fn or _default_alert
+
+    dirty_now = _dirty_paths(repo_root, runner)
+    if dirty_now is None:
+        # e.g. not a git repository / index lock. Do NOT misreport as "clean" —
+        # that would silently skip a real safety-net on a dirty tree.
+        _consume_pre_fire_snapshot(repo_root)
         return {"committed": False, "reason": "status_error"}
 
-    if status.returncode != 0:
-        # e.g. not a git repository / index lock. Do NOT misreport as "clean"
-        # (empty stdout) — that would silently skip a real safety-net when the
-        # tree could actually be dirty. Observable, no-op this fire.
-        LOG.warning("phase_z: git status rc=%d: %s — skipping safety-net this fire",
-                    status.returncode, (status.stderr or "").strip()[:200])
-        return {"committed": False, "reason": "status_error"}
-
-    if not (status.stdout or "").strip():
+    if not dirty_now:
         LOG.info("phase_z: working tree clean — agent committed everything")
+        _consume_pre_fire_snapshot(repo_root)
         return {"committed": False, "reason": "clean"}
 
-    LOG.info("phase_z: uncommitted changes after dispatch — auto-committing")
+    baseline = set(pre_fire_dirty) if pre_fire_dirty is not None else _read_pre_fire_snapshot(repo_root)
+    if baseline is None:
+        # Ownership unknown. The old code committed anyway (`git add -A`), which
+        # is how it swept an interactive session's half-finished edits into an
+        # agent's commit. Declining leaves the work dirty and visible; committing
+        # rewrites someone else's history under someone else's name.
+        LOG.warning("phase_z: no fire-start baseline — declining to commit %d dirty path(s)",
+                    len(dirty_now))
+        alert_fn(
+            level="warn",
+            title=f"PHASE-Z 沒有 fire 起始基線 {hhmm} — 這班不自動 commit",
+            body="\n".join([
+                "## 發生什麼",
+                f"PHASE-Z 看到 {len(dirty_now)} 個未提交檔案，但拿不到「這班 fire 開始時工作區長怎樣」"
+                "的基線，所以無法分辨哪些是這班 agent 產出的、哪些是別人正在編輯的。",
+                "",
+                "## 為何不直接 commit",
+                "以前它會 `git add -A` 全收。那樣做過三次事故：收走截斷的 next_tasks.json、"
+                "繞過測試閘門送進 main、以及把別人正在編輯的檔案 commit 進不相干的訊息裡。",
+                "",
+                "## 現在該做什麼",
+                "檔案仍在工作區、沒有遺失。確認是誰的工作後由該作者 commit。",
+                f"- 未提交檔案數: {len(dirty_now)}",
+                f"- 基線檔: {'/'.join(_PRE_FIRE_SNAPSHOT_RELPATH)}（缺失或過期）",
+            ]),
+        )
+        return {"committed": False, "reason": "ownership_unknown", "dirty": len(dirty_now)}
+
+    owned = sorted(dirty_now - baseline)
+    foreign = sorted(dirty_now & baseline)
+    _consume_pre_fire_snapshot(repo_root)
+
+    if foreign:
+        LOG.info("phase_z: leaving %d path(s) dirty — already dirty at fire start, not ours: %s",
+                 len(foreign), foreign[:10])
+
+    if not owned:
+        LOG.info("phase_z: nothing this fire produced — %d foreign path(s) left alone", len(foreign))
+        alert_fn(
+            level="warn",
+            title=f"PHASE-Z {hhmm}: {len(foreign)} 個檔案未提交，但不是這班產出的",
+            body="\n".join([
+                "## 發生什麼",
+                "這班 fire 沒有留下任何自己的未提交變更，但工作區裡有別人的未提交檔案"
+                "（fire 開始前就髒了）。PHASE-Z 不碰它們。",
+                "",
+                "## 現在該做什麼",
+                "若這些是某個已結束 session 的遺留，請人工判斷後 commit 或捨棄；"
+                "自動收養正是先前三次事故的成因。",
+                "",
+                "## 檔案",
+                *[f"- {p}" for p in foreign[:30]],
+                *(["- …"] if len(foreign) > 30 else []),
+            ]),
+        )
+        return {"committed": False, "reason": "nothing_owned", "foreign": foreign}
+
+    LOG.info("phase_z: %d path(s) produced by this fire — auto-committing", len(owned))
     untracked: list[str] = []
     try:
         leaked = _git(
@@ -475,23 +676,62 @@ def run_phase_z(
         # commit of real work must still happen. Logged, not silent.
         LOG.warning("phase_z: leaked-ignored untrack step failed (%s) — proceeding to add/commit", exc)
 
+    # The commit itself stays index-based: the `git rm --cached` above only exists
+    # in the index, and a pathspec commit would bypass it and leave the leaked
+    # state files tracked. So the index must be made to contain exactly this
+    # fire's work — which means first evicting anything ANOTHER writer staged.
+    # `git reset -- <paths>` restores those index entries to HEAD and never
+    # touches the working tree: their content survives, only the staging does not.
+    if foreign:
+        try:
+            reset = _git(repo_root, "reset", "-q", "--", *foreign,
+                         timeout_s=_SHORT_TIMEOUT_S, runner=runner)
+        except (subprocess.TimeoutExpired, OSError) as exc:
+            LOG.warning("phase_z: cannot unstage foreign paths (%s) — declining to commit", exc)
+            return {"committed": False, "reason": "unstage_error", "untracked": untracked}
+        if reset.returncode != 0:
+            # Cannot prove the index is free of another writer's staged work.
+            # Commit anyway and we are back to the bug this whole path exists for.
+            LOG.warning("phase_z: git reset rc=%d: %s — declining to commit (theft risk)",
+                        reset.returncode, (reset.stderr or "").strip()[:200])
+            return {"committed": False, "reason": "unstage_error", "untracked": untracked}
+
+    # `--pathspec-from-file` (NUL) rather than argv: paths with spaces stay intact
+    # and a fire that touched hundreds of files cannot hit ARG_MAX.
     try:
-        add = _git(repo_root, "add", "-A", timeout_s=_SHORT_TIMEOUT_S, runner=runner)
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".pathspec",
+                                         delete=False) as fh:
+            fh.write("\0".join(owned))
+            pathspec_file = fh.name
+    except OSError as exc:
+        LOG.warning("phase_z: cannot write pathspec file (%s)", exc)
+        return {"committed": False, "reason": "pathspec_error", "untracked": untracked}
+
+    try:
+        add = _git(repo_root, "add", "-A", f"--pathspec-from-file={pathspec_file}",
+                   "--pathspec-file-nul", timeout_s=_SHORT_TIMEOUT_S, runner=runner)
         if add.returncode != 0:
-            # Codex review #3: a failed `git add -A` means the index is in an
+            # Codex review #3: a failed `git add` means the index is in an
             # unknown/partial state — committing now could snapshot a partial
             # tree. Abort this fire's safety-net (observable, no commit).
-            LOG.warning("phase_z: git add -A rc=%d: %s — aborting commit (partial-index risk)",
+            LOG.warning("phase_z: git add rc=%d: %s — aborting commit (partial-index risk)",
                         add.returncode, (add.stderr or "").strip()[:200])
             return {"committed": False, "reason": "add_error", "untracked": untracked}
         commit = _git(
-            repo_root, "commit", "-m",
-            f"ops(dispatch-supervisor {hhmm}): PHASE-Z safety-net auto-commit (agent left uncommitted)",
+            repo_root, "commit",
+            "-m", f"ops(dispatch-supervisor {hhmm}): PHASE-Z safety-net auto-commit (agent left uncommitted)",
+            "-m", (f"Staged only what this fire produced: {len(owned)} path(s).\n"
+                   f"Left alone (dirty before the fire, another writer's): {len(foreign)} path(s)."),
             timeout_s=_COMMIT_TIMEOUT_S, runner=runner,
         )
     except (subprocess.TimeoutExpired, OSError) as exc:
         LOG.warning("phase_z: git add/commit failed (%s)", exc)
         return {"committed": False, "reason": "commit_error", "untracked": untracked}
+    finally:
+        try:
+            os.unlink(pathspec_file)
+        except OSError:  # pragma: no cover
+            pass
 
     out = ((commit.stdout or "") + (commit.stderr or "")).strip()
     if commit.returncode == 0:
@@ -501,7 +741,25 @@ def run_phase_z(
             test_runner=test_runner or subprocess.run,
             alert_fn=alert_fn or _default_alert,
         )
+        if foreign:
+            alert_fn(
+                level="warn",
+                title=f"PHASE-Z {hhmm}: 有 {len(foreign)} 個檔案不是這班產出的，已略過",
+                body="\n".join([
+                    "## 發生什麼",
+                    f"這班 fire 的 {len(owned)} 個檔案已自動 commit。另外 {len(foreign)} 個檔案"
+                    "在 fire 開始前就已經是未提交狀態 —— 那是別的 session 正在做的事，PHASE-Z 沒有動它們。",
+                    "",
+                    "## 現在該做什麼",
+                    "通常不需要處理（該 session 會自己 commit）。若它已經結束，請人工確認後再 commit。",
+                    "",
+                    "## 略過的檔案",
+                    *[f"- {p}" for p in foreign[:30]],
+                    *(["- …"] if len(foreign) > 30 else []),
+                ]),
+            )
         return {"committed": True, "reason": "committed", "untracked": untracked,
+                "owned": owned, "foreign": foreign,
                 "commit_head": out[-500:], "tests": tests}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything
     # dirty was a leaked-ignored file already rm --cached'd, or a race cleaned

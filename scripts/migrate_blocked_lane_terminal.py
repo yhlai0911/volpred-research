@@ -24,7 +24,10 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
-from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
+from volpred.ops.next_tasks import (  # noqa: E402
+    validate_task_status,
+    write_tasks_to_handle,
+)
 
 CLAIM_FIELDS = ("claimed_by", "claimed_at", "claim_session_id")
 
@@ -101,6 +104,9 @@ def migrate_tasks(tasks: list[Any], *, now_iso: str | None = None) -> MigrationS
 
         if original_status == "blocked" and reason == "deprecated":
             target = terminal_status_for_deprecated(task)
+            # This is the one Python writer that derives a status dynamically; a
+            # bad derivation must not slip an out-of-vocab status into the queue.
+            validate_task_status(target)
             task["status"] = target
             task["terminal_migration_at"] = now_iso
             task["terminal_migration_from_status"] = "blocked"
@@ -133,13 +139,9 @@ def _load_tasks(handle) -> list[Any]:
 
 
 def _write_tasks(handle, tasks: list[Any]) -> None:
-    normalize_task_priorities(tasks)
-    payload = json.dumps(tasks, ensure_ascii=False, indent=2)
-    payload.encode("utf-8")
-    handle.seek(0)
-    handle.truncate()
-    handle.write(payload)
-    handle.write("\n")
+    # Shared hardened writer: normalize priorities + status audit +
+    # serialize-first-then-truncate + surrogate scrub.
+    write_tasks_to_handle(handle, tasks)
 
 
 def run(*, apply: bool, path: Path = NEXT_TASKS) -> MigrationStats:

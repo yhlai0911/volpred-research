@@ -2,6 +2,34 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 「不知道上次何時 fire」被當成「立刻 fire」—— off-slot 重複 fire 的根因
+
+**現象**：`firing worker` 日誌稽核，159 次 fire 裡有 **9 次 off-slot**：在自己的 cron slot 之後 +24～+54 分鐘才觸發（07-07 09:45 打 09:07、07-10 22:58 打 22:07…）。每次都是完整的 ~95K opus cold-load。今日額度兩度耗盡。
+
+**根因**：`scheduler._due_to_fire()` 對 missing / unparseable 的 `last_fire_at` 一律 `return True`。
+
+```python
+if not last_fire_at:
+    return True, prev     # ← 「不知道」== 「該跑」
+```
+
+在一個 60 秒 tick 的常駐 daemon 裡，這條讓 **任何一次 `dispatch_state.json` 遺失，都在下一拍換來一整發 cold-load**；而且在有東西寫回該欄位之前，每個 tick 都會再 fire 一次。
+
+**state 是怎麼不見的**：22:58 那次，`completions` 被清空（22:50 還有 3 筆）。**daemon 自己從未 log 過 state reset** —— `read_state()` 走 `_empty_state()` 分支時必寫 `dispatch state reset to empty`，全日誌 0 筆。所以是**外部 writer** 覆寫了 production state（同日另有 session 在修「孤兒寫入 production state」，同一病灶）。`dispatch_state.json` 已 gitignore，排除 git 操作。
+
+**觸發脈絡**（P1 (c) 項）：7/10 的 3 次 off-slot fire 全部緊跟 daemon 啟動（+12 / +2 / +21 分鐘），與冷啟動語意一致；7/7–7/9 的 6 次因日誌輪替無法回溯 daemon 啟動時間，但這是唯一能在 not-due 的 slot 觸發 fire 的路徑（requested fire 會標成 `fire_reason=requested:*`）。
+
+**解決方法（改語意，不是加 patch）**：
+1. **unknown ≠ due**。`_due_to_fire` 對 missing / unparseable 回 `False`。抽出 `_parse_last_fire()` 統一解析（aware → naive local，對齊 croniter 的 frame）。
+2. **配套 bootstrap**：`_tick_once` 偵測到欄位缺失/損壞，就蓋上 `now` 並 skip 這一拍，讓**下一個真正的 cron slot** 正常 fire。**沒有這個 bootstrap，「unknown 不 due」會讓 daemon 永久停擺** —— 這是修復本身的失效模式，已用 `test_daemon_never_stalls_forever_after_bootstrap` 鎖住。
+3. 最壞情況從「白燒一班 opus」降為「少跑一小時」。
+
+**驗證**（依 control-plane.md：break-then-verify 不可在 daemon 腳下的 checkout 做）：開臨時 worktree 把 bug 種回去 → 5 個新測試 FAIL（2 個 `_due_to_fire` 語意 + 3 個 bootstrap/stall）；還原後 7/7 PASS，且不誤咬「真的錯過 slot 該補打」的正常行為。worktree 以 `git checkout -- . && git clean -fd` 還原後正規 remove（`--force` 是硬禁項）。
+
+**連帶修正**：兩個既有測試原本靠 `last_fire_at=None → due` 來表達「這一拍該 fire」。fixture 複製了程式的錯誤世界觀，於是它們在舊 bug 上是綠的。改用真實的過期時戳表達 due-ness。
+
+**教訓**：fail-open 有方向。「讀不到就放行」在 gate 上是安全的，在 **trigger** 上是災難的 —— 一個會**發動昂貴動作**的判斷，其未知狀態必須 fail-**closed**（不動作），再用 bootstrap 保證不會永久卡死。判準：這個 `return True` 會讓系統*花錢*還是*省錢*？
+
 ## 2026-07-10 canonical-write gate round 2：`git status` 乾淨不等於沒被寫 —— 兩個藏在 gitignore 底下的 writer
 
 **起因**：老闆要求「把 worktree 汙染清掉」。盤點後所有 worktree 的**追蹤中** storage 都乾淨，`upbeat-rhodes-ffaad8` 的殘留隨那個 worktree 移除而消失。但「乾淨」是用 `git status` 量的 —— 而 `git status` 對 `.gitignore` 覆蓋的路徑天生盲目。
@@ -69,7 +97,7 @@
 
 它被接線、被 17 個測試覆蓋、被部署、被我在回報裡宣稱「修復了最大成本洞」。**測試全綠是因為測試 fixture 自己餵了 `claimed_by="hourly-dispatch"` —— 測的是程式碼裡那個不存在於現實的假設**。這是本次最該記住的一點：*fixture 若複製了程式的錯誤世界觀，測試只會確認這個錯誤是自洽的*。
 
-**過程中挖出的第二個事實**：掃 `firing worker` 日誌發現 **159 次 fire 裡有 9 次是 off-slot 重複觸發**（同一 cron slot 在 +24～+54 分鐘後又 fire 一次，最新一次 07-10 22:58 補打 22:07 的 slot），每次都是完整的 ~95K opus cold-load。而 pregate 對 22:58 那班的判定正好是 `would_skip=true` —— 修好的 gate 第一個要擋的就是它。**重複 fire 的根因未定案**（磁碟版 `_due_to_fire` 在該時刻重現為 `due=False`；daemon 22:37 啟動而 `state.py` mtime 為 22:57，記憶體副本與磁碟不同步是最可能方向），已排 P1 任務獨立排查，不在此 patch 範圍。
+**過程中挖出的第二個事實**：掃 `firing worker` 日誌發現 **159 次 fire 裡有 9 次是 off-slot 重複觸發**（同一 cron slot 在 +24～+54 分鐘後又 fire 一次，最新一次 07-10 22:58 補打 22:07 的 slot），每次都是完整的 ~95K opus cold-load。而 pregate 對 22:58 那班的判定正好是 `would_skip=true` —— 修好的 gate 第一個要擋的就是它。**重複 fire 的根因已於同日稍後定案**：`_due_to_fire` 把「不知道上次何時 fire」當成「立刻 fire」，任何一次 state 遺失都換來一發 cold-load（見本檔『不知道上次何時 fire』entry）。當時的推測（記憶體/磁碟不同步）**是錯的** —— 磁碟版重現 `due=False` 是因為那時 `last_fire_at` 尚未被外部 writer 抹掉。
 
 **解決方法（改語意，不是加 patch）**：
 1. **cadence 問的是「研究餓死了沒」，不是「是不是 hourly 班做的」**。並行的 codex / interactive session 產出服務同一批 mission，必須重置時鐘 → **actor-agnostic**。

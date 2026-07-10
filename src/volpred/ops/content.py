@@ -20,7 +20,7 @@ from volpred.topic_clusters import classify_topic_cluster, cluster_cap
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
 from .content_quality import DIGEST_TITLE_PREFIX
-from .next_tasks import normalize_task_priorities, normalize_task_priority
+from .next_tasks import normalize_task_priority, validate_task_status, write_tasks_to_handle
 from scripts.supabase_sync import _delete_where, _get_article_id, _patch_where, _select_rows, delete_article, sync_article
 
 DEFAULT_RELEASE_SETTINGS = {
@@ -839,13 +839,10 @@ def _materialize_release_audit_fix_task(
                 "release_audit_skipped_count": skip_count,
                 "release_audit_issues": audit_issues,
             }
+            validate_task_status(task["status"])
             normalize_task_priority(task)
             tasks.append(task)
-            normalize_task_priorities(tasks)
-            fh.seek(0)
-            fh.truncate()
-            json.dump(tasks, fh, indent=2, ensure_ascii=False)
-            fh.write("\n")
+            write_tasks_to_handle(fh, tasks)
         finally:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 

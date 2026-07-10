@@ -1,9 +1,15 @@
 {
-  "generated_at": "2026-07-10T18:28:05.901534",
-  "overall": "ok",
+  "generated_at": "2026-07-10T23:18:50.678064",
+  "overall": "warn",
   "critical_count": 0,
-  "warn_count": 0,
+  "warn_count": 1,
   "findings": [
+    {
+      "dimension": "alert_conditions",
+      "severity": "warn",
+      "message": "dispatch_supervisor_stale_code: 派工程式狀態檔失去開機時間（疑似被覆寫）",
+      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
+    },
     {
       "dimension": "reader_metrics",
       "severity": "info",

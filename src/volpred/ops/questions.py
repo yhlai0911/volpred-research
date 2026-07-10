@@ -14,7 +14,7 @@ from scripts.supabase_sync import (
 from volpred.memory.system import MemorySystem
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
-from .next_tasks import normalize_task_priorities, normalize_task_priority
+from .next_tasks import normalize_task_priority, validate_task_status, write_tasks_to_handle
 
 
 def _utc_now() -> str:
@@ -579,13 +579,10 @@ def ensure_member_qa_task(
                 "question_score": candidate.get("score"),
                 "task_mode": mode,
             }
+            validate_task_status(task["status"])
             normalize_task_priority(task)
             tasks.append(task)
-            normalize_task_priorities(tasks)
-            fh.seek(0)
-            fh.truncate()
-            json.dump(tasks, fh, indent=2, ensure_ascii=False)
-            fh.write("\n")
+            write_tasks_to_handle(fh, tasks)
         finally:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 

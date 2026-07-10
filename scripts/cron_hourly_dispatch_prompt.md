@@ -183,28 +183,36 @@ PHASE Z — **Dispatch-end commit step**（2026-05-28 新增 hard rule，boss �
 本 fire 派完工 / agent 收完 / task 標完 status **之前**，**強制執行**:
 
 ```bash
-# 1. 看本 fire 改了什麼（state/log noise 已全 gitignored，不會出現在此）
+# 1. 看工作區現況（state/log noise 已全 gitignored，不會出現在此）
 git status -s
 
-# 2. git add -A 安全 — 所有 state/log noise (storage/logs/, storage/ops/*.json,
-#    storage/.*, data/vixtwn/, experiments/INDEX*, etc) 已在 .gitignore，
-#    add -A 只會抓到真實改動 (experiments/kXXX/, storage/drafts/, scripts/,
-#    tests/, paper/, docs/, config/, src/, .claude/ + canonical state:
-#    next_tasks/feed/paper_trading/reports INDEX)。
-git add -A
+# 2. 只 stage 你自己改的路徑。你知道你動過哪些檔 —— 列出來。
+#    main checkout 是共用的：互動 session、codex_loop、其他 agent 可能正在同時編輯。
+git add -- <你這班實際改動的路徑…>
 git commit -m "<task_id> | <一句話 what changed | why>"
 
-# 3. Verify clean
-git status -s | wc -l  # 應該 0
+# 3. Verify: 你的檔案都進去了（不是「工作區全乾淨」）
+git status -s -- <你這班實際改動的路徑…> | wc -l  # 應該 0
 ```
 
 **Why**: 沒 PHASE Z → agent 改檔 → dispatch 結束 → orphan 躺 working tree → boss 抓到一堆 uncommitted（2026-05-28 16:24 incident: 60 files）。
-2026-05-29 更新：state/log noise 全 gitignored 後 `git add -A` 變安全且**更可靠** —
-舊版 `git add <關聯檔案>` 每班 fire 都漏抓 agent 新建的 untracked experiments/drafts/scripts（主線程每次手動補 commit，重複勞動）。
+
+**2026-07-10 更正（取代 2026-05-29 的「`git add -A` 變安全且更可靠」）**：`git add -A` 不安全。
+它的問題從來不是 gitignore noise，而是**它沒有作者的概念** —— 工作區裡髒的檔案不一定是你的。
+同一個假設造成三次事故（`docs/error_log.md` 2026-07-10）：收走被截斷的 `next_tasks.json`、
+把改寫繞過測試閘門送進 main、把某個互動 session 沒改完的 `merge_worktree.sh` commit 進不相干的訊息裡。
+**舊版收尾檢查 `git status -s | wc -l == 0` 正是幫兇** —— 別人的髒檔會讓它不為 0，於是你為了讓它變 0 就把別人的工作一起 commit。
+檢查只該問「**我的**檔案進去了嗎」。
+
+漏掉未追蹤的新檔怎麼辦？`scripts/dispatch_supervisor/phase_z.py` 是這件事的唯一 owner：
+它在 fire 開始前記下工作區的髒檔基線，fire 結束後只 commit 「這班新產生的」，別人的一律不碰、改用 alert 浮現。
+所以你漏 stage 的**自己的**新檔它會補收；別人的檔它不會替你收 —— 也不該。
 
 **禁止**:
+- ❌ `git add -A` / `git add .` / `git commit -a`（會收走別人正在編輯的檔）
 - ❌ commit message 寫 "ops update" / "wip" / "save progress"（無 audit 價值）
 - ❌ skip PHASE Z 直接 exit（違反「完整完成」原則）
-- ⚠️ 若 `git add -A` 後 `git status` 仍有 untracked → 是新 noise type 沒 gitignore，補 .gitignore 不要硬 commit
+- ⚠️ 若你自己的新檔是 noise type（不該進 repo）→ 補 `.gitignore`，不要硬 commit
+- ⚠️ `git status` 顯示**你沒動過**的髒檔 → 那是別人的，不要碰、不要 commit、不要 stash
 
 **Boss directive 2026-05-28**：「當次問題 當次解決 不要排到下次」— PHASE Z 是本 fire 範圍內的事，不可變成 followup。

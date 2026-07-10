@@ -54,6 +54,7 @@ from volpred.ops.next_tasks import (  # noqa: E402
     normalize_task_priority,
     normalize_task_priorities,
     priority_sort_key,
+    write_tasks_to_handle,
 )
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
@@ -77,10 +78,6 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _warn(message: str) -> None:
-    print(f"[task_pool_claim] WARN {message}", file=sys.stderr)
-
-
 @contextmanager
 def _locked_load() -> Iterator[tuple[Any, list[dict[str, Any]]]]:
     NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
@@ -93,23 +90,11 @@ def _locked_load() -> Iterator[tuple[Any, list[dict[str, Any]]]]:
         if not isinstance(data, list):
             raise SystemExit("next_tasks.json is not a list")
         yield fh, data
-        # Serialize FIRST, then truncate+write. If serialization fails we must
-        # NOT have already truncated the canonical queue. Lone surrogates can
-        # arrive via non-UTF-8 locale argv (surrogateescape) and make an
-        # ensure_ascii=False UTF-8 write raise UnicodeEncodeError mid-write —
-        # which previously truncated next_tasks.json to a corrupted partial.
-        # (incident 2026-07-05: `complete --result` with a shell-mangled char)
-        normalize_task_priorities(data)
-        payload = json.dumps(data, indent=2, ensure_ascii=False)
-        try:
-            payload.encode("utf-8")
-        except UnicodeEncodeError as exc:
-            _warn(f"scrubbed non-encodable char(s) before write: {exc}")
-            payload = payload.encode("utf-8", "replace").decode("utf-8")
-        fh.seek(0)
-        fh.truncate()
-        fh.write(payload)
-        fh.write("\n")
+        # Shared hardened writer: serialize-first-then-truncate + surrogate scrub
+        # + status audit. The serialize-first invariant (originally grown inline
+        # here after incident 2026-07-05) now lives in
+        # volpred.ops.next_tasks.write_tasks_to_handle so every writer shares it.
+        write_tasks_to_handle(fh, data)
     finally:
         fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
         fh.close()
