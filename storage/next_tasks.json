@@ -56793,7 +56793,7 @@
     "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
     "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "source": "auto_journal_discovery_fallback",
@@ -56818,8 +56818,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-10T00:29:19.129367+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-10T00:19:21.308803+00:00"
+    "started_at": "2026-07-10T00:19:21.308803+00:00",
+    "completed_at": "2026-07-10T00:29:19.128994+00:00",
+    "result": "完成 journal_discovery_20260710_0。fresh-context worker 掃 FRL/JFE/RFS/JBF/QJE/JFEC/RCFS 2024-26 趨勢；主線程去重後於 research_program.md 新增 2026-07-10 batch 共 7 條，gate 掉美元主導性、clean-energy climate、EM generic 三條近鄰/過寬題。"
   }
 ]
