@@ -2,6 +2,21 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 pregate 在 7/4 supervisor cutover 時孤兒化 — cutover 遷移沒有元件清單
+
+**現象**：`scripts/hourly_dispatch_pregate.py`（零 token「本班值不值得 ~95K opus cold-load」triage，shadow 資料顯示多數班可 skip，如 7/1 有 18/22 班是 stub）只掛在 legacy `cron_hourly_dispatch.sh:145`。2026-07-04 cutover 到 dispatch-supervisor 後無人移植 — supervisor 每小時無條件 spawn opus/high，空班照付全額 cold-load，持續 6 天無人發現。shadow log 停更在 cutover 當日是最清楚的死亡訊號，但沒有 alert 盯「shadow log 停更」。
+
+**根因**：cutover 遷移靠記憶不靠清單 — 沒有「legacy 路徑上掛了哪些元件」的 inventory，refactor plan 的 deliverables 沒把 pregate 列入。次因：pregate 當時仍處 shadow 觀察期（未 enforce），停擺零行為差異 → 無症狀。
+
+**解決方法（2026-07-10 拓撲審計發現後當日修復，commit a3d243650）**：
+1. `scheduler.py` 新增 `load_pregate_config()`（讀 `config/runtime_schedules.json` 的 `pregate` 欄位，每 tick 熱重載 — shadow→enforce 切換免重啟 daemon）+ `_run_pregate()`（subprocess 隔離，pregate 崩潰不可能拖垮 daemon；exit 0=SKIP、其餘一律 fail-open PROCEED、60s timeout）。
+2. 只 gate 純 cron fire；**requested fire（老闆觸發）永不 gate**。順手修一個邊角 bug：cron due 時消費的 fire request 原本 `fire_reason` 仍標 `"cron"` — pregate 會誤吃老闆觸發的班；現標 `cron+requested:<reason>` bypass。
+3. pregate skip 時比照 dry_run 消費 slot（寫 `last_fire_at`），避免同一小時每 tick 重跑。
+4. 17 個 regression tests（skip/proceed/shadow/requested-bypass/fail-open 全路徑）。
+5. 先 shadow 觀察 2-3 班，pregate 判斷與實際 fire 產出一致才 flip enforce（config 一行改）。flip 時寄 email 通知老闆（排程行為變更）。
+
+**教訓**：(a) cutover/refactor 遷移必附「legacy 路徑元件 inventory」，逐項標 遷移/廢棄/不適用；(b) shadow 模式的元件停擺無症狀 — shadow log 的 freshness 也要有 owner 盯（本次靠拓撲審計偶然發現，不是監控）。
+
 ## 2026-07-10 dispatch_state.json 三個觀察性缺陷：幽靈欄位、心跳凍結、測試污染 production state
 
 **現象**：健檢讀 `storage/ops/dispatch_state.json` 想確認 daemon 活著，`last_dispatch_at` 與 `supervisor_pid` 皆 null，只好改讀 `~/.volpred/logs/dispatch_supervisor_launchd.err` 才知道它其實正常派工。state 檔沒發揮 single-source-of-truth 作用。
