@@ -1,0 +1,131 @@
+{
+  "sample": {
+    "start": "2023-08-07",
+    "end": "2026-07-09",
+    "n_days": 733,
+    "n_drawdown_episodes": 6
+  },
+  "current": {
+    "as_of": "2026-07-09",
+    "qqq_drawdown_pct": -2.96,
+    "qqq_rv": 30.95,
+    "qqq_rv_change": 8.7,
+    "hyg_rv": 3.31,
+    "hyg_rv_change": -1.38,
+    "lqd_rv": 5.49,
+    "hy_oas": 2.7,
+    "hy_oas_bp_change": -7.5,
+    "ig_oas": 0.76,
+    "ig_oas_bp_change": -0.7,
+    "vix": 15.84
+  },
+  "conditional_on_equity_vol_spike": {
+    "condition": "QQQ 20d RV at least 8.7 pp above its own trailing 60d mean",
+    "n_days": 59,
+    "hy_oas_bp_change": {
+      "median": 26.9,
+      "q25": -3.9,
+      "q75": 59.3,
+      "share_negative": 30.5,
+      "current": -7.5,
+      "current_percentile": 15.3
+    },
+    "hyg_rv_change": {
+      "median": 0.47,
+      "share_negative": 28.8,
+      "current": -1.38,
+      "current_percentile": 0.0
+    }
+  },
+  "historical_events": [
+    {
+      "event_date": "2024-08-07",
+      "qqq_drawdown_pct": -13.56,
+      "qqq_rv": 27.26,
+      "qqq_rv_change": 12.19,
+      "hyg_rv": 4.58,
+      "hyg_rv_change": 0.34,
+      "hy_oas_bp_change": 37.8,
+      "ig_oas_bp_change": 13.9,
+      "vix": 27.85
+    },
+    {
+      "event_date": "2024-09-06",
+      "qqq_drawdown_pct": -10.79,
+      "qqq_rv": 22.74,
+      "qqq_rv_change": 2.65,
+      "hyg_rv": 3.64,
+      "hyg_rv_change": -0.36,
+      "hy_oas_bp_change": 13.7,
+      "ig_oas_bp_change": 2.3,
+      "vix": 22.38
+    },
+    {
+      "event_date": "2025-03-13",
+      "qqq_drawdown_pct": -13.19,
+      "qqq_rv": 25.3,
+      "qqq_rv_change": 5.89,
+      "hyg_rv": 4.11,
+      "hyg_rv_change": -0.25,
+      "hy_oas_bp_change": 61.9,
+      "ig_oas_bp_change": 14.0,
+      "vix": 24.66
+    },
+    {
+      "event_date": "2025-04-08",
+      "qqq_drawdown_pct": -22.77,
+      "qqq_rv": 36.38,
+      "qqq_rv_change": 13.91,
+      "hyg_rv": 8.52,
+      "hyg_rv_change": 4.02,
+      "hy_oas_bp_change": 159.6,
+      "ig_oas_bp_change": 30.4,
+      "vix": 52.33
+    },
+    {
+      "event_date": "2025-05-06",
+      "qqq_drawdown_pct": -10.64,
+      "qqq_rv": 49.96,
+      "qqq_rv_change": 16.14,
+      "hyg_rv": 12.65,
+      "hyg_rv_change": 5.29,
+      "hy_oas_bp_change": 27.6,
+      "ig_oas_bp_change": 8.3,
+      "vix": 24.76
+    },
+    {
+      "event_date": "2026-03-30",
+      "qqq_drawdown_pct": -11.96,
+      "qqq_rv": 18.91,
+      "qqq_rv_change": 3.04,
+      "hyg_rv": 7.23,
+      "hyg_rv_change": 4.35,
+      "hy_oas_bp_change": 52.3,
+      "ig_oas_bp_change": 12.4,
+      "vix": 30.61
+    }
+  ],
+  "historical_median": {
+    "qqq_rv_change": 9.04,
+    "hyg_rv_change": 2.18,
+    "hy_oas_bp_change": 45.0,
+    "ig_oas_bp_change": 13.2
+  },
+  "current_percentile_vs_history": {
+    "hy_oas_bp_change": 0.0,
+    "hyg_rv_change": 0.0,
+    "qqq_rv_change": 50.0
+  },
+  "full_sample_correlation": {
+    "qqq_rv_vs_hyg_rv": 0.672,
+    "qqq_rv_vs_hy_oas": 0.266,
+    "vix_vs_hy_oas": 0.219
+  },
+  "provenance": {
+    "equity_source": "yfinance (auto_adjust=True)",
+    "oas_source": "FRED BAMLH0A0HYM2 / BAMLC0A0CM (ICE BofA OAS, percent)",
+    "rv_definition": "20d close-to-close log-return stdev, annualised x sqrt(252), in %",
+    "event_definition": "trough day of each maximal run with QQQ drawdown from trailing 252d high <= -10%",
+    "baseline": "60 trading days immediately before the event day"
+  }
+}
