@@ -15307,5 +15307,60 @@
     "actor": "hourly-18",
     "outcome": "succeeded",
     "summary": "CI 真跑驗證：push 揭露首次真實 run 是紅的（12 failed）；修掉 9 條 ripgrep 缺失（workflow 裝 rg + 缺 rg 改拋可行動 RuntimeError + regression）。另修 pretooluse worktree-remove deny hook 的 force-flag 誤判（rm -f 被誤算），清掉 2 個死 worktree 釋出 slot。"
+  },
+  {
+    "timestamp": "2026-07-10T18:41:01+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-fb18101bd",
+    "outcome": "succeeded",
+    "summary": "fix(ci): isolate series-registry alert fixture",
+    "commit": "fb18101bdc180f25c42883712d37e6274f60ef18",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T12:07:34.824919+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T19:09:57+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-7659d0cd6",
+    "outcome": "succeeded",
+    "summary": "fix(ci): isolate host-only dispatch health",
+    "commit": "7659d0cd6ded8f19823720c31abf951954a124d9",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T12:07:34.824913+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T19:11:22+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-256df4e71",
+    "outcome": "succeeded",
+    "summary": "ci: restore automatic Test Suite gates",
+    "commit": "256df4e71b9a29c0d8c2ed6e088a376d59dde9bf",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T12:07:34.824906+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T19:23:40+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-d611ccdcb",
+    "outcome": "succeeded",
+    "summary": "fix(ci): remove clean-checkout test skips",
+    "commit": "d611ccdcb03885e0fc79bacbc2ad32a91953988e",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T12:07:34.824898+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T20:06:38+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-27ae20f73",
+    "outcome": "succeeded",
+    "summary": "ops: close CI hardening tasks",
+    "commit": "27ae20f734d36b466ccf75ecb99391b60584c9f9",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T12:07:34.824572+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
