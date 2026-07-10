@@ -131,6 +131,7 @@ _LEAKED_STATE_PATHSPECS = (
 # orphan-branch alert already refuses to automate: a non-conflicting file is
 # silently plausible and therefore silently wrong.
 _PRE_FIRE_SNAPSHOT_RELPATH = ("storage", "ops", "phase_z_pre_fire_dirty.json")
+_SNAPSHOT_PATH_STR = "/".join(_PRE_FIRE_SNAPSHOT_RELPATH)  # git speaks POSIX separators
 # A fire is bounded by the worker timeout (~50min). A snapshot older than this is
 # from a fire whose PHASE-Z never ran (daemon killed mid-fire); trusting it would
 # mean judging today's dirt against yesterday's baseline.
@@ -163,7 +164,14 @@ def _porcelain_paths(raw: str) -> set[str]:
 
 def _dirty_paths(repo_root: Path, runner) -> set[str] | None:
     """Current dirty set, or None if git could not tell us (never an empty set —
-    "clean" and "we don't know" must not collapse into the same value)."""
+    "clean" and "we don't know" must not collapse into the same value).
+
+    Our own baseline file is excluded here rather than left to `.gitignore`:
+    PHASE-Z writes it, consumes it, and would otherwise see it as work this fire
+    produced and try to stage a path it just deleted. `.gitignore` does hide it in
+    production, which is precisely why that coupling is worth breaking — the bug
+    would only ever appear in a checkout whose ignore rules drifted.
+    """
     try:
         proc = _git(repo_root, "status", "--porcelain", "-z", "--untracked-files=all",
                     timeout_s=_SHORT_TIMEOUT_S, runner=runner)
@@ -174,7 +182,7 @@ def _dirty_paths(repo_root: Path, runner) -> set[str] | None:
         LOG.warning("phase_z: dirty-set probe rc=%d: %s",
                     proc.returncode, (proc.stderr or "").strip()[:200])
         return None
-    return _porcelain_paths(proc.stdout or "")
+    return _porcelain_paths(proc.stdout or "") - {_SNAPSHOT_PATH_STR}
 
 
 def _write_pre_fire_snapshot(repo_root: Path, paths: set[str]) -> bool:
@@ -731,7 +739,7 @@ def run_phase_z(
         try:
             os.unlink(pathspec_file)
         except OSError:  # pragma: no cover
-            pass
+            pass  # silent-ok: best-effort cleanup of our own temp pathspec file
 
     out = ((commit.stdout or "") + (commit.stderr or "")).strip()
     if commit.returncode == 0:
