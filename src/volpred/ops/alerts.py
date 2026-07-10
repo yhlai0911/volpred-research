@@ -2423,10 +2423,24 @@ def _parse_codex_failover_ready_state(storage_dir: str, now: datetime) -> dict[s
     if codex_bin is None:
         reason = "binary_missing"
     else:
+        # The codex binary is a `#!/usr/bin/env node` shebang script; its node
+        # runtime lives in the same nvm bin dir. The supervisor daemon runs the
+        # failover with that dir already on PATH (LaunchAgent EnvironmentVariables),
+        # so the failover works in production. But this probe fires from host cron
+        # (`cron_check_alerts.sh`) whose PATH lacks node — running codex there gets
+        # `env: node: No such file or directory` (rc 127), a FALSE version_nonzero.
+        # Replicate the failover's actual runtime by prepending the bin dir to PATH
+        # so the probe answers "will the failover run" faithfully, not "does host
+        # cron happen to have node". (2026-07-11)
+        probe_env = dict(os.environ)
+        probe_env["PATH"] = os.pathsep.join(
+            filter(None, [os.path.dirname(codex_bin), probe_env.get("PATH", "")])
+        )
         try:
             probe = subprocess.run(
                 [codex_bin, "--version"],
                 capture_output=True, text=True, timeout=CODEX_FAILOVER_PROBE_TIMEOUT_S,
+                env=probe_env,
             )
             rc = probe.returncode
             version = (probe.stdout or "").strip()
