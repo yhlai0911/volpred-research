@@ -639,6 +639,23 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
             "details": {},
         },
     )
+    # codex_failover_ready (2026-07-10) actually runs `codex --version` against a
+    # pinned nvm path. An Ubuntu CI runner has no such binary, so it breached and
+    # became the index-2 intruder that reddened this test — while a macOS dev box
+    # (codex installed) stayed green, so it went unnoticed until the Linux CI run.
+    # Same host-dependent shape as dispatch_binary_health above; its own probe is
+    # covered by test_dispatch_binary_health_source.py, so keep it out here.
+    monkeypatch.setattr(
+        "volpred.ops.alerts._parse_codex_failover_ready_state",
+        lambda _storage_dir, _now: {
+            "id": "codex_failover_ready",
+            "breached": False,
+            "level": "info",
+            "title": "codex_failover_ready ok",
+            "body": "",
+            "details": {},
+        },
+    )
     # This test exercises alert fan-out for the three cron/pool conditions below.
     # Series-registry drift has its own storage-dir regression test, so keep that
     # independent condition quiet instead of making this fixture reproduce every
