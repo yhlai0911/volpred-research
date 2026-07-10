@@ -131,3 +131,39 @@ def test_decide_proceeds_on_true_critical(tmp_path, monkeypatch):
     result = pregate.decide(window_hours=3.0)
     assert result["proceed"] is True
     assert result["reasons"]["critical"] is True
+
+
+# ── invoker attribution（2026-07-10 pregate-observability）──────────────────
+
+
+def _isolate_main(tmp_path, monkeypatch):
+    """main() 級測試的完整路徑隔離 — 絕不寫 production log。"""
+    dashboard = tmp_path / "dashboard_latest.json"
+    next_tasks = tmp_path / "next_tasks.json"
+    work_log = tmp_path / "work_log.json"
+    log = tmp_path / "hourly_pregate.jsonl"
+    _write_json(dashboard, {"section_critical": 0})
+    _write_json(next_tasks, [])
+    _write_json(work_log, [])
+    monkeypatch.setattr(pregate, "DASHBOARD", dashboard)
+    monkeypatch.setattr(pregate, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(pregate, "WORK_LOG", work_log)
+    monkeypatch.setattr(pregate, "LOG", log)
+    return log
+
+
+def test_main_logs_invoker_supervisor(tmp_path, monkeypatch):
+    log = _isolate_main(tmp_path, monkeypatch)
+    rc = pregate.main(["--shadow", "--invoker", "supervisor"])
+    assert rc == 1  # shadow never skips
+    entry = json.loads(log.read_text().strip().splitlines()[-1])
+    assert entry["invoker"] == "supervisor"
+    assert entry["mode"] == "shadow"
+
+
+def test_main_default_invoker_is_manual(tmp_path, monkeypatch):
+    log = _isolate_main(tmp_path, monkeypatch)
+    rc = pregate.main(["--shadow"])
+    assert rc == 1
+    entry = json.loads(log.read_text().strip().splitlines()[-1])
+    assert entry["invoker"] == "manual"

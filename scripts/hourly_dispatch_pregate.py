@@ -231,6 +231,11 @@ def main(argv: list) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--window-hours", type=float, default=3.0)
     ap.add_argument("--shadow", action="store_true", help="never skip; only log the would-be decision")
+    # 2026-07-10 歸因欄位：不帶 --invoker 的呼叫（手動 / 測試 / 不明來源）記 "manual"，
+    # supervisor 呼叫記 "supervisor" — skip-vs-產出交叉核對只採 supervisor entries，
+    # 解決 13:34:58 三筆一秒內不明來源 entries 污染觀察資料的問題。
+    ap.add_argument("--invoker", default="manual",
+                    help="who invoked this run (supervisor|shell|manual|test); logged for attribution")
     args = ap.parse_args(argv)
 
     try:
@@ -241,16 +246,18 @@ def main(argv: list) -> int:
         # top-level fail-open: never skip on an unexpected error
         _warn("pregate_fatal", "decide() crashed, fail-open PROCEED", err=str(e))
         _log_decision({"ts": _now().isoformat(), "mode": "shadow" if args.shadow else "real",
+                       "invoker": args.invoker,
                        "decision": "proceed", "reason": "fail_open_exception", "err": str(e)})
         return 1
 
     would_skip = not proceed
     if args.shadow:
-        _log_decision({"ts": _now().isoformat(), "mode": "shadow", "would_skip": would_skip,
+        _log_decision({"ts": _now().isoformat(), "mode": "shadow", "invoker": args.invoker,
+                       "would_skip": would_skip,
                        "window_hours": args.window_hours, "reasons": reasons})
         return 1  # shadow: always proceed (zero behavior change)
 
-    _log_decision({"ts": _now().isoformat(), "mode": "real",
+    _log_decision({"ts": _now().isoformat(), "mode": "real", "invoker": args.invoker,
                    "decision": "skip" if would_skip else "proceed",
                    "window_hours": args.window_hours, "reasons": reasons})
     return 0 if would_skip else 1

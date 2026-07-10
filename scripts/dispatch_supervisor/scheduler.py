@@ -152,7 +152,8 @@ def _run_pregate(*, mode: str, window_hours: float) -> bool:
     pass --shadow: pregate always exits 1 (proceed) but appends the would-be
     decision to storage/logs/hourly_pregate.jsonl for the observation window.
     """
-    cmd = [sys.executable, str(PREGATE_SCRIPT), "--window-hours", str(window_hours)]
+    cmd = [sys.executable, str(PREGATE_SCRIPT), "--window-hours", str(window_hours),
+           "--invoker", "supervisor"]
     if mode == "shadow":
         cmd.append("--shadow")
     try:

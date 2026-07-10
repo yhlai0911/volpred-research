@@ -248,3 +248,19 @@ def test_run_pregate_shadow_passes_flag(monkeypatch) -> None:
     monkeypatch.setattr(scheduler.subprocess, "run", fake)
     assert scheduler._run_pregate(mode="shadow", window_hours=3.0) is False
     assert "--shadow" in seen["cmd"]
+
+
+def test_run_pregate_stamps_supervisor_invoker(monkeypatch) -> None:
+    """2026-07-10 歸因硬規：daemon 呼叫必帶 --invoker supervisor —
+    交叉核對只採 supervisor entries，手動/測試 entries 不污染觀察資料。"""
+    seen: dict = {}
+
+    def fake(cmd, **kwargs):
+        seen["cmd"] = cmd
+        return SimpleNamespace(returncode=1, stdout="", stderr="")
+
+    monkeypatch.setattr(scheduler.subprocess, "run", fake)
+    scheduler._run_pregate(mode="enforce", window_hours=3.0)
+    cmd = seen["cmd"]
+    assert "--invoker" in cmd
+    assert cmd[cmd.index("--invoker") + 1] == "supervisor"
