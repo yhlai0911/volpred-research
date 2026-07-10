@@ -624,6 +624,21 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     # it so this test isolates only the cron/pool set. (storage_dir bug tracked
     # separately — surfaced by the 2026-06-29 loop-health work.)
     monkeypatch.setattr("volpred.topic_clusters.recent_cluster_counts", lambda days=30: ({}, 0))
+    # The generator-binary condition intentionally inspects host configuration;
+    # an Ubuntu CI runner does not have the macOS daemon's configured Claude
+    # binary. Dedicated tests in test_dispatch_binary_health_source.py cover that
+    # condition, so keep it out of this cron/pool fan-out fixture.
+    monkeypatch.setattr(
+        "volpred.ops.alerts._parse_dispatch_health_state",
+        lambda _storage_dir, _now: {
+            "id": "dispatch_binary_health",
+            "breached": False,
+            "level": "info",
+            "title": "dispatch_binary_health ok",
+            "body": "",
+            "details": {},
+        },
+    )
     # This test exercises alert fan-out for the three cron/pool conditions below.
     # Series-registry drift has its own storage-dir regression test, so keep that
     # independent condition quiet instead of making this fixture reproduce every
