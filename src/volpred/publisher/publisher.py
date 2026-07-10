@@ -372,8 +372,9 @@ def _log_anti_ai_gate_decision(
         }
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
+    except Exception as e:
+        # fail-open per dedup-gate-audit.md（log 失敗不可炸 publish），但 swallow 必須可觀測
+        print(f"⚠️ anti_ai_gate_decision_log_failed (fail-open): {e}")
 
 
 def _send_anti_ai_gate_degraded_alert(storage_dir: str, item: dict, exc: Exception) -> None:
