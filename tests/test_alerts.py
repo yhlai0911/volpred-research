@@ -656,6 +656,23 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
             "details": {},
         },
     )
+    duplicate_slot_calls: list[str] = []
+
+    def duplicate_slot_ok(_storage_dir, _now):
+        duplicate_slot_calls.append(str(_storage_dir))
+        return {
+            "id": "dispatch_duplicate_slot",
+            "breached": False,
+            "level": "info",
+            "title": "dispatch_duplicate_slot ok",
+            "body": "",
+            "details": {},
+        }
+
+    monkeypatch.setattr(
+        "volpred.ops.alerts._parse_dispatch_duplicate_slot_state",
+        duplicate_slot_ok,
+    )
     # This test exercises alert fan-out for the three cron/pool conditions below.
     # Series-registry drift has its own storage-dir regression test, so keep that
     # independent condition quiet instead of making this fixture reproduce every
@@ -728,6 +745,7 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     assert sent_titles[0].startswith("Release pool cron gap")
     assert sent_titles[1] == "Draft pool below threshold (<4)"
     assert sent_titles[2] == "Host cron failure detected"
+    assert duplicate_slot_calls == [str(storage_dir)]
 
 
 def test_parse_series_registry_state_reads_injected_storage_feed(tmp_path: Path):

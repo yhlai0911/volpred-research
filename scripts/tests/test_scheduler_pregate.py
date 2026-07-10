@@ -116,6 +116,8 @@ def test_enforce_proceed_fires(tmp_path, tmp_state, prompt_file, worker_calls, m
     assert result["action"] == "fired"
     assert result["fire_reason"] == "cron"
     assert len(worker_calls) == 1
+    assert worker_calls[0]["fire_reason"] == "cron"
+    assert worker_calls[0]["scheduled_for"].endswith(":07:00")
 
 
 def test_shadow_mode_invokes_pregate_but_fires(
@@ -152,6 +154,8 @@ def test_requested_fire_off_cadence_bypasses_pregate(
     assert result["action"] == "fired"
     assert result["fire_reason"] == "requested:boss-email"
     assert len(worker_calls) == 1
+    assert worker_calls[0]["fire_reason"] == "requested:boss-email"
+    assert worker_calls[0]["scheduled_for"].endswith(":07:00")
 
 
 def test_request_consumed_on_due_cron_bypasses_pregate(
@@ -170,6 +174,8 @@ def test_request_consumed_on_due_cron_bypasses_pregate(
     assert result["action"] == "fired"
     assert result["fire_reason"] == "cron+requested:boss-email"
     assert len(worker_calls) == 1
+    assert worker_calls[0]["fire_reason"] == "cron+requested:boss-email"
+    assert worker_calls[0]["scheduled_for"].endswith(":07:00")
 
 
 def test_mode_off_never_invokes_pregate(

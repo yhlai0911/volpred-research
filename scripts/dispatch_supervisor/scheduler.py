@@ -394,6 +394,7 @@ async def _tick_once(
         result = await asyncio.to_thread(
             worker.run_worker,
             prompt_text=prompt, schedule_id=SCHEDULE_ID,
+            scheduled_for=prev_fire.isoformat(), fire_reason=fire_reason,
             log_path=log_path, state_path=state_path,
         )
         LOG.info("worker returned outcome=%s attempts=%d duration=%.1fs",

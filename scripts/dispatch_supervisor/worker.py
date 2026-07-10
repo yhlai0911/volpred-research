@@ -257,6 +257,8 @@ def _run_one_attempt(
     log_path: Path,
     attempt: int,
     schedule_id: str,
+    scheduled_for: str | None = None,
+    fire_reason: str = "cron",
     state_path: Path,
     claude_bin: str = CLAUDE_BIN,
     effort: str = DISPATCH_EFFORT,
@@ -278,7 +280,8 @@ def _run_one_attempt(
     # caller can pass a concurrent "current_job is None" check while we spawn.
     state.reserve_fire(
         schedule_id=schedule_id, attempt=attempt, model=model,
-        log_path=str(log_path), path=state_path,
+        log_path=str(log_path), scheduled_for=scheduled_for,
+        fire_reason=fire_reason, path=state_path,
     )
     # Record where the shared append-log ends BEFORE we spawn: classification
     # must only ever see THIS attempt's bytes (2026-07-05 cross-fire
@@ -385,6 +388,8 @@ def run_worker(
     *,
     prompt_text: str,
     schedule_id: str = "hourly_dispatch",
+    scheduled_for: str | None = None,
+    fire_reason: str = "cron",
     log_path: Path,
     timeout_s: int = DEFAULT_TIMEOUT_S,
     max_attempts: int = MAX_ATTEMPTS,
@@ -419,6 +424,7 @@ def run_worker(
         exit_code, duration, attempt_output = _run_one_attempt(
             prompt_text=prompt_text, model=model, timeout_s=timeout_s,
             log_path=log_path, attempt=attempt, schedule_id=schedule_id,
+            scheduled_for=scheduled_for, fire_reason=fire_reason,
             state_path=state_path, claude_bin=claude_bin,
         )
         total_duration += duration

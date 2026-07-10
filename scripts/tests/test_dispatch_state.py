@@ -350,6 +350,27 @@ def test_record_completion_moves_to_ring_buffer(tmp_state: Path) -> None:
     assert len(snap["completions"]) == 1
 
 
+def test_record_completion_preserves_slot_and_fire_reason(tmp_state: Path) -> None:
+    st.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/c.log",
+        scheduled_for="2026-07-11T01:07:00",
+        fire_reason="requested:email_reply:test",
+        path=tmp_state,
+    )
+    st.attach_process(pid=1, pgid=1, started_wall="w", path=tmp_state)
+
+    entry = st.record_completion(
+        exit_code=0, outcome="success", final_model="opus", path=tmp_state,
+    )
+
+    assert entry is not None
+    assert entry["scheduled_for"] == "2026-07-11T01:07:00"
+    assert entry["fire_reason"] == "requested:email_reply:test"
+
+
 def test_record_completion_accepts_naive_started_at(tmp_state: Path) -> None:
     _begin_fire(
         tmp_state, pid=1, pgid=1, schedule_id="hourly_dispatch",

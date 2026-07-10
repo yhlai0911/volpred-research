@@ -17,6 +17,8 @@ Schema (version 1)::
         "attempt": int,                          # 1..3
         "model": "opus",                         # all attempts opus (2026-07-05 all-opus directive)
         "log_path": str,
+        "scheduled_for": "<ISO|null>",            # cron slot this fire services (naive local ISO)
+        "fire_reason": "cron|requested:*|cron+requested:*",
         "restart_cleanup_pending": true,          # only present while a restart-orphan investigation is in flight
         "cleanup_recorded": true,                 # append_completion_entry() stamped this orphan's entry
         "cleanup_outcome": str                    # …and which outcome, so a crash-before-finalize retry
@@ -24,6 +26,7 @@ Schema (version 1)::
       "completions": [                           # ring buffer (max 100 entries)
         {
           "fire_at": "<ISO>", "completed_at": "<ISO>",
+          "scheduled_for": "<ISO|null>", "fire_reason": str,
           "exit_code": int, "duration_s": float,
           "attempts": int, "final_model": str,
           # 下三者只在 orphan 路徑（append_completion_entry 且 job 有 pid）出現，
@@ -448,6 +451,8 @@ def append_completion_entry(
         entry = {
             "fire_at": started_at,
             "completed_at": _now(),
+            "scheduled_for": job.get("scheduled_for"),
+            "fire_reason": job.get("fire_reason") or "cron",
             "exit_code": exit_code,
             "duration_s": round(duration_s, 2),
             "attempts": job.get("attempt", 1),
@@ -536,6 +541,8 @@ def reserve_fire(
     attempt: int,
     model: str,
     log_path: str,
+    scheduled_for: str | None = None,
+    fire_reason: str = "cron",
     path: Path = STATE_PATH,
 ) -> None:
     """Atomically claim the job slot BEFORE spawning the child process.
@@ -565,6 +572,8 @@ def reserve_fire(
             "attempt": attempt,
             "model": model,
             "log_path": log_path,
+            "scheduled_for": scheduled_for,
+            "fire_reason": fire_reason,
         }
         data["last_fire_at"] = _now()
 
@@ -651,6 +660,8 @@ def record_completion(
         entry = {
             "fire_at": started_at,
             "completed_at": _now(),
+            "scheduled_for": job.get("scheduled_for"),
+            "fire_reason": job.get("fire_reason") or "cron",
             "exit_code": exit_code,
             "duration_s": round(duration_s, 2),
             "attempts": job.get("attempt", 1),

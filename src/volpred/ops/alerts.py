@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from croniter import croniter
+
 from volpred.config import load_runtime_schedules
 from volpred.publisher.email_notifier import EmailNotifier
 
@@ -86,6 +88,20 @@ _RELEASE_POOL_FIRE_RE = re.compile(
 _CRON_EXIT_RE = re.compile(
     r"^=== \[[^\]]+\] exit (\d+) at (.+?)(?: \(duration=[^)]*\))? ===$"
 )
+_DISPATCH_FIRE_LOG_RE = re.compile(
+    r"^(?P<fire>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d+)\s+INFO"
+    r"(?:\s+\[[^\]]+\])?\s+"
+    r"firing worker prev_scheduled=(?P<slot>\S+)"
+)
+_DISPATCH_REQUEST_LOG_RE = re.compile(
+    r"^(?P<request>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d+)\s+INFO"
+    r"(?:\s+\[[^\]]+\])?\s+"
+    r"fire request consumed"
+)
+DISPATCH_DUPLICATE_SLOT_WINDOW = timedelta(hours=24)
+DISPATCH_DUPLICATE_SLOT_CRITICAL_COUNT = 3
+DISPATCH_DUPLICATE_SLOT_TOKEN_COST = "約 95K token"
+DISPATCH_CRON_FALLBACK = "7 * * * *"
 
 
 def _utc_now() -> datetime:
@@ -2011,6 +2027,267 @@ def _parse_publishing_freshness_state(storage_dir: str, now: datetime) -> dict[s
     }
 
 
+def _dispatch_schedule_expr() -> str:
+    """Canonical hourly cron expression, with the daemon's same safe fallback."""
+    try:
+        config = load_runtime_schedules()
+    except (OSError, ValueError, TypeError) as exc:
+        warn("dispatch_duplicate_slot", "runtime schedule unreadable", err=str(exc))
+        return DISPATCH_CRON_FALLBACK
+    for key in ("cron_jobs", "items"):
+        entries = config.get(key) or []
+        if not isinstance(entries, list):
+            continue
+        for item in entries:
+            if not isinstance(item, dict) or item.get("id") != "volpred-hourly-dispatch":
+                continue
+            for field in ("schedule", "cron"):
+                value = item.get(field)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
+    return DISPATCH_CRON_FALLBACK
+
+
+def _parse_dispatch_slot(raw: Any) -> datetime | None:
+    """Parse scheduler's naive-local ``prev_scheduled`` into aware UTC."""
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=_TAIPEI_TZ)
+    return parsed.astimezone(timezone.utc)
+
+
+def _dispatch_slot_for_fire(fire_at: datetime, cron_expr: str) -> datetime:
+    """Map a real fire to the cron slot it serviced; delay length is irrelevant."""
+    local_fire = fire_at.astimezone(_TAIPEI_TZ).replace(tzinfo=None)
+    # At exactly HH:07:00, ``get_prev`` otherwise returns the prior hour.
+    local_slot = croniter(cron_expr, local_fire + timedelta(microseconds=1)).get_prev(datetime)
+    return local_slot.replace(tzinfo=_TAIPEI_TZ).astimezone(timezone.utc)
+
+
+def _parse_dispatch_log_local(raw: str) -> datetime | None:
+    try:
+        parsed = datetime.strptime(raw, "%Y-%m-%d %H:%M:%S,%f")
+    except ValueError:
+        return None
+    return parsed.replace(tzinfo=_TAIPEI_TZ).astimezone(timezone.utc)
+
+
+def _structured_dispatch_fire_events(
+    storage_dir: str, *, cron_expr: str,
+) -> list[dict[str, Any]]:
+    state_path = _ops_path(storage_dir, "dispatch_state.json")
+    try:
+        snapshot = load_json(state_path, None)
+    except (OSError, ValueError) as exc:
+        warn(
+            "dispatch_duplicate_slot",
+            "dispatch state unreadable",
+            path=str(state_path),
+            err=str(exc),
+        )
+        return []
+    if not isinstance(snapshot, dict) or not isinstance(snapshot.get("completions"), list):
+        return []
+
+    events: list[dict[str, Any]] = []
+    for completion in snapshot["completions"]:
+        if not isinstance(completion, dict):
+            continue
+        # Retries are part of one scheduled fire. Only attempt 1 represents the
+        # scheduler servicing a slot; counting attempts 2+ would page on the
+        # intentional retry ladder rather than duplicate scheduler fires.
+        try:
+            attempt = int(completion.get("attempts", 1))
+        except (TypeError, ValueError):
+            attempt = 1
+        if attempt != 1:
+            continue
+        fire_at = _parse_iso_datetime(completion.get("fire_at"))
+        if fire_at is None:
+            continue
+        slot = _parse_dispatch_slot(completion.get("scheduled_for"))
+        if slot is None:
+            slot = _dispatch_slot_for_fire(fire_at, cron_expr)
+        events.append(
+            {
+                "fire_at": fire_at,
+                "slot": slot,
+                "fire_reason": str(completion.get("fire_reason") or "cron"),
+                "source": "dispatch_state.completions",
+            }
+        )
+    return events
+
+
+def _dispatch_log_fire_events(log_path: Path) -> list[dict[str, Any]]:
+    """Fallback/supplement for a recently reset completions ring buffer.
+
+    The log also identifies explicitly requested fires. Those are legitimate
+    off-cadence work and must not be mistaken for a second service of the prior
+    cron slot.
+    """
+    try:
+        lines = log_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return []
+
+    events: list[dict[str, Any]] = []
+    pending_request: datetime | None = None
+    for line in lines:
+        requested_match = _DISPATCH_REQUEST_LOG_RE.match(line)
+        if requested_match:
+            pending_request = _parse_dispatch_log_local(requested_match.group("request"))
+            continue
+        fire_match = _DISPATCH_FIRE_LOG_RE.match(line)
+        if not fire_match:
+            continue
+        fire_at = _parse_dispatch_log_local(fire_match.group("fire"))
+        slot = _parse_dispatch_slot(fire_match.group("slot"))
+        if fire_at is None or slot is None:
+            continue
+        requested = (
+            pending_request is not None
+            and 0.0 <= (fire_at - pending_request).total_seconds() <= 300.0
+        )
+        events.append(
+            {
+                "fire_at": fire_at,
+                "slot": slot,
+                "fire_reason": "requested:log" if requested else "cron",
+                "source": str(log_path),
+            }
+        )
+        pending_request = None
+    return events
+
+
+def _default_dispatch_supervisor_log() -> Path:
+    log_root = Path.home() / ".volpred" / "logs"
+    canonical = log_root / "dispatch_supervisor.log"
+    return canonical if canonical.exists() else log_root / "dispatch_supervisor_launchd.err"
+
+
+def _parse_dispatch_duplicate_slot_state(
+    storage_dir: str,
+    now: datetime,
+    *,
+    cron_expr: str | None = None,
+    supervisor_log: Path | None = None,
+) -> dict[str, Any]:
+    """Detect more than one scheduler fire servicing the same hourly slot."""
+    current = now.astimezone(timezone.utc)
+    expr = cron_expr or _dispatch_schedule_expr()
+    log_path = supervisor_log or _default_dispatch_supervisor_log()
+
+    structured = _structured_dispatch_fire_events(storage_dir, cron_expr=expr)
+    logged = _dispatch_log_fire_events(log_path)
+
+    # State is authoritative when both sources describe the same fire. The log
+    # overlays it because old-schema state entries lacked ``fire_reason`` and
+    # only the log can distinguish a legitimate requested fire. Second-level
+    # identity is sufficient: the state write and scheduler log differ by a few
+    # milliseconds for the same spawn.
+    merged: dict[tuple[str, str], dict[str, Any]] = {}
+    for event in structured + logged:
+        fire_at = event["fire_at"]
+        slot = event["slot"]
+        key = (
+            slot.isoformat(),
+            fire_at.replace(microsecond=0).isoformat(),
+        )
+        merged[key] = event
+
+    window_start = current - DISPATCH_DUPLICATE_SLOT_WINDOW
+    by_slot: dict[str, list[dict[str, Any]]] = {}
+    for event in merged.values():
+        fire_at = event["fire_at"]
+        if fire_at < window_start or fire_at > current + timedelta(minutes=5):
+            continue
+        # A due cron that also consumes a request still services one real cron
+        # slot and must count. A pure requested fire is deliberately off-cadence.
+        if str(event.get("fire_reason") or "").startswith("requested:"):
+            continue
+        slot_key = event["slot"].isoformat()
+        by_slot.setdefault(slot_key, []).append(event)
+
+    duplicate_slots: list[dict[str, Any]] = []
+    for _slot_key, fires in sorted(by_slot.items()):
+        if len(fires) <= 1:
+            continue
+        ordered = sorted(fires, key=lambda item: item["fire_at"])
+        slot = ordered[0]["slot"]
+        duplicate_slots.append(
+            {
+                "slot": slot.astimezone(_TAIPEI_TZ).isoformat(),
+                "fire_count": len(ordered),
+                "extra_fire_count": len(ordered) - 1,
+                "fire_at": [
+                    item["fire_at"].astimezone(_TAIPEI_TZ).isoformat()
+                    for item in ordered
+                ],
+            }
+        )
+
+    duplicate_slot_count = len(duplicate_slots)
+    extra_fire_count = sum(item["extra_fire_count"] for item in duplicate_slots)
+    breached = duplicate_slot_count >= 1
+    level = (
+        "critical"
+        if duplicate_slot_count >= DISPATCH_DUPLICATE_SLOT_CRITICAL_COUNT
+        else ("warn" if breached else "info")
+    )
+    body = ""
+    if breached:
+        lines = [
+            "## 觸發條件",
+            f"過去 24 小時有 {duplicate_slot_count} 個排定時段被服務超過一次。",
+        ]
+        for item in duplicate_slots:
+            lines.append(
+                f"- {item['slot']}：共跑 {item['fire_count']} 班，多跑 {item['extra_fire_count']} 班"
+            )
+        lines += [
+            "",
+            "## 影響",
+            f"派工在非排定時間多跑了 {extra_fire_count} 班，每班{DISPATCH_DUPLICATE_SLOT_TOKEN_COST}。",
+            "這裡直接按 cron slot 計數，不用『延遲幾分鐘』做代理，因此合法的延遲補打只算一班；",
+            "email／老闆明確觸發的 requested fire 也不列入重複。",
+            "",
+            "## 系統狀態",
+            "此條件只回報實際重複數字，不自動重啟或改寫派工狀態，避免掩蓋未知的新根因。",
+        ]
+        body = "\n".join(lines)
+
+    source_names = sorted({str(item.get("source")) for item in merged.values()})
+    return {
+        "id": "dispatch_duplicate_slot",
+        "breached": breached,
+        "level": level,
+        "title": (
+            f"Hourly dispatch 重複 slot：{duplicate_slot_count} 個（多跑 {extra_fire_count} 班）"
+            if breached
+            else "dispatch_duplicate_slot ok"
+        ),
+        "body": body,
+        "details": {
+            "window_hours": 24,
+            "cron_expr": expr,
+            "duplicate_slot_count": duplicate_slot_count,
+            "extra_fire_count": extra_fire_count,
+            "duplicate_slots": duplicate_slots,
+            "events_considered": sum(len(items) for items in by_slot.values()),
+            "sources": source_names,
+            "structured_events": len(structured),
+            "log_events": len(logged),
+        },
+    }
+
+
 # Must stay identical to `scripts/dispatch_supervisor/worker.py::CLAUDE_BIN`'s
 # default — pinned mechanically by
 # `tests/test_dispatch_binary_health_source.py::test_alerts_default_matches_worker`.
@@ -3453,6 +3730,7 @@ def build_alert_condition_report(
         _parse_dispatch_health_state(storage_dir, current),       # 2026-06-22 generator binary 源頭健康
         _parse_codex_failover_ready_state(storage_dir, current),  # 2026-07-10 備援只在額度中斷時才走 → 平時無訊號，主動探測
         _parse_dispatch_supervisor_heartbeat_state(storage_dir, current),  # 2026-07-10 daemon loop 卡死 dead-man switch（launchctl 抓不到）
+        _parse_dispatch_duplicate_slot_state(storage_dir, current),  # 2026-07-11 同一 cron slot 服務 >1 次（不用延遲分鐘做代理）
         _parse_dispatch_supervisor_stale_code_state(storage_dir, current), # 2026-07-10 「修好了但沒重載」dead-man switch（三次靜默違反同日規則）
         _parse_gmail_poll_freshness_state(storage_dir, current),  # 2026-06-22 boss-email pipeline dead-man switch
         _parse_telegram_poll_freshness_state(storage_dir, current),  # 2026-07-06 boss-request: Telegram poller dead-man switch
