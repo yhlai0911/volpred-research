@@ -1,0 +1,446 @@
+{
+  "experiment_id": "K1675",
+  "title": "台股颱風臨時停市事件研究 — 復市首日跳空、報酬與前後 RV",
+  "run_date": "2026-07-10",
+  "trigger_event": {
+    "date": "2026-07-10",
+    "typhoon": "巴威 Bavi",
+    "source": "config/market_closures_adhoc.json（detect_market_closure.py 自動偵測，NCDR/DGPA 停班停課 RSS：臺北市全日停止上班）",
+    "note": "T+0 事件；不在 2012-2025 統計樣本內"
+  },
+  "sample_period": "2012-01-01 ~ 2025-12-31",
+  "data_sources": [
+    "yfinance ^TWII (storage/macro/yf_TWII.csv)",
+    "yfinance 0050.TW (storage/macro/yf_0050.TW.csv, 交叉驗證)",
+    "exchange_calendars XTAI 4.13.2 (sessions + 結構化 typhoons 清單)",
+    "TWSE 融資融券 (storage/sentiment/tw_margin_0050.csv, 殘差日交叉驗證)"
+  ],
+  "seed": 42,
+  "n_bootstrap": 10000,
+  "data_quality": {
+    "twii_open_zero_gap_fraction": 0.0025,
+    "note": "零跳空比例；過高代表 yfinance 以前日收盤回填開盤價，開盤跳空統計需保守解讀"
+  },
+  "closure_days": [
+    "2012-08-02",
+    "2013-08-21",
+    "2014-07-23",
+    "2015-07-10",
+    "2015-09-29",
+    "2016-07-08",
+    "2016-09-27",
+    "2016-09-28",
+    "2019-08-09",
+    "2019-09-30",
+    "2023-08-03",
+    "2024-07-24",
+    "2024-07-25",
+    "2024-10-02",
+    "2024-10-03",
+    "2024-10-31"
+  ],
+  "n_closure_days": 16,
+  "n_events": 13,
+  "derivation_audit": {
+    "source_a_library_typhoons": [
+      "2012-08-02",
+      "2013-08-21",
+      "2014-07-23",
+      "2015-07-10",
+      "2015-09-29",
+      "2016-07-08",
+      "2016-09-27",
+      "2016-09-28",
+      "2019-08-09",
+      "2019-09-30",
+      "2023-08-03",
+      "2024-07-24",
+      "2024-07-25",
+      "2024-10-02",
+      "2024-10-03"
+    ],
+    "source_b_residual_scan_accepted": [
+      "2024-10-31"
+    ],
+    "source_b_residual_scan_rejected": [
+      {
+        "date": "2012-01-02",
+        "reason": "0050 有真實行情（市場有開，^TWII 資料缺漏）"
+      },
+      {
+        "date": "2019-09-09",
+        "reason": "TWSE 融資券有資料（市場有開，yfinance 缺漏）"
+      },
+      {
+        "date": "2021-04-06",
+        "reason": "TWSE 融資券有資料（市場有開，yfinance 缺漏）"
+      },
+      {
+        "date": "2022-02-04",
+        "reason": "緊鄰預定連假（calendar 邊界誤標，非颱風）"
+      },
+      {
+        "date": "2023-01-18",
+        "reason": "緊鄰預定連假（calendar 邊界誤標，非颱風）"
+      }
+    ],
+    "final_margin_cross_check": "16/16 停市日皆無 TWSE 融資券資料（市場確實未開）",
+    "verification": "來源 A 全數確認 ^TWII 與 0050.TW 皆無行情；來源 B 指數缺資料即候選，以 0050 行情 + TWSE 融資券 + 假期鄰接三重 reject",
+    "known_blind_spots": [
+      "真停市日若緊鄰預定連假（如 2015-09-29 杜鵑型），來源 B 會誤剔，需靠來源 A 或 config/market_closures_adhoc.json 覆蓋",
+      "來源 B 以 ^TWII 缺資料為 trigger；若 yfinance 在停市日塞入未被清理規則攔截的新型 phantom 列會漏抓（現行規則涵蓋全部已知 pattern）"
+    ]
+  },
+  "events": [
+    {
+      "closure_dates": [
+        "2012-08-02"
+      ],
+      "typhoon": "蘇拉 Saola",
+      "n_closure_days": 1,
+      "last_pre_close_day": "2012-08-01",
+      "reopen_day": "2012-08-03",
+      "abs_open_gap_pct": 0.6529,
+      "abs_close_ret_pct": 0.6941,
+      "rv_pre_5d_pct": 1.2286,
+      "rv_post_5d_pct": 0.8876,
+      "rv_ratio_post_over_pre": 0.7225
+    },
+    {
+      "closure_dates": [
+        "2013-08-21"
+      ],
+      "typhoon": "潭美 Trami",
+      "n_closure_days": 1,
+      "last_pre_close_day": "2013-08-20",
+      "reopen_day": "2013-08-22",
+      "abs_open_gap_pct": 0.6793,
+      "abs_close_ret_pct": 0.2332,
+      "rv_pre_5d_pct": 0.6162,
+      "rv_post_5d_pct": 0.5626,
+      "rv_ratio_post_over_pre": 0.913
+    },
+    {
+      "closure_dates": [
+        "2014-07-23"
+      ],
+      "typhoon": "麥德姆 Matmo",
+      "n_closure_days": 1,
+      "last_pre_close_day": "2014-07-22",
+      "reopen_day": "2014-07-24",
+      "abs_open_gap_pct": 0.0937,
+      "abs_close_ret_pct": 0.2966,
+      "rv_pre_5d_pct": 0.6322,
+      "rv_post_5d_pct": 0.5333,
+      "rv_ratio_post_over_pre": 0.8435
+    },
+    {
+      "closure_dates": [
+        "2015-07-10"
+      ],
+      "typhoon": "昌鴻 Chan-hom",
+      "n_closure_days": 1,
+      "last_pre_close_day": "2015-07-09",
+      "reopen_day": "2015-07-13",
+      "abs_open_gap_pct": 0.3656,
+      "abs_close_ret_pct": 1.3438,
+      "rv_pre_5d_pct": 1.4493,
+      "rv_post_5d_pct": 0.6085,
+      "rv_ratio_post_over_pre": 0.4199
+    },
+    {
+      "closure_dates": [
+        "2015-09-29"
+      ],
+      "typhoon": "杜鵑 Dujuan",
+      "n_closure_days": 1,
+      "last_pre_close_day": "2015-09-25",
+      "reopen_day": "2015-09-30",
+      "abs_open_gap_pct": 0.4328,
+      "abs_close_ret_pct": 0.6012,
+      "rv_pre_5d_pct": 1.3314,
+      "rv_post_5d_pct": 0.7633,
+      "rv_ratio_post_over_pre": 0.5733
+    },
+    {
+      "closure_dates": [
+        "2016-07-08"
+      ],
+      "typhoon": "尼伯特 Nepartak",
+      "n_closure_days": 1,
+      "last_pre_close_day": "2016-07-07",
+      "reopen_day": "2016-07-11",
+      "abs_open_gap_pct": 1.0105,
+      "abs_close_ret_pct": 1.6845,
+      "rv_pre_5d_pct": 0.9139,
+      "rv_post_5d_pct": 0.9121,
+      "rv_ratio_post_over_pre": 0.998
+    },
+    {
+      "closure_dates": [
+        "2016-09-27",
+        "2016-09-28"
+      ],
+      "typhoon": "梅姬 Megi",
+      "n_closure_days": 2,
+      "last_pre_close_day": "2016-09-26",
+      "reopen_day": "2016-09-29",
+      "abs_open_gap_pct": 0.5122,
+      "abs_close_ret_pct": 0.8307,
+      "rv_pre_5d_pct": 0.5959,
+      "rv_post_5d_pct": 0.7555,
+      "rv_ratio_post_over_pre": 1.2679
+    },
+    {
+      "closure_dates": [
+        "2019-08-09"
+      ],
+      "typhoon": "利奇馬 Lekima",
+      "n_closure_days": 1,
+      "last_pre_close_day": "2019-08-08",
+      "reopen_day": "2019-08-12",
+      "abs_open_gap_pct": 0.0257,
+      "abs_close_ret_pct": 0.2109,
+      "rv_pre_5d_pct": 1.0475,
+      "rv_post_5d_pct": 0.8113,
+      "rv_ratio_post_over_pre": 0.7745
+    },
+    {
+      "closure_dates": [
+        "2019-09-30"
+      ],
+      "typhoon": "米塔 Mitag",
+      "n_closure_days": 1,
+      "last_pre_close_day": "2019-09-27",
+      "reopen_day": "2019-10-01",
+      "abs_open_gap_pct": 0.2393,
+      "abs_close_ret_pct": 1.274,
+      "rv_pre_5d_pct": 0.2554,
+      "rv_post_5d_pct": 0.6717,
+      "rv_ratio_post_over_pre": 2.63
+    },
+    {
+      "closure_dates": [
+        "2023-08-03"
+      ],
+      "typhoon": "卡努 Khanun",
+      "n_closure_days": 1,
+      "last_pre_close_day": "2023-08-02",
+      "reopen_day": "2023-08-04",
+      "abs_open_gap_pct": 0.2752,
+      "abs_close_ret_pct": 0.2963,
+      "rv_pre_5d_pct": 0.9614,
+      "rv_post_5d_pct": 0.8194,
+      "rv_ratio_post_over_pre": 0.8524
+    },
+    {
+      "closure_dates": [
+        "2024-07-24",
+        "2024-07-25"
+      ],
+      "typhoon": "凱米 Gaemi",
+      "n_closure_days": 2,
+      "last_pre_close_day": "2024-07-23",
+      "reopen_day": "2024-07-26",
+      "abs_open_gap_pct": 2.9071,
+      "abs_close_ret_pct": 3.2906,
+      "rv_pre_5d_pct": 2.1565,
+      "rv_post_5d_pct": 1.7281,
+      "rv_ratio_post_over_pre": 0.8013
+    },
+    {
+      "closure_dates": [
+        "2024-10-02",
+        "2024-10-03"
+      ],
+      "typhoon": "山陀兒 Krathon",
+      "n_closure_days": 2,
+      "last_pre_close_day": "2024-10-01",
+      "reopen_day": "2024-10-04",
+      "abs_open_gap_pct": 0.3069,
+      "abs_close_ret_pct": 0.3916,
+      "rv_pre_5d_pct": 1.3998,
+      "rv_post_5d_pct": 0.9715,
+      "rv_ratio_post_over_pre": 0.694
+    },
+    {
+      "closure_dates": [
+        "2024-10-31"
+      ],
+      "typhoon": "康芮 Kong-rey",
+      "n_closure_days": 1,
+      "last_pre_close_day": "2024-10-30",
+      "reopen_day": "2024-11-01",
+      "abs_open_gap_pct": 1.6717,
+      "abs_close_ret_pct": 0.1768,
+      "rv_pre_5d_pct": 0.7513,
+      "rv_post_5d_pct": 0.6295,
+      "rv_ratio_post_over_pre": 0.8378
+    }
+  ],
+  "stats": {
+    "closure_reopen_abs_gap": {
+      "n": 13,
+      "mean": 0.007056076923076923,
+      "median": 0.004328,
+      "boot95_mean": [
+        0.003567296153846154,
+        0.01176660192307692
+      ],
+      "boot95_median": [
+        0.002752,
+        0.006793
+      ]
+    },
+    "closure_reopen_abs_ret": {
+      "n": 13,
+      "mean": 0.008711,
+      "median": 0.006012,
+      "boot95_mean": [
+        0.00469866923076923,
+        0.013808384615384613
+      ],
+      "boot95_median": [
+        0.002963,
+        0.01274
+      ]
+    },
+    "closure_rv_ratio": {
+      "n": 13,
+      "mean": 0.9483153846153844,
+      "median": 0.8378,
+      "boot95_mean": [
+        0.7267890384615384,
+        1.2800467307692305
+      ],
+      "boot95_median": [
+        0.7225,
+        0.913
+      ]
+    },
+    "control_abs_gap_same_months": {
+      "n": 1042,
+      "mean": 0.0032393700787299523,
+      "median": 0.002148134277930147,
+      "boot95_mean": [
+        0.003025207378438879,
+        0.0034579419691055627
+      ],
+      "boot95_median": [
+        0.001984438856639459,
+        0.0023327509364149956
+      ]
+    },
+    "control_abs_ret_same_months": {
+      "n": 1042,
+      "mean": 0.007057136562354326,
+      "median": 0.005145540727169107,
+      "boot95_mean": [
+        0.006640157725195357,
+        0.007510109410771787
+      ],
+      "boot95_median": [
+        0.004821627153760721,
+        0.005561991556090237
+      ]
+    },
+    "control_monday_abs_gap": {
+      "n": 205,
+      "mean": 0.003553143108268044,
+      "median": 0.002252081012304563,
+      "boot95_mean": [
+        0.003000020051731388,
+        0.0041597325666086074
+      ],
+      "boot95_median": [
+        0.00189205522229563,
+        0.0027175134732539963
+      ]
+    },
+    "control_monday_abs_ret": {
+      "n": 205,
+      "mean": 0.00777588270939728,
+      "median": 0.005806787755362364,
+      "boot95_mean": [
+        0.006699934456490706,
+        0.009047714423483365
+      ],
+      "boot95_median": [
+        0.004755796968586967,
+        0.006872161606717331
+      ]
+    },
+    "diff_abs_ret_closure_minus_control": {
+      "point": 0.0016538634376456742,
+      "boot95": [
+        -0.002350817610477483,
+        0.00661652614108753
+      ],
+      "significant_at_5pct": false
+    },
+    "diff_abs_ret_closure_minus_monday": {
+      "point": 0.0009351172906027199,
+      "boot95": [
+        -0.003180095955106988,
+        0.00604011221209098
+      ],
+      "significant_at_5pct": false
+    },
+    "diff_abs_gap_closure_minus_control": {
+      "point": 0.0038167068443469704,
+      "boot95": [
+        0.00028381311446607085,
+        0.008397331500807589
+      ],
+      "significant_at_5pct": true
+    },
+    "diff_abs_gap_closure_minus_monday": {
+      "point": 0.0035029338148088785,
+      "boot95": [
+        -3.5085263891828576e-05,
+        0.008146509683427604
+      ],
+      "significant_at_5pct": false
+    }
+  },
+  "control_definition": {
+    "primary": "同月份（[7, 8, 9, 10] 月）2012-2025 普通交易日，排除任何停市日 ±5 個交易日，n=1042",
+    "secondary_monday": "主對照中的週一（跨 2+ 日曆日 gap，與停市跨日結構較可比），n=205"
+  },
+  "caveats": [
+    "停市事件僅 13 個（2012-2025），樣本小；bootstrap CI 寬，所有比較皆不足以宣稱統計顯著",
+    "復市首日跳空橫跨 2+ 個日曆日（停市 + 可能的週末），與單日對照的隔夜 gap 結構不同；已用週一次對照緩解",
+    "yfinance ^TWII 開盤價部分時期疑似回填（見 data_quality），跳空統計保守解讀；close-to-close 報酬不受影響",
+    "颱風停市多在 7-10 月，對照已限同月份，但無法控制颱風本身對基本面的實質衝擊（災損）"
+  ],
+  "rv_path": {
+    "tau": [
+      -5,
+      -4,
+      -3,
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "tau_definition": "tau<=0: 停市前第 |tau| 個交易日（0=最後交易日）；tau>=1: 復市後第 tau 個交易日",
+    "mean_abs_ret_pct": [
+      0.7193,
+      0.7469,
+      0.828,
+      0.6417,
+      1.171,
+      0.8693,
+      0.8711,
+      0.8318,
+      0.3875,
+      0.3787,
+      0.8008
+    ],
+    "control_mean_abs_ret_pct": 0.7057
+  }
+}

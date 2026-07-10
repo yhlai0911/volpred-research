@@ -65,14 +65,30 @@ def _load_env():
                     os.environ.setdefault(key.strip(), val.strip())
 
 
+class MissingEmbeddingCredentials(RuntimeError):
+    """No embedding API key available. Raised — never `sys.exit()`.
+
+    2026-07-10: `get_client()` used to `sys.exit(1)` here. It is library code:
+    `volpred.ops.topic_similarity._real_embedder` calls it from inside the
+    publisher's semantic-duplicate *warning* path, which is deliberately
+    fail-open — `embed_with_cache` catches `Exception`, logs through `warn()`,
+    and returns None so the caller records `semantic_unavailable`. But
+    `sys.exit()` raises `SystemExit`, which derives from `BaseException`, so
+    `except Exception` never saw it: a missing OPTIONAL credential killed the
+    whole process mid-publish, and failed 24 tests on any machine without an
+    OpenAI key. Only `__main__` may translate this into an exit code.
+    """
+
+
 def get_client():
     _load_env()
     if EMBED_PROVIDER == "openai":
         import openai
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
-            print("ERROR: OPENAI_API_KEY not found. Set it in .env.local or environment.")
-            sys.exit(1)
+            raise MissingEmbeddingCredentials(
+                "OPENAI_API_KEY not found. Set it in .env.local or environment."
+            )
         return openai.OpenAI(api_key=api_key)
     else:
         from google import genai
@@ -82,8 +98,9 @@ def get_client():
             or os.environ.get("GOOGLE_CLOUD_API_KEY")
         )
         if not api_key:
-            print("ERROR: No Google/Gemini API key found in environment or .env file.")
-            sys.exit(1)
+            raise MissingEmbeddingCredentials(
+                "No Google/Gemini API key found in environment or .env file."
+            )
         return genai.Client(api_key=api_key)
 
 
@@ -796,6 +813,8 @@ def stats():
 
 
 # ── CLI ───────────────────────────────────────────────────────────────
+# An uncaught MissingEmbeddingCredentials still exits non-zero here, which is the
+# CLI behaviour cron depends on. The message is the exception's, not a print().
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(__doc__)

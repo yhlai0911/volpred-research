@@ -44,7 +44,15 @@ def assert_fb_comment_url(url: str) -> None:
 
 
 def _extract_fb_urls_from_log() -> list[tuple[str, str, str]]:
-    """Return list of (mile_id, field_name, url) for log entries with FB url-bearing fields."""
+    """Return list of (mile_id, field_name, url) for log entries with FB url-bearing fields.
+
+    `LOG_PATH` is gitignored production data. On a clean checkout (CI) there is
+    nothing to assert an invariant over, so skip rather than fail — the two tests
+    below audit *live data*, not code. Skipping keeps them honest: a green CI must
+    not be read as "the live FB URLs were checked" when the log was never there.
+    """
+    if not LOG_PATH.exists():
+        pytest.skip(f"{LOG_PATH.relative_to(REPO_ROOT)} absent (gitignored production data)")
     data = json.loads(LOG_PATH.read_text())
     out: list[tuple[str, str, str]] = []
     for entry in data:
