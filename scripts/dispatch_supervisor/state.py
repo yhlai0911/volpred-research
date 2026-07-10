@@ -32,6 +32,8 @@ Schema (version 1)::
       ],
       "auth_blocked": false,                      # set true on 'Not logged in' — halts ticks
       "auth_blocked_at": "<ISO|null>",
+      "fire_requested_at": "<ISO|null>",          # pending out-of-band fire request (request_fire)
+      "fire_request_reason": "<str|null>",        # why; both cleared by consume_fire_request()
       "alerts_dedup": {                           # alert_key -> last_sent_at (for dedup window)
         "auth_blocked": "<ISO>"
       }
@@ -57,11 +59,11 @@ a phantom. Known misreads that have cost real debugging time:
   - `last_dispatch_at` → does not exist. Use `last_fire_at` (set under the
     state lock inside `reserve_fire()`, i.e. per worker-spawn ATTEMPT, and it
     doubles as the cron cursor `scheduler._due_to_fire()` reads).
-  - `last_completion`  → not written by anything. Use `completions[-1]`, the
-    append-only ring buffer that is the single owner of "last finished run".
-    (`scripts/cron_review.py` reads `last_completion` as an optional freshest
-    override and falls back to `completions[-1]`, so it works today by
-    accident of the fallback, not because a writer exists.)
+  - `last_completion`  → not written by anything, and since 2026-07-10 not read
+    by anything either. Use `completions[-1]`, the append-only ring buffer that
+    `record_completion()` owns and that is the single source of "last finished
+    run". To ask "is a run in flight?", read `current_job`, not the freshness of
+    that buffer.
   - `supervisor_pid` vs `launchctl list` → these legitimately DIFFER by one.
     The plist runs `uv run python -m ...`, so launchd tracks the `uv` wrapper
     while this field holds its Python child — the process that actually runs
