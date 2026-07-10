@@ -57,7 +57,11 @@ build-backend = "hatchling.build"
 packages = ["src/volpred"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+# `scripts/tests` 加入 2026-07-10：原本只有 ["tests"]，導致 scripts/tests/ 底下
+# 的 69 個測試（含 dispatch_state schema 契約 gate、scheduler pregate、
+# merge_worktree dedup）從未被裸跑 `pytest` 收集 —— gate 存在但零執行，正是
+# 「機制存在、沒人在問」那一類缺陷。全數 69 passed / 0.73s，納入成本可忽略。
+testpaths = ["tests", "scripts/tests"]
 
 [dependency-groups]
 dev = [
