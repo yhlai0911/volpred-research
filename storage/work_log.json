@@ -15300,5 +15300,12 @@
     "actor": "main-session",
     "outcome": "succeeded",
     "summary": "Codex CLI 0.144.1 升級 + gpt-5.6-sol/ultra 全平台切換（config+CLAUDE.md+rules+skill+memory）"
+  },
+  {
+    "ts": "2026-07-10T10:24:21.000000+00:00",
+    "task_type": "platform_ops",
+    "actor": "hourly-18",
+    "outcome": "succeeded",
+    "summary": "CI 真跑驗證：push 揭露首次真實 run 是紅的（12 failed）；修掉 9 條 ripgrep 缺失（workflow 裝 rg + 缺 rg 改拋可行動 RuntimeError + regression）。另修 pretooluse worktree-remove deny hook 的 force-flag 誤判（rm -f 被誤算），清掉 2 個死 worktree 釋出 slot。"
   }
 ]

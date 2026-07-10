@@ -156,6 +156,12 @@
 
 **順手修**（同一條 fire path 上發現）：`tests/test_dispatch_supervisor.py` 的 fire-path 測試原本會真的 spawn `hourly_dispatch_pregate.py`（`_run_pregate` 從 module-level ROOT 解析腳本，不看測試的 `repo_root`），每跑一次 pytest 就往 `storage/logs/hourly_pregate.jsonl` 灌 4 筆合成決策 —— 而那正是判斷 shadow→enforce 是否該翻轉的觀察日誌。已加 `_stub_pregate()` 隔離。
 
+> **更正（2026-07-10 18:33）**：上面那個 `_stub_pregate()` 是**要記得手動呼叫的 helper**，不是 fixture —— 五個既有 fire-path 測試呼叫了它，但同日稍後加入的整合測試 `test_heartbeat_advances_while_worker_in_flight` 沒有，於是**污染從未停止**。單獨跑那一個測試、前後數行數，日誌 147→148，實錘。**opt-in 的防護不是防護。** 已改成 `@pytest.fixture(autouse=True)`，並加 `test_pregate_is_stubbed_for_every_test_in_this_module`（比對 `scheduler._run_pregate is not _REAL_RUN_PREGATE`）—— 拿掉 autouse 就會在那裡失敗，而不是安靜地繼續灌日誌。驗證：整檔 78 tests 跑完，日誌零成長。
+>
+> **判讀污染列**：合成列的 `invoker` 一律被 `_run_pregate` 硬寫成 `"supervisor"`，肉眼與真實派工決策無法區分；**唯一硬證據是 `ppid`**。真實派工列的 `ppid` 等於當時的 `dispatch_state.supervisor_pid`。評估 shadow→enforce 時**必須**用 `ppid` 或對照 `completions[].fire_at` 過濾，不可直接數行數（依「永遠修流程，不修資料」，既有污染列不手動刪除）。
+>
+> **這條的元教訓**：修這個 bug 的過程本身犯了同一個錯 —— 我先假設兇手是 `scripts/tests/test_scheduler_pregate.py`，跑實驗證明它清白，就宣告「測試不會污染」。**測了一個測試檔，卻對整個 test 檔案母體下結論**，正是本專案 `.claude/rules/experiments.md` §Audit methodology hard rule 明文禁止的子集 audit。真兇是另一個檔案，而答案早就寫在這條 error_log entry 裡。
+
 **教訓**：(1) **靜默的守門員是最危險的守門員** —— 一個乾淨路徑上無輸出、無 side-effect 的元件，「沒在跑」不會產生任何被動訊號，只能靠主動 inventory 發現。凡「fail-open + 乾淨時 no-op」的防護元件，上線時就該同步立一個「它是否仍被呼叫」的機械 gate。(2) 退役任何執行路徑（LaunchAgent / cron / wrapper）時，**必須先枚舉掛在它身上的完整元件清單**並逐一判定「移植 / 明確廢棄」，散文規則已被證明擋不住（這是第 4 次）。(3) sweep 用 naive grep 會被註解製造的偽陽性汙染，讓真 orphan 躲在後面 —— 掃描器本身也要有反例測試。
 ## 2026-07-10 兩個長期紅燈測試：cutover 遺留的 dead-behavior 測試 + 硬編日期 fixture 時間炸彈
 

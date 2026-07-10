@@ -21,6 +21,9 @@ def _tmp_state(tmp_path: Path) -> Path:
     return tmp_path / "dispatch_state.json"
 
 
+_REAL_RUN_PREGATE = scheduler._run_pregate
+
+
 def _stub_pregate(monkeypatch) -> None:
     """Keep fire-path tests off the REAL scripts/hourly_dispatch_pregate.py.
 
@@ -32,6 +35,36 @@ def _stub_pregate(monkeypatch) -> None:
     pytest run. Returns False = "do not skip".
     """
     monkeypatch.setattr(scheduler, "_run_pregate", lambda **_kwargs: False)
+
+
+@pytest.fixture(autouse=True)
+def _never_spawn_the_real_pregate(monkeypatch) -> None:
+    """Autouse, because opt-in protection is not protection.
+
+    2026-07-10: `_stub_pregate()` landed as a helper each fire-path test had to
+    remember to call. Five did. The integration test added later that same day
+    (`test_heartbeat_advances_while_worker_in_flight`) did not, and every run of
+    it appended a row to the production shadow log — stamped `invoker=supervisor`,
+    because `_run_pregate` hardcodes that flag, so the row was indistinguishable
+    from a real dispatch decision except by its parent pid. Proven by running
+    that single test and watching the log grow by one.
+
+    The existing explicit `_stub_pregate(monkeypatch)` calls stay valid (they
+    just re-apply the same patch); a new test can no longer forget.
+    """
+    _stub_pregate(monkeypatch)
+
+
+def test_pregate_is_stubbed_for_every_test_in_this_module() -> None:
+    """If `_never_spawn_the_real_pregate` ever loses `autouse=True`, this fails
+    here instead of quietly resuming writes to the production shadow log — the
+    failure mode is invisible otherwise: tests pass, the log just grows.
+    """
+    assert scheduler._run_pregate is not _REAL_RUN_PREGATE, (
+        "the real _run_pregate is live during tests — a fire-path test will spawn "
+        "scripts/hourly_dispatch_pregate.py and append a synthetic row to "
+        "storage/logs/hourly_pregate.jsonl, the log the shadow→enforce flip is judged on"
+    )
 
 
 def test_worker_transient_retry_then_success(tmp_path: Path, monkeypatch) -> None:

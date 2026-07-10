@@ -667,6 +667,12 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
         storage_dir=str(storage_dir), now=now, paper_root=paper_root
     )
 
+    # Assert WHICH conditions breached, not just how many. A bare count reported
+    # "4 != 3" on the first Linux CI run and said nothing about the intruder.
+    # Several conditions still read production state instead of `storage_dir`, so
+    # an extra breach here is environment-dependent by construction — name it.
+    breached_ids = [c["id"] for c in result["conditions"] if c.get("breached")]
+    assert breached_ids == ["release_pool_gap", "draft_pool_low", "host_cron_fail"]
     assert result["breach_count"] == 3
     assert result["sent_count"] == 3
     # each breached condition sends exactly once (unique titles), in condition order
