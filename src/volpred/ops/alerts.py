@@ -4,6 +4,8 @@ import hashlib
 import json
 import os
 import re
+import shutil
+import subprocess
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -1979,6 +1981,102 @@ def _parse_dispatch_health_state(storage_dir: str, now: datetime) -> dict[str, A
     }
 
 
+# Must stay identical to `scripts/dispatch_supervisor/codex_failover.py::_NVM_CODEX`,
+# pinned mechanically by
+# `tests/test_dispatch_binary_health_source.py::test_alerts_codex_default_matches_failover`.
+# A literal for the same reason as DISPATCH_CLAUDE_BIN_DEFAULT above.
+CODEX_FAILOVER_BIN_DEFAULT = "/Users/yhlai0911/.nvm/versions/node/v22.20.0/bin/codex"
+CODEX_FAILOVER_PROBE_TIMEOUT_S = 20
+
+
+def _resolve_codex_bin() -> str | None:
+    """Same resolution order as `codex_failover.resolve_codex_bin()`."""
+    for candidate in (os.environ.get("CODEX_BIN"), shutil.which("codex"), CODEX_FAILOVER_BIN_DEFAULT):
+        if candidate and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
+def _parse_codex_failover_ready_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Can the Claude→Codex failover actually run, right now?
+
+    2026-07-10. The failover (`scripts/dispatch_supervisor/codex_failover.py`) runs
+    only when Claude returns quota_blocked or auth_blocked. That makes it a textbook
+    silent guardian: on a healthy day it is a no-op that emits nothing, so "it is
+    broken" and "it was never needed" look identical from outside. It sat orphaned
+    by the 2026-07-04 cutover for six days — every quota outage silently dropped its
+    hourly slot — and nothing signalled that, because a guardian that never runs
+    also never fails.
+
+    Its two hard prerequisites are exactly the ones that rot without a signal:
+
+      - the codex binary path (a HARDCODED nvm path pinned to node v22.20.0 — one
+        `nvm install` away from vanishing), and
+      - a working node runtime behind that binary's `#!/usr/bin/env node` shebang.
+
+    So probe both on the monitor's normal cadence: resolve the binary exactly the
+    way the failover does, then actually run `codex --version` (~0.3s). Existence
+    alone would not catch a broken node runtime, which is the failure the shebang
+    makes possible.
+
+    Severity is **warn, not critical** (per `.claude/rules/alert.md` taxonomy): the
+    primary dispatch path is unaffected. What is lost is the backup that covers
+    quota windows — real damage, but bounded and not user-facing.
+    """
+    codex_bin = _resolve_codex_bin()
+    version = ""
+    rc: int | None = None
+    if codex_bin is None:
+        reason = "binary_missing"
+    else:
+        try:
+            probe = subprocess.run(
+                [codex_bin, "--version"],
+                capture_output=True, text=True, timeout=CODEX_FAILOVER_PROBE_TIMEOUT_S,
+            )
+            rc = probe.returncode
+            version = (probe.stdout or "").strip()
+            reason = "ok" if rc == 0 else "version_nonzero"
+        except subprocess.TimeoutExpired:
+            reason = "version_timeout"
+        except OSError as exc:
+            reason = f"exec_failed:{type(exc).__name__}"
+
+    breached = reason != "ok"
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            "Claude→Codex 失效轉移所需的 codex binary 無法執行。",
+            f"- 解析到的 binary：{codex_bin or '(找不到)'}",
+            f"- `codex --version` rc：{rc if rc is not None else '(未取得)'}",
+            f"- 原因：{reason}",
+            "",
+            "## 影響",
+            "這條備援只在 Claude 額度用盡或認證失效時才會走，壞掉時平常完全沒有症狀。"
+            "要等到下一次額度中斷，整排每小時的派工才會再次被靜默丟掉"
+            "（2026-07-04 cutover 後就這樣連丟六天）。主要派工路徑不受影響，故列 warn。",
+            "",
+            "## 建議行動",
+            "1. `which codex && codex --version`（預期 codex-cli 0.144.1）",
+            "2. 路徑消失多半是 nvm 換了 node 版本：",
+            "   `npm install -g @openai/codex@latest --include=optional`",
+            "3. 更新 `scripts/dispatch_supervisor/codex_failover.py::_NVM_CODEX`，",
+            "   `alerts.py::CODEX_FAILOVER_BIN_DEFAULT` 必須同時改",
+            "   （只改一邊會被 test_alerts_codex_default_matches_failover 擋下）。",
+            "4. 不必等額度中斷就能驗整條路徑：用無害 prompt 呼叫",
+            "   `run_codex_failover(reason='smoke', prompt_path=..., enabled=True)`。",
+        ]
+    )
+    return {
+        "id": "codex_failover_ready",
+        "breached": breached,
+        "level": "warn" if breached else "info",
+        "title": (f"Codex 失效轉移不可用：{reason}" if breached else "codex_failover_ready ok"),
+        "body": body if breached else "",
+        "details": {"codex_bin": codex_bin, "reason": reason, "version": version, "rc": rc},
+    }
+
+
 # health_loop beats every 30s, and (since 2026-07-10) keeps beating while a
 # worker is in flight — so a 10min warn is a ~20x margin over the cadence and a
 # launchd restart (ThrottleInterval 60s + one beat) can never trip it.
@@ -3252,6 +3350,7 @@ def build_alert_condition_report(
         _parse_draft_pool_state(storage_dir),
         _parse_publishing_freshness_state(storage_dir, current),  # 2026-06-22 outcome dead-man switch (禁止脫班)
         _parse_dispatch_health_state(storage_dir, current),       # 2026-06-22 generator binary 源頭健康
+        _parse_codex_failover_ready_state(storage_dir, current),  # 2026-07-10 備援只在額度中斷時才走 → 平時無訊號，主動探測
         _parse_dispatch_supervisor_heartbeat_state(storage_dir, current),  # 2026-07-10 daemon loop 卡死 dead-man switch（launchctl 抓不到）
         _parse_dispatch_supervisor_stale_code_state(storage_dir, current), # 2026-07-10 「修好了但沒重載」dead-man switch（三次靜默違反同日規則）
         _parse_gmail_poll_freshness_state(storage_dir, current),  # 2026-06-22 boss-email pipeline dead-man switch

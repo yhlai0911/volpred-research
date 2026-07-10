@@ -2,6 +2,29 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 Claude→Codex 失效轉移從未被執行過 — 加主動探針（「只在別的東西壞掉時才跑」的路徑必須被主動探測）
+
+**觸發**：巡檢 `loop_health`，`error_recurrence=degrading`（9 個簽章中 6 個重複）。最大的**當前**簽章是 `dispatch_supervisor:quota_blocked`（17 次、`recovered=False`、當日仍在發生）。同日 commit `e88ed373e` 才剛「restore Claude→Codex failover orphaned by the 2026-07-04 supervisor cutover」—— 也就是說**這條備援在 7/4 到 7/10 之間孤兒化六天，每次額度中斷都靜默丟掉整排 hourly slot**。
+
+**現象（非錯誤，是缺口）**：修復於 22:26 落地、22:37 重載 daemon。但 14:00–21:07 的 8 次 `quota_blocked` 全發生在修復之前，所以**這條路徑從未在 production 執行過一次**。它是一條 fail-open 安全網：只在 `quota_blocked` / `auth_blocked` 時才走，健康日完全 no-op、不輸出任何東西。**「它壞了」和「它沒被需要」在外部觀測上完全同形。**
+
+**驗證（不等額度中斷）**：用無害 prompt 走真實的 `run_codex_failover(reason='smoke', prompt_path=…, enabled=True)`。
+- 第一次（cap 150s）→ 逾時、`recovered=False`。
+- 隔離變因：`codex exec` 在小目錄 26s、在主 repo `-s workspace-write` 27s、用 failover 的確切 `subprocess.run(capture_output=True)` 22s、加 `stdin=DEVNULL` 28s。**repo 大小、pipe、stdin 都不是原因。**
+- 重跑同一個 smoke → `recovered=True`, rc=0, **24.0s**。第一次是該路徑當日首次 codex 呼叫的冷啟動。
+- 結論：**失效轉移可用**（端到端實證），但真實 cap 是 600s，一次冷啟動就可能吃掉 1/4，餘裕比帳面上少。
+- 順帶推翻一個假說：`codex` 是 `#!/usr/bin/env node` shebang script，原以為 launchd 的精簡 PATH 找不到 node —— 實測 plist 的 `EnvironmentVariables.PATH` 已把 nvm bin 放在最前面，`node` 拿得到。
+
+**修復（缺口在「無訊號」，不在程式碼）**：新增 alert 條件 `codex_failover_ready`（`src/volpred/ops/alerts.py`，收編進既有 alert owner，未新增 watchdog）。
+1. 用**與 failover 完全相同的解析順序**取得 binary（`$CODEX_BIN` → `which codex` → 寫死的 nvm 路徑）。
+2. **實際執行 `codex --version`**（約 0.3s、20s 上限），不是只檢查檔案存在 —— 真實 binary 是 shebang script，node runtime 壞掉時檔案照樣在。
+3. Severity 是 **warn 不是 critical**（依 `.claude/rules/alert.md` 的 taxonomy）：主派工路徑不受影響，損失的是額度中斷時的備援。
+4. **機械釘住路徑漂移**：`alerts.py::CODEX_FAILOVER_BIN_DEFAULT` 與 `codex_failover.py::_NVM_CODEX` 由 `test_alerts_codex_default_matches_failover` 斷言相等 —— 沿用 `test_alerts_default_matches_worker`（Claude binary）的既有 pattern。那條路徑寫死在 node `v22.20.0`，一次 `nvm install` 就會消失。
+5. 另一支 `test_condition_is_wired_into_the_report` 斷言新條件真的被 `build_alert_condition_report` 呼叫 —— 一個沒人呼叫的條件正是本檔要防的 bug。
+
+**反向驗證**：把字面值改成 `v24.0.0` → pin 測試 fail；把條件從 report 拔掉 → wiring 測試 fail。真實 binary 上探針回報 `ok / codex-cli 0.144.1`，成本 0.3s。
+
+**教訓（已寫進 `.claude/rules/alert.md` 作通則）**：**凡是「只在別的東西壞掉時才執行」的備援路徑（failover / guard / 復原程序），健康日的 no-op 與壞掉的 no-op 無法區分，必須有主動探針** —— 否則你只會在最需要它的那一刻發現它不能用。這與同日 `git_conflict_guard` 孤兒化（乾淨樹上 `--quiet` 無輸出，「沒在跑」不產生任何被動訊號）是同一個結構性教訓的兩個面：**wiring 要探（它還被呼叫嗎），capability 也要探（它還跑得動嗎）**。
 ## 2026-07-10 「不知道上次何時 fire」被當成「立刻 fire」—— off-slot 重複 fire 的根因
 
 **現象**：`firing worker` 日誌稽核，159 次 fire 裡有 **9 次 off-slot**：在自己的 cron slot 之後 +24～+54 分鐘才觸發（07-07 09:45 打 09:07、07-10 22:58 打 22:07…）。每次都是完整的 ~95K opus cold-load。今日額度兩度耗盡。
