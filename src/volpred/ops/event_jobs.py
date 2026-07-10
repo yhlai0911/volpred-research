@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 from volpred.config import get_optional_schedule_items, load_runtime_schedules
 
+from .canonical_write import guard_canonical_write
 from .common import project_path
 from .local_control_plane import create_task
 from .shared_lock import shared_state_lock
@@ -71,6 +72,7 @@ def _read_json(path: Path) -> dict[str, Any] | None:
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    guard_canonical_write(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -86,6 +88,10 @@ def _event_status(item: dict[str, Any], *, now: datetime) -> str:
 
 
 def _materialize_task(item: dict[str, Any], *, storage_dir: str, now: datetime) -> dict[str, Any]:
+    # Before create_task(), not just before the ledger write below: materializing
+    # leaves a real TaskRecord in storage/ops/tasks/ (gitignored, so a leak there
+    # is invisible to `git status`) even if the ledger write is later refused.
+    guard_canonical_write(_ledger_path(str(item.get("dedupe_key") or ""), storage_dir=storage_dir))
     template = item.get("task_template") or {}
     if not isinstance(template, dict):
         raise RuntimeError(f"event_jobs task_template must be an object: {item.get('id')}")

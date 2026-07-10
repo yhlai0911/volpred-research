@@ -34,6 +34,7 @@ NEXT_TASKS_PATH = ROOT / "storage/next_tasks.json"
 
 sys.path.insert(0, str(ROOT / "src"))
 
+from volpred.ops.canonical_write import guard_canonical_write
 from volpred.topic_clusters import classify_topic_cluster, cluster_gate_status
 
 
@@ -308,6 +309,8 @@ def _is_invalidated_artifact(entry: dict) -> bool:
 
 
 def main():
+    # Fail before the ~30s scan rather than at the write site below.
+    guard_canonical_write(OUTPUT_PATH)
     if not KNOWLEDGE_PATH.exists():
         print(f"ERROR: {KNOWLEDGE_PATH} not found", file=sys.stderr)
         sys.exit(1)
@@ -616,6 +619,7 @@ def main():
         "candidates": candidates,
     }
 
+    guard_canonical_write(OUTPUT_PATH)
     OUTPUT_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2))
 
     # Print concise summary
