@@ -59,7 +59,7 @@ repeated_tool_failure / recurring_error / stale_knowledge / missing_retry_strate
 
 | 層 | Owner 機制 | 管什麼 | 現駐 checks |
 |---|---|---|---|
-| **L1 機械不變量** | `.claude/settings.json` hooks + `scripts/git_hooks/pre-push`（單一 runner）+ `.github/workflows/` | 每 turn / 每 push 必須成立的格式性約束 | Stop: final-text、save_session_state；pre-push: encoding sweep + silent-fallback baseline；CI: provenance、encoding |
+| **L1 機械不變量** | `.claude/settings.json` hooks + `scripts/git_hooks/pre-push`（單一 runner）+ `.github/workflows/` | 每 turn / 每 push 必須成立的格式性約束 | Stop: final-text、save_session_state；pre-push: encoding sweep + silent-fallback baseline；CI: provenance、encoding、silent-fallback、**pytest**（2026-07-10 補；此前約 1700 個測試在 CI 零執行，兩個紅燈爛數週。**零憑證下必須全綠** — 這性質本身擋掉 import-time side effect 再爬回來；why 見 error_log 同日兩條 entry） |
 | **L2 營運存活** | `check_alerts`（hourly piggy-back，單一 alert registry）+ email dedup | 「X 還活著/新鮮嗎」 | release gap / draft low / host cron fail / knowledge stale / paper stale / push backlog |
 | **L2b 派工失敗** | `dispatch_supervisor/alerts.py`（daemon 內建，唯一 owner — 2026-07-05 明確化） | hourly dispatch 的失敗/掛/額度/認證 alert | completion_failure / hang / quota（outage-scoped，一次事故一信）/ auth / orphan / loop_crash。`host_cron_fail` **刻意不覆蓋** supervisor（legacy log 已凍結）；dashboard health_cron 只量 daemon 存活（dispatch_state.json mtime），不量成敗——成敗歸這層 |
 | **L3 改善迴圈** | `loop_health`（fast）+ `dreaming_review`（slow，propose-only） | 「loop 有沒有在變好」 | 4 指標 + 5 detector；事故經 error_log 結構化 entry 餵進來，不另建 watchdog |
@@ -73,3 +73,5 @@ repeated_tool_failure / recurring_error / stale_knowledge / missing_retry_strate
 5. 違反此表 = 疊床架屋，code review / dreaming 應標 finding。
 
 **前例**：encoding sweep（2026-07-02）正例 — 收進既有 pre-push runner + CI，零新層；final-text hook（同日）修正案例 — hook 上線同 commit 未收編 CLAUDE.md 長段，後補（見 error_log 14:25 entry）。
+
+**pytest gate 的教訓（2026-07-10）**：一個 gate 只要沒有任何 job 在執行它，它就等於不存在（同日「幽靈欄位」是同一病灶：reader 讀一個沒有 writer 的 key）。而且**「本機零憑證跑綠」不蘊含「runner 跑綠」**：本機綠了才開 push trigger，第一次真實 ubuntu run 仍 12 紅 —— 剩下的耦合是 OS 與工具身分（`rg` 未宣告相依、macOS-only wrapper、只存在於一台機器的 binary 路徑），不是 secret。**新 gate 一律以「一次真實 CI run 變綠」為開通條件，不接受本機綠燈代打。** 其中兩個測試更在 Linux 上「因為錯誤的理由而通過」（腳本提早 exit 0，從未執行受測程式碼）—— 沒跑到受測碼的綠燈比紅燈更危險。
