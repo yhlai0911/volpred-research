@@ -1,56 +1,175 @@
 #!/bin/bash
-# Pre-push silent-fallback gate (2026-06-28).
-# The git_push_backup wrapper gates AUTONOMOUS pushes, but MANUAL `git push`
-# bypasses it — that's how dbcddc032 reached origin with new=1 and turned CI red.
-# This git-level pre-push hook covers BOTH manual and scripted pushes: it runs
-# the audit and blocks the push if HEAD carries new silent fallbacks, so red code
-# can never reach origin regardless of who pushes.
+# Pre-push gate — audits THE COMMITS BEING PUSHED, never the working tree.
+#
+# Why (2026-07-10 incident, docs/error_log.md):
+#   Both gates below used to run against whatever was on disk. Commit ee407db3a
+#   introduced 3 new silent fallbacks (scripts/check_alerts.py:271,
+#   scripts/cron_mark_last_run.py:173,180). The gate correctly blocked the first
+#   push. The three sites were then fixed IN THE WORKING TREE but could not be
+#   committed — a concurrent session held an in-progress merge in the shared main
+#   checkout, so `git commit` died on "unmerged files". The retried `git push`
+#   saw a clean working tree, passed, and ee407db3a landed on origin/main still
+#   carrying all three violations. CI (run 29101935680) then went red on main.
+#   Repaired after the fact by e00b83482.
+#
+# The gate now reproduces what CI actually does: for each pushed <local sha>,
+# extract that commit's tree into a temp dir and run THAT COMMIT'S OWN audit
+# scripts against THAT COMMIT'S OWN baseline. Disk state is irrelevant. Only the
+# ref tips are audited, which is exactly what CI checks out (.github/workflows/
+# silent-fallbacks.yml + source-encoding.yml run on the pushed head).
+#
+# Shared-checkout safety (requirement, not a nicety):
+#   Many concurrent Claude sessions share ONE main checkout. This hook MUST NOT
+#   mutate the index or the working tree. `git archive | tar -x` writes nothing
+#   to $GIT_DIR and nothing to the worktree, so it is safe even while another
+#   session holds an in-progress merge. The alternatives were rejected:
+#     - `git stash --include-untracked` mutates the shared worktree and would
+#       corrupt a concurrent in-progress merge (the exact 2026-07-10 condition).
+#     - `git worktree add` writes $GIT_DIR/worktrees/ metadata and would need
+#       `git worktree remove --force` or `git worktree prune` to clean up — both
+#       banned/unsafe in this repo (CLAUDE.md; K1032/K1618 lost-work incidents).
 #
 # Install (idempotent): bash scripts/git_hooks/install.sh
-# (copies this to .git/hooks/pre-push + chmod +x)
 #
-# Fail-open on audit error (uv missing / baseline absent): a broken gate must not
-# block backups. Only a definitive new>0 blocks.
-ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
-cd "$ROOT" || exit 0
+# Failure policy: fail-open ONLY on a true environment error (no python
+# interpreter, unreadable stdin). Every other ambiguity — audit crashed, baseline
+# absent from the commit, audit scanned zero files — fails CLOSED and prints why.
+# A gate that silently scans nothing is the very bug this file exists to prevent.
+set -uo pipefail
 
-# --- Gate 1: source encoding sweep (2026-07-02, zero tolerance) -------------
-# Mojibake in a .py silently kills its gate — pytest collection dies and
-# regression tests stop running unnoticed (docs/error_log.md 2026-07-02 14:11).
-# Stdlib-only script; fail-open when script/python absent or on env error
-# (exit 2). Only a definitive corruption (exit 1) blocks.
-if [ -f scripts/audit_source_encoding.py ]; then
-  PY_BIN="$(command -v python3 2>/dev/null)"
-  if [ -n "$PY_BIN" ]; then
-    ENC_OUT="$("$PY_BIN" scripts/audit_source_encoding.py 2>&1)"
+# Every fail-open path below announces itself. Fail-open is a legitimate ops
+# choice here (a broken gate must not wedge the hourly push-backup); staying
+# silent about it is not — see .claude/rules/no-silent-fallback.md. "The gate
+# did not run" and "the gate passed" must never look the same from the outside,
+# which is the whole lesson of the incident this file documents.
+degraded() { echo "[pre-push] WARN gate degraded: $1 — pushing UNAUDITED." >&2; }
+
+GIT_DIR_ABS="$(git rev-parse --absolute-git-dir 2>/dev/null)" || { degraded "not a git repo"; exit 0; }
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { degraded "no work tree"; exit 0; }
+export GIT_DIR="$GIT_DIR_ABS"   # survive the cd below; archive/cat-file need it
+cd "$ROOT" || { degraded "cannot cd to $ROOT"; exit 0; }
+
+# Tree paths extracted for the audit. Keep in sync with the two audit scripts:
+#   audit_source_encoding.py   DEFAULT_ROOTS   = ("src", "tests", "scripts")
+#   audit_silent_fallbacks.py  DEFAULT_TARGETS = scripts/, src/volpred/, .claude/hooks/
+#   audit_silent_fallbacks.py  --baseline      = storage/qa/silent_fallback_baseline.json
+# A full-tree extract is not viable (3.2 GB / 44 s, mostly storage/ + experiments/);
+# this subset is ~7 MB / 0.5 s. If a root ever goes missing from the extract the
+# audits exit 2 and this hook BLOCKS loudly instead of quietly scanning nothing.
+ARCHIVE_PATHS="src tests scripts .claude storage/qa"
+
+# Prefer the project interpreter (3.12, same as CI) over system python3 (3.9 on
+# macOS); both audits are stdlib-only, so no `uv run` / venv sync is needed.
+PY="$ROOT/.venv/bin/python"
+[ -x "$PY" ] || PY="$(command -v python3 2>/dev/null)"
+[ -n "${PY:-}" ] && [ -x "$PY" ] || { degraded "no python interpreter"; exit 0; }
+
+GATE_TMP="$(mktemp -d "${TMPDIR:-/tmp}/prepush-gate.XXXXXX")" || { degraded "mktemp failed"; exit 0; }
+trap 'rm -rf "$GATE_TMP"' EXIT INT TERM
+
+# git feeds us: <local ref> <local sha> <remote ref> <remote sha>
+SHAS=""
+while read -r _local_ref local_sha _remote_ref _remote_sha; do
+  [ -n "${local_sha:-}" ] || continue
+  case "$local_sha" in
+    *[!0]*) ;;         # has a non-zero char → a real object
+    *) continue ;;     # all zeros → ref deletion, nothing to audit
+  esac
+  case " $SHAS " in *" $local_sha "*) continue ;; esac   # dedupe
+  SHAS="$SHAS $local_sha"
+done
+# Nothing to audit: every ref was a deletion, or git handed us no refs at all.
+# Not a degradation — there is no commit to inspect.
+[ -n "${SHAS// /}" ] || exit 0
+
+block() {   # $1 = one-line reason
+  echo ""
+  echo "[pre-push] BLOCKED: $1"
+}
+
+for sha in $SHAS; do
+  short="$(git rev-parse --short "$sha" 2>/dev/null || printf '%s' "$sha")"
+  tree="$GATE_TMP/$short"
+  mkdir -p "$tree" || { degraded "cannot create scratch dir for $short"; exit 0; }
+
+  # git archive dies (rc 128) on a pathspec that matches nothing in the tree, so
+  # only ask for the paths this particular commit actually has.
+  paths=""
+  for p in $ARCHIVE_PATHS; do
+    git cat-file -e "$sha:$p" 2>/dev/null && paths="$paths $p"
+  done
+  [ -n "${paths// /}" ] || continue   # commit has no auditable source at all
+
+  if ! git archive --format=tar "$sha" -- $paths | tar -x -C "$tree"; then
+    block "cannot extract the tree of $short — the gate could not inspect what you are pushing."
+    echo "[pre-push] This is a hook/git failure, not a code problem. Do not use --no-verify to get around it."
+    exit 1
+  fi
+
+  # --- Gate 1: source encoding sweep (2026-07-02, zero tolerance) -------------
+  # Mojibake in a .py silently kills its gate — pytest collection dies and
+  # regression tests stop running unnoticed (docs/error_log.md 2026-07-02 14:11).
+  ENC="$tree/scripts/audit_source_encoding.py"
+  if [ -f "$ENC" ]; then
+    ENC_OUT="$("$PY" "$ENC" 2>&1)"
     ENC_RC=$?
     if [ "$ENC_RC" -eq 1 ]; then
       printf '%s\n' "$ENC_OUT" | grep '^BAD '
-      echo ""
-      echo "[pre-push] BLOCKED: corrupted .py source (utf-8/U+FFFD/py_compile) — CI Source Encoding Gate would go red."
+      block "commit $short contains corrupted .py source — CI Source Encoding Gate would go red."
       echo "[pre-push] Rebuild the damaged lines from git history or semantics; do NOT delete the file."
       exit 1
     fi
+    if [ "$ENC_RC" -ne 0 ]; then
+      printf '%s\n' "$ENC_OUT"
+      block "the encoding sweep could not run on $short (rc=$ENC_RC)."
+      echo "[pre-push] If it names a missing root dir, add that dir to ARCHIVE_PATHS in scripts/git_hooks/pre-push."
+      exit 1
+    fi
+    # Coverage canary: a gate that scans 0 files is indistinguishable from a
+    # passing gate unless we assert it actually looked at something.
+    ENC_N="$(printf '%s\n' "$ENC_OUT" | sed -n 's/.*\[audit-encoding\] \([0-9][0-9]*\) files checked.*/\1/p' | head -1)"
+    if [ -z "$ENC_N" ] || [ "$ENC_N" -eq 0 ]; then
+      printf '%s\n' "$ENC_OUT"
+      block "the encoding sweep scanned 0 files in $short — the gate is not actually gating."
+      echo "[pre-push] Check ARCHIVE_PATHS in scripts/git_hooks/pre-push against audit_source_encoding.py DEFAULT_ROOTS."
+      exit 1
+    fi
   fi
-fi
 
-# --- Gate 2: silent-fallback audit (2026-06-28, baseline) -------------------
-UV_BIN="${UV_BIN:-/opt/homebrew/bin/uv}"
-[ -x "$UV_BIN" ] || UV_BIN="$(command -v uv 2>/dev/null)"
-[ -n "$UV_BIN" ] || exit 0  # no uv → can't gate → fail-open
+  # --- Gate 2: silent-fallback audit (2026-06-28, baseline) -------------------
+  SF="$tree/scripts/audit_silent_fallbacks.py"
+  BL="$tree/storage/qa/silent_fallback_baseline.json"
+  if [ -f "$SF" ]; then
+    if [ ! -f "$BL" ]; then
+      block "commit $short does not contain storage/qa/silent_fallback_baseline.json — the audit CI runs cannot run."
+      echo "[pre-push] Commit the baseline alongside the code; the gate reads it from the pushed commit, not from disk."
+      exit 1
+    fi
+    OUT="$("$PY" "$SF" --strict --baseline "$BL" 2>&1)"
+    RC=$?
+    NEW="$(printf '%s\n' "$OUT" | grep -oE 'new=[0-9]+' | head -1 | cut -d= -f2)"
+    if [ -z "$NEW" ]; then
+      printf '%s\n' "$OUT"
+      block "the silent-fallback audit produced no verdict for $short (rc=$RC) — treating as a red gate."
+      exit 1
+    fi
+    if [ "$NEW" -gt 0 ]; then
+      printf '%s\n' "$OUT" | grep '^NEW '
+      block "commit $short introduces ${NEW} new silent fallback(s) — CI Silent Fallback Gate would go red."
+      echo "[pre-push] NOTE: the gate audits the COMMIT, not your working tree. Fixing the files on disk is not"
+      echo "[pre-push]       enough — the fix must be committed (git commit / git commit --amend) before pushing."
+      echo "[pre-push] Fix each (add 'from volpred.ops.diagnostics import warn' + warn(), or '# silent-ok: <reason>')."
+      echo "[pre-push] If the NEW lines are only a line-shift of an existing baselined entry:"
+      echo "[pre-push]   $PY scripts/audit_silent_fallbacks.py --write-baseline storage/qa/silent_fallback_baseline.json"
+      echo "[pre-push]   then COMMIT the regenerated baseline and retry the push."
+      exit 1
+    fi
+    if [ "$RC" -ne 0 ]; then
+      printf '%s\n' "$OUT"
+      block "the silent-fallback audit exited $RC with new=0 for $short — gate malfunction, not a clean tree."
+      exit 1
+    fi
+  fi
+done
 
-OUT="$("$UV_BIN" run python scripts/audit_silent_fallbacks.py --strict \
-  --baseline storage/qa/silent_fallback_baseline.json 2>&1)"
-RC=$?
-NEW="$(printf '%s\n' "$OUT" | grep -oE 'new=[0-9]+' | head -1 | cut -d= -f2)"
-if [ "$RC" -ne 0 ] && [ -n "$NEW" ] && [ "$NEW" -gt 0 ]; then
-  printf '%s\n' "$OUT" | grep '^NEW '
-  echo ""
-  echo "[pre-push] BLOCKED: ${NEW} new silent fallback(s) — CI Silent Fallback Gate would go red."
-  echo "[pre-push] Fix each (add 'from volpred.ops.diagnostics import warn' + warn(), or '# silent-ok: <reason>')."
-  echo "[pre-push] If the NEW lines are only a line-shift of an existing baselined entry:"
-  echo "[pre-push]   $UV_BIN run python scripts/audit_silent_fallbacks.py --write-baseline storage/qa/silent_fallback_baseline.json"
-  echo "[pre-push] then retry the push."
-  exit 1
-fi
 exit 0
