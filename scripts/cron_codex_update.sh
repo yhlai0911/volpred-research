@@ -6,7 +6,7 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/codex_update.log 2>&
 # IMPORTANT: host cron does NOT exec files under Desktop/ (macOS TCC/FDA blocks
 # the cron daemon). The cron-exec target lives at ~/.volpred/bin/cron_codex_update.sh.
 # After editing this file, sync with:
-#   cp scripts/cron_codex_update.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_codex_update.sh
+#   uv run python scripts/sync_cron_wrappers.py --apply
 #
 # 目的：codex-cli 作為輔助 agent 降低 Claude Code token 消耗，需定期更新到最新。
 # 每週把 @openai/codex 更新到 latest（含 darwin-arm64 optional binary，缺它會 crash）。

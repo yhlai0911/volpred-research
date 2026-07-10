@@ -306,12 +306,36 @@ def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) ->
     return records
 
 
+def _wrapper_drift_entries() -> list[str]:
+    """Does the wrapper launchd execs still match the one in the repo?
+
+    launchd runs ~/.volpred/bin/cron_<x>.sh; `scripts/cron_<x>.sh` is only its
+    source. Editing the canonical copy silently changes nothing until someone
+    syncs — on 2026-07-10, 11 of 40 wrappers had drifted, `cron_market_cal.sh`
+    by three months and `cron_hourly_dispatch.sh` (the dispatch backbone) by a
+    portability fix. This is the same bug class as the cron freshness marker:
+    the artifact you edit is decoupled from the thing that runs.
+
+    Fail loud, never silently: a broken detector must not read as "no drift".
+    """
+    try:
+        from sync_cron_wrappers import detect_live_drift  # noqa: WPS433 (scripts/ on sys.path)
+
+        findings = detect_live_drift(PROJECT_ROOT)
+    except Exception as exc:  # noqa: BLE001 — a dead detector is itself a drift signal
+        return [f"wrapper_drift_check_failed: {type(exc).__name__}: {exc}"]
+
+    return [f"{f['kind']}: {f['job_id']} {f['detail']}" for f in findings]
+
+
 def _check_piggy_back_drift(due_summary: dict) -> dict:
     """Detect piggy-back scheduler health drift (B3.7 / finding #18).
 
     Signals:
     - run_due_jobs returned ok=False (croniter / config / import error)
     - any wrapper_script reported missing
+    - any wrapper whose live ~/.volpred/bin copy drifts from its repo canonical
+      (`wrapper_drift`) or was never installed (`wrapper_not_installed`)
     - any non-skipped job's cron_last_run is older than 2× its cron period
       (host cron alone could not reliably fire that cadence — piggy-back is
       our only safety net; if last_run goes stale, the safety net is broken)
@@ -329,6 +353,8 @@ def _check_piggy_back_drift(due_summary: dict) -> dict:
     for job in due_summary.get("jobs", []) or []:
         if job.get("action") == "skip" and job.get("reason") == "wrapper_missing":
             drifts.append(f"wrapper_missing: {job.get('job_id')} path={job.get('path')}")
+
+    drifts.extend(_wrapper_drift_entries())
 
     # Stale last_run check
     state_path = PROJECT_ROOT / "storage" / "ops" / "cron_last_run.json"

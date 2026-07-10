@@ -2,6 +2,34 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 23:30 你編輯的 wrapper 不是 launchd 執行的 wrapper — 40 支漂移 11 支，而「記得 cp」是唯一的防線
+
+同日「cron 新鮮度監控盯著死 marker」那則的隔壁房間，**同一個 bug class 當日第 6 次**：可觀測性 / 執行實體與「你實際編輯的產物」脫鉤。
+
+**現象**：`config/runtime_schedules.json` 的 `wrapper_script` 指向 `~/.volpred/bin/cron_<x>.sh`，launchd 執行的是那一份；`scripts/cron_<x>.sh` 只是它的原始碼。改 canonical **完全不影響線上任務**，而且沒有任何東西會告訴你。40 支 wrapper 有 11 支漂移，`cron_market_cal.sh` 的 live 版落後三個月、連 `cron_lib.sh` 都沒 source（→ 它的新鮮度 marker 永遠寫不出來，正是上一則凍結 6 週的直接成因）。
+
+**根因一（散文當 enforcement）**：每支 wrapper 的檔頭都寫著「編輯後請 `cp scripts/... ~/.volpred/bin/ && chmod +x`」。**這是提醒，不是 gate**。提醒撐不過幾個月與幾十次編輯；`.claude/rules/control-plane.md` 早就寫明「同一 bug class 第二次出現起，交付物必須是機械 gate」。
+
+**根因二（子集 audit 把 false negative 留在盲區）**：手上的重現腳本只掃 `system_crontab.items[].wrapper_script`，回報 8 支。但 host wrapper 路徑在 config 裡**散在兩個 section**：`cron_jobs[].tcc_bypass_copy` 底下躺著 `cron_hourly_dispatch.sh`（**派工 backbone**）。只讀第一個 section 的掃描會回報「其餘乾淨」，而 backbone 正好隱形。實際 11 支，另有 `cron_continue_task_stub.sh`（live 的 flock 鎖被短命 python 子行程持有 → 等於沒鎖，canonical 早已修成 pid-file 鎖）。新的 `declared_host_wrappers()` 改成**遞迴走訪整份 config、用路徑形狀比對**，section 再長也漏不掉。
+
+**根因三（有 4 支 wrapper 根本沒有 canonical）**：`cron_audit_publish_sync.sh` / `cron_audit_fb_pipeline.sh` / `cron_ops_dashboard.sh` / `cron_boss_report.sh` 只存在於 `~/.volpred/bin`，repo 裡查無此檔 —— 沒有 canonical 就**沒有任何辦法「編輯後同步」**，連 review 都不可能。已 verbatim 匯入 `scripts/`（bytes 完全相同 → 線上行為零變化）。它們是樣板產生的，帶著 `if [ "audit_publish_sync" = "ops_dashboard" ]` 這種恆假死碼；本次刻意不動，先讓它們進版控。
+
+**根因四（連 cp 本身都是錯的 primitive）**：bash 執行腳本時是**按 byte offset 邊讀邊執行**。`cp` 會 truncate 並改寫**同一個 inode**，覆蓋一支正在被 launchd 跑的 wrapper 會讓 bash 從舊 offset 讀到新 bytes，行為未定義。所有檔頭教的 `cp` 都埋著這顆雷。`sync_cron_wrappers.py` 改用 **`os.replace()` 原子 rename**：換的是目錄項，跑到一半的行程續抱舊 inode 直到結束。
+
+**根因五（一支 wrapper 因為壞編碼而對所有 grep sweep 隱形）**：`scripts/cron_fred_backfill_guard.sh` 的註解裡有一段 `\xef\xbf\xbd\x80\x94` —— em-dash（`\xe2\x80\x94`）的首 byte 被換成 U+FFFD 後留下兩個孤兒 continuation byte，整個檔案**不是合法 UTF-8**。後果：`grep 'cp .*volpred/bin' scripts/cron_*.sh` **掃不到它**（grep 遇到非法 byte 就放棄該檔），所以它那句 `cp` 指示躲過了歷來每一次 audit，也是本次 header 改寫腳本第一版直接 `UnicodeDecodeError` 崩掉的原因。已修回 em-dash；改寫工具一律用 `errors="surrogateescape"` 讀寫，遇到怪 byte 也 round-trip 不壞檔。**教訓：以 grep 為唯一儀器的 sweep，其覆蓋率上限受制於檔案編碼** —— 「掃過了、沒事」在壞編碼的檔案上是假陰性。
+
+**修（機械 gate，收編進既有 owner，不新增看門狗）**：
+- `config/cron_wrapper_manifest.json` — 44 支 canonical 的 sha256，**committed**。它是 CI 唯一看得到的「兩邊同步」證據（`~/.volpred/bin` 是機器本地路徑，CI 沒有）。
+- `scripts/sync_cron_wrappers.py` — 唯一的同步工具：`--apply` 原子安裝 + 重生 manifest；`--check` 報漂移並 exit 1。母體 = `scripts/cron_*.sh` 減去 `cron_lib.sh`（後者由 wrapper `source` repo 內原檔，本來就不該安裝）。glob 是 config 兩個 section 的超集合，不可能再漏 section。
+- **CI 半邊** `scripts/tests/test_cron_wrapper_manifest.py` — 改了 wrapper 卻沒跑 `--apply` → manifest hash 對不上 → build 紅。含 negative control（竄改 wrapper 必須讓 gate 真的 fire）與 `install_atomic` 不截斷執行中 inode 的測試。
+- **Host 半邊** `scripts/check_alerts.py::_check_piggy_back_drift` — 沿用既有的 `wrapper_missing` 回報路徑，新增 `wrapper_drift: <id>` / `wrapper_not_installed: <id>`。**沒有新增 script、沒有新 cron**（anti-stacking）。偵測器自己壞掉會回報 `wrapper_drift_check_failed`，不會靜默成「無漂移」。
+- **散文降級為 pointer**（anti-stacking 規則 4，同 commit）：31 支 wrapper 檔頭教的 `cp scripts/... ~/.volpred/bin/ && chmod +x` 全數換成 `uv run python scripts/sync_cron_wrappers.py --apply`。改寫由腳本執行並以硬不變量把關：**任何非註解行只要有一個字元變動就 abort**（實測 31/31 僅註解變動、`bash -n` 全過）。
+- Enforcement Layer Map（`.claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md`）L1 / L2 兩列已登記。
+
+**驗證**：11 支同步後 44/44 lockstep、全數可執行、無殘留 temp；44 支 `bash -n` 全過；9 支非 backbone wrapper 實跑 exit 0（`release_pool` 依 240min interval 判定未到期、確認 `last_released_at` 未變動 → 沒有誤發文；`research_backlog` 依常態補池 pending 5→9）；`paper_sync_all` / `research_backlog` / `populate_events` / `release_settings_audit` / `refresh_paper_snapshots` 的 marker 由停滯數日跳到當下 → 證明 `cron_lib` 確實在 live 副本上跑起來了。負向對照：對 live `cron_token_report.sh` 注入一行註解 → `wrapper_drift: token_report_daily` 立刻現形、`--check` exit 1，還原後回 lockstep。
+
+**誠實揭露（沒做的事）**：`cron_hourly_dispatch.sh` 與 `cron_continue_task_stub.sh` **沒有實跑 smoke** —— 前者會真的派一個 agent 跑 50 分鐘、後者會 claim 任務，且當下 `dispatch_state.json` 正有 in-flight job（pid 39146）。改以 `bash -n` + 把本次唯一變動的函式（`file_mtime_epoch`）抽出來單獨驗證（digits-only epoch、缺檔回非零）。兩支已同步且原子安裝，下一班由排程自然驗證。
+
 ## 2026-07-10 merge_worktree 的 shared-JSON guard 把「時間」當成「違規」；同一段程式的假警告會叫人把陳年 stash 蓋回 main
 
 修下一則「掃 0 個檔的 gate」時撞出來的。gate 本體的根因見該則 §3，此處不重述。

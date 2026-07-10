@@ -6,7 +6,7 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/release_pool.log 2>&
 # IMPORTANT: host cron does NOT exec this file — macOS TCC (FDA) blocks
 # cron daemon from exec'ing .sh files under Desktop/. The cron-exec target
 # lives at ~/.volpred/bin/cron_release_pool.sh. After editing this file,
-# sync with:   cp scripts/cron_release_pool.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_release_pool.sh
+# sync with:   uv run python scripts/sync_cron_wrappers.py --apply
 cd /Users/yhlai0911/volpred-research || exit 1
 source scripts/cron_lib.sh
 _start=$SECONDS
