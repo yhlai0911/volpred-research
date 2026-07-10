@@ -45,6 +45,14 @@ jobs:
       VOLPRED_NO_EMAIL: "1"
     steps:
       - uses: actions/checkout@v4
+      - name: Install ripgrep
+        # `volpred.ops.experiments` shells out to `rg` to find references to an
+        # experiment's files before moving them. It is a real runtime dependency
+        # of that code path (present on the dev mac via homebrew), not a test
+        # convenience — 9 tests in test_experiments_ops.py died on `rg` missing
+        # in the first real CI run (29085496663). Installing it here keeps the
+        # runner honest about what production actually needs.
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:

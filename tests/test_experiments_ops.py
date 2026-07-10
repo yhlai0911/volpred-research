@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from volpred.ops.experiments import (
     adopt_experiment_files,
     build_experiment_migration_plan,
@@ -324,3 +326,20 @@ def test_adopt_experiment_files_overwrite_replaces_existing_canonical_target(tmp
         }
     ]
     assert canonical_script.read_text(encoding="utf-8") == "print('new source')\n"
+
+
+def test_missing_ripgrep_raises_actionable_error(tmp_path: Path, monkeypatch):
+    """A machine without `rg` must fail loud, not report "no references found".
+
+    The first real CI run (2026-07-10) died here with a bare FileNotFoundError.
+    Reporting zero references when the scan never ran would let a migration move
+    files while leaving every reference to them dangling.
+    """
+    experiments_dir = tmp_path / "experiments"
+    experiments_dir.mkdir()
+    (experiments_dir / "k999.py").write_text("print('x')\n", encoding="utf-8")
+
+    monkeypatch.setenv("PATH", str(tmp_path / "empty-bin"))
+
+    with pytest.raises(RuntimeError, match="ripgrep"):
+        migrate_experiment_files("k999", root_path=tmp_path, apply_changes=False)
