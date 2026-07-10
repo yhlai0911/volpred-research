@@ -4,9 +4,12 @@ description: >
   平台運營的持續改善（PDCA）作業流程 —— 自主運營經理每個 turn / autonomous tick /
   每日都該走的 Plan-Do-Check-Act 迴圈。把「主動找工作 + 每日大體檢 + 發現即修 +
   把贏固化」變成可重複流程，而不是靠記性或散文提醒。觸發時機：autonomous loop fire、
-  每日大體檢、處理用戶糾正後的制度化、任何「該怎麼運營下一步」的決策。
+  每日大體檢、處理用戶糾正後的制度化、任何「該怎麼運營下一步」的決策，以及**任何對平台
+  健康狀態的查詢或宣稱**（回答前先跑 scripts/daily_checkup.py，不要用臨時 grep 當儀器）。
   Trigger phrases: 'PDCA', '持續改善', '大體檢', 'daily checkup', '主動運營',
-  '該做什麼', 'autonomous tick', '運營下一步'.
+  '該做什麼', 'autonomous tick', '運營下一步',
+  '一切正常了嗎', '都正常嗎', '都修好了嗎', '沒問題了嗎', '平台健康', '系統健康',
+  'is everything ok', 'health check', 'all good'.
   Do NOT use for: 單一實驗設計（autonomous-research）、單篇文章寫作（feed-publisher）、
   論文（paper-*）。本 skill 是「運營層的 meta 流程」，不是任務層執行細節。
 ---
@@ -93,6 +96,11 @@ PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調�
 - ✗ 內容越寫越短當預設（金融文最佳 2200-2800 英文字 ≈ 中文 ~3000-4500 字，要深度+圖表+數據+詮釋，非湊字）。
 - ✗ 凡事問用戶（你是運營經理，知道 missions 與目標就該知道做什麼）。
 - ✗ 踩坑不固化（不寫 skill / 不改指引 / 不寫 memory → loop 沒變好）。
+- ✗ **用臨時 grep 當儀器**：被問「一切正常了嗎」或要宣稱平台健康時，先跑
+  `scripts/daily_checkup.py`，再談你手上那條線。2026-07-10 連續五輪被問同一句，前四輪
+  全靠手刻 grep 找 bug（是找到了，但都是同一個子系統）；第五輪跑了大體檢，4 秒內就撈出
+  一個**當下正在阻塞**的 `git_push_backup exit=120`（silent-fallback gate 擋住 push，
+  2 個 commit 沒備份）—— 那條線我的 grep 永遠碰不到。**儀器的價值在於它掃你沒在看的地方。**
 
 ## 排程
 
