@@ -2,6 +2,24 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 兩個長期紅燈測試：cutover 遺留的 dead-behavior 測試 + 硬編日期 fixture 時間炸彈
+
+**現象**：全套 pytest 有兩個既有 FAIL（`git checkout c4dfb4c1f` 確認非近期引入）：
+1. `tests/test_gmail_inbox_poll_warnings.py::test_trigger_immediate_dispatch_warns_when_pgrep_guard_fails` → `AttributeError: module 'gmail_inbox_poll' has no attribute '_DISPATCH_WRAPPER'`
+2. `tests/test_topic_cluster_gate.py::test_recent_cluster_counts_split_factor_etf_from_spy` → `assert total == 2` 實得 1
+
+**根因（兩個獨立問題，都不是 production bug）**：
+1. **測試守著已被 cutover 刪掉的行為**。7/4 dispatch-supervisor cutover 後，`gmail_inbox_poll._trigger_immediate_dispatch` 的「已有 dispatch 在跑」守衛從 `pgrep -f cron_hourly_dispatch.sh` 換成 `dispatch_state.read_state()["current_job"]`，`_DISPATCH_WRAPPER` / `wrapper_missing` 分支整個消失（不再 spawn wrapper，改寫 supervisor fire-flag）。改寫本身是對的（被刪的那條 `Popen` 路徑正是 double-dispatch race 本身），但**測試沒跟著改**。紅了 5 天沒被發現的原因：該改寫是由 `dab3baa12`「PHASE-Z safety-net auto-commit（agent left uncommitted）」提交的 —— **safety-net 自動 commit 不跑測試**，等於繞過測試閘門。
+2. **fixture 用硬編絕對日期對抗 relative cutoff**。`recent_cluster_counts()` 的 cutoff 是 `now - days`，fixture 卻寫死 `2026-06-10`。到 2026-07-10 這天，SPY 那筆正好落到 30 天窗外被濾掉 → `total` 由 2 掉到 1。**cluster 判定邏輯完全正常**（實測 `classify_topic_cluster` 仍把 USMV 判為 `factor_etf`、SPY 判為 `spy`，split 有效），純粹是 fixture 過期。同檔 `test_recent_cluster_counts_warns_on_bad_timestamp` 的 `2026-06-11` 是同一顆炸彈，隔天就會引爆。
+
+**解決方法**：
+1. 刪掉 `_DISPATCH_WRAPPER` / `wrapper_missing` 斷言（**不**為了讓測試變綠而把沒人用的死常數塞回 production），改成對現行實作斷言，並保住原測試真正在守的不變量：
+   - `test_trigger_immediate_dispatch_skips_when_supervisor_job_in_flight`：`current_job` 非 null → `dispatch_already_running`，且 `request_fire` 絕不被呼叫（cutover 的核心不變量：不並行第二個 unmanaged dispatch）
+   - `test_trigger_immediate_dispatch_warns_when_supervisor_state_unreadable`：守衛自己壞掉時 **fail closed**（不 fire）並留 stderr trace（對齊 `.claude/rules/no-silent-fallback.md`），由下一班 hourly fire 接手
+2. fixture 改相對時間 helper `_days_ago_iso(n)`，同檔兩個測試一起改；docstring 寫明「cutoff 是相對的，fixture 就不能是絕對的」。
+
+**教訓**：(a) **safety-net auto-commit 是測試閘門的破口** —— 它替 agent 收拾未 commit 的工作，但不驗證；凡走這條路徑進 main 的 commit，下一班應補跑受影響測試（或至少全套一次）。(b) **production 若用 relative window（`now - N days`），測試 fixture 一律用相對時間**；硬編日期只是把 FAIL 延後到某一天，且屆時症狀（`total` 少 1）看起來會像分群邏輯退化，會誤導後人去改 production。(c) 測試紅了先問「它守的行為現在歸誰負責」，而不是「怎麼讓它變綠」。
+
 ## 2026-07-10 颱風臨時休市，網頁仍顯示「台股正常開盤」+ 發「本日持倉建議」→ 加 adhoc-closure override + NCDR 自動偵測 + 內容閘門
 
 **現象**：颱風巴威 7/10 台股全日休市（證交所公告、臺北市停班停課），但 VolPred 網頁市場橫幅顯示「台股正常開盤」、V3 首頁「今日建議」照列進場配置、daily_update 00:03 照發 2 篇每日建議（`mile_98d8b420` 每日策略建議 7/10、`mile_855bf302` 7/10 本日持倉比率建議）—— 對讀者是「休市日的進場指示」。老闆要求徹底修底層邏輯/流程/程式碼。

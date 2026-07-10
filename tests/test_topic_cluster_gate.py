@@ -11,6 +11,7 @@ import json
 import pytest
 import sys
 import importlib
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from volpred.publisher.publisher import Publisher
@@ -251,6 +252,13 @@ class TestClusterCapEnforcement:
         assert pub_id.startswith("mile_")
 
 
+def _days_ago_iso(days: int) -> str:
+    """recent_cluster_counts() cuts off at now - `days`, so fixtures must be
+    relative. Hard-coded dates silently age out of the window and turn a real
+    assertion into a time bomb (2026-07-10: this file's 06-10 fixture did)."""
+    return (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+
+
 def test_recent_cluster_counts_split_factor_etf_from_spy(tmp_path):
     feed_path = tmp_path / "feed.json"
     feed_path.write_text(
@@ -260,13 +268,13 @@ def test_recent_cluster_counts_split_factor_etf_from_spy(tmp_path):
                     "title": "SPY 估值觀察",
                     "tags": ["SPY"],
                     "status": "published",
-                    "published_at": "2026-06-10T00:00:00+00:00",
+                    "published_at": _days_ago_iso(2),
                 },
                 {
                     "title": "USMV 的低波動配置",
                     "tags": ["USMV", "美股 ETF"],
                     "status": "published",
-                    "published_at": "2026-06-11T00:00:00+00:00",
+                    "published_at": _days_ago_iso(1),
                 },
             ],
             ensure_ascii=False,
@@ -299,7 +307,7 @@ def test_recent_cluster_counts_warns_on_bad_timestamp(tmp_path, capsys):
                     "title": "SPY 正常時間戳",
                     "tags": ["SPY"],
                     "status": "published",
-                    "published_at": "2026-06-11T00:00:00+00:00",
+                    "published_at": _days_ago_iso(1),
                 },
             ],
             ensure_ascii=False,
