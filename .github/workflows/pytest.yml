@@ -1,0 +1,60 @@
+name: Test Suite
+
+# The repo's ~1640 tests had NEVER run in CI (2026-07-10). Cause: importing
+# `scripts/supabase_sync.py` raised at module scope when credentials were absent,
+# and `volpred.ops` imports it transitively — so pytest collection died on any
+# machine without the gitignored `.env.local`. Two tests had been red for days
+# before a full local run surfaced them.
+#
+# Every mechanical gate this repo relies on (dispatch_state schema contract,
+# no-raw-kickstart, merge_worktree dedup, scheduler pregate) lives in pytest.
+# Until this workflow existed, all of them were gates that only fired when a
+# human happened to run them locally.
+#
+# Safety belts, both already honoured by conftest.py — set here too so a broken
+# conftest cannot let a CI run touch production:
+#   VOLPRED_NO_REMOTE_WRITE=1  no Supabase POST/PATCH (2026-06-23 leak incident)
+#   VOLPRED_NO_EMAIL=1         no SMTP
+
+# TRIGGER IS INTENTIONALLY `workflow_dispatch` ONLY, until the suite is green in a
+# clean checkout. A clean-worktree run (2026-07-10, no `.env.local`, no creds)
+# gives 1663 passed / 22 failed. Turning this on for push/PR today would mean a
+# permanently red CI, and a red CI that everyone learns to ignore is worse than
+# no CI. The 22 are NOT caused by the import-safety fix; they are pre-existing
+# environment couplings that only a credential-less checkout exposes:
+#
+#   24× SystemExit(1)   scripts/build_knowledge_index.py:75 hard-exits when
+#                       OPENAI_API_KEY is absent (same disease as the supabase
+#                       import-time raise: missing credential kills the process)
+#    8× RuntimeError    tests that touch Supabase HEADERS at request time
+#    6× repo_root_mismatch  tests/test_session_ops.py:76 hardcodes
+#                       "/Users/yhlai0911/volpred-research" in a fixture
+#    4× FileNotFoundError   data-invariant tests over gitignored production files
+#                       (storage/reports/trending_repost_log.json) — should skip,
+#                       not fail, where the data does not exist
+#
+# Flip to `push`/`pull_request` in the same commit that makes the clean-checkout
+# run green. Do not flip it earlier "to see what happens".
+on:
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VOLPRED_NO_REMOTE_WRITE: "1"
+      VOLPRED_NO_EMAIL: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Run test suite
+        # testpaths = ["tests", "scripts/tests"] (pyproject.toml). No credentials
+        # are provided on purpose: a reintroduced import-time raise must fail here,
+        # not silently pass because a secret papered over it.
+        run: uv run --extra dev python -m pytest -q -p no:cacheprovider

@@ -1355,6 +1355,27 @@ def apply_update(args) -> int:
     return 0
 
 
+def _plan_only_uploader(local_path: str, bucket: str = "article-images") -> str:
+    """Return the URL `upload_chart` *would* produce, without touching Supabase.
+
+    Used only under --dry-run. Shares `_object_key` with the real uploader so the
+    preview cannot drift from what a real publish would emit.
+    """
+    sys.path.insert(0, str(ROOT / "src"))
+    from volpred.charts.article_charts import _object_key
+
+    base = os.environ.get("SUPABASE_URL", "").rstrip("/")
+    if not base:
+        env_path = ROOT / ".env.local"
+        if env_path.exists():
+            for line in env_path.read_text(encoding="utf-8").splitlines():
+                if line.startswith("SUPABASE_URL="):
+                    base = line.split("=", 1)[1].strip().strip('"').strip("'").rstrip("/")
+                    break
+    base = base or "https://<SUPABASE_URL unset>"
+    return f"{base}/storage/v1/object/public/{bucket}/{_object_key(local_path)}"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     # 2026-05-08 P3 platform_ops: accept draft path via positional OR --draft.
@@ -1434,6 +1455,15 @@ def main() -> int:
                               "after this update fixes the flagged issue")
 
     args = parser.parse_args()
+
+    # 2026-07-10: --dry-run used to upload every image for real. The rewrite step
+    # runs long before the `if args.dry_run` bail-out, and `upload_chart` sends
+    # `x-upsert: true`, so a "preview" silently replaced live article images whose
+    # filenames matched (lazypack posters all share names). Caught when a dry-run
+    # of credit_silence_20260710 overwrote mile_e71ea353's lazypack. A dry run must
+    # predict the URL, never write it.
+    if args.dry_run and getattr(args, "_image_uploader", None) is None:
+        args._image_uploader = _plan_only_uploader
 
     # 2026-05-08 P3 platform_ops: resolve draft_path from --draft alias OR
     # positional. --draft wins if both are provided (explicit-flag preference).

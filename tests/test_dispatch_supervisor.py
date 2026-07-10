@@ -2034,3 +2034,72 @@ def test_quota_dedup_cleared_on_next_success(tmp_path: Path, monkeypatch) -> Non
     # NEXT outage must email again despite 7d backstop window
     assert supervisor.alerts.send_quota_alert(log_tail="limit again", state_path=state_path) is True
     assert len(sends) == 2
+
+
+# ---------------------------------------------------------------------------
+# Deploy-aware restart-alert suppression (2026-07-10, ops-superv-restart-noise)
+# ---------------------------------------------------------------------------
+def _tmp_marker(tmp_path: Path) -> Path:
+    return tmp_path / "supervisor_restart_marker.json"
+
+
+def test_planned_restart_marker_roundtrip_fresh(tmp_path: Path) -> None:
+    """A fresh marker is consumed once and returns its reason."""
+    marker = _tmp_marker(tmp_path)
+    state.write_planned_restart_marker(reason="deploy", ttl_s=120, path=marker)
+    assert marker.exists()
+    assert state.consume_planned_restart_marker(path=marker) == "deploy"
+    # consume-once: the file is gone and a second read yields None
+    assert not marker.exists()
+    assert state.consume_planned_restart_marker(path=marker) is None
+
+
+def test_planned_restart_marker_expired_treated_as_unexpected(tmp_path: Path) -> None:
+    """A stale marker must NOT suppress --- it returns None and is cleaned up."""
+    marker = _tmp_marker(tmp_path)
+    state.write_planned_restart_marker(reason="deploy", ttl_s=1, path=marker)
+    time.sleep(1.2)
+    assert state.consume_planned_restart_marker(path=marker) is None
+    assert not marker.exists()  # consumed even though stale
+
+
+def test_planned_restart_marker_corrupt_returns_none(tmp_path: Path) -> None:
+    """Corrupt marker JSON is logged and treated as no-marker (alert fires)."""
+    marker = _tmp_marker(tmp_path)
+    marker.write_text("{not json", encoding="utf-8")
+    assert state.consume_planned_restart_marker(path=marker) is None
+    assert not marker.exists()
+
+
+def test_supervisor_restart_planned_reason_suppresses_email(tmp_path: Path, monkeypatch) -> None:
+    """planned_reason set --- log-only breadcrumb, NO email, returns False."""
+    state_path = _tmp_state(tmp_path)
+    sends: list[str] = []
+    monkeypatch.setattr(supervisor.alerts, "_send", lambda level, title, body: sends.append(title) or 0)
+
+    sent = supervisor.alerts.send_supervisor_restart(
+        prev_started="2026-07-10T05:00:00+00:00",
+        planned_reason="deploy",
+        state_path=state_path,
+    )
+    assert sent is False
+    assert sends == []  # deploy reload never emails
+
+
+def test_supervisor_restart_unexpected_still_emails(tmp_path: Path, monkeypatch) -> None:
+    """No marker (planned_reason=None) --- genuine restart still alerts once."""
+    state_path = _tmp_state(tmp_path)
+    sends: list[str] = []
+    monkeypatch.setattr(supervisor.alerts, "_send", lambda level, title, body: sends.append(title) or 0)
+
+    first = supervisor.alerts.send_supervisor_restart(
+        prev_started="2026-07-10T05:00:00+00:00", planned_reason=None, state_path=state_path,
+    )
+    assert first is True
+    assert sends == ["supervisor restart"]
+    # 60s dedup: an immediate second unexpected restart does not re-email
+    second = supervisor.alerts.send_supervisor_restart(
+        prev_started="2026-07-10T05:00:30+00:00", planned_reason=None, state_path=state_path,
+    )
+    assert second is False
+    assert len(sends) == 1

@@ -218,6 +218,31 @@ def generate_heatmap(
 
 # ─── Supabase upload ─────────────────────────────────────────
 
+_GENERIC_ASSET_DIRS = {"assets", "reports", "storage", "images", "charts", "tmp", ""}
+
+
+def _object_key(png_path: str) -> str:
+    """Object key for a chart PNG, namespaced by its asset folder.
+
+    The upload below sends `x-upsert: true`, so two files that hash to the same
+    key silently replace one another. Lazypack filenames are standardised
+    (`lazy1_concept.png`, `lazy2_data.png`, ...), which means a bare-basename key
+    made every lazypack article a live overwrite hazard for every other one —
+    publishing article B would swap out article A's already-published images.
+    Assets live in `storage/reports/assets/<article-slug>/`, so the parent
+    directory is exactly the namespace we want.
+
+    Falls back to the bare filename when the parent carries no article identity
+    (a chart written straight into `assets/` or a temp dir), preserving the URLs
+    of everything published before 2026-07-10.
+    """
+    path = Path(png_path)
+    parent = path.parent.name
+    if parent.lower() in _GENERIC_ASSET_DIRS:
+        return path.name
+    return f"{parent}/{path.name}"
+
+
 def upload_chart(png_path: str, bucket: str = "article-images") -> str:
     """Upload PNG to Supabase Storage, return public URL.
 
@@ -251,8 +276,7 @@ def upload_chart(png_path: str, bucket: str = "article-images") -> str:
 
     import requests
 
-    filename = Path(png_path).name
-    storage_path = f"{bucket}/{filename}"
+    storage_path = f"{bucket}/{_object_key(png_path)}"
 
     with open(png_path, "rb") as f:
         resp = requests.post(

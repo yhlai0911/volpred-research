@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import re
+from collections.abc import Mapping
 from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
@@ -36,8 +37,23 @@ if not SUPABASE_URL or not SUPABASE_KEY:
                 SUPABASE_URL = v
             elif k == "SUPABASE_SERVICE_ROLE_KEY" and not SUPABASE_KEY:
                 SUPABASE_KEY = v
+
+_MISSING_CREDS = (
+    "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Set env vars or create .env.local"
+)
+
+
+def require_creds() -> None:
+    """Raise if Supabase credentials are absent. Call before any remote request.
+
+    Importing this module used to `raise` here (2026-07-10 and earlier). That made
+    the module un-importable without credentials, and since `volpred.ops.__init__`
+    imports it transitively, **pytest collection died in any environment without
+    `.env.local`** — which is why CI has never been able to run the test suite.
+    Credentials are a *request-time* requirement, not an *import-time* one.
+    """
     if not SUPABASE_URL or not SUPABASE_KEY:
-        raise RuntimeError("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Set env vars or create .env.local")
+        raise RuntimeError(_MISSING_CREDS)
 
 
 def _remote_writes_blocked() -> bool:
@@ -53,12 +69,45 @@ def _remote_writes_blocked() -> bool:
     mirroring VOLPRED_NO_EMAIL for SMTP (conftest set at 2026-04-20)."""
     return os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1"
 
-HEADERS = {
-    "apikey": SUPABASE_KEY,
-    "Authorization": f"Bearer {SUPABASE_KEY}",
-    "Content-Type": "application/json",
-    "Prefer": "resolution=merge-duplicates,return=minimal",
-}
+class _GuardedHeaders(Mapping):
+    """Request headers that refuse to materialise without credentials.
+
+    A single choke point beats sprinkling `require_creds()` into all seven
+    request helpers — helper #8 would silently skip the check.
+
+    Deliberately **not** a `dict` subclass. CPython's `{**d}` and `dict(d)` take
+    a C fast path that copies a dict subclass's internal storage directly,
+    bypassing any overridden `__getitem__`/`keys()`. Five of the seven helpers
+    build their headers with `{**HEADERS, "Prefer": ...}`, so a dict-subclass
+    guard would be bypassed exactly where it is needed. `Mapping` has no such
+    fast path — unpacking goes through `keys()` + `__getitem__`.
+    (Measured 2026-07-10, not assumed: `{**GuardDict()}` returned the payload
+    without ever calling the override.)
+    """
+
+    def _payload(self) -> dict[str, str]:
+        require_creds()
+        return {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates,return=minimal",
+        }
+
+    def __getitem__(self, key: str) -> str:
+        return self._payload()[key]
+
+    def __iter__(self):
+        return iter(self._payload())
+
+    def __len__(self) -> int:
+        return len(self._payload())
+
+    def __repr__(self) -> str:  # never leak the service-role key into a traceback
+        return "<supabase HEADERS (credential-guarded)>"
+
+
+HEADERS = _GuardedHeaders()
 
 _ARTICLE_ID_CACHE: dict[str, str] = {}
 _TAG_ID_CACHE: dict[str, int] = {}
@@ -616,8 +665,36 @@ def sync_strategy_signal(
     """Sync a strategy signal to Supabase while preserving metadata."""
     from datetime import datetime, timezone
 
-    existing = _find_strategy_signal(strategy_key, strategy_name) or {}
+    from volpred.ops.strategy_gate import StrategyGateError, assert_activation_allowed
+
+    # Look up current state once — reused for metadata preservation AND the
+    # activation gate. `_find_strategy_signal` returns None only on a genuine
+    # not-found (query succeeded, empty result); a backend query failure
+    # propagates as an exception. That distinction is what lets the gate tell
+    # "new strategy" apart from "Supabase unreachable" below.
+    try:
+        existing = _find_strategy_signal(strategy_key, strategy_name) or {}
+    except Exception as e:
+        if is_active:
+            # Indeterminate current state on an activation write => fail-closed.
+            # A transient lookup failure is indistinguishable from a brand-new
+            # strategy; allowing the write would be an activation backdoor.
+            # Distinct message so this is not mistaken for a missing-receipt block.
+            raise StrategyGateError(
+                f"Cannot verify activation gate for strategy "
+                f"'{strategy_key or strategy_name}': strategy_signals lookup "
+                f"failed ({e}). Refusing to activate while the current active "
+                f"state is indeterminate. This is NOT a missing-receipt error — "
+                f"retry once Supabase is reachable."
+            ) from e
+        raise  # deactivation / metadata-only: propagate the original error unchanged
     resolved_key = strategy_key or existing.get("strategy_key") or _slugify_strategy_key(strategy_name)
+
+    # Gate the inactive->active transition only. An already-active strategy being
+    # re-synced (daily_update.py full-sync, the most common path) is a no-op
+    # transition and passes without a receipt, so live cards never disappear.
+    if is_active and not existing.get("is_active"):
+        assert_activation_allowed(resolved_key, strategy_name)
 
     row = {
         "strategy_key": resolved_key,
@@ -649,10 +726,30 @@ def sync_strategy_signal(
 
 def set_strategy_active(identifier: str, active: bool) -> bool:
     """Activate/deactivate strategy by key first, then by display name."""
-    existing = _find_strategy_signal(identifier, identifier)
+    from volpred.ops.strategy_gate import StrategyGateError, assert_activation_allowed
+
+    try:
+        existing = _find_strategy_signal(identifier, identifier)
+    except Exception as e:
+        if active:
+            # Same fail-closed reasoning as sync_strategy_signal: an indeterminate
+            # lookup on an activation request must not fall through to the PATCH.
+            raise StrategyGateError(
+                f"Cannot verify activation gate for strategy '{identifier}': "
+                f"strategy_signals lookup failed ({e}). Refusing to activate "
+                f"while the current active state is indeterminate. This is NOT a "
+                f"missing-receipt error — retry once Supabase is reachable."
+            ) from e
+        raise  # deactivation: propagate the original error unchanged
     if not existing:
         print(f"  Supabase strategy_signals error: strategy not found ({identifier})")
         return False
+    # Gate only the inactive->active transition; deactivation always passes.
+    if active and not existing.get("is_active"):
+        assert_activation_allowed(
+            existing.get("strategy_key") or identifier,
+            existing.get("strategy_name") or identifier,
+        )
     return _patch_where("strategy_signals", {"id": existing["id"]}, {"is_active": active})
 
 

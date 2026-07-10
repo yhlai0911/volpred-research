@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from volpred.ops.common import project_path
 from volpred.ops.local_control_plane import create_task, get_agent_session, get_task
 from volpred.ops.session import session_bootstrap, session_finish_task, session_next_task, session_shutdown
 
@@ -73,14 +74,14 @@ task_summary: "{{title}}"
 goal: "{{description}}"
 success_criteria:
   - "done"
-repo_root: "/Users/yhlai0911/volpred-research"
+repo_root: "__REPO_ROOT__"
 required_files:
   - "docs/project_improvement_status.md"
 recommended_files: []
 forbidden_large_files: []
 relevant_commands: []
 why_this_agent: "code template"
-""".strip(),
+""".strip().replace("__REPO_ROOT__", str(project_path())),
         encoding="utf-8",
     )
     monkeypatch.setenv("VOLPRED_ACTOR", "codex")

@@ -57159,21 +57159,390 @@
     "task_type": "platform_ops",
     "priority": 4,
     "source": "topology-fit-audit-20260710",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-10T04:35:42.392290+00:00",
     "title": "task schema 加 topology 欄位：拓撲路由從 prose 機械化（先選拓撲再選模型）",
-    "description": "現況：路由已機械化兩層 — lane（continue_task_dispatch：agentable/main_thread/blocked）與 model/effort（model_router.py），但『用什麼協作拓撲』（inline / subagent / worktree / codex_exec / compute_queue / agent_team）散在 prose（task-routing.md、workflow-index.md 執行模式欄、各 skill 內）由每班 orchestrator 臨場判斷。task schema 有 dispatch_lane 沒有 topology。\n\n要求（anti-stacking：收編進既有兩層路由 owner，不建新 Router）：\n1. storage/next_tasks.json schema 在 dispatch_lane 旁加 topology 欄位（enum: inline|subagent|worktree|codex_exec|compute_queue|agent_team）。\n2. task_type → topology 預設映射放 config/models.json，查詢面加進 scripts/model_router.py（與 model/effort 同一次查詢回傳）；scripts/continue_task_dispatch.py categorizer 輸出 report 時帶 topology 建議。\n3. 同 commit 把 .claude/rules/task-routing.md 與 docs/workflow-index.md『執行模式』欄 prose 降級成 pointer 指向 schema 欄位。\n4. hourly orchestrator prompt 的分流決策段改為『讀 topology 欄位，僅在欄位缺失或明顯不合時 override 並記 override 原因』— 讓 override 成為可觀測例外而非常態。\n5. 未 backfill 的既有 task fail-open（無欄位 → 現行 prose 判斷），漸進遷移。\n動機：2026-07-10 拓撲審計核心發現 —『先選協作方式再選模型』是唯一還沒機械化的路由層；機械化後 dispatch 決策可審計、可統計（哪類任務哪種拓撲成功率高）。"
+    "description": "現況：路由已機械化兩層 — lane（continue_task_dispatch：agentable/main_thread/blocked）與 model/effort（model_router.py），但『用什麼協作拓撲』（inline / subagent / worktree / codex_exec / compute_queue / agent_team）散在 prose（task-routing.md、workflow-index.md 執行模式欄、各 skill 內）由每班 orchestrator 臨場判斷。task schema 有 dispatch_lane 沒有 topology。\n\n要求（anti-stacking：收編進既有兩層路由 owner，不建新 Router）：\n1. storage/next_tasks.json schema 在 dispatch_lane 旁加 topology 欄位（enum: inline|subagent|worktree|codex_exec|compute_queue|agent_team）。\n2. task_type → topology 預設映射放 config/models.json，查詢面加進 scripts/model_router.py（與 model/effort 同一次查詢回傳）；scripts/continue_task_dispatch.py categorizer 輸出 report 時帶 topology 建議。\n3. 同 commit 把 .claude/rules/task-routing.md 與 docs/workflow-index.md『執行模式』欄 prose 降級成 pointer 指向 schema 欄位。\n4. hourly orchestrator prompt 的分流決策段改為『讀 topology 欄位，僅在欄位缺失或明顯不合時 override 並記 override 原因』— 讓 override 成為可觀測例外而非常態。\n5. 未 backfill 的既有 task fail-open（無欄位 → 現行 prose 判斷），漸進遷移。\n動機：2026-07-10 拓撲審計核心發現 —『先選協作方式再選模型』是唯一還沒機械化的路由層；機械化後 dispatch 決策可審計、可統計（哪類任務哪種拓撲成功率高）。",
+    "claimed_by": "main-session",
+    "claimed_at": "2026-07-10T05:25:12.629090+00:00",
+    "claim_session_id": "fdb60732",
+    "status_history": [
+      {
+        "ts": "2026-07-10T05:25:12.629421+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main-session"
+      },
+      {
+        "ts": "2026-07-10T05:30:46.905908+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-session"
+      }
+    ],
+    "completed_at": "2026-07-10T05:30:46.905531+00:00",
+    "result": "commit：TASK_TYPE_TO_TOPOLOGY + pick_topology 落地 model_router.py；dispatch report candidate 帶 topology；prompt step 5 讀欄位 override 記 work_log；task-routing prose 降級 pointer；9 tests 全過；CLI 實跑驗證 experiment→worktree"
   },
   {
     "id": "topology-audit-20260710-pregate-enforce-flip",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "topology-fit-audit-20260710",
-    "status": "pending",
+    "status": "blocked",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-10T05:04:18.281904+00:00",
     "title": "pregate shadow→enforce 切換（觀察期滿後）",
-    "description": "前置：commit a3d243650 已把 pregate 接進 dispatch_supervisor/scheduler.py，config pregate.mode=shadow 運行中。\n\n切換 criteria（全部滿足才 flip）：\n1. storage/logs/hourly_pregate.jsonl 自 2026-07-10 13:07 起累積 >=3 筆 daemon 觸發的 shadow 決策。\n2. 逐筆核對：would_skip=true 的班，該班實際 fire 產出是否真的是 stub（看 supervisor log / work_log 該小時 entry）；would_skip=false 的班是否真有實質工作。任何一筆誤判（would_skip=true 但該班有實質產出）→ 不 flip，改 pregate 訊號並重新觀察。\n3. 確認 email_reply / critical 班次從未被判 would_skip（安全不變量）。\n\nFlip 操作：config/runtime_schedules.json 的 pregate.mode 改 'enforce'（熱重載，免重啟 daemon）。\nFlip 後義務：(a) 觀察下一個被 skip 的班，確認 skip receipt 寫入且下一班正常 fire；(b) 寄 email 通知老闆（排程行為變更，per feedback_email_on_major_decisions）：預估每日省下的空班 cold-load 數；(c) 更新 error_log 2026-07-10 pregate entry 的驗證段。"
+    "description": "前置：commit a3d243650 已把 pregate 接進 dispatch_supervisor/scheduler.py，config pregate.mode=shadow 運行中。\n\n切換 criteria（全部滿足才 flip）：\n1. storage/logs/hourly_pregate.jsonl 自 2026-07-10 13:07 起累積 >=3 筆 daemon 觸發的 shadow 決策。\n2. 逐筆核對：would_skip=true 的班，該班實際 fire 產出是否真的是 stub（看 supervisor log / work_log 該小時 entry）；would_skip=false 的班是否真有實質工作。任何一筆誤判（would_skip=true 但該班有實質產出）→ 不 flip，改 pregate 訊號並重新觀察。\n3. 確認 email_reply / critical 班次從未被判 would_skip（安全不變量）。\n\nFlip 操作：config/runtime_schedules.json 的 pregate.mode 改 'enforce'（熱重載，免重啟 daemon）。\nFlip 後義務：(a) 觀察下一個被 skip 的班，確認 skip receipt 寫入且下一班正常 fire；(b) 寄 email 通知老闆（排程行為變更，per feedback_email_on_major_decisions）：預估每日省下的空班 cold-load 數；(c) 更新 error_log 2026-07-10 pregate entry 的驗證段。",
+    "claimed_by": "main-session",
+    "claimed_at": "2026-07-10T05:39:34.773765+00:00",
+    "claim_session_id": "fdb60732",
+    "status_history": [
+      {
+        "ts": "2026-07-10T05:39:34.774086+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main-session"
+      },
+      {
+        "ts": "2026-07-10T05:39:35.063735+00:00",
+        "from": "claimed",
+        "to": "blocked",
+        "by": "main-session"
+      }
+    ],
+    "completed_at": "2026-07-10T05:39:35.063435+00:00",
+    "result": "觀察期 criteria 執行完畢，判定：不切換。交叉核對 122 筆 shadow entries：56 筆 would_skip=true 中，寬鬆歸因 27 筆(48%)該小時有實質產出、嚴格歸因(actor=hourly)僅 3 筆(5%) — 但 work_log actor 蓋章不可靠(最近60筆實質工作57筆空actor)，真實誤判率介於 5-48% 無法判定。儀器先行：見後續任務 topology-audit-20260710-pregate-observability。shadow 模式維持(零行為變更零風險)，enforce 決策待儀器修好後用可歸因資料重評。"
+  },
+  {
+    "id": "telegram-340",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T05:31:42.881124+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 340）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n所以立即處理？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T05:35:09.755178+00:00",
+    "claim_session_id": "f97c8d58a5dd",
+    "status_history": [
+      {
+        "ts": "2026-07-10T05:35:09.756181+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T05:36:23.375101+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-10T05:36:23.374648+00:00"
+  },
+  {
+    "id": "topology-audit-20260710-pregate-observability",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "topology-fit-audit-20260710",
+    "status": "succeeded",
+    "dispatch_lane": "agentable",
+    "created_at": "2026-07-10T05:40:14.045972+00:00",
+    "title": "pregate 可歸因儀器 + enforce 重評（接替 blocked 的 enforce-flip）",
+    "description": "前置事實（2026-07-10 flip 評估結論，見 blocked task topology-audit-20260710-pregate-enforce-flip）：122 筆 shadow 交叉核對顯示 would_skip=true 的班有 5%~48% 該小時產出實質工作，但 work_log actor 蓋章不可靠（最近 60 筆實質工作 57 筆空 actor），無法歸因『是那班 fire 做的還是並行 session 做的』→ enforce 安全性無法證明 → 維持 shadow。\n\n儀器修復（三件，全是小改）：\n1. scripts/hourly_dispatch_pregate.py 的 _log_decision 加 invoker 欄位；scripts/dispatch_supervisor/scheduler.py 的 _run_pregate 傳 --invoker supervisor。解決 13:34:58 三筆一秒內不明來源 entries 的歸因問題（疑似測試或手動呼叫污染觀察資料）。\n2. hourly orchestrator 的 work_log 寫入必蓋 actor=hourly-<HH>（改 scripts/cron_hourly_dispatch_prompt.md 的 work_log 寫入指示 + 若有 helper script 改 helper）— 讓未來 skip-vs-產出交叉核對可精確歸因。\n3. 補一個 duration-based 歷史核對 script（scratchpad/crosscheck_pregate.py 有雛形可入庫為 scripts/crosscheck_pregate_outcomes.py）：would_skip=true 的班若 fire duration 長（>15min，從 dispatch_state completions / supervisor worker log 取）視為疑似誤判 — duration 是不依賴 actor 蓋章的替代訊號。\n\n重評 criteria（儀器上線後累積 ≥24h 可歸因資料）：\n- 嚴格誤判率（該班 fire 自己產出實質工作 / would_skip 總數）≤10% 且誤判後果全部是 ≤window_hours 的有界延遲 → 可 flip，flip 時 window_hours 建議同步降到 2.0 收緊延遲上界，並寄 email 通知老闆。\n- 誤判率 >10% → 補訊號（候選：compute-queue followup pending / draft pool deficit / reader-facing release due / P3 backlog age）再觀察。\n安全不變量不變：email/critical/requested fire 永不 gate；shadow 期間零行為變更。",
+    "claimed_by": "main-session",
+    "claimed_at": "2026-07-10T05:42:53.974265+00:00",
+    "claim_session_id": "fdb60732",
+    "status_history": [
+      {
+        "ts": "2026-07-10T05:42:53.974605+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main-session"
+      },
+      {
+        "ts": "2026-07-10T05:48:56.177626+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-session"
+      }
+    ],
+    "completed_at": "2026-07-10T05:48:56.177323+00:00",
+    "result": "commit 162c6b2b4：invoker 欄位（scheduler 帶 --invoker supervisor，daemon 13:48 已重啟載入）+ prompt 完整完成 gate 強制 work_log actor=hourly-<HH> + scripts/crosscheck_pregate_outcomes.py 入庫（strict/loose/duration 三軌 + coverage + verdict hint）。28 tests。flip 重評門檻寫死在工具與任務：supervisor 資料 ≥24h + coverage ≥80% + strict ≤10%。"
+  },
+  {
+    "id": "telegram-349",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T05:48:54.405641+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 349）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n為什麼持續出現這個訊息？立刻徹底檢查\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T05:49:30.090116+00:00",
+    "claim_session_id": "7ccb74e2e7a4",
+    "status_history": [
+      {
+        "ts": "2026-07-10T05:49:30.090481+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T05:53:26.863547+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-10T05:53:26.863236+00:00"
+  },
+  {
+    "id": "telegram-352",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T05:53:59.466256+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 352）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我是說 為什麼一直出現這個問題：\nℹ️ [INFO] supervisor restart\n\n📌 Supervisor restarted under launchd KeepAlive\n\n• previous_started_at: 2026-07-10T05:39:53.255536+00:00\n• now: 2026-07-10T05:48:30.737200+00:00\n• 若短時間內反覆 restart，檢查 ~/.volpred/logs/dispatch_supervisor.log 找 crash trace\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T05:54:25.707565+00:00",
+    "claim_session_id": "a618d4b77eba",
+    "status_history": [
+      {
+        "ts": "2026-07-10T05:54:25.707913+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T05:57:48.072123+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-10T05:57:48.071767+00:00"
+  },
+  {
+    "id": "ops-superv-restart-noise-20260710",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "telegram-responder",
+    "status": "succeeded",
+    "created_at": "2026-07-10T05:57:27.852587+00:00",
+    "title": "抑制 supervisor『restart』INFO alert 的部署噪音（deploy-aware）",
+    "description": "背景：老闆 Telegram msg 352 抱怨『supervisor restart』INFO 一直出現。查證：非 crash（無 traceback，每次都乾淨重入 scheduler_loop，launchd 退碼 143=SIGTERM=kickstart -k）。根因=今日 12:28–13:48 對 scripts/dispatch_supervisor/** 連續 commit ~10 次修 bug（pregate orphan、ghost-field gate、git_conflict_guard、heartbeat dead-man switch 等），daemon code 改動必 kickstart 重載才生效，每次重載 alerts.send_supervisor_restart() 就發一則 INFO → 5 次重載=5 則噪音。\n\n改善：讓 restart alert deploy-aware。做法建議：kickstart 前（或 deploy wrapper）在 storage/ops/ 落一個 restart_marker（含 reason='deploy' + expiry ~120s）；supervisor.main() 的 send_supervisor_restart() 讀 marker 若新鮮則降級為 debug/不寄（planned reload），marker 過期或不存在才照舊 INFO（真正 KeepAlive 意外重啟才吵老闆）。務必保留『非預期重啟仍要 alert』的能力。加 unit test 覆蓋 planned-vs-unexpected 兩路徑。落地後 kickstart -k 生效（重載前查 current_job==idle）。",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-10T09:17:40.329329+00:00",
+    "claim_session_id": "f3ceb7963da3",
+    "status_history": [
+      {
+        "status": "pending",
+        "at": "2026-07-10T05:57:27.852587+00:00",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T09:17:40.329640+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-10T09:17:40.601831+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-10T09:17:40.862610+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-claude"
+      }
+    ],
+    "started_at": "2026-07-10T09:17:40.601527+00:00",
+    "completed_at": "2026-07-10T09:17:40.862230+00:00",
+    "result": "deploy-aware restart-alert suppression: planned-restart marker (state.write/consume_planned_restart_marker) + send_supervisor_restart(planned_reason) log-only + reload wrapper scripts/reload_dispatch_supervisor.sh (in-flight guard + marker + kickstart). 5 unit tests, 77 pass. error_log + control-plane.md updated."
+  },
+  {
+    "id": "email-11950-60628a",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] supervisor restart",
+    "description": "Gmail UID: 11950\nMessage-ID: <3F40D5DE-5E3E-4CA6-B1F9-B163D24F3CC8@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 10 Jul 2026 13:46:59 +0800\nSubject: Re: [VolPred Alert][INFO] supervisor restart\n\n--- 用戶回信內容 ---\n立刻檢查這是什麼情況 並徹底解決\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月10日 13:39 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> supervisor restart\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> Supervisor restarted under launchd KeepAlive\r\n> \r\n> previous_started_at: 2026-07-10T05:22:09.580937+00:00\r\n> now: 2026-07-10T05:39:53.258148+00:00\r\n> 若短時間內反覆 restart，檢查 ~/.volpred/logs/dispatch_supervisor.log 找 crash trace\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-10T06:00:08.275318+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11950,
+    "email_message_id": "<3F40D5DE-5E3E-4CA6-B1F9-B163D24F3CC8@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] supervisor restart",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-10T09:18:43.569088+00:00",
+    "claim_session_id": "fca791086c60",
+    "status_history": [
+      {
+        "ts": "2026-07-10T09:08:13.345412+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-10T09:18:43.569445+00:00",
+        "from": "claimed",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-10T09:20:38.823410+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "interactive-claude"
+      }
+    ],
+    "completed_at": "2026-07-10T09:20:38.823061+00:00",
+    "result": "調查 supervisor restart：確認為部署噪音（12:28-13:48 密集改 supervisor code 連續 kickstart 重載，每次自動發 INFO；非 crash）。徹底解決=deploy-aware marker 抑制 planned reload alert，保留意外 restart alert 能力。commit cfe13589a, ops-superv-restart-noise-20260710 succeeded, close email 已寄。"
+  },
+  {
+    "id": "telegram-359",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T09:02:27.773439+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 359）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n剛剛今天額度不夠，現在已經時間開放你可以重新把所有有問題的部分立刻解決\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T09:03:12.354244+00:00",
+    "claim_session_id": "e7faa5612728",
+    "status_history": [
+      {
+        "ts": "2026-07-10T09:03:12.354582+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T09:07:47.613423+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-10T09:07:47.613081+00:00"
+  },
+  {
+    "id": "event-typhoon-closure-20260710",
+    "task_type": "event_article",
+    "priority": 1,
+    "source": "drought-remediation-emergency-20260710",
+    "status": "claimed",
+    "dispatch_lane": "main_thread",
+    "topology": "inline",
+    "created_at": "2026-07-10T09:26:21.916215+00:00",
+    "title": "[T+0 事件文] 颱風巴威台股停市：歷史颱風假的波動率帳單（K1675）",
+    "description": "發文脫班 critical（8h 無新文，remediation 0/0 升級）的 emergency fresh 文章。事件：2026-07-10 台股因颱風巴威停市（TWSE 依臺北市全日停止上班）。角度：歷史台股颱風停市樣本 → 停市後首個交易日的跳空/絕對報酬/RV 變化 vs 對照日；3-layer + arc dedup 已過（主線程 17:24 驗證，feed 無停市×波動主題）。證據包 = experiments/k1675/；主線程負責 publish + FB。",
+    "claimed_by": "main-session",
+    "claimed_at": "2026-07-10T09:26:22.355471+00:00",
+    "claim_session_id": "fdb60732",
+    "status_history": [
+      {
+        "ts": "2026-07-10T09:26:22.355719+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main-session"
+      }
+    ]
+  },
+  {
+    "id": "email-11962-9a1805",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] 發文脫班補救失敗：force-release/refill 皆為 0",
+    "description": "Gmail UID: 11962\nMessage-ID: <BFEB0515-9E07-40AC-9669-C8AC5A008EBB@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 10 Jul 2026 17:25:56 +0800\nSubject: Re: [VolPred Alert][CRITICAL] 發文脫班補救失敗：force-release/refill 皆為 0\n\n--- 用戶回信內容 ---\nclaude額度已恢復 給我立刻處理\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月10日 17:23 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 發文脫班補救失敗：force-release/refill 皆為 0\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 系統偵測到讀者端內容更新可能中斷，需要先恢復發文節奏。\r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> 行動\r\n> \r\n> 先補一篇可發佈文章或觸發釋出流程，再追查為什麼排程沒接上。\r\n> Publishing-freshness dead-man switch attempted automatic remediation, but both live escape paths returned empty.\r\n> publish_gap_hours: 7.98\r\n> threshold_hours: 6.0\r\n> force_release.released: 0\r\n> refill_reader_facing.added: 0\r\n> refill_reader_facing.reason: no_reader_facing_candidates_passing_filter\r\n> Required operator action: create or dispatch a fresh reader-facing article task; do not treat this as a no-op.\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-10T09:30:06.927985+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11962,
+    "email_message_id": "<BFEB0515-9E07-40AC-9669-C8AC5A008EBB@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] 發文脫班補救失敗：force-release/refill 皆為 0",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-07-10T09:31:44.264348+00:00",
+    "claim_session_id": "44d1f900e142",
+    "status_history": [
+      {
+        "ts": "2026-07-10T09:31:44.264648+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-10T09:31:44.580622+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-10T09:52:40.431777+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-17"
+      }
+    ],
+    "started_at": "2026-07-10T09:31:44.580204+00:00",
+    "completed_at": "2026-07-10T09:52:40.431367+00:00",
+    "result": "�?��??�?��??解�?��?�?��? mile_66c3fc3b�?gap 8.14h�??0.01h�?�??�??帶根治 upload_chart �??平 object key �?�?? bug + publish_draft --dry-run �??�?�?��?��?�?��?復�?? mile_e71ea353 �?張被�?�??�??�?�人�??�??�?hash �?�??�?�??commit 2e1940866�??"
+  },
+  {
+    "id": "telegram-366",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T09:38:58.194491+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 366）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nGitHub\n[yhlai0911/volpred-research] Test Suite workflow run\n \n\n \nTest Suite: All jobs have failed\n \n \nStatus Job Annotations\npytest \nTest Suite / pytest\nFailed in 5 minutes and 10 seconds\nannotations for Test Suite / pytest 2 \n \n \n—\nYou are receiving this because you are subscribed to this thread.\nManage your GitHub Actions notifications\n\n \nGitHub, Inc. ・88 Colin P Kelly Jr Street ・San Francisco, CA 94107\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T09:39:35.884661+00:00",
+    "claim_session_id": "1cfbe3ebc750",
+    "status_history": [
+      {
+        "ts": "2026-07-10T09:39:35.885048+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T09:42:00.966805+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-10T09:42:00.966429+00:00"
+  },
+  {
+    "id": "ci-env-hardening-20260710",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "telegram-responder",
+    "status": "pending",
+    "created_at": "2026-07-10T09:41:36.797485+00:00",
+    "title": "CI Test Suite 34 fail — 全為環境依賴，修 workflow 環境與測試 fixture",
+    "description": "run 29083395825 (2026-07-10) 首次真的跑 pytest 後 34 failed / 1650 passed。本機 uv run --extra dev python -m pytest 同批全 PASS（39 passed）→ 全部是 CI 環境依賴，非產品 bug。\n根因分四類：\n1. 缺 ripgrep（9 tests, test_experiments_ops）→ workflow 加 apt-get install -y ripgrep\n2. 缺 SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY（4 tests, test_feed_sync）→ 測試改 monkeypatch env，或 CI 注入 dummy env；不可把 secret 放 CI\n3. repo_root_mismatch（6 tests, test_execution_brief / test_session_ops）→ guard 假設 repo 在 ~/volpred-research，CI 在 /home/runner/work/...；改讀 git rev-parse --show-toplevel\n4. gitignored 資料檔缺（~13 tests: trending_repost_log.json、arc_dedup / topic_cluster_gate / daily_digest 的 SystemExit:1）→ 測試改建 fixture，不依賴 storage/ 實資料\n另 test_alerts assert 4==3 與 test_cron_auth_preflight 需個別確認是否亦屬類 3/4。\n禁止用 skip/xfail 掩蓋 — 依「永遠修流程」修環境與測試 fixture。"
   }
 ]

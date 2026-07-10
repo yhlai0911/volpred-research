@@ -38,6 +38,37 @@
 1. **測試隔離不可依賴「patch 每一個路徑常數」的人類注意力**。callee 用 `__file__` / `PROJECT_ROOT` 自行解析路徑時，caller 的 monkeypatch 完全無效，而兩者的差別在 code review 時肉眼幾乎看不出來（兩個兇手都只差一行 `monkeypatch.setattr(MODULE, "ROOT", tmp_path)`）。結構性解法是**在 writer 上設 env-gated 守門員**，讓隔離失敗變成 loud failure 而不是 silent write。
 2. **`subprocess.run(timeout=)` 不是寫入的保護**。它 bound 的是父程序的等待；`uv run python X` 的孫程序在 `uv` 被殺後照樣跑完並落盤，寫入可能發生在測試 session 結束後數十秒。這也代表**用 mtime 歸因「哪支測試寫的」會被延遲落盤誤導** —— 判斷時要同時看有無存活的孤兒程序。
 3. **gitignore 的目錄仍然是 canonical 狀態**。`storage/ops/tasks/` 不進 git，但 dispatcher 讀它；「`git status` 乾淨」不等於「沒有汙染」。任何以 `git status` 為唯一 audit 儀器的流程，對 ignored 路徑天生盲目。
+## 2026-07-10 新 gate 上線的兩個必檢項：grandfather backfill + enclosing-try blast radius
+
+**背景**：外部 Codex 稽核指出策略 activation 的五項 gate 100% 是 prose、五條旁路零檢查。落地機械 gate（`src/volpred/ops/strategy_gate.py`）時，實作 agent 的設計本身正確（只攔 inactive→active transition，daily_update 對既有 active 的 no-op re-sync 免 receipt），單元測試 30 passed 全綠 —— **但兩個 adversarial reviewer 各自獨立抓到同一個會上線爆炸的洞**。
+
+**洞 1 — gate 上線但 grandfather backfill 只跑 dry-run**：五項 gate 標準誕生於 2026-03-29，比史上最後一次策略上架（2026-03-28）晚一天，**現存 11 檔 active 策略全部沒走過這道 gate**。gate 程式碼一 commit 就 armed，而 receipt 目錄不存在 → 任一次 `strategy-set-active <既有策略>`（如 Supabase row 被 is_active=False 後要復原）就會被自己的 gate 鎖死，直接違反老闆 standing directive「好的上架」。
+
+**洞 2 — enclosing try 把 gate 例外放大成整日資料斷更**：`scripts/daily_update.py` 把 strategy loop + paper_trades sync + market_daily backfill **全包在同一個 `try` 裡**，尾端是 broad `except Exception: print("Supabase sync skipped")`。gate raise 的 `StrategyGateError` 會 unwind 整塊 → 當天 paper_trades 與 market_daily 一起不同步 → `/portfolio` 價格空白（與 2026-04-17 outage 同一 class）。實作者自評的 blast radius 是「一張策略卡被擋」，實際是「整日行情資料斷更」——**自評低估了一個數量級**。
+
+**解決方法**：
+1. `scripts/backfill_strategy_gate_receipts.py --apply` 與 gate 程式碼**同一個 commit** 落地，11 檔既有策略各發一份 receipt，`gates` 值標 `"grandfathered"` 而非 `true`（誠實：不謊稱檢驗跑過），`note` 寫明 gate 標準晚於上架日誕生。
+2. `daily_update.py` strategy loop 加 per-strategy 隔離：`except StrategyGateError` → `warn()` + 計數 + `continue`，單一策略被擋不再連坐下游同步。
+
+**教訓（下次立任何新 gate 前強制自問）**：
+- **Grandfather 檢查**：這道 gate 誕生時，已存在的資料/物件有沒有走過它？沒有 → backfill 必須與 gate 同 commit，否則 gate 上線即鎖死存量。
+- **Blast radius 檢查**：新 raise 的例外會被哪一層 `except` 接住？把 enclosing try 的**完整範圍**讀一遍 —— 「我只是讓一個函式 raise」在一個 200 行的 broad try 裡等於「讓整塊功能靜默消失」。
+- **自評 blast radius 不可信**：實作者對自己改動的影響半徑系統性低估。adversarial reviewer 的價值不在找語法錯，而在追 exception 的傳播路徑。本次兩個獨立 reviewer 收斂到同一結論，是設計正確但部署順序錯誤的典型。
+
+## 2026-07-10 supervisor『restart』INFO alert 部署噪音 → deploy-aware marker 抑制
+
+**現象**：老闆收到多則「supervisor restart」INFO email（Telegram msg 352 抱怨）並回信「立刻檢查這是什麼情況 並徹底解決」。
+
+**查證（非 crash）**：`launchctl list` 退碼 143（=SIGTERM，即 `kickstart -k`），`dispatch_supervisor.log` 每次都乾淨重入 `scheduler_loop`、無 traceback。restart burst 集中在 **2026-07-10 12:28 / 12:59 / 13:22 / 13:39 / 13:48（80 分鐘 5 次）**，之後穩定跑 3.5h；07-05 至 07-10 中間 5 天零 restart。對照 git log：同一時段對 `scripts/dispatch_supervisor/**` 連續 commit ~10 次修 bug（pregate orphan、ghost-field gate、git_conflict_guard、topology-audit 等）。daemon 程式凍結於開機 image，改 code 必 `kickstart -k` 重載才生效 → 每次重載 `alerts.send_supervisor_restart()` 就發一則 INFO → 5 次重載 = 5 則噪音。**這是部署噪音，非故障**。（附帶查到 worker 14:00–17:00 連續 `category=quota` exit，根因=Max session 額度用罄、5pm reset，屬 worker.py 既有 cheap-single-attempt 自動 resume 設計，非 bug；17:07 fire 額度恢復後已正常運作。）
+
+**解決方法（marker-based deploy-aware suppression）**：
+1. `state.write_planned_restart_marker(reason, ttl_s=120)` 寫獨立檔 `storage/ops/supervisor_restart_marker.json`（不進 `dispatch_state.json`，避開熱路徑 lock 與 schema-version 清洗）。
+2. `state.consume_planned_restart_marker()` 在 `supervisor.main()` 開機時 **consume-once** 讀取：fresh → 回 reason；expired/corrupt/absent → 回 None（皆記錄，非 silent）。consume-once 保證只抑制它被寫入的那一次開機——planned reload 後若立刻 crash，KeepAlive 重生時已無 marker → 那次（真正意外的）restart 仍會 alert。
+3. `alerts.send_supervisor_restart(planned_reason=...)`：`planned_reason` 非 None → log-only breadcrumb、不寄信；None → 照舊 INFO（保留「非預期重啟仍 alert」能力）。
+4. **reload wrapper** `scripts/reload_dispatch_supervisor.sh`：reload 前 (a) 查 `current_job==null`（in-flight worker 保護，per control-plane.md）否則拒絕（`--force` 才覆蓋）、(b) 寫 marker、(c) `kickstart -k`。往後所有 supervisor code 重載走此 wrapper，噪音自動消除。
+5. 5 個 unit test 覆蓋 planned/unexpected/expired/corrupt/consume-once（`tests/test_dispatch_supervisor.py`）。
+
+**anti-stacking**：未新增 watchdog／第二 hook；抑制邏輯收編進既有 `send_supervisor_restart` 這個 alert 的單一 owner，reload 收編進單一 wrapper。task `ops-superv-restart-noise-20260710`。
 
 ## 2026-07-10 git_conflict_guard 在 7/4 supervisor cutover 時孤兒化（同類第 4 次）→ 收編進 phase_z + 立機械 gate
 

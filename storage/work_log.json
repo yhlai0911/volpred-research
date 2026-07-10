@@ -15265,5 +15265,25 @@
     "owner": "codex",
     "backfilled_at": "2026-07-10T05:18:46.745415+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T09:17:40.987846+00:00",
+    "actor": "interactive-claude",
+    "task_type": "platform_ops",
+    "task_id": "ops-superv-restart-noise-20260710",
+    "summary": "deploy-aware supervisor restart-alert suppression (marker + reload wrapper + 5 tests); resolves boss email-11950 restart-noise complaint",
+    "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-10T17:47:51+08:00",
+    "task_type": "daily_article",
+    "task_id": "email-11962-9a1805",
+    "actor": "hourly-17",
+    "summary": "發文脫班補救：發佈 mile_66c3fc3b（股市在怕債市沒在怕，QQQ vs HYG 波動率背離，真數據+2圖+懶人包3圖）。順修 upload_chart 扁平 object key 覆蓋 bug + publish_draft --dry-run 真上傳的副作用，並復原被覆蓋的 mile_e71ea353 三張懶人包圖。",
+    "artifacts": [
+      "mile_66c3fc3b",
+      "experiments/daily_credit_silence_20260710/",
+      "tests/test_upload_chart_object_key.py"
+    ]
   }
 ]

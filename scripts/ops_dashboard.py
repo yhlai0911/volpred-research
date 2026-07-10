@@ -496,8 +496,12 @@ def main():
         "ok" if not stale else "warn" if len(stale) <= 2 else "critical",
         f"{len(stale)} cron jobs stale (over max-age)",
         (
-            "hourly_dispatch stale → check supervisor: launchctl kickstart -k "
-            "gui/501/com.volpred.dispatch-supervisor + uv run python -m "
+            # NOT raw `launchctl kickstart` — that bypasses the planned-restart
+            # marker and makes a deliberate reload look like a crash to the owner
+            # (2026-07-10 restart-noise incident). The wrapper writes the marker
+            # and refuses while a worker is in flight.
+            "hourly_dispatch stale → check supervisor: bash "
+            "scripts/reload_dispatch_supervisor.sh --reason stale_dispatch + uv run python -m "
             "scripts.dispatch_supervisor.cli status; other jobs → manual fire "
             "~/.volpred/bin/cron_<id>.sh"
             if any(s.get("job") == "hourly_dispatch" for s in stale)

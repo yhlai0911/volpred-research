@@ -63,7 +63,13 @@ def _set_runtime_env() -> None:
 
     Set ONCE at supervisor boot so all worker children inherit:
       - RLIMIT_NOFILE soft to 65536 (strike 3 mitigation)
+      - VOLPRED_ACTOR=dispatch-supervisor so the daemon's OWN shared-state writes
+        (writer_log; phase_z runs in this same process) are attributed instead of
+        logging actor="unknown" (2026-07-10 attribution gap, docs/error_log.md).
+        setdefault so an operator/launchd override wins; worker children override
+        it per-fire (worker._dispatch_actor) so AGENT writes carry the fire.
     """
+    os.environ.setdefault("VOLPRED_ACTOR", "dispatch-supervisor")
     try:
         soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
         target = 65536
@@ -234,7 +240,11 @@ def main(argv: list[str] | None = None) -> int:
     prev_started = state.read_state(state_path).get("supervisor_started_at")
     state.mark_supervisor_started(state_path)
     _handle_restart_orphan()
-    alerts.send_supervisor_restart(prev_started=prev_started)
+    # Deploy-aware restart alert (2026-07-10): a fresh marker means this boot is
+    # a deliberate `kickstart -k` reload (supervisor code change) → suppress the
+    # INFO alert. No marker → genuine/unexpected KeepAlive respawn → alert.
+    planned_reason = state.consume_planned_restart_marker()
+    alerts.send_supervisor_restart(prev_started=prev_started, planned_reason=planned_reason)
     try:
         if args.once:
             return asyncio.run(_run_once_async(dry_run=args.dry_run))

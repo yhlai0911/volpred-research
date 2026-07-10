@@ -1296,18 +1296,32 @@ def main():
         # Sync ALL 7 strategy signals
         # Names MUST match strategyNames in portfolio page.tsx
         # Sync all strategies to Supabase using STRATEGY_REGISTRY as single source of truth
+        from volpred.ops.diagnostics import warn
+        from volpred.ops.strategy_gate import StrategyGateError
         synced_count = 0
+        gate_blocked = []
         for sid, w_info in strat_list:
             display_name, is_active, display_order = STRATEGY_REGISTRY.get(sid, (sid, True, 99))
             sig_weights = {a: round(w * 100) for a, w in w_info.items()}
-            sync_strategy_signal(display_name, sig_weights,
-                                 vix_level=round(vix_level, 2) if vix_level else None,
-                                 sigma_ann=sigma_gjr_ann,
-                                 display_order=display_order,
-                                 is_active=is_active,
-                                 strategy_key=sid)
+            try:
+                sync_strategy_signal(display_name, sig_weights,
+                                     vix_level=round(vix_level, 2) if vix_level else None,
+                                     sigma_ann=sigma_gjr_ann,
+                                     display_order=display_order,
+                                     is_active=is_active,
+                                     strategy_key=sid)
+            except StrategyGateError as e:
+                # One un-receipted strategy must not abort the enclosing try
+                # block — paper_trades and market_daily sync live below it, and
+                # losing them blanks /portfolio (2026-04-17 outage class).
+                warn("strategy_gate", "activation blocked during daily sync",
+                     strategy=sid, err=str(e))
+                gate_blocked.append(sid)
+                continue
             synced_count += 1
         print(f"  Supabase: {synced_count} strategy signals synced")
+        if gate_blocked:
+            print(f"  ⚠️ Supabase: {len(gate_blocked)} strategy activation(s) blocked by gate: {', '.join(gate_blocked)}")
         # Sync paper trades (last 30 entries per strategy, covers backfill + today)
         # Merge _market_daily into entry for Supabase (frontend expects market data in entry)
         market = pt.get("_market_daily", {})

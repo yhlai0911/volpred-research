@@ -184,8 +184,25 @@ def send_completion_failure(*, entry: dict[str, Any], log_tail: str = "", state_
     return True
 
 
-def send_supervisor_restart(*, prev_started: str | None, state_path: Path = state.STATE_PATH) -> bool:
-    """Supervisor (re)started under launchd KeepAlive. Dedup 60s."""
+def send_supervisor_restart(
+    *,
+    prev_started: str | None,
+    planned_reason: str | None = None,
+    state_path: Path = state.STATE_PATH,
+) -> bool:
+    """Supervisor (re)started under launchd KeepAlive. Dedup 60s.
+
+    `planned_reason` set (a fresh planned-restart marker was consumed at boot)
+    means this restart was a deliberate `kickstart -k` reload — deploy noise,
+    NOT a crash. Downgrade to a log-only breadcrumb and send NO email. An
+    absent/expired marker (`planned_reason is None`) keeps the INFO alert so a
+    genuinely unexpected KeepAlive respawn still reaches the owner."""
+    if planned_reason is not None:
+        LOG.info(
+            "supervisor restart suppressed as planned reload (reason=%s, prev_started=%s)",
+            planned_reason, prev_started,
+        )
+        return False
     key = "supervisor_restart"
     if state.should_dedup_alert(key, window_s=60, path=state_path):
         return False

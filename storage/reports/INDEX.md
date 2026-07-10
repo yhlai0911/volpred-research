@@ -1,25 +1,27 @@
 # Feed Index
 
-_Last built: 2026-07-10 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-10 06:02 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1775**  (with thumbnail: 75)
-- Last 30 days: **293**
-- Total chars (content): 5,369,823
+- Total articles: **1777**  (with thumbnail: 75)
+- Last 30 days: **290**
+- Total chars (content): 5,380,644
 
-**Status**: published=1574, archived=123, unpublished=60, retracted=12, draft=5, wont_fix=1
+**Status**: published=1574, archived=123, unpublished=62, retracted=12, draft=5, wont_fix=1
 
-**Audience**: research=1113, general=430, daily=138, unknown=77, member_qa=12, event=5
+**Audience**: research=1113, general=432, daily=138, unknown=77, member_qa=12, event=5
 
-**Category**: milestone=875, general=784, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, experiment=4, event_article=3, diary=1
+**Category**: milestone=875, general=786, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, experiment=4, event_article=3, diary=1
 
-## 最近 30 天 (293)
+## 最近 30 天 (290)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
-| 2026-07-10 | `mile_98d8b420` | 每日策略建議：VIX 15.84（正常）— 2026-07-10 | daily | general | published | 1650 | Y | 每日建議, VIX, 策略配置 |
-| 2026-07-10 | `mile_855bf302` | 2026-07-10 本日持倉比率建議（依據 2026-07-09 收盤數據） | daily | milestone | published | 1048 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
+| 2026-07-10 | `mile_e13e5485` | 台股恐慌 37、美股只剩 16：一道 20 點的「恐慌溫差」，用三個問題就能讀懂 | general | general | published | 7601 |  | 一般讀者, 精選導讀, 台股, VIX, 波動率, 恐慌指數 |
+| 2026-07-10 | `mile_cf007769` | 財報週的隱波偏斜：市場替七巨頭標的價，你看得懂嗎？ | general | general | published | 3220 |  | 一般讀者, 選擇權, 財報行情, 波動率, 美股, 七巨頭 |
+| 2026-07-10 | `mile_98d8b420` | 每日策略建議：VIX 15.84（正常）— 2026-07-10 | daily | general | unpublished | 1650 | Y | 每日建議, VIX, 策略配置 |
+| 2026-07-10 | `mile_855bf302` | 2026-07-10 本日持倉比率建議（依據 2026-07-09 收盤數據） | daily | milestone | unpublished | 1048 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-09 | `mile_3e11060d` | 台股恐慌居高不下，美股早就退燒了：台版 VIX 站上 37 在說什麼 | general | general | published | 2095 |  | 一般讀者, 波動率指數, 台股, VIX, 避險, 台美市場 |
 | 2026-07-09 | `mile_e71ea353` | AI 晶片的鐘擺盪過頭了嗎？費半波動率飆到近四年最高，營收卻還在加速 | general | general | published | 2323 |  | 一般讀者, 半導體, 波動率, AI晶片, 費半, 風險管理 |
 | 2026-07-09 | `mile_bd06ccbc` | VIX 掉回 16.9 的假平靜：科技股才回檔逾一成，該盯的其實是這四件事 | general | general | published | 8347 |  | 一般讀者, 精選導讀, VIX, 波動率, 科技股, 風險管理 |
@@ -306,16 +308,16 @@ _Last built: 2026-07-10 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-10 | `mile_4e5a221e` | 明知道 VIX 在比特幣恐慌時會失靈，為什麼把它關掉還是沒救？ | general | general | published | 2084 |  | 一般讀者, 比特幣, VIX, 波動率, 加密貨幣 |
 | 2026-06-10 | `mile_a6b1ed98` | 同一籃子台股，換個市場掛牌，波動預測就變了？ | research | milestone | published | 3643 |  | 研究, EM, ETF, currency, VIX, Taiwan |
 | 2026-06-10 | `mile_41b7c7d0` | 退休時房貸該一次還清嗎？模擬 1 萬次後，答案其實沒那麼直覺 | general | general | published | 2228 |  | 一般讀者, 退休, 房貸, 提領, 台股 |
+
+<details><summary>## 2026-Q2 (815)</summary>
+
+| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
+|---|---|---|---|---|---|---|---|---|
 | 2026-06-10 | `mile_2e12b166` | K1306：SEC 10-K 管理階層語氣能預測個股月度 RV 嗎？Loughran-McDonald pilot — NULL | research | milestone | published | 6139 |  | 研究, Loughran-McDonald, SEC-EDGAR, NLP, realized-volatility, pilot-study |
 | 2026-06-10 | `mile_5af5ec51` | 銅博士的波動率版本：13 年數據說了什麼 | general | general | unpublished | 2625 |  | 一般讀者, 銅, 波動率預測, 跨資產, 領先指標, 商品 |
 | 2026-06-10 | `mile_0e1eb5aa` | 🌡️ 事件溫度計｜FOMC 6/17 T-7：SOFR 期貨說「不降息」，但點陣圖說什麼？ | event | event_article | published | 3898 |  | FOMC, FedWatch, SOFR, VIX, VIX9D, 利率 |
 | 2026-06-10 | `mile_377b569a` | 美元一轉強，原油和商品通常比黃金更會抖 | general | general | unpublished | 1720 |  | 一般讀者, 美元, 商品, 黃金, 原油, 新興市場 |
 | 2026-06-10 | `mile_64f2e656` | 台積電 5 月營收 NT$3,205 億：史上次高的公告日，市場為什麼先賣後問？ | event | milestone | published | 1862 |  | 台積電, TSMC, 月營收, 半導體, CoWoS, AI需求 |
-
-<details><summary>## 2026-Q2 (810)</summary>
-
-| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
-|---|---|---|---|---|---|---|---|---|
 | 2026-06-09 | `mile_166eda01` | 市場以為 CPI 前要 vol crush，23 年 MOVE/VIX 數據說相反 | general | general | published | 2045 |  | 一般讀者, move, vix, cpi, implied-volatility, event-study |
 | 2026-06-09 | `mile_5e0944a1` | 為什麼同樣吃財報，聯發科和聯電的波動反應會差這麼多？ | general | general | published | 1865 |  | 一般讀者, 台股, 財報, 波動率, 台積電, 聯發科 |
 | 2026-06-09 | `mile_fab21350` | 為什麼財報前後股票會躁動？台、美、日三個市場同時驗證 | general | general | unpublished | 1980 |  | 一般讀者, 台股, 美股, 日股, 財報, 波動率 |

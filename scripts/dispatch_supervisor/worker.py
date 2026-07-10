@@ -27,6 +27,7 @@ import re
 import subprocess
 import time
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
@@ -199,8 +200,31 @@ def _kill_pgid(pgid: int, *, grace_s: float = GRACE_PERIOD_S) -> None:
     procutil.kill_pgid(pgid, grace_s=grace_s)
 
 
-def _spawn(*, argv: Sequence[str], log_path: Path) -> subprocess.Popen:
-    """Spawn child in its own process group; redirect combined stdout+stderr to log_path."""
+def _dispatch_actor(schedule_id: str, *, now: datetime | None = None) -> str:
+    """VOLPRED_ACTOR stamp injected into the spawned agent's env.
+
+    Until 2026-07-10 no automated dispatch path exported VOLPRED_ACTOR, so every
+    shared-state write the agent made (writer_log reads actor off os.environ —
+    memory/publisher/control_plane call sites) logged actor="unknown": 197/200
+    recent writer_log lines. That unrecoverable attribution stalled the pregate
+    enforce-flip evaluation (docs/error_log.md 2026-07-10). The stamp locates the
+    exact fire — schedule id plus local HHMM, matching the clock the work_log
+    `hourly-<HH>` convention already uses — so a writer_log line traces back to
+    the dispatch that produced it instead of the pipeline-wide default.
+    """
+    return f"dispatch-worker:{schedule_id}:{(now or datetime.now()).strftime('%H%M')}"
+
+
+def _spawn(
+    *, argv: Sequence[str], log_path: Path, env: dict[str, str] | None = None
+) -> subprocess.Popen:
+    """Spawn child in its own process group; redirect combined stdout+stderr to log_path.
+
+    `env=None` (the default) inherits the parent's environment unchanged — the
+    pre-2026-07-10 behaviour. Callers that need to stamp VOLPRED_ACTOR pass an
+    os.environ EXTENSION (`{**os.environ, ...}`), never a replacement, so PATH /
+    auth / HOME survive.
+    """
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_fh = log_path.open("ab")
     return subprocess.Popen(
@@ -210,6 +234,7 @@ def _spawn(*, argv: Sequence[str], log_path: Path) -> subprocess.Popen:
         stdin=subprocess.DEVNULL,
         start_new_session=True,  # new PGID — clean SIGKILL group
         close_fds=True,
+        env=env,
     )
 
 
@@ -249,8 +274,13 @@ def _run_one_attempt(
     # contamination fix — see _read_since).
     log_offset = _log_size(log_path)
     started = time.time()
+    # Stamp the fire onto the agent's env so its shared-state writes are
+    # attributable (see _dispatch_actor). Extend os.environ — the supervisor
+    # boot set VOLPRED_ACTOR=dispatch-supervisor as a process default, which we
+    # deliberately override here so AGENT writes carry the fire, not the daemon.
+    child_env = {**os.environ, "VOLPRED_ACTOR": _dispatch_actor(schedule_id)}
     try:
-        proc = _spawn(argv=argv, log_path=log_path)
+        proc = _spawn(argv=argv, log_path=log_path, env=child_env)
     except OSError:
         # Spawn itself failed (e.g. claude_bin missing) — free the slot we
         # just reserved so it doesn't wedge forever with no process behind it.
