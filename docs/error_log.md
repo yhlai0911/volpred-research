@@ -77,6 +77,8 @@
 
 **教訓**：(a) cutover/refactor 遷移必附「legacy 路徑元件 inventory」，逐項標 遷移/廢棄/不適用；(b) shadow 模式的元件停擺無症狀 — shadow log 的 freshness 也要有 owner 盯（本次靠拓撲審計偶然發現，不是監控）。
 
+**追加（同日 13:35-13:40，enforce flip 評估 → 判定不切換）**：接線後依 flip criteria 跑 122 筆 shadow 交叉核對，發現 **would_skip=true 的 56 班中，寬鬆歸因 27 班（48%）該小時有實質產出、嚴格歸因（actor=hourly）僅 3 班（5%）— 而 work_log actor 蓋章不可靠（最近 60 筆實質工作 57 筆空 actor），真實誤判率介於 5-48% 之間不可判定**。pregate 的四訊號模型只涵蓋 email/critical/P1-P2/cadence，但 hourly 班實際還做 refill / compute followup / draft fan-out / discovery — 這些不在訊號內。決策：**維持 shadow 不切 enforce**（研究誠實：資料不能證明安全就不上）；儀器先行（invoker 欄位 + work_log actor 蓋章 + duration 核對），見任務 `topology-audit-20260710-pregate-observability`。第三個教訓：**觀察 gate 的 criteria 必須連同「歸因儀器是否存在」一起設計** — 沒有可歸因的 outcome 資料，觀察期只是形式。
+
 ## 2026-07-10 dispatch_state.json 三個觀察性缺陷：幽靈欄位、心跳凍結、測試污染 production state
 
 **現象**：健檢讀 `storage/ops/dispatch_state.json` 想確認 daemon 活著，`last_dispatch_at` 與 `supervisor_pid` 皆 null，只好改讀 `~/.volpred/logs/dispatch_supervisor_launchd.err` 才知道它其實正常派工。state 檔沒發揮 single-source-of-truth 作用。
