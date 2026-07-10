@@ -25,6 +25,7 @@ import asyncio
 import json
 import logging
 import os
+import subprocess
 import sys
 import traceback
 from datetime import datetime
@@ -93,6 +94,83 @@ def load_cron_expr(*, schedules_path: Path = SCHEDULES_PATH, schedule_id: str = 
     return FALLBACK_CRON
 
 
+PREGATE_SCRIPT = ROOT / "scripts" / "hourly_dispatch_pregate.py"
+PREGATE_TIMEOUT_S = 60
+PREGATE_MODES = ("off", "shadow", "enforce")
+
+
+def load_pregate_config(*, schedules_path: Path = SCHEDULES_PATH, schedule_id: str = SCHEDULE_ID) -> dict[str, Any]:
+    """Read the pregate config from the canonical schedule entry.
+
+    2026-07-10 rewire: scripts/hourly_dispatch_pregate.py (zero-token "is this
+    cron slot worth the ~95K claude -p cold-load?" triage) was orphaned by the
+    7/4 supervisor cutover — it was only wired into the legacy shell. This
+    reads `pregate: {mode, window_hours}` from the volpred-hourly-dispatch
+    entry so the flip shadow→enforce is a config edit, no daemon restart
+    (scheduler_loop re-reads config every tick).
+
+    Fail-open: missing/invalid config → mode "off" (never skip on uncertainty).
+    """
+    fallback = {"mode": "off", "window_hours": 3.0}
+    try:
+        data = json.loads(schedules_path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        LOG.warning("load_pregate_config fail-open mode=off: %s", exc)
+        return fallback
+    for key in ("cron_jobs", "items"):
+        entries = data.get(key) or []
+        if not isinstance(entries, list):
+            continue
+        for item in entries:
+            if not isinstance(item, dict) or item.get("id") != schedule_id:
+                continue
+            cfg = item.get("pregate")
+            if not isinstance(cfg, dict):
+                return fallback
+            mode = str(cfg.get("mode", "off")).lower()
+            if mode not in PREGATE_MODES:
+                LOG.warning("pregate mode %r invalid — fail-open mode=off", mode)
+                mode = "off"
+            try:
+                window_hours = float(cfg.get("window_hours", 3.0))
+            except (TypeError, ValueError):
+                LOG.warning("pregate window_hours %r invalid — using 3.0", cfg.get("window_hours"))
+                window_hours = 3.0
+            return {"mode": mode, "window_hours": window_hours}
+    return fallback
+
+
+def _run_pregate(*, mode: str, window_hours: float) -> bool:
+    """Run the zero-token pregate as a subprocess. Returns True = SKIP this fire.
+
+    Subprocess (not import) so a pregate crash can never take down the daemon.
+    Pregate CLI exit semantics: 0 = SKIP, anything else = PROCEED — a crash
+    (exit≠0) or timeout is therefore inherently fail-open. In shadow mode we
+    pass --shadow: pregate always exits 1 (proceed) but appends the would-be
+    decision to storage/logs/hourly_pregate.jsonl for the observation window.
+    """
+    cmd = [sys.executable, str(PREGATE_SCRIPT), "--window-hours", str(window_hours)]
+    if mode == "shadow":
+        cmd.append("--shadow")
+    try:
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True,
+            timeout=PREGATE_TIMEOUT_S, cwd=str(ROOT), check=False,
+        )
+    except subprocess.TimeoutExpired:
+        LOG.warning("pregate timeout after %ss — fail-open PROCEED", PREGATE_TIMEOUT_S)
+        return False
+    except OSError as exc:
+        LOG.warning("pregate spawn failed (%s) — fail-open PROCEED", exc)
+        return False
+    if proc.returncode == 0:
+        return True
+    if proc.returncode != 1:
+        LOG.warning("pregate unexpected exit=%s stderr=%s — fail-open PROCEED",
+                    proc.returncode, (proc.stderr or "")[-300:])
+    return False
+
+
 def _prev_fire(cron_expr: str, *, now: datetime | None = None) -> datetime:
     base = now or datetime.now()
     return croniter(cron_expr, base).get_prev(datetime)
@@ -150,7 +228,7 @@ async def scheduler_loop(
             await _tick_once(
                 state_path=state_path, cron_expr=cron_expr,
                 prompt_path=prompt_path, log_path=log_path,
-                dry_run=dry_run,
+                dry_run=dry_run, schedules_path=schedules_path,
             )
             # reload cron expr in case ops changed config mid-run
             cron_expr = load_cron_expr(schedules_path=schedules_path)
@@ -175,6 +253,7 @@ async def _tick_once(
     log_path: Path,
     dry_run: bool,
     repo_root: Path = ROOT,
+    schedules_path: Path = SCHEDULES_PATH,
 ) -> dict[str, Any]:
     """One tick. Returns a small dict describing the decision (for tests + audit log)."""
     state.heartbeat(path=state_path)
@@ -198,10 +277,33 @@ async def _tick_once(
             fire_reason = f"requested:{requested}"
     else:
         # Cron is due anyway — clear any pending request so it doesn't cause
-        # a SECOND fire right after this one (the request is satisfied).
-        state.consume_fire_request(state_path)
+        # a SECOND fire right after this one (the request is satisfied). Keep
+        # the request visible in fire_reason: a requested fire must never be
+        # pregate-skipped (boss asked for it), so it can't stay plain "cron".
+        requested = state.consume_fire_request(state_path)
+        if requested is not None:
+            fire_reason = f"cron+requested:{requested}"
     if not due:
         return {"action": "skip", "reason": "not_due", "prev_fire": prev_fire.isoformat()}
+    # Zero-token pregate (2026-07-10 rewire; see load_pregate_config docstring).
+    # Gates ONLY plain cron fires — requested fires always run. Shadow mode
+    # never skips (pregate exits 1) but logs the would-be decision for the
+    # observation window before the config flip to enforce.
+    if fire_reason == "cron" and not dry_run:
+        pregate_cfg = load_pregate_config(schedules_path=schedules_path)
+        if pregate_cfg["mode"] in ("shadow", "enforce"):
+            pregate_skip = await asyncio.to_thread(
+                _run_pregate,
+                mode=pregate_cfg["mode"], window_hours=pregate_cfg["window_hours"],
+            )
+            if pregate_skip:  # only reachable in enforce mode
+                LOG.info("pregate SKIP — no work worth the cold-load; slot consumed (prev_scheduled=%s)",
+                         prev_fire.isoformat())
+                # consume the slot like dry_run does, so we don't re-evaluate
+                # every tick for the rest of the hour
+                with state._locked_state(state_path) as (_fh, data):
+                    data["last_fire_at"] = state._now()
+                return {"action": "pregate_skip", "prev_fire": prev_fire.isoformat()}
     if dry_run:
         LOG.info("DRY-RUN would fire (prev_scheduled=%s)", prev_fire.isoformat())
         # update last_fire_at so we don't re-log every tick — shadow run still tracks
