@@ -18,6 +18,22 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SKILLS_DIR="${ROOT}/.claude/skills"
 
+# Portable mtime epoch. BSD/macOS is `stat -f %m`; GNU/Linux is `stat -c %Y`.
+# GNU reads `-f` as --file-system and prints a multi-line report, so a zero exit
+# status proves nothing — validate digits-only. Same invariant as
+# `file_mtime_epoch()` in cron_hourly_dispatch.sh (2026-07-10 CI incident).
+file_mtime_epoch() {
+    local target=$1 value
+    value=$(stat -c %Y "$target" 2>/dev/null || true)
+    case "$value" in
+        ""|*[!0-9]*) value=$(stat -f %m "$target" 2>/dev/null || true) ;;
+    esac
+    case "$value" in
+        ""|*[!0-9]*) return 1 ;;
+    esac
+    printf '%s\n' "$value"
+}
+
 if [ ! -d "$SKILLS_DIR" ]; then
     echo "error: $SKILLS_DIR not found" >&2
     exit 2
@@ -68,9 +84,12 @@ for skill_dir in "$SKILLS_DIR"/*/; do
         empty_frontmatter+=("$skill_name")
     fi
 
-    skill_mtime=$(stat -f "%m" "$skill_md")
-    if [ "$skill_mtime" -lt "$stale_cutoff" ]; then
-        stale_skills+=("$skill_name")
+    if skill_mtime=$(file_mtime_epoch "$skill_md"); then
+        if [ "$skill_mtime" -lt "$stale_cutoff" ]; then
+            stale_skills+=("$skill_name")
+        fi
+    else
+        echo "WARN: cannot read mtime of $skill_md — stale check skipped" >&2
     fi
 
     # Find references in SKILL.md，三種形式皆檢查：
