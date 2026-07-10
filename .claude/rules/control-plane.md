@@ -59,8 +59,16 @@ paths:
   無 side-effect log** —— 「沒在跑」與「跑了但沒事」在觀測上同形，沒有任何被動訊號。凡
   **fail-open + 乾淨時 no-op** 的防護元件，上線當下就要同步立「它是否仍被呼叫」的機械 gate。
 - **「程式碼寫完」不等於「上線」**。常駐 daemon 讀的是啟動時載入的記憶體副本；改了
-  `scripts/dispatch_supervisor/**` 的**程式碼**必須重啟 daemon 才生效（只有 `config/` 欄位是
-  每 tick 熱重載）。宣告完成前確認：改的是 config 還是 code？code 的話，誰重啟？
+  `scripts/dispatch_supervisor/**` 的**程式碼**必須重載才生效（只有 `config/` 欄位是每 tick
+  熱重載）。宣告完成前確認：改的是 config 還是 code？code 的話，誰重載？
+  **本條散文已於同日第 3 次違反後機械化** → `volpred.ops.alerts` 的
+  `dispatch_supervisor_stale_code` 告警條件（比對 `scripts/dispatch_supervisor/*.py` 的 mtime
+  與 `supervisor_started_at`；20 分鐘 grace 讓 agent 邊寫邊存不誤報，>2h 升 critical）。
+  2026-07-10 三個修復（quota no-retry / fire-request race / restart noise）寫完、commit、
+  task 標 succeeded，daemon 卻跑了三個多小時的舊碼 —— 跑舊碼的 daemon 與健康的 daemon 在
+  觀測上完全同形（心跳新鮮、任務照跑、零告警）。**散文撐不過 agent 之間的交接**，這條規則
+  在寫下的當天就被違反三次。這段散文現在只是 pointer；重載一律走
+  `bash scripts/reload_dispatch_supervisor.sh --reason <why>`。
 - **驗證 gate 會不會咬，不可在 production checkout 上做**。「故意弄壞再看 gate 是否 FAIL」是
   必要紀律（兩邊都會過的測試等於沒有測試），但 `scripts/dispatch_supervisor/**` 正是常駐
   daemon 開機時讀取的來源。2026-07-10 我以 `perl -pi` 就地改壞 `health.py` / `state.py` /

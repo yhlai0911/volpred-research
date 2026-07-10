@@ -1853,6 +1853,128 @@ def _parse_dispatch_health_state(storage_dir: str, now: datetime) -> dict[str, A
 DISPATCH_SUPERVISOR_HEARTBEAT_WARN_MINUTES = 10.0
 DISPATCH_SUPERVISOR_HEARTBEAT_CRITICAL_MINUTES = 30.0
 
+# Grace before an un-reloaded edit is called a breach: long enough that an agent
+# mid-edit (or a `cp` that only touched mtime) never trips it, short enough that
+# the next hourly check_alerts still catches a forgotten reload.
+DISPATCH_SUPERVISOR_STALE_CODE_WARN_MINUTES = 20.0
+DISPATCH_SUPERVISOR_STALE_CODE_CRITICAL_MINUTES = 120.0
+DISPATCH_SUPERVISOR_SRC_DIR = Path(__file__).resolve().parents[3] / "scripts" / "dispatch_supervisor"
+
+
+def _parse_dispatch_supervisor_stale_code_state(
+    storage_dir: str,
+    now: datetime,
+    *,
+    supervisor_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Dead-man switch for "the fix was written but never went live" (2026-07-10).
+
+    The supervisor daemon executes the copy of `scripts/dispatch_supervisor/*.py`
+    it imported at boot. Editing those files changes nothing until someone runs
+    `scripts/reload_dispatch_supervisor.sh`. Only `config/` is hot-reloaded per
+    tick.
+
+    On 2026-07-10 three separate fixes — quota no-retry, the gmail fire-request
+    double-dispatch race, and the restart-alert noise suppression — were written,
+    committed, and their tasks closed as "solved", while the running daemon kept
+    executing code from hours earlier. Nobody noticed for over three hours,
+    because a daemon running stale code looks exactly like a healthy one: fresh
+    heartbeat, jobs completing, zero alerts. The rule "code written != deployed"
+    was added to `.claude/rules/control-plane.md` that same morning and was
+    violated three times before the day was out. Prose does not survive a handoff
+    between agents; this does.
+
+    Compares each source file's mtime against `supervisor_started_at`. Anything
+    newer than the boot is, by definition, not the code that is running.
+    """
+    src_dir = supervisor_dir or DISPATCH_SUPERVISOR_SRC_DIR
+    state_path = Path(storage_dir) / "ops" / "dispatch_state.json"
+
+    snapshot: dict[str, Any] | None = None
+    try:
+        raw = load_json(state_path, None)
+        if isinstance(raw, dict):
+            snapshot = raw
+    except (OSError, ValueError) as exc:
+        warn("dispatch_supervisor_stale_code", "dispatch state unreadable", path=str(state_path), err=str(exc))
+
+    boot = _parse_iso_datetime(snapshot.get("supervisor_started_at")) if snapshot else None
+
+    stale: list[dict[str, Any]] = []
+    if boot is not None and src_dir.is_dir():
+        for src in sorted(src_dir.glob("*.py")):
+            try:
+                mtime = datetime.fromtimestamp(src.stat().st_mtime, tz=timezone.utc)
+            except OSError as exc:
+                # Raced a writer that unlinked/replaced the file between glob()
+                # and stat(). Skipping is right — but a vanished daemon source
+                # file is worth a word, not a shrug.
+                warn(
+                    "dispatch_supervisor_stale_code",
+                    "supervisor source unreadable during scan",
+                    path=str(src),
+                    err=str(exc),
+                )
+                continue
+            if mtime <= boot:
+                continue
+            stale.append({
+                "file": src.name,
+                "edited_at": mtime.isoformat(),
+                "age_minutes": round((now - mtime).total_seconds() / 60.0, 2),
+            })
+
+    # An edit made seconds ago is an agent still working, not a forgotten deploy.
+    settled = [s for s in stale if s["age_minutes"] > DISPATCH_SUPERVISOR_STALE_CODE_WARN_MINUTES]
+    oldest = max((s["age_minutes"] for s in settled), default=0.0)
+
+    # boot unknown → cannot compare; `dispatch_supervisor_heartbeat` owns "is the
+    # daemon even alive", so stay quiet here rather than double-alert.
+    breached = bool(settled)
+    is_critical = oldest > DISPATCH_SUPERVISOR_STALE_CODE_CRITICAL_MINUTES
+    level = "critical" if is_critical else ("warn" if breached else "info")
+
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            "派工程式的程式碼被改過，但那個常駐程式還在跑舊版 —— 改動沒有生效。",
+            f"- daemon 開機時間: {boot.isoformat() if boot else '未知'}",
+            f"- 改了但沒生效的檔案: {[s['file'] for s in settled] or '無'}",
+            f"- 最久的一個已經放置: {oldest} 分鐘",
+            f"- 門檻: warn>{DISPATCH_SUPERVISOR_STALE_CODE_WARN_MINUTES}分 / critical>{DISPATCH_SUPERVISOR_STALE_CODE_CRITICAL_MINUTES}分",
+            "",
+            "## 影響",
+            "常駐程式讀的是它啟動當下的程式碼。改了檔案不重載，等於沒改 —— 而且它看起來",
+            "完全正常：心跳新鮮、任務照跑、零告警。2026-07-10 有三個修好的問題就這樣躺了",
+            "三個多小時沒生效，沒有任何訊號。",
+            "",
+            "## 建議行動",
+            "1. 確認沒有派工正在跑：uv run python -m scripts.dispatch_supervisor.cli status",
+            "2. 重載：bash scripts/reload_dispatch_supervisor.sh --reason <為什麼>",
+            "   （它會拒絕殺掉在飛的工作，也會避免這次重啟被誤報成崩潰）",
+            "3. 若那些改動是刻意不上線的，把它們 revert 或說明，別讓磁碟與線上長期分岔。",
+        ]
+    )
+    return {
+        "id": "dispatch_supervisor_stale_code",
+        "breached": breached,
+        "level": level,
+        "title": (
+            "派工程式有改動沒生效（daemon 未重載）"
+            if breached
+            else "dispatch_supervisor_stale_code ok"
+        ),
+        "body": body if breached else "",
+        "details": {
+            "supervisor_started_at": boot.isoformat() if boot else None,
+            "stale_files": settled,
+            "unsettled_files": [s for s in stale if s not in settled],
+            "oldest_age_minutes": oldest,
+            "warn_minutes": DISPATCH_SUPERVISOR_STALE_CODE_WARN_MINUTES,
+            "critical_minutes": DISPATCH_SUPERVISOR_STALE_CODE_CRITICAL_MINUTES,
+        },
+    }
+
 GMAIL_POLL_STALE_WARN_HOURS = 2.0
 GMAIL_POLL_STALE_CRITICAL_HOURS = 6.0
 TELEGRAM_POLL_STALE_WARN_HOURS = 2.0
@@ -2975,6 +3097,7 @@ def build_alert_condition_report(
         _parse_publishing_freshness_state(storage_dir, current),  # 2026-06-22 outcome dead-man switch (禁止脫班)
         _parse_dispatch_health_state(storage_dir, current),       # 2026-06-22 generator binary 源頭健康
         _parse_dispatch_supervisor_heartbeat_state(storage_dir, current),  # 2026-07-10 daemon loop 卡死 dead-man switch（launchctl 抓不到）
+        _parse_dispatch_supervisor_stale_code_state(storage_dir, current), # 2026-07-10 「修好了但沒重載」dead-man switch（三次靜默違反同日規則）
         _parse_gmail_poll_freshness_state(storage_dir, current),  # 2026-06-22 boss-email pipeline dead-man switch
         _parse_telegram_poll_freshness_state(storage_dir, current),  # 2026-07-06 boss-request: Telegram poller dead-man switch
         _parse_host_cron_state(storage_dir, current),

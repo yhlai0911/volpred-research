@@ -15,6 +15,23 @@ import pytest
 from volpred.ops.feed_sync import compute_diff, reconcile_content_from_singles
 
 
+@pytest.fixture(autouse=True)
+def _no_production_tag_reads(monkeypatch):
+    """`compute_diff()` fetches article TAGS as well as articles.
+
+    Every test below patched `_fetch_supabase_articles` but not
+    `_fetch_supabase_article_tags`, so each run issued three real `_select_rows`
+    reads against **production Supabase** (articles / article_tags / tags). It
+    went unnoticed because credentials were always present locally; on a
+    credential-less checkout it surfaced as `Missing SUPABASE_URL` (2026-07-10,
+    while wiring pytest into CI). Autouse so a new test in this file cannot
+    reintroduce the prod read by forgetting one patch.
+    """
+    monkeypatch.setattr(
+        "volpred.ops.feed_sync._fetch_supabase_article_tags", lambda *a, **k: {}
+    )
+
+
 def _md5(s: str) -> str:
     return hashlib.md5(s.encode("utf-8")).hexdigest()
 

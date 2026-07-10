@@ -16,26 +16,21 @@ name: Test Suite
 #   VOLPRED_NO_REMOTE_WRITE=1  no Supabase POST/PATCH (2026-06-23 leak incident)
 #   VOLPRED_NO_EMAIL=1         no SMTP
 
-# TRIGGER IS INTENTIONALLY `workflow_dispatch` ONLY, until the suite is green in a
-# clean checkout. A clean-worktree run (2026-07-10, no `.env.local`, no creds)
-# gives 1663 passed / 22 failed. Turning this on for push/PR today would mean a
-# permanently red CI, and a red CI that everyone learns to ignore is worse than
-# no CI. The 22 are NOT caused by the import-safety fix; they are pre-existing
-# environment couplings that only a credential-less checkout exposes:
-#
-#   24× SystemExit(1)   scripts/build_knowledge_index.py:75 hard-exits when
-#                       OPENAI_API_KEY is absent (same disease as the supabase
-#                       import-time raise: missing credential kills the process)
-#    8× RuntimeError    tests that touch Supabase HEADERS at request time
-#    6× repo_root_mismatch  tests/test_session_ops.py:76 hardcodes
-#                       "/Users/yhlai0911/volpred-research" in a fixture
-#    4× FileNotFoundError   data-invariant tests over gitignored production files
-#                       (storage/reports/trending_repost_log.json) — should skip,
-#                       not fail, where the data does not exist
-#
-# Flip to `push`/`pull_request` in the same commit that makes the clean-checkout
-# run green. Do not flip it earlier "to see what happens".
+# Enabled for push/PR only once a credential-less clean checkout ran green:
+# 1683 passed, 8 skipped, 0 failed (2026-07-10, fresh worktree, no `.env.local`).
+# Getting there took four fixes, all of them pre-existing couplings that only a
+# credential-less checkout could expose:
+#   - supabase_sync raised at import → now request-time (`require_creds`)
+#   - build_knowledge_index.get_client() `sys.exit(1)` on a missing OPTIONAL
+#     embedding key → now raises, so the publisher's fail-open path can catch it
+#   - config/brief_templates/*.yaml hardcoded the author's absolute repo path,
+#     so every brief-backed task would `repo_root_mismatch` on any other machine
+#   - tests/test_feed_sync.py issued real reads against PRODUCTION Supabase
 on:
+  pull_request:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
