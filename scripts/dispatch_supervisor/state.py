@@ -47,7 +47,11 @@ atomic `os.replace()` via `_atomic_write_json()`.
 Used by:
   - supervisor.py  (scheduler tick, fire decision, completion record, restart-orphan cleanup)
   - health.py      (heartbeat + read current_job to verify worker liveness)
-  - check_alerts.py (read last_heartbeat_at to detect supervisor death)
+  - volpred.ops.alerts._parse_dispatch_supervisor_heartbeat_state
+                   (reads last_heartbeat_at as a wedged-daemon dead-man switch;
+                    this docstring claimed check_alerts.py did so long before
+                    any reader actually existed — wired 2026-07-10)
+  - scripts/cron_review.py (daemon liveness + last completed run, for boss report)
 
 Reader's field map — `jq` against a key that was never implemented returns
 `null`, which is indistinguishable from "declared but not set yet". Every

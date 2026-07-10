@@ -21,6 +21,14 @@
 
 **驗證**：新增 7 個 regression tests（其中 4 個在舊碼上實測 FAIL）；`scripts/tests/test_dispatch_state.py` + `tests/test_dispatch_supervisor.py` + `test_cron_review.py` + `test_loop_health.py` 共 137 passed。線上 kickstart daemon 後 `supervisor_pid` = 實際 launchd pid、心跳每 30s 前進、`last_fire_at` 合理。
 
+**追加（同日，老闆問「所以一切都正常了？」時查出的第四個缺陷）**：`state.get_supervisor_age_seconds()` 的 docstring 寫「used by external monitor to flag dead supervisor」，`state.py` module docstring 也寫「check_alerts.py 讀 last_heartbeat_at 偵測 supervisor 死亡」—— **兩句都是假的**，全 repo grep 只有測試在呼叫，零 production consumer。即 state 檔終於能誠實回答「daemon 死了嗎」，卻沒人在問。
+
+- **為什麼一直沒接**：心跳原本會在整段 dispatch 期間凍結（本 entry 症狀 2），接了必然每小時假警報。**修掉凍結才讓這個告警變成可以接的** — 兩個 bug 是因果關係，不是巧合。
+- **既有覆蓋的盲區**：`cron_review.py` 只用 `launchctl` 看行程在不在，但 launchd `KeepAlive` 會自動重啟消失的行程 → 那個 case 本來就自癒。真正沒人抓的是**行程還在、loop 卡死**，只有 stale heartbeat 看得到。
+- **修法（收編既有 owner，不新增 watchdog）**：在 `volpred.ops.alerts.build_alert_condition_report()` 這個 alert 條件的單一 owner 內新增 `_parse_dispatch_supervisor_heartbeat_state`（warn>10min / critical>30min，心跳 cadence 30s → 20x 邊際；launchd restart 的 ThrottleInterval 60s + 一拍也絕不會誤觸）。沿用 `gmail_poll_freshness` 的穩定 title 慣例維持 24h dedup 有效；壞 JSON 降級為「無法證明存活」而非拋例外炸掉整份 report。
+- **missing 檔案不算 breach**（採 telegram_poll 的「尚未觀測」慣例而非 gmail 的 missing→critical）：daemon 若在跑，心跳 30 秒內必重建該檔，所以「檔案不存在」= daemon 沒在跑 = `cron_review` launchctl 檢查的職責。讓兩個 owner 搶同一件事就是疊床架屋。
+- **驗證**：新增 `tests/test_dispatch_supervisor_heartbeat_alert.py`（7 tests）；alerts 全套 57 passed。線上實跑條件：健康 daemon age=0.33min → `breached=False`；拿線上真實 state 只把心跳回撥 42 分鐘 → `critical` + 正確 title/body。`build_alert_condition_report` 23 conditions / 0 breaches，新條件確認接入且無假警報。
+
 **待辦（另案）**：`cron_review.py` 的 `last_completion` 幽靈讀取應移除，改單一依賴 `completions[-1]`（今日靠 fallback 無影響，故不併入本次 diff）。
 
 ## 2026-07-10 差點靠改 submitted 論文數字把 reproduce gate 硬轉 green（provenance sweep Batch 4a）

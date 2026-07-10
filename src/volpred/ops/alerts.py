@@ -1822,10 +1822,110 @@ def _parse_dispatch_health_state(storage_dir: str, now: datetime) -> dict[str, A
     }
 
 
+# health_loop beats every 30s, and (since 2026-07-10) keeps beating while a
+# worker is in flight — so a 10min warn is a ~20x margin over the cadence and a
+# launchd restart (ThrottleInterval 60s + one beat) can never trip it.
+DISPATCH_SUPERVISOR_HEARTBEAT_WARN_MINUTES = 10.0
+DISPATCH_SUPERVISOR_HEARTBEAT_CRITICAL_MINUTES = 30.0
+
 GMAIL_POLL_STALE_WARN_HOURS = 2.0
 GMAIL_POLL_STALE_CRITICAL_HOURS = 6.0
 TELEGRAM_POLL_STALE_WARN_HOURS = 2.0
 TELEGRAM_POLL_STALE_CRITICAL_HOURS = 6.0
+
+
+def _parse_dispatch_supervisor_heartbeat_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Dead-man switch for the dispatch-supervisor daemon loop (2026-07-10).
+
+    `dispatch_state.json.last_heartbeat_at` is the daemon's own liveness proof,
+    written by `health.health_loop()` every 30s. Nothing read it until now:
+    `state.get_supervisor_age_seconds()` was written for "an external monitor"
+    that never existed, and this module's only dispatch condition
+    (`dispatch_binary_health`) checks the generator binary, not the daemon.
+
+    Why it stayed unwired: until 2026-07-10 the heartbeat was stamped only by
+    the scheduler tick, which awaits the worker to completion — so it froze for
+    the whole dispatch (798s observed on a healthy fire) and any staleness
+    alert would have false-fired on every normal hourly run. Moving the beat to
+    the non-blocking health loop is what makes this switch safe to arm.
+
+    `cron_review.py` already flags a daemon that has vanished from launchctl,
+    but launchd's `KeepAlive` restarts a vanished process, so that case largely
+    self-heals. The dangerous, previously-undetected case is a daemon whose
+    process is alive while its loops are wedged — which only a stale heartbeat
+    reveals.
+    """
+    state_path = Path(storage_dir) / "ops" / "dispatch_state.json"
+    # A corrupt state file must degrade to "cannot prove alive" (→ breach), never
+    # raise and take the whole alert report down with it.
+    snapshot: dict[str, Any] | None = None
+    try:
+        raw = load_json(state_path, None)
+        if isinstance(raw, dict):
+            snapshot = raw
+    except (OSError, ValueError) as exc:
+        warn("dispatch_supervisor_heartbeat", "dispatch state unreadable", path=str(state_path), err=str(exc))
+
+    beat = _parse_iso_datetime(snapshot.get("last_heartbeat_at")) if snapshot else None
+    age_minutes = round((now - beat).total_seconds() / 60.0, 2) if beat else None
+    supervisor_pid = snapshot.get("supervisor_pid") if snapshot else None
+    running = bool(snapshot.get("current_job")) if snapshot else False
+
+    # A missing file / never-written heartbeat is NOT a breach here: a running
+    # daemon recreates `dispatch_state.json` within one 30s beat, so its absence
+    # means the daemon is not running at all — which `cron_review.py` already
+    # owns via its launchctl check. This switch's unique job is the case that
+    # check cannot see: process alive, heartbeat stale. (Mirrors the
+    # telegram_poll "not yet observed" convention, not gmail's missing→critical.)
+    missing = age_minutes is None
+    is_critical = (not missing) and age_minutes > DISPATCH_SUPERVISOR_HEARTBEAT_CRITICAL_MINUTES
+    breached = (not missing) and age_minutes > DISPATCH_SUPERVISOR_HEARTBEAT_WARN_MINUTES
+    level = "critical" if is_critical else ("warn" if breached else "info")
+
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            "dispatch-supervisor 這個常駐派工程式，超過預期時間沒有回報「我還活著」。",
+            f"- 狀態檔: {state_path}",
+            f"- 上次回報距今: {age_minutes if age_minutes is not None else '檔案不存在/心跳未寫入'} 分鐘",
+            f"- 門檻: warn>{DISPATCH_SUPERVISOR_HEARTBEAT_WARN_MINUTES}分 / critical>{DISPATCH_SUPERVISOR_HEARTBEAT_CRITICAL_MINUTES}分",
+            f"- 程式編號 (supervisor_pid): {supervisor_pid}",
+            f"- 目前是否正在派工: {'是' if running else '否'}",
+            "",
+            "## 影響",
+            "這個程式負責每小時派出一個 agent 做研究、寫文章、跑實驗。它每 30 秒回報一次",
+            "心跳；心跳停了代表它雖然還在，但內部已經卡死 —— 派工會整個停擺，而且不會有",
+            "任何其他警報（launchctl 看得到行程還在，所以舊的檢查抓不到）。",
+            "",
+            "## 建議行動",
+            "1. 確認行程還在不在：ps -p <supervisor_pid>",
+            "2. 看它最後在做什麼：tail -50 ~/.volpred/logs/dispatch_supervisor.log",
+            "3. 重啟（會殺掉正在跑的 worker，先確認 current_job 是否為 null）：",
+            "   launchctl kickstart -k gui/$(id -u)/com.volpred.dispatch-supervisor",
+            "4. 讀全量狀態：uv run python -m scripts.dispatch_supervisor.cli status",
+        ]
+    )
+    return {
+        "id": "dispatch_supervisor_heartbeat",
+        "breached": breached,
+        "level": level,
+        # 動態 age 只放 body/details，title 維持穩定 → sha256(level+title) 的 24h
+        # dedup 才不會在持續 breach 時每小時洗版（沿用 gmail_poll_freshness 慣例）。
+        "title": (
+            "派工程式心跳停止（dispatch-supervisor 疑似卡死）"
+            if breached
+            else "dispatch_supervisor_heartbeat ok"
+        ),
+        "body": body if breached else "",
+        "details": {
+            "state_path": str(state_path),
+            "age_minutes": age_minutes,
+            "supervisor_pid": supervisor_pid,
+            "current_job_running": running,
+            "warn_minutes": DISPATCH_SUPERVISOR_HEARTBEAT_WARN_MINUTES,
+            "critical_minutes": DISPATCH_SUPERVISOR_HEARTBEAT_CRITICAL_MINUTES,
+        },
+    }
 
 
 def _parse_gmail_poll_freshness_state(storage_dir: str, now: datetime) -> dict[str, Any]:
@@ -2847,6 +2947,7 @@ def build_alert_condition_report(
         _parse_draft_pool_state(storage_dir),
         _parse_publishing_freshness_state(storage_dir, current),  # 2026-06-22 outcome dead-man switch (禁止脫班)
         _parse_dispatch_health_state(storage_dir, current),       # 2026-06-22 generator binary 源頭健康
+        _parse_dispatch_supervisor_heartbeat_state(storage_dir, current),  # 2026-07-10 daemon loop 卡死 dead-man switch（launchctl 抓不到）
         _parse_gmail_poll_freshness_state(storage_dir, current),  # 2026-06-22 boss-email pipeline dead-man switch
         _parse_telegram_poll_freshness_state(storage_dir, current),  # 2026-07-06 boss-request: Telegram poller dead-man switch
         _parse_host_cron_state(storage_dir, current),
