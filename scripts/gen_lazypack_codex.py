@@ -224,6 +224,17 @@ def main() -> int:
 
     expected = [out_dir / f"{(p.get('name') or f'{i}_panel')}.png" for i, p in enumerate(panels, 1)]
     made = [p for p in expected if p.exists() and p.stat().st_size > 1024]
+    if not made:
+        # 2026-07-10 incident：codex 串流內的 API error（如 400 model-not-supported）
+        # 印在 stdout 中段、rc 可能仍為 0 — 零產出時把 error 事件浮上 stderr summary，
+        # 讓「為什麼失敗」跟「失敗了」出現在同一個地方（error_log 當日 entry）。
+        err_lines = [ln for ln in (proc.stdout or "").splitlines() if '"type":"error"' in ln]
+        for ln in err_lines[-3:]:
+            print(f"CODEX-ERROR: {ln[-300:]}", file=sys.stderr)
+        if err_lines:
+            print("HINT: API error 常見根因是 config model × CLI 版本不相容 — 先跑 "
+                  "`codex exec --skip-git-repo-check \"echo TEST\"` smoke（experiments.md 診斷 SOP step 6）",
+                  file=sys.stderr)
     print(f"\nDONE: {len(made)}/{len(expected)} panel PNGs in {out_dir}")
     for p in expected:
         ok = p.exists() and p.stat().st_size > 1024
