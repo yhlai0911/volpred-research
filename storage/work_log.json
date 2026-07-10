@@ -15442,5 +15442,19 @@
     "actor": "hourly-00",
     "outcome": "failed",
     "summary": "K1679 regional-bank deposit-flight 實驗收工：merge to main + Codex review=FAIL（directional NULL 但非 knowledge-grade）。修 README BH-q 6/8 誤（min q 0.26→0.34，honesty）。3 待修（ALFRED point-in-time / Clark-West nested / floor sensitivity）→ 建 K1679-rev。未寫 knowledge.json（gate 守住）。"
+  },
+  {
+    "ts": "2026-07-10T17:19:45.757911+00:00",
+    "task_type": "platform_ops",
+    "actor": "hourly-01",
+    "outcome": "succeeded",
+    "summary": "清理 orphan worktree kind-wescoff-5539ec（branch hopeful-gauss 0-ahead-of-main、0 uncommitted、live_procs_cwd=0）→ 零遺失、釋出 1 個 slot。dispatch report active_agents=0 誤導：實有 2 個 live agent（wizardly=cron-freshness、fervent-payne=ops-infra）。branch 保留未刪。"
+  },
+  {
+    "ts": "2026-07-10T17:19:45.757911+00:00",
+    "task_type": "experiment",
+    "actor": "hourly-01",
+    "outcome": "in_progress",
+    "summary": "派 worktree agent 執行 K1679-rev（override 引擎 K1677：ALFRED/FRED 資料存取有保證 vs SEC-AAER 爬蟲不確定 + 範圍收斂 + NULL knowledge-grade closure）。3 修：ALFRED point-in-time vintage / Clark-West nested test / un-floored loss sensitivity。seed=42、j+H<i embargo、heavy 走 compute_queue、Codex CONDITIONAL_PASS+ gate、agent 禁寫 knowledge.json。"
   }
 ]
