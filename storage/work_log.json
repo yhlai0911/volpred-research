@@ -15245,5 +15245,13 @@
     "outcome": "succeeded",
     "summary": "Provenance sweep Batch 4a: reconcile garch-x-vix A4f DM t=4.03 vs canonical 4.148 (known yfinance drift, Harvey invariant). Confirmed 85.7%-yellow reproduce gate is honest signal; respected submitted-paper no-body-edit policy; escalated owner sign-off (email+telegram). Self-caught+reverted a premature main.tex edit (zero net change). Lesson logged.",
     "owner": "hourly-12"
+  },
+  {
+    "timestamp": "2026-07-10T13:16:02+08:00",
+    "task_type": "platform_ops",
+    "task_id": "topology-audit-20260710-anti-ai-gate-wire",
+    "outcome": "succeeded",
+    "summary": "Wired anti_ai_style into publisher append and release_pool publish flip; warn-only until 2026-07-13 then strict; added JSONL audit, fail-open alert, and regression tests.",
+    "owner": "codex-cli"
   }
 ]

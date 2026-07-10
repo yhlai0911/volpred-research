@@ -13,6 +13,7 @@ from volpred.publisher.publisher import (
     Publisher,
     _audit_general_content,
     _extract_experiment_refs,
+    _run_publish_anti_ai_gate,
     has_lazypack_section,
 )
 from volpred.topic_clusters import classify_topic_cluster, cluster_cap
@@ -1324,6 +1325,14 @@ def release_pool_articles(
                 _warn_release_pool(
                     "lazypack release gate check failed; fail-open", exc
                 )
+        anti_ai_issues = _run_publish_anti_ai_gate(
+            storage_dir,
+            item,
+            target_status="published",
+            raise_on_block=False,
+        )
+        if anti_ai_issues:
+            audit_issues = list(audit_issues) + anti_ai_issues
         if audit_issues:
             details = item.get("details")
             if not isinstance(details, dict):

@@ -195,6 +195,319 @@ def _semantic_dup_warn(storage_dir: str, item: dict, feed: list[dict]) -> None:
         print(f"  ⚠️ semantic dedup warn-check skipped (publish proceeds): {exc}")
 
 
+_ANTI_AI_GATE_NAME = "anti_ai_style"
+_ANTI_AI_GATE_STRICT_AFTER = date(2026, 7, 13)
+_ANTI_AI_GATE_READER_AUDIENCES = {"general", "research", "event", "member_qa"}
+_ANTI_AI_GATE_READER_CONTENT_TYPES = {
+    "general_article",
+    "research_article",
+    "daily_digest",
+    "event_article",
+    "trending_repost",
+    "member_qa",
+}
+_ANTI_AI_GATE_DAILY_BULLETIN_TYPES = {"daily_update", "daily-update"}
+_ANTI_AI_TEMPLATE_FIXES: tuple[tuple[re.Pattern, str, str], ...] = (
+    (re.compile(r"值得注意的是[，,]?\s*"), "", "remove_值得注意的是"),
+    (re.compile(r"綜上所述[，,]?\s*"), "", "remove_綜上所述"),
+    (re.compile(r"總而言之[，,]?\s*"), "", "remove_總而言之"),
+    (re.compile(r"簡而言之[，,]?\s*"), "", "remove_簡而言之"),
+    (re.compile(r"更值得思考的是[，,]?\s*"), "要看的是，", "rewrite_更值得思考的是"),
+    (re.compile(r"值得關注的是[，,]?\s*"), "要看的是，", "rewrite_值得關注的是"),
+)
+
+
+def _anti_ai_gate_warn_only() -> tuple[bool, str]:
+    """Return whether the gate is in migration warn-only mode.
+
+    Task topology-audit-20260710-anti-ai-gate-wire allows a 3-day warn-only
+    ramp. The date is deliberately machine-readable so the soft gate cannot
+    silently become permanent.
+    """
+    mode = os.environ.get("VOLPRED_ANTI_AI_GATE_MODE", "").strip().lower()
+    if mode in {"strict", "block", "hard"}:
+        return False, "strict_env"
+    if mode in {"warn", "warn_only", "warn-only"}:
+        return True, "warn_only_env"
+    if os.environ.get("VOLPRED_ANTI_AI_GATE_STRICT") == "1":
+        return False, "strict_env_legacy"
+    today = datetime.now(timezone.utc).date()
+    if today < _ANTI_AI_GATE_STRICT_AFTER:
+        return True, f"warn_only_until_{_ANTI_AI_GATE_STRICT_AFTER.isoformat()}"
+    return False, f"strict_after_{_ANTI_AI_GATE_STRICT_AFTER.isoformat()}"
+
+
+def _anti_ai_content_type(item: dict) -> str:
+    details = item.get("details") if isinstance(item.get("details"), dict) else {}
+    return str(
+        details.get("content_type")
+        or item.get("content_type")
+        or item.get("category")
+        or ""
+    ).strip().lower()
+
+
+def _anti_ai_gate_applies(item: dict, *, target_status: str | None = None) -> bool:
+    if str(target_status or item.get("status") or "").strip().lower() != "published":
+        return False
+    audience = str(item.get("audience") or "").strip().lower()
+    content_type = _anti_ai_content_type(item)
+    if audience == "daily" and content_type in _ANTI_AI_GATE_DAILY_BULLETIN_TYPES:
+        return False
+    if content_type in _ANTI_AI_GATE_READER_CONTENT_TYPES:
+        return True
+    return audience in _ANTI_AI_GATE_READER_AUDIENCES
+
+
+def _anti_ai_fb_mode(item: dict) -> bool:
+    audience = str(item.get("audience") or "").strip().lower()
+    content_type = _anti_ai_content_type(item)
+    return audience in {"general", "event"} or content_type in {
+        "daily_digest",
+        "event_article",
+        "trending_repost",
+    }
+
+
+def _normalize_anti_ai_template_phrases(text: str) -> tuple[str, list[str]]:
+    fixes: list[str] = []
+    out = text
+    for pattern, replacement, label in _ANTI_AI_TEMPLATE_FIXES:
+        out, count = pattern.subn(replacement, out)
+        if count:
+            fixes.append(f"{label}:{count}")
+    return out, fixes
+
+
+def _apply_anti_ai_autofixes(item: dict) -> list[str]:
+    """Apply deterministic, low-risk style fixes before the blocking check."""
+    fixes: list[str] = []
+    text_fields = ("content", "description", "summary", "analysis")
+    for field in text_fields:
+        raw = item.get(field)
+        if not isinstance(raw, str) or not raw:
+            continue
+        text = raw
+        try:
+            from volpred.publisher.emdash_normalizer import normalize_emdash
+
+            normalized, emrep = normalize_emdash(text)
+            if emrep.changed:
+                text = normalized
+                fixes.append(f"{field}:emdash:{emrep.replaced}")
+                print(
+                    f"  [feed_publisher] emdash_normalizer auto-fixed "
+                    f"{emrep.replaced} em-dash(es) for "
+                    f"{item.get('id', 'unknown')}: {emrep.summary()}"
+                )
+        except Exception as exc:
+            # The hard gate itself remains fail-open; keep auto-fix failures
+            # observable but do not abort before the checker gets a chance to run.
+            print(
+                f"  [feed_publisher] WARN emdash_normalizer skipped for "
+                f"{item.get('id', 'unknown')}: {exc}"
+            )
+        text, phrase_fixes = _normalize_anti_ai_template_phrases(text)
+        if phrase_fixes:
+            fixes.extend(f"{field}:{fix}" for fix in phrase_fixes)
+            print(
+                f"  [feed_publisher] anti_ai_template auto-fixed "
+                f"{len(phrase_fixes)} phrase pattern(s) for "
+                f"{item.get('id', 'unknown')}: {phrase_fixes}"
+            )
+        if text != raw:
+            item[field] = text
+    return fixes
+
+
+def _anti_ai_gate_text(item: dict) -> str:
+    body = (
+        item.get("content")
+        or item.get("analysis")
+        or item.get("summary")
+        or item.get("description")
+        or ""
+    )
+    return f"{item.get('title') or ''}\n\n{body}"
+
+
+def _run_anti_ai_checks(text: str, *, fb_mode: bool) -> tuple[bool, list[str]]:
+    import sys
+
+    scripts_dir = Path(__file__).resolve().parents[3] / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    from anti_ai_gate import run_checks  # noqa: WPS433
+
+    return run_checks(text, fb_mode=fb_mode)
+
+
+def _log_anti_ai_gate_decision(
+    storage_dir: str,
+    item: dict,
+    *,
+    decision: str,
+    reason: str,
+    failures: list[str] | None = None,
+    fixes: list[str] | None = None,
+    mode: str | None = None,
+) -> None:
+    """Append the anti-AI gate audit record; logging is fail-open."""
+    try:
+        path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        rec = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "gate": _ANTI_AI_GATE_NAME,
+            "target_id": item.get("id"),
+            "decision": decision,
+            "reason": reason,
+            "mode": mode,
+            "strict_after": _ANTI_AI_GATE_STRICT_AFTER.isoformat(),
+            "title": str(item.get("title") or "")[:120],
+            "audience": item.get("audience"),
+            "content_type": _anti_ai_content_type(item),
+            "failures": list(failures or [])[:8],
+            "fixes": list(fixes or [])[:12],
+        }
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+
+def _send_anti_ai_gate_degraded_alert(storage_dir: str, item: dict, exc: Exception) -> None:
+    try:
+        from volpred.ops.alerts import send_alert
+
+        send_alert(
+            level="warn",
+            title="anti_ai_style gate 失效 — publish gate fail-open",
+            body=(
+                "publish pipeline 的 anti_ai_style gate 拋出例外並 fail-open，"
+                f"文章 `{item.get('id')}` / `{str(item.get('title') or '')[:80]}` "
+                "會繼續發佈但未完成 anti-AI-style 檢查。\n\n"
+                f"例外：`{type(exc).__name__}: {exc}`\n\n"
+                "請檢查 `scripts/anti_ai_gate.py` 與 "
+                "`src/volpred/publisher/publisher.py::_run_publish_anti_ai_gate`。"
+            ),
+            storage_dir=storage_dir,
+        )
+    except Exception as alert_exc:
+        print(
+            f"  [feed_publisher] WARN anti-AI degraded alert failed for "
+            f"{item.get('id', 'unknown')}: {alert_exc}"
+        )
+
+
+def _run_publish_anti_ai_gate(
+    storage_dir: str,
+    item: dict,
+    *,
+    target_status: str | None = None,
+    raise_on_block: bool = True,
+) -> list[str]:
+    """Run anti-AI-style publish gate.
+
+    Returns release-audit issues when `raise_on_block=False`; otherwise raises
+    ValueError on hard-block. Gate malfunction is explicitly fail-open.
+    """
+    if not _anti_ai_gate_applies(item, target_status=target_status):
+        return []
+
+    warn_only, mode_reason = _anti_ai_gate_warn_only()
+    try:
+        fixes = _apply_anti_ai_autofixes(item)
+        text = _anti_ai_gate_text(item)
+        if not text.strip():
+            _log_anti_ai_gate_decision(
+                storage_dir,
+                item,
+                decision="warn",
+                reason="empty_text_fail_open",
+                fixes=fixes,
+                mode=mode_reason,
+            )
+            return []
+        passed, failures = _run_anti_ai_checks(text, fb_mode=_anti_ai_fb_mode(item))
+    except Exception as exc:
+        _log_anti_ai_gate_decision(
+            storage_dir,
+            item,
+            decision="pass",
+            reason=f"gate_error_fail_open_degraded:{type(exc).__name__}:{exc}",
+            mode=mode_reason,
+        )
+        _send_anti_ai_gate_degraded_alert(storage_dir, item, exc)
+        print(
+            f"  [feed_publisher] WARN anti-AI gate fail-open for "
+            f"{item.get('id', 'unknown')}: {exc}"
+        )
+        return []
+
+    warn_count = sum(1 for failure in failures if "[WARN]" in failure)
+    must_count = sum(1 for failure in failures if "[MUST]" in failure)
+    summary = "; ".join(f.strip() for f in failures[:5])
+    if passed:
+        decision = "warn" if failures else "pass"
+        reason = (
+            f"passed_with_minor_warnings warn={warn_count} must={must_count}: {summary}"
+            if failures
+            else "passed"
+        )
+        _log_anti_ai_gate_decision(
+            storage_dir,
+            item,
+            decision=decision,
+            reason=reason,
+            failures=failures,
+            fixes=fixes,
+            mode=mode_reason,
+        )
+        return []
+
+    reason = (
+        f"blocked_by_checker warn={warn_count} must={must_count}: {summary}; "
+        "fix per .claude/skills/anti-ai-style/references/editor-sop.md"
+    )
+    if warn_only:
+        _log_anti_ai_gate_decision(
+            storage_dir,
+            item,
+            decision="warn",
+            reason=(
+                f"{reason}; WARN-ONLY migration until "
+                f"{_ANTI_AI_GATE_STRICT_AFTER.isoformat()}"
+            ),
+            failures=failures,
+            fixes=fixes,
+            mode=mode_reason,
+        )
+        print(
+            f"  [feed_publisher] WARN anti-AI gate would block "
+            f"{item.get('id', 'unknown')} after "
+            f"{_ANTI_AI_GATE_STRICT_AFTER.isoformat()}: {summary}"
+        )
+        return []
+
+    _log_anti_ai_gate_decision(
+        storage_dir,
+        item,
+        decision="block",
+        reason=reason,
+        failures=failures,
+        fixes=fixes,
+        mode=mode_reason,
+    )
+    issue = (
+        f"anti_ai_style publish gate failed: {summary}. "
+        "Rewrite per .claude/skills/anti-ai-style/references/editor-sop.md"
+    )
+    if raise_on_block:
+        raise ValueError(issue)
+    return [issue]
+
+
 # 2026-06-23: base64 data-URI image gate. One-time Codex publish scripts embedded
 # charts as ``![alt](data:image/png;base64,...)`` (bypassing Supabase upload via
 # monkey-patched _normalize_publish_assets), bloating feed.json — one entry hit
@@ -2034,25 +2347,6 @@ class Publisher:
                     f"  [feed_publisher] WARN unfixable table rows for "
                     f"{item.get('id', 'unknown')}: lines={report.unfixed_lines}"
                 )
-            # Anti-AI-style landmine 9 defense (2026-05-29): auto-correct
-            # over-used CJK appositive em-dashes (「——」/「—」) to commas at the
-            # canonical write site. publishing.md §7 mandates anti-ai-style
-            # co-run but the publisher had no hard gate — relied on agent
-            # self-discipline (validate_anti_ai_style.py: only ~10% of recent
-            # articles clean). Conservative: only CJK-flanked appositive dashes
-            # are rewritten (fix (b)「改逗號併入主句」, semantically lossless);
-            # numeric ranges / Latin compounds / attribution / code / tables
-            # are skipped. Same two-layer pattern as markdown_table_sanitizer.
-            from volpred.publisher.emdash_normalizer import normalize_emdash
-
-            normalized, emrep = normalize_emdash(item['content'])
-            if emrep.changed:
-                item['content'] = normalized
-                print(
-                    f"  [feed_publisher] emdash_normalizer auto-fixed "
-                    f"{emrep.replaced} em-dash(es) for "
-                    f"{item.get('id', 'unknown')}: {emrep.summary()}"
-                )
         # Serialize concurrent writers (Claude Code, Codex, cron workers)
         # against feed.json. Lock name follows docs/agent-collab-invariants.md.
         from volpred.ops.shared_lock import shared_state_lock
@@ -2062,6 +2356,12 @@ class Publisher:
         result_label = "ok"
         log_record_id = item.get('id')
         try:
+            # publishing.md §7: reader-facing published articles must pass
+            # anti-ai-style. Deterministic auto-fixes (em-dash/template
+            # phrases) happen here; checker failures are warn-only until
+            # _ANTI_AI_GATE_STRICT_AFTER, then hard-block. Gate exceptions
+            # fail-open with alert + audit trail.
+            _run_publish_anti_ai_gate(storage_dir, item, raise_on_block=True)
             with shared_state_lock("publisher_feed", storage_dir=storage_dir):
                 feed = self._load_feed()
                 # 2026-06-30 boss email-12281: pre-publish throttle gate. The

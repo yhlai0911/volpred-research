@@ -214,7 +214,7 @@ Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup sel
 
 ## Token / Context 紀律
 
-- **禁止整檔讀取** `storage/reports/feed.json`；用 `grep`、`jq`、單篇 `storage/reports/<id>.json`。
+- **禁止整檔讀取** `storage/reports/feed.json`；用 `grep`、`jq`、單篇 `storage/reports/<id>.json`。〔L1 機械 deny：`cat/less/more feed.json·knowledge.json` 已由 `.claude/hooks/pretooluse-bash-optimizer.sh` 攔截〕
 - `storage/memory/knowledge.json` 同理，禁止整檔讀取。
 - 重複性流程靠 skill，不要每次把長 SOP 貼進主對話。
 - 先看 [`docs/workflow-index.md`](/Users/yhlai0911/volpred-research/docs/workflow-index.md) 判斷 workflow / 執行模式，再按需讀對應 skill 全文；不要一開始就把多份長 SOP 全載入。
@@ -259,7 +259,7 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 
 - Worktree agent 只產 `experiments/kXXX/` 檔；**禁改共享狀態**（`feed.json`、`storage/memory/*.json`、Supabase/Mirror sync）
 - 完成後 agent commit，主線程用 `bash scripts/merge_worktree.sh` 合併
-- **絕對禁止** `git worktree remove --force`
+- **絕對禁止** `git worktree remove --force`〔L1 機械 deny：`.claude/hooks/pretooluse-bash-optimizer.sh` 已攔截〕
 
 ## 發佈、論文、策略
 

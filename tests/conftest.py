@@ -32,3 +32,8 @@ os.environ["VOLPRED_NO_EMAIL"] = "1"
 # (loaded from .env.local at import) and a missing per-test stub, no test can
 # mutate prod. Structural backstop mirroring VOLPRED_NO_EMAIL above.
 os.environ["VOLPRED_NO_REMOTE_WRITE"] = "1"
+
+# Keep legacy publisher fixtures deterministic across the anti-AI gate's
+# 2026-07-13 production escalation date. Strict/blocking behavior is covered by
+# targeted tests that set VOLPRED_ANTI_AI_GATE_MODE explicitly.
+os.environ.setdefault("VOLPRED_ANTI_AI_GATE_MODE", "warn")
