@@ -44,6 +44,13 @@ assert_deny "cat after pipe"               "echo x | cat storage/memory/knowledg
 assert_deny "zeabur deploy after &&"       "cd frontend-v2-fix && npx zeabur deploy"
 assert_deny "worktree remove after ;"      "cd /tmp ; git worktree remove --force foo"
 assert_deny "force flag after path"        "git worktree remove foo --force"
+# 2026-07-10：git parse-options 收長選項不歧義縮寫與 short flag 聚合，實測 -ff/--for/--forc
+# 全被 git 接受而舊 regex 全放行。-ff 正是文件建議用來移除 locked worktree 的寫法。
+assert_deny "aggregated -ff"               "git worktree remove -ff foo"
+assert_deny "abbrev --for"                 "git worktree remove --for foo"
+assert_deny "abbrev --forc"                "git worktree remove --forc foo"
+assert_deny "short cluster -vf"            "git worktree remove -vf foo"
+assert_deny "aggregated -ff after path"    "git worktree remove foo -ff"
 
 # ── false-positive 防護：命令引數 / commit message / echo 裡「提到」危險字串不可誤擋 ──
 assert_allow "commit msg mentions zeabur"  "git commit -m 'ban zeabur deploy direct call'"
@@ -61,6 +68,9 @@ assert_allow "worktree remove (no force)"  "git worktree remove .claude/worktree
 assert_allow "rm -f then worktree remove"  "rm -f /tmp/junk && git worktree remove .claude/worktrees/foo"
 assert_allow "rm -f on next line"          $'rm -f /tmp/junk\ngit worktree remove .claude/worktrees/foo'
 assert_allow "worktree remove then rm -f"  "git worktree remove .claude/worktrees/foo && rm -f /tmp/junk"
+# 過度攔截防護：路徑內含 -f 子字串（無前導空白）不是 flag
+assert_allow "path contains -f substring"  "git worktree remove .claude/worktrees/wt-fix"
+assert_allow "path named frontend-fix"     "git worktree remove .claude/worktrees/frontend-fix"
 assert_allow "plain echo"                  "echo hello"
 assert_allow "pytest advisory rewrite"     "uv run pytest tests/"
 assert_allow "cat unrelated file"          "cat storage/reports/mile_abc123.json"

@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 `worktree remove --force` 機械 gate 只擋得住老實人 — flag 比對漏了縮寫與聚合形式
+
+**現象**：兩個獨立缺陷，同一天在同一條 deny 規則上發現。
+1. **false positive**（先被踩到）：`rm -f /tmp/junk && git worktree remove foo` 被擋。舊版把 `--force|-f` 當成**整個 COMMAND** 的獨立條件，`-f` 屬於前一段的 `rm` 也照擋。合法清理被封死 → 逼 agent 去想繞道寫法。
+2. **false negative**（修 1 時發現）：`git worktree remove -ff foo`、`--for foo`、`--forc foo` **git 全部接受**（parse-options 支援長選項不歧義縮寫 + short flag 聚合），而舊 regex 只認死 `-f` 與 `--force` → **全部放行**。`-ff` 正是 git 文件建議用來移除 locked worktree 的寫法，也就是 agent 在 `remove` 失敗後最可能伸手去拿的那一個。這條 gate 存在的唯一理由是防 K1032/K1618 誤刪未合併實驗，而它在最可能被觸發的情境下形同虛設。
+
+**解決方法**（`.claude/hooks/pretooluse-bash-optimizer.sh`）：
+- flag 比對錨定到 `git worktree remove` **自己的指令段**內（`SEG_TAIL='[^;&|]*'`，段界＝`; & |`；grep 逐行比對故換行天然是界）。
+- flag pattern 由 `(--force|-f)` 改為 `(--f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*)`。`worktree remove` 的唯一長選項是 `--force`、唯一 short flag 是 `-f`，故「`--f` 開頭」或「短 flag 群含 f」即可安全判定為 force，同時 `.claude/worktrees/wt-fix` 這種路徑（`-f` 無前導空白）不誤判。
+- 回歸測試 `scripts/tests/test_pretooluse_deny.sh` 補 7 例（`-ff` / `--for` / `--forc` / `-vf` / path 後置 `-ff` / 兩個過度攔截防護），現 34 assertions 全綠。
+
+**教訓**：
+- **false positive 與 false negative 是同一個病灶的兩面**：flag 比對沒有錨定到它要保護的那個指令。只修被踩到的那一面，另一面會繼續睡著。**動任何 deny 規則時，正反兩向各測一輪**（該擋的擋不擋得住、該放的放不放得過）。
+- **機械 gate 的 pattern 必須對照工具的真實 CLI 語法，不能只對照「人類慣常寫法」**。`git` 收縮寫與聚合 flag 是 parse-options 的預設行為；prose 規則寫「禁止 `--force`」時腦中只有那一種拼法，機械化時若直譯就留下破口。**寫 deny pattern 前先跑一次 `<tool> <subcommand> --wrong-flag` 探測它到底收哪些形式。**
+- **被 gate 誤擋時，正確反應是修 gate，不是繞過它。** 本次 agent 的第一反應是把 `rm -f` 拆到另一個 Bash 呼叫繞開比對——任務是完成了，但破口留在那裡。繞道成本低會讓 gate 的失效無聲無息。
+
 ## 2026-07-10 pytest 改寫 canonical `storage/` 狀態（與 6/23 線上 feed 汙染同 bug class）→ `VOLPRED_NO_CANONICAL_WRITE` writer-level gate
 
 **現象**：在 worktree `magical-chaplygin-bc88af` 跑全套 pytest 時，該 worktree 的 `storage/publication_candidates.json` 被完整重生（mtime 13:21:44 台灣時間落在測試窗內，`generated_at` 03:20:46Z → 05:21:44Z，48 insertions / 48 deletions）。`tests/test_build_publication_candidates.py` 與 `tests/test_content_quality.py` 都用 `tmp_path` 隔離，hooks 也沒引用 builder —— 兇手不在明顯的地方。

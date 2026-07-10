@@ -23,8 +23,14 @@ CMD_START='(^|[;&|(])[[:space:]]*'
 # 這種無 force 的合法清理被誤擋（2026-07-10 18:20 實際踩到）。
 # 段界＝ ; & | ；換行不必列入 — grep 逐行比對，match 本來就跨不過換行。
 SEG_TAIL='[^;&|]*'
+# flag 比對不可只認死 `-f` / `--force`：git parse-options 接受長選項的不歧義縮寫
+# （`--for` / `--forc`）與 short flag 聚合（`-ff`，即文件建議用來移 locked worktree
+# 的 `-f -f`）。2026-07-10 實測三者 git 全收，而舊 regex 全放行 — 擋得住老實人，
+# 擋不住卡住的 agent。`worktree remove` 的唯一長選項是 --force，唯一 short flag 是
+# -f，故「`--f` 開頭」或「短 flag 群含 f」即可安全判定為 force。
+FORCE_FLAG='(--f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*)'
 DENY_REASON=""
-if printf '%s' "$COMMAND" | grep -qE "${CMD_START}git[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]](--force|-f)([[:space:]]|\$)"; then
+if printf '%s' "$COMMAND" | grep -qE "${CMD_START}git[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]]${FORCE_FLAG}([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止 git worktree remove --force（CLAUDE.md『絕對禁止』；K1032/K1618 誤刪未合併實驗事故）。改用 bash scripts/merge_worktree.sh 正常合併；worktree 從 stale base 分出時用 git checkout <branch> -- experiments/kXXXX/ path-scoped 抽取。"
 elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}(npx[[:space:]]+)?zeabur[[:space:]]+deploy([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止直呼 zeabur deploy（frontend-and-deploy.md）。部署一律走 frontend-v2-fix/scripts/deploy-zeabur-safe.sh（鎖正確 service ID + 安全檢查）。"
