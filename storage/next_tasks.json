@@ -57439,5 +57439,110 @@
       }
     ],
     "completed_at": "2026-07-10T09:07:47.613081+00:00"
+  },
+  {
+    "id": "event-typhoon-closure-20260710",
+    "task_type": "event_article",
+    "priority": 1,
+    "source": "drought-remediation-emergency-20260710",
+    "status": "claimed",
+    "dispatch_lane": "main_thread",
+    "topology": "inline",
+    "created_at": "2026-07-10T09:26:21.916215+00:00",
+    "title": "[T+0 事件文] 颱風巴威台股停市：歷史颱風假的波動率帳單（K1675）",
+    "description": "發文脫班 critical（8h 無新文，remediation 0/0 升級）的 emergency fresh 文章。事件：2026-07-10 台股因颱風巴威停市（TWSE 依臺北市全日停止上班）。角度：歷史台股颱風停市樣本 → 停市後首個交易日的跳空/絕對報酬/RV 變化 vs 對照日；3-layer + arc dedup 已過（主線程 17:24 驗證，feed 無停市×波動主題）。證據包 = experiments/k1675/；主線程負責 publish + FB。",
+    "claimed_by": "main-session",
+    "claimed_at": "2026-07-10T09:26:22.355471+00:00",
+    "claim_session_id": "fdb60732",
+    "status_history": [
+      {
+        "ts": "2026-07-10T09:26:22.355719+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main-session"
+      }
+    ]
+  },
+  {
+    "id": "email-11962-9a1805",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] 發文脫班補救失敗：force-release/refill 皆為 0",
+    "description": "Gmail UID: 11962\nMessage-ID: <BFEB0515-9E07-40AC-9669-C8AC5A008EBB@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 10 Jul 2026 17:25:56 +0800\nSubject: Re: [VolPred Alert][CRITICAL] 發文脫班補救失敗：force-release/refill 皆為 0\n\n--- 用戶回信內容 ---\nclaude額度已恢復 給我立刻處理\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月10日 17:23 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 發文脫班補救失敗：force-release/refill 皆為 0\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 系統偵測到讀者端內容更新可能中斷，需要先恢復發文節奏。\r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> 行動\r\n> \r\n> 先補一篇可發佈文章或觸發釋出流程，再追查為什麼排程沒接上。\r\n> Publishing-freshness dead-man switch attempted automatic remediation, but both live escape paths returned empty.\r\n> publish_gap_hours: 7.98\r\n> threshold_hours: 6.0\r\n> force_release.released: 0\r\n> refill_reader_facing.added: 0\r\n> refill_reader_facing.reason: no_reader_facing_candidates_passing_filter\r\n> Required operator action: create or dispatch a fresh reader-facing article task; do not treat this as a no-op.\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-10T09:30:06.927985+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11962,
+    "email_message_id": "<BFEB0515-9E07-40AC-9669-C8AC5A008EBB@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] 發文脫班補救失敗：force-release/refill 皆為 0",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-07-10T09:31:44.264348+00:00",
+    "claim_session_id": "44d1f900e142",
+    "status_history": [
+      {
+        "ts": "2026-07-10T09:31:44.264648+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-10T09:31:44.580622+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-10T09:52:40.431777+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-17"
+      }
+    ],
+    "started_at": "2026-07-10T09:31:44.580204+00:00",
+    "completed_at": "2026-07-10T09:52:40.431367+00:00",
+    "result": "�?��??�?��??解�?��?�?��? mile_66c3fc3b�?gap 8.14h�??0.01h�?�??�??帶根治 upload_chart �??平 object key �?�?? bug + publish_draft --dry-run �??�?�?��?��?�?��?復�?? mile_e71ea353 �?張被�?�??�??�?�人�??�??�?hash �?�??�?�??commit 2e1940866�??"
+  },
+  {
+    "id": "telegram-366",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T09:38:58.194491+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 366）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nGitHub\n[yhlai0911/volpred-research] Test Suite workflow run\n \n\n \nTest Suite: All jobs have failed\n \n \nStatus Job Annotations\npytest \nTest Suite / pytest\nFailed in 5 minutes and 10 seconds\nannotations for Test Suite / pytest 2 \n \n \n—\nYou are receiving this because you are subscribed to this thread.\nManage your GitHub Actions notifications\n\n \nGitHub, Inc. ・88 Colin P Kelly Jr Street ・San Francisco, CA 94107\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T09:39:35.884661+00:00",
+    "claim_session_id": "1cfbe3ebc750",
+    "status_history": [
+      {
+        "ts": "2026-07-10T09:39:35.885048+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T09:42:00.966805+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-10T09:42:00.966429+00:00"
+  },
+  {
+    "id": "ci-env-hardening-20260710",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "telegram-responder",
+    "status": "pending",
+    "created_at": "2026-07-10T09:41:36.797485+00:00",
+    "title": "CI Test Suite 34 fail — 全為環境依賴，修 workflow 環境與測試 fixture",
+    "description": "run 29083395825 (2026-07-10) 首次真的跑 pytest 後 34 failed / 1650 passed。本機 uv run --extra dev python -m pytest 同批全 PASS（39 passed）→ 全部是 CI 環境依賴，非產品 bug。\n根因分四類：\n1. 缺 ripgrep（9 tests, test_experiments_ops）→ workflow 加 apt-get install -y ripgrep\n2. 缺 SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY（4 tests, test_feed_sync）→ 測試改 monkeypatch env，或 CI 注入 dummy env；不可把 secret 放 CI\n3. repo_root_mismatch（6 tests, test_execution_brief / test_session_ops）→ guard 假設 repo 在 ~/volpred-research，CI 在 /home/runner/work/...；改讀 git rev-parse --show-toplevel\n4. gitignored 資料檔缺（~13 tests: trending_repost_log.json、arc_dedup / topic_cluster_gate / daily_digest 的 SystemExit:1）→ 測試改建 fixture，不依賴 storage/ 實資料\n另 test_alerts assert 4==3 與 test_cron_auth_preflight 需個別確認是否亦屬類 3/4。\n禁止用 skip/xfail 掩蓋 — 依「永遠修流程」修環境與測試 fixture。"
   }
 ]
