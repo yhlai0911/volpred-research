@@ -57615,7 +57615,7 @@
     "title": "K1675: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1675 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: K1675 台股颱風停市事件研究（2012-2025，^TWII + 0050 雙源驗證；觸發事件=2026-07-10 颱風巴威停市）。停市日推導：XTAI adhoc_holidays（15 天）∪ 殘差掃描（+2024-10-31 康芮，library 漏列）；殘差 false positives 用 TWSE 融資融券獨立第二來源 + 假期鄰接剔除；共 16 停市日 / 13 事件。主結論（null 即結論）：(1) 復市首日 |報酬| 0.871% vs 同月對照日 0.706%，bootstrap 95% CI [-0.235%, +0.66",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1675",
@@ -57624,7 +57624,33 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-10T10:08:37+00:00"
+    "created_at": "2026-07-10T10:08:37+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-10T13:09:42.835026+00:00",
+    "claim_session_id": "cddded5fc30b",
+    "status_history": [
+      {
+        "ts": "2026-07-10T13:09:42.835424+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-10T13:09:46.041480+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-10T13:29:25.628476+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-10T13:09:46.041011+00:00",
+    "completed_at": "2026-07-10T13:29:25.628060+00:00",
+    "result": "完成一般讀者常青稿 mile_3c3b4201（audience=general、status=draft、2,911 字、4 個 experiment refs），以資料鑑識軸避開既有事件稿。新增兩張 results-bound 圖並上傳驗證 HTTP 200；feed-sync failed=0，lazypack-mile_3c3b4201 已排入 async queue。"
   },
   {
     "id": "telegram-369",
