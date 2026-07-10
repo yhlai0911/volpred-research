@@ -15456,5 +15456,27 @@
     "actor": "hourly-01",
     "outcome": "in_progress",
     "summary": "派 worktree agent 執行 K1679-rev（override 引擎 K1677：ALFRED/FRED 資料存取有保證 vs SEC-AAER 爬蟲不確定 + 範圍收斂 + NULL knowledge-grade closure）。3 修：ALFRED point-in-time vintage / Clark-West nested test / un-floored loss sensitivity。seed=42、j+H<i embargo、heavy 走 compute_queue、Codex CONDITIONAL_PASS+ gate、agent 禁寫 knowledge.json。"
+  },
+  {
+    "timestamp": "2026-07-11T01:34:50+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-dabd5ab47",
+    "outcome": "succeeded",
+    "summary": "alert on duplicate hourly dispatch slots",
+    "commit": "dabd5ab470378dde47f0f8c22d3d11cf34fe429c",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T17:39:09.897997+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-11T01:38:10+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-383eaa6ac",
+    "outcome": "succeeded",
+    "summary": "ignore temporary Codex worktrees",
+    "commit": "383eaa6aca5168e202411de6658bd374d0e8339e",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T17:39:09.897621+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
