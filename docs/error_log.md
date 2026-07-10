@@ -2,6 +2,27 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 supervisor cutover 把 Claude→Codex failover 弄丟 — 每次額度用完都靜默丟掉整批 hourly slot（cutover 孤兒第 5 次）
+
+**現象**：老闆 Telegram msg 376 問「claude 的額度到了時候 codex app 會自動接手嗎」。查證答案是**不會**。`cron_hourly_dispatch.sh::run_codex_failover()`（2026-06-28 老闆指令落地）在 Claude quota/auth 死掉時把該小時的 slot 交給 `codex exec`（ChatGPT auth，額度與 Claude 完全獨立）。2026-07-04 派工 cutover 到 `com.volpred.dispatch-supervisor` 常駐 daemon 後，`worker.py` 只把 quota 正確**分類**（2026-07-05 加的 `_QUOTA_RE`），然後 `send_quota_alert` + abort —— **failover 整段沒搬過去**。自 cutover 起每次 Claude 額度耗盡，該小時的工作就直接消失，等額度自己恢復；老闆只會收到一封「額度用完」的信，看不出 slot 被丟掉。
+
+**根因**：**cutover 孤兒**（control-plane.md 已記錄的同一 class，這是第 5 次）。退役 `cron_hourly_dispatch.sh` 時 grep 了它呼叫的 `scripts/*.py`（`test_cutover_orphans.py` 覆蓋這一面），但**沒有 grep 它自己 shell 函式裡實作的行為**。`run_codex_failover` 不是外部 script、不是 reader，是 wrapper 內生的一段邏輯 —— 現有的機械 gate 看不到它。孤兒 gate 只覆蓋「被呼叫的檔案」，不覆蓋「被實作的功能」。
+
+**過程 / 連帶發現**：修好 wiring 後，既有測試 `test_dispatch_supervisor.py::test_worker_auth_blocks_without_retry` 從 5 秒變成掛住 7 分鐘。原因是它驅動 `run_worker` 走 auth 分支、沒 patch failover → **pytest 真的 spawn 了一個 codex exec**，而 `codex exec` 不是唯讀探針：它會 claim 任務、做事、commit。事後查 `next_tasks.json` 確認它在 22:22 claim 了 `research_safe_haven_regime`（kill 後留下孤兒 `in_progress`，已用 `task_pool_claim.py release` 釋放，無其他 side effect：無新 commit、無實驗檔、無殘留 process）。
+
+**解決方法**：
+1. `scripts/dispatch_supervisor/codex_failover.py`（新）— 移植 shell 版的三個 incident fix：本機 binary preflight、**逾時 ≠ binary 損壞**的診斷分流、10min failover cap（非 50min hourly cap）。
+2. `worker.py` quota / auth 兩條分支都接上 failover。auth 分支**仍然** `set_auth_blocked(True)` —— failover 買回這一小時，不代表憑證修好了。
+3. `alerts.send_codex_failover_alert()` — dedup key 帶 reason（quota / auth 各自一封）；recovered → warn，接不了 → critical。
+4. **pytest guard**（`_under_pytest()`）：測試環境預設不 exec codex，要測 failover 得顯式傳 `enabled=True`。這是安全預設，不是 silent fallback（有 LOG + detail）。
+5. `reload_dispatch_supervisor.sh --defer` — 改 supervisor code 的人通常**就是 in-flight worker 自己**（hourly fire），既不能 reload（guard 正確拒絕）也不能 `--force`（會殺自己）。`--defer` detach 一個 waiter，等 `current_job` 清空就重載，讓「改 code → 上線」留在做出改動的那一班之內。
+6. 測試 `tests/test_dispatch_supervisor_codex_failover.py`（15 個）。**在臨時 worktree 上做 break-then-verify**（per control-plane.md：不在 daemon 腳下抽地毯）：模組存在但 worker 未接線時，兩個 wiring 測試準確 FAIL —— 不是兩邊都會過的假測試。
+
+**教訓**：
+- **退役一個執行路徑時，要 grep 的不只是「它呼叫誰」，還有「它自己做了什麼」。** 現有 `test_cutover_orphans.py` 只能抓前者。一段寫在 shell 函式裡的行為，沒有任何檔案指向它，cutover 後就無聲蒸發。
+- **會產生 side effect 的 ops 動作接進任何 code path 之前，先想「測試會不會踩到它」。** `codex exec` 從測試裡被 spawn 出去 claim 任務並 commit，是比原本那個 bug 更危險的東西 —— 它在 CI 上會直接動 production 任務池。凡是「呼叫外部 agent / 寫 canonical state / 對外發布」的函式，安全預設就該是在 pytest 下關閉。
+- **測試從 5 秒變 7 分鐘是訊號，不是雜訊。** 當下差點把它當成「這個測試本來就慢」跳過。
+
 ## 2026-07-10 Codex config 指到舊 CLI 不支援的 model — 全平台 codex 流程 400 靜默失敗數小時
 
 **現象**：K1675 lazypack render 連續兩次 0/3 產出（exit 0 但零 PNG）。挖 log 才見 API 400：`The 'gpt-5.6-sol' model requires a newer version of Codex`。當時 `~/.codex/config.toml` 已被設 `model="gpt-5.6-sol"` + `model_reasoning_effort="ultra"`，但已裝 CLI 是 0.142.5（不支援）。影響面 = 所有走 config 預設的 codex 呼叫（實驗 review gate / lazypack / paper review）— 靜默失敗因為呼叫端多半 capture output 後只看檔案有沒有產出。
