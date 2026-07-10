@@ -130,3 +130,32 @@ def test_release_layer_coverage_filters_stale_publication_gaps(
 
     assert by_kid["K3003"]["release_layer_covered"] is False
     assert "K3003" in missing_general_ids
+
+
+def test_output_write_is_atomic(tmp_path: Path, monkeypatch) -> None:
+    """A SIGKILL mid-write must never leave truncated JSON in tracked state.
+
+    refill_task_pool spawns this builder under a hard timeout that kills uv and
+    orphans the python child mid-write (docs/error_log.md 2026-07-10). The write
+    must go through a tmp file + os.replace so the tracked candidates file is only
+    ever swapped as a whole, never observed half-written.
+    """
+    mod = _load_module()
+    out = tmp_path / "publication_candidates.json"
+    out.write_text('{"generated_at": "old"}', encoding="utf-8")
+    monkeypatch.setattr(mod, "OUTPUT_PATH", out)
+
+    seen = {}
+    real_replace = mod.os.replace
+
+    def spy_replace(src, dst):
+        # Until the rename lands, the destination must still hold the OLD content.
+        seen["dst_before_replace"] = Path(dst).read_text(encoding="utf-8")
+        return real_replace(src, dst)
+
+    monkeypatch.setattr(mod.os, "replace", spy_replace)
+    mod._write_output_atomically({"generated_at": "new"})
+
+    assert seen["dst_before_replace"] == '{"generated_at": "old"}'
+    assert json.loads(out.read_text(encoding="utf-8"))["generated_at"] == "new"
+    assert not out.with_name(out.name + ".tmp").exists()

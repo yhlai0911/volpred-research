@@ -2,6 +2,25 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-11 detached-HEAD worktree 帶 4 個 gc-exposed commit —— orphan_branch alert 的反向盲區（rescue + alert 擴充）
+
+**問題**：`.claude/worktrees/distracted-poincare-fb39bc` 停在 detached HEAD、帶 4 個 main 上沒有的 commit（`main..HEAD=4`），**沒有任何 branch ref 指向**。這是 `orphan_branch` alert（同日新增，抓「branch 有工作但 worktree 被刪」）的**鏡像盲區**：worktree 移除的六層防護全在保護 worktree，而這裡剛好相反 —— worktree 在、ref 不在。branch 型孤兒有 ref、gc 撐得住；detached worktree 連 ref 都沒有，`git worktree remove` 或之後的 `git gc` 會讓那 4 個 commit unreachable 而**永久遺失**。
+
+**現象**：接手時該 worktree **已在 23:29 被移除**（`.git/worktrees/` admin 目錄也沒了），4 個 commit 當下只剩 unreachable object（`git fsck --unreachable` 才找得到，任何 ref 都指不到）。距 gc 兩週寬限期還沒到才僥倖還在。
+
+**過程**：`git fsck --unreachable` 撈出 3443 個 unreachable commit → 按「今天 + 距 main 正好 4 + 非 stash」篩出鏈尾 `d069ec7c9`（訊息 `wip(rescue): 孤兒 worktree 清理前保存未提交變更`）→ **立刻 `git branch rescue/distracted-poincare-fb39bc d069ec7c9` 綁 ref 保命**（脫離 gc）→ 才做內容分析。
+
+**處置（4 commit 大多被平行實作取代，撈出 1 個獨有 nugget）**：
+- 3/4 commit（`fix(test-isolation)` / merge / `fix(ci)`）= pytest 改寫線上 storage 的隔離修 + brief_templates 寫死 repo_root 修，**已被 main 獨立的 `f5f3d210b` / `6d3a0a3af` 取代**（平行實作；另一 session 的對抗式雙 agent 審查也判 `NO_GO_ABANDON`，逐檔交叉確認）→ drop。
+- **獨有 nugget 撈回**：`scripts/build_publication_candidates.py::_write_output_atomically()`（tmp + `os.replace` 的 crash-atomic 寫入）。main 是裸 `OUTPUT_PATH.write_text`（`git grep os.replace main` = 0）；refill 用 hard timeout spawn 這支、timeout 殺 uv 而 orphan 掉 python child，SIGKILL 落在寫一半會截斷 tracked JSON。cherry-pick 該 helper + swap write site + 加 `test_output_write_is_atomic`。**沒**照抄 rescue branch 的 `--storage-dir`/`_configure_storage_paths`（main 的 `guard_canonical_write` + `VOLPRED_NO_CANONICAL_WRITE` 已擋 test-time prod 寫入，那套是冗餘）。
+- `.claude/worktrees/funny-cartwright-d6471a`（1 commit `fix(gate): kickstart gate repo-relative`）= main 的 `6d3a0a3af` 的**子集**（`git diff main 270802081` 只少 4 行註解）→ 已被取代；但它有 branch ref + live worktree（不在 gc 風險），留原地不動、記錄待清。
+
+**根因 / 修法（擴充既有 owner，不新增第二個 watchdog）**：`orphan_branch` alert 只掃「branch 無 worktree」單向。→ `src/volpred/ops/alerts.py::_parse_orphan_branch_state` 加 case (B)：掃 `git worktree list --porcelain`，抓 detached HEAD、`rev-list <head> ^main > 0`、且位於受管理的 `.claude/worktrees/` 底下的 worktree（`/private/tmp` 的 sanctioned throwaway scratch 排除，避免噪音）。**因為無 ref backing、gc 一跑即消失，一出現即 breach（不等 2h）**，>24h 升 critical。body 三段沿用、建議行動第 1 條就是 `git switch -c rescue/<topic>` 先保命。測試 `tests/test_alerts.py` +5 例（detached breach / throwaway 排除 / fully-on-main safe / 24h critical / 兩 case 併存）。
+
+**連帶清理**（同日 clobber incident 的 fixture 殘留漏在真 repo）：`conflict.txt`（`printf 'main' > $WORK/conflict.txt` 洩漏，untracked）+ `side` branch（`prepush test` author 的 fixture branch）—— PHASE-Z `git add -A` 會把它們掃進真 main，先 `rm` + `git branch -D side` 清掉。
+
+**教訓**：新增任何「A 沒有 B」型的 orphan/一致性 alert 時，同一動作要問「B 沒有 A 呢？」。單向偵測會留下對稱盲區；detached-worktree（無 ref）比 orphan-branch（有 ref）更危險，卻正是原 alert 漏掉的那半。
+
 ## 2026-07-10 23:xx 非 hermetic git 測試把 sandbox commit 推上真 origin/main —— 真遠端 main 變 6-file skeleton（production incident）
 
 **問題**：修 pre-push gate（改成稽核「即將推送的 commit tree」而非工作區）時，附帶寫的 regression 測試 `scripts/tests/test_pre_push_pushed_tree.sh` 不是 hermetic —— 它用 `git -C "$WORK"` 對 `/tmp` sandbox 操作，但**沒有 unset 繼承來的 `GIT_DIR` / `GIT_WORK_TREE`**。當測試在一個 `GIT_DIR` 指向真 repo 的環境下跑（我自己的 hostile-env 探測，或平行 session 一份未 hermetic 的同名測試），sandbox 的 `git init / remote add origin $REMOTE / commit / push origin main` 全部改對**真 repo** 執行，於是 sandbox 的 base commit（訊息 `base: clean tree`、author `prepush test <test@example.com>`、只有 6 個檔的 skeleton tree）被推上真的 GitHub `origin/main`。

@@ -20,6 +20,7 @@ Logic:
 4. Output sorted candidates with coverage status.
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -306,6 +307,22 @@ def _is_invalidated_artifact(entry: dict) -> bool:
         "設計錯誤作廢",
     )
     return any(marker in merged for marker in fail_markers)
+
+
+def _write_output_atomically(output: dict) -> None:
+    """Write via tmp + os.replace so a killed run can never leave truncated JSON.
+
+    refill_task_pool spawns this script under a hard timeout, and the timeout
+    kills `uv`, orphaning the python child mid-write (see docs/error_log.md
+    2026-07-10). A SIGKILL landing between `write_text`'s open-truncate and its
+    final flush would otherwise corrupt the tracked storage/publication_candidates.json.
+    os.replace is atomic on the same filesystem, so readers see either the old
+    complete file or the new complete file, never a half-written one.
+    """
+    payload = json.dumps(output, ensure_ascii=False, indent=2)
+    tmp_path = OUTPUT_PATH.with_name(OUTPUT_PATH.name + ".tmp")
+    tmp_path.write_text(payload, encoding="utf-8")
+    os.replace(tmp_path, OUTPUT_PATH)
 
 
 def main():
@@ -620,7 +637,7 @@ def main():
     }
 
     guard_canonical_write(OUTPUT_PATH)
-    OUTPUT_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2))
+    _write_output_atomically(output)
 
     # Print concise summary
     print(f"Scanned {total} K experiments ({incomplete_research_count} filtered: no results JSON).")

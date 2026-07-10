@@ -1479,3 +1479,170 @@ def test_orphan_branch_probe_failure_is_loud_not_silent(tmp_path: Path, monkeypa
     result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
     assert result["breached"] is False
     assert "probe failed" in result["details"]["note"]
+
+
+# ---------------------------------------------------------------------------
+# orphan_branch, inverse case — 2026-07-10 (`distracted-poincare-fb39bc`): a
+# worktree left at a DETACHED HEAD carrying commits absent from main. No branch
+# ref points at those commits, so `git worktree remove` (or a later gc) makes
+# them unreachable and LOST — strictly worse than an orphan branch. Any age
+# breaches; there is no ref to survive gc.
+# ---------------------------------------------------------------------------
+
+
+def _patch_git_worktree_state(monkeypatch, *, heads, wt_blocks, per_rev):
+    """wt_blocks: list of dicts {path, head?, branch?, detached?} → porcelain.
+
+    per_rev: {rev_id -> (unmerged_count, newest_epoch | None)} where rev_id is a
+    branch name (case A) or a HEAD sha (case B, the detached worktree).
+    """
+    import subprocess as _sp
+
+    def _porcelain() -> str:
+        out = []
+        for b in wt_blocks:
+            out.append(f"worktree {b['path']}")
+            if b.get("head"):
+                out.append(f"HEAD {b['head']}")
+            if b.get("branch"):
+                out.append(f"branch refs/heads/{b['branch']}")
+            if b.get("detached"):
+                out.append("detached")
+            out.append("")
+        return "\n".join(out)
+
+    def fake_run(argv, **kwargs):
+        if "for-each-ref" in argv:
+            return _FakeCompleted(0, "\n".join(heads) + ("\n" if heads else ""))
+        if "worktree" in argv:
+            return _FakeCompleted(0, _porcelain())
+        if "rev-list" in argv:
+            rev = argv[argv.index("rev-list") + 2]  # ("--count", <rev>, "^main")
+            return _FakeCompleted(0, f"{per_rev[rev][0]}\n")
+        if "log" in argv:
+            # case A: "main..<branch>"; case B: [<sha>, "^main"]
+            spec = next((a for a in argv if a.startswith("main..")), None)
+            rev = spec.removeprefix("main..") if spec else argv[argv.index("log") + 1]
+            count, newest = per_rev[rev]
+            if newest is None:
+                return _FakeCompleted(0, "")
+            return _FakeCompleted(0, "\n".join(str(newest - i * 600) for i in range(count)))
+        raise AssertionError(f"unexpected git argv: {argv}")
+
+    monkeypatch.setattr(_sp, "run", fake_run)
+
+
+def _managed_wt(tmp_path: Path, name: str) -> str:
+    # Detached detection is scoped to the managed worktree area, repo_root/.claude/worktrees/.
+    # repo_root is the storage dir's parent, i.e. tmp_path here.
+    return str(tmp_path / ".claude" / "worktrees" / name)
+
+
+def test_orphan_branch_detached_worktree_with_unique_commits_breaches_immediately(tmp_path: Path, monkeypatch):
+    """No ref backs the commits → any age breaches, not just >2h."""
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 23, 0, tzinfo=timezone.utc)
+    fresh = int((now - timedelta(minutes=6)).timestamp())  # well under the 2h grace
+    _patch_git_worktree_state(
+        monkeypatch,
+        heads=[],
+        wt_blocks=[
+            {"path": str(tmp_path), "head": "aaaa11122", "branch": "main"},
+            {"path": _managed_wt(tmp_path, "distracted-poincare-fb39bc"),
+             "head": "d069ec7c9", "detached": True},
+        ],
+        per_rev={"d069ec7c9": (4, fresh)},
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is True          # fresh, but no ref = immediate breach
+    assert result["level"] == "warn"
+    assert result["details"]["detached_worktree_count"] == 1
+    assert result["details"]["detached_worktrees"][0]["unmerged_commits"] == 4
+    assert "distracted-poincare-fb39bc" in result["body"]
+    assert "無 branch ref" in result["title"]
+    # the gc-loss framing and the rescue-branch-first remediation must be present
+    assert "永久遺失" in result["body"]
+    assert "rescue/" in result["body"]
+
+
+def test_orphan_branch_detached_throwaway_outside_managed_area_is_ignored(tmp_path: Path, monkeypatch):
+    """A detached worktree under /private/tmp is sanctioned scratch — not an alert."""
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 23, 0, tzinfo=timezone.utc)
+    fresh = int((now - timedelta(minutes=6)).timestamp())
+    _patch_git_worktree_state(
+        monkeypatch,
+        heads=[],
+        wt_blocks=[
+            {"path": str(tmp_path), "head": "aaaa11122", "branch": "main"},
+            {"path": "/private/tmp/merge-trial", "head": "d069ec7c9", "detached": True},
+        ],
+        per_rev={"d069ec7c9": (4, fresh)},
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is False
+    assert result["details"]["detached_worktree_count"] == 0
+
+
+def test_orphan_branch_detached_worktree_fully_on_main_is_safe(tmp_path: Path, monkeypatch):
+    """Detached but 0 commits absent from main → deletable, not endangered."""
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 23, 0, tzinfo=timezone.utc)
+    _patch_git_worktree_state(
+        monkeypatch,
+        heads=[],
+        wt_blocks=[
+            {"path": str(tmp_path), "head": "aaaa11122", "branch": "main"},
+            {"path": _managed_wt(tmp_path, "throwaway"), "head": "aaaa11122", "detached": True},
+        ],
+        per_rev={"aaaa11122": (0, None)},
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is False
+    assert result["details"]["detached_worktree_count"] == 0
+
+
+def test_orphan_branch_detached_worktree_critical_after_24h(tmp_path: Path, monkeypatch):
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 23, 0, tzinfo=timezone.utc)
+    stale = int((now - timedelta(hours=30)).timestamp())
+    _patch_git_worktree_state(
+        monkeypatch,
+        heads=[],
+        wt_blocks=[
+            {"path": str(tmp_path), "head": "aaaa11122", "branch": "main"},
+            {"path": _managed_wt(tmp_path, "old-detached"), "head": "beef00001", "detached": True},
+        ],
+        per_rev={"beef00001": (2, stale)},
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is True
+    assert result["level"] == "critical"
+
+
+def test_orphan_branch_reports_both_cases_together(tmp_path: Path, monkeypatch):
+    """An aged orphan branch AND a detached worktree both surface in one alert."""
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 23, 0, tzinfo=timezone.utc)
+    aged = int((now - timedelta(hours=5)).timestamp())
+    fresh = int((now - timedelta(minutes=8)).timestamp())
+    _patch_git_worktree_state(
+        monkeypatch,
+        heads=["claude/aged-orphan"],
+        wt_blocks=[
+            {"path": str(tmp_path), "head": "aaaa11122", "branch": "main"},
+            {"path": _managed_wt(tmp_path, "detached-wt"), "head": "d069ec7c9", "detached": True},
+        ],
+        per_rev={"claude/aged-orphan": (3, aged), "d069ec7c9": (4, fresh)},
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is True
+    assert result["details"]["aged_orphan_count"] == 1
+    assert result["details"]["detached_worktree_count"] == 1
+    assert "claude/aged-orphan" in result["body"]
+    assert "detached-wt" in result["body"]
