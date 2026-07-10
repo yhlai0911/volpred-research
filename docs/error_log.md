@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 颱風臨時休市，網頁仍顯示「台股正常開盤」+ 發「本日持倉建議」→ 加 adhoc-closure override + NCDR 自動偵測 + 內容閘門
+
+**現象**：颱風巴威 7/10 台股全日休市（證交所公告、臺北市停班停課），但 VolPred 網頁市場橫幅顯示「台股正常開盤」、V3 首頁「今日建議」照列進場配置、daily_update 00:03 照發 2 篇每日建議（`mile_98d8b420` 每日策略建議 7/10、`mile_855bf302` 7/10 本日持倉比率建議）—— 對讀者是「休市日的進場指示」。老闆要求徹底修底層邏輯/流程/程式碼。
+
+**根因（結構性）**：`src/volpred/market_calendar.py` 把 `exchange_calendars`（XTAI）當**唯一**權威。該套件只有**預排假日行事曆**（農曆年/清明/端午…），對**颱風這種當天才宣布的緊急休市完全盲目** → `cal.is_session(2026-07-10)` 回 True。整條 pipeline（market_status → Supabase → 橫幅 + V3 today box；daily_update 內容產生）全繼承這個錯誤。缺一層 adhoc-closure override。
+
+**解決（三層 + 前端）**：
+1. **Override 層**（`market_calendar.py` + `config/market_closures_adhoc.json`）：adhoc closure 的 single source of truth，套在 exchange_calendars 之上。`get_market_status` 命中即 `is_open=False`+reason；`prev/next_trading_day` 與 `get_upcoming_holidays` 一併跳過 override 日（`_is_effective_session`）。mtime-cached、malformed fail-open（log 不 crash）。回歸測試 `tests/test_market_calendar_adhoc.py`（5 passed：typhoon-close / next-day-skip / no-override-untouched / market-scoped / malformed-fail-open）。
+2. **內容閘門**（`daily_update.py`）：發佈前先跑偵測器刷新 override；`get_market_status(today,"tw").is_open==False` → 跳過本日持倉/策略建議發佈（對齊 `alert.md`「freshness checks must pass the trading-day gate first」）。
+3. **自動偵測**（`scripts/detect_market_closure.py` + LaunchAgent `com.volpred.market-closure-detect` 每小時 :00）：讀 NCDR/人事行政總處**停班停課 CAP RSS**（`AlertType=33`，data.gov.tw dataset 20457）。規則＝**TWSE 跟隨臺北市全日停止上班**；解析排除「X:XX起」（半日）與「已達…標準」（預警）。命中且 exchange_calendars 判為交易日且未在 override → 自動寫 override + resync Supabase + send-alert。regex 解析（非 XML parser）避開 XXE/billion-laughs。idempotent。**08:00 那班＝台股開盤前 1 小時的確認閘門**（老闆要求）。
+4. **前端**：`/api/market-status` `revalidate` 3600→300（緊急休市 mid-day 寫入後橫幅 5 分鐘內翻，原本卡 1h）；`Editorial.tsx TodayStrategyBox` 讀 market-status，台股休市時標題改「策略配置」+「台股今日休市 · 原因 · 下個交易日」橫幅 +「非今日進場指示」。
+
+**驗證**：override 由 detector 自動加回（NCDR provenance）；線上 `/api/market-status`＝「美股正常開盤、台股休市（颱風休市）」next=7/13；2 篇誤發文章已 unpublish 且不在 feed；真瀏覽器確認 V3 today box 顯示休市。
+
+**教訓**：任何「日曆/交易日」判斷不可只信一個靜態套件——**排程性事實（預排假日）與臨時性事實（緊急休市）是兩種來源**，必須有 override 層 + 權威即時源（政府 open data）。凡「對讀者是行動指示」的自動內容（持倉/進場建議）必須先過**市場是否開盤**的閘門，不可假設每天都開盤。監控/內容/前端三處只要有一處用了未經 override 的日曆就會 drift → override 必須在**最底層**（market_calendar）套用，讓所有下游自動繼承。
+
 ## 2026-07-10 pregate 在 7/4 supervisor cutover 時孤兒化 — cutover 遷移沒有元件清單
 
 **現象**：`scripts/hourly_dispatch_pregate.py`（零 token「本班值不值得 ~95K opus cold-load」triage，shadow 資料顯示多數班可 skip，如 7/1 有 18/22 班是 stub）只掛在 legacy `cron_hourly_dispatch.sh:145`。2026-07-04 cutover 到 dispatch-supervisor 後無人移植 — supervisor 每小時無條件 spawn opus/high，空班照付全額 cold-load，持續 6 天無人發現。shadow log 停更在 cutover 當日是最清楚的死亡訊號，但沒有 alert 盯「shadow log 停更」。
