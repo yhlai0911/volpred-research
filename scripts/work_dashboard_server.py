@@ -299,7 +299,15 @@ def build_work() -> dict:
     }
 
     daemons = {
-        "hourly_dispatch": _daemon_alive("com.volpred.hourly-dispatch", warnings),
+        # 2026-07-10: was `com.volpred.hourly-dispatch` — the LaunchAgent the
+        # 2026-07-04 daemon cutover retired. Its plist still sits in
+        # ~/Library/LaunchAgents but is UNLOADED, so `launchctl list` never
+        # matches and this tile reported the (healthy, dispatching) hourly loop
+        # as dead for six days. Third monitor to make the same mistake:
+        # ops_dashboard fixed 2026-07-05, cron_review 2026-07-08, this one was
+        # missed both times because neither sweep grepped the full population of
+        # readers. Guarded by tests/test_work_dashboard_daemon_labels.py.
+        "hourly_dispatch": _daemon_alive("com.volpred.dispatch-supervisor", warnings),
         "check_alerts": _daemon_alive("com.volpred.check-alerts", warnings),
         "compute_worker": _daemon_alive("com.volpred.compute-worker", warnings),
         "codex_loop": _proc_count("codex_loop.sh", warnings),

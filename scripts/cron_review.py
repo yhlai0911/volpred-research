@@ -63,7 +63,10 @@ from volpred.ops.schedules import get_job_cron  # noqa: E402
 # work_summary 寫成 '5 6 * * *' 但 canonical 是 '5 */6 * * *'。Root cause = 重複
 # schedule source。改讀 config 後單一來源，未來改 cron 不會再 drift 監控。
 JOBS = {
-    "hourly_dispatch":  ("com.volpred.hourly-dispatch",      "hourly_dispatch.log", 2,   None,                    "volpred-hourly-dispatch"),
+    # label 欄今天不可達（hourly_dispatch 走 dispatch_supervisor_state() 特判後 continue），
+    # 但留著已退役的 `com.volpred.hourly-dispatch` 是地雷：拿掉特判就會靜默去探一具永遠
+    # unloaded 的屍體，重演 2026-07-08 的假 🔴 stale。指向真正活著的 daemon（2026-07-10）。
+    "hourly_dispatch":  (DISPATCH_SUPERVISOR_LABEL,          "hourly_dispatch.log", 2,   None,                    "volpred-hourly-dispatch"),
     "compute_worker":   ("com.volpred.compute-worker",       "compute_worker.log",  1,   None,                    "volpred-compute-worker"),
     "check_alerts":     ("com.volpred.check-alerts",         "check_alerts.log",    2,   None,                    "check_alerts"),
     "collect_tw":       ("com.volpred.collect-tw-data",      "collect_tw.log",      30,  "collect_tw_data",       "collect_tw_data"),

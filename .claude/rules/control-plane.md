@@ -5,6 +5,15 @@ paths:
   - "config/runtime_schedules.json"
   - "scripts/session_startup.md"
   - "docs/project_improvement_status.md"
+  # 2026-07-10 加：dispatch_supervisor 是 storage/ops/dispatch_state.json 這份
+  # canonical 控制面 state 的 writer。舊 paths 只涵蓋「被寫的資料」、不涵蓋「寫它的
+  # 程式」，於是「審 daemon 程式碼」這整個階段本規則從不 load —— 當日連續四輪 audit
+  # 都在 scripts/dispatch_supervisor/ 裡進行，控制面規則一次都沒 surface（silent
+  # skip，同 2026-04-20 publish-checklist incident 的 path-trigger 時序錯誤）。
+  # cron_review / check_alerts 同理：它們是這份 state 的 reader，監控 drift 就發生在此。
+  - "scripts/dispatch_supervisor/**/*"
+  - "scripts/cron_review.py"
+  - "scripts/check_alerts.py"
 ---
 
 # Control Plane Rules
@@ -19,6 +28,32 @@ paths:
 - `uv run volpred ops scheduler-tick` executor lane **目前只做 advisory snapshot**；正式 task claim/finish 必須來自主線程 direct dispatch 或明確 bootstrapped session
 - Session cron 與 system crontab **需與 canonical runtime schedule 一致**
 - Admin UI 目前是 **observer**；UI 與 canonical spec 不一致時以 canonical spec / local state 為準
+
+## 控制面 audit 的完成門檻（2026-07-10，幽靈欄位 strike 3 後補）
+
+審查任何控制面 state / 監控 / 排程時，**「我改的東西通過測試」不等於完成**。完成的門檻是
+**「這個 bug class 在整個 population 上都不存在，且有機械 gate 擋住復發」**。
+
+- **Full-population audit 是硬規則，不限實驗**。規範正文在 `.claude/rules/experiments.md`
+  §「Audit methodology hard rule」（掃描範圍 / blind-spot 分析 / 可驗證 evidence 三段）——
+  它寫的是「任何 ledger / dataset / output JSON」，控制面 state 完全適用。**該規則的 paths
+  不含 `storage/ops/**`，過去審 ops state 時不會 auto-load**，故在此立指標。
+  修完一個欄位 / 一個 reader / 一個監控前，先問：**同類還有幾個？**（2026-07-10 實例：補了
+  `supervisor_pid` 就宣告幽靈欄位解決，漏掉同樣有 writer 卻未宣告的 `fire_requested_at` /
+  `fire_request_reason`；隔一輪才被抓出來。子集 audit 把 false negative 留在盲區。）
+- **散文不是處置**。同一 bug class 第二次出現起，交付物必須是**機械 gate**（AST / invariant
+  test / CI script），不是 docstring 或 rule 裡的一段提醒。既有範例：
+  `scripts/tests/test_dispatch_state.py::test_every_written_field_is_declared_in_empty_state`
+  （AST 掃 `data[...]` 寫入，斷言全部宣告於 `_empty_state()`）。**新 gate 一律收編進既有
+  owner，不新增第二層 watchdog**（anti-stacking）。
+- **Cutover 會製造孤兒，孤兒不會自己叫**。退役一個執行路徑（LaunchAgent / wrapper / script）時，
+  必須一併 grep 出**所有仍讀寫它的 reader**（監控、告警、boss report、被它獨家 wire 的工具），
+  否則監控會安靜地驗證一具屍體。已發生三次：2026-07-08 `cron_review` 讀死 LaunchAgent label；
+  2026-07-10 `dispatch_binary_health` grep 已退役的 `cron_hourly_dispatch.sh`；
+  同日 `hourly_dispatch_pregate.py` 因只 wire 在 legacy shell 而被孤立整整六天。
+- **「程式碼寫完」不等於「上線」**。常駐 daemon 讀的是啟動時載入的記憶體副本；改了
+  `scripts/dispatch_supervisor/**` 的**程式碼**必須重啟 daemon 才生效（只有 `config/` 欄位是
+  每 tick 熱重載）。宣告完成前確認：改的是 config 還是 code？code 的話，誰重啟？
 
 ## Error-log 320 sweep control-plane invariants（2026-07-06）
 
