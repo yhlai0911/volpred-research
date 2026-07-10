@@ -57907,7 +57907,7 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-07-10T15:07:20.215023+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 411）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻改正\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
@@ -57920,8 +57920,15 @@
         "from": "pending",
         "to": "claimed",
         "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T15:16:43.436468+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
       }
-    ]
+    ],
+    "completed_at": "2026-07-10T15:16:43.435607+00:00"
   },
   {
     "id": "ops-offslot-duplicate-fire-20260710",
