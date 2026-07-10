@@ -57989,7 +57989,7 @@
     "title": "K1679: Bank deposits and stock-market cycle：存款流失是否放大 regional-bank vol** — 用 FDIC Call Reports / H.8 / FRED deposit proxies、KRE",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1524). Original: Bank deposits and stock-market cycle：存款流失是否放大 regional-bank vol** — 用 FDIC Call Reports / H.8 / FRED deposit proxies、KRE/XLF 與 regional bank basket，檢定 stock-market boom/crash 與存款增減 state 是否領先銀行 RV、downside semivariance、信用相關 drawdown；所有報表資料按發布 lag 處理。與 bond-fund run / bank M/B 題正交——這裡是 household deposit cycle 造成銀行 funding fragility（來源：RFS bank deposits and stock market channel；家庭資產配置與銀行資金來源連動可轉成 VolPred funding-risk proxy）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1679.py with signal.shift(1) + seed=42, (c) K1679_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "failed",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -57998,7 +57998,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-10T15:21:18Z"
+    "created_at": "2026-07-10T15:21:18Z",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-07-10T15:31:07.565395+00:00",
+    "claim_session_id": "25d707aa2e14",
+    "status_history": [
+      {
+        "ts": "2026-07-10T15:31:07.565696+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-10T15:31:08.114273+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-10T16:24:14.258721+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-23"
+      }
+    ],
+    "started_at": "2026-07-10T15:31:08.113979+00:00",
+    "completed_at": "2026-07-10T16:24:14.258374+00:00",
+    "result": "實驗已跑完並 merge 到 main（experiments/K1679/ 三件套+2圖）。Codex review = FAIL：directional NULL 成立但非 knowledge-grade。硬檢查多通過（j+H<i embargo 確實執行、per-horizon HAC、canonical QLIKE、Bonferroni/BH 正確、construct validity SVB+4.16/GFC+3.20、seed=42）。3 個待修阻擋 knowledge：(1) H.8 用當前 vintage 非 ALFRED point-in-time（對 null 屬 hindsight-favorable 保守但不乾淨）(2) baseline 巢狀於 augmented 卻用標準 DM/HLN，偏向不拒絕=偏向 null，最強 cell 需 Clark-West nested test（可能翻轉）(3) floor 對 DSV/MSE 零值 cell 也裁切，最強 cell 50/53 被裁需未裁敏感度。README BH-q 欄位 6/8 錯已修正對齊 JSON（min q 0.26→0.34，結論方向不變）。未寫 knowledge.json（gate 守住）。revision 已建 follow-up task K1679-rev。"
   },
   {
     "id": "K1680",
@@ -58027,5 +58053,24 @@
     "created_at": "2026-07-10T15:26:46.980936+00:00",
     "title": "off-slot fire 計數接成 alert（根因已修，但這種浪費目前只能靠人工掃 log 發現）",
     "description": "背景：2026-07-10 靠人工掃 ~/.volpred/logs/dispatch_supervisor_launchd.err 的 `firing worker` 行才發現 159 次 fire 中有 9 次 off-slot（比自己的 cron slot 晚 +24~+54 分），每次白燒 ~95K opus cold-load。根因已修（commit 9c4f73e21：unknown last_fire_at 不再視為 due）。\n\n但『沒有人在看』這件事本身是缺口 —— 若未來有別的路徑製造 off-slot fire，一樣只能靠人工發現。\n\n要求（anti-stacking：收編既有 owner，不新增 watchdog）：\n1. 指標放進 src/volpred/ops/alerts.py 的既有 alert condition registry（check_alerts hourly 已是 L2 owner）。\n2. 判準（**不可用 lag > N 分鐘**，那會誤報合法的延遲補打 —— 前一班長跑時下個 slot 本來就晚打）：\n   數『同一個 cron slot 被服務幾次』，>1 即為重複 fire。過去 24h 內重複 slot ≥1 → warn；≥3 → critical。\n   資料源優先用 dispatch_state.completions 的 fire_at（結構化）＋對應的 prev_scheduled；log 解析為 fallback。\n   （2026-07-10 教訓：lag>5min 與遮蔽分析兩個代理指標分別給出「9 次異常」與「9 次全合法」兩個相反答案。）\n3. body 用白話（per feedback_plain_language_boss_facing）：「派工在非排定時間多跑了 N 班，每班約 95K token」。\n4. 有 auto-remediation 就寫已修復（per feedback_alerts_auto_act_not_suggest）；沒有就只報數字，不要叫老闆做事。\n5. Regression test：偽造 completions 含 off-slot fire → 斷言 breached。"
+  },
+  {
+    "id": "K1679-rev",
+    "title": "K1679 revision: regional-bank deposit-flight NULL 升到 knowledge-grade（ALFRED point-in-time + Clark-West nested + floor sensitivity）",
+    "priority": 3,
+    "description": "Follow-up to K1679 (merged to main, Codex verdict=FAIL). K1679 找到 regional-bank deposit-flight（H.8 small-minus-large）對 KRE forward RV/DSV 的 directional NULL，但 3 個方法問題阻擋 knowledge-grade：(1) H.8 用當前修訂 vintage 非 ALFRED point-in-time — 改用 ALFRED realtime vintages 重取 DPSSCBW027SBOG/DPSLCBW027SBOG；(2) baseline HAR 完全巢狀於 augmented model，標準 DM/HLN 偏向不拒絕=偏向 null → 對最強 cell（dep_flight_4w·dsv·H5 與 dep_flight_4w·rv·H21）加 Clark-West(2007) nested-forecast test，可能翻轉 null；(3) training-min positivity floor 也套到允許零的 DSV/MSE cell（最強 cell 50/53 被裁）→ 加未裁切 loss sensitivity run。復用 experiments/K1679/K1679.py 為基底，seed=42，j+H<i embargo 保留。過 Codex CONDITIONAL_PASS 以上才寫 knowledge.json。若 Clark-West 仍 null 則 confirm K1606→K1679 的 funding-flight NULL 敘事、可發 methodology-null 文章。heavy re-run 走 compute_queue。",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "codex_review_followup",
+    "parent_experiment_id": "K1679",
+    "tags": [
+      "experiment",
+      "revision",
+      "codex-followup",
+      "nested-inference",
+      "point-in-time"
+    ],
+    "created_at": "2026-07-10T16:15:00Z"
   }
 ]

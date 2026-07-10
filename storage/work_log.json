@@ -15435,5 +15435,12 @@
     "actor": "main-session",
     "outcome": "succeeded",
     "summary": "P1 off-slot 重複 fire 根因修復：unknown last_fire_at 不再視為 due + bootstrap 防停擺（9c4f73e21）"
+  },
+  {
+    "ts": "2026-07-10T16:24:47.243024+00:00",
+    "task_type": "experiment",
+    "actor": "hourly-00",
+    "outcome": "failed",
+    "summary": "K1679 regional-bank deposit-flight 實驗收工：merge to main + Codex review=FAIL（directional NULL 但非 knowledge-grade）。修 README BH-q 6/8 誤（min q 0.26→0.34，honesty）。3 待修（ALFRED point-in-time / Clark-West nested / floor sensitivity）→ 建 K1679-rev。未寫 knowledge.json（gate 守住）。"
   }
 ]

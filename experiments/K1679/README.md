@@ -163,19 +163,19 @@ correctly identifies both regional-bank deposit-run episodes. It simply carries 
 
 | predictor | target | H | primary loss | base | aug | improv. % | DM t (HLN) | p raw | p Bonf. | BH q |
 |---|---|---|---|---|---|---|---|---|---|---|
-| dep_flight_13w | rv  | 5  | QLIKE | 0.2698 | 0.2810 | −4.17 | +0.633 | 0.527 | 1.00 | 0.29 |
-| dep_flight_13w | rv  | 21 | QLIKE | 0.1957 | 0.2085 | −6.58 | +0.661 | 0.509 | 1.00 | 0.36 |
-| dep_flight_13w | dsv | 5  | MSE   | 3.92e-7 | 3.93e-7 | −0.16 | +1.154 | 0.249 | 1.00 | 0.29 |
+| dep_flight_13w | rv  | 5  | QLIKE | 0.2698 | 0.2810 | −4.17 | +0.633 | 0.527 | 1.00 | 0.60 |
+| dep_flight_13w | rv  | 21 | QLIKE | 0.1957 | 0.2085 | −6.58 | +0.661 | 0.509 | 1.00 | 0.60 |
+| dep_flight_13w | dsv | 5  | MSE   | 3.92e-7 | 3.93e-7 | −0.16 | +1.154 | 0.249 | 1.00 | 0.50 |
 | dep_flight_13w | dsv | 21 | MSE   | 2.19e-7 | 2.19e-7 | +0.08 | −0.097 | 0.923 | 1.00 | 0.92 |
-| dep_flight_4w  | rv  | 5  | QLIKE | 0.2698 | 0.2775 | −2.86 | +0.698 | 0.485 | 1.00 | 0.29 |
-| dep_flight_4w  | rv  | 21 | QLIKE | 0.1957 | 0.2564 | −31.04 | +1.722 | 0.085 | 0.68 | 0.29 |
+| dep_flight_4w  | rv  | 5  | QLIKE | 0.2698 | 0.2775 | −2.86 | +0.698 | 0.485 | 1.00 | 0.60 |
+| dep_flight_4w  | rv  | 21 | QLIKE | 0.1957 | 0.2564 | −31.04 | +1.722 | 0.085 | 0.68 | 0.34 |
 | dep_flight_4w  | dsv | 5  | MSE   | 3.92e-7 | 3.93e-7 | −0.08 | +1.773 | 0.076 | 0.61 | 0.34 |
-| dep_flight_4w  | dsv | 21 | MSE   | 2.19e-7 | 2.20e-7 | −0.29 | +1.447 | 0.148 | 1.00 | 0.26 |
+| dep_flight_4w  | dsv | 21 | MSE   | 2.19e-7 | 2.20e-7 | −0.29 | +1.447 | 0.148 | 1.00 | 0.39 |
 
 - **Every DM t is positive except one** (which is essentially zero): the deposit signal
   makes forecasts **worse or no better**, never reliably better. It is not a helpful predictor.
 - **No cell reaches |t| = 1.96** (raw), let alone the Harvey |t| = 3 bar.
-- **No cell survives** Bonferroni (min = 0.61) **or** BH-FDR at q = 0.10 (min q = 0.26).
+- **No cell survives** Bonferroni (min = 0.61) **or** BH-FDR at q = 0.10 (min q = 0.34).
 - Strongest cell (`dep_flight_4w · dsv · H5`, p = 0.076 raw): its moving-block bootstrap CI
   on the loss differential is **[+2.4e-11, +6.5e-10]** — entirely *positive*, i.e. the
   bootstrap agrees the signal marginally *raises* error. The economic magnitude is nil
@@ -265,3 +265,41 @@ from that live run; nothing is hand-entered. Each statistic in the JSON carries 
 - `K1679.py` — the experiment (pre-registered grid, lookahead assertions, DM-HLN, BH-FDR).
 - `K1679_results.json` — full byte-traceable results (primary + secondary + construct check).
 - `K1679_fig_signal_vs_forward_rv.png`, `K1679_fig_dm_grid.png` — figures.
+
+---
+
+## 11. Code review status (2026-07-11, main-thread + Codex)
+
+**Verdict: FAIL — directional NULL stands but is NOT yet knowledge-grade; a revision is required before writing to `knowledge.json`.**
+
+Codex review confirmed the hard checks that matter most: the forward-label OOS
+embargo `j + H < i` is genuinely enforced (`j_end = i - H - 1`), each cell uses
+its own H as the HAC/HLN truncation lag, the QLIKE direction is canonical, the
+8-cell Bonferroni/BH-FDR is computed correctly, construct validity holds (signal
+spikes +4.16 at SVB, +3.20 at GFC), and `seed = 42` is fixed. The README BH-q
+column was corrected on 2026-07-11 to match the JSON (6/8 cells were off; the
+stated "min q = 0.26" was wrong, the true minimum is 0.34 — the conclusion that
+no cell survives q = 0.10 is unchanged).
+
+Three substantive issues block knowledge-grade status:
+
+1. **Point-in-time data (lookahead).** The H.8 deposit series is pulled from the
+   *current* FRED vintage, not ALFRED point-in-time vintages. H.8 is revised, so
+   the pseudo-OOS uses hindsight-revised values that were not available at the
+   trading date. For a NULL this is *hindsight-favorable* to the signal (revised
+   data is cleaner), so it makes the null conservative rather than obviously
+   spurious — but it is not a clean point-in-time test.
+2. **Nested-model inference (most important for a NULL).** The baseline HAR is
+   fully nested in the augmented model, yet the test is standard DM/HLN. Standard
+   DM on nested models is biased toward *not* rejecting — i.e. biased toward the
+   null. A Clark–West (2007) style test on the strongest cells
+   (`dep_flight_4w · dsv · H5`, `dep_flight_4w · rv · H21`) is required before the
+   null can be trusted; it could move the strongest cell.
+3. **Floor sensitivity.** The training-min positivity floor (leak-free for
+   RV/QLIKE) is also applied to DSV/MSE cells that admit exact zeros; the
+   strongest cell had ~50/53 obs clipped. Needs an unclipped-loss sensitivity run.
+
+Revision tracked as a follow-up task (ALFRED point-in-time H.8 + Clark–West on
+nested strongest cells + unclipped floor sensitivity). Until that passes review,
+K1679 is a *provisional* directional null and is intentionally absent from
+`knowledge.json`.
