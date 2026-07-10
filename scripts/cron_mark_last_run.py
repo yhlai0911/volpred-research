@@ -75,6 +75,18 @@ def _log(msg: str) -> None:
     print(f"[cron-mark-last-run] {msg}", flush=True)
 
 
+def _warn(msg: str) -> None:
+    """Observable trace for the fail-open paths below.
+
+    They already printed via `_log`, but audit_silent_fallbacks resolves call
+    *names*, not one level of indirection, so a `_log(...)` before `return 0`
+    reads as a silent fallback to the gate. `_warn*` is the auditor's sanctioned
+    name for a module-local helper. This script stays free of `volpred` imports
+    on purpose — it is a standalone marker-stamper invoked from shell wrappers.
+    """
+    _log(f"WARN {msg}")
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
@@ -171,14 +183,14 @@ def main() -> int:
     try:
         job_id = args.job_id or job_id_for_wrapper(args.wrapper, schedules_path=args.schedules)
     except Exception as exc:  # noqa: BLE001 — bookkeeping must never fail the job
-        _log(f"WARN cannot resolve job id from wrapper={args.wrapper!r}: "
-             f"{type(exc).__name__}: {exc} — marker NOT updated")
+        _warn(f"cannot resolve job id from wrapper={args.wrapper!r}: "
+              f"{type(exc).__name__}: {exc} — marker NOT updated")
         return 0
 
     try:
         ts = mark_last_run(job_id, iso=args.iso, path=args.path)
     except Exception as exc:  # noqa: BLE001
-        _log(f"WARN could not record {job_id}: {type(exc).__name__}: {exc}")
+        _warn(f"could not record {job_id}: {type(exc).__name__}: {exc}")
         return 0
     _log(f"{job_id} last_run={ts}")
     return 0
