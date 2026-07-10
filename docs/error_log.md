@@ -2,6 +2,27 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 canonical-write gate round 2：`git status` 乾淨不等於沒被寫 —— 兩個藏在 gitignore 底下的 writer
+
+**起因**：老闆要求「把 worktree 汙染清掉」。盤點後所有 worktree 的**追蹤中** storage 都乾淨，`upbeat-rhodes-ffaad8` 的殘留隨那個 worktree 移除而消失。但「乾淨」是用 `git status` 量的 —— 而 `git status` 對 `.gitignore` 覆蓋的路徑天生盲目。
+
+**方法（不靠猜，靠窮舉）**：拋棄式 worktree → `touch T0.marker` → 跑全套 pytest → `find storage -type f -newer T0.marker`。這會列出**測試期間被寫入的每一個檔案**，與 git 是否追蹤無關。結果 7 個檔：3 個 `.lock`（用完即棄，無害）、`storage/ops/pending_sessions.json`、`storage/notifications/{78f1d7b5,7ad3473c}.json` + `notification_log.json`。**其中 0 個出現在 `git status`**。
+
+**兩個 writer**：
+1. **`run_due_jobs._save_pending_sessions`** — `PENDING_SESSIONS_PATH` 在 **import 時**就從真實 `PROJECT_ROOT` 綁定，所以 `test_run_due_jobs_skips_piggy_back_skip_items` 即使已 patch `PROJECT_ROOT`（那是本檔另一則 entry 的修正）仍寫進線上檔。**同一支測試、同一個根因、第二個常數** —— patch 了看得見的，漏掉 import 時綁死的。
+2. **`EmailNotifier._write_notification_file` / `_save_log`** — `VOLPRED_NO_EMAIL=1` 擋住 SMTP 送信，**沒擋住本地落地**。任何觸發告警路徑的測試都會在 canonical `storage/notifications/` 留下一筆真實通知（`sent: false`），而 admin 介面讀的就是那個目錄。實測抓到的那筆內容是完整的 production 告警文案（Claude→Codex failover 失敗），不是 fixture 假資料。`storage_dir="storage"` 是**相對路徑**，pytest 從 repo root 跑就落在 repo 上。
+
+**解決**：兩處都接 writer-level `guard_canonical_write()`（沿用本日既有 owner，未新增第二層機制）。**刻意不擴充 `tests/conftest.py` 的指紋清單** —— `storage/notifications/` 與 `pending_sessions.json` 都是**活著的 daemon 會寫的**檔案，加進指紋會重演 `dispatch_state.json` 那個誤報（跨越一次 daemon 寫入的測試被隨機判紅，PHASE-Z 據此寄 CRITICAL 給老闆）。**writer gate 知道「誰」在寫，指紋只知道「bytes 動了」。**
+
+**驗證**：接上 gate 後全套只擋下 1 支測試（`test_run_due_jobs_skips_piggy_back_skip_items`），修好後 **1846 passed / 0 failed**，`find -newer` 只剩一個 `.lock`。
+
+**採納同日 23:02 entry 的教訓**：那則說「驗證防護有效的測試，本身就是最危險的測試」。本輪新增的三支 probe 正是這種 —— 它們對真實 canonical 路徑呼叫真實 writer，靠 gate raise 接住。若旗標沒 arm，寫入會直接成功，`pytest.raises` 事後才失敗，**破壞已經造成**。故加 autouse `_require_gate_armed()`：旗標沒 arm 就在 **setup 階段 fail**，probe 永遠不會執行那行寫入。單獨用 node id 選一支 probe 也照樣受保護（`test_conftest_enables_the_gate` 擋不住這種用法：沒有東西保證它先跑）。已做反例驗證：用 `-p` 插件在 collection 前清掉旗標 → probe 在 setup ERROR，未寫入任何檔案。
+
+**教訓**：
+1. **`.gitignore` 底下的目錄仍然是 canonical 狀態**（`storage/ops/tasks/`、`storage/ops/pending_sessions.json`、`storage/notifications/`）。以 `git status` 為唯一 audit 儀器的流程，對它們永久失明。要窮舉「誰被寫了」，用**時間戳 marker + `find -newer`**，不要用 `git status`。
+2. **一個 kill switch 只擋它名字說的那件事**。`VOLPRED_NO_EMAIL` 擋的是「寄」，不是「記錄」；`VOLPRED_NO_REMOTE_WRITE` 擋的是遠端，不是本地。每加一個 side-effect gate，要問「這個動作**還有哪些**副作用面沒被這個名字涵蓋」。
+3. **`monkeypatch.setattr(mod, "PROJECT_ROOT", tmp)` 改不到 import 時就算好的衍生常數**。凡 `X = PROJECT_ROOT / ...` 寫在 module top-level，patch 上游的 `PROJECT_ROOT` 一律無效 —— 這是同一支測試在同一天被抓到兩次的原因。
+
 ## 2026-07-10 merge_worktree 的 shared-JSON guard 把「時間」當成「違規」；同一段程式的假警告會叫人把陳年 stash 蓋回 main
 
 修下一則「掃 0 個檔的 gate」時撞出來的。gate 本體的根因見該則 §3，此處不重述。

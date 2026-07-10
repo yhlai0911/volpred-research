@@ -42,7 +42,9 @@ except ImportError:  # pragma: no cover
     croniter = None
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from cron_mark_last_run import merge_last_run  # noqa: E402
+from volpred.ops.canonical_write import guard_canonical_write  # noqa: E402
 
 # Host crontab expressions are in LOCAL time (macOS cron default). When we
 # evaluate "is this job due?" via croniter, we must use the same local tz
@@ -195,6 +197,14 @@ def _load_pending_sessions() -> dict[str, Any]:
 
 
 def _save_pending_sessions(state: dict[str, Any]) -> None:
+    # 2026-07-10 writer-level gate. `run_due_jobs()` tail-calls this, and
+    # PENDING_SESSIONS_PATH is bound at import from the real PROJECT_ROOT — so a
+    # test that redirects PROJECT_ROOT still lands here, on the live file. The
+    # file is gitignored, so the damage never shows up in `git status`, and the
+    # conftest fingerprint cannot watch it: the hourly scheduler rewrites it from
+    # the main checkout, which would fail a random test on every crossing run
+    # (same trap as dispatch_state.json). Guard at the writer, which knows who wrote.
+    guard_canonical_write(PENDING_SESSIONS_PATH)
     PENDING_SESSIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
     PENDING_SESSIONS_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n")
 

@@ -226,6 +226,9 @@ def test_run_due_jobs_skips_piggy_back_skip_items(tmp_path, monkeypatch):
     # which materializes real event tasks + ledger entries. Patching CONFIG_PATH and
     # LAST_RUN_PATH is not enough — PROJECT_ROOT is resolved independently.
     monkeypatch.setattr(rdj, "PROJECT_ROOT", tmp_path)
+    # ...and PENDING_SESSIONS_PATH was bound at import from the ORIGINAL PROJECT_ROOT,
+    # so redirecting PROJECT_ROOT does not reach it. run_due_jobs() writes it too.
+    monkeypatch.setattr(rdj, "PENDING_SESSIONS_PATH", tmp_path / "storage" / "ops" / "pending_sessions.json")
 
     result = rdj.run_due_jobs()
 

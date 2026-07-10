@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from volpred.config.runtime import get_default_remote_url
+from volpred.ops.canonical_write import guard_canonical_write
 from zoneinfo import ZoneInfo
 
 
@@ -378,12 +379,21 @@ class EmailNotifier:
             )
         return [item for item in payload if isinstance(item, dict)]
 
+    # 2026-07-10 writer-level gate. VOLPRED_NO_EMAIL stops the SMTP send but not
+    # the local record: a test that triggers any alert path still persisted a real
+    # notification (`sent: false`) into the canonical storage/notifications/, which
+    # the admin surface reads. Default storage_dir="storage" is relative, so it
+    # resolves against the repo root whenever pytest runs from there. Tests that
+    # genuinely exercise alerting must pass storage_dir=tmp_path; that path is
+    # outside the repo and the guard lets it through.
     def _save_log(self, entries: list[dict[str, Any]]) -> None:
         log_file = self.notifications_dir / "notification_log.json"
+        guard_canonical_write(log_file)
         log_file.write_text(json.dumps(entries, indent=2, ensure_ascii=False, default=str))
 
     def _write_notification_file(self, notification: dict[str, Any]) -> None:
         notif_file = self.notifications_dir / f"{notification['id']}.json"
+        guard_canonical_write(notif_file)
         notif_file.write_text(json.dumps(notification, indent=2, ensure_ascii=False, default=str))
 
     def _send_email(

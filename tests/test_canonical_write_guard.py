@@ -28,6 +28,28 @@ from volpred.ops.canonical_write import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.fixture(autouse=True)
+def _require_gate_armed():
+    """Prove the gate is armed BEFORE any probe below performs a forbidden write.
+
+    The destructive probes here deliberately aim a real writer at a real canonical
+    path and rely on the gate to raise. If the flag is not armed, the write simply
+    succeeds and the assertion fails afterwards — too late. Not hypothetical: on
+    2026-07-10 23:02 a sibling gate-probe under `scripts/tests/` (a tree no conftest
+    covers, so the flag was never set there) blanked the live dispatch_state.json
+    and caused a duplicate opus dispatch.
+
+    `test_conftest_enables_the_gate` below is not sufficient on its own: nothing
+    orders it first, and selecting a single probe by node id skips it entirely.
+    """
+    if not canonical_writes_disabled():
+        pytest.fail(
+            f"{ENV_FLAG} is not armed — refusing to run the canonical-write probes; "
+            "they would write live state instead of being blocked. Check that a "
+            "conftest.py covering this directory sets the flag."
+        )
+
+
 def test_conftest_enables_the_gate():
     """If this fails, every other guard in this file is inert."""
     assert canonical_writes_disabled(), f"{ENV_FLAG} must be set by tests/conftest.py"
@@ -91,3 +113,57 @@ def test_builder_refuses_to_write_canonical_output_in_subprocess(launcher):
 
     after = canonical.stat().st_mtime_ns if canonical.exists() else None
     assert after == before, f"builder rewrote {canonical}"
+
+
+# ---------------------------------------------------------------------------
+# 2026-07-10 round 2. The first sweep watched files git could see. These two
+# writers land on gitignored canonical state, so `git status` stays clean while
+# the damage accumulates — they were found by diffing the storage/ tree against
+# a timestamp marker across a full suite run, not by reading the diff.
+
+
+def test_pending_sessions_writer_refuses_canonical_path():
+    """run_due_jobs binds PENDING_SESSIONS_PATH at import from the real PROJECT_ROOT,
+    so redirecting PROJECT_ROOT alone still lands on the live control-plane file."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "run_due_jobs_guard_probe", ROOT / "scripts" / "run_due_jobs.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    canonical = ROOT / "storage" / "ops" / "pending_sessions.json"
+    before = canonical.stat().st_mtime_ns if canonical.exists() else None
+
+    with pytest.raises(CanonicalWriteBlocked):
+        module._save_pending_sessions({"jobs": {}})
+
+    after = canonical.stat().st_mtime_ns if canonical.exists() else None
+    assert after == before, f"_save_pending_sessions rewrote {canonical}"
+
+
+def test_notification_writer_refuses_canonical_path():
+    """VOLPRED_NO_EMAIL blocks the SMTP send, not the local record. An alert fired
+    from any test used to persist a real notification into storage/notifications/."""
+    from volpred.publisher.email_notifier import EmailNotifier
+
+    notifier = EmailNotifier()  # default storage_dir="storage" → repo-relative
+
+    with pytest.raises(CanonicalWriteBlocked):
+        notifier._write_notification_file({"id": "guard_probe", "body": "x"})
+
+    with pytest.raises(CanonicalWriteBlocked):
+        notifier._save_log([])
+
+    assert not (ROOT / "storage" / "notifications" / "guard_probe.json").exists()
+
+
+def test_notification_writer_allows_tmp_storage(tmp_path):
+    """A test that genuinely exercises alerting redirects storage_dir and stays green."""
+    from volpred.publisher.email_notifier import EmailNotifier
+
+    notifier = EmailNotifier(storage_dir=str(tmp_path / "storage"))
+    notifier._write_notification_file({"id": "ok", "body": "x"})
+
+    assert (tmp_path / "storage" / "notifications" / "ok.json").exists()
