@@ -46,10 +46,17 @@
 **解決方法**（`.claude/hooks/pretooluse-bash-optimizer.sh`）：
 - flag 比對錨定到 `git worktree remove` **自己的指令段**內（`SEG_TAIL='[^;&|]*'`，段界＝`; & |`；grep 逐行比對故換行天然是界）。
 - flag pattern 由 `(--force|-f)` 改為 `(--f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*)`。`worktree remove` 的唯一長選項是 `--force`、唯一 short flag 是 `-f`，故「`--f` 開頭」或「短 flag 群含 f」即可安全判定為 force，同時 `.claude/worktrees/wt-fix` 這種路徑（`-f` 無前導空白）不誤判。
-- 回歸測試 `scripts/tests/test_pretooluse_deny.sh` 補 7 例（`-ff` / `--for` / `--forc` / `-vf` / path 後置 `-ff` / 兩個過度攔截防護），現 34 assertions 全綠。
+- 回歸測試 `scripts/tests/test_pretooluse_deny.sh` 補 7 例（`-ff` / `--for` / `--forc` / `-vf` / path 後置 `-ff` / 兩個過度攔截防護）。
+
+**Class sweep（同日補做，老闆問「所以從底層修復了？」之後）**：上述「pattern 只認人類慣常拼法」的缺陷**不是 worktree 規則獨有 —— 三條 deny 全中**。實測放行清單：
+- `zeabur deploy` 規則：`npx zeabur@latest deploy`（npx 慣用的版本釘選）、`npx -y` / `npx --yes`、`bunx`、`pnpm dlx`、`yarn dlx`、`./node_modules/.bin/zeabur deploy` —— **7 種全放行**（舊 pattern 只認 `zeabur` 與 `npx zeabur`）。
+- 整檔讀 canonical JSON 規則：`bat` / `nl` / `view` / `tac` / `od` / `strings` —— **6 種全放行**（舊 pattern 只認 `cat|less|more`）。
+
+修法：抽出 `PKG_RUNNER` / `ZEABUR_BIN` / `FULL_READERS` 三個具名 pattern；回歸測試補到 **51 assertions 全綠**（13 個 bypass + 反向的過度攔截防護：`npx zeabur list` 不擋、`batch_render` 不擋、`deploy-zeabur-safe.sh` 不擋）。
 
 **教訓**：
 - **false positive 與 false negative 是同一個病灶的兩面**：flag 比對沒有錨定到它要保護的那個指令。只修被踩到的那一面，另一面會繼續睡著。**動任何 deny 規則時，正反兩向各測一輪**（該擋的擋不擋得住、該放的放不放得過）。
+- **修一條 deny 規則時，同批的其他規則必須一起 sweep。** 它們出自同一次「prose → 機械化」的翻譯，因此共享同一個翻譯錯誤。本次三條全中；只修被踩到的那條，等於留兩條開著。對齊 memory `feedback_declare_complete_requires_class_sweep`：宣告完成前對 bug class 做 full-population sweep，「我改的那條通過測試」只是 strike-1 門檻。
 - **機械 gate 的 pattern 必須對照工具的真實 CLI 語法，不能只對照「人類慣常寫法」**。`git` 收縮寫與聚合 flag 是 parse-options 的預設行為；prose 規則寫「禁止 `--force`」時腦中只有那一種拼法，機械化時若直譯就留下破口。**寫 deny pattern 前先跑一次 `<tool> <subcommand> --wrong-flag` 探測它到底收哪些形式。**
 - **被 gate 誤擋時，正確反應是修 gate，不是繞過它。** 本次 agent 的第一反應是把 `rm -f` 拆到另一個 Bash 呼叫繞開比對——任務是完成了，但破口留在那裡。繞道成本低會讓 gate 的失效無聲無息。
 
