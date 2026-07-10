@@ -56997,7 +56997,7 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-07-10T04:19:52.519842+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 331）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n什麼叫已投稿？ 我看到頁面上都是working\n而且我們應該沒有已投稿這個選項吧 最多也只是ready for submission\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
@@ -57010,7 +57010,170 @@
         "from": "pending",
         "to": "claimed",
         "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T04:21:59.180366+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
       }
-    ]
+    ],
+    "completed_at": "2026-07-10T04:21:59.180043+00:00"
+  },
+  {
+    "id": "topology-audit-20260710-pregate-rewire",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "topology-fit-audit-20260710",
+    "status": "succeeded",
+    "dispatch_lane": "agentable",
+    "created_at": "2026-07-10T04:35:42.392290+00:00",
+    "title": "pregate 回接 dispatch-supervisor：修復 7/4 cutover 遺孤的零 token skip gate",
+    "description": "根因：scripts/hourly_dispatch_pregate.py（零 token 判斷本班是否值得 ~95K opus cold-load，shadow log 顯示多數 fire would_skip=true，如 7/1 有 18/22 班是 stub）只掛在 legacy scripts/cron_hourly_dispatch.sh:145；2026-07-04 cutover 到 dispatch-supervisor 後，scripts/dispatch_supervisor/ 全無引用 — supervisor 每小時無條件 spawn opus/high，空班照付全額 cold-load。\n\n要求（anti-stacking：收編進既有 owner）：\n1. 把 pregate 判斷 wire 進 scripts/dispatch_supervisor/scheduler.py 的 decide()（唯一喚醒決策點），skip 時寫 skip receipt（沿用 pregate 的 shadow log 格式）不 spawn。\n2. fail-open：pregate 本身 exception → 照常 spawn（不能讓 gate 壞掉變成 loop 停擺），並發 warn alert。\n3. 同 commit 廢棄 legacy cron_hourly_dispatch.sh:145 掛點（該 shell 已非 canonical 路徑，確認無其他 caller 後移除或標記 _legacy）。\n4. Regression test：模擬『無 email backlog / 無 critical / 無 P1-P2 / 無 cadence due』→ 斷言不 spawn；模擬任一訊號 → 斷言 spawn。\n5. 驗證：接回後觀察 2-3 班 supervisor log，確認 skip/spawn 決策與 pregate 訊號一致。\n動機：這是 2026-07-10 拓撲審計發現的最大成本洞（貴模型坐在高頻低槓桿位置的直接違反，修復物已存在只差 wiring）。",
+    "claimed_by": "main-session",
+    "claimed_at": "2026-07-10T04:48:25.016190+00:00",
+    "claim_session_id": "fdb60732",
+    "status_history": [
+      {
+        "ts": "2026-07-10T04:48:25.017577+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main-session"
+      },
+      {
+        "ts": "2026-07-10T05:08:32.401111+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-session"
+      }
+    ],
+    "completed_at": "2026-07-10T05:08:32.400748+00:00",
+    "result": "commit a3d243650 + config(62c46c57f)：pregate 接進 scheduler._tick_once（subprocess 隔離/fail-open/requested-fire bypass），17 tests 全過，daemon 12:59 重啟乾淨，13:07 班線上驗證：pregate shadow 決策(would_skip=true)寫入後 23ms worker 正常 fire — 零行為變更確認。enforce flip 為獨立任務 topology-audit-20260710-pregate-enforce-flip（≥3 班觀察 + 逐筆核對 criteria）"
+  },
+  {
+    "id": "topology-audit-20260710-fix-gate-overclaims",
+    "task_type": "governance",
+    "priority": 2,
+    "source": "topology-fit-audit-20260710",
+    "status": "succeeded",
+    "dispatch_lane": "agentable",
+    "created_at": "2026-07-10T04:35:42.392290+00:00",
+    "title": "修正兩處自家文件 gate 過度宣稱 + 把 provenance validator 掛上真正的 CI",
+    "description": "2026-07-10 拓撲審計（批判 agent 實查）發現兩處我們自己的文件宣稱了不存在的機械 gate — 研究誠實原則延伸（文件也是數據）：\n1. scripts/cron_hourly_dispatch_prompt.md:164 宣稱 arc-dedup『publisher publish 時另有 hard block 兜底』— 實碼 src/volpred/publisher/publisher.py:1276-1296 已於 2026-06-23 降級為 warn+log+publish（實印 '⚠️ ARC-DUP (warn, publishing anyway)'）。修正 prompt 文字為 warn-only 事實，並強化 prompt 內『寫前必跑 check_arc_dedup.py』的措辭（它現在是唯一防線）。\n2. .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md 的 Enforcement Layer Map L1 行宣稱『CI: provenance、encoding』— .github/workflows/ 實際只有 silent-fallbacks.yml + source-encoding.yml，scripts/validate_knowledge_provenance.py 無任何 CI/排程/pre-push 掛點（grep 三處零命中）。修法二選一：(a) 建真正的 provenance CI workflow（比照 silent-fallbacks.yml pattern，baseline 檢查）讓宣稱成立；(b) 若不建，改 Layer Map 文字如實。優先 (a) — 該 validator 是 K1259 gate 的防繞道閉環（jq/Edit 手改 knowledge.json 目前落地後沒有東西會自動抓）。\n注意：本任務改到既有 skill reference 檔 → 依 skill-autonomy 規則完成後必寄 email 給老闆（diff 摘要 + 觸發 incident）。",
+    "claimed_by": "main-session",
+    "claimed_at": "2026-07-10T04:48:25.287480+00:00",
+    "claim_session_id": "fdb60732",
+    "status_history": [
+      {
+        "ts": "2026-07-10T04:48:25.287839+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main-session"
+      },
+      {
+        "ts": "2026-07-10T05:01:03.729176+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-session"
+      }
+    ],
+    "completed_at": "2026-07-10T05:01:03.728756+00:00",
+    "result": "commit 42735d236: cron_hourly_dispatch_prompt.md 過時 hard-block 宣稱改為 warn-only 事實+強化寫前 gate 措辭；新建 .github/workflows/knowledge-provenance.yml（本地驗證 0/2485 exit 0）使 Layer Map 的 CI:provenance 宣稱成立（選項 a：改事實不改文件，skill 檔未動故無需 skill-edit email）"
+  },
+  {
+    "id": "topology-audit-20260710-anti-ai-gate-wire",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "topology-fit-audit-20260710",
+    "status": "succeeded",
+    "dispatch_lane": "agentable",
+    "created_at": "2026-07-10T04:35:42.392290+00:00",
+    "title": "anti_ai_gate 機械化：wire 進 publish 路徑（目前僅 ~10% 文章 clean）",
+    "description": "現況：.claude/rules/publishing.md §7 明寫 anti-AI-style『是 publish gate 不是可選優化』，scripts/anti_ai_gate.py 有 exit 0/1 機械核心，但未 wired 進 publish 路徑 — publisher 內只有 emdash auto-fix；程式註解自承近期文章僅 ~10% clean。這是 7 個治理 gate 中 Public Gate 唯一未機械化的宣稱項。\n\n要求（anti-stacking：owner = publisher canonical write site，比照既有 _audit_* pattern）：\n1. 在 src/volpred/publisher/publisher.py 的 publish 路徑（與 prepublish_audit / throttle 同層）呼叫 anti_ai_gate 檢查，違規項先走 auto-fix（可自動修的如 em-dash、樣板句），不可自動修的 → block + 明確錯誤訊息讓寫作 agent 修稿重投。\n2. fail-open：gate 自身 exception → degrade + warn alert（比照 prepublish_audit degrade pattern），不可讓發文管線停擺。\n3. gate 決策寫入 storage/logs/dedup_decisions.jsonl 同款 JSONL trail（依 .claude/rules/dedup-gate-audit.md 規範）。\n4. Regression test + 用近期 3 篇已發文章跑一次基準，確認 false-positive 率可接受再開 strict（先 warn-only 觀察 3 天亦可，但要留升級時間點）。\n動機：mission 1（文章品質→回訪率）直接相關；讀者體感的 AI 味是付費轉換的隱形殺手。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-10T05:04:58.687954+00:00",
+    "claim_session_id": "7ca1689405d6",
+    "status_history": [
+      {
+        "ts": "2026-07-10T05:04:58.688302+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-10T05:05:08.454229+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-10T05:15:37.407424+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-10T05:05:08.453876+00:00",
+    "completed_at": "2026-07-10T05:15:37.407075+00:00",
+    "result": "wired anti_ai_style publish gate into publisher append and release_pool; warn-only until 2026-07-13 then strict; added JSONL audit, fail-open alert path, and regression coverage"
+  },
+  {
+    "id": "topology-audit-20260710-pretooluse-deny",
+    "task_type": "governance",
+    "priority": 3,
+    "source": "topology-fit-audit-20260710",
+    "status": "succeeded",
+    "dispatch_lane": "main_thread",
+    "created_at": "2026-07-10T04:35:42.392290+00:00",
+    "title": "PreToolUse deny 清單：把 CLAUDE.md『絕對禁止』prose 升級成機械攔截",
+    "description": "現況：PreToolUse 真 deny 只有 ScheduleWakeup 一個工具（scripts/hooks/deny_wakeup_interactive.py）；CLAUDE.md 多條『絕對禁止』全停留在 prose：git worktree remove --force、繞過 deploy-zeabur-safe.sh 直呼 npx zeabur deploy、整檔讀 feed.json/knowledge.json、手改 storage 歷史 JSON、主 repo 根目錄 git add frontend-v2-fix。這些正是 effect interception（動作落地前攔截）的標準目標，且多條有既往事故（K1032/K1618 worktree、error_log 多起）。\n\n要求（anti-stacking：收編進既有 L1 owner = .claude/settings.json hooks）：\n1. Bash matcher deny 清單收編進既有 .claude/hooks/pretooluse-bash-optimizer.sh（目前 advisory-only）或依 Layer Map 收編條款換成單一 consolidated gate script 並廢棄舊檔 — 不開第二個 Bash hook file。\n2. deny 實作樣板直接複製 scripts/hooks/deny_wakeup_interactive.py（exit 2 + stderr 餵回模型 + fail-open + scripts/tests/ regression test）。\n3. 同 commit 把 CLAUDE.md / rules 對應 prose 縮成一行 pointer（L4→L1 升級條款），不留雙份。\n4. deny 清單第一批（保守，只收既往事故項）：worktree remove --force / npx zeabur deploy 直呼 / cat・Read 整檔 feed.json・knowledge.json。Edit|Write matcher（擋直接編輯 feed.json/knowledge.json 繞過 writer gate）做第二批，先觀察第一批 false-positive。\n注意：治理檔修改 → 先 snapshot commit（snapshot: prefix），完成後寄 email 給老闆。主線程任務（涉 CLAUDE.md 治理面）。",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-07-10T05:10:38.919117+00:00",
+    "claim_session_id": "527673469b6a",
+    "status_history": [
+      {
+        "ts": "2026-07-10T05:10:38.919422+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-10T05:10:39.198920+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-10T05:19:42.856273+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-13"
+      }
+    ],
+    "started_at": "2026-07-10T05:10:39.198596+00:00",
+    "completed_at": "2026-07-10T05:19:42.855955+00:00",
+    "result": "PreToolUse deny 清單第一批上線：worktree remove --force / zeabur deploy 直呼 / 整檔 cat feed·knowledge.json，收編進 pretooluse-bash-optimizer.sh（不開第二 hook）。命令段邊界錨定治本（首上線被自身 commit 誤擋）。23/23 regression。prose 加 L1 pointer。commit 6f8cf9ead"
+  },
+  {
+    "id": "topology-audit-20260710-topology-field",
+    "task_type": "platform_ops",
+    "priority": 4,
+    "source": "topology-fit-audit-20260710",
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "created_at": "2026-07-10T04:35:42.392290+00:00",
+    "title": "task schema 加 topology 欄位：拓撲路由從 prose 機械化（先選拓撲再選模型）",
+    "description": "現況：路由已機械化兩層 — lane（continue_task_dispatch：agentable/main_thread/blocked）與 model/effort（model_router.py），但『用什麼協作拓撲』（inline / subagent / worktree / codex_exec / compute_queue / agent_team）散在 prose（task-routing.md、workflow-index.md 執行模式欄、各 skill 內）由每班 orchestrator 臨場判斷。task schema 有 dispatch_lane 沒有 topology。\n\n要求（anti-stacking：收編進既有兩層路由 owner，不建新 Router）：\n1. storage/next_tasks.json schema 在 dispatch_lane 旁加 topology 欄位（enum: inline|subagent|worktree|codex_exec|compute_queue|agent_team）。\n2. task_type → topology 預設映射放 config/models.json，查詢面加進 scripts/model_router.py（與 model/effort 同一次查詢回傳）；scripts/continue_task_dispatch.py categorizer 輸出 report 時帶 topology 建議。\n3. 同 commit 把 .claude/rules/task-routing.md 與 docs/workflow-index.md『執行模式』欄 prose 降級成 pointer 指向 schema 欄位。\n4. hourly orchestrator prompt 的分流決策段改為『讀 topology 欄位，僅在欄位缺失或明顯不合時 override 並記 override 原因』— 讓 override 成為可觀測例外而非常態。\n5. 未 backfill 的既有 task fail-open（無欄位 → 現行 prose 判斷），漸進遷移。\n動機：2026-07-10 拓撲審計核心發現 —『先選協作方式再選模型』是唯一還沒機械化的路由層；機械化後 dispatch 決策可審計、可統計（哪類任務哪種拓撲成功率高）。"
+  },
+  {
+    "id": "topology-audit-20260710-pregate-enforce-flip",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "topology-fit-audit-20260710",
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "created_at": "2026-07-10T05:04:18.281904+00:00",
+    "title": "pregate shadow→enforce 切換（觀察期滿後）",
+    "description": "前置：commit a3d243650 已把 pregate 接進 dispatch_supervisor/scheduler.py，config pregate.mode=shadow 運行中。\n\n切換 criteria（全部滿足才 flip）：\n1. storage/logs/hourly_pregate.jsonl 自 2026-07-10 13:07 起累積 >=3 筆 daemon 觸發的 shadow 決策。\n2. 逐筆核對：would_skip=true 的班，該班實際 fire 產出是否真的是 stub（看 supervisor log / work_log 該小時 entry）；would_skip=false 的班是否真有實質工作。任何一筆誤判（would_skip=true 但該班有實質產出）→ 不 flip，改 pregate 訊號並重新觀察。\n3. 確認 email_reply / critical 班次從未被判 would_skip（安全不變量）。\n\nFlip 操作：config/runtime_schedules.json 的 pregate.mode 改 'enforce'（熱重載，免重啟 daemon）。\nFlip 後義務：(a) 觀察下一個被 skip 的班，確認 skip receipt 寫入且下一班正常 fire；(b) 寄 email 通知老闆（排程行為變更，per feedback_email_on_major_decisions）：預估每日省下的空班 cold-load 數；(c) 更新 error_log 2026-07-10 pregate entry 的驗證段。"
   }
 ]
