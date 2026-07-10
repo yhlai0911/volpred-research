@@ -525,6 +525,20 @@
           "reader_metrics",
           "cron_reader_metrics.sh"
         ]
+      },
+      {
+        "id": "market_closure_detect",
+        "label": "台股臨時休市偵測（颱風）",
+        "cron": "0 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_market_closure.sh",
+        "launchd_label": "com.volpred.market-closure-detect",
+        "mechanism": "launchd",
+        "command_deprecated": "python scripts/detect_market_closure.py",
+        "description": "每小時 :00 讀 NCDR/人事行政總處停班停課 RSS，臺北市全日停止上班→自動寫 config/market_closures_adhoc.json + resync Supabase + alert。08:00 那班=台股開盤前 1 小時的確認閘門。2026-07-10 颱風巴威休市 incident 建立（exchange_calendars 對當天才宣布的緊急休市盲目）。",
+        "matchers": [
+          "market_closure",
+          "detect_market_closure.py"
+        ]
       }
     ]
   },
@@ -1187,7 +1201,12 @@
       "deprecated_at": "2026-07-04T16:36:00+08:00",
       "deprecated_reason": "Deliverable 7 cutover: replaced by com.volpred.dispatch-supervisor LaunchAgent (real-run daemon). Legacy LaunchAgent launchctl-disabled; shell wrapper kept on disk as the plan §7 one-command rollback artifact until Deliverable 8 archives it to scripts/_legacy/.",
       "host_crontab_managed": false,
-      "note_schedule_still_canonical": "dispatch_supervisor/scheduler.py load_cron_expr() reads this entry's `schedule` field — keep it accurate even though the command is deprecated."
+      "note_schedule_still_canonical": "dispatch_supervisor/scheduler.py load_cron_expr() reads this entry's `schedule` field — keep it accurate even though the command is deprecated.",
+      "pregate": {
+        "mode": "shadow",
+        "window_hours": 3.0,
+        "note": "2026-07-10 pregate rewire: scheduler.py load_pregate_config() 每 tick 熱重載此欄位。shadow=只記錄 would-skip 到 storage/logs/hourly_pregate.jsonl 不改變行為；觀察 2-3 班判斷正確後改 enforce。requested fire（老闆觸發）永不被 gate。"
+      }
     },
     {
       "id": "volpred-compute-worker",

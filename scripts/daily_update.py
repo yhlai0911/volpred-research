@@ -567,6 +567,20 @@ def main():
     today = datetime.now().strftime("%Y-%m-%d")
     print(f"=== Daily Update: {today} ===")
 
+    # 2026-07-10 (boss「颱風休市網頁還顯示台股開盤中指示」): refresh the adhoc-closure
+    # override BEFORE any content gating. exchange_calendars is blind to same-day
+    # typhoon closures; the detector reads the NCDR/DGPA 停班停課 feed and, if 臺北市
+    # is fully suspended, writes config/market_closures_adhoc.json so the TW gate
+    # below correctly skips 本日持倉建議. Best-effort — never block daily_update.
+    try:
+        import subprocess
+        subprocess.run(
+            ["uv", "run", "python", "scripts/detect_market_closure.py"],
+            cwd=str(Path(__file__).resolve().parent.parent), timeout=120, check=False,
+        )
+    except Exception as e:
+        print(f"  ⚠️ market-closure detector 執行失敗（沿用既有 override）：{e}")
+
     dm = DataManager()
     pub = Publisher()
 
@@ -1087,10 +1101,29 @@ def main():
     else:
         feed = []
 
-    skip_publish = (last_spy_date == spy_date)
+    # 2026-07-10 (boss「颱風休市，網頁還顯示台股開盤中的指示」): gate the daily
+    # TW/portfolio 「本日持倉比率建議」+「每日策略建議」on TW market being OPEN.
+    # exchange_calendars is blind to same-day emergency closures, but
+    # market_calendar now applies the adhoc-closure override, so this correctly
+    # skips the "本日" TW advice on a closed TW day (typhoon OR scheduled holiday)
+    # — no "本日進場指示" published when 台股 didn't open. (Future refinement:
+    # on US-open/TW-closed days publish a US-only bulletin instead of skipping.)
+    tw_closed_reason = None
+    try:
+        from volpred.market_calendar import get_market_status
+        _tw = get_market_status(datetime.now().date(), "tw")
+        if not _tw.get("is_open"):
+            tw_closed_reason = _tw.get("reason") or "台股休市"
+    except Exception as e:
+        # fail-open: keep prior behaviour if the calendar lookup breaks, but log it.
+        print(f"  ⚠️ market_calendar 查詢失敗，無法判斷 TW 是否休市（沿用舊行為）：{e}")
 
-    # --- Publish signal for each strategy (skip if data unchanged) ---
-    if skip_publish:
+    skip_publish = (last_spy_date == spy_date) or (tw_closed_reason is not None)
+
+    # --- Publish signal for each strategy (skip if data unchanged / TW closed) ---
+    if tw_closed_reason:
+        print(f"  🌀 台股今日休市（{tw_closed_reason}）→ 跳過本日持倉/策略建議發佈")
+    elif skip_publish:
         print(f"  跳過發布（數據與上次相同）")
     else:
         gap_section = ""

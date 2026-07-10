@@ -8,6 +8,7 @@ market status data consumed by daily_update.py → Supabase → frontend.
 from __future__ import annotations
 
 import json
+import logging
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -15,8 +16,62 @@ from typing import Any
 import exchange_calendars as ecals
 import pandas as pd
 
+_log = logging.getLogger(__name__)
+
 # ── Calendar instances (lazy singletons) ────────────────────────────
 _calendars: dict[str, ecals.ExchangeCalendar] = {}
+
+# ── Adhoc (unscheduled) closure override layer ──────────────────────
+# exchange_calendars only knows PRE-SCHEDULED holidays; it is blind to
+# same-day emergency closures (typhoon 颱風, etc.) which TWSE announces on
+# the day. This override is the single source of truth for adhoc closures,
+# applied ON TOP OF exchange_calendars. Populated by
+# scripts/detect_market_closure.py (auto) or by hand.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_ADHOC_CLOSURES_PATH = _REPO_ROOT / "config" / "market_closures_adhoc.json"
+_adhoc_cache: dict[tuple[str, str], dict[str, Any]] | None = None
+_adhoc_cache_mtime: float | None = None
+
+
+def _load_adhoc_closures() -> dict[tuple[str, str], dict[str, Any]]:
+    """Load adhoc closures keyed by (market, date_iso). mtime-cached; fail-open."""
+    global _adhoc_cache, _adhoc_cache_mtime
+    try:
+        mtime = _ADHOC_CLOSURES_PATH.stat().st_mtime
+    except FileNotFoundError:
+        _log.debug("adhoc closures file absent (%s) — no adhoc overrides", _ADHOC_CLOSURES_PATH)
+        _adhoc_cache, _adhoc_cache_mtime = {}, None
+        return {}
+    if _adhoc_cache is not None and _adhoc_cache_mtime == mtime:
+        return _adhoc_cache
+    try:
+        raw = json.loads(_ADHOC_CLOSURES_PATH.read_text())
+        out: dict[tuple[str, str], dict[str, Any]] = {}
+        for entry in raw.get("closures", []):
+            mk = str(entry.get("market", "")).strip()
+            dt = str(entry.get("date", "")).strip()
+            if mk and dt:
+                out[(mk, dt)] = entry
+        _adhoc_cache, _adhoc_cache_mtime = out, mtime
+        return out
+    except Exception as e:  # fail-open: adhoc layer must never break the calendar
+        _log.warning(
+            "market_calendar: adhoc closures load failed path=%s err=%s (falling back to scheduled-only)",
+            _ADHOC_CLOSURES_PATH,
+            e,
+        )
+        _adhoc_cache, _adhoc_cache_mtime = {}, mtime
+        return {}
+
+
+def _adhoc_closure(market_key: str, d: date) -> dict[str, Any] | None:
+    """Return the adhoc-closure entry for (market, date) if any, else None."""
+    return _load_adhoc_closures().get((market_key, d.isoformat()))
+
+
+def _is_effective_session(cal: ecals.ExchangeCalendar, ts: pd.Timestamp, market_key: str) -> bool:
+    """True iff exchange_calendars says session AND no adhoc closure overrides it."""
+    return bool(cal.is_session(ts)) and _adhoc_closure(market_key, ts.date()) is None
 
 MARKETS = {
     "us": {"exchange_code": "XNYS", "label": "美股 (NYSE)", "tz": "America/New_York"},
@@ -113,14 +168,21 @@ def get_market_status(d: date, market_key: str) -> dict[str, Any]:
     """
     cal = _get_calendar(market_key)
     ts = pd.Timestamp(d)
-    is_open = bool(cal.is_session(ts))
+    scheduled_open = bool(cal.is_session(ts))
+    adhoc = _adhoc_closure(market_key, d)  # unscheduled closure (e.g. typhoon)
+    is_open = scheduled_open and adhoc is None
 
     reason = ""
     reason_en = ""
 
     if not is_open:
         weekday = ts.weekday()
-        if weekday >= 5:
+        if adhoc is not None:
+            # Unscheduled closure overrides everything (weekday or not) —
+            # exchange_calendars thought it was a session but it wasn't.
+            reason = adhoc.get("reason") or "臨時休市"
+            reason_en = adhoc.get("reason_en") or "Unscheduled closure"
+        elif weekday >= 5:
             reason = "週末"
             reason_en = "Weekend"
         else:
@@ -140,17 +202,24 @@ def get_market_status(d: date, market_key: str) -> dict[str, Any]:
                 else:
                     reason = "交易所休市"
 
-    # Previous / next trading day
+    # Previous / next trading day — must skip adhoc-closed days too, else a
+    # typhoon-closed session would still be reported as the next trading day.
     search_start = ts - pd.Timedelta(days=10)
     search_end = ts + pd.Timedelta(days=10)
 
-    prev_sessions = cal.sessions_in_range(search_start, ts - pd.Timedelta(days=1))
-    next_sessions = cal.sessions_in_range(ts + pd.Timedelta(days=1), search_end)
+    prev_sessions = [
+        s for s in cal.sessions_in_range(search_start, ts - pd.Timedelta(days=1))
+        if _adhoc_closure(market_key, s.date()) is None
+    ]
+    next_sessions = [
+        s for s in cal.sessions_in_range(ts + pd.Timedelta(days=1), search_end)
+        if _adhoc_closure(market_key, s.date()) is None
+    ]
 
     prev_day = prev_sessions[-1].date().isoformat() if len(prev_sessions) > 0 else None
     next_day = next_sessions[0].date().isoformat() if len(next_sessions) > 0 else None
 
-    return {
+    result = {
         "market": market_key,
         "label": MARKETS[market_key]["label"],
         "date": d.isoformat(),
@@ -160,6 +229,10 @@ def get_market_status(d: date, market_key: str) -> dict[str, Any]:
         "prev_trading_day": prev_day,
         "next_trading_day": next_day,
     }
+    if adhoc is not None:
+        result["adhoc_closure"] = True
+        result["adhoc_source"] = adhoc.get("source", "")
+    return result
 
 
 def get_all_market_status(d: date | None = None) -> dict[str, Any]:
@@ -228,7 +301,8 @@ def get_upcoming_holidays(
     results = []
     cursor = start
     while cursor <= end:
-        if cursor.weekday() < 5 and not cal.is_session(cursor):
+        # weekday closure = scheduled holiday OR adhoc (typhoon) override
+        if cursor.weekday() < 5 and not _is_effective_session(cal, cursor, market_key):
             status = get_market_status(cursor.date(), market_key)
             results.append({
                 "date": cursor.date().isoformat(),

@@ -1,0 +1,14 @@
+{
+  "_doc": "臨時/非排程休市覆蓋層。exchange_calendars（XTAI/XNYS）只知道預排假日，對颱風等當天才宣布的緊急休市完全盲目。market_calendar.py 會在 exchange_calendars 判斷之上套用此覆蓋：命中 (market,date) 即強制 is_open=false。這是 adhoc closure 的 single source of truth。可由 scripts/detect_market_closure.py 自動填入（颱風），或人工新增。日期用台北/紐約當地日 YYYY-MM-DD。",
+  "closures": [
+    {
+      "market": "tw",
+      "date": "2026-07-10",
+      "reason": "颱風休市",
+      "reason_en": "Typhoon closure",
+      "source": "NCDR/DGPA 停班停課 RSS — 臺北市全日停止上班",
+      "added_at": "2026-07-10",
+      "added_by": "detect_market_closure.py (auto)"
+    }
+  ]
+}
