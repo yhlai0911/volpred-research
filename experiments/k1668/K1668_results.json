@@ -1,0 +1,676 @@
+{
+  "experiment_id": "K1668",
+  "generated_at_utc": "2026-07-10T01:42:09.147918+00:00",
+  "seed": 42,
+  "verdict": "NULL_NO_OOS_CPU_INCREMENT",
+  "plain_english": "Lagged U.S. CPU does not improve OOS QLIKE beyond the monthly HAR baseline in this ETF proxy.",
+  "data_sources": {
+    "cpu_primary": {
+      "url": "https://raw.githubusercontent.com/dkaenzig/Climate-Policy-Uncertainty-Index/main/cpu_2026-05.dta",
+      "local_cache": "data/cpu_2026-05_gkrs.dta",
+      "source_note": "Gavriilidis, Kanzig, Raghavan, and Stock 2026 monthly U.S. Climate Policy Uncertainty dataset.",
+      "primary_field": "cpu_index_narrow",
+      "available_months": {
+        "start": "1985-01-01",
+        "end": "2026-04-01",
+        "n": 496
+      }
+    },
+    "gcpu_proxy_robustness": {
+      "url": "https://www.policyuncertainty.com/media/cpu_base_pos_neg_all_countries_monthly.csv",
+      "local_cache": "data/cpu_all_countries_monthly.csv",
+      "source_note": "Equal-weight proxy from public multi-country CPU file; pre-2020 robustness only, not the GKRS U.S. index.",
+      "available_months_with_at_least_3_countries": {
+        "start": "1997-01-01",
+        "end": "2019-12-01",
+        "n": 276
+      }
+    },
+    "prices": {
+      "source": "Yahoo Finance via yfinance.download(auto_adjust=True)",
+      "tickers": [
+        "USO",
+        "UNG",
+        "DBA",
+        "CORN",
+        "WEAT",
+        "GLD"
+      ],
+      "local_cache": "data/prices_yfinance_auto_adjust.csv"
+    }
+  },
+  "data_summary": {
+    "daily_price_rows_by_ticker": [
+      {
+        "ticker": "CORN",
+        "first_date": "2010-06-09T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "daily_rows": 4045
+      },
+      {
+        "ticker": "DBA",
+        "first_date": "2007-01-05T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "daily_rows": 4907
+      },
+      {
+        "ticker": "GLD",
+        "first_date": "2006-01-03T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "daily_rows": 5160
+      },
+      {
+        "ticker": "UNG",
+        "first_date": "2007-04-18T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "daily_rows": 4837
+      },
+      {
+        "ticker": "USO",
+        "first_date": "2006-04-10T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "daily_rows": 5093
+      },
+      {
+        "ticker": "WEAT",
+        "first_date": "2011-09-19T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "daily_rows": 3722
+      }
+    ],
+    "monthly_rv_rows_by_ticker": [
+      {
+        "ticker": "CORN",
+        "first_month": "2010-06-01T00:00:00",
+        "last_month": "2026-06-01T00:00:00",
+        "monthly_rows": 193,
+        "mean_rv_ann": 0.0474531839614421
+      },
+      {
+        "ticker": "DBA",
+        "first_month": "2007-01-01T00:00:00",
+        "last_month": "2026-06-01T00:00:00",
+        "monthly_rows": 234,
+        "mean_rv_ann": 0.027763026303359632
+      },
+      {
+        "ticker": "GLD",
+        "first_month": "2006-01-01T00:00:00",
+        "last_month": "2026-06-01T00:00:00",
+        "monthly_rows": 246,
+        "mean_rv_ann": 0.034117760772498826
+      },
+      {
+        "ticker": "UNG",
+        "first_month": "2007-05-01T00:00:00",
+        "last_month": "2026-06-01T00:00:00",
+        "monthly_rows": 230,
+        "mean_rv_ann": 0.2463370468418198
+      },
+      {
+        "ticker": "USO",
+        "first_month": "2006-04-01T00:00:00",
+        "last_month": "2026-06-01T00:00:00",
+        "monthly_rows": 243,
+        "mean_rv_ann": 0.13914099984534609
+      },
+      {
+        "ticker": "WEAT",
+        "first_month": "2011-10-01T00:00:00",
+        "last_month": "2026-06-01T00:00:00",
+        "monthly_rows": 177,
+        "mean_rv_ann": 0.06876703500137786
+      }
+    ],
+    "monthly_target": "monthly sum of squared adjusted-close log returns, annualized by 252 / monthly trading-day count"
+  },
+  "methodology": {
+    "frequency": "monthly",
+    "target": "next-month annualized realized variance proxy from commodity ETF adjusted close returns",
+    "baseline": "log-HAR using lagged 1m, 3m, and 12m realized variance",
+    "challenger": "log-HAR plus lagged log CPU and lagged monthly CPU log change",
+    "anti_lookahead": "raw monthly RV and CPU features are indexed at month t, then signal = raw_signal.shift(1); OOS row i is fit on work.iloc[:i]",
+    "loss": "QLIKE pointwise losses from volpred.stats.model_evaluation.qlike_pointwise",
+    "inference": "Diebold-Mariano HAC h=1; Harvey-style practical pass requires challenger-better t < -3",
+    "cross_asset_inference": "date-clustered: per-month mean loss across assets before DM",
+    "initial_train_months": 72
+  },
+  "main_oos_har_cpu": {
+    "challenger_name": "har_cpu",
+    "baseline_features": [
+      "log_rv_1",
+      "log_rv_3",
+      "log_rv_12"
+    ],
+    "challenger_features": [
+      "log_rv_1",
+      "log_rv_3",
+      "log_rv_12",
+      "cpu_log",
+      "cpu_delta"
+    ],
+    "asset_results": {
+      "USO": {
+        "ticker": "USO",
+        "sector": "energy",
+        "comparison": "har_cpu",
+        "n_monthly_design_rows": 230,
+        "n_oos": 158,
+        "initial_train_months": 72,
+        "sample_start": "2007-04-01",
+        "sample_end": "2026-05-01",
+        "forecast_start": "2013-04-01",
+        "forecast_end": "2026-05-01",
+        "qlike_har": 0.34090987684182167,
+        "qlike_har_cpu": 0.34431623782080084,
+        "qlike_improvement_pct": -0.9991969169493101,
+        "mse_har": 0.06471181535211241,
+        "mse_har_cpu": 0.06466266925338335,
+        "mse_improvement_pct": 0.07594609803735355,
+        "dm_t_challenger_vs_har": 0.3715714905174652,
+        "dm_p_challenger_vs_har": 0.710712898951749,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.458691633327974,
+        "full_sample_standardized_beta": {
+          "intercept": -2.422756582067305,
+          "log_rv_1": 0.5935074091916822,
+          "log_rv_3": -0.08302535041119678,
+          "log_rv_12": 0.09327042853439883,
+          "cpu_log": 0.02042196991221146,
+          "cpu_delta": -0.10135123496808551
+        }
+      },
+      "UNG": {
+        "ticker": "UNG",
+        "sector": "energy",
+        "comparison": "har_cpu",
+        "n_monthly_design_rows": 217,
+        "n_oos": 145,
+        "initial_train_months": 72,
+        "sample_start": "2008-05-01",
+        "sample_end": "2026-05-01",
+        "forecast_start": "2014-05-01",
+        "forecast_end": "2026-05-01",
+        "qlike_har": 0.19216377900400483,
+        "qlike_har_cpu": 0.19690904087501956,
+        "qlike_improvement_pct": -2.469384134517795,
+        "mse_har": 0.03648885105983058,
+        "mse_har_cpu": 0.03673098869258461,
+        "mse_improvement_pct": -0.6635934695696346,
+        "dm_t_challenger_vs_har": 1.4532064641531024,
+        "dm_p_challenger_vs_har": 0.14834221217989474,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.5534966507390505,
+        "full_sample_standardized_beta": {
+          "intercept": -1.7048387529889515,
+          "log_rv_1": 0.6244799174619836,
+          "log_rv_3": -0.1324140215195301,
+          "log_rv_12": 0.08980325519515292,
+          "cpu_log": 0.06141680001653777,
+          "cpu_delta": -0.01830310545605138
+        }
+      },
+      "DBA": {
+        "ticker": "DBA",
+        "sector": "agriculture",
+        "comparison": "har_cpu",
+        "n_monthly_design_rows": 221,
+        "n_oos": 149,
+        "initial_train_months": 72,
+        "sample_start": "2008-01-01",
+        "sample_end": "2026-05-01",
+        "forecast_start": "2014-01-01",
+        "forecast_end": "2026-05-01",
+        "qlike_har": 0.15835481707844926,
+        "qlike_har_cpu": 0.1635914579942291,
+        "qlike_improvement_pct": -3.306903454149812,
+        "mse_har": 0.00013302786126216686,
+        "mse_har_cpu": 0.00013601692965800827,
+        "mse_improvement_pct": -2.2469491484574435,
+        "dm_t_challenger_vs_har": 1.8122370435393977,
+        "dm_p_challenger_vs_har": 0.07197657999347906,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.5729882101608562,
+        "full_sample_standardized_beta": {
+          "intercept": -4.0761400258200196,
+          "log_rv_1": 0.4397476058452243,
+          "log_rv_3": 0.01953566353086571,
+          "log_rv_12": 0.23796041962292547,
+          "cpu_log": -0.03675181629444623,
+          "cpu_delta": 0.04204824638534438
+        }
+      },
+      "CORN": {
+        "ticker": "CORN",
+        "sector": "agriculture",
+        "comparison": "har_cpu",
+        "n_monthly_design_rows": 180,
+        "n_oos": 108,
+        "initial_train_months": 72,
+        "sample_start": "2011-06-01",
+        "sample_end": "2026-05-01",
+        "forecast_start": "2017-06-01",
+        "forecast_end": "2026-05-01",
+        "qlike_har": 0.2042076203133234,
+        "qlike_har_cpu": 0.21669365755987616,
+        "qlike_improvement_pct": -6.114383600080624,
+        "mse_har": 0.0009944202712621599,
+        "mse_har_cpu": 0.001015998618766959,
+        "mse_improvement_pct": -2.169942440675617,
+        "dm_t_challenger_vs_har": 1.40927167619931,
+        "dm_p_challenger_vs_har": 0.16165455195309408,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.3661632782623071,
+        "full_sample_standardized_beta": {
+          "intercept": -3.4405880607746533,
+          "log_rv_1": 0.34829489313098744,
+          "log_rv_3": -0.0012057587538445384,
+          "log_rv_12": 0.11737786071696849,
+          "cpu_log": -0.06198707333032366,
+          "cpu_delta": 0.000225958665167304
+        }
+      },
+      "WEAT": {
+        "ticker": "WEAT",
+        "sector": "agriculture",
+        "comparison": "har_cpu",
+        "n_monthly_design_rows": 164,
+        "n_oos": 92,
+        "initial_train_months": 72,
+        "sample_start": "2012-10-01",
+        "sample_end": "2026-05-01",
+        "forecast_start": "2018-10-01",
+        "forecast_end": "2026-05-01",
+        "qlike_har": 0.16720314386690713,
+        "qlike_har_cpu": 0.16404179252148743,
+        "qlike_improvement_pct": 1.8907248226959894,
+        "mse_har": 0.007739001096681029,
+        "mse_har_cpu": 0.007485992064843809,
+        "mse_improvement_pct": 3.2692724639324164,
+        "dm_t_challenger_vs_har": -0.39808780637873764,
+        "dm_p_challenger_vs_har": 0.6914978678122246,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.3802414042158223,
+        "full_sample_standardized_beta": {
+          "intercept": -2.9323748087955983,
+          "log_rv_1": 0.3130615539498523,
+          "log_rv_3": 0.022768488497807562,
+          "log_rv_12": 0.06914340883403827,
+          "cpu_log": 0.03396986107334699,
+          "cpu_delta": -0.0742975241618342
+        }
+      },
+      "GLD": {
+        "ticker": "GLD",
+        "sector": "metal",
+        "comparison": "har_cpu",
+        "n_monthly_design_rows": 233,
+        "n_oos": 161,
+        "initial_train_months": 72,
+        "sample_start": "2007-01-01",
+        "sample_end": "2026-05-01",
+        "forecast_start": "2013-01-01",
+        "forecast_end": "2026-05-01",
+        "qlike_har": 0.26456557740916964,
+        "qlike_har_cpu": 0.2721737720197323,
+        "qlike_improvement_pct": -2.8757311079801022,
+        "mse_har": 0.0007569946308855148,
+        "mse_har_cpu": 0.0007712364126453811,
+        "mse_improvement_pct": -1.8813583582761437,
+        "dm_t_challenger_vs_har": 0.8975118854198358,
+        "dm_p_challenger_vs_har": 0.37079435711798614,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.42780406538872295,
+        "full_sample_standardized_beta": {
+          "intercept": -3.7837491361636455,
+          "log_rv_1": 0.30290447597300624,
+          "log_rv_3": 0.16875815157254562,
+          "log_rv_12": 0.07925419570632619,
+          "cpu_log": -0.010829170538468989,
+          "cpu_delta": -0.0868359013531553
+        }
+      }
+    },
+    "sector_results": {
+      "energy": {
+        "label": "energy",
+        "comparison": "har_cpu",
+        "n_months": 158,
+        "month_start": "2013-04-01",
+        "month_end": "2026-05-01",
+        "qlike_har": 0.2634951804254751,
+        "qlike_har_cpu": 0.2674862431689037,
+        "qlike_improvement_pct": -1.5146625213349536,
+        "dm_t_challenger_vs_har": 0.7588650517048772,
+        "dm_p_challenger_vs_har": 0.4490710643583635,
+        "harvey_pass_challenger_better": false
+      },
+      "agriculture": {
+        "label": "agriculture",
+        "comparison": "har_cpu",
+        "n_months": 149,
+        "month_start": "2014-01-01",
+        "month_end": "2026-05-01",
+        "qlike_har": 0.16454582701814124,
+        "qlike_har_cpu": 0.16926108384620425,
+        "qlike_improvement_pct": -2.865619209864951,
+        "dm_t_challenger_vs_har": 1.389274025013686,
+        "dm_p_challenger_vs_har": 0.1668361193706418,
+        "harvey_pass_challenger_better": false
+      },
+      "metal": {
+        "label": "metal",
+        "comparison": "har_cpu",
+        "n_months": 161,
+        "month_start": "2013-01-01",
+        "month_end": "2026-05-01",
+        "qlike_har": 0.26456557740916964,
+        "qlike_har_cpu": 0.2721737720197323,
+        "qlike_improvement_pct": -2.8757311079801022,
+        "dm_t_challenger_vs_har": 0.8975118854198358,
+        "dm_p_challenger_vs_har": 0.37079435711798614,
+        "harvey_pass_challenger_better": false
+      }
+    },
+    "overall_date_clustered": {
+      "label": "all_assets_date_clustered",
+      "comparison": "har_cpu",
+      "n_months": 161,
+      "month_start": "2013-01-01",
+      "month_end": "2026-05-01",
+      "qlike_har": 0.23609834169536686,
+      "qlike_har_cpu": 0.24197382147351454,
+      "qlike_improvement_pct": -2.488573081859547,
+      "dm_t_challenger_vs_har": 1.5640640057440478,
+      "dm_p_challenger_vs_har": 0.11977824590176533,
+      "harvey_pass_challenger_better": false
+    }
+  },
+  "gcpu_equal_weight_proxy_robustness_pre2020": {
+    "challenger_name": "har_gcpu_proxy",
+    "baseline_features": [
+      "log_rv_1",
+      "log_rv_3",
+      "log_rv_12"
+    ],
+    "challenger_features": [
+      "log_rv_1",
+      "log_rv_3",
+      "log_rv_12",
+      "gcpu_proxy_log",
+      "gcpu_proxy_delta"
+    ],
+    "asset_results": {
+      "USO": {
+        "ticker": "USO",
+        "sector": "energy",
+        "comparison": "har_gcpu_proxy",
+        "n_monthly_design_rows": 154,
+        "n_oos": 82,
+        "initial_train_months": 72,
+        "sample_start": "2007-04-01",
+        "sample_end": "2020-01-01",
+        "forecast_start": "2013-04-01",
+        "forecast_end": "2020-01-01",
+        "qlike_har": 0.1707571566217437,
+        "qlike_har_gcpu_proxy": 0.17490626036548856,
+        "qlike_improvement_pct": -2.4298271450700204,
+        "mse_har": 0.005079211694603207,
+        "mse_har_gcpu_proxy": 0.005086716993846402,
+        "mse_improvement_pct": -0.1477650410036968,
+        "dm_t_challenger_vs_har": 0.9420401975089251,
+        "dm_p_challenger_vs_har": 0.34897324972565835,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.5744656253910494,
+        "full_sample_standardized_beta": {
+          "intercept": -2.50963057828618,
+          "log_rv_1": 0.4888507841485777,
+          "log_rv_3": 0.13073890123847054,
+          "log_rv_12": 0.033083705701582526,
+          "gcpu_proxy_log": -0.026590258446081573,
+          "gcpu_proxy_delta": -0.056116172593294815
+        }
+      },
+      "UNG": {
+        "ticker": "UNG",
+        "sector": "energy",
+        "comparison": "har_gcpu_proxy",
+        "n_monthly_design_rows": 141,
+        "n_oos": 69,
+        "initial_train_months": 72,
+        "sample_start": "2008-05-01",
+        "sample_end": "2020-01-01",
+        "forecast_start": "2014-05-01",
+        "forecast_end": "2020-01-01",
+        "qlike_har": 0.24553865878144412,
+        "qlike_har_gcpu_proxy": 0.2514907445387999,
+        "qlike_improvement_pct": -2.4240931293241914,
+        "mse_har": 0.028521475935596084,
+        "mse_har_gcpu_proxy": 0.029242519184436308,
+        "mse_improvement_pct": -2.528071304824479,
+        "dm_t_challenger_vs_har": 1.0488584446050115,
+        "dm_p_challenger_vs_har": 0.2979568595245108,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.42813512913981666,
+        "full_sample_standardized_beta": {
+          "intercept": -2.0136207927982226,
+          "log_rv_1": 0.5411298759329148,
+          "log_rv_3": -0.14616425001658503,
+          "log_rv_12": 0.058094066961744024,
+          "gcpu_proxy_log": -0.0497894473812557,
+          "gcpu_proxy_delta": 0.04353947674250647
+        }
+      },
+      "DBA": {
+        "ticker": "DBA",
+        "sector": "agriculture",
+        "comparison": "har_gcpu_proxy",
+        "n_monthly_design_rows": 145,
+        "n_oos": 73,
+        "initial_train_months": 72,
+        "sample_start": "2008-01-01",
+        "sample_end": "2020-01-01",
+        "forecast_start": "2014-01-01",
+        "forecast_end": "2020-01-01",
+        "qlike_har": 0.10932362541889767,
+        "qlike_har_gcpu_proxy": 0.11079089661265278,
+        "qlike_improvement_pct": -1.3421355065137357,
+        "mse_har": 3.371515213212576e-05,
+        "mse_har_gcpu_proxy": 3.524194695570118e-05,
+        "mse_improvement_pct": -4.5285123365069975,
+        "dm_t_challenger_vs_har": 0.2808566758698584,
+        "dm_p_challenger_vs_har": 0.7796258273839982,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.6765897545990756,
+        "full_sample_standardized_beta": {
+          "intercept": -4.042432486262029,
+          "log_rv_1": 0.4415392827022925,
+          "log_rv_3": 0.09661999947391077,
+          "log_rv_12": 0.28825399292957293,
+          "gcpu_proxy_log": 0.018751092289962572,
+          "gcpu_proxy_delta": -0.07041237145794317
+        }
+      },
+      "CORN": {
+        "ticker": "CORN",
+        "sector": "agriculture",
+        "comparison": "har_gcpu_proxy",
+        "n_monthly_design_rows": 104,
+        "n_oos": 32,
+        "initial_train_months": 72,
+        "sample_start": "2011-06-01",
+        "sample_end": "2020-01-01",
+        "forecast_start": "2017-06-01",
+        "forecast_end": "2020-01-01",
+        "qlike_har": 0.18759142702268417,
+        "qlike_har_gcpu_proxy": 0.20411525655275242,
+        "qlike_improvement_pct": -8.80841400501215,
+        "mse_har": 0.00020617550946733034,
+        "mse_har_gcpu_proxy": 0.00021584772842363767,
+        "mse_improvement_pct": -4.6912550289295885,
+        "dm_t_challenger_vs_har": 0.6901878820854737,
+        "dm_p_challenger_vs_har": 0.49521124254373405,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.4195061364238536,
+        "full_sample_standardized_beta": {
+          "intercept": -3.4293277641707904,
+          "log_rv_1": 0.3067465942495756,
+          "log_rv_3": 0.03799740873561044,
+          "log_rv_12": 0.13397893659697577,
+          "gcpu_proxy_log": -0.0909386001760915,
+          "gcpu_proxy_delta": 0.08583440289865914
+        }
+      },
+      "WEAT": {
+        "ticker": "WEAT",
+        "sector": "agriculture",
+        "comparison": "har_gcpu_proxy",
+        "n_monthly_design_rows": 88,
+        "n_oos": 16,
+        "initial_train_months": 72,
+        "sample_start": "2012-10-01",
+        "sample_end": "2020-01-01",
+        "forecast_start": "2018-10-01",
+        "forecast_end": "2020-01-01",
+        "qlike_har": 0.17044709324062796,
+        "qlike_har_gcpu_proxy": 0.18816053124768223,
+        "qlike_improvement_pct": -10.392337980236132,
+        "mse_har": 0.0007084181054426879,
+        "mse_har_gcpu_proxy": 0.000641017390522518,
+        "mse_improvement_pct": 9.514256397788067,
+        "dm_t_challenger_vs_har": 0.4356849073428885,
+        "dm_p_challenger_vs_har": 0.6692699047534125,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.28001481579902565,
+        "full_sample_standardized_beta": {
+          "intercept": -3.0838406114281054,
+          "log_rv_1": 0.27362876864502633,
+          "log_rv_3": -0.029754611172794664,
+          "log_rv_12": -0.04784786884284293,
+          "gcpu_proxy_log": -0.11794678464553522,
+          "gcpu_proxy_delta": 0.06396463762190077
+        }
+      },
+      "GLD": {
+        "ticker": "GLD",
+        "sector": "metal",
+        "comparison": "har_gcpu_proxy",
+        "n_monthly_design_rows": 157,
+        "n_oos": 85,
+        "initial_train_months": 72,
+        "sample_start": "2007-01-01",
+        "sample_end": "2020-01-01",
+        "forecast_start": "2013-01-01",
+        "forecast_end": "2020-01-01",
+        "qlike_har": 0.26129963275461576,
+        "qlike_har_gcpu_proxy": 0.2768669855436533,
+        "qlike_improvement_pct": -5.957663478102438,
+        "mse_har": 0.0004580334945670086,
+        "mse_har_gcpu_proxy": 0.00045646595908757073,
+        "mse_improvement_pct": 0.34223162673282315,
+        "dm_t_challenger_vs_har": 1.167772602329606,
+        "dm_p_challenger_vs_har": 0.2462024739493942,
+        "harvey_pass_challenger_better": false,
+        "full_sample_log_ols_r2": 0.5110492136057538,
+        "full_sample_standardized_beta": {
+          "intercept": -3.811854623780623,
+          "log_rv_1": 0.25019837432008174,
+          "log_rv_3": 0.32454611247112325,
+          "log_rv_12": 0.009940486022499848,
+          "gcpu_proxy_log": -0.06098168134911318,
+          "gcpu_proxy_delta": -0.008256612651772558
+        }
+      }
+    },
+    "sector_results": {
+      "energy": {
+        "label": "energy",
+        "comparison": "har_gcpu_proxy",
+        "n_months": 82,
+        "month_start": "2013-04-01",
+        "month_end": "2020-01-01",
+        "qlike_har": 0.19805623668758682,
+        "qlike_har_gcpu_proxy": 0.20275703652272403,
+        "qlike_improvement_pct": -2.3734672099986627,
+        "dm_t_challenger_vs_har": 1.5296260868067746,
+        "dm_p_challenger_vs_har": 0.13000542697546025,
+        "harvey_pass_challenger_better": false
+      },
+      "agriculture": {
+        "label": "agriculture",
+        "comparison": "har_gcpu_proxy",
+        "n_months": 73,
+        "month_start": "2014-01-01",
+        "month_end": "2020-01-01",
+        "qlike_har": 0.13347355486292825,
+        "qlike_har_gcpu_proxy": 0.13799760089889984,
+        "qlike_improvement_pct": -3.3894699520197817,
+        "dm_t_challenger_vs_har": 0.5608352259523929,
+        "dm_p_challenger_vs_har": 0.5766510952002482,
+        "harvey_pass_challenger_better": false
+      },
+      "metal": {
+        "label": "metal",
+        "comparison": "har_gcpu_proxy",
+        "n_months": 85,
+        "month_start": "2013-01-01",
+        "month_end": "2020-01-01",
+        "qlike_har": 0.26129963275461576,
+        "qlike_har_gcpu_proxy": 0.2768669855436533,
+        "qlike_improvement_pct": -5.957663478102438,
+        "dm_t_challenger_vs_har": 1.167772602329606,
+        "dm_p_challenger_vs_har": 0.2462024739493942,
+        "harvey_pass_challenger_better": false
+      }
+    },
+    "overall_date_clustered": {
+      "label": "all_assets_date_clustered",
+      "comparison": "har_gcpu_proxy",
+      "n_months": 85,
+      "month_start": "2013-01-01",
+      "month_end": "2020-01-01",
+      "qlike_har": 0.220748781449366,
+      "qlike_har_gcpu_proxy": 0.23126936903625797,
+      "qlike_improvement_pct": -4.76586439925836,
+      "dm_t_challenger_vs_har": 1.5971074560114848,
+      "dm_p_challenger_vs_har": 0.11399708803061626,
+      "harvey_pass_challenger_better": false
+    }
+  },
+  "figures": [
+    "figures/K1668_fig1_cpu_commodity_rv.png",
+    "figures/K1668_fig2_oos_qlike_improvement.png"
+  ],
+  "conclusion": {
+    "verdict": "NULL_NO_OOS_CPU_INCREMENT",
+    "plain_english": "Lagged U.S. CPU does not improve OOS QLIKE beyond the monthly HAR baseline in this ETF proxy.",
+    "sector_harvey_passes": "none",
+    "research_honesty_notes": [
+      "This is a commodity ETF proxy test, not a futures-contract replication of the Journal of Futures Markets article.",
+      "The primary CPU series is U.S. GKRS CPU through 2026-04; the GCPU proxy is a shorter public equal-weight multi-country robustness series ending 2019.",
+      "All forecast signals are lagged one month with signal = raw_signal.shift(1)."
+    ]
+  },
+  "references": [
+    {
+      "key": "Gavriilidis-Kanzig-Raghavan-Stock-2026",
+      "url": "https://www.nber.org/papers/w34762",
+      "role": "Official U.S. CPU paper and supply-shock motivation."
+    },
+    {
+      "key": "GKRS-CPU-data",
+      "url": "https://github.com/dkaenzig/Climate-Policy-Uncertainty-Index",
+      "role": "Official downloadable monthly CPU dataset."
+    },
+    {
+      "key": "Zhu-Wu-Wan-Li-2026",
+      "url": "https://ideas.repec.org/a/wly/jfutmk/v46y2026i1p197-220.html",
+      "role": "Commodity futures volatility risk motivation and sector heterogeneity claim."
+    },
+    {
+      "key": "Bakas-Triantafyllou-2018",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0261560617302516",
+      "role": "Prior evidence linking uncertainty shocks and commodity price volatility."
+    }
+  ]
+}

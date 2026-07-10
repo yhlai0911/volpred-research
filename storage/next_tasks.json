@@ -56729,7 +56729,7 @@
     "title": "K1668: 氣候政策不確定性（CPU）指數 → 商品期貨 RV 增量**（高信心）— 用 Gavriilidis 免費 news-based CPU/GCPU 月頻指數（policyuncertainty.com）作 HAR 外生 covariate，",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1511). Original: 氣候政策不確定性（CPU）指數 → 商品期貨 RV 增量**（高信心）— 用 Gavriilidis 免費 news-based CPU/GCPU 月頻指數（policyuncertainty.com）作 HAR 外生 covariate，檢定對 USO/UNG/DBA/CORN/WEAT/GLD 次期 realized vol 的 OOS QLIKE+DM 增量，並測 sector heterogeneity（農產/金屬曝險最高）；signal.shift(1)。與 line 479（純 UNG/DBA 季節性、無 CPU 訊號）正交（來源：JFutMkt 2026 + NBER w34762 CPU-as-supply-shock；CPU→commodity vol 是 2025-26 明確上升趨勢）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1668.py with signal.shift(1) + seed=42, (c) K1668_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -56738,7 +56738,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-10T00:00:01Z"
+    "created_at": "2026-07-10T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-10T01:30:45.479565+00:00",
+    "claim_session_id": "ecfe00653e0e",
+    "status_history": [
+      {
+        "ts": "2026-07-10T01:30:45.479890+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-10T01:30:45.719450+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-10T01:42:30.685259+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-10T01:30:45.719117+00:00",
+    "completed_at": "2026-07-10T01:42:30.684935+00:00",
+    "result": "K1668 completed as NULL_NO_OOS_CPU_INCREMENT. Lagged GKRS U.S. CPU worsened overall date-clustered monthly commodity ETF RV QLIKE by -2.489% vs HAR (DM t=+1.564); sectors energy/agriculture/metal all negative and GCPU proxy robustness also negative. Outputs: experiments/k1668/README.md, K1668.py, K1668_results.json, codex_review.md, figures and data snapshots; knowledge=f0be4112."
   },
   {
     "id": "K1669",
