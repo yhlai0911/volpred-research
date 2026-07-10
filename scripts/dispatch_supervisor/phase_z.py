@@ -1,4 +1,19 @@
-"""PHASE-Z safety net — deterministic post-fire commit of whatever the
+"""Git hygiene around a dispatch fire — the single owner of both ends.
+
+Two entry points, both called from `scheduler._tick_once`:
+
+  - `run_pre_fire_guard()`  — BEFORE the worker: conflict-marker / orphaned
+    AUTO_MERGE backstop (port of the legacy shell's git_conflict_guard call).
+  - `run_phase_z()`         — AFTER the worker: deterministic commit of
+    whatever the dispatched agent left uncommitted.
+
+Keeping both here (rather than scattering a third git-touching module into the
+scheduler) means "git hygiene around a fire" has exactly one enforcement owner
+— see `.claude/rules/control-plane.md` anti-stacking.
+
+---
+
+PHASE-Z safety net — deterministic post-fire commit of whatever the
 dispatched agent left uncommitted.
 
 Port of the `scripts/cron_hourly_dispatch.sh` PHASE-Z block (2026-05-29) into
@@ -36,6 +51,7 @@ from __future__ import annotations
 
 import logging
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -74,6 +90,89 @@ _LEAKED_STATE_PATHSPECS = (
     "storage/session_state.json",
     "storage/work_log.json.append",
 )
+
+
+# ── pre-fire guard ───────────────────────────────────────────────────────────
+# Byte-for-byte the legacy ceiling: cron_hourly_dispatch.sh:76 wrapped the guard
+# in `perl -e 'alarm 30; exec'` after 2026-07-02, when `uv` hung >6min inside
+# __private_getcwd and blocked a whole dispatch slot before it began.
+_GUARD_TIMEOUT_S = 30
+_GUARD_SCRIPT_RELPATH = ("scripts", "git_conflict_guard.py")
+
+
+def run_pre_fire_guard(
+    *,
+    repo_root: Path,
+    runner=subprocess.run,
+) -> dict:
+    """Run the conflict-marker / orphaned-AUTO_MERGE guard before a fire.
+
+    Re-wire of `scripts/git_conflict_guard.py`, orphaned by the 2026-07-04
+    supervisor cutover: its only caller was `cron_hourly_dispatch.sh`, whose
+    LaunchAgent is now unloaded. The risk it was built for is unchanged — the
+    dispatcher and the always-on `codex_loop.sh` still write the same branch
+    concurrently, so a half-finished 3-way merge can orphan `.git/AUTO_MERGE`
+    and inject `<<<<<<<` markers into `feed.json` / `next_tasks.json` /
+    `work_log.json`, which the live site and the dispatcher then read
+    (docs/error_log.md 2026-06-28).
+
+    Contract, preserved from the legacy call site:
+
+      - **fail-OPEN** — a missing script, spawn error, timeout, crash, or
+        non-zero exit is logged and returns; it never vetoes the fire. This
+        function has no failure mode that can return "don't dispatch".
+      - **idempotent** — the guard no-ops on a clean tree.
+      - **subprocess, not import** — a guard crash (or a hang in `git`) can
+        never take down the daemon, and the hard timeout bounds it. Mirrors
+        `scheduler._run_pregate`.
+
+    Invoked with `sys.executable` rather than the legacy `uv run python`: the
+    guard is pure-stdlib, so no venv resolution is needed, and this sidesteps
+    the `uv` cwd-resolution hang above entirely.
+
+    Returns an observability dict: ``ran`` (bool — did the guard execute),
+    ``reason`` (str), plus ``guard_output`` when it printed anything. Never
+    raises.
+    """
+    repo_root = Path(repo_root)
+    script = repo_root.joinpath(*_GUARD_SCRIPT_RELPATH)
+    if not script.exists():
+        LOG.warning("pre_fire_guard: %s missing — no conflict backstop this fire", script)
+        return {"ran": False, "reason": "guard_missing"}
+
+    try:
+        proc = runner(
+            [sys.executable, str(script), "--quiet"],
+            capture_output=True,
+            text=True,
+            timeout=_GUARD_TIMEOUT_S,
+            cwd=str(repo_root),
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        LOG.warning("pre_fire_guard: timeout after %ss — fail-open, firing anyway", _GUARD_TIMEOUT_S)
+        return {"ran": False, "reason": "timeout"}
+    except OSError as exc:
+        LOG.warning("pre_fire_guard: spawn failed (%s) — fail-open, firing anyway", exc)
+        return {"ran": False, "reason": "spawn_error"}
+
+    # `--quiet` keeps the guard silent on a clean tree, so any output means it
+    # acted (or warned). Forward it: the guard's own stdout is the only record
+    # of which canonical blobs it restored.
+    out = ((proc.stdout or "") + (proc.stderr or "")).strip()
+    for line in out.splitlines():
+        LOG.info("pre_fire_guard: %s", line)
+
+    if proc.returncode != 0:
+        # The guard's main() returns 0 on every path, so this is a crash. Not
+        # silent (see .claude/rules/no-silent-fallback.md) — but not a veto.
+        LOG.warning("pre_fire_guard: exit=%d — fail-open, firing anyway", proc.returncode)
+        return {"ran": True, "reason": "nonzero_exit", "exit_code": proc.returncode}
+
+    result = {"ran": True, "reason": "ok"}
+    if out:
+        result["guard_output"] = out[-500:]
+    return result
 
 
 def _git(

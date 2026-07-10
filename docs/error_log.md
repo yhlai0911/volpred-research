@@ -2,6 +2,32 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 git_conflict_guard 在 7/4 supervisor cutover 時孤兒化（同類第 4 次）→ 收編進 phase_z + 立機械 gate
+
+**現象**：`scripts/git_conflict_guard.py` 自 2026-07-04 dispatch-supervisor cutover 後**六天未曾執行**。它唯一的 caller 是 `scripts/cron_hourly_dispatch.sh:104`，而該 shell 的 LaunchAgent（`com.volpred.hourly-dispatch`）已在 cutover 時 unload（`launchctl list | grep hourly-dispatch` 為空）。
+
+**影響**：guard 是「同分支兩個並發 writer」的確定性後盾 —— hourly dispatcher 與常駐 `codex_loop.sh` 同時寫 main，未完成的 3-way merge 會留下孤兒 `.git/AUTO_MERGE`（無 `MERGE_HEAD`）並把 `<<<<<<<` 衝突標記注入 `storage/reports/feed.json` / `next_tasks.json` / `work_log.json` —— 而這三個檔正是**線上網站與 dispatcher 讀的**（原始事故見本檔 2026-06-28）。**並發 writer 的風險完全沒有消失，消失的只有 guard**。六天無防護裸奔。
+
+**根因（與 pregate orphan 同一 bug class）**：cutover 遷移靠記憶不靠元件清單。此例比 pregate 更難察覺 —— pregate 至少有 shadow log 停更當死亡訊號，而 **guard 在乾淨樹上是靜默的（`--quiet` 無輸出、無 side-effect log）**，「沒在跑」與「跑了但沒事」在觀測上完全同形。沒有任何被動訊號能發現它。
+
+**解決方法**：
+1. **收編進既有 owner，不散落第三個 git module**（anti-stacking）：`scripts/dispatch_supervisor/phase_z.py` 本就是「fire 前後 git hygiene」的唯一 owner（它擁有 post-fire auto-commit），故新增 pre-fire 入口 `run_pre_fire_guard()`，由 `scheduler._tick_once` 在 `worker.run_worker()` **之前**呼叫。未新增 watchdog process、未新增 LaunchAgent。
+2. **保留原契約**：fail-OPEN（missing script / spawn error / timeout / 崩潰 / 非零 exit 全部只記錄不否決 fire —— 這函式沒有任何能回傳「不要派工」的路徑）、idempotent（乾淨樹 no-op）、subprocess 隔離 + 30s 硬上限（沿用 legacy `GIT_CONFLICT_GUARD_TIMEOUT_SEC`），完全比照 `scheduler._run_pregate()`。scheduler 端另包一層 try/except 作 belt-and-suspenders：**guard 永遠不可以否決它所保護的 dispatch**。
+3. **順序**：置於 pregate **之前**，與 legacy shell 一致（"run the watchdog FIRST so every hourly slot starts on a clean, valid tree"）—— guard 修的檔是**線上站與 pregate 自己**都要讀的，不只被派工 agent 讀，故 pregate 決定 skip 的班次仍應有乾淨的樹。
+4. **改用 `sys.executable` 取代 legacy 的 `uv run python`**：guard 是純 stdlib，不需 venv resolution，順帶完全繞開本檔 2026-07-02 記錄的 `uv` 卡在 `__private_getcwd` 逾時事故。
+5. **機械 gate（本次核心交付）**：`scripts/tests/test_cutover_orphans.py` —— 解析 legacy wrapper 真正**執行**的 `scripts/*.py`（會剔除註解行；wrapper:181 只在註解提到 `model_router.py`，naive grep 會誤判成 wired 而把真 orphan 藏在偽陽性後面），斷言每一個都必須「被 supervisor package 引用」或「列入 `_RETIRED_BY_DESIGN` 並附理由」，沒有第三種可能。反向驗證：把 `phase_z.py` 還原成 orphan 狀態，gate 立刻報 `Cutover orphan(s): scripts/git_conflict_guard.py`。
+
+**Full-population sweep（依 `.claude/rules/control-plane.md` §控制面 audit 的完成門檻）**：
+- **掃描範圍**：legacy wrapper 執行的全部 `scripts/*.py`，非子集。結果 = `{git_conflict_guard.py, hourly_dispatch_pregate.py, model_router.py}`。
+- **逐項判定**：pregate 已於本日稍早修復（commit `a3d243650`）；`model_router.py` 是**偽陽性** —— wrapper:181 只是註解，其真正 caller 是 `continue_task_dispatch.py`（per-task 路由跑在被派工 agent 內，supervisor fire path 一律 opus，見 `worker.py OPUS_MODEL`），已列入 `_RETIRED_BY_DESIGN` 附理由；`git_conflict_guard.py` 即本次修復對象。
+- **Blind-spot 分析**：本 sweep 只覆蓋 *legacy wrapper* 這一條退役路徑。其他退役路徑（舊 cron entries、已刪 LaunchAgent）不在此 gate 範圍內；若日後再退役執行路徑，需為該路徑另立同型 gate（或推廣本 gate 的 wrapper 清單）。
+- **結論**：此 vector 的 orphan population 已歸零，無 orphan #5。
+
+**回歸測試**：`tests/test_dispatch_supervisor.py` 新增 12 tests（guard 每次真 fire 恰跑一次且嚴格早於 worker spawn / guard 崩潰或逾時不阻止 fire / `dry_run` 不呼叫 / not_due tick 不呼叫 / pregate skip 時仍跑 / subprocess 參數與 30s timeout / 真 guard 對乾淨 repo 的 idempotency）。負向驗證：拿掉 scheduler 的 guard 呼叫後，3 支 orphan 偵測器立刻 fail。**特別注意**：`crash_does_not_prevent_fire` 若不斷言 `guard 被呼叫過`，會在 guard 再次被孤兒化時**空洞通過** —— 已補 counter 斷言。
+
+**順手修**（同一條 fire path 上發現）：`tests/test_dispatch_supervisor.py` 的 fire-path 測試原本會真的 spawn `hourly_dispatch_pregate.py`（`_run_pregate` 從 module-level ROOT 解析腳本，不看測試的 `repo_root`），每跑一次 pytest 就往 `storage/logs/hourly_pregate.jsonl` 灌 4 筆合成決策 —— 而那正是判斷 shadow→enforce 是否該翻轉的觀察日誌。已加 `_stub_pregate()` 隔離。
+
+**教訓**：(1) **靜默的守門員是最危險的守門員** —— 一個乾淨路徑上無輸出、無 side-effect 的元件，「沒在跑」不會產生任何被動訊號，只能靠主動 inventory 發現。凡「fail-open + 乾淨時 no-op」的防護元件，上線時就該同步立一個「它是否仍被呼叫」的機械 gate。(2) 退役任何執行路徑（LaunchAgent / cron / wrapper）時，**必須先枚舉掛在它身上的完整元件清單**並逐一判定「移植 / 明確廢棄」，散文規則已被證明擋不住（這是第 4 次）。(3) sweep 用 naive grep 會被註解製造的偽陽性汙染，讓真 orphan 躲在後面 —— 掃描器本身也要有反例測試。
 ## 2026-07-10 兩個長期紅燈測試：cutover 遺留的 dead-behavior 測試 + 硬編日期 fixture 時間炸彈
 
 **現象**：全套 pytest 有兩個既有 FAIL（`git checkout c4dfb4c1f` 確認非近期引入）：

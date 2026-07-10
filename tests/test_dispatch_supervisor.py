@@ -8,6 +8,7 @@ import os
 import resource
 import signal
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -18,6 +19,19 @@ from scripts.dispatch_supervisor import health, phase_z, procutil, scheduler, st
 
 def _tmp_state(tmp_path: Path) -> Path:
     return tmp_path / "dispatch_state.json"
+
+
+def _stub_pregate(monkeypatch) -> None:
+    """Keep fire-path tests off the REAL scripts/hourly_dispatch_pregate.py.
+
+    `_run_pregate` resolves the script from the module-level ROOT (the real
+    checkout), not from the test's `repo_root`. The pregate is live in
+    mode=shadow, so an un-stubbed fire-path test spawns it for real and appends
+    a synthetic decision to storage/logs/hourly_pregate.jsonl — the very log the
+    shadow→enforce flip is judged on. Observed 2026-07-10: 4 rows within 2s per
+    pytest run. Returns False = "do not skip".
+    """
+    monkeypatch.setattr(scheduler, "_run_pregate", lambda **_kwargs: False)
 
 
 def test_worker_transient_retry_then_success(tmp_path: Path, monkeypatch) -> None:
@@ -198,6 +212,7 @@ def test_scheduler_fire_runs_worker_when_due(tmp_path: Path, monkeypatch) -> Non
     state_path = _tmp_state(tmp_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
+    _stub_pregate(monkeypatch)
     received: list[dict] = []
 
     def fake_run_worker(**kwargs):
@@ -427,6 +442,7 @@ def test_scheduler_phase_z_runs_even_if_worker_raises(tmp_path: Path, monkeypatc
     state_path = _tmp_state(tmp_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt", encoding="utf-8")
+    _stub_pregate(monkeypatch)
     ran = {"phase_z": 0}
 
     def boom(**kwargs):
@@ -473,6 +489,7 @@ def test_scheduler_post_fire_hook_invokes_phase_z(tmp_path: Path, monkeypatch) -
     state_path = _tmp_state(tmp_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
+    _stub_pregate(monkeypatch)
 
     monkeypatch.setattr(
         scheduler.worker, "run_worker",
@@ -522,6 +539,301 @@ def test_scheduler_dry_run_skips_phase_z(tmp_path: Path, monkeypatch) -> None:
 
     assert decision["action"] == "dry_run_fire"
     assert called["phase_z"] == 0  # dry-run never spawns an agent → nothing to commit
+
+
+# ── pre-fire git conflict guard ──────────────────────────────────────────────
+# Regression suite for the 2026-07-10 rewire of scripts/git_conflict_guard.py,
+# orphaned for 6 days by the 7/4 supervisor cutover (its only caller was the
+# now-unloaded cron_hourly_dispatch.sh). The invariants below are exactly the
+# ones whose absence made the orphaning invisible.
+
+
+def _ok_worker(**_kwargs) -> worker.WorkerResult:
+    return worker.WorkerResult(
+        exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+        attempts=1, duration_s=1.0, log_tail="ok",
+    )
+
+
+def test_scheduler_pre_fire_guard_runs_once_before_worker(tmp_path: Path, monkeypatch) -> None:
+    # The whole point of the guard: the tree must be clean BEFORE the agent
+    # starts writing to it. Ordering, not just presence, is the invariant.
+    state_path = _tmp_state(tmp_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    _stub_pregate(monkeypatch)
+    order: list[str] = []
+
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_pre_fire_guard",
+        lambda **kwargs: order.append(f"guard:{kwargs['repo_root']}") or {"ran": True, "reason": "ok"},
+    )
+    monkeypatch.setattr(
+        scheduler.worker, "run_worker",
+        lambda **kwargs: order.append("worker") or _ok_worker(),
+    )
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_phase_z",
+        lambda **kwargs: order.append("phase_z") or {"committed": False, "reason": "clean"},
+    )
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+    ))
+
+    assert decision["action"] == "fired"
+    # exactly once, strictly before the worker spawns, against the given repo_root
+    assert order == [f"guard:{tmp_path}", "worker", "phase_z"]
+
+
+def test_scheduler_pre_fire_guard_crash_does_not_prevent_fire(tmp_path: Path, monkeypatch) -> None:
+    # run_pre_fire_guard is no-raise by construction; this pins the scheduler's
+    # belt-and-suspenders try/except. A guard must never veto the dispatch it
+    # guards — a broken backstop degrades to "unprotected", never to "no fire".
+    state_path = _tmp_state(tmp_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    _stub_pregate(monkeypatch)
+    ran = {"guard": 0, "worker": 0}
+
+    def exploding_guard(**_kwargs):
+        ran["guard"] += 1
+        raise RuntimeError("guard exploded")
+
+    monkeypatch.setattr(scheduler.phase_z, "run_pre_fire_guard", exploding_guard)
+    monkeypatch.setattr(
+        scheduler.worker, "run_worker",
+        lambda **kwargs: ran.__setitem__("worker", ran["worker"] + 1) or _ok_worker(),
+    )
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", lambda **kwargs: {"committed": False})
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+    ))
+
+    assert decision["action"] == "fired"
+    # ran["guard"] pins that the crash path was actually exercised. Without it
+    # this test passes vacuously the moment the guard call is orphaned again —
+    # which is precisely the failure mode this suite exists to catch.
+    assert ran["guard"] == 1
+    assert ran["worker"] == 1
+
+
+def test_scheduler_dry_run_skips_pre_fire_guard(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt", encoding="utf-8")
+    called = {"guard": 0}
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_pre_fire_guard",
+        lambda **kwargs: called.__setitem__("guard", called["guard"] + 1) or {},
+    )
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=True,
+        repo_root=tmp_path,
+    ))
+
+    assert decision["action"] == "dry_run_fire"
+    assert called["guard"] == 0  # dry-run mutates no repo → nothing to guard
+
+
+def test_scheduler_pre_fire_guard_not_run_on_undue_tick(tmp_path: Path, monkeypatch) -> None:
+    # 59 of every 60 ticks are not_due. Guarding those would turn a once-hourly
+    # git scan into a once-a-minute one.
+    state_path = _tmp_state(tmp_path)
+    with state._locked_state(state_path) as (_fh, data):
+        data["last_fire_at"] = state._now()  # just fired → next slot is an hour away
+    called = {"guard": 0}
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_pre_fire_guard",
+        lambda **kwargs: called.__setitem__("guard", called["guard"] + 1) or {},
+    )
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=tmp_path / "prompt.md",
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+    ))
+
+    assert decision["action"] == "skip"
+    assert decision["reason"] == "not_due"
+    assert called["guard"] == 0
+
+
+def test_scheduler_pre_fire_guard_runs_even_when_pregate_skips(tmp_path: Path, monkeypatch) -> None:
+    # Deliberate ordering (guard BEFORE pregate), mirroring the legacy shell:
+    # the files the guard repairs are read by the live site and by the pregate
+    # itself, so a slot the pregate declines still deserves a clean tree.
+    state_path = _tmp_state(tmp_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt", encoding="utf-8")
+    called = {"guard": 0, "worker": 0}
+
+    monkeypatch.setattr(
+        scheduler, "load_pregate_config",
+        lambda **_kwargs: {"mode": "enforce", "window_hours": 3.0},
+    )
+    monkeypatch.setattr(scheduler, "_run_pregate", lambda **_kwargs: True)  # SKIP this fire
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_pre_fire_guard",
+        lambda **kwargs: called.__setitem__("guard", called["guard"] + 1) or {"ran": True, "reason": "ok"},
+    )
+    monkeypatch.setattr(
+        scheduler.worker, "run_worker",
+        lambda **kwargs: called.__setitem__("worker", called["worker"] + 1) or _ok_worker(),
+    )
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+    ))
+
+    assert decision["action"] == "pregate_skip"
+    assert called["guard"] == 1   # tree still cleaned...
+    assert called["worker"] == 0  # ...even though no agent ran
+
+
+def test_pre_fire_guard_invokes_script_quietly_under_timeout(tmp_path: Path) -> None:
+    guard = tmp_path / "scripts" / "git_conflict_guard.py"
+    guard.parent.mkdir(parents=True)
+    guard.write_text("", encoding="utf-8")
+    seen: dict = {}
+
+    def fake_runner(cmd, **kwargs):
+        seen["cmd"] = cmd
+        seen["kwargs"] = kwargs
+        return _FakeCompleted(returncode=0)
+
+    out = phase_z.run_pre_fire_guard(repo_root=tmp_path, runner=fake_runner)
+
+    assert out == {"ran": True, "reason": "ok"}
+    # subprocess (never import) so a guard crash cannot take down the daemon;
+    # sys.executable (never `uv run`) so the pure-stdlib guard skips uv's
+    # cwd-resolution hang (docs/error_log.md 2026-07-02).
+    assert seen["cmd"] == [sys.executable, str(guard), "--quiet"]
+    assert seen["kwargs"]["timeout"] == 30  # legacy GIT_CONFLICT_GUARD_TIMEOUT_SEC
+    assert seen["kwargs"]["cwd"] == str(tmp_path)
+    assert seen["kwargs"]["check"] is False
+
+
+def test_pre_fire_guard_forwards_output_when_it_acted(tmp_path: Path) -> None:
+    guard = tmp_path / "scripts" / "git_conflict_guard.py"
+    guard.parent.mkdir(parents=True)
+    guard.write_text("", encoding="utf-8")
+    stdout = "[git-conflict-guard] restored canonical: storage/reports/feed.json"
+
+    out = phase_z.run_pre_fire_guard(
+        repo_root=tmp_path,
+        runner=lambda *a, **k: _FakeCompleted(returncode=0, stdout=stdout),
+    )
+
+    assert out["ran"] is True
+    assert out["reason"] == "ok"
+    assert "feed.json" in out["guard_output"]  # which blobs it restored is the record
+
+
+def test_pre_fire_guard_missing_script_is_fail_open(tmp_path: Path) -> None:
+    # No scripts/ dir under repo_root → nothing spawned, observable no-op.
+    out = phase_z.run_pre_fire_guard(repo_root=tmp_path)
+    assert out == {"ran": False, "reason": "guard_missing"}
+
+
+def test_pre_fire_guard_timeout_is_fail_open(tmp_path: Path) -> None:
+    guard = tmp_path / "scripts" / "git_conflict_guard.py"
+    guard.parent.mkdir(parents=True)
+    guard.write_text("", encoding="utf-8")
+
+    def boom(*_args, **_kwargs):
+        raise subprocess.TimeoutExpired(cmd="git_conflict_guard.py", timeout=30)
+
+    out = phase_z.run_pre_fire_guard(repo_root=tmp_path, runner=boom)
+    assert out == {"ran": False, "reason": "timeout"}  # no raise
+
+
+def test_pre_fire_guard_spawn_error_is_fail_open(tmp_path: Path) -> None:
+    guard = tmp_path / "scripts" / "git_conflict_guard.py"
+    guard.parent.mkdir(parents=True)
+    guard.write_text("", encoding="utf-8")
+
+    def boom(*_args, **_kwargs):
+        raise OSError("no fork for you")
+
+    out = phase_z.run_pre_fire_guard(repo_root=tmp_path, runner=boom)
+    assert out == {"ran": False, "reason": "spawn_error"}
+
+
+def test_pre_fire_guard_nonzero_exit_is_fail_open(tmp_path: Path) -> None:
+    # The guard's main() returns 0 on every path, so a non-zero exit is a crash.
+    # Report it (no silent fallback) but never veto the fire.
+    guard = tmp_path / "scripts" / "git_conflict_guard.py"
+    guard.parent.mkdir(parents=True)
+    guard.write_text("", encoding="utf-8")
+
+    out = phase_z.run_pre_fire_guard(
+        repo_root=tmp_path,
+        runner=lambda *a, **k: _FakeCompleted(returncode=2, stderr="Traceback ..."),
+    )
+
+    assert out["ran"] is True
+    assert out["reason"] == "nonzero_exit"
+    assert out["exit_code"] == 2
+
+
+def test_pre_fire_guard_is_idempotent_on_a_clean_tree(tmp_path: Path) -> None:
+    # End-to-end against the REAL guard script + a real (empty) git repo: it
+    # must exit 0, print nothing under --quiet, and mutate nothing.
+    repo = tmp_path / "repo"
+    (repo / "scripts").mkdir(parents=True)
+    real_guard = Path(__file__).resolve().parents[1] / "scripts" / "git_conflict_guard.py"
+    (repo / "scripts" / "git_conflict_guard.py").write_text(
+        real_guard.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    for args in (
+        ["init", "-q"],
+        # pre-assert the driver the guard would otherwise set on its first run:
+        # _ensure_ours_driver() logs "set merge.ours.driver=true" and that print
+        # is NOT suppressed by --quiet, which would make run #1 != run #2.
+        ["config", "merge.ours.driver", "true"],
+        ["add", "-A"],
+    ):
+        subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "-c", "user.email=t@t", "-c", "user.name=t",
+         "commit", "-qm", "seed"],
+        check=True, capture_output=True,
+    )
+
+    first = phase_z.run_pre_fire_guard(repo_root=repo)
+    second = phase_z.run_pre_fire_guard(repo_root=repo)
+
+    assert first == {"ran": True, "reason": "ok"}
+    assert second == first  # idempotent: no-op on a clean tree, twice
+    status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--porcelain"], capture_output=True, text=True,
+    )
+    assert status.stdout.strip() == ""
 
 
 def test_due_to_fire_warns_on_invalid_last_fire_at(capsys) -> None:

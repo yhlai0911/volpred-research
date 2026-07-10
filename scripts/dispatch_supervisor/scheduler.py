@@ -9,8 +9,11 @@ Tick every TICK_INTERVAL_S (=60s). On each tick:
   2. If `auth_blocked` true → log + skip (manual unblock via CLI)
   3. If `current_job` non-null → log + skip (worker in flight; health watches)
   4. Compute most recent scheduled fire time via croniter
-  5. If `last_fire_at < that fire time` → spawn worker (or DRY-RUN log only)
-  6. Block-wait for worker to return; loop continues on next tick
+  5. If due (and not dry_run) → `phase_z.run_pre_fire_guard()` — fail-open git
+     conflict backstop, so the slot starts on a clean, valid tree
+  6. If `last_fire_at < that fire time` → spawn worker (or DRY-RUN log only)
+  7. Block-wait for worker to return, then `phase_z.run_phase_z()`; loop
+     continues on next tick
 
 The worker call is blocking; we run it inside `asyncio.to_thread()` so the
 event loop stays responsive for health_loop concurrent execution.
@@ -285,6 +288,26 @@ async def _tick_once(
             fire_reason = f"cron+requested:{requested}"
     if not due:
         return {"action": "skip", "reason": "not_due", "prev_fire": prev_fire.isoformat()}
+    # Git conflict guard (2026-07-10 rewire; see phase_z.run_pre_fire_guard).
+    # Orphaned by the 7/4 cutover — its only caller was the now-unloaded
+    # cron_hourly_dispatch.sh, while the concurrent-writer risk it backstops
+    # (dispatcher + always-on codex_loop on one branch) never went away.
+    #
+    # Ordered BEFORE the pregate, exactly as the legacy shell had it ("run the
+    # watchdog FIRST so every hourly slot starts on a clean, valid tree"): the
+    # files it repairs are read by the live site AND by the pregate itself, not
+    # only by the dispatched agent, so a pregate-skipped slot still deserves a
+    # clean tree. dry_run touches no repo → never guards.
+    #
+    # try/except is belt-and-suspenders: run_pre_fire_guard is already no-raise
+    # and fail-open, but a guard must never be able to veto the dispatch it
+    # guards (same rationale as the phase_z call below).
+    if not dry_run:
+        try:
+            guard_outcome = await asyncio.to_thread(phase_z.run_pre_fire_guard, repo_root=repo_root)
+            LOG.info("pre_fire_guard outcome=%s", guard_outcome)
+        except Exception as exc:  # noqa: BLE001
+            LOG.warning("pre_fire_guard failed (non-fatal, firing anyway): %s", exc)
     # Zero-token pregate (2026-07-10 rewire; see load_pregate_config docstring).
     # Gates ONLY plain cron fires — requested fires always run. Shadow mode
     # never skips (pregate exits 1) but logs the would-be decision for the
