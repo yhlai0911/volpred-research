@@ -11,6 +11,7 @@ from volpred.ops.alerts import (
     _parse_event_receipt_state,
     _parse_loop_health_state,
     _parse_paper_website_drift_state,
+    _parse_series_registry_state,
     build_alert_condition_report,
     check_alert_conditions,
     send_alert,
@@ -623,6 +624,21 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     # it so this test isolates only the cron/pool set. (storage_dir bug tracked
     # separately — surfaced by the 2026-06-29 loop-health work.)
     monkeypatch.setattr("volpred.topic_clusters.recent_cluster_counts", lambda days=30: ({}, 0))
+    # This test exercises alert fan-out for the three cron/pool conditions below.
+    # Series-registry drift has its own storage-dir regression test, so keep that
+    # independent condition quiet instead of making this fixture reproduce every
+    # registered article series.
+    monkeypatch.setattr(
+        "volpred.ops.alerts._parse_series_registry_state",
+        lambda _storage_dir: {
+            "id": "series_registry",
+            "breached": False,
+            "level": "info",
+            "title": "series_registry ok",
+            "body": "",
+            "details": {"drift": 0},
+        },
+    )
     # Stale release_pool fire keeps release_pool_gap isolated; host_cron_fail now uses
     # a separate fresh non-zero exit so the recency gate does not suppress this fixture.
     _write_text(
@@ -680,6 +696,50 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     assert sent_titles[0].startswith("Release pool cron gap")
     assert sent_titles[1] == "Draft pool below threshold (<4)"
     assert sent_titles[2] == "Host cron failure detected"
+
+
+def test_parse_series_registry_state_reads_injected_storage_feed(tmp_path: Path):
+    """The alert audit must not leak the production feed into isolated runs."""
+    registry_path = Path(__file__).resolve().parents[1] / "config" / "article_series.json"
+    series = json.loads(registry_path.read_text(encoding="utf-8"))["series"]
+    articles: dict[str, dict[str, str]] = {}
+    target_id: str | None = None
+
+    for definition in series.values():
+        if definition.get("branding") != "title_prefix":
+            continue
+        prefix = definition["prefix"]
+        for status, key in (("published", "members_published"), ("draft", "members_draft")):
+            for article_id in definition.get(key) or []:
+                articles[article_id] = {
+                    "id": article_id,
+                    "title": f"{prefix}fixture {article_id}",
+                    "status": status,
+                }
+                target_id = target_id or article_id
+
+    assert target_id is not None, "registry fixture needs at least one explicit member"
+    storage_dir = tmp_path / "storage"
+    feed_path = storage_dir / "reports" / "feed.json"
+    _write_json(feed_path, list(articles.values()))
+
+    clean = _parse_series_registry_state(str(storage_dir))
+    assert clean["breached"] is False
+    assert clean["details"]["drift"] == 0
+
+    injected = json.loads(feed_path.read_text(encoding="utf-8"))
+    target = next(article for article in injected if article["id"] == target_id)
+    target["title"] = f"fixture without registered prefix {target_id}"
+    _write_json(feed_path, injected)
+
+    drift = _parse_series_registry_state(str(storage_dir))
+    assert drift["breached"] is True
+    assert drift["details"]["drift"] == 1
+    assert drift["details"]["kinds"] == {"missing_prefix": 1}
+    assert any(
+        finding["id"] == target_id and finding["kind"] == "missing_prefix"
+        for finding in drift["details"]["findings"]
+    )
 
 
 def test_host_cron_fail_severity_calibration(tmp_path: Path):
