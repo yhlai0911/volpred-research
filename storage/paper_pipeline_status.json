@@ -17,7 +17,7 @@
     "stall_days": 7,
     "baseline_set_at": "2026-07-01T00:00:00+08:00",
     "audit_source": "2026-07-01 paper portfolio audit",
-    "updated_at": "2026-07-05T23:56:52+08:00",
+    "updated_at": "2026-07-10T13:35:18+08:00",
     "stage_entered_at_semantics": "Backfilled on 2026-07-05 from git evidence. The original 2026-07-01 baseline_set_at came from the portfolio audit and is not a true stage-entry date. For papers without an exact transition commit, stage_entered_at is the earliest git-evidenced date that the current stage/blocker was already true.",
     "stage_entered_at_backfill_source": {
       "task_id": "paper_stage_entered_at_backfill_b8",
@@ -331,10 +331,10 @@
     {
       "paper": "garch-x-vix",
       "journal_target": "decide",
-      "stage": "under_journal_review",
+      "stage": "revision",
       "stage_entered_at": "2026-06-14T00:00:00+08:00",
       "last_advance_at": "2026-07-01T00:00:00+08:00",
-      "blocker": "awaiting R1; K1066/K1583 robustness ready",
+      "blocker": "A4f errata (DM t=4.03 vs canonical 4.148) awaiting owner sign-off; NOT submitted to any journal",
       "owner_decision_pending": false,
       "stage_entered_at_provenance": {
         "source": "git",
@@ -342,7 +342,9 @@
         "commit_date": "2026-06-14",
         "confidence": "earliest_git_evidence_for_current_stage_or_blocker",
         "basis": "prepare R1 wording patch queue; current blocker is awaiting R1 with robustness ready"
-      }
+      },
+      "stage_corrected_at": "2026-07-10T13:35:18+08:00",
+      "stage_correction_note": "2026-07-10 owner(Telegram msg 331/340): no paper is actually submitted; max stage is ready_for_submission. Prior under_journal_review label was aspirational/false — no arXiv or journal submission evidence. Reverted to revision (open errata pending)."
     },
     {
       "paper": "volatility-absorption",
