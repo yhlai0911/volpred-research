@@ -1305,3 +1305,177 @@ def test_push_backlog_probe_failure_is_logged_not_breached(tmp_path: Path, monke
     result = _parse_push_backlog_state(str(tmp_path / "storage"), now)
     assert result["breached"] is False
     assert "probe failed" in result["details"]["note"]
+
+
+# ---------------------------------------------------------------------------
+# orphan_branch — 2026-07-10: worktree cleanup leaves branches with unmerged
+# `wip(rescue)` commits and no owner. Every worktree-removal guard protects the
+# worktree; once it's gone the branch has no signal. Escalates on the age of the
+# newest unmerged commit (how long the work sat unclaimed).
+# ---------------------------------------------------------------------------
+
+
+def _patch_git_branches(monkeypatch, *, heads: list[str], attached: list[str], per_branch: dict):
+    """per_branch: {branch: (unmerged_count, newest_epoch | None)}"""
+    import subprocess as _sp
+
+    def fake_run(argv, **kwargs):
+        if "for-each-ref" in argv:
+            return _FakeCompleted(0, "\n".join(heads) + ("\n" if heads else ""))
+        if "worktree" in argv:
+            out = "".join(f"worktree /x/{b}\nbranch refs/heads/{b}\n\n" for b in attached)
+            return _FakeCompleted(0, out)
+        if "rev-list" in argv:
+            branch = argv[argv.index("rev-list") + 2]
+            return _FakeCompleted(0, f"{per_branch[branch][0]}\n")
+        if "log" in argv:
+            spec = next(a for a in argv if a.startswith("main.."))
+            branch = spec.removeprefix("main..")
+            count, newest = per_branch[branch]
+            if newest is None:
+                return _FakeCompleted(0, "")
+            stamps = "\n".join(str(newest - i * 600) for i in range(count))
+            return _FakeCompleted(0, stamps)
+        raise AssertionError(f"unexpected git argv: {argv}")
+
+    monkeypatch.setattr(_sp, "run", fake_run)
+
+
+def test_orphan_branch_ok_when_no_branches(tmp_path: Path, monkeypatch):
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    _patch_git_branches(monkeypatch, heads=[], attached=[], per_branch={})
+    now = datetime(2026, 7, 10, 18, 0, tzinfo=timezone.utc)
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is False
+    assert result["details"]["orphan_count"] == 0
+
+
+def test_orphan_branch_ignores_branch_with_live_worktree(tmp_path: Path, monkeypatch):
+    """A branch someone is actively working in is not an orphan, however old."""
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 18, 0, tzinfo=timezone.utc)
+    old = int((now - timedelta(hours=48)).timestamp())
+    _patch_git_branches(
+        monkeypatch,
+        heads=["claude/live-work"],
+        attached=["claude/live-work"],
+        per_branch={"claude/live-work": (9, old)},
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is False
+    assert result["details"]["orphan_count"] == 0
+
+
+def test_orphan_branch_fully_merged_is_deletable_not_breach(tmp_path: Path, monkeypatch):
+    """0 unmerged commits = housekeeping, not endangered work."""
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 18, 0, tzinfo=timezone.utc)
+    _patch_git_branches(
+        monkeypatch,
+        heads=["claude/merged-already"],
+        attached=[],
+        per_branch={"claude/merged-already": (0, None)},
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is False
+    assert result["details"]["merged_deletable"] == ["claude/merged-already"]
+
+
+def test_orphan_branch_fresh_orphan_below_threshold_does_not_breach(tmp_path: Path, monkeypatch):
+    """The merging session gets a 2h grace window before we escalate."""
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 18, 0, tzinfo=timezone.utc)
+    fresh = int((now - timedelta(minutes=9)).timestamp())
+    _patch_git_branches(
+        monkeypatch,
+        heads=["claude/just-rescued"],
+        attached=[],
+        per_branch={"claude/just-rescued": (1, fresh)},
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is False
+    assert result["details"]["orphan_count"] == 1
+    assert result["details"]["aged_orphan_count"] == 0
+
+
+def test_orphan_branch_warns_after_2h(tmp_path: Path, monkeypatch):
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 18, 0, tzinfo=timezone.utc)
+    aged = int((now - timedelta(hours=3)).timestamp())
+    _patch_git_branches(
+        monkeypatch,
+        heads=["claude/cron-marker-truth"],
+        attached=[],
+        per_branch={"claude/cron-marker-truth": (1, aged)},
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is True
+    assert result["level"] == "warn"
+    assert "cron-marker-truth" in result["body"]
+    assert "建議行動" in result["body"]
+    # 平行實作陷阱必須寫進 body — 直接 merge 是今天踩過的坑
+    assert "靜默採用" in result["body"]
+
+
+def test_orphan_branch_critical_after_24h(tmp_path: Path, monkeypatch):
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 18, 0, tzinfo=timezone.utc)
+    stale = int((now - timedelta(hours=30)).timestamp())
+    _patch_git_branches(
+        monkeypatch,
+        heads=["claude/eloquent-chatterjee-32e858"],
+        attached=[],
+        per_branch={"claude/eloquent-chatterjee-32e858": (4, stale)},
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is True
+    assert result["level"] == "critical"
+    assert result["details"]["aged_orphan_count"] == 1
+
+
+def test_orphan_branch_mixed_population_only_aged_orphans_breach(tmp_path: Path, monkeypatch):
+    """live worktree + merged + fresh + aged — only the aged orphan escalates."""
+    from volpred.ops.alerts import _parse_orphan_branch_state
+
+    now = datetime(2026, 7, 10, 18, 0, tzinfo=timezone.utc)
+    aged = int((now - timedelta(hours=5)).timestamp())
+    fresh = int((now - timedelta(minutes=5)).timestamp())
+    _patch_git_branches(
+        monkeypatch,
+        heads=["claude/live", "claude/merged", "claude/fresh", "claude/aged"],
+        attached=["claude/live"],
+        per_branch={
+            "claude/live": (3, aged),
+            "claude/merged": (0, None),
+            "claude/fresh": (2, fresh),
+            "claude/aged": (7, aged),
+        },
+    )
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is True
+    assert result["details"]["aged_orphan_count"] == 1
+    assert result["details"]["orphan_count"] == 2  # fresh + aged
+    assert result["details"]["merged_deletable"] == ["claude/merged"]
+    assert "claude/aged" in result["body"]
+    assert "claude/live" not in result["body"]
+    assert "7 個未合併 commit" in result["title"]
+
+
+def test_orphan_branch_probe_failure_is_loud_not_silent(tmp_path: Path, monkeypatch):
+    from volpred.ops.alerts import _parse_orphan_branch_state
+    import subprocess as _sp
+
+    def boom(argv, **kwargs):
+        raise OSError("git missing")
+
+    monkeypatch.setattr(_sp, "run", boom)
+    now = datetime(2026, 7, 10, 18, 0, tzinfo=timezone.utc)
+    result = _parse_orphan_branch_state(str(tmp_path / "storage"), now)
+    assert result["breached"] is False
+    assert "probe failed" in result["details"]["note"]

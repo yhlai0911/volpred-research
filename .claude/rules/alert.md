@@ -27,6 +27,7 @@ paths:
      scheduler-tick staleness 在 v12 已降級為 advisory-only（body 內 readout 供參考，不貢獻 breach judgement）。
   4. `member_qa_stale` — `questions` 表 pending（status=`evaluating`/`pending`/未 ranked）`created_at` 距 now 超過 24h → warn / 超過 72h → critical（2026-04-26 新增；防 5 天 silent gap 再現）。
   5. `push_backlog` — `git rev-list origin/main..main` 最老未推 commit 滯留 >3h → warn / >8h → critical（2026-07-04 新增；26h push-hold incident 教訓：silent-fallback gate 正確擋 push 但無機制強迫行動——此條件直接量測傷害「未推積壓年齡」，held/分岔/認證/網路任何原因同樣浮現，且不受該 job 自身 warn email 的 24h dedup 影響）。
+  6. `orphan_branch` — 沒有 worktree 但仍帶未合併 commit 的 `claude/*` branch，最新一筆 commit 滯留 >2h → warn / >24h → critical（2026-07-10 新增）。worktree 移除路徑有六層防護（K1032/K1114/K1262/K1618），但**每一層保護的都是 worktree**；worktree 一消失，branch 就沒有 owner 也沒有訊號。當日兩條孤兒（`cron-marker-truth` / `eloquent-chatterjee-32e858`）帶著 `wip(rescue)` commit（188 行 `cron_mark_last_run.py` + 240 行測試、195 行 isolation-guard 測試）全靠人工發現。**無 auto-remediation**：當日兩條都是平行實作，直接 merge 反而有害（不衝突檔會被靜默採用）。有 worktree 的 branch 一律排除（有人在做）；已全合併的孤兒只記 `merged_deletable`，不 breach。
 
 ## Severity taxonomy before escalation（2026-07-06 error-log 320 sweep）
 

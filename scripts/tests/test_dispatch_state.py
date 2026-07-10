@@ -56,6 +56,43 @@ def test_read_state_bootstraps_empty(tmp_state: Path) -> None:
     assert snap["auth_blocked"] is False
 
 
+def test_writer_gate_refuses_the_canonical_state_under_test(tmp_path: Path) -> None:
+    """A test that forgets to redirect STATE_PATH must fail loudly, not write the
+    LIVE daemon state. `conftest.py` sets VOLPRED_NO_CANONICAL_WRITE=1 for the
+    whole session; this asserts the writer honours it.
+    """
+    with pytest.raises(RuntimeError, match="refusing to write canonical dispatch state"):
+        st._atomic_write_json(st._CANONICAL_STATE_PATH, st._empty_state())
+
+
+def test_writer_gate_leaves_tmp_paths_alone(tmp_state: Path) -> None:
+    """The gate must compare against the path captured at import, not against a
+    monkeypatched `STATE_PATH` — otherwise redirecting to tmp would trip it and
+    every test in this file would fail.
+    """
+    st.mark_supervisor_started(tmp_state)
+    assert st.read_state(tmp_state)["supervisor_pid"] == os.getpid()
+
+
+def test_side_effect_guards_are_armed_outside_the_tests_tree() -> None:
+    """This file lives under `scripts/tests/`, not `tests/`.
+
+    Until 2026-07-10 the four side-effect guards were set in `tests/conftest.py`
+    only, and a pytest conftest applies to its own directory tree — so every test
+    here ran free to send real email, write production Supabase, and rewrite
+    canonical `storage/` state. They now live in the repo-root `conftest.py`.
+    Asserting them from THIS tree is the point: a guard set in the other tree
+    would let the two tests above pass vacuously.
+    """
+    for flag in (
+        "VOLPRED_NO_EMAIL",
+        "VOLPRED_NO_REMOTE_WRITE",
+        "VOLPRED_NO_REMOTE_READ",
+        "VOLPRED_NO_CANONICAL_WRITE",
+    ):
+        assert os.environ.get(flag) == "1", f"{flag} not armed under scripts/tests/"
+
+
 def test_mark_supervisor_started_sets_timestamps(tmp_state: Path) -> None:
     st.mark_supervisor_started(tmp_state)
     snap = st.read_state(tmp_state)

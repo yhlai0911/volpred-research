@@ -1027,6 +1027,138 @@ def _parse_push_backlog_state(storage_dir: str, now: datetime) -> dict[str, Any]
     }
 
 
+_ORPHAN_BRANCH_WARN_HOURS = 2.0
+_ORPHAN_BRANCH_CRITICAL_HOURS = 24.0
+
+
+def _parse_orphan_branch_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Worktree removed, branch left behind with unmerged commits — nobody owns it.
+
+    2026-07-10 incident: two `claude/*` branches (`cron-marker-truth`,
+    `eloquent-chatterjee-32e858`) survived their worktrees' cleanup carrying
+    `wip(rescue)` commits — 188-line `cron_mark_last_run.py` + its 240-line test,
+    and a 195-line isolation-guard test — none of it on main. They were found by
+    hand. The worktree-removal path is guarded six ways (K1032/K1114/K1262/K1618)
+    but every guard protects the *worktree*; once it is gone the branch has no
+    owner and no signal. `git branch -d` refuses to help because it only knows
+    "unmerged", and today's two orphans were BOTH parallel re-implementations
+    whose merge would have been actively harmful — so this cannot auto-remediate.
+    It escalates by the age of the newest unmerged commit (how long the work has
+    sat unclaimed), not by orphan-detection time, which we cannot observe:
+      newest unmerged commit >= 2h  → warn  (the merging session moved on)
+      newest unmerged commit >= 24h → critical (a day of work with no owner)
+    Branches whose worktree still exists are excluded — they are being worked on.
+    Fully-merged orphans are counted in details but never breach: they are
+    deletable housekeeping, not endangered work.
+    """
+    import subprocess  # noqa: WPS433 — deferred; keeps module import light for offline tests
+
+    repo_root = _storage_root(storage_dir).parent
+    breached = False
+    level = "info"
+    note = ""
+    orphans: list[dict[str, Any]] = []
+    merged_deletable: list[str] = []
+
+    def _git(*args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", "-C", str(repo_root), *args],
+            capture_output=True, text=True, timeout=15,
+        )
+
+    try:
+        heads = _git("for-each-ref", "--format=%(refname:short)", "refs/heads/claude/")
+        if heads.returncode != 0:
+            note = f"for-each-ref unavailable: {heads.stderr.strip()[:120]}"
+        else:
+            wt = _git("worktree", "list", "--porcelain")
+            attached = {
+                line.split(" ", 1)[1].strip().removeprefix("refs/heads/")
+                for line in wt.stdout.splitlines()
+                if line.startswith("branch ")
+            }
+            for branch in (b.strip() for b in heads.stdout.splitlines() if b.strip()):
+                if branch in attached:
+                    continue  # a live worktree owns it
+                counted = _git("rev-list", "--count", branch, "^main")
+                if counted.returncode != 0:
+                    warn("orphan_branch", "rev-list failed", branch=branch, err=counted.stderr.strip()[:120])
+                    continue
+                unmerged = int(counted.stdout.strip() or 0)
+                if unmerged == 0:
+                    merged_deletable.append(branch)
+                    continue
+                stamps_out = _git("log", f"main..{branch}", "--format=%ct")
+                stamps = [int(s) for s in stamps_out.stdout.split() if s.strip().isdigit()]
+                if not stamps:
+                    warn("orphan_branch", "no commit timestamps", branch=branch)
+                    continue
+                newest = datetime.fromtimestamp(max(stamps), tz=timezone.utc)
+                orphans.append({
+                    "branch": branch,
+                    "unmerged_commits": unmerged,
+                    "newest_commit_age_hours": round((now - newest).total_seconds() / 3600.0, 2),
+                })
+    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+        warn("orphan_branch", "git orphan-branch probe failed", err=str(exc))
+        note = f"probe failed: {exc}"
+
+    aged = [o for o in orphans if o["newest_commit_age_hours"] >= _ORPHAN_BRANCH_WARN_HOURS]
+    if aged:
+        breached = True
+        worst = max(o["newest_commit_age_hours"] for o in aged)
+        level = "critical" if worst >= _ORPHAN_BRANCH_CRITICAL_HOURS else "warn"
+
+    if breached:
+        total_commits = sum(o["unmerged_commits"] for o in aged)
+        title = f"orphan_branch: {len(aged)} 條 branch 有 {total_commits} 個未合併 commit，但 worktree 已被刪除"
+        lines = [
+            "## 觸發條件",
+            f"- 沒有 worktree、但仍帶未合併 commit 的 claude/* branch：{len(aged)} 條"
+            f"（警戒 {_ORPHAN_BRANCH_WARN_HOURS:.0f}h / 嚴重 {_ORPHAN_BRANCH_CRITICAL_HOURS:.0f}h）",
+        ]
+        for o in sorted(aged, key=lambda x: -x["newest_commit_age_hours"]):
+            lines.append(
+                f"  - `{o['branch']}`：{o['unmerged_commits']} 個 commit，"
+                f"最後一次提交在 {o['newest_commit_age_hours']:.1f} 小時前"
+            )
+        lines += [
+            "- 來源：`git for-each-ref refs/heads/claude/` 比對 `git worktree list`（每小時巡檢）",
+            "",
+            "## 影響",
+            "worktree 被清掉時，branch 上的工作沒有任何人接手 —— 移除流程的六層防護全都在保護 worktree，"
+            "worktree 一消失，branch 就失去 owner 也失去訊號。這些 commit 常是清理前臨時搶救的 `wip(rescue)`，"
+            "內容可能是別處沒有的測試或工具。研究可復現性直接受威脅。",
+            "",
+            "## 建議行動",
+            "1. 先查是否已被別的路徑取代（今天兩條都是平行實作）："
+            "`git diff main <branch> -- <關鍵檔>`、`git log --oneline main..<branch>`",
+            "2. 若內容仍獨有 → 從 repo root 正常合併，並在合併後逐檔 `git cat-file -e HEAD:<path>` 驗證真的進了 main",
+            "3. 若已被取代 → `git branch -D <branch>`（commit object 仍在 reflog 內可救回）",
+            "4. ⚠️ 不可直接 `git merge` 平行實作：衝突檔會被人工審視，**不衝突的檔會被靜默採用**，"
+            "混合兩套設計會在執行期才炸（見 error_log 2026-07-10 ffaad8 entry）",
+        ]
+        body = "\n".join(lines)
+    else:
+        title = "orphan_branch ok"
+        body = ""
+
+    return {
+        "id": "orphan_branch",
+        "breached": breached,
+        "level": level,
+        "title": title,
+        "body": body,
+        "details": {
+            "orphan_count": len(orphans),
+            "aged_orphan_count": len(aged),
+            "orphans": orphans,
+            "merged_deletable": merged_deletable,
+            "note": note,
+        },
+    }
+
+
 def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     logs_dir = _cron_logs_dir(storage_dir)
     failing_logs: list[dict[str, Any]] = []
@@ -3109,6 +3241,7 @@ def build_alert_condition_report(
         _parse_telegram_poll_freshness_state(storage_dir, current),  # 2026-07-06 boss-request: Telegram poller dead-man switch
         _parse_host_cron_state(storage_dir, current),
         _parse_push_backlog_state(storage_dir, current),          # 2026-07-04 26h push-hold incident: persistent unpushed-backlog escalation
+        _parse_orphan_branch_state(storage_dir, current),         # 2026-07-10 worktree 清掉、branch 留下未合併工作，無人接手
         _parse_work_log_freshness_state(storage_dir, current),    # 2026-06-28 Codex/dispatch diversity dead-man switch
         _parse_event_receipt_state(storage_dir, current),         # 2026-07-05 event jobs: claimed zombie / queued past deadline
         _parse_member_qa_state(storage_dir, current),

@@ -73,7 +73,15 @@ _CANONICAL_FILES = (
     "storage/memory/knowledge.json",
     "storage/memory/thinking_journal.json",
     "storage/memory/experiment_experiences.json",
-    "storage/ops/dispatch_state.json",
+    # NOT storage/ops/dispatch_state.json — the live daemon stamps a heartbeat
+    # into it every 30s, so this per-test fingerprint failed a random test on
+    # every run whose span crossed a beat, and PHASE-Z (which runs the test gate
+    # on this checkout after each fire) emailed the owner a CRITICAL "測試紅燈"
+    # for it. Observed 2026-07-10: the error moved between tests across
+    # back-to-back runs of the same suite. It is covered at the writer instead —
+    # `dispatch_supervisor.state._atomic_write_json` raises on a canonical write
+    # when VOLPRED_NO_CANONICAL_WRITE is set — which is precise where a
+    # fingerprint cannot be: it knows WHO wrote, not merely that bytes moved.
 )
 
 # Dirs where the damage is a *new* file, not a modified one — a fixed file list

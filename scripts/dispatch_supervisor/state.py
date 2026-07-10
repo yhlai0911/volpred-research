@@ -177,6 +177,12 @@ def _state_schema_detail(data: Any) -> str:
     return f"type={type(data).__name__} version={version!r}"
 
 
+# Captured at import, BEFORE any test monkeypatches `STATE_PATH` to a tmp file.
+# The gate below must compare against the real canonical path, never against a
+# redirected one — otherwise every tmp-path write would look like a canonical write.
+_CANONICAL_STATE_PATH = STATE_PATH
+
+
 def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
     """Write JSON atomically: temp file in same dir → fsync → os.replace.
 
@@ -187,7 +193,26 @@ def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
     would silently nuke completion history / auth_blocked flag / dedup).
     os.replace() is POSIX-atomic on same filesystem; downstream readers
     never observe a partially-written file.
+
+    2026-07-10 writer-level gate: a test that forgets to redirect `STATE_PATH`
+    used to write the LIVE daemon state (`supervisor.main()` did exactly that —
+    see its call-time-lookup NOTE). `tests/conftest.py` backstopped it with a
+    per-test fingerprint of canonical files, but `dispatch_state.json` is also
+    where the running daemon stamps a heartbeat every 30s, so that detector
+    failed a random test on every run whose span crossed a beat — and PHASE-Z,
+    which runs the test gate on this very checkout after each fire, emailed the
+    owner a CRITICAL "測試紅燈" for it. A gate at the writer is precise where a
+    fingerprint cannot be: it knows who is writing, not merely that bytes moved.
+    The daemon's own env never sets this flag; pytest's does, and subprocesses
+    inherit it.
     """
+    if os.environ.get("VOLPRED_NO_CANONICAL_WRITE") == "1" and path == _CANONICAL_STATE_PATH:
+        raise RuntimeError(
+            f"refusing to write canonical dispatch state under test: {path}\n"
+            "Redirect it: monkeypatch `state.STATE_PATH` AND pass the path down "
+            "explicitly (the `path=STATE_PATH` defaults bind at function-definition "
+            "time, so patching the module attribute alone does not reach them)."
+        )
     fd, tmp_name = tempfile.mkstemp(
         prefix=f".{path.name}.tmp.",
         dir=str(path.parent),

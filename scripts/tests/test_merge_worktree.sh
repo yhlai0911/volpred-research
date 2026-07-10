@@ -622,9 +622,123 @@ test_case_10_cross_repo_cwd_anchor() {
 }
 
 # ============================================================
+# Test Case 11 (2026-07-10): shared-JSON guard 必須只看 agent 改了什麼
+#   main 在 branch 分出去之後自己改了 feed.json（cron 每小時都在做這件事）。
+#   舊版用 two-dot `main..branch` → 把 main 自己的改動記到 agent 頭上 → 誤 ABORT。
+#   任何 base 稍舊的 worktree 都中，安全網變路障，逼人手動硬 merge。
+# ============================================================
+test_case_11_stale_base_no_false_abort() {
+    echo "=== Case 11: main 自己動了 feed.json → 不可誤判成 agent 修改 ==="
+    local test_dir
+    test_dir=$(setup_test_env "case11")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase11"
+
+    # agent 只碰自己的 experiments/（完全合規）
+    mkdir -p "$wt/experiments/k9911"
+    echo "print('k9911')" > "$wt/experiments/k9911/k9911.py"
+    (cd "$wt" && git add -A && git commit -qm "k9911: agent 只動 experiments/")
+
+    # main 在 branch 分出去「之後」改共享 JSON —— 這是 cron 的日常，不是違規
+    mkdir -p storage/reports
+    echo '{"articles": ["cron 每小時寫這支"]}' > storage/reports/feed.json
+    git add -A && git commit -qm "main: cron 更新 feed.json"
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir")
+
+    # 11-1: 不可 ABORT
+    if echo "$output" | grep -q "Agent 修改了共享 JSON"; then
+        fail "11-1: 誤判 ABORT（two-dot 回歸；main 自己的 feed.json 改動被算到 agent 頭上）"
+        echo "$output" | grep -E "ABORT|共享 JSON" | head -5
+    else
+        pass "11-1: main 自己改 feed.json 不觸發 shared-JSON ABORT"
+    fi
+
+    # 11-2: 合併真的發生 —— agent 的檔案要進 main 的 git tree（不只 working tree）
+    if git -C "$test_dir" cat-file -e "main:experiments/k9911/k9911.py" 2>/dev/null; then
+        pass "11-2: k9911.py 已在 main HEAD 的 git tree"
+    else
+        fail "11-2: k9911.py 不在 main HEAD（合併被誤 abort 擋掉）"
+    fi
+
+    # 11-3: main 自己的 feed.json 不可被 agent 版本蓋掉
+    local feed
+    feed=$(git -C "$test_dir" show "main:storage/reports/feed.json" 2>/dev/null || echo MISSING)
+    if [[ "$feed" == *"cron 每小時寫這支"* ]]; then
+        pass "11-3: main 的 feed.json 內容保留"
+    else
+        fail "11-3: feed.json = '$feed'（main 的 live state 被覆蓋）"
+    fi
+}
+
+# ============================================================
+# Test Case 12 (2026-07-10): guard 真的該響時要響，且 stash 還原不可假警報
+#   agent 真的改了 feed.json → 必 ABORT（Case 11 不能把 guard 修成永遠不響）。
+#   且 main 有未提交變更時：stash pop 成功就不准印「stash pop 失敗」。
+#   舊版 `git stash pop | head -5 || echo 失敗` 在 pipefail 下被 SIGPIPE 打成 rc=141，
+#   pop 成功也印失敗，還叫人 `git stash apply stash@{0}` —— 那已是別人的舊 stash。
+# ============================================================
+test_case_12_real_violation_aborts_and_stash_restores() {
+    echo "=== Case 12: agent 真改 feed.json → ABORT；且 stash 還原不假警報 ==="
+    local test_dir
+    test_dir=$(setup_test_env "case12")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase12"
+
+    mkdir -p storage/reports
+    echo '{"articles": []}' > storage/reports/feed.json
+    git add -A && git commit -qm "seed feed.json"
+    (cd "$wt" && git merge main --no-edit -q 2>&1 || git reset --hard main -q)
+
+    # agent 違規改共享 JSON
+    echo '{"articles": ["agent 不該碰這支"]}' > "$wt/storage/reports/feed.json"
+    (cd "$wt" && git add -A && git commit -qm "agent 違規改 feed.json")
+
+    # main 有一堆未提交變更 → 觸發 stash；夠多行才能讓舊版的 head -5 提早關管線
+    # 只 stage dirty_*.txt：`git add -A` 會把測試用的 worktree 當 embedded repo 加進 index
+    local i
+    for i in $(seq 1 12); do echo "dirty $i" > "dirty_$i.txt"; done
+    git add dirty_*.txt
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir")
+
+    # 12-1: guard 該響
+    if echo "$output" | grep -q "Agent 修改了共享 JSON"; then
+        pass "12-1: agent 真改 feed.json → ABORT（guard 沒被 Case 11 修壞）"
+    else
+        fail "12-1: agent 改了 feed.json 卻沒 ABORT（guard 失效）"
+    fi
+
+    # 12-2: pop 成功就不准印失敗
+    if echo "$output" | grep -q "stash pop 失敗"; then
+        fail "12-2: 假警報「stash pop 失敗」（pipefail + head -5 的 SIGPIPE 回歸）"
+    else
+        pass "12-2: stash pop 成功，無假警報"
+    fi
+
+    # 12-3: 絕不可教人跑 stash@{0}（pop 已成功，那是別人的 stash）
+    if echo "$output" | grep -q "stash apply stash@{0}"; then
+        fail "12-3: 提示 stash@{0} —— 照做會把陳年 stash 蓋回 main"
+    else
+        pass "12-3: 未提示危險的 stash@{0}"
+    fi
+
+    # 12-4: main 的未提交變更必須真的回到工作區（不可 silent stash）
+    if [[ -f "$test_dir/dirty_12.txt" ]]; then
+        pass "12-4: main 的未提交變更已還原"
+    else
+        fail "12-4: dirty_12.txt 不見了（stash 沒還原，工作被吞）"
+    fi
+}
+
+# ============================================================
 # Run tests
 # ============================================================
-echo "### merge_worktree.sh 測試 (K1143-v2 + K1262-v4 + K1618) ###"
+echo "### merge_worktree.sh 測試 (K1143-v2 + K1262-v4 + K1618 + 2026-07-10 guard) ###"
 echo ""
 
 test_case_a
@@ -647,12 +761,16 @@ test_case_9_ours_dropped_auto_restore
 echo ""
 test_case_10_cross_repo_cwd_anchor
 echo ""
+test_case_11_stale_base_no_false_abort
+echo ""
+test_case_12_real_violation_aborts_and_stash_restores
+echo ""
 
 echo "================================"
 echo "Assertions PASS: $PASS"
 echo "Assertions FAIL: $FAIL"
-# Test case-level summary（10 cases = A/B/C/D + 5/6/7 + 8/9/10）
-TOTAL_CASES=10
+# Test case-level summary（12 cases = A/B/C/D + 5/6/7 + 8/9/10 + 11/12）
+TOTAL_CASES=12
 if [[ $FAIL -eq 0 ]]; then
     echo "Test cases: PASS $TOTAL_CASES/$TOTAL_CASES"
 else

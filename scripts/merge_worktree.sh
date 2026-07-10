@@ -386,6 +386,14 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
         # K1262-v4 (2026-04-27): git diff 用 -C "$MAIN_DIR" 強制 ref 解析在主 repo
         # 2026-05-18 K-worktree-stash-pop fix: 加 runtime/operational state 檔
         # （worktree 不該帶這些；它們是 main 上 cron/runtime 寫的 live state）
+        #
+        # 2026-07-10: 必須 three-dot。`main..branch`（two-dot）比的是 main tip 對 branch
+        # tip —— 「兩邊差在哪」，其中包含 branch 分出去之後 main 自己改的檔。feed.json 幾乎
+        # 每小時被 main 上的 cron 改一次，於是任何 base 稍舊的 worktree 都被判成「agent 動了
+        # 共享 JSON」而 ABORT：這條 guard 想擋的是 agent，實際擋的是時間。`main...branch`
+        # （three-dot）比的是 merge-base 對 branch tip —— 正好是「agent 改了什麼」。
+        # 同檔 L443 的 experiments/ 掃描早就避開這個坑（見該處註解「會列所有差異，包含 agent
+        # 從未動過但 main 領先的檔」），這裡漏掉，於是安全網變成路障。
         local shared_json_modified=false
         local shared_files=""
         for shared_f in \
@@ -398,7 +406,7 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
             "storage/session_state.json" \
             "storage/market_status.json" \
             "storage/ops/cron_last_run.json"; do
-            if git -C "$MAIN_DIR" diff --name-only "$main_branch..$branch" -- "$shared_f" 2>/dev/null | grep -q .; then
+            if git -C "$MAIN_DIR" diff --name-only "$main_branch...$branch" -- "$shared_f" 2>/dev/null | grep -q .; then
                 shared_json_modified=true
                 shared_files="$shared_files $shared_f"
             fi
@@ -409,13 +417,23 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
             echo "     $shared_files"
             echo "  [🛑 ABORT] -X ours 會靜默覆蓋 agent 變更；改 abort 讓你手動處理"
             echo "  [HINT] 手動路徑："
-            echo "         1. 檢視 git diff $main_branch..$branch -- $shared_files"
+            echo "         1. 檢視 git diff $main_branch...$branch -- $shared_files"
             echo "         2. 決定把 agent 的有價值變更手動 apply 到 main（或直接 drop）"
             echo "         3. 再跑 bash scripts/merge_worktree.sh $wt_name 續做合併"
             # 還原 stash 才退出（避免 silent stash）
             if $main_dirty; then
                 echo "  [RESTORE] 還原剛才的 stash..."
-                git stash pop 2>&1 | head -5 || echo "  [⚠️] stash pop 失敗，手動 git stash list + git stash apply stash@{0}"
+                # 不可寫成 `git stash pop 2>&1 | head -5 || echo 失敗`：set -o pipefail (L16) 下
+                # head 讀滿 5 行就關管線 → git 收到 SIGPIPE → rc=141 → pop 明明成功也走 `||`。
+                # 那個假警告還教人跑 `git stash apply stash@{0}`；此時 pop 已成功、stash 已彈出，
+                # stash@{0} 是別人幾個月前的 stash —— 照做等於把陳年 stash 蓋回 main。(2026-07-10)
+                local pop_out pop_rc=0
+                pop_out=$(git stash pop 2>&1) || pop_rc=$?
+                printf '%s\n' "$pop_out" | head -5 || true
+                if (( pop_rc != 0 )); then
+                    echo "  [⚠️] stash pop 失敗 (rc=$pop_rc)。該 stash 仍在，用訊息定位（不要用 stash@{0}）："
+                    echo "       git stash list | grep 'merge_worktree: temp stash before merging $wt_name'"
+                fi
             fi
             return 1
         fi

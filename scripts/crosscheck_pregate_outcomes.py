@@ -34,10 +34,11 @@ PREGATE_LOG = ROOT / "storage" / "logs" / "hourly_pregate.jsonl"
 WORK_LOG = ROOT / "storage" / "work_log.json"
 DISPATCH_STATE = ROOT / "storage" / "ops" / "dispatch_state.json"
 
-SUBSTANTIVE = {
-    "daily_article", "experiment", "paper_body", "paper_review", "paper_decision",
-    "event_article", "member_qa", "trending_repost", "strategy_lifecycle", "daily_digest",
-}
+# Single source (2026-07-10): this file kept its own copy of the type set and it
+# had already drifted from the gate's. An audit tool measuring a different
+# population than the gate it audits is worse than no audit.
+sys.path.insert(0, str(ROOT / "scripts"))
+from hourly_dispatch_pregate import SUBSTANTIVE_TYPES as SUBSTANTIVE  # noqa: E402
 
 
 def _parse(s) -> datetime | None:

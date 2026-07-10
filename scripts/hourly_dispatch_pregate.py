@@ -40,14 +40,22 @@ ROOT = Path(__file__).resolve().parent.parent
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 DASHBOARD = ROOT / "storage" / "ops" / "dashboard_latest.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
+COMPUTE_QUEUE = ROOT / "storage" / "ops" / "compute_queue"
 LOG = ROOT / "storage" / "logs" / "hourly_pregate.jsonl"
+
+# Host wall clock (Asia/Taipei) — the zone of naive timestamps in work_log.
+_HOST_TZ = timezone(timedelta(hours=8))
 
 # Substantive (research/content output) task types — used for backlog cadence.
 # Ops/overhead types (email_reply, platform_ops, governance) don't count as
 # "research got dispatched", so a run of only those still lets cadence fire.
+# SINGLE SOURCE: scripts/crosscheck_pregate_outcomes.py imports this set —
+# do not fork a second copy (2026-07-10: the two had already drifted on
+# daily_digest).
 SUBSTANTIVE_TYPES = {
-    "daily_article", "experiment", "paper_body", "paper_review", "paper_decision",
-    "event_article", "member_qa", "trending_repost", "strategy_lifecycle",
+    "daily_article", "daily_digest", "experiment", "paper_body", "paper_review",
+    "paper_decision", "event_article", "member_qa", "trending_repost",
+    "strategy_lifecycle",
 }
 
 
@@ -65,13 +73,24 @@ def _now() -> datetime:
 
 
 def _parse_iso(s):
+    """Parse an ISO timestamp to an AWARE datetime, or None.
+
+    work_log carries three shapes in the wild (2026-07-10 survey of the last 60
+    rows): `...+00:00` (aware), `...+0800` (aware, no colon), and bare
+    `2026-07-08T03:16` (naive). The naive rows come from local
+    `datetime.now().isoformat()` calls, so the host wall clock — Asia/Taipei —
+    is their true zone. Guessing UTC instead would shift them 8h into the past,
+    which only ever makes cadence look MORE stale (fail-open direction), but
+    it's still wrong; stamp the real zone.
+    """
     if not s:
         return None
     try:
-        return datetime.fromisoformat(str(s).replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
     except Exception as exc:
         logging.debug("pregate: unparseable ISO timestamp %r: %s", s, exc)
         return None
+    return dt if dt.tzinfo is not None else dt.replace(tzinfo=_HOST_TZ)
 
 
 def _load_tasks() -> list:
@@ -150,35 +169,56 @@ def has_high_prio(tasks: list) -> bool:
 
 
 def _last_substantive_dispatch(tasks: list):
-    """Most recent time an hourly fire dispatched a substantive task.
+    """Most recent time ANY actor completed substantive (research/content) work.
 
-    Preferred source = next_tasks claimed_at (claimed_by startswith 'hourly').
-    Fallback = work_log entries. Returns aware datetime or None (unknown)."""
+    2026-07-10 root-cause fix. The old version only counted tasks whose
+    `claimed_by` startswith 'hourly' (primary) or work_log actors containing
+    'hourly' (fallback). No claimer in this repo is ever named that way — the
+    real owners are `codex-cli` (535 claims), `codex-vscode`, `interactive-
+    claude`, `telegram-responder`, `main-session`… — so the primary source
+    always returned None and the fallback almost always did too. Result:
+    `cadence_due` was True on 20/20 supervisor fires and the gate could never
+    skip anything. The gate was wired but structurally a no-op.
+
+    The cadence signal's real question is "has research starved?" — NOT "did
+    an hourly fire specifically do it". Work done by a parallel interactive or
+    codex session feeds the same missions, so it must reset the clock. Hence:
+    actor-agnostic, and keyed on COMPLETION (a claim that never finished is
+    not output).
+
+    Returns aware datetime or None (unknown → treated as due, research must
+    never starve on a read failure).
+    """
     latest = None
     for t in tasks:
         if not isinstance(t, dict):
             continue
         if t.get("task_type") not in SUBSTANTIVE_TYPES:
             continue
-        by = str(t.get("claimed_by", "") or "")
-        if not by.startswith("hourly"):
+        if str(t.get("status", "")).lower() != "succeeded":
             continue
-        ts = _parse_iso(t.get("claimed_at") or t.get("started_at") or t.get("updated_at"))
+        ts = _parse_iso(t.get("completed_at"))
+        if ts is None:
+            # status_history is the canonical transition ledger (task_pool_claim)
+            for h in reversed(t.get("status_history") or []):
+                if isinstance(h, dict) and str(h.get("to", "")).lower() == "succeeded":
+                    ts = _parse_iso(h.get("ts"))
+                    break
         if ts and (latest is None or ts > latest):
             latest = ts
-    if latest is not None:
-        return latest
-    # fallback: work_log
+
+    # work_log is the second ledger (some substantive work is logged there
+    # without a next_tasks row — e.g. main-thread event articles).
     try:
         d = json.loads(WORK_LOG.read_text(encoding="utf-8"))
         items = d if isinstance(d, list) else d.get("entries", d.get("log", []))
-        for e in items[-50:]:
+        for e in items[-100:]:
             if not isinstance(e, dict):
                 continue
             if e.get("task_type") not in SUBSTANTIVE_TYPES:
                 continue
-            actor = str(e.get("actor", "") or e.get("claimed_by", "") or "")
-            if "hourly" not in actor:
+            outcome = str(e.get("outcome", "") or "").lower()
+            if outcome and outcome not in ("succeeded", "success", "done", "completed"):
                 continue
             ts = _parse_iso(e.get("ts") or e.get("timestamp"))
             if ts and (latest is None or ts > latest):
@@ -186,6 +226,41 @@ def _last_substantive_dispatch(tasks: list):
     except Exception as e:
         _warn("pregate_worklog", "cannot read work_log for cadence", err=str(e))
     return latest
+
+
+def has_compute_followup() -> bool:
+    """True when a finished compute job still awaits its LLM interpretation.
+
+    2026-07-10: the hourly fire's PHASE 0.5 dispatches these followups. Without
+    this signal an enforced skip would strand completed heavy-compute artifacts
+    (the executor-advisor advisor call would simply never happen).
+    """
+    if not COMPUTE_QUEUE.is_dir():
+        return False
+    for p in COMPUTE_QUEUE.glob("*.json"):
+        try:
+            j = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            logging.warning("pregate: unreadable compute job %s: %s", p.name, exc)
+            continue  # a single bad file must not mask other pending followups
+        if (j.get("status") == "completed" and j.get("claude_followup")
+                and not j.get("followup_dispatched")):
+            return True
+    return False
+
+
+def has_publish_drought() -> bool:
+    """True when reader-facing publishing has fallen behind its cadence.
+
+    Reuses the canonical detector owned by volpred.ops.alerts (single source —
+    do not reimplement the gap/active-window rules here). The hourly fire is
+    what repairs a drought, so a drought must never be skipped.
+    """
+    sys.path.insert(0, str(ROOT / "src"))
+    from volpred.ops.alerts import _parse_publishing_freshness_state  # type: ignore
+
+    state = _parse_publishing_freshness_state(str(ROOT / "storage"), _now())
+    return bool(state.get("breached"))
 
 
 def _log_decision(entry: dict) -> None:
@@ -217,6 +292,10 @@ def decide(window_hours: float) -> dict:
     _safe("email", lambda: has_email_backlog(tasks))
     _safe("critical", has_critical)
     _safe("high_prio", lambda: has_high_prio(tasks))
+    # 2026-07-10: the hourly fire also repairs droughts and dispatches compute
+    # followups. Skipping a fire that owed either of those was a silent stall.
+    _safe("compute_followup", has_compute_followup)
+    _safe("publish_drought", has_publish_drought)
 
     last = _last_substantive_dispatch(tasks)
     if last is None:
@@ -225,10 +304,18 @@ def decide(window_hours: float) -> dict:
     else:
         hrs = (_now() - last).total_seconds() / 3600.0
         reasons["cadence_hours_since"] = round(hrs, 2)
-        reasons["cadence_due"] = hrs >= window_hours
+        if hrs < 0:
+            # Future timestamp = clock skew or a mis-zoned row. It would fake a
+            # "just did work" reading and manufacture a skip. Refuse it.
+            _warn("pregate_cadence", "future last-completion timestamp, fail-open",
+                  last=last.isoformat(), hours=round(hrs, 2))
+            reasons["cadence_due"] = True
+        else:
+            reasons["cadence_due"] = hrs >= window_hours
 
     # None (unknown) counts as demand present -> proceed
-    demand = any(reasons.get(k) in (True, None) for k in ("email", "critical", "high_prio"))
+    _DEMAND_SIGNALS = ("email", "critical", "high_prio", "compute_followup", "publish_drought")
+    demand = any(reasons.get(k) in (True, None) for k in _DEMAND_SIGNALS)
     proceed = bool(demand or reasons.get("cadence_due"))
     return {"proceed": proceed, "reasons": reasons}
 
