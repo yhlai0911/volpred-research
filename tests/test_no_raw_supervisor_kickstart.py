@@ -31,6 +31,15 @@ _ALLOWLIST = {WRAPPER, "tests/test_no_raw_supervisor_kickstart.py"}
 # `.claude/worktrees/**` holds full checkouts of this repo — scanning them
 # re-scans every file once per worktree (first run of this gate: 113,926 tests,
 # 2 minutes) and reports stale copies of code already fixed on main.
+#
+# Matched against the REPO-RELATIVE path, never the absolute one: an agent
+# worktree's own root IS `.claude/worktrees/<name>`, so every absolute path it
+# scans carries a `worktrees` part. Filtering those skipped every file and the
+# `assert files` self-check below fired in every agent checkout — a gate that is
+# red everywhere agents work, and that never inspected a file there, is worse
+# than no gate. (`_SEARCH_ROOTS` is what actually excludes worktrees on main;
+# this set is the belt to that pair of braces, and stays for the day someone
+# widens the roots back to `.claude`.)
 _SKIP_PARTS = {"__pycache__", "worktrees", ".git", "node_modules"}
 
 _SEARCH_ROOTS = ("scripts", "src", "docs", ".claude/rules", ".claude/skills")
@@ -46,9 +55,10 @@ def _candidate_files() -> list[Path]:
         for path in base.rglob("*"):
             if path.suffix not in _SUFFIXES:
                 continue
-            if _SKIP_PARTS & set(path.parts):
+            rel = path.relative_to(REPO)
+            if _SKIP_PARTS & set(rel.parts):
                 continue
-            if str(path.relative_to(REPO)) in _ALLOWLIST:
+            if str(rel) in _ALLOWLIST:
                 continue
             out.append(path)
     return out
@@ -113,6 +123,23 @@ def test_gate_does_not_flag_documentation() -> None:
     assert not _offends(f"**禁止手動裸 `kickstart -k`**（漏寫 marker）… {LABEL} …")
     assert not _offends(f"把 `{LABEL}` 從 --dry-run 切成 real-run（→ `launchctl kickstart -k`）")
     assert _is_comment("        # NOT raw `launchctl kickstart` — bypasses the marker")
+
+
+def test_candidate_files_survive_a_worktree_checkout() -> None:
+    """The scan must see files, and never a worktree's copy of them.
+
+    Both halves failed at once when `_SKIP_PARTS` was matched against absolute
+    paths: run from `.claude/worktrees/<name>/`, every path carried a
+    `worktrees` part, so the scan returned `[]` and the gate was red in exactly
+    the checkouts CLAUDE.md tells agents to work in. `assert files` alone would
+    catch that; the per-file check pins the other direction, so nobody "fixes"
+    the emptiness by dropping the skip and re-importing the 113,926-test scan.
+    """
+    files = _candidate_files()
+    assert files, "no files scanned — search roots or suffixes changed; gate is dead"
+    for path in files:
+        rel = path.relative_to(REPO)
+        assert not (_SKIP_PARTS & set(rel.parts)), f"{rel} should have been skipped"
 
 
 def test_no_raw_kickstart_instruction() -> None:
