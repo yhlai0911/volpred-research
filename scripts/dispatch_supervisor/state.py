@@ -62,6 +62,12 @@ a phantom. Known misreads that have cost real debugging time:
     (`scripts/cron_review.py` reads `last_completion` as an optional freshest
     override and falls back to `completions[-1]`, so it works today by
     accident of the fallback, not because a writer exists.)
+  - `supervisor_pid` vs `launchctl list` → these legitimately DIFFER by one.
+    The plist runs `uv run python -m ...`, so launchd tracks the `uv` wrapper
+    while this field holds its Python child — the process that actually runs
+    the loops and owns this file. A mismatch is expected; check liveness with
+    `ps -p <supervisor_pid>` (or a fresh `last_heartbeat_at`), not by diffing
+    the two numbers.
 
 Prefer `uv run python -m scripts.dispatch_supervisor.cli status` over
 hand-rolled `jq` — it prints the whole normalized state, so a key that is

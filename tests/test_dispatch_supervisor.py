@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 import os
 import resource
 import signal
 import subprocess
+import time
 from pathlib import Path
 
 import pytest
@@ -1338,6 +1340,72 @@ def test_health_loop_heartbeats_before_each_check(tmp_path: Path, monkeypatch) -
     assert all(b["last_heartbeat_at"] > "2001" for b in beats), "no beat before check_once"
     assert beats[1]["last_heartbeat_at"] > beats[0]["last_heartbeat_at"], "beat did not advance"
     assert beats[0]["supervisor_pid"] == os.getpid(), "stale pid not re-stamped"
+
+
+def test_heartbeat_advances_while_worker_in_flight(tmp_path: Path, monkeypatch) -> None:
+    """Integration regression (2026-07-10): both REAL loops, no mocked internals.
+
+    `_tick_once()` awaits the worker to completion, so when it owned the only
+    heartbeat, `last_heartbeat_at` froze for the whole dispatch — observed live
+    as a 798s freeze during a healthy 12:07 fire. With `health_loop` owning the
+    beat, the timestamp must keep advancing WHILE `current_job` is non-null.
+    """
+    state_path = _tmp_state(tmp_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    observed: dict = {}
+
+    def fake_run_worker(**kwargs):
+        # Claim the slot exactly like the real worker does, then block this
+        # thread (the scheduler tick is awaiting us) and watch for a beat.
+        state.reserve_fire(schedule_id="test", attempt=1, model="opus",
+                           log_path=str(tmp_path / "w.log"), path=state_path)
+        state.attach_process(pid=os.getpid(), pgid=os.getpgid(0), started_wall=None, path=state_path)
+        beat_at_fire = state.read_state(state_path)["last_heartbeat_at"]
+
+        deadline = time.monotonic() + 5.0
+        while time.monotonic() < deadline:
+            time.sleep(0.02)
+            snap = state.read_state(state_path)
+            if snap["last_heartbeat_at"] > beat_at_fire:
+                observed["beat_during_worker"] = snap["last_heartbeat_at"]
+                observed["job_was_in_flight"] = snap["current_job"] is not None
+                break
+
+        observed["beat_at_fire"] = beat_at_fire
+        state.record_completion(exit_code=0, outcome="success", final_model="opus", path=state_path)
+        return worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", lambda **kwargs: {"committed": False})
+
+    async def drive():
+        beat = asyncio.create_task(
+            health.health_loop(state_path=state_path, check_interval_s=0.05)
+        )
+        try:
+            return await scheduler._tick_once(
+                state_path=state_path, cron_expr="7 * * * *",
+                prompt_path=prompt_path, log_path=tmp_path / "worker.log",
+                dry_run=False, repo_root=tmp_path,
+            )
+        finally:
+            beat.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await beat
+
+    decision = asyncio.run(drive())
+
+    assert decision["action"] == "fired"
+    assert "beat_during_worker" in observed, (
+        "last_heartbeat_at never advanced while the worker ran — the tick is the "
+        "only heartbeat owner again, so a busy daemon looks dead"
+    )
+    assert observed["job_was_in_flight"], "beat did not land during the in-flight window"
+    assert observed["beat_during_worker"] > observed["beat_at_fire"]
 
 
 def test_health_loop_crash_sends_escalation_alert(tmp_path: Path, monkeypatch) -> None:
