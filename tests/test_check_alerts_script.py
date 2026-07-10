@@ -128,8 +128,14 @@ def test_piggy_back_drift_warns_on_bad_job_timestamp(tmp_path: Path, monkeypatch
     result = check_alerts._check_piggy_back_drift({"ok": True, "jobs": []})
 
     captured = capsys.readouterr()
-    assert result == {"drift_count": 0, "drifts": []}
+    # 2026-07-10: this used to assert drift_count == 0 — the old loop `continue`d
+    # past an unparsable marker, so a corrupt timestamp warned to stderr and then
+    # vanished from the drift summary that log scrapers actually read. A marker we
+    # cannot parse means we cannot tell whether the job ran; that IS drift. The
+    # stderr WARN (the test's real contract) is unchanged.
+    assert result["drift_count"] == 1
+    assert result["drifts"] == ["unparsable_marker: paper_sync_all 'not-a-timestamp'"]
     assert "[check_alerts] WARN cron_last_run timestamp parse failed" in captured.err
     assert "job_id=paper_sync_all" in captured.err
     assert "Invalid isoformat string" in captured.err
-    assert "piggy-back-drift: none" in captured.out
+    assert "piggy-back-drift:" in captured.out

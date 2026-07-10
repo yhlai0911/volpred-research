@@ -19,7 +19,13 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
+
+try:
+    from croniter import croniter
+except ImportError:  # pragma: no cover — surfaces as bad_cron on every job
+    croniter = None
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = PROJECT_ROOT / "src"
@@ -206,6 +212,92 @@ def _auto_remediate_publish_drought() -> dict:
         return {"attempted": False, "error": str(exc)}
 
 
+# The monitor cannot meaningfully monitor itself; `host_crontab_managed: false`
+# means the entry documents something this host does not schedule.
+STALENESS_EXCLUDED_JOB_IDS = frozenset({"check_alerts"})
+STALENESS_TOLERANCE = 2.0  # a job is stale past 2× its longest legitimate gap
+
+
+def cron_max_gap_min(cron_expr: str, *, base=None, samples: int = 12) -> float:
+    """Longest legitimate gap, in minutes, between consecutive fires of `cron_expr`.
+
+    Replaces a hardcoded 7-entry `period_map` (2026-07-10). That table covered 7 of
+    the 32 monitored jobs — the other 24 hit `period_min is None` and were skipped
+    *silently*, so a dead `daily_update` or `release_pool` could never surface. It
+    also carried 3 entries (`0 */2 * * *`, `3 */2 * * *`, `0 0 * * *`) matching no
+    job at all.
+
+    MAX gap, not mean: `0 15 * * 1-5` fires each weekday, so its longest honest gap
+    is Fri→Mon (3 days), not 24h. Using the mean would alert every weekend.
+    """
+    from datetime import datetime as _dt
+
+    if croniter is None:
+        raise RuntimeError("croniter not installed")
+    it = croniter(cron_expr, base or _dt.now())
+    times = [it.get_next(_dt) for _ in range(samples)]
+    return max((b - a).total_seconds() / 60 for a, b in zip(times, times[1:]))
+
+
+def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) -> list[dict]:
+    """One record per configured job — nothing is silently skipped.
+
+    Every entry in `system_crontab.items` gets a verdict:
+      excluded / unmanaged   — deliberately not checked, with a reason
+      never_ran              — configured but has NEVER recorded a run
+      bad_cron               — cron expression croniter cannot parse
+      unparsable_marker      — marker exists but is not a timestamp
+      stale / ok             — compared against 2× the cron's longest legit gap
+
+    Returning `never_ran` and `bad_cron` as verdicts rather than `continue`
+    statements is the point: the old loop dropped both on the floor, which is how
+    `indicator_arena_daily` (never once recorded) stayed invisible.
+    """
+    records: list[dict] = []
+    for item in items:
+        job_id = item.get("id")
+        cron = item.get("cron")
+        if not job_id:
+            continue
+        if item.get("host_crontab_managed") is False:
+            records.append({"job_id": job_id, "status": "unmanaged", "detail": "host_crontab_managed=false"})
+            continue
+        if job_id in STALENESS_EXCLUDED_JOB_IDS:
+            records.append({"job_id": job_id, "status": "excluded", "detail": "the monitor itself"})
+            continue
+
+        try:
+            period_min = cron_max_gap_min(cron, base=base)
+        except Exception as exc:  # noqa: BLE001
+            records.append({"job_id": job_id, "status": "bad_cron", "detail": f"cron={cron!r} ({exc})"})
+            continue
+
+        last_iso = state.get(job_id)
+        if not last_iso:
+            records.append({"job_id": job_id, "status": "never_ran",
+                            "detail": f"no cron_last_run entry (cron={cron})",
+                            "period_min": period_min})
+            continue
+        try:
+            last_dt = datetime.fromisoformat(str(last_iso).replace("Z", "+00:00"))
+        except Exception as exc:  # noqa: BLE001
+            _warn_check_alerts(
+                f"cron_last_run timestamp parse failed for job_id={job_id}",
+                state_path, exc,
+            )
+            records.append({"job_id": job_id, "status": "unparsable_marker", "detail": repr(last_iso)})
+            continue
+
+        age_min = (now - last_dt).total_seconds() / 60
+        records.append({
+            "job_id": job_id,
+            "status": "stale" if age_min > STALENESS_TOLERANCE * period_min else "ok",
+            "age_min": age_min,
+            "period_min": period_min,
+        })
+    return records
+
+
 def _check_piggy_back_drift(due_summary: dict) -> dict:
     """Detect piggy-back scheduler health drift (B3.7 / finding #18).
 
@@ -238,43 +330,14 @@ def _check_piggy_back_drift(due_summary: dict) -> dict:
 
     items = (config.get("system_crontab") or {}).get("items") or []
     now = datetime.now(timezone.utc)
-    period_map = {
-        "0 * * * *": 60,
-        "0 */2 * * *": 120,
-        "3 */2 * * *": 120,
-        "0 */6 * * *": 360,
-        "17 */6 * * *": 360,
-        "0 0 * * *": 1440,
-        "30 5 * * *": 1440,
-    }
-    for item in items:
-        job_id = item.get("id")
-        cron = item.get("cron")
-        if item.get("host_crontab_managed") is False:
-            continue
-        if job_id in {"check_alerts"}:
-            continue
-        last_iso = state.get(job_id)
-        if not last_iso:
-            continue
-        try:
-            last_dt = datetime.fromisoformat(str(last_iso).replace("Z", "+00:00"))
-        except Exception as exc:
-            _warn_check_alerts(
-                f"cron_last_run timestamp parse failed for job_id={job_id}; "
-                "skipping staleness check",
-                state_path,
-                exc,
-            )
-            continue
-        period_min = period_map.get(cron)
-        if period_min is None:
-            continue
-        age_min = (now - last_dt).total_seconds() / 60
-        if age_min > 2 * period_min:
+    for record in evaluate_cron_staleness(items, state, now, state_path=state_path):
+        if record["status"] == "stale":
             drifts.append(
-                f"stale_last_run: {job_id} age={age_min:.0f}min period={period_min}min"
+                f"stale_last_run: {record['job_id']} age={record['age_min']:.0f}min "
+                f"period={record['period_min']:.0f}min"
             )
+        elif record["status"] in ("never_ran", "bad_cron", "unparsable_marker"):
+            drifts.append(f"{record['status']}: {record['job_id']} {record['detail']}")
 
     if drifts:
         print("  piggy-back-drift:")

@@ -41,6 +41,9 @@ try:
 except ImportError:  # pragma: no cover
     croniter = None
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cron_mark_last_run import merge_last_run  # noqa: E402
+
 # Host crontab expressions are in LOCAL time (macOS cron default). When we
 # evaluate "is this job due?" via croniter, we must use the same local tz
 # or specific-hour jobs like `0 8 * * 1` shift 8h from CST. Hardcoded
@@ -109,9 +112,21 @@ def _load_last_run() -> dict[str, str]:
     return data
 
 
-def _save_last_run(state: dict[str, str]) -> None:
-    LAST_RUN_PATH.parent.mkdir(parents=True, exist_ok=True)
-    LAST_RUN_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False))
+def _save_last_run(updates: dict[str, str]) -> None:
+    """Merge only the jobs THIS run fired into the marker map, under a lock.
+
+    2026-07-10: this used to be a blind whole-dict `write_text(state)`, where
+    `state` was loaded before the (multi-minute) firing loop began. Since
+    `scripts/cron_lib.sh` now makes every wrapper stamp its own marker on exit 0,
+    a LaunchAgent job finishing mid-loop would have its fresh timestamp silently
+    reverted by our stale in-memory copy. Merge-under-flock instead of overwrite.
+
+    Fail-open + loud: a bookkeeping failure must not abort the piggy-back run.
+    """
+    try:
+        merge_last_run(updates, path=LAST_RUN_PATH)
+    except Exception as exc:  # noqa: BLE001
+        _warn_run_due_jobs("cron_last_run merge failed; markers not updated", LAST_RUN_PATH, exc)
 
 
 def _parse_iso(
@@ -299,6 +314,7 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
     now_local = _local_now()
 
     results = []
+    fired_updates: dict[str, str] = {}
     for item in items:
         job_id = item.get("id")
         cron_expr = item.get("cron")
@@ -357,7 +373,9 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
                 end = _utc_now()
                 log_fp.write(f"=== [{job_id}] exit {proc.returncode} at {end.isoformat()} (duration={(end-start).total_seconds():.1f}s) ===\n".encode())
             if proc.returncode == 0:
-                state[job_id] = end.isoformat(timespec="seconds")
+                stamp = end.isoformat(timespec="seconds")
+                state[job_id] = stamp        # keep the in-memory view consistent
+                fired_updates[job_id] = stamp  # …and this is what actually gets merged
                 results.append({"job_id": job_id, "action": "fired", "ok": True, "duration_sec": round((end - start).total_seconds(), 1)})
             else:
                 results.append({"job_id": job_id, "action": "fired", "ok": False,
@@ -367,7 +385,7 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
         except Exception as exc:  # noqa: BLE001
             results.append({"job_id": job_id, "action": "fired", "ok": False, "reason": f"error:{exc}"})
 
-    _save_last_run(state)
+    _save_last_run(fired_updates)
 
     # 2026-04-25: session_crons drift coverage. `session_crons.items` in
     # runtime_schedules.json describes 9 recurring crons (daily_planning /

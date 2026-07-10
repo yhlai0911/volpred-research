@@ -2,6 +2,48 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 cron 新鮮度監控盯著死 marker 監控活任務 — 5 個任務凍結 6 週 + 監控只覆蓋 22%
+
+**現象**：`check_alerts` 的 piggy-back-drift 每次都印一行 `stale_last_run: memory_health_daily age=61197min period=1440min`（42.5 天），但 `breaches=0`，沒有任何 alert。實際查證：`memory_health_daily` **今天 05:30 才剛跑完、exit 0**（`storage/logs/cron/memory_health.log` mtime 為證）。監控在對一個活著的任務讀一個死掉的時間戳。
+
+**兩個獨立的根因，合起來讓整套新鮮度監控失效**：
+
+**A. marker 永遠不會被寫（5 個任務）** — `storage/ops/cron_last_run.json` 的**唯一寫入者是 `scripts/run_due_jobs.py`**，它只為「自己觸發的任務」蓋章。但 `config/runtime_schedules.json` 裡標 `piggy_back_skip: true` 的任務，**照設計就是 run_due_jobs 永遠不會觸發的**（它們的 LaunchAgent 才是 owner；這個 flag 正是 2026-05-29 `collect_us` double-fetch 事故後加的防重複觸發）。於是這 5 個任務天天照跑，marker 凍結在 flag 打開那天：
+
+| job | marker 凍結於 | 實際狀態 |
+|---|---|---|
+| `collect_tw_data` | 2026-05-28 | 今天有跑 |
+| `collect_us_data` | 2026-05-29 | 今天有跑 |
+| `market_calendar_sync` | 2026-05-25 | 每週一跑 |
+| `memory_health_daily` | 2026-05-28 | 今天 05:30 跑 |
+| `indicator_arena_daily` | **從未寫過** | 一出生就 piggy_back_skip |
+
+**B. 偵測器自己有三個 silent skip（覆蓋率 22%）** — staleness 檢查用一個硬編 7 條 cron 字串的 `period_map` 決定容忍度：
+```python
+if not last_iso: continue           # 從沒寫過 marker → 完全不檢查（indicator_arena_daily 隱形）
+period_min = period_map.get(cron)
+if period_min is None: continue     # cron 不在表裡 → 靜默不監控
+```
+32 個受管任務中只有 **7 個**的 cron 字串在表裡（`daily_update`、`release_pool`、`ops_dashboard`、`boss_report_4h` 等 24 個全部落在 `period_min is None` 的靜默分支）。表裡還有 3 條（`0 */2 * * *`、`3 */2 * * *`、`0 0 * * *`）對不到任何任務。
+
+**淨效果**：監控**看不到 25 個任務的真實停擺**，而它唯一發出的訊號是**對一個健康任務的誤報**。兩頭都錯。
+
+**解決方法**：
+1. **wrapper 自己記錄自己**（修 A）。`scripts/cron_lib.sh::cron_emit_exit` 在 exit 0 時呼叫新的 `scripts/cron_mark_last_run.py`。只有 wrapper 知道自己跑了，所以由 wrapper 記錄；不論觸發者是 launchd、host cron 還是 run_due_jobs piggy-back 都成立。**只有 exit 0 才更新** —— 一個天天跑但天天失敗的任務**必須**變 stale，那正是要監控的停擺。
+2. **job id 從 wrapper 的「路徑」反查，絕不用傳進來的名字**。`cron_emit_exit` 的第一個參數只是 log 標籤，sweep 發現**已有 8 個 wrapper 的標籤與 config id 不同**（`market_calendar_sync` 記成 `market_cal`、`supabase_sync_drain` 記成 `drain_failed_syncs`…）。用標籤當 key 會把 marker 寫進沒人讀的鍵。改由 `runtime_schedules.json` 的 `wrapper_script → id` 反查（basename 已驗證唯一），查不到就大聲 WARN，不猜。
+3. **`run_due_jobs._save_last_run` 從「整份 dict 盲寫」改為 flock + 單鍵 merge + `os.replace` 原子寫**。原本它在觸發迴圈**開始前**載入整份 state，迴圈跑好幾分鐘後再整份寫回 —— 現在 wrapper 會自己蓋章，一個在迴圈中途完成的 LaunchAgent 任務，它的新 marker 會被這份過期的記憶體副本**默默還原**。
+4. **偵測器改用 croniter 推導週期**（修 B）。`cron_max_gap_min()` 取「連續觸發之間的**最長**合法間隔」而非平均 —— `0 15 * * 1-5` 的最長合法間隔是週五→週一（3 天），用平均會每個週末誤報。`evaluate_cron_staleness()` 對**每一個**任務都回傳 verdict（`ok`/`stale`/`never_ran`/`bad_cron`/`unparsable_marker`/`excluded`/`unmanaged`），**沒有任何 `continue`**。
+5. **機械 gate**（`scripts/tests/test_cron_last_run_truth.py`，22 tests）：
+   - `test_every_configured_job_gets_a_verdict` — 拿**真 config** 斷言每個任務都有 verdict，沒有靜默漏網
+   - `test_piggy_back_skip_jobs_self_report_via_cron_lib` — 斷言每個 `piggy_back_skip` 任務的 canonical wrapper 都 source `cron_lib.sh` 且呼叫 `cron_emit_exit`。這條若 6 週前存在，A 根本不會發生
+   - `test_wrapper_basenames_are_unique_so_reverse_lookup_is_unambiguous` — 守住 (2) 的前提
+   - e2e：真的用 `/bin/bash` 跑一個 wrapper 過真的 `cron_lib.sh`，斷言 exit 0 寫進 **config id**（不是傳進去的漂移標籤）、exit 1 不寫
+
+**反向驗證**：還原 `cron_lib.sh` → e2e marker 測試 fail；把 evaluator 換回 `continue` → 3 支測試 fail（含覆蓋率 gate）。測試用 `VOLPRED_CRON_MARKER_PATH` 導向 tmp，不汙染真實 marker（今天稍早才發現 pregate rewire 的測試會汙染 shadow 觀察日誌，同一類錯不再犯）。
+
+**既有測試更正**：`tests/test_check_alerts_script.py::test_piggy_back_drift_warns_on_bad_job_timestamp` 原本斷言壞掉的 timestamp 產生 `drift_count == 0` —— 那個 silent skip 是被測試**鎖住**的。壞掉的 marker 代表「我們無法判斷這任務有沒有跑」，那就是 drift。改為斷言回報 `unparsable_marker`，原本的 stderr WARN 契約不變。
+
+**教訓**：(1) **「誰執行」與「誰記錄」必須是同一個角色**。marker 的寫入者是觸發者（run_due_jobs），但有一整類任務照設計不由它觸發 —— 這個矛盾在 `piggy_back_skip` 這個 flag 誕生的那一刻就注定了，只是沒人問「那它們的 marker 誰寫？」。**加一個「某某不由 X 處理」的例外 flag 時，必須列舉 X 順便做的所有副作用，逐一交接**。(2) **硬編查表 = 靜默的覆蓋率黑洞**。`period_map.get(cron)` 回 None 就 `continue`，讓 78% 的任務悄悄退出監控；能從資料推導的東西（croniter 就在依賴裡）不要手抄成表。(3) 這是今天第 5 個「觀測層與真實狀態脫鉤」的同源問題（work_dashboard 把活派工顯示成死的、`dispatch_binary_health` grep 已退役 shell、pregate orphan、git_conflict_guard orphan）—— **監控自己也要被監控**，判準是「這個監控如果壞了/瞎了，會有任何訊號嗎？」
 ## 2026-07-10 supervisor cutover 把 Claude→Codex failover 弄丟 — 每次額度用完都靜默丟掉整批 hourly slot（cutover 孤兒第 5 次）
 
 **現象**：老闆 Telegram msg 376 問「claude 的額度到了時候 codex app 會自動接手嗎」。查證答案是**不會**。`cron_hourly_dispatch.sh::run_codex_failover()`（2026-06-28 老闆指令落地）在 Claude quota/auth 死掉時把該小時的 slot 交給 `codex exec`（ChatGPT auth，額度與 Claude 完全獨立）。2026-07-04 派工 cutover 到 `com.volpred.dispatch-supervisor` 常駐 daemon 後，`worker.py` 只把 quota 正確**分類**（2026-07-05 加的 `_QUOTA_RE`），然後 `send_quota_alert` + abort —— **failover 整段沒搬過去**。自 cutover 起每次 Claude 額度耗盡，該小時的工作就直接消失，等額度自己恢復；老闆只會收到一封「額度用完」的信，看不出 slot 被丟掉。
