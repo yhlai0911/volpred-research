@@ -56981,7 +56981,7 @@
     "title": "研究 backlog fallback: 黃金 safe-haven 屬性的 regime 依賴與美元/實質利率脫鉤",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 黃金 safe-haven 屬性的 regime 依賴與美元/實質利率脫鉤 — yfinance GLD/SPY/UUP + FRED 實質利率，滾動檢定 gold-equity 與 gold-dollar 相關在 risk-off vs 一般期是否變號，量化 gold 作 tail hedge 的條件有效性（與既有 alt-asset/DXY 題不同，聚焦 safe-haven 相關 regime 切換）（來源：LSEG/WGC 2025；2025 gold +50% 與股脫鉤但對 vol hedge 落後） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -57022,13 +57022,21 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-10T15:16:05.500155+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
       }
     ],
     "started_at": "2026-07-10T14:49:03.203907+00:00",
     "last_released_at": "2026-07-10T14:26:17.613667+00:00",
     "claimed_by": "codex-failover",
     "claimed_at": "2026-07-10T14:48:59.251649+00:00",
-    "claim_session_id": "372d9688565a"
+    "claim_session_id": "372d9688565a",
+    "completed_at": "2026-07-10T15:16:05.499817+00:00",
+    "result": "K1676 complete: GLD/SPY/UUP + DFII10, 2016-07-06..2026-06-18, n=2503. Joint lagged USD/real-yield tail-mean/tail-beta interactions 0/4 strict passes (HAC |t|<=1.49; Holm p>=0.541; all block CIs cross 0), verdict NULL_NO_ROBUST_LAGGED_MACRO_STATE_MODIFIER. Independent Codex source review PASS after 3 major fixes; deterministic JSON hash verified twice. Artifacts: experiments/k1676/; knowledge=3fa70fc9; commit=b4b17cd33."
   },
   {
     "id": "telegram-331",
