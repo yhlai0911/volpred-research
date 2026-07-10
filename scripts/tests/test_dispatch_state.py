@@ -833,23 +833,35 @@ def _schema_keys_from_module_docstring() -> set[str]:
     return set(re.findall(r'^ {6}"(\w+)"\s*:', doc, flags=re.MULTILINE))
 
 
-def _toplevel_keys_written_by_writers() -> set[str]:
-    """AST 掃 state.py：所有 `data["X"] = ...` 形式的頂層寫入。
+def _writer_sources() -> list[Path]:
+    """所有可能寫 state 的模組 — 整個 dispatch_supervisor package，不只 state.py。
 
-    `data` 是 `_locked_state()` yield 出來的 state dict，是唯一的寫入入口。
+    `_locked_state()` 是公開給 package 內部用的（`scheduler.py:305` 就直接在裡面
+    寫 `data["last_fire_at"]`）。只掃 state.py 會留下盲區：任何模組在 locked
+    context 裡新增一個未宣告的 key，gate 都會靜默放行 —— 那正是本 gate 要防的病。
     """
-    src = Path(st.__file__).read_text(encoding="utf-8")
+    pkg = Path(st.__file__).parent
+    return sorted(p for p in pkg.glob("*.py") if p.name != "__init__.py")
+
+
+def _toplevel_keys_written_by_writers() -> set[str]:
+    """AST 掃整個 package：所有 `data["X"] = ...` 形式的頂層寫入。
+
+    `data` 是 `_locked_state()` yield 出來的 state dict — package 內一致的慣例。
+    """
     keys: set[str] = set()
-    for node in ast.walk(ast.parse(src)):
-        if not isinstance(node, (ast.Assign, ast.AugAssign)):
-            continue
-        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-        for tgt in targets:
-            if (isinstance(tgt, ast.Subscript)
-                    and isinstance(tgt.value, ast.Name) and tgt.value.id == "data"
-                    and isinstance(tgt.slice, ast.Constant)
-                    and isinstance(tgt.slice.value, str)):
-                keys.add(tgt.slice.value)
+    for src_path in _writer_sources():
+        src = src_path.read_text(encoding="utf-8")
+        for node in ast.walk(ast.parse(src)):
+            if not isinstance(node, (ast.Assign, ast.AugAssign)):
+                continue
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for tgt in targets:
+                if (isinstance(tgt, ast.Subscript)
+                        and isinstance(tgt.value, ast.Name) and tgt.value.id == "data"
+                        and isinstance(tgt.slice, ast.Constant)
+                        and isinstance(tgt.slice.value, str)):
+                    keys.add(tgt.slice.value)
     return keys
 
 
@@ -873,6 +885,11 @@ def test_every_written_field_is_declared_in_empty_state():
     written = _toplevel_keys_written_by_writers()
     declared = set(st._empty_state().keys())
     assert written, "AST 沒掃到任何 data[...] 寫入（_locked_state 慣例改了？）"
+    # 掃描範圍自檢：scheduler.py 確實在 _locked_state 內寫 last_fire_at。掃不到它
+    # 代表 glob/AST 比對壞了而不是「沒有違規」—— 空結果的 silent pass 是假綠燈。
+    assert "last_fire_at" in written, (
+        "掃描沒涵蓋 scheduler.py 的 data['last_fire_at'] 寫入 → gate 範圍已失效"
+    )
     undeclared = written - declared
     assert not undeclared, (
         f"這些欄位有 writer 但 _empty_state() 沒宣告，會產生 null/absent 不可分辨："
