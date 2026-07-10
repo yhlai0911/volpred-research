@@ -63,7 +63,13 @@ def _set_runtime_env() -> None:
 
     Set ONCE at supervisor boot so all worker children inherit:
       - RLIMIT_NOFILE soft to 65536 (strike 3 mitigation)
+      - VOLPRED_ACTOR=dispatch-supervisor so the daemon's OWN shared-state writes
+        (writer_log; phase_z runs in this same process) are attributed instead of
+        logging actor="unknown" (2026-07-10 attribution gap, docs/error_log.md).
+        setdefault so an operator/launchd override wins; worker children override
+        it per-fire (worker._dispatch_actor) so AGENT writes carry the fire.
     """
+    os.environ.setdefault("VOLPRED_ACTOR", "dispatch-supervisor")
     try:
         soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
         target = 65536

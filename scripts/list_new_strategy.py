@@ -233,6 +233,15 @@ class StrategyLister:
         try:
             # Check if already exists
             existing = _sb_select("strategy_signals", strategy_key=self.key)
+            # Activation gate: this path always writes is_active=True. It has its
+            # own Supabase writer (not the supabase_sync choke points), so wire the
+            # same single enforcement owner here. Require a valid receipt on any
+            # inactive->active transition (new listing or re-enabling a disabled
+            # strategy); a re-run over an already-active row is a no-op and passes.
+            currently_active = bool(existing and existing[0].get("is_active"))
+            if not currently_active:
+                from volpred.ops.strategy_gate import assert_activation_allowed
+                assert_activation_allowed(self.key, self.name)
             row = {
                 "strategy_key": self.key,
                 "strategy_name": self.name,

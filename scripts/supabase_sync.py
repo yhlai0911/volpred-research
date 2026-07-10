@@ -665,8 +665,36 @@ def sync_strategy_signal(
     """Sync a strategy signal to Supabase while preserving metadata."""
     from datetime import datetime, timezone
 
-    existing = _find_strategy_signal(strategy_key, strategy_name) or {}
+    from volpred.ops.strategy_gate import StrategyGateError, assert_activation_allowed
+
+    # Look up current state once — reused for metadata preservation AND the
+    # activation gate. `_find_strategy_signal` returns None only on a genuine
+    # not-found (query succeeded, empty result); a backend query failure
+    # propagates as an exception. That distinction is what lets the gate tell
+    # "new strategy" apart from "Supabase unreachable" below.
+    try:
+        existing = _find_strategy_signal(strategy_key, strategy_name) or {}
+    except Exception as e:
+        if is_active:
+            # Indeterminate current state on an activation write => fail-closed.
+            # A transient lookup failure is indistinguishable from a brand-new
+            # strategy; allowing the write would be an activation backdoor.
+            # Distinct message so this is not mistaken for a missing-receipt block.
+            raise StrategyGateError(
+                f"Cannot verify activation gate for strategy "
+                f"'{strategy_key or strategy_name}': strategy_signals lookup "
+                f"failed ({e}). Refusing to activate while the current active "
+                f"state is indeterminate. This is NOT a missing-receipt error — "
+                f"retry once Supabase is reachable."
+            ) from e
+        raise  # deactivation / metadata-only: propagate the original error unchanged
     resolved_key = strategy_key or existing.get("strategy_key") or _slugify_strategy_key(strategy_name)
+
+    # Gate the inactive->active transition only. An already-active strategy being
+    # re-synced (daily_update.py full-sync, the most common path) is a no-op
+    # transition and passes without a receipt, so live cards never disappear.
+    if is_active and not existing.get("is_active"):
+        assert_activation_allowed(resolved_key, strategy_name)
 
     row = {
         "strategy_key": resolved_key,
@@ -698,10 +726,30 @@ def sync_strategy_signal(
 
 def set_strategy_active(identifier: str, active: bool) -> bool:
     """Activate/deactivate strategy by key first, then by display name."""
-    existing = _find_strategy_signal(identifier, identifier)
+    from volpred.ops.strategy_gate import StrategyGateError, assert_activation_allowed
+
+    try:
+        existing = _find_strategy_signal(identifier, identifier)
+    except Exception as e:
+        if active:
+            # Same fail-closed reasoning as sync_strategy_signal: an indeterminate
+            # lookup on an activation request must not fall through to the PATCH.
+            raise StrategyGateError(
+                f"Cannot verify activation gate for strategy '{identifier}': "
+                f"strategy_signals lookup failed ({e}). Refusing to activate "
+                f"while the current active state is indeterminate. This is NOT a "
+                f"missing-receipt error — retry once Supabase is reachable."
+            ) from e
+        raise  # deactivation: propagate the original error unchanged
     if not existing:
         print(f"  Supabase strategy_signals error: strategy not found ({identifier})")
         return False
+    # Gate only the inactive->active transition; deactivation always passes.
+    if active and not existing.get("is_active"):
+        assert_activation_allowed(
+            existing.get("strategy_key") or identifier,
+            existing.get("strategy_name") or identifier,
+        )
     return _patch_where("strategy_signals", {"id": existing["id"]}, {"is_active": active})
 
 
