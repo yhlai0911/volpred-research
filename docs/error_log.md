@@ -294,6 +294,7 @@ skip 暫置的 clean-checkout 缺口已改為真修：
 **驗證（真實 Ubuntu runner，取代原本的「本機 1683 passed」）**：第一次真 CI
 `29085496663` = 12 failed / 1731 passed。修完後 main 上連續四個 run 綠：
 `29091180310` / `29094498110` / `29098177205` / `29101441481`（皆 `conclusion=success`）。
+含本次 `stat -f` sweep 交付的 final SHA `076c958e4` → run `29102758364` = **1909 passed / 7 skipped / 0 failed**（Ubuntu runner，157s）。
 12 個 failure 的歸屬：9 個 `rg` missing（workflow 裝 ripgrep）、2 個
 `test_cron_auth_preflight`（`stat -f` 可攜性）、1 個 `test_alerts`（`series_registry`
 讀 production feed）。本機 macOS 結果不再作為完成依據。
