@@ -2,6 +2,23 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 新 gate 上線的兩個必檢項：grandfather backfill + enclosing-try blast radius
+
+**背景**：外部 Codex 稽核指出策略 activation 的五項 gate 100% 是 prose、五條旁路零檢查。落地機械 gate（`src/volpred/ops/strategy_gate.py`）時，實作 agent 的設計本身正確（只攔 inactive→active transition，daily_update 對既有 active 的 no-op re-sync 免 receipt），單元測試 30 passed 全綠 —— **但兩個 adversarial reviewer 各自獨立抓到同一個會上線爆炸的洞**。
+
+**洞 1 — gate 上線但 grandfather backfill 只跑 dry-run**：五項 gate 標準誕生於 2026-03-29，比史上最後一次策略上架（2026-03-28）晚一天，**現存 11 檔 active 策略全部沒走過這道 gate**。gate 程式碼一 commit 就 armed，而 receipt 目錄不存在 → 任一次 `strategy-set-active <既有策略>`（如 Supabase row 被 is_active=False 後要復原）就會被自己的 gate 鎖死，直接違反老闆 standing directive「好的上架」。
+
+**洞 2 — enclosing try 把 gate 例外放大成整日資料斷更**：`scripts/daily_update.py` 把 strategy loop + paper_trades sync + market_daily backfill **全包在同一個 `try` 裡**，尾端是 broad `except Exception: print("Supabase sync skipped")`。gate raise 的 `StrategyGateError` 會 unwind 整塊 → 當天 paper_trades 與 market_daily 一起不同步 → `/portfolio` 價格空白（與 2026-04-17 outage 同一 class）。實作者自評的 blast radius 是「一張策略卡被擋」，實際是「整日行情資料斷更」——**自評低估了一個數量級**。
+
+**解決方法**：
+1. `scripts/backfill_strategy_gate_receipts.py --apply` 與 gate 程式碼**同一個 commit** 落地，11 檔既有策略各發一份 receipt，`gates` 值標 `"grandfathered"` 而非 `true`（誠實：不謊稱檢驗跑過），`note` 寫明 gate 標準晚於上架日誕生。
+2. `daily_update.py` strategy loop 加 per-strategy 隔離：`except StrategyGateError` → `warn()` + 計數 + `continue`，單一策略被擋不再連坐下游同步。
+
+**教訓（下次立任何新 gate 前強制自問）**：
+- **Grandfather 檢查**：這道 gate 誕生時，已存在的資料/物件有沒有走過它？沒有 → backfill 必須與 gate 同 commit，否則 gate 上線即鎖死存量。
+- **Blast radius 檢查**：新 raise 的例外會被哪一層 `except` 接住？把 enclosing try 的**完整範圍**讀一遍 —— 「我只是讓一個函式 raise」在一個 200 行的 broad try 裡等於「讓整塊功能靜默消失」。
+- **自評 blast radius 不可信**：實作者對自己改動的影響半徑系統性低估。adversarial reviewer 的價值不在找語法錯，而在追 exception 的傳播路徑。本次兩個獨立 reviewer 收斂到同一結論，是設計正確但部署順序錯誤的典型。
+
 ## 2026-07-10 supervisor『restart』INFO alert 部署噪音 → deploy-aware marker 抑制
 
 **現象**：老闆收到多則「supervisor restart」INFO email（Telegram msg 352 抱怨）並回信「立刻檢查這是什麼情況 並徹底解決」。
