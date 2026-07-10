@@ -68,6 +68,61 @@ TASK_TYPE_TO_MODEL: dict[str, tuple[str, str]] = {
     "classification":     ("opus", "low"),
 }
 
+# ─────────────────────────────────────────────────────────────────────────
+# Topology routing (2026-07-10 topology-audit：先選協作方式，再選模型)
+# ─────────────────────────────────────────────────────────────────────────
+# 拓撲此前散在 prose（task-routing.md / workflow-index.md 執行模式欄 / 各 skill 內），
+# 由每班 orchestrator 臨場判斷。這裡機械化 task_type → 預設拓撲；task 自帶合法
+# `topology` 欄位時以欄位為準（per-task override）。orchestrator 只在欄位/預設
+# 明顯不合時 override，且必須在 work_log 記 override 原因（讓 override 成為可觀測
+# 例外而非常態）。
+# NOTE: compute_queue 不是 per-type 預設 — 任何類型的 heavy compute 子步驟
+# （GARCH MLE / bootstrap / 全期 backtest / pooled-MLE multistart）都應 enqueue
+# compute_queue（見 cron_hourly_dispatch_prompt.md step 5 分流決策），與本表並行。
+
+TOPOLOGIES = ("inline", "subagent", "worktree", "codex_exec", "compute_queue", "agent_team")
+
+TASK_TYPE_TO_TOPOLOGY: dict[str, str] = {
+    "experiment":         "worktree",   # 隔離產出 experiments/kXXX/；merge_worktree.sh 收
+    "paper_review":       "subagent",   # 並行 reviewer（serialize per paper）
+    "paper_body":         "inline",     # 主線程 only（CLAUDE.md hard rule：禁 agent 寫 .tex）
+    "paper_decision":     "inline",     # 主線程 only + narrative state machine
+    "strategy_lifecycle": "inline",     # 固定 gate pipeline（evaluate → review → sensitivity → MDD）
+    "daily_article":      "subagent",   # writer subagent（隔離 draft 檔，主線程串行 publish）
+    "daily_digest":       "subagent",
+    "event_article":      "inline",     # 即時性需主線程判斷；直接 published
+    "member_qa":          "inline",
+    "trending_repost":    "inline",
+    "email_reply":        "inline",     # PHASE 0 orchestrator 自做（跨 tick mini-orchestrator）
+    "platform_ops":       "subagent",   # Claude/Codex claim 制
+    "governance":         "subagent",
+    "lookup":             "inline",
+    "verify":             "inline",
+    "classification":     "inline",
+}
+DEFAULT_TOPOLOGY = "subagent"  # 未知型別：交給一般 bounded subagent（保守，不佔主線程）
+
+
+def pick_topology(task_type: str | None, task: dict | None = None) -> dict:
+    """Return {"topology": str, "source": "task_field"|"type_default"|"fallback"}.
+
+    優先序：task 自帶合法 `topology` 欄位 > task_type 預設表 > DEFAULT_TOPOLOGY。
+    非法欄位值 fail-open 落回 type default 並標 invalid_field（不 raise —
+    派工路徑不可因 metadata 打錯字炸掉；invalid 值可被 report 消費者看見）。
+    """
+    field = (task or {}).get("topology")
+    if isinstance(field, str) and field.strip().lower() in TOPOLOGIES:
+        return {"topology": field.strip().lower(), "source": "task_field"}
+    out: dict = {}
+    if field is not None:
+        out["invalid_field"] = str(field)
+    if task_type in TASK_TYPE_TO_TOPOLOGY:
+        out.update({"topology": TASK_TYPE_TO_TOPOLOGY[task_type], "source": "type_default"})
+    else:
+        out.update({"topology": DEFAULT_TOPOLOGY, "source": "fallback"})
+    return out
+
+
 # Map to CLI flag (`claude -p --model <X>`)
 MODEL_TO_CLI_FLAG: dict[str, str] = {
     "opus":   "claude-opus-4-8",
@@ -171,25 +226,32 @@ def main() -> int:
 
     if args.list:
         rows = sorted(TASK_TYPE_TO_MODEL.items(), key=lambda kv: (kv[1][0], kv[0]))
-        print(f"{'task_type':<22} {'model':<8} {'effort':<8} {'cli_flag':<32}")
-        print("─" * 72)
+        print(f"{'task_type':<22} {'model':<8} {'effort':<8} {'topology':<12} {'cli_flag':<32}")
+        print("─" * 84)
         for t, (m, e) in rows:
-            print(f"{t:<22} {m:<8} {e:<8} {cli_flag(m):<32}")
-        print(f"\nfallback (unknown): {DEFAULT[0]} / {DEFAULT[1]}")
+            topo = TASK_TYPE_TO_TOPOLOGY.get(t, DEFAULT_TOPOLOGY)
+            print(f"{t:<22} {m:<8} {e:<8} {topo:<12} {cli_flag(m):<32}")
+        print(f"\nfallback (unknown): {DEFAULT[0]} / {DEFAULT[1]} / topology={DEFAULT_TOPOLOGY}")
         print(f"\nescalation ladder: {' → '.join(f'{m}/{e}' for m, e in ESCALATION_LADDER)}")
         return 0
 
     if args.attempt > 0:
         out = pick_model_escalated(args.task_type, args.attempt)
         out["fallback"] = args.task_type not in TASK_TYPE_TO_MODEL
+        topo = pick_topology(args.task_type)
+        out["topology"] = topo["topology"]
+        out["topology_source"] = topo["source"]
         print(json.dumps(out, indent=2, ensure_ascii=False))
         return 0
 
     model, effort = pick_model(args.task_type)
+    topo = pick_topology(args.task_type)
     out = {
         "task_type": args.task_type,
         "model": model,
         "effort": effort,
+        "topology": topo["topology"],
+        "topology_source": topo["source"],
         "cli_flag": cli_flag(model),
         "agent_short": model,
         "attempt": 0,

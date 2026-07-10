@@ -150,7 +150,8 @@ PHASE B — 派新工:
    - Attempt cap = ladder 長度（最多到 opus/max）；每個 task 的 escalation 次數記在 next_tasks task 的 `escalation_attempts` 欄位，避免無限重試 token 燒爆
 
 5. 分流決策（token 節省）:
-   - heavy compute (GARCH MLE / Bootstrap / data fetch / 全期 backtest / pooled-MLE multistart) → 改 `uv run python scripts/compute_queue.py enqueue --script <path> --title <T> --result-artifact <path> --followup-brief 'brief' --followup-task-type paper_review --timeout 3600`。Compute worker cron */15 min 接手；下次 hourly 自動派 interpretation agent（省 60-70% tokens）。注意: 腳本必須完整已寫才能 enqueue。
+   - **拓撲以機械路由為準（2026-07-10 topology-audit）**：dispatch report 的每個 candidate 已帶 `topology` 欄位（task 自帶欄位優先，否則 `model_router.py` 的 task_type 預設表）— `inline`（主線程自做）/ `subagent` / `worktree` / `codex_exec` / `compute_queue` / `agent_team`。**依欄位選載具**；僅在欄位明顯不合本 task 實況時 override，且 override 必須在 work_log entry 記 `topology_override: <from>→<to> 原因`（override 是可觀測例外，不是常態）。
+   - heavy compute (GARCH MLE / Bootstrap / data fetch / 全期 backtest / pooled-MLE multistart) → 改 `uv run python scripts/compute_queue.py enqueue --script <path> --title <T> --result-artifact <path> --followup-brief 'brief' --followup-task-type paper_review --timeout 3600`。Compute worker cron */15 min 接手；下次 hourly 自動派 interpretation agent（省 60-70% tokens）。注意: 腳本必須完整已寫才能 enqueue。此規則凌駕 topology 預設 — 任何類型的 heavy compute 子步驟都走 compute_queue。
    - decision / writing / narrative → 派 Claude agent 正常流程（worktree for experiments；main repo for articles/paper body）。
 6. Brief 含 task title/description + skill 規範 + lookahead + Codex 審核要求 + Mission sanity check。
 

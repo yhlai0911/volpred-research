@@ -29,6 +29,12 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+_SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
+from model_router import pick_topology  # noqa: E402  (2026-07-10 topology-audit：拓撲隨 lane 一起機械路由)
+
+
 def _coerce_priority(v) -> int:
     """Normalize priority to int: 1/"1"/"P1" → 1; unknown → 999 (queue tail).
 
@@ -846,6 +852,9 @@ def build_report(*, auto_refill: bool = True) -> dict:
                 "id": t.get("id"),
                 "priority": t.get("priority"),
                 "title": (t.get("title") or t.get("description") or "")[:120],
+                # 拓撲建議（task.topology 欄位優先，否則 task_type 預設）— orchestrator
+                # 依此選載具，僅明顯不合時 override 並在 work_log 記原因
+                "topology": pick_topology(t.get("task_type"), t)["topology"],
             }
             for t in candidates_to_dispatch
         ],
@@ -897,7 +906,7 @@ def print_report(report: dict) -> None:
     if report["dispatch_candidates"]:
         print(f"[dispatch] candidates to dispatch ({len(report['dispatch_candidates'])}):")
         for c in report["dispatch_candidates"]:
-            print(f"  - P{c['priority']} {c['id']} :: {c['title']}")
+            print(f"  - P{c['priority']} [{c['topology']}] {c['id']} :: {c['title']}")
     else:
         print("[dispatch] NO agent dispatch candidates "
               "(slot full or all pending are main-thread-only)")

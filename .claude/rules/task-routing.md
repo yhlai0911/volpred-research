@@ -12,6 +12,7 @@ paths:
 
 Canonical mapping of `task_type` → who can claim, concurrency rules, **model tier**, special constraints.
 **Updated 2026-05-25**: backfill applied (0 null types remaining); experiment_review collapsed into paper_review; email_reply added; **model column added** (per `scripts/model_router.py`).
+**Updated 2026-07-10（topology-audit）**: **協作拓撲已機械路由** — canonical 對照表在 `scripts/model_router.py` 的 `TASK_TYPE_TO_TOPOLOGY`（`uv run python scripts/model_router.py --list` 看全表；task 自帶 `topology` 欄位優先）。dispatch report 的 candidate 直接帶 `topology` 欄位，orchestrator 依欄位選載具、override 須記 work_log。本檔下方 prose 的執行模式描述自此為 pointer 性質，以 model_router 為準。
 
 ## 13 canonical task types
 
@@ -93,3 +94,4 @@ Linked sub-tasks 用一般 task_type（描述含 `parent_email_task_id` 反向�
 | Date | Change |
 |---|---|
 | 2026-05-25 | 初版 — backfill 60 個 null/experiment_review tasks；email_reply 加入；本表落地 |
+| 2026-07-10 | topology 機械路由（topology-audit）— `TASK_TYPE_TO_TOPOLOGY` + `pick_topology()` 落地 `scripts/model_router.py`；`continue_task_dispatch.py` candidate 帶 `topology` 欄位；orchestrator prompt step 5 改讀欄位、override 記 work_log |
