@@ -2,6 +2,20 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 Codex config 指到舊 CLI 不支援的 model — 全平台 codex 流程 400 靜默失敗數小時
+
+**現象**：K1675 lazypack render 連續兩次 0/3 產出（exit 0 但零 PNG）。挖 log 才見 API 400：`The 'gpt-5.6-sol' model requires a newer version of Codex`。當時 `~/.codex/config.toml` 已被設 `model="gpt-5.6-sol"` + `model_reasoning_effort="ultra"`，但已裝 CLI 是 0.142.5（不支援）。影響面 = 所有走 config 預設的 codex 呼叫（實驗 review gate / lazypack / paper review）— 靜默失敗因為呼叫端多半 capture output 後只看檔案有沒有產出。
+
+**根因**：改 config 的 session 沒有在改完後跑 smoke — config 的 model 與已裝 CLI 版本是兩個獨立變數，必須同一動作內驗證。次因：`gen_lazypack_codex.py` 把 codex stderr capture 起來，400 沒 fail-loud。
+
+**解決方法**：
+1. 臨時恢復（18:01）：config 回退 `gpt-5.4`+`high`（smoke PASS；備份 `~/.codex/config.toml.bak-20260710`）。
+2. 根治（boss 指示 gpt-5.6 已出，18:15）：CLI 升級 0.142.5 → **0.144.1**（`npm install -g @openai/codex@latest --include=optional`），config 恢復 `gpt-5.6-sol`+`ultra`，三組 smoke 全過（顯式 model / ultra effort / config 預設）。
+3. 平台底層引用同步更新（boss：不是只改這邊）：CLAUDE.md L131、`.claude/rules/experiments.md` Codex 診斷 SOP（**新增 step 6：改 config model 後必 smoke** — 機械化這條教訓的位置）、`~/.claude/skills/codex-cli/SKILL.md`（4 處）、memory `reference_dual_cli_availability`。
+4. 遺留：`gen_lazypack_codex.py` fail-loud（400 浮上 summary）在任務 `ops-codex-cli-upgrade-20260710` result 標注，待下一輪 ops 收。
+
+**教訓**：config 與執行 binary 的相容性是「兩檔案一約定」— 任一邊變動都要 smoke；被 capture 的 subprocess stderr 等於不存在，gate 型工具的錯誤必須浮上 exit path。
+
 ## 2026-07-10 `worktree remove --force` 機械 gate 只擋得住老實人 — flag 比對漏了縮寫與聚合形式
 
 **現象**：兩個獨立缺陷，同一天在同一條 deny 規則上發現。
