@@ -1829,7 +1829,9 @@ def _parse_dispatch_health_state(storage_dir: str, now: datetime) -> dict[str, A
             "1. 確認現行版本：ls -la ~/.local/bin/claude && claude --version",
             "2. 修 scripts/dispatch_supervisor/worker.py 的 CLAUDE_BIN 指向 always-current",
             "   symlink ~/.local/bin/claude（不要 pin 死版本），再重啟 daemon：",
-            "   launchctl kickstart -k gui/$(id -u)/com.volpred.dispatch-supervisor",
+            "   bash scripts/reload_dispatch_supervisor.sh --reason claude_bin_fix",
+            "   （不要用 raw launchctl kickstart：wrapper 會寫 planned-restart marker，",
+            "    否則這次部署會被誤報成非預期崩潰；wrapper 也會拒絕殺掉在飛的 worker。）",
             "   （alerts.py 的 DISPATCH_CLAUDE_BIN_DEFAULT 要一起改；只改一邊會被",
             "    test_alerts_default_matches_worker 擋下。）",
             "3. 驗證：env -i HOME=$HOME PATH=/usr/bin:/bin CLAUDE_CODE_OAUTH_TOKEN=… <bin> -p 'say AUTHOK'",
@@ -1923,8 +1925,10 @@ def _parse_dispatch_supervisor_heartbeat_state(storage_dir: str, now: datetime) 
             "## 建議行動",
             "1. 確認行程還在不在：ps -p <supervisor_pid>",
             "2. 看它最後在做什麼：tail -50 ~/.volpred/logs/dispatch_supervisor.log",
-            "3. 重啟（會殺掉正在跑的 worker，先確認 current_job 是否為 null）：",
-            "   launchctl kickstart -k gui/$(id -u)/com.volpred.dispatch-supervisor",
+            "3. 重啟：bash scripts/reload_dispatch_supervisor.sh --reason wedged_daemon",
+            "   （wrapper 會寫 planned-restart marker 避免這次部署被誤報成崩潰，",
+            "    並在 current_job 非 null 時拒絕執行，不會殺掉在飛的 worker。",
+            "    真要殺一個卡死的 worker 才加 --force。）",
             "4. 讀全量狀態：uv run python -m scripts.dispatch_supervisor.cli status",
         ]
     )

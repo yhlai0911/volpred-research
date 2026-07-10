@@ -57375,7 +57375,7 @@
     "description": "Gmail UID: 11950\nMessage-ID: <3F40D5DE-5E3E-4CA6-B1F9-B163D24F3CC8@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 10 Jul 2026 13:46:59 +0800\nSubject: Re: [VolPred Alert][INFO] supervisor restart\n\n--- 用戶回信內容 ---\n立刻檢查這是什麼情況 並徹底解決\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月10日 13:39 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> supervisor restart\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> Supervisor restarted under launchd KeepAlive\r\n> \r\n> previous_started_at: 2026-07-10T05:22:09.580937+00:00\r\n> now: 2026-07-10T05:39:53.258148+00:00\r\n> 若短時間內反覆 restart，檢查 ~/.volpred/logs/dispatch_supervisor.log 找 crash trace\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -57387,16 +57387,30 @@
     "email_subject": "Re: [VolPred Alert][INFO] supervisor restart",
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
     "claimed_by": "interactive-claude",
-    "claimed_at": "2026-07-10T09:08:13.345068+00:00",
-    "claim_session_id": "0ea011977daf",
+    "claimed_at": "2026-07-10T09:18:43.569088+00:00",
+    "claim_session_id": "fca791086c60",
     "status_history": [
       {
         "ts": "2026-07-10T09:08:13.345412+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-10T09:18:43.569445+00:00",
+        "from": "claimed",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-10T09:20:38.823410+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "interactive-claude"
       }
-    ]
+    ],
+    "completed_at": "2026-07-10T09:20:38.823061+00:00",
+    "result": "調查 supervisor restart：確認為部署噪音（12:28-13:48 密集改 supervisor code 連續 kickstart 重載，每次自動發 INFO；非 crash）。徹底解決=deploy-aware marker 抑制 planned reload alert，保留意外 restart alert 能力。commit cfe13589a, ops-superv-restart-noise-20260710 succeeded, close email 已寄。"
   },
   {
     "id": "telegram-359",
