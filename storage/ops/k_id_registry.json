@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1667,
+  "last_k_id": 1671,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -570,8 +570,48 @@
       "status": "reserved",
       "topic": "「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
       "topic_hash": "a8c7ecdaedd943ab"
+    },
+    {
+      "claimed_at": "2026-07-10T00:00:01.597184+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1668",
+      "number": 1668,
+      "source_max": 1667,
+      "status": "reserved",
+      "topic": "氣候政策不確定性（CPU）指數 → 商品期貨 RV 增量**（高信心）— 用 Gavriilidis 免費 news-based CPU/GCPU 月頻指數（policyuncertainty.com）作 HAR 外生 covariate，檢定對 USO/UNG/DBA/CORN/WEAT/GLD 次期 realized vol 的 OOS QLIKE+DM 增量，並測 sector heterogeneity（農產/金屬曝險最高）；signal.shift(1)。與 line 479（純 UNG/DBA 季節性、無 CPU 訊號）正交（來源：JFutMkt 2026 + NBER w34762 CPU-as-supply-shock；CPU→commodity vol 是 2025-26 明確上升趨勢）。",
+      "topic_hash": "d8cc038fccd06f93"
+    },
+    {
+      "claimed_at": "2026-07-10T00:00:01.684712+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1669",
+      "number": 1669,
+      "source_max": 1668,
+      "status": "reserved",
+      "topic": "⚠️(medium) **動能因子崩盤：動態（Daniel-Moskowitz）vs 常數（Barroso）波動率縮放的 MDD/尾部改善** — yfinance MTUM 或自建截面動能組合，跨 2020/2022/2025 三類回撤，比較常數 12% vol-target 與 forecast-based 動態縮放對 momentum crash 的 MDD、左偏、淨成本後 Sharpe 改善；與 line 516（Moreira-Muir 因子動物園 vol-managing premium 存活性）正交——這裡聚焦 crash-tail/MDD 縮減與 dynamic-vs-constant scaling 機制（來源：JPM 2026 Baltussen-Van Vliet 150yr/40國 + Barroso-Santa Clara 2015 + Daniel-Moskowitz JFE 2016）。",
+      "topic_hash": "724ed33201d8c160"
+    },
+    {
+      "claimed_at": "2026-07-10T00:00:01.767740+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1670",
+      "number": 1670,
+      "source_max": 1669,
+      "status": "reserved",
+      "topic": "⚠️(medium-low, dispatch 前查期刊分量) **區間值（interval-valued / range-based）RV 預測 vs 點預測 HAR** — 把日 OHLC 的 [low,high] range 視為 interval-valued time series 物件直接預測整段區間，與傳統 point HAR-RV 比 interval-forecast accuracy（coverage + interval MSE）；interval-valued/fuzzy grep=0（來源：Journal of Forecasting 2026 fuzzy/interval RV；頂刊分量較弱 → ⚠️ dispatch 前確認是否值得投）。",
+      "topic_hash": "35fd94fbc9466a8f"
+    },
+    {
+      "claimed_at": "2026-07-10T00:00:01.859683+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1671",
+      "number": 1671,
+      "source_max": 1670,
+      "status": "reserved",
+      "topic": "「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
+      "topic_hash": "a8c7ecdaedd943ab"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-09T00:00:01.662389+00:00"
+  "updated_at": "2026-07-10T00:00:01.859683+00:00"
 }

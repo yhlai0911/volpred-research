@@ -56648,14 +56648,40 @@
     "description": "聚焦 Q2 財報公布前，美股七巨頭的期權隱含波動率偏斜（Skew）。可量化：分析 Put/Call Ratio 與歷史盈餘公佈後跳空幅度的關係，評估賣出跨式策略的期望值。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-09T22:00:15+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-07-10T00:08:39.196040+00:00",
+    "claim_session_id": "115f32ddb307",
+    "status_history": [
+      {
+        "ts": "2026-07-10T00:08:39.196397+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-10T00:08:46.703432+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-10T00:21:24.070203+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-08"
+      }
+    ],
+    "started_at": "2026-07-10T00:08:46.703017+00:00",
+    "completed_at": "2026-07-10T00:21:24.069863+00:00",
+    "result": "發佈 trending 文章 mile_cf007769「財報週的隱波偏斜」— 七巨頭財報 IV skew + 賣跨式 EV 實測(yfinance即時期權鏈+過去12次財報跳空)；feed live 200 + FB Ivan Lai 雙發佈成功(3圖+留言連結)"
   },
   {
     "id": "trending_repost_2026_07_10_台股避險",
@@ -56697,5 +56723,103 @@
     "started_at": "2026-07-09T22:11:06.530035+00:00",
     "completed_at": "2026-07-09T22:31:07.782766+00:00",
     "result": "台美 VIX 恐慌背離 trending_repost: feed mile_3e11060d(published,4圖) + FB Ivan Lai 雙發佈(主文+2圖+第一則留言連結) 全上線驗證。台版VIX37.09 vs 美股15.84 價差21點,連續54天站上30"
+  },
+  {
+    "id": "K1668",
+    "title": "K1668: 氣候政策不確定性（CPU）指數 → 商品期貨 RV 增量**（高信心）— 用 Gavriilidis 免費 news-based CPU/GCPU 月頻指數（policyuncertainty.com）作 HAR 外生 covariate，",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1511). Original: 氣候政策不確定性（CPU）指數 → 商品期貨 RV 增量**（高信心）— 用 Gavriilidis 免費 news-based CPU/GCPU 月頻指數（policyuncertainty.com）作 HAR 外生 covariate，檢定對 USO/UNG/DBA/CORN/WEAT/GLD 次期 realized vol 的 OOS QLIKE+DM 增量，並測 sector heterogeneity（農產/金屬曝險最高）；signal.shift(1)。與 line 479（純 UNG/DBA 季節性、無 CPU 訊號）正交（來源：JFutMkt 2026 + NBER w34762 CPU-as-supply-shock；CPU→commodity vol 是 2025-26 明確上升趨勢）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1668.py with signal.shift(1) + seed=42, (c) K1668_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1511,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-10T00:00:01Z"
+  },
+  {
+    "id": "K1669",
+    "title": "K1669: ⚠️(medium) **動能因子崩盤：動態（Daniel-Moskowitz）vs 常數（Barroso）波動率縮放的 MDD/尾部改善** — yfinance MTUM 或自建截面動能組合，跨 2020/2022/2025 三類回撤，",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1515). Original: ⚠️(medium) **動能因子崩盤：動態（Daniel-Moskowitz）vs 常數（Barroso）波動率縮放的 MDD/尾部改善** — yfinance MTUM 或自建截面動能組合，跨 2020/2022/2025 三類回撤，比較常數 12% vol-target 與 forecast-based 動態縮放對 momentum crash 的 MDD、左偏、淨成本後 Sharpe 改善；與 line 516（Moreira-Muir 因子動物園 vol-managing premium 存活性）正交——這裡聚焦 crash-tail/MDD 縮減與 dynamic-vs-constant scaling 機制（來源：JPM 2026 Baltussen-Van Vliet 150yr/40國 + Barroso-Santa Clara 2015 + Daniel-Moskowitz JFE 2016）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1669.py with signal.shift(1) + seed=42, (c) K1669_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1515,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-10T00:00:01Z"
+  },
+  {
+    "id": "K1670",
+    "title": "K1670: ⚠️(medium-low, dispatch 前查期刊分量) **區間值（interval-valued / range-based）RV 預測 vs 點預測 HAR** — 把日 OHLC 的 [low,high] range 視為 i",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1516). Original: ⚠️(medium-low, dispatch 前查期刊分量) **區間值（interval-valued / range-based）RV 預測 vs 點預測 HAR** — 把日 OHLC 的 [low,high] range 視為 interval-valued time series 物件直接預測整段區間，與傳統 point HAR-RV 比 interval-forecast accuracy（coverage + interval MSE）；interval-valued/fuzzy grep=0（來源：Journal of Forecasting 2026 fuzzy/interval RV；頂刊分量較弱 → ⚠️ dispatch 前確認是否值得投）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1670.py with signal.shift(1) + seed=42, (c) K1670_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1516,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-10T00:00:01Z"
+  },
+  {
+    "id": "K1671",
+    "title": "K1671: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1528). Original: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1671.py with signal.shift(1) + seed=42, (c) K1671_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1528,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-10T00:00:01Z"
+  },
+  {
+    "id": "journal_discovery_20260710_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "in_progress",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-07-10T00:00:03+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-10T00:19:21.069245+00:00",
+    "claim_session_id": "d8bc592088dc",
+    "status_history": [
+      {
+        "ts": "2026-07-10T00:19:21.069648+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-10T00:19:21.309139+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-10T00:19:21.308803+00:00"
   }
 ]
