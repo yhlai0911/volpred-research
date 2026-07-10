@@ -1,0 +1,1780 @@
+{
+  "experiment_id": "k1671",
+  "title": "量先價行 / 爆量長黑是出貨：成交量能否預測隔日方向（獨立複核）",
+  "generated_at_utc": "2026-07-10T03:58:04.063458+00:00",
+  "seed": 42,
+  "data_source": "yfinance daily OHLCV, cached under experiments/k1671/data",
+  "related_prior_experiments": [
+    "k1659",
+    "k1667"
+  ],
+  "literature": [
+    "Campbell, Grossman and Wang (1993), Trading Volume and Serial Correlation in Stock Returns",
+    "Gervais, Kaniel and Mingelgrin (2001), The High-Volume Return Premium",
+    "Llorente, Michaely, Saar and Wang (2002), Dynamic Volume-Return Relation of Individual Stocks"
+  ],
+  "config": {
+    "start": "2005-01-01",
+    "end": "2026-07-10",
+    "volume_window": 20,
+    "volume_multiplier": 2.0,
+    "black_return_threshold": -0.015,
+    "bootstrap_reps": 5000,
+    "bootstrap_block": 5,
+    "hac_lags": 5,
+    "transaction_cost": 0.0005,
+    "assets": {
+      "SPY": "S&P 500 ETF",
+      "QQQ": "Nasdaq 100 ETF",
+      "IWM": "Russell 2000 ETF",
+      "AAPL": "Apple",
+      "MSFT": "Microsoft",
+      "NVDA": "Nvidia",
+      "0050.TW": "Taiwan 50 ETF",
+      "2330.TW": "TSMC Taiwan",
+      "2317.TW": "Hon Hai"
+    },
+    "lookahead_policy": "volume threshold uses rolling(volume,20).mean().shift(1); event signal uses signal.shift(1) before multiplying same-index return"
+  },
+  "assets": {
+    "SPY": {
+      "meta": {
+        "ticker": "SPY",
+        "name": "S&P 500 ETF",
+        "source": "cache",
+        "price_field": "Adj Close",
+        "start": "2005-01-04",
+        "end": "2026-07-09",
+        "n_days": 5411
+      },
+      "event_counts": {
+        "high_volume": 126,
+        "high_volume_up": 32,
+        "high_volume_down": 94,
+        "high_volume_black": 59
+      },
+      "tests": {
+        "A_high_volume_next_up": {
+          "ticker": "SPY",
+          "n_signal": 126,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5476190476190477,
+          "unconditional_rate": 0.5510996119016818,
+          "hit_rate_minus_base": -0.003480564282634102,
+          "binom_p_vs_estimated_base": 1.0,
+          "two_prop_z": {
+            "diff": -0.003480564282634102,
+            "z": -0.07764961280264979,
+            "p": 0.9381067761768156
+          },
+          "cond_mean_ret": 0.0023391758420970104,
+          "uncond_mean_ret": 0.00048270885113790575,
+          "mean_diff": 0.0018564669909591047,
+          "mean_diff_bootstrap": {
+            "point": 0.0018564669909591047,
+            "ci95": [
+              -0.0012411056692752144,
+              0.005188895176874135
+            ],
+            "p_two_sided_boot": 0.2542,
+            "reps": 5000,
+            "block": 5,
+            "seed": 43
+          },
+          "cond_worst_day": -0.06512300510216373,
+          "cond_best_day": 0.08548634743838157
+        },
+        "A2_high_volume_up_next_up": {
+          "ticker": "SPY",
+          "n_signal": 32,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.53125,
+          "unconditional_rate": 0.5510996119016818,
+          "hit_rate_minus_base": -0.019849611901681774,
+          "binom_p_vs_estimated_base": 0.8601495074495775,
+          "two_prop_z": {
+            "diff": -0.019849611901681774,
+            "z": -0.22508476966286148,
+            "p": 0.8219133290463843
+          },
+          "cond_mean_ret": -0.0008768761853999302,
+          "uncond_mean_ret": 0.00048270885113790575,
+          "mean_diff": -0.0013595850365378359,
+          "mean_diff_bootstrap": {
+            "point": -0.0013595850365378359,
+            "ci95": [
+              -0.007941054152099256,
+              0.004412160346475904
+            ],
+            "p_two_sided_boot": 0.665,
+            "reps": 5000,
+            "block": 5,
+            "seed": 45
+          },
+          "cond_worst_day": -0.044962834616998903,
+          "cond_best_day": 0.039714153348664016
+        },
+        "A3_high_volume_down_next_down": {
+          "ticker": "SPY",
+          "n_signal": 94,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.44680851063829785,
+          "unconditional_rate": 0.44594344853077067,
+          "hit_rate_minus_base": 0.0008650621075271814,
+          "binom_p_vs_estimated_base": 1.0,
+          "two_prop_z": {
+            "diff": 0.0008650621075271814,
+            "z": 0.016728344993048073,
+            "p": 0.986653334288152
+          },
+          "cond_mean_ret": 0.003434002064223629,
+          "uncond_mean_ret": 0.00048270885113790575,
+          "mean_diff": 0.002951293213085723,
+          "mean_diff_bootstrap": {
+            "point": 0.002951293213085723,
+            "ci95": [
+              -0.000927651856596116,
+              0.0074348441477436545
+            ],
+            "p_two_sided_boot": 0.1564,
+            "reps": 5000,
+            "block": 5,
+            "seed": 46
+          },
+          "cond_worst_day": -0.06512300510216373,
+          "cond_best_day": 0.08548634743838157
+        },
+        "B_high_volume_black_next_down": {
+          "ticker": "SPY",
+          "n_signal": 59,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.4406779661016949,
+          "unconditional_rate": 0.44594344853077067,
+          "hit_rate_minus_base": -0.005265482429075763,
+          "binom_p_vs_estimated_base": 1.0,
+          "two_prop_z": {
+            "diff": -0.005265482429075763,
+            "z": -0.08092780020521051,
+            "p": 0.9354993711050601
+          },
+          "cond_mean_ret": 0.004772961815466635,
+          "uncond_mean_ret": 0.00048270885113790575,
+          "mean_diff": 0.004290252964328729,
+          "mean_diff_bootstrap": {
+            "point": 0.004290252964328729,
+            "ci95": [
+              -0.0012569190811559299,
+              0.010230046275831742
+            ],
+            "p_two_sided_boot": 0.1404,
+            "reps": 5000,
+            "block": 5,
+            "seed": 44
+          },
+          "cond_worst_day": -0.04210695954077648,
+          "cond_best_day": 0.08548634743838157
+        }
+      }
+    },
+    "QQQ": {
+      "meta": {
+        "ticker": "QQQ",
+        "name": "Nasdaq 100 ETF",
+        "source": "cache",
+        "price_field": "Adj Close",
+        "start": "2005-01-04",
+        "end": "2026-07-09",
+        "n_days": 5411
+      },
+      "event_counts": {
+        "high_volume": 120,
+        "high_volume_up": 24,
+        "high_volume_down": 96,
+        "high_volume_black": 67
+      },
+      "tests": {
+        "A_high_volume_next_up": {
+          "ticker": "QQQ",
+          "n_signal": 120,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5166666666666667,
+          "unconditional_rate": 0.554241360192201,
+          "hit_rate_minus_base": -0.03757469352553433,
+          "binom_p_vs_estimated_base": 0.4102184421331023,
+          "two_prop_z": {
+            "diff": -0.03757469352553433,
+            "z": -0.8189295168946845,
+            "p": 0.41282662818466953
+          },
+          "cond_mean_ret": -0.0014806979904150113,
+          "uncond_mean_ret": 0.0006602110436397904,
+          "mean_diff": -0.002140909034054802,
+          "mean_diff_bootstrap": {
+            "point": -0.002140909034054802,
+            "ci95": [
+              -0.005400387091895587,
+              0.0010135687112062747
+            ],
+            "p_two_sided_boot": 0.187,
+            "reps": 5000,
+            "block": 5,
+            "seed": 53
+          },
+          "cond_worst_day": -0.06018925995963631,
+          "cond_best_day": 0.05197120942947797
+        },
+        "A2_high_volume_up_next_up": {
+          "ticker": "QQQ",
+          "n_signal": 24,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.375,
+          "unconditional_rate": 0.554241360192201,
+          "hit_rate_minus_base": -0.17924136019220105,
+          "binom_p_vs_estimated_base": 0.09942154882505587,
+          "two_prop_z": {
+            "diff": -0.17924136019220105,
+            "z": -1.7624166572969455,
+            "p": 0.07799892631411476
+          },
+          "cond_mean_ret": -0.003848743932652337,
+          "uncond_mean_ret": 0.0006602110436397904,
+          "mean_diff": -0.004508954976292127,
+          "mean_diff_bootstrap": {
+            "point": -0.004508954976292127,
+            "ci95": [
+              -0.01318189226521128,
+              0.004434159342372546
+            ],
+            "p_two_sided_boot": 0.3122,
+            "reps": 5000,
+            "block": 5,
+            "seed": 55
+          },
+          "cond_worst_day": -0.050073948374596444,
+          "cond_best_day": 0.05160326633837342
+        },
+        "A3_high_volume_down_next_down": {
+          "ticker": "QQQ",
+          "n_signal": 96,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.4479166666666667,
+          "unconditional_rate": 0.4409536130105341,
+          "hit_rate_minus_base": 0.0069630536561325895,
+          "binom_p_vs_estimated_base": 0.9183304668265904,
+          "two_prop_z": {
+            "diff": 0.0069630536561325895,
+            "z": 0.1362020356051529,
+            "p": 0.8916615659854044
+          },
+          "cond_mean_ret": -0.00088868650485568,
+          "uncond_mean_ret": 0.0006602110436397904,
+          "mean_diff": -0.0015488975484954704,
+          "mean_diff_bootstrap": {
+            "point": -0.0015488975484954704,
+            "ci95": [
+              -0.0049791218774912546,
+              0.0019673849959249545
+            ],
+            "p_two_sided_boot": 0.4018,
+            "reps": 5000,
+            "block": 5,
+            "seed": 56
+          },
+          "cond_worst_day": -0.06018925995963631,
+          "cond_best_day": 0.05197120942947797
+        },
+        "B_high_volume_black_next_down": {
+          "ticker": "QQQ",
+          "n_signal": 67,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.3582089552238806,
+          "unconditional_rate": 0.4409536130105341,
+          "hit_rate_minus_base": -0.08274465778665352,
+          "binom_p_vs_estimated_base": 0.17848295574587203,
+          "two_prop_z": {
+            "diff": -0.08274465778665352,
+            "z": -1.3560976004540695,
+            "p": 0.17506811625599417
+          },
+          "cond_mean_ret": 0.0020816623902460245,
+          "uncond_mean_ret": 0.0006602110436397904,
+          "mean_diff": 0.001421451346606234,
+          "mean_diff_bootstrap": {
+            "point": 0.001421451346606234,
+            "ci95": [
+              -0.003260865793722026,
+              0.006484670005797386
+            ],
+            "p_two_sided_boot": 0.5608,
+            "reps": 5000,
+            "block": 5,
+            "seed": 54
+          },
+          "cond_worst_day": -0.04370560586033523,
+          "cond_best_day": 0.05197120942947797
+        }
+      }
+    },
+    "IWM": {
+      "meta": {
+        "ticker": "IWM",
+        "name": "Russell 2000 ETF",
+        "source": "cache",
+        "price_field": "Adj Close",
+        "start": "2005-01-04",
+        "end": "2026-07-09",
+        "n_days": 5411
+      },
+      "event_counts": {
+        "high_volume": 109,
+        "high_volume_up": 37,
+        "high_volume_down": 72,
+        "high_volume_black": 52
+      },
+      "tests": {
+        "A_high_volume_next_up": {
+          "ticker": "IWM",
+          "n_signal": 109,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5504587155963303,
+          "unconditional_rate": 0.5340972093882831,
+          "hit_rate_minus_base": 0.016361506208047216,
+          "binom_p_vs_estimated_base": 0.7737384230028377,
+          "two_prop_z": {
+            "diff": 0.016361506208047216,
+            "z": 0.3390527464088152,
+            "p": 0.734569995064442
+          },
+          "cond_mean_ret": 0.0018605086651772768,
+          "uncond_mean_ret": 0.00045206106268857446,
+          "mean_diff": 0.0014084476024887023,
+          "mean_diff_bootstrap": {
+            "point": 0.0014084476024887023,
+            "ci95": [
+              -0.0023789509575136087,
+              0.005337183939436002
+            ],
+            "p_two_sided_boot": 0.4542,
+            "reps": 5000,
+            "block": 5,
+            "seed": 63
+          },
+          "cond_worst_day": -0.0870603025457174,
+          "cond_best_day": 0.06698208571528519
+        },
+        "A2_high_volume_up_next_up": {
+          "ticker": "IWM",
+          "n_signal": 37,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5675675675675675,
+          "unconditional_rate": 0.5340972093882831,
+          "hit_rate_minus_base": 0.033470358179284454,
+          "binom_p_vs_estimated_base": 0.7433924446734674,
+          "two_prop_z": {
+            "diff": 0.033470358179284454,
+            "z": 0.40675902911837025,
+            "p": 0.6841849810344156
+          },
+          "cond_mean_ret": 0.0019067705552018941,
+          "uncond_mean_ret": 0.00045206106268857446,
+          "mean_diff": 0.0014547094925133196,
+          "mean_diff_bootstrap": {
+            "point": 0.0014547094925133196,
+            "ci95": [
+              -0.004910297281902754,
+              0.00696643907105088
+            ],
+            "p_two_sided_boot": 0.6182,
+            "reps": 5000,
+            "block": 5,
+            "seed": 65
+          },
+          "cond_worst_day": -0.04894923656152972,
+          "cond_best_day": 0.04456792734234116
+        },
+        "A3_high_volume_down_next_down": {
+          "ticker": "IWM",
+          "n_signal": 72,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.4583333333333333,
+          "unconditional_rate": 0.4636850859360562,
+          "hit_rate_minus_base": -0.005351752602722859,
+          "binom_p_vs_estimated_base": 1.0,
+          "two_prop_z": {
+            "diff": -0.005351752602722859,
+            "z": -0.09046381146641691,
+            "p": 0.9279186502717534
+          },
+          "cond_mean_ret": 0.0018367351939146265,
+          "uncond_mean_ret": 0.00045206106268857446,
+          "mean_diff": 0.001384674131226052,
+          "mean_diff_bootstrap": {
+            "point": 0.001384674131226052,
+            "ci95": [
+              -0.0032478004983718823,
+              0.006440539629251584
+            ],
+            "p_two_sided_boot": 0.5724,
+            "reps": 5000,
+            "block": 5,
+            "seed": 66
+          },
+          "cond_worst_day": -0.0870603025457174,
+          "cond_best_day": 0.06698208571528519
+        },
+        "B_high_volume_black_next_down": {
+          "ticker": "IWM",
+          "n_signal": 52,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.4230769230769231,
+          "unconditional_rate": 0.4636850859360562,
+          "hit_rate_minus_base": -0.0406081628591331,
+          "binom_p_vs_estimated_base": 0.5810931796502671,
+          "two_prop_z": {
+            "diff": -0.0406081628591331,
+            "z": -0.5844418753380703,
+            "p": 0.558923060297952
+          },
+          "cond_mean_ret": 0.0045199873094557246,
+          "uncond_mean_ret": 0.00045206106268857446,
+          "mean_diff": 0.0040679262467671505,
+          "mean_diff_bootstrap": {
+            "point": 0.0040679262467671505,
+            "ci95": [
+              -0.0014965640736059626,
+              0.010024786571651212
+            ],
+            "p_two_sided_boot": 0.1664,
+            "reps": 5000,
+            "block": 5,
+            "seed": 64
+          },
+          "cond_worst_day": -0.0870603025457174,
+          "cond_best_day": 0.06698208571528519
+        }
+      }
+    },
+    "AAPL": {
+      "meta": {
+        "ticker": "AAPL",
+        "name": "Apple",
+        "source": "cache",
+        "price_field": "Adj Close",
+        "start": "2005-01-04",
+        "end": "2026-07-09",
+        "n_days": 5411
+      },
+      "event_counts": {
+        "high_volume": 163,
+        "high_volume_up": 76,
+        "high_volume_down": 87,
+        "high_volume_black": 59
+      },
+      "tests": {
+        "A_high_volume_next_up": {
+          "ticker": "AAPL",
+          "n_signal": 163,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5276073619631901,
+          "unconditional_rate": 0.530770652374792,
+          "hit_rate_minus_base": -0.0031632904116019045,
+          "binom_p_vs_estimated_base": 0.9376391612871101,
+          "two_prop_z": {
+            "diff": -0.0031632904116019045,
+            "z": -0.07973282680992277,
+            "p": 0.9364497505393476
+          },
+          "cond_mean_ret": 0.003392003084388268,
+          "uncond_mean_ret": 0.0012779407604666974,
+          "mean_diff": 0.0021140623239215704,
+          "mean_diff_bootstrap": {
+            "point": 0.0021140623239215704,
+            "ci95": [
+              -0.00223079939412835,
+              0.006250923261333667
+            ],
+            "p_two_sided_boot": 0.3114,
+            "reps": 5000,
+            "block": 5,
+            "seed": 73
+          },
+          "cond_worst_day": -0.09210513165326661,
+          "cond_best_day": 0.09310083300094218
+        },
+        "A2_high_volume_up_next_up": {
+          "ticker": "AAPL",
+          "n_signal": 76,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.618421052631579,
+          "unconditional_rate": 0.530770652374792,
+          "hit_rate_minus_base": 0.08765040025678694,
+          "binom_p_vs_estimated_base": 0.13587635323055958,
+          "two_prop_z": {
+            "diff": 0.08765040025678694,
+            "z": 1.5207309669488902,
+            "p": 0.12832736428335356
+          },
+          "cond_mean_ret": 0.00807387624388891,
+          "uncond_mean_ret": 0.0012779407604666974,
+          "mean_diff": 0.006795935483422212,
+          "mean_diff_bootstrap": {
+            "point": 0.006795935483422212,
+            "ci95": [
+              0.001676694404692665,
+              0.011756096123529333
+            ],
+            "p_two_sided_boot": 0.0068,
+            "reps": 5000,
+            "block": 5,
+            "seed": 75
+          },
+          "cond_worst_day": -0.04535726892441794,
+          "cond_best_day": 0.07210805313779911
+        },
+        "A3_high_volume_down_next_down": {
+          "ticker": "AAPL",
+          "n_signal": 87,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5517241379310345,
+          "unconditional_rate": 0.46719645167251894,
+          "hit_rate_minus_base": 0.08452768625851553,
+          "binom_p_vs_estimated_base": 0.13222480274140294,
+          "two_prop_z": {
+            "diff": 0.08452768625851553,
+            "z": 1.5674247758572846,
+            "p": 0.11701543654893021
+          },
+          "cond_mean_ret": -0.0006979091009226371,
+          "uncond_mean_ret": 0.0012779407604666974,
+          "mean_diff": -0.0019758498613893344,
+          "mean_diff_bootstrap": {
+            "point": -0.0019758498613893344,
+            "ci95": [
+              -0.008249661897401624,
+              0.004608019069664964
+            ],
+            "p_two_sided_boot": 0.5494,
+            "reps": 5000,
+            "block": 5,
+            "seed": 76
+          },
+          "cond_worst_day": -0.09210513165326661,
+          "cond_best_day": 0.09310083300094218
+        },
+        "B_high_volume_black_next_down": {
+          "ticker": "AAPL",
+          "n_signal": 59,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5932203389830508,
+          "unconditional_rate": 0.46719645167251894,
+          "hit_rate_minus_base": 0.12602388731053188,
+          "binom_p_vs_estimated_base": 0.06688235940732659,
+          "two_prop_z": {
+            "diff": 0.12602388731053188,
+            "z": 1.9293654121434678,
+            "p": 0.053685514431509596
+          },
+          "cond_mean_ret": -0.0032674623119988014,
+          "uncond_mean_ret": 0.0012779407604666974,
+          "mean_diff": -0.004545403072465499,
+          "mean_diff_bootstrap": {
+            "point": -0.004545403072465499,
+            "ci95": [
+              -0.01261276245999323,
+              0.003960992416547132
+            ],
+            "p_two_sided_boot": 0.278,
+            "reps": 5000,
+            "block": 5,
+            "seed": 74
+          },
+          "cond_worst_day": -0.09210513165326661,
+          "cond_best_day": 0.0911674661954529
+        }
+      }
+    },
+    "MSFT": {
+      "meta": {
+        "ticker": "MSFT",
+        "name": "Microsoft",
+        "source": "cache",
+        "price_field": "Adj Close",
+        "start": "2005-01-04",
+        "end": "2026-07-09",
+        "n_days": 5411
+      },
+      "event_counts": {
+        "high_volume": 158,
+        "high_volume_up": 84,
+        "high_volume_down": 74,
+        "high_volume_black": 51
+      },
+      "tests": {
+        "A_high_volume_next_up": {
+          "ticker": "MSFT",
+          "n_signal": 158,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.4936708860759494,
+          "unconditional_rate": 0.5150619109221956,
+          "hit_rate_minus_base": -0.021391024846246165,
+          "binom_p_vs_estimated_base": 0.6331575731044758,
+          "two_prop_z": {
+            "diff": -0.021391024846246165,
+            "z": -0.53030027797155,
+            "p": 0.5959037539983814
+          },
+          "cond_mean_ret": 0.001769144660629477,
+          "uncond_mean_ret": 0.0007087989771922606,
+          "mean_diff": 0.0010603456834372164,
+          "mean_diff_bootstrap": {
+            "point": 0.0010603456834372164,
+            "ci95": [
+              -0.0029914958057906125,
+              0.005448130428350368
+            ],
+            "p_two_sided_boot": 0.6226,
+            "reps": 5000,
+            "block": 5,
+            "seed": 83
+          },
+          "cond_worst_day": -0.113760642594818,
+          "cond_best_day": 0.18604615876710606
+        },
+        "A2_high_volume_up_next_up": {
+          "ticker": "MSFT",
+          "n_signal": 84,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.4880952380952381,
+          "unconditional_rate": 0.5150619109221956,
+          "hit_rate_minus_base": -0.026966672826957472,
+          "binom_p_vs_estimated_base": 0.6629997126283174,
+          "two_prop_z": {
+            "diff": -0.026966672826957472,
+            "z": -0.49072526031789887,
+            "p": 0.6236207779163907
+          },
+          "cond_mean_ret": -0.00018788203443755895,
+          "uncond_mean_ret": 0.0007087989771922606,
+          "mean_diff": -0.0008966810116298195,
+          "mean_diff_bootstrap": {
+            "point": -0.0008966810116298195,
+            "ci95": [
+              -0.006498226384884783,
+              0.004271703392279926
+            ],
+            "p_two_sided_boot": 0.7488,
+            "reps": 5000,
+            "block": 5,
+            "seed": 85
+          },
+          "cond_worst_day": -0.113760642594818,
+          "cond_best_day": 0.09502950784501385
+        },
+        "A3_high_volume_down_next_down": {
+          "ticker": "MSFT",
+          "n_signal": 74,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5,
+          "unconditional_rate": 0.47588246165219,
+          "hit_rate_minus_base": 0.024117538347809997,
+          "binom_p_vs_estimated_base": 0.7274985188051724,
+          "two_prop_z": {
+            "diff": 0.024117538347809997,
+            "z": 0.41259268242041125,
+            "p": 0.6799050634368757
+          },
+          "cond_mean_ret": 0.003990634422597464,
+          "uncond_mean_ret": 0.0007087989771922606,
+          "mean_diff": 0.0032818354454052035,
+          "mean_diff_bootstrap": {
+            "point": 0.0032818354454052035,
+            "ci95": [
+              -0.002615269201182898,
+              0.010481317700305418
+            ],
+            "p_two_sided_boot": 0.327,
+            "reps": 5000,
+            "block": 5,
+            "seed": 86
+          },
+          "cond_worst_day": -0.041738867097898646,
+          "cond_best_day": 0.18604615876710606
+        },
+        "B_high_volume_black_next_down": {
+          "ticker": "MSFT",
+          "n_signal": 51,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5098039215686274,
+          "unconditional_rate": 0.47588246165219,
+          "hit_rate_minus_base": 0.03392145991643741,
+          "binom_p_vs_estimated_base": 0.6752158639286937,
+          "two_prop_z": {
+            "diff": 0.03392145991643741,
+            "z": 0.48277540086321713,
+            "p": 0.6292552189415035
+          },
+          "cond_mean_ret": 0.003884212519537019,
+          "uncond_mean_ret": 0.0007087989771922606,
+          "mean_diff": 0.0031754135423447587,
+          "mean_diff_bootstrap": {
+            "point": 0.0031754135423447587,
+            "ci95": [
+              -0.0045142625527671626,
+              0.01340990712151409
+            ],
+            "p_two_sided_boot": 0.49,
+            "reps": 5000,
+            "block": 5,
+            "seed": 84
+          },
+          "cond_worst_day": -0.041738867097898646,
+          "cond_best_day": 0.18604615876710606
+        }
+      }
+    },
+    "NVDA": {
+      "meta": {
+        "ticker": "NVDA",
+        "name": "Nvidia",
+        "source": "cache",
+        "price_field": "Adj Close",
+        "start": "2005-01-04",
+        "end": "2026-07-09",
+        "n_days": 5411
+      },
+      "event_counts": {
+        "high_volume": 193,
+        "high_volume_up": 109,
+        "high_volume_down": 84,
+        "high_volume_black": 70
+      },
+      "tests": {
+        "A_high_volume_next_up": {
+          "ticker": "NVDA",
+          "n_signal": 193,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.49740932642487046,
+          "unconditional_rate": 0.52411753834781,
+          "hit_rate_minus_base": -0.026708211922939595,
+          "binom_p_vs_estimated_base": 0.47169976951862647,
+          "two_prop_z": {
+            "diff": -0.026708211922939595,
+            "z": -0.7299802134748627,
+            "p": 0.46540227929800526
+          },
+          "cond_mean_ret": 0.0058500314745955255,
+          "uncond_mean_ret": 0.001764488763980745,
+          "mean_diff": 0.004085542710614781,
+          "mean_diff_bootstrap": {
+            "point": 0.004085542710614781,
+            "ci95": [
+              -0.0018455078223729704,
+              0.010120915871748891
+            ],
+            "p_two_sided_boot": 0.19,
+            "reps": 5000,
+            "block": 5,
+            "seed": 93
+          },
+          "cond_worst_day": -0.11999059499755038,
+          "cond_best_day": 0.29806715959750774
+        },
+        "A2_high_volume_up_next_up": {
+          "ticker": "NVDA",
+          "n_signal": 109,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.47706422018348627,
+          "unconditional_rate": 0.52411753834781,
+          "hit_rate_minus_base": -0.04705331816432379,
+          "binom_p_vs_estimated_base": 0.3387304589564445,
+          "two_prop_z": {
+            "diff": -0.04705331816432379,
+            "z": -0.9738011270317739,
+            "p": 0.33015529340710925
+          },
+          "cond_mean_ret": 0.0026004530934091333,
+          "uncond_mean_ret": 0.001764488763980745,
+          "mean_diff": 0.0008359643294283882,
+          "mean_diff_bootstrap": {
+            "point": 0.0008359643294283882,
+            "ci95": [
+              -0.0061353589466258416,
+              0.008342074894488604
+            ],
+            "p_two_sided_boot": 0.8134,
+            "reps": 5000,
+            "block": 5,
+            "seed": 95
+          },
+          "cond_worst_day": -0.07381069070597002,
+          "cond_best_day": 0.1782589263740637
+        },
+        "A3_high_volume_down_next_down": {
+          "ticker": "NVDA",
+          "n_signal": 84,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.47619047619047616,
+          "unconditional_rate": 0.4699685825170948,
+          "hit_rate_minus_base": 0.0062218936733813845,
+          "binom_p_vs_estimated_base": 0.9134546286818364,
+          "two_prop_z": {
+            "diff": 0.0062218936733813845,
+            "z": 0.11337752052806319,
+            "p": 0.909731260803802
+          },
+          "cond_mean_ret": 0.01006674627875406,
+          "uncond_mean_ret": 0.001764488763980745,
+          "mean_diff": 0.008302257514773315,
+          "mean_diff_bootstrap": {
+            "point": 0.008302257514773315,
+            "ci95": [
+              -0.0021048406104080108,
+              0.020398525229741983
+            ],
+            "p_two_sided_boot": 0.1454,
+            "reps": 5000,
+            "block": 5,
+            "seed": 96
+          },
+          "cond_worst_day": -0.11999059499755038,
+          "cond_best_day": 0.29806715959750774
+        },
+        "B_high_volume_black_next_down": {
+          "ticker": "NVDA",
+          "n_signal": 70,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.4714285714285714,
+          "unconditional_rate": 0.4699685825170948,
+          "hit_rate_minus_base": 0.0014599889114766396,
+          "binom_p_vs_estimated_base": 1.0,
+          "two_prop_z": {
+            "diff": 0.0014599889114766396,
+            "z": 0.02431763007866558,
+            "p": 0.9805992505200223
+          },
+          "cond_mean_ret": 0.00880318660855733,
+          "uncond_mean_ret": 0.001764488763980745,
+          "mean_diff": 0.007038697844576586,
+          "mean_diff_bootstrap": {
+            "point": 0.007038697844576586,
+            "ci95": [
+              -0.0037739884429434777,
+              0.019998605003884107
+            ],
+            "p_two_sided_boot": 0.2438,
+            "reps": 5000,
+            "block": 5,
+            "seed": 94
+          },
+          "cond_worst_day": -0.11999059499755038,
+          "cond_best_day": 0.29806715959750774
+        }
+      }
+    },
+    "0050.TW": {
+      "meta": {
+        "ticker": "0050.TW",
+        "name": "Taiwan 50 ETF",
+        "source": "cache",
+        "price_field": "Adj Close",
+        "start": "2009-01-06",
+        "end": "2026-07-08",
+        "n_days": 4269
+      },
+      "event_counts": {
+        "high_volume": 354,
+        "high_volume_up": 152,
+        "high_volume_down": 193,
+        "high_volume_black": 106
+      },
+      "tests": {
+        "A_high_volume_next_up": {
+          "ticker": "0050.TW",
+          "n_signal": 354,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5451977401129944,
+          "unconditional_rate": 0.5122979620520028,
+          "hit_rate_minus_base": 0.032899778060991536,
+          "binom_p_vs_estimated_base": 0.22168687255864547,
+          "two_prop_z": {
+            "diff": 0.032899778060991536,
+            "z": 1.190190578436013,
+            "p": 0.23397149540119955
+          },
+          "cond_mean_ret": 0.0009988136692452901,
+          "uncond_mean_ret": 0.0007762904959883024,
+          "mean_diff": 0.00022252317325698772,
+          "mean_diff_bootstrap": {
+            "point": 0.00022252317325698772,
+            "ci95": [
+              -0.001090169067619129,
+              0.001506995535964322
+            ],
+            "p_two_sided_boot": 0.7396,
+            "reps": 5000,
+            "block": 5,
+            "seed": 103
+          },
+          "cond_worst_day": -0.09129930758469984,
+          "cond_best_day": 0.09986322602815512
+        },
+        "A2_high_volume_up_next_up": {
+          "ticker": "0050.TW",
+          "n_signal": 152,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5855263157894737,
+          "unconditional_rate": 0.5122979620520028,
+          "hit_rate_minus_base": 0.07322835373747083,
+          "binom_p_vs_estimated_base": 0.07443641908590375,
+          "two_prop_z": {
+            "diff": 0.07322835373747083,
+            "z": 1.7751073510038538,
+            "p": 0.07588016345155069
+          },
+          "cond_mean_ret": 0.0017570667704447528,
+          "uncond_mean_ret": 0.0007762904959883024,
+          "mean_diff": 0.0009807762744564502,
+          "mean_diff_bootstrap": {
+            "point": 0.0009807762744564502,
+            "ci95": [
+              -0.0004041722090676467,
+              0.00241496850068178
+            ],
+            "p_two_sided_boot": 0.1664,
+            "reps": 5000,
+            "block": 5,
+            "seed": 105
+          },
+          "cond_worst_day": -0.022980136741513668,
+          "cond_best_day": 0.039701485245122736
+        },
+        "A3_high_volume_down_next_down": {
+          "ticker": "0050.TW",
+          "n_signal": 193,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.43523316062176165,
+          "unconditional_rate": 0.4483485593815882,
+          "hit_rate_minus_base": -0.013115398759826535,
+          "binom_p_vs_estimated_base": 0.7723029153701433,
+          "two_prop_z": {
+            "diff": -0.013115398759826535,
+            "z": -0.3584015841383941,
+            "p": 0.72004280631967
+          },
+          "cond_mean_ret": 0.0007666765385852867,
+          "uncond_mean_ret": 0.0007762904959883024,
+          "mean_diff": -9.613957403015704e-06,
+          "mean_diff_bootstrap": {
+            "point": -9.613957403015704e-06,
+            "ci95": [
+              -0.0022213527929100694,
+              0.002090542794717292
+            ],
+            "p_two_sided_boot": 0.9936,
+            "reps": 5000,
+            "block": 5,
+            "seed": 106
+          },
+          "cond_worst_day": -0.09129930758469984,
+          "cond_best_day": 0.09986322602815512
+        },
+        "B_high_volume_black_next_down": {
+          "ticker": "0050.TW",
+          "n_signal": 106,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.41509433962264153,
+          "unconditional_rate": 0.4483485593815882,
+          "hit_rate_minus_base": -0.03325421975894666,
+          "binom_p_vs_estimated_base": 0.5581354381744605,
+          "two_prop_z": {
+            "diff": -0.03325421975894666,
+            "z": -0.6801538054141448,
+            "p": 0.4964070785935375
+          },
+          "cond_mean_ret": 0.0016437906499747546,
+          "uncond_mean_ret": 0.0007762904959883024,
+          "mean_diff": 0.0008675001539864522,
+          "mean_diff_bootstrap": {
+            "point": 0.0008675001539864522,
+            "ci95": [
+              -0.0022451657751657557,
+              0.004224992323370474
+            ],
+            "p_two_sided_boot": 0.5872,
+            "reps": 5000,
+            "block": 5,
+            "seed": 104
+          },
+          "cond_worst_day": -0.09129930758469984,
+          "cond_best_day": 0.09986322602815512
+        }
+      }
+    },
+    "2330.TW": {
+      "meta": {
+        "ticker": "2330.TW",
+        "name": "TSMC Taiwan",
+        "source": "cache",
+        "price_field": "Adj Close",
+        "start": "2005-01-04",
+        "end": "2026-07-09",
+        "n_days": 5260
+      },
+      "event_counts": {
+        "high_volume": 228,
+        "high_volume_up": 111,
+        "high_volume_down": 111,
+        "high_volume_black": 77
+      },
+      "tests": {
+        "A_high_volume_next_up": {
+          "ticker": "2330.TW",
+          "n_signal": 228,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5526315789473685,
+          "unconditional_rate": 0.4859315589353612,
+          "hit_rate_minus_base": 0.06670002001200726,
+          "binom_p_vs_estimated_base": 0.04678989959529012,
+          "two_prop_z": {
+            "diff": 0.06670002001200726,
+            "z": 1.9725139851249576,
+            "p": 0.04855096140932447
+          },
+          "cond_mean_ret": 0.00399902621782553,
+          "uncond_mean_ret": 0.0010475208591136113,
+          "mean_diff": 0.0029515053587119188,
+          "mean_diff_bootstrap": {
+            "point": 0.0029515053587119188,
+            "ci95": [
+              0.0002669780906095345,
+              0.0056612582916782265
+            ],
+            "p_two_sided_boot": 0.0276,
+            "reps": 5000,
+            "block": 5,
+            "seed": 113
+          },
+          "cond_worst_day": -0.06904262963579144,
+          "cond_best_day": 0.09936299261573378
+        },
+        "A2_high_volume_up_next_up": {
+          "ticker": "2330.TW",
+          "n_signal": 111,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5225225225225225,
+          "unconditional_rate": 0.4859315589353612,
+          "hit_rate_minus_base": 0.036590963587161296,
+          "binom_p_vs_estimated_base": 0.44911076908732206,
+          "two_prop_z": {
+            "diff": 0.036590963587161296,
+            "z": 0.7632812768348652,
+            "p": 0.4452956657517415
+          },
+          "cond_mean_ret": 0.0013542572851835478,
+          "uncond_mean_ret": 0.0010475208591136113,
+          "mean_diff": 0.00030673642606993644,
+          "mean_diff_bootstrap": {
+            "point": 0.00030673642606993644,
+            "ci95": [
+              -0.0035488685509885145,
+              0.004088331003659933
+            ],
+            "p_two_sided_boot": 0.873,
+            "reps": 5000,
+            "block": 5,
+            "seed": 115
+          },
+          "cond_worst_day": -0.06904262963579144,
+          "cond_best_day": 0.06985299756815211
+        },
+        "A3_high_volume_down_next_down": {
+          "ticker": "2330.TW",
+          "n_signal": 111,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.38738738738738737,
+          "unconditional_rate": 0.44011406844106465,
+          "hit_rate_minus_base": -0.05272668105367728,
+          "binom_p_vs_estimated_base": 0.29320681270666066,
+          "two_prop_z": {
+            "diff": -0.05272668105367728,
+            "z": -1.1077478261144573,
+            "p": 0.2679707382466465
+          },
+          "cond_mean_ret": 0.0063827507637585655,
+          "uncond_mean_ret": 0.0010475208591136113,
+          "mean_diff": 0.005335229904644954,
+          "mean_diff_bootstrap": {
+            "point": 0.005335229904644954,
+            "ci95": [
+              0.0009224737233626537,
+              0.009935062353352396
+            ],
+            "p_two_sided_boot": 0.0198,
+            "reps": 5000,
+            "block": 5,
+            "seed": 116
+          },
+          "cond_worst_day": -0.05240125795354034,
+          "cond_best_day": 0.09936299261573378
+        },
+        "B_high_volume_black_next_down": {
+          "ticker": "2330.TW",
+          "n_signal": 77,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.36363636363636365,
+          "unconditional_rate": 0.44011406844106465,
+          "hit_rate_minus_base": -0.07647770480470101,
+          "binom_p_vs_estimated_base": 0.20662434390404424,
+          "two_prop_z": {
+            "diff": -0.07647770480470101,
+            "z": -1.3424856107956498,
+            "p": 0.1794385928378699
+          },
+          "cond_mean_ret": 0.00904280477440644,
+          "uncond_mean_ret": 0.0010475208591136113,
+          "mean_diff": 0.007995283915292828,
+          "mean_diff_bootstrap": {
+            "point": 0.007995283915292828,
+            "ci95": [
+              0.0022346603286186825,
+              0.014003161449629105
+            ],
+            "p_two_sided_boot": 0.0076,
+            "reps": 5000,
+            "block": 5,
+            "seed": 114
+          },
+          "cond_worst_day": -0.04063659971580047,
+          "cond_best_day": 0.09936299261573378
+        }
+      }
+    },
+    "2317.TW": {
+      "meta": {
+        "ticker": "2317.TW",
+        "name": "Hon Hai",
+        "source": "cache",
+        "price_field": "Adj Close",
+        "start": "2005-01-04",
+        "end": "2026-07-09",
+        "n_days": 5239
+      },
+      "event_counts": {
+        "high_volume": 293,
+        "high_volume_up": 174,
+        "high_volume_down": 114,
+        "high_volume_black": 91
+      },
+      "tests": {
+        "A_high_volume_next_up": {
+          "ticker": "2317.TW",
+          "n_signal": 293,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5631399317406144,
+          "unconditional_rate": 0.46783737354456956,
+          "hit_rate_minus_base": 0.09530255819604483,
+          "binom_p_vs_estimated_base": 0.0012466512321151453,
+          "two_prop_z": {
+            "diff": 0.09530255819604483,
+            "z": 3.1797357081069424,
+            "p": 0.0014740942984030614
+          },
+          "cond_mean_ret": 0.005882025599189975,
+          "uncond_mean_ret": 0.0006626214253775756,
+          "mean_diff": 0.0052194041738124,
+          "mean_diff_bootstrap": {
+            "point": 0.0052194041738124,
+            "ci95": [
+              0.0022945752820854926,
+              0.008453623684519648
+            ],
+            "p_two_sided_boot": 0.0008,
+            "reps": 5000,
+            "block": 5,
+            "seed": 123
+          },
+          "cond_worst_day": -0.10484574544197456,
+          "cond_best_day": 0.22057417556234338
+        },
+        "A2_high_volume_up_next_up": {
+          "ticker": "2317.TW",
+          "n_signal": 174,
+          "direction": "up",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.5574712643678161,
+          "unconditional_rate": 0.46783737354456956,
+          "hit_rate_minus_base": 0.08963389082324658,
+          "binom_p_vs_estimated_base": 0.018517755070951353,
+          "two_prop_z": {
+            "diff": 0.08963389082324658,
+            "z": 2.330387062595036,
+            "p": 0.019785702932774596
+          },
+          "cond_mean_ret": 0.005801059850021965,
+          "uncond_mean_ret": 0.0006626214253775756,
+          "mean_diff": 0.0051384384246443895,
+          "mean_diff_bootstrap": {
+            "point": 0.0051384384246443895,
+            "ci95": [
+              0.0021946480639264488,
+              0.008155510868966523
+            ],
+            "p_two_sided_boot": 0.0008,
+            "reps": 5000,
+            "block": 5,
+            "seed": 125
+          },
+          "cond_worst_day": -0.06569339320746315,
+          "cond_best_day": 0.09931983926019194
+        },
+        "A3_high_volume_down_next_down": {
+          "ticker": "2317.TW",
+          "n_signal": 114,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.39473684210526316,
+          "unconditional_rate": 0.44474136285550675,
+          "hit_rate_minus_base": -0.050004520750243586,
+          "binom_p_vs_estimated_base": 0.3008450977450837,
+          "two_prop_z": {
+            "diff": -0.050004520750243586,
+            "z": -1.0631397641844058,
+            "p": 0.2877185739921231
+          },
+          "cond_mean_ret": 0.0060003088774924765,
+          "uncond_mean_ret": 0.0006626214253775756,
+          "mean_diff": 0.005337687452114901,
+          "mean_diff_bootstrap": {
+            "point": 0.005337687452114901,
+            "ci95": [
+              -0.0007856393550141858,
+              0.012810261746853622
+            ],
+            "p_two_sided_boot": 0.1208,
+            "reps": 5000,
+            "block": 5,
+            "seed": 126
+          },
+          "cond_worst_day": -0.10484574544197456,
+          "cond_best_day": 0.22057417556234338
+        },
+        "B_high_volume_black_next_down": {
+          "ticker": "2317.TW",
+          "n_signal": 91,
+          "direction": "down",
+          "lookahead_policy": "signal.shift(1): event at close t-1 predicts return t",
+          "insufficient": false,
+          "hit_rate": 0.4065934065934066,
+          "unconditional_rate": 0.44474136285550675,
+          "hit_rate_minus_base": -0.03814795626210016,
+          "binom_p_vs_estimated_base": 0.5271002911049723,
+          "two_prop_z": {
+            "diff": -0.03814795626210016,
+            "z": -0.726130737768091,
+            "p": 0.46775862721674644
+          },
+          "cond_mean_ret": 0.006787514526181964,
+          "uncond_mean_ret": 0.0006626214253775756,
+          "mean_diff": 0.0061248931008043885,
+          "mean_diff_bootstrap": {
+            "point": 0.0061248931008043885,
+            "ci95": [
+              -0.0014242714038509945,
+              0.015181879855801302
+            ],
+            "p_two_sided_boot": 0.1406,
+            "reps": 5000,
+            "block": 5,
+            "seed": 124
+          },
+          "cond_worst_day": -0.10484574544197456,
+          "cond_best_day": 0.22057417556234338
+        }
+      }
+    }
+  },
+  "pooled_diagnostic": {
+    "A_high_volume_next_up": {
+      "note": "date-level cross-asset mean; HAC on dates, not stacked asset-days",
+      "direction": "up",
+      "raw_next_day_return": {
+        "available": true,
+        "n_dates": 1229,
+        "mean": 0.0029276000826582603,
+        "hac_t": 4.0980505483751255,
+        "hac_p": 4.1664430710479936e-05,
+        "hac_lags": 5
+      },
+      "myth_signed_return": {
+        "available": true,
+        "n_dates": 1229,
+        "mean": 0.0029276000826582603,
+        "hac_t": 4.0980505483751255,
+        "hac_p": 4.1664430710479936e-05,
+        "hac_lags": 5
+      }
+    },
+    "B_high_volume_black_next_down": {
+      "note": "date-level cross-asset mean; HAC on dates, not stacked asset-days",
+      "direction": "down",
+      "raw_next_day_return": {
+        "available": true,
+        "n_dates": 445,
+        "mean": 0.0034448717765002473,
+        "hac_t": 2.170159476417376,
+        "hac_p": 0.029994766787218186,
+        "hac_lags": 5
+      },
+      "myth_signed_return": {
+        "available": true,
+        "n_dates": 445,
+        "mean": -0.0034448717765002473,
+        "hac_t": -2.170159476417376,
+        "hac_p": 0.029994766787218186,
+        "hac_lags": 5
+      }
+    }
+  },
+  "strategy": {
+    "A_long_after_high_volume": {
+      "n_days": 5583,
+      "active_days": 1220,
+      "ann_return_arith": 0.13489587433278236,
+      "ann_vol": 0.18780941126587739,
+      "sharpe": 0.7182593961801703,
+      "max_drawdown": -0.2846831267252733,
+      "hit_rate_positive_day": 0.5385245901639344
+    },
+    "B_short_after_black": {
+      "n_days": 5583,
+      "active_days": 444,
+      "ann_return_arith": -0.08010698925608774,
+      "ann_vol": 0.14529251517590175,
+      "sharpe": -0.5513497316713415,
+      "max_drawdown": -0.8903961124020732,
+      "hit_rate_positive_day": 0.4346846846846847
+    },
+    "buyhold_equal_weight": {
+      "n_days": 5583,
+      "active_days": 5583,
+      "ann_return_arith": 0.22372680527155944,
+      "ann_vol": 0.19453094157271467,
+      "sharpe": 1.150083392712781,
+      "max_drawdown": -0.6129633388358449,
+      "hit_rate_positive_day": 0.5609887157442235
+    },
+    "A_minus_buyhold_on_active_dates": {
+      "n_days": 1220,
+      "active_days": 1220,
+      "ann_return_arith": 0.38727821613588914,
+      "ann_vol": 0.3296947864636956,
+      "sharpe": 1.1746567796531853,
+      "max_drawdown": -0.29870718027381515,
+      "hit_rate_positive_day": 0.5131147540983606
+    },
+    "B_minus_buyhold_on_active_dates": {
+      "n_days": 444,
+      "active_days": 444,
+      "ann_return_arith": -1.0339103232696047,
+      "ann_vol": 0.6982357569792461,
+      "sharpe": -1.4807467433959216,
+      "max_drawdown": -0.917885975435218,
+      "hit_rate_positive_day": 0.4527027027027027
+    }
+  },
+  "summary": {
+    "primary_spec": "volume > 2.0 x previous 20d average; signal.shift(1)",
+    "n_primary_tests": 18,
+    "n_myth_supported_bh_5pct": 1,
+    "n_opposite_bh_5pct": 0,
+    "rows": [
+      {
+        "ticker": "SPY",
+        "test": "A_high_volume_next_up",
+        "n_signal": 126,
+        "hit_rate_minus_base": -0.003480564282634102,
+        "mean_diff": 0.0018564669909591047,
+        "mean_diff_ci95": [
+          -0.0012411056692752144,
+          0.005188895176874135
+        ],
+        "p_two_prop": 0.9381067761768156,
+        "q_bh": 0.9805992505200223,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "SPY",
+        "test": "B_high_volume_black_next_down",
+        "n_signal": 59,
+        "hit_rate_minus_base": -0.005265482429075763,
+        "mean_diff": 0.004290252964328729,
+        "mean_diff_ci95": [
+          -0.0012569190811559299,
+          0.010230046275831742
+        ],
+        "p_two_prop": 0.9354993711050601,
+        "q_bh": 0.9805992505200223,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "QQQ",
+        "test": "A_high_volume_next_up",
+        "n_signal": 120,
+        "hit_rate_minus_base": -0.03757469352553433,
+        "mean_diff": -0.002140909034054802,
+        "mean_diff_ci95": [
+          -0.005400387091895587,
+          0.0010135687112062747
+        ],
+        "p_two_prop": 0.41282662818466953,
+        "q_bh": 0.8712764569959279,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "QQQ",
+        "test": "B_high_volume_black_next_down",
+        "n_signal": 67,
+        "hit_rate_minus_base": -0.08274465778665352,
+        "mean_diff": 0.001421451346606234,
+        "mean_diff_ci95": [
+          -0.003260865793722026,
+          0.006484670005797386
+        ],
+        "p_two_prop": 0.17506811625599417,
+        "q_bh": 0.6459789342163316,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "IWM",
+        "test": "A_high_volume_next_up",
+        "n_signal": 109,
+        "hit_rate_minus_base": 0.016361506208047216,
+        "mean_diff": 0.0014084476024887023,
+        "mean_diff_ci95": [
+          -0.0023789509575136087,
+          0.005337183939436002
+        ],
+        "p_two_prop": 0.734569995064442,
+        "q_bh": 0.9444471365114254,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "IWM",
+        "test": "B_high_volume_black_next_down",
+        "n_signal": 52,
+        "hit_rate_minus_base": -0.0406081628591331,
+        "mean_diff": 0.0040679262467671505,
+        "mean_diff_ci95": [
+          -0.0014965640736059626,
+          0.010024786571651212
+        ],
+        "p_two_prop": 0.558923060297952,
+        "q_bh": 0.8712764569959279,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "AAPL",
+        "test": "A_high_volume_next_up",
+        "n_signal": 163,
+        "hit_rate_minus_base": -0.0031632904116019045,
+        "mean_diff": 0.0021140623239215704,
+        "mean_diff_ci95": [
+          -0.00223079939412835,
+          0.006250923261333667
+        ],
+        "p_two_prop": 0.9364497505393476,
+        "q_bh": 0.9805992505200223,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "AAPL",
+        "test": "B_high_volume_black_next_down",
+        "n_signal": 59,
+        "hit_rate_minus_base": 0.12602388731053188,
+        "mean_diff": -0.004545403072465499,
+        "mean_diff_ci95": [
+          -0.01261276245999323,
+          0.003960992416547132
+        ],
+        "p_two_prop": 0.053685514431509596,
+        "q_bh": 0.3221130865890576,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "MSFT",
+        "test": "A_high_volume_next_up",
+        "n_signal": 158,
+        "hit_rate_minus_base": -0.021391024846246165,
+        "mean_diff": 0.0010603456834372164,
+        "mean_diff_ci95": [
+          -0.0029914958057906125,
+          0.005448130428350368
+        ],
+        "p_two_prop": 0.5959037539983814,
+        "q_bh": 0.8712764569959279,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "MSFT",
+        "test": "B_high_volume_black_next_down",
+        "n_signal": 51,
+        "hit_rate_minus_base": 0.03392145991643741,
+        "mean_diff": 0.0031754135423447587,
+        "mean_diff_ci95": [
+          -0.0045142625527671626,
+          0.01340990712151409
+        ],
+        "p_two_prop": 0.6292552189415035,
+        "q_bh": 0.8712764569959279,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "NVDA",
+        "test": "A_high_volume_next_up",
+        "n_signal": 193,
+        "hit_rate_minus_base": -0.026708211922939595,
+        "mean_diff": 0.004085542710614781,
+        "mean_diff_ci95": [
+          -0.0018455078223729704,
+          0.010120915871748891
+        ],
+        "p_two_prop": 0.46540227929800526,
+        "q_bh": 0.8712764569959279,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "NVDA",
+        "test": "B_high_volume_black_next_down",
+        "n_signal": 70,
+        "hit_rate_minus_base": 0.0014599889114766396,
+        "mean_diff": 0.007038697844576586,
+        "mean_diff_ci95": [
+          -0.0037739884429434777,
+          0.019998605003884107
+        ],
+        "p_two_prop": 0.9805992505200223,
+        "q_bh": 0.9805992505200223,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "0050.TW",
+        "test": "A_high_volume_next_up",
+        "n_signal": 354,
+        "hit_rate_minus_base": 0.032899778060991536,
+        "mean_diff": 0.00022252317325698772,
+        "mean_diff_ci95": [
+          -0.001090169067619129,
+          0.001506995535964322
+        ],
+        "p_two_prop": 0.23397149540119955,
+        "q_bh": 0.7019144862035986,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "0050.TW",
+        "test": "B_high_volume_black_next_down",
+        "n_signal": 106,
+        "hit_rate_minus_base": -0.03325421975894666,
+        "mean_diff": 0.0008675001539864522,
+        "mean_diff_ci95": [
+          -0.0022451657751657557,
+          0.004224992323370474
+        ],
+        "p_two_prop": 0.4964070785935375,
+        "q_bh": 0.8712764569959279,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "2330.TW",
+        "test": "A_high_volume_next_up",
+        "n_signal": 228,
+        "hit_rate_minus_base": 0.06670002001200726,
+        "mean_diff": 0.0029515053587119188,
+        "mean_diff_ci95": [
+          0.0002669780906095345,
+          0.0056612582916782265
+        ],
+        "p_two_prop": 0.04855096140932447,
+        "q_bh": 0.3221130865890576,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "2330.TW",
+        "test": "B_high_volume_black_next_down",
+        "n_signal": 77,
+        "hit_rate_minus_base": -0.07647770480470101,
+        "mean_diff": 0.007995283915292828,
+        "mean_diff_ci95": [
+          0.0022346603286186825,
+          0.014003161449629105
+        ],
+        "p_two_prop": 0.1794385928378699,
+        "q_bh": 0.6459789342163316,
+        "myth_supported": false,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "2317.TW",
+        "test": "A_high_volume_next_up",
+        "n_signal": 293,
+        "hit_rate_minus_base": 0.09530255819604483,
+        "mean_diff": 0.0052194041738124,
+        "mean_diff_ci95": [
+          0.0022945752820854926,
+          0.008453623684519648
+        ],
+        "p_two_prop": 0.0014740942984030614,
+        "q_bh": 0.026533697371255105,
+        "myth_supported": true,
+        "opposite_significant": false
+      },
+      {
+        "ticker": "2317.TW",
+        "test": "B_high_volume_black_next_down",
+        "n_signal": 91,
+        "hit_rate_minus_base": -0.03814795626210016,
+        "mean_diff": 0.0061248931008043885,
+        "mean_diff_ci95": [
+          -0.0014242714038509945,
+          0.015181879855801302
+        ],
+        "p_two_prop": 0.46775862721674644,
+        "q_bh": 0.8712764569959279,
+        "myth_supported": false,
+        "opposite_significant": false
+      }
+    ],
+    "pooled_A_high_volume_signed_t": {
+      "available": true,
+      "n_dates": 1229,
+      "mean": 0.0029276000826582603,
+      "hac_t": 4.0980505483751255,
+      "hac_p": 4.1664430710479936e-05,
+      "hac_lags": 5
+    },
+    "pooled_B_black_signed_t": {
+      "available": true,
+      "n_dates": 445,
+      "mean": -0.0034448717765002473,
+      "hac_t": -2.170159476417376,
+      "hac_p": 0.029994766787218186,
+      "hac_lags": 5
+    },
+    "strategy_A_long_after_high_volume": {
+      "n_days": 5583,
+      "active_days": 1220,
+      "ann_return_arith": 0.13489587433278236,
+      "ann_vol": 0.18780941126587739,
+      "sharpe": 0.7182593961801703,
+      "max_drawdown": -0.2846831267252733,
+      "hit_rate_positive_day": 0.5385245901639344
+    },
+    "strategy_B_short_after_black": {
+      "n_days": 5583,
+      "active_days": 444,
+      "ann_return_arith": -0.08010698925608774,
+      "ann_vol": 0.14529251517590175,
+      "sharpe": -0.5513497316713415,
+      "max_drawdown": -0.8903961124020732,
+      "hit_rate_positive_day": 0.4346846846846847
+    },
+    "buyhold_equal_weight": {
+      "n_days": 5583,
+      "active_days": 5583,
+      "ann_return_arith": 0.22372680527155944,
+      "ann_vol": 0.19453094157271467,
+      "sharpe": 1.150083392712781,
+      "max_drawdown": -0.6129633388358449,
+      "hit_rate_positive_day": 0.5609887157442235
+    },
+    "verdict": "PARTIAL_FOR_VOLUME_LEADS_PRICE__FALSE_FOR_BLACK_CANDLE_DISTRIBUTION",
+    "interpretation": "Independent replication refines K1659/K1667: high volume is not a universal next-day up rule across ETFs and single names, but a positive effect appears in specific Taiwan single stocks and the date-level pooled diagnostic. The high-volume black-candle/distribution claim is rejected again: next-day returns are not robustly negative and pooled evidence points in the opposite direction."
+  },
+  "figures": [
+    "figs/k1671_hit_rates.png",
+    "figs/k1671_strategy_equity.png"
+  ]
+}

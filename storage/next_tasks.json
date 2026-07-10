@@ -56855,7 +56855,7 @@
     "title": "K1671: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1528). Original: 「量先價行 / 爆量長黑是出貨」** 成交量能否預測隔日方向（技術分析迷思破解）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1671.py with signal.shift(1) + seed=42, (c) K1671_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -56864,7 +56864,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-10T00:00:01Z"
+    "created_at": "2026-07-10T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-10T03:53:09.889310+00:00",
+    "claim_session_id": "6f7e122d4d0f",
+    "status_history": [
+      {
+        "ts": "2026-07-10T03:53:09.889731+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-10T03:53:20.081678+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-10T04:02:20.009356+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-10T03:53:20.081358+00:00",
+    "completed_at": "2026-07-10T04:02:20.008964+00:00",
+    "result": "K1671 completed as stale-backlog independent replication: experiments/k1671/ three-piece output plus figures and Codex review. Verdict: 量先價行部分、資產依賴；爆量長黑隔日續跌不支持. Knowledge item f0878f8f and research_program.md backlog line updated."
   },
   {
     "id": "journal_discovery_20260710_0",

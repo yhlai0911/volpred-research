@@ -38263,5 +38263,19 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-07-10T11:16:11.226041"
+  },
+  {
+    "item_id": "f0878f8f",
+    "category": "experiment_result",
+    "content": "K1671 completed. experiment_id=k1671; experiment_path=experiments/k1671/; reviewer=Codex primary path; review_file=experiments/k1671/codex_review.md; verdict=PARTIAL_FOR_VOLUME_LEADS_PRICE__FALSE_FOR_BLACK_CANDLE_DISTRIBUTION. Task purpose: stale-backlog independent replication/closure for the '量先價行 / 爆量長黑是出貨' myth already tested in K1659/K1667. Data: yfinance daily OHLCV cached under experiments/k1671/data, 9 assets SPY/QQQ/IWM/AAPL/MSFT/NVDA/0050.TW/2330.TW/2317.TW; US sample mostly 2005-01-04..2026-07-09, 0050.TW 2009-01-06..2026-07-08; seed=42. Method: high-volume event = volume_t > 2.0 * previous-20d average volume, with rolling(volume,20).mean().shift(1); event signal uses signal.shift(1) to predict next-day return; per-asset primary tests hit-rate vs unconditional baseline plus circular block-bootstrap CI for mean_diff; 18 primary cells BH-FDR; pooled diagnostic aggregates by date before HAC (K1355 compliant); 5bps one-way transaction cost for event strategies. Findings: Volume-leads-price is PARTIAL, not universal. Only 2317.TW high-volume -> next-day up survives BH 5% (n=293, hit-rate lift +9.53pp, mean_diff +0.522%, bootstrap CI [+0.229%, +0.845%], q=0.0265). 2330.TW has raw positive mean_diff (+0.295%, CI [+0.027%, +0.566%]) but does not survive BH (q=0.322). ETF and US megacap cells are not consistently significant. Date-level pooled diagnostic is positive (+0.293%, HAC t=4.10, p=4.17e-5) but explicitly diagnostic only. High-volume long strategy Sharpe=0.718 vs equal-weight buyhold Sharpe=1.150, so not a standalone replacement for holding diversified risk. Black-candle distribution myth is FALSE again: 0/9 assets support next-day down continuation; pooled signed return for the down myth is -0.344% (raw next-day return +0.344%, HAC t=-2.17, p=0.030), i.e. opposite direction; short-after-black strategy Sharpe=-0.551 and MDD=-89.0%. Conclusion: update public/reader wording to '量先價行部分、資產依賴；爆量長黑隔日續跌不支持' rather than full-null or universal support.",
+    "evidence": [
+      "experiments/k1671/README.md",
+      "experiments/k1671/k1671.py",
+      "experiments/k1671/k1671_results.json",
+      "experiments/k1671/codex_review.md",
+      "research_program.md:1538"
+    ],
+    "confidence": 0.86,
+    "created_at": "2026-07-10T12:01:01.709585"
   }
 ]
