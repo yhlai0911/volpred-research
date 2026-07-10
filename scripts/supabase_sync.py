@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import re
+from collections.abc import Mapping
 from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
@@ -36,8 +37,23 @@ if not SUPABASE_URL or not SUPABASE_KEY:
                 SUPABASE_URL = v
             elif k == "SUPABASE_SERVICE_ROLE_KEY" and not SUPABASE_KEY:
                 SUPABASE_KEY = v
+
+_MISSING_CREDS = (
+    "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Set env vars or create .env.local"
+)
+
+
+def require_creds() -> None:
+    """Raise if Supabase credentials are absent. Call before any remote request.
+
+    Importing this module used to `raise` here (2026-07-10 and earlier). That made
+    the module un-importable without credentials, and since `volpred.ops.__init__`
+    imports it transitively, **pytest collection died in any environment without
+    `.env.local`** — which is why CI has never been able to run the test suite.
+    Credentials are a *request-time* requirement, not an *import-time* one.
+    """
     if not SUPABASE_URL or not SUPABASE_KEY:
-        raise RuntimeError("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Set env vars or create .env.local")
+        raise RuntimeError(_MISSING_CREDS)
 
 
 def _remote_writes_blocked() -> bool:
@@ -53,12 +69,45 @@ def _remote_writes_blocked() -> bool:
     mirroring VOLPRED_NO_EMAIL for SMTP (conftest set at 2026-04-20)."""
     return os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1"
 
-HEADERS = {
-    "apikey": SUPABASE_KEY,
-    "Authorization": f"Bearer {SUPABASE_KEY}",
-    "Content-Type": "application/json",
-    "Prefer": "resolution=merge-duplicates,return=minimal",
-}
+class _GuardedHeaders(Mapping):
+    """Request headers that refuse to materialise without credentials.
+
+    A single choke point beats sprinkling `require_creds()` into all seven
+    request helpers — helper #8 would silently skip the check.
+
+    Deliberately **not** a `dict` subclass. CPython's `{**d}` and `dict(d)` take
+    a C fast path that copies a dict subclass's internal storage directly,
+    bypassing any overridden `__getitem__`/`keys()`. Five of the seven helpers
+    build their headers with `{**HEADERS, "Prefer": ...}`, so a dict-subclass
+    guard would be bypassed exactly where it is needed. `Mapping` has no such
+    fast path — unpacking goes through `keys()` + `__getitem__`.
+    (Measured 2026-07-10, not assumed: `{**GuardDict()}` returned the payload
+    without ever calling the override.)
+    """
+
+    def _payload(self) -> dict[str, str]:
+        require_creds()
+        return {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates,return=minimal",
+        }
+
+    def __getitem__(self, key: str) -> str:
+        return self._payload()[key]
+
+    def __iter__(self):
+        return iter(self._payload())
+
+    def __len__(self) -> int:
+        return len(self._payload())
+
+    def __repr__(self) -> str:  # never leak the service-role key into a traceback
+        return "<supabase HEADERS (credential-guarded)>"
+
+
+HEADERS = _GuardedHeaders()
 
 _ARTICLE_ID_CACHE: dict[str, str] = {}
 _TAG_ID_CACHE: dict[str, int] = {}

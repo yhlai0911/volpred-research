@@ -1,0 +1,45 @@
+name: Test Suite
+
+# The repo's ~1640 tests had NEVER run in CI (2026-07-10). Cause: importing
+# `scripts/supabase_sync.py` raised at module scope when credentials were absent,
+# and `volpred.ops` imports it transitively — so pytest collection died on any
+# machine without the gitignored `.env.local`. Two tests had been red for days
+# before a full local run surfaced them.
+#
+# Every mechanical gate this repo relies on (dispatch_state schema contract,
+# no-raw-kickstart, merge_worktree dedup, scheduler pregate) lives in pytest.
+# Until this workflow existed, all of them were gates that only fired when a
+# human happened to run them locally.
+#
+# Safety belts, both already honoured by conftest.py — set here too so a broken
+# conftest cannot let a CI run touch production:
+#   VOLPRED_NO_REMOTE_WRITE=1  no Supabase POST/PATCH (2026-06-23 leak incident)
+#   VOLPRED_NO_EMAIL=1         no SMTP
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VOLPRED_NO_REMOTE_WRITE: "1"
+      VOLPRED_NO_EMAIL: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Run test suite
+        # testpaths = ["tests", "scripts/tests"] (pyproject.toml). No credentials
+        # are provided on purpose: a reintroduced import-time raise must fail here,
+        # not silently pass because a secret papered over it.
+        run: uv run --extra dev python -m pytest -q -p no:cacheprovider
