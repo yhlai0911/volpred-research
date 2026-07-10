@@ -29,7 +29,7 @@
 - **missing 檔案不算 breach**（採 telegram_poll 的「尚未觀測」慣例而非 gmail 的 missing→critical）：daemon 若在跑，心跳 30 秒內必重建該檔，所以「檔案不存在」= daemon 沒在跑 = `cron_review` launchctl 檢查的職責。讓兩個 owner 搶同一件事就是疊床架屋。
 - **驗證**：新增 `tests/test_dispatch_supervisor_heartbeat_alert.py`（7 tests）；alerts 全套 57 passed。線上實跑條件：健康 daemon age=0.33min → `breached=False`；拿線上真實 state 只把心跳回撥 42 分鐘 → `critical` + 正確 title/body。`build_alert_condition_report` 23 conditions / 0 breaches，新條件確認接入且無假警報。
 
-**待辦（另案）**：`cron_review.py` 的 `last_completion` 幽靈讀取應移除，改單一依賴 `completions[-1]`（今日靠 fallback 無影響，故不併入本次 diff）。
+**待辦（另案）→ 已完成 2026-07-10**：`cron_review.py` 的 `last_completion` 幽靈讀取已移除，改單一依賴 `completions[-1]`（`state.record_completion()` 是唯一 writer）。線上 state 實測確認該 key **根本不在檔案裡**（不是 null，是不存在），佐證「從未實作」而非「尚未設值」。同時把 `state.py` schema docstring 缺漏的 `fire_requested_at` / `fire_request_reason` 兩個**真實**欄位補上——該 docstring 自稱「schema 沒列的就是幽靈」，缺列會讓讀者把真欄位誤判成幽靈（幽靈欄位的反向錯誤，同一根因）。Regression: `tests/test_cron_review.py` 端到端釘死 running gate（125 passed）。
 
 ## 2026-07-10 差點靠改 submitted 論文數字把 reproduce gate 硬轉 green（provenance sweep Batch 4a）
 
@@ -111,6 +111,8 @@
 **驗證**：修後 `cron_review.py` 輸出 `hourly_dispatch daemon=alive exit=0 running | last: 2026-07-08 01:11:50 (daemon-state)`，整體 `✅ 所有 cron 排程器：無逾時`。新增 4 個 regression test（`tests/test_cron_review.py`：健康 daemon 無假 stale / last_completion transient-null fall back completions[] / daemon down 標旗 / 真 5h stale 仍報）+ 既有 9 test 全 PASS。
 
 **教訓**：backbone cutover（換派工引擎 / LaunchAgent→daemon / 換 log 路徑）時，**所有監控該 backbone 的 checker 要一次全部改**，不能改一個漏一個——漏掉的那個會產生「監控說掛了但其實好好的」假告警，比沒監控更糟（老闆被迫花注意力查一個不存在的問題）。cutover PR 應附「哪些 monitor 引用舊 label/log」的 grep 清單當 checklist。次要：`last_completion` 這種 transient 欄位不可當唯一真相源，canonical 是 append-only 的 `completions[]`。
+
+**更正（2026-07-10）**：上面兩處把 `last_completion` 描述成「transient，新 fire 啟動時清 null」是**錯的**——它從來沒有任何 writer，是幽靈欄位，該 fix 只是靠 `completions[-1]` fallback 意外正確。此讀取已於 2026-07-10 移除（見本檔 2026-07-10「dispatch_state.json 三個觀察性缺陷」entry）。當時之所以會憑空描述出一個 transient 生命週期，正是因為 `dict.get()` 讀不存在的 key 回 `null`，與「已設為 null」無法分辨——寫 fix 的人把觀察到的 `null` 腦補成「被清掉」。**教訓延伸：對 state 欄位的行為描述必須來自 writer 側的 grep，不能來自 reader 側觀察到的值。**
 
 ## 2026-07-07 首頁 feed「7/5 文章排在 7/6 之後」看似排序壞掉 → diversify 無界時序重排；改 day-bucket 修復
 

@@ -160,9 +160,9 @@ def dispatch_supervisor_state(now: datetime) -> dict:
     Returns the same shape main() expects so the hourly_dispatch row can be
     computed without touching the dead LaunchAgent / stale log:
       - daemon_alive: launchctl 有 dispatch-supervisor process
-      - end:          last_completion.completed_at (TPE) — 最後完成班
+      - end:          completions[-1].completed_at (TPE) — 最後完成班
       - running:      current_job 非 null (本班正在跑)
-      - last_exit:    last_completion.exit_code (str) — 非 0 → 標紅
+      - last_exit:    completions[-1].exit_code (str) — 非 0 → 標紅
       - error:        state 讀取失敗訊息 (None = ok)
     """
     launch = launchctl_state(DISPATCH_SUPERVISOR_LABEL)
@@ -177,12 +177,11 @@ def dispatch_supervisor_state(now: datetime) -> dict:
         return {"daemon_alive": daemon_alive, "end": None, "running": False,
                 "last_exit": None, "error": f"state parse failed: {str(exc)[:120]}"}
     running = state.get("current_job") is not None
-    # last_completion 是 transient（新 fire 啟動時清 null）；canonical 最後完成班取
-    # append-only completions[] 末筆，last_completion 僅作 freshest override。
-    comp = state.get("last_completion")
-    if not comp:
-        completions = state.get("completions") or []
-        comp = completions[-1] if completions else {}
+    # 最後完成班的唯一來源是 append-only 的 completions[] 末筆（唯一 writer 是
+    # `state.record_completion()`）。此處曾另讀一個 `last_completion` 欄位當
+    # freshest override，但全 repo 沒有任何 writer 設它 — 幽靈欄位，2026-07-10 移除。
+    completions = state.get("completions") or []
+    comp = completions[-1] if completions else {}
     end = None
     completed_raw = comp.get("completed_at")
     if completed_raw:
@@ -324,7 +323,7 @@ def main() -> int:
             when = "?"
             if end:
                 when = end.strftime("%Y-%m-%d %H:%M:%S") + " (daemon-state)"
-                # 本班正在跑時不判 stale（last_completion 是上一班，gap 必小）。
+                # 本班正在跑時不判 stale（completions[-1] 是上一班，gap 必小）。
                 if not ds["running"]:
                     stale, stale_flag = is_stale(
                         now=now, last_end=end, cron_expr=cron_expr,
