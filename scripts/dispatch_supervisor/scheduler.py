@@ -185,24 +185,47 @@ def _next_fire(cron_expr: str, *, now: datetime | None = None) -> datetime:
     return croniter(cron_expr, base).get_next(datetime)
 
 
-def _due_to_fire(*, cron_expr: str, last_fire_at: str | None, now: datetime | None = None) -> tuple[bool, datetime]:
-    """Decide if we should fire now. Returns (due, prev_scheduled_fire)."""
-    prev = _prev_fire(cron_expr, now=now)
-    if not last_fire_at:
-        return True, prev
-    # tz-naive cron + tz-aware state: ask helper for naive datetime so we can
-    # compare against the cron-derived naive `prev` directly.
-    last_dt = parse_iso_warn(
-        last_fire_at,
+def _parse_last_fire(raw: str | None) -> datetime | None:
+    """`last_fire_at` as a naive-local datetime, or None if missing/unparseable.
+
+    tz-naive cron + tz-aware state: croniter's `prev` is naive local, so an
+    aware stored value must be converted to the same frame before comparing.
+    """
+    if not raw:
+        return None
+    dt = parse_iso_warn(
+        raw,
         tag="supervisor",
         field_name="last_fire_at",
         fallback=None,
         assume_tz=None,
     )
+    if dt is None:
+        return None  # parse failed → parse_iso_warn already emitted a WARN
+    return dt.astimezone().replace(tzinfo=None) if dt.tzinfo is not None else dt
+
+
+def _due_to_fire(*, cron_expr: str, last_fire_at: str | None, now: datetime | None = None) -> tuple[bool, datetime]:
+    """Decide if we should fire now. Returns (due, prev_scheduled_fire).
+
+    2026-07-10 root-cause fix. This used to `return True` when `last_fire_at`
+    was missing or unparseable — "we don't know when we last fired" was treated
+    as "fire right now". In a 60s-tick daemon that turns any loss of
+    `dispatch_state.json` into an immediate ~95K opus cold-load, and keeps
+    firing every tick until something writes the field back.
+
+    That is exactly what happened: an external writer reset production state
+    (daemon never logged a reset of its own), and the very next tick fired an
+    off-slot duplicate of the 22:07 slot at 22:58. Log audit: 9 such off-slot
+    fires in 159 (+24…+54 min after their slot), each a full cold-load.
+
+    Unknown is now NOT due. `_tick_once` bootstraps the field and we resume on
+    the next real cron slot — worst case one skipped hour, never a burn.
+    """
+    prev = _prev_fire(cron_expr, now=now)
+    last_dt = _parse_last_fire(last_fire_at)
     if last_dt is None:
-        return True, prev  # parse failed → WARN already emitted, treat as due
-    if last_dt.tzinfo is not None:
-        last_dt = last_dt.astimezone().replace(tzinfo=None)
+        return False, prev
     return last_dt < prev, prev
 
 
@@ -268,6 +291,21 @@ async def _tick_once(
         # NOTE: a pending fire_requested_at deliberately survives this skip —
         # "fire ASAP" means right after the in-flight job, never in parallel.
         return {"action": "skip", "reason": "job_in_flight"}
+    if _parse_last_fire(snap.get("last_fire_at")) is None:
+        # Cold start, or `dispatch_state.json` was lost / clobbered by an
+        # external writer (the daemon logs its own resets; a silent loss is
+        # someone else's write). `_due_to_fire` now refuses to treat "unknown"
+        # as "due" — so stamp the field and let the NEXT real slot fire.
+        # Without this bootstrap the daemon would never fire again.
+        with state._locked_state(state_path) as (_fh, data):
+            if _parse_last_fire(data.get("last_fire_at")) is None:
+                data["last_fire_at"] = state._now()
+        LOG.warning(
+            "last_fire_at missing/unparseable (cold start or external state loss) — "
+            "bootstrapped to now; the next scheduled slot fires normally. "
+            "NOT firing an off-slot catch-up (2026-07-10: that cost 9 stray ~95K cold-loads)."
+        )
+        return {"action": "skip", "reason": "bootstrap_last_fire_at"}
     due, prev_fire = _due_to_fire(cron_expr=cron_expr, last_fire_at=snap.get("last_fire_at"))
     fire_reason = "cron"
     if not due:

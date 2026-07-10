@@ -20,6 +20,7 @@ from __future__ import annotations
 import asyncio
 import json
 import subprocess
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -32,7 +33,24 @@ CRON = "7 * * * *"
 
 @pytest.fixture
 def tmp_state(tmp_path: Path) -> Path:
-    return tmp_path / "dispatch_state.json"
+    """State with a STALE last_fire_at, i.e. a genuinely due tick.
+
+    2026-07-10: this used to be a bare empty state, relying on
+    `last_fire_at is None -> due`. That coupling is exactly the off-slot
+    duplicate-fire bug (unknown state must not mean "fire now"), so due-ness is
+    now expressed the way production expresses it: an old timestamp.
+    Bootstrap-path tests build their own fresh state instead.
+    """
+    p = tmp_path / "dispatch_state.json"
+    with st._locked_state(p) as (_fh, data):
+        data["last_fire_at"] = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+    return p
+
+
+@pytest.fixture
+def fresh_state(tmp_path: Path) -> Path:
+    """Never-written state — cold start / external state loss."""
+    return tmp_path / "fresh_dispatch_state.json"
 
 
 @pytest.fixture
@@ -142,7 +160,7 @@ def test_request_consumed_on_due_cron_bypasses_pregate(
     """Cron due AND a pending request: the request is consumed by the same
     fire — it must mark the fire as requested so pregate cannot eat it."""
     schedules = _schedules_file(tmp_path, {"mode": "enforce", "window_hours": 3.0})
-    st.request_fire("boss-email", path=tmp_state)  # last_fire_at None -> due
+    st.request_fire("boss-email", path=tmp_state)  # tmp_state is stale -> cron due
 
     def pregate_must_not_run(**kw):  # pragma: no cover - failure path
         raise AssertionError("pregate must never gate a requested fire")
@@ -264,3 +282,85 @@ def test_run_pregate_stamps_supervisor_invoker(monkeypatch) -> None:
     cmd = seen["cmd"]
     assert "--invoker" in cmd
     assert cmd[cmd.index("--invoker") + 1] == "supervisor"
+
+
+# ── 2026-07-10 off-slot duplicate fire root cause ──────────────────────────
+# `_due_to_fire` used to `return True` on a missing/unparseable last_fire_at.
+# "We don't know when we last fired" is NOT "fire right now" — in a 60s-tick
+# daemon that turned every loss of dispatch_state.json into an immediate ~95K
+# opus cold-load. Log audit found 9 such off-slot fires in 159 (+24..+54 min
+# after their slot). The daemon never logged a reset of its own, so the state
+# was clobbered by an external writer.
+
+
+def test_due_to_fire_missing_last_fire_is_not_due() -> None:
+    due, _prev = scheduler._due_to_fire(cron_expr=CRON, last_fire_at=None)
+    assert due is False
+
+
+def test_due_to_fire_unparseable_last_fire_is_not_due() -> None:
+    due, _prev = scheduler._due_to_fire(cron_expr=CRON, last_fire_at="not-a-timestamp")
+    assert due is False
+
+
+def test_due_to_fire_still_fires_when_slot_genuinely_missed() -> None:
+    """The safety fix must not break normal catch-up of a real missed slot."""
+    from datetime import datetime as _dt
+
+    now = _dt(2026, 7, 10, 22, 58, 25)          # naive local, as croniter uses
+    stale = "2026-07-10T12:07:51.000000+08:00"  # long before the 22:07 slot
+    due, prev = scheduler._due_to_fire(cron_expr=CRON, last_fire_at=stale, now=now)
+    assert due is True
+    assert prev.hour == 22 and prev.minute == 7
+
+
+def test_due_to_fire_not_due_when_slot_already_served() -> None:
+    """The 22:58 incident: 22:07 slot was already fired at 22:07:51."""
+    from datetime import datetime as _dt
+
+    now = _dt(2026, 7, 10, 22, 58, 25)
+    served = "2026-07-10T14:07:51.094696+00:00"  # == 22:07:51 Taipei
+    due, _prev = scheduler._due_to_fire(cron_expr=CRON, last_fire_at=served, now=now)
+    assert due is False
+
+
+def test_tick_bootstraps_missing_last_fire_and_does_not_spawn(
+    tmp_path, fresh_state, prompt_file, worker_calls
+) -> None:
+    """State loss must cost at most a skipped hour — never a stray cold-load."""
+    schedules = _schedules_file(tmp_path, {"mode": "off"})
+    result = _tick(fresh_state, prompt_file, schedules)
+    assert result == {"action": "skip", "reason": "bootstrap_last_fire_at"}
+    assert worker_calls == []
+    assert st.read_state(fresh_state)["last_fire_at"] is not None
+
+
+def test_tick_bootstraps_unparseable_last_fire(tmp_path, tmp_state, prompt_file, worker_calls) -> None:
+    schedules = _schedules_file(tmp_path, {"mode": "off"})
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["last_fire_at"] = "garbage"
+    result = _tick(tmp_state, prompt_file, schedules)
+    assert result["reason"] == "bootstrap_last_fire_at"
+    assert worker_calls == []
+    # self-healed: the corrupt value is replaced, so the daemon can never stall
+    assert scheduler._parse_last_fire(st.read_state(tmp_state)["last_fire_at"]) is not None
+
+
+def test_daemon_never_stalls_forever_after_bootstrap(
+    tmp_path, fresh_state, prompt_file, worker_calls, monkeypatch
+) -> None:
+    """Bootstrap is a one-tick cost: the next real slot must still fire.
+
+    Guards the failure mode introduced by the fix itself — 'unknown is not due'
+    would stall the daemon permanently if nothing ever wrote the field back.
+    """
+    schedules = _schedules_file(tmp_path, {"mode": "off"})
+    assert _tick(fresh_state, prompt_file, schedules)["reason"] == "bootstrap_last_fire_at"
+    # time passes -> the stamped value is now older than the latest slot
+    with st._locked_state(fresh_state) as (_fh, data):
+        data["last_fire_at"] = (
+            datetime.now(timezone.utc) - timedelta(hours=2)
+        ).isoformat()
+    result = _tick(fresh_state, prompt_file, schedules)
+    assert result["action"] == "fired"
+    assert len(worker_calls) == 1
