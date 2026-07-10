@@ -15395,5 +15395,38 @@
     "summary": "2026-07-04 supervisor cutover 把 Claude→Codex failover 留在退役的 cron_hourly_dispatch.sh：quota/auth 掛掉時 supervisor 只寄信不接手，每次額度用完都靜默丟掉整批 hourly slot。移植成 scripts/dispatch_supervisor/codex_failover.py + wire 進 worker 的 quota/auth 分支 + 15 個回歸測試。過程中發現 failover 會被 pytest 觸發、真的 spawn codex（既有 auth 測試 hang 7 分鐘並 claim 了 research_safe_haven_regime）→ 加 pytest guard + release 孤兒 claim。觸發來源：老闆 Telegram msg 376/378。",
     "owner": "claude",
     "actor": "hourly-22"
+  },
+  {
+    "timestamp": "2026-07-10T23:15:40+08:00",
+    "task_type": "experiment",
+    "task_id": "codex-commit-b4b17cd33",
+    "outcome": "succeeded",
+    "summary": "complete K1676 gold safe-haven regime test",
+    "commit": "b4b17cd33e1bd198e5a1adc2b7bf917fac6a0cfa",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T15:17:41.133517+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1676"
+  },
+  {
+    "timestamp": "2026-07-10T23:16:32+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-6e9b29479",
+    "outcome": "succeeded",
+    "summary": "close K1676 task as succeeded",
+    "commit": "6e9b29479361afb82b08e65f801925f86181585b",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T15:17:41.133229+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1676"
+  },
+  {
+    "timestamp": "2026-07-10T23:20:52+08:00",
+    "task_type": "platform_ops",
+    "task_id": "shared-checkout-amend-guard-20260710",
+    "outcome": "succeeded",
+    "actor": "hourly-23",
+    "owner": "hourly-23",
+    "summary": "解開卡住 main 的 merge conflict（kickstart gate 測試，取 HEAD+MERGE_HEAD 聯集，5 passed）；commit 一批含測試的 alerts/pregate/merge_worktree 修正；事故：在共用 main checkout 上 git commit --amend 覆蓋了另一個 agent 的 commit message 並吞掉其 5 個在途檔案（內容無遺失、測試綠）；治本：收編進既有 L1 PreToolUse deny hook 擋 shared-main amend（worktree 內不擋），regression 61 PASS/0 FAIL + 活 session 實測被擋；error_log + Enforcement Layer Map 已登記"
   }
 ]
