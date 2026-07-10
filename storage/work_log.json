@@ -15502,5 +15502,17 @@
     "summary": "K1679-rev stranded-complete closure. Task 被 stale-release 卡 pending 但工作已 committed 主 repo 且未獨立 review。補跑獨立 Codex review=FAIL：PIT 顯著格 dep_flight_13w·rv·H5 (DM t=+2.772, Bonf=BH=.045) 沒跑 Clark-West 卻外推過不了；verdict 邏輯忽略方向/Bonferroni（實為 augmented 顯著惡化 3.72% 的 negative finding）；ALFRED output_type=4 first-release-only 非真 vintage。current-vintage NULL 可保留、PIT knowledge-grade 不成立。更正 README、gate 守住未寫 knowledge → 建 K1679-rev2（3 修）。標 K1679-rev succeeded。",
     "task_id": "K1679-rev",
     "status": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-11T05:21:05+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-5a448c44e",
+    "outcome": "succeeded",
+    "summary": "K1677-rev harden directional contagion inference",
+    "commit": "5a448c44e077734bbdf344d643bd652a12f6e920",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T21:21:40.776008+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1677"
   }
 ]
