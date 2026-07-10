@@ -1905,7 +1905,16 @@ def _parse_dispatch_supervisor_stale_code_state(
         for src in sorted(src_dir.glob("*.py")):
             try:
                 mtime = datetime.fromtimestamp(src.stat().st_mtime, tz=timezone.utc)
-            except OSError:
+            except OSError as exc:
+                # Raced a writer that unlinked/replaced the file between glob()
+                # and stat(). Skipping is right — but a vanished daemon source
+                # file is worth a word, not a shrug.
+                warn(
+                    "dispatch_supervisor_stale_code",
+                    "supervisor source unreadable during scan",
+                    path=str(src),
+                    err=str(exc),
+                )
                 continue
             if mtime <= boot:
                 continue
