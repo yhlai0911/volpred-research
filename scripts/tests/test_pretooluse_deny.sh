@@ -43,6 +43,7 @@ assert_deny "cat feed.json piped to jq"    "cat storage/reports/feed.json | jq '
 assert_deny "cat after pipe"               "echo x | cat storage/memory/knowledge.json"
 assert_deny "zeabur deploy after &&"       "cd frontend-v2-fix && npx zeabur deploy"
 assert_deny "worktree remove after ;"      "cd /tmp ; git worktree remove --force foo"
+assert_deny "force flag after path"        "git worktree remove foo --force"
 
 # ── false-positive 防護：命令引數 / commit message / echo 裡「提到」危險字串不可誤擋 ──
 assert_allow "commit msg mentions zeabur"  "git commit -m 'ban zeabur deploy direct call'"
@@ -56,6 +57,10 @@ assert_allow "grep feed.json"              "grep NVDA storage/reports/feed.json"
 assert_allow "head knowledge.json"         "head -c 500 storage/memory/knowledge.json"
 assert_allow "deploy-zeabur-safe.sh"       "bash frontend-v2-fix/scripts/deploy-zeabur-safe.sh"
 assert_allow "worktree remove (no force)"  "git worktree remove .claude/worktrees/foo"
+# 2026-07-10 18:20：清理死 worktree 時被誤擋 — -f 屬於前一段的 rm，不屬於 worktree remove
+assert_allow "rm -f then worktree remove"  "rm -f /tmp/junk && git worktree remove .claude/worktrees/foo"
+assert_allow "rm -f on next line"          $'rm -f /tmp/junk\ngit worktree remove .claude/worktrees/foo'
+assert_allow "worktree remove then rm -f"  "git worktree remove .claude/worktrees/foo && rm -f /tmp/junk"
 assert_allow "plain echo"                  "echo hello"
 assert_allow "pytest advisory rewrite"     "uv run pytest tests/"
 assert_allow "cat unrelated file"          "cat storage/reports/mile_abc123.json"

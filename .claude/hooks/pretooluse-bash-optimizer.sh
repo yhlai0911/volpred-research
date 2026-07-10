@@ -18,9 +18,13 @@ DECISION_REASON=""
 # 避免誤擋 commit message / echo / grep pattern 裡提到這些字串的 git commit 等命令
 # （2026-07-10 首次上線即被自身 commit message 的 "zeabur deploy" 誤擋 → 治本錨定邊界）。
 CMD_START='(^|[;&|(])[[:space:]]*'
+# force flag 必須落在 `git worktree remove` 自己的指令段內。
+# 舊版把 --force/-f 當成全 COMMAND 的獨立條件 → `rm -f x && git worktree remove y`
+# 這種無 force 的合法清理被誤擋（2026-07-10 18:20 實際踩到）。
+# 段界＝ ; & | ；換行不必列入 — grep 逐行比對，match 本來就跨不過換行。
+SEG_TAIL='[^;&|]*'
 DENY_REASON=""
-if printf '%s' "$COMMAND" | grep -qE "${CMD_START}git[[:space:]]+worktree[[:space:]]+remove([[:space:]]|\$)" \
-   && printf '%s' "$COMMAND" | grep -qE '(^|[[:space:]])(--force|-f)([[:space:]]|$)'; then
+if printf '%s' "$COMMAND" | grep -qE "${CMD_START}git[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]](--force|-f)([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止 git worktree remove --force（CLAUDE.md『絕對禁止』；K1032/K1618 誤刪未合併實驗事故）。改用 bash scripts/merge_worktree.sh 正常合併；worktree 從 stale base 分出時用 git checkout <branch> -- experiments/kXXXX/ path-scoped 抽取。"
 elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}(npx[[:space:]]+)?zeabur[[:space:]]+deploy([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止直呼 zeabur deploy（frontend-and-deploy.md）。部署一律走 frontend-v2-fix/scripts/deploy-zeabur-safe.sh（鎖正確 service ID + 安全檢查）。"
