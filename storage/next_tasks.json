@@ -57548,7 +57548,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "telegram-responder",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-10T09:41:36.797485+00:00",
     "title": "CI Test Suite 34 fail — 全為環境依賴，修 workflow 環境與測試 fixture",
     "description": "run 29083395825 (2026-07-10) 首次真的跑 pytest 後 34 failed / 1650 passed。本機 uv run --extra dev python -m pytest 同批全 PASS（39 passed）→ 全部是 CI 環境依賴，非產品 bug。\n根因分四類：\n1. 缺 ripgrep（9 tests, test_experiments_ops）→ workflow 加 apt-get install -y ripgrep\n2. 缺 SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY（4 tests, test_feed_sync）→ 測試改 monkeypatch env，或 CI 注入 dummy env；不可把 secret 放 CI\n3. repo_root_mismatch（6 tests, test_execution_brief / test_session_ops）→ guard 假設 repo 在 ~/volpred-research，CI 在 /home/runner/work/...；改讀 git rev-parse --show-toplevel\n4. gitignored 資料檔缺（~13 tests: trending_repost_log.json、arc_dedup / topic_cluster_gate / daily_digest 的 SystemExit:1）→ 測試改建 fixture，不依賴 storage/ 實資料\n另 test_alerts assert 4==3 與 test_cron_auth_preflight 需個別確認是否亦屬類 3/4。\n禁止用 skip/xfail 掩蓋 — 依「永遠修流程」修環境與測試 fixture。",
@@ -57567,9 +57567,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-10T12:05:53.300272+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-18"
       }
     ],
-    "started_at": "2026-07-10T10:10:24.966764+00:00"
+    "started_at": "2026-07-10T10:10:24.966764+00:00",
+    "completed_at": "2026-07-10T12:05:53.299916+00:00",
+    "result": "hourly-18 session-limit orphan 已由 ci-green-20260710 接手收尾；同一 final SHA d611ccdcb 的 GitHub Test Suite run 29091180310 conclusion=success，34 個原始 CI failures 全部真修且未用新增 skip/xfail 掩蓋。"
   },
   {
     "id": "ops-codex-cli-upgrade-20260710",
@@ -57688,7 +57696,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "telegram",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-10T10:15:43.763233+00:00",
     "title": "修好 CI Test Suite 34 個失敗（run 29083395825）",
     "description": "背景：import-time raise 修掉後 CI 首次真的跑測試，暴露 34 個 CI-env 失敗（1650 passed）。\n五類根因（都要修測試/流程，不是塞 env 掩蓋）：\n1. tests/test_experiments_ops.py (8 fail) — FileNotFoundError 'rg'：CI runner 無 ripgrep。修法：程式面 grep fallback 或 workflow 安裝 ripgrep（擇一，寫明理由）。\n2. tests/test_feed_sync.py (4 fail) — RuntimeError Missing SUPABASE_URL：測試不該需要真 env，改成 monkeypatch/fixture 注入假 client。\n3. tests/test_session_ops.py (2 fail) — RuntimeError repo_root_mismatch：CI runner path 與 repo_root 假設不符。\n4. tests/test_topic_cluster_gate.py (7 fail) — SystemExit: 1，gate script 在 CI 環境 exit non-zero。\n5. tests/test_trending_repost_fb_url.py (2 fail) — storage/reports/trending_repost_log.json 不存在（gitignored）：測試要 skip 或用 fixture。\n成功標準：Test Suite workflow 在 main 上 conclusion=success，且無 xfail/skip 掩蓋。完成後 Telegram 回報老闆。",
@@ -57707,9 +57715,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-10T12:05:53.023948+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-10T10:34:58.396818+00:00"
+    "started_at": "2026-07-10T10:34:58.396818+00:00",
+    "completed_at": "2026-07-10T12:05:53.023532+00:00",
+    "result": "GitHub Test Suite run 29091180310 在 main@d611ccdcb 自動 push trigger 下 conclusion=success；隔離全套 1761 passed/6 baseline skipped。修復 host/production fixture 洩漏、GNU/BSD stat portability，移除本 incident 新增的全部 skip/xfail，並恢復 push/PR gate。"
   },
   {
     "id": "ops-tier2-audit-date-grounding-20260710",
