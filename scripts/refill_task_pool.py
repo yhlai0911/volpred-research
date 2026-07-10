@@ -1183,8 +1183,14 @@ def _ensure_candidates_fresh(max_age_hours: float = CANDIDATES_STALE_HOURS) -> d
         return {"rebuilt": False, "reason": "builder_missing"}
     timeout_seconds = _candidate_rebuild_timeout_seconds()
     try:
+        # sys.executable, not ["uv", "run", "python"]: subprocess.run's timeout kills the
+        # process it spawned. With a `uv` wrapper that is uv itself, leaving the builder
+        # orphaned to overwrite storage/publication_candidates.json minutes later — after
+        # this function already returned rebuild_timeout and the caller re-read the file.
+        # Measured 2026-07-10: the orphan landed its write ~20s after the parent exited.
+        # (Same `uv`-wrapper class as the 2026-07-02 git_conflict_guard fix.)
         proc = subprocess.run(
-            ["uv", "run", "python", str(builder)],
+            [sys.executable, str(builder)],
             capture_output=True,
             timeout=timeout_seconds,
             check=False,

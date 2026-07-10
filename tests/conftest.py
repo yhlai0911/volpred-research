@@ -35,6 +35,16 @@ os.environ["VOLPRED_NO_EMAIL"] = "1"
 # mutate prod. Structural backstop mirroring VOLPRED_NO_EMAIL above.
 os.environ["VOLPRED_NO_REMOTE_WRITE"] = "1"
 
+# 2026-07-10: writes were blocked, reads were not. A test with an incomplete stub still
+# queried LIVE production, so its verdict depended on today's prod data rather than its
+# fixtures. tests/test_feed_sync.py stubbed `_fetch_supabase_articles` but not
+# `_fetch_supabase_article_tags`; two of its tests were observed flipping between pass
+# and fail across runs 40 minutes apart with no code change on that path.
+# supabase_sync._urlopen raises on GET when this is set — loudly, because a silently
+# empty read is indistinguishable from "nothing in the DB" and would let a missing stub
+# produce a green test asserting the wrong thing.
+os.environ["VOLPRED_NO_REMOTE_READ"] = "1"
+
 # 2026-07-10: test runs must never rewrite canonical local state under storage/.
 # test_refill_task_pool.py::test_research_reader_friendly_still_allows_general_companion
 # monkeypatched refill_task_pool.CANDIDATES to a tmp_path file but left ROOT alone;

@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -46,7 +47,9 @@ def test_ensure_candidates_fresh_times_out_builder(tmp_path, monkeypatch):
         "timeout_seconds": 7,
     }
     assert calls and calls[0]["timeout"] == 7
-    assert calls[0]["cmd"] == ["uv", "run", "python", str(builder)]
+    # No `uv` wrapper: subprocess.run's timeout must kill the builder itself, not a
+    # wrapper process that leaves it orphaned to overwrite canonical state later.
+    assert calls[0]["cmd"] == [sys.executable, str(builder)]
 
 
 def test_default_candidate_rebuild_timeout_leaves_dispatch_headroom(monkeypatch):

@@ -69,6 +69,40 @@ def _remote_writes_blocked() -> bool:
     mirroring VOLPRED_NO_EMAIL for SMTP (conftest set at 2026-04-20)."""
     return os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1"
 
+
+def _remote_reads_blocked() -> bool:
+    """Test-mode kill switch for ALL Supabase reads.
+
+    VOLPRED_NO_REMOTE_WRITE stops tests corrupting prod. It does nothing about reads,
+    so a test with an incomplete stub silently queries LIVE production and its verdict
+    then tracks today's prod data. 2026-04-26: tests/test_feed_sync.py stubbed
+    `_fetch_supabase_articles` but not `_fetch_supabase_article_tags`, whose
+    `_select_rows` calls went to prod. Two of its tests were still flipping between
+    pass and fail across runs 40 minutes apart on 2026-07-10, with no code change on
+    that path.
+
+    Reads fail LOUD rather than returning an empty result: a silent empty read is
+    indistinguishable from "nothing in the DB" and would turn a missing stub into a
+    green test asserting the wrong thing (.claude/rules/no-silent-fallback.md).
+    """
+    return os.environ.get("VOLPRED_NO_REMOTE_READ") == "1"
+
+
+def _urlopen(req, timeout: int = 15):
+    """Single egress chokepoint for every Supabase HTTP call.
+
+    Gating here rather than at each of the seven request helpers means a newly added
+    read cannot forget the switch — the same reasoning as the HEADERS guard below.
+    """
+    if req.get_method() == "GET" and _remote_reads_blocked():
+        raise RuntimeError(
+            f"Blocked live Supabase read of {req.full_url.split('?')[0]} because "
+            "VOLPRED_NO_REMOTE_READ=1 (set by tests/conftest.py). A test reached "
+            "production Supabase, which makes its result depend on live data. Stub "
+            "the fetch helper this call path uses instead of relaxing the switch."
+        )
+    return urlopen(req, timeout=timeout)
+
 class _GuardedHeaders(Mapping):
     """Request headers that refuse to materialise without credentials.
 
@@ -169,7 +203,7 @@ def _post(table: str, data: list | dict) -> bool:
                          ensure_ascii=False).encode("utf-8")
     req = Request(url, data=payload, headers=HEADERS, method="POST")
     try:
-        urlopen(req, timeout=15)
+        _urlopen(req, timeout=15)
         return True
     except HTTPError as e:
         code = e.code
@@ -203,7 +237,7 @@ def _patch(table: str, conflict_key: str, data: list | dict) -> bool:
         patch_headers = {**HEADERS, "Prefer": "return=minimal"}
         req = Request(url, data=payload, headers=patch_headers, method="PATCH")
         try:
-            urlopen(req, timeout=15)
+            _urlopen(req, timeout=15)
         except Exception:
             ok = False
     return ok
@@ -224,7 +258,7 @@ def _request_json(url: str, method: str = "GET", data: list | dict | None = None
     if data is not None:
         payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
     req = Request(url, data=payload, headers=headers, method=method)
-    with urlopen(req, timeout=15) as resp:
+    with _urlopen(req, timeout=15) as resp:
         body = resp.read()
         if not body:
             return None
@@ -297,7 +331,7 @@ def _patch_where(table: str, filters: dict[str, object], row: dict) -> bool:
     headers = {**HEADERS, "Prefer": "return=minimal"}
     req = Request(url, data=payload, headers=headers, method="PATCH")
     try:
-        urlopen(req, timeout=15)
+        _urlopen(req, timeout=15)
         return True
     except Exception as e:
         print(f"  Supabase {table} patch error: {e}")
@@ -323,7 +357,7 @@ def _patch_where_returning(
     headers = {**HEADERS, "Prefer": "return=representation"}
     req = Request(url, data=payload, headers=headers, method="PATCH")
     try:
-        resp = urlopen(req, timeout=15)
+        resp = _urlopen(req, timeout=15)
         body = resp.read().decode("utf-8")
         if not body:
             return []
@@ -341,7 +375,7 @@ def _delete_where(table: str, filters: dict[str, object]) -> bool:
     url = f"{SUPABASE_URL}/rest/v1/{table}?{query}"
     req = Request(url, headers={**HEADERS, "Prefer": "return=minimal"}, method="DELETE")
     try:
-        urlopen(req, timeout=15)
+        _urlopen(req, timeout=15)
         return True
     except Exception as e:
         print(f"  Supabase {table} delete error: {e}")
@@ -810,7 +844,7 @@ def _get_article_id(slug: str) -> str | None:
     url = f"{SUPABASE_URL}/rest/v1/articles?select=id&slug=eq.{slug}"
     req = Request(url, headers=HEADERS, method="GET")
     try:
-        with urlopen(req, timeout=15) as resp:
+        with _urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode())
             return data[0]["id"] if data else None
     except Exception:

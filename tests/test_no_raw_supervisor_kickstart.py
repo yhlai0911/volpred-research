@@ -46,9 +46,14 @@ def _candidate_files() -> list[Path]:
         for path in base.rglob("*"):
             if path.suffix not in _SUFFIXES:
                 continue
-            if _SKIP_PARTS & set(path.parts):
+            rel = path.relative_to(REPO)
+            # Match parts BELOW the repo root, not the absolute path. This gate also runs
+            # from inside `.claude/worktrees/<name>/`, where every absolute path contains
+            # "worktrees" — matching on `path.parts` skipped every file, scanned zero, and
+            # the self-check below correctly reported "gate is dead".
+            if _SKIP_PARTS & set(rel.parts):
                 continue
-            if str(path.relative_to(REPO)) in _ALLOWLIST:
+            if str(rel) in _ALLOWLIST:
                 continue
             out.append(path)
     return out
