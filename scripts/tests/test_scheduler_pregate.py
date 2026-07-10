@@ -315,13 +315,37 @@ def test_due_to_fire_still_fires_when_slot_genuinely_missed() -> None:
 
 
 def test_due_to_fire_not_due_when_slot_already_served() -> None:
-    """The 22:58 incident: 22:07 slot was already fired at 22:07:51."""
+    """The 22:58 incident: 22:07 slot was already fired at 22:07:51.
+
+    `_due_to_fire` resolves in the daemon's LOCAL timezone: `_parse_last_fire`
+    does `.astimezone().replace(tzinfo=None)` on the tz-aware stored value, then
+    compares it against croniter's tz-NAIVE prev-slot. The stored value here is
+    14:07:51 UTC == 22:07:51 Asia/Taipei, i.e. just after the 22:07 slot — but
+    only *in Taipei*. On a UTC runner (CI) it reads as 14:07, hours before the
+    slot, so the served slot wrongly looks due (this is the True-is-False CI
+    failure). The daemon runs in Asia/Taipei, so pin that here instead of letting
+    the machine's zone decide; without tzset this passed only by accident of
+    being run in +08. (Production tz-fragility — `_due_to_fire` silently depends
+    on the host zone — escalated in docs/error_log.md 2026-07-11.)
+    """
+    import os
+    import time
     from datetime import datetime as _dt
 
-    now = _dt(2026, 7, 10, 22, 58, 25)
-    served = "2026-07-10T14:07:51.094696+00:00"  # == 22:07:51 Taipei
-    due, _prev = scheduler._due_to_fire(cron_expr=CRON, last_fire_at=served, now=now)
-    assert due is False
+    _orig_tz = os.environ.get("TZ")
+    os.environ["TZ"] = "Asia/Taipei"
+    time.tzset()
+    try:
+        now = _dt(2026, 7, 10, 22, 58, 25)
+        served = "2026-07-10T14:07:51.094696+00:00"  # == 22:07:51 Taipei
+        due, _prev = scheduler._due_to_fire(cron_expr=CRON, last_fire_at=served, now=now)
+        assert due is False
+    finally:
+        if _orig_tz is None:
+            os.environ.pop("TZ", None)
+        else:
+            os.environ["TZ"] = _orig_tz
+        time.tzset()
 
 
 def test_tick_bootstraps_missing_last_fire_and_does_not_spawn(

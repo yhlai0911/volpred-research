@@ -2,6 +2,20 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-11 `_due_to_fire` 靜默依賴 daemon 本地時區 —— CI(UTC) 暴露 pytest gate 上線後第一批紅
+
+**問題**：`scripts/dispatch_supervisor/scheduler.py::_due_to_fire` 在 daemon 的**本地時區**裡做判斷，但這個依賴從未被明說。`_parse_last_fire` 對 tz-aware 的 `last_fire_at` 做 `.astimezone().replace(tzinfo=None)`（轉成 naive 本地），再跟 croniter 的 tz-**naive** prev-slot 比較。croniter 的 base 是 `datetime.now()`（naive 本地）。整條路徑一致的前提是「daemon 跑固定時區的機器」—— 現在是 Asia/Taipei，成立。
+
+**現象**：CI 的 pytest gate（今天才接上 push/PR，`.github` Test Suite）上線後對 main 連紅。抓到 2 個測試在 UTC runner 失敗，本機（台灣 +08）全綠：
+- `scripts/tests/test_scheduler_pregate.py::test_due_to_fire_not_due_when_slot_already_served` — `assert due is False` 在 CI 變 `True is False`。測試用 `served="…14:07:51+00:00"`（註解 `== 22:07:51 Taipei`）測「slot 剛服務完 → not due」的**邊界**。台灣機器 astimezone→22:07:51（剛過 22:07 slot，not due ✓）；UTC 機器 astimezone→14:07:51（遠早於 22:07 slot，誤判 due ✗）。
+- `tests/test_alerts.py::test_check_alert_conditions_sends_each_breached_condition_once` — CI 的 Ubuntu runner 無 nvm codex binary → 新增的 `codex_failover_ready` 條件 breach，硬編碼期望列表對不上（此測試已由 codex_failover 那條線的 session 補 stub 修好，本 entry 不重複）。
+
+**過程**：`TZ=UTC uv run pytest …` 本機重現失敗 1（台灣時區 pass、UTC fail），確認是**測試 encode 了「跑在 +08」的隱藏假設**，不是行為 bug。讀 `_parse_last_fire` docstring 確認 astimezone-local 是**刻意設計**（tz-naive cron + tz-aware state 要轉同一 frame）。
+
+**解決方法（修測試，不改 production；理由見下）**：`test_due_to_fire_not_due_when_slot_already_served` 用 `os.environ["TZ"]="Asia/Taipei"` + `time.tzset()`（try/finally 還原、不洩漏污染 sibling）pin 住 daemon 的實際時區，讓 astimezone 邊界 deterministic。驗證：UTC 整檔 25 passed、本機整檔 25 passed、CI 兩個原始失敗在 UTC 皆綠。
+
+**未修的 root cause（escalation，不靜默掩蓋）**：production `_due_to_fire` 若移到**非台灣時區**的機器（或不同 host zone 的 CI/備援機），slot 判斷會偏移整個時區差 —— 「上個 slot 服務了沒」在 UTC 機器上會系統性早判/晚判。現在不修 production 的理由：(1) daemon 跑 Asia/Taipei 是穩定事實，production 當前正確；(2) 統一 UTC frame 要動 `_prev_fire`/`_parse_last_fire`/`_due_to_fire` 核心，且 scheduler.py 那條線有其他 session 在改（Fable 5 的 9c4f73e21 + 後續），同時動會撞車。**建議** owner 評估把整條 fire-timing 改成全程 aware-UTC frame（croniter base 也用 UTC），根除 host-zone 依賴。在此 escalate，測試註解已指回本 entry。
+
 ## 2026-07-11 detached-HEAD worktree 帶 4 個 gc-exposed commit —— orphan_branch alert 的反向盲區（rescue + alert 擴充）
 
 **問題**：`.claude/worktrees/distracted-poincare-fb39bc` 停在 detached HEAD、帶 4 個 main 上沒有的 commit（`main..HEAD=4`），**沒有任何 branch ref 指向**。這是 `orphan_branch` alert（同日新增，抓「branch 有工作但 worktree 被刪」）的**鏡像盲區**：worktree 移除的六層防護全在保護 worktree，而這裡剛好相反 —— worktree 在、ref 不在。branch 型孤兒有 ref、gc 撐得住；detached worktree 連 ref 都沒有，`git worktree remove` 或之後的 `git gc` 會讓那 4 個 commit unreachable 而**永久遺失**。
