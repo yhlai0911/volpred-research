@@ -48,9 +48,16 @@ paths:
   owner，不新增第二層 watchdog**（anti-stacking）。
 - **Cutover 會製造孤兒，孤兒不會自己叫**。退役一個執行路徑（LaunchAgent / wrapper / script）時，
   必須一併 grep 出**所有仍讀寫它的 reader**（監控、告警、boss report、被它獨家 wire 的工具），
-  否則監控會安靜地驗證一具屍體。已發生三次：2026-07-08 `cron_review` 讀死 LaunchAgent label；
+  否則監控會安靜地驗證一具屍體。已發生四次：2026-07-08 `cron_review` 讀死 LaunchAgent label；
   2026-07-10 `dispatch_binary_health` grep 已退役的 `cron_hourly_dispatch.sh`；
-  同日 `hourly_dispatch_pregate.py` 因只 wire 在 legacy shell 而被孤立整整六天。
+  同日 `hourly_dispatch_pregate.py` 因只 wire 在 legacy shell 而被孤立整整六天；
+  同日 `git_conflict_guard.py` 同一根因、同樣六天。
+  **本條散文已於第 4 次後機械化** → `scripts/tests/test_cutover_orphans.py`（斷言 legacy wrapper
+  執行的每個 `scripts/*.py` 都已被 supervisor 引用，或列入 `_RETIRED_BY_DESIGN` 附理由）。
+  再退役其他執行路徑時，為該路徑推廣同型 gate；這段散文只是 pointer。
+- **靜默的守門員最危險**。`git_conflict_guard` 比 pregate 更晚被發現，因為它在乾淨樹上**無輸出、
+  無 side-effect log** —— 「沒在跑」與「跑了但沒事」在觀測上同形，沒有任何被動訊號。凡
+  **fail-open + 乾淨時 no-op** 的防護元件，上線當下就要同步立「它是否仍被呼叫」的機械 gate。
 - **「程式碼寫完」不等於「上線」**。常駐 daemon 讀的是啟動時載入的記憶體副本；改了
   `scripts/dispatch_supervisor/**` 的**程式碼**必須重啟 daemon 才生效（只有 `config/` 欄位是
   每 tick 熱重載）。宣告完成前確認：改的是 config 還是 code？code 的話，誰重啟？
