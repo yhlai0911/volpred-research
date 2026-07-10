@@ -28,8 +28,9 @@ paths:
     1. `codex --version` — 看 CLI binary 真正版本（**不**是 `~/.claude/plugins/cache/openai-codex/codex/<x>/` 目錄名，後者是 marketplace plugin 版號）
     2. `codex login status` — 確認 auth mode（ChatGPT account vs API key 接受不同 model whitelist）
     3. `cat ~/.codex/config.toml` 看 `model =` 欄位
-    4. **暫時移除** `model = ` line → CLI auto-pick default（目前 0.121.0 default = `gpt-5.4`）→ smoke test `codex exec --skip-git-repo-check "echo TEST"`
-    5. 若 default model PASS 就改回 config 鎖定（如 `model = "gpt-5.4"`）；若 default 仍 fail 才考慮 plugin 升級
+    4. **暫時移除** `model = ` line → CLI auto-pick default → smoke test `codex exec --skip-git-repo-check "echo TEST"`
+    5. 若 default model PASS 就改回 config 鎖定（2026-07-10 起 canonical = `model = "gpt-5.6-sol"` + `model_reasoning_effort = "ultra"`，CLI 0.144.1 smoke 驗證）；若 default 仍 fail 才考慮 CLI 升級（`npm install -g @openai/codex@latest --include=optional`）
+    6. **改 config 的 model 後必跑 smoke**（2026-07-10 incident：config 指到已裝 CLI 不支援的 model → API 400 → 全平台 codex 流程（review gate / lazypack / paper review）靜默失敗數小時；改 config 與升級 CLI 必須同一動作內驗證）
   - **Fallback**：上述 diagnostic 全 fail 仍無法恢復 Codex 時，改派 `feature-dev:code-reviewer` subagent 做 independent fresh-context review（K1259 / K1261 / K1262 已走過此 path）。Knowledge entry 必註明 reviewer source（`Codex review` vs `code-reviewer subagent fallback`）。Bar 不變：CONDITIONAL PASS 以上才寫 knowledge.json。
   - **Codex 已於 2026-04-28 21:58 CST production-path 端到端驗證恢復**（`docs/error_log.md` RESOLVED entry；session `019dd462`，task `task-moioyr49-g0dg9v`）— primary path 是 Codex review，不是 fallback。
   - **Subagent fallback PASS ≠ primary-path Codex PASS**（2026-04-29 K1259 教訓）：subagent 走過 PASS-with-caveats 後若 Codex 恢復可用，**必須**用 primary-path Codex 二次驗證 — 不可只靠 subagent verdict 標 closure。K1259 案例：subagent v1 PASS 標「provenance-clean」，1 天後 Codex v2 在同份 code 找到 12 個 residual non-DM rows（`statistical_tests`/`stat_test`/`welch`/`vs_zero` patterns 全 keyed via `t_stat` 欄位，落在原 audit subset 之外）。Closure 才能立。

@@ -57445,7 +57445,7 @@
     "task_type": "event_article",
     "priority": 1,
     "source": "drought-remediation-emergency-20260710",
-    "status": "claimed",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "topology": "inline",
     "created_at": "2026-07-10T09:26:21.916215+00:00",
@@ -57460,8 +57460,16 @@
         "from": "pending",
         "to": "claimed",
         "by": "main-session"
+      },
+      {
+        "ts": "2026-07-10T10:20:22.022291+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-session"
       }
-    ]
+    ],
+    "completed_at": "2026-07-10T10:20:22.021947+00:00",
+    "result": "mile_e3cede77 已 published + 線上 200 + feed-sync（updated 133/failed 0）+ 🌡️ 事件溫度計前綴（registry member #5 + series_registry --apply）+ FB 雙發佈成功（主文+留言連結，fb_post_status=success）。K1675 證據包 committed + knowledge 99c054fe（CONDITIONAL_PASS，Codex reviewed）。null 主結論：13 次颱風假復市波動與對照日無異、高點在停市前。"
   },
   {
     "id": "email-11962-9a1805",
@@ -57540,9 +57548,153 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "telegram-responder",
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-10T09:41:36.797485+00:00",
     "title": "CI Test Suite 34 fail — 全為環境依賴，修 workflow 環境與測試 fixture",
-    "description": "run 29083395825 (2026-07-10) 首次真的跑 pytest 後 34 failed / 1650 passed。本機 uv run --extra dev python -m pytest 同批全 PASS（39 passed）→ 全部是 CI 環境依賴，非產品 bug。\n根因分四類：\n1. 缺 ripgrep（9 tests, test_experiments_ops）→ workflow 加 apt-get install -y ripgrep\n2. 缺 SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY（4 tests, test_feed_sync）→ 測試改 monkeypatch env，或 CI 注入 dummy env；不可把 secret 放 CI\n3. repo_root_mismatch（6 tests, test_execution_brief / test_session_ops）→ guard 假設 repo 在 ~/volpred-research，CI 在 /home/runner/work/...；改讀 git rev-parse --show-toplevel\n4. gitignored 資料檔缺（~13 tests: trending_repost_log.json、arc_dedup / topic_cluster_gate / daily_digest 的 SystemExit:1）→ 測試改建 fixture，不依賴 storage/ 實資料\n另 test_alerts assert 4==3 與 test_cron_auth_preflight 需個別確認是否亦屬類 3/4。\n禁止用 skip/xfail 掩蓋 — 依「永遠修流程」修環境與測試 fixture。"
+    "description": "run 29083395825 (2026-07-10) 首次真的跑 pytest 後 34 failed / 1650 passed。本機 uv run --extra dev python -m pytest 同批全 PASS（39 passed）→ 全部是 CI 環境依賴，非產品 bug。\n根因分四類：\n1. 缺 ripgrep（9 tests, test_experiments_ops）→ workflow 加 apt-get install -y ripgrep\n2. 缺 SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY（4 tests, test_feed_sync）→ 測試改 monkeypatch env，或 CI 注入 dummy env；不可把 secret 放 CI\n3. repo_root_mismatch（6 tests, test_execution_brief / test_session_ops）→ guard 假設 repo 在 ~/volpred-research，CI 在 /home/runner/work/...；改讀 git rev-parse --show-toplevel\n4. gitignored 資料檔缺（~13 tests: trending_repost_log.json、arc_dedup / topic_cluster_gate / daily_digest 的 SystemExit:1）→ 測試改建 fixture，不依賴 storage/ 實資料\n另 test_alerts assert 4==3 與 test_cron_auth_preflight 需個別確認是否亦屬類 3/4。\n禁止用 skip/xfail 掩蓋 — 依「永遠修流程」修環境與測試 fixture。",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-07-10T10:10:24.617547+00:00",
+    "claim_session_id": "d765c104608e",
+    "status_history": [
+      {
+        "ts": "2026-07-10T10:10:24.617897+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-10T10:10:24.967360+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-18"
+      }
+    ],
+    "started_at": "2026-07-10T10:10:24.966764+00:00"
+  },
+  {
+    "id": "ops-codex-cli-upgrade-20260710",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "k1675-lazypack-incident-20260710",
+    "status": "succeeded",
+    "dispatch_lane": "agentable",
+    "topology": "subagent",
+    "created_at": "2026-07-10T10:00:52.982289+00:00",
+    "title": "Codex CLI 升級：config drift（gpt-5.6-sol + ultra）與 CLI 0.142.5 不相容",
+    "description": "Incident（2026-07-10 17:52-18:00）：~/.codex/config.toml 被設成 model=gpt-5.6-sol + model_reasoning_effort=ultra，但已裝 CLI codex-cli 0.142.5 不支援該 model（API 400：requires a newer version of Codex）→ 全平台 codex 流程（review gate / lazypack render / paper review）靜默失敗。K1675 lazypack 連續 2 次 0/3 產出後才定位。\n\n已做的臨時恢復（主線程 18:01）：config 回退 model=gpt-5.4 + effort=high（smoke test SMOKE_OK；備份在 ~/.codex/config.toml.bak-20260710）。\n\n本任務（真正根治）：\n1. 升級 CLI：npm install -g @openai/codex@latest --include=optional（CLAUDE.md 註記：缺 darwin-arm64 optional binary 會 crash，--include=optional 必帶）。\n2. 升級後 smoke：codex --version + codex exec --skip-git-repo-check 'echo TEST'。\n3. 若新 CLI 支援 gpt-5.6-sol → 評估是否恢復該 model（誰當初設的？grep 各 session 紀錄/error_log 確認動機；若是更強 model 且 flat-rate 則恢復並 smoke）；否則維持 gpt-5.4。\n4. 教訓固化：scripts/gen_lazypack_codex.py 的 codex 呼叫加 fail-loud（400 error 要浮上 stderr summary 而非只留在 captured output）+ 開工前 smoke 一次 config 模型可用性（比照 experiments.md Codex 診斷 SOP step 4）。\n5. error_log 記 root cause（config 改動與 CLI 版本必須同步驗證 — 改 config 的 session 沒跑 smoke）。",
+    "claimed_by": "main-session",
+    "claimed_at": "2026-07-10T10:04:30.387860+00:00",
+    "claim_session_id": "fdb60732",
+    "status_history": [
+      {
+        "ts": "2026-07-10T10:04:30.388206+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main-session"
+      },
+      {
+        "ts": "2026-07-10T10:21:15.102190+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-session"
+      }
+    ],
+    "completed_at": "2026-07-10T10:21:15.101824+00:00",
+    "result": "CLI 0.142.5→0.144.1（npm --include=optional）；gpt-5.6-sol + ultra 三組 smoke 全過（SMOKE_56_OK/ULTRA_OK/DEFAULT_56_OK）；config 恢復 gpt-5.6-sol+ultra。平台底層引用全更新：CLAUDE.md L131、experiments.md 診斷 SOP（新增 step 6 config-model×CLI 同步 smoke 硬規）、~/.claude/skills/codex-cli/SKILL.md（4 處）、memory reference_dual_cli_availability。root cause 教訓已入 rule。"
+  },
+  {
+    "id": "K1675_article_general",
+    "title": "K1675: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1675 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: K1675 台股颱風停市事件研究（2012-2025，^TWII + 0050 雙源驗證；觸發事件=2026-07-10 颱風巴威停市）。停市日推導：XTAI adhoc_holidays（15 天）∪ 殘差掃描（+2024-10-31 康芮，library 漏列）；殘差 false positives 用 TWSE 融資融券獨立第二來源 + 假期鄰接剔除；共 16 停市日 / 13 事件。主結論（null 即結論）：(1) 復市首日 |報酬| 0.871% vs 同月對照日 0.706%，bootstrap 95% CI [-0.235%, +0.66",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1675",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-10T10:08:37+00:00"
+  },
+  {
+    "id": "telegram-369",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T10:13:29.683160+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 369）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n有立刻處理？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T10:14:12.876393+00:00",
+    "claim_session_id": "77e80451da90",
+    "status_history": [
+      {
+        "ts": "2026-07-10T10:14:12.876741+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T10:16:47.032441+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-10T10:16:47.031828+00:00"
+  },
+  {
+    "id": "email-11968-8acd19",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 發文脫班已解除：已發 mile_66c3fc3b + 修掉兩個圖片相關 bug",
+    "description": "Gmail UID: 11968\nMessage-ID: <053C2099-F40E-405C-940C-12FB80BF175F@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 10 Jul 2026 18:01:58 +0800\nSubject: Re: [VolPred Alert][INFO] 發文脫班已解除：已發 mile_66c3fc3b + 修掉兩個圖片相關 bug\n\n--- 用戶回信內容 ---\n不是說可以當班處理的就立即當班處理嗎？ 那個孤兒應該要立刻處理吧\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月10日 17:52 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 發文脫班已解除：已發 mile_66c3fc3b + 修掉兩個圖片相關 bug\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 發文脫班已解除\r\n> \r\n> 結論：已發佈一篇新文章，發文間隔從 8.14 小時 回到 0.01 小時，警報解除。\r\n> 為什麼 force-release 和 refill 都回 0\r\n> \r\n> 不是壞掉，是照設計在說「沒有乾淨的東西可以發」：\r\n> 池子裡 5 篇草稿全部被標記為「和已發文章講同一個故事」（舊題材重複）。\r\n> 補池要用的研究題目（K backlog）也全部是 舊題材重複。\r\n> 補救階梯第 2 步的斷路器刻意拒絕把重複內容再發一次，直接回 0，要求產出新內容。\r\n> 所以正確處置是寫一篇新的，而不是硬推舊的。\r\n> 發了什麼\r\n> \r\n> 〈股市在怕，債市沒在怕：信用市場對這波科技股震盪的沉默〉（mile_66c3fc3b）\r\n> 7/9 收盤，那斯達克 100 的 20 日波動率衝到 30.95%，比自身 60 日均值高 8.7 個百分點；\r\n> 同一天高收益債 ETF 的波動率反而降 1.38 個百分點，利差還收窄 7.5 個基點。\r\n> 把條件設成一樣，翻出過去 59 個同樣「股票波動率跑這麼熱」的交易日：\r\n> 指標\t現值\t相對 60 日均值\t歷史中位數\t百分位\r\n> QQQ 20 日波動率\t30.95%\t+8.70 pp\t—（條件本身）\t—\r\n> HYG 20 日波動率\t3.31%\t−1.38 pp\t+0.47 pp\t0（最低）\r\n> 高收益利差\t2.70%\t−7.5 bp\t+26.9 bp\t15\r\n> 利差收窄其實三成機率會發生，不算異象。真正罕見的是信用資產自己的價格變得更安穩。\r\n> 資料 yfinance + FRED，2 張真圖 + 懶人包 3 圖。寫前過 arc 查重 gate，寫後過 anti-AI gate。\r\n> 另外抓到兩個 bug（都已修並驗證）\r\n> \r\n> 發佈過程中撞到的，順手根治：\r\n> 圖片會互相覆蓋：上傳到 Supabase 的檔名沒有帶文章名，而懶人包檔名是固定的\r\n> （lazy1_concept.png 之類）。等於任兩篇有懶人包的文章必然蓋掉對方的圖。\r\n> 已改成用文章資料夾當命名空間，舊連結照常可用。\r\n> 預覽模式會真的寫遠端：--dry-run 名為預覽，實際上在檢查旗標之前就把圖片上傳了。\r\n> 我今天的預覽因此蓋掉了 7/9 半導體那篇的三張懶人包圖 —— 已用 hash 比對確認完整復原，\r\n> 並修掉預覽的副作用。\r\n> 兩個修正都留了機械測試（7 passed），舊行為可重現碰撞。\r\n> 一個提醒\r\n> \r\n> dispatcher 目前顯示 slot 6/4 已滿、活躍 agent 0 —— 6 個 worktree 是孤兒，其中 5 個\r\n> 的 commit 早就在 main 上。這會讓派工完全停擺（沒人能被派去寫文章），是這次脫班的\r\n> 結構性背景。我沒有在這一班清理，因為當下有另一個 session 正在同一個工作區編輯檔案，\r\n> 併發清 worktree 有風險。已記錄，下一班處理。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-10T10:15:07.820811+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11968,
+    "email_message_id": "<053C2099-F40E-405C-940C-12FB80BF175F@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 發文脫班已解除：已發 mile_66c3fc3b + 修掉兩個圖片相關 bug",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-10T10:21:08.455635+00:00",
+    "claim_session_id": "fa43dd15e78c",
+    "status_history": [
+      {
+        "ts": "2026-07-10T10:21:08.455927+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      }
+    ]
+  },
+  {
+    "id": "ci-green-20260710",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "telegram",
+    "status": "pending",
+    "created_at": "2026-07-10T10:15:43.763233+00:00",
+    "title": "修好 CI Test Suite 34 個失敗（run 29083395825）",
+    "description": "背景：import-time raise 修掉後 CI 首次真的跑測試，暴露 34 個 CI-env 失敗（1650 passed）。\n五類根因（都要修測試/流程，不是塞 env 掩蓋）：\n1. tests/test_experiments_ops.py (8 fail) — FileNotFoundError 'rg'：CI runner 無 ripgrep。修法：程式面 grep fallback 或 workflow 安裝 ripgrep（擇一，寫明理由）。\n2. tests/test_feed_sync.py (4 fail) — RuntimeError Missing SUPABASE_URL：測試不該需要真 env，改成 monkeypatch/fixture 注入假 client。\n3. tests/test_session_ops.py (2 fail) — RuntimeError repo_root_mismatch：CI runner path 與 repo_root 假設不符。\n4. tests/test_topic_cluster_gate.py (7 fail) — SystemExit: 1，gate script 在 CI 環境 exit non-zero。\n5. tests/test_trending_repost_fb_url.py (2 fail) — storage/reports/trending_repost_log.json 不存在（gitignored）：測試要 skip 或用 fixture。\n成功標準：Test Suite workflow 在 main 上 conclusion=success，且無 xfail/skip 掩蓋。完成後 Telegram 回報老闆。"
+  },
+  {
+    "id": "ops-tier2-audit-date-grounding-20260710",
+    "task_type": "platform_ops",
+    "priority": 4,
+    "source": "k1675-publish-observation",
+    "status": "pending",
+    "dispatch_lane": "agentable",
+    "topology": "subagent",
+    "created_at": "2026-07-10T10:21:29.211732+00:00",
+    "title": "prepublish Tier-2 audit 的 LLM 缺當日日期 grounding — 誤報未來日期",
+    "description": "2026-07-10 發佈 mile_e3cede77 時 Tier-2（audit_conclusion_consistency，agy/gemini-flash）誤報：『文章將今天描述為 2026-07-10，與設定之今日日期 2026-06-03 衝突』— audit LLM 的今日認知過期，把當天日期當未來。warn-only 不擋但產生噪音 flag。修法：src/volpred/publisher/prepublish_audit.py 的 conclusion-consistency prompt 注入真實當日日期（datetime.now 台北時區），並加一行 regression test。"
   }
 ]

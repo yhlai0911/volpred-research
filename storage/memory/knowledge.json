@@ -38277,5 +38277,22 @@
     ],
     "confidence": 0.86,
     "created_at": "2026-07-10T12:01:01.709585"
+  },
+  {
+    "item_id": "99c054fe",
+    "category": "event_study",
+    "content": "K1675 台股颱風停市事件研究（2012-2025，^TWII + 0050 雙源驗證；觸發事件=2026-07-10 颱風巴威停市）。停市日推導：XTAI adhoc_holidays（15 天）∪ 殘差掃描（+2024-10-31 康芮，library 漏列）；殘差 false positives 用 TWSE 融資融券獨立第二來源 + 假期鄰接剔除；共 16 停市日 / 13 事件。主結論（null 即結論）：(1) 復市首日 |報酬| 0.871% vs 同月對照日 0.706%，bootstrap 95% CI [-0.235%, +0.662%] 含 0 — 分不出差別（n=13，只做描述性區間不宣稱檢定力）。(2) 停市後/前 5 日 RV 比中位數 0.838，13 次中 11 次 <1 — 停市後波動未放大反而略降。(3) 全事件視窗波動高點在停市前（tau=-1 平均 |報酬| 1.171%）— 該怕的是颱風逼近的定價日，非復市日。(4) |跳空| 對全日對照名目較大（0.706% vs 0.324%）但對週一對照即失效 — 跨日曆天數效應非停市特有。方法論教訓：exchange_calendars 4.13.2 已 backfill 歷史颱風（brief 假設它盲目是錯的）— 用套件前先驗其 adhoc_holidays 覆蓋；yfinance ^TWII 有 phantom 填充列（開盤=收盤 zero-gap），需規則清理。Caveats：n=13 樣本小；凱米 2024-07-26 -3.29% 與全球科技股回檔同日不可全歸因颱風；災損效應與停市機制效應不可分離。seed=42。",
+    "evidence": [
+      "experiments/k1675/k1675_results.json",
+      "experiments/k1675/README.md",
+      "experiments/k1675/k1675_typhoon_closure_event.py"
+    ],
+    "confidence": 0.8,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1675",
+    "k_id": "K1675",
+    "experiment_path": "experiments/k1675",
+    "reviewer_source": "Codex gpt-5.4 CONDITIONAL PASS（兩 findings：來源 B 盲點 + README tau 誤植，同日修正重跑，主結果不變，Codex 獨立重算驗證）",
+    "created_at": "2026-07-10T18:03:17.412278"
   }
 ]
