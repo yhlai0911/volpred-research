@@ -95,6 +95,53 @@ assert_allow "plain echo"                  "echo hello"
 assert_allow "pytest advisory rewrite"     "uv run pytest tests/"
 assert_allow "cat unrelated file"          "cat storage/reports/mile_abc123.json"
 
+# ── git commit --amend on 共用 main checkout（2026-07-10 hourly-23 事故）──
+# 這條 deny 依賴「目標 repo 的 toplevel/branch」，不能靠真實 repo 當下狀態（會隨分支漂移）。
+# 起一個一次性 repo 當 ROOT，worktree 當「agent 自己的 checkout」，兩者對照。
+AMEND_TMP="$(mktemp -d)"
+trap 'rm -rf "$AMEND_TMP"' EXIT
+git init -q -b main "$AMEND_TMP/shared" 2>/dev/null
+git -C "$AMEND_TMP/shared" -c user.email=t@t -c user.name=t commit -q --allow-empty -m base
+git -C "$AMEND_TMP/shared" worktree add -q -b agent-branch "$AMEND_TMP/wt" 2>/dev/null
+SHARED="$AMEND_TMP/shared"
+WT="$AMEND_TMP/wt"
+
+run_cwd() {  # $1=cwd $2=command → hook stdout（ROOT 指向一次性 shared repo）
+  printf '{"cwd":%s,"tool_input":{"command":%s}}' \
+    "$(printf '%s' "$1" | jq -Rs .)" "$(printf '%s' "$2" | jq -Rs .)" \
+    | VOLPRED_HOOK_ROOT="$SHARED" bash "$HOOK"
+}
+decision_cwd() { run_cwd "$1" "$2" | jq -r '.hookSpecificOutput.permissionDecision // "none"'; }
+
+assert_deny_cwd() {  # $1=label $2=cwd $3=command
+  local dec; dec="$(decision_cwd "$2" "$3")"
+  if [[ "$dec" == "deny" ]]; then PASS=$((PASS + 1)); echo "PASS deny : $1";
+  else FAIL=$((FAIL + 1)); echo "FAIL deny (got $dec): $1"; fi
+}
+assert_allow_cwd() {  # $1=label $2=cwd $3=command
+  local dec; dec="$(decision_cwd "$2" "$3")"
+  if [[ "$dec" != "deny" ]]; then PASS=$((PASS + 1)); echo "PASS allow: $1";
+  else FAIL=$((FAIL + 1)); echo "FAIL allow (got deny): $1"; fi
+}
+
+assert_deny_cwd  "amend on shared main"        "$SHARED" "git commit --amend -m x"
+assert_deny_cwd  "amend abbrev --amen"         "$SHARED" "git commit --amen -m x"
+assert_deny_cwd  "amend abbrev --am"           "$SHARED" "git commit --am -m x"
+assert_deny_cwd  "amend after &&"              "$SHARED" "git add -A && git commit --amend --no-edit"
+# 從 worktree 用 `git -C <main>` 打回共用 checkout —— cwd 看起來安全，目標不安全
+assert_deny_cwd  "git -C shared from worktree" "$WT"     "git -C $SHARED commit --amend --no-edit"
+
+# agent 在自己的 worktree 分支上 amend：單一 owner，無覆蓋他人之虞
+assert_allow_cwd "amend in own worktree"       "$WT"     "git commit --amend --no-edit"
+# 主 checkout 但不在 main 分支
+git -C "$SHARED" checkout -q -b side
+assert_allow_cwd "amend on shared side-branch" "$SHARED" "git commit --amend --no-edit"
+git -C "$SHARED" checkout -q main
+# false positive 防護：引號內提到 --amend、以及 `git commit -C <commit>`（沿用 message，非 amend）
+assert_allow_cwd "commit msg mentions amend"   "$SHARED" "git commit -m 'ban --amend on shared main'"
+assert_allow_cwd "commit -C reuse message"     "$SHARED" "git commit -C HEAD~1"
+assert_allow_cwd "plain commit on shared main" "$SHARED" "git commit -m normal"
+
 echo "---"
 echo "PASS=$PASS FAIL=$FAIL"
 [[ "$FAIL" -eq 0 ]]

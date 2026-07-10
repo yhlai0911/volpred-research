@@ -15419,5 +15419,14 @@
     "backfilled_at": "2026-07-10T15:17:41.133229+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1676"
+  },
+  {
+    "timestamp": "2026-07-10T23:20:52+08:00",
+    "task_type": "platform_ops",
+    "task_id": "shared-checkout-amend-guard-20260710",
+    "outcome": "succeeded",
+    "actor": "hourly-23",
+    "owner": "hourly-23",
+    "summary": "解開卡住 main 的 merge conflict（kickstart gate 測試，取 HEAD+MERGE_HEAD 聯集，5 passed）；commit 一批含測試的 alerts/pregate/merge_worktree 修正；事故：在共用 main checkout 上 git commit --amend 覆蓋了另一個 agent 的 commit message 並吞掉其 5 個在途檔案（內容無遺失、測試綠）；治本：收編進既有 L1 PreToolUse deny hook 擋 shared-main amend（worktree 內不擋），regression 61 PASS/0 FAIL + 活 session 實測被擋；error_log + Enforcement Layer Map 已登記"
   }
 ]

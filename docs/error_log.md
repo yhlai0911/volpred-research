@@ -2,6 +2,25 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 `git commit --amend` 在共用 main checkout 上覆蓋了另一個 agent 的 commit（hourly-23）
+
+下一則的「併發副作用」段是**對手方視角**的同一起事故；這裡補加害方視角與機械修正。
+
+**現象**：hourly-23 commit `62e19cc6a` 時 message 亂碼（heredoc 經 hook wrapper 轉出非 UTF-8），連做兩次 `git commit --amend` 想修訊息。第二次 amend 後 `git log` 顯示 HEAD 訊息正確 —— 但 HEAD 已經不是我的 commit 了。
+
+**根因（不是編碼，是所有權假設）**：`--amend` 隱含「HEAD 是我剛做的」。**共用 main checkout 裡這個前提不成立**：dispatch worker、codex-vscode、rescue agent 同時在 `/Users/yhlai0911/volpred-research` 上 commit，reflog 顯示兩個 actor 的 commit **交錯**（`HEAD@{7}` 對方 commit → `HEAD@{3}` 對方 pull merge → `HEAD@{2}` 對方 commit `1c7275bae` → `HEAD@{1}/{0}` 我的兩次 amend）。我的 amend 打在對方剛做的 `1c7275bae` 上，兩層傷害：
+1. 把對方的 commit message 換成我的；
+2. 第二次 amend 走了 pre-commit hook（hook 會 stage），把對方**尚未提交**的 5 個在途檔案（`pytest.yml` / `check_skills_complete.sh` / `cron_log_rotate.sh` / `test_portable_stat.py` / 更多 `error_log`）一起吞進那個 commit。
+
+**未做的事**：沒有 rebase 改寫歷史。main 是活的、還有 process 在寫，rewrite 會直接輾掉對方進行中的 merge。只用 `--amend --only` 想修訊息，結果它**疊了一個新 commit 而非 amend**，接著連 `reset --soft` 都被 git 以 `Cannot do a soft reset in the middle of a merge` 擋下 —— 對方此刻正在解另一個衝突。**那個 abort 是好事**：它是唯一阻止我在別人 merge 中途動 HEAD 的東西。至此停手，改唯讀驗證雙方內容都在 HEAD（皆在，測試綠）。
+
+**修（L1 機械攔截，收編進既有 deny hook，不新開層）**：`.claude/hooks/pretooluse-bash-optimizer.sh` 第 4 條 deny —— 目標 repo 的 toplevel == 共用 main checkout **且**分支 == `main` 時，拒絕 `git commit --amend`。判定看 `.cwd`（fallback `$PWD`），並解析 `git -C <dir> commit` 這種從 worktree 打回 main 的寫法；`git commit -C <commit>`（沿用 message）語意不同，不可誤取。引號內字串先剝除，否則 `git commit -m 'fix --amend hazard'` 會被誤擋。長選項不歧義縮寫 `--am/--ame/--amen` git 全收，pattern 一併涵蓋（同 `worktree remove --force` 那條的 class 教訓）。**agent 在自己 worktree 分支上 amend 不擋** —— 單一 owner，無此風險。
+**補救方式不是 amend，是再疊一個 commit**：歷史多一行，勝過覆蓋別人的一行。
+
+**驗證**：`scripts/tests/test_pretooluse_deny.sh` 新增 10 案（shared main deny × 4，含縮寫與 `&&` 段界；worktree 用 `git -C` 打回 main deny；自己 worktree allow；main checkout 非 main 分支 allow；引號內提及 allow；`commit -C` allow；一般 commit allow），全檔 **61 PASS / 0 FAIL**。活 session 實測 `git commit --amend --dry-run` 被擋下。
+
+**教訓（比 bug 大）**：我一開始把那批 22:54–22:58 的 dirty 檔案讀成「上一班留下的未提交孤兒」，於是覺得 commit 它們是在**修**孤兒問題。實際上有 agent 正在寫它們。**mtime 只說明「最近被改過」，不說明「沒人在改」** —— 判定「無主」需要 owner 訊號（`dispatch_state.current_job`、活 process、reflog actor），不是時間差。共用 checkout 裡，「看起來沒人要的檔案」與「別人做到一半的檔案」外觀完全一樣。
+
 ## 2026-07-10 merge_worktree 的 shared-JSON guard 把「時間」當成「違規」；同一段程式的假警告會叫人把陳年 stash 蓋回 main
 
 修下一則「掃 0 個檔的 gate」時撞出來的。gate 本體的根因見該則 §3，此處不重述。

@@ -5,6 +5,8 @@ set -euo pipefail
 ROOT="${VOLPRED_HOOK_ROOT:-/Users/yhlai0911/volpred-research}"
 INPUT="$(cat)"
 COMMAND="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""')"
+HOOK_CWD="$(printf '%s' "$INPUT" | jq -r '.cwd // ""')"
+[[ -z "$HOOK_CWD" ]] && HOOK_CWD="$PWD"
 
 ADDITIONAL_CONTEXT=""
 UPDATED_COMMAND=""
@@ -41,6 +43,32 @@ ZEABUR_BIN='([^[:space:];&|()]*/)?zeabur(@[^[:space:]]+)?'
 # grep / jq / head 是 CLAUDE.md 明文放行的取用方式，不列入。
 FULL_READERS='(cat|bat|less|more|most|nl|od|tac|strings|view)'
 
+# 2026-07-10 hourly-23：主 checkout 是共用的 —— dispatch worker、codex-vscode、rescue agent
+# 會同時在 /Users/yhlai0911/volpred-research 上 commit。`git commit --amend` 假設「HEAD 是我剛做的」，
+# 這個假設在共用 checkout 裡不成立：當班 amend 打在 1c7275bae 上，把別的 agent 的 commit message
+# 換成自己的，並把它尚未提交的 5 個在途檔案一起吞進來。amend 沒有「只有我碰過 HEAD」的檢查，
+# 而 reflog 顯示兩個 actor 的 commit 是交錯的。worktree 內 amend 自己的分支無此風險（單一 owner），
+# 故只擋「目標 repo == 共用 main checkout 且在 main 分支」這一格。
+# 補救不是 amend 而是「再疊一個 commit」——歷史多一行，勝過覆蓋別人的一行。
+# git parse-options 收長選項不歧義縮寫：`--amend` 之外 `--am/--ame/--amen` git 全收（commit 沒有
+# 其他 `--am` 開頭選項）。引號內字串先剝掉，否則 `git commit -m 'fix --amend hazard'` 會被誤擋。
+AMEND_FLAG='--am[[:alpha:]]*'
+COMMAND_NOQ="$(printf '%s' "$COMMAND" | sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g")"
+
+# `git -C <dir> commit --amend` 從 worktree 也能打到 main checkout —— 目標目錄以 `-C` 為準
+# （必須落在子命令 `commit` 之前；`git commit -C <commit>` 的 -C 是「沿用某 commit 的 message」，
+# 語意完全不同，不可誤取）。無 `-C` 時目標即本次 Bash 的 cwd。
+_amend_target_is_shared_main() {
+  local target toplevel branch root_real
+  target="$(printf '%s' "$COMMAND_NOQ" | sed -nE 's|.*git[[:space:]]+-C[[:space:]]+([^[:space:]]+)[[:space:]]+commit.*|\1|p' | head -1)"
+  [[ -z "$target" ]] && target="$HOOK_CWD"
+  toplevel="$(git -C "$target" rev-parse --show-toplevel 2>/dev/null)" || return 1
+  branch="$(git -C "$target" rev-parse --abbrev-ref HEAD 2>/dev/null)" || return 1
+  root_real="$(cd "$ROOT" 2>/dev/null && pwd -P)" || return 1
+  toplevel="$(cd "$toplevel" 2>/dev/null && pwd -P)" || return 1
+  [[ "$toplevel" == "$root_real" && "$branch" == "main" ]]
+}
+
 DENY_REASON=""
 if printf '%s' "$COMMAND" | grep -qE "${CMD_START}git[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]]${FORCE_FLAG}([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止 git worktree remove --force（CLAUDE.md『絕對禁止』；K1032/K1618 誤刪未合併實驗事故）。改用 bash scripts/merge_worktree.sh 正常合併；worktree 從 stale base 分出時用 git checkout <branch> -- experiments/kXXXX/ path-scoped 抽取。"
@@ -48,6 +76,9 @@ elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${PKG_RUNNER}${ZEABUR_BIN}[[
   DENY_REASON="🚫 禁止直呼 zeabur deploy（frontend-and-deploy.md）。部署一律走 frontend-v2-fix/scripts/deploy-zeabur-safe.sh（鎖正確 service ID + 安全檢查）。"
 elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${FULL_READERS}[[:space:]].*(storage/reports/feed\.json|storage/memory/knowledge\.json)([[:space:]]|\$|[^A-Za-z0-9_./])"; then
   DENY_REASON="🚫 禁止整檔讀取 feed.json / knowledge.json（CLAUDE.md Token 紀律）。改用 grep / jq / 單篇 storage/reports/<id>.json；jq、grep、head 皆不受此攔截。"
+elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit${SEG_TAIL}[[:space:]]${AMEND_FLAG}([[:space:]]|\$)" \
+     && _amend_target_is_shared_main; then
+  DENY_REASON="🚫 禁止在共用 main checkout 的 main 分支上 git commit --amend（2026-07-10 hourly-23 事故：amend 打在另一個 agent 剛做的 commit 上，覆蓋其 message 並吞掉它 5 個未提交的在途檔案）。主 checkout 同時有 dispatch worker / codex-vscode / rescue agent 在 commit，HEAD 不保證是你做的。改法：要修訊息或補內容，就再疊一個 commit（歷史多一行，勝過覆蓋別人的一行）。在自己的 worktree 分支上 amend 不受此攔截。"
 fi
 if [[ -n "$DENY_REASON" ]]; then
   printf '%s' "$INPUT" | jq --arg reason "$DENY_REASON" \
