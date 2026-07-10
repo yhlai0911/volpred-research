@@ -2,6 +2,56 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 23:xx 非 hermetic git 測試把 sandbox commit 推上真 origin/main —— 真遠端 main 變 6-file skeleton（production incident）
+
+**問題**：修 pre-push gate（改成稽核「即將推送的 commit tree」而非工作區）時，附帶寫的 regression 測試 `scripts/tests/test_pre_push_pushed_tree.sh` 不是 hermetic —— 它用 `git -C "$WORK"` 對 `/tmp` sandbox 操作，但**沒有 unset 繼承來的 `GIT_DIR` / `GIT_WORK_TREE`**。當測試在一個 `GIT_DIR` 指向真 repo 的環境下跑（我自己的 hostile-env 探測，或平行 session 一份未 hermetic 的同名測試），sandbox 的 `git init / remote add origin $REMOTE / commit / push origin main` 全部改對**真 repo** 執行，於是 sandbox 的 base commit（訊息 `base: clean tree`、author `prepush test <test@example.com>`、只有 6 個檔的 skeleton tree）被推上真的 GitHub `origin/main`。
+
+**現象**：`git ls-remote origin refs/heads/main` = `e8615c641`，其 tree 只有 `scripts/ src/ storage/ tests/` 6 個檔、**無 `CLAUDE.md`**，相對其 parent `3d56c24ba`（真 main）刪掉 17,276 檔 / 14.6M 行。等於真遠端 main 被換成測試骨架 —— 任何 fetch / clone / CI 都會拿到壞樹。另一症狀：`scripts/bad_mod.py` fixture 洩漏成真 repo 的 untracked 檔（silent-fallback 稽核多報 new=1）。
+
+**過程**：`ls-remote` 確認遠端 tip 是 skeleton（非 fetch 幻覺）→ 確認 `3d56c24ba`（真 main，17,277 檔）是本地 HEAD 的祖先、skeleton `e8615c641` 唯一多出來的東西就是它自己（純垃圾，不含任何真內容）→ 用 `git push --force-with-lease=refs/heads/main:e8615c641... origin main` 把本地 HEAD（真樹 + 本次 fix）推回去。**pinned lease** 讓它 fail-safe：只有在 origin 仍**恰好**是那顆 skeleton 時才成功；若別的 session 已先復原成任何真 commit，push 會被拒、不會誤覆蓋。復原後 `ls-remote` 確認 `CLAUDE.md` 回來、17,277 檔。
+
+**根因（與本檔上一條同家族）**：**在共用 checkout 上假設自己獨佔 git 環境**。上一條是 `git add -A` 假設單一寫入者；這條是測試假設 `git -C sandbox` 只會碰 sandbox。兩者都在「多 session 共用一棵真 tree」的現實下破功。測試驅動 `git` 卻沒隔離 git 的環境變數，等於把真 repo 當靶。
+
+**修法（`scripts/tests/test_pre_push_pushed_tree.sh`，已 commit `34cf698e2` 推上 origin）**：
+- Hermetic git env：`unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_OBJECT_DIRECTORY ...`、`GIT_CONFIG_NOSYSTEM=1`、`HOME=$SB`（sandbox），並 `LC_ALL=C`（git 的 zh_TW「未合併的檔案」訊息本來會讓 prose grep 在 pytest 下失敗）。
+- 斷言改看**機器狀態**（HEAD 沒動 + `.git/MERGE_HEAD` 在），不看 git 的可翻譯散文。
+- 順手修另一個 flake：`printf "$big" | grep -q` 在 `set -o pipefail` 下 grep 命中即退、printf 吃 EPIPE → pipeline 報錯（~1/10 平行負載下偽失敗）；改用純 shell substring `case` 比對。
+- 驗證：test 對真 repo 零寫入（`GIT_WORK_TREE=$PWD GIT_INDEX_FILE=$PWD/.git/index` 強制下跑，工作區 change count 前後不變、無 `scripts/bad_mod.py` 生成）；24/24 平行、pytest 284 passed。
+
+**防復發 / 待辦**：任何**驅動 `git` 的測試**都必須先隔離 git 環境變數（unset GIT_DIR/GIT_WORK_TREE/INDEX + HOME=sandbox）。這應成為 `scripts/tests/` 裡 git-driving 測試的 checklist 一條 —— 見 memory `feedback_hermetic_git_in_tests`。平行 session 若還有未 hermetic 的同名測試複本，其下次跑仍可能再洩漏；canonical 版已是 hermetic，但根治要靠此規則被所有寫測試的人遵守（機械 gate 待評估：CI grep git-driving `.sh` 是否 unset GIT_DIR）。
+
+## 2026-07-10 PHASE-Z auto-commit `git add -A` 沒有作者的概念 —— 同一 root cause 第 4 次（3-STRIKE 早已成立）
+
+**3-STRIKE TRIGGER**（同 root cause 已達 4 次，遠超門檻）：
+- **#1** 本檔上方 entry：`next_tasks.json` 被 `task_pool_claim.py` 截斷成無效 JSON，**壞檔被 PHASE-Z auto-commit** 成正式歷史（從 HEAD~1 還原 + 重加 task 復原）。
+- **#2** 本檔 `dab3baa12` entry：safety-net commit 把 `gmail_inbox_poll` 改寫送進 main、**繞過測試閘門**，紅了 5 天沒人發現（root：safety-net 自動 commit 不跑測試）。
+- **#3** 2026-07-10 本次：修 kickstart gate 時，某互動 session 沒改完的 `merge_worktree.sh` 被 PHASE-Z `git add -A` 掃進**不相干 agent 的 commit**（訊息還亂碼）。
+- **#4** 修 #3 的當下（23:26）：PHASE-Z 又把**這個修法本身**寫到一半的版本 commit 進 main，留下半套 code → `tests/test_phase_z_ownership.py` 7 條紅在 main 上。它在我修它的過程中，對著修它的 commit，再犯一次。
+
+**根因（底層邏輯）**：`git add -A` 假設工作區只有一個寫入者。但 main checkout 是**共用**的 —— dispatch 的 hourly agent、互動 session（landing worktree）、常駐 `codex_loop`、cron job 全在同一棵樹上寫。`git add -A` 分不出「這班 agent 留下的」與「別人還在編輯的」，於是把後者一起收走。prompt（`cron_hourly_dispatch_prompt.md`）還明文教 agent「`git add -A` 變安全且更可靠」+ 收尾檢查「`git status -s | wc -l` 應為 0」—— 後者是幫兇：別人的髒檔讓計數不為 0，agent 為了讓它變 0 就把別人的工作一起 commit。
+
+**為何是翻底層而非再 patch**（Three-Strike）：前三次的修法都是「加測試閘門」「補 gitignore」「事後還原」—— 全是 surface patch，沒動「safety-net 沒有所有權概念」這個 domain model 缺陷。第 4 次證明 patch 無效。
+
+**修法（`scripts/dispatch_supervisor/phase_z.py`）**：給 safety-net 一個所有權訊號。
+- `run_pre_fire_guard`（在 worker **之前**跑）快照 fire 起始的髒檔集合，存 `<git-dir>/volpred_phase_z_pre_fire_dirty.json`。
+- `run_phase_z`（worker 之後）只 commit「現在髒、且 fire 起始時不髒」的檔（`dirty_now - baseline`）；其餘一律不碰，改用 alert 浮現。
+- 快照放 **git-dir 內**（非 `storage/ops/`）：`git status` 永遠看不到、任何人都 commit 不到、不需要 `.gitignore` 規則。放工作區的話 PHASE-Z 會把自己的基線當成本班產出，去 stage 一個它剛 unlink 的路徑 → `git add` rc=128（測試 `test_baseline_never_dirties_the_tree` 抓到）。
+- **拿不到基線 → 一個字都不 commit + warn**（fail-closed 朝「不動別人的檔」）。不 commit 只是讓工作留在工作區並被看見；commit 則改寫別人歷史 —— 兩害相權。
+- **不只 scope `git add`**：先 `git reset -- <foreign>` 把別人已 stage 的檔退出 index（工作區不動），否則 index-based 的 `git commit` 照樣寫進去。
+- `git rm --cached` 過的 leaked state 檔要從 pathspec 剔除 —— 它們已成 ignored path，列在 pathspec 裡會讓整個 `git add` 報錯（舊的裸 `add -A` 是靜默略過，行為差異由 `test_phase_z_untracks_leaked_ignored_state_file` 守住）。
+- pathspec 走 `--pathspec-from-file` NUL：帶空格路徑不被拆、吃不到 ARG_MAX。
+
+**prompt 同步改**：禁止 agent 自己 `git add -A` / `git add .` / `git commit -a`；只 stage 自己動過的路徑；收尾檢查從「工作區全乾淨」改成「**我的**檔案都進去了」；「`git status` 顯示你沒動過的髒檔 → 那是別人的，不要碰」。
+
+**break-then-verify（真的做，非假的）**：用 importlib 載入 `8edae506e` 的舊 phase_z、對同一情境跑 —— 它確實把 `scripts/merge_worktree.sh`（別人的檔）commit 進去；新版沒有。過程中第一次的 break-verify 是**假的**：`git show HEAD:` 拿到的已是被 auto-commit 收走的新版，不是舊版；改從確含 `add -A` 的舊 commit 抽檔才成立。教訓：**break-then-verify 前先確認手上真的是「壞的那版」**，不能假設 HEAD 或 stash 狀態。
+
+**驗證**：`tests/test_phase_z_ownership.py` 14 例（事故最小重現 / 別人已 stage 的檔 / 刪除 / 空格路徑 / stale·缺失基線 / 基線不弄髒乾淨樹）。`test_dispatch_supervisor.py` + `test_phase_z_test_gate.py` 既有測試改成守新契約（它們把舊的「髒的都收」寫死了）。
+
+**連帶修**（同主題「保護未合併/在途工作」）：`.claude/hooks/pretooluse-bash-optimizer.sh` 的 `git worktree remove --force` deny 有 `-C <dir>` 前綴繞過 —— 規則假設 `git` 後直接接 `worktree`，而 `git -C <repo> worktree remove <path> --force` 整串放行（我修本 bug 時親手觸發，只被 git 自己的「contains modified files」擋下）。amend 規則早已用 `(-C …)?` 處理同一件事，worktree 漏了：同 bug class 一條學到、另一條沒有。加 `GIT_GLOBAL_OPTS` 前綴覆蓋 `-C` / `--git-dir=`；regression `scripts/tests/test_pretooluse_deny.sh` +6 例（67 PASS）。
+
+**已知未修（不是本次造成）**：main 上 9 條 scheduler 測試紅，來自 `9c4f73e21`（`_due_to_fire` 語義變更未更新測試）+ 2 條 `fdb6e3c8e` 相關。用 `fdb6e3c8e` 對照確認：該 commit 前 0 failed。屬另一 session 的進行中工作，未插手。
+
+
 ## 2026-07-10 23:30 你編輯的 wrapper 不是 launchd 執行的 wrapper — 40 支漂移 11 支，而「記得 cp」是唯一的防線
 
 同日「cron 新鮮度監控盯著死 marker」那則的隔壁房間，**同一個 bug class 當日第 6 次**：可觀測性 / 執行實體與「你實際編輯的產物」脫鉤。
