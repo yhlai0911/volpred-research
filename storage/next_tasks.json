@@ -57899,15 +57899,26 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "claimed",
     "created_at": "2026-07-10T15:07:20.215023+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 411）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻改正\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻改正\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T15:15:14.364140+00:00",
+    "claim_session_id": "941f9bd38ffa",
+    "status_history": [
+      {
+        "ts": "2026-07-10T15:15:14.364562+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      }
+    ]
   },
   {
     "id": "ops-offslot-duplicate-fire-20260710",
     "task_type": "platform_ops",
-    "priority": 0,
+    "priority": 1,
     "source": "pregate-cadence-rootcause-20260710",
     "status": "pending",
     "dispatch_lane": "agentable",
