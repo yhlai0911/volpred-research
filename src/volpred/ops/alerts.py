@@ -1776,15 +1776,35 @@ def _parse_publishing_freshness_state(storage_dir: str, now: datetime) -> dict[s
     }
 
 
+# Must stay identical to `scripts/dispatch_supervisor/worker.py::CLAUDE_BIN`'s
+# default — pinned mechanically by
+# `tests/test_dispatch_binary_health_source.py::test_alerts_default_matches_worker`.
+# A literal (not an import) because `check_alerts.py` lives inside `scripts/`,
+# which has no `__init__.py`, so `import scripts.dispatch_supervisor.worker`
+# resolves only under pytest's rootdir sys.path, not in the cron process.
+DISPATCH_CLAUDE_BIN_DEFAULT = "/Users/yhlai0911/.local/bin/claude"
+
+
 def _parse_dispatch_health_state(storage_dir: str, now: datetime) -> dict[str, Any]:
-    wrapper = Path.home() / ".volpred" / "bin" / "cron_hourly_dispatch.sh"
-    claude_bin: str | None = None
-    if wrapper.exists():
-        m = re.search(r'CLAUDE_BIN="\$\{CLAUDE_BIN:-([^}"]+)\}"', wrapper.read_text(errors="ignore"))
-        if m:
-            claude_bin = m.group(1).strip()
-    if not claude_bin:
-        claude_bin = str(Path.home() / ".local" / "bin" / "claude")
+    """Is the binary the dispatcher shells out to actually resolvable?
+
+    2026-07-10: this used to grep `CLAUDE_BIN` out of
+    `~/.volpred/bin/cron_hourly_dispatch.sh` — the legacy shell wrapper that the
+    2026-07-04 daemon cutover retired. The file still sits on disk (its
+    LaunchAgent is unloaded, so nothing fires it), and the daemon resolves its
+    binary from `worker.py::CLAUDE_BIN` instead. The alert was therefore
+    validating a dead artifact and only happened to be right because both named
+    the same path. That is precisely the failure mode of the 2026-07-08 false
+    stale-dispatch alert (a monitor still pointed at a post-cutover corpse), so
+    it is fixed here before it can bite: resolve the binary by the SAME rule the
+    daemon uses (`CLAUDE_BIN` env, else the shared default).
+
+    Caveat: `check_alerts` is a separate process from the daemon, so a
+    `CLAUDE_BIN` set only in the supervisor's plist environment would not be
+    visible here. The plist sets no such variable today; if that ever changes,
+    this check must read it from the same place the daemon does.
+    """
+    claude_bin = os.environ.get("CLAUDE_BIN", DISPATCH_CLAUDE_BIN_DEFAULT)
     resolved = Path(claude_bin)
     try:
         target = resolved.resolve()

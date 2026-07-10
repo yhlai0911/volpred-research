@@ -29,6 +29,13 @@
 - **missing 檔案不算 breach**（採 telegram_poll 的「尚未觀測」慣例而非 gmail 的 missing→critical）：daemon 若在跑，心跳 30 秒內必重建該檔，所以「檔案不存在」= daemon 沒在跑 = `cron_review` launchctl 檢查的職責。讓兩個 owner 搶同一件事就是疊床架屋。
 - **驗證**：新增 `tests/test_dispatch_supervisor_heartbeat_alert.py`（7 tests）；alerts 全套 57 passed。線上實跑條件：健康 daemon age=0.33min → `breached=False`；拿線上真實 state 只把心跳回撥 42 分鐘 → `critical` + 正確 title/body。`build_alert_condition_report` 23 conditions / 0 breaches，新條件確認接入且無假警報。
 
+**再追加（老闆第二次問「所以一切都正常了？」時查出，第五個缺陷）**：`_parse_dispatch_health_state`（`dispatch_binary_health` 告警）是去 grep `~/.volpred/bin/cron_hourly_dispatch.sh` 裡的 `CLAUDE_BIN` —— 那是 7/4 cutover 已退役的 legacy shell wrapper。檔案還躺在磁碟上，所以 grep 靜默成功，而告警**只是碰巧正確**：wrapper 與 daemon 的 `worker.py::CLAUDE_BIN` 剛好都指向 `~/.local/bin/claude`。這與 2026-07-08 假 stale 告警是**同一種病**：監控盯著 cutover 後的死掉產物。
+
+- **順帶排除的更壞情境**：`com.volpred.hourly-dispatch` plist 也還在 `~/Library/LaunchAgents/`，若仍 loaded 就是 legacy wrapper 與 daemon 雙重派工。實查 `launchctl list` 確認**未載入**（僅檔案殘留，不會 fire）。
+- **修法**：改用 daemon 相同的解析規則（`CLAUDE_BIN` env → 共用 default `DISPATCH_CLAUDE_BIN_DEFAULT`）。**不 runtime import** `worker.CLAUDE_BIN` —— `check_alerts.py` 住在沒有 `__init__.py` 的 `scripts/` 裡，該 import 只在 pytest rootdir 下解析得到，cron 行程會炸。改用 `tests/test_dispatch_binary_health_source.py::test_alerts_default_matches_worker` **機械化釘住**兩處宣告不得漂移（實測：把 `worker.CLAUDE_BIN` 改掉，guard 立刻 FAIL）。註解擋不住漂移，測試可以。
+- **已知殘留 caveat（寫進 docstring）**：`check_alerts` 與 daemon 是不同行程，若未來只在 supervisor plist 的 environment 設 `CLAUDE_BIN`，此檢查看不到。plist 今日未設此變數。
+- **驗證**：新增 4 tests；alerts + dispatch 全套 178 passed。線上實跑 `breached=False`，`resolved=~/.local/share/claude/versions/2.1.198`（symlink 解得開）。
+
 **待辦（另案）→ 已完成 2026-07-10**：`cron_review.py` 的 `last_completion` 幽靈讀取已移除，改單一依賴 `completions[-1]`（`state.record_completion()` 是唯一 writer）。線上 state 實測確認該 key **根本不在檔案裡**（不是 null，是不存在），佐證「從未實作」而非「尚未設值」。同時把 `state.py` schema docstring 缺漏的 `fire_requested_at` / `fire_request_reason` 兩個**真實**欄位補上——該 docstring 自稱「schema 沒列的就是幽靈」，缺列會讓讀者把真欄位誤判成幽靈（幽靈欄位的反向錯誤，同一根因）。Regression: `tests/test_cron_review.py` 端到端釘死 running gate（125 passed）。
 
 ## 2026-07-10 差點靠改 submitted 論文數字把 reproduce gate 硬轉 green（provenance sweep Batch 4a）
