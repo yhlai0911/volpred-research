@@ -796,3 +796,85 @@ def test_no_lost_updates_under_concurrent_read_modify_write(tmp_state: Path) -> 
     assert not errors, f"concurrent bump raised: {errors}"
     snap = st.read_state(tmp_state)
     assert int(snap["alerts_dedup"]["stress_counter"]) == n_threads * n_iters
+
+
+# --- schema contract gate (幽靈欄位 strike 3, 2026-07-10) ---------------------
+# 根因（error_log 2026-07-10）：state 檔沒有 reader/writer 共享的 schema 契約。
+# `dict.get()` 對「打錯的名字」「從未實作的欄位」「宣告但未設值」一律回 null，
+# 三者不可分辨 → 幽靈欄位已累積 3 例（last_dispatch_at / supervisor_pid /
+# last_completion）。當時的處置只有 module docstring 的一段散文 "Reader's field
+# map"。散文擋不住第四個。以下把那段散文升級成機械 gate：
+#
+#   writer 寫的 key ⊆ _empty_state() 宣告的 key == docstring schema 區塊列的 key
+#
+# **守得住什麼**：三者任一漂移即 fail。抓得到 fire_requested_at 那一類（有 writer、
+# _empty_state 沒宣告）與 supervisor_pid 那一類（宣告漏了）。效果是讓 docstring
+# schema 成為**可信**的 field map — 它自稱「沒列的就是幽靈」，這句話現在由測試背書。
+#
+# **守不住什麼（誠實聲明）**：本 gate **不掃 reader**。今天的 last_completion
+# （reader 讀一個哪裡都不存在的 key）不會被它擋下。試過做 reader 側 AST gate 後
+# 放棄：ops_dashboard 走泛用 `_load(path)` helper 綁不到變數名；cron_review 的
+# `state` 同時綁 LAST_RUN_PATH 與 DISPATCH_STATE_PATH，name-based 掃描必假陽性。
+# 硬上啟發式只會製造假確信 —— 那正是本 entry 的病灶（docstring 曾宣稱
+# check_alerts.py 是 consumer，實際零 reader）。reader 側仍靠 code review + field map。
+
+import ast
+import re
+import inspect
+
+
+def _schema_keys_from_module_docstring() -> set[str]:
+    """抓 module docstring 裡 schema 區塊的**頂層**欄位（縮排 6 空格）。
+
+    巢狀子鍵（current_job 的 8 空格、completions entry 的 10 空格）刻意排除 —
+    它們不是頂層 state key。
+    """
+    doc = inspect.getdoc(st) or ""
+    return set(re.findall(r'^ {6}"(\w+)"\s*:', doc, flags=re.MULTILINE))
+
+
+def _toplevel_keys_written_by_writers() -> set[str]:
+    """AST 掃 state.py：所有 `data["X"] = ...` 形式的頂層寫入。
+
+    `data` 是 `_locked_state()` yield 出來的 state dict，是唯一的寫入入口。
+    """
+    src = Path(st.__file__).read_text(encoding="utf-8")
+    keys: set[str] = set()
+    for node in ast.walk(ast.parse(src)):
+        if not isinstance(node, (ast.Assign, ast.AugAssign)):
+            continue
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        for tgt in targets:
+            if (isinstance(tgt, ast.Subscript)
+                    and isinstance(tgt.value, ast.Name) and tgt.value.id == "data"
+                    and isinstance(tgt.slice, ast.Constant)
+                    and isinstance(tgt.slice.value, str)):
+                keys.add(tgt.slice.value)
+    return keys
+
+
+def test_empty_state_matches_module_docstring_schema():
+    """docstring schema 是 reader 的唯一權威（它自稱「沒列的就是幽靈」）。
+    它必須與 `_empty_state()` 逐鍵相等 —— 否則讀者會把真欄位當幽靈，或反之。"""
+    declared = set(st._empty_state().keys())
+    documented = _schema_keys_from_module_docstring()
+    assert documented, "docstring schema 區塊解析失敗（縮排改了？）"
+    assert declared == documented, (
+        f"schema 契約漂移：\n"
+        f"  _empty_state 有但 docstring 沒列（讀者會誤判為幽靈）: {sorted(declared - documented)}\n"
+        f"  docstring 列了但 _empty_state 沒宣告（幽靈欄位本體）: {sorted(documented - declared)}"
+    )
+
+
+def test_every_written_field_is_declared_in_empty_state():
+    """有 writer 就必須在 `_empty_state()` 宣告 —— 「宣告即存在」才能讓 reader
+    區分 null=未設值 與 key-absent=從未實作。supervisor_pid（2026-07-10）與
+    fire_requested_at/fire_request_reason 都是漏了這一步才變成觀察性缺陷。"""
+    written = _toplevel_keys_written_by_writers()
+    declared = set(st._empty_state().keys())
+    assert written, "AST 沒掃到任何 data[...] 寫入（_locked_state 慣例改了？）"
+    undeclared = written - declared
+    assert not undeclared, (
+        f"這些欄位有 writer 但 _empty_state() 沒宣告，會產生 null/absent 不可分辨："
+        f" {sorted(undeclared)}"
+    )

@@ -38,6 +38,13 @@
 
 **待辦（另案）→ 已完成 2026-07-10**：`cron_review.py` 的 `last_completion` 幽靈讀取已移除，改單一依賴 `completions[-1]`（`state.record_completion()` 是唯一 writer）。線上 state 實測確認該 key **根本不在檔案裡**（不是 null，是不存在），佐證「從未實作」而非「尚未設值」。同時把 `state.py` schema docstring 缺漏的 `fire_requested_at` / `fire_request_reason` 兩個**真實**欄位補上——該 docstring 自稱「schema 沒列的就是幽靈」，缺列會讓讀者把真欄位誤判成幽靈（幽靈欄位的反向錯誤，同一根因）。Regression: `tests/test_cron_review.py` 端到端釘死 running gate（125 passed）。
 
+**追加（同日，老闆第二次問「所以都改好了？」時查出的第五個缺陷）**：對「幽靈欄位」這個**第三次**復發，前面的處置最終只留下 module docstring 的一段散文 "Reader's field map"。依 CLAUDE.md anti-stacking 的升級路徑（prose = strike 1；strike 2+ 必須機械 gate），散文擋不住第四個。且 `fire_requested_at` / `fire_request_reason` 有真 writer（`request_fire()`）卻**沒補進 `_empty_state()`** — 與 `supervisor_pid` 同病，當時只治了一個欄位。
+
+- **AST 全掃 reader 側**（`cron_review` / `ops_dashboard` / `alerts` / `loop_health`）：**無第四個幽靈讀取**，四個 reader 讀的頂層 key 全部合法。殘餘風險在 writer↔schema 契約，不在現有 reader。
+- **修法（收編進既有 test 檔，不新增 gate 檔）**：`scripts/tests/test_dispatch_state.py` 新增 2 個契約測試，機械 enforce `writer 寫的 key ⊆ _empty_state() == docstring schema 區塊`，三者任一漂移即 fail。**負向控制實測**：拿掉 `fire_*` 宣告後兩測試皆 FAIL 且印出正確欄位名。`_empty_state()` 補上該兩欄位（**不 bump SCHEMA_VERSION** — line 120 註解已明訂 optional key 不可 bump，否則下一拍心跳會清掉線上 `current_job` 與整個 completions ring）。
+- **殘餘缺口（誠實聲明，不假裝關閉）**：此 gate **不掃 reader**，擋不下 `last_completion` 那一類（讀一個哪裡都不存在的 key）。做過 reader 側 AST gate 後放棄：`ops_dashboard` 走泛用 `_load(path)` helper 綁不到變數名；`cron_review` 的 `state` 同名先後綁 `LAST_RUN_PATH` 與 `DISPATCH_STATE_PATH`，name-based 掃描必假陽性。**寧可留一個標明射程的 gate，也不放一個會製造假確信的啟發式** —— 假確信正是本 entry 的病灶（docstring 曾宣稱 `check_alerts.py` 是 consumer，實際零 reader 長達數月）。reader 側現靠 code review + 已被測試背書為可信的 field map。
+- **驗證**：`test_dispatch_state` + `test_cron_review` + `test_dispatch_supervisor` + `heartbeat_alert` + `loop_health` 共 151 passed。線上 daemon 不受影響（`version` 仍 1、`current_job` 未被清）；`cron_review.py` 實跑仍 `✅ 無逾時`。
+
 ## 2026-07-10 差點靠改 submitted 論文數字把 reproduce gate 硬轉 green（provenance sweep Batch 4a）
 
 **現象**：hourly-12 執行 provenance sweep Batch 4（garch-x-vix A4f DM t reconcile）時，看到 `main.tex` 用 4.03 但 canonical `mcs_dm_results.json`=4.148、reproduce gate 停 85.7% yellow，初判為「stale 抄錯」→ 直接 replace_all main.tex 4.03→4.15、reproduce.py `expected`→4.148，重編譯 + rerun 使 report 100% green，正要 `paper-update` sync 公開平台。

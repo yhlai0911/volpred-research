@@ -149,6 +149,11 @@ def _empty_state() -> dict[str, Any]:
         "completions": [],
         "auth_blocked": False,
         "auth_blocked_at": None,
+        # 宣告即存在 — 與幽靈欄位可區分（同 supervisor_pid 2026-07-10 的修法）。
+        # `request_fire()` 是 writer；fresh state 缺這兩個 key 會讓 reader 讀到的
+        # null 再度分不清「沒有 pending request」與「這欄位根本沒實作」。
+        "fire_requested_at": None,
+        "fire_request_reason": None,
         "alerts_dedup": {},
     }
 
