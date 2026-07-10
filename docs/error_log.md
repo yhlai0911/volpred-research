@@ -2,25 +2,6 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
-## 2026-07-10 CI 從未跑過測試 — 一個 import-time raise 藏住 1683 個測試與一顆搬家地雷
-
-**現象**：查「supervisor restart」時順線發現 `scripts/tests/` 不在 pytest `testpaths`（當日新加的 dispatch_state schema gate 零執行）→ 再往上查，**三個 CI workflow 沒有一個跑 pytest**，`pre-push` 也沒有。全 repo ~1690 個測試從未在 CI 跑過；兩個測試紅了好幾天無人知。
-
-**根因（一個 import-time side effect 擋住整條 CI 路徑）**：`scripts/supabase_sync.py` 在 module scope 缺憑證就 `raise RuntimeError`。`volpred.ops.__init__` 遞迴 import 它 → 任何沒有 `.env.local`（gitignored，CI 必然沒有）的環境，**pytest collection 直接死**（`no tests collected, 1 error`）。沒人能把 pytest 放進 CI，久了就沒人再試。憑證是 request-time 需求，不是 import-time 需求。
-
-**過程（拿掉 raise 後，乾淨 checkout 照出 22 個既有失敗，全與該修復無關）**：
-
-1. **24× `SystemExit(1)`** — `build_knowledge_index.get_client()` 缺 `OPENAI_API_KEY` 就 `sys.exit(1)`。它是 library code，被 publisher 的語意查重**警告**路徑呼叫，而該路徑本就設計成 fail-open（`embed_with_cache` catch `Exception` → `warn()` → 回 `None`）。但 `SystemExit` 繼承 **`BaseException`**，`except Exception` 永遠看不見它 → **缺一把「選用」金鑰就殺掉整個發文行程**。改 raise `MissingEmbeddingCredentials` 後，既有 fail-open 才第一次真的接上（實測 `WARN embedding failed` + 回 None + 行程存活）。
-2. **6× `repo_root_mismatch`** — `config/brief_templates/*.yaml` **8 個 production template 全部寫死** `/Users/yhlai0911/volpred-research`。`execution_brief.render()` 的 `setdefault("repo_root", str(project_path()))` 本來就會填對值。**這是活地雷不是測試問題**：換機器或 repo 再搬家（7/2 才從 Desktop 搬出來），每個 brief-backed 任務都會 mismatch 被 `_block_task` 擋掉。CI 只是先踩到它。
-3. **4× `Missing SUPABASE_URL`** — `tests/test_feed_sync.py` patch 了 `_fetch_supabase_articles` 卻漏了 `_fetch_supabase_article_tags` → **每跑一次測試就對 production Supabase 發三次真實讀取**，因本機一直有憑證而數月無人察覺。改 autouse fixture。
-4. **4× `FileNotFoundError`** — 對 gitignored production 資料檔做不變量檢查的測試，資料不在時應 skip 而非 fail。
-
-**解決**：`require_creds()` 取代 import-time raise；`HEADERS` 改 credential-guarded `Mapping` 作單一咽喉點（七個 request helper 全經過它，不必在七處各插檢查 → 第八個不會靜默漏掉）。**刻意不用 dict 子類**：實測 CPython `{**d}` / `dict(d)` 走 C fast path 直接複製子類內部儲存、**繞過**覆寫的 `__getitem__`/`keys()`，而七個 helper 有五個用 `{**HEADERS, ...}` —— dict 子類守衛會在最需要的地方失效。新增 `.github/workflows/pytest.yml`（**刻意不注入 dummy 憑證**：import-time raise 若被加回來，CI 必須紅，不能被 secret 遮掉）。
-
-**驗證**：全新 worktree（無 `.env.local`、清空所有憑證 env）→ **1683 passed / 8 skipped / 0 failed**；主 checkout（有憑證）→ 1747 passed / 0 failed。先以 `workflow_dispatch` 落地，綠了才在同一 commit 換回 `push`/`pull_request`。commit `12c665c3a` + `e8e9c90c8`。
-
-**教訓**：(L1) **library code 不可 `sys.exit()`** —— `SystemExit` 是 `BaseException`，會穿過所有 `except Exception` 的 fail-open 設計；呼叫端以為在容錯，其實整個行程正在死。缺「選用」憑證更不該殺行程。(L2) **import-time side effect 會靜默廢掉整條測試路徑**。缺憑證就 raise 看似 fail-fast，實則讓 collection 死在 import，代價是 1690 個測試永遠不在 CI 跑。憑證檢查放在真正發請求的地方。(L3) **「gate 存在」不等於「gate 會跑」**。上線任何 gate 都要問：**誰會執行它、什麼時候**。(L4) 測試在有憑證的機器上綠、無憑證的機器上紅，通常不是憑證問題，而是**測試正在打 production**。
-
 ## 2026-07-10 CI 從未跑過 pytest — 1600+ 個測試零執行，紅燈爛在那裡沒人知道
 
 **現象**：`.github/workflows/` 只有 knowledge-provenance / silent-fallbacks / source-encoding 三個 audit gate，**沒有一個跑 pytest**；`.git/hooks/pre-push` 也沒有。1600+ 個測試（含大量 regression gate）在 CI 上一次都沒跑過。後果是兩個測試長期紅燈無人察覺（另見同日「兩個長期紅燈測試」entry）：`test_gmail_inbox_poll_warnings`（7/5 cutover 刪掉 `_DISPATCH_WRAPPER`，測試還在 monkeypatch 它）與 `test_topic_cluster_gate`（fixture 寫死 `2026-06-10`，7/10 剛好落出 `now-30d` 窗外）。
@@ -35,6 +16,7 @@
 
 **解決方法**（commit 鏈 `12c665c3a` → `be5d2f508` → `e8e9c90c8`）：
 - `supabase_sync`：credentials 改成 **request-time** 要求 —— import 時 best-effort 讀 env / `.env.local` 不 raise，`require_creds()` 與 `HEADERS = _GuardedHeaders()`（lazy guarded mapping）在真正發 request 時才檢查並 raise 同一句訊息。fail-fast 語意保留，只是延後。測試 `tests/test_supabase_sync_import_safety.py`（8 tests）。
+- **為何 `HEADERS` 是 `Mapping` 而非 `dict` 子類**（實測，非假設）：CPython 的 `{**d}` / `dict(d)` 對 dict 子類走 C fast path，直接複製其內部儲存，**繞過**覆寫的 `__getitem__`/`keys()`；而七個 request helper 中有五個用 `{**HEADERS, ...}` 建 header —— dict 子類守衛會在最需要的地方靜默失效。`Mapping` 無此 fast path。測試 `test_dict_subclass_would_have_been_bypassed` 釘住此 CPython 行為，若未來版本改掉，該測試會 fail 並允許簡化。
 - `build_knowledge_index`：新增 `MissingEmbeddingCredentials(RuntimeError)` 取代 `sys.exit(1)`，只有 `__main__` 可以把它翻成 exit code。fail-open 的 `except Exception` 這才真的 open。
 - `test_feed_sync`：補 autouse fixture `_no_production_tag_reads` stub 掉 tag join 的 read。
 - `brief_templates`：**把 `repo_root` 從 template 拿掉**（它是 runtime 事實不是 template 資料；`_render_template_brief` 早就有 `rendered.setdefault("repo_root", str(project_path()))`）。
