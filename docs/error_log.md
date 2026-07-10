@@ -2,6 +2,31 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 worktree 清掉、branch 留下未合併工作 —— 六層防護全在保護 worktree，沒有一層保護 branch
+
+**現象**：一天之內累積兩條孤兒 branch，全靠人工發現：
+- `claude/cron-marker-truth`：1 個 commit，`scripts/cron_mark_last_run.py`（188 行）+ `scripts/tests/test_cron_last_run_truth.py`（240 行），main 兩個都沒有
+- `claude/eloquent-chatterjee-32e858`：4 個 commit，含 `tests/test_test_isolation_guards.py`（195 行）；它的 gate 本體已進 main，**但 195 行回歸測試沒進去**
+
+兩條的 tip 都是 `wip(rescue): 孤兒 worktree 清理前保存未提交變更` —— 有 agent 在清 worktree 前把未提交的工作搶救成 commit，然後 worktree 被移除，branch 就留在那裡沒有任何人接手。
+
+**根因**：worktree 移除路徑有六層防護（K1032 / K1114 / K1262-v4 / K1618 …），**每一層保護的都是 worktree 目錄**。worktree 一消失，branch 就同時失去 owner 與訊號 —— 沒有 process 在它上面、沒有 log、沒有告警，`git branch -d` 只會說「未合併」而不會說「這是誰的、還要不要」。這是「靜默的守門員」的鏡像：守門員守的是門，門拆了之後沒人守門框。
+
+**為什麼不能自動合併**（此點決定了告警形態）：當日兩條孤兒**都是平行實作**。`eloquent` 的測試檔搬進 main 後 8 個失敗——它綁的是 branch 自己那套 gate，跟 main 落地的那套不同設計。同日 `ffaad8` 更凶險：merge 時 `scripts/supabase_sync.py` 會衝突（被人工審視、保留 main 版），但 `scripts/pull_reader_metrics.py` **不衝突**（main 沒動過），於是靜默採用 branch 版去呼叫一個 main 上不存在的 `headers()` → 執行期 ImportError。**衝突檔會被看見，不衝突的檔不會。** 所以這條 alert 必須是「浮現 + 要求人判斷」，不能是 auto-remediation。
+
+**解決方法**（收編進既有 owner，不新增第二層 watchdog）：
+- `src/volpred/ops/alerts.py` 新增 `_parse_orphan_branch_state`，註冊進 `build_alert_condition_report`（現 25 個條件）。判準：`git for-each-ref refs/heads/claude/` 比對 `git worktree list --porcelain`，取沒有 worktree 且 `rev-list --count <b> ^main > 0` 的 branch。
+- **escalate 依據「最新一筆未合併 commit 的年齡」**（工作擱置多久），不依據孤兒化的時刻——後者觀測不到。>2h → warn（合併的 session 已經走掉了）、>24h → critical。2h 的 grace window 讓正在收尾的 session 不被誤報。
+- 有 worktree 的 branch 一律排除（有人在做）；已全合併的孤兒只記進 `details.merged_deletable`，**不 breach**（那是清潔工作，不是瀕危工作）。
+- Body 明寫平行實作陷阱與「合併後逐檔 `git cat-file -e HEAD:<path>` 驗證」。
+- 測試 `tests/test_alerts.py` 8 例：無 branch / 有 worktree 不算孤兒 / 已合併只記不 breach / fresh 未達門檻 / 2h warn / 24h critical / 混合族群只有 aged 的 breach / probe 失敗要 loud 不 silent。
+- **Break-then-verify**：用 `git commit-tree` 造一條 backdated 3h、無 worktree 的 `claude/zz-orphan-probe`，確認 detector 真的 breach（warn，body 列出 branch 名），驗完刪除。**沒有在 production checkout 上弄壞任何東西**（對齊 control-plane.md「不要在 daemon 腳下抽地毯」）。
+
+**教訓**：
+- **移除一個容器時，要問容器裡的東西歸誰。** 六層防護把「worktree 不可誤刪」做到滴水不漏，卻沒人問「worktree 合法刪除之後，branch 怎麼辦」。防護的邊界停在被保護物的生命週期終點，而工作的生命週期比容器長。
+- **`git branch -d` 的「未合併」不是可用訊號**：它對「內容已由別的路徑落地」與「這是唯一一份」給出完全相同的答案。今天兩種都遇到了（`ffaad8` 是前者、`cron-marker-truth` 是後者）。**要靠人看 diff，所以告警只能浮現、不能自動處置。**
+- **不能自動修的東西，更需要自動偵測。** 正因為處置需要判斷，缺了偵測就等於永遠不會被處置。
+
 ## 2026-07-10 cron 新鮮度監控盯著死 marker 監控活任務 — 5 個任務凍結 6 週 + 監控只覆蓋 22%
 
 **現象**：`check_alerts` 的 piggy-back-drift 每次都印一行 `stale_last_run: memory_health_daily age=61197min period=1440min`（42.5 天），但 `breaches=0`，沒有任何 alert。實際查證：`memory_health_daily` **今天 05:30 才剛跑完、exit 0**（`storage/logs/cron/memory_health.log` mtime 為證）。監控在對一個活著的任務讀一個死掉的時間戳。

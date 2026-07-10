@@ -2060,17 +2060,32 @@ def _parse_dispatch_supervisor_stale_code_state(
     settled = [s for s in stale if s["age_minutes"] > DISPATCH_SUPERVISOR_STALE_CODE_WARN_MINUTES]
     oldest = max((s["age_minutes"] for s in settled), default=0.0)
 
-    # boot unknown → cannot compare; `dispatch_supervisor_heartbeat` owns "is the
-    # daemon even alive", so stay quiet here rather than double-alert.
-    breached = bool(settled)
+    # A beating daemon that has lost its boot time is not "nothing to compare" —
+    # it is a daemon whose state was reset out from under it, and with `boot is
+    # None` the loop above silently finds zero stale files. 2026-07-10 23:02: a
+    # test wrote `_empty_state()` over the canonical file; `supervisor_started_at`
+    # went null, `completions` emptied, `last_fire_at` cleared (re-firing an
+    # already-completed slot) — and this condition reported `ok`. It went blind at
+    # the exact moment it was needed. A file that exists and is beating, with no
+    # boot time, is anomalous. An ABSENT file is a daemon that never ran, which
+    # `dispatch_supervisor_heartbeat` owns; stay quiet there, don't double-alert.
+    boot_lost = boot is None and snapshot is not None and bool(snapshot.get("last_heartbeat_at"))
+
+    breached = bool(settled) or boot_lost
     is_critical = oldest > DISPATCH_SUPERVISOR_STALE_CODE_CRITICAL_MINUTES
     level = "critical" if is_critical else ("warn" if breached else "info")
 
     body = "\n".join(
         [
             "## 觸發條件",
-            "派工程式的程式碼被改過，但那個常駐程式還在跑舊版 —— 改動沒有生效。",
-            f"- daemon 開機時間: {boot.isoformat() if boot else '未知'}",
+            (
+                "派工程式的狀態檔失去了開機時間 —— 它還在跳心跳，卻不記得自己何時啟動。"
+                "通常代表狀態檔被覆寫過（例如某個測試寫到了正式檔案）。這種情況下無法"
+                "判斷程式碼有沒有生效，所以直接告警。"
+                if boot_lost
+                else "派工程式的程式碼被改過，但那個常駐程式還在跑舊版 —— 改動沒有生效。"
+            ),
+            f"- daemon 開機時間: {boot.isoformat() if boot else '未知（狀態檔疑似被重置）'}",
             f"- 改了但沒生效的檔案: {[s['file'] for s in settled] or '無'}",
             f"- 最久的一個已經放置: {oldest} 分鐘",
             f"- 門檻: warn>{DISPATCH_SUPERVISOR_STALE_CODE_WARN_MINUTES}分 / critical>{DISPATCH_SUPERVISOR_STALE_CODE_CRITICAL_MINUTES}分",
