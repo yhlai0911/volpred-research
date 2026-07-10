@@ -35,6 +35,8 @@ if str(SRC_DIR) not in sys.path:
 if str(PROJECT_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
+from volpred.ops.diagnostics import warn  # noqa: E402 — needs SRC_DIR on sys.path above
+
 
 def _warn_check_alerts(message: str, path: Path, exc: Exception) -> None:
     print(
@@ -269,6 +271,12 @@ def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) ->
         try:
             period_min = cron_max_gap_min(cron, base=base)
         except Exception as exc:  # noqa: BLE001
+            # The bad_cron record below is the machine-readable trace, but a
+            # record in a returned list is invisible to audit_silent_fallbacks
+            # (it only recognises logging-shaped calls). Emit the sanctioned
+            # diagnostic too, per .claude/rules/no-silent-fallback.md.
+            warn("check_alerts", "cron expression unparseable; job marked bad_cron",
+                 job_id=job_id, cron=cron, err=str(exc))
             records.append({"job_id": job_id, "status": "bad_cron", "detail": f"cron={cron!r} ({exc})"})
             continue
 
