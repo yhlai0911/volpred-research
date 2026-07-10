@@ -77,6 +77,33 @@ if not last_fire_at:
 1. **`.gitignore` 底下的目錄仍然是 canonical 狀態**（`storage/ops/tasks/`、`storage/ops/pending_sessions.json`、`storage/notifications/`）。以 `git status` 為唯一 audit 儀器的流程，對它們永久失明。要窮舉「誰被寫了」，用**時間戳 marker + `find -newer`**，不要用 `git status`。
 2. **一個 kill switch 只擋它名字說的那件事**。`VOLPRED_NO_EMAIL` 擋的是「寄」，不是「記錄」；`VOLPRED_NO_REMOTE_WRITE` 擋的是遠端，不是本地。每加一個 side-effect gate，要問「這個動作**還有哪些**副作用面沒被這個名字涵蓋」。
 3. **`monkeypatch.setattr(mod, "PROJECT_ROOT", tmp)` 改不到 import 時就算好的衍生常數**。凡 `X = PROJECT_ROOT / ...` 寫在 module top-level，patch 上游的 `PROJECT_ROOT` 一律無效 —— 這是同一支測試在同一天被抓到兩次的原因。
+## 2026-07-10 pre-push gate 稽核工作區而非「即將推送的 commit」——帶違規的 commit 直接上 main
+
+**現象**：`ee407db3a` 帶著三個新 silent fallback（`check_alerts.py:271`、`cron_mark_last_run.py:173,180`）推上 `origin/main`。CI 的 Silent Fallback Gate 隨即在 main 上變紅（run 29101935680）。但 pre-push hook **明明存在、而且第一次 push 時確實擋下來了**。
+
+**過程**：第一次 `git push` 被 gate 擋下 → 我把三處修好寫進工作區 → `git commit` 失敗（共用 main checkout 當時卡在另一個 session 的 in-progress merge，`unmerged files`）→ 重試 `git push` → **通過**。
+
+**根因**：`scripts/git_hooks/pre-push` 的兩個 gate（encoding sweep + silent-fallback）都是 `cd $(git rev-parse --show-toplevel)` 之後掃**磁碟上的工作區**。git 要送出去的是 **commit**。兩者在任何「改了但沒 commit」的時刻都不同——而這個 repo 有多個 Claude session 共用同一個 checkout，那種時刻是常態，不是例外。
+
+**這是本日第三個同型缺陷**（三者同一句話：**宣告與執行之間沒有契約**）：
+1. 「CI 從未跑過 pytest」— repo 宣稱有 ~1700 個測試，沒有任何 job 執行它們。
+2. 「幽靈欄位」— reader 讀一個從來沒有 writer 的 key。
+3. 本條 — gate 有跑，但**量的是錯的物件**。
+
+第 3 種最危險：前兩者是「沒人在問」，這一個是**問了、答了、答案沒有意義**。一個量錯對象的 gate 比沒有 gate 更糟，因為它在它守護的東西壞掉時回報成功。
+
+**解決方法**（`scripts/git_hooks/pre-push` 重寫）：
+- 從 stdin 讀 git 傳進來的 `<local_ref> <local_sha> <remote_ref> <remote_sha>`，對每個要推的 sha 用 `git archive` 把那棵 tree 抽到暫存目錄，跑**那棵 tree 自己的**稽核腳本。
+- **必須跑抽出來那棵 tree 裡的那份腳本**：兩支稽核腳本都把掃描根目錄錨在 `Path(__file__).resolve().parents[1]`。拿 checkout 的那份換個 cwd 去跑，會靜默地又掃回 checkout（第一版就是這樣，差點自我驗證成功）。
+- **不可用 `git stash` / `checkout` / `clean`**：多 session 共用同一個 checkout，hook 絕不能碰 index 或工作區。`git archive` 只讀 object，在別人 merge 到一半時也安全。
+- **不可用 `uv run`**：兩支腳本都是 stdlib-only，而 `uv` 會從 cwd 解析 project、在抽出來的 tree 裡每次 push 都建 venv。改用 `$ROOT/.venv/bin/python`，退回裸 `python3`。
+- 全樹抽取不可行（3.2 GB / 44 秒，大半是 `storage/` 與 `experiments/`）；只抽 `src tests scripts .claude storage/qa`（~7 MB / 0.5 秒）。
+- **Coverage canary**：encoding sweep 若掃到 0 個檔就 BLOCK。掃 0 個檔的 gate 與通過的 gate 在觀測上同形——這正是本檔存在的理由。同理，baseline 不在 commit 裡、audit 給不出 verdict、audit 非零退出卻 `new=0`，一律 fail-closed。
+- 抽取失敗 **fail-closed**（gate 看不見要推的東西就不該放行）；缺 python3 / mktemp 失敗維持 fail-open，但**每條 fail-open 路徑都印 loud WARN**。「gate 沒跑」與「gate 通過」永遠不可以長得一樣。
+
+**Regression gate**：`scripts/tests/test_pre_push_gate.sh`（5 cases / 9 assertions，在拋棄式 repo pair 裡跑，不碰真 checkout）。case 2 就是本次事故的形狀：**commit 髒、工作區乾淨**。留了 `PREPUSH_HOOK=` seam 用來對舊 hook 跑同一份測試——舊 hook 得到 `PUSH SUCCEEDED`（4 passed / 2 failed）。**兩邊都會過的測試等於沒有測試**。以 `scripts/tests/test_pre_push_gate_wrapper.py` 接進 pytest，否則它自己就是下一個「存在但沒人執行」的 gate。
+
+**教訓**：新增或修改任何 gate 時，先問一句「**它量的是不是它宣稱要守護的那個物件？**」——不是「它有沒有在跑」。工作區、index、commit、遠端 ref 是四個不同的物件，隨手拿到哪個就量哪個，是這類缺陷的通用成因。
 ## 2026-07-10 `git commit --amend` 在共用 main checkout 上覆蓋了另一個 agent 的 commit（hourly-23）
 
 下一則的「併發副作用」段是**對手方視角**的同一起事故；這裡補加害方視角與機械修正。

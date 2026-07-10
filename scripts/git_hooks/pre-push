@@ -37,10 +37,17 @@
 # A gate that silently scans nothing is the very bug this file exists to prevent.
 set -uo pipefail
 
-GIT_DIR_ABS="$(git rev-parse --absolute-git-dir 2>/dev/null)" || exit 0
-ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+# Every fail-open path below announces itself. Fail-open is a legitimate ops
+# choice here (a broken gate must not wedge the hourly push-backup); staying
+# silent about it is not — see .claude/rules/no-silent-fallback.md. "The gate
+# did not run" and "the gate passed" must never look the same from the outside,
+# which is the whole lesson of the incident this file documents.
+degraded() { echo "[pre-push] WARN gate degraded: $1 — pushing UNAUDITED." >&2; }
+
+GIT_DIR_ABS="$(git rev-parse --absolute-git-dir 2>/dev/null)" || { degraded "not a git repo"; exit 0; }
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { degraded "no work tree"; exit 0; }
 export GIT_DIR="$GIT_DIR_ABS"   # survive the cd below; archive/cat-file need it
-cd "$ROOT" || exit 0
+cd "$ROOT" || { degraded "cannot cd to $ROOT"; exit 0; }
 
 # Tree paths extracted for the audit. Keep in sync with the two audit scripts:
 #   audit_source_encoding.py   DEFAULT_ROOTS   = ("src", "tests", "scripts")
@@ -55,22 +62,15 @@ ARCHIVE_PATHS="src tests scripts .claude storage/qa"
 # macOS); both audits are stdlib-only, so no `uv run` / venv sync is needed.
 PY="$ROOT/.venv/bin/python"
 [ -x "$PY" ] || PY="$(command -v python3 2>/dev/null)"
-[ -n "${PY:-}" ] && [ -x "$PY" ] || exit 0   # no interpreter → env error → fail-open
+[ -n "${PY:-}" ] && [ -x "$PY" ] || { degraded "no python interpreter"; exit 0; }
 
-GATE_TMP="$(mktemp -d "${TMPDIR:-/tmp}/prepush-gate.XXXXXX")" || exit 0
+GATE_TMP="$(mktemp -d "${TMPDIR:-/tmp}/prepush-gate.XXXXXX")" || { degraded "mktemp failed"; exit 0; }
 trap 'rm -rf "$GATE_TMP"' EXIT INT TERM
 
 # git feeds us: <local ref> <local sha> <remote ref> <remote sha>
 SHAS=""
-while read -r local_ref local_sha _remote_ref _remote_sha; do
+while read -r _local_ref local_sha _remote_ref _remote_sha; do
   [ -n "${local_sha:-}" ] || continue
-  case "${local_ref:-}" in
-    refs/heads/*|HEAD) ;;
-    *) continue ;;     # tags/notes: CI triggers on pull_request + push to a
-                       # branch, so a tag push can never turn CI red. Auditing
-                       # them would block e.g. pushing stable-pre-refactor-*,
-                       # whose tree predates the baseline entirely.
-  esac
   case "$local_sha" in
     *[!0]*) ;;         # has a non-zero char → a real object
     *) continue ;;     # all zeros → ref deletion, nothing to audit
@@ -78,7 +78,9 @@ while read -r local_ref local_sha _remote_ref _remote_sha; do
   case " $SHAS " in *" $local_sha "*) continue ;; esac   # dedupe
   SHAS="$SHAS $local_sha"
 done
-[ -n "${SHAS// /}" ] || exit 0   # nothing being pushed
+# Nothing to audit: every ref was a deletion, or git handed us no refs at all.
+# Not a degradation — there is no commit to inspect.
+[ -n "${SHAS// /}" ] || exit 0
 
 block() {   # $1 = one-line reason
   echo ""
@@ -88,7 +90,7 @@ block() {   # $1 = one-line reason
 for sha in $SHAS; do
   short="$(git rev-parse --short "$sha" 2>/dev/null || printf '%s' "$sha")"
   tree="$GATE_TMP/$short"
-  mkdir -p "$tree" || exit 0
+  mkdir -p "$tree" || { degraded "cannot create scratch dir for $short"; exit 0; }
 
   # git archive dies (rc 128) on a pathspec that matches nothing in the tree, so
   # only ask for the paths this particular commit actually has.
@@ -141,7 +143,6 @@ for sha in $SHAS; do
     if [ ! -f "$BL" ]; then
       block "commit $short does not contain storage/qa/silent_fallback_baseline.json — the audit CI runs cannot run."
       echo "[pre-push] Commit the baseline alongside the code; the gate reads it from the pushed commit, not from disk."
-      echo "[pre-push] (Branch tips older than the baseline commit fd00c7c1e are expected to trip this.)"
       exit 1
     fi
     OUT="$("$PY" "$SF" --strict --baseline "$BL" 2>&1)"
