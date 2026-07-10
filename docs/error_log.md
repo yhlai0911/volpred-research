@@ -44,6 +44,7 @@
 
 **教訓**：(a) 一個 gate「有沒有被呼叫」和「呼叫後有沒有改變任何決策」是兩件事，上線後必須量後者 —— 這次是靠 `crosscheck` 的 `skip=0` 才發現；(b) 宣告「修好了」之前先看它在 production 資料上的**輸出分佈**，不是看它的測試。
 
+
 ## 2026-07-10 23:02 我寫的「防止測試寫 production state」的測試，把 production state 寫壞了
 
 **現象**：`storage/ops/dispatch_state.json` 的 `completions` 從 100 筆變 0、`supervisor_started_at` 變 null、`alerts_dedup` 清空。22:58:25 daemon 對**已經在 22:07 成功跑完的 slot** 重複派出一班 opus worker（log：`firing worker prev_scheduled=2026-07-10T22:07:00`）。
