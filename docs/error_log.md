@@ -2,6 +2,73 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 merge_worktree 的 shared-JSON guard 把「時間」當成「違規」；同一段程式的假警告會叫人把陳年 stash 蓋回 main
+
+修下一則「掃 0 個檔的 gate」時撞出來的。gate 本體的根因見該則 §3，此處不重述。
+
+**現象**：一個**只動了 `tests/` 一支檔案**的 worktree branch，`bash scripts/merge_worktree.sh <wt>` 報 `[🛑 ABORT] Agent 修改了共享 JSON: storage/reports/feed.json`，拒絕合併。
+
+**根因一（guard 比錯東西）**：L401 用 two-dot `git diff --name-only "$main_branch..$branch"`。two-dot 是「main tip 對 branch tip 差在哪」，**包含 branch 分出去之後 main 自己改的檔**。`feed.json` 幾乎每小時被 main 上的 cron 改一次 → **任何 base 稍舊的 worktree 都會被誤判成「agent 動了共享 JSON」**。這條 guard 想擋的是 agent，實際擋的是時間。它把安全網變成路障，而路障的正常反應是繞過它（手動硬 merge），於是 guard 越嚴、資料越危險。諷刺的是同檔 L443 掃 `experiments/` 時早就在註解裡寫明這個坑（「會列所有差異，包含 agent 從未動過但 main 領先的檔」）並改用 `git log --diff-filter=A` —— **同一個 bug class，一個函式防住、另一個沒有**。這正是「宣告完成前要對 bug class 做 full-population sweep」的反面教材。
+**修**：改 three-dot `"$main_branch...$branch"`（= `merge-base..branch` = 「agent 改了什麼」）。HINT 文字同步改。全 `scripts/` sweep 過，此為唯一一處。
+
+**根因二（假警告 + 危險提示）**：同一段 abort 路徑寫 `git stash pop 2>&1 | head -5 || echo "stash pop 失敗，手動 git stash list + git stash apply stash@{0}"`。腳本開頭 `set -euo pipefail`：`head` 讀滿 5 行就關管線 → git 收 SIGPIPE → rc=141 → **pop 明明成功也走 `||`**。而它印的補救指令是致命的：pop 已成功、stash 已彈出，此刻 `stash@{0}` 是**別人幾個月前**的 stash（本機當時最上面是 2026-04-18 那筆）—— 照做等於把陳年 stash 蓋回 main。
+**修**：`pop_out=$(git stash pop 2>&1) || pop_rc=$?` 取真 rc；`printf … | head -5 || true` 只負責截斷顯示；失敗提示改用 stash message 定位（`git stash list | grep 'merge_worktree: temp stash before merging <wt>'`），不再提 `stash@{0}`。
+**class sweep**：同檔 6 處 `| head`，只有這處拿管線 rc 當「成功與否」；其餘皆被 `|| true` 包住或非條件式。L476 用 `tee`（讀完全部輸入、不觸發 SIGPIPE）是安全的。
+
+**過程教訓（比 bug 本身重要）**：第一次的 break-then-verify 是**假的**。我 `git stash push` 想換回舊版 script，push 因為 main 當時有另一個 session 留下的 unmerged index entry 而**失敗**，舊版根本沒被換進去 —— 於是「12/12 全綠」是拿**修好的** script 跑出來的，我差點把它當成驗證。**`git stash push` 失敗必須當硬錯誤，不可忽略 rc 繼續往下跑。** 重做方式是零 git 寫入：`git show HEAD:scripts/merge_worktree.sh` 抽出舊版副本，複製一份 harness 把 `MERGE_SCRIPT` 指過去。舊版精準紅 4 條（11-1 / 11-2 / 12-2 / 12-3），且 11-3 / 12-1 / 12-4 仍綠 —— 證明 guard 對**真違規**照樣響、stash 仍會還原。只看「修完全綠」永遠分不出「修好了」和「測試沒在測」。
+
+**驗證**：`scripts/tests/test_merge_worktree.sh` 新增 case 11（main 自己改 feed.json 不可誤 abort、合併要真的發生、main 的 live state 不可被覆蓋）+ case 12（agent 真改 feed.json 要 abort、stash pop 成功不可印失敗、不可提示 `stash@{0}`、未提交變更要真的回到工作區），現為 **12 cases / 32 assertions PASS**。
+
+**併發副作用（記錄用，需單獨評估）**：修正落地期間另一個 session 正把 `claude/orphan-and-read-gate` 合進 main（同檔衝突）。我**未提交**的 `merge_worktree.sh` + harness 修改被 PHASE-Z safety-net 的 auto-commit `62e19cc6a` 掃走（commit message 還亂碼）。內容無遺失、測試全綠，但作者歸屬與訊息被糟蹋。未 rebase 改寫歷史（main 是活的、還有別的 process 在寫）。**auto-commit safety-net 會與進行中的工作搶檔案** —— 它救的是孤兒，順手也綁架了正在編輯的檔。
+
+
+## 2026-07-10 pregate 接線成功、測試全綠、部署上線 —— 然後結構性地什麼都沒做
+
+**現象**：pregate 接進 dispatch-supervisor 後（同日稍早 entry），shadow 資料顯示 **20/20 個 supervisor 班全部 `proceed`，`would_skip` 從未為 true**。`cadence_due` 在 20 筆裡是 20 個 `True`。零 token 的省錢 gate 一毛錢都沒省。
+
+**根因**：`_last_substantive_dispatch()` 的主來源只認 `claimed_by.startswith("hourly")` 的任務，fallback 只認 work_log 裡 actor 含 `"hourly"` 的 entry。**這個 repo 裡沒有任何 claimer 叫這個名字** —— 實際 owner 是 `codex-cli`（535 次 claim）、`codex-vscode`（161）、`interactive-claude`（92）、`telegram-responder`（67）、`main-session`。主來源永遠回 `None`，fallback 幾乎永遠回 `None` → `cadence_due` 恆 `True` → gate 永遠 proceed。
+
+它被接線、被 17 個測試覆蓋、被部署、被我在回報裡宣稱「修復了最大成本洞」。**測試全綠是因為測試 fixture 自己餵了 `claimed_by="hourly-dispatch"` —— 測的是程式碼裡那個不存在於現實的假設**。這是本次最該記住的一點：*fixture 若複製了程式的錯誤世界觀，測試只會確認這個錯誤是自洽的*。
+
+**過程中挖出的第二個事實**：掃 `firing worker` 日誌發現 **159 次 fire 裡有 9 次是 off-slot 重複觸發**（同一 cron slot 在 +24～+54 分鐘後又 fire 一次，最新一次 07-10 22:58 補打 22:07 的 slot），每次都是完整的 ~95K opus cold-load。而 pregate 對 22:58 那班的判定正好是 `would_skip=true` —— 修好的 gate 第一個要擋的就是它。**重複 fire 的根因未定案**（磁碟版 `_due_to_fire` 在該時刻重現為 `due=False`；daemon 22:37 啟動而 `state.py` mtime 為 22:57，記憶體副本與磁碟不同步是最可能方向），已排 P1 任務獨立排查，不在此 patch 範圍。
+
+**解決方法（改語意，不是加 patch）**：
+1. **cadence 問的是「研究餓死了沒」，不是「是不是 hourly 班做的」**。並行的 codex / interactive session 產出服務同一批 mission，必須重置時鐘 → **actor-agnostic**。
+2. **以 completion 為鍵**（`completed_at` → `status_history` 的 `succeeded`）。claim 了沒跑完不算產出。
+3. `_parse_iso` 統一回 aware datetime。work_log 三種格式並存（`+00:00` / `+0800` / 裸 naive）；裸 naive 是 host wall clock（Asia/Taipei）不是 UTC。
+4. **未來時間戳 fail-safe**：時鐘偏移或錯時區的 row 不得偽造出一次 skip（那會讓 gate 從「不省錢」變成「該跑不跑」，方向錯得更危險）。
+5. `SUBSTANTIVE_TYPES` 收為單一 source —— `crosscheck_pregate_outcomes.py` 原本自帶副本且已在 `daily_digest` 上漂移。**稽核工具量到與被稽核 gate 不同的母體，比不稽核更糟**。
+6. 補兩個 hourly fire 專屬職責的 demand 訊號（少了它們，enforce 後的 skip 會靜默擱置工作）：`compute_followup`（completed 但 followup 未派的 compute job —— executor-advisor 的 advisor 呼叫會永遠不發生）、`publish_drought`（reader-facing 脫班，reuse alerts 的 canonical detector）。
+
+**驗證**：修完實跑，首次得到 `would_skip=true`，且 cadence 的來源是 **codex-vscode 完成的 daily_article** —— 正是舊邏輯會忽略的那類工作。13 個新 regression test（含「非 hourly claimer 必須重置 cadence」這條主 regression），兩個舊測改用 completion 語意並補上隔離（它們原本會去讀 production compute queue 與 alerts 模組）。
+
+**教訓**：(a) 一個 gate「有沒有被呼叫」和「呼叫後有沒有改變任何決策」是兩件事，上線後必須量後者 —— 這次是靠 `crosscheck` 的 `skip=0` 才發現；(b) 宣告「修好了」之前先看它在 production 資料上的**輸出分佈**，不是看它的測試。
+
+
+## 2026-07-10 23:02 我寫的「防止測試寫 production state」的測試，把 production state 寫壞了
+
+**現象**：`storage/ops/dispatch_state.json` 的 `completions` 從 100 筆變 0、`supervisor_started_at` 變 null、`alerts_dedup` 清空。22:58:25 daemon 對**已經在 22:07 成功跑完的 slot** 重複派出一班 opus worker（log：`firing worker prev_scheduled=2026-07-10T22:07:00`）。
+
+**因果鏈**：
+1. 為了驗證新加的 writer-level gate，我在 `scripts/tests/test_dispatch_state.py` 寫下 `test_writer_gate_refuses_the_canonical_state_under_test`，內容是對**真正的 canonical 路徑**呼叫 `st._atomic_write_json(st._CANONICAL_STATE_PATH, st._empty_state())`，用 `pytest.raises` 斷言 gate 會擋。
+2. 但 `VOLPRED_NO_CANONICAL_WRITE` 當時只設在 `tests/conftest.py`。**pytest 的 conftest 只作用於自己的目錄樹** —— `scripts/tests/` 底下那 58 個測試從來沒有任何防護（實測探針：`NO_EMAIL` / `NO_REMOTE_WRITE` / `NO_REMOTE_READ` / `NO_CANONICAL_WRITE` 全為 `None`）。
+3. gate 沒被 arm → 不 raise → `pytest.raises` 失敗，**但那行寫入已經執行**。`_empty_state()` 覆蓋了線上狀態。
+4. `last_fire_at` 被清成 null → `scheduler._due_to_fire()` 認定 22:07 slot 尚未 fire → **重複派工**，燒掉一次完整的 opus dispatch。
+
+**損失**：100 筆 completion receipts（audit trail；ground truth 仍在 `~/.volpred/logs/dispatch_supervisor_launchd.err`）、`supervisor_started_at`、`alerts_dedup`、一次重複 opus 派工。該檔 gitignored，無法從 git 復原。依「永遠修流程，不修資料」不手動回填：`supervisor_started_at` 下次重載自動寫回，`completions` 隨新派工自然重建。
+
+**解決（三層，全部有測試）**：
+1. **Writer-level gate**：`dispatch_supervisor.state._atomic_write_json` 在 `VOLPRED_NO_CANONICAL_WRITE=1` 且目標等於 `_CANONICAL_STATE_PATH`（**import 時捕捉**，不可拿被 monkeypatch 過的 `STATE_PATH` 比對，否則每個 tmp 寫入都會被誤擋）時直接 raise。
+2. **旗標提到根 `conftest.py`**：四個 side-effect guard 移到 repo root，覆蓋整棵樹。`scripts/tests/test_dispatch_state.py::test_side_effect_guards_are_armed_outside_the_tests_tree` **從那棵樹內**斷言四個旗標都 armed —— 從另一棵樹斷言會讓它 vacuously pass。
+3. **告警盲點**：`dispatch_supervisor_stale_code` 原本 `boot is None → 不 breach`（我寫的）。狀態被重置後 `supervisor_started_at` 正是 null，於是**它在最該叫的時候安靜地回報 ok**。改為：檔案存在 + 有心跳 + 無開機時間 = 異常 → warn（檔案不存在仍不 breach，那是 `dispatch_supervisor_heartbeat` 的職責，不重複告警）。對受損的線上狀態實跑，確認 breach=True。
+
+**順帶修掉的既有 flake**：`tests/conftest.py` 的 autouse 指紋守衛把 `dispatch_state.json` 列為 canonical —— 但活著的 daemon **每 30 秒**往裡面蓋心跳，於是任何跨越一次心跳的測試都被誤判成「污染 canonical state」。PHASE-Z 在每次 fire 後於同一份 checkout 跑測試閘門，18:35 就因此寄了一封 CRITICAL「測試紅燈」給老闆。實測同一組測試連跑兩次，ERROR 會**換測試出現**。已從指紋清單移除，改由 writer gate 精確覆蓋 —— gate 知道**誰**在寫，指紋只知道 bytes 動了。
+
+**教訓**：
+1. **「驗證防護有效」的測試，本身就是最危險的測試** —— 它刻意執行被禁止的動作。寫這種測試前必須先證明 gate 已 arm（本次第 2 層那個斷言就是這件事），順序不能反。
+2. **pytest conftest 的作用域是目錄樹，不是 repo**。任何 side-effect kill switch 一律放 repo root。半棵樹沒有防護等於沒有防護。
+3. 我在同一天的 `control-plane.md` 裡寫下「**不可在 production checkout 上做 break-then-verify**」，然後在**同一份 checkout** 上對真實 canonical 路徑做了 break-then-verify。規則寫給別人容易，套在自己手上難。
+
 ## 2026-07-10 補上一則之上的三個缺口：孤兒寫入的 *production* 後果、Supabase 只擋寫不擋讀、以及一個掃 0 個檔的 gate
 
 本 entry **不重述**下方「pytest 改寫 canonical storage/」那則（`VOLPRED_NO_CANONICAL_WRITE` writer-level gate）。它把 `uv run` 孫程序在 timeout 後仍會落盤這件事查得很透徹。這裡只補它沒有涵蓋的三塊。
@@ -223,6 +290,47 @@ skip 暫置的 clean-checkout 缺口已改為真修：
 - workflow 恢復 `push(main)` / `pull_request` / manual 三種 trigger，並顯式鎖
   `permissions: contents: read`。最終完成仍以同一 final SHA 的 GitHub Test Suite
   `conclusion=success` 為 gate，不以本機結果代替。
+
+**驗證（真實 Ubuntu runner，取代原本的「本機 1683 passed」）**：第一次真 CI
+`29085496663` = 12 failed / 1731 passed。修完後 main 上連續四個 run 綠：
+`29091180310` / `29094498110` / `29098177205` / `29101441481`（皆 `conclusion=success`）。
+含本次 `stat -f` sweep 交付的 final SHA `076c958e4` → run `29102758364` = **1909 passed / 7 skipped / 0 failed**（Ubuntu runner，157s）。
+12 個 failure 的歸屬：9 個 `rg` missing（workflow 裝 ripgrep）、2 個
+`test_cron_auth_preflight`（`stat -f` 可攜性）、1 個 `test_alerts`（`series_registry`
+讀 production feed）。本機 macOS 結果不再作為完成依據。
+
+**第 12 個 failure 的真因（`assert 4 == 3`）**：多出來的 breach 是 `series_registry`。
+`_parse_series_registry_state()` 呼叫的 `scripts/series_registry.py::_load_feed()`
+**忽略傳入的 `storage_dir`**，直接讀 production `storage/reports/feed.json`。dev mac
+的 feed 裡有 registry 登記的那 21 篇文章 → 0 drift；CI checkout 的 feed 沒有 →
+21 個 `member_missing` → breach。與 `launchctl` / macOS 專屬工具**無關**（事前的懷疑
+方向是錯的，照著查會白花時間）。修法：condition 改從 `storage_dir` 讀 feed，並補
+`test_parse_series_registry_state_reads_injected_storage_feed` 單獨覆蓋 clean/drift
+兩路；主 test 則 stub 掉這個 condition，因為它的 concern 是 cron/pool 集合。
+
+**`stat -f` 的 bug class sweep（2026-07-10 收尾）**：exit code 正是這個 bug 的陷阱 ——
+GNU `stat -f` 對存在的檔案**成功回 0**，只是印出多行 filesystem report。所以 caller
+該守的 invariant 不是「檢查 exit code」而是「拒絕任何非 digits-only 的值」。
+全 population（`scripts/**/*.sh` + `.claude/hooks/**/*.sh`）共 3 個 call site：
+- `cron_hourly_dispatch.sh`（本 incident 主角，已修）
+- `cron_log_rotate.sh`：`size=$(stat -f%z ... || echo 0)` → GNU 下失敗被 `|| echo 0`
+  吞掉 → `size=0` → **log 永遠不 rotate**（silent fallback，違反
+  `.claude/rules/no-silent-fallback.md`）。改走 `file_size_bytes()` + loud WARN。
+- `check_skills_complete.sh`：`set -euo pipefail` 下 `stat -f "%m"` rc=1 → 整支腳本
+  在 Linux 直接死掉（至少 fail loud）。改走 `file_mtime_epoch()`，讀不到就 WARN 跳過。
+
+機械 gate：`scripts/tests/test_portable_stat.py`（已在 `testpaths`，由既有 pytest CI
+job 執行，**不新增 workflow**）—— 任何含 `stat -f` 的 shell script 必須同時具備 GNU
+`stat -c` 路徑與 `*[!0-9]*` digits 驗證。負向控制：拿掉任一條件、或還原成原始
+`stat -f%z` 裸寫法，gate 立刻 fail。雙平台行為驗證：同一份 helper 在 macOS 與
+ubuntu:24.04 container 上對同一個 12345-byte 檔皆回 `size=12345` 與 digits-only mtime。
+
+**這條的元教訓**：bug 的可見症狀（`assert 0 == 1`）把人誤導去猜「腳本在抵達 preflight
+前就退出」。實際上腳本**跑完了 preflight、還印出「successful」**——非互動 bash 在算術
+展開語法錯誤時會 discard 掉整個當前複合命令，控制流從 `if 失敗` 區塊裡被彈出來，落到
+下一個 top-level 敘述。exit code 只是最無害的一個後果；真正的損害是 send-alert 與
+Claude→Codex failover **整段被靜默跳過**。**症狀的位置不是 bug 的位置**；沒有在目標 OS
+上實際重現之前，任何「應該是 X」都只是猜測。
 
 **⚠️ 平行實作警告**：branch `claude/upbeat-rhodes-ffaad8` 的 commit `6d2dd3a0c` 是同一問題的**另一套實作**，從 36 個 commit 前的 base 分出，已被上述 commit 鏈取代。**不要 merge**：它把 `HEADERS` 常數換成 `headers(**overrides)` 工廠函式，與 main 的 `_GuardedHeaders()` 不相容；而 `scripts/pull_reader_metrics.py` 在 merge 時**不會衝突**（main 沒動過它），會靜默採用呼叫 `headers(Prefer="")` 的版本 → 執行期 ImportError。這是「兩套設計被 merge 成一個混合體」的典型陷阱：衝突檔會被人工審視，不衝突的檔不會。本 entry 的分析大部分承襲自該 branch 的草稿，已按 main 實際落地的實作校正。
 

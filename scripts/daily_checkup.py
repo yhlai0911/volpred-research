@@ -308,6 +308,39 @@ def check_reader_metrics() -> list[dict]:
     return out
 
 
+def check_alert_conditions() -> list[dict]:
+    """Surface the 24 conditions `volpred.ops.alerts` already owns.
+
+    2026-07-10 23:09: this checkup printed `overall=ok / 全部維度通過` while
+    `build_alert_condition_report()` had a live breach (`dispatch_supervisor_stale_code`,
+    the daemon's state file had lost its boot time). Two health surfaces, neither
+    aware of the other — and this one is what the PDCA skill tells you to run
+    before claiming the platform is healthy. It was blind to every alert condition.
+
+    This is a READER, not a second alerter: `alerts.py` decides what a breach is,
+    `check_alerts.py` (hourly) owns emailing it, and this surfaces it to whoever
+    is looking. Adding a third opinion would be the stacking the anti-stacking
+    rule forbids.
+    """
+    from volpred.ops.alerts import build_alert_condition_report
+
+    report = build_alert_condition_report(storage_dir="storage")
+    out: list[dict] = []
+    for cond in report["conditions"]:
+        if not cond.get("breached"):
+            continue
+        severity = "critical" if cond.get("level") == "critical" else "warn"
+        out.append(
+            _finding(
+                "alert_conditions",
+                severity,
+                f"{cond['id']}: {cond.get('title', '')}",
+                recovery="uv run volpred ops check-alerts --storage-dir storage",
+            )
+        )
+    return out
+
+
 def run_all() -> dict:
     dims = {
         "data_freshness": check_data_freshness,
@@ -316,6 +349,7 @@ def run_all() -> dict:
         "live_freshness": check_live_freshness,
         "live_cache": check_live_cache,
         "mission_progress": check_mission_progress,
+        "alert_conditions": check_alert_conditions,
         "reader_metrics": check_reader_metrics,
     }
     findings = []

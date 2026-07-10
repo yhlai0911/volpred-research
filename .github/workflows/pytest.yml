@@ -31,6 +31,11 @@ name: Test Suite
 # The follow-up real runs reduced that set to one host-only alert fixture
 # (29088232678); the fix batch that removes that final coupling restores the
 # automatic triggers here, so this push is itself the isolated acceptance gate.
+# Acceptance met: after the restore, four consecutive Ubuntu runs on main are
+# green — 29091180310, 29094498110, 29098177205, 29101441481. The 12 failures of
+# 29085496663 are gone (ripgrep installed above; `stat -f` made portable; the
+# series_registry condition no longer reads the production feed). Do not re-narrow
+# this trigger without a red run id to point at.
 on:
   pull_request:
   push:

@@ -13,6 +13,24 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/log_rotate.log 2>&1
 
 set -u
 
+# Portable file size in bytes. BSD/macOS is `stat -f %z`; GNU/Linux is `stat -c %s`.
+# GNU accepts `-f` with a wholly different meaning (--file-system) and prints a
+# multi-line filesystem report, so a zero exit status alone proves nothing —
+# validate the result is digits-only before trusting it. Same invariant as
+# `file_mtime_epoch()` in cron_hourly_dispatch.sh, whose BSD-only `stat -f %m`
+# silently rerouted the whole auth-preflight control flow on Linux (2026-07-10).
+file_size_bytes() {
+  local target=$1 value
+  value=$(stat -c %s "$target" 2>/dev/null || true)
+  case "$value" in
+    ""|*[!0-9]*) value=$(stat -f %z "$target" 2>/dev/null || true) ;;
+  esac
+  case "$value" in
+    ""|*[!0-9]*) return 1 ;;
+  esac
+  printf '%s\n' "$value"
+}
+
 MAX_BYTES=$((5 * 1024 * 1024))   # 5 MB 門檻
 KEEP_LINES=4000                   # 截斷後保留最後 N 行
 
@@ -27,7 +45,10 @@ for dir in "${LOG_DIRS[@]}"; do
   [ -d "$dir" ] || continue
   for f in "$dir"/*.log; do
     [ -f "$f" ] || continue
-    size=$(stat -f%z "$f" 2>/dev/null || echo 0)
+    if ! size=$(file_size_bytes "$f"); then
+      echo "WARN: cannot read size of $f (stat unsupported?) — skipping rotation"
+      continue
+    fi
     if [ "$size" -gt "$MAX_BYTES" ]; then
       tmp="${f}.rotate.$$"
       if tail -n "$KEEP_LINES" "$f" > "$tmp" 2>/dev/null; then

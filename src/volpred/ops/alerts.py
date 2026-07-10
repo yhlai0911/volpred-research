@@ -2107,7 +2107,9 @@ def _parse_dispatch_supervisor_stale_code_state(
         "breached": breached,
         "level": level,
         "title": (
-            "派工程式有改動沒生效（daemon 未重載）"
+            "派工程式狀態檔失去開機時間（疑似被覆寫）"
+            if boot_lost
+            else "派工程式有改動沒生效（daemon 未重載）"
             if breached
             else "dispatch_supervisor_stale_code ok"
         ),

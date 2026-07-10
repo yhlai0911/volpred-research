@@ -38294,5 +38294,17 @@
     "experiment_path": "experiments/k1675",
     "reviewer_source": "Codex gpt-5.4 CONDITIONAL PASS（兩 findings：來源 B 盲點 + README tau 誤植，同日修正重跑，主結果不變，Codex 獨立重算驗證）",
     "created_at": "2026-07-10T18:03:17.412278"
+  },
+  {
+    "item_id": "3fa70fc9",
+    "category": "cross_asset_safe_haven",
+    "content": "K1676 | experiment_id=k1676 | verdict=NULL_NO_ROBUST_LAGGED_MACRO_STATE_MODIFIER | reviewer=Codex primary path PASS_NULL_RESULT. GLD/SPY/UUP + FRED DFII10, 2016-07-06..2026-06-18, n=2503, SPY<=-1% tail n=272. Joint lagged USD/real-yield tail-mean and hierarchical tail-beta interactions had HAC t=0.342,-1.494,-1.151,-0.973; Holm p>=0.541; all 5000-rep block-bootstrap CIs crossed zero; 0/4 strict passes. High-real-yield bucket looked directionally weaker but its mean/positive-rate bootstrap CIs crossed zero. Conclusion: K1628 episode dependence cannot be reduced to a robust lagged USD or real-yield moderator; no causal decoupling or trading claim.",
+    "evidence": [
+      "experiments/k1676/k1676_results.json",
+      "experiments/k1676/README.md",
+      "experiments/k1676/codex_review.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-07-10T23:13:42.188131"
   }
 ]
