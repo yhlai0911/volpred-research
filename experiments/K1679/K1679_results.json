@@ -1,0 +1,1310 @@
+{
+  "experiment_id": "K1679",
+  "title": "Deposit flight from small to large banks (FRED H.8 small-minus-large growth differential) as a lead signal for regional-bank realized volatility and downside semivariance",
+  "run_utc": "2026-07-10T15:55:34.050986+00:00",
+  "seed": 42,
+  "verdict": "NULL",
+  "relation_to_prior_work": {
+    "K1606": "K1606 tested the AGGREGATE all-bank deposit level (DPSACBW027SBOG) on KRE forward RV at H=5, 2015-2026, and found NULL (DM t=-0.382, p=0.703). Its Limitations section named the regional-bank-specific deposit series as the natural follow-up. K1679 supplies exactly that series (H.8 small vs large charter breakout), adds downside-semivariance targets and H=21, and extends the sample back to 2007 to include the GFC deposit-stress regime.",
+    "differentiation_axes": [
+      "predictor",
+      "targets_and_horizons",
+      "sample_period"
+    ],
+    "shared_by_design": [
+      "HAR baseline",
+      "Parkinson RV proxy",
+      "canonical QLIKE",
+      "seed=42"
+    ]
+  },
+  "data_sources": {
+    "deposits_small": "FRED DPSSCBW027SBOG (Deposits, Small Domestically Chartered Commercial Banks, weekly Wed, SA)",
+    "deposits_large": "FRED DPSLCBW027SBOG (Deposits, Large Domestically Chartered Commercial Banks, weekly Wed, SA)",
+    "prices": "yfinance auto_adjust=True (KRE, XLF, SPY, ^VIX)",
+    "vix_control_available": true,
+    "n_weekly_deposit_obs": 1109
+  },
+  "signal_definition": {
+    "formula": "dep_flight_Nw = -z( log-growth_N(small deposits) - log-growth_N(large deposits) ), trailing 52w z",
+    "sign_convention": "HIGH = deposits fleeing small (regional) banks toward large banks = stress",
+    "publication_lag_days": 10,
+    "merge": "merge_asof(direction='backward') on available_date = as_of + 10d"
+  },
+  "lookahead_policy": {
+    "features": "all predictors known at close of day t",
+    "target": "strictly the future window (t, t+H]; y_t = mean(q_{t+1..t+H})",
+    "oos_embargo": "expanding refit at origin i trains only on rows j with j + H < i",
+    "per_horizon_inference": "HAC truncation lag = that cell's own H; no shared horizon",
+    "mechanical_assertions": [
+      "target reconstruction asserted equal to q[t+1 : t+1+H].mean()",
+      "min(trading_date - deposit_as_of_date) >= publication_lag_days",
+      "incremental (X'X, X'y) betas asserted against direct lstsq refits at random origins"
+    ]
+  },
+  "method": {
+    "rv_proxy": "Parkinson (high-low) daily variance",
+    "dsv_proxy": "daily downside semivariance min(log-return, 0)^2",
+    "baseline": "OLS: 1 + HAR(d,w,m) on the target quantity + SPY 21d RV control + VIX level control",
+    "augmented": "baseline + deposit-flight signal (only difference)",
+    "oos_scheme": "expanding window, refit every origin, initial train = 60%",
+    "primary_loss_by_target": {
+      "rv": "qlike",
+      "dsv": "mse"
+    },
+    "dm": "Newey-West HAC (Bartlett, truncation lag = H) + Harvey-Leybourne-Newbold small-sample correction, t(n-1)",
+    "bootstrap": "moving-block bootstrap, block = max(10, H), 2000 reps, seed 42",
+    "multiple_testing": "Bonferroni + Benjamini-Hochberg over the pre-registered primary family (m=8)"
+  },
+  "prereg_primary_grid": [
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "H": 5
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "H": 21
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "H": 5
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "H": 21
+    }
+  ],
+  "prereg_secondary_grid": [
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21
+    }
+  ],
+  "construct_validity": {
+    "svb_2023_max_signal": 4.164004266726147,
+    "svb_2023_argmax_date": "2023-03-27",
+    "gfc_2008_09_to_2009_06_max_signal": 3.1957777013290145,
+    "full_sample_signal_mean": 0.12319881070508804,
+    "full_sample_signal_std": 1.182017127373861,
+    "note": "Construct-validity check: if the small-minus-large differential is a real measure of deposit flight from regional banks, it must spike during the March-2023 regional-bank run."
+  },
+  "summary": {
+    "any_raw_p_below_05": false,
+    "any_bh_reject_at_q10": false,
+    "any_harvey_abs_t_above_3": false,
+    "strongest_primary_cell": {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "H": 5,
+      "DM_t_hln": 1.7730543607007143,
+      "p_value": 0.0763748940586233,
+      "p_value_bonferroni": 0.6109991524689864,
+      "p_value_bh_q": 0.34055869016187845
+    }
+  },
+  "cells": [
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "target_definition": "forward mean Parkinson variance over (t, t+H]",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 6,
+      "n_floored_pred_aug": 17,
+      "embargo_check": {
+        "first_origin": 2943,
+        "first_train_last_row": 2937,
+        "gap_rows_between_last_train_row_and_origin": 6,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.269795446593374,
+          "loss_aug": 0.2810366425271415,
+          "improvement_pct": -4.166562510860243,
+          "mean_loss_diff": 0.011241195933767488,
+          "DM_t_raw": 0.634729800558878,
+          "DM_t_hln": 0.633273977605549,
+          "DM_p_value": 0.5266285884434088,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.011241195933767488,
+            "boot_se": 0.020328743331098763,
+            "ci95": [
+              -0.024525783015602293,
+              0.054602690737970944
+            ],
+            "p_two_sided_centered": 0.581
+          }
+        },
+        "mse": {
+          "loss_base": 8.7310119970289e-08,
+          "loss_aug": 8.699937765403629e-08,
+          "improvement_pct": 0.35590641309214816,
+          "mean_loss_diff": -3.107423162527271e-10,
+          "DM_t_raw": -0.46544812494824894,
+          "DM_t_hln": -0.4643805682283865,
+          "DM_p_value": 0.6424266590078997,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "p_value": 0.5266285884434088,
+      "DM_t_hln": 0.633273977605549,
+      "family": "primary",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.6018612439353243,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "target_definition": "forward mean Parkinson variance over (t, t+H]",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 4,
+      "embargo_check": {
+        "first_origin": 2933,
+        "first_train_last_row": 2911,
+        "gap_rows_between_last_train_row_and_origin": 22,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.19565100460863402,
+          "loss_aug": 0.20851572269499388,
+          "improvement_pct": -6.575339652404803,
+          "mean_loss_diff": 0.012864718086359837,
+          "DM_t_raw": 0.6678924961939257,
+          "DM_t_hln": 0.6608925783481483,
+          "DM_p_value": 0.5087590756155211,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.012864718086359837,
+            "boot_se": 0.018634280196167138,
+            "ci95": [
+              -0.023106853052318105,
+              0.05088451381272157
+            ],
+            "p_two_sided_centered": 0.48
+          }
+        },
+        "mse": {
+          "loss_base": 6.929993422076914e-08,
+          "loss_aug": 6.850893412780599e-08,
+          "improvement_pct": 1.141415358986134,
+          "mean_loss_diff": -7.910000929631446e-10,
+          "DM_t_raw": -0.37695847170144875,
+          "DM_t_hln": -0.37300771862634047,
+          "DM_p_value": 0.7091831365769141,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "p_value": 0.5087590756155211,
+      "DM_t_hln": 0.6608925783481483,
+      "family": "primary",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.6018612439353243,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "target_definition": "forward mean downside semivariance min(r,0)^2 over (t, t+H]",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 43,
+      "n_floored_pred_base": 50,
+      "n_floored_pred_aug": 56,
+      "embargo_check": {
+        "first_origin": 2943,
+        "first_train_last_row": 2937,
+        "gap_rows_between_last_train_row_and_origin": 6,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 254.79403557133753,
+          "loss_aug": 348.2410856114362,
+          "improvement_pct": -36.67552493156192,
+          "mean_loss_diff": 93.44705004009865,
+          "DM_t_raw": 1.052128725892905,
+          "DM_t_hln": 1.049715552369836,
+          "DM_p_value": 0.2939782575958394,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "43 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there and the floor (1e-16) makes this statistic unreliable. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 3.92229578351177e-07,
+          "loss_aug": 3.928605431237937e-07,
+          "improvement_pct": -0.1608661884371606,
+          "mean_loss_diff": 6.309647726166316e-10,
+          "DM_t_raw": 1.15659473530816,
+          "DM_t_hln": 1.1539419574460235,
+          "DM_p_value": 0.24866457991721114,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 6.309647726166316e-10,
+            "boot_se": 5.828694968543996e-10,
+            "ci95": [
+              -3.630458081955244e-10,
+              1.945331559065107e-09
+            ],
+            "p_two_sided_centered": 0.2635
+          }
+        }
+      },
+      "p_value": 0.24866457991721114,
+      "DM_t_hln": 1.1539419574460235,
+      "family": "primary",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.4973291598344223,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "target_definition": "forward mean downside semivariance min(r,0)^2 over (t, t+H]",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 12,
+      "embargo_check": {
+        "first_origin": 2933,
+        "first_train_last_row": 2911,
+        "gap_rows_between_last_train_row_and_origin": 22,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.7283698333339805,
+          "loss_aug": 0.8743826199448095,
+          "improvement_pct": -20.046517569581642,
+          "mean_loss_diff": 0.14601278661082903,
+          "DM_t_raw": 1.3008745673133835,
+          "DM_t_hln": 1.2872406140188837,
+          "DM_p_value": 0.1981628102255153,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 2.188970626349822e-07,
+          "loss_aug": 2.1871876887992725e-07,
+          "improvement_pct": 0.08145095823065823,
+          "mean_loss_diff": -1.7829375505498783e-10,
+          "DM_t_raw": -0.09771802884142614,
+          "DM_t_hln": -0.09669388471967114,
+          "DM_p_value": 0.9229794073221482,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -1.7829375505498783e-10,
+            "boot_se": 1.7759112360365518e-09,
+            "ci95": [
+              -3.978794488654411e-09,
+              2.9528651949332037e-09
+            ],
+            "p_two_sided_centered": 0.92
+          }
+        }
+      },
+      "p_value": 0.9229794073221482,
+      "DM_t_hln": -0.09669388471967114,
+      "family": "primary",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.9229794073221482,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "target_definition": "forward mean Parkinson variance over (t, t+H]",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 6,
+      "n_floored_pred_aug": 7,
+      "embargo_check": {
+        "first_origin": 2943,
+        "first_train_last_row": 2937,
+        "gap_rows_between_last_train_row_and_origin": 6,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.269795446593374,
+          "loss_aug": 0.2775140192058146,
+          "improvement_pct": -2.860898028451063,
+          "mean_loss_diff": 0.007718572612440569,
+          "DM_t_raw": 0.6999432560845065,
+          "DM_t_hln": 0.6983378588629826,
+          "DM_p_value": 0.4850487295539303,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.007718572612440569,
+            "boot_se": 0.012355745263666586,
+            "ci95": [
+              -0.015949713526648594,
+              0.032020027734676174
+            ],
+            "p_two_sided_centered": 0.536
+          }
+        },
+        "mse": {
+          "loss_base": 8.7310119970289e-08,
+          "loss_aug": 8.674001160467837e-08,
+          "improvement_pct": 0.6529693989707464,
+          "mean_loss_diff": -5.701083656106401e-10,
+          "DM_t_raw": -1.7373167089334272,
+          "DM_t_hln": -1.733331981038439,
+          "DM_p_value": 0.08319386798512984,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "p_value": 0.4850487295539303,
+      "DM_t_hln": 0.6983378588629826,
+      "family": "primary",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.6018612439353243,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "target_definition": "forward mean Parkinson variance over (t, t+H]",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 1,
+      "embargo_check": {
+        "first_origin": 2933,
+        "first_train_last_row": 2911,
+        "gap_rows_between_last_train_row_and_origin": 22,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.19565100460863402,
+          "loss_aug": 0.25637920656358115,
+          "improvement_pct": -31.039044280106502,
+          "mean_loss_diff": 0.06072820195494712,
+          "DM_t_raw": 1.740729887515913,
+          "DM_t_hln": 1.7224859840827433,
+          "DM_p_value": 0.08513967254046961,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.06072820195494712,
+            "boot_se": 0.0340669818842053,
+            "ci95": [
+              0.009958831567321176,
+              0.1402760962315805
+            ],
+            "p_two_sided_centered": 0.054
+          }
+        },
+        "mse": {
+          "loss_base": 6.929993422076914e-08,
+          "loss_aug": 7.009647058434996e-08,
+          "improvement_pct": -1.1494042130592663,
+          "mean_loss_diff": 7.965363635808191e-10,
+          "DM_t_raw": 0.7177667741470316,
+          "DM_t_hln": 0.7102441436636986,
+          "DM_p_value": 0.4776374610502594,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "p_value": 0.08513967254046961,
+      "DM_t_hln": 1.7224859840827433,
+      "family": "primary",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 0.6811173803237569,
+        "benjamini_hochberg_q": 0.34055869016187845,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "target_definition": "forward mean downside semivariance min(r,0)^2 over (t, t+H]",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 43,
+      "n_floored_pred_base": 50,
+      "n_floored_pred_aug": 53,
+      "embargo_check": {
+        "first_origin": 2943,
+        "first_train_last_row": 2937,
+        "gap_rows_between_last_train_row_and_origin": 6,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 254.79403557133753,
+          "loss_aug": 276.4970768394941,
+          "improvement_pct": -8.51787649561371,
+          "mean_loss_diff": 21.703041268156554,
+          "DM_t_raw": 1.1521088054803235,
+          "DM_t_hln": 1.1494663165940702,
+          "DM_p_value": 0.2505039182125084,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "43 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there and the floor (1e-16) makes this statistic unreliable. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 3.92229578351177e-07,
+          "loss_aug": 3.92517278037066e-07,
+          "improvement_pct": -0.07334981902649716,
+          "mean_loss_diff": 2.876996858888737e-10,
+          "DM_t_raw": 1.777130405709808,
+          "DM_t_hln": 1.7730543607007143,
+          "DM_p_value": 0.0763748940586233,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 2.876996858888737e-10,
+            "boot_se": 1.6772055636796127e-10,
+            "ci95": [
+              2.3846508296826914e-11,
+              6.526926480145519e-10
+            ],
+            "p_two_sided_centered": 0.071
+          }
+        }
+      },
+      "p_value": 0.0763748940586233,
+      "DM_t_hln": 1.7730543607007143,
+      "family": "primary",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 0.6109991524689864,
+        "benjamini_hochberg_q": 0.34055869016187845,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "target_definition": "forward mean downside semivariance min(r,0)^2 over (t, t+H]",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "embargo_check": {
+        "first_origin": 2933,
+        "first_train_last_row": 2911,
+        "gap_rows_between_last_train_row_and_origin": 22,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.7283698333339805,
+          "loss_aug": 0.746797091174412,
+          "improvement_pct": -2.5299314986843973,
+          "mean_loss_diff": 0.018427257840431456,
+          "DM_t_raw": 1.0312784699691253,
+          "DM_t_hln": 1.020470047046214,
+          "DM_p_value": 0.30763184861228177,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 2.188970626349822e-07,
+          "loss_aug": 2.195366082518265e-07,
+          "improvement_pct": -0.2921672904815281,
+          "mean_loss_diff": 6.395456168442335e-10,
+          "DM_t_raw": 1.4628235348071121,
+          "DM_t_hln": 1.4474922582545662,
+          "DM_p_value": 0.147919434741842,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 6.395456168442335e-10,
+            "boot_se": 4.3658851165608333e-10,
+            "ci95": [
+              -1.130119729598474e-10,
+              1.5766636295210166e-09
+            ],
+            "p_two_sided_centered": 0.137
+          }
+        }
+      },
+      "p_value": 0.147919434741842,
+      "DM_t_hln": 1.4474922582545662,
+      "family": "primary",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.3944518259782453,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "target_definition": "forward mean Parkinson variance over (t, t+H]",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 145,
+      "n_floored_pred_aug": 141,
+      "embargo_check": {
+        "first_origin": 2943,
+        "first_train_last_row": 2937,
+        "gap_rows_between_last_train_row_and_origin": 6,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.6578091199583129,
+          "loss_aug": 0.6652176571456774,
+          "improvement_pct": -1.1262442192704698,
+          "mean_loss_diff": 0.007408537187364399,
+          "DM_t_raw": 0.1599922953094725,
+          "DM_t_hln": 0.1596253352964682,
+          "DM_p_value": 0.8731926590145878,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.007408537187364399,
+            "boot_se": 0.05006564909519334,
+            "ci95": [
+              -0.09648310495196666,
+              0.10234876538927673
+            ],
+            "p_two_sided_centered": 0.879
+          }
+        },
+        "mse": {
+          "loss_base": 3.1854247536329494e-08,
+          "loss_aug": 3.186991846485549e-08,
+          "improvement_pct": -0.04919572659225475,
+          "mean_loss_diff": 1.5670928525997106e-11,
+          "DM_t_raw": 0.029917096671058647,
+          "DM_t_hln": 0.029848478503151078,
+          "DM_p_value": 0.9761909330355583,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "p_value": 0.8731926590145878,
+      "DM_t_hln": 0.1596253352964682,
+      "family": "secondary",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family; not in the primary FDR family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "target_definition": "forward mean Parkinson variance over (t, t+H]",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 49,
+      "embargo_check": {
+        "first_origin": 2933,
+        "first_train_last_row": 2911,
+        "gap_rows_between_last_train_row_and_origin": 22,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.24568397607291115,
+          "loss_aug": 0.31500300490480393,
+          "improvement_pct": -28.214713039047002,
+          "mean_loss_diff": 0.06931902883189273,
+          "DM_t_raw": 1.5980762390534824,
+          "DM_t_hln": 1.5813274322493778,
+          "DM_p_value": 0.11396494879186525,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.06931902883189273,
+            "boot_se": 0.04192810628827679,
+            "ci95": [
+              -0.0052719753598846715,
+              0.1612693983824145
+            ],
+            "p_two_sided_centered": 0.0845
+          }
+        },
+        "mse": {
+          "loss_base": 3.570886374947453e-08,
+          "loss_aug": 3.542469551435252e-08,
+          "improvement_pct": 0.7957918714963111,
+          "mean_loss_diff": -2.841682351220142e-10,
+          "DM_t_raw": -0.17394655657989683,
+          "DM_t_hln": -0.17212349132230845,
+          "DM_p_value": 0.8633582601981638,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "p_value": 0.11396494879186525,
+      "DM_t_hln": 1.5813274322493778,
+      "family": "secondary",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family; not in the primary FDR family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "target_definition": "forward mean downside semivariance min(r,0)^2 over (t, t+H]",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 76,
+      "n_floored_pred_base": 199,
+      "n_floored_pred_aug": 240,
+      "embargo_check": {
+        "first_origin": 2943,
+        "first_train_last_row": 2937,
+        "gap_rows_between_last_train_row_and_origin": 6,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 212.43376993089595,
+          "loss_aug": 268.49771702888717,
+          "improvement_pct": -26.391259316364177,
+          "mean_loss_diff": 56.06394709799122,
+          "DM_t_raw": 1.1022382399348971,
+          "DM_t_hln": 1.0997101347028422,
+          "DM_p_value": 0.2715934207517412,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "76 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there and the floor (1e-16) makes this statistic unreliable. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 1.8855953734190011e-07,
+          "loss_aug": 1.8713777472500257e-07,
+          "improvement_pct": 0.7540125718062061,
+          "mean_loss_diff": -1.4217626168975306e-09,
+          "DM_t_raw": -0.7285378929319822,
+          "DM_t_hln": -0.7268669107503257,
+          "DM_p_value": 0.4673942464730907,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": -1.4217626168975306e-09,
+            "boot_se": 2.405222556043681e-09,
+            "ci95": [
+              -6.399811866234255e-09,
+              2.873966827239501e-09
+            ],
+            "p_two_sided_centered": 0.5625
+          }
+        }
+      },
+      "p_value": 0.4673942464730907,
+      "DM_t_hln": -0.7268669107503257,
+      "family": "secondary",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family; not in the primary FDR family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "target_definition": "forward mean downside semivariance min(r,0)^2 over (t, t+H]",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 114,
+      "embargo_check": {
+        "first_origin": 2933,
+        "first_train_last_row": 2911,
+        "gap_rows_between_last_train_row_and_origin": 22,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.7663062511437931,
+          "loss_aug": 2.826488244900809,
+          "improvement_pct": -268.8457768264289,
+          "mean_loss_diff": 2.0601819937570154,
+          "DM_t_raw": 2.363444034404669,
+          "DM_t_hln": 2.3386737095871233,
+          "DM_p_value": 0.019452617637160552,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 1.379506426926409e-07,
+          "loss_aug": 1.3548617462465625e-07,
+          "improvement_pct": 1.7864853833813457,
+          "mean_loss_diff": -2.4644680679846362e-09,
+          "DM_t_raw": -0.564871678131871,
+          "DM_t_hln": -0.5589514808503292,
+          "DM_p_value": 0.5762588518663265,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -2.4644680679846362e-09,
+            "boot_se": 4.429994932689122e-09,
+            "ci95": [
+              -1.2835186479255297e-08,
+              4.527965946564206e-09
+            ],
+            "p_two_sided_centered": 0.5865
+          }
+        }
+      },
+      "p_value": 0.5762588518663265,
+      "DM_t_hln": -0.5589514808503292,
+      "family": "secondary",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family; not in the primary FDR family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "target_definition": "forward mean Parkinson variance over (t, t+H]",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 32,
+      "n_floored_pred_aug": 47,
+      "embargo_check": {
+        "first_origin": 2943,
+        "first_train_last_row": 2937,
+        "gap_rows_between_last_train_row_and_origin": 6,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.5694521273747873,
+          "loss_aug": 0.6292785872976465,
+          "improvement_pct": -10.505968288969818,
+          "mean_loss_diff": 0.059826459922859065,
+          "DM_t_raw": 0.9437239544770969,
+          "DM_t_hln": 0.9415594192790893,
+          "DM_p_value": 0.3465342264788922,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.059826459922859065,
+            "boot_se": 0.07004947052515988,
+            "ci95": [
+              -0.06471715466539504,
+              0.21036969220795895
+            ],
+            "p_two_sided_centered": 0.404
+          }
+        },
+        "mse": {
+          "loss_base": 1.6821154208086182e-08,
+          "loss_aug": 1.6900545435820998e-08,
+          "improvement_pct": -0.47197253382678905,
+          "mean_loss_diff": 7.939122773481208e-11,
+          "DM_t_raw": 2.1759894000300855,
+          "DM_t_hln": 2.170998527832223,
+          "DM_p_value": 0.030050872615559943,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "p_value": 0.3465342264788922,
+      "DM_t_hln": 0.9415594192790893,
+      "family": "secondary",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family; not in the primary FDR family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "target_definition": "forward mean Parkinson variance over (t, t+H]",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "embargo_check": {
+        "first_origin": 2933,
+        "first_train_last_row": 2911,
+        "gap_rows_between_last_train_row_and_origin": 22,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.3284293703128989,
+          "loss_aug": 0.3281417037489105,
+          "improvement_pct": 0.08758856240974051,
+          "mean_loss_diff": -0.0002876665639884897,
+          "DM_t_raw": -0.03424012214672462,
+          "DM_t_hln": -0.033881264930297895,
+          "DM_p_value": 0.9729752917396828,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -0.0002876665639884897,
+            "boot_se": 0.008176496412432803,
+            "ci95": [
+              -0.017432808433815308,
+              0.014757433069724303
+            ],
+            "p_two_sided_centered": 0.9765
+          }
+        },
+        "mse": {
+          "loss_base": 1.6037821333186462e-08,
+          "loss_aug": 1.5984893084237413e-08,
+          "improvement_pct": 0.33002144025339897,
+          "mean_loss_diff": -5.292824894904904e-11,
+          "DM_t_raw": -0.3570483467727464,
+          "DM_t_hln": -0.3533062638647597,
+          "DM_p_value": 0.7238969420575192,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "p_value": 0.9729752917396828,
+      "DM_t_hln": -0.033881264930297895,
+      "family": "secondary",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family; not in the primary FDR family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "target_definition": "forward mean downside semivariance min(r,0)^2 over (t, t+H]",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 98,
+      "n_floored_pred_base": 17,
+      "n_floored_pred_aug": 32,
+      "embargo_check": {
+        "first_origin": 2943,
+        "first_train_last_row": 2937,
+        "gap_rows_between_last_train_row_and_origin": 6,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 434.41537454533335,
+          "loss_aug": 543.2252961366332,
+          "improvement_pct": -25.047437997603613,
+          "mean_loss_diff": 108.80992159129993,
+          "DM_t_raw": 1.402854556035144,
+          "DM_t_hln": 1.3996369540554359,
+          "DM_p_value": 0.16178023020487897,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "98 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there and the floor (1e-16) makes this statistic unreliable. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 7.316065961394132e-08,
+          "loss_aug": 7.332775766022867e-08,
+          "improvement_pct": -0.22839876946039273,
+          "mean_loss_diff": 1.6709804628735421e-10,
+          "DM_t_raw": 1.790637281912466,
+          "DM_t_hln": 1.7865302573899065,
+          "DM_p_value": 0.07416787958489923,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.6709804628735421e-10,
+            "boot_se": 1.0435238730242766e-10,
+            "ci95": [
+              1.9729666204868976e-11,
+              3.957346898881956e-10
+            ],
+            "p_two_sided_centered": 0.081
+          }
+        }
+      },
+      "p_value": 0.07416787958489923,
+      "DM_t_hln": 1.7865302573899065,
+      "family": "secondary",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family; not in the primary FDR family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "target_definition": "forward mean downside semivariance min(r,0)^2 over (t, t+H]",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "embargo_check": {
+        "first_origin": 2933,
+        "first_train_last_row": 2911,
+        "gap_rows_between_last_train_row_and_origin": 22,
+        "requirement": "j + H < i  =>  last train row j = i - H - 1",
+        "holds_for_all_origins": true
+      },
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.768049273261062,
+          "loss_aug": 0.7506471560102013,
+          "improvement_pct": 2.2657553176208385,
+          "mean_loss_diff": -0.017402117250860664,
+          "DM_t_raw": -0.9455907856594784,
+          "DM_t_hln": -0.9356804215618729,
+          "DM_p_value": 0.34955331524253186,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 4.516916980463032e-08,
+          "loss_aug": 4.512939477953264e-08,
+          "improvement_pct": 0.08805790602245012,
+          "mean_loss_diff": -3.9775025097674625e-11,
+          "DM_t_raw": -0.2282106472593038,
+          "DM_t_hln": -0.22581886146825192,
+          "DM_p_value": 0.8213659109665068,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -3.9775025097674625e-11,
+            "boot_se": 1.748383623913144e-10,
+            "ci95": [
+              -4.0684043000327234e-10,
+              2.9202165176370675e-10
+            ],
+            "p_two_sided_centered": 0.8085
+          }
+        }
+      },
+      "p_value": 0.8213659109665068,
+      "DM_t_hln": -0.22581886146825192,
+      "family": "secondary",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family; not in the primary FDR family"
+      }
+    }
+  ],
+  "runtime_seconds": 19.5,
+  "conclusion": "NULL. The regional-bank-specific deposit-flight differential adds no robust incremental out-of-sample forecasting power over HAR for KRE forward realized volatility or downside semivariance, at either H=5 or H=21, before or after FDR. Supplying the bank-size-specific series that K1606 said it lacked does NOT rescue K1606's null: the funding-flight channel is not exploitable at daily frequency from publicly-released H.8 aggregates."
+}
