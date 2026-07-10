@@ -57975,7 +57975,7 @@
     "title": "K1677: Fraud / enforcement contagion 的 peer-vol spillover** — 用 SEC Accounting and Auditing Enforcement Releases、DOJ press rele",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1522). Original: Fraud / enforcement contagion 的 peer-vol spillover** — 用 SEC Accounting and Auditing Enforcement Releases、DOJ press release、PPP fraud / corporate scandal verified event set，檢定事件公司同業與 sector ETF 在 t+1..t+10 的 RV、left-tail、bid-ask proxy 是否擴散；事件必手工/程式雙重驗證，避免新聞 rumor。與 broad ESG controversy / cyber incident 題正交——這裡是法律/詐欺 enforcement shock 的 peer-vol contagion（來源：RFS 2025 fraud contagion stream；social connection + fraud diffusion 使 enforcement shock 成為可驗證事件源）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1677.py with signal.shift(1) + seed=42, (c) K1677_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -58000,9 +58000,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-10T20:25:53.465841+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04",
+        "note": "experiment executed + rescued to main + Codex review=FAIL → K1677-rev spawned; gate held (no knowledge.json)"
       }
     ],
-    "started_at": "2026-07-10T19:15:25.000963+00:00"
+    "started_at": "2026-07-10T19:15:25.000963+00:00",
+    "completed_at": "2026-07-10T20:25:53.465841+00:00",
+    "result": "跑完 + 救援到主 repo（產出原僅在 worktree 未 commit）。Codex verdict=FAIL：方向錯置（雙尾 vs 方向性 claim；單尾重算 spread q=.032/worst-day q=.039 過 5%）、peer 非 point-in-time 靜默剔 9/128、placebo halo 不足、semivar/Amihud 定義偏差。主 RV 仍 NULL。gate 守住未寫 knowledge。→ K1677-rev。"
   },
   {
     "id": "K1678",
@@ -58121,7 +58130,7 @@
     "title": "K1679 revision: regional-bank deposit-flight NULL 升到 knowledge-grade（ALFRED point-in-time + Clark-West nested + floor sensitivity）",
     "priority": 3,
     "description": "Follow-up to K1679 (merged to main, Codex verdict=FAIL). K1679 找到 regional-bank deposit-flight（H.8 small-minus-large）對 KRE forward RV/DSV 的 directional NULL，但 3 個方法問題阻擋 knowledge-grade：(1) H.8 用當前修訂 vintage 非 ALFRED point-in-time — 改用 ALFRED realtime vintages 重取 DPSSCBW027SBOG/DPSLCBW027SBOG；(2) baseline HAR 完全巢狀於 augmented model，標準 DM/HLN 偏向不拒絕=偏向 null → 對最強 cell（dep_flight_4w·dsv·H5 與 dep_flight_4w·rv·H21）加 Clark-West(2007) nested-forecast test，可能翻轉 null；(3) training-min positivity floor 也套到允許零的 DSV/MSE cell（最強 cell 50/53 被裁）→ 加未裁切 loss sensitivity run。復用 experiments/K1679/K1679.py 為基底，seed=42，j+H<i embargo 保留。過 Codex CONDITIONAL_PASS 以上才寫 knowledge.json。若 Clark-West 仍 null 則 confirm K1606→K1679 的 funding-flight NULL 敘事、可發 methodology-null 文章。heavy re-run 走 compute_queue。",
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "codex_review_followup",
@@ -58134,9 +58143,6 @@
       "point-in-time"
     ],
     "created_at": "2026-07-10T16:15:00Z",
-    "claimed_by": "hourly-01",
-    "claimed_at": "2026-07-10T17:17:13.431511+00:00",
-    "claim_session_id": "37c6bbe81f80",
     "status_history": [
       {
         "ts": "2026-07-10T17:17:13.431865+00:00",
@@ -58149,8 +58155,38 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-10T19:50:04.586682+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-01",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-10T17:17:13.710102+00:00"
+    "started_at": "2026-07-10T17:17:13.710102+00:00",
+    "last_released_at": "2026-07-10T19:50:04.586674+00:00",
+    "last_release_reason": "auto_release_stale_2h"
+  },
+  {
+    "id": "K1677-rev",
+    "title": "K1677 revision: fraud/enforcement peer-vol contagion — 修方向檢定 + point-in-time peer universe（Codex FAIL 5 修）",
+    "priority": 3,
+    "description": "Follow-up to K1677 (rescued to main, Codex verdict=FAIL). K1677 事件研究發現詐欺/執法揭露事件對同產業 peers 的『波動率』傳染 NULL，但 5 個方法問題阻擋 knowledge-grade：(1) 方向錯置最關鍵——程式全用雙尾檢定但 claim 是方向性（peer 波動/尾部上升），按事前方向單尾對同 8 項 BH 重算後 spread q=.032、worst-day q=.039 兩者均過 5% → 需改單尾 directional 檢定並重寫敘事（RV NULL 但 illiquidity/worst-day 有顯著方向性傳染）；(2) peer 非 point-in-time universe，程式靜默忽略抓不到的 ticker，128 occurrence 缺 9（Archegos CS、RIDE NKLA/FSR）偏向 NULL → 補資料或明示剔除並加 focal-firm filter/assert；(3) placebo 只排 t0±30 日未覆蓋 60 日前窗、未排其他事件、42 origins 與實際 post window 重疊 → placebo halo 覆蓋全前窗 + 排其他事件 origins；(4) downside semivariance 實為負報酬日條件均方非標準 semivariance；Amihud 切窗後才 diff() 漏 t+1 → 修定義；(5) 事件 iid bootstrap 未處理時間重疊/共同 SPY shock → 加 block/time-cluster 處理。復用 experiments/K1677/K1677.py 為基底，seed=42，t+1..t+10 embargo 保留。過 Codex CONDITIONAL_PASS 以上才寫 knowledge.json。若方向性 illiquidity 傳染穩健，可能是可發表 finding（非純 null）。heavy re-run 走 compute_queue。",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "codex_review_followup",
+    "parent_experiment_id": "K1677",
+    "tags": [
+      "experiment",
+      "revision",
+      "codex-followup",
+      "directional-test",
+      "point-in-time",
+      "event-study"
+    ],
+    "created_at": "2026-07-10T20:25:53.465841+00:00",
+    "status_history": []
   }
 ]
