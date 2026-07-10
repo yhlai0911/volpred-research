@@ -150,8 +150,15 @@ def _handle_update(update: dict) -> None:
     reply_ctx = ((msg.get("reply_to_message") or {}).get("text") or "")[:800]
     task_id = _append_task(text, msg.get("message_id", 0), sender, reply_context=reply_ctx)
     _log(f"task queued: {task_id} ({text[:40]!r})")
-    send_telegram(f"收到（已排 P1：{task_id}）。處理中，完成回報。", disable_notification=True)
-    _spawn_responder(model=_pick_model(text))
+    # 2026-07-10 (boss msg 349「為什麼持續出現這個訊息」)：正常路徑不再發
+    # 「收到（已排 P1）處理中」ack — responder 稍後會回真正答覆，這句只是
+    # 每則訊息都重複一次的噪音。只有 responder 派不出去（fail-open）時才回
+    # 一次「已排入、稍後處理」，讓 boss 知道訊息沒掉。
+    if not _spawn_responder(model=_pick_model(text)):
+        send_telegram(
+            f"收到（已排 P1：{task_id}）。即時處理器暫時忙碌，稍後由排程接手回你。",
+            disable_notification=True,
+        )
 
 
 def _pick_model(text: str) -> str:
@@ -172,11 +179,12 @@ def _pick_model(text: str) -> str:
     return "claude-opus-4-8"  # all-opus default（2026-07-05 directive）
 
 
-def _spawn_responder(model: str = "claude-opus-4-8") -> None:
+def _spawn_responder(model: str = "claude-opus-4-8") -> bool:
     """即時 spawn headless responder 處理剛進池的 telegram_reply 任務。
 
     單飛鎖在 responder script 內（同時多訊息 → 一個 responder drain 全部）。
     Fail-open：spawn 失敗不影響訊息入池（hourly dispatch 兜底，最壞 ~1h）。
+    回傳 True=spawn 成功、False=失敗（caller 據此決定要不要發 fallback ack）。
     """
     import os
     import subprocess
@@ -190,8 +198,10 @@ def _spawn_responder(model: str = "claude-opus-4-8") -> None:
             start_new_session=True, env=env,
         )
         _log(f"responder spawned (model={model})")
+        return True
     except Exception as exc:  # noqa: BLE001 — hourly dispatch 兜底
         _log(f"responder spawn failed (hourly 兜底): {exc}")
+        return False
 
 
 def poll_pass(timeout: int = 25) -> int:

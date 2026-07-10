@@ -1,7 +1,25 @@
-# AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead.
-
 project_doc_max_bytes = 65536
 
 [agents]
 max_threads = 4
 max_depth = 1
+
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "62"
+
+[mcp_servers.graphify-volpred-codeonly]
+command = "/Users/yhlai0911/.local/bin/graphify-mcp"
+args = [
+    "--graph",
+    "/Users/yhlai0911/volpred-research/storage/ops/graphify_codeonly/graphify-out/graph.json",
+]
+
+[mcp_servers.zeabur]
+command = "npx"
+args = [
+    "-y",
+    "@zeabur/mcp-server",
+]
