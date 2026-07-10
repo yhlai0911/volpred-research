@@ -69,8 +69,16 @@ trap 'rm -rf "$GATE_TMP"' EXIT INT TERM
 
 # git feeds us: <local ref> <local sha> <remote ref> <remote sha>
 SHAS=""
-while read -r _local_ref local_sha _remote_ref _remote_sha; do
+while read -r local_ref local_sha _remote_ref _remote_sha; do
   [ -n "${local_sha:-}" ] || continue
+  case "${local_ref:-}" in
+    refs/heads/*|HEAD) ;;
+    *) continue ;;     # tags/notes: CI triggers on pull_request + push to a
+                       # branch, so a tag push can never turn CI red. Gating them
+                       # would block archival tags (e.g. stable-pre-refactor-*)
+                       # whose trees predate the baseline entirely. Pinned by
+                       # case 7 of scripts/tests/test_pre_push_pushed_tree.sh.
+  esac
   case "$local_sha" in
     *[!0]*) ;;         # has a non-zero char → a real object
     *) continue ;;     # all zeros → ref deletion, nothing to audit
@@ -143,6 +151,7 @@ for sha in $SHAS; do
     if [ ! -f "$BL" ]; then
       block "commit $short does not contain storage/qa/silent_fallback_baseline.json — the audit CI runs cannot run."
       echo "[pre-push] Commit the baseline alongside the code; the gate reads it from the pushed commit, not from disk."
+      echo "[pre-push] (Branch tips older than the baseline commit fd00c7c1e are expected to trip this.)"
       exit 1
     fi
     OUT="$("$PY" "$SF" --strict --baseline "$BL" 2>&1)"

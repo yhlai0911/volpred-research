@@ -29,10 +29,38 @@ FAIL=0
 ok()  { PASS=$((PASS + 1)); echo "PASS: $1"; }
 bad() { FAIL=$((FAIL + 1)); echo "FAIL: $1"; }
 
+# Substring test without a pipe. `printf "$big" | grep -q pat` races under
+# `set -o pipefail`: grep -q exits at the first match, printf takes EPIPE, and the
+# pipeline reports failure even though the match succeeded. That made this suite
+# flake ~1-in-10 under parallel load, always on the assertion whose needle sits on
+# the first line of the haystack. Never reintroduce that shape here.
+contains() {  # $1 = needle, $2 = haystack
+  case "$2" in *"$1"*) return 0 ;; *) return 1 ;; esac
+}
+
 [ -f "$HOOK" ] || { echo "FATAL: hook not found: $HOOK"; exit 1; }
 
 SB="$(mktemp -d "${TMPDIR:-/tmp}/prepush-test.XXXXXX")" || exit 1
 trap 'rm -rf "$SB"' EXIT INT TERM
+
+# Hermetic git environment. Two ways the ambient env silently broke this suite:
+#   - GIT_DIR / GIT_WORK_TREE inherited from a caller retarget every `git -C`
+#     below at the real repo instead of the sandbox.
+#   - git localises its messages. Under pytest the parent env made git speak
+#     Traditional Chinese ("錯誤: 無法提交，有未合併的檔案。"), so a grep for
+#     "unmerged" missed and the suite failed only when run through pytest.
+# Never assert on git's prose; pin the locale anyway so failures read the same
+# everywhere. HOME points at the sandbox so a global gitconfig (e.g. a stray
+# core.hooksPath) cannot disable the very hook under test.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_OBJECT_DIRECTORY \
+      GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_COMMON_DIR GIT_NAMESPACE \
+      GIT_CONFIG GIT_CONFIG_GLOBAL GIT_CONFIG_SYSTEM
+export GIT_CONFIG_NOSYSTEM=1
+export GIT_TERMINAL_PROMPT=0
+export GIT_EDITOR=true
+export LC_ALL=C
+export LANG=C
+export HOME="$SB"
 
 WORK="$SB/work"
 REMOTE="$SB/remote.git"
@@ -156,13 +184,13 @@ OUT="$(git -C "$WORK" push origin main 2>&1)"; RC=$?
 if [ "$RC" -ne 0 ]; then ok "bad commit is rejected even though the working tree is clean"
 else bad "bad commit was ACCEPTED (rc=0) — hook still audits the working tree"; fi
 
-if printf '%s' "$OUT" | grep -q 'BLOCKED'; then ok "block message printed"
+if contains 'BLOCKED' "$OUT"; then ok "block message printed"
 else bad "no BLOCKED message: $OUT"; fi
 
-if printf '%s' "$OUT" | grep -q 'new silent fallback'; then ok "block names the violation"
+if contains 'new silent fallback' "$OUT"; then ok "block names the violation"
 else bad "block message does not name the violation: $OUT"; fi
 
-if printf '%s' "$OUT" | grep -q 'scripts/bad_mod.py'; then ok "block names the offending file"
+if contains 'scripts/bad_mod.py' "$OUT"; then ok "block names the offending file"
 else bad "block message does not name scripts/bad_mod.py: $OUT"; fi
 
 REMOTE_SHA="$(git -C "$REMOTE" rev-parse refs/heads/main 2>/dev/null)"
@@ -211,21 +239,26 @@ git -C "$WORK" merge side >/dev/null 2>&1   # leaves an unmerged index
 if [ -f "$WORK/.git/MERGE_HEAD" ]; then
   ok "sandbox reproduces an in-progress merge"
 
+  # Assert on machine state, never on git's (localisable) prose: the commit must
+  # not happen and the merge must still be pending.
+  HEAD_PRE_COMMIT="$(git -C "$WORK" rev-parse HEAD)"
   CO="$(git -C "$WORK" commit -qm "attempt" 2>&1)"; CRC=$?
-  if [ "$CRC" -ne 0 ] && printf '%s' "$CO" | grep -qi 'unmerged'; then
-    ok "git commit refuses with 'unmerged files' (exact incident precondition)"
+  HEAD_POST_COMMIT="$(git -C "$WORK" rev-parse HEAD)"
+  if [ "$CRC" -ne 0 ] && [ "$HEAD_POST_COMMIT" = "$HEAD_PRE_COMMIT" ] && [ -f "$WORK/.git/MERGE_HEAD" ]; then
+    ok "git commit refuses while the merge is unresolved (exact incident precondition)"
   else
-    bad "commit did not fail on unmerged files (rc=$CRC): $CO"
+    bad "commit unexpectedly succeeded during merge (rc=$CRC): $CO"
   fi
 
   OUT="$(git -C "$WORK" push origin main 2>&1)"; RC=$?
-  if [ "$RC" -ne 0 ] && printf '%s' "$OUT" | grep -q 'BLOCKED'; then
+  if [ "$RC" -ne 0 ] && contains 'BLOCKED' "$OUT"; then
     ok "gate still blocks the bad commit while a merge is in progress"
   else
     bad "gate passed during in-progress merge (rc=$RC): $OUT"
   fi
 
-  if [ -f "$WORK/.git/MERGE_HEAD" ] && git -C "$WORK" status --porcelain | grep -qE '^(AA|UU)'; then
+  MSTATUS="$(git -C "$WORK" status --porcelain)"
+  if [ -f "$WORK/.git/MERGE_HEAD" ] && { contains 'AA ' "$MSTATUS" || contains 'UU ' "$MSTATUS"; }; then
     ok "in-progress merge survived the hook"
   else
     bad "hook destroyed the in-progress merge state"
