@@ -38248,5 +38248,20 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-07-10T10:51:23.442917"
+  },
+  {
+    "item_id": "40012766",
+    "category": "momentum_crash_vol_scaling",
+    "content": "K1669 動能因子崩盤：動態（Daniel-Moskowitz 精神簡化）vs 常數（Barroso）波動率縮放的 MDD/尾部比較。資產=MTUM ETF（2013-2026, 3325日）+ 自建 10-ETF 類股動能 long-only / long-short（含 2008-09）。同組合、同 OOS、同 lag（signal.shift(1)、expanding-only stats、seed=42、21日 block bootstrap 5000 reps）。核心 null-leaning 發現：(1) Panel A 看似 vol scaling 大幅壓 MDD（MTUM −34%→−25%），但主要是槓桿水準效應（annVol 20%→14-16%）；risk-match 到等全期 vol（Panel B）後改善大幅縮水甚至消失。(2) ΔSharpe 全 null：9 個兩兩 bootstrap 比較 p 值 0.196–0.896，全部 p>0.05（最小 MTUM dyn−const 0.196）。(3) 動態 vs 常數縮放無統計顯著差別；低自由度 vol-quantile 規則在此樣本無法宣稱優於常數縮放。(4) 真正尾部好處集中於『崩盤事件窗內 + 真正 crash-prone 的 long-short 動能』（類股 L-S 2009 崩盤 baseline −24.5%→dynamic −3.8%）。尾部指標（MDD/CVaR/最差月）僅 point estimate 無 CI，故『尾部好處來自少冒險』為 point-estimate 觀察非顯著結論。不宣稱 vol scaling 是普適動能尾部解方（honest null-leaning）。限制：自建類股 universe 僅 10 ETF、橫截面動能弱、未納入 DM 完整熊市狀態條件。 [Codex review verdict=CONDITIONAL_PASS：無致命 lookahead、seed 固定、Sharpe null 有 bootstrap 支撐；3 個 must-fix（README p-value 敘述錯誤 p>0.4→實 0.196、尾部結論降格 point-estimate、burn-in/n_days 5625vs5624 註記）已於主線程修正。]",
+    "evidence": [
+      "experiments/k1669/k1669_results.json",
+      "experiments/k1669/README.md",
+      "experiments/k1669/k1669.py",
+      "Codex review CONDITIONAL_PASS (2026-07-10)",
+      "Barroso & Santa-Clara (2015, JFE)",
+      "Daniel & Moskowitz (2016, JFE)"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-07-10T11:16:11.226041"
   }
 ]

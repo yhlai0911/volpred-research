@@ -56771,7 +56771,7 @@
     "title": "K1669: ⚠️(medium) **動能因子崩盤：動態（Daniel-Moskowitz）vs 常數（Barroso）波動率縮放的 MDD/尾部改善** — yfinance MTUM 或自建截面動能組合，跨 2020/2022/2025 三類回撤，",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1515). Original: ⚠️(medium) **動能因子崩盤：動態（Daniel-Moskowitz）vs 常數（Barroso）波動率縮放的 MDD/尾部改善** — yfinance MTUM 或自建截面動能組合，跨 2020/2022/2025 三類回撤，比較常數 12% vol-target 與 forecast-based 動態縮放對 momentum crash 的 MDD、左偏、淨成本後 Sharpe 改善；與 line 516（Moreira-Muir 因子動物園 vol-managing premium 存活性）正交——這裡聚焦 crash-tail/MDD 縮減與 dynamic-vs-constant scaling 機制（來源：JPM 2026 Baltussen-Van Vliet 150yr/40國 + Barroso-Santa Clara 2015 + Daniel-Moskowitz JFE 2016）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1669.py with signal.shift(1) + seed=42, (c) K1669_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -56796,9 +56796,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-10"
+      },
+      {
+        "ts": "2026-07-10T03:16:21.442520+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-10"
       }
     ],
-    "started_at": "2026-07-10T02:09:05.330537+00:00"
+    "started_at": "2026-07-10T02:09:05.330537+00:00",
+    "completed_at": "2026-07-10T03:16:21.442200+00:00",
+    "result": "動能崩盤 動態vs常數 vol scaling MDD/尾部比較完成。null-leaning: ΔSharpe全null(9比較 p 0.196-0.896)、動態vs常數無顯著差別、vol scaling MDD改善主要是槓桿水準效應(risk-match後消失)、尾部好處集中崩盤窗+crash-prone L-S。Codex CONDITIONAL_PASS+3 must-fix已修。worktree merged(path-scoped), knowledge 40012766"
   },
   {
     "id": "K1670",
