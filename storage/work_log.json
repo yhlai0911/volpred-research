@@ -15534,5 +15534,17 @@
     "actor": "hourly-06",
     "summary": "push_backlog breach (15 commit 4.6h held): PHASE-Z auto-commit 7caccf99d 引入 3 個 dispatch_duplicate_slot silent fallback 卡 pre-push gate。加 warn() marker → audit new=0 → commit dcc541b32 → push 16 commit OK ahead=0",
     "outcome": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-11T07:11:58+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-049d98666",
+    "outcome": "succeeded",
+    "summary": "K1678 test saliency amplification after manipulation",
+    "commit": "049d9866641f39e31161fc98ebef061a898503df",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T23:13:10.770729+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1678"
   }
 ]
