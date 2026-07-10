@@ -24,8 +24,22 @@ FAIL=0
 ok()   { PASS=$((PASS + 1)); echo "  ok   — $1"; }
 bad()  { FAIL=$((FAIL + 1)); echo "  FAIL — $1"; }
 
+# HERMETIC ISOLATION — mandatory for any git-driving test (2026-07-10 incident).
+# If this process inherits GIT_DIR / GIT_WORK_TREE / GIT_INDEX_FILE pointing at
+# the real repo — from a hostile-env probe, a parent hook that `export`ed GIT_DIR,
+# or a flaky sibling test — then every `git commit`/`git push origin main` below
+# runs against the REAL repo instead of the sandbox, and a 6-file skeleton gets
+# force-pushed to the real origin/main. That actually happened (docs/error_log.md,
+# author "prepush test"). Unset them, and give git a sandbox HOME so no global
+# config or credential helper can reach a network remote.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_OBJECT_DIRECTORY GIT_COMMON_DIR
+export GIT_CONFIG_NOSYSTEM=1
+
 TMPROOT="$(mktemp -d "${TMPDIR:-/tmp}/prepush-gate-test.XXXXXX")" || exit 1
 trap 'rm -rf "$TMPROOT"' EXIT
+
+export HOME="$TMPROOT/home"   # sandbox global config away from the real one
+mkdir -p "$HOME"
 
 REMOTE="$TMPROOT/remote.git"
 WORK="$TMPROOT/work"
