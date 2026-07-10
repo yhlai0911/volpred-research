@@ -61,6 +61,12 @@ paths:
 - **「程式碼寫完」不等於「上線」**。常駐 daemon 讀的是啟動時載入的記憶體副本；改了
   `scripts/dispatch_supervisor/**` 的**程式碼**必須重啟 daemon 才生效（只有 `config/` 欄位是
   每 tick 熱重載）。宣告完成前確認：改的是 config 還是 code？code 的話，誰重啟？
+- **驗證 gate 會不會咬，不可在 production checkout 上做**。「故意弄壞再看 gate 是否 FAIL」是
+  必要紀律（兩邊都會過的測試等於沒有測試），但 `scripts/dispatch_supervisor/**` 正是常駐
+  daemon 開機時讀取的來源。2026-07-10 我以 `perl -pi` 就地改壞 `health.py` / `state.py` /
+  `worker.py` / `phase_z.py` 各數秒後還原 —— 那幾秒內若 launchd 因任何原因重啟，載入的就是
+  被我故意弄壞的程式碼。**改用臨時 worktree**（`git worktree add /tmp/gate-check HEAD`）或
+  temp 複本做 break-then-verify，不要在 daemon 腳下抽地毯。
 
 ## Error-log 320 sweep control-plane invariants（2026-07-06）
 
