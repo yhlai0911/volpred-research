@@ -139,3 +139,48 @@ def test_piggy_back_drift_warns_on_bad_job_timestamp(tmp_path: Path, monkeypatch
     assert "job_id=paper_sync_all" in captured.err
     assert "Invalid isoformat string" in captured.err
     assert "piggy-back-drift:" in captured.out
+
+
+def test_piggy_back_drift_reports_wrapper_drift(tmp_path: Path, monkeypatch):
+    """launchd execs ~/.volpred/bin, not scripts/ — a stale live copy must surface here.
+
+    2026-07-10: 11 of 40 wrappers had drifted, unnoticed, because nothing compared
+    the two. This is the host half of the gate; the CI half is
+    scripts/tests/test_cron_wrapper_manifest.py.
+    """
+    check_alerts = _load_check_alerts_module()
+    monkeypatch.setattr(check_alerts, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        check_alerts,
+        "_wrapper_drift_entries",
+        lambda: ["wrapper_drift: release_pool live=5d5424471871 canonical=0abd01281e76"],
+    )
+
+    result = check_alerts._check_piggy_back_drift({"ok": True, "jobs": []})
+
+    assert "wrapper_drift: release_pool live=5d5424471871 canonical=0abd01281e76" in result["drifts"]
+    assert result["drift_count"] == 1
+
+
+def test_wrapper_drift_entries_fails_loud_not_silent(monkeypatch):
+    """A dead detector must not read as 'no drift' — that is how this class hides."""
+    check_alerts = _load_check_alerts_module()
+    root = Path(__file__).resolve().parents[1]
+    monkeypatch.setattr(check_alerts, "PROJECT_ROOT", root)
+
+    import sync_cron_wrappers
+
+    def _boom(*_args, **_kwargs):
+        raise RuntimeError("manifest unreadable")
+
+    monkeypatch.setattr(sync_cron_wrappers, "detect_live_drift", _boom)
+
+    entries = check_alerts._wrapper_drift_entries()
+    assert entries == ["wrapper_drift_check_failed: RuntimeError: manifest unreadable"]
+
+
+def test_wrapper_drift_entries_quiet_on_a_non_checkout_root(tmp_path: Path, monkeypatch):
+    """Guards the exact-equality assertions above: a bare tmp PROJECT_ROOT adds no entries."""
+    check_alerts = _load_check_alerts_module()
+    monkeypatch.setattr(check_alerts, "PROJECT_ROOT", tmp_path)
+    assert check_alerts._wrapper_drift_entries() == []

@@ -6,7 +6,7 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/drain_failed_syncs.l
 # IMPORTANT: host cron does NOT exec this file — macOS TCC (FDA) blocks
 # cron daemon from exec'ing .sh files under Desktop/. The cron-exec target
 # lives at ~/.volpred/bin/cron_drain_failed_syncs.sh. After editing this file,
-# sync with:   cp scripts/cron_drain_failed_syncs.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_drain_failed_syncs.sh
+# sync with:   uv run python scripts/sync_cron_wrappers.py --apply
 #
 # Drains the .failed_supabase_syncs.json dead-letter queue (re-sync transient
 # Supabase sync failures, remove successes). Structural fix 2026-06-02: the

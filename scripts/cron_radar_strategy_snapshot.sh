@@ -7,7 +7,7 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/radar_strategy_snaps
 # cron daemon from exec'ing .sh files under Desktop/. The piggy-back dispatcher
 # (run_due_jobs.py) execs ~/.volpred/bin/cron_radar_strategy_snapshot.sh.
 # After editing this file, sync with:
-#   cp scripts/cron_radar_strategy_snapshot.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_radar_strategy_snapshot.sh
+#   uv run python scripts/sync_cron_wrappers.py --apply
 cd /Users/yhlai0911/volpred-research || exit 1
 source scripts/cron_lib.sh
 _start=$SECONDS

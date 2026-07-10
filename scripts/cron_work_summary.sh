@@ -9,7 +9,7 @@
 # IMPORTANT: macOS TCC blocks daemons from exec'ing .sh under Desktop/.
 # Actual exec target: ~/.volpred/bin/cron_work_summary.sh
 # After editing:
-#   cp scripts/cron_work_summary.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_work_summary.sh
+#   uv run python scripts/sync_cron_wrappers.py --apply
 
 exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/work_summary.log 2>&1
 cd /Users/yhlai0911/volpred-research || exit 1

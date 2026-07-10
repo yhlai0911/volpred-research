@@ -1,5 +1,5 @@
 #!/bin/bash
-# Daily token-usage report email (multi-angle HTML). Canonical source; cp to ~/.volpred/bin/.
+# Daily token-usage report email (multi-angle HTML). Canonical source; install via scripts/sync_cron_wrappers.py --apply.
 REPO_ROOT="${VOLPRED_REPO_ROOT:-/Users/yhlai0911/volpred-research}"
 UV_BIN="${UV_BIN:-/Users/yhlai0911/.local/bin/uv}"
 LOG="${REPO_ROOT}/storage/logs/cron/token_report.log"

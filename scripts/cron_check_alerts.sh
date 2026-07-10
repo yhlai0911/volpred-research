@@ -9,7 +9,7 @@
 # IMPORTANT: macOS TCC (FDA) blocks daemons from exec'ing .sh under Desktop/.
 # The actual exec target is ~/.volpred/bin/cron_check_alerts.sh.
 # After editing this file:
-#   cp scripts/cron_check_alerts.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_check_alerts.sh
+#   uv run python scripts/sync_cron_wrappers.py --apply
 
 exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/check_alerts.log 2>&1
 cd /Users/yhlai0911/volpred-research || exit 1

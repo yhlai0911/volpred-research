@@ -6,7 +6,7 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/collect_us.log 2>&1
 # IMPORTANT: host cron does NOT exec this file — macOS TCC (FDA) blocks
 # cron daemon from exec'ing .sh files under Desktop/. The cron-exec target
 # lives at ~/.volpred/bin/cron_collect_us.sh. After editing this file,
-# sync with:   cp scripts/cron_collect_us.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_collect_us.sh
+# sync with:   uv run python scripts/sync_cron_wrappers.py --apply
 cd /Users/yhlai0911/volpred-research || exit 1
 source scripts/cron_lib.sh
 _start=$SECONDS

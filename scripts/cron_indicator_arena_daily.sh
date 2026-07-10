@@ -6,7 +6,7 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/indicator_arena_dail
 # IMPORTANT: host cron does NOT exec this file — macOS TCC (FDA) blocks
 # cron daemon from exec'ing .sh files under Desktop/. The cron-exec target
 # lives at ~/.volpred/bin/cron_indicator_arena_daily.sh. After editing this file,
-# sync with:   cp scripts/cron_indicator_arena_daily.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_indicator_arena_daily.sh
+# sync with:   uv run python scripts/sync_cron_wrappers.py --apply
 #
 # Indicator Arena daily pipeline (task indicator_arena_phase1d_cron_job_2026_06_11):
 # emit 6 indicator signals (ex-ante, idempotent) + resolve due outcome reviews

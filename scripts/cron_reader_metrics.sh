@@ -7,7 +7,7 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/reader_metrics.log 2
 # execs the copy at ~/.volpred/bin/cron_reader_metrics.sh (NOT host cron — macOS
 # TCC blocks this process from modifying the crontab; LaunchAgents are the
 # drift-free mechanism the other daily jobs use). After editing this file, sync:
-#   cp scripts/cron_reader_metrics.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_reader_metrics.sh
+#   uv run python scripts/sync_cron_wrappers.py --apply
 #
 # Why this job exists (2026-07-10): reader_metrics feeds daily_checkup's
 # reader_metrics dimension (48h staleness threshold) + content decisions, but
