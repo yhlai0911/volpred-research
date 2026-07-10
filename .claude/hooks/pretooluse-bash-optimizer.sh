@@ -20,6 +20,13 @@ DECISION_REASON=""
 # 避免誤擋 commit message / echo / grep pattern 裡提到這些字串的 git commit 等命令
 # （2026-07-10 首次上線即被自身 commit message 的 "zeabur deploy" 誤擋 → 治本錨定邊界）。
 CMD_START='(^|[;&|(])[[:space:]]*'
+# git 全域選項前綴：`git -C <dir>` / `git --git-dir=<p>` / `git -c k=v` 可夾在
+# `git` 與子命令之間。2026-07-10：`git -C <dir> worktree remove <path> --force`
+# 整串繞過 worktree deny（規則假設 `git` 後面直接接 `worktree`）——我在修 PHASE-Z
+# 時親手觸發，remove 未合併 worktree 前一刻才被 git 自己的「contains modified files」
+# 擋下。amend 規則早已用 `(-C …)?` 處理同一件事，worktree 規則漏了：同 bug class，
+# 一條學到、另一條沒有。`[^;&|]*?` 惰性吃掉任意數量的全域選項，不跨指令段界。
+GIT_GLOBAL_OPTS='([[:space:]]+-[^[:space:];&|]+([[:space:]]+[^[:space:];&|-][^[:space:];&|]*)?)*'
 # force flag 必須落在 `git worktree remove` 自己的指令段內。
 # 舊版把 --force/-f 當成全 COMMAND 的獨立條件 → `rm -f x && git worktree remove y`
 # 這種無 force 的合法清理被誤擋（2026-07-10 18:20 實際踩到）。
@@ -70,7 +77,7 @@ _amend_target_is_shared_main() {
 }
 
 DENY_REASON=""
-if printf '%s' "$COMMAND" | grep -qE "${CMD_START}git[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]]${FORCE_FLAG}([[:space:]]|\$)"; then
+if printf '%s' "$COMMAND" | grep -qE "${CMD_START}git${GIT_GLOBAL_OPTS}[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]]${FORCE_FLAG}([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止 git worktree remove --force（CLAUDE.md『絕對禁止』；K1032/K1618 誤刪未合併實驗事故）。改用 bash scripts/merge_worktree.sh 正常合併；worktree 從 stale base 分出時用 git checkout <branch> -- experiments/kXXXX/ path-scoped 抽取。"
 elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${PKG_RUNNER}${ZEABUR_BIN}[[:space:]]+deploy([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止直呼 zeabur deploy（frontend-and-deploy.md）。部署一律走 frontend-v2-fix/scripts/deploy-zeabur-safe.sh（鎖正確 service ID + 安全檢查）。"

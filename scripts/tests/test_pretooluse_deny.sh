@@ -66,6 +66,16 @@ assert_deny "abbrev --for"                 "git worktree remove --for foo"
 assert_deny "abbrev --forc"                "git worktree remove --forc foo"
 assert_deny "short cluster -vf"            "git worktree remove -vf foo"
 assert_deny "aggregated -ff after path"    "git worktree remove foo -ff"
+# 2026-07-10：`git -C <dir>` / `--git-dir=` 前綴繞過 worktree deny（規則假設 git 後直接接
+# worktree）。我修 PHASE-Z 時親手觸發 `git -C <repo> worktree remove <path> --force`，
+# 只被 git 自己的「contains modified files」擋下。amend 規則早已處理 `-C`，worktree 漏了。
+assert_deny "worktree -C prefix + force"   "git -C /repo worktree remove foo --force"
+assert_deny "worktree -C prefix + path+force" "git -C /repo worktree remove /tmp/x --force"
+assert_deny "worktree --git-dir prefix -f" "git --git-dir=/r/.git worktree remove foo -f"
+assert_deny "worktree -C + -ff after &&"   "cd /tmp && git -C /r worktree remove x -ff"
+# false-positive 防護：-C 前綴但無 force 仍須放行
+assert_allow "worktree -C prefix no force" "git -C /repo worktree remove .claude/worktrees/foo"
+assert_allow "worktree -C prefix prune"    "git -C /repo worktree prune"
 
 # ── false-positive 防護：命令引數 / commit message / echo 裡「提到」危險字串不可誤擋 ──
 assert_allow "commit msg mentions zeabur"  "git commit -m 'ban zeabur deploy direct call'"

@@ -20,7 +20,10 @@ import pytest
 
 from scripts.dispatch_supervisor import phase_z
 
-SNAPSHOT = Path(*phase_z._PRE_FIRE_SNAPSHOT_RELPATH)
+def _snapshot(root: Path) -> Path:
+    """Where PHASE-Z parks its fire-start baseline: inside the git dir, so no
+    `.gitignore` rule is load-bearing and nobody can ever commit it."""
+    return root / ".git" / phase_z._SNAPSHOT_BASENAME
 
 
 def _git(root: Path, *args: str) -> subprocess.CompletedProcess:
@@ -191,7 +194,7 @@ def test_stale_baseline_is_refused(repo: Path) -> None:
     """A daemon killed mid-fire leaves yesterday's baseline behind. Judging today's
     dirt against it would call another writer's files 'ours'."""
     phase_z.run_pre_fire_guard(repo_root=repo)
-    snap = repo / SNAPSHOT
+    snap = _snapshot(repo)
     payload = json.loads(snap.read_text(encoding="utf-8"))
     payload["taken_at"] -= phase_z._SNAPSHOT_MAX_AGE_S + 60
     snap.write_text(json.dumps(payload), encoding="utf-8")
@@ -206,7 +209,7 @@ def test_snapshot_is_consumed_so_the_next_fire_rebaselines(repo: Path) -> None:
     phase_z.run_pre_fire_guard(repo_root=repo)
     _write(repo, "a.txt", "a\n")
     _fire(repo)
-    assert not (repo / SNAPSHOT).exists()
+    assert not _snapshot(repo).exists()
 
 
 def test_guard_baselines_even_when_guard_script_is_absent(repo: Path) -> None:
@@ -217,7 +220,7 @@ def test_guard_baselines_even_when_guard_script_is_absent(repo: Path) -> None:
 
     assert outcome["reason"] == "guard_missing"
     assert outcome["dirty_at_fire_start"] == 1
-    assert (repo / SNAPSHOT).exists()
+    assert _snapshot(repo).exists()
 
 
 # ── porcelain parsing ────────────────────────────────────────────────────────
@@ -235,3 +238,11 @@ def test_dirty_probe_distinguishes_clean_from_unknown(tmp_path: Path) -> None:
     assert phase_z._dirty_paths(tmp_path, subprocess.run) is None  # not a git repo
     _init_repo(tmp_path)
     assert phase_z._dirty_paths(tmp_path, subprocess.run) == set()
+
+def test_baseline_never_dirties_the_tree(repo: Path) -> None:
+    """The baseline must be invisible to `git status`. Parked in the working tree
+    it would need a `.gitignore` rule to hide — and PHASE-Z would then see its own
+    baseline as this fire's output and try to stage a file it just deleted."""
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    assert _snapshot(repo).exists()
+    assert _dirty(repo) == set(), "pre-fire guard must not dirty a clean tree"

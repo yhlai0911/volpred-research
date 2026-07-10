@@ -81,7 +81,11 @@ def test_gate_skips_when_commit_touches_only_docs_and_json(tmp_path: Path) -> No
     (tmp_path / "config.json").write_text('{"k": 1}\n', encoding="utf-8")
     test_runner, calls = _recording_runner()
 
+    # baseline = clean tree at fire start, so every dirty path is this fire's.
+    # Without it PHASE-Z declines to commit and there is nothing for the gate
+    # to check (docs/error_log.md 2026-07-10 — `git add -A` had no owner).
     out = phase_z.run_phase_z(
+        pre_fire_dirty=set(),
         repo_root=tmp_path, now_hhmm="16:07", test_runner=test_runner,
     )
 
@@ -99,7 +103,11 @@ def test_gate_runs_precise_test_and_reports_green(tmp_path: Path) -> None:
     (tmp_path / "scripts" / "foo.py").write_text("VALUE = 1\n", encoding="utf-8")
     test_runner, calls = _recording_runner()
 
+    # baseline = clean tree at fire start, so every dirty path is this fire's.
+    # Without it PHASE-Z declines to commit and there is nothing for the gate
+    # to check (docs/error_log.md 2026-07-10 — `git add -A` had no owner).
     out = phase_z.run_phase_z(
+        pre_fire_dirty=set(),
         repo_root=tmp_path, now_hhmm="16:07", test_runner=test_runner,
     )
 
@@ -124,7 +132,11 @@ def test_gate_red_alerts_and_does_not_revert(tmp_path: Path) -> None:
 
     alert_fn, alerts = _recording_alert()
 
+    # baseline = clean tree at fire start, so every dirty path is this fire's.
+    # Without it PHASE-Z declines to commit and there is nothing for the gate
+    # to check (docs/error_log.md 2026-07-10 — `git add -A` had no owner).
     out = phase_z.run_phase_z(
+        pre_fire_dirty=set(),
         repo_root=tmp_path, now_hhmm="16:07",
         test_runner=red_runner, alert_fn=alert_fn,
     )
@@ -152,7 +164,11 @@ def test_gate_runner_timeout_is_observable_and_does_not_crash(tmp_path: Path) ->
         raise subprocess.TimeoutExpired(cmd=argv, timeout=kwargs.get("timeout"))
 
     # must not raise — the commit already landed; a wedged runner cannot undo it
+    # baseline = clean tree at fire start, so every dirty path is this fire's.
+    # Without it PHASE-Z declines to commit and there is nothing for the gate
+    # to check (docs/error_log.md 2026-07-10 — `git add -A` had no owner).
     out = phase_z.run_phase_z(
+        pre_fire_dirty=set(),
         repo_root=tmp_path, now_hhmm="16:07",
         test_runner=timeout_runner, alert_fn=alert_fn,
     )
@@ -171,7 +187,11 @@ def test_gate_records_code_change_with_no_matching_test(tmp_path: Path) -> None:
     (tmp_path / "scripts" / "orphan.py").write_text("VALUE = 4\n", encoding="utf-8")
     test_runner, calls = _recording_runner()
 
+    # baseline = clean tree at fire start, so every dirty path is this fire's.
+    # Without it PHASE-Z declines to commit and there is nothing for the gate
+    # to check (docs/error_log.md 2026-07-10 — `git add -A` had no owner).
     out = phase_z.run_phase_z(
+        pre_fire_dirty=set(),
         repo_root=tmp_path, now_hhmm="16:07", test_runner=test_runner,
     )
 
@@ -193,7 +213,11 @@ def test_gate_keyword_fallback_when_no_precise_file(tmp_path: Path) -> None:
     (tmp_path / "scripts" / "widget.py").write_text("def go():\n    return True\n", encoding="utf-8")
     test_runner, calls = _recording_runner()
 
+    # baseline = clean tree at fire start, so every dirty path is this fire's.
+    # Without it PHASE-Z declines to commit and there is nothing for the gate
+    # to check (docs/error_log.md 2026-07-10 — `git add -A` had no owner).
     out = phase_z.run_phase_z(
+        pre_fire_dirty=set(),
         repo_root=tmp_path, now_hhmm="16:07", test_runner=test_runner,
     )
 
@@ -216,7 +240,11 @@ def test_gate_no_tests_collected_is_not_a_pass(tmp_path: Path) -> None:
     def empty_runner(argv, **kwargs):
         return _FakeCompleted(5, stdout="no tests ran\n")
 
+    # baseline = clean tree at fire start, so every dirty path is this fire's.
+    # Without it PHASE-Z declines to commit and there is nothing for the gate
+    # to check (docs/error_log.md 2026-07-10 — `git add -A` had no owner).
     out = phase_z.run_phase_z(
+        pre_fire_dirty=set(),
         repo_root=tmp_path, now_hhmm="16:07", test_runner=empty_runner,
     )
 

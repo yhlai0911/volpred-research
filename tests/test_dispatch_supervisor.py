@@ -333,7 +333,7 @@ def test_phase_z_dirty_tree_commits_with_correct_message(tmp_path: Path) -> None
     # Simulate an agent that produced real work but forgot to commit it.
     (tmp_path / "experiments").mkdir()
     (tmp_path / "experiments" / "k9999.py").write_text("print('result')\n", encoding="utf-8")
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07")
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set())
     assert out["committed"] is True
     assert out["reason"] == "committed"
     assert _git_head_count(tmp_path) == before + 1
@@ -367,7 +367,8 @@ def test_phase_z_untracks_leaked_ignored_state_file(tmp_path: Path) -> None:
     leaked.write_text('{"interval_minutes": 999}\n', encoding="utf-8")
     (tmp_path / "real_work.md").write_text("real\n", encoding="utf-8")
 
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07")
+    # baseline = clean tree at fire start → everything dirty now is this fire's.
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set())
 
     assert out["committed"] is True
     assert "storage/.release_settings.json" in out["untracked"]
@@ -404,7 +405,7 @@ def test_phase_z_untracks_leaked_supervisor_dispatch_state(tmp_path: Path) -> No
     leaked.write_text('{"last_fire_at": "new-heartbeat"}\n', encoding="utf-8")
     (tmp_path / "work.md").write_text("real\n", encoding="utf-8")
 
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07")
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set())
 
     assert out["committed"] is True
     assert "storage/ops/dispatch_state.json" in out["untracked"]
@@ -429,7 +430,7 @@ def test_phase_z_add_failure_aborts_commit(tmp_path: Path) -> None:
     def fake_runner(argv, **kwargs):
         sub = argv[3]  # ["git", "-C", root, <subcommand>, ...]
         if sub == "status":
-            return _FakeCompleted(0, stdout=" M dirty.txt\n")
+            return _FakeCompleted(0, stdout=" M dirty.txt\0")
         if sub == "ls-files":
             return _FakeCompleted(0, stdout="")
         if sub == "add":
@@ -439,7 +440,8 @@ def test_phase_z_add_failure_aborts_commit(tmp_path: Path) -> None:
             return _FakeCompleted(0)
         return _FakeCompleted(0)
 
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner)
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner,
+                              pre_fire_dirty=set())
     assert out["committed"] is False
     assert out["reason"] == "add_error"
     assert commits == []  # never reached commit
@@ -454,7 +456,7 @@ def test_phase_z_lsfiles_failure_warns_but_still_commits(tmp_path: Path) -> None
         sub = argv[3]
         calls.append(sub)
         if sub == "status":
-            return _FakeCompleted(0, stdout=" M work.txt\n")
+            return _FakeCompleted(0, stdout=" M work.txt\0")
         if sub == "ls-files":
             return _FakeCompleted(128, stderr="fatal: bad revision")
         if sub == "add":
@@ -463,7 +465,8 @@ def test_phase_z_lsfiles_failure_warns_but_still_commits(tmp_path: Path) -> None
             return _FakeCompleted(0, stdout="[main abc] PHASE-Z\n")
         return _FakeCompleted(0)
 
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner)
+    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner,
+                              pre_fire_dirty=set())
     assert out["committed"] is True
     assert out["untracked"] == []  # could not untrack (ls-files failed)
     assert "commit" in calls  # but real work was still committed
@@ -761,7 +764,7 @@ def test_pre_fire_guard_invokes_script_quietly_under_timeout(tmp_path: Path) -> 
 
     out = phase_z.run_pre_fire_guard(repo_root=tmp_path, runner=fake_runner)
 
-    assert out == {"ran": True, "reason": "ok"}
+    assert out == {"ran": True, "reason": "ok", "dirty_at_fire_start": -1}
     # subprocess (never import) so a guard crash cannot take down the daemon;
     # sys.executable (never `uv run`) so the pure-stdlib guard skips uv's
     # cwd-resolution hang (docs/error_log.md 2026-07-02).
@@ -787,10 +790,13 @@ def test_pre_fire_guard_forwards_output_when_it_acted(tmp_path: Path) -> None:
     assert "feed.json" in out["guard_output"]  # which blobs it restored is the record
 
 
+# dirty_at_fire_start == -1: repo_root is a non-git tmp dir, so the fire-start
+# baseline probe cannot run. PHASE-Z then declines to commit rather than guess
+# whose files it is looking at (docs/error_log.md 2026-07-10).
 def test_pre_fire_guard_missing_script_is_fail_open(tmp_path: Path) -> None:
     # No scripts/ dir under repo_root → nothing spawned, observable no-op.
     out = phase_z.run_pre_fire_guard(repo_root=tmp_path)
-    assert out == {"ran": False, "reason": "guard_missing"}
+    assert out == {"ran": False, "reason": "guard_missing", "dirty_at_fire_start": -1}
 
 
 def test_pre_fire_guard_timeout_is_fail_open(tmp_path: Path) -> None:
@@ -802,7 +808,7 @@ def test_pre_fire_guard_timeout_is_fail_open(tmp_path: Path) -> None:
         raise subprocess.TimeoutExpired(cmd="git_conflict_guard.py", timeout=30)
 
     out = phase_z.run_pre_fire_guard(repo_root=tmp_path, runner=boom)
-    assert out == {"ran": False, "reason": "timeout"}  # no raise
+    assert out == {"ran": False, "reason": "timeout", "dirty_at_fire_start": -1}  # no raise
 
 
 def test_pre_fire_guard_spawn_error_is_fail_open(tmp_path: Path) -> None:
@@ -814,7 +820,7 @@ def test_pre_fire_guard_spawn_error_is_fail_open(tmp_path: Path) -> None:
         raise OSError("no fork for you")
 
     out = phase_z.run_pre_fire_guard(repo_root=tmp_path, runner=boom)
-    assert out == {"ran": False, "reason": "spawn_error"}
+    assert out == {"ran": False, "reason": "spawn_error", "dirty_at_fire_start": -1}
 
 
 def test_pre_fire_guard_nonzero_exit_is_fail_open(tmp_path: Path) -> None:
@@ -861,7 +867,7 @@ def test_pre_fire_guard_is_idempotent_on_a_clean_tree(tmp_path: Path) -> None:
     first = phase_z.run_pre_fire_guard(repo_root=repo)
     second = phase_z.run_pre_fire_guard(repo_root=repo)
 
-    assert first == {"ran": True, "reason": "ok"}
+    assert first == {"ran": True, "reason": "ok", "dirty_at_fire_start": 0}
     assert second == first  # idempotent: no-op on a clean tree, twice
     status = subprocess.run(
         ["git", "-C", str(repo), "status", "--porcelain"], capture_output=True, text=True,
