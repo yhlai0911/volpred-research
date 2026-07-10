@@ -1,7 +1,9 @@
 """Health monitor — independent worker liveness check.
 
-Runs as asyncio task inside supervisor.py main loop. Polls
-`state.get_current_job()` every CHECK_INTERVAL_S seconds:
+Runs as asyncio task inside supervisor.py main loop. Every CHECK_INTERVAL_S
+seconds it stamps `state.heartbeat()` (this loop is the liveness owner — it
+never blocks on a worker, unlike the scheduler tick) and then polls
+`state.get_current_job()`:
 
   - job.age_seconds > MAX_JOB_AGE_S    → identity-verified SIGKILL pgid, record
                                           killed_timeout, alert
@@ -117,11 +119,23 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
 
 
 async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: int = CHECK_INTERVAL_S) -> None:
-    """Long-running health monitor coroutine."""
+    """Long-running health monitor coroutine. Also owns the supervisor
+    liveness heartbeat.
+
+    2026-07-10: the heartbeat used to live only in `scheduler._tick_once()`,
+    which blocks on `await worker.run_worker()` for the whole dispatch — so
+    `dispatch_state.json` reported a frozen `last_heartbeat_at` for up to
+    3×50min while the daemon was in fact working normally. This loop never
+    blocks on a worker, so a beat from here means "the supervisor process is
+    responsive", which is what the field is supposed to assert. Stamped BEFORE
+    `check_once()` so a crash inside the health pass still leaves proof the
+    process was alive (and the except-branch below alerts on it).
+    """
     LOG.info("health_loop start interval=%ds", check_interval_s)
     while True:
         try:
             await asyncio.sleep(check_interval_s)
+            state.heartbeat(path=state_path)
             check_once(state_path=state_path)
         except asyncio.CancelledError:
             LOG.info("health_loop cancelled")

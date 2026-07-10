@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import resource
 import signal
 import subprocess
@@ -1303,6 +1304,42 @@ def test_scheduler_loop_crash_sends_escalation_alert(tmp_path: Path, monkeypatch
     assert "boom" in crash_calls[0][1]
 
 
+def test_health_loop_heartbeats_before_each_check(tmp_path: Path, monkeypatch) -> None:
+    """Regression (2026-07-10): liveness used to be stamped only by
+    `scheduler._tick_once()`, which awaits `worker.run_worker()` to completion —
+    so `last_heartbeat_at` froze for the whole dispatch (up to 3x50min with the
+    retry ladder) and `dispatch_state.json` reported a busy daemon as a dead one.
+    `health_loop` never blocks on a worker, so it owns the beat, and it stamps
+    BEFORE `check_once()` so a crashing health pass still leaves proof of life.
+    """
+    state_path = _tmp_state(tmp_path)
+    state.mark_supervisor_started(state_path)
+    with state._locked_state(state_path) as (_fh, data):
+        data["last_heartbeat_at"] = "2000-01-01T00:00:00+00:00"
+        data["supervisor_pid"] = 999_999
+
+    beats: list[dict] = []
+
+    async def fake_sleep(_secs):
+        return None
+
+    def fake_check_once(**kwargs):
+        beats.append(state.read_state(state_path))
+        if len(beats) >= 2:
+            raise asyncio.CancelledError()
+
+    monkeypatch.setattr(health.asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(health, "check_once", fake_check_once)
+
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(health.health_loop(state_path=state_path))
+
+    assert len(beats) == 2
+    assert all(b["last_heartbeat_at"] > "2001" for b in beats), "no beat before check_once"
+    assert beats[1]["last_heartbeat_at"] > beats[0]["last_heartbeat_at"], "beat did not advance"
+    assert beats[0]["supervisor_pid"] == os.getpid(), "stale pid not re-stamped"
+
+
 def test_health_loop_crash_sends_escalation_alert(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
     crash_calls: list[tuple[str, str]] = []
@@ -1359,6 +1396,41 @@ def test_supervisor_main_top_level_crash_sends_alert_and_reraises(tmp_path: Path
     assert len(crash_calls) == 1
     assert crash_calls[0][0] == "supervisor_main"
     assert "gather exploded" in crash_calls[0][1]
+    # `main()` must honour the monkeypatched STATE_PATH — see below.
+    assert state.read_state(state_path)["supervisor_pid"] == os.getpid()
+
+
+def test_supervisor_main_writes_only_to_patched_state_path(tmp_path: Path, monkeypatch) -> None:
+    """Regression (2026-07-10): `main()` called `state.read_state()` /
+    `state.mark_supervisor_started()` with no argument, so their `path=STATE_PATH`
+    default — bound at function-DEFINITION time — ignored a monkeypatched
+    `state.STATE_PATH`. Every run of the crash test above therefore stamped a
+    dead pytest pid and a fake heartbeat into the LIVE dispatch_state.json,
+    masking a genuinely dead daemon. `main()` must resolve STATE_PATH at call
+    time and pass it down.
+    """
+    patched_path = tmp_path / "test_state.json"
+    default_path = state.STATE_PATH  # the real production path — must stay untouched
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", patched_path)
+    monkeypatch.setattr(supervisor, "_set_runtime_env", lambda: None)
+    monkeypatch.setattr(supervisor, "_setup_logging", lambda level: None)
+    monkeypatch.setattr(supervisor, "_handle_restart_orphan", lambda: None)
+    monkeypatch.setattr(supervisor.alerts, "send_supervisor_restart", lambda **kwargs: True)
+    monkeypatch.setattr(supervisor.asyncio, "run", lambda coro: coro.close() or 0)
+
+    supervisor.main([])
+
+    # Under the old definition-time default this file was never created, because
+    # main() wrote to `default_path` instead.
+    assert patched_path.exists(), "main() ignored the patched STATE_PATH"
+    assert state.read_state(patched_path)["supervisor_pid"] == os.getpid()
+    # Deliberately NOT a byte-compare of `default_path`: on the dev host a live
+    # daemon heartbeats into it every 30s, which would make that flaky. Stamping
+    # OUR pid there is the exact corruption this regression guards, and it is
+    # unambiguous — a running daemon can never share this process's pid.
+    assert state.read_state(default_path).get("supervisor_pid") != os.getpid(), (
+        f"main() stamped the pytest pid into the production state at {default_path}"
+    )
 
 
 # ---------------------------------------------------------------------------

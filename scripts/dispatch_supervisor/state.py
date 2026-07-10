@@ -5,7 +5,8 @@ Schema (version 1)::
     {
       "version": 1,
       "supervisor_started_at": "<ISO>",          # supervisor process boot time
-      "last_heartbeat_at": "<ISO>",              # scheduler tick heartbeat (every 60s)
+      "supervisor_pid": int | null,              # os.getpid() of the live daemon
+      "last_heartbeat_at": "<ISO>",              # liveness heartbeat (health_loop, every 30s)
       "last_fire_at": "<ISO|null>",              # last time a worker was actually spawned
       "current_job": null | {                    # in-flight worker (None when idle)
         "pid": int | null,                       # null during the reserve_fire()..attach_process() window
@@ -45,8 +46,26 @@ atomic `os.replace()` via `_atomic_write_json()`.
 
 Used by:
   - supervisor.py  (scheduler tick, fire decision, completion record, restart-orphan cleanup)
-  - health.py      (read current_job to verify worker liveness)
+  - health.py      (heartbeat + read current_job to verify worker liveness)
   - check_alerts.py (read last_heartbeat_at to detect supervisor death)
+
+Reader's field map — `jq` against a key that was never implemented returns
+`null`, which is indistinguishable from "declared but not set yet". Every
+field an outside reader needs is listed in the schema above; anything else is
+a phantom. Known misreads that have cost real debugging time:
+
+  - `last_dispatch_at` → does not exist. Use `last_fire_at` (set under the
+    state lock inside `reserve_fire()`, i.e. per worker-spawn ATTEMPT, and it
+    doubles as the cron cursor `scheduler._due_to_fire()` reads).
+  - `last_completion`  → not written by anything. Use `completions[-1]`, the
+    append-only ring buffer that is the single owner of "last finished run".
+    (`scripts/cron_review.py` reads `last_completion` as an optional freshest
+    override and falls back to `completions[-1]`, so it works today by
+    accident of the fallback, not because a writer exists.)
+
+Prefer `uv run python -m scripts.dispatch_supervisor.cli status` over
+hand-rolled `jq` — it prints the whole normalized state, so a key that is
+absent from the output is a key that does not exist.
 """
 from __future__ import annotations
 
@@ -86,6 +105,12 @@ def _lock_path(state_path: Path) -> Path:
     return state_path.with_name(state_path.name + ".lock")
 
 SCHEMA_VERSION = 1
+# Adding an OPTIONAL key to `_empty_state()` must NOT bump SCHEMA_VERSION:
+# `_locked_state()` / `read_state()` reset the file to empty whenever the
+# on-disk `version` differs, so a bump would wipe `current_job` (orphaning a
+# live worker) and the whole `completions` ring on the very next heartbeat of
+# the running daemon. New keys read back as `None` on a pre-existing file until
+# their first write; only a change that INVALIDATES existing values earns a bump.
 COMPLETIONS_MAX = 100  # ring buffer cap
 LOG = logging.getLogger(__name__)
 
@@ -105,6 +130,7 @@ def _empty_state() -> dict[str, Any]:
     return {
         "version": SCHEMA_VERSION,
         "supervisor_started_at": None,
+        "supervisor_pid": None,
         "last_heartbeat_at": None,
         "last_fire_at": None,
         "current_job": None,
@@ -277,7 +303,13 @@ def read_state(path: Path = STATE_PATH) -> dict[str, Any]:
 
 
 def mark_supervisor_started(path: Path = STATE_PATH) -> None:
-    """Called once at supervisor boot. Sets timestamps only.
+    """Called once at supervisor boot. Sets timestamps + owning pid.
+
+    `supervisor_pid` is the daemon's own `os.getpid()`, not a worker's — a
+    reader that wants "is the daemon alive" needs BOTH this and a fresh
+    `last_heartbeat_at`, since a bare pid can be stale or OS-reused. The two
+    are always written together (here and in `heartbeat()`), so they never
+    disagree about which process last proved itself alive.
 
     Codex review §10 #3 fix (2026-06-15): this function used to also silently
     discard a stale `current_job` on restart. Workers spawn with
@@ -291,6 +323,7 @@ def mark_supervisor_started(path: Path = STATE_PATH) -> None:
     """
     with _locked_state(path) as (_fh, data):
         data["supervisor_started_at"] = _now()
+        data["supervisor_pid"] = os.getpid()
         data["last_heartbeat_at"] = _now()
 
 
@@ -396,9 +429,27 @@ def append_completion_entry(
 
 
 def heartbeat(path: Path = STATE_PATH) -> None:
-    """Called every scheduler tick (~60s) to prove supervisor alive."""
+    """Prove the supervisor process is alive. Owner: `health.health_loop()`
+    (every 30s); `scheduler._tick_once()` also calls it so `--once` smoke runs
+    still stamp one.
+
+    2026-07-10: liveness used to be stamped ONLY from the scheduler tick,
+    which `await`s `worker.run_worker()` to completion — so `last_heartbeat_at`
+    froze for the entire run (up to 3×50min with the retry ladder), i.e. the
+    field went stale exactly while the daemon was busiest, and a reader had to
+    fall back to launchd logs to tell a working daemon from a dead one. The
+    health loop never blocks, so it is the correct owner.
+
+    Re-stamps `supervisor_pid` on every beat rather than trusting the boot
+    write: that self-heals both a state-file reset (corrupt JSON / schema drift
+    → `_empty_state()`) and a hand-run `--once` process having stamped its own
+    short-lived pid, within one beat. Safe because every caller runs inside the
+    supervisor process itself — workers are `Popen` children and never import
+    this module.
+    """
     with _locked_state(path) as (_fh, data):
         data["last_heartbeat_at"] = _now()
+        data["supervisor_pid"] = os.getpid()
 
 
 def request_fire(reason: str, path: Path = STATE_PATH) -> None:

@@ -2,7 +2,10 @@
 
 Tick every TICK_INTERVAL_S (=60s). On each tick:
 
-  1. `state.heartbeat()` — prove supervisor alive
+  1. `state.heartbeat()` — belt-and-suspenders only. This tick BLOCKS in step 6
+     for the entire worker run, so it cannot keep the heartbeat fresh; the
+     liveness owner is `health.health_loop()` (30s, never blocks). Kept here so
+     `--once` smoke runs, which skip health_loop, still stamp one beat.
   2. If `auth_blocked` true → log + skip (manual unblock via CLI)
   3. If `current_job` non-null → log + skip (worker in flight; health watches)
   4. Compute most recent scheduled fire time via croniter

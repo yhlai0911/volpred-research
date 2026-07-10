@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -524,6 +525,56 @@ def test_heartbeat_updates_timestamp(tmp_state: Path) -> None:
     st.heartbeat(tmp_state)
     second = st.read_state(tmp_state)["last_heartbeat_at"]
     assert second > first
+
+
+def test_empty_state_declares_supervisor_pid(tmp_state: Path) -> None:
+    # Declared-but-unset must be a PRESENT key, so a reader can tell it apart
+    # from a phantom field (a `jq` miss also yields null).
+    snap = st.read_state(tmp_state)
+    assert "supervisor_pid" in snap
+    assert snap["supervisor_pid"] is None
+
+
+def test_mark_supervisor_started_records_own_pid(tmp_state: Path) -> None:
+    st.mark_supervisor_started(tmp_state)
+    snap = st.read_state(tmp_state)
+    assert snap["supervisor_pid"] == os.getpid()
+    assert snap["supervisor_started_at"] is not None
+
+
+def test_heartbeat_restamps_supervisor_pid(tmp_state: Path) -> None:
+    # A stale pid (state reset, or a hand-run `--once` stamping its own
+    # short-lived pid) must self-heal on the next beat, not persist until the
+    # daemon happens to restart.
+    st.mark_supervisor_started(tmp_state)
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["supervisor_pid"] = 999_999
+    assert st.read_state(tmp_state)["supervisor_pid"] == 999_999
+
+    st.heartbeat(tmp_state)
+    assert st.read_state(tmp_state)["supervisor_pid"] == os.getpid()
+
+
+def test_new_optional_key_does_not_reset_preexisting_state(tmp_state: Path) -> None:
+    """A state file written before `supervisor_pid` existed is still version 1,
+    so it must survive untouched — bumping SCHEMA_VERSION for a new optional key
+    would wipe `current_job` (orphaning a live worker) and the completions ring.
+    """
+    legacy = st._empty_state()
+    del legacy["supervisor_pid"]  # exactly what a pre-2026-07-10 file looks like
+    legacy["completions"] = [{"outcome": "success", "exit_code": 0}]
+    legacy["current_job"] = {"pid": 4242, "pgid": 4242, "attempt": 1, "model": "opus"}
+    tmp_state.write_text(json.dumps(legacy), encoding="utf-8")
+
+    snap = st.read_state(tmp_state)
+    assert snap["current_job"]["pid"] == 4242, "live worker orphaned by a schema reset"
+    assert snap["completions"] == [{"outcome": "success", "exit_code": 0}]
+    assert snap.get("supervisor_pid") is None  # absent until the first beat
+
+    st.heartbeat(tmp_state)
+    healed = st.read_state(tmp_state)
+    assert healed["supervisor_pid"] == os.getpid()
+    assert healed["current_job"]["pid"] == 4242  # still intact
 
 
 def test_get_supervisor_age_seconds_when_alive(tmp_state: Path) -> None:

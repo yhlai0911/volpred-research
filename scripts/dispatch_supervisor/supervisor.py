@@ -6,7 +6,7 @@ Runs under launchd Aqua agent `com.volpred.dispatch-supervisor.plist`
 Boot sequence::
 
     1. _set_runtime_env()                    — ulimit -Sn 65536; source-like env hygiene
-    2. state.mark_supervisor_started()        — heartbeat timestamps only
+    2. state.mark_supervisor_started()        — heartbeat timestamps + supervisor_pid
     3. _handle_restart_orphan()               — identity-verified kill of any job
                                                  left `current_job` by a crashed
                                                  prior instance (Codex review §10 #3)
@@ -221,8 +221,18 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     _setup_logging(getattr(logging, args.log_level.upper(), logging.INFO))
     _set_runtime_env()
-    prev_started = state.read_state().get("supervisor_started_at")
-    state.mark_supervisor_started()
+    # NOTE: resolve `state.STATE_PATH` here and pass it down explicitly — the
+    # same definition-time default-binding trap `_handle_restart_orphan()`
+    # documents. These two calls used to rely on `mark_supervisor_started`'s own
+    # `path=STATE_PATH` default, which binds at function-DEFINITION time, so a
+    # test monkeypatching `state.STATE_PATH` did not redirect them and every run
+    # of `test_supervisor_main_top_level_crash_sends_alert_and_reraises` wrote a
+    # bogus boot time / heartbeat / pid into the LIVE `dispatch_state.json`
+    # (caught 2026-07-10, when the new `supervisor_pid` field made a dead pytest
+    # pid show up as the running daemon's).
+    state_path = state.STATE_PATH
+    prev_started = state.read_state(state_path).get("supervisor_started_at")
+    state.mark_supervisor_started(state_path)
     _handle_restart_orphan()
     alerts.send_supervisor_restart(prev_started=prev_started)
     try:

@@ -2,6 +2,27 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 dispatch_state.json 三個觀察性缺陷：幽靈欄位、心跳凍結、測試污染 production state
+
+**現象**：健檢讀 `storage/ops/dispatch_state.json` 想確認 daemon 活著，`last_dispatch_at` 與 `supervisor_pid` 皆 null，只好改讀 `~/.volpred/logs/dispatch_supervisor_launchd.err` 才知道它其實正常派工。state 檔沒發揮 single-source-of-truth 作用。
+
+**過程（一個症狀挖出三個獨立 bug + 一個結構性根因）**：
+1. **幽靈欄位**：`last_dispatch_at` / `supervisor_pid` 全 repo grep 不到 — 不是寫入漏了，是**從未實作**。canonical 名稱是 `last_fire_at`（`reserve_fire()` 內在 state lock 下寫，且兼任 cron cursor），它一直是對的。`jq` 讀不存在的 key 回 `null`，與「已宣告但尚未設值」**無法區分** → 讀者誤判成「daemon 沒在動」。同類第三例：`cron_review.py` 讀的 `last_completion` 也沒有任何 writer，只因 fallback 到 `completions[-1]` 才沒出事。
+2. **心跳凍結（真 bug）**：`last_heartbeat_at` 只由 `scheduler._tick_once()` 蓋章，而該 tick `await worker.run_worker()` 直到 worker 跑完 — 心跳因此在整段 dispatch 期間凍結（retry ladder 下最長 3×50min），**恰好在 daemon 最忙時看起來像死了**。當場實測：12:07:04 fire → 12:20:23 完成（798.5s），心跳整整 13 分鐘停在 12:07:04。
+3. **測試污染 production（真 bug，由 (1) 的修復當場抓到）**：`supervisor.main()` 呼叫 `state.mark_supervisor_started()` 不帶參數，其 `path=STATE_PATH` 預設值在**函式定義時**綁定，測試 `monkeypatch.setattr(state, "STATE_PATH", tmp)` 對它無效 → `test_supervisor_main_top_level_crash_sends_alert_and_reraises` 每跑一次就把 pytest 的 boot time / 心跳寫進**線上** `dispatch_state.json`。加了 `supervisor_pid` 後立刻現形：production 顯示 pid 8009（早已結束的 pytest），launchd 上的 daemon 卻是 89010。諷刺的是 `_handle_restart_orphan()` 自己的註解早就寫明這個 definition-time binding 陷阱，`main()` 卻踩進去。
+
+**根因**：state 檔沒有 reader / writer 共享的 schema 契約。`dict.get()` 對「打錯的名字」「從未實作的欄位」「宣告但未設值」一律回 `null`，三者不可分辨 → 幽靈欄位持續累積（已 3 例）。
+
+**解決方法（修流程，不修資料）**：
+1. `supervisor_pid` 補進 `_empty_state()`（宣告即存在，與幽靈欄位可區分）；`mark_supervisor_started()` 開機寫、`heartbeat()` 每拍重寫（state reset 或手動 `--once` 污染可在一拍內自癒）。**刻意不 bump `SCHEMA_VERSION`** — `_locked_state()`/`read_state()` 遇 version 不符會 reset 成 `_empty_state()`，bump 會在下一次心跳清掉線上 `current_job`（孤兒化正在跑的 worker）與整個 completions ring；新增 optional key 不需要也不可以 bump。
+2. 心跳所有權移到 `health.health_loop()`（30s、不 block worker）。`_tick_once()` 保留一次僅為 `--once` smoke（它不跑 health_loop）。
+3. `supervisor.main()` 改為 call-time 解析 `state.STATE_PATH` 再顯式往下傳，對齊 `_handle_restart_orphan()` 早已採用的作法。
+4. `last_dispatch_at` **不新增** — 它與 `last_fire_at` 同義，加了就是雙 source of truth（違反 anti-stacking）。改為在 `state.py` module docstring 寫「Reader's field map」明列已知誤讀，並指明用 `cli.py status` 讀全量 normalized state，不要手刻 jq。
+
+**驗證**：新增 7 個 regression tests（其中 4 個在舊碼上實測 FAIL）；`scripts/tests/test_dispatch_state.py` + `tests/test_dispatch_supervisor.py` + `test_cron_review.py` + `test_loop_health.py` 共 137 passed。線上 kickstart daemon 後 `supervisor_pid` = 實際 launchd pid、心跳每 30s 前進、`last_fire_at` 合理。
+
+**待辦（另案）**：`cron_review.py` 的 `last_completion` 幽靈讀取應移除，改單一依賴 `completions[-1]`（今日靠 fallback 無影響，故不併入本次 diff）。
+
 ## 2026-07-10 差點靠改 submitted 論文數字把 reproduce gate 硬轉 green（provenance sweep Batch 4a）
 
 **現象**：hourly-12 執行 provenance sweep Batch 4（garch-x-vix A4f DM t reconcile）時，看到 `main.tex` 用 4.03 但 canonical `mcs_dm_results.json`=4.148、reproduce gate 停 85.7% yellow，初判為「stale 抄錯」→ 直接 replace_all main.tex 4.03→4.15、reproduce.py `expected`→4.148，重編譯 + rerun 使 report 100% green，正要 `paper-update` sync 公開平台。
