@@ -56975,5 +56975,21 @@
     "started_at": "2026-07-10T01:08:15.553335+00:00",
     "completed_at": "2026-07-10T01:24:56.460459+00:00",
     "result": "發佈每日精選導讀 mile_e13e5485『台股恐慌溫差三問診法』（8篇跨archive策展，span 19天過gate，5 inline圖+1框架poster，anti-ai+arc-dedup雙gate過，線上200）"
+  },
+  {
+    "id": "research_safe_haven_regime",
+    "title": "研究 backlog fallback: 黃金 safe-haven 屬性的 regime 依賴與美元/實質利率脫鉤",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 黃金 safe-haven 屬性的 regime 依賴與美元/實質利率脫鉤 — yfinance GLD/SPY/UUP + FRED 實質利率，滾動檢定 gold-equity 與 gold-dollar 相關在 risk-off vs 一般期是否變號，量化 gold 作 tail hedge 的條件有效性（與既有 alt-asset/DXY 題不同，聚焦 safe-haven 相關 regime 切換）（來源：LSEG/WGC 2025；2025 gold +50% 與股脫鉤但對 vol hedge 落後） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "safe_haven_regime",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-10T04:07:43+00:00"
   }
 ]

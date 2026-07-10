@@ -15237,5 +15237,13 @@
     "backfilled_at": "2026-07-10T04:04:29.820374+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1671"
+  },
+  {
+    "timestamp": "2026-07-10T12:18:46+08:00",
+    "task_type": "paper_review",
+    "task_id": "garch_x_vix_a4f_errata_batch4a",
+    "outcome": "succeeded",
+    "summary": "Provenance sweep Batch 4a: reconcile garch-x-vix A4f DM t=4.03 vs canonical 4.148 (known yfinance drift, Harvey invariant). Confirmed 85.7%-yellow reproduce gate is honest signal; respected submitted-paper no-body-edit policy; escalated owner sign-off (email+telegram). Self-caught+reverted a premature main.tex edit (zero net change). Lesson logged.",
+    "owner": "hourly-12"
   }
 ]
