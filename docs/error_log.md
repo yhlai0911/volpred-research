@@ -2,6 +2,30 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 23:02 我寫的「防止測試寫 production state」的測試，把 production state 寫壞了
+
+**現象**：`storage/ops/dispatch_state.json` 的 `completions` 從 100 筆變 0、`supervisor_started_at` 變 null、`alerts_dedup` 清空。22:58:25 daemon 對**已經在 22:07 成功跑完的 slot** 重複派出一班 opus worker（log：`firing worker prev_scheduled=2026-07-10T22:07:00`）。
+
+**因果鏈**：
+1. 為了驗證新加的 writer-level gate，我在 `scripts/tests/test_dispatch_state.py` 寫下 `test_writer_gate_refuses_the_canonical_state_under_test`，內容是對**真正的 canonical 路徑**呼叫 `st._atomic_write_json(st._CANONICAL_STATE_PATH, st._empty_state())`，用 `pytest.raises` 斷言 gate 會擋。
+2. 但 `VOLPRED_NO_CANONICAL_WRITE` 當時只設在 `tests/conftest.py`。**pytest 的 conftest 只作用於自己的目錄樹** —— `scripts/tests/` 底下那 58 個測試從來沒有任何防護（實測探針：`NO_EMAIL` / `NO_REMOTE_WRITE` / `NO_REMOTE_READ` / `NO_CANONICAL_WRITE` 全為 `None`）。
+3. gate 沒被 arm → 不 raise → `pytest.raises` 失敗，**但那行寫入已經執行**。`_empty_state()` 覆蓋了線上狀態。
+4. `last_fire_at` 被清成 null → `scheduler._due_to_fire()` 認定 22:07 slot 尚未 fire → **重複派工**，燒掉一次完整的 opus dispatch。
+
+**損失**：100 筆 completion receipts（audit trail；ground truth 仍在 `~/.volpred/logs/dispatch_supervisor_launchd.err`）、`supervisor_started_at`、`alerts_dedup`、一次重複 opus 派工。該檔 gitignored，無法從 git 復原。依「永遠修流程，不修資料」不手動回填：`supervisor_started_at` 下次重載自動寫回，`completions` 隨新派工自然重建。
+
+**解決（三層，全部有測試）**：
+1. **Writer-level gate**：`dispatch_supervisor.state._atomic_write_json` 在 `VOLPRED_NO_CANONICAL_WRITE=1` 且目標等於 `_CANONICAL_STATE_PATH`（**import 時捕捉**，不可拿被 monkeypatch 過的 `STATE_PATH` 比對，否則每個 tmp 寫入都會被誤擋）時直接 raise。
+2. **旗標提到根 `conftest.py`**：四個 side-effect guard 移到 repo root，覆蓋整棵樹。`scripts/tests/test_dispatch_state.py::test_side_effect_guards_are_armed_outside_the_tests_tree` **從那棵樹內**斷言四個旗標都 armed —— 從另一棵樹斷言會讓它 vacuously pass。
+3. **告警盲點**：`dispatch_supervisor_stale_code` 原本 `boot is None → 不 breach`（我寫的）。狀態被重置後 `supervisor_started_at` 正是 null，於是**它在最該叫的時候安靜地回報 ok**。改為：檔案存在 + 有心跳 + 無開機時間 = 異常 → warn（檔案不存在仍不 breach，那是 `dispatch_supervisor_heartbeat` 的職責，不重複告警）。對受損的線上狀態實跑，確認 breach=True。
+
+**順帶修掉的既有 flake**：`tests/conftest.py` 的 autouse 指紋守衛把 `dispatch_state.json` 列為 canonical —— 但活著的 daemon **每 30 秒**往裡面蓋心跳，於是任何跨越一次心跳的測試都被誤判成「污染 canonical state」。PHASE-Z 在每次 fire 後於同一份 checkout 跑測試閘門，18:35 就因此寄了一封 CRITICAL「測試紅燈」給老闆。實測同一組測試連跑兩次，ERROR 會**換測試出現**。已從指紋清單移除，改由 writer gate 精確覆蓋 —— gate 知道**誰**在寫，指紋只知道 bytes 動了。
+
+**教訓**：
+1. **「驗證防護有效」的測試，本身就是最危險的測試** —— 它刻意執行被禁止的動作。寫這種測試前必須先證明 gate 已 arm（本次第 2 層那個斷言就是這件事），順序不能反。
+2. **pytest conftest 的作用域是目錄樹，不是 repo**。任何 side-effect kill switch 一律放 repo root。半棵樹沒有防護等於沒有防護。
+3. 我在同一天的 `control-plane.md` 裡寫下「**不可在 production checkout 上做 break-then-verify**」，然後在**同一份 checkout** 上對真實 canonical 路徑做了 break-then-verify。規則寫給別人容易，套在自己手上難。
+
 ## 2026-07-10 補上一則之上的三個缺口：孤兒寫入的 *production* 後果、Supabase 只擋寫不擋讀、以及一個掃 0 個檔的 gate
 
 本 entry **不重述**下方「pytest 改寫 canonical storage/」那則（`VOLPRED_NO_CANONICAL_WRITE` writer-level gate）。它把 `uv run` 孫程序在 timeout 後仍會落盤這件事查得很透徹。這裡只補它沒有涵蓋的三塊。
