@@ -510,6 +510,21 @@
           "cron_token_report.sh"
         ],
         "host_crontab_managed": true
+      },
+      {
+        "id": "reader_metrics_daily",
+        "label": "Reader metrics 日拉",
+        "cron": "30 6 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_reader_metrics.sh",
+        "log_path": "storage/logs/cron/reader_metrics.log",
+        "launchd_label": "com.volpred.reader-metrics-daily",
+        "mechanism": "launchd",
+        "command_deprecated": "python scripts/pull_reader_metrics.py --top 20 --days 30",
+        "description": "每日 06:30 拉 reader_metrics（impressions/reactions/read-completion proxy）供 daily_checkup reader_metrics 維度 (48h 門檻) + 內容決策。2026-07-10 建立：此 metric 被 daily_checkup 監控但原本無任何 producer，靜默 stale 到 112h。用 LaunchAgent（com.volpred.reader-metrics-daily）而非 host cron —— 此 process 受 macOS TCC 擋無法改 crontab，LaunchAgent 是 drift-free 機制、與其他 daily job (memory-health-daily 等) 一致。",
+        "matchers": [
+          "reader_metrics",
+          "cron_reader_metrics.sh"
+        ]
       }
     ]
   },
