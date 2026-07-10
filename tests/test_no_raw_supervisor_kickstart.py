@@ -19,10 +19,7 @@ comments explaining the history; never in a string the operator is told to run.
 """
 from __future__ import annotations
 
-import re
 from pathlib import Path
-
-import pytest
 
 REPO = Path(__file__).resolve().parents[1]
 LABEL = "com.volpred.dispatch-supervisor"
@@ -31,7 +28,12 @@ WRAPPER = "scripts/reload_dispatch_supervisor.sh"
 # The wrapper IS the sanctioned path; this gate names the command to forbid it.
 _ALLOWLIST = {WRAPPER, "tests/test_no_raw_supervisor_kickstart.py"}
 
-_SEARCH_ROOTS = ("scripts", "src", "docs", ".claude")
+# `.claude/worktrees/**` holds full checkouts of this repo — scanning them
+# re-scans every file once per worktree (first run of this gate: 113,926 tests,
+# 2 minutes) and reports stale copies of code already fixed on main.
+_SKIP_PARTS = {"__pycache__", "worktrees", ".git", "node_modules"}
+
+_SEARCH_ROOTS = ("scripts", "src", "docs", ".claude/rules", ".claude/skills")
 _SUFFIXES = (".py", ".sh", ".md")
 
 
@@ -42,7 +44,9 @@ def _candidate_files() -> list[Path]:
         if not base.exists():
             continue
         for path in base.rglob("*"):
-            if path.suffix not in _SUFFIXES or "__pycache__" in path.parts:
+            if path.suffix not in _SUFFIXES:
+                continue
+            if _SKIP_PARTS & set(path.parts):
                 continue
             if str(path.relative_to(REPO)) in _ALLOWLIST:
                 continue
@@ -55,13 +59,24 @@ def _is_comment(line: str) -> bool:
     return stripped.startswith("#") or stripped.startswith("//")
 
 
-def _offending_lines(path: Path) -> list[tuple[int, str]]:
-    """A line offends when it names BOTH `kickstart` and the supervisor label —
-    i.e. it is a runnable command, not a passing mention of `kickstart -k`.
+def _offends(window: str) -> bool:
+    """True only for the RUNNABLE form: `launchctl kickstart … gui/<uid>/<label>`.
 
-    Multi-line string concatenation splits the command across lines, so join a
-    line with its successor before matching (the 2026-07-10 ops_dashboard.py
-    case put `kickstart -k ` and the label on adjacent lines).
+    Requiring the `gui/` domain target is what separates a command the operator
+    can paste from prose that merely names `kickstart -k`. Without it this gate
+    flags its own ban — `.claude/rules/control-plane.md` says 「禁止手動裸
+    `kickstart -k`」 next to the label — and the historical cutover plan in
+    `docs/refactor_plan_hourly_dispatch.md`. Both are documentation, neither is
+    a paste-able command. (Both were false positives on this gate's first run.)
+    """
+    return "kickstart" in window and "gui/" in window and LABEL in window
+
+
+def _offending_lines(path: Path) -> list[tuple[int, str]]:
+    """Multi-line string concatenation splits the command across source lines, so
+    join each line with its successor before matching — the 2026-07-10
+    `ops_dashboard.py` case put `kickstart -k ` and `gui/501/<label>` on adjacent
+    lines and would slip past a single-line matcher.
     """
     lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
     hits: list[tuple[int, str]] = []
@@ -69,7 +84,7 @@ def _offending_lines(path: Path) -> list[tuple[int, str]]:
         if _is_comment(line):
             continue
         window = line + (lines[i + 1] if i + 1 < len(lines) else "")
-        if "kickstart" in window and LABEL in window:
+        if _offends(window):
             hits.append((i + 1, line.strip()))
     return hits
 
@@ -83,27 +98,37 @@ def test_wrapper_exists_or_this_gate_is_dead() -> None:
 
 
 def test_gate_detects_a_raw_kickstart() -> None:
-    """Self-check: the matcher must actually fire on the forbidden command,
-    including the split-across-lines form that slipped past a manual review."""
-    sample = REPO / "tests" / "test_no_raw_supervisor_kickstart.py"
-    lines = [
-        '            "check supervisor: launchctl kickstart -k "',
-        f'            "gui/501/{LABEL} + uv run ..."',
-    ]
-    joined = lines[0] + lines[1]
-    assert "kickstart" in joined and LABEL in joined
-    assert not _is_comment(lines[0])
-    assert sample.exists()
+    """Break-then-verify, without touching the production checkout: feed the
+    matcher the exact forms that existed at 2026-07-10 17:20."""
+    # alert-remediation body (src/volpred/ops/alerts.py, single line)
+    assert _offends(f"   launchctl kickstart -k gui/$(id -u)/{LABEL}")
+    # ops_dashboard.py — command split across concatenated string literals
+    split = '"check supervisor: launchctl kickstart -k "' + f'"gui/501/{LABEL} + uv run ..."'
+    assert _offends(split)
 
 
-@pytest.mark.parametrize("path", _candidate_files(), ids=lambda p: str(p.relative_to(REPO)))
-def test_no_raw_kickstart_instruction(path: Path) -> None:
-    offenders = _offending_lines(path)
-    rel = path.relative_to(REPO)
+def test_gate_does_not_flag_documentation() -> None:
+    """The ban itself, and historical plans, name the command without `gui/`.
+    A gate that flags its own rule text gets disabled by the next person."""
+    assert not _offends(f"**禁止手動裸 `kickstart -k`**（漏寫 marker）… {LABEL} …")
+    assert not _offends(f"把 `{LABEL}` 從 --dry-run 切成 real-run（→ `launchctl kickstart -k`）")
+    assert _is_comment("        # NOT raw `launchctl kickstart` — bypasses the marker")
+
+
+def test_no_raw_kickstart_instruction() -> None:
+    files = _candidate_files()
+    assert files, "no files scanned — search roots or suffixes changed; gate is dead"
+
+    offenders: dict[str, list[tuple[int, str]]] = {}
+    for path in files:
+        hits = _offending_lines(path)
+        if hits:
+            offenders[str(path.relative_to(REPO))] = hits
+
     assert not offenders, (
-        f"{rel} tells the operator to run a raw `launchctl kickstart` against "
-        f"{LABEL}: {offenders}. That writes no planned-restart marker, so a routine "
-        f"deploy pages the owner as an unexpected crash. Use `bash {WRAPPER} "
-        f"--reason <why>` (it writes the marker and refuses while a worker is in "
-        f"flight), or move the mention into a `#` comment if it is history."
+        f"These tell the operator to run a raw `launchctl kickstart` against {LABEL}: "
+        f"{offenders}. That writes no planned-restart marker, so a routine deploy pages "
+        f"the owner as an unexpected crash. Use `bash {WRAPPER} --reason <why>` (it writes "
+        f"the marker and refuses while a worker is in flight), or move the mention into a "
+        f"`#` comment if it is history."
     )
