@@ -12,6 +12,9 @@ canonical state. That holds through `subprocess`/`uv run` because env is inherit
 
 from __future__ import annotations
 
+import ast
+import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -24,8 +27,14 @@ from volpred.ops.canonical_write import (
     canonical_writes_disabled,
     guard_canonical_write,
 )
+from volpred.ops.shared_lock import sandboxed_lock_path, shared_state_lock
 
 ROOT = Path(__file__).resolve().parents[1]
+
+# Some sweep findings live in scripts/, which is not a package.
+_SCRIPTS = ROOT / "scripts"
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
 
 
 @pytest.fixture(autouse=True)
@@ -167,3 +176,95 @@ def test_notification_writer_allows_tmp_storage(tmp_path):
     notifier._write_notification_file({"id": "ok", "body": "x"})
 
     assert (tmp_path / "storage" / "notifications" / "ok.json").exists()
+
+
+# ---------------------------------------------------------------------------
+# 2026-07-10 round 3: the lock sub-class. The two writers above raise; locks must
+# NOT — the code under test needs a real fcntl lock, so a CanonicalWriteBlocked
+# would just delete the coverage. `shared_lock.sandboxed_lock_path` relocates the
+# lock file out of the checkout instead. Found by the full-suite mtime sweep, not
+# by `git status` — every path here is .gitignore'd.
+
+
+def test_no_module_shadows_shared_state_lock():
+    """A second `shared_state_lock` cannot inherit the sandbox — it just looks like it did.
+
+    scripts/mark_task_blocked.py carried one for months: same name, same semantics, its
+    own hardcoded LOCK_DIR. Reading `with shared_state_lock("control_plane"):` at the
+    call site gave no hint it was the wrong one.
+    """
+    canonical = ROOT / "src" / "volpred" / "ops" / "shared_lock.py"
+    offenders = []
+    for path in [*(ROOT / "scripts").rglob("*.py"), *(ROOT / "src").rglob("*.py")]:
+        if path.resolve() == canonical.resolve():
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "shared_state_lock":
+                offenders.append(f"{path.relative_to(ROOT)}:{node.lineno}")
+    assert not offenders, (
+        "shared_state_lock is redefined outside its canonical module: "
+        + ", ".join(offenders)
+        + " — import it from volpred.ops.shared_lock instead"
+    )
+
+
+def test_shared_state_lock_never_touches_the_production_lock_dir():
+    """`shared_state_lock` defaults to blocking=True, so an unredirected test waits on
+    whatever cron writer holds `control_plane`.
+
+    Probes a name no production writer uses. Asserting on control_plane.lock would go
+    blind the moment a stray run leaves that file behind: shared_state_lock only
+    touch()es a lock file it must create, so on an existing one there is nothing for a
+    before/after check to see.
+    """
+    name = "__canonical_write_guard_probe__"
+    canonical = ROOT / "storage" / "ops" / "locks" / f"{name}.lock"
+    assert not canonical.exists(), f"probe name is not supposed to exist: {canonical}"
+
+    with shared_state_lock(name) as acquired:
+        assert acquired
+
+    assert not canonical.exists(), f"test created a lock inside the checkout: {canonical}"
+    assert sandboxed_lock_path(canonical).exists(), "the lock was not taken anywhere"
+
+
+def test_sandboxed_lock_path_redirects_canonical_and_passes_tmp(tmp_path):
+    canonical = ROOT / "storage" / "ops" / "locks" / "control_plane.lock"
+    assert sandboxed_lock_path(canonical) != canonical
+    assert not sandboxed_lock_path(canonical).is_relative_to(ROOT)
+
+    outside = tmp_path / "ops" / "locks" / "control_plane.lock"
+    assert sandboxed_lock_path(outside) == outside
+
+
+def test_sandboxed_lock_names_do_not_collide_across_dirs():
+    """storage/ops/locks/x.lock and storage/ops/x.lock must not map to one file."""
+    a = sandboxed_lock_path(ROOT / "storage" / "ops" / "locks" / "x.lock")
+    b = sandboxed_lock_path(ROOT / "storage" / "ops" / "x.lock")
+    assert a != b
+
+
+def test_drought_single_flight_lock_is_sandboxed():
+    """A test holding the real lock makes the live remediation take its silent skip.
+
+    Byte-compare rather than exists(): `_acquire_apply_lock` truncates and rewrites the
+    file with its pid, so an existing lock file left by a stray run would make an
+    exists() check pass while the write still landed.
+    """
+    import remediate_publish_drought as mod
+
+    canonical = ROOT / "storage" / "ops" / "remediate_publish_drought.lock"
+    before = canonical.read_bytes() if canonical.exists() else None
+
+    handle = mod._acquire_apply_lock("storage")
+    assert handle is not None
+    try:
+        sandbox = sandboxed_lock_path(canonical)
+        assert sandbox != canonical
+        assert json.loads(sandbox.read_text())["pid"] == os.getpid()
+    finally:
+        handle.close()
+
+    after = canonical.read_bytes() if canonical.exists() else None
+    assert after == before, f"test wrote the production single-flight lock {canonical}"

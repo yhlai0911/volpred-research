@@ -24,7 +24,12 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-__all__ = ["CanonicalWriteBlocked", "canonical_writes_disabled", "guard_canonical_write"]
+__all__ = [
+    "CanonicalWriteBlocked",
+    "canonical_writes_disabled",
+    "guard_canonical_write",
+    "is_canonical_path",
+]
 
 ENV_FLAG = "VOLPRED_NO_CANONICAL_WRITE"
 
@@ -45,6 +50,22 @@ def canonical_writes_disabled() -> bool:
     return os.environ.get(ENV_FLAG) == "1"
 
 
+def is_canonical_path(path: str | os.PathLike[str]) -> bool:
+    """True if `path` is inside a guarded dir of THIS checkout.
+
+    Independent of the env flag, so callers that redirect rather than raise
+    (see `shared_lock.sandboxed_lock_path`) share one definition of "canonical"
+    with `guard_canonical_write`.
+    """
+    target = Path(path).resolve()
+    root = _repo_root()
+    for name in GUARDED_DIRS:
+        guarded = (root / name).resolve()
+        if target == guarded or guarded in target.parents:
+            return True
+    return False
+
+
 def guard_canonical_write(path: str | os.PathLike[str]) -> None:
     """Raise if `path` is canonical state and the gate is on. Otherwise no-op.
 
@@ -54,14 +75,10 @@ def guard_canonical_write(path: str | os.PathLike[str]) -> None:
     if not canonical_writes_disabled():
         return
 
-    target = Path(path).resolve()
-    root = _repo_root()
-    for name in GUARDED_DIRS:
-        guarded = (root / name).resolve()
-        if target == guarded or guarded in target.parents:
-            raise CanonicalWriteBlocked(
-                f"{ENV_FLAG}=1 blocks write to canonical state: {target}\n"
-                f"A test tried to rewrite shared repo state. Redirect the writer's "
-                f"output to a tmp_path (monkeypatch every path constant it reads, "
-                f"not just the one you noticed), or stub the function that spawns it."
-            )
+    if is_canonical_path(path):
+        raise CanonicalWriteBlocked(
+            f"{ENV_FLAG}=1 blocks write to canonical state: {Path(path).resolve()}\n"
+            f"A test tried to rewrite shared repo state. Redirect the writer's "
+            f"output to a tmp_path (monkeypatch every path constant it reads, "
+            f"not just the one you noticed), or stub the function that spawns it."
+        )

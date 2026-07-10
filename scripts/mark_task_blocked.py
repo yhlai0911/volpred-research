@@ -34,22 +34,25 @@ Inverse:
 from __future__ import annotations
 
 import argparse
-import fcntl
 import json
 import sys
-from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
-LOCK_DIR = ROOT / "storage" / "ops" / "locks"
 
 sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS  # noqa: E402
 from volpred.ops.blocked_reasons import is_valid as _valid_blocked_reason  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
+# 2026-07-10: this module used to define its OWN `shared_state_lock` — same name, same
+# semantics, its own hardcoded LOCK_DIR — shadowing the real one. It therefore never
+# picked up the sandboxing that keeps tests off the production lock, and
+# test_mark_task_blocked_sets_awaiting_interactive_session took a blocking LOCK_EX on
+# the very `control_plane` lock the cron writers use. One implementation, not two.
+from volpred.ops.shared_lock import shared_state_lock  # noqa: E402
 
 
 DEFAULT_BLOCKED_UNTIL_DAYS = 14
@@ -74,20 +77,6 @@ CANONICAL_STATUSES = {
 
 def _warn_block_cli(message: str) -> None:
     _diag_warn("mark_task_blocked", message)
-
-
-@contextmanager
-def shared_state_lock(name: str) -> None:
-    LOCK_DIR.mkdir(parents=True, exist_ok=True)
-    lock_path = LOCK_DIR / f"{name}.lock"
-    if not lock_path.exists():
-        lock_path.touch()
-    with lock_path.open("a+", encoding="utf-8") as handle:
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-        try:
-            yield
-        finally:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def _load() -> tuple[dict | list, list]:

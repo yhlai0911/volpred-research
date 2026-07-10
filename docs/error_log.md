@@ -84,6 +84,37 @@
 
 **已知未修（不是本次造成）**：main 上 9 條 scheduler 測試紅，來自 `9c4f73e21`（`_due_to_fire` 語義變更未更新測試）+ 2 條 `fdb6e3c8e` 相關。用 `fdb6e3c8e` 對照確認：該 commit 前 0 failed。屬另一 session 的進行中工作，未插手。
 
+## 2026-07-10 canonical-write gate round 3：**3-STRIKE** — 「一支一支修」不收斂，改立 class-level CI gate；round 2 判「無害」的那 3 個 lock 其實有害
+
+**3-STRIKE TRIGGER**（「測試寫 canonical state」同日第三輪，前兩輪都是找到一支修一支）：
+1. round 0（本檔下方「pytest 改寫 canonical storage/」）：`publication_candidates.json` → writer gate `guard_canonical_write` + conftest 指紋 fixture。
+2. round 2（本檔「round 2」entry）：`pending_sessions.json` + `notifications/*.json` → 兩處各接 writer gate。
+3. round 3（本則）：**同一次 sweep 的 lock 檔**。
+
+**round 2 的誠實錯誤，被本輪推翻**：round 2 的 sweep 明明列出了 7 個檔，其中 3 個 `.lock` 被一句「用完即棄，無害」帶過。**那個判斷是錯的**：
+- `storage/ops/locks/control_plane.lock` / `fb_pipeline_log.lock` —— `shared_state_lock` 預設 `blocking=True`。測試取這把鎖 = **阻塞等待生產 cron writer 放手**。兇手：`test_mark_task_blocked.py`、`test_fb_pipeline_status.py`。
+- `storage/ops/remediate_publish_drought.lock` —— 單飛鎖是 `LOCK_NB` + `# silent-ok` skip 分支。測試持鎖時，**真實的「發文脫班補救」那一班會靜默什麼都不做**。兇手：`test_remediate_publish_drought.py` 4 處未帶 `storage_dir` 的 `remediate(apply=True)`。
+
+「用完即棄」只描述了檔案生命週期，沒描述**取得它的過程**會不會與生產競爭。lock 的危害不在殘留的檔，在持鎖的那段時間。
+
+**還有一個 round 2 沒抓到的 root**：`scripts/mark_task_blocked.py` 定義了**自己那一份** `shared_state_lock` —— 同名、同語意、自己 hardcode 的 `LOCK_DIR`，shadowing `volpred.ops.shared_lock` 的正版。call site 寫 `with shared_state_lock("control_plane"):` 完全看不出用的是哪一個。它因此永遠拿不到 sandboxing。
+
+**為什麼要停止 round-by-round，改立 class-level gate**：round 0 / round 2 的儀器都是「盯一張 canonical 檔清單」（conftest 指紋）或「讀 `git status`」。這個 bug class 的四條洩漏路徑**全部 gitignored**（連 round 0 的 `hourly_pregate.jsonl` 也是），`git status` 對它們永久失明。**題目最初提議的 gate（porcelain 非空即失敗）在這次全套 pytest 下會回報「乾淨」** —— 實測 `git status --porcelain` 全乾淨，mtime sentinel 卻抓到 7 個被寫檔。清單會漏，`git status` 會漏；只有「跑完 checkout 有沒有變」這個不變量不會漏。
+
+**解決（一道 gate 管整個 class，不是一支一個修）**：
+1. **機械 gate（class owner）**：`.github/workflows/pytest.yml` 加 `Assert the suite mutated no repo state` step = `git status --porcelain`（抓 tracked 檔的改動**與刪除**）+ `find storage config paper -newer <sentinel>`（抓其餘一切，含 gitignored）。任一非空 → CI red。兩個儀器互補：porcelain 看得到刪除、sentinel 看得到 gitignored 寫入，實測各自能抓到對方漏的那一類。**只放 CI 不放 pre-push**：開發機的排程 job（`publication_candidates_refresh` 05:30 台北、`publish_draft`、supervisor daemon）本來就會改這些檔，同檢查放 pre-push 只會對 cron 誤報；乾淨 runner 沒有這些 writer。
+2. **鎖用重導向不用 raise**：新增 `shared_lock.sandboxed_lock_path()` —— gate 開啟時把 canonical 鎖檔搬到 checkout 外的 `$TMPDIR/volpred-sandboxed-locks/`，fcntl 路徑照跑，只是不再與生產競爭。名稱扁平化（`ops/locks/x.lock` 與 `ops/x.lock` 不可撞成同一檔）。**受測碼需要真的 side effect 時用重導向，不需要時才 raise** —— 這是 lock 與 notification/pending 兩類 writer 處置不同的分界。一處修正涵蓋 `shared_state_lock` / drought / `kid_reserve` / `topic_claim` 全部呼叫者。
+3. **刪掉 shadow lock**：`mark_task_blocked.py` 改 `from volpred.ops.shared_lock import shared_state_lock`，刪掉自帶那份。新增 AST 測試 `test_no_module_shadows_shared_state_lock` 防復發（掃全 repo，`shared_state_lock` 只准定義在 canonical module）。
+4. `VOLPRED_NO_CANONICAL_WRITE=1` 進 CI job env，與既有兩道 belt 同層。
+5. Regression：`tests/test_canonical_write_guard.py` round 3 段（lock sandbox / shadow AST / drought byte-compare）。
+
+**驗證（break-then-verify，在臨時 worktree 做，不在 daemon 腳下）**：停用 lock 重導向 → 對應鎖測試轉紅；把 CI step 的**實際 shell** 抽出來單獨跑，clean tree → exit 0，人工製造三種洩漏（gitignored 寫、tracked 改、tracked 刪）→ 三種都 exit 1。過程中發現自己第一版鎖測試有盲區（`exists()` 前後比對遇到既存鎖檔就失去敏感度）→ 改用生產永不使用的探測鎖名 + 逐位元組比對，修正後在「鎖檔預先存在」情境仍正確轉紅。乾淨 `/private/tmp` worktree 全套：1919 passed / 6 skipped / 0 failed，sentinel 掃 `storage|config|paper` = 空。
+
+**教訓**：
+1. **一個 bug class 的 gate，判準要是不變量不是清單。** round 0 / round 2 各補一張清單，round 3 還是漏；「跑完 checkout 不變」一次覆蓋全部。
+2. **稽核儀器要對齊 bug 的分佈。** 這個 class 大多落在 gitignored 路徑，用 `git status` 當唯一儀器的 sweep 會誠實地回報「歸零」——它只是看不見。
+3. **「用完即棄」不等於「無害」。** 檔案生命週期短，不代表取得它的過程不與生產競爭。lock 的危害在持鎖那段時間，不在殘留的檔。判「無害」前要問：這個 side effect 在生產有沒有別的 reader/waiter？
+4. **同名函式會 shadow 掉安全機制而 call site 完全無感。** 任何有「唯一正版」語意的 helper（lock、gate、writer），都值得一條 AST 測試釘住它不被別處重定義。
 
 ## 2026-07-10 23:30 你編輯的 wrapper 不是 launchd 執行的 wrapper — 40 支漂移 11 支，而「記得 cp」是唯一的防線
 

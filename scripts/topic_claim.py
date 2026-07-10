@@ -45,6 +45,11 @@ def _default_lock_path(ledger_path: Path) -> Path:
 
 @contextmanager
 def _exclusive_lock(lock_path: Path) -> Iterator[None]:
+    # Blocking LOCK_EX: under pytest this must not land on a canonical path, or the
+    # test waits on whatever real writer holds it. Same treatment as shared_state_lock.
+    from volpred.ops.shared_lock import sandboxed_lock_path
+
+    lock_path = sandboxed_lock_path(lock_path)
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with lock_path.open("a+", encoding="utf-8") as fh:
         fcntl.flock(fh.fileno(), fcntl.LOCK_EX)

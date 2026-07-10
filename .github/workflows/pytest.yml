@@ -11,10 +11,11 @@ name: Test Suite
 # Until this workflow existed, all of them were gates that only fired when a
 # human happened to run them locally.
 #
-# Safety belts, both already honoured by conftest.py — set here too so a broken
+# Safety belts, all three already honoured by conftest.py — set here too so a broken
 # conftest cannot let a CI run touch production:
-#   VOLPRED_NO_REMOTE_WRITE=1  no Supabase POST/PATCH (2026-06-23 leak incident)
-#   VOLPRED_NO_EMAIL=1         no SMTP
+#   VOLPRED_NO_REMOTE_WRITE=1     no Supabase POST/PATCH (2026-06-23 leak incident)
+#   VOLPRED_NO_EMAIL=1            no SMTP
+#   VOLPRED_NO_CANONICAL_WRITE=1  no writes under storage/ (2026-07-10 leak incident)
 
 # Enabled for push/PR only once a credential-less clean checkout ran green:
 # 1683 passed, 8 skipped, 0 failed (2026-07-10, fresh worktree, no `.env.local`).
@@ -53,6 +54,7 @@ jobs:
     env:
       VOLPRED_NO_REMOTE_WRITE: "1"
       VOLPRED_NO_EMAIL: "1"
+      VOLPRED_NO_CANONICAL_WRITE: "1"
     steps:
       - uses: actions/checkout@v4
       - name: Install ripgrep
@@ -69,8 +71,59 @@ jobs:
           enable-cache: true
       - name: Set up Python
         run: uv python install 3.12
+      - name: Stamp a sentinel before the suite runs
+        # Kept outside the checkout so the sentinel itself never dirties the tree.
+        run: touch "$RUNNER_TEMP/pre-suite"
       - name: Run test suite
         # testpaths = ["tests", "scripts/tests"] (pyproject.toml). No credentials
         # are provided on purpose: a reintroduced import-time raise must fail here,
         # not silently pass because a secret papered over it.
         run: uv run --extra dev python -m pytest -q -p no:cacheprovider
+      - name: Assert the suite mutated no repo state
+        # One gate for a whole bug class: "a test wrote live repo state". Four
+        # instances surfaced on 2026-07-10 alone — the pregate decision log, the
+        # cron last-run marker, publication_candidates.json, and (found by the
+        # sweep that added this step) the alert dedup ledger + pending_sessions.json
+        # + the real control_plane lock. Each was fixed one test at a time; nothing
+        # stopped the next one. A dirty tree after a test run IS the bug, whichever
+        # file and whichever test.
+        #
+        # Why not `git status --porcelain` alone, as first proposed: it is blind to
+        # .gitignore'd paths, and MOST of this bug class lands there —
+        # storage/logs/hourly_pregate.jsonl (.gitignore:81), storage/ops/tasks/ (:60),
+        # storage/notifications/*.json (:94), storage/ops/pending_sessions.json (:85).
+        # A porcelain-only check reported this very suite CLEAN while it was writing
+        # seven files under storage/. So: porcelain for tracked files (it alone sees
+        # deletions and content reverts), plus a mtime sweep for everything else.
+        #
+        # CI-only, deliberately. The dev checkout has scheduled jobs
+        # (publication_candidates_refresh 05:30 Taipei, publish_draft, the supervisor
+        # daemon) legitimately rewriting these same paths, so the same check in the
+        # pre-push hook would fire on cron, not on tests. A clean runner has no such
+        # writers, which is the whole reason this belongs here.
+        #
+        # Residual blind spot, stated rather than papered over: deleting an ignored
+        # file leaves no trace in either instrument.
+        if: always()
+        run: |
+          set -uo pipefail
+          tracked="$(git status --porcelain)"
+          written="$(find storage config paper -type f -newer "$RUNNER_TEMP/pre-suite" 2>/dev/null | sort)"
+          if [ -z "$tracked" ] && [ -z "$written" ]; then
+            echo "Clean: the suite wrote nothing under storage/, config/ or paper/."
+            exit 0
+          fi
+          echo "::error::The test suite mutated repo state. Tests must write to tmp_path only."
+          if [ -n "$tracked" ]; then
+            echo "--- tracked files changed (git status --porcelain):"
+            printf '%s\n' "$tracked"
+          fi
+          if [ -n "$written" ]; then
+            echo "--- files created or modified under storage|config|paper (includes .gitignore'd):"
+            printf '%s\n' "$written"
+          fi
+          echo ""
+          echo "Fix at the writer, not the test: call volpred.ops.canonical_write.guard_canonical_write(path)"
+          echo "before the write, so the leak fails loudly however the writer is reached"
+          echo "(direct import, subprocess, 'uv run', or an orphaned grandchild process)."
+          exit 1

@@ -44,7 +44,12 @@ if str(PROJECT_ROOT / "scripts") not in sys.path:
 
 
 def _acquire_apply_lock(storage_dir: str):
-    lock_path = Path(storage_dir) / "ops" / "remediate_publish_drought.lock"
+    from volpred.ops.shared_lock import sandboxed_lock_path
+
+    # Under pytest this lock is relocated out of the checkout. The `except
+    # BlockingIOError` below is a silent single-flight skip, so a test holding the
+    # real lock would make the live hourly remediation quietly do nothing.
+    lock_path = sandboxed_lock_path(Path(storage_dir) / "ops" / "remediate_publish_drought.lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     handle = lock_path.open("a+", encoding="utf-8")
     try:
