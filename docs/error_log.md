@@ -2,6 +2,28 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 補上一則之上的三個缺口：孤兒寫入的 *production* 後果、Supabase 只擋寫不擋讀、以及一個掃 0 個檔的 gate
+
+本 entry **不重述**下方「pytest 改寫 canonical storage/」那則（`VOLPRED_NO_CANONICAL_WRITE` writer-level gate）。它把 `uv run` 孫程序在 timeout 後仍會落盤這件事查得很透徹。這裡只補它沒有涵蓋的三塊。
+
+**1. 孤兒寫入不只是測試問題，production 也在踩，而 writer-level gate 在 production 是關的。**
+`VOLPRED_NO_CANONICAL_WRITE` 只在測試設；正式 ops 跑 `refill_task_pool._ensure_candidates_fresh()` 時它是關的，所以那道 gate 擋不到這條路徑。而該函式原本 `subprocess.run(["uv","run","python",builder], timeout=30)` → timeout 殺 `uv`，builder 孫程序繼續跑完並覆寫 `storage/publication_candidates.json`；函式回傳 `{"rebuilt": False, "reason": "rebuild_timeout"}` 之後**下一行就去讀 `CANDIDATES`** —— 讀的正是一個「它以為已經殺掉的行程」正在覆寫的檔。「宣告沒重建」與「其實正在被重建」同時為真，而且是 race，不是必然，所以平常看不出來。
+**修法**：caller 改 spawn `sys.executable`（不經 `uv`），timeout 才殺得到真正的 writer。與 2026-07-02 `git_conflict_guard` 改用 `sys.executable` 是同一個 `uv`-wrapper class 的第三次。`tests/test_refill_task_pool.py::test_ensure_candidates_fresh_times_out_builder` 斷言 argv 機械釘死。
+**教訓**：writer-level gate 與 caller-level 修正**不是二選一**。前者守測試邊界（fail-closed，env 由子程序繼承）；後者守 production 語義（timeout 必須真的 bound 住它宣稱 bound 的東西）。只做前者，production 的 race 原封不動。
+
+**2. `VOLPRED_NO_REMOTE_WRITE` 擋寫不擋讀。**
+2026-06-23 之後沒有測試能寫 production Supabase，但**任何測試都能讀**。stub 不完整的測試會靜默查 LIVE production，於是它的判定跟著當天的 prod 資料走。症狀是「同一份代碼今天綠、明天紅」—— 而這個症狀在絕大多數 repo 裡會被歸類成 flaky，重跑一次就過去了，永遠查不到根因。實例：`tests/test_feed_sync.py` 只 stub 了 `_fetch_supabase_articles`，沒 stub `_fetch_supabase_article_tags`（`compute_diff` 會 fan-out 到兩個 reader），其中兩個測試在 2026-07-10 相隔 40 分鐘的兩次全套之間，**零代碼改動自己從 FAIL 翻成 PASS**。
+**修法**：`VOLPRED_NO_REMOTE_READ=1`（`tests/conftest.py` 設），閘門放在 `supabase_sync._urlopen` 這個**單一 egress chokepoint**，七個 request helper 全部改道 —— 與同檔 `HEADERS` credential guard 選擇 chokepoint 的理由相同：第八個 helper 一定會忘記加檢查。GET 被擋時**大聲 raise**，不回空值：空讀與「DB 裡本來就沒東西」在型別上無法分辨，會把漏 stub 的測試變成綠燈卻在斷言錯的東西（`.claude/rules/no-silent-fallback.md`）。
+**誠實範圍**：開關上線後全套攔截數為 **0** —— `test_feed_sync` 那條 live read 已由 `_no_production_tag_reads` fixture 修掉。本開關是 **class-level 預防閘門**，擋的是下一個檔，不是今天修好了誰。回歸測試 `tests/test_supabase_read_gate.py`（5 tests，含用 AST 檢查「沒有 helper 繞過 chokepoint」，以及該偵測器自身的反例控制 —— 純字串比對會被 `urlopen(req, timeout=timeout)` 這種寫法繞過）。
+
+**3. 一個掃 0 個檔、但誠實喊出「我死了」的 gate。**
+`tests/test_no_raw_supervisor_kickstart._candidate_files()` 用**絕對路徑**的 `path.parts` 比對 `_SKIP_PARTS`（內含 `"worktrees"`，原意是跳過 repo 內的 `.claude/worktrees/**`）。但這個 gate 在 worktree 裡跑時，**repo 根自己就住在 `.claude/worktrees/<name>/` 底下** → 每個檔案的絕對路徑都含 `worktrees` → 掃到 0 個檔。改用 `path.relative_to(REPO).parts`。
+**它沒有靜默失敗**：作者寫了 `assert files, "no files scanned — search roots or suffixes changed; gate is dead"`。這是本檔「靜默的守門員」那條教訓的**正面案例** —— 凡「乾淨路徑上無輸出」的 gate，都該有一條斷言自己還活著的檢查。沒有那行 assert，這個 gate 會在每個 worktree agent 的 session 裡假裝通過。
+
+**驗證**：合併後 clean worktree、CI 條件（無憑證 + 三條 env 安全帶）**1797 passed / 6 skipped / 0 failed**；帶憑證 1761 passed / 0 failed。兩次跑完 `storage/` `config/` 皆乾淨、無孤兒行程。
+**注意（歸因陷阱）**：在**主 checkout** 上跑全套會看到 `storage/reports/feed.json` 與 `storage/logs/dedup_decisions.jsonl` 變髒，那是 **release_pool cron 在測試期間正常 fire**（timestamp 對得上、內容是真實 gate 決策），**不是**測試汙染。任何「跑完 pytest 後 git status 不乾淨」的機械 gate，在主 checkout 上都會被 ops cron 製造偽陽性 —— 這類 gate 應該在 clean checkout / CI 上判定，或比對 session 前後的差集而非「必須全乾淨」。
+
+
 ## 2026-07-10 worktree 清掉、branch 留下未合併工作 —— 六層防護全在保護 worktree，沒有一層保護 branch
 
 **現象**：一天之內累積兩條孤兒 branch，全靠人工發現：
