@@ -4199,5 +4199,22 @@
       "climate_policy_uncertainty",
       "null_result"
     ]
+  },
+  {
+    "entry_id": "7d3e40ce",
+    "timestamp": "2026-07-10T10:51:23.492773",
+    "phase": "experiment",
+    "action": "completed K1670 interval-valued OHLC forecast test",
+    "observation": "Center-radius interval model improved aggregate interval MSE by only +0.034% with DM t=-0.318; direct-bounds interval model worsened interval MSE by -1.347%.",
+    "decision": "Record as NULL_NO_INTERVAL_EDGE; interval-valued OHLC proxy does not beat calibrated point-HAR interval baseline in this design.",
+    "experiment_ids": [
+      "K1670"
+    ],
+    "tags": [
+      "K1670",
+      "interval_forecast",
+      "range_based_volatility",
+      "null_result"
+    ]
   }
 ]

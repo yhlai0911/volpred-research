@@ -56805,7 +56805,7 @@
     "title": "K1670: ⚠️(medium-low, dispatch 前查期刊分量) **區間值（interval-valued / range-based）RV 預測 vs 點預測 HAR** — 把日 OHLC 的 [low,high] range 視為 i",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1516). Original: ⚠️(medium-low, dispatch 前查期刊分量) **區間值（interval-valued / range-based）RV 預測 vs 點預測 HAR** — 把日 OHLC 的 [low,high] range 視為 interval-valued time series 物件直接預測整段區間，與傳統 point HAR-RV 比 interval-forecast accuracy（coverage + interval MSE）；interval-valued/fuzzy grep=0（來源：Journal of Forecasting 2026 fuzzy/interval RV；頂刊分量較弱 → ⚠️ dispatch 前確認是否值得投）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1670.py with signal.shift(1) + seed=42, (c) K1670_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -56814,7 +56814,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-10T00:00:01Z"
+    "created_at": "2026-07-10T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-10T02:44:18.421754+00:00",
+    "claim_session_id": "6dfea93982de",
+    "status_history": [
+      {
+        "ts": "2026-07-10T02:44:18.422098+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-10T02:44:27.706003+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-10T02:52:06.166283+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-10T02:44:27.705616+00:00",
+    "completed_at": "2026-07-10T02:52:06.165997+00:00",
+    "result": "K1670 completed as NULL_NO_INTERVAL_EDGE. Daily OHLC interval-valued models did not beat a calibrated scalar point-HAR interval baseline: center-radius interval MSE +0.034% (DM t=-0.318, coverage 78.34% vs 78.41% baseline); direct bounds interval MSE -1.347% (DM t=+0.902). Outputs: experiments/k1670/README.md, K1670.py, K1670_results.json, codex_review.md, figures/data; knowledge=b52e118a."
   },
   {
     "id": "K1671",

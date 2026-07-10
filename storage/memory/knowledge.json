@@ -38236,5 +38236,17 @@
     ],
     "confidence": 0.84,
     "created_at": "2026-07-10T09:41:12.836120"
+  },
+  {
+    "item_id": "b52e118a",
+    "category": "experiment",
+    "content": "experiment_id=K1670; reviewer=Codex primary path; verdict=NULL_NO_INTERVAL_EDGE; review_file=experiments/k1670/codex_review.md; data=yfinance adjusted OHLC for SPY/QQQ/IWM/TLT/GLD/HYG, request start 2005-01-01, OOS SPY/QQQ/IWM/TLT/GLD 2009-01-27..2026-07-09 n=4389 each and HYG 2011-05-02..2026-07-09 n=3819; target interval=[log(Low_t/Close_{t-1}), log(High_t/Close_{t-1})]; method=point_har scalar log-HAR interval baseline versus center_radius_interval and bounds_direct_interval, all features shifted with signal.shift(1), expanding OOS with 1000-row initial train and 21-day refit, 80% train containment calibration, primary loss interval_mse with date-clustered DM h=1. Main aggregate result: center_radius_interval interval MSE improvement +0.034% vs point_har, DM t=-0.318, p=0.751, coverage 78.34% vs point_har 78.41%; interval score worsens -0.096%. bounds_direct_interval interval MSE improvement -1.347%, DM t=+0.902, p=0.367, coverage 77.80%. QQQ center-radius per-asset DM t=-4.08 is offset by IWM/GLD/HYG and does not survive date-clustered aggregate inference. Conclusion: transparent daily OHLC interval-valued models do not provide robust next-day interval forecast edge beyond a calibrated scalar point-HAR interval baseline; do not rephrase this as scalar RV QLIKE evidence.",
+    "evidence": [
+      "experiments/k1670/K1670_results.json",
+      "experiments/k1670/README.md",
+      "experiments/k1670/codex_review.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-07-10T10:51:23.442917"
   }
 ]

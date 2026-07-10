@@ -1,0 +1,546 @@
+{
+  "experiment_id": "K1670",
+  "generated_at_utc": "2026-07-10T02:51:57.846281+00:00",
+  "seed": 42,
+  "verdict": "NULL_NO_INTERVAL_EDGE",
+  "plain_english": "Interval-valued OHLC models do not improve OOS interval-MSE forecasts beyond a calibrated scalar point-HAR interval baseline.",
+  "data": {
+    "source": "Yahoo Finance via yfinance.download(auto_adjust=True)",
+    "tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "TLT",
+      "GLD",
+      "HYG"
+    ],
+    "start": "2005-01-01",
+    "price_cache": "data/prices_yfinance_auto_adjust.csv",
+    "price_rows_by_ticker": [
+      {
+        "ticker": "GLD",
+        "first_date": "2005-01-03T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "rows": 5412
+      },
+      {
+        "ticker": "HYG",
+        "first_date": "2007-04-11T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "rows": 4842
+      },
+      {
+        "ticker": "IWM",
+        "first_date": "2005-01-03T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "rows": 5412
+      },
+      {
+        "ticker": "QQQ",
+        "first_date": "2005-01-03T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "rows": 5412
+      },
+      {
+        "ticker": "SPY",
+        "first_date": "2005-01-03T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "rows": 5412
+      },
+      {
+        "ticker": "TLT",
+        "first_date": "2005-01-03T00:00:00",
+        "last_date": "2026-07-09T00:00:00",
+        "rows": 5412
+      }
+    ],
+    "target_interval": "[log(Low_t/Close_{t-1}), log(High_t/Close_{t-1})]",
+    "nominal_coverage": 0.8
+  },
+  "methodology": {
+    "baseline": "point_har: scalar log-HAR forecast for interval half-width with zero center, calibrated to 80% training containment",
+    "center_radius_interval": "OLS HAR center forecast plus log-HAR radius forecast, calibrated to 80% training containment",
+    "bounds_direct_interval": "separate OLS forecasts for next lower and upper interval bounds using lagged interval features, calibrated to 80% training containment",
+    "anti_lookahead": "raw interval features are shifted with signal = raw_signal.shift(1); expanding OOS row i uses work.iloc[:i]",
+    "primary_loss": "interval_mse = (forecast_lower - actual_lower)^2 + (forecast_upper - actual_upper)^2",
+    "secondary_loss": "interval score with alpha=0.20 and penalties for actual interval not contained",
+    "inference": "Diebold-Mariano HAC h=1 on date-clustered daily average losses; Harvey pass requires challenger-better t < -3",
+    "initial_train": 1000,
+    "refit_freq": 21
+  },
+  "asset_results": {
+    "SPY": {
+      "ticker": "SPY",
+      "n_design_rows": 5389,
+      "n_oos": 4389,
+      "forecast_start": "2009-01-27",
+      "forecast_end": "2026-07-09",
+      "initial_train": 1000,
+      "refit_freq": 21,
+      "models": {
+        "point_har": {
+          "interval_mse": 0.0003343518756908008,
+          "interval_score": 0.041265513237080075,
+          "coverage": 0.7789929368876737,
+          "mean_width": 0.02915024861633223,
+          "center_mse": 6.14342444619481e-05,
+          "radius_mse": 0.0001057416933834523,
+          "mean_train_multiplier": 2.4742132707061093,
+          "mean_train_coverage": 0.7999169779478157
+        },
+        "center_radius_interval": {
+          "interval_mse": 0.0003330896430907637,
+          "interval_score": 0.04125927778191459,
+          "coverage": 0.7753474595579859,
+          "mean_width": 0.02903843269108766,
+          "center_mse": 6.185982856770459e-05,
+          "radius_mse": 0.00010468499297767725,
+          "mean_train_multiplier": 2.464307108413435,
+          "mean_train_coverage": 0.7999168956828187
+        },
+        "bounds_direct_interval": {
+          "interval_mse": 0.0003470889741358497,
+          "interval_score": 0.04113076027713628,
+          "coverage": 0.7719298245614035,
+          "mean_width": 0.0289649347678052,
+          "center_mse": 6.284813249475424e-05,
+          "radius_mse": 0.0001106963545731706,
+          "mean_train_multiplier": 2.4544933658371995,
+          "mean_train_coverage": 0.7999093407466014
+        }
+      },
+      "comparisons_vs_point_har": {
+        "center_radius_interval": {
+          "interval_mse_improvement_pct": 0.37751623119481376,
+          "interval_mse_dm_t": -1.627304767412409,
+          "interval_mse_dm_p": 0.1037441832625976,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": 0.01511057218568398,
+          "interval_score_dm_t": -0.11239069421906661,
+          "interval_score_dm_p": 0.9105187744252234,
+          "coverage_minus_point_har_pp": -0.3645477329687785,
+          "coverage_error_from_nominal_pp": -2.465254044201415
+        },
+        "bounds_direct_interval": {
+          "interval_mse_improvement_pct": -3.809489155319653,
+          "interval_mse_dm_t": 1.2233605316903242,
+          "interval_mse_dm_p": 0.22125924481248282,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": 0.32655103347341297,
+          "interval_score_dm_t": -0.518487159713907,
+          "interval_score_dm_p": 0.6041445600581425,
+          "coverage_minus_point_har_pp": -0.7063112326270216,
+          "coverage_error_from_nominal_pp": -2.807017543859658
+        }
+      }
+    },
+    "QQQ": {
+      "ticker": "QQQ",
+      "n_design_rows": 5389,
+      "n_oos": 4389,
+      "forecast_start": "2009-01-27",
+      "forecast_end": "2026-07-09",
+      "initial_train": 1000,
+      "refit_freq": 21,
+      "models": {
+        "point_har": {
+          "interval_mse": 0.0004776837564408454,
+          "interval_score": 0.05057653629902143,
+          "coverage": 0.7758031442241968,
+          "mean_width": 0.03597681502547528,
+          "center_mse": 8.796691593532888e-05,
+          "radius_mse": 0.00015087496228509385,
+          "mean_train_multiplier": 2.47009864033364,
+          "mean_train_coverage": 0.7999161696687324
+        },
+        "center_radius_interval": {
+          "interval_mse": 0.00047481338153293495,
+          "interval_score": 0.05058758455291067,
+          "coverage": 0.7744360902255639,
+          "mean_width": 0.03585940926578454,
+          "center_mse": 8.802275013622854e-05,
+          "radius_mse": 0.00014938394063023893,
+          "mean_train_multiplier": 2.46213846331789,
+          "mean_train_coverage": 0.7999195160064295
+        },
+        "bounds_direct_interval": {
+          "interval_mse": 0.0004805631039751571,
+          "interval_score": 0.05025834121830113,
+          "coverage": 0.7771701982228298,
+          "mean_width": 0.035706945313665736,
+          "center_mse": 8.869146382504702e-05,
+          "radius_mse": 0.0001515900881625315,
+          "mean_train_multiplier": 2.4441070876486353,
+          "mean_train_coverage": 0.7999190062482586
+        }
+      },
+      "comparisons_vs_point_har": {
+        "center_radius_interval": {
+          "interval_mse_improvement_pct": 0.6008943928295212,
+          "interval_mse_dm_t": -4.081326685684526,
+          "interval_mse_dm_p": 4.557557457895989e-05,
+          "interval_mse_harvey_pass": true,
+          "interval_score_improvement_pct": -0.02184462341176456,
+          "interval_score_dm_t": 0.2256432124466871,
+          "interval_score_dm_p": 0.8214894371457748,
+          "coverage_minus_point_har_pp": -0.13670539986329056,
+          "coverage_error_from_nominal_pp": -2.556390977443612
+        },
+        "bounds_direct_interval": {
+          "interval_mse_improvement_pct": -0.602772754042399,
+          "interval_mse_dm_t": 0.42832414369287775,
+          "interval_mse_dm_p": 0.6684361660834826,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": 0.6291357692805376,
+          "interval_score_dm_t": -1.5802783068966988,
+          "interval_score_dm_p": 0.1141152206544489,
+          "coverage_minus_point_har_pp": 0.13670539986330166,
+          "coverage_error_from_nominal_pp": -2.28298017771702
+        }
+      }
+    },
+    "IWM": {
+      "ticker": "IWM",
+      "n_design_rows": 5389,
+      "n_oos": 4389,
+      "forecast_start": "2009-01-27",
+      "forecast_end": "2026-07-09",
+      "initial_train": 1000,
+      "refit_freq": 21,
+      "models": {
+        "point_har": {
+          "interval_mse": 0.0005598325280605065,
+          "interval_score": 0.05539129053390536,
+          "coverage": 0.785600364547733,
+          "mean_width": 0.040615607560353664,
+          "center_mse": 0.00010404143622478832,
+          "radius_mse": 0.0001758748278054649,
+          "mean_train_multiplier": 2.3885547844505344,
+          "mean_train_coverage": 0.7999210537178459
+        },
+        "center_radius_interval": {
+          "interval_mse": 0.0005623419074040547,
+          "interval_score": 0.0554248819436709,
+          "coverage": 0.7849168375484165,
+          "mean_width": 0.04063001651803793,
+          "center_mse": 0.00010501761309621637,
+          "radius_mse": 0.000176153340605811,
+          "mean_train_multiplier": 2.3889607845313434,
+          "mean_train_coverage": 0.799922587602297
+        },
+        "bounds_direct_interval": {
+          "interval_mse": 0.0005668019845944827,
+          "interval_score": 0.055555849420634774,
+          "coverage": 0.7739804055593529,
+          "mean_width": 0.04012024299431425,
+          "center_mse": 0.00010568156390921843,
+          "radius_mse": 0.0001777194283880229,
+          "mean_train_multiplier": 2.3654144828130543,
+          "mean_train_coverage": 0.7999161889510296
+        }
+      },
+      "comparisons_vs_point_har": {
+        "center_radius_interval": {
+          "interval_mse_improvement_pct": -0.4482375027835192,
+          "interval_mse_dm_t": 2.417686739221713,
+          "interval_mse_dm_p": 0.015660005177803527,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": -0.060643847510609826,
+          "interval_score_dm_t": 0.5828472695800666,
+          "interval_score_dm_p": 0.5600260704553444,
+          "coverage_minus_point_har_pp": -0.06835269993165083,
+          "coverage_error_from_nominal_pp": -1.5083162451583587
+        },
+        "bounds_direct_interval": {
+          "interval_mse_improvement_pct": -1.2449181111575132,
+          "interval_mse_dm_t": 0.5525633514817871,
+          "interval_mse_dm_p": 0.5805905877861319,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": -0.2970844064892959,
+          "interval_score_dm_t": 0.6269848556170791,
+          "interval_score_dm_p": 0.5307017817465256,
+          "coverage_minus_point_har_pp": -1.1619958988380086,
+          "coverage_error_from_nominal_pp": -2.6019594440647165
+        }
+      }
+    },
+    "TLT": {
+      "ticker": "TLT",
+      "n_design_rows": 5389,
+      "n_oos": 4389,
+      "forecast_start": "2009-01-27",
+      "forecast_end": "2026-07-09",
+      "initial_train": 1000,
+      "refit_freq": 21,
+      "models": {
+        "point_har": {
+          "interval_mse": 0.00030481678113798477,
+          "interval_score": 0.03760311906891239,
+          "coverage": 0.7824105718842561,
+          "mean_width": 0.027283176301279338,
+          "center_mse": 5.674751166055174e-05,
+          "radius_mse": 9.566087890844066e-05,
+          "mean_train_multiplier": 2.9395078803064068,
+          "mean_train_coverage": 0.7999215565569819
+        },
+        "center_radius_interval": {
+          "interval_mse": 0.0003042004988559115,
+          "interval_score": 0.03768697028596692,
+          "coverage": 0.7853725222146275,
+          "mean_width": 0.027246738944930172,
+          "center_mse": 5.683799454785296e-05,
+          "radius_mse": 9.526225488010282e-05,
+          "mean_train_multiplier": 2.935573140670047,
+          "mean_train_coverage": 0.7999213677191901
+        },
+        "bounds_direct_interval": {
+          "interval_mse": 0.00030282295392973117,
+          "interval_score": 0.037641554856979696,
+          "coverage": 0.7758031442241968,
+          "mean_width": 0.027141925292027563,
+          "center_mse": 5.716326337015901e-05,
+          "radius_mse": 9.424821359470657e-05,
+          "mean_train_multiplier": 2.923731377860518,
+          "mean_train_coverage": 0.7999151287102877
+        }
+      },
+      "comparisons_vs_point_har": {
+        "center_radius_interval": {
+          "interval_mse_improvement_pct": 0.2021812184265127,
+          "interval_mse_dm_t": -1.8703541113656894,
+          "interval_mse_dm_p": 0.061501182457335934,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": -0.22299005808763417,
+          "interval_score_dm_t": 2.2003649510238286,
+          "interval_score_dm_p": 0.027832940763987013,
+          "coverage_minus_point_har_pp": 0.2961950330371388,
+          "coverage_error_from_nominal_pp": -1.4627477785372545
+        },
+        "bounds_direct_interval": {
+          "interval_mse_improvement_pct": 0.6541067722091832,
+          "interval_mse_dm_t": -0.47842229677073944,
+          "interval_mse_dm_p": 0.6323735023488699,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": -0.10221436151844432,
+          "interval_score_dm_t": 0.2705759966395589,
+          "interval_score_dm_p": 0.786729884854009,
+          "coverage_minus_point_har_pp": -0.6607427660059284,
+          "coverage_error_from_nominal_pp": -2.4196855775803217
+        }
+      }
+    },
+    "GLD": {
+      "ticker": "GLD",
+      "n_design_rows": 5389,
+      "n_oos": 4389,
+      "forecast_start": "2009-01-27",
+      "forecast_end": "2026-07-09",
+      "initial_train": 1000,
+      "refit_freq": 21,
+      "models": {
+        "point_har": {
+          "interval_mse": 0.0004122342337980803,
+          "interval_score": 0.04390818862010675,
+          "coverage": 0.7830940988835726,
+          "mean_width": 0.030405562387447363,
+          "center_mse": 7.902664465897664e-05,
+          "radius_mse": 0.0001270904722400635,
+          "mean_train_multiplier": 3.0863340500133805,
+          "mean_train_coverage": 0.7999236541847746
+        },
+        "center_radius_interval": {
+          "interval_mse": 0.0004137643367339918,
+          "interval_score": 0.04400256819819661,
+          "coverage": 0.7830940988835726,
+          "mean_width": 0.03046984057883219,
+          "center_mse": 7.926596636965974e-05,
+          "radius_mse": 0.00012761620199733617,
+          "mean_train_multiplier": 3.095293035990186,
+          "mean_train_coverage": 0.7999222616676048
+        },
+        "bounds_direct_interval": {
+          "interval_mse": 0.0004161581320598171,
+          "interval_score": 0.0439203042238489,
+          "coverage": 0.785144679881522,
+          "mean_width": 0.03053819154450699,
+          "center_mse": 7.8946302174382e-05,
+          "radius_mse": 0.00012913276385552653,
+          "mean_train_multiplier": 3.079210840799575,
+          "mean_train_coverage": 0.7999213820052813
+        }
+      },
+      "comparisons_vs_point_har": {
+        "center_radius_interval": {
+          "interval_mse_improvement_pct": -0.3711731851607863,
+          "interval_mse_dm_t": 3.0308994627880455,
+          "interval_mse_dm_p": 0.0024524905970848554,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": -0.21494755546950603,
+          "interval_score_dm_t": 2.075671449845682,
+          "interval_score_dm_p": 0.037982457192479835,
+          "coverage_minus_point_har_pp": 0.0,
+          "coverage_error_from_nominal_pp": -1.6905901116427424
+        },
+        "bounds_direct_interval": {
+          "interval_mse_improvement_pct": -0.9518613302889266,
+          "interval_mse_dm_t": 1.410044602102714,
+          "interval_mse_dm_p": 0.15859738922429134,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": -0.02759303930064319,
+          "interval_score_dm_t": 0.1086050300198173,
+          "interval_score_dm_p": 0.9135207366979161,
+          "coverage_minus_point_har_pp": 0.20505809979494138,
+          "coverage_error_from_nominal_pp": -1.485532011847801
+        }
+      }
+    },
+    "HYG": {
+      "ticker": "HYG",
+      "n_design_rows": 4819,
+      "n_oos": 3819,
+      "forecast_start": "2011-05-02",
+      "forecast_end": "2026-07-09",
+      "initial_train": 1000,
+      "refit_freq": 21,
+      "models": {
+        "point_har": {
+          "interval_mse": 7.628988298753434e-05,
+          "interval_score": 0.01808557722797744,
+          "coverage": 0.7999476302697041,
+          "mean_width": 0.01238633528504448,
+          "center_mse": 1.6247792091771963e-05,
+          "radius_mse": 2.1897149401995204e-05,
+          "mean_train_multiplier": 2.544528110282622,
+          "mean_train_coverage": 0.7999093306097408
+        },
+        "center_radius_interval": {
+          "interval_mse": 7.616310033605775e-05,
+          "interval_score": 0.018105866035069095,
+          "coverage": 0.7975909924063891,
+          "mean_width": 0.012359350290349472,
+          "center_mse": 1.6340708487427508e-05,
+          "radius_mse": 2.174084168060137e-05,
+          "mean_train_multiplier": 2.53960126596172,
+          "mean_train_coverage": 0.799913835164797
+        },
+        "bounds_direct_interval": {
+          "interval_mse": 8.385549764253385e-05,
+          "interval_score": 0.01801023856761389,
+          "coverage": 0.7850222571353758,
+          "mean_width": 0.012665357710444233,
+          "center_mse": 1.653197866322537e-05,
+          "radius_mse": 2.539577015804156e-05,
+          "mean_train_multiplier": 2.5783397458987287,
+          "mean_train_coverage": 0.799911620977136
+        }
+      },
+      "comparisons_vs_point_har": {
+        "center_radius_interval": {
+          "interval_mse_improvement_pct": 0.16618540560261147,
+          "interval_mse_dm_t": -0.5652930178415836,
+          "interval_mse_dm_p": 0.5719076921555066,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": -0.11218224796424221,
+          "interval_score_dm_t": 0.9782298337016244,
+          "interval_score_dm_p": 0.32802264223982824,
+          "coverage_minus_point_har_pp": -0.23566378633149698,
+          "coverage_error_from_nominal_pp": -0.24090075936109567
+        },
+        "bounds_direct_interval": {
+          "interval_mse_improvement_pct": -9.916930474563339,
+          "interval_mse_dm_t": 3.229890692943292,
+          "interval_mse_dm_p": 0.001248873663508565,
+          "interval_mse_harvey_pass": false,
+          "interval_score_improvement_pct": 0.4165676296303376,
+          "interval_score_dm_t": -0.962396847674415,
+          "interval_score_dm_p": 0.3359112432719207,
+          "coverage_minus_point_har_pp": -1.492537313432829,
+          "coverage_error_from_nominal_pp": -1.4977742864624277
+        }
+      }
+    }
+  },
+  "aggregate_date_clustered": {
+    "center_radius_interval": {
+      "model": "center_radius_interval",
+      "n_dates": 4389,
+      "date_start": "2009-01-27",
+      "date_end": "2026-07-09",
+      "interval_mse_point_har": 0.0003710432415696396,
+      "interval_mse_center_radius_interval": 0.00037091706000206567,
+      "interval_mse_improvement_pct": 0.03400724051465029,
+      "interval_mse_dm_t": -0.3177988542560378,
+      "interval_mse_dm_p": 0.7506526417836903,
+      "interval_mse_harvey_pass": false,
+      "interval_score_point_har": 0.041906127292115125,
+      "interval_score_center_radius_interval": 0.04194627804251272,
+      "interval_score_improvement_pct": -0.09581116889593508,
+      "interval_score_dm_t": 1.5327557679321988,
+      "interval_score_dm_p": 0.1254081327534855,
+      "point_har_coverage": 0.7841117946381104,
+      "center_radius_interval_coverage": 0.7833599149388624,
+      "coverage_minus_point_har_pp": -0.07518796992480592
+    },
+    "bounds_direct_interval": {
+      "model": "bounds_direct_interval",
+      "n_dates": 4389,
+      "date_start": "2009-01-27",
+      "date_end": "2026-07-09",
+      "interval_mse_point_har": 0.0003710432415696396,
+      "interval_mse_bounds_direct_interval": 0.0003760404535228461,
+      "interval_mse_improvement_pct": -1.346800424680034,
+      "interval_mse_dm_t": 0.9023938833203742,
+      "interval_mse_dm_p": 0.36689719974596624,
+      "interval_mse_harvey_pass": false,
+      "interval_score_point_har": 0.041906127292115125,
+      "interval_score_bounds_direct_interval": 0.04186421004817507,
+      "interval_score_improvement_pct": 0.10002652750006095,
+      "interval_score_dm_t": -0.31387170636659495,
+      "interval_score_dm_p": 0.7536334001938512,
+      "point_har_coverage": 0.7841117946381104,
+      "bounds_direct_interval_coverage": 0.7780284043441938,
+      "coverage_minus_point_har_pp": -0.608339029391658
+    }
+  },
+  "verdict_details": {
+    "verdict": "NULL_NO_INTERVAL_EDGE",
+    "plain_english": "Interval-valued OHLC models do not improve OOS interval-MSE forecasts beyond a calibrated scalar point-HAR interval baseline.",
+    "pass_models": [],
+    "weak_models": []
+  },
+  "figures": [
+    "figures/K1670_fig1_interval_mse_improvement.png",
+    "figures/K1670_fig2_interval_coverage.png"
+  ],
+  "references": [
+    {
+      "key": "Huarng-Yu-Li-2025",
+      "citation": "Huarng, K.-H., Yu, T. H.-K. and Li, Y. (2025), A Dynamic Fuzzy Modeling Method for Interval Time Series and its Application to Financial Market Forecasting, Journal of Forecasting 44(8), 2459-2477.",
+      "url": "https://ideas.repec.org/a/wly/jforec/v44y2025i8p2459-2477.html",
+      "role": "Direct interval-valued financial time-series motivation."
+    },
+    {
+      "key": "Fuzzy-RV-FTS-2026",
+      "citation": "A Fuzzy Framework for Realized Volatility Prediction, Journal of Forecasting, 2026.",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1002/for.70082",
+      "role": "Recent Journal of Forecasting fuzzy realized-volatility motivation."
+    },
+    {
+      "key": "Martens-van-Dijk-de-Pooter-2009",
+      "citation": "Martens, M., van Dijk, D. and de Pooter, M. (2009), Forecasting S&P 500 volatility: Long memory, level shifts, leverage effects, day-of-the-week seasonality, and macroeconomic announcements, IJF 25(2), 282-303.",
+      "url": "https://ideas.repec.org/a/eee/intfor/v25y2009i2p282-303.html",
+      "role": "HAR-style realized-volatility benchmark motivation."
+    },
+    {
+      "key": "Christensen-Podolskij-2007",
+      "citation": "Christensen, K. and Podolskij, M. (2007), Realized range-based estimation of integrated variance, Journal of Econometrics 141(2), 323-349.",
+      "url": "https://public.econ.duke.edu/~get/browse/courses/201/spr12/DOWNLOADS/MicroStructure/cp_range_rv_joe_07.pdf",
+      "role": "Range-based volatility estimation foundation."
+    }
+  ],
+  "research_honesty_notes": [
+    "This is a daily OHLC interval proxy experiment, not a 5-minute realized-volatility replication.",
+    "The baseline is intentionally strong: it is calibrated to the same 80% training containment target as the interval-valued models.",
+    "Interval containment and interval MSE answer an interval-forecasting question; they should not be rephrased as scalar RV QLIKE superiority."
+  ]
+}
