@@ -1,0 +1,23 @@
+name: Knowledge Provenance Gate
+
+# K1259 gate 防繞道閉環：src/volpred/memory/system.py:_append_to_index 攔 Python writer，
+# 此 CI 攔 jq/Edit 手改 knowledge.json 繞過 writer 的情況（baseline 見 validator docstring）。
+# 2026-07-10 補上 — 此前 Enforcement Layer Map 宣稱「CI: provenance」但 workflow 不存在。
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate knowledge.json provenance baseline
+        run: python scripts/validate_knowledge_provenance.py
