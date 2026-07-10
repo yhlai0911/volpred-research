@@ -58130,7 +58130,7 @@
     "title": "K1679 revision: regional-bank deposit-flight NULL 升到 knowledge-grade（ALFRED point-in-time + Clark-West nested + floor sensitivity）",
     "priority": 3,
     "description": "Follow-up to K1679 (merged to main, Codex verdict=FAIL). K1679 找到 regional-bank deposit-flight（H.8 small-minus-large）對 KRE forward RV/DSV 的 directional NULL，但 3 個方法問題阻擋 knowledge-grade：(1) H.8 用當前修訂 vintage 非 ALFRED point-in-time — 改用 ALFRED realtime vintages 重取 DPSSCBW027SBOG/DPSLCBW027SBOG；(2) baseline HAR 完全巢狀於 augmented model，標準 DM/HLN 偏向不拒絕=偏向 null → 對最強 cell（dep_flight_4w·dsv·H5 與 dep_flight_4w·rv·H21）加 Clark-West(2007) nested-forecast test，可能翻轉 null；(3) training-min positivity floor 也套到允許零的 DSV/MSE cell（最強 cell 50/53 被裁）→ 加未裁切 loss sensitivity run。復用 experiments/K1679/K1679.py 為基底，seed=42，j+H<i embargo 保留。過 Codex CONDITIONAL_PASS 以上才寫 knowledge.json。若 Clark-West 仍 null 則 confirm K1606→K1679 的 funding-flight NULL 敘事、可發 methodology-null 文章。heavy re-run 走 compute_queue。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "codex_review_followup",
@@ -58162,11 +58162,20 @@
         "to": "pending",
         "by": "hourly-01",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-10T20:36:49+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "hourly-04",
+        "note": "executed (committed to main) + independent Codex review=FAIL -> K1679-rev2 spawned; gate held (no knowledge.json)"
       }
     ],
     "started_at": "2026-07-10T17:17:13.710102+00:00",
     "last_released_at": "2026-07-10T19:50:04.586674+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-10T20:36:49+00:00",
+    "result": "已在主 repo committed。獨立 Codex review=FAIL：PIT 顯著格 dep_flight_13w·rv·H5 (DM t=+2.772, Bonf=BH=.045) 根本沒跑 Clark-West，卻外推過不了 CW；verdict 邏輯忽略方向/Bonferroni (實為 augmented 顯著惡化 3.72% 的 negative finding 非 FDR artifact)；ALFRED output_type=4 是 first-release-only 非真 vintage。current-vintage NULL 可保留但 PIT knowledge-grade 不成立。gate 守住未寫 knowledge -> K1679-rev2。"
   },
   {
     "id": "K1677-rev",
@@ -58187,6 +58196,27 @@
       "event-study"
     ],
     "created_at": "2026-07-10T20:25:53.465841+00:00",
+    "status_history": []
+  },
+  {
+    "id": "K1679-rev2",
+    "title": "K1679-rev2: 對 PIT hit 補 Clark-West + 修 verdict 邏輯 + ALFRED 真 vintage（Codex FAIL 3 修）",
+    "priority": 3,
+    "description": "Follow-up to K1679-rev (committed to main, Codex verdict=FAIL). K1679-rev 聲稱 regional-bank deposit-flight 對 KRE forward-vol 為 knowledge-grade NULL，但獨立 review 抓到 3 個阻斷：(1) 最關鍵——PIT 顯著格 dep_flight_13w·rv·H5 (DM t=+2.772, Bonferroni=BH=0.0452) 根本沒跑 Clark-West，CW_CELLS 只含舊 K1679 的兩個 4w cells，程式把那兩格 any_reject=False 外推成整體『BH hit 過不了 CW』→ 必須對真正的 PIT hit（最好全 8 格）實跑 CW(2007) 單尾 nested test；(2) verdict 判定邏輯忽略方向與 Bonferroni，PIT hit 為正 t = augmented QLIKE 顯著惡化 3.72%，不是 FDR-only artifact 而是 deposit-flight signal 顯著傷害 forecast 的 negative finding → 修 verdict 邏輯納入 sign + Bonferroni；(3) ALFRED 用 output_type=4（Initial Release Only / first print）非真 point-in-time vintage snapshot → 改標 first-release-only sensitivity，或改用 realtime_start/realtime_end 抓每發布日當時可見含當時修訂的 vintage。PASS 項不必重做：embargo j=i-H-1、各格自身 H、seed=42、bootstrap max(10,H)、un-floored MSE sensitivity、DM/HLN/HAC/Bonferroni/BH 皆正確。復用 experiments/K1679-rev/K1679-rev.py 為基底。過 Codex CONDITIONAL_PASS 以上才寫 knowledge.json。⚠️ K1679→K1679-rev 已連兩 FAIL：若 rev2 再 FAIL，直接以 documented negative （funding-flight proxy 顯著傷害 KRE forward-vol forecast）收錄，不再無限 revision。heavy re-run 走 compute_queue。",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "codex_review_followup",
+    "parent_experiment_id": "K1679-rev",
+    "tags": [
+      "experiment",
+      "revision",
+      "codex-followup",
+      "clark-west",
+      "point-in-time",
+      "nested-inference"
+    ],
+    "created_at": "2026-07-10T20:36:49+00:00",
     "status_history": []
   }
 ]

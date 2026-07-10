@@ -15494,5 +15494,13 @@
     "summary": "K1677 orphan rescue + closure. Agent 跑完 compute 死掉未 commit，產出僅在 worktree agent-a9db2e4b942997e25 未追蹤。救援 K1677 .py/results/png/csv/data 到主 repo + 補 README。Codex review verdict=FAIL：關鍵方向錯置（雙尾檢定 vs 方向性 claim，單尾對同 8 項 BH 重算 spread q=.032、worst-day q=.039 過 5%，本 README 舊敘事錯）；peer 非 point-in-time 靜默剔 9/128 偏 NULL；placebo halo 不足；semivar/Amihud 定義偏差。主指標 RV 仍 NULL。gate 守住未寫 knowledge.json → 建 K1677-rev（5 修）。標 K1677 succeeded（實驗執行+獨立 review+revision spawned）。",
     "task_id": "K1677",
     "status": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-11T04:36:49+08:00",
+    "task_type": "experiment",
+    "actor": "hourly-04",
+    "summary": "K1679-rev stranded-complete closure. Task 被 stale-release 卡 pending 但工作已 committed 主 repo 且未獨立 review。補跑獨立 Codex review=FAIL：PIT 顯著格 dep_flight_13w·rv·H5 (DM t=+2.772, Bonf=BH=.045) 沒跑 Clark-West 卻外推過不了；verdict 邏輯忽略方向/Bonferroni（實為 augmented 顯著惡化 3.72% 的 negative finding）；ALFRED output_type=4 first-release-only 非真 vintage。current-vintage NULL 可保留、PIT knowledge-grade 不成立。更正 README、gate 守住未寫 knowledge → 建 K1679-rev2（3 修）。標 K1679-rev succeeded。",
+    "task_id": "K1679-rev",
+    "status": "succeeded"
   }
 ]

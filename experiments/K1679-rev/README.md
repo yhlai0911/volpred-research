@@ -95,3 +95,17 @@ Requires `FRED_API_KEY` in `.env.local` and live yfinance access.
 - Deposits (small): FRED/ALFRED `DPSSCBW027SBOG`
 - Deposits (large): FRED/ALFRED `DPSLCBW027SBOG`
 - Prices: yfinance `auto_adjust=True` (KRE, XLF, SPY, ^VIX)
+
+---
+
+## ⚠️ Codex review = FAIL（2026-07-11，gpt-5.6-sol，獨立審查）— **未寫 knowledge.json，需 K1679-rev2**
+
+current-vintage 的 directional NULL 可保留，但 **point-in-time 的 knowledge-grade NULL 不成立**，本 README 上方「WEAK_FDR_ONLY / NULL confirmed at knowledge grade」敘事**錯誤**：
+
+1. **阻斷（最關鍵）**：PIT 顯著格 `dep_flight_13w·rv·H5`（DM t=**+2.772**，Bonferroni=BH=**0.0452**）**根本沒跑 Clark-West**。`CW_CELLS` 只含舊 K1679 的兩個 4w cells（K1679-rev.py:129），執行也只限那兩格（:651），程式卻把那兩格 `any_reject=False` 外推成「BH hit 過不了 CW」（:690）— gate 沒對真正的 hit 執行。CW 公式本身正確（:354）但必須至少補測該 PIT hit，最好全 8 格。
+2. **verdict 判定邏輯錯**（:684）：忽略方向與 Bonferroni。PIT hit 為**正 t** = augmented QLIKE **惡化 3.72%** 且 Bonferroni 顯著 → 不是「FDR-only artifact」，是 deposit-flight signal **顯著傷害** forecast 的證據（negative finding，非 clean null）。
+3. **ALFRED 僅部分修好**：用 `output_type=4`（官方 = Initial Release **Only**，first print，:174/:268），非宣稱的「每發布日當時可見含當時既有修訂」vintage snapshot → 只能稱 **first-release-only sensitivity**，非真 PIT；遺漏當時已知修訂可能增 measurement error、偏 NULL。
+
+**PASS 項**：embargo `j=i−H−1` 正確（:444）、各格用自身 H、seed=42、bootstrap max(10,H)、un-floored MSE sensitivity 確有執行（:599）、DM/HLN/HAC + Bonferroni/BH m=8 計算正確。
+
+**Closure**：實驗執行 + 獨立 review。PIT 敘事不成立 → 建 **K1679-rev2**（3 修：對 PIT hit（全 8 格）跑 Clark-West + 修 verdict 邏輯納入方向/Bonferroni + ALFRED 改標 first-release sensitivity 或改抓真 vintage snapshot）。修正後才可寫 knowledge。⚠️ K1679 已 FAIL、K1679-rev 亦 FAIL — 若 rev2 再 FAIL，考慮此 signal 無 clean knowledge-grade 敘事、直接以「documented negative（funding-flight proxy 顯著傷害 KRE forward-vol forecast）」收錄。
