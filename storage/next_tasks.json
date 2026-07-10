@@ -57935,12 +57935,22 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "pregate-cadence-rootcause-20260710",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agentable",
     "topology": "subagent",
     "created_at": "2026-07-10T15:08:43.291887+00:00",
     "title": "同一 cron slot 重複 fire — 159 班中 9 次 off-slot，每次白燒 ~95K opus cold-load",
-    "description": "證據（2026-07-10 23:0x 主線程掃 ~/.volpred/logs/dispatch_supervisor_launchd.err 的 `firing worker` 行，比對 fired_at vs prev_scheduled）：159 次 fire 中 9 次的 lag > 5 分鐘 —— 07-07 09:45(+38m)、07-07 10:00(+53m)、07-07 12:30(+24m)、07-08 01:30(+24m)、07-08 01:45(+39m)、07-09 16:31(+24m)、07-10 14:00(+54m)、07-10 17:30(+24m)、07-10 22:58(+51m，補打 22:07 slot)。每次 = 完整 ~95K opus cold-load，直接吃掉 quota（今日 quota 兩度耗盡）。\n\n已排除：磁碟版 scheduler._due_to_fire(cron='7 * * * *', last_fire_at='2026-07-10T14:07:51+00:00', now=22:58) 主線程實測回 due=False —— 磁碟程式在該時刻不該 fire。\n\n最可能方向（未定案，請驗證後再改）：\n1. **daemon 記憶體副本 vs 磁碟不同步**。22:58 那次 fire 時 daemon 啟動於 22:37:10，而 scripts/dispatch_supervisor/state.py 的 mtime 是 22:57:21（晚於啟動），worker.py 是 22:12。常駐 daemon 讀的是啟動時載入的副本 —— 若當時載入的 state.py/scheduler.py 版本對 last_fire_at 的讀取或時區處理與現版不同，就會誤判 due（control-plane.md 已有『程式碼寫完不等於上線』條）。\n2. **read_state 的 schema-version reset**。若某次 SCHEMA_VERSION bump 讓 read_state() 回 _empty_state()，last_fire_at 變 None → _due_to_fire 直接 return True → 重啟後立刻補打一班。注意 off-slot fire 的時間點與 daemon 重啟高度相關，這條要優先驗。\n3. worker 跑滿後 current_job 清空的那一 tick 重新評估 due 時的邊界條件。\n\n要求：\n(a) 先寫 regression test 重現（給定 last_fire_at 已覆蓋當前 slot → 斷言 _tick_once 不 spawn），在真實 daemon 啟動路徑下驗證（不可只測 import 後的磁碟版）。\n(b) 修根因；若確認是記憶體/磁碟不同步，需要的是**部署紀律的機械化**（改 supervisor code 後強制 kickstart 的 gate），不是在 _due_to_fire 裡加 patch。\n(c) 掃全部 9 次 off-slot fire 的前後文，確認沒有其他觸發途徑（fire_requested_at 誤消費等）。\n(d) 完成後把 off-slot fire 計數接成 alert（check_alerts 既有 owner，勿新增 watchdog）—— 這種浪費目前只能靠人工掃 log 發現。\n\n關聯：pregate 對 22:58 那班的判定正是 would_skip=true（gate 修好後第一個要擋的就是它），但 gate 仍在 shadow，擋不住。error_log 2026-07-10 『pregate 結構性 no-op』entry 有完整脈絡。\n\n[2026-07-10 23:1x telegram-responder 主線程實測，縮小範圍]\n**假設 2（read_state schema-version reset）已排除**：storage/ops/dispatch_state.json 的 `.version == 1` 等於 state.SCHEMA_VERSION，且 dispatch_supervisor.log / launchd.err 中 `state_reset|schema_invalid` 出現 0 次，last_fire_at 從未被清成 None。不要再花時間驗這條。\n**收斂到假設 1 的一個更具體形式**：9 次 off-slot fire 全部緊跟 daemon 重啟（22:37 restart → 22:58 補打 22:07 slot），而 alerts.py 已能分辨『planned reload』(restart suppressed as planned reload)。真正要問的是：**planned reload 後，scheduler 是否應該補打重載期間錯過的 slot？** 純部署重載補打 = 白燒 95K opus cold-load。修的方向是在 scheduler 啟動路徑判斷『這次啟動是 planned reload 且錯過的 slot 距今 < 1 個 cron 週期』→ 不 catch-up，而不是動 _due_to_fire 的 due 判定。需先寫 regression test 重現（daemon 啟動路徑，非 import 磁碟版）。\n**執行限制**：任何 supervisor code 改動要 `launchctl kickstart -k` 才上線，而 kickstart 會殺掉 in-flight worker —— 改完必須等 dispatch_state.json 的 current_job 為 null 再重載。"
+    "description": "證據（2026-07-10 23:0x 主線程掃 ~/.volpred/logs/dispatch_supervisor_launchd.err 的 `firing worker` 行，比對 fired_at vs prev_scheduled）：159 次 fire 中 9 次的 lag > 5 分鐘 —— 07-07 09:45(+38m)、07-07 10:00(+53m)、07-07 12:30(+24m)、07-08 01:30(+24m)、07-08 01:45(+39m)、07-09 16:31(+24m)、07-10 14:00(+54m)、07-10 17:30(+24m)、07-10 22:58(+51m，補打 22:07 slot)。每次 = 完整 ~95K opus cold-load，直接吃掉 quota（今日 quota 兩度耗盡）。\n\n已排除：磁碟版 scheduler._due_to_fire(cron='7 * * * *', last_fire_at='2026-07-10T14:07:51+00:00', now=22:58) 主線程實測回 due=False —— 磁碟程式在該時刻不該 fire。\n\n最可能方向（未定案，請驗證後再改）：\n1. **daemon 記憶體副本 vs 磁碟不同步**。22:58 那次 fire 時 daemon 啟動於 22:37:10，而 scripts/dispatch_supervisor/state.py 的 mtime 是 22:57:21（晚於啟動），worker.py 是 22:12。常駐 daemon 讀的是啟動時載入的副本 —— 若當時載入的 state.py/scheduler.py 版本對 last_fire_at 的讀取或時區處理與現版不同，就會誤判 due（control-plane.md 已有『程式碼寫完不等於上線』條）。\n2. **read_state 的 schema-version reset**。若某次 SCHEMA_VERSION bump 讓 read_state() 回 _empty_state()，last_fire_at 變 None → _due_to_fire 直接 return True → 重啟後立刻補打一班。注意 off-slot fire 的時間點與 daemon 重啟高度相關，這條要優先驗。\n3. worker 跑滿後 current_job 清空的那一 tick 重新評估 due 時的邊界條件。\n\n要求：\n(a) 先寫 regression test 重現（給定 last_fire_at 已覆蓋當前 slot → 斷言 _tick_once 不 spawn），在真實 daemon 啟動路徑下驗證（不可只測 import 後的磁碟版）。\n(b) 修根因；若確認是記憶體/磁碟不同步，需要的是**部署紀律的機械化**（改 supervisor code 後強制 kickstart 的 gate），不是在 _due_to_fire 裡加 patch。\n(c) 掃全部 9 次 off-slot fire 的前後文，確認沒有其他觸發途徑（fire_requested_at 誤消費等）。\n(d) 完成後把 off-slot fire 計數接成 alert（check_alerts 既有 owner，勿新增 watchdog）—— 這種浪費目前只能靠人工掃 log 發現。\n\n關聯：pregate 對 22:58 那班的判定正是 would_skip=true（gate 修好後第一個要擋的就是它），但 gate 仍在 shadow，擋不住。error_log 2026-07-10 『pregate 結構性 no-op』entry 有完整脈絡。\n\n[2026-07-10 23:1x telegram-responder 主線程實測，縮小範圍]\n**假設 2（read_state schema-version reset）已排除**：storage/ops/dispatch_state.json 的 `.version == 1` 等於 state.SCHEMA_VERSION，且 dispatch_supervisor.log / launchd.err 中 `state_reset|schema_invalid` 出現 0 次，last_fire_at 從未被清成 None。不要再花時間驗這條。\n**收斂到假設 1 的一個更具體形式**：9 次 off-slot fire 全部緊跟 daemon 重啟（22:37 restart → 22:58 補打 22:07 slot），而 alerts.py 已能分辨『planned reload』(restart suppressed as planned reload)。真正要問的是：**planned reload 後，scheduler 是否應該補打重載期間錯過的 slot？** 純部署重載補打 = 白燒 95K opus cold-load。修的方向是在 scheduler 啟動路徑判斷『這次啟動是 planned reload 且錯過的 slot 距今 < 1 個 cron 週期』→ 不 catch-up，而不是動 _due_to_fire 的 due 判定。需先寫 regression test 重現（daemon 啟動路徑，非 import 磁碟版）。\n**執行限制**：任何 supervisor code 改動要 `launchctl kickstart -k` 才上線，而 kickstart 會殺掉 in-flight worker —— 改完必須等 dispatch_state.json 的 current_job 為 null 再重載。",
+    "completed_at": "2026-07-10T15:26:46.980936+00:00",
+    "result": "根因定案並修復（commit 9c4f73e21）：scheduler._due_to_fire 對 missing/unparseable 的 last_fire_at 一律 return True —— 「不知道上次何時 fire」被當成「立刻 fire」。60s tick 的 daemon 下，任何一次 dispatch_state.json 遺失都換來一整發 ~95K opus cold-load。(a) regression test 已重現：臨時 worktree 內種回舊 bug → 5 個新測試 FAIL、還原後 7/7 PASS （break-then-verify 依 control-plane.md 不在 daemon 腳下的 checkout 做）。(b) 修根因：unknown ≠ due（回 False）+ _tick_once bootstrap 蓋 now 並 skip 一拍，下個真 slot 正常 fire；沒有 bootstrap 的話「unknown 不 due」會讓 daemon 永久停擺，該失效模式已用 test_daemon_never_stalls_forever_after_bootstrap 鎖住。最壞情況從『白燒一班』降為『少跑一小時』。(c) 9 次全掃：7/10 的 3 次緊跟 daemon 啟動（+12/+2/+21 min，冷啟動語意一致）；7/7-7/9 的 6 次因 log 輪替無法回溯啟動時間，但這是唯一能在 not-due slot 觸發 fire 的路徑（requested fire 會標 fire_reason）。排除 git（dispatch_state.json 已 gitignore）與 schema reset（daemon 自己 reset 會 log，全日誌 0 筆）→ 22:58 那次是外部 writer 清空 completions。(d) off-slot 計數 alert 拆為 follow-up 任務 ops-offslot-fire-alert-20260710。部署：daemon 需 current_job=null 才可 kickstart（control-plane 硬規），已掛背景 watcher 等 worker 結束後自動重啟。",
+    "status_history": [
+      {
+        "ts": "2026-07-10T15:26:46.980936+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "main-session"
+      }
+    ]
   },
   {
     "id": "K1677",
@@ -58005,5 +58015,17 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-10T15:21:18Z"
+  },
+  {
+    "id": "ops-offslot-fire-alert-20260710",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "ops-offslot-duplicate-fire-20260710",
+    "status": "pending",
+    "dispatch_lane": "agentable",
+    "topology": "subagent",
+    "created_at": "2026-07-10T15:26:46.980936+00:00",
+    "title": "off-slot fire 計數接成 alert（根因已修，但這種浪費目前只能靠人工掃 log 發現）",
+    "description": "背景：2026-07-10 靠人工掃 ~/.volpred/logs/dispatch_supervisor_launchd.err 的 `firing worker` 行才發現 159 次 fire 中有 9 次 off-slot（比自己的 cron slot 晚 +24~+54 分），每次白燒 ~95K opus cold-load。根因已修（commit 9c4f73e21：unknown last_fire_at 不再視為 due）。\n\n但『沒有人在看』這件事本身是缺口 —— 若未來有別的路徑製造 off-slot fire，一樣只能靠人工發現。\n\n要求（anti-stacking：收編既有 owner，不新增 watchdog）：\n1. 指標放進 src/volpred/ops/alerts.py 的既有 alert condition registry（check_alerts hourly 已是 L2 owner）。\n2. 判準：過去 24h 內 fired_at - prev_scheduled > 5 min 的 fire 次數 ≥1 → warn；≥3 → critical。\n   資料源優先用 dispatch_state.completions 的 fire_at（結構化），log 解析為 fallback。\n3. body 用白話（per feedback_plain_language_boss_facing）：「派工在非排定時間多跑了 N 班，每班約 95K token」。\n4. 有 auto-remediation 就寫已修復（per feedback_alerts_auto_act_not_suggest）；沒有就只報數字，不要叫老闆做事。\n5. Regression test：偽造 completions 含 off-slot fire → 斷言 breached。"
   }
 ]
