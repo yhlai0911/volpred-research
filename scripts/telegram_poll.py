@@ -201,7 +201,7 @@ def _spawn_responder(model: str = "claude-opus-4-8") -> bool:
         return True
     except Exception as exc:  # noqa: BLE001 — hourly dispatch 兜底
         _log(f"responder spawn failed (hourly 兜底): {exc}")
-        return False
+        return False  # silent-ok: 上一行 _log 已留 trace；spawn 失敗 fail-open，hourly dispatch 兜底
 
 
 def poll_pass(timeout: int = 25) -> int:
