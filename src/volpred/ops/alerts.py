@@ -2055,6 +2055,11 @@ def _parse_dispatch_slot(raw: Any) -> datetime | None:
     try:
         parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
     except ValueError:
+        warn(
+            "dispatch_duplicate_slot",
+            "unparseable scheduled_for slot",
+            raw=str(raw)[:80],
+        )
         return None
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=_TAIPEI_TZ)
@@ -2073,6 +2078,11 @@ def _parse_dispatch_log_local(raw: str) -> datetime | None:
     try:
         parsed = datetime.strptime(raw, "%Y-%m-%d %H:%M:%S,%f")
     except ValueError:
+        warn(
+            "dispatch_duplicate_slot",
+            "unparseable dispatch log timestamp",
+            raw=str(raw)[:80],
+        )
         return None
     return parsed.replace(tzinfo=_TAIPEI_TZ).astimezone(timezone.utc)
 
@@ -2133,7 +2143,13 @@ def _dispatch_log_fire_events(log_path: Path) -> list[dict[str, Any]]:
     """
     try:
         lines = log_path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
+    except OSError as exc:
+        warn(
+            "dispatch_duplicate_slot",
+            "dispatch log unreadable",
+            path=str(log_path),
+            err=str(exc),
+        )
         return []
 
     events: list[dict[str, Any]] = []
