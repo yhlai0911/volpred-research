@@ -15386,5 +15386,14 @@
     "backfilled_at": "2026-07-10T13:48:16.123947+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1675"
+  },
+  {
+    "timestamp": "2026-07-10T22:26:51+08:00",
+    "task_type": "platform_ops",
+    "task_id": "supervisor-codex-failover-restore-20260710",
+    "outcome": "succeeded",
+    "summary": "2026-07-04 supervisor cutover 把 Claude→Codex failover 留在退役的 cron_hourly_dispatch.sh：quota/auth 掛掉時 supervisor 只寄信不接手，每次額度用完都靜默丟掉整批 hourly slot。移植成 scripts/dispatch_supervisor/codex_failover.py + wire 進 worker 的 quota/auth 分支 + 15 個回歸測試。過程中發現 failover 會被 pytest 觸發、真的 spawn codex（既有 auth 測試 hang 7 分鐘並 claim 了 research_safe_haven_regime）→ 加 pytest guard + release 孤兒 claim。觸發來源：老闆 Telegram msg 376/378。",
+    "owner": "claude",
+    "actor": "hourly-22"
   }
 ]

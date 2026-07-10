@@ -56990,7 +56990,30 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-10T04:07:43+00:00"
+    "created_at": "2026-07-10T04:07:43+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-10T14:22:31.140697+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-10T14:22:38.791488+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-10T14:26:17.614014+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-10T14:22:38.791110+00:00",
+    "last_released_at": "2026-07-10T14:26:17.613667+00:00"
   },
   {
     "id": "telegram-331",
@@ -57789,19 +57812,55 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-10T12:20:50.585895+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 376）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我想確認claude的額度到了時候 codex app會自動接手嗎\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我想確認claude的額度到了時候 codex app會自動接手嗎\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-07-10T14:08:20.340962+00:00",
+    "claim_session_id": "87731eb263ea",
+    "status_history": [
+      {
+        "ts": "2026-07-10T14:08:20.341325+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-10T14:08:20.844906+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-22"
+      }
+    ],
+    "started_at": "2026-07-10T14:08:20.844535+00:00"
   },
   {
     "id": "telegram-378",
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-10T12:27:42.341873+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 378）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n另外根據這張圖有關Fable跟Codex sol的比較 你在做Agent和sub Agent互動模式建立時 可以採用這樣的關係來發配任務 不一定所有的模型都要使用claude 途中的部分適合Codex則使用Codex app的codex exec做sub agent 這樣是可以的嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n另外根據這張圖有關Fable跟Codex sol的比較 你在做Agent和sub Agent互動模式建立時 可以採用這樣的關係來發配任務 不一定所有的模型都要使用claude 途中的部分適合Codex則使用Codex app的codex exec做sub agent 這樣是可以的嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-07-10T14:08:20.589789+00:00",
+    "claim_session_id": "704bb6c73b64",
+    "status_history": [
+      {
+        "ts": "2026-07-10T14:08:20.590104+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-10T14:08:21.096764+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-22"
+      }
+    ],
+    "started_at": "2026-07-10T14:08:21.096355+00:00"
   }
 ]
