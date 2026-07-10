@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -189,6 +190,11 @@ def _last_substantive_dispatch(tasks: list):
 
 def _log_decision(entry: dict) -> None:
     try:
+        # forensic attribution（2026-07-10）：invoker 是自報值可被誤標（13:44/13:50 兩筆
+        # 手動跑卻標 supervisor 的實例）；pid/ppid 是 OS 事實 — daemon 生的 pregate 其
+        # ppid == supervisor pid，crosscheck 可機械驗證 entry 真偽。
+        entry.setdefault("pid", os.getpid())
+        entry.setdefault("ppid", os.getppid())
         LOG.parent.mkdir(parents=True, exist_ok=True)
         with LOG.open("a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
