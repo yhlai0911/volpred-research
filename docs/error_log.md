@@ -2,6 +2,42 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 pytest 改寫 canonical `storage/` 狀態（與 6/23 線上 feed 汙染同 bug class）→ `VOLPRED_NO_CANONICAL_WRITE` writer-level gate
+
+**現象**：在 worktree `magical-chaplygin-bc88af` 跑全套 pytest 時，該 worktree 的 `storage/publication_candidates.json` 被完整重生（mtime 13:21:44 台灣時間落在測試窗內，`generated_at` 03:20:46Z → 05:21:44Z，48 insertions / 48 deletions）。`tests/test_build_publication_candidates.py` 與 `tests/test_content_quality.py` 都用 `tmp_path` 隔離，hooks 也沒引用 builder —— 兇手不在明顯的地方。
+
+**兇手**：`tests/test_refill_task_pool.py::test_research_reader_friendly_still_allows_general_companion`。它 monkeypatch 了 `MODULE.CANDIDATES` 到 `tmp_path`，但**沒 patch `MODULE.ROOT`**；而它寫的 tmp fixture **不含 `generated_at` 欄位**。`refill_task_pool._ensure_candidates_fresh()` 靠 `generated_at` 判斷新鮮度，讀到 `None` → `age_hours = None` → 略過 `age_hours < max_age_hours` 的守衛 → 視為 stale → `subprocess.run(["uv","run","python", ROOT/"scripts/build_publication_candidates.py"])`。builder 用 `Path(__file__).parent.parent` 自行解析 `OUTPUT_PATH`，完全不看 caller 的 monkeypatch，於是寫進**活的 checkout**。
+
+同檔隔壁的 `test_refill_skips_general_retry_v2_when_feed_already_has_k_coverage` 之所以沒事，純粹因為它多 patch 了一行 `MODULE.ROOT = tmp_path`（builder 路徑不存在 → `builder_missing`）。**這是靠巧合而非設計的隔離。**
+
+**重現（實測，非推論）**：restore 檔案後單獨跑那一支測試 → mtime 13:57:10 → 14:01:06、`generated_at` 05:02:31Z → 06:01:06Z。該測試耗時 31 秒（純 monkeypatch 單元測試的正常值是 <1 秒）—— 時間本身就是 subprocess 的指紋。
+
+**Bug class**：與 2026-06-23「測試把 stub `daily_digest` 同步到線上 feed」同一類 —— 測試碰到共享狀態。當時的結構性修正是 `tests/conftest.py` 的 `VOLPRED_NO_REMOTE_WRITE` / `VOLPRED_NO_EMAIL`。那兩道 gate 擋的是**對外**（SMTP / Supabase），**對 repo 自身 canonical JSON 的寫入完全沒有等價 backstop**。
+
+**根因（三層）**：
+1. **底層邏輯**：`_ensure_candidates_fresh` 把「讀不到 `generated_at`」等同於「stale，該重建」。對 production 是對的（缺欄位＝檔案有問題＝重建），對測試 fixture 是災難 —— fixture 天生不寫 `generated_at`。
+2. **流程**：測試隔離靠「作者記得 patch 每一個路徑常數」。callee 自行解析路徑時（builder 的 `__file__`-relative `OUTPUT_PATH`、`run_due_jobs` 的 `PROJECT_ROOT`），caller 的 monkeypatch 根本管不到。**能否隔離取決於作者有沒有注意到看不見的那一個常數。**
+3. **程式架構**：`subprocess.run(timeout=30)` 被誤當成保護。**實測證明它完全不 bound 寫入** —— `uv` 是 child、`python` 是 grandchild，timeout 殺掉 `uv`，`python` 孫程序照樣跑完並落盤。probe：kill `uv` 後 grandchild 仍寫出檔案。這解釋了本次調查中 17:34:49 的一筆「幽靈寫入」：它來自 17:30–17:33 那輪無守門員的 baseline suite 所遺留的孤兒程序，在測試進程結束後約 80 秒才落盤。**timeout bound 的是等待，不是寫入；只有 writer 內的守門員能 bound 寫入。**
+
+**解決方法（修流程，不修資料）**：
+1. **Writer-level gate**（enforcement owner）：新增 `src/volpred/ops/canonical_write.py::guard_canonical_write(path)` —— 當 `VOLPRED_NO_CANONICAL_WRITE=1` 且 `path` 落在 repo root 的 `storage/` 底下時 raise `CanonicalWriteBlocked`；`tmp_path` 一律放行。**gate 放在 writer 而非每個 caller**，所以不論怎麼抵達（直接 import / `subprocess` / `uv run` / 孤兒孫程序）都擋得住 —— env 會被子程序繼承（已實測 `uv run` 傳遞）。
+2. `tests/conftest.py` 設 `VOLPRED_NO_CANONICAL_WRITE=1`，與既有 `VOLPRED_NO_EMAIL` / `VOLPRED_NO_REMOTE_WRITE` 同層。**同一個 concern 只有一個 owner**（anti-stacking）：`_ensure_candidates_fresh` 的 spawn 端不另設第二道 gate，spawn 了也寫不進去。
+3. 接線點：`scripts/build_publication_candidates.py`（`main()` 入口 fail-fast + 寫入點 invariant 各一次；前者讓被擋的 builder 從 31 秒縮到 <1 秒）、`src/volpred/ops/event_jobs.py::_materialize_task`（見下）。
+4. **機械 gate**：`tests/conftest.py` 新增 autouse fixture `_forbid_canonical_state_mutation` —— 每支測試前後對 canonical 檔案（`publication_candidates` / `next_tasks` / `work_log` / `feed` / `knowledge` / `thinking_journal` / `experiment_experiences` / `dispatch_state`）與 canonical 目錄（`ops/event_ledger` / `ops/tasks`）取 `(mtime_ns, size)` 指紋，變動就 fail 並**指名該支測試**。只 stat 不讀檔（`knowledge.json` ~50MB）。它是 detector，補 writer gate 尚未接線的 writer。誤報防護：訊息明寫「排程 job 也會改這些檔（`publication_candidates_refresh` 每日 05:30 台北 / `publish_draft` publish 後 refresh），先比對 mtime 與 `storage/logs/cron/` 再怪測試」。
+5. 修測試本身：那支測試補 `_ensure_candidates_fresh` stub（比照同檔其他 6 支）。31 秒 → 0.6 秒。
+6. **Regression test**：`tests/test_canonical_write_guard.py`（11 tests）—— canonical 路徑必擋、`tmp_path` 必放行、repo 內非 `storage/` 路徑必放行、flag 未設時必 no-op、builder 在 `python` **與 `uv run` 兩種 launcher** 下都 fail-closed 且不動 canonical 檔（`uv run` 是 `_ensure_candidates_fresh` 真正用的形式，只測裸 python 會漏掉真實路徑）。
+
+**Full-population sweep（依 `.claude/rules/control-plane.md` §控制面 audit 的完成門檻）**：
+- **掃描範圍**：全套 pytest（1662 passed / 5 skipped），非子集。以新 fixture 當掃描器，讓它自己指認全 population 中所有汙染 canonical 狀態的測試。
+- **第二個兇手（sweep 抓到，非事前已知）**：`tests/test_run_due_jobs.py::test_run_due_jobs_skips_piggy_back_skip_items`。它 patch 了 `CONFIG_PATH` / `LAST_RUN_PATH`，但 `run_due_jobs()` 尾端呼叫 `expand_due_event_jobs(storage_dir=str(PROJECT_ROOT / "storage"))` —— `PROJECT_ROOT` 是另一個獨立解析的常數。結果在真實 `storage/ops/event_ledger/` 落下一筆 `tsmc-revenue-2026-07-10-t0` dedupe key，**並且**經由 `_materialize_task` → `create_task()` 在 `storage/ops/tasks/` 建了真的 TaskRecord（`task_a052c9d41b4f`）。與第一個兇手**完全同形**：patch 了看得見的路徑常數，漏掉 callee 自己解析的那個。
+- **Blind-spot 分析**：`storage/ops/tasks/` 被 `.gitignore:60` 忽略 → TaskRecord 洩漏**不會出現在 `git status`**，而 dispatcher 會讀它。純靠 `git status` 做 audit 會漏掉這一半。故 fixture 的 `_CANONICAL_DIRS` 明確納入該目錄。另：`_materialize_task` 先 `create_task()` 再寫 ledger，所以守門員必須放在 `create_task()` **之前**（只守 `_write_json` 會擋下 ledger 卻留下 TaskRecord）。
+- **Verification（可驗證 evidence，非「我改的通過測試」）**：baseline（stash 掉全部改動）跑全套 → 18 failed / 1651 passed；修正後跑全套 → 18 failed / 1662 passed（+11 = 新增 regression tests）。`diff` 兩份 FAILED 清單 → **逐字相同**（那 18 支是本 worktree 既有紅燈，主因 `repo_root_mismatch` 等 worktree 環境問題，與本修正無關）。gate 觸發數 0；`git status --porcelain storage/` 乾淨；`storage/ops/tasks/` 無新檔。
+- **結論**：`storage/` canonical 寫入的 test-leak population 已歸零，且有 writer gate（預防）+ autouse fixture（偵測）雙重覆蓋。
+
+**教訓**：
+1. **測試隔離不可依賴「patch 每一個路徑常數」的人類注意力**。callee 用 `__file__` / `PROJECT_ROOT` 自行解析路徑時，caller 的 monkeypatch 完全無效，而兩者的差別在 code review 時肉眼幾乎看不出來（兩個兇手都只差一行 `monkeypatch.setattr(MODULE, "ROOT", tmp_path)`）。結構性解法是**在 writer 上設 env-gated 守門員**，讓隔離失敗變成 loud failure 而不是 silent write。
+2. **`subprocess.run(timeout=)` 不是寫入的保護**。它 bound 的是父程序的等待；`uv run python X` 的孫程序在 `uv` 被殺後照樣跑完並落盤，寫入可能發生在測試 session 結束後數十秒。這也代表**用 mtime 歸因「哪支測試寫的」會被延遲落盤誤導** —— 判斷時要同時看有無存活的孤兒程序。
+3. **gitignore 的目錄仍然是 canonical 狀態**。`storage/ops/tasks/` 不進 git，但 dispatcher 讀它；「`git status` 乾淨」不等於「沒有汙染」。任何以 `git status` 為唯一 audit 儀器的流程，對 ignored 路徑天生盲目。
 ## 2026-07-10 CI 從未跑過 pytest — 1600+ 個測試零執行，紅燈爛在那裡沒人知道
 
 **現象**：`.github/workflows/` 只有 knowledge-provenance / silent-fallbacks / source-encoding 三個 audit gate，**沒有一個跑 pytest**；`.git/hooks/pre-push` 也沒有。1600+ 個測試（含大量 regression gate）在 CI 上一次都沒跑過。後果是兩個測試長期紅燈無人察覺（另見同日「兩個長期紅燈測試」entry）：`test_gmail_inbox_poll_warnings`（7/5 cutover 刪掉 `_DISPATCH_WRAPPER`，測試還在 monkeypatch 它）與 `test_topic_cluster_gate`（fixture 寫死 `2026-06-10`，7/10 剛好落出 `now-30d` 窗外）。

@@ -421,6 +421,10 @@ def test_research_reader_friendly_still_allows_general_companion(tmp_path, monke
 
     monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    # The fixture above has no `generated_at`, so an unstubbed _ensure_candidates_fresh
+    # reads the age as unknown, judges it stale, and shells out to the real builder —
+    # which rewrites the live storage/publication_candidates.json (2026-07-10 incident).
+    monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
     monkeypatch.setattr(MODULE, "_kids_with_audience_article", lambda audience: set())
     monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())

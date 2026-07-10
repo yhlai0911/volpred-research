@@ -222,6 +222,10 @@ def test_run_due_jobs_skips_piggy_back_skip_items(tmp_path, monkeypatch):
     }))
     monkeypatch.setattr(rdj, "CONFIG_PATH", config_path)
     monkeypatch.setattr(rdj, "LAST_RUN_PATH", last_run_path)
+    # run_due_jobs() tail-calls expand_due_event_jobs(storage_dir=PROJECT_ROOT/"storage"),
+    # which materializes real event tasks + ledger entries. Patching CONFIG_PATH and
+    # LAST_RUN_PATH is not enough — PROJECT_ROOT is resolved independently.
+    monkeypatch.setattr(rdj, "PROJECT_ROOT", tmp_path)
 
     result = rdj.run_due_jobs()
 
