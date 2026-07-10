@@ -1001,3 +1001,104 @@ def test_completion_entry_shape_matches_docstring(tmp_state):
     entry2 = st.read_state(tmp_state)["completions"][-1]
     undocumented2 = set(entry2) - documented
     assert not undocumented2, f"[record_completion] 未文件化欄位: {sorted(undocumented2)}"
+
+
+def test_locked_state_binding_is_always_named_data():
+    """AST gate（`_toplevel_keys_written_by_writers`）假設 `_locked_state()` 綁出的
+    state dict 永遠叫 `data`。那是慣例不是保證 —— 換個名字，gate 靜默漏掉整個模組。
+    把這個假設本身變成斷言。"""
+    bad: list[str] = []
+    for src_path in _writer_sources():
+        for node in ast.walk(ast.parse(src_path.read_text(encoding="utf-8"))):
+            if not isinstance(node, ast.With):
+                continue
+            for item in node.items:
+                call = item.context_expr
+                if not (isinstance(call, ast.Call) and _is_locked_state_call(call)):
+                    continue
+                var = item.optional_vars
+                if not (isinstance(var, ast.Tuple) and len(var.elts) == 2
+                        and isinstance(var.elts[1], ast.Name)
+                        and var.elts[1].id == "data"):
+                    bad.append(f"{src_path.name}:{node.lineno}")
+    assert not bad, (
+        f"_locked_state() 綁定不叫 (_fh, data) → AST gate 會漏掉這些位置: {bad}"
+    )
+
+
+def _is_locked_state_call(call: ast.Call) -> bool:
+    f = call.func
+    if isinstance(f, ast.Attribute):
+        return f.attr == "_locked_state"
+    return isinstance(f, ast.Name) and f.id == "_locked_state"
+
+
+def _drive_every_writer(path: Path) -> None:
+    """跑過每一個會寫 state 的 public writer，讓 state 樹長到最完整的形狀。"""
+    st.mark_supervisor_started(path=path)
+    st.heartbeat(path=path)
+    st.request_fire(reason="manual", path=path)
+    st.consume_fire_request(path=path)
+    st.set_auth_blocked(True, path=path)
+    st.set_auth_blocked(False, path=path)
+    st.mark_alert_sent("auth_blocked", path=path)
+    st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                    log_path="/tmp/x.log", path=path)
+    st.attach_process(pid=4242, pgid=4242, started_wall="w1", path=path)
+    st.update_started_wall(pid=4242, started_wall="w2", path=path)
+    job = st.mark_restart_orphan_pending(path=path)
+    st.append_completion_entry(job, exit_code=0, outcome="orphan_gone_or_reused",
+                               final_model="opus", path=path, mark_cleanup_recorded=True)
+    st.finalize_restart_orphan_cleanup(path=path)
+    st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                    log_path="/tmp/y.log", path=path)
+    st.attach_process(pid=99, pgid=99, started_wall="w3", path=path)
+    st.record_completion(exit_code=0, outcome="success", final_model="opus", path=path)
+    # 最後留一個 in-flight job，好讓 current_job 這個容器現形
+    st.reserve_fire(schedule_id="hourly_dispatch", attempt=2, model="opus",
+                    log_path="/tmp/z.log", path=path)
+
+
+def _container_shapes(node, path="$"):
+    """走整棵 state 樹，回傳所有 dict 容器的形狀（list index 正規化成 `[]`）。"""
+    if isinstance(node, dict):
+        yield path
+        for k, v in node.items():
+            yield from _container_shapes(v, f"{path}.{k}")
+    elif isinstance(node, list):
+        for v in node:
+            yield from _container_shapes(v, f"{path}[]")
+
+
+# state 樹的**完整**容器清單。前三個各有 schema 契約 gate 守著；`alerts_dedup`
+# 是動態 map（key = alert 名稱，由 caller 決定），沒有固定欄位可 gate，但它必須
+# 保持扁平 —— 一旦有人往裡面塞巢狀 dict，就是一個沒人 gate 的新層。
+KNOWN_CONTAINERS = {"$", "$.current_job", "$.completions[]", "$.alerts_dedup"}
+
+
+def test_no_undocumented_nested_container(tmp_state):
+    """窮舉 gate：state 樹**只能**有已知的四個 dict 容器。
+
+    2026-07-10 的教訓：schema 契約 bug 一層一層被人工發現（頂層 → current_job →
+    completions entry），每輪都以為是最後一層。這條測試把「還有沒有下一層」從人的
+    信心轉成機械檢查 —— 新增任何巢狀 dict 都會 fail，逼作者去補文件與 gate。
+    """
+    _drive_every_writer(tmp_state)
+    state = st.read_state(tmp_state)
+    shapes = set(_container_shapes(state))
+
+    # 範圍自檢：四個容器都得真的長出來，否則「沒有未知容器」只是驅動失敗的假綠燈。
+    assert KNOWN_CONTAINERS <= shapes, (
+        f"驅動沒長出全部已知容器（假綠燈風險）: 缺 {sorted(KNOWN_CONTAINERS - shapes)}"
+    )
+    unknown = shapes - KNOWN_CONTAINERS
+    assert not unknown, (
+        f"state 樹出現未知的巢狀容器 {sorted(unknown)} —— 它沒有 schema 契約 gate。"
+        f" 請補進 docstring schema + 對應 shape gate，再加進 KNOWN_CONTAINERS。"
+    )
+
+    # alerts_dedup 的 key 是動態的（alert 名稱），不 gate 欄位名；但值必須是純量。
+    for k, v in state["alerts_dedup"].items():
+        assert not isinstance(v, (dict, list)), (
+            f"alerts_dedup[{k!r}] 是 {type(v).__name__} —— 動態 map 必須保持扁平"
+        )
