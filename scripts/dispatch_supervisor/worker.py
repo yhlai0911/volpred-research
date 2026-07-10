@@ -8,8 +8,13 @@ Retry ladder (refactor_plan §3 retry policy)::
     attempt 1: opus    → opus exit≠0 + transient (529 / network) → sleep 90s
     attempt 2: opus    → opus exit≠0 + transient → sleep 90s
     attempt 3: sonnet  (final fallback)
-    auth-class error  → NO retry; set_auth_blocked(True); send_auth_alert; abort
+    auth-class error  → NO retry; set_auth_blocked(True); send_auth_alert; Codex failover
+    quota exhausted   → NO retry; send_quota_alert; Codex failover (separate quota)
     hang (SIGKILL'd)  → NO retry; record killed_timeout; alert
+
+Codex failover (`codex_failover.py`) hands the hourly slot to `codex exec` when
+Claude cannot run at all. Ported back in 2026-07-10 after the 2026-07-04
+supervisor cutover orphaned it in the retired `cron_hourly_dispatch.sh`.
 
 Each attempt calls `state.reserve_fire()` BEFORE Popen spawn (atomic slot
 claim — Codex review §10 #5), `state.attach_process()` right after (records
@@ -31,7 +36,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
-from . import alerts, procutil, state
+from . import alerts, codex_failover, procutil, state
 
 LOG = logging.getLogger(__name__)
 
@@ -46,6 +51,10 @@ OPUS_MODEL = "claude-opus-4-8"
 # drops to sonnet on the final attempt. Kept defined as a valid roster alias so
 # any external reference still resolves, but no dispatch path selects it.
 SONNET_MODEL = "claude-sonnet-5"
+
+# Recorded as `final_model` when Codex covered the slot — never a Claude model,
+# so completion history distinguishes "Claude did it" from "Codex did it".
+CODEX_MODEL_LABEL = "codex-failover"
 
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "/Users/yhlai0911/.local/bin/claude")
 
@@ -93,7 +102,9 @@ _QUOTA_RE = re.compile(
 @dataclass
 class WorkerResult:
     exit_code: int
-    outcome: str             # success | failure | killed_timeout | auth_blocked
+    # success | failure | killed_timeout | auth_blocked | quota_blocked
+    # | codex_failover_recovered
+    outcome: str
     final_model: str
     attempts: int
     duration_s: float
@@ -324,6 +335,52 @@ def _run_one_attempt(
     return _normalize_signal_exit(exit_code), duration, _read_since(log_path, log_offset)
 
 
+def _attempt_codex_failover(
+    *,
+    reason: str,
+    attempt: int,
+    total_duration: float,
+    fallback_exit: int,
+    model: str,
+    log_tail: str,
+    state_path: Path,
+) -> WorkerResult | None:
+    """Hand this hourly slot to Codex. Returns a WorkerResult only if Codex recovered it.
+
+    Alerts either way — a failover that fired is something the owner must see,
+    and one that failed is worse. `None` means the caller should return its own
+    Claude-side result (quota_blocked / auth_blocked) unchanged.
+    """
+    try:
+        result = codex_failover.run_codex_failover(reason=reason)
+    except Exception as exc:  # failover must never take the supervisor down
+        LOG.exception("codex failover raised unexpectedly reason=%s", reason)
+        alerts.send_codex_failover_alert(
+            reason=reason, recovered=False, exit_code=-1,
+            detail=f"failover 本身拋出例外：{exc}", attempted=True,
+            output_tail=log_tail, state_path=state_path,
+        )
+        return None
+
+    alerts.send_codex_failover_alert(
+        reason=reason, recovered=result.recovered, exit_code=result.exit_code,
+        detail=result.detail, attempted=result.attempted,
+        output_tail=result.output_tail, state_path=state_path,
+    )
+    if not result.recovered:
+        return None
+
+    state.record_completion(
+        exit_code=0, outcome="codex_failover_recovered", final_model=CODEX_MODEL_LABEL,
+        path=state_path,
+    )
+    return WorkerResult(
+        exit_code=0, outcome="codex_failover_recovered", final_model=CODEX_MODEL_LABEL,
+        attempts=attempt, duration_s=total_duration + result.duration_s,
+        log_tail=result.output_tail or log_tail,
+    )
+
+
 def run_worker(
     *,
     prompt_text: str,
@@ -414,6 +471,16 @@ def run_worker(
             )
             state.set_auth_blocked(True, path=state_path)
             alerts.send_auth_alert(log_tail=log_tail, state_path=state_path)
+            # Claude stays blocked until a human fixes the credential, but Codex
+            # authenticates through ChatGPT — let it cover this slot. Failover
+            # buys back the hour; it does not repair the credential, so
+            # auth_blocked remains set.
+            recovered = _attempt_codex_failover(
+                reason="auth", attempt=attempt, total_duration=total_duration,
+                fallback_exit=exit_code, model=model, log_tail=log_tail, state_path=state_path,
+            )
+            if recovered is not None:
+                return recovered
             return WorkerResult(
                 exit_code=exit_code, outcome="auth_blocked", final_model=model,
                 attempts=attempt, duration_s=total_duration, log_tail=log_tail,
@@ -431,6 +498,17 @@ def run_worker(
                 path=state_path,
             )
             alerts.send_quota_alert(log_tail=log_tail, state_path=state_path)
+            # Codex runs on a separate (ChatGPT) quota — hand it the slot rather
+            # than dropping the hour. 2026-07-10: this is the failover the
+            # 2026-07-04 supervisor cutover left behind in the retired shell
+            # wrapper; without it every Claude quota outage silently lost every
+            # hourly slot until the reset.
+            recovered = _attempt_codex_failover(
+                reason="quota", attempt=attempt, total_duration=total_duration,
+                fallback_exit=exit_code, model=model, log_tail=log_tail, state_path=state_path,
+            )
+            if recovered is not None:
+                return recovered
             return WorkerResult(
                 exit_code=exit_code, outcome="quota_blocked", final_model=model,
                 attempts=attempt, duration_s=total_duration, log_tail=log_tail,

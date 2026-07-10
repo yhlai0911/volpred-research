@@ -205,6 +205,22 @@ run_auth_preflight() {
   return $?
 }
 
+# Portable file mtime for the diagnostic below. BSD/macOS stat uses `-f %m`;
+# GNU/Linux stat uses `-c %Y`. GNU stat accepts `-f` with a different meaning
+# and prints a multi-line filesystem report, so a successful exit code alone is
+# not enough — accept only a digits-only epoch before choosing the fallback.
+file_mtime_epoch() {
+  local target=$1 value
+  value=$(/usr/bin/stat -f %m "$target" 2>/dev/null)
+  case "$value" in
+    ""|*[!0-9]*) value=$(/usr/bin/stat -c %Y "$target" 2>/dev/null) ;;
+  esac
+  case "$value" in
+    ""|*[!0-9]*) return 1 ;;
+  esac
+  printf '%s\n' "$value"
+}
+
 # 2026-07-02 fix — see SEND_ALERT_TIMEOUT_SEC comment above. Every
 # `send-alert` call in this script must go through this wrapper, never call
 # "$UV_BIN" run volpred ops send-alert directly.
@@ -254,7 +270,7 @@ send_auth_preflight_alert() {
   # CLI auto-update just invalidated the TCC grant.
   local claude_link_age_h=999
   local _link_mtime
-  _link_mtime=$(stat -f %m "$CLAUDE_BIN" 2>/dev/null)
+  _link_mtime=$(file_mtime_epoch "$CLAUDE_BIN")
   if [ -n "$_link_mtime" ]; then
     claude_link_age_h=$(( ( $(date +%s) - _link_mtime ) / 3600 ))
   fi

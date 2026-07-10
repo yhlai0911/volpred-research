@@ -2,6 +2,41 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 supervisor cutover 把 Claude→Codex failover 弄丟 — 每次額度用完都靜默丟掉整批 hourly slot（cutover 孤兒第 5 次）
+
+**現象**：老闆 Telegram msg 376 問「claude 的額度到了時候 codex app 會自動接手嗎」。查證答案是**不會**。`cron_hourly_dispatch.sh::run_codex_failover()`（2026-06-28 老闆指令落地）在 Claude quota/auth 死掉時把該小時的 slot 交給 `codex exec`（ChatGPT auth，額度與 Claude 完全獨立）。2026-07-04 派工 cutover 到 `com.volpred.dispatch-supervisor` 常駐 daemon 後，`worker.py` 只把 quota 正確**分類**（2026-07-05 加的 `_QUOTA_RE`），然後 `send_quota_alert` + abort —— **failover 整段沒搬過去**。自 cutover 起每次 Claude 額度耗盡，該小時的工作就直接消失，等額度自己恢復；老闆只會收到一封「額度用完」的信，看不出 slot 被丟掉。
+
+**根因**：**cutover 孤兒**（control-plane.md 已記錄的同一 class，這是第 5 次）。退役 `cron_hourly_dispatch.sh` 時 grep 了它呼叫的 `scripts/*.py`（`test_cutover_orphans.py` 覆蓋這一面），但**沒有 grep 它自己 shell 函式裡實作的行為**。`run_codex_failover` 不是外部 script、不是 reader，是 wrapper 內生的一段邏輯 —— 現有的機械 gate 看不到它。孤兒 gate 只覆蓋「被呼叫的檔案」，不覆蓋「被實作的功能」。
+
+**過程 / 連帶發現**：修好 wiring 後，既有測試 `test_dispatch_supervisor.py::test_worker_auth_blocks_without_retry` 從 5 秒變成掛住 7 分鐘。原因是它驅動 `run_worker` 走 auth 分支、沒 patch failover → **pytest 真的 spawn 了一個 codex exec**，而 `codex exec` 不是唯讀探針：它會 claim 任務、做事、commit。事後查 `next_tasks.json` 確認它在 22:22 claim 了 `research_safe_haven_regime`（kill 後留下孤兒 `in_progress`，已用 `task_pool_claim.py release` 釋放，無其他 side effect：無新 commit、無實驗檔、無殘留 process）。
+
+**解決方法**：
+1. `scripts/dispatch_supervisor/codex_failover.py`（新）— 移植 shell 版的三個 incident fix：本機 binary preflight、**逾時 ≠ binary 損壞**的診斷分流、10min failover cap（非 50min hourly cap）。
+2. `worker.py` quota / auth 兩條分支都接上 failover。auth 分支**仍然** `set_auth_blocked(True)` —— failover 買回這一小時，不代表憑證修好了。
+3. `alerts.send_codex_failover_alert()` — dedup key 帶 reason（quota / auth 各自一封）；recovered → warn，接不了 → critical。
+4. **pytest guard**（`_under_pytest()`）：測試環境預設不 exec codex，要測 failover 得顯式傳 `enabled=True`。這是安全預設，不是 silent fallback（有 LOG + detail）。
+5. `reload_dispatch_supervisor.sh --defer` — 改 supervisor code 的人通常**就是 in-flight worker 自己**（hourly fire），既不能 reload（guard 正確拒絕）也不能 `--force`（會殺自己）。`--defer` detach 一個 waiter，等 `current_job` 清空就重載，讓「改 code → 上線」留在做出改動的那一班之內。
+6. 測試 `tests/test_dispatch_supervisor_codex_failover.py`（15 個）。**在臨時 worktree 上做 break-then-verify**（per control-plane.md：不在 daemon 腳下抽地毯）：模組存在但 worker 未接線時，兩個 wiring 測試準確 FAIL —— 不是兩邊都會過的假測試。
+
+**教訓**：
+- **退役一個執行路徑時，要 grep 的不只是「它呼叫誰」，還有「它自己做了什麼」。** 現有 `test_cutover_orphans.py` 只能抓前者。一段寫在 shell 函式裡的行為，沒有任何檔案指向它，cutover 後就無聲蒸發。
+- **會產生 side effect 的 ops 動作接進任何 code path 之前，先想「測試會不會踩到它」。** `codex exec` 從測試裡被 spawn 出去 claim 任務並 commit，是比原本那個 bug 更危險的東西 —— 它在 CI 上會直接動 production 任務池。凡是「呼叫外部 agent / 寫 canonical state / 對外發布」的函式，安全預設就該是在 pytest 下關閉。
+- **測試從 5 秒變 7 分鐘是訊號，不是雜訊。** 當下差點把它當成「這個測試本來就慢」跳過。
+
+## 2026-07-10 Codex config 指到舊 CLI 不支援的 model — 全平台 codex 流程 400 靜默失敗數小時
+
+**現象**：K1675 lazypack render 連續兩次 0/3 產出（exit 0 但零 PNG）。挖 log 才見 API 400：`The 'gpt-5.6-sol' model requires a newer version of Codex`。當時 `~/.codex/config.toml` 已被設 `model="gpt-5.6-sol"` + `model_reasoning_effort="ultra"`，但已裝 CLI 是 0.142.5（不支援）。影響面 = 所有走 config 預設的 codex 呼叫（實驗 review gate / lazypack / paper review）— 靜默失敗因為呼叫端多半 capture output 後只看檔案有沒有產出。
+
+**根因**：改 config 的 session 沒有在改完後跑 smoke — config 的 model 與已裝 CLI 版本是兩個獨立變數，必須同一動作內驗證。次因：`gen_lazypack_codex.py` 把 codex stderr capture 起來，400 沒 fail-loud。
+
+**解決方法**：
+1. 臨時恢復（18:01）：config 回退 `gpt-5.4`+`high`（smoke PASS；備份 `~/.codex/config.toml.bak-20260710`）。
+2. 根治（boss 指示 gpt-5.6 已出，18:15）：CLI 升級 0.142.5 → **0.144.1**（`npm install -g @openai/codex@latest --include=optional`），config 恢復 `gpt-5.6-sol`+`ultra`，三組 smoke 全過（顯式 model / ultra effort / config 預設）。
+3. 平台底層引用同步更新（boss：不是只改這邊）：CLAUDE.md L131、`.claude/rules/experiments.md` Codex 診斷 SOP（**新增 step 6：改 config model 後必 smoke** — 機械化這條教訓的位置）、`~/.claude/skills/codex-cli/SKILL.md`（4 處）、memory `reference_dual_cli_availability`。
+4. 遺留：`gen_lazypack_codex.py` fail-loud（400 浮上 summary）在任務 `ops-codex-cli-upgrade-20260710` result 標注，待下一輪 ops 收。
+
+**教訓**：config 與執行 binary 的相容性是「兩檔案一約定」— 任一邊變動都要 smoke；被 capture 的 subprocess stderr 等於不存在，gate 型工具的錯誤必須浮上 exit path。
+
 ## 2026-07-10 `worktree remove --force` 機械 gate 只擋得住老實人 — flag 比對漏了縮寫與聚合形式
 
 **現象**：兩個獨立缺陷，同一天在同一條 deny 規則上發現。
@@ -11,10 +46,17 @@
 **解決方法**（`.claude/hooks/pretooluse-bash-optimizer.sh`）：
 - flag 比對錨定到 `git worktree remove` **自己的指令段**內（`SEG_TAIL='[^;&|]*'`，段界＝`; & |`；grep 逐行比對故換行天然是界）。
 - flag pattern 由 `(--force|-f)` 改為 `(--f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*)`。`worktree remove` 的唯一長選項是 `--force`、唯一 short flag 是 `-f`，故「`--f` 開頭」或「短 flag 群含 f」即可安全判定為 force，同時 `.claude/worktrees/wt-fix` 這種路徑（`-f` 無前導空白）不誤判。
-- 回歸測試 `scripts/tests/test_pretooluse_deny.sh` 補 7 例（`-ff` / `--for` / `--forc` / `-vf` / path 後置 `-ff` / 兩個過度攔截防護），現 34 assertions 全綠。
+- 回歸測試 `scripts/tests/test_pretooluse_deny.sh` 補 7 例（`-ff` / `--for` / `--forc` / `-vf` / path 後置 `-ff` / 兩個過度攔截防護）。
+
+**Class sweep（同日補做，老闆問「所以從底層修復了？」之後）**：上述「pattern 只認人類慣常拼法」的缺陷**不是 worktree 規則獨有 —— 三條 deny 全中**。實測放行清單：
+- `zeabur deploy` 規則：`npx zeabur@latest deploy`（npx 慣用的版本釘選）、`npx -y` / `npx --yes`、`bunx`、`pnpm dlx`、`yarn dlx`、`./node_modules/.bin/zeabur deploy` —— **7 種全放行**（舊 pattern 只認 `zeabur` 與 `npx zeabur`）。
+- 整檔讀 canonical JSON 規則：`bat` / `nl` / `view` / `tac` / `od` / `strings` —— **6 種全放行**（舊 pattern 只認 `cat|less|more`）。
+
+修法：抽出 `PKG_RUNNER` / `ZEABUR_BIN` / `FULL_READERS` 三個具名 pattern；回歸測試補到 **51 assertions 全綠**（13 個 bypass + 反向的過度攔截防護：`npx zeabur list` 不擋、`batch_render` 不擋、`deploy-zeabur-safe.sh` 不擋）。
 
 **教訓**：
 - **false positive 與 false negative 是同一個病灶的兩面**：flag 比對沒有錨定到它要保護的那個指令。只修被踩到的那一面，另一面會繼續睡著。**動任何 deny 規則時，正反兩向各測一輪**（該擋的擋不擋得住、該放的放不放得過）。
+- **修一條 deny 規則時，同批的其他規則必須一起 sweep。** 它們出自同一次「prose → 機械化」的翻譯，因此共享同一個翻譯錯誤。本次三條全中；只修被踩到的那條，等於留兩條開著。對齊 memory `feedback_declare_complete_requires_class_sweep`：宣告完成前對 bug class 做 full-population sweep，「我改的那條通過測試」只是 strike-1 門檻。
 - **機械 gate 的 pattern 必須對照工具的真實 CLI 語法，不能只對照「人類慣常寫法」**。`git` 收縮寫與聚合 flag 是 parse-options 的預設行為；prose 規則寫「禁止 `--force`」時腦中只有那一種拼法，機械化時若直譯就留下破口。**寫 deny pattern 前先跑一次 `<tool> <subcommand> --wrong-flag` 探測它到底收哪些形式。**
 - **被 gate 誤擋時，正確反應是修 gate，不是繞過它。** 本次 agent 的第一反應是把 `rm -f` 拆到另一個 Bash 呼叫繞開比對——任務是完成了，但破口留在那裡。繞道成本低會讓 gate 的失效無聲無息。
 
@@ -75,6 +117,23 @@
 - `test_trending_repost_fb_url`：改 `pytest.skip`（明示「本機資料不變式，CI 無資料可稽核」），**不假裝檢查過**。
 - 新增 `.github/workflows/pytest.yml`，**刻意不接任何 secret**（`grep -c secrets. = 0`）—— 「零憑證下全綠」這個性質本身就是防止 import-time side effect 再爬回來的護欄。先 `workflow_dispatch` 觀察，全綠後才對 push/PR 開火。
 - 驗證：乾淨無憑證 checkout **1683 passed / 0 failed**。
+
+**Follow-up correction（2026-07-10，同日第一批真 Ubuntu runs）**：上面的
+`1683 passed` 是乾淨 macOS worktree，不是 GitHub Ubuntu runner；第一次真 CI
+`29085496663` 仍有 12 failures。後續不得把這段寫成「CI 已綠」。其中兩個原先以
+skip 暫置的 clean-checkout 缺口已改為真修：
+
+- `test_trending_repost_fb_url` 不再依賴 gitignored production log，也不再 skip；
+  parser / canonical URL invariant 改用注入的 `tmp_path` JSON fixture。live log 稽核屬
+  ops audit，不把「檔案不存在」冒充測試通過。
+- `test_cron_auth_preflight` 的 Linux 分歧已在本機 Docker 決定性重現：GNU
+  `stat -f %m` 會輸出多行 filesystem report（非 epoch），被 shell arithmetic 使用後
+  拋 syntax error，控制流誤落到 `preflight-only exit 0`。wrapper 新增 BSD/GNU
+  雙路徑 mtime helper，且只接受 digits-only epoch；macOS 與 Linux container 的四個
+  preflight tests 都實際執行通過，已移除整檔 Linux skip。
+- workflow 恢復 `push(main)` / `pull_request` / manual 三種 trigger，並顯式鎖
+  `permissions: contents: read`。最終完成仍以同一 final SHA 的 GitHub Test Suite
+  `conclusion=success` 為 gate，不以本機結果代替。
 
 **⚠️ 平行實作警告**：branch `claude/upbeat-rhodes-ffaad8` 的 commit `6d2dd3a0c` 是同一問題的**另一套實作**，從 36 個 commit 前的 base 分出，已被上述 commit 鏈取代。**不要 merge**：它把 `HEADERS` 常數換成 `headers(**overrides)` 工廠函式，與 main 的 `_GuardedHeaders()` 不相容；而 `scripts/pull_reader_metrics.py` 在 merge 時**不會衝突**（main 沒動過它），會靜默採用呼叫 `headers(Prefer="")` 的版本 → 執行期 ImportError。這是「兩套設計被 merge 成一個混合體」的典型陷阱：衝突檔會被人工審視，不衝突的檔不會。本 entry 的分析大部分承襲自該 branch 的草稿，已按 main 實際落地的實作校正。
 
@@ -141,6 +200,12 @@
 **回歸測試**：`tests/test_dispatch_supervisor.py` 新增 12 tests（guard 每次真 fire 恰跑一次且嚴格早於 worker spawn / guard 崩潰或逾時不阻止 fire / `dry_run` 不呼叫 / not_due tick 不呼叫 / pregate skip 時仍跑 / subprocess 參數與 30s timeout / 真 guard 對乾淨 repo 的 idempotency）。負向驗證：拿掉 scheduler 的 guard 呼叫後，3 支 orphan 偵測器立刻 fail。**特別注意**：`crash_does_not_prevent_fire` 若不斷言 `guard 被呼叫過`，會在 guard 再次被孤兒化時**空洞通過** —— 已補 counter 斷言。
 
 **順手修**（同一條 fire path 上發現）：`tests/test_dispatch_supervisor.py` 的 fire-path 測試原本會真的 spawn `hourly_dispatch_pregate.py`（`_run_pregate` 從 module-level ROOT 解析腳本，不看測試的 `repo_root`），每跑一次 pytest 就往 `storage/logs/hourly_pregate.jsonl` 灌 4 筆合成決策 —— 而那正是判斷 shadow→enforce 是否該翻轉的觀察日誌。已加 `_stub_pregate()` 隔離。
+
+> **更正（2026-07-10 18:33）**：上面那個 `_stub_pregate()` 是**要記得手動呼叫的 helper**，不是 fixture —— 五個既有 fire-path 測試呼叫了它，但同日稍後加入的整合測試 `test_heartbeat_advances_while_worker_in_flight` 沒有，於是**污染從未停止**。單獨跑那一個測試、前後數行數，日誌 147→148，實錘。**opt-in 的防護不是防護。** 已改成 `@pytest.fixture(autouse=True)`，並加 `test_pregate_is_stubbed_for_every_test_in_this_module`（比對 `scheduler._run_pregate is not _REAL_RUN_PREGATE`）—— 拿掉 autouse 就會在那裡失敗，而不是安靜地繼續灌日誌。驗證：整檔 78 tests 跑完，日誌零成長。
+>
+> **判讀污染列**：合成列的 `invoker` 一律被 `_run_pregate` 硬寫成 `"supervisor"`，肉眼與真實派工決策無法區分；**唯一硬證據是 `ppid`**。真實派工列的 `ppid` 等於當時的 `dispatch_state.supervisor_pid`。評估 shadow→enforce 時**必須**用 `ppid` 或對照 `completions[].fire_at` 過濾，不可直接數行數（依「永遠修流程，不修資料」，既有污染列不手動刪除）。
+>
+> **這條的元教訓**：修這個 bug 的過程本身犯了同一個錯 —— 我先假設兇手是 `scripts/tests/test_scheduler_pregate.py`，跑實驗證明它清白，就宣告「測試不會污染」。**測了一個測試檔，卻對整個 test 檔案母體下結論**，正是本專案 `.claude/rules/experiments.md` §Audit methodology hard rule 明文禁止的子集 audit。真兇是另一個檔案，而答案早就寫在這條 error_log entry 裡。
 
 **教訓**：(1) **靜默的守門員是最危險的守門員** —— 一個乾淨路徑上無輸出、無 side-effect 的元件，「沒在跑」不會產生任何被動訊號，只能靠主動 inventory 發現。凡「fail-open + 乾淨時 no-op」的防護元件，上線時就該同步立一個「它是否仍被呼叫」的機械 gate。(2) 退役任何執行路徑（LaunchAgent / cron / wrapper）時，**必須先枚舉掛在它身上的完整元件清單**並逐一判定「移植 / 明確廢棄」，散文規則已被證明擋不住（這是第 4 次）。(3) sweep 用 naive grep 會被註解製造的偽陽性汙染，讓真 orphan 躲在後面 —— 掃描器本身也要有反例測試。
 ## 2026-07-10 兩個長期紅燈測試：cutover 遺留的 dead-behavior 測試 + 硬編日期 fixture 時間炸彈

@@ -84,6 +84,10 @@ yfinance ^TWII 開盤價部分時期疑似回填（zero-gap fraction 0.3%，見 
 - `k1675_results.json` — 全部數字（含 derivation_audit 可驗證）
 - `k1675_reopen_ret_dist.png` — 復市首日 vs 對照 \|報酬\| 分佈（箱型圖）
 - `k1675_rv_path.png` — 事件前後 ±5 交易日平均 \|報酬\| 路徑
+- `k1675_data_quality_article_charts.py` — 從 K1675/K758v2/K739bv2 results JSON
+  重現一般讀者文章的資料鑑識圖
+- `k1675_residual_candidate_audit.png` — 6 個殘差候選的交叉驗證分類
+- `k1675_bad_row_consequences.png` — 0050 幻影拆股斷點清理前後三項結果比較
 
 資料來源：yfinance ^TWII / 0050.TW、exchange_calendars XTAI 4.13.2、TWSE 融資融券。
 

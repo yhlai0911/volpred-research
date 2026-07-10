@@ -3043,7 +3043,14 @@ def _parse_series_registry_state(storage_dir: str) -> dict[str, Any]:
             "_series_registry_audit", str(repo_root / "scripts" / "series_registry.py"))
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        findings = mod.audit(mod._load_registry(), mod._load_feed())
+        # Read the feed through `storage_dir`, not the module's hardcoded production
+        # path. `mod._load_feed()` ignored the argument this condition is given, so
+        # an isolated fixture still audited the real feed and the breach count moved
+        # with whatever happened to be published — the 2026-07-10 CI run went red on
+        # exactly that (green on the dev mac, 4 breaches on the runner).
+        feed_path = Path(storage_dir) / "reports" / "feed.json"
+        feed = json.loads(feed_path.read_text(encoding="utf-8"))
+        findings = mod.audit(mod._load_registry(), feed)
     except Exception as exc:
         return {
             "id": "series_registry", "breached": False, "level": "info",

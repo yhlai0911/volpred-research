@@ -39,6 +39,7 @@ import math
 import re
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Statistics-context keywords. A numeric token is only audited if at least one
@@ -299,9 +300,14 @@ def run_llm_consistency_check(key_claims: str, source_summary: str) -> dict:
     """
     # zh-Hant multi-line prompt: build via heredoc-equivalent (Python string)
     # then pass as a single -p argument. agy -p takes the prompt as an arg
-    # (not stdin). Today's date is embedded to avoid stale-date misjudgement.
+    # (not stdin). Today's date is embedded DYNAMICALLY to avoid stale-date
+    # misjudgement — 2026-07-10 incident: this line was hardcoded "2026-06-03"
+    # (authoring date), so a month later the auditor flagged the REAL current
+    # date as "future date conflict" on mile_e3cede77. Exactly the bug the
+    # embedding was meant to prevent.
+    today_taipei = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
     prompt = (
-        "今天是 2026-06-03。你是一個研究文章事實查核助手。\n"
+        f"今天是 {today_taipei}。你是一個研究文章事實查核助手。\n"
         "以下是一篇波動率研究文章的『關鍵結論句』與其引用實驗的『來源數據攤平摘要』。\n"
         "請判斷文章結論是否與來源數據衝突，特別檢查以下三類錯誤：\n"
         "1. 結論挑錯最大值/最小值（例如說某層『最抖』但其實另一層波動率更高）。\n"

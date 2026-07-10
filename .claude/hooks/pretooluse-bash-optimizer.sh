@@ -29,12 +29,24 @@ SEG_TAIL='[^;&|]*'
 # 擋不住卡住的 agent。`worktree remove` 的唯一長選項是 --force，唯一 short flag 是
 # -f，故「`--f` 開頭」或「短 flag 群含 f」即可安全判定為 force。
 FORCE_FLAG='(--f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*)'
+
+# 2026-07-10 class sweep：上面那個「pattern 只認人類慣常拼法」的 bug 不是 worktree 規則
+# 獨有 — 三條 deny 全中。以下兩條同步補上 agent 卡住時真的會伸手拿的等價寫法。
+#
+# zeabur：npx 慣用 `pkg@version` 與 `-y/--yes`；同類 runner 有 bunx / pnpm dlx / yarn dlx；
+# 也可能直呼 ./node_modules/.bin/zeabur。實測舊 pattern 對這 7 種全部放行。
+PKG_RUNNER='((npx|bunx)([[:space:]]+(-y|--yes))?[[:space:]]+|(pnpm|yarn)[[:space:]]+dlx[[:space:]]+)?'
+ZEABUR_BIN='([^[:space:];&|()]*/)?zeabur(@[^[:space:]]+)?'
+# 整檔讀：cat 的等價 dumper 遠不只 less/more。列舉「會吐出整份檔案」的讀取器；
+# grep / jq / head 是 CLAUDE.md 明文放行的取用方式，不列入。
+FULL_READERS='(cat|bat|less|more|most|nl|od|tac|strings|view)'
+
 DENY_REASON=""
 if printf '%s' "$COMMAND" | grep -qE "${CMD_START}git[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]]${FORCE_FLAG}([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止 git worktree remove --force（CLAUDE.md『絕對禁止』；K1032/K1618 誤刪未合併實驗事故）。改用 bash scripts/merge_worktree.sh 正常合併；worktree 從 stale base 分出時用 git checkout <branch> -- experiments/kXXXX/ path-scoped 抽取。"
-elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}(npx[[:space:]]+)?zeabur[[:space:]]+deploy([[:space:]]|\$)"; then
+elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${PKG_RUNNER}${ZEABUR_BIN}[[:space:]]+deploy([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止直呼 zeabur deploy（frontend-and-deploy.md）。部署一律走 frontend-v2-fix/scripts/deploy-zeabur-safe.sh（鎖正確 service ID + 安全檢查）。"
-elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}(cat|less|more)[[:space:]].*(storage/reports/feed\.json|storage/memory/knowledge\.json)([[:space:]]|\$|[^A-Za-z0-9_./])"; then
+elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${FULL_READERS}[[:space:]].*(storage/reports/feed\.json|storage/memory/knowledge\.json)([[:space:]]|\$|[^A-Za-z0-9_./])"; then
   DENY_REASON="🚫 禁止整檔讀取 feed.json / knowledge.json（CLAUDE.md Token 紀律）。改用 grep / jq / 單篇 storage/reports/<id>.json；jq、grep、head 皆不受此攔截。"
 fi
 if [[ -n "$DENY_REASON" ]]; then

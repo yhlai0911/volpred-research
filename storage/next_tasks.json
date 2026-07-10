@@ -56990,7 +56990,30 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-10T04:07:43+00:00"
+    "created_at": "2026-07-10T04:07:43+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-10T14:22:31.140697+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-10T14:22:38.791488+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-10T14:26:17.614014+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-10T14:22:38.791110+00:00",
+    "last_released_at": "2026-07-10T14:26:17.613667+00:00"
   },
   {
     "id": "telegram-331",
@@ -57548,7 +57571,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "telegram-responder",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-10T09:41:36.797485+00:00",
     "title": "CI Test Suite 34 fail — 全為環境依賴，修 workflow 環境與測試 fixture",
     "description": "run 29083395825 (2026-07-10) 首次真的跑 pytest 後 34 failed / 1650 passed。本機 uv run --extra dev python -m pytest 同批全 PASS（39 passed）→ 全部是 CI 環境依賴，非產品 bug。\n根因分四類：\n1. 缺 ripgrep（9 tests, test_experiments_ops）→ workflow 加 apt-get install -y ripgrep\n2. 缺 SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY（4 tests, test_feed_sync）→ 測試改 monkeypatch env，或 CI 注入 dummy env；不可把 secret 放 CI\n3. repo_root_mismatch（6 tests, test_execution_brief / test_session_ops）→ guard 假設 repo 在 ~/volpred-research，CI 在 /home/runner/work/...；改讀 git rev-parse --show-toplevel\n4. gitignored 資料檔缺（~13 tests: trending_repost_log.json、arc_dedup / topic_cluster_gate / daily_digest 的 SystemExit:1）→ 測試改建 fixture，不依賴 storage/ 實資料\n另 test_alerts assert 4==3 與 test_cron_auth_preflight 需個別確認是否亦屬類 3/4。\n禁止用 skip/xfail 掩蓋 — 依「永遠修流程」修環境與測試 fixture。",
@@ -57567,9 +57590,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-10T12:05:53.300272+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-18"
       }
     ],
-    "started_at": "2026-07-10T10:10:24.966764+00:00"
+    "started_at": "2026-07-10T10:10:24.966764+00:00",
+    "completed_at": "2026-07-10T12:05:53.299916+00:00",
+    "result": "hourly-18 session-limit orphan 已由 ci-green-20260710 接手收尾；同一 final SHA d611ccdcb 的 GitHub Test Suite run 29091180310 conclusion=success，34 個原始 CI failures 全部真修且未用新增 skip/xfail 掩蓋。"
   },
   {
     "id": "ops-codex-cli-upgrade-20260710",
@@ -57607,7 +57638,7 @@
     "title": "K1675: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1675 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: K1675 台股颱風停市事件研究（2012-2025，^TWII + 0050 雙源驗證；觸發事件=2026-07-10 颱風巴威停市）。停市日推導：XTAI adhoc_holidays（15 天）∪ 殘差掃描（+2024-10-31 康芮，library 漏列）；殘差 false positives 用 TWSE 融資融券獨立第二來源 + 假期鄰接剔除；共 16 停市日 / 13 事件。主結論（null 即結論）：(1) 復市首日 |報酬| 0.871% vs 同月對照日 0.706%，bootstrap 95% CI [-0.235%, +0.66",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1675",
@@ -57616,7 +57647,33 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-10T10:08:37+00:00"
+    "created_at": "2026-07-10T10:08:37+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-10T13:09:42.835026+00:00",
+    "claim_session_id": "cddded5fc30b",
+    "status_history": [
+      {
+        "ts": "2026-07-10T13:09:42.835424+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-10T13:09:46.041480+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-10T13:29:25.628476+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-10T13:09:46.041011+00:00",
+    "completed_at": "2026-07-10T13:29:25.628060+00:00",
+    "result": "完成一般讀者常青稿 mile_3c3b4201（audience=general、status=draft、2,911 字、4 個 experiment refs），以資料鑑識軸避開既有事件稿。新增兩張 results-bound 圖並上傳驗證 HTTP 200；feed-sync failed=0，lazypack-mile_3c3b4201 已排入 async queue。"
   },
   {
     "id": "telegram-369",
@@ -57652,7 +57709,7 @@
     "description": "Gmail UID: 11968\nMessage-ID: <053C2099-F40E-405C-940C-12FB80BF175F@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 10 Jul 2026 18:01:58 +0800\nSubject: Re: [VolPred Alert][INFO] 發文脫班已解除：已發 mile_66c3fc3b + 修掉兩個圖片相關 bug\n\n--- 用戶回信內容 ---\n不是說可以當班處理的就立即當班處理嗎？ 那個孤兒應該要立刻處理吧\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月10日 17:52 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 發文脫班已解除：已發 mile_66c3fc3b + 修掉兩個圖片相關 bug\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 發文脫班已解除\r\n> \r\n> 結論：已發佈一篇新文章，發文間隔從 8.14 小時 回到 0.01 小時，警報解除。\r\n> 為什麼 force-release 和 refill 都回 0\r\n> \r\n> 不是壞掉，是照設計在說「沒有乾淨的東西可以發」：\r\n> 池子裡 5 篇草稿全部被標記為「和已發文章講同一個故事」（舊題材重複）。\r\n> 補池要用的研究題目（K backlog）也全部是 舊題材重複。\r\n> 補救階梯第 2 步的斷路器刻意拒絕把重複內容再發一次，直接回 0，要求產出新內容。\r\n> 所以正確處置是寫一篇新的，而不是硬推舊的。\r\n> 發了什麼\r\n> \r\n> 〈股市在怕，債市沒在怕：信用市場對這波科技股震盪的沉默〉（mile_66c3fc3b）\r\n> 7/9 收盤，那斯達克 100 的 20 日波動率衝到 30.95%，比自身 60 日均值高 8.7 個百分點；\r\n> 同一天高收益債 ETF 的波動率反而降 1.38 個百分點，利差還收窄 7.5 個基點。\r\n> 把條件設成一樣，翻出過去 59 個同樣「股票波動率跑這麼熱」的交易日：\r\n> 指標\t現值\t相對 60 日均值\t歷史中位數\t百分位\r\n> QQQ 20 日波動率\t30.95%\t+8.70 pp\t—（條件本身）\t—\r\n> HYG 20 日波動率\t3.31%\t−1.38 pp\t+0.47 pp\t0（最低）\r\n> 高收益利差\t2.70%\t−7.5 bp\t+26.9 bp\t15\r\n> 利差收窄其實三成機率會發生，不算異象。真正罕見的是信用資產自己的價格變得更安穩。\r\n> 資料 yfinance + FRED，2 張真圖 + 懶人包 3 圖。寫前過 arc 查重 gate，寫後過 anti-AI gate。\r\n> 另外抓到兩個 bug（都已修並驗證）\r\n> \r\n> 發佈過程中撞到的，順手根治：\r\n> 圖片會互相覆蓋：上傳到 Supabase 的檔名沒有帶文章名，而懶人包檔名是固定的\r\n> （lazy1_concept.png 之類）。等於任兩篇有懶人包的文章必然蓋掉對方的圖。\r\n> 已改成用文章資料夾當命名空間，舊連結照常可用。\r\n> 預覽模式會真的寫遠端：--dry-run 名為預覽，實際上在檢查旗標之前就把圖片上傳了。\r\n> 我今天的預覽因此蓋掉了 7/9 半導體那篇的三張懶人包圖 —— 已用 hash 比對確認完整復原，\r\n> 並修掉預覽的副作用。\r\n> 兩個修正都留了機械測試（7 passed），舊行為可重現碰撞。\r\n> 一個提醒\r\n> \r\n> dispatcher 目前顯示 slot 6/4 已滿、活躍 agent 0 —— 6 個 worktree 是孤兒，其中 5 個\r\n> 的 commit 早就在 main 上。這會讓派工完全停擺（沒人能被派去寫文章），是這次脫班的\r\n> 結構性背景。我沒有在這一班清理，因為當下有另一個 session 正在同一個工作區編輯檔案，\r\n> 併發清 worktree 有風險。已記錄，下一班處理。\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -57672,29 +57729,154 @@
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-10T10:22:43.681898+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "interactive-claude"
       }
-    ]
+    ],
+    "completed_at": "2026-07-10T10:22:43.680748+00:00",
+    "result": "孤兒 worktree 當班清完：slot 6/4→1/4（3 空位），641+517 行工作保存至 claude/cron-marker-truth 與 claude/eloquent-chatterjee-32e858 branch，零遺失。close email 已寄（telegram msg 372）。待辦：兩 branch merge 回 main（與今日 supabase_sync/error_log 改動有衝突面，待 18:07 worker 收工後處理）"
   },
   {
     "id": "ci-green-20260710",
     "task_type": "platform_ops",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-10T10:15:43.763233+00:00",
     "title": "修好 CI Test Suite 34 個失敗（run 29083395825）",
-    "description": "背景：import-time raise 修掉後 CI 首次真的跑測試，暴露 34 個 CI-env 失敗（1650 passed）。\n五類根因（都要修測試/流程，不是塞 env 掩蓋）：\n1. tests/test_experiments_ops.py (8 fail) — FileNotFoundError 'rg'：CI runner 無 ripgrep。修法：程式面 grep fallback 或 workflow 安裝 ripgrep（擇一，寫明理由）。\n2. tests/test_feed_sync.py (4 fail) — RuntimeError Missing SUPABASE_URL：測試不該需要真 env，改成 monkeypatch/fixture 注入假 client。\n3. tests/test_session_ops.py (2 fail) — RuntimeError repo_root_mismatch：CI runner path 與 repo_root 假設不符。\n4. tests/test_topic_cluster_gate.py (7 fail) — SystemExit: 1，gate script 在 CI 環境 exit non-zero。\n5. tests/test_trending_repost_fb_url.py (2 fail) — storage/reports/trending_repost_log.json 不存在（gitignored）：測試要 skip 或用 fixture。\n成功標準：Test Suite workflow 在 main 上 conclusion=success，且無 xfail/skip 掩蓋。完成後 Telegram 回報老闆。"
+    "description": "背景：import-time raise 修掉後 CI 首次真的跑測試，暴露 34 個 CI-env 失敗（1650 passed）。\n五類根因（都要修測試/流程，不是塞 env 掩蓋）：\n1. tests/test_experiments_ops.py (8 fail) — FileNotFoundError 'rg'：CI runner 無 ripgrep。修法：程式面 grep fallback 或 workflow 安裝 ripgrep（擇一，寫明理由）。\n2. tests/test_feed_sync.py (4 fail) — RuntimeError Missing SUPABASE_URL：測試不該需要真 env，改成 monkeypatch/fixture 注入假 client。\n3. tests/test_session_ops.py (2 fail) — RuntimeError repo_root_mismatch：CI runner path 與 repo_root 假設不符。\n4. tests/test_topic_cluster_gate.py (7 fail) — SystemExit: 1，gate script 在 CI 環境 exit non-zero。\n5. tests/test_trending_repost_fb_url.py (2 fail) — storage/reports/trending_repost_log.json 不存在（gitignored）：測試要 skip 或用 fixture。\n成功標準：Test Suite workflow 在 main 上 conclusion=success，且無 xfail/skip 掩蓋。完成後 Telegram 回報老闆。",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-10T10:34:58.088306+00:00",
+    "claim_session_id": "5426870524b4",
+    "status_history": [
+      {
+        "ts": "2026-07-10T10:34:58.088968+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-10T10:34:58.397149+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-10T12:05:53.023948+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-10T10:34:58.396818+00:00",
+    "completed_at": "2026-07-10T12:05:53.023532+00:00",
+    "result": "GitHub Test Suite run 29091180310 在 main@d611ccdcb 自動 push trigger 下 conclusion=success；隔離全套 1761 passed/6 baseline skipped。修復 host/production fixture 洩漏、GNU/BSD stat portability，移除本 incident 新增的全部 skip/xfail，並恢復 push/PR gate。"
   },
   {
     "id": "ops-tier2-audit-date-grounding-20260710",
     "task_type": "platform_ops",
     "priority": 4,
     "source": "k1675-publish-observation",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agentable",
     "topology": "subagent",
     "created_at": "2026-07-10T10:21:29.211732+00:00",
     "title": "prepublish Tier-2 audit 的 LLM 缺當日日期 grounding — 誤報未來日期",
-    "description": "2026-07-10 發佈 mile_e3cede77 時 Tier-2（audit_conclusion_consistency，agy/gemini-flash）誤報：『文章將今天描述為 2026-07-10，與設定之今日日期 2026-06-03 衝突』— audit LLM 的今日認知過期，把當天日期當未來。warn-only 不擋但產生噪音 flag。修法：src/volpred/publisher/prepublish_audit.py 的 conclusion-consistency prompt 注入真實當日日期（datetime.now 台北時區），並加一行 regression test。"
+    "description": "2026-07-10 發佈 mile_e3cede77 時 Tier-2（audit_conclusion_consistency，agy/gemini-flash）誤報：『文章將今天描述為 2026-07-10，與設定之今日日期 2026-06-03 衝突』— audit LLM 的今日認知過期，把當天日期當未來。warn-only 不擋但產生噪音 flag。修法：src/volpred/publisher/prepublish_audit.py 的 conclusion-consistency prompt 注入真實當日日期（datetime.now 台北時區），並加一行 regression test。",
+    "claimed_by": "main-session",
+    "claimed_at": "2026-07-10T10:28:03.279673+00:00",
+    "claim_session_id": "fdb60732",
+    "status_history": [
+      {
+        "ts": "2026-07-10T10:28:03.280473+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main-session"
+      },
+      {
+        "ts": "2026-07-10T10:28:03.694664+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-session"
+      }
+    ],
+    "completed_at": "2026-07-10T10:28:03.694292+00:00",
+    "result": "根因比預期更諷刺：prompt 本來就嵌日期防過期誤判，但嵌的是寫死的 2026-06-03（authoring date）。改為 datetime.now(台北) 動態注入；gen_lazypack_codex.py 零產出時同步浮出 CODEX-ERROR + smoke HINT。py_compile + 相關測試過。"
+  },
+  {
+    "id": "telegram-376",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T12:20:50.585895+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 376）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我想確認claude的額度到了時候 codex app會自動接手嗎\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-07-10T14:08:20.340962+00:00",
+    "claim_session_id": "87731eb263ea",
+    "status_history": [
+      {
+        "ts": "2026-07-10T14:08:20.341325+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-10T14:08:20.844906+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-10T14:30:47.949209+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-22"
+      }
+    ],
+    "started_at": "2026-07-10T14:08:20.844535+00:00",
+    "completed_at": "2026-07-10T14:30:47.948860+00:00",
+    "result": "�?��??�?�??�?�?supervisor cutover �? codex failover �?�失�?�?�??�?��??�?��??�?�?�?�場修復 commit e88ed373e + pytest guard + deferred reload�??Telegram msg 381"
+  },
+  {
+    "id": "telegram-378",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T12:27:42.341873+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 378）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n另外根據這張圖有關Fable跟Codex sol的比較 你在做Agent和sub Agent互動模式建立時 可以採用這樣的關係來發配任務 不一定所有的模型都要使用claude 途中的部分適合Codex則使用Codex app的codex exec做sub agent 這樣是可以的嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-07-10T14:08:20.589789+00:00",
+    "claim_session_id": "704bb6c73b64",
+    "status_history": [
+      {
+        "ts": "2026-07-10T14:08:20.590104+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-10T14:08:21.096764+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-10T14:30:48.205101+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-22"
+      }
+    ],
+    "started_at": "2026-07-10T14:08:21.096355+00:00",
+    "completed_at": "2026-07-10T14:30:48.204725+00:00",
+    "result": "�??�?�?codex exec �?� sub agent �?��?�?已�?� task-routing.md �?��?��?說�?? Claude/Codex �??工�? + �?��?�?度�?��?��?�?�??�??�?�?��?�?�??以校�? routing 表�??Telegram msg 382"
   }
 ]

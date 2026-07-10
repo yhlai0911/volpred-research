@@ -15300,5 +15300,100 @@
     "actor": "main-session",
     "outcome": "succeeded",
     "summary": "Codex CLI 0.144.1 升級 + gpt-5.6-sol/ultra 全平台切換（config+CLAUDE.md+rules+skill+memory）"
+  },
+  {
+    "ts": "2026-07-10T10:24:21.000000+00:00",
+    "task_type": "platform_ops",
+    "actor": "hourly-18",
+    "outcome": "succeeded",
+    "summary": "CI 真跑驗證：push 揭露首次真實 run 是紅的（12 failed）；修掉 9 條 ripgrep 缺失（workflow 裝 rg + 缺 rg 改拋可行動 RuntimeError + regression）。另修 pretooluse worktree-remove deny hook 的 force-flag 誤判（rm -f 被誤算），清掉 2 個死 worktree 釋出 slot。"
+  },
+  {
+    "timestamp": "2026-07-10T18:41:01+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-fb18101bd",
+    "outcome": "succeeded",
+    "summary": "fix(ci): isolate series-registry alert fixture",
+    "commit": "fb18101bdc180f25c42883712d37e6274f60ef18",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T12:07:34.824919+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T19:09:57+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-7659d0cd6",
+    "outcome": "succeeded",
+    "summary": "fix(ci): isolate host-only dispatch health",
+    "commit": "7659d0cd6ded8f19823720c31abf951954a124d9",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T12:07:34.824913+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T19:11:22+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-256df4e71",
+    "outcome": "succeeded",
+    "summary": "ci: restore automatic Test Suite gates",
+    "commit": "256df4e71b9a29c0d8c2ed6e088a376d59dde9bf",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T12:07:34.824906+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T19:23:40+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-d611ccdcb",
+    "outcome": "succeeded",
+    "summary": "fix(ci): remove clean-checkout test skips",
+    "commit": "d611ccdcb03885e0fc79bacbc2ad32a91953988e",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T12:07:34.824898+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T20:06:38+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-27ae20f73",
+    "outcome": "succeeded",
+    "summary": "ops: close CI hardening tasks",
+    "commit": "27ae20f734d36b466ccf75ecb99391b60584c9f9",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T12:07:34.824572+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-10T21:30:14+08:00",
+    "task_type": "daily_article",
+    "task_id": "codex-commit-cf3736334",
+    "outcome": "succeeded",
+    "summary": "publish K1675 data-quality article",
+    "commit": "cf3736334b8cfc409ede11ee577a2743487f32af",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T13:48:16.124271+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1675"
+  },
+  {
+    "timestamp": "2026-07-10T21:47:35+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-6c81ebd5d",
+    "outcome": "succeeded",
+    "summary": "finalize K1675 lazypack artifacts",
+    "commit": "6c81ebd5d7e3bd056c6d3a99eec2cf6965268afd",
+    "owner": "codex",
+    "backfilled_at": "2026-07-10T13:48:16.123947+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1675"
+  },
+  {
+    "timestamp": "2026-07-10T22:26:51+08:00",
+    "task_type": "platform_ops",
+    "task_id": "supervisor-codex-failover-restore-20260710",
+    "outcome": "succeeded",
+    "summary": "2026-07-04 supervisor cutover 把 Claude→Codex failover 留在退役的 cron_hourly_dispatch.sh：quota/auth 掛掉時 supervisor 只寄信不接手，每次額度用完都靜默丟掉整批 hourly slot。移植成 scripts/dispatch_supervisor/codex_failover.py + wire 進 worker 的 quota/auth 分支 + 15 個回歸測試。過程中發現 failover 會被 pytest 觸發、真的 spawn codex（既有 auth 測試 hang 7 分鐘並 claim 了 research_safe_haven_regime）→ 加 pytest guard + release 孤兒 claim。觸發來源：老闆 Telegram msg 376/378。",
+    "owner": "claude",
+    "actor": "hourly-22"
   }
 ]

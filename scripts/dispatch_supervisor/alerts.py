@@ -128,6 +128,65 @@ def send_quota_alert(*, log_tail: str = "", state_path: Path = state.STATE_PATH)
     return True
 
 
+def send_codex_failover_alert(
+    *,
+    reason: str,
+    recovered: bool,
+    exit_code: int,
+    detail: str,
+    attempted: bool = True,
+    output_tail: str = "",
+    state_path: Path = state.STATE_PATH,
+) -> bool:
+    """Claude 掛了、Codex 接手（或也接不了）。Dedup 4h per reason.
+
+    `reason` is the Claude-side failure class ("quota" / "auth"), so a quota
+    outage and an auth break each get their own email rather than one muting
+    the other.
+    """
+    key = f"codex_failover_{reason}"
+    if state.should_dedup_alert(key, window_s=4 * 3600, path=state_path):
+        return False
+    claude_side = {
+        "quota": "Claude Code 額度用完（會在額度重置時自行恢復）",
+        "auth": "Claude CLI 認證失效（**需人工處理**）",
+    }.get(reason, f"Claude 端失敗（{reason}）")
+
+    if recovered:
+        headline = "# Claude 這班派不了工，已由 Codex 接手完成"
+        impact = (
+            "- 本班的 Codex-eligible 工作已由 Codex 做掉（ChatGPT 帳號額度，與 Claude 完全獨立）\n"
+            "- 讀者向文章 / email 回信 / FB / 論文正文仍只能由 Claude 做，會累積到 Claude 恢復\n"
+        )
+    elif attempted:
+        headline = "# Claude 這班派不了工，Codex 也接不了"
+        impact = "- 本班的 hourly slot 沒有產出；兩邊都不可用\n"
+    else:
+        headline = "# Claude 這班派不了工，Codex failover 未啟動"
+        impact = "- 本班的 hourly slot 沒有產出；failover 在真正呼叫 Codex 之前就停住了\n"
+
+    body = (
+        f"{headline}\n\n"
+        "## 發生什麼事\n"
+        f"- Claude 端：{claude_side}\n"
+        f"- Codex 端：{detail}（exit code {exit_code}）\n\n"
+        "## 影響\n" + impact + "\n"
+        "## 需要你做什麼\n"
+        + (
+            "- Claude 認證要人工修復，指令見另一封 `supervisor auth_blocked` 通知\n"
+            if reason == "auth"
+            else "- 不用做什麼；額度恢復後下一班自動回到 Claude\n"
+        )
+        + "\n## Codex 輸出片段\n\n"
+        "```\n" + (output_tail[-1500:] if output_tail else "(無輸出)") + "\n```\n"
+    )
+    level = "warn" if recovered else "critical"
+    status = "已接手" if recovered else "接手失敗"
+    _send(level, f"Claude→Codex failover {status}（Claude 端：{reason}）", body)
+    state.mark_alert_sent(key, path=state_path)
+    return True
+
+
 def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path = state.STATE_PATH) -> bool:
     """Hang-killed alert. Dedup 10min."""
     key = "hang_killed"

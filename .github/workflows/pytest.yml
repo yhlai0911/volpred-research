@@ -26,15 +26,20 @@ name: Test Suite
 #   - config/brief_templates/*.yaml hardcoded the author's absolute repo path,
 #     so every brief-backed task would `repo_root_mismatch` on any other machine
 #   - tests/test_feed_sync.py issued real reads against PRODUCTION Supabase
-# RE-NARROWED to workflow_dispatch (2026-07-10, run 29085496663). A clean macOS
-# worktree was green (1683/0), but the FIRST real CI run on ubuntu was red:
-# 12 failed / 1731 passed. "Green on my machine without credentials" turned out
-# not to imply "green on a Linux runner" — the remaining couplings are to the OS
-# and to git/tool identity, not to secrets. Same rule as before: this flips back
-# to push/pull_request only in the commit that makes an actual CI run green, not
-# a local one.
+# Temporarily narrowed to workflow_dispatch after the first Ubuntu run
+# (29085496663) exposed 12 OS/tool-identity couplings despite a clean macOS run.
+# The follow-up real runs reduced that set to one host-only alert fixture
+# (29088232678); the fix batch that removes that final coupling restores the
+# automatic triggers here, so this push is itself the isolated acceptance gate.
 on:
+  pull_request:
+  push:
+    branches:
+      - main
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   pytest:
@@ -45,6 +50,14 @@ jobs:
       VOLPRED_NO_EMAIL: "1"
     steps:
       - uses: actions/checkout@v4
+      - name: Install ripgrep
+        # `volpred.ops.experiments` shells out to `rg` to find references to an
+        # experiment's files before moving them. It is a real runtime dependency
+        # of that code path (present on the dev mac via homebrew), not a test
+        # convenience — 9 tests in test_experiments_ops.py died on `rg` missing
+        # in the first real CI run (29085496663). Installing it here keeps the
+        # runner honest about what production actually needs.
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:

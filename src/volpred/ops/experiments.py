@@ -110,27 +110,37 @@ def _collect_reference_hits(
     root_path: Path,
     max_hits: int | None = 10,
 ) -> dict[str, Any]:
-    result = subprocess.run(
-        [
-            "rg",
-            "-n",
-            "-F",
-            "--color",
-            "never",
-            "--glob",
-            "!frontend-v2-fix/.next/**",
-            "--glob",
-            "!.git/**",
-            "--glob",
-            "!storage/ops/rollback_points/**",
-            relative_path,
-            ".",
-        ],
-        cwd=root_path,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            [
+                "rg",
+                "-n",
+                "-F",
+                "--color",
+                "never",
+                "--glob",
+                "!frontend-v2-fix/.next/**",
+                "--glob",
+                "!.git/**",
+                "--glob",
+                "!storage/ops/rollback_points/**",
+                relative_path,
+                ".",
+            ],
+            cwd=root_path,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        # Not a fallback: without rg we cannot enumerate references, and moving an
+        # experiment's files while silently reporting "no references" would leave
+        # dangling paths across the repo. Fail loud, and say how to fix it.
+        raise RuntimeError(
+            "ripgrep (rg) is required to scan for experiment references but was not "
+            "found on PATH. Install it (macOS: brew install ripgrep; Debian/Ubuntu: "
+            "apt-get install ripgrep) and retry."
+        ) from exc
     if result.returncode not in {0, 1}:
         raise RuntimeError(result.stderr.strip() or f"rg failed while searching for {relative_path}")
 

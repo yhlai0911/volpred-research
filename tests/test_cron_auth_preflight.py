@@ -5,7 +5,6 @@ import stat
 import subprocess
 from pathlib import Path
 
-
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "cron_hourly_dispatch.sh"
 
 
@@ -169,7 +168,8 @@ def test_auth_preflight_sends_actionable_alert_on_double_failure(tmp_path: Path)
         timeout=10,
     )
 
-    assert result.returncode == 1
+    log_path = tmp_path / ".volpred" / "logs" / "hourly_dispatch.log"
+    assert result.returncode == 1, log_path.read_text(encoding="utf-8")
     args_text = (tmp_path / "uv_args.txt").read_text(encoding="utf-8")
     body_text = (tmp_path / "uv_body.txt").read_text(encoding="utf-8")
     assert "send-alert" in args_text
@@ -235,7 +235,8 @@ def test_auth_preflight_tcc_shaped_failure_diagnoses_claude_update(tmp_path: Pat
         timeout=10,
     )
 
-    assert result.returncode == 1
+    log_path = tmp_path / ".volpred" / "logs" / "hourly_dispatch.log"
+    assert result.returncode == 1, log_path.read_text(encoding="utf-8")
     args_text = (tmp_path / "uv_args.txt").read_text(encoding="utf-8")
     body_text = (tmp_path / "uv_body.txt").read_text(encoding="utf-8")
     assert "send-alert" in args_text
