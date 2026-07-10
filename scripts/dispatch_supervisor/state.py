@@ -17,13 +17,18 @@ Schema (version 1)::
         "attempt": int,                          # 1..3
         "model": "opus",                         # all attempts opus (2026-07-05 all-opus directive)
         "log_path": str,
-        "restart_cleanup_pending": true           # only present while a restart-orphan investigation is in flight
-      },
+        "restart_cleanup_pending": true,          # only present while a restart-orphan investigation is in flight
+        "cleanup_recorded": true,                 # append_completion_entry() stamped this orphan's entry
+        "cleanup_outcome": str                    # …and which outcome, so a crash-before-finalize retry
+      },                                          #    knows whether to re-alert without re-appending
       "completions": [                           # ring buffer (max 100 entries)
         {
           "fire_at": "<ISO>", "completed_at": "<ISO>",
           "exit_code": int, "duration_s": float,
           "attempts": int, "final_model": str,
+          # 下三者只在 orphan 路徑（append_completion_entry 且 job 有 pid）出現，
+          # 供事後人工核對是哪個行程 — 一般 record_completion() 的 entry 沒有。
+          "pid": int, "pgid": int, "started_wall": str,
           "outcome": "success" | "failure" | "killed_timeout" | "silent_death" |
                      "timeout_unverified" | "killed_supervisor_restart" |
                      "orphan_gone_or_reused" | "orphan_unverified_not_killed" |

@@ -895,3 +895,109 @@ def test_every_written_field_is_declared_in_empty_state():
         f"這些欄位有 writer 但 _empty_state() 沒宣告，會產生 null/absent 不可分辨："
         f" {sorted(undeclared)}"
     )
+
+
+def _subblock_keys_from_docstring(anchor: str, closer: str) -> set[str]:
+    """切出 docstring schema 裡某個巢狀 block，回傳它列出的欄位。
+
+    不能只靠縮排全域掃：`alerts_dedup` 的示例子鍵與 current_job 的欄位同為 8 空格，
+    必須先切 block。也**不可錨定行首** —— completions entry 是一行兩個 key
+    （`"fire_at": "<ISO>", "completed_at": "<ISO>",`），錨行首只抓得到每行第一個，
+    會把 completed_at / duration_s / final_model 誤報成「有 writer 沒文件」。
+    2026-07-10 實測踩過此坑，差點產出 6 個假發現（真正漏的只有 pid/pgid/started_wall）。
+    """
+    doc = inspect.getdoc(st) or ""
+    lines = doc.splitlines()
+    start = next(i for i, ln in enumerate(lines) if anchor in ln)
+    end = next(i for i in range(start + 1, len(lines)) if re.match(closer, lines[i]))
+    return set(re.findall(r'"(\w+)"\s*:', "\n".join(lines[start + 1:end])))
+
+
+def _current_job_keys_from_docstring() -> set[str]:
+    return _subblock_keys_from_docstring('"current_job"', r'^ {6}\},')
+
+
+def _completion_entry_keys_from_docstring() -> set[str]:
+    return _subblock_keys_from_docstring('"completions"', r'^ {6}\],')
+
+
+def test_current_job_shape_matches_docstring(tmp_state):
+    """**Runtime** shape gate（不是 AST）：跑真正的 writer，檢查它們產出的
+    `current_job` 只含 docstring 列出的欄位。
+
+    為什麼不用 AST：current_job 有三種寫入形式 —— `data["current_job"] = {literal}`、
+    `data["current_job"]["k"] = v`、以及先取別名 `job["k"] = v` 再整包指派。要用
+    AST 穩健涵蓋第三種需要 dataflow 分析；靠變數命名慣例（`job`）猜就是啟發式，
+    換個名字就靜默漏掉。改成驅動真 writer、檢查真產物 —— sound，且別名寫法藏不住。
+
+    2026-07-10 實測抓到：`cleanup_recorded` / `cleanup_outcome` 由
+    `append_completion_entry(mark_cleanup_recorded=True)` 寫入 current_job，
+    但 docstring 從未列出（與 fire_requested_at 同一病：有 writer、無文件）。
+    """
+    documented = _current_job_keys_from_docstring()
+    assert documented, "current_job block 解析失敗（docstring 結構改了？）"
+
+    def observed() -> set[str]:
+        cj = st.read_state(tmp_state).get("current_job")
+        return set(cj.keys()) if cj else set()
+
+    def check(stage: str) -> None:
+        undocumented = observed() - documented
+        assert not undocumented, (
+            f"[{stage}] current_job 出現 docstring 沒列的欄位: {sorted(undocumented)}"
+        )
+
+    st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                    log_path="/tmp/x.log", path=tmp_state)
+    check("reserve_fire")
+
+    st.attach_process(pid=4242, pgid=4242, started_wall="Fri Jul 10 12:00:00 2026",
+                      path=tmp_state)
+    check("attach_process")
+
+    job = st.mark_restart_orphan_pending(path=tmp_state)
+    check("mark_restart_orphan_pending")
+    assert job is not None
+
+    st.append_completion_entry(job, exit_code=0, outcome="orphan_gone_or_reused",
+                               final_model="opus", path=tmp_state,
+                               mark_cleanup_recorded=True)
+    check("append_completion_entry(mark_cleanup_recorded=True)")
+
+
+def test_completion_entry_shape_matches_docstring(tmp_state):
+    """同一個 runtime shape gate，往下一層：completions[] entry。
+
+    `append_completion_entry()` 在 job 有 pid 時額外蓋 `pid`/`pgid`/`started_wall`
+    （orphan 路徑專用，一般 `record_completion()` 的 entry 沒有）。2026-07-10 實測
+    這三個欄位有 writer 但 docstring 從未列出 —— 與 fire_requested_at /
+    cleanup_recorded 同一病，只是深一層。兩條 entry 產生路徑都要驗。
+    """
+    documented = _completion_entry_keys_from_docstring()
+    assert documented, "completions block 解析失敗（docstring 結構改了？）"
+
+    # 路徑 1：orphan — append_completion_entry（會多蓋 pid/pgid/started_wall）
+    st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                    log_path="/tmp/x.log", path=tmp_state)
+    st.attach_process(pid=4242, pgid=4242, started_wall="Fri Jul 10 12:00:00 2026",
+                      path=tmp_state)
+    job = st.mark_restart_orphan_pending(path=tmp_state)
+    st.append_completion_entry(job, exit_code=0, outcome="orphan_gone_or_reused",
+                               final_model="opus", path=tmp_state)
+    entry = st.read_state(tmp_state)["completions"][-1]
+    undocumented = set(entry) - documented
+    assert not undocumented, f"[append_completion_entry] 未文件化欄位: {sorted(undocumented)}"
+    assert {"pid", "pgid", "started_wall"} <= set(entry), (
+        "orphan 路徑沒蓋上 pid/pgid/started_wall → 掃描範圍自檢失效（假綠燈）"
+    )
+
+    # 路徑 2：正常收班 — record_completion
+    st.finalize_restart_orphan_cleanup(path=tmp_state)
+    st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                    log_path="/tmp/y.log", path=tmp_state)
+    st.attach_process(pid=99, pgid=99, started_wall="w", path=tmp_state)
+    st.record_completion(exit_code=0, outcome="success", final_model="opus",
+                         path=tmp_state)
+    entry2 = st.read_state(tmp_state)["completions"][-1]
+    undocumented2 = set(entry2) - documented
+    assert not undocumented2, f"[record_completion] 未文件化欄位: {sorted(undocumented2)}"
