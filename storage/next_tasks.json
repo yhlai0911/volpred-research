@@ -56981,7 +56981,7 @@
     "title": "研究 backlog fallback: 黃金 safe-haven 屬性的 regime 依賴與美元/實質利率脫鉤",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 黃金 safe-haven 屬性的 regime 依賴與美元/實質利率脫鉤 — yfinance GLD/SPY/UUP + FRED 實質利率，滾動檢定 gold-equity 與 gold-dollar 相關在 risk-off vs 一般期是否變號，量化 gold 作 tail hedge 的條件有效性（與既有 alt-asset/DXY 題不同，聚焦 safe-haven 相關 regime 切換）（來源：LSEG/WGC 2025；2025 gold +50% 與股脫鉤但對 vol hedge 落後） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -57010,10 +57010,25 @@
         "to": "pending",
         "by": "codex-failover",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-10T14:48:59.255936+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-10T14:49:03.204613+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
       }
     ],
-    "started_at": "2026-07-10T14:22:38.791110+00:00",
-    "last_released_at": "2026-07-10T14:26:17.613667+00:00"
+    "started_at": "2026-07-10T14:49:03.203907+00:00",
+    "last_released_at": "2026-07-10T14:26:17.613667+00:00",
+    "claimed_by": "codex-failover",
+    "claimed_at": "2026-07-10T14:48:59.251649+00:00",
+    "claim_session_id": "372d9688565a"
   },
   {
     "id": "telegram-331",
@@ -57878,5 +57893,27 @@
     "started_at": "2026-07-10T14:08:21.096355+00:00",
     "completed_at": "2026-07-10T14:30:48.204725+00:00",
     "result": "�??�?�?codex exec �?� sub agent �?��?�?已�?� task-routing.md �?��?��?說�?? Claude/Codex �??工�? + �?��?�?度�?��?��?�?�??�??�?�?��?�?�??以校�? routing 表�??Telegram msg 382"
+  },
+  {
+    "id": "telegram-411",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "pending",
+    "created_at": "2026-07-10T15:07:20.215023+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 411）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻改正\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+  },
+  {
+    "id": "ops-offslot-duplicate-fire-20260710",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "pregate-cadence-rootcause-20260710",
+    "status": "pending",
+    "dispatch_lane": "agentable",
+    "topology": "subagent",
+    "created_at": "2026-07-10T15:08:43.291887+00:00",
+    "title": "同一 cron slot 重複 fire — 159 班中 9 次 off-slot，每次白燒 ~95K opus cold-load",
+    "description": "證據（2026-07-10 23:0x 主線程掃 ~/.volpred/logs/dispatch_supervisor_launchd.err 的 `firing worker` 行，比對 fired_at vs prev_scheduled）：159 次 fire 中 9 次的 lag > 5 分鐘 —— 07-07 09:45(+38m)、07-07 10:00(+53m)、07-07 12:30(+24m)、07-08 01:30(+24m)、07-08 01:45(+39m)、07-09 16:31(+24m)、07-10 14:00(+54m)、07-10 17:30(+24m)、07-10 22:58(+51m，補打 22:07 slot)。每次 = 完整 ~95K opus cold-load，直接吃掉 quota（今日 quota 兩度耗盡）。\n\n已排除：磁碟版 scheduler._due_to_fire(cron='7 * * * *', last_fire_at='2026-07-10T14:07:51+00:00', now=22:58) 主線程實測回 due=False —— 磁碟程式在該時刻不該 fire。\n\n最可能方向（未定案，請驗證後再改）：\n1. **daemon 記憶體副本 vs 磁碟不同步**。22:58 那次 fire 時 daemon 啟動於 22:37:10，而 scripts/dispatch_supervisor/state.py 的 mtime 是 22:57:21（晚於啟動），worker.py 是 22:12。常駐 daemon 讀的是啟動時載入的副本 —— 若當時載入的 state.py/scheduler.py 版本對 last_fire_at 的讀取或時區處理與現版不同，就會誤判 due（control-plane.md 已有『程式碼寫完不等於上線』條）。\n2. **read_state 的 schema-version reset**。若某次 SCHEMA_VERSION bump 讓 read_state() 回 _empty_state()，last_fire_at 變 None → _due_to_fire 直接 return True → 重啟後立刻補打一班。注意 off-slot fire 的時間點與 daemon 重啟高度相關，這條要優先驗。\n3. worker 跑滿後 current_job 清空的那一 tick 重新評估 due 時的邊界條件。\n\n要求：\n(a) 先寫 regression test 重現（給定 last_fire_at 已覆蓋當前 slot → 斷言 _tick_once 不 spawn），在真實 daemon 啟動路徑下驗證（不可只測 import 後的磁碟版）。\n(b) 修根因；若確認是記憶體/磁碟不同步，需要的是**部署紀律的機械化**（改 supervisor code 後強制 kickstart 的 gate），不是在 _due_to_fire 裡加 patch。\n(c) 掃全部 9 次 off-slot fire 的前後文，確認沒有其他觸發途徑（fire_requested_at 誤消費等）。\n(d) 完成後把 off-slot fire 計數接成 alert（check_alerts 既有 owner，勿新增 watchdog）—— 這種浪費目前只能靠人工掃 log 發現。\n\n關聯：pregate 對 22:58 那班的判定正是 would_skip=true（gate 修好後第一個要擋的就是它），但 gate 仍在 shadow，擋不住。error_log 2026-07-10 『pregate 結構性 no-op』entry 有完整脈絡。"
   }
 ]
