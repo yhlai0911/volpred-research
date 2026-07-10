@@ -1,0 +1,1134 @@
+{
+  "artifacts": {
+    "figure": "K1678_saliency_crash_risk.png",
+    "figure_sha256": "9fa60b13515abd3f63f7a46608c171ed75c7ceebf12001e49fcb12157471700e",
+    "matched_events": "K1678_matched_events.csv.gz",
+    "matched_events_sha256": "f6bb4d6843f14123b52c7f21b82bf54c4da09bafd4b444bc3f5165612a58a1f6",
+    "results": "K1678_results.json",
+    "script": "K1678.py",
+    "summary_csv": "K1678_primary_results.csv",
+    "summary_sha256": "17c73de7336677db462ef60c66e41baf8fbd55e6eadbd53e1ee9c267b7a7f9bc"
+  },
+  "data": {
+    "coverage": {
+      "analysis_panel_rows": 198643,
+      "analysis_panel_tickers": 250,
+      "exact_label_ticker_dates_observed_in_price_panel": 657,
+      "label_ticker_dates_for_available_tickers": 664,
+      "label_tickers_with_price": 252,
+      "matched_event_date_clusters_by_horizon": {
+        "1": 302,
+        "5": 242
+      },
+      "matched_rows_by_horizon": {
+        "1": 525,
+        "5": 345
+      },
+      "matched_tickers_by_horizon": {
+        "1": 205,
+        "5": 204
+      },
+      "sec_label_ticker_dates": 1079,
+      "sec_label_tickers": 412
+    },
+    "prices": {
+      "available_symbols": 254,
+      "missing_symbols": [
+        "AAMC",
+        "ACAQ",
+        "ACLX",
+        "ACY",
+        "ADGI",
+        "AERC",
+        "AGIL",
+        "AHPI",
+        "ALF",
+        "ALLG",
+        "AMBI",
+        "AMV",
+        "AONC",
+        "APRN",
+        "ATNF",
+        "AURC",
+        "AVGR",
+        "AXLA",
+        "BGXX",
+        "BIOC",
+        "BLBX",
+        "BLUW",
+        "BTB",
+        "BTCM",
+        "BWV",
+        "CCXI",
+        "CFFE",
+        "CJET",
+        "CJJD",
+        "CLBR",
+        "CMA",
+        "CPTN",
+        "DATS",
+        "DHHC",
+        "DKDCA",
+        "DPSI",
+        "DTOC",
+        "DWAC",
+        "DWACW",
+        "EAST",
+        "EDTX",
+        "ELOX",
+        "EVBG",
+        "FFIE",
+        "FLGC",
+        "FRGE",
+        "FRLN",
+        "FWBI",
+        "FWP",
+        "FZT",
+        "GLTA",
+        "GMVD",
+        "GOCO",
+        "GXGX",
+        "HCDI",
+        "HHGC",
+        "HIBB",
+        "HLBZ",
+        "HOTH",
+        "HTGM",
+        "HX",
+        "ICCT",
+        "ICVX",
+        "IKNA",
+        "IKNX",
+        "IMPL",
+        "IRNT",
+        "ISIG",
+        "ISPO",
+        "ISUN",
+        "JCS",
+        "JGGC",
+        "JMAC",
+        "JWAC",
+        "KAL",
+        "KBSF",
+        "KSPN",
+        "KTRA",
+        "LDWY",
+        "LEJU",
+        "LFLY",
+        "LIFW",
+        "LMDX",
+        "LTRY",
+        "LYT",
+        "MASI",
+        "MCAF",
+        "MGOL",
+        "MGRM",
+        "MINM",
+        "MOXC",
+        "MRIN",
+        "MULN",
+        "MURF",
+        "MYNZ",
+        "NARI",
+        "NIR",
+        "NOGN",
+        "NTRB",
+        "NURO",
+        "NUZE",
+        "NVEI",
+        "NWGL",
+        "NXTT",
+        "OLIT",
+        "ORPH",
+        "OTRK",
+        "PEV",
+        "PIK",
+        "PIXY",
+        "PKBO",
+        "PKST",
+        "PWM",
+        "QSG",
+        "RAPT",
+        "RCLF",
+        "RDBX",
+        "RHE",
+        "RMED",
+        "RNA",
+        "RSLS",
+        "SATX",
+        "SAVA",
+        "SECO",
+        "SEQL",
+        "SEV",
+        "SGMA",
+        "SGOC",
+        "SI",
+        "SMLR",
+        "SNCE",
+        "SNPX",
+        "SOPA",
+        "SQBG",
+        "SSNT",
+        "SWAV",
+        "SWIN",
+        "TCBP",
+        "TCJH",
+        "TKAT",
+        "TSP",
+        "TSRI",
+        "TYHT",
+        "UHG",
+        "UPTD",
+        "UTME",
+        "VERV",
+        "VIEW",
+        "VIEWQ",
+        "VRAR",
+        "VSCO",
+        "VZIO",
+        "WAVS",
+        "WBEV",
+        "WETG",
+        "WISA",
+        "WISH",
+        "WOLF",
+        "YOSH",
+        "ZY"
+      ],
+      "requested_period": [
+        "2020-01-01",
+        "2024-02-15"
+      ],
+      "requested_symbols": 414,
+      "rows": 200866,
+      "sha256": "357ec7eb9701c4867d5bc56e70dfa884a7704346ab6bda0bbf7fd561c301085e",
+      "source": "yfinance daily OHLCV, split/dividend-adjusted OHLC",
+      "status": "cache"
+    },
+    "sec": {
+      "attachment_pages": "21-37 of PDF (Attachment A pages 1-17)",
+      "complaint_bytes": 572657,
+      "complaint_filed_date": "2026-04-20",
+      "complaint_sha256": "ad8a8cbaec9c6648dca74323f017c0742d9e4301ab0a6abd6f3e97c8c0e7dc80",
+      "complaint_url": "https://www.sec.gov/files/litigation/complaints/2026/comp26532.pdf",
+      "csv_sha256": "9a56b70248a49ae6c4139934ee66516b38bbbf6e059b1d76f3eae7868cf767bc",
+      "equity_tickers": 412,
+      "excluded_non_equity_identifier_count": 11,
+      "first_event_date": "2021-05-26",
+      "last_event_date": "2024-01-02",
+      "litigation_release": "https://www.sec.gov/enforcement-litigation/litigation-releases/lr-26532",
+      "parsed_blocks": 439,
+      "parser_rule": "full Attachment-A population; strip wrapped Account-column fragments, retain only 1-5 uppercase-letter identifiers, exclude options/malformed rows, then enforce exact count/year invariants",
+      "raw_date_occurrences": 1083,
+      "status_warning": "These are allegations in a complaint filed after all event dates; they are not convictions and were not available in real time.",
+      "unique_ticker_dates": 1079
+    },
+    "wikimedia": {
+      "metadata": {
+        "Day_trading": {
+          "article": "Day_trading",
+          "first_date": "2020-01-01",
+          "last_date": "2024-02-15",
+          "n_obs": 1507,
+          "sha256": "e8c80e36f99d839dc012e0251e844b478090c566338ac26655a24492f7debe05",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/Day_trading/daily/20200101/20240215"
+        },
+        "Dow_Jones_Industrial_Average": {
+          "article": "Dow_Jones_Industrial_Average",
+          "first_date": "2020-01-01",
+          "last_date": "2024-02-15",
+          "n_obs": 1507,
+          "sha256": "2d7b9071ee979733ed8b3affa32214c261e560b103bf01afe2c9fdfa84db06c0",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/Dow_Jones_Industrial_Average/daily/20200101/20240215"
+        },
+        "GameStop_short_squeeze": {
+          "article": "GameStop_short_squeeze",
+          "first_date": "2021-01-27",
+          "last_date": "2024-02-15",
+          "n_obs": 1115,
+          "sha256": "29b1ebabb10ee0e16005216dac4ad0deda715b965d64b66ec771b4daa851aeac",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/GameStop_short_squeeze/daily/20200101/20240215"
+        },
+        "Investment": {
+          "article": "Investment",
+          "first_date": "2020-01-01",
+          "last_date": "2024-02-15",
+          "n_obs": 1507,
+          "sha256": "7de57264f6de0107196a82483fb01502114c1120f529abc87dd03aec12191114",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/Investment/daily/20200101/20240215"
+        },
+        "Meme_stock": {
+          "article": "Meme_stock",
+          "first_date": "2021-06-05",
+          "last_date": "2024-02-15",
+          "n_obs": 979,
+          "sha256": "19e14b8622e0199ce8030fada82e95d2ef712ccfaad97d2bba26644b22a1fa03",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/Meme_stock/daily/20200101/20240215"
+        },
+        "Nasdaq_Composite": {
+          "article": "Nasdaq_Composite",
+          "first_date": "2020-01-01",
+          "last_date": "2024-02-15",
+          "n_obs": 1507,
+          "sha256": "6559f0160ee05fb3179bd546bc0d7c0abf68c5651768c2d0dc0aa2323138cec4",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/Nasdaq_Composite/daily/20200101/20240215"
+        },
+        "Pump_and_dump": {
+          "article": "Pump_and_dump",
+          "first_date": "2020-01-01",
+          "last_date": "2024-02-15",
+          "n_obs": 1507,
+          "sha256": "4a0e84ef9fa9f7a7b2b71e9d66e9376507b0aa293aff0e7a62eaa4ccb63c097d",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/Pump_and_dump/daily/20200101/20240215"
+        },
+        "Robinhood_Markets": {
+          "article": "Robinhood_Markets",
+          "first_date": "2020-01-01",
+          "last_date": "2024-02-15",
+          "n_obs": 1507,
+          "sha256": "0ac17c51f8673c4d4bd454c46f46648553afbb908a83a84a08376052bbd714a9",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/Robinhood_Markets/daily/20200101/20240215"
+        },
+        "S&P_500": {
+          "article": "S&P_500",
+          "first_date": "2020-01-01",
+          "last_date": "2024-02-15",
+          "n_obs": 1507,
+          "sha256": "b7cfcabed997417d841300c1423613627f4025f490ce525dc876cc671d78615e",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/S%26P_500/daily/20200101/20240215"
+        },
+        "Short_squeeze": {
+          "article": "Short_squeeze",
+          "first_date": "2020-01-01",
+          "last_date": "2024-02-15",
+          "n_obs": 1507,
+          "sha256": "6579229dec4cfe9408de1d2d4a3004ed7028944281f0ee5d0329555e33777616",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/Short_squeeze/daily/20200101/20240215"
+        },
+        "Stock_market": {
+          "article": "Stock_market",
+          "first_date": "2020-01-01",
+          "last_date": "2024-02-15",
+          "n_obs": 1507,
+          "sha256": "402a047b312c0f716c08a6c4868d4252b28c3c724464ae560f2d0db4861b5faa",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/Stock_market/daily/20200101/20240215"
+        },
+        "WallStreetBets": {
+          "article": "WallStreetBets",
+          "first_date": "2020-03-17",
+          "last_date": "2024-02-15",
+          "n_obs": 1367,
+          "sha256": "cdc2db3c5aa49d7370dea41e22146162121271b068d5e7b6ea2bbbbdd004f8ca",
+          "status": "cache",
+          "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/WallStreetBets/daily/20200101/20240215"
+        },
+        "panel": {
+          "anchor_pages": [
+            "Stock_market",
+            "S&P_500",
+            "Nasdaq_Composite",
+            "Dow_Jones_Industrial_Average",
+            "Investment"
+          ],
+          "definition": "past-only z-score of log 7-day topic views minus log 7-day anchor views",
+          "episode_pages_secondary_only": [
+            "Meme_stock",
+            "GameStop_short_squeeze"
+          ],
+          "minimum_baseline_days": 60,
+          "primary_pages": [
+            "Pump_and_dump",
+            "WallStreetBets",
+            "Short_squeeze",
+            "Day_trading",
+            "Robinhood_Markets"
+          ],
+          "rolling_baseline_days": 126,
+          "sha256": "422606ce8a6a177c6d63d3ec38e6fab88e573e68382f637ea4e2656f099958eb"
+        }
+      },
+      "proxy_warning": "Topic pageviews are broad public-attention proxies, not ticker-specific searches, posts, trades, or proof of manipulation.",
+      "requested_period": [
+        "2020-01-01",
+        "2024-02-15"
+      ],
+      "source": "Wikimedia Analytics Pageviews API"
+    }
+  },
+  "design": {
+    "inference": {
+      "bootstrap_base_seed": 42,
+      "bootstrap_block_by_horizon": {
+        "1": 10,
+        "5": 10
+      },
+      "bootstrap_cell_seed_rule": "SEED + 100 * horizon + outcome_index (0=RV, 1=DSV, 2=left-tail, 3=gap)",
+      "bootstrap_reps": 2000,
+      "date_aggregation": "average multiple tickers sharing the same SEC event date before inference",
+      "hac_maxlags_by_horizon": {
+        "1": 0,
+        "5": 4
+      },
+      "harvey_directional_threshold": "t >= 3.0",
+      "multiple_testing": "Bonferroni and Benjamini-Hochberg over m=8 primary cells"
+    },
+    "matching": {
+      "clean_control_warning": "A no-label control day means only that this SEC complaint did not label it; it is not proven manipulation-free.",
+      "controls_per_event": 3,
+      "features": [
+        "ret1_lag1",
+        "ret5_lag1",
+        "log_rv21_lag1",
+        "volume_z_lag1",
+        "spy_ret_lag1",
+        "vix_z_lag1"
+      ],
+      "maximum_trading_row_distance": 252,
+      "preferred_same_calendar_year": true,
+      "same_ticker": true
+    },
+    "primary_family": {
+      "coefficient": "date-aggregated matched outcome difference on matched saliency difference, per one sample SD",
+      "horizons": [
+        1,
+        5
+      ],
+      "m": 8,
+      "outcomes": {
+        "downside_gap": "maximum downside open-versus-prior-close gap in percent",
+        "dsv": "mean squared negative close-to-close log return × 10,000",
+        "left_tail": "maximum downside close-to-close loss in percent",
+        "rv": "mean squared close-to-close log return × 10,000"
+      }
+    }
+  },
+  "experiment_id": "K1678",
+  "generated_at": "2026-07-10T23:09:53.745684+00:00",
+  "limitations": [
+    "The April 2026 SEC complaint is a post-sample allegation, not a conviction and not a point-in-time detector.",
+    "The complaint concerns one alleged trader and is not a random or complete population of U.S. manipulation.",
+    "Current yfinance availability creates survivorship and delisting attrition, especially among thinly traded issuers.",
+    "Wikimedia topic pageviews are market-wide and not ticker-specific search, Reddit, Stocktwits, news, or investor-flow data.",
+    "Daily OHLCV cannot identify the complaint's intraday odd-lot, spoofing, or order-book mechanism.",
+    "Matched no-label dates are not verified clean dates; contamination biases the contrast toward zero.",
+    "The same official case supplied the retrospective sample definition, so p-values are conditional on this case and not population-wide discovery probabilities."
+  ],
+  "methodology_type": "empirical retrospective proxy diagnostic; non-causal",
+  "primary_results": [
+    {
+      "beta_per_1sd": 57.63400658980984,
+      "bh_q": 0.7716459271544931,
+      "bh_reject_5pct": false,
+      "bonferroni_p": 1.0,
+      "control_target_mean": 142.93516752151214,
+      "direct_event_minus_control_mean": 370.516709069821,
+      "direct_event_minus_control_t_hac": 2.760299639398729,
+      "event_target_mean": 506.72636301276066,
+      "hac_maxlags": 0,
+      "harvey_directional_pass": false,
+      "horizon": 1,
+      "moving_block_bootstrap": {
+        "block": 10,
+        "ci95": [
+          -141.7639613920623,
+          328.41042410817874
+        ],
+        "median": 49.930104324915106,
+        "p_two_sided": 0.665,
+        "reps": 2000,
+        "seed": 142
+      },
+      "n_event_date_clusters": 302,
+      "n_event_rows": 525,
+      "n_tickers": 205,
+      "outcome": "rv",
+      "p_hac_two_sided": 0.5777333630188906,
+      "se_hac": 103.52820176694007,
+      "signal": "saliency_diff",
+      "signal_scale": {
+        "mean": -0.18598083039431396,
+        "std": 1.3925359605614553
+      },
+      "strict_cell_pass": false,
+      "t_hac": 0.5566986155091729
+    },
+    {
+      "beta_per_1sd": 71.56518397001972,
+      "bh_q": 0.7716459271544931,
+      "bh_reject_5pct": false,
+      "bonferroni_p": 1.0,
+      "control_target_mean": 91.76166534038013,
+      "direct_event_minus_control_mean": 174.48435004112497,
+      "direct_event_minus_control_t_hac": 1.9205116681809964,
+      "event_target_mean": 278.66947516927735,
+      "hac_maxlags": 0,
+      "harvey_directional_pass": false,
+      "horizon": 1,
+      "moving_block_bootstrap": {
+        "block": 10,
+        "ci95": [
+          -89.37159966653348,
+          294.3221982618007
+        ],
+        "median": 62.18108438383341,
+        "p_two_sided": 0.468,
+        "reps": 2000,
+        "seed": 143
+      },
+      "n_event_date_clusters": 302,
+      "n_event_rows": 525,
+      "n_tickers": 205,
+      "outcome": "dsv",
+      "p_hac_two_sided": 0.45063151312883654,
+      "se_hac": 94.86841272315671,
+      "signal": "saliency_diff",
+      "signal_scale": {
+        "mean": -0.18598083039431396,
+        "std": 1.3925359605614553
+      },
+      "strict_cell_pass": false,
+      "t_hac": 0.7543626157091924
+    },
+    {
+      "beta_per_1sd": -0.35880102946963666,
+      "bh_q": 0.7716459271544931,
+      "bh_reject_5pct": false,
+      "bonferroni_p": 1.0,
+      "control_target_mean": 4.573190295777641,
+      "direct_event_minus_control_mean": 2.592950562127295,
+      "direct_event_minus_control_t_hac": 3.305286100406768,
+      "event_target_mean": 7.382977075471589,
+      "hac_maxlags": 0,
+      "harvey_directional_pass": false,
+      "horizon": 1,
+      "moving_block_bootstrap": {
+        "block": 10,
+        "ci95": [
+          -1.7856850445256458,
+          1.141646557779007
+        ],
+        "median": -0.39725810158098174,
+        "p_two_sided": 0.605,
+        "reps": 2000,
+        "seed": 144
+      },
+      "n_event_date_clusters": 302,
+      "n_event_rows": 525,
+      "n_tickers": 205,
+      "outcome": "left_tail",
+      "p_hac_two_sided": 0.6361399458896719,
+      "se_hac": 0.7583999562776097,
+      "signal": "saliency_diff",
+      "signal_scale": {
+        "mean": -0.18598083039431396,
+        "std": 1.3925359605614553
+      },
+      "strict_cell_pass": false,
+      "t_hac": -0.4731026505205899
+    },
+    {
+      "beta_per_1sd": -0.21096262740354674,
+      "bh_q": 0.7716459271544931,
+      "bh_reject_5pct": false,
+      "bonferroni_p": 1.0,
+      "control_target_mean": 2.0968822130008054,
+      "direct_event_minus_control_mean": 1.1741796568697547,
+      "direct_event_minus_control_t_hac": 3.5715021524214055,
+      "event_target_mean": 3.234649434429573,
+      "hac_maxlags": 0,
+      "harvey_directional_pass": false,
+      "horizon": 1,
+      "moving_block_bootstrap": {
+        "block": 10,
+        "ci95": [
+          -0.8133178858769621,
+          0.32782040949504787
+        ],
+        "median": -0.21282510296787485,
+        "p_two_sided": 0.462,
+        "reps": 2000,
+        "seed": 145
+      },
+      "n_event_date_clusters": 302,
+      "n_event_rows": 525,
+      "n_tickers": 205,
+      "outcome": "downside_gap",
+      "p_hac_two_sided": 0.49396664852993066,
+      "se_hac": 0.3084188119472294,
+      "signal": "saliency_diff",
+      "signal_scale": {
+        "mean": -0.18598083039431396,
+        "std": 1.3925359605614553
+      },
+      "strict_cell_pass": false,
+      "t_hac": -0.6840134882551928
+    },
+    {
+      "beta_per_1sd": 33.72070320789276,
+      "bh_q": 0.7716459271544931,
+      "bh_reject_5pct": false,
+      "bonferroni_p": 1.0,
+      "control_target_mean": 102.5883280837471,
+      "direct_event_minus_control_mean": 215.76696810919674,
+      "direct_event_minus_control_t_hac": 2.617512697569092,
+      "event_target_mean": 301.5385232988536,
+      "hac_maxlags": 4,
+      "harvey_directional_pass": false,
+      "horizon": 5,
+      "moving_block_bootstrap": {
+        "block": 10,
+        "ci95": [
+          -58.23929977203719,
+          148.68086452666887
+        ],
+        "median": 36.91016588199349,
+        "p_two_sided": 0.456,
+        "reps": 2000,
+        "seed": 542
+      },
+      "n_event_date_clusters": 242,
+      "n_event_rows": 345,
+      "n_tickers": 204,
+      "outcome": "rv",
+      "p_hac_two_sided": 0.47796703326183165,
+      "se_hac": 47.522319763345095,
+      "signal": "saliency_diff",
+      "signal_scale": {
+        "mean": -0.23884539707035596,
+        "std": 1.4149080101461011
+      },
+      "strict_cell_pass": false,
+      "t_hac": 0.7095761186704991
+    },
+    {
+      "beta_per_1sd": 13.856684203870119,
+      "bh_q": 0.7716459271544931,
+      "bh_reject_5pct": false,
+      "bonferroni_p": 1.0,
+      "control_target_mean": 56.911009316029755,
+      "direct_event_minus_control_mean": 124.4069475241768,
+      "direct_event_minus_control_t_hac": 2.448156298033519,
+      "event_target_mean": 173.13388596655244,
+      "hac_maxlags": 4,
+      "harvey_directional_pass": false,
+      "horizon": 5,
+      "moving_block_bootstrap": {
+        "block": 10,
+        "ci95": [
+          -42.48338970180466,
+          82.82370542023047
+        ],
+        "median": 14.463879566661312,
+        "p_two_sided": 0.651,
+        "reps": 2000,
+        "seed": 543
+      },
+      "n_event_date_clusters": 242,
+      "n_event_rows": 345,
+      "n_tickers": 204,
+      "outcome": "dsv",
+      "p_hac_two_sided": 0.6751901862601815,
+      "se_hac": 33.06804345821751,
+      "signal": "saliency_diff",
+      "signal_scale": {
+        "mean": -0.23884539707035596,
+        "std": 1.4149080101461011
+      },
+      "strict_cell_pass": false,
+      "t_hac": 0.41903550239912035
+    },
+    {
+      "beta_per_1sd": -0.12627254081106487,
+      "bh_q": 0.9153599883730185,
+      "bh_reject_5pct": false,
+      "bonferroni_p": 1.0,
+      "control_target_mean": 10.390582278552461,
+      "direct_event_minus_control_mean": 6.507262670375363,
+      "direct_event_minus_control_t_hac": 4.128853551653473,
+      "event_target_mean": 16.398721101534107,
+      "hac_maxlags": 4,
+      "harvey_directional_pass": false,
+      "horizon": 5,
+      "moving_block_bootstrap": {
+        "block": 10,
+        "ci95": [
+          -1.8861738027185384,
+          2.4192500327435176
+        ],
+        "median": 0.278136248502623,
+        "p_two_sided": 0.795,
+        "reps": 2000,
+        "seed": 544
+      },
+      "n_event_date_clusters": 242,
+      "n_event_rows": 345,
+      "n_tickers": 204,
+      "outcome": "left_tail",
+      "p_hac_two_sided": 0.9153599883730185,
+      "se_hac": 1.1881090026703687,
+      "signal": "saliency_diff",
+      "signal_scale": {
+        "mean": -0.23884539707035596,
+        "std": 1.4149080101461011
+      },
+      "strict_cell_pass": false,
+      "t_hac": -0.10628026597497146
+    },
+    {
+      "beta_per_1sd": -0.79785296240296,
+      "bh_q": 0.7716459271544931,
+      "bh_reject_5pct": false,
+      "bonferroni_p": 1.0,
+      "control_target_mean": 4.644463996558969,
+      "direct_event_minus_control_mean": 2.545826687769476,
+      "direct_event_minus_control_t_hac": 3.818688968897224,
+      "event_target_mean": 7.058371683211933,
+      "hac_maxlags": 4,
+      "harvey_directional_pass": false,
+      "horizon": 5,
+      "moving_block_bootstrap": {
+        "block": 10,
+        "ci95": [
+          -2.2645109542627506,
+          0.32031727937512255
+        ],
+        "median": -0.7820402190581796,
+        "p_two_sided": 0.21,
+        "reps": 2000,
+        "seed": 545
+      },
+      "n_event_date_clusters": 242,
+      "n_event_rows": 345,
+      "n_tickers": 204,
+      "outcome": "downside_gap",
+      "p_hac_two_sided": 0.20837540242433494,
+      "se_hac": 0.634200543055356,
+      "signal": "saliency_diff",
+      "signal_scale": {
+        "mean": -0.23884539707035596,
+        "std": 1.4149080101461011
+      },
+      "strict_cell_pass": false,
+      "t_hac": -1.2580452210891904
+    }
+  ],
+  "references": [
+    {
+      "authors": "Li, Z.; Liu, J.; Liu, J.; Liu, X.; Wu, C.",
+      "doi": "https://doi.org/10.1016/j.jbankfin.2025.107528",
+      "journal": "Journal of Banking & Finance 179, 107528",
+      "role": "Motivates an attention-manipulation link; its China rounding design is not replicated here.",
+      "title": "Investor attention and stock price manipulation: Evidence from daily quasi-natural experiments",
+      "year": 2025
+    },
+    {
+      "authors": "Chen, Z.; Li, Z.; Liu, J.; Liu, X.",
+      "doi": "https://doi.org/10.1016/j.jempfin.2025.101670",
+      "journal": "Journal of Empirical Finance 85, 101670",
+      "role": "Motivates forward crash-risk outcomes after exogenous salience.",
+      "title": "Information salience, investor attention, and stock price crash risk",
+      "year": 2026
+    },
+    {
+      "authors": "Hong, Z.; Liu, Q.; Tse, Y.; Wang, Z.",
+      "doi": "https://doi.org/10.1016/j.irfa.2023.102921",
+      "journal": "International Review of Financial Analysis 90, 102921",
+      "role": "Supports enforcement cases as retrospective event evidence, not causal attention identification.",
+      "title": "Black mouth, investor attention, and stock return",
+      "year": 2023
+    },
+    {
+      "authors": "Cheng, F.; Wang, C.; Chiao, C.; Yao, S.; Fang, Z.",
+      "doi": "https://doi.org/10.1016/j.ememar.2021.100821",
+      "journal": "Emerging Markets Review 49, 100821",
+      "role": "Motivates abnormal/detrended attention rather than attention levels.",
+      "title": "Retail attention, retail trades, and stock price crash risk",
+      "year": 2021
+    },
+    {
+      "authors": "Da, Z.; Engelberg, J.; Gao, P.",
+      "doi": "https://doi.org/10.1111/j.1540-6261.2011.01679.x",
+      "journal": "Journal of Finance 66(5), 1461-1499",
+      "role": "Motivates a past-only abnormal public-attention shock.",
+      "title": "In Search of Attention",
+      "year": 2011
+    }
+  ],
+  "related_prior_evidence": {
+    "K1340": "Daily price-volume retail-pressure proxy had no directional crash-risk pass.",
+    "K1487": "Coarse GDELT theme attention did not improve OOS RV forecasts.",
+    "K1554": "Public Stocktwits history was underpowered (22 events from two tickers).",
+    "anti_stockholder_identity_proxy": "Wikimedia retail-attention 22-day RV had a raw t=2.85 but failed Holm and OOS gates; K1678 differs via exact SEC event labels and H=1/H=5 crash-risk targets."
+  },
+  "research_question": "Within retrospective SEC-labelled manipulative trading events, does an abnormal public saliency shock amplify next-day or next-five-day RV, downside semivariance, left-tail loss, or downside opening-gap risk?",
+  "seed": 42,
+  "sensitivity_results": {
+    "cells": [
+      {
+        "beta_per_1sd": 119.07119852128493,
+        "control_target_mean": 142.93516752151214,
+        "direct_event_minus_control_mean": 370.516709069821,
+        "direct_event_minus_control_t_hac": 2.760299639398729,
+        "event_target_mean": 506.72636301276066,
+        "hac_maxlags": 0,
+        "horizon": 1,
+        "n_event_date_clusters": 302,
+        "n_event_rows": 525,
+        "n_tickers": 205,
+        "outcome": "rv",
+        "p_hac_two_sided": 0.27403622678212225,
+        "se_hac": 108.85864979180012,
+        "signal": "pump_diff",
+        "signal_scale": {
+          "mean": -0.14520430654452327,
+          "std": 1.4347131670924291
+        },
+        "t_hac": 1.0938147657445414
+      },
+      {
+        "beta_per_1sd": -75.61027898532933,
+        "control_target_mean": 142.93516752151214,
+        "direct_event_minus_control_mean": 370.516709069821,
+        "direct_event_minus_control_t_hac": 2.760299639398729,
+        "event_target_mean": 506.72636301276066,
+        "hac_maxlags": 0,
+        "horizon": 1,
+        "n_event_date_clusters": 302,
+        "n_event_rows": 525,
+        "n_tickers": 205,
+        "outcome": "rv",
+        "p_hac_two_sided": 0.5162257877429326,
+        "se_hac": 116.47147918014554,
+        "signal": "saliency21_diff",
+        "signal_scale": {
+          "mean": -0.47302988882099306,
+          "std": 1.6622297754320048
+        },
+        "t_hac": -0.6491741971301275
+      },
+      {
+        "beta_per_1sd": 46.16823380569511,
+        "control_target_mean": 91.76166534038013,
+        "direct_event_minus_control_mean": 174.48435004112497,
+        "direct_event_minus_control_t_hac": 1.9205116681809964,
+        "event_target_mean": 278.66947516927735,
+        "hac_maxlags": 0,
+        "horizon": 1,
+        "n_event_date_clusters": 302,
+        "n_event_rows": 525,
+        "n_tickers": 205,
+        "outcome": "dsv",
+        "p_hac_two_sided": 0.5425296434254341,
+        "se_hac": 75.81088516727428,
+        "signal": "pump_diff",
+        "signal_scale": {
+          "mean": -0.14520430654452327,
+          "std": 1.4347131670924291
+        },
+        "t_hac": 0.6089921480777647
+      },
+      {
+        "beta_per_1sd": 48.77787121557685,
+        "control_target_mean": 91.76166534038013,
+        "direct_event_minus_control_mean": 174.48435004112497,
+        "direct_event_minus_control_t_hac": 1.9205116681809964,
+        "event_target_mean": 278.66947516927735,
+        "hac_maxlags": 0,
+        "horizon": 1,
+        "n_event_date_clusters": 302,
+        "n_event_rows": 525,
+        "n_tickers": 205,
+        "outcome": "dsv",
+        "p_hac_two_sided": 0.41673871881889935,
+        "se_hac": 60.06444859206137,
+        "signal": "saliency21_diff",
+        "signal_scale": {
+          "mean": -0.47302988882099306,
+          "std": 1.6622297754320048
+        },
+        "t_hac": 0.8120922169261994
+      },
+      {
+        "beta_per_1sd": -0.6650345638942439,
+        "control_target_mean": 4.573190295777641,
+        "direct_event_minus_control_mean": 2.592950562127295,
+        "direct_event_minus_control_t_hac": 3.305286100406768,
+        "event_target_mean": 7.382977075471589,
+        "hac_maxlags": 0,
+        "horizon": 1,
+        "n_event_date_clusters": 302,
+        "n_event_rows": 525,
+        "n_tickers": 205,
+        "outcome": "left_tail",
+        "p_hac_two_sided": 0.25831828299149207,
+        "se_hac": 0.5883309686126413,
+        "signal": "pump_diff",
+        "signal_scale": {
+          "mean": -0.14520430654452327,
+          "std": 1.4347131670924291
+        },
+        "t_hac": -1.1303749069379763
+      },
+      {
+        "beta_per_1sd": 0.3693060134647099,
+        "control_target_mean": 4.573190295777641,
+        "direct_event_minus_control_mean": 2.592950562127295,
+        "direct_event_minus_control_t_hac": 3.305286100406768,
+        "event_target_mean": 7.382977075471589,
+        "hac_maxlags": 0,
+        "horizon": 1,
+        "n_event_date_clusters": 302,
+        "n_event_rows": 525,
+        "n_tickers": 205,
+        "outcome": "left_tail",
+        "p_hac_two_sided": 0.6157357396038143,
+        "se_hac": 0.7358114963527859,
+        "signal": "saliency21_diff",
+        "signal_scale": {
+          "mean": -0.47302988882099306,
+          "std": 1.6622297754320048
+        },
+        "t_hac": 0.5019030217593198
+      },
+      {
+        "beta_per_1sd": -0.21241877737557038,
+        "control_target_mean": 2.0968822130008054,
+        "direct_event_minus_control_mean": 1.1741796568697547,
+        "direct_event_minus_control_t_hac": 3.5715021524214055,
+        "event_target_mean": 3.234649434429573,
+        "hac_maxlags": 0,
+        "horizon": 1,
+        "n_event_date_clusters": 302,
+        "n_event_rows": 525,
+        "n_tickers": 205,
+        "outcome": "downside_gap",
+        "p_hac_two_sided": 0.31303004117118594,
+        "se_hac": 0.21054816725960862,
+        "signal": "pump_diff",
+        "signal_scale": {
+          "mean": -0.14520430654452327,
+          "std": 1.4347131670924291
+        },
+        "t_hac": -1.0088844758912352
+      },
+      {
+        "beta_per_1sd": 0.7451632084972764,
+        "control_target_mean": 2.0968822130008054,
+        "direct_event_minus_control_mean": 1.1741796568697547,
+        "direct_event_minus_control_t_hac": 3.5715021524214055,
+        "event_target_mean": 3.234649434429573,
+        "hac_maxlags": 0,
+        "horizon": 1,
+        "n_event_date_clusters": 302,
+        "n_event_rows": 525,
+        "n_tickers": 205,
+        "outcome": "downside_gap",
+        "p_hac_two_sided": 0.173548562850653,
+        "se_hac": 0.5475559352714082,
+        "signal": "saliency21_diff",
+        "signal_scale": {
+          "mean": -0.47302988882099306,
+          "std": 1.6622297754320048
+        },
+        "t_hac": 1.360889656191782
+      },
+      {
+        "beta_per_1sd": 128.4399388564767,
+        "control_target_mean": 102.5883280837471,
+        "direct_event_minus_control_mean": 215.76696810919674,
+        "direct_event_minus_control_t_hac": 2.617512697569092,
+        "event_target_mean": 301.5385232988536,
+        "hac_maxlags": 4,
+        "horizon": 5,
+        "n_event_date_clusters": 242,
+        "n_event_rows": 345,
+        "n_tickers": 204,
+        "outcome": "rv",
+        "p_hac_two_sided": 0.13706823544946695,
+        "se_hac": 86.38696062666351,
+        "signal": "pump_diff",
+        "signal_scale": {
+          "mean": -0.13161779848989155,
+          "std": 1.4616305912446277
+        },
+        "t_hac": 1.4867977519379636
+      },
+      {
+        "beta_per_1sd": -37.2107815842255,
+        "control_target_mean": 102.5883280837471,
+        "direct_event_minus_control_mean": 215.76696810919674,
+        "direct_event_minus_control_t_hac": 2.617512697569092,
+        "event_target_mean": 301.5385232988536,
+        "hac_maxlags": 4,
+        "horizon": 5,
+        "n_event_date_clusters": 242,
+        "n_event_rows": 345,
+        "n_tickers": 204,
+        "outcome": "rv",
+        "p_hac_two_sided": 0.47460388022549604,
+        "se_hac": 52.042442988825485,
+        "signal": "saliency21_diff",
+        "signal_scale": {
+          "mean": -0.4954089157973261,
+          "std": 1.6610702965194806
+        },
+        "t_hac": -0.7150083556264907
+      },
+      {
+        "beta_per_1sd": 78.09001396325317,
+        "control_target_mean": 56.911009316029755,
+        "direct_event_minus_control_mean": 124.4069475241768,
+        "direct_event_minus_control_t_hac": 2.448156298033519,
+        "event_target_mean": 173.13388596655244,
+        "hac_maxlags": 4,
+        "horizon": 5,
+        "n_event_date_clusters": 242,
+        "n_event_rows": 345,
+        "n_tickers": 204,
+        "outcome": "dsv",
+        "p_hac_two_sided": 0.1666511047225434,
+        "se_hac": 56.46238602081776,
+        "signal": "pump_diff",
+        "signal_scale": {
+          "mean": -0.13161779848989155,
+          "std": 1.4616305912446277
+        },
+        "t_hac": 1.3830448811437277
+      },
+      {
+        "beta_per_1sd": -9.742050217682014,
+        "control_target_mean": 56.911009316029755,
+        "direct_event_minus_control_mean": 124.4069475241768,
+        "direct_event_minus_control_t_hac": 2.448156298033519,
+        "event_target_mean": 173.13388596655244,
+        "hac_maxlags": 4,
+        "horizon": 5,
+        "n_event_date_clusters": 242,
+        "n_event_rows": 345,
+        "n_tickers": 204,
+        "outcome": "dsv",
+        "p_hac_two_sided": 0.7064963113877094,
+        "se_hac": 25.870778365436905,
+        "signal": "saliency21_diff",
+        "signal_scale": {
+          "mean": -0.4954089157973261,
+          "std": 1.6610702965194806
+        },
+        "t_hac": -0.3765657948157174
+      },
+      {
+        "beta_per_1sd": 2.6355620663682746,
+        "control_target_mean": 10.390582278552461,
+        "direct_event_minus_control_mean": 6.507262670375363,
+        "direct_event_minus_control_t_hac": 4.128853551653473,
+        "event_target_mean": 16.398721101534107,
+        "hac_maxlags": 4,
+        "horizon": 5,
+        "n_event_date_clusters": 242,
+        "n_event_rows": 345,
+        "n_tickers": 204,
+        "outcome": "left_tail",
+        "p_hac_two_sided": 0.12448226277280451,
+        "se_hac": 1.7156051114424724,
+        "signal": "pump_diff",
+        "signal_scale": {
+          "mean": -0.13161779848989155,
+          "std": 1.4616305912446277
+        },
+        "t_hac": 1.5362288493954805
+      },
+      {
+        "beta_per_1sd": -0.07380385989507843,
+        "control_target_mean": 10.390582278552461,
+        "direct_event_minus_control_mean": 6.507262670375363,
+        "direct_event_minus_control_t_hac": 4.128853551653473,
+        "event_target_mean": 16.398721101534107,
+        "hac_maxlags": 4,
+        "horizon": 5,
+        "n_event_date_clusters": 242,
+        "n_event_rows": 345,
+        "n_tickers": 204,
+        "outcome": "left_tail",
+        "p_hac_two_sided": 0.9407501997039062,
+        "se_hac": 0.9929617443286569,
+        "signal": "saliency21_diff",
+        "signal_scale": {
+          "mean": -0.4954089157973261,
+          "std": 1.6610702965194806
+        },
+        "t_hac": -0.07432699226995632
+      },
+      {
+        "beta_per_1sd": -0.35154124919209684,
+        "control_target_mean": 4.644463996558969,
+        "direct_event_minus_control_mean": 2.545826687769476,
+        "direct_event_minus_control_t_hac": 3.818688968897224,
+        "event_target_mean": 7.058371683211933,
+        "hac_maxlags": 4,
+        "horizon": 5,
+        "n_event_date_clusters": 242,
+        "n_event_rows": 345,
+        "n_tickers": 204,
+        "outcome": "downside_gap",
+        "p_hac_two_sided": 0.5869322157224446,
+        "se_hac": 0.6470636168662492,
+        "signal": "pump_diff",
+        "signal_scale": {
+          "mean": -0.13161779848989155,
+          "std": 1.4616305912446277
+        },
+        "t_hac": -0.543286996871533
+      },
+      {
+        "beta_per_1sd": 0.3369938305702071,
+        "control_target_mean": 4.644463996558969,
+        "direct_event_minus_control_mean": 2.545826687769476,
+        "direct_event_minus_control_t_hac": 3.818688968897224,
+        "event_target_mean": 7.058371683211933,
+        "hac_maxlags": 4,
+        "horizon": 5,
+        "n_event_date_clusters": 242,
+        "n_event_rows": 345,
+        "n_tickers": 204,
+        "outcome": "downside_gap",
+        "p_hac_two_sided": 0.5590013254820392,
+        "se_hac": 0.5767227664620651,
+        "signal": "saliency21_diff",
+        "signal_scale": {
+          "mean": -0.4954089157973261,
+          "std": 1.6610702965194806
+        },
+        "t_hac": 0.5843255202798959
+      }
+    ],
+    "description": "Same matched design using Pump_and_dump-only 7-day attention and broader 21-day topic attention; secondary, not included in the m=8 verdict family."
+  },
+  "timing_and_lookahead": {
+    "attention_baseline": "rolling mean/std use values ending at t-1",
+    "code_guard": "sec_event_lag1 = sec_event.shift(1); Wikimedia raw past-only z-scores are shifted one trading row before joining targets",
+    "control_exclusion": "candidate control rows within max(10,H) trading rows of any labelled event are excluded",
+    "event_overlap": "within-ticker labelled events are de-clustered by H trading rows",
+    "formation_day": "t",
+    "target_windows": {
+      "H1": "t+1",
+      "H5": "t+1 through t+5"
+    }
+  },
+  "verdict": {
+    "conclusion": "The public Wikimedia saliency shock does not robustly amplify post-event crash risk across the eight predeclared cells.",
+    "fdr_only_positive_count": 0,
+    "label": "NULL_NO_ROBUST_SALIENCY_AMPLIFICATION",
+    "strict_primary_pass_count": 0
+  }
+}
