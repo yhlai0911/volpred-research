@@ -10,6 +10,7 @@ import signal
 import subprocess
 import sys
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,20 @@ from scripts.dispatch_supervisor import health, phase_z, procutil, scheduler, st
 
 def _tmp_state(tmp_path: Path) -> Path:
     return tmp_path / "dispatch_state.json"
+
+
+def _seed_due(state_path: Path) -> None:
+    """Seed a stale last_fire_at so `_due_to_fire()` returns True — a genuinely due tick.
+
+    Since 2026-07-10 (9c4f73e21) a missing/unparseable last_fire_at is NOT due:
+    the daemon bootstraps the field and skips, which killed the off-slot
+    duplicate-fire bug (unknown state must not mean "fire now"). A fire-path test
+    must therefore express due-ness the way production does — a stale timestamp —
+    rather than leaning on an empty state file, which would reassert the exact bug
+    the commit fixed. Mirrors the `due_state` fixture in test_scheduler_pregate.py.
+    """
+    with state._locked_state(state_path) as (_fh, data):
+        data["last_fire_at"] = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
 
 
 _REAL_RUN_PREGATE = scheduler._run_pregate
@@ -217,6 +232,7 @@ def test_scheduler_tick_skips_when_auth_blocked(tmp_path: Path) -> None:
 
 def test_scheduler_dry_run_marks_last_fire_without_worker(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt", encoding="utf-8")
     called = {"worker": 0}
@@ -243,6 +259,7 @@ def test_scheduler_dry_run_marks_last_fire_without_worker(tmp_path: Path, monkey
 
 def test_scheduler_fire_runs_worker_when_due(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
     _stub_pregate(monkeypatch)
@@ -476,6 +493,7 @@ def test_scheduler_phase_z_runs_even_if_worker_raises(tmp_path: Path, monkeypatc
     # Codex review #2: PHASE-Z lives in `finally`, so a worker that RAISES still
     # gets the safety-net (and the exception propagates afterward).
     state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt", encoding="utf-8")
     _stub_pregate(monkeypatch)
@@ -523,6 +541,7 @@ def test_phase_z_git_timeout_does_not_raise(tmp_path: Path) -> None:
 
 def test_scheduler_post_fire_hook_invokes_phase_z(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
     _stub_pregate(monkeypatch)
@@ -556,6 +575,7 @@ def test_scheduler_post_fire_hook_invokes_phase_z(tmp_path: Path, monkeypatch) -
 
 def test_scheduler_dry_run_skips_phase_z(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt", encoding="utf-8")
     called = {"phase_z": 0}
@@ -595,6 +615,7 @@ def test_scheduler_pre_fire_guard_runs_once_before_worker(tmp_path: Path, monkey
     # The whole point of the guard: the tree must be clean BEFORE the agent
     # starts writing to it. Ordering, not just presence, is the invariant.
     state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
     _stub_pregate(monkeypatch)
@@ -632,6 +653,7 @@ def test_scheduler_pre_fire_guard_crash_does_not_prevent_fire(tmp_path: Path, mo
     # belt-and-suspenders try/except. A guard must never veto the dispatch it
     # guards — a broken backstop degrades to "unprotected", never to "no fire".
     state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
     _stub_pregate(monkeypatch)
@@ -667,6 +689,7 @@ def test_scheduler_pre_fire_guard_crash_does_not_prevent_fire(tmp_path: Path, mo
 
 def test_scheduler_dry_run_skips_pre_fire_guard(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt", encoding="utf-8")
     called = {"guard": 0}
@@ -719,6 +742,7 @@ def test_scheduler_pre_fire_guard_runs_even_when_pregate_skips(tmp_path: Path, m
     # the files the guard repairs are read by the live site and by the pregate
     # itself, so a slot the pregate declines still deserves a clean tree.
     state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt", encoding="utf-8")
     called = {"guard": 0, "worker": 0}
@@ -884,7 +908,10 @@ def test_due_to_fire_warns_on_invalid_last_fire_at(capsys) -> None:
     )
 
     err = capsys.readouterr().err
-    assert due is True
+    # 9c4f73e21: an unparseable last_fire_at is NOT due (it used to be treated as
+    # "fire now" — the off-slot duplicate-fire bug). The WARN still fires; only the
+    # due verdict flipped True→False.
+    assert due is False
     assert "[supervisor] WARN last_fire_at parse failed" in err
     assert "raw=not-a-date" in err
 
@@ -1702,6 +1729,7 @@ def test_heartbeat_advances_while_worker_in_flight(tmp_path: Path, monkeypatch) 
     beat, the timestamp must keep advancing WHILE `current_job` is non-null.
     """
     state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
     observed: dict = {}
