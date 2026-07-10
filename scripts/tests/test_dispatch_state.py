@@ -1034,14 +1034,27 @@ def _is_locked_state_call(call: ast.Call) -> bool:
 
 
 def _drive_every_writer(path: Path) -> None:
-    """跑過每一個會寫 state 的 public writer，讓 state 樹長到最完整的形狀。"""
+    """跑過每一個會寫 state 的 public writer，讓 state 樹長到最完整的形狀。
+
+    「每一個」由 `test_drive_every_writer_covers_all_public_writers` 機械保證 ——
+    不是靠這行註解。初版漏了 `release_reservation` / `clear_alert_dedup` 卻在
+    commit message 宣稱「驅動每一個」（2026-07-10）。
+    """
     st.mark_supervisor_started(path=path)
     st.heartbeat(path=path)
     st.request_fire(reason="manual", path=path)
     st.consume_fire_request(path=path)
     st.set_auth_blocked(True, path=path)
     st.set_auth_blocked(False, path=path)
-    st.mark_alert_sent("auth_blocked", path=path)
+    st.mark_alert_sent("stale_alert", path=path)
+    st.clear_alert_dedup("stale_alert", path=path)
+    st.mark_alert_sent("auth_blocked", path=path)  # 留一筆，扁平性斷言才有東西可驗
+
+    # spawn 失敗路徑：reserve 之後還沒有 pid 就 release，slot 必須回收
+    st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                    log_path="/tmp/w.log", path=path)
+    st.release_reservation(path=path)
+
     st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
                     log_path="/tmp/x.log", path=path)
     st.attach_process(pid=4242, pgid=4242, started_wall="w1", path=path)
@@ -1057,6 +1070,54 @@ def _drive_every_writer(path: Path) -> None:
     # 最後留一個 in-flight job，好讓 current_job 這個容器現形
     st.reserve_fire(schedule_id="hourly_dispatch", attempt=2, model="opus",
                     log_path="/tmp/z.log", path=path)
+
+
+def _public_writers_of_state_module() -> set[str]:
+    """AST 導出：state.py 裡所有會開 `_locked_state()` 的 public function。"""
+    tree = ast.parse(Path(st.__file__).read_text(encoding="utf-8"))
+    writers: set[str] = set()
+    for fn in tree.body:
+        if not isinstance(fn, ast.FunctionDef) or fn.name.startswith("_"):
+            continue
+        for node in ast.walk(fn):
+            if isinstance(node, ast.With) and any(
+                isinstance(it.context_expr, ast.Call)
+                and _is_locked_state_call(it.context_expr)
+                for it in node.items
+            ):
+                writers.add(fn.name)
+    return writers
+
+
+def _writers_driven_by_helper() -> set[str]:
+    """AST 導出：`_drive_every_writer` 實際呼叫了哪些 `st.<name>()`。"""
+    tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    fn = next(f for f in tree.body
+              if isinstance(f, ast.FunctionDef) and f.name == "_drive_every_writer")
+    return {
+        node.func.attr for node in ast.walk(fn)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name) and node.func.value.id == "st"
+    }
+
+
+def test_drive_every_writer_covers_all_public_writers():
+    """窮舉 gate 的前提是「真的驅動了每一個 writer」。那個前提本身必須被檢查。
+
+    否則新增一個 writer 時，`test_no_undocumented_nested_container` 會**靜默地
+    不再窮舉** —— 它仍然綠燈，只是不再覆蓋那個 writer 可能長出的新容器。
+    2026-07-10 初版就漏了兩個（release_reservation / clear_alert_dedup），而
+    commit message 寫著「驅動每一個 public writer」。對程式驗證、對描述不驗證，
+    是本 session 反覆復發的病 —— 這條測試把描述也納入驗證。
+    """
+    writers = _public_writers_of_state_module()
+    driven = _writers_driven_by_helper()
+    assert writers, "AST 沒抓到任何 public writer（_locked_state 慣例改了？）"
+    missed = writers - driven
+    assert not missed, (
+        f"_drive_every_writer 沒驅動這些 public writer: {sorted(missed)} → "
+        f"窮舉 gate 已不再窮舉。請補上呼叫。"
+    )
 
 
 def _container_shapes(node, path="$"):
