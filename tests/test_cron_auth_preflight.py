@@ -3,32 +3,9 @@ from __future__ import annotations
 import os
 import stat
 import subprocess
-import sys
 from pathlib import Path
 
-import pytest
-
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "cron_hourly_dispatch.sh"
-
-# `cron_hourly_dispatch.sh` is the legacy macOS launchd wrapper — launchctl-disabled
-# since the 2026-07-04 supervisor cutover, kept only as a one-click rollback artifact.
-# It never executes on Linux in production.
-#
-# On ubuntu the two double-failure tests get returncode 0 where macOS gives 1, i.e.
-# the script exits before reaching run_auth_preflight(). **I did not diagnose why.**
-# Without a Linux host to reproduce on, "make it green" would have meant guessing,
-# and a guess dressed as a fix is worse than a declared gap. Skipping keeps CI
-# honest about what it did NOT verify. Tracking task: diagnose the divergence (it
-# may be a real portability bug in the rollback path we would want working if the
-# cutover ever has to be reverted onto another host).
-pytestmark = pytest.mark.skipif(
-    sys.platform != "darwin",
-    reason=(
-        "cron_hourly_dispatch.sh is a macOS launchd wrapper (launchctl-disabled, "
-        "rollback-only); its exit path diverges on Linux and the cause is UNDIAGNOSED "
-        "— see docs/error_log.md 2026-07-10 CI entry. Not skipped to hide a fix."
-    ),
-)
 
 
 def _write_executable(path: Path, content: str) -> None:
@@ -191,7 +168,8 @@ def test_auth_preflight_sends_actionable_alert_on_double_failure(tmp_path: Path)
         timeout=10,
     )
 
-    assert result.returncode == 1
+    log_path = tmp_path / ".volpred" / "logs" / "hourly_dispatch.log"
+    assert result.returncode == 1, log_path.read_text(encoding="utf-8")
     args_text = (tmp_path / "uv_args.txt").read_text(encoding="utf-8")
     body_text = (tmp_path / "uv_body.txt").read_text(encoding="utf-8")
     assert "send-alert" in args_text
@@ -257,7 +235,8 @@ def test_auth_preflight_tcc_shaped_failure_diagnoses_claude_update(tmp_path: Pat
         timeout=10,
     )
 
-    assert result.returncode == 1
+    log_path = tmp_path / ".volpred" / "logs" / "hourly_dispatch.log"
+    assert result.returncode == 1, log_path.read_text(encoding="utf-8")
     args_text = (tmp_path / "uv_args.txt").read_text(encoding="utf-8")
     body_text = (tmp_path / "uv_body.txt").read_text(encoding="utf-8")
     assert "send-alert" in args_text

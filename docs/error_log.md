@@ -90,6 +90,23 @@
 - 新增 `.github/workflows/pytest.yml`，**刻意不接任何 secret**（`grep -c secrets. = 0`）—— 「零憑證下全綠」這個性質本身就是防止 import-time side effect 再爬回來的護欄。先 `workflow_dispatch` 觀察，全綠後才對 push/PR 開火。
 - 驗證：乾淨無憑證 checkout **1683 passed / 0 failed**。
 
+**Follow-up correction（2026-07-10，同日第一批真 Ubuntu runs）**：上面的
+`1683 passed` 是乾淨 macOS worktree，不是 GitHub Ubuntu runner；第一次真 CI
+`29085496663` 仍有 12 failures。後續不得把這段寫成「CI 已綠」。其中兩個原先以
+skip 暫置的 clean-checkout 缺口已改為真修：
+
+- `test_trending_repost_fb_url` 不再依賴 gitignored production log，也不再 skip；
+  parser / canonical URL invariant 改用注入的 `tmp_path` JSON fixture。live log 稽核屬
+  ops audit，不把「檔案不存在」冒充測試通過。
+- `test_cron_auth_preflight` 的 Linux 分歧已在本機 Docker 決定性重現：GNU
+  `stat -f %m` 會輸出多行 filesystem report（非 epoch），被 shell arithmetic 使用後
+  拋 syntax error，控制流誤落到 `preflight-only exit 0`。wrapper 新增 BSD/GNU
+  雙路徑 mtime helper，且只接受 digits-only epoch；macOS 與 Linux container 的四個
+  preflight tests 都實際執行通過，已移除整檔 Linux skip。
+- workflow 恢復 `push(main)` / `pull_request` / manual 三種 trigger，並顯式鎖
+  `permissions: contents: read`。最終完成仍以同一 final SHA 的 GitHub Test Suite
+  `conclusion=success` 為 gate，不以本機結果代替。
+
 **⚠️ 平行實作警告**：branch `claude/upbeat-rhodes-ffaad8` 的 commit `6d2dd3a0c` 是同一問題的**另一套實作**，從 36 個 commit 前的 base 分出，已被上述 commit 鏈取代。**不要 merge**：它把 `HEADERS` 常數換成 `headers(**overrides)` 工廠函式，與 main 的 `_GuardedHeaders()` 不相容；而 `scripts/pull_reader_metrics.py` 在 merge 時**不會衝突**（main 沒動過它），會靜默採用呼叫 `headers(Prefer="")` 的版本 → 執行期 ImportError。這是「兩套設計被 merge 成一個混合體」的典型陷阱：衝突檔會被人工審視，不衝突的檔不會。本 entry 的分析大部分承襲自該 branch 的草稿，已按 main 實際落地的實作校正。
 
 **教訓（與同日「幽靈欄位」entry 同一病灶：機制存在、沒人在問）**：

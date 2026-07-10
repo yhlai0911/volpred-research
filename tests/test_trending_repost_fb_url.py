@@ -16,9 +16,6 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-LOG_PATH = REPO_ROOT / "storage" / "reports" / "trending_repost_log.json"
-
 ALLOWED_URL_RE = re.compile(
     r"^https://volpred\.zeabur\.app/v3/reports/mile_[a-z0-9]+$"
 )
@@ -43,17 +40,14 @@ def assert_fb_comment_url(url: str) -> None:
         )
 
 
-def _extract_fb_urls_from_log() -> list[tuple[str, str, str]]:
-    """Return list of (mile_id, field_name, url) for log entries with FB url-bearing fields.
+def _extract_fb_urls_from_log(log_path: Path) -> list[tuple[str, str, str]]:
+    """Return (mile_id, field_name, url) rows from an injected FB log fixture.
 
-    `LOG_PATH` is gitignored production data. On a clean checkout (CI) there is
-    nothing to assert an invariant over, so skip rather than fail — the two tests
-    below audit *live data*, not code. Skipping keeps them honest: a green CI must
-    not be read as "the live FB URLs were checked" when the log was never there.
+    The production trending log is gitignored operational state. Unit tests must
+    exercise the parser and URL invariant with deterministic input instead of
+    treating a missing live file as a passing CI result.
     """
-    if not LOG_PATH.exists():
-        pytest.skip(f"{LOG_PATH.relative_to(REPO_ROOT)} absent (gitignored production data)")
-    data = json.loads(LOG_PATH.read_text())
+    data = json.loads(log_path.read_text(encoding="utf-8"))
     out: list[tuple[str, str, str]] = []
     for entry in data:
         mile_id = entry.get("mile_id", "<unknown>")
@@ -69,18 +63,62 @@ def _extract_fb_urls_from_log() -> list[tuple[str, str, str]]:
     return out
 
 
-def test_no_banned_article_path_in_log() -> None:
+@pytest.fixture
+def fb_log_path(tmp_path: Path) -> Path:
+    path = tmp_path / "trending_repost_log.json"
+    path.write_text(
+        json.dumps(
+            [
+                {
+                    "mile_id": "mile_abc123",
+                    "fb_comment_link": "https://volpred.zeabur.app/v3/reports/mile_abc123",
+                },
+                {
+                    "mile_id": "mile_def456",
+                    "fb_comment_draft": (
+                        "完整圖表：https://volpred.zeabur.app/v3/reports/mile_def456。"
+                    ),
+                },
+                {
+                    "mile_id": "mile_external",
+                    "fb_comment_draft": "來源：https://example.com/reference).",
+                },
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_extract_fb_urls_from_injected_log(fb_log_path: Path) -> None:
+    assert _extract_fb_urls_from_log(fb_log_path) == [
+        (
+            "mile_abc123",
+            "fb_comment_link",
+            "https://volpred.zeabur.app/v3/reports/mile_abc123",
+        ),
+        (
+            "mile_def456",
+            "fb_comment_draft",
+            "https://volpred.zeabur.app/v3/reports/mile_def456",
+        ),
+        ("mile_external", "fb_comment_draft", "https://example.com/reference"),
+    ]
+
+
+def test_no_banned_article_path_in_log(fb_log_path: Path) -> None:
     bad = [
         (mile_id, field, url)
-        for mile_id, field, url in _extract_fb_urls_from_log()
+        for mile_id, field, url in _extract_fb_urls_from_log(fb_log_path)
         if BANNED_SUBSTR in url and "volpred.zeabur.app" in url
     ]
     assert not bad, f"banned /article/ URLs found in log: {bad}"
 
 
-def test_all_volpred_fb_urls_match_canonical_pattern() -> None:
+def test_all_volpred_fb_urls_match_canonical_pattern(fb_log_path: Path) -> None:
     failures: list[tuple[str, str, str]] = []
-    for mile_id, field, url in _extract_fb_urls_from_log():
+    for mile_id, field, url in _extract_fb_urls_from_log(fb_log_path):
         if "volpred.zeabur.app" not in url:
             continue
         if not ALLOWED_URL_RE.match(url):
