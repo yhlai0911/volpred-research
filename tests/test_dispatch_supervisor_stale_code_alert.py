@@ -131,6 +131,35 @@ def test_reload_clears_the_breach(tmp_path: Path) -> None:
     assert out["breached"] is False
 
 
+def test_beating_daemon_with_no_boot_time_breaches(tmp_path: Path) -> None:
+    """The exact shape left behind at 2026-07-10 23:02, when a test wrote
+    `_empty_state()` over the canonical file: heartbeat fresh, `completions`
+    empty, `supervisor_started_at` null. With `boot is None` the mtime loop finds
+    nothing and the old code answered `ok` — blind precisely when it mattered.
+    """
+    ops = tmp_path / "storage" / "ops"
+    ops.mkdir(parents=True)
+    (ops / "dispatch_state.json").write_text(
+        json.dumps({
+            "version": 1,
+            "supervisor_pid": 85741,
+            "supervisor_started_at": None,   # wiped
+            "last_heartbeat_at": NOW.isoformat(),  # still beating
+            "current_job": None,
+            "completions": [],
+        }),
+        encoding="utf-8",
+    )
+    src = tmp_path / "scripts" / "dispatch_supervisor"
+    src.mkdir(parents=True)
+
+    out = _parse_dispatch_supervisor_stale_code_state(str(tmp_path / "storage"), NOW, supervisor_dir=src)
+
+    assert out["breached"] is True
+    assert out["details"]["supervisor_started_at"] is None
+    assert "開機時間" in out["title"]
+
+
 def test_missing_state_is_not_yet_observed(tmp_path: Path) -> None:
     # `dispatch_supervisor_heartbeat` owns "is the daemon alive"; don't double-alert.
     src = tmp_path / "scripts" / "dispatch_supervisor"
