@@ -2,6 +2,36 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-10 CI 從未跑過 pytest — 1600+ 個測試零執行，紅燈爛在那裡沒人知道
+
+**現象**：`.github/workflows/` 只有 knowledge-provenance / silent-fallbacks / source-encoding 三個 audit gate，**沒有一個跑 pytest**；`.git/hooks/pre-push` 也沒有。1600+ 個測試（含大量 regression gate）在 CI 上一次都沒跑過。後果是兩個測試長期紅燈無人察覺（另見同日「兩個長期紅燈測試」entry）：`test_gmail_inbox_poll_warnings`（7/5 cutover 刪掉 `_DISPATCH_WRAPPER`，測試還在 monkeypatch 它）與 `test_topic_cluster_gate`（fixture 寫死 `2026-06-10`，7/10 剛好落出 `now-30d` 窗外）。
+
+**為什麼一直沒放進 CI（真正的技術根因）**：`scripts/supabase_sync.py` 在 **module import 時**就 `raise RuntimeError("Missing SUPABASE_URL or ...")`。`src/volpred/ops/__init__.py → content.py → supabase_sync` 這條 import 鏈讓 **pytest collection 在跑第一個測試前就死掉**。CI 沒有 `.env.local`（gitignored）→ 加 pytest 必紅 → 沒人加。**gate 的缺席被一個 import-time side effect 給鎖死了。**
+
+**修完 import 才看見的另外 4 類紅燈**（都被開發機的環境假象掩蓋）：
+1. `tests/test_feed_sync.py` 只 stub `_fetch_supabase_articles`，但 `compute_diff` 還會呼叫 `_fetch_supabase_article_tags` → **單元測試一直在對 production Supabase 發真實 read**（開發機有 creds，所以沒人看得出來）。
+2. `config/brief_templates/*.yaml` 8 支全部硬編 `repo_root: "/Users/yhlai0911/volpred-research"`，而 `preflight_executor_task` 會擋 `brief.repo_root != project_path()` → **worktree 或 CI runner 上每個 agent brief 都 `repo_root_mismatch`**。
+3. `scripts/build_knowledge_index.py::get_client()` 缺 API key 時 `sys.exit(1)`。它同時被 library path 呼叫（`topic_similarity._real_embedder`），而上游 `embed_with_cache` 的 fail-open 寫的是 `except Exception` —— **`SystemExit` 繼承 `BaseException`，直接穿過去**。一個 optional credential 缺席就在 publish 中途殺掉整個 process。
+4. `tests/test_trending_repost_fb_url.py` 讀 gitignored 的 `storage/reports/trending_repost_log.json` → CI `FileNotFoundError`。
+
+**解決方法**（commit 鏈 `12c665c3a` → `be5d2f508` → `e8e9c90c8`）：
+- `supabase_sync`：credentials 改成 **request-time** 要求 —— import 時 best-effort 讀 env / `.env.local` 不 raise，`require_creds()` 與 `HEADERS = _GuardedHeaders()`（lazy guarded mapping）在真正發 request 時才檢查並 raise 同一句訊息。fail-fast 語意保留，只是延後。測試 `tests/test_supabase_sync_import_safety.py`（8 tests）。
+- `build_knowledge_index`：新增 `MissingEmbeddingCredentials(RuntimeError)` 取代 `sys.exit(1)`，只有 `__main__` 可以把它翻成 exit code。fail-open 的 `except Exception` 這才真的 open。
+- `test_feed_sync`：補 autouse fixture `_no_production_tag_reads` stub 掉 tag join 的 read。
+- `brief_templates`：**把 `repo_root` 從 template 拿掉**（它是 runtime 事實不是 template 資料；`_render_template_brief` 早就有 `rendered.setdefault("repo_root", str(project_path()))`）。
+- `test_trending_repost_fb_url`：改 `pytest.skip`（明示「本機資料不變式，CI 無資料可稽核」），**不假裝檢查過**。
+- 新增 `.github/workflows/pytest.yml`，**刻意不接任何 secret**（`grep -c secrets. = 0`）—— 「零憑證下全綠」這個性質本身就是防止 import-time side effect 再爬回來的護欄。先 `workflow_dispatch` 觀察，全綠後才對 push/PR 開火。
+- 驗證：乾淨無憑證 checkout **1683 passed / 0 failed**。
+
+**⚠️ 平行實作警告**：branch `claude/upbeat-rhodes-ffaad8` 的 commit `6d2dd3a0c` 是同一問題的**另一套實作**，從 36 個 commit 前的 base 分出，已被上述 commit 鏈取代。**不要 merge**：它把 `HEADERS` 常數換成 `headers(**overrides)` 工廠函式，與 main 的 `_GuardedHeaders()` 不相容；而 `scripts/pull_reader_metrics.py` 在 merge 時**不會衝突**（main 沒動過它），會靜默採用呼叫 `headers(Prefer="")` 的版本 → 執行期 ImportError。這是「兩套設計被 merge 成一個混合體」的典型陷阱：衝突檔會被人工審視，不衝突的檔不會。本 entry 的分析大部分承襲自該 branch 的草稿，已按 main 實際落地的實作校正。
+
+**教訓（與同日「幽靈欄位」entry 同一病灶：機制存在、沒人在問）**：
+- **「有 gate」不等於「gate 有在跑」。** 幽靈欄位是 reader 讀一個沒有 writer 的 key；這裡是 CI 宣稱有測試而沒有任何 job 執行它。兩者都是**宣告與執行之間沒有契約**。新增任何 gate（test / audit / hook）時必須同時指出**誰在什麼時候執行它**，且要有辦法看出它停了。
+- **import-time side effect 會靜默地決定「哪些工程實踐做得到」。** 這裡它否決了整個 CI 測試層，代價遠超過那行 `raise` 想防的錯誤。副作用放在 import，等於把成本轉嫁給每一個 importer。
+- **開發機的環境（`.env.local` / embedding cache / 絕對路徑）會讓測試看起來比實際健康。** 「單元測試打 production」與「fail-open 根本沒 open」只有在乾淨環境跑一次才會現形。**任何測試套件都應該至少在一個零憑證環境跑過。**
+- **時間相關的 fixture 寫死日期＝定時炸彈。** 固定「相對偏移」不要固定「日曆日期」。
+- **同一問題出現兩條平行修法時，先查對方是否已落地，再決定 merge 或棄用。** 從 stale base 分出的完整實作，其危險不在衝突檔（會被看見），而在不衝突檔（會被靜默採用）。
+
 ## 2026-07-10 新 gate 上線的兩個必檢項：grandfather backfill + enclosing-try blast radius
 
 **背景**：外部 Codex 稽核指出策略 activation 的五項 gate 100% 是 prose、五條旁路零檢查。落地機械 gate（`src/volpred/ops/strategy_gate.py`）時，實作 agent 的設計本身正確（只攔 inactive→active transition，daily_update 對既有 active 的 no-op re-sync 免 receipt），單元測試 30 passed 全綠 —— **但兩個 adversarial reviewer 各自獨立抓到同一個會上線爆炸的洞**。
