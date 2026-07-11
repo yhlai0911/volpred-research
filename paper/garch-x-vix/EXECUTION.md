@@ -1,8 +1,8 @@
 # EXECUTION — garch-x-vix
 
-> **BADGE** · verdict `2.5/5` · stage `revision`（**從未投稿**）· journal `IJF → JEF → JoF` · **p0 = TODO** · dod `0/7`
+> **BADGE** · verdict `2.5/5` · stage `revision`（**從未投稿**）· journal `IJF → JEF → JoF` · **p0 = 1 empirical gate closed / 3** · dod `1/7`
 > 依據：`review_history/fable_deep_review_20260711/README.md`（Fable 深審 2.5/5）· `docs/paper_portfolio_review_20260711.md` · `storage/paper_pipeline_status.json`
-> 最後更新：2026-07-11（Fable deep review 完成，P0 尚未執行）
+> 最後更新：2026-07-12（K1685 關閉 P0-2 empirical gate；P0-1/P0-3 未執行）
 
 ---
 
@@ -29,14 +29,14 @@
 - **手稿層不健全** ❌：Table 3 的 C1=3.49 無任何來源（canonical 1.995，Harvey 由 Yes 翻 No）、A3f/B2 兩處 Harvey 質性標錯、headline 4.03 來源宣稱為偽（main.tex:723 稱出自 `mcs_dm_results.json`，該檔實存 4.148）、§5.9 宣稱測六個 macro 變數但 K1001 只跑兩個、`acerbi2019` 是嵌合引用、pairwise DM 表同表混兩套符號慣例。全是 referee 一眼可見、無需重跑即可抓到的問題。
 - **Pipeline 卡住的真正根因** = 上述假前提（body frozen until R1，reviewer 不存在）。解法不是等 sign-off，是解凍後把整份修正 queue 落地。
 - **Reproduce gate**（`reproduce_report.json` 2026-07-09）：match_rate 85.7% / **yellow**，唯一 mismatch 就是 4.03 vs 4.148 + `readme_status_mismatch`；P0-1 落地後預期轉 **green**。
-- **未關閉的最大實證風險**：K1391（full QLIKE kernel、Codex v2 PASS）顯示 OOS 延長 41 天後全樣本 DM t = −2.03（GJR 反勝），但用的是 K1392-bug 家族 spec（K1393 已修 5 bug），且**至今無任何 K988-faithful spec 的延長 OOS 重跑**。投稿在即，「為何樣本停在 4 月」是 referee 必問題 → 見 P0-2，投稿前必須自己知道答案（研究誠實 § 不能讓步）。
+- **P0-2 empirical risk 已由 K1685 關閉（2026-07-12）**：K1393-faithful、pinned SPY/VIX snapshot、OOS 延至 2026-07-10（n=1,890），A4f vs GJR canonical DM t=+3.9656；symmetric 12-start t=+3.0098，只高 Harvey 門檻 0.0098，lag-10 sensitivity=2.9901。故 headline 以 `GO_WITH_FRAGILITY_DISCLOSURE` 存活，不得寫成廣泛穩健。K1393 legacy anchor t=3.602900965 精確重現；60-refit parameter audit 與 Codex review PASS。舊 paper CSV 的 10 個重複日期使 K1391 reversal 另受資料污染，須修 collector、不可手改資料。手稿 endpoint/sensitivity 綁定仍屬 P0-1。
 
 ---
 
 ## 完成定義（DoD）— 全部未達成
 
 - [ ] **P0-1** 落地：Table 3 由 canonical `mcs_dm_results.json` 全表重生（C1→1.995 No、A3f→3.018 Yes、B2→3.066 Yes、計數 10/16→11/16）；4.03→4.148 全文統一；macro 段、符號慣例、引用、措辭全部修正
-- [ ] **P0-2** 落地：K1393-faithful spec 延長 OOS 覆核完成，headline claim 存活（或加誠實 sample-sensitivity 小節）
+- [x] **P0-2 empirical gate**：K1393-faithful spec 延長 OOS 覆核完成；headline 以 `GO_WITH_FRAGILITY_DISCLOSURE` 存活。手稿 endpoint / optimizer-HAC sensitivity 綁定併入尚未完成的 P0-1。
 - [ ] **P0-3** 落地：replication package 除雷完成，狀態行改「revision, not submitted」
 - [ ] `reproduce.py` exit 0 且 `reproduce_report.json` match_rate ≥ 95% / **alert green**
 - [ ] `/citation-verifier` 重跑 **0 MAJOR**（含 acerbi2019 修正 + 新增文獻卷期驗證）
@@ -65,15 +65,16 @@
 
 **驗證 gate**：xelatex 重編譯無誤 + `reproduce.py` match_rate ≥ 95% **green** + `paper-update` 同步線上驗證。
 
-### ⬜ P0-2 — 延長 OOS faithful-spec 覆核（新 K，一個 compute job）
+### ✅ P0-2 — 延長 OOS faithful-spec 覆核（K1685；empirical gate complete）
 
 以 K1393 的 K988-faithful A4f spec、新 pinned snapshot，OOS 延到最新資料（≥2026-06），full QLIKE kernel + canonical DM。
 
-- ⬜ 若 Harvey 仍過：資料節更新至新端點一併投稿
-- ⬜ 若翻轉：加誠實 sample-sensitivity 小節（K1027 七窗證據可支撐「長期優勢 vs 近期窗口逆風」框架），headline 改寫
+- ✅ 完整 OOS canonical Harvey gate 仍過：3-start t=+3.9656；12-start t=+3.0098。
+- ✅ 未翻轉，但屬門檻脆弱：lag-10=2.9901、anchor multistart<3；裁決 `GO_WITH_FRAGILITY_DISCLOSURE`。
+- ⬜ 手稿資料節更新至 2026-07-10，並寫入 optimizer/HAC sensitivity（與 P0-1 canonical rebind 一起由主線程修改 `.tex`）。
 
-**驗證 gate**：實驗三件套（`experiments/<id>/{README.md, <id>.py, <id>_results.json}`）+ 固定 seed + Codex review PASS；結論寫入 `knowledge.json`。
-（對應 next_tasks：`fable0711_garchx_k1393_oos`）
+**驗證 gate：PASS**。`experiments/k1685/` 三件套 + pinned data / figures / parameter audit 齊全；seed=42；Codex primary + 兩位 fresh-context reviewers PASS；knowledge item `7d2e411b`（confidence=.84）。
+（對應收件 task：`k1685_collect_orphaned_results`；原 compute job 因 orphan-process timeout 被標 failed，特殊 provenance 見 K1685 README。）
 
 ### ⬜ P0-3 — Replication package 除雷（修流程不修資料）
 

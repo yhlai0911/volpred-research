@@ -38619,5 +38619,41 @@
     ],
     "confidence": 0.99,
     "created_at": "2026-07-12T04:01:46.596189"
+  },
+  {
+    "item_id": "7d2e411b",
+    "category": "garch_x_vix_robustness",
+    "experiment_id": "K1685",
+    "verdict": "CONDITIONAL_PASS",
+    "research_verdict": "GO_WITH_FRAGILITY_DISCLOSURE",
+    "title": "K1685: K1393-faithful GARCH-X 延長 OOS 存活，但 optimizer/HAC 門檻脆弱",
+    "content": "K1685 以 pinned yfinance SPY/VIX snapshot（2000-01-03～2026-07-10）延長 K988/K1393-faithful A4f vs GJR 的 OOS。完整 OOS 2019-01-02～2026-07-10、n=1,890：GJR QLIKE=1.515680，A4f=1.431558，A4f 相對改善 5.550%；canonical HAC-DM d=loss_GJR-loss_A4f，t=+3.9656、p=0.00007595、lag=13。K1393 legacy anchor t=3.602900965 精確重現。對兩模型對稱增至 12 starts 後，full-OOS t=+3.0098，僅高於 Harvey |t|>3 門檻 0.0098；lag-10 sensitivity=2.9901，anchor multistart 亦低於 3，因此只能判 GO_WITH_FRAGILITY_DISCLOSURE，不可宣稱顯著性廣泛穩健。新增 65 日單獨 t=0.9120、p=.365，不顯著。Post-hoc full-population parameter audit 覆蓋 primary 30 + multistart 30 refits，所有 selected fits finite 且定態；GJR persistence max=.994075、A4f max=.954607。另發現 Paper 9 舊 CSV 在 2026-05-04～05-15 有 10 個重複日期，K1391 的反轉同時混入 degraded spec 與資料污染；不得手改 CSV，須修 refresh collector 的並行/去重流程。原 results JSON 由 supervising agent timeout 後存活的 orphan compute child 產出；收件後經兩位 fresh-context reviewer 與 Codex primary path 全量驗證 PASS。",
+    "evidence": [
+      "experiments/k1685/k1685_garchx_oos_extension_results.json",
+      "experiments/k1685/k1685_parameter_audit.json",
+      "experiments/k1685/k1685_codex_review.md",
+      "experiments/k1685/README.md",
+      "experiments/k1393/k1393_results.json",
+      "Patton (2011)",
+      "Harvey, Liu, and Zhu (2016)"
+    ],
+    "confidence": 0.84,
+    "reviewer": "Codex primary-path PASS + two fresh-context independent reviewers PASS (2026-07-12)",
+    "reviewer_source": "Codex primary path; agent-result-verification; fresh-context code reviewer",
+    "codex_review": "PASS package/code; research verdict GO_WITH_FRAGILITY_DISCLOSURE. Full 60-refit parameter audit, provenance hashes, canonical DM/HAC and exact anchor verified.",
+    "oos_start": "2019-01-02",
+    "oos_end": "2026-07-10",
+    "oos_n": 1890,
+    "qlike_gjr": 1.5156804461191642,
+    "qlike_a4f": 1.4315581375381328,
+    "qlike_improvement_pct": 5.550134845139888,
+    "dm_t_canonical": 3.9655760274363283,
+    "dm_p_canonical": 7.594890383044728e-05,
+    "dm_hac_lag": 13,
+    "multistart_dm_t": 3.009751703045657,
+    "snapshot_sha256": "eee7f9c62ce3ed3ee68d2bffeb3c9386fb8a6343e1a053379cfc89058518e3fb",
+    "results_sha256": "1fd7fd8488cdfa2c66c54acc07459d9d643303d60dc1b51c953b3b2f99c97ec3",
+    "parameter_audit_sha256": "0e4fc56badfe208f965011f0d8e37f4ce3d852db930163557a14d12121bcacf4",
+    "created_at": "2026-07-11T21:33:30.195901+00:00"
   }
 ]
