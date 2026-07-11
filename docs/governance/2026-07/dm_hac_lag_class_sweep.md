@@ -102,3 +102,34 @@ that carry live knowledge claims are queued as follow-up work, priority-ordered 
 whether the DM result is load-bearing for a published article or a paper. Sites
 whose DM is diagnostic-only can be corrected lazily; sites whose Harvey-significance
 *is* the headline claim must be re-run before their claim is quoted again.
+
+## 2026-07-12 blind-spot expansion
+
+The follow-up audit expanded the population to `paper/*/experiments/**/*.py` and
+replaced the original narrow pattern matcher with AST evidence for four missed
+classes: plain-variance / `diff.std()` inference, zero floors such as
+`max(0, h-1)`, explicit `h<=1` iid branches, and iid exception fallbacks behind
+a canonical normal path. It also distinguishes canonical wrappers and
+block/stationary bootstrap from local no-HAC implementations.
+
+The corrected machine report contains **615 path-level local findings**:
+
+| Verdict | Count |
+|---|---:|
+| `no_hac` | 80 |
+| `degenerate_at_h1` | 148 |
+| `unknown` | 78 |
+| `h_lags_inclusive` | 28 |
+| `hardcoded` | 9 |
+| `canonical_like` | 225 |
+| `dependence_robust_resampling` | 8 |
+| `delegates_to_canonical` | 39 |
+
+There are 35 paper-path findings. These are kept as separate ratchet keys even
+when a paper package currently duplicates a root experiment, because either copy
+can diverge later. The active ratchet is **228 sites**: 128 remaining from the
+original cohort plus a separately frozen 100-site blind-spot cohort. The audit
+set and baseline set are exactly equal (`new=0`, `stale=0`); repaired sites still
+move to the retired ledger and cannot reappear. Twelve regression tests cover
+the named VIX-sufficiency/EAV/Taiwan sites plus the zero-floor, manual-HAC,
+canonical-wrapper, result-reader, and dependence-robust false-positive traps.

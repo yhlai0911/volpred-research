@@ -39,9 +39,13 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from audit_dm_hac_lag import (  # noqa: E402
     CANONICAL_LIKE,
     DEGENERATE,
+    DELEGATES,
+    DEPENDENCE_ROBUST,
     NO_HAC,
     NOT_A_TEST,
     RATCHET_VERDICTS,
+    UNKNOWN,
+    _classify_lag_expr,
     scan_population,
 )
 
@@ -166,10 +170,62 @@ def test_paper_side_experiments_are_in_population(findings) -> None:
         "paper/taiwan-vt/experiments/k849_har_rv_taifex.py::dm_test"
     ] == CANONICAL_LIKE
 
+    assert verdicts[
+        "paper/taiwan-vt/experiments/k844_futures_vs_stock_vt.py::<module>:ttest_1samp@570"
+    ] == NO_HAC
+
+
+def test_zero_floor_is_not_mistaken_for_positive_floor() -> None:
+    assert _classify_lag_expr("max(0, h - 1)")[0] == DEGENERATE
+    assert _classify_lag_expr("max(horizon - 1, 0)")[0] == DEGENERATE
+    assert _classify_lag_expr("max(1, h - 1)")[0] == CANONICAL_LIKE
+    assert _classify_lag_expr("max(h - 1, 1)")[0] == CANONICAL_LIKE
+
+
+def test_zero_floor_and_h1_branch_variants_are_frozen(findings, baseline) -> None:
+    verdicts = {_site_key(f): f.verdict for f in findings}
+    sites = {
+        "experiments/K1618/K1618.py::dm_hln",
+        "experiments/k1301/k1301_har_rs.py::dm_hln",
+        "experiments/k1309/k1309.py::dm_hln",
+        "experiments/k1316/k1316.py::dm_hln",
+        "experiments/k1432/k1432_tw_financial_stress.py::dm_test",
+        "experiments/k1600/k1600.py::dm_hln",
+        "experiments/k1605/k1605_formal.py::dm_test",
+        "experiments/k1682/k1682.py::hln_dm",
+        "experiments/k1683/k1683.py::hln_dm",
+        "experiments/k782/k782_har_5d_rv.py::dm_test",
+        "experiments/k782v2/k782v2_har_5d_rv.py::dm_test",
+        "experiments/research_har_mcs_spy_0050_tw_tx_tsfm_timesfm_ttm_log_har/research_har_mcs_spy_0050_tw_tx_tsfm_timesfm_ttm_log_har.py::dm_hln",
+    }
+    for site in sites:
+        assert verdicts[site] == DEGENERATE
+        assert site in baseline
+
+
+def test_manual_hac_and_canonical_wrappers_are_not_false_positives(findings) -> None:
+    verdicts = {_site_key(f): f.verdict for f in findings}
+    assert verdicts[
+        "experiments/K1424_hurst_garch_covariate/K1424_hurst_garch_covariate.py::dm_test"
+    ] == CANONICAL_LIKE
+    assert verdicts["experiments/k797/k797_kan_garch.py::dm_test"] == CANONICAL_LIKE
+    assert verdicts[
+        "experiments/k797v2/k797v2_kan_garch.py::dm_test"
+    ] == CANONICAL_LIKE
+    assert verdicts["experiments/k1337/K1337.py::dm_test_hac"] == UNKNOWN
+    assert verdicts["experiments/K1611/K1611.py::dm_hln"] == CANONICAL_LIKE
+    assert verdicts[
+        "experiments/k507/k507_dynamic_allocation.py::diebold_mariano_test"
+    ] == DELEGATES
+    assert verdicts[
+        "experiments/k436/k436_vrp_robustness.py::block_bootstrap_dm"
+    ] == DEPENDENCE_ROBUST
+
 
 def test_result_readers_do_not_masquerade_as_dm_tests(findings) -> None:
     verdicts = {_site_key(f): f.verdict for f in findings}
     assert verdicts["experiments/k1203/k1203.py::plot_dm_bar_eem"] == NOT_A_TEST
+    assert verdicts["experiments/K1404/K1404.py::classify_dm_status"] == NOT_A_TEST
 
 
 def test_canonical_dm_does_not_degenerate_at_h1() -> None:

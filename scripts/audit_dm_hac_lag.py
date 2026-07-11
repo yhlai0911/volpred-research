@@ -52,8 +52,13 @@ DM_NAME_RE = re.compile(r"(^|_)(dm|hln|diebold|mariano)(_|$)", re.IGNORECASE)
 
 # Names an author would bind a Newey-West bandwidth to.
 LAG_NAME_RE = re.compile(
-    r"^(nw_)?(max_)?(lag|lags|bandwidth|band|q|trunc|truncation)$", re.IGNORECASE
+    r"^(?:(?:nw|hac|canon(?:ical)?|newey_west)_)?"
+    r"(?:(?:max)_)?(?:lag|lags|bandwidth|band|q|trunc|truncation)"
+    r"(?:_(?:max|used|nw|hac))?$|^L$",
+    re.IGNORECASE,
 )
+
+HORIZON_NAME_RE = re.compile(r"^(?:h|H|(?:\w*_)?horizon(?:_\w*)?)$")
 
 # Verdicts, ordered worst -> best.
 DEGENERATE = "degenerate_at_h1"  # lag = h-1 with no floor: zero HAC when h=1
@@ -61,6 +66,7 @@ NO_HAC = "no_hac"  # plain variance / iid t-test / explicit zero bandwidth
 H_INCLUSIVE = "h_lags_inclusive"  # range(1, h+1): keeps lag 1, but never scales with n
 HARDCODED = "hardcoded"  # fixed integer bandwidth, independent of h and n
 CANONICAL_LIKE = "canonical_like"  # n**(1/3) style rule, or floored at >= 1
+DEPENDENCE_ROBUST = "dependence_robust_resampling"  # block/stationary bootstrap
 DELEGATES = "delegates_to_canonical"  # imports volpred canonical dm_test
 UNKNOWN = "unknown"  # DM-ish def found, no bandwidth binding recognised
 NOT_A_TEST = "not_a_dm_test"  # name matched but the body computes no test statistic
@@ -72,8 +78,9 @@ SEVERITY = {
     H_INCLUSIVE: 3,
     HARDCODED: 4,
     CANONICAL_LIKE: 5,
-    DELEGATES: 6,
-    NOT_A_TEST: 7,
+    DEPENDENCE_ROBUST: 6,
+    DELEGATES: 7,
+    NOT_A_TEST: 8,
 }
 
 # The CI ratchet freezes both ways a local forecast-comparison test can silently
@@ -84,28 +91,25 @@ RATCHET_VERDICTS = frozenset({DEGENERATE, NO_HAC})
 # Plotting / formatting / classification helpers whose name merely contains "dm"
 # do not, and must not inflate the population count.
 TEST_MACHINERY_RE = re.compile(
-    r"\b(np\.var|\.var\(|np\.cov|\.cov\(|gamma|autocov|ttest_1samp"
-    r"|stats\.t\.|stats\.norm\.|sp_stats\.t\.|sp_stats\.norm\."
-    r"|_st\.t\.|_st\.norm\.|norm\.cdf)\b"
+    r"np\.(?:var|std|cov)|\.(?:var|std|cov)\(|gamma|autocov|ttest_1samp"
+    r"|(?:\w*stats|_st)\.(?:t|norm)\.|norm\.(?:cdf|sf)"
 )
 
 # Reading a ``t_stat`` key in a plot is not evidence that the function computes
 # a test.  Assigning the statistic is.  This distinction removes the old
 # ``plot_dm_*`` false positives while retaining oddly named local tests.
-STAT_TARGET_NAMES = frozenset({"t", "t_stat", "tstat", "dm_stat", "dm_t"})
-STAT_OUTPUT_KEYS = frozenset({"t", "t_stat", "tstat", "dm_stat", "dm_t"})
+STAT_TARGET_NAMES = frozenset(
+    {"t", "t_stat", "tstat", "dm_stat", "dm_t", "t_hln", "t_hac"}
+)
 
 PLAIN_VARIANCE_RE = re.compile(
-    r"np\.var\(\s*d\b|\bd\.var\(|np\.std\(\s*d\b|\bd\.std\(", re.IGNORECASE
+    r"np\.(?:var|std)\s*\(|\.(?:var|std)\s*\(", re.IGNORECASE
 )
 HAC_MACHINERY_RE = re.compile(
-    r"np\.cov|\.cov\(|autocov|gamma_[kl]|gamma\[|newey|bartlett|hac|nw_var|cov_hac",
+    r"np\.cov|\.cov\(|autocov|\bcov_hac\b|gamma(?:_[kl]|\[)|newey_west|bartlett"
+    r"|\bnw_var\b|\b_?hac_var\s*\(|\b_?dm_lrv\s*\(|\blong_run_var\b"
+    r"|cov_type\s*=\s*['\"]HAC['\"]",
     re.IGNORECASE,
-)
-
-CANONICAL_IMPORT_RE = re.compile(
-    r"from\s+volpred\.stats\.model_evaluation\s+import[^\n]*\bdm_test\b"
-    r"|from\s+volpred\.stats\s+import[^\n]*\bmodel_evaluation\b"
 )
 
 # Evidence that the file actually evaluates a one-step-ahead horizon, which is
@@ -156,6 +160,13 @@ def _target_names(target: ast.expr) -> set[str]:
     return set()
 
 
+def _expression_computes_statistic(value: ast.expr | None) -> bool:
+    """Reject result readers such as ``dm_stat = row['dm_stat']``."""
+    if value is None:
+        return False
+    return any(isinstance(node, ast.BinOp) for node in ast.walk(value))
+
+
 def _function_computes_test_statistic(fn: ast.FunctionDef) -> bool:
     """Distinguish statistic producers from plotting/result-reader helpers."""
     body_src = _function_body_src(fn)
@@ -166,21 +177,12 @@ def _function_computes_test_statistic(fn: ast.FunctionDef) -> bool:
             continue
         targets = node.targets if isinstance(node, ast.Assign) else [node.target]
         names = set().union(*(_target_names(target) for target in targets))
-        if names & STAT_TARGET_NAMES or any(
+        statistic_target = bool(names & STAT_TARGET_NAMES) or any(
             "dm" in name.lower()
             and ("stat" in name.lower() or name.lower().endswith("_t"))
             for name in names
-        ):
-            return True
-    for node in ast.walk(fn):
-        if not isinstance(node, ast.Return) or not isinstance(node.value, ast.Dict):
-            continue
-        keys = {
-            key.value
-            for key in node.value.keys
-            if isinstance(key, ast.Constant) and isinstance(key.value, str)
-        }
-        if keys & STAT_OUTPUT_KEYS:
+        )
+        if statistic_target and _expression_computes_statistic(node.value):
             return True
     return False
 
@@ -227,11 +229,156 @@ def _is_candidate_function(fn: ast.FunctionDef) -> bool:
     )
 
 
-def _plain_variance_only(body_src: str) -> bool:
+def _function_has_serial_lag_loop(fn: ast.FunctionDef) -> bool:
+    """Detect hand-written Bartlett/autocovariance loops independent of names."""
+    for node in ast.walk(fn):
+        if isinstance(node, ast.For):
+            target = node.target
+            iterator = node.iter
+            loop_src = ast.unparse(node)
+        elif isinstance(node, ast.comprehension):
+            target = node.target
+            iterator = node.iter
+            loop_src = ast.unparse(node)
+        else:
+            continue
+        if not isinstance(target, ast.Name) or not isinstance(iterator, ast.Call):
+            continue
+        if not isinstance(iterator.func, ast.Name) or iterator.func.id != "range":
+            continue
+        args = iterator.args
+        if len(args) < 2 or not isinstance(args[0], ast.Constant) or args[0].value != 1:
+            continue
+        lag_name = re.escape(target.id)
+        forward_slice = re.search(rf"\[\s*{lag_name}\s*:", loop_src)
+        backward_slice = re.search(rf":\s*-\s*{lag_name}\s*\]", loop_src)
+        covariance_name = re.search(
+            r"\b(?:cov|gamma|autocov|long_var|var_d|lrv)\w*\b", loop_src, re.I
+        )
+        if (forward_slice and backward_slice) or covariance_name:
+            return True
+    return False
+
+
+def _plain_variance_only(fn: ast.FunctionDef, body_src: str) -> bool:
     """Recognise iid variance used as the DM long-run variance."""
-    return bool(PLAIN_VARIANCE_RE.search(body_src)) and not bool(
-        HAC_MACHINERY_RE.search(body_src)
+    return (
+        bool(PLAIN_VARIANCE_RE.search(body_src))
+        and not bool(HAC_MACHINERY_RE.search(body_src))
+        and not _function_has_serial_lag_loop(fn)
     )
+
+
+def _canonical_aliases(tree: ast.AST) -> set[str]:
+    """Names bound to canonical DM helpers, including function-local imports."""
+    aliases: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        if node.module != "volpred.stats.model_evaluation":
+            continue
+        for alias in node.names:
+            if "dm_test" in alias.name:
+                aliases.add(alias.asname or alias.name)
+    return aliases
+
+
+def _function_calls_alias(fn: ast.FunctionDef, aliases: set[str]) -> bool:
+    for node in ast.walk(fn):
+        if not isinstance(node, ast.Call):
+            continue
+        if isinstance(node.func, ast.Name) and node.func.id in aliases:
+            return True
+    return False
+
+
+def _function_has_iid_fallback(fn: ast.FunctionDef) -> bool:
+    """A canonical normal path does not make an iid exception fallback safe."""
+    for handler in (node for node in ast.walk(fn) if isinstance(node, ast.ExceptHandler)):
+        src = ast.unparse(handler)
+        if "ttest_1samp" in src:
+            return True
+        if PLAIN_VARIANCE_RE.search(src) and not HAC_MACHINERY_RE.search(src):
+            return True
+    return False
+
+
+def _function_uses_dependence_robust_resampling(fn: ast.FunctionDef) -> bool:
+    """Recognise block/stationary bootstrap as a valid non-HAC alternative."""
+    name = fn.name.lower()
+    if "bootstrap" not in name:
+        return False
+    src = ast.unparse(fn).lower()
+    return any(
+        marker in src
+        for marker in ("block_size", "block_len", "block_starts", "stationary bootstrap", "p_geom")
+    )
+
+
+def _function_is_explicitly_non_forecast(fn: ast.FunctionDef) -> bool:
+    doc = (ast.get_docstring(fn) or "").lower()
+    return "not a forecast-loss" in doc or "not a forecast loss" in doc
+
+
+def _function_has_h1_iid_branch(fn: ast.FunctionDef) -> bool:
+    """Catch ``if h <= 1: variance`` variants implemented via comprehensions."""
+    for node in ast.walk(fn):
+        if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare):
+            continue
+        test = node.test
+        if len(test.ops) != 1 or len(test.comparators) != 1:
+            continue
+        if not isinstance(test.left, ast.Name) or not HORIZON_NAME_RE.match(test.left.id):
+            continue
+        if not isinstance(test.ops[0], (ast.Lt, ast.LtE)):
+            continue
+        threshold = _numeric_constant(test.comparators[0])
+        if threshold is None or threshold > 1:
+            continue
+        body_src = "\n".join(ast.unparse(stmt) for stmt in node.body)
+        if PLAIN_VARIANCE_RE.search(body_src) or ("** 2" in body_src and ".mean()" in body_src):
+            return True
+    return False
+
+
+def _numeric_constant(node: ast.AST) -> float | None:
+    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+        return float(node.value)
+    if (
+        isinstance(node, ast.UnaryOp)
+        and isinstance(node.op, ast.USub)
+        and isinstance(node.operand, ast.Constant)
+        and isinstance(node.operand.value, (int, float))
+    ):
+        return -float(node.operand.value)
+    return None
+
+
+def _contains_horizon_minus_one(node: ast.AST) -> bool:
+    for part in ast.walk(node):
+        if not isinstance(part, ast.BinOp) or not isinstance(part.op, ast.Sub):
+            continue
+        if not isinstance(part.left, ast.Name) or not HORIZON_NAME_RE.match(part.left.id):
+            continue
+        if _numeric_constant(part.right) == 1.0:
+            return True
+    return False
+
+
+def _outer_max_info(node: ast.AST) -> tuple[float | None, bool]:
+    """Return the numeric floor and whether max() has an unresolved dynamic arm."""
+    if not (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "max"
+    ):
+        return None, False
+    constants = [value for arg in node.args if (value := _numeric_constant(arg)) is not None]
+    dynamic = any(
+        _numeric_constant(arg) is None and not _contains_horizon_minus_one(arg)
+        for arg in node.args
+    )
+    return (max(constants) if constants else None), dynamic
 
 
 def _classify_lag_expr(src: str) -> tuple[str, list[str]]:
@@ -242,22 +389,32 @@ def _classify_lag_expr(src: str) -> tuple[str, list[str]]:
     canonical_shape = (
         "**(1/3)" in compact
         or "**(1./3" in compact
+        or "**(2/9)" in compact
+        or "**(2./9" in compact
         or "ceil" in compact.lower()
         or "n//4" in compact
+        or "newey_west" in compact.lower()
     )
-    minus_one = re.search(r"\b(h|horizon|H)\s*-\s*1\b", src) is not None
-    floored = compact.startswith("max(") or "max(1," in compact or "max(1 ," in compact
+    try:
+        expr = ast.parse(src, mode="eval").body
+    except SyntaxError:
+        expr = None
+    minus_one = bool(expr is not None and _contains_horizon_minus_one(expr))
+    numeric_floor, dynamic_floor = _outer_max_info(expr) if expr is not None else (None, False)
 
     if canonical_shape and not minus_one:
         return CANONICAL_LIKE, notes
-    if minus_one and floored:
-        notes.append("h-1 present but floored via max() -- does not degenerate")
+    if minus_one and numeric_floor is not None and numeric_floor >= 1:
+        notes.append(f"h-1 present but floored at {numeric_floor:g} -- does not degenerate")
         return CANONICAL_LIKE, notes
     if minus_one and canonical_shape:
         notes.append("h-1 combined with a canonical-shaped bound")
         return CANONICAL_LIKE, notes
+    if minus_one and dynamic_floor:
+        notes.append("h-1 combined with an unresolved dynamic max() arm -- inspect by hand")
+        return UNKNOWN, notes
     if minus_one:
-        notes.append("lag = h-1 with no floor: HAC loop is empty when h == 1")
+        notes.append("lag = h-1 with no positive floor: HAC loop is empty when h == 1")
         return DEGENERATE, notes
     if compact == "0":
         notes.append("bandwidth fixed at zero: inference uses iid variance only")
@@ -265,14 +422,86 @@ def _classify_lag_expr(src: str) -> tuple[str, list[str]]:
     if re.fullmatch(r"\d+", compact):
         notes.append(f"bandwidth fixed at {compact}, ignores h and sample size")
         return HARDCODED, notes
-    if floored:
+    if numeric_floor is not None and numeric_floor >= 1:
         return CANONICAL_LIKE, notes
     return UNKNOWN, notes
 
 
-def _scan_function(fn: ast.FunctionDef, path: Path, exercises_h1: bool) -> Finding | None:
+def _horizon_range_kind(node: ast.AST) -> str | None:
+    """Classify the upper bound of ``range(1, upper)``."""
+    if isinstance(node, ast.Name) and HORIZON_NAME_RE.match(node.id):
+        return "exclusive"
+    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+        if node.func.id == "min" and any(
+            isinstance(arg, ast.Name) and HORIZON_NAME_RE.match(arg.id)
+            for arg in node.args
+        ):
+            return "exclusive"
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+        pairs = ((node.left, node.right), (node.right, node.left))
+        if any(
+            isinstance(horizon, ast.Name)
+            and HORIZON_NAME_RE.match(horizon.id)
+            and _numeric_constant(one) == 1.0
+            for horizon, one in pairs
+        ):
+            return "inclusive"
+    return None
+
+
+def _scan_function(
+    fn: ast.FunctionDef,
+    path: Path,
+    exercises_h1: bool,
+    canonical_aliases: set[str],
+) -> Finding | None:
     """Find the bandwidth binding inside one DM-ish function."""
     body_src = _function_body_src(fn)
+    delegates = _function_calls_alias(fn, canonical_aliases)
+
+    if _function_is_explicitly_non_forecast(fn):
+        return Finding(
+            file=str(path.relative_to(REPO_ROOT)),
+            function=fn.name,
+            lineno=fn.lineno,
+            verdict=NOT_A_TEST,
+            lag_expr=None,
+            exercises_h1=exercises_h1,
+            notes=["function explicitly documents a non-forecast Monte Carlo comparison"],
+        )
+
+    if _function_uses_dependence_robust_resampling(fn):
+        return Finding(
+            file=str(path.relative_to(REPO_ROOT)),
+            function=fn.name,
+            lineno=fn.lineno,
+            verdict=DEPENDENCE_ROBUST,
+            lag_expr="block/stationary bootstrap",
+            exercises_h1=exercises_h1,
+            notes=["dependence is preserved by block or stationary resampling"],
+        )
+
+    if delegates and _function_has_iid_fallback(fn):
+        return Finding(
+            file=str(path.relative_to(REPO_ROOT)),
+            function=fn.name,
+            lineno=fn.lineno,
+            verdict=NO_HAC,
+            lag_expr="iid exception fallback",
+            exercises_h1=exercises_h1,
+            notes=["canonical normal path has an iid fallback with no HAC correction"],
+        )
+
+    if delegates:
+        return Finding(
+            file=str(path.relative_to(REPO_ROOT)),
+            function=fn.name,
+            lineno=fn.lineno,
+            verdict=DELEGATES,
+            lag_expr=None,
+            exercises_h1=exercises_h1,
+            notes=["calls a canonical volpred model_evaluation DM helper"],
+        )
 
     if not _function_computes_test_statistic(fn):
         return Finding(
@@ -312,15 +541,12 @@ def _scan_function(fn: ast.FunctionDef, path: Path, exercises_h1: bool) -> Findi
                     args = node.iter.args
                     if len(args) < 2:
                         continue
-                    upper = ast.unparse(args[1])
-                    bare_h = re.fullmatch(r"\s*(h|horizon|H)\s*", upper)
-                    min_h = re.fullmatch(
-                        r"\s*min\(\s*(h|horizon|H)\s*,.+\)\s*", upper
-                    )
-                    h_plus_1 = re.fullmatch(r"\s*(h|horizon|H)\s*\+\s*1\s*", upper)
-                    if not (bare_h or min_h or h_plus_1):
+                    upper_node = args[1]
+                    upper = ast.unparse(upper_node)
+                    range_kind = _horizon_range_kind(upper_node)
+                    if range_kind is None:
                         continue
-                    if bare_h or min_h:
+                    if range_kind == "exclusive":
                         verdict = DEGENERATE
                         notes = [
                             f"inline `range(1, {upper})`: HAC loop is empty when h == 1"
@@ -341,17 +567,30 @@ def _scan_function(fn: ast.FunctionDef, path: Path, exercises_h1: bool) -> Findi
                         notes=notes,
                     )
 
-    if lag_expr is None and _plain_variance_only(body_src):
+    if lag_expr is None and _function_has_h1_iid_branch(fn):
+        return Finding(
+            file=str(path.relative_to(REPO_ROOT)),
+            function=fn.name,
+            lineno=fn.lineno,
+            verdict=DEGENERATE,
+            lag_expr="if h <= 1: iid variance",
+            exercises_h1=exercises_h1,
+            notes=["explicit h<=1 branch omits every serial-covariance term"],
+        )
+
+    iid_ttest = "ttest_1samp" in body_src and not _function_has_serial_lag_loop(fn)
+    if lag_expr is None and (iid_ttest or _plain_variance_only(fn, body_src)):
+        lag_label = "iid one-sample t-test" if iid_ttest else "iid sample variance"
         return Finding(
             file=str(path.relative_to(REPO_ROOT)),
             function=fn.name,
             lineno=fn.lineno,
             verdict=NO_HAC,
-            lag_expr="iid sample variance",
+            lag_expr=lag_label,
             exercises_h1=exercises_h1,
             notes=[
-                "test statistic divides by sample variance only; no long-run "
-                "variance / HAC covariance terms are present"
+                "test statistic uses iid inference only; no long-run variance / "
+                "HAC covariance terms are present"
             ],
         )
 
@@ -394,26 +633,29 @@ def scan_file(path: Path) -> list[Finding]:
         return []
 
     exercises_h1 = H1_RE.search(source) is not None
-    delegates = CANONICAL_IMPORT_RE.search(source) is not None
+    canonical_aliases = _canonical_aliases(tree)
 
     findings: list[Finding] = []
+    candidate_function_ids: set[int] = set()
     for node in ast.walk(tree):
         if not isinstance(node, ast.FunctionDef):
             continue
         if not _is_candidate_function(node):
             continue
-        finding = _scan_function(node, path, exercises_h1)
+        candidate_function_ids.add(id(node))
+        finding = _scan_function(node, path, exercises_h1, canonical_aliases)
         if finding is None:
             continue
-        if delegates and finding.verdict == UNKNOWN:
-            finding.verdict = DELEGATES
-            finding.notes = ["wraps the canonical volpred dm_test"]
         findings.append(finding)
 
-    # Some historical scripts label an iid one-sample t-test as DM directly at
-    # module scope.  It has no function for the loop above to inspect, so catch
-    # only calls whose assigned result variable explicitly contains ``dm``.
-    for node in tree.body:
+    # Some historical scripts label an iid one-sample t-test as DM at module
+    # scope or hide it inside an exception fallback in a broad ``main`` helper.
+    # Walk assignments at every nesting level; candidate DM functions were
+    # already handled above, so this path only fills the non-candidate blind spot.
+    parent: dict[ast.AST, ast.AST] = {
+        child: owner for owner in ast.walk(tree) for child in ast.iter_child_nodes(owner)
+    }
+    for node in ast.walk(tree):
         if not isinstance(node, (ast.Assign, ast.AnnAssign)):
             continue
         value = node.value
@@ -424,17 +666,36 @@ def scan_file(path: Path) -> list[Finding]:
             continue
         targets = node.targets if isinstance(node, ast.Assign) else [node.target]
         target_names = set().union(*(_target_names(target) for target in targets))
-        if not any("dm" in name.lower() for name in target_names):
+        owner: ast.AST | None = node
+        enclosing_function: ast.FunctionDef | None = None
+        exception_handler: ast.ExceptHandler | None = None
+        while owner in parent:
+            owner = parent[owner]
+            if exception_handler is None and isinstance(owner, ast.ExceptHandler):
+                exception_handler = owner
+            if isinstance(owner, ast.FunctionDef):
+                enclosing_function = owner
+                break
+        if enclosing_function is not None and id(enclosing_function) in candidate_function_ids:
             continue
+        context = exception_handler or enclosing_function or node
+        context_src = ast.unparse(context)
+        dm_context = any("dm" in name.lower() for name in target_names) or (
+            bool(target_names & {"t", "t_stat", "tstat", "p", "p_val", "p_value"})
+            and re.search(r"\bdm_(?:results|stat|test)\b", context_src, re.I) is not None
+        )
+        if not dm_context:
+            continue
+        owner_name = enclosing_function.name if enclosing_function is not None else "module"
         findings.append(
             Finding(
                 file=str(path.relative_to(REPO_ROOT)),
-                function=f"<module>:ttest_1samp@{node.lineno}",
+                function=f"<{owner_name}>:ttest_1samp@{node.lineno}",
                 lineno=node.lineno,
                 verdict=NO_HAC,
                 lag_expr="iid one-sample t-test",
                 exercises_h1=True,
-                notes=["module-level DM-like t-test has no HAC correction"],
+                notes=["DM-like iid t-test path has no HAC correction"],
             )
         )
 
@@ -458,7 +719,7 @@ def main() -> int:
     parser.add_argument(
         "--affected-only",
         action="store_true",
-        help="print only structurally exposed sites (degenerate bandwidth AND an h=1 cell)",
+        help="print sites with no HAC, or an h=1-degenerate rule exercised at h=1",
     )
     args = parser.parse_args()
 
@@ -474,14 +735,14 @@ def main() -> int:
             "scan_scope": list(SCAN_PATTERNS),
             "bug_class": (
                 "local DM/HLN omits HAC via h-1 at h=1, plain iid variance, "
-                "module-level iid t-test, or explicit zero bandwidth"
+                "iid t-test fallback, or explicit zero bandwidth"
             ),
             "canonical_owner": "volpred.stats.model_evaluation.dm_test",
             "materiality_caveat": (
-                "Exposure is structural, not a proven error. Zero HAC at h=1 is the "
-                "textbook DM formula and is only wrong when the loss differential is "
-                "actually autocorrelated. Confirming materiality at any site requires "
-                "re-running it and measuring the differential's acf."
+                "Exposure is structural, not a proven error. An h=1-degenerate rule is "
+                "only material when the loss differential is autocorrelated; a NO_HAC "
+                "site omits serial-covariance correction at every horizon. Confirming "
+                "materiality requires a re-run and the differential's acf."
             ),
             "total_local_dm_functions": len(findings),
             "verdict_counts": counts,
@@ -496,7 +757,7 @@ def main() -> int:
     for verdict, count in sorted(counts.items(), key=lambda kv: SEVERITY[kv[0]]):
         print(f"[audit]   {verdict:<24} {count}")
     print(
-        f"[audit] STRUCTURALLY EXPOSED (zero HAC on an h=1 cell): {len(exposed)}"
+        f"[audit] STRUCTURALLY EXPOSED (NO_HAC or degenerate on h=1): {len(exposed)}"
         " -- materiality needs a re-run, see --json caveat"
     )
 
