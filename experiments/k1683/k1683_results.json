@@ -1,0 +1,495 @@
+{
+  "experiment_id": "K1683",
+  "title": "Public leveraged-fund Treasury-futures crowding proxy and short-horizon risk",
+  "run_utc": "2026-07-11T08:32:06.034084+00:00",
+  "seed": 42,
+  "methodology_type": "empirical_public_proxy_diagnostic",
+  "data_provenance": {
+    "sources": {
+      "cftc_tff_futures_only": "https://publicreporting.cftc.gov/resource/gpe5-46if.csv",
+      "cftc_release_schedule": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/ReleaseSchedule/index.htm",
+      "fred_dgs10": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10",
+      "market_prices": "Yahoo Finance via yfinance; adjusted closes"
+    },
+    "files": [
+      {
+        "path": "data/adjusted_closes.csv",
+        "bytes": 387636,
+        "sha256": "b05d8a4f4adc771cda221614fb82332f3027ae696e2659ed6f8b7a5ba93aeebd"
+      },
+      {
+        "path": "data/cftc_tff_treasury.csv",
+        "bytes": 258383,
+        "sha256": "0a39ac553348c82d98b58e6219adffe3c29d5c372a52162dc3c666462c5b12f1"
+      },
+      {
+        "path": "data/fred_dgs10.csv",
+        "bytes": 81654,
+        "sha256": "8c20497b438a9bbba86d7687dad36b6c2f6aac8b953c20f52d3fc6e26c73018f"
+      }
+    ],
+    "cftc": {
+      "raw_selected_rows": 4192,
+      "signal_weeks_after_lag_and_scaling": 899,
+      "report_start": "2006-06-13",
+      "report_end": "2026-07-07",
+      "signal_origin_start": "2008-09-12",
+      "signal_origin_end": "2026-07-10",
+      "contracts": {
+        "042601": "UST_2Y",
+        "044601": "UST_5Y",
+        "043602": "UST_10Y",
+        "020601": "UST_BOND"
+      }
+    },
+    "prices": {
+      "start": "2006-01-03",
+      "end": "2026-07-10",
+      "rows": 5165,
+      "assets": [
+        "TLT",
+        "IEF",
+        "ZN=F",
+        "SPY"
+      ]
+    },
+    "dgs10": {
+      "start": "2006-01-03",
+      "end": "2026-07-09",
+      "rows": 5133
+    }
+  },
+  "signal": {
+    "name": "leveraged_fund_treasury_futures_gross_participation_proxy",
+    "formula": "equal-weight across 2Y/5Y/10Y/Bond of (long+short+2*spread)/(2*open_interest); expanding-z level plus expanding-z 13-week change; then weekly shift(1)",
+    "timing": "Tuesday report is nominally Friday release; signal.shift(1) means each Friday origin uses the prior report; targets start strictly after origin",
+    "publication_blackouts_excluded": [
+      [
+        "2013-10-01",
+        "2013-10-22"
+      ],
+      [
+        "2018-12-18",
+        "2019-03-05"
+      ]
+    ],
+    "descriptive_proxy_change": {
+      "start_report": "2023-01-03",
+      "end_report": "2025-09-30",
+      "gross_participation_start": 0.24062787764634763,
+      "gross_participation_end": 0.30101254675938816,
+      "change_pct": 25.094627315704578,
+      "interpretation": "not comparable in units or coverage to Form PF dollar gross exposure"
+    }
+  },
+  "external_context_not_model_input": {
+    "source": "Monin (2026) FEDS Notes using confidential SEC Form PF",
+    "gross_treasury_exposure_2025_sep_trillion_usd": 4.0,
+    "long_exposure_2025_sep_trillion_usd": 2.4,
+    "short_exposure_2025_sep_trillion_usd": 1.6,
+    "top_50_share_percent_2025_sep": 90.0,
+    "note": "published context only; no exact public monthly Form PF series was reconstructed or used"
+  },
+  "models": {
+    "initial_train_weeks": 260,
+    "strict_embargo": "training target_end_date < forecast_origin",
+    "primary_family": "TLT RV5, IEF RV5, DGS10 max yield jump5, SPY-TLT Fisher-z correlation20",
+    "sensitivity": "ZN=F continuous futures RV5 is excluded from headline family because roll artifacts remain"
+  },
+  "primary_family": {
+    "definition": "4 pre-specified OOS cells across three target classes",
+    "multiplicity": "Benjamini-Hochberg FDR across all 4 HLN-DM p-values",
+    "gate": "improvement>0, HLN-DM t<-3, BH q<0.05, positive association coefficient, and early/late improvements both positive",
+    "audit": [
+      {
+        "cell": "TLT_RV5",
+        "target_class": "duration_rv",
+        "improvement_pct": 1.4026038748396232,
+        "t_hln": -1.270115489450718,
+        "raw_p": 0.20450796256432943,
+        "bh_q": 0.5634724474919137,
+        "association_coef": 0.061834401053638355,
+        "early_improvement_pct": 2.9803412574058292,
+        "late_improvement_pct": -0.5407401827987853,
+        "pass": false
+      },
+      {
+        "cell": "IEF_RV5",
+        "target_class": "duration_rv",
+        "improvement_pct": 0.4978547418674615,
+        "t_hln": -0.5779944527214179,
+        "raw_p": 0.5634724474919137,
+        "bh_q": 0.5634724474919137,
+        "association_coef": 0.05985039481142007,
+        "early_improvement_pct": 1.1877757642447104,
+        "late_improvement_pct": -0.2984535387886794,
+        "pass": false
+      },
+      {
+        "cell": "DGS10_JUMP5",
+        "target_class": "yield_jump",
+        "improvement_pct": -0.26528798918032165,
+        "t_hln": 0.687077201061692,
+        "raw_p": 0.49228492461531737,
+        "bh_q": 0.5634724474919137,
+        "association_coef": 0.0176259720558344,
+        "early_improvement_pct": 0.29388734354507284,
+        "late_improvement_pct": -0.6614903969830882,
+        "pass": false
+      },
+      {
+        "cell": "SPY_TLT_CORR20",
+        "target_class": "stock_bond_correlation",
+        "improvement_pct": -1.3395726728856872,
+        "t_hln": 0.9859020939303744,
+        "raw_p": 0.3245602402333169,
+        "bh_q": 0.5634724474919137,
+        "association_coef": -0.01601198652220663,
+        "early_improvement_pct": 0.8872111954865656,
+        "late_improvement_pct": -2.6679749008408518,
+        "pass": false
+      }
+    ]
+  },
+  "results": {
+    "TLT_RV5": {
+      "cell": "TLT_RV5",
+      "target_class": "duration_rv",
+      "loss": "qlike",
+      "n_oos": 637,
+      "oos_start": "2013-09-13",
+      "oos_end": "2026-07-03",
+      "loss_base": 0.3051921534631918,
+      "loss_augmented": 0.30091151649301057,
+      "loss_improvement_pct": 1.4026038748396232,
+      "dm_hln": {
+        "t_raw": -1.271113615726136,
+        "t_hln": -1.270115489450718,
+        "p_two_sided": 0.20450796256432943,
+        "mean_loss_diff_aug_minus_base": -0.004280636970181162,
+        "n": 637,
+        "nw_lag": 0,
+        "direction": "negative_t_means_augmented_better",
+        "bh_fdr_q_primary_family_4": 0.5634724474919137,
+        "primary_gate_pass": false
+      },
+      "dm_helper_crosscheck": {
+        "t": -0.9756661044001038,
+        "p": 0.3296009011991605,
+        "h_weekly": 1
+      },
+      "association": {
+        "coef_crowding": 0.061834401053638355,
+        "hac_t": 1.8788712878769367,
+        "p_two_sided": 0.06026207015439572,
+        "expected_direction": "positive",
+        "status": "association_only_not_causal"
+      },
+      "mean_expanding_crowding_coef": 0.07604438657782864,
+      "subperiods": [
+        {
+          "name": "early",
+          "n": 318,
+          "start": "2013-09-13",
+          "end": "2020-05-22",
+          "loss_improvement_pct": 2.9803412574058292
+        },
+        {
+          "name": "late",
+          "n": 319,
+          "start": "2020-05-29",
+          "end": "2026-07-03",
+          "loss_improvement_pct": -0.5407401827987853
+        }
+      ],
+      "timing_audit": {
+        "all_training_targets_end_before_origin": true,
+        "latest_training_target_end": "2026-06-26"
+      }
+    },
+    "IEF_RV5": {
+      "cell": "IEF_RV5",
+      "target_class": "duration_rv",
+      "loss": "qlike",
+      "n_oos": 637,
+      "oos_start": "2013-09-13",
+      "oos_end": "2026-07-03",
+      "loss_base": 0.3146741902355344,
+      "loss_augmented": 0.31310756985801375,
+      "loss_improvement_pct": 0.4978547418674615,
+      "dm_hln": {
+        "t_raw": -0.5784486724007295,
+        "t_hln": -0.5779944527214179,
+        "p_two_sided": 0.5634724474919137,
+        "mean_loss_diff_aug_minus_base": -0.0015666203775206622,
+        "n": 637,
+        "nw_lag": 0,
+        "direction": "negative_t_means_augmented_better",
+        "bh_fdr_q_primary_family_4": 0.5634724474919137,
+        "primary_gate_pass": false
+      },
+      "dm_helper_crosscheck": {
+        "t": -0.5750184335238666,
+        "p": 0.5654821852258674,
+        "h_weekly": 1
+      },
+      "association": {
+        "coef_crowding": 0.05985039481142007,
+        "hac_t": 1.9043697260727586,
+        "p_two_sided": 0.05686204911097851,
+        "expected_direction": "positive",
+        "status": "association_only_not_causal"
+      },
+      "mean_expanding_crowding_coef": 0.07305002749456653,
+      "subperiods": [
+        {
+          "name": "early",
+          "n": 318,
+          "start": "2013-09-13",
+          "end": "2020-05-22",
+          "loss_improvement_pct": 1.1877757642447104
+        },
+        {
+          "name": "late",
+          "n": 319,
+          "start": "2020-05-29",
+          "end": "2026-07-03",
+          "loss_improvement_pct": -0.2984535387886794
+        }
+      ],
+      "timing_audit": {
+        "all_training_targets_end_before_origin": true,
+        "latest_training_target_end": "2026-06-26"
+      }
+    },
+    "DGS10_JUMP5": {
+      "cell": "DGS10_JUMP5",
+      "target_class": "yield_jump",
+      "loss": "mse",
+      "n_oos": 636,
+      "oos_start": "2013-09-13",
+      "oos_end": "2026-06-26",
+      "loss_base": 12.822681943676026,
+      "loss_augmented": 12.856698978763392,
+      "loss_improvement_pct": -0.26528798918032165,
+      "dm_hln": {
+        "t_raw": 0.6876179939050082,
+        "t_hln": 0.687077201061692,
+        "p_two_sided": 0.49228492461531737,
+        "mean_loss_diff_aug_minus_base": 0.034017035087367135,
+        "n": 636,
+        "nw_lag": 0,
+        "direction": "negative_t_means_augmented_better",
+        "bh_fdr_q_primary_family_4": 0.5634724474919137,
+        "primary_gate_pass": false
+      },
+      "dm_helper_crosscheck": {
+        "t": 0.7111373620610207,
+        "p": 0.47726024944141443,
+        "h_weekly": 1
+      },
+      "association": {
+        "coef_crowding": 0.0176259720558344,
+        "hac_t": 0.9262234576920998,
+        "p_two_sided": 0.3543298642976962,
+        "expected_direction": "positive",
+        "status": "association_only_not_causal"
+      },
+      "mean_expanding_crowding_coef": 0.01693783412063902,
+      "subperiods": [
+        {
+          "name": "early",
+          "n": 318,
+          "start": "2013-09-13",
+          "end": "2020-05-22",
+          "loss_improvement_pct": 0.29388734354507284
+        },
+        {
+          "name": "late",
+          "n": 318,
+          "start": "2020-05-29",
+          "end": "2026-06-26",
+          "loss_improvement_pct": -0.6614903969830882
+        }
+      ],
+      "timing_audit": {
+        "all_training_targets_end_before_origin": true,
+        "latest_training_target_end": "2026-06-22"
+      }
+    },
+    "SPY_TLT_CORR20": {
+      "cell": "SPY_TLT_CORR20",
+      "target_class": "stock_bond_correlation",
+      "loss": "mse",
+      "n_oos": 630,
+      "oos_start": "2013-10-04",
+      "oos_end": "2026-06-05",
+      "loss_base": 0.18241012121093556,
+      "loss_augmented": 0.1848536373472549,
+      "loss_improvement_pct": -1.3395726728856872,
+      "dm_hln": {
+        "t_raw": 0.9914102425913461,
+        "t_hln": 0.9859020939303744,
+        "p_two_sided": 0.3245602402333169,
+        "mean_loss_diff_aug_minus_base": 0.0024435161363193423,
+        "n": 630,
+        "nw_lag": 3,
+        "direction": "negative_t_means_augmented_better",
+        "bh_fdr_q_primary_family_4": 0.5634724474919137,
+        "primary_gate_pass": false
+      },
+      "dm_helper_crosscheck": {
+        "t": 0.7736575994555472,
+        "p": 0.4394239629160621,
+        "h_weekly": 4
+      },
+      "association": {
+        "coef_crowding": -0.01601198652220663,
+        "hac_t": -0.6985628283024691,
+        "p_two_sided": 0.48482528078348286,
+        "expected_direction": "positive",
+        "status": "association_only_not_causal"
+      },
+      "mean_expanding_crowding_coef": -0.05727397403317289,
+      "subperiods": [
+        {
+          "name": "early",
+          "n": 315,
+          "start": "2013-10-04",
+          "end": "2020-05-22",
+          "loss_improvement_pct": 0.8872111954865656
+        },
+        {
+          "name": "late",
+          "n": 315,
+          "start": "2020-05-29",
+          "end": "2026-06-05",
+          "loss_improvement_pct": -2.6679749008408518
+        }
+      ],
+      "timing_audit": {
+        "all_training_targets_end_before_origin": true,
+        "latest_training_target_end": "2026-06-01"
+      }
+    }
+  },
+  "sensitivity": {
+    "ZN_CONTINUOUS_RV5": {
+      "cell": "ZN_CONTINUOUS_RV5",
+      "target_class": "roll_sensitive_robustness",
+      "loss": "qlike",
+      "n_oos": 637,
+      "oos_start": "2013-09-13",
+      "oos_end": "2026-07-03",
+      "loss_base": 0.32656262764183525,
+      "loss_augmented": 0.3256381683641338,
+      "loss_improvement_pct": 0.28308789783360716,
+      "dm_hln": {
+        "t_raw": -0.5511596517395819,
+        "t_hln": -0.5507268604268737,
+        "p_two_sided": 0.5820143176786687,
+        "mean_loss_diff_aug_minus_base": -0.0009244592777014558,
+        "n": 637,
+        "nw_lag": 0,
+        "direction": "negative_t_means_augmented_better"
+      },
+      "dm_helper_crosscheck": {
+        "t": -0.5265297998672822,
+        "p": 0.598703725006243,
+        "h_weekly": 1
+      },
+      "association": {
+        "coef_crowding": 0.04951549305106506,
+        "hac_t": 1.5016389450174144,
+        "p_two_sided": 0.1331903797176213,
+        "expected_direction": "positive",
+        "status": "association_only_not_causal"
+      },
+      "mean_expanding_crowding_coef": 0.05557221643952854,
+      "subperiods": [
+        {
+          "name": "early",
+          "n": 318,
+          "start": "2013-09-13",
+          "end": "2020-05-22",
+          "loss_improvement_pct": 0.9762139839694906
+        },
+        {
+          "name": "late",
+          "n": 319,
+          "start": "2020-05-29",
+          "end": "2026-07-03",
+          "loss_improvement_pct": -0.47095052770145895
+        }
+      ],
+      "timing_audit": {
+        "all_training_targets_end_before_origin": true,
+        "latest_training_target_end": "2026-06-26"
+      }
+    }
+  },
+  "verdict": {
+    "status": "NULL_NO_ROBUST_INCREMENT",
+    "n_primary_pass": 0,
+    "target_classes_with_pass": [],
+    "claim_scope": "incremental predictive association of a lagged public CFTC category proxy; not forced-deleveraging causality or Form PF hedge-fund exposure"
+  },
+  "proxy_limits": [
+    "CFTC Leveraged Funds includes hedge funds, CTAs, CPOs and other managed funds; classifications can change.",
+    "Futures positions do not identify cash Treasury, repo, swap, margin, leverage, fund identity, or trade intent.",
+    "Gross participation is a share of contract sides, not dollar notional, DV01, Form PF gross exposure, or concentration among funds.",
+    "High crowding without a funding, margin, or risk-limit shock need not trigger an unwind; predictive null cannot reject the forced-deleveraging mechanism.",
+    "ZN=F is a back-adjusted continuous futures series and remains a roll-sensitive robustness result only."
+  ],
+  "prior_overlap": {
+    "experiment": "k_repo_basis_funding_stress_gate_duration_2026_06_14",
+    "difference": "prior study combined SOFR/EFFR/TGCR with 10Y/Bond short share and only next-week duration RV; K1683 removes funding, uses four-maturity gross participation, and adds yield-jump and stock-bond-correlation targets",
+    "prior_verified_result": "NULL"
+  },
+  "figures": [
+    "k1683_crowding_signal.png",
+    "k1683_oos_comparison.png"
+  ],
+  "references": [
+    {
+      "authors": "Monin, P. J.",
+      "year": 2026,
+      "title": "Decomposing Hedge Funds' U.S. Treasury Exposures",
+      "publication": "FEDS Notes",
+      "doi": "10.17016/2380-7172.4082"
+    },
+    {
+      "authors": "Kruttli, M. S.; Monin, P. J.; Petrasek, L.; Watugala, S. W.",
+      "year": 2025,
+      "title": "LTCM Redux? Hedge fund Treasury trading, funding fragility, and risk constraints",
+      "publication": "Journal of Financial Economics 169, 104017",
+      "doi": "10.1016/j.jfineco.2025.104017"
+    },
+    {
+      "authors": "Glicoes, J.; Iorio, B.; Monin, P.; Petrasek, L.",
+      "year": 2024,
+      "title": "Quantifying Treasury Cash-Futures Basis Trades",
+      "publication": "FEDS Notes",
+      "doi": "10.17016/2380-7172.3458"
+    },
+    {
+      "authors": "Avalos, F.; Sushko, V.",
+      "year": 2023,
+      "title": "Margin leverage and vulnerabilities in US Treasury futures",
+      "publication": "BIS Quarterly Review",
+      "url": "https://www.bis.org/publ/qtrpdf/r_qt2309w.htm"
+    }
+  ],
+  "review": {
+    "pre_run": {
+      "status": "PASS_TO_RUN",
+      "artifact": "codex_review_pre_run.md",
+      "reviewed_before_formal_execution": true
+    },
+    "post_run": {
+      "status": "PASS",
+      "artifact": "codex_review.md",
+      "independent_numeric_verification": true
+    }
+  }
+}
