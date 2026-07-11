@@ -34,6 +34,9 @@ import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from volpred.ops.diagnostics import warn  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXPERIMENTS_DIR = REPO_ROOT / "experiments"
 
@@ -227,14 +230,18 @@ def _scan_function(fn: ast.FunctionDef, path: Path, exercises_h1: bool) -> Findi
 
 
 def scan_file(path: Path) -> list[Finding]:
+    # A skipped file is a false negative for a bug-class audit: it silently
+    # shrinks the population being certified. Never drop one without a trace.
     try:
         source = path.read_text(encoding="utf-8")
-    except (OSError, UnicodeDecodeError):
+    except (OSError, UnicodeDecodeError) as exc:
+        warn("audit_dm_hac_lag", "unreadable file skipped", path=str(path), err=str(exc))
         return []
 
     try:
         tree = ast.parse(source)
-    except SyntaxError:
+    except SyntaxError as exc:
+        warn("audit_dm_hac_lag", "unparseable file skipped", path=str(path), err=str(exc))
         return []
 
     exercises_h1 = H1_RE.search(source) is not None

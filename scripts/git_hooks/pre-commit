@@ -1,0 +1,45 @@
+#!/bin/bash
+# Pre-commit gate — stops a NEW silent fallback from ever entering a commit.
+#
+# Why (2026-07-11, boss via Telegram msg 481):
+#   The silent-fallback rule was only enforced at pre-push. So a new bare
+#   `except: return []` would land in a commit, sit there, and only surface
+#   hours later when cron_git_push_backup.sh held the push and paged the boss.
+#   Same defect, same fix, over and over. Moving the gate one step earlier means
+#   the offending line never becomes a commit in the first place.
+#
+# Anti-stacking: this is NOT a new mechanism. The enforcement owner is still
+#   scripts/audit_silent_fallbacks.py + storage/qa/silent_fallback_baseline.json.
+#   pre-push stays (it audits the pushed commits and catches --no-verify /
+#   supervisor auto-commits); pre-commit is just the earliest trigger point.
+#
+# Escape hatch: git commit --no-verify (pre-push will still catch it).
+
+set -uo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT" || exit 0
+
+# Only pay the cost when Python actually changed.
+if ! git diff --cached --name-only --diff-filter=ACM | grep -qE '\.py$'; then
+  exit 0
+fi
+
+PY="$(command -v uv >/dev/null 2>&1 && echo "uv run python" || echo python3)"
+AUDIT="scripts/audit_silent_fallbacks.py"
+BL="storage/qa/silent_fallback_baseline.json"
+[ -f "$AUDIT" ] && [ -f "$BL" ] || exit 0
+
+OUT="$($PY "$AUDIT" --strict --baseline "$BL" --limit 20 2>&1)"
+RC=$?
+
+if [ "$RC" -ne 0 ]; then
+  echo "[pre-commit] BLOCKED — this commit introduces new silent fallback(s):"
+  echo "$OUT" | sed 's/^/[pre-commit]   /'
+  echo "[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,"
+  echo "[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path."
+  echo "[pre-commit] Rule: .claude/rules/no-silent-fallback.md"
+  exit 1
+fi
+
+exit 0
