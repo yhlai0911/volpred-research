@@ -1658,6 +1658,40 @@ def main() -> int:
                 return 3
 
     if args.dry_run:
+        # The content-vs-source gate lives inside the publisher CLI, which dry-run
+        # never invokes. Returning 0 here without checking made dry-run report a
+        # clean bill of health for drafts the real publish would reject (2026-07-11:
+        # K1611 dry-ran clean, K1639's derived numbers only surfaced on the real
+        # run). A preflight that skips the gate that actually blocks you is worse
+        # than no preflight — you act on it. Run the same audit the publisher runs.
+        try:
+            from volpred.publisher.prepublish_audit import audit_content_provenance
+
+            audit = audit_content_provenance(body, refs)
+            findings = audit.get("tier1_findings") or []
+            if audit.get("skipped"):
+                print("[publish_draft] dry-run: content-vs-source audit SKIPPED "
+                      f"(no citable source for refs={refs}) — the real publish will "
+                      "not gate this either")
+            elif findings:
+                print(f"\n[publish_draft] dry-run: content-vs-source violations "
+                      f"({len(findings)}) — the real publish WILL reject this:",
+                      file=sys.stderr)
+                for f in findings[:10]:
+                    print(f"  - {f}", file=sys.stderr)
+                print("[publish_draft] dry-run: not invoking CLI")
+                return 1
+            else:
+                print(f"[publish_draft] dry-run: content-vs-source audit PASS "
+                      f"({audit.get('n_claims')} claims vs "
+                      f"{audit.get('n_source_values')} source values)")
+        except Exception as exc:
+            # Fail-open with a loud trace, per .claude/rules/dedup-gate-audit.md:
+            # a preflight must never be the thing that blocks a publish. But it
+            # must never claim to have checked when it did not.
+            print(f"[publish_draft] dry-run: content-vs-source audit UNAVAILABLE "
+                  f"({type(exc).__name__}: {exc}) — NOT verified, run the real "
+                  f"publish to gate it", file=sys.stderr)
         print("[publish_draft] dry-run: not invoking CLI")
         return 0
 
