@@ -456,28 +456,36 @@ def run_worker(
             # Sanitize sentinel to canonical SIGKILL hang code before persisting:
             # state file readers + alerts expect a real POSIX exit code, not -1000.
             persisted_exit = 137 if exit_code == TIMEOUT_KILLED_SENTINEL else exit_code
-            # Read the job BEFORE record_completion clears the slot. The alert
-            # used to hardcode pid=-1/pgid=-1 (2026-07-11 boss report: "告警顯示
-            # pid=-1 / pgid=-1，等於瞎的") — the numbers were always available,
-            # just never passed. `survivors` is observed at alert time, so the
-            # mail can say whether the SIGKILL actually landed rather than
-            # asserting it did (macOS can and does refuse killpg — see
-            # procutil.kill_pgid).
-            hung = state.get_current_job(state_path)
-            pgid = hung.pgid if hung else -1
-            survivors = procutil.pgid_members(pgid) if hung else []
+            # record_completion is the atomic hand-off; a non-None return means
+            # WE closed this job and therefore own the incident report. It hands
+            # back the job as it was at that instant, so we never re-read
+            # current_job (health.py's max-age watchdog fires on the same hang
+            # within ~1s and would have cleared it out from under us — that race
+            # is what mailed the owner blind pid=-1 hang alerts, 2026-07-12 00:57).
             entry = state.record_completion(
                 exit_code=persisted_exit, outcome="killed_timeout", final_model=model,
                 path=state_path,
             )
-            alerts.send_hang_alert(
-                job={"pid": hung.pid if hung else -1, "pgid": pgid,
-                     "started_at": (entry or {}).get("fire_at"),
-                     "attempt": attempt, "model": model,
-                     "log_path": hung.log_path if hung else "",
-                     "survivors": survivors},
-                log_tail=log_tail, state_path=state_path,
-            )
+            if entry is None:
+                LOG.info(
+                    "worker attempt=%d hang: slot already closed by the health watchdog — "
+                    "it owns the alert, staying silent to avoid a blind duplicate",
+                    attempt,
+                )
+            else:
+                hung = entry["job"]
+                pgid = hung.get("pgid", -1)
+                alerts.send_hang_alert(
+                    job={"pid": hung.get("pid", -1), "pgid": pgid,
+                         "started_at": entry.get("fire_at"),
+                         "attempt": attempt, "model": model,
+                         "log_path": hung.get("log_path", ""),
+                         # observed at alert time: macOS can and does refuse
+                         # killpg, so report whether the SIGKILL actually landed
+                         # rather than asserting it did (see procutil.kill_pgid).
+                         "survivors": procutil.pgid_members(pgid)},
+                    log_tail=log_tail, state_path=state_path,
+                )
             return WorkerResult(
                 exit_code=persisted_exit, outcome="killed_timeout", final_model=model,
                 attempts=attempt, duration_s=total_duration, log_tail=log_tail,

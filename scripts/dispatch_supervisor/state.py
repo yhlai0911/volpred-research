@@ -640,7 +640,26 @@ def record_completion(
     final_model: str,
     path: Path = STATE_PATH,
 ) -> dict[str, Any] | None:
-    """Move current_job → completions ring buffer. Returns the completion entry."""
+    """Move current_job → completions ring buffer. Returns the completion entry,
+    or None if the slot was already empty.
+
+    The return value is also the **race-winner token**, and callers must treat it
+    as such. Hang detection has two independent triggers (the worker's own
+    subprocess timeout in worker.py, and the max-age watchdog in health.py) and
+    on a real hang both fire within ~1s of each other. This function is the
+    single atomic transition between them: it runs under `_locked_state`, so
+    exactly one caller sees the job and clears it; the loser sees None.
+
+    Whoever gets a non-None entry OWNS the incident and is the one that must
+    alert. The loser must stay silent — it no longer has the job to describe.
+    Ignoring that, and re-reading `current_job` after the transition to build the
+    alert, is what produced the blind "pid=-1 / pgid=-1 / started_at=None /
+    log=(unknown) / tail=(empty)" hang mails the owner kept receiving (2026-07-12
+    00:57): the loser won the alert-dedup lottery and mailed a job it could no
+    longer see. Hence `job` — the snapshot as it was at the moment of the
+    transition — rides along in the returned dict so the winner never has to look
+    it up again. It is deliberately NOT persisted into the completions ring.
+    """
     with _locked_state(path) as (_fh, data):
         job = data.get("current_job")
         if job is None:
@@ -675,7 +694,9 @@ def record_completion(
             completions = completions[-COMPLETIONS_MAX:]
         data["completions"] = completions
         data["current_job"] = None
-        return entry
+        # `job` is returned but never persisted — the ring buffer keeps its
+        # existing shape (see test_every_written_field_is_declared_in_empty_state).
+        return {**entry, "job": job}
 
 
 def set_auth_blocked(blocked: bool, path: Path = STATE_PATH) -> None:

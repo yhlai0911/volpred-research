@@ -105,15 +105,28 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
             )
             exit_code, outcome = -1, "silent_death"
             log_tail = "(identity mismatch/dead at max-age check — not killed, recorded as silent_death)"
-        state.record_completion(exit_code=exit_code, outcome=outcome, final_model=job.model, path=state_path)
-        alerts.send_hang_alert(
-            job={"pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
-                 "attempt": job.attempt, "model": job.model,
-                 "log_path": job.log_path,
-                 "survivors": procutil.pgid_members(job.pgid)},
-            log_tail=log_tail,
-            state_path=state_path,
+        # Non-None == we won the atomic close and own the incident report. The
+        # worker's own timeout fires on the same hang within ~1s; whoever loses
+        # must not mail (see state.record_completion). We still hold a full `job`
+        # here, so the alert is built from that, not from a post-close re-read.
+        closed = state.record_completion(
+            exit_code=exit_code, outcome=outcome, final_model=job.model, path=state_path,
         )
+        if closed is None:
+            LOG.info(
+                "health: worker pid=%d hang already closed by the worker's own timeout — "
+                "it owns the alert, staying silent to avoid a duplicate",
+                job.pid,
+            )
+        else:
+            alerts.send_hang_alert(
+                job={"pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
+                     "attempt": job.attempt, "model": job.model,
+                     "log_path": job.log_path,
+                     "survivors": procutil.pgid_members(job.pgid)},
+                log_tail=log_tail,
+                state_path=state_path,
+            )
         if identity != procutil.IDENTITY_MATCH:
             return outcome
         return "killed" if outcome == "killed_timeout" else outcome
@@ -122,17 +135,26 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
             "health: worker pid=%d dead/reused (identity=%s) but state has current_job — recording silent failure",
             job.pid, identity,
         )
-        state.record_completion(
+        # Same ownership rule as the hang path: only the caller that actually
+        # closed the slot reports it.
+        closed = state.record_completion(
             exit_code=-1, outcome="failure", final_model=job.model,
             path=state_path,
         )
-        alerts.send_silent_death_alert(
-            job={"pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
-                 "attempt": job.attempt, "model": job.model,
-                 "log_path": job.log_path,
-                 "survivors": procutil.pgid_members(job.pgid)},
-            state_path=state_path,
-        )
+        if closed is None:
+            LOG.info(
+                "health: worker pid=%d silent death already closed by the worker — "
+                "it owns the alert, staying silent",
+                job.pid,
+            )
+        else:
+            alerts.send_silent_death_alert(
+                job={"pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
+                     "attempt": job.attempt, "model": job.model,
+                     "log_path": job.log_path,
+                     "survivors": procutil.pgid_members(job.pgid)},
+                state_path=state_path,
+            )
         return "silent_death"
     # IDENTITY_MATCH, or IDENTITY_UNVERIFIED while still within budget — leave
     # it alone. An unverified fingerprint here just means it hasn't been
