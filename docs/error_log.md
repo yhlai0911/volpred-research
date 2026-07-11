@@ -2,6 +2,35 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-12 04:0x — **3-STRIKE TRIGGER**：agentic CLI 逾時只殺一個 pid，孫程序活著繼續寫（commits 3ea4e876d + 01a833e8d）
+
+**三次 incident（同根因、同症狀、不同檔案）**：
+
+| 日期 | 檔案 | 事發 |
+|---|---|---|
+| 2026-07-11 | `gen_lazypack_codex._run_codex` | codex worker 在 job 標 failed 後 11 分鐘才寫出 `render_lazypack.py` |
+| 2026-07-12 | `scripts/run_agent_job.py` | agent 在 3300s 被砍；它 spawn 的 compute 子行程活著跑完，**24 分鐘後**寫下 37KB 的 K1685 results.json，進到一個 job 已標 failed、沒人會去 merge 的 worktree |
+| 2026-07-12 | `scripts/scan_trending_agy.py` | `agy -p` 掛在 `subprocess.run(timeout=180)` 底下，同形；由本次 class sweep 掃出 |
+
+**根因（三層）**：
+1. **底層邏輯**：`subprocess.run(timeout=)` 殺的是「我 spawn 的那個 pid」，但 agentic CLI（`claude`/`codex`/`agy`）**真正的工作在它的子行程裡**。殺掉 launcher ≠ 停止工作。於是「逾時失敗」與「還在跑」在觀測上完全同形 —— job 標 failed，工作卻安靜地跑到完成。
+2. **流程**：7/11 的修正**只綁一個檔案**（`test_lazypack_codex_timeout_orphan.py` 是 per-file behavioural test），所以**隔天**在另一個那個 test 看不到的檔案裡原樣復發。修 instance 不修 class = 保證復發。
+3. **架構**：這個 concern **有四份手刻實作、沒有 owner**。`procutil.kill_pgid` 早就是身經百戰的正確版本（SIGTERM→grace→SIGKILL、macOS EPERM 退回 per-pid、回報 group 是否確實消滅），但每支新腳本都自己重新發明一次 —— 四個裡面就有一個忘記。
+
+**連帶挖出的同族 bug（`run_agent_job` 的容器邊界全錯，皆同日觀測到）**：
+- 內層 timeout 是寫死的 `3300` 常數，而 `enqueue-agent` **從不傳這個 flag** → 用 `timeout_seconds=10800` 排的 job 仍在 55 分鐘被砍。**外層預算是一個沒人遵守的數字** —— 正是這支腳本 docstring 自己批判、它被寫出來就是要逃離的那個 domain error（「工作比裝它的容器長」），在下一層原樣重建。
+- `--result-artifact` 可以指向 `experiments/`，runner 那份 8 行的 run-summary 會**覆寫掉實驗自己的 results.json**。已經在 K1685 的位置留下一個 318 bytes 的假檔。
+- `--cwd` 在 enqueue 時不檢查 → K1684 排在一個隨後被 orphan recovery 移除的 worktree 上，秒退 exit 2，工作完全沒跑。
+
+**解決**：
+- **Enforcement owner（唯一，勿再加第二層）**：`scripts/tests/test_agentic_cli_timeout_killpg.py` —— AST 掃 `scripts/` + `src/`，凡 argv[0] 是 agentic CLI 且帶 timeout，就**必須** `start_new_session=True` + killpg。它同時帶一個**行為測試**（假 CLI fork 一個 5 秒後寫檔的孫程序、1 秒後逾時，斷言那個檔永遠不出現）—— 靜態掃描只能證明 `killpg` 這個字串在檔案裡，證明不了孫程序真的死了，而孫程序就是 bug 本身。
+- **全庫修完，零負債**：`run_agent_job` / `scan_trending_agy` / `prepublish_audit` / `execution_brief`（3 站點抽成 `_run_agentic` helper）全部改走 `procutil.kill_pgid`。sweep 掃出 `prepublish_audit` 與 `execution_brief` 兩個**手動 grep 漏掉**的實例 —— 這就是為什麼要掃 class 不是修眼前那支。
+- `enqueue_agent` 現在把內層 timeout 從外層預算推導、擋掉指向 `experiments/` 的 artifact、加 cwd preflight。
+
+**教訓（會再犯的兩點）**：
+1. **`execution_brief` 的 `for _ in range(3)` retry loop 是最毒的形態**：舊碼逾時後 `continue` 會**再 spawn 一個 claude**，而前一棵樹還活著 → 3 次 retry 可疊出 3 棵並行的孤兒樹，而我們只讀其中一棵的輸出。kill 必須發生在 retry 之前。
+2. **換掉 subprocess seam 會靜默弄壞 monkeypatch 測試**：`tests/test_execution_brief.py` patch 的是 `subprocess.run`，新 helper 走 `Popen` → patch 攔不到 → 測試**真的去 spawn `claude`**，掛 3 分鐘而不是 fail。改 subprocess 呼叫形態時，先 grep 誰在 patch 它。
+
 ## 2026-07-12 02:0x — hang 告警是瞎的：雙擁有者競態，輸家寄信（commit 68886b7b9）
 
 **觸發**：老闆 email-12083 回覆 00:57 那封 hang_killed CRITICAL：「又來 你到底要出幾次這樣的狀況 立刻從底層優化修改」。
