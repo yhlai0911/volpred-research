@@ -5746,3 +5746,13 @@ reproduce.py 曾以「0.272 = 1997-2026 long-sample」NOTE 辯解掩蓋，但該
 屬 narrative-affecting change，依 narrative state machine 不由單一 fire 擅改 body。
 **教訓**：uniqueness/headline 數字若 reproduce_report 已標 HIGH severity「source unidentified」，
 不可用 footnote NOTE 辯解粉飾 —— 必回頭重估。能重現就用可重現值，禁湊舊值。
+
+## 2026-07-11 13:15 — 0050 五分鐘 RV 把隔夜跳空混入日內第一筆報酬
+
+**症狀**：`data/intraday/0050_TW_daily_rv.csv` 與 TAIFEX 日盤五分鐘 RV 的 2026 年重疊期相關僅約 0.42，無法作為台股高頻資料交叉驗證；檔案前段另有空白 RV。
+
+**根因**：`scripts/collect_tw_data.py::collect_5min()` 先對涵蓋多日的下載結果做 `pct_change()`，之後才按日期分組。每個交易日第一根五分鐘 bar 因此錯接前一交易日最後一根 bar，把隔夜 close-to-open 跳空算進「日內五分鐘 RV」。這和 TAIFEX collector 明確在 session 邊界重設報酬的口徑不一致。
+
+**Fix**：改由每日獨立 CSV 重建 RV，每檔內先取 Close、再計算相鄰五分鐘 log return 平方和；每次收集會重建所有已存日，回溯修掉舊錯值。TAIFEX canonical 同樣只在 day/night session 內計算，不跨封市 gap，並以 TX 全合約當日成交量最高月契約避免換月價差。修正後 2026-01-20～2026-07-09 共 108 個重疊交易日，日 RV Pearson `r=0.902444`。
+
+**防再犯**：高頻 RV 聚合的 grouping 必須先於 return/diff；任何跨日資料先 `groupby(trading_date)` 再 `diff`。交叉驗證不得直接相信既有 aggregate，須能由原始逐日 bars 重算，並以 regression test 放入「前一日末價極端不同」案例。

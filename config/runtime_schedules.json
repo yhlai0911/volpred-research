@@ -45,12 +45,12 @@
       },
       {
         "id": "collect_tw_data",
-        "label": "台股/0050/VIXTWN 收集",
+        "label": "台股/0050/VIXTWN/TAIFEX RV 收集",
         "cron": "0 15 * * 1-5",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_collect_tw.sh",
         "log_path": "storage/logs/cron/collect_tw.log",
         "command_deprecated": "collect_tw_data.py",
-        "description": "15:00 台股收盤後收集台股日頻與 5min 資料。",
+        "description": "15:00 台股收盤後收集台股日頻、0050 5min、VIXTWN、TWSE order-flow，並由本機 TAIFEX 官方 tick 增量更新 5min RV。",
         "matchers": [
           "collect_tw_data.py",
           "cron_collect_tw.sh"

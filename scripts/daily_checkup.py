@@ -58,7 +58,22 @@ DATA_JOBS_EXPECTED_H = {
 DATA_FILE_JOBS = [
     # TWSE order-flow (MI_5MINS) 由 collect_tw_data.py 第 4 步 --date today 收，
     # 寫 data/intraday/twse_orderflow/，無獨立 log。80h 涵蓋週一早上(latest=週五15:00→~65h)。
-    ("twse_orderflow", "data/intraday/twse_orderflow/*.csv", 80, "collect_tw"),
+    (
+        "twse_orderflow",
+        "data/intraday/twse_orderflow/*.csv",
+        80,
+        "collect_tw",
+        "uv run python scripts/collect_twse_orderflow.py --date today  # 或回補 --backfill",
+    ),
+    # TAIFEX TX 官方 tick 衍生 RV 是 collect_tw 的子步驟；來源通常在午夜後落地，
+    # 因此 15:00 會增量到當時最新可得檔。80h 同樣涵蓋週末與一日來源延遲。
+    (
+        "taifex_5min_rv",
+        "data/intraday/taifex_5min_rv.csv",
+        80,
+        "collect_tw",
+        "uv run python scripts/collect_taifex_tick.py",
+    ),
 ]
 
 _now = datetime.datetime.now()
@@ -92,12 +107,12 @@ def check_data_freshness() -> list[dict]:
                 recovery=f"uv run python scripts/{job}.py  # 或對應 wrapper",
             ))
     # result-level：查實際資料檔最新 mtime（無獨立 cron log 的子步驟型 job）
-    for job, pattern, expected, parent in DATA_FILE_JOBS:
+    for job, pattern, expected, parent, recovery in DATA_FILE_JOBS:
         files = glob.glob(str(ROOT / pattern))
         if not files:
             out.append(_finding("data_freshness", "warn",
                                 f"{job}: 資料目錄無檔（{pattern}）—— 從未收集？",
-                                recovery=f"uv run python scripts/{parent}_data.py"))
+                                recovery=recovery))
             continue
         newest = max(files, key=lambda p: os.path.getmtime(p))
         a = _age_h(newest)
@@ -106,7 +121,7 @@ def check_data_freshness() -> list[dict]:
             out.append(_finding(
                 "data_freshness", sev,
                 f"{job}: 最新資料檔已 {a:.0f}h（預期 ≤{expected}h，由 {parent} 子步驟收）—— 資料落後",
-                recovery=f"uv run python scripts/collect_twse_orderflow.py --date today  # 或回補 --backfill",
+                recovery=recovery,
             ))
     return out
 

@@ -1,22 +1,28 @@
-"""台股數據收集（台股收盤後 14:00 執行）
+"""台股數據收集（台股收盤後 15:00 執行）
 
 收集：
 - 0050.TW 日線（yfinance）
 - 0050.TW 5-min data（yfinance，用於 Realized Volatility）
 - VIXTWN（TAIFEX）
+- TAIFEX TX tick 衍生 5-min RV（本機官方逐筆成交檔，每日增量）
 
-Cron: 0 14 * * 1-5
+Cron: 0 15 * * 1-5
 """
+import os
+import re
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import yfinance as yf
 
 PROJECT = Path(__file__).resolve().parent.parent
 VENV_PYTHON = PROJECT / ".venv" / "bin" / "python"
+CRITICAL_SECTIONS = {"taifex_5min_rv"}
 
 
 def _detect_gap_days(ticker, output_dir):
@@ -26,6 +32,81 @@ def _detect_gap_days(ticker, output_dir):
     Always request full window; skip files we already have on save.
     """
     return 59
+
+
+def _close_from_saved_5min(path: Path, ticker: str) -> pd.Series:
+    """Read a saved yfinance file with either its two-row or flat header."""
+    with path.open("r", encoding="utf-8", errors="replace") as source:
+        first_line = source.readline().split(",", 1)[0].strip()
+        second_line = source.readline().split(",", 1)[0].strip()
+    has_multi_header = first_line == "Price" and second_line == "Ticker"
+    if has_multi_header:
+        frame = pd.read_csv(path, header=[0, 1], index_col=0)
+        close_columns = [column for column in frame.columns if str(column[0]).lower() == "close"]
+        if close_columns:
+            return pd.to_numeric(frame[close_columns[0]], errors="coerce").dropna()
+    frame = pd.read_csv(path, index_col=0)
+    close_name = next((column for column in frame.columns if str(column).lower() == "close"), None)
+    if close_name is None:
+        raise ValueError(f"{path.name}: no Close column")
+    return pd.to_numeric(frame[close_name], errors="coerce").dropna()
+
+
+def _within_day_rv(close: pd.Series) -> float:
+    """Five-minute RV with the first observation reset at each trading day."""
+    values = close.to_numpy(dtype=float)
+    if len(values) < 2:
+        return float("nan")
+    return float(np.square(np.diff(np.log(values))).sum())
+
+
+def rebuild_saved_daily_rv(ticker: str, output_dir: Path) -> pd.DataFrame:
+    """Rebuild daily RV from per-day files without an overnight cross-day return.
+
+    The previous implementation called ``pct_change`` on a multi-day download
+    before grouping.  That placed the overnight close-to-open move into each
+    day's first five-minute return and made the 0050 validation target
+    incomparable with session-only TAIFEX RV.
+    """
+    prefix = ticker.replace(".", "_")
+    pattern = re.compile(rf"^{re.escape(prefix)}_5min_(\d{{4}}-\d{{2}}-\d{{2}})\.csv$")
+    rows = []
+    for path in sorted(output_dir.glob(f"{prefix}_5min_*.csv")):
+        match = pattern.fullmatch(path.name)
+        if not match:
+            continue
+        close = _close_from_saved_5min(path, ticker)
+        rows.append({"date": match.group(1), "rv_5min": _within_day_rv(close)})
+    result = pd.DataFrame(rows, columns=["date", "rv_5min"])
+    if result.empty:
+        return result
+    result = result.drop_duplicates("date", keep="last").sort_values("date")
+    result = result.set_index("date")
+
+    rv_file = output_dir / f"{prefix}_daily_rv.csv"
+    handle = tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", newline="", suffix=".tmp", dir=output_dir, delete=False
+    )
+    tmp_path = Path(handle.name)
+    try:
+        with handle:
+            result.to_csv(handle)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(tmp_path, 0o644)
+        os.replace(tmp_path, rv_file)
+    finally:
+        tmp_path.unlink(missing_ok=True)
+    return result
+
+
+def _collection_exit_code(section_ok: dict[str, bool]) -> int:
+    """Fail immediately for canonical sections; retain legacy all-fail guard."""
+    if any(not section_ok.get(section, False) for section in CRITICAL_SECTIONS):
+        return 1
+    if section_ok and not any(section_ok.values()):
+        return 1
+    return 0
 
 
 def collect_5min(ticker, output_dir):
@@ -56,26 +137,9 @@ def collect_5min(ticker, output_dir):
             group.to_csv(filename)
             print(f"  Saved {filename.name} ({len(group)} bars)")
 
-    # Compute daily RV
-    data['returns'] = data['Close'].pct_change()
-    daily_rv = data.groupby(data.index.date)['returns'].apply(
-        lambda x: (x.dropna()**2).sum()
-    )
-
-    rv_file = output_dir / f"{ticker.replace('.', '_')}_daily_rv.csv"
-    if rv_file.exists():
-        existing = pd.read_csv(rv_file, index_col=0, parse_dates=True)
-        new_rv = pd.DataFrame({'rv_5min': daily_rv})
-        new_rv.index = pd.DatetimeIndex(daily_rv.index)
-        combined = pd.concat([existing, new_rv])
-        combined = combined[~combined.index.duplicated(keep='last')]
-        combined.sort_index().to_csv(rv_file)
-    else:
-        rv_df = pd.DataFrame({'rv_5min': daily_rv})
-        rv_df.index = pd.DatetimeIndex(daily_rv.index)
-        rv_df.to_csv(rv_file)
-
-    total_rv = pd.read_csv(rv_file, index_col=0)
+    # Recompute from every saved day so old rows created by the former
+    # cross-day pct_change bug are corrected, not merely appended around.
+    total_rv = rebuild_saved_daily_rv(ticker, output_dir)
     print(f"  {ticker} 5-min RV: {len(total_rv)} days total")
 
 
@@ -83,8 +147,8 @@ def main():
     now = datetime.now()
     print(f"=== 台股數據收集: {now.strftime('%Y-%m-%d %H:%M')} ===")
 
-    # 2026-05-04 silent-fail fix: track per-section ok/fail so cron exit
-    # surfaces total failure to check_alerts host_cron_fail.
+    # Track per-section ok/fail so cron exit surfaces total failure and any
+    # canonical high-frequency section failure to host_cron_fail immediately.
     section_ok: dict[str, bool] = {}
 
     # 1. VIXTWN（TAIFEX 來源）
@@ -135,10 +199,33 @@ def main():
         print(f"  TWSE order-flow error: {e}")
         section_ok["twse_orderflow"] = False
 
+    # 5. TAIFEX official tick -> canonical 5-minute RV.  The local source
+    # normally lands after midnight, so this 15:00 run processes the latest
+    # file available at invocation time (typically the previous trading day).
+    print("\n--- TAIFEX TX 5-min RV ---")
+    try:
+        result = subprocess.run(
+            [str(VENV_PYTHON), str(PROJECT / "scripts" / "collect_taifex_tick.py")],
+            cwd=str(PROJECT),
+            timeout=900,
+        )
+        section_ok["taifex_5min_rv"] = result.returncode == 0
+    except Exception as e:
+        print(f"  TAIFEX 5-min RV error: {e}")
+        section_ok["taifex_5min_rv"] = False
+
     print("\n✓ 台股數據收集完成")
-    if section_ok and not any(section_ok.values()):
-        print(f"\n  [collect_tw_data] FAIL: all sections failed: {section_ok}",
-              file=sys.stderr)
+    exit_code = _collection_exit_code(section_ok)
+    if exit_code:
+        failed_critical = sorted(
+            section for section in CRITICAL_SECTIONS if not section_ok.get(section, False)
+        )
+        reason = (
+            f"critical sections failed: {failed_critical}"
+            if failed_critical
+            else "all sections failed"
+        )
+        print(f"\n  [collect_tw_data] FAIL: {reason}: {section_ok}", file=sys.stderr)
         return 1
     return 0
 
