@@ -2,6 +2,49 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-11 FEVD 取錯軸：`decomp[-1]` 把「最後一個變數」當成「最後一個 horizon」（K865 全數字作廢）
+
+**問題**：`experiments/k865/k865_vol_spillover_network.py:116`（`fit_var_fevd`）用
+`spillover_matrix = fevd.decomp[-1]` 取 Diebold-Yilmaz 的溢出矩陣，程式註解也寫成
+「`fevd.decomp` is (horizon, n, n)」。**實際上 statsmodels 的 `decomp` 是 `(n, horizon, n)`**：
+axis 0 = 被分解的變數 i，axis 1 = horizon 步，axis 2 = 衝擊來源 j（本次實測驗證，statsmodels 0.14.6：
+`decomp.shape == (n, horizon, n)`，且 `decomp.sum(axis=2) == 1`）。
+所以 `decomp[-1]` 取到的是**最後一個資產（BTC）跨 horizon 的 (horizon, n) 表**，
+下游再把前 n 列當成 n×n 矩陣讀 —— **horizon 步被當成資產**。
+
+**現象**（安靜失敗，因為陣列仍是 2-D、算術照跑、輸出仍像百分比）：
+- TSI 在**所有** regime 都黏在 ~90%（COVID 90.9 / 平靜 90.5 / 關稅 90.9）—— 誤切後「對角線」不再是自身變異，
+  幾乎所有質量都落到 off-diagonal，於是指數天生就高且不動。**「危機與平靜一樣連動」這個賣點本身就是 artifact。**
+- BTC 淨溢出 +536 —— 淨額佔比不可能超過 ~100×n，這個數字當時就該當紅旗。
+- 同 bug 由 fable 深審在 crypto-fear 論文先發現，class sweep 才掃到 k865。
+
+**影響範圍**：k865 舊 `k865_results.json` 中**所有** FEVD 衍生數字全部作廢（TSI、from/to/net、
+transmitters/receivers、spillover_matrix、rolling TSI、crisis_comparison、connectivity_change、
+traditional_asset_network、spy_role_change）。已流入 `knowledge.json` K865 一筆、
+feed 兩篇（`mile_8cc3dfe9` 全篇建構於錯誤數字、`mile_1597b341` 引用其中一句結論）。
+**未受影響**：Granger 檢定（不經 FEVD，新舊完全相同 31/10/14/18/14）、RV 描述統計與相關係數
+（OIL 2.83x / EEM 2.05x 等）—— 因為它們不走 spillover matrix。
+
+**結論翻轉**（重跑後）：TSI 90.9% → **27–61% 且隨 regime 明顯變動**（平靜 32.8 → 關稅 39.6）；
+最大傳染源 BTC → **SPY（全部五個視窗）**；「SPY 平常是接收者、關稅時翻成傳染源」**整個消失** ——
+SPY 在**所有**視窗都是淨傳染源（+104 ~ +183）。修正後的 SPY-hub 結果反而與 K7 / K356 一致，
+舊的「BTC 主導」本來就與前作矛盾，這個矛盾當時被當成新發現寫進文章，而不是當成 bug 訊號。
+
+**解決**：
+1. 取法改 `fevd.decomp[:, -1, :]`，並在 `fit_var_fevd` 內加 `assert decomp.shape == (n, horizon, n)`
+   （statsmodels 若改軸序就當場炸，不會再靜默）。舊結果保留為
+   `k865_results_SUPERSEDED_fevd_bug.json` + 頂層 `superseded_reason`。
+2. **機械 gate（唯一 enforcement owner，anti-stacking 勿再加第二層）**：
+   `scripts/tests/test_fevd_shape.py` —— (a) 釘死 statsmodels 軸序；(b) iid 合成資料下正確取法的
+   TSI 必須 < 5%（實測 1.1–1.7%），(c) 同一份 iid 資料下 buggy 取法必須 > 50%（實測 ~80%，
+   證明測試真的抓得到已出貨的 bug 而非空過），(d) 刻意連通的 X→Y→Z chain 必須 > 20%（實測 33%，
+   防止「永遠回傳小數字」的實作矇混過關），(e) AST 全庫掃 `.decomp[-1]` —— clean-tree assertion。
+   全庫掃描結果：**k865 是唯一站點**；`k628b` 的 `decomp[i][-1]` 與 `k304` 的 `decomp[1][h-1, 0]`
+   都是先索引變數軸再取 horizon，**寫法正確**。
+3. **教訓（與 K1655 / K1681 同一家族）**：失效點不是「算不出來」而是「算出來的東西語意是錯的，
+   但長得像對的」。防線是**在正確性有解析解的合成資料上驗屬性**（iid → 連動性必須 ≈ 0），
+   而不是靠讀 code 或看圖。另外：**與前作矛盾的「新發現」要先當 bug 假設處理，不是先當賣點。**
+
 ## 2026-07-11 巢狀模型用 raw DM 判 NULL —— 「沒過 Harvey 門檻」不能反推「沒有預測力」（K1681）
 
 **問題**：K1681（SMAD 作為波動/左尾預測子）把 NULL verdict 的一條腿架在

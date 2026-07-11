@@ -33,6 +33,7 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 from datetime import datetime
+from pathlib import Path
 from statsmodels.tsa.api import VAR
 from statsmodels.tsa.stattools import grangercausalitytests
 from scipy import stats
@@ -111,9 +112,19 @@ def fit_var_fevd(rv_data, lags=VAR_LAGS, horizon=FEVD_HORIZON):
         return None, None
 
     fevd = results.fevd(horizon)
-    # fevd.decomp is (horizon, n, n) — we want the final horizon step
-    # Each row i: how much of asset i's FEV is explained by shocks to each asset j
-    spillover_matrix = fevd.decomp[-1]  # shape (n, n)
+    # statsmodels FEVD: fevd.decomp has shape (n, horizon, n)
+    #   axis 0 = variable i whose forecast error variance is being decomposed
+    #   axis 1 = forecast horizon step (0 .. horizon-1)
+    #   axis 2 = shock source j
+    # We want the n x n table at the FINAL horizon step, so we slice axis 1 with -1.
+    # (2026-07-11 fix: the old code used `fevd.decomp[-1]`, which selects the LAST
+    #  VARIABLE and returns a (horizon, n) table — horizon steps were silently being
+    #  treated as assets, making the entire spillover matrix meaningless.)
+    n_vars = fevd.decomp.shape[0]
+    assert fevd.decomp.shape == (n_vars, horizon, n_vars), (
+        f"unexpected FEVD shape {fevd.decomp.shape}, expected ({n_vars}, {horizon}, {n_vars})"
+    )
+    spillover_matrix = fevd.decomp[:, -1, :]  # shape (n, n); row i = variable i's FEV decomposition
 
     # Normalize rows to sum to 100
     row_sums = spillover_matrix.sum(axis=1, keepdims=True)
@@ -635,8 +646,9 @@ if __name__ == '__main__':
         print(f"  t-stat: {tt['t_stat']:.3f}, p: {tt['p_value']:.6f}")
         print(f"  Harvey |t|>3.0: {'YES' if tt['significant_harvey'] else 'NO'}")
 
-    # Save results
-    output_path = 'experiments/k865_results.json'
+    # Save results (canonical location: experiments/k865/k865_results.json, resolved
+    # relative to this script so the run is cwd-independent)
+    output_path = str(Path(__file__).resolve().parent / 'k865_results.json')
     with open(output_path, 'w') as f:
         json.dump(results, f, indent=2, default=str)
     print(f"\nResults saved to {output_path}")
