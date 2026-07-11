@@ -38345,5 +38345,73 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-07-11T16:41:35.141093"
+  },
+  {
+    "item_id": "98a3e103",
+    "category": "growth_at_risk_equity_tail",
+    "title": "K1655 true-PIT ALFRED rerun overturns the final-vintage conditional pass [NULL]",
+    "content": "SELF-CORRECTION／推翻 K1655 舊結論：原始 item 274f2886 使用 final-vintage NFCI 並在指數公開前評分，因此舊 CONDITIONAL_PASS、2000 年起樣本、2008 calibration、樣本內 GaR fan 顯著與 VIX dominance 敘事全部失效。改用 ALFRED output_type=1 真實 revision intervals 後，panel 為 788 週（2011-05-27～2026-06-26）；首個 public vintage 前 594 個 origins 全排除。對 ^GSPC 5% return tail，H=1/4/12 的 NFCI OOS pinball 改善為 -1.934%/-2.656%/-7.331%，DM-HLN t=+0.898/+0.690/+1.819，三格都沒有優於 unconditional empirical quantile benchmark；PIT 樣本內斜率 p=0.151/0.205/0.871，亦不顯著。最終 statistical verdict=NULL，independent post-run review=PASS。結論只限此 true-PIT 樣本與基準；沒有檢定 VIX encompassing，也不否定強制去槓桿機制。",
+    "verdict": "NULL",
+    "experiment_id": "K1655",
+    "experiment_path": "experiments/K1655/",
+    "supersedes": "274f2886",
+    "reviewer": "Codex independent post-run review PASS (2026-07-11)",
+    "reviewer_source": "Codex primary-path independent post-run review",
+    "codex_review": "PASS limited to the true-PIT ALFRED reconstruction, timing gates, serialized forecast audit, and the narrow NULL conclusion.",
+    "evidence": [
+      "experiments/K1655/K1655_results.json",
+      "experiments/K1655/K1655_oos_forecasts.csv",
+      "experiments/K1655/data/alfred_NFCI_vintage_audit.json",
+      "experiments/K1655/reviews/codex_alfred_pit_postrun_2026-07-11.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-07-11T10:45:56.722653+00:00",
+    "sample": {
+      "start": "2011-05-27",
+      "end": "2026-06-26",
+      "n_weeks": 788
+    },
+    "alfred_audit": {
+      "raw_rows": 207755,
+      "pages": 3,
+      "vintage_dates": 786,
+      "first_public_vintage": "2011-05-25",
+      "pre_first_vintage_origins_excluded": 594,
+      "raw_sha256": "a31101f9a82773619a35dd1f0da65250ac2467e5e1c8f8e17bf620067a0e880a",
+      "derived_sha256": "eb927e7ebfc33ff8acf0ece00bb000ac95a0bfe684f3e225e9653cb1a17440e0"
+    },
+    "primary_oos": {
+      "1": {
+        "n": 536,
+        "pinball_cond": 0.003076212081893261,
+        "pinball_uncond": 0.003017843919546874,
+        "pinball_reduction_pct": -1.9341014281199382,
+        "dm_t_hln": 0.8978507731707166,
+        "dm_p_hln": 0.36966898326081066,
+        "nw_lag": 9,
+        "harvey_significant_better": false
+      },
+      "4": {
+        "n": 530,
+        "pinball_cond": 0.006214759280585812,
+        "pinball_uncond": 0.0060539435473841415,
+        "pinball_reduction_pct": -2.656379795136303,
+        "dm_t_hln": 0.6895144858438128,
+        "dm_p_hln": 0.49080189944035135,
+        "nw_lag": 13,
+        "harvey_significant_better": false
+      },
+      "12": {
+        "n": 514,
+        "pinball_cond": 0.010420225357983223,
+        "pinball_uncond": 0.009708534768940411,
+        "pinball_reduction_pct": -7.330566413787339,
+        "dm_t_hln": 1.818648565256795,
+        "dm_p_hln": 0.06954800448477516,
+        "nw_lag": 19,
+        "harvey_significant_better": false
+      }
+    },
+    "forecast_artifact_sha256": "0b47082bcc51be299be45fc122cc8c5a410cd691a0665594ddd88e68712c468e"
   }
 ]

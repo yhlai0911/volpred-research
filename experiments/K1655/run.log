@@ -1,31 +1,5 @@
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
-/Users/yhlai0911/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (2000) reached.
-  warnings.warn("Maximum number of iterations (" + str(max_iter) +
 [K1655] building weekly panel ...
-[K1655] panel: n=1383 weeks, 2000-01-07..2026-07-03
+[K1655] panel: n=788 weeks, 2011-05-27..2026-06-26
 [K1655] equity-at-risk spec=NFCI: in-sample + OOS ...
 [K1655] equity-at-risk spec=VIX: in-sample + OOS ...
 [K1655] vol-at-risk spec=NFCI: in-sample + OOS ...
@@ -33,9 +7,9 @@
 [K1655] charts ...
 
 ===== K1655 SUMMARY =====
-verdict: CONDITIONAL_PASS
- H= 1w | IS NFCI slope@0.05=-0.02192 (boot p=0.014) | OOS pinball cond=0.002890 unc=0.003099 red=+6.74% DM_HLN t=-2.74 p=0.006
- H= 4w | IS NFCI slope@0.05=-0.06605 (boot p=0.035) | OOS pinball cond=0.006127 unc=0.006350 red=+3.51% DM_HLN t=-0.87 p=0.382
- H=12w | IS NFCI slope@0.05=-0.14720 (boot p=0.023) | OOS pinball cond=0.011413 unc=0.011046 red=-3.32% DM_HLN t=+0.74 p=0.460
-elapsed: 191s
-written: /Users/yhlai0911/volpred-research/.claude/worktrees/agent-k1655-gar/experiments/K1655/K1655_results.json
+verdict: NULL
+ H= 1w | IS NFCI slope@0.05=-0.01627 (boot p=0.151) | OOS pinball cond=0.003076 unc=0.003018 red=-1.93% DM_HLN t=+0.90 p=0.370
+ H= 4w | IS NFCI slope@0.05=-0.03994 (boot p=0.205) | OOS pinball cond=0.006215 unc=0.006054 red=-2.66% DM_HLN t=+0.69 p=0.491
+ H=12w | IS NFCI slope@0.05=-0.01486 (boot p=0.871) | OOS pinball cond=0.010420 unc=0.009709 red=-7.33% DM_HLN t=+1.82 p=0.070
+elapsed: 144s
+written: /Users/yhlai0911/volpred-research/experiments/K1655/K1655_results.json

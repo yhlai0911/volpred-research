@@ -15852,5 +15852,19 @@
     "topology_override": "worktree→inline 主線程（產出落在 scripts/ + docs/ + storage/ops/，非 experiments/kXXXX/，worktree agent 依規則不得寫共享路徑）",
     "summary": "K1655 DM HAC bandwidth bug class 全量掃描。建 AST 稽核器（scripts/audit_dm_hac_lag.py）掃 experiments/** 全população：570 個 local DM，139 個用 range(1,h)（h=1 零 HAC），其中 130 個實際跑 h=1 cell = 結構性暴露，95 個有 knowledge 活宣稱、2 個（k507/k621）被論文引用。機械 gate 上線（scripts/tests/test_dm_hac_lag_ratchet.py，ratchet：139 凍結 baseline 只准變少，新的 degenerate DM 直接 CI FAIL），已用臨時 worktree break-then-verify 確認會咬。誠實性關鍵：暴露≠結論錯（零 HAC 在 h=1 是教科書 DM，只有 differential 自相關才失效），實質性需重跑量 acf — 報告全程用『結構性暴露』不用『confirmed bug』。盲區：195 個 unknown bandwidth 未解析（含 K1611 這種正確雙變體實作）。3 個 follow-up 已排池。",
     "status": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-11T10:45:56.789950+00:00",
+    "task_type": "experiment",
+    "task_id": "k1655_alfred_pit_rerun",
+    "k_id": "K1655",
+    "title": "K1655 ALFRED true-PIT NFCI correction rerun",
+    "status": "succeeded",
+    "verdict": "NULL",
+    "actor": "codex-vscode",
+    "notes": "True-PIT panel 788 weeks (2011-05-27..2026-06-26); NFCI return-tail OOS improvement H1/H4/H12=-1.934%/-2.656%/-7.331%; independent numeric verification and post-run review PASS. Old final-vintage CONDITIONAL_PASS and associated article claims corrected.",
+    "experiment_path": "experiments/K1655/",
+    "knowledge_item_id": "98a3e103",
+    "supersedes_knowledge_item_id": "274f2886"
   }
 ]

@@ -32,14 +32,30 @@ cross-check，而 helper 的 −1.7068 跟 Codex 手算的 −1.7069 完全吻�
 - `_nw_lag()`：HAC 落後期以 repo canonical bandwidth（`volpred.stats.model_evaluation.dm_test` 的
   `ceil(h^(1/3)·n^(1/3))`）為**下限**，`lag = max(h-1, canonical)`。重跑 192s，60 個 DM cell 的
   `harvey_significant` **26 → 18**（8 個翻盤）。文章引用的那格 −3.62 → **−3.15**（仍過門檻但只是勉強過）。
-- 線上文章 `mile_9c211681` **不下架**、就地更正。判斷依據是**方向**：PIT 修訂偏誤讓 NFCI 看起來比實際更強，
-  而文章主結論是「NFCI 預測不了股市左尾」—— 在一個對它有利的環境下它都做不到，換成真實即時資料只會更 null。
-  主結論保守安全，過度宣稱的是「輕鬆過關」與「VIX 蓋過 NFCI」兩處，已改寫並加完整限制聲明（Supabase 已驗證）。
+- 線上文章 `mile_9c211681` **不下架**、就地更正。先前用「final-vintage 偏誤方向只會讓 NFCI 更強」推論
+  true-PIT 結果只會更 null，這個推論本身沒有經過實算，現已撤回；後續必須等 ALFRED 重跑數字完成再改文章，
+  不能用預想的偏誤方向替代實證結果。
 - README verdict `CONDITIONAL_PASS` → **`FAIL`（未結案）**。Review 全文存
   `experiments/K1655/reviews/codex_primary_reverify_2026-07-11.md`。
-- Follow-ups：`k1655_alfred_pit_rerun`（ALFRED 真 vintage 重建）、`k1655_vix_nfci_encompassing`（配對 DM +
+- Follow-ups：`k1655_alfred_pit_rerun`（**2026-07-11 已完成，見下方 resolution addendum**）、`k1655_vix_nfci_encompassing`（配對 DM +
   encompassing）、`k1655_dm_lag_class_sweep`（**bug class**：grep 出 20+ 實驗自寫 local DM，需全量掃
   `lag=h-1` + h=1；終局是收斂到 `volpred.stats` 單一 owner + CI gate 擋新的 local 實作）。
+
+### Resolution addendum — ALFRED true-PIT 重跑完成
+
+- 完整抓取 ALFRED `NFCI` `output_type=1` revision history：207,755 列、3 頁、786 個 vintage dates，raw cache
+  SHA-256 `a31101f9a82773619a35dd1f0da65250ac2467e5e1c8f8e17bf620067a0e880a`。
+- 每個 Friday origin 只選 `realtime_start <= origin <= realtime_end` 的唯一有效 revision；首個 public vintage
+  2011-05-25 前 594 個 origins 全排除。panel 剩 788 週（2011-05-27～2026-06-26），post-release gaps=0，
+  information lag 最小／中位／最大為 7／7／21 日。
+- 31,600 列 forecast artifact 覆蓋 60/60 cells，逐格重算 loss、improvement、DM t/p 與 NW lag 全通過；
+  independent numeric verification 與 post-run code/research review 均 `PASS`。
+- Primary NFCI return-tail τ=.05 的 H=1/4/12 OOS 改善為 **−1.934% / −2.656% / −7.331%**，
+  DM-HLN t=+0.898/+0.690/+1.819；三格都比 unconditional benchmark 差，最終 verdict=`NULL`。
+- 舊結果不只數字改變，敘事也被推翻：PIT 樣本內左尾斜率 p=.151/.205/.871，不能再說 equity GaR fan
+  「三個 horizon 都顯著」；VIX-only 與 NFCI-only 各自對 benchmark 的結果，也不能推出 VIX dominance。
+- **新增教訓**：revision-bias 的方向不可用口頭推論代替重跑。修訂會同時改 predictor 值與可評分樣本邊界；
+  只有在相同 origins 上的診斷與完整 true-PIT OOS 重算，才可判定結論是否維持。
 
 **教訓**：
 

@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+from statsmodels.tools.sm_exceptions import IterationLimitWarning
 
 
 @pytest.fixture(scope="module")
@@ -238,3 +239,32 @@ def test_http_failure_never_echoes_api_key(k1655, monkeypatch):
         )
     assert secret not in str(caught.value)
     assert "request URL redacted" in str(caught.value)
+
+
+def test_quantreg_iteration_limit_retries_then_resolves(k1655, monkeypatch):
+    calls: list[int] = []
+
+    class FakeResult:
+        params = np.array([0.0, 0.0])
+
+    class FakeModel:
+        def __init__(self, y, x):
+            pass
+
+        def fit(self, *, q, max_iter, p_tol):
+            calls.append(max_iter)
+            if len(calls) == 1:
+                import warnings
+
+                warnings.warn("retry me", IterationLimitWarning)
+            return FakeResult()
+
+    monkeypatch.setattr(k1655, "QuantReg", FakeModel)
+    k1655.FIT_DIAGNOSTICS.clear()
+    k1655.FIT_DIAGNOSTICS.update(k1655._empty_fit_diagnostics())
+    result = k1655.fit_quantreg(np.array([[1.0], [2.0]]), np.array([1.0, 2.0]), 0.05)
+
+    assert result.params.tolist() == [0.0, 0.0]
+    assert calls == [5_000, 20_000]
+    assert k1655.FIT_DIAGNOSTICS["iteration_limit_retry_events"] == 1
+    assert k1655.FIT_DIAGNOSTICS["unresolved_iteration_limit_failures"] == 0
