@@ -15699,5 +15699,45 @@
     "owner": "codex",
     "backfilled_at": "2026-07-11T05:26:26.618202+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-11T13:38:11.396040+08:00",
+    "actor": "hourly-13",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_check_arc_dedup_audience_wiring",
+    "summary": "選題 gate 修正：check_arc_dedup CLI 補 --audience + 新增 find_k_coverage() 精確 gate。根因=CLI 從沒把 library 早就有的 audience/new_refs 傳進 find_arc_duplicates，導致同 K 同 audience 既有文章被放行(K1586/K1605 白派 2 個 writer)、同時能寫的 K1611/K1639 被 research 手足誤判永久擋住。commit 9939dc092。10 新 tests + 既有 104 dedup tests 全過。",
+    "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-11T13:38:11.396040+08:00",
+    "actor": "hourly-13",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_arc_dedup_false_positive_v3",
+    "summary": "arc-dedup false positive 與 false negative 同根因，隨 audience wiring 一併修掉；K1611 誤判不再重現。",
+    "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-11T13:53:36.811942+08:00",
+    "actor": "hourly-13",
+    "task_type": "daily_article",
+    "task_id": "K1611_article_general",
+    "summary": "發佈 mile_b5e264a5（draft/general）：市場一恐慌就該換模型？台美 5,368 天，勝負沒換人（null result）。被 audience gate 擋 → jargon 降級後過關，數字零變動。懶人包已 enqueue。",
+    "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-11T13:53:36.811942+08:00",
+    "actor": "hourly-13",
+    "task_type": "daily_article",
+    "task_id": "K1639_article_general",
+    "summary": "發佈 mile_de666838（draft/general）：4 種階層式配置法沒一個贏過反波動加權（null result）。被 content-vs-source gate 擋 → 推導值改引用組成值（共修 6 處），數字零竄改。懶人包已 enqueue。",
+    "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-11T13:53:36.811942+08:00",
+    "actor": "hourly-13",
+    "task_type": "platform_ops",
+    "task_id": "publish_draft_dryrun_silent_pass",
+    "summary": "修 publish_draft.py --dry-run 靜默放行：dry-run 在 content-vs-source gate 之前就 return，對會被真發佈拒絕的草稿也回報乾淨（本班被騙過一次）。改為 dry-run 也跑同一個 audit，找不到來源時明說 NOT verified（fail-open 但不謊報）。negative control 驗證非空轉。",
+    "verdict": "succeeded"
   }
 ]
