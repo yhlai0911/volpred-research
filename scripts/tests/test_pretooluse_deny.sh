@@ -162,6 +162,48 @@ assert_allow "commit -F 中文檔（合法解）"  "git commit -F /tmp/中文訊
 assert_allow "commit -m 純 ASCII"          "git commit -m 'fix: ban non-ascii -m'"
 assert_allow "非 commit 指令含中文"        "echo '中文' > /tmp/x"
 
+# ── 2026-07-12 3-STRIKE class sweep：fire 內無界 agentic 子程序 ──────────────
+# 7/11 只擋了 class 的一個成員（codex exec）；隔天同 root cause 換執行檔（claude -p）
+# 又炸三次 hang_killed，三次 duration 全是 3001.3s（＝supervisor 的 3000s hard cap）。
+# 這批 assert 鎖住「class 不是成員」：新成員（agy -p）與繞過寫法（絕對路徑）一併蓋住。
+#
+# 這條 deny 是 actor-scoped（只在 fire 內生效），所以 assert 必須顯式指定 VOLPRED_ACTOR —
+# 不可讓它繼承跑測試那個人的環境（否則 hourly fire 跑 CI 與人手跑 CI 會得到不同結果）。
+decision_actor() {  # $1=actor $2=command → permissionDecision 或 "none"
+  printf '{"tool_input":{"command":%s}}' "$(printf '%s' "$2" | jq -Rs .)" \
+    | VOLPRED_ACTOR="$1" bash "$HOOK" | jq -r '.hookSpecificOutput.permissionDecision // "none"'
+}
+assert_deny_actor() {  # $1=label $2=actor $3=command
+  local dec; dec="$(decision_actor "$2" "$3")"
+  if [[ "$dec" == "deny" ]]; then PASS=$((PASS + 1)); echo "PASS deny : $1";
+  else FAIL=$((FAIL + 1)); echo "FAIL deny (got $dec): $1"; fi
+}
+assert_allow_actor() {  # $1=label $2=actor $3=command
+  local dec; dec="$(decision_actor "$2" "$3")"
+  if [[ "$dec" != "deny" ]]; then PASS=$((PASS + 1)); echo "PASS allow: $1";
+  else FAIL=$((FAIL + 1)); echo "FAIL allow (got deny): $1"; fi
+}
+
+FIRE="dispatch-worker:volpred-hourly-dispatch:0135"
+
+# fire 內 = 有 3000s hard cap 的容器 → 無界 agentic 子程序一律擋
+assert_deny_actor  "fire: claude -p"              "$FIRE" "claude -p --effort xhigh 'brief'"
+assert_deny_actor  "fire: claude --print"         "$FIRE" "claude --print 'brief'"
+assert_deny_actor  "fire: claude -p 絕對路徑"      "$FIRE" "/usr/local/bin/claude -p 'x'"
+assert_deny_actor  "fire: agy -p（class 新成員）"  "$FIRE" "agy -p '審查這段'"
+assert_deny_actor  "fire: codex exec"             "$FIRE" "codex exec 'review'"
+assert_deny_actor  "fire: codex exec 絕對路徑"     "$FIRE" "/opt/homebrew/bin/codex exec 'x'"
+assert_deny_actor  "fire: && 串接 claude -p"      "$FIRE" "cd /tmp && claude -p 'x'"
+
+# fire 外 = 沒有 cap（互動有人盯著 / compute worker 是 detached）→ 合法，不可誤擋
+assert_allow_actor "互動 session: claude -p"      "interactive"     "claude -p 'x'"
+assert_allow_actor "queue runner 的 agent"        "agent-job:k1684" "claude -p 'x'"
+# 合法出路本身不可被自己的 deny 擋住（否則 agent 無路可走 → 又回去硬 spawn）
+assert_allow_actor "fire: enqueue-agent（正解）"  "$FIRE" \
+  "uv run python scripts/compute_queue.py enqueue-agent --brief-file /tmp/b.md --effort xhigh"
+# false positive 防護：提到字串 ≠ 執行它
+assert_allow_actor "fire: grep 提到 claude -p"    "$FIRE" "grep -rn 'claude -p' docs/"
+
 echo "---"
 echo "PASS=$PASS FAIL=$FAIL"
 [[ "$FAIL" -eq 0 ]]

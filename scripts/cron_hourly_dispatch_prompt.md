@@ -134,8 +134,23 @@ PHASE B — 派新工:
    - **paper_body** → `opus / high`（主線程才能跑）
    - **paper_review / event_article / daily_article / daily_digest / trending_repost / member_qa / email_reply** → `opus / medium`（寫作）
    - **platform_ops / governance / lookup / verify / classification** → `opus / low`（短流程/checklist，effort 低但仍 opus）
-   - 派 Agent tool 時 `model: "opus"`；派 `claude -p` 時 `--model claude-opus-4-8 --effort <EFFORT>`（cli_flag 從 router output 取，恆為 opus）
-   - **⚠️ effort 要真的生效必須傳 `--effort`**：Agent/Task tool **無 effort 旋鈕**，若任務 effort 是 `xhigh`/`max`（研究類），**必須用 `claude -p --effort <EFFORT> --model claude-opus-4-8` spawn** 而不是 Agent tool，否則 subagent 跑在 CLI 預設 effort、拿不到升級（2026-07-05 前 effort 全程 inert 的教訓）
+   - 派 Agent tool 時 `model: "opus"`
+   - **⚠️ effort 要真的生效必須傳 `--effort`**：Agent/Task tool **無 effort 旋鈕**，若任務 effort 是 `xhigh`/`max`（研究類），跑 Agent tool 會拿 CLI 預設 effort、拿不到升級（2026-07-05 教訓）。**但解法不是在本班 fire 裡 spawn `claude -p`** —— 見下條。
+   - 🚫 **絕對禁止在 fire 內 spawn `claude -p` / `agy -p` / `codex exec`**（2026-07-12 3-STRIKE，已由 PreToolUse hook 機械攔截）。fire 有 **3000s hard cap**，研究 agent 要跑 20-60 分鐘：**父等子 → 燒完 cap 被 SIGKILL**（7/12 三次 hang，duration 全是 3001.3s）；**父先走 → 子變 ppid=1 孤兒、worktree 成果沒人收**（K1681 整份實驗白做）。這不是 timeout 調太小，是**把 60 分鐘的工作塞進 50 分鐘的容器**。
+   - ✅ **長 agent（xhigh/max、研究類）的唯一合法路徑 = 進 queue**：
+     ```bash
+     # 1) brief 用 Write 工具寫成檔案（不要塞進 shell 引號）
+     # 2) enqueue → 秒回，不阻塞本班
+     uv run python scripts/compute_queue.py enqueue-agent \
+       --brief-file /tmp/brief_kXXXX.md \
+       --model claude-opus-4-8 --effort xhigh \
+       --cwd .claude/worktrees/<worktree> \
+       --followup-brief '<收件時要做什麼：驗數字 / Codex 審 / 合併 worktree / 寫 knowledge>' \
+       --followup-task-type experiment
+     ```
+     agent 由 ***/15 的 detached compute worker** 執行（不受 fire cap 限制、有 lock、有自己的 timeout），成果由**後續某一班 fire 在 PHASE A 收**。這正是 heavy compute 一直在走的路 —— agentic 長工作只是同一條路上的另一種 job。
+   - **本班 fire 的職責到 enqueue 為止**：enqueue 完就往下走 / 收尾，**不要坐在那裡等 agent**。這不違反「完整完成原則」—— 完成的單位是 **task**，不是 fire。一個 60 分鐘的 agent 在 50 分鐘的 fire 裡「等到底」只有一種結局：被 SIGKILL、成果全毀，那才是真正的沒完成。
+   - **短任務**（≤10min、`low`/`medium` effort：lookup / verify / classification / 短 review）→ 用 **Agent tool**（`run_in_background: false`，同步跑完）。這類本來就塞得進 fire，不必進 queue。
    - Brief 必含一行 `**Model**: opus / <effort> (per task_type routing)`，便於 audit
    - 違反（例：任何 subagent 派 sonnet/haiku）= 違反 owner directive，下次 boss_report 會抓
 

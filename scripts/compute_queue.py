@@ -131,6 +131,50 @@ def enqueue(args) -> int:
     return 0
 
 
+def enqueue_agent(args) -> int:
+    """Queue a long-lived `claude -p` agent instead of running it inside a fire.
+
+    A fire is capped at ~50min; a research agent needs 20-60min. Spawning the
+    agent from inside the fire kills the fire (SIGKILL at the cap) or orphans the
+    agent (ppid=1, work never collected) — both observed 2026-07-11/12, see
+    docs/error_log.md 3-STRIKE. The agent belongs here, in the same detached,
+    locked, later-collected container heavy compute already uses.
+    """
+    brief_path = Path(args.brief_file)
+    if not brief_path.is_absolute():
+        brief_path = ROOT / brief_path
+    if not brief_path.exists():
+        print(f"error: brief file not found: {brief_path}", file=sys.stderr)
+        return 2
+
+    script_args = [
+        "--brief-file", str(brief_path),
+        "--model", args.model,
+        "--effort", args.effort,
+    ]
+    if args.cwd:
+        script_args += ["--cwd", args.cwd]
+
+    job_id = args.id or f"agent-{brief_path.stem}-{uuid.uuid4().hex[:6]}"
+    artifact = args.result_artifact or str(LOG_DIR / f"{job_id}.result.json")
+    script_args += ["--result-artifact", artifact]
+
+    inner = argparse.Namespace(
+        id=job_id,
+        title=args.title or f"agent: {brief_path.stem}",
+        script="scripts/run_agent_job.py",
+        interpreter="uv run python",
+        script_args=script_args,
+        env=None,
+        result_artifact=artifact,
+        followup_brief=args.followup_brief,
+        followup_task_type=args.followup_task_type,
+        followup_priority=args.followup_priority,
+        timeout=args.timeout or 3600,
+    )
+    return enqueue(inner)
+
+
 def list_jobs(args) -> int:
     ensure_dirs()
     rows = []
@@ -290,6 +334,23 @@ def main():
     e.add_argument("--followup-priority", type=int)
     e.add_argument("--timeout", type=int)
     e.set_defaults(func=enqueue)
+
+    ea = sub.add_parser(
+        "enqueue-agent",
+        help="Queue a long-lived claude -p agent (the ONLY legal way to run one from a dispatch fire).",
+    )
+    ea.add_argument("--id")
+    ea.add_argument("--title")
+    ea.add_argument("--brief-file", required=True, help="Agent brief markdown (write it with the Write tool first).")
+    ea.add_argument("--model", default="claude-opus-4-8")
+    ea.add_argument("--effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
+    ea.add_argument("--cwd", help="Working dir for the agent, e.g. a git worktree path.")
+    ea.add_argument("--result-artifact")
+    ea.add_argument("--followup-brief")
+    ea.add_argument("--followup-task-type")
+    ea.add_argument("--followup-priority", type=int)
+    ea.add_argument("--timeout", type=int)
+    ea.set_defaults(func=enqueue_agent)
 
     l = sub.add_parser("list")
     l.add_argument("--status")

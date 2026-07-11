@@ -88,14 +88,41 @@ _commit_message_has_non_ascii() {
   printf '%s' "$COMMAND" | LC_ALL=C grep -q '[^[:print:][:space:]]'
 }
 
+# ── 無界 agentic 子程序 class（2026-07-12 3-STRIKE class sweep）──────────────
+# 2026-07-11 只擋了這個 class 的一個成員（codex exec，見下方 deny）。隔天同一個
+# root cause 換一個執行檔又炸三次：hourly fire 在 Bash 裡 spawn `claude -p` 研究
+# agent，三次 hang 的 duration 全是 3001.3s —— 分毫不差撞上 supervisor 的 3000s
+# hard cap。會「每次都剛好等到天花板」的只有一種東西：阻塞等待一個永遠不會來的事件。
+#
+# class 定義：從 fire 的 Bash tool spawn、無上界、會跑很久的 agentic 子程序。
+# 成員：codex exec（7/11 修）、claude -p（7/12 炸三次）、agy -p（同構，還沒炸）。
+# 失效機制有兩個出口，都已實測：
+#   父等子 → 燒完整個 cap → SIGKILL（hang_killed ×3）
+#   父先走 → 子 reparent 到 init（ppid=1）→ 沒人收 worktree commit（K1681 白做、
+#            K1684 在本次事故當下正以 ppid=1 裸跑）
+# 兩者是同一個 domain-model 錯誤：把一個 60 分鐘的工作塞進 50 分鐘的容器。
+#
+# 因此 deny 只在「fire 內」生效（VOLPRED_ACTOR=dispatch-worker:*，由 worker.py 蓋章）。
+# 互動 session 有人盯著、compute worker 不受 cap 限制 —— 那兩處合法，不擋。
+# run_agent_job.py 蓋 VOLPRED_ACTOR=agent-job:* 正是為了不被這條誤傷。
+BIN_PREFIX='([^[:space:];&|()]*/)?'
+CLAUDE_HEADLESS='claude[^;&|]*[[:space:]](-p|--print)([[:space:]]|=|$)'
+AGY_HEADLESS='agy[^;&|]*[[:space:]]-p([[:space:]]|=|$)'
+_inside_dispatch_fire() {
+  [[ "${VOLPRED_ACTOR:-}" == dispatch-worker:* ]]
+}
+
 DENY_REASON=""
-if printf '%s' "$COMMAND" | grep -qE "${CMD_START}git${GIT_GLOBAL_OPTS}[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]]${FORCE_FLAG}([[:space:]]|\$)"; then
+if _inside_dispatch_fire \
+   && printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}${BIN_PREFIX}(${CLAUDE_HEADLESS}|${AGY_HEADLESS})"; then
+  DENY_REASON="🚫 禁止在 dispatch fire 內 spawn headless agent（claude -p / agy -p）。這是 2026-07-12 三次 hang_killed 的 root cause：fire 有 3000s hard cap，研究 agent 要跑 20-60min —— 父等子就燒完 cap 被 SIGKILL（三次 duration 全是 3001.3s），父先走子就變 ppid=1 孤兒、worktree 成果沒人收（K1681 白做）。這不是 timeout 調太小，是把 60 分鐘的工作塞進 50 分鐘的容器。改法：把 brief 用 Write 寫成檔案，再 uv run python scripts/compute_queue.py enqueue-agent --brief-file /tmp/brief.md --model claude-opus-4-8 --effort xhigh [--cwd <worktree>] --followup-brief '<收件時要做什麼>' --followup-task-type experiment。agent 由 */15 的 detached compute worker 執行（不受 fire cap 限制），成果由後續某一班 fire 在 PHASE A 收 —— 這正是 heavy compute 一直在走的路。本班 fire 的職責是 enqueue 後立刻結束，不是坐在那裡等。"
+elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}git${GIT_GLOBAL_OPTS}[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]]${FORCE_FLAG}([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止 git worktree remove --force（CLAUDE.md『絕對禁止』；K1032/K1618 誤刪未合併實驗事故）。改用 bash scripts/merge_worktree.sh 正常合併；worktree 從 stale base 分出時用 git checkout <branch> -- experiments/kXXXX/ path-scoped 抽取。"
 elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${PKG_RUNNER}${ZEABUR_BIN}[[:space:]]+deploy([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止直呼 zeabur deploy（frontend-and-deploy.md）。部署一律走 frontend-v2-fix/scripts/deploy-zeabur-safe.sh（鎖正確 service ID + 安全檢查）。"
 elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${FULL_READERS}[[:space:]].*(storage/reports/feed\.json|storage/memory/knowledge\.json)([[:space:]]|\$|[^A-Za-z0-9_./])"; then
   DENY_REASON="🚫 禁止整檔讀取 feed.json / knowledge.json（CLAUDE.md Token 紀律）。改用 grep / jq / 單篇 storage/reports/<id>.json；jq、grep、head 皆不受此攔截。"
-elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}codex[[:space:]]+exec([[:space:]]|\$)"; then
+elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}${BIN_PREFIX}codex[[:space:]]+exec([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止裸跑 codex exec（2026-07-11 事故：hourly agent 在 session 內直接 codex exec 補渲染 lazypack，卡住 >30min 無輸出，agent 阻塞在無 timeout 的 Bash → 撞 supervisor 3000s hard cap → SIGKILL → hang_killed）。codex exec 是 agentic loop，可以跑很久而且不會自己停；Bash tool 沒有 timeout，macOS 也沒有 coreutils timeout 指令，所以「裸跑」= 把整個 fire 的命運交給一個沒有上界的呼叫。改法二選一：(1) 互動 / review 等你會盯著的短工作 → bash scripts/codex_exec_bounded.sh --timeout 300 <args>（有界，逾時 exit 124）；(2) 重活（渲染、長 review、任何你不會坐著等的）→ uv run python scripts/compute_queue.py enqueue --script <path> --timeout 1800，交給 */15 async worker。Python 內用 subprocess.run(timeout=) 呼叫 codex 不受此攔截（那本來就有界）。"
 elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit${SEG_TAIL}[[:space:]]${AMEND_FLAG}([[:space:]]|\$)" \
      && _amend_target_is_shared_main; then
