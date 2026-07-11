@@ -93,6 +93,7 @@ loss step, after the forecast has been produced.
 Author: VolPred Research System | Date: 2026-07-12 | Seed: 42
 """
 
+import hashlib
 import json
 import os
 import sys
@@ -141,6 +142,57 @@ K1393_REF = {"dm_t_legacy": 3.6029009651588626, "qlike_gjr": -8.267001519557294,
              "qlike_a4f": -8.359703082789737, "n": 1825}
 GATE_T_TOL = 0.10          # |t_gate - 3.6029| must be under this
 GATE_QLIKE_TOL = 0.01
+
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def validate_provenance(provenance):
+    """Fail closed if either pinned input has drifted from its sidecar."""
+    snapshot_rel = os.path.relpath(SNAPSHOT_PATH, PROJECT_ROOT)
+    if provenance.get("snapshot_file") != snapshot_rel:
+        raise RuntimeError(
+            f"snapshot path mismatch: sidecar={provenance.get('snapshot_file')!r}, "
+            f"runtime={snapshot_rel!r}")
+    snapshot_hash = sha256_file(SNAPSHOT_PATH)
+    if snapshot_hash != provenance.get("snapshot_sha256"):
+        raise RuntimeError(
+            f"snapshot SHA256 mismatch: {snapshot_hash} != "
+            f"{provenance.get('snapshot_sha256')}")
+
+    raw = pd.read_csv(SNAPSHOT_PATH, parse_dates=["date"])
+    raw_dates = raw["date"]
+    expected_shape = (
+        int(provenance["n_rows"]),
+        str(pd.Timestamp(provenance["first_date"]).date()),
+        str(pd.Timestamp(provenance["last_date"]).date()),
+    )
+    actual_shape = (
+        len(raw),
+        str(raw_dates.min().date()),
+        str(raw_dates.max().date()),
+    )
+    if actual_shape != expected_shape or raw_dates.duplicated().any():
+        raise RuntimeError(
+            f"snapshot shape/date integrity mismatch: {actual_shape} != {expected_shape}; "
+            f"duplicates={int(raw_dates.duplicated().sum())}")
+
+    crosscheck = provenance.get("crosscheck_vs_paper_snapshot", {})
+    paper_rel = os.path.relpath(PAPER_CSV, PROJECT_ROOT)
+    if crosscheck.get("paper_csv") != paper_rel:
+        raise RuntimeError(
+            f"paper CSV path mismatch: sidecar={crosscheck.get('paper_csv')!r}, "
+            f"runtime={paper_rel!r}")
+    paper_hash = sha256_file(PAPER_CSV)
+    if paper_hash != crosscheck.get("paper_csv_sha256"):
+        raise RuntimeError(
+            f"paper CSV SHA256 mismatch: {paper_hash} != "
+            f"{crosscheck.get('paper_csv_sha256')}")
 
 
 # ============================================================
@@ -500,7 +552,7 @@ def run_rolling(df, oos_start, oos_end, label, extra_starts=0, frozen_params=Non
         index=df.index[oos_indices],
     ).dropna()
     print(f"  valid forecasts: {len(out)}  | guarded reads: {view.reads}  | "
-          f"refits: {len(fitted_params)}  (all converged)")
+          f"refits: {len(fitted_params)}  (each model/refit has >=1 converged start)")
     return out, {"refit_diag": refit_diag, "fitted_params": fitted_params}
 
 
@@ -669,6 +721,7 @@ def main():
 
     with open(PROVENANCE_PATH) as fh:
         provenance = json.load(fh)
+    validate_provenance(provenance)
     print(f"\nSnapshot : {provenance['snapshot_file']}")
     print(f"  sha256 : {provenance['snapshot_sha256']}")
     print(f"  window : {provenance['first_date']} .. {provenance['last_date']}  "
@@ -870,15 +923,25 @@ def main():
     scan_txt = (f"none of the {len(scan)} monthly endpoints turns negative"
                 if n_neg == 0 else
                 f"{n_neg} of the {len(scan)} monthly endpoints turn negative")
-    if full["harvey_significant"] and full["dm_t_canonical"] > 0:
-        verdict, verdict_txt = "GO", (
+    primary_go = full["harvey_significant"] and full["dm_t_canonical"] > 0
+    multistart_go = ms_full["harvey_significant"] and ms_full["dm_t_canonical"] > 0
+    if primary_go and multistart_go:
+        verdict, verdict_txt = "GO_WITH_FRAGILITY_DISCLOSURE", (
             f"Headline holds. Extending the OOS to {last_date} (n={full['n']}) leaves the A4f "
             f"advantage Harvey-significant (canonical DM t = {full['dm_t_canonical']:+.3f}); "
             f"{scan_txt}, and the symmetric multistart re-estimation gives "
-            f"t = {ms_full['dm_t_canonical']:+.3f}. Paper 9 can ship the headline and update the "
-            "data-section endpoint — but it must disclose the estimation-noise band on t "
-            "(see numerical_sensitivity) and stop sourcing the extended sample from the "
-            "duplicate-ridden paper CSV.")
+            f"t = {ms_full['dm_t_canonical']:+.3f}, only "
+            f"{ms_full['dm_t_canonical'] - HARVEY_THRESHOLD:+.3f} above the threshold. Paper 9 "
+            "may retain the directional headline, but must disclose the optimizer/HAC sensitivity, "
+            "must not call the significance broadly robust, and must stop sourcing the extended "
+            "sample from the duplicate-ridden paper CSV.")
+    elif primary_go:
+        verdict, verdict_txt = "NO-GO (optimizer-sensitive)", (
+            f"The faithful three-start result clears the threshold "
+            f"(t = {full['dm_t_canonical']:+.3f}), but the symmetric multistart result does not "
+            f"(t = {ms_full['dm_t_canonical']:+.3f}). The significance headline is therefore "
+            "optimizer-sensitive and cannot ship without a softened sample/estimation-sensitivity "
+            "framing.")
     elif full["dm_t_canonical"] > 0:
         verdict, verdict_txt = "NO-GO (weakened)", (
             f"A4f still wins on average but no longer clears |t|>3 at the extended endpoint "
@@ -998,8 +1061,22 @@ def main():
                 return obj.tolist()
             return super().default(obj)
 
-    with open(RESULTS_PATH, "w") as fh:
-        json.dump(results, fh, indent=2, cls=NpEncoder)
+    # Write into the destination directory, prove the payload is parseable, then
+    # atomically replace the public artifact.  The supervising agent for this run
+    # was killed while its compute child was still alive; a direct write here would
+    # make that failure mode capable of leaving a truncated JSON file behind.
+    tmp_path = f"{RESULTS_PATH}.tmp.{os.getpid()}"
+    try:
+        with open(tmp_path, "w") as fh:
+            json.dump(results, fh, indent=2, cls=NpEncoder)
+            fh.flush()
+            os.fsync(fh.fileno())
+        with open(tmp_path) as fh:
+            json.load(fh)
+        os.replace(tmp_path, RESULTS_PATH)
+    finally:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
     print(f"\nResults -> {RESULTS_PATH}")
     print(f"Elapsed : {time.time() - START_TIME:.0f}s")
 
@@ -1021,10 +1098,10 @@ def make_figures(scan, panel_b, d_b, last_date, reports):
     ax.axhline(-HARVEY_THRESHOLD, ls="--", lw=1.2, color="#c00000")
     ax.axhline(0, lw=0.8, color="grey")
     anchor = pd.Timestamp(K1393_OOS_END)
-    t_anchor = min(scan, key=lambda s: abs(pd.Timestamp(s["oos_end"]) - anchor))
-    ax.plot([pd.Timestamp(t_anchor["oos_end"])], [t_anchor["dm_t"]], "o", ms=9,
+    t_anchor = reports["anchor_2026_04_07_new_snapshot"]["dm_t_canonical"]
+    ax.plot([anchor], [t_anchor], "o", ms=9,
             color="#2e7d32", zorder=5,
-            label=f"paper / K1393 endpoint 2026-04-07 ($t$={t_anchor['dm_t']:+.2f})")
+            label=f"paper / K1393 endpoint 2026-04-07 ($t$={t_anchor:+.2f})")
     ax.plot([ends[-1]], [ts[-1]], "D", ms=9, color="#e65100", zorder=5,
             label=f"extended endpoint {last_date} ($t$={ts[-1]:+.2f})")
     ms_t = reports["multistart_full_extended_oos"]["dm_t_canonical"]
@@ -1041,6 +1118,13 @@ def make_figures(scan, panel_b, d_b, last_date, reports):
     fig.tight_layout()
     fig.savefig(os.path.join(FIG_DIR, "k1685_dm_t_vs_oos_end.png"), dpi=150)
     plt.close(fig)
+
+    # The endpoint figure is fully reproducible from results JSON alone.  Allow the
+    # review/collection path to repair that derived artifact without rerunning the
+    # expensive rolling estimation merely to obtain the cumulative-loss panel.
+    if panel_b is None or d_b is None:
+        print(f"\nEndpoint figure -> {FIG_DIR}/k1685_dm_t_vs_oos_end.png")
+        return
 
     # Figure 2 — cumulative loss differential
     fig, ax = plt.subplots(figsize=(11, 5.0))
