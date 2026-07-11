@@ -2358,3 +2358,2889 @@ exec
    752	if __name__ == '__main__':
    753	    main()
 
+exec
+/bin/zsh -lc 'find experiments/k897 -type f -maxdepth 3 -print' in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+experiments/k897/references/.gitkeep
+experiments/k897/k897_sar_null_simulation.py
+experiments/k897/README.md
+experiments/k897/k897_sar_null_simulation_results.json
+experiments/k897/data/.gitkeep
+
+exec
+/bin/zsh -lc "nl -ba experiments/k897/README.md && nl -ba experiments/k897/k897_sar_null_simulation_results.json | sed -n '1,320p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+     1	# k897
+     2	
+     3	- Experiment ID: `k897`
+     4	- Status: planning
+     5	- Created At: 2026-04-16T09:41:26.977094+00:00
+     6	
+     7	## 問題描述
+     8	
+     9	- 待補充
+    10	
+    11	## 動機
+    12	
+    13	- 待補充
+    14	
+    15	## 方法
+    16	
+    17	- 待補充
+    18	
+    19	## 預期
+    20	
+    21	- 待補充
+    22	
+    23	## 結論
+    24	
+    25	- 待補充
+     1	{
+     2	  "experiment_id": "k897",
+     3	  "title": "Null Simulation: Does SAR Arise Mechanically from GARCH?",
+     4	  "data_source": "yfinance (SPY, ^VIX), simulation",
+     5	  "sample_period": "2006-01-04 to 2026-04-02",
+     6	  "n_observations": 5093,
+     7	  "n_simulations": 10000,
+     8	  "n_obs_per_sim": 5000,
+     9	  "garch_params": {
+    10	    "mu": 0.07641013516248987,
+    11	    "ar1": 0.0,
+    12	    "omega": 0.022188769677603346,
+    13	    "alpha": 0.0,
+    14	    "gamma": 0.24422367045225124,
+    15	    "beta": 0.8594147336803625,
+    16	    "nu": 5.647879075643755,
+    17	    "persistence": 0.981526568906488
+    18	  },
+    19	  "fixed_threshold_results": {
+    20	    "calm (<15)": {
+    21	      "empirical_sar": 3.1487,
+    22	      "sim_mean": 1.2325,
+    23	      "sim_std": 0.0974,
+    24	      "sim_ci_95": [
+    25	        1.0491,
+    26	        1.4318
+    27	      ],
+    28	      "in_95_ci": false,
+    29	      "cohens_d": 19.6717,
+    30	      "z_score": 1967.1698,
+    31	      "p_value": 0.0,
+    32	      "frac_sim_above_empirical": 0.0,
+    33	      "n_valid_sims": 10000
+    34	    },
+    35	    "normal (15-20)": {
+    36	      "empirical_sar": 2.7723,
+    37	      "sim_mean": 1.0119,
+    38	      "sim_std": 0.1042,
+    39	      "sim_ci_95": [
+    40	        0.8242,
+    41	        1.2274
+    42	      ],
+    43	      "in_95_ci": false,
+    44	      "cohens_d": 16.8919,
+    45	      "z_score": 1689.1929,
+    46	      "p_value": 0.0,
+    47	      "frac_sim_above_empirical": 0.0,
+    48	      "n_valid_sims": 10000
+    49	    },
+    50	    "elevated (20-25)": {
+    51	      "empirical_sar": 2.377,
+    52	      "sim_mean": 1.012,
+    53	      "sim_std": 0.1488,
+    54	      "sim_ci_95": [
+    55	        0.7458,
+    56	        1.3297
+    57	      ],
+    58	      "in_95_ci": false,
+    59	      "cohens_d": 9.1742,
+    60	      "z_score": 917.4217,
+    61	      "p_value": 0.0,
+    62	      "frac_sim_above_empirical": 0.0,
+    63	      "n_valid_sims": 10000
+    64	    },
+    65	    "high (25-30)": {
+    66	      "empirical_sar": 2.3325,
+    67	      "sim_mean": 1.0591,
+    68	      "sim_std": 0.1862,
+    69	      "sim_ci_95": [
+    70	        0.7401,
+    71	        1.4803
+    72	      ],
+    73	      "in_95_ci": false,
+    74	      "cohens_d": 6.839,
+    75	      "z_score": 683.9045,
+    76	      "p_value": 0.0,
+    77	      "frac_sim_above_empirical": 0.0,
+    78	      "n_valid_sims": 10000
+    79	    },
+    80	    "crisis (>=30)": {
+    81	      "empirical_sar": 2.4514,
+    82	      "sim_mean": 1.1795,
+    83	      "sim_std": 0.3278,
+    84	      "sim_ci_95": [
+    85	        0.7521,
+    86	        1.9176
+    87	      ],
+    88	      "in_95_ci": false,
+    89	      "cohens_d": 3.88,
+    90	      "z_score": 386.5579,
+    91	      "p_value": 0.0,
+    92	      "frac_sim_above_empirical": 0.0071,
+    93	      "n_valid_sims": 9926
+    94	    }
+    95	  },
+    96	  "sar_decline_comparison": {
+    97	    "empirical_decline": 0.8162,
+    98	    "sim_mean_decline": 0.1734,
+    99	    "sim_std_decline": 0.2105,
+   100	    "sim_ci_95": [
+   101	      -0.2811,
+   102	      0.5575
+   103	    ],
+   104	    "in_95_ci": false,
+   105	    "cohens_d": 3.0541,
+   106	    "z_score": 3.0541,
+   107	    "p_value": 0.002257,
+   108	    "n_valid_sims": 10000
+   109	  },
+   110	  "percentile_threshold_results": {
+   111	    "calm (<15)": {
+   112	      "n_valid_sims": 0,
+   113	      "note": "Insufficient data"
+   114	    },
+   115	    "normal (15-20)": {
+   116	      "n_valid_sims": 0,
+   117	      "note": "Insufficient data"
+   118	    },
+   119	    "elevated (20-25)": {
+   120	      "n_valid_sims": 0,
+   121	      "note": "Insufficient data"
+   122	    },
+   123	    "high (25-30)": {
+   124	      "n_valid_sims": 0,
+   125	      "note": "Insufficient data"
+   126	    },
+   127	    "crisis (>=30)": {
+   128	      "n_valid_sims": 0,
+   129	      "note": "Insufficient data"
+   130	    }
+   131	  },
+   132	  "persistence_sensitivity": {
+   133	    "0.9": {
+   134	      "regimes": {
+   135	        "calm (<15)": {
+   136	          "mean": 1.4864,
+   137	          "std": 0.114,
+   138	          "n_valid": 2000
+   139	        },
+   140	        "normal (15-20)": {
+   141	          "mean": 1.1084,
+   142	          "std": 0.3191,
+   143	          "n_valid": 1992
+   144	        },
+   145	        "elevated (20-25)": {
+   146	          "mean": 1.1797,
+   147	          "std": 0.4778,
+   148	          "n_valid": 258
+   149	        },
+   150	        "high (25-30)": {
+   151	          "mean": 0.9434,
+   152	          "std": 0.3056,
+   153	          "n_valid": 11
+   154	        },
+   155	        "crisis (>=30)": {
+   156	          "mean": 0.9614,
+   157	          "std": 0.3472,
+   158	          "n_valid": 12
+   159	        }
+   160	      },
+   161	      "mean_decline": 0.5303,
+   162	      "n_valid_declines": 11
+   163	    },
+   164	    "0.95": {
+   165	      "regimes": {
+   166	        "calm (<15)": {
+   167	          "mean": 1.3433,
+   168	          "std": 0.0975,
+   169	          "n_valid": 2000
+   170	        },
+   171	        "normal (15-20)": {
+   172	          "mean": 1.0107,
+   173	          "std": 0.1505,
+   174	          "n_valid": 2000
+   175	        },
+   176	        "elevated (20-25)": {
+   177	          "mean": 1.0872,
+   178	          "std": 0.2615,
+   179	          "n_valid": 1999
+   180	        },
+   181	        "high (25-30)": {
+   182	          "mean": 1.1206,
+   183	          "std": 0.5509,
+   184	          "n_valid": 1090
+   185	        },
+   186	        "crisis (>=30)": {
+   187	          "mean": 1.1959,
+   188	          "std": 0.4525,
+   189	          "n_valid": 705
+   190	        }
+   191	      },
+   192	      "mean_decline": 0.2264,
+   193	      "n_valid_declines": 1090
+   194	    },
+   195	    "0.97": {
+   196	      "regimes": {
+   197	        "calm (<15)": {
+   198	          "mean": 1.274,
+   199	          "std": 0.0962,
+   200	          "n_valid": 2000
+   201	        },
+   202	        "normal (15-20)": {
+   203	          "mean": 1.0122,
+   204	          "std": 0.1187,
+   205	          "n_valid": 2000
+   206	        },
+   207	        "elevated (20-25)": {
+   208	          "mean": 1.0271,
+   209	          "std": 0.1852,
+   210	          "n_valid": 2000
+   211	        },
+   212	        "high (25-30)": {
+   213	          "mean": 1.0577,
+   214	          "std": 0.2956,
+   215	          "n_valid": 1955
+   216	        },
+   217	        "crisis (>=30)": {
+   218	          "mean": 1.1794,
+   219	          "std": 0.398,
+   220	          "n_valid": 1795
+   221	        }
+   222	      },
+   223	      "mean_decline": 0.2168,
+   224	      "n_valid_declines": 1955
+   225	    },
+   226	    "0.99": {
+   227	      "regimes": {
+   228	        "calm (<15)": {
+   229	          "mean": 1.1982,
+   230	          "std": 0.1029,
+   231	          "n_valid": 2000
+   232	        },
+   233	        "normal (15-20)": {
+   234	          "mean": 1.0132,
+   235	          "std": 0.1014,
+   236	          "n_valid": 2000
+   237	        },
+   238	        "elevated (20-25)": {
+   239	          "mean": 1.0061,
+   240	          "std": 0.1271,
+   241	          "n_valid": 2000
+   242	        },
+   243	        "high (25-30)": {
+   244	          "mean": 1.0467,
+   245	          "std": 0.1568,
+   246	          "n_valid": 2000
+   247	        },
+   248	        "crisis (>=30)": {
+   249	          "mean": 1.2283,
+   250	          "std": 0.3764,
+   251	          "n_valid": 2000
+   252	        }
+   253	      },
+   254	      "mean_decline": 0.1516,
+   255	      "n_valid_declines": 2000
+   256	    }
+   257	  },
+   258	  "gjr_vs_symmetric": {
+   259	    "gjr_mean_decline": 0.1694,
+   260	    "sym_mean_decline": 0.1271,
+   261	    "difference": 0.0423,
+   262	    "t_stat": 6.3775,
+   263	    "p_value": 0.0
+   264	  },
+   265	  "conclusion": "NULL REJECTED: Empirical absorption is STRONGER than GARCH predicts",
+   266	  "detail": "The empirical SAR decline (0.816) exceeds the simulated 95% CI [-0.281, 0.557]. Real markets show MORE absorption than a standard GARCH process would produce. This supports the paper's claim that absorption is a real phenomenon beyond GARCH.",
+   267	  "regimes_outside_ci": "5/5"
+   268	}
+exec
+/bin/zsh -lc "nl -ba experiments/k1686/README.md | sed -n '1,240p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+     1	# K1686 — Volatility Absorption: Contemporaneous Null 重跑（make-or-break gating）
+     2	
+     3	- **Experiment ID**: `k1686`
+     4	- **Status**: PRE-REGISTERED（本節於執行模擬**之前** commit；見 git history）
+     5	- **Paper**: `paper/volatility-absorption`（Paper 8）
+     6	- **前身**: `experiments/k897/`（GJR-GARCH null simulation，結論 `NULL REJECTED`）
+     7	- **觸發**: `paper/volatility-absorption/review_history/fable_deep_review_20260711/README.md` §3-B / §5 P0-1
+     8	- **Created**: 2026-07-12（台灣時間）
+     9	
+    10	---
+    11	
+    12	## 1. 動機 — 要關閉的識別缺陷
+    13	
+    14	Paper 8 的核心主張是 **SAR（Shock Amplification Ratio）**
+    15	
+    16	```
+    17	SAR(regime) = mean(|r_t| | shock day, regime) / mean(|r_t| | normal day, regime)
+    18	```
+    19	
+    20	隨 VIX regime 上升而**遞減**（實證 calm→high decline = 0.8165），且 K897 的 GJR-GARCH null 模擬顯示此
+    21	decline 落在 95% null 區間之外（sim mean 0.1734、95% CI [−0.2811, 0.5575]、5/5 regimes outside CI）
+    22	→ 結論 `NULL REJECTED`：「absorption 是超越 GARCH 機械效應的真實現象」。
+    23	
+    24	**缺陷（fable deep review P0-1，本實驗要檢定的對象）**：
+    25	
+    26	K897 的模擬中，day-t 的 vol proxy 用 `h[t]`（`k897_sar_null_simulation.py:269-278`）。在 GJR 遞迴下
+    27	
+    28	```
+    29	h[t] = ω + (α + γ·1{ε_{t-1}<0})·ε_{t-1}² + β·h[t-1]
+    30	```
+    31	
+    32	`h[t]` 是 **F_{t−1}-可測**的（在 t−1 收盤就已算得出），**完全不對 r_t 反應**。於是模擬的
+    33	`Δproxy[t] = √h[t] − √h[t-1]` 由 `ε_{t-1}` 驅動 —— 「shock day」被標在**大跌的隔天**，而不是大跌當天。
+    34	shock 旗標與當日 innovation `z_t` 統計獨立。
+    35	
+    36	但實證端的 `ΔVIX_t = VIX_t − VIX_{t-1}` 中，`VIX_t` 是**當日收盤**的 implied vol，**與 r_t 同期共動**
+    37	（崩盤當天 VIX 同步暴漲）—— shock day 就是大跌當天。
+    38	
+    39	**後果**：實證 SAR 的分子（shock 日 |r_t|）被同期共動機械性拉高，模擬 SAR 的分子沒有。直接寫在 K897 結果裡：
+    40	模擬 SAR 水準 ≈ 1.01–1.23，實證 ≈ 2.33–3.16。**null 世界的 shock 定義根本抓不到當日大波動**，
+    41	於是「empirical decline 遠大於 null」有可能只是這個口徑錯配的 artifact，不是真實的 absorption。
+    42	
+    43	**這是 make-or-break**：若在同期化 null 下 decline 落回 null 區間內，Paper 8 的核心識別即關閉。
+    44	
+    45	---
+    46	
+    47	## 2. 修正 — 與 K897 的逐項 diff
+    48	
+    49	**唯一的實質改動是 vol proxy 的 timing**。其餘（GARCH params、seed 集、路徑數、路徑長度、SAR 公式、
+    50	regime 切點）全部維持不變，使任何結果差異都能 100% 歸因於 timing 修正。
+    51	
+    52	| 項目 | K897（舊） | K1686（本實驗） | 理由 |
+    53	|---|---|---|---|
+    54	| **day-t vol proxy** | `√h[t] · √252` | **`√h[t+1] · √252`** | `h[t+1]` 是觀測到 `r_t`/`ε_t` **之後**才算得出的 GARCH forecast（F_t-可測），這才是「收盤 VIX 反映當日資訊」的正確類比 |
+    55	| **shock 定義** | `\|√h[t] − √h[t-1]\|·√252 > 2`（由 ε_{t-1} 驅動 → 標在大跌**隔天**） | `\|√h[t+1] − √h[t]\|·√252 > 2`（由 ε_t 驅動 → 標在大跌**當天**） | 與 `\|ΔVIX_t\| > 2` 同期化 |
+    56	| **regime 分類的 vol level** | `√h[t]·√252` | `√h[t+1]·√252`（同一 proxy，口徑一致） | 實證用同期的 `VIX_t` 分 regime，模擬必須同口徑 |
+    57	| **h 遞迴長度** | `h[0..n-1]` | `h[0..n]`（多算 1 步；`h[n]` 只需 `ε_{n-1}`，已存在） | 使 `h[t+1]` 在 t = n−1 仍有定義。**不用 padding / 複製尾值** |
+    58	| GARCH params | 見下表 | **完全相同**（沿用 K897 fitted 值） | 保持 null DGP 不變 |
+    59	| Seeds | `RandomState(seed)`, seed = 0..9999 | **完全相同** | 同 seed + 同 `n_obs` + 同 params ⇒ 模擬報酬路徑 `r` **逐點相同**，只有 proxy 定義不同 |
+    60	| n_paths × n_obs | 10,000 × 5,000 | **完全相同** | 同上 |
+    61	| 實證資料 | **live yfinance 下載**（不可重現） | **pinned CSV**：`paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv` | 修 review P1-3：K897 實證端未走 pinned snapshot，與論文 snapshot-pinning 原則不一致 |
+    62	| z-score | `(emp − mean) / (std/√n)` → z=1967 這類荒謬值（review 抓到的 bug） | `(emp − mean) / std`（= 標準化距離）**+ 直接 Monte-Carlo 經驗 p 值**（primary，無分佈假設） | `std/√n` 是「模擬均值的 SE」，不是實證統計量的 SE。修 review §3-B (b) |
+    63	| percentile 變體 | **silently failed**（5/5 regime `n_valid_sims=0`，JSON 留著但論文未揭露） | 重新實作為 **frequency-matched null**（見 §4 變體 B），並強制驗證 `n_valid_sims > 0` | 修 review §3-B (a) |
+    64	
+    65	**沿用的 GARCH params**（K897 fitted，GJR-GARCH(1,1)-t on SPY 2006–2026）：
+    66	
+    67	| μ | ar1 | ω | α | γ | β | ν | persistence |
+    68	|---|---|---|---|---|---|---|---|
+    69	| 0.07641014 | 0.0 | 0.02218877 | **0.0** | 0.24422367 | 0.85941473 | 5.6478791 | 0.98152657 |
+    70	
+    71	> ⚠️ `α = 0`：fitted GJR 中正報酬對條件變異數**零衝擊**，只有負報酬經 γ 進入。這使
+    72	> 同期化 null 的 `Δproxy` 在正報酬日必為負（純均值回歸衰減）。這個不對稱性對 sign-split
+    73	> 變體（§4 D）的解讀至關重要，結果段會明確處理。
+    74	
+    75	**內建對照組（本實驗最重要的設計）**：腳本在**同一組模擬路徑**上同時計算 K897 的 lagged-proxy SAR
+    76	（replication arm）。若該 arm 重現 K897 的 `sim_mean_decline = 0.1734` / CI [−0.2811, 0.5575]，
+    77	即證明我們的重實作忠實，**因此同期化 arm 的任何差異必然、且僅僅來自 timing 修正**。
+    78	此為內建 placebo，不是額外裝飾。
+    79	
+    80	---
+    81	
+    82	## 3. 事前判定規則（PRE-REGISTERED — 在跑任何模擬之前寫死）
+    83	
+    84	**主要統計量**：`decline = SAR(calm, <15) − SAR(high, 25–30)`，實證值 **0.8165**
+    85	（pinned snapshot；K897 live-yf 值 0.8162，K716/Table 3 rounded 值 0.84 —— 三者一致）。
+    86	
+    87	**主規格（PRIMARY）**：變體 A = 同期化 proxy + fixed threshold（regime 15/20/25/30，shock `|Δproxy| > 2`）
+    88	—— 因為論文 Table 3 的實證端正是此口徑。
+    89	
+    90	**判定**（以變體 A 的模擬 decline 分佈之 95% percentile 區間為準）：
+    91	
+    92	- **empirical decline 仍落在 95% null 區間之外** → 識別**成立且強化**。K897 的結論在更嚴格的同期化口徑下
+    93	  依然成立，論文顯著升級（absorption 不是同期共動的機械 artifact）。
+    94	- **empirical decline 落入 95% null 區間之內** → absorption 主張**降級**為「fixed-threshold 選樣 ×
+    95	  同期共動的機械分解」。論文走**重新框架**路線（deep review §6 hard gate）：改寫為 measurement note
+    96	  投 FRL，或把 SAR/null-simulation 方法併入其他 VIX 論文。**本篇不得再以「absorption 是超越機械效應的
+    97	  現象」為主張投稿。**
+    98	
+    99	**輔助判定**（不改變上述主判定，只用於刻畫結果的穩健性）：4 個變體（A/B/C/D）+ 補充變體 E 的結論若彼此
+   100	衝突，**如實報告衝突並說明機制**，不挑對自己有利的變體當 headline。
+   101	
+   102	**禁止事項（研究誠實）**：不得在看到結果後調整 threshold、seed、regime 切點、樣本期間或規格，
+   103	把結果推回想要的方向。無論落點為何，README 與 results JSON 都如實記錄。Null result 是結果，不是失敗。
+   104	
+   105	---
+   106	
+   107	## 4. 變體規格（口徑一致性：實證 vs 模擬逐欄對齊）
+   108	
+   109	所有變體的 SAR 公式相同；差別只在 shock 定義與 regime 分類。模擬端一律用同期化 proxy
+   110	`P_t = √h[t+1]·√252`；實證端對應 `VIX_t`。
+   111	
+   112	| 變體 | regime 分類 | shock 定義（實證） | shock 定義（模擬） | 目的 |
+   113	|---|---|---|---|---|
+   114	| **A（PRIMARY）** | `VIX_t` / `P_t` ∈ {<15, 15–20, 20–25, 25–30, ≥30} | `\|ΔVIX_t\| > 2` | `\|ΔP_t\| > 2` | 與論文 Table 3 完全同口徑；主判定 |
+   115	| **B** | 頻率匹配：模擬用**每條路徑自己**的 `P` 分位數，對齊實證 VIX 各 regime 的**佔比** | `\|ΔVIX_t\| >` 第 (1−s) 分位 | `\|ΔP_t\| >` 該路徑第 (1−s) 分位 | VIX 含 variance risk premium ⇒ 水準系統性高於物理條件波動度，fixed threshold 會讓模擬過度佔用 calm regime。B 讓 **shock rate 與 regime 佔比兩者都按建構匹配** |
+   116	| **C** | 同 A | `\|ΔVIX_t\| / VIX_{t-1} > q` | `\|ΔP_t\| / P_{t-1} > q`（**同一個 q**，無單位） | VIX=12 時 ΔVIX=2 是 17% 的相對變動，VIX=40 時只有 5% —— 固定加法門檻使高 regime 的「shock」相對更弱，SAR 遞減可能有一部分是選樣機械效應。`q` 取實證 `\|ΔVIX\|/VIX_{t-1}` 中對應 s 的分位數 |
+   117	| **D** | 同 A | 分開報 `ΔVIX_t > +2`（vol 上升）與 `ΔVIX_t < −2`（vol 下降） | 同左（對 `ΔP_t`） | `\|ΔVIX\|>2` 把恐慌暴漲日與 relief-rally 日混進同一個「fear shock」桶。檢查 absorption 是否只來自單邊 |
+   118	| **E（補充）** | **`VIX_{t-1}` / `P_{t-1}`**（ambient fear，落後一期） | `\|ΔVIX_t\| > 2` | `\|ΔP_t\| > 2` | A–D 的 regime 分類本身是 `r_t` 的函數（大跌 → VIX_t 高 → 被分進高 regime），存在內生分選。E 用**衝擊前的 ambient 恐懼水準**分 regime，這也更貼近論文「ambient fear 調節反應」的故事 |
+   119	
+   120	其中 `s` = 實證 `|ΔVIX_t| > 2` 的 shock rate = **0.1508**（768 / 5092）。
+   121	
+   122	**共用規則**：
+   123	- normal day = 非 shock day（同 regime 內）；sign-split（D）的分母沿用同一個 normal day 集合。
+   124	- 一個 regime 的 SAR 需 `n_shock > 5` 且 `n_normal > 5` 才有效，否則記 `NaN`（沿用 K897）。
+   125	- decline 需 calm 與 high 兩個 regime 的 SAR 皆有效。
+   126	- 每個變體都會報 **regime 佔比與 shock rate 的實證 vs 模擬對照**（口徑一致性診斷）。
+   127	
+   128	**推論**：
+   129	- **主判定**：實證 decline 是否落在模擬 decline 的 **95% percentile 區間** [2.5%, 97.5%] 內。
+   130	- **Monte-Carlo 經驗 p 值**（primary，無分佈假設）：`p = 2 · min(P(sim ≥ emp), P(sim ≤ emp))`，下限 `1/n_valid`。
+   131	- 標準化距離 `z = (emp − sim_mean) / sim_std`（修 K897 的 z bug）。
+   132	- `frac_sim_above_empirical`（K897 唯一誠實的統計量，保留）。
+   133	
+   134	---
+   135	
+   136	## 5. 資料與可重現性
+   137	
+   138	- **實證**：`paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv`（pinned snapshot）。
+   139	  SPY 用 `spy_adj_close`（含息調整，等同 `yf.download` 的 `auto_adjust=True`）、VIX 用 `vix_close`。
+   140	  期間 2006-01-05 → 2026-04-02，n = 5,092。
+   141	  **驗證**：此 pinned 資料重現 K897 的 live-yf 實證 SAR 至小數點後 3 位
+   142	  （3.1490/2.7723/2.3770/2.3325/2.4514 vs K897 的 3.1487/2.7723/2.3770/2.3325/2.4514），
+   143	  decline 0.8165 vs 0.8162 —— 實證端 pin 住而不失與 K897/K716/Table 3 的連續性。
+   144	- **Seed spec**：`np.random.RandomState(seed)`，`seed = 0, 1, …, 9999`（與 K897 逐一相同）。
+   145	  每條路徑 `z = rng.standard_t(df=ν, size=5000) · √((ν−2)/ν)`。因 `n_obs` 與抽樣呼叫順序皆與 K897 相同，
+   146	  innovation 序列 **bit-identical**；`h[n]` 只需 `ε_{n-1}`，不需額外抽樣。
+   147	- **執行**：`uv run python experiments/k1686/k1686_contemporaneous_null.py`
+   148	
+   149	---
+   150	
+   151	## 6. 結果
+   152	
+   153	### 6.0 前置驗證：K897 replication arm 完全命中
+   154	
+   155	| | sim_mean_decline | sim_std_decline | 95% CI |
+   156	|---|---|---|---|
+   157	| K897 published | 0.1734 | 0.2105 | [−0.2811, 0.5575] |
+   158	| **本實驗 lagged arm** | **0.1734** | **0.2105** | **[−0.2811, 0.5575]** |
+   159	
+   160	各 regime 的模擬 SAR 水準亦逐一吻合（K897 published 1.2325 / 1.0119 / 1.0120 / 1.0591 / 1.1795）。
+   161	**重實作忠實 ⇒ 同期化 arm 的任何差異，必然、且僅僅來自 vol proxy 的 timing。** 這是本實驗的內建 placebo。
+   162	
+   163	### 6.1 主結果：五個變體
+   164	
+   165	實證 decline 一律為 `SAR(calm) − SAR(high 25–30)`。
+   166	
+   167	| 變體 | 實證 decline | Null mean ± sd | Null 95% CI | 落在 CI 內？ | MC p |
+   168	|---|---|---|---|---|---|
+   169	| K897 lagged arm（**有缺陷的舊 null**） | 0.8165 | 0.1734 ± 0.2105 | [−0.2811, 0.5575] | **否** | 0.0004 |
+   170	| **A — PRIMARY（同期化 + fixed）** | **0.8165** | **0.6190 ± 0.2487** | **[0.0824, 1.0596]** | **是** | **0.410** |
+   171	| B — frequency-matched | 0.8165 | −0.0035 ± 0.1578 | [−0.3115, 0.3096] | 否 | 0.0002 |
+   172	| C — relative threshold | **0.3397** | −0.1877 ± 0.2159 | [−0.6543, 0.2006] | 否 | 0.0064 |
+   173	| D — sign-split：vol **UP** shocks | **−0.1192** | 0.0904 ± 0.2660 | [−0.4666, 0.5725] | 是 | 0.394 |
+   174	| D — sign-split：vol **DOWN** shocks | +1.3368 | *null 結構上不存在*（見 6.4） | — | — | — |
+   175	| E — ambient regime | 1.4643 | 0.9527 ± 0.3537 | [0.1956, 1.5830] | 是 | 0.117 |
+   176	| F — VRP 校準（**事後**加，見 6.6） | 0.8165 | *calm cell 無法評估* | — | — | — |
+   177	| G — 雙重修正（**事後**加，見 6.6） | 0.5831 | −0.3573 ± 0.4111 | [−1.2832, 0.3134] | 否 | 0.0037 |
+   178	
+   179	**事前規則的主判定**：變體 A 的實證 decline **落在 null 95% 區間內**（MC p = 0.41）→ 依 §3 字面規則，
+   180	absorption 主張降級。**K897 的 `NULL REJECTED` 確實不能通過 timing 修正**（同 seed 同 params 下，
+   181	null 的 SAR 水準由 1.0–1.2 升到 1.6–2.4，decline 由 0.1734 升到 0.619）。
+   182	
+   183	> ⚠️ **但我必須自己拆穿變體 A**（獨立審查 H1 指出，我確認屬實）：A 的 null 之所以生得出 0.619 的
+   184	> decline，是因為**純衰減在高波動區跨過固定 2 點門檻**（§6.3：null 在 crisis 把 82% 的日子標成
+   185	> shock，實證只有 54%）—— 這是**資料裡沒有的機制**。所以 A 的「不拒絕」是**兩個 artifact 互相抵消**，
+   186	> 不是強證據。三個修正過的 null（B / C / G）**全部拒絕**。
+   187	>
+   188	> **結論：null 比較本身是 inconclusive —— 兩個方向都不能宣稱。**
+   189	> 真正決定論文命運的是下一節那個**不需要 null** 的證據。
+   190	
+   191	### 6.2 決定性的實證事實（**不需要任何 null 模型**）
+   192	
+   193	把「shock」按 ΔVIX 的**正負號**拆開之後：
+   194	
+   195	| regime | SAR（pooled, 論文定義） | SAR（**vol UP**, 真正的恐慌衝擊） | SAR（**vol DOWN**, relief rally） | n↑ | n↓ | n_normal |
+   196	|---|---|---|---|---|---|---|
+   197	| calm (<15) | **3.1490** | 2.3764 | **3.4710** | **10** | 24 | 1721 |
+   198	| normal (15–20) | 2.7723 | 2.8516 | 2.7002 | 80 | 88 | 1403 |
+   199	| elevated (20–25) | 2.3770 | 2.4173 | 2.3144 | 115 | 74 | 696 |
+   200	| high (25–30) | 2.3325 | 2.4956 | 2.1342 | 73 | 60 | 299 |
+   201	| crisis (≥30) | 2.4514 | 2.6794 | 2.1870 | 131 | 113 | 205 |
+   202	| **decline (calm−high)** | **+0.8165** | **−0.1192** | **+1.3368** | | | |
+   203	
+   204	**把 up-only 那一列單獨看：2.38 → 2.85 → 2.42 → 2.50 → 2.68 —— 這不是遞減，是非單調的鋸齒。**
+   205	calm 不但不是最高，反而低於 normal；crisis 又彈回 2.68。**論文所宣稱的「ambient fear 越高、
+   206	恐慌衝擊越被吸收」的單調梯度，在真正的恐慌衝擊裡不存在。**
+   207	
+   208	論文 headline 的 0.8165 decline，其**量級**來自 pooled 的 calm 錨點 3.1490 —— 而這一格建立在
+   209	**34 個 shock 日**上，其中 **24 日（71%）是 VIX 下跌日**，真正的恐慌衝擊**只有 10 日**。
+   210	up-only 的 calm 值（2.3764, n=10）比 pooled 的 3.1490 低了 0.77，差額全部由 down-shock 的
+   211	3.4710 貢獻。**pooled decline 的分子端是被 relief rally 灌高的。**
+   212	
+   213	**機制**：VIX = 13 時掉 2 點（→ 11）是罕見的大幅 relief，伴隨大漲（|r| 大）；VIX = 27 時掉 2 點只是
+   214	例行均值回歸，伴隨普通報酬。於是 down-shock 的 SAR 從 calm 的 3.471 一路掉到 high 的 2.134
+   215	（down-decline = **+1.337**，是 pooled 0.8165 的 1.6 倍）。**這是 signed-composition 的選樣效應。**
+   216	
+   217	**Bootstrap（n=10 那格不能用點估計就下定論 — 獨立審查 H3）**：對 calm/high 的 up-shock 與 normal cell
+   218	做 10,000 次 bootstrap（seed 20260712）：
+   219	
+   220	| 統計量 | 點估計 | Bootstrap 95% CI |
+   221	|---|---|---|
+   222	| `SAR_up(calm)` | 2.3777 | [1.8617, 3.0246] |
+   223	| **up-only decline（calm−high）** | **−0.1226** | **[−0.7289, 0.5828]** |
+   224	
+   225	這個 CI **同時做到兩件事**：
+   226	
+   227	1. **包含 0** → 在真正的恐慌衝擊中，**無法建立任何 absorption 梯度**。
+   228	2. **上界 0.5828 < pooled headline 0.8165** → **headline 顯著大於恐慌衝擊所能解釋的任何值**。
+   229	
+   230	**所以「論文的 headline decline 不是恐慌衝擊造成的」在統計上站得住，而且完全不依賴任何 null 模型
+   231	—— 它免疫於 §6.4 全部的 null 校準爭議。**
+   232	
+   233	> **誠實邊界**：這**不等於**「恐慌衝擊完全沒有任何遞減」。normal→high leg 上 up-only 仍有 +0.356
+   234	> 且落在 null 外（§6.6）；crisis 又反彈到 2.6794。正確的陳述是：**恐慌衝擊的 SAR 沒有論文宣稱的
+   235	> 單調 absorption 梯度，且 headline 的量級不是它給的。** normal→high 之間的殘留值得後續研究，
+   236	> 但那不是論文現在寫的東西。
+   237	
+   238	### 6.3 機制診斷：固定門檻在高波動區被「衰減」灌爆
+   239	
+   240	| | calm | normal | elevated | high | crisis |
+
+exec
+/bin/zsh -lc "nl -ba experiments/k1686/README.md | sed -n '241,480p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+   241	|---|---|---|---|---|---|
+   242	| within-regime shock rate（實證 VIX） | 0.019 | 0.107 | 0.214 | 0.308 | 0.543 |
+   243	| within-regime shock rate（null，變體 A） | 0.036 | 0.152 | 0.195 | **0.485** | **0.823** |
+   244	| regime 佔比（實證） | 0.345 | 0.309 | 0.174 | 0.085 | 0.088 |
+   245	| regime 佔比（null，變體 A） | **0.766** | 0.120 | 0.050 | 0.024 | 0.039 |
+   246	
+   247	固定的 ±2 絕對門檻套在均值回歸的波動度上，**水準越高越容易被跨過** —— 因為衰減項本身一天就走超過
+   248	2 個年化波動點。在 null 的 crisis regime，**82% 的日子被標成「shock」**，shock 桶被普通日灌爆，
+   249	SAR 被推向 1 → **憑空製造出 decline**。實證資料有同一個機制（0.019 → 0.543），只是程度較輕。
+   250	
+   251	同時暴露變體 A 的 null 校準弱點：VIX 帶 variance risk premium，水準系統性高於物理條件波動度，
+   252	於是 null 的 calm regime 佔了 **76.6%** 的日子（實證只有 34.5%）。**這是繼承自 K897 的規格弱點，
+   253	如實揭露而非隱藏。**（變體 B 按建構消除此問題。）
+   254	
+   255	### 6.4 變體衝突的誠實處理
+   256	
+   257	B 與 C **拒絕** null，表面上與 A 相反。逐項說明，不挑對自己有利的當 headline：
+   258	
+   259	- **B（frequency-matched）**：null decline ≈ 0，實證 0.8165 在外 (p=0.0002)。**但 B 的 null 在 5/5 個
+   260	  regime 都重現不了實證的 SAR 水準**（null ≈ 1.8 平坦，實證 2.3–3.1，全部 outside CI）。一個在每個
+   261	  regime 都對不上水準的 null，不是判斷「差分」的可靠尺。B 真正說的是：「把佔比對齊之後，GARCH 生不出
+   262	  這個 pooled decline」—— 而 §6.2 已經證明這個 pooled decline 的來源是 signed composition，**不是 absorption**。
+   263	- **C（relative threshold）**：光是把絕對門檻換成相對門檻，**實證 decline 就從 0.8165 掉到 0.3397
+   264	  （蒸發 58%）**。這直接量化了 deep review §3-C 的疑慮：headline 的多數來自固定門檻的選樣效應。
+   265	- **E（ambient regime）**：實證 1.4643 落在 null [0.1956, 1.5830] 內（p=0.117）—— 與 A 同向，識別關閉。
+   266	- **D_down 的 null 結構上不存在**（calm/normal/elevated 三個 regime `n_valid_sims = 0`）：這**不是 bug，
+   267	  是可以解析證明的 null 性質**。因為 fitted `α = 0`，正報酬對次日變異數零貢獻，null 一天內能跌最多的
+   268	  情況就是純衰減 `h_next = ω + β·h`。解
+   269	
+   270	  ```
+   271	  (√(ω + β·h) − √h) · √252 = −2      ⇒   P* = 28.84（年化波動點）
+   272	  ```
+   273	
+   274	  **在 P < 28.84 以下，這個 null 根本不可能出現「vol 下降 2 點」的日子** —— 也就是整個
+   275	  calm / normal / elevated regime。（腳本 `decay_only_drop_level()` 計算，寫入 JSON
+   276	  `down_shock_impossibility`。）
+   277	
+   278	  這件事比「n_valid_sims = 0」嚴重得多：**實證的 decline 是 100% 由 vol 下降日撐起的（§6.2），
+   279	  而 null 在那些 regime 連這個通道都不存在。** 換言之，在下跌側，null 與實證**根本不是在量同一種事件**。
+   280	  這也解釋了為什麼 B / C 會「拒絕 null」—— 它們拒絕的是「GARCH 沒有 relief-rally 通道」，
+   281	  不是「市場存在 absorption」。
+   282	
+   283	  （K897 讓一個變體 silently 回傳 0 valid sims 卻完全不揭露；此處明確揭露、解析證明、並寫進 JSON。）
+   284	
+   285	**§6.4 的收斂結論**：**null 比較是 inconclusive 的 —— 兩個方向都不能宣稱。**
+   286	「這只是 GARCH 機械效應」沒被證實（B/C/G 拒絕）；「這是 absorption」也沒被證實
+   287	（A 的不拒絕是 artifact 互抵；且 B/C/G 拒絕的是「GARCH 沒有 relief-rally 通道」）。
+   288	**論文的命運由 §6.2 那個不需要 null 的證據決定，不由這裡決定。**
+   289	
+   290	---
+   291	
+   292	## 6.5 已知限制（如實列出）
+   293	
+   294	1. **同期化在 α=0 下是「不對稱」的**（獨立審查 M1，我確認屬實且原本漏了）：因為 fitted `α = 0`，
+   295	   在**正報酬日** `h[t+1] = ω + β·h[t]` —— **完全不含 `ε_t²`**。所以修正後的 proxy 只在**下跌日**
+   296	   真正對 `r_t` 同期反應；上漲日它仍然是 F_{t−1}-可測的。這是繼承自 K897 的 fit，不是本實驗引入，
+   297	   但它意味著變體 A–G 的「同期性」只做到一半，**必須明講而不是默認**。
+   298	2. **Null 的 DGP 是特定的 GJR-GARCH-t**。它對 `r_t` 的反應是該函數形式；VIX 的實際反應更陡、更凸，
+   299	   且有 relief-rally 通道（§6.4）。**以實證 ΔVIX–return 彈性校準的 implied-vol null 是最有價值的
+   300	   後續工作** —— 在它存在之前，沒有任何 null 檢定能對下跌側發言。
+   301	3. **calm regime 的 up-shock cell 只有 n = 10**。已用 bootstrap 量化（§6.2），不以點估計下定論。
+   302	4. **crisis 上界**：本實驗模擬端用 `1e6`（與 K897 模擬端相同）；實證端 K897 用 200，本實驗用 `1e6`
+   303	   —— VIX 史上最高約 85，無實質差異。
+   304	
+   305	---
+   306	
+   307	## 6.6 事後追加的兩個變體（明確標註：**非** pre-registered）
+   308	
+   309	獨立審查（M2）指出 B / C / E **每個只修一個缺陷**，缺一個「同時修多個」的 null。我補了兩個。
+   310	**兩者都是看到結果之後才加的，因此不得用來取代事前規則的主判定** —— 只用來刻畫穩健性，
+   311	且無論結果偏向哪邊都照實報。
+   312	
+   313	| 變體 | 設計 | 結果 |
+   314	|---|---|---|
+   315	| **F — VRP 校準** | 用實證擬合的仿射映射 `VIX ≈ 7.967 + 0.691 · P` 把 null 的 proxy 搬到 VIX 的尺度，**再**套論文的原始固定門檻。這是對「A 的 null 水準校準不良」最直接的回應 | **calm cell 無法評估**。因為 b = 0.691 < 1，映射在修正 level 的同時**壓縮了日增量** —— VIX 尺度上 2 點的移動，需要 null 自身單位的 \|ΔP\| > 2.89，calm 水準下幾乎不發生（null 整體 shock rate 崩到 0.060，實證 0.151）。**可評估的 normal→high leg：實證 0.4398 落在 null [−0.2916, 0.4561] 內（p=0.061）** |
+   316	| **G — 雙重修正** | ambient regime（殺掉 regime 內生分選）**＋** relative threshold（殺掉固定門檻選樣）—— 審查要求的「最外科手術式」null | 實證 0.5831 vs null [−1.2832, 0.3134] → **拒絕**（p=0.0037） |
+   317	
+   318	**F 失敗本身是一個發現，不是 bug**：**沒有任何單一仿射校準能讓 GARCH proxy 同時對上 VIX 的
+   319	level 與 increment 尺度** —— 修好一個就弄壞另一個。**這個統計量根本不存在「校準不變」的 null。**
+   320	這正是 SAR 設計最深的問題，也是為什麼 §6.4 的 null 比較註定 inconclusive。
+   321	（K897 讓失敗的變體 silently 消失；此處明確揭露、解釋成因、並補一條可評估的 leg。）
+   322	
+   323	### 次要 leg（`SAR(normal) − SAR(high)`，因為 F 的 calm cell 不可評估）
+   324	
+   325	| 變體 | 實證 | Null 95% CI | 落在 CI 內？ | MC p |
+   326	|---|---|---|---|---|
+   327	| A | 0.4398 | [−0.2850, 0.7294] | 是 | 0.520 |
+   328	| **F（VRP 校準）** | **0.4398** | **[−0.2916, 0.4561]** | **是** | 0.061 |
+   329	| E | 0.6230 | [−0.1115, 1.4286] | 是 | 0.792 |
+   330	| B | 0.4398 | [−0.2756, 0.2980] | 否 | 0.0034 |
+   331	| C | 0.4344 | [−0.6171, 0.2960] | 否 | 0.0078 |
+   332	| D_up | 0.3560 | [−0.8281, 0.2486] | 否 | 0.015 |
+   333	
+   334	次要 leg 上同樣是分裂的（A / E / F 不拒絕；B / C / D_up 拒絕）—— **再次確認 null 比較不能定案。**
+   335	
+   336	---
+   337	
+   338	## 7. Verdict
+   339	
+   340	# 🔴 ABSORPTION CLAIM NOT SUPPORTED
+   341	
+   342	三個發現，依「能承受多少重量」排序：
+   343	
+   344	### (1) 不需要任何 null 模型 — 決定性
+   345	
+   346	論文的**機制**不是驅動它的統計量的東西。把 shock 按 VIX 移動的**正負號**拆開：
+   347	
+   348	- pooled decline = **0.8165**（論文 headline）
+   349	- 真正的**恐慌衝擊**（ΔVIX > +2）decline = **−0.1226**，bootstrap 95% CI **[−0.7289, 0.5828]**
+   350	  → **包含 0**（建立不了 absorption 梯度）**且上界低於 0.8165**（headline 顯著大於恐慌衝擊能解釋的量）
+   351	- decline 住在 **relief rally**（ΔVIX < −2）裡：**+1.3368**
+   352	- 決定 headline 量級的 calm 錨點：**10 個真恐慌日 vs 24 個 relief 日**
+   353	
+   354	**「ambient fear 越高、恐慌衝擊越被吸收」不是 SAR decline 所顯示的東西。**
+   355	此結論**不依賴任何 null 模型**，因此免疫於 §6.4 的全部校準爭議。
+   356	
+   357	### (2) Null 比較本身 inconclusive — 兩個方向都不能宣稱
+   358	
+   359	- 事前規則的主判定（變體 A）**不拒絕** null（0.8165 落在 [0.0824, 1.0596] 內，p = 0.41）→
+   360	  依 §3 字面規則，absorption 主張降級。**照實報告。**
+   361	- **但 A 的 null 是靠「純衰減跨過固定門檻」賺到它的 0.619 decline 的**（§6.3：null 在 crisis 標
+   362	  82% 的日子為 shock，實證只有 54%）—— 那是資料裡沒有的機制。**A 的「不拒絕」是兩個 artifact 互抵。**
+   363	- 三個修正過的 null（B / C / G）**全部拒絕**。
+   364	- ⇒ **「這只是 GARCH 機械效應」沒被證實；「這是 absorption」也沒被證實。**
+   365	  而 B/C/G 拒絕的東西，是「GARCH 沒有 relief-rally 通道」（§6.4 的 P\* = 28.84 證明），
+   366	  **不是**「市場存在 absorption」。
+   367	
+   368	### (3) 無論如何，K897 的結論不成立
+   369	
+   370	K897 的 `NULL REJECTED` 建立在一個 vol proxy 無法對當日報酬反應的 null 上。在**同 seed、同 params**
+   371	下把 proxy 同期化：null 的 SAR 水準由 1.0–1.2 → 1.6–2.4，decline 由 0.1734 → 0.619。
+   372	**K897 報告的 margin 大部分是 timing artifact。**
+   373	
+   374	---
+   375	
+   376	### 對論文的處置建議（交主線程裁決）
+   377	
+   378	依 deep review §6 的 **hard gate**（事前承諾）：**本篇不得再以「volatility absorption 是超越機械效應的
+   379	現象」為主張投稿。**
+   380	
+   381	但**這不是空手而歸** —— 資料裡有一個**真實、且 GARCH null 生不出來**的規律，只是它不是 absorption：
+   382	
+   383	> **建議重新框架為 measurement note（FRL）**：
+   384	> 「**VIX-regime SAR 的遞減是 signed-composition 效應**：它由 relief rally 而非恐慌衝擊驅動，
+   385	> 對 shock 門檻的絕對/相對定義極度敏感（換成相對門檻即蒸發 58%），且**沒有校準不變的 GARCH null**
+   386	> 可以檢定它（§6.6 F）。」
+   387	>
+   388	> 這是有內容的正面貢獻：它糾正一個看似合理的現象，並給出可操作的診斷工具組
+   389	> （sign-split + relative threshold + contemporaneous null + 機制診斷）。本實驗的 7 個變體
+   390	> 已經是這篇 note 的完整實證骨架。
+   391	
+   392	**最有價值的後續研究**（也是唯一能救回 null 檢定的路）：建一個**有 relief-rally 通道**的
+   393	implied-vol null（用實證 ΔVIX–return 彈性校準、且在高檔有自己的均值回歸）。在它存在之前，
+   394	**沒有任何 null 能對下跌側發言** —— 而下跌側正是整個效應的所在。
+   395	
+   396	### 連帶關閉的 review 項目
+   397	
+   398	- **P0-1**（本實驗）：✅ 完成。結果：absorption 主張不成立；null 比較 inconclusive；K897 verdict 推翻。
+   399	- **§3-C sign-split robustness 要求**：✅ 已做（§6.2），且它才是決定性的證據。
+   400	- **§3-C relative-threshold 疑慮**：✅ 已量化（headline decline 有 **58%** 來自固定門檻）。
+   401	- **P1-3 K897 衛生**：✅ z-score bug 已修（標準化距離 + MC 經驗 p 值，`(b+1)/(n+1)` plug-in）；
+   402	  percentile 變體的 silent fail 已重實作並揭露；實證端已改讀 pinned CSV。
+   403	
+   404	---
+   405	
+   406	## 9. 審查紀錄（研究誠實：reviewer source 必須標明）
+   407	
+   408	**Reviewer**：`feature-dev:code-reviewer` subagent（fresh-context 對抗性審查）
+   409	**Verdict**：**CONDITIONAL PASS** —— **程式碼零 bug**（masks / 索引 / off-by-one / RNG 決定性 /
+   410	推論公式全部確認正確；replication arm 逐位對上 K897），但**指出我的 headline 過度宣稱**。
+   411	
+   412	| 審查發現 | 我的處置 |
+   413	|---|---|
+   414	| **H1** A 的不拒絕與它自己的 selection artifact 糾纏；B/C 拒絕 → 不能宣稱 CLOSED | **接受**。改寫 verdict 為「null 比較 inconclusive」，並在 §6.1/§6.4 自己拆穿 A |
+   415	| **H2** `verdict` 欄只讀變體 A，把衝突埋起來，違反自訂的誠實條款 | **接受**。新增 `variant_disagreement` 欄；verdict 字串現在**自帶**分裂與機制說明 |
+   416	| **H3** D_up 的 calm cell 只有 n=10，不能當定論 | **接受**。加 10,000 次 bootstrap（seed 20260712）；CI **[−0.729, 0.583]** —— 反而**強化**了結論（排除 pooled 0.8165） |
+   417	| **M1** α=0 使同期化**不對稱**（正報酬日 proxy 仍是 F_{t−1}-可測） | **接受**，原本漏了。寫入 §6.5 限制 1 |
+   418	| **M2** 缺「雙重修正」的 null | **接受**。新增變體 **G**（ambient + relative）→ 拒絕 null（p=0.0037），如實報告 |
+   419	| **M3** B 過度校準（null 在 5/5 regime 都對不上 SAR 水準） | **同意**，已在 §6.4 說明 |
+   420	| **L3** MC p 值下限應用 `(b+1)/(n+1)` 而非 `1/n` | **接受**，已改 |
+   421	| **L1** crisis 上界 `1e6` vs K897 的 `200` | 查證：K897 **模擬端**也是 `1e6`（其 L292），僅**實證端**為 200；VIX 史上最高約 85 → 無實質差異。已註於 §6.5 |
+   422	
+   423	> ⚠️ **Codex primary path 未完成（必須揭露）**：依 `.claude/rules/experiments.md`，primary reviewer
+   424	> 應為 Codex CLI。本次 **`codex exec` 連續 3 次**（700s / 1500s / 內嵌程式碼版）都在 transport 層
+   425	> 被截斷、預算耗盡於重複讀檔，**未產出 verdict**。因此改走規則明列的 **`code-reviewer` subagent
+   426	> fallback**。
+   427	> **依 K1259 規則：subagent PASS ≠ primary-path Codex PASS。主線程在寫 `knowledge.json` 之前，
+   428	> 必須用 Codex 再驗一次。** 本 agent 未寫 knowledge.json（符合規範）。
+   429	
+   430	---
+   431	
+   432	## 8. 檔案
+   433	
+   434	| 檔 | 內容 |
+   435	|---|---|
+   436	| `k1686_contemporaneous_null.py` | 模擬 + 7 變體（A–G）+ K897 replication arm + 機制診斷 + bootstrap |
+   437	| `k1686_contemporaneous_null_results.json` | 全部結果（`seed_spec` / `k897_replication_check` / `variant_disagreement` / **`null_free_evidence`**（決定性）/ `down_shock_impossibility` / `mechanism_diagnostic_*` / `calibration_diagnostics` / `up_shock_bootstrap`） |
+   438	| `k1686_null_distributions.png` | 8 格圖：K897 replication arm / A / B / C / D_up null 分佈 + **實證 sign-split（不需 null 的關鍵證據）** + E + 機制診斷。**變體 F / G 只在 JSON 與 README，未進圖**（F 的 calm cell 不可評估，無分佈可畫；G 見 §6.6 表） |
+   439	
+   440	**復現**：`uv run --extra dev python experiments/k1686/k1686_contemporaneous_null.py`
+   441	—— 已驗證**逐位元決定性**（連跑兩次 results JSON 的 SHA-1 相同：`3b4809f0…`）。
+   442	
+
+exec
+/bin/zsh -lc "nl -ba experiments/k1686/k1686_contemporaneous_null_results.json | sed -n '1,300p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+     1	{
+     2	  "experiment_id": "k1686",
+     3	  "title": "Contemporaneous null simulation for volatility absorption (K897 timing fix)",
+     4	  "paper": "volatility-absorption (Paper 8)",
+     5	  "supersedes_identification_test_in": "k897",
+     6	  "trigger": "paper/volatility-absorption/review_history/fable_deep_review_20260711/README.md P0-1",
+     7	  "data_source": "PINNED snapshot: paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv",
+     8	  "sample_period": "2006-01-05 to 2026-04-02",
+     9	  "n_observations": 5092,
+    10	  "n_simulations": 10000,
+    11	  "n_obs_per_sim": 5000,
+    12	  "garch_params": {
+    13	    "mu": 0.07641013516248987,
+    14	    "ar1": 0.0,
+    15	    "omega": 0.022188769677603346,
+    16	    "alpha": 0.0,
+    17	    "gamma": 0.24422367045225124,
+    18	    "beta": 0.8594147336803625,
+    19	    "nu": 5.647879075643755,
+    20	    "persistence": 0.981526568906488
+    21	  },
+    22	  "seed_spec": {
+    23	    "generator": "numpy.random.RandomState(seed)",
+    24	    "seeds": "0..9999 (identical to K897)",
+    25	    "innovation": "rng.standard_t(df=nu, size=5000) * sqrt((nu-2)/nu)",
+    26	    "note": "Same seed + same n_obs + same params as K897 => simulated return paths are pointwise identical to K897's. h is extended one step (h[n_obs], which needs only eps[n_obs-1]) so no extra random draw is taken and no padding is used."
+    27	  },
+    28	  "empirical_diagnostics": {
+    29	    "sample": "2006-01-05 to 2026-04-02",
+    30	    "up_shock_bootstrap": {
+    31	      "n_calm_up_shocks": 10,
+    32	      "sar_up_calm": 2.3777,
+    33	      "sar_up_calm_ci95": [
+    34	        1.8617,
+    35	        3.0246
+    36	      ],
+    37	      "sar_up_high_ci95": [
+    38	        2.2004,
+    39	        2.8233
+    40	      ],
+    41	      "up_decline_calm_minus_high": -0.1226,
+    42	      "up_decline_ci95": [
+    43	        -0.7289,
+    44	        0.5828
+    45	      ],
+    46	      "up_decline_ci_contains_zero": true,
+    47	      "seed": 20260712,
+    48	      "note": "The calm up-shock cell has only 10 days, so the up-only decline is imprecise. What the interval CAN establish is reported; what it cannot is not asserted."
+    49	    },
+    50	    "n_observations": 5092,
+    51	    "shock_rate_A": 0.15082482325216026,
+    52	    "n_shock_A": 768,
+    53	    "regime_occupancy": [
+    54	      0.3446582875098193,
+    55	      0.30852317360565595,
+    56	      0.17380204241948155,
+    57	      0.08483896307934014,
+    58	      0.08817753338570307
+    59	    ],
+    60	    "n_shock_by_regime": [
+    61	      34,
+    62	      168,
+    63	      189,
+    64	      133,
+    65	      244
+    66	    ],
+    67	    "shock_sign_composition": [
+    68	      {
+    69	        "regime": "calm (<15)",
+    70	        "n_shock_up": 10,
+    71	        "n_shock_down": 24,
+    72	        "n_normal": 1721,
+    73	        "up_share_of_shocks": 0.2941
+    74	      },
+    75	      {
+    76	        "regime": "normal (15-20)",
+    77	        "n_shock_up": 80,
+    78	        "n_shock_down": 88,
+    79	        "n_normal": 1403,
+    80	        "up_share_of_shocks": 0.4762
+    81	      },
+    82	      {
+    83	        "regime": "elevated (20-25)",
+    84	        "n_shock_up": 115,
+    85	        "n_shock_down": 74,
+    86	        "n_normal": 696,
+    87	        "up_share_of_shocks": 0.6085
+    88	      },
+    89	      {
+    90	        "regime": "high (25-30)",
+    91	        "n_shock_up": 73,
+    92	        "n_shock_down": 60,
+    93	        "n_normal": 299,
+    94	        "up_share_of_shocks": 0.5489
+    95	      },
+    96	      {
+    97	        "regime": "crisis (>=30)",
+    98	        "n_shock_up": 131,
+    99	        "n_shock_down": 113,
+   100	        "n_normal": 205,
+   101	        "up_share_of_shocks": 0.5369
+   102	      }
+   103	    ],
+   104	    "n_shock_up": 409,
+   105	    "n_shock_down": 359,
+   106	    "relative_threshold_q": 0.09544206403709261,
+   107	    "abs_threshold_b": 2.0015079950780637
+   108	  },
+   109	  "variant_spec": {
+   110	    "A": "PRIMARY. contemporaneous proxy sqrt(h[t+1]); regime by level; shock |dP|>2",
+   111	    "B": "frequency-matched: per-path quantile shock threshold + per-path regime cut-points matched to empirical VIX regime probabilities",
+   112	    "C": "relative threshold |dP|/P_{t-1} > q, same unit-free q as empirical",
+   113	    "D": "sign-split: dP>+2 (vol up) vs dP<-2 (vol down); shared non-shock denominator",
+   114	    "E": "ambient regime: classify day t by the PRE-shock level P[t-1]",
+   115	    "G": "POST-HOC (not pre-registered): doubly-corrected -- ambient regime AND relative threshold, i.e. B/C/E's fixes combined (independent review M2)",
+   116	    "F": "POST-HOC (not pre-registered): VRP-calibrated -- affine-map the null proxy onto VIX's scale (VIX ~ a + b*P fitted on real data), THEN apply the paper's literal thresholds",
+   117	    "k897_lagged": "REPLICATION ARM: K897's proxy sqrt(h[t]) on the same paths (internal placebo)"
+   118	  },
+   119	  "pre_registered_decision_rule": {
+   120	    "primary_statistic": "decline = SAR(calm <15) - SAR(high 25-30), variant A",
+   121	    "empirical_value": 0.8165,
+   122	    "outside_95_ci": "identification HOLDS and strengthens; paper upgrades",
+   123	    "inside_95_ci": "absorption claim DOWNGRADED to mechanical decomposition; paper reframes",
+   124	    "committed_before_results": "git commit 870af5d00 (README pre-registration, no results present)"
+   125	  },
+   126	  "k897_replication_check": {
+   127	    "ours": {
+   128	      "sim_mean": 0.1734,
+   129	      "sim_std": 0.2105,
+   130	      "sim_ci_95": [
+   131	        -0.2811,
+   132	        0.5575
+   133	      ],
+   134	      "n_valid_sims": 10000
+   135	    },
+   136	    "k897_published": {
+   137	      "sim_mean_decline": 0.1734,
+   138	      "sim_std_decline": 0.2105,
+   139	      "sim_ci_95": [
+   140	        -0.2811,
+   141	        0.5575
+   142	      ],
+   143	      "empirical_decline_live_yfinance": 0.8162
+   144	    },
+   145	    "reproduces_k897": true
+   146	  },
+   147	  "sar_decline_comparison": {
+   148	    "k897_lagged|A": {
+   149	      "label": "k897_lagged|A",
+   150	      "empirical": 0.8165,
+   151	      "sim_mean": 0.1734,
+   152	      "sim_std": 0.2105,
+   153	      "sim_ci_95": [
+   154	        -0.2811,
+   155	        0.5575
+   156	      ],
+   157	      "in_95_ci": false,
+   158	      "z_score": 3.0557,
+   159	      "p_value_monte_carlo": 0.0006,
+   160	      "frac_sim_above_empirical": 0.0002,
+   161	      "n_valid_sims": 10000
+   162	    },
+   163	    "contemporaneous|A": {
+   164	      "label": "contemporaneous|A",
+   165	      "empirical": 0.8165,
+   166	      "sim_mean": 0.619,
+   167	      "sim_std": 0.2487,
+   168	      "sim_ci_95": [
+   169	        0.0824,
+   170	        1.0596
+   171	      ],
+   172	      "in_95_ci": true,
+   173	      "z_score": 0.7939,
+   174	      "p_value_monte_carlo": 0.409759,
+   175	      "frac_sim_above_empirical": 0.2048,
+   176	      "n_valid_sims": 10000
+   177	    },
+   178	    "contemporaneous|B": {
+   179	      "label": "contemporaneous|B",
+   180	      "empirical": 0.8165,
+   181	      "sim_mean": -0.0035,
+   182	      "sim_std": 0.1578,
+   183	      "sim_ci_95": [
+   184	        -0.3115,
+   185	        0.3096
+   186	      ],
+   187	      "in_95_ci": false,
+   188	      "z_score": 5.1951,
+   189	      "p_value_monte_carlo": 0.000206,
+   190	      "frac_sim_above_empirical": 0.0,
+   191	      "n_valid_sims": 9704
+   192	    },
+   193	    "contemporaneous|C": {
+   194	      "label": "contemporaneous|C",
+   195	      "empirical": 0.3397,
+   196	      "sim_mean": -0.1877,
+   197	      "sim_std": 0.2159,
+   198	      "sim_ci_95": [
+   199	        -0.6543,
+   200	        0.2006
+   201	      ],
+   202	      "in_95_ci": false,
+   203	      "z_score": 2.4433,
+   204	      "p_value_monte_carlo": 0.006601,
+   205	      "frac_sim_above_empirical": 0.0032,
+   206	      "n_valid_sims": 9997
+   207	    },
+   208	    "contemporaneous|D_up": {
+   209	      "label": "contemporaneous|D_up",
+   210	      "empirical": -0.1192,
+   211	      "sim_mean": 0.0904,
+   212	      "sim_std": 0.266,
+   213	      "sim_ci_95": [
+   214	        -0.4666,
+   215	        0.5725
+   216	      ],
+   217	      "in_95_ci": true,
+   218	      "z_score": -0.7882,
+   219	      "p_value_monte_carlo": 0.393679,
+   220	      "frac_sim_above_empirical": 0.8032,
+   221	      "n_valid_sims": 9997
+   222	    },
+   223	    "contemporaneous|D_down": {
+   224	      "label": "contemporaneous|D_down",
+   225	      "empirical": 1.3368,
+   226	      "n_valid_sims": 0,
+   227	      "note": "insufficient valid simulations"
+   228	    },
+   229	    "contemporaneous|E": {
+   230	      "label": "contemporaneous|E",
+   231	      "empirical": 1.4643,
+   232	      "sim_mean": 0.9527,
+   233	      "sim_std": 0.3537,
+   234	      "sim_ci_95": [
+   235	        0.1956,
+   236	        1.583
+   237	      ],
+   238	      "in_95_ci": true,
+   239	      "z_score": 1.4465,
+   240	      "p_value_monte_carlo": 0.117647,
+   241	      "frac_sim_above_empirical": 0.0587,
+   242	      "n_valid_sims": 9961
+   243	    },
+   244	    "contemporaneous|F": {
+   245	      "label": "contemporaneous|F",
+   246	      "empirical": 0.8165,
+   247	      "n_valid_sims": 0,
+   248	      "note": "insufficient valid simulations"
+   249	    },
+   250	    "contemporaneous|G": {
+   251	      "label": "contemporaneous|G",
+   252	      "empirical": 0.5831,
+   253	      "sim_mean": -0.3573,
+   254	      "sim_std": 0.4111,
+   255	      "sim_ci_95": [
+   256	        -1.2832,
+   257	        0.3134
+   258	      ],
+   259	      "in_95_ci": false,
+   260	      "z_score": 2.2873,
+   261	      "p_value_monte_carlo": 0.00371,
+   262	      "frac_sim_above_empirical": 0.0017,
+   263	      "n_valid_sims": 9164
+   264	    }
+   265	  },
+   266	  "sar_decline_normal_to_high_comparison": {
+   267	    "k897_lagged|A": {
+   268	      "label": "k897_lagged|A",
+   269	      "empirical": 0.4398,
+   270	      "sim_mean": -0.0472,
+   271	      "sim_std": 0.2152,
+   272	      "sim_ci_95": [
+   273	        -0.504,
+   274	        0.347
+   275	      ],
+   276	      "in_95_ci": false,
+   277	      "z_score": 2.2626,
+   278	      "p_value_monte_carlo": 0.013199,
+   279	      "frac_sim_above_empirical": 0.0065,
+   280	      "n_valid_sims": 10000
+   281	    },
+   282	    "contemporaneous|A": {
+   283	      "label": "contemporaneous|A",
+   284	      "empirical": 0.4398,
+   285	      "sim_mean": 0.2743,
+   286	      "sim_std": 0.257,
+   287	      "sim_ci_95": [
+   288	        -0.285,
+   289	        0.7294
+   290	      ],
+   291	      "in_95_ci": true,
+   292	      "z_score": 0.6438,
+   293	      "p_value_monte_carlo": 0.519948,
+   294	      "frac_sim_above_empirical": 0.2599,
+   295	      "n_valid_sims": 10000
+   296	    },
+   297	    "contemporaneous|B": {
+   298	      "label": "contemporaneous|B",
+   299	      "empirical": 0.4398,
+   300	      "sim_mean": 0.0165,
+
+exec
+/bin/zsh -lc "nl -ba experiments/k1686/k1686_contemporaneous_null_results.json | sed -n '301,600p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+   301	      "sim_std": 0.146,
+   302	      "sim_ci_95": [
+   303	        -0.2756,
+   304	        0.298
+   305	      ],
+   306	      "in_95_ci": false,
+   307	      "z_score": 2.8996,
+   308	      "p_value_monte_carlo": 0.0036,
+   309	      "frac_sim_above_empirical": 0.0017,
+   310	      "n_valid_sims": 10000
+   311	    },
+   312	    "contemporaneous|C": {
+   313	      "label": "contemporaneous|C",
+   314	      "empirical": 0.4344,
+   315	      "sim_mean": -0.1304,
+   316	      "sim_std": 0.2303,
+   317	      "sim_ci_95": [
+   318	        -0.6171,
+   319	        0.296
+   320	      ],
+   321	      "in_95_ci": false,
+   322	      "z_score": 2.453,
+   323	      "p_value_monte_carlo": 0.008002,
+   324	      "frac_sim_above_empirical": 0.0039,
+   325	      "n_valid_sims": 9997
+   326	    },
+   327	    "contemporaneous|D_up": {
+   328	      "label": "contemporaneous|D_up",
+   329	      "empirical": 0.356,
+   330	      "sim_mean": -0.2542,
+   331	      "sim_std": 0.2749,
+   332	      "sim_ci_95": [
+   333	        -0.8281,
+   334	        0.2486
+   335	      ],
+   336	      "in_95_ci": false,
+   337	      "z_score": 2.2203,
+   338	      "p_value_monte_carlo": 0.015003,
+   339	      "frac_sim_above_empirical": 0.0074,
+   340	      "n_valid_sims": 9997
+   341	    },
+   342	    "contemporaneous|D_down": {
+   343	      "label": "contemporaneous|D_down",
+   344	      "empirical": 0.5661,
+   345	      "n_valid_sims": 0,
+   346	      "note": "insufficient valid simulations"
+   347	    },
+   348	    "contemporaneous|E": {
+   349	      "label": "contemporaneous|E",
+   350	      "empirical": 0.623,
+   351	      "sim_mean": 0.7054,
+   352	      "sim_std": 0.3892,
+   353	      "sim_ci_95": [
+   354	        -0.1115,
+   355	        1.4286
+   356	      ],
+   357	      "in_95_ci": true,
+   358	      "z_score": -0.2117,
+   359	      "p_value_monte_carlo": 0.79201,
+   360	      "frac_sim_above_empirical": 0.6041,
+   361	      "n_valid_sims": 9961
+   362	    },
+   363	    "contemporaneous|F": {
+   364	      "label": "contemporaneous|F",
+   365	      "empirical": 0.4398,
+   366	      "sim_mean": 0.1058,
+   367	      "sim_std": 0.1897,
+   368	      "sim_ci_95": [
+   369	        -0.2916,
+   370	        0.4561
+   371	      ],
+   372	      "in_95_ci": true,
+   373	      "z_score": 1.7607,
+   374	      "p_value_monte_carlo": 0.060794,
+   375	      "frac_sim_above_empirical": 0.0303,
+   376	      "n_valid_sims": 10000
+   377	    },
+   378	    "contemporaneous|G": {
+   379	      "label": "contemporaneous|G",
+   380	      "empirical": 0.4872,
+   381	      "sim_mean": -0.0878,
+   382	      "sim_std": 0.441,
+   383	      "sim_ci_95": [
+   384	        -1.077,
+   385	        0.6736
+   386	      ],
+   387	      "in_95_ci": true,
+   388	      "z_score": 1.3038,
+   389	      "p_value_monte_carlo": 0.151227,
+   390	      "frac_sim_above_empirical": 0.0755,
+   391	      "n_valid_sims": 9164
+   392	    }
+   393	  },
+   394	  "variant_F_calibration_note": {
+   395	    "affine_map": {
+   396	      "a": 7.9672,
+   397	      "b": 0.6914
+   398	    },
+   399	    "calm_regime_evaluable": false,
+   400	    "why": "The affine map that removes the variance-risk-premium level gap has slope b=0.691 < 1, so it also COMPRESSES daily increments: a 2-point move on VIX's scale needs |dP| > 2.89 in the null's own units. Calm-regime shocks then fall below the minimum cell size in every path, and the null's overall shock rate collapses to ~0.06 vs the data's 0.151. So F fixes the LEVEL but breaks the INCREMENT scale. No single affine recalibration matches VIX in both -- there is no calibration-invariant null for this statistic. That is a property of the SAR design, not a coding failure, and it is reported rather than dropped.",
+   401	    "evaluable_leg_normal_to_high": "see sar_decline_normal_to_high_comparison"
+   402	  },
+   403	  "regime_sar": {
+   404	    "k897_lagged|A": {
+   405	      "calm (<15)": {
+   406	        "label": "k897_lagged|A :: calm (<15)",
+   407	        "empirical": 3.149,
+   408	        "sim_mean": 1.2325,
+   409	        "sim_std": 0.0974,
+   410	        "sim_ci_95": [
+   411	          1.0491,
+   412	          1.4318
+   413	        ],
+   414	        "in_95_ci": false,
+   415	        "z_score": 19.6753,
+   416	        "p_value_monte_carlo": 0.0002,
+   417	        "frac_sim_above_empirical": 0.0,
+   418	        "n_valid_sims": 10000
+   419	      },
+   420	      "normal (15-20)": {
+   421	        "label": "k897_lagged|A :: normal (15-20)",
+   422	        "empirical": 2.7723,
+   423	        "sim_mean": 1.0119,
+   424	        "sim_std": 0.1042,
+   425	        "sim_ci_95": [
+   426	          0.8242,
+   427	          1.2274
+   428	        ],
+   429	        "in_95_ci": false,
+   430	        "z_score": 16.892,
+   431	        "p_value_monte_carlo": 0.0002,
+   432	        "frac_sim_above_empirical": 0.0,
+   433	        "n_valid_sims": 10000
+   434	      },
+   435	      "elevated (20-25)": {
+   436	        "label": "k897_lagged|A :: elevated (20-25)",
+   437	        "empirical": 2.377,
+   438	        "sim_mean": 1.012,
+   439	        "sim_std": 0.1488,
+   440	        "sim_ci_95": [
+   441	          0.7458,
+   442	          1.3297
+   443	        ],
+   444	        "in_95_ci": false,
+   445	        "z_score": 9.1742,
+   446	        "p_value_monte_carlo": 0.0002,
+   447	        "frac_sim_above_empirical": 0.0,
+   448	        "n_valid_sims": 10000
+   449	      },
+   450	      "high (25-30)": {
+   451	        "label": "k897_lagged|A :: high (25-30)",
+   452	        "empirical": 2.3325,
+   453	        "sim_mean": 1.0591,
+   454	        "sim_std": 0.1862,
+   455	        "sim_ci_95": [
+   456	          0.7401,
+   457	          1.4803
+   458	        ],
+   459	        "in_95_ci": false,
+   460	        "z_score": 6.8391,
+   461	        "p_value_monte_carlo": 0.0002,
+   462	        "frac_sim_above_empirical": 0.0,
+   463	        "n_valid_sims": 10000
+   464	      },
+   465	      "crisis (>=30)": {
+   466	        "label": "k897_lagged|A :: crisis (>=30)",
+   467	        "empirical": 2.4514,
+   468	        "sim_mean": 1.1795,
+   469	        "sim_std": 0.3278,
+   470	        "sim_ci_95": [
+   471	          0.7521,
+   472	          1.9176
+   473	        ],
+   474	        "in_95_ci": false,
+   475	        "z_score": 3.88,
+   476	        "p_value_monte_carlo": 0.014304,
+   477	        "frac_sim_above_empirical": 0.0071,
+   478	        "n_valid_sims": 9926
+   479	      }
+   480	    },
+   481	    "contemporaneous|A": {
+   482	      "calm (<15)": {
+   483	        "label": "contemporaneous|A :: calm (<15)",
+   484	        "empirical": 3.149,
+   485	        "sim_mean": 2.348,
+   486	        "sim_std": 0.0546,
+   487	        "sim_ci_95": [
+   488	          2.2424,
+   489	          2.454
+   490	        ],
+   491	        "in_95_ci": false,
+   492	        "z_score": 14.6729,
+   493	        "p_value_monte_carlo": 0.0002,
+   494	        "frac_sim_above_empirical": 0.0,
+   495	        "n_valid_sims": 10000
+   496	      },
+   497	      "normal (15-20)": {
+   498	        "label": "contemporaneous|A :: normal (15-20)",
+   499	        "empirical": 2.7723,
+   500	        "sim_mean": 2.0034,
+   501	        "sim_std": 0.086,
+   502	        "sim_ci_95": [
+   503	          1.8387,
+   504	          2.1742
+   505	        ],
+   506	        "in_95_ci": false,
+   507	        "z_score": 8.9466,
+   508	        "p_value_monte_carlo": 0.0002,
+   509	        "frac_sim_above_empirical": 0.0,
+   510	        "n_valid_sims": 10000
+   511	      },
+   512	      "elevated (20-25)": {
+   513	        "label": "contemporaneous|A :: elevated (20-25)",
+   514	        "empirical": 2.377,
+   515	        "sim_mean": 2.0405,
+   516	        "sim_std": 0.1415,
+   517	        "sim_ci_95": [
+   518	          1.7802,
+   519	          2.3409
+   520	        ],
+   521	        "in_95_ci": false,
+   522	        "z_score": 2.3779,
+   523	        "p_value_monte_carlo": 0.030397,
+   524	        "frac_sim_above_empirical": 0.0151,
+   525	        "n_valid_sims": 10000
+   526	      },
+   527	      "high (25-30)": {
+   528	        "label": "contemporaneous|A :: high (25-30)",
+   529	        "empirical": 2.3325,
+   530	        "sim_mean": 1.729,
+   531	        "sim_std": 0.2422,
+   532	        "sim_ci_95": [
+   533	          1.3097,
+   534	          2.2642
+   535	        ],
+   536	        "in_95_ci": false,
+   537	        "z_score": 2.4916,
+   538	        "p_value_monte_carlo": 0.033197,
+   539	        "frac_sim_above_empirical": 0.0165,
+   540	        "n_valid_sims": 10000
+   541	      },
+   542	      "crisis (>=30)": {
+   543	        "label": "contemporaneous|A :: crisis (>=30)",
+   544	        "empirical": 2.4514,
+   545	        "sim_mean": 1.5522,
+   546	        "sim_std": 0.2542,
+   547	        "sim_ci_95": [
+   548	          1.2396,
+   549	          2.081
+   550	        ],
+   551	        "in_95_ci": false,
+   552	        "z_score": 3.5378,
+   553	        "p_value_monte_carlo": 0.017528,
+   554	        "frac_sim_above_empirical": 0.0087,
+   555	        "n_valid_sims": 9926
+   556	      }
+   557	    },
+   558	    "contemporaneous|B": {
+   559	      "calm (<15)": {
+   560	        "label": "contemporaneous|B :: calm (<15)",
+   561	        "empirical": 3.149,
+   562	        "sim_mean": 1.81,
+   563	        "sim_std": 0.0973,
+   564	        "sim_ci_95": [
+   565	          1.6323,
+   566	          2.0144
+   567	        ],
+   568	        "in_95_ci": false,
+   569	        "z_score": 13.7587,
+   570	        "p_value_monte_carlo": 0.000206,
+   571	        "frac_sim_above_empirical": 0.0,
+   572	        "n_valid_sims": 9704
+   573	      },
+   574	      "normal (15-20)": {
+   575	        "label": "contemporaneous|B :: normal (15-20)",
+   576	        "empirical": 2.7723,
+   577	        "sim_mean": 1.8286,
+   578	        "sim_std": 0.0731,
+   579	        "sim_ci_95": [
+   580	          1.6919,
+   581	          1.9797
+   582	        ],
+   583	        "in_95_ci": false,
+   584	        "z_score": 12.917,
+   585	        "p_value_monte_carlo": 0.0002,
+   586	        "frac_sim_above_empirical": 0.0,
+   587	        "n_valid_sims": 10000
+   588	      },
+   589	      "elevated (20-25)": {
+   590	        "label": "contemporaneous|B :: elevated (20-25)",
+   591	        "empirical": 2.377,
+   592	        "sim_mean": 1.9089,
+   593	        "sim_std": 0.0791,
+   594	        "sim_ci_95": [
+   595	          1.7587,
+   596	          2.0699
+   597	        ],
+   598	        "in_95_ci": false,
+   599	        "z_score": 5.9157,
+   600	        "p_value_monte_carlo": 0.0002,
+
+exec
+/bin/zsh -lc "nl -ba experiments/k1686/k1686_contemporaneous_null_results.json | sed -n '601,900p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+   601	        "frac_sim_above_empirical": 0.0,
+   602	        "n_valid_sims": 10000
+   603	      },
+   604	      "high (25-30)": {
+   605	        "label": "contemporaneous|B :: high (25-30)",
+   606	        "empirical": 2.3325,
+   607	        "sim_mean": 1.8121,
+   608	        "sim_std": 0.1232,
+   609	        "sim_ci_95": [
+   610	          1.5824,
+   611	          2.0678
+   612	        ],
+   613	        "in_95_ci": false,
+   614	        "z_score": 4.2258,
+   615	        "p_value_monte_carlo": 0.0004,
+   616	        "frac_sim_above_empirical": 0.0001,
+   617	        "n_valid_sims": 10000
+   618	      },
+   619	      "crisis (>=30)": {
+   620	        "label": "contemporaneous|B :: crisis (>=30)",
+   621	        "empirical": 2.4514,
+   622	        "sim_mean": 1.625,
+   623	        "sim_std": 0.2372,
+   624	        "sim_ci_95": [
+   625	          1.3581,
+   626	          2.1123
+   627	        ],
+   628	        "in_95_ci": false,
+   629	        "z_score": 3.4839,
+   630	        "p_value_monte_carlo": 0.016598,
+   631	        "frac_sim_above_empirical": 0.0082,
+   632	        "n_valid_sims": 10000
+   633	      }
+   634	    },
+   635	    "contemporaneous|C": {
+   636	      "calm (<15)": {
+   637	        "label": "contemporaneous|C :: calm (<15)",
+   638	        "empirical": 2.581,
+   639	        "sim_mean": 1.8923,
+   640	        "sim_std": 0.0414,
+   641	        "sim_ci_95": [
+   642	          1.8121,
+   643	          1.9737
+   644	        ],
+   645	        "in_95_ci": false,
+   646	        "z_score": 16.6266,
+   647	        "p_value_monte_carlo": 0.0002,
+   648	        "frac_sim_above_empirical": 0.0,
+   649	        "n_valid_sims": 10000
+   650	      },
+   651	      "normal (15-20)": {
+   652	        "label": "contemporaneous|C :: normal (15-20)",
+   653	        "empirical": 2.6756,
+   654	        "sim_mean": 1.9495,
+   655	        "sim_std": 0.0878,
+   656	        "sim_ci_95": [
+   657	          1.7807,
+   658	          2.124
+   659	        ],
+   660	        "in_95_ci": false,
+   661	        "z_score": 8.2696,
+   662	        "p_value_monte_carlo": 0.0002,
+   663	        "frac_sim_above_empirical": 0.0,
+   664	        "n_valid_sims": 10000
+   665	      },
+   666	      "elevated (20-25)": {
+   667	        "label": "contemporaneous|C :: elevated (20-25)",
+   668	        "empirical": 2.2701,
+   669	        "sim_mean": 2.032,
+   670	        "sim_std": 0.1419,
+   671	        "sim_ci_95": [
+   672	          1.7732,
+   673	          2.3363
+   674	        ],
+   675	        "in_95_ci": true,
+   676	        "z_score": 1.678,
+   677	        "p_value_monte_carlo": 0.108389,
+   678	        "frac_sim_above_empirical": 0.0541,
+   679	        "n_valid_sims": 10000
+   680	      },
+   681	      "high (25-30)": {
+   682	        "label": "contemporaneous|C :: high (25-30)",
+   683	        "empirical": 2.2412,
+   684	        "sim_mean": 2.08,
+   685	        "sim_std": 0.2119,
+   686	        "sim_ci_95": [
+   687	          1.7032,
+   688	          2.5459
+   689	        ],
+   690	        "in_95_ci": true,
+   691	        "z_score": 0.7609,
+   692	        "p_value_monte_carlo": 0.407882,
+   693	        "frac_sim_above_empirical": 0.2039,
+   694	        "n_valid_sims": 9997
+   695	      },
+   696	      "crisis (>=30)": {
+   697	        "label": "contemporaneous|C :: crisis (>=30)",
+   698	        "empirical": 2.5276,
+   699	        "sim_mean": 2.2233,
+   700	        "sim_std": 0.2204,
+   701	        "sim_ci_95": [
+   702	          1.8168,
+   703	          2.6782
+   704	        ],
+   705	        "in_95_ci": true,
+   706	        "z_score": 1.3805,
+   707	        "p_value_monte_carlo": 0.160192,
+   708	        "frac_sim_above_empirical": 0.08,
+   709	        "n_valid_sims": 9987
+   710	      }
+   711	    },
+   712	    "contemporaneous|D_up": {
+   713	      "calm (<15)": {
+   714	        "label": "contemporaneous|D_up :: calm (<15)",
+   715	        "empirical": 2.3764,
+   716	        "sim_mean": 2.348,
+   717	        "sim_std": 0.0546,
+   718	        "sim_ci_95": [
+   719	          2.2424,
+   720	          2.454
+   721	        ],
+   722	        "in_95_ci": true,
+   723	        "z_score": 0.519,
+   724	        "p_value_monte_carlo": 0.59594,
+   725	        "frac_sim_above_empirical": 0.2979,
+   726	        "n_valid_sims": 10000
+   727	      },
+   728	      "normal (15-20)": {
+   729	        "label": "contemporaneous|D_up :: normal (15-20)",
+   730	        "empirical": 2.8516,
+   731	        "sim_mean": 2.0034,
+   732	        "sim_std": 0.086,
+   733	        "sim_ci_95": [
+   734	          1.8387,
+   735	          2.1742
+   736	        ],
+   737	        "in_95_ci": false,
+   738	        "z_score": 9.8692,
+   739	        "p_value_monte_carlo": 0.0002,
+   740	        "frac_sim_above_empirical": 0.0,
+   741	        "n_valid_sims": 10000
+   742	      },
+   743	      "elevated (20-25)": {
+   744	        "label": "contemporaneous|D_up :: elevated (20-25)",
+   745	        "empirical": 2.4173,
+   746	        "sim_mean": 2.0405,
+   747	        "sim_std": 0.1415,
+   748	        "sim_ci_95": [
+   749	          1.7802,
+   750	          2.3409
+   751	        ],
+   752	        "in_95_ci": false,
+   753	        "z_score": 2.6625,
+   754	        "p_value_monte_carlo": 0.015398,
+   755	        "frac_sim_above_empirical": 0.0076,
+   756	        "n_valid_sims": 10000
+   757	      },
+   758	      "high (25-30)": {
+   759	        "label": "contemporaneous|D_up :: high (25-30)",
+   760	        "empirical": 2.4956,
+   761	        "sim_mean": 2.2576,
+   762	        "sim_std": 0.2603,
+   763	        "sim_ci_95": [
+   764	          1.7909,
+   765	          2.8083
+   766	        ],
+   767	        "in_95_ci": true,
+   768	        "z_score": 0.9141,
+   769	        "p_value_monte_carlo": 0.340468,
+   770	        "frac_sim_above_empirical": 0.1702,
+   771	        "n_valid_sims": 9997
+   772	      },
+   773	      "crisis (>=30)": {
+   774	        "label": "contemporaneous|D_up :: crisis (>=30)",
+   775	        "empirical": 2.6794,
+   776	        "sim_mean": 2.439,
+   777	        "sim_std": 0.3805,
+   778	        "sim_ci_95": [
+   779	          1.9967,
+   780	          3.2169
+   781	        ],
+   782	        "in_95_ci": true,
+   783	        "z_score": 0.6318,
+   784	        "p_value_monte_carlo": 0.293572,
+   785	        "frac_sim_above_empirical": 0.1467,
+   786	        "n_valid_sims": 9925
+   787	      }
+   788	    },
+   789	    "contemporaneous|D_down": {
+   790	      "calm (<15)": {
+   791	        "label": "contemporaneous|D_down :: calm (<15)",
+   792	        "empirical": 3.471,
+   793	        "n_valid_sims": 0,
+   794	        "note": "insufficient valid simulations"
+   795	      },
+   796	      "normal (15-20)": {
+   797	        "label": "contemporaneous|D_down :: normal (15-20)",
+   798	        "empirical": 2.7002,
+   799	        "n_valid_sims": 0,
+   800	        "note": "insufficient valid simulations"
+   801	      },
+   802	      "elevated (20-25)": {
+   803	        "label": "contemporaneous|D_down :: elevated (20-25)",
+   804	        "empirical": 2.3144,
+   805	        "n_valid_sims": 0,
+   806	        "note": "insufficient valid simulations"
+   807	      },
+   808	      "high (25-30)": {
+   809	        "label": "contemporaneous|D_down :: high (25-30)",
+   810	        "empirical": 2.1342,
+   811	        "sim_mean": 1.2854,
+   812	        "sim_std": 0.2755,
+   813	        "sim_ci_95": [
+   814	          0.8115,
+   815	          1.8995
+   816	        ],
+   817	        "in_95_ci": false,
+   818	        "z_score": 3.0804,
+   819	        "p_value_monte_carlo": 0.016206,
+   820	        "frac_sim_above_empirical": 0.008,
+   821	        "n_valid_sims": 9995
+   822	      },
+   823	      "crisis (>=30)": {
+   824	        "label": "contemporaneous|D_down :: crisis (>=30)",
+   825	        "empirical": 2.187,
+   826	        "sim_mean": 1.1426,
+   827	        "sim_std": 0.2331,
+   828	        "sim_ci_95": [
+   829	          0.8238,
+   830	          1.634
+   831	        ],
+   832	        "in_95_ci": false,
+   833	        "z_score": 4.4805,
+   834	        "p_value_monte_carlo": 0.008663,
+   835	        "frac_sim_above_empirical": 0.0042,
+   836	        "n_valid_sims": 9926
+   837	      }
+   838	    },
+   839	    "contemporaneous|E": {
+   840	      "calm (<15)": {
+   841	        "label": "contemporaneous|E :: calm (<15)",
+   842	        "empirical": 3.7975,
+   843	        "sim_mean": 3.0207,
+   844	        "sim_std": 0.0953,
+   845	        "sim_ci_95": [
+   846	          2.8435,
+   847	          3.2212
+   848	        ],
+   849	        "in_95_ci": false,
+   850	        "z_score": 8.1479,
+   851	        "p_value_monte_carlo": 0.0002,
+   852	        "frac_sim_above_empirical": 0.0,
+   853	        "n_valid_sims": 10000
+   854	      },
+   855	      "normal (15-20)": {
+   856	        "label": "contemporaneous|E :: normal (15-20)",
+   857	        "empirical": 2.9562,
+   858	        "sim_mean": 2.7731,
+   859	        "sim_std": 0.1854,
+   860	        "sim_ci_95": [
+   861	          2.4409,
+   862	          3.1758
+   863	        ],
+   864	        "in_95_ci": true,
+   865	        "z_score": 0.9878,
+   866	        "p_value_monte_carlo": 0.307369,
+   867	        "frac_sim_above_empirical": 0.1536,
+   868	        "n_valid_sims": 10000
+   869	      },
+   870	      "elevated (20-25)": {
+   871	        "label": "contemporaneous|E :: elevated (20-25)",
+   872	        "empirical": 2.5475,
+   873	        "sim_mean": 2.7005,
+   874	        "sim_std": 0.2789,
+   875	        "sim_ci_95": [
+   876	          2.2089,
+   877	          3.3015
+   878	        ],
+   879	        "in_95_ci": true,
+   880	        "z_score": -0.5485,
+   881	        "p_value_monte_carlo": 0.613107,
+   882	        "frac_sim_above_empirical": 0.6935,
+   883	        "n_valid_sims": 9994
+   884	      },
+   885	      "high (25-30)": {
+   886	        "label": "contemporaneous|E :: high (25-30)",
+   887	        "empirical": 2.3332,
+   888	        "sim_mean": 2.0682,
+   889	        "sim_std": 0.3393,
+   890	        "sim_ci_95": [
+   891	          1.4535,
+   892	          2.7941
+   893	        ],
+   894	        "in_95_ci": true,
+   895	        "z_score": 0.7809,
+   896	        "p_value_monte_carlo": 0.396507,
+   897	        "frac_sim_above_empirical": 0.1982,
+   898	        "n_valid_sims": 9961
+   899	      },
+   900	      "crisis (>=30)": {
+
+exec
+/bin/zsh -lc "nl -ba experiments/k1686/k1686_contemporaneous_null_results.json | sed -n '901,1220p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+   901	        "label": "contemporaneous|E :: crisis (>=30)",
+   902	        "empirical": 2.4511,
+   903	        "sim_mean": 1.4534,
+   904	        "sim_std": 0.2946,
+   905	        "sim_ci_95": [
+   906	          1.0814,
+   907	          2.0972
+   908	        ],
+   909	        "in_95_ci": false,
+   910	        "z_score": 3.3861,
+   911	        "p_value_monte_carlo": 0.021497,
+   912	        "frac_sim_above_empirical": 0.0106,
+   913	        "n_valid_sims": 9954
+   914	      }
+   915	    },
+   916	    "contemporaneous|F": {
+   917	      "calm (<15)": {
+   918	        "label": "contemporaneous|F :: calm (<15)",
+   919	        "empirical": 3.149,
+   920	        "n_valid_sims": 0,
+   921	        "note": "insufficient valid simulations"
+   922	      },
+   923	      "normal (15-20)": {
+   924	        "label": "contemporaneous|F :: normal (15-20)",
+   925	        "empirical": 2.7723,
+   926	        "sim_mean": 2.2131,
+   927	        "sim_std": 0.0559,
+   928	        "sim_ci_95": [
+   929	          2.1038,
+   930	          2.3245
+   931	        ],
+   932	        "in_95_ci": false,
+   933	        "z_score": 10.0061,
+   934	        "p_value_monte_carlo": 0.0002,
+   935	        "frac_sim_above_empirical": 0.0,
+   936	        "n_valid_sims": 10000
+   937	      },
+   938	      "elevated (20-25)": {
+   939	        "label": "contemporaneous|F :: elevated (20-25)",
+   940	        "empirical": 2.377,
+   941	        "sim_mean": 2.0902,
+   942	        "sim_std": 0.098,
+   943	        "sim_ci_95": [
+   944	          1.9053,
+   945	          2.2897
+   946	        ],
+   947	        "in_95_ci": false,
+   948	        "z_score": 2.9256,
+   949	        "p_value_monte_carlo": 0.006199,
+   950	        "frac_sim_above_empirical": 0.003,
+   951	        "n_valid_sims": 10000
+   952	      },
+   953	      "high (25-30)": {
+   954	        "label": "contemporaneous|F :: high (25-30)",
+   955	        "empirical": 2.3325,
+   956	        "sim_mean": 2.1072,
+   957	        "sim_std": 0.1819,
+   958	        "sim_ci_95": [
+   959	          1.7754,
+   960	          2.4942
+   961	        ],
+   962	        "in_95_ci": true,
+   963	        "z_score": 1.2384,
+   964	        "p_value_monte_carlo": 0.216978,
+   965	        "frac_sim_above_empirical": 0.1084,
+   966	        "n_valid_sims": 10000
+   967	      },
+   968	      "crisis (>=30)": {
+   969	        "label": "contemporaneous|F :: crisis (>=30)",
+   970	        "empirical": 2.4514,
+   971	        "sim_mean": 2.0031,
+   972	        "sim_std": 0.3677,
+   973	        "sim_ci_95": [
+   974	          1.52,
+   975	          2.7966
+   976	        ],
+   977	        "in_95_ci": true,
+   978	        "z_score": 1.2192,
+   979	        "p_value_monte_carlo": 0.151919,
+   980	        "frac_sim_above_empirical": 0.0759,
+   981	        "n_valid_sims": 9978
+   982	      }
+   983	    },
+   984	    "contemporaneous|G": {
+   985	      "calm (<15)": {
+   986	        "label": "contemporaneous|G :: calm (<15)",
+   987	        "empirical": 2.938,
+   988	        "sim_mean": 2.3907,
+   989	        "sim_std": 0.0705,
+   990	        "sim_ci_95": [
+   991	          2.2577,
+   992	          2.5359
+   993	        ],
+   994	        "in_95_ci": false,
+   995	        "z_score": 7.7596,
+   996	        "p_value_monte_carlo": 0.0002,
+   997	        "frac_sim_above_empirical": 0.0,
+   998	        "n_valid_sims": 10000
+   999	      },
+  1000	      "normal (15-20)": {
+  1001	        "label": "contemporaneous|G :: normal (15-20)",
+  1002	        "empirical": 2.8421,
+  1003	        "sim_mean": 2.6567,
+  1004	        "sim_std": 0.1759,
+  1005	        "sim_ci_95": [
+  1006	          2.3409,
+  1007	          3.0282
+  1008	        ],
+  1009	        "in_95_ci": true,
+  1010	        "z_score": 1.0541,
+  1011	        "p_value_monte_carlo": 0.285971,
+  1012	        "frac_sim_above_empirical": 0.1429,
+  1013	        "n_valid_sims": 10000
+  1014	      },
+  1015	      "elevated (20-25)": {
+  1016	        "label": "contemporaneous|G :: elevated (20-25)",
+  1017	        "empirical": 2.471,
+  1018	        "sim_mean": 2.7194,
+  1019	        "sim_std": 0.2825,
+  1020	        "sim_ci_95": [
+  1021	          2.2224,
+  1022	          3.3312
+  1023	        ],
+  1024	        "in_95_ci": true,
+  1025	        "z_score": -0.879,
+  1026	        "p_value_monte_carlo": 0.369659,
+  1027	        "frac_sim_above_empirical": 0.8153,
+  1028	        "n_valid_sims": 9992
+  1029	      },
+  1030	      "high (25-30)": {
+  1031	        "label": "contemporaneous|G :: high (25-30)",
+  1032	        "empirical": 2.3549,
+  1033	        "sim_mean": 2.7507,
+  1034	        "sim_std": 0.4043,
+  1035	        "sim_ci_95": [
+  1036	          2.0905,
+  1037	          3.6675
+  1038	        ],
+  1039	        "in_95_ci": true,
+  1040	        "z_score": -0.9789,
+  1041	        "p_value_monte_carlo": 0.286525,
+  1042	        "frac_sim_above_empirical": 0.8568,
+  1043	        "n_valid_sims": 9164
+  1044	      },
+  1045	      "crisis (>=30)": {
+  1046	        "label": "contemporaneous|G :: crisis (>=30)",
+  1047	        "empirical": 2.5848,
+  1048	        "sim_mean": 2.6769,
+  1049	        "sim_std": 0.3331,
+  1050	        "sim_ci_95": [
+  1051	          2.0962,
+  1052	          3.4148
+  1053	        ],
+  1054	        "in_95_ci": true,
+  1055	        "z_score": -0.2765,
+  1056	        "p_value_monte_carlo": 0.816868,
+  1057	        "frac_sim_above_empirical": 0.5916,
+  1058	        "n_valid_sims": 9200
+  1059	      }
+  1060	    }
+  1061	  },
+  1062	  "regimes_outside_ci": {
+  1063	    "k897_lagged|A": "5/5",
+  1064	    "contemporaneous|A": "5/5",
+  1065	    "contemporaneous|B": "5/5",
+  1066	    "contemporaneous|C": "2/5",
+  1067	    "contemporaneous|D_up": "2/5",
+  1068	    "contemporaneous|D_down": "2/2",
+  1069	    "contemporaneous|E": "2/5",
+  1070	    "contemporaneous|F": "2/4",
+  1071	    "contemporaneous|G": "1/5"
+  1072	  },
+  1073	  "mechanism_diagnostic_within_regime_shock_rate": {
+  1074	    "empirical": [
+  1075	      0.0194,
+  1076	      0.1069,
+  1077	      0.2136,
+  1078	      0.3079,
+  1079	      0.5434
+  1080	    ],
+  1081	    "sim_contemporaneous_A": [
+  1082	      0.0356,
+  1083	      0.1524,
+  1084	      0.1949,
+  1085	      0.4853,
+  1086	      0.8226
+  1087	    ],
+  1088	    "regimes": [
+  1089	      "calm (<15)",
+  1090	      "normal (15-20)",
+  1091	      "elevated (20-25)",
+  1092	      "high (25-30)",
+  1093	      "crisis (>=30)"
+  1094	    ],
+  1095	    "note": "A fixed absolute threshold on a mean-reverting vol proxy becomes progressively EASIER to cross as the level rises, because the decay term itself moves more than 2 annualised points. Where the null's within-regime shock rate runs far above the data's, the null's shock bucket is being flooded with ordinary days and its SAR is pushed toward 1 -- a decline produced by selection, not by absorption."
+  1096	  },
+  1097	  "down_shock_impossibility": {
+  1098	    "min_level_for_a_2pt_one_day_fall": 28.84,
+  1099	    "regimes_where_null_can_never_produce_a_down_shock": [
+  1100	      "calm (<15)",
+  1101	      "normal (15-20)",
+  1102	      "elevated (20-25)"
+  1103	    ],
+  1104	    "note": "With alpha=0 the deepest one-day fall the null can produce is pure decay, h_next = omega + beta*h. That crosses -2 annualised points only above 28.84. Below it a vol-DOWN shock cannot exist in this null AT ALL. The empirical decline, however, is carried ENTIRELY by vol-DOWN days (see the sign-split): the null has no such channel, so on the down side the null and the data are not even measuring the same event. D_down's n_valid_sims=0 in calm/normal/elevated is therefore a structural property of the null, not a silent failure."
+  1105	  },
+  1106	  "calibration_diagnostics": {
+  1107	    "regime_occupancy_empirical": [
+  1108	      0.3447,
+  1109	      0.3085,
+  1110	      0.1738,
+  1111	      0.0848,
+  1112	      0.0882
+  1113	    ],
+  1114	    "regime_occupancy_sim_A_contemporaneous": [
+  1115	      0.7664,
+  1116	      0.1204,
+  1117	      0.0496,
+  1118	      0.0241,
+  1119	      0.0394
+  1120	    ],
+  1121	    "regime_occupancy_sim_A_k897_lagged": [
+  1122	      0.7662,
+  1123	      0.1206,
+  1124	      0.0496,
+  1125	      0.0241,
+  1126	      0.0394
+  1127	    ],
+  1128	    "regime_occupancy_sim_B_frequency_matched": [
+  1129	      0.3446,
+  1130	      0.3086,
+  1131	      0.1738,
+  1132	      0.0848,
+  1133	      0.0882
+  1134	    ],
+  1135	    "shock_rate_empirical": 0.1508,
+  1136	    "shock_rate_sim_A_contemporaneous": 0.0994,
+  1137	    "shock_rate_sim_A_k897_lagged": 0.0994,
+  1138	    "shock_rate_sim_B": 0.1508,
+  1139	    "shock_rate_sim_C": 0.1141,
+  1140	    "regime_occupancy_sim_F_vrp_calibrated": [
+  1141	      0.4304,
+  1142	      0.4084,
+  1143	      0.0952,
+  1144	      0.0324,
+  1145	      0.0336
+  1146	    ],
+  1147	    "shock_rate_sim_F": 0.0595,
+  1148	    "vrp_affine_map": {
+  1149	      "a": 7.9672,
+  1150	      "b": 0.6914
+  1151	    },
+  1152	    "shock_rate_sim_D_up": 0.0704,
+  1153	    "shock_rate_sim_D_down": 0.029,
+  1154	    "note": "VIX carries a variance risk premium, so its level sits above the physical conditional vol of the GARCH null. Under fixed thresholds (variant A) the simulation therefore over-populates the calm regime relative to the data. Variant B removes this by matching regime occupancy and shock rate by construction."
+  1155	  },
+  1156	  "variant_disagreement": {
+  1157	    "fails_to_reject_the_null": [
+  1158	      "contemporaneous|A",
+  1159	      "contemporaneous|D_up",
+  1160	      "contemporaneous|E"
+  1161	    ],
+  1162	    "rejects_the_null": [
+  1163	      "contemporaneous|B",
+  1164	      "contemporaneous|C",
+  1165	      "contemporaneous|G"
+  1166	    ],
+  1167	    "not_evaluable_on_the_primary_leg": [
+  1168	      "contemporaneous|D_down",
+  1169	      "contemporaneous|F"
+  1170	    ],
+  1171	    "the_null_comparison_is_INCONCLUSIVE": "The variants split. Worse, the pre-registered primary's own non-rejection is not strong evidence: the mechanism diagnostic shows variant A's null manufactures its 0.619 decline by letting plain decay cross the fixed 2-point threshold at high vol levels (null within-regime shock rate 0.82 at crisis vs the data's 0.54), which is NOT how the decline arises in the data. A's 'pass' is one artifact cancelling another. The corrected nulls (B frequency-matched, C relative-threshold, G doubly-corrected) all reject. So neither 'the decline is pure GARCH mechanics' NOR 'the decline is absorption' is established by the null comparison. It is inconclusive, and saying otherwise in either direction would be overclaiming.",
+  1172	    "why_no_null_can_settle_the_down_side": "Below 28.8 annualised points this null cannot produce a vol-DOWN shock AT ALL (alpha=0 => the deepest one-day fall is pure decay). But the empirical decline is carried ENTIRELY by vol-DOWN days. On the down side the null and the data are not even measuring the same event, so where B/C/G reject, what they detect is the ABSENCE OF A RELIEF-RALLY CHANNEL IN GARCH -- not the PRESENCE OF ABSORPTION IN MARKETS."
+  1173	  },
+  1174	  "null_free_evidence": {
+  1175	    "pooled_decline_headline": 0.8165,
+  1176	    "up_only_decline": -0.1226,
+  1177	    "up_only_decline_ci95": [
+  1178	      -0.7289,
+  1179	      0.5828
+  1180	    ],
+  1181	    "up_only_ci_excludes_pooled_headline": true,
+  1182	    "down_only_decline": 1.3368,
+  1183	    "n_calm_up_shocks": 10,
+  1184	    "n_calm_down_shocks": 24,
+  1185	    "finding": "Split the shock set by the SIGN of the VIX move and the paper's mechanism evaporates. Pooled decline 0.8165. Among genuine FEAR SPIKES (dVIX>+2) the decline is -0.1226, bootstrap 95% CI [-0.7289, 0.5828] -- it contains ZERO (no absorption gradient can be established) AND its upper end sits BELOW the pooled headline 0.8165, so the headline is significantly larger than anything fear spikes can account for. The decline lives in the RELIEF RALLIES (dVIX<-2): 1.3368. And the calm anchor that sets the headline's magnitude rests on 10 fear-spike days against 24 relief days. This holds with NO null model, so it is immune to every calibration dispute above.",
+  1186	    "mechanism": "A 2-point VIX fall from 13 is a rare, large relief move that comes with a big rally; a 2-point fall from 27 is routine mean reversion with an ordinary return. So the shock bucket's mean |r| is inflated at calm levels and deflated at high levels -- SAR declines. That is signed-composition selection, not fear being absorbed."
+  1187	  },
+  1188	  "pre_registered_primary_outcome": "IDENTIFICATION CLOSED",
+  1189	  "pre_registered_primary_detail": "Empirical decline 0.8165 falls INSIDE the contemporaneous null 95% CI [0.0824, 1.0596] (MC p=0.409759). A GJR-GARCH with no absorption mechanism, once its vol proxy is made contemporaneous with returns the way VIX is, reproduces the observed SAR decline. Per the pre-registered rule the absorption claim is DOWNGRADED to a mechanical decomposition of fixed-threshold selection plus same-day co-movement; K897's NULL REJECTED verdict does not survive the timing fix.",
+  1190	  "verdict": "ABSORPTION CLAIM NOT SUPPORTED",
+  1191	  "verdict_detail": "Three findings, in order of how much weight they can bear.\n\n(1) NULL-FREE, DECISIVE -- the paper's mechanism is not what drives its statistic. Splitting shocks by the sign of the VIX move: the pooled decline is 0.8165, but among genuine FEAR SPIKES it is -0.1226 with bootstrap 95% CI [-0.7289, 0.5828] -- containing zero AND lying entirely below the pooled headline. The decline lives in the RELIEF RALLIES (1.3368). The calm anchor rests on 10 fear-spike days vs 24 relief days. 'Ambient fear absorbs fear shocks' is therefore not what the SAR decline shows, and this conclusion depends on NO null model.\n\n(2) THE NULL COMPARISON IS INCONCLUSIVE, in both directions. The pre-registered primary (variant A) does not reject (0.8165 inside [0.0824, 1.0596], p=0.409759), so by the letter of the pre-registered rule the absorption claim is downgraded. But A's null earns its decline by letting plain decay cross the fixed 2-point threshold at high vol -- an artifact, not the data's mechanism -- so its non-rejection is two artifacts cancelling. The corrected nulls (B, C, G) all reject. Neither 'it is just GARCH' nor 'it is absorption' is established by the null comparison.\n\n(3) K897'S VERDICT DOES NOT SURVIVE REGARDLESS. Its NULL REJECTED rested on a null whose vol proxy could not react to the same day's return; on the same seeds and params, making the proxy contemporaneous moves the null's SAR levels from ~1.0-1.2 to ~1.6-2.4 and its decline from 0.1734 to 0.619. The margin K897 reported was largely a timing artifact.\n\nRECOMMENDATION: the paper cannot claim absorption. It CAN claim something real and publishable -- that the SAR regime-decline is a signed-composition effect, and that it is NOT reproduced by a well-specified GARCH null (B/C/G reject). That is a measurement note, not the absorption hypothesis."
+  1192	}
+exec
+/bin/zsh -lc "git show --no-ext-diff --format=fuller --stat 870af5d00 && git show --no-ext-diff --format= --name-status 870af5d00 && git branch --all --contains 870af5d00 && git merge-base --is-ancestor 870af5d00 HEAD; printf 'ancestor_exit=%s\\n' \""'$?"' in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+commit 870af5d0012ea12ab3d27c68a2492b1bd09385a1
+Author:     prepush test <test@example.com>
+AuthorDate: Sun Jul 12 03:51:14 2026 +0800
+Commit:     prepush test <test@example.com>
+CommitDate: Sun Jul 12 03:51:14 2026 +0800
+
+    K1686 pre-registration: contemporaneous null decision rule fixed BEFORE running simulation
+    
+    Decision rule (pre-registered, deep review P0-1 hard gate):
+    - empirical decline (0.8165) outside contemporaneous null 95% CI -> identification holds, paper upgrades
+    - inside 95% CI -> absorption claim downgraded to mechanical decomposition, paper reframes (FRL note / merge)
+    
+    No results exist at this commit. Any post-hoc spec change would be visible in git history.
+
+ experiments/k1686/README.md | 157 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 157 insertions(+)
+A	experiments/k1686/README.md
+  agent/k1686-volabs-null
+ancestor_exit=1
+
+exec
+/bin/zsh -lc "git log --all --format='%H %P %ad %an %s' --date=iso-strict -- experiments/k1686" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+085064f0f1eee9d3a995f32a5a58f6fba67fd8d7 8c7777b722bf16429f2020e4cf4c2bb8053ae53c 2026-07-12T05:15:45+08:00 prepush test fable0711_volabs_contemp_null | K1686 收件：absorption 識別檢定落在 null 內，論文主張不成立
+8c7777b722bf16429f2020e4cf4c2bb8053ae53c d3024e328d2cb68ef21e4b0446f965c7ce7a788d 2026-07-12T04:36:49+08:00 prepush test ops(dispatch-supervisor 04:36): PHASE-Z safety-net auto-commit (agent left uncommitted)
+ddf0c8e9099cf66fd0e618b9ab052716f3ef0bde 1c91b875b27fb271a3afdbf401f8f2b3902371cf 2026-07-12T04:33:48+08:00 prepush test K1686: document figure scope and byte-level determinism in README file table
+1c91b875b27fb271a3afdbf401f8f2b3902371cf 7d0117d811c0bc0d5e7cdb973040ad542247219e 2026-07-12T04:31:22+08:00 prepush test K1686: address independent review (CONDITIONAL PASS) -- verdict now carries the conflict
+7d0117d811c0bc0d5e7cdb973040ad542247219e 117f3b9c586b1861c117caf15114c616f402b8f2 2026-07-12T04:18:32+08:00 prepush test K1686: analytic proof that the null has NO vol-DOWN shock channel below P*=28.84
+117f3b9c586b1861c117caf15114c616f402b8f2 322cfeb38fee8671c1a5c9100b1996203dd97d43 2026-07-12T04:14:45+08:00 prepush test K1686: README results + verdict (IDENTIFICATION CLOSED)
+322cfeb38fee8671c1a5c9100b1996203dd97d43 870af5d0012ea12ab3d27c68a2492b1bd09385a1 2026-07-12T04:11:19+08:00 prepush test K1686: contemporaneous null simulation + results (pre-registered rule -> IDENTIFICATION CLOSED)
+870af5d0012ea12ab3d27c68a2492b1bd09385a1 210c7aa3ea854e5cac2539532c19c4b7880574e3 2026-07-12T03:51:14+08:00 prepush test K1686 pre-registration: contemporaneous null decision rule fixed BEFORE running simulation
+
+exec
+/bin/zsh -lc 'git branch --all --contains 085064f0f1eee9d3a995f32a5a58f6fba67fd8d7 && git branch --all --contains ddf0c8e9099cf66fd0e618b9ab052716f3ef0bde && git show --format=fuller --stat --summary 085064f0f1eee9d3a995f32a5a58f6fba67fd8d7' in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+* main
+  agent/k1686-volabs-null
+commit 085064f0f1eee9d3a995f32a5a58f6fba67fd8d7
+Author:     prepush test <test@example.com>
+AuthorDate: Sun Jul 12 05:15:45 2026 +0800
+Commit:     prepush test <test@example.com>
+CommitDate: Sun Jul 12 05:15:45 2026 +0800
+
+    fable0711_volabs_contemp_null | K1686 收件：absorption 識別檢定落在 null 內，論文主張不成立
+    
+    verdict = ABSORPTION CLAIM NOT SUPPORTED（誠實 null，如實報告）。
+    
+    主線程驗證：事前判定規則確實先於結果 commit（870af5d00 樹內只有 README、
+    verdict 段空白、實證值 0.8165 已寫死）；post-hoc 變體 F/G 明標、pre-registered
+    primary（A）未被更換；README 與 results.json 逐項一致。
+    
+    決定性發現不依賴任何 null 模型：SAR decline（0.8165）住在 relief rally
+    （+1.3368）裡，真正的恐慌衝擊 decline = -0.1226、bootstrap 95% CI 含 0。
+    null 比較本身變體分裂（A/D_up/E 不拒絕；B/C/G 拒絕）→ 實驗如實稱其
+    inconclusive、兩個方向都不宣稱。K897 的 NULL REJECTED 在同 seed 同 params
+    下同期化 proxy 後不成立（decline 0.1734 → 0.619），margin 大部分是 timing
+    artifact。
+    
+    knowledge.json 與論文處置 gated 在 compute queue job k1686_codex_primary_review
+    （K1259：subagent PASS 不等於 Codex primary-path PASS）。fire 禁 spawn codex exec
+    （3-STRIKE hook）→ 新增 scripts/codex_review_job.sh 作為可排進 queue 的 Codex
+    review 入口（repo 原本只有給短呼叫用的 codex_exec_bounded.sh）。
+    
+    合併走 path-scoped 抽取（main 已被 autocommit 收進同路徑假 results.json，直接
+    merge 會撞）；抽取後 branch 與 main diff 為空，worktree 已移除、branch 保留。
+    
+    新排 P1：platform_ops_run_agent_job_stub_clobbers_results — run_agent_job.py 把
+    job 摘要寫到 --result-artifact 且相對 main 而非 --cwd 的 worktree 解析，本次在
+    實驗 canonical results 路徑上留下 319-byte 假結果檔並被 autocommit 收走。
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+
+ experiments/k1686/README.md                        |  442 ++++++++
+ experiments/k1686/k1686_contemporaneous_null.py    |  913 +++++++++++++++
+ .../k1686/k1686_contemporaneous_null_results.json  | 1198 +++++++++++++++++++-
+ experiments/k1686/k1686_null_distributions.png     |  Bin 0 -> 238125 bytes
+ 4 files changed, 2545 insertions(+), 8 deletions(-)
+ create mode 100644 experiments/k1686/README.md
+ create mode 100644 experiments/k1686/k1686_contemporaneous_null.py
+ create mode 100644 experiments/k1686/k1686_null_distributions.png
+
+exec
+/bin/zsh -lc "git rev-parse HEAD && git log -1 --format='%H %ad %s' --date=iso-strict && shasum -a 256 experiments/k1686/k1686_contemporaneous_null.py experiments/k1686/k1686_contemporaneous_null_results.json experiments/k1686/README.md && git status --short experiments/k1686 && git diff --stat HEAD -- experiments/k1686 && git diff --cached --stat HEAD -- experiments/k1686" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+d425d13c504195145f038e863bc07e7f45bde0cd
+d425d13c504195145f038e863bc07e7f45bde0cd 2026-07-12T05:16:20+08:00 fable0711_volabs_contemp_null | K1686 收尾：Codex 複驗排進 queue + 新增可排隊的 review 入口
+9d46c050c9aa8c209efa335fea12ddc20cd6cf3d7fd8e8e12936fd37bb16d76a  experiments/k1686/k1686_contemporaneous_null.py
+f11f61d3ddc3f83f995f105f857035a261c4ff9a2cbe5647f66c0102b44737bf  experiments/k1686/k1686_contemporaneous_null_results.json
+674133c42fc0dc05b308a16ed4624b01ed85db70fc37a32c231e9205623cab4d  experiments/k1686/README.md
+
+exec
+/bin/zsh -lc "git ls-tree -r --name-only 870af5d0012ea12ab3d27c68a2492b1bd09385a1 experiments/k1686 && git show 870af5d0012ea12ab3d27c68a2492b1bd09385a1:experiments/k1686/README.md | nl -ba | sed -n '1,220p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+experiments/k1686/README.md
+     1	# K1686 — Volatility Absorption: Contemporaneous Null 重跑（make-or-break gating）
+     2	
+     3	- **Experiment ID**: `k1686`
+     4	- **Status**: PRE-REGISTERED（本節於執行模擬**之前** commit；見 git history）
+     5	- **Paper**: `paper/volatility-absorption`（Paper 8）
+     6	- **前身**: `experiments/k897/`（GJR-GARCH null simulation，結論 `NULL REJECTED`）
+     7	- **觸發**: `paper/volatility-absorption/review_history/fable_deep_review_20260711/README.md` §3-B / §5 P0-1
+     8	- **Created**: 2026-07-12（台灣時間）
+     9	
+    10	---
+    11	
+    12	## 1. 動機 — 要關閉的識別缺陷
+    13	
+    14	Paper 8 的核心主張是 **SAR（Shock Amplification Ratio）**
+    15	
+    16	```
+    17	SAR(regime) = mean(|r_t| | shock day, regime) / mean(|r_t| | normal day, regime)
+    18	```
+    19	
+    20	隨 VIX regime 上升而**遞減**（實證 calm→high decline = 0.8165），且 K897 的 GJR-GARCH null 模擬顯示此
+    21	decline 落在 95% null 區間之外（sim mean 0.1734、95% CI [−0.2811, 0.5575]、5/5 regimes outside CI）
+    22	→ 結論 `NULL REJECTED`：「absorption 是超越 GARCH 機械效應的真實現象」。
+    23	
+    24	**缺陷（fable deep review P0-1，本實驗要檢定的對象）**：
+    25	
+    26	K897 的模擬中，day-t 的 vol proxy 用 `h[t]`（`k897_sar_null_simulation.py:269-278`）。在 GJR 遞迴下
+    27	
+    28	```
+    29	h[t] = ω + (α + γ·1{ε_{t-1}<0})·ε_{t-1}² + β·h[t-1]
+    30	```
+    31	
+    32	`h[t]` 是 **F_{t−1}-可測**的（在 t−1 收盤就已算得出），**完全不對 r_t 反應**。於是模擬的
+    33	`Δproxy[t] = √h[t] − √h[t-1]` 由 `ε_{t-1}` 驅動 —— 「shock day」被標在**大跌的隔天**，而不是大跌當天。
+    34	shock 旗標與當日 innovation `z_t` 統計獨立。
+    35	
+    36	但實證端的 `ΔVIX_t = VIX_t − VIX_{t-1}` 中，`VIX_t` 是**當日收盤**的 implied vol，**與 r_t 同期共動**
+    37	（崩盤當天 VIX 同步暴漲）—— shock day 就是大跌當天。
+    38	
+    39	**後果**：實證 SAR 的分子（shock 日 |r_t|）被同期共動機械性拉高，模擬 SAR 的分子沒有。直接寫在 K897 結果裡：
+    40	模擬 SAR 水準 ≈ 1.01–1.23，實證 ≈ 2.33–3.16。**null 世界的 shock 定義根本抓不到當日大波動**，
+    41	於是「empirical decline 遠大於 null」有可能只是這個口徑錯配的 artifact，不是真實的 absorption。
+    42	
+    43	**這是 make-or-break**：若在同期化 null 下 decline 落回 null 區間內，Paper 8 的核心識別即關閉。
+    44	
+    45	---
+    46	
+    47	## 2. 修正 — 與 K897 的逐項 diff
+    48	
+    49	**唯一的實質改動是 vol proxy 的 timing**。其餘（GARCH params、seed 集、路徑數、路徑長度、SAR 公式、
+    50	regime 切點）全部維持不變，使任何結果差異都能 100% 歸因於 timing 修正。
+    51	
+    52	| 項目 | K897（舊） | K1686（本實驗） | 理由 |
+    53	|---|---|---|---|
+    54	| **day-t vol proxy** | `√h[t] · √252` | **`√h[t+1] · √252`** | `h[t+1]` 是觀測到 `r_t`/`ε_t` **之後**才算得出的 GARCH forecast（F_t-可測），這才是「收盤 VIX 反映當日資訊」的正確類比 |
+    55	| **shock 定義** | `\|√h[t] − √h[t-1]\|·√252 > 2`（由 ε_{t-1} 驅動 → 標在大跌**隔天**） | `\|√h[t+1] − √h[t]\|·√252 > 2`（由 ε_t 驅動 → 標在大跌**當天**） | 與 `\|ΔVIX_t\| > 2` 同期化 |
+    56	| **regime 分類的 vol level** | `√h[t]·√252` | `√h[t+1]·√252`（同一 proxy，口徑一致） | 實證用同期的 `VIX_t` 分 regime，模擬必須同口徑 |
+    57	| **h 遞迴長度** | `h[0..n-1]` | `h[0..n]`（多算 1 步；`h[n]` 只需 `ε_{n-1}`，已存在） | 使 `h[t+1]` 在 t = n−1 仍有定義。**不用 padding / 複製尾值** |
+    58	| GARCH params | 見下表 | **完全相同**（沿用 K897 fitted 值） | 保持 null DGP 不變 |
+    59	| Seeds | `RandomState(seed)`, seed = 0..9999 | **完全相同** | 同 seed + 同 `n_obs` + 同 params ⇒ 模擬報酬路徑 `r` **逐點相同**，只有 proxy 定義不同 |
+    60	| n_paths × n_obs | 10,000 × 5,000 | **完全相同** | 同上 |
+    61	| 實證資料 | **live yfinance 下載**（不可重現） | **pinned CSV**：`paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv` | 修 review P1-3：K897 實證端未走 pinned snapshot，與論文 snapshot-pinning 原則不一致 |
+    62	| z-score | `(emp − mean) / (std/√n)` → z=1967 這類荒謬值（review 抓到的 bug） | `(emp − mean) / std`（= 標準化距離）**+ 直接 Monte-Carlo 經驗 p 值**（primary，無分佈假設） | `std/√n` 是「模擬均值的 SE」，不是實證統計量的 SE。修 review §3-B (b) |
+    63	| percentile 變體 | **silently failed**（5/5 regime `n_valid_sims=0`，JSON 留著但論文未揭露） | 重新實作為 **frequency-matched null**（見 §4 變體 B），並強制驗證 `n_valid_sims > 0` | 修 review §3-B (a) |
+    64	
+    65	**沿用的 GARCH params**（K897 fitted，GJR-GARCH(1,1)-t on SPY 2006–2026）：
+    66	
+    67	| μ | ar1 | ω | α | γ | β | ν | persistence |
+    68	|---|---|---|---|---|---|---|---|
+    69	| 0.07641014 | 0.0 | 0.02218877 | **0.0** | 0.24422367 | 0.85941473 | 5.6478791 | 0.98152657 |
+    70	
+    71	> ⚠️ `α = 0`：fitted GJR 中正報酬對條件變異數**零衝擊**，只有負報酬經 γ 進入。這使
+    72	> 同期化 null 的 `Δproxy` 在正報酬日必為負（純均值回歸衰減）。這個不對稱性對 sign-split
+    73	> 變體（§4 D）的解讀至關重要，結果段會明確處理。
+    74	
+    75	**內建對照組（本實驗最重要的設計）**：腳本在**同一組模擬路徑**上同時計算 K897 的 lagged-proxy SAR
+    76	（replication arm）。若該 arm 重現 K897 的 `sim_mean_decline = 0.1734` / CI [−0.2811, 0.5575]，
+    77	即證明我們的重實作忠實，**因此同期化 arm 的任何差異必然、且僅僅來自 timing 修正**。
+    78	此為內建 placebo，不是額外裝飾。
+    79	
+    80	---
+    81	
+    82	## 3. 事前判定規則（PRE-REGISTERED — 在跑任何模擬之前寫死）
+    83	
+    84	**主要統計量**：`decline = SAR(calm, <15) − SAR(high, 25–30)`，實證值 **0.8165**
+    85	（pinned snapshot；K897 live-yf 值 0.8162，K716/Table 3 rounded 值 0.84 —— 三者一致）。
+    86	
+    87	**主規格（PRIMARY）**：變體 A = 同期化 proxy + fixed threshold（regime 15/20/25/30，shock `|Δproxy| > 2`）
+    88	—— 因為論文 Table 3 的實證端正是此口徑。
+    89	
+    90	**判定**（以變體 A 的模擬 decline 分佈之 95% percentile 區間為準）：
+    91	
+    92	- **empirical decline 仍落在 95% null 區間之外** → 識別**成立且強化**。K897 的結論在更嚴格的同期化口徑下
+    93	  依然成立，論文顯著升級（absorption 不是同期共動的機械 artifact）。
+    94	- **empirical decline 落入 95% null 區間之內** → absorption 主張**降級**為「fixed-threshold 選樣 ×
+    95	  同期共動的機械分解」。論文走**重新框架**路線（deep review §6 hard gate）：改寫為 measurement note
+    96	  投 FRL，或把 SAR/null-simulation 方法併入其他 VIX 論文。**本篇不得再以「absorption 是超越機械效應的
+    97	  現象」為主張投稿。**
+    98	
+    99	**輔助判定**（不改變上述主判定，只用於刻畫結果的穩健性）：4 個變體（A/B/C/D）+ 補充變體 E 的結論若彼此
+   100	衝突，**如實報告衝突並說明機制**，不挑對自己有利的變體當 headline。
+   101	
+   102	**禁止事項（研究誠實）**：不得在看到結果後調整 threshold、seed、regime 切點、樣本期間或規格，
+   103	把結果推回想要的方向。無論落點為何，README 與 results JSON 都如實記錄。Null result 是結果，不是失敗。
+   104	
+   105	---
+   106	
+   107	## 4. 變體規格（口徑一致性：實證 vs 模擬逐欄對齊）
+   108	
+   109	所有變體的 SAR 公式相同；差別只在 shock 定義與 regime 分類。模擬端一律用同期化 proxy
+   110	`P_t = √h[t+1]·√252`；實證端對應 `VIX_t`。
+   111	
+   112	| 變體 | regime 分類 | shock 定義（實證） | shock 定義（模擬） | 目的 |
+   113	|---|---|---|---|---|
+   114	| **A（PRIMARY）** | `VIX_t` / `P_t` ∈ {<15, 15–20, 20–25, 25–30, ≥30} | `\|ΔVIX_t\| > 2` | `\|ΔP_t\| > 2` | 與論文 Table 3 完全同口徑；主判定 |
+   115	| **B** | 頻率匹配：模擬用**每條路徑自己**的 `P` 分位數，對齊實證 VIX 各 regime 的**佔比** | `\|ΔVIX_t\| >` 第 (1−s) 分位 | `\|ΔP_t\| >` 該路徑第 (1−s) 分位 | VIX 含 variance risk premium ⇒ 水準系統性高於物理條件波動度，fixed threshold 會讓模擬過度佔用 calm regime。B 讓 **shock rate 與 regime 佔比兩者都按建構匹配** |
+   116	| **C** | 同 A | `\|ΔVIX_t\| / VIX_{t-1} > q` | `\|ΔP_t\| / P_{t-1} > q`（**同一個 q**，無單位） | VIX=12 時 ΔVIX=2 是 17% 的相對變動，VIX=40 時只有 5% —— 固定加法門檻使高 regime 的「shock」相對更弱，SAR 遞減可能有一部分是選樣機械效應。`q` 取實證 `\|ΔVIX\|/VIX_{t-1}` 中對應 s 的分位數 |
+   117	| **D** | 同 A | 分開報 `ΔVIX_t > +2`（vol 上升）與 `ΔVIX_t < −2`（vol 下降） | 同左（對 `ΔP_t`） | `\|ΔVIX\|>2` 把恐慌暴漲日與 relief-rally 日混進同一個「fear shock」桶。檢查 absorption 是否只來自單邊 |
+   118	| **E（補充）** | **`VIX_{t-1}` / `P_{t-1}`**（ambient fear，落後一期） | `\|ΔVIX_t\| > 2` | `\|ΔP_t\| > 2` | A–D 的 regime 分類本身是 `r_t` 的函數（大跌 → VIX_t 高 → 被分進高 regime），存在內生分選。E 用**衝擊前的 ambient 恐懼水準**分 regime，這也更貼近論文「ambient fear 調節反應」的故事 |
+   119	
+   120	其中 `s` = 實證 `|ΔVIX_t| > 2` 的 shock rate = **0.1508**（768 / 5092）。
+   121	
+   122	**共用規則**：
+   123	- normal day = 非 shock day（同 regime 內）；sign-split（D）的分母沿用同一個 normal day 集合。
+   124	- 一個 regime 的 SAR 需 `n_shock > 5` 且 `n_normal > 5` 才有效，否則記 `NaN`（沿用 K897）。
+   125	- decline 需 calm 與 high 兩個 regime 的 SAR 皆有效。
+   126	- 每個變體都會報 **regime 佔比與 shock rate 的實證 vs 模擬對照**（口徑一致性診斷）。
+   127	
+   128	**推論**：
+   129	- **主判定**：實證 decline 是否落在模擬 decline 的 **95% percentile 區間** [2.5%, 97.5%] 內。
+   130	- **Monte-Carlo 經驗 p 值**（primary，無分佈假設）：`p = 2 · min(P(sim ≥ emp), P(sim ≤ emp))`，下限 `1/n_valid`。
+   131	- 標準化距離 `z = (emp − sim_mean) / sim_std`（修 K897 的 z bug）。
+   132	- `frac_sim_above_empirical`（K897 唯一誠實的統計量，保留）。
+   133	
+   134	---
+   135	
+   136	## 5. 資料與可重現性
+   137	
+   138	- **實證**：`paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv`（pinned snapshot）。
+   139	  SPY 用 `spy_adj_close`（含息調整，等同 `yf.download` 的 `auto_adjust=True`）、VIX 用 `vix_close`。
+   140	  期間 2006-01-05 → 2026-04-02，n = 5,092。
+   141	  **驗證**：此 pinned 資料重現 K897 的 live-yf 實證 SAR 至小數點後 3 位
+   142	  （3.1490/2.7723/2.3770/2.3325/2.4514 vs K897 的 3.1487/2.7723/2.3770/2.3325/2.4514），
+   143	  decline 0.8165 vs 0.8162 —— 實證端 pin 住而不失與 K897/K716/Table 3 的連續性。
+   144	- **Seed spec**：`np.random.RandomState(seed)`，`seed = 0, 1, …, 9999`（與 K897 逐一相同）。
+   145	  每條路徑 `z = rng.standard_t(df=ν, size=5000) · √((ν−2)/ν)`。因 `n_obs` 與抽樣呼叫順序皆與 K897 相同，
+   146	  innovation 序列 **bit-identical**；`h[n]` 只需 `ε_{n-1}`，不需額外抽樣。
+   147	- **執行**：`uv run python experiments/k1686/k1686_contemporaneous_null.py`
+   148	
+   149	---
+   150	
+   151	## 6. 結果
+   152	
+   153	> 待模擬執行後填入（本節於 pre-registration commit 時為空白，這是刻意的）。
+   154	
+   155	## 7. Verdict
+   156	
+   157	> 待填入。
+
+exec
+/bin/zsh -lc "git show --format=fuller --stat 322cfeb38fee8671c1a5c9100b1996203dd97d43 && git diff --no-ext-diff --unified=3 322cfeb38fee8671c1a5c9100b1996203dd97d43..HEAD -- experiments/k1686/k1686_contemporaneous_null.py | sed -n '1,360p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+commit 322cfeb38fee8671c1a5c9100b1996203dd97d43
+Author:     prepush test <test@example.com>
+AuthorDate: Sun Jul 12 04:11:19 2026 +0800
+Commit:     prepush test <test@example.com>
+CommitDate: Sun Jul 12 04:11:19 2026 +0800
+
+    K1686: contemporaneous null simulation + results (pre-registered rule -> IDENTIFICATION CLOSED)
+    
+    Replication arm reproduces K897 EXACTLY (sim_mean 0.1734, sim_std 0.2105) on the same
+    seeds/params/n_obs, so the only thing that changed is the vol-proxy timing.
+    
+    PRIMARY (variant A): empirical decline 0.8165 lies INSIDE the contemporaneous null 95% CI
+    [0.0824, 1.0596], MC p=0.41. K897's NULL REJECTED does not survive the timing fix.
+    
+    Sign-split (null-free): among genuine fear spikes (dVIX>+2) the empirical SAR does NOT
+    decline (calm 2.376 -> high 2.496). The entire pooled decline comes from VIX-DOWN relief
+    days (calm 3.471 -> high 2.134). The calm up-shock cell has n=10.
+
+ experiments/k1686/k1686_contemporaneous_null.py    | 620 ++++++++++++++++
+ .../k1686/k1686_contemporaneous_null_results.json  | 810 +++++++++++++++++++++
+ experiments/k1686/k1686_null_distributions.png     | Bin 0 -> 237757 bytes
+ 3 files changed, 1430 insertions(+)
+diff --git a/experiments/k1686/k1686_contemporaneous_null.py b/experiments/k1686/k1686_contemporaneous_null.py
+index 532d8004a..9ea1614ff 100644
+--- a/experiments/k1686/k1686_contemporaneous_null.py
++++ b/experiments/k1686/k1686_contemporaneous_null.py
+@@ -101,6 +101,28 @@ def sar_by_regime(abs_ret, level, shock, bounds=REGIME_BOUNDS):
+     return np.array(out), np.array(occ), np.array(shock_n)
+ 
+ 
++def decay_only_drop_level(params, drop=SHOCK_ABS):
++    """Lowest vol level at which the null can produce a `drop`-point one-day FALL.
++
++    With alpha = 0 a positive return contributes nothing to next-day variance, so the deepest
++    possible one-day fall is pure decay: h_next = omega + beta*h.  Solving
++        (sqrt(omega + beta*h) - sqrt(h)) * sqrt(252) = -drop
++    gives the level below which a "vol-DOWN shock" is IMPOSSIBLE in this null.  That is what
++    makes D_down undefined in the lower regimes -- a structural property, not a coding bug.
++    """
++    from scipy.optimize import brentq
++    w, b = params["omega"], params["beta"]
++
++    def f(P):
++        h = (P / ANN) ** 2
++        return (np.sqrt(w + b * h) - np.sqrt(h)) * ANN + drop
++
++    try:
++        return float(brentq(f, 1.0, 500.0))
++    except ValueError:
++        return float("nan")
++
++
+ def decline(sars):
+     """Primary statistic: SAR(calm) - SAR(high 25-30)."""
+     calm, high = sars[0], sars[3]
+@@ -109,6 +131,20 @@ def decline(sars):
+     return float(calm - high)
+ 
+ 
++def decline_nh(sars):
++    """Secondary statistic: SAR(normal 15-20) - SAR(high 25-30).
++
++    Needed because the calm cell is not always measurable -- in variant F the affine
++    recalibration that fixes the level gap also shrinks the increments, so a calm-regime
++    shock (2 VIX-scale points) becomes rarer than the minimum cell size. Reporting the
++    normal-to-high leg keeps that variant from being silently dropped.
++    """
++    normal, high = sars[1], sars[3]
++    if np.isnan(normal) or np.isnan(high):
++        return np.nan
++    return float(normal - high)
++
++
+ # ====================================================================================
+ # Simulation: one GJR path -> every variant's SAR (computed on the SAME path)
+ # ====================================================================================
+@@ -207,12 +243,55 @@ def simulate_one(args):
+     res["contemporaneous|E"] = sars_e
+     res["occ_E"] = occ_e
+ 
++    # --- G: doubly-corrected (POST-HOC): ambient regime AND relative threshold ---
++    # Neither B, C nor E fixes more than one flaw at a time. G is the "most surgical" null the
++    # independent review asked for: classify by the PRE-shock level (kills regime endogeneity)
++    # AND use the unit-free relative threshold (kills the fixed-absolute-threshold selection
++    # artifact). If the empirical decline still sits inside THIS null, the closure is robust to
++    # both corrections at once; if it sits outside, the closure is fragile. Reported either way.
++    sars_g, occ_g, _ = sar_by_regime(abs_ret[1:], P[:-1], shock_c[1:])
++    res["contemporaneous|G"] = sars_g
++    res["occ_G"] = occ_g
++
++    # --- F: VRP-calibrated (POST-HOC, not pre-registered -- see README) ---
++    # The obvious attack on variant A is that VIX carries a variance risk premium, so the
++    # paper's literal 15/20/25/30 cut-points mean something different on the null's physical
++    # vol scale (the null then sits in "calm" 77% of the time vs the data's 34%).  F answers
++    # it head-on: map the null's proxy onto VIX's scale with the affine fit VIX ~ a + b*P
++    # estimated on the real data, THEN apply the paper's literal thresholds.  The same map
++    # scales the increments, so the +/-2 shock threshold is transported consistently.
++    a_vrp, b_vrp = spec["vrp_a"], spec["vrp_b"]
++    P_f = a_vrp + b_vrp * P
++    dP_f = np.concatenate([[0.0], np.diff(P_f)])
++    shock_f = np.abs(dP_f) > SHOCK_ABS
++    sars_f, occ_f, ns_f = sar_by_regime(abs_ret, P_f, shock_f)
++    res["contemporaneous|F"] = sars_f
++    res["occ_F"] = occ_f
++    res["shock_rate_F"] = float(shock_f.mean())
++
+     return res
+ 
+ 
+ # ====================================================================================
+ # Empirical side -- mirrors simulate_one() variant for variant
+ # ====================================================================================
++def filtered_contemporaneous_proxy(returns, params):
++    """Run the SAME GJR recursion on the REAL returns and return the day-t contemporaneous
++    proxy sqrt(h[t+1])*sqrt(252). Used only to calibrate the null's vol scale onto VIX's
++    (variant F) -- it is not used for any SAR computation on the empirical side."""
++    mu, ar1 = params["mu"], params["ar1"]
++    w, al, g, b = params["omega"], params["alpha"], params["gamma"], params["beta"]
++    r = np.asarray(returns, dtype=float)
++    n = len(r)
++    h = np.zeros(n + 1)
++    h[0] = w / (1 - al - g / 2 - b)
++    for t in range(1, n + 1):
++        ind = 1.0 if r[t - 1] - mu < 0 else 0.0
++        eps = r[t - 1] - mu - ar1 * (r[t - 2] if t >= 2 else 0.0)
++        h[t] = max(w + (al + g * ind) * eps ** 2 + b * h[t - 1], 1e-8)
++    return np.sqrt(h[1:n + 1]) * ANN
++
++
+ def empirical_side():
+     df = pd.read_csv(PINNED_CSV, parse_dates=["date"])
+     df = df[(df.date >= SAMPLE_START) & (df.date <= SAMPLE_END)].copy()
+@@ -260,12 +339,23 @@ def empirical_side():
+         emp[sfx] = np.array(vals)
+ 
+     emp["E"] = sar_by_regime(a[1:], V[:-1], any_shock[1:])[0]
++    emp["F"] = emp["A"]   # F changes only the NULL's scale; the data side is variant A
++    emp["G"] = sar_by_regime(a[1:], V[:-1], shock_c[1:])[0]   # ambient regime + relative threshold
++
++    # Variant F calibration: affine map from the null's physical vol scale onto VIX's scale,
++    # fitted on the real data (VIX_t ~ a + b * P_t, where P_t is the same contemporaneous GJR
++    # proxy the simulation uses). This is what lets the null be judged by the paper's literal
++    # 15/20/25/30 thresholds without the variance-risk-premium level gap contaminating it.
++    P_emp = filtered_contemporaneous_proxy(df["ret"].values, K897_PARAMS)
++    b_vrp, a_vrp = np.polyfit(P_emp, V, 1)
+ 
+     spec = {
+         "shock_rate": s,
+         "regime_probs": regime_probs,
+         "rel_q": rel_q,
+         "shock_thr_b": thr_b,
++        "vrp_a": float(a_vrp),
++        "vrp_b": float(b_vrp),
+     }
+     # Sign composition of the shock bucket, regime by regime. This is what the pooled
+     # |dVIX| > 2 definition hides: at low VIX the shock bucket is mostly VIX-DOWN days,
+@@ -283,8 +373,40 @@ def empirical_side():
+             "up_share_of_shocks": round(n_up / (n_up + n_dn), 4) if (n_up + n_dn) else None,
+         })
+ 
++    # The up-only calm cell has n=10. A point estimate from 10 observations must not be stated
++    # as settled fact (independent review H3), so bootstrap it and report the interval.
++    rng_bs = np.random.RandomState(20260712)
++    calm_m = (V >= 0) & (V < 15)
++    high_m = (V >= 25) & (V < 30)
++    cells = {
++        "calm_up": a[calm_m & (dV > SHOCK_ABS)], "calm_normal": a[calm_m & ~shock_a],
++        "high_up": a[high_m & (dV > SHOCK_ABS)], "high_normal": a[high_m & ~shock_a],
++    }
++    bs_sar_calm, bs_sar_high, bs_dec = [], [], []
++    for _ in range(10_000):
++        d = {k: rng_bs.choice(v, size=len(v), replace=True) for k, v in cells.items()}
++        sc = d["calm_up"].mean() / d["calm_normal"].mean()
++        sh = d["high_up"].mean() / d["high_normal"].mean()
++        bs_sar_calm.append(sc), bs_sar_high.append(sh), bs_dec.append(sc - sh)
++    up_bs = {
++        "n_calm_up_shocks": int(len(cells["calm_up"])),
++        "sar_up_calm": round(float(np.mean(bs_sar_calm)), 4),
++        "sar_up_calm_ci95": [round(float(np.percentile(bs_sar_calm, 2.5)), 4),
++                             round(float(np.percentile(bs_sar_calm, 97.5)), 4)],
++        "sar_up_high_ci95": [round(float(np.percentile(bs_sar_high, 2.5)), 4),
++                             round(float(np.percentile(bs_sar_high, 97.5)), 4)],
++        "up_decline_calm_minus_high": round(float(np.mean(bs_dec)), 4),
++        "up_decline_ci95": [round(float(np.percentile(bs_dec, 2.5)), 4),
++                            round(float(np.percentile(bs_dec, 97.5)), 4)],
++        "up_decline_ci_contains_zero": bool(np.percentile(bs_dec, 2.5) <= 0 <= np.percentile(bs_dec, 97.5)),
++        "seed": 20260712,
++        "note": ("The calm up-shock cell has only 10 days, so the up-only decline is imprecise. "
++                 "What the interval CAN establish is reported; what it cannot is not asserted."),
++    }
++
+     diag = {
+         "sample": f"{df.date.min():%Y-%m-%d} to {df.date.max():%Y-%m-%d}",
++        "up_shock_bootstrap": up_bs,
+         "n_observations": int(len(df)),
+         "shock_rate_A": s,
+         "n_shock_A": int(shock_a.sum()),
+@@ -313,7 +435,9 @@ def compare(emp_val, sim_vals, label):
+     frac_above = float((sim >= emp_val).mean())
+     frac_below = float((sim <= emp_val).mean())
+     # Monte-Carlo empirical p-value (primary; no distributional assumption)
+-    p_mc = float(min(1.0, 2.0 * max(min(frac_above, frac_below), 1.0 / n)))
++    # (b+1)/(n+1) plug-in rather than a bare 1/n floor -- the unbiased MC p-value (review L3).
++    b_side = min(int((sim >= emp_val).sum()), int((sim <= emp_val).sum()))
++    p_mc = float(min(1.0, 2.0 * (b_side + 1) / (n + 1)))
+     z = float((emp_val - mean) / std) if std > 0 else float("nan")  # standardised distance
+     return {
+         "label": label,
+@@ -369,7 +493,8 @@ def main():
+ 
+     print("\n[3/4] Assembling...")
+     keys = ["k897_lagged|A", "contemporaneous|A", "contemporaneous|B", "contemporaneous|C",
+-            "contemporaneous|D_up", "contemporaneous|D_down", "contemporaneous|E"]
++            "contemporaneous|D_up", "contemporaneous|D_down", "contemporaneous|E",
++            "contemporaneous|F", "contemporaneous|G"]
+     mats = {k: np.vstack([s[k] for s in sims]) for k in keys}
+     declines = {k: np.array([decline(s[k]) for s in sims]) for k in keys}
+ 
+@@ -401,6 +526,10 @@ def main():
+             "C": "relative threshold |dP|/P_{t-1} > q, same unit-free q as empirical",
+             "D": "sign-split: dP>+2 (vol up) vs dP<-2 (vol down); shared non-shock denominator",
+             "E": "ambient regime: classify day t by the PRE-shock level P[t-1]",
++            "G": "POST-HOC (not pre-registered): doubly-corrected -- ambient regime AND relative "
++                 "threshold, i.e. B/C/E's fixes combined (independent review M2)",
++            "F": "POST-HOC (not pre-registered): VRP-calibrated -- affine-map the null proxy onto VIX's "
++                 "scale (VIX ~ a + b*P fitted on real data), THEN apply the paper's literal thresholds",
+             "k897_lagged": "REPLICATION ARM: K897's proxy sqrt(h[t]) on the same paths (internal placebo)",
+         },
+         "pre_registered_decision_rule": {
+@@ -431,11 +560,44 @@ def main():
+         "contemporaneous|B": decline(emp["B"]), "contemporaneous|C": decline(emp["C"]),
+         "contemporaneous|D_up": decline(emp["D_up"]), "contemporaneous|D_down": decline(emp["D_down"]),
+         "contemporaneous|E": decline(emp["E"]),
++        "contemporaneous|F": emp_decline,   # F changes only the null's scale; data side = variant A
++        "contemporaneous|G": decline(emp["G"]),
+     }
+     out["sar_decline_comparison"] = {
+         k: compare(emp_declines[k], declines[k], k) for k in keys
+     }
+ 
++    # Secondary leg (normal -> high). Variant F's calm cell is unmeasurable (see
++    # variant_F_calibration_note), so without this leg F would drop out silently -- exactly
++    # the failure mode K897 shipped. Reported for every variant so the legs are comparable.
++    declines_nh = {k: np.array([decline_nh(s[k]) for s in sims]) for k in keys}
++    emp_nh = {
++        "k897_lagged|A": decline_nh(emp["A"]), "contemporaneous|A": decline_nh(emp["A"]),
++        "contemporaneous|B": decline_nh(emp["B"]), "contemporaneous|C": decline_nh(emp["C"]),
++        "contemporaneous|D_up": decline_nh(emp["D_up"]),
++        "contemporaneous|D_down": decline_nh(emp["D_down"]),
++        "contemporaneous|E": decline_nh(emp["E"]), "contemporaneous|F": decline_nh(emp["A"]),
++        "contemporaneous|G": decline_nh(emp["G"]),
++    }
++    out["sar_decline_normal_to_high_comparison"] = {
++        k: compare(emp_nh[k], declines_nh[k], k) for k in keys
++    }
++
++    out["variant_F_calibration_note"] = {
++        "affine_map": {"a": round(spec["vrp_a"], 4), "b": round(spec["vrp_b"], 4)},
++        "calm_regime_evaluable": False,
++        "why": ("The affine map that removes the variance-risk-premium level gap has slope "
++                f"b={spec['vrp_b']:.3f} < 1, so it also COMPRESSES daily increments: a 2-point "
++                f"move on VIX's scale needs |dP| > {2 / spec['vrp_b']:.2f} in the null's own units. "
++                "Calm-regime shocks then fall below the minimum cell size in every path, and the "
++                "null's overall shock rate collapses to ~0.06 vs the data's 0.151. "
++                "So F fixes the LEVEL but breaks the INCREMENT scale. No single affine "
++                "recalibration matches VIX in both -- there is no calibration-invariant null for "
++                "this statistic. That is a property of the SAR design, not a coding failure, and "
++                "it is reported rather than dropped."),
++        "evaluable_leg_normal_to_high": "see sar_decline_normal_to_high_comparison",
++    }
++
+     # --- regime-wise SAR levels + occupancy diagnostics ---
+     out["regime_sar"] = {}
+     out["regimes_outside_ci"] = {}
+@@ -472,6 +634,22 @@ def main():
+                  "pushed toward 1 -- a decline produced by selection, not by absorption."),
+     }
+ 
++    # --- why D_down is undefined in the lower regimes: it is structural, not a bug -----------
++    p_star = decay_only_drop_level(K897_PARAMS)
++    out["down_shock_impossibility"] = {
++        "min_level_for_a_2pt_one_day_fall": round(p_star, 2),
++        "regimes_where_null_can_never_produce_a_down_shock":
++            [rn for rn, (lo, hi) in zip(REGIME_NAMES, REGIME_BOUNDS) if hi <= p_star],
++        "note": ("With alpha=0 the deepest one-day fall the null can produce is pure decay, "
++                 f"h_next = omega + beta*h. That crosses -2 annualised points only above "
++                 f"{p_star:.2f}. Below it a vol-DOWN shock cannot exist in this null AT ALL. "
++                 "The empirical decline, however, is carried ENTIRELY by vol-DOWN days (see "
++                 "the sign-split): the null has no such channel, so on the down side the null "
++                 "and the data are not even measuring the same event. D_down's n_valid_sims=0 "
++                 "in calm/normal/elevated is therefore a structural property of the null, not "
++                 "a silent failure."),
++    }
++
+     out["calibration_diagnostics"] = {
+         "regime_occupancy_empirical": [round(x, 4) for x in diag["regime_occupancy"]],
+         "regime_occupancy_sim_A_contemporaneous":
+@@ -485,6 +663,10 @@ def main():
+         "shock_rate_sim_A_k897_lagged": round(float(np.mean([s["shock_rate_A_lagged"] for s in sims])), 4),
+         "shock_rate_sim_B": round(float(np.mean([s["shock_rate_B"] for s in sims])), 4),
+         "shock_rate_sim_C": round(float(np.mean([s["shock_rate_C"] for s in sims])), 4),
++        "regime_occupancy_sim_F_vrp_calibrated":
++            [round(float(np.mean([s["occ_F"][i] for s in sims])), 4) for i in range(5)],
++        "shock_rate_sim_F": round(float(np.mean([s["shock_rate_F"] for s in sims])), 4),
++        "vrp_affine_map": {"a": round(spec["vrp_a"], 4), "b": round(spec["vrp_b"], 4)},
+         "shock_rate_sim_D_up": round(float(np.mean([s["shock_rate_D_up"] for s in sims])), 4),
+         "shock_rate_sim_D_down": round(float(np.mean([s["shock_rate_D_down"] for s in sims])), 4),
+         "note": ("VIX carries a variance risk premium, so its level sits above the physical conditional "
+@@ -516,6 +698,111 @@ def main():
+             f"timing-corrected null. Per the pre-registered rule the identification holds and strengthens."
+         )
+ 
++    # --- the verdict must CARRY the disagreement, not bury it (independent review H2) ---------
++    # The pre-registered rule names A as primary AND obliges us to report variant conflict rather
++    # than headline whichever variant flatters us. A verdict string computed from A alone would
++    # satisfy the first half and quietly break the second. So attach the split to the verdict.
++    rejects, fails_to_reject, unevaluable = [], [], []
++    for k in keys:
++        if k == "k897_lagged|A":
++            continue
++        c = out["sar_decline_comparison"][k]
++        if "in_95_ci" not in c:
++            unevaluable.append(k)
++        elif c["in_95_ci"]:
++            fails_to_reject.append(k)
++        else:
++            rejects.append(k)
++
++    bs = diag["up_shock_bootstrap"]
++    out["variant_disagreement"] = {
++        "fails_to_reject_the_null": fails_to_reject,
++        "rejects_the_null": rejects,
++        "not_evaluable_on_the_primary_leg": unevaluable,
++        "the_null_comparison_is_INCONCLUSIVE": (
++            "The variants split. Worse, the pre-registered primary's own non-rejection is not strong "
++            "evidence: the mechanism diagnostic shows variant A's null manufactures its 0.619 decline "
++            "by letting plain decay cross the fixed 2-point threshold at high vol levels (null "
++            "within-regime shock rate 0.82 at crisis vs the data's 0.54), which is NOT how the decline "
++            "arises in the data. A's 'pass' is one artifact cancelling another. The corrected nulls "
++            "(B frequency-matched, C relative-threshold, G doubly-corrected) all reject. So neither "
++            "'the decline is pure GARCH mechanics' NOR 'the decline is absorption' is established by "
++            "the null comparison. It is inconclusive, and saying otherwise in either direction would "
++            "be overclaiming."
++        ),
++        "why_no_null_can_settle_the_down_side": (
++            f"Below {p_star:.1f} annualised points this null cannot produce a vol-DOWN shock AT ALL "
++            "(alpha=0 => the deepest one-day fall is pure decay). But the empirical decline is carried "
++            "ENTIRELY by vol-DOWN days. On the down side the null and the data are not even measuring "
++            "the same event, so where B/C/G reject, what they detect is the ABSENCE OF A RELIEF-RALLY "
++            "CHANNEL IN GARCH -- not the PRESENCE OF ABSORPTION IN MARKETS."
++        ),
++    }
++
++    # --- what survives WITHOUT any null model. This is what actually decides the paper. --------
++    out["null_free_evidence"] = {
++        "pooled_decline_headline": round(emp_decline, 4),
++        "up_only_decline": bs["up_decline_calm_minus_high"],
++        "up_only_decline_ci95": bs["up_decline_ci95"],
++        "up_only_ci_excludes_pooled_headline":
++            bool(bs["up_decline_ci95"][1] < emp_decline),
++        "down_only_decline": round(decline(emp["D_down"]), 4),
++        "n_calm_up_shocks": bs["n_calm_up_shocks"],
++        "n_calm_down_shocks": diag["shock_sign_composition"][0]["n_shock_down"],
++        "finding": (
++            "Split the shock set by the SIGN of the VIX move and the paper's mechanism evaporates. "
++            f"Pooled decline {emp_decline:.4f}. Among genuine FEAR SPIKES (dVIX>+2) the decline is "
++            f"{bs['up_decline_calm_minus_high']:.4f}, bootstrap 95% CI {bs['up_decline_ci95']} -- it "
++            "contains ZERO (no absorption gradient can be established) AND its upper end sits BELOW "
++            f"the pooled headline {emp_decline:.4f}, so the headline is significantly larger than "
++            "anything fear spikes can account for. The decline lives in the RELIEF RALLIES "
++            f"(dVIX<-2): {decline(emp['D_down']):.4f}. And the calm anchor that sets the headline's "
++            f"magnitude rests on {bs['n_calm_up_shocks']} fear-spike days against "
++            f"{diag['shock_sign_composition'][0]['n_shock_down']} relief days. "
++            "This holds with NO null model, so it is immune to every calibration dispute above."
++        ),
++        "mechanism": (
++            "A 2-point VIX fall from 13 is a rare, large relief move that comes with a big rally; a "
++            "2-point fall from 27 is routine mean reversion with an ordinary return. So the shock "
++            "bucket's mean |r| is inflated at calm levels and deflated at high levels -- SAR declines. "
++            "That is signed-composition selection, not fear being absorbed."
++        ),
++    }
+
+exec
+/bin/zsh -lc "shasum experiments/k1686/k1686_contemporaneous_null_results.json && git show 322cfeb38:experiments/k1686/k1686_contemporaneous_null_results.json | jq -r '.sar_decline_comparison[\"contemporaneous|A\"]' && git show 1c91b875:experiments/k1686/k1686_contemporaneous_null_results.json | jq -r '.sar_decline_comparison[\"contemporaneous|A\"]'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+3b4809f072ed5fba9408b9adefa61ab60a0e840b  experiments/k1686/k1686_contemporaneous_null_results.json
+{
+  "label": "contemporaneous|A",
+  "empirical": 0.8165,
+  "sim_mean": 0.619,
+  "sim_std": 0.2487,
+  "sim_ci_95": [
+    0.0824,
+    1.0596
+  ],
+  "in_95_ci": true,
+  "z_score": 0.7939,
+  "p_value_monte_carlo": 0.4096,
+  "frac_sim_above_empirical": 0.2048,
+  "n_valid_sims": 10000
+}
+{
+  "label": "contemporaneous|A",
+  "empirical": 0.8165,
+  "sim_mean": 0.619,
+  "sim_std": 0.2487,
+  "sim_ci_95": [
+    0.0824,
+    1.0596
+  ],
+  "in_95_ci": true,
+  "z_score": 0.7939,
+  "p_value_monte_carlo": 0.409759,
+  "frac_sim_above_empirical": 0.2048,
+  "n_valid_sims": 10000
+}
+
+codex
+初步沒有發現會推翻主模擬的 timing/RNG bug；K897 的 return path 同一性也成立。現在剩下最關鍵的一關：README 把 n=10 的 sign-split 稱為「決定性」，但程式只對 up-only 統計量做分層 i.i.d. bootstrap，並未直接 bootstrap「pooled − up-only」的配對差，也未處理時間依賴。我正在獨立重算，判斷這是措辭問題還是會改變 paper disposition。
+exec
+/bin/zsh -lc "uv run python - <<'PY'
+import numpy as np
+import pandas as pd
+from pathlib import Path
+p=Path('paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv')
+df=pd.read_csv(p,parse_dates=['date'])
+df=df[(df.date>='2006-01-01')&(df.date<='2026-04-05')].copy()
+df['ret']=np.log(df.spy_adj_close/df.spy_adj_close.shift(1))*100
+df=df.dropna(subset=['ret','vix_close'])
+df['dvix']=df.vix_close.diff()
+df=df.dropna(subset=['dvix']).reset_index(drop=True)
+a=np.abs(df.ret.to_numpy()); V=df.vix_close.to_numpy(); dV=df.dvix.to_numpy()
+shock=np.abs(dV)>2
+calm=V<15; high=(V>=25)&(V<30); up=dV>2; down=dV< -2
+
+def sar(mask_event, reg):
+    return a[mask_event&reg].mean()/a[(~shock)&reg].mean()
+def stats(idx=None):
+    if idx is None:
+        aa,VV,dVV=a,V,dV
+    else:
+        aa,VV,dVV=a[idx],V[idx],dV[idx]
+    sh=np.abs(dVV)>2; ca=VV<15; hi=(VV>=25)&(VV<30); uu=dVV>2; dd=dVV< -2
+    def s(ev,rg):
+        den=aa[(~sh)&rg]
+        num=aa[ev&rg]
+        if len(num)==0 or len(den)==0:return np.nan
+        return num.mean()/den.mean()
+    pooled=s(sh,ca)-s(sh,hi)
+    upv=s(uu,ca)-s(uu,hi)
+    dnv=s(dd,ca)-s(dd,hi)
+    return pooled,upv,dnv,pooled-upv
+print('point',stats(), 'n', len(df), 'cells', (calm&up).sum(), (calm&down).sum(), (high&up).sum(),(high&down).sum())
+
+def boot_iid(B=10000,seed=20260712):
+    rng=np.random.RandomState(seed); out=np.empty((B,4))
+    n=len(a)
+    for b in range(B): out[b]=stats(rng.randint(0,n,n))
+    return out
+
+def boot_mbb(L,B=5000,seed=20260712):
+    rng=np.random.RandomState(seed+L); n=len(a); m=(n+L-1)//L; out=np.empty((B,4)); base=np.arange(L)
+    for b in range(B):
+        starts=rng.randint(0,n,m)
+        idx=((starts[:,None]+base)%n).ravel()[:n]
+        out[b]=stats(idx)
+    return out
+for label,x in [('iid-row',boot_iid())]+[(f'mbb{L}',boot_mbb(L)) for L in (5,10,20,40)]:
+    print(label,'valid',np.isfinite(x).all(1).sum())
+    for j,nm in enumerate(('pooled','up','down','pooled_minus_up')):
+        q=np.nanpercentile(x[:,j],[2.5,50,97.5])
+        print(nm, np.round(q,4))
+PY" in /Users/yhlai0911/volpred-research
+ succeeded in 5008ms:
+point (np.float64(0.8165078621112825), np.float64(-0.11921114229922525), np.float64(1.3368327890367038), np.float64(0.9357190044105077)) n 5092 cells 10 24 73 60
+iid-row valid 10000
+pooled [0.3335 0.813  1.3171]
+up [-0.7627 -0.1471  0.6259]
+down [0.7716 1.3323 1.9187]
+pooled_minus_up [0.3654 0.9341 1.5539]
+mbb5 valid 4999
+pooled [0.3252 0.8134 1.3178]
+up [-0.7543 -0.1509  0.6236]
+down [0.7452 1.3272 1.9027]
+pooled_minus_up [0.3371 0.9305 1.5372]
+mbb10 valid 5000
+pooled [0.3258 0.8077 1.3254]
+up [-0.7641 -0.1368  0.6556]
+down [0.7657 1.3321 1.9361]
+pooled_minus_up [0.3587 0.929  1.5322]
+mbb20 valid 5000
+pooled [0.299  0.7951 1.3262]
+up [-0.7659 -0.1537  0.6311]
+down [0.7043 1.3123 1.9189]
+pooled_minus_up [0.3308 0.9244 1.5494]
+mbb40 valid 5000
+pooled [0.2616 0.8037 1.3735]
+up [-0.7751 -0.1567  0.6498]
+down [0.6675 1.3295 1.995 ]
+pooled_minus_up [0.3284 0.9406 1.5609]
+
+collab: Wait
+exec
+/bin/zsh -lc "uv run python - <<'PY'
+import numpy as np, pandas as pd
+p='paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv'
+df=pd.read_csv(p,parse_dates=['date'])
+df=df[(df.date>='2006-01-01')&(df.date<='2026-04-05')].copy()
+df['ret']=np.log(df.spy_adj_close/df.spy_adj_close.shift(1))*100
+df=df.dropna(subset=['ret','vix_close'])
+df['dvix']=df.vix_close.diff(); df=df.dropna(subset=['dvix']).reset_index(drop=True)
+a=np.abs(df.ret.to_numpy())[1:]; prior=df.vix_close.to_numpy()[:-1]; dv=df.dvix.to_numpy()[1:]
+anys=np.abs(dv)>2; up=dv>2; down=dv< -2
+bounds=[(0,15),(15,20),(20,25),(25,30),(30,1e6)]
+def vec(flag):
+ out=[]; counts=[]
+ for lo,hi in bounds:
+  m=(prior>=lo)&(prior<hi); num=a[m&flag]; den=a[m&~anys]
+  out.append(num.mean()/den.mean()); counts.append((len(num),len(den)))
+ return np.array(out),counts
+for name,flag in [('up',up),('down',down),('pooled',anys)]:
+ s,c=vec(flag); print(name, np.round(s,4), 'decline',round(float(s[0]-s[3]),4),'counts',c)
+# Recreate stratified iid bootstrap for ambient-up decline, same 4-cell style
+ca=(prior<15); hi=(prior>=25)&(prior<30)
+cells={'cu':a[ca&up], 'cn':a[ca&~anys], 'hu':a[hi&up], 'hn':a[hi&~anys]}
+rng=np.random.RandomState(20260712); z=np.empty(100000)
+for b in range(len(z)):
+ d={k:rng.choice(v,len(v),replace=True) for k,v in cells.items()}
+ z[b]=d['cu'].mean()/d['cn'].mean()-d['hu'].mean()/d['hn'].mean()
+print('ambient up iid CI',np.round(np.percentile(z,[2.5,50,97.5]),4), 'mean',round(float(z.mean()),4))
+PY" in /Users/yhlai0911/volpred-research
+ succeeded in 4486ms:
+up [3.8863 3.1017 2.9013 2.8398 3.0082] decline 1.0465 counts [(47, 1705), (124, 1389), (99, 703), (53, 309), (86, 217)]
+down [2.4061 2.645  2.1203 1.9496 2.1229] decline 0.4565 counts [(3, 1705), (58, 1389), (82, 703), (70, 309), (146, 217)]
+pooled [3.7975 2.9562 2.5475 2.3332 2.4511] decline 1.4643 counts [(50, 1705), (182, 1389), (181, 703), (123, 309), (232, 217)]
+ambient up iid CI [0.3606 1.0409 1.7325] mean 1.0418
+
+exec
+/bin/zsh -lc "uv run python - <<'PY'
+import numpy as np,pandas as pd
+p='paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv'; d=pd.read_csv(p)
+d=d[(d.date>='2006-01-01')&(d.date<='2026-04-05')].copy(); d['ret']=np.log(d.spy_adj_close/d.spy_adj_close.shift(1))*100; d=d.dropna(subset=['ret','vix_close']); d['dvix']=d.vix_close.diff(); d=d.dropna(subset=['dvix']).reset_index(drop=True)
+a=np.abs(d.ret.to_numpy())[1:]; v=d.vix_close.to_numpy()[:-1]; x=d.dvix.to_numpy()[1:]; n=len(a)
+def stat(ix):
+ aa=a[ix]; vv=v[ix]; xx=x[ix]; sh=np.abs(xx)>2; up=xx>2; ca=vv<15; hi=(vv>=25)&(vv<30)
+ return aa[ca&up].mean()/aa[ca&~sh].mean()-aa[hi&up].mean()/aa[hi&~sh].mean()
+rng=np.random.RandomState(20260732); L=20; m=(n+L-1)//L; base=np.arange(L); z=[]
+for _ in range(10000):
+ st=rng.randint(0,n,m); ix=((st[:,None]+base)%n).ravel()[:n]; val=stat(ix)
+ if np.isfinite(val): z.append(val)
+print(len(z),np.round(np.percentile(z,[2.5,50,97.5]),4))
+PY" in /Users/yhlai0911/volpred-research
+ succeeded in 1057ms:
+10000 [0.3286 1.0281 1.7625]
+
+exec
+/bin/zsh -lc "uv run python - <<'PY'
+import numpy as np
+P={'mu':0.07641013516248987,'ar1':0.0,'omega':0.022188769677603346,'alpha':0.0,'gamma':0.24422367045225124,'beta':0.8594147336803625,'nu':5.647879075643755}
+def run(seed,extra):
+ n=5000; rng=np.random.RandomState(seed); z=rng.standard_t(df=P['nu'],size=n)*np.sqrt((P['nu']-2)/P['nu']); r=np.zeros(n); h=np.zeros(n+extra); h[0]=P['omega']/(1-P['alpha']-P['gamma']/2-P['beta']); r[0]=P['mu']+np.sqrt(h[0])*z[0]
+ for t in range(1,n):
+  ind=1.0 if r[t-1]-P['mu']<0 else 0.0; eps=r[t-1]-P['mu']-P['ar1']*(r[t-2] if t>=2 else 0); h[t]=max(P['omega']+(P['alpha']+P['gamma']*ind)*eps**2+P['beta']*h[t-1],1e-8); r[t]=P['mu']+P['ar1']*r[t-1]+np.sqrt(h[t])*z[t]
+ if extra:
+  ind=1.0 if r[-1]-P['mu']<0 else 0.0; eps=r[-1]-P['mu']-P['ar1']*r[-2]; h[n]=max(P['omega']+(P['alpha']+P['gamma']*ind)*eps**2+P['beta']*h[n-1],1e-8)
+ return z,r,h,rng.get_state()[1].copy()
+for s in (0,1,42,897,9999):
+ zo,ro,ho,so=run(s,0); zn,rn,hn,sn=run(s,1); print(s,np.array_equal(zo,zn),np.array_equal(ro,rn),np.array_equal(ho,hn[:-1]),np.array_equal(so,sn))
+PY" in /Users/yhlai0911/volpred-research
+ succeeded in 128ms:
+0 True True True True
+1 True True True True
+42 True True True True
+897 True True True True
+9999 True True True True
+
+exec
+/bin/zsh -lc "uv run python - <<'PY'
+import numpy as np
+from numba import njit
+MU=0.07641013516248987; OMEGA=0.022188769677603346; ALPHA=0.0; GAMMA=0.24422367045225124; BETA=0.8594147336803625; NU=5.647879075643755; ANN=np.sqrt(252.0); N=5000
+@njit
+def one(seed):
+ np.random.seed(seed); z=np.random.standard_t(NU,N)*np.sqrt((NU-2.0)/NU); r=np.zeros(N); h=np.zeros(N+1); h[0]=OMEGA/(1-ALPHA-GAMMA/2-BETA); r[0]=MU+np.sqrt(h[0])*z[0]
+ for t in range(1,N):
+  ind=1.0 if r[t-1]-MU<0 else 0.0; eps=r[t-1]-MU; h[t]=max(OMEGA+(ALPHA+GAMMA*ind)*eps*eps+BETA*h[t-1],1e-8); r[t]=MU+np.sqrt(h[t])*z[t]
+ ind=1.0 if r[N-1]-MU<0 else 0.0; eps=r[N-1]-MU; h[N]=max(OMEGA+(ALPHA+GAMMA*ind)*eps*eps+BETA*h[N-1],1e-8)
+ P=np.sqrt(h[1:])*ANN; d=np.zeros(N)
+ for t in range(1,N): d[t]=P[t]-P[t-1]
+ sums=np.zeros((2,2,2)); counts=np.zeros((2,2,2),np.int64) # spec pooled/up, regime calm/high, event/normal
+ for t in range(1,N):
+  reg=-1
+  if P[t-1]<15: reg=0
+  elif P[t-1]>=25 and P[t-1]<30: reg=1
+  if reg>=0:
+   ar=abs(r[t]); anysh=abs(d[t])>2; up=d[t]>2
+   if not anysh:
+    for sp in range(2): sums[sp,reg,1]+=ar; counts[sp,reg,1]+=1
+   if anysh: sums[0,reg,0]+=ar; counts[0,reg,0]+=1
+   if up: sums[1,reg,0]+=ar; counts[1,reg,0]+=1
+ out=np.empty(2)
+ for sp in range(2):
+  if counts[sp,0,0]>5 and counts[sp,0,1]>5 and counts[sp,1,0]>5 and counts[sp,1,1]>5:
+   out[sp]=sums[sp,0,0]/counts[sp,0,0]/(sums[sp,0,1]/counts[sp,0,1])-sums[sp,1,0]/counts[sp,1,0]/(sums[sp,1,1]/counts[sp,1,1])
+  else: out[sp]=np.nan
+ return out
+@njit
+def allruns(nsim):
+ x=np.empty((nsim,2))
+ for s in range(nsim): x[s]=one(s)
+ return x
+x=allruns(10000)
+for j,name in enumerate(('pooled_E','up_E')):
+ y=x[:,j]; y=y[~np.isnan(y)]; print(name,len(y),np.mean(y),np.std(y),np.percentile(y,[2.5,97.5]))
+PY" in /Users/yhlai0911/volpred-research
+ succeeded in 7677ms:
+pooled_E 9962 0.9496834408761554 0.3587713200676045 [0.17283618 1.59568367]
+up_E 9456 0.28170797331966385 0.4248949550283732 [-0.67609896  0.98726183]
+
+Completed primary-path source review, independent recomputations, K897/path audit, and git-history audit. A blocking ambient-regime flaw was found in the claimed decisive signed decomposition.
+  ✓ Read K1686 source end-to-end and map all timing/index/variant logic
+  ✓ Verify results JSON, README claims, and independently recompute key outputs
+  ✓ Audit K897 implementation and exact seeded-path equivalence
+  ✓ Audit git history for pre-registration integrity and post-hoc labeling
+  ✓ Assess signed decomposition and calibrate K897/paper verdict
+codex
+## VERDICT: FAIL
+
+### Blocking issues
+
+1. The “decisive” sign decomposition does not test the stated ambient-fear mechanism. D assigns regimes using contemporaneous `VIX_t` ([code:329](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:329)), although E correctly defines ambient fear using `VIX_{t-1}` ([code:341](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:341), [README:118](/Users/yhlai0911/volpred-research/experiments/k1686/README.md:118)). The final verdict nevertheless uses D_up to conclude that ambient-fear absorption evaporates ([code:742](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:742), [code:781](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:781)). Since a positive VIX shock itself raises `VIX_t`, this is endogenous post-shock sorting and mechanically thins the current-calm cell to n=10. My no-write recomputation combining D’s sign split/shared denominator with E’s `VIX_{t-1}` alignment gives ambient-up SARs `[3.8863, 3.1017, 2.9013, 2.8398, 3.0082]`, calm−high decline `+1.0465`, with 47 calm and 53 high fear-spike days. A diagnostic stratified bootstrap gives `[0.3606, 1.7325]`; a 20-day moving-block version gives `[0.3286, 1.7625]`. These are post-hoc diagnostics, not replacement evidence, but they demonstrate that the omitted D×E specification reverses the purported “decisive” result. D is a valid decomposition of the published contemporaneous metric; it cannot decide the ambient mechanism.
+
+2. The claimed significant pooled-versus-up-only contrast is not actually tested. The bootstrap independently resamples only the four up-shock/normal cells ([code:376](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:376)) and forms an up-only CI. The code then compares that CI’s upper endpoint with the pooled point estimate ([code:747](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:747)) and calls the pooled headline significantly larger ([code:752](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:752)). These are overlapping estimated statistics; significance requires directly bootstrapping their paired difference, preferably with time-series blocks. With only 10 calm up-shocks, the present bootstrap supports “no gradient established under current-VIX binning,” not “decisive mechanism closure.”
+
+### Non-blocking findings
+
+1. Contemporaneous timing itself is correct and contains no lookahead. Returns through `r_t` update `h[t+1]`; the extra terminal variance uses only `r[n−1]` and takes no random draw ([code:169](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:169), [code:175](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:175)). `P_t = sqrt(h[t+1])` is therefore \(\mathcal F_t\)-measurable ([code:182](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:182)). C, E, and G’s substantive indexing is clean ([code:218](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:218), [code:241](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:241)). Minor boundary mismatch: simulated A–D/F force `dP[0]=0`, while empirical A has a valid first ΔVIX ([code:188](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:188), [code:300](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:300)); one observation per 5,000 cannot plausibly drive the result.
+
+2. The identical-path claim is true. K1686 copies K897’s parameters, seeds, sole Student-t draw, initialization, and return recursion exactly ([K1686:60](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:60), [K1686:151](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:151), [K897:247](/Users/yhlai0911/volpred-research/experiments/k897/k897_sar_null_simulation.py:247)). I independently obtained exact array equality for `z`, every `r`, and the original `h` for seeds 0, 1, 42, 897, and 9999. The full lagged arm also exactly reproduces K897’s mean, SD, and CI ([results:126](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null_results.json:126)).
+
+3. SAR formulas, literal cut-points, and shock thresholds align across empirical and simulated A/C/D/E/G ([code:83](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:83), [code:295](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:295)). The proxy-scale mismatch is disclosed: A has empirical/null calm occupancy 0.3447/0.7664 and shock rates 0.1508/0.0994 ([results:1106](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null_results.json:1106)). `h[t+1]` is the correct timing analogue, but remains a one-day physical-variance forecast—not VIX’s roughly 30-day risk-neutral construction. The README acknowledges this limitation ([README:292](/Users/yhlai0911/volpred-research/experiments/k1686/README.md:292)).
+
+4. Pre-registration integrity passes. Commit `870af5d00` directly precedes the first-results commit `322cfeb38`; its K1686 tree contains only README, with 0.8165, A, thresholds, and the decision rule fixed at lines 82–103 and empty result/verdict placeholders. A’s seeds, specification, CI, and outcome did not change afterward. F/G first appeared post-results and are honestly labelled post-hoc ([code:246](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:246), [README:307](/Users/yhlai0911/volpred-research/experiments/k1686/README.md:307)); neither carries the registered A outcome. Git cannot prove no private/untracked run occurred before the commit, but there is no evidence of leakage.
+
+5. Primary A is internally coherent: empirical 0.8165, null mean 0.6190, CI `[0.0824, 1.0596]`, MC p=0.409759, n=10,000 ([results:163](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null_results.json:163)). The variant split is also reported honestly ([results:1156](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null_results.json:1156)). The defensible wording is “pre-registered A fails to reject”; `IDENTIFICATION CLOSED` is too global.
+
+6. Minor reporting errors: the observed D_up decline is −0.1192, whereas −0.1226 is the bootstrap distribution mean but is called a point estimate ([results:208](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null_results.json:208), [code:391](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null.py:391)). README p-values are stale after the `(b+1)/(n+1)` correction—for example 0.0004 versus JSON 0.0006, and 0.0064 versus 0.006601 ([README:169](/Users/yhlai0911/volpred-research/experiments/k1686/README.md:169), [results:159](/Users/yhlai0911/volpred-research/experiments/k1686/k1686_contemporaneous_null_results.json:159)).
+
+### On the K897 overturn
+
+Yes. K897’s lagged-proxy test should be retired. Its exact statistic is reproduced on pointwise-identical paths, and changing only proxy timing shifts the decline distribution from mean 0.1734, CI `[−0.2811, 0.5575]` to mean 0.6190, CI `[0.0824, 1.0596]`. Thus K897’s `NULL REJECTED` margin was materially timing-dependent.
+
+This supports “K897’s rejection is invalid,” not “the null is true” or “absorption is false.”
+
+### On the paper disposition
+
+The proposed FRL signed-composition note is currently too strong. K1686 supports a narrower measurement result: the published contemporaneous `VIX_t` SAR is highly sensitive to proxy timing, shock sign, threshold definition, and calibration. It does not establish that signed composition replaces ambient-fear absorption as the explanation.
+
+The defensible current disposition is:
+
+> The original contemporaneous SAR identification failed its pre-registered gate; K897 is retired; the ambient-fear mechanism remains unresolved.
+
+Before reframing, run the missing ambient×sign specification on both empirical and same-seed null sides, use a direct paired block-bootstrap contrast, and avoid calling B/C/G “well-specified” while their calibration failures remain.
+tokens used
+168,533

@@ -14,9 +14,13 @@ predictors like NFCI / VIX). In K1655 the differential had acf(1) = 0.68 and the
 missing HAC correction inflated |t|: 26 of 60 DM cells read as Harvey-significant
 before the fix, 18 after.
 
-This script classifies every local DM in ``experiments/`` by its bandwidth rule
-so the class can be triaged as a population rather than one file at a time.
-Static analysis only -- it never imports or executes experiment code.
+The first version only recognised an explicit ``lag = h - 1`` / ``range(1, h)``
+shape under ``experiments/``.  That left three important false-negative classes:
+plain-variance DM/HLN helpers (zero HAC without any lag variable), DM-like
+one-sample t-tests, and replication scripts under ``paper/*/experiments/``.
+This script classifies all of those sites so the class can be triaged as a
+population rather than one file at a time.  Static analysis only -- it never
+imports or executes experiment code.
 
 Usage:
     uv run python scripts/audit_dm_hac_lag.py                    # human summary
@@ -38,7 +42,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from volpred.ops.diagnostics import warn  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-EXPERIMENTS_DIR = REPO_ROOT / "experiments"
+SCAN_PATTERNS = (
+    "experiments/**/*.py",
+    "paper/*/experiments/**/*.py",
+)
 
 # Function names that plausibly implement a DM / HLN test locally.
 DM_NAME_RE = re.compile(r"(^|_)(dm|hln|diebold|mariano)(_|$)", re.IGNORECASE)
@@ -50,6 +57,7 @@ LAG_NAME_RE = re.compile(
 
 # Verdicts, ordered worst -> best.
 DEGENERATE = "degenerate_at_h1"  # lag = h-1 with no floor: zero HAC when h=1
+NO_HAC = "no_hac"  # plain variance / iid t-test / explicit zero bandwidth
 H_INCLUSIVE = "h_lags_inclusive"  # range(1, h+1): keeps lag 1, but never scales with n
 HARDCODED = "hardcoded"  # fixed integer bandwidth, independent of h and n
 CANONICAL_LIKE = "canonical_like"  # n**(1/3) style rule, or floored at >= 1
@@ -58,21 +66,41 @@ UNKNOWN = "unknown"  # DM-ish def found, no bandwidth binding recognised
 NOT_A_TEST = "not_a_dm_test"  # name matched but the body computes no test statistic
 
 SEVERITY = {
-    DEGENERATE: 0,
-    UNKNOWN: 1,
-    H_INCLUSIVE: 2,
-    HARDCODED: 3,
-    CANONICAL_LIKE: 4,
-    DELEGATES: 5,
-    NOT_A_TEST: 6,
+    NO_HAC: 0,
+    DEGENERATE: 1,
+    UNKNOWN: 2,
+    H_INCLUSIVE: 3,
+    HARDCODED: 4,
+    CANONICAL_LIKE: 5,
+    DELEGATES: 6,
+    NOT_A_TEST: 7,
 }
+
+# The CI ratchet freezes both ways a local forecast-comparison test can silently
+# omit HAC: an h=1-degenerate loop and an implementation with no HAC machinery.
+RATCHET_VERDICTS = frozenset({DEGENERATE, NO_HAC})
 
 # A real DM implementation has to touch the loss differential's second moment.
 # Plotting / formatting / classification helpers whose name merely contains "dm"
 # do not, and must not inflate the population count.
 TEST_MACHINERY_RE = re.compile(
-    r"\b(np\.var|\.var\(|np\.cov|\.cov\(|gamma|autocov|t_stat|tstat|dm_stat"
-    r"|stats\.t\.|norm\.cdf|p_value|pval)\b"
+    r"\b(np\.var|\.var\(|np\.cov|\.cov\(|gamma|autocov|ttest_1samp"
+    r"|stats\.t\.|stats\.norm\.|sp_stats\.t\.|sp_stats\.norm\."
+    r"|_st\.t\.|_st\.norm\.|norm\.cdf)\b"
+)
+
+# Reading a ``t_stat`` key in a plot is not evidence that the function computes
+# a test.  Assigning the statistic is.  This distinction removes the old
+# ``plot_dm_*`` false positives while retaining oddly named local tests.
+STAT_TARGET_NAMES = frozenset({"t", "t_stat", "tstat", "dm_stat", "dm_t"})
+STAT_OUTPUT_KEYS = frozenset({"t", "t_stat", "tstat", "dm_stat", "dm_t"})
+
+PLAIN_VARIANCE_RE = re.compile(
+    r"np\.var\(\s*d\b|\bd\.var\(|np\.std\(\s*d\b|\bd\.std\(", re.IGNORECASE
+)
+HAC_MACHINERY_RE = re.compile(
+    r"np\.cov|\.cov\(|autocov|gamma_[kl]|gamma\[|newey|bartlett|hac|nw_var|cov_hac",
+    re.IGNORECASE,
 )
 
 CANONICAL_IMPORT_RE = re.compile(
@@ -100,7 +128,7 @@ class Finding:
 
     @property
     def exposed(self) -> bool:
-        """Structurally exposed: applies zero HAC correction on a one-step cell.
+        """Structurally exposed to omitted serial-correlation correction.
 
         This is exposure, not a proven error. At h == 1 the textbook DM statistic
         legitimately uses no HAC term, because a correctly specified one-step
@@ -111,7 +139,99 @@ class Finding:
         static analysis cannot answer it. Confirming materiality means re-running
         the experiment and measuring the autocorrelation.
         """
-        return self.verdict == DEGENERATE and self.exercises_h1
+        return self.verdict == NO_HAC or (
+            self.verdict == DEGENERATE and self.exercises_h1
+        )
+
+
+def _target_names(target: ast.expr) -> set[str]:
+    """Return all simple names bound by an assignment target."""
+    if isinstance(target, ast.Name):
+        return {target.id}
+    if isinstance(target, (ast.Tuple, ast.List)):
+        names: set[str] = set()
+        for elt in target.elts:
+            names.update(_target_names(elt))
+        return names
+    return set()
+
+
+def _function_computes_test_statistic(fn: ast.FunctionDef) -> bool:
+    """Distinguish statistic producers from plotting/result-reader helpers."""
+    body_src = _function_body_src(fn)
+    if TEST_MACHINERY_RE.search(body_src):
+        return True
+    for node in ast.walk(fn):
+        if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+            continue
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        names = set().union(*(_target_names(target) for target in targets))
+        if names & STAT_TARGET_NAMES or any(
+            "dm" in name.lower()
+            and ("stat" in name.lower() or name.lower().endswith("_t"))
+            for name in names
+        ):
+            return True
+    for node in ast.walk(fn):
+        if not isinstance(node, ast.Return) or not isinstance(node.value, ast.Dict):
+            continue
+        keys = {
+            key.value
+            for key in node.value.keys
+            if isinstance(key, ast.Constant) and isinstance(key.value, str)
+        }
+        if keys & STAT_OUTPUT_KEYS:
+            return True
+    return False
+
+
+def _function_body_src(fn: ast.FunctionDef) -> str:
+    """Unparse executable body only, excluding a docstring's prose tokens."""
+    body = list(fn.body)
+    if (
+        body
+        and isinstance(body[0], ast.Expr)
+        and isinstance(body[0].value, ast.Constant)
+        and isinstance(body[0].value.value, str)
+    ):
+        body = body[1:]
+    return "\n".join(ast.unparse(node) for node in body)
+
+
+def _lag_default(fn: ast.FunctionDef) -> tuple[str, str] | None:
+    """Return a lag-like argument and its default expression, if present."""
+    positional = [*fn.args.posonlyargs, *fn.args.args]
+    defaults = [None] * (len(positional) - len(fn.args.defaults)) + list(fn.args.defaults)
+    pairs = list(zip(positional, defaults, strict=True))
+    pairs.extend(zip(fn.args.kwonlyargs, fn.args.kw_defaults, strict=True))
+    for arg, default in pairs:
+        if default is not None and LAG_NAME_RE.match(arg.arg):
+            return arg.arg, ast.unparse(default)
+    return None
+
+
+def _is_candidate_function(fn: ast.FunctionDef) -> bool:
+    """Select DM-named helpers plus zero-bandwidth forecast-test variants."""
+    if DM_NAME_RE.search(fn.name):
+        return True
+    lag_default = _lag_default(fn)
+    if lag_default is None:
+        return False
+    arg_name, default = lag_default
+    parameter_names = {arg.arg for arg in [*fn.args.posonlyargs, *fn.args.args]}
+    return (
+        arg_name.lower().startswith("nw_")
+        and default.replace(" ", "") == "0"
+        and "h" in parameter_names
+        and _function_computes_test_statistic(fn)
+    )
+
+
+def _plain_variance_only(body_src: str) -> bool:
+    """Recognise iid variance used as the DM long-run variance."""
+    return bool(PLAIN_VARIANCE_RE.search(body_src)) and not bool(
+        HAC_MACHINERY_RE.search(body_src)
+    )
 
 
 def _classify_lag_expr(src: str) -> tuple[str, list[str]]:
@@ -139,6 +259,9 @@ def _classify_lag_expr(src: str) -> tuple[str, list[str]]:
     if minus_one:
         notes.append("lag = h-1 with no floor: HAC loop is empty when h == 1")
         return DEGENERATE, notes
+    if compact == "0":
+        notes.append("bandwidth fixed at zero: inference uses iid variance only")
+        return NO_HAC, notes
     if re.fullmatch(r"\d+", compact):
         notes.append(f"bandwidth fixed at {compact}, ignores h and sample size")
         return HARDCODED, notes
@@ -149,9 +272,9 @@ def _classify_lag_expr(src: str) -> tuple[str, list[str]]:
 
 def _scan_function(fn: ast.FunctionDef, path: Path, exercises_h1: bool) -> Finding | None:
     """Find the bandwidth binding inside one DM-ish function."""
-    body_src = ast.unparse(fn)
+    body_src = _function_body_src(fn)
 
-    if not TEST_MACHINERY_RE.search(body_src):
+    if not _function_computes_test_statistic(fn):
         return Finding(
             file=str(path.relative_to(REPO_ROOT)),
             function=fn.name,
@@ -172,6 +295,13 @@ def _scan_function(fn: ast.FunctionDef, path: Path, exercises_h1: bool) -> Findi
                     if node.value is not None:
                         lag_expr = ast.unparse(node.value)
 
+    # A default such as ``nw_lag=0`` is itself the binding when the function
+    # never replaces it.  This was the k1116c Clark-West blind spot.
+    if lag_expr is None:
+        default = _lag_default(fn)
+        if default is not None:
+            _, lag_expr = default
+
     # A HAC loop written inline as `for lag in range(1, h)` binds no name but is
     # the same defect -- range(1, 1) is empty.
     if lag_expr is None:
@@ -184,12 +314,17 @@ def _scan_function(fn: ast.FunctionDef, path: Path, exercises_h1: bool) -> Findi
                         continue
                     upper = ast.unparse(args[1])
                     bare_h = re.fullmatch(r"\s*(h|horizon|H)\s*", upper)
+                    min_h = re.fullmatch(
+                        r"\s*min\(\s*(h|horizon|H)\s*,.+\)\s*", upper
+                    )
                     h_plus_1 = re.fullmatch(r"\s*(h|horizon|H)\s*\+\s*1\s*", upper)
-                    if not (bare_h or h_plus_1):
+                    if not (bare_h or min_h or h_plus_1):
                         continue
-                    if bare_h:
+                    if bare_h or min_h:
                         verdict = DEGENERATE
-                        notes = ["inline `range(1, h)`: HAC loop is empty when h == 1"]
+                        notes = [
+                            f"inline `range(1, {upper})`: HAC loop is empty when h == 1"
+                        ]
                     else:
                         verdict = H_INCLUSIVE
                         notes = [
@@ -205,6 +340,20 @@ def _scan_function(fn: ast.FunctionDef, path: Path, exercises_h1: bool) -> Findi
                         exercises_h1=exercises_h1,
                         notes=notes,
                     )
+
+    if lag_expr is None and _plain_variance_only(body_src):
+        return Finding(
+            file=str(path.relative_to(REPO_ROOT)),
+            function=fn.name,
+            lineno=fn.lineno,
+            verdict=NO_HAC,
+            lag_expr="iid sample variance",
+            exercises_h1=exercises_h1,
+            notes=[
+                "test statistic divides by sample variance only; no long-run "
+                "variance / HAC covariance terms are present"
+            ],
+        )
 
     if lag_expr is None:
         return Finding(
@@ -251,7 +400,7 @@ def scan_file(path: Path) -> list[Finding]:
     for node in ast.walk(tree):
         if not isinstance(node, ast.FunctionDef):
             continue
-        if not DM_NAME_RE.search(node.name):
+        if not _is_candidate_function(node):
             continue
         finding = _scan_function(node, path, exercises_h1)
         if finding is None:
@@ -261,12 +410,43 @@ def scan_file(path: Path) -> list[Finding]:
             finding.notes = ["wraps the canonical volpred dm_test"]
         findings.append(finding)
 
+    # Some historical scripts label an iid one-sample t-test as DM directly at
+    # module scope.  It has no function for the loop above to inspect, so catch
+    # only calls whose assigned result variable explicitly contains ``dm``.
+    for node in tree.body:
+        if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+            continue
+        value = node.value
+        if not isinstance(value, ast.Call):
+            continue
+        callee = ast.unparse(value.func)
+        if not callee.endswith("ttest_1samp"):
+            continue
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        target_names = set().union(*(_target_names(target) for target in targets))
+        if not any("dm" in name.lower() for name in target_names):
+            continue
+        findings.append(
+            Finding(
+                file=str(path.relative_to(REPO_ROOT)),
+                function=f"<module>:ttest_1samp@{node.lineno}",
+                lineno=node.lineno,
+                verdict=NO_HAC,
+                lag_expr="iid one-sample t-test",
+                exercises_h1=True,
+                notes=["module-level DM-like t-test has no HAC correction"],
+            )
+        )
+
     return findings
 
 
-def scan_population(root: Path = EXPERIMENTS_DIR) -> list[Finding]:
+def scan_population(root: Path = REPO_ROOT) -> list[Finding]:
     findings: list[Finding] = []
-    for path in sorted(root.rglob("*.py")):
+    paths: set[Path] = set()
+    for pattern in SCAN_PATTERNS:
+        paths.update(root.glob(pattern))
+    for path in sorted(paths):
         findings.extend(scan_file(path))
     findings.sort(key=lambda f: (SEVERITY[f.verdict], not f.exercises_h1, f.file))
     return findings
@@ -291,8 +471,11 @@ def main() -> int:
 
     if args.json:
         payload = {
-            "scan_scope": "experiments/**/*.py (full population, static AST)",
-            "bug_class": "DM HAC bandwidth lag=h-1 applies zero HAC correction at h=1",
+            "scan_scope": list(SCAN_PATTERNS),
+            "bug_class": (
+                "local DM/HLN omits HAC via h-1 at h=1, plain iid variance, "
+                "module-level iid t-test, or explicit zero bandwidth"
+            ),
             "canonical_owner": "volpred.stats.model_evaluation.dm_test",
             "materiality_caveat": (
                 "Exposure is structural, not a proven error. Zero HAC at h=1 is the "

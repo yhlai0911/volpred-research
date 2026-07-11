@@ -8,11 +8,11 @@ from a persistent predictor), it inflates |t| and manufactures significance. The
 canonical helper, ``volpred.stats.model_evaluation.dm_test``, floors its
 bandwidth at 1 and scales it with the sample, so it never degenerates.
 
-This is a RATCHET, not a clean-tree assertion. 139 pre-existing sites carry the
-degenerate rule and are frozen into a baseline; re-running and correcting them is
-tracked separately. What the gate enforces is that the class cannot GROW: a newly
-written local DM with the degenerate bandwidth fails CI, and every site removed
-from the baseline can never come back.
+This is a RATCHET, not a clean-tree assertion. Pre-existing sites are frozen into
+a baseline; re-running and correcting them is tracked separately. What the gate
+enforces is that the class cannot GROW: a newly written local DM with either an
+h=1-degenerate bandwidth or no HAC at all fails CI, and every site removed from
+the baseline can never come back.
 
 Per anti-stacking, this is the single enforcement owner for this concern. Do not
 add a second watchdog -- extend this one.
@@ -36,7 +36,14 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from audit_dm_hac_lag import DEGENERATE, scan_population  # noqa: E402
+from audit_dm_hac_lag import (  # noqa: E402
+    CANONICAL_LIKE,
+    DEGENERATE,
+    NO_HAC,
+    NOT_A_TEST,
+    RATCHET_VERDICTS,
+    scan_population,
+)
 
 BASELINE_PATH = REPO_ROOT / "storage" / "ops" / "dm_hac_lag_baseline.json"
 
@@ -46,22 +53,38 @@ def _site_key(finding) -> str:
 
 
 @pytest.fixture(scope="module")
-def degenerate_sites() -> set[str]:
-    return {_site_key(f) for f in scan_population() if f.verdict == DEGENERATE}
+def findings():
+    return scan_population()
 
 
 @pytest.fixture(scope="module")
-def baseline() -> set[str]:
-    payload = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
-    return set(payload["degenerate_sites"])
+def affected_sites(findings) -> set[str]:
+    return {_site_key(f) for f in findings if f.verdict in RATCHET_VERDICTS}
 
 
-def test_no_new_degenerate_dm(degenerate_sites: set[str], baseline: set[str]) -> None:
-    """A newly written local DM must not apply zero HAC at h == 1."""
-    new_sites = degenerate_sites - baseline
+@pytest.fixture(scope="module")
+def baseline_payload() -> dict:
+    return json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(scope="module")
+def baseline(baseline_payload: dict) -> set[str]:
+    return set(baseline_payload["degenerate_sites"]) | set(
+        baseline_payload.get("blindspot_sites", [])
+    )
+
+
+@pytest.fixture(scope="module")
+def retired(baseline_payload: dict) -> set[str]:
+    return {entry["site"] for entry in baseline_payload.get("retired", [])}
+
+
+def test_no_new_degenerate_dm(affected_sites: set[str], baseline: set[str]) -> None:
+    """A newly written local DM must not omit HAC correction."""
+    new_sites = affected_sites - baseline
     assert not new_sites, (
-        "New local DM implementation(s) use `range(1, h)` for the Newey-West "
-        "correction, which applies no HAC at all when h == 1:\n\n"
+        "New local DM implementation(s) omit HAC or use an h=1-degenerate "
+        "bandwidth:\n\n"
         + "\n".join(f"  - {s}" for s in sorted(new_sites))
         + "\n\nUse volpred.stats.model_evaluation.dm_test, whose bandwidth is "
         "max(1, min(ceil(h**(1/3) * n**(1/3)), n // 4)). If you must write a local "
@@ -70,17 +93,54 @@ def test_no_new_degenerate_dm(degenerate_sites: set[str], baseline: set[str]) ->
     )
 
 
-def test_baseline_only_shrinks(degenerate_sites: set[str], baseline: set[str]) -> None:
-    """Sites fixed and removed from the baseline must not regress back."""
-    resurrected = degenerate_sites & (baseline - degenerate_sites)
+def test_baseline_only_contains_active_sites(
+    affected_sites: set[str], baseline: set[str]
+) -> None:
+    """A repaired site must be pruned rather than left as stale baseline debt."""
+    stale = baseline - affected_sites
+    assert not stale, (
+        f"{len(stale)} baseline entries are already clean; prune them from "
+        f"{BASELINE_PATH.name}: {sorted(stale)[:5]}"
+    )
+
+
+def test_retired_sites_cannot_resurrect(
+    affected_sites: set[str], baseline: set[str], retired: set[str]
+) -> None:
+    """The old test used an always-empty set expression; retired is the memory."""
+    assert baseline.isdisjoint(retired), "Active baseline and retired ledger overlap"
+    resurrected = affected_sites & retired
     assert not resurrected, f"Fixed sites regressed: {sorted(resurrected)}"
 
-    stale = baseline - degenerate_sites
-    if stale:
-        pytest.skip(
-            f"{len(stale)} baseline entries are already clean; prune them from "
-            f"{BASELINE_PATH.name} to tighten the ratchet: {sorted(stale)[:5]}"
-        )
+
+def test_known_blind_spots_are_now_classified(findings) -> None:
+    """Regression coverage for the six variants found by the paper deep review."""
+    verdicts = {_site_key(f): f.verdict for f in findings}
+
+    assert verdicts[
+        "experiments/k730/k730_cross_asset_vol_momentum.py::dm_test_func"
+    ] == DEGENERATE
+    assert verdicts["experiments/k731/k731_vix_term_structure.py::dm_test"] == NO_HAC
+    assert verdicts["experiments/k1116b/k1116b.py::dm_hln"] == NO_HAC
+    assert verdicts["experiments/k1203/k1203.py::dm_hln"] == NO_HAC
+    assert verdicts[
+        "experiments/k1116c/k1116c_clark_west.py::one_sample_t"
+    ] == NO_HAC
+    assert verdicts[
+        "experiments/k751/k751_overnight_vix_news.py::<module>:ttest_1samp@416"
+    ] == NO_HAC
+
+
+def test_paper_side_experiments_are_in_population(findings) -> None:
+    verdicts = {_site_key(f): f.verdict for f in findings}
+    assert verdicts[
+        "paper/taiwan-vt/experiments/k849_har_rv_taifex.py::dm_test"
+    ] == CANONICAL_LIKE
+
+
+def test_result_readers_do_not_masquerade_as_dm_tests(findings) -> None:
+    verdicts = {_site_key(f): f.verdict for f in findings}
+    assert verdicts["experiments/k1203/k1203.py::plot_dm_bar_eem"] == NOT_A_TEST
 
 
 def test_canonical_dm_does_not_degenerate_at_h1() -> None:
