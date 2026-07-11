@@ -27,6 +27,15 @@
 - **全庫修完，零負債**：`run_agent_job` / `scan_trending_agy` / `prepublish_audit` / `execution_brief`（3 站點抽成 `_run_agentic` helper）全部改走 `procutil.kill_pgid`。sweep 掃出 `prepublish_audit` 與 `execution_brief` 兩個**手動 grep 漏掉**的實例 —— 這就是為什麼要掃 class 不是修眼前那支。
 - `enqueue_agent` 現在把內層 timeout 從外層預算推導、擋掉指向 `experiments/` 的 artifact、加 cwd preflight。
 
+**同日 artifact ownership 更正（Codex failover）**：上面的「擋掉 `experiments/`」只是止血，仍把
+`result_artifact` 誤當 runner summary，而且 absolute worktree path 可繞過禁令後照樣被覆寫。現已改成
+真正的 ownership boundary：`--result-artifact` 是 agent 產物，relative path 一律相對 `--cwd`，runner
+只檢查存在、絕不建立或寫入；runner summary 獨立落在
+`storage/ops/agent_jobs/<job_id>.json`。agent exit 0 卻缺 declared artifact 時 runner 回非零，compute
+queue 不會標 completed。regression test 用 fake agent 在 worktree 寫真 JSON，機械斷言 main repo 同路徑
+不存在、真結果內容未被改寫、metadata 分流正確；另覆蓋 missing-artifact fail-closed 與 code-only job
+不虛構 artifact。
+
 **教訓（會再犯的兩點）**：
 1. **`execution_brief` 的 `for _ in range(3)` retry loop 是最毒的形態**：舊碼逾時後 `continue` 會**再 spawn 一個 claude**，而前一棵樹還活著 → 3 次 retry 可疊出 3 棵並行的孤兒樹，而我們只讀其中一棵的輸出。kill 必須發生在 retry 之前。
 2. **換掉 subprocess seam 會靜默弄壞 monkeypatch 測試**：`tests/test_execution_brief.py` patch 的是 `subprocess.run`，新 helper 走 `Popen` → patch 攔不到 → 測試**真的去 spawn `claude`**，掛 3 分鐘而不是 fail。改 subprocess 呼叫形態時，先 grep 誰在 patch 它。

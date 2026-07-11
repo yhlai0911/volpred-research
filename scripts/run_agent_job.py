@@ -81,9 +81,24 @@ def main() -> int:
     ap.add_argument("--model", default="claude-opus-4-8")
     ap.add_argument("--effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
     ap.add_argument("--cwd", default=None, help="Working dir (e.g. a git worktree). Defaults to repo root.")
-    ap.add_argument("--result-artifact", default=None, help="Where to write the run summary JSON.")
+    ap.add_argument(
+        "--result-artifact",
+        default=None,
+        help=(
+            "Agent-produced artifact to verify after the run. Relative paths are "
+            "resolved from --cwd; this runner never writes the artifact."
+        ),
+    )
+    ap.add_argument(
+        "--job-metadata",
+        default=None,
+        help=(
+            "Independent runner-metadata JSON. Relative paths are resolved from the "
+            "repo root; defaults to storage/ops/agent_jobs/<brief>-<pid>.json."
+        ),
+    )
     # Inner bound. It exists so a wedged agent surfaces as a diagnosed job failure
-    # (artifact written, stderr explains) instead of being hard-killed by the
+    # (metadata written, stderr explains) instead of being hard-killed by the
     # worker with nothing to read. It must therefore fire just BEFORE the worker's
     # own job.timeout_seconds — which means it has to be DERIVED from that budget,
     # never guessed.
@@ -116,6 +131,29 @@ def main() -> int:
         print(f"[run_agent_job] cwd not found: {workdir}", file=sys.stderr)
         return 2
 
+    result_artifact = None
+    if args.result_artifact:
+        result_artifact = Path(args.result_artifact)
+        if not result_artifact.is_absolute():
+            result_artifact = workdir / result_artifact
+
+    if args.job_metadata:
+        metadata_path = Path(args.job_metadata)
+        if not metadata_path.is_absolute():
+            metadata_path = ROOT / metadata_path
+    else:
+        metadata_path = (
+            ROOT / "storage" / "ops" / "agent_jobs" /
+            f"{brief_path.stem}-{os.getpid()}.json"
+        )
+
+    if result_artifact is not None and metadata_path == result_artifact:
+        print(
+            "[run_agent_job] --job-metadata must be separate from --result-artifact",
+            file=sys.stderr,
+        )
+        return 2
+
     argv = [
         CLAUDE_BIN, "-p", "--dangerously-skip-permissions",
         "--effort", args.effort, "--model", args.model, brief,
@@ -146,6 +184,9 @@ def main() -> int:
         _kill_agent_tree(proc)
 
     finished = _utc_now()
+    artifact_exists = result_artifact.exists() if result_artifact is not None else None
+    validation_ok = exit_code == 0 and artifact_exists is not False
+    runner_exit_code = 0 if validation_ok else 1
     summary = {
         "brief_file": str(brief_path.relative_to(ROOT)) if brief_path.is_relative_to(ROOT) else str(brief_path),
         "model": args.model,
@@ -155,17 +196,31 @@ def main() -> int:
         "finished_at": finished,
         "exit_code": exit_code,
         "timed_out": timed_out,
+        "result_artifact": str(result_artifact) if result_artifact is not None else None,
+        "result_artifact_exists": artifact_exists,
+        "validation_ok": validation_ok,
+        "runner_exit_code": runner_exit_code,
     }
-    if args.result_artifact:
-        art = Path(args.result_artifact)
-        if not art.is_absolute():
-            art = ROOT / art
-        art.parent.mkdir(parents=True, exist_ok=True)
-        art.write_text(json.dumps(summary, ensure_ascii=False, indent=2))
-        print(f"[run_agent_job] artifact → {art}", flush=True)
 
-    print(f"[run_agent_job] done exit={exit_code} timed_out={timed_out}", flush=True)
-    return 0 if exit_code == 0 else 1
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata_tmp = metadata_path.with_name(f".{metadata_path.name}.{os.getpid()}.tmp")
+    metadata_tmp.write_text(json.dumps(summary, ensure_ascii=False, indent=2))
+    os.replace(metadata_tmp, metadata_path)
+    print(f"[run_agent_job] metadata → {metadata_path}", flush=True)
+
+    if exit_code == 0 and artifact_exists is False:
+        print(
+            f"[run_agent_job] expected result artifact missing: {result_artifact}",
+            file=sys.stderr,
+            flush=True,
+        )
+
+    print(
+        f"[run_agent_job] done exit={exit_code} timed_out={timed_out} "
+        f"artifact_ok={artifact_exists is not False}",
+        flush=True,
+    )
+    return runner_exit_code
 
 
 if __name__ == "__main__":

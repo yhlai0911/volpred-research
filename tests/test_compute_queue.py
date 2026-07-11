@@ -76,3 +76,65 @@ def test_compute_queue_has_no_silent_fallback_audit_findings() -> None:
     findings = audit_silent_fallbacks.audit_file(Path(module.__file__))
 
     assert findings == []
+
+
+def _queued_job(queue_dir: Path, log_dir: Path, *, artifact: Path | None) -> Path:
+    path = queue_dir / "artifact-postcondition.json"
+    path.write_text(
+        json.dumps(
+            {
+                "id": "artifact-postcondition",
+                "status": "queued",
+                "title": "artifact postcondition",
+                "queued_at": "2026-07-12T00:00:00Z",
+                "script_path": "unused.py",
+                "interpreter": "python",
+                "args": [],
+                "env": {},
+                "stdout_file": str(log_dir / "job.stdout"),
+                "stderr_file": str(log_dir / "job.stderr"),
+                "result_artifact": str(artifact) if artifact is not None else None,
+                "timeout_seconds": 10,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_run_next_fails_closed_when_declared_artifact_is_missing(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    job_path = _queued_job(queue_dir, module.LOG_DIR, artifact=tmp_path / "missing.json")
+    monkeypatch.setattr(module.subprocess, "run", lambda *args, **kwargs: SimpleNamespace(returncode=0))
+
+    assert module.run_next(SimpleNamespace()) == 0
+
+    job = json.loads(job_path.read_text())
+    assert job["status"] == "failed"
+    assert job["process_exit_code"] == 0
+    assert job["exit_code"] == 3
+    assert job["failure_reason"] == "result_artifact_missing"
+
+
+def test_run_next_completes_when_artifact_exists_or_is_not_declared(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    artifact = tmp_path / "result.json"
+    artifact.write_text("{}")
+    monkeypatch.setattr(module.subprocess, "run", lambda *args, **kwargs: SimpleNamespace(returncode=0))
+
+    existing_job = _queued_job(queue_dir, module.LOG_DIR, artifact=artifact)
+    assert module.run_next(SimpleNamespace()) == 0
+    assert json.loads(existing_job.read_text())["status"] == "completed"
+
+    existing_job.unlink()
+    no_artifact_job = _queued_job(queue_dir, module.LOG_DIR, artifact=None)
+    assert module.run_next(SimpleNamespace()) == 0
+    assert json.loads(no_artifact_job.read_text())["status"] == "completed"

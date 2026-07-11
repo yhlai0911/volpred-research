@@ -19,6 +19,7 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
     exit_code (int|null)
     stdout_file / stderr_file (str)
     result_artifact (str|null)  — path Claude followup will read
+    job_metadata (str|null)     — runner lifecycle/validation receipt (agent jobs)
     claude_followup (dict|null) — { brief, task_type, priority }
     followup_dispatched (bool)  — true after hourly_dispatch creates next_task
     timeout_seconds (int)
@@ -50,6 +51,7 @@ ROOT = Path(__file__).resolve().parents[1]
 QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
 LOCK_FILE = QUEUE_DIR / ".worker.lock"
 LOG_DIR = ROOT / "storage" / "logs" / "compute"
+AGENT_JOB_DIR = ROOT / "storage" / "ops" / "agent_jobs"
 
 # Agent jobs. A research agent needs 20-60min of wall clock (that is the whole
 # reason it cannot live inside a ~50min dispatch fire), so the default budget has
@@ -92,6 +94,15 @@ def _read_job_file(path: Path, *, context: str) -> dict[str, Any] | None:
     return payload
 
 
+def _declared_result_artifact(job: dict[str, Any]) -> Path | None:
+    """Resolve a queue result artifact on the worker side of the boundary."""
+    raw = job.get("result_artifact")
+    if not raw:
+        return None
+    path = Path(raw)
+    return path if path.is_absolute() else ROOT / path
+
+
 def slug(s: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
     return s[:60] or uuid.uuid4().hex[:8]
@@ -128,6 +139,7 @@ def enqueue(args) -> int:
         "stdout_file": str(LOG_DIR / f"{job_id}.stdout"),
         "stderr_file": str(LOG_DIR / f"{job_id}.stderr"),
         "result_artifact": args.result_artifact,
+        "job_metadata": getattr(args, "job_metadata", None),
         "claude_followup": followup,
         "followup_dispatched": False,
         "timeout_seconds": args.timeout or 3600,
@@ -158,6 +170,7 @@ def enqueue_agent(args) -> int:
     # the job cannot possibly run — fail here, where a human is watching, instead of
     # 60 minutes later inside the worker (K1684, 2026-07-12: enqueued against a
     # worktree that orphan-recovery had already removed → instant exit 2, work lost).
+    workdir = ROOT
     if args.cwd:
         cwd_path = Path(args.cwd)
         if not cwd_path.is_absolute():
@@ -165,28 +178,20 @@ def enqueue_agent(args) -> int:
         if not cwd_path.is_dir():
             print(f"error: --cwd does not exist: {cwd_path}", file=sys.stderr)
             return 2
+        workdir = cwd_path
 
     job_id = args.id or f"agent-{brief_path.stem}-{uuid.uuid4().hex[:6]}"
 
-    # This artifact is the RUNNER's summary (exit code, timing, timed_out) — not the
-    # agent's research output. Letting a caller aim it at an experiment's own results
-    # JSON means the runner overwrites real results with an 8-line stub when the run
-    # ends. That already happened once (K1685 left a 318-byte stub sitting where a
-    # 37KB results.json belonged). The agent's real output lives in its worktree and
-    # is collected via claude_followup; this file never belongs under experiments/.
-    artifact = args.result_artifact or str(LOG_DIR / f"{job_id}.result.json")
-    artifact_path = Path(artifact)
-    if not artifact_path.is_absolute():
-        artifact_path = ROOT / artifact_path
-    if artifact_path.is_relative_to(ROOT / "experiments"):
-        print(
-            f"error: --result-artifact must not point inside experiments/: {artifact_path}\n"
-            "       This is the runner's run-summary, and it would clobber the experiment's\n"
-            "       own results JSON. Omit the flag; the agent's output is collected from its\n"
-            "       worktree via --followup-brief.",
-            file=sys.stderr,
-        )
-        return 2
+    # `result_artifact` is the AGENT'S output, never the runner's summary. Resolve
+    # it on the same side of the worktree boundary as the agent itself. The runner
+    # only verifies that this path exists after a successful exit; it never writes
+    # or creates it. Lifecycle metadata has a separate, main-repo-owned path.
+    artifact_path = None
+    if args.result_artifact:
+        artifact_path = Path(args.result_artifact)
+        if not artifact_path.is_absolute():
+            artifact_path = workdir / artifact_path
+    metadata_path = AGENT_JOB_DIR / f"{job_id}.json"
 
     script_args = [
         "--brief-file", str(brief_path),
@@ -195,7 +200,9 @@ def enqueue_agent(args) -> int:
     ]
     if args.cwd:
         script_args += ["--cwd", args.cwd]
-    script_args += ["--result-artifact", str(artifact_path)]
+    if artifact_path is not None:
+        script_args += ["--result-artifact", str(artifact_path)]
+    script_args += ["--job-metadata", str(metadata_path)]
 
     # Couple the inner bound to the outer budget. The worker kills the whole script
     # at timeout_seconds; the runner must fire slightly earlier so it can write a
@@ -212,7 +219,8 @@ def enqueue_agent(args) -> int:
         interpreter="uv run python",
         script_args=script_args,
         env=None,
-        result_artifact=str(artifact_path),
+        result_artifact=str(artifact_path) if artifact_path is not None else None,
+        job_metadata=str(metadata_path),
         followup_brief=args.followup_brief,
         followup_task_type=args.followup_task_type,
         followup_priority=args.followup_priority,
@@ -330,7 +338,23 @@ def run_next(args) -> int:
                     timeout=job.get("timeout_seconds", 3600),
                 )
             job["exit_code"] = proc.returncode
-            job["status"] = "completed" if proc.returncode == 0 else "failed"
+            if proc.returncode != 0:
+                job["status"] = "failed"
+            else:
+                artifact_path = _declared_result_artifact(job)
+                if artifact_path is not None and not artifact_path.exists():
+                    # A successful process without its declared output is not a
+                    # successful job. Keep both codes: process_exit_code preserves
+                    # what actually ran; exit_code=3 is the queue postcondition.
+                    job["process_exit_code"] = proc.returncode
+                    job["exit_code"] = 3
+                    job["status"] = "failed"
+                    job["failure_reason"] = "result_artifact_missing"
+                    job["missing_result_artifact"] = str(artifact_path)
+                    with stderr_p.open("a") as se:
+                        se.write(f"\n[RESULT_ARTIFACT_MISSING] {artifact_path}\n")
+                else:
+                    job["status"] = "completed"
         except subprocess.TimeoutExpired:
             job["status"] = "failed"
             job["exit_code"] = -1
