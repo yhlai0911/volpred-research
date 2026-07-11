@@ -39,13 +39,13 @@ HAR-RV 是現役 RV point forecast 的標竿之一。若改用 pinball loss 訓�
 1. **Pinball loss** at each τ on OOS
 2. **Empirical coverage** at each τ：`coverage_τ = P(daily_rv_actual ≤ q̂_τ)`；nominal 對應 0.5/0.75/0.9/0.95/0.99
 3. **Kupiec UC test** for τ=0.95/0.99 violation rate（右尾 violation rate = 1-τ）
-4. **DM test (Diebold-Mariano, HLN-adjusted)** baseline OLS QLIKE vs τ=0.5 quantile median forecast on QLIKE 損失（檢驗 median quantile 是否 outperform mean）
+4. **DM test（canonical Newey-West HAC）** baseline OLS QLIKE vs τ=0.5 quantile median forecast on QLIKE 損失（檢驗 median quantile 是否 outperform mean）
 
 ## 成功標準（PASS / CONDITIONAL_PASS / NULL）
 
-- **PASS**：(a) τ=0.95 與 τ=0.99 empirical coverage 落在 nominal ±2pp 範圍內、(b) Kupiec UC p>0.05、(c) DM qmed vs OLS p<0.10 且 stat>0（quantile median 顯著 outperform mean）
-- **CONDITIONAL_PASS**：(a) coverage 落在 nominal ±5pp 範圍內、(b) Kupiec UC p>0.05、(c) DM **NS** (p≥0.10)；tail calibration 實用但 median 不顯著超越 OLS
-- **NULL**：以下任一條件成立 — (i) tail coverage gap > ±5pp、(ii) Kupiec UC 任一尾 p≤0.05、(iii) **DM stat<0 且 p<0.10**（quantile median QLIKE 顯著差於 OLS）
+- **PASS**：(a) τ=0.95 與 τ=0.99 empirical coverage 落在 nominal ±2pp 範圍內、(b) Kupiec UC p>0.05、(c) DM qmed vs OLS **t>3**（quantile median Harvey-significantly outperform mean）
+- **CONDITIONAL_PASS**：(a) coverage 落在 nominal ±5pp 範圍內、(b) Kupiec UC p>0.05、(c) DM **|t|≤3**；tail calibration 實用但 median 未過 Harvey 門檻
+- **NULL**：以下任一條件成立 — (i) tail coverage gap > ±5pp、(ii) Kupiec UC 任一尾 p≤0.05、(iii) **DM t<-3**（quantile median QLIKE Harvey-significantly 差於 OLS）
 
 ## Reproducibility
 
@@ -74,7 +74,21 @@ HAR-RV 是現役 RV point forecast 的標竿之一。若改用 pinball loss 訓�
 - verdict: **NULL** (但 narrative = "median-under-QLIKE null"，per Codex v2 framing)
 - τ=0.95 emp coverage 96.07% (gap +1.07pp), Kupiec UC p=0.062 邊際 PASS
 - τ=0.99 emp coverage 99.26% (gap +0.26pp), Kupiec UC p=0.318 PASS
-- DM qmed vs OLS QLIKE: stat<<0 p≈0.000 顯著 NEGATIVE
+- DM qmed vs OLS QLIKE（2026-07-11 canonical HAC 重跑）: **t=-10.95, p≈0**，Harvey-significantly NEGATIVE
 - 解讀：使用 QLIKE（對 conditional mean 一致的 loss）評估 q50 conditional median，目標函數不對稱 → q50 系統性 underforecast → DM 顯著為負 = 預期且具資訊量的 null result
 - **不是** 「quantile HAR 全失敗」：tail (q95/q99) coverage 與 Kupiec 表現 OK，可獨立服務 risk-management 上界
 - 後續：K1402b rolling refit / K1402c log-QR / K1402d quantile-implied mean vs OLS 公平比較
+
+## 2026-07-11 DM HAC class-sweep 重跑
+
+K1655 全庫稽核發現原 local DM 在 `h=1` 時 `range(1, h)` 為空，等於沒有 HAC。
+本次保持 SPY 固定資料快照、模型、OOS 與 loss orientation 不變，改委派
+`volpred.stats.model_evaluation.dm_test`，並把 loss differential ACF 寫入 results。
+
+| 舊 local t | canonical HAC t | ACF(1) | 95% 白噪音界 | 結論 |
+|---:|---:|---:|---:|---|
+| -10.1968 | **-10.9496** | +0.0436 | ±0.0534 | ACF(1) 未顯著；仍遠過 Harvey 3，`NULL` 不變 |
+
+高階 lag 有負相關，因此 canonical HAC 後 |t| 略增；這再次說明遺漏 HAC 的影響不是單向。
+QuantReg 重估的 QLIKE 數值漂移低於 0.000003，屬 solver 精度，不改點估結論。公開文章的
+「quantile median 不適合作 QLIKE 點預測、tail coverage 仍可用」方向不需撤回，但舊 t 值應以本節為準。

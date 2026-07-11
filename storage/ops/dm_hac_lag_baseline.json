@@ -5,10 +5,9 @@
   "canonical": "volpred.stats.model_evaluation.dm_test",
   "policy": "Frozen backlog. The set may only shrink -- new entries fail CI.",
   "frozen_at": "2026-07-11 (K1655 class sweep)",
-  "count": 136,
+  "count": 133,
   "degenerate_sites": [
     "experiments/K1048/k1048.py::dm_test",
-    "experiments/K1404/K1404.py::dm_test",
     "experiments/K158/K158_wavelet_garch_modwt.py::dm_test",
     "experiments/emd_garch_vol/emd_garch_vol.py::dm_test",
     "experiments/gld_inventory_vol/gld_inventory_vol.py::dm_test",
@@ -20,8 +19,6 @@
     "experiments/k1318/k1318.py::dm_test_hln",
     "experiments/k1347/k1347.py::dm_test",
     "experiments/k1378/k1378.py::dm_test",
-    "experiments/k1402/k1402.py::dm_test",
-    "experiments/k1403/k1403.py::dm_test",
     "experiments/k142/k142_foundation_ml_vol.py::diebold_mariano",
     "experiments/k1421/k1421.py::dm_test_hln",
     "experiments/k1422/k1422.py::dm_test_hln",
@@ -159,6 +156,21 @@
       "site": "experiments/k623/k623_mf2_garch_corrected.py::dm_test",
       "date": "2026-07-11",
       "note": "swapped to canonical dm_test; re-run complete — QLIKE MF2-vs-GJR t -2.03 → -2.30 (p 0.042 → 0.0218), negative acf shrank the HAC SE; claim direction unchanged, Harvey t>3 still not met"
+    },
+    {
+      "site": "experiments/k1402/k1402.py::dm_test",
+      "date": "2026-07-11",
+      "note": "canonical HAC re-run complete — SPY t -10.20 → -10.95, acf(1)=0.044 not significant; NULL headline unchanged"
+    },
+    {
+      "site": "experiments/k1403/k1403.py::dm_test",
+      "date": "2026-07-11",
+      "note": "canonical HAC re-run complete — QQQ/GLD/TLT t = -13.23/-8.43/-11.39; GLD acf(1)=0.172 significant; all remain beyond Harvey |t|>3 and aggregate verdict unchanged"
+    },
+    {
+      "site": "experiments/K1404/K1404.py::dm_test",
+      "date": "2026-07-11",
+      "note": "canonical HAC re-run complete — TWII t -8.90 → -6.43, acf(1)=0.237 significant; TAIL_CALIB_USABLE unchanged"
     }
   ]
 }

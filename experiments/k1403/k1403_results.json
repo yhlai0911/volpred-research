@@ -15,29 +15,39 @@
       "oos_first_date": "2021-01-04",
       "oos_last_date": "2026-05-27",
       "ols_baseline": {
-        "qlike_mean_oos": 1.7282763629469649,
-        "pinball_at_tau_0.50": 0.33598684987779726
+        "qlike_mean_oos": 1.7282763629469635,
+        "pinball_at_tau_0.50": 0.33598684987779703
       },
       "quantile_median_vs_ols": {
-        "qlike_mean_oos_qmed": 2.4899152861150795,
-        "pinball_at_tau_0.50": 0.32789142873110794,
+        "qlike_mean_oos_qmed": 2.4899153521415536,
+        "pinball_at_tau_0.50": 0.32789142924820364,
         "dm_qmed_vs_ols": {
-          "dm_stat": -12.681468675226794,
+          "dm_stat": -13.232712056218936,
           "p_value": 0.0,
           "n": 1355,
-          "mean_diff": -0.761638923168115
+          "mean_diff": -0.7616389891945902,
+          "loss_differential_acf_1_to_5": [
+            0.028804644844830134,
+            -0.058571150881278095,
+            -0.0024610986844958833,
+            -0.0007476947216832715,
+            -0.03297789625906485
+          ],
+          "acf1_95pct_bound": 0.0532459308425678,
+          "acf1_significant": false,
+          "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)"
         }
       },
       "quantile_forecasts": {
         "q50": {
           "tau": 0.5,
           "params": {
-            "const": 0.09753118054871868,
-            "rv_d": -0.03626032211945929,
-            "rv_w": 0.35247690911779017,
-            "rv_m": 0.3465155187664628
+            "const": 0.09753114775533556,
+            "rv_d": -0.03626032966264292,
+            "rv_w": 0.3524769421719114,
+            "rv_m": 0.34651552304384836
           },
-          "pinball_loss_oos": 0.32789142873110794,
+          "pinball_loss_oos": 0.32789142924820364,
           "empirical_coverage": 0.46494464944649444,
           "nominal_coverage": 0.5,
           "coverage_gap_pp": -3.505535055350556,
@@ -53,12 +63,12 @@
         "q75": {
           "tau": 0.75,
           "params": {
-            "const": 0.21324890069867664,
-            "rv_d": -0.016026573522907483,
-            "rv_w": 0.5594892112426901,
-            "rv_m": 0.6495135000648631
+            "const": 0.21324903364742198,
+            "rv_d": -0.016026639781451024,
+            "rv_w": 0.5594893344577212,
+            "rv_m": 0.6495132338744014
           },
-          "pinball_loss_oos": 0.3002431299638749,
+          "pinball_loss_oos": 0.30024313230849864,
           "empirical_coverage": 0.7136531365313653,
           "nominal_coverage": 0.75,
           "coverage_gap_pp": -3.6346863468634694,
@@ -74,12 +84,12 @@
         "q90": {
           "tau": 0.9,
           "params": {
-            "const": 0.3985743139734925,
-            "rv_d": 0.04934026127980928,
-            "rv_w": 0.7613333565124698,
-            "rv_m": 0.9701325025310785
+            "const": 0.39857460473313466,
+            "rv_d": 0.04934026926946267,
+            "rv_w": 0.76133279815949,
+            "rv_m": 0.9701326550683191
           },
-          "pinball_loss_oos": 0.18401646170019076,
+          "pinball_loss_oos": 0.184016457594619,
           "empirical_coverage": 0.9033210332103321,
           "nominal_coverage": 0.9,
           "coverage_gap_pp": 0.33210332103320583,
@@ -95,12 +105,12 @@
         "q95": {
           "tau": 0.95,
           "params": {
-            "const": 0.5856360531991252,
-            "rv_d": -0.06226530420839538,
-            "rv_w": 1.2488447951077148,
-            "rv_m": 0.9255250488820153
+            "const": 0.5856360604221464,
+            "rv_d": -0.06226530221384152,
+            "rv_w": 1.248844783617841,
+            "rv_m": 0.9255250498027472
           },
-          "pinball_loss_oos": 0.11723860222055693,
+          "pinball_loss_oos": 0.11723860213280657,
           "empirical_coverage": 0.9542435424354243,
           "nominal_coverage": 0.95,
           "coverage_gap_pp": 0.4243542435424352,
@@ -116,12 +126,12 @@
         "q99": {
           "tau": 0.99,
           "params": {
-            "const": 0.9394969909507509,
-            "rv_d": 0.023561609120169247,
-            "rv_w": 1.2204705532835547,
-            "rv_m": 1.5323603097926082
+            "const": 0.9394295497115763,
+            "rv_d": 0.023566698145288,
+            "rv_w": 1.2204631911593822,
+            "rv_m": 1.5324310326564046
           },
-          "pinball_loss_oos": 0.03576100048416047,
+          "pinball_loss_oos": 0.035761016824386975,
           "empirical_coverage": 0.9911439114391144,
           "nominal_coverage": 0.99,
           "coverage_gap_pp": 0.1143911439114409,
@@ -137,7 +147,7 @@
       },
       "verdict": "NULL",
       "verdict_reasons": [
-        "DM significantly NEGATIVE (qmed worse than OLS, stat=-12.68 p=0.000)",
+        "DM significantly NEGATIVE (qmed worse than OLS, stat=-13.23 p=0.000)",
         "Tail coverage acceptable (gap95=0.42pp gap99=0.11pp) + Kupiec PASS → tail upper bound usable despite NULL on DM"
       ],
       "dm_status": "SIG_NEG",
@@ -150,29 +160,39 @@
       "oos_first_date": "2021-01-04",
       "oos_last_date": "2026-05-27",
       "ols_baseline": {
-        "qlike_mean_oos": 1.3009902232532815,
+        "qlike_mean_oos": 1.3009902232532795,
         "pinball_at_tau_0.50": 0.26692368103062697
       },
       "quantile_median_vs_ols": {
-        "qlike_mean_oos_qmed": 2.1339696968684505,
-        "pinball_at_tau_0.50": 0.2556290199418228,
+        "qlike_mean_oos_qmed": 2.133989668248397,
+        "pinball_at_tau_0.50": 0.25562907777242316,
         "dm_qmed_vs_ols": {
-          "dm_stat": -10.514381614546467,
+          "dm_stat": -8.434880771660112,
           "p_value": 0.0,
           "n": 1355,
-          "mean_diff": -0.8329794736151687
+          "mean_diff": -0.8329994449951179,
+          "loss_differential_acf_1_to_5": [
+            0.17218737432501677,
+            0.03289197371588209,
+            0.023501409987541407,
+            0.11131703364186009,
+            0.003157860701412508
+          ],
+          "acf1_95pct_bound": 0.0532459308425678,
+          "acf1_significant": true,
+          "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)"
         }
       },
       "quantile_forecasts": {
         "q50": {
           "tau": 0.5,
           "params": {
-            "const": 0.11417643104844721,
-            "rv_d": -0.05407906543496743,
-            "rv_w": 0.054307670207158765,
-            "rv_m": 0.6203681240245373
+            "const": 0.11417640597357726,
+            "rv_d": -0.054082725779900365,
+            "rv_w": 0.05430705175385597,
+            "rv_m": 0.6203705743794963
           },
-          "pinball_loss_oos": 0.2556290199418228,
+          "pinball_loss_oos": 0.25562907777242316,
           "empirical_coverage": 0.5040590405904058,
           "nominal_coverage": 0.5,
           "coverage_gap_pp": 0.4059040590405849,
@@ -188,12 +208,12 @@
         "q75": {
           "tau": 0.75,
           "params": {
-            "const": 0.15813987428963827,
-            "rv_d": -0.0957144924219051,
-            "rv_w": 0.12213617111163444,
-            "rv_m": 1.1660162185297054
+            "const": 0.15813992139174893,
+            "rv_d": -0.09571450747759513,
+            "rv_w": 0.12213606499761909,
+            "rv_m": 1.1660163062853997
           },
-          "pinball_loss_oos": 0.2466027282636795,
+          "pinball_loss_oos": 0.2466027288951013,
           "empirical_coverage": 0.7343173431734318,
           "nominal_coverage": 0.75,
           "coverage_gap_pp": -1.568265682656822,
@@ -209,12 +229,12 @@
         "q90": {
           "tau": 0.9,
           "params": {
-            "const": 0.4112715628426997,
-            "rv_d": -0.11439677921755198,
-            "rv_w": 0.13078434952298323,
-            "rv_m": 1.5875489362387896
+            "const": 0.411271555739944,
+            "rv_d": -0.11439677813339166,
+            "rv_w": 0.13078434050244425,
+            "rv_m": 1.587548955135901
           },
-          "pinball_loss_oos": 0.15795879787426775,
+          "pinball_loss_oos": 0.15795879796803414,
           "empirical_coverage": 0.8952029520295203,
           "nominal_coverage": 0.9,
           "coverage_gap_pp": -0.4797047970479751,
@@ -230,12 +250,12 @@
         "q95": {
           "tau": 0.95,
           "params": {
-            "const": 0.6345742460446218,
-            "rv_d": -0.0888245934234071,
-            "rv_w": 0.18632743212629066,
-            "rv_m": 1.8289878650878109
+            "const": 0.6345748563990412,
+            "rv_d": -0.08882352735519561,
+            "rv_w": 0.18632454236916374,
+            "rv_m": 1.8289898037098737
           },
-          "pinball_loss_oos": 0.10174785586494754,
+          "pinball_loss_oos": 0.10174786199419096,
           "empirical_coverage": 0.9505535055350554,
           "nominal_coverage": 0.95,
           "coverage_gap_pp": 0.05535055350553986,
@@ -251,12 +271,12 @@
         "q99": {
           "tau": 0.99,
           "params": {
-            "const": 1.0690986719801128,
-            "rv_d": -0.2983365122387909,
-            "rv_w": 0.8062860889027661,
-            "rv_m": 2.274789793759709
+            "const": 1.0690986719812283,
+            "rv_d": -0.2983365122677988,
+            "rv_w": 0.8062860889842796,
+            "rv_m": 2.274789793735806
           },
-          "pinball_loss_oos": 0.03269386011639212,
+          "pinball_loss_oos": 0.0326938601163739,
           "empirical_coverage": 0.992619926199262,
           "nominal_coverage": 0.99,
           "coverage_gap_pp": 0.26199261992619904,
@@ -272,7 +292,7 @@
       },
       "verdict": "NULL",
       "verdict_reasons": [
-        "DM significantly NEGATIVE (qmed worse than OLS, stat=-10.51 p=0.000)",
+        "DM significantly NEGATIVE (qmed worse than OLS, stat=-8.43 p=0.000)",
         "Tail coverage acceptable (gap95=0.06pp gap99=0.26pp) + Kupiec PASS → tail upper bound usable despite NULL on DM"
       ],
       "dm_status": "SIG_NEG",
@@ -285,29 +305,39 @@
       "oos_first_date": "2021-01-04",
       "oos_last_date": "2026-05-27",
       "ols_baseline": {
-        "qlike_mean_oos": 1.0986465037566953,
-        "pinball_at_tau_0.50": 0.22739951120265087
+        "qlike_mean_oos": 1.0986465037566944,
+        "pinball_at_tau_0.50": 0.22739951120265056
       },
       "quantile_median_vs_ols": {
-        "qlike_mean_oos_qmed": 1.4847783264680967,
-        "pinball_at_tau_0.50": 0.22162824506298268,
+        "qlike_mean_oos_qmed": 1.4847783378478687,
+        "pinball_at_tau_0.50": 0.2216282454214479,
         "dm_qmed_vs_ols": {
-          "dm_stat": -11.592365843623536,
+          "dm_stat": -11.389650298266599,
           "p_value": 0.0,
           "n": 1355,
-          "mean_diff": -0.3861318227114017
+          "mean_diff": -0.38613183409117424,
+          "loss_differential_acf_1_to_5": [
+            0.00935677675108686,
+            0.03915613301076849,
+            0.024957650163252867,
+            -0.004861340355435781,
+            -0.015280494505754279
+          ],
+          "acf1_95pct_bound": 0.0532459308425678,
+          "acf1_significant": false,
+          "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)"
         }
       },
       "quantile_forecasts": {
         "q50": {
           "tau": 0.5,
           "params": {
-            "const": 0.1499925828521107,
-            "rv_d": 0.04836384705388319,
-            "rv_w": 0.11680819232935136,
-            "rv_m": 0.4400621706831771
+            "const": 0.14999258781970326,
+            "rv_d": 0.04836385951908362,
+            "rv_w": 0.1168082070824994,
+            "rv_m": 0.4400621356422789
           },
-          "pinball_loss_oos": 0.22162824506298268,
+          "pinball_loss_oos": 0.2216282454214479,
           "empirical_coverage": 0.47675276752767526,
           "nominal_coverage": 0.5,
           "coverage_gap_pp": -2.324723247232474,
@@ -323,12 +353,12 @@
         "q75": {
           "tau": 0.75,
           "params": {
-            "const": 0.28281699505988334,
-            "rv_d": 0.06108169303619171,
-            "rv_w": 0.19320252197330312,
-            "rv_m": 0.7538439336134832
+            "const": 0.28281699249033654,
+            "rv_d": 0.06108169279779174,
+            "rv_w": 0.19320252522829406,
+            "rv_m": 0.7538439326015229
           },
-          "pinball_loss_oos": 0.20364060128049247,
+          "pinball_loss_oos": 0.2036406012990126,
           "empirical_coverage": 0.744649446494465,
           "nominal_coverage": 0.75,
           "coverage_gap_pp": -0.5350553505535038,
@@ -344,12 +374,12 @@
         "q90": {
           "tau": 0.9,
           "params": {
-            "const": 0.34364418356114257,
-            "rv_d": 0.06213825267543527,
-            "rv_w": 0.4595865139568218,
-            "rv_m": 1.0587100213004987
+            "const": 0.3436441823483065,
+            "rv_d": 0.06213825117004035,
+            "rv_w": 0.4595865270709396,
+            "rv_m": 1.058710013695304
           },
-          "pinball_loss_oos": 0.1268130725931894,
+          "pinball_loss_oos": 0.12681307263473704,
           "empirical_coverage": 0.8959409594095941,
           "nominal_coverage": 0.9,
           "coverage_gap_pp": -0.405904059040596,
@@ -365,12 +395,12 @@
         "q95": {
           "tau": 0.95,
           "params": {
-            "const": 0.48616392673287123,
-            "rv_d": 0.08853219928016998,
-            "rv_w": 0.7939089240557848,
-            "rv_m": 0.9229098146835639
+            "const": 0.486163987038708,
+            "rv_d": 0.08853218501766946,
+            "rv_w": 0.7939088237880014,
+            "rv_m": 0.9229098025317057
           },
-          "pinball_loss_oos": 0.0790984966125745,
+          "pinball_loss_oos": 0.0790984963344082,
           "empirical_coverage": 0.9446494464944649,
           "nominal_coverage": 0.95,
           "coverage_gap_pp": -0.5350553505535038,
@@ -386,12 +416,12 @@
         "q99": {
           "tau": 0.99,
           "params": {
-            "const": 1.0508018037108684,
-            "rv_d": -0.008504917775653098,
-            "rv_w": 1.3892531446655099,
-            "rv_m": 0.6342539803275713
+            "const": 1.050802176183538,
+            "rv_d": -0.008505018544497034,
+            "rv_w": 1.389253107613369,
+            "rv_m": 0.6342536908535976
           },
-          "pinball_loss_oos": 0.02304184578622288,
+          "pinball_loss_oos": 0.023041845526522046,
           "empirical_coverage": 0.9896678966789668,
           "nominal_coverage": 0.99,
           "coverage_gap_pp": -0.03321033210331725,
@@ -407,7 +437,7 @@
       },
       "verdict": "NULL",
       "verdict_reasons": [
-        "DM significantly NEGATIVE (qmed worse than OLS, stat=-11.59 p=0.000)",
+        "DM significantly NEGATIVE (qmed worse than OLS, stat=-11.39 p=0.000)",
         "Tail coverage acceptable (gap95=0.54pp gap99=0.03pp) + Kupiec PASS → tail upper bound usable despite NULL on DM"
       ],
       "dm_status": "SIG_NEG",
@@ -424,6 +454,7 @@
   },
   "config": {
     "seed": 42,
+    "harvey_abs_t_threshold": 3.0,
     "data_start": "2007-01-03",
     "oos_start": "2021-01-04",
     "quantiles": [

@@ -3,7 +3,7 @@
 ## Research Question
 
 K1402 (SPY) verdict = NULL: HAR-RV quantile-median QLIKE 顯著差於 OLS point
-forecast (DM HLN stat=-10.20, p≈0), 但 tail coverage (τ=0.95/0.99) ±2pp 內
+forecast（canonical HAC DM t=-10.95, p≈0），但 tail coverage (τ=0.95/0.99) ±2pp 內
 acceptable，因此方法走 *conditional-usable-for-tail-VaR upper bound* 路線。
 
 K1403 (QQQ/GLD/TLT) verdict = **TAIL_CALIB_USABLE**: 3/3 dm_sig_neg AND
@@ -64,8 +64,8 @@ rv_m = daily_rv.rolling(22).mean().shift(1)
 1. **Pinball loss** at each τ on OOS
 2. **Empirical coverage** `cov_τ = P(daily_rv_actual ≤ q̂_τ)` vs nominal τ
 3. **Kupiec UC test** for τ=0.95/0.99 violation rate
-4. **DM test (HLN-adjusted, h=1)** OLS QLIKE vs τ=0.5 quantile median QLIKE
-   - HLN k = `sqrt((n + 1 - 2h + h(h-1)/n) / n)`, t-dist df=n-1
+4. **DM test（canonical Newey-West HAC, h=1）** OLS QLIKE vs τ=0.5 quantile median QLIKE
+   - bandwidth 隨樣本縮放且至少為 1；Harvey 門檻為 |t|>3
 
 ## 成功標準（與 K1402/K1403 一致）
 
@@ -81,7 +81,7 @@ rv_m = daily_rv.rolling(22).mean().shift(1)
 - **Verdict = TAIL_CALIB_USABLE**（與 K1403 跨資產驗證、K1402 SPY 同 pattern
   並擴展到亞洲市場）
 - n_test = 1,305 (OOS 2021-01-04 → 2026-05-26；2026-05-27 yfinance 尾端 NaN 由 panel dropna 自動排除)
-- DM HLN stat = **-8.901** (p ≈ 0) → qmed QLIKE 顯著差於 OLS（dm_status=SIG_NEG）
+- canonical HAC DM t = **-6.431** (p=1.78×10⁻¹⁰) → qmed QLIKE 仍 Harvey-significantly 差於 OLS（dm_status=SIG_NEG）
 - τ=0.95 coverage gap = **+0.019 pp**（empirical 95.02% vs nominal 95%）
 - τ=0.99 coverage gap = **-0.149 pp**（empirical 98.85% vs nominal 99%）
 - Kupiec UC: τ=0.95 p=0.9747, τ=0.99 p=0.5962 → PASS both → tail_status=TIGHT
@@ -122,3 +122,16 @@ uv run python experiments/K1404/K1404.py
    可寫成短文投 Finance Research Letters / Economics Letters
 3. **Expanding window 對照**：依 K783c 預期 expanding 可能 narrow tail gap，
    下一個 K
+
+## 2026-07-11 DM HAC class-sweep 重跑
+
+原 local DM 使用 `range(1, h)`，在 `h=1` 完全沒有 HAC。本次保持 ^TWII 固定 CSV、模型、
+OOS 與 loss 不變，委派 canonical `dm_test`，並輸出 loss differential ACF。
+
+| 舊 local t | canonical HAC t | ACF(1) | 95% 白噪音界 | 結論 |
+|---:|---:|---:|---:|---|
+| -8.9014 | **-6.4305** | **+0.2372** | ±0.0543 | 正自相關使舊 abs(t) 偏大；新值仍遠過 Harvey 3 |
+
+因此 `TAIL_CALIB_USABLE` 不變：q50 仍不適合作 QLIKE 點預測，q95/q99 coverage 與 Kupiec
+結果也未變。QuantReg 重估僅有約 10⁻⁹ 等級數值漂移；公開文章方向不需撤回，但精確 DM
+統計量須由 -8.90 更正為 -6.43。

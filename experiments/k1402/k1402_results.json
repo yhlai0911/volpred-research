@@ -8,29 +8,39 @@
   "oos_first_date": "2021-01-04",
   "oos_last_date": "2026-05-15",
   "ols_baseline": {
-    "qlike_mean_oos": 1.1596836436895646,
-    "pinball_at_tau_0.50": 0.25421536804763
+    "qlike_mean_oos": 1.1596836436895637,
+    "pinball_at_tau_0.50": 0.25421536804763006
   },
   "quantile_median_vs_ols": {
-    "qlike_mean_oos_qmed": 1.9886210369786237,
-    "pinball_at_tau_0.50": 0.24397132511325537,
+    "qlike_mean_oos_qmed": 1.9886183135443716,
+    "pinball_at_tau_0.50": 0.24397133024929515,
     "dm_qmed_vs_ols": {
-      "dm_stat": -10.196849625157515,
+      "dm_stat": -10.949614526420444,
       "p_value": 0.0,
       "n": 1348,
-      "mean_diff": -0.8289373932890594
+      "mean_diff": -0.828934669854808,
+      "loss_differential_acf_1_to_5": [
+        0.043611862015145865,
+        -0.013076707917911858,
+        -0.02870429832418843,
+        -0.017661874334387345,
+        -0.04940808836319542
+      ],
+      "acf1_95pct_bound": 0.053384001648878646,
+      "acf1_significant": false,
+      "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)"
     }
   },
   "quantile_forecasts": {
     "q50": {
       "tau": 0.5,
       "params": {
-        "const": 0.04621999446445102,
-        "rv_d": -0.0569835047299847,
-        "rv_w": 0.4926272980394515,
-        "rv_m": 0.28570692335074455
+        "const": 0.04622057747302932,
+        "rv_d": -0.05698332350232249,
+        "rv_w": 0.49262835602240784,
+        "rv_m": 0.28570528776333504
       },
-      "pinball_loss_oos": 0.24397132511325537,
+      "pinball_loss_oos": 0.24397133024929515,
       "empirical_coverage": 0.4910979228486647,
       "nominal_coverage": 0.5,
       "coverage_gap_pp": -0.8902077151335286,
@@ -46,12 +56,12 @@
     "q75": {
       "tau": 0.75,
       "params": {
-        "const": 0.17962260700739208,
-        "rv_d": -0.04367981728044512,
-        "rv_w": 0.6498432424158693,
-        "rv_m": 0.5839473154558448
+        "const": 0.17962260277653286,
+        "rv_d": -0.04367981974888124,
+        "rv_w": 0.6498432722129621,
+        "rv_m": 0.5839472925135851
       },
-      "pinball_loss_oos": 0.22730295300330042,
+      "pinball_loss_oos": 0.2273029531900868,
       "empirical_coverage": 0.7433234421364985,
       "nominal_coverage": 0.75,
       "coverage_gap_pp": -0.667655786350152,
@@ -67,12 +77,12 @@
     "q90": {
       "tau": 0.9,
       "params": {
-        "const": 0.3208779719325321,
-        "rv_d": -0.08517013804680573,
-        "rv_w": 1.1137198098936096,
-        "rv_m": 0.7668835494805535
+        "const": 0.32087796497103227,
+        "rv_d": -0.08517013129630868,
+        "rv_w": 1.1137197854072838,
+        "rv_m": 0.7668835810145538
       },
-      "pinball_loss_oos": 0.1416703660144409,
+      "pinball_loss_oos": 0.14167036597672797,
       "empirical_coverage": 0.9094955489614244,
       "nominal_coverage": 0.9,
       "coverage_gap_pp": 0.9495548961424349,
@@ -88,12 +98,12 @@
     "q95": {
       "tau": 0.95,
       "params": {
-        "const": 0.45352739061741687,
-        "rv_d": -0.09415932401427085,
-        "rv_w": 1.1920757722447206,
-        "rv_m": 1.0472367680655168
+        "const": 0.45352739970234524,
+        "rv_d": -0.09415931420505785,
+        "rv_w": 1.192075762515401,
+        "rv_m": 1.0472367620213276
       },
-      "pinball_loss_oos": 0.09186191112783317,
+      "pinball_loss_oos": 0.09186191111149472,
       "empirical_coverage": 0.9606824925816023,
       "nominal_coverage": 0.95,
       "coverage_gap_pp": 1.0682492581602365,
@@ -109,12 +119,12 @@
     "q99": {
       "tau": 0.99,
       "params": {
-        "const": 1.1001671774441917,
-        "rv_d": -0.08683598652110902,
-        "rv_w": 1.8486658902427422,
-        "rv_m": 0.9397739423185953
+        "const": 1.100167103275524,
+        "rv_d": -0.08683609749164134,
+        "rv_w": 1.8486659774405894,
+        "rv_m": 0.9397741401456301
       },
-      "pinball_loss_oos": 0.030479932232604718,
+      "pinball_loss_oos": 0.030479932579712814,
       "empirical_coverage": 0.9925816023738873,
       "nominal_coverage": 0.99,
       "coverage_gap_pp": 0.25816023738872707,
@@ -130,10 +140,11 @@
   },
   "verdict": "NULL",
   "verdict_reasons": [
-    "DM significantly NEGATIVE (qmed worse than OLS, stat=-10.20 p=0.000) — quantile median forecast 顯著退步，整體 QLIKE quality 下降"
+    "DM significantly NEGATIVE (qmed worse than OLS, stat=-10.95 p=0.000) — quantile median forecast 顯著退步，整體 QLIKE quality 下降"
   ],
   "config": {
     "seed": 42,
+    "harvey_abs_t_threshold": 3.0,
     "data_start": "2007-01-03",
     "oos_start": "2021-01-04",
     "quantiles": [

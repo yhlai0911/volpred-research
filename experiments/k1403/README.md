@@ -2,7 +2,7 @@
 
 ## Research question
 
-K1402 在 SPY 上跑 HAR-RV quantile regression（pinball loss, τ ∈ {0.50, 0.75, 0.90, 0.95, 0.99}），verdict NULL：DM stat=-10.20, p=0 → quantile median QLIKE 顯著差於 OLS point forecast。
+K1402 在 SPY 上跑 HAR-RV quantile regression（pinball loss, τ ∈ {0.50, 0.75, 0.90, 0.95, 0.99}），verdict NULL：canonical HAC DM t=-10.95, p≈0 → quantile median QLIKE 顯著差於 OLS point forecast。
 
 K1403 把同一 pipeline 在 **QQQ (科技)、GLD (黃金)、TLT (長債)** 三個跨資產類別重跑，回答：
 
@@ -17,7 +17,7 @@ K1403 把同一 pipeline 在 **QQQ (科技)、GLD (黃金)、TLT (長債)** 三�
 
 ## 相關 K
 
-- K1402 — SPY 結果 NULL (DM stat=-10.20 p=0)；但 tail coverage 95/99 是否 acceptable 留待此 K cross-asset confirm
+- K1402 — SPY 結果 NULL（canonical HAC DM t=-10.95, p≈0）；但 tail coverage 95/99 是否 acceptable 留待此 K cross-asset confirm
 - K783c — expanding window 是 RV 預測 cross-regime 最佳折衷
 - K785 — MF2-GARCH NULL，HAR-RV ceiling 仍未破
 - K1038/K1129 — GAS-t VaR 邊際勝出但 QLIKE NS
@@ -41,13 +41,13 @@ K1403 把同一 pipeline 在 **QQQ (科技)、GLD (黃金)、TLT (長債)** 三�
 1. Pinball loss at each τ on OOS
 2. Empirical coverage：`coverage_τ = P(daily_rv_actual ≤ q̂_τ)`，與 nominal τ 比
 3. Kupiec UC test for τ=0.95/0.99 violation rate（右尾 violation rate = 1-τ）
-4. DM test (HLN-adjusted) OLS QLIKE vs τ=0.5 quantile median QLIKE
+4. DM test（canonical Newey-West HAC）OLS QLIKE vs τ=0.5 quantile median QLIKE
 
 ## 成功標準（per-asset，套 K1402 同 criteria）
 
-- **PASS**：(a) τ=0.95 與 τ=0.99 coverage ±2pp 內、(b) Kupiec UC p>0.05、(c) DM stat>0 p<0.10
-- **CONDITIONAL_PASS**：(a) coverage ±5pp 內、(b) Kupiec UC p>0.05、(c) DM NS (p≥0.10)
-- **NULL**：tail coverage gap > ±5pp OR Kupiec UC reject OR DM stat<0 p<0.10
+- **PASS**：(a) τ=0.95 與 τ=0.99 coverage ±2pp 內、(b) Kupiec UC p>0.05、(c) DM t>3
+- **CONDITIONAL_PASS**：(a) coverage ±5pp 內、(b) Kupiec UC p>0.05、(c) DM |t|≤3
+- **NULL**：tail coverage gap > ±5pp OR Kupiec UC reject OR DM t<-3
 
 ## Cross-asset aggregate verdict
 
@@ -60,3 +60,18 @@ K1403 把同一 pipeline 在 **QQQ (科技)、GLD (黃金)、TLT (長債)** 三�
 - Seed 42 (np.random.seed at top)
 - yfinance cache 確定性；OOS_START 固定 2021-01-04
 - `uv run python experiments/k1403/k1403.py`
+
+## 2026-07-11 DM HAC class-sweep 重跑
+
+原 local DM 在 `h=1` 沒有 HAC；本次以固定 CSV、同模型、同 OOS 重跑 canonical DM，並輸出
+loss differential ACF。三個資產仍全數遠過 Harvey |t|>3，aggregate
+`TAIL_CALIB_USABLE` 不變。
+
+| 資產 | 舊 local t | canonical HAC t | ACF(1) | 95% 白噪音界 | 判讀 |
+|---|---:|---:|---:|---:|---|
+| QQQ | -12.6815 | **-13.2327** | +0.0288 | ±0.0532 | ACF(1) 未顯著；結論不變 |
+| GLD | -10.5144 | **-8.4349** | **+0.1722** | ±0.0532 | 正自相關使舊 abs(t) 偏大，但仍遠過 3 |
+| TLT | -11.5924 | **-11.3897** | +0.0094 | ±0.0532 | ACF(1) 未顯著；結論不變 |
+
+QuantReg 重估的最大 QLIKE 漂移約 0.00002，屬 solver 精度。公開文章「三資產的 q50
+點預測不如 OLS、q95/q99 coverage 仍緊」不需撤回；精確 DM 數字改以上表為準。

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
 
 import numpy as np
@@ -19,6 +20,8 @@ import pandas as pd
 from scipy import stats
 import statsmodels.api as sm
 from statsmodels.regression.quantile_regression import QuantReg
+
+from volpred.stats.model_evaluation import dm_test as canonical_dm_test
 
 # ============================================================
 # Config
@@ -28,12 +31,21 @@ DATA_START = "2007-01-03"
 OOS_START = "2021-01-04"
 QUANTILES = [0.50, 0.75, 0.90, 0.95, 0.99]
 SEED = 42
+HARVEY_T = 3.0
 
 ROOT = Path(__file__).parent
 RESULTS_PATH = ROOT / "k1403_results.json"
 CACHE_DIR = ROOT / "data"
 
 np.random.seed(SEED)
+
+
+def atomic_write_results(payload: dict) -> None:
+    """Write parseable results atomically; a killed rerun must not truncate JSON."""
+    tmp = RESULTS_PATH.with_suffix(RESULTS_PATH.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    json.loads(tmp.read_text(encoding="utf-8"))
+    os.replace(tmp, RESULTS_PATH)
 
 
 # ============================================================
@@ -117,26 +129,33 @@ def kupiec_uc(violations: int, n: int, p_nominal: float) -> dict:
 
 
 def dm_test(loss_1: np.ndarray, loss_2: np.ndarray, h: int = 1) -> dict:
-    d = loss_1 - loss_2
-    n = len(d)
-    if n < 5:
+    """Canonical HAC DM plus loss-differential autocorrelation diagnostics."""
+    first = np.asarray(loss_1, dtype=float)
+    second = np.asarray(loss_2, dtype=float)
+    valid = np.isfinite(first) & np.isfinite(second)
+    first, second = first[valid], second[valid]
+    d = first - second
+    n = int(len(d))
+    if n < 10:
         return {"dm_stat": float("nan"), "p_value": float("nan"), "n": int(n)}
     d_mean = float(np.mean(d))
-    gamma0 = float(np.var(d, ddof=0))
-    var_d = gamma0
-    for lag in range(1, h):
-        gl = float(np.mean((d[lag:] - d_mean) * (d[:-lag] - d_mean)))
-        var_d += 2.0 * gl
-    var_d = max(var_d, 1e-12)
-    dm = d_mean / math.sqrt(var_d / n)
-    k = math.sqrt((n + 1 - 2 * h + h * (h - 1) / n) / n)
-    dm_hln = dm * k
-    p_value = 2.0 * (1.0 - stats.t.cdf(abs(dm_hln), df=n - 1))
+    centered = d - d_mean
+    denom = float(np.dot(centered, centered))
+    acf = [
+        float(np.dot(centered[lag:], centered[:-lag]) / denom)
+        for lag in range(1, min(5, n - 1) + 1)
+    ] if denom > 0 else [float("nan")]
+    acf1_bound = float(1.96 / math.sqrt(n))
+    dm_stat, p_value = canonical_dm_test(first, second, h=h)
     return {
-        "dm_stat": float(dm_hln),
+        "dm_stat": float(dm_stat),
         "p_value": float(p_value),
         "n": int(n),
         "mean_diff": d_mean,
+        "loss_differential_acf_1_to_5": acf,
+        "acf1_95pct_bound": acf1_bound,
+        "acf1_significant": bool(np.isfinite(acf[0]) and abs(acf[0]) > acf1_bound),
+        "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
     }
 
 
@@ -228,11 +247,10 @@ def run_asset(asset: str) -> dict:
 
 def classify_dm_status(dm: dict) -> str:
     """Explicit DM dimension: SIG_POS / SIG_NEG / NS."""
-    dm_p = dm["p_value"]
     dm_stat = dm["dm_stat"]
-    if dm_p < 0.10 and dm_stat > 0:
+    if dm_stat > HARVEY_T:
         return "SIG_POS"
-    if dm_p < 0.10 and dm_stat < 0:
+    if dm_stat < -HARVEY_T:
         return "SIG_NEG"
     return "NS"
 
@@ -266,9 +284,9 @@ def classify_verdict(qres: dict, dm: dict) -> dict:
     kupiec_99_pass = q99["kupiec_uc"]["p_value"] > 0.05
     dm_p = dm["p_value"]
     dm_stat = dm["dm_stat"]
-    dm_sig_neg = dm_p < 0.10 and dm_stat < 0
-    dm_sig_pos = dm_p < 0.10 and dm_stat > 0
-    dm_ns = dm_p >= 0.10
+    dm_sig_neg = dm_stat < -HARVEY_T
+    dm_sig_pos = dm_stat > HARVEY_T
+    dm_ns = abs(dm_stat) <= HARVEY_T
     cov_tight = gap_95 <= 2.0 and gap_99 <= 2.0
     cov_acceptable = gap_95 <= 5.0 and gap_99 <= 5.0
 
@@ -286,12 +304,12 @@ def classify_verdict(qres: dict, dm: dict) -> dict:
         return {"label": "NULL", "reasons": reasons}
 
     if cov_tight and kupiec_95_pass and kupiec_99_pass and dm_sig_pos:
-        reasons.append("Coverage ±2pp, Kupiec UC PASS both tails, DM qmed>ols p<0.10")
+        reasons.append("Coverage ±2pp, Kupiec UC PASS both tails, DM qmed>ols t>3")
         return {"label": "PASS", "reasons": reasons}
     if cov_acceptable and kupiec_95_pass and kupiec_99_pass and dm_ns:
         reasons.append(
             f"Coverage gap 95={gap_95:.2f}pp 99={gap_99:.2f}pp, Kupiec PASS, "
-            f"DM NS (p={dm_p:.3f})"
+            f"DM not Harvey-significant (|t|≤3; t={dm_stat:.2f}, p={dm_p:.3f})"
         )
         return {"label": "CONDITIONAL_PASS", "reasons": reasons}
     if not cov_acceptable:
@@ -378,6 +396,7 @@ def main() -> dict:
         "aggregate_verdict": agg,
         "config": {
             "seed": SEED,
+            "harvey_abs_t_threshold": HARVEY_T,
             "data_start": DATA_START,
             "oos_start": OOS_START,
             "quantiles": QUANTILES,
@@ -385,7 +404,7 @@ def main() -> dict:
             "refit": "none (single fixed-origin fit)",
         },
     }
-    RESULTS_PATH.write_text(json.dumps(out, indent=2, ensure_ascii=False))
+    atomic_write_results(out)
     print(json.dumps({
         "experiment_id": out["experiment_id"],
         "aggregate_label": agg["label"],
