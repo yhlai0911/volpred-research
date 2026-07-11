@@ -2,6 +2,71 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-12 **3-STRIKE TRIGGER** — fire 內 spawn 無界 agentic 子程序（hang_killed ×3）
+
+**三次 incident**（全在 24h 內，全部 `duration=3001.3s`）：
+
+| # | 時間 | 症狀 | 當時在等什麼 |
+|---|---|---|---|
+| 1 | 07-11 14:57:40 | `exit=-1000 category=hang` | 背景 digest agent（自述「約 20–40 min」） |
+| 2 | 07-11 21:50:21 | 同上 | 背景 codex 渲染懶人包 PNG（自述「約 15-20 分鐘」） |
+| 3 | 07-12 00:57:04 | 同上 | 背景研究 agent |
+
+**問題**：dispatch fire 的 hard cap 是 **3000s**，但 fire 內 spawn 的研究 agent（`claude -p`）需要
+**20–60 分鐘**。把後者塞進前者，只有兩種結局，兩種都實測到了：
+
+- **父等子** → 燒完整個 cap → SIGKILL（上表三次）
+- **父先走** → 子 reparent 到 init（**ppid=1**）、脫離監管、worktree 成果沒人回收
+  （K1681「agent 已死、成果卡在分支上、等於白做」；**本次事故當下 K1684 的 agent（pid 84974）
+  正以 ppid=1 裸跑**，其父 worker 早在 01:10:54 就 `exit=0 category=success` 走了）
+
+**決定性證據**：三次 duration **全是 3001.3s，分毫不差**。CPU-bound 的工作不會每次都剛好撞天花板；
+真的 hang 也不會。**只有「阻塞等待一個永遠不會到的事件」才會每次精準等到上限。**
+
+**為什麼是 3-STRIKE 而不是 strike 1**：2026-07-11 已經修過**同一個 root cause**，但只擋了 class 的
+一個成員 —— hook 第 99 行的 `codex exec` deny，理由欄寫得一字不差：「卡住 >30min 無輸出 → agent
+阻塞在無 timeout 的 Bash → 撞 supervisor 3000s hard cap → SIGKILL → hang_killed」。
+**隔天同一個 root cause 換一個執行檔（`claude -p`）就又炸三次。**
+修的是「一個成員」不是「那一類」——正是 memory `feedback_declare_complete_requires_class_sweep`
+的教訓（宣告完成前要對 bug class 做 full-population sweep）。
+
+**Bug class 定義**：*從 fire 的 Bash tool spawn、無上界、會跑很久的 agentic 子程序。*
+成員清單：`codex exec`（7/11 修）、`claude -p` / `claude --print`（7/12 炸三次）、
+`agy -p`（同構，尚未炸但必然會）。
+
+**三層診斷與修正**（commit `5aa8cd180`）：
+
+1. **底層邏輯（domain model 錯誤）**：一個 60 分鐘的工作被塞進 50 分鐘的容器。這**不是 timeout
+   調太小** —— 調參數只會換一種死法。正確容器 repo 早就有：**compute queue**（detached `*/15`
+   worker、有 lock、有自己的 timeout、成果由**後續某一班** fire 在 PHASE A 回收）。heavy compute
+   一直走這條路；**「agentic 長工作」從來沒接上去**，於是被硬塞進 fire。
+   → 新增 `scripts/run_agent_job.py` + `compute_queue.py enqueue-agent`。
+2. **流程**：hourly prompt（`scripts/cron_hourly_dispatch_prompt.md:138`）**明文下令**
+   「**必須用 `claude -p --effort <E>` spawn** 而不是 Agent tool」—— 這條指令本身就是元兇。
+   已刪除，改導向 queue，並釐清**「完成的單位是 task，不是 fire」**：在 50 分鐘的容器裡等一個
+   60 分鐘的 agent「等到底」，結局是 SIGKILL、成果全毀，那才是真正的沒完成。
+3. **程式架構**：機械閘門收編進**既有**的 PreToolUse deny owner（anti-stacking，**未新增第二套
+   機制**）：fire 內 `claude -p` / `agy -p` / `codex exec` 一律 deny，且 **actor-scoped**
+   （`VOLPRED_ACTOR=dispatch-worker:*`，由 `worker.py:_dispatch_actor` 蓋章）—— 互動 session 有人
+   盯著、compute worker 不受 cap 限制，那兩處合法不擋；`run_agent_job.py` 蓋
+   `VOLPRED_ACTOR=agent-job:*` 正是為了不被自己的閘門誤傷。
+   順帶補掉 `codex exec` 舊 pattern 的**路徑前綴漏洞**（`/opt/homebrew/bin/codex exec` 可繞過）——
+   同 class：本檔第 42 行自己就警告過「pattern 只認人類慣常拼法」。
+
+**驗證**：`scripts/tests/test_pretooluse_deny.sh` **75 → 86 assertions，全綠零回歸**。新增覆蓋：
+新成員 `agy -p`、絕對路徑繞過、`&&` 串接、**合法出路（`enqueue-agent`）不可被自己的 deny 擋住**
+（否則 agent 無路可走 → 又回去硬 spawn）、提到字串不誤擋。actor 一律**顯式指定**，不吃跑測試者的
+環境（否則 hourly fire 跑 CI 與人手跑 CI 會得到不同結果）。
+
+**遺留（已立單，未在本班修）**：
+- `collect_k1684_orphan_worktree`（P1）：K1684 孤兒 agent 仍在跑，需回收 worktree 成果，
+  否則就是下一個 K1681 白做。**沒有殺它** —— 它做的是真工作。
+- `hook_commit_m_nonascii_false_positive`（P2）：`_commit_message_has_non_ascii()` 檢查的是
+  **整條 COMMAND** 是否含非 ASCII，不是 `-m` 的引數本身。於是「Python heredoc 含中文 + 同一條
+  指令裡有純 ASCII 的 `git commit -m`」會被誤擋（本班實際踩到）。**刻意不在時間壓力下放寬一個
+  strike-3 的 guard** —— 誤擋的成本是拆成兩個 Bash call，放寬錯的成本是不可回復的非 UTF-8 commit。
+  正確修法是精準抽出 `-m` 的引數值再判斷，需要完整測試，另班處理。
+
 ## 2026-07-11 FEVD 取錯軸：`decomp[-1]` 把「最後一個變數」當成「最後一個 horizon」（K865 全數字作廢）
 
 **問題**：`experiments/k865/k865_vol_spillover_network.py:116`（`fit_var_fevd`）用

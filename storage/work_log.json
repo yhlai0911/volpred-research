@@ -16028,5 +16028,15 @@
     "owner": "codex",
     "backfilled_at": "2026-07-11T17:11:22.132096+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-11T17:50:16.825710+00:00",
+    "task_type": "platform_ops",
+    "task_id": "email-12084-9b55bc",
+    "outcome": "succeeded",
+    "summary": "3-STRIKE: fire 內 spawn 無界 agentic 子程序（hang_killed x3, duration 全 3001.3s）。root cause = 60min 的工作塞進 50min 容器（非 timeout 太小）。三層修正：compute_queue enqueue-agent + run_agent_job.py 出路；PreToolUse class deny（claude -p / agy -p / codex exec，actor-scoped）收編進既有 owner；hourly prompt 刪除「必須用 claude -p spawn」違規指令。regression 75->86 全綠。遺留立單：K1684 孤兒回收（P1）、hook commit -m false positive（P2）。",
+    "commit": "5aa8cd180",
+    "owner": "hourly-01",
+    "actor": "hourly-01"
   }
 ]
