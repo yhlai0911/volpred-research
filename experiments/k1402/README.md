@@ -92,3 +92,4 @@ K1655 全庫稽核發現原 local DM 在 `h=1` 時 `range(1, h)` 為空，等於
 高階 lag 有負相關，因此 canonical HAC 後 |t| 略增；這再次說明遺漏 HAC 的影響不是單向。
 QuantReg 重估的 QLIKE 數值漂移低於 0.000003，屬 solver 精度，不改點估結論。公開文章的
 「quantile median 不適合作 QLIKE 點預測、tail coverage 仍可用」方向不需撤回，但舊 t 值應以本節為準。
+執行前 Codex review = PASS（canonical loss orientation、finite mask、lookahead、原子輸出均通過）。

@@ -135,3 +135,4 @@ OOS 與 loss 不變，委派 canonical `dm_test`，並輸出 loss differential A
 因此 `TAIL_CALIB_USABLE` 不變：q50 仍不適合作 QLIKE 點預測，q95/q99 coverage 與 Kupiec
 結果也未變。QuantReg 重估僅有約 10⁻⁹ 等級數值漂移；公開文章方向不需撤回，但精確 DM
 統計量須由 -8.90 更正為 -6.43。
+執行前 Codex review = PASS（canonical loss orientation、finite mask、lookahead、原子輸出均通過）。

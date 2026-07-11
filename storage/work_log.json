@@ -15978,5 +15978,18 @@
     "actor": "hourly-22",
     "task_id": "research_smad_vol_left_tail_predictor",
     "summary": "K1681 SMAD 作為波動/左尾預測子 — NULL。收編孤兒 worktree k1681-smad（agent 已死、工作未合併）；Codex primary-path review 撞出巢狀模型誤用 raw DM（Clark-West 後 t=+6.71，統計那條腿翻面，NULL 方向不變但理由改由經濟顯著性 0.54% 單獨承擔）；README §8 附記 + knowledge 9c74b106；立兩個 follow-up：CW 正式重跑 + 巢狀 DM 誤用全庫 class sweep。另：推掉 6 個積壓 commit（push backlog warn 解除）、排定 supervisor deferred reload。"
+  },
+  {
+    "timestamp": "2026-07-11T14:43:28.272701+00:00",
+    "task_type": "experiment",
+    "task_id": "k1655_dm_sweep_rerun_article_bound",
+    "outcome": "succeeded",
+    "actor": "codex-vscode",
+    "owner": "codex",
+    "k_id": "K1402,K1403,K1404",
+    "batch": "K1402/K1403/K1404",
+    "summary": "DM-HAC article-bound batch 1 complete: canonical reruns changed SPY t -10.20→-10.95; QQQ/GLD/TLT to -13.23/-8.43/-11.39; ^TWII -8.90→-6.43. GLD and ^TWII ACF(1) were significant, but all five remain beyond Harvey |t|>3; K1402 NULL and K1403/K1404 TAIL_CALIB_USABLE verdicts are unchanged. Three existing articles (two published, one unpublished) were corrected in place; deterministic double-run and Codex review passed.",
+    "knowledge_item_id": "a4a9eacc",
+    "continuation_task_id": "k1655_dm_sweep_rerun_article_bound_b02"
   }
 ]

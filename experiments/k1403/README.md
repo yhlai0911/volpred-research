@@ -75,3 +75,4 @@ loss differential ACF。三個資產仍全數遠過 Harvey |t|>3，aggregate
 
 QuantReg 重估的最大 QLIKE 漂移約 0.00002，屬 solver 精度。公開文章「三資產的 q50
 點預測不如 OLS、q95/q99 coverage 仍緊」不需撤回；精確 DM 數字改以上表為準。
+執行前 Codex review = PASS（canonical loss orientation、finite mask、lookahead、原子輸出均通過）。
