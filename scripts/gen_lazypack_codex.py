@@ -97,7 +97,23 @@ def _resolve_codex_bin() -> str:
     return "codex"
 
 
+def _ensure_codex_runtime_on_path(codex_bin: str) -> None:
+    """codex's shebang is `env node` — resolving the codex path is not enough.
+
+    A non-interactive caller that lacks the nvm bin dir also lacks `node`, so
+    spawning an absolute codex still dies with `env: node: No such file`.
+    Prepend the binary's own dir so its interpreter resolves too.
+    """
+    # NOT .resolve(): nvm's bin/codex is a symlink into lib/node_modules/,
+    # and node lives in the bin dir, not in the symlink target dir.
+    bin_dir = str(Path(codex_bin).absolute().parent)
+    parts = os.environ.get("PATH", "").split(os.pathsep)
+    if bin_dir not in parts:
+        os.environ["PATH"] = os.pathsep.join([bin_dir, *parts])
+
+
 CODEX_BIN = _resolve_codex_bin()
+_ensure_codex_runtime_on_path(CODEX_BIN)
 
 # One wall-clock budget for the whole generation; every phase draws from it.
 # Stays under the 1800s compute_queue job timeout with room for the upload →

@@ -39,10 +39,30 @@ fi
 # it spawned. `start_new_session` + `killpg` takes the whole tree down and keeps
 # the GNU-timeout exit convention that callers actually check for.
 exec python3 -c '
-import os, signal, subprocess, sys
+import glob, os, shutil, signal, subprocess, sys
+
+def resolve_codex():
+    # nvm puts codex on PATH only for interactive shells (nvm init lives in
+    # .zshrc), so a Bash-tool / subagent / launchd caller sees no `codex` and
+    # reads the resulting rc as "codex is broken". Resolve it ourselves.
+    found = os.environ.get("CODEX_BIN") or shutil.which("codex")
+    if found and os.access(found, os.X_OK):
+        return found
+    for pattern in (os.path.expanduser("~/.nvm/versions/node/*/bin/codex"),
+                    "/opt/homebrew/bin/codex", "/usr/local/bin/codex"):
+        for cand in glob.glob(pattern):
+            if os.access(cand, os.X_OK):
+                return cand
+    return "codex"
 
 timeout = float(sys.argv[1])
-proc = subprocess.Popen(["codex", "exec", *sys.argv[2:]], start_new_session=True)
+codex_bin = resolve_codex()
+# codex has an `env node` shebang: without the nvm bin dir on PATH, an absolute
+# codex still dies with "env: node: No such file". Put its own dir on PATH too.
+bin_dir = os.path.dirname(os.path.abspath(codex_bin))  # NOT realpath: bin/codex is a symlink into lib/node_modules, where node is not
+if bin_dir and bin_dir not in os.environ.get("PATH", "").split(os.pathsep):
+    os.environ["PATH"] = os.pathsep.join([bin_dir, os.environ.get("PATH", "")])
+proc = subprocess.Popen([codex_bin, "exec", *sys.argv[2:]], start_new_session=True)
 try:
     sys.exit(proc.wait(timeout=timeout))
 except subprocess.TimeoutExpired:

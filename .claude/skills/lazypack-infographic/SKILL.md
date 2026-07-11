@@ -125,6 +125,7 @@ uv run python scripts/gen_lazypack_infographic.py \
 - **Rate limit**：NotebookLM infographic 生成有 Google rate limit，連生多張可能 429 → `--retry 3`（指數退避）已內建；仍失敗就分批/隔幾分鐘。
 - **headless**：notebooklm-py 用 stored auth（`~/.notebooklm/`），cron 可跑（不需互動瀏覽器）—— 但 auth 過期要 `notebooklm login`（互動）。若 cron 報 auth 失敗，降級成「互動 session 補圖」。
 - **品質不過關**：數字錯/版面亂/塞太多 → 改 prompt 重生，不將就發佈（同 anti-ai-style 是 publish gate）。
+- **「codex 不能生圖」= PATH，不是 codex**（2026-07-11，error_log 21:55）：`codex` 裝在 nvm bin，只有互動 shell 會加進 PATH；Bash tool / subagent / 缺 PATH 的 launchd job 拿到 rc 3「codex CLI not found」，被誤讀成生圖功能壞掉。所有入口已自行解析絕對路徑（`gen_lazypack_codex.py::_resolve_codex_bin`、`codex_exec_bounded.sh`）。**看到生圖失敗先確認錯誤是「找不到 binary」還是「真的生不出來」，不要直接降級 NotebookLM。**
 - 驗證：生完用 Read 看圖、核對數字 vs results.json 再 append。
 
 ## 交叉參考

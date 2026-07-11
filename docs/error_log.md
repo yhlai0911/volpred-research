@@ -5992,3 +5992,28 @@ reproduce.py 曾以「0.272 = 1997-2026 long-sample」NOTE 辯解掩蓋，但該
 **Fix**：改由每日獨立 CSV 重建 RV，每檔內先取 Close、再計算相鄰五分鐘 log return 平方和；每次收集會重建所有已存日，回溯修掉舊錯值。TAIFEX canonical 同樣只在 day/night session 內計算，不跨封市 gap，並以 TX 全合約當日成交量最高月契約避免換月價差。修正後 2026-01-20～2026-07-09 共 108 個重疊交易日，日 RV Pearson `r=0.902444`。
 
 **防再犯**：高頻 RV 聚合的 grouping 必須先於 return/diff；任何跨日資料先 `groupby(trading_date)` 再 `diff`。交叉驗證不得直接相信既有 aggregate，須能由原始逐日 bars 重算，並以 regression test 放入「前一日末價極端不同」案例。
+
+## 2026-07-11 21:55 — 「codex 不能生圖」的真根因是非互動 shell 的 PATH，不是 codex
+
+**症狀**：懶人包（lazypack）生圖多次被判定「codex exec 生不出圖 → 改走 NotebookLM / 手動」。
+
+**實測**：codex exec 生圖完全正常。`codex` 裝在 nvm 管理的 bin dir，而 nvm 的 init 寫在 `.zshrc` —
+**只有互動 shell 會把它加進 PATH**。Claude 的 Bash tool、subagent、任何忘了在 plist 補 PATH 的 launchd job
+都是非互動 shell，`shutil.which("codex")` → None → `_run_codex` 回 rc 3「codex CLI not found on PATH」。
+這個 rc 被上游讀成「codex 不能生圖」，於是一直在錯的地方找原因。補上 nvm bin 後：codex 0.144.1 寫出
+render.py，本地跑出 1200×800 PNG，5k tokens。
+
+**根因**：呼叫外部 CLI 時用裸名字（`"codex"`），等於把「能不能執行」的決定權交給**呼叫端的 PATH**。
+compute-worker 的 plist 剛好有 nvm bin，所以 async 路徑一直是好的；壞的只有 session 內同步呼叫 —
+這種「有時好有時壞」正是它被誤診成 codex 本身不穩的原因。
+
+**Fix + class sweep**（不是只修一處）：所有 spawn codex 的入口都改成自己解析絕對路徑
+（`$CODEX_BIN` → `which` → `~/.nvm/versions/node/*/bin/codex` → homebrew）：
+- `scripts/gen_lazypack_codex.py::_resolve_codex_bin()`（commit 2e92f505d）
+- `scripts/codex_exec_bounded.sh`（本次；原本 `Popen(["codex", ...])` 是唯一殘留的裸名呼叫）
+- `scripts/cron_hourly_dispatch.sh` / `scripts/dispatch_supervisor/codex_failover.py` 本來就已解析，無須改。
+
+**防再犯（通用規則）**：**任何從 Python/shell spawn 外部 CLI 的地方，不可依賴呼叫端 PATH**。
+凡是靠 shell rc file 才會上 PATH 的工具（nvm/pyenv/rbenv 系：codex、npx、node、agy…），
+一律 `$XXX_BIN` → `which` → 已知安裝路徑 fallback。診斷時先問「這個 process 是互動 shell 嗎」，
+再懷疑工具本身。錯誤訊息要說「找不到 binary」，不要讓上游把它讀成「功能壞掉」。

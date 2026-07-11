@@ -76,9 +76,18 @@ class FailoverResult:
 
 
 def resolve_codex_bin() -> str | None:
-    """First of $CODEX_BIN, `which codex`, the known nvm path — or None."""
+    """First of $CODEX_BIN, `which codex`, the known nvm path — or None.
+
+    Also puts the binary's own dir on PATH: codex's shebang is `env node`, so a
+    caller without the nvm bin dir cannot run even an absolute codex.
+    """
     for candidate in (os.environ.get("CODEX_BIN"), shutil.which("codex"), _NVM_CODEX):
         if candidate and os.access(candidate, os.X_OK):
+            # NOT .resolve(): bin/codex symlinks into lib/node_modules/, no node there.
+            bin_dir = str(Path(candidate).absolute().parent)
+            parts = os.environ.get("PATH", "").split(os.pathsep)
+            if bin_dir not in parts:
+                os.environ["PATH"] = os.pathsep.join([bin_dir, *parts])
             return candidate
     return None
 
