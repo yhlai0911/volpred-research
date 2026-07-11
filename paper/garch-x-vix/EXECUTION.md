@@ -74,7 +74,7 @@
 - ⬜ 手稿資料節更新至 2026-07-10，並寫入 optimizer/HAC sensitivity（與 P0-1 canonical rebind 一起由主線程修改 `.tex`）。
 
 **驗證 gate：PASS**。`experiments/k1685/` 三件套 + pinned data / figures / parameter audit 齊全；seed=42；Codex primary + 兩位 fresh-context reviewers PASS；knowledge item `7d2e411b`（confidence=.84）。
-（對應收件 task：`k1685_collect_orphaned_results`；原 compute job 因 orphan-process timeout 被標 failed，特殊 provenance 見 K1685 README。）
+（對應收件 task：`k1685_collect_orphaned_results`；原 compute job 因 orphan-process timeout 被標 failed，特殊 provenance 見 K1685 README。舊 planning alias `fable0711_garchx_k1393_oos` 已由同一份 K1685 證據滿足，禁止重跑。）
 
 ### ⬜ P0-3 — Replication package 除雷（修流程不修資料）
 
@@ -118,4 +118,4 @@
 
 ## 接續提示詞
 
-讀 `paper/garch-x-vix/EXECUTION.md` 後，從 **P0-1** 開始：解凍（撤銷 body-frozen 假前提，A4f errata sign-off 是不存在的等待點，論文從未投稿）→ 把 `r1_response_queue.md` Q1–Q5 + `review_history/v7` P1–P3 一次落地 `main.tex`，**首要動作 = Table 3 全表由 canonical `mcs_dm_results.json` 重生**（C1 3.49→1.995 No、A3f→3.018 Yes、B2→3.066 Yes、10/16→11/16、4.03→4.148 全文同步），完整清單見上方 P0-1。落地後 xelatex 重編譯 + `reproduce.py` 轉 green + `paper-update` 同步。修訂在主線程進行（不丟 background agent 改 .tex，paper-workflow 硬規則）；每項改動的來源數字先讀 `mcs_dm_results.json` 驗證再寫，不臆造。P0-2（延長 OOS 覆核）是獨立 compute job（next_tasks `fable0711_garchx_k1393_oos`），可與 P0-1/P0-3 平行。
+讀 `paper/garch-x-vix/EXECUTION.md` 後，從 **P0-1** 開始：解凍（撤銷 body-frozen 假前提，A4f errata sign-off 是不存在的等待點，論文從未投稿）→ 把 `r1_response_queue.md` Q1–Q5 + `review_history/v7` P1–P3 一次落地 `main.tex`，**首要動作 = Table 3 全表由 canonical `mcs_dm_results.json` 重生**（C1 3.49→1.995 No、A3f→3.018 Yes、B2→3.066 Yes、10/16→11/16、4.03→4.148 全文同步），完整清單見上方 P0-1。落地後 xelatex 重編譯 + `reproduce.py` 轉 green + `paper-update` 同步。修訂在主線程進行（不丟 background agent 改 .tex，paper-workflow 硬規則）；每項改動的來源數字先讀 `mcs_dm_results.json` 驗證再寫，不臆造。**P0-2 已由 K1685 完成，不再派 compute；只剩其 endpoint / fragility disclosure 併入 P0-1。**
