@@ -15775,5 +15775,15 @@
     "backfilled_at": "2026-07-11T07:06:12.944206+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1682"
+  },
+  {
+    "timestamp": "2026-07-11T15:27:09+08:00",
+    "task_type": "platform_ops",
+    "actor": "hourly-15",
+    "task_id": "ops-lazypack-codex-hang-20260711",
+    "summary": "根治 lazypack codex render hang + supervisor 假擊殺回報",
+    "detail": "A) gen_lazypack_codex 改成 codex 只寫腳本、本地跑腳本（各自 timeout + 共用總預算 + 字型本地解析 + resume 已完成 panel）；B) 新增 codex_exec_bounded.sh 並在 pretooluse hook 擋裸跑 codex exec；C) procutil.kill_pgid 濾 zombie、EPERM 逐 pid 補刀、回傳觀察結果，health 記 kill_failed_orphan，修 worker 寫死的 pid=-1 與 health 從不讀檔的 log_tail；D) 兩個 failed lazypack job 重新入列。活體 smoke 挖出 zombie 是 EPERM 真因。",
+    "commit": "49e170e15",
+    "tests": "176 passed + live smoke"
   }
 ]

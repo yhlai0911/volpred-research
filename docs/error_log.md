@@ -2,6 +2,74 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-11 supervisor 說它 SIGKILL 了 worker —— 但那個 killpg 其實被拒了，而且被拒的原因是屍體
+
+**現象**（boss Telegram msg 465）：14:07 那班 hourly agent 在 session 內裸跑 `codex exec` 補渲染
+lazypack，卡住 >30 min（零 stdout、零 commit、零 hook log），撞 supervisor 3000s hard cap →
+SIGKILL → `hang_killed` 告警。告警內容是瞎的：`pid=-1 / pgid=-1`、log tail `(empty)`。
+supervisor log 同時寫著 `killpg SIGKILL denied pgid=69948: [Errno 1] Operation not permitted`。
+
+**三層根因**（照 3-strike 精神從底層翻，不加 flag / retry）：
+
+1. **渲染架構（A）**：`gen_lazypack_codex.py` 把「讀證據 + 寫 render 程式 + 跑 matplotlib +
+   偵測 CJK 字型 + tofu 重試」全塞進**一次** agentic `codex exec`，硬 timeout 900s。今天兩個
+   compute job（06:00 / 06:30）都在 900s 撞牆。字型偵測是它 thrash 最兇的一環 —— 而那是本機
+   一行 `font_manager` 就能回答的事。
+   **修**：codex 只**寫**腳本（有界呼叫、明令不准執行/不准安裝/不准偵測字型），本地**跑**腳本
+   （`subprocess.run(timeout=)`，秒級、確定性、hang 不可能發生），失敗才把 traceback 餵回去做
+   有界的修腳本回合（上限 2）。全部階段共用一個 `--budget-s` 總預算。字型本地解析後注入 prompt。
+   **另加 resume**：panel 已存在就完全不叫 codex；腳本已存在就先跑既有的。今天那兩個 job 的
+   PNG 其實 14:2x 就 render 好了，真正死掉的是後面的「上傳 + 插入文章 + 同步」—— 舊碼一重跑
+   就必然重新叫一次 codex 去重做已經做完的事。
+
+2. **沒有上界可用（B）**：agent 不是懶得加 timeout，是**加不了** —— macOS 沒有 coreutils
+   `timeout`，Bash tool 也沒有 timeout 旋鈕。等於把整個 fire 的命運交給一個沒有上界的呼叫。
+   **修**：`scripts/codex_exec_bounded.sh`（逾時回標準 124、`start_new_session` + `killpg` 殺
+   整組行程，不留子行程）+ `.claude/hooks/pretooluse-bash-optimizer.sh` 擋掉裸跑形式，deny 訊息
+   指路到 wrapper（短工作）或 compute_queue（重活）。Python 內 `subprocess.run(timeout=)` 呼叫
+   codex 不受攔截 —— 那本來就有界。
+   （寫 wrapper 時的插曲：第一版用 perl `alarm` + `exec`，實測 exit 142 而非 124 —— `exec` 之後
+   perl 的 SIGALRM handler 已不存在，pending alarm 用**預設處置**殺掉行程，且只殺 codex 本身、
+   不殺它的子行程。改用 python watchdog 才對。）
+
+3. **kill 會謊報（C，最陰險）**：`procutil.kill_pgid()` 回 `None`，caller 無從得知 killpg 被拒；
+   health.py 照樣記 `killed_timeout`、照樣寄「SIGKILL'd 一個 worker」。**一個無法回報失敗的 kill
+   routine，會把孤兒變成隱形的孤兒。**
+   **修**：`kill_pgid` 改回傳「**觀察到的**」結果而非 syscall 的說法 —— killpg EPERM 時逐 pid 補刀，
+   最後用 `ps` 驗屍；殺不掉就回 False，health 記 `kill_failed_orphan`，告警直接列出還活著的 pid
+   與手動 `kill -9` 指令。順手修掉 worker.py **寫死**的 `pid=-1/pgid=-1`（那兩個數字一直都在
+   state 裡，只是從沒傳過去）與 health.py 傳給告警的 log_tail —— 它傳的是字面字串
+   `"(killed by health monitor — see worker log_path)"`，**從沒去讀那個檔**。難怪 tail 是空的。
+
+**最關鍵的一課 — EPERM 的真正成因是 zombie，是活體測試挖出來的**：
+新的 `pgid_members()` 寫完、mock 測試全綠之後，我對真的 process group 跑活體 smoke，它立刻
+回報「orphan survived」—— 對一個明明剛被 SIGKILL 的 group。原因：**被殺的行程在父行程 reap
+之前是 zombie（`Z`），而 `ps -g` 會把它列出來**。這同時解釋了原始的 EPERM：**macOS 對「只剩
+zombie 成員的 process group」下 killpg 就是回 `Operation not permitted`** —— 那個 SIGKILL
+其實成功了，被拒的是對屍體再開一槍。所以：
+- 若不濾 zombie，新碼會把**每一次正常擊殺**誤判成「孤兒還活著」，狂發假警報（比原 bug 更糟）；
+- 「這個 group 還活著嗎」的正確定義是「**它還有非 Z 的成員嗎**」，不是「killpg 有沒有成功」。
+
+**教訓（已固化成測試，不是散文）**：
+- **mock 全綠不代表對**。這個 bug 在 mock 世界裡完全看不見 —— 因為 mock 裡沒有 zombie 這種東西。
+  凡是碰 signal / 行程生命週期 / 檔案系統的修正，**必須有活體 smoke**。（同一課 2026-07-04
+  Codex review fix #5 也是靠 live smoke 才抓到 PermissionError，這是第二次。）
+- 測試斷言**不變量**、不要斷言**機制**。原本 4 個 kill 測試斷言的是 `killpg(0)` 探測的呼叫序列 ——
+  而那個探測正是 false-positive 的來源。機制一改測試就紅，紅的卻是測試不是程式。改寫後斷言的是
+  「已死就別再開槍」「被拒不可中斷升級」「殺不掉必須回報失敗」。
+  新增不變量：zombie 不算 survivor / EPERM → 逐 pid fallback / 殺不掉 → 回 False。
+- **`git commit -m` 的中文訊息在本機會變亂碼**（本次 commit 49e170e15 就中了）：`LANG` / `LC_ALL`
+  皆為空、`LC_COLLATE=C`，git 因此警告「提交說明不符合 UTF-8」並寫入 mojibake。i18n.commitEncoding
+  已是 UTF-8，問題在 shell locale。**中文 commit message 一律走 `git commit -F <file>`**（用 Write
+  工具產生的檔案是正確 UTF-8），或在該次命令前置 `LC_ALL=en_US.UTF-8`。已污染的訊息不 amend
+  （共用 main 禁令），敘事以本 entry 為準。
+
+**驗證**：176 tests passed（含 4 個改寫 + 5 個新不變量）；活體 smoke 兩情境（trap TERM 的多行程
+group 被 SIGKILL 收乾淨回 True；聽話的 group 不升級到 SIGKILL 且未等滿 grace）；resume 路徑對
+真 job 實測零 codex 呼叫瞬間完成。兩個 failed lazypack job 已重新入列（-r2）。
+supervisor code 改動已排 deferred reload（fire 一結束自動載入 —— 本班自己就是 in-flight worker，
+不能現在 reload 也不能 --force 殺自己）。commit 49e170e15。
+
 ## 2026-07-11 選題 gate 放行了兩篇已存在的文章 —— library 有參數，CLI 沒接線
 
 **現象**：hourly-13 為補草稿池選題，對 K1586 / K1605 跑強制的 pre-write gate
