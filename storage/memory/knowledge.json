@@ -38426,5 +38426,19 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-07-11T19:14:08.590988"
+  },
+  {
+    "item_id": "f944ff00",
+    "category": "methodology",
+    "content": "[提出: K1655 DM HAC class sweep, 執行: Claude hourly-20] **K623 DM 推論回溯更正（MF2-GARCH vs GJR, SPY）**：原 K623 條目宣稱「MF2-GARCH(m=66) QLIKE=1.503 vs GJR 1.530，DM t=-2.03 p=0.042 顯著」。該 t 值來自實驗內自寫的退化 DM （Newey-West 頻寬 range(1,h)，h=1 時等於完全不做 HAC）。改用 canonical volpred.stats.model_evaluation.dm_test 重跑後：**t=-2.30, p=0.0218**（QLIKE, MF2 vs GJR）。點估計完全未動（QLIKE 1.5030 vs 1.5303，樣本窗口釘死 END=2026-03-27、OOS 2023-01-01~2024-12-31、502 obs），故新舊差異可**純歸因於 HAC 修正**，無樣本延長混淆（k507 有，k623 沒有）。方向與 k621 同族一致：QLIKE loss differential acf(1..5)=(-0.049,-0.037,-0.041,-0.030,+0.011) 為負，負自協方差縮小 HAC 標準誤 → |t| 反而變大、p 變小。**結論方向未被推翻，反而略增強**——這是 class sweep 第二個確證「遺漏 HAC 是雙向誤設而非單向灌水」的案例。**但宣稱強度不得升級**，三項保留條款全部未解：(1) t=-2.30 仍未達 Harvey t>3 門檻，維持 cautiously positive 而非 confirmed；(2) 收斂率僅 25%（6/24 refits）；(3) unit-mean 未實現，g 跨 refit 平均 =1.367（理論應 1.0），係 K621 Codex 二審指出的 τ 約束數學錯誤殘留，需 K625 第三次修正。另一個新揭露的 nuance（舊宣稱未帶）：MF2 的優勢是 **QLIKE-specific**——在 MSE 上最佳模型其實是 EWMA (1.1213 < MF2 1.1329 < GJR 1.1522)，且 MF2 贏不過 EWMA（DM p=0.77）；MF2 與 GJR 預測相關性高達 0.986，QLIKE 1.8% 差距的經濟意義有限。順帶修掉腳本一個 provenance bug：輸出寫死相對路徑 'experiments/k623_results.json'（落在 repo root 而非 experiments/k623/），已改為 script-dir 相對路徑。",
+    "evidence": [
+      "experiments/k623/k623_results.json (dm_tests_qlike + loss_differential_acf, 2026-07-11 rerun)",
+      "experiments/k623/README.md (2026-07-11 更正段)",
+      "storage/ops/dm_hac_lag_baseline.json (retired: k623)",
+      "docs/governance/2026-07/dm_hac_lag_class_sweep.md",
+      "supersedes: knowledge entry 2026-03-29T01:04:03 (t=-2.03, p=0.042)"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-07-11T20:11:52.828387"
   }
 ]

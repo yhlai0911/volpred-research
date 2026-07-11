@@ -31,6 +31,7 @@ OOS: 2023-01-01 to 2024-12-31, re-estimate every 21 trading days
 """
 
 import json
+import os
 import sys
 import time
 import warnings
@@ -821,7 +822,7 @@ results = {
     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 }
 
-out_path = "experiments/k623_results.json"
+out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "k623_results.json")
 with open(out_path, "w") as f:
     json.dump(results, f, indent=2, default=str)
 print(f"\nResults saved to {out_path}")

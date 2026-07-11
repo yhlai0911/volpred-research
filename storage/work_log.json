@@ -15910,5 +15910,15 @@
     "owner": "claude",
     "k_id": "K623",
     "summary": "順藤摸瓜：k623（K621 修正版）帶 borderline 活躍宣稱 DM t=-2.03/p=0.042 且用同一退化 DM。同族 acf 為負代表該 p 值極可能移動 → 已改用 canonical dm_test + 輸出 acf，樣本窗口釘死可純歸因，重跑排入 compute queue（compute-k623-...-1783768298）。"
+  },
+  {
+    "timestamp": "2026-07-11T20:13:26+08:00",
+    "task_type": "paper_review",
+    "task_id": "k1655_dm_sweep_k623_followup",
+    "outcome": "succeeded",
+    "actor": "hourly-20",
+    "owner": "claude",
+    "k_id": "K623",
+    "summary": "k623 canonical-HAC 重跑判讀（compute queue followup）：QLIKE MF2-vs-GJR t -2.03 → -2.30（p 0.042 → 0.0218）。點估計未動（窗口釘死 END=2026-03-27），差異純歸因 HAC；acf(1..5) 為負 → 縮小 SE → |t| 變大。結論方向未推翻反而略增強，但三項保留條款全部未解（Harvey t>3 未達、收斂率 25%、g mean=1.367 unit-mean 未實現），宣稱強度不升級。新揭露 nuance：MF2 優勢為 QLIKE-specific（MSE 最佳是 EWMA 且 MF2 贏不過，p=0.77）。knowledge f944ff00 回溯更正舊條目；k623 站點自 dm_hac_lag_baseline 退休（137→136）；順修腳本輸出路徑 bug（寫到 repo root 而非 experiments/k623/）。"
   }
 ]

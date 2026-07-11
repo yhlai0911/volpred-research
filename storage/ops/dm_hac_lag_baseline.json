@@ -5,7 +5,7 @@
   "canonical": "volpred.stats.model_evaluation.dm_test",
   "policy": "Frozen backlog. The set may only shrink -- new entries fail CI.",
   "frozen_at": "2026-07-11 (K1655 class sweep)",
-  "count": 137,
+  "count": 136,
   "degenerate_sites": [
     "experiments/K1048/k1048.py::dm_test",
     "experiments/K1404/K1404.py::dm_test",
@@ -98,7 +98,6 @@
     "experiments/k583/k583_iv_surface.py::dm_test",
     "experiments/k591/k591_window_size_sweep.py::dm_test",
     "experiments/k622/k622_window_sensitivity.py::dm_test",
-    "experiments/k623/k623_mf2_garch_corrected.py::dm_test",
     "experiments/k624/k624_har_pd_daily.py::dm_test",
     "experiments/k631/k631_calendar_vol.py::dm_test",
     "experiments/k635/k635_fixed_vs_rolling_vt.py::dm_test",
@@ -155,6 +154,11 @@
       "site": "experiments/k621/k621_mf2_garch.py::dm_test",
       "date": "2026-07-11",
       "note": "swapped to canonical dm_test; re-run queued"
+    },
+    {
+      "site": "experiments/k623/k623_mf2_garch_corrected.py::dm_test",
+      "date": "2026-07-11",
+      "note": "swapped to canonical dm_test; re-run complete — QLIKE MF2-vs-GJR t -2.03 → -2.30 (p 0.042 → 0.0218), negative acf shrank the HAC SE; claim direction unchanged, Harvey t>3 still not met"
     }
   ]
 }
