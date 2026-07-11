@@ -187,24 +187,56 @@ def send_codex_failover_alert(
     return True
 
 
+def read_log_tail(log_path: str, *, limit: int = 2000) -> str:
+    """Last `limit` chars of the worker log, for alerts whose caller had no tail
+    to hand. health.py used to pass the literal string 'see worker log_path' as
+    the tail, which is how the hang mail ended up with a useless body."""
+    if not log_path:
+        return ""
+    try:
+        return Path(log_path).read_text(encoding="utf-8", errors="replace")[-limit:]
+    except OSError as exc:
+        LOG.warning("hang alert: cannot read worker log %s: %s", log_path, exc)
+        return f"(worker log unreadable: {exc})"
+
+
 def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path = state.STATE_PATH) -> bool:
     """Hang-killed alert. Dedup 10min."""
     key = "hang_killed"
     if state.should_dedup_alert(key, window_s=600, path=state_path):
         return False
+
+    # 2026-07-11: don't assert the kill landed — report what was observed.
+    survivors = job.get("survivors") or []
+    if survivors:
+        headline = "# ⚠️ Worker hang 了，但 SIGKILL 沒殺掉（孤兒還活著）"
+        impact = (
+            f"- **pid {survivors} 仍在跑** — macOS 拒絕了 killpg（EPERM）。\n"
+            f"- 這個孤兒可能還握著 worktree、還在寫 repo。請手動收：`kill -9 {' '.join(map(str, survivors))}`\n"
+            "- 派工 slot 已清掉，下個整點照常 fire（但孤兒不會自己消失）\n"
+        )
+    else:
+        headline = "# Supervisor SIGKILL'd 一個 worker（hang > 50min cap）"
+        impact = (
+            "- 本輪 hourly fire 沒派工成功；pool 沒消化\n"
+            "- 該行程已確認消失；Supervisor 仍存活，下個整點會嘗試新 fire\n"
+        )
+
+    log_path = job.get("log_path") or ""
+    tail = log_tail or read_log_tail(log_path)
     body = (
-        "# Supervisor SIGKILL'd 一個 worker（hang > 50min cap）\n\n"
+        f"{headline}\n\n"
         f"## Job\n"
         f"- pid: {job.get('pid')}\n"
         f"- pgid: {job.get('pgid')}\n"
         f"- started_at: {job.get('started_at')}\n"
         f"- attempt: {job.get('attempt')}\n"
-        f"- model: {job.get('model')}\n\n"
+        f"- model: {job.get('model')}\n"
+        f"- log: {log_path or '(unknown)'}\n\n"
         "## 影響\n"
-        "- 本輪 hourly fire 沒派工成功；pool 沒消化\n"
-        "- Supervisor 仍存活，下個整點會嘗試新 fire\n\n"
+        f"{impact}\n"
         "## Worker log tail\n\n"
-        "```\n" + (log_tail[-2000:] if log_tail else "(empty)") + "\n```\n"
+        "```\n" + (tail[-2000:] if tail else "(empty)") + "\n```\n"
     )
     _send("critical", "supervisor hang_killed", body)
     state.mark_alert_sent(key, path=state_path)

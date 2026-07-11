@@ -32,7 +32,8 @@ Schema (version 1)::
           # 下三者只在 orphan 路徑（append_completion_entry 且 job 有 pid）出現，
           # 供事後人工核對是哪個行程 — 一般 record_completion() 的 entry 沒有。
           "pid": int, "pgid": int, "started_wall": str,
-          "outcome": "success" | "failure" | "killed_timeout" | "silent_death" |
+          "outcome": "success" | "failure" | "killed_timeout" | "kill_failed_orphan" |
+                     "silent_death" |
                      "timeout_unverified" | "killed_supervisor_restart" |
                      "orphan_gone_or_reused" | "orphan_unverified_not_killed" |
                      "reservation_abandoned_no_pid" | "quota_blocked" | "auth_blocked"

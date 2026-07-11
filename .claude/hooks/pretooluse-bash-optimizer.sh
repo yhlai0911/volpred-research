@@ -83,6 +83,8 @@ elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${PKG_RUNNER}${ZEABUR_BIN}[[
   DENY_REASON="🚫 禁止直呼 zeabur deploy（frontend-and-deploy.md）。部署一律走 frontend-v2-fix/scripts/deploy-zeabur-safe.sh（鎖正確 service ID + 安全檢查）。"
 elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${FULL_READERS}[[:space:]].*(storage/reports/feed\.json|storage/memory/knowledge\.json)([[:space:]]|\$|[^A-Za-z0-9_./])"; then
   DENY_REASON="🚫 禁止整檔讀取 feed.json / knowledge.json（CLAUDE.md Token 紀律）。改用 grep / jq / 單篇 storage/reports/<id>.json；jq、grep、head 皆不受此攔截。"
+elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}codex[[:space:]]+exec([[:space:]]|\$)"; then
+  DENY_REASON="🚫 禁止裸跑 codex exec（2026-07-11 事故：hourly agent 在 session 內直接 codex exec 補渲染 lazypack，卡住 >30min 無輸出，agent 阻塞在無 timeout 的 Bash → 撞 supervisor 3000s hard cap → SIGKILL → hang_killed）。codex exec 是 agentic loop，可以跑很久而且不會自己停；Bash tool 沒有 timeout，macOS 也沒有 coreutils timeout 指令，所以「裸跑」= 把整個 fire 的命運交給一個沒有上界的呼叫。改法二選一：(1) 互動 / review 等你會盯著的短工作 → bash scripts/codex_exec_bounded.sh --timeout 300 <args>（有界，逾時 exit 124）；(2) 重活（渲染、長 review、任何你不會坐著等的）→ uv run python scripts/compute_queue.py enqueue --script <path> --timeout 1800，交給 */15 async worker。Python 內用 subprocess.run(timeout=) 呼叫 codex 不受此攔截（那本來就有界）。"
 elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit${SEG_TAIL}[[:space:]]${AMEND_FLAG}([[:space:]]|\$)" \
      && _amend_target_is_shared_main; then
   DENY_REASON="🚫 禁止在共用 main checkout 的 main 分支上 git commit --amend（2026-07-10 hourly-23 事故：amend 打在另一個 agent 剛做的 commit 上，覆蓋其 message 並吞掉它 5 個未提交的在途檔案）。主 checkout 同時有 dispatch worker / codex-vscode / rescue agent 在 commit，HEAD 不保證是你做的。改法：要修訊息或補內容，就再疊一個 commit（歷史多一行，勝過覆蓋別人的一行）。在自己的 worktree 分支上 amend 不受此攔截。"

@@ -936,7 +936,13 @@ def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
     kills: list[int] = []
     alerts_called: list[dict] = []
 
-    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: kills.append(pgid))
+    # returns True = kill confirmed. The contract gained a bool on 2026-07-11 so
+    # a REFUSED kill can no longer masquerade as a successful one; a mock that
+    # returns None would now (correctly) be read as "the orphan survived".
+    monkeypatch.setattr(
+        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+    )
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(
         health.alerts,
         "send_hang_alert",
@@ -981,7 +987,13 @@ def test_health_check_kills_overdue_job_skips_kill_on_identity_mismatch(
     kills: list[int] = []
     alerts_called: list[dict] = []
 
-    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: kills.append(pgid))
+    # returns True = kill confirmed. The contract gained a bool on 2026-07-11 so
+    # a REFUSED kill can no longer masquerade as a successful one; a mock that
+    # returns None would now (correctly) be read as "the orphan survived".
+    monkeypatch.setattr(
+        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+    )
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(
         health.alerts,
         "send_hang_alert",
@@ -1022,7 +1034,13 @@ def test_health_check_kills_overdue_job_skips_kill_when_unverified(
     kills: list[int] = []
     alerts_called: list[dict] = []
 
-    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: kills.append(pgid))
+    # returns True = kill confirmed. The contract gained a bool on 2026-07-11 so
+    # a REFUSED kill can no longer masquerade as a successful one; a mock that
+    # returns None would now (correctly) be read as "the orphan survived".
+    monkeypatch.setattr(
+        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+    )
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(
         health.alerts,
         "send_hang_alert",
@@ -1103,20 +1121,25 @@ def test_force_kill_pgid_tolerates_process_lookup_races(monkeypatch) -> None:
     assert calls == [signal.SIGTERM]
 
 
-def test_force_kill_pgid_tolerates_exit_between_term_and_probe(monkeypatch) -> None:
-    calls: list[int] = []
-
-    def exits_after_term(pgid: int, sig: int) -> None:
-        calls.append(sig)
-        if sig == 0:
-            raise ProcessLookupError
-
-    monkeypatch.setattr(procutil.os, "killpg", exits_after_term)
+def test_force_kill_pgid_tolerates_exit_after_term(monkeypatch) -> None:
+    """health._force_kill_pgid delegates to procutil.kill_pgid, which must now
+    RETURN whether the group is confirmed gone (2026-07-11) — a refused kill
+    used to be indistinguishable from a successful one."""
+    sigs: list[int] = []
+    monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: sigs.append(sig))
+    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(procutil.time, "sleep", lambda seconds: None)
 
-    health._force_kill_pgid(456)
+    assert health._force_kill_pgid(456) is True
+    assert sigs == [signal.SIGTERM]
 
-    assert calls == [signal.SIGTERM, 0]
+
+def test_force_kill_pgid_reports_false_when_orphan_survives(monkeypatch) -> None:
+    monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: None)
+    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: [456])  # never dies
+    monkeypatch.setattr(procutil.time, "sleep", lambda seconds: None)
+
+    assert health._force_kill_pgid(456) is False
 
 
 def test_supervisor_set_runtime_env_raises_soft_limit(monkeypatch) -> None:
@@ -1891,24 +1914,30 @@ def test_supervisor_main_writes_only_to_patched_state_path(tmp_path: Path, monke
 # ---------------------------------------------------------------------------
 
 
-def test_kill_pgid_survives_permission_error_on_liveness_probe(monkeypatch) -> None:
-    calls: list[tuple[str, int]] = []
+def test_worker_kill_pgid_falls_back_to_per_pid_when_killpg_denied(monkeypatch) -> None:
+    """worker._kill_pgid delegates to procutil.kill_pgid, so the 2026-07-11
+    EPERM fix must hold through this entry point too: a refused `killpg` falls
+    back to per-pid signalling instead of leaving the hung worker alive."""
+    per_pid: list[tuple[int, int]] = []
+    alive = {999}
 
-    def fake_killpg(pgid, sig):
-        calls.append(("SIGTERM" if sig == 15 else ("PROBE" if sig == 0 else "SIGKILL"), pgid))
-        if sig == 0:
-            raise PermissionError("sandbox denied signal-0 probe")
-        return None
+    def denied_killpg(pgid, sig):
+        raise PermissionError("Operation not permitted")
 
-    monkeypatch.setattr(worker.os, "killpg", fake_killpg)
+    def kill_one(pid, sig):
+        per_pid.append((pid, sig))
+        if sig == signal.SIGKILL:
+            alive.discard(pid)
+
+    monkeypatch.setattr(worker.os, "killpg", denied_killpg)
+    monkeypatch.setattr(worker.os, "kill", kill_one)
+    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: sorted(alive))
     monkeypatch.setattr(worker.time, "sleep", lambda s: None)
 
     worker._kill_pgid(999, grace_s=1)
 
-    kinds = [c[0] for c in calls]
-    assert "SIGTERM" in kinds
-    assert "PROBE" in kinds
-    assert "SIGKILL" in kinds, "must fall through to SIGKILL after the probe is denied, not crash"
+    assert signal.SIGKILL in [sig for _, sig in per_pid], \
+        "killpg was denied — must escalate per-pid, not give up"
 
 
 # ---------------------------------------------------------------------------

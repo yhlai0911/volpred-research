@@ -456,13 +456,26 @@ def run_worker(
             # Sanitize sentinel to canonical SIGKILL hang code before persisting:
             # state file readers + alerts expect a real POSIX exit code, not -1000.
             persisted_exit = 137 if exit_code == TIMEOUT_KILLED_SENTINEL else exit_code
+            # Read the job BEFORE record_completion clears the slot. The alert
+            # used to hardcode pid=-1/pgid=-1 (2026-07-11 boss report: "告警顯示
+            # pid=-1 / pgid=-1，等於瞎的") — the numbers were always available,
+            # just never passed. `survivors` is observed at alert time, so the
+            # mail can say whether the SIGKILL actually landed rather than
+            # asserting it did (macOS can and does refuse killpg — see
+            # procutil.kill_pgid).
+            hung = state.get_current_job(state_path)
+            pgid = hung.pgid if hung else -1
+            survivors = procutil.pgid_members(pgid) if hung else []
             entry = state.record_completion(
                 exit_code=persisted_exit, outcome="killed_timeout", final_model=model,
                 path=state_path,
             )
             alerts.send_hang_alert(
-                job={"pid": -1, "pgid": -1, "started_at": (entry or {}).get("fire_at"),
-                     "attempt": attempt, "model": model},
+                job={"pid": hung.pid if hung else -1, "pgid": pgid,
+                     "started_at": (entry or {}).get("fire_at"),
+                     "attempt": attempt, "model": model,
+                     "log_path": hung.log_path if hung else "",
+                     "survivors": survivors},
                 log_tail=log_tail, state_path=state_path,
             )
             return WorkerResult(

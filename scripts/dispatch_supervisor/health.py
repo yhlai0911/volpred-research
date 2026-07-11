@@ -40,11 +40,14 @@ CHECK_INTERVAL_S = 30
 MAX_JOB_AGE_S = 3000  # 50min — matches worker DEFAULT_TIMEOUT_S
 
 
-def _force_kill_pgid(pgid: int) -> None:
+def _force_kill_pgid(pgid: int) -> bool:
     """Codex review fix #5 (2026-07-04): this used to be a near-duplicate of
     worker.py's kill routine and missed a PermissionError fix applied there
-    (found via a live smoke test) — now both share `procutil.kill_pgid()`."""
-    procutil.kill_pgid(pgid)
+    (found via a live smoke test) — now both share `procutil.kill_pgid()`.
+
+    Returns whether the group is CONFIRMED gone (2026-07-11) — a denied killpg
+    used to be indistinguishable from a successful one here."""
+    return procutil.kill_pgid(pgid)
 
 
 def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JOB_AGE_S) -> str | None:
@@ -61,9 +64,22 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
     if job.age_seconds > max_age_s:
         if identity == procutil.IDENTITY_MATCH:
             LOG.warning("health: worker pgid=%d age=%.0fs > %.0fs cap — force-killing", job.pgid, job.age_seconds, max_age_s)
-            _force_kill_pgid(job.pgid)
-            exit_code, outcome = -9, "killed_timeout"
-            log_tail = "(killed by health monitor — see worker log_path)"
+            if _force_kill_pgid(job.pgid):
+                exit_code, outcome = -9, "killed_timeout"
+                log_tail = ("(killed by health monitor)\n\n"
+                            + alerts.read_log_tail(job.log_path))
+            else:
+                # The signals were refused and the group is still up. Say so:
+                # the slot must still be cleared (below) or the scheduler wedges
+                # forever, but claiming "killed" would hide a live orphan that
+                # is still holding a worktree / writing to the repo.
+                LOG.error("health: kill_pgid(%d) FAILED — orphan still alive", job.pgid)
+                exit_code, outcome = -9, "kill_failed_orphan"
+                log_tail = (
+                    f"(hang detected but the kill was REFUSED — pid={job.pid} "
+                    f"pgid={job.pgid} may still be running. Check `ps -g {job.pgid}` "
+                    f"and kill by hand; the slot was cleared so dispatch can resume.)"
+                )
         elif identity == procutil.IDENTITY_UNVERIFIED:
             # Codex review fix #4: no fingerprint was ever recorded for this
             # job — we cannot confirm this pid is still our worker and not a
@@ -92,11 +108,15 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
         state.record_completion(exit_code=exit_code, outcome=outcome, final_model=job.model, path=state_path)
         alerts.send_hang_alert(
             job={"pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
-                 "attempt": job.attempt, "model": job.model},
+                 "attempt": job.attempt, "model": job.model,
+                 "log_path": job.log_path,
+                 "survivors": procutil.pgid_members(job.pgid)},
             log_tail=log_tail,
             state_path=state_path,
         )
-        return "killed" if identity == procutil.IDENTITY_MATCH else outcome
+        if identity != procutil.IDENTITY_MATCH:
+            return outcome
+        return "killed" if outcome == "killed_timeout" else outcome
     if identity in (procutil.IDENTITY_MISMATCH, procutil.IDENTITY_DEAD):
         LOG.warning(
             "health: worker pid=%d dead/reused (identity=%s) but state has current_job — recording silent failure",
@@ -108,7 +128,9 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
         )
         alerts.send_silent_death_alert(
             job={"pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
-                 "attempt": job.attempt, "model": job.model},
+                 "attempt": job.attempt, "model": job.model,
+                 "log_path": job.log_path,
+                 "survivors": procutil.pgid_members(job.pgid)},
             state_path=state_path,
         )
         return "silent_death"

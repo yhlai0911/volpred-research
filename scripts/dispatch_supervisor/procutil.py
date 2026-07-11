@@ -107,40 +107,105 @@ def check_identity(pid: int, expected_start_wall: str | None) -> str:
 DEFAULT_KILL_GRACE_S = 10.0
 
 
-def kill_pgid(pgid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> None:
-    """SIGTERM whole process group; SIGKILL after `grace_s` if still alive.
+def pgid_members(pgid: int) -> list[int]:
+    """LIVE pids in process group `pgid` — zombies excluded.
 
-    Codex review fix #5 (2026-07-04, gate-blocking finding): `worker.py` and
-    `health.py` each carried their own near-duplicate copy of this routine.
-    A real bug found via a live (non-mocked) smoke test — spawning a genuine
-    orphan process and running restart-cleanup against it — was fixed in
-    worker's copy (a sandboxed `os.killpg(pgid, 0)` liveness probe can raise
-    `PermissionError`, not just `ProcessLookupError`) but NOT in health's,
-    which would have silently skipped the SIGKILL and let a caller believe
-    the job was killed when the process was, in fact, still alive. One
-    shared implementation so a future fix here cannot miss a second copy.
+    Zombies are the whole reason this function is careful. A SIGKILL'd process
+    stays in the process table as `Z` until its parent reaps it, and `ps -g`
+    happily lists it. Two consequences, both observed on 2026-07-11:
+
+      - Counting a zombie as a survivor makes every successful kill look like a
+        failed one (a live smoke test of the new kill path reported "orphan
+        survived" for a group it had definitely just killed).
+      - It also explains the original `killpg SIGKILL denied pgid=69948:
+        [Errno 1] Operation not permitted` — macOS returns EPERM for a signal
+        aimed at a process group whose only remaining member is a zombie. The
+        kill HAD landed; the syscall's complaint was about the corpse.
+
+    So "is the group still alive" must mean "does it hold a non-Z process".
     """
     if pgid <= 0:
-        return
+        return []
     try:
-        os.killpg(pgid, signal.SIGTERM)
-    except ProcessLookupError:
-        return  # silent-ok: process group was already gone before SIGTERM.
-    except PermissionError as exc:
-        LOG.warning("killpg SIGTERM denied pgid=%d: %s", pgid, exc)
+        result = subprocess.run(
+            ["ps", "-o", "pid=,stat=", "-g", str(pgid)],
+            capture_output=True, text=True, timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        LOG.warning("pgid_members pgid=%d ps invocation failed: %s", pgid, exc)
+        return []
+    live: list[int] = []
+    for line in result.stdout.splitlines():
+        parts = line.split()
+        if len(parts) < 2:
+            if line.strip():
+                LOG.warning("pgid_members pgid=%d unparseable ps row: %r", pgid, line)
+            continue
+        try:
+            pid = int(parts[0])
+        except ValueError:
+            LOG.warning("pgid_members pgid=%d unparseable pid: %r", pgid, parts[0])
+            continue
+        if parts[1].startswith("Z"):
+            continue  # dead already, just not reaped — not a survivor
+        if pid != os.getpid():
+            live.append(pid)
+    return live
+
+
+def kill_pgid(pgid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
+    """SIGTERM the group, SIGKILL after `grace_s`, then VERIFY. Returns True
+    only if the group is confirmed empty afterwards.
+
+    2026-07-11 (boss Telegram msg 465): the 14:57 hang-kill logged
+    `killpg SIGKILL denied pgid=69948: [Errno 1] Operation not permitted` — the
+    kill never landed — and this function returned None anyway, so `health.py`
+    recorded `killed_timeout` and alerted "SIGKILL'd a worker" for a process
+    that may well have still been running. A kill routine that cannot report
+    failure turns an orphan into a silent one.
+
+    Two changes: (1) `killpg` EPERM is no longer terminal — macOS can refuse a
+    whole-group signal while still permitting the individual members (a group
+    holding one unsignalable member is enough for EPERM), so fall back to
+    signalling each pid from `ps -g`; (2) the return value is the *observed*
+    state, not the syscall's, so callers stop having to trust the signal path.
+
+    Codex review fix #5 (2026-07-04): `worker.py` and `health.py` each carried a
+    near-duplicate copy of this routine and a PermissionError fix applied to one
+    was missed in the other. One shared implementation so that cannot recur.
+    """
+    if pgid <= 0:
+        return True
+
+    def _signal_all(sig: int) -> None:
+        try:
+            os.killpg(pgid, sig)
+            return
+        except ProcessLookupError:
+            return  # silent-ok: group already gone.
+        except PermissionError as exc:
+            LOG.warning("killpg %s denied pgid=%d: %s — falling back to per-pid",
+                        sig, pgid, exc)
+        for pid in pgid_members(pgid):
+            try:
+                os.kill(pid, sig)
+            except ProcessLookupError:
+                continue  # silent-ok: exited between ps and kill.
+            except PermissionError as exc:
+                LOG.warning("kill %s denied pid=%d (pgid=%d): %s", sig, pid, pgid, exc)
+
+    _signal_all(signal.SIGTERM)
     deadline = time.time() + grace_s
     while time.time() < deadline:
-        try:
-            os.killpg(pgid, 0)  # liveness probe
-        except ProcessLookupError:
-            return  # silent-ok: process group exited between SIGTERM and probe.
-        except PermissionError as exc:
-            LOG.warning("killpg liveness probe denied pgid=%d: %s", pgid, exc)
-            break
+        if not pgid_members(pgid):
+            return True
         time.sleep(0.5)
-    try:
-        os.killpg(pgid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass  # silent-ok: process group exited before final SIGKILL.
-    except PermissionError as exc:
-        LOG.warning("killpg SIGKILL denied pgid=%d: %s", pgid, exc)
+
+    _signal_all(signal.SIGKILL)
+    time.sleep(0.5)
+    survivors = pgid_members(pgid)
+    if survivors:
+        LOG.error("kill_pgid pgid=%d FAILED — survivors still running: %s",
+                  pgid, survivors)
+        return False
+    return True

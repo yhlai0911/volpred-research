@@ -19,10 +19,31 @@ A frozen example of the kind of data-bound Pillow renderer codex should write
 lives at scripts/lazypack_render_example_spacex.py (article-specific; reference
 only). This harness makes codex write a BESPOKE renderer per article instead.
 
-Flow: gather evidence package → compose a codex prompt (evidence paths + panel
-plan + hard rules) → `codex exec -s workspace-write` writes & runs a render script
-→ verify each expected PNG exists. CLI mirrors gen_lazypack_infographic.py so the
-two are drop-in swappable.
+Flow (2026-07-11 rewrite — see below): gather evidence package → codex WRITES a
+render script (bounded call, no execution) → THIS process runs it locally with
+its own timeout → verify PNGs → bounded repair rounds on failure. CLI mirrors
+gen_lazypack_infographic.py so the two are drop-in swappable.
+
+Why the LLM no longer executes anything (2026-07-11, boss Telegram msg 465):
+the old flow handed codex one 900s agentic call to read evidence + write the
+script + run matplotlib + hunt a CJK font + retry on tofu. That loop routinely
+blew the wall (both 2026-07-11 renders died at exactly 900s), and a hourly agent
+retrying it inline blocked past the supervisor's 3000s cap → SIGKILL →
+hang_killed. Splitting it fixes the class, not the instance:
+
+  codex   : reads evidence, writes <out_dir>/render_lazypack.py, stops.
+            One bounded call. No matplotlib, no font hunt, no retry loop.
+  local   : runs the script under `subprocess.run(timeout=)`. Deterministic,
+            seconds not minutes, and a hang is impossible — the timeout is ours.
+  repair  : if the script raises or a PNG is missing, feed the traceback back
+            for a bounded fix-the-script call. At most REPAIR_ROUNDS of these.
+  budget  : every phase draws from one wall-clock deadline (--budget-s), so the
+            worst case is bounded no matter which phase misbehaves.
+
+The CJK font is resolved HERE (matplotlib's own font list) and injected into the
+prompt as a known-good family name, because font discovery was the single
+biggest source of codex's agentic thrashing and it is a thing the local machine
+can simply answer.
 
 Usage:
   uv run python scripts/gen_lazypack_codex.py \
@@ -46,12 +67,42 @@ import json
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CODEX_BIN = "codex"
-# codex render can take a few minutes (write script + matplotlib/PIL run).
-CODEX_TIMEOUT_S = 900
+
+# One wall-clock budget for the whole generation; every phase draws from it.
+DEFAULT_BUDGET_S = 900
+# Writing a render script is a read-a-few-files-then-write-one-file job. If a
+# call is still going after this, it is thrashing, not thinking.
+CODEX_WRITE_TIMEOUT_S = 360
+# Local matplotlib/PIL render of a handful of panels. Seconds in practice.
+RENDER_TIMEOUT_S = 240
+REPAIR_ROUNDS = 2
+RENDER_SCRIPT_NAME = "render_lazypack.py"
+
+# Ordered by how well they render zh-Hant on macOS. Resolved locally so codex
+# never has to discover a font (the old flow's worst time sink).
+_CJK_FONT_CANDIDATES = (
+    "PingFang TC", "Heiti TC", "Hiragino Sans GB",
+    "Arial Unicode MS", "Songti SC", "Noto Sans CJK TC",
+)
+
+
+def _resolve_cjk_font() -> str | None:
+    """First installed family from `_CJK_FONT_CANDIDATES`, or None."""
+    try:
+        from matplotlib import font_manager
+    except Exception as exc:  # noqa: BLE001
+        print(f"WARN: matplotlib unavailable for font probe: {exc}", file=sys.stderr)
+        return None
+    installed = {f.name for f in font_manager.fontManager.ttflist}
+    for name in _CJK_FONT_CANDIDATES:
+        if name in installed:
+            return name
+    return None
 
 _STYLE_HINTS = {
     "professional": "乾淨企業風、留白充足、深色標題列 + 數據區塊",
@@ -75,7 +126,7 @@ def _article_content(article_id: str) -> str | None:
     return None
 
 
-def _gather_sources(a: argparse.Namespace) -> list[Path]:
+def _gather_sources(a: argparse.Namespace, out_dir: Path | None = None) -> list[Path]:
     source_files: list[Path] = []
     for k in a.experiment:
         kdir = ROOT / "experiments" / k.lower()
@@ -92,9 +143,16 @@ def _gather_sources(a: argparse.Namespace) -> list[Path]:
     if a.article_id:
         content = _article_content(a.article_id)
         if content:
-            tmp = Path(tempfile.mkstemp(suffix="_article.md")[1])
-            tmp.write_text(content, encoding="utf-8")
-            source_files.append(tmp)
+            # Next to the panels, not in /var/folders: the render script cites
+            # its source paths, and a script pointing at a reaped temp file is
+            # neither re-runnable by the repair round nor by a reviewer.
+            if out_dir is not None:
+                out_dir.mkdir(parents=True, exist_ok=True)
+                art = out_dir / f"{a.article_id}_article.md"
+            else:
+                art = Path(tempfile.mkstemp(suffix="_article.md")[1])
+            art.write_text(content, encoding="utf-8")
+            source_files.append(art)
         else:
             print(f"WARN: article {a.article_id} not found in feed (continuing)", file=sys.stderr)
     seen: set[str] = set()
@@ -107,7 +165,13 @@ def _gather_sources(a: argparse.Namespace) -> list[Path]:
     return uniq
 
 
-def _build_prompt(title: str, panels: list[dict], sources: list[Path], out_dir: Path) -> str:
+def _build_prompt(
+    title: str,
+    panels: list[dict],
+    sources: list[Path],
+    out_dir: Path,
+    font: str | None = None,
+) -> str:
     src_lines = "\n".join(f"  - {p}" for p in sources)
     panel_lines = []
     for i, panel in enumerate(panels, 1):
@@ -128,26 +192,46 @@ def _build_prompt(title: str, panels: list[dict], sources: list[Path], out_dir: 
         "但你要為這篇文章自己的數據重寫，不要沿用 SpaceX 欄位。"
         if _REFERENCE_RENDERER.exists() else ""
     )
-    return f"""你是資深資料視覺化工程師。請為一篇 VolPred 一般讀者文章「{title}」產生一組「懶人包圖組」PNG。
+    font_rule = (
+        f"- **字型**: 直接用 `'{font}'`（本機已確認安裝，不要再自己偵測或試別的）。"
+        f"設 `plt.rcParams['font.sans-serif'] = ['{font}']` 且 "
+        f"`plt.rcParams['axes.unicode_minus'] = False`。"
+        if font else
+        "- **字型**: 本機找不到 CJK 字型，程式裡用 matplotlib.font_manager 挑一個可用的 "
+        "CJK family，設 font.sans-serif 且 axes.unicode_minus=False。"
+    )
+    script_path = out_dir / RENDER_SCRIPT_NAME
+    return f"""你是資深資料視覺化工程師。請為一篇 VolPred 一般讀者文章「{title}」**寫一支** render 程式，
+它會產生一組「懶人包圖組」PNG。
 
-## 你的工作（用程式 render，不要呼叫任何影像生成模型）
-1. 先讀以下 evidence package（**數字一律以 results.json 為準，逐字對齊，禁臆造**）:
+## 你的工作（只有兩步，做完就結束）
+1. 讀以下 evidence package（**數字一律以 results.json 為準，逐字對齊，禁臆造**）:
 {src_lines}
-2. 寫一支 Python render 程式（matplotlib 或 PIL），為下列每個 panel 各輸出一張獨立 PNG 到目錄:
-   {out_dir}
-   檔名就用每個 panel 指定的 `<name>.png`。
-3. 跑這支程式，確認每個 PNG 都產出且非空。
-4. 把 render 程式存成 {out_dir}/render_lazypack.py（可復現）。
+2. 寫出檔案 {script_path} — 一支獨立可執行的 Python 程式（matplotlib 或 PIL），
+   執行後為下列每個 panel 各輸出一張獨立 PNG 到 {out_dir}，檔名用每個 panel 指定的 `<name>.png`。
 {ref_hint}
+
+## ⛔ 不要做的事（這些由呼叫端負責，你做了只會拖垮時間預算）
+- **不要執行**那支程式（不要 `python render_lazypack.py`，不要試跑、不要驗證輸出）。
+- **不要**安裝任何套件、不要 pip install。matplotlib / PIL / numpy 都已就緒。
+- **不要**呼叫任何影像生成模型。
+- **不要**自己偵測字型或迭代重跑。
+寫完 {script_path} 就直接結束回合。
+
+## 程式必須自帶的東西（因為呼叫端會直接跑它）
+- 讀 evidence 的路徑用**絕對路徑**（上面列的那些），不要依賴 cwd。
+- 數字從 evidence 檔案**讀出來**（json.load 等），不要把數字硬編在字串裡 — 除非該數字只在文章正文出現。
+- `out_dir` 常數就寫死成 {out_dir}，並在寫檔前 `os.makedirs(out_dir, exist_ok=True)`。
+- 用 `matplotlib.use("Agg")`（無頭環境）。
+- 任何欄位缺失就 raise（讓呼叫端看得到 traceback），不要 silently 畫出假數字。
 
 ## Panels（每張只講一種資訊型態，禁止全塞一張）
 {panels_text}
 
-## 硬規則（研究誠實 + 專業，違反即失敗）
+## 版面硬規則（研究誠實 + 專業，違反即失敗）
 - **數字精確**: 圖上每個統計量/數字必須能對應 evidence 的某個欄位/數據；不確定就不要放。
-- **語言**: 全部繁體中文（zh-Hant）。matplotlib 必設 CJK 字型（macOS 試 'Heiti TC' / 'PingFang TC' /
-  'Arial Unicode MS'，挑一個存在的；設 plt.rcParams['font.sans-serif'] 且 axes.unicode_minus=False）。
-  **檢查不可有缺字方框（tofu）**；若主字型缺字就換另一個 CJK 字型重跑。
+- **語言**: 全部繁體中文（zh-Hant）。
+{font_rule}
 - **專業、資料導向、非卡通**: 乾淨圖表 + 圖示 + 大數字 + 分區；**禁卡通人物 / 可愛插畫 / 手繪塗鴉**。
 - **每張底部標資料來源**: 例「資料來源：experiment K####」（K 編號從 evidence 檔名/內容判斷）。
 - **不要把 panel 的 info / 資訊型態（concept/method/results）當文字標籤畫在圖上** — 那是內部分類，讀者不需要看到。
@@ -155,8 +239,163 @@ def _build_prompt(title: str, panels: list[dict], sources: list[Path], out_dir: 
 - **不要**輸出 base64 或 data-URI；輸出實體 .png 檔到 {out_dir}。
 
 ## 完成後
-列出實際產出的 PNG 絕對路徑清單，並一句話確認每張的主要數字來自 evidence 的哪個欄位。
+一句話說明每張圖的主要數字讀自 evidence 的哪個欄位。
 """
+
+
+def _build_repair_prompt(script_path: Path, failure: str, out_dir: Path,
+                         missing: list[Path], font: str | None) -> str:
+    missing_text = "\n".join(f"  - {p}" for p in missing) or \
+        "  (無 — 檔案有產出但程式回報失敗)"
+    font_note = f"\n- 字型固定用 '{font}'，不要換、不要偵測。" if font else ""
+    return f"""你上一輪寫的 render 程式 {script_path} 執行失敗了。請**修好這支程式**。
+
+## 執行結果（呼叫端在本機跑的，非你跑的）
+```
+{failure[-3000:]}
+```
+
+## 缺少的 PNG
+{missing_text}
+
+## 規則
+- **只改** {script_path}，改完就結束回合。
+- **不要執行**它、不要試跑、不要安裝套件 — 呼叫端會再跑一次。
+- 原本的資料誠實規則不變：數字一律從 evidence 檔案讀，缺欄位就 raise，禁臆造。
+- 輸出目錄仍是 {out_dir}。{font_note}
+"""
+
+
+def _run_codex(prompt: str, out_dir: Path, timeout_s: float,
+               model: str | None) -> tuple[int, str]:
+    """One bounded `codex exec`. Returns (rc, combined stdout+stderr tail).
+
+    rc 3 = codex CLI missing, rc 2 = timed out. Never raises on codex failure —
+    the caller decides whether the render script it was supposed to write
+    actually landed, which is the only outcome that matters.
+    """
+    cmd = [CODEX_BIN, "exec", "-s", "workspace-write", "-C", str(ROOT),
+           "--add-dir", str(out_dir), "--skip-git-repo-check"]
+    if model:
+        cmd += ["-m", model]
+    try:
+        proc = subprocess.run(
+            cmd, input=prompt, text=True, timeout=timeout_s,
+            cwd=str(ROOT), capture_output=True,
+        )
+    except FileNotFoundError:
+        return 3, "codex CLI not found on PATH (see CLAUDE.md dual-CLI note)"
+    except subprocess.TimeoutExpired:
+        return 2, f"codex exec timed out after {timeout_s:.0f}s"
+    out = (proc.stdout or "")
+    err = (proc.stderr or "")
+    if proc.returncode != 0:
+        # 2026-07-10 incident: an API error (e.g. 400 model-not-supported) is
+        # streamed mid-stdout while rc can still be 0 — surface it next to the
+        # failure rather than burying it in the stream.
+        for ln in [l for l in out.splitlines() if '"type":"error"' in l][-3:]:
+            print(f"CODEX-ERROR: {ln[-300:]}", file=sys.stderr)
+    return proc.returncode, (out[-2000:] + "\n" + err[-2000:]).strip()
+
+
+def _run_render_script(script: Path, timeout_s: float) -> tuple[bool, str]:
+    """Run the codex-written render script locally. (ok, failure_text)."""
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(script)], cwd=str(ROOT),
+            capture_output=True, text=True, timeout=timeout_s,
+        )
+    except subprocess.TimeoutExpired:
+        return False, f"render script exceeded {timeout_s:.0f}s and was killed"
+    if proc.returncode != 0:
+        return False, (f"render script exited rc={proc.returncode}\n"
+                       f"{(proc.stderr or proc.stdout or '')[-3000:]}")
+    return True, ""
+
+
+def _missing_panels(out_dir: Path, panels: list[dict]) -> list[Path]:
+    expected = [out_dir / f"{(p.get('name') or f'{i}_panel')}.png"
+                for i, p in enumerate(panels, 1)]
+    return [p for p in expected
+            if not p.exists() or p.stat().st_size <= 1024]
+
+
+def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path,
+              *, budget_s: float, model: str | None) -> int:
+    """codex writes the script → we run it → bounded repair rounds. All phases
+    share one deadline, so no single step can wedge the caller."""
+    deadline = time.monotonic() + budget_s
+
+    def remaining() -> float:
+        return deadline - time.monotonic()
+
+    font = _resolve_cjk_font()
+    print(f"[gen_lazypack_codex] CJK font: {font or 'NONE FOUND (codex will pick)'}",
+          file=sys.stderr)
+    script = out_dir / RENDER_SCRIPT_NAME
+
+    # Resume semantics. A lazypack run is one step of a longer job (render →
+    # upload → append → sync); when a later step dies, the retry lands back
+    # here with the panels already on disk. Re-driving codex to recreate work
+    # that exists is what turned a failed upload into a 900s codex call.
+    #   panels present        → nothing to do.
+    #   script present, no PNG → run the script we already have before writing
+    #                            a new one (a crashed render, not a bad prompt).
+    if not _missing_panels(out_dir, panels):
+        print(f"\nDONE: {len(panels)}/{len(panels)} panel PNGs already in {out_dir} "
+              f"(reused — no codex call)")
+        return 0
+
+    prompt: str | None = _build_prompt(title, panels, sources, out_dir, font=font)
+    if script.exists():
+        print(f"[gen_lazypack_codex] {script.name} already exists — running it "
+              f"before calling codex", file=sys.stderr)
+        prompt = None
+
+    for attempt in range(REPAIR_ROUNDS + 1):
+        if prompt is not None:
+            phase = "write" if attempt == 0 else f"repair {attempt}/{REPAIR_ROUNDS}"
+            codex_budget = min(CODEX_WRITE_TIMEOUT_S, remaining())
+            if codex_budget <= 30:
+                print(f"ERROR: budget exhausted before codex {phase} "
+                      f"({remaining():.0f}s left of {budget_s:.0f}s)", file=sys.stderr)
+                return 2
+            print(f"[gen_lazypack_codex] codex {phase} (≤{codex_budget:.0f}s) "
+                  f"→ {script}", file=sys.stderr)
+            rc, tail = _run_codex(prompt, out_dir, codex_budget, model)
+            if not script.exists():
+                print(f"ERROR: codex {phase} produced no {script} (rc={rc})\n{tail}",
+                      file=sys.stderr)
+                return 2 if rc in (2, 3) else 1
+
+        render_budget = min(RENDER_TIMEOUT_S, remaining())
+        if render_budget <= 10:
+            print("ERROR: budget exhausted before local render", file=sys.stderr)
+            return 2
+        print(f"[gen_lazypack_codex] running {script.name} locally "
+              f"(≤{render_budget:.0f}s)", file=sys.stderr)
+        ok, failure = _run_render_script(script, render_budget)
+        missing = _missing_panels(out_dir, panels)
+        if ok and not missing:
+            print(f"\nDONE: {len(panels)}/{len(panels)} panel PNGs in {out_dir}")
+            for p in [out_dir / f"{(x.get('name') or f'{i}_panel')}.png"
+                      for i, x in enumerate(panels, 1)]:
+                print(f"  [ok] {p}")
+            return 0
+
+        failure = failure or f"script exited 0 but panels are missing/empty: {missing}"
+        print(f"[gen_lazypack_codex] render failed: {failure.splitlines()[0]}",
+              file=sys.stderr)
+        if attempt == REPAIR_ROUNDS:
+            break
+        prompt = _build_repair_prompt(script, failure, out_dir, missing, font)
+
+    missing = _missing_panels(out_dir, panels)
+    print(f"ERROR: render still failing after {REPAIR_ROUNDS} repair round(s); "
+          f"missing {len(missing)}/{len(panels)} panels", file=sys.stderr)
+    for p in missing:
+        print(f"  [MISSING] {p}", file=sys.stderr)
+    return 1
 
 
 def main() -> int:
@@ -171,6 +410,9 @@ def main() -> int:
                     help="JSON file: [{name, info, must_show?, style?}] — one PNG per panel")
     ap.add_argument("--out-dir", required=True, help="output dir for the PNG set")
     ap.add_argument("--model", help="override codex model (default: codex config)")
+    ap.add_argument("--budget-s", type=float, default=DEFAULT_BUDGET_S,
+                    help="wall-clock budget for codex write + local render + "
+                         f"repair rounds combined (default: {DEFAULT_BUDGET_S}s)")
     ap.add_argument("--dry-run", action="store_true", help="print the codex prompt and exit (no codex call)")
     a = ap.parse_args()
 
@@ -181,7 +423,10 @@ def main() -> int:
         print("ERROR: --plan must be a non-empty JSON list (or {panels:[...]})", file=sys.stderr)
         return 1
 
-    sources = _gather_sources(a)
+    out_dir = Path(a.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    sources = _gather_sources(a, out_dir)
     if not sources:
         print("ERROR: no sources — provide --experiment / --source / --article-id", file=sys.stderr)
         return 1
@@ -190,56 +435,12 @@ def main() -> int:
     if title == "懶人包" and a.experiment:
         title = f"{a.experiment[0]} 懶人包"
 
-    out_dir = Path(a.out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    prompt = _build_prompt(title, panels, sources, out_dir)
     if a.dry_run:
-        print(prompt)
+        print(_build_prompt(title, panels, sources, out_dir, font=_resolve_cjk_font()))
         return 0
 
-    cmd = [CODEX_BIN, "exec", "-s", "workspace-write", "-C", str(ROOT),
-           "--add-dir", str(out_dir), "--skip-git-repo-check"]
-    if a.model:
-        cmd += ["-m", a.model]
-    print(f"[gen_lazypack_codex] invoking codex exec for {len(panels)} panel(s) -> {out_dir}",
-          file=sys.stderr)
-    try:
-        proc = subprocess.run(
-            cmd, input=prompt, text=True, timeout=CODEX_TIMEOUT_S,
-            cwd=str(ROOT), capture_output=True,
-        )
-    except FileNotFoundError:
-        print("ERROR: codex CLI not found on PATH (install Codex CLI; see CLAUDE.md dual-CLI note)",
-              file=sys.stderr)
-        return 3
-    except subprocess.TimeoutExpired:
-        print(f"ERROR: codex exec timed out after {CODEX_TIMEOUT_S}s", file=sys.stderr)
-        return 2
-    if proc.stdout:
-        print(proc.stdout[-4000:])
-    if proc.returncode != 0:
-        print(f"ERROR: codex exec rc={proc.returncode}\n{(proc.stderr or '')[-2000:]}", file=sys.stderr)
-        # fall through to verification — codex may have produced files before erroring
-
-    expected = [out_dir / f"{(p.get('name') or f'{i}_panel')}.png" for i, p in enumerate(panels, 1)]
-    made = [p for p in expected if p.exists() and p.stat().st_size > 1024]
-    if not made:
-        # 2026-07-10 incident：codex 串流內的 API error（如 400 model-not-supported）
-        # 印在 stdout 中段、rc 可能仍為 0 — 零產出時把 error 事件浮上 stderr summary，
-        # 讓「為什麼失敗」跟「失敗了」出現在同一個地方（error_log 當日 entry）。
-        err_lines = [ln for ln in (proc.stdout or "").splitlines() if '"type":"error"' in ln]
-        for ln in err_lines[-3:]:
-            print(f"CODEX-ERROR: {ln[-300:]}", file=sys.stderr)
-        if err_lines:
-            print("HINT: API error 常見根因是 config model × CLI 版本不相容 — 先跑 "
-                  "`codex exec --skip-git-repo-check \"echo TEST\"` smoke（experiments.md 診斷 SOP step 6）",
-                  file=sys.stderr)
-    print(f"\nDONE: {len(made)}/{len(expected)} panel PNGs in {out_dir}")
-    for p in expected:
-        ok = p.exists() and p.stat().st_size > 1024
-        print(f"  [{'ok' if ok else 'MISSING'}] {p}")
-    return 0 if len(made) == len(expected) else 1
+    return _generate(title, panels, sources, out_dir,
+                     budget_s=a.budget_s, model=a.model)
 
 
 if __name__ == "__main__":

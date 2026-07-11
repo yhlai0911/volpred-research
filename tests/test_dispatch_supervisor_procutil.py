@@ -3,6 +3,7 @@ identity checks (Codex review §10 #2 fix, 2026-06-15/2026-07-04).
 """
 from __future__ import annotations
 
+import signal
 import subprocess
 
 import pytest
@@ -116,45 +117,103 @@ def test_kill_pgid_noop_for_nonpositive_pgid(monkeypatch) -> None:
     assert calls == []
 
 
-def test_kill_pgid_sigterm_then_sigkill_after_grace(monkeypatch) -> None:
-    calls: list[tuple[str, int]] = []
+def test_pgid_members_excludes_zombies(monkeypatch) -> None:
+    """A SIGKILL'd process sits in the table as `Z` until its parent reaps it,
+    and `ps -g` lists it. Counting that corpse as a survivor (a) makes every
+    successful kill look failed, and (b) is why macOS returned EPERM for the
+    2026-07-11 `killpg SIGKILL denied pgid=69948` — the signal was aimed at a
+    group whose only member was already dead. Found by a live smoke test; the
+    mocked tests all passed while this was broken.
+    """
+    ps_rows = "  501 Ss\n  502 Z+\n  503 S+\n"
 
-    def fake_killpg(pgid, sig):
-        kind = {15: "SIGTERM", 0: "PROBE", 9: "SIGKILL"}[sig]
-        calls.append((kind, pgid))
-        if kind == "PROBE":
-            raise ProcessLookupError  # dies right after SIGTERM
+    def fake_run(cmd, **kw):
+        assert cmd[:3] == ["ps", "-o", "pid=,stat="], "stat column is required to spot zombies"
+        return subprocess.CompletedProcess(cmd, 0, stdout=ps_rows, stderr="")
 
-    monkeypatch.setattr(procutil.os, "killpg", fake_killpg)
+    monkeypatch.setattr(procutil.subprocess, "run", fake_run)
+    assert procutil.pgid_members(999) == [501, 503]
+
+
+def test_kill_pgid_reports_success_when_only_zombies_remain(monkeypatch) -> None:
+    """End of the same story: once the group holds nothing but zombies, the kill
+    succeeded and kill_pgid must say so (not raise a false orphan alarm)."""
+    monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: None)
+    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: [])  # zombies filtered out
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
-    procutil.kill_pgid(456, grace_s=1)
-
-    kinds = [c[0] for c in calls]
-    assert kinds == ["SIGTERM", "PROBE"]
+    assert procutil.kill_pgid(69948, grace_s=1) is True
 
 
-def test_kill_pgid_survives_permission_error_on_liveness_probe(monkeypatch) -> None:
-    """The real bug found via a live (non-mocked) smoke test: a sandboxed
-    `os.killpg(pgid, 0)` liveness probe can raise PermissionError, not just
-    ProcessLookupError. Must fall through to attempt SIGKILL, not crash."""
-    calls: list[tuple[str, int]] = []
+def test_kill_pgid_no_sigkill_when_group_dies_after_sigterm(monkeypatch) -> None:
+    """Invariant (unchanged): a group that exits on SIGTERM is never SIGKILL'd.
 
-    def fake_killpg(pgid, sig):
-        kind = {15: "SIGTERM", 0: "PROBE", 9: "SIGKILL"}[sig]
-        calls.append((kind, pgid))
-        if kind == "PROBE":
-            raise PermissionError("sandbox denied signal-0 probe")
-
-    monkeypatch.setattr(procutil.os, "killpg", fake_killpg)
+    2026-07-11: liveness is now observed with `ps -g` rather than an
+    `os.killpg(pgid, 0)` probe — that probe was the thing that returned EPERM
+    and let a REFUSED kill be reported as a successful one.
+    """
+    sigs: list[int] = []
+    monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: sigs.append(sig))
+    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: [])  # gone after SIGTERM
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
-    procutil.kill_pgid(999, grace_s=1)
+    assert procutil.kill_pgid(456, grace_s=1) is True
+    assert sigs == [signal.SIGTERM]
 
-    kinds = [c[0] for c in calls]
-    assert "SIGTERM" in kinds
-    assert "PROBE" in kinds
-    assert "SIGKILL" in kinds, "must fall through to SIGKILL after the probe is denied, not crash"
+
+def test_kill_pgid_escalates_to_sigkill_when_group_survives(monkeypatch) -> None:
+    sigs: list[int] = []
+    monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: sigs.append(sig))
+    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: [777])  # never dies
+    monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
+
+    # Survivors remain after SIGKILL → the caller must be told the kill FAILED.
+    assert procutil.kill_pgid(456, grace_s=1) is False
+    assert sigs == [signal.SIGTERM, signal.SIGKILL]
+
+
+def test_kill_pgid_falls_back_to_per_pid_when_killpg_denied(monkeypatch) -> None:
+    """The 2026-07-11 hang: macOS refused `killpg` (EPERM: `killpg SIGKILL
+    denied pgid=69948`) so the SIGKILL never landed — yet kill_pgid returned as
+    though it had, and the supervisor mailed "SIGKILL'd a worker" about a
+    process that may well have still been running.
+
+    A denied group signal must fall back to signalling each member by pid.
+    """
+    per_pid: list[tuple[int, int]] = []
+    alive = {321}
+
+    def denied_killpg(pgid: int, sig: int) -> None:
+        raise PermissionError("Operation not permitted")
+
+    def kill_one(pid: int, sig: int) -> None:
+        per_pid.append((pid, sig))
+        if sig == signal.SIGKILL:
+            alive.discard(pid)
+
+    monkeypatch.setattr(procutil.os, "killpg", denied_killpg)
+    monkeypatch.setattr(procutil.os, "kill", kill_one)
+    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: sorted(alive))
+    monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
+
+    assert procutil.kill_pgid(999, grace_s=1) is True, \
+        "the per-pid fallback did kill it — that must be reported as success"
+    assert (321, signal.SIGTERM) in per_pid
+    assert (321, signal.SIGKILL) in per_pid
+
+
+def test_kill_pgid_reports_failure_when_every_signal_is_denied(monkeypatch) -> None:
+    """If the group cannot be signalled at all, kill_pgid must return False so
+    health.py records `kill_failed_orphan` instead of claiming a clean kill."""
+    def denied(*a, **k):
+        raise PermissionError("Operation not permitted")
+
+    monkeypatch.setattr(procutil.os, "killpg", denied)
+    monkeypatch.setattr(procutil.os, "kill", denied)
+    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: [4242])
+    monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
+
+    assert procutil.kill_pgid(4242, grace_s=1) is False
 
 
 if __name__ == "__main__":
