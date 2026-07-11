@@ -1,0 +1,98 @@
+{
+  "id": "mile_2673f6c4",
+  "title": "K1403：HAR-RV 分位數迴歸跨資產驗證 — QQQ/GLD/TLT 的分裂結論",
+  "description": "K1403 canonical HAC 重跑：QQQ、GLD、TLT 的 DM t 為 -13.23、-8.43、-11.39，仍全數通過 Harvey |t|>3；尾部 coverage 結論不變。",
+  "content": "# K1403：HAR-RV 分位數迴歸跨資產驗證 — QQQ/GLD/TLT 的分裂結論\n\n[提出: Claude]\n\n> **2026-07-11 推論更新**：原文的 local DM 在 h=1 沒有 HAC。改用 canonical HAC 後，QQQ、GLD、TLT 的 t 值依序為 -13.23、-8.43、-11.39，三者仍超過嚴格門檻 |t|>3；「中位數點預測輸、尾部 coverage 可用」的結論不變。\n\n## 摘要\n\n本文報告實驗 K1403 的完整樣本外驗證結果：HAR-RV 分位數迴歸在 QQQ（Nasdaq-100 ETF）、GLD（黃金 ETF）、TLT（20 年期美債 ETF）三個性質截然不同的資產上，OOS 期間 2021-01-04 至 2026-05-27，共 1,355 個交易日。核心發現有兩面：中位數預測（τ=0.50）在三個資產上均顯著劣於 OLS（canonical HAC DM t 介於 -13.23 至 -8.43，p≈0）；但 τ=0.95/0.99 的尾部覆蓋率在三個資產上全數通過 Kupiec UC 檢定，覆蓋率 gap 落在 ±0.54pp 以內。此結果與 K1402（SPY 單資產）一致，但 QQQ/GLD/TLT 三個資產的資產特性差異，讓 \"尾端校準穩健\" 的結論具備跨資產類別的意義。實務上，HAR-RV 分位數方法的定位應是 VaR 上界估計器，不應做為 QLIKE 最小化的點預測替代品。\n\n---\n\n## 研究背景\n\nK1402 是這個研究系列的起點，測試 SPY 一個資產上的 HAR-RV 分位數迴歸。結果顯示 τ=0.50 中位數預測的 QLIKE 損失顯著高於 OLS（DM stat=-10.95），但 τ=0.95/0.99 的覆蓋率通過 Kupiec 檢定。這個「中位數輸、尾端贏」的分裂結論，在單一資產上可能只是巧合；K1403 的任務是問：換到截然不同的三個資產上，分裂結論是否持續成立？\n\n選擇 QQQ、GLD、TLT 三個資產有明確理由。QQQ 是科技股集中指數，波動率特性受盈利季節性與利率敏感性驅動，與 SPY 高度相關但 beta 更高。GLD 是實物商品代理資產，波動率驅動因子為美元指數、實質利率與地緣政治溢酬，與股票指數相關性低，長期年化波動率約 12-13%，遠低於 SPY。TLT 是長天期美債，2021-2022 聯準會升息週期期間波動率大幅上升，與股票指數的傳統負相關在此 OOS 期間出現結構性轉變。三個資產橫跨股票、商品、固定收益三大資產類別，是對方法跨資產穩健性的正式壓力測試。\n\n研究問題有兩個：（1）中位數 DM 負值是 SPY 特有結果，還是跨資產系統性現象？（2）尾部覆蓋率通過是否在不同波動率特性的資產上都能維持？\n\n---\n\n## 方法與數據\n\n| 項目 | 設定 |\n|---|---|\n| 資產 | QQQ, GLD, TLT |\n| 數據來源 | yfinance 日頻調整收盤價 |\n| 訓練起始 | 2007-01-03 |\n| 訓練樣本數 | 3,502 個交易日（每資產相同） |\n| OOS 起始 | 2021-01-04 |\n| OOS 樣本數 | 1,355 個交易日 |\n| OOS 截止 | 2026-05-27 |\n| 目標變數 | `daily_rv = abs(log return %)`，一步預測 |\n| HAR 因子 | rv_d（前一日）、rv_w（前 5 日均值）、rv_m（前 22 日均值）；全部 `.shift(1)` lag，無 lookahead |\n| 模型 | HAR-RV QuantReg（statsmodels.QuantReg，Koenker-Bassett 1978）；τ ∈ {0.50, 0.75, 0.90, 0.95, 0.99} |\n| OOS 模式 | Single fixed-origin fit（2021 前訓練集固定，OOS 期間不更新參數） |\n| 基準 | HAR-RV OLS（MSE 點預測） |\n| 評估指標 | Pinball loss、Empirical coverage vs nominal τ、Kupiec UC 統計量（H0: 名義覆蓋率等於經驗覆蓋率）、canonical HAC DM 檢定（Diebold-Mariano with Newey-West correction） |\n| 隨機 seed | 42 |\n\n---\n\n## 核心發現\n\n### 發現一：中位數 DM 負值在三個資產上全部顯著\n\ncanonical HAC DM 檢定使用 QLIKE 損失函數比較 τ=0.50 分位數迴歸與 OLS 點預測。三個資產的 DM stat 全部為強負值，且 p 值趨近於零。\n\n| 資產 | OOS n | DM stat | p-value | 中位數 QLIKE | OLS QLIKE | QLIKE 倍率 |\n|---|---|---|---|---|---|---|\n| QQQ | 1,355 | -13.23 | <0.001 | 2.490 | 1.728 | 1.44x |\n| GLD | 1,355 | -8.43 | <0.001 | 2.134 | 1.301 | 1.64x |\n| TLT | 1,355 | -11.39 | <0.001 | 1.485 | 1.099 | 1.35x |\n\n三個 canonical HAC DM t 介於 -13.23 至 -8.43，遠超過 Harvey（2016）建議的 |t| > 3.0 嚴格門檻。「中位數分位數顯著劣於 OLS」，在三個截然不同的資產類別上都重現，確認這是跨資產類別的系統性現象，SPY 結果具備一般性。\n\nQLIKE 倍率說明問題的嚴重程度。GLD 的 QLIKE 損失達 OLS 的 1.64 倍，最為突出；TLT 的 1.35 倍相對最小。這個差異部分反映各資產的波動率持久性：TLT 的 rv_m 月度 HAR 因子係數估計值達 0.922（QQQ 為 0.347、GLD 為 1.829），GLD 的月度持久性最高，但高持久性的月度因子在 pinball loss 優化下的失準反而最大。\n\n為什麼分位數迴歸在 τ=0.50 處顯著劣於 OLS？根本原因是目標函數不一致。QuantReg 以 pinball loss（非對稱 absolute error，τ=0.50 等同 MAE）為目標最小化；QLIKE 是對數概率損失，對低估波動率施以更大懲罰。這兩個損失函數在數學上不可能同時最小化，pinball 最優化不蘊含 QLIKE 最優化。DM 負值是理論預期的正確方向，而非程式錯誤或數據問題。\n\n### 發現二：尾部覆蓋率在三資產上全數通過 Kupiec 檢定\n\nτ=0.95 和 τ=0.99 的尾部覆蓋率校準是評估 VaR 模型可用性的關鍵指標。Kupiec UC 檢定的虛無假設為「名義覆蓋率等於經驗覆蓋率」，p > 0.05 代表無法拒絕 H0，覆蓋校準通過。\n\n**τ=0.95 Kupiec 檢定結果**\n\n| 資產 | 名義覆蓋率 | 經驗覆蓋率 | Gap (pp) | LR 統計量 | Kupiec p-value |\n|---|---|---|---|---|---|\n| QQQ | 95.00% | 95.42% | +0.42 | 0.528 | 0.467 PASS |\n| GLD | 95.00% | 95.06% | +0.06 | 0.009 | 0.925 PASS |\n| TLT | 95.00% | 94.46% | -0.54 | 0.790 | 0.374 PASS |\n\n**τ=0.99 Kupiec 檢定結果**\n\n| 資產 | 名義覆蓋率 | 經驗覆蓋率 | Gap (pp) | LR 統計量 | Kupiec p-value |\n|---|---|---|---|---|---|\n| QQQ | 99.00% | 99.11% | +0.11 | 0.186 | 0.666 PASS |\n| GLD | 99.00% | 99.26% | +0.26 | 1.033 | 0.309 PASS |\n| TLT | 99.00% | 98.97% | -0.03 | 0.015 | 0.903 PASS |\n\n六組（3 資產 × 2 分位數）Kupiec UC 檢定全部通過。Gap 落在 -0.54pp 至 +0.42pp（q95）與 -0.03pp 至 +0.26pp（q99）之間，屬於 TIGHT 校準等級。\n\n值得注意幾個細節。GLD 的 q95 gap 僅 +0.06pp，p=0.925，是三個資產中校準最精準的。TLT 的 q95 gap 為 -0.54pp（輕微低估尾部風險），但 p=0.374 仍遠大於 0.05，統計上無法拒絕校準良好的假設。QQQ 的 q99 gap 為 +0.11pp，代表模型略微高估 99% 分位數，也就是說 q99 上界保守了一點點；從風控角度，保守高估比低估要好。\n\n中位數與低分位數（τ=0.50、τ=0.75）的 Kupiec 結果形成對比。QQQ 在 τ=0.50 的 Kupiec p=0.010（不通過），τ=0.75 的 p=0.002（不通過）；TLT 在 τ=0.50 的 p=0.087（邊緣通過）。這個分佈型態確認了「中位數段校準差、尾端校準好」是有內在結構的，不是隨機分佈的結果。\n\n### 發現三：跨資產類別的不對稱分佈與尾端穩健性\n\n圖一顯示三資產 × 五分位數的完整覆蓋率 gap 與 Kupiec p-value heat map。顯著失敗（FAIL，p < 0.05，以深紅色標示）集中在 τ=0.50 和 τ=0.75 低分位數區，特別是 QQQ（p=0.010、0.002）；τ=0.90 到 τ=0.99 的右半部分全部 PASS（綠框標示）。\n\n三個資產的失敗模式有細微差異。QQQ 在低分位數的失敗最為明顯（gap -3.51pp 和 -3.63pp），反映科技股波動率的左偏性質，市場急跌時，波動率驟升的幅度讓低分位數估計偏低。GLD 在 τ=0.50 通過（gap +0.41pp，p=0.765），這可能是黃金波動率更接近對稱分佈，pinball loss 優化在中位數段意外不虛耗。TLT 在所有分位數上的 gap 數值較小（最大 -2.32pp），整體校準偏差較 QQQ 低，但這也部分反映 TLT 相對較低的 OOS 基期 QLIKE（1.099 vs QQQ 1.728）。\n\n![K1403 覆蓋率校準 Heatmap：Coverage Gap 與 Kupiec p-value](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1403_fig1_coverage_heatmap.png)\n\n*圖一：K1403 三資產 × 五分位數的覆蓋率校準。左圖為 coverage gap（pp），綠色代表接近名義覆蓋率；右圖為 Kupiec p-value，深色 = PASS，深紅標記 = FAIL（p < 0.05）。綠框標示 q95/q99 尾端區域，全部 PASS。*\n\n---\n\n## 與 K1313 的比較：從 SPY 單資產到跨資產 Robustness\n\nK1313 的設定與 K1403 存在根本差異：K1313 直接對報酬做分位數迴歸（預測尾端報酬，評估 VaR 覆蓋率），而 K1403 對 RV proxy（\\|log return %\\|）做分位數迴歸（預測波動率上界）。兩者在目標變數定義上不相同，因此不應直接比較 DM 數字。\n\n但兩個系列在一個核心結論上是一致的：**分位數迴歸在高分位數（q95/q99）的覆蓋率校準能力是穩健的**。K1313 在 SPY 單資產顯示 HAR-QR 在 5% 和 1% VaR 水準全部通過 Kupiec；K1403 把同一類結論搬到三個不同資產類別，結論不變。不同之處在於 K1313 用 GARCH-Normal 作為對照組，而 K1403 用 HAR-RV OLS 作為對照。K1313 的對比是「分位數迴歸 vs 參數分佈假設」，K1403 的核心問題是「同一 HAR 結構下，分位數目標 vs OLS 目標」。\n\nK1313 沒有報告中位數（τ=0.50）的 QLIKE DM 比較，因為其 target 是 return VaR 而非 RV 預測；K1402/K1403 系列把中位數退步這個現象系統性地記錄為跨資產規律。兩個系列組合起來，形成一個更完整的圖像：**分位數迴歸對 HAR 結構的最有效應用是 tail calibration，不是 central tendency prediction**。\n\n---\n\n## 實務意義\n\n**可以直接用的場景**\n\n多資產投資組合的 VaR 上界估計。持有 QQQ + GLD + TLT 的投資人，可以把三個資產的 τ=0.95 分位數估計分別當作 95% 置信度下各資產的日波動率上界：「在 95% 的交易日，QQQ 的日波動率不會超過 q̂_{QQQ,0.95}」。K1403 確認這個陳述的 empirical coverage 為 95.42%，Kupiec PASS。對 GLD 和 TLT 也各自成立。\n\n這個設計不需要假設波動率分佈形狀，不需要 GARCH 模型收斂，計算成本是標準 OLS 的延伸，且所有參數估計在 OOS 期間保持固定（single fixed-origin fit）。對需要跨資產 risk dashboard 的量化框架，這是可快速部署的基礎設施。\n\n**不應用在的場景**\n\n中位數分位數（τ=0.50）不應作為 RV 點預測的替代品。三個資產的 QLIKE 損失全部比 OLS 差出 35-64%，canonical HAC DM t 約為 -8 到 -13。任何需要最佳化 QLIKE 或 MSE 的應用場景，HAR-RV QuantReg 中位數不具競爭力。\n\n也不應假設低分位數（τ=0.50、τ=0.75）的覆蓋率校準同樣穩健。圖一顯示 QQQ 在 τ=0.50/0.75 Kupiec FAIL，GLD 和 TLT 在 τ=0.75 的 p 值也偏低。方法的有效區間是尾端，不是全分位數空間。\n\n**Portfolio manager 的具體操作**\n\n把 τ=0.95/0.99 分位數估計用在部位規模決策的壓力測試。例如，在評估持倉壓縮閾值時，可以把「三個資產的 q95 分位數預測」組合成一個 multi-asset 最壞情境波動率向量，不需要假設協方差矩陣結構（只需要各資產個別的 marginal upper bound）。若要加入聯合尾部，需要另外處理相關性結構，K1403 本身只覆蓋 marginal calibration。\n\n---\n\n## 限制與穩健性\n\n**Single fixed-origin fit 的潛在參數漂移**\n\n三個資產的 QuantReg 模型全部在 2020-12-31 之前的訓練集上估計，此後五年完全不更新參數。2022 年聯準會升息週期是 OOS 期間最顯著的 regime change，特別對 TLT 的波動率影響最大（10 年期美債殖利率從 1.5% 升至 5%，TLT 單年最大回撤超過 35%）。儘管 TLT 在 q95/q99 的 Kupiec 仍然通過，expanding window 或 rolling window refit 是否能改善中低分位數的校準，是值得後續驗證的問題。\n\n**目標變數定義的 proxy 限制**\n\n`daily_rv = abs(log return %)` 是低估真實 RV 的 proxy，尤其在高頻數據可用時，應使用 Andersen-Bollerslev-Diebold-Labys（2003）定義的 realized variance（5 分鐘 squared return 加總）。proxy RV 低估了真實波動率，使得分位數模型估計的「上界」在概念上指的是 proxy 的 q95，不是真實 RV 的 q95。用更精確的高頻 RV 數據重測，覆蓋率數字可能有所變動。\n\n**Conditional Coverage 尚未驗證**\n\nKupiec UC 只檢定無條件覆蓋率：整個 OOS 期間的違反頻率是否符合名義比例。若違反事件有時間聚集性（violation clustering），UC PASS 不代表 Christoffersen（1998）Conditional Coverage 也 PASS。實務上，監管框架（Basel III）更重視 CC 檢定，因為連續違反對資本計提的衝擊更大。後續應補 Christoffersen CC 和 Berkowitz（2001）轉換檢定。\n\n**資產特性異質性在高分位數的穩定性**\n\n三個資產的 q95/q99 Gap 分佈不完全相同：QQQ 有輕微正偏（略為高估 VaR），TLT 有輕微負偏（略為低估 VaR）。目前所有 gap 都落在 ±0.54pp 以內，統計上可接受；但若 OOS 延長或市場 regime 發生系統性轉變（如債券熊市持續），TLT 的負偏可能擴大到統計顯著。\n\n---\n\n## 實驗設計補充\n\nHAR 因子計算方式與 Corsi（2009）原始設定一致：\n\n```\nrv_d_t = abs(log_return_t-1)\nrv_w_t = mean(rv_d_{t-5} to rv_d_{t-1})\nrv_m_t = mean(rv_d_{t-22} to rv_d_{t-1})\n```\n\n全部 lag 由 `.shift(1)` 在程式碼層面強制實施，確保 t 日的預測只使用 t-1 及之前的資訊。OOS 評估使用固定訓練集（2007-01-03 到 2020-12-31）的單一估計參數，對 OOS 期間的每一天輸入當時的 rv_d、rv_w、rv_m（均已 lag），取出模型預測值，與實現值比較。實驗代碼中記錄 seed=42，確保結果可完整復現。\n\n---\n\n## 結論\n\nK1403 把 K1402 的 SPY 發現搬到 QQQ、GLD、TLT 三個跨資產類別，OOS 期間 2021-01-04 至 2026-05-27，每資產 1,355 個交易日。結果在兩個維度上都與 K1402 一致：\n\n**中位數 DM 負值**（三資產 DM stat 分別為 -13.23、-8.43、-11.39，p≈0），代表分位數迴歸在 τ=0.50 的 QLIKE 損失顯著高於 OLS。此結果的根本原因是 pinball loss 與 QLIKE 的目標函數差異，不是方法論或數據問題。\n\n**尾部覆蓋率全通過**（6/6 個 Kupiec PASS，gap 落在 ±0.54pp 以內），確認 HAR-RV 分位數在 q95/q99 的 VaR 上界應用具備跨股票、商品、固定收益的 robustness。\n\n> **圖表更正**：原圖二使用未做 HAC 的 local DM，已移除，避免舊柱狀圖與最新推論混用。\n\n方法的邊界因此明確：**HAR-RV 分位數迴歸適合做尾部 VaR 上界估計，不適合做點預測替代 OLS**。在這個定位下，三個資產的尾部校準結果提供了跨資產 risk dashboard 的統計基礎。\n\n後續研究方向：expanding window refit 對中低分位數校準的改善效果（K783c 相關）、Christoffersen CC 檢定補充、以及 GARCH-Quantile 或 CAViaR 方法的對照比較。\n\n---\n\n*數據來源：yfinance（QQQ / GLD / TLT），日頻調整收盤，2007-01-03 至 2026-05-27。實驗 K1403，腳本：`experiments/k1403/k1403.py`，結果：`experiments/k1403/k1403_results.json`，OOS 2021-01-04 起，n=1,355。模型：HAR-RV QuantReg（statsmodels，Koenker-Bassett 1978），τ ∈ {0.50, 0.75, 0.90, 0.95, 0.99}，seed=42。*\n",
+  "category": "milestone",
+  "audience": "research",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1403"
+    ],
+    "data_sources": [
+      "yfinance",
+      "experiments/k1403"
+    ],
+    "dup_waiver": "K1403 was included in joint K1402/K1403/K1404 aggregate article; this article focuses exclusively on K1403 3-asset heterogeneity (QQQ/GLD/TLT cross-asset dynamics, asset-class specific analysis, and model regime analysis) — distinct from the joint 5-asset transportability narrative",
+    "cluster_waiver": "Cross-asset validation research K1403 (QQQ/GLD/TLT): primary subject is cross-asset-class robustness of HAR-RV quantile calibration (equity+commodity+bond), not SPY/equity cluster. Distinct contribution requiring standalone reporting.",
+    "image_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1403_fig1_coverage_heatmap.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1403_fig2_dm_coverage.png"
+    ],
+    "supabase_storage_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1403_fig1_coverage_heatmap.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1403_fig2_dm_coverage.png"
+    ],
+    "topic_cluster": "spy",
+    "topic_cluster_30d": {
+      "count": 97,
+      "cap": 10,
+      "ratio": 0.2337,
+      "exempt": false
+    },
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "GOLD",
+        "LONG_BOND",
+        "NASDAQ",
+        "USD",
+        "US_BOND",
+        "US_EQUITY"
+      ],
+      "conclusion_class": "descriptive",
+      "mechanisms": [
+        "factor_causality",
+        "macro_policy"
+      ],
+      "time_horizon": "intraday"
+    },
+    "arc_signature_backfill": {
+      "reason": "release_layer_arc_upgrade_a1",
+      "script": "scripts/backfill_arc_dedup_metadata.py",
+      "applied_at": "2026-06-18T02:13:29.530955+00:00"
+    },
+    "release_dedup_skipped": true,
+    "release_dedup_skipped_at": "2026-06-27T21:00:26.864228+00:00",
+    "release_arc_dedup_of": "mile_59f60989",
+    "release_arc_dedup_class": "descriptive"
+  },
+  "tags": [
+    "研究",
+    "HAR-RV",
+    "quantile-regression",
+    "VaR",
+    "QQQ",
+    "GLD",
+    "TLT",
+    "cross-asset"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-08T06:18:28.735290+00:00",
+  "published_at": "2026-06-08T06:18:28.735290+00:00",
+  "status": "unpublished",
+  "proposer": "Claude",
+  "errata": {
+    "update_at": "2026-07-11T14:32:40.037261+00:00",
+    "update_action": "dm_hac_canonical_correction",
+    "update_summary": "將 K1403 與 K1402 的退化 local DM 數字改為 canonical HAC；結論不變，並移除使用舊統計量的 DM 圖。",
+    "update_history": [
+      {
+        "at": "2026-07-11T14:32:40.037261+00:00",
+        "action": "dm_hac_canonical_correction",
+        "summary": "將 K1403 與 K1402 的退化 local DM 數字改為 canonical HAC；結論不變，並移除使用舊統計量的 DM 圖。",
+        "old_content_chars": 8706,
+        "new_content_chars": 8583,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "cli override (--update-description)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-07-11T14:32:40.037261+00:00"
+}

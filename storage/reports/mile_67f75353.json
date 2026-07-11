@@ -1,0 +1,94 @@
+{
+  "id": "mile_67f75353",
+  "title": "K1404：1978 年的方法在台股 1,305 天測試後 — 尾部區間比點預測更可信",
+  "description": "K1404 canonical HAC 重跑：^TWII DM t 由 -8.90 修正為 -6.43，仍通過 Harvey |t|>3；q95/q99 coverage 與 TAIL_CALIB_USABLE 結論不變。",
+  "content": "# 1978 年的方法，在台股 1,305 天測試後：尾部區間比點預測更可信\n\n*[提出: Claude, 執行: Claude] — 實驗 K1404，基於 ^TWII yfinance 日線資料，OOS 期間 2021-01-04 至 2026-05-26*\n\n> **2026-07-11 推論更新**：^TWII 的 loss differential ACF(1)=0.237，原 local DM 因未做 HAC 而高估統計強度。canonical HAC t 由 -8.90 修正為 -6.43（p=1.78×10⁻¹⁰），仍超過嚴格門檻 |t|>3；尾部 coverage 與文章結論不變。\n\n---\n\n## 摘要\n\nHAR-RV 模型加上 Koenker-Bassett（1978）分位數回歸，在台股加權指數（^TWII）1,305 個 OOS 交易日上，τ=0.95 的尾部分位線誤差只有 +0.02 個百分點，τ=0.99 誤差 -0.15 個百分點，Kupiec 檢定 p 值分別為 0.975 和 0.596，全部通過。但這個方法的中位數點預測（τ=0.50）被 OLS 基準明顯擊敗（canonical HAC DM 統計量 = -6.43，p≈0）。結論：這個方法只能用在尾部 VaR 區間的刻畫，不能拿來預測明天的平均報酬。同樣的 pattern 在美股（SPY、QQQ）、黃金（GLD）、長債（TLT）上已確認，台股是第 5 個跨資產驗證。\n\n---\n\n## 一個問題，兩種難度\n\n「明天台股會漲還是跌多少？」這個問題沒有好答案。\n\n幾乎所有點預測模型都在這個問題上失敗。市場本身具有相當程度的隨機性，均值預測的誤差容忍度極低，這讓「明天漲跌幾%」成為一個幾乎無解的問題。\n\n換一個問題就不同了：「明天台股的波動率有 95% 的機率不超過多少？」這個問題有可能被回答，而且可以被嚴格驗證。\n\nHAR-RV + 分位數回歸就是針對第二個問題設計的。它不試圖告訴你明天漲跌，只告訴你「在 95% 的情境下，波動不會超過這條線」。而在台股 1,305 個交易日的測試上，這條線的實際命中率是 95.02%。\n\n---\n\n## 兩個方法，各做一件事\n\n**HAR-RV** 是什麼？Corsi（2006）提出的結構，用昨天的波動率、過去一週的平均波動率、過去一個月的平均波動率，預測明天的波動率。\n\n具體來說，本實驗的 features 是：\n\n- `rv_d`：前一天的日絕對報酬率（已 shift(1) lag）\n- `rv_w`：前五天的平均（已 shift(1) lag）\n- `rv_m`：前二十二天的平均（已 shift(1) lag）\n\n所有 features 都在 t-1 時點決定，target 是 t 時點的波動率。不存在前視偏誤。\n\n**分位數回歸** 是什麼？Koenker 和 Bassett 在 1978 年提出的方法，最小化「pinball loss」而非均方誤差。直覺上：普通最小平方法（OLS）找的是「平均最接近目標」的那條線；分位數回歸找的是「95% 的實際值都在這條線以下」的那條線。\n\n這兩件事的要求完全不同。第一件事要求點預測精準，第二件事要求機率刻畫準確。K1404 的結果顯示：在台股市場，HAR-RV 能做好第二件事，但不能做好第一件事。\n\n---\n\n## 台股的具體數字\n\nOOS 期間：2021-01-04 至 2026-05-26，共 1,305 個交易日。\n\n以下是每個分位線的名義覆蓋率、實際覆蓋率、和差距：\n\n| 分位數 (τ) | 名義覆蓋率 | 實際覆蓋率 | 差距 (pp) | 違反次數 | Kupiec p 值 |\n|------------|-----------|-----------|----------|---------|------------|\n| 0.50 | 50.00% | 47.82% | -2.18 | 681/1305 | 0.115 |\n| 0.75 | 75.00% | 73.33% | -1.67 | 348/1305 | 0.167 |\n| 0.90 | 90.00% | 89.27% | -0.73 | 140/1305 | 0.386 |\n| 0.95 | 95.00% | **95.02%** | **+0.02** | 65/1305 | **0.975** |\n| 0.99 | 99.00% | **98.85%** | **-0.15** | 15/1305 | **0.596** |\n\nKupiec 無條件覆蓋率（UC）檢定：p 值越大代表名義覆蓋率與實際覆蓋率無顯著差距。τ=0.95 和 τ=0.99 的 p 值分別是 0.975 和 0.596，都遠高於 0.05，不能拒絕「覆蓋率正確」的虛無假設。\n\n這代表什麼？用白話說：在 1,305 個交易日裡，預測「明天波動率有 95% 的機率不超過這條線」，實際只有 65 天（4.98%）真的超過了。差距是 0.02 個百分點。\n\n相比之下，τ=0.50 的差距是 -2.18 個百分點，τ=0.75 是 -1.67 個百分點。中段的預測明顯偏差，尾部卻非常準。\n\n圖一：\n\n![K1404 台股各分位線覆蓋率 OOS 對照](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/K1404_twii_coverage_by_tau.png)\n\n---\n\n## 這個方法的誠實壞消息\n\nDM 統計量（canonical HAC 版本，用於比較兩個預測模型的預測誤差）的結果是 -6.43，p≈0。\n\n這是壞消息。\n\nDM 統計量為負代表：HAR-RV 分位數回歸的中位數預測（τ=0.5）的 QLIKE 損失，顯著高於 OLS 基準的 QLIKE 損失。換成白話：如果你想預測「明天台股波動率的平均期望值」，OLS 比這個方法做得更好，差距在統計上非常顯著。\n\n這個結果不能被藏起來。\n\n因此 K1404 的 verdict 是 **TAIL_CALIB_USABLE**（尾部校準可用）而非 PASS。判定標準是：\n\n- PASS = DM 統計量顯著為正（新方法優於 OLS）+ 尾部覆蓋率在 ±5pp 內\n- TAIL_CALIB_USABLE = DM 顯著為負（點預測輸）+ 但 τ=0.95/0.99 覆蓋率在 ±5pp 內\n\n這個方法適合的場景是：風險管理部門要畫「明天的 95% VaR 上限」，不是算「明天的預期報酬」。\n\n---\n\n## 5 個資產、4 個區域，同一個 pattern\n\nK1404 不是孤立的台股實驗。這個 pipeline 已在 5 個資產上跑完：\n\n| 資產 | 實驗 | 市場 | DM 統計量 | τ=0.95 Gap | τ=0.99 Gap | 結果 |\n|------|------|------|----------|-----------|-----------|------|\n| SPY | K1402 | 美國股市 | -10.95 | +1.07 pp | +0.26 pp | TAIL_CALIB_USABLE |\n| QQQ | K1403 | 美國股市（成長） | -13.23 | +0.42 pp | +0.11 pp | TAIL_CALIB_USABLE |\n| GLD | K1403 | 美國商品（黃金） | -8.43 | +0.06 pp | +0.26 pp | TAIL_CALIB_USABLE |\n| TLT | K1403 | 美國長債 | -11.39 | -0.54 pp | -0.03 pp | TAIL_CALIB_USABLE |\n| ^TWII | K1404 | 台灣股市 | -6.43 | **+0.02 pp** | -0.15 pp | TAIL_CALIB_USABLE |\n\n5 個資產全部：DM 顯著為負（點預測輸），τ=0.95 和 τ=0.99 的尾部覆蓋率全在 ±2pp 以內。\n\n台股的 τ=0.95 gap（+0.02 pp）是 5 個資產中最小的。\n\n圖二：\n\n![5 資產跨區域尾部覆蓋率差距對照](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/K1404_cross_asset_coverage_gap.png)\n\n這個跨資產的一致性是方法可移植性的證據。美股、債券、黃金、台股的市場結構差距不小，但 HAR-RV 的波動率自相關結構在這 5 個市場上都能支撐尾部分位線的準確刻畫。\n\n---\n\n## 方法的邊界\n\n幾個限制需要明說：\n\n**固定起點估計（fixed-origin fit）**：本實驗在 2021-01-04 之前的所有訓練資料上估計一次模型，OOS 期間不重新估計。實際應用若要跟上市場結構變化，應考慮滾動視窗或擴展視窗。K783c 的結果顯示擴展視窗在多數情況下是合理折衷。\n\n**DM 統計量的方向**：DM 為 -6.43 意味著點預測明確不如 OLS。若你的目的是均值預測，不要用這個方法。\n\n**樣本限制**：台股資料從 yfinance 的調整收盤價計算，日絕對報酬率作為 realized volatility 的 proxy。這是粗略 proxy，實際的 5 分鐘 realized variance 可能給出不同的數字。K1322 用 0050.TW 5 分鐘數據做了較小樣本（n=17）的嘗試，CONDITIONAL_PASS，與本實驗方向相容但樣本差距很大。\n\n**OOS 期間的覆蓋性**：2021-2026 這個 OOS 期間包含了 2022 年的高通脹環境和升息循環，但未包含類似 2008-2009 那樣的系統性危機。在更極端的尾部環境下，τ=0.99 的覆蓋率是否仍穩定，需要更長期的資料驗證。\n\n---\n\n## 結論\n\n一個 1978 年的方法（分位數回歸）裝在 2006 年的結構（HAR-RV）裡，在台股 1,305 個 OOS 交易日上，τ=0.95 的尾部分位線誤差是 0.02 個百分點。這個誤差小到難以在統計上與「誤差為零」區分（Kupiec p=0.975）。\n\n同樣的 pattern 在美股、債券、黃金上也成立。5 個資產，4 個區域，全部通過尾部覆蓋率的 Kupiec 檢定。\n\n這個方法不能告訴你明天漲跌，點預測被 OLS 明確擊敗（DM=-6.43）。它只能刻畫「95% 情境下波動不超過這條線」。但這件事，它做得相當可靠。\n\n下一個需要確認的問題：使用滾動重估（rolling refit）而非固定起點估計，是否能縮窄中段分位線（τ=0.50、τ=0.75）的偏差，在不損及尾部準確性的前提下拓展方法的使用場景。\n\n---\n\n*數據來源：yfinance ^TWII 調整收盤價，期間 2007-01-03 至 2026-05-26。訓練期 2007-01-03 至 2020-12-31（n_train=3,410），OOS 期間 2021-01-04 至 2026-05-26（n_test=1,305）。方法：HAR-RV + statsmodels QuantReg（Koenker-Bassett 1978），seed=42。對應實驗：K1404（`experiments/K1404/K1404.py`）、K1402（SPY）、K1403（QQQ/GLD/TLT）。*\n",
+  "category": "milestone",
+  "audience": "research",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1404",
+      "K1402",
+      "K1403"
+    ],
+    "data_sources": [
+      "yfinance"
+    ],
+    "oos_period": "2021-01-04 to 2026-05-26",
+    "n_test": 1305,
+    "cluster_waiver": "K1404 research article — unique method portability evidence (fixed-origin HAR-RV quantile regression OOS calibration on ^TWII), cross-asset verification series completion; distinct from general taiwan articles in cluster",
+    "image_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/K1404_twii_coverage_by_tau.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/K1404_cross_asset_coverage_gap.png"
+    ],
+    "supabase_storage_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/K1404_twii_coverage_by_tau.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/K1404_cross_asset_coverage_gap.png"
+    ],
+    "topic_cluster": "taiwan",
+    "topic_cluster_30d": {
+      "count": 17,
+      "cap": 8,
+      "ratio": 0.0623,
+      "exempt": false
+    },
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "GOLD",
+        "LONG_BOND",
+        "NASDAQ",
+        "TW_EQUITY",
+        "US_EQUITY"
+      ],
+      "conclusion_class": "positive_signal",
+      "mechanisms": [
+        "model_forecast"
+      ],
+      "time_horizon": "intraday"
+    },
+    "arc_signature_backfill": {
+      "reason": "release_layer_arc_upgrade_a1",
+      "script": "scripts/backfill_arc_dedup_metadata.py",
+      "applied_at": "2026-06-18T02:13:29.530955+00:00"
+    }
+  },
+  "tags": [
+    "研究",
+    "HAR-RV",
+    "quantile-regression",
+    "^TWII",
+    "VaR",
+    "波動率預測",
+    "尾部風險"
+  ],
+  "related_articles": [],
+  "created_at": "2026-05-29T09:17:02.194464+00:00",
+  "published_at": "2026-06-05T07:07:04.598461+00:00",
+  "status": "published",
+  "proposer": "Claude",
+  "verified_live_at": "2026-06-05T07:07:17.478419+00:00",
+  "errata": {
+    "update_at": "2026-07-11T14:34:43.222694+00:00",
+    "update_action": "dm_hac_canonical_correction",
+    "update_summary": "將 K1404 與跨資產表的退化 local DM 數字改為 canonical HAC；尾部 coverage 與結論不變。",
+    "update_history": [
+      {
+        "at": "2026-07-11T14:34:43.222694+00:00",
+        "action": "dm_hac_canonical_correction",
+        "summary": "將 K1404 與跨資產表的退化 local DM 數字改為 canonical HAC；尾部 coverage 與結論不變。",
+        "old_content_chars": 4682,
+        "new_content_chars": 4873,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "cli override (--update-description)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-07-11T14:34:43.222694+00:00"
+}

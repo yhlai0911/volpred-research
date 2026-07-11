@@ -1,0 +1,89 @@
+{
+  "id": "mile_15d43f72",
+  "title": "K1402/K1403/K1404：跨市場 HAR-RV 尾部分位數預測驗證 — 美股、債券、黃金、台股全數通過",
+  "description": "K1402–K1404 canonical HAC 重跑後，五資產 DM t 介於 -13.23 至 -6.43，仍全數通過 Harvey |t|>3；跨市場尾部校準結論不變。",
+  "content": "# K1402/K1403/K1404：跨市場 HAR-RV 尾部分位數預測驗證 — 美股、債券、黃金、台股全數通過\n\n[提出: Claude]\n\n> **2026-07-11 推論更新**：三個實驗已改用 canonical HAC DM。SPY、QQQ、GLD、TLT、^TWII 的 t 值依序為 -10.95、-13.23、-8.43、-11.39、-6.43；五者仍超過嚴格門檻 |t|>3，跨市場結論不變。\n\n## 摘要\n\n本文整合實驗 K1402（SPY）、K1403（QQQ/GLD/TLT）、K1404（^TWII）的樣本外驗證結果，測試 HAR-RV 分位數迴歸（Koenker-Bassett 1978 pinball loss）在 5 類資產、跨美股／美債／美商品／台股四個區域的 VaR 上界可用性。OOS 期間 2021-01-04 起，總觀察日數達 5,368 筆（美股 1,348–1,355、台股 1,305）。核心發現：**中位數點預測（τ=0.50）在所有 5 個資產皆顯著劣於 OLS**（canonical HAC DM t 介於 -13.23 至 -6.43，p≈0）；但 **τ=0.95/0.99 尾部覆蓋率在全部 5 個資產均落在 ±2pp 以內，Kupiec UC 檢定全數通過**，確認跨區域 transportability 成立。結論：HAR-RV 分位數模型不適合做均值預測，但可作 multi-asset Risk Forecast 頁的 VaR 上界估計器。\n\n---\n\n## 研究背景\n\nHAR-RV（Heterogeneous Autoregressive Realized Volatility）是波動率預測的標準基準，由 Corsi（2009）提出，將一日、一週、一月已實現波動率串接為三個 HAR 因子。傳統版本以 OLS 最小化 MSE，估計的是條件平均。\n\n當風險管理的目標轉向尾部——例如持倉人想知道「明天最壞的 5% 情境下日波動率會落在哪」——OLS 點預測沒有直接對應的機率詮釋。Koenker-Bassett（1978）分位數迴歸以 pinball loss 為目標函數，把 HAR-RV 直接估計成條件分位數，理論上能給出 τ=0.95 的 VaR 上界。\n\nK1402 是這條研究鏈的起點：測試 SPY 的 HAR-RV 分位數預測。結果出乎預料：中位數分位數（τ=0.50）的 QLIKE 顯著差於 OLS 點預測（DM stat=-10.95, p≈0），但 τ=0.95/0.99 的尾部覆蓋率卻落在 ±2pp 以內、Kupiec 統計量通過。初步結論：**點預測沒用，尾部校準有用**。\n\nK1403 把同一 pipeline 套到三個跨資產（QQQ 科技股、GLD 黃金、TLT 長債），驗證 SPY 結論是否具備跨資產穩健性。K1404 再進一步把驗證範圍拉到台灣市場（^TWII 加權指數），測試跨區域是否仍成立。\n\n本文呈現這三個實驗的完整數字，並在「美股 + 台股」5 個資產構成的聯合證據下，重新評估方法的使用邊界。\n\n---\n\n## 方法與數據\n\n| 項目 | 設定 |\n|---|---|\n| 資產 | SPY（K1402）；QQQ, GLD, TLT（K1403）；^TWII（K1404） |\n| 數據來源 | yfinance 日頻調整收盤價 |\n| 訓練起始 | 2007-01-03 |\n| OOS 起始 | 2021-01-04（三組對齊） |\n| 目標變數 | `daily_rv = \\|daily log return %\\|`，一步預測 |\n| HAR 因子 | rv_d（前一日）、rv_w（前 5 日均值）、rv_m（前 22 日均值）；全經 `.shift(1)` lag，無 lookahead |\n| 模型 | HAR-RV QuantReg（statsmodels；τ ∈ {0.50, 0.75, 0.90, 0.95, 0.99}） |\n| OOS 模式 | single fixed-origin fit（2021 之前訓練集固定不更新） |\n| 基準 | HAR-RV OLS（MSE 點預測） |\n| 評估 | Pinball loss、Empirical coverage vs nominal τ、Kupiec UC 統計量、canonical HAC DM 檢定 |\n| 種子 | seed=42 |\n\n---\n\n## 核心發現\n\n### 發現一：中位數點預測在 5 個資產全部顯著劣於 OLS\n\ncanonical HAC DM（Diebold-Mariano with Newey-West correction）檢定比較 τ=0.50 分位數的 QLIKE 損失與 OLS 點預測。所有 5 個資產的 DM stat 皆為顯著負值，代表分位數中位數顯著**退步**。\n\n| 資產 | OOS n | DM stat | p-value | 中位數 QLIKE | OLS QLIKE |\n|---|---|---|---|---|---|\n| SPY | 1,348 | -10.95 | <0.001 | 1.989 | 1.160 |\n| QQQ | 1,355 | -13.23 | <0.001 | 2.490 | 1.728 |\n| GLD | 1,355 | -8.43 | <0.001 | 2.134 | 1.301 |\n| TLT | 1,355 | -11.39 | <0.001 | 1.485 | 1.099 |\n| ^TWII | 1,305 | -6.43 | <0.001 | 2.499 | 1.568 |\n\n原因在於 **pinball loss 與 QLIKE 是不同目標**。Pinball loss 最小化的是條件分位數的非對稱誤差，對稱等同於中位數絕對誤差（MAE 的一般化），並不直接最小化 QLIKE。QLIKE 是波動率預測領域的標準損失，對應 log-predictive 概率；pinball loss 優化的模型參數對 QLIKE 沒有理論保障。DM 負號是方法正確應用的副作用，而非數據或程式錯誤。\n\n### 發現二：尾部 τ=0.95/0.99 覆蓋率跨區域全數通過\n\n覆蓋率是核心驗證指標：模型說「有 95% 的日子 RV 會低於 q̂_{0.95}」，實際上有多少比例的觀測日確實低於這個閾值？Kupiec UC（Unconditional Coverage）檢定的 null hypothesis 是「名義覆蓋率等於經驗覆蓋率」，p>0.05 代表無法拒絕 H0，覆蓋率校準通過。\n\n**τ=0.95 Kupiec 檢定結果**\n\n| 資產 | 名義覆蓋率 | 經驗覆蓋率 | Gap (pp) | Kupiec p-value |\n|---|---|---|---|---|\n| SPY | 95.00% | 96.07% | +1.07 | 0.062 ✅ |\n| QQQ | 95.00% | 95.42% | +0.42 | 0.467 ✅ |\n| GLD | 95.00% | 95.06% | +0.06 | 0.925 ✅ |\n| TLT | 95.00% | 94.46% | -0.54 | 0.374 ✅ |\n| ^TWII | 95.00% | 95.02% | +0.02 | 0.975 ✅ |\n\n**τ=0.99 Kupiec 檢定結果**\n\n| 資產 | 名義覆蓋率 | 經驗覆蓋率 | Gap (pp) | Kupiec p-value |\n|---|---|---|---|---|\n| SPY | 99.00% | 99.26% | +0.26 | 0.318 ✅ |\n| QQQ | 99.00% | 99.11% | +0.11 | 0.666 ✅ |\n| GLD | 99.00% | 99.26% | +0.26 | 0.309 ✅ |\n| TLT | 99.00% | 98.97% | -0.03 | 0.903 ✅ |\n| ^TWII | 99.00% | 98.85% | -0.15 | 0.596 ✅ |\n\n**所有 10 個（5 資產 × 2 分位數）Kupiec 檢定全數通過**。Gap 在 -0.54pp 到 +1.07pp 之間，遠低於 ±5pp 容忍帶，多數落在 ±0.5pp 以內，屬於 TIGHT 校準。\n\n台股（^TWII）τ=0.95 的 gap 是全部 5 個資產中最小的：僅 +0.02pp，對應 Kupiec p=0.975，幾乎是完美校準。\n\n### 發現三：跨區域 transportability 成立\n\nK1402/K1403 的驗證覆蓋美國市場 4 個資產（股票指數 SPY/QQQ、黃金 GLD、長債 TLT），特性各異：SPY/QQQ 高度相關的美股指數、GLD 商品避險資產、TLT 長天期公債。K1404 把驗證邊界跨到東亞市場——台灣加權指數，市場微結構、交易機制與流動性均不同於美股。\n\n三組實驗的聯合結論：**不論資產類別（股/債/商品）或地理區域（美股/台股），single fixed-origin fit 的 HAR-RV 分位數模型在尾部 τ=0.95/0.99 均能維持良好校準**。這個一致性不是巧合——HAR-RV 模型本身對波動率持久性（persistence）的結構假設，在這些資產上都足夠穩健，使得尾部的順序統計特性得以保留。\n\n覆蓋率 plot（實驗目錄 `experiments/K1404/coverage_plot.png`）顯示 ^TWII 在各 τ 的實際覆蓋率曲線與名義 τ 線的貼近程度。\n\n---\n\n## 實務意義\n\n**可用的場景**：\n\n1. **VaR 上界估計**：風險管理人可把 HAR-RV τ=0.95/0.99 分位數作為日頻 RV 的 VaR 上界，解讀為「在 95%（99%）的交易日，組合的日波動率不會超過 q̂」。Coverage 校準通過意味著這個上界不虛誇、不過保守。\n2. **Multi-asset Risk Forecast 頁**：K1402/K1403/K1404 跨 5 個資產的結果，可以匯成統一格式呈現在 VolPred 的 Risk Forecast 頁，供使用者比較各資產的尾部 RV band。\n3. **跨市場頭寸比例決策**：若投資人同時持有美股（SPY/QQQ）、黃金（GLD）、美債（TLT）與台股，可用這 5 個資產的 τ=0.95 分位數估算最壞情境下各資產的相對 RV，作為分散化依據。\n\n**不可用的場景**：\n\n中位數分位數（τ=0.50）顯著劣於 OLS 點預測，**不適合**做每日 RV 的均值預測或 QLIKE 最佳化目標。若研究目標是比較平均預測精度，HAR-RV QuantReg 對 OLS 沒有優勢。\n\n---\n\n## 限制與穩健性\n\n1. **Single fixed-origin fit**：三組實驗皆使用 2021 年之前的訓練集固定估計，OOS 期間完全不更新參數。實際風險管理通常採用 expanding window 或 rolling window refit；固定 origin 下的長達 5 年 OOS 可能使參數漂移，特別是 2022 年聯準會升息週期改變了波動率 regime。K783c 的結果顯示 expanding window 可能縮小 gap，未來實驗可對照。\n2. **點預測顯著退步**：DM stat 最差達 -13.23（QQQ），比 OLS QLIKE 高出逾 44%。任何需要良好點預測的應用場景，HAR-RV QuantReg 皆不應作為主模型。\n3. **樣本數**：台股（^TWII）OOS n=1,305，美股 OOS n=1,348–1,355，接近但未到 Kupiec 檢定在極端分位數（τ=0.99）的漸近理想樣本數。若 τ=0.99 的名義期望違反次數（1,305 × 0.01 ≈ 13 次）發生任何 cluster，檢定可能失去效力。\n4. **缺乏 Conditional Coverage 檢定**：本系列只跑 Kupiec UC，未跑 Christoffersen（1998）CC 檢定。若違反事件有時間聚集性（violation clustering），UC PASS 不保證 CC PASS。後續可補。\n5. **目標變數定義**：`daily_rv = |log return %|` 是 proxy RV，不是高頻真實 RV。不同的 proxy（如 Rogers-Satchell range estimator）可能給出不同的覆蓋率數字。\n\n---\n\n## 結論\n\nK1402/K1403/K1404 三組實驗橫跨美股（SPY、QQQ）、美商品（GLD）、美債（TLT）與台股（^TWII），OOS 期間 2021-01-04 起、總觀察日 5,368 筆。結果一致：\n\n- **HAR-RV QuantReg 中位數點預測在 5/5 個資產顯著劣於 OLS**（DM p≈0）；\n- **τ=0.95/0.99 尾部覆蓋率 10/10 個 Kupiec UC 全數通過**，gap 落在 ±1.1pp 以內；\n- 跨區域 transportability（美國 → 台灣）確認成立。\n\n方法的使用界限很清楚：**不做點預測、只做尾部 VaR 上界**。在這個定位下，HAR-RV QuantReg 提供了一個輕量、可解釋、跨市場可複製的風險估計器，不需要參數分布假設、不依賴波動率機制假設，只靠 HAR 結構的持久性與 pinball loss 的非對稱優化。\n\n後續方向：expanding window 對照（K783c 預期能縮小中位數 gap）、Christoffersen CC 檢定、以及把三組結果整合進 Risk Forecast 頁 multi-asset 視覺化。\n\n---\n\n*數據來源：yfinance（^TWII / SPY / QQQ / GLD / TLT），日頻調整收盤，2007-01-03 起。實驗 K1402（`experiments/k1402/`）、K1403（`experiments/k1403/`）、K1404（`experiments/K1404/`），OOS 2021-01-04 起，SPY n=1,348，QQQ/GLD/TLT n=1,355，^TWII n=1,305。*\n",
+  "category": "milestone",
+  "audience": "research",
+  "phase": "research",
+  "details": {
+    "k_id": "K1404",
+    "related_k": [
+      "K1402",
+      "K1403"
+    ],
+    "experiment_refs": [
+      "K1402",
+      "K1403",
+      "K1404"
+    ],
+    "figure_path": "experiments/K1404/coverage_plot.png",
+    "cluster_waiver": "Cross-region verification research: K1402/K1403/K1404 spans US equity/bond/commodity + TW equity — primary subject is ^TWII Taiwan market transportability, not SPY alone. Distinct research contribution requiring combined reporting.",
+    "topic_cluster": "spy",
+    "topic_cluster_30d": {
+      "count": 34,
+      "cap": 10,
+      "ratio": 0.1355,
+      "exempt": false
+    },
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "GOLD",
+        "LONG_BOND",
+        "NASDAQ",
+        "TW_EQUITY",
+        "US_BOND",
+        "US_EQUITY"
+      ],
+      "conclusion_class": "null_no_info",
+      "mechanisms": [
+        "factor_causality"
+      ],
+      "time_horizon": "weekly"
+    },
+    "arc_signature_backfill": {
+      "reason": "release_layer_arc_upgrade_a1",
+      "script": "scripts/backfill_arc_dedup_metadata.py",
+      "applied_at": "2026-06-18T02:13:29.530955+00:00"
+    }
+  },
+  "tags": [
+    "研究",
+    "波動率",
+    "VaR",
+    "風險管理",
+    "台股",
+    "跨市場",
+    "HAR-RV",
+    "分位數預測"
+  ],
+  "related_articles": [],
+  "created_at": "2026-05-28T04:15:11.779352+00:00",
+  "published_at": "2026-06-01T11:00:11.182009+00:00",
+  "status": "published",
+  "proposer": "Claude",
+  "verified_live_at": "2026-06-01T11:00:31.080043+00:00",
+  "errata": {
+    "update_at": "2026-07-11T14:36:39.927425+00:00",
+    "update_action": "dm_hac_canonical_correction",
+    "update_summary": "將 K1402–K1404 聚合文章的五個退化 local DM 數字改為 canonical HAC；跨市場結論不變。",
+    "update_history": [
+      {
+        "at": "2026-07-11T14:36:39.927425+00:00",
+        "action": "dm_hac_canonical_correction",
+        "summary": "將 K1402–K1404 聚合文章的五個退化 local DM 數字改為 canonical HAC；跨市場結論不變。",
+        "old_content_chars": 5934,
+        "new_content_chars": 6089,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "cli override (--update-description)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-07-11T14:36:39.927425+00:00"
+}
