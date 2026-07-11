@@ -113,6 +113,19 @@ def test_retired_sites_cannot_resurrect(
     assert not resurrected, f"Fixed sites regressed: {sorted(resurrected)}"
 
 
+def test_baseline_metadata_matches_frozen_cohorts(baseline_payload: dict) -> None:
+    """The one-time blind-spot expansion stays explicit and auditable."""
+    original = baseline_payload["degenerate_sites"]
+    blindspots = baseline_payload["blindspot_sites"]
+
+    assert original == sorted(set(original))
+    assert blindspots == sorted(set(blindspots))
+    assert set(original).isdisjoint(blindspots)
+    assert baseline_payload["original_cohort_count"] == len(original)
+    assert baseline_payload["blindspot_cohort_count"] == len(blindspots)
+    assert baseline_payload["count"] == len(original) + len(blindspots)
+
+
 def test_known_blind_spots_are_now_classified(findings) -> None:
     """Regression coverage for the six variants found by the paper deep review."""
     verdicts = {_site_key(f): f.verdict for f in findings}
@@ -129,6 +142,22 @@ def test_known_blind_spots_are_now_classified(findings) -> None:
     assert verdicts[
         "experiments/k751/k751_overnight_vix_news.py::<module>:ttest_1samp@416"
     ] == NO_HAC
+
+
+def test_paper_review_named_hac_debt_is_frozen(findings, baseline) -> None:
+    """VIX-sufficiency and EAV sites named by the deep review stay visible."""
+    verdicts = {_site_key(f): f.verdict for f in findings}
+    expected = {
+        "experiments/k1148_d2/k1148_d2.py::dm_hln_stat": NO_HAC,
+        "experiments/k1149/k1149.py::dm_hln": NO_HAC,
+        "paper/vix-sufficiency/experiments/k730_cross_asset_vol_momentum.py::dm_test_func": DEGENERATE,
+        "paper/vix-sufficiency/experiments/k731_vix_term_structure.py::dm_test": NO_HAC,
+        "paper/vix-sufficiency/experiments/k828_vix_only_insurance.py::manual_dm_test": NO_HAC,
+    }
+
+    for site, verdict in expected.items():
+        assert verdicts[site] == verdict
+        assert site in baseline
 
 
 def test_paper_side_experiments_are_in_population(findings) -> None:
