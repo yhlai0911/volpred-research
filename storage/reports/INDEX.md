@@ -1,23 +1,27 @@
 # Feed Index
 
-_Last built: 2026-07-10 06:02 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-11 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1777**  (with thumbnail: 75)
-- Last 30 days: **290**
-- Total chars (content): 5,380,644
+- Total articles: **1781**  (with thumbnail: 75)
+- Last 30 days: **289**
+- Total chars (content): 5,395,177
 
-**Status**: published=1574, archived=123, unpublished=62, retracted=12, draft=5, wont_fix=1
+**Status**: published=1578, archived=123, unpublished=62, retracted=12, draft=5, wont_fix=1
 
-**Audience**: research=1113, general=432, daily=138, unknown=77, member_qa=12, event=5
+**Audience**: research=1113, general=435, daily=138, unknown=77, member_qa=12, event=6
 
-**Category**: milestone=875, general=786, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, experiment=4, event_article=3, diary=1
+**Category**: milestone=875, general=789, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=4, experiment=4, diary=1
 
-## 最近 30 天 (290)
+## 最近 30 天 (289)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-10 | `mile_81867788` | 把電力股當避風港的人，可能沒發現它的波動率已經翻倍 | general | general | published | 3900 |  | 一般讀者, trending, AI, 電力股, 波動率, 板塊輪動 |
+| 2026-07-10 | `mile_3c3b4201` | 市場休市，資料卻說有交易：一筆假行情如何把回測結論翻面 | general | general | published | 3305 |  | 一般讀者, 台股, 資料品質, 回測 |
+| 2026-07-10 | `mile_e3cede77` | 🌡️ 事件溫度計｜巴威關了台股一天：13 次颱風假復盤，復市那天沒有想像中可怕 | event | event_article | published | 3924 |  | 台股, 颱風假, 停市, 波動率, 事件研究, 市場觀察 |
+| 2026-07-10 | `mile_66c3fc3b` | 股市在怕，債市沒在怕：信用市場對這波科技股震盪的沉默 | general | general | published | 3404 |  | 一般讀者, 高收益債, 信用利差, 波動率, 科技股, 跨資產 |
 | 2026-07-10 | `mile_e13e5485` | 台股恐慌 37、美股只剩 16：一道 20 點的「恐慌溫差」，用三個問題就能讀懂 | general | general | published | 7601 |  | 一般讀者, 精選導讀, 台股, VIX, 波動率, 恐慌指數 |
 | 2026-07-10 | `mile_cf007769` | 財報週的隱波偏斜：市場替七巨頭標的價，你看得懂嗎？ | general | general | published | 3220 |  | 一般讀者, 選擇權, 財報行情, 波動率, 美股, 七巨頭 |
 | 2026-07-10 | `mile_98d8b420` | 每日策略建議：VIX 15.84（正常）— 2026-07-10 | daily | general | unpublished | 1650 | Y | 每日建議, VIX, 策略配置 |
@@ -303,16 +307,16 @@ _Last built: 2026-07-10 06:02 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-11 | `mile_23312ae9` | 做了 305 次投資研究後，真正活下來的結論有多少？ | general | general | published | 1748 |  | 一般讀者, 投資研究, 風險管理, 波動率, 方法論 |
 | 2026-06-11 | `mile_872abdc3` | 比特幣自己的數據，真的比 VIX 更懂它的波動嗎？ | general | general | published | 1705 |  | 一般讀者, 比特幣, 波動率, VIX, 加密貨幣 |
 | 2026-06-11 | `mile_6a601155` | 兩支 ETF 同時暴跌時，波動率會提前發出信號嗎？ | general | general | published | 3455 |  | 一般讀者, SPY, TLT, GLD, QQQ, copula |
+
+<details><summary>## 2026-Q2 (820)</summary>
+
+| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
+|---|---|---|---|---|---|---|---|---|
 | 2026-06-10 | `mile_9a5c1ea4` | 市場跌過之後通常更容易亂，但把波動拆更細，真的比較有用嗎？ | general | general | published | 1653 |  | 一般讀者, 波動率, 美股, 黃金, 比特幣 |
 | 2026-06-10 | `mile_c26fcd8e` | 把六個市場一起看，真的比只看自己更懂波動嗎？ | general | general | published | 2325 |  | 一般讀者, 波動率, 跨資產, 美股, 黃金 |
 | 2026-06-10 | `mile_4e5a221e` | 明知道 VIX 在比特幣恐慌時會失靈，為什麼把它關掉還是沒救？ | general | general | published | 2084 |  | 一般讀者, 比特幣, VIX, 波動率, 加密貨幣 |
 | 2026-06-10 | `mile_a6b1ed98` | 同一籃子台股，換個市場掛牌，波動預測就變了？ | research | milestone | published | 3643 |  | 研究, EM, ETF, currency, VIX, Taiwan |
 | 2026-06-10 | `mile_41b7c7d0` | 退休時房貸該一次還清嗎？模擬 1 萬次後，答案其實沒那麼直覺 | general | general | published | 2228 |  | 一般讀者, 退休, 房貸, 提領, 台股 |
-
-<details><summary>## 2026-Q2 (815)</summary>
-
-| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
-|---|---|---|---|---|---|---|---|---|
 | 2026-06-10 | `mile_2e12b166` | K1306：SEC 10-K 管理階層語氣能預測個股月度 RV 嗎？Loughran-McDonald pilot — NULL | research | milestone | published | 6139 |  | 研究, Loughran-McDonald, SEC-EDGAR, NLP, realized-volatility, pilot-study |
 | 2026-06-10 | `mile_5af5ec51` | 銅博士的波動率版本：13 年數據說了什麼 | general | general | unpublished | 2625 |  | 一般讀者, 銅, 波動率預測, 跨資產, 領先指標, 商品 |
 | 2026-06-10 | `mile_0e1eb5aa` | 🌡️ 事件溫度計｜FOMC 6/17 T-7：SOFR 期貨說「不降息」，但點陣圖說什麼？ | event | event_article | published | 3898 |  | FOMC, FedWatch, SOFR, VIX, VIX9D, 利率 |

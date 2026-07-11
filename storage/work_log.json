@@ -15596,5 +15596,15 @@
     "backfilled_at": "2026-07-11T02:01:58.303496+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1679"
+  },
+  {
+    "timestamp": "2026-07-11T11:48:58+08:00",
+    "task_type": "daily_digest",
+    "task_id": "daily_digest_20260711",
+    "actor": "hourly-11",
+    "owner": "hourly-11",
+    "outcome": "succeeded",
+    "summary": "接手 hourly-09 stale digest：發佈 mile_ed21255d「財報控制盤」（8 篇 archive 來源、跨度 87 天、5303 字、arc-dedup/anti-ai gate 皆 exit 0、線上 200）",
+    "notes": "lazypack 主路徑 gen_lazypack_codex.py 兩次無產出（>13min，shared codex runtime 排隊），改用自寫 matplotlib render script fallback；事後 codex exec smoke = CODEX_OK（CLI 健康，非 model config 問題）。render script + evidence package 已收進 storage/drafts/digest_20260711_lazypack/。"
   }
 ]

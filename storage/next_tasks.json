@@ -58024,7 +58024,7 @@
     "title": "K1678: Saliency-driven stock price manipulation 的 crash-risk proxy** — 用 abnormal search / Reddit / Stocktwits / news burst 當 s",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1523). Original: Saliency-driven stock price manipulation 的 crash-risk proxy** — 用 abnormal search / Reddit / Stocktwits / news burst 當 saliency shock，再用 SEC pump-and-dump / market-manipulation enforcement case 作弱標籤，檢定小盤股與 meme basket 的 t+1/t+5 left-tail、RV、gap risk 是否被放大；需 FDR/Harvey gate 防資料探勘。與一般 attention 或 social-transmission 題正交——這裡聚焦 manipulation/crash-risk channel（來源：Journal of Banking & Finance 2025 investor attention and stock price manipulation；saliency × manipulation 是新興行為風險題）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1678.py with signal.shift(1) + seed=42, (c) K1678_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -58033,7 +58033,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-10T15:21:18Z"
+    "created_at": "2026-07-10T15:21:18Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-10T22:23:04.243914+00:00",
+    "claim_session_id": "fd98eccd1dd8",
+    "status_history": [
+      {
+        "ts": "2026-07-10T22:23:04.243930+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-10T22:23:04.495668+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-10T23:11:34.600107+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-10T22:23:04.495652+00:00",
+    "completed_at": "2026-07-10T23:11:34.600089+00:00",
+    "result": "K1678 完成：SEC complaint Attachment A 412 tickers／1,079 alleged ticker-dates，250 檔進分析；H=1/5 matched events 525/345。預註冊 m=8 無 strict 或 FDR-only pass（max |HAC t|=1.258；bootstrap CI 全跨 0），結論 NULL_NO_ROBUST_SALIENCY_AMPLIFICATION；shift(1)、H 專屬 HAC、BH+Bonferroni、seed/block、deterministic rerun與雙重 Codex review 全通過。"
   },
   {
     "id": "K1679",
@@ -58082,7 +58108,7 @@
     "title": "K1680: 地理型 investor attention / local information advantage 的波動效應** — 用公司 HQ 州、Google Trends state-level search、地方新聞量與 yfinance",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1526). Original: 地理型 investor attention / local information advantage 的波動效應** — 用公司 HQ 州、Google Trends state-level search、地方新聞量與 yfinance 個股資料，拆 local vs nonlocal attention shock，檢定是否預測個股 RV、gap risk、bid-ask proxy 與非本地 attention；先從大州/大市值公司做可行 pilot。與一般 attention 題正交——把 attention 變成 spatial channel，並直接測 local information advantage 對 volatility/liquidity 的傳導（來源：RCFS 2025 geography of investor attention；local attention predicts volatility and spreads 是可轉譯 VolPred angle）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1680.py with signal.shift(1) + seed=42, (c) K1680_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -58091,7 +58117,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-10T15:21:18Z"
+    "created_at": "2026-07-10T15:21:18Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-11T03:14:18.319899+00:00",
+    "claim_session_id": "0c43607ebf8d",
+    "status_history": [
+      {
+        "ts": "2026-07-11T03:14:18.319917+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-11T03:14:27.207599+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-11T03:14:27.207584+00:00"
   },
   {
     "id": "ops-offslot-fire-alert-20260710",
@@ -58234,7 +58278,7 @@
     "title": "K1679-rev2: 對 PIT hit 補 Clark-West + 修 verdict 邏輯 + ALFRED 真 vintage（Codex FAIL 3 修）",
     "priority": 3,
     "description": "Follow-up to K1679-rev (committed to main, Codex verdict=FAIL). K1679-rev 聲稱 regional-bank deposit-flight 對 KRE forward-vol 為 knowledge-grade NULL，但獨立 review 抓到 3 個阻斷：(1) 最關鍵——PIT 顯著格 dep_flight_13w·rv·H5 (DM t=+2.772, Bonferroni=BH=0.0452) 根本沒跑 Clark-West，CW_CELLS 只含舊 K1679 的兩個 4w cells，程式把那兩格 any_reject=False 外推成整體『BH hit 過不了 CW』→ 必須對真正的 PIT hit（最好全 8 格）實跑 CW(2007) 單尾 nested test；(2) verdict 判定邏輯忽略方向與 Bonferroni，PIT hit 為正 t = augmented QLIKE 顯著惡化 3.72%，不是 FDR-only artifact 而是 deposit-flight signal 顯著傷害 forecast 的 negative finding → 修 verdict 邏輯納入 sign + Bonferroni；(3) ALFRED 用 output_type=4（Initial Release Only / first print）非真 point-in-time vintage snapshot → 改標 first-release-only sensitivity，或改用 realtime_start/realtime_end 抓每發布日當時可見含當時修訂的 vintage。PASS 項不必重做：embargo j=i-H-1、各格自身 H、seed=42、bootstrap max(10,H)、un-floored MSE sensitivity、DM/HLN/HAC/Bonferroni/BH 皆正確。復用 experiments/K1679-rev/K1679-rev.py 為基底。過 Codex CONDITIONAL_PASS 以上才寫 knowledge.json。⚠️ K1679→K1679-rev 已連兩 FAIL：若 rev2 再 FAIL，直接以 documented negative （funding-flight proxy 顯著傷害 KRE forward-vol forecast）收錄，不再無限 revision。heavy re-run 走 compute_queue。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "codex_review_followup",
@@ -58248,7 +58292,54 @@
       "nested-inference"
     ],
     "created_at": "2026-07-10T20:36:49+00:00",
-    "status_history": []
+    "status_history": [
+      {
+        "ts": "2026-07-10T23:12:48.813017+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-10T23:12:49.082800+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-11T00:15:32.364720+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-07",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-11T01:39:39.533550+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-11T01:39:39.821064+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-11T02:00:47.114800+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-11T01:39:39.821048+00:00",
+    "closure_note": "orphan owning-agent pid 77264 died; output PRESERVED on branch worktree-agent-a28bc6bb8dbd10f2e commit e8525e1f7 (script+results.json+figure). CLOSURE PENDING: needs README + Codex review + knowledge.json + merge. RED FLAG for reviewer: true_pit signal construct_validity full_sample_std=0.0 (near-constant) — verdict safe_null may rest on a degenerate PIT reconstruction, NOT a genuine null. Codex must verify PIT signal is non-degenerate before any closure.",
+    "needs_codex_before_closure": true,
+    "last_released_at": "2026-07-11T00:15:32.364702+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-11T01:39:39.533531+00:00",
+    "claim_session_id": "d2a3720ef21b",
+    "completed_at": "2026-07-11T02:00:47.114783+00:00",
+    "result": "CONDITIONAL_PASS：修正 ALFRED 100k pagination 截斷、output_type=4 origin + output_type=1 真 vintage snapshot 與非退化 hard gates；genuine PIT=SAFE_NULL，first-release-only=DOCUMENTED_NEGATIVE。全 8 格 CW、sign+Bonf/BH、embargo/H-specific HAC、seed/bootstrap、unfloored sensitivity 均驗證；README + CODEX_REVIEW 完成。K1259 knowledge gate 已通過，shared knowledge write 依 Codex hard rule留 Claude main-thread canonical writer。"
   },
   {
     "id": "trending_repost_2026_07_11_a",
@@ -58291,5 +58382,249 @@
     "started_at": "2026-07-10T21:13:34.708349+00:00",
     "completed_at": "2026-07-10T21:34:05.993842+00:00",
     "result": "feed mile_81867788 published (AI電力股波動率翻倍, HTTP200驗證); FB Ivan Lai 上牆+留言連結; 全 gate PASS (arc-dedup exit0/anti-ai/image/lazypack)"
+  },
+  {
+    "id": "trending_repost_2026_07_11_美債風險",
+    "title": "[trending_repost] CPI粘性拖累降息，MOVE指數如何揭示跨資產波動傳導？",
+    "description": "針對 2026 年中 CPI 升至 4.2% 及聯準會維持利率不變，探討利率波動率對股市隱含波動率的領先效應。可量化：分析 CPI 公布前後，MOVE 與 SPX 隱含波動率期限結構的跨資產傳導機制。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "closed_no_action",
+    "created_at": "2026-07-10T22:00:19+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "terminalized_at": "2026-07-10T23:10:26+00:00",
+    "terminalized_reason": "deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-10T23:10:26+00:00",
+    "blocked_note": "arc-dedup gate exit=1: 同 narrative arc 已有 mile_166eda01 (CPI×MOVE×VIX event window, descriptive_strict)。不重寫。"
+  },
+  {
+    "id": "telegram-430",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T23:07:10.587103+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 430）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻處理所有問題\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T23:07:38.713420+00:00",
+    "claim_session_id": "caaad3601a92",
+    "status_history": [
+      {
+        "ts": "2026-07-10T23:07:38.713439+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T23:12:23.738478+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-10T23:12:23.738454+00:00"
+  },
+  {
+    "id": "telegram-433",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-10T23:44:59.816132+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 433）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻檢查處理\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-10T23:45:25.737140+00:00",
+    "claim_session_id": "9ad9969d6b13",
+    "status_history": [
+      {
+        "ts": "2026-07-10T23:45:25.737158+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-10T23:46:16.026058+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-10T23:46:16.026042+00:00"
+  },
+  {
+    "id": "journal_discovery_20260711_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-07-11T00:00:01+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-11T00:22:07.653636+00:00",
+    "claim_session_id": "b9217466b928",
+    "status_history": [
+      {
+        "ts": "2026-07-11T00:22:07.653652+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-11T00:22:07.912519+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-11T00:36:42.509082+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-11T00:22:07.912500+00:00",
+    "completed_at": "2026-07-11T00:36:42.509067+00:00",
+    "result": "完成 2026-07-11 journal discovery：財金計量、實務、經濟跨領域三線掃描 21 候選，官方來源與免費資料/PIT gate 後保留 10 個正交方向寫入 research_program.md。依 research-topic-discovery SOP 執行 refill，canonical queue 新增 4 個 P3 fallback task；本批方向留待後續排序 materialize。"
+  },
+  {
+    "id": "research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
+    "title": "研究 backlog fallback: Spot Bitcoin ETF flow shock 對 BTC/ETH vol 的影響",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Spot Bitcoin ETF flow shock 對 BTC/ETH vol 的影響 — 用 IBIT/FBTC/ARKB/GBTC 等公開 AUM/net-flow/volume（issuer / ETF.com / Farside fallback，dispatch 前驗證覆蓋）+ BTC-USD/ETH-USD，flow shock `shift(1)` 後檢定 t+1/t+5 RV、週末 gap、BTC-ETH beta 與 basis proxy；與既有 BTC ETF 時段結構題正交——那是 ETF-ization 改變交易時鐘，這裡是 ETF 資金流/creation-re | 來源 section: 期刊主題挖掘 batch 2026-07-05（journal_discovery_20260705_0；websearch fed/feds/imf gfsr/faj/cfa/ssrn 2025-26 趨勢層級；task pool json 修復後派 fresh-context general-purpose agent；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "spot_bitcoin_etf_flow_shock_btc_eth_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-11T00:36:11+00:00"
+  },
+  {
+    "id": "research_crypto_arbitrage_spread_rv",
+    "title": "研究 backlog fallback: 跨交易所 crypto arbitrage spread 作為短期 RV 訊號",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 跨交易所 crypto arbitrage spread 作為短期 RV 訊號 — 用 CCXT / Binance-Coinbase-Kraken public API 抓 BTC/ETH midprice dispersion、quoted spread 與 arbitrage gap，建立 exchange-fragmentation stress 指標，`signal.shift(1)` 檢定 t+1/t+5 RV、left-tail 與 liquidity drought；與 stablecoin / perp funding / crypto vol-of-vol 題正交——這裡是 | 來源 section: 期刊主題挖掘 batch 2026-07-05（journal_discovery_20260705_0；websearch fed/feds/imf gfsr/faj/cfa/ssrn 2025-26 趨勢層級；task pool json 修復後派 fresh-context general-purpose agent；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "crypto_arbitrage_spread_rv",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-11T00:36:11+00:00"
+  },
+  {
+    "id": "research_smad_vol_left_tail_predictor",
+    "title": "研究 backlog fallback: 短期移動平均距離（SMAD）作為 vol / left-tail predictor",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 短期移動平均距離（SMAD）作為 vol / left-tail predictor — 用 yfinance 美股/ETF universe 的 close 與 10d moving-average distance 建 salience gap，目標改成 next-day range RV、downside semivariance、left-tail hit rate，而非原始報酬；所有 SMAD signal `shift(1)`，用 FDR/Harvey gate 檢查是否只是技術分析資料探勘。與既有 MA/TF 策略賽馬正交——這裡不交易均線，而是測均線距離是否預示波動/左尾（來源 | 來源 section: 期刊主題挖掘 batch 2026-07-05（journal_discovery_20260705_0；websearch fed/feds/imf gfsr/faj/cfa/ssrn 2025-26 趨勢層級；task pool json 修復後派 fresh-context general-purpose agent；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "smad_vol_left_tail_predictor",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-11T00:36:11+00:00"
+  },
+  {
+    "id": "research_private_market_rv_correlation_regime",
+    "title": "研究 backlog fallback: 主權財富基金 private-market 配置上升是否改變公共市場 RV / correlation regime",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 主權財富基金 private-market 配置上升是否改變公共市場 RV / correlation regime — 用公開 SWF allocation / annual report / Global SWF summary（dispatch 前驗證歷史覆蓋）建 sovereign-allocator private-market share proxy，對 public equity / credit / REIT / infrastructure ETF basket（SPY/EFA/EEM/HYG/VNQ/PAVE/IGF）做 regime compare，檢定 allocati | 來源 section: 期刊主題挖掘 batch 2026-07-05（journal_discovery_20260705_0；websearch fed/feds/imf gfsr/faj/cfa/ssrn 2025-26 趨勢層級；task pool json 修復後派 fresh-context general-purpose agent；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "private_market_rv_correlation_regime",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-11T00:36:11+00:00"
+  },
+  {
+    "id": "daily_digest_20260711",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-11T09:00:03.349145+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-11T01:09:34.069211+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-11T01:10:04.807426+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-11T03:08:31.155811+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-09",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-11T03:08:31.429672+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-11T03:08:31.695987+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-11T03:48:58.813112+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-11"
+      }
+    ],
+    "started_at": "2026-07-11T03:08:31.695971+00:00",
+    "last_released_at": "2026-07-11T03:08:31.155794+00:00",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-07-11T03:08:31.429656+00:00",
+    "claim_session_id": "3f16ee0689f8",
+    "completed_at": "2026-07-11T03:48:58.813096+00:00",
+    "result": "發佈 mile_ed21255d（財報控制盤，8 篇來源跨 87 天，5303 字，gates 全過，線上 200）"
   }
 ]
