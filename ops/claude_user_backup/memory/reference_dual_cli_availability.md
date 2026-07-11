@@ -1,18 +1,19 @@
 ---
 name: reference-dual-cli-availability
-description: 本機雙 AI CLI 可用性快照 — Codex 0.132 + Gemini CLI 6/18 將停用，headless 改走 gemini_ask.py（Gemini 3.1 Pro API）（2026-05-20 更新）
+description: 本機雙 AI CLI 可用性快照 — Codex 0.144.1 預設 gpt-5.6-sol/ultra（2026-07-10 升級）；headless Gemini 走 gemini_ask.py
 metadata: 
   node_type: memory
   type: reference
   originSessionId: 0ca8f10c-d34e-4570-af41-a25c2fff4e5c
 ---
 
-# 雙 AI CLI 可用性快照（2026-05-20 更新）
+# 雙 AI CLI 可用性快照（2026-07-10 更新）
 
-## Codex CLI `codex-cli 0.132.0` ✅
-- 2026-05-20 更新 0.130→0.132；reinstall 時需 `npm install -g @openai/codex@latest --include=optional` 才會帶 `@openai/codex-darwin-arm64` binary（少了會 crash）
+## Codex CLI `codex-cli 0.144.1` ✅（2026-07-10 boss 指示升級）
+- 預設模型：`gpt-5.6-sol`，`model_reasoning_effort = "ultra"`（`~/.codex/config.toml`；升級日三組 smoke 全過：gpt-5.6-sol、ultra effort、config 預設）
+- ⚠️ **config model × CLI 版本必須同步 smoke**：2026-07-10 incident — config 被設 gpt-5.6-sol 但當時 CLI 0.142.5 不支援 → API 400 → 全平台 codex 流程（review gate / lazypack / paper review）靜默失敗數小時。診斷 SOP 在 `.claude/rules/experiments.md`（含 step 6 smoke 硬規）
+- reinstall / 升級：`npm install -g @openai/codex@latest --include=optional` 才會帶 `@openai/codex-darwin-arm64` binary（少了會 crash）
 - Auth：`Logged in using ChatGPT`（個人 ChatGPT 帳號 OAuth）
-- 預設模型：`gpt-5.4`，`model_reasoning_effort = "medium"`（`~/.codex/config.toml`）
 - Headless 入口：`codex exec`；中文/多行 prompt 用 heredoc + stdin
 - 限制：`codex exec` 無 web search
 - Deprecation：`--full-auto` → `-s workspace-write`

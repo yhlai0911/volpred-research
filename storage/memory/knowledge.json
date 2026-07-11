@@ -38306,5 +38306,18 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-07-10T23:13:42.188131"
+  },
+  {
+    "item_id": "3103712b",
+    "category": "macro_bank_deposit_flight",
+    "content": "K1679-rev2 | experiment_id=K1679-rev2 | verdict=CONDITIONAL_PASS_SAFE_NULL | reviewer=Codex primary path CONDITIONAL_PASS (experiments/K1679-rev2/CODEX_REVIEW.md). H.8 regional-bank deposit-flight signal (small-vs-large domestic bank deposits, 4w/13w log-diff, 52w rolling z, sign-flipped) vs KRE forward RV/DSV at H5/H21, weekly signal 2012-08..2026-07. True point-in-time build: ALFRED fully paginated revision history (output_type=1 vintage snapshot as-of each weekly first-print release; output_type=4 defines release origins), backward as-of merge, signal age 9-23 days, per-horizon HAC, embargo j+H<i, seed=42. Genuine PIT result: all 8 primary cells carry Clark-West nested MSPE; strongest cell dep_flight_13w.rv.H5 CW t_hln=1.154 (one-sided p=0.124), BH q>=0.331, Bonferroni>=0.99 -> no robust incremental predictive power (safe_null). First-release-only sensitivity is a documented_negative (augmented model significantly worse), not an FDR artifact. Non-degeneracy evidence: true-PIT 13w std=1.198, 725 weekly values / 725 unique, corr(current_vintage, true_pit)=0.886, SVB-2023 peak 3.97. The earlier 'PIT signal std=0' red flag came from the pre-fix 100k-row ALFRED pagination truncation (223 fake rows sharing one available date); final version fails closed on row-count mismatch, so the null is not a reconstruction artifact. Scope: NULL means no robust forecast improvement, not proof the two models are equal.",
+    "evidence": [
+      "experiments/K1679-rev2/K1679-rev2_results.json",
+      "experiments/K1679-rev2/CODEX_REVIEW.md",
+      "experiments/K1679-rev2/README.md",
+      "experiments/K1679-rev2/K1679-rev2_fig_pit_vs_current.png"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-07-11T12:10:39.708516"
   }
 ]

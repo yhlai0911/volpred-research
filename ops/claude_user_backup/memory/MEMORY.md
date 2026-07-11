@@ -15,10 +15,12 @@
 - [reference_zeabur_deploy_target.md](reference_zeabur_deploy_target.md) — 前端部署=CLI deploy-zeabur-safe.sh 到 volpred-v3（live domain）；搬機器只改 config.deploy 三 ID（新機器 project 6a15c5a8/env 6a15c5a85/v3 …117）；volpred-web 勿動
 - [reference_antigravity_cli.md](reference_antigravity_cli.md) — Antigravity CLI (agy 1.0.0) 取代 gemini-cli；`~/.local/bin/agy`，預設模型 gemini-3.5-flash，OAuth 認證
 - [reference_trending_blog_sources.md](reference_trending_blog_sources.md) — trending_repost 強制掃描清單（havingchien + Stratechery + 凱基/Ranger/元大 + 國外 forums）+ high-viral 3 類 (AI 發展/token maxxing/矽谷裁員)
+- [reference_unified_memory_one_brain.md](reference_unified_memory_one_brain.md) — Telegram 與本機 session 是同一個大腦（共用 auto-memory）；headless -p 預設自動載入(2026-07-10實測)；平行 telegram_memory.md/py 已廢棄，勿再建 channel 專屬記憶
 
 ## Projects
 - [project_myth_lab_series.md](project_myth_lab_series.md) — 文章系列「迷思實驗室｜」🧪 純前綴(無EP)/全形｜/已上線8篇；舊「迷思」文不算本系列
-- [project_repo_moved_out_of_desktop.md](project_repo_moved_out_of_desktop.md) — 2026-07-02 repo 搬到 ~/volpred-research 根除 TCC；舊 Desktop 路徑=symlink
+- [project_event_thermometer_series.md](project_event_thermometer_series.md) — 文章系列「事件溫度計｜」🌡️ 即期事件(FOMC/CPI/NFP/財報)前後分析；marker=details.event_series_slot；SoT=config/article_series.json
+- [project_repo_moved_out_of_desktop.md](project_repo_moved_out_of_desktop.md) — 2026-07-02 repo 搬到 ~/volpred-research 根除 TCC；Desktop symlink 同日移除，桌面現已淨空（2026-07-10 實測 0 項），全系統單一 canonical repo（+內部 .claude/worktrees 屬同 repo）
 - [project_platform_vision_full.md](project_platform_vision_full.md) — 用戶 2026-05-29 完整願景：全自動不間斷自我運營（研究→論文/多元策略/文章→曝光→獲利），所有結果可復現，email 回報+回信指示
 - [project_loop_engineering_layer.md](project_loop_engineering_layer.md) — 2026-06-29 上線 loop-engineering 閉環：loop-health 指標(fast loop)+dreaming 慢 loop(每日 propose-only)+內容巡檢補完；治理檔不自動改
 - [project_refactor_safety_net.md](project_refactor_safety_net.md) — 2026-05-29 大改重構：volpred-refactor worktree + tag stable-pre-refactor-20260529；回滾指令在 docs/refactor_safety_net.md
@@ -27,16 +29,19 @@
 - [project_domain_migration.md](project_domain_migration.md) — 未來換網域的 SEO 遷移步驟
 - [project_paper_portfolio_decisions_2026_04_27.md](project_paper_portfolio_decisions_2026_04_27.md) — Paper portfolio A/B/C/D tier（用戶 2026-04-27 授權自主決定）
 - [project_platform_profitability_goal.md](project_platform_profitability_goal.md) — 平台 ultimate goal = 盈利；5-mission 是 means；task priority 加問「對 monetization 何貢獻」
+- [project_codex_audit_20260710_disposition.md](project_codex_audit_20260710_disposition.md) — Codex 稽核裁決：做 phase_z 測試閘門/actor 儀器/策略 gate；不做 TaskContract 大一統/topology 四欄/Effect Gateway（附理由）
 - [project_fb_page_operation.md](project_fb_page_operation.md) — VolPred 粉專(id 61590464616031)由 AI 全權經營+優化+固定巡檢；Chrome 發文個人優先於粉專；headless API 卡 App Review
 - [project_prepublish_content_gate.md](project_prepublish_content_gate.md) — 發佈前有 content-vs-source gate（prepublish_audit.py）；正確性驗證在 publish 之前；sync 改 hash-based
 - [project_papers_awaiting_submit_decision.md](project_papers_awaiting_submit_decision.md) — 更正(7/4)：兩篇原 ready 論文均被誠實 re-review 撤回；M3 瓶頸=revision 收斂(prg=K1544 narrative、leverage=method-null rewrite)非投稿決策；停用「重提投稿」
 - [project_strategy_lifecycle_standing_directive.md](project_strategy_lifecycle_standing_directive.md) — boss standing directive：策略持續增加，好的上架觀察壞的下架走既有 gate；3 檔高Sharpe inactive 的 lookahead audit 已完成(6/21 全 reject：c2c artifact)維持 inactive
 - [project_cloud_agent_git_divergence.md](project_cloud_agent_git_divergence.md) — 雲端 Claude agent 每 6h push ops 報告到 origin/main 與本機研究線從 6/4 分岔；6/24 已同步(0/0)；待決定停掉或改 email-only；自動 push 待此決定後再建
+- [project_canonical_write_test_leak_gate.md](project_canonical_write_test_leak_gate.md) — 「測試寫 canonical storage/」bug class 的 class-level gate(tree-clean CI step)+lock 子類重導向;round3 branch claude/canonical-write-gate-round3 待 phase_z 綠後 ff 合併
 
 ## Feedback — Paper Submission
 - [feedback_agent_markdown_not_tex.md](feedback_agent_markdown_not_tex.md) — Agent 寫 .md draft 不寫 .tex；2026-04-17 session 6 drafts ~20,000 words 高效 pattern
 - [feedback_paper_multi_round_review.md](feedback_paper_multi_round_review.md) — Paper READY GREEN ≠ 可投稿；必須先跑多輪 paper-review-cycle（latex-academic-reviewer + citation-verifier）收斂
 - [feedback_paper_cross_paper_meta_eval.md](feedback_paper_cross_paper_meta_eval.md) — 單篇 latex/citation review 看不到設計性結果 / 自我封閉研究生態；review cycle 必加 cross-paper meta-evaluation
+- [feedback_paper_autonomy_optimize_acceptance.md](feedback_paper_autonomy_optimize_acceptance.md) — 老闆 msg 309(7/9)授權：論文方法/敘事/期刊/revision/投稿時機自主判斷優化 acceptance，不再逐次問投稿；誠實為底線
 
 ## Feedback — Publishing & Content
 - [feedback_report_content_sync.md](feedback_report_content_sync.md) — feed.json 和 reports/{id}.json content 必須同步
@@ -91,6 +96,8 @@
 - [feedback_member_qa_evidence_based_prediction.md](feedback_member_qa_evidence_based_prediction.md) — member_qa 預測/估值/選股題要做不 decline；誠實的線是「方法（真數據+假設+不確定+可複現+免責）」不是「題目」
 - [feedback_fb_dual_publish_precheck.md](feedback_fb_dual_publish_precheck.md) — FB 雙發佈 2026-06-19 恢復；發 FB 前必先用 Chrome 查老闆是否已手動發過同主題（已發→跳過只做 feed）
 - [feedback_dont_deflect_act_on_repeated_complaints.md](feedback_dont_deflect_act_on_repeated_complaints.md) — 被反覆點名的問題要實做不要 deflect 成「正常/測量問題」；idle tick 要做真 M2/M3 closure（reviewed 實驗含 null 寫 knowledge）不空轉；knowledge_stale alert 已建
+- [feedback_declare_complete_requires_class_sweep.md](feedback_declare_complete_requires_class_sweep.md) — 宣告完成前對 bug class 做 full-population sweep + 留機械 gate；「我改的通過測試」是 strike-1 門檻；引用的 docstring 先 grep 驗證再引用
+- [feedback_autocommit_poisons_before_after.md](feedback_autocommit_poisons_before_after.md) — supervisor 的 PHASE-Z `git add -A` 會把未 commit 修改捲進 HEAD；`git show HEAD:file` 取到的「修正前」可能是修正後，before/after 對照靜默失效
 
 ## Feedback — Governance Refactor
 - [feedback_snapshot_before_refactor.md](feedback_snapshot_before_refactor.md) — 動 CLAUDE.md/rules/skills/memory 治理檔前先 commit snapshot + `snapshot:` prefix 留回滾點
@@ -112,6 +119,8 @@
 - [feedback_cross_machine_file_links.md](feedback_cross_machine_file_links.md) — Mac Studio 遠端機；給用戶看的圖/檔/連結用 SendUserFile 或 Tailscale URL，不丟本機路徑
 - [feedback_lazypack_infographic.md](feedback_lazypack_infographic.md) — 一般讀者文章文末附懶人包圖組；NotebookLM 能生圖、多圖 poster、餵 evidence package 寫文中生、禁付費 API
 - [reference_frontend_nested_git_repo.md](reference_frontend_nested_git_repo.md) — frontend-v2-fix 是獨立巢狀 git repo（主 repo gitignore）；commit 前端要 cd 進去
+- [reference_worktree_pytest_wrong_interpreter.md](reference_worktree_pytest_wrong_interpreter.md) — worktree 內 `uv run pytest` 靜默掉到系統 py3.9；改 `uv run --extra dev python -m pytest` + 載主 checkout 的 .env.local
+- [feedback_parallel_impl_and_worktree_liveness.md](feedback_parallel_impl_and_worktree_liveness.md) — ops/infra 修復無 claim 機制致同日 3 次平行實作；worktree liveness 用 lsof 非 mtime；remove 不刪 branch 的零遺失清理流程
 - [feedback_no_cd_into_worktree_before_merge.md](feedback_no_cd_into_worktree_before_merge.md) — merge worktree 前勿 cd 進 worktree（持久 cwd 汙染使 merge_worktree.sh 誤刪未合併工作；K1032/K1618 root cause，merge 後必驗檔案存在）
 - [feedback_worktree_stale_base_extract_by_path.md](feedback_worktree_stale_base_extract_by_path.md) — worktree 從 stale base 分出使 merge guard abort 時，用 `git checkout <branch> -- experiments/kXXXX/` path-scoped 抽取，勿硬 merge（K1619 實測零遺失）
 - [feedback_proactively_complete_red_alerts.md](feedback_proactively_complete_red_alerts.md) — 看到紅色/critical 主動完成或排程完成並告訴老闆，不被動回報
@@ -130,3 +139,5 @@
 - [feedback_alerts_auto_act_not_suggest.md](feedback_alerts_auto_act_not_suggest.md) — 有 auto-remediation 的 alert body 寫「已自動修復+結果」不是「建議老闆行動」；發文脫班已 wire remediate_publish_drought.py（email-12559）
 - [feedback_fix_silent_fallback_immediately.md](feedback_fix_silent_fallback_immediately.md) — git-push-backup 因 silent fallback hold push 時當場立刻修（warn/silent-ok + strict gate new=0 + 重跑 wrapper 解封），不丟給下一班 hourly（老闆 email-12564「以後自己立刻修」）
 - [feedback_fb_post_idempotency_guard.md](feedback_fb_post_idempotency_guard.md) — FB/多入口 outward-facing 動作必須有 idempotency guard；fb_realchrome_post 已加 _claim_fb_post 讀 canonical fb_post_status（2026-07-07 雙 session 重發 incident）
+- [feedback_repeated_done_question_means_finish_now.md](feedback_repeated_done_question_means_finish_now.md) — 老闆連問「都完成了嗎」=能做的當回合做完；只准剩時間硬限制與數據支撐的 no-go 決策
+- [feedback_hermetic_git_in_tests.md](feedback_hermetic_git_in_tests.md) — 驅動 git 的測試必須 unset GIT_DIR/GIT_WORK_TREE + HOME=sandbox + LC_ALL=C，否則共用 checkout 上會誤操作真 repo（曾把 sandbox commit 推上真 origin/main）

@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-07-11T07:45:33.850370",
+  "overall": "warn",
+  "critical_count": 0,
+  "warn_count": 1,
+  "findings": [
+    {
+      "dimension": "alert_conditions",
+      "severity": "warn",
+      "message": "dispatch_duplicate_slot: Hourly dispatch 重複 slot：1 個（多跑 1 班）",
+      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
+    },
+    {
+      "dimension": "reader_metrics",
+      "severity": "info",
+      "message": "top-3 讀者互動: VIX 在 2026 衝到 31，標普同期漲 8(score=363); 六月科技股回檔實錄：QQQ 只跌 7%，你的持股(score=150); 為什麼 NVDA 每天都讓人心跳加速？不是業績，(score=118)",
+      "recovery": null
+    }
+  ]
+}

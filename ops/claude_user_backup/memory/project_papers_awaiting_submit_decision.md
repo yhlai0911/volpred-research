@@ -15,7 +15,7 @@ metadata:
 
 **How to apply**：
 - **停用**「每隔幾 tick 向 boss 重提 ready-but-unsubmitted」指示——當前無任何一篇真 ready，重提會誤導。
-- M3 真瓶頸 = revision 收斂工作（主線程逐篇推進，禁 background agent 寫 .tex）。revision 完成 + re-review PASS + package 重建後，才帶完整狀態向 boss 請投稿決策（投稿與否仍是 user-policy，per CLAUDE.md）。
+- M3 真瓶頸 = revision 收斂工作（主線程逐篇推進，禁 background agent 寫 .tex）。revision 完成 + re-review PASS + package 重建後，**自主推進投稿**——老闆 msg 309（2026-07-09 Telegram）已把投稿決策下放主線程、目標優化 acceptance，取代舊的「投稿仍是 user-policy」framing。見 [[feedback_paper_autonomy_optimize_acceptance]]。
 - `paper_stale` alert 兜底不變；stage tracker `stage_entered_at` 7/1 被 bulk baseline 重設過（days_in_stage 曾全體低估），讀數時注意 baseline 語意。
 
 關聯 [[feedback_dont_deflect_act_on_repeated_complaints]] [[project_paper_portfolio_decisions_2026_04_27]] [[feedback_no_user_policy_block]]。

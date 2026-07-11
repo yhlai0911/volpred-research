@@ -8,8 +8,9 @@ user_invocable: true
 
 Use `codex exec` for non-interactive prompts against OpenAI GPT models from inside Claude Code.
 
-- **Binary**：`codex`（`codex-cli` v0.130.0+）
-- **預設模型**：`gpt-5.4`（reasoning effort = `medium`，由 `~/.codex/config.toml` 控制）
+- **Binary**：`codex`（`codex-cli` v0.144.1，2026-07-10 升級）
+- **預設模型**：`gpt-5.6-sol`（reasoning effort = `ultra`，由 `~/.codex/config.toml` 控制；2026-07-10 CLI 升級後 smoke 驗證通過）
+- ⚠️ **config model 與 CLI 版本必須同步驗證**：config 指到已裝 CLI 不支援的 model 會 API 400 靜默失敗（2026-07-10 incident：gpt-5.6-sol × 舊 CLI 0.142.5 卡死全平台 codex 流程）。改 model 或升級 CLI 後必跑 `codex exec --skip-git-repo-check "echo TEST"` smoke
 - **認證**：ChatGPT account（`codex login status` 確認）；可改為 API key（`codex login --with-api-key`）
 
 ## 主指令一覽（v0.130）
@@ -36,7 +37,7 @@ Use `codex exec` for non-interactive prompts against OpenAI GPT models from insi
 
 ## `codex exec` 用法
 
-### 預設執行（gpt-5.4, medium reasoning）
+### 預設執行（gpt-5.6-sol, ultra reasoning — 2026-07-10 起）
 
 ```bash
 codex exec "<prompt>" 2>/dev/null
@@ -46,7 +47,7 @@ codex exec "<prompt>" 2>/dev/null
 
 | Flag | 用途 |
 |---|---|
-| `-m, --model <MODEL>` | 切模型（`gpt-5.4`, `gpt-5.5`, `o3`, `o4-mini` 等） |
+| `-m, --model <MODEL>` | 切模型（`gpt-5.6-sol`（預設）, `gpt-5.4`, `gpt-5.5` 等；舊 CLI 不支援新 model 會 400） |
 | `-c, --config <key=value>` | TOML 路徑覆寫（如 `-c model_reasoning_effort="high"`） |
 | `-C, --cd <DIR>` | 設定 working root |
 | `--add-dir <DIR>` | ⚡ 額外可寫目錄 |
@@ -72,7 +73,7 @@ codex exec "<prompt>" 2>/dev/null
 # 純問答（網路自動關閉）
 codex exec "<prompt>" 2>/dev/null
 
-# 換模型 + 拉高 reasoning
+# 換模型 + 調 reasoning（預設已是 gpt-5.6-sol/ultra；降級到快速模型時用）
 codex exec -m gpt-5.4 -c model_reasoning_effort='"high"' "<prompt>" 2>/dev/null
 
 # 改 working dir + 可寫 sandbox + 不問 approval
