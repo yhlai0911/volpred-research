@@ -34,7 +34,11 @@ EDGE_TOL_PX = 2.0
 
 # Two text boxes count as colliding only when the shared area is a real chunk of
 # the smaller one. Descenders and kerning make tiny brushes unavoidable.
-OVERLAP_MIN_FRACTION = 0.20
+# Calibrated on mile_531e4c87's panels: a small caption sitting on top of a big
+# numeral — plainly broken to the eye — measured 15%, so 0.20 let it through. At
+# 0.10 that defect is caught and nothing else in three clean panels trips (probed
+# by dropping the threshold to 0.01: exactly one collision, the real one).
+OVERLAP_MIN_FRACTION = 0.10
 
 MAX_REPORTED = 12
 
@@ -122,8 +126,33 @@ def find_violations(fig) -> list[str]:
     return violations
 
 
-def install() -> None:
-    """Patch Figure.savefig so a broken layout raises instead of shipping."""
+def _report(violations: list[str], header: str) -> str:
+    shown = violations[:MAX_REPORTED]
+    extra = len(violations) - len(shown)
+    lines = "\n".join(f"  - {v}" for v in shown)
+    if extra > 0:
+        lines += f"\n  - …and {extra} more."
+    return (
+        f"LAYOUT CHECK FAILED — {header}:\n{lines}\n"
+        "Fix the layout in the render script (every text must sit inside the canvas "
+        "and must not overlap other text), then save again."
+    )
+
+
+# Populated in collect mode: [(png_path, [violation, ...]), ...]
+COLLECTED: list[tuple[str, list[str]]] = []
+
+
+def install(collect: bool = False) -> None:
+    """Patch Figure.savefig so a broken layout cannot reach disk.
+
+    collect=False: raise on the first bad panel (library / test use).
+    collect=True:  record it, skip the write, and let the script carry on to the
+      remaining panels. Render scripts save panels one after another, so raising
+      on panel 2 means panel 3 is never even drawn — a repair round would then see
+      one complaint at a time and three panels could never converge inside the
+      round budget. Collecting hands codex every defect in a single round.
+    """
     from matplotlib.figure import Figure
 
     if getattr(Figure.savefig, "_lazypack_guarded", False):
@@ -134,17 +163,12 @@ def install() -> None:
     def guarded(self, *args, **kwargs):
         violations = find_violations(self)
         if violations:
-            shown = violations[:MAX_REPORTED]
-            extra = len(violations) - len(shown)
-            lines = "\n".join(f"  - {v}" for v in shown)
-            if extra > 0:
-                lines += f"\n  - …and {extra} more."
-            raise RuntimeError(
-                "LAYOUT CHECK FAILED — the panel would ship unreadable:\n"
-                f"{lines}\n"
-                "Fix the layout in the render script (text must sit inside the "
-                "canvas and must not overlap other text), then save again."
-            )
+            target = str(args[0]) if args else str(kwargs.get("fname", "<figure>"))
+            if collect:
+                COLLECTED.append((target, violations))
+                print(f"[layout_guard] REJECTED {target}", file=sys.stderr)
+                return None
+            raise RuntimeError(_report(violations, "the panel would ship unreadable"))
         return original(self, *args, **kwargs)
 
     guarded._lazypack_guarded = True  # type: ignore[attr-defined]
@@ -156,9 +180,18 @@ def main(argv: list[str]) -> int:
         print("usage: lazypack_layout_guard.py <render_script.py>", file=sys.stderr)
         return 2
     script = Path(argv[1]).resolve()
-    install()
+    install(collect=True)
     sys.argv = [str(script), *argv[2:]]
     runpy.run_path(str(script), run_name="__main__")
+
+    if COLLECTED:
+        flat: list[str] = []
+        for target, violations in COLLECTED:
+            name = Path(target).name
+            flat.extend(f"[{name}] {v}" for v in violations)
+        print(_report(flat, f"{len(COLLECTED)} panel(s) would ship unreadable"),
+              file=sys.stderr)
+        return 1
     return 0
 
 

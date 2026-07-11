@@ -89,7 +89,7 @@ CODEX_WRITE_PER_PANEL_S = 240
 CODEX_WRITE_CEILING_S = 1200
 # Local matplotlib/PIL render of a handful of panels. Seconds in practice.
 RENDER_TIMEOUT_S = 240
-REPAIR_ROUNDS = 2
+REPAIR_ROUNDS = 3
 RENDER_SCRIPT_NAME = "render_lazypack.py"
 
 # Ordered by how well they render zh-Hant on macOS. Resolved locally so codex

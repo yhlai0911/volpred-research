@@ -92,6 +92,33 @@ def test_render_script_under_guard_exits_nonzero(tmp_path):
     assert not (tmp_path / "1_panel.png").exists()
 
 
+def test_every_bad_panel_is_reported_in_one_run(tmp_path):
+    """Convergence: render scripts save panels one by one, so a guard that raised on
+    panel 2 left panel 3 undrawn and each repair round saw one defect at a time —
+    three panels could never be fixed inside the round budget. One run, all defects."""
+    script = tmp_path / "render_lazypack.py"
+    script.write_text(textwrap.dedent(f"""
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        for name, x in [("1_a", 0.85), ("2_b", 0.90), ("3_c", 0.1)]:
+            fig = plt.figure(figsize=(10, 6), dpi=100)
+            fig.text(x, 0.5, "a long line of panel text here", fontsize=30)
+            fig.savefig(r"{tmp_path}/" + name + ".png")
+            plt.close(fig)
+    """), encoding="utf-8")
+
+    proc = subprocess.run(
+        [sys.executable, str(GUARD), str(script)],
+        capture_output=True, text=True, timeout=120,
+    )
+    out = proc.stderr + proc.stdout
+    assert proc.returncode != 0
+    assert "1_a.png" in out and "2_b.png" in out, out
+    assert (tmp_path / "3_c.png").exists(), "the clean panel still renders"
+
+
 def test_clean_render_script_under_guard_still_succeeds(tmp_path):
     """The guard must not break the happy path it wraps."""
     out = tmp_path / "1_panel.png"
