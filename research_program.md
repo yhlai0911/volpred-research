@@ -133,6 +133,9 @@
 - **跨學科方法**：物理學的相變模型、生態學的 regime shift detection、複雜系統理論
 
 ### 面向 H: 論文撰寫與投稿
+
+> **★ 2026-07-11 Fable 深審輪（13 論文全檢視 + 研究總線）**：portfolio 層裁決（投稿排序、kill/merge、9 個 gating 實驗、governance 修正）見 `docs/paper_portfolio_review_20260711.md`；單篇完整報告在 `paper/<name>/review_history/fable_deep_review_20260711/README.md`；非論文研究線計畫在 `docs/research_notes/fable_research_lines_review_20260711.md`。**本段以下的單篇狀態描述早於該輪，以深審報告為準。**
+
 **第一篇：Leverage Direction Matters**
 - `paper/leverage-direction/main.tex`（60 頁，3 contributions）
 - 目標：Journal of Banking and Finance (JBF)
