@@ -38319,5 +38319,18 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-07-11T12:10:39.708516"
+  },
+  {
+    "item_id": "8dcf1fcb",
+    "category": "crypto_microstructure",
+    "content": "K1682 | experiment_id=K1682 | reviewer=Codex primary path with pre-run and independent post-run numeric verification | verdict=NULL_NO_ROBUST_OOS_INCREMENT. Binance BTC/ETH-USDT completed daily closes were converted to USD with same-UTC-day Coinbase USDT-USD and aligned by exact UTC date with Coinbase/Kraken USD closes; 720 common days per asset (2024-07-21..2026-07-10). Every forecast feature used signal.shift(1), with strict forward-label embargo j+h<i. OOS counts were h=1 n=407 and h=5 n=399. Across the pre-specified 2 assets x 2 horizons x 2 outcomes family, 0/8 cells met loss improvement >0, HLN-DM t<-3, and BH q<0.05. The only positive loss direction was BTC h=1 5% tail pinball: +0.3733659%, HLN-DM t=-0.3063379, BH q=0.832821, not significant. BTC RV QLIKE worsened -2.744805% at h=1 and -0.104741% at h=5; ETH RV QLIKE worsened -0.557609% and -0.083900%. QuantReg audit reported zero failures, convergence warnings, or iteration-limit hits; cache-only reruns matched after removing run_utc. Scope: this is a null for a lagged daily close-price dispersion proxy, not evidence against synchronized executable cross-exchange arbitrage signals; daily OHLCV lacks bid/ask, depth, fees, and settlement latency.",
+    "evidence": [
+      "experiments/k1682/k1682_results.json",
+      "experiments/k1682/README.md",
+      "experiments/k1682/codex_review_pre_run.md",
+      "experiments/k1682/codex_review.md"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-07-11T15:03:46.168252"
   }
 ]

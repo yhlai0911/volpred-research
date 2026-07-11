@@ -15739,5 +15739,29 @@
     "task_id": "publish_draft_dryrun_silent_pass",
     "summary": "修 publish_draft.py --dry-run 靜默放行：dry-run 在 content-vs-source gate 之前就 return，對會被真發佈拒絕的草稿也回報乾淨（本班被騙過一次）。改為 dry-run 也跑同一個 audit，找不到來源時明說 NOT verified（fail-open 但不謊報）。negative control 驗證非空轉。",
     "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-11T14:27:23+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-ce9e85e71",
+    "outcome": "succeeded",
+    "summary": "Render K1611 lazypack panels",
+    "commit": "ce9e85e7158db749e9cc011f45b5dc84781cd265",
+    "owner": "codex",
+    "backfilled_at": "2026-07-11T07:04:28.172562+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1611"
+  },
+  {
+    "timestamp": "2026-07-11T15:01:53+08:00",
+    "task_type": "experiment",
+    "task_id": "codex-commit-f67d1a417",
+    "outcome": "succeeded",
+    "summary": "Complete K1682 crypto fragmentation experiment",
+    "commit": "f67d1a4177af332ea57114e91a7d07a539c3a226",
+    "owner": "codex",
+    "backfilled_at": "2026-07-11T07:04:28.172248+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1682"
   }
 ]
