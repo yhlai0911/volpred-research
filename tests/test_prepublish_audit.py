@@ -165,6 +165,36 @@ def test_negative_number_claims_match_verbatim_source():
     assert result["tier1_findings"] == []
 
 
+def test_threshold_declared_inside_criteria_string_is_source_backed():
+    # k1683 (2026-07-11): the pass gate lives in a PROSE field —
+    # "gate": "improvement>0, HLN-DM t<-3, BH q<0.05, ...". An article quoting
+    # 門檻 -3 was flagged as fabricated because _flatten_numbers only walks
+    # numeric leaves. Criteria/gate STRING values are legitimate source.
+    import json, tempfile
+    from pathlib import Path
+    d = tempfile.mkdtemp()
+    kdir = Path(d) / "experiments" / "k1683"
+    kdir.mkdir(parents=True)
+    (kdir / "k1683_results.json").write_text(
+        json.dumps(
+            {
+                "gate": "improvement>0, HLN-DM t<-3, BH q<0.05",
+                "results": {"TLT_RV5": {"dm_hln": {"t_hln": -1.27}}},
+                "proxy_limits": ["gross participation is not a 7.77 dollar notional"],
+            }
+        )
+    )
+    ok = audit_content_provenance(
+        "t 值只有 -1.27，離門檻 -3 差得遠。", ["K1683"], root=d
+    )
+    assert ok["tier1_findings"] == []
+
+    # Scope stays narrow: a number buried in a NON-criteria string (a caveat,
+    # a label, an id) must NOT be whitelisted, or the gate goes blunt.
+    bad = audit_content_provenance("本策略 Sharpe 7.77 遠勝大盤。", ["K1683"], root=d)
+    assert [f["raw"] for f in bad["tier1_findings"]] == ["7.77"]
+
+
 def test_negative_claim_without_source_match_is_flagged():
     import json, tempfile
     from pathlib import Path

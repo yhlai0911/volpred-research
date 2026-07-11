@@ -196,6 +196,40 @@ def _flatten_numbers(obj) -> list[float]:
     return out
 
 
+_CRITERIA_KEY_RE = re.compile(
+    r"(gate|criteri|threshold|decision_rule|pass_rule|spec)", re.IGNORECASE
+)
+_NUMERIC_LITERAL_RE = re.compile(r"[-+]?\d+(?:\.\d+)?")
+
+
+def _flatten_criteria_numbers(obj, key: str | None = None) -> list[float]:
+    """Collect numeric literals declared inside criteria/gate STRING values.
+
+    Experiments routinely record their pass thresholds as prose, e.g.
+    `"gate": "improvement>0, HLN-DM t<-3, BH q<0.05, ..."` (k1683). Those
+    thresholds are legitimately source-backed, but `_flatten_numbers` only sees
+    numeric leaves, so an article quoting "門檻 -3" was flagged as fabricated.
+
+    Scope is deliberately narrow — only string leaves whose KEY looks like a
+    criteria/gate declaration. Parsing numbers out of every string leaf would
+    dump dates, ids and sample labels into the whitelist and blunt the gate.
+    """
+    out: list[float] = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            out.extend(_flatten_criteria_numbers(v, key=k))
+    elif isinstance(obj, (list, tuple)):
+        for v in obj:
+            out.extend(_flatten_criteria_numbers(v, key=key))
+    elif isinstance(obj, str) and key and _CRITERIA_KEY_RE.search(key):
+        for token in _NUMERIC_LITERAL_RE.findall(obj):
+            try:
+                out.append(float(token))
+            except ValueError:  # silent-ok: regex-matched token, float() is total
+                pass
+    return out
+
+
 def _warn_source_values_load(path: Path, exc: Exception) -> None:
     print(
         "[prepublish_audit] WARN source results JSON read failed; skipping "
@@ -227,6 +261,8 @@ def load_source_values(k_ids: list[str], root: str | Path = ".") -> set[float]:
             _warn_source_values_load(path, exc)
             continue
         for n in _flatten_numbers(data):
+            values.add(n)
+        for n in _flatten_criteria_numbers(data):
             values.add(n)
     return values
 

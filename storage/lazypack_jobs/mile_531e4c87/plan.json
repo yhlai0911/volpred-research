@@ -1,0 +1,43 @@
+[
+  {
+    "name": "01_free_proxy_concept",
+    "info": "concept",
+    "alt": "從機密的 Form PF 到免費的 CFTC 部位報告：擁擠度指標是怎麼被做出來的",
+    "must_show": [
+      "機密資料：Form PF 顯示對沖基金美國國債曝險約 4.0 兆美元（多 2.4 兆 / 空 1.6 兆，前 50 大佔九成）",
+      "這是外部脈絡，不是模型輸入",
+      "免費替代品：CFTC 每週公佈的 Leveraged Funds 期貨持倉",
+      "代理指標 = (多單 + 空單 + 2×價差單) ÷ (2×未平倉量)",
+      "涵蓋 2 年 / 5 年 / 10 年 / 長債四個國債期貨合約"
+    ],
+    "style": "clean editorial finance infographic, no cartoon, high contrast, Traditional Chinese labels"
+  },
+  {
+    "name": "02_how_we_tested",
+    "info": "method",
+    "alt": "四個預測目標與五道同時要過的檢定關卡",
+    "must_show": [
+      "指標一律落後使用，避免看到未來資料",
+      "四個預測目標：TLT 5 日波動、IEF 5 日波動、10 年殖利率跳動、股債 20 日相關",
+      "樣本外約 630 至 637 週，起自 2013-09-13",
+      "五道關卡要同時過：誤差變小、檢定統計量低於 -3、多重檢定校正後 q 值低於 0.05、關聯方向為正、前後半段都改善",
+      "指標本身確實在上升：2023-01-03 的 0.2406 到 2025-09-30 的 0.3010，漲 25.09%"
+    ],
+    "style": "clean editorial finance infographic, no cartoon, high contrast, Traditional Chinese labels"
+  },
+  {
+    "name": "03_null_result",
+    "info": "results",
+    "alt": "四個目標全數沒過關的誠實 null 結果",
+    "must_show": [
+      "四個目標通過數：0 / 4",
+      "TLT 5 日波動：誤差改善 +1.40%，統計量 -1.27，校正後 q 值 0.563",
+      "IEF 5 日波動：統計量 -0.58，同樣離門檻 -3 很遠",
+      "TLT 前半段改善 +2.98%，後半段翻負 -0.54%（不穩定）",
+      "股債相關是最差的一格：-1.34%，後半段 -2.67%",
+      "結論：免費的公開擁擠度指標，不能當風險預警儀表板",
+      "這個 null 不能否定強制去槓桿機制本身，只說這個公開代理變數沒有穩健預測力"
+    ],
+    "style": "clean editorial finance infographic, no cartoon, high contrast, Traditional Chinese labels"
+  }
+]
