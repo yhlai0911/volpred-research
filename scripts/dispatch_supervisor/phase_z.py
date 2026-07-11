@@ -296,6 +296,45 @@ def _consume_pre_fire_snapshot(repo_root: Path, runner) -> None:
         LOG.warning("phase_z: cannot remove pre-fire snapshot (%s)", exc)
 
 
+# ── foreign paths that never clear ───────────────────────────────────────────
+# One fire finding a foreign path means a session is mid-edit; harmless. The same
+# path still foreign fire after fire means nobody is coming back for it, and a
+# `warn` that repeats hourly reads as noise instead of a leak. Owner directive
+# (2026-07-11): escalate on persistence. The count lives next to the pre-fire
+# snapshot in the git dir — same reasons (invisible to `git status`, per-checkout,
+# never committable).
+_FOREIGN_STREAK_BASENAME = "volpred_phase_z_foreign_streak.json"
+_FOREIGN_STREAK_CRITICAL = 3  # consecutive fires before warn → critical
+
+
+def _bump_foreign_streaks(repo_root: Path, runner, foreign: list[str]) -> dict[str, int]:
+    """Consecutive-fire count per still-foreign path; paths that cleared drop out."""
+    snapshot = _snapshot_path(repo_root, runner)
+    if snapshot is None:
+        return {p: 1 for p in foreign}
+    dest = snapshot.with_name(_FOREIGN_STREAK_BASENAME)
+    prev: dict[str, int] = {}
+    try:
+        if dest.exists():
+            raw = json.loads(dest.read_text(encoding="utf-8"))
+            if isinstance(raw, dict):
+                prev = {k: int(v) for k, v in raw.items()
+                        if isinstance(k, str) and isinstance(v, int)}
+    except (OSError, ValueError, TypeError) as exc:
+        LOG.warning("phase_z: cannot read foreign-streak state (%s) — restarting counts", exc)
+    current = {p: prev.get(p, 0) + 1 for p in foreign}
+    try:
+        if current:
+            tmp = dest.with_suffix(".tmp")
+            tmp.write_text(json.dumps(current, indent=2, sort_keys=True), encoding="utf-8")
+            tmp.replace(dest)
+        else:
+            dest.unlink(missing_ok=True)
+    except OSError as exc:
+        LOG.warning("phase_z: cannot persist foreign-streak state (%s) — counts reset next fire", exc)
+    return current
+
+
 def _classify_machine_churn(repo_root: Path, candidates: list[str]) -> tuple[list[str], list[str], list[str]]:
     """Split declared machine-churn paths into (committable, deferred, corrupt).
 
@@ -697,6 +736,7 @@ def run_phase_z(
     if not dirty_now:
         LOG.info("phase_z: working tree clean — agent committed everything")
         _consume_pre_fire_snapshot(repo_root, runner)
+        _bump_foreign_streaks(repo_root, runner, [])  # nothing foreign left → streaks die here
         return {"committed": False, "reason": "clean"}
 
     baseline = set(pre_fire_dirty) if pre_fire_dirty is not None else _read_pre_fire_snapshot(repo_root, runner)
@@ -755,6 +795,34 @@ def run_phase_z(
             ]),
         )
 
+    streaks = _bump_foreign_streaks(repo_root, runner, foreign)
+    stuck = sorted((p for p, n in streaks.items() if n >= _FOREIGN_STREAK_CRITICAL),
+                   key=lambda p: (-streaks[p], p))
+    worst_streak = max(streaks.values(), default=0)
+
+    if stuck:
+        LOG.warning("phase_z: %d foreign path(s) stuck for >=%d fires: %s",
+                    len(stuck), _FOREIGN_STREAK_CRITICAL, stuck[:10])
+        alert_fn(
+            level="critical",
+            title=f"PHASE-Z {hhmm}: {len(stuck)} 個檔案已連續 {worst_streak} 班沒人收 — 遺留變成堆積",
+            body="\n".join([
+                "## 發生什麼",
+                f"這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 {worst_streak} 班都還在工作區。"
+                "單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— "
+                "它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。",
+                "",
+                "## 現在該做什麼",
+                "人工判斷後二選一：確認內容正確就 `git add <檔案> && git commit`；"
+                "是廢棄的半成品就 `git checkout HEAD -- <檔案>` 丟掉。"
+                "（PHASE-Z 不自動收養 —— 自動收養正是先前三次事故的成因。）",
+                "",
+                "## 卡住的檔案（連續班數）",
+                *[f"- {p} — {streaks[p]} 班" for p in stuck[:30]],
+                *(["- …"] if len(stuck) > 30 else []),
+            ]),
+        )
+
     if foreign:
         LOG.info("phase_z: leaving %d path(s) dirty — already dirty at fire start, not ours: %s",
                  len(foreign), foreign[:10])
@@ -769,6 +837,10 @@ def run_phase_z(
         LOG.info("phase_z: nothing this fire produced — %d foreign path(s) left alone", len(foreign))
         if not foreign:
             return {"committed": False, "reason": "nothing_owned", "foreign": []}
+        if stuck:
+            # the critical alert above already said everything this one would, louder.
+            return {"committed": False, "reason": "nothing_owned",
+                    "foreign": foreign, "stuck": stuck}
         alert_fn(
             level="warn",
             title=f"PHASE-Z {hhmm}: {len(foreign)} 個檔案未提交，但不是這班產出的",

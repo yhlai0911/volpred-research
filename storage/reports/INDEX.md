@@ -1,23 +1,27 @@
 # Feed Index
 
-_Last built: 2026-07-11 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-11 06:01 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1781**  (with thumbnail: 75)
-- Last 30 days: **289**
-- Total chars (content): 5,395,177
+- Total articles: **1784**  (with thumbnail: 75)
+- Last 30 days: **290**
+- Total chars (content): 5,414,393
 
-**Status**: published=1578, archived=123, unpublished=62, retracted=12, draft=5, wont_fix=1
+**Status**: published=1580, archived=123, unpublished=62, retracted=12, draft=6, wont_fix=1
 
-**Audience**: research=1113, general=435, daily=138, unknown=77, member_qa=12, event=6
+**Audience**: research=1113, general=438, daily=138, unknown=77, member_qa=12, event=6
 
-**Category**: milestone=875, general=789, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=4, experiment=4, diary=1
+**Category**: milestone=875, general=792, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=4, experiment=4, diary=1
 
-## 最近 30 天 (289)
+## 最近 30 天 (290)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-11 | `mile_de666838` | 跑完 4,585 天：4 種階層式配置法，沒一個贏過「誰波動小就多買一點」 | general | general | draft | 4227 |  | 一般讀者, 資產配置, 風險平價, HRP, 分散投資, 樣本外驗證 |
+| 2026-07-11 | `mile_b5e264a5` | 市場一恐慌就該換模型？我們把台美 5,368 個交易日切成兩半，勝負沒有換人 | general | general | draft | 3392 |  | 一般讀者, 波動率, 模型選擇, VIX, 台股, 美股 |
+| 2026-07-11 | `mile_30438396` | 把學術因子裝進 ETF 後，到底掉了多少？我們做了一次 13 年的記帳 | general | general | published | 4467 |  | 一般讀者, 因子投資, 美股 ETF, MTUM, VLUE, QUAL |
+| 2026-07-11 | `mile_ed21255d` | 財報季開跑前，把你的「財報控制盤」盤一次：一個開關會亮，四個旋鈕有三個沒接線 | general | general | published | 11597 |  | 一般讀者, 精選導讀, 財報季, 波動率, 選擇權, 台積電 |
 | 2026-07-10 | `mile_81867788` | 把電力股當避風港的人，可能沒發現它的波動率已經翻倍 | general | general | published | 3900 |  | 一般讀者, trending, AI, 電力股, 波動率, 板塊輪動 |
 | 2026-07-10 | `mile_3c3b4201` | 市場休市，資料卻說有交易：一筆假行情如何把回測結論翻面 | general | general | published | 3305 |  | 一般讀者, 台股, 資料品質, 回測 |
 | 2026-07-10 | `mile_e3cede77` | 🌡️ 事件溫度計｜巴威關了台股一天：13 次颱風假復盤，復市那天沒有想像中可怕 | event | event_article | published | 3924 |  | 台股, 颱風假, 停市, 波動率, 事件研究, 市場觀察 |
@@ -107,7 +111,6 @@ _Last built: 2026-07-11 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-29 | `mile_9312bb19` | 收盤價只用一個數字，K 棒給你四個——多出來的三個能預測明天的波動嗎？ | research | general | unpublished | 2311 |  | 研究, ETF, 波動率, K棒估計, 量化方法, GARCH |
 | 2026-06-29 | `mile_35dfee97` | 每日策略建議：VIX 17.65（正常）— 2026-06-30 | daily | general | published | 1581 | Y | 每日建議, VIX, 策略配置 |
 | 2026-06-29 | `mile_2a80d569` | 2026-06-30 本日持倉比率建議（依據 2026-06-29 收盤數據） | daily | milestone | published | 949 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
-| 2026-06-29 | `mile_30438396` | 把學術因子裝進 ETF 後，到底掉了多少？我們做了一次 13 年的記帳 | general | general | draft | 4467 |  | 一般讀者, 因子投資, 美股 ETF, MTUM, VLUE, QUAL |
 | 2026-06-29 | `mile_9839822d` | 政策標題嚇人，數據沒這麼怕：八次稀土管制公告之後，礦業 ETF 都怎麼走？ | general | general | published | 4020 |  | 一般讀者, 關鍵礦物, 稀土, 出口管制, 事件研究, REMX |
 | 2026-06-29 | `mile_5399bf01` | 你買 MTUM 真的買到 Momentum 嗎？7 檔因子 ETF 對紙上學術因子的 13 年體檢 | research | milestone | published | 5432 |  | 研究, 因子ETF, Fama-French, MTUM, VLUE, QUAL |
 | 2026-06-29 | `mile_7b95b816` | 年度等權再平衡，真的比抱著不動強嗎？台美 30 年實測拆給你看 | general | milestone | published | 3201 |  | 一般讀者, 再平衡, 資產配置, 買進持有, 風險管理 |
@@ -305,13 +308,13 @@ _Last built: 2026-07-11 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-11 | `mile_9b76989e` | 💬 會員提問｜酒店娛樂業是股市的晴雨表嗎？文獻回顧與十年實證 | member_qa | member_qa | published | 5700 |  | 研究, 酒店業, 娛樂業, 股市相關性, 消費板塊, RevPAR |
 | 2026-06-11 | `mile_938a158f` | 跌的時候才算數：RS⁻ 跨 8 資產波動率預測力實測 | research | milestone | published | 3809 |  | 研究, 波動率預測, 下行半方差, 跨資產, SPY, GJR-GARCH |
 | 2026-06-11 | `mile_23312ae9` | 做了 305 次投資研究後，真正活下來的結論有多少？ | general | general | published | 1748 |  | 一般讀者, 投資研究, 風險管理, 波動率, 方法論 |
-| 2026-06-11 | `mile_872abdc3` | 比特幣自己的數據，真的比 VIX 更懂它的波動嗎？ | general | general | published | 1705 |  | 一般讀者, 比特幣, 波動率, VIX, 加密貨幣 |
-| 2026-06-11 | `mile_6a601155` | 兩支 ETF 同時暴跌時，波動率會提前發出信號嗎？ | general | general | published | 3455 |  | 一般讀者, SPY, TLT, GLD, QQQ, copula |
 
-<details><summary>## 2026-Q2 (820)</summary>
+<details><summary>## 2026-Q2 (822)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-11 | `mile_872abdc3` | 比特幣自己的數據，真的比 VIX 更懂它的波動嗎？ | general | general | published | 1705 |  | 一般讀者, 比特幣, 波動率, VIX, 加密貨幣 |
+| 2026-06-11 | `mile_6a601155` | 兩支 ETF 同時暴跌時，波動率會提前發出信號嗎？ | general | general | published | 3455 |  | 一般讀者, SPY, TLT, GLD, QQQ, copula |
 | 2026-06-10 | `mile_9a5c1ea4` | 市場跌過之後通常更容易亂，但把波動拆更細，真的比較有用嗎？ | general | general | published | 1653 |  | 一般讀者, 波動率, 美股, 黃金, 比特幣 |
 | 2026-06-10 | `mile_c26fcd8e` | 把六個市場一起看，真的比只看自己更懂波動嗎？ | general | general | published | 2325 |  | 一般讀者, 波動率, 跨資產, 美股, 黃金 |
 | 2026-06-10 | `mile_4e5a221e` | 明知道 VIX 在比特幣恐慌時會失靈，為什麼把它關掉還是沒救？ | general | general | published | 2084 |  | 一般讀者, 比特幣, VIX, 波動率, 加密貨幣 |

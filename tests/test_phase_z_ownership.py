@@ -130,6 +130,44 @@ def test_nothing_owned_commits_nothing_and_alerts(repo: Path) -> None:
     assert alerts and alerts[0][0] == "warn"
 
 
+def test_foreign_path_stuck_across_fires_escalates_to_critical(repo: Path) -> None:
+    """One fire's leftover is a session mid-edit; the same path still foreign three
+    fires later is a leak nobody is coming back for — an hourly `warn` reads as
+    noise (owner directive, 2026-07-11)."""
+    _write(repo, "theirs.txt", "abandoned by a dead session\n")
+
+    levels: list[str] = []
+    for _ in range(phase_z._FOREIGN_STREAK_CRITICAL):
+        alerts: list = []
+        phase_z.run_pre_fire_guard(repo_root=repo)
+        outcome = _fire(repo, alerts=alerts)
+        assert outcome["committed"] is False
+        levels.append(alerts[0][0])
+
+    assert levels[:-1] == ["warn"] * (phase_z._FOREIGN_STREAK_CRITICAL - 1)
+    assert levels[-1] == "critical", "persistence across fires must escalate"
+    assert outcome["stuck"] == ["theirs.txt"]
+    assert "theirs.txt" in _dirty(repo), "escalating must not mean auto-adopting"
+
+
+def test_foreign_streak_resets_once_the_path_is_cleaned_up(repo: Path) -> None:
+    """A cleared path must not carry its old streak into a future, unrelated leftover."""
+    _write(repo, "theirs.txt", "mid-edit\n")
+    for _ in range(2):
+        phase_z.run_pre_fire_guard(repo_root=repo)
+        _fire(repo)
+
+    (repo / "theirs.txt").unlink()  # a human cleaned it up between fires
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _fire(repo)
+
+    _write(repo, "theirs.txt", "a different session, later\n")
+    alerts: list = []
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _fire(repo, alerts=alerts)
+    assert alerts[0][0] == "warn", "the streak must start over, not resume at 3"
+
+
 # ── the fire's own work still lands ──────────────────────────────────────────
 
 def test_agent_work_is_committed_when_tree_was_clean(repo: Path) -> None:
