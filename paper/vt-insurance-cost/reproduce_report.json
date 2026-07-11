@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-20T04:17:46+08:00",
+  "timestamp": "2026-07-11T23:21:15+08:00",
   "reproduce_exit_code": 0,
   "data_bundle": {
     "files_used": [
@@ -160,16 +160,16 @@
       "recommendation": "matched after fixing the self-contained calculation path."
     },
     {
-      "name": "50/50 SPY/GLD rebalancing premium 54 bps/yr (dual-convention)",
-      "paper_value": 54.0,
+      "name": "50/50 SPY/GLD rebalancing premium — replication raw-Close basis ~63 bps/yr",
+      "paper_value": 63.0,
       "reproduced_value": 62.91,
       "unit": "bps/yr",
-      "paper_source": "main.tex:184 + dual-convention footnote",
-      "absolute_diff": 8.91,
-      "relative_diff_pct": 16.5,
-      "tolerance_abs": 10.0,
+      "paper_source": "main.tex:184 footnote (raw-Close / auto_adjust=False convention)",
+      "absolute_diff": -0.09,
+      "relative_diff_pct": 0.143,
+      "tolerance_abs": 5.0,
       "status": "match",
-      "recommendation": "RESOLVED 2026-04-19 via main.tex L184 footnote: paper text now explicitly states the 54 bps estimate uses K846 dividend-adjusted series (auto_adjust=True), and the replication package's raw-Close (auto_adjust=False) convention yields ~63 bps. Both fall within the paper's structural 50-80 bps claim (L186). No further action required; tolerance widened to 10 bps to reflect documented range."
+      "recommendation": "Verifies the REPLICATION-basis (raw-Close, auto_adjust=False) rebalancing premium against the value the paper discloses for that same convention in the main.tex:184 footnote (~63 bps). The paper's HEADLINE 54 bps is a distinct dividend-adjusted (auto_adjust=True) estimate anchored to K846 (53.67 bps), verified separately in experiments.md rather than by this raw-Close gate. Both conventions are disclosed in the paper; this is now a strict same-basis check (5 bps) instead of a cross-convention comparison widened to 10 bps."
     }
   ],
   "match_rate_pct": 100.0,

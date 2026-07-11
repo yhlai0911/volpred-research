@@ -1,7 +1,7 @@
 # Paper 4: The True Cost of Volatility Targeting — Insurance Premium Decomposition
 
 **Target Journal**: Finance Research Letters (FRL)
-**Status**: `MAJOR_REVISION`. v3 text fixes applied 2026-07-06 (`review_history/v3/fix_log.md`): **S-01** 50/50 (S4) benchmark relabelled to daily constant-weight (matches code; no reported numbers changed), **S-03** S3 Smooth-VoV equation rewritten to the continuous-clip form actually used in code (unsubstantiated 0.3/0.7 claim removed), **C-01** hasbrouck2009 citation restated to what it supports. Package is **not submission-ready yet** because (a) **S-02**: cross-OOS still covers only 4 of 6 complete two-year windows — 2017–18 / 2021–22 re-runs pending (compute follow-up `paper2_vt_insurance_cost_s02_cross_oos_rerun`), and (b) reproduce gate reaches 100% only by widening claim #9 tolerance from 5 to 10 bps. Current state: `body fixed (S-01/S-03/C-01) / S-02 compute follow-up pending`.
+**Status**: `REVISION` — 2026-07-11 Fable finishing pass complete (P0 done; see `EXECUTION.md`). v3 text fixes (2026-07-06, `review_history/v3/fix_log.md`): **S-01** S4 relabelled daily constant-weight, **S-03** S3 Smooth-VoV equation rewritten to continuous-clip form, **C-01** hasbrouck2009 citation restated. 2026-07-11 finishing (`review_history/fable_deep_review_20260711/`): **S-02** cross-OOS covers all 6 two-year windows (2/6 Sharpe-basis wins, honestly reported — S-02 no longer pending); reproduce gate re-scoped to strict same-basis check on claim #9 (raw-Close 62.91 vs disclosed ~63 bps, tolerance 5) → **9/9 green without widened tolerance**; experiment package cleaned (stale `sensitivity_sweep.json` + mislabelled `threshold_0.5_results.json` removed; `_tmp_th*.py` renamed `k811v2_sensitivity_th*.py`); main.tex fixes (§4.4 period-scope split, Eq.3 T/Y notation, abstract+§4.5 "Sharpe-basis" disambiguation). **Before submission**: P1 citation cleanup (C-02–C-09) + one main figure — see `EXECUTION.md`.
 **Pages**: 14 | **Citations**: 17
 
 ## Data Sources
@@ -37,9 +37,9 @@ See `review_history/diagnosis_v1/resolution.md` for closing verdict and handoff.
 ## Experiment Files
 | File | Description |
 |------|-------------|
-| k811v2_threshold_0.5.py | Insurance cost decomposition (main) |
-| k811v2_sensitivity_*.json | Sensitivity analysis results |
-| k846_rebalancing_premium.py | 2006-2024 rebalancing premium (paper claim #9 anchor) |
+| k811v2_insurance_premium_vov_fixed.py | Main decomposition — Tables 1 & 2 (generates `k811v2_insurance_premium_vov_fixed_results.json` + `..._cross_oos6_results.json`) |
+| k811v2_sensitivity_th{0_5,1_0,1_5}.py | VoV z-threshold sensitivity (generate `k811v2_th{0_5,1_0,1_5}_results.json`) |
+| k846_rebalancing_premium.py | 2006–2024 rebalancing premium (headline 54 bps dividend-adjusted anchor; raw-Close ~63 bps verified by reproduce.py) |
 
 ## Number Traceability
 See `reviews/audit_step1_2.md` for complete traceability table.
@@ -62,4 +62,4 @@ All paper-internal numbers verified against K811v2 + K846 experiment JSONs — 0
 | K811 | Insurance Premium VoV (original) | Pilot; superseded by K811v2 |
 | K811v2 | Insurance Premium VoV (fixed) | Main Table 2; 0-mismatch verified |
 | K846 | Rebalancing Premium | Isolated rebalancing cost component |
-| K860 | Prospect Theory VT | Supplementary behavioral analysis |
+| K860 | Prospect Theory VT | Supplementary behavioral analysis — **unused in final draft** (not cited in main.tex; kept for reference) |

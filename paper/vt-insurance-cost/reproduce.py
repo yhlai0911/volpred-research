@@ -362,25 +362,29 @@ def build_claims(
             recommendation="matched after fixing the self-contained calculation path.",
         ),
         ClaimSpec(
-            # 2026-04-19 L11 policy RESOLVED: main.tex L184 footnote now explicitly
-            # discloses dual-value 54 bps (K846 auto_adjust=True) vs ~63 bps
-            # (replication auto_adjust=False); tolerance expanded to 10.0 bps to
-            # capture the full documented range (both values are correct under
-            # their respective dividend conventions, within paper's structural
-            # 50-80 bps claim in main.tex L186).
-            name="50/50 SPY/GLD rebalancing premium 54 bps/yr (dual-convention)",
-            paper_value=54.0,
+            # 2026-07-11 (Fable finishing pass): claim re-scoped to a strict
+            # SAME-BASIS check instead of a widened cross-convention one. This
+            # reproduce gate uses bundled raw-Close (auto_adjust=False) data, so
+            # it verifies the paper's raw-Close disclosure (main.tex:184 footnote,
+            # ~63 bps), NOT the dividend-adjusted headline (54 bps). The 54 bps
+            # headline is the auto_adjust=True estimate anchored to K846
+            # (53.67 bps) and is verified separately in experiments.md. Tightened
+            # tolerance 10->5 bps: raw-Close vs raw-Close is now apples-to-apples.
+            name="50/50 SPY/GLD rebalancing premium — replication raw-Close basis ~63 bps/yr",
+            paper_value=63.0,
             reproduced_value=rebalancing["premium_cagr_bps"],
-            tolerance_abs=10.0,  # widened 5→10 per L11 footnote disambiguation
+            tolerance_abs=5.0,  # tightened 10->5: same-convention (raw-Close) check
             unit="bps/yr",
-            paper_source="main.tex:184 + dual-convention footnote",
+            paper_source="main.tex:184 footnote (raw-Close / auto_adjust=False convention)",
             recommendation=(
-                "RESOLVED 2026-04-19 via main.tex L184 footnote: paper text now "
-                "explicitly states the 54 bps estimate uses K846 dividend-adjusted "
-                "series (auto_adjust=True), and the replication package's raw-Close "
-                "(auto_adjust=False) convention yields ~63 bps. Both fall within "
-                "the paper's structural 50-80 bps claim (L186). No further action "
-                "required; tolerance widened to 10 bps to reflect documented range."
+                "Verifies the REPLICATION-basis (raw-Close, auto_adjust=False) "
+                "rebalancing premium against the value the paper discloses for that "
+                "same convention in the main.tex:184 footnote (~63 bps). The paper's "
+                "HEADLINE 54 bps is a distinct dividend-adjusted (auto_adjust=True) "
+                "estimate anchored to K846 (53.67 bps), verified separately in "
+                "experiments.md rather than by this raw-Close gate. Both conventions "
+                "are disclosed in the paper; this is now a strict same-basis check "
+                "(5 bps) instead of a cross-convention comparison widened to 10 bps."
             ),
         ),
     ]

@@ -27,11 +27,11 @@ Scripts co-located in paper folder:
 | `k811_insurance_premium_vov.py` | K811 | Original VoV decomposition (superseded by K811v2) |
 | `k811v2_insurance_premium_vov_fixed.py` | K811v2 | Fixed estimation — Table 2 main results |
 | `k811v2_main.py` | K811v2 | Main entry point for full reproduction |
-| `k811v2_threshold_0.5.py` | K811v2 | Threshold sensitivity at σ×0.5 |
-| `k811v2_threshold_1.5.py` | K811v2 | Threshold sensitivity at σ×1.5 |
+| `k811v2_sensitivity_th0_5.py` | K811v2 | Threshold sensitivity at z=0.5 (generates `k811v2_th0_5_results.json`) |
+| `k811v2_sensitivity_th1_0.py` | K811v2 | Threshold sensitivity at z=1.0 (generates `k811v2_th1_0_results.json`) |
+| `k811v2_sensitivity_th1_5.py` | K811v2 | Threshold sensitivity at z=1.5 (generates `k811v2_th1_5_results.json`) |
 | `k846_rebalancing_premium.py` | K846 | Rebalancing premium isolation |
-| `k860_prospect_theory_vt.py` | K860 | Prospect theory extension |
-| `sensitivity_sweep.py` | K811v2 | Full sensitivity parameter sweep |
+| `k860_prospect_theory_vt.py` | K860 | Prospect theory extension — unused in final draft |
 
 ---
 
@@ -62,7 +62,8 @@ Detailed traceability table available in audit file.
 
 | Threshold | File |
 |-----------|------|
-| σ×0.5 | `k811v2_threshold_0.5_results.json` / `k811v2_th0_5_results.json` |
-| σ×1.0 | `k811v2_th1_0_results.json` |
-| σ×1.5 | `k811v2_th1_5_results.json` |
-| Sweep | `k811v2_sensitivity_sweep.json` |
+| z=0.5 | `k811v2_th0_5_results.json` |
+| z=1.0 | `k811v2_th1_0_results.json` |
+| z=1.5 | `k811v2_th1_5_results.json` |
+
+(2026-07-11 package hygiene: stale `k811v2_sensitivity_sweep.json` and mislabelled `k811v2_threshold_0.5_results.json` removed; superseded `k811v2_threshold_*.py` / `sensitivity_sweep.py` removed — the three `k811v2_sensitivity_th*.py` scripts above are the canonical generators.)
