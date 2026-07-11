@@ -1,0 +1,744 @@
+{
+  "experiment_id": "K1682",
+  "title": "Cross-exchange daily close-price dispersion as a BTC/ETH short-horizon risk signal",
+  "run_utc": "2026-07-11T07:01:20.628012+00:00",
+  "seed": 42,
+  "methodology_type": "empirical_proxy_diagnostic",
+  "data_provenance": {
+    "sources": {
+      "binance": "https://data-api.binance.vision/api/v3/klines",
+      "coinbase": "https://api.coinbase.com/api/v3/brokerage/market/products/{product}/candles",
+      "kraken": "https://api.kraken.com/0/public/OHLC"
+    },
+    "files": [
+      {
+        "path": "data/BTC_binance_1d.csv",
+        "bytes": 75481,
+        "sha256": "daabbbabb14ac7b40e71a4928ca8fa7d803e9313e0c805f54ba6881e16d8e66e"
+      },
+      {
+        "path": "data/BTC_coinbase_1d.csv",
+        "bytes": 61287,
+        "sha256": "2d7f14fd09ca729b3a518a4e3df9b21d6f0f81e661b779e053437b43d0dbc0de"
+      },
+      {
+        "path": "data/BTC_kraken_1d.csv",
+        "bytes": 52529,
+        "sha256": "02c240850907c275554778d0973493a109e843b5de5f33e726ecc83228b77a09"
+      },
+      {
+        "path": "data/ETH_binance_1d.csv",
+        "bytes": 70978,
+        "sha256": "2cc158adcf8dd45a26403736be030e5c96cf74a1447d1876be5ebdc3c9ddb81f"
+      },
+      {
+        "path": "data/ETH_coinbase_1d.csv",
+        "bytes": 58373,
+        "sha256": "9efa70a8c786b0d7198f87514794dc3871764cdda11d3099c79703327c3a89e6"
+      },
+      {
+        "path": "data/ETH_kraken_1d.csv",
+        "bytes": 51878,
+        "sha256": "ff74ec996d627608a7e9e5a5ffdd8c64227eca03b10be3e421d68095658bbdd4"
+      },
+      {
+        "path": "data/USDT_coinbase_1d.csv",
+        "bytes": 56398,
+        "sha256": "4467b1cb1b3cf1505068128228a685f533cb87e3c2cd3fbfa5a9e30866e6c5a7"
+      }
+    ],
+    "panels": {
+      "BTC": {
+        "start": "2024-07-21",
+        "end": "2026-07-10",
+        "n_common_completed_days": 720,
+        "mean_normalized_dispersion_bps": 1.144202428026552,
+        "median_normalized_dispersion_bps": 0.9026820921000944,
+        "mean_abs_usdt_basis_bps": 4.417486473615076
+      },
+      "ETH": {
+        "start": "2024-07-21",
+        "end": "2026-07-10",
+        "n_common_completed_days": 720,
+        "mean_normalized_dispersion_bps": 1.1966655120328182,
+        "median_normalized_dispersion_bps": 0.9203861697807241,
+        "mean_abs_usdt_basis_bps": 4.417486473615076
+      }
+    }
+  },
+  "proxy_limits": [
+    "Daily OHLCV close is not a synchronized midquote, bid-ask spread, or executable arbitrage quote.",
+    "Binance USDT closes are converted with same-UTC-day Coinbase USDT-USD close; residual timing/basis noise remains.",
+    "Kraken public REST limits the common sample to roughly 720 completed daily candles.",
+    "Close-to-close squared returns are noisy variance proxies, not intraday realized variance.",
+    "Volume drought is a secondary within-exchange-standardized OHLCV volume proxy, not order-book depth."
+  ],
+  "timing": {
+    "feature_lag": "every forecast feature explicitly shift(1)",
+    "training_embargo": "training row j admissible only if j + horizon < forecast origin i",
+    "incomplete_candles": "Binance/Coinbase completion time gate; Kraken final row always dropped",
+    "calendar_alignment": "exact UTC date inner join; no forward fill"
+  },
+  "models": {
+    "rv_baseline": [
+      "log_rv_d_lag1",
+      "log_rv_w_lag1",
+      "log_rv_m_lag1"
+    ],
+    "rv_augmented": [
+      "log_rv_d_lag1",
+      "log_rv_w_lag1",
+      "log_rv_m_lag1",
+      "dispersion_lag1"
+    ],
+    "rv_target": "sum of close-to-close squared log returns beginning at forecast date",
+    "tail_target": "5% quantile of cumulative log return over h days",
+    "min_train": 252,
+    "tail_refit_every_days": 7
+  },
+  "primary_family": {
+    "definition": "2 assets x 2 horizons x 2 outcomes = 8 pre-specified OOS DM tests",
+    "multiplicity": "Benjamini-Hochberg FDR across all 8 cells",
+    "gate": "loss improvement >0, HLN-DM t<-3, and BH q<0.05",
+    "cells": [
+      {
+        "asset": "BTC",
+        "horizon_days": 1,
+        "outcome": "rv_qlike",
+        "improvement_pct": -2.7448050179315713,
+        "t_hln": 1.3789965912361344,
+        "raw_p": 0.16865501344796383,
+        "bh_q": 0.38750002639225933,
+        "pass": false
+      },
+      {
+        "asset": "BTC",
+        "horizon_days": 1,
+        "outcome": "tail_pinball",
+        "improvement_pct": 0.37336590783835955,
+        "t_hln": -0.30633791983013436,
+        "raw_p": 0.759504402136059,
+        "bh_q": 0.8328209614487367,
+        "pass": false
+      },
+      {
+        "asset": "BTC",
+        "horizon_days": 5,
+        "outcome": "rv_qlike",
+        "improvement_pct": -0.10474055836400566,
+        "t_hln": 0.712619994942677,
+        "raw_p": 0.47649849980356085,
+        "bh_q": 0.7623975996856973,
+        "pass": false
+      },
+      {
+        "asset": "BTC",
+        "horizon_days": 5,
+        "outcome": "tail_pinball",
+        "improvement_pct": -1.9494062992970524,
+        "t_hln": 1.906345350432809,
+        "raw_p": 0.05732538854481214,
+        "bh_q": 0.38750002639225933,
+        "pass": false
+      },
+      {
+        "asset": "ETH",
+        "horizon_days": 1,
+        "outcome": "rv_qlike",
+        "improvement_pct": -0.557608602732376,
+        "t_hln": 1.3017206005520836,
+        "raw_p": 0.19375001319612967,
+        "bh_q": 0.38750002639225933,
+        "pass": false
+      },
+      {
+        "asset": "ETH",
+        "horizon_days": 1,
+        "outcome": "tail_pinball",
+        "improvement_pct": -1.783612242089988,
+        "t_hln": 1.4431192678781226,
+        "raw_p": 0.14975796032598804,
+        "bh_q": 0.38750002639225933,
+        "pass": false
+      },
+      {
+        "asset": "ETH",
+        "horizon_days": 5,
+        "outcome": "rv_qlike",
+        "improvement_pct": -0.08390018207549861,
+        "t_hln": 0.21122352911861647,
+        "raw_p": 0.8328209614487367,
+        "bh_q": 0.8328209614487367,
+        "pass": false
+      },
+      {
+        "asset": "ETH",
+        "horizon_days": 5,
+        "outcome": "tail_pinball",
+        "improvement_pct": -0.430014865004282,
+        "t_hln": 0.44995292514632257,
+        "raw_p": 0.652989352093142,
+        "bh_q": 0.8328209614487367,
+        "pass": false
+      }
+    ]
+  },
+  "results": {
+    "BTC": {
+      "1": {
+        "rv_forecast": {
+          "n_oos": 407,
+          "oos_start": "2025-05-30",
+          "oos_end": "2026-07-10",
+          "qlike_base": 1.6382023758848947,
+          "qlike_augmented": 1.6831678369020575,
+          "qlike_improvement_pct": -2.7448050179315713,
+          "mse_base": 2.0936515722705064e-06,
+          "mse_augmented": 2.1420518954019373e-06,
+          "spearman_base": {
+            "rho": 0.1467747481946265,
+            "p": 0.0029969357294674414
+          },
+          "spearman_augmented": {
+            "rho": 0.14082091364038626,
+            "p": 0.004421462928912252
+          },
+          "dm_hln": {
+            "t_raw": 1.3806938184523052,
+            "t_hln": 1.3789965912361344,
+            "p_two_sided": 0.16865501344796383,
+            "mean_loss_diff_aug_minus_base": 0.0449654610171628,
+            "n": 407,
+            "nw_lag": 0,
+            "direction": "negative_t_means_augmented_better",
+            "bh_fdr_q_primary_family_8": 0.38750002639225933,
+            "primary_gate_pass": false
+          },
+          "dm_helper_crosscheck": {
+            "t": 1.3566834909543903,
+            "p": 0.1756356621730215,
+            "h": 1
+          },
+          "clark_west_nested_mse": {
+            "mean_adjusted_loss_gain": 0.003322518035375219,
+            "hac_t": 0.06551671518179154,
+            "p_one_sided_aug_better": 0.4738812990688673
+          },
+          "subperiod_sensitivity": [
+            {
+              "name": "early",
+              "start": "2025-05-30",
+              "end": "2025-12-18",
+              "n": 203,
+              "qlike_improvement_pct": -2.614518777841756
+            },
+            {
+              "name": "late",
+              "start": "2025-12-19",
+              "end": "2026-07-10",
+              "n": 204,
+              "qlike_improvement_pct": -2.8616926795006954
+            }
+          ],
+          "fit_failures": 0
+        },
+        "left_tail_forecast": {
+          "n_oos": 407,
+          "oos_start": "2025-05-30",
+          "oos_end": "2026-07-10",
+          "pinball_base": 0.0026735603413533568,
+          "pinball_augmented": 0.0026635781785132565,
+          "pinball_improvement_pct": 0.37336590783835955,
+          "breach_rate_base": 0.05405405405405406,
+          "breach_rate_augmented": 0.05896805896805897,
+          "dm_hln": {
+            "t_raw": -0.3067149512587725,
+            "t_hln": -0.30633791983013436,
+            "p_two_sided": 0.759504402136059,
+            "mean_loss_diff_aug_minus_base": -9.982162840100222e-06,
+            "n": 407,
+            "nw_lag": 0,
+            "direction": "negative_t_means_augmented_better",
+            "bh_fdr_q_primary_family_8": 0.8328209614487367,
+            "primary_gate_pass": false
+          },
+          "dm_helper_crosscheck": {
+            "t": -0.27353948797807104,
+            "p": 0.7845776405331102,
+            "h": 1
+          },
+          "refit_every": 7,
+          "fit_failures": 0,
+          "convergence_warnings": 0,
+          "iteration_limit_hits": 0
+        },
+        "association_primary_normalized": {
+          "n": 660,
+          "signal": "dispersion_lag1",
+          "coef": -0.12682076267181439,
+          "hac_t": -1.2646117032897344,
+          "p_two_sided": 0.20601055567670756,
+          "nw_lag": 0,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "association_usd_only_robustness": {
+          "n": 660,
+          "signal": "dispersion_usd_only_lag1",
+          "coef": -0.09912147981720525,
+          "hac_t": -0.9909447802749616,
+          "p_two_sided": 0.32171254462090293,
+          "nw_lag": 0,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "association_raw_native_sensitivity": {
+          "n": 660,
+          "signal": "dispersion_native_lag1",
+          "coef": -0.035960391054772486,
+          "hac_t": -0.4282590745926241,
+          "p_two_sided": 0.6684625111758482,
+          "nw_lag": 0,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "liquidity_drought_volume_proxy": {
+          "n": 660,
+          "drought_rate": 0.05909090909090909,
+          "coef": -0.012337996355772589,
+          "hac_t": -1.6212655936061686,
+          "p_two_sided": 0.10496069060381545,
+          "status": "secondary_volume_proxy_only"
+        }
+      },
+      "5": {
+        "rv_forecast": {
+          "n_oos": 399,
+          "oos_start": "2025-06-03",
+          "oos_end": "2026-07-06",
+          "qlike_base": 0.4637205654708836,
+          "qlike_augmented": 0.4642062689804065,
+          "qlike_improvement_pct": -0.10474055836400566,
+          "mse_base": 1.748716322354924e-05,
+          "mse_augmented": 1.7495359829434187e-05,
+          "spearman_base": {
+            "rho": 0.23237692220501002,
+            "p": 2.711586568686559e-06
+          },
+          "spearman_augmented": {
+            "rho": 0.22462235991990026,
+            "p": 5.8766760182120945e-06
+          },
+          "dm_hln": {
+            "t_raw": 0.7207493190279564,
+            "t_hln": 0.712619994942677,
+            "p_two_sided": 0.47649849980356085,
+            "mean_loss_diff_aug_minus_base": 0.0004857035095229028,
+            "n": 399,
+            "nw_lag": 4,
+            "direction": "negative_t_means_augmented_better",
+            "bh_fdr_q_primary_family_8": 0.7623975996856973,
+            "primary_gate_pass": false
+          },
+          "dm_helper_crosscheck": {
+            "t": 0.7231500276873487,
+            "p": 0.4700124742902312,
+            "h": 5
+          },
+          "clark_west_nested_mse": {
+            "mean_adjusted_loss_gain": -0.003615348756874212,
+            "hac_t": -1.9064475572242747,
+            "p_one_sided_aug_better": 0.9717039182205319
+          },
+          "subperiod_sensitivity": [
+            {
+              "name": "early",
+              "start": "2025-06-03",
+              "end": "2025-12-18",
+              "n": 199,
+              "qlike_improvement_pct": -0.19377986534247568
+            },
+            {
+              "name": "late",
+              "start": "2025-12-19",
+              "end": "2026-07-06",
+              "n": 200,
+              "qlike_improvement_pct": -0.040760018284832
+            }
+          ],
+          "fit_failures": 0
+        },
+        "left_tail_forecast": {
+          "n_oos": 399,
+          "oos_start": "2025-06-03",
+          "oos_end": "2026-07-06",
+          "pinball_base": 0.006313175615877368,
+          "pinball_augmented": 0.006436245059018967,
+          "pinball_improvement_pct": -1.9494062992970524,
+          "breach_rate_base": 0.08020050125313283,
+          "breach_rate_augmented": 0.08270676691729323,
+          "dm_hln": {
+            "t_raw": 1.9280922832751581,
+            "t_hln": 1.906345350432809,
+            "p_two_sided": 0.05732538854481214,
+            "mean_loss_diff_aug_minus_base": 0.00012306944314159998,
+            "n": 399,
+            "nw_lag": 4,
+            "direction": "negative_t_means_augmented_better",
+            "bh_fdr_q_primary_family_8": 0.38750002639225933,
+            "primary_gate_pass": false
+          },
+          "dm_helper_crosscheck": {
+            "t": 1.8000817607219552,
+            "p": 0.07260484507673315,
+            "h": 5
+          },
+          "refit_every": 7,
+          "fit_failures": 0,
+          "convergence_warnings": 0,
+          "iteration_limit_hits": 0
+        },
+        "association_primary_normalized": {
+          "n": 656,
+          "signal": "dispersion_lag1",
+          "coef": 0.006537298031658895,
+          "hac_t": 0.16528882173253065,
+          "p_two_sided": 0.8687166567720926,
+          "nw_lag": 4,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "association_usd_only_robustness": {
+          "n": 656,
+          "signal": "dispersion_usd_only_lag1",
+          "coef": -0.019070551683269876,
+          "hac_t": -0.5102987309362284,
+          "p_two_sided": 0.6098421916983079,
+          "nw_lag": 4,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "association_raw_native_sensitivity": {
+          "n": 656,
+          "signal": "dispersion_native_lag1",
+          "coef": 0.08329406216050686,
+          "hac_t": 1.8564525251350743,
+          "p_two_sided": 0.0633890839296329,
+          "nw_lag": 4,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "liquidity_drought_volume_proxy": {
+          "n": 656,
+          "drought_rate": 0.22408536585365854,
+          "coef": -0.021199720265609796,
+          "hac_t": -1.2785975751843155,
+          "p_two_sided": 0.20103880430761434,
+          "status": "secondary_volume_proxy_only"
+        }
+      }
+    },
+    "ETH": {
+      "1": {
+        "rv_forecast": {
+          "n_oos": 407,
+          "oos_start": "2025-05-30",
+          "oos_end": "2026-07-10",
+          "qlike_base": 1.9380257503648322,
+          "qlike_augmented": 1.9488323486720351,
+          "qlike_improvement_pct": -0.557608602732376,
+          "mse_base": 6.4156302903145715e-06,
+          "mse_augmented": 6.450657359663925e-06,
+          "spearman_base": {
+            "rho": 0.10288938077984731,
+            "p": 0.03800132372629638
+          },
+          "spearman_augmented": {
+            "rho": 0.09710250278201597,
+            "p": 0.050280205636455216
+          },
+          "dm_hln": {
+            "t_raw": 1.303322718820648,
+            "t_hln": 1.3017206005520836,
+            "p_two_sided": 0.19375001319612967,
+            "mean_loss_diff_aug_minus_base": 0.010806598307202897,
+            "n": 407,
+            "nw_lag": 0,
+            "direction": "negative_t_means_augmented_better",
+            "bh_fdr_q_primary_family_8": 0.38750002639225933,
+            "primary_gate_pass": false
+          },
+          "dm_helper_crosscheck": {
+            "t": 1.2207529779207933,
+            "p": 0.22288805258935018,
+            "h": 1
+          },
+          "clark_west_nested_mse": {
+            "mean_adjusted_loss_gain": 0.002655271425249007,
+            "hac_t": 0.08964438731160099,
+            "p_one_sided_aug_better": 0.46428490520255444
+          },
+          "subperiod_sensitivity": [
+            {
+              "name": "early",
+              "start": "2025-05-30",
+              "end": "2025-12-18",
+              "n": 203,
+              "qlike_improvement_pct": -0.6324664015600543
+            },
+            {
+              "name": "late",
+              "start": "2025-12-19",
+              "end": "2026-07-10",
+              "n": 204,
+              "qlike_improvement_pct": -0.49272520772031875
+            }
+          ],
+          "fit_failures": 0
+        },
+        "left_tail_forecast": {
+          "n_oos": 407,
+          "oos_start": "2025-05-30",
+          "oos_end": "2026-07-10",
+          "pinball_base": 0.004197863801822266,
+          "pinball_augmented": 0.004272737414497832,
+          "pinball_improvement_pct": -1.783612242089988,
+          "breach_rate_base": 0.04914004914004914,
+          "breach_rate_augmented": 0.051597051597051594,
+          "dm_hln": {
+            "t_raw": 1.4448954153415676,
+            "t_hln": 1.4431192678781226,
+            "p_two_sided": 0.14975796032598804,
+            "mean_loss_diff_aug_minus_base": 7.487361267556667e-05,
+            "n": 407,
+            "nw_lag": 0,
+            "direction": "negative_t_means_augmented_better",
+            "bh_fdr_q_primary_family_8": 0.38750002639225933,
+            "primary_gate_pass": false
+          },
+          "dm_helper_crosscheck": {
+            "t": 1.5723403840810308,
+            "p": 0.11665057150810965,
+            "h": 1
+          },
+          "refit_every": 7,
+          "fit_failures": 0,
+          "convergence_warnings": 0,
+          "iteration_limit_hits": 0
+        },
+        "association_primary_normalized": {
+          "n": 660,
+          "signal": "dispersion_lag1",
+          "coef": 0.07491016359378336,
+          "hac_t": 0.7805504362252836,
+          "p_two_sided": 0.43506695242997984,
+          "nw_lag": 0,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "association_usd_only_robustness": {
+          "n": 660,
+          "signal": "dispersion_usd_only_lag1",
+          "coef": 0.06548357706247462,
+          "hac_t": 0.6683277945811431,
+          "p_two_sided": 0.5039243750112999,
+          "nw_lag": 0,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "association_raw_native_sensitivity": {
+          "n": 660,
+          "signal": "dispersion_native_lag1",
+          "coef": 0.010509633422885828,
+          "hac_t": 0.11554857395269923,
+          "p_two_sided": 0.9080103218283241,
+          "nw_lag": 0,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "liquidity_drought_volume_proxy": {
+          "n": 660,
+          "drought_rate": 0.07727272727272727,
+          "coef": -0.02198521564350943,
+          "hac_t": -2.460559289668341,
+          "p_two_sided": 0.013872064935017994,
+          "status": "secondary_volume_proxy_only"
+        }
+      },
+      "5": {
+        "rv_forecast": {
+          "n_oos": 399,
+          "oos_start": "2025-06-03",
+          "oos_end": "2026-07-06",
+          "qlike_base": 0.518785494316167,
+          "qlike_augmented": 0.5192207562904796,
+          "qlike_improvement_pct": -0.08390018207549861,
+          "mse_base": 4.980545544645509e-05,
+          "mse_augmented": 4.992354236470233e-05,
+          "spearman_base": {
+            "rho": 0.1042721124419088,
+            "p": 0.037344513231053936
+          },
+          "spearman_augmented": {
+            "rho": 0.0936570068387048,
+            "p": 0.06161753986205235
+          },
+          "dm_hln": {
+            "t_raw": 0.21363309457401713,
+            "t_hln": 0.21122352911861647,
+            "p_two_sided": 0.8328209614487367,
+            "mean_loss_diff_aug_minus_base": 0.000435261974312536,
+            "n": 399,
+            "nw_lag": 4,
+            "direction": "negative_t_means_augmented_better",
+            "bh_fdr_q_primary_family_8": 0.8328209614487367,
+            "primary_gate_pass": false
+          },
+          "dm_helper_crosscheck": {
+            "t": 0.20948502330039814,
+            "p": 0.8341768101267064,
+            "h": 5
+          },
+          "clark_west_nested_mse": {
+            "mean_adjusted_loss_gain": 0.0008589874235534688,
+            "hac_t": 0.16747028974257053,
+            "p_one_sided_aug_better": 0.4335000113612863
+          },
+          "subperiod_sensitivity": [
+            {
+              "name": "early",
+              "start": "2025-06-03",
+              "end": "2025-12-18",
+              "n": 199,
+              "qlike_improvement_pct": -0.42128152598006063
+            },
+            {
+              "name": "late",
+              "start": "2025-12-19",
+              "end": "2026-07-06",
+              "n": 200,
+              "qlike_improvement_pct": 0.10604134208659656
+            }
+          ],
+          "fit_failures": 0
+        },
+        "left_tail_forecast": {
+          "n_oos": 399,
+          "oos_start": "2025-06-03",
+          "oos_end": "2026-07-06",
+          "pinball_base": 0.00954148012732662,
+          "pinball_augmented": 0.009582509910215553,
+          "pinball_improvement_pct": -0.430014865004282,
+          "breach_rate_base": 0.03759398496240601,
+          "breach_rate_augmented": 0.03759398496240601,
+          "dm_hln": {
+            "t_raw": 0.4550858335373201,
+            "t_hln": 0.44995292514632257,
+            "p_two_sided": 0.652989352093142,
+            "mean_loss_diff_aug_minus_base": 4.102978288893624e-05,
+            "n": 399,
+            "nw_lag": 4,
+            "direction": "negative_t_means_augmented_better",
+            "bh_fdr_q_primary_family_8": 0.8328209614487367,
+            "primary_gate_pass": false
+          },
+          "dm_helper_crosscheck": {
+            "t": 0.40766295602938263,
+            "p": 0.6837403284563588,
+            "h": 5
+          },
+          "refit_every": 7,
+          "fit_failures": 0,
+          "convergence_warnings": 0,
+          "iteration_limit_hits": 0
+        },
+        "association_primary_normalized": {
+          "n": 656,
+          "signal": "dispersion_lag1",
+          "coef": 0.047054295106254085,
+          "hac_t": 1.060779657246693,
+          "p_two_sided": 0.2887900491958475,
+          "nw_lag": 4,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "association_usd_only_robustness": {
+          "n": 656,
+          "signal": "dispersion_usd_only_lag1",
+          "coef": 0.03926080173476364,
+          "hac_t": 0.8673984423332138,
+          "p_two_sided": 0.3857237350348204,
+          "nw_lag": 4,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "association_raw_native_sensitivity": {
+          "n": 656,
+          "signal": "dispersion_native_lag1",
+          "coef": 0.015403887052971604,
+          "hac_t": 0.2832973999249227,
+          "p_two_sided": 0.776948870242194,
+          "nw_lag": 4,
+          "interpretation": "association only; not causal and not in primary OOS verdict"
+        },
+        "liquidity_drought_volume_proxy": {
+          "n": 656,
+          "drought_rate": 0.27896341463414637,
+          "coef": -0.033115712965540396,
+          "hac_t": -1.6483368311345241,
+          "p_two_sided": 0.09928357076346578,
+          "status": "secondary_volume_proxy_only"
+        }
+      }
+    }
+  },
+  "verdict": {
+    "status": "NULL_NO_ROBUST_OOS_INCREMENT",
+    "n_primary_pass": 0,
+    "n_positive_loss_directions": 1,
+    "assets_with_primary_pass": [],
+    "claim_scope": "predictive association of a lagged daily close-price dispersion proxy; never executable arbitrage"
+  },
+  "figures": [
+    "k1682_fragmentation_timeseries.png",
+    "k1682_oos_loss_comparison.png"
+  ],
+  "references": [
+    {
+      "authors": "Makarov, I.; Schoar, A.",
+      "year": 2020,
+      "title": "Trading and arbitrage in cryptocurrency markets",
+      "journal": "Journal of Financial Economics 135(2), 293-319",
+      "doi": "10.1016/j.jfineco.2019.07.001"
+    },
+    {
+      "authors": "Brandvold, M.; Molnar, P.; Vagstad, K.; Valstad, O.C.A.",
+      "year": 2015,
+      "title": "Price discovery on Bitcoin exchanges",
+      "journal": "Journal of International Financial Markets, Institutions and Money 36, 18-35",
+      "doi": "10.1016/j.intfin.2015.02.010"
+    },
+    {
+      "authors": "Hautsch, N.; Scheuch, C.; Voigt, S.",
+      "year": 2024,
+      "title": "Building Trust Takes Time: Limits to Arbitrage for Blockchain-Based Assets",
+      "journal": "Review of Finance 28(4), 1345-1381",
+      "doi": "10.1093/rof/rfae004"
+    },
+    {
+      "authors": "Corsi, F.",
+      "year": 2009,
+      "title": "A simple approximate long-memory model of realized volatility",
+      "journal": "Journal of Financial Econometrics 7(2), 174-196",
+      "doi": "10.1093/jjfinec/nbp001"
+    },
+    {
+      "authors": "Patton, A.J.",
+      "year": 2011,
+      "title": "Volatility forecast comparison using imperfect volatility proxies",
+      "journal": "Journal of Econometrics 160(1), 246-256",
+      "doi": "10.1016/j.jeconom.2010.03.034"
+    }
+  ],
+  "review": {
+    "pre_run": {
+      "status": "PASS_TO_RUN",
+      "artifact": "codex_review_pre_run.md",
+      "reviewed_before_formal_execution": true
+    },
+    "post_run": {
+      "status": "PASS",
+      "artifact": "codex_review.md",
+      "independent_numeric_verification": true
+    }
+  }
+}
