@@ -16017,5 +16017,16 @@
     "actor": "hourly-23",
     "topology_override": "subagent effort low->high (canonical 研究紀錄正確性回溯，governance 預設 low 不足)",
     "summary": "k865 FEVD 取錯軸 bug：修 code、重跑、下游回溯更正。三個 headline 結論撤回（TSI 恆定90%/SPY 角色翻轉/BTC 傳染樞紐皆為 mis-slice artifact）。更正 knowledge K865 + 撤回 feed mile_8cc3dfe9 + 改寫 live digest mile_1597b341 第四層並移除推翻連結 + Supabase synced。新增機械 gate test_fevd_shape.py（13 passed，含負向對照）。commit c1831a0f6。盲區：Cholesky ordering 使修正後的 SPY-hub 讀法仍非 ordering-robust，待 GFEVD 重跑。"
+  },
+  {
+    "timestamp": "2026-07-12T01:10:31+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-9717e5084",
+    "outcome": "succeeded",
+    "summary": "close dm hac batch 2",
+    "commit": "9717e5084c09092db4006cc8d96ed463919b4462",
+    "owner": "codex",
+    "backfilled_at": "2026-07-11T17:11:22.132096+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
