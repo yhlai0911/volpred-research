@@ -15639,5 +15639,18 @@
     "actor": "hourly-12",
     "owner": "claude",
     "summary": "釋出池凍結第2次根因修復：arc-dedup 跨受眾把科普孿生文判成鬼打牆(74 個 K 本就雙受眾)，冷卻旗標每次重評又蓋新章→永不到期。修法：arc-dedup 限縮同受眾內比對 + 冷卻旗標蓋 gate 版本號(自我失效)。驗證：dedup_flagged 5→0、eligible 0→5，釋出 mile_30438396(卡12天) supabase_synced+verified_live。5 個回歸測試；90 tests pass。"
+  },
+  {
+    "timestamp": "2026-07-11T12:32:47+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_arc_dedup_audience_scope_class_sweep",
+    "outcome": "succeeded",
+    "actor": "hourly-12",
+    "owner": "claude",
+    "summary": "arc-dedup 誤判 class sweep（find_arc_duplicates 5 個呼叫點全查）：受眾限縮做進共用函式。refill_task_pool 同誤判且正造成傷害(本班開頭跳掉 5 個 K)→已修，K1611/K1639/K1572/K1583 恢復入池、K1654/K1513 仍正確被擋。refill_reader_facing_pool 刻意不動(標籤異質，限縮會削弱防線)。check_arc_dedup 需 brief wiring，另立任務。495 tests pass。",
+    "commits": [
+      "c294e9ee3",
+      "cb5d45cd9"
+    ]
   }
 ]
