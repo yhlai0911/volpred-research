@@ -60,5 +60,25 @@ VaR / ES 實驗或文章若寫 `Basel` / traffic-light，必須說清楚是標�
 ### 跨資產 pooled inference 不可把 asset-day 當 iid
 多資產 forecast / strategy 檢定若把同一日期的多個資產樣本串成 pooled array，**不得**直接把 stacked asset-day DM / t-test 當 primary publication claim。除非已明確實作並揭露 cluster-robust / panel HAC，否則預設做法是先按日期聚合 cross-asset loss differential，再對日期序列做 HAC / DM；stacked asset-day 結果只能放 diagnostic。**K1355 教訓**：同日跨資產 loss differential 有共同市場 shock，直接串接會低估標準誤並誇大顯著性。
 
+### 修訂型總經資料的 OOS 必須用 real-time vintage，且不得在首次發布日前評分
+FRED / 主計總處這類序列，**「今天下載的歷史」≠「當時看得到的歷史」**。兩個獨立陷阱都要擋：
+(a) **回溯修訂** — 指數的歷史值會隨新資料與模型重估而改；用 final vintage 做 OOS 等於偷看未來。
+(b) **首次發布日** — 很多指數的早期歷史是事後 **backcast** 出來的，當時世界上根本沒有這個數字。
+做法：查該序列的 first ALFRED release date，**禁止在該日前的 origin 評分**，並用 vintage API 取每個
+forecast origin 當時有效的 vintage 重建特徵。做不到就必須把結果全面改稱 **final-vintage pseudo-OOS**，
+撤回 real-time predictive claim，不可包裝成 PIT。
+**K1655 教訓**（2026-07-11 Codex primary-path re-verify FAIL）：NFCI 2011 才公開、OOS 從 2004 起 →
+343/1131 個預測原點早於指數存在；README 宣稱「rigorous PIT」但實際是 back-stamp 今日修訂後歷史。
+
+### DM 的 HAC 落後期不可只用 `h-1`；先量 acf 再決定
+`lag = h-1` 只涵蓋**最適預測下重疊視窗**造成的 MA(h-1)。一旦比較的是**誤設模型 vs 基準**、或預測子高度持續
+（NFCI / VIX / 任何慢變總經指標），loss differential 的自相關會遠超 h-1。**h=1 時 `h-1 = 0` 等於完全不做
+HAC** — 這個退化行為要當場警覺。硬規則：`lag = max(h-1, repo canonical bandwidth)`，canonical =
+`volpred.stats.model_evaluation.dm_test` 的 `ceil(h^(1/3)·n^(1/3))`；並報 lag sensitivity。
+**不要自寫 local DM/HLN 實作蓋掉 canonical** — canonical 存在就用它，要另寫必須以它為下限/對照。
+**K1655 教訓**：local `hln_dm` 用 `lag=h-1`，h=1→lag=0，loss differential acf(1)=0.68 → |t| 灌水；
+修正後 60 個 DM cell 的 Harvey-significant 由 26 掉到 18。腳本裡的 helper 欄位其實一直存著正確答案，
+只是沒人拿它當主檢定。
+
 ### 跨市場比較必 symmetric refinement
 若 benchmark 用 canonical spec（e.g. DEV refined EM）、alternative 用 unrefined EM-only，得到的係數差是 **asymmetric artifact 不是真效應**。必須**兩邊同步 refine** 或**兩邊同 EM-only**。**K1216b ρ=-0.071 教訓**：asymmetric refinement 下 spurious 負相關；K1216c 全 refine 後 ρ=+0.379 與 canonical +0.441 indistinguishable（null）。

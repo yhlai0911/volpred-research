@@ -1,10 +1,36 @@
 # K1655 — Growth-at-Risk moved to markets: Equity/Vol-at-Risk multi-horizon quantile regression
 
-**Verdict: `CONDITIONAL_PASS`** — the Growth-at-Risk *structure* replicates cleanly
-for an equity market **in-sample**, but its **out-of-sample** predictive value for the
-return left tail is **marginal and horizon-1-only** (fails the Harvey |t|>3 bar), and is
-**dominated by VIX**. Honest cross-domain contrast: GaR is a real conditional-distribution
-description for equities, but not a strong predictive edge for efficient equity return tails.
+**Verdict: `FAIL` (2026-07-11, Codex primary-path re-verify) — NOT closed, do not cite as settled.**
+
+The earlier `CONDITIONAL_PASS` was issued by a code-reviewer **subagent fallback** (2026-07-09,
+Codex quota exhausted). The primary-path Codex re-verify returns **FAIL**. Per the K1259 rule
+(*subagent fallback PASS ≠ primary-path Codex PASS*), the primary verdict governs.
+
+Four blocking defects (full record: `reviews/codex_primary_reverify_2026-07-11.md`):
+
+1. **NFCI is not point-in-time.** The script pulls today's fully-revised NFCI history and
+   back-stamps it. NFCI was not published until 2011; the OOS window starts 2004, so
+   **343/1131 (H=1) forecast origins predate the index's first ALFRED release**, and post-2011
+   origins still use a vintage unknown at the time. The README's "rigorous PIT" claim is void.
+   *Fix: rebuild features from real ALFRED vintages; refuse to score before first release.*
+2. **HAC lag was too short (FIXED in this commit).** `lag = h−1` degenerates to lag=0 at h=1,
+   while the loss differential has acf(1)≈0.68. `_nw_lag` now floors the lag at the
+   repo-canonical bandwidth. Rerun done: Harvey-significant cells **26 → 18** of 60.
+   Residual: nested/recursive-estimation inference still not handled (needs Giacomini–White
+   or a recursive block bootstrap).
+3. **"VIX dominates/subsumes NFCI" was never tested.** NFCI and VIX are each compared only
+   against the unconditional benchmark — no paired NFCI-vs-VIX DM, no encompassing test.
+   The point estimates favour VIX; the *subsumption* claim is unsupported.
+4. **In-sample bootstrap is not robust.** `block=H` degenerates to iid pairs at H=1;
+   `boot_p` is a normal-approximation p, not a bootstrap-null p.
+
+**What survives.** The headline finding — *NFCI has no out-of-sample predictive value for the
+equity return left tail* — is a **NULL and it holds**, and defect 1 biases *in NFCI's favour*
+(revised data flatters it), so correcting it can only strengthen the null. The published
+article `mile_9c211681` is therefore **not retracted**, but has been amended in place with a
+correction covering defects 1–3.
+
+Follow-ups: `k1655_alfred_pit_rerun`, `k1655_vix_nfci_encompassing`, `k1655_dm_lag_class_sweep`.
 
 ---
 
@@ -132,32 +158,45 @@ from 0.** Cross-domain GaR structure confirmed. (Chart: `K1655_nfci_slope_across
 
 ### 6b. Out-of-sample — Equity-at-Risk (τ=0.05), pinball loss vs unconditional
 
-| Spec | H | pinball reduction | HLN-DM t (lag H−1) | HLN-DM p | helper-DM t | Harvey \|t\|>3 |
-|---|---|---|---|---|---|---|
-| **NFCI** | 1w | +6.7% | **−2.74** | 0.006 | −2.09 | ✗ |
-| NFCI | 4w | +3.5% | −0.87 | 0.382 | −1.01 | ✗ |
-| NFCI | 12w | −3.3% | +0.74 | 0.460 | +0.65 | ✗ |
-| **VIX** | 1w | +12.5% | **−3.62** | 0.0003 | — | **✓** |
-| VIX | 4w | +7.4% | −2.31 | 0.021 | — | ✗ |
-| VIX | 12w | +0.3% | −0.08 | 0.937 | — | ✗ |
+> **2026-07-11 correction (Codex primary-path re-verify).** The DM HAC lag was originally
+> `h−1`, which at h=1 degenerates to lag=0 — no HAC at all — while the measured loss-differential
+> autocorrelation is acf(1)≈0.68 (persistent conditioning variable, not just window overlap).
+> `hln_dm` now floors the lag at the repo-canonical bandwidth (`_nw_lag`). Numbers below are the
+> corrected rerun. Across all 60 DM cells, Harvey-significant count drops **26 → 18**.
+> Direction of every headline conclusion is unchanged; the *strength* of several is lower.
 
-- **NFCI** helps the equity return tail **only at H=1w** (p=0.006 under lag=H−1; p≈0.037 under
-  the more conservative helper auto-bandwidth) and **fails the Harvey |t|>3 bar at every
-  horizon**. The edge **vanishes by 4w and is negative at 12w**.
-- **VIX dominates NFCI** and **passes Harvey at H=1w** — the forward-looking market vol absorbs
-  and exceeds the backward macro index for the equity left tail. This **confirms K503/K828**
-  ("VIX absorbs stress indices") in a new tail-quantile / GaR framing.
+| Spec | H | pinball reduction | HLN-DM t (HAC lag) | HLN-DM p | Harvey \|t\|>3 |
+|---|---|---|---|---|---|
+| **NFCI** | 1w | +6.7% | **−2.09** (lag 11) | 0.037 | ✗ |
+| NFCI | 4w | +3.5% | −1.01 (lag 17) | 0.315 | ✗ |
+| NFCI | 12w | −3.3% | +0.64 (lag 24) | 0.520 | ✗ |
+| **VIX** | 1w | +12.5% | **−3.15** (lag 11) | 0.0017 | **✓ (marginal)** |
+| VIX | 4w | +7.4% | −2.57 (lag 17) | 0.010 | ✗ |
+| VIX | 12w | +0.3% | −0.07 (lag 24) | 0.944 | ✗ |
+
+- **NFCI** helps the equity return tail **only at H=1w** (p=0.037) and **fails the Harvey |t|>3 bar
+  at every horizon**. The edge **vanishes by 4w and is negative at 12w**. This is the headline
+  finding and it is a NULL — the stricter HAC only reinforces it.
+- **VIX dominates NFCI** and **passes Harvey at H=1w, but only marginally** (|t|=3.15 vs a bar of
+  3.0; it was 3.62 under the old lag=0). The forward-looking market vol absorbs and exceeds the
+  backward macro index for the equity left tail — directionally consistent with **K503/K828**
+  ("VIX absorbs stress indices") in a new tail-quantile / GaR framing, but a single marginal cell
+  out of 60 tests is **not** publication-strength on its own.
 - OOS calibration is good: the conditional 5% quantile breaches **4.2%** of the time (target 5%),
   deepening precisely in 2008/2020 (chart: `K1655_gar_quantiles_vs_realized.png`).
 
 ### 6c. Out-of-sample — Vol-at-Risk (τ=0.95), secondary
 
-| Spec | H | pinball reduction | HLN-DM t | HLN-DM p | Harvey |
+| Spec | H | pinball reduction | HLN-DM t (HAC lag) | HLN-DM p | Harvey |
 |---|---|---|---|---|---|
-| NFCI | 1w | +25.4% | −4.22 | 2.6e-5 | ✓ |
-| NFCI | 4w | +20.5% | −2.33 | 0.020 | ✗ |
-| VIX | 1w | +51.4% | −7.25 | 7.5e-13 | ✓ |
-| VIX | 4w | +37.0% | −3.31 | 0.001 | ✓ |
+| NFCI | 1w | +25.4% | −1.71 (lag 11) | 0.088 | ✗ (was ✓ at lag 0) |
+| NFCI | 4w | +20.5% | −1.63 (lag 17) | 0.103 | ✗ |
+| VIX | 1w | +51.4% | −3.36 (lag 11) | 0.0008 | ✓ |
+| VIX | 4w | +37.0% | −2.51 (lag 17) | 0.012 | ✗ (was ✓ at lag 3) |
+
+The Vol-at-Risk block is where the old lag rule did the most damage: NFCI's τ=0.95 "Harvey-significant"
+result at H=1w was **entirely an artifact of lag=0** (t went −4.22 → −1.71). NFCI now clears the Harvey
+bar **nowhere** in this experiment.
 
 Both NFCI and VIX strongly predict the **upper tail of future realized vol** at short horizons.
 This is **largely the well-known volatility-persistence / VIX→RV result, not a novel GaR claim** —

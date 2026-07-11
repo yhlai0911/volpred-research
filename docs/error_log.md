@@ -2,6 +2,60 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-11 fallback reviewer 說 PASS，primary Codex 說 FAIL —— K1259 那條規則不是形式主義
+
+**問題**：K1655（Growth-at-Risk 搬到股市）2026-07-09 因 Codex 額度耗盡，24h review 走了 `code-reviewer`
+subagent **fallback**，verdict = PASS、零修正，文章 `mile_9c211681` 據此發佈。今天（hourly-16）補跑
+primary-path `codex exec` 二次驗證 → **VERDICT = FAIL**，四個 critical。fallback 一個都沒抓到。
+
+**現象**：
+
+1. **NFCI 不是 point-in-time**（fallback 完全沒看見；我自己也沒看見，是 Codex 抓的）。`K1655.py:120-182`
+   抓的是 FRED **今日修訂後**的完整歷史，再人為 back-stamp `obs_date + 3BDay` 當作「當時可得」。但 NFCI
+   2011 年才公開（首個 ALFRED release 2011-05-25），而 OOS 從 2004 開始 → **H=1 有 343/1131 個預測原點
+   早於這個指數存在的日期**。且 Chicago Fed 明載 NFCI 歷史值會回溯修訂，2011 後的 origins 也用了當時未知的
+   final vintage。README 的「rigorous PIT」宣稱無效。
+2. **DM 的 HAC 落後期太短**。local `hln_dm` 用教科書的 `lag = h-1`，h=1 時退化成 **lag=0 = 完全不做 HAC**。
+   但 loss differential 的 acf(1)≈0.68 —— 那是 NFCI/VIX 這種 persistent 預測子造成的，不是重疊視窗造成的
+   MA(h-1)，`h-1` 規則救不到。變異數被低估、|t| 灌水。
+3. **「VIX 蓋過 NFCI」從未被檢定**。腳本只把 NFCI-only 和 VIX-only 各自跟無條件基準比，沒有 NFCI vs VIX 的
+   配對 DM，也沒有 encompassing test。但那是 README verdict 的核心敘事，也是線上文章的一整個段落標題。
+4. In-sample bootstrap 的 `block=H` 在 H=1 退化成 iid pairs；`boot_p` 其實是常態近似 p 不是 bootstrap-null p。
+
+**過程**：Codex 沒有只讀 code —— 它自己重算了 loss differential 的自相關結構，實測 t 從 lag 0 的 −4.22 一路
+掉到 lag 11 的 −1.71。我獨立從 results JSON 推出同一件事：腳本本來就存了一個用自動頻寬的 helper-DM 作
+cross-check，而 helper 的 −1.7068 跟 Codex 手算的 −1.7069 完全吻合。**三條獨立路徑收斂到同一個數字**，
+而灌水的那一欄正是被寫進 `harvey_significant` flag、再被寫進文章的那一欄。
+
+**解決方法**：
+
+- `_nw_lag()`：HAC 落後期以 repo canonical bandwidth（`volpred.stats.model_evaluation.dm_test` 的
+  `ceil(h^(1/3)·n^(1/3))`）為**下限**，`lag = max(h-1, canonical)`。重跑 192s，60 個 DM cell 的
+  `harvey_significant` **26 → 18**（8 個翻盤）。文章引用的那格 −3.62 → **−3.15**（仍過門檻但只是勉強過）。
+- 線上文章 `mile_9c211681` **不下架**、就地更正。判斷依據是**方向**：PIT 修訂偏誤讓 NFCI 看起來比實際更強，
+  而文章主結論是「NFCI 預測不了股市左尾」—— 在一個對它有利的環境下它都做不到，換成真實即時資料只會更 null。
+  主結論保守安全，過度宣稱的是「輕鬆過關」與「VIX 蓋過 NFCI」兩處，已改寫並加完整限制聲明（Supabase 已驗證）。
+- README verdict `CONDITIONAL_PASS` → **`FAIL`（未結案）**。Review 全文存
+  `experiments/K1655/reviews/codex_primary_reverify_2026-07-11.md`。
+- Follow-ups：`k1655_alfred_pit_rerun`（ALFRED 真 vintage 重建）、`k1655_vix_nfci_encompassing`（配對 DM +
+  encompassing）、`k1655_dm_lag_class_sweep`（**bug class**：grep 出 20+ 實驗自寫 local DM，需全量掃
+  `lag=h-1` + h=1；終局是收斂到 `volpred.stats` 單一 owner + CI gate 擋新的 local 實作）。
+
+**教訓**：
+
+- **(L1)** `.claude/rules/experiments.md` 的「subagent fallback PASS ≠ primary-path Codex PASS」不是形式規則。
+  這次 fallback 給了 PASS/零修正，primary 給了 FAIL/四個 critical，其中一個（PIT）足以推翻整個 real-time
+  predictive claim。**額度恢復後補跑 primary 是硬義務，不是 nice-to-have。**
+- **(L2)** 「教科書規則」不等於「這份資料適用」。`lag = h-1` 對**最適預測**下的重疊視窗是對的；一旦比較的是
+  **誤設模型 vs 基準**、而且預測子高度持續，loss differential 的自相關遠超 MA(h-1)。**寫 DM 前先量 acf，
+  不要背公式。** h=1 時 `h-1 = 0`（等於沒有 HAC）這個退化行為尤其該當場警覺。
+- **(L3)** 自寫 local 統計實作會**蓋掉** repo canonical 的正確版本，而且不會有任何人發現 —— K1655 的 helper
+  欄位其實一直存著正確答案，只是沒有人拿它當主檢定。**canonical 存在時不要自己再寫一份**（experiments.md
+  既有規則），要寫就必須以 canonical 為下限/對照。
+- **(L4)** 修訂型總經資料（NFCI、GDP、就業）用在 OOS 預測時，**「今天下載的歷史」≠「當時看得到的歷史」**。
+  必須查該序列的**首次發布日**（很多指數的歷史值是事後 backcast 出來的），並用 vintage API。這條之前沒有任何
+  規則涵蓋，已寫入 experiments.md。
+
 ## 2026-07-11 supervisor 說它 SIGKILL 了 worker —— 但那個 killpg 其實被拒了，而且被拒的原因是屍體
 
 **現象**（boss Telegram msg 465）：14:07 那班 hourly agent 在 session 內裸跑 `codex exec` 補渲染

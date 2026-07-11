@@ -199,9 +199,28 @@ def fit_quantreg(X: np.ndarray, y: np.ndarray, tau: float):
     return res  # params[0]=intercept, params[1:]=slopes
 
 
+def _nw_lag(horizon: int, n: int) -> int:
+    """Newey-West truncation lag for the DM loss differential.
+
+    The textbook DM rule is lag = h-1, which covers only the MA(h-1) structure that
+    overlapping forecast windows induce *under forecast optimality*. Here we compare a
+    misspecified conditional quantile model against an unconditional benchmark, and the
+    conditioning variable (NFCI / VIX) is highly persistent, so the loss differential
+    carries serial correlation well beyond h-1 (measured acf(1) ~= 0.68). At h=1 the
+    textbook rule degenerates to lag=0 -- i.e. no HAC correction at all -- which
+    understates the variance and inflates |t|.
+
+    Floor the lag at the repo-canonical bandwidth used by
+    volpred.stats.model_evaluation.dm_test so the two never disagree by construction.
+    """
+    canonical = max(1, min(int(np.ceil(horizon ** (1 / 3) * n ** (1 / 3))), n // 4))
+    return max(horizon - 1, canonical)
+
+
 def hln_dm(loss_a: np.ndarray, loss_b: np.ndarray, horizon: int):
-    """Diebold-Mariano on a loss differential with Newey-West lag = horizon-1 and the
-    Harvey-Leybourne-Newbold (1997) small-sample correction.
+    """Diebold-Mariano on a loss differential with a HAC lag that is at least the
+    repo-canonical bandwidth (see _nw_lag) and the Harvey-Leybourne-Newbold (1997)
+    small-sample correction.
 
     d = loss_a - loss_b. Negative t => model A (conditional) has lower loss => better.
     Returns (t_hln, p_hln, nw_lag, n).
@@ -212,7 +231,7 @@ def hln_dm(loss_a: np.ndarray, loss_b: np.ndarray, horizon: int):
     if n < 10:
         return (0.0, 1.0, max(0, horizon - 1), n)
     dbar = d.mean()
-    lag = max(0, horizon - 1)
+    lag = _nw_lag(horizon, n)
     gamma0 = np.mean((d - dbar) ** 2)
     var = gamma0
     for k in range(1, lag + 1):
