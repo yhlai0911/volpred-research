@@ -1,7 +1,7 @@
 ---
 title: "金融情勢一收緊，就能提前看到股市崩跌嗎？真實時點重跑後的答案"
 audience: research
-description: "K1655 改用 ALFRED 真實歷史版本重跑後，NFCI 在 1、4、12 週的股市左尾預測都輸給無條件基準；舊版的有條件通過與 2008 敘事正式撤回。"
+description: "K1655 改用 ALFRED 真實歷史版本重跑後，NFCI 在 1、4、12 週的股市左尾預測都輸給無條件基準；後續直接檢定顯示 VIX 點估較好但優勢不穩健，NFCI 對 VIX 也沒有增量證據。"
 experiment_refs:
   - K1655
 ---
@@ -46,11 +46,33 @@ Growth-at-Risk 的直覺是，金融情勢收緊時，未來結果最差的那�
 
 ![1、4、12 週樣本外 pinball loss 比較；NFCI 在三個期間都高於無條件基準](experiments/K1655/K1655_oos_pinball_by_horizon.png)
 
-## VIX 可以取代 NFCI 嗎？這次沒有回答
+## VIX 對 NFCI：點估較好，證據不夠穩
 
-舊版把 NFCI-only 與 VIX-only 各自對無條件基準的成績放在一起，便寫成「VIX 蓋過 NFCI」。那個結論超出實驗設計。
+舊版把 NFCI-only 與 VIX-only 各自對無條件基準的成績放在一起，便寫成「VIX 蓋過 NFCI」。那個結論超出實驗設計。後續實驗把兩個模型放到相同預測日期，逐筆比較 pinball loss，才真正回答直接勝負。
 
-真實時點樣本中，VIX 對 1 週左尾的點估改善為 11.56%，但 DM-HLN t 只有 −1.34，沒有通過嚴格門檻；4 週改善 3.39%，12 週則為 −5.48%，同樣沒有任何一格過關。更重要的是，這些仍是各自對基準的比較。要判斷 VIX 是否吸收 NFCI 的資訊，還需要 NFCI 對 VIX 的配對檢定或 encompassing test。K1655 沒有做這一步。
+| 預測期間 | 樣本外筆數 | VIX 誤差 | NFCI 誤差 | VIX 點估改善 | 配對檢定統計值 | 多重校正後 p 值 |
+|---|---:|---:|---:|---:|---:|---:|
+| 1 週 | 536 | 0.0026689 | 0.0030762 | **+13.24%** | −1.61 | 0.325 |
+| 4 週 | 530 | 0.0058485 | 0.0062148 | **+5.89%** | −1.54 | 0.325 |
+| 12 週 | 514 | 0.0102404 | 0.0104202 | **+1.73%** | −0.64 | 0.524 |
+
+三個點估計都由 VIX 勝出，幅度則隨期間拉長而縮小。統計強度全部低於平台採用的嚴格 −3 門檻，多重校正後也沒有一格低於 0.05；12 週的前後半樣本甚至換了方向。因此，現有資料沒有提供「VIX 穩健勝過 NFCI」的證據。
+
+## NFCI 還能替 VIX 補上什麼嗎？
+
+直接勝負只回答誰的誤差較低。下一步把 VIX-only 與 VIX+NFCI 放進 forecast-encompassing test，檢查 NFCI 是否帶來 VIX 原本沒有的資訊。正式檢定改採固定 400 筆的 rolling window、每週重估；每筆訓練標籤仍須在預測日以前完全實現。
+
+| 預測期間 | 樣本外筆數 | VIX+NFCI 相對 VIX 改善 | 誤差比較統計值 | CQFE 完整限制校正後 p 值 | NFCI 增量係數校正後 p 值 |
+|---|---:|---:|---:|---:|---:|
+| 1 週 | 386 | **−3.72%** | +0.61 | 0.822 | 1.000 |
+| 4 週 | 380 | **−2.97%** | +0.44 | 0.822 | 1.000 |
+| 12 週 | 364 | **−14.56%** | +1.38 | 0.723 | 1.000 |
+
+加入 NFCI 後，三個期間的點估誤差都更高。CQFE 的有限樣本推論使用 1,999 次 circular moving-block bootstrap，三個期間全部完成 1,999／1,999 次；完整限制與 NFCI 增量係數的校正後 p 值均未達顯著。解析 χ² p 值在部分期間很小，但 5% 尾端、小樣本的 bootstrap 分布極厚尾，且解析 covariance 只用單一 residual sparsity，因此本文以 bootstrap 作正式判讀，χ² 數字只留作診斷。
+
+![VIX 與真實時點 NFCI 的同原點比較；VIX 點估較好但未過嚴格檢定，rolling R=400 加入 NFCI 後三個期間都惡化](experiments/K1655/K1655_vix_nfci_encompassing.png)
+
+兩道檢定合起來得到雙重 null：VIX 沒有證明自己穩健勝過 NFCI，NFCI 也沒有顯示能替 VIX 增加預測資訊。後一句不能倒過來解讀成「VIX 已經吸收 NFCI」；未拒絕增量價值，只代表本樣本沒有偵測到增量。
 
 ## 這個 null 告訴我們什麼
 
@@ -62,4 +84,4 @@ Growth-at-Risk 的直覺是，金融情勢收緊時，未來結果最差的那�
 
 ---
 
-**資料來源**：FRED／ALFRED `NFCI` 完整歷史版本、FRED `VIXCLS`、yfinance `^GSPC`。週頻樣本 2011-05-27 至 2026-06-26，共 788 週。所有數字來自實驗 K1655 的 `K1655_results.json` 與 31,600 列 OOS forecast artifact；獨立數值複核與 post-run review 均通過。
+**資料來源**：FRED／ALFRED `NFCI` 完整歷史版本、FRED `VIXCLS`、yfinance `^GSPC`。週頻樣本 2011-05-27 至 2026-06-26，共 788 週。true-PIT 重跑數字來自實驗 K1655 的 `K1655_results.json` 與 31,600 列 OOS forecast artifact；直接比較與 CQFE 數字來自 `K1655_vix_nfci_encompassing_results.json` 與 4,970 列 addendum artifact。兩部分的獨立數值複核與 post-run review 均通過。

@@ -15920,5 +15920,19 @@
     "owner": "claude",
     "k_id": "K623",
     "summary": "k623 canonical-HAC 重跑判讀（compute queue followup）：QLIKE MF2-vs-GJR t -2.03 → -2.30（p 0.042 → 0.0218）。點估計未動（窗口釘死 END=2026-03-27），差異純歸因 HAC；acf(1..5) 為負 → 縮小 SE → |t| 變大。結論方向未推翻反而略增強，但三項保留條款全部未解（Harvey t>3 未達、收斂率 25%、g mean=1.367 unit-mean 未實現），宣稱強度不升級。新揭露 nuance：MF2 優勢為 QLIKE-specific（MSE 最佳是 EWMA 且 MF2 贏不過，p=0.77）。knowledge f944ff00 回溯更正舊條目；k623 站點自 dm_hac_lag_baseline 退休（137→136）；順修腳本輸出路徑 bug（寫到 repo root 而非 experiments/k623/）。"
+  },
+  {
+    "timestamp": "2026-07-11T12:31:38.870237+00:00",
+    "task_type": "experiment",
+    "task_id": "k1655_vix_nfci_encompassing",
+    "k_id": "K1655",
+    "title": "K1655 VIX versus true-PIT NFCI encompassing follow-up",
+    "status": "succeeded",
+    "verdict": "NULL_NO_DOMINANCE_OR_INCREMENTAL_EVIDENCE",
+    "actor": "codex-vscode",
+    "notes": "Same-origin paired DM found no robust VIX dominance; rolling R=400 CQFE found no NFCI incremental evidence beyond VIX. Independent numeric verification and post-run review PASS.",
+    "experiment_path": "experiments/K1655/",
+    "knowledge_item_id": "3f6af5aa",
+    "extends_knowledge_item_id": "98a3e103"
   }
 ]

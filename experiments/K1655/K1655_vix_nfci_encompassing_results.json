@@ -1,0 +1,689 @@
+{
+  "experiment_id": "K1655_VIX_NFCI_ENCOMPASSING",
+  "parent_experiment_id": "K1655",
+  "title": "VIX versus true-PIT NFCI: paired quantile forecast accuracy and CQFE",
+  "run_at": "2026-07-11T12:27:43.931662+00:00",
+  "methodology_type": "empirical out-of-sample forecast comparison",
+  "seed": 16552,
+  "data": {
+    "asset": "S&P 500 price index (^GSPC), not SPY total return",
+    "target": "forward cumulative log return",
+    "frequency": "weekly W-FRI",
+    "sample": {
+      "start": "2011-05-27",
+      "end": "2026-06-26",
+      "n_weeks": 788
+    },
+    "frozen_inputs": {
+      "base_results_sha256": "c0bad549a563254dfd3558c9f19ef159807c47cc602069b0d7c97a74519067f3",
+      "base_forecasts_sha256": "0b47082bcc51be299be45fc122cc8c5a410cd691a0665594ddd88e68712c468e",
+      "gspc_cache_sha256": "79bbf7f1b203400bd1c4a594cedf9e4c41e3683aab8cbaff3f251c74e7394355",
+      "vix_cache_sha256": "aa12cc1fd4e7a05024f450cdbd1d65f3904951e98f870e6f7d7a23aab76839a5",
+      "nfci_pit_cache_sha256": "eb927e7ebfc33ff8acf0ece00bb000ac95a0bfe684f3e225e9653cb1a17440e0",
+      "alfred_raw_cache_sha256": "a31101f9a82773619a35dd1f0da65250ac2467e5e1c8f8e17bf620067a0e880a",
+      "base_run_at": "2026-07-11T18:42:57.866589",
+      "base_sample": {
+        "start": "2011-05-27",
+        "end": "2026-06-26",
+        "n_weeks": 788
+      }
+    },
+    "offline_only": true,
+    "network_fallback": false,
+    "panel_timing_gates": {
+      "all_nfci_observations_not_after_origin": true,
+      "all_nfci_revisions_started_by_origin": true,
+      "all_nfci_revision_windows_cover_origin": true,
+      "no_pre_first_vintage_origin": true
+    },
+    "output_forecast_artifact": {
+      "path": "K1655_vix_nfci_encompassing_oos.csv",
+      "rows": 4970,
+      "sha256": "04a17e6741dd7ec3da2f15523a8675d5410bcaaaaab7fd015ac115558270e356",
+      "schemes": {
+        "expanding_refit4_bridge": 1580,
+        "rolling_R300": 1430,
+        "rolling_R400": 1130,
+        "rolling_R500": 830
+      }
+    }
+  },
+  "config": {
+    "primary_target": "fwd_ret",
+    "primary_tau": 0.05,
+    "horizons_weeks": [
+      1,
+      4,
+      12
+    ],
+    "frozen_expanding_refit_every": 4,
+    "strict_embargo": "training row j admissible iff j + H < origin i",
+    "cqfe_primary_rolling_window": 400,
+    "cqfe_refit_every": 1,
+    "cqfe_sensitivity_windows": [
+      300,
+      500
+    ],
+    "cqfe_bootstrap_reps": 1999,
+    "cqfe_inference_priority": "circular moving-block bootstrap is primary; chi-square asymptotic p-values are diagnostic only because the analytic covariance uses a single residual sparsity estimate",
+    "multiple_testing": "Holm correction within each pre-registered 3-horizon family",
+    "harvey_gate": "candidate must have t < -3",
+    "quantreg_fit_diagnostics": {
+      "fit_calls": 14306,
+      "iteration_limit_retry_events": 13,
+      "unresolved_iteration_limit_failures": 0,
+      "other_warning_count": 0,
+      "warning_categories": {},
+      "bootstrap_fit_exceptions": 0,
+      "oos_fit_exceptions": 0,
+      "exception_types": {}
+    }
+  },
+  "analysis": {
+    "frozen_expanding_vix_vs_nfci": {
+      "1": {
+        "candidate": "VIX-only",
+        "benchmark": "NFCI-only",
+        "n": 536,
+        "candidate_mean_loss": 0.0026688620668697243,
+        "benchmark_mean_loss": 0.003076212081893213,
+        "mean_loss_differential_candidate_minus_benchmark": -0.0004073500150234885,
+        "candidate_improvement_pct": 13.241935347084095,
+        "canonical_dm_t": -1.6078023485735304,
+        "canonical_dm_p_two_sided": 0.10846842581522331,
+        "canonical_nw_lag": 9,
+        "hln_dm_t_crosscheck": -1.606301832755673,
+        "hln_dm_p_two_sided_crosscheck": 0.10879763600894332,
+        "candidate_better": true,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": -0.0006442249331248212,
+        "second_half_mean_differential": -0.00017047509692215572,
+        "canonical_dm_p_two_sided_holm": 0.32540527744566994,
+        "canonical_dm_p_two_sided_holm_below_0_05": false,
+        "pair_pass": false
+      },
+      "4": {
+        "candidate": "VIX-only",
+        "benchmark": "NFCI-only",
+        "n": 530,
+        "candidate_mean_loss": 0.005848477372624819,
+        "benchmark_mean_loss": 0.0062147592805857615,
+        "mean_loss_differential_candidate_minus_benchmark": -0.00036628190796094204,
+        "candidate_improvement_pct": 5.893742483400239,
+        "canonical_dm_t": -1.5384836924473522,
+        "canonical_dm_p_two_sided": 0.12452829965875112,
+        "canonical_nw_lag": 13,
+        "hln_dm_t_crosscheck": -1.5283232053045535,
+        "hln_dm_p_two_sided_crosscheck": 0.12703000539475995,
+        "candidate_better": true,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": -0.0002650191172620794,
+        "second_half_mean_differential": -0.00046754469865980473,
+        "canonical_dm_p_two_sided_holm": 0.32540527744566994,
+        "canonical_dm_p_two_sided_holm_below_0_05": false,
+        "pair_pass": false
+      },
+      "12": {
+        "candidate": "VIX-only",
+        "benchmark": "NFCI-only",
+        "n": 514,
+        "candidate_mean_loss": 0.010240433055686508,
+        "benchmark_mean_loss": 0.010420225357983176,
+        "mean_loss_differential_candidate_minus_benchmark": -0.00017979230229666826,
+        "candidate_improvement_pct": 1.7254166404273144,
+        "canonical_dm_t": -0.6381646840856792,
+        "canonical_dm_p_two_sided": 0.5236512465567791,
+        "canonical_nw_lag": 19,
+        "hln_dm_t_crosscheck": -0.623886371606188,
+        "hln_dm_p_two_sided_crosscheck": 0.532979526713032,
+        "candidate_better": true,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": -0.0006591387335762886,
+        "second_half_mean_differential": 0.000299554128982952,
+        "canonical_dm_p_two_sided_holm": 0.5236512465567791,
+        "canonical_dm_p_two_sided_holm_below_0_05": false,
+        "pair_pass": false
+      }
+    },
+    "expanding_bridge_vix_nfci_vs_vix": {
+      "1": {
+        "candidate": "VIX+NFCI",
+        "benchmark": "VIX-only",
+        "n": 536,
+        "candidate_mean_loss": 0.0026617415126345277,
+        "benchmark_mean_loss": 0.0026688620668697243,
+        "mean_loss_differential_candidate_minus_benchmark": -7.120554235196627e-06,
+        "candidate_improvement_pct": 0.2668011330967056,
+        "canonical_dm_t": -0.0772310166595996,
+        "canonical_dm_p_two_sided": 0.9384686413656844,
+        "canonical_nw_lag": 9,
+        "hln_dm_t_crosscheck": -0.07715893916684699,
+        "hln_dm_p_two_sided_crosscheck": 0.9385259526822645,
+        "candidate_better": true,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": -0.0002295658111689654,
+        "second_half_mean_differential": 0.00021532470269857213,
+        "canonical_dm_p_two_sided_holm": 0.9384686413656844,
+        "canonical_dm_p_two_sided_holm_below_0_05": false
+      },
+      "4": {
+        "candidate": "VIX+NFCI",
+        "benchmark": "VIX-only",
+        "n": 530,
+        "candidate_mean_loss": 0.006495382098541921,
+        "benchmark_mean_loss": 0.005848477372624819,
+        "mean_loss_differential_candidate_minus_benchmark": 0.0006469047259171011,
+        "candidate_improvement_pct": -11.061079400684566,
+        "canonical_dm_t": 1.9760902015058253,
+        "canonical_dm_p_two_sided": 0.04866367341093092,
+        "canonical_nw_lag": 13,
+        "hln_dm_t_crosscheck": 1.9630396640292327,
+        "hln_dm_p_two_sided_crosscheck": 0.050165101157155556,
+        "candidate_better": false,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": 0.00075175490824618,
+        "second_half_mean_differential": 0.0005420545435880222,
+        "canonical_dm_p_two_sided_holm": 0.09732734682186184,
+        "canonical_dm_p_two_sided_holm_below_0_05": false
+      },
+      "12": {
+        "candidate": "VIX+NFCI",
+        "benchmark": "VIX-only",
+        "n": 514,
+        "candidate_mean_loss": 0.011065464826263218,
+        "benchmark_mean_loss": 0.010240433055686508,
+        "mean_loss_differential_candidate_minus_benchmark": 0.0008250317705767105,
+        "candidate_improvement_pct": -8.056610165705548,
+        "canonical_dm_t": 2.9550464690210925,
+        "canonical_dm_p_two_sided": 0.003269916648924731,
+        "canonical_nw_lag": 19,
+        "hln_dm_t_crosscheck": 2.8889301859858576,
+        "hln_dm_p_two_sided_crosscheck": 0.004028993240468237,
+        "candidate_better": false,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": 0.0008605776400248997,
+        "second_half_mean_differential": 0.0007894859011285213,
+        "canonical_dm_p_two_sided_holm": 0.009809749946774193,
+        "canonical_dm_p_two_sided_holm_below_0_05": true
+      }
+    },
+    "rolling_primary_vix_vs_nfci": {
+      "1": {
+        "candidate": "VIX-only",
+        "benchmark": "NFCI-only",
+        "n": 386,
+        "candidate_mean_loss": 0.0028250761147869514,
+        "benchmark_mean_loss": 0.003285357840493279,
+        "mean_loss_differential_candidate_minus_benchmark": -0.00046028172570632814,
+        "candidate_improvement_pct": 14.010094122265201,
+        "canonical_dm_t": -1.1889151832339655,
+        "canonical_dm_p_two_sided": 0.23520582805452728,
+        "canonical_nw_lag": 8,
+        "hln_dm_t_crosscheck": -1.18737413892687,
+        "hln_dm_p_two_sided_crosscheck": 0.23581213839139736,
+        "candidate_better": true,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": -0.0007518031999771981,
+        "second_half_mean_differential": -0.00016876025143545815,
+        "canonical_dm_p_two_sided_holm": 0.7056174841635818,
+        "canonical_dm_p_two_sided_holm_below_0_05": false
+      },
+      "4": {
+        "candidate": "VIX-only",
+        "benchmark": "NFCI-only",
+        "n": 380,
+        "candidate_mean_loss": 0.0069142139221549425,
+        "benchmark_mean_loss": 0.007198392855717336,
+        "mean_loss_differential_candidate_minus_benchmark": -0.00028417893356239406,
+        "candidate_improvement_pct": 3.9478108413697366,
+        "canonical_dm_t": -0.7611600227493602,
+        "canonical_dm_p_two_sided": 0.44703481842586146,
+        "canonical_nw_lag": 12,
+        "hln_dm_t_crosscheck": -0.7541486733048732,
+        "hln_dm_p_two_sided_crosscheck": 0.45122824705965847,
+        "candidate_better": true,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": -0.0001383774570167535,
+        "second_half_mean_differential": -0.00042998041010803466,
+        "canonical_dm_p_two_sided_holm": 0.7056174841635818,
+        "canonical_dm_p_two_sided_holm_below_0_05": false
+      },
+      "12": {
+        "candidate": "VIX-only",
+        "benchmark": "NFCI-only",
+        "n": 364,
+        "candidate_mean_loss": 0.011939424706964385,
+        "benchmark_mean_loss": 0.013258431117823953,
+        "mean_loss_differential_candidate_minus_benchmark": -0.001319006410859568,
+        "candidate_improvement_pct": 9.948435068507944,
+        "canonical_dm_t": -0.9998947692341076,
+        "canonical_dm_p_two_sided": 0.31802749272915065,
+        "canonical_nw_lag": 17,
+        "hln_dm_t_crosscheck": -0.9683037131379982,
+        "hln_dm_p_two_sided_crosscheck": 0.3335374132390525,
+        "candidate_better": true,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": -0.0030762404198142962,
+        "second_half_mean_differential": 0.00043822759809516044,
+        "canonical_dm_p_two_sided_holm": 0.7056174841635818,
+        "canonical_dm_p_two_sided_holm_below_0_05": false
+      }
+    },
+    "rolling_primary_vix_nfci_vs_vix_dm_diagnostic": {
+      "1": {
+        "candidate": "VIX+NFCI",
+        "benchmark": "VIX-only",
+        "n": 386,
+        "candidate_mean_loss": 0.0029301636942944873,
+        "benchmark_mean_loss": 0.0028250761147869514,
+        "mean_loss_differential_candidate_minus_benchmark": 0.00010508757950753601,
+        "candidate_improvement_pct": -3.7198140948305367,
+        "canonical_dm_t": 0.6095035023663634,
+        "canonical_dm_p_two_sided": 0.5425502743586139,
+        "canonical_nw_lag": 8,
+        "hln_dm_t_crosscheck": 0.608713478051995,
+        "hln_dm_p_two_sided_crosscheck": 0.5430733489888624,
+        "candidate_better": false,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": 0.00017419390812288847,
+        "second_half_mean_differential": 3.59812508921836e-05,
+        "canonical_dm_p_two_sided_holm": 1.0,
+        "canonical_dm_p_two_sided_holm_below_0_05": false
+      },
+      "4": {
+        "candidate": "VIX+NFCI",
+        "benchmark": "VIX-only",
+        "n": 380,
+        "candidate_mean_loss": 0.007119879258687876,
+        "benchmark_mean_loss": 0.0069142139221549425,
+        "mean_loss_differential_candidate_minus_benchmark": 0.00020566533653293458,
+        "candidate_improvement_pct": -2.974529553879263,
+        "canonical_dm_t": 0.436975491071891,
+        "canonical_dm_p_two_sided": 0.6623779845074917,
+        "canonical_nw_lag": 12,
+        "hln_dm_t_crosscheck": 0.43295033502715446,
+        "hln_dm_p_two_sided_crosscheck": 0.6652971268406005,
+        "candidate_better": false,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": 0.0005321731956012446,
+        "second_half_mean_differential": -0.00012084252253537565,
+        "canonical_dm_p_two_sided_holm": 1.0,
+        "canonical_dm_p_two_sided_holm_below_0_05": false
+      },
+      "12": {
+        "candidate": "VIX+NFCI",
+        "benchmark": "VIX-only",
+        "n": 364,
+        "candidate_mean_loss": 0.013677903314424622,
+        "benchmark_mean_loss": 0.011939424706964385,
+        "mean_loss_differential_candidate_minus_benchmark": 0.0017384786074602341,
+        "candidate_improvement_pct": -14.560823910101503,
+        "canonical_dm_t": 1.3786415649362924,
+        "canonical_dm_p_two_sided": 0.16885428579585482,
+        "canonical_nw_lag": 17,
+        "hln_dm_t_crosscheck": 1.3350842383511252,
+        "hln_dm_p_two_sided_crosscheck": 0.18268543479720578,
+        "candidate_better": false,
+        "harvey_t_better_gate": false,
+        "first_half_mean_differential": 0.0031385879882858893,
+        "second_half_mean_differential": 0.0003383692266345791,
+        "canonical_dm_p_two_sided_holm": 0.5065628573875645,
+        "canonical_dm_p_two_sided_holm_below_0_05": false
+      }
+    },
+    "rolling_primary_cqfe": {
+      "1": {
+        "n": 386,
+        "combination_parameters": {
+          "intercept": 0.0036930712184597425,
+          "lambda_vix": 0.9554518056654615,
+          "lambda_vix_nfci": 0.061840281423400256
+        },
+        "canonical_nw_lag": 8,
+        "bootstrap_block_length": 9,
+        "vix_encompasses_joint_null": {
+          "restriction": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "wald": 2.5727329037206097,
+          "asymptotic_p_chi2_df3": 0.4622898858658445,
+          "bootstrap_p": 0.799,
+          "bootstrap_p_holm": 0.822,
+          "bootstrap_holm_reject": false
+        },
+        "joint_encompasses_vix_reverse_null": {
+          "restriction": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "wald": 7.474543687805941,
+          "asymptotic_p_chi2_df3": 0.05821615376914375,
+          "bootstrap_p": 0.5665
+        },
+        "incremental_lambda_joint_zero_subtest": {
+          "restriction": "lambda_vix_nfci = 0",
+          "wald": 0.010121667850619511,
+          "asymptotic_p_chi2_df1": 0.9198628366036465,
+          "bootstrap_p": 0.975,
+          "bootstrap_p_holm": 1.0,
+          "bootstrap_holm_reject": false
+        },
+        "bootstrap": {
+          "requested": 1999,
+          "successful": 1999,
+          "failures": {},
+          "seed": 16553,
+          "method": "circular moving-block, centered studentized Wald roots"
+        },
+        "identification": {
+          "sparsity": 0.19282253451413797,
+          "bandwidth": 0.014658054943312173,
+          "density_at_zero": 5.186115837133542,
+          "standardized_design_condition_number": 4.835294230846844,
+          "covariance_min_eigenvalue": 4.2908612462128375e-06,
+          "condition_number_gate": 100000000.0,
+          "passes_condition_number_gate": true
+        },
+        "nfci_incremental_information_pass": false
+      },
+      "4": {
+        "n": 380,
+        "combination_parameters": {
+          "intercept": -0.11005978201968361,
+          "lambda_vix": -0.31648850729671096,
+          "lambda_vix_nfci": -0.16464592759790264
+        },
+        "canonical_nw_lag": 12,
+        "bootstrap_block_length": 13,
+        "vix_encompasses_joint_null": {
+          "restriction": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "wald": 14.569356401126894,
+          "asymptotic_p_chi2_df3": 0.0022242199946776865,
+          "bootstrap_p": 0.411,
+          "bootstrap_p_holm": 0.822,
+          "bootstrap_holm_reject": false
+        },
+        "joint_encompasses_vix_reverse_null": {
+          "restriction": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "wald": 12.749769122666493,
+          "asymptotic_p_chi2_df3": 0.005210212515997044,
+          "bootstrap_p": 0.4325
+        },
+        "incremental_lambda_joint_zero_subtest": {
+          "restriction": "lambda_vix_nfci = 0",
+          "wald": 0.02561592385855458,
+          "asymptotic_p_chi2_df1": 0.8728418810665246,
+          "bootstrap_p": 0.8975,
+          "bootstrap_p_holm": 1.0,
+          "bootstrap_holm_reject": false
+        },
+        "bootstrap": {
+          "requested": 1999,
+          "successful": 1999,
+          "failures": {},
+          "seed": 16556,
+          "method": "circular moving-block, centered studentized Wald roots"
+        },
+        "identification": {
+          "sparsity": 0.6038790733781735,
+          "bandwidth": 0.02204046156096396,
+          "density_at_zero": 1.6559606783621057,
+          "standardized_design_condition_number": 2.531429213832733,
+          "covariance_min_eigenvalue": 0.0001531512531225004,
+          "condition_number_gate": 100000000.0,
+          "passes_condition_number_gate": true
+        },
+        "nfci_incremental_information_pass": false
+      },
+      "12": {
+        "n": 364,
+        "combination_parameters": {
+          "intercept": -0.18839901619659272,
+          "lambda_vix": -0.415410573934893,
+          "lambda_vix_nfci": -0.346785952355833
+        },
+        "canonical_nw_lag": 17,
+        "bootstrap_block_length": 18,
+        "vix_encompasses_joint_null": {
+          "restriction": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "wald": 37.45600190124078,
+          "asymptotic_p_chi2_df3": 3.684646508112463e-08,
+          "bootstrap_p": 0.241,
+          "bootstrap_p_holm": 0.723,
+          "bootstrap_holm_reject": false
+        },
+        "joint_encompasses_vix_reverse_null": {
+          "restriction": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "wald": 58.089461439908426,
+          "asymptotic_p_chi2_df3": 1.5042313200956133e-12,
+          "bootstrap_p": 0.155
+        },
+        "incremental_lambda_joint_zero_subtest": {
+          "restriction": "lambda_vix_nfci = 0",
+          "wald": 0.1916398076917631,
+          "asymptotic_p_chi2_df1": 0.6615553098978314,
+          "bootstrap_p": 0.6335,
+          "bootstrap_p_holm": 1.0,
+          "bootstrap_holm_reject": false
+        },
+        "bootstrap": {
+          "requested": 1999,
+          "successful": 1999,
+          "failures": {},
+          "seed": 16564,
+          "method": "circular moving-block, centered studentized Wald roots"
+        },
+        "identification": {
+          "sparsity": 0.9253692699455246,
+          "bandwidth": 0.04396800002191015,
+          "density_at_zero": 1.0806496741121183,
+          "standardized_design_condition_number": 4.927257719304102,
+          "covariance_min_eigenvalue": 0.00036231172461973876,
+          "condition_number_gate": 100000000.0,
+          "passes_condition_number_gate": true
+        },
+        "nfci_incremental_information_pass": false
+      }
+    },
+    "rolling_window_sensitivity_vix_nfci_vs_vix": {
+      "300": {
+        "1": {
+          "candidate": "VIX+NFCI",
+          "benchmark": "VIX-only",
+          "n": 486,
+          "candidate_mean_loss": 0.0028842121920155343,
+          "benchmark_mean_loss": 0.002797066351277309,
+          "mean_loss_differential_candidate_minus_benchmark": 8.71458407382252e-05,
+          "candidate_improvement_pct": -3.1156157843173573,
+          "canonical_dm_t": 0.677340829049495,
+          "canonical_dm_p_two_sided": 0.49851269058004144,
+          "canonical_nw_lag": 8,
+          "hln_dm_t_crosscheck": 0.6766436175121217,
+          "hln_dm_p_two_sided_crosscheck": 0.4989546679745889,
+          "candidate_better": false,
+          "harvey_t_better_gate": false,
+          "first_half_mean_differential": -0.00021163917657576872,
+          "second_half_mean_differential": 0.00038593085805221905,
+          "canonical_dm_p_two_sided_holm": 0.8635156594420241,
+          "canonical_dm_p_two_sided_holm_below_0_05": false
+        },
+        "4": {
+          "candidate": "VIX+NFCI",
+          "benchmark": "VIX-only",
+          "n": 480,
+          "candidate_mean_loss": 0.007077120091710816,
+          "benchmark_mean_loss": 0.006550683944674646,
+          "mean_loss_differential_candidate_minus_benchmark": 0.0005264361470361709,
+          "candidate_improvement_pct": -8.0363539362044,
+          "canonical_dm_t": 0.786851664981638,
+          "canonical_dm_p_two_sided": 0.43175782972101207,
+          "canonical_nw_lag": 13,
+          "hln_dm_t_crosscheck": 0.7811137748943772,
+          "hln_dm_p_two_sided_crosscheck": 0.4351214543284041,
+          "candidate_better": false,
+          "harvey_t_better_gate": false,
+          "first_half_mean_differential": -0.0006289174923378209,
+          "second_half_mean_differential": 0.0016817897864101626,
+          "canonical_dm_p_two_sided_holm": 0.8635156594420241,
+          "canonical_dm_p_two_sided_holm_below_0_05": false
+        },
+        "12": {
+          "candidate": "VIX+NFCI",
+          "benchmark": "VIX-only",
+          "n": 464,
+          "candidate_mean_loss": 0.012503959589374258,
+          "benchmark_mean_loss": 0.011091494800277357,
+          "mean_loss_differential_candidate_minus_benchmark": 0.0014124647890969013,
+          "candidate_improvement_pct": -12.734665746420227,
+          "canonical_dm_t": 1.3745524272634548,
+          "canonical_dm_p_two_sided": 0.16993514779057262,
+          "canonical_nw_lag": 18,
+          "hln_dm_t_crosscheck": 1.3404840379870304,
+          "hln_dm_p_two_sided_crosscheck": 0.18074539395728229,
+          "candidate_better": false,
+          "harvey_t_better_gate": false,
+          "first_half_mean_differential": -0.0001465284642172363,
+          "second_half_mean_differential": 0.002971458042411039,
+          "canonical_dm_p_two_sided_holm": 0.5098054433717178,
+          "canonical_dm_p_two_sided_holm_below_0_05": false
+        }
+      },
+      "500": {
+        "1": {
+          "candidate": "VIX+NFCI",
+          "benchmark": "VIX-only",
+          "n": 286,
+          "candidate_mean_loss": 0.0026024086806322707,
+          "benchmark_mean_loss": 0.0023828615311798215,
+          "mean_loss_differential_candidate_minus_benchmark": 0.00021954714945244925,
+          "candidate_improvement_pct": -9.213592421534676,
+          "canonical_dm_t": 1.445738440784354,
+          "canonical_dm_p_two_sided": 0.1493493075984067,
+          "canonical_nw_lag": 7,
+          "hln_dm_t_crosscheck": 1.4432087127907025,
+          "hln_dm_p_two_sided_crosscheck": 0.15005990070006692,
+          "candidate_better": false,
+          "harvey_t_better_gate": false,
+          "first_half_mean_differential": 0.00042601905965633643,
+          "second_half_mean_differential": 1.3075239248562033e-05,
+          "canonical_dm_p_two_sided_holm": 0.33678534729012877,
+          "canonical_dm_p_two_sided_holm_below_0_05": false
+        },
+        "4": {
+          "candidate": "VIX+NFCI",
+          "benchmark": "VIX-only",
+          "n": 280,
+          "candidate_mean_loss": 0.005669541297954807,
+          "benchmark_mean_loss": 0.004849336466421971,
+          "mean_loss_differential_candidate_minus_benchmark": 0.0008202048315328367,
+          "candidate_improvement_pct": -16.913753813787547,
+          "canonical_dm_t": 1.4877870141671161,
+          "canonical_dm_p_two_sided": 0.13793639435593263,
+          "canonical_nw_lag": 11,
+          "hln_dm_t_crosscheck": 1.4691872743519645,
+          "hln_dm_p_two_sided_crosscheck": 0.14290864401188874,
+          "candidate_better": false,
+          "harvey_t_better_gate": false,
+          "first_half_mean_differential": 0.0017270716039779754,
+          "second_half_mean_differential": -8.666194091230216e-05,
+          "canonical_dm_p_two_sided_holm": 0.33678534729012877,
+          "canonical_dm_p_two_sided_holm_below_0_05": false
+        },
+        "12": {
+          "candidate": "VIX+NFCI",
+          "benchmark": "VIX-only",
+          "n": 264,
+          "candidate_mean_loss": 0.012176822071612827,
+          "benchmark_mean_loss": 0.009693479297429896,
+          "mean_loss_differential_candidate_minus_benchmark": 0.0024833427741829295,
+          "candidate_improvement_pct": -25.61869374231147,
+          "canonical_dm_t": 1.5934436037720048,
+          "canonical_dm_p_two_sided": 0.11226178243004292,
+          "canonical_nw_lag": 15,
+          "hln_dm_t_crosscheck": 1.524029246659813,
+          "hln_dm_p_two_sided_crosscheck": 0.1287029400048103,
+          "candidate_better": false,
+          "harvey_t_better_gate": false,
+          "first_half_mean_differential": 0.0048475266097743,
+          "second_half_mean_differential": 0.00011915893859155758,
+          "canonical_dm_p_two_sided_holm": 0.33678534729012877,
+          "canonical_dm_p_two_sided_holm_below_0_05": false
+        }
+      }
+    },
+    "verdict": {
+      "overall": "NULL_NO_DOMINANCE_OR_INCREMENTAL_EVIDENCE",
+      "vix_vs_nfci": "NO_ROBUST_VIX_DOMINANCE",
+      "nfci_incremental_beyond_vix": "NO_EVIDENCE_OF_NFCI_INCREMENTAL_INFORMATION_BEYOND_VIX",
+      "pair_pass_by_horizon": {
+        "1": false,
+        "4": false,
+        "12": false
+      },
+      "encompassing_pass_by_horizon": {
+        "1": false,
+        "4": false,
+        "12": false
+      },
+      "interpretation_rule": "Failure to reject incremental value is absence of evidence, not proof that VIX fully encompasses NFCI."
+    }
+  },
+  "review_status": {
+    "status": "PASS",
+    "reviewed_at": "2026-07-11",
+    "review_path": "experiments/K1655/reviews/codex_vix_nfci_encompassing_postrun_2026-07-11.md",
+    "scope": "PASS for frozen-input integrity, paired loss reconstruction, fixed-window CQFE implementation, deterministic block bootstrap, and the narrow double-null conclusion",
+    "caveat": "Block-bootstrap p-values govern CQFE inference; asymptotic chi-square p-values are diagnostic and must not be used to upgrade the conclusion."
+  },
+  "references": [
+    {
+      "authors": "Giacomini, R.; Komunjer, I.",
+      "year": 2005,
+      "title": "Evaluation and Combination of Conditional Quantile Forecasts",
+      "publication": "Journal of Business & Economic Statistics 23(4), 416-431",
+      "doi": "10.1198/073500105000000018"
+    },
+    {
+      "authors": "Giacomini, R.; White, H.",
+      "year": 2006,
+      "title": "Tests of Conditional Predictive Ability",
+      "publication": "Econometrica 74(6), 1545-1578",
+      "doi": "10.1111/j.1468-0262.2006.00718.x"
+    },
+    {
+      "authors": "Diebold, F. X.; Mariano, R. S.",
+      "year": 1995,
+      "title": "Comparing Predictive Accuracy",
+      "publication": "Journal of Business & Economic Statistics 13(3), 253-263",
+      "doi": "10.1080/07350015.1995.10524599"
+    },
+    {
+      "authors": "Clark, T. E.; McCracken, M. W.",
+      "year": 2001,
+      "title": "Tests of Equal Forecast Accuracy and Encompassing for Nested Models",
+      "publication": "Journal of Econometrics 105(1), 85-110",
+      "doi": "10.1016/S0304-4076(01)00071-7"
+    }
+  ],
+  "honest_statement": "Paired loss tests can establish horizon-specific forecast accuracy, not universal dominance. CQFE rejection plus a lambda_joint subtest is required for positive NFCI incremental evidence. Failure to reject is not proof that VIX fully encompasses NFCI.",
+  "elapsed_seconds": 76.961144
+}

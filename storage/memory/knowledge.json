@@ -38440,5 +38440,92 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-07-11T20:11:52.828387"
+  },
+  {
+    "item_id": "3f6af5aa",
+    "category": "growth_at_risk_equity_tail",
+    "title": "K1655 VIX/NFCI direct comparison and CQFE yield a double null",
+    "content": "K1655 VIX/NFCI follow-up（extends true-PIT correction 98a3e103）：在相同 expanding origins 上，VIX-only 相對 NFCI-only 的 H=1/4/12 pinball 點估改善為 +13.242%/+5.894%/+1.725%，canonical DM t=-1.608/-1.538/-0.638，三格都未過 t<−3 或 Holm p<.05，因此沒有穩健 VIX dominance。固定 rolling R=400、weekly refit、strict j+H<i 的 VIX+NFCI 相對 VIX-only 點估改善為 -3.720%/-2.975%/-14.561%；CQFE 1,999-rep circular-block bootstrap full-null Holm p=0.822/0.822/0.723，lambda_joint=0 Holm p=1.000/1.000/1.000。最終為雙重 null：無穩健 VIX dominance，也無 NFCI beyond-VIX 增量證據。failure to reject 不是 VIX 已涵蓋、吸收或取代 NFCI 的證明；chi-square 漸近 p 只作診斷，正式 CQFE 推論以 block bootstrap 為主。",
+    "verdict": "NULL_NO_DOMINANCE_OR_INCREMENTAL_EVIDENCE",
+    "experiment_id": "K1655",
+    "experiment_addendum_id": "K1655_VIX_NFCI_ENCOMPASSING",
+    "experiment_path": "experiments/K1655/",
+    "task_id": "k1655_vix_nfci_encompassing",
+    "extends": "98a3e103",
+    "reviewer": "Codex independent numeric verification and post-run review PASS (2026-07-11)",
+    "reviewer_source": "Codex primary-path independent post-run review",
+    "codex_review": "PASS limited to frozen-input integrity, paired loss reconstruction, fixed-window CQFE, deterministic block bootstrap, and the double-null wording.",
+    "evidence": [
+      "experiments/K1655/K1655_vix_nfci_encompassing_results.json",
+      "experiments/K1655/K1655_vix_nfci_encompassing_oos.csv",
+      "experiments/K1655/K1655_vix_nfci_encompassing.py",
+      "experiments/K1655/reviews/codex_vix_nfci_encompassing_postrun_2026-07-11.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-07-11T12:31:38.802280+00:00",
+    "sample": {
+      "start": "2011-05-27",
+      "end": "2026-06-26",
+      "n_weeks": 788
+    },
+    "forecast_artifact_sha256": "04a17e6741dd7ec3da2f15523a8675d5410bcaaaaab7fd015ac115558270e356",
+    "primary_paired_vix_vs_nfci": {
+      "1": {
+        "n": 536,
+        "candidate_mean_loss": 0.0026688620668697243,
+        "benchmark_mean_loss": 0.003076212081893213,
+        "candidate_improvement_pct": 13.241935347084095,
+        "canonical_dm_t": -1.6078023485735304,
+        "canonical_dm_p_two_sided": 0.10846842581522331,
+        "canonical_dm_p_two_sided_holm": 0.32540527744566994,
+        "pair_pass": false
+      },
+      "4": {
+        "n": 530,
+        "candidate_mean_loss": 0.005848477372624819,
+        "benchmark_mean_loss": 0.0062147592805857615,
+        "candidate_improvement_pct": 5.893742483400239,
+        "canonical_dm_t": -1.5384836924473522,
+        "canonical_dm_p_two_sided": 0.12452829965875112,
+        "canonical_dm_p_two_sided_holm": 0.32540527744566994,
+        "pair_pass": false
+      },
+      "12": {
+        "n": 514,
+        "candidate_mean_loss": 0.010240433055686508,
+        "benchmark_mean_loss": 0.010420225357983176,
+        "candidate_improvement_pct": 1.7254166404273144,
+        "canonical_dm_t": -0.6381646840856792,
+        "canonical_dm_p_two_sided": 0.5236512465567791,
+        "canonical_dm_p_two_sided_holm": 0.5236512465567791,
+        "pair_pass": false
+      }
+    },
+    "rolling_r400_joint_vs_vix": {
+      "1": {
+        "n": 386,
+        "candidate_improvement_pct": -3.7198140948305367,
+        "canonical_dm_t": 0.6095035023663634,
+        "cqfe_full_bootstrap_p_holm": 0.822,
+        "cqfe_incremental_bootstrap_p_holm": 1.0,
+        "nfci_incremental_information_pass": false
+      },
+      "4": {
+        "n": 380,
+        "candidate_improvement_pct": -2.974529553879263,
+        "canonical_dm_t": 0.436975491071891,
+        "cqfe_full_bootstrap_p_holm": 0.822,
+        "cqfe_incremental_bootstrap_p_holm": 1.0,
+        "nfci_incremental_information_pass": false
+      },
+      "12": {
+        "n": 364,
+        "candidate_improvement_pct": -14.560823910101503,
+        "canonical_dm_t": 1.3786415649362924,
+        "cqfe_full_bootstrap_p_holm": 0.723,
+        "cqfe_incremental_bootstrap_p_holm": 1.0,
+        "nfci_incremental_information_pass": false
+      }
+    }
   }
 ]

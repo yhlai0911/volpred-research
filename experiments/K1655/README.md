@@ -102,9 +102,43 @@ distinguishable from zero in this PIT sample:
 The corrected data therefore do not support the earlier claim that an equity GaR fan was
 replicated at all horizons.
 
-VIX and the realized-volatility target remain secondary diagnostics. No VIX-return cell passes
-the `t < -3` gate in this sample. A direct NFCI-versus-VIX paired DM or encompassing test is a
-separate experiment, so this K makes no dominance or subsumption claim.
+VIX and the realized-volatility target remain secondary diagnostics in the original rerun. No
+VIX-return cell passes the `t < -3` gate against the unconditional benchmark. The direct
+VIX-versus-NFCI and encompassing follow-up is reported below.
+
+## Follow-up: does VIX dominate or encompass NFCI?
+
+The addendum first freezes the original expanding-window forecasts and compares VIX-only with
+NFCI-only on identical origins. VIX has lower point-estimate loss at all three horizons, but
+none of the paired differences passes either the `t < -3` gate or Holm-adjusted `p < 0.05`:
+
+| Horizon | OOS n | VIX loss | NFCI loss | VIX improvement | canonical DM t | Holm p |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 week | 536 | 0.0026688621 | 0.0030762121 | +13.242% | −1.608 | 0.325 |
+| 4 weeks | 530 | 0.0058484774 | 0.0062147593 | +5.894% | −1.538 | 0.325 |
+| 12 weeks | 514 | 0.0102404331 | 0.0104202254 | +1.725% | −0.638 | 0.524 |
+
+The formal quantile forecast-encompassing comparison cannot reuse an expanding recursive
+estimation window. Following the fixed-window requirement in Giacomini and Komunjer (2005)
+and Giacomini and White (2006), the primary design refits VIX-only and VIX+NFCI every week on
+exactly 400 admissible observations. The strict embargo remains `j + H < i`.
+
+| Horizon | OOS n | VIX+NFCI loss | VIX loss | Joint improvement | DM diagnostic | CQFE full bootstrap Holm p | `lambda_joint=0` bootstrap Holm p |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 week | 386 | 0.0029301637 | 0.0028250761 | −3.720% | +0.610 | 0.822 | 1.000 |
+| 4 weeks | 380 | 0.0071198793 | 0.0069142139 | −2.975% | +0.437 | 0.822 | 1.000 |
+| 12 weeks | 364 | 0.0136779033 | 0.0119394247 | −14.561% | +1.379 | 0.723 | 1.000 |
+
+The nested-model DM statistics are diagnostics only. CQFE inference is based on 1,999-rep
+circular moving-block bootstrap distributions, with all 5,997 requested replications
+completed. The analytic chi-square p values are retained as diagnostics because the analytic
+covariance uses a single residual-sparsity estimate; they cannot upgrade the conclusion.
+Rolling-window sensitivities R=300 and R=500 likewise show higher joint-model loss at all
+three horizons.
+
+The follow-up verdict is a **double null**: there is no robust evidence that VIX dominates
+NFCI, and there is no evidence that NFCI adds predictive information beyond VIX. Failure to
+reject incremental value is not proof that VIX fully encompasses, subsumes, or replaces NFCI.
 
 ## Audit and review
 
@@ -117,6 +151,11 @@ separate experiment, so this K makes no dominance or subsumption claim.
   20,000-iteration stage; unresolved limits, other warnings, bootstrap exceptions, and OOS
   exceptions are all zero. Every bootstrap cell completed 500/500 replications.
 - Independent review: `reviews/codex_alfred_pit_postrun_2026-07-11.md`.
+- VIX/NFCI addendum: 4,970 serialized forecast rows, SHA-256
+  `04a17e6741dd7ec3da2f15523a8675d5410bcaaaaab7fd015ac115558270e356`; all three 1,999-rep
+  CQFE bootstraps completed without failure. Independent numeric verification and post-run
+  review both pass; see
+  `reviews/codex_vix_nfci_encompassing_postrun_2026-07-11.md`.
 
 ## Files and reproduction
 
@@ -131,6 +170,10 @@ separate experiment, so this K makes no dominance or subsumption claim.
 | `K1655_nfci_slope_across_quantiles.png` | In-sample NFCI slope diagnostic |
 | `K1655_gar_quantiles_vs_realized.png` | OOS conditional quantile versus realized return |
 | `K1655_oos_pinball_by_horizon.png` | OOS pinball-loss comparison |
+| `K1655_vix_nfci_encompassing.py` | Frozen paired DM and fixed-window CQFE addendum |
+| `K1655_vix_nfci_encompassing_results.json` | Addendum results, gates, and review metadata |
+| `K1655_vix_nfci_encompassing_oos.csv` | Addendum forecast-level audit artifact |
+| `K1655_vix_nfci_encompassing.png` | Same-origin loss comparison across horizons |
 
 Use the pinned cache without network access:
 
@@ -152,5 +195,11 @@ python experiments/K1655/K1655.py --refresh-alfred
   Econometrics*, 105(1), 111–130. https://doi.org/10.1016/S0304-4076(01)00072-0
 - Diebold, F. X., & Mariano, R. S. (1995). “Comparing Predictive Accuracy.” *Journal of
   Business & Economic Statistics*, 13(3), 253–263.
+- Giacomini, R., & Komunjer, I. (2005). “Evaluation and Combination of Conditional Quantile
+  Forecasts.” *Journal of Business & Economic Statistics*, 23(4), 416–431.
+- Giacomini, R., & White, H. (2006). “Tests of Conditional Predictive Ability.”
+  *Econometrica*, 74(6), 1545–1578.
+- Clark, T. E., & McCracken, M. W. (2001). “Tests of Equal Forecast Accuracy and
+  Encompassing for Nested Models.” *Journal of Econometrics*, 105(1), 85–110.
 - Harvey, D., Leybourne, S., & Newbold, P. (1997). “Testing the Equality of Prediction Mean
   Squared Errors.” *International Journal of Forecasting*, 13(2), 281–291.

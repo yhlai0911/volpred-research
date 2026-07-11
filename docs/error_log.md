@@ -57,6 +57,24 @@ cross-check，而 helper 的 −1.7068 跟 Codex 手算的 −1.7069 完全吻�
 - **新增教訓**：revision-bias 的方向不可用口頭推論代替重跑。修訂會同時改 predictor 值與可評分樣本邊界；
   只有在相同 origins 上的診斷與完整 true-PIT OOS 重算，才可判定結論是否維持。
 
+### Resolution addendum — VIX/NFCI 直接比較與 encompassing 完成
+
+- 凍結更正後 K1655 的同一批 expanding origins，VIX-only 相對 NFCI-only 的 H=1/4/12
+  pinball loss 點估改善為 **+13.242% / +5.894% / +1.725%**，但 canonical DM
+  t=−1.608/−1.538/−0.638，Holm p=.325/.325/.524；沒有一格過 `t < −3` 或校正後
+  `p < .05`，所以不能宣稱 VIX 穩健 dominates NFCI。
+- 正式 CQFE 改用每週 refit、固定 400 筆的 rolling window，避免把 Giacomini–Komunjer / White
+  不涵蓋的 expanding recursive estimation 套進檢定。VIX+NFCI 相對 VIX-only 的 H=1/4/12
+  點估改善為 **−3.720% / −2.975% / −14.561%**；full-null block-bootstrap Holm
+  p=.822/.822/.723，`lambda_joint=0` Holm p 全為 1.000。
+- 4,970 列 forecast artifact、1,999×3 bootstrap、輸入／輸出 hashes 與時序 gate 均經獨立重算
+  `PASS`。H=4/12 的 chi-square 漸近 p 很小，但 5% quantile、小樣本的 studentized block-root
+  分布極厚尾；解析 covariance 又只用單一 residual sparsity，因此正式推論以 block bootstrap 為主，
+  漸近 p 只作診斷。
+- **新增教訓**：兩個模型各自勝過共同基準，不能推出彼此 dominance；「未偵測到 NFCI 增量」也不能
+  反過來當成「已證明 VIX 吸收 NFCI」。正確終局是雙重 null：沒有穩健 VIX dominance，也沒有
+  NFCI beyond-VIX 增量證據。
+
 **教訓**：
 
 - **(L1)** `.claude/rules/experiments.md` 的「subagent fallback PASS ≠ primary-path Codex PASS」不是形式規則。
