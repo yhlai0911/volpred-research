@@ -18,6 +18,17 @@
 
 **機械 gate**：`tests/test_release_gate_narrative_axis.py` 新增 5 個回歸測試 —— 跨受眾孿生文（共用 K / 共用資料源）不 block、同受眾共用 K 仍 block、舊版本旗標必重評、當前版本旗標仍抑制。
 
+**Class sweep（同 bug class 的全 population 掃描）**：`find_arc_duplicates` 有 5 個呼叫點，逐一查證後處置如下 ——
+- `src/volpred/ops/content.py`（釋出池）→ **已修**（上述 block-reason 限縮）。
+- `scripts/refill_task_pool.py`（補池第 9 道防線）→ **同一誤判、且正在造成傷害**：本班 fire 開頭它就以「narrative-arc duplicate」跳掉 K1611/K1639/K1572/K1654/K1583 五個 K。它其實**知道**目標受眾（`needed_audience` 就在同一迴圈算出），卻沒傳進 dedup。更糟的是「第 8 道防線」註解已寫明「≥2 篇研究文 → arc-dedup 會拒絕任何新的科普草稿」—— 當時是用「乾脆先跳過」把誤判**制度化**，而不是修比對範圍。→ **已修**：把受眾傳入。驗證：K1611/K1639/K1572/K1583 恢復入池，K1654/K1513 仍正確被擋（防線未鈍化）。
+- `scripts/refill_reader_facing_pool.py`（trending/event 補池）→ **刻意不動**。它擋的是 trending 主題重複（Fed-pivot 22 dups），而 reader-facing 已發佈文橫跨 `general`(383)+`event`(6)+`null`(75) 三種標籤；限縮到單一受眾反而會**削弱**防重複，且無任何誤判證據。
+- `src/volpred/publisher/publisher.py`（發佈時）→ 已是 warn-only（2026-06-23 降級），無害，維持跨受眾。
+- `scripts/check_arc_dedup.py`（寫作前 gate，agent 開工必跑）→ **仍有同型誤判，但需要 brief/skill 一起改才生效**（CLI 目前無 audience 參數，寫作 agent 也沒傳）。共用函式的 `audience` 參數已就位，wiring 另立任務處理，不在本次範圍內硬塞。
+
+**修在哪一層**：`audience` 限縮做在**共用函式** `find_arc_duplicates`（單一 enforcement owner，anti-stacking），5 個呼叫點一起繼承；不知道受眾的呼叫端傳 `None` 即維持舊行為（向後相容）。
+
+**差點犯的第二個錯（測試抓到的）**：第一版把「受眾未知」也當成「不同受眾」而排除 —— 線上有 **75 篇** `audience=null` 的舊文，這會讓它們悄悄退出比對集、削弱 gate。既有 refill 測試立刻轉紅擋下。正確語意是保守版：**只有明確已知且不同的受眾才排除，未知一律留在比對集**。`tests/test_arc_dedup.py` 新增 4 個差分測試鎖住（同一 fixture 只差 audience 欄位 → 一放一擋，證明不是假通過；含「未標記受眾必須仍被比對」）。
+
 ## 2026-07-11 `_due_to_fire` 靜默依賴 daemon 本地時區 —— CI(UTC) 暴露 pytest gate 上線後第一批紅
 
 **問題**：`scripts/dispatch_supervisor/scheduler.py::_due_to_fire` 在 daemon 的**本地時區**裡做判斷，但這個依賴從未被明說。`_parse_last_fire` 對 tz-aware 的 `last_fire_at` 做 `.astimezone().replace(tzinfo=None)`（轉成 naive 本地），再跟 croniter 的 tz-**naive** prev-slot 比較。croniter 的 base 是 `datetime.now()`（naive 本地）。整條路徑一致的前提是「daemon 跑固定時區的機器」—— 現在是 Asia/Taipei，成立。

@@ -792,6 +792,13 @@ def _is_significant_overlap(new_ents: set[str], old_ents: set[str]) -> bool:
     return False
 
 
+def _arc_item_audience(item: dict) -> str:
+    audience = item.get("audience") or (item.get("details") or {}).get("audience")
+    if isinstance(audience, str) and audience.strip():
+        return audience.strip().lower()
+    return "uncategorized"
+
+
 def find_arc_duplicates(
     title: str,
     content: str,
@@ -799,6 +806,7 @@ def find_arc_duplicates(
     days: int = 90,
     max_scan: int = 300,
     new_refs: set[str] | list[str] | None = None,
+    audience: str | None = None,
 ) -> list[dict]:
     """Return feed articles that are narrative-arc duplicates of the new piece.
 
@@ -810,6 +818,16 @@ def find_arc_duplicates(
     the descriptive-mode gate and the same-experiment-refs short-circuit (vuln 2
     of the 2026-06-19 K1054 ghost-recycle incident: mile_bb520db8 byte-for-byte
     re-published mile_c481c8cf, both K1054, both 'descriptive', neither blocked).
+
+    `audience`: when the caller knows which audience the new piece is FOR, the
+    corpus is narrowed to that audience. Publishing a research write-up and a
+    general-reader write-up of the same K is the product design (74 K-ids carry
+    both audiences live), so judging a general twin against its research sibling
+    is a false positive — and a permanent one, since the sibling stays published
+    forever. That mis-scoping froze the release pool for 30+ consecutive fires
+    (2026-07-11) and still skips general candidates at task refill. Callers that
+    genuinely span audiences (the publish-time warn) leave this None and keep the
+    old cross-audience behaviour.
     """
     new_sig = arc_signature(title, content)
     new_ents = _entities_for_matching(new_sig)
@@ -839,6 +857,8 @@ def find_arc_duplicates(
     if not new_ents and not new_ref_set:
         return []
 
+    want_audience = str(audience or "").strip().lower() or None
+
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     dups: list[dict] = []
     recent = sorted(
@@ -847,6 +867,14 @@ def find_arc_duplicates(
     for existing in recent:
         if existing.get("status") in ("unpublished", "retracted"):
             continue
+        if want_audience:
+            existing_audience = _arc_item_audience(existing)
+            # Only an audience we can positively identify as DIFFERENT is out of
+            # scope. Untagged legacy articles (75 live, audience=null) stay in the
+            # corpus — "unknown" is not evidence of a different audience, and
+            # dropping them would quietly weaken the gate.
+            if existing_audience not in (want_audience, "uncategorized"):
+                continue
         ts_raw = existing.get("published_at") or existing.get("created_at") or ""
         try:
             from dateutil.parser import parse as dtparse

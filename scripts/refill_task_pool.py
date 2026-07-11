@@ -681,8 +681,18 @@ def _is_arc_duplicate_candidate(cand: dict) -> bool:
     if not text:
         return False
     title_hint = str(cand.get("title") or "")
+    # Scope the corpus to the audience this candidate would be WRITTEN for (same
+    # expression the dispatch loops use). A general-reader write-up of a K whose
+    # research write-up is already published is the product design, not a
+    # recycle; comparing it against that research sibling blocked the general
+    # track at refill for every already-covered K (2026-07-11 — the same
+    # mis-scoping that froze the release pool).
+    audiences_covered = cand.get("audiences_covered") or []
+    needed_audience = "general" if "general" not in audiences_covered else "research"
     try:
-        dups = find_arc_duplicates(title_hint, text, feed, days=90, new_refs=[k_id])
+        dups = find_arc_duplicates(
+            title_hint, text, feed, days=90, new_refs=[k_id], audience=needed_audience
+        )
     except Exception as exc:
         _warn_refill(f"arc duplicate check failed for {k_id}; candidate not blocked", exc)
         return False

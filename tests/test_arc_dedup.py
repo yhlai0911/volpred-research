@@ -838,3 +838,71 @@ def test_legacy_none_arc_signature_fuzzy_does_not_block_core_market_only():
     dups = find_arc_duplicates(new_title, new_content, [existing], days=90)
 
     assert dups == []
+
+
+# --- audience scoping (2026-07-11 release-pool freeze, 2nd occurrence) --------
+# Publishing a research write-up and a general-reader write-up of the same K is
+# the product design (74 K-ids carry both audiences live). Judging the general
+# twin against its research sibling is a false positive — and a PERMANENT one,
+# since the sibling stays published forever. That mis-scoping froze the release
+# pool for 30+ consecutive fires and skipped general candidates at task refill.
+
+_TWIN_TITLE = "K1574 避險比例再檢驗"
+_TWIN_BODY = (
+    "gld slv copper wti fxy ung 的 hedge ratio 與 asset allocation 檢驗。"
+    "結果顯著改善且通過檢定。"
+)
+
+
+def _factor_etf_twin(audience: str | None) -> dict:
+    item = {
+        "id": f"mile_prior_{audience or 'untagged'}",
+        "status": "published",
+        "published_at": datetime.now(timezone.utc).isoformat(),
+        "title": "避險比例再檢驗",
+        "content": (
+            "gld slv copper wti fxy ung 的 hedge ratio 與 asset allocation 檢驗。"
+            "結果顯著改善且通過檢定。"
+        ),
+        "details": {"experiment_refs": ["K1574"]},
+    }
+    if audience is not None:
+        item["audience"] = audience
+    return item
+
+
+def test_general_twin_not_blocked_by_research_sibling_of_same_k():
+    dups = find_arc_duplicates(
+        _TWIN_TITLE, _TWIN_BODY, [_factor_etf_twin("research")], days=90,
+        new_refs=["K1574"], audience="general",
+    )
+    assert dups == []
+
+
+def test_general_twin_still_blocked_by_general_sibling_of_same_k():
+    dups = find_arc_duplicates(
+        _TWIN_TITLE, _TWIN_BODY, [_factor_etf_twin("general")], days=90,
+        new_refs=["K1574"], audience="general",
+    )
+    assert dups, "same-audience rehash must still block — that is the anti-rehash gate"
+
+
+def test_untagged_legacy_article_stays_in_corpus():
+    """'Unknown audience' is not evidence of a DIFFERENT audience. 75 published
+    articles carry audience=null; dropping them from the corpus would quietly
+    weaken the gate."""
+    dups = find_arc_duplicates(
+        _TWIN_TITLE, _TWIN_BODY, [_factor_etf_twin(None)], days=90,
+        new_refs=["K1574"], audience="general",
+    )
+    assert dups, "untagged legacy articles must still be deduped against"
+
+
+def test_audience_omitted_keeps_cross_audience_behaviour():
+    """Callers that genuinely span audiences (the publish-time warn) pass no
+    audience and must keep seeing the old, wider corpus."""
+    dups = find_arc_duplicates(
+        _TWIN_TITLE, _TWIN_BODY, [_factor_etf_twin("research")], days=90,
+        new_refs=["K1574"],
+    )
+    assert dups, "audience=None must not silently narrow the corpus"
