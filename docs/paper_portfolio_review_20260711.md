@@ -54,7 +54,7 @@
 **孵化/重建**
 10. **btc-gas-negative**：markdown → LaTeX + reproduce 建置，重框標題。
 11. **eav-universal-magnitude**：magnitude ordering 降級為 sign universality 主軸 + DM HAC 重算。
-12. **crypto-fear-channel**：generalized FEVD 重建（真值 ~18-22% spillover），headline 重寫。
+12. **crypto-fear-channel**：K1025_v3 generalized FEVD 重建（真值 ~18-22% spillover），headline 重寫。期刊序：JIMFIM → JEF → IRFA → FRL backup。P0 完成 + Codex 語義級複核前**禁止任何 ready 標記**（已兩次 premature promotion）。
 13. **forecast-tail-divergence**：E1 尺度再校準 gating 實驗 → 完整論文或 FRL 方法論短文二擇一。
 
 ## 4. 新實驗清單（各深審提出的 gating/補強實驗，待編 K 入池）
@@ -67,7 +67,8 @@
 | prg-periodic-garch | 六市場 close-convention 補跑（PRG_tminus1 vs GJR/HAR；K1544 infra 複用） | 敘事最後一塊 | P0 |
 | vt-trend-following | Table 5 canonical 重跑（pinned snapshot、IRX rf、跨市場 joint block bootstrap） | 修致命傷 | P0 |
 | taiwan-vt | rolling gamma calendar-aligned snapshot 重跑 → Table 2 rolling block 重建 | 修致命傷 | P0 |
-| crypto-fear-channel | generalized FEVD 重建 + K1025b data pinning | 重建 headline | P1 |
+| crypto-fear-channel | K1025_v3：修 FEVD 切片 + KPPS generalized FEVD + pinned snapshot + QR lagged-VIX 控制存活測試 + subsample DM 補 HAC | 重建 headline | P1 |
+| crypto-fear-channel（外溢） | **k865 同 FEVD bug 下游回溯更正**（class sweep：k1025/k1025_v2/k1025b/k865 四檔 buggy；追 k865 的 knowledge/feed 引用並更正）+ iid-noise FEVD 機械 gate 進 scripts/tests/ | 研究誠實回溯 | P1 |
 | vix-sufficiency | DM 推論層 HAC 全面重算（k1116b/k1203/k1116c） | 修 K1655 class | P1 |
 | eav-universal-magnitude | k1148/k1149 DM HAC 重算 | 修 K1655 class | P1 |
 
