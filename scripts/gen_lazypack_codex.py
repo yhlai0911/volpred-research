@@ -65,6 +65,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import signal
 import subprocess
 import sys
@@ -73,7 +74,30 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CODEX_BIN = "codex"
+
+
+def _resolve_codex_bin() -> str:
+    """Absolute codex path, so a caller's PATH cannot decide whether we can render.
+
+    codex lives in an nvm-managed bin dir that only interactive shells put on
+    PATH (nvm init lives in .zshrc). Non-interactive callers — Claude Bash tool
+    calls, subagents, any launchd job whose plist forgets the entry — get
+    rc 3 "codex CLI not found", which reads as "codex cannot make images" when
+    codex is in fact fine. Resolve the binary ourselves instead.
+    """
+    found = shutil.which("codex")
+    if found:
+        return found
+    for candidate in Path.home().glob(".nvm/versions/node/*/bin/codex"):
+        if os.access(candidate, os.X_OK):
+            return str(candidate)
+    for candidate in ("/opt/homebrew/bin/codex", "/usr/local/bin/codex"):
+        if os.access(candidate, os.X_OK):
+            return candidate
+    return "codex"
+
+
+CODEX_BIN = _resolve_codex_bin()
 
 # One wall-clock budget for the whole generation; every phase draws from it.
 # Stays under the 1800s compute_queue job timeout with room for the upload →
