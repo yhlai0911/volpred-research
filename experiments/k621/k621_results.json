@@ -14,86 +14,117 @@
   "optimal_m": 252,
   "m_selection": {
     "22": {
-      "bic": 5130.0961,
-      "negll": 2538.4449,
+      "bic": 5130.0958,
+      "negll": 2538.4447,
       "converged": true
     },
     "44": {
-      "bic": 5073.0182,
-      "negll": 2509.9059,
+      "bic": 5073.0175,
+      "negll": 2509.9056,
       "converged": true
     },
     "66": {
-      "bic": 5033.3655,
-      "negll": 2490.0796,
+      "bic": 5033.3651,
+      "negll": 2490.0794,
       "converged": true
     },
     "126": {
-      "bic": 4911.0136,
-      "negll": 2428.9036,
+      "bic": 4911.0128,
+      "negll": 2428.9032,
       "converged": true
     },
     "252": {
-      "bic": 4532.9478,
-      "negll": 2239.8707,
+      "bic": 4532.945,
+      "negll": 2239.8693,
       "converged": true
     }
   },
   "metrics": {
     "GJR_GARCH": {
-      "QLIKE": 1.489443,
-      "MSE": 1.154188
+      "QLIKE": 1.489393,
+      "MSE": 1.154186
     },
     "MF2_GARCH": {
-      "QLIKE": 1.484914,
-      "MSE": 1.183398
+      "QLIKE": 1.485949,
+      "MSE": 1.183976
     },
     "EWMA_094": {
-      "QLIKE": 1.521528,
-      "MSE": 1.123229
+      "QLIKE": 1.521478,
+      "MSE": 1.123223
     }
   },
   "dm_tests": {
     "MF2_vs_GJR_QLIKE": {
-      "DM_stat": -0.4658,
-      "p_value": 0.6414,
+      "DM_stat": -0.4057,
+      "p_value": 0.6851,
       "significant_5pct": false
     },
     "EWMA_vs_GJR_QLIKE": {
-      "DM_stat": 1.2917,
-      "p_value": 0.1965,
+      "DM_stat": 1.4258,
+      "p_value": 0.1546,
       "significant_5pct": false
     },
     "MF2_vs_EWMA_QLIKE": {
-      "DM_stat": -1.4109,
-      "p_value": 0.1583,
+      "DM_stat": -1.557,
+      "p_value": 0.1201,
       "significant_5pct": false
     },
     "MF2_vs_GJR_MSE": {
-      "DM_stat": 2.2619,
-      "p_value": 0.0237,
+      "DM_stat": 3.6401,
+      "p_value": 0.0003,
       "significant_5pct": true
+    },
+    "_hac_note": "DM now delegates to volpred.stats.model_evaluation.dm_test, whose bandwidth is floored at 1. The previous local helper corrected only `if h > 1` and so applied NO HAC at the h=1 used here (K1655 class sweep, 2026-07-11). loss_differential_acf below shows whether that omission mattered: near-zero acf means the old statistic was already fine; persistent acf means it was inflated.",
+    "loss_differential_acf": {
+      "MF2_vs_GJR_QLIKE": [
+        -0.0753,
+        -0.0492,
+        -0.0224,
+        -0.0331,
+        0.063
+      ],
+      "EWMA_vs_GJR_QLIKE": [
+        -0.0454,
+        -0.0906,
+        0.0323,
+        -0.075,
+        0.0415
+      ],
+      "MF2_vs_EWMA_QLIKE": [
+        -0.0831,
+        -0.0989,
+        0.0246,
+        -0.0383,
+        0.0526
+      ],
+      "MF2_vs_GJR_MSE": [
+        -0.1811,
+        -0.1961,
+        0.154,
+        -0.1245,
+        -0.0538
+      ]
     }
   },
   "improvements": {
-    "MF2_vs_GJR_QLIKE_pct": 0.3,
-    "MF2_vs_GJR_MSE_pct": -2.53
+    "MF2_vs_GJR_QLIKE_pct": 0.23,
+    "MF2_vs_GJR_MSE_pct": -2.58
   },
   "parameters": {
     "MF2_GARCH_last": {
-      "omega": 0.001176,
-      "alpha": 0.001197,
-      "gamma": 0.00619,
-      "beta": 0.8093,
+      "omega": 0.001178,
+      "alpha": 0.001198,
+      "gamma": 0.006198,
+      "beta": 0.809296,
       "lam1": 5.0,
-      "lam2": 0.016585,
-      "lam3": 0.855228,
+      "lam2": 0.016595,
+      "lam3": 0.855064,
       "converged": true
     },
     "GJR_GARCH_last": {
       "omega": 0.031045,
-      "alpha": 0.054527,
-      "gamma": 0.226673,
+      "alpha": 0.054528,
+      "gamma": 0.226672,
       "beta": 0.819428
     }
   },
@@ -101,6 +132,6 @@
     "MF2_convergence_rate_pct": 91.7,
     "n_refits": 24
   },
-  "runtime_seconds": 853.5,
-  "timestamp": "2026-03-29T00:28:48.732012"
+  "runtime_seconds": 926.2,
+  "timestamp": "2026-07-11T18:46:20.396301"
 }

@@ -38413,5 +38413,18 @@
       }
     },
     "forecast_artifact_sha256": "0b47082bcc51be299be45fc122cc8c5a410cd691a0665594ddd88e68712c468e"
+  },
+  {
+    "item_id": "f8aabe88",
+    "category": "methodology",
+    "content": "K1655 class sweep P1（k507 + k621 canonical DM 重跑）: **遺漏 HAC 是雙向誤設，不是單向灌水**。原本的 class-sweep 敘事假設「local DM 在 h=1 完全不做 HAC → |t| 灌水 → 修正後顯著性只會變少」。k621（SPY MF2-GARCH，樣本與模型輸出完全未動，故差異可純歸因於 HAC）打破這個假設：MF2 vs GJR 的 MSE loss differential 自相關是**負的**（acf(1)=-0.18, acf(2)=-0.20），負自協方差縮小 HAC 標準誤，|t| 從 2.26 **升到** 3.64（p 0.0237 → 0.0003）。k507（SPY/GLD 動態配置）則相反：四組 loss differential acf(1) 全在 ±0.06 內，HAC 遺漏不實質，四個策略修正前後皆不顯著（null 維持，論文 vt-trend-following 的引用不需回溯更正）。口徑警語：k507 重跑順帶把 yfinance 樣本從 2026-03-26 延到 2026-07-10，故其新舊 |t| 差異混雜了樣本延長，不可當純 HAC 歸因；k621 樣本釘死才是乾淨對照。操作結論：稽核暴露站點時**必須先讀 loss differential 的 acf 再判斷方向**，不可預設「本來就 null 所以安全」——負自相關的 null 有可能翻成顯著。下一步：k623（K621 的修正版）帶著一個 borderline 活躍宣稱（DM t=-2.03, p=0.042）且用同一個退化 DM，同族 acf 為負代表該 p 值極可能移動 → 已修 code 並排入 compute queue 重跑。",
+    "evidence": [
+      "experiments/k621/k621_results.json (dm_tests + loss_differential_acf, 2026-07-11 rerun)",
+      "experiments/k507/k507_dynamic_allocation_results.json (dm_tests + loss_differential_acf, 2026-07-11 rerun)",
+      "storage/ops/dm_hac_lag_baseline.json (retired: k507, k621)",
+      "docs/governance/2026-07/dm_hac_lag_class_sweep.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-07-11T19:14:08.590988"
   }
 ]

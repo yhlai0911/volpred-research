@@ -1,0 +1,23 @@
+{
+  "id": "compute-k623-corrected-mf2-garch-dm-canonical-hac-bandwidth-k1655-cl-1783768298",
+  "title": "k623 corrected MF2-GARCH: DM 改用 canonical HAC bandwidth 重跑（K1655 class sweep，claim-bearing）",
+  "script_path": "experiments/k623/k623_mf2_garch_corrected.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-11T11:11:38Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k623-corrected-mf2-garch-dm-canonical-hac-bandwidth-k1655-cl-1783768298.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k623-corrected-mf2-garch-dm-canonical-hac-bandwidth-k1655-cl-1783768298.stderr",
+  "result_artifact": "experiments/k623/k623_results.json",
+  "claude_followup": {
+    "brief": "k623 是 K621 的修正版，且帶著一個**活躍且 borderline 的 knowledge 宣稱**：『MF2-GARCH(m=66) QLIKE=1.503 vs GJR 1.530，DM t=-2.03 p=0.042 顯著』。該 t 值來自 local degenerate DM（if h>1 才做 HAC → h=1 時零 HAC）。判讀重點：(1) 樣本窗口釘死（END=2026-03-27、OOS 2023-01-01~2024-12-31），故新舊 |t| 差異可**純歸因於 HAC 修正**，不像 k507 有樣本延長混淆。(2) 同族 k621 實測 MF2/GJR loss differential acf(1)=-0.18（負） → HAC 縮小標準誤、|t| 反而變大（k621 MSE t: 2.26→3.64）。所以 k623 的 p=0.042 可能變更顯著、也可能因 QLIKE 差異的 acf 結構不同而失去顯著。**兩個方向都要如實報告，不可預設結論**。(3) 讀新輸出的 loss_differential_acf 判斷 HAC 遺漏是否實質。(4) 若 p 跨過 0.05 任一方向 → 必須回溯更正 knowledge K623 條目（研究誠實原則：推翻舊結論必回溯更正），並檢查 K644/K691 等 meta 條目是否轉述了『MF2 Codex 修正→顯著』。(5) 注意 K623 本身另有 2 個未解 HIGH bug（τ 約束、收斂率 25%）——DM 修正不改變那些 caveat，結論強度不可超過證據。(6) 完成後把 experiments/k623/k623_mf2_garch_corrected.py::dm_test 從 storage/ops/dm_hac_lag_baseline.json 的 sites 移到 retired。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}

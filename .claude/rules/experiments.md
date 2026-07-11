@@ -80,6 +80,12 @@ HAC** — 這個退化行為要當場警覺。硬規則：`lag = max(h-1, repo c
 修正後 60 個 DM cell 的 Harvey-significant 由 26 掉到 18。腳本裡的 helper 欄位其實一直存著正確答案，
 只是沒人拿它當主檢定 — **真正的失效點是「哪個變體餵給對外結論」，不是「程式碼裡有沒有 h-1」**。
 
+**遺漏 HAC 是雙向誤設，不是單向灌水**（2026-07-11 k621 實測補強）：正自相關會放大標準誤（修正後 |t| 變小），
+但**負自協方差會縮小標準誤（修正後 |t| 變大，原本不顯著的有可能翻成顯著）**。k621 的 MF2-vs-GJR MSE
+loss differential acf(1)=-0.18，補上 HAC 後 |t| 由 2.26 **升到** 3.64（p 0.0237→0.0003）。
+所以稽核暴露站點時**先讀 loss differential 的 acf 再判斷方向**，
+**不可預設「本來就 null 所以安全」而跳過重跑**。
+
 **本條已機械化（2026-07-11 class sweep）**，這段散文現在只是 pointer：
 - **Enforcement owner**（唯一，anti-stacking 勿再加第二層）：`scripts/tests/test_dm_hac_lag_ratchet.py`
   — 新寫的 local DM 若用 `range(1, h)` 當 HAC 迴圈，CI 直接 FAIL。

@@ -15890,5 +15890,25 @@
     "backfilled_at": "2026-07-11T10:51:15.246758+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1655"
+  },
+  {
+    "timestamp": "2026-07-11T19:14:45+08:00",
+    "task_type": "paper_review",
+    "task_id": "k1655_dm_sweep_p1_followup",
+    "outcome": "succeeded",
+    "actor": "hourly-19",
+    "owner": "claude",
+    "k_id": "K1655",
+    "summary": "PHASE A followup: 判讀 k507 + k621 canonical-DM 重跑。k507 四組 acf(1)|<0.06| → HAC 遺漏不實質，全 null 維持（vt-trend-following 引用免更正）；k621 樣本釘死、acf(1)=-0.18 為負 → HAC 修正把 MSE DM 從 t=2.26/p=0.024 推到 t=3.64/p=0.0003。發現：遺漏 HAC 是雙向誤設，非單向灌水。兩份 README 補寫完整。"
+  },
+  {
+    "timestamp": "2026-07-11T19:14:45+08:00",
+    "task_type": "experiment",
+    "task_id": "k1655_dm_sweep_k623_exposed_claim",
+    "outcome": "succeeded",
+    "actor": "hourly-19",
+    "owner": "claude",
+    "k_id": "K623",
+    "summary": "順藤摸瓜：k623（K621 修正版）帶 borderline 活躍宣稱 DM t=-2.03/p=0.042 且用同一退化 DM。同族 acf 為負代表該 p 值極可能移動 → 已改用 canonical dm_test + 輸出 acf，樣本窗口釘死可純歸因，重跑排入 compute queue（compute-k623-...-1783768298）。"
   }
 ]
