@@ -303,27 +303,36 @@ def mse(proxy_arr, forecast_arr):
     return np.mean((proxy_arr - forecast_arr) ** 2)
 
 
+def loss_diff_acf(loss1, loss2, max_lag=5):
+    """Autocorrelation of the loss differential -- the thing that decides whether
+    the HAC correction matters at h=1 (K1655: acf(1)=0.68 inflated |t|)."""
+    d = np.asarray(loss1, dtype=float) - np.asarray(loss2, dtype=float)
+    d = d[np.isfinite(d)]
+    d = d - d.mean()
+    denom = np.dot(d, d)
+    if denom <= 0:
+        return [float("nan")] * max_lag
+    return [float(np.dot(d[k:], d[:-k]) / denom) for k in range(1, max_lag + 1)]
+
+
 def dm_test(loss1, loss2, h=1):
+    """Diebold-Mariano test (two-sided). Negative stat means model 1 is better.
+
+    Delegates to the canonical volpred implementation. The local version this
+    replaced applied its Newey-West correction only `if h > 1`, so at the h=1
+    used throughout this script it ran with NO HAC correction at all. That is the
+    textbook one-step DM, valid only when the loss differential is serially
+    uncorrelated -- see loss_diff_acf() output in the results JSON for whether
+    that held here. The canonical helper floors its bandwidth at 1, so it stays
+    robust when it does not (K1655, 2026-07-11 class sweep).
     """
-    Diebold-Mariano test (two-sided).
-    H0: E[d_t] = 0 where d_t = loss1_t - loss2_t
-    Negative DM stat means model 1 is better.
-    """
-    d = loss1 - loss2
-    n = len(d)
-    d_mean = np.mean(d)
-    # HAC variance (Newey-West with h-1 lags)
-    gamma0 = np.var(d, ddof=1)
-    if h > 1:
-        for k in range(1, h):
-            gamma_k = np.mean((d[k:] - d_mean) * (d[:-k] - d_mean))
-            gamma0 += 2 * (1 - k / h) * gamma_k
-    se = np.sqrt(gamma0 / n)
-    if se < 1e-12:
+    from volpred.stats.model_evaluation import dm_test as canonical_dm
+
+    d1 = np.asarray(loss1, dtype=float)
+    d2 = np.asarray(loss2, dtype=float)
+    if np.allclose(d1, d2):
         return 0.0, 1.0
-    dm_stat = d_mean / se
-    p_val = 2 * (1 - stats.norm.cdf(abs(dm_stat)))
-    return dm_stat, p_val
+    return canonical_dm(d1, d2, h=h)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -651,6 +660,20 @@ results = {
             "DM_stat": round(float(dm_mf2_vs_gjr_mse_stat), 4),
             "p_value": round(float(dm_mf2_vs_gjr_mse_pval), 4),
             "significant_5pct": bool(dm_mf2_vs_gjr_mse_pval < 0.05),
+        },
+        "_hac_note": (
+            "DM now delegates to volpred.stats.model_evaluation.dm_test, whose "
+            "bandwidth is floored at 1. The previous local helper corrected only "
+            "`if h > 1` and so applied NO HAC at the h=1 used here (K1655 class "
+            "sweep, 2026-07-11). loss_differential_acf below shows whether that "
+            "omission mattered: near-zero acf means the old statistic was already "
+            "fine; persistent acf means it was inflated."
+        ),
+        "loss_differential_acf": {
+            "MF2_vs_GJR_QLIKE": [round(v, 4) for v in loss_diff_acf(loss_mf2_qlike, loss_gjr_qlike)],
+            "EWMA_vs_GJR_QLIKE": [round(v, 4) for v in loss_diff_acf(loss_ewma_qlike, loss_gjr_qlike)],
+            "MF2_vs_EWMA_QLIKE": [round(v, 4) for v in loss_diff_acf(loss_mf2_qlike, loss_ewma_qlike)],
+            "MF2_vs_GJR_MSE": [round(v, 4) for v in loss_diff_acf(loss_mf2_mse, loss_gjr_mse)],
         },
     },
     "improvements": {

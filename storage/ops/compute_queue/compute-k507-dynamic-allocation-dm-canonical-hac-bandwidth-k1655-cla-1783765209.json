@@ -1,0 +1,23 @@
+{
+  "id": "compute-k507-dynamic-allocation-dm-canonical-hac-bandwidth-k1655-cla-1783765209",
+  "title": "k507 dynamic allocation: DM 改用 canonical HAC bandwidth 重跑（K1655 class sweep P1）",
+  "script_path": "experiments/k507/k507_dynamic_allocation.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-11T10:20:09Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k507-dynamic-allocation-dm-canonical-hac-bandwidth-k1655-cla-1783765209.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k507-dynamic-allocation-dm-canonical-hac-bandwidth-k1655-cla-1783765209.stderr",
+  "result_artifact": "experiments/k507/k507_dynamic_allocation_results.json",
+  "claude_followup": {
+    "brief": "k507 已把 local degenerate DM（range(1,h)，h=1 時零 HAC）換成 canonical dm_test 並輸出 loss_differential_acf。判讀：(1) 舊 DM 全部不顯著（vix_dynamic -0.455/p=0.6493, momentum -0.105/p=0.9166, inv_vol -0.552/p=0.581, combined -0.328/p=0.743）。(2) 注意方向性：正自相關會放大標準誤（|t| 變小、更不顯著）；但負自協方差會縮小標準誤（|t| 變大，null 有可能翻成顯著）— 不可預設『本來就 null 所以安全』。(3) 讀 loss_differential_acf 判斷實質性，比較新舊 |t|。(4) 若任一翻成顯著 → 回溯更正 knowledge.json + paper/vt-trend-following（k507 被論文引用）。(5) 完成後從 storage/ops/dm_hac_lag_baseline.json 移除 k507 站點。誠實原則：如實報告，暴露≠錯。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}

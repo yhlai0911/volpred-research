@@ -283,33 +283,36 @@ def compute_tx_cost(spy_w, monthly=True):
     return annual_tx
 
 
+def loss_diff_acf(e1, e2, max_lag=5):
+    """Autocorrelation of the loss differential -- decides whether the HAC
+    correction matters at h=1 (K1655: acf(1)=0.68 inflated |t|)."""
+    d = np.asarray(pd.Series(e1) - pd.Series(e2), dtype=float)
+    d = d[np.isfinite(d)]
+    d = d - d.mean()
+    denom = float(np.dot(d, d))
+    if denom <= 0:
+        return [float("nan")] * max_lag
+    return [float(np.dot(d[k:], d[:-k]) / denom) for k in range(1, max_lag + 1)]
+
+
 def diebold_mariano_test(e1, e2, h=1):
+    """Diebold-Mariano test for equal predictive accuracy.
+
+    Delegates to the canonical volpred implementation. The local version this
+    replaced ran its Newey-West loop as `range(1, h)`, which is empty at the h=1
+    used here -- so it applied NO HAC correction. Valid only if the loss
+    differential is serially uncorrelated; see loss_diff_acf() in the results for
+    whether it was. The canonical helper floors its bandwidth at 1 and scales it
+    with the sample (K1655 class sweep, 2026-07-11).
     """
-    Diebold-Mariano test for equal predictive accuracy.
-    H0: both forecasts have equal accuracy.
-    e1, e2: forecast errors (or loss differentials).
-    Returns: DM statistic and p-value.
-    """
-    from scipy import stats
-    d = e1 - e2  # loss differential
-    d = d.dropna()
-    n = len(d)
+    from volpred.stats.model_evaluation import dm_test as canonical_dm
+
+    d1 = np.asarray(pd.Series(e1).dropna(), dtype=float)
+    d2 = np.asarray(pd.Series(e2).dropna(), dtype=float)
+    n = min(len(d1), len(d2))
     if n < 10:
         return 0, 1.0
-
-    d_mean = d.mean()
-    # Newey-West HAC variance with h-1 lags
-    gamma_0 = np.var(d, ddof=1)
-    d_var = gamma_0
-    for k in range(1, h):
-        gamma_k = np.cov(d[k:], d[:-k])[0, 1]
-        d_var += 2 * gamma_k
-
-    d_var = max(d_var, 1e-10)
-    dm_stat = d_mean / np.sqrt(d_var / n)
-    p_value = 2 * (1 - stats.t.cdf(abs(dm_stat), df=n-1))
-
-    return dm_stat, p_value
+    return canonical_dm(d1[:n], d2[:n], h=h)
 
 
 def run_cross_oos(spy_ret, gld_ret, vix_close, spy_price, gld_price, strategies):
@@ -541,7 +544,15 @@ def main():
         e1 = -b_ret  # negative of returns (lower loss = better)
         e2 = -s_ret
         dm_stat, dm_p = diebold_mariano_test(e1, e2)
-        dm_results[name] = {'dm_stat': round(dm_stat, 3), 'dm_p': round(dm_p, 4)}
+        dm_results[name] = {
+            'dm_stat': round(dm_stat, 3),
+            'dm_p': round(dm_p, 4),
+            # K1655 class sweep: the old local DM applied no HAC at h=1. Report the
+            # loss-differential acf so the correction's materiality is checkable
+            # rather than assumed -- positive acf widens the SE, negative acf
+            # narrows it, so a null result can move either way.
+            'loss_differential_acf': [round(v, 4) for v in loss_diff_acf(e1, e2)],
+        }
 
         sig = "***" if abs(dm_stat) > 3.0 else "**" if abs(dm_stat) > 2.0 else "*" if abs(dm_stat) > 1.65 else ""
         print(f"  {name:<20} DM={dm_stat:>7.3f}, p={dm_p:.4f} {sig}  {'(Harvey t>3.0 pass)' if abs(dm_stat) > 3.0 else ''}")

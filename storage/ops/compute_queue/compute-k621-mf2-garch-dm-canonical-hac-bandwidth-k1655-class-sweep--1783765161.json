@@ -1,0 +1,23 @@
+{
+  "id": "compute-k621-mf2-garch-dm-canonical-hac-bandwidth-k1655-class-sweep--1783765161",
+  "title": "k621 MF2-GARCH: DM 改用 canonical HAC bandwidth 重跑（K1655 class sweep P1）",
+  "script_path": "experiments/k621/k621_mf2_garch.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-11T10:19:21Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k621-mf2-garch-dm-canonical-hac-bandwidth-k1655-class-sweep--1783765161.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k621-mf2-garch-dm-canonical-hac-bandwidth-k1655-class-sweep--1783765161.stderr",
+  "result_artifact": "experiments/k621/k621_results.json",
+  "claude_followup": {
+    "brief": "k621 已把 local degenerate DM（h=1 時零 HAC）換成 canonical dm_test 並輸出 loss_differential_acf。判讀：(1) 讀 dm_tests.loss_differential_acf — acf(1) 接近 0 → 舊統計量本來就沒問題，如實記錄「暴露但不實質」；acf(1) 顯著（如 >0.2）→ 舊 |t| 被灌水。(2) 比較新舊 DM：舊值 MF2_vs_GJR_QLIKE=-0.4658(p=0.6414), EWMA_vs_GJR_QLIKE=1.2917(p=0.1965), MF2_vs_EWMA_QLIKE=-1.4109(p=0.1583), MF2_vs_GJR_MSE=2.2619(p=0.0237, 唯一 5% 顯著). 重點看 MF2_vs_GJR_MSE 是否掉出顯著。(3) 若顯著性翻盤 → 回溯更正 knowledge.json + paper/vt-trend-following（k621 被論文引用）+ 已發文章。(4) 無論結果，從 storage/ops/dm_hac_lag_baseline.json 移除 k621 站點。誠實原則：暴露≠錯，多數可能不變，不可為求成果誇大。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}
