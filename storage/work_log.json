@@ -15946,5 +15946,30 @@
     "backfilled_at": "2026-07-11T12:42:59.576121+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1655"
+  },
+  {
+    "timestamp": "2026-07-11T22:08:28+08:00",
+    "actor": "hourly-21",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_render_layout_verify_gate",
+    "summary": "懶人包版面 gate 補上 OVERFLOW（文字溢出卡片容器）判準，收編進既有 find_violations → 同一個 repair loop，未新增 watchdog。容器=含文字中心點的最小 Patch（避開 ax.set_title FP）；垂直容差用比例 0.22（實測 FP=0.13 vs 真缺陷 0.35/0.42/0.46）。FP 校準跑 6 個上線 render script，15 flag 逐張人眼驗證=14 真陽性+1 FP（已根除）。測試 26 passed。",
+    "verdict": "PASS",
+    "commit": "see git log lazypack_render_layout_verify_gate"
+  },
+  {
+    "timestamp": "2026-07-11T22:08:28+08:00",
+    "actor": "hourly-21",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_live_panel_repair_3a7bd6f6_4fe0a026",
+    "summary": "新 gate 抓出 2 篇線上文章的懶人包真的爆版（mile_3a7bd6f6 說明文字衝出卡片右緣+數字壓住軸標；mile_4fe0a026 時間軸標籤被卡片下框劃穿），主線程開圖親眼確認。已 enqueue 重畫（lazypack-mile_*-r2，*/15 worker，install 是 replace 語意不會變兩組圖）。",
+    "verdict": "IN_PROGRESS"
+  },
+  {
+    "timestamp": "2026-07-11T22:08:28+08:00",
+    "actor": "hourly-21",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_pil_render_unguarded",
+    "summary": "Class sweep 盲區立案：11 個上線 render script 有 5 個是 PIL ImageDraw 繪製，guard patch 的是 Figure.savefig → 三類違規全都看不到。P2 pending。",
+    "verdict": "FILED"
   }
 ]
