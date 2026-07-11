@@ -1,0 +1,4701 @@
+{
+  "experiment_id": "K1679-rev2",
+  "title": "Regional-bank deposit-flight, revision #3: Clark-West on the real hit + sign/Bonferroni verdict logic + genuine ALFRED point-in-time vintage",
+  "revises": "K1679-rev (Codex FAIL) and K1679 (Codex FAIL)",
+  "run_utc": "2026-07-10T23:24:20.525976+00:00",
+  "seed": 42,
+  "primary_signal_for_verdict": "true_pit",
+  "verdict": "safe_null",
+  "three_fixes": {
+    "fix1_clark_west_on_real_hit": {
+      "problem": "K1679-rev ran Clark-West only on the two old 4w cells and extrapolated any_reject=False onto the BH/Bonferroni-surviving PIT hit dep_flight_13w\u00b7rv\u00b7H5, which never got a CW test.",
+      "fix": "run_cw=True for EVERY primary cell (all 8); the real hit and the whole grid now carry an actual Clark-West result. NB: CW is one-sided for the augmented model being BETTER, so a hurting signal correctly does not reject \u2014 that is not a rescue of the null.",
+      "clark_west_by_vintage": {
+        "current": {
+          "dep_flight_13w\u00b7rv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1962,
+            "mean_adjusted_diff_fbar": 7.844808491622219e-10,
+            "CW_t_raw": 1.1568963170540516,
+            "CW_t_hln": 1.1542428474808475,
+            "CW_p_one_sided_raw": 0.12372781427921375,
+            "CW_p_one_sided_hln": 0.12427063209440492,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_13w\u00b7rv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1956,
+            "mean_adjusted_diff_fbar": 2.931070300860613e-09,
+            "CW_t_raw": 1.3651208494390048,
+            "CW_t_hln": 1.350813556199321,
+            "CW_p_one_sided_raw": 0.08618606915681126,
+            "CW_p_one_sided_hln": 0.08845574253844346,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": true,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_13w\u00b7dsv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1962,
+            "mean_adjusted_diff_fbar": -6.118756367978018e-10,
+            "CW_t_raw": -1.1287190459433245,
+            "CW_t_hln": -1.126130204055805,
+            "CW_p_one_sided_raw": 0.8704227829203106,
+            "CW_p_one_sided_hln": 0.8698758978233094,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_13w\u00b7dsv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1956,
+            "mean_adjusted_diff_fbar": 8.370159957621209e-10,
+            "CW_t_raw": 0.44306949433408066,
+            "CW_t_hln": 0.43842585770396025,
+            "CW_p_one_sided_raw": 0.32888224556112755,
+            "CW_p_one_sided_hln": 0.33056302320514264,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7rv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1962,
+            "mean_adjusted_diff_fbar": 7.595957216858344e-10,
+            "CW_t_raw": 2.264519199547935,
+            "CW_t_hln": 2.2593252744698105,
+            "CW_p_one_sided_raw": 0.011825477430634668,
+            "CW_p_one_sided_hln": 0.011986262094873634,
+            "reject_equal_mspe_at_05_hln": true,
+            "reject_equal_mspe_at_10_hln": true,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7rv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1956,
+            "mean_adjusted_diff_fbar": 1.4732774469048862e-10,
+            "CW_t_raw": 0.129905170935298,
+            "CW_t_hln": 0.12854368607138553,
+            "CW_p_one_sided_raw": 0.44832740854827724,
+            "CW_p_one_sided_hln": 0.44886597505724557,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7dsv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1962,
+            "mean_adjusted_diff_fbar": -2.9098459306475203e-10,
+            "CW_t_raw": -1.7982646824221677,
+            "CW_t_hln": -1.794140163613494,
+            "CW_p_one_sided_raw": 0.9638555907659648,
+            "CW_p_one_sided_hln": 0.9635276043286559,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7dsv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1956,
+            "mean_adjusted_diff_fbar": -5.903767800389855e-10,
+            "CW_t_raw": -1.3785252031489226,
+            "CW_t_hln": -1.3640774241644824,
+            "CW_p_one_sided_raw": 0.9159005436126333,
+            "CW_p_one_sided_hln": 0.9136498926222019,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          }
+        },
+        "first_release": {
+          "dep_flight_13w\u00b7rv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1270,
+            "mean_adjusted_diff_fbar": -6.309487927146104e-11,
+            "CW_t_raw": -0.2819452221907367,
+            "CW_t_hln": -0.28094618175841257,
+            "CW_p_one_sided_raw": 0.6109842572503001,
+            "CW_p_one_sided_hln": 0.6106012615132166,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_13w\u00b7rv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1263,
+            "mean_adjusted_diff_fbar": -1.7228494937604903e-10,
+            "CW_t_raw": -0.4862414307542961,
+            "CW_t_hln": -0.4783491122680617,
+            "CW_p_one_sided_raw": 0.6865597896894206,
+            "CW_p_one_sided_hln": 0.6837576998153965,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_13w\u00b7dsv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1270,
+            "mean_adjusted_diff_fbar": -6.056033241364317e-11,
+            "CW_t_raw": -0.08349440354227776,
+            "CW_t_hln": -0.08319855073667465,
+            "CW_p_one_sided_raw": 0.5332642021622465,
+            "CW_p_one_sided_hln": 0.533146606698071,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_13w\u00b7dsv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1263,
+            "mean_adjusted_diff_fbar": -7.867713965825636e-10,
+            "CW_t_raw": -0.6495425222426657,
+            "CW_t_hln": -0.6389996187966581,
+            "CW_p_one_sided_raw": 0.7419470140016216,
+            "CW_p_one_sided_hln": 0.7385304316935171,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7rv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1288,
+            "mean_adjusted_diff_fbar": -1.5905640962354108e-10,
+            "CW_t_raw": -1.0067557321891683,
+            "CW_t_hln": -1.003238264143559,
+            "CW_p_one_sided_raw": 0.8428792935954124,
+            "CW_p_one_sided_hln": 0.8420327512168864,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7rv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1281,
+            "mean_adjusted_diff_fbar": -6.531773813301755e-10,
+            "CW_t_raw": -1.1121666110020094,
+            "CW_t_hln": -1.0943683863214717,
+            "CW_p_one_sided_raw": 0.8668623211684339,
+            "CW_p_one_sided_hln": 0.8630003330194038,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7dsv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1288,
+            "mean_adjusted_diff_fbar": -4.502266263151057e-10,
+            "CW_t_raw": -0.6544644248521229,
+            "CW_t_hln": -0.6521778148753417,
+            "CW_p_one_sided_raw": 0.7435352127581685,
+            "CW_p_one_sided_hln": 0.7427985368322141,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7dsv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1281,
+            "mean_adjusted_diff_fbar": -1.4470774183715473e-09,
+            "CW_t_raw": -1.1548415702555237,
+            "CW_t_hln": -1.1363604096681597,
+            "CW_p_one_sided_raw": 0.8758145721690714,
+            "CW_p_one_sided_hln": 0.871990769242721,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          }
+        },
+        "true_pit": {
+          "dep_flight_13w\u00b7rv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1395,
+            "mean_adjusted_diff_fbar": -3.895824181739392e-24,
+            "CW_t_raw": -0.12697244116851653,
+            "CW_t_hln": -0.12656284446633886,
+            "CW_p_one_sided_raw": 0.5505097387027622,
+            "CW_p_one_sided_hln": 0.5503476709609794,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_13w\u00b7rv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1388,
+            "mean_adjusted_diff_fbar": -3.7988943542410895e-23,
+            "CW_t_raw": -1.5840675958639978,
+            "CW_t_hln": -1.5606716805101377,
+            "CW_p_one_sided_raw": 0.9432968489375931,
+            "CW_p_one_sided_hln": 0.9405853188792607,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_13w\u00b7dsv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1395,
+            "mean_adjusted_diff_fbar": -2.128379489181918e-22,
+            "CW_t_raw": -1.367335303047106,
+            "CW_t_hln": -1.362924455892046,
+            "CW_p_one_sided_raw": 0.9141296729902699,
+            "CW_p_one_sided_hln": 0.913436784290039,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_13w\u00b7dsv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1388,
+            "mean_adjusted_diff_fbar": -1.384502757185269e-22,
+            "CW_t_raw": -0.8736337085500349,
+            "CW_t_hln": -0.8607305594995253,
+            "CW_p_one_sided_raw": 0.8087655035452982,
+            "CW_p_one_sided_hln": 0.8052323905399481,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7rv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1395,
+            "mean_adjusted_diff_fbar": -8.153356521921776e-24,
+            "CW_t_raw": -0.5381150386619804,
+            "CW_t_hln": -0.5363791490216795,
+            "CW_p_one_sided_raw": 0.7047082332157553,
+            "CW_p_one_sided_hln": 0.7041089396557524,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7rv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1388,
+            "mean_adjusted_diff_fbar": -1.900231449561362e-23,
+            "CW_t_raw": -1.382106845450869,
+            "CW_t_hln": -1.3616937930971766,
+            "CW_p_one_sided_raw": 0.9164192848847219,
+            "CW_p_one_sided_hln": 0.9132421630056986,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7dsv\u00b7H5": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 5,
+            "n": 1395,
+            "mean_adjusted_diff_fbar": -1.8197210927815843e-22,
+            "CW_t_raw": -1.1910075776923577,
+            "CW_t_hln": -1.187165541014147,
+            "CW_p_one_sided_raw": 0.8830733176422865,
+            "CW_p_one_sided_hln": 0.8823177054650853,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          },
+          "dep_flight_4w\u00b7dsv\u00b7H21": {
+            "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+            "hac_lag": 21,
+            "n": 1388,
+            "mean_adjusted_diff_fbar": -1.7096134737803787e-22,
+            "CW_t_raw": -1.154600427827505,
+            "CW_t_hln": -1.137547535673462,
+            "CW_p_one_sided_raw": 0.8757735109469732,
+            "CW_p_one_sided_hln": 0.8722470332058714,
+            "reject_equal_mspe_at_05_hln": false,
+            "reject_equal_mspe_at_10_hln": false,
+            "direction": "positive_CW_t_means_augmented(deposit)_better"
+          }
+        }
+      }
+    },
+    "fix2_sign_bonferroni_verdict": {
+      "problem": "K1679-rev verdict ignored sign and Bonferroni; it labelled a Bonferroni-significant POSITIVE-t cell (signal hurts) as an 'FDR-only artefact'.",
+      "fix": "verdict uses sign (DM_t>0 => hurts) + Bonferroni (<0.05 => significant) + CW: hurts+Bonferroni => documented_negative; helps+CW-reject => documented_positive; else weak_fdr_only/safe_null.",
+      "convention": "d = loss_aug - loss_base; DM_t_hln>0 => deposit signal HURTS."
+    },
+    "fix3_genuine_point_in_time": {
+      "problem": "K1679-rev's 'PIT' used output_type=4 = Initial Release ONLY (first print), which is not a vintage snapshot \u2014 it omits the revisions of older weeks that were actually visible at the trading date.",
+      "fix": "Pull the full ALFRED real-time revision history (output_type=1, wide realtime window) and reconstruct the signal as known at each weekly first-print release date: newest week at first print, prior weeks at their revision current on that date. First-release-only retained as an explicit, honestly-labelled sensitivity.",
+      "signal_correlations": {
+        "current_vs_first_release": 0.5489961465135064,
+        "current_vs_true_pit": -4.431495233520318e-18,
+        "first_release_vs_true_pit": -2.233199671156638e-17
+      },
+      "construct_validity": {
+        "current": {
+          "svb_2023_max_signal": 4.164023855288315,
+          "svb_2023_argmax_date": "2023-03-27",
+          "gfc_max_signal": 3.1957750476621856,
+          "full_sample_mean": 0.12267414820865237,
+          "full_sample_std": 1.1816632141562085,
+          "signal_first_date": "2006-06-01"
+        },
+        "first_release": {
+          "svb_2023_max_signal": 3.2997936240032155,
+          "svb_2023_argmax_date": "2023-05-15",
+          "gfc_max_signal": null,
+          "full_sample_mean": 0.053683417825312225,
+          "full_sample_std": 1.1890790103770743,
+          "signal_first_date": "2013-11-18"
+        },
+        "true_pit": {
+          "svb_2023_max_signal": 0.06795999910434052,
+          "svb_2023_argmax_date": "2023-03-01",
+          "gfc_max_signal": null,
+          "full_sample_mean": 0.06795999910434052,
+          "full_sample_std": 0.0,
+          "signal_first_date": "2012-08-20"
+        }
+      },
+      "note_true_pit_sample": "ALFRED archiving for these H.8 series starts ~2012-08; the true-PIT signal additionally needs >=65 archived weeks before each target week to form the 52w z on a 13w diff, so it begins ~2014. Disclosed; does not alter the pre-registered primary grid."
+    }
+  },
+  "summary_current_vintage": {
+    "verdict": "safe_null",
+    "any_raw_p_below_05": false,
+    "any_bh_reject_at_q10": false,
+    "any_harvey_abs_t_above_3": false,
+    "clark_west_any_reject_at_05_hln": true,
+    "documented_negative_cells": [],
+    "documented_positive_cells": [],
+    "strongest_primary_cell": {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "H": 5,
+      "DM_t_hln": 1.7748926046589917,
+      "p_value": 0.07607071516696662,
+      "sign": "hurts",
+      "bonferroni": 0.608565721335733,
+      "bh_q": 0.34048501758635297,
+      "clark_west_t_hln": -1.794140163613494,
+      "clark_west_p_one_sided_hln": 0.9635276043286559,
+      "clark_west_reject_05": false
+    },
+    "all_primary_cells": [
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "rv",
+        "H": 5,
+        "DM_t_hln": 0.6326888630747941,
+        "p_value": 0.5270106089676725,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.6022978388201972,
+        "clark_west_t_hln": 1.1542428474808475,
+        "clark_west_p_one_sided_hln": 0.12427063209440492,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "rv",
+        "H": 21,
+        "DM_t_hln": 0.6609732739300814,
+        "p_value": 0.508707334066266,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.6022978388201972,
+        "clark_west_t_hln": 1.350813556199321,
+        "clark_west_p_one_sided_hln": 0.08845574253844346,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "dsv",
+        "H": 5,
+        "DM_t_hln": 1.1542796455700761,
+        "p_value": 0.24852618592573172,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.49705237185146345,
+        "clark_west_t_hln": -1.126130204055805,
+        "clark_west_p_one_sided_hln": 0.8698758978233094,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "dsv",
+        "H": 21,
+        "DM_t_hln": -0.09662811152269234,
+        "p_value": 0.9230316353421142,
+        "sign": "helps",
+        "bonferroni": 1.0,
+        "bh_q": 0.9230316353421142,
+        "clark_west_t_hln": 0.43842585770396025,
+        "clark_west_p_one_sided_hln": 0.33056302320514264,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "rv",
+        "H": 5,
+        "DM_t_hln": 0.6967896983970848,
+        "p_value": 0.4860170008709632,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.6022978388201972,
+        "clark_west_t_hln": 2.2593252744698105,
+        "clark_west_p_one_sided_hln": 0.011986262094873634,
+        "clark_west_reject_05": true
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "rv",
+        "H": 21,
+        "DM_t_hln": 1.7225877276603059,
+        "p_value": 0.08512125439658824,
+        "sign": "hurts",
+        "bonferroni": 0.6809700351727059,
+        "bh_q": 0.34048501758635297,
+        "clark_west_t_hln": 0.12854368607138553,
+        "clark_west_p_one_sided_hln": 0.44886597505724557,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "dsv",
+        "H": 5,
+        "DM_t_hln": 1.7748926046589917,
+        "p_value": 0.07607071516696662,
+        "sign": "hurts",
+        "bonferroni": 0.608565721335733,
+        "bh_q": 0.34048501758635297,
+        "clark_west_t_hln": -1.794140163613494,
+        "clark_west_p_one_sided_hln": 0.9635276043286559,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "dsv",
+        "H": 21,
+        "DM_t_hln": 1.4472494956148019,
+        "p_value": 0.14798738317109494,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.39463302178958654,
+        "clark_west_t_hln": -1.3640774241644824,
+        "clark_west_p_one_sided_hln": 0.9136498926222019,
+        "clark_west_reject_05": false
+      }
+    ]
+  },
+  "summary_first_release": {
+    "verdict": "documented_negative",
+    "any_raw_p_below_05": true,
+    "any_bh_reject_at_q10": true,
+    "any_harvey_abs_t_above_3": false,
+    "clark_west_any_reject_at_05_hln": false,
+    "documented_negative_cells": [
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "rv",
+        "H": 5,
+        "DM_t_hln": 2.772171315801317,
+        "p_value": 0.005649791559239725,
+        "sign": "hurts",
+        "bonferroni": 0.0451983324739178,
+        "bh_q": 0.0451983324739178,
+        "clark_west_t_hln": -0.28094618175841257,
+        "clark_west_p_one_sided_hln": 0.6106012615132166,
+        "clark_west_reject_05": false
+      }
+    ],
+    "documented_positive_cells": [],
+    "strongest_primary_cell": {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5,
+      "DM_t_hln": 2.772171315801317,
+      "p_value": 0.005649791559239725,
+      "sign": "hurts",
+      "bonferroni": 0.0451983324739178,
+      "bh_q": 0.0451983324739178,
+      "clark_west_t_hln": -0.28094618175841257,
+      "clark_west_p_one_sided_hln": 0.6106012615132166,
+      "clark_west_reject_05": false
+    },
+    "all_primary_cells": [
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "rv",
+        "H": 5,
+        "DM_t_hln": 2.772171315801317,
+        "p_value": 0.005649791559239725,
+        "sign": "hurts",
+        "bonferroni": 0.0451983324739178,
+        "bh_q": 0.0451983324739178,
+        "clark_west_t_hln": -0.28094618175841257,
+        "clark_west_p_one_sided_hln": 0.6106012615132166,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "rv",
+        "H": 21,
+        "DM_t_hln": 1.9255288772800296,
+        "p_value": 0.05438770505222745,
+        "sign": "hurts",
+        "bonferroni": 0.4351016404178196,
+        "bh_q": 0.1174605598752521,
+        "clark_west_t_hln": -0.4783491122680617,
+        "clark_west_p_one_sided_hln": 0.6837576998153965,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "dsv",
+        "H": 5,
+        "DM_t_hln": 1.213486819670063,
+        "p_value": 0.22516956221835915,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.2573366425352676,
+        "clark_west_t_hln": -0.08319855073667465,
+        "clark_west_p_one_sided_hln": 0.533146606698071,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "dsv",
+        "H": 21,
+        "DM_t_hln": 1.7917480104671815,
+        "p_value": 0.07341284992203256,
+        "sign": "hurts",
+        "bonferroni": 0.5873027993762605,
+        "bh_q": 0.1174605598752521,
+        "clark_west_t_hln": -0.6389996187966581,
+        "clark_west_p_one_sided_hln": 0.7385304316935171,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "rv",
+        "H": 5,
+        "DM_t_hln": 1.318925691986811,
+        "p_value": 0.18742858080796188,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.24990477441061584,
+        "clark_west_t_hln": -1.003238264143559,
+        "clark_west_p_one_sided_hln": 0.8420327512168864,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "rv",
+        "H": 21,
+        "DM_t_hln": 1.8387135674002186,
+        "p_value": 0.06618887940316887,
+        "sign": "hurts",
+        "bonferroni": 0.5295110352253509,
+        "bh_q": 0.1174605598752521,
+        "clark_west_t_hln": -1.0943683863214717,
+        "clark_west_p_one_sided_hln": 0.8630003330194038,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "dsv",
+        "H": 5,
+        "DM_t_hln": 1.0061430460795782,
+        "p_value": 0.31453589036592855,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.31453589036592855,
+        "clark_west_t_hln": -0.6521778148753417,
+        "clark_west_p_one_sided_hln": 0.7427985368322141,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "dsv",
+        "H": 21,
+        "DM_t_hln": 1.8450447568978054,
+        "p_value": 0.06526190886484251,
+        "sign": "hurts",
+        "bonferroni": 0.5220952709187401,
+        "bh_q": 0.1174605598752521,
+        "clark_west_t_hln": -1.1363604096681597,
+        "clark_west_p_one_sided_hln": 0.871990769242721,
+        "clark_west_reject_05": false
+      }
+    ]
+  },
+  "summary_true_pit": {
+    "verdict": "safe_null",
+    "any_raw_p_below_05": false,
+    "any_bh_reject_at_q10": false,
+    "any_harvey_abs_t_above_3": false,
+    "clark_west_any_reject_at_05_hln": false,
+    "documented_negative_cells": [],
+    "documented_positive_cells": [],
+    "strongest_primary_cell": {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "H": 5,
+      "DM_t_hln": 1.4724608999756317,
+      "p_value": 0.14112219029021644,
+      "sign": "hurts",
+      "bonferroni": 1.0,
+      "bh_q": 0.4804505399206785,
+      "clark_west_t_hln": -0.5363791490216795,
+      "clark_west_p_one_sided_hln": 0.7041089396557524,
+      "clark_west_reject_05": false
+    },
+    "all_primary_cells": [
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "rv",
+        "H": 5,
+        "DM_t_hln": 1.2208196248325316,
+        "p_value": 0.22236077307885038,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.4804505399206785,
+        "clark_west_t_hln": -0.12656284446633886,
+        "clark_west_p_one_sided_hln": 0.5503476709609794,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "rv",
+        "H": 21,
+        "DM_t_hln": 1.1574981015460089,
+        "p_value": 0.24726820415000939,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.4804505399206785,
+        "clark_west_t_hln": -1.5606716805101377,
+        "clark_west_p_one_sided_hln": 0.9405853188792607,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "dsv",
+        "H": 5,
+        "DM_t_hln": 0.9532773267907676,
+        "p_value": 0.34061483992312436,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.4804505399206785,
+        "clark_west_t_hln": -1.362924455892046,
+        "clark_west_p_one_sided_hln": 0.913436784290039,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_13w",
+        "target": "dsv",
+        "H": 21,
+        "DM_t_hln": 0.8607305594995253,
+        "p_value": 0.3895352189201038,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.4804505399206785,
+        "clark_west_t_hln": -0.8607305594995253,
+        "clark_west_p_one_sided_hln": 0.8052323905399481,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "rv",
+        "H": 5,
+        "DM_t_hln": 1.4724608999756317,
+        "p_value": 0.14112219029021644,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.4804505399206785,
+        "clark_west_t_hln": -0.5363791490216795,
+        "clark_west_p_one_sided_hln": 0.7041089396557524,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "rv",
+        "H": 21,
+        "DM_t_hln": 0.5469791259598888,
+        "p_value": 0.5844810618790541,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.5844810618790541,
+        "clark_west_t_hln": -1.3616937930971766,
+        "clark_west_p_one_sided_hln": 0.9132421630056986,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "dsv",
+        "H": 5,
+        "DM_t_hln": 0.8059758793840325,
+        "p_value": 0.42039422243059366,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.4804505399206785,
+        "clark_west_t_hln": -1.187165541014147,
+        "clark_west_p_one_sided_hln": 0.8823177054650853,
+        "clark_west_reject_05": false
+      },
+      {
+        "asset": "KRE",
+        "predictor": "dep_flight_4w",
+        "target": "dsv",
+        "H": 21,
+        "DM_t_hln": 1.137547535673462,
+        "p_value": 0.25550593358825724,
+        "sign": "hurts",
+        "bonferroni": 1.0,
+        "bh_q": 0.4804505399206785,
+        "clark_west_t_hln": -1.137547535673462,
+        "clark_west_p_one_sided_hln": 0.8722470332058714,
+        "clark_west_reject_05": false
+      }
+    ]
+  },
+  "data_sources": {
+    "deposits_small": "FRED/ALFRED DPSSCBW027SBOG",
+    "deposits_large": "FRED/ALFRED DPSLCBW027SBOG",
+    "prices": "yfinance auto_adjust=True (KRE, XLF, SPY, ^VIX)",
+    "vix_control_available": true
+  },
+  "method": {
+    "baseline": "OLS 1 + HAR(d,w,m) + SPY 21d RV + VIX level",
+    "augmented": "baseline + deposit-flight signal (only difference)",
+    "oos": "expanding refit, initial train 60%, embargo j+H<i",
+    "dm": "NW HAC lag=H + HLN correction, two-sided t(n-1)",
+    "clark_west": "CW(2007) one-sided nested MSPE, HAC lag=H + HLN, ALL 8 primary cells",
+    "bootstrap": "moving-block block=max(10,H) reps=2000 seed=42",
+    "multiple_testing": "Bonferroni + BH over primary family m=8",
+    "verdict_rule": "sign + Bonferroni + Clark-West (see three_fixes.fix2)"
+  },
+  "cells_current_vintage": [
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 6,
+      "n_floored_pred_aug": 17,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.26979400551832505,
+          "loss_aug": 0.28102474532564503,
+          "improvement_pct": -4.162709169814064,
+          "mean_loss_diff": 0.01123073980731998,
+          "DM_t_raw": 0.6341433409181164,
+          "DM_t_hln": 0.6326888630747941,
+          "DM_p_value": 0.5270106089676725,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.01123073980731998,
+            "boot_se": 0.020328749114223277,
+            "ci95": [
+              -0.024532199005574084,
+              0.054612565135602864
+            ],
+            "p_two_sided_centered": 0.5815
+          }
+        },
+        "mse": {
+          "loss_base": 8.731008584685353e-08,
+          "loss_aug": 8.699982370137084e-08,
+          "improvement_pct": 0.35535659193705005,
+          "mean_loss_diff": -3.102621454827155e-10,
+          "DM_t_raw": -0.46473123016173595,
+          "DM_t_hln": -0.46366531771930375,
+          "DM_p_value": 0.6429390081730011,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~6/1962 base and 17/1962 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 8.731274211873446e-08,
+        "loss_aug_unfloored": 8.702058709808563e-08,
+        "improvement_pct_unfloored": 0.3346075424495726,
+        "mean_loss_diff_unfloored": -2.92155020648838e-10,
+        "DM_t_hln_unfloored": -0.4364525837362989,
+        "DM_p_value_unfloored": 0.662556441720529,
+        "DM_n": 1962,
+        "vs_floored_mse_DM_t_hln": -0.46366531771930375
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1962,
+        "mean_adjusted_diff_fbar": 7.844808491622219e-10,
+        "CW_t_raw": 1.1568963170540516,
+        "CW_t_hln": 1.1542428474808475,
+        "CW_p_one_sided_raw": 0.12372781427921375,
+        "CW_p_one_sided_hln": 0.12427063209440492,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.5270106089676725,
+      "DM_t_hln": 0.6326888630747941,
+      "family": "primary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.6022978388201972,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 4,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.1956505527733373,
+          "loss_aug": 0.20851680594210245,
+          "improvement_pct": -6.576139441666091,
+          "mean_loss_diff": 0.012866253168765149,
+          "DM_t_raw": 0.6679740464721627,
+          "DM_t_hln": 0.6609732739300814,
+          "DM_p_value": 0.508707334066266,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.012866253168765149,
+            "boot_se": 0.018634257180304536,
+            "ci95": [
+              -0.023105875259075356,
+              0.050884741419410455
+            ],
+            "p_two_sided_centered": 0.48
+          }
+        },
+        "mse": {
+          "loss_base": 6.929990861699523e-08,
+          "loss_aug": 6.850903389310489e-08,
+          "improvement_pct": 1.1412348727057036,
+          "mean_loss_diff": -7.908747238903577e-10,
+          "DM_t_raw": -0.37689924620036513,
+          "DM_t_hln": -0.372949113844376,
+          "DM_p_value": 0.7092267474941525,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1956 base and 4/1956 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.929990861699523e-08,
+        "loss_aug_unfloored": 6.851211656506395e-08,
+        "improvement_pct_unfloored": 1.1367865667546921,
+        "mean_loss_diff_unfloored": -7.87792051931299e-10,
+        "DM_t_hln_unfloored": -0.3714908166386124,
+        "DM_p_value_unfloored": 0.7103122503288608,
+        "DM_n": 1956,
+        "vs_floored_mse_DM_t_hln": -0.372949113844376
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1956,
+        "mean_adjusted_diff_fbar": 2.931070300860613e-09,
+        "CW_t_raw": 1.3651208494390048,
+        "CW_t_hln": 1.350813556199321,
+        "CW_p_one_sided_raw": 0.08618606915681126,
+        "CW_p_one_sided_hln": 0.08845574253844346,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": true,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.508707334066266,
+      "DM_t_hln": 0.6609732739300814,
+      "family": "primary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.6022978388201972,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 43,
+      "n_floored_pred_base": 50,
+      "n_floored_pred_aug": 56,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 254.38558134801738,
+          "loss_aug": 347.6838865011321,
+          "improvement_pct": -36.67594077412591,
+          "mean_loss_diff": 93.29830515311475,
+          "DM_t_raw": 1.052081797746883,
+          "DM_t_hln": 1.0496687318587037,
+          "DM_p_value": 0.2939997854922438,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "43 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 3.9222835520169927e-07,
+          "loss_aug": 3.928594830185949e-07,
+          "improvement_pct": -0.1609082588052705,
+          "mean_loss_diff": 6.311278168956517e-10,
+          "DM_t_raw": 1.156933199737792,
+          "DM_t_hln": 1.1542796455700761,
+          "DM_p_value": 0.24852618592573172,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 6.311278168956517e-10,
+            "boot_se": 5.828493729927989e-10,
+            "ci95": [
+              -3.6284986786802917e-10,
+              1.9455331739658172e-09
+            ],
+            "p_two_sided_centered": 0.2625
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~50/1962 base and 56/1962 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 3.9230979018045135e-07,
+        "loss_aug_unfloored": 3.929968110772005e-07,
+        "improvement_pct_unfloored": -0.17512203721277092,
+        "mean_loss_diff_unfloored": 6.870208967492256e-10,
+        "DM_t_hln_unfloored": 1.2366938330562474,
+        "DM_p_value_unfloored": 0.21634885615774646,
+        "DM_n": 1962,
+        "vs_floored_mse_DM_t_hln": 1.1542796455700761
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1962,
+        "mean_adjusted_diff_fbar": -6.118756367978018e-10,
+        "CW_t_raw": -1.1287190459433245,
+        "CW_t_hln": -1.126130204055805,
+        "CW_p_one_sided_raw": 0.8704227829203106,
+        "CW_p_one_sided_hln": 0.8698758978233094,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.24852618592573172,
+      "DM_t_hln": 1.1542796455700761,
+      "family": "primary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.49705237185146345,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 12,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.7283695012716188,
+          "loss_aug": 0.8743667876907852,
+          "improvement_pct": -20.044398641661697,
+          "mean_loss_diff": 0.1459972864191663,
+          "DM_t_raw": 1.3008862648945456,
+          "DM_t_hln": 1.2872521890023112,
+          "DM_p_value": 0.19815877786237257,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 2.1889659657440536e-07,
+          "loss_aug": 2.1871842888747674e-07,
+          "improvement_pct": 0.08139353910331738,
+          "mean_loss_diff": -1.7816768692859457e-10,
+          "DM_t_raw": -0.09765155900025675,
+          "DM_t_hln": -0.09662811152269234,
+          "DM_p_value": 0.9230316353421142,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -1.7816768692859457e-10,
+            "boot_se": 1.7758648994428254e-09,
+            "ci95": [
+              -3.9786192535023595e-09,
+              2.9528263731406896e-09
+            ],
+            "p_two_sided_centered": 0.92
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1956 base and 12/1956 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 2.1889659657440536e-07,
+        "loss_aug_unfloored": 2.1872407109985276e-07,
+        "improvement_pct_unfloored": 0.07881596939034913,
+        "mean_loss_diff_unfloored": -1.7252547455257385e-10,
+        "DM_t_hln_unfloored": -0.09356188691028146,
+        "DM_p_value_unfloored": 0.9254667737278084,
+        "DM_n": 1956,
+        "vs_floored_mse_DM_t_hln": -0.09662811152269234
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1956,
+        "mean_adjusted_diff_fbar": 8.370159957621209e-10,
+        "CW_t_raw": 0.44306949433408066,
+        "CW_t_hln": 0.43842585770396025,
+        "CW_p_one_sided_raw": 0.32888224556112755,
+        "CW_p_one_sided_hln": 0.33056302320514264,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.9230316353421142,
+      "DM_t_hln": -0.09662811152269234,
+      "family": "primary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.9230316353421142,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 6,
+      "n_floored_pred_aug": 7,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.26979400551832505,
+          "loss_aug": 0.2774952520970009,
+          "improvement_pct": -2.854491360503092,
+          "mean_loss_diff": 0.007701246578675872,
+          "DM_t_raw": 0.6983915365784121,
+          "DM_t_hln": 0.6967896983970848,
+          "DM_p_value": 0.4860170008709632,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.007701246578675872,
+            "boot_se": 0.012355480464556498,
+            "ci95": [
+              -0.01594695739250068,
+              0.032004587533125024
+            ],
+            "p_two_sided_centered": 0.5365
+          }
+        },
+        "mse": {
+          "loss_base": 8.731008584685353e-08,
+          "loss_aug": 8.674091728045728e-08,
+          "improvement_pct": 0.6518932616726585,
+          "mean_loss_diff": -5.691685663962789e-10,
+          "DM_t_raw": -1.73432106037894,
+          "DM_t_hln": -1.7303432033350163,
+          "DM_p_value": 0.08372629853561864,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~6/1962 base and 7/1962 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 8.731274211873446e-08,
+        "loss_aug_unfloored": 8.674978399071422e-08,
+        "improvement_pct_unfloored": 0.6447605634177488,
+        "mean_loss_diff_unfloored": -5.629581280202459e-10,
+        "DM_t_hln_unfloored": -1.71094188218264,
+        "DM_p_value_unfloored": 0.08724999186273985,
+        "DM_n": 1962,
+        "vs_floored_mse_DM_t_hln": -1.7303432033350163
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1962,
+        "mean_adjusted_diff_fbar": 7.595957216858344e-10,
+        "CW_t_raw": 2.264519199547935,
+        "CW_t_hln": 2.2593252744698105,
+        "CW_p_one_sided_raw": 0.011825477430634668,
+        "CW_p_one_sided_hln": 0.011986262094873634,
+        "reject_equal_mspe_at_05_hln": true,
+        "reject_equal_mspe_at_10_hln": true,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.4860170008709632,
+      "DM_t_hln": 0.6967896983970848,
+      "family": "primary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.6022978388201972,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 1,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.1956505527733373,
+          "loss_aug": 0.2563815053219157,
+          "improvement_pct": -31.040521832277022,
+          "mean_loss_diff": 0.06073095254857845,
+          "DM_t_raw": 1.7408327087219853,
+          "DM_t_hln": 1.7225877276603059,
+          "DM_p_value": 0.08512125439658824,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.06073095254857845,
+            "boot_se": 0.034066493865859464,
+            "ci95": [
+              0.009961495688941245,
+              0.1402795367243991
+            ],
+            "p_two_sided_centered": 0.054
+          }
+        },
+        "mse": {
+          "loss_base": 6.929990861699523e-08,
+          "loss_aug": 7.009668249315839e-08,
+          "improvement_pct": -1.1497473691729565,
+          "mean_loss_diff": 7.967738761631495e-10,
+          "DM_t_raw": 0.7179856782522493,
+          "DM_t_hln": 0.710460753521322,
+          "DM_p_value": 0.477503200565337,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1956 base and 1/1956 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.929990861699523e-08,
+        "loss_aug_unfloored": 7.00973180260994e-08,
+        "improvement_pct_unfloored": -1.1506644453332155,
+        "mean_loss_diff_unfloored": 7.974094091041629e-10,
+        "DM_t_hln_unfloored": 0.7110120745904378,
+        "DM_p_value_unfloored": 0.47716157051439545,
+        "DM_n": 1956,
+        "vs_floored_mse_DM_t_hln": 0.710460753521322
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1956,
+        "mean_adjusted_diff_fbar": 1.4732774469048862e-10,
+        "CW_t_raw": 0.129905170935298,
+        "CW_t_hln": 0.12854368607138553,
+        "CW_p_one_sided_raw": 0.44832740854827724,
+        "CW_p_one_sided_hln": 0.44886597505724557,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.08512125439658824,
+      "DM_t_hln": 1.7225877276603059,
+      "family": "primary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 0.6809700351727059,
+        "benjamini_hochberg_q": 0.34048501758635297,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 43,
+      "n_floored_pred_base": 50,
+      "n_floored_pred_aug": 53,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 254.38558134801738,
+          "loss_aug": 276.05277128038875,
+          "improvement_pct": -8.517459919526308,
+          "mean_loss_diff": 21.66718993237145,
+          "DM_t_raw": 1.1521258625209692,
+          "DM_t_hln": 1.149483334512508,
+          "DM_p_value": 0.25049690646136313,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "43 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 3.9222835520169927e-07,
+          "loss_aug": 3.9251636009805587e-07,
+          "improvement_pct": -0.07342786224838226,
+          "mean_loss_diff": 2.8800489635666107e-10,
+          "DM_t_raw": 1.7789728755763698,
+          "DM_t_hln": 1.7748926046589917,
+          "DM_p_value": 0.07607071516696662,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 2.8800489635666107e-10,
+            "boot_se": 1.6771431027178725e-10,
+            "ci95": [
+              2.4508926573696637e-11,
+              6.5271287187364e-10
+            ],
+            "p_two_sided_centered": 0.0705
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~50/1962 base and 53/1962 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 3.9230979018045135e-07,
+        "loss_aug_unfloored": 3.926069811231079e-07,
+        "improvement_pct_unfloored": -0.0757541489137591,
+        "mean_loss_diff_unfloored": 2.971909426565956e-10,
+        "DM_t_hln_unfloored": 1.828808021351191,
+        "DM_p_value_unfloored": 0.06758017823060625,
+        "DM_n": 1962,
+        "vs_floored_mse_DM_t_hln": 1.7748926046589917
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1962,
+        "mean_adjusted_diff_fbar": -2.9098459306475203e-10,
+        "CW_t_raw": -1.7982646824221677,
+        "CW_t_hln": -1.794140163613494,
+        "CW_p_one_sided_raw": 0.9638555907659648,
+        "CW_p_one_sided_hln": 0.9635276043286559,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.07607071516696662,
+      "DM_t_hln": 1.7748926046589917,
+      "family": "primary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 0.608565721335733,
+        "benjamini_hochberg_q": 0.34048501758635297,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.7283695012716188,
+          "loss_aug": 0.7467914361496607,
+          "improvement_pct": -2.529201846848349,
+          "mean_loss_diff": 0.018421934878041894,
+          "DM_t_raw": 1.0310939857832948,
+          "DM_t_hln": 1.0202874963663775,
+          "DM_p_value": 0.3077183702513022,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 2.1889659657440536e-07,
+          "loss_aug": 2.1953603402442727e-07,
+          "improvement_pct": -0.29211849797059913,
+          "mean_loss_diff": 6.39437450021911e-10,
+          "DM_t_raw": 1.462578200919629,
+          "DM_t_hln": 1.4472494956148019,
+          "DM_p_value": 0.14798738317109494,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 6.39437450021911e-10,
+            "boot_se": 4.365869723507001e-10,
+            "ci95": [
+              -1.1310974689516743e-10,
+              1.5766058520860522e-09
+            ],
+            "p_two_sided_centered": 0.137
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1956 base and 0/1956 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 2.1889659657440536e-07,
+        "loss_aug_unfloored": 2.1953603402442727e-07,
+        "improvement_pct_unfloored": -0.29211849797059913,
+        "mean_loss_diff_unfloored": 6.39437450021911e-10,
+        "DM_t_hln_unfloored": 1.4472494956148019,
+        "DM_p_value_unfloored": 0.14798738317109494,
+        "DM_n": 1956,
+        "vs_floored_mse_DM_t_hln": 1.4472494956148019
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1956,
+        "mean_adjusted_diff_fbar": -5.903767800389855e-10,
+        "CW_t_raw": -1.3785252031489226,
+        "CW_t_hln": -1.3640774241644824,
+        "CW_p_one_sided_raw": 0.9159005436126333,
+        "CW_p_one_sided_hln": 0.9136498926222019,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.14798738317109494,
+      "DM_t_hln": 1.4472494956148019,
+      "family": "primary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.39463302178958654,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 145,
+      "n_floored_pred_aug": 141,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.6578091199583436,
+          "loss_aug": 0.6651273182561912,
+          "improvement_pct": -1.1125109208444945,
+          "mean_loss_diff": 0.007318198297847619,
+          "DM_t_raw": 0.1580430402540614,
+          "DM_t_hln": 0.15768055107297496,
+          "DM_p_value": 0.8747247605175361,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.007318198297847619,
+            "boot_se": 0.050066031206567066,
+            "ci95": [
+              -0.0965520744632843,
+              0.10228086906732183
+            ],
+            "p_two_sided_centered": 0.881
+          }
+        },
+        "mse": {
+          "loss_base": 3.185424753632947e-08,
+          "loss_aug": 3.186983651247204e-08,
+          "improvement_pct": -0.04893845357606744,
+          "mean_loss_diff": 1.558897614256976e-11,
+          "DM_t_raw": 0.029760655706596452,
+          "DM_t_hln": 0.029692396353332064,
+          "DM_p_value": 0.9763153975020011,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~145/1962 base and 141/1962 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 3.191676703327006e-08,
+        "loss_aug_unfloored": 3.197669686125129e-08,
+        "improvement_pct_unfloored": -0.1877691055574508,
+        "mean_loss_diff_unfloored": 5.992982798122278e-11,
+        "DM_t_hln_unfloored": 0.11399320504625544,
+        "DM_p_value_unfloored": 0.9092548490600438,
+        "DM_n": 1962,
+        "vs_floored_mse_DM_t_hln": 0.029692396353332064
+      },
+      "p_value": 0.8747247605175361,
+      "DM_t_hln": 0.15768055107297496,
+      "family": "secondary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 49,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.24568397607291154,
+          "loss_aug": 0.3149950790361479,
+          "improvement_pct": -28.211486996883714,
+          "mean_loss_diff": 0.06931110296323638,
+          "DM_t_raw": 1.5978915681097772,
+          "DM_t_hln": 1.5811446967690022,
+          "DM_p_value": 0.11400671661924311,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.06931110296323638,
+            "boot_se": 0.04192813834540081,
+            "ci95": [
+              -0.005272850558079639,
+              0.16126591096563167
+            ],
+            "p_two_sided_centered": 0.0845
+          }
+        },
+        "mse": {
+          "loss_base": 3.5708863749474497e-08,
+          "loss_aug": 3.5424687856050874e-08,
+          "improvement_pct": 0.7958133179967236,
+          "mean_loss_diff": -2.8417589342361845e-10,
+          "DM_t_raw": -0.17395120710154435,
+          "DM_t_hln": -0.17212809310367266,
+          "DM_p_value": 0.8633546429876859,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1956 base and 49/1956 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 3.5708863749474497e-08,
+        "loss_aug_unfloored": 3.545833136207114e-08,
+        "improvement_pct_unfloored": 0.7015971977183012,
+        "mean_loss_diff_unfloored": -2.505323874033597e-10,
+        "DM_t_hln_unfloored": -0.15167248776587827,
+        "DM_p_value_unfloored": 0.8794609069371826,
+        "DM_n": 1956,
+        "vs_floored_mse_DM_t_hln": -0.17212809310367266
+      },
+      "p_value": 0.11400671661924311,
+      "DM_t_hln": 1.5811446967690022,
+      "family": "secondary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 76,
+      "n_floored_pred_base": 199,
+      "n_floored_pred_aug": 239,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 212.50465242387227,
+          "loss_aug": 267.9416458651849,
+          "improvement_pct": -26.087425761735922,
+          "mean_loss_diff": 55.43699344131258,
+          "DM_t_raw": 1.0897350958628826,
+          "DM_t_hln": 1.087235667973711,
+          "DM_p_value": 0.2770662857897377,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "76 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 1.8855822363689834e-07,
+          "loss_aug": 1.871372869461677e-07,
+          "improvement_pct": 0.7535798032691001,
+          "mean_loss_diff": -1.4209366907306581e-09,
+          "DM_t_raw": -0.7281135324181397,
+          "DM_t_hln": -0.7264435235542257,
+          "DM_p_value": 0.4676536163910505,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": -1.4209366907306581e-09,
+            "boot_se": 2.4052421733902103e-09,
+            "ci95": [
+              -6.399821839676002e-09,
+              2.8754276061964248e-09
+            ],
+            "p_two_sided_centered": 0.5625
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~199/1962 base and 239/1962 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.8866013620785144e-07,
+        "loss_aug_unfloored": 1.8741034091722244e-07,
+        "improvement_pct_unfloored": 0.6624585965802957,
+        "mean_loss_diff_unfloored": -1.249795290629042e-09,
+        "DM_t_hln_unfloored": -0.6383729645648446,
+        "DM_p_value_unfloored": 0.5233054673710105,
+        "DM_n": 1962,
+        "vs_floored_mse_DM_t_hln": -0.7264435235542257
+      },
+      "p_value": 0.4676536163910505,
+      "DM_t_hln": -0.7264435235542257,
+      "family": "secondary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 114,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.7663032242334407,
+          "loss_aug": 2.8269651950345067,
+          "improvement_pct": -268.9094741657151,
+          "mean_loss_diff": 2.060661970801066,
+          "DM_t_raw": 2.3634634283266243,
+          "DM_t_hln": 2.338692900249031,
+          "DM_p_value": 0.01945162142378387,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 1.3794977988542708e-07,
+          "loss_aug": 1.3548537227698766e-07,
+          "improvement_pct": 1.786452729744266,
+          "mean_loss_diff": -2.4644076084393973e-09,
+          "DM_t_raw": -0.5648598684824708,
+          "DM_t_hln": -0.5589397949732068,
+          "DM_p_value": 0.5762668258505466,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -2.4644076084393973e-09,
+            "boot_se": 4.429979165267479e-09,
+            "ci95": [
+              -1.283513156769959e-08,
+              4.527966609437507e-09
+            ],
+            "p_two_sided_centered": 0.5865
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1956 base and 114/1956 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.3794977988542708e-07,
+        "loss_aug_unfloored": 1.3557589772452148e-07,
+        "improvement_pct_unfloored": 1.7208306985898791,
+        "mean_loss_diff_unfloored": -2.3738821609055524e-09,
+        "DM_t_hln_unfloored": -0.5383258409547467,
+        "DM_p_value_unfloored": 0.5904133966328782,
+        "DM_n": 1956,
+        "vs_floored_mse_DM_t_hln": -0.5589397949732068
+      },
+      "p_value": 0.5762668258505466,
+      "DM_t_hln": -0.5589397949732068,
+      "family": "secondary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 32,
+      "n_floored_pred_aug": 47,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.5694075297846296,
+          "loss_aug": 0.6292350654665366,
+          "improvement_pct": -10.506980071818852,
+          "mean_loss_diff": 0.059827535681907046,
+          "DM_t_raw": 0.9437398984208456,
+          "DM_t_hln": 0.9415753266536406,
+          "DM_p_value": 0.3465260809955033,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.059827535681907046,
+            "boot_se": 0.07004948469474041,
+            "ci95": [
+              -0.06471725161714281,
+              0.21037236124025682
+            ],
+            "p_two_sided_centered": 0.404
+          }
+        },
+        "mse": {
+          "loss_base": 1.682101436079177e-08,
+          "loss_aug": 1.6900386016233188e-08,
+          "improvement_pct": -0.47186010153123803,
+          "mean_loss_diff": 7.93716554414198e-11,
+          "DM_t_raw": 2.1754439988342673,
+          "DM_t_hln": 2.17045437757433,
+          "DM_p_value": 0.030092091893594963,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~32/1962 base and 47/1962 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.6822791238722976e-08,
+        "loss_aug_unfloored": 1.690711522394539e-08,
+        "improvement_pct_unfloored": -0.501248479077103,
+        "mean_loss_diff_unfloored": 8.432398522241493e-11,
+        "DM_t_hln_unfloored": 2.2910612049902004,
+        "DM_p_value_unfloored": 0.02206549778710376,
+        "DM_n": 1962,
+        "vs_floored_mse_DM_t_hln": 2.17045437757433
+      },
+      "p_value": 0.3465260809955033,
+      "DM_t_hln": 0.9415753266536406,
+      "family": "secondary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.32842595797330915,
+          "loss_aug": 0.3281309924497746,
+          "improvement_pct": 0.08981187886449006,
+          "mean_loss_diff": -0.0002949655235345366,
+          "DM_t_raw": -0.03511428322103286,
+          "DM_t_hln": -0.034746264267142384,
+          "DM_p_value": 0.9722856167473162,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -0.0002949655235345366,
+            "boot_se": 0.008175891023339118,
+            "ci95": [
+              -0.017432802805314132,
+              0.01475719661475708
+            ],
+            "p_two_sided_centered": 0.976
+          }
+        },
+        "mse": {
+          "loss_base": 1.6037767626430197e-08,
+          "loss_aug": 1.598483217255572e-08,
+          "improvement_pct": 0.330067470158632,
+          "mean_loss_diff": -5.293545387447922e-11,
+          "DM_t_raw": -0.3570982799401597,
+          "DM_t_hln": -0.3533556737023383,
+          "DM_p_value": 0.723859910183795,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1956 base and 0/1956 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.6037767626430197e-08,
+        "loss_aug_unfloored": 1.598483217255572e-08,
+        "improvement_pct_unfloored": 0.330067470158632,
+        "mean_loss_diff_unfloored": -5.293545387447922e-11,
+        "DM_t_hln_unfloored": -0.3533556737023383,
+        "DM_p_value_unfloored": 0.723859910183795,
+        "DM_n": 1956,
+        "vs_floored_mse_DM_t_hln": -0.3533556737023383
+      },
+      "p_value": 0.9722856167473162,
+      "DM_t_hln": -0.034746264267142384,
+      "family": "secondary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4905,
+      "n_oos": 1962,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-07-02",
+      "oos_start": "2018-09-11",
+      "n_zero_actual": 98,
+      "n_floored_pred_base": 17,
+      "n_floored_pred_aug": 32,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 425.05562443827694,
+          "loss_aug": 535.0996032413581,
+          "improvement_pct": -25.88931247492781,
+          "mean_loss_diff": 110.04397880308099,
+          "DM_t_raw": 1.4028249258820664,
+          "DM_t_hln": 1.3996073918623892,
+          "DM_p_value": 0.16178908621201304,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "98 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 7.316039776578926e-08,
+          "loss_aug": 7.332751663805376e-08,
+          "improvement_pct": -0.22842805311077644,
+          "mean_loss_diff": 1.6711887226451257e-10,
+          "DM_t_raw": 1.7908557732644783,
+          "DM_t_hln": 1.7867482476078533,
+          "DM_p_value": 0.07413261159285711,
+          "DM_n": 1962,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.6711887226451257e-10,
+            "boot_se": 1.0435239125538883e-10,
+            "ci95": [
+              1.973003378464768e-11,
+              3.957393616852213e-10
+            ],
+            "p_two_sided_centered": 0.081
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~17/1962 base and 32/1962 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 7.316071732955393e-08,
+        "loss_aug_unfloored": 7.332859807260042e-08,
+        "improvement_pct_unfloored": -0.22946842127076028,
+        "mean_loss_diff_unfloored": 1.6788074304651029e-10,
+        "DM_t_hln_unfloored": 1.7947053407526419,
+        "DM_p_value_unfloored": 0.07285461709317254,
+        "DM_n": 1962,
+        "vs_floored_mse_DM_t_hln": 1.7867482476078533
+      },
+      "p_value": 0.07413261159285711,
+      "DM_t_hln": 1.7867482476078533,
+      "family": "secondary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 4889,
+      "n_oos": 1956,
+      "sample_start": "2007-01-03",
+      "sample_end": "2026-06-09",
+      "oos_start": "2018-08-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 12,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.7680461709443052,
+          "loss_aug": 0.750637311189324,
+          "improvement_pct": 2.2666423469798915,
+          "mean_loss_diff": -0.017408859754981257,
+          "DM_t_raw": -0.9460039509049765,
+          "DM_t_hln": -0.9360892565853791,
+          "DM_p_value": 0.3493428487676773,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 4.516915700563445e-08,
+          "loss_aug": 4.512937916059057e-08,
+          "improvement_pct": 0.08806417405336518,
+          "mean_loss_diff": -3.9777845043884e-11,
+          "DM_t_raw": -0.22822751832072147,
+          "DM_t_hln": -0.22583555571072858,
+          "DM_p_value": 0.8213529280679743,
+          "DM_n": 1956,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -3.9777845043884e-11,
+            "boot_se": 1.748379553351958e-10,
+            "ci95": [
+              -4.0684055163887344e-10,
+              2.92025220558982e-10
+            ],
+            "p_two_sided_centered": 0.8085
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1956 base and 0/1956 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 4.516915700563445e-08,
+        "loss_aug_unfloored": 4.512937916059057e-08,
+        "improvement_pct_unfloored": 0.08806417405336518,
+        "mean_loss_diff_unfloored": -3.9777845043884e-11,
+        "DM_t_hln_unfloored": -0.22583555571072858,
+        "DM_p_value_unfloored": 0.8213529280679743,
+        "DM_n": 1956,
+        "vs_floored_mse_DM_t_hln": -0.22583555571072858
+      },
+      "p_value": 0.8213529280679743,
+      "DM_t_hln": -0.22583555571072858,
+      "family": "secondary",
+      "signal_vintage": "current",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    }
+  ],
+  "cells_first_release": [
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3173,
+      "n_oos": 1270,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-07-02",
+      "oos_start": "2021-06-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.2283672714978517,
+          "loss_aug": 0.2368669622373059,
+          "improvement_pct": -3.7219390868512363,
+          "mean_loss_diff": 0.00849969073945423,
+          "DM_t_raw": 2.7820291156563663,
+          "DM_t_hln": 2.772171315801317,
+          "DM_p_value": 0.005649791559239725,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.00849969073945423,
+            "boot_se": 0.003296060323979433,
+            "ci95": [
+              0.0026817128256082833,
+              0.01573864608958879
+            ],
+            "p_two_sided_centered": 0.01
+          }
+        },
+        "mse": {
+          "loss_base": 6.638437240349171e-08,
+          "loss_aug": 6.660248534293666e-08,
+          "improvement_pct": -0.3285606710555809,
+          "mean_loss_diff": 2.1811293944495312e-10,
+          "DM_t_raw": 0.966826279828173,
+          "DM_t_hln": 0.9634004422237022,
+          "DM_p_value": 0.3355301473090029,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1270 base and 0/1270 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.638437240349171e-08,
+        "loss_aug_unfloored": 6.660248534293666e-08,
+        "improvement_pct_unfloored": -0.3285606710555809,
+        "mean_loss_diff_unfloored": 2.1811293944495312e-10,
+        "DM_t_hln_unfloored": 0.9634004422237022,
+        "DM_p_value_unfloored": 0.3355301473090029,
+        "DM_n": 1270,
+        "vs_floored_mse_DM_t_hln": 0.9634004422237022
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1270,
+        "mean_adjusted_diff_fbar": -6.309487927146104e-11,
+        "CW_t_raw": -0.2819452221907367,
+        "CW_t_hln": -0.28094618175841257,
+        "CW_p_one_sided_raw": 0.6109842572503001,
+        "CW_p_one_sided_hln": 0.6106012615132166,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.005649791559239725,
+      "DM_t_hln": 2.772171315801317,
+      "family": "primary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 0.0451983324739178,
+        "benjamini_hochberg_q": 0.0451983324739178,
+        "bh_reject_at_q10": true,
+        "bonferroni_reject_at_05": true
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3157,
+      "n_oos": 1263,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-06-09",
+      "oos_start": "2021-05-28",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.1697926597128534,
+          "loss_aug": 0.1756923657960723,
+          "improvement_pct": -3.4746531994941696,
+          "mean_loss_diff": 0.005899706083218922,
+          "DM_t_raw": 1.9572983250832885,
+          "DM_t_hln": 1.9255288772800296,
+          "DM_p_value": 0.05438770505222745,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.005899706083218922,
+            "boot_se": 0.0029855663536821845,
+            "ci95": [
+              0.0002871624246602092,
+              0.011746657407906315
+            ],
+            "p_two_sided_centered": 0.045
+          }
+        },
+        "mse": {
+          "loss_base": 3.554648248711111e-08,
+          "loss_aug": 3.5925956104418535e-08,
+          "improvement_pct": -1.0675419640888992,
+          "mean_loss_diff": 3.7947361730742617e-10,
+          "DM_t_raw": 1.0428081923341723,
+          "DM_t_hln": 1.0258820855620934,
+          "DM_p_value": 0.3051437601977389,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1263 base and 0/1263 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 3.554648248711111e-08,
+        "loss_aug_unfloored": 3.5925956104418535e-08,
+        "improvement_pct_unfloored": -1.0675419640888992,
+        "mean_loss_diff_unfloored": 3.7947361730742617e-10,
+        "DM_t_hln_unfloored": 1.0258820855620934,
+        "DM_p_value_unfloored": 0.3051437601977389,
+        "DM_n": 1263,
+        "vs_floored_mse_DM_t_hln": 1.0258820855620934
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1263,
+        "mean_adjusted_diff_fbar": -1.7228494937604903e-10,
+        "CW_t_raw": -0.4862414307542961,
+        "CW_t_hln": -0.4783491122680617,
+        "CW_p_one_sided_raw": 0.6865597896894206,
+        "CW_p_one_sided_hln": 0.6837576998153965,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.05438770505222745,
+      "DM_t_hln": 1.9255288772800296,
+      "family": "primary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 0.4351016404178196,
+        "benjamini_hochberg_q": 0.1174605598752521,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3173,
+      "n_oos": 1270,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-07-02",
+      "oos_start": "2021-06-11",
+      "n_zero_actual": 28,
+      "n_floored_pred_base": 10,
+      "n_floored_pred_aug": 8,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 207.05048945680213,
+          "loss_aug": 133.63961314833514,
+          "improvement_pct": 35.45554347688853,
+          "mean_loss_diff": -73.41087630846694,
+          "DM_t_raw": -1.0320928307220216,
+          "DM_t_hln": -1.0284357286090955,
+          "DM_p_value": 0.303940890231154,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "28 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 1.7257784713071966e-07,
+          "loss_aug": 1.7347386820967242e-07,
+          "improvement_pct": -0.5191982017680835,
+          "mean_loss_diff": 8.960210789527534e-10,
+          "DM_t_raw": 1.2178019607029649,
+          "DM_t_hln": 1.213486819670063,
+          "DM_p_value": 0.22516956221835915,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 8.960210789527534e-10,
+            "boot_se": 7.716894479659763e-10,
+            "ci95": [
+              -5.768785227011017e-10,
+              2.3947138658012812e-09
+            ],
+            "p_two_sided_centered": 0.245
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~10/1270 base and 8/1270 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.726880402668163e-07,
+        "loss_aug_unfloored": 1.735260359982897e-07,
+        "improvement_pct_unfloored": -0.48526564444105,
+        "mean_loss_diff_unfloored": 8.379957314733751e-10,
+        "DM_t_hln_unfloored": 1.132038492072055,
+        "DM_p_value_unfloored": 0.2578321143619384,
+        "DM_n": 1270,
+        "vs_floored_mse_DM_t_hln": 1.213486819670063
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1270,
+        "mean_adjusted_diff_fbar": -6.056033241364317e-11,
+        "CW_t_raw": -0.08349440354227776,
+        "CW_t_hln": -0.08319855073667465,
+        "CW_p_one_sided_raw": 0.5332642021622465,
+        "CW_p_one_sided_hln": 0.533146606698071,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.22516956221835915,
+      "DM_t_hln": 1.213486819670063,
+      "family": "primary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.2573366425352676,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3157,
+      "n_oos": 1263,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-06-09",
+      "oos_start": "2021-05-28",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.4380160766373231,
+          "loss_aug": 0.47520353505398216,
+          "improvement_pct": -8.48997568814129,
+          "mean_loss_diff": 0.0371874584166591,
+          "DM_t_raw": 2.2952633022695927,
+          "DM_t_hln": 2.258008251906697,
+          "DM_p_value": 0.024115387549216383,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 6.589040789699243e-08,
+          "loss_aug": 6.830317890171322e-08,
+          "improvement_pct": -3.661794002691131,
+          "mean_loss_diff": 2.4127710047207992e-09,
+          "DM_t_raw": 1.8213101975456418,
+          "DM_t_hln": 1.7917480104671815,
+          "DM_p_value": 0.07341284992203256,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 2.4127710047207992e-09,
+            "boot_se": 1.3230196309800705e-09,
+            "ci95": [
+              -1.5935112891253436e-10,
+              5.111304395848894e-09
+            ],
+            "p_two_sided_centered": 0.0695
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1263 base and 0/1263 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.589040789699243e-08,
+        "loss_aug_unfloored": 6.830317890171322e-08,
+        "improvement_pct_unfloored": -3.661794002691131,
+        "mean_loss_diff_unfloored": 2.4127710047207992e-09,
+        "DM_t_hln_unfloored": 1.7917480104671815,
+        "DM_p_value_unfloored": 0.07341284992203256,
+        "DM_n": 1263,
+        "vs_floored_mse_DM_t_hln": 1.7917480104671815
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1263,
+        "mean_adjusted_diff_fbar": -7.867713965825636e-10,
+        "CW_t_raw": -0.6495425222426657,
+        "CW_t_hln": -0.6389996187966581,
+        "CW_p_one_sided_raw": 0.7419470140016216,
+        "CW_p_one_sided_hln": 0.7385304316935171,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.07341284992203256,
+      "DM_t_hln": 1.7917480104671815,
+      "family": "primary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 0.5873027993762605,
+        "benjamini_hochberg_q": 0.1174605598752521,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3218,
+      "n_oos": 1288,
+      "sample_start": "2013-09-16",
+      "sample_end": "2026-07-02",
+      "oos_start": "2021-05-17",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.22832273482614776,
+          "loss_aug": 0.23014998586570237,
+          "improvement_pct": -0.800293076791472,
+          "mean_loss_diff": 0.0018272510395546447,
+          "DM_t_raw": 1.323549996244242,
+          "DM_t_hln": 1.318925691986811,
+          "DM_p_value": 0.18742858080796188,
+          "DM_n": 1288,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.0018272510395546447,
+            "boot_se": 0.0014349313696625694,
+            "ci95": [
+              -0.00041280239676255096,
+              0.005085778576963779
+            ],
+            "p_two_sided_centered": 0.19
+          }
+        },
+        "mse": {
+          "loss_base": 6.562060135916166e-08,
+          "loss_aug": 6.581743785312924e-08,
+          "improvement_pct": -0.29996142962822203,
+          "mean_loss_diff": 1.968364939675941e-10,
+          "DM_t_raw": 1.2473275436612201,
+          "DM_t_hln": 1.2429695503198799,
+          "DM_p_value": 0.21410545003046844,
+          "DM_n": 1288,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1288 base and 0/1288 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.562060135916166e-08,
+        "loss_aug_unfloored": 6.581743785312924e-08,
+        "improvement_pct_unfloored": -0.29996142962822203,
+        "mean_loss_diff_unfloored": 1.968364939675941e-10,
+        "DM_t_hln_unfloored": 1.2429695503198799,
+        "DM_p_value_unfloored": 0.21410545003046844,
+        "DM_n": 1288,
+        "vs_floored_mse_DM_t_hln": 1.2429695503198799
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1288,
+        "mean_adjusted_diff_fbar": -1.5905640962354108e-10,
+        "CW_t_raw": -1.0067557321891683,
+        "CW_t_hln": -1.003238264143559,
+        "CW_p_one_sided_raw": 0.8428792935954124,
+        "CW_p_one_sided_hln": 0.8420327512168864,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.18742858080796188,
+      "DM_t_hln": 1.318925691986811,
+      "family": "primary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.24990477441061584,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3202,
+      "n_oos": 1281,
+      "sample_start": "2013-09-16",
+      "sample_end": "2026-06-09",
+      "oos_start": "2021-05-04",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.16902046116023808,
+          "loss_aug": 0.18145715495933848,
+          "improvement_pct": -7.358099554177596,
+          "mean_loss_diff": 0.012436693799100392,
+          "DM_t_raw": 1.8686174257396797,
+          "DM_t_hln": 1.8387135674002186,
+          "DM_p_value": 0.06618887940316887,
+          "DM_n": 1281,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.012436693799100392,
+            "boot_se": 0.006623035252846958,
+            "ci95": [
+              0.002221336851146469,
+              0.028020747291788117
+            ],
+            "p_two_sided_centered": 0.0495
+          }
+        },
+        "mse": {
+          "loss_base": 3.5165679305271216e-08,
+          "loss_aug": 3.612309089607315e-08,
+          "improvement_pct": -2.7225738552942524,
+          "mean_loss_diff": 9.57411590801932e-10,
+          "DM_t_raw": 1.627784993230666,
+          "DM_t_hln": 1.6017352244689294,
+          "DM_p_value": 0.10946091265232916,
+          "DM_n": 1281,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1281 base and 0/1281 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 3.5165679305271216e-08,
+        "loss_aug_unfloored": 3.612309089607315e-08,
+        "improvement_pct_unfloored": -2.7225738552942524,
+        "mean_loss_diff_unfloored": 9.57411590801932e-10,
+        "DM_t_hln_unfloored": 1.6017352244689294,
+        "DM_p_value_unfloored": 0.10946091265232916,
+        "DM_n": 1281,
+        "vs_floored_mse_DM_t_hln": 1.6017352244689294
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1281,
+        "mean_adjusted_diff_fbar": -6.531773813301755e-10,
+        "CW_t_raw": -1.1121666110020094,
+        "CW_t_hln": -1.0943683863214717,
+        "CW_p_one_sided_raw": 0.8668623211684339,
+        "CW_p_one_sided_hln": 0.8630003330194038,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.06618887940316887,
+      "DM_t_hln": 1.8387135674002186,
+      "family": "primary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 0.5295110352253509,
+        "benjamini_hochberg_q": 0.1174605598752521,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3218,
+      "n_oos": 1288,
+      "sample_start": "2013-09-16",
+      "sample_end": "2026-07-02",
+      "oos_start": "2021-05-17",
+      "n_zero_actual": 28,
+      "n_floored_pred_base": 10,
+      "n_floored_pred_aug": 12,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 204.17026686364053,
+          "loss_aug": 233.1194463339389,
+          "improvement_pct": -14.178939918628155,
+          "mean_loss_diff": 28.9491794702984,
+          "DM_t_raw": 1.403327740109733,
+          "DM_t_hln": 1.39842470323045,
+          "DM_p_value": 0.1622264778053364,
+          "DM_n": 1288,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "28 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 1.704402128977882e-07,
+          "loss_aug": 1.7113301649193565e-07,
+          "improvement_pct": -0.40647895374485976,
+          "mean_loss_diff": 6.928035941474791e-10,
+          "DM_t_raw": 1.0096706986227335,
+          "DM_t_hln": 1.0061430460795782,
+          "DM_p_value": 0.31453589036592855,
+          "DM_n": 1288,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 6.928035941474791e-10,
+            "boot_se": 6.712687003134615e-10,
+            "ci95": [
+              -4.4660349177472983e-10,
+              2.154238711220938e-09
+            ],
+            "p_two_sided_centered": 0.2925
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~10/1288 base and 12/1288 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.7055171620549936e-07,
+        "loss_aug_unfloored": 1.712886226180101e-07,
+        "improvement_pct_unfloored": -0.43207211800955975,
+        "mean_loss_diff_unfloored": 7.36906412510758e-10,
+        "DM_t_hln_unfloored": 1.0690847647918353,
+        "DM_p_value_unfloored": 0.28523194607604996,
+        "DM_n": 1288,
+        "vs_floored_mse_DM_t_hln": 1.0061430460795782
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1288,
+        "mean_adjusted_diff_fbar": -4.502266263151057e-10,
+        "CW_t_raw": -0.6544644248521229,
+        "CW_t_hln": -0.6521778148753417,
+        "CW_p_one_sided_raw": 0.7435352127581685,
+        "CW_p_one_sided_hln": 0.7427985368322141,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.31453589036592855,
+      "DM_t_hln": 1.0061430460795782,
+      "family": "primary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.31453589036592855,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3202,
+      "n_oos": 1281,
+      "sample_start": "2013-09-16",
+      "sample_end": "2026-06-09",
+      "oos_start": "2021-05-04",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 2,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.43630777177709307,
+          "loss_aug": 0.5388500574598416,
+          "improvement_pct": -23.50228263528085,
+          "mean_loss_diff": 0.10254228568274859,
+          "DM_t_raw": 1.891131746388329,
+          "DM_t_hln": 1.8608675868732434,
+          "DM_p_value": 0.0629920261726633,
+          "DM_n": 1281,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 6.514274414685196e-08,
+          "loss_aug": 6.750636295821906e-08,
+          "improvement_pct": -3.6283685041556906,
+          "mean_loss_diff": 2.36361881136709e-09,
+          "DM_t_raw": 1.875051582331877,
+          "DM_t_hln": 1.8450447568978054,
+          "DM_p_value": 0.06526190886484251,
+          "DM_n": 1281,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 2.36361881136709e-09,
+            "boot_se": 1.2368143079150499e-09,
+            "ci95": [
+              3.0946719035605174e-10,
+              5.1255331384210984e-09
+            ],
+            "p_two_sided_centered": 0.054
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1281 base and 2/1281 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.514274414685196e-08,
+        "loss_aug_unfloored": 6.751452087567146e-08,
+        "improvement_pct_unfloored": -3.6408916447744115,
+        "mean_loss_diff_unfloored": 2.3717767288194987e-09,
+        "DM_t_hln_unfloored": 1.8511528457646051,
+        "DM_p_value_unfloored": 0.06437778809105121,
+        "DM_n": 1281,
+        "vs_floored_mse_DM_t_hln": 1.8450447568978054
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1281,
+        "mean_adjusted_diff_fbar": -1.4470774183715473e-09,
+        "CW_t_raw": -1.1548415702555237,
+        "CW_t_hln": -1.1363604096681597,
+        "CW_p_one_sided_raw": 0.8758145721690714,
+        "CW_p_one_sided_hln": 0.871990769242721,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.06526190886484251,
+      "DM_t_hln": 1.8450447568978054,
+      "family": "primary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 0.5220952709187401,
+        "benjamini_hochberg_q": 0.1174605598752521,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3173,
+      "n_oos": 1270,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-07-02",
+      "oos_start": "2021-06-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.21165435403793223,
+          "loss_aug": 0.23099582953810152,
+          "improvement_pct": -9.138236531010817,
+          "mean_loss_diff": 0.019341475500169288,
+          "DM_t_raw": 4.42415966083834,
+          "DM_t_hln": 4.4084831604674815,
+          "DM_p_value": 1.1289347396914451e-05,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.019341475500169288,
+            "boot_se": 0.0050318973430184735,
+            "ci95": [
+              0.0106462455512034,
+              0.030239864403995242
+            ],
+            "p_two_sided_centered": 0.0005
+          }
+        },
+        "mse": {
+          "loss_base": 1.374048214328431e-08,
+          "loss_aug": 1.395828761870262e-08,
+          "improvement_pct": -1.5851370654032149,
+          "mean_loss_diff": 2.178054754183112e-10,
+          "DM_t_raw": 2.6377375889433794,
+          "DM_t_hln": 2.628391069499851,
+          "DM_p_value": 0.008682535292262816,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1270 base and 0/1270 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.374048214328431e-08,
+        "loss_aug_unfloored": 1.395828761870262e-08,
+        "improvement_pct_unfloored": -1.5851370654032149,
+        "mean_loss_diff_unfloored": 2.178054754183112e-10,
+        "DM_t_hln_unfloored": 2.628391069499851,
+        "DM_p_value_unfloored": 0.008682535292262816,
+        "DM_n": 1270,
+        "vs_floored_mse_DM_t_hln": 2.628391069499851
+      },
+      "p_value": 1.1289347396914451e-05,
+      "DM_t_hln": 4.4084831604674815,
+      "family": "secondary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3157,
+      "n_oos": 1263,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-06-09",
+      "oos_start": "2021-05-28",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.17075684581271125,
+          "loss_aug": 0.1760682582896693,
+          "improvement_pct": -3.1105121740089317,
+          "mean_loss_diff": 0.005311412476958049,
+          "DM_t_raw": 2.0259007923542,
+          "DM_t_hln": 1.9930178390238544,
+          "DM_p_value": 0.04647452214015435,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.005311412476958049,
+            "boot_se": 0.0025767609602385206,
+            "ci95": [
+              0.00043887122420870257,
+              0.01056810995548392
+            ],
+            "p_two_sided_centered": 0.036
+          }
+        },
+        "mse": {
+          "loss_base": 7.011709591651235e-09,
+          "loss_aug": 7.182946473833085e-09,
+          "improvement_pct": -2.4421559384852465,
+          "mean_loss_diff": 1.7123688218185094e-10,
+          "DM_t_raw": 2.0979119670645443,
+          "DM_t_hln": 2.0638601805385157,
+          "DM_p_value": 0.03923501883439906,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1263 base and 0/1263 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 7.011709591651235e-09,
+        "loss_aug_unfloored": 7.182946473833085e-09,
+        "improvement_pct_unfloored": -2.4421559384852465,
+        "mean_loss_diff_unfloored": 1.7123688218185094e-10,
+        "DM_t_hln_unfloored": 2.0638601805385157,
+        "DM_p_value_unfloored": 0.03923501883439906,
+        "DM_n": 1263,
+        "vs_floored_mse_DM_t_hln": 2.0638601805385157
+      },
+      "p_value": 0.04647452214015435,
+      "DM_t_hln": 1.9930178390238544,
+      "family": "secondary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3173,
+      "n_oos": 1270,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-07-02",
+      "oos_start": "2021-06-11",
+      "n_zero_actual": 52,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 2,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 2.031446721900001,
+          "loss_aug": 7.108902872005035,
+          "improvement_pct": -249.94286561235123,
+          "mean_loss_diff": 5.077456150105033,
+          "DM_t_raw": 1.3381165930659824,
+          "DM_t_hln": 1.3333751309860455,
+          "DM_p_value": 0.18264802450661932,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "52 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 2.46199118537616e-08,
+          "loss_aug": 2.4954381849943993e-08,
+          "improvement_pct": -1.3585344991041843,
+          "mean_loss_diff": 3.3446999618239556e-10,
+          "DM_t_raw": 2.1061982431914363,
+          "DM_t_hln": 2.0987351722193917,
+          "DM_p_value": 0.03603746376090622,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 3.3446999618239556e-10,
+            "boot_se": 1.775072721305913e-10,
+            "ci95": [
+              -9.974184717765747e-12,
+              6.987711024297394e-10
+            ],
+            "p_two_sided_centered": 0.061
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1270 base and 2/1270 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 2.46199118537616e-08,
+        "loss_aug_unfloored": 2.4954707810781165e-08,
+        "improvement_pct_unfloored": -1.3598584715014366,
+        "mean_loss_diff_unfloored": 3.347959570195612e-10,
+        "DM_t_hln_unfloored": 2.1007566233043242,
+        "DM_p_value_unfloored": 0.0358592108805591,
+        "DM_n": 1270,
+        "vs_floored_mse_DM_t_hln": 2.0987351722193917
+      },
+      "p_value": 0.03603746376090622,
+      "DM_t_hln": 2.0987351722193917,
+      "family": "secondary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3157,
+      "n_oos": 1263,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-06-09",
+      "oos_start": "2021-05-28",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.450867735426712,
+          "loss_aug": 0.4824677179892783,
+          "improvement_pct": -7.008703457713452,
+          "mean_loss_diff": 0.031599982562566215,
+          "DM_t_raw": 2.0667509127048507,
+          "DM_t_hln": 2.033204909828299,
+          "DM_p_value": 0.04224074161895208,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 9.801138824088678e-09,
+          "loss_aug": 1.0825678052451907e-08,
+          "improvement_pct": -10.45326718406615,
+          "mean_loss_diff": 1.0245392283632291e-09,
+          "DM_t_raw": 2.5733008386143057,
+          "DM_t_hln": 2.5315328844773397,
+          "DM_p_value": 0.011477082262845384,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.0245392283632291e-09,
+            "boot_se": 3.925198803316646e-10,
+            "ci95": [
+              3.238639524301742e-10,
+              1.8435283661715938e-09
+            ],
+            "p_two_sided_centered": 0.0065
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1263 base and 0/1263 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 9.801138824088678e-09,
+        "loss_aug_unfloored": 1.0825678052451907e-08,
+        "improvement_pct_unfloored": -10.45326718406615,
+        "mean_loss_diff_unfloored": 1.0245392283632291e-09,
+        "DM_t_hln_unfloored": 2.5315328844773397,
+        "DM_p_value_unfloored": 0.011477082262845384,
+        "DM_n": 1263,
+        "vs_floored_mse_DM_t_hln": 2.5315328844773397
+      },
+      "p_value": 0.011477082262845384,
+      "DM_t_hln": 2.5315328844773397,
+      "family": "secondary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3173,
+      "n_oos": 1270,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-07-02",
+      "oos_start": "2021-06-11",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 2,
+      "n_floored_pred_aug": 4,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.2904231491729872,
+          "loss_aug": 0.3256341773149789,
+          "improvement_pct": -12.124043225293528,
+          "mean_loss_diff": 0.03521102814199165,
+          "DM_t_raw": 4.262487177536254,
+          "DM_t_hln": 4.247383544995388,
+          "DM_p_value": 2.3206512395512746e-05,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.03521102814199165,
+            "boot_se": 0.009087402183903751,
+            "ci95": [
+              0.019432121265113192,
+              0.055105655862958694
+            ],
+            "p_two_sided_centered": 0.0
+          }
+        },
+        "mse": {
+          "loss_base": 1.1616582700268723e-08,
+          "loss_aug": 1.1673459608899202e-08,
+          "improvement_pct": -0.48961824744865046,
+          "mean_loss_diff": 5.6876908630479706e-11,
+          "DM_t_raw": 2.9072816756534006,
+          "DM_t_hln": 2.8969800577732863,
+          "DM_p_value": 0.0038323929614385577,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~2/1270 base and 4/1270 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.161667639752072e-08,
+        "loss_aug_unfloored": 1.1673794407560684e-08,
+        "improvement_pct_unfloored": -0.4916897749872269,
+        "mean_loss_diff_unfloored": 5.7118010039964566e-11,
+        "DM_t_hln_unfloored": 2.909265504029427,
+        "DM_p_value_unfloored": 0.0036859274446152668,
+        "DM_n": 1270,
+        "vs_floored_mse_DM_t_hln": 2.8969800577732863
+      },
+      "p_value": 2.3206512395512746e-05,
+      "DM_t_hln": 4.247383544995388,
+      "family": "secondary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3157,
+      "n_oos": 1263,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-06-09",
+      "oos_start": "2021-05-28",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.23179785347529147,
+          "loss_aug": 0.24298088764186768,
+          "improvement_pct": -4.824477016897079,
+          "mean_loss_diff": 0.011183034166576301,
+          "DM_t_raw": 2.2528878216349186,
+          "DM_t_hln": 2.2163205793608096,
+          "DM_p_value": 0.02684735563167462,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 0.011183034166576301,
+            "boot_se": 0.004856358464768428,
+            "ci95": [
+              0.0013501811631796057,
+              0.020573540851666298
+            ],
+            "p_two_sided_centered": 0.0205
+          }
+        },
+        "mse": {
+          "loss_base": 6.089130949315016e-09,
+          "loss_aug": 6.2095862276478174e-09,
+          "improvement_pct": -1.9782014762936175,
+          "mean_loss_diff": 1.204552783328012e-10,
+          "DM_t_raw": 2.2885099960546373,
+          "DM_t_hln": 2.2513645604635655,
+          "DM_p_value": 0.024533910343778942,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1263 base and 0/1263 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.089130949315016e-09,
+        "loss_aug_unfloored": 6.2095862276478174e-09,
+        "improvement_pct_unfloored": -1.9782014762936175,
+        "mean_loss_diff_unfloored": 1.204552783328012e-10,
+        "DM_t_hln_unfloored": 2.2513645604635655,
+        "DM_p_value_unfloored": 0.024533910343778942,
+        "DM_n": 1263,
+        "vs_floored_mse_DM_t_hln": 2.2513645604635655
+      },
+      "p_value": 0.02684735563167462,
+      "DM_t_hln": 2.2163205793608096,
+      "family": "secondary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3173,
+      "n_oos": 1270,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-07-02",
+      "oos_start": "2021-06-11",
+      "n_zero_actual": 69,
+      "n_floored_pred_base": 2,
+      "n_floored_pred_aug": 18,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 48.83166680906824,
+          "loss_aug": 435.28137674349136,
+          "improvement_pct": -791.3916013668775,
+          "mean_loss_diff": 386.4497099344232,
+          "DM_t_raw": 2.1674729078006094,
+          "DM_t_hln": 2.159792717109543,
+          "DM_p_value": 0.030975527947279424,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "69 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 1.209268999710722e-08,
+          "loss_aug": 1.2286960455145365e-08,
+          "improvement_pct": -1.6065115212960719,
+          "mean_loss_diff": 1.9427045803814798e-10,
+          "DM_t_raw": 3.003960903070075,
+          "DM_t_hln": 2.9933167134790284,
+          "DM_p_value": 0.00281301606294182,
+          "DM_n": 1270,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.9427045803814798e-10,
+            "boot_se": 7.106302689681692e-11,
+            "ci95": [
+              5.7754936083977787e-11,
+              3.3752376944515824e-10
+            ],
+            "p_two_sided_centered": 0.0045
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~2/1270 base and 18/1270 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.2092725416092307e-08,
+        "loss_aug_unfloored": 1.228796015442712e-08,
+        "improvement_pct_unfloored": -1.6144808685972991,
+        "mean_loss_diff_unfloored": 1.952347383348142e-10,
+        "DM_t_hln_unfloored": 3.007955380669889,
+        "DM_p_value_unfloored": 0.0026819165803038114,
+        "DM_n": 1270,
+        "vs_floored_mse_DM_t_hln": 2.9933167134790284
+      },
+      "p_value": 0.00281301606294182,
+      "DM_t_hln": 2.9933167134790284,
+      "family": "secondary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3157,
+      "n_oos": 1263,
+      "sample_start": "2013-11-18",
+      "sample_end": "2026-06-09",
+      "oos_start": "2021-05-28",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 9,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.4825469776964147,
+          "loss_aug": 0.5141617017155781,
+          "improvement_pct": -6.5516365204660305,
+          "mean_loss_diff": 0.031614724019163425,
+          "DM_t_raw": 2.3788449374297516,
+          "DM_t_hln": 2.340233250543183,
+          "DM_p_value": 0.01942684624710056,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 5.281153576644269e-09,
+          "loss_aug": 5.629449089750937e-09,
+          "improvement_pct": -6.595065037437921,
+          "mean_loss_diff": 3.482955131066682e-10,
+          "DM_t_raw": 2.5616390201193044,
+          "DM_t_hln": 2.5200603521679037,
+          "DM_p_value": 0.011856046107257212,
+          "DM_n": 1263,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 3.482955131066682e-10,
+            "boot_se": 1.345441851498396e-10,
+            "ci95": [
+              8.214227925229487e-11,
+              6.191979025398291e-10
+            ],
+            "p_two_sided_centered": 0.01
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1263 base and 0/1263 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 5.281153576644269e-09,
+        "loss_aug_unfloored": 5.629449089750937e-09,
+        "improvement_pct_unfloored": -6.595065037437921,
+        "mean_loss_diff_unfloored": 3.482955131066682e-10,
+        "DM_t_hln_unfloored": 2.5200603521679037,
+        "DM_p_value_unfloored": 0.011856046107257212,
+        "DM_n": 1263,
+        "vs_floored_mse_DM_t_hln": 2.5200603521679037
+      },
+      "p_value": 0.011856046107257212,
+      "DM_t_hln": 2.5200603521679037,
+      "family": "secondary",
+      "signal_vintage": "first_release",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    }
+  ],
+  "cells_true_pit": [
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3486,
+      "n_oos": 1395,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-07-02",
+      "oos_start": "2020-12-10",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.22313765226067386,
+          "loss_aug": 0.22313765226067395,
+          "improvement_pct": -3.7316304981829285e-14,
+          "mean_loss_diff": 1.0457584619049861e-16,
+          "DM_t_raw": 1.2247705765861339,
+          "DM_t_hln": 1.2208196248325316,
+          "DM_p_value": 0.22236077307885038,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.0457584619049861e-16,
+            "boot_se": 8.64028736782699e-17,
+            "ci95": [
+              -4.474318168059233e-17,
+              2.936718968363317e-16
+            ],
+            "p_two_sided_centered": 0.2145
+          }
+        },
+        "mse": {
+          "loss_base": 6.238112871170172e-08,
+          "loss_aug": 6.238112871170172e-08,
+          "improvement_pct": 0.0,
+          "mean_loss_diff": 3.895824181739392e-24,
+          "DM_t_raw": 0.12697244116851653,
+          "DM_t_hln": 0.12656284446633886,
+          "DM_p_value": 0.8993046580780413,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1395 base and 0/1395 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.238112871170172e-08,
+        "loss_aug_unfloored": 6.238112871170172e-08,
+        "improvement_pct_unfloored": 0.0,
+        "mean_loss_diff_unfloored": 3.895824181739392e-24,
+        "DM_t_hln_unfloored": 0.12656284446633886,
+        "DM_p_value_unfloored": 0.8993046580780413,
+        "DM_n": 1395,
+        "vs_floored_mse_DM_t_hln": 0.12656284446633886
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1395,
+        "mean_adjusted_diff_fbar": -3.895824181739392e-24,
+        "CW_t_raw": -0.12697244116851653,
+        "CW_t_hln": -0.12656284446633886,
+        "CW_p_one_sided_raw": 0.5505097387027622,
+        "CW_p_one_sided_hln": 0.5503476709609794,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.22236077307885038,
+      "DM_t_hln": 1.2208196248325316,
+      "family": "primary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.4804505399206785,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3470,
+      "n_oos": 1388,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-06-09",
+      "oos_start": "2020-11-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.16188547587185745,
+          "loss_aug": 0.16188547587185753,
+          "improvement_pct": -5.1435575920842706e-14,
+          "mean_loss_diff": 3.903377781102856e-17,
+          "DM_t_raw": 1.1748500711781946,
+          "DM_t_hln": 1.1574981015460089,
+          "DM_p_value": 0.24726820415000939,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 3.903377781102856e-17,
+            "boot_se": 3.3773165527482896e-17,
+            "ci95": [
+              -2.7515613866790622e-17,
+              1.0254765336604334e-16
+            ],
+            "p_two_sided_centered": 0.257
+          }
+        },
+        "mse": {
+          "loss_base": 3.291127292413055e-08,
+          "loss_aug": 3.291127292413059e-08,
+          "improvement_pct": -1.2064154885189463e-13,
+          "mean_loss_diff": 3.7988943542410895e-23,
+          "DM_t_raw": 1.5840675958639978,
+          "DM_t_hln": 1.5606716805101377,
+          "DM_p_value": 0.11882936224147866,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1388 base and 0/1388 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 3.291127292413055e-08,
+        "loss_aug_unfloored": 3.291127292413059e-08,
+        "improvement_pct_unfloored": -1.2064154885189463e-13,
+        "mean_loss_diff_unfloored": 3.7988943542410895e-23,
+        "DM_t_hln_unfloored": 1.5606716805101377,
+        "DM_p_value_unfloored": 0.11882936224147866,
+        "DM_n": 1388,
+        "vs_floored_mse_DM_t_hln": 1.5606716805101377
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1388,
+        "mean_adjusted_diff_fbar": -3.7988943542410895e-23,
+        "CW_t_raw": -1.5840675958639978,
+        "CW_t_hln": -1.5606716805101377,
+        "CW_p_one_sided_raw": 0.9432968489375931,
+        "CW_p_one_sided_hln": 0.9405853188792607,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.24726820415000939,
+      "DM_t_hln": 1.1574981015460089,
+      "family": "primary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.4804505399206785,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3486,
+      "n_oos": 1395,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-07-02",
+      "oos_start": "2020-12-10",
+      "n_zero_actual": 29,
+      "n_floored_pred_base": 10,
+      "n_floored_pred_aug": 10,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 188.6294808618158,
+          "loss_aug": 188.62948086181586,
+          "improvement_pct": -3.013496013512849e-14,
+          "mean_loss_diff": 1.6269423084732777e-14,
+          "DM_t_raw": 2.914818295051147,
+          "DM_t_hln": 2.905415467554781,
+          "DM_p_value": 0.0037255428576243865,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "29 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 1.6113384964964698e-07,
+          "loss_aug": 1.6113384964964714e-07,
+          "improvement_pct": -9.856319944909183e-14,
+          "mean_loss_diff": 1.4581556566595615e-22,
+          "DM_t_raw": 0.9563624285120558,
+          "DM_t_hln": 0.9532773267907676,
+          "DM_p_value": 0.34061483992312436,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.4581556566595615e-22,
+            "boot_se": 1.6133572701838377e-22,
+            "ci95": [
+              -1.1824335955325101e-22,
+              5.151732797447956e-22
+            ],
+            "p_two_sided_centered": 0.3575
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~10/1395 base and 10/1395 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.6123255438059972e-07,
+        "loss_aug_unfloored": 1.6123255438059993e-07,
+        "improvement_pct_unfloored": -1.3133714690998833e-13,
+        "mean_loss_diff_unfloored": 2.128379489181918e-22,
+        "DM_t_hln_unfloored": 1.362924455892046,
+        "DM_p_value_unfloored": 0.1731264314199219,
+        "DM_n": 1395,
+        "vs_floored_mse_DM_t_hln": 0.9532773267907676
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1395,
+        "mean_adjusted_diff_fbar": -2.128379489181918e-22,
+        "CW_t_raw": -1.367335303047106,
+        "CW_t_hln": -1.362924455892046,
+        "CW_p_one_sided_raw": 0.9141296729902699,
+        "CW_p_one_sided_hln": 0.913436784290039,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.34061483992312436,
+      "DM_t_hln": 0.9532773267907676,
+      "family": "primary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.4804505399206785,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3470,
+      "n_oos": 1388,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-06-09",
+      "oos_start": "2020-11-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.43628634989585713,
+          "loss_aug": 0.43628634989585985,
+          "improvement_pct": -6.234543920480017e-13,
+          "mean_loss_diff": 2.6882114849857536e-15,
+          "DM_t_raw": 1.6894174215069195,
+          "DM_t_hln": 1.6644655399747719,
+          "DM_p_value": 0.09624529907493806,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 6.253530848961084e-08,
+          "loss_aug": 6.253530848961099e-08,
+          "improvement_pct": -2.328025419967651e-13,
+          "mean_loss_diff": 1.384502757185269e-22,
+          "DM_t_raw": 0.8736337085500349,
+          "DM_t_hln": 0.8607305594995253,
+          "DM_p_value": 0.3895352189201038,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.384502757185269e-22,
+            "boot_se": 1.6746093458682661e-22,
+            "ci95": [
+              -1.0569823228811987e-22,
+              5.132069087496498e-22
+            ],
+            "p_two_sided_centered": 0.407
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1388 base and 0/1388 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.253530848961084e-08,
+        "loss_aug_unfloored": 6.253530848961099e-08,
+        "improvement_pct_unfloored": -2.328025419967651e-13,
+        "mean_loss_diff_unfloored": 1.384502757185269e-22,
+        "DM_t_hln_unfloored": 0.8607305594995253,
+        "DM_p_value_unfloored": 0.3895352189201038,
+        "DM_n": 1388,
+        "vs_floored_mse_DM_t_hln": 0.8607305594995253
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1388,
+        "mean_adjusted_diff_fbar": -1.384502757185269e-22,
+        "CW_t_raw": -0.8736337085500349,
+        "CW_t_hln": -0.8607305594995253,
+        "CW_p_one_sided_raw": 0.8087655035452982,
+        "CW_p_one_sided_hln": 0.8052323905399481,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.3895352189201038,
+      "DM_t_hln": 0.8607305594995253,
+      "family": "primary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.4804505399206785,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3486,
+      "n_oos": 1395,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-07-02",
+      "oos_start": "2020-12-10",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.22313765226067386,
+          "loss_aug": 0.22313765226067395,
+          "improvement_pct": -3.7316304981829285e-14,
+          "mean_loss_diff": 9.120541836705587e-17,
+          "DM_t_raw": 1.4772262411091897,
+          "DM_t_hln": 1.4724608999756317,
+          "DM_p_value": 0.14112219029021644,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 9.120541836705587e-17,
+            "boot_se": 6.245236178135304e-17,
+            "ci95": [
+              -2.42020660780294e-17,
+              2.1965702852798796e-16
+            ],
+            "p_two_sided_centered": 0.154
+          }
+        },
+        "mse": {
+          "loss_base": 6.238112871170172e-08,
+          "loss_aug": 6.238112871170172e-08,
+          "improvement_pct": 0.0,
+          "mean_loss_diff": 8.153356521921776e-24,
+          "DM_t_raw": 0.5381150386619804,
+          "DM_t_hln": 0.5363791490216795,
+          "DM_p_value": 0.5917821206884952,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1395 base and 0/1395 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.238112871170172e-08,
+        "loss_aug_unfloored": 6.238112871170172e-08,
+        "improvement_pct_unfloored": 0.0,
+        "mean_loss_diff_unfloored": 8.153356521921776e-24,
+        "DM_t_hln_unfloored": 0.5363791490216795,
+        "DM_p_value_unfloored": 0.5917821206884952,
+        "DM_n": 1395,
+        "vs_floored_mse_DM_t_hln": 0.5363791490216795
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1395,
+        "mean_adjusted_diff_fbar": -8.153356521921776e-24,
+        "CW_t_raw": -0.5381150386619804,
+        "CW_t_hln": -0.5363791490216795,
+        "CW_p_one_sided_raw": 0.7047082332157553,
+        "CW_p_one_sided_hln": 0.7041089396557524,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.14112219029021644,
+      "DM_t_hln": 1.4724608999756317,
+      "family": "primary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.4804505399206785,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3470,
+      "n_oos": 1388,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-06-09",
+      "oos_start": "2020-11-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.16188547587185745,
+          "loss_aug": 0.1618854758718575,
+          "improvement_pct": -3.429038394722847e-14,
+          "mean_loss_diff": 1.5357551925650582e-17,
+          "DM_t_raw": 0.5551788501498626,
+          "DM_t_hln": 0.5469791259598888,
+          "DM_p_value": 0.5844810618790541,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.5357551925650582e-17,
+            "boot_se": 2.7574177353730058e-17,
+            "ci95": [
+              -3.999362480638172e-17,
+              6.81611347575163e-17
+            ],
+            "p_two_sided_centered": 0.561
+          }
+        },
+        "mse": {
+          "loss_base": 3.291127292413055e-08,
+          "loss_aug": 3.291127292413057e-08,
+          "improvement_pct": -6.032077442594732e-14,
+          "mean_loss_diff": 1.900231449561362e-23,
+          "DM_t_raw": 1.382106845450869,
+          "DM_t_hln": 1.3616937930971766,
+          "DM_p_value": 0.1735156739886028,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1388 base and 0/1388 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 3.291127292413055e-08,
+        "loss_aug_unfloored": 3.291127292413057e-08,
+        "improvement_pct_unfloored": -6.032077442594732e-14,
+        "mean_loss_diff_unfloored": 1.900231449561362e-23,
+        "DM_t_hln_unfloored": 1.3616937930971766,
+        "DM_p_value_unfloored": 0.1735156739886028,
+        "DM_n": 1388,
+        "vs_floored_mse_DM_t_hln": 1.3616937930971766
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1388,
+        "mean_adjusted_diff_fbar": -1.900231449561362e-23,
+        "CW_t_raw": -1.382106845450869,
+        "CW_t_hln": -1.3616937930971766,
+        "CW_p_one_sided_raw": 0.9164192848847219,
+        "CW_p_one_sided_hln": 0.9132421630056986,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.5844810618790541,
+      "DM_t_hln": 0.5469791259598888,
+      "family": "primary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.5844810618790541,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3486,
+      "n_oos": 1395,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-07-02",
+      "oos_start": "2020-12-10",
+      "n_zero_actual": 29,
+      "n_floored_pred_base": 10,
+      "n_floored_pred_aug": 10,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 188.6294808618158,
+          "loss_aug": 188.62948086181586,
+          "improvement_pct": -3.013496013512849e-14,
+          "mean_loss_diff": 1.4820641727006875e-14,
+          "DM_t_raw": 2.892610013729451,
+          "DM_t_hln": 2.883278827281384,
+          "DM_p_value": 0.003995992261984771,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "29 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 1.6113384964964698e-07,
+          "loss_aug": 1.6113384964964709e-07,
+          "improvement_pct": -6.570879963272789e-14,
+          "mean_loss_diff": 1.2158703512026853e-22,
+          "DM_t_raw": 0.8085842678381829,
+          "DM_t_hln": 0.8059758793840325,
+          "DM_p_value": 0.42039422243059366,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.2158703512026853e-22,
+            "boot_se": 1.645000219709342e-22,
+            "ci95": [
+              -1.4305030271658225e-22,
+              4.862265333414118e-22
+            ],
+            "p_two_sided_centered": 0.4575
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~10/1395 base and 10/1395 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.6123255438059972e-07,
+        "loss_aug_unfloored": 1.6123255438059988e-07,
+        "improvement_pct_unfloored": -9.850286018249126e-14,
+        "mean_loss_diff_unfloored": 1.8197210927815843e-22,
+        "DM_t_hln_unfloored": 1.187165541014147,
+        "DM_p_value_unfloored": 0.2353645890698295,
+        "DM_n": 1395,
+        "vs_floored_mse_DM_t_hln": 0.8059758793840325
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 5,
+        "n": 1395,
+        "mean_adjusted_diff_fbar": -1.8197210927815843e-22,
+        "CW_t_raw": -1.1910075776923577,
+        "CW_t_hln": -1.187165541014147,
+        "CW_p_one_sided_raw": 0.8830733176422865,
+        "CW_p_one_sided_hln": 0.8823177054650853,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.42039422243059366,
+      "DM_t_hln": 0.8059758793840325,
+      "family": "primary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.4804505399206785,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "KRE",
+      "predictor": "dep_flight_4w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3470,
+      "n_oos": 1388,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-06-09",
+      "oos_start": "2020-11-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.43628634989585713,
+          "loss_aug": 0.43628634989585985,
+          "improvement_pct": -6.234543920480017e-13,
+          "mean_loss_diff": 2.682772352012086e-15,
+          "DM_t_raw": 1.6567332953281908,
+          "DM_t_hln": 1.6322641425959308,
+          "DM_p_value": 0.10285084417244406,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 6.253530848961084e-08,
+          "loss_aug": 6.253530848961103e-08,
+          "improvement_pct": -2.962941443595192e-13,
+          "mean_loss_diff": 1.7096134737803787e-22,
+          "DM_t_raw": 1.154600427827505,
+          "DM_t_hln": 1.137547535673462,
+          "DM_p_value": 0.25550593358825724,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.7096134737803787e-22,
+            "boot_se": 1.4953797794787317e-22,
+            "ci95": [
+              -5.330601056009492e-23,
+              5.212744024989889e-22
+            ],
+            "p_two_sided_centered": 0.2385
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1388 base and 0/1388 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.253530848961084e-08,
+        "loss_aug_unfloored": 6.253530848961103e-08,
+        "improvement_pct_unfloored": -2.962941443595192e-13,
+        "mean_loss_diff_unfloored": 1.7096134737803787e-22,
+        "DM_t_hln_unfloored": 1.137547535673462,
+        "DM_p_value_unfloored": 0.25550593358825724,
+        "DM_n": 1388,
+        "vs_floored_mse_DM_t_hln": 1.137547535673462
+      },
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE, one-sided upper-tail",
+        "hac_lag": 21,
+        "n": 1388,
+        "mean_adjusted_diff_fbar": -1.7096134737803787e-22,
+        "CW_t_raw": -1.154600427827505,
+        "CW_t_hln": -1.137547535673462,
+        "CW_p_one_sided_raw": 0.8757735109469732,
+        "CW_p_one_sided_hln": 0.8722470332058714,
+        "reject_equal_mspe_at_05_hln": false,
+        "reject_equal_mspe_at_10_hln": false,
+        "direction": "positive_CW_t_means_augmented(deposit)_better"
+      },
+      "p_value": 0.25550593358825724,
+      "DM_t_hln": 1.137547535673462,
+      "family": "primary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "family_size_m": 8,
+        "bonferroni": 1.0,
+        "benjamini_hochberg_q": 0.4804505399206785,
+        "bh_reject_at_q10": false,
+        "bonferroni_reject_at_05": false
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3486,
+      "n_oos": 1395,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-07-02",
+      "oos_start": "2020-12-10",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.2171888743578388,
+          "loss_aug": 0.2171888743578388,
+          "improvement_pct": 0.0,
+          "mean_loss_diff": 2.2124874612601685e-17,
+          "DM_t_raw": 0.36071969604832516,
+          "DM_t_hln": 0.35955606088031394,
+          "DM_p_value": 0.7192336061687472,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 2.2124874612601685e-17,
+            "boot_se": 6.740222536536915e-17,
+            "ci95": [
+              -1.0205297379762281e-16,
+              1.637917201311687e-16
+            ],
+            "p_two_sided_centered": 0.743
+          }
+        },
+        "mse": {
+          "loss_base": 1.3724878137022918e-08,
+          "loss_aug": 1.372487813702292e-08,
+          "improvement_pct": -1.2053740722428775e-14,
+          "mean_loss_diff": 9.404709907760021e-26,
+          "DM_t_raw": 0.037683846710850295,
+          "DM_t_hln": 0.03756228348660979,
+          "DM_p_value": 0.9700420582942728,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1395 base and 0/1395 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.3724878137022918e-08,
+        "loss_aug_unfloored": 1.372487813702292e-08,
+        "improvement_pct_unfloored": -1.2053740722428775e-14,
+        "mean_loss_diff_unfloored": 9.404709907760021e-26,
+        "DM_t_hln_unfloored": 0.03756228348660979,
+        "DM_p_value_unfloored": 0.9700420582942728,
+        "DM_n": 1395,
+        "vs_floored_mse_DM_t_hln": 0.03756228348660979
+      },
+      "p_value": 0.7192336061687472,
+      "DM_t_hln": 0.35955606088031394,
+      "family": "secondary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3470,
+      "n_oos": 1388,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-06-09",
+      "oos_start": "2020-11-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.1654454391002842,
+          "loss_aug": 0.16544543910028414,
+          "improvement_pct": 3.355254247752936e-14,
+          "mean_loss_diff": -4.719247727153043e-17,
+          "DM_t_raw": -2.019431186234916,
+          "DM_t_hln": -1.9896051603636349,
+          "DM_p_value": 0.046830548528179916,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -4.719247727153043e-17,
+            "boot_se": 2.3572864610874913e-17,
+            "ci95": [
+              -9.69565446181112e-17,
+              -7.03087924096195e-18
+            ],
+            "p_two_sided_centered": 0.0405
+          }
+        },
+        "mse": {
+          "loss_base": 6.964010393435924e-09,
+          "loss_aug": 6.964010393435923e-09,
+          "improvement_pct": 2.3755869558514856e-14,
+          "mean_loss_diff": -5.778338449547299e-25,
+          "DM_t_raw": -0.24440313791012838,
+          "DM_t_hln": -0.24079342129090522,
+          "DM_p_value": 0.8097508159648799,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1388 base and 0/1388 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 6.964010393435924e-09,
+        "loss_aug_unfloored": 6.964010393435923e-09,
+        "improvement_pct_unfloored": 2.3755869558514856e-14,
+        "mean_loss_diff_unfloored": -5.778338449547299e-25,
+        "DM_t_hln_unfloored": -0.24079342129090522,
+        "DM_p_value_unfloored": 0.8097508159648799,
+        "DM_n": 1388,
+        "vs_floored_mse_DM_t_hln": -0.24079342129090522
+      },
+      "p_value": 0.046830548528179916,
+      "DM_t_hln": -1.9896051603636349,
+      "family": "secondary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3486,
+      "n_oos": 1395,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-07-02",
+      "oos_start": "2020-12-10",
+      "n_zero_actual": 61,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 2.116240811545017,
+          "loss_aug": 2.116240811545017,
+          "improvement_pct": 0.0,
+          "mean_loss_diff": 5.586928769081432e-17,
+          "DM_t_raw": 0.3056664537915483,
+          "DM_t_hln": 0.30468041327529805,
+          "DM_p_value": 0.7606550481260983,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "61 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 2.3785005180904713e-08,
+          "loss_aug": 2.3785005180904723e-08,
+          "improvement_pct": -4.173287865669815e-14,
+          "mean_loss_diff": 1.138869330673133e-23,
+          "DM_t_raw": 1.5265249086767025,
+          "DM_t_hln": 1.5216005364063752,
+          "DM_p_value": 0.12833599325903555,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 1.138869330673133e-23,
+            "boot_se": 7.565545251396014e-24,
+            "ci95": [
+              7.351889763635713e-25,
+              2.889552835503508e-23
+            ],
+            "p_two_sided_centered": 0.0985
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1395 base and 0/1395 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 2.3785005180904713e-08,
+        "loss_aug_unfloored": 2.3785005180904723e-08,
+        "improvement_pct_unfloored": -4.173287865669815e-14,
+        "mean_loss_diff_unfloored": 1.138869330673133e-23,
+        "DM_t_hln_unfloored": 1.5216005364063752,
+        "DM_p_value_unfloored": 0.12833599325903555,
+        "DM_n": 1395,
+        "vs_floored_mse_DM_t_hln": 1.5216005364063752
+      },
+      "p_value": 0.12833599325903555,
+      "DM_t_hln": 1.5216005364063752,
+      "family": "secondary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "XLF",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3470,
+      "n_oos": 1388,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-06-09",
+      "oos_start": "2020-11-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.4475742650213355,
+          "loss_aug": 0.4475742650213356,
+          "improvement_pct": -2.4805336485828405e-14,
+          "mean_loss_diff": 4.399298728701989e-17,
+          "DM_t_raw": 0.9869004481591444,
+          "DM_t_hln": 0.9723244039246025,
+          "DM_p_value": 0.3310587205486035,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 1.0120752045750344e-08,
+          "loss_aug": 1.0120752045750338e-08,
+          "improvement_pct": 6.53849128059891e-14,
+          "mean_loss_diff": -7.353153841228216e-24,
+          "DM_t_raw": -0.9943348589650366,
+          "DM_t_hln": -0.9796490120640085,
+          "DM_p_value": 0.327430243069444,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -7.353153841228216e-24,
+            "boot_se": 7.442622997562316e-24,
+            "ci95": [
+              -2.4226214311918183e-23,
+              2.187277725656214e-24
+            ],
+            "p_two_sided_centered": 0.361
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1388 base and 0/1388 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.0120752045750344e-08,
+        "loss_aug_unfloored": 1.0120752045750338e-08,
+        "improvement_pct_unfloored": 6.53849128059891e-14,
+        "mean_loss_diff_unfloored": -7.353153841228216e-24,
+        "DM_t_hln_unfloored": -0.9796490120640085,
+        "DM_p_value_unfloored": 0.327430243069444,
+        "DM_n": 1388,
+        "vs_floored_mse_DM_t_hln": -0.9796490120640085
+      },
+      "p_value": 0.327430243069444,
+      "DM_t_hln": -0.9796490120640085,
+      "family": "secondary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3486,
+      "n_oos": 1395,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-07-02",
+      "oos_start": "2020-12-10",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 2,
+      "n_floored_pred_aug": 2,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.29306609021998237,
+          "loss_aug": 0.2930660902199826,
+          "improvement_pct": -7.576605152727132e-14,
+          "mean_loss_diff": 2.443286512974359e-16,
+          "DM_t_raw": 0.808222676906595,
+          "DM_t_hln": 0.8056154548981059,
+          "DM_p_value": 0.42060200686895044,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": 2.443286512974359e-16,
+            "boot_se": 2.934547543076322e-16,
+            "ci95": [
+              -1.9769928426317933e-16,
+              9.189144865180632e-16
+            ],
+            "p_two_sided_centered": 0.402
+          }
+        },
+        "mse": {
+          "loss_base": 1.1047152549673156e-08,
+          "loss_aug": 1.1047152549673164e-08,
+          "improvement_pct": -7.487726894633142e-14,
+          "mean_loss_diff": 8.43678974738817e-24,
+          "DM_t_raw": 0.8492468131978916,
+          "DM_t_hln": 0.8465072526222304,
+          "DM_p_value": 0.39741512101379484,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~2/1395 base and 2/1395 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.1047208137264971e-08,
+        "loss_aug_unfloored": 1.1047208137264978e-08,
+        "improvement_pct_unfloored": -5.990151374175652e-14,
+        "mean_loss_diff_unfloored": 8.430341296376332e-24,
+        "DM_t_hln_unfloored": 0.8458583570096113,
+        "DM_p_value_unfloored": 0.39777693261939717,
+        "DM_n": 1395,
+        "vs_floored_mse_DM_t_hln": 0.8465072526222304
+      },
+      "p_value": 0.42060200686895044,
+      "DM_t_hln": 0.8056154548981059,
+      "family": "secondary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "rv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "qlike",
+      "n_obs_modelling_rows": 3470,
+      "n_oos": 1388,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-06-09",
+      "oos_start": "2020-11-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.22952084857301128,
+          "loss_aug": 0.2295208485730113,
+          "improvement_pct": -1.2092834175279628e-14,
+          "mean_loss_diff": -4.319311479089226e-18,
+          "DM_t_raw": -0.10278870368045351,
+          "DM_t_hln": -0.10127056403987256,
+          "DM_p_value": 0.9193503195188542,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -4.319311479089226e-18,
+            "boot_se": 4.116656481417211e-17,
+            "ci95": [
+              -8.417058276751097e-17,
+              7.966730061431239e-17
+            ],
+            "p_two_sided_centered": 0.9105
+          }
+        },
+        "mse": {
+          "loss_base": 5.7873555760699685e-09,
+          "loss_aug": 5.787355576069971e-09,
+          "improvement_pct": -4.2878682760049603e-14,
+          "mean_loss_diff": 2.930305242832033e-24,
+          "DM_t_raw": 1.1473192451422392,
+          "DM_t_hln": 1.13037389254915,
+          "DM_p_value": 0.258514139069121,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1388 base and 0/1388 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 5.7873555760699685e-09,
+        "loss_aug_unfloored": 5.787355576069971e-09,
+        "improvement_pct_unfloored": -4.2878682760049603e-14,
+        "mean_loss_diff_unfloored": 2.930305242832033e-24,
+        "DM_t_hln_unfloored": 1.13037389254915,
+        "DM_p_value_unfloored": 0.258514139069121,
+        "DM_n": 1388,
+        "vs_floored_mse_DM_t_hln": 1.13037389254915
+      },
+      "p_value": 0.9193503195188542,
+      "DM_t_hln": -0.10127056403987256,
+      "family": "secondary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 5,
+      "hac_lag": 5,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3486,
+      "n_oos": 1395,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-07-02",
+      "oos_start": "2020-12-10",
+      "n_zero_actual": 73,
+      "n_floored_pred_base": 2,
+      "n_floored_pred_aug": 2,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 44.70233440899008,
+          "loss_aug": 44.702334408990275,
+          "improvement_pct": -4.2916447472292365e-13,
+          "mean_loss_diff": 1.945212609069548e-13,
+          "DM_t_raw": 1.817614521230707,
+          "DM_t_hln": 1.8117511314519894,
+          "DM_p_value": 0.0702397728113795,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "caveat": "73 OOS windows have exactly zero downside semivariance; QLIKE's log term is undefined there. MSE is the pre-declared primary loss for dsv."
+        },
+        "mse": {
+          "loss_base": 1.1760102211625686e-08,
+          "loss_aug": 1.1760102211625604e-08,
+          "improvement_pct": 7.033787612281989e-13,
+          "mean_loss_diff": -8.171428119066619e-23,
+          "DM_t_raw": -2.9393187054739576,
+          "DM_t_hln": -2.929836842816742,
+          "DM_p_value": 0.003446586330390078,
+          "DM_n": 1395,
+          "hac_lag": 5,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 10,
+            "n_reps": 2000,
+            "mean_loss_diff": -8.171428119066619e-23,
+            "boot_se": 2.821088061931246e-23,
+            "ci95": [
+              -1.4247658421793228e-22,
+              -3.069184043649645e-23
+            ],
+            "p_two_sided_centered": 0.009
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~2/1395 base and 2/1395 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 1.1760147433208656e-08,
+        "loss_aug_unfloored": 1.1760147433208575e-08,
+        "improvement_pct_unfloored": 6.893085353784478e-13,
+        "mean_loss_diff_unfloored": -8.159088970995403e-23,
+        "DM_t_hln_unfloored": -2.925161897129407,
+        "DM_p_value_unfloored": 0.0034984665065092013,
+        "DM_n": 1395,
+        "vs_floored_mse_DM_t_hln": -2.929836842816742
+      },
+      "p_value": 0.003446586330390078,
+      "DM_t_hln": -2.929836842816742,
+      "family": "secondary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    },
+    {
+      "asset": "SPY",
+      "predictor": "dep_flight_13w",
+      "target": "dsv",
+      "H": 21,
+      "hac_lag": 21,
+      "primary_loss": "mse",
+      "n_obs_modelling_rows": 3470,
+      "n_oos": 1388,
+      "sample_start": "2012-08-20",
+      "sample_end": "2026-06-09",
+      "oos_start": "2020-11-27",
+      "n_zero_actual": 0,
+      "n_floored_pred_base": 0,
+      "n_floored_pred_aug": 0,
+      "min_days_between_deposit_asof_and_use": 1139,
+      "loss_results": {
+        "qlike": {
+          "loss_base": 0.49211294826838875,
+          "loss_aug": 0.4921129482683832,
+          "improvement_pct": 1.1280164731813383e-12,
+          "mean_loss_diff": -5.63702142920989e-15,
+          "DM_t_raw": -1.936444910304906,
+          "DM_t_hln": -1.9078445517550575,
+          "DM_p_value": 0.056617635057099935,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better"
+        },
+        "mse": {
+          "loss_base": 5.240003420875949e-09,
+          "loss_aug": 5.240003420875897e-09,
+          "improvement_pct": 9.945103925548458e-13,
+          "mean_loss_diff": -5.300847936417112e-23,
+          "DM_t_raw": -2.9005174789774886,
+          "DM_t_hln": -2.857678232977045,
+          "DM_p_value": 0.004331254204056334,
+          "DM_n": 1388,
+          "hac_lag": 21,
+          "direction": "negative_t_means_deposit_augmented_better",
+          "block_bootstrap": {
+            "block_len": 21,
+            "n_reps": 2000,
+            "mean_loss_diff": -5.300847936417112e-23,
+            "boot_se": 1.8803065237268366e-23,
+            "ci95": [
+              -8.898433173693529e-23,
+              -1.4960366721365676e-23
+            ],
+            "p_two_sided_centered": 0.005
+          }
+        }
+      },
+      "mse_unfloored_sensitivity": {
+        "note": "MSE recomputed on RAW (un-floored) OLS forecasts. MSE needs no positivity floor; this isolates whether the training-min floor (which clipped ~0/1388 base and 0/1388 aug forecasts) was doing the work.",
+        "loss_base_unfloored": 5.240003420875949e-09,
+        "loss_aug_unfloored": 5.240003420875897e-09,
+        "improvement_pct_unfloored": 9.945103925548458e-13,
+        "mean_loss_diff_unfloored": -5.300847936417112e-23,
+        "DM_t_hln_unfloored": -2.857678232977045,
+        "DM_p_value_unfloored": 0.004331254204056334,
+        "DM_n": 1388,
+        "vs_floored_mse_DM_t_hln": -2.857678232977045
+      },
+      "p_value": 0.004331254204056334,
+      "DM_t_hln": -2.857678232977045,
+      "family": "secondary",
+      "signal_vintage": "true_pit",
+      "p_value_adjusted": {
+        "note": "declared secondary/falsification family"
+      }
+    }
+  ],
+  "runtime_seconds": 105.2
+}
