@@ -34,8 +34,18 @@ import yfinance as yf
 from scipy import stats
 from datetime import datetime
 import json
+import math
+import os
+from pathlib import Path
 import warnings
+
+from volpred.stats.model_evaluation import strategy_dm_test
+
 warnings.filterwarnings('ignore')
+
+ROOT = Path(__file__).resolve().parent
+RESULTS_PATH = ROOT / "k565_btc_allocation_results.json"
+HARVEY_T = 3.0
 
 # ============================================================
 # 1. Data Collection
@@ -219,28 +229,58 @@ def dm_test(e1, e2, h=1):
     Here we compare portfolio returns (higher is better),
     so we test if e2 - e1 > 0 significantly.
     """
-    d = e2 - e1  # positive means e2 is better
-    d = d.dropna()
-    n = len(d)
+    if isinstance(e1, pd.Series) and isinstance(e2, pd.Series):
+        paired = pd.concat([e1.rename("base"), e2.rename("challenger")], axis=1).dropna()
+        base = paired["base"].to_numpy(dtype=float)
+        challenger = paired["challenger"].to_numpy(dtype=float)
+    else:
+        base = np.asarray(e1, dtype=float)
+        challenger = np.asarray(e2, dtype=float)
+        valid = np.isfinite(base) & np.isfinite(challenger)
+        base, challenger = base[valid], challenger[valid]
+    finite = np.isfinite(base) & np.isfinite(challenger)
+    base, challenger = base[finite], challenger[finite]
+    d = challenger - base  # positive means challenger is better
+    n = int(len(d))
     if n < 30:
-        return np.nan, np.nan
-
-    d_mean = d.mean()
-
-    # Newey-West variance with h-1 lags
-    gamma_0 = np.var(d, ddof=1)
-    if h > 1:
-        for k in range(1, h):
-            gamma_k = np.cov(d[k:], d[:-k])[0, 1]
-            gamma_0 += 2 * (1 - k / h) * gamma_k
-
-    se = np.sqrt(gamma_0 / n)
-    if se < 1e-10:
-        return np.nan, np.nan
-
-    t_stat = d_mean / se
-    p_value = 1 - stats.t.cdf(t_stat, df=n - 1)  # one-sided: e2 > e1
-    return float(t_stat), float(p_value)
+        return {"t_stat": float("nan"), "p_value": float("nan"), "n": n}
+    d_mean = float(np.mean(d))
+    centered = d - d_mean
+    denom = float(np.dot(centered, centered))
+    acf = (
+        [
+            float(np.dot(centered[lag:], centered[:-lag]) / denom)
+            for lag in range(1, min(5, n - 1) + 1)
+        ]
+        if denom > 0
+        else [float("nan")]
+    )
+    acf1_bound = float(1.96 / math.sqrt(n))
+    canonical_t, p_value = strategy_dm_test(
+        challenger,
+        base,
+        h=h,
+        loss_fn="negative_return",
+    )
+    # strategy_dm_test uses negative loss orientation: negative means its first
+    # strategy wins. Flip only the presentation sign to preserve this script's
+    # longstanding positive-means-challenger-better convention.
+    t_stat = -float(canonical_t)
+    return {
+        "t_stat": t_stat,
+        "p_value": float(p_value),
+        "n": n,
+        "mean_return_diff": d_mean,
+        "loss_differential_acf_1_to_5": acf,
+        "acf1_95pct_bound": acf1_bound,
+        "acf1_significant": bool(np.isfinite(acf[0]) and abs(acf[0]) > acf1_bound),
+        "passes_harvey": bool(abs(t_stat) > HARVEY_T),
+        "challenger_harvey_better": bool(t_stat > HARVEY_T),
+        "method": (
+            "volpred.stats.model_evaluation.strategy_dm_test "
+            "(canonical HAC; display sign positive=challenger better)"
+        ),
+    }
 
 # ============================================================
 # 4. Define Portfolio Variants
@@ -309,9 +349,10 @@ print("-" * 70)
 dm_results = {}
 base_ret = port_returns['base_50_50']
 for key in ['btc_5pct', 'btc_10pct', 'btc_20pct', 'btc_5pct_vix_cond', 'btc_5pct_momentum']:
-    t, p = dm_test(base_ret, port_returns[key])
+    dm_result = dm_test(base_ret, port_returns[key])
+    t, p = dm_result['t_stat'], dm_result['p_value']
     sig = "***" if t > 3.0 else ("**" if t > 2.0 else ("*" if t > 1.645 else ""))
-    dm_results[key] = {'t_stat': t, 'p_value': p, 'passes_harvey': t > 3.0}
+    dm_results[key] = dm_result
     print(f"  {strategies[key]['label']:<38} {t:>8.3f} {p:>10.4f} {'PASS' if t > 3.0 else 'FAIL':>8} {sig}")
 
 # NOTE: 5%/10%/20% BTC have identical DM t-stats because:
@@ -366,10 +407,10 @@ for period_name, (start, end) in oos_periods.items():
     print(f"\n  DM tests vs base:")
     period_dm = {}
     for key in ['btc_5pct', 'btc_10pct', 'btc_20pct', 'btc_5pct_vix_cond', 'btc_5pct_momentum']:
-        t, p = dm_test(base_sub, period_port_returns[key])
+        dm_result = dm_test(base_sub, period_port_returns[key])
+        t, p = dm_result['t_stat'], dm_result['p_value']
         sig = "***" if t > 3.0 else ("**" if t > 2.0 else ("*" if t > 1.645 else ""))
-        period_dm[key] = {'t_stat': float(t) if not np.isnan(t) else None,
-                          'p_value': float(p) if not np.isnan(p) else None}
+        period_dm[key] = dm_result
         t_str = f"{t:.3f}" if not np.isnan(t) else "N/A"
         p_str = f"{p:.4f}" if not np.isnan(p) else "N/A"
         print(f"    {strategies[key]['label']:<36} t={t_str:>8} p={p_str:>8} {sig}")
@@ -412,10 +453,10 @@ print(f"\n  DM tests vs base (ETF era):")
 etf_dm = {}
 base_etf = etf_port_returns['base_50_50']
 for key in ['btc_5pct', 'btc_10pct', 'btc_20pct', 'btc_5pct_vix_cond', 'btc_5pct_momentum']:
-    t, p = dm_test(base_etf, etf_port_returns[key])
+    dm_result = dm_test(base_etf, etf_port_returns[key])
+    t, p = dm_result['t_stat'], dm_result['p_value']
     sig = "***" if t > 3.0 else ("**" if t > 2.0 else ("*" if t > 1.645 else ""))
-    etf_dm[key] = {'t_stat': float(t) if not np.isnan(t) else None,
-                   'p_value': float(p) if not np.isnan(p) else None}
+    etf_dm[key] = dm_result
     t_str = f"{t:.3f}" if not np.isnan(t) else "N/A"
     p_str = f"{p:.4f}" if not np.isnan(p) else "N/A"
     print(f"    {strategies[key]['label']:<36} t={t_str:>8} p={p_str:>8} {sig}")
@@ -654,7 +695,9 @@ print("SUMMARY & CONCLUSIONS")
 print("=" * 70)
 
 # Determine which strategies pass Harvey threshold
-passing_strategies = [k for k, v in dm_results.items() if v.get('passes_harvey', False)]
+passing_strategies = [
+    k for k, v in dm_results.items() if v.get('challenger_harvey_better', False)
+]
 print(f"\nStrategies passing Harvey t>3.0 threshold: {passing_strategies if passing_strategies else 'NONE'}")
 
 # Cross-OOS consistency
@@ -691,6 +734,11 @@ results = {
     'n_observations': int(len(returns)),
     'references': ['K66', 'K78', 'Bouri et al. 2017', 'Platanakis & Urquhart 2020', 'Liu & Tsyvinski 2021'],
     'methodology': '12/VIX timing on SPY portion, static GLD, fixed/conditional BTC allocation',
+    'dm_method': (
+        'volpred.stats.model_evaluation.strategy_dm_test '
+        '(canonical HAC; display sign positive=challenger better)'
+    ),
+    'harvey_abs_t_threshold': HARVEY_T,
     'descriptive_stats': desc_stats,
     'correlation_by_year': corr_by_year,
     'full_period_metrics': full_results,
@@ -768,11 +816,12 @@ if '2024' in corr_by_year and '2016' in corr_by_year:
 results['conclusions']['key_findings'] = findings
 
 # Save
-output_path = 'experiments/k565_btc_allocation_results.json'
-with open(output_path, 'w') as f:
-    json.dump(results, f, indent=2, default=str)
+tmp_path = RESULTS_PATH.with_name(f".{RESULTS_PATH.name}.tmp-{os.getpid()}")
+tmp_path.write_text(json.dumps(results, indent=2, default=str), encoding="utf-8")
+json.loads(tmp_path.read_text(encoding="utf-8"))
+os.replace(tmp_path, RESULTS_PATH)
 
-print(f"\nResults saved to {output_path}")
+print(f"\nResults saved to {RESULTS_PATH}")
 print("\n" + "=" * 70)
 print("EXPERIMENT K565 COMPLETE")
 print("=" * 70)

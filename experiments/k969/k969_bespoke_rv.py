@@ -20,18 +20,25 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 import json
+import math
+import os
 import warnings
 from datetime import datetime
+from pathlib import Path
 from sklearn.linear_model import LinearRegression
 from scipy import stats
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
+from volpred.stats.model_evaluation import dm_test as canonical_dm_test
+
 warnings.filterwarnings('ignore')
 np.random.seed(42)
 
-OUTPUT_DIR = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a8a170fc/experiments/k969'
+OUTPUT_DIR = str(Path(__file__).resolve().parent)
+RESULTS_PATH = Path(OUTPUT_DIR) / "k969_bespoke_rv_results.json"
+HARVEY_T = 3.0
 
 
 # =============================================================================
@@ -223,7 +230,7 @@ def bespoke_ridge_forecast(proxies_all, target_all, split_idx, alpha=1.0):
 
         coef, intercept = _ridge_fit(X, Y, alpha)
         x_today = proxies_all.iloc[t-1:t][proxy_names].values
-        pred = float(x_today @ coef + intercept)
+        pred = float((x_today @ coef + intercept).item())
         forecasts.append(max(pred, 1e-10))
 
     # Final weights
@@ -333,25 +340,38 @@ def dm_test(loss1, loss2, h=1):
     Negative DM stat means model 1 is better.
     Returns: DM statistic, p-value
     """
-    d = loss1 - loss2
-    n = len(d)
-    d_mean = np.mean(d)
-
-    # HAC variance (Newey-West with h-1 lags)
-    gamma_0 = np.var(d, ddof=1)
-    gamma_sum = 0
-    for k in range(1, h):
-        gamma_k = np.sum((d[k:] - d_mean) * (d[:-k] - d_mean)) / n
-        gamma_sum += 2 * gamma_k
-
-    var_d = (gamma_0 + gamma_sum) / n
-    if var_d <= 0:
-        return 0.0, 1.0
-
-    dm_stat = d_mean / np.sqrt(var_d)
-    p_value = 2 * (1 - stats.norm.cdf(abs(dm_stat)))
-
-    return float(dm_stat), float(p_value)
+    first = np.asarray(loss1, dtype=float)
+    second = np.asarray(loss2, dtype=float)
+    valid = np.isfinite(first) & np.isfinite(second)
+    first, second = first[valid], second[valid]
+    d = first - second
+    n = int(len(d))
+    if n < 10:
+        return {"dm_stat": float("nan"), "p_value": float("nan"), "n": n}
+    d_mean = float(np.mean(d))
+    centered = d - d_mean
+    denom = float(np.dot(centered, centered))
+    acf = (
+        [
+            float(np.dot(centered[lag:], centered[:-lag]) / denom)
+            for lag in range(1, min(5, n - 1) + 1)
+        ]
+        if denom > 0
+        else [float("nan")]
+    )
+    acf1_bound = float(1.96 / math.sqrt(n))
+    dm_stat, p_value = canonical_dm_test(first, second, h=h)
+    return {
+        "dm_stat": float(dm_stat),
+        "p_value": float(p_value),
+        "n": n,
+        "mean_diff": d_mean,
+        "loss_differential_acf_1_to_5": acf,
+        "acf1_95pct_bound": acf1_bound,
+        "acf1_significant": bool(np.isfinite(acf[0]) and abs(acf[0]) > acf1_bound),
+        "passes_harvey": bool(abs(dm_stat) > HARVEY_T),
+        "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
+    }
 
 
 # =============================================================================
@@ -510,14 +530,14 @@ def main():
             continue
         fc_v = fc[valid_mask]
         losses_i = actual_v / fc_v - np.log(actual_v / fc_v) - 1
-        dm_stat, p_val = dm_test(losses_i, best_losses, h=1)
+        dm_result = dm_test(losses_i, best_losses, h=1)
+        dm_stat, p_val = dm_result['dm_stat'], dm_result['p_value']
         signif = '***' if p_val < 0.01 else '**' if p_val < 0.05 else '*' if p_val < 0.10 else ''
 
         dm_results[name] = {
-            'dm_stat': dm_stat,
-            'p_value': p_val,
+            **dm_result,
             'significant_10pct': p_val < 0.10,
-            'significant_5pct': p_val < 0.05
+            'significant_5pct': p_val < 0.05,
         }
 
         print(f"{name:<20s} {'':>20s} {dm_stat:>10.3f} {p_val:>10.4f} {signif:>8s}")
@@ -528,7 +548,8 @@ def main():
     bespoke_v = bespoke_ols_fc[valid_mask]
     losses_ar1_r2 = actual_v / ar1_r2_v - np.log(actual_v / ar1_r2_v) - 1
     losses_bespoke = actual_v / bespoke_v - np.log(actual_v / bespoke_v) - 1
-    dm_s, dm_p = dm_test(losses_ar1_r2, losses_bespoke, h=1)
+    dm_natural = dm_test(losses_ar1_r2, losses_bespoke, h=1)
+    dm_s, dm_p = dm_natural['dm_stat'], dm_natural['p_value']
     print(f"  DM stat = {dm_s:.3f}, p-value = {dm_p:.4f}")
     print(f"  Positive DM → AR1_r2 has higher loss → Bespoke is better")
 
@@ -536,7 +557,8 @@ def main():
     print("\n--- Key Comparison: Bespoke OLS vs Equal Weight ---")
     eq_v = eq_fc[valid_mask]
     losses_eq = actual_v / eq_v - np.log(actual_v / eq_v) - 1
-    dm_s2, dm_p2 = dm_test(losses_eq, losses_bespoke, h=1)
+    dm_equal = dm_test(losses_eq, losses_bespoke, h=1)
+    dm_s2, dm_p2 = dm_equal['dm_stat'], dm_equal['p_value']
     print(f"  DM stat = {dm_s2:.3f}, p-value = {dm_p2:.4f}")
 
     # =================================================================
@@ -703,6 +725,8 @@ def main():
         'target': 'r2 (close-to-close squared return)',
         'seed': 42,
         'method': 'Daily-frequency Bespoke Volatility (Patton & Zhang 2026 concept)',
+        'dm_method': 'volpred.stats.model_evaluation.dm_test (canonical HAC)',
+        'harvey_abs_t_threshold': HARVEY_T,
         'references': [
             'Patton & Zhang (2026), Bespoke Realized Volatility, Journal of Econometrics',
             'Patton (2011), Volatility forecast comparison using imperfect volatility proxies, JoE',
@@ -726,13 +750,13 @@ def main():
         'best_model_mse': best_mse[0],
         'dm_tests_vs_best': dm_results,
         'dm_bespoke_ols_vs_ar1_r2': {
-            'dm_stat': float(dm_s),
-            'p_value': float(dm_p),
+            **dm_natural,
+            'comparison_order': 'AR1_r2 loss minus Bespoke_OLS loss',
             'interpretation': 'Positive DM stat means AR1_r2 has higher loss (Bespoke better)'
         },
         'dm_bespoke_ols_vs_equal_weight': {
-            'dm_stat': float(dm_s2),
-            'p_value': float(dm_p2)
+            **dm_equal,
+            'comparison_order': 'Equal_Weight loss minus Bespoke_OLS loss',
         },
         'ols_weights': ols_weights,
         'ridge_weights': ridge_weights,
@@ -776,12 +800,14 @@ def main():
         conclusions.append(f"OLS ({bespoke_qlike:.4f}) outperforms Ridge ({ridge_qlike:.4f}) — no overfitting issue")
 
     # 5. Statistical significance
-    if dm_p < 0.05:
-        conclusions.append(f"Bespoke vs AR1(r²) is statistically significant (DM p={dm_p:.4f})")
-    elif dm_p < 0.10:
-        conclusions.append(f"Bespoke vs AR1(r²) is marginally significant (DM p={dm_p:.4f})")
+    if abs(dm_s) > HARVEY_T:
+        conclusions.append(
+            f"Bespoke vs AR1(r²) passes Harvey |t|>3 (DM t={dm_s:.3f}, p={dm_p:.4f})"
+        )
     else:
-        conclusions.append(f"Bespoke vs AR1(r²) is NOT statistically significant (DM p={dm_p:.4f})")
+        conclusions.append(
+            f"Bespoke vs AR1(r²) is NOT Harvey-significant (DM t={dm_s:.3f}, p={dm_p:.4f})"
+        )
 
     output['conclusions'] = conclusions
 
@@ -793,8 +819,10 @@ def main():
         print(f"  {i}. {c}")
 
     # Save JSON
-    with open(f'{OUTPUT_DIR}/k969_bespoke_rv_results.json', 'w') as f:
-        json.dump(output, f, indent=2, default=str)
+    tmp_path = RESULTS_PATH.with_name(f".{RESULTS_PATH.name}.tmp-{os.getpid()}")
+    tmp_path.write_text(json.dumps(output, indent=2, default=str), encoding="utf-8")
+    json.loads(tmp_path.read_text(encoding="utf-8"))
+    os.replace(tmp_path, RESULTS_PATH)
     print(f"\nSaved: k969_bespoke_rv_results.json")
 
     print("\n✓ K969 experiment complete.")

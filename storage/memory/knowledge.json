@@ -38575,5 +38575,22 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-07-11T22:43:06.914154"
+  },
+  {
+    "item_id": "904b647b",
+    "category": "methodology_correction",
+    "content": "[提出: Codex, 執行: Codex] experiment_id=k1655_dm_sweep_rerun_article_bound_b02。方法更正；reviewer=/root/dm_b02_code_review，final verdict=PASS；比較包含 GJR-X(VIX) vs GJR-GARCH、BTC5 vs Baseline、Bayes-Median vs MLE、HAR-Bespoke vs Ridge、HAR-QR vs Baseline。根因是五個 headline-bound 站點在 h=1 時把 HAC lag 設為 0，使檢定退化成 iid；已統一改用 canonical Newey-West HAC、paired finite mask、正確 loss direction 與 Harvey |t|>3 gate。K486 的 GJR-X(VIX) QLIKE 點估計 5/5 較低、平均 17.4319%，但 Harvey 0/5；VaR 1% 兩模型仍同為 5/5。K565 的 5% BTC 全樣本 t=2.862364、momentum t=2.98904，headline Harvey PASS 由 4 降為 0，post-ETF Sharpe 增益近零仍成立。K432 的 Mean/Median/BMA 對 MLE t=3.011/2.256/3.152，MLE 點排名仍第一，最佳 Bayes Median 未過 Harvey。K969 的 HAR-Bespoke 核心排名不變；Ridge t=3.156、p=0.0016 仍過 Harvey，Bespoke OLS 未過。K1422 q05 為 8/9 Harvey；q95 為 Gaussian 2/3、Empirical 1/3、Location-scale 0/3，aggregate 3/3 PASS 不變。已回溯更正文章 mile_f0be55f7、mile_a1f7bfa8、mile_93dcb525、mile_429cd241、mile_85129dcd、mile_cfab6308、mile_b87cc779。",
+    "evidence": [
+      "experiments/k486/k486_gjr_vix_final_results.json",
+      "experiments/k565/k565_btc_allocation_results.json",
+      "experiments/k432/k432_bayesian_garch_results.json",
+      "experiments/k969/k969_bespoke_rv_results.json",
+      "experiments/k1422/k1422_results.json",
+      "storage/ops/dm_hac_lag_baseline.json",
+      "task:k1655_dm_sweep_rerun_article_bound_b02",
+      "articles:mile_f0be55f7,mile_a1f7bfa8,mile_93dcb525,mile_429cd241,mile_85129dcd,mile_cfab6308,mile_b87cc779"
+    ],
+    "confidence": 0.99,
+    "created_at": "2026-07-12T01:02:38.856870"
   }
 ]

@@ -1,7 +1,7 @@
 {
   "experiment_id": "K565",
   "title": "Bitcoin Allocation in VT Portfolio \u2014 Revisiting K66",
-  "timestamp": "2026-03-28T03:15:49.035353",
+  "timestamp": "2026-07-12T00:03:52.767046",
   "data_source": "yfinance (SPY, GLD, BTC-USD, ^VIX)",
   "data_period": "2015-01-02 to 2026-03-26",
   "n_observations": 2823,
@@ -13,15 +13,17 @@
     "Liu & Tsyvinski 2021"
   ],
   "methodology": "12/VIX timing on SPY portion, static GLD, fixed/conditional BTC allocation",
+  "dm_method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)",
+  "harvey_abs_t_threshold": 3.0,
   "descriptive_stats": {
     "SPY": {
-      "mean_annual": 0.1347202302499392,
-      "std_annual": 0.17705401602849566,
-      "skewness": -0.308747895999204,
-      "kurtosis": 14.159105958518573,
-      "min_daily": -0.10942387272140675,
-      "max_daily": 0.1050193499563612,
-      "sharpe_standalone": 0.7608990367564262
+      "mean_annual": 0.1347202306273774,
+      "std_annual": 0.17705401140839308,
+      "skewness": -0.3087449048703705,
+      "kurtosis": 14.159039507855148,
+      "min_daily": -0.1094236694047167,
+      "max_daily": 0.10501918444524994,
+      "sharpe_standalone": 0.7608990587433316
     },
     "GLD": {
       "mean_annual": 0.12460597731888282,
@@ -44,167 +46,232 @@
   },
   "correlation_by_year": {
     "2016": {
-      "SPY_BTC": -0.047865586846324575,
+      "SPY_BTC": -0.04786396737802456,
       "GLD_BTC": 0.09206307001659438,
-      "SPY_GLD": -0.35158103935219454
+      "SPY_GLD": -0.35158316300584813
     },
     "2017": {
-      "SPY_BTC": 0.06681868085575154,
+      "SPY_BTC": 0.0668095462465271,
       "GLD_BTC": -0.03070864525110972,
-      "SPY_GLD": -0.24764052824131955
+      "SPY_GLD": -0.2476428689269761
     },
     "2018": {
-      "SPY_BTC": 0.07246999674599726,
+      "SPY_BTC": 0.07246987459005039,
       "GLD_BTC": -0.045039247812073184,
-      "SPY_GLD": -0.03000404765812861
+      "SPY_GLD": -0.03000197699234605
     },
     "2019": {
-      "SPY_BTC": -0.12270651973316334,
+      "SPY_BTC": -0.12270778873206178,
       "GLD_BTC": 0.22239087236527375,
-      "SPY_GLD": -0.2673511304327381
+      "SPY_GLD": -0.2673503949199326
     },
     "2020": {
-      "SPY_BTC": 0.4282173922744849,
+      "SPY_BTC": 0.4282170601905221,
       "GLD_BTC": 0.2895164387201439,
-      "SPY_GLD": 0.16011353321911012
+      "SPY_GLD": 0.16011261445792507
     },
     "2021": {
-      "SPY_BTC": 0.2604183009024806,
+      "SPY_BTC": 0.2604187387872909,
       "GLD_BTC": -0.01293144005626813,
-      "SPY_GLD": 0.1685232774234912
+      "SPY_GLD": 0.16852393207347519
     },
     "2022": {
-      "SPY_BTC": 0.5639252929704222,
+      "SPY_BTC": 0.5639258268342819,
       "GLD_BTC": 0.14163493839847485,
-      "SPY_GLD": 0.1942604394492806
+      "SPY_GLD": 0.19425882066427802
     },
     "2023": {
-      "SPY_BTC": 0.15230494066367076,
+      "SPY_BTC": 0.15230324434666848,
       "GLD_BTC": 0.10173948148910147,
-      "SPY_GLD": 0.001674745115720029
+      "SPY_GLD": 0.0016743848601123187
     },
     "2024": {
-      "SPY_BTC": 0.36041566308802375,
+      "SPY_BTC": 0.36041416190720615,
       "GLD_BTC": 0.0798644927769947,
-      "SPY_GLD": 0.26588477421650863
+      "SPY_GLD": 0.26588574151695943
     },
     "2025": {
-      "SPY_BTC": 0.4218753641863679,
+      "SPY_BTC": 0.4218750176136056,
       "GLD_BTC": 0.11114210267406395,
-      "SPY_GLD": 0.027112108038862034
+      "SPY_GLD": 0.027111519908336424
     }
   },
   "full_period_metrics": {
     "base_50_50": {
       "label": "50/50 SPY/GLD (12/VIX)",
-      "annual_return": 0.1012894325352152,
-      "annual_vol": 0.0928595213507646,
-      "sharpe": 1.0907813335867598,
-      "sortino": 1.4543591020709754,
-      "mdd": -0.14049482666823307,
-      "calmar": 0.720947773930508,
-      "skewness": -0.49606751290509565,
-      "kurtosis": 4.91341200041924,
-      "cvar_5pct": -0.008947685862353063,
-      "max_monthly_loss": -0.10871652984017419,
+      "annual_return": 0.10128942995301846,
+      "annual_vol": 0.09285951379833346,
+      "sharpe": 1.0907813944944034,
+      "sortino": 1.4543590655752308,
+      "mdd": -0.14049487311664888,
+      "calmar": 0.7209475172017183,
+      "skewness": -0.4960679339596391,
+      "kurtosis": 4.913410909848368,
+      "cvar_5pct": -0.008947664487399119,
+      "max_monthly_loss": -0.1087165552542928,
       "n_obs": 2823
     },
     "btc_5pct": {
       "label": "47.5/47.5/5 + BTC (K66 original)",
-      "annual_return": 0.13147202916164077,
-      "annual_vol": 0.09957403873777863,
-      "sharpe": 1.3203444474906085,
-      "sortino": 1.761528208993833,
-      "mdd": -0.1670642451830229,
-      "calmar": 0.7869549167603757,
-      "skewness": -0.5360144066761848,
-      "kurtosis": 4.8776209538194335,
-      "cvar_5pct": -0.009275244647616332,
-      "max_monthly_loss": -0.11872511428237542,
+      "annual_return": 0.13147202670855387,
+      "annual_vol": 0.099574014641088,
+      "sharpe": 1.3203447423752215,
+      "sortino": 1.7615285280638202,
+      "mdd": -0.16706429239916046,
+      "calmar": 0.7869546796656743,
+      "skewness": -0.5360151801721308,
+      "kurtosis": 4.877625366361863,
+      "cvar_5pct": -0.009275194566360938,
+      "max_monthly_loss": -0.1187251384257881,
       "n_obs": 2823
     },
     "btc_10pct": {
       "label": "45/45/10 + BTC",
-      "annual_return": 0.16165462578806636,
-      "annual_vol": 0.11561788305254883,
-      "sharpe": 1.3981801216217877,
-      "sortino": 1.8874795919730523,
-      "mdd": -0.2044167024408465,
-      "calmar": 0.7908092824990438,
-      "skewness": -0.5099455537976367,
-      "kurtosis": 5.019558839475398,
-      "cvar_5pct": -0.010843202234144464,
-      "max_monthly_loss": -0.13921400685967994,
+      "annual_return": 0.1616546234640893,
+      "annual_vol": 0.11561784919051117,
+      "sharpe": 1.3981805110188503,
+      "sortino": 1.8874800556363858,
+      "mdd": -0.204416731823048,
+      "calmar": 0.7908091574618488,
+      "skewness": -0.5099461950959615,
+      "kurtosis": 5.019564385114,
+      "cvar_5pct": -0.01084317053580962,
+      "max_monthly_loss": -0.13921400991450367,
       "n_obs": 2823
     },
     "btc_20pct": {
       "label": "40/40/20 + BTC (aggressive)",
-      "annual_return": 0.22201981904091747,
-      "annual_vol": 0.16356566840683687,
-      "sharpe": 1.3573742045224773,
-      "sortino": 1.8448412592184673,
-      "mdd": -0.28586979933860585,
-      "calmar": 0.7766466396750794,
-      "skewness": -0.36147325223638344,
-      "kurtosis": 5.987657835653714,
-      "cvar_5pct": -0.015058921734254818,
-      "max_monthly_loss": -0.1850926896538806,
+      "annual_return": 0.2220198169751601,
+      "annual_vol": 0.16356562928463445,
+      "sharpe": 1.3573745165544808,
+      "sortino": 1.8448415133343499,
+      "mdd": -0.2858698175738867,
+      "calmar": 0.7766465829075371,
+      "skewness": -0.36147342317822406,
+      "kurtosis": 5.9876612929463775,
+      "cvar_5pct": -0.015058934442924082,
+      "max_monthly_loss": -0.18509263306183638,
       "n_obs": 2823
     },
     "btc_5pct_vix_cond": {
       "label": "47.5/47.5/5 BTC (VIX<20 only)",
-      "annual_return": 0.11948148319549284,
-      "annual_vol": 0.09367232690454648,
-      "sharpe": 1.2755259439348217,
-      "sortino": 1.733315877955912,
-      "mdd": -0.14982922165493498,
-      "calmar": 0.7974511372065013,
-      "skewness": -0.492882149058461,
-      "kurtosis": 3.9554029263936092,
-      "cvar_5pct": -0.008868598395448672,
-      "max_monthly_loss": -0.10319148829802696,
+      "annual_return": 0.11948148074240596,
+      "annual_vol": 0.09367230482170882,
+      "sharpe": 1.2755262184465412,
+      "sortino": 1.7333160986024876,
+      "mdd": -0.14982926884136746,
+      "calmar": 0.7974508696889365,
+      "skewness": -0.4928829815073272,
+      "kurtosis": 3.955406263203982,
+      "cvar_5pct": -0.008868629125923096,
+      "max_monthly_loss": -0.10319151244143968,
       "n_obs": 2823
     },
     "btc_5pct_momentum": {
       "label": "47.5/47.5/5 BTC (60d mom>0)",
-      "annual_return": 0.128563344966603,
-      "annual_vol": 0.09560734723256308,
-      "sharpe": 1.3447015181152875,
-      "sortino": 1.7873450097923131,
-      "mdd": -0.15118113850131157,
-      "calmar": 0.8503927556114259,
-      "skewness": -0.5835114390525092,
-      "kurtosis": 4.999401352900854,
-      "cvar_5pct": -0.008795665357477887,
-      "max_monthly_loss": -0.13107518154957196,
+      "annual_return": 0.1285633425135161,
+      "annual_vol": 0.09560732552757546,
+      "sharpe": 1.344701797734477,
+      "sortino": 1.787345572843763,
+      "mdd": -0.15118115116762879,
+      "calmar": 0.8503926681373513,
+      "skewness": -0.5835121730527637,
+      "kurtosis": 4.999404575119948,
+      "cvar_5pct": -0.00879571414121742,
+      "max_monthly_loss": -0.13107520569298464,
       "n_obs": 2823
     }
   },
   "dm_tests_full": {
     "btc_5pct": {
-      "t_stat": 3.073682168121037,
-      "p_value": 0.0010672792380430618,
-      "passes_harvey": true
+      "t_stat": 2.862364249090883,
+      "p_value": 0.004235921038071133,
+      "n": 2823,
+      "mean_return_diff": 0.00011977220934736272,
+      "loss_differential_acf_1_to_5": [
+        -0.014929139949748262,
+        -0.0008026779039420242,
+        0.04719609310753656,
+        0.013636772246757632,
+        -0.012028133149338382
+      ],
+      "acf1_95pct_bound": 0.03688931851848254,
+      "acf1_significant": false,
+      "passes_harvey": false,
+      "challenger_harvey_better": false,
+      "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
     },
     "btc_10pct": {
-      "t_stat": 3.0736821681210382,
-      "p_value": 0.0010672792380430618,
-      "passes_harvey": true
+      "t_stat": 2.8623642490908834,
+      "p_value": 0.004235921038071133,
+      "n": 2823,
+      "mean_return_diff": 0.0002395444186947255,
+      "loss_differential_acf_1_to_5": [
+        -0.014929139949748272,
+        -0.0008026779039420421,
+        0.04719609310753655,
+        0.013636772246757623,
+        -0.012028133149338384
+      ],
+      "acf1_95pct_bound": 0.03688931851848254,
+      "acf1_significant": false,
+      "passes_harvey": false,
+      "challenger_harvey_better": false,
+      "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
     },
     "btc_20pct": {
-      "t_stat": 3.073682168121038,
-      "p_value": 0.0010672792380430618,
-      "passes_harvey": true
+      "t_stat": 2.8623642490908825,
+      "p_value": 0.004235921038071133,
+      "n": 2823,
+      "mean_return_diff": 0.0004790888373894509,
+      "loss_differential_acf_1_to_5": [
+        -0.014929139949748264,
+        -0.0008026779039420354,
+        0.047196093107536564,
+        0.013636772246757623,
+        -0.012028133149338394
+      ],
+      "acf1_95pct_bound": 0.03688931851848254,
+      "acf1_significant": false,
+      "passes_harvey": false,
+      "challenger_harvey_better": false,
+      "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
     },
     "btc_5pct_vix_cond": {
-      "t_stat": 2.2943397167701867,
-      "p_value": 0.0109220525150443,
-      "passes_harvey": false
+      "t_stat": 2.043206995482323,
+      "p_value": 0.04112465294968248,
+      "n": 2823,
+      "mean_return_diff": 7.219067773566465e-05,
+      "loss_differential_acf_1_to_5": [
+        0.029411921950303975,
+        0.007149021410600106,
+        0.034597054261231004,
+        0.015049232501911265,
+        0.005831890921919269
+      ],
+      "acf1_95pct_bound": 0.03688931851848254,
+      "acf1_significant": false,
+      "passes_harvey": false,
+      "challenger_harvey_better": false,
+      "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
     },
     "btc_5pct_momentum": {
-      "t_stat": 3.3723006662063058,
-      "p_value": 0.00037773819775022144,
-      "passes_harvey": true
+      "t_stat": 2.9890366783976647,
+      "p_value": 0.0028227351821321633,
+      "n": 2823,
+      "mean_return_diff": 0.00010822981174800655,
+      "loss_differential_acf_1_to_5": [
+        -0.007810871428261768,
+        -0.003897549973231712,
+        0.07642916457023828,
+        0.0032925324594611375,
+        0.005397574328727272
+      ],
+      "acf1_95pct_bound": 0.03688931851848254,
+      "acf1_significant": false,
+      "passes_harvey": false,
+      "challenger_harvey_better": false,
+      "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
     }
   },
   "cross_oos": {
@@ -212,109 +279,179 @@
       "metrics": {
         "base_50_50": {
           "label": "50/50 SPY/GLD (12/VIX)",
-          "annual_return": 0.10012496189922705,
-          "annual_vol": 0.06805088265370962,
-          "sharpe": 1.4713249556031878,
-          "sortino": 2.186559596050391,
-          "mdd": -0.08794741577305257,
-          "calmar": 1.1384639448372027,
-          "skewness": -0.18695917792645858,
-          "kurtosis": 1.303627384852021,
-          "cvar_5pct": -0.006616467449311783,
-          "max_monthly_loss": -0.042823475537424494,
+          "annual_return": 0.10012493364623343,
+          "annual_vol": 0.0680509302150286,
+          "sharpe": 1.4713235121086043,
+          "sortino": 2.1865527202233648,
+          "mdd": -0.08794738505789818,
+          "calmar": 1.1384640211908341,
+          "skewness": -0.18696542447945697,
+          "kurtosis": 1.3036187941456054,
+          "cvar_5pct": -0.00661635433792355,
+          "max_monthly_loss": -0.04282340281624812,
           "n_obs": 1006
         },
         "btc_5pct": {
           "label": "47.5/47.5/5 + BTC (K66 original)",
-          "annual_return": 0.1440064483434178,
-          "annual_vol": 0.07636110649119059,
-          "sharpe": 1.8858612055344055,
-          "sortino": 2.9124298316023514,
-          "mdd": -0.12026117525431351,
-          "calmar": 1.1974475389824748,
-          "skewness": -0.13164334170717837,
-          "kurtosis": 1.2252250884952414,
-          "cvar_5pct": -0.007244217500991174,
-          "max_monthly_loss": -0.042476380175939354,
+          "annual_return": 0.14400642150307388,
+          "annual_vol": 0.07636110491895541,
+          "sharpe": 1.8858608928709544,
+          "sortino": 2.9124236229630136,
+          "mdd": -0.12026114575637022,
+          "calmar": 1.1974476095114526,
+          "skewness": -0.13164841233516267,
+          "kurtosis": 1.2252300029870078,
+          "cvar_5pct": -0.007244250324361069,
+          "max_monthly_loss": -0.042476362409621896,
           "n_obs": 1006
         },
         "btc_10pct": {
           "label": "45/45/10 + BTC",
-          "annual_return": 0.18788793478760862,
-          "annual_vol": 0.09884699703388453,
-          "sharpe": 1.9007955772617053,
-          "sortino": 2.938932727652232,
-          "mdd": -0.1693647188790075,
-          "calmar": 1.1093687990698577,
-          "skewness": 0.024507932423359104,
-          "kurtosis": 1.874178246959679,
-          "cvar_5pct": -0.009262089404904713,
-          "max_monthly_loss": -0.07721536141356919,
+          "annual_return": 0.1878879093599144,
+          "annual_vol": 0.09884696526347199,
+          "sharpe": 1.9007959309535494,
+          "sortino": 2.9389296939530216,
+          "mdd": -0.1693649181686887,
+          "calmar": 1.1093673435532656,
+          "skewness": 0.02450534170425089,
+          "kurtosis": 1.8741840911735954,
+          "cvar_5pct": -0.009262125494520847,
+          "max_monthly_loss": -0.07721560329437795,
           "n_obs": 1006
         },
         "btc_20pct": {
           "label": "40/40/20 + BTC (aggressive)",
-          "annual_return": 0.27565090767599026,
-          "annual_vol": 0.16083840383775244,
-          "sharpe": 1.7138376227238379,
-          "sortino": 2.5064409017977907,
-          "mdd": -0.2805038449314392,
-          "calmar": 0.9826992130655638,
-          "skewness": 0.24750703897810034,
-          "kurtosis": 3.4218308013059984,
-          "cvar_5pct": -0.015047350095941952,
-          "max_monthly_loss": -0.1493367263239668,
+          "annual_return": 0.27565088507359536,
+          "annual_vol": 0.16083835302759902,
+          "sharpe": 1.7138380236105446,
+          "sortino": 2.5064397238515537,
+          "mdd": -0.2805039968720384,
+          "calmar": 0.9826986001890841,
+          "skewness": 0.24750648003259032,
+          "kurtosis": 3.4218342640250636,
+          "cvar_5pct": -0.015047309920101283,
+          "max_monthly_loss": -0.1493369413291301,
           "n_obs": 1006
         },
         "btc_5pct_vix_cond": {
           "label": "47.5/47.5/5 BTC (VIX<20 only)",
-          "annual_return": 0.14341127668914738,
-          "annual_vol": 0.07528580092564724,
-          "sharpe": 1.9048914260842005,
-          "sortino": 2.905974550662584,
-          "mdd": -0.11180345001113595,
-          "calmar": 1.2827088669881224,
-          "skewness": -0.15455251284782798,
-          "kurtosis": 1.3037036471704377,
-          "cvar_5pct": -0.007180466143494654,
-          "max_monthly_loss": -0.05077031547292049,
+          "annual_return": 0.14341124984880346,
+          "annual_vol": 0.07528580170886368,
+          "sharpe": 1.9048910497544602,
+          "sortino": 2.905967981809611,
+          "mdd": -0.1118034212194885,
+          "calmar": 1.2827089572443726,
+          "skewness": -0.15455760805054475,
+          "kurtosis": 1.3037101065621792,
+          "cvar_5pct": -0.00718047776075555,
+          "max_monthly_loss": -0.050770230249878964,
           "n_obs": 1006
         },
         "btc_5pct_momentum": {
           "label": "47.5/47.5/5 BTC (60d mom>0)",
-          "annual_return": 0.1522428654949666,
-          "annual_vol": 0.07411404635684922,
-          "sharpe": 2.054170200908173,
-          "sortino": 3.1182066113493407,
-          "mdd": -0.09782567916910731,
-          "calmar": 1.5562668901259606,
-          "skewness": -0.1526201637011234,
-          "kurtosis": 1.4551069878714795,
-          "cvar_5pct": -0.0070608743774434385,
-          "max_monthly_loss": -0.04115467895837036,
+          "annual_return": 0.15224283865462268,
+          "annual_vol": 0.07411405139824861,
+          "sharpe": 2.0541696990298433,
+          "sortino": 3.1182025073931006,
+          "mdd": -0.09782564863133272,
+          "calmar": 1.556267101569318,
+          "skewness": -0.1526252801356915,
+          "kurtosis": 1.4551073181041598,
+          "cvar_5pct": -0.007060846029773781,
+          "max_monthly_loss": -0.041154934277001815,
           "n_obs": 1006
         }
       },
       "dm_tests": {
         "btc_5pct": {
-          "t_stat": 2.3689196880349788,
-          "p_value": 0.009014193117721336
+          "t_stat": 2.1670935924730537,
+          "p_value": 0.030462036490982447,
+          "n": 1006,
+          "mean_return_diff": 0.00017413288832079555,
+          "loss_differential_acf_1_to_5": [
+            0.009900539744762389,
+            0.0029171842714434,
+            0.03529226270581343,
+            0.009801074689613155,
+            0.03514135611411251
+          ],
+          "acf1_95pct_bound": 0.0617955327897043,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_10pct": {
-          "t_stat": 2.3689196880349788,
-          "p_value": 0.009014193117721336
+          "t_stat": 2.167093592473054,
+          "p_value": 0.030462036490982447,
+          "n": 1006,
+          "mean_return_diff": 0.0003482657766415912,
+          "loss_differential_acf_1_to_5": [
+            0.009900539744762411,
+            0.0029171842714433875,
+            0.03529226270581342,
+            0.00980107468961316,
+            0.0351413561141125
+          ],
+          "acf1_95pct_bound": 0.0617955327897043,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_20pct": {
-          "t_stat": 2.368919688034979,
-          "p_value": 0.009014193117721336
+          "t_stat": 2.167093592473054,
+          "p_value": 0.030462036490982447,
+          "n": 1006,
+          "mean_return_diff": 0.0006965315532831823,
+          "loss_differential_acf_1_to_5": [
+            0.009900539744762401,
+            0.0029171842714433923,
+            0.03529226270581342,
+            0.009801074689613165,
+            0.03514135611411251
+          ],
+          "acf1_95pct_bound": 0.0617955327897043,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_5pct_vix_cond": {
-          "t_stat": 2.504719362636812,
-          "p_value": 0.006206126208884721
+          "t_stat": 2.241050132750817,
+          "p_value": 0.025240534195646536,
+          "n": 1006,
+          "mean_return_diff": 0.00017177109604194464,
+          "loss_differential_acf_1_to_5": [
+            0.032096879512931026,
+            0.02187738954556533,
+            0.01344462324619686,
+            0.013002680378342213,
+            0.04967763168651703
+          ],
+          "acf1_95pct_bound": 0.0617955327897043,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_5pct_momentum": {
-          "t_stat": 3.233353399736224,
-          "p_value": 0.0006316472770163672
+          "t_stat": 2.9703321708092525,
+          "p_value": 0.0030455046225525972,
+          "n": 1006,
+          "mean_return_diff": 0.00020681708336662394,
+          "loss_differential_acf_1_to_5": [
+            0.0020675468729354778,
+            0.013067284916682255,
+            0.029868883687441977,
+            -0.017502215228673908,
+            0.04249903935573823
+          ],
+          "acf1_95pct_bound": 0.0617955327897043,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         }
       }
     },
@@ -322,109 +459,179 @@
       "metrics": {
         "base_50_50": {
           "label": "50/50 SPY/GLD (12/VIX)",
-          "annual_return": 0.05180167145476739,
-          "annual_vol": 0.10210252398956007,
-          "sharpe": 0.5073495681660533,
-          "sortino": 0.7001404319079662,
-          "mdd": -0.14049482666823324,
-          "calmar": 0.36870874667216536,
-          "skewness": -0.21130771356320163,
-          "kurtosis": 2.6471629507518877,
-          "cvar_5pct": -0.010438196562740448,
-          "max_monthly_loss": -0.10871652984017417,
+          "annual_return": 0.05180165471712001,
+          "annual_vol": 0.10210248095903794,
+          "sharpe": 0.5073496180558247,
+          "sortino": 0.7001408532875641,
+          "mdd": -0.14049487311664893,
+          "calmar": 0.3687085056414162,
+          "skewness": -0.21130680728370324,
+          "kurtosis": 2.647168124596586,
+          "cvar_5pct": -0.010438180624122637,
+          "max_monthly_loss": -0.1087165552542928,
           "n_obs": 756
         },
         "btc_5pct": {
           "label": "47.5/47.5/5 + BTC (K66 original)",
-          "annual_return": 0.0765328128888491,
-          "annual_vol": 0.1134359496792071,
-          "sharpe": 0.674678645572953,
-          "sortino": 0.8850234645956292,
-          "mdd": -0.1670642451830226,
-          "calmar": 0.4581040832824863,
-          "skewness": -0.530349448218533,
-          "kurtosis": 4.521588619449201,
-          "cvar_5pct": -0.011495436799641882,
-          "max_monthly_loss": -0.11872511428237542,
+          "annual_return": 0.0765327969880841,
+          "annual_vol": 0.1134359180487144,
+          "sharpe": 0.6746786935264855,
+          "sortino": 0.8850238615836148,
+          "mdd": -0.16706429239916054,
+          "calmar": 0.45810385863441794,
+          "skewness": -0.5303490974319621,
+          "kurtosis": 4.521594851937127,
+          "cvar_5pct": -0.011495441973498671,
+          "max_monthly_loss": -0.11872513842578811,
           "n_obs": 756
         },
         "btc_10pct": {
           "label": "45/45/10 + BTC",
-          "annual_return": 0.10126395432293081,
-          "annual_vol": 0.13313507342723802,
-          "sharpe": 0.760610646887684,
-          "sortino": 0.9731739945112445,
-          "mdd": -0.20441670244084653,
-          "calmar": 0.49538004044573736,
-          "skewness": -0.8021535388224245,
-          "kurtosis": 6.477204578881776,
-          "cvar_5pct": -0.013312843336238835,
-          "max_monthly_loss": -0.13921400685967994,
+          "annual_return": 0.10126393925904818,
+          "annual_vol": 0.13313505206389867,
+          "sharpe": 0.7606106557906792,
+          "sortino": 0.973174200509809,
+          "mdd": -0.20441673182304654,
+          "calmar": 0.49537989554938866,
+          "skewness": -0.8021535365735936,
+          "kurtosis": 6.477209653299465,
+          "cvar_5pct": -0.013312891302279334,
+          "max_monthly_loss": -0.13921400991450364,
           "n_obs": 756
         },
         "btc_20pct": {
           "label": "40/40/20 + BTC (aggressive)",
-          "annual_return": 0.1507262371910942,
-          "annual_vol": 0.1862330406694354,
-          "sharpe": 0.8093420837102372,
-          "sortino": 1.023793577657482,
-          "mdd": -0.2858697993386055,
-          "calmar": 0.5272548465763703,
-          "skewness": -0.990751524510945,
-          "kurtosis": 8.518688771961262,
-          "cvar_5pct": -0.017691914263818612,
-          "max_monthly_loss": -0.18509268965388062,
+          "annual_return": 0.1507262238009763,
+          "annual_vol": 0.18623303239188532,
+          "sharpe": 0.8093420477834836,
+          "sortino": 1.0237936226454711,
+          "mdd": -0.28586981757388613,
+          "calmar": 0.5272547661035236,
+          "skewness": -0.9907516451887971,
+          "kurtosis": 8.518690234863783,
+          "cvar_5pct": -0.01769188363578548,
+          "max_monthly_loss": -0.18509263306183638,
           "n_obs": 756
         },
         "btc_5pct_vix_cond": {
           "label": "47.5/47.5/5 BTC (VIX<20 only)",
-          "annual_return": 0.0523414278672004,
-          "annual_vol": 0.09913892483020294,
-          "sharpe": 0.5279604147094245,
-          "sortino": 0.7345692165415587,
-          "mdd": -0.1498292216549343,
-          "calmar": 0.349340584493897,
-          "skewness": -0.22314986764371958,
-          "kurtosis": 2.331743560454557,
-          "cvar_5pct": -0.01007912552688861,
-          "max_monthly_loss": -0.10319148829802698,
+          "annual_return": 0.05234141196643541,
+          "annual_vol": 0.0991388939320981,
+          "sharpe": 0.527960418867341,
+          "sortino": 0.734569616766391,
+          "mdd": -0.14982926884136724,
+          "calmar": 0.3493403683485383,
+          "skewness": -0.22314886210918192,
+          "kurtosis": 2.331746852792043,
+          "cvar_5pct": -0.01007915321431461,
+          "max_monthly_loss": -0.10319151244143966,
           "n_obs": 756
         },
         "btc_5pct_momentum": {
           "label": "47.5/47.5/5 BTC (60d mom>0)",
-          "annual_return": 0.07533228112079252,
-          "annual_vol": 0.1045044207617035,
-          "sharpe": 0.7208525780222175,
-          "sortino": 0.9970055197935387,
-          "mdd": -0.15118113850131223,
-          "calmar": 0.49829153204940735,
-          "skewness": -0.24983680572588154,
-          "kurtosis": 2.1381953273894823,
-          "cvar_5pct": -0.010543968643541079,
-          "max_monthly_loss": -0.10328070334816546,
+          "annual_return": 0.0753322652200275,
+          "annual_vol": 0.10450437755425426,
+          "sharpe": 0.7208527239054476,
+          "sortino": 0.9970061206398262,
+          "mdd": -0.1511811511676283,
+          "calmar": 0.4982913851244575,
+          "skewness": -0.24983637622714383,
+          "kurtosis": 2.138200317739546,
+          "cvar_5pct": -0.010544017562398944,
+          "max_monthly_loss": -0.10328072749157816,
           "n_obs": 756
         }
       },
       "dm_tests": {
         "btc_5pct": {
-          "t_stat": 1.2328528226573854,
-          "p_value": 0.109007206605918
+          "t_stat": 1.2069018916966319,
+          "p_value": 0.22784792539495324,
+          "n": 756,
+          "mean_return_diff": 9.813945345620662e-05,
+          "loss_differential_acf_1_to_5": [
+            -0.050411293080046195,
+            0.017768074205062684,
+            0.06020798221145643,
+            0.0211672678511072,
+            -0.06754818688908516
+          ],
+          "acf1_95pct_bound": 0.07128451081042418,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_10pct": {
-          "t_stat": 1.2328528226573865,
-          "p_value": 0.10900720660591778
+          "t_stat": 1.2069018916966323,
+          "p_value": 0.22784792539495302,
+          "n": 756,
+          "mean_return_diff": 0.00019627890691241328,
+          "loss_differential_acf_1_to_5": [
+            -0.05041129308004618,
+            0.01776807420506267,
+            0.06020798221145646,
+            0.021167267851107213,
+            -0.06754818688908516
+          ],
+          "acf1_95pct_bound": 0.07128451081042418,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_20pct": {
-          "t_stat": 1.2328528226573865,
-          "p_value": 0.10900720660591778
+          "t_stat": 1.2069018916966319,
+          "p_value": 0.22784792539495324,
+          "n": 756,
+          "mean_return_diff": 0.00039255781382482646,
+          "loss_differential_acf_1_to_5": [
+            -0.0504112930800462,
+            0.017768074205062684,
+            0.060207982211456415,
+            0.021167267851107202,
+            -0.06754818688908516
+          ],
+          "acf1_95pct_bound": 0.07128451081042418,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_5pct_vix_cond": {
-          "t_stat": 0.054653257345441325,
-          "p_value": 0.4782145837076488
+          "t_stat": 0.055913339889721136,
+          "p_value": 0.955425636653517,
+          "n": 756,
+          "mean_return_diff": 2.1418938464896504e-06,
+          "loss_differential_acf_1_to_5": [
+            0.03267577056611916,
+            -0.07036103719648588,
+            0.03028550575534703,
+            0.04668754749347307,
+            -0.08061226664972014
+          ],
+          "acf1_95pct_bound": 0.07128451081042418,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_5pct_momentum": {
-          "t_stat": 1.7070172524704244,
-          "p_value": 0.044115005839151955
+          "t_stat": 1.5193588018527913,
+          "p_value": 0.12909084148876415,
+          "n": 756,
+          "mean_return_diff": 9.337543850360115e-05,
+          "loss_differential_acf_1_to_5": [
+            -0.030775840349608993,
+            -0.01238009587256055,
+            0.1384017004136444,
+            0.008710411749859422,
+            0.001352282060245786
+          ],
+          "acf1_95pct_bound": 0.07128451081042418,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         }
       }
     },
@@ -432,109 +639,179 @@
       "metrics": {
         "base_50_50": {
           "label": "50/50 SPY/GLD (12/VIX)",
-          "annual_return": 0.2176873489987256,
-          "annual_vol": 0.09755594818899153,
-          "sharpe": 2.2314103141820523,
-          "sortino": 3.164606653367449,
-          "mdd": -0.06846259147835343,
-          "calmar": 3.1796539438264504,
-          "skewness": -0.31822840109790157,
-          "kurtosis": 2.3268068881704616,
-          "cvar_5pct": -0.0092678780082571,
-          "max_monthly_loss": -0.05663369648072967,
+          "annual_return": 0.21768736877706493,
+          "annual_vol": 0.09755592470189543,
+          "sharpe": 2.2314110541441616,
+          "sortino": 3.164606268353873,
+          "mdd": -0.06846255865731257,
+          "calmar": 3.1796557570495283,
+          "skewness": -0.3182293480655818,
+          "kurtosis": 2.326808191818094,
+          "cvar_5pct": -0.009267897116888996,
+          "max_monthly_loss": -0.0566336043295559,
           "n_obs": 752
         },
         "btc_5pct": {
           "label": "47.5/47.5/5 + BTC (K66 original)",
-          "annual_return": 0.2404609477641371,
-          "annual_vol": 0.10065817330948565,
-          "sharpe": 2.3888864645378676,
-          "sortino": 3.451027792946869,
-          "mdd": -0.06879737299066079,
-          "calmar": 3.495205373565348,
-          "skewness": -0.21611561934238147,
-          "kurtosis": 2.350342135671275,
-          "cvar_5pct": -0.009032351227275841,
-          "max_monthly_loss": -0.05062700267778333,
+          "annual_return": 0.24046096655355945,
+          "annual_vol": 0.100658135207133,
+          "sharpe": 2.3888875554742,
+          "sortino": 3.451027957784378,
+          "mdd": -0.06879734161086584,
+          "calmar": 3.49520724090858,
+          "skewness": -0.21611688568619705,
+          "kurtosis": 2.3503451834711355,
+          "cvar_5pct": -0.009032289268202414,
+          "max_monthly_loss": -0.05062691513416825,
           "n_obs": 752
         },
         "btc_10pct": {
           "label": "45/45/10 + BTC",
-          "annual_return": 0.26323454652954864,
-          "annual_vol": 0.1089530240257142,
-          "sharpe": 2.4160370846377073,
-          "sortino": 3.6246058643491117,
-          "mdd": -0.06917367302497383,
-          "calmar": 3.805415196537458,
-          "skewness": -0.07135903029419313,
-          "kurtosis": 2.2989719375838518,
-          "cvar_5pct": -0.00981926110071426,
-          "max_monthly_loss": -0.05269389897929706,
+          "annual_return": 0.26323456433005404,
+          "annual_vol": 0.10895297625527389,
+          "sharpe": 2.416038307327214,
+          "sortino": 3.6246068886913783,
+          "mdd": -0.06917364310777857,
+          "calmar": 3.8054170996879786,
+          "skewness": -0.07136015676899451,
+          "kurtosis": 2.2989748602329354,
+          "cvar_5pct": -0.009819225398859774,
+          "max_monthly_loss": -0.052693913237769494,
           "n_obs": 752
         },
         "btc_20pct": {
           "label": "40/40/20 + BTC (aggressive)",
-          "annual_return": 0.30878174406037173,
-          "annual_vol": 0.13681927830253723,
-          "sharpe": 2.256858447810169,
-          "sortino": 3.65164639737427,
-          "mdd": -0.08130063869112414,
-          "calmar": 3.798023595281822,
-          "skewness": 0.24240238564729868,
-          "kurtosis": 2.5633835533355778,
-          "cvar_5pct": -0.011800126929763788,
-          "max_monthly_loss": -0.0654205195508937,
+          "annual_return": 0.3087817598830432,
+          "annual_vol": 0.1368192240717641,
+          "sharpe": 2.25685945800337,
+          "sortino": 3.6516485059787445,
+          "mdd": -0.08130064759906455,
+          "calmar": 3.7980233737596456,
+          "skewness": 0.24240200767057235,
+          "kurtosis": 2.5633851402999626,
+          "cvar_5pct": -0.011800094592003952,
+          "max_monthly_loss": -0.06542053222509144,
           "n_obs": 752
         },
         "btc_5pct_vix_cond": {
           "label": "47.5/47.5/5 BTC (VIX<20 only)",
-          "annual_return": 0.2218503466620615,
-          "annual_vol": 0.09775197790041881,
-          "sharpe": 2.269522841656087,
-          "sortino": 3.270166905882891,
-          "mdd": -0.06879737299066029,
-          "calmar": 3.2246921214881157,
-          "skewness": -0.3182888471871082,
-          "kurtosis": 2.0448223160923145,
-          "cvar_5pct": -0.008955117440045492,
-          "max_monthly_loss": -0.05062700267778333,
+          "annual_return": 0.22185036545148384,
+          "annual_vol": 0.0977519397880487,
+          "sharpe": 2.2695239187325833,
+          "sortino": 3.270166968520314,
+          "mdd": -0.06879734161086598,
+          "calmar": 3.224693865445004,
+          "skewness": -0.3182901969082701,
+          "kurtosis": 2.0448257133578855,
+          "cvar_5pct": -0.008955089444742414,
+          "max_monthly_loss": -0.05062691513416825,
           "n_obs": 752
         },
         "btc_5pct_momentum": {
           "label": "47.5/47.5/5 BTC (60d mom>0)",
-          "annual_return": 0.2250058601968343,
-          "annual_vol": 0.09662982874629754,
-          "sharpe": 2.328534191937659,
-          "sortino": 3.3055653432077747,
-          "mdd": -0.07381215634846319,
-          "calmar": 3.048357768259659,
-          "skewness": -0.3514468789489129,
-          "kurtosis": 2.1471069289034532,
-          "cvar_5pct": -0.00879950778734366,
-          "max_monthly_loss": -0.05318279751915037,
+          "annual_return": 0.22500587898625668,
+          "annual_vol": 0.09662979817640245,
+          "sharpe": 2.328535123042453,
+          "sortino": 3.305565097439404,
+          "mdd": -0.07381212510004384,
+          "calmar": 3.0483593133416376,
+          "skewness": -0.3514480774048676,
+          "kurtosis": 2.1471099360892674,
+          "cvar_5pct": -0.008799485799661822,
+          "max_monthly_loss": -0.05318270997553529,
           "n_obs": 752
         }
       },
       "dm_tests": {
         "btc_5pct": {
-          "t_stat": 1.6596364704783313,
-          "p_value": 0.04870254428967491
+          "t_stat": 1.7362506018872346,
+          "p_value": 0.08292963272249088,
+          "n": 752,
+          "mean_return_diff": 9.03714197479942e-05,
+          "loss_differential_acf_1_to_5": [
+            -0.04840223463548521,
+            0.002518728959762123,
+            0.04973621804663808,
+            -0.021340425781107373,
+            -0.005838231097143661
+          ],
+          "acf1_95pct_bound": 0.07147384583396833,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_10pct": {
-          "t_stat": 1.6596364704783322,
-          "p_value": 0.0487025442896748
+          "t_stat": 1.7362506018872363,
+          "p_value": 0.08292963272249065,
+          "n": 752,
+          "mean_return_diff": 0.00018074283949598855,
+          "loss_differential_acf_1_to_5": [
+            -0.048402234635485215,
+            0.0025187289597620745,
+            0.04973621804663809,
+            -0.021340425781107415,
+            -0.005838231097143651
+          ],
+          "acf1_95pct_bound": 0.07147384583396833,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_20pct": {
-          "t_stat": 1.6596364704783322,
-          "p_value": 0.0487025442896748
+          "t_stat": 1.7362506018872352,
+          "p_value": 0.08292963272249088,
+          "n": 752,
+          "mean_return_diff": 0.0003614856789919769,
+          "loss_differential_acf_1_to_5": [
+            -0.0484022346354852,
+            0.0025187289597620806,
+            0.04973621804663807,
+            -0.02134042578110741,
+            -0.005838231097143657
+          ],
+          "acf1_95pct_bound": 0.07147384583396833,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_5pct_vix_cond": {
-          "t_stat": 0.3523602969158762,
-          "p_value": 0.36233346598419724
+          "t_stat": 0.3818705608139266,
+          "p_value": 0.7026654033743864,
+          "n": 752,
+          "mean_return_diff": 1.651982807309094e-05,
+          "loss_differential_acf_1_to_5": [
+            -0.07395245669948224,
+            0.03891713680370476,
+            0.02239991152403447,
+            -0.033638814767357444,
+            -0.033849247293435226
+          ],
+          "acf1_95pct_bound": 0.07147384583396833,
+          "acf1_significant": true,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         },
         "btc_5pct_momentum": {
-          "t_stat": 0.6663692916247652,
-          "p_value": 0.25268986673064564
+          "t_stat": 0.6768166850775802,
+          "p_value": 0.49873067868496923,
+          "n": 752,
+          "mean_return_diff": 2.904170717933231e-05,
+          "loss_differential_acf_1_to_5": [
+            -0.07338654991311902,
+            0.06399704036640723,
+            0.05927699713707439,
+            -0.0649635064460844,
+            -0.013959959304986145
+          ],
+          "acf1_95pct_bound": 0.07147384583396833,
+          "acf1_significant": true,
+          "passes_harvey": false,
+          "challenger_harvey_better": false,
+          "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
         }
       }
     }
@@ -542,232 +819,302 @@
   "etf_era_metrics": {
     "base_50_50": {
       "label": "50/50 SPY/GLD (12/VIX)",
-      "annual_return": 0.22642233581505855,
-      "annual_vol": 0.12134080790884962,
-      "sharpe": 1.8660031997244115,
-      "sortino": 2.232925035841574,
-      "mdd": -0.11716497836724532,
-      "calmar": 1.9325086640254718,
-      "skewness": -0.9785897802755288,
-      "kurtosis": 5.601704304923359,
-      "cvar_5pct": -0.01122317451163348,
-      "max_monthly_loss": -0.10000584787997244,
+      "annual_return": 0.2264223660226622,
+      "annual_vol": 0.1213407888801561,
+      "sharpe": 1.866003741299979,
+      "sortino": 2.232925045887655,
+      "mdd": -0.1171649801376162,
+      "calmar": 1.93250889264623,
+      "skewness": -0.9785903938656473,
+      "kurtosis": 5.601706438672284,
+      "cvar_5pct": -0.011223163154108809,
+      "max_monthly_loss": -0.10000583557069773,
       "n_obs": 560
     },
     "btc_5pct": {
       "label": "47.5/47.5/5 + BTC (K66 original)",
-      "annual_return": 0.2324381229605688,
-      "annual_vol": 0.12388612037637828,
-      "sharpe": 1.8762240859137311,
-      "sortino": 2.2983016831049943,
-      "mdd": -0.12124506489987201,
-      "calmar": 1.917093476361479,
-      "skewness": -0.8531409753078463,
-      "kurtosis": 4.683635791772648,
-      "cvar_5pct": -0.011680668181452237,
-      "max_monthly_loss": -0.09400766419673018,
+      "annual_return": 0.2324381516577922,
+      "annual_vol": 0.1238860920291905,
+      "sharpe": 1.8762247468668578,
+      "sortino": 2.2983014333485974,
+      "mdd": -0.12124506520753263,
+      "calmar": 1.9170937081845987,
+      "skewness": -0.8531419489246073,
+      "kurtosis": 4.68364074157939,
+      "cvar_5pct": -0.01168070187677555,
+      "max_monthly_loss": -0.09400765250291919,
       "n_obs": 560
     },
     "btc_10pct": {
       "label": "45/45/10 + BTC",
-      "annual_return": 0.238453910106079,
-      "annual_vol": 0.13101048873249788,
-      "sharpe": 1.8201131253922969,
-      "sortino": 2.32724966419835,
-      "mdd": -0.12599214112006402,
-      "calmar": 1.8926093960006976,
-      "skewness": -0.6624122882534169,
-      "kurtosis": 3.648452937501523,
-      "cvar_5pct": -0.012214455844532415,
-      "max_monthly_loss": -0.08800948051348795,
+      "annual_return": 0.23845393729292239,
+      "annual_vol": 0.13101045380461263,
+      "sharpe": 1.8201138181579741,
+      "sortino": 2.3272494867600244,
+      "mdd": -0.125992141651216,
+      "calmar": 1.8926096038039764,
+      "skewness": -0.662413382178728,
+      "kurtosis": 3.6484589213157066,
+      "cvar_5pct": -0.012214356450571834,
+      "max_monthly_loss": -0.08800946943514068,
       "n_obs": 560
     },
     "btc_20pct": {
       "label": "40/40/20 + BTC (aggressive)",
-      "annual_return": 0.25048548439709956,
-      "annual_vol": 0.15611245102233454,
-      "sharpe": 1.6045195803201076,
-      "sortino": 2.274531008749128,
-      "mdd": -0.13582047348757142,
-      "calmar": 1.8442395168061376,
-      "skewness": -0.27026929861852916,
-      "kurtosis": 2.469009643079078,
-      "cvar_5pct": -0.014429509251012093,
-      "max_monthly_loss": -0.07601311314700339,
+      "annual_return": 0.25048550856318247,
+      "annual_vol": 0.15611241074494558,
+      "sharpe": 1.604520149089379,
+      "sortino": 2.274531273827677,
+      "mdd": -0.13582047438260003,
+      "calmar": 1.8442396825796405,
+      "skewness": -0.27027015241833574,
+      "kurtosis": 2.4690146513504048,
+      "cvar_5pct": -0.01442948305836989,
+      "max_monthly_loss": -0.0760131032995836,
       "n_obs": 560
     },
     "btc_5pct_vix_cond": {
       "label": "47.5/47.5/5 BTC (VIX<20 only)",
-      "annual_return": 0.21959461450316203,
-      "annual_vol": 0.12067387557603852,
-      "sharpe": 1.819736156271802,
-      "sortino": 2.222036197837599,
-      "mdd": -0.12698322172224888,
-      "calmar": 1.7293199174256468,
-      "skewness": -0.9619347713571142,
-      "kurtosis": 4.783564286879361,
-      "cvar_5pct": -0.010883501126168598,
-      "max_monthly_loss": -0.0943469170110577,
+      "annual_return": 0.2195946432003855,
+      "annual_vol": 0.12067384718105463,
+      "sharpe": 1.8197368222703112,
+      "sortino": 2.222035979802911,
+      "mdd": -0.12698322197404285,
+      "calmar": 1.729320139988838,
+      "skewness": -0.9619359566907197,
+      "kurtosis": 4.783569188365764,
+      "cvar_5pct": -0.01088347384364432,
+      "max_monthly_loss": -0.09434690531724674,
       "n_obs": 560
     },
     "btc_5pct_momentum": {
       "label": "47.5/47.5/5 BTC (60d mom>0)",
-      "annual_return": 0.22324439323448217,
-      "annual_vol": 0.11814273759874311,
-      "sharpe": 1.8896158813646553,
-      "sortino": 2.27677919631399,
-      "mdd": -0.11144375105286279,
-      "calmar": 2.0032024328451334,
-      "skewness": -0.9673902715669799,
-      "kurtosis": 5.125731880693966,
-      "cvar_5pct": -0.010863240132947104,
-      "max_monthly_loss": -0.09500555548597381,
+      "annual_return": 0.22324442193170563,
+      "annual_vol": 0.11814271741152173,
+      "sharpe": 1.8896164471491492,
+      "sortino": 2.27677907303481,
+      "mdd": -0.11144375280268863,
+      "calmar": 2.0032026588961007,
+      "skewness": -0.9673911218224392,
+      "kurtosis": 5.125735004036114,
+      "cvar_5pct": -0.01086322514631109,
+      "max_monthly_loss": -0.09500554379216285,
       "n_obs": 560
     }
   },
   "etf_era_dm_tests": {
     "btc_5pct": {
-      "t_stat": 0.36736674791575924,
-      "p_value": 0.3567422547984398
+      "t_stat": 0.3862249746587298,
+      "p_value": 0.6994770162333794,
+      "n": 560,
+      "mean_return_diff": 2.387216521877007e-05,
+      "loss_differential_acf_1_to_5": [
+        -0.0786950684933226,
+        -0.001521078715846395,
+        0.0598866057794508,
+        -0.03454444487863794,
+        0.0116518777420018
+      ],
+      "acf1_95pct_bound": 0.08282511696339462,
+      "acf1_significant": false,
+      "passes_harvey": false,
+      "challenger_harvey_better": false,
+      "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
     },
     "btc_10pct": {
-      "t_stat": 0.36736674791575935,
-      "p_value": 0.3567422547984398
+      "t_stat": 0.38622497465873123,
+      "p_value": 0.6994770162333781,
+      "n": 560,
+      "mean_return_diff": 4.7744330437540315e-05,
+      "loss_differential_acf_1_to_5": [
+        -0.0786950684933226,
+        -0.0015210787158464615,
+        0.05988660577945082,
+        -0.03454444487863804,
+        0.011651877742001788
+      ],
+      "acf1_95pct_bound": 0.08282511696339462,
+      "acf1_significant": false,
+      "passes_harvey": false,
+      "challenger_harvey_better": false,
+      "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
     },
     "btc_20pct": {
-      "t_stat": 0.36736674791575963,
-      "p_value": 0.3567422547984397
+      "t_stat": 0.3862249746587307,
+      "p_value": 0.6994770162333785,
+      "n": 560,
+      "mean_return_diff": 9.54886608750805e-05,
+      "loss_differential_acf_1_to_5": [
+        -0.07869506849332258,
+        -0.0015210787158464333,
+        0.059886605779450826,
+        -0.03454444487863802,
+        0.01165187774200178
+      ],
+      "acf1_95pct_bound": 0.08282511696339462,
+      "acf1_significant": false,
+      "passes_harvey": false,
+      "challenger_harvey_better": false,
+      "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
     },
     "btc_5pct_vix_cond": {
-      "t_stat": -0.4776706114785433,
-      "p_value": 0.6834643077125814
+      "t_stat": -0.45752980353882433,
+      "p_value": 0.6474680567472526,
+      "n": 560,
+      "mean_return_diff": -2.709413818363754e-05,
+      "loss_differential_acf_1_to_5": [
+        -0.03522754707245627,
+        0.048870472095179814,
+        0.06356242282920734,
+        -0.006768836821296777,
+        -0.015059560024057216
+      ],
+      "acf1_95pct_bound": 0.08282511696339462,
+      "acf1_significant": false,
+      "passes_harvey": false,
+      "challenger_harvey_better": false,
+      "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
     },
     "btc_5pct_momentum": {
-      "t_stat": -0.2926731725573062,
-      "p_value": 0.6150597099447175
+      "t_stat": -0.2928031736873113,
+      "p_value": 0.7697812564930762,
+      "n": 560,
+      "mean_return_diff": -1.2610889249827536e-05,
+      "loss_differential_acf_1_to_5": [
+        -0.031469275294491235,
+        0.02728137888281418,
+        0.005132659098775269,
+        0.047478940218341335,
+        -0.05515493049001196
+      ],
+      "acf1_95pct_bound": 0.08282511696339462,
+      "acf1_significant": false,
+      "passes_harvey": false,
+      "challenger_harvey_better": false,
+      "method": "volpred.stats.model_evaluation.strategy_dm_test (canonical HAC; display sign positive=challenger better)"
     }
   },
   "tail_analysis": {
     "base_50_50": {
-      "skewness": -0.49606751290509565,
-      "kurtosis": 4.91341200041924,
-      "var_1pct": -0.016196989553266514,
-      "cvar_1pct": -0.021697956736490453,
+      "skewness": -0.4960679339596391,
+      "kurtosis": 4.913410909848368,
+      "var_1pct": -0.01619697124068466,
+      "cvar_1pct": -0.021697962643642356,
       "crash_corr_spy_btc": null,
       "worst_5_days": [
-        -0.0524313852858417,
-        -0.032139381877786824,
-        -0.03059466729099948,
-        -0.029085256224200357,
-        -0.0247728066424253
+        -0.052431382532653246,
+        -0.03213936442044268,
+        -0.03059466712428746,
+        -0.029085291877266155,
+        -0.024772806932788206
       ]
     },
     "btc_5pct": {
-      "skewness": -0.5360144066761848,
-      "kurtosis": 4.8776209538194335,
-      "var_1pct": -0.01767766949097116,
-      "cvar_1pct": -0.023590096853260255,
-      "crash_corr_spy_btc": 0.35060701279549866,
+      "skewness": -0.5360151801721308,
+      "kurtosis": 4.877625366361863,
+      "var_1pct": -0.01767767444890693,
+      "cvar_1pct": -0.023590104548216573,
+      "crash_corr_spy_btc": 0.3506066620454075,
       "worst_5_days": [
-        -0.05006580086543604,
-        -0.04764970320650805,
-        -0.03168503524970614,
-        -0.03148731806622011,
-        -0.02959926060877276
+        -0.05006579824990701,
+        -0.047649703048131625,
+        -0.031685072275929455,
+        -0.031487301481743175,
+        -0.029599294479185266
       ]
     },
     "btc_10pct": {
-      "skewness": -0.5099455537976367,
-      "kurtosis": 5.019558839475398,
-      "var_1pct": -0.01998646331345627,
-      "cvar_1pct": -0.026620889510656155,
-      "crash_corr_spy_btc": 0.35060701279549866,
+      "skewness": -0.5099461950959615,
+      "kurtosis": 5.019564385114,
+      "var_1pct": -0.019986453438360474,
+      "cvar_1pct": -0.02662088638322417,
+      "crash_corr_spy_btc": 0.3506066620454075,
       "worst_5_days": [
-        -0.06470473912201662,
-        -0.04770021644503039,
-        -0.04195462234172606,
-        -0.03314562548197915,
-        -0.030835254254653405
+        -0.06470473897197579,
+        -0.04770021396716078,
+        -0.041954657419200785,
+        -0.03314563346268443,
+        -0.030835238543043673
       ]
     },
     "btc_20pct": {
-      "skewness": -0.36147325223638344,
-      "kurtosis": 5.987657835653714,
-      "var_1pct": -0.027891752978111098,
-      "cvar_1pct": -0.03767570994029193,
-      "crash_corr_spy_btc": 0.35060701279549866,
+      "skewness": -0.36147342317822406,
+      "kurtosis": 5.9876612929463775,
+      "var_1pct": -0.027891746079049793,
+      "cvar_1pct": -0.037675695506244604,
+      "crash_corr_spy_btc": 0.3506066620454075,
       "worst_5_days": [
-        -0.09881481095303374,
-        -0.062493796525765914,
-        -0.05306062261313717,
-        -0.04434241324040042,
-        -0.04296904760421908
+        -0.09881481081966413,
+        -0.062493827705743445,
+        -0.05306062970709742,
+        -0.04434235239635039,
+        -0.04296904540166832
       ]
     },
     "btc_5pct_vix_cond": {
-      "skewness": -0.492882149058461,
-      "kurtosis": 3.9554029263936092,
-      "var_1pct": -0.015877645248868782,
-      "cvar_1pct": -0.021612797846972093,
-      "crash_corr_spy_btc": 0.35060701279549866,
+      "skewness": -0.4928829815073272,
+      "kurtosis": 3.955406263203982,
+      "var_1pct": -0.01587764917092486,
+      "cvar_1pct": -0.021612804731209436,
+      "crash_corr_spy_btc": 0.3506066620454075,
       "worst_5_days": [
-        -0.05006580086543604,
-        -0.03148731806622011,
-        -0.02906493392644951,
-        -0.02763099341299034,
-        -0.02353416631030403
+        -0.05006579824990701,
+        -0.031487301481743175,
+        -0.02906493376807309,
+        -0.027631027283402845,
+        -0.023534166586148795
       ]
     },
     "btc_5pct_momentum": {
-      "skewness": -0.5835114390525092,
-      "kurtosis": 4.999401352900854,
-      "var_1pct": -0.01697484619620716,
-      "cvar_1pct": -0.022358848893086012,
-      "crash_corr_spy_btc": 0.35060701279549866,
+      "skewness": -0.5835121730527637,
+      "kurtosis": 4.999404575119948,
+      "var_1pct": -0.016974824255692626,
+      "cvar_1pct": -0.022358855483049462,
+      "crash_corr_spy_btc": 0.3506066620454075,
       "worst_5_days": [
-        -0.04980981602154961,
-        -0.04764970320650805,
-        -0.03053241278389748,
-        -0.02959926060877276,
-        -0.02353416631030403
+        -0.04980981340602058,
+        -0.047649703048131625,
+        -0.030532396199420542,
+        -0.029599294479185266,
+        -0.023534166586148795
       ]
     }
   },
   "bootstrap": {
     "btc_5pct": {
-      "mean_sharpe_diff": 0.23065580411208034,
-      "ci_95_lower": 0.03519068992548188,
-      "ci_95_upper": 0.42992451025624534,
+      "mean_sharpe_diff": 0.23065604071921988,
+      "ci_95_lower": 0.03519111756312315,
+      "ci_95_upper": 0.4299243508480304,
       "pct_positive": 0.9894,
-      "se": 0.10098811548363748
+      "se": 0.10098814218850412
     },
     "btc_10pct": {
-      "mean_sharpe_diff": 0.310480786576131,
-      "ci_95_lower": -0.04903834519211071,
-      "ci_95_upper": 0.6576130232710954,
+      "mean_sharpe_diff": 0.31048112327087485,
+      "ci_95_lower": -0.04903932548707724,
+      "ci_95_upper": 0.6576124318073023,
       "pct_positive": 0.9568,
-      "se": 0.18085818234282808
+      "se": 0.18085826147311232
     },
     "btc_20pct": {
-      "mean_sharpe_diff": 0.2630161604710847,
-      "ci_95_lower": -0.2685599490406793,
-      "ci_95_upper": 0.8185127848217802,
+      "mean_sharpe_diff": 0.2630164234497843,
+      "ci_95_lower": -0.2685596794150992,
+      "ci_95_upper": 0.8185150936333576,
       "pct_positive": 0.8301,
-      "se": 0.27561146485001414
+      "se": 0.27561156149493743
     },
     "btc_5pct_vix_cond": {
-      "mean_sharpe_diff": 0.18485167883747236,
-      "ci_95_lower": 0.017648167691981312,
-      "ci_95_upper": 0.350555030709077,
+      "mean_sharpe_diff": 0.18485189968110136,
+      "ci_95_lower": 0.01764807842787155,
+      "ci_95_upper": 0.3505555793567564,
       "pct_positive": 0.9843,
-      "se": 0.08544874508872882
+      "se": 0.08544877167458421
     },
     "btc_5pct_momentum": {
-      "mean_sharpe_diff": 0.25522661590162155,
-      "ci_95_lower": 0.08644891778585725,
-      "ci_95_upper": 0.4266734807124851,
+      "mean_sharpe_diff": 0.25522683284126363,
+      "ci_95_lower": 0.08644921482612998,
+      "ci_95_upper": 0.42667371479540483,
       "pct_positive": 0.9983,
-      "se": 0.08676245263115301
+      "se": 0.08676248306065092
     }
   },
   "rolling_windows": {
@@ -775,67 +1122,62 @@
       "win_rate": 0.9696969696969697,
       "total_windows": 33,
       "wins": 32,
-      "mean_sharpe_diff": 0.2992860842652419,
-      "min_sharpe_diff": -0.03162692571409864,
-      "max_sharpe_diff": 0.8733585939079073
+      "mean_sharpe_diff": 0.29928650634291404,
+      "min_sharpe_diff": -0.03162684907688251,
+      "max_sharpe_diff": 0.8733600160480018
     },
     "btc_10pct": {
       "win_rate": 0.9090909090909091,
       "total_windows": 33,
       "wins": 30,
-      "mean_sharpe_diff": 0.3794612644078254,
-      "min_sharpe_diff": -0.1220660607106101,
-      "max_sharpe_diff": 1.290916084471279
+      "mean_sharpe_diff": 0.3794619101705441,
+      "min_sharpe_diff": -0.12206597869694957,
+      "max_sharpe_diff": 1.2909181775682441
     },
     "btc_20pct": {
       "win_rate": 0.696969696969697,
       "total_windows": 33,
       "wins": 23,
-      "mean_sharpe_diff": 0.328336100432021,
-      "min_sharpe_diff": -0.3235957085633141,
-      "max_sharpe_diff": 1.4675688498742145
+      "mean_sharpe_diff": 0.32833665851132476,
+      "min_sharpe_diff": -0.3235956763941674,
+      "max_sharpe_diff": 1.4675704809572876
     }
   },
   "tx_cost_sensitivity": {
     "base_50_50": {
-      "tc_0bps": 1.0907813335867598,
-      "tc_5bps": 1.058474468804764,
-      "tc_10bps": 1.0261676040227683,
-      "tc_20bps": 0.9615538744587768,
-      "tc_50bps": 0.7677126857668022
+      "tc_0bps": 1.0907813944944034,
+      "tc_5bps": 1.0584745270848321,
+      "tc_10bps": 1.026167659675261,
+      "tc_20bps": 0.9615539248561188,
+      "tc_50bps": 0.767712720398692
     },
     "btc_5pct": {
-      "tc_0bps": 1.3203444474906085,
-      "tc_5bps": 1.2841904454471607,
-      "tc_10bps": 1.2480364434037128,
-      "tc_20bps": 1.1757284393168173,
-      "tc_50bps": 0.9588044270561303
+      "tc_0bps": 1.3203447423752215,
+      "tc_5bps": 1.2841907315825856,
+      "tc_10bps": 1.2480367207899494,
+      "tc_20bps": 1.1757286992046772,
+      "tc_50bps": 0.9588046344488605
     },
     "btc_10pct": {
-      "tc_0bps": 1.3981801216217877,
-      "tc_5bps": 1.3618535613258247,
-      "tc_10bps": 1.325527001029862,
-      "tc_20bps": 1.2528738804379362,
-      "tc_50bps": 1.0349145186621589
+      "tc_0bps": 1.3981805110188503,
+      "tc_5bps": 1.3618539400836016,
+      "tc_10bps": 1.325527369148353,
+      "tc_20bps": 1.2528742272778552,
+      "tc_50bps": 1.0349148016663627
     },
     "btc_20pct": {
-      "tc_0bps": 1.3573742045224773,
-      "tc_5bps": 1.3243599414891825,
-      "tc_10bps": 1.2913456784558874,
-      "tc_20bps": 1.2253171523892976,
-      "tc_50bps": 1.0272315741895286
+      "tc_0bps": 1.3573745165544808,
+      "tc_5bps": 1.3243602456247183,
+      "tc_10bps": 1.291345974694956,
+      "tc_20bps": 1.225317432835431,
+      "tc_50bps": 1.027231807256857
     }
   },
   "conclusions": {
-    "harvey_passing": [
-      "btc_5pct",
-      "btc_10pct",
-      "btc_20pct",
-      "btc_5pct_momentum"
-    ],
+    "harvey_passing": [],
     "key_findings": [
-      "Strategies passing Harvey t>3.0: btc_5pct, btc_10pct, btc_20pct, btc_5pct_momentum",
-      "5% BTC (K66 original): DM t=3.074, p=0.0011 (K66 had p=0.014)",
+      "No BTC allocation strategy passes the Harvey (2016) t>3.0 threshold on full sample",
+      "5% BTC (K66 original): DM t=2.862, p=0.0042 (K66 had p=0.014)",
       "Skewness cost: base=-0.496, 5% BTC=-0.536, 10% BTC=-0.510, 20% BTC=-0.361",
       "Post-ETF era (2024+): 5% BTC Sharpe=1.8762 vs base 1.8660",
       "VIX-conditional 5% BTC: Sharpe=1.2755, Momentum 5% BTC: Sharpe=1.3447",

@@ -45,8 +45,11 @@ Author: [Proposed: User, Executed: Claude]
 """
 
 import json
+import math
+import os
 import warnings
 import time
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -55,6 +58,8 @@ from scipy import stats, optimize
 from arch import arch_model
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.stats.diagnostic import het_arch, acorr_ljungbox
+
+from volpred.stats.model_evaluation import dm_test as canonical_dm_test
 
 warnings.filterwarnings('ignore')
 
@@ -70,6 +75,9 @@ print("=" * 70)
 IS_WINDOW = 2000
 REFIT_INTERVAL = 21  # refit every ~1 month
 ALPHA_LEVELS = [0.01, 0.05]
+HARVEY_T = 3.0
+ROOT = Path(__file__).resolve().parent
+RESULTS_PATH = ROOT / "k486_gjr_vix_final_results.json"
 
 OOS_PERIODS = [
     {"name": "2015-2016", "start": "2015-01-01", "end": "2016-12-31"},
@@ -444,23 +452,48 @@ def diebold_mariano_test(loss1, loss2, h=1):
     H0: E[d_t] = 0 where d_t = loss1_t - loss2_t
     Returns DM stat and p-value. Positive stat means loss1 > loss2 (model 2 better).
     """
-    d = loss1 - loss2
-    T = len(d)
-    d_bar = np.mean(d)
-
-    # Newey-West variance with h-1 lags
-    gamma_0 = np.var(d, ddof=0)
-    V = gamma_0
-    for k in range(1, h):
-        gamma_k = np.mean((d[k:] - d_bar) * (d[:-k] - d_bar))
-        V += 2 * (1 - k / h) * gamma_k
-
-    if V <= 0:
-        return 0.0, 1.0
-
-    dm_stat = d_bar / np.sqrt(V / T)
-    dm_pval = 2 * (1 - stats.norm.cdf(abs(dm_stat)))
-    return float(dm_stat), float(dm_pval)
+    first = np.asarray(loss1, dtype=float)
+    second = np.asarray(loss2, dtype=float)
+    valid = np.isfinite(first) & np.isfinite(second)
+    first, second = first[valid], second[valid]
+    d = first - second
+    n = int(len(d))
+    if n < 10:
+        return {
+            "dm_stat": float("nan"),
+            "p_value": float("nan"),
+            "n": n,
+            "mean_diff": float("nan"),
+            "loss_differential_acf_1_to_5": [],
+            "acf1_95pct_bound": float("nan"),
+            "acf1_significant": False,
+            "passes_harvey": False,
+            "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
+        }
+    d_mean = float(np.mean(d))
+    centered = d - d_mean
+    denom = float(np.dot(centered, centered))
+    acf = (
+        [
+            float(np.dot(centered[lag:], centered[:-lag]) / denom)
+            for lag in range(1, min(5, n - 1) + 1)
+        ]
+        if denom > 0
+        else [float("nan")]
+    )
+    acf1_bound = float(1.96 / math.sqrt(n))
+    dm_stat, dm_pval = canonical_dm_test(first, second, h=h)
+    return {
+        "dm_stat": float(dm_stat),
+        "p_value": float(dm_pval),
+        "n": n,
+        "mean_diff": d_mean,
+        "loss_differential_acf_1_to_5": acf,
+        "acf1_95pct_bound": acf1_bound,
+        "acf1_significant": bool(np.isfinite(acf[0]) and abs(acf[0]) > acf1_bound),
+        "passes_harvey": bool(abs(dm_stat) > HARVEY_T),
+        "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
+    }
 
 
 # ============================================================
@@ -622,7 +655,9 @@ for p_idx, period in enumerate(OOS_PERIODS):
     rel_qlike_pct = (mean_qlike_gjrx - mean_qlike_gjr) / abs(mean_qlike_gjr) * 100
 
     # DM test
-    dm_stat, dm_pval = diebold_mariano_test(qlike_gjr_loss, qlike_gjrx_loss)
+    dm_result = diebold_mariano_test(qlike_gjr_loss, qlike_gjrx_loss)
+    dm_stat = dm_result["dm_stat"]
+    dm_pval = dm_result["p_value"]
 
     print(f"\n  QLIKE: GJR={mean_qlike_gjr:.6f}, GJR-X(VIX)={mean_qlike_gjrx:.6f}")
     print(f"  Relative: {rel_qlike_pct:+.2f}% {'BETTER' if rel_qlike_pct < 0 else 'WORSE'}")
@@ -698,6 +733,8 @@ for p_idx, period in enumerate(OOS_PERIODS):
             'DM_pval': round(dm_pval, 4),
             'GJR-X_better': rel_qlike_pct < 0,
             'significant_10pct': dm_pval < 0.10,
+            'passes_harvey': dm_result['passes_harvey'],
+            'dm_diagnostics': dm_result,
         },
         'delta_stats': delta_stats,
         'var_trinity': var_results,
@@ -722,6 +759,7 @@ print("-" * 82)
 
 n_better = 0
 n_sig = 0
+n_harvey = 0
 qlike_rels = []
 dm_stats_all = []
 
@@ -733,13 +771,18 @@ for p_name, res in all_period_results.items():
           f"{q['DM_stat']:>6.2f} {q['DM_pval']:>8.4f} {better:>6}{sig}")
     if q['GJR-X_better']:
         n_better += 1
+    if q['passes_harvey']:
+        n_harvey += 1
     if q['significant_10pct'] and q['GJR-X_better']:
         n_sig += 1
     qlike_rels.append(q['relative_pct'])
     dm_stats_all.append(q['DM_stat'])
 
 avg_rel = np.mean(qlike_rels)
-print(f"\nGJR-X(VIX) better in {n_better}/5 periods, significant in {n_sig}/5")
+print(
+    f"\nGJR-X(VIX) better in {n_better}/5 periods, "
+    f"nominal p<0.10 in {n_sig}/5, Harvey |t|>3 in {n_harvey}/5"
+)
 print(f"Average relative QLIKE: {avg_rel:+.2f}%")
 
 # VaR Trinity summary
@@ -840,6 +883,8 @@ results = {
         "VaR_levels": ALPHA_LEVELS,
         "VaR_tests": ["Kupiec (1995)", "Christoffersen (1998)", "DQ (Engle-Manganelli 2004)"],
         "models": ["GJR-GARCH(1,1)", "GJR-GARCH-X(VIX)"],
+        "dm_method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
+        "harvey_abs_t_threshold": HARVEY_T,
         "variance_equation_GJRX": "h_t = ω + α·ε²_{t-1} + γ·I(ε<0)·ε²_{t-1} + β·h_{t-1} + δ·VIX²_{t-1}/252",
     },
     "diagnostics": diagnostics,
@@ -847,6 +892,7 @@ results = {
     "qlike_summary": {
         "n_periods_GJRX_better": n_better,
         "n_periods_significant_10pct": n_sig,
+        "n_periods_harvey_pass": n_harvey,
         "avg_relative_QLIKE_pct": round(avg_rel, 4),
         "per_period_relative_pct": {p: round(r, 4) for p, r in zip(all_period_results.keys(), qlike_rels)},
     },
@@ -880,11 +926,15 @@ results = {
     ],
 }
 
-output_path = 'experiments/k486_gjr_vix_final_results.json'
-with open(output_path, 'w', encoding='utf-8') as f:
-    json.dump(results, f, indent=2, ensure_ascii=False, default=str)
+tmp_path = RESULTS_PATH.with_name(f".{RESULTS_PATH.name}.tmp-{os.getpid()}")
+tmp_path.write_text(
+    json.dumps(results, indent=2, ensure_ascii=False, default=str),
+    encoding="utf-8",
+)
+json.loads(tmp_path.read_text(encoding="utf-8"))
+os.replace(tmp_path, RESULTS_PATH)
 
-print(f"\nResults saved to {output_path}")
+print(f"\nResults saved to {RESULTS_PATH}")
 print(f"\n{'='*70}")
 print("K486 COMPLETE")
 print(f"{'='*70}")

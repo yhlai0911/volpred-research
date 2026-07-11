@@ -22,12 +22,25 @@ Method:
 
 import numpy as np
 import json
+import math
+import os
 import time
 import warnings
 from datetime import datetime, timezone
+from pathlib import Path
 from scipy import stats
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+from volpred.stats.model_evaluation import dm_test as canonical_dm_test
+
 warnings.filterwarnings('ignore')
+
+ROOT = Path(__file__).resolve().parent
+RESULTS_PATH = ROOT / "k432_bayesian_garch_results.json"
+HARVEY_T = 3.0
 
 # ============================================================
 # 1. DATA
@@ -419,30 +432,56 @@ for name, h in methods.items():
 print("\n[9] Diebold-Mariano Tests (QLIKE loss)...")
 
 def dm_test(loss1, loss2, h=1):
-    """Diebold-Mariano test. H0: equal predictive accuracy."""
-    d = loss1 - loss2
-    n = len(d)
-    d_mean = np.mean(d)
-
-    # Newey-West variance (for h-step ahead)
-    gamma0 = np.var(d, ddof=1)
-    nw_var = gamma0
-    for k in range(1, h):
-        gamma_k = np.cov(d[k:], d[:-k])[0, 1]
-        nw_var += 2 * (1 - k / h) * gamma_k
-
-    se = np.sqrt(nw_var / n)
-    if se < 1e-12:
-        return 0.0, 1.0
-    dm_stat = d_mean / se
-    p_val = 2 * (1 - stats.norm.cdf(abs(dm_stat)))
-    return float(dm_stat), float(p_val)
+    """Canonical HAC DM with loss-differential autocorrelation diagnostics."""
+    first = np.asarray(loss1, dtype=float)
+    second = np.asarray(loss2, dtype=float)
+    valid = np.isfinite(first) & np.isfinite(second)
+    first, second = first[valid], second[valid]
+    d = first - second
+    n = int(len(d))
+    if n < 10:
+        return {
+            "dm_stat": float("nan"),
+            "p_value": float("nan"),
+            "n": n,
+            "mean_diff": float("nan"),
+            "loss_differential_acf_1_to_5": [],
+            "acf1_95pct_bound": float("nan"),
+            "acf1_significant": False,
+            "passes_harvey": False,
+            "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
+        }
+    d_mean = float(np.mean(d))
+    centered = d - d_mean
+    denom = float(np.dot(centered, centered))
+    acf = (
+        [
+            float(np.dot(centered[lag:], centered[:-lag]) / denom)
+            for lag in range(1, min(5, n - 1) + 1)
+        ]
+        if denom > 0
+        else [float("nan")]
+    )
+    acf1_bound = float(1.96 / math.sqrt(n))
+    dm_stat, p_val = canonical_dm_test(first, second, h=h)
+    return {
+        "dm_stat": float(dm_stat),
+        "p_value": float(p_val),
+        "n": n,
+        "mean_diff": d_mean,
+        "loss_differential_acf_1_to_5": acf,
+        "acf1_95pct_bound": acf1_bound,
+        "acf1_significant": bool(np.isfinite(acf[0]) and abs(acf[0]) > acf1_bound),
+        "passes_harvey": bool(abs(dm_stat) > HARVEY_T),
+        "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
+    }
 
 # QLIKE losses for each method
 qlike_losses = {}
 for name, h in methods.items():
     valid = (h > 0) & np.isfinite(h) & np.isfinite(rv_oos) & (rv_oos > 0)
-    losses = rv_oos[valid] / h[valid] - np.log(rv_oos[valid] / h[valid]) - 1
+    losses = np.full(len(rv_oos), np.nan, dtype=float)
+    losses[valid] = rv_oos[valid] / h[valid] - np.log(rv_oos[valid] / h[valid]) - 1
     qlike_losses[name] = losses
 
 dm_results = {}
@@ -454,12 +493,11 @@ comparisons = [
 print(f"\n  {'Comparison':>30} {'DM_stat':>10} {'p_value':>10} {'Better':>10}")
 print(f"  {'-'*62}")
 for method1, method2 in comparisons:
-    dm_stat, dm_p = dm_test(qlike_losses[method1], qlike_losses[method2])
+    dm_result = dm_test(qlike_losses[method1], qlike_losses[method2])
+    dm_stat, dm_p = dm_result['dm_stat'], dm_result['p_value']
     better = method1 if dm_stat < 0 else method2
-    sig = '*' if dm_p < 0.10 else ('**' if dm_p < 0.05 else ('***' if dm_p < 0.01 else ''))
-    dm_results[f'{method1}_vs_{method2}'] = {
-        'dm_stat': dm_stat, 'p_value': dm_p, 'better': better
-    }
+    sig = 'HARVEY' if dm_result['passes_harvey'] else ''
+    dm_results[f'{method1}_vs_{method2}'] = {**dm_result, 'better': better}
     print(f"  {method1+' vs '+method2:>30} {dm_stat:>10.4f} {dm_p:>10.4f} {better:>10} {sig}")
 
 # ============================================================
@@ -563,8 +601,11 @@ best_bayes_method = min([k for k in results_metrics if k != 'MLE'], key=lambda k
 best_bayes_qlike = results_metrics[best_bayes_method]['qlike']
 improvement_pct = (mle_qlike - best_bayes_qlike) / mle_qlike * 100
 
-# Check DM significance
-any_dm_sig = any(v['p_value'] < 0.10 for v in dm_results.values())
+# Keep the legacy nominal count for audit; headline inference uses Harvey |t|>3.
+any_dm_sig_10pct = any(v['p_value'] < 0.10 for v in dm_results.values())
+any_dm_harvey = any(v['passes_harvey'] for v in dm_results.values())
+best_bayes_dm = dm_results[f'{best_bayes_method}_vs_MLE']
+best_bayes_harvey_better = bool(best_bayes_dm['dm_stat'] < -HARVEY_T)
 
 results = {
     "experiment_id": "K432",
@@ -595,7 +636,9 @@ results = {
             "gamma": "HalfNormal(0.1)",
             "beta": "Beta(10,2) * 0.999"
         },
-        "rv_proxy": "squared returns"
+        "rv_proxy": "squared returns",
+        "dm_method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
+        "harvey_abs_t_threshold": HARVEY_T,
     },
     "diagnostics": {
         "descriptive_stats": desc,
@@ -646,15 +689,17 @@ results = {
         "best_method_by_qlike": best_method,
         "best_bayesian_method": best_bayes_method,
         "bayesian_qlike_improvement_pct": round(improvement_pct, 3),
-        "dm_significant_at_10pct": any_dm_sig,
+        "dm_significant_at_10pct": any_dm_sig_10pct,
+        "dm_harvey_significant": any_dm_harvey,
+        "best_bayesian_dm": best_bayes_dm,
         "bayesian_improves_prediction": improvement_pct > 0,
-        "bayesian_significantly_better": any_dm_sig and improvement_pct > 0,
+        "bayesian_significantly_better": best_bayes_harvey_better and improvement_pct > 0,
         "summary": ""
     }
 }
 
 # Write summary
-if improvement_pct > 0 and any_dm_sig:
+if improvement_pct > 0 and best_bayes_harvey_better:
     results["conclusion"]["summary"] = (
         f"Bayesian GJR-GARCH ({best_bayes_method}) significantly outperforms MLE "
         f"with {improvement_pct:.2f}% QLIKE improvement (DM test significant). "
@@ -682,15 +727,60 @@ print("=" * 60)
 print(f"  Best overall: {best_method}")
 print(f"  Best Bayesian: {best_bayes_method}")
 print(f"  QLIKE improvement: {improvement_pct:.3f}%")
-print(f"  DM significant? {any_dm_sig}")
+print(f"  DM Harvey-significant? {any_dm_harvey}")
 print(f"  VaR: MLE {mle_violations} violations ({kupiec_mle_p:.4f}), "
       f"Bayesian {bayes_violations} violations ({kupiec_bayes_p:.4f})")
 print(f"\n  {results['conclusion']['summary']}")
 
 # Save
-output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a87353fb/experiments/k432_bayesian_garch_results.json'
-with open(output_path, 'w') as f:
-    json.dump(results, f, indent=2, default=str)
+tmp_path = RESULTS_PATH.with_name(f".{RESULTS_PATH.name}.tmp-{os.getpid()}")
+tmp_path.write_text(json.dumps(results, indent=2, default=str), encoding="utf-8")
+json.loads(tmp_path.read_text(encoding="utf-8"))
+os.replace(tmp_path, RESULTS_PATH)
 
-print(f"\n  Results saved to {output_path}")
+print(f"\n  Results saved to {RESULTS_PATH}")
+
+# Keep downstream article figures tied to the same canonical result object.
+# The old static DM image still showed the pre-HAC statistics and 1.96/2.58
+# thresholds, so every re-run must regenerate both plots from `results`.
+method_order = ["MLE", "Bayes_Mean", "Bayes_Median", "Bayes_BMA"]
+method_labels = ["MLE", "Bayes Mean", "Bayes Median", "Bayes BMA"]
+qlike_values = [results_metrics[name]["qlike"] for name in method_order]
+
+fig, ax = plt.subplots(figsize=(9, 5.5))
+bars = ax.bar(method_labels, qlike_values, color=["#2563EB", "#94A3B8", "#64748B", "#475569"])
+ax.set_ylabel("OOS QLIKE (lower is better)")
+ax.set_title("K432: MLE vs Bayesian GJR-GARCH")
+ax.set_ylim(min(qlike_values) - 0.0005, max(qlike_values) + 0.0007)
+for bar, value in zip(bars, qlike_values):
+    ax.text(bar.get_x() + bar.get_width() / 2, value + 0.00008, f"{value:.4f}", ha="center", fontsize=10)
+fig.tight_layout()
+qlike_path = ROOT / "k432_qlike_comparison.png"
+qlike_tmp = qlike_path.with_name(f".{qlike_path.name}.tmp-{os.getpid()}")
+fig.savefig(qlike_tmp, format="png", dpi=180, facecolor="white")
+plt.close(fig)
+os.replace(qlike_tmp, qlike_path)
+
+dm_order = ["Bayes_Mean_vs_MLE", "Bayes_Median_vs_MLE", "Bayes_BMA_vs_MLE"]
+dm_labels = ["Bayes Mean", "Bayes Median", "Bayes BMA"]
+dm_values = [dm_results[name]["dm_stat"] for name in dm_order]
+fig, ax = plt.subplots(figsize=(9, 5.5))
+colors = ["#DC2626" if abs(value) > HARVEY_T else "#F59E0B" for value in dm_values]
+bars = ax.bar(dm_labels, dm_values, color=colors)
+ax.axhline(HARVEY_T, color="#111827", linestyle="--", linewidth=1.5, label="Harvey |t| > 3")
+ax.axhline(-HARVEY_T, color="#111827", linestyle="--", linewidth=1.5)
+ax.set_ylabel("Canonical HAC DM statistic\n(positive = MLE lower loss)")
+ax.set_title("K432: Canonical Newey-West HAC comparison")
+ax.set_ylim(-3.6, 3.8)
+ax.legend(loc="lower right")
+for bar, value in zip(bars, dm_values):
+    ax.text(bar.get_x() + bar.get_width() / 2, value + 0.08, f"{value:.3f}", ha="center", fontsize=11)
+fig.tight_layout()
+dm_path = ROOT / "k432_dm_tests.png"
+dm_tmp = dm_path.with_name(f".{dm_path.name}.tmp-{os.getpid()}")
+fig.savefig(dm_tmp, format="png", dpi=180, facecolor="white")
+plt.close(fig)
+os.replace(dm_tmp, dm_path)
+
+print(f"  Figures saved to {qlike_path.name}, {dm_path.name}")
 print("\nDone.")

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
 
 import numpy as np
@@ -21,6 +22,8 @@ import pandas as pd
 from scipy import stats
 import statsmodels.api as sm
 from statsmodels.regression.quantile_regression import QuantReg
+
+from volpred.stats.model_evaluation import dm_test as canonical_dm_test
 
 ASSETS = ["GLD", "USO", "UNG"]
 DATA_START = "2012-01-03"
@@ -30,6 +33,7 @@ TAILS = ["q05", "q95"]
 SEED = 42
 N_BOOT = 1000
 P_SIG = 0.10
+HARVEY_T = 3.0
 
 ROOT = Path(__file__).parent
 RESULTS_PATH = ROOT / "k1422_results.json"
@@ -119,27 +123,39 @@ def kupiec_uc(violations: int, n: int, p_nominal: float) -> dict:
     }
 
 
-def dm_test_hln(loss_a: np.ndarray, loss_b: np.ndarray, h: int = 1) -> dict:
-    d = loss_a - loss_b
-    n = len(d)
-    if n < 5:
+def dm_test_canonical(loss_a: np.ndarray, loss_b: np.ndarray, h: int = 1) -> dict:
+    """Canonical HAC DM plus loss-differential autocorrelation diagnostics."""
+    first = np.asarray(loss_a, dtype=float)
+    second = np.asarray(loss_b, dtype=float)
+    valid = np.isfinite(first) & np.isfinite(second)
+    first, second = first[valid], second[valid]
+    d = first - second
+    n = int(len(d))
+    if n < 10:
         return {"dm_stat": float("nan"), "p_value": float("nan"), "n": int(n)}
     d_mean = float(np.mean(d))
-    gamma0 = float(np.var(d, ddof=0))
-    var_d = gamma0
-    for lag in range(1, h):
-        gl = float(np.mean((d[lag:] - d_mean) * (d[:-lag] - d_mean)))
-        var_d += 2.0 * gl
-    var_d = max(var_d, 1e-12)
-    dm = d_mean / math.sqrt(var_d / n)
-    k = math.sqrt((n + 1 - 2 * h + h * (h - 1) / n) / n)
-    dm_hln = dm * k
-    p_value = 2.0 * (1.0 - stats.t.cdf(abs(dm_hln), df=n - 1))
+    centered = d - d_mean
+    denom = float(np.dot(centered, centered))
+    acf = (
+        [
+            float(np.dot(centered[lag:], centered[:-lag]) / denom)
+            for lag in range(1, min(5, n - 1) + 1)
+        ]
+        if denom > 0
+        else [float("nan")]
+    )
+    acf1_bound = float(1.96 / math.sqrt(n))
+    dm_stat, p_value = canonical_dm_test(first, second, h=h)
     return {
-        "dm_stat": float(dm_hln),
+        "dm_stat": float(dm_stat),
         "p_value": float(p_value),
-        "n": int(n),
+        "n": n,
         "mean_diff": d_mean,
+        "loss_differential_acf_1_to_5": acf,
+        "acf1_95pct_bound": acf1_bound,
+        "acf1_significant": bool(np.isfinite(acf[0]) and abs(acf[0]) > acf1_bound),
+        "passes_harvey": bool(abs(dm_stat) > HARVEY_T),
+        "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
     }
 
 
@@ -295,7 +311,7 @@ def run_asset(asset: str) -> dict:
             qr_pred = qr_preds[tau_key]
             base_loss_series = pinball_series(y_oos, baseline_pred, tau)
             qr_loss_series = pinball_series(y_oos, qr_pred, tau)
-            dm_by_tau[tau_key] = dm_test_hln(base_loss_series, qr_loss_series, h=1)
+            dm_by_tau[tau_key] = dm_test_canonical(base_loss_series, qr_loss_series, h=1)
             loss_diffs[tau_key] = (base_loss_series - qr_loss_series).tolist()
             baseline_summary[tau_key] = {
                 "pinball_loss_oos": pinball_loss(y_oos, baseline_pred, tau),
@@ -344,8 +360,8 @@ def aggregate_results(per_asset: list[dict]) -> dict:
                 1
                 for r in per_asset
                 if (
-                    r["fair_baseline_comparisons"][baseline_name]["dm_qr_vs_baseline"][tail]["p_value"] < P_SIG
-                    and r["fair_baseline_comparisons"][baseline_name]["dm_qr_vs_baseline"][tail]["dm_stat"] > 0
+                    r["fair_baseline_comparisons"][baseline_name]["dm_qr_vs_baseline"][tail]["dm_stat"]
+                    > HARVEY_T
                 )
             )
             tail_counts[tail] = int(sig_pos_assets)
@@ -440,10 +456,15 @@ def main() -> dict:
                 "HAR location-scale Gaussian via abs-residual HAR",
             ],
             "bootstrap_method": "Centered-null stationary bootstrap, L=ceil(n^{1/3})",
+            "dm_method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
+            "harvey_abs_t_threshold": HARVEY_T,
             "refit": "none (single fixed-origin fit, IS pre-2021)",
         },
     }
-    RESULTS_PATH.write_text(json.dumps(out, indent=2, ensure_ascii=False))
+    tmp_path = RESULTS_PATH.with_name(f".{RESULTS_PATH.name}.tmp-{os.getpid()}")
+    tmp_path.write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
+    json.loads(tmp_path.read_text(encoding="utf-8"))
+    os.replace(tmp_path, RESULTS_PATH)
     print(
         json.dumps(
             {

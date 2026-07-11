@@ -5,8 +5,8 @@
   "proposed_by": "User (publication-critical validation)",
   "asset": "SPY",
   "data_source": "yfinance (SPY, ^VIX) — empirical data",
-  "data_period": "2005-01-04 to 2026-03-25",
-  "total_observations": 5339,
+  "data_period": "2005-01-04 to 2026-07-10",
+  "total_observations": 5412,
   "configuration": {
     "IS_window": 2000,
     "refit_interval": 21,
@@ -27,23 +27,25 @@
       "GJR-GARCH(1,1)",
       "GJR-GARCH-X(VIX)"
     ],
+    "dm_method": "volpred.stats.model_evaluation.dm_test (canonical HAC)",
+    "harvey_abs_t_threshold": 3.0,
     "variance_equation_GJRX": "h_t = ω + α·ε²_{t-1} + γ·I(ε<0)·ε²_{t-1} + β·h_{t-1} + δ·VIX²_{t-1}/252"
   },
   "diagnostics": {
-    "n_obs": 5339,
-    "date_range": "2005-01-04 to 2026-03-25",
-    "return_mean_pct": 0.03911284262697104,
-    "return_std_pct": 1.197361882170272,
-    "return_skew": -0.3037207763538905,
-    "return_kurt": 14.728105625993514,
-    "vix_mean": 19.15372729207675,
-    "vix_std": 8.613578221476546,
-    "vix_daily_var_mean": 1.7501789777678638,
-    "adf_stat": -16.398081534448185,
-    "adf_p": 2.654463930565524e-29,
+    "n_obs": 5412,
+    "date_range": "2005-01-04 to 2026-07-10",
+    "return_mean_pct": 0.04120563691448135,
+    "return_std_pct": 1.1942947750949569,
+    "return_skew": -0.3048310369901936,
+    "return_kurt": 14.692238290349906,
+    "vix_mean": 19.147620106307297,
+    "vix_std": 8.563622763703451,
+    "vix_daily_var_mean": 1.7458469841814377,
+    "adf_stat": -16.517869941711556,
+    "adf_p": 2.0772451420736713e-29,
     "is_stationary": true,
-    "arch_lm_stat": 1462.6808538833893,
-    "arch_lm_p": 2.8942353770617106e-308,
+    "arch_lm_stat": 1480.8936130477239,
+    "arch_lm_p": 0.0,
     "has_arch_effects": true,
     "ljung_box_sq_p10": 0.0
   },
@@ -53,19 +55,37 @@
       "n_valid": 504,
       "n_refits": 24,
       "qlike": {
-        "GJR": 0.5884680638150148,
-        "GJR-X(VIX)": 0.519475854459786,
-        "relative_pct": -11.724,
-        "DM_stat": 2.9253,
-        "DM_pval": 0.0034,
+        "GJR": 0.5884655447372568,
+        "GJR-X(VIX)": 0.5194751452644568,
+        "relative_pct": -11.7238,
+        "DM_stat": 2.7807,
+        "DM_pval": 0.0056,
         "GJR-X_better": true,
-        "significant_10pct": true
+        "significant_10pct": true,
+        "passes_harvey": false,
+        "dm_diagnostics": {
+          "dm_stat": 2.780732802311233,
+          "p_value": 0.005627018662624161,
+          "n": 504,
+          "mean_diff": 0.06899039947280004,
+          "loss_differential_acf_1_to_5": [
+            0.07125305790108556,
+            -0.008748122111709002,
+            -0.011861931047153823,
+            -0.004528608166080472,
+            -0.00455287256596334
+          ],
+          "acf1_95pct_bound": 0.0873053390247253,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)"
+        }
       },
       "delta_stats": {
-        "mean": 0.0730007219406036,
-        "std": 0.008740487002371091,
-        "min": 0.06270972944325738,
-        "max": 0.09344315314633601,
+        "mean": 0.07300261739391987,
+        "std": 0.008740636206987167,
+        "min": 0.06271084492132714,
+        "max": 0.09344700172303876,
         "n_refits": 24
       },
       "var_trinity": {
@@ -85,7 +105,7 @@
             "pass": true
           },
           "dq": {
-            "stat": 2.1106,
+            "stat": 2.1105,
             "p_value": 0.9093,
             "pass": true
           },
@@ -168,19 +188,37 @@
       "n_valid": 502,
       "n_refits": 24,
       "qlike": {
-        "GJR": 0.1043828794888418,
-        "GJR-X(VIX)": 0.05059173942172433,
-        "relative_pct": -51.5325,
-        "DM_stat": 2.7166,
-        "DM_pval": 0.0066,
+        "GJR": 0.10436921576312727,
+        "GJR-X(VIX)": 0.05057869597100469,
+        "relative_pct": -51.5387,
+        "DM_stat": 2.5322,
+        "DM_pval": 0.0116,
         "GJR-X_better": true,
-        "significant_10pct": true
+        "significant_10pct": true,
+        "passes_harvey": false,
+        "dm_diagnostics": {
+          "dm_stat": 2.532222025392548,
+          "p_value": 0.01163856985576106,
+          "n": 502,
+          "mean_diff": 0.053790519792122495,
+          "loss_differential_acf_1_to_5": [
+            0.025314355505411206,
+            0.05815999526829669,
+            -0.01140966168675301,
+            0.048725961842028945,
+            0.006117646881633506
+          ],
+          "acf1_95pct_bound": 0.08747908116478055,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)"
+        }
       },
       "delta_stats": {
-        "mean": 0.09792509602445416,
-        "std": 0.004936795842097842,
-        "min": 0.08744206124710772,
-        "max": 0.10763275372547529,
+        "mean": 0.09792507630033526,
+        "std": 0.004936072148961861,
+        "min": 0.08744247726904172,
+        "max": 0.10763029637202831,
         "n_refits": 24
       },
       "var_trinity": {
@@ -269,7 +307,7 @@
             "pass": true
           },
           "dq": {
-            "stat": 2.4394,
+            "stat": 2.4395,
             "p_value": 0.8752,
             "pass": true
           },
@@ -283,19 +321,37 @@
       "n_valid": 505,
       "n_refits": 25,
       "qlike": {
-        "GJR": 1.1329321543906932,
-        "GJR-X(VIX)": 0.9695167358323015,
-        "relative_pct": -14.4241,
-        "DM_stat": 1.6285,
-        "DM_pval": 0.1034,
+        "GJR": 1.1329332109216042,
+        "GJR-X(VIX)": 0.9695154832040906,
+        "relative_pct": -14.4243,
+        "DM_stat": 1.4091,
+        "DM_pval": 0.1594,
         "GJR-X_better": true,
-        "significant_10pct": false
+        "significant_10pct": false,
+        "passes_harvey": false,
+        "dm_diagnostics": {
+          "dm_stat": 1.409144585072379,
+          "p_value": 0.1594090965143269,
+          "n": 505,
+          "mean_diff": 0.1634177277175136,
+          "loss_differential_acf_1_to_5": [
+            0.0570204371461809,
+            0.026341733587242427,
+            0.009272062581208019,
+            0.15361653450991244,
+            -0.0280029587471132
+          ],
+          "acf1_95pct_bound": 0.08721885526003702,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)"
+        }
       },
       "delta_stats": {
-        "mean": 0.10791653730664029,
-        "std": 0.006507764719039122,
-        "min": 0.09720241329576722,
-        "max": 0.13197326109003288,
+        "mean": 0.10791517864116823,
+        "std": 0.006508077991386165,
+        "min": 0.097200185995544,
+        "max": 0.13197332395526712,
         "n_refits": 25
       },
       "var_trinity": {
@@ -398,19 +454,37 @@
       "n_valid": 503,
       "n_refits": 24,
       "qlike": {
-        "GJR": 1.2337919245995976,
-        "GJR-X(VIX)": 1.1857694167282251,
-        "relative_pct": -3.8923,
-        "DM_stat": 1.3789,
-        "DM_pval": 0.1679,
+        "GJR": 1.23379294549486,
+        "GJR-X(VIX)": 1.1857691921063092,
+        "relative_pct": -3.8924,
+        "DM_stat": 1.5796,
+        "DM_pval": 0.1148,
         "GJR-X_better": true,
-        "significant_10pct": false
+        "significant_10pct": false,
+        "passes_harvey": false,
+        "dm_diagnostics": {
+          "dm_stat": 1.579641799654629,
+          "p_value": 0.11481878377852706,
+          "n": 503,
+          "mean_diff": 0.04802375338855084,
+          "loss_differential_acf_1_to_5": [
+            -0.046695517111158054,
+            -0.027473836168566024,
+            -0.02172330336140315,
+            -0.05335381312355623,
+            0.011306817098628647
+          ],
+          "acf1_95pct_bound": 0.08739208056527112,
+          "acf1_significant": false,
+          "passes_harvey": false,
+          "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)"
+        }
       },
       "delta_stats": {
-        "mean": 0.09494127967969757,
-        "std": 0.007762391716414235,
-        "min": 0.08064223816346963,
-        "max": 0.10651977226738897,
+        "mean": 0.09493891176033531,
+        "std": 0.007762559688600846,
+        "min": 0.08063908764519874,
+        "max": 0.10651733727344462,
         "n_refits": 24
       },
       "var_trinity": {
@@ -513,19 +587,37 @@
       "n_valid": 502,
       "n_refits": 24,
       "qlike": {
-        "GJR": 0.5556400492939174,
-        "GJR-X(VIX)": 0.5246339535861958,
-        "relative_pct": -5.5802,
-        "DM_stat": 2.0174,
-        "DM_pval": 0.0437,
+        "GJR": 0.5556394668924953,
+        "GJR-X(VIX)": 0.5246341103202228,
+        "relative_pct": -5.5801,
+        "DM_stat": 2.4633,
+        "DM_pval": 0.0141,
         "GJR-X_better": true,
-        "significant_10pct": true
+        "significant_10pct": true,
+        "passes_harvey": false,
+        "dm_diagnostics": {
+          "dm_stat": 2.4633276955917887,
+          "p_value": 0.014100476834560283,
+          "n": 502,
+          "mean_diff": 0.03100535657227244,
+          "loss_differential_acf_1_to_5": [
+            -0.0920350502160249,
+            -0.04296217206488286,
+            -0.05708182937550832,
+            -0.01251886183969142,
+            -0.04973418687222071
+          ],
+          "acf1_95pct_bound": 0.08747908116478055,
+          "acf1_significant": true,
+          "passes_harvey": false,
+          "method": "volpred.stats.model_evaluation.dm_test (canonical HAC)"
+        }
       },
       "delta_stats": {
-        "mean": 0.08444280232247392,
-        "std": 0.002536867794795441,
-        "min": 0.07757960836209125,
-        "max": 0.08897963483056688,
+        "mean": 0.08444054480717882,
+        "std": 0.0025367063448275486,
+        "min": 0.07757743960024244,
+        "max": 0.08897744328653216,
         "n_refits": 24
       },
       "var_trinity": {
@@ -591,7 +683,7 @@
             "pass": true
           },
           "dq": {
-            "stat": 8.6248,
+            "stat": 8.6249,
             "p_value": 0.1958,
             "pass": true
           },
@@ -614,7 +706,7 @@
             "pass": true
           },
           "dq": {
-            "stat": 4.2077,
+            "stat": 4.2078,
             "p_value": 0.6486,
             "pass": true
           },
@@ -627,13 +719,14 @@
   "qlike_summary": {
     "n_periods_GJRX_better": 5,
     "n_periods_significant_10pct": 3,
-    "avg_relative_QLIKE_pct": -17.4306,
+    "n_periods_harvey_pass": 0,
+    "avg_relative_QLIKE_pct": -17.4319,
     "per_period_relative_pct": {
-      "2015-2016": -11.724,
-      "2017-2018 (Volmageddon)": -51.5325,
-      "2019-2020 (COVID)": -14.4241,
-      "2021-2022 (rate hikes)": -3.8923,
-      "2023-2024": -5.5802
+      "2015-2016": -11.7238,
+      "2017-2018 (Volmageddon)": -51.5387,
+      "2019-2020 (COVID)": -14.4243,
+      "2021-2022 (rate hikes)": -3.8924,
+      "2023-2024": -5.5801
     }
   },
   "var_trinity_summary": {
@@ -666,7 +759,7 @@
               "pass": true
             },
             "dq": {
-              "stat": 2.1106,
+              "stat": 2.1105,
               "p_value": 0.9093,
               "pass": true
             },
@@ -994,7 +1087,7 @@
               "pass": true
             },
             "dq": {
-              "stat": 8.6248,
+              "stat": 8.6249,
               "p_value": 0.1958,
               "pass": true
             },
@@ -1042,7 +1135,7 @@
               "pass": true
             },
             "dq": {
-              "stat": 2.4394,
+              "stat": 2.4395,
               "p_value": 0.8752,
               "pass": true
             },
@@ -1111,7 +1204,7 @@
               "pass": true
             },
             "dq": {
-              "stat": 4.2077,
+              "stat": 4.2078,
               "p_value": 0.6486,
               "pass": true
             },
@@ -1125,38 +1218,38 @@
   "delta_stability": {
     "per_period": {
       "2015-2016": {
-        "mean": 0.0730007219406036,
-        "std": 0.008740487002371091,
-        "min": 0.06270972944325738,
-        "max": 0.09344315314633601,
+        "mean": 0.07300261739391987,
+        "std": 0.008740636206987167,
+        "min": 0.06271084492132714,
+        "max": 0.09344700172303876,
         "n_refits": 24
       },
       "2017-2018 (Volmageddon)": {
-        "mean": 0.09792509602445416,
-        "std": 0.004936795842097842,
-        "min": 0.08744206124710772,
-        "max": 0.10763275372547529,
+        "mean": 0.09792507630033526,
+        "std": 0.004936072148961861,
+        "min": 0.08744247726904172,
+        "max": 0.10763029637202831,
         "n_refits": 24
       },
       "2019-2020 (COVID)": {
-        "mean": 0.10791653730664029,
-        "std": 0.006507764719039122,
-        "min": 0.09720241329576722,
-        "max": 0.13197326109003288,
+        "mean": 0.10791517864116823,
+        "std": 0.006508077991386165,
+        "min": 0.097200185995544,
+        "max": 0.13197332395526712,
         "n_refits": 25
       },
       "2021-2022 (rate hikes)": {
-        "mean": 0.09494127967969757,
-        "std": 0.007762391716414235,
-        "min": 0.08064223816346963,
-        "max": 0.10651977226738897,
+        "mean": 0.09493891176033531,
+        "std": 0.007762559688600846,
+        "min": 0.08063908764519874,
+        "max": 0.10651733727344462,
         "n_refits": 24
       },
       "2023-2024": {
-        "mean": 0.08444280232247392,
-        "std": 0.002536867794795441,
-        "min": 0.07757960836209125,
-        "max": 0.08897963483056688,
+        "mean": 0.08444054480717882,
+        "std": 0.0025367063448275486,
+        "min": 0.07757743960024244,
+        "max": 0.08897744328653216,
         "n_refits": 24
       }
     },
@@ -1165,7 +1258,7 @@
     "cv": 0.1304
   },
   "core_question_answer": "Does GJR-GARCH-X(VIX) beat QLIKE AND pass VaR Trinity? QLIKE: GJR-X better in 5/5 periods (avg -17.43%). VaR: see var_trinity_summary for pass counts.",
-  "computation_time_seconds": 78.6,
+  "computation_time_seconds": 95.4,
   "references": [
     "Kupiec (1995) Techniques for Verifying the Accuracy of Risk Measurement Models",
     "Christoffersen (1998) Evaluating Interval Forecasts, IER 39(4):841-862",

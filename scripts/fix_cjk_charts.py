@@ -4,6 +4,7 @@ Re-generate ALL Supabase chart images with CJK text using the fixed font (PingFa
 
 Each chart is uploaded with x-upsert:true to overwrite the broken version at the same URL.
 """
+import json
 import os
 import sys
 import requests
@@ -172,6 +173,112 @@ def chart_btc_correlation_regime(filename):
     ax.set_title("BTC-SPY 年度相關係數：三段樣本比較",
                  fontsize=13, fontweight="bold", pad=15)
     ax.set_ylim(-0.2, 0.7)
+    fig.tight_layout()
+    return save_fig(fig, filename)
+
+
+# ════════════════════════════════════════════════════════
+# Chart 5: k486_var_trinity.png
+# Article: mile_85129dcd — K486 VaR Trinity cross-OOS pass counts
+# ════════════════════════════════════════════════════════
+def chart_k486_var_trinity(filename):
+    results_path = (
+        Path(__file__).resolve().parents[1]
+        / "experiments"
+        / "k486"
+        / "k486_gjr_vix_final_results.json"
+    )
+    results = json.loads(results_path.read_text(encoding="utf-8"))
+    pass_counts = results["var_trinity_summary"]["pass_counts"]
+
+    def parse_count(value):
+        numerator_text, denominator_text = value.split("/", 1)
+        numerator = int(numerator_text)
+        denominator = int(denominator_text)
+        if denominator <= 0 or not 0 <= numerator <= denominator:
+            raise ValueError(f"invalid VaR pass count: {value!r}")
+        return numerator, denominator
+
+    level_keys = sorted(
+        pass_counts,
+        key=lambda key: int(key.removesuffix("pct")),
+    )
+    levels = [f"{int(key.removesuffix('pct'))}% VaR" for key in level_keys]
+    gjr_labels = [pass_counts[key]["GJR"] for key in level_keys]
+    gjrx_labels = [pass_counts[key]["GJR-X(VIX)"] for key in level_keys]
+    gjr_parsed = [parse_count(value) for value in gjr_labels]
+    gjrx_parsed = [parse_count(value) for value in gjrx_labels]
+    gjr = [numerator for numerator, _ in gjr_parsed]
+    gjrx = [numerator for numerator, _ in gjrx_parsed]
+    denominators = [denominator for _, denominator in gjr_parsed + gjrx_parsed]
+    if len(set(denominators)) != 1:
+        raise ValueError(f"inconsistent VaR pass-count denominators: {denominators}")
+    n_periods = denominators[0]
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    x = np.arange(len(levels))
+    width = 0.34
+    bars_gjr = ax.bar(
+        x - width / 2,
+        gjr,
+        width,
+        label="GJR-GARCH",
+        color="#607D8B",
+        edgecolor="white",
+    )
+    bars_gjrx = ax.bar(
+        x + width / 2,
+        gjrx,
+        width,
+        label="GJR-X(VIX)",
+        color="#2196F3",
+        edgecolor="white",
+    )
+    for bars, values, labels in (
+        (bars_gjr, gjr, gjr_labels),
+        (bars_gjrx, gjrx, gjrx_labels),
+    ):
+        for bar, value, label in zip(bars, values, labels):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                value + 0.08,
+                label,
+                ha="center",
+                va="bottom",
+                fontsize=12,
+                fontweight="bold",
+            )
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(levels, fontsize=11)
+    ax.set_ylabel(f"通過 Trinity Test 的 OOS 期數（共 {n_periods} 期）", fontsize=12)
+    ax.set_ylim(0, n_periods + 0.8)
+    primary_comparison = (
+        f"兩模型同為 {gjr_labels[0]}"
+        if gjr_labels[0] == gjrx_labels[0]
+        else f"GJR {gjr_labels[0]}，GJR-X(VIX) {gjrx_labels[0]}"
+    )
+    ax.set_title(
+        f"K486 VaR 回驗：{levels[0]} 水準{primary_comparison}",
+        fontsize=14,
+        fontweight="bold",
+    )
+    primary_note = (
+        f"{levels[0]} 保護兩模型同為 {gjr_labels[0]}，"
+        "不是 GJR-X(VIX) 的增量改善"
+        if gjr_labels[0] == gjrx_labels[0]
+        else f"{levels[0]} 結果來自 canonical results JSON"
+    )
+    ax.text(
+        0.5,
+        n_periods + 0.45,
+        primary_note,
+        ha="center",
+        va="center",
+        fontsize=11,
+        color="#455A64",
+    )
+    ax.legend(fontsize=11, loc="upper right")
     fig.tight_layout()
     return save_fig(fig, filename)
 
@@ -996,6 +1103,7 @@ def main():
         ("survival_funnel.png", chart_survival_funnel),
         ("btc_correlation_shift_fix_6592f2.png", chart_btc_correlation_shift),
         ("btc_correlation_regime.png", chart_btc_correlation_regime),
+        ("k486_var_trinity.png", chart_k486_var_trinity),
         ("k551_cross_oos_sharpe_comparison_1e3413.png", chart_k551_cross_oos),
         ("dca_vix_fear_terminal_wealth_c06302.png", chart_dca_terminal_wealth),
         ("vix_sufficiency_k537_k539.png", chart_vix_sufficiency),
