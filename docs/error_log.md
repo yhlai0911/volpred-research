@@ -2,6 +2,41 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-11 被判死刑的 codex 行程沒有死 —— 它 11 分鐘後把檔案寫了出來
+
+**問題**（老闆 email-12062「這是卡什麼？立刻處理」）：PHASE-Z 連續 3 班告警
+`storage/lazypack_jobs/mile_531e4c87/panels/mile_531e4c87_article.md` 是無主孤兒檔。表面是 git 衛生問題，
+實際是 K1683 那篇文章（對沖基金國債期貨擁擠度）的懶人包 render **失敗後沒有任何人接手**。
+
+**現象**：`gen_lazypack_codex._run_codex` 用 `subprocess.run(timeout=)`，它**只殺我們直接 spawn 的那個
+行程**。codex 自己的工作行程活了下來：job 在 17:36（360s）被判 timeout=failed，那個「已被殺掉」的行程
+在 **17:47** 把 `render_lazypack.py` 寫進工作區 —— 比死亡宣告晚 11 分鐘。後果三層：
+
+1. 一個沒有任何 fire 認領的檔案躺在工作區 → PHASE-Z 連叫 3 班（這是老闆看到的表象）。
+2. 文章因缺 `## 懶人包圖組` section 被 release gate 擋住，**靜靜卡在 draft**，而 compute job 失敗
+   **完全沒有告警** —— 沒有人知道它卡住。
+3. 那支孤兒寫的腳本從沒被 repair rounds 驗證過（pipeline 早已放棄），它的版面是壞的：文字溢出、
+   標題與副標重疊、右側被裁掉。
+
+**最惡毒的一層**：前兩次同類失敗（`mile_b5e264a5`、`mile_de666838`）是人工補一個 `-r2` job 救回來的，
+而它們之所以會成功，**正是因為那個孤兒稍後把腳本寫出來了**（`-r2` 重跑時 `script.exists()` → 直接沿用）。
+系統在無意間依賴一個它以為已經殺死的行程。這不是修好了，這是運氣。
+
+**解決方法**（三層）：
+
+- **底層邏輯**：timeout 必須真的代表「不會再有東西落地」。`_run_codex` 改用 `Popen(start_new_session=True)`
+  + timeout 時 `os.killpg` 整組殺掉。Gate：`scripts/tests/test_lazypack_codex_timeout_orphan.py`
+  （用會 spawn 延遲寫檔子行程的假 codex 重現孤兒寫入；已實測舊寫法 FAIL、新寫法 PASS，非空轉測試）。
+- **預算**：固定 360s 餓死了這份 3-panel 計畫（實測 write 需 ~1020s）。改成隨 panel 數縮放
+  （`CODEX_WRITE_BASE_S` + 每 panel）。
+- **觀測**：新增告警條件 `lazypack_render_stuck`（`volpred.ops.alerts`，per alert.md「新條件擴充 alerts.py」）
+  —— render 失敗且文章仍無懶人包 section = 這篇出不去。warn，超過 24h 升 critical；已有重試/section 已補
+  則不叫。Gate：`scripts/tests/test_lazypack_render_stuck_alert.py`（含「在事故當下狀態會 breach」一條）。
+
+**教訓**：`subprocess.run(timeout=)` 對任何會自行 spawn 子行程的 CLI（codex / npm / uv）都只是**建議**，
+不是保證。凡是「殺掉外部 CLI」的地方，一律 `start_new_session=True` + `killpg`，否則你的失敗路徑會在背後
+繼續寫檔案。另：「PNG 存在且 >1KB」看不出版面爆掉 —— render 的成功判準仍是盲的（見 next_tasks 追蹤項）。
+
 ## 2026-07-11 fallback reviewer 說 PASS，primary Codex 說 FAIL —— K1259 那條規則不是形式主義
 
 **問題**：K1655（Growth-at-Risk 搬到股市）2026-07-09 因 Codex 額度耗盡，24h review 走了 `code-reviewer`

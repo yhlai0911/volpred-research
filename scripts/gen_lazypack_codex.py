@@ -155,6 +155,9 @@ def _gather_sources(a: argparse.Namespace, out_dir: Path | None = None) -> list[
             # Next to the panels, not in /var/folders: the render script cites
             # its source paths, and a script pointing at a reaped temp file is
             # neither re-runnable by the repair round nor by a reviewer.
+            # Gitignored (.gitignore: storage/lazypack_jobs/*/panels/*_article.md) —
+            # derived from feed.json, and no fire owns it, so tracking it strands
+            # an orphan that PHASE-Z re-alerts on every shift.
             if out_dir is not None:
                 out_dir.mkdir(parents=True, exist_ok=True)
                 art = out_dir / f"{a.article_id}_article.md"

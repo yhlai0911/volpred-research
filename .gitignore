@@ -111,6 +111,13 @@ storage/risk_forecast.json
 # Now committed; recalc_metrics.py still refreshes it on local runs.
 storage/reports/trending_repost_log.json
 
+# Lazypack render scratch: gen_lazypack_codex.py copies the article body next to
+# the panels so the generated render script cites a re-runnable path instead of a
+# reaped /var/folders temp. It is derived from feed.json (regenerate with
+# --article-id) and no fire commits it, so tracking it strands an orphan that
+# PHASE-Z re-alerts every shift. Panels + render script stay tracked.
+storage/lazypack_jobs/*/panels/*_article.md
+
 # 3rd-party tool caches
 .antigravitycli/
 .codex-companion/
