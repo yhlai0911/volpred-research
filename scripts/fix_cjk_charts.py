@@ -85,7 +85,10 @@ def save_fig(fig, filename: str) -> str:
 def chart_survival_funnel(filename):
     fig, ax = plt.subplots(figsize=(10, 6))
     stages = ["候選策略", "Harvey t>3.0", "Cross-OOS\n5期驗證", "靈敏度分析", "最終存活"]
-    counts = [41, 12, 5, 3, 2]
+    # K565 canonical HAC correction (2026-07-12): t=2.862, so it no
+    # longer clears the Harvey t>3 first gate. Later-stage survivors stay
+    # unchanged because K565 had already failed Cross-OOS.
+    counts = [41, 11, 5, 3, 2]
     colors = ["#2196F3", "#FF9800", "#4CAF50", "#F44336", "#9C27B0"]
 
     bars = ax.barh(stages[::-1], counts[::-1], color=colors[::-1], edgecolor="white", linewidth=1.5, height=0.6)
@@ -114,7 +117,9 @@ def chart_survival_funnel(filename):
 def chart_btc_correlation_shift(filename):
     fig, ax = plt.subplots(figsize=(12, 6))
     years = ["2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"]
-    corr = [-0.12, 0.07, -0.05, 0.03, 0.43, 0.56, 0.48, 0.32, 0.42, 0.36]
+    # Byte-for-byte rounded from K565 correlation_by_year; do not use a
+    # hand-drawn narrative series here.
+    corr = [-0.0479, 0.0668, 0.0725, -0.1227, 0.4282, 0.2604, 0.5639, 0.1523, 0.3604, 0.4219]
 
     colors = []
     for c in corr:
@@ -134,10 +139,10 @@ def chart_btc_correlation_shift(filename):
 
     ax.axhline(y=0, color="gray", linestyle="-", linewidth=0.8)
     ax.axvline(x=7.5, color="red", linestyle="--", linewidth=1.5, alpha=0.7)
-    ax.text(7.7, 0.55, "BTC ETF\n上市", fontsize=10, color="red", fontweight="bold")
+    ax.text(7.7, 0.58, "BTC ETF\n上市", fontsize=10, color="red", fontweight="bold")
 
     ax.set_ylabel("BTC-SPY 年度相關係數", fontsize=12)
-    ax.set_title("比特幣與美股相關性的結構性轉變", fontsize=14, fontweight="bold", pad=15)
+    ax.set_title("比特幣與美股的年度相關性變化", fontsize=14, fontweight="bold", pad=15)
     ax.set_ylim(-0.2, 0.65)
     fig.tight_layout()
     return save_fig(fig, filename)
@@ -149,9 +154,9 @@ def chart_btc_correlation_shift(filename):
 # ════════════════════════════════════════════════════════
 def chart_btc_correlation_regime(filename):
     fig, ax = plt.subplots(figsize=(10, 6))
-    regimes = ["2016-2019\n前ETF時代", "2020-2022\n機構湧入", "2024-2025\n後ETF時代"]
-    corr_ranges = [(-0.12, 0.07), (0.43, 0.56), (0.36, 0.42)]
-    avg_corr = [-0.025, 0.49, 0.39]
+    regimes = ["2016-2019\nETF 前期", "2020-2022", "2024-2025\nETF 上市後"]
+    corr_ranges = [(-0.1227, 0.0725), (0.2604, 0.5639), (0.3604, 0.4219)]
+    avg_corr = [-0.0078, 0.4175, 0.3911]
     colors = ["#4CAF50", "#FF9800", "#F44336"]
 
     bars = ax.bar(regimes, avg_corr, color=colors, edgecolor="white", linewidth=1.5, width=0.5)
@@ -164,7 +169,7 @@ def chart_btc_correlation_regime(filename):
 
     ax.axhline(y=0, color="gray", linestyle="-", linewidth=0.8)
     ax.set_ylabel("BTC-SPY 平均相關係數", fontsize=12)
-    ax.set_title("BTC-SPY 年度相關係數：2024年ETF上市後出現結構性上升",
+    ax.set_title("BTC-SPY 年度相關係數：三段樣本比較",
                  fontsize=13, fontweight="bold", pad=15)
     ax.set_ylim(-0.2, 0.7)
     fig.tight_layout()

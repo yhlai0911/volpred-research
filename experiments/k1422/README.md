@@ -30,7 +30,7 @@ K1422 的目的不是「修飾 K1421 結論」，而是重新做一個**公平�
 ## 成功標準
 
 - **單一 baseline formal PASS**：某個 tail（`q05` 或 `q95`）達成
-  - `>=1/3` assets DM sig positive (`p < 0.10`, `dm_stat > 0`)
+  - `>=1/3` assets DM positive 且通過 Harvey (`dm_stat > 3.0`)
   - 且 joint bootstrap one-sided `p < 0.10`
 - **整體 PASS**：至少 `2/3` fair baselines 都 formal PASS
 - **整體 CONDITIONAL_PASS**：只有 `1/3` baseline formal PASS，或只有 per-asset positive 但 joint 不過
@@ -50,3 +50,18 @@ K1422 的目的不是「修飾 K1421 結論」，而是重新做一個**公平�
 - Corsi (2009) HAR
 - Koenker & Bassett (1978) Quantile Regression
 - Politis & Romano (1994) Stationary bootstrap
+
+## 2026-07-11 canonical HAC 重跑
+
+原 `dm_test_hln()` 在 `h=1` 沒有任何 HAC lag，aggregate gate 也仍用 `p<0.10`。現在每格改用
+canonical HAC 並以正向 `t>3` 計數；joint centered-null bootstrap 的 loss differential 不變。
+
+- q05：Harvey PASS 由 9/9 降為 8/9。唯一翻轉是 GLD 對 empirical-residual baseline，
+  t=3.354→2.168（p=0.0303），nominal 顯著但不過 Harvey。
+- q95：Gaussian baseline 2/3 PASS；empirical-residual 1/3；location-scale 0/3。
+- 代表性下修：USO Gaussian q05 37.487→24.114；USO empirical q05 7.166→4.210。
+- aggregate 仍為 3/3 fair baselines PASS，因三組 baseline 的 q05 都至少有一資產通過 Harvey，
+  且 joint bootstrap p<0.10。正確 headline 是 commodity lower-tail relative loss gain 維持，
+  不是 q05/q95 每格都正式顯著。
+
+三份 cache 重跑結果逐位元一致；結果 JSON 已改為原子寫入。執行前 Codex review PASS。

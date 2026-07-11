@@ -5,7 +5,7 @@
   "canonical": "volpred.stats.model_evaluation.dm_test",
   "policy": "Frozen backlog. The set may only shrink -- new entries fail CI.",
   "frozen_at": "2026-07-11 (K1655 class sweep)",
-  "count": 133,
+  "count": 128,
   "degenerate_sites": [
     "experiments/K1048/k1048.py::dm_test",
     "experiments/K158/K158_wavelet_garch_modwt.py::dm_test",
@@ -21,7 +21,6 @@
     "experiments/k1378/k1378.py::dm_test",
     "experiments/k142/k142_foundation_ml_vol.py::diebold_mariano",
     "experiments/k1421/k1421.py::dm_test_hln",
-    "experiments/k1422/k1422.py::dm_test_hln",
     "experiments/k1431/k1431.py::dm_hln_test",
     "experiments/k149/k149_regime_icl.py::diebold_mariano",
     "experiments/k1492/k1492.py::dm_hln",
@@ -51,7 +50,6 @@
     "experiments/k374/k374_parkinson_garch.py::dm_test",
     "experiments/k380/k380_agriculture_vol.py::dm_test",
     "experiments/k429/k429_vix_term_structure.py::dm_test",
-    "experiments/k432/k432_bayesian_garch.py::dm_test",
     "experiments/k433/k433_ssvs_garch.py::dm_test",
     "experiments/k435/k435_structural_break_garch.py::dm_test",
     "experiments/k438/k438_garchx_vrp.py::dm_test",
@@ -72,7 +70,6 @@
     "experiments/k479/k479_wavelet_vol.py::dm_test",
     "experiments/k484/k484_ssvs_variance_eq.py::dm_test",
     "experiments/k485/k485_ssvs_vareq_cross_oos.py::dm_test",
-    "experiments/k486/k486_gjr_vix_final.py::diebold_mariano_test",
     "experiments/k487/k487_gjr_vix_cross_asset.py::diebold_mariano_test",
     "experiments/k490/k490_gjrx_vix9d.py::diebold_mariano_test",
     "experiments/k506/k506_ewt_volspread_cross_oos.py::dm_test",
@@ -90,7 +87,6 @@
     "experiments/k550/k550_adaptive_vix_threshold.py::dm_test",
     "experiments/k560/k560_sector_rotation_vt.py::diebold_mariano_test",
     "experiments/k561/k561_bond_equity_switch.py::diebold_mariano_test",
-    "experiments/k565/k565_btc_allocation.py::dm_test",
     "experiments/k576/k576_vol_clustering_vt.py::dm_test",
     "experiments/k583/k583_iv_surface.py::dm_test",
     "experiments/k591/k591_window_size_sweep.py::dm_test",
@@ -123,7 +119,6 @@
     "experiments/k948/k948.py::dm_test",
     "experiments/k965/k965_wild_bootstrap_ohr.py::dm_test",
     "experiments/k966/k966_har_pd.py::dm_test",
-    "experiments/k969/k969_bespoke_rv.py::dm_test",
     "experiments/k970/k970_mf2_garch.py::dm_test",
     "experiments/k971/k971_caviar_vt.py::dm_test",
     "experiments/k972/k972_mf2_taiwan.py::dm_test",
@@ -171,6 +166,31 @@
       "site": "experiments/K1404/K1404.py::dm_test",
       "date": "2026-07-11",
       "note": "canonical HAC re-run complete — TWII t -8.90 → -6.43, acf(1)=0.237 significant; TAIL_CALIB_USABLE unchanged"
+    },
+    {
+      "site": "experiments/k1422/k1422.py::dm_test_hln",
+      "date": "2026-07-11",
+      "note": "canonical HAC re-run complete — aggregate PASS remains 3/3 baselines; q05 Harvey passes 9/9 → 8/9 and q95 passes are Gaussian 2/3, empirical 1/3, location-scale 0/3"
+    },
+    {
+      "site": "experiments/k432/k432_bayesian_garch.py::dm_test",
+      "date": "2026-07-11",
+      "note": "canonical HAC re-run complete — MLE still ranks first; Mean and BMA remain formally worse, while the best Bayesian Median comparison is t=2.26 and does not meet Harvey t>3"
+    },
+    {
+      "site": "experiments/k486/k486_gjr_vix_final.py::diebold_mariano_test",
+      "date": "2026-07-11",
+      "note": "canonical HAC re-run complete — GJR-X point estimates improve QLIKE in 5/5 periods but 0/5 meet Harvey t>3; VaR coverage conclusions unchanged"
+    },
+    {
+      "site": "experiments/k565/k565_btc_allocation.py::dm_test",
+      "date": "2026-07-11",
+      "note": "canonical HAC re-run complete — previously reported 4 Harvey passes reverse to 0; full-sample allocation performance remains economically null"
+    },
+    {
+      "site": "experiments/k969/k969_bespoke_rv.py::dm_test",
+      "date": "2026-07-11",
+      "note": "canonical HAC re-run complete — core HAR-Bespoke result remains; Ridge t shrinks 6.63 → 3.16 with acf(1)=0.380 and still narrowly clears Harvey t>3"
     }
   ]
 }

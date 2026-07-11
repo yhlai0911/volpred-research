@@ -71,3 +71,16 @@ Patton & Zhang (JoE 2026, "Bespoke Realized Volatility") showed that ML-optimize
 - `k969_bespoke_rv_results.json` — Full results
 - `k969_weight_analysis.png` — OLS/Ridge weights + rolling stability
 - `k969_forecast_comparison.png` — OOS performance comparison
+
+## 2026-07-11 canonical HAC 重跑
+
+原 local DM 在 `h=1` 退化成 iid variance。改用 canonical HAC 後，HAR-Bespoke 對合理替代模型
+仍全數通過 Harvey：AR1-r² 7.469→5.524、AR1-GK 4.270→3.710、AR1-RS
+4.685→3.684、Equal Weight 5.032→4.877、Ridge 6.634→3.156。Ridge loss differential
+ACF(1)=0.380（白噪音界 ±0.046），因此原 t 明顯偏大；修正後只勉強留在門檻上方。
+
+Bespoke OLS 對 HAR 的 t=1.007、自然比較 AR1-r² minus Bespoke OLS 的 t=-1.007，均不通過。
+核心結論不變：HAR 的 temporal aggregation 才是贏家，直接 OLS 加權仍因多重共線性崩潰。
+
+重跑同時修正 NumPy 2 對一元素陣列的 scalar 轉換，以及死亡 worktree 輸出路徑；結果 JSON
+改為原子寫入。兩次 live-yfinance 重跑 DM t 最大漂移 0.000031，所有 Harvey gate 一致。

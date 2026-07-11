@@ -6138,3 +6138,21 @@ compute-worker 的 plist 剛好有 nvm bin，所以 async 路徑一直是好的�
 凡是靠 shell rc file 才會上 PATH 的工具（nvm/pyenv/rbenv 系：codex、npx、node、agy…），
 一律 `$XXX_BIN` → `which` → 已知安裝路徑 fallback。診斷時先問「這個 process 是互動 shell 嗎」，
 再懷疑工具本身。錯誤訊息要說「找不到 binary」，不要讓上游把它讀成「功能壞掉」。
+
+## 2026-07-12 00:13 — DM helper 在 h=1 退化成 iid，K565 的 Harvey PASS 被推翻
+
+**症狀**：K486、K565、K432、K969、K1422 的本地 DM helper 都用 `range(1, h)` 建 Newey–West
+長期變異數；所有呼叫又固定 `h=1`，迴圈因此為空。文章雖標成 DM／HLN，實際只用 loss
+differential 的 iid variance，沒有 HAC。最明顯的影響是 K565：5% BTC 與 momentum 版本原報
+Harvey t=3.07 / 3.37，改用 canonical HAC 後為 2.862 / 2.989，兩者都不再通過 t>3。
+
+**修正與邊界**：五站全部改呼叫 `volpred.stats.model_evaluation.dm_test`（策略報酬用
+`strategy_dm_test(..., loss_fn="negative_return")`），保存 loss differential ACF(1–5)、95% 白噪音界線、
+樣本數與 Harvey flag，並完成重跑。K486 的 QLIKE 點估計仍是 5/5 較低，但 Harvey 為 0/5；K432
+只有 Bayes Mean/BMA 相對 MLE 超過 3，最佳 Bayesian Median 為 2.256；K969 與 K1422 的 aggregate
+headline 維持，細部分格統計量下修。受影響文章與 knowledge 必須加 errata，不可只改實驗 JSON。
+
+**防再犯**：forecast horizon `h` 不能被當成 HAC bandwidth；所有新 DM 比較一律走 canonical helper。
+`storage/ops/dm_hac_lag_baseline.json` 是 frozen backlog，`scripts/tests/test_dm_hac_lag_ratchet.py`
+禁止新增退化 helper，修一站就必須讓 baseline 單調縮小。正式結論使用 Harvey `|t|>3`，名目
+p-value 可列，但不得代替多重嘗試下的嚴格 gate。
