@@ -15606,5 +15606,29 @@
     "outcome": "succeeded",
     "summary": "接手 hourly-09 stale digest：發佈 mile_ed21255d「財報控制盤」（8 篇 archive 來源、跨度 87 天、5303 字、arc-dedup/anti-ai gate 皆 exit 0、線上 200）",
     "notes": "lazypack 主路徑 gen_lazypack_codex.py 兩次無產出（>13min，shared codex runtime 排隊），改用自寫 matplotlib render script fallback；事後 codex exec smoke = CODEX_OK（CLI 健康，非 model config 問題）。render script + evidence package 已收進 storage/drafts/digest_20260711_lazypack/。"
+  },
+  {
+    "timestamp": "2026-07-11T11:13:16+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-932300a1e",
+    "outcome": "succeeded",
+    "summary": "render K1409 lazypack infographic set",
+    "commit": "932300a1e47c65b981c012ff1cd19b3fcf925623",
+    "owner": "codex",
+    "backfilled_at": "2026-07-11T03:57:36.416266+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1409"
+  },
+  {
+    "timestamp": "2026-07-11T11:56:39+08:00",
+    "task_type": "experiment",
+    "task_id": "codex-commit-e4e89aff0",
+    "outcome": "succeeded",
+    "summary": "complete K1680 geographic attention pilot",
+    "commit": "e4e89aff0ecb7b4a68f9be8f912608ce11777646",
+    "owner": "codex",
+    "backfilled_at": "2026-07-11T03:57:36.415941+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1680"
   }
 ]
