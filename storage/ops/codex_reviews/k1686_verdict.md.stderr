@@ -1,0 +1,2360 @@
+OpenAI Codex v0.144.1
+--------
+workdir: /Users/yhlai0911/volpred-research
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: ultra
+reasoning summaries: none
+session id: 019f5308-9a0e-7250-9806-adb9712d6c96
+--------
+user
+# Codex primary-path review — K1686 contemporaneous null (volatility absorption)
+
+You are the primary-path code reviewer for an empirical finance experiment. A
+`feature-dev:code-reviewer` subagent already passed it CONDITIONAL PASS, but under this
+repo's K1259 rule a subagent PASS does not substitute for a Codex primary-path PASS. Your
+verdict decides whether the result may be written to the canonical knowledge base.
+
+Read these files (repo is read-only to you):
+
+- `experiments/k1686/k1686_contemporaneous_null.py` (~1200 lines — the whole thing)
+- `experiments/k1686/k1686_contemporaneous_null_results.json`
+- `experiments/k1686/README.md`
+- `experiments/k897/` (the predecessor whose `NULL REJECTED` verdict this experiment overturns)
+
+## Context
+
+Paper 8 (`paper/volatility-absorption`) claims that high ambient fear *absorbs* volatility
+shocks: the shock-absorption ratio (SAR) declines across VIX regimes (calm <15 → high 25-30),
+empirical decline = 0.8165. K897 simulated a GJR-GARCH null and reported `NULL REJECTED`,
+i.e. GARCH mechanics cannot reproduce the decline.
+
+K1686's charge: K897's null used a vol proxy that could not react to the *same day's* return,
+whereas VIX can. Making the proxy contemporaneous is the make-or-break identification test. The
+decision rule was pre-registered in commit `870af5d00` **before any simulation ran** (verify this
+yourself in git history): decline outside the null's 95% CI → identification holds, paper upgrades;
+inside → absorption claim downgraded, paper reframes.
+
+Reported outcome: 0.8165 falls **inside** the contemporaneous null 95% CI [0.0824, 1.0596],
+MC p = 0.41 → `IDENTIFICATION CLOSED`, verdict `ABSORPTION CLAIM NOT SUPPORTED`.
+
+## What I need you to check (be adversarial — try to break it)
+
+1. **Contemporaneous timing is actually implemented, and is not lookahead.** The null's proxy at
+   time t must react to r_t (that is the whole point), but nothing may use information from t+1 or
+   later. The code extends the GARCH recursion one step to get `h[n_obs]`. Verify that `h[t+1]`
+   (a *conditional* variance known at t) is what feeds the proxy, that this is the correct analogue
+   of VIX's forward-looking construction, and that the shift/index arithmetic (`abs_ret[1:]`,
+   `P[:-1]`, `shock[1:]`) is off-by-one clean in every variant.
+
+2. **Seed reproducibility and the "identical paths as K897" claim.** README asserts the same seeds
+   + same params + no extra random draw ⇒ simulated return paths are pointwise identical to K897's,
+   which is what licenses the "on the same seeds, the margin was a timing artifact" comparison. Check
+   this is true in code (no extra `standard_t` draw, no padding, no reordering). If it is not exactly
+   true, say so — the K897-overturn claim leans on it.
+
+3. **Empirical vs simulated definitions are aligned.** The SAR, the regime cut-points (15/20/25/30),
+   and the shock threshold (|Δproxy| > 2) must mean the same thing on both sides. Where they cannot
+   (the null's proxy lives on a different scale than VIX — see variants F and G, the calibration
+   discussion in README §6), check the code does not quietly compare unlike with unlike, and that
+   any such gap is *disclosed* rather than papered over.
+
+4. **Pre-registration integrity.** Confirm from git history that the decision rule and the empirical
+   value 0.8165 were committed with **no results present**, and that the pre-registered primary
+   (variant A) was not swapped, re-specified, or re-seeded after results appeared. Variants F and G
+   are labelled POST-HOC — confirm that labelling is honest and that no post-hoc variant is being
+   used to carry the primary verdict.
+
+5. **Does the verdict overclaim?** The result JSON says the null comparison is *inconclusive* (A/D_up/E
+   fail to reject; B/C/G reject) and rests the decisive finding instead on a null-free signed
+   decomposition (fear spikes: decline −0.1226, bootstrap 95% CI [−0.7289, 0.5828], n=10 fear-spike
+   days vs 24 relief days). Two things to judge: (a) is the signed decomposition itself sound, or is
+   n=10 too thin to carry "decisive"? (b) is the *stated* verdict appropriately weaker than the
+   evidence, or does it overclaim in either direction?
+
+## Output format (plain markdown, no preamble)
+
+```
+## VERDICT: PASS | CONDITIONAL PASS | FAIL
+
+### Blocking issues
+(numbered; each with file:line and why it invalidates the result. "none" if none.)
+
+### Non-blocking findings
+(numbered; file:line.)
+
+### On the K897 overturn
+(does the evidence support retiring K897's NULL REJECTED verdict? yes/no + why)
+
+### On the paper disposition
+(the experiment recommends reframing Paper 8 as an FRL measurement note — signed-composition
+effect, not absorption. Is that supported by what you read, or is even that too strong?)
+```
+
+Be concrete. Cite line numbers. If the code is clean, say so plainly — do not manufacture findings.
+
+codex
+我會把主審留在這條 primary path：逐行讀完 K1686 全檔並自行重算關鍵索引與統計。另用平行唯讀審查分別核對 git 預註冊、K897 路徑同一性、以及 signed decomposition 的證據強度；同時套用 `agent-result-verification` 的結果核驗清單。
+exec
+/bin/zsh -lc "sed -n '1,240p' .agents/skills/agent-result-verification/SKILL.md && cat storage/ops/handoff_latest.md" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+---
+name: agent-result-verification
+description: >
+  Agent（worktree 或 background）返回實驗結果後的驗證 checklist。
+  防止 agent 回報不準確的數字（K1016 教訓：agent 聲稱 QLIKE 改善 +13.7%
+  但 JSON 顯示惡化）。Trigger: 每次 agent 返回實驗結果後自動執行。
+  Do not use for research design, article writing, or generic platform ops.
+model: sonnet
+effort: low
+user-invocable: false
+---
+
+# Agent Result Verification Checklist
+
+## Scope Boundary
+
+Use this skill only after agent 回報統計或比較結果時，用來：
+
+- 以 results JSON 為準驗證數字
+- 檢查號誌方向與合理性
+- 阻止錯誤數字流入 knowledge / 文章
+
+Do **not** use this skill for：
+
+- 研究設計與模型選擇 → `autonomous-research`
+- worktree merge / reflog 恢復 → `worktree-merge-verification`
+
+## 觸發時機
+每次 agent 返回包含統計數字的實驗結果後，**在記錄 knowledge 之前**必須執行。
+
+## Checklist（按順序）
+
+### 1. 讀取 results JSON（不信 agent summary）
+```python
+import json
+experiment_id = "k123"  # or k123b
+with open(f'experiments/{experiment_id}/{experiment_id}_results.json') as f:
+    r = json.load(f)
+```
+
+### 2. 核對關鍵數字
+逐一比對以下數字是否與 agent summary 一致：
+
+| 指標 | Agent 說 | JSON 實際值 | 一致？ |
+|------|---------|------------|--------|
+| QLIKE (model A) | | | |
+| QLIKE (model B) | | | |
+| DM t-stat | | | |
+| QLIKE improvement % | | | |
+| VaR pass/fail | | | |
+
+**如果任何數字不一致 → 以 JSON 為準，不用 agent 的數字。**
+
+### 3. 合理性檢查
+- [ ] Sharpe > 2x baseline? → 90% 有 bug，暫停
+- [ ] DM t-stat 的正負號是否合理？（負 = 新模型更好）
+- [ ] QLIKE improvement 方向是否與 DM 一致？
+- [ ] VaR violation rate 是否在合理範圍？（2.5% target → 1-4% 正常）
+- [ ] 模型有收斂嗎？（convergence flag, persistence < 1）
+
+### 4. 數字不一致的常見原因
+
+| 現象 | 常見原因 |
+|------|---------|
+| Agent 說改善但 JSON 顯示惡化 | Agent 混淆了 model A 和 model B 的數字 |
+| DM t-stat 正負號反了 | Agent 弄反了比較方向（A vs B 還是 B vs A）|
+| QLIKE % 不匹配 | Agent 用了不同的 baseline（round-off 或 wrong model）|
+| 兩個模型結果完全相同 | 代碼 bug：兩個模型共享了同一組參數或 fear input |
+
+### 5. 通過驗證後才可以
+- 記錄 knowledge（數字從 JSON 抄，不從 agent summary 抄）
+- 撰寫文章
+- 更新 research_program.md
+
+### 6. Publishable-finding gate（2026-04-18 新增，防 session 整天不發 milestone）
+每次 agent 回報 **必做** 這個判定：
+
+- ✅ Confidence ≥ 0.85（knowledge.json 標 confidence）
+- ✅ Harvey-significant 或 decisive verdict（PASS / NULL confirmed / artifact discovered / narrative pivot gate met）
+- ✅ 結果對讀者/實務有 takeaway（非純 internal audit）
+
+**三項全中**：立即 `TaskCreate` 一個 `publish_milestone_article` P3 task，指向該 K experiment；不 queue 到下 session 才處理。
+
+**排除**：純 markdown draft / edit guide / session consolidation / reproduction-package audit — 這些是 internal artifacts，不面向外部讀者。
+
+2026-04-17 教訓：~80 K experiments 含 K1216c ROOT_CAUSE / K1203 UNIVERSAL_NULL / K1133b BTC decomposition / K1235b Paper 9 defensibility 等 decisive findings 全沒發 milestone 文章，根因就是 agent-result-verification skill 沒這個 publish gate。
+
+## 歷史事件
+
+| 日期 | 實驗 | 問題 | 影響 |
+|------|------|------|------|
+| 2026-04-10 | K1016 | Agent 聲稱 QLIKE +13.7% (DM=+5.46)，JSON 顯示惡化 (1.616→1.831) | Knowledge 記錄錯誤數字，需要修正 |
+| 2026-04-10 | K1016 | M4/M5 結果完全相同 | 代碼 bug：兩個模型共用 input |
+| 2026-03-29 | 8/93 實驗 | 10% 的實驗被推翻 | 全部因跳過「Codex 先審代碼」|
+# Handoff — 2026-07-12 04:50:00 台灣時間
+
+**角色**：VolPred 自主運營經理（用戶 = 老闆 / report-only / full autonomy）
+
+> 此檔由 `scripts/generate_handoff.py` 每小時 :50 自動產生。手寫補充請放本檔末段「## 候補 / 手動補充」並標時間戳。
+
+## 1. 任務池快照（`storage/next_tasks.json`）
+
+- **總數**：2387
+  - pending: 24
+  - in_progress: 2
+  - succeeded: 2153
+  - failed: 40
+  - blocked: 50
+  - blocked_on_user: 2
+  - Codex-eligible pending: 21
+  - Codex-skip pending: 3
+
+**type 分佈（top 6）**：
+  - daily_article: 667
+  - experiment: 546
+  - paper_review: 412
+  - platform_ops: 242
+  - email_reply: 159
+  - paper_body: 98
+
+## 2. 已 claim / in_progress 任務
+
+- `fable0711_volabs_contemp_null` P1 [experiment] K-new: volatility-absorption contemporaneous null（make-or-break gating） — claimed_by=hourly-03
+- `fable0711_garchx_k1393_oos` P1 [experiment] K-new: garch-x-vix K1393-faithful spec 延長 OOS 覆核 — claimed_by=hourly-02
+
+## 3. Email 回信任務（**優先處理**）
+
+- (無未處理回信)
+
+_Gmail 最後 poll：2026-07-11T20:45:09.240227+00:00_
+
+## 4. Pending 任務 top 8（依 priority asc）
+
+- **Codex-eligible pending**：21；**Codex-skip pending**：3
+
+**Codex-eligible pending top 8**：
+- `fable0711_vttrend_table5_rerun` P1 [experiment] K-new: vt-trend-following Table 5 國際 13 市場 canonical 重跑
+- `k1684_reenqueue_with_fresh_worktree` P1 [experiment] K1684 重排：worktree 被清掉導致 job 秒退，需重建 worktree 再 enqueue
+- `k1685_collect_orphaned_results` P1 [experiment] K1685 收件：驗證孤兒 compute 寫下的 results + README + Codex review
+- `fable0711_dm_hac_auditor_blindspot` P2 [platform_ops] platform_ops: audit_dm_hac_lag.py 盲區補掃（paper-side experiments + dm_hln 變體）
+- `fable0711_prg_close_convention` P2 [experiment] K-new: prg 六市場 close-convention 補跑（PRG_tminus1 vs GJR/HAR）
+- `fable0711_taiwanvt_rolling_gamma` P2 [experiment] K-new: taiwan-vt rolling gamma calendar-aligned snapshot 重跑
+- `hook_commit_m_nonascii_false_positive` P2 [platform_ops] 修 PreToolUse commit -m 非 ASCII 判定的 false positive
+- `k1681_clark_west_nested_dm_rerun` P2 [experiment] K1681：巢狀模型改用 Clark-West 重跑（raw DM 誤用）
+
+**All pending top 8**：
+- `fable0711_levdir_evidence_wiring` P1 [paper_body] paper_body: leverage-direction K1592/K1591 證據進稿 + HM rebind（IJF）
+- `fable0711_vtins_frl_package` P1 [paper_body] paper_body: vt-insurance-cost package 衛生 + FRL 投稿包（第一梯隊最近可投）
+- `fable0711_vttrend_table5_rerun` P1 [experiment] K-new: vt-trend-following Table 5 國際 13 市場 canonical 重跑
+- `k1684_reenqueue_with_fresh_worktree` P1 [experiment] K1684 重排：worktree 被清掉導致 job 秒退，需重建 worktree 再 enqueue
+- `k1685_collect_orphaned_results` P1 [experiment] K1685 收件：驗證孤兒 compute 寫下的 results + README + Codex review
+- `fable0711_abm_honesty_pass` P2 [paper_body] paper_body: vt-crowding-abm 敘事單一化 + K1471 誠實補報 + scope 收斂 VT-only（QF）
+- `fable0711_dm_hac_auditor_blindspot` P2 [platform_ops] platform_ops: audit_dm_hac_lag.py 盲區補掃（paper-side experiments + dm_hln 變體）
+- `fable0711_prg_close_convention` P2 [experiment] K-new: prg 六市場 close-convention 補跑（PRG_tminus1 vs GJR/HAR）
+
+## 5. 進行中 agent / worktree
+
+- **slot 占用**：4 / 4
+- worktrees:
+  - `k1685-garchx-oos`
+  - `wizardly-mirzakhani-2fcc2a`
+  - `k1686-volabs-null`
+  - `fervent-payne-f38a73`
+
+## 6. 最近 24h 完成（top 5）
+
+- `platform_ops_execution_brief_killpg` P2 [platform_ops] execution_brief.py 的 3 個 claude -p 站點補 process-group kill — claimed_by=hourly-04
+- `fable0711_cryptofear_k1025v3` P1 [experiment] K1025_v3: crypto-fear FEVD 修正重跑（KPPS generalized + pinned snapshot） — claimed_by=codex-vscode
+- `collect_k1684_orphan_worktree` P1 [experiment] 回收 K1684 孤兒 agent 成果（worktree agent/k1690-ftd-e1） — claimed_by=codex-vscode
+- `email-12083-62a2a3` P1 [email_reply] [email_reply] Re: [VolPred Alert][CRITICAL] supervisor hang_killed — claimed_by=hourly-02
+- `email-12084-9b55bc` P1 [email_reply] [email_reply] Re: [VolPred Alert][CRITICAL] supervisor hang_killed — claimed_by=hourly-01
+
+## 7. Dashboard 訊號
+
+- overall_status=warn (breaches=1, critical=0, generated=2026-07-11T20:30:08Z)
+- WARN: section=health_alerts_unhandled :: 1 current warn/critical alert conditions
+
+## 8. 最近 work_log（5 筆，新→舊）
+
+- `2026-07-12T04:33` [platform_ops] platform_ops_execution_brief_killpg
+- `2026-07-12T04:22` [platform_ops] agentic_cli_timeout_orphan_class_sweep
+- `2026-07-12T04:03` [experiment] codex-commit-4f4030cbb
+- `2026-07-12T03:11` [experiment] fable0711_volabs_contemp_null
+- `2026-07-12T02:25` [platform_ops] codex-commit-4b5550cb0
+
+## 9. 接續提示詞（hourly dispatch / 互動 session 共用）
+
+```
+讀 storage/ops/handoff_latest.md 後依以下優先序選工：
+
+優先序 (HARD)：
+  1. Section 3 Email reply 任務（task_type=email_reply）— 若有 pending，立即 claim + 處理（讀 description 的「用戶回信內容」+「原始助理寄出內容」，依用戶指示回應 / 修正 / 派工 / 寄回信）
+  2. Section 7 Dashboard CRITICAL — 立即 triage
+  3. Section 4 Pending 任務 top 8 — 依 priority asc + work_log diversity（last-3 task_type rotate）
+
+Claim 流程（避免雙 session 撞題）：
+  uv run python scripts/task_pool_claim.py claim --id <task_id> --owner <hourly|interactive|agent-name>
+  uv run python scripts/task_pool_claim.py start --id <task_id>
+  ... 執行 ...
+  uv run python scripts/task_pool_claim.py complete --id <task_id> --status succeeded --result '...摘要...'
+
+完整完成原則：派 agent 後 wait 完成、驗證、寫 knowledge.json / work_log、commit。50min cap。Heavy compute 走 compute_queue。
+```
+
+---
+
+## 候補 / 手動補充
+
+（此區由人工 / 互動 session 編輯。只有放在 KEEP 註解標記區段內的手寫內容會被 auto-regen 保留，其餘自動章節每 :50 覆寫。標記語法見 generate_handoff.py `_extract_keep_block` 或 docs；標記本身不寫在此說明以免與 extractor 自我衝突。）
+
+<!-- KEEP -->
+### ⏱ 2026-07-01 ~16:00 最新狀態（compact 後最優先讀）
+**已完成+committed 今日**：(1) 12 死碼腳本移 `scripts/_legacy/`（crontab「雙觸發」是 false positive、未動）；(2) hourly-dispatch 修 stale opus-4-7→**opus-4-8** + model_router sonnet→**sonnet-5** + token_usage_report pricing 補 4-8/5；(3) `check_model_roster.py` 加 stale-model-pin 掃描（代碼零 pin）；(4) **pre-gate `scripts/hourly_dispatch_pregate.py` 部署 SHADOW 模式**（`PREGATE_SHADOW=1`，只記 log 不跳過；~1 週後審 `storage/logs/hourly_pregate.jsonl` 確認「判 skip 的真沒產出」再 flip `PREGATE_SHADOW=0`）；(5) **每日 token 報表 `scripts/token_report_email.py`**（多角度 HTML 內嵌）+ **cap 校準到官方**（`config/token_quota_calibration.json`，report 顯示 76%=官方 Weekly；官方飄移用 `--calibrate <fraction>` 重錨）。
+**待用戶**：token 報表版面確認後→排每日定時任務（runtime_schedules.json + `~/.volpred/bin/` wrapper + piggy-back/LaunchAgent + 文件，建議每日 08:00 台灣）。
+**重要教訓（勿重犯）**：我曾誤判 token 報表「3× 灌水」並提議去重，被用戶官方截圖 76% 打臉 → **報表 per-record 加總方法本來就對、與官方一致，勿再用 message.id 去重**。thinking/reasoning 因 redact+output 合計無法可靠拆分，不列不硬湊。
+**接續**：turn 尾排 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`；工具嚴格 `antml:invoke`；中文用 Write 不用 heredoc；emoji 勿放 bash echo。
+
+### ⏱ 2026-07-01 ~14:55 手動 handoff（compact/退出前｜最新最優先讀｜此段在 KEEP 區、撐得過 auto-regen）
+
+**兩個架構稽核 subagent 皆完成（結果已在對話，勿重跑）**：
+- **token overhead**：每天 ~460 次例行觸發，只 ~72 次吃 token（24 hourly-dispatch + ~48 互動 loop tick），其餘 436 次純 Python 零 token。純 overhead ≈ 每週 **7–16%** 預算。**最大槓桿 = hourly-dispatch 每次冷載 CLAUDE.md+context ≈ 95K token ×24/天 = 2.28M/天（stub 空跑也付）**。本週 3.5 天用 158.8M(73.9%)。
+- **疊床架屋 + 我的主線程驗證**：⚠️ subagent 兩個誤判要修正 —— (1)「5 任務 crontab+LaunchAgent 雙觸發、砍 crontab」= **FALSE**（control-plane.md：本機 macOS cron 只可靠跑 `0 * * * *`，其他 pattern silently skip，crontab 是 harmless 永不 fire 的 fallback、刻意保留；**勿砍、勿跑 install_host_crontab.sh**）；(2) `record_and_publish.py` 非死碼（feed-publisher「方法 B」）。✅ **真可收斂**：`article_backups.py`(no-op 死碼)+殭屍 import、13+ 歷史一次性腳本 → 移 `scripts/_legacy/`；`release_pool` 頻率三處不一致(spec `7 */6` vs crontab `7 */3` vs LaunchAgent 6h)→ 對齊。✅ **澄清**：4 條 Supabase sync 互補非重複，全留。
+- **下一步**：回報老闆(含 crontab false-positive 修正) → 執行安全收斂(死碼移 _legacy + release_pool 頻率) → hourly-dispatch token 優化選項提老闆(減層不加層)。
+
+**digest 已定案上線（老闆連 4 次糾正，勿重做）**：`mile_4901f7bc`=今天 digest 原地抽換=**AI 資本支出投資議題專欄 v2**（時事驅動→撈 8 篇跨時間 archive→回答「該不該擔心+選擇權怎麼定價」；body 4604字、8 篇每段 inline 標註、具名框架「三個 VIX 照不到的角落」+三項檢查表）。Chrome 驗證 live（CDN 舊快取→`?v=` cache-bust 見新）。**spec 已 3 修**（`enqueue_daily_digest.py`：時事驅動+全archive禁本週湊、name-first、深度≥4000+inline標註）。
+
+**leverage 論文 gated**：`paper_pipeline_status.json` `do_not_advance=True`；Stage 2 兩支柱皆弱(K1591/K1592 我驗證 sound)→非 JBF-grade→待老闆研究方向決策(FRL/IJF/null/暫置，WARN email 已送)。**勿自動推 arXiv**。
+
+**模型政策**：主線 opus 固定、subagent sonnet↔opus 依難度、haiku off、fable unavailable。source=`config/models.json`。
+
+**接續提示詞（2026-07-01 14:55）**：讀本段。下一步=回報兩份稽核(含 crontab false-positive)+執行安全死碼/release_pool 收斂+提 hourly-dispatch token 優化。digest 完成勿重做，leverage 待老闆。turn 尾排 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`。工具嚴格 `antml:invoke`，中文用 Write 不用 heredoc，emoji 勿放 bash echo。
+
+---
+
+### 📄 學術論文線 — 老闆 2026-07-01 ~00:45-02:00 連續 ~14 指令（最高優先，clean context 接續）
+
+**老闆核心訴求**：論文線「感覺停滯」。diagnosis（paper-audit workflow）：不缺彈藥，缺「扣扳機」+ synthesis/submission gate 沒人 drive。
+
+**已建好的流程基礎建設（durable，已 commit+push）**：
+- skill `paper-submission-pipeline`（狀態機 draft→revision→compliance_scrub→multi_round_review→review_converged→arxiv_ready→arxiv_posted→journal_submitted；PDCA gate）+ `scripts/paper_pipeline_check.py`（stall detector）+ `storage/paper_pipeline_status.json`（14 篇 stage tracker）
+- skill `journal-review`（10 期刊上網查的 references + templates：JBF/JFE/RFS/JoE/FRL/IJF/JPM/FAJ/PBFJ/JoF）
+- 合規 audit 全結果 `storage/ops/paper_compliance_audit_20260701.json`（14 篇，1 clean，13 待修）
+
+**老闆硬規則（必遵守）**：
+1. **投稿論文作者僅「Yi-Hao Lai」**，禁 volpred/claude/ai/llm 提及，禁 AI 用語符號
+2. **contribution gate**：review 必看真正貢獻/經濟意義，**非單純計量方法練習**（純方法練習不過 gate）
+3. **arXiv 只給 ready-for-submission 的**（drafts/revision 禁上）；流程 = scrub→多輪 review→修正→最終版**先丟 arXiv 佔 priority**→找機會投目標期刊（投稿時點老闆擇時拍板）
+4. **多輪 review 全用 codex exec 跑**（latex-academic-reviewer + citation-verifier + journal-review）省 Claude token；**codex 額度無限制**
+5. **任何前端改動，/paper 原版 + /v3/paper 兩版都要改**（standing rule，兩版是不同網頁）
+6. **內容編輯類「完成」必 curl+Chrome 線上驗證**，不假設（老闆兩次抓我假宣告）
+
+**目前只有 1 篇真正 ready**：`leverage-direction`(JBF) — 6/11 技術定稿、合規只差 body.tex:231 一個 VolPred footnote（fix 在 audit json）。`vt-trend-following`(JPM/FAJ) 下一棒（6/30 才 v7 PASS + 10 個 K-id tags 待清）。
+
+**P1 queued（durable）**：`paper_compliance_scrub_leverage_direction`（1 footnote）、`paper_compliance_scrub_vt_trend_following`（10 tags）、`content_erratum_mile_48c8328b_k189_reversed`（誠信：文章結論與 K189 相反）。
+
+**下一步（clean context 接）**：drive leverage-direction：scrub 1 footnote → codex 多輪 review（含 contribution gate）→ 修到最終 → arXiv。每階段更新 pipeline tracker + 回報。
+
+**✅ 已完成本 session（verified）**：論文頁 Updated 顯示加 date+hh:mm（兩版 Chrome 驗證：/v3/paper + /paper 都顯示「Updated 2026-06-24 18:00」）；feed 文章「更新於」功能（誤解產物，老闆要的是論文非文章，但功能無害留著）；8 篇 prose-dump lazypack 用 codex-exec 重做（前幾 tick）。
+
+---
+### 🔴 FB URGENT BANNER（2026-07-01 01:10 hourly-01 標 — 老闆 email-12327 親點派）
+
+**老闆 2026-06-30 23:54 email：「Fb都開著 你自己切換啊」**。hourly cron 無 Chrome MCP 做不了，已 close-reply email 接力。下個 interactive session **第一動作** = 切 Chrome 連 MAC STUDIO（deviceId 輪替不可 hardcode，照 `reference_fb_chrome_browser_autoselect` 即時 `list_connected_browsers` 找登入 yihao.lai 的那台），到 facebook.com/yihao.lai 走 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP **5 篇逐一發**（每篇主貼文無連結 + 第一則留言貼 volpred 連結 + `mark_fb_post_status.py --mile-id <id> --status success`）：
+
+| 序 | mile_id | 標題 | 等待時數 |
+|---|---|---|---|
+| 1 | `mile_f5f4cb43` | 科技巨頭資本支出爆表，AI 變現期的隱含波動率拐點 | ~20h |
+| 2 | `mile_819af916` | 防禦股悄悄贏了：XLV 一個月漲 8%，科技 ETF 卻原地踏步 | ~26h |
+| 3 | `mile_a0b174f9` | 蘋果一週跌 4.8%、波動跳 2.3 倍；NVDA 跌 8.6% 卻反而最低 | ~64h |
+| 4 | `mile_bd564eb7` | 創新高然後急殺，「短彈可搶、抱一年會死」是真的嗎？bootstrap | ~74h |
+| 5 | `mile_0941e2f0` | 半導體修正進行中：選擇權偏斜告訴你市場還沒放心 | ~74h |
+
+連結模板：`https://volpred.zeabur.app/v3/reports/<mile_id>` → 留言。預估 5 篇 ≤30 分鐘。發完寫 work_log + 寄 boss confirm email。
+
+**結構性 follow-up**（queue 進 platform_ops）：把 `audit_fb_pipeline.py >72h auto-expire` 改 48h（3/5 已 >64h，timely insight 衰減）+ early-warn 階段。
+
+---
+
+### 🟢 互動 session 脈絡（2026-06-30 ~18:00 台灣時間）— 最新，compact 後優先讀
+
+接續 ~13:55 段之後，下午又完整交付（全 commit+push 到 GitHub，main repo 與 origin 同步 0/0）：
+
+**A. 下午已交付（改完+test+commit+push）**：
+1. **quota 計算雙修**（boss 抓 122% vs dashboard 54%）：(a) `weekly_quota_estimate.py` anchor 漂 7 週未校準 → re-anchor 54%@116M→cap 215M + 加 ANCHOR_STALE_DAYS=10 警告；(b) `token_usage_report.py` weekly window 從週五對齊改 **週日16:00 台灣**（boss 確認 quota 週期 SUN16:00-SUN15:59）→ `get_quota_week_range`（friday alias 保留），week 6/28→7/05。
+2. **publishing_freshness 門檻 interval-aware**（第三個對齊 6h release 的 publish-gap 門檻，前兩個 burst/drought）：5h hardcode → interval+2h grace=8h。+ 修 hourly 引入的 `mark_fb_post_status.py:113` silent fallback（解封 git_push_backup）。
+3. **lazypack 偵測**（boss：general 文章缺懶人包圖，實測近12篇只1篇有=12%）：`content_quality.py` 加 lazypack coverage（<0.6→lazypack_gap）。**生成/enforce 未做**（queue `platform_ops_enforce_lazypack_in_publish_pipeline`，需 NotebookLM+乾淨 context）。
+4. **🔑 換機可攜性全套**（boss：另一台機 clone+填env 就能運作 + skills/agents 完整保留）：新建 `README.md`（根目錄 GitHub 入口）+ 重寫 `docs/host-migration.md`（逐步手冊）+ `.env.example`（三檔 secrets 範本）+ `scripts/bootstrap_new_host.sh`（一鍵）+ `backup_user_claude.sh`/`restore_user_claude.sh` + `ops/claude_user_backup/`（**128 檔：user-level CLAUDE.md+27 skills+100 memory 快照**）+ 每日 05:35 `cron_backup_user_claude` 自動保鮮。**repo 確認 PRIVATE**。釐清：project-level `.claude/` 自動進 repo；user-level `~/.claude` 原不進→已快照+每日同步。
+
+**B. 已 queue 待 clean-context（勿在 bloated context 草率做）**：`platform_ops_enforce_lazypack_in_publish_pipeline`(P2，NotebookLM 生成懶人包+enforce+回補)、`paper_review_vt_trend_v7_codex_primary_path_verify`(P3，Codex)、`platform_ops_centralize_release_cadence_thresholds`(P3，抽共用 release-interval helper)、`platform_ops_publish_rhythm_pre_publish_throttle`(P3，publisher 核心路徑謹慎)。dreaming persistent-alert detector 已由 hourly-14 建好+我驗證 sound（抓到 6 個真 active 持續 alert）。
+
+**C. Meta-lesson**：今天一連串（cluster/burst/drought/freshness 誤報、quota anchor 漂移、lazypack silent skip）全同類「規則/測量沒人持續盯就失準/被跳過」。修法哲學統一=偵測層讓 gap 自動可見（區分 discretionary vs fixture/event/operational）。
+
+**接續提示詞（2026-06-30 18:00）**：讀本段。系統健康（breach_count=0、daily-checkup ok、無 pending email、main repo 與 GitHub 同步）。從自主 ops loop 繼續：PHASE 0 清 email backlog → 推進上述 B 的 queued P2/P3（**乾淨 context 起跑後最該先做 lazypack 生成 enforce + VT-trend v7**）→ 沒 critical 主動掃 5 missions。**換機可攜性已完成**，新機照 README/host-migration 可運作。turn 尾排 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`，工具嚴格 `antml:invoke`，emoji 勿放 bash echo（會 UnicodeEncodeError）。
+
+### 🟢 互動 session 脈絡（2026-06-30 ~13:55 台灣時間）
+
+長 session（57+ commits），老闆連續高強度抓問題 + 逼 root-cause 不表面修。已完整根治並上線驗證：
+
+**A. 今日已交付（改完+test+部署/驗證+commit）**：
+1. **2 個長期 warn 根治**（boss email-12256/12281「存在很久」）—— 都是「測量太粗誤報合法模式」：(a) **cluster spy catch-all**：keyword 分類把所有用 SPY 當測試資產的 vol 研究算成 spy → 加 6 粒度主題 cluster（risk_mgmt/forecast_method/event_study/hedging/microstructure/return_predict）+ specific-first 排序 + spy 收窄移除「美股」，spy 74→14（`topic_clusters.py`，commit bd2b68bff）；(b) **publish_rhythm burst**：digest+trending fixture 偶然相近被誤判 → burst 只算 discretionary 文章 clumping，排除 `_NON_RHYTHM_PHASES`（`content_quality.py`，commit 3d1dfed8a）。breach_count→0。
+2. **daily_update intraday 14:00**（boss 親建 plist+wrapper，我驗證全鏈 + smoke-test 撞出 transient SSL hang → kill+lock 釋放）+ **兩 wrapper 加 600s perl-alarm watchdog** 杜絕 lock cascade（commit 6a3352c3f）。daily_checkup order-flow 改 result-level（ebbed800d）。
+3. **策略卡 VIX 情景軌跡**（boss 問「3 張卡為何相同」）：`strategy-regimes.ts` + `DailyDigestSection` 無關，是 `StrategyPanel.tsx` 加「VIX 低→高」三點軌跡揭露低/高 VIX 分歧。deploy 上線驗證 11 卡（commit 40d86fa）。
+4. **首頁導讀發布時間 hh:mm**（boss 指出 detail 頁有但首頁漏）：`DailyDigestSection.tsx` 右側加「發布 hh:mm」台灣時間。deploy 驗證（commit 5ad0675）。
+5. **VT-trend 論文 body v6 HIGH Finding 3**（2009 trough 過強）：精準化「3/5 零、2/5 mixed sign（50/50 +2.1pp, QQQ -3.5pp）不能說完全不存在」，xelatex 編譯通過（commit f08b12263）。
+
+**B. 已 queue 待 clean-context 執行（勿在 bloated context 草率做）**：
+- `paper_review_vt_trend_v7_post_v6_fixes`（P2，Codex）：確認 body narrative HIGH 全解 + 修 v6 CRITICAL（K1458 實驗 doc 的 decomposition identity `VIX_timing=PureVT_excess` 寫錯，應加法）。
+- `platform_ops_dreaming_persistent_alert_detector`（P2）：dreaming 加 detector 讀 alert_dedup.json，同 alert_key 連 N 天 fire → 自動升級 root-cause finding，杜絕「warn 存在很久才被 boss 抓到」（系統性 gap）。
+- `platform_ops_strategy_card_regime_presentation` 已 succeeded（即上面 #3）。
+
+**C. Meta-lesson（PDCA Act，已記 error_log）**：多個 warn 持續 = 測量粗→誤報→fire 太頻繁變噪音→真問題被淹沒 + 只能等 boss 人工發現。修法哲學統一：**區分 discretionary vs fixture/event/operational**（cluster 排 audience=daily、burst 排 non-rhythm phase）。
+
+**接續提示詞（2026-06-30）**：讀本段。系統健康（breach_count=0、daily-checkup ok）。從自主 ops loop 繼續：PHASE 0 清 email backlog → 推進 queued P2（VT-trend v7 派 Codex、dreaming persistent-alert detector，**兩者都需相對乾淨 context**）→ 沒 critical 就主動掃 5 missions。**context 紀律**：此 session 已長，heavy/delicate 工作（論文 body、detector build）優先在 compact 後或新 session 做，勿堆進 bloated context（boss 明確要求 token 成本紀律）。turn 尾排 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`，工具嚴格 `antml:invoke`。
+
+### 🟢 互動 session 脈絡（2026-06-24 ~16:30 台灣時間）
+
+老闆整天連續高強度抓問題 + 逼「從底層邏輯/流程解決，不表面修補」。本 session 完成大量根治 + 診斷出 5 個待實作工程（含一個 meta-fix）。
+
+**A. 已完整根治（改完+測試+部署+驗證，push 0/0）**：
+1. **git 分岔 + 10 天備份缺口**（root cause = 雙 Claude dual-source）：本機與雲端 Claude routine 從 6/4 在同 `origin/main` 各自 commit、分岔 + 曾被 force 改寫。處理：(a) `git merge origin/main` 保留兩邊 + push 同步 **0/0**；(b) 用 `/schedule`+RemoteTrigger 停掉 4 個 cloud routines（兩個 push-main 的 `trig_01HzWX2ZUmsGHnzwciGpHeNz`=platform-ops-patrol、`trig_015iaE6yv3V9V1opjUAA5R2V`=token-usage-daily-report → enabled=false）；(c) 建本機自動 push：`scripts/cron_git_push_backup.sh`(canonical) + `~/.volpred/bin/cron_git_push_backup.sh`(runtime) + crontab `17 */2` + config 登記。**memory `project_cloud_agent_git_divergence`**。
+2. **CI silent fallback 13 處**（背景 codex 引入，push 後 CI red）：kid_reserve.py(6)+topic_claim.py(1)+content.py(1)+alerts.py(5)，warn/silent-ok 修，**audit new=0**、tests 22 passed。
+3. **health check 補強**（停雲端後補回監控）：`src/volpred/ops/health.py` 加 check_strategy_metrics_freshness/check_paper_trading_gaps/check_disk_usage，接 `alerts.py` build_alert_condition_report 鏈。**disk 改雙條件 `>85% AND free<50GB`**（避 926G 大碟誤報，老闆建議）。
+
+**B. 診斷完成、root cause 已查實、待實作（老闆逼出來的真問題；勿表面修）**：
+1. **🔝 內容品質巡檢（META-FIX，最高優先）** `docs/refactor_plan_content_quality_patrol.md` + memory `feedback_content_quality_patrol_gap`：老闆質疑「沒有固定任務檢驗發文/流程/排版有沒有問題嗎」→ 點破 meta-root-cause：系統只有基礎設施巡檢，缺內容品質層。今天 4 問題全靠老闆人工發現。新固定任務巡檢：發文節奏 / 主題 arc 多樣性（早抓 deadlock 源頭）/ digest 每日唯一 / 排版（標題前綴重複）/ 前端 render 健康(fetch 查 React error)/ 內容完整(真圖表+來源)。**判準：只有用戶會發現的問題 = 缺巡檢。**
+2. **release-layer deadlock（發文脫班）** `docs/refactor_plan_release_layer_deadlock.md`：root cause = **39 draft 全被 `release_dedup_skipped` flag 排除**（觸發 if 在 `content.py:861` arc_dups/dup/flood；flag 賦值實際在 `content.py:869-870`；`_release_dedup_flag_active` `content.py:603`；`is_due` `content.py:641` draft 看 effective_include_drafts）。**⚠️ 2026-06-24 自我更正（workflow 驗證抓到）**：flag **不是「鎖+等 review」**——`content.py:244-253` 明寫 6/23 boss throughput incident 後已把它從 21天window 改成 **2天 anti-thrash COOLDOWN**（純優化，correctness 由 LIVE dedup gate 每次重查保證）。老闆「鎖不合理」直覺對舊的 21天window 正確（已修）。**真 root cause = 生產端持續產 arc 重複 → 每次 release run 重判重複 → 重標 flag → 2天 cooldown 永遠 active → pool freeze（code 註解自記 46/46 flagged）**。修法核心 = **生產端 arc-dedup pre-check（不產重複，research milestone path 缺）**，非「廢除鎖」（鎖已是輕量 cooldown）；輔以 remediation 改派 fresh-arc。**force release 是錯解**（`--force` 不繞 dedup + 成功會 reset last_released cadence timer）。
+3. **digest 同日兩篇** ⚠️ **2026-06-24 自我更正**：`scripts/enqueue_daily_digest.py` **已有冪等**（`_digest_published_today` :72 + `_digest_task_exists_today` :99 + docstring :5-6，6/23 寫的）——**不是缺冪等**。6/24 兩篇 `mile_1597b341`(02:34)+`mile_f3e389cf`(02:16) 是**繞過**既有冪等：race（兩次 enqueue 都在對方標記 today-published 前觸發）或雙源/手動 dispatch。待：查為何繞過（race/雙源）+ 即時 retract `mile_f3e389cf`（`volpred ops unpublish`）。**勿重造已存在的冪等 code**。
+4. **「每日精選導讀」標題重複** = 前端 digest title 帶「每日精選導讀｜」前綴 vs 區塊 header 同名重複。`frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。
+5. **前端 React #418 hydration mismatch**（老闆貼 console：HTML mismatch + 無限 postMessage re-render）。定位 `frontend-v2-fix/src/app/page.tsx` + components；高危 pattern(Date/random/toLocale in render)：SiteFooter/MyQuestionsConsole/AdminAnalyticsConsole 等。**前端是獨立巢狀 git repo → cd frontend-v2-fix 才能 commit；deploy 走 deploy-zeabur-safe.sh**。
+
+**C. 本 session 老闆硬性 feedback（已記 memory）**：
+- 從底層邏輯/流程解決不表面修補（force release 被打回）；鎖機制「鎖+等review」對自主系統不合理 → 廢除非補丁。
+- 自主運營缺內容品質巡檢層（`feedback_content_quality_patrol_gap`）。
+- 關 session/終端/重開機要能接續（`feedback_tasks_survive_session_close`）：backbone OS cron/LaunchAgent session-independent；**重開機後 FileVault 解鎖=登入，輸入一次密碼即全恢復**（FileVault 擋 auto-login 但不影響）；⚠️ **跑 install_host_crontab.sh 前必 `--diff`**（2026-06-24 更正：實測 --diff 不是刪 9 條，而是**新增 6 條 + 把 fred-backfill-guard 換成 supabase-sync-drain**——因 fred-backfill-guard 在 config `cron_jobs[2]` 非 system_crontab.items，腳本掃不到。會改動運作中 cron，先 --diff/--dry-run 檢視再決定）。
+
+**D. 擱置/未做**：
+- FB backlog 唯一常青 `mile_312204b2`（砍人燒錢科技股波動率）待貼 Ivan 個人 FB（老闆已開 Chrome）。**App Review 查證結果：發文 app(VolPredPoster/VolPredPage/社團發文)全 Development mode 未上線 → headless 發 FB 粉專不可行 → 走 Chrome 是對的**。FB 個人帳號 Chrome 選法（⚠️ 2026-06-24 更正，照 memory `reference_fb_chrome_browser_autoselect`）：登入的是 **「MAX STUDIO」**（有 X；「MAC STUDIO」是登出錯機別用）。**deviceId 會輪替、不可 hardcode**——每次 `list_connected_browsers` + `tabs_context_mcp`，找 tabs 含 `facebook.com/yihao.lai` 的那台（本 session 剛好是 bc09353b/Browser 3，但下次會變，勿照抄）。
+- 脫班即時止血未做（正解=派 fresh-arc daily_article，非 force）。digest 去重 retract 未做。
+
+**接續提示詞（2026-06-24）**：讀 `storage/ops/handoff_latest.md` KEEP 最上方此 2026-06-24 段。**ultracode 已開（xhigh + workflow）**。從自主 ops loop 繼續，優先序：**(1) 內容品質巡檢 meta-fix（最高——建立後自動 surface 全部，先做 digest唯一/主題多樣/前端render 三項直接覆蓋今天問題）→ (2) 前端 #418+標題重複（cd frontend-v2-fix，獨立 repo，build+deploy-zeabur-safe）→ (3) release deadlock（核心=生產端 arc-dedup pre-check 不產重複；鎖已是 6/23 改的 2天cooldown，非廢除對象；remediation 改 fresh-arc）→ (4) digest 查繞過既有冪等的 race + retract mile_f3e389cf（勿重造冪等）**。每項乾淨 context + Codex/test 驗證，**勿在單一 session 草率全堆**（老闆認可分階段保品質）。auto-push 用 `~/.volpred/bin/cron_git_push_backup.sh`。**install_host_crontab.sh 跑前必 --diff**（會新增 6 + 換 fred-backfill-guard）。turn 結尾排 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`，工具呼叫嚴格 `antml:invoke` 格式。
+
+---
+
+### 互動 session 脈絡（2026-06-19 ~17:52 台灣時間）
+
+**本 session 全部已完成 + 驗證（老闆即時連續抓問題，全從底層修，無 critical 殘留）**：
+1. **鬼打牆 K1054 重發**：`mile_bb520db8`(06-19) 是 `mile_c481c8cf`(06-07) 逐字複製、同 K1054。retract+sync 前端下架（已驗證移除）+ arc_dedup `descriptive→return[]`（我前 session 自傷）改 `_descriptive_dup()` 嚴格判斷 + publish_milestone same-K-id gate + content.py 傳 experiment_refs（commit `be88c2d1`）+ regression test（SpaceX 不擋/ghost 擋，主線程驗證）+ error_log `e1de1fe6`。
+2. **前端「詳情」洩漏**（老闆 2 次截圖）：arc_signature/content_type/experiment_refs 顯示給讀者。`ReportDetail.tsx` 三段 fix（frontend repo 43ff348/11fcfd5/110fd86：黑名單+空值+experiment_refs）+ **foreground** deploy volpred-v3 + 線上驗證詳情/experiment_refs/arc_signature=0（保護 1643 篇）。
+3. **老闆 3 根因** `c35509c8`：release pool dedup flag 加 TTL=21天（46 篇 legacy 回流，已見 released_count=1）+ member_qa dispatch regex **strike2**（2026-06-10 yfinance 同 root，加 explicit agentable override，已驗證進 agentable）+ M2 供給派 journal-discovery 補 7 新方向 `8868f3fb`。
+4. mirror SSL EOF(22MB feed PUT 超 Next.js body limit)+Codex .git sandbox(-s workspace-write 覆蓋 config) 修(dd5f1834) + CLI 診斷(Codex/agy 都正常非沒登入) + email backlog 5→0+老闆回覆。
+5. **stale member_qa_9ab8d3a7**（yaoxk1431 選股/點位提問）評 18/100 **declined**，守住投資建議三紅線**未發投資建議文**，task=`pending_main_thread`（不再 stale）。
+
+**follow-up（已記 error_log，未做）**：
+- **禮貌回覆 yaoxk1431**：寫「VolPred 定位說明（只做波動率/風險，不做選股/點位/個人化建議）+ 邀請提波動率問題」簡短回應，**不可滑入投資建議**。decision: **不 archive**（真實付費會員）。
+- member_qa 進 agentable 但 hourly headless 不自動執行 reader-facing workflow → 確認 dispatch prompt 涵蓋 or 靠互動/subagent 派（觀察下幾班 hourly 是否派出 9ab8d3a7）。
+- dispatch ownership 改 schema `dispatch_lane`（strike3 預備）；theme_flood 改節流非封死；research_backlog 加 fallback 自動觸發 journal-discovery；legacy publish_experiment/publish_comparison 繞 dedup（_append_to_feed last-resort 防呆待評估）；M3 paper 2 筆待主線程 body rewrite。
+
+**本 session 教訓**：多次把工具呼叫開頭標籤打成 `court`/`invoke`（應 `antml:invoke`）→ user-visible 破圖、惹惱用戶。**接續嚴格用正確 function_calls 格式**。修雙向 dedup（false-positive vs false-negative）必同時寫正反兩面 regression test。
+
+**FB**：用戶本 session 明確說「FB 先停」；trending FB 2 篇文案備妥（/tmp/fb_index_inclusion.md + /tmp/fb_move_vix.md）但 harness facebook.com 互動權限擋——**勿主動推 FB**（下方一大串舊 FB awaiting 同理，用戶已表態 FB 暫停）。
+
+**接續提示詞（2026-06-19）**：讀 `storage/ops/handoff_latest.md`（先看 KEEP block 最上方此 2026-06-19 段）後從自主 ops loop 繼續（dashboard 巡檢→triage→派工→收背景 agent）。老闆抱怨的鬼打牆/前端洩漏/3 根因已全修驗證生效，無 critical。優先 follow-up（視 context 鬆緊）：(1) 寫 yaoxk1431 禮貌定位回覆（純定位，不投資建議）；(2) 觀察 member_qa_9ab8d3a7 是否被 hourly 派出，連續不派則補 dispatch prompt。turn 結尾**正確格式**排 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`。**工具呼叫嚴格用 `antml:invoke`，FB 暫停勿推**。
+
+---
+
+### 互動 session 脈絡（2026-05-29 ~13:50 台灣時間，主 agent 手動維護）
+
+**本 session 已完成**：
+1. 全面運營 audit（真實架構 = LaunchAgent + piggy-back scheduler + codex_loop daemon + dispatch_supervisor 重構，**非 crontab**；docs/architecture.md 停在 4/19 已 stale）
+2. 用戶完整願景 → memory `project_platform_vision_full`（全自動不間斷自我運營）
+3. codex-cli 更新 0.132→0.135 + 設週度自動更新 job（runtime_schedules `codex_update`，piggy-back 執行）
+4. 大改安全網：tag `stable-pre-refactor-20260529` + branch `refactor/autonomy-overhaul` + worktree `../volpred-refactor`（回滾指令見 `docs/refactor_safety_net.md`）
+5. 修 `generate_handoff.py` KEEP 保留 bug（原 main() 直接覆寫從不讀回，手寫 handoff 每 :50 被清）
+6. log rotation（codex_loop.log 46MB→196K）+ crontab 違規教訓記 error_log
+7. **重新擘劃**：3 平行 explorer 盤點（前端/後端/指引文件）→ `docs/master_plan.md`（已 commit，7 phase 路線圖）
+8. 清理：`舊前端/` 515MB 移 ~/.Trash（未 git 追蹤、hygiene.py 標 ROOT_CLUTTER，可 Finder 還原）
+9. 歸檔 11 個一次性 audit docs → `docs/archived/incident-history/`（docs/ 根 50→39，已驗證無 active 引用）
+10. `architecture.md` 加當前真實架構修正區塊（原 v12 描述 stale）
+11. **驗證**：double-fire（P2）已被並行流程處理 — `run_due_jobs.py` 確 honor `piggy_back_skip`（非假旗標）；config 已加 4 job 的 skip。**勿重複做**
+12. **糾正 explorer 誤判**：AGENTS.md 是 codex_loop 活躍指令檔（勿歸檔，只能去重）；memory 非「僅 1 檔」（數十檔健在）
+
+13. **用戶「你決定」→ 3 項已決並執行**：(a) 殺重複 codex_loop 82862、留 42125（兩者都 idle 無風險）(b) FB 2 篇標 wont_fix（3天 stale、無法自主 OAuth、改 headless P6）(c) main/origin reconcile：merge 39 ops-report + push，**277 commit 全備份上雲，0/0 同步**
+
+14. **P2 文件優化（main，逐 commit 可審；worktree 因落後 main 改用 main+snapshot tag 兜底）**：AGENTS.md 7 處 `.agents/`→`.claude/` 壞路徑修正（Codex 活躍指令檔）+ 歸檔 DEPRECATED multi-agent-terminal-workflow-codex。跳過 context-hygiene path 改（explorer over-reach）。
+
+15. **P1/P2 再推進（main，逐 commit）**：刪 16 個驗證無引用死腳本（_*/exp_*/rough_vol_pilot/test_* model 調試；scripts 179→163，git 可復原）+ system_handbook.md 加 STALE header。跳過 autonomous-loop 抽離（違反 memory `feedback_claudemd_keep_inline`：CLAUDE.md 不拆）。
+
+16. **P2 文件優化 = 安全有效項全完成**。逐檔驗證後判定 3 項為 explorer over-reach 正確不做：(a) autonomous-loop 抽離→違反 keep-inline (b) publishing.md 砍60%→削弱治理 enforcement（rule 冗餘是刻意設計）(c) scheduler 4-way dedup→alert/publishing 只是 contextual ref 非真重複。詳見 master_plan §7 + 方法論教訓（DRY 不可套治理檔）。
+
+17. **P1 死腳本清理完成**：再刪 35 個死的 publish_k*/publish_<topic>（發現 publish_draft.py 統一入口早已存在；35 個是 spent 一次性、無引用、文章已 published）。**本 session 共清 51 死腳本，scripts/ 179→128，publisher import 驗證 OK**。
+18. **又擋下 over-reach**：generate_diverse_tasks / generate_research_backlog explorer 說「冗餘可合併」→ 驗證皆 active（dispatcher + 每日 08:00 cron 引用），**不可刪**。本 session 共擋 6 個 explorer over-reach。
+
+**P1 清理 + P2 文件 = 完成**（安全項全做、over-reach 全擋、active 全保）。
+**剩餘 = 純多 session 工程，非 chat 可完成**：P0 supervisor D5-D8、P3 前端商業化、P4 資料樞紐、P5 provenance 補修、P6 內容引擎。autonomous loop 持續推進。
+**已決議**：codex_loop 去重(留42125)、FB wont_fix、main/origin 已 reconcile 上雲、double-fire 已由 piggy_back_skip 處理。
+
+**優化路線圖 6 主題**：1.自動化可靠性地基（推完 dispatch_supervisor 4/8→8/8，最高槓桿）2.議題 selectivity/變現 gate 3.論文 pipeline 推進 4.策略自動上架+多元標的 5.曝光/社群/變現 6.活文件更新。
+
+19. **anti-ai-style 破折號 normalizer 完成（2026-05-29 ~17:39，commit 2130d746 已推 origin）**：用戶明確指令「繼續做 normalizer」。新增 `src/volpred/publisher/emdash_normalizer.py` + 掛進 `_append_to_feed`（緊接 markdown_table_sanitizer，同兩層防禦 pattern）。保守 scope：只把 **CJK 兩側包夾**的補充式破折號 `——`/`—` 改逗號（skill 地雷 9 fix (b)「改逗號併入主句」，語意無損）；數字範圍 `2020—2024`、拉丁複合 `risk—reward`、行首署名 `——作者`、code fence、表格 cell 全跳過。10 unit tests 覆蓋各 edge case 全綠。補上 publisher 端硬 gate（先前全靠 agent 自律，validate_anti_ai_style 顯示近期僅 ~10% 乾淨）。
+
+**接續提示詞補充**：compact/clear 後接手，先讀 `docs/refactor_safety_net.md` + memory `project_platform_vision_full` + `project_refactor_safety_net`，再依路線圖主題 1 推進 dispatch_supervisor 重構（在 `../volpred-refactor` worktree 做，主目錄 main 保持 ops 不間斷）。
+
+---
+### 🔴 進行中 user-assigned（2026-05-30 ~12:48 起，最高優先 — compact 後優先續做）
+
+**寫 2 篇 trending articles**（用戶連發 2 主題，daily cap 2）：
+1. **定期定額(DCA) vs 單筆投入(Lump Sum)** — 用戶 Ivan Lai FB，核心洞見「總報酬率 LumpSum 勝、IRR 資金效率本質相等」（工讀生/時薪比喻）
+2. **逢低買進(dip-buying) vs 固定配置** — yp-finance（trending 不可引用來源），主題=time in market vs timing
+
+**共用實驗 K1406**（worktree `agent-ae6bda7e937b51054`，subagent 獨家 owner 收尾中）：conditional block bootstrap，SPY 2005-2026 + 0050 2009-2026。
+- **主線程已實跑驗證**：命題 A Lump Sum 終值勝率 **~0.74**（合 FB 69.7%）✓；命題 B dip-buying(10%) 勝率 **~0.42** + cash drag 0.20-0.62 ✓
+- **✅ 最終數字已驗證（results.json 齊全，2026-05-30 ~13:20）**：
+  - 命題 A confirmed：Lump FV 勝率 **74.1%**；**IRR 年化中位差 lump−dca=+0.0003（≈0）、IRR 勝率~0.50 擲銅板 → 資金效率本質相等**。per-asset：SPY IRR diff +0.0003/+0.0002、0050 −0.008/+0.005（皆微小）
+  - 命題 B confirmed：dip-buying(10%) 勝率 **42.3%**、cash drag(閒置現金時間) **40.7%**、等不到回檔 **13.4%**
+  - 4 圖：fig_a(DCA/Lump 勝率)/fig_b(分布+IRR)/fig_c(dip 勝率+drag)/fig_d(dip 分布+等不到)
+  - **待**：subagent commit K1406 到 worktree branch（產出已在但未 commit）+ Codex verdict
+
+**接續步驟**：(1) `bash scripts/merge_worktree.sh agent-ae6bda7e937b51054` 合併 (2) 驗證 results.json + Codex verdict (3) 寫 2 篇 anti-ai-style（讀 anti-ai-style references；破折號 ≤1/1000、禁假哲理/翻譯腔）+ 嵌真圖 → feed-publisher（trending_repost published）(4) FB 雙發走 Claude in Chrome + Ivan Lai 口吻 (5) 研究誠實：數字有出入如實報告
+
+### 🔔 明早 follow-up（2026-05-31 09:00 後，loop 補做）
+FB 文 4（K1408 進場時機文）已排程明早 09:00 自動發到 Ivan Lai。**排程貼文發出後要補第一則留言貼連結**：到 facebook.com/yihao.lai 找已發出的該篇 → 留言「完整的數字跟圖表在這 👉 https://volpred.zeabur.app/v3/reports/mile_15dcf8e6」→ 寫回 feed.json mile_15dcf8e6 fb_post_status=success + fb_post_url。Chrome=MACBOOK(398dcdba)，單步操作（batch 會被權限擋）。
+
+### 🔔 明天 2 個 FB 留言 follow-up（貼文自動發出後補連結）
+1. ~09:00 後 — K1408 進場時機文（mile_15dcf8e6）：留言「完整的數字跟圖表在這 👉 https://volpred.zeabur.app/v3/reports/mile_15dcf8e6」
+2. ~20:00 後 — K1409 月月配文（mile_c523a922）：留言「完整的數字跟圖表在這 👉 https://volpred.zeabur.app/v3/reports/mile_c523a922」
+做法：facebook.com/yihao.lai 找已發出該篇 → 留言貼連結 → 寫回 feed.json fb_post_status=success。Chrome=MACBOOK(398dcdba)，單步操作。
+
+### 🔔 FB awaiting interactive — mile_072c3972（2026-06-09 05:35 hourly-05 標）
+
+- 文章：財報前波動率反而縮水？NVDA 九次財報的 EAV 解剖（trending_repost，今早 05:23 published, sanitizer-fix 05:31 update）
+- 狀態：fb_post_status=awaiting_interactive_session
+- 原因：個人 FB 帳號（Ivan Lai）只能走 Claude in Chrome
+- 互動 session 接手做法：開 Chrome MACBOOK(398dcdba) → facebook.com/yihao.lai → 走 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP（200-400 字改寫、主貼文不放連結、第一則留言貼 `https://volpred.zeabur.app/v3/reports/mile_072c3972`）→ `mark_fb_post_status.py --mile-id mile_072c3972 --status success` + URL/timestamp 寫 details
+- 重點數字（FB 改寫可用）：NVDA 財報前 5 日 RV 比基準低 19.7%（單測 0.034、Bonferroni 後 NS）；MSFT 財報後 5 日 RV 飆 +102.6%（Bonferroni 後 borderline survive 0.0049）；AAPL 全 NS。九次財報 / 三家公司 / 2024–2026
+
+### 🔔 FB awaiting interactive — mile_123a3855（2026-06-05 13:07 hourly fire 標）
+- 文章：S&P 500 集中度突破 32%，指數波動率卻跌到 14%：這個缺口是怎麼來的（trending_repost，今早 07:19 published）
+- 狀態：fb_post_status=awaiting_interactive_session（hourly cron 改標，dashboard WARN 解除）
+- 原因：個人 FB 帳號（Ivan Lai）只能走 Claude in Chrome，hourly cron 無自主能力
+- 互動 session 接手做法：開 Chrome MACBOOK(398dcdba) → facebook.com/yihao.lai → 走 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP（200-400 字改寫、主貼文不放連結、第一則留言貼 `https://volpred.zeabur.app/v3/reports/mile_123a3855`）→ `mark_fb_post_status.py --mile-id mile_123a3855 --status success` + URL/timestamp 寫 details
+
+### 🔔 FB awaiting interactive — mile_0fa9c7f5（2026-06-09 08:17 hourly-08 標）
+- 文章：VIX 一根長腳之後：CPI 前夕的短端結構告訴我們什麼（event_article CPI_US 2026-06-11 T-2，08:16 published）
+- 狀態：fb_post_status=awaiting_interactive_session
+- 原因：個人 FB 帳號（Ivan Lai）只能走 Claude in Chrome
+- 互動 session 接手做法：開 Chrome MACBOOK(398dcdba) → facebook.com/yihao.lai → 走 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP（200-400 字改寫、主貼文不放連結、第一則留言貼 `https://volpred.zeabur.app/v3/reports/mile_0fa9c7f5`）→ `mark_fb_post_status.py --mile-id mile_0fa9c7f5 --status success`
+- FB 草稿已寫好：`storage/event_articles/us_cpi_2026_06_11_t2/fb_draft.md`（200 字、Ivan Lai 口吻、6/5 VIX 長腳 + VIX9D 倒掛 hook）
+- 重點數字：近 4 次 CPI 反應變淡（5/13 -0.7% vs 2/12 +18%）+ 當前 VIX9D/VIX 1.041 倒掛 + T+5 一律負（平均 -8%）
+
+### 🔔 FB awaiting interactive — mile_0e1eb5aa（2026-06-10 10:xx hourly-10 標）
+- 文章：FOMC 6/17 T-7：SOFR 期貨說「不降息」，但點陣圖說什麼？（event_article FOMC_2026_06_17 T-7，10:xx published）
+- 狀態：fb_post_status=awaiting_interactive_session
+- 原因：個人 FB 帳號（Ivan Lai）只能走 Claude in Chrome
+- 互動 session 接手做法：開 Chrome MACBOOK(398dcdba) → facebook.com/yihao.lai → 走 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP（200-400 字改寫、主貼文不放連結、第一則留言貼 `https://volpred.zeabur.app/v3/reports/mile_0e1eb5aa`）→ `mark_fb_post_status.py --mile-id mile_0e1eb5aa --status success`
+- FB 草稿已寫好：`experiments/event_article_fomc_2026_06_17_t7/fb_draft.md`（Ivan Lai 口吻、SOFR 期貨 vs 點陣圖分歧 hook + VIX9D/VIX 比值 1.114）
+- 重點數字：VIX 19.87 / VIX9D 22.14 / 比值 1.114（今年 4 場 FOMC T-7 最高）/ SOFR Jun 3.67%→Mar27 4.06% 上坡 / SPY 5日 RV 17.6%
+
+### ✅ RESOLVED mile_a5e79b07（2026-07-07 09:50 標 expired_skip — 事件過3週補發無ROI；勿再發，下方 stale 條目留存作 audit）
+### 🔔 FB awaiting interactive — mile_a5e79b07（2026-06-15 09:25 task_89accaab6ced 標）
+- 文章：FOMC 6/17 倒數 48 小時：VIX9D/VIX 比值從 1.11 跌回 0.98，市場已收手（event_article FOMC_2026_06_17 T-2，published 2026-06-15）
+- 狀態：fb_post_status=awaiting_interactive_session
+- 原因：個人 FB 帳號（Ivan Lai）只能走 Claude in Chrome
+- 互動 session 接手做法：開 Chrome → facebook.com/yihao.lai → 走 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP（200-400 字改寫、主貼文不放連結、第一則留言貼 `https://volpred.zeabur.app/v3/reports/mile_a5e79b07`）→ `mark_fb_post_status.py --mile-id mile_a5e79b07 --status success`
+- FB 草稿已寫好：`experiments/event_article_fomc_2026_06_17_t2/fb_draft.md`（Ivan Lai 口吻、VIX9D/VIX 從 1.11→0.98 hook + 19 場 FOMC 平均報酬 -0.22% + 降息會議反直覺 -0.44%）
+- 重點數字：VIX 17.68 / VIX9D 17.26 / 比值 0.976（T-7 是 1.114，壓力已消失）/ SOFR Jun 3.67%→Mar27 4.06% / SPY 19 場 FOMC 均值 -0.22%
+
+### 🔔 FB awaiting interactive — mile_0daa4bb2（2026-06-18 07:15 hourly-07 標）
+- 文章：NVDA 選擇權把話說得很清楚：先怕，再買（trending_repost，2026-06-18 07:14 published）
+- 狀態：fb_post_status=awaiting_interactive_session
+- 互動 session 接手做法：開 Chrome MACBOOK(398dcdba) → facebook.com/yihao.lai → 走 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP（200-400 字改寫、主貼文不放連結、第一則留言貼 `https://volpred.zeabur.app/v3/reports/mile_0daa4bb2`）→ `mark_fb_post_status.py --mile-id mile_0daa4bb2 --status success`
+- FB 草稿已寫好：`storage/drafts/fb_mile_0daa4bb2.md`
+- 重點數字：NVDA 25Δ skew put-call +0.8%（近乎持平）/ 短 dated ±10% OTM skew +3.5%（put 較貴）/ ATM IV 32.4% vs RV30 45.4% IV-RV gap **-13pp**（市場低估近期波動）/ skew flip 約 64 天後由 put skew 翻 call skew
+
+### 🔔 FB awaiting interactive — mile_d341175c（2026-06-18 11:19 hourly-11 標）
+- 文章：Treasury 拍賣冷清不等於 MOVE 噴出（daily_article K1506 null finding general-audience，11:19 published draft）
+- 狀態：fb_post_status=awaiting_interactive_session
+- 原因：個人 FB 帳號（Ivan Lai）只能走 Claude in Chrome
+- 互動 session 接手做法：開 Chrome MACBOOK(398dcdba) → facebook.com/yihao.lai → 走 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP（200-400 字改寫、主貼文不放連結、第一則留言貼 `https://volpred.zeabur.app/v3/reports/mile_d341175c`）→ `mark_fb_post_status.py --mile-id mile_d341175c --status success`
+- FB 草稿：`storage/drafts/fb_mile_d341175c.md`
+- 重點數字：278 場 Treasury auctions（2015-2026 / 11 年）/ Welch t=-0.47, p=0.642, Cohen's d=-0.10 / 5d MOVE cum vol weak 8.79% vs benign 9.20% / Bootstrap 95% CI [-0.020, +0.008] 橫跨 0 / Secondary z<-1.0 N=45 同方向 FAIL
+
+### 🔔 FB awaiting interactive — mile_19fa8ca1（2026-06-17 hourly-12 標）
+- 文章：空倉多到9年最高，上次這樣的時候 VIX 一週翻了兩倍（trending_repost，2026-06-17 12:20 published）
+- 狀態：fb_post_status=awaiting_interactive_session
+- 原因：個人 FB 帳號（Ivan Lai）只能走 Claude in Chrome
+- 互動 session 接手做法：開 Chrome MACBOOK(398dcdba) → facebook.com/yihao.lai → 走 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP（200-400 字改寫、主貼文不放連結、第一則留言貼 `https://volpred.zeabur.app/v3/reports/mile_19fa8ca1`）→ `mark_fb_post_status.py --mile-id mile_19fa8ca1 --status success`
+- FB 草稿：`storage/drafts/fb_mile_19fa8ca1.md`（Ivan Lai 口吻，已寫好，carry trade 倉位擁擠 + VIX 定價缺口 hook）
+- 重點數字：CFTC 日圓淨空倉 -145,800 張（9年高）/ 2024/8/5 VIX 38.6（月均14→38）/ USDJPY 160.2 vs 2024年152.7 / VIX 18（現在）
+### 🔔 FB awaiting interactive — mile_08fefa59（2026-07-07 06:20 hourly-06 標）
+- 文章：AI 基建變現疑慮升溫，科技股與防禦板塊的波動率黃金交叉（trending_repost，2026-07-07 06:20 published）
+- 狀態：fb_post_status=awaiting_interactive_session（hourly headless 無 Chrome）
+- 互動 session 做法：**發前先 pre-check 老闆是否已手動發過同主題** → 開 Chrome 連 MAC STUDIO（`list_connected_browsers` 找登入 yihao.lai 那台）→ facebook.com/yihao.lai → 走 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP（主貼文不放連結、第一則留言貼 `https://volpred.zeabur.app/v3/reports/mile_08fefa59`）→ `mark_fb_post_status.py --mile-id mile_08fefa59 --status success`
+- FB 草稿已寫好：`storage/drafts/fb_trending_ai_capex_20260707.md`（Ivan Lai 口吻、~300字、已過 anti_ai_gate）
+- 重點數字：QQQ 20日RV 35.28%（一個月前 15.55 翻倍）vs 防禦籃 16.02%／科技−防禦利差 19.27pp（近90日高點 20.54）／VIX 15.57 低檔／SKEW 145／近1月 QQQ −2.77% vs XLV +10.25%（黃金交叉）
+- ⚠️ 註記：Codex 額度用盡（reset Jul 11），本篇懶人包改自寫 matplotlib renderer（`experiments/trending_ai_capex_defensive_20260707/render_lazypack.py`，數字直讀 results.json）；lazypack 生成的 codex primary path 至 7/11 前不可用，需 lazypack 的文章走自寫 renderer 或 NotebookLM fallback。
+
+### ✅ RESOLVED mile_d12825bb（2026-07-07 14:14 hourly-14 發佈成功 — 老闆 Telegram msg229「你立刻發」觸發）
+- **已發**：fb_realchrome_post CDP-attach 老闆 port 9222 Chrome → 566字主文+4圖（結果圖+3懶人包，先 upload_chart 上傳 supabase）+第一則留言連結；canonical fb_post_status→success；獨立截圖驗證相片區顯示 MOVE 圖為最新照片。Telegram 已回 msg263。
+- **教訓**：headless hourly **可**用 fb_realchrome_post CDP-attach 發 FB（不必等互動 session），前提=老闆 dedicated Chrome(port 9222)開著且已登入。draft 缺圖時先 upload_chart lazypack→補 `## 圖片` 區塊（worker 只吃 URL、0圖 ABORT）。下方 stale 條目留存作 audit。
+### 🔔 FB awaiting interactive — mile_d12825bb（2026-07-07 09:50 標，email-12690 老闆「立刻處理」觸發）
+- 文章：同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感（trending_repost，2026-07-06 published）
+- 狀態：fb_post_status=awaiting_interactive_session（headless 無 Chrome 發不出）
+- 互動 session 做法：**發前 pre-check 老闆是否已手動發** → 開 Chrome 連 MAC STUDIO（`list_connected_browsers` 找登入 yihao.lai 那台）→ facebook.com/yihao.lai → 主貼文不放連結、第一則留言貼 `https://volpred.zeabur.app/v3/reports/mile_d12825bb` → `mark_fb_post_status.py --mile-id mile_d12825bb --status success`
+- FB 草稿已寫好：`storage/drafts/fb_trending_move_asymmetry_20260706.md`（Ivan Lai 口吻、已過 anti_ai_gate）
+- 重點數字：2010以來4065交易日／殖利率上行日 MOVE +0.51% vs 下行日 −0.28%（差0.79pp, t=5.52）／扣掉幅度後每bp反應 上0.40% vs 下0.27%＝1.47倍／近90日方向差距放大近6倍(4.53pp)／MOVE 65.4, 10Y 4.485%
+- ⚠️ email-12690 已寄 close email（含2篇可直接貼上完稿+連結）給老闆；老闆二選一：等 Chrome session 我發 or 他自己秒貼
+<!-- /KEEP -->
+
+Primary-path review remains local; three independent read-only audits provide cross-checks.
+  → Read K1686 source end-to-end and map all timing/index/variant logic
+  • Verify results JSON, README claims, and independently recompute key outputs
+  • Audit K897 implementation and exact seeded-path equivalence
+  • Audit git history for pre-registration integrity and post-hoc labeling
+  • Assess signed decomposition and calibrate K897/paper verdict
+exec
+/bin/zsh -lc 'wc -l experiments/k1686/k1686_contemporaneous_null.py experiments/k1686/k1686_contemporaneous_null_results.json experiments/k1686/README.md && rg --files experiments/k897 && git status --short && git log --oneline --decorate -20 -- experiments/k1686' in /Users/yhlai0911/volpred-research
+ succeeded in 256ms:
+A  experiments/k1686/README.md
+A  experiments/k1686/k1686_contemporaneous_null.py
+M  experiments/k1686/k1686_contemporaneous_null_results.json
+A  experiments/k1686/k1686_null_distributions.png
+ M storage/next_tasks.json
+ M storage/ops/compute_queue/k1686_volabs_contemporaneous_null.json
+ M storage/reports/feed.json
+ M storage/reports/token_usage/weekly_2026-07-05.json
+ M storage/reports/token_usage/weekly_2026-07-05.md
+ M storage/work_log.json
+?? scripts/codex_review_job.sh
+?? storage/ops/codex_reviews/
+?? storage/ops/compute_queue/k1686_codex_primary_review.json
+8c7777b72 (HEAD -> main, origin/main, origin/HEAD) ops(dispatch-supervisor 04:36): PHASE-Z safety-net auto-commit (agent left uncommitted)
+
+exec
+/bin/zsh -lc "nl -ba experiments/k1686/k1686_contemporaneous_null.py | sed -n '1,240p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+     1	"""
+     2	K1686: Contemporaneous Null Simulation for Volatility Absorption (Paper 8)
+     3	
+     4	Fixes the identification defect found in the 2026-07-11 fable deep review (P0-1):
+     5	
+     6	  K897's simulated day-t vol proxy was sqrt(h[t]), which is F_{t-1}-measurable under the
+     7	  GJR recursion h[t] = w + (a + g*1{eps_{t-1}<0})*eps_{t-1}^2 + b*h[t-1].  It does not
+     8	  react to r_t at all, so the simulated "shock day" lands on the day AFTER a large move.
+     9	  The empirical delta_VIX_t, by contrast, is contemporaneous with r_t (VIX spikes on the
+    10	  day the market crashes).  The empirical SAR numerator is therefore mechanically inflated
+    11	  by same-day co-movement while the simulated one is not -- the two sides are not the same
+    12	  statistic, and "empirical decline >> null" may be an artifact of that mismatch.
+    13	
+    14	  Fix: use sqrt(h[t+1]) as the day-t proxy -- the GARCH forecast formed at the close of day
+    15	  t, after r_t is observed.  That is the correct analogue of "closing VIX reflects today's
+    16	  information".
+    17	
+    18	Design (see README.md for the full pre-registered spec):
+    19	  - Same GARCH params, same seeds (0..9999), same n_obs (5000) as K897, so the simulated
+    20	    return paths r are POINTWISE IDENTICAL to K897's.  Only the proxy timing changes.
+    21	  - Built-in K897 replication arm (lagged proxy) computed on the SAME paths.  If it
+    22	    reproduces K897's sim_mean_decline = 0.1734, any difference in the contemporaneous arm
+    23	    is attributable to the timing fix alone.  This is the experiment's internal placebo.
+    24	  - Empirical side reads the PINNED snapshot CSV (K897 used live yfinance -- review P1-3).
+    25	  - 5 variants: A fixed (PRIMARY) / B frequency-matched / C relative / D sign-split /
+    26	    E ambient-regime.
+    27	
+    28	Decision rule was pre-registered and committed BEFORE this script was run (git history).
+    29	
+    30	Data: paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv (pinned)
+    31	"""
+    32	
+    33	import json
+    34	import warnings
+    35	from pathlib import Path
+    36	
+    37	import numpy as np
+    38	import pandas as pd
+    39	from concurrent.futures import ProcessPoolExecutor
+    40	import multiprocessing
+    41	
+    42	warnings.filterwarnings("ignore")
+    43	
+    44	HERE = Path(__file__).resolve().parent
+    45	REPO = HERE.parent.parent
+    46	PINNED_CSV = REPO / "paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv"
+    47	
+    48	# --- Frozen spec (pre-registered) ---------------------------------------------------
+    49	N_SIM = 10_000
+    50	N_OBS = 5_000
+    51	SEEDS = range(N_SIM)              # identical to K897
+    52	SAMPLE_START, SAMPLE_END = "2006-01-01", "2026-04-05"
+    53	SHOCK_ABS = 2.0                   # |delta VIX| > 2, same as paper Table 3
+    54	ANN = np.sqrt(252.0)
+    55	MIN_CELL = 5                      # need n_shock > 5 and n_normal > 5 (K897 convention)
+    56	
+    57	REGIME_NAMES = ["calm (<15)", "normal (15-20)", "elevated (20-25)", "high (25-30)", "crisis (>=30)"]
+    58	REGIME_BOUNDS = [(0, 15), (15, 20), (20, 25), (25, 30), (30, 1e6)]
+    59	
+    60	# K897 fitted GJR-GARCH(1,1)-t params, reused verbatim so the null DGP is unchanged.
+    61	K897_PARAMS = {
+    62	    "mu": 0.07641013516248987,
+    63	    "ar1": 0.0,
+    64	    "omega": 0.022188769677603346,
+    65	    "alpha": 0.0,
+    66	    "gamma": 0.24422367045225124,
+    67	    "beta": 0.8594147336803625,
+    68	    "nu": 5.647879075643755,
+    69	    "persistence": 0.981526568906488,
+    70	}
+    71	K897_REFERENCE = {  # for the replication check
+    72	    "sim_mean_decline": 0.1734,
+    73	    "sim_std_decline": 0.2105,
+    74	    "sim_ci_95": [-0.2811, 0.5575],
+    75	    "empirical_decline_live_yfinance": 0.8162,
+    76	}
+    77	
+    78	
+    79	# ====================================================================================
+    80	# SAR core -- one implementation used by BOTH the empirical and the simulated side,
+    81	# so the two can never drift apart.
+    82	# ====================================================================================
+    83	def sar_by_regime(abs_ret, level, shock, bounds=REGIME_BOUNDS):
+    84	    """SAR(regime) = mean(|r| | shock, regime) / mean(|r| | normal, regime).
+    85	
+    86	    abs_ret : |r_t|
+    87	    level   : the fear level used to assign day t to a regime (VIX_t or the GARCH proxy)
+    88	    shock   : boolean shock flag for day t
+    89	    """
+    90	    out, occ, shock_n = [], [], []
+    91	    for lo, hi in bounds:
+    92	        m = (level >= lo) & (level < hi)
+    93	        sm, nm = m & shock, m & ~shock
+    94	        ns, nn = int(sm.sum()), int(nm.sum())
+    95	        occ.append(float(m.mean()))
+    96	        shock_n.append(ns)
+    97	        if ns > MIN_CELL and nn > MIN_CELL:
+    98	            out.append(float(abs_ret[sm].mean() / abs_ret[nm].mean()))
+    99	        else:
+   100	            out.append(np.nan)
+   101	    return np.array(out), np.array(occ), np.array(shock_n)
+   102	
+   103	
+   104	def decay_only_drop_level(params, drop=SHOCK_ABS):
+   105	    """Lowest vol level at which the null can produce a `drop`-point one-day FALL.
+   106	
+   107	    With alpha = 0 a positive return contributes nothing to next-day variance, so the deepest
+   108	    possible one-day fall is pure decay: h_next = omega + beta*h.  Solving
+   109	        (sqrt(omega + beta*h) - sqrt(h)) * sqrt(252) = -drop
+   110	    gives the level below which a "vol-DOWN shock" is IMPOSSIBLE in this null.  That is what
+   111	    makes D_down undefined in the lower regimes -- a structural property, not a coding bug.
+   112	    """
+   113	    from scipy.optimize import brentq
+   114	    w, b = params["omega"], params["beta"]
+   115	
+   116	    def f(P):
+   117	        h = (P / ANN) ** 2
+   118	        return (np.sqrt(w + b * h) - np.sqrt(h)) * ANN + drop
+   119	
+   120	    try:
+   121	        return float(brentq(f, 1.0, 500.0))
+   122	    except ValueError:
+   123	        return float("nan")
+   124	
+   125	
+   126	def decline(sars):
+   127	    """Primary statistic: SAR(calm) - SAR(high 25-30)."""
+   128	    calm, high = sars[0], sars[3]
+   129	    if np.isnan(calm) or np.isnan(high):
+   130	        return np.nan
+   131	    return float(calm - high)
+   132	
+   133	
+   134	def decline_nh(sars):
+   135	    """Secondary statistic: SAR(normal 15-20) - SAR(high 25-30).
+   136	
+   137	    Needed because the calm cell is not always measurable -- in variant F the affine
+   138	    recalibration that fixes the level gap also shrinks the increments, so a calm-regime
+   139	    shock (2 VIX-scale points) becomes rarer than the minimum cell size. Reporting the
+   140	    normal-to-high leg keeps that variant from being silently dropped.
+   141	    """
+   142	    normal, high = sars[1], sars[3]
+   143	    if np.isnan(normal) or np.isnan(high):
+   144	        return np.nan
+   145	    return float(normal - high)
+   146	
+   147	
+   148	# ====================================================================================
+   149	# Simulation: one GJR path -> every variant's SAR (computed on the SAME path)
+   150	# ====================================================================================
+   151	def simulate_one(args):
+   152	    seed, params, n_obs, spec = args
+   153	    rng = np.random.RandomState(seed)
+   154	
+   155	    mu, ar1 = params["mu"], params["ar1"]
+   156	    omega, alpha, gamma, beta, nu = (
+   157	        params["omega"], params["alpha"], params["gamma"], params["beta"], params["nu"],
+   158	    )
+   159	
+   160	    # Identical draw to K897: same seed, same size, same scaling -> bit-identical z.
+   161	    z = rng.standard_t(df=nu, size=n_obs) * np.sqrt((nu - 2) / nu)
+   162	
+   163	    r = np.zeros(n_obs)
+   164	    h = np.zeros(n_obs + 1)          # ONE EXTRA STEP: h[n_obs] needs only eps[n_obs-1]
+   165	
+   166	    h[0] = omega / (1 - alpha - gamma / 2 - beta)
+   167	    r[0] = mu + np.sqrt(h[0]) * z[0]
+   168	
+   169	    for t in range(1, n_obs):        # recursion identical to K897 (ar1 = 0 here)
+   170	        indicator = 1.0 if r[t - 1] - mu < 0 else 0.0
+   171	        eps = r[t - 1] - mu - ar1 * (r[t - 2] if t >= 2 else 0)
+   172	        h[t] = max(omega + (alpha + gamma * indicator) * eps ** 2 + beta * h[t - 1], 1e-8)
+   173	        r[t] = mu + ar1 * r[t - 1] + np.sqrt(h[t]) * z[t]
+   174	
+   175	    # The extra step that makes a contemporaneous proxy possible at t = n_obs-1.
+   176	    indicator = 1.0 if r[n_obs - 1] - mu < 0 else 0.0
+   177	    eps = r[n_obs - 1] - mu - ar1 * (r[n_obs - 2] if n_obs >= 2 else 0)
+   178	    h[n_obs] = max(omega + (alpha + gamma * indicator) * eps ** 2 + beta * h[n_obs - 1], 1e-8)
+   179	
+   180	    abs_ret = np.abs(r)
+   181	
+   182	    # --- the two proxies -------------------------------------------------------------
+   183	    p_lag = np.sqrt(h[:n_obs]) * ANN        # K897: sqrt(h[t])   -- F_{t-1}-measurable
+   184	    p_con = np.sqrt(h[1:n_obs + 1]) * ANN   # K1686: sqrt(h[t+1]) -- reacts to r_t
+   185	
+   186	    res = {}
+   187	    for tag, P in (("k897_lagged", p_lag), ("contemporaneous", p_con)):
+   188	        dP = np.concatenate([[0.0], np.diff(P)])   # K897 convention: t=0 is a normal day
+   189	
+   190	        # --- A: fixed threshold (PRIMARY) ---
+   191	        shock_a = np.abs(dP) > SHOCK_ABS
+   192	        sars, occ, ns = sar_by_regime(abs_ret, P, shock_a)
+   193	        res[f"{tag}|A"] = sars
+   194	        if tag == "contemporaneous":
+   195	            res["occ_A"], res["nshock_A"] = occ, ns
+   196	            res["shock_rate_A"] = float(shock_a.mean())
+   197	        else:
+   198	            res["occ_A_lagged"] = occ
+   199	            res["shock_rate_A_lagged"] = float(shock_a.mean())
+   200	
+   201	    # Everything below uses the contemporaneous proxy only.
+   202	    P = p_con
+   203	    dP = np.concatenate([[0.0], np.diff(P)])
+   204	    s = spec["shock_rate"]
+   205	
+   206	    # --- B: frequency-matched (path-specific quantiles for BOTH shock and regimes) ---
+   207	    thr_b = np.quantile(np.abs(dP[1:]), 1.0 - s)
+   208	    shock_b = np.abs(dP) > thr_b
+   209	    # regime cut-points = this path's own P-quantiles at the empirical VIX regime probabilities
+   210	    qs = np.quantile(P, spec["regime_probs"])
+   211	    bounds_b = [(-1e9, qs[0]), (qs[0], qs[1]), (qs[1], qs[2]), (qs[2], qs[3]), (qs[3], 1e9)]
+   212	    sars_b, occ_b, _ = sar_by_regime(abs_ret, P, shock_b, bounds_b)
+   213	    res["contemporaneous|B"] = sars_b
+   214	    res["occ_B"] = occ_b
+   215	    res["shock_rate_B"] = float(shock_b.mean())
+   216	
+   217	    # --- C: relative threshold (same unit-free q as empirical) ---
+   218	    rel = np.zeros(len(P))
+   219	    rel[1:] = np.abs(dP[1:]) / P[:-1]
+   220	    shock_c = rel > spec["rel_q"]
+   221	    sars_c, _, _ = sar_by_regime(abs_ret, P, shock_c)
+   222	    res["contemporaneous|C"] = sars_c
+   223	    res["shock_rate_C"] = float(shock_c.mean())
+   224	
+   225	    # --- D: sign-split (denominator = the shared non-shock set, as in the empirical) ---
+   226	    shock_up, shock_dn = dP > SHOCK_ABS, dP < -SHOCK_ABS
+   227	    any_shock = np.abs(dP) > SHOCK_ABS
+   228	    for sfx, sm_flag in (("D_up", shock_up), ("D_down", shock_dn)):
+   229	        vals = []
+   230	        for lo, hi in REGIME_BOUNDS:
+   231	            m = (P >= lo) & (P < hi)
+   232	            sm, nm = m & sm_flag, m & ~any_shock
+   233	            if int(sm.sum()) > MIN_CELL and int(nm.sum()) > MIN_CELL:
+   234	                vals.append(float(abs_ret[sm].mean() / abs_ret[nm].mean()))
+   235	            else:
+   236	                vals.append(np.nan)
+   237	        res[f"contemporaneous|{sfx}"] = np.array(vals)
+   238	    res["shock_rate_D_up"] = float(shock_up.mean())
+   239	    res["shock_rate_D_down"] = float(shock_dn.mean())
+   240	
+
+exec
+/bin/zsh -lc "nl -ba experiments/k1686/k1686_contemporaneous_null.py | sed -n '241,480p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+   241	    # --- E: ambient regime (classify by the PRE-shock fear level P[t-1]) ---
+   242	    sars_e, occ_e, _ = sar_by_regime(abs_ret[1:], P[:-1], any_shock[1:])
+   243	    res["contemporaneous|E"] = sars_e
+   244	    res["occ_E"] = occ_e
+   245	
+   246	    # --- G: doubly-corrected (POST-HOC): ambient regime AND relative threshold ---
+   247	    # Neither B, C nor E fixes more than one flaw at a time. G is the "most surgical" null the
+   248	    # independent review asked for: classify by the PRE-shock level (kills regime endogeneity)
+   249	    # AND use the unit-free relative threshold (kills the fixed-absolute-threshold selection
+   250	    # artifact). If the empirical decline still sits inside THIS null, the closure is robust to
+   251	    # both corrections at once; if it sits outside, the closure is fragile. Reported either way.
+   252	    sars_g, occ_g, _ = sar_by_regime(abs_ret[1:], P[:-1], shock_c[1:])
+   253	    res["contemporaneous|G"] = sars_g
+   254	    res["occ_G"] = occ_g
+   255	
+   256	    # --- F: VRP-calibrated (POST-HOC, not pre-registered -- see README) ---
+   257	    # The obvious attack on variant A is that VIX carries a variance risk premium, so the
+   258	    # paper's literal 15/20/25/30 cut-points mean something different on the null's physical
+   259	    # vol scale (the null then sits in "calm" 77% of the time vs the data's 34%).  F answers
+   260	    # it head-on: map the null's proxy onto VIX's scale with the affine fit VIX ~ a + b*P
+   261	    # estimated on the real data, THEN apply the paper's literal thresholds.  The same map
+   262	    # scales the increments, so the +/-2 shock threshold is transported consistently.
+   263	    a_vrp, b_vrp = spec["vrp_a"], spec["vrp_b"]
+   264	    P_f = a_vrp + b_vrp * P
+   265	    dP_f = np.concatenate([[0.0], np.diff(P_f)])
+   266	    shock_f = np.abs(dP_f) > SHOCK_ABS
+   267	    sars_f, occ_f, ns_f = sar_by_regime(abs_ret, P_f, shock_f)
+   268	    res["contemporaneous|F"] = sars_f
+   269	    res["occ_F"] = occ_f
+   270	    res["shock_rate_F"] = float(shock_f.mean())
+   271	
+   272	    return res
+   273	
+   274	
+   275	# ====================================================================================
+   276	# Empirical side -- mirrors simulate_one() variant for variant
+   277	# ====================================================================================
+   278	def filtered_contemporaneous_proxy(returns, params):
+   279	    """Run the SAME GJR recursion on the REAL returns and return the day-t contemporaneous
+   280	    proxy sqrt(h[t+1])*sqrt(252). Used only to calibrate the null's vol scale onto VIX's
+   281	    (variant F) -- it is not used for any SAR computation on the empirical side."""
+   282	    mu, ar1 = params["mu"], params["ar1"]
+   283	    w, al, g, b = params["omega"], params["alpha"], params["gamma"], params["beta"]
+   284	    r = np.asarray(returns, dtype=float)
+   285	    n = len(r)
+   286	    h = np.zeros(n + 1)
+   287	    h[0] = w / (1 - al - g / 2 - b)
+   288	    for t in range(1, n + 1):
+   289	        ind = 1.0 if r[t - 1] - mu < 0 else 0.0
+   290	        eps = r[t - 1] - mu - ar1 * (r[t - 2] if t >= 2 else 0.0)
+   291	        h[t] = max(w + (al + g * ind) * eps ** 2 + b * h[t - 1], 1e-8)
+   292	    return np.sqrt(h[1:n + 1]) * ANN
+   293	
+   294	
+   295	def empirical_side():
+   296	    df = pd.read_csv(PINNED_CSV, parse_dates=["date"])
+   297	    df = df[(df.date >= SAMPLE_START) & (df.date <= SAMPLE_END)].copy()
+   298	    df["ret"] = np.log(df["spy_adj_close"] / df["spy_adj_close"].shift(1)) * 100
+   299	    df = df.dropna(subset=["ret", "vix_close"])
+   300	    df["dvix"] = df["vix_close"].diff()
+   301	    df = df.dropna(subset=["dvix"]).reset_index(drop=True)
+   302	
+   303	    a = df["ret"].abs().values
+   304	    V = df["vix_close"].values
+   305	    dV = df["dvix"].values
+   306	
+   307	    shock_a = np.abs(dV) > SHOCK_ABS
+   308	    s = float(shock_a.mean())
+   309	
+   310	    # regime probabilities under the empirical VIX -- variant B matches these by construction
+   311	    regime_probs = [float((V < b).mean()) for b in (15, 20, 25, 30)]
+   312	
+   313	    # variant C: the unit-free threshold that reproduces the same shock rate empirically
+   314	    rel = np.zeros(len(V))
+   315	    rel[1:] = np.abs(dV[1:]) / V[:-1]
+   316	    rel_q = float(np.quantile(rel[1:], 1.0 - s))
+   317	
+   318	    emp = {}
+   319	    sars_a, occ_a, ns_a = sar_by_regime(a, V, shock_a)
+   320	    emp["A"] = sars_a
+   321	
+   322	    thr_b = float(np.quantile(np.abs(dV), 1.0 - s))
+   323	    shock_b = np.abs(dV) > thr_b
+   324	    emp["B"] = sar_by_regime(a, V, shock_b)[0]
+   325	
+   326	    shock_c = rel > rel_q
+   327	    emp["C"] = sar_by_regime(a, V, shock_c)[0]
+   328	
+   329	    any_shock = np.abs(dV) > SHOCK_ABS
+   330	    for sfx, sm_flag in (("D_up", dV > SHOCK_ABS), ("D_down", dV < -SHOCK_ABS)):
+   331	        vals = []
+   332	        for lo, hi in REGIME_BOUNDS:
+   333	            m = (V >= lo) & (V < hi)
+   334	            sm, nm = m & sm_flag, m & ~any_shock
+   335	            if int(sm.sum()) > MIN_CELL and int(nm.sum()) > MIN_CELL:
+   336	                vals.append(float(a[sm].mean() / a[nm].mean()))
+   337	            else:
+   338	                vals.append(np.nan)
+   339	        emp[sfx] = np.array(vals)
+   340	
+   341	    emp["E"] = sar_by_regime(a[1:], V[:-1], any_shock[1:])[0]
+   342	    emp["F"] = emp["A"]   # F changes only the NULL's scale; the data side is variant A
+   343	    emp["G"] = sar_by_regime(a[1:], V[:-1], shock_c[1:])[0]   # ambient regime + relative threshold
+   344	
+   345	    # Variant F calibration: affine map from the null's physical vol scale onto VIX's scale,
+   346	    # fitted on the real data (VIX_t ~ a + b * P_t, where P_t is the same contemporaneous GJR
+   347	    # proxy the simulation uses). This is what lets the null be judged by the paper's literal
+   348	    # 15/20/25/30 thresholds without the variance-risk-premium level gap contaminating it.
+   349	    P_emp = filtered_contemporaneous_proxy(df["ret"].values, K897_PARAMS)
+   350	    b_vrp, a_vrp = np.polyfit(P_emp, V, 1)
+   351	
+   352	    spec = {
+   353	        "shock_rate": s,
+   354	        "regime_probs": regime_probs,
+   355	        "rel_q": rel_q,
+   356	        "shock_thr_b": thr_b,
+   357	        "vrp_a": float(a_vrp),
+   358	        "vrp_b": float(b_vrp),
+   359	    }
+   360	    # Sign composition of the shock bucket, regime by regime. This is what the pooled
+   361	    # |dVIX| > 2 definition hides: at low VIX the shock bucket is mostly VIX-DOWN days,
+   362	    # and the calm-regime cell that anchors the whole decline is tiny.
+   363	    comp = []
+   364	    for lo, hi in REGIME_BOUNDS:
+   365	        m = (V >= lo) & (V < hi)
+   366	        n_up = int((m & (dV > SHOCK_ABS)).sum())
+   367	        n_dn = int((m & (dV < -SHOCK_ABS)).sum())
+   368	        comp.append({
+   369	            "regime": REGIME_NAMES[len(comp)],
+   370	            "n_shock_up": n_up,
+   371	            "n_shock_down": n_dn,
+   372	            "n_normal": int((m & ~shock_a).sum()),
+   373	            "up_share_of_shocks": round(n_up / (n_up + n_dn), 4) if (n_up + n_dn) else None,
+   374	        })
+   375	
+   376	    # The up-only calm cell has n=10. A point estimate from 10 observations must not be stated
+   377	    # as settled fact (independent review H3), so bootstrap it and report the interval.
+   378	    rng_bs = np.random.RandomState(20260712)
+   379	    calm_m = (V >= 0) & (V < 15)
+   380	    high_m = (V >= 25) & (V < 30)
+   381	    cells = {
+   382	        "calm_up": a[calm_m & (dV > SHOCK_ABS)], "calm_normal": a[calm_m & ~shock_a],
+   383	        "high_up": a[high_m & (dV > SHOCK_ABS)], "high_normal": a[high_m & ~shock_a],
+   384	    }
+   385	    bs_sar_calm, bs_sar_high, bs_dec = [], [], []
+   386	    for _ in range(10_000):
+   387	        d = {k: rng_bs.choice(v, size=len(v), replace=True) for k, v in cells.items()}
+   388	        sc = d["calm_up"].mean() / d["calm_normal"].mean()
+   389	        sh = d["high_up"].mean() / d["high_normal"].mean()
+   390	        bs_sar_calm.append(sc), bs_sar_high.append(sh), bs_dec.append(sc - sh)
+   391	    up_bs = {
+   392	        "n_calm_up_shocks": int(len(cells["calm_up"])),
+   393	        "sar_up_calm": round(float(np.mean(bs_sar_calm)), 4),
+   394	        "sar_up_calm_ci95": [round(float(np.percentile(bs_sar_calm, 2.5)), 4),
+   395	                             round(float(np.percentile(bs_sar_calm, 97.5)), 4)],
+   396	        "sar_up_high_ci95": [round(float(np.percentile(bs_sar_high, 2.5)), 4),
+   397	                             round(float(np.percentile(bs_sar_high, 97.5)), 4)],
+   398	        "up_decline_calm_minus_high": round(float(np.mean(bs_dec)), 4),
+   399	        "up_decline_ci95": [round(float(np.percentile(bs_dec, 2.5)), 4),
+   400	                            round(float(np.percentile(bs_dec, 97.5)), 4)],
+   401	        "up_decline_ci_contains_zero": bool(np.percentile(bs_dec, 2.5) <= 0 <= np.percentile(bs_dec, 97.5)),
+   402	        "seed": 20260712,
+   403	        "note": ("The calm up-shock cell has only 10 days, so the up-only decline is imprecise. "
+   404	                 "What the interval CAN establish is reported; what it cannot is not asserted."),
+   405	    }
+   406	
+   407	    diag = {
+   408	        "sample": f"{df.date.min():%Y-%m-%d} to {df.date.max():%Y-%m-%d}",
+   409	        "up_shock_bootstrap": up_bs,
+   410	        "n_observations": int(len(df)),
+   411	        "shock_rate_A": s,
+   412	        "n_shock_A": int(shock_a.sum()),
+   413	        "regime_occupancy": occ_a.tolist(),
+   414	        "n_shock_by_regime": ns_a.tolist(),
+   415	        "shock_sign_composition": comp,
+   416	        "n_shock_up": int((dV > SHOCK_ABS).sum()),
+   417	        "n_shock_down": int((dV < -SHOCK_ABS).sum()),
+   418	        "relative_threshold_q": rel_q,
+   419	        "abs_threshold_b": thr_b,
+   420	    }
+   421	    return emp, spec, diag
+   422	
+   423	
+   424	# ====================================================================================
+   425	# Inference
+   426	# ====================================================================================
+   427	def compare(emp_val, sim_vals, label):
+   428	    sim = np.asarray([v for v in sim_vals if not np.isnan(v)], dtype=float)
+   429	    n = len(sim)
+   430	    if n < 100 or emp_val is None or np.isnan(emp_val):
+   431	        return {"label": label, "empirical": None if emp_val is None or np.isnan(emp_val) else round(float(emp_val), 4),
+   432	                "n_valid_sims": n, "note": "insufficient valid simulations"}
+   433	    mean, std = float(sim.mean()), float(sim.std())
+   434	    lo, hi = float(np.percentile(sim, 2.5)), float(np.percentile(sim, 97.5))
+   435	    frac_above = float((sim >= emp_val).mean())
+   436	    frac_below = float((sim <= emp_val).mean())
+   437	    # Monte-Carlo empirical p-value (primary; no distributional assumption)
+   438	    # (b+1)/(n+1) plug-in rather than a bare 1/n floor -- the unbiased MC p-value (review L3).
+   439	    b_side = min(int((sim >= emp_val).sum()), int((sim <= emp_val).sum()))
+   440	    p_mc = float(min(1.0, 2.0 * (b_side + 1) / (n + 1)))
+   441	    z = float((emp_val - mean) / std) if std > 0 else float("nan")  # standardised distance
+   442	    return {
+   443	        "label": label,
+   444	        "empirical": round(float(emp_val), 4),
+   445	        "sim_mean": round(mean, 4),
+   446	        "sim_std": round(std, 4),
+   447	        "sim_ci_95": [round(lo, 4), round(hi, 4)],
+   448	        "in_95_ci": bool(lo <= emp_val <= hi),
+   449	        "z_score": round(z, 4),
+   450	        "p_value_monte_carlo": round(p_mc, 6),
+   451	        "frac_sim_above_empirical": round(frac_above, 4),
+   452	        "n_valid_sims": n,
+   453	    }
+   454	
+   455	
+   456	def regimewise(emp_sars, sim_matrix, label):
+   457	    out, n_out, n_tested = {}, 0, 0
+   458	    for i, rn in enumerate(REGIME_NAMES):
+   459	        c = compare(emp_sars[i], sim_matrix[:, i], f"{label} :: {rn}")
+   460	        out[rn] = c
+   461	        if "in_95_ci" in c:
+   462	            n_tested += 1
+   463	            n_out += (not c["in_95_ci"])
+   464	    return out, f"{n_out}/{n_tested}"
+   465	
+   466	
+   467	# ====================================================================================
+   468	def main():
+   469	    print("=" * 78)
+   470	    print("K1686: Contemporaneous null simulation (Paper 8 make-or-break gate)")
+   471	    print("=" * 78)
+   472	
+   473	    print("\n[1/4] Empirical side (PINNED snapshot)...")
+   474	    emp, spec, diag = empirical_side()
+   475	    print(f"  {diag['sample']}  n={diag['n_observations']}  shock rate={diag['shock_rate_A']:.4f} "
+   476	          f"(n_shock={diag['n_shock_A']})")
+   477	    for i, rn in enumerate(REGIME_NAMES):
+   478	        print(f"    {rn:<18} SAR={emp['A'][i]:.4f}  occupancy={diag['regime_occupancy'][i]:.3f}")
+   479	    emp_decline = decline(emp["A"])
+   480	    print(f"  EMPIRICAL DECLINE (calm - high) = {emp_decline:.4f}   "
+
+exec
+/bin/zsh -lc "nl -ba experiments/k1686/k1686_contemporaneous_null.py | sed -n '481,720p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+   481	          f"[K897 live-yf: {K897_REFERENCE['empirical_decline_live_yfinance']}]")
+   482	    print(f"  variant C relative threshold q = {spec['rel_q']:.4f}")
+   483	
+   484	    print(f"\n[2/4] Simulating {N_SIM} GJR paths x {N_OBS} obs (K897 params, K897 seeds)...")
+   485	    args = [(seed, K897_PARAMS, N_OBS, spec) for seed in SEEDS]
+   486	    n_workers = min(8, multiprocessing.cpu_count())
+   487	    sims = []
+   488	    with ProcessPoolExecutor(max_workers=n_workers) as ex:
+   489	        for i, r in enumerate(ex.map(simulate_one, args, chunksize=50)):
+   490	            sims.append(r)
+   491	            if (i + 1) % 2500 == 0:
+   492	                print(f"    {i + 1}/{N_SIM}")
+   493	
+   494	    print("\n[3/4] Assembling...")
+   495	    keys = ["k897_lagged|A", "contemporaneous|A", "contemporaneous|B", "contemporaneous|C",
+   496	            "contemporaneous|D_up", "contemporaneous|D_down", "contemporaneous|E",
+   497	            "contemporaneous|F", "contemporaneous|G"]
+   498	    mats = {k: np.vstack([s[k] for s in sims]) for k in keys}
+   499	    declines = {k: np.array([decline(s[k]) for s in sims]) for k in keys}
+   500	
+   501	    out = {
+   502	        "experiment_id": "k1686",
+   503	        "title": "Contemporaneous null simulation for volatility absorption (K897 timing fix)",
+   504	        "paper": "volatility-absorption (Paper 8)",
+   505	        "supersedes_identification_test_in": "k897",
+   506	        "trigger": "paper/volatility-absorption/review_history/fable_deep_review_20260711/README.md P0-1",
+   507	        "data_source": f"PINNED snapshot: {PINNED_CSV.relative_to(REPO)}",
+   508	        "sample_period": diag["sample"],
+   509	        "n_observations": diag["n_observations"],
+   510	        "n_simulations": N_SIM,
+   511	        "n_obs_per_sim": N_OBS,
+   512	        "garch_params": K897_PARAMS,
+   513	        "seed_spec": {
+   514	            "generator": "numpy.random.RandomState(seed)",
+   515	            "seeds": "0..9999 (identical to K897)",
+   516	            "innovation": "rng.standard_t(df=nu, size=5000) * sqrt((nu-2)/nu)",
+   517	            "note": ("Same seed + same n_obs + same params as K897 => simulated return paths are "
+   518	                     "pointwise identical to K897's. h is extended one step (h[n_obs], which needs "
+   519	                     "only eps[n_obs-1]) so no extra random draw is taken and no padding is used."),
+   520	        },
+   521	        "empirical_diagnostics": diag,
+   522	        "variant_spec": {
+   523	            "A": "PRIMARY. contemporaneous proxy sqrt(h[t+1]); regime by level; shock |dP|>2",
+   524	            "B": "frequency-matched: per-path quantile shock threshold + per-path regime cut-points "
+   525	                 "matched to empirical VIX regime probabilities",
+   526	            "C": "relative threshold |dP|/P_{t-1} > q, same unit-free q as empirical",
+   527	            "D": "sign-split: dP>+2 (vol up) vs dP<-2 (vol down); shared non-shock denominator",
+   528	            "E": "ambient regime: classify day t by the PRE-shock level P[t-1]",
+   529	            "G": "POST-HOC (not pre-registered): doubly-corrected -- ambient regime AND relative "
+   530	                 "threshold, i.e. B/C/E's fixes combined (independent review M2)",
+   531	            "F": "POST-HOC (not pre-registered): VRP-calibrated -- affine-map the null proxy onto VIX's "
+   532	                 "scale (VIX ~ a + b*P fitted on real data), THEN apply the paper's literal thresholds",
+   533	            "k897_lagged": "REPLICATION ARM: K897's proxy sqrt(h[t]) on the same paths (internal placebo)",
+   534	        },
+   535	        "pre_registered_decision_rule": {
+   536	            "primary_statistic": "decline = SAR(calm <15) - SAR(high 25-30), variant A",
+   537	            "empirical_value": round(emp_decline, 4),
+   538	            "outside_95_ci": "identification HOLDS and strengthens; paper upgrades",
+   539	            "inside_95_ci": "absorption claim DOWNGRADED to mechanical decomposition; paper reframes",
+   540	            "committed_before_results": "git commit 870af5d00 (README pre-registration, no results present)",
+   541	        },
+   542	    }
+   543	
+   544	    # --- replication check: does the lagged arm reproduce K897? ---
+   545	    rep = compare(emp_decline, declines["k897_lagged|A"], "K897 replication arm")
+   546	    out["k897_replication_check"] = {
+   547	        "ours": {k: rep[k] for k in ("sim_mean", "sim_std", "sim_ci_95", "n_valid_sims")},
+   548	        "k897_published": K897_REFERENCE,
+   549	        "reproduces_k897": bool(
+   550	            abs(rep["sim_mean"] - K897_REFERENCE["sim_mean_decline"]) < 0.02
+   551	            and abs(rep["sim_std"] - K897_REFERENCE["sim_std_decline"]) < 0.02
+   552	        ),
+   553	    }
+   554	    print(f"  K897 replication arm: sim_mean={rep['sim_mean']} (K897 published 0.1734), "
+   555	          f"sim_std={rep['sim_std']} (0.2105) -> reproduces={out['k897_replication_check']['reproduces_k897']}")
+   556	
+   557	    # --- decline comparisons, all variants ---
+   558	    emp_declines = {
+   559	        "k897_lagged|A": emp_decline, "contemporaneous|A": emp_decline,
+   560	        "contemporaneous|B": decline(emp["B"]), "contemporaneous|C": decline(emp["C"]),
+   561	        "contemporaneous|D_up": decline(emp["D_up"]), "contemporaneous|D_down": decline(emp["D_down"]),
+   562	        "contemporaneous|E": decline(emp["E"]),
+   563	        "contemporaneous|F": emp_decline,   # F changes only the null's scale; data side = variant A
+   564	        "contemporaneous|G": decline(emp["G"]),
+   565	    }
+   566	    out["sar_decline_comparison"] = {
+   567	        k: compare(emp_declines[k], declines[k], k) for k in keys
+   568	    }
+   569	
+   570	    # Secondary leg (normal -> high). Variant F's calm cell is unmeasurable (see
+   571	    # variant_F_calibration_note), so without this leg F would drop out silently -- exactly
+   572	    # the failure mode K897 shipped. Reported for every variant so the legs are comparable.
+   573	    declines_nh = {k: np.array([decline_nh(s[k]) for s in sims]) for k in keys}
+   574	    emp_nh = {
+   575	        "k897_lagged|A": decline_nh(emp["A"]), "contemporaneous|A": decline_nh(emp["A"]),
+   576	        "contemporaneous|B": decline_nh(emp["B"]), "contemporaneous|C": decline_nh(emp["C"]),
+   577	        "contemporaneous|D_up": decline_nh(emp["D_up"]),
+   578	        "contemporaneous|D_down": decline_nh(emp["D_down"]),
+   579	        "contemporaneous|E": decline_nh(emp["E"]), "contemporaneous|F": decline_nh(emp["A"]),
+   580	        "contemporaneous|G": decline_nh(emp["G"]),
+   581	    }
+   582	    out["sar_decline_normal_to_high_comparison"] = {
+   583	        k: compare(emp_nh[k], declines_nh[k], k) for k in keys
+   584	    }
+   585	
+   586	    out["variant_F_calibration_note"] = {
+   587	        "affine_map": {"a": round(spec["vrp_a"], 4), "b": round(spec["vrp_b"], 4)},
+   588	        "calm_regime_evaluable": False,
+   589	        "why": ("The affine map that removes the variance-risk-premium level gap has slope "
+   590	                f"b={spec['vrp_b']:.3f} < 1, so it also COMPRESSES daily increments: a 2-point "
+   591	                f"move on VIX's scale needs |dP| > {2 / spec['vrp_b']:.2f} in the null's own units. "
+   592	                "Calm-regime shocks then fall below the minimum cell size in every path, and the "
+   593	                "null's overall shock rate collapses to ~0.06 vs the data's 0.151. "
+   594	                "So F fixes the LEVEL but breaks the INCREMENT scale. No single affine "
+   595	                "recalibration matches VIX in both -- there is no calibration-invariant null for "
+   596	                "this statistic. That is a property of the SAR design, not a coding failure, and "
+   597	                "it is reported rather than dropped."),
+   598	        "evaluable_leg_normal_to_high": "see sar_decline_normal_to_high_comparison",
+   599	    }
+   600	
+   601	    # --- regime-wise SAR levels + occupancy diagnostics ---
+   602	    out["regime_sar"] = {}
+   603	    out["regimes_outside_ci"] = {}
+   604	    for k in keys:
+   605	        emp_key = k.split("|")[1] if k.startswith("contemporaneous") else "A"
+   606	        rw, cnt = regimewise(emp[emp_key], mats[k], k)
+   607	        out["regime_sar"][k] = rw
+   608	        out["regimes_outside_ci"][k] = cnt
+   609	
+   610	    # --- mechanism diagnostic: WITHIN-REGIME shock rate, empirical vs null ---------------
+   611	    # If a fixed +/-2 threshold is applied to a mean-reverting vol process, plain decay at a
+   612	    # high level can cross the threshold on its own, flooding the "shock" bucket of the high
+   613	    # regimes with ordinary days. That inflates the within-regime shock rate and drags SAR
+   614	    # toward 1 -- i.e. it MANUFACTURES a decline with no absorption anywhere in the DGP.
+   615	    # This panel is what tells a genuine effect apart from that selection artifact.
+   616	    emp_wr = [
+   617	        round(diag["n_shock_by_regime"][i] / (diag["regime_occupancy"][i] * diag["n_observations"]), 4)
+   618	        if diag["regime_occupancy"][i] > 0 else None
+   619	        for i in range(5)
+   620	    ]
+   621	    sim_wr = [
+   622	        round(float(np.mean([s["nshock_A"][i] / (s["occ_A"][i] * N_OBS)
+   623	                             for s in sims if s["occ_A"][i] > 0])), 4)
+   624	        for i in range(5)
+   625	    ]
+   626	    out["mechanism_diagnostic_within_regime_shock_rate"] = {
+   627	        "empirical": emp_wr,
+   628	        "sim_contemporaneous_A": sim_wr,
+   629	        "regimes": REGIME_NAMES,
+   630	        "note": ("A fixed absolute threshold on a mean-reverting vol proxy becomes progressively "
+   631	                 "EASIER to cross as the level rises, because the decay term itself moves more than "
+   632	                 "2 annualised points. Where the null's within-regime shock rate runs far above the "
+   633	                 "data's, the null's shock bucket is being flooded with ordinary days and its SAR is "
+   634	                 "pushed toward 1 -- a decline produced by selection, not by absorption."),
+   635	    }
+   636	
+   637	    # --- why D_down is undefined in the lower regimes: it is structural, not a bug -----------
+   638	    p_star = decay_only_drop_level(K897_PARAMS)
+   639	    out["down_shock_impossibility"] = {
+   640	        "min_level_for_a_2pt_one_day_fall": round(p_star, 2),
+   641	        "regimes_where_null_can_never_produce_a_down_shock":
+   642	            [rn for rn, (lo, hi) in zip(REGIME_NAMES, REGIME_BOUNDS) if hi <= p_star],
+   643	        "note": ("With alpha=0 the deepest one-day fall the null can produce is pure decay, "
+   644	                 f"h_next = omega + beta*h. That crosses -2 annualised points only above "
+   645	                 f"{p_star:.2f}. Below it a vol-DOWN shock cannot exist in this null AT ALL. "
+   646	                 "The empirical decline, however, is carried ENTIRELY by vol-DOWN days (see "
+   647	                 "the sign-split): the null has no such channel, so on the down side the null "
+   648	                 "and the data are not even measuring the same event. D_down's n_valid_sims=0 "
+   649	                 "in calm/normal/elevated is therefore a structural property of the null, not "
+   650	                 "a silent failure."),
+   651	    }
+   652	
+   653	    out["calibration_diagnostics"] = {
+   654	        "regime_occupancy_empirical": [round(x, 4) for x in diag["regime_occupancy"]],
+   655	        "regime_occupancy_sim_A_contemporaneous":
+   656	            [round(float(np.mean([s["occ_A"][i] for s in sims])), 4) for i in range(5)],
+   657	        "regime_occupancy_sim_A_k897_lagged":
+   658	            [round(float(np.mean([s["occ_A_lagged"][i] for s in sims])), 4) for i in range(5)],
+   659	        "regime_occupancy_sim_B_frequency_matched":
+   660	            [round(float(np.mean([s["occ_B"][i] for s in sims])), 4) for i in range(5)],
+   661	        "shock_rate_empirical": round(diag["shock_rate_A"], 4),
+   662	        "shock_rate_sim_A_contemporaneous": round(float(np.mean([s["shock_rate_A"] for s in sims])), 4),
+   663	        "shock_rate_sim_A_k897_lagged": round(float(np.mean([s["shock_rate_A_lagged"] for s in sims])), 4),
+   664	        "shock_rate_sim_B": round(float(np.mean([s["shock_rate_B"] for s in sims])), 4),
+   665	        "shock_rate_sim_C": round(float(np.mean([s["shock_rate_C"] for s in sims])), 4),
+   666	        "regime_occupancy_sim_F_vrp_calibrated":
+   667	            [round(float(np.mean([s["occ_F"][i] for s in sims])), 4) for i in range(5)],
+   668	        "shock_rate_sim_F": round(float(np.mean([s["shock_rate_F"] for s in sims])), 4),
+   669	        "vrp_affine_map": {"a": round(spec["vrp_a"], 4), "b": round(spec["vrp_b"], 4)},
+   670	        "shock_rate_sim_D_up": round(float(np.mean([s["shock_rate_D_up"] for s in sims])), 4),
+   671	        "shock_rate_sim_D_down": round(float(np.mean([s["shock_rate_D_down"] for s in sims])), 4),
+   672	        "note": ("VIX carries a variance risk premium, so its level sits above the physical conditional "
+   673	                 "vol of the GARCH null. Under fixed thresholds (variant A) the simulation therefore "
+   674	                 "over-populates the calm regime relative to the data. Variant B removes this by "
+   675	                 "matching regime occupancy and shock rate by construction."),
+   676	    }
+   677	
+   678	    # --- verdict, driven strictly by the pre-registered rule ---
+   679	    prim = out["sar_decline_comparison"]["contemporaneous|A"]
+   680	    if "in_95_ci" not in prim:
+   681	        out["verdict"] = "INCONCLUSIVE: primary variant had insufficient valid simulations"
+   682	    elif prim["in_95_ci"]:
+   683	        out["verdict"] = "IDENTIFICATION CLOSED"
+   684	        out["verdict_detail"] = (
+   685	            f"Empirical decline {prim['empirical']} falls INSIDE the contemporaneous null 95% CI "
+   686	            f"{prim['sim_ci_95']} (MC p={prim['p_value_monte_carlo']}). A GJR-GARCH with no absorption "
+   687	            f"mechanism, once its vol proxy is made contemporaneous with returns the way VIX is, "
+   688	            f"reproduces the observed SAR decline. Per the pre-registered rule the absorption claim is "
+   689	            f"DOWNGRADED to a mechanical decomposition of fixed-threshold selection plus same-day "
+   690	            f"co-movement; K897's NULL REJECTED verdict does not survive the timing fix."
+   691	        )
+   692	    else:
+   693	        side = "ABOVE" if prim["empirical"] > prim["sim_ci_95"][1] else "BELOW"
+   694	        out["verdict"] = "IDENTIFICATION HOLDS"
+   695	        out["verdict_detail"] = (
+   696	            f"Empirical decline {prim['empirical']} falls OUTSIDE ({side}) the contemporaneous null 95% CI "
+   697	            f"{prim['sim_ci_95']} (MC p={prim['p_value_monte_carlo']}). The decline survives the stricter, "
+   698	            f"timing-corrected null. Per the pre-registered rule the identification holds and strengthens."
+   699	        )
+   700	
+   701	    # --- the verdict must CARRY the disagreement, not bury it (independent review H2) ---------
+   702	    # The pre-registered rule names A as primary AND obliges us to report variant conflict rather
+   703	    # than headline whichever variant flatters us. A verdict string computed from A alone would
+   704	    # satisfy the first half and quietly break the second. So attach the split to the verdict.
+   705	    rejects, fails_to_reject, unevaluable = [], [], []
+   706	    for k in keys:
+   707	        if k == "k897_lagged|A":
+   708	            continue
+   709	        c = out["sar_decline_comparison"][k]
+   710	        if "in_95_ci" not in c:
+   711	            unevaluable.append(k)
+   712	        elif c["in_95_ci"]:
+   713	            fails_to_reject.append(k)
+   714	        else:
+   715	            rejects.append(k)
+   716	
+   717	    bs = diag["up_shock_bootstrap"]
+   718	    out["variant_disagreement"] = {
+   719	        "fails_to_reject_the_null": fails_to_reject,
+   720	        "rejects_the_null": rejects,
+
+exec
+/bin/zsh -lc "nl -ba experiments/k1686/k1686_contemporaneous_null.py | sed -n '721,960p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+   721	        "not_evaluable_on_the_primary_leg": unevaluable,
+   722	        "the_null_comparison_is_INCONCLUSIVE": (
+   723	            "The variants split. Worse, the pre-registered primary's own non-rejection is not strong "
+   724	            "evidence: the mechanism diagnostic shows variant A's null manufactures its 0.619 decline "
+   725	            "by letting plain decay cross the fixed 2-point threshold at high vol levels (null "
+   726	            "within-regime shock rate 0.82 at crisis vs the data's 0.54), which is NOT how the decline "
+   727	            "arises in the data. A's 'pass' is one artifact cancelling another. The corrected nulls "
+   728	            "(B frequency-matched, C relative-threshold, G doubly-corrected) all reject. So neither "
+   729	            "'the decline is pure GARCH mechanics' NOR 'the decline is absorption' is established by "
+   730	            "the null comparison. It is inconclusive, and saying otherwise in either direction would "
+   731	            "be overclaiming."
+   732	        ),
+   733	        "why_no_null_can_settle_the_down_side": (
+   734	            f"Below {p_star:.1f} annualised points this null cannot produce a vol-DOWN shock AT ALL "
+   735	            "(alpha=0 => the deepest one-day fall is pure decay). But the empirical decline is carried "
+   736	            "ENTIRELY by vol-DOWN days. On the down side the null and the data are not even measuring "
+   737	            "the same event, so where B/C/G reject, what they detect is the ABSENCE OF A RELIEF-RALLY "
+   738	            "CHANNEL IN GARCH -- not the PRESENCE OF ABSORPTION IN MARKETS."
+   739	        ),
+   740	    }
+   741	
+   742	    # --- what survives WITHOUT any null model. This is what actually decides the paper. --------
+   743	    out["null_free_evidence"] = {
+   744	        "pooled_decline_headline": round(emp_decline, 4),
+   745	        "up_only_decline": bs["up_decline_calm_minus_high"],
+   746	        "up_only_decline_ci95": bs["up_decline_ci95"],
+   747	        "up_only_ci_excludes_pooled_headline":
+   748	            bool(bs["up_decline_ci95"][1] < emp_decline),
+   749	        "down_only_decline": round(decline(emp["D_down"]), 4),
+   750	        "n_calm_up_shocks": bs["n_calm_up_shocks"],
+   751	        "n_calm_down_shocks": diag["shock_sign_composition"][0]["n_shock_down"],
+   752	        "finding": (
+   753	            "Split the shock set by the SIGN of the VIX move and the paper's mechanism evaporates. "
+   754	            f"Pooled decline {emp_decline:.4f}. Among genuine FEAR SPIKES (dVIX>+2) the decline is "
+   755	            f"{bs['up_decline_calm_minus_high']:.4f}, bootstrap 95% CI {bs['up_decline_ci95']} -- it "
+   756	            "contains ZERO (no absorption gradient can be established) AND its upper end sits BELOW "
+   757	            f"the pooled headline {emp_decline:.4f}, so the headline is significantly larger than "
+   758	            "anything fear spikes can account for. The decline lives in the RELIEF RALLIES "
+   759	            f"(dVIX<-2): {decline(emp['D_down']):.4f}. And the calm anchor that sets the headline's "
+   760	            f"magnitude rests on {bs['n_calm_up_shocks']} fear-spike days against "
+   761	            f"{diag['shock_sign_composition'][0]['n_shock_down']} relief days. "
+   762	            "This holds with NO null model, so it is immune to every calibration dispute above."
+   763	        ),
+   764	        "mechanism": (
+   765	            "A 2-point VIX fall from 13 is a rare, large relief move that comes with a big rally; a "
+   766	            "2-point fall from 27 is routine mean reversion with an ordinary return. So the shock "
+   767	            "bucket's mean |r| is inflated at calm levels and deflated at high levels -- SAR declines. "
+   768	            "That is signed-composition selection, not fear being absorbed."
+   769	        ),
+   770	    }
+   771	
+   772	    # --- SYNTHESIS. The pre-registered primary is reported verbatim above and is binding as the
+   773	    # answer to the test we said we would run. But the primary turned out to rest on a weak null
+   774	    # (see variant_disagreement), so reporting ONLY "the null was not rejected" would be its own
+   775	    # kind of overclaim. The claim the PAPER makes is decided by evidence that needs no null.
+   776	    out["pre_registered_primary_outcome"] = out.pop("verdict")
+   777	    out["pre_registered_primary_detail"] = out.pop("verdict_detail")
+   778	    out["verdict"] = "ABSORPTION CLAIM NOT SUPPORTED"
+   779	    out["verdict_detail"] = (
+   780	        "Three findings, in order of how much weight they can bear.\n\n"
+   781	        "(1) NULL-FREE, DECISIVE -- the paper's mechanism is not what drives its statistic. "
+   782	        f"Splitting shocks by the sign of the VIX move: the pooled decline is {emp_decline:.4f}, but "
+   783	        f"among genuine FEAR SPIKES it is {bs['up_decline_calm_minus_high']:.4f} with bootstrap 95% CI "
+   784	        f"{bs['up_decline_ci95']} -- containing zero AND lying entirely below the pooled headline. The "
+   785	        f"decline lives in the RELIEF RALLIES ({decline(emp['D_down']):.4f}). The calm anchor rests on "
+   786	        f"{bs['n_calm_up_shocks']} fear-spike days vs {diag['shock_sign_composition'][0]['n_shock_down']} "
+   787	        "relief days. 'Ambient fear absorbs fear shocks' is therefore not what the SAR decline shows, "
+   788	        "and this conclusion depends on NO null model.\n\n"
+   789	        "(2) THE NULL COMPARISON IS INCONCLUSIVE, in both directions. The pre-registered primary "
+   790	        f"(variant A) does not reject ({prim['empirical']} inside {prim['sim_ci_95']}, p="
+   791	        f"{prim['p_value_monte_carlo']}), so by the letter of the pre-registered rule the absorption "
+   792	        "claim is downgraded. But A's null earns its decline by letting plain decay cross the fixed "
+   793	        "2-point threshold at high vol -- an artifact, not the data's mechanism -- so its "
+   794	        "non-rejection is two artifacts cancelling. The corrected nulls (B, C, G) all reject. Neither "
+   795	        "'it is just GARCH' nor 'it is absorption' is established by the null comparison.\n\n"
+   796	        "(3) K897'S VERDICT DOES NOT SURVIVE REGARDLESS. Its NULL REJECTED rested on a null whose vol "
+   797	        "proxy could not react to the same day's return; on the same seeds and params, making the "
+   798	        "proxy contemporaneous moves the null's SAR levels from ~1.0-1.2 to ~1.6-2.4 and its decline "
+   799	        f"from 0.1734 to {prim['sim_mean']}. The margin K897 reported was largely a timing artifact.\n\n"
+   800	        "RECOMMENDATION: the paper cannot claim absorption. It CAN claim something real and "
+   801	        "publishable -- that the SAR regime-decline is a signed-composition effect, and that it is "
+   802	        "NOT reproduced by a well-specified GARCH null (B/C/G reject). That is a measurement note, "
+   803	        "not the absorption hypothesis."
+   804	    )
+   805	
+   806	    with open(HERE / "k1686_contemporaneous_null_results.json", "w") as f:
+   807	        json.dump(out, f, indent=2, default=str)
+   808	
+   809	    print("\n[4/4] Verdict")
+   810	    print("=" * 78)
+   811	    for k in keys:
+   812	        c = out["sar_decline_comparison"][k]
+   813	        if "in_95_ci" in c:
+   814	            print(f"  {k:<26} emp={c['empirical']:>7}  null={c['sim_mean']:>7} +/-{c['sim_std']:<6} "
+   815	                  f"CI={str(c['sim_ci_95']):<18} in_CI={str(c['in_95_ci']):<5} p_mc={c['p_value_monte_carlo']}")
+   816	        else:
+   817	            print(f"  {k:<26} {c.get('note')}")
+   818	    print("-" * 78)
+   819	    print(f"  null comparison: rejects={[k.split('|')[1] for k in rejects]}  "
+   820	          f"fails-to-reject={[k.split('|')[1] for k in fails_to_reject]}  -> INCONCLUSIVE")
+   821	    print(f"  pre-registered primary (A): {out['pre_registered_primary_outcome']}")
+   822	    print(f"  NULL-FREE: up-only decline {bs['up_decline_calm_minus_high']} CI {bs['up_decline_ci95']} "
+   823	          f"(pooled headline {emp_decline:.4f} lies ABOVE this CI)")
+   824	    print("=" * 78)
+   825	    print(f"  VERDICT: {out['verdict']}")
+   826	    print(f"\n{out['verdict_detail']}")
+   827	
+   828	    make_figure(out, declines, emp_declines, emp, diag)
+   829	    return out
+   830	
+   831	
+   832	def make_figure(out, declines, emp_declines, emp, diag):
+   833	    import matplotlib
+   834	    matplotlib.use("Agg")
+   835	    import matplotlib.pyplot as plt
+   836	
+   837	    panels = [
+   838	        ("k897_lagged|A", "K897 replication arm\n(lagged proxy -- the flawed null)"),
+   839	        ("contemporaneous|A", "A -- PRIMARY\ncontemporaneous, fixed threshold"),
+   840	        ("contemporaneous|B", "B -- frequency-matched\n(occupancy + shock rate matched)"),
+   841	        ("contemporaneous|C", "C -- relative threshold\n|dP|/P > q"),
+   842	        ("contemporaneous|D_up", "D -- sign-split: vol UP shocks\n(genuine fear spikes)"),
+   843	        (None, None),  # slot 6 is the empirical sign-split panel, drawn below
+   844	        ("contemporaneous|E", "E -- ambient regime\n(classify by pre-shock level)"),
+   845	    ]
+   846	    fig, axes = plt.subplots(2, 4, figsize=(21, 9.5))
+   847	    flat = axes.ravel()
+   848	    for ax, (k, title) in zip(flat, panels):
+   849	        if k is None:
+   850	            continue
+   851	        d = declines[k][~np.isnan(declines[k])]
+   852	        e = emp_declines[k]
+   853	        c = out["sar_decline_comparison"][k]
+   854	        if len(d) < 100 or e is None or np.isnan(e):
+   855	            ax.text(0.5, 0.5, "insufficient valid sims", ha="center", va="center")
+   856	            ax.set_title(title, fontsize=10)
+   857	            continue
+   858	        ax.hist(d, bins=60, color="#8fb8de", edgecolor="white", linewidth=0.4)
+   859	        lo, hi = c["sim_ci_95"]
+   860	        ax.axvline(lo, color="#3b6ea5", ls="--", lw=1.2)
+   861	        ax.axvline(hi, color="#3b6ea5", ls="--", lw=1.2, label="null 95% CI")
+   862	        inside = c["in_95_ci"]
+   863	        ax.axvline(e, color="#c0392b" if not inside else "#1e8449", lw=2.4,
+   864	                   label=f"empirical = {e:.3f}")
+   865	        ax.set_title(f"{title}\nin 95% CI: {'YES' if inside else 'NO'}   MC p = {c['p_value_monte_carlo']}",
+   866	                     fontsize=9.5)
+   867	        ax.set_xlabel("SAR decline (calm - high)")
+   868	        ax.set_ylabel("simulated paths")
+   869	        ax.legend(fontsize=7.5, loc="upper right")
+   870	
+   871	    # 6th panel: the empirical sign-split. This one needs no null model at all -- it is what the
+   872	    # data says once "fear shock" stops meaning "VIX moved 2 points in EITHER direction".
+   873	    # The null cannot even be drawn for the down-shocks (a GARCH sitting at a calm level cannot
+   874	    # shed 2 annualised vol points in one day), which is itself reported rather than hidden.
+   875	    ax = flat[5]
+   876	    x = np.arange(5)
+   877	    ax.plot(x, emp["A"], "o-", color="#2c3e50", lw=2.2, label="pooled |dVIX|>2 (paper's definition)")
+   878	    ax.plot(x, emp["D_up"], "s-", color="#c0392b", lw=2.2, label="vol UP shocks only (real fear)")
+   879	    ax.plot(x, emp["D_down"], "^-", color="#2980b9", lw=2.2, label="vol DOWN shocks only (relief)")
+   880	    ax.axhline(1.0, color="grey", ls=":", lw=1)
+   881	    for i, c in enumerate(diag["shock_sign_composition"]):
+   882	        ax.annotate(f"n↑={c['n_shock_up']}\nn↓={c['n_shock_down']}", (i, 3.63),
+   883	                    ha="center", fontsize=6.5, color="#555")
+   884	    ax.set_ylim(0.8, 3.95)
+   885	    ax.set_xticks(x)
+   886	    ax.set_xticklabels(["calm", "normal", "elev.", "high", "crisis"], fontsize=8)
+   887	    ax.set_ylabel("empirical SAR")
+   888	    ax.set_title("THE DATA, WITHOUT ANY NULL:\nthe decline lives entirely in the relief rallies", fontsize=9.5)
+   889	    ax.legend(fontsize=7, loc="lower left")
+   890	
+   891	    # 8th panel: the mechanism. Where the null's within-regime shock rate runs above the data's,
+   892	    # its shock bucket is flooded with ordinary days and SAR is pushed toward 1 by selection.
+   893	    ax = flat[7]
+   894	    md = out["mechanism_diagnostic_within_regime_shock_rate"]
+   895	    x = np.arange(5)
+   896	    ax.bar(x - 0.2, [v if v is not None else 0 for v in md["empirical"]], 0.4,
+   897	           label="empirical (VIX)", color="#c0392b")
+   898	    ax.bar(x + 0.2, md["sim_contemporaneous_A"], 0.4, label="null, variant A", color="#8fb8de")
+   899	    ax.set_xticks(x)
+   900	    ax.set_xticklabels(["calm", "normal", "elev.", "high", "crisis"], fontsize=8)
+   901	    ax.set_ylabel("within-regime shock rate")
+   902	    ax.set_title("MECHANISM: is the null's shock bucket\nflooded by threshold-crossing decay?", fontsize=9.5)
+   903	    ax.legend(fontsize=7.5)
+   904	
+   905	    fig.suptitle("K1686: does the SAR decline survive a null whose vol proxy is contemporaneous with returns?",
+   906	                 fontsize=13)
+   907	    fig.tight_layout(rect=[0, 0, 1, 0.95])
+   908	    fig.savefig(HERE / "k1686_null_distributions.png", dpi=140)
+   909	    print(f"\n  Figure: {HERE / 'k1686_null_distributions.png'}")
+   910	
+   911	
+   912	if __name__ == "__main__":
+   913	    main()
+
+codex
+主程式 913 行已逐段讀完。關鍵 recursion 確實先用 \(r_t\) 更新 \(h_{t+1}\)，再以 `sqrt(h[t+1])` 當日末 proxy；目前正在逐變體核對 shock、return、regime 三者是否落在同一個 t，並比對 K897 的 RNG 與 recursion 是否逐位元一致。
+exec
+/bin/zsh -lc "wc -l experiments/k897/* && nl -ba experiments/k897/k897_sar_null_simulation.py | sed -n '1,260p'" in /Users/yhlai0911/volpred-research
+ exited 1 in 0ms:
+wc: experiments/k897/data: read: Is a directory
+      25 experiments/k897/README.md
+     753 experiments/k897/k897_sar_null_simulation.py
+     267 experiments/k897/k897_sar_null_simulation_results.json
+    1045 total
+wc: experiments/k897/references: read: Is a directory
+
+exec
+/bin/zsh -lc "nl -ba experiments/k897/k897_sar_null_simulation.py | sed -n '1,260p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+     1	"""
+     2	K897: Null Simulation for Volatility Absorption — Does SAR Arise Mechanically from GARCH?
+     3	
+     4	Purpose:
+     5	  Paper 8 (volatility-absorption) R1 found SEVERE S1: "No null simulation — the paper
+     6	  does not show the SAR decline cannot arise mechanically from a standard GARCH with
+     7	  no absorption."
+     8	
+     9	  The SAR (Shock Amplification Ratio) = mean(|r_t| on shock days) / mean(|r_t| on normal days)
+    10	  within each VIX regime. The paper claims SAR declines from 3.16x (calm) to 2.32x (high),
+    11	  revealing a real absorption phenomenon.
+    12	
+    13	  A critic could argue: GARCH already has mean-reverting variance (persistence < 1),
+    14	  so SAR decline is just GARCH mean reversion, not a new phenomenon.
+    15	
+    16	Methodology:
+    17	  1. Fit GJR-GARCH(1,1) with Student-t innovations to SPY returns (2006-2026)
+    18	  2. Simulate 10,000 paths of length 5,000 from this fitted GARCH (NO absorption mechanism)
+    19	  3. For each simulated path, compute SAR at each VIX regime equivalent
+    20	  4. Compare simulated SAR distribution to empirical SAR from real data
+    21	
+    22	Key Question:
+    23	  If simulated GARCH SAR matches empirical SAR → absorption is just GARCH mean reversion (null supported)
+    24	  If empirical SAR differs significantly → there IS a real phenomenon beyond GARCH
+    25	
+    26	Statistical Tests:
+    27	  - Mean SAR comparison (simulated vs empirical) at each regime
+    28	  - 95% CI from simulation
+    29	  - Kolmogorov-Smirnov test
+    30	  - Effect size (Cohen's d)
+    31	
+    32	References:
+    33	  - Bollerslev (1986): GARCH model
+    34	  - Glosten, Jagannathan, Runkle (1993): GJR-GARCH
+    35	  - Engle & Ng (1993): News impact curve
+    36	  - Our paper: volatility-absorption, SAR definition (Equation 1)
+    37	  - K716: Original SAR computation on real data
+    38	
+    39	Data Source: yfinance (SPY, ^VIX), 2006-01-01 to 2026-04-04
+    40	"""
+    41	
+    42	import json
+    43	import warnings
+    44	import numpy as np
+    45	import pandas as pd
+    46	from scipy import stats
+    47	from arch import arch_model
+    48	from concurrent.futures import ProcessPoolExecutor
+    49	import multiprocessing
+    50	
+    51	warnings.filterwarnings('ignore')
+    52	
+    53	# ============================================================
+    54	# 1. Download real data and compute empirical SAR
+    55	# ============================================================
+    56	def get_empirical_data():
+    57	    """Download SPY + VIX data and compute empirical SAR."""
+    58	    import yfinance as yf
+    59	
+    60	    spy = yf.download('SPY', start='2006-01-01', end='2026-04-05', progress=False)
+    61	    vix = yf.download('^VIX', start='2006-01-01', end='2026-04-05', progress=False)
+    62	
+    63	    # Handle MultiIndex columns
+    64	    if isinstance(spy.columns, pd.MultiIndex):
+    65	        spy.columns = spy.columns.get_level_values(0)
+    66	    if isinstance(vix.columns, pd.MultiIndex):
+    67	        vix.columns = vix.columns.get_level_values(0)
+    68	
+    69	    # Compute log returns
+    70	    spy_ret = np.log(spy['Close'] / spy['Close'].shift(1)).dropna() * 100  # percent
+    71	    vix_close = vix['Close'].reindex(spy_ret.index)
+    72	
+    73	    # Align
+    74	    df = pd.DataFrame({
+    75	        'ret': spy_ret,
+    76	        'vix': vix_close,
+    77	    }).dropna()
+    78	
+    79	    df['abs_ret'] = df['ret'].abs()
+    80	    df['delta_vix'] = df['vix'].diff()
+    81	    df['shock'] = df['delta_vix'].abs() > 2  # shock threshold = 2
+    82	
+    83	    return df
+    84	
+    85	
+    86	def compute_sar_from_data(df):
+    87	    """Compute SAR for each VIX regime from a DataFrame with 'abs_ret', 'vix', 'shock' columns."""
+    88	    regimes = {
+    89	        'calm (<15)': (0, 15),
+    90	        'normal (15-20)': (15, 20),
+    91	        'elevated (20-25)': (20, 25),
+    92	        'high (25-30)': (25, 30),
+    93	        'crisis (>=30)': (30, 200),
+    94	    }
+    95	
+    96	    results = {}
+    97	    for name, (lo, hi) in regimes.items():
+    98	        mask = (df['vix'] >= lo) & (df['vix'] < hi)
+    99	        shock_mask = mask & df['shock']
+   100	        normal_mask = mask & ~df['shock']
+   101	
+   102	        n_shock = shock_mask.sum()
+   103	        n_normal = normal_mask.sum()
+   104	
+   105	        if n_shock > 5 and n_normal > 5:
+   106	            mean_shock = df.loc[shock_mask, 'abs_ret'].mean()
+   107	            mean_normal = df.loc[normal_mask, 'abs_ret'].mean()
+   108	            sar = mean_shock / mean_normal
+   109	        else:
+   110	            mean_shock = np.nan
+   111	            mean_normal = np.nan
+   112	            sar = np.nan
+   113	
+   114	        results[name] = {
+   115	            'n_shock': int(n_shock),
+   116	            'n_normal': int(n_normal),
+   117	            'mean_shock': float(mean_shock) if not np.isnan(mean_shock) else None,
+   118	            'mean_normal': float(mean_normal) if not np.isnan(mean_normal) else None,
+   119	            'sar': float(sar) if not np.isnan(sar) else None,
+   120	        }
+   121	
+   122	    return results
+   123	
+   124	
+   125	# ============================================================
+   126	# 2. Fit GJR-GARCH to real SPY returns
+   127	# ============================================================
+   128	def fit_garch(returns):
+   129	    """Fit GJR-GARCH(1,1) with Student-t innovations to SPY returns."""
+   130	    # returns in percent
+   131	    am = arch_model(returns, vol='Garch', p=1, o=1, q=1, dist='t', mean='AR', lags=1)
+   132	    res = am.fit(disp='off')
+   133	
+   134	    params = {
+   135	        'mu': res.params.get('Const', 0),
+   136	        'ar1': res.params.get('y[1]', 0) if 'y[1]' in res.params else 0,
+   137	        'omega': res.params['omega'],
+   138	        'alpha': res.params['alpha[1]'],
+   139	        'gamma': res.params.get('gamma[1]', 0),
+   140	        'beta': res.params['beta[1]'],
+   141	        'nu': res.params['nu'],
+   142	        'persistence': res.params['alpha[1]'] + res.params.get('gamma[1]', 0) / 2 + res.params['beta[1]'],
+   143	    }
+   144	
+   145	    return res, params
+   146	
+   147	
+   148	# ============================================================
+   149	# 3. Simulate GARCH paths and compute SAR
+   150	# ============================================================
+   151	def simulate_garch_path(args):
+   152	    """Simulate one GJR-GARCH path and compute SAR.
+   153	
+   154	    Since GARCH doesn't have a VIX, we use conditional volatility percentiles
+   155	    to define regimes (analogous to VIX regimes).
+   156	    """
+   157	    seed, params, n_obs, vix_percentiles = args
+   158	    rng = np.random.RandomState(seed)
+   159	
+   160	    mu = params['mu']
+   161	    ar1 = params['ar1']
+   162	    omega = params['omega']
+   163	    alpha = params['alpha']
+   164	    gamma = params['gamma']
+   165	    beta = params['beta']
+   166	    nu = params['nu']
+   167	
+   168	    # Generate Student-t innovations
+   169	    # scipy t distribution: scale by sqrt((nu-2)/nu) to get unit variance
+   170	    z = rng.standard_t(df=nu, size=n_obs) * np.sqrt((nu - 2) / nu)
+   171	
+   172	    # Simulate returns
+   173	    r = np.zeros(n_obs)
+   174	    h = np.zeros(n_obs)  # conditional variance
+   175	
+   176	    # Initialize
+   177	    unconditional_var = omega / (1 - alpha - gamma / 2 - beta)
+   178	    h[0] = unconditional_var
+   179	    r[0] = mu + np.sqrt(h[0]) * z[0]
+   180	
+   181	    for t in range(1, n_obs):
+   182	        # GJR-GARCH variance equation
+   183	        indicator = 1.0 if r[t-1] - mu < 0 else 0.0
+   184	        eps = r[t-1] - mu - ar1 * (r[t-2] if t >= 2 else 0)
+   185	        h[t] = omega + (alpha + gamma * indicator) * eps**2 + beta * h[t-1]
+   186	        h[t] = max(h[t], 1e-8)  # floor
+   187	
+   188	        # Return with AR(1)
+   189	        r[t] = mu + ar1 * r[t-1] + np.sqrt(h[t]) * z[t]
+   190	
+   191	    # Compute conditional vol (annualized, to be analogous to VIX)
+   192	    # VIX ~ sqrt(h) * sqrt(252) where h is daily variance in decimal
+   193	    # Our returns are in percent, so sqrt(h) is daily vol in percent
+   194	    # VIX equivalent: sqrt(h) * sqrt(252)
+   195	    cond_vol_ann = np.sqrt(h) * np.sqrt(252)
+   196	
+   197	    # Define "shock" as large absolute change in conditional vol
+   198	    # Analogous to |delta_VIX| > 2
+   199	    delta_vol = np.diff(cond_vol_ann)
+   200	    delta_vol = np.concatenate([[0], delta_vol])
+   201	
+   202	    # Use empirical VIX percentile thresholds for regime definition
+   203	    # This ensures comparable regime sizes
+   204	    abs_ret = np.abs(r)
+   205	
+   206	    # Define regimes based on conditional vol using empirical VIX thresholds
+   207	    regimes = {
+   208	        'calm (<15)': (0, vix_percentiles[15]),
+   209	        'normal (15-20)': (vix_percentiles[15], vix_percentiles[20]),
+   210	        'elevated (20-25)': (vix_percentiles[20], vix_percentiles[25]),
+   211	        'high (25-30)': (vix_percentiles[25], vix_percentiles[30]),
+   212	        'crisis (>=30)': (vix_percentiles[30], 1e6),
+   213	    }
+   214	
+   215	    # Shock threshold: use same percentile as empirical
+   216	    # In real data, |delta_VIX| > 2 captures about 15-20% of days
+   217	    shock_pct = np.percentile(np.abs(delta_vol[1:]), 80)  # top 20% as shocks
+   218	    shock = np.abs(delta_vol) > shock_pct
+   219	
+   220	    results = {}
+   221	    for name, (lo, hi) in regimes.items():
+   222	        mask = (cond_vol_ann >= lo) & (cond_vol_ann < hi)
+   223	        shock_mask = mask & shock
+   224	        normal_mask = mask & ~shock
+   225	
+   226	        n_shock = shock_mask.sum()
+   227	        n_normal = normal_mask.sum()
+   228	
+   229	        if n_shock > 5 and n_normal > 5:
+   230	            mean_shock = abs_ret[shock_mask].mean()
+   231	            mean_normal = abs_ret[normal_mask].mean()
+   232	            sar = mean_shock / mean_normal
+   233	        else:
+   234	            sar = np.nan
+   235	
+   236	        results[name] = sar
+   237	
+   238	    return results
+   239	
+   240	
+   241	def simulate_garch_sar_fixed_thresholds(args):
+   242	    """Simulate one GJR-GARCH path and compute SAR using FIXED VIX-equivalent thresholds.
+   243	
+   244	    This is the more conservative approach: use the same absolute thresholds (15, 20, 25, 30)
+   245	    applied to annualized conditional vol, and the same shock threshold (delta > 2 points).
+   246	    """
+   247	    seed, params, n_obs = args
+   248	    rng = np.random.RandomState(seed)
+   249	
+   250	    mu = params['mu']
+   251	    ar1 = params['ar1']
+   252	    omega = params['omega']
+   253	    alpha = params['alpha']
+   254	    gamma = params['gamma']
+   255	    beta = params['beta']
+   256	    nu = params['nu']
+   257	
+   258	    # Generate Student-t innovations
+   259	    z = rng.standard_t(df=nu, size=n_obs) * np.sqrt((nu - 2) / nu)
+   260	
+
+exec
+/bin/zsh -lc "nl -ba experiments/k897/k897_sar_null_simulation.py | sed -n '241,520p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+   241	def simulate_garch_sar_fixed_thresholds(args):
+   242	    """Simulate one GJR-GARCH path and compute SAR using FIXED VIX-equivalent thresholds.
+   243	
+   244	    This is the more conservative approach: use the same absolute thresholds (15, 20, 25, 30)
+   245	    applied to annualized conditional vol, and the same shock threshold (delta > 2 points).
+   246	    """
+   247	    seed, params, n_obs = args
+   248	    rng = np.random.RandomState(seed)
+   249	
+   250	    mu = params['mu']
+   251	    ar1 = params['ar1']
+   252	    omega = params['omega']
+   253	    alpha = params['alpha']
+   254	    gamma = params['gamma']
+   255	    beta = params['beta']
+   256	    nu = params['nu']
+   257	
+   258	    # Generate Student-t innovations
+   259	    z = rng.standard_t(df=nu, size=n_obs) * np.sqrt((nu - 2) / nu)
+   260	
+   261	    # Simulate returns
+   262	    r = np.zeros(n_obs)
+   263	    h = np.zeros(n_obs)
+   264	
+   265	    unconditional_var = omega / (1 - alpha - gamma / 2 - beta)
+   266	    h[0] = unconditional_var
+   267	    r[0] = mu + np.sqrt(h[0]) * z[0]
+   268	
+   269	    for t in range(1, n_obs):
+   270	        indicator = 1.0 if r[t-1] - mu < 0 else 0.0
+   271	        eps = r[t-1] - mu - ar1 * (r[t-2] if t >= 2 else 0)
+   272	        h[t] = omega + (alpha + gamma * indicator) * eps**2 + beta * h[t-1]
+   273	        h[t] = max(h[t], 1e-8)
+   274	
+   275	        r[t] = mu + ar1 * r[t-1] + np.sqrt(h[t]) * z[t]
+   276	
+   277	    # Annualized conditional vol (VIX equivalent)
+   278	    cond_vol_ann = np.sqrt(h) * np.sqrt(252)
+   279	
+   280	    # Delta conditional vol
+   281	    delta_vol = np.diff(cond_vol_ann)
+   282	    delta_vol = np.concatenate([[0], delta_vol])
+   283	
+   284	    abs_ret = np.abs(r)
+   285	
+   286	    # Fixed thresholds matching VIX regimes
+   287	    regimes = {
+   288	        'calm (<15)': (0, 15),
+   289	        'normal (15-20)': (15, 20),
+   290	        'elevated (20-25)': (20, 25),
+   291	        'high (25-30)': (25, 30),
+   292	        'crisis (>=30)': (30, 1e6),
+   293	    }
+   294	
+   295	    # Fixed shock threshold: |delta_vol| > 2 (same as |delta_VIX| > 2)
+   296	    shock = np.abs(delta_vol) > 2
+   297	
+   298	    results = {}
+   299	    for name, (lo, hi) in regimes.items():
+   300	        mask = (cond_vol_ann >= lo) & (cond_vol_ann < hi)
+   301	        shock_mask = mask & shock
+   302	        normal_mask = mask & ~shock
+   303	
+   304	        n_shock = shock_mask.sum()
+   305	        n_normal = normal_mask.sum()
+   306	
+   307	        if n_shock > 5 and n_normal > 5:
+   308	            mean_shock = abs_ret[shock_mask].mean()
+   309	            mean_normal = abs_ret[normal_mask].mean()
+   310	            sar = mean_shock / mean_normal
+   311	        else:
+   312	            sar = np.nan
+   313	
+   314	        results[name] = sar
+   315	
+   316	    return results
+   317	
+   318	
+   319	# ============================================================
+   320	# 4. Sensitivity to persistence level
+   321	# ============================================================
+   322	def simulate_with_persistence(args):
+   323	    """Simulate GARCH with modified persistence and compute SAR."""
+   324	    seed, base_params, target_persistence, n_obs = args
+   325	    params = base_params.copy()
+   326	
+   327	    # Scale alpha and gamma to achieve target persistence while keeping ratio
+   328	    current_p = params['alpha'] + params['gamma'] / 2 + params['beta']
+   329	    # Adjust beta to hit target persistence
+   330	    params['beta'] = target_persistence - params['alpha'] - params['gamma'] / 2
+   331	    if params['beta'] < 0:
+   332	        params['beta'] = 0.01
+   333	        excess = target_persistence - params['beta']
+   334	        params['alpha'] = excess * (params['alpha'] / (params['alpha'] + params['gamma'] / 2))
+   335	        params['gamma'] = 2 * (excess - params['alpha'])
+   336	
+   337	    return simulate_garch_sar_fixed_thresholds((seed, params, n_obs))
+   338	
+   339	
+   340	# ============================================================
+   341	# 5. Main execution
+   342	# ============================================================
+   343	def main():
+   344	    print("=" * 70)
+   345	    print("K897: Null Simulation for Volatility Absorption")
+   346	    print("Does SAR decline arise mechanically from GARCH?")
+   347	    print("=" * 70)
+   348	
+   349	    # ---- Step 1: Get empirical data ----
+   350	    print("\n[1/5] Downloading real data and computing empirical SAR...")
+   351	    df = get_empirical_data()
+   352	    empirical_sar = compute_sar_from_data(df)
+   353	
+   354	    print(f"  Sample: {df.index[0].strftime('%Y-%m-%d')} to {df.index[-1].strftime('%Y-%m-%d')}")
+   355	    print(f"  Observations: {len(df)}")
+   356	    print(f"  Shock days (|dVIX| > 2): {df['shock'].sum()}")
+   357	
+   358	    print("\n  Empirical SAR:")
+   359	    for regime, vals in empirical_sar.items():
+   360	        if vals['sar'] is not None:
+   361	            print(f"    {regime}: SAR = {vals['sar']:.3f} (n_shock={vals['n_shock']}, n_normal={vals['n_normal']})")
+   362	
+   363	    # ---- Step 2: Fit GJR-GARCH ----
+   364	    print("\n[2/5] Fitting GJR-GARCH(1,1) with Student-t to SPY...")
+   365	    res, params = fit_garch(df['ret'])
+   366	
+   367	    print(f"  mu     = {params['mu']:.6f}")
+   368	    print(f"  ar1    = {params['ar1']:.6f}")
+   369	    print(f"  omega  = {params['omega']:.6f}")
+   370	    print(f"  alpha  = {params['alpha']:.6f}")
+   371	    print(f"  gamma  = {params['gamma']:.6f}")
+   372	    print(f"  beta   = {params['beta']:.6f}")
+   373	    print(f"  nu     = {params['nu']:.4f}")
+   374	    print(f"  persistence = {params['persistence']:.6f}")
+   375	
+   376	    # Compute empirical VIX percentile thresholds
+   377	    vix_vals = df['vix'].dropna()
+   378	    vix_percentiles = {}
+   379	    for thresh in [15, 20, 25, 30]:
+   380	        pct = (vix_vals < thresh).mean() * 100
+   381	        vix_percentiles[thresh] = np.percentile(np.sqrt(res.conditional_volatility.values**2) * np.sqrt(252) / 100 * np.sqrt(252), pct)
+   382	        # Actually, let's use cond vol percentiles properly
+   383	    # Recompute: map empirical VIX levels to conditional vol percentiles
+   384	    cond_vol_ann_empirical = res.conditional_volatility * np.sqrt(252)  # annualized in %
+   385	    for thresh in [15, 20, 25, 30]:
+   386	        pct = (vix_vals < thresh).mean()
+   387	        vix_percentiles[thresh] = np.percentile(cond_vol_ann_empirical.values, pct * 100)
+   388	    print(f"\n  VIX percentile mapping to conditional vol:")
+   389	    for thresh in [15, 20, 25, 30]:
+   390	        print(f"    VIX < {thresh} ≈ cond_vol < {vix_percentiles[thresh]:.1f}% (pct={100*(vix_vals < thresh).mean():.1f}%)")
+   391	
+   392	    # ---- Step 3: Monte Carlo simulation with FIXED thresholds ----
+   393	    N_SIM = 10000
+   394	    N_OBS = 5000
+   395	    print(f"\n[3/5] Running {N_SIM} GARCH simulations (fixed thresholds, n={N_OBS} each)...")
+   396	
+   397	    n_workers = min(8, multiprocessing.cpu_count())
+   398	
+   399	    # Method 1: Fixed thresholds (primary — most comparable to empirical)
+   400	    sim_args = [(seed, params, N_OBS) for seed in range(N_SIM)]
+   401	
+   402	    sim_results_fixed = []
+   403	    with ProcessPoolExecutor(max_workers=n_workers) as executor:
+   404	        for i, result in enumerate(executor.map(simulate_garch_sar_fixed_thresholds, sim_args, chunksize=100)):
+   405	            sim_results_fixed.append(result)
+   406	            if (i + 1) % 2000 == 0:
+   407	                print(f"    Fixed threshold: {i+1}/{N_SIM} done")
+   408	
+   409	    # Method 2: Percentile-based thresholds (robustness)
+   410	    print(f"\n[4/5] Running {N_SIM} GARCH simulations (percentile thresholds)...")
+   411	    sim_args_pct = [(seed, params, N_OBS, vix_percentiles) for seed in range(N_SIM)]
+   412	
+   413	    sim_results_pct = []
+   414	    with ProcessPoolExecutor(max_workers=n_workers) as executor:
+   415	        for i, result in enumerate(executor.map(simulate_garch_path, sim_args_pct, chunksize=100)):
+   416	            sim_results_pct.append(result)
+   417	            if (i + 1) % 2000 == 0:
+   418	                print(f"    Percentile: {i+1}/{N_SIM} done")
+   419	
+   420	    # ---- Step 4: Compare simulated vs empirical SAR ----
+   421	    print("\n[5/5] Comparing simulated vs empirical SAR...")
+   422	
+   423	    regime_names = ['calm (<15)', 'normal (15-20)', 'elevated (20-25)', 'high (25-30)', 'crisis (>=30)']
+   424	
+   425	    # Collect simulated SARs
+   426	    output = {
+   427	        'experiment_id': 'k897',
+   428	        'title': 'Null Simulation: Does SAR Arise Mechanically from GARCH?',
+   429	        'data_source': 'yfinance (SPY, ^VIX), simulation',
+   430	        'sample_period': f"{df.index[0].strftime('%Y-%m-%d')} to {df.index[-1].strftime('%Y-%m-%d')}",
+   431	        'n_observations': len(df),
+   432	        'n_simulations': N_SIM,
+   433	        'n_obs_per_sim': N_OBS,
+   434	        'garch_params': {k: float(v) for k, v in params.items()},
+   435	    }
+   436	
+   437	    # === Fixed threshold results ===
+   438	    print("\n" + "=" * 70)
+   439	    print("METHOD 1: FIXED THRESHOLDS (same as VIX: 15/20/25/30, shock > 2)")
+   440	    print("=" * 70)
+   441	
+   442	    fixed_results = {}
+   443	    for regime in regime_names:
+   444	        sim_sars = [r[regime] for r in sim_results_fixed if not np.isnan(r.get(regime, np.nan))]
+   445	        emp_sar = empirical_sar[regime]['sar'] if regime in empirical_sar and empirical_sar[regime]['sar'] is not None else None
+   446	
+   447	        if len(sim_sars) > 100 and emp_sar is not None:
+   448	            sim_mean = np.mean(sim_sars)
+   449	            sim_std = np.std(sim_sars)
+   450	            sim_ci_lo = np.percentile(sim_sars, 2.5)
+   451	            sim_ci_hi = np.percentile(sim_sars, 97.5)
+   452	
+   453	            # Is empirical SAR within simulated CI?
+   454	            in_ci = sim_ci_lo <= emp_sar <= sim_ci_hi
+   455	
+   456	            # Effect size (Cohen's d)
+   457	            cohens_d = (emp_sar - sim_mean) / sim_std if sim_std > 0 else 0
+   458	
+   459	            # KS test: is empirical SAR consistent with simulation distribution?
+   460	            # One-sample z-test
+   461	            z_score = (emp_sar - sim_mean) / (sim_std / np.sqrt(len(sim_sars)))
+   462	            p_value = 2 * (1 - stats.norm.cdf(abs(z_score)))
+   463	
+   464	            # More informative: what fraction of simulations produce SAR >= empirical?
+   465	            frac_above = np.mean(np.array(sim_sars) >= emp_sar)
+   466	
+   467	            fixed_results[regime] = {
+   468	                'empirical_sar': round(emp_sar, 4),
+   469	                'sim_mean': round(sim_mean, 4),
+   470	                'sim_std': round(sim_std, 4),
+   471	                'sim_ci_95': [round(sim_ci_lo, 4), round(sim_ci_hi, 4)],
+   472	                'in_95_ci': bool(in_ci),
+   473	                'cohens_d': round(cohens_d, 4),
+   474	                'z_score': round(z_score, 4),
+   475	                'p_value': round(p_value, 6),
+   476	                'frac_sim_above_empirical': round(frac_above, 4),
+   477	                'n_valid_sims': len(sim_sars),
+   478	            }
+   479	
+   480	            print(f"\n  {regime}:")
+   481	            print(f"    Empirical SAR:  {emp_sar:.3f}")
+   482	            print(f"    Simulated SAR:  {sim_mean:.3f} ± {sim_std:.3f}  [{sim_ci_lo:.3f}, {sim_ci_hi:.3f}]")
+   483	            print(f"    In 95% CI?      {'YES' if in_ci else 'NO'}")
+   484	            print(f"    Cohen's d:      {cohens_d:.3f}")
+   485	            print(f"    z-score:        {z_score:.3f} (p = {p_value:.6f})")
+   486	            print(f"    Frac sim >= emp: {frac_above:.3f}")
+   487	        else:
+   488	            fixed_results[regime] = {
+   489	                'empirical_sar': emp_sar,
+   490	                'n_valid_sims': len(sim_sars),
+   491	                'note': 'Insufficient simulated data for comparison'
+   492	            }
+   493	            print(f"\n  {regime}: insufficient data (n_valid_sims={len(sim_sars)})")
+   494	
+   495	    output['fixed_threshold_results'] = fixed_results
+   496	
+   497	    # === SAR decline pattern comparison ===
+   498	    print("\n" + "-" * 50)
+   499	    print("SAR DECLINE PATTERN (calm → high)")
+   500	    print("-" * 50)
+   501	
+   502	    # Empirical decline
+   503	    emp_calm = empirical_sar['calm (<15)']['sar']
+   504	    emp_high = empirical_sar['high (25-30)']['sar']
+   505	    emp_decline = emp_calm - emp_high if emp_calm and emp_high else None
+   506	
+   507	    # Simulated decline
+   508	    sim_declines = []
+   509	    for r in sim_results_fixed:
+   510	        calm_sar = r.get('calm (<15)', np.nan)
+   511	        high_sar = r.get('high (25-30)', np.nan)
+   512	        if not np.isnan(calm_sar) and not np.isnan(high_sar):
+   513	            sim_declines.append(calm_sar - high_sar)
+   514	
+   515	    if len(sim_declines) > 100 and emp_decline is not None:
+   516	        sim_decline_mean = np.mean(sim_declines)
+   517	        sim_decline_std = np.std(sim_declines)
+   518	        sim_decline_ci = [np.percentile(sim_declines, 2.5), np.percentile(sim_declines, 97.5)]
+   519	        decline_in_ci = sim_decline_ci[0] <= emp_decline <= sim_decline_ci[1]
+   520	        decline_z = (emp_decline - sim_decline_mean) / sim_decline_std
+
+exec
+/bin/zsh -lc "nl -ba experiments/k897/k897_sar_null_simulation.py | sed -n '521,780p'" in /Users/yhlai0911/volpred-research
+ succeeded in 0ms:
+   521	        decline_p = 2 * (1 - stats.norm.cdf(abs(decline_z)))
+   522	        decline_d = (emp_decline - sim_decline_mean) / sim_decline_std
+   523	
+   524	        print(f"  Empirical SAR decline (calm→high): {emp_decline:.3f}")
+   525	        print(f"  Simulated SAR decline:             {sim_decline_mean:.3f} ± {sim_decline_std:.3f}")
+   526	        print(f"  95% CI:                            [{sim_decline_ci[0]:.3f}, {sim_decline_ci[1]:.3f}]")
+   527	        print(f"  In 95% CI?                         {'YES' if decline_in_ci else 'NO'}")
+   528	        print(f"  Cohen's d:                         {decline_d:.3f}")
+   529	        print(f"  z-score:                           {decline_z:.3f} (p = {decline_p:.6f})")
+   530	
+   531	        output['sar_decline_comparison'] = {
+   532	            'empirical_decline': round(emp_decline, 4),
+   533	            'sim_mean_decline': round(sim_decline_mean, 4),
+   534	            'sim_std_decline': round(sim_decline_std, 4),
+   535	            'sim_ci_95': [round(sim_decline_ci[0], 4), round(sim_decline_ci[1], 4)],
+   536	            'in_95_ci': bool(decline_in_ci),
+   537	            'cohens_d': round(decline_d, 4),
+   538	            'z_score': round(decline_z, 4),
+   539	            'p_value': round(decline_p, 6),
+   540	            'n_valid_sims': len(sim_declines),
+   541	        }
+   542	
+   543	    # === Percentile threshold results (robustness) ===
+   544	    print("\n" + "=" * 70)
+   545	    print("METHOD 2: PERCENTILE THRESHOLDS (robustness)")
+   546	    print("=" * 70)
+   547	
+   548	    pct_results = {}
+   549	    for regime in regime_names:
+   550	        sim_sars = [r[regime] for r in sim_results_pct if not np.isnan(r.get(regime, np.nan))]
+   551	        emp_sar = empirical_sar[regime]['sar'] if regime in empirical_sar and empirical_sar[regime]['sar'] is not None else None
+   552	
+   553	        if len(sim_sars) > 100 and emp_sar is not None:
+   554	            sim_mean = np.mean(sim_sars)
+   555	            sim_std = np.std(sim_sars)
+   556	            sim_ci_lo = np.percentile(sim_sars, 2.5)
+   557	            sim_ci_hi = np.percentile(sim_sars, 97.5)
+   558	            in_ci = sim_ci_lo <= emp_sar <= sim_ci_hi
+   559	            cohens_d = (emp_sar - sim_mean) / sim_std if sim_std > 0 else 0
+   560	
+   561	            pct_results[regime] = {
+   562	                'empirical_sar': round(emp_sar, 4),
+   563	                'sim_mean': round(sim_mean, 4),
+   564	                'sim_std': round(sim_std, 4),
+   565	                'sim_ci_95': [round(sim_ci_lo, 4), round(sim_ci_hi, 4)],
+   566	                'in_95_ci': bool(in_ci),
+   567	                'cohens_d': round(cohens_d, 4),
+   568	                'n_valid_sims': len(sim_sars),
+   569	            }
+   570	
+   571	            print(f"\n  {regime}:")
+   572	            print(f"    Empirical SAR:  {emp_sar:.3f}")
+   573	            print(f"    Simulated SAR:  {sim_mean:.3f} ± {sim_std:.3f}  [{sim_ci_lo:.3f}, {sim_ci_hi:.3f}]")
+   574	            print(f"    In 95% CI?      {'YES' if in_ci else 'NO'}")
+   575	        else:
+   576	            pct_results[regime] = {'n_valid_sims': len(sim_sars), 'note': 'Insufficient data'}
+   577	            print(f"\n  {regime}: insufficient data")
+   578	
+   579	    output['percentile_threshold_results'] = pct_results
+   580	
+   581	    # === Persistence sensitivity ===
+   582	    print("\n" + "=" * 70)
+   583	    print("PERSISTENCE SENSITIVITY ANALYSIS")
+   584	    print("=" * 70)
+   585	
+   586	    persistence_levels = [0.90, 0.95, 0.97, 0.99]
+   587	    N_SIM_SENS = 2000  # fewer sims for sensitivity
+   588	
+   589	    persistence_results = {}
+   590	    for target_p in persistence_levels:
+   591	        print(f"\n  Persistence = {target_p}:")
+   592	        sim_args_p = [(seed, params, target_p, N_OBS) for seed in range(N_SIM_SENS)]
+   593	
+   594	        sens_results = []
+   595	        with ProcessPoolExecutor(max_workers=n_workers) as executor:
+   596	            for result in executor.map(simulate_with_persistence, sim_args_p, chunksize=50):
+   597	                sens_results.append(result)
+   598	
+   599	        # SAR decline for this persistence level
+   600	        sens_declines = []
+   601	        for r in sens_results:
+   602	            calm_sar = r.get('calm (<15)', np.nan)
+   603	            high_sar = r.get('high (25-30)', np.nan)
+   604	            if not np.isnan(calm_sar) and not np.isnan(high_sar):
+   605	                sens_declines.append(calm_sar - high_sar)
+   606	
+   607	        regime_sars = {}
+   608	        for regime in regime_names:
+   609	            sars = [r[regime] for r in sens_results if not np.isnan(r.get(regime, np.nan))]
+   610	            if sars:
+   611	                regime_sars[regime] = {
+   612	                    'mean': round(np.mean(sars), 4),
+   613	                    'std': round(np.std(sars), 4),
+   614	                    'n_valid': len(sars),
+   615	                }
+   616	                print(f"    {regime}: SAR = {np.mean(sars):.3f} ± {np.std(sars):.3f} (n={len(sars)})")
+   617	
+   618	        if sens_declines:
+   619	            mean_decline = np.mean(sens_declines)
+   620	            print(f"    SAR decline (calm→high): {mean_decline:.3f}")
+   621	            persistence_results[str(target_p)] = {
+   622	                'regimes': regime_sars,
+   623	                'mean_decline': round(mean_decline, 4),
+   624	                'n_valid_declines': len(sens_declines),
+   625	            }
+   626	
+   627	    output['persistence_sensitivity'] = persistence_results
+   628	
+   629	    # === GJR asymmetry test ===
+   630	    print("\n" + "=" * 70)
+   631	    print("GJR vs SYMMETRIC GARCH COMPARISON")
+   632	    print("=" * 70)
+   633	
+   634	    # Run symmetric GARCH (gamma=0)
+   635	    params_sym = params.copy()
+   636	    params_sym['gamma'] = 0.0
+   637	    # Adjust alpha to keep similar persistence
+   638	    params_sym['alpha'] = params['alpha'] + params['gamma'] / 2
+   639	
+   640	    print(f"  Symmetric GARCH: alpha={params_sym['alpha']:.6f}, gamma=0, beta={params_sym['beta']:.6f}")
+   641	    print(f"  Persistence: {params_sym['alpha'] + params_sym['beta']:.6f}")
+   642	
+   643	    sim_args_sym = [(seed, params_sym, N_OBS) for seed in range(N_SIM_SENS)]
+   644	
+   645	    sym_results = []
+   646	    with ProcessPoolExecutor(max_workers=n_workers) as executor:
+   647	        for result in executor.map(simulate_garch_sar_fixed_thresholds, sim_args_sym, chunksize=50):
+   648	            sym_results.append(result)
+   649	
+   650	    sym_declines = []
+   651	    for r in sym_results:
+   652	        calm_sar = r.get('calm (<15)', np.nan)
+   653	        high_sar = r.get('high (25-30)', np.nan)
+   654	        if not np.isnan(calm_sar) and not np.isnan(high_sar):
+   655	            sym_declines.append(calm_sar - high_sar)
+   656	
+   657	    gjr_declines = []
+   658	    for r in sim_results_fixed[:N_SIM_SENS]:
+   659	        calm_sar = r.get('calm (<15)', np.nan)
+   660	        high_sar = r.get('high (25-30)', np.nan)
+   661	        if not np.isnan(calm_sar) and not np.isnan(high_sar):
+   662	            gjr_declines.append(calm_sar - high_sar)
+   663	
+   664	    if sym_declines and gjr_declines:
+   665	        sym_mean = np.mean(sym_declines)
+   666	        gjr_mean = np.mean(gjr_declines)
+   667	        t_stat, p_val = stats.ttest_ind(gjr_declines, sym_declines)
+   668	
+   669	        print(f"\n  GJR-GARCH SAR decline:       {gjr_mean:.3f}")
+   670	        print(f"  Symmetric GARCH SAR decline: {sym_mean:.3f}")
+   671	        print(f"  Difference:                  {gjr_mean - sym_mean:.3f}")
+   672	        print(f"  t-stat:                      {t_stat:.3f} (p = {p_val:.6f})")
+   673	
+   674	        output['gjr_vs_symmetric'] = {
+   675	            'gjr_mean_decline': round(gjr_mean, 4),
+   676	            'sym_mean_decline': round(sym_mean, 4),
+   677	            'difference': round(gjr_mean - sym_mean, 4),
+   678	            't_stat': round(t_stat, 4),
+   679	            'p_value': round(p_val, 6),
+   680	        }
+   681	
+   682	    # ============================================================
+   683	    # SUMMARY AND CONCLUSION
+   684	    # ============================================================
+   685	    print("\n" + "=" * 70)
+   686	    print("SUMMARY AND CONCLUSION")
+   687	    print("=" * 70)
+   688	
+   689	    # Determine if null is supported or rejected
+   690	    if 'sar_decline_comparison' in output:
+   691	        decline_info = output['sar_decline_comparison']
+   692	        if decline_info['in_95_ci']:
+   693	            conclusion = "NULL SUPPORTED: Empirical SAR decline is within the 95% CI of GARCH simulation"
+   694	            detail = (
+   695	                f"The empirical SAR decline ({decline_info['empirical_decline']:.3f}) falls within "
+   696	                f"the simulated 95% CI [{decline_info['sim_ci_95'][0]:.3f}, {decline_info['sim_ci_95'][1]:.3f}]. "
+   697	                f"This means a standard GARCH process with no absorption mechanism can produce "
+   698	                f"the observed SAR decline pattern. The absorption effect may be fully explained "
+   699	                f"by GARCH mean reversion."
+   700	            )
+   701	        else:
+   702	            if decline_info['empirical_decline'] > decline_info['sim_ci_95'][1]:
+   703	                conclusion = "NULL REJECTED: Empirical absorption is STRONGER than GARCH predicts"
+   704	                detail = (
+   705	                    f"The empirical SAR decline ({decline_info['empirical_decline']:.3f}) exceeds "
+   706	                    f"the simulated 95% CI [{decline_info['sim_ci_95'][0]:.3f}, {decline_info['sim_ci_95'][1]:.3f}]. "
+   707	                    f"Real markets show MORE absorption than a standard GARCH process would produce. "
+   708	                    f"This supports the paper's claim that absorption is a real phenomenon beyond GARCH."
+   709	                )
+   710	            else:
+   711	                conclusion = "NULL REJECTED: Empirical absorption is WEAKER than GARCH predicts"
+   712	                detail = (
+   713	                    f"The empirical SAR decline ({decline_info['empirical_decline']:.3f}) is below "
+   714	                    f"the simulated 95% CI [{decline_info['sim_ci_95'][0]:.3f}, {decline_info['sim_ci_95'][1]:.3f}]. "
+   715	                    f"Real markets show LESS absorption than GARCH predicts, which is unexpected."
+   716	                )
+   717	
+   718	        print(f"\n  {conclusion}")
+   719	        print(f"\n  Detail: {detail}")
+   720	        print(f"\n  Cohen's d = {decline_info['cohens_d']:.3f}")
+   721	        print(f"  z-score   = {decline_info['z_score']:.3f}")
+   722	        print(f"  p-value   = {decline_info['p_value']:.6f}")
+   723	
+   724	        output['conclusion'] = conclusion
+   725	        output['detail'] = detail
+   726	    else:
+   727	        output['conclusion'] = "Insufficient data for conclusive comparison"
+   728	        output['detail'] = "SAR decline comparison could not be computed"
+   729	
+   730	    # Count how many regimes have empirical SAR outside simulated CI
+   731	    n_outside = 0
+   732	    n_tested = 0
+   733	    for regime in regime_names:
+   734	        fr = fixed_results.get(regime, {})
+   735	        if 'in_95_ci' in fr:
+   736	            n_tested += 1
+   737	            if not fr['in_95_ci']:
+   738	                n_outside += 1
+   739	
+   740	    output['regimes_outside_ci'] = f"{n_outside}/{n_tested}"
+   741	    print(f"\n  Regimes with empirical SAR outside simulated 95% CI: {n_outside}/{n_tested}")
+   742	
+   743	    # Save results
+   744	    output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-aa7ddc51/experiments/k897_sar_null_simulation_results.json'
+   745	    with open(output_path, 'w') as f:
+   746	        json.dump(output, f, indent=2, default=str)
+   747	    print(f"\n  Results saved to: {output_path}")
+   748	
+   749	    return output
+   750	
+   751	
+   752	if __name__ == '__main__':
+   753	    main()
+

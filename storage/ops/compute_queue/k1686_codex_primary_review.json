@@ -1,0 +1,27 @@
+{
+  "id": "k1686_codex_primary_review",
+  "title": "K1686 Codex primary-path review (K1259 gate before knowledge.json)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1686_prompt.md",
+    "storage/ops/codex_reviews/k1686_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-11T21:12:37Z",
+  "started_at": "2026-07-11T21:15:00Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1686_codex_primary_review.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1686_codex_primary_review.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1686_verdict.md",
+  "claude_followup": {
+    "brief": "收 K1686 Codex primary-path verdict（storage/ops/codex_reviews/k1686_verdict.md）：(1) PASS/CONDITIONAL PASS → 寫 knowledge.json（reviewer_source='Codex primary path + code-reviewer subagent'；verdict=ABSORPTION CLAIM NOT SUPPORTED；含 signed-composition 決定性發現、null 比較 inconclusive、K897 NULL REJECTED 撤回）；FAIL → 不寫 knowledge，依 blocking issues 派修正 task。(2) 裁決 paper/volatility-absorption：實驗建議降級為 FRL measurement note（signed-composition 非 absorption）→ 更新 storage/paper_pipeline_status.json + research_program.md。(3) K897 標 superseded（NULL REJECTED 是 timing artifact）。worktree 已 path-scoped 抽取合併，勿重合。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 2700
+}

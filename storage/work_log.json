@@ -16121,5 +16121,13 @@
     "task_id": "platform_ops_execution_brief_killpg",
     "summary": "把 class sweep 的最後一筆負債清掉（原本要凍進 KNOWN_UNFIXED，時間夠就直接修完）：execution_brief.py 的 3 個 claude/codex 站點抽出 _run_agentic helper（Popen + start_new_session + procutil.kill_pgid，維持 subprocess.run 的介面與 TimeoutExpired 語意）。coordinator 的 for _ in range(3) retry loop 是最危險的：舊碼逾時後 continue 會再 spawn 一個 claude，而前一棵樹還活著 → 3 次 retry 可疊出 3 棵並行的孤兒樹。修改後測試掛住 3 分鐘 → 查出是我弄壞的：測試 monkeypatch subprocess.run，新 helper 走 Popen 繞過 patch → 真的去 spawn claude。5 個 patch seam 移到 _run_agentic，14 passed in 0.37s。另補行為測試證明孫程序真被收掉（舊做法實測 canary=True 孤兒存活，新做法 False）。KNOWN_UNFIXED 清空 → 這個 bug class 全庫歸零。27 tests green。",
     "outcome": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-12T05:28:00+08:00",
+    "actor": "hourly-05",
+    "task_type": "experiment",
+    "task_id": "fable0711_volabs_contemp_null",
+    "summary": "收 K1686（volatility-absorption 的 make-or-break 識別檢定）。Agent 跑完的結論是誠實的 null：verdict = ABSORPTION CLAIM NOT SUPPORTED。主線程驗證了三件它最容易造假的事：(a) 事前判定規則確實先於結果 commit（870af5d00 樹內只有 README、verdict 段刻意留空、實證值 0.8165 已寫死）；(b) 事後才加的變體 F/G 在 code 與 README 都明標 POST-HOC，pre-registered primary（變體 A）自第一次跑完就沒被換過；(c) README 的 verdict 與 results.json 逐項一致。\n\n結果本身比『null』更有意思：真正決定性的發現不需要任何 null 模型 —— 把 shock 按 VIX 移動正負號拆開後，論文 headline 的 SAR decline（0.8165）住在 relief rally（+1.3368）裡，真正的恐慌衝擊 decline 是 −0.1226、bootstrap 95% CI [−0.7289, 0.5828] 含 0。『高恐慌吸收恐慌衝擊』不是這個統計量顯示的東西。至於 null 比較本身，變體之間分裂（A/D_up/E 不拒絕；B/C/G 拒絕），實驗如實說它 inconclusive、兩個方向都不宣稱 —— 這點克制是對的。順帶：K897 的 NULL REJECTED 在同 seed 同 params 下把 proxy 同期化後就不成立（decline 0.1734 → 0.619），它的 margin 大部分是 timing artifact。\n\nagent 誠實揭露 codex exec 三次 transport 截斷、改走 code-reviewer subagent（CONDITIONAL PASS、程式碼零 bug），並依 K1259 規則沒有自己寫 knowledge.json。本班 fire 禁 spawn codex exec（3-STRIKE hook），所以把 Codex primary-path 複驗排進 compute queue（k1686_codex_primary_review），knowledge.json 與論文處置一律gated 在它的 verdict 之後。為此補了 scripts/codex_review_job.sh —— repo 原本沒有『可排進 queue 的 Codex review』入口，只有給短呼叫用的 codex_exec_bounded.sh，長 review 因此無處可去。\n\n合併走 path-scoped 抽取而非 merge_worktree.sh：main 已被 PHASE-Z autocommit 收進一個同路徑的假 results.json（見下），直接 merge 會撞。抽取後 branch 與 main working tree diff 為空，worktree 已移除、branch 保留。\n\n過程中挖到一個資料完整性缺陷並排進池（platform_ops_run_agent_job_stub_clobbers_results，P1）：run_agent_job.py 把 job 執行摘要寫到 --result-artifact，且相對 main repo 解析而非 --cwd 的 worktree。K1686 的 --result-artifact 正好指到實驗的 canonical results 路徑 → main 出現 319-byte 假 results.json，還被 autocommit 收進 HEAD。這次是 worktree 還在才沒事；K1684 那種 worktree 先被清掉的情況，main 會永久留著一個看起來完全正常的假結果檔，不會有任何訊號叫。",
+    "outcome": "succeeded"
   }
 ]
