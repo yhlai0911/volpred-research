@@ -160,6 +160,13 @@ def _silent_action(stmt: ast.stmt) -> str | None:
     return None
 
 
+def _line_has_silent_ok(source_lines: list[str], line_no: int | None) -> bool:
+    """Accept the marker on the `except ...:` header line, not just the body."""
+    if line_no is None or not 1 <= line_no <= len(source_lines):
+        return False
+    return "silent-ok:" in source_lines[line_no - 1]
+
+
 def _has_silent_ok_comment(source_lines: list[str], stmt: ast.stmt) -> bool:
     start = getattr(stmt, "lineno", None)
     end = getattr(stmt, "end_lineno", start)
@@ -232,7 +239,9 @@ def audit_file(path: Path, *, root: Path = ROOT) -> list[Finding]:
             action = _silent_action(stmt)
             if action is None:
                 continue
-            if _has_silent_ok_comment(source_lines, stmt):
+            if _has_silent_ok_comment(source_lines, stmt) or _line_has_silent_ok(
+                source_lines, node.lineno
+            ):
                 continue
             exception = _exception_name(node)
             findings.append(

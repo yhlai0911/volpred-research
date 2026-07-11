@@ -225,8 +225,8 @@ def _flatten_criteria_numbers(obj, key: str | None = None) -> list[float]:
         for token in _NUMERIC_LITERAL_RE.findall(obj):
             try:
                 out.append(float(token))
-            except ValueError:  # silent-ok: regex-matched token, float() is total
-                pass
+            except ValueError:
+                pass  # silent-ok: token came from _NUMERIC_LITERAL_RE, float() is total
     return out
 
 
