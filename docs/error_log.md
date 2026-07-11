@@ -6263,3 +6263,32 @@ headline 維持，細部分格統計量下修。受影響文章與 knowledge 必
 `storage/ops/dm_hac_lag_baseline.json` 是 frozen backlog，`scripts/tests/test_dm_hac_lag_ratchet.py`
 禁止新增退化 helper，修一站就必須讓 baseline 單調縮小。正式結論使用 Harvey `|t|>3`，名目
 p-value 可列，但不得代替多重嘗試下的嚴格 gate。
+
+## 2026-07-12 04:15 — K1025_v3 初稿通過表面 gate，語義審查仍抓出四類規格漂移
+
+**症狀**：hourly agent 已提交完整 script / JSON / PNG / README，既有 FEVD 與 DM 測試 24/24
+通過；但接手 task 的 Codex 依 deep-review brief 重新推導後，發現初稿把 FEVD VAR lag grid
+從 5 擅改為 22、rolling window 從 paper 的 252 日改為 200 日，另把只包含到 `i-1` 的窗口
+日期標成 `index[i]`。初稿因此把主 TCI 寫成 24.48%（brief 預期 18%–22%）並產生 523 個
+rolling 窗口，而非 paper 規格的 19.52% 與 512 窗口。
+
+**第二層錯誤**：OOS 用 `AutoReg(y, lags=p).aic` 比 AR(1)…AR(22)，未固定共同
+`hold_back`。每個候選各自少掉 p 筆，AIC 比較不同樣本，會機械性選 grid 上界 22；固定
+`hold_back=22` 後選 p=3。QR bootstrap 另有 `IterationLimitWarning`，舊碼仍把未收斂 draw
+計入 `n_boot_ok=500`；直接 `write_text` JSON 也可能在中斷時留下半檔。
+
+**修正**：FEVD VAR 恢復 paper/brief 的 maxlags=5；rolling 恢復 252 日並用 `index[i-1]`；
+AR 候選固定共同 hold-back，runtime assert 所有候選 `nobs=942`；bootstrap 提高到 B=1,000，
+未收斂 draw 明確排除，成功率低於 95% 即 raise；PNG/JSON 改 temp + atomic replace。最終 pinned
+結果：N=2,812、generalized TCI=19.5153%、BTC net=−0.9478pp、OOS AR(3) full DM=−0.9950、
+CW=−0.1248。獨立 reviewer 與獨立重算均 PASS。
+
+**下游更正教訓**：公開文章 `mile_113ce9d1` 原始數字來自 v1（90.11%、−76.89pp、QR
+8.5 倍），v2 則是 −74.4052pp / 7.04 倍；非對稱 Granger 舊圖也是 v1，而非 v2。文章 errata
+必須逐項標版本，不能把「old」當成單一 vintage。p=22 更只屬本輪尚未定稿的初版 v3，v2
+是 p=10，最終 v3 才是共同樣本 p=3。
+
+**防再犯**：(1) 測試全綠只證明已寫的 gate，paper task 必須逐句比 brief 與 manuscript
+pre-spec；(2) lag-order information criterion 一律固定共同有效樣本並輸出 selection nobs；
+(3) optimizer warning 必須轉成可計數失敗，不可等同收斂；(4) 回溯文章先建立
+v1/v2/v3 claim-to-JSON mapping，再寫「舊版」摘要。

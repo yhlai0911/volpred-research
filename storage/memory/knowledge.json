@@ -38592,5 +38592,32 @@
     ],
     "confidence": 0.99,
     "created_at": "2026-07-12T01:02:38.856870"
+  },
+  {
+    "item_id": "b2160be1",
+    "category": "self-correction",
+    "content": "[提出: Codex, 執行: Codex] [CORRECTED 2026-07-12 — K1025 v3 semantic rerun]\nK1025 舊結論發生重大更正。RETRACTION：舊版 k1025/k1025_v2 把 statsmodels FEVD.decomp（shape = variable × horizon × shock）用 decomp[-1] 誤切，90.11% total connectedness 與 BTC net −76.89pp 全數無效；未控制 lagged VIX 的 QR「右尾放大 8.5 倍」也不通過存活測試。\n\nCORRECTED EVIDENCE（pinned snapshot，2015-02-02..2026-04-08，N=2812，seed=42）：paper-prespecified VAR maxlags=5、KPPS generalized FEVD 得 TCI=19.5153%、BTC net=−0.9478pp。兩種 Cholesky 排序使 BTC net 從 +10.5485pp 翻到 −8.1080pp；generalized permutation gap 5.6e−12pp。252d rolling 共512窗，COVID 2020-02..06平均36.1602% vs calm 2017-2019 20.7589%，全期峰值47.0190%於2021-02-24；BTC在72.46%窗口為net receiver，但一階差分 robustness 翻成 +1.9165pp，故不可宣稱穩固淨方向。\n\nQR 使用 BTC_RV[t−1] + VIX[t−1]、moving-block bootstrap B=1000；τ=.95 beta=+0.4175、95% CI [−0.6133,+1.1413]，sign reversal survives=false。OOS AutoReg 候選統一 hold_back=22 後 AIC 選p=3（舊版不同樣本比較會機械選grid上界22）；full OOS MSE惡化0.3151%，DM t=−0.9950、Clark-West t=−0.1248，僅能說未見改善證據，不能把未拒絕寫成真 null。K1025 v2 的 downside-vs-upside Granger 5/5 vs 0/5 不經上述兩個錯誤，保留為獨立預測關聯，不能升格為結構性因果或可交易性。\n\nVERDICT=MIXED_MAJOR_CORRECTION；K1025_v3 實驗包經 Codex 語義審查 PASS，但 crypto-fear-channel 論文尚未 ready，須另做 body/reproduce/K1025b v3 重寫。公開文章 mile_113ce9d1 已排本輪正式更正。",
+    "evidence": [
+      "experiments/k1025/k1025_v3.py",
+      "experiments/k1025/k1025_v3_results.json",
+      "experiments/k1025/README.md",
+      "scripts/tests/test_fevd_shape.py",
+      "paper/crypto-fear-channel/review_history/fable_deep_review_20260711/README.md"
+    ],
+    "confidence": 0.97,
+    "created_at": "2026-07-12T03:48:31.506947"
+  },
+  {
+    "item_id": "9e2254da",
+    "category": "self-correction",
+    "content": "[提出: Codex, 執行: Codex] [CORRECTION TO knowledge item b2160be1 — vintage labels only]\nb2160be1 的實證數字與 K1025_v3 verdict 維持不變，但兩處「舊版」標示需要精確分版：\n(1) 原公開文章 mile_113ce9d1 使用 v1 k1025_results.json；90.11% total connectedness、BTC net −76.89pp、QR 右尾放大 8.5× 與非對稱 Granger 舊圖（前三個 downside F 約18.96/14.79/10.18）都屬 v1。\n(2) v2 k1025_v2_results.json 的對應 FEVD net 是 −74.4052pp、QR ratio 7.04×、downside Granger 前三個 F 約21.78/19.57/13.11；v2 OOS AR order 是 p=10。\n(3) p=22 只屬 2026-07-12 尚未定稿的初版 v3：AutoReg 候選未固定共同 hold_back，AIC 機械選 grid 上界。Final v3 固定共同 hold_back=22 後選 p=3。\n因此 b2160be1 的「k1025/k1025_v2 ... 90.11/−76.89」與「舊版...p=22」應分別讀成 v1 public claim 與 initial-v3 defect。公開文章已用 errata action k1025_v3_vintage_label_fix 同步修正。",
+    "evidence": [
+      "experiments/k1025/k1025_results.json",
+      "experiments/k1025/k1025_v2_results.json",
+      "experiments/k1025/k1025_v3_results.json",
+      "storage/reports/feed.json#mile_113ce9d1"
+    ],
+    "confidence": 0.99,
+    "created_at": "2026-07-12T04:01:46.596189"
   }
 ]

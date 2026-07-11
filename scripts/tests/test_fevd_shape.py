@@ -249,10 +249,11 @@ def test_bug_reproduction_marker_is_not_being_used_to_smuggle_the_bug_back() -> 
 # in docs/error_log.md names this file as the sole owner).
 # ---------------------------------------------------------------------------
 
-# The brief's threshold for the iid placebo. The measured value is ~0.4%, so this is
-# a very loose ceiling -- it is set where it is because ANY value near it already
-# means the pipeline is mis-slicing, and the buggy slice lands at ~67%.
-SHIPPED_IID_TSI_CEILING = 15.0
+# The brief requires an approximately-zero iid placebo. Across the pinned seeds the
+# shipped estimators measure about 0.3--0.7%, so 5% leaves ample estimation-noise
+# headroom while still rejecting a materially connected result. The buggy slice is
+# around 67%, far beyond this ceiling.
+SHIPPED_IID_TSI_CEILING = 5.0
 
 
 def _load_k1025_v3():
@@ -366,7 +367,7 @@ def test_generalized_fevd_is_order_invariant_but_cholesky_is_not() -> None:
 
     The crypto-fear headline is a claim about the SIGN of BTC's net connectedness.
     Under Cholesky that sign flips with the variable ordering (measured on the real
-    data: +6.79pp under {BTC,SPY,VIX} vs -10.28pp under {VIX,SPY,BTC}), so no
+    data: +10.55pp under {BTC,SPY,VIX} vs -8.11pp under {VIX,SPY,BTC}), so no
     Cholesky ordering can support it. KPPS does not orthogonalise, so it is
     invariant by construction -- and this test is what keeps it that way.
     """

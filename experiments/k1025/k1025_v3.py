@@ -22,7 +22,9 @@ Additional corrections over v2 (each is a separate defect, see README):
   * Data now comes from the pinned snapshot CSV, never a live yfinance fetch.
   * Weekend-NaN alignment bug (see `build_panel`): prices are dropna'd BEFORE
     differencing, not after. Doing it the other way silently deletes Mondays.
-  * VAR lag grid extended to 22 (v2 capped at 5).
+  * The OOS AR lag grid is extended to 22; the FEVD VAR keeps the paper's
+    pre-specified maxlags=5 so the estimator correction is not confounded with
+    an unrequested lag-grid change.
   * Quantile regression gains a lagged-VIX control (quantile-Granger form) and
     a moving-block bootstrap, since an iid bootstrap on a persistent series
     understates the standard error.
@@ -37,6 +39,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import warnings
 from pathlib import Path
 
 import matplotlib
@@ -47,6 +50,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from statsmodels.regression.quantile_regression import QuantReg
+from statsmodels.tools.sm_exceptions import IterationLimitWarning
 from statsmodels.tsa.api import VAR
 from statsmodels.tsa.ar_model import AutoReg
 from statsmodels.tsa.stattools import adfuller
@@ -66,12 +70,14 @@ SNAPSHOT = REPO_ROOT / "paper" / "crypto-fear-channel" / "data" / "spy_btc_usd_v
 RV_WINDOW = 20  # trading days, matches v2 and the manuscript
 ANNUALIZE = np.sqrt(252)
 FEVD_HORIZON = 10
-VAR_MAXLAGS_FULL = 22  # v2 capped at 5
-ROLL_WINDOW = 200
+VAR_MAXLAGS_FULL = 5  # preserve the paper/v2 FEVD specification; AR_MAXLAGS below is the 22-lag extension
+ROLL_WINDOW = 252  # preserve the paper/v2 rolling specification (512 windows on the pinned snapshot)
 ROLL_STEP = 5
-ROLL_MAXLAGS = 5  # see README: 22 lags on a 200-obs window is 67 params/eq -- infeasible
+ROLL_MAXLAGS = 5  # 22 lags on a 252-obs window is 67 params/eq -- too parameter-heavy
 QUANTILES = (0.05, 0.25, 0.50, 0.75, 0.95)
-N_BOOT = 500
+N_BOOT = 1_000  # experiment preamble minimum for bootstrap inference
+QR_MAX_ITER = 5_000
+MIN_BOOT_SUCCESS_RATE = 0.95
 OOS_START = "2019-01-01"
 IS_END = "2018-12-31"
 AR_MAXLAGS = 22  # v2 capped at 10
@@ -243,21 +249,34 @@ def quantile_regression(y: pd.Series, x: pd.DataFrame, block_len: int, key: str)
     n = len(y)
     out = {}
     for tau in QUANTILES:
-        fitted = QuantReg(y, x_c).fit(q=tau)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", IterationLimitWarning)
+            fitted = QuantReg(y, x_c).fit(q=tau, max_iter=QR_MAX_ITER)
         beta = float(fitted.params[key])
 
         rng = np.random.default_rng(SEED)  # same block draws across taus -> comparable CIs
         boot = []
+        failed = 0
         for _ in range(N_BOOT):
             idx = moving_block_indices(n, block_len, rng)
             try:
-                b = QuantReg(y.iloc[idx], x_c.iloc[idx]).fit(q=tau)
+                with warnings.catch_warnings():
+                    warnings.simplefilter("error", IterationLimitWarning)
+                    b = QuantReg(y.iloc[idx], x_c.iloc[idx]).fit(q=tau, max_iter=QR_MAX_ITER)
                 boot.append(float(b.params[key]))
-            except Exception as exc:  # noqa: BLE001
-                # A resample can be rank-deficient; recording it keeps the failure countable
-                # rather than silent (.claude/rules/no-silent-fallback.md).
-                print(f"    [warn] QR bootstrap draw failed (tau={tau}): {exc}")
+            except Exception:  # noqa: BLE001
+                # A resample can be rank-deficient or fail to converge. Count it;
+                # never let an IterationLimitWarning masquerade as a successful draw.
+                failed += 1
         boot_arr = np.asarray(boot)
+        min_ok = int(np.ceil(N_BOOT * MIN_BOOT_SUCCESS_RATE))
+        if len(boot_arr) < min_ok:
+            raise RuntimeError(
+                f"QR bootstrap tau={tau} retained {len(boot_arr)}/{N_BOOT} draws; "
+                f"minimum required is {min_ok}."
+            )
+        if failed:
+            print(f"    [warn] QR bootstrap tau={tau}: excluded {failed}/{N_BOOT} failed draws")
         lo, hi = np.percentile(boot_arr, [2.5, 97.5])
         se = float(boot_arr.std(ddof=1))
         out[f"{tau:.2f}"] = {
@@ -268,6 +287,7 @@ def quantile_regression(y: pd.Series, x: pd.DataFrame, block_len: int, key: str)
             "t_stat": float(beta / se) if se > 0 else 0.0,
             "significant_5pct": bool(lo > 0 or hi < 0),
             "n_boot_ok": int(len(boot_arr)),
+            "n_boot_failed": int(failed),
         }
     return out
 
@@ -499,6 +519,7 @@ def main() -> dict:
     for i in range(ROLL_WINDOW, len(var_data), ROLL_STEP):
         w = var_data.iloc[i - ROLL_WINDOW : i]
         wb = data_b.iloc[i - ROLL_WINDOW : i]
+        window_end = var_data.index[i - 1]
         try:
             rw, lw = fit_var(w, ROLL_MAXLAGS)
             g = connectedness(generalized_fevd(rw))
@@ -506,11 +527,11 @@ def main() -> dict:
             rb, _ = fit_var(wb, ROLL_MAXLAGS)
             cb = connectedness(cholesky_fevd(rb), names=tuple(order_b))
         except Exception as exc:  # noqa: BLE001
-            print(f"    [warn] window ending {var_data.index[i].date()} failed: {exc}")
+            print(f"    [warn] window ending {window_end.date()} failed: {exc}")
             continue
         roll_rows.append(
             {
-                "date": str(var_data.index[i].date()),
+                "date": str(window_end.date()),
                 "lag": lw,
                 "gen_total": g["total_connectedness"],
                 "gen_net_btc": g["net"]["BTC_RV"],
@@ -544,6 +565,7 @@ def main() -> dict:
         "window": ROLL_WINDOW,
         "step": ROLL_STEP,
         "maxlags": ROLL_MAXLAGS,
+        "date_convention": "last observation included in each trailing window",
         "n_windows": int(len(roll)),
         "generalized_total": {
             "mean": float(roll.gen_total.mean()),
@@ -607,6 +629,8 @@ def main() -> dict:
             "block_length": block_len,
             "block_rule": "ceil(n^(1/3))",
             "seed": SEED,
+            "max_iter": QR_MAX_ITER,
+            "min_success_rate": MIN_BOOT_SUCCESS_RATE,
         },
         "n_obs": int(len(qr_df)),
         "no_control": qr_nc,
@@ -628,7 +652,16 @@ def main() -> dict:
 
     is_data = fdata.loc[:IS_END]
     oos_data = fdata.loc[OOS_START:]
-    aic = {p: AutoReg(is_data["VIX"], lags=p).fit().aic for p in range(1, AR_MAXLAGS + 1)}
+    # Every candidate must be compared on the SAME observations. AutoReg's
+    # default hold_back=p silently gives AR(p) a different effective sample and
+    # mechanically drove the old implementation to the upper grid boundary.
+    ar_candidates = {
+        p: AutoReg(is_data["VIX"], lags=p, hold_back=AR_MAXLAGS).fit()
+        for p in range(1, AR_MAXLAGS + 1)
+    }
+    selection_nobs = {int(fit.nobs) for fit in ar_candidates.values()}
+    assert len(selection_nobs) == 1, f"AR AIC candidates use unequal samples: {selection_nobs}"
+    aic = {p: fit.aic for p, fit in ar_candidates.items()}
     ar_p = int(min(aic, key=aic.get))
     print(f"  IS n={len(is_data)}  OOS n={len(oos_data)}  AIC-selected AR order p={ar_p} "
           f"(grid 1..{AR_MAXLAGS})")
@@ -723,6 +756,9 @@ def main() -> dict:
         "oos_start": OOS_START,
         "ar_order_aic": ar_p,
         "ar_maxlags_grid": AR_MAXLAGS,
+        "ar_selection_hold_back": AR_MAXLAGS,
+        "ar_selection_nobs": int(next(iter(selection_nobs))),
+        "ar_selection_rule": "AIC on a common IS sample (AutoReg hold_back=AR_MAXLAGS)",
         "rolling_train_size": ROLL_TRAIN,
         "n_oos": int(len(actual)),
         "hac_rule": "max(h-1, ceil(h^(1/3)*n^(1/3))) — canonical volpred.stats dm_test bandwidth",
@@ -822,12 +858,20 @@ def main() -> dict:
 
     fig.tight_layout(rect=[0, 0, 1, 0.955])
     out_png = HERE / "k1025_v3_results.png"
-    fig.savefig(out_png, dpi=150)
+    tmp_png = HERE / ".k1025_v3_results.tmp.png"
+    fig.savefig(tmp_png, dpi=150)
     plt.close(fig)
+    tmp_png.replace(out_png)
     print(f"  saved {out_png.name}")
 
     out_json = HERE / "k1025_v3_results.json"
-    out_json.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
+    tmp_json = HERE / ".k1025_v3_results.tmp.json"
+    tmp_json.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
+    # Parse the staged payload before replacing the canonical result. A killed run
+    # must leave either the previous complete JSON or the new complete JSON, never
+    # a truncated half-write.
+    json.loads(tmp_json.read_text(encoding="utf-8"))
+    tmp_json.replace(out_json)
     print(f"  saved {out_json.name}")
     return results
 
