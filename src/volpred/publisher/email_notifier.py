@@ -13,8 +13,15 @@ from pathlib import Path
 from typing import Any
 
 from volpred.config.runtime import get_default_remote_url
-from volpred.ops.canonical_write import guard_canonical_write
 from zoneinfo import ZoneInfo
+
+# NOTE: `guard_canonical_write` is imported lazily inside the methods that use it
+# (see `_save_log` / `_write_notification_file`). A top-level
+# `from volpred.ops.canonical_write import ...` eagerly runs `volpred.ops.__init__`,
+# which imports `.alerts`, which imports `EmailNotifier` from this module while it
+# is still partially initialized → circular ImportError. Importing at call time
+# keeps `email_notifier` below `volpred.ops` in the dependency order (2026-07-11
+# fix: token_report_daily cron was failing daily on this cycle).
 
 
 def _utc_now() -> str:
@@ -387,11 +394,15 @@ class EmailNotifier:
     # genuinely exercise alerting must pass storage_dir=tmp_path; that path is
     # outside the repo and the guard lets it through.
     def _save_log(self, entries: list[dict[str, Any]]) -> None:
+        from volpred.ops.canonical_write import guard_canonical_write
+
         log_file = self.notifications_dir / "notification_log.json"
         guard_canonical_write(log_file)
         log_file.write_text(json.dumps(entries, indent=2, ensure_ascii=False, default=str))
 
     def _write_notification_file(self, notification: dict[str, Any]) -> None:
+        from volpred.ops.canonical_write import guard_canonical_write
+
         notif_file = self.notifications_dir / f"{notification['id']}.json"
         guard_canonical_write(notif_file)
         notif_file.write_text(json.dumps(notification, indent=2, ensure_ascii=False, default=str))
