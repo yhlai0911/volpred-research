@@ -1,0 +1,1014 @@
+{
+  "experiment_id": "K1680",
+  "title": "Geographic investor attention and next-week firm risk pilot",
+  "generated_at": "2026-07-11T03:54:18.382333+00:00",
+  "methodology_type": "retrospective empirical proxy diagnostic; not real-time OOS and not causal",
+  "seed": 42,
+  "config": {
+    "firms": {
+      "AAPL": {
+        "state": "California",
+        "geo": "US-CA",
+        "term": "AAPL stock"
+      },
+      "AMZN": {
+        "state": "Washington",
+        "geo": "US-WA",
+        "term": "AMZN stock"
+      },
+      "BAC": {
+        "state": "North Carolina",
+        "geo": "US-NC",
+        "term": "BAC stock"
+      },
+      "CVX": {
+        "state": "Texas",
+        "geo": "US-TX",
+        "term": "CVX stock"
+      },
+      "AIG": {
+        "state": "New York",
+        "geo": "US-NY",
+        "term": "AIG stock"
+      },
+      "ABBV": {
+        "state": "Illinois",
+        "geo": "US-IL",
+        "term": "ABBV stock"
+      }
+    },
+    "trend_timeframe": [
+      "2021-07-01",
+      "2026-07-01"
+    ],
+    "anchor_term": "SPY stock",
+    "rolling_z_weeks": 52,
+    "rolling_z_min": 26,
+    "initial_expanding_train_weeks": 156,
+    "lookahead_policy": "raw attention is transformed then signal.shift(1), preventing same-week target use; Google historical-vintage availability is not claimed",
+    "primary_targets": [
+      "rv",
+      "gap",
+      "corwin_schultz",
+      "national_attention"
+    ],
+    "evaluation_design": "expanding-window pseudo-OOS on a single retrospectively downloaded Google Trends vintage",
+    "vintage_caveat": "full-window Trends normalization cancels in the within-payload ticker/anchor ratio, but sampling/revision history is unavailable; results are not genuine real-time OOS",
+    "formal_test": "Clark-West one-sided on six-firm common-week adjusted log-MSE; Holm across four targets",
+    "harvey_gate": "CW t >= 3, Holm p < 0.05, MSE improvement > 0"
+  },
+  "references": [
+    {
+      "citation": "Mengoli, Pagano & Pattitoni (2025), RCFS 14(3), 752-803",
+      "doi": "10.1093/rcfs/cfae016",
+      "replication_doi": "10.7910/DVN/94UPDQ"
+    },
+    {
+      "citation": "Da, Engelberg & Gao (2011), Journal of Finance 66(5), 1461-1499",
+      "doi": "10.1111/j.1540-6261.2011.01679.x"
+    },
+    {
+      "citation": "Andrei & Hasler (2015), Review of Financial Studies 28(1), 33-72",
+      "doi": "10.1093/rfs/hhu059"
+    },
+    {
+      "citation": "Shive (2012), Journal of Financial Economics 104(1), 145-161",
+      "doi": "10.1016/j.jfineco.2011.10.015"
+    },
+    {
+      "citation": "Clark & West (2007), Journal of Econometrics 138(1), 291-311",
+      "doi": "10.1016/j.jeconom.2006.05.023"
+    },
+    {
+      "citation": "Corwin & Schultz (2012), Journal of Finance 67(2), 719-760",
+      "doi": "10.1111/j.1540-6261.2012.01729.x"
+    }
+  ],
+  "data_provenance": {
+    "manifest_path": "experiments/k1680/data/manifest.json",
+    "manifest_sha256": "1bb540953199896b984d2d85ee5a6d3bca8ed6d1f8f0b980346071461be7fbf2",
+    "experiment_id": "K1680",
+    "created_at": "2026-07-11T03:54:18.381428+00:00",
+    "rcfs": {
+      "path": "experiments/k1680/data/DatasetDemo.dta",
+      "source_url": "https://dataverse.harvard.edu/api/access/datafile/9554951?format=original",
+      "bytes": 2341642,
+      "md5": "e31f2f677d4fa6f4ab62a712b199a48e",
+      "sha256": "16c4b78e5ca08dd5d167bba2a43ffeb2fd637ee829f6abe227851e0c4573e6a2",
+      "license": "CC0 1.0 (Harvard Dataverse metadata)"
+    },
+    "pinned_yfinance": {
+      "hq_source": "experiments/k1588/data/hq_county_geocodes.csv",
+      "hq_sha256": "ff81e53c140658efdf1354527aa4969832ff1b78644a63517a793ff0fe1cf0db",
+      "price_source": "experiments/k1588/data/prices_long.csv",
+      "price_sha256": "24d5c9d29b9f4eae1b2dabb67a470d4403d58fd8d770107868e31b975c22fb2f",
+      "source_description": "K1588 pinned yfinance adjusted OHLCV and current-HQ snapshot",
+      "coverage": {
+        "AAPL": {
+          "daily_rows": 2133,
+          "first_date": "2018-01-02",
+          "last_date": "2026-06-29",
+          "weekly_rows": 444
+        },
+        "AMZN": {
+          "daily_rows": 2133,
+          "first_date": "2018-01-02",
+          "last_date": "2026-06-29",
+          "weekly_rows": 444
+        },
+        "BAC": {
+          "daily_rows": 2133,
+          "first_date": "2018-01-02",
+          "last_date": "2026-06-29",
+          "weekly_rows": 444
+        },
+        "CVX": {
+          "daily_rows": 2133,
+          "first_date": "2018-01-02",
+          "last_date": "2026-06-29",
+          "weekly_rows": 444
+        },
+        "AIG": {
+          "daily_rows": 2133,
+          "first_date": "2018-01-02",
+          "last_date": "2026-06-29",
+          "weekly_rows": 444
+        },
+        "ABBV": {
+          "daily_rows": 2133,
+          "first_date": "2018-01-02",
+          "last_date": "2026-06-29",
+          "weekly_rows": 444
+        }
+      }
+    },
+    "google_trends": {
+      "queries": {
+        "AAPL:local": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_AAPL_US_CA.csv",
+          "sha256": "f88d3a88b8b246251b1980d6c7c81e06ba89ab778cec6cd7a6a5ebca61858b90",
+          "bytes": 4489,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US-CA",
+          "term": "AAPL stock",
+          "anchor": "SPY stock"
+        },
+        "AAPL:national": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_AAPL_US.csv",
+          "sha256": "70cd3bde5db58189508d83ffd578dc1323f1d599f253c563645153aa4147e9ba",
+          "bytes": 4488,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US",
+          "term": "AAPL stock",
+          "anchor": "SPY stock"
+        },
+        "AMZN:local": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_AMZN_US_WA.csv",
+          "sha256": "a9cc3e788a610b4d622bba745f52ad1eda1d008a88986cd7e76a3e73e9c99065",
+          "bytes": 4476,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US-WA",
+          "term": "AMZN stock",
+          "anchor": "SPY stock"
+        },
+        "AMZN:national": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_AMZN_US.csv",
+          "sha256": "f932b63fa1e0cecc3fa9e2f374a81018a35bb3fd0279ec7cad1c5de1e9ca6c59",
+          "bytes": 4489,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US",
+          "term": "AMZN stock",
+          "anchor": "SPY stock"
+        },
+        "BAC:local": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_BAC_US_NC.csv",
+          "sha256": "8eda367ef6d2ca6deaeecf760af6ff08cda81711c2f09321f7a42271e68cf52b",
+          "bytes": 4348,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US-NC",
+          "term": "BAC stock",
+          "anchor": "SPY stock"
+        },
+        "BAC:national": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_BAC_US.csv",
+          "sha256": "d92e2f693767b572d2ba42836b924193883e32d9e8cfb61ef9c06c5f2dad1792",
+          "bytes": 4232,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US",
+          "term": "BAC stock",
+          "anchor": "SPY stock"
+        },
+        "CVX:local": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_CVX_US_TX.csv",
+          "sha256": "f7ae9f2b34e610450202a950f76ffc44127946535b48510bf85338704c157675",
+          "bytes": 4234,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US-TX",
+          "term": "CVX stock",
+          "anchor": "SPY stock"
+        },
+        "CVX:national": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_CVX_US.csv",
+          "sha256": "a33a21bef585e3f42bda646a3a1131de46ff96b0594331f7cfa46220042ba5e5",
+          "bytes": 4229,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US",
+          "term": "CVX stock",
+          "anchor": "SPY stock"
+        },
+        "AIG:local": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_AIG_US_NY.csv",
+          "sha256": "d89270c66120df30ed9bc23cea019a4bfdc49de320f0480940cfd863b8b0998e",
+          "bytes": 4223,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US-NY",
+          "term": "AIG stock",
+          "anchor": "SPY stock"
+        },
+        "AIG:national": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_AIG_US.csv",
+          "sha256": "95062ab490e266e0758930d21c1c7ce881fb7c973de0464cf7acbef30e1d79d9",
+          "bytes": 4227,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US",
+          "term": "AIG stock",
+          "anchor": "SPY stock"
+        },
+        "ABBV:local": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_ABBV_US_IL.csv",
+          "sha256": "61518a44e362c538e3acbf436b71f657eec72a0051ad99539589a0d94fcf31d5",
+          "bytes": 4227,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US-IL",
+          "term": "ABBV stock",
+          "anchor": "SPY stock"
+        },
+        "ABBV:national": {
+          "source": "local_cache",
+          "path": "experiments/k1680/data/trends_ABBV_US.csv",
+          "sha256": "11a03fbd0efe856ee818633c85365250dfd9e50ea74e8cb29eb81cbdccec5cce",
+          "bytes": 4227,
+          "rows": 262,
+          "first_week": "2021-06-27",
+          "last_week": "2026-06-28",
+          "geo": "US",
+          "term": "ABBV stock",
+          "anchor": "SPY stock"
+        }
+      },
+      "errors": {},
+      "complete_firms": [
+        "AAPL",
+        "ABBV",
+        "AIG",
+        "AMZN",
+        "BAC",
+        "CVX"
+      ],
+      "required_firms": [
+        "AAPL",
+        "ABBV",
+        "AIG",
+        "AMZN",
+        "BAC",
+        "CVX"
+      ],
+      "complete": true
+    }
+  },
+  "rcfs_replication_demo_sanity": {
+    "role": "directional replication-package sanity check, not K1680 OOS sample",
+    "shape": [
+      10400,
+      40
+    ],
+    "firms_anonymized": 4,
+    "states": 50,
+    "weeks": 52,
+    "mean_search_same_state": 56.96153846153846,
+    "mean_search_other_states": 39.22350863422292,
+    "same_state_ratio": 1.4522295542892594,
+    "fixed_effect_regression": {
+      "SameState": {
+        "coef": -10.292388977327603,
+        "p_value": 0.6317841323133258
+      },
+      "News": {
+        "coef": -0.053276112709405465,
+        "p_value": 0.9257665459477792
+      },
+      "SameStateXNews": {
+        "coef": 5.297706738310781,
+        "p_value": 0.13878721323734605
+      },
+      "Vol": {
+        "coef": -15.495073029430538,
+        "p_value": 0.10153342661348741
+      },
+      "SameStateXVol": {
+        "coef": 39.31715036638663,
+        "p_value": 0.6849821036999367
+      },
+      "LocalNewsPaper": {
+        "coef": 8.672502975057983,
+        "p_value": 0.0016011620289364107
+      },
+      "SameStateXLocalNewsPaper": {
+        "coef": 0.0,
+        "p_value": null
+      }
+    },
+    "dynamic_sanity": {
+      "available": false,
+      "reason": "Demo GSearch is rebased within each firm-week and cannot be used across weeks. The RCFS dynamic LocalSearch/NonLocalSearch series requires state shares multiplied by national aggregate ticker searches and is not reconstructed from this demo."
+    },
+    "causal_claim_allowed": false
+  },
+  "prior_related_results": {
+    "K192_K473_K750_K789": "broad Google attention/fear signals were OOS null or reactive; no spatial channel test",
+    "research_google_trends_vol": "partial real Trends panel, no robust OOS increment; no fake fallback allowed",
+    "K1588": "source of pinned current-HQ and yfinance OHLCV snapshot"
+  },
+  "limitations": [
+    "Six firms are below the general N>=7 cross-sectional threshold; this remains a pilot.",
+    "US national Trends includes the HQ state, so local-minus-national is not a clean nonlocal measure.",
+    "Google Trends uses sampled and normalized search intensity; the ticker/SPY ratio is a proxy.",
+    "K1588 headquarters are current snapshots and may not capture historical relocations.",
+    "Corwin-Schultz is a daily OHLC range-based spread proxy, not quoted/effective TAQ spread.",
+    "RCFS demo has four anonymized firms and is a directional sanity arm, not merged with OOS data.",
+    "Predictive timing does not identify a causal local information-processing advantage.",
+    "Google Trends was downloaded retrospectively in one current vintage; expanding evaluation is pseudo-OOS, not a historical-vintage real-time backtest."
+  ],
+  "runtime_seconds": 6.109314,
+  "sample": {
+    "AAPL": {
+      "rv": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "gap": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "corwin_schultz": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "national_attention": {
+        "model_rows": 224,
+        "first_model_week": "2022-03-25",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 68
+      }
+    },
+    "AMZN": {
+      "rv": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "gap": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "corwin_schultz": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "national_attention": {
+        "model_rows": 224,
+        "first_model_week": "2022-03-25",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 68
+      }
+    },
+    "BAC": {
+      "rv": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "gap": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "corwin_schultz": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "national_attention": {
+        "model_rows": 224,
+        "first_model_week": "2022-03-25",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 68
+      }
+    },
+    "CVX": {
+      "rv": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "gap": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "corwin_schultz": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "national_attention": {
+        "model_rows": 224,
+        "first_model_week": "2022-03-25",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 68
+      }
+    },
+    "AIG": {
+      "rv": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "gap": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "corwin_schultz": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "national_attention": {
+        "model_rows": 224,
+        "first_model_week": "2022-03-25",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 68
+      }
+    },
+    "ABBV": {
+      "rv": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "gap": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "corwin_schultz": {
+        "model_rows": 236,
+        "first_model_week": "2021-12-31",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 80
+      },
+      "national_attention": {
+        "model_rows": 224,
+        "first_model_week": "2022-03-25",
+        "last_model_week": "2026-07-03",
+        "evaluation_rows_before_common_date_intersection": 68
+      }
+    }
+  },
+  "retrospective_pseudo_oos_results": {
+    "rv": {
+      "pooled_by_week": {
+        "common_evaluation_weeks": 80,
+        "firms_per_week": 6,
+        "base_model_scale_mse": 2.0335812823193176,
+        "aug_model_scale_mse": 2.0173579408649793,
+        "mse_improvement_pct": 0.7977719698440267,
+        "clark_west": {
+          "n": 80,
+          "mean": 0.02632570377451512,
+          "t": 1.880056691081701,
+          "p": 0.03005017603458615,
+          "holm_p": 0.1202007041383446
+        },
+        "passes_retrospective_gate": false
+      },
+      "per_firm": {
+        "AAPL": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.601148191133208,
+          "aug_model_scale_mse": 1.5856508275410248,
+          "mse_improvement_pct": 0.9678906473494443,
+          "clark_west": {
+            "n": 80,
+            "mean": 0.04273090070985201,
+            "t": 0.893041030719673,
+            "p": 0.18591760013588265
+          }
+        },
+        "AMZN": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 0.844029885097467,
+          "aug_model_scale_mse": 0.8495508691432818,
+          "mse_improvement_pct": -0.6541218674001396,
+          "clark_west": {
+            "n": 80,
+            "mean": -0.004336787050885464,
+            "t": -0.5345403205374618,
+            "p": 0.703516119507941
+          }
+        },
+        "BAC": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 6.089435817755432,
+          "aug_model_scale_mse": 6.01734581627415,
+          "mse_improvement_pct": 1.183853539782514,
+          "clark_west": {
+            "n": 80,
+            "mean": 0.08931498883199358,
+            "t": 1.3114363507188398,
+            "p": 0.09485519223730743
+          }
+        },
+        "CVX": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 0.7779961138669845,
+          "aug_model_scale_mse": 0.7785876118815289,
+          "mse_improvement_pct": -0.0760284021991296,
+          "clark_west": {
+            "n": 80,
+            "mean": -0.0001670034415687271,
+            "t": -0.053532187536525014,
+            "p": 0.521346057268829
+          }
+        },
+        "AIG": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.5566990173775137,
+          "aug_model_scale_mse": 1.5317401431203304,
+          "mse_improvement_pct": 1.603320486398855,
+          "clark_west": {
+            "n": 80,
+            "mean": 0.03927336697748346,
+            "t": 1.210453944559516,
+            "p": 0.11305237648832134
+          }
+        },
+        "ABBV": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.3321786686852999,
+          "aug_model_scale_mse": 1.34127237722956,
+          "mse_improvement_pct": -0.6826192880895299,
+          "clark_west": {
+            "n": 80,
+            "mean": -0.008861243379784112,
+            "t": -2.081365921451746,
+            "p": 0.9812997872702126
+          }
+        }
+      },
+      "descriptive_loss": {
+        "metric": "QLIKE",
+        "base": 0.8015889520607151,
+        "augmented": 0.8047591280104112,
+        "improvement_pct": -0.3954864823855408,
+        "dm_t_aug_vs_base": 0.2500150170834586,
+        "dm_p_two_sided": 0.8032247387911409,
+        "formal_gate": false
+      }
+    },
+    "gap": {
+      "pooled_by_week": {
+        "common_evaluation_weeks": 80,
+        "firms_per_week": 6,
+        "base_model_scale_mse": 1.8319198939454466,
+        "aug_model_scale_mse": 1.8488122279700494,
+        "mse_improvement_pct": -0.9221109547656792,
+        "clark_west": {
+          "n": 80,
+          "mean": -0.012383798698671266,
+          "t": -1.3178397697335296,
+          "p": 0.9062213541902153,
+          "holm_p": 0.9062213541902153
+        },
+        "passes_retrospective_gate": false
+      },
+      "per_firm": {
+        "AAPL": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 2.05244885521671,
+          "aug_model_scale_mse": 2.0838151616355334,
+          "mse_improvement_pct": -1.5282381502028506,
+          "clark_west": {
+            "n": 80,
+            "mean": -0.027710550052633353,
+            "t": -1.3607596854670618,
+            "p": 0.9132051770423086
+          }
+        },
+        "AMZN": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.8960512017460567,
+          "aug_model_scale_mse": 1.9267021655357985,
+          "mse_improvement_pct": -1.6165683585715227,
+          "clark_west": {
+            "n": 80,
+            "mean": -0.02720636763452757,
+            "t": -1.5156554833155331,
+            "p": 0.9351967551787708
+          }
+        },
+        "BAC": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.5784891069093976,
+          "aug_model_scale_mse": 1.5882747739795449,
+          "mse_improvement_pct": -0.6199388407125038,
+          "clark_west": {
+            "n": 80,
+            "mean": -0.009442616743330395,
+            "t": -2.0400131473661,
+            "p": 0.979325491865135
+          }
+        },
+        "CVX": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.5959072203804858,
+          "aug_model_scale_mse": 1.6290535235303907,
+          "mse_improvement_pct": -2.076956775845799,
+          "clark_west": {
+            "n": 80,
+            "mean": -0.02802766823361922,
+            "t": -1.8533499806497218,
+            "p": 0.9680838941491975
+          }
+        },
+        "AIG": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.384577536141803,
+          "aug_model_scale_mse": 1.360811830768673,
+          "mse_improvement_pct": 1.7164589741470393,
+          "clark_west": {
+            "n": 80,
+            "mean": 0.037740227725710486,
+            "t": 1.1419340232149353,
+            "p": 0.126740722508993
+          }
+        },
+        "ABBV": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 2.4840454432782266,
+          "aug_model_scale_mse": 2.5042159123703556,
+          "mse_improvement_pct": -0.8120008088704574,
+          "clark_west": {
+            "n": 80,
+            "mean": -0.01965581725362752,
+            "t": -2.482182691853371,
+            "p": 0.9934709846024167
+          }
+        }
+      },
+      "descriptive_loss": {
+        "metric": "QLIKE",
+        "base": 1.7591167142636785,
+        "augmented": 1.7800143364644696,
+        "improvement_pct": -1.1879610961196665,
+        "dm_t_aug_vs_base": 1.4183678896802496,
+        "dm_p_two_sided": 0.16001629877665202,
+        "formal_gate": false
+      }
+    },
+    "corwin_schultz": {
+      "pooled_by_week": {
+        "common_evaluation_weeks": 80,
+        "firms_per_week": 6,
+        "base_model_scale_mse": 1.8046341991940277e-05,
+        "aug_model_scale_mse": 1.807124138812862e-05,
+        "mse_improvement_pct": -0.13797475521334301,
+        "clark_west": {
+          "n": 80,
+          "mean": 9.522803727461273e-08,
+          "t": 0.8496820733108776,
+          "p": 0.19775093387839582,
+          "holm_p": 0.39550186775679164
+        },
+        "passes_retrospective_gate": false
+      },
+      "per_firm": {
+        "AAPL": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.7104068374738933e-05,
+          "aug_model_scale_mse": 1.7249065592899805e-05,
+          "mse_improvement_pct": -0.8477352579753424,
+          "clark_west": {
+            "n": 80,
+            "mean": 7.315379308035971e-08,
+            "t": 0.20445908321182732,
+            "p": 0.4189973817192773
+          }
+        },
+        "AMZN": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 2.7378814364622552e-05,
+          "aug_model_scale_mse": 2.7324326231711775e-05,
+          "mse_improvement_pct": 0.1990156775422084,
+          "clark_west": {
+            "n": 80,
+            "mean": 1.6875619369575862e-07,
+            "t": 0.6747981705552969,
+            "p": 0.24990200143035318
+          }
+        },
+        "BAC": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 2.327510177301019e-05,
+          "aug_model_scale_mse": 2.304820439024779e-05,
+          "mse_improvement_pct": 0.9748502282619864,
+          "clark_west": {
+            "n": 80,
+            "mean": 3.62490711178761e-07,
+            "t": 0.8989826114939611,
+            "p": 0.18433096135144533
+          }
+        },
+        "CVX": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.0875650191697127e-05,
+          "aug_model_scale_mse": 1.0884228732407782e-05,
+          "mse_improvement_pct": -0.07887841700907013,
+          "clark_west": {
+            "n": 80,
+            "mean": -2.3284890159892025e-09,
+            "t": -0.09792435532880721,
+            "p": 0.539003819913393
+          }
+        },
+        "AIG": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.330393976498655e-05,
+          "aug_model_scale_mse": 1.3272434264481933e-05,
+          "mse_improvement_pct": 0.23681331290701085,
+          "clark_west": {
+            "n": 80,
+            "mean": 6.347910712807067e-08,
+            "t": 0.5531526026506383,
+            "p": 0.2900794596626877
+          }
+        },
+        "ABBV": {
+          "evaluation_n": 80,
+          "evaluation_start": "2024-12-27",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.6340477482586343e-05,
+          "aug_model_scale_mse": 1.6649189117022636e-05,
+          "mse_improvement_pct": -1.88924488140129,
+          "clark_west": {
+            "n": 80,
+            "mean": -9.418309241928436e-08,
+            "t": -0.39671351774475566,
+            "p": 0.654210634626645
+          }
+        }
+      },
+      "descriptive_loss": {
+        "metric": "squared_error",
+        "base": 1.854609712876232e-05,
+        "augmented": 1.856448791871143e-05,
+        "improvement_pct": -0.09916258834095869,
+        "dm_t_aug_vs_base": 0.15527476914666263,
+        "dm_p_two_sided": 0.877000760237646,
+        "formal_gate": false
+      }
+    },
+    "national_attention": {
+      "pooled_by_week": {
+        "common_evaluation_weeks": 68,
+        "firms_per_week": 6,
+        "base_model_scale_mse": 0.8036250621742719,
+        "aug_model_scale_mse": 0.7993396816566861,
+        "mse_improvement_pct": 0.5332562060709403,
+        "clark_west": {
+          "n": 68,
+          "mean": 0.01137021298676014,
+          "t": 1.6685432404573426,
+          "p": 0.04760396781295845,
+          "holm_p": 0.14281190343887534
+        },
+        "passes_retrospective_gate": false
+      },
+      "per_firm": {
+        "AAPL": {
+          "evaluation_n": 68,
+          "evaluation_start": "2025-03-21",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 0.9054229810652652,
+          "aug_model_scale_mse": 0.9456946328335377,
+          "mse_improvement_pct": -4.447827436508334,
+          "clark_west": {
+            "n": 68,
+            "mean": -0.030174723119758246,
+            "t": -1.3128393631618895,
+            "p": 0.9053814585532892
+          }
+        },
+        "AMZN": {
+          "evaluation_n": 68,
+          "evaluation_start": "2025-03-21",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 0.7679929709331658,
+          "aug_model_scale_mse": 0.752499624617064,
+          "mse_improvement_pct": 2.0173812655181287,
+          "clark_west": {
+            "n": 68,
+            "mean": 0.019067623865790605,
+            "t": 1.1570451835642117,
+            "p": 0.12362695031095733
+          }
+        },
+        "BAC": {
+          "evaluation_n": 68,
+          "evaluation_start": "2025-03-21",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 0.5212525460196893,
+          "aug_model_scale_mse": 0.5176037940139693,
+          "mse_improvement_pct": 0.6999969656900609,
+          "clark_west": {
+            "n": 68,
+            "mean": 0.005380249080853995,
+            "t": 0.7677999221332422,
+            "p": 0.22130303039745852
+          }
+        },
+        "CVX": {
+          "evaluation_n": 68,
+          "evaluation_start": "2025-03-21",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 0.767064570695151,
+          "aug_model_scale_mse": 0.7434557420325901,
+          "mse_improvement_pct": 3.0778150320729067,
+          "clark_west": {
+            "n": 68,
+            "mean": 0.03688453313882728,
+            "t": 1.715079824155137,
+            "p": 0.04316529641863051
+          }
+        },
+        "AIG": {
+          "evaluation_n": 68,
+          "evaluation_start": "2025-03-21",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 1.0722936093782298,
+          "aug_model_scale_mse": 1.0721551889755045,
+          "mse_improvement_pct": 0.012908815413488584,
+          "clark_west": {
+            "n": 68,
+            "mean": 0.0015199144427541752,
+            "t": 0.20060455587209347,
+            "p": 0.4205038977099717
+          }
+        },
+        "ABBV": {
+          "evaluation_n": 68,
+          "evaluation_start": "2025-03-21",
+          "evaluation_end": "2026-07-03",
+          "base_model_scale_mse": 0.7877236949541301,
+          "aug_model_scale_mse": 0.7646291074674512,
+          "mse_improvement_pct": 2.931813227736375,
+          "clark_west": {
+            "n": 68,
+            "mean": 0.03554368051209303,
+            "t": 1.2046973705757777,
+            "p": 0.114160075740459
+          }
+        }
+      },
+      "descriptive_loss": {
+        "metric": "squared_error",
+        "base": 0.8036250621742719,
+        "augmented": 0.7993396816566861,
+        "improvement_pct": 0.5332562060709403,
+        "dm_t_aug_vs_base": -0.6153635115360927,
+        "dm_p_two_sided": 0.5403993411408483,
+        "formal_gate": false
+      }
+    }
+  },
+  "multiple_testing": {
+    "family": [
+      "rv",
+      "gap",
+      "corwin_schultz",
+      "national_attention"
+    ],
+    "raw_one_sided_cw_p": {
+      "rv": 0.03005017603458615,
+      "gap": 0.9062213541902153,
+      "corwin_schultz": 0.19775093387839582,
+      "national_attention": 0.04760396781295845
+    },
+    "holm_adjusted_p": {
+      "rv": 0.1202007041383446,
+      "national_attention": 0.14281190343887534,
+      "corwin_schultz": 0.39550186775679164,
+      "gap": 0.9062213541902153
+    }
+  },
+  "verdict": {
+    "status": "RETROSPECTIVE_NULL",
+    "passed_targets": [],
+    "summary": "0/4 targets passed the pre-registered Clark-West + Holm + Harvey t>=3 retrospective gate. This is current-vintage pseudo-OOS proxy evidence, not real-time OOS or causal evidence."
+  },
+  "output_artifacts": {
+    "results": "experiments/k1680/K1680_results.json",
+    "figure": "experiments/k1680/K1680_geographic_attention.png",
+    "figure_sha256": "7430cd3831f979676697a775c911ec47e27b67c89a458cc1bbe9f6c5218581c9"
+  }
+}

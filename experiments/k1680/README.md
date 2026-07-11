@@ -1,6 +1,6 @@
 # K1680：地理型 investor attention 與公司波動風險
 
-> 實作狀態：程式已建立但尚未執行。因此本目錄目前沒有 results JSON 或圖；不得把 README 的假說或成功門檻當成實證結果。
+> 驗證狀態：2026-07-11 已完成 pre-run Codex review、正式執行、cache-only 重跑與 results JSON 數字稽核。Verdict 為 **RETROSPECTIVE_NULL**；這不是 genuine OOS 或因果證據。
 
 ## Data & Methodology
 
@@ -52,6 +52,23 @@ RV 與 gap 使用 log specification；Corwin–Schultz 合法的 0 spread 保留
 - **描述性診斷**：RV／gap 額外報 QLIKE 與 DM；spread／national attention 報 squared-error DM。nested model 的 retrospective gate 只看 Clark–West，QLIKE/DM 不進 verdict。
 - 六檔低於 preamble 的一般 cross-sectional N≥7 門檻，因此即使通過也只叫 pilot，不得宣稱普遍地理效應或因果 local-information advantage。
 
+## Verified results
+
+Google Trends 12 個 payload（6 firms × HQ state/US）皆完成，週頻資料為 2021-06-27 至 2026-06-28；程式保存每個 cache 的 SHA-256。風險 target 的六檔共同 retrospective evaluation 為 80 週，national-attention target 為 68 週。
+
+| Target | model-scale MSE 改善 | CW t | Holm p | 描述性 loss 改善 | Gate |
+|---|---:|---:|---:|---:|---|
+| RV | +0.798% | 1.880 | 0.120 | QLIKE -0.395% | FAIL |
+| Gap variance | -0.922% | -1.318 | 0.906 | QLIKE -1.188% | FAIL |
+| Corwin–Schultz spread | -0.138% | 0.850 | 0.396 | squared error -0.099% | FAIL |
+| National attention | +0.533% | 1.669 | 0.143 | squared error +0.533% | FAIL |
+
+因此 **0/4** target 通過預註冊的 Clark–West one-sided + Holm + Harvey t≥3 retrospective gate。RV 在 model-scale MSE 有小幅點估改善，但 proxy-robust QLIKE 方向相反，且多重檢定後不顯著；不能挑有利 metric 宣稱成功。
+
+官方 RCFS demo sanity arm 有 10,400 rows（4 匿名 firms、50 states、52 weeks），同州平均搜尋量為其他州的 1.452 倍。`LocalNewsPaper` 的同週係數為 +8.673（clustered p=0.0016），但這個四公司 demo 不足以重建論文的跨週 LocalSearch/NonLocalSearch series；錯誤的動態聚合已在 pre-run review 階段明確停用。
+
+結論範圍很窄：在這 6 檔、這次 current-vintage Trends 回溯資料與本 proxy 定義下，沒有證據支持 HQ 州相對全美 attention 對次週 RV、gap、CS spread 或全美 attention 提供穩健增量。不可外推成所有 geographic attention 無效。
+
 ## Reproducibility and outputs
 
 固定 `seed=42`。執行：
@@ -60,7 +77,7 @@ RV 與 gap 使用 log specification；Corwin–Schultz 合法的 0 spread 保留
 uv run python experiments/k1680/K1680.py
 ```
 
-預期產出：
+已產出：
 
 - `K1680.py`
 - `K1680_results.json`（以同目錄暫存檔寫入、重新 `json.load` 驗證，再 `os.replace`）
@@ -68,7 +85,7 @@ uv run python experiments/k1680/K1680.py
 - `README.md`
 - `data/` 下官方 Dataverse cache 與逐 ticker／geo 的 Google Trends cache；每個實際輸入的 byte size 與 SHA-256 都寫入 results provenance。
 
-本次實作任務明確要求先不要執行，所以 results 與圖要等 code review 後才生成。任何 data limitation 也會產生誠實的狀態 results／圖，但不會產生虛構統計量。
+`K1680_results.json` 可由 cache-only 重跑得到完全相同的 verdict、CW/Holm、loss 與 RCFS sanity 數字；圖檔已通過 PNG decode。任何未來 data limitation 仍會產生誠實的狀態 results／圖，不會用替代 proxy 虛構 attention。
 
 ## References
 

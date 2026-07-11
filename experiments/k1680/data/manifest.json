@@ -1,0 +1,223 @@
+{
+  "experiment_id": "K1680",
+  "created_at": "2026-07-11T03:54:18.381428+00:00",
+  "rcfs": {
+    "path": "experiments/k1680/data/DatasetDemo.dta",
+    "source_url": "https://dataverse.harvard.edu/api/access/datafile/9554951?format=original",
+    "bytes": 2341642,
+    "md5": "e31f2f677d4fa6f4ab62a712b199a48e",
+    "sha256": "16c4b78e5ca08dd5d167bba2a43ffeb2fd637ee829f6abe227851e0c4573e6a2",
+    "license": "CC0 1.0 (Harvard Dataverse metadata)"
+  },
+  "pinned_yfinance": {
+    "hq_source": "experiments/k1588/data/hq_county_geocodes.csv",
+    "hq_sha256": "ff81e53c140658efdf1354527aa4969832ff1b78644a63517a793ff0fe1cf0db",
+    "price_source": "experiments/k1588/data/prices_long.csv",
+    "price_sha256": "24d5c9d29b9f4eae1b2dabb67a470d4403d58fd8d770107868e31b975c22fb2f",
+    "source_description": "K1588 pinned yfinance adjusted OHLCV and current-HQ snapshot",
+    "coverage": {
+      "AAPL": {
+        "daily_rows": 2133,
+        "first_date": "2018-01-02",
+        "last_date": "2026-06-29",
+        "weekly_rows": 444
+      },
+      "AMZN": {
+        "daily_rows": 2133,
+        "first_date": "2018-01-02",
+        "last_date": "2026-06-29",
+        "weekly_rows": 444
+      },
+      "BAC": {
+        "daily_rows": 2133,
+        "first_date": "2018-01-02",
+        "last_date": "2026-06-29",
+        "weekly_rows": 444
+      },
+      "CVX": {
+        "daily_rows": 2133,
+        "first_date": "2018-01-02",
+        "last_date": "2026-06-29",
+        "weekly_rows": 444
+      },
+      "AIG": {
+        "daily_rows": 2133,
+        "first_date": "2018-01-02",
+        "last_date": "2026-06-29",
+        "weekly_rows": 444
+      },
+      "ABBV": {
+        "daily_rows": 2133,
+        "first_date": "2018-01-02",
+        "last_date": "2026-06-29",
+        "weekly_rows": 444
+      }
+    }
+  },
+  "google_trends": {
+    "queries": {
+      "AAPL:local": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_AAPL_US_CA.csv",
+        "sha256": "f88d3a88b8b246251b1980d6c7c81e06ba89ab778cec6cd7a6a5ebca61858b90",
+        "bytes": 4489,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US-CA",
+        "term": "AAPL stock",
+        "anchor": "SPY stock"
+      },
+      "AAPL:national": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_AAPL_US.csv",
+        "sha256": "70cd3bde5db58189508d83ffd578dc1323f1d599f253c563645153aa4147e9ba",
+        "bytes": 4488,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US",
+        "term": "AAPL stock",
+        "anchor": "SPY stock"
+      },
+      "AMZN:local": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_AMZN_US_WA.csv",
+        "sha256": "a9cc3e788a610b4d622bba745f52ad1eda1d008a88986cd7e76a3e73e9c99065",
+        "bytes": 4476,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US-WA",
+        "term": "AMZN stock",
+        "anchor": "SPY stock"
+      },
+      "AMZN:national": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_AMZN_US.csv",
+        "sha256": "f932b63fa1e0cecc3fa9e2f374a81018a35bb3fd0279ec7cad1c5de1e9ca6c59",
+        "bytes": 4489,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US",
+        "term": "AMZN stock",
+        "anchor": "SPY stock"
+      },
+      "BAC:local": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_BAC_US_NC.csv",
+        "sha256": "8eda367ef6d2ca6deaeecf760af6ff08cda81711c2f09321f7a42271e68cf52b",
+        "bytes": 4348,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US-NC",
+        "term": "BAC stock",
+        "anchor": "SPY stock"
+      },
+      "BAC:national": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_BAC_US.csv",
+        "sha256": "d92e2f693767b572d2ba42836b924193883e32d9e8cfb61ef9c06c5f2dad1792",
+        "bytes": 4232,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US",
+        "term": "BAC stock",
+        "anchor": "SPY stock"
+      },
+      "CVX:local": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_CVX_US_TX.csv",
+        "sha256": "f7ae9f2b34e610450202a950f76ffc44127946535b48510bf85338704c157675",
+        "bytes": 4234,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US-TX",
+        "term": "CVX stock",
+        "anchor": "SPY stock"
+      },
+      "CVX:national": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_CVX_US.csv",
+        "sha256": "a33a21bef585e3f42bda646a3a1131de46ff96b0594331f7cfa46220042ba5e5",
+        "bytes": 4229,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US",
+        "term": "CVX stock",
+        "anchor": "SPY stock"
+      },
+      "AIG:local": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_AIG_US_NY.csv",
+        "sha256": "d89270c66120df30ed9bc23cea019a4bfdc49de320f0480940cfd863b8b0998e",
+        "bytes": 4223,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US-NY",
+        "term": "AIG stock",
+        "anchor": "SPY stock"
+      },
+      "AIG:national": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_AIG_US.csv",
+        "sha256": "95062ab490e266e0758930d21c1c7ce881fb7c973de0464cf7acbef30e1d79d9",
+        "bytes": 4227,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US",
+        "term": "AIG stock",
+        "anchor": "SPY stock"
+      },
+      "ABBV:local": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_ABBV_US_IL.csv",
+        "sha256": "61518a44e362c538e3acbf436b71f657eec72a0051ad99539589a0d94fcf31d5",
+        "bytes": 4227,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US-IL",
+        "term": "ABBV stock",
+        "anchor": "SPY stock"
+      },
+      "ABBV:national": {
+        "source": "local_cache",
+        "path": "experiments/k1680/data/trends_ABBV_US.csv",
+        "sha256": "11a03fbd0efe856ee818633c85365250dfd9e50ea74e8cb29eb81cbdccec5cce",
+        "bytes": 4227,
+        "rows": 262,
+        "first_week": "2021-06-27",
+        "last_week": "2026-06-28",
+        "geo": "US",
+        "term": "ABBV stock",
+        "anchor": "SPY stock"
+      }
+    },
+    "errors": {},
+    "complete_firms": [
+      "AAPL",
+      "ABBV",
+      "AIG",
+      "AMZN",
+      "BAC",
+      "CVX"
+    ],
+    "required_firms": [
+      "AAPL",
+      "ABBV",
+      "AIG",
+      "AMZN",
+      "BAC",
+      "CVX"
+    ],
+    "complete": true
+  }
+}
