@@ -53,6 +53,7 @@ Differences from legacy (deliberate, same behaviour):
 """
 from __future__ import annotations
 
+import fcntl
 import json
 import logging
 import os
@@ -88,7 +89,9 @@ _PYTEST_NO_TESTS_COLLECTED = 5
 # Scoped to the exact legacy list — NOT the storage/ops/{tasks,agents,...}/
 # directories (large historical content; needs a deliberate cleanup pass, not
 # an unattended per-fire rm --cached) and never paper/*/main.pdf (force-tracked
-# exception). Kept byte-for-byte in sync with cron_hourly_dispatch.sh PHASE-Z.
+# exception). This list is now the only live one: cron_hourly_dispatch.sh's copy
+# is launchctl-disabled (a rollback artifact), so its set stays frozen at the
+# legacy entries and new entries land here only — do NOT "fix" that drift.
 _LEAKED_STATE_PATHSPECS = (
     # supervisor's OWN runtime state — gitignored (.gitignore:88). Not in the
     # legacy list (it predates the supervisor) but MOST important here: PHASE-Z
@@ -110,7 +113,31 @@ _LEAKED_STATE_PATHSPECS = (
     "storage/notifications/*.json",
     "storage/session_state.json",
     "storage/work_log.json.append",
+    # Append-only machine logs / markers with no reader outside this host: the
+    # dedup gate's decision trail (tailed locally per .claude/rules/dedup-gate-audit.md)
+    # and gmail_inbox_poll's last-dispatch timestamp. Tracked by accident; they are
+    # rewritten by daemons between fires, so every fire found them dirty and with no
+    # session to attribute them to → an hourly "not this fire's files" alert
+    # (email-12038, boss: "一直爆警告"). Untracked, they stop being anybody's problem.
+    "storage/logs/dedup_decisions.jsonl",
+    "storage/ops/.last_email_immediate_dispatch",
 )
+
+# Canonical control-plane state that background daemons (gmail poll, pool refill,
+# telegram responder, unblock sweep) rewrite between fires. Unlike the leaked state
+# above it MUST stay tracked — next_tasks.json is the pending queue, and its history
+# is the audit trail for what the platform was asked to do.
+#
+# It has no session owner, though, and PHASE-Z's model only knows two kinds of dirty
+# file: "this fire produced it" and "another session is still typing it". Churn fell
+# into the second bucket, so it was skipped and alerted on every single hour while
+# nobody was ever going to come back and commit it. This module is its owner.
+#
+# Adoption is gated, because the failure mode is real: incident #1 (docs/error_log.md
+# 2026-07-10) committed a next_tasks.json truncated mid-write as if it were history.
+# See _classify_machine_churn — a file being written right now is left for the next
+# fire, and a file that does not parse is escalated, never committed.
+_MACHINE_CHURN_PATHS = ("storage/next_tasks.json",)
 
 
 # ── ownership: what did THIS fire produce? ───────────────────────────────────
@@ -267,6 +294,52 @@ def _consume_pre_fire_snapshot(repo_root: Path, runner) -> None:
         path.unlink(missing_ok=True)
     except OSError as exc:  # pragma: no cover — unlink of our own file
         LOG.warning("phase_z: cannot remove pre-fire snapshot (%s)", exc)
+
+
+def _classify_machine_churn(repo_root: Path, candidates: list[str]) -> tuple[list[str], list[str], list[str]]:
+    """Split declared machine-churn paths into (committable, deferred, corrupt).
+
+    Adopting a daemon-written file is only safe when nobody is mid-write. Two gates:
+
+    1. the writers' own lock (``fcntl`` ``LOCK_EX`` across every read-modify-write of
+       next_tasks.json — see scripts/task_pool_claim.py:87). If a shared lock cannot
+       be taken without blocking, a writer holds it right now → defer to the next
+       fire. This is the guard incident #1 lacked.
+    2. the content parses. A canonical control file that does not parse is a real
+       problem worth escalating, but committing it is how a truncated queue became
+       "valid history" once already.
+
+    Only ``.json`` candidates are parse-checked; a future non-JSON churn path still
+    gets the lock gate.
+    """
+    committable: list[str] = []
+    deferred: list[str] = []
+    corrupt: list[str] = []
+    for rel in candidates:
+        try:
+            with open(repo_root / rel, "r", encoding="utf-8") as fh:
+                try:
+                    fcntl.flock(fh.fileno(), fcntl.LOCK_SH | fcntl.LOCK_NB)
+                except OSError:
+                    LOG.info("phase_z: %s is locked by a writer right now — leaving it "
+                             "for the next fire", rel)
+                    deferred.append(rel)
+                    continue
+                try:
+                    if rel.endswith(".json"):
+                        json.load(fh)
+                except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                    LOG.warning("phase_z: %s does not parse (%s) — refusing to commit it", rel, exc)
+                    corrupt.append(rel)
+                    continue
+                finally:
+                    fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        except OSError as exc:
+            LOG.warning("phase_z: cannot read machine-churn path %s (%s) — leaving it dirty", rel, exc)
+            deferred.append(rel)
+            continue
+        committable.append(rel)
+    return committable, deferred, corrupt
 
 
 # ── pre-fire guard ───────────────────────────────────────────────────────────
@@ -655,15 +728,47 @@ def run_phase_z(
         return {"committed": False, "reason": "ownership_unknown", "dirty": len(dirty_now)}
 
     owned = sorted(dirty_now - baseline)
-    foreign = sorted(dirty_now & baseline)
+    dirty_before = sorted(dirty_now & baseline)
     _consume_pre_fire_snapshot(repo_root, runner)
+
+    # Dirty-at-fire-start splits two ways, not one. A daemon-written churn path has
+    # an owner (this module); only the rest is "another session is still typing it".
+    churn, churn_deferred, churn_corrupt = _classify_machine_churn(
+        repo_root, [p for p in dirty_before if p in _MACHINE_CHURN_PATHS])
+    foreign = [p for p in dirty_before if p not in _MACHINE_CHURN_PATHS]
+
+    if churn_corrupt:
+        alert_fn(
+            level="critical",
+            title=f"PHASE-Z {hhmm}: 控制檔內容壞掉，拒絕提交 — {', '.join(churn_corrupt)}",
+            body="\n".join([
+                "## 發生什麼",
+                "任務池等控制檔的內容無法解析（可能是某次寫入被中斷截斷）。PHASE-Z 沒有把它 commit "
+                "進歷史 —— 曾經有一次截斷的任務池被當成正常歷史提交，這道閘門就是為了擋那件事。",
+                "",
+                "## 現在該做什麼",
+                "檔案還在工作區、沒被覆蓋。從上一個 commit 取回可用版本："
+                "`git checkout HEAD -- <檔案>`，確認寫入端為何中斷。",
+                "",
+                "## 檔案",
+                *[f"- {p}" for p in churn_corrupt],
+            ]),
+        )
 
     if foreign:
         LOG.info("phase_z: leaving %d path(s) dirty — already dirty at fire start, not ours: %s",
                  len(foreign), foreign[:10])
+    if churn:
+        LOG.info("phase_z: adopting %d machine-churn path(s) — daemon-written, no session owner: %s",
+                 len(churn), churn)
+    if churn_deferred:
+        LOG.info("phase_z: %d machine-churn path(s) busy/unreadable — next fire takes them: %s",
+                 len(churn_deferred), churn_deferred)
 
-    if not owned:
+    if not owned and not churn:
         LOG.info("phase_z: nothing this fire produced — %d foreign path(s) left alone", len(foreign))
+        if not foreign:
+            return {"committed": False, "reason": "nothing_owned", "foreign": []}
         alert_fn(
             level="warn",
             title=f"PHASE-Z {hhmm}: {len(foreign)} 個檔案未提交，但不是這班產出的",
@@ -683,7 +788,8 @@ def run_phase_z(
         )
         return {"committed": False, "reason": "nothing_owned", "foreign": foreign}
 
-    LOG.info("phase_z: %d path(s) produced by this fire — auto-committing", len(owned))
+    LOG.info("phase_z: auto-committing %d path(s) from this fire + %d machine-churn path(s)",
+             len(owned), len(churn))
     untracked: list[str] = []
     try:
         leaked = _git(
@@ -740,7 +846,7 @@ def run_phase_z(
     # makes git refuse the whole call ("paths are ignored by one of your
     # .gitignore files"), which would abort the fire's safety-net. Drop them: the
     # untracking is already staged and the commit below carries it.
-    to_stage = [p for p in owned if p not in set(untracked)]
+    to_stage = [p for p in (owned + churn) if p not in set(untracked)]
 
     pathspec_file = ""
     if to_stage:
@@ -766,10 +872,16 @@ def run_phase_z(
                 LOG.warning("phase_z: git add rc=%d: %s — aborting commit (partial-index risk)",
                             add.returncode, (add.stderr or "").strip()[:200])
                 return {"committed": False, "reason": "add_error", "untracked": untracked}
+        subject = (
+            f"ops(dispatch-supervisor {hhmm}): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+            if owned else
+            f"ops(dispatch-supervisor {hhmm}): PHASE-Z state churn (no agent output this fire)"
+        )
         commit = _git(
             repo_root, "commit",
-            "-m", f"ops(dispatch-supervisor {hhmm}): PHASE-Z safety-net auto-commit (agent left uncommitted)",
-            "-m", (f"Staged only what this fire produced: {len(to_stage)} path(s).\n"
+            "-m", subject,
+            "-m", (f"Staged what this fire produced: {len(owned)} path(s), plus "
+                   f"{len(churn)} daemon-written machine-churn path(s) this module owns.\n"
                    f"Left alone (dirty before the fire, another writer's): {len(foreign)} path(s)."),
             timeout_s=_COMMIT_TIMEOUT_S, runner=runner,
         )
@@ -809,7 +921,7 @@ def run_phase_z(
                 ]),
             )
         return {"committed": True, "reason": "committed", "untracked": untracked,
-                "owned": owned, "foreign": foreign,
+                "owned": owned, "foreign": foreign, "churn": churn,
                 "commit_head": out[-500:], "tests": tests}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything
     # dirty was a leaked-ignored file already rm --cached'd, or a race cleaned

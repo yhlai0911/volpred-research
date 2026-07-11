@@ -246,3 +246,90 @@ def test_baseline_never_dirties_the_tree(repo: Path) -> None:
     phase_z.run_pre_fire_guard(repo_root=repo)
     assert _snapshot(repo).exists()
     assert _dirty(repo) == set(), "pre-fire guard must not dirty a clean tree"
+
+
+# ── machine churn: dirty before the fire, but nobody's session ────────────────
+# Background daemons rewrite next_tasks.json between fires. It is dirty at almost
+# every fire start, so the two-bucket model filed it under "another session is
+# still typing this" and alerted on it every single hour while no session was ever
+# coming back for it (email-12038, boss: "一直爆警告"). PHASE-Z owns it now — but
+# only when it can prove nobody is mid-write.
+
+CHURN = phase_z._MACHINE_CHURN_PATHS[0]  # storage/next_tasks.json
+
+
+def _seed_churn(repo: Path, payload: str = '[{"id": "t1"}]\n') -> None:
+    """Tracked and committed, then rewritten by a 'daemon' before the fire starts."""
+    _write(repo, CHURN, '[]\n')
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "seed churn")
+    _write(repo, CHURN, payload)
+
+
+def test_machine_churn_is_adopted_not_alerted(repo: Path) -> None:
+    _seed_churn(repo)
+    phase_z.run_pre_fire_guard(repo_root=repo)  # churn is dirty at fire start
+
+    alerts: list = []
+    outcome = _fire(repo, alerts=alerts)
+
+    assert outcome["committed"] is True
+    assert CHURN in _head_files(repo), "the queue's history must not stall forever"
+    assert outcome["churn"] == [CHURN]
+    assert outcome["foreign"] == [], "churn is not another session's work"
+    assert alerts == [], "this is the hourly alert the boss told us to kill"
+
+
+def test_machine_churn_commits_even_when_the_fire_produced_nothing(repo: Path) -> None:
+    """The alerting case at 12:37 was exactly this: no output of its own, so the
+    old code returned `nothing_owned` and left the churn dirty for the next fire
+    to alert about again."""
+    _seed_churn(repo)
+    phase_z.run_pre_fire_guard(repo_root=repo)
+
+    alerts: list = []
+    outcome = _fire(repo, alerts=alerts)
+
+    assert outcome["committed"] is True
+    assert _head_files(repo) == {CHURN}
+    assert alerts == []
+
+
+def test_half_written_churn_is_never_committed(repo: Path) -> None:
+    """Incident #1: a next_tasks.json truncated mid-write was committed as valid
+    history. A file that does not parse is escalated, not adopted."""
+    _seed_churn(repo, payload='[{"id": "t1"},')  # truncated mid-write
+    phase_z.run_pre_fire_guard(repo_root=repo)
+
+    alerts: list = []
+    before = _git(repo, "rev-parse", "HEAD").stdout
+    outcome = _fire(repo, alerts=alerts)
+
+    assert _git(repo, "rev-parse", "HEAD").stdout == before, \
+        "truncated queue must not become history"
+    assert outcome.get("churn", []) == []
+    assert (repo / CHURN).read_text(encoding="utf-8") == '[{"id": "t1"},', "content survives"
+    assert [lvl for lvl, _ in alerts] == ["critical"]
+
+
+def test_churn_held_by_a_writer_is_left_for_the_next_fire(repo: Path) -> None:
+    """A writer holds fcntl LOCK_EX across its read-modify-write (task_pool_claim.py).
+    Staging underneath it is how you capture a half-written file — defer instead."""
+    import fcntl
+
+    _seed_churn(repo)
+    phase_z.run_pre_fire_guard(repo_root=repo)
+
+    alerts: list = []
+    before = _git(repo, "rev-parse", "HEAD").stdout
+    with open(repo / CHURN, "r+", encoding="utf-8") as writer:
+        fcntl.flock(writer.fileno(), fcntl.LOCK_EX)  # a daemon is mid-write
+        try:
+            outcome = _fire(repo, alerts=alerts)
+        finally:
+            fcntl.flock(writer.fileno(), fcntl.LOCK_UN)
+
+    assert _git(repo, "rev-parse", "HEAD").stdout == before, "must not stage under a writer"
+    assert outcome.get("churn", []) == []
+    assert alerts == [], "a busy writer is normal, not an incident"
+    assert CHURN in _dirty(repo), "still dirty — the next fire picks it up"

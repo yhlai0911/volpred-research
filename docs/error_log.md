@@ -2,6 +2,58 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-11 PHASE-Z 每小時對同一批機器 state 爆警告 —— 模型少了「沒有 session 主人」這一類
+
+**現象**：老闆兩封回信（email-12034 / email-12038）：「這個 phase z 到底是什麼鬼 一直爆警告」。
+每個 fire 都寄一封 WARN：「有 N 個檔案不是這班產出的，已略過」，點名的永遠是同一批：
+`storage/logs/dedup_decisions.jsonl`、`storage/ops/.last_email_immediate_dispatch`、`storage/next_tasks.json`。
+
+**根因（不是誤報，是 domain model 缺一類）**：PHASE-Z 的擁有權模型只有兩格 ——「這班 fire 產出的」
+與「別的 session 正在編輯的」。但這三個檔是背景 daemon（gmail poll / 補池 / telegram responder /
+unblock sweep）在 fire 之間改的，**永遠不屬於任何 session**。它們在幾乎每個 fire 開始時都是髒的 →
+落進第二格 → 被略過並告警 → 而那個「會自己回來 commit」的 session 根本不存在。所以警報每小時
+重複，且永遠不會自己消失。**警報在描述一個永遠為真的事實，等於沒有資訊。**
+
+**修法（分兩類，各自收編進既有 owner，不新增 watchdog）**：
+1. `dedup_decisions.jsonl` / `.last_email_immediate_dispatch` 是純機器 log / 時間戳 marker，
+   本機外無 reader（只被 `tail` 讀），**本來就不該被追蹤** → `.gitignore` + `git rm --cached`
+   + 加入 `phase_z._LEAKED_STATE_PATHSPECS`（既有機制會自動處理未來的 drift-back）。
+2. `next_tasks.json` 是 canonical 待辦佇列，歷史即審計軌跡，**必須留在 git** → PHASE-Z 認領它為
+   `_MACHINE_CHURN_PATHS`，成為它的 commit owner。採納前兩道閘（`_classify_machine_churn`）：
+   (a) 寫入端的 `fcntl` 鎖必須是空的（有人正在寫 → 留給下一班），(b) 內容必須 parse 得過
+   （**壞檔升 critical，絕不 commit** —— 2026-07-10 incident #1 正是把寫到一半截斷的 next_tasks.json
+   當成正常歷史提交）。
+
+**教訓**：一個每小時準時響、內容永遠一樣、且沒有任何人能處置的警報，不是「噪音待調參」，
+是**模型漏了一整類實體**。修 threshold 只會把它藏起來；要問的是「這個檔案的主人是誰」——
+答案若是「沒有人」，那就得指定一個。
+
+**Regression**：`tests/test_phase_z_ownership.py` 新增 4 例（採納 / fire 無產出時仍收 /
+截斷檔拒收並升 critical / 寫入端持鎖時延後）。
+
+## 2026-07-11 `volpred` import-time 循環 —— 每天炸掉 token_report，但只炸「先 import 誰」不對的入口
+
+**現象**：`storage/logs/cron/token_report.log` 連日 exit=1，觸發 CRITICAL「主機定時任務 failure」。
+Traceback：`ImportError: cannot import name 'EmailNotifier' from partially initialized module`。
+
+**根因**：`volpred.publisher.email_notifier` 在 module 頂層 `from volpred.ops.canonical_write import ...`
+→ **import 任何子模組都會先執行父 package 的 `__init__`** → `volpred/ops/__init__.py` 匯入 `.alerts`
+→ `alerts` 又 `from volpred.publisher.email_notifier import EmailNotifier`（此時它才初始化到一半）→ 炸。
+
+環早就存在，卻**只有部分入口會炸**：先碰到 `volpred.ops` 的 process 沒事，先碰到 `email_notifier` 的
+（token_report 這支 cron）必死。所以 runtime 從不告訴我們 graph 壞了 —— 只有一支每天早上、
+在沒人看的 log 裡失敗的腳本會。
+
+**修法**：import 改到用到它的 function 內（已於 `bf165fdfa` 落地）+ **機械 gate**
+`tests/test_no_circular_imports.py`：用 AST 建 import-time graph（只算 module-level import，
+函式內的 lazy import 不算邊——那正是修法本身），正確建模「跨 package import 會觸發父 `__init__`」，
+對全部 113 個 module 找環。現況 **0 環**（full-population sweep，沒有其他漏網的）。
+Gate 自帶 break-then-verify：在 tmp 複本把那行 top-level import 放回去，斷言偵測器一定要咬 ——
+兩邊都會過的測試等於沒有測試。
+
+**教訓**：**「靠載入順序僥倖沒炸」的環，跟已經炸的環是同一個 bug**。單修那一行只解決今天這個入口；
+真正的處置是讓「環」這個 class 在 CI 上不可能存在。
+
 ## 2026-07-11 我為了修 commit 訊息編碼而 force push —— 明令禁止的動作，理由還只是裝飾性的
 
 **問題**：hourly-12 這班用 `git push -f origin main` 覆寫了 60 秒前才推上去的 `8bc9f7463`，只因為該 commit 的中文訊息是亂碼、想 amend 修好。`git push --force` 在 CLAUDE.md 與 hourly dispatch prompt 都列在**嚴禁**清單（且是「真有破壞性風險」需先問用戶的少數情境之一）。
