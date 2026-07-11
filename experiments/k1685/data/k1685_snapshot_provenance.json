@@ -1,0 +1,28 @@
+{
+  "experiment_id": "K1685",
+  "snapshot_file": "experiments/k1685/data/k1685_spy_vix_snapshot.csv",
+  "snapshot_sha256": "eee7f9c62ce3ed3ee68d2bffeb3c9386fb8a6343e1a053379cfc89058518e3fb",
+  "source": "yfinance",
+  "yfinance_version": "1.2.0",
+  "tickers": {
+    "spy": "SPY (Adj Close)",
+    "vix": "^VIX (Close)"
+  },
+  "fetch_start": "2000-01-01",
+  "fetched_at_utc": "2026-07-11T18:34:15.347011+00:00",
+  "n_rows": 6669,
+  "first_date": "2000-01-03",
+  "last_date": "2026-07-10",
+  "crosscheck_vs_paper_snapshot": {
+    "status": "ok",
+    "paper_csv": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "paper_csv_sha256": "9fc2d64fe578f12995ba25e3e04311087bc6095a844d758b374d7261b3c0cb59",
+    "paper_last_date": "2026-07-09",
+    "n_common_dates": 6668,
+    "spy_logret_max_abs_diff": 0.013803688898871048,
+    "spy_logret_mean_abs_diff": 1.0556313352510574e-05,
+    "vix_max_abs_diff": 3.552713678800501e-15,
+    "n_dates_only_in_snapshot": 1,
+    "n_dates_only_in_paper": 3
+  }
+}
