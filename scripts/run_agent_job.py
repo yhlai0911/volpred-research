@@ -35,12 +35,44 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.dispatch_supervisor import procutil  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 CLAUDE_BIN = os.environ.get("VOLPRED_CLAUDE_BIN", "claude")
 
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _kill_agent_tree(proc: subprocess.Popen) -> bool:
+    """Kill the agent AND everything it spawned. Returns True if the group is gone.
+
+    An agent's real work happens in its children: it shells out to python for the
+    compute, and that grandchild is what actually holds the run. Killing only the
+    direct `claude` pid leaves that grandchild alive, reparented to init, writing
+    results into a worktree with nobody left to verify, commit, or merge them.
+    That is not a timeout — it is a silent fork of unsupervised work.
+
+    Observed 2026-07-12 (K1685): the agent was killed at its 3300s bound; its
+    compute child kept running and wrote a complete 37KB results.json 24 minutes
+    later, into a worktree whose job was already marked `failed`. The results were
+    real and nobody was watching. One day earlier the identical bug was fixed in
+    gen_lazypack_codex (scripts/tests/test_lazypack_codex_timeout_orphan.py) — it
+    came straight back because the kill lived in that file instead of in an owner.
+
+    `procutil.kill_pgid` IS that owner: SIGTERM→grace→SIGKILL, macOS EPERM
+    fallback to per-pid, and it reports whether the group is confirmed gone.
+    Do not hand-roll another one here.
+    """
+    try:
+        pgid = os.getpgid(proc.pid)
+    except (ProcessLookupError, PermissionError) as e:
+        print(f"[run_agent_job] cannot resolve pgid for {proc.pid}: {e}", file=sys.stderr, flush=True)
+        proc.kill()
+        return False
+    return procutil.kill_pgid(pgid)
 
 
 def main() -> int:
@@ -50,10 +82,23 @@ def main() -> int:
     ap.add_argument("--effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
     ap.add_argument("--cwd", default=None, help="Working dir (e.g. a git worktree). Defaults to repo root.")
     ap.add_argument("--result-artifact", default=None, help="Where to write the run summary JSON.")
-    # The compute worker already bounds the whole script via job.timeout_seconds.
-    # This is the inner bound so a wedged agent surfaces as a job failure rather
-    # than eating the worker's entire budget with no diagnosis.
-    ap.add_argument("--timeout", type=int, default=3300, help="Seconds before the agent is killed (default 3300).")
+    # Inner bound. It exists so a wedged agent surfaces as a diagnosed job failure
+    # (artifact written, stderr explains) instead of being hard-killed by the
+    # worker with nothing to read. It must therefore fire just BEFORE the worker's
+    # own job.timeout_seconds — which means it has to be DERIVED from that budget,
+    # never guessed.
+    #
+    # It used to default to a flat 3300s while `enqueue-agent` never passed the
+    # flag at all. So a job queued with timeout_seconds=10800 was still killed at
+    # 55 minutes: the outer budget was a number nobody honoured. That is the same
+    # domain error this whole script was written to escape — a job longer than the
+    # container it runs in — rebuilt one layer down (docs/error_log.md 2026-07-12).
+    #
+    # `compute_queue.enqueue_agent` now always passes this, set to the outer budget
+    # minus a grace. The default here is only a floor for direct invocation.
+    ap.add_argument("--timeout", type=int, default=3300,
+                    help="Seconds before the agent tree is killed. Callers MUST derive this "
+                         "from the compute job's timeout_seconds (enqueue-agent does).")
     args = ap.parse_args()
 
     brief_path = Path(args.brief_file)
@@ -86,16 +131,19 @@ def main() -> int:
     print(f"[run_agent_job] start {started} model={args.model} effort={args.effort} cwd={workdir}", flush=True)
 
     timed_out = False
+    # start_new_session: the agent leads its own process group, so on timeout the
+    # whole tree (agent + the compute it shelled out to) dies as a unit. Killing
+    # only the agent pid would leave its compute orphaned and still writing — see
+    # _kill_agent_tree.
+    proc = subprocess.Popen(argv, cwd=str(workdir), env=env, start_new_session=True)
     try:
-        proc = subprocess.run(
-            argv, cwd=str(workdir), env=env, timeout=args.timeout,
-            start_new_session=True,  # own process group: a wedged agent can be killed as a unit
-        )
-        exit_code = proc.returncode
+        exit_code = proc.wait(timeout=args.timeout)
     except subprocess.TimeoutExpired:
         timed_out = True
         exit_code = -1
-        print(f"[run_agent_job] TIMEOUT after {args.timeout}s", file=sys.stderr, flush=True)
+        print(f"[run_agent_job] TIMEOUT after {args.timeout}s — killing agent tree",
+              file=sys.stderr, flush=True)
+        _kill_agent_tree(proc)
 
     finished = _utc_now()
     summary = {

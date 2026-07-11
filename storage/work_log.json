@@ -16105,5 +16105,13 @@
     "backfilled_at": "2026-07-11T20:03:49.179295+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1025"
+  },
+  {
+    "timestamp": "2026-07-12T04:22:18+08:00",
+    "actor": "hourly-04",
+    "task_type": "platform_ops",
+    "task_id": "agentic_cli_timeout_orphan_class_sweep",
+    "summary": "3-STRIKE class sweep：timed-out agentic CLI 留下孤兒子行程。修 run_agent_job（內層 3300s 死常數蓋掉 queue 的 5400/10800s 預算 → K1685 被砍；逾時只 kill 直接子行程 → 其 compute 孫程序活著跑完、24 分鐘後寫下 37KB results 沒人收）、scan_trending_agy（agy）、prepublish_audit（agy）；compute_queue.enqueue_agent 現在把內層 timeout 從外層預算推導、擋掉指向 experiments/ 的 result-artifact（會覆寫真結果）、加 cwd preflight（K1684 秒退根因）。新增 class-level gate scripts/tests/test_agentic_cli_timeout_killpg.py（AST 掃全庫，argv[0] 是 claude/codex/agy 且帶 timeout 就必須 start_new_session + killpg），break-then-verify 確認會咬。execution_brief 的 3 個站點凍進 KNOWN_UNFIXED ratchet + 排 P2。K1685 真結果已 commit 進 worktree 保住（3ccaf6a11），收件排 P1。",
+    "outcome": "succeeded"
   }
 ]

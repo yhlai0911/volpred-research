@@ -36,11 +36,17 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+from scripts.dispatch_supervisor import procutil  # noqa: E402
 
 # Statistics-context keywords. A numeric token is only audited if at least one
 # of these appears within +/-15 chars of it. Keeps pure prose numbers (page
@@ -358,19 +364,35 @@ def run_llm_consistency_check(key_claims: str, source_summary: str) -> dict:
         "若無任何衝突，verdict 設為 PASS 且 contradictions 為空陣列。\n"
         "不要輸出 JSON 以外的任何文字、不要用 markdown code fence 包起來。"
     )
+    # `agy` spawns tool subprocesses of its own, so a plain subprocess.run timeout
+    # would kill only the pid we hold and leave its workers running unsupervised.
+    # Own process group + kill_pgid. Gate: scripts/tests/test_agentic_cli_timeout_killpg.py
     try:
-        proc = subprocess.run(
+        proc = subprocess.Popen(
             ["agy", "-p", prompt],
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            timeout=60,
+            start_new_session=True,
         )
     except FileNotFoundError:
         return {"verdict": "SKIP", "error": "agy_not_found"}
+    except Exception as exc:  # pragma: no cover — defensive catch-all
+        return {"verdict": "SKIP", "error": f"agy_exception:{exc}"}
+
+    try:
+        stdout, stderr = proc.communicate(timeout=60)
     except subprocess.TimeoutExpired:
+        try:
+            procutil.kill_pgid(os.getpgid(proc.pid))
+        except (ProcessLookupError, PermissionError) as kill_exc:
+            print(f"[prepublish_audit] agy timed out; killpg failed: {kill_exc}", file=sys.stderr)
+        proc.wait()
         return {"verdict": "SKIP", "error": "agy_timeout"}
     except Exception as exc:  # pragma: no cover — defensive catch-all
         return {"verdict": "SKIP", "error": f"agy_exception:{exc}"}
+
+    proc = subprocess.CompletedProcess(proc.args, proc.returncode, stdout, stderr)
 
     if proc.returncode != 0:
         return {"verdict": "SKIP", "error": f"agy_returncode_{proc.returncode}"}

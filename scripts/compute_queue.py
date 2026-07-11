@@ -51,6 +51,13 @@ QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
 LOCK_FILE = QUEUE_DIR / ".worker.lock"
 LOG_DIR = ROOT / "storage" / "logs" / "compute"
 
+# Agent jobs. A research agent needs 20-60min of wall clock (that is the whole
+# reason it cannot live inside a ~50min dispatch fire), so the default budget has
+# to actually cover one. The grace is how much earlier the runner's inner bound
+# fires, leaving it time to write a diagnosis before the worker kills the script.
+AGENT_DEFAULT_TIMEOUT = 5400  # 90 min
+AGENT_TIMEOUT_GRACE = 120
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -147,6 +154,40 @@ def enqueue_agent(args) -> int:
         print(f"error: brief file not found: {brief_path}", file=sys.stderr)
         return 2
 
+    # An agent works in a git worktree. If that worktree is missing at enqueue time
+    # the job cannot possibly run — fail here, where a human is watching, instead of
+    # 60 minutes later inside the worker (K1684, 2026-07-12: enqueued against a
+    # worktree that orphan-recovery had already removed → instant exit 2, work lost).
+    if args.cwd:
+        cwd_path = Path(args.cwd)
+        if not cwd_path.is_absolute():
+            cwd_path = ROOT / cwd_path
+        if not cwd_path.is_dir():
+            print(f"error: --cwd does not exist: {cwd_path}", file=sys.stderr)
+            return 2
+
+    job_id = args.id or f"agent-{brief_path.stem}-{uuid.uuid4().hex[:6]}"
+
+    # This artifact is the RUNNER's summary (exit code, timing, timed_out) — not the
+    # agent's research output. Letting a caller aim it at an experiment's own results
+    # JSON means the runner overwrites real results with an 8-line stub when the run
+    # ends. That already happened once (K1685 left a 318-byte stub sitting where a
+    # 37KB results.json belonged). The agent's real output lives in its worktree and
+    # is collected via claude_followup; this file never belongs under experiments/.
+    artifact = args.result_artifact or str(LOG_DIR / f"{job_id}.result.json")
+    artifact_path = Path(artifact)
+    if not artifact_path.is_absolute():
+        artifact_path = ROOT / artifact_path
+    if artifact_path.is_relative_to(ROOT / "experiments"):
+        print(
+            f"error: --result-artifact must not point inside experiments/: {artifact_path}\n"
+            "       This is the runner's run-summary, and it would clobber the experiment's\n"
+            "       own results JSON. Omit the flag; the agent's output is collected from its\n"
+            "       worktree via --followup-brief.",
+            file=sys.stderr,
+        )
+        return 2
+
     script_args = [
         "--brief-file", str(brief_path),
         "--model", args.model,
@@ -154,10 +195,15 @@ def enqueue_agent(args) -> int:
     ]
     if args.cwd:
         script_args += ["--cwd", args.cwd]
+    script_args += ["--result-artifact", str(artifact_path)]
 
-    job_id = args.id or f"agent-{brief_path.stem}-{uuid.uuid4().hex[:6]}"
-    artifact = args.result_artifact or str(LOG_DIR / f"{job_id}.result.json")
-    script_args += ["--result-artifact", artifact]
+    # Couple the inner bound to the outer budget. The worker kills the whole script
+    # at timeout_seconds; the runner must fire slightly earlier so it can write a
+    # diagnosis first. Passing this explicitly is what keeps the two honest — the
+    # runner's own default is a floor, and a stale one (see run_agent_job.py).
+    outer_timeout = args.timeout or AGENT_DEFAULT_TIMEOUT
+    inner_timeout = max(60, outer_timeout - AGENT_TIMEOUT_GRACE)
+    script_args += ["--timeout", str(inner_timeout)]
 
     inner = argparse.Namespace(
         id=job_id,
@@ -166,11 +212,11 @@ def enqueue_agent(args) -> int:
         interpreter="uv run python",
         script_args=script_args,
         env=None,
-        result_artifact=artifact,
+        result_artifact=str(artifact_path),
         followup_brief=args.followup_brief,
         followup_task_type=args.followup_task_type,
         followup_priority=args.followup_priority,
-        timeout=args.timeout or 3600,
+        timeout=outer_timeout,
     )
     return enqueue(inner)
 

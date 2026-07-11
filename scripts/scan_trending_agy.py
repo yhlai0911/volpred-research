@@ -18,9 +18,14 @@ Usage:
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.dispatch_supervisor import procutil  # noqa: E402
 
 AGY = "/Users/yhlai0911/.local/bin/agy"
 
@@ -74,13 +79,37 @@ def _extract_json(text: str):
 
 
 def main() -> int:
+    # `agy` is an agentic CLI: it spawns its own tool subprocesses. subprocess.run's
+    # timeout kills only the pid we spawned, so on timeout agy's workers survive,
+    # reparent to init, and keep running unsupervised. Same bug class as
+    # gen_lazypack_codex (2026-07-11) and run_agent_job (2026-07-12) — the fix is a
+    # process group + procutil.kill_pgid, which is the single owner of this concern.
+    # Gate: scripts/tests/test_agentic_cli_timeout_killpg.py
     try:
-        proc = subprocess.run([AGY, "-p", PROMPT], capture_output=True, text=True, timeout=180)
-    except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
+        proc = subprocess.Popen(
+            [AGY, "-p", PROMPT],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            start_new_session=True,
+        )
+    except FileNotFoundError as exc:
+        _warn_scan("agy command failed before producing output", exc)
+        print(json.dumps({"candidates": [], "error": type(exc).__name__, "detail": str(exc)[:200]}))
+        return 0
+
+    try:
+        stdout, stderr = proc.communicate(timeout=180)
+    except subprocess.TimeoutExpired as exc:
+        try:
+            procutil.kill_pgid(os.getpgid(proc.pid))
+        except (ProcessLookupError, PermissionError) as kill_exc:
+            _warn_scan("agy timed out and its process group could not be killed", kill_exc)
+        proc.wait()
         # 失敗 = 印空候選（best-effort，refill 視為 skip 不報錯）
         _warn_scan("agy command failed before producing output", exc)
         print(json.dumps({"candidates": [], "error": type(exc).__name__, "detail": str(exc)[:200]}))
         return 0
+
+    proc = subprocess.CompletedProcess(proc.args, proc.returncode, stdout, stderr)
 
     if proc.returncode != 0:
         _warn_scan(f"agy command exited nonzero returncode={proc.returncode}")
