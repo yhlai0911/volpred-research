@@ -38,12 +38,14 @@ Three fixes
    <=>  the deposit signal HURTS the forecast. A primary cell with DM-t > 0 whose
    Bonferroni-adjusted p < 0.05 is a *documented negative* (signal significantly hurts),
    NOT a benign null and NOT an "FDR-only artefact". Symmetrically, a cell with DM-t < 0
-   that CW rejects at 0.05 would be a *documented positive* (signal helps). Everything
-   else is graded weak_fdr_only / safe_null.
+   whose CW test survives Bonferroni over the same m=8 family would be a
+   *documented positive* (signal helps). Everything else is graded weak_fdr_only /
+   safe_null.
 
 3. GENUINE POINT-IN-TIME VINTAGE (not just first-release).
-   We pull the FULL ALFRED real-time revision history (output_type=1 with a wide
-   realtime window: every (date, realtime_start, realtime_end, value) tuple), and
+   We pull the FULL, PAGINATED ALFRED real-time revision history (output_type=1
+   with a wide realtime window: every (date, realtime_start, realtime_end, value)
+   tuple), and
    reconstruct the signal AS IT WAS ACTUALLY KNOWN at each weekly first-print release
    date R_w: at R_w the newest week enters at its first print while every prior week
    enters at whatever revision was public on R_w. The rolling growth/z transform is
@@ -120,6 +122,15 @@ ANALYSIS_START = "2007-01-02"
 # compute a 52-week rolling z on a 13-week diff (>=65 weekly points). 800 calendar
 # days (~114 weeks) is a comfortable margin.
 PIT_VINTAGE_LOOKBACK_DAYS = 800
+FRED_PAGE_LIMIT = 100_000
+# H.8 observations are normally released about 8--10 calendar days after the
+# observation Wednesday.  ALFRED backfilled pre-archive observations on
+# 2012-08-17; those rows must not be mistaken for genuine first releases.
+MAX_PIT_RELEASE_LAG_DAYS = 30
+MIN_PIT_SIGNAL_OBS = 100
+MIN_PIT_SIGNAL_UNIQUE = 20
+MIN_PIT_SIGNAL_STD = 1e-6
+MAX_PIT_SIGNAL_AGE_DAYS = 45
 
 TRAIN_FRAC = 0.60
 BOOT_REPS = 2000
@@ -217,7 +228,9 @@ def fetch_fred_first_release(series_id: str, api_key: str) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
 
 
-def fetch_fred_vintage_history(series_id: str, api_key: str) -> pd.DataFrame:
+def fetch_fred_vintage_history(
+    series_id: str, api_key: str
+) -> tuple[pd.DataFrame, dict]:
     """
     FULL ALFRED real-time revision history (output_type=1 with a wide realtime window).
     Returns one row per (observation date, revision) with the window during which that
@@ -227,38 +240,105 @@ def fetch_fred_vintage_history(series_id: str, api_key: str) -> pd.DataFrame:
 
     This is the raw material for a genuine point-in-time vintage snapshot: to know the
     value of observation `date` as seen on any calendar day R, take the row whose
-    [realtime_start, realtime_end] window contains R. One request (compact long format;
-    a handful of revisions per weekly obs).
+    [realtime_start, realtime_end] window contains R.  The wide response is paginated
+    because the history is much larger than the endpoint's per-request row cap.
     """
-    r = requests.get(
-        "https://api.stlouisfed.org/fred/series/observations",
-        params={
-            "series_id": series_id,
-            "api_key": api_key,
-            "file_type": "json",
-            "observation_start": FRED_START,
-            "output_type": 1,  # observations by real-time period (all vintages)
-            "realtime_start": "1776-07-04",
-            "realtime_end": "9999-12-31",
-        },
-        timeout=180,
-    )
-    r.raise_for_status()
-    obs = r.json()["observations"]
+    # A wide output_type=1 request contains hundreds of thousands of
+    # observation-vintage rows.  The endpoint caps each response at 100,000;
+    # silently reading only page 1 was the orphan-run bug that produced a
+    # constant pseudo-PIT signal.  Paginate to the API-reported count and fail
+    # closed if any page is missing.
+    url = "https://api.stlouisfed.org/fred/series/observations"
+    base_params = {
+        "series_id": series_id,
+        "api_key": api_key,
+        "file_type": "json",
+        "observation_start": FRED_START,
+        "output_type": 1,  # observations by real-time period (all vintages)
+        "realtime_start": "1776-07-04",
+        "realtime_end": "9999-12-31",
+        "limit": FRED_PAGE_LIMIT,
+        "sort_order": "asc",
+    }
+    obs: list[dict] = []
+    expected_count: int | None = None
+    offset = 0
+    n_pages = 0
+    while expected_count is None or offset < expected_count:
+        r = requests.get(
+            url,
+            params={**base_params, "offset": offset},
+            timeout=180,
+        )
+        r.raise_for_status()
+        payload = r.json()
+        page = payload.get("observations", [])
+        if expected_count is None:
+            expected_count = int(payload["count"])
+        if not page:
+            raise RuntimeError(
+                f"ALFRED pagination stopped early for {series_id}: "
+                f"received={offset}, expected={expected_count}"
+            )
+        obs.extend(page)
+        offset += len(page)
+        n_pages += 1
+
+    assert expected_count is not None
+    if len(obs) != expected_count:
+        raise RuntimeError(
+            f"ALFRED row-count mismatch for {series_id}: "
+            f"received={len(obs)}, expected={expected_count}"
+        )
+
     rows = []
+    n_open_ended = 0
     for o in obs:
         v = pd.to_numeric(o["value"], errors="coerce")
         if pd.isna(v):
             continue
+        is_open_ended = o["realtime_end"] == "9999-12-31"
+        n_open_ended += int(is_open_ended)
         rows.append(
             {
                 "date": pd.Timestamp(o["date"]),
                 "realtime_start": pd.Timestamp(o["realtime_start"]),
-                "realtime_end": pd.Timestamp(o["realtime_end"]),
+                # 9999-12-31 is the ALFRED open-ended sentinel and is outside
+                # datetime64[ns].  NaT below means "still current".
+                "realtime_end": (
+                    pd.NaT
+                    if is_open_ended
+                    else pd.Timestamp(o["realtime_end"])
+                ),
                 "value": float(v),
             }
         )
-    return pd.DataFrame(rows).sort_values(["date", "realtime_start"]).reset_index(drop=True)
+    out = (
+        pd.DataFrame(rows)
+        .sort_values(["date", "realtime_start"])
+        .reset_index(drop=True)
+    )
+    if int(out["realtime_end"].isna().sum()) != n_open_ended:
+        raise RuntimeError(
+            f"ALFRED open-ended sentinel parse failed for {series_id}: "
+            f"expected_NaT={n_open_ended}, got={int(out['realtime_end'].isna().sum())}"
+        )
+    audit = {
+        "series_id": series_id,
+        "api_output_type": 1,
+        "api_reported_count": expected_count,
+        "raw_rows_received": len(obs),
+        "numeric_rows_retained": len(out),
+        "page_limit": FRED_PAGE_LIMIT,
+        "pages_fetched": n_pages,
+        "pagination_complete": len(obs) == expected_count,
+        "observation_date_min": str(out["date"].min().date()),
+        "observation_date_max": str(out["date"].max().date()),
+        "n_observation_dates": int(out["date"].nunique()),
+        "n_realtime_starts": int(out["realtime_start"].nunique()),
+        "n_open_ended_realtime_windows": n_open_ended,
+    }
+    return out, audit
 
 
 def fetch_prices(ticker: str) -> pd.DataFrame:
@@ -339,8 +419,9 @@ def _revision_index(vh: pd.DataFrame) -> dict:
     for date, grp in vh.groupby("date"):
         g = grp.sort_values("realtime_start")
         rs = g["realtime_start"].to_numpy(dtype="datetime64[ns]")
+        re = g["realtime_end"].to_numpy(dtype="datetime64[ns]")
         vv = g["value"].to_numpy(dtype=np.float64)
-        idx[pd.Timestamp(date)] = (rs, vv)
+        idx[pd.Timestamp(date)] = (rs, re, vv)
         first[pd.Timestamp(date)] = pd.Timestamp(rs[0])
     return idx, first
 
@@ -351,31 +432,56 @@ def _value_as_of(idx: dict, date: pd.Timestamp, R: pd.Timestamp) -> float:
     entry = idx.get(date)
     if entry is None:
         return float("nan")
-    rs, vv = entry
+    rs, re, vv = entry
     pos = int(np.searchsorted(rs, np.datetime64(R), side="right")) - 1
     if pos < 0:
+        return float("nan")
+    # realtime_end is inclusive.  NaT is our representation of ALFRED's
+    # 9999-12-31 open-ended sentinel.
+    if not np.isnat(re[pos]) and np.datetime64(R) > re[pos]:
         return float("nan")
     return float(vv[pos])
 
 
-def build_true_pit_signal(small_vh: pd.DataFrame, large_vh: pd.DataFrame) -> pd.DataFrame:
+def build_true_pit_signal(
+    small_vh: pd.DataFrame,
+    large_vh: pd.DataFrame,
+    small_fr: pd.DataFrame,
+    large_fr: pd.DataFrame,
+) -> pd.DataFrame:
     """
-    GENUINE point-in-time signal. For each observation week w with first-print date
-    R_w = max(small_first[w], large_first[w]) (both series public), reconstruct the
+    GENUINE point-in-time signal.  output_type=4 supplies the official initial-release
+    origin weeks and dates; output_type=1 supplies every revision needed for the
+    snapshot. For each observation week w with first-print date
+    R_w = max(small_release[w], large_release[w]) (both series public), reconstruct the
     deposit series AS IT WAS KNOWN ON R_w over a trailing window: the newest week enters
     at its first print, every prior week enters at whatever revision was current on R_w.
     Recompute the rolling growth/z transform on that true vintage snapshot and take the
     value at week w as the signal. available_date = R_w + PIT_BUFFER_DAYS.
     """
-    small_idx, small_first = _revision_index(small_vh)
-    large_idx, large_first = _revision_index(large_vh)
-    common = sorted(set(small_idx) & set(large_idx))
+    small_idx, _ = _revision_index(small_vh)
+    large_idx, _ = _revision_index(large_vh)
+    common_history = sorted(set(small_idx) & set(large_idx))
+    small_release = small_fr.set_index("date")["release_date"].to_dict()
+    large_release = large_fr.set_index("date")["release_date"].to_dict()
+    origin_weeks = sorted(
+        set(common_history) & set(small_release) & set(large_release)
+    )
 
     rows = []
-    for w in common:
-        R = max(small_first[w], large_first[w])
+    candidate_release_lags = []
+    n_invalid_release_origins_excluded = 0
+    for w in origin_weeks:
+        R = max(pd.Timestamp(small_release[w]), pd.Timestamp(large_release[w]))
+        release_lag = int((R - w).days)
+        if release_lag < 0 or release_lag > MAX_PIT_RELEASE_LAG_DAYS:
+            # Fail closed on any anomalous output_type=4 record rather than
+            # silently treating an archive backfill as a live release origin.
+            n_invalid_release_origins_excluded += 1
+            continue
+        candidate_release_lags.append(release_lag)
         lo = w - pd.Timedelta(days=PIT_VINTAGE_LOOKBACK_DAYS)
-        window = [e for e in common if lo <= e <= w]
+        window = [e for e in common_history if lo <= e <= w]
         if len(window) < 66:  # need >=65 weekly points for 52w z on 13w diff
             continue
         s_snap = pd.Series(
@@ -402,10 +508,44 @@ def build_true_pit_signal(small_vh: pd.DataFrame, large_vh: pd.DataFrame) -> pd.
                 "available_date": R + timedelta(days=PIT_BUFFER_DAYS),
             }
         )
+    if not rows:
+        raise RuntimeError("true-PIT reconstruction produced no release-valid weeks")
     res = pd.DataFrame(rows).set_index("as_of").sort_index()
     res.index.name = "as_of"
     res = res.dropna(subset=["dep_flight_4w", "dep_flight_13w"], how="all")
-    return res[["dep_flight_4w", "dep_flight_13w", "release_date", "available_date"]]
+    signal_gate = {}
+    for col in ("dep_flight_4w", "dep_flight_13w"):
+        s = res[col].dropna()
+        stats_gate = {
+            "n": int(len(s)),
+            "n_unique": int(s.nunique()),
+            "std": float(s.std(ddof=1)),
+        }
+        stats_gate["passes"] = bool(
+            stats_gate["n"] >= MIN_PIT_SIGNAL_OBS
+            and stats_gate["n_unique"] >= MIN_PIT_SIGNAL_UNIQUE
+            and stats_gate["std"] > MIN_PIT_SIGNAL_STD
+        )
+        signal_gate[col] = stats_gate
+        if not stats_gate["passes"]:
+            raise RuntimeError(f"degenerate true-PIT signal {col}: {stats_gate}")
+
+    res.attrs["pit_build_audit"] = {
+        "release_valid_weeks": len(candidate_release_lags),
+        "history_only_weeks_not_in_output_type4": int(
+            len(set(common_history) - set(origin_weeks))
+        ),
+        "invalid_output_type4_origins_excluded": n_invalid_release_origins_excluded,
+        "release_lag_days_min": min(candidate_release_lags),
+        "release_lag_days_max": max(candidate_release_lags),
+        "max_allowed_release_lag_days": MAX_PIT_RELEASE_LAG_DAYS,
+        "signal_non_degeneracy_gate": signal_gate,
+        "signal_as_of_min": str(res.index.min().date()),
+        "signal_as_of_max": str(res.index.max().date()),
+    }
+    out = res[["dep_flight_4w", "dep_flight_13w", "release_date", "available_date"]].copy()
+    out.attrs = dict(res.attrs)
+    return out
 
 
 def merge_signal_to_trading_days(
@@ -651,7 +791,9 @@ def evaluate_cell(
     expect = float(q.iloc[pos + 1 : pos + 1 + H].mean())
     assert abs(float(frame.loc[probe, "y"]) - expect) < 1e-14, "target window is not (t, t+H]"
     asof = pd.to_datetime(panel.loc[frame.index, "as_of_date"].to_numpy())
-    min_gap = (pd.DatetimeIndex(frame.index) - pd.DatetimeIndex(asof)).min()
+    signal_ages = pd.DatetimeIndex(frame.index) - pd.DatetimeIndex(asof)
+    min_gap = signal_ages.min()
+    max_gap = signal_ages.max()
 
     scale = {"q_d": 1e4, "q_w": 1e4, "q_m": 1e4, "spy_rv21": 1e4, "vix": 1e-2}
     cols = ["q_d", "q_w", "q_m"] + ctrl_cols + [predictor]
@@ -694,7 +836,9 @@ def evaluate_cell(
         "n_zero_actual": n_zero_actual,
         "n_floored_pred_base": n_floor_b,
         "n_floored_pred_aug": n_floor_a,
+        "embargo_check": oos["embargo_check"],
         "min_days_between_deposit_asof_and_use": int(min_gap.days),
+        "max_days_between_deposit_asof_and_use": int(max_gap.days),
         "loss_results": {},
     }
 
@@ -793,6 +937,25 @@ def run_grid(panel: pd.DataFrame, signal_label: str) -> list[dict]:
             "bh_reject_at_q10": bool(q < 0.10),
             "bonferroni_reject_at_05": bool(bonf < 0.05),
         }
+    # CW is also evaluated over the same eight pre-registered nested-model
+    # cells.  Because CW participates in the verdict, its one-sided p-values
+    # need the same family-wise/FDR accounting rather than eight unadjusted
+    # chances to trigger a "documented_positive" label.
+    cw_raw_p = []
+    for c in prim:
+        p_cw = c.get("clark_west", {}).get("CW_p_one_sided_hln")
+        cw_raw_p.append(float(p_cw) if p_cw is not None and np.isfinite(p_cw) else 1.0)
+    cw_bh = benjamini_hochberg(cw_raw_p)
+    for c, p_cw, q_cw in zip(prim, cw_raw_p, cw_bh):
+        bonf_cw = float(min(1.0, p_cw * m))
+        if "clark_west" in c:
+            c["clark_west"]["p_value_adjusted"] = {
+                "family_size_m": m,
+                "bonferroni": bonf_cw,
+                "benjamini_hochberg_q": q_cw,
+                "bh_reject_at_q10": bool(q_cw < 0.10),
+                "bonferroni_reject_at_05": bool(bonf_cw < 0.05),
+            }
     for c in cells:
         if c["family"] == "secondary":
             c["p_value_adjusted"] = {"note": "declared secondary/falsification family"}
@@ -809,8 +972,9 @@ def summarise(cells: list[dict]) -> dict:
 
     * A primary cell with DM_t_hln > 0 AND Bonferroni p < 0.05 is a DOCUMENTED NEGATIVE
       (signal significantly hurts), not an "FDR-only artefact".
-    * A primary cell with DM_t_hln < 0 AND Clark-West rejects at 0.05 (HLN) is a
-      DOCUMENTED POSITIVE (signal helps once nested-bias is corrected).
+    * A primary cell with DM_t_hln < 0 AND its Clark-West test survives Bonferroni
+      at 0.05 over m=8 is a DOCUMENTED POSITIVE (signal helps once nested-bias is
+      corrected).
     * Otherwise weak_fdr_only (some BH survivor but no sign/Bonferroni/CW support) or
       safe_null.
     """
@@ -820,19 +984,30 @@ def summarise(cells: list[dict]) -> dict:
     def bonf(c):
         return c["p_value_adjusted"]["bonferroni"]
 
-    def cw_reject(c):
+    def cw_reject_raw(c):
         cw = c.get("clark_west", {})
         return bool(cw.get("reject_equal_mspe_at_05_hln", False))
 
+    def cw_reject_bonf(c):
+        cw = c.get("clark_west", {})
+        return bool(
+            cw.get("p_value_adjusted", {}).get(
+                "bonferroni_reject_at_05", False
+            )
+        )
+
     hurts_bonf = [c for c in prim if c["DM_t_hln"] > 0 and bonf(c) < 0.05]
-    helps_cw = [c for c in prim if c["DM_t_hln"] < 0 and cw_reject(c)]
+    helps_cw = [c for c in prim if c["DM_t_hln"] < 0 and cw_reject_bonf(c)]
 
     any_raw = any(c["p_value"] < 0.05 for c in prim)
     any_bh = any(c["p_value_adjusted"]["bh_reject_at_q10"] for c in prim)
     any_harvey = any(abs(c["DM_t_hln"]) > 3.0 for c in prim)
-    any_cw_reject = any(cw_reject(c) for c in prim)
+    any_cw_reject_raw = any(cw_reject_raw(c) for c in prim)
+    any_cw_reject_bonf = any(cw_reject_bonf(c) for c in prim)
 
-    if helps_cw:
+    if helps_cw and hurts_bonf:
+        verdict = "mixed_documented"
+    elif helps_cw:
         verdict = "documented_positive"  # signal helps (CW rejects, aug better)
     elif hurts_bonf:
         verdict = "documented_negative"  # signal significantly HURTS (Bonferroni)
@@ -853,7 +1028,11 @@ def summarise(cells: list[dict]) -> dict:
             "bh_q": c["p_value_adjusted"]["benjamini_hochberg_q"],
             "clark_west_t_hln": c.get("clark_west", {}).get("CW_t_hln"),
             "clark_west_p_one_sided_hln": c.get("clark_west", {}).get("CW_p_one_sided_hln"),
-            "clark_west_reject_05": cw_reject(c),
+            "clark_west_bonferroni": c.get("clark_west", {}).get(
+                "p_value_adjusted", {}
+            ).get("bonferroni"),
+            "clark_west_reject_05_raw": cw_reject_raw(c),
+            "clark_west_reject_05_bonferroni": cw_reject_bonf(c),
         }
 
     return {
@@ -861,7 +1040,8 @@ def summarise(cells: list[dict]) -> dict:
         "any_raw_p_below_05": any_raw,
         "any_bh_reject_at_q10": any_bh,
         "any_harvey_abs_t_above_3": any_harvey,
-        "clark_west_any_reject_at_05_hln": any_cw_reject,
+        "clark_west_any_raw_reject_at_05_hln": any_cw_reject_raw,
+        "clark_west_any_bonferroni_reject_at_05_hln": any_cw_reject_bonf,
         "documented_negative_cells": [cell_tag(c) for c in hurts_bonf],
         "documented_positive_cells": [cell_tag(c) for c in helps_cw],
         "strongest_primary_cell": cell_tag(best),
@@ -961,12 +1141,23 @@ def assemble_panel(sig: pd.DataFrame, px: dict, vix, vix_ok: bool) -> pd.DataFra
 def _construct(panel):
     svb = panel.loc["2023-03-01":"2023-06-30", "dep_flight_13w"].dropna()
     gfc = panel.loc["2008-09-01":"2009-06-30", "dep_flight_13w"].dropna()
+    full = panel["dep_flight_13w"].dropna()
+    age_frame = panel.loc[full.index, ["as_of_date"]].dropna()
+    ages = (
+        pd.DatetimeIndex(age_frame.index)
+        - pd.DatetimeIndex(pd.to_datetime(age_frame["as_of_date"].to_numpy()))
+    ).days
     return {
         "svb_2023_max_signal": float(svb.max()) if len(svb) else None,
         "svb_2023_argmax_date": str(svb.idxmax().date()) if len(svb) else None,
         "gfc_max_signal": float(gfc.max()) if len(gfc) else None,
-        "full_sample_mean": float(panel["dep_flight_13w"].mean()),
-        "full_sample_std": float(panel["dep_flight_13w"].std()),
+        "full_sample_mean": float(full.mean()),
+        "full_sample_std": float(full.std()),
+        "full_sample_n": int(len(full)),
+        "full_sample_n_unique": int(full.nunique()),
+        "signal_age_days_min": int(ages.min()) if len(ages) else None,
+        "signal_age_days_median": float(np.median(ages)) if len(ages) else None,
+        "signal_age_days_max": int(ages.max()) if len(ages) else None,
         "signal_first_date": str(panel["dep_flight_13w"].dropna().index.min().date())
         if panel["dep_flight_13w"].notna().any() else None,
     }
@@ -992,11 +1183,12 @@ def main() -> None:
           f"first available={sig_fr['available_date'].min().date()}")
 
     print("[3/7] ALFRED full vintage history (output_type=1) — true PIT …")
-    small_vh = fetch_fred_vintage_history(FRED_SMALL, key)
-    large_vh = fetch_fred_vintage_history(FRED_LARGE, key)
+    small_vh, small_vh_audit = fetch_fred_vintage_history(FRED_SMALL, key)
+    large_vh, large_vh_audit = fetch_fred_vintage_history(FRED_LARGE, key)
     print(f"    vintage rows: small={len(small_vh)} (obs={small_vh['date'].nunique()})  "
           f"large={len(large_vh)} (obs={large_vh['date'].nunique()})")
-    sig_pit = build_true_pit_signal(small_vh, large_vh)
+    sig_pit = build_true_pit_signal(small_vh, large_vh, small_fr, large_fr)
+    pit_build_audit = dict(sig_pit.attrs["pit_build_audit"])
     print(f"    true-PIT weeks={len(sig_pit)}  "
           f"first available={sig_pit['available_date'].min().date()}  "
           f"last={sig_pit['available_date'].max().date()}")
@@ -1022,6 +1214,16 @@ def main() -> None:
         "first_release": _construct(panel_fr),
         "true_pit": _construct(panel_pit),
     }
+    if (
+        construct["true_pit"]["full_sample_std"] <= MIN_PIT_SIGNAL_STD
+        or construct["true_pit"]["full_sample_n_unique"] < MIN_PIT_SIGNAL_UNIQUE
+        or construct["true_pit"]["signal_age_days_min"] < 0
+        or construct["true_pit"]["signal_age_days_max"] > MAX_PIT_SIGNAL_AGE_DAYS
+    ):
+        raise RuntimeError(
+            "true-PIT trading-day panel failed non-degeneracy gate: "
+            f"{construct['true_pit']}"
+        )
     print(f"    construct SVB max: current={construct['current']['svb_2023_max_signal']:.2f}  "
           f"first_release={construct['first_release']['svb_2023_max_signal']:.2f}  "
           f"true_pit={construct['true_pit']['svb_2023_max_signal']:.2f}")
@@ -1095,7 +1297,8 @@ def main() -> None:
                 "fix": (
                     "verdict uses sign (DM_t>0 => hurts) + Bonferroni (<0.05 => "
                     "significant) + CW: hurts+Bonferroni => documented_negative; "
-                    "helps+CW-reject => documented_positive; else weak_fdr_only/safe_null."
+                    "helps+CW Bonferroni-reject over m=8 => documented_positive; "
+                    "else weak_fdr_only/safe_null."
                 ),
                 "convention": "d = loss_aug - loss_base; DM_t_hln>0 => deposit signal HURTS.",
             },
@@ -1106,19 +1309,26 @@ def main() -> None:
                     "older weeks that were actually visible at the trading date."
                 ),
                 "fix": (
-                    "Pull the full ALFRED real-time revision history (output_type=1, wide "
-                    "realtime window) and reconstruct the signal as known at each weekly "
+                    "Pull the full PAGINATED ALFRED real-time revision history "
+                    "(output_type=1, wide realtime window) and reconstruct the signal as "
+                    "known at each weekly "
                     "first-print release date: newest week at first print, prior weeks at "
                     "their revision current on that date. First-release-only retained as an "
                     "explicit, honestly-labelled sensitivity."
                 ),
                 "signal_correlations": sig_corr,
                 "construct_validity": construct,
+                "vintage_fetch_audit": {
+                    "small": small_vh_audit,
+                    "large": large_vh_audit,
+                },
+                "pit_build_audit": pit_build_audit,
                 "note_true_pit_sample": (
-                    "ALFRED archiving for these H.8 series starts ~2012-08; the true-PIT "
-                    "signal additionally needs >=65 archived weeks before each target week "
-                    "to form the 52w z on a 13w diff, so it begins ~2014. Disclosed; does "
-                    "not alter the pre-registered primary grid."
+                    "ALFRED real-time archiving for these H.8 series starts ~2012-08. "
+                    "output_type=4 defines genuine release-origin weeks; older "
+                    "output_type=1-only observations remain valid trailing history at "
+                    "each 2012+ snapshot but never become forecast origins. Any anomalous "
+                    "output_type=4 origin with a release lag over 30 days is excluded."
                 ),
             },
         },
@@ -1138,7 +1348,10 @@ def main() -> None:
             "dm": "NW HAC lag=H + HLN correction, two-sided t(n-1)",
             "clark_west": "CW(2007) one-sided nested MSPE, HAC lag=H + HLN, ALL 8 primary cells",
             "bootstrap": f"moving-block block=max(10,H) reps={BOOT_REPS} seed={SEED}",
-            "multiple_testing": "Bonferroni + BH over primary family m=8",
+            "multiple_testing": (
+                "Bonferroni + BH over primary family m=8, separately for two-sided "
+                "DM and one-sided Clark-West p-values"
+            ),
             "verdict_rule": "sign + Bonferroni + Clark-West (see three_fixes.fix2)",
         },
         "cells_current_vintage": cells_cur,
