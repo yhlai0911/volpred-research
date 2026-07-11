@@ -1,0 +1,34 @@
+{
+  "id": "k1684_ftd_e1_review_blocked_rerun",
+  "title": "K1684 review-blocked canonical rerun",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/k1684_ftd_e1_review_blocked_rerun.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    ".claude/worktrees/k1684-ftd-e1-rerun",
+    "--result-artifact",
+    "experiments/k1684/k1684_ftd_e1_scale_gating_results.json"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-11T18:24:54Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1684_ftd_e1_review_blocked_rerun.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1684_ftd_e1_review_blocked_rerun.stderr",
+  "result_artifact": "experiments/k1684/k1684_ftd_e1_scale_gating_results.json",
+  "claude_followup": {
+    "brief": "收 K1684 review-blocked rerun：先讀 experiments/k1684/CODEX_REVIEW_BLOCKED.md；驗 7 gates、JSON 原始數字、active-contract/gap-complete RV、GJR >=100 starts、VaR+ES、atomic write；獨立 Codex PASS 後才 merge/knowledge/paper route。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 10800
+}
