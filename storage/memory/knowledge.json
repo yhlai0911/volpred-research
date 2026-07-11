@@ -38332,5 +38332,18 @@
     ],
     "confidence": 0.88,
     "created_at": "2026-07-11T15:03:46.168252"
+  },
+  {
+    "item_id": "01bd87e9",
+    "category": "treasury_crowding",
+    "content": "experiment_id=K1683；verdict=NULL_NO_ROBUST_INCREMENT；reviewer=Codex（執行前與執行後驗證均通過）。公開 CFTC TFF 的四年期 Treasury gross-participation proxy（2Y/5Y/10Y/Bond）經名目週五發布、再 lag 一週後，未對 2013-09 至 2026-07 的週頻風險結果提供穩健增量預測：TLT RV5 的 OOS QLIKE 改善 1.4026038748396232%（HLN t=-1.270115489450718，BH q=0.5634724474919137），IEF RV5 改善 0.4978547418674615%（HLN t=-0.5779944527214179，BH q=0.5634724474919137），但兩者 late-half 都轉負；DGS10 五日最大升息與 SPY–TLT 20 日 Fisher-z correlation 的 loss 分別惡化 0.26528798918032165% 與 1.3395726728856872%。四個主要結果 0/4 通過事前 gate。2023-01-03 至 2025-09-30 這個公開 proxy 上升 25.094627315704578%，不可拿來重現或驗證 Fed Form PF 對沖基金 gross exposure 的倍增敘述；資料定義不同，不能推論 forced deleveraging 不存在。後續若再測，應使用真正可得的資金／保證金壓力觸發與 interaction，而不是再做無條件 crowding-level 回歸。",
+    "evidence": [
+      "experiments/k1683/k1683_results.json",
+      "experiments/k1683/README.md",
+      "experiments/k1683/codex_review_pre_run.md",
+      "experiments/k1683/codex_review.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-07-11T16:41:35.141093"
   }
 ]

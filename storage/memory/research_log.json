@@ -4234,5 +4234,23 @@
       "real_yield",
       "null_result"
     ]
+  },
+  {
+    "entry_id": "1f10dc9e",
+    "timestamp": "2026-07-11T16:41:35.321379",
+    "phase": "verification",
+    "action": "完成 K1683 前後 Codex review、results JSON 公式／方向／FDR gate 與資料雜湊核對。",
+    "observation": "4 個主要 OOS 格子 0/4 通過；TLT/IEF headline loss 小幅改善但統計不顯著且 late-half 轉負，yield-jump 與 stock-bond-correlation loss 惡化；公開 CFTC proxy 與 Form PF exposure 不同義。",
+    "decision": "接受 NULL_NO_ROBUST_INCREMENT，限定為 lagged public CFTC proxy 的增量預測 null；不作 forced-deleveraging 因果否定，將後續方向收斂到 funding/margin stress interaction。",
+    "experiment_ids": [
+      "K1683"
+    ],
+    "tags": [
+      "treasury",
+      "crowding",
+      "cftc",
+      "null_result",
+      "oos_verified"
+    ]
   }
 ]

@@ -15794,5 +15794,19 @@
     "summary": "K1655 primary-path Codex 二次驗證：VERDICT=FAIL（2026-07-09 的 code-reviewer subagent fallback 給 PASS/零修正，全錯）。4 critical：(1) NFCI 非 PIT — 今日修訂後歷史 back-stamp，NFCI 2011 才公開但 OOS 從 2004 起 → 343/1131 origins 早於指數存在 (2) DM HAC lag=h-1，h=1 退化成 lag=0 無 HAC，但 loss diff acf(1)=0.68 → |t| 灌水 (3)「VIX 蓋過 NFCI」從未檢定 (4) bootstrap block=H 在 H=1 退化。已修 (2)：_nw_lag 以 repo canonical bandwidth 為下限，重跑 192s → harvey_significant 60 cells 中 26→18（8 翻盤），文章那格 -3.62→-3.15。線上文章 mile_9c211681 不下架（PIT 偏誤方向對 NFCI 有利，主 NULL 結論更站得住）但就地更正 + 完整限制聲明，Supabase 已線上驗證。README verdict CONDITIONAL_PASS→FAIL。error_log + experiments.md 各補 2 條 methodology 硬規則。Follow-ups: k1655_alfred_pit_rerun / k1655_vix_nfci_encompassing / k1655_dm_lag_class_sweep(bug class)。",
     "verdict": "FAIL",
     "reviewer": "Codex CLI 0.144.1 / gpt-5.6-sol (primary path)"
+  },
+  {
+    "timestamp": "2026-07-11T16:42:17.273626+08:00",
+    "task_type": "experiment",
+    "task_id": "research_hedge_fund_treasury_crowding",
+    "k_id": "K1683",
+    "outcome": "succeeded_null_result",
+    "summary": "K1683 完成：公開 CFTC Treasury crowding proxy 在四個主要 expanding-OOS 格子 0/4 通過；結論限定為公開 proxy 的無條件增量預測 null。",
+    "commit": "dab4940c9",
+    "actor": "codex-vscode",
+    "owner": "codex-vscode",
+    "reviewer": "Codex pre-run + post-run + agent-result-verification",
+    "knowledge_item_id": "01bd87e9",
+    "followup_task_id": "K1683_article_general"
   }
 ]
