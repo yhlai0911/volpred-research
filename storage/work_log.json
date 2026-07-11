@@ -15971,5 +15971,12 @@
     "task_id": "lazypack_pil_render_unguarded",
     "summary": "Class sweep 盲區立案：11 個上線 render script 有 5 個是 PIL ImageDraw 繪製，guard patch 的是 Figure.savefig → 三類違規全都看不到。P2 pending。",
     "verdict": "FILED"
+  },
+  {
+    "timestamp": "2026-07-11T22:33:27.987603+08:00",
+    "task_type": "experiment",
+    "actor": "hourly-22",
+    "task_id": "research_smad_vol_left_tail_predictor",
+    "summary": "K1681 SMAD 作為波動/左尾預測子 — NULL。收編孤兒 worktree k1681-smad（agent 已死、工作未合併）；Codex primary-path review 撞出巢狀模型誤用 raw DM（Clark-West 後 t=+6.71，統計那條腿翻面，NULL 方向不變但理由改由經濟顯著性 0.54% 單獨承擔）；README §8 附記 + knowledge 9c74b106；立兩個 follow-up：CW 正式重跑 + 巢狀 DM 誤用全庫 class sweep。另：推掉 6 個積壓 commit（push backlog warn 解除）、排定 supervisor deferred reload。"
   }
 ]

@@ -38527,5 +38527,33 @@
         "nfci_incremental_information_pass": false
       }
     }
+  },
+  {
+    "item_id": "9c74b106",
+    "category": "volatility_prediction",
+    "title": "K1681 SMAD (price-to-MA10 distance) as vol / left-tail predictor — NULL (economically negligible)",
+    "content": "K1681：SMAD = (P - MA10)/MA10 對次日 RV / 未來 5 日下行半變異數 / 左尾命中率的增量預測力。20 檔美股 ETF 與大型股，2010-01 至 2026-07，79,140 asset-days，seed 1681。\n\n【核心設計 — span baseline】SMAD 的一階近似是過去 10 日報酬的遞減加權和，其表面預測力與槓桿效應糾纏。把 10 個 individual lagged returns 全放進基準（張成所有線性重新加權）後，天真 HAR-only 基準記給 SMAD 的 1.90pp 增量 R² 蒸發約 85%，只剩 0.287pp。\n\n【結果】(a) 左尾：完全 null（增量 pseudo-R² = 0.023pp，joint p = 0.62）—— 「離均線太遠就要變天」在控制過去報酬後歸零；(b) 下行半變異數（H=5）：樣本內有、樣本外 raw loss differential 符號為反（加 SMAD 反而變差）；(c) 次日 RV：增量 R² = 0.287pp，僅 HAR 自身 R²(0.536) 的 0.54%。\n\n【唯一穩健規律】不對稱性 —— 只有「跌破均線」那一半帶訊號，斜率是「衝高離開均線」的 2.7 倍。「距離」是假議題，「在均線哪一邊」才是真的（但仍小到不值得交易）。\n\n【檢定誤用修正，2026-07-11 Codex review】初版把 NULL 的一條腿架在「樣本外 DM t = -2.32 未過 Harvey |t|>3 門檻」上。但 M2B 巢狀於 M1B，巢狀比較下 raw DM 在虛無假設之下非標準常態、且因大模型多估參數的估計噪音而系統性偏嚴；正確檢定是 Clark & West (2007) MSPE-adjusted。Codex 重算：y_rv 的 CW adjusted t = +6.71 (p=1.9e-11)、y_semivar CW t = +3.70 —— 統計那條腿翻面。NULL 方向不變，但理由改由「經濟顯著性（0.54%）」單獨承擔，不可再引用「DM 沒過 Harvey 門檻」。CW 顯著只代表母體係數不為零，不代表有限樣本 MSPE 會改善（y_semivar 的 raw 符號仍為反即是實例）。此為與 K1655 DM/HAC lag 稽核同家族的 bug class（失效點是「哪個檢定變體餵給對外宣稱」）。follow-up：k1681_clark_west_nested_dm_rerun（正式實作 CW 重跑）、nested_dm_misuse_class_sweep（全庫掃描 + 機械 gate）。\n\n【方法論合規】所有 predictor .shift(1)；forward-label (H=5) 訓練區塊尾端丟 H 列確保 target_end < forecast_origin；HAC bandwidth = max(Andrews, horizon)（非 h-1 退化）；OOS loss differential 先按日期跨資產聚合再做 HAC t 檢定（堆疊 asset-day t = -5.61 三倍膨脹，僅列 diagnostic）；BH FDR 跨 40 個 (asset x target) 檢定。",
+    "verdict": "NULL",
+    "experiment_id": "k1681",
+    "experiment_path": "experiments/k1681/",
+    "task_id": "research_smad_vol_left_tail_predictor",
+    "reviewer": "Codex CLI primary path (bounded run; no formal verdict line — killed at 700s cap)",
+    "reviewer_source": "Codex primary-path code review; recomputed Clark-West statistics and surfaced the nested-DM misuse",
+    "evidence": [
+      "experiments/k1681/k1681_results.json",
+      "experiments/k1681/README.md",
+      "experiments/k1681/figures/k1681_incremental_r2.png",
+      "experiments/k1681/figures/k1681_asymmetry.png",
+      "experiments/k1681/figures/k1681_smad_quintiles.png"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-07-11T22:33:08.120975",
+    "sample": {
+      "start": "2010-01-01",
+      "end": "2026-07-10",
+      "n_assets": 20,
+      "asset_days": 79140
+    },
+    "actor": "hourly-22"
   }
 ]
