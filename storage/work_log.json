@@ -15546,5 +15546,23 @@
     "backfilled_at": "2026-07-10T23:13:10.770729+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1678"
+  },
+  {
+    "timestamp": "2026-07-11T08:15:57+08:00",
+    "task_type": "platform_ops",
+    "task_id": "fix-token-report-circular-import",
+    "outcome": "succeeded",
+    "actor": "hourly-08",
+    "summary": "修 CRITICAL host_cron_fail: token_report_daily 每日 exit=1 根因=email_notifier top-level import volpred.ops.canonical_write 觸發 ops/__init__→alerts→回頭 import EmailNotifier 循環。改 guard_canonical_write 為 lazy import。加 regression test (子進程失敗順序 + AST gate)。dry-run exit=0 驗證。",
+    "k_id": null
+  },
+  {
+    "timestamp": "2026-07-11T08:15:57+08:00",
+    "task_type": "platform_ops",
+    "task_id": "rescue-K1679-rev2-orphan-worktree",
+    "outcome": "succeeded",
+    "actor": "hourly-08",
+    "summary": "孤兒救援: worktree agent-a28bc6bb8dbd10f2e owning pid 77264 死亡, 未commit K1679-rev2 產出(safe_null)保全到 branch commit e8525e1f7; 停用死鎖; 任務退回 pending. RED FLAG 已註記: true_pit signal std=0.0 疑退化, closure 前須 Codex 驗 PIT 非退化。不寫 knowledge.json。",
+    "k_id": "K1679-rev2"
   }
 ]
