@@ -2,6 +2,48 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-12 02:0x — hang 告警是瞎的：雙擁有者競態，輸家寄信（commit 68886b7b9）
+
+**觸發**：老闆 email-12083 回覆 00:57 那封 hang_killed CRITICAL：「又來 你到底要出幾次這樣的狀況 立刻從底層優化修改」。
+
+**關鍵區分**：hang 的**成因**昨天 01:41 已修（`5aa8cd180` 3-STRIKE：fire 內無界 agentic 子程序 → class sweep + queue 出路），00:57 那次 hang 發生在修正落地**之前**。但老闆的「又來」還指向另一件事——**每次收到的 CRITICAL 都是空的**：
+
+```
+pid: -1 / pgid: -1 / started_at: None / log: (unknown)
+Worker log tail: (empty)
+```
+
+一封零診斷資訊的 CRITICAL。連收數封長這樣的信，主觀上就是「講幾次都沒改善」。這是獨立於成因的**第二個結構性缺陷**，本次修的是它。
+
+**根因（domain model 錯，非欄位漏傳）**：hang 有兩個獨立偵測器——`worker.py` 自己的 subprocess timeout，與 `health.py` 的 max-age watchdog。真 hang 時兩者相隔約 1 秒先後觸發（log 實錄）：
+
+```
+00:57:03,848 WARNING [worker] worker attempt=1 timeout=3000s — SIGTERM→SIGKILL pgid=80516
+00:57:04,906 WARNING [health] worker pgid=80516 age=3001s > 3000s cap — force-killing
+00:57:04,969 INFO    [worker] worker attempt=1 exit=-1000 category=hang duration=3001.3s
+```
+
+兩邊都要描述同一件事故，但 `current_job` 只有一份。`state.record_completion()` 在 `_locked_state` 下原子清空 slot：**先到的清掉、後到的拿到 None**——它本來就已經是勝負訊號了。但兩個 caller 都把這個回傳值丟掉，照常寄信；更糟的是 `worker.py` 是**關單之後才 re-read `current_job`** 來組信，於是拿到 None → `pid=-1 / pgid=-1 / started_at=None / log_path=""`。哪一封真的寄出去，由 10 分鐘 alert-dedup **抽籤**決定。抽到瞎的那封，老闆就收到空信。
+
+**修正（單一擁有者；不新增機制，符合 anti-stacking）**：
+- `record_completion()` 回傳值正式定義為 **race-winner token**，並把「關單那一刻的 job 快照」一起交還（`{**entry, "job": job}`；**不寫進 completions ring**，on-disk shape 不變）。贏家永遠不必再去讀一次已被清空的 slot。
+- `worker.py` hang 路徑：刪掉致命的二次讀取，改用交還的快照；拿到 `None` → 記 log、**不寄信**。
+- `health.py` hang + silent_death 兩路徑：同一條擁有權規則，輸家閉嘴。
+- dedup 從此降為 backstop，不再是決定誰發言的抽籤機。
+
+**驗證（break-then-verify，於臨時 worktree 對 HEAD 舊碼跑，未動 production daemon — 遵 control-plane.md「不可在 daemon 腳下抽地毯」）**：
+- 新增 `scripts/tests/test_hang_alert_ownership.py`（9 條）；新碼 9/9 PASS
+- **舊碼 3 FAIL**，含事故重現 `test_worker_does_not_mail_a_blind_alert_when_health_won`（精確重放 00:57 interleaving：health 先關單 → worker 寄出 pid=-1 瞎信）
+- 既有 `test_dispatch_state` + `test_cutover_orphans` 63 條零回歸
+- 告警本體加斷言：`pid` / `started_at` / log tail 全在，且 `"pid: -1"` / `"(empty)"` 不得回歸
+
+**部署**：改的是常駐 daemon code（`scripts/dispatch_supervisor/**`），必須 reload 才生效。但本班 fire 自己就是 in-flight worker → 走 `reload_dispatch_supervisor.sh --defer`（本班結束後自動 reload），不 `--force`（會殺掉自己）。
+
+**教訓**：
+- **L1｜告警的第一個 bug 是「它沒說事」**。成因修好了，但只要事故報告是空的，對外觀感就是「同一個問題又來了」。告警的資訊量本身就是可靠性的一部分，不是附屬品。
+- **L2｜同一件事有兩個偵測器 = 兩個擁有者 = 競態**。既有的原子轉移已經在告訴你誰贏了（回傳 `None` vs entry），caller 卻把訊號丟掉。**遇到 dual-detector，先問「誰有資格報案」，不要靠 dedup 抽籤決定**。
+- **L3｜先關單、再讀狀態來組報告，必然讀到空的**。報告要用的快照必須在轉移的那一刻取，不能事後補讀——這是 read-after-clear，跟 use-after-free 同構。
+
 ## 2026-07-12 **3-STRIKE TRIGGER** — fire 內 spawn 無界 agentic 子程序（hang_killed ×3）
 
 **三次 incident**（全在 24h 內，全部 `duration=3001.3s`）：

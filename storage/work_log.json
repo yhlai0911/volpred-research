@@ -16038,5 +16038,15 @@
     "commit": "5aa8cd180",
     "owner": "hourly-01",
     "actor": "hourly-01"
+  },
+  {
+    "timestamp": "2026-07-11T18:10:38.738360+00:00",
+    "task_type": "platform_ops",
+    "task_id": "email-12083-62a2a3",
+    "outcome": "succeeded",
+    "summary": "hang 告警的雙擁有者競態修復。老闆 email-12083「又來...立刻從底層優化修改」。區分兩件事：hang 的成因昨天已修(5aa8cd180)，00:57 那次發生在修正落地前；但告警本體是空的(pid:-1/started_at:None/tail:(empty)) — 這是獨立的結構性缺陷。根因=hang 有兩個獨立偵測器(worker subprocess timeout + health max-age watchdog)，相隔約1秒先後觸發；record_completion 原子清空 slot，輸家拿到 None 卻仍照常寄信，且 worker 是關單後才 re-read current_job(read-after-clear) → 寄出瞎信；哪封寄出由 10min dedup 抽籤決定。修正=record_completion 回傳值正式定義為 race-winner token 並交還關單當下的 job 快照；輸家閉嘴(不新增機制，anti-stacking)。驗證: 新測試 9/9 PASS，舊碼 3 FAIL(含事故重現)，既有 63 條零回歸。部署走 reload --defer(本班 fire 自己就是 in-flight worker，不可 --force)。",
+    "commit": "68886b7b9",
+    "owner": "hourly-02",
+    "actor": "hourly-02"
   }
 ]
