@@ -338,6 +338,7 @@ def test_preview_release_pool_excludes_active_dedup_flags(tmp_path: Path, monkey
                 "details": {
                     "release_dedup_skipped": True,
                     "release_dedup_skipped_at": (frozen_now - timedelta(days=1)).isoformat(),
+                    "release_dedup_gate_version": content._RELEASE_DEDUP_GATE_VERSION,
                 },
             },
             {

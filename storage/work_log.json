@@ -15630,5 +15630,14 @@
     "backfilled_at": "2026-07-11T03:57:36.415941+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1680"
+  },
+  {
+    "timestamp": "2026-07-11T12:19:45+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_release_pool_freeze_arc_dedup_cross_audience",
+    "outcome": "succeeded",
+    "actor": "hourly-12",
+    "owner": "claude",
+    "summary": "釋出池凍結第2次根因修復：arc-dedup 跨受眾把科普孿生文判成鬼打牆(74 個 K 本就雙受眾)，冷卻旗標每次重評又蓋新章→永不到期。修法：arc-dedup 限縮同受眾內比對 + 冷卻旗標蓋 gate 版本號(自我失效)。驗證：dedup_flagged 5→0、eligible 0→5，釋出 mile_30438396(卡12天) supabase_synced+verified_live。5 個回歸測試；90 tests pass。"
   }
 ]

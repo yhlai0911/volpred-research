@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-11 釋出池凍結（第 2 次）—— arc-dedup 跨受眾把「科普孿生文」判成鬼打牆，冷卻旗標又永遠蓋新章
+
+**問題**：`_release_arc_block_reason`（`src/volpred/ops/content.py`）只要候選草稿與已發佈文**共用同一個 K**（或同一資料源）就 block，**不分受眾**。但「同一個 K 出 research 版 + general 版」是平台既有設計 —— live feed 裡 **74 個 K 同時有已發佈的 general 與 research 版**（光 2026-06 就 71 篇）。於是每一篇科普孿生文都會撞到自己的研究版兄弟，而兄弟**永遠**在 published 狀態 → 這是個**永久**條件，不是暫時的。
+
+**現象**：釋出池連續 30+ 次 fire `released_count=0`，5 篇草稿卡在 draft 5~12 天（最舊 `mile_30438396` 自 6/29）。dashboard `production_throughput` 報 warn（4-5 篇/24h < 6 目標），但**每一道 gate 的輸出清單都是空的**（`audit_skipped=[] dedup_skipped=[] narrative_cluster_filtered=[]`）—— 因為被 cooldown 旗標擋在**候選選取階段**，根本沒進 gate 迴圈。發文量全靠 event/trending/digest 等直發路徑撐著，草稿池的產出等於整條丟掉。
+
+**為什麼 TTL 沒救到**：2026-06-23 同一個「池子凍結、0 篇/天」事故（當時觀察到 46/46 草稿全被 flag）判斷成暫時性問題，加了 2 天 TTL 冷卻。但**永久**條件下 TTL 到期重評 → gate 再擋一次 → `release_dedup_skipped_at` **被蓋上新章** → 冷卻永遠不到期。TTL 的註解寫著「correctness 由 LIVE gates 每次重查保證」，正是這個重查在重新蓋章。連 drought breaker 也救不了：它明文拒絕強制釋出「已發佈文章的 arc-dup」（2026-06-29 anti-rehash），所以鎖死密不透風。
+
+**解決方法**（兩層，皆為結構性）：
+1. **arc-dedup 限縮在同一受眾內比對** —— 跨受眾（general vs research）共用 K/資料源不再構成 block，降級為 ARC-WARN 放行。同受眾內**完全不動**，老闆在意的「同一群讀者重複看到同一個故事」防線一絲未減。
+2. **冷卻旗標蓋 gate 版本號**（`release_dedup_gate_version` / `_RELEASE_DEDUP_GATE_VERSION`）—— 旗標是 gate 判決的**快取**；gate 邏輯一改，舊判決依定義即失效，下次 fire 從頭重評。這讓本次修復自動解封線上 5 篇（不必手改 `feed.json`），也讓未來任何 gate 修改自我痊癒，不再需要「等 TTL」或人工清旗標。
+
+**教訓**：**永久性的阻擋條件不可以用冷卻來處理**。冷卻假設「過一陣子情況會變」；當阻擋來自一個不會消失的事實（兄弟文永遠已發佈），冷卻只會變成無限迴圈，而且外表看起來一切正常（gate 清單全空、fire 正常、exit 0）。凡是 fail-closed 的 gate，都要問：這個 block 條件有沒有可能**永遠為真**？若有，它需要的是**終局處置**（放行 / 退役 / 升任務），不是重試節流。
+
+**機械 gate**：`tests/test_release_gate_narrative_axis.py` 新增 5 個回歸測試 —— 跨受眾孿生文（共用 K / 共用資料源）不 block、同受眾共用 K 仍 block、舊版本旗標必重評、當前版本旗標仍抑制。
+
 ## 2026-07-11 `_due_to_fire` 靜默依賴 daemon 本地時區 —— CI(UTC) 暴露 pytest gate 上線後第一批紅
 
 **問題**：`scripts/dispatch_supervisor/scheduler.py::_due_to_fire` 在 daemon 的**本地時區**裡做判斷，但這個依賴從未被明說。`_parse_last_fire` 對 tz-aware 的 `last_fire_at` 做 `.astimezone().replace(tzinfo=None)`（轉成 naive 本地），再跟 croniter 的 tz-**naive** prev-slot 比較。croniter 的 base 是 `datetime.now()`（naive 本地）。整條路徑一致的前提是「daemon 跑固定時區的機器」—— 現在是 Asia/Taipei，成立。

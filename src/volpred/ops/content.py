@@ -282,6 +282,15 @@ _RELEASE_DEDUP_WINDOW_DAYS = 21
 # Jaccard near-dup) re-checked against current published content on every run;
 # the flag is pure optimization, so a short cooldown is sufficient and safe.
 _RELEASE_DEDUP_FLAG_TTL_DAYS = 2
+# A cooldown flag caches a decision made by the gates BELOW. When that logic
+# changes, every cached decision is stale by definition — but the TTL alone will
+# not surface that: a draft blocked by a permanent condition simply gets
+# re-stamped on each re-evaluation, so the cooldown never expires in practice
+# (2026-07-11: 5 drafts held 5-12 days, pool released 0). Stamping the gate
+# version makes a logic change self-invalidating: bump this whenever the block
+# rules change and the next run re-decides from scratch instead of trusting a
+# verdict the current code would no longer reach.
+_RELEASE_DEDUP_GATE_VERSION = 2
 _RELEASE_DEDUP_JACCARD = 0.45
 _RELEASE_DEDUP_AUDIENCES = {"general", "research"}
 _RELEASE_LAST_N_CLUSTER_WINDOW = 3
@@ -527,7 +536,24 @@ def _release_data_source_tokens(item: dict) -> set[str]:
 
 
 def _release_arc_block_reason(item: dict, blocker: dict | None, arc_dup: dict) -> str | None:
-    """Return why an arc-dup is strong enough to block release, else None."""
+    """Return why an arc-dup is strong enough to block release, else None.
+
+    Arc-dedup is scoped to ONE audience. Publishing a research write-up and a
+    general-reader write-up of the same K is the product design, not a rehash —
+    74 K-ids already carry both audiences in the live feed. Judging the general
+    twin against its research sibling made "shared K" fire on every such draft,
+    which is a permanent condition (the sibling stays published forever), so the
+    draft could never leave the pool: the cooldown flag below was re-stamped on
+    every re-evaluation and the pool released 0 articles for 30+ consecutive
+    fires (2026-07-11; second occurrence of the 2026-06-23 pool-freeze).
+
+    Within one audience the gate is unchanged — that is where a reader would
+    actually see the same story twice, which is what the anti-rehash directive
+    (email-12139) is about.
+    """
+    if blocker is not None and _article_audience(item) != _article_audience(blocker):
+        return None
+
     shared_refs = {
         str(ref).upper()
         for ref in (arc_dup.get("shared_experiment_refs") or [])
@@ -861,6 +887,8 @@ def _release_dedup_flag_active(item: dict, *, now: datetime) -> bool:
     d = item.get("details")
     if not (isinstance(d, dict) and bool(d.get("release_dedup_skipped"))):
         return False
+    if d.get("release_dedup_gate_version") != _RELEASE_DEDUP_GATE_VERSION:
+        return False  # verdict predates the current gate logic -> re-evaluate
     # Dedup flags expire with the dedup window. Without this TTL, a draft can
     # be permanently excluded from the release pool after a one-time skip.
     flagged_at = d.get("release_dedup_skipped_at")
@@ -1533,6 +1561,7 @@ def release_pool_articles(
                     item["details"] = _d
                 _d["release_dedup_skipped"] = True
                 _d["release_dedup_skipped_at"] = now.isoformat()
+                _d["release_dedup_gate_version"] = _RELEASE_DEDUP_GATE_VERSION
                 if dup is not None:
                     _d["release_dedup_of"] = dup["id"]
                     _d["release_dedup_jaccard"] = dup["jaccard"]

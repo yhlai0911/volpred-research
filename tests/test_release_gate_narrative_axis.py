@@ -429,6 +429,76 @@ def test_generic_provider_alone_is_not_release_arc_block_reason():
     ) is None
 
 
+# --- cross-audience twins (2026-07-11 pool-freeze, 2nd occurrence) -----------
+# A general-reader write-up of the same K as an already-published research
+# write-up is the product design (74 K-ids carry both audiences live), not a
+# rehash. Judging it against its research sibling made "shared K" a PERMANENT
+# block — the sibling stays published forever — so the draft could never leave
+# the pool and the release pool emitted 0 articles for 30+ consecutive fires.
+
+def test_cross_audience_twin_of_same_k_does_not_block_release():
+    draft = {"audience": "general", "details": {"experiment_refs": ["K1574"]}}
+    blocker = {"audience": "research", "details": {"experiment_refs": ["K1574"]}}
+    assert content._release_arc_block_reason(
+        draft,
+        blocker,
+        {"shared_experiment_refs": ["K1574"]},
+    ) is None
+
+
+def test_cross_audience_twin_sharing_data_source_does_not_block_release():
+    draft = {"audience": "general", "details": {"data_source": "taifex_tick"}}
+    blocker = {"audience": "research", "details": {"data_source": "taifex_tick"}}
+    assert content._release_arc_block_reason(
+        draft,
+        blocker,
+        {"shared_experiment_refs": []},
+    ) is None
+
+
+def test_same_audience_shared_k_still_blocks():
+    """The anti-rehash gate is intact WITHIN an audience — that is where a
+    reader would actually see the same story twice."""
+    draft = {"audience": "general", "details": {"experiment_refs": ["K1574"]}}
+    blocker = {"audience": "general", "details": {"experiment_refs": ["K1574"]}}
+    reason = content._release_arc_block_reason(
+        draft,
+        blocker,
+        {"shared_experiment_refs": ["K1574"]},
+    )
+    assert reason == "shared_experiment_refs=['K1574']"
+
+
+# --- cooldown flag must not outlive the logic that produced it --------------
+
+def test_cooldown_flag_from_an_older_gate_version_is_re_evaluated():
+    """A cooldown flag caches a gate verdict. When the gate logic changes the
+    cached verdict is stale, and the TTL alone will not surface that: a draft
+    blocked by a PERMANENT condition is simply re-stamped on every
+    re-evaluation, so the cooldown never expires in practice."""
+    now = datetime(2026, 7, 11, 12, 0, tzinfo=timezone.utc)
+    stale = {
+        "details": {
+            "release_dedup_skipped": True,
+            "release_dedup_skipped_at": now.isoformat(),  # fresh: TTL still open
+            "release_dedup_gate_version": content._RELEASE_DEDUP_GATE_VERSION - 1,
+        }
+    }
+    assert content._release_dedup_flag_active(stale, now=now) is False
+
+
+def test_cooldown_flag_from_the_current_gate_version_still_suppresses():
+    now = datetime(2026, 7, 11, 12, 0, tzinfo=timezone.utc)
+    current = {
+        "details": {
+            "release_dedup_skipped": True,
+            "release_dedup_skipped_at": now.isoformat(),
+            "release_dedup_gate_version": content._RELEASE_DEDUP_GATE_VERSION,
+        }
+    }
+    assert content._release_dedup_flag_active(current, now=now) is True
+
+
 # ===========================================================================
 # Part 2 — drought circuit-breaker
 # ===========================================================================
@@ -615,10 +685,12 @@ def test_drought_rescues_cooldown_flagged_draft_when_pool_all_flagged(tmp_path: 
         "audience": "general",
         "created_at": (frozen_now - timedelta(days=2)).isoformat(),
         "content": _BASE_BODY + _NOVEL_TAIL + _LZ,
-        # cooldown flag active (< 2-day TTL) -> excluded from candidates entirely
+        # cooldown flag active (< 2-day TTL, current gate version) -> excluded
+        # from candidates entirely
         "details": {
             "release_dedup_skipped": True,
             "release_dedup_skipped_at": (frozen_now - timedelta(hours=12)).isoformat(),
+            "release_dedup_gate_version": content._RELEASE_DEDUP_GATE_VERSION,
         },
     }
     _write_json(storage_dir / "reports" / "feed.json", [blocker, flagged])
