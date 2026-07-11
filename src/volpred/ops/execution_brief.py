@@ -2,12 +2,19 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
+import sys
 import tempfile
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+from scripts.dispatch_supervisor import procutil  # noqa: E402
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -35,6 +42,49 @@ COORDINATOR_TIMEOUT_SECONDS = 90
 EXECUTOR_TIMEOUT_SECONDS = 180
 CLAUDE_PRINT_EXTRA_ARGS: tuple[str, ...] = ()
 CODEX_EXEC_EXTRA_ARGS: tuple[str, ...] = ("--full-auto",)
+
+
+def _run_agentic(
+    argv: list[str], *, cwd: Any, timeout: int
+) -> subprocess.CompletedProcess:
+    """`subprocess.run` for an agentic CLI, with the whole process tree killed on timeout.
+
+    `claude` and `codex` do their work in subprocesses of their own. subprocess.run's
+    timeout kills only the pid we spawned, so those children survive, reparent to init
+    and keep running — unsupervised, still writing, still burning quota, while we have
+    already reported the call as timed out.
+
+    That is bad anywhere; in the coordinator's `for _ in range(3)` retry loop below it
+    is worse, because each retry would stack ANOTHER live agent tree on top of the one
+    we only pretended to kill. Three attempts, three concurrent agents, one of which we
+    read the output of.
+
+    Same signature, same CompletedProcess, same TimeoutExpired as subprocess.run — the
+    difference is entirely in what is dead afterwards. Gate:
+    scripts/tests/test_agentic_cli_timeout_killpg.py
+    """
+    proc = subprocess.Popen(
+        argv,
+        cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        start_new_session=True,  # its own process group, so it can be killed as one
+    )
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        try:
+            procutil.kill_pgid(os.getpgid(proc.pid))
+        except (ProcessLookupError, PermissionError) as exc:
+            print(
+                f"[execution_brief] {argv[0]} timed out and its process group "
+                f"could not be killed: {exc}",
+                file=sys.stderr,
+            )
+        stdout, stderr = proc.communicate()  # reap; the group is gone
+        raise subprocess.TimeoutExpired(argv, timeout, output=stdout, stderr=stderr)
+    return subprocess.CompletedProcess(argv, proc.returncode, stdout, stderr)
 WORKFLOW_ID_BY_TEMPLATE = {
     "code.yaml": "code-implement",
     "content.yaml": "feed-write",
@@ -619,14 +669,14 @@ def run_coordinator_brief(task_id: str, *, storage_dir: str = "storage") -> dict
     last_error = "coordinator_failed"
     for _ in range(3):
         try:
-            result = subprocess.run(
+            result = _run_agentic(
                 ["claude", "-p", *CLAUDE_PRINT_EXTRA_ARGS, "--output-format", "json", "--json-schema", schema, prompt],
                 cwd=project_path(),
-                capture_output=True,
-                text=True,
                 timeout=COORDINATOR_TIMEOUT_SECONDS,
             )
         except subprocess.TimeoutExpired:
+            # The tree is dead before we loop: otherwise this retry would run
+            # alongside the agent we just "timed out", not instead of it.
             last_error = f"coordinator_timeout_after_{COORDINATOR_TIMEOUT_SECONDS}s"
             continue
         if result.returncode != 0:
@@ -797,11 +847,9 @@ def run_executor_task(task_id: str, *, agent_name: str, storage_dir: str = "stor
     if agent_name == "claude":
         schema = json.dumps(ExecutorResult.model_json_schema(), ensure_ascii=False)
         try:
-            result = subprocess.run(
+            result = _run_agentic(
                 ["claude", "-p", *CLAUDE_PRINT_EXTRA_ARGS, "--output-format", "json", "--json-schema", schema, prompt],
                 cwd=project_path(),
-                capture_output=True,
-                text=True,
                 timeout=EXECUTOR_TIMEOUT_SECONDS,
             )
         except subprocess.TimeoutExpired as exc:
@@ -819,7 +867,7 @@ def run_executor_task(task_id: str, *, agent_name: str, storage_dir: str = "stor
             output_path = output_file.name
         try:
             try:
-                result = subprocess.run(
+                result = _run_agentic(
                     [
                         "codex",
                         "exec",
@@ -833,8 +881,6 @@ def run_executor_task(task_id: str, *, agent_name: str, storage_dir: str = "stor
                         prompt,
                     ],
                     cwd=project_path(),
-                    capture_output=True,
-                    text=True,
                     timeout=EXECUTOR_TIMEOUT_SECONDS,
                 )
             except subprocess.TimeoutExpired as exc:

@@ -38,6 +38,8 @@ Run: uv run --extra dev python -m pytest scripts/tests/test_agentic_cli_timeout_
 from __future__ import annotations
 
 import ast
+import subprocess
+import time
 from pathlib import Path
 
 import pytest
@@ -60,20 +62,16 @@ EXEMPT: dict[str, str] = {
     "scripts/dispatch_supervisor/worker.py": "supervisor owns the fire lifecycle; already killpgs via procutil",
 }
 
-# Known-unfixed instances, frozen. This is a debt ledger, not an exemption: these
-# files DO leak orphans on timeout. They are listed so the gate can still fail on
+# Known-unfixed instances, frozen. This is a debt ledger, not an exemption: a file
+# listed here DOES leak orphans on timeout. It exists so the gate can still fail on
 # anything NEW while a real fix is scheduled, rather than being switched off.
 #
-# The number may only go DOWN. Fixing one = delete its line. Adding one is not a
-# thing you may do — the assertion below fails on any file not already listed.
-KNOWN_UNFIXED: dict[str, str] = {
-    "src/volpred/ops/execution_brief.py": (
-        "3 x subprocess.run(['claude', '-p', ...], timeout=...) in the coordinator/executor "
-        "retry loops. Needs the same Popen + start_new_session + kill_pgid treatment, but it "
-        "sits on a src/ publishing path with retry semantics worth verifying properly rather "
-        "than at the tail of a dispatch fire. Queued: platform_ops_execution_brief_killpg."
-    ),
-}
+# The number may only go DOWN. Fixing one = delete its line (the ratchet below fails
+# if you fix a file and leave it listed, so the ledger cannot rot into a list of
+# things that are actually fine). Adding one is not a thing you may do.
+#
+# Currently empty: the 2026-07-12 sweep fixed every instance it found.
+KNOWN_UNFIXED: dict[str, str] = {}
 
 
 def _iter_py_files() -> list[Path]:
@@ -235,6 +233,44 @@ def test_timed_out_agentic_cli_is_killed_as_a_group() -> None:
     assert not fixed_but_still_listed, (
         "These are listed in KNOWN_UNFIXED but now pass — delete their entries:\n  "
         + "\n  ".join(fixed_but_still_listed)
+    )
+
+
+def test_timeout_actually_reaps_the_grandchild(tmp_path: Path) -> None:
+    """Behavioural companion to the sweep: prove the kill reaches the grandchild.
+
+    The static gate can only prove the word `killpg` appears in the file. It cannot
+    prove a grandchild dies — and the grandchild is the whole problem, because the
+    agent is just a launcher for the process that does the work.
+
+    Stand-in for an agentic CLI: a script that forks a child which will write a file
+    in 5s, then sleeps forever itself. Time it out after 1s. If the tree really died,
+    that file never appears.
+
+    Without start_new_session + killpg this test fails by finding the file — which is
+    exactly what K1685 did in production, 24 minutes late and 37KB large.
+    """
+    from volpred.ops.execution_brief import _run_agentic  # the shared helper
+
+    canary = tmp_path / "grandchild_was_here.txt"
+    fake_cli = tmp_path / "fake_agentic_cli.sh"
+    fake_cli.write_text(
+        "#!/bin/bash\n"
+        # the grandchild: outlives its parent unless the GROUP is signalled
+        f"( sleep 5; echo 'I am still running' > {canary} ) &\n"
+        "sleep 300\n"  # the "agent" itself wedges
+    )
+    fake_cli.chmod(0o755)
+
+    with pytest.raises(subprocess.TimeoutExpired):
+        _run_agentic([str(fake_cli)], cwd=str(tmp_path), timeout=1)
+
+    # Outlive the grandchild's own schedule, then look.
+    time.sleep(7)
+    assert not canary.exists(), (
+        "the grandchild survived the timeout and wrote its file — the kill reached the "
+        "launcher but not the process doing the work. This is the K1685 failure exactly: "
+        "a job reported as failed while its compute quietly ran to completion."
     )
 
 

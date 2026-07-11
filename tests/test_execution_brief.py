@@ -393,7 +393,7 @@ def test_run_coordinator_brief_timeout_blocks_task(tmp_path: Path, monkeypatch):
     def _timeout(*args, **kwargs):
         raise subprocess.TimeoutExpired(cmd=args[0], timeout=kwargs.get("timeout", 0))
 
-    monkeypatch.setattr("volpred.ops.execution_brief.subprocess.run", _timeout)
+    monkeypatch.setattr("volpred.ops.execution_brief._run_agentic", _timeout)
 
     try:
         run_coordinator_brief(task["id"], storage_dir=str(storage_dir))
@@ -444,7 +444,7 @@ why_this_agent: "ops template"
     def _timeout(*args, **kwargs):
         raise subprocess.TimeoutExpired(cmd=args[0], timeout=kwargs.get("timeout", 0))
 
-    monkeypatch.setattr("volpred.ops.execution_brief.subprocess.run", _timeout)
+    monkeypatch.setattr("volpred.ops.execution_brief._run_agentic", _timeout)
 
     try:
         run_executor_task(task["id"], agent_name="claude", storage_dir=str(storage_dir))
@@ -499,7 +499,7 @@ def test_run_coordinator_brief_unwraps_claude_json_envelope(tmp_path: Path, monk
     }
 
     monkeypatch.setattr(
-        "volpred.ops.execution_brief.subprocess.run",
+        "volpred.ops.execution_brief._run_agentic",
         lambda *args, **kwargs: subprocess.CompletedProcess(
             args=args[0],
             returncode=0,
@@ -602,7 +602,7 @@ def test_run_coordinator_brief_surfaces_claude_json_envelope_errors(tmp_path: Pa
     }
 
     monkeypatch.setattr(
-        "volpred.ops.execution_brief.subprocess.run",
+        "volpred.ops.execution_brief._run_agentic",
         lambda *args, **kwargs: subprocess.CompletedProcess(
             args=args[0],
             returncode=0,
@@ -631,7 +631,7 @@ def test_run_coordinator_brief_surfaces_plain_text_errors(tmp_path: Path, monkey
     )
 
     monkeypatch.setattr(
-        "volpred.ops.execution_brief.subprocess.run",
+        "volpred.ops.execution_brief._run_agentic",
         lambda *args, **kwargs: subprocess.CompletedProcess(
             args=args[0],
             returncode=0,
