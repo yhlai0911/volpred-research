@@ -249,6 +249,10 @@ def _build_prompt(
 - **不要把 panel 的 info / 資訊型態（concept/method/results）當文字標籤畫在圖上** — 那是內部分類，讀者不需要看到。
 - **尺寸**: 橫式約 1600x1000 px、150 dpi、白底，邊距充足，字夠大（一眼看懂）。
 - **不要**輸出 base64 或 data-URI；輸出實體 .png 檔到 {out_dir}。
+- **文字不可溢出、不可互相重疊（呼叫端會機械檢查，違反直接 rc≠0）**：每段文字都必須完整落在畫布內，
+  且任兩段文字的方框不得相撞（標題壓副標、內文壓浮水印、長句被右緣切掉，都算失敗）。
+  長句請先在程式裡自己折行（textwrap）或縮小字級，**不要假設畫布會自動容納**；
+  裝飾性大字（浮水印）要嘛不放，要嘛放在絕對不會被文字覆蓋的空白區。
 
 ## 完成後
 一句話說明每張圖的主要數字讀自 evidence 的哪個欄位。
@@ -348,10 +352,17 @@ def _run_codex(prompt: str, out_dir: Path, timeout_s: float,
 
 
 def _run_render_script(script: Path, timeout_s: float) -> tuple[bool, str]:
-    """Run the codex-written render script locally. (ok, failure_text)."""
+    """Run the codex-written render script locally. (ok, failure_text).
+
+    Under scripts/lazypack_layout_guard.py: a figure whose text is clipped by the
+    canvas or overlaps other text raises out of savefig, so a garbled panel fails
+    here and reaches the repair round. Without it "the PNG exists" was the whole
+    success criterion, and three unreadable panels shipped (2026-07-11).
+    """
+    guard = ROOT / "scripts" / "lazypack_layout_guard.py"
     try:
         proc = subprocess.run(
-            [sys.executable, str(script)], cwd=str(ROOT),
+            [sys.executable, str(guard), str(script)], cwd=str(ROOT),
             capture_output=True, text=True, timeout=timeout_s,
         )
     except subprocess.TimeoutExpired:
