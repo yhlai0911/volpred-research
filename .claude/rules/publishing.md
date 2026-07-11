@@ -223,13 +223,17 @@ uv run volpred ops publication-candidates-summary
 ```
 **只選 uncovered 或 missing_audience 的 K**。session_state.json 記得的 K 可能已有覆蓋。
 
-### 層 2: feed 主題 grep
+### 層 2: feed 主題 grep + K-coverage gate
 ```bash
+# 機械檢查：這個 K 在這個 audience 是否已有現成文章（含 draft — 池裡那篇會被 release cron 發出去）
+uv run python scripts/check_arc_dedup.py --k-id <kXXXX> --audience <general|research> --title "<planned title>"
+# 人工檢查：既有文章標題與 tags，不是只看自家剛派的幾篇
 grep -i "核心關鍵詞" storage/reports/INDEX.md | head
-# 或對特定 K:
 grep -i "K<id>" storage/reports/feed.json | grep title
 ```
-檢查既有文章標題與 tags，不是只看自家剛派的幾篇。
+**`--audience` 不可省**：同一個 K 同時出 research 版與 general 版是產品設計，不帶 audience 會讓 general 稿被自己的 research 手足判成永久重複。
+
+**機械 gate 不取代這一層**（2026-07-11 教訓）：K1586 / K1605 兩篇當時 gate 都回 exit 0，但線上早有同 K 同 audience 的文章（`mile_c1ce6550` / `mile_3a7bd6f6`），兩個 writer agent 被派上去白做工——CLI 從沒把 `--audience` / `new_refs` 傳進 `find_arc_duplicates`。K-COVERAGE gate 已補上這個確定性檢查，但**主線程仍要親自 grep feed**：gate 只知道 K 編號對不對得上，不知道兩個不同 K 是不是在講同一件事。
 
 ### 層 3: 跨文章主題 matrix
 多篇並行時，主線程先手畫主題軸：`VT / VIX / 台股 / 事件研究 / 方法論 / 資產類 / 策略類`。每篇分配**不同軸**。LanceDB dist 0.6-0.8 **不足以排除主題重疊**（K1098 vs 台美 VT dist=0.769 仍高度相關）。

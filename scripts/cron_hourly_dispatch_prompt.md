@@ -162,7 +162,21 @@ PHASE B — 派新工:
        - `.claude/skills/anti-ai-style/SKILL.md`
        - `.claude/rules/publishing.md`
    (b) **Evidence package 先於 prose** — 任何句子之前先組好：≥3 個可驗證數字（primary source）+ ≥1 表 + ≥1 圖 + ≥1 層量化分析（descriptive stats / before-after / cross-section / rolling / event-window / vol change）+ 最好有統計檢定或比較框架。不滿足 → 換題目或換 task type，禁強推。
-   (b2) **ARC-DEDUP GATE（2026-06-10 強制；K1449/K1091 dup incident）**：寫任何 feed 文章**之前**必跑 `uv run python scripts/check_arc_dedup.py --k-id <kXXXX> --title "<planned title>"`（無對應 K 就 `--text-file` 餵主題摘要）。**exit 1 = 同 narrative arc 已有文章（資產×結論同構，標題不同、方向相反也算）→ 不寫**，換題或回報 arc-covered。標題字面不像 ≠ 不重複 —「銅博士 vol」與「銅銀吃不到 VIX 紅利」是同一篇故事。⚠️ publisher publish 端的 arc-dedup 已於 2026-06-23 降級為 **warn-only**（false-positive 造成內容黑洞後降級，見 dedup-gate-audit.md）— **沒有 hard block 兜底，寫前這一跑就是唯一防線，絕不可跳過**。
+   (b2) **DEDUP GATE（2026-06-10 強制；K1449/K1091 dup incident）**：寫任何 feed 文章**之前**必跑
+
+   ```bash
+   uv run python scripts/check_arc_dedup.py --k-id <kXXXX> --audience <general|research> --title "<planned title>"
+   ```
+
+   （無對應 K 就 `--text-file` 餵主題摘要）。**`--audience` 不可省**（2026-07-11 起）：同一個 K 同時出 research 版與 general 版是產品設計，不帶 audience 會讓 general 稿被自己的 research 手足判成重複、且是永久性誤判。
+
+   兩道 gate，依確定性排序：
+   - **exit 1 + `🚫 K-COVERAGE`** = 這個 K 在這個 audience **已經有現成文章**（含 draft — 草稿池裡那篇會被 release cron 發出去，等於已覆蓋）。精確比對、無模糊判斷 → **絕對不寫**，換 K。
+   - **exit 1 + `🚫 ARC DUPLICATE`** = 同 narrative arc 已有文章（資產×結論同構，標題不同、方向相反也算）→ 不寫，換題或回報 arc-covered。標題字面不像 ≠ 不重複 —「銅博士 vol」與「銅銀吃不到 VIX 紅利」是同一篇故事。
+
+   ⚠️ publisher publish 端的 arc-dedup 已於 2026-06-23 降級為 **warn-only**（false-positive 造成內容黑洞後降級，見 dedup-gate-audit.md）— **沒有 hard block 兜底，寫前這一跑就是唯一防線，絕不可跳過**。
+
+   ⚠️ **gate 說可以寫 ≠ 主線程免做 3-layer 查重**（2026-07-11 教訓）：那天 K1586 / K1605 兩篇 gate 都回 exit 0，但線上早有同 K 同 audience 的文章（`mile_c1ce6550` / `mile_3a7bd6f6`），兩個 writer agent 被派上去白做工 —— 因為當時 CLI 從沒把 `--audience` / `new_refs` 傳進 `find_arc_duplicates`（library 早就有這兩個參數，就是沒接線）。K-COVERAGE gate 就是為此補的，但 `.claude/rules/publishing.md` 的 3-layer 查重（層 2 grep feed）仍是主線程的責任，不可外包給單一 gate。
    (c) **trending_repost 特別**：正式 task type 非摘要 / 翻譯；風格可參 havingchien Substack/commentary tone 但不引用不貼近改寫；先選題掃描 + 30 日查重 + VolPred angle 確認；**VolPred 直接 published 不進 draft pool**；daily cap = 2/day；雙發佈 feed + Ivan Lai FB。
 
    (c2) **event_article 特別（2026-05-25 新增 FB 強制）**：CPI/NFP/FOMC/財報/地緣政治 → **VolPred 直接 published 不進 draft pool** + **FB 雙發佈強制**（與 trending_repost 共用 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP；但**不算入** trending daily cap=2/day）。語氣可更貼「即時市場觀察」非「專欄式 commentary」。FB 失敗不阻塞 feed publish 但**必留 retry log + work_log entry `fb_post_failed`**。

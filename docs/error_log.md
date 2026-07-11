@@ -2,6 +2,45 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-11 選題 gate 放行了兩篇已存在的文章 —— library 有參數，CLI 沒接線
+
+**現象**：hourly-13 為補草稿池選題，對 K1586 / K1605 跑強制的 pre-write gate
+`check_arc_dedup.py --k-id <K> --title "<標題>"`，兩篇都回 **exit 0（可以寫）**，於是並行派了兩個
+writer agent。K1586 的 agent 在動筆前自己查 feed，發現 `mile_c1ce6550`（同 K、同 audience=general、
+2026-07-02 已 published）就是要它寫的東西，拒絕交差並回報。查證後 K1605 同樣有 `mile_3a7bd6f6`
+（同 K、general、draft 已在釋出池）。兩個 agent 白做工，其中一個已畫完圖才被中止。
+
+**根因（不是判斷失準，是接線缺口）**：`find_arc_duplicates()` **本來就有** `new_refs` 和 `audience`
+兩個參數，`_refs_from_feed_item()` 也早就會從 `details.experiment_refs` 抽 K-id —— 但
+`scripts/check_arc_dedup.py` 從頭到尾**沒傳過這兩個參數**。後果是雙向的：
+
+- **False negative（放行真重複）**：唯一的同 K 訊號埋在 `arc_dedup.py:951/962`，被
+  `ex_cls == new_cls`（結論類別必須相同）擋著。同一個 K 的兩篇文，只要結論措辭被文字分類器歸到
+  不同 bucket，這個訊號就整個失效。**最確定的一種重複，竟然要看一個文字分類器對兩份文件的判斷一不一致。**
+- **False positive（誤擋能寫的）**：不帶 audience → general 稿被拿去跟自己的 research 手足比對。
+  `find_arc_duplicates` 的 docstring 自己寫了這件事「froze the release pool for 30+ consecutive
+  fires (2026-07-11)」。同一天 K1611 被誤判成撞一篇**比特幣文章**，理由只是兩篇都引用過 K445 這條
+  方法論教訓 —— 引用共享被當成敘事共享。
+
+兩個症狀、一個根因。修好接線後：K1586/K1605 正確擋下（exit 1 + 點名撞到哪篇），K1611/K1639
+正確放行（exit 0）—— 後兩篇本來就該寫，是 gate 冤枉的，當班已更正 task 狀態重派。
+
+**解決**：
+1. `scripts/check_arc_dedup.py` 補 `--audience`，並把 `new_refs={K}` / `audience` 傳進
+   `find_arc_duplicates`（library 端零改動 —— 它一直是對的）。
+2. 新增 **K-COVERAGE gate**（`find_k_coverage()`），在模糊的 arc gate **之前**跑：同 K + 同 audience
+   且 status 非 unpublished/retracted → 硬擋。這是精確比對，路徑上沒有任何文字分類器。
+   `draft` 也算覆蓋 —— 池裡那篇會被 release cron 發出去。`retracted` 不算，否則撤稿會永久禁止改寫。
+   決策全寫 `storage/logs/dedup_decisions.jsonl`（沿用 `_log_dedup_decision`，不新增機制）。
+3. 呼叫端接線：`scripts/cron_hourly_dispatch_prompt.md` (b2) 與 `.claude/rules/publishing.md` 層 2
+   都改成必帶 `--audience`，並寫明「gate 說可以寫 ≠ 主線程免做 3-layer 查重」。
+4. Regression test：`tests/test_check_arc_dedup_k_coverage.py`（10 cases，含 K1586/K1605 verbatim
+   重現 + research 手足不得誤擋 + retracted 不算覆蓋 + 舊文無 experiment_refs 時從標題抽 K-id）。
+
+**教訓（我這班犯的，記在前面）**：我跳過了 `.claude/rules/publishing.md` 要求的**主線程 3-layer 查重**
+（層 2 是 grep feed.json），只信一個機械 gate 就派工。gate 當時剛好是壞的，於是沒有第二道防線。
+**機械 gate 是用來接住人會忘的事，不是用來取代該做的事** —— 兩者都做才是設計意圖。
+
 ## 2026-07-11 PHASE-Z 每小時對同一批機器 state 爆警告 —— 模型少了「沒有 session 主人」這一類
 
 **現象**：老闆兩封回信（email-12034 / email-12038）：「這個 phase z 到底是什麼鬼 一直爆警告」。
