@@ -58,11 +58,17 @@ zombie 成員的 process group」下 killpg 就是回 `Operation not permitted`*
   而那個探測正是 false-positive 的來源。機制一改測試就紅，紅的卻是測試不是程式。改寫後斷言的是
   「已死就別再開槍」「被拒不可中斷升級」「殺不掉必須回報失敗」。
   新增不變量：zombie 不算 survivor / EPERM → 逐 pid fallback / 殺不掉 → 回 False。
-- **`git commit -m` 的中文訊息在本機會變亂碼**（本次 commit 49e170e15 就中了）：`LANG` / `LC_ALL`
-  皆為空、`LC_COLLATE=C`，git 因此警告「提交說明不符合 UTF-8」並寫入 mojibake。i18n.commitEncoding
-  已是 UTF-8，問題在 shell locale。**中文 commit message 一律走 `git commit -F <file>`**（用 Write
-  工具產生的檔案是正確 UTF-8），或在該次命令前置 `LC_ALL=en_US.UTF-8`。已污染的訊息不 amend
-  （共用 main 禁令），敘事以本 entry 為準。
+- **中文 commit message 在本機會被寫成亂碼 —— 但根因不是 locale**（49e170e15 與 ecf5433cf 都中了）。
+  第一直覺是 `LANG` / `LC_ALL` 皆為空（`LC_COLLATE=C`）+ git 警告「提交說明不符合 UTF-8」，
+  於是改用 `LC_ALL=en_US.UTF-8 git commit -F - <<EOF`。**實測仍然亂碼** —— 假設被自己的測試推翻。
+  驗屍（`git cat-file commit HEAD` 讀原始位元組）：存進去的是**合法 UTF-8，但中文字已被換成替代
+  字元** —— 也就是損毀發生在 **git 拿到訊息之前**，在 shell / heredoc 的傳輸路徑上（同一路徑稍早
+  也讓 `python3 - <<'EOF'` 對含中文的腳本報 `Non-UTF-8 code starting with '\x80'`）。
+  對照組：用 Edit / Write 工具寫的檔案（本 entry 所在的 error_log.md、work_log.json、next_tasks.json）
+  中文**全部正確** → 檔案寫入路徑是乾淨的，髒的是「把中文塞進 bash 命令字串/heredoc」這件事。
+  **做法：中文 commit message 先用 Write 工具寫成檔案，再 `git commit -F <file>`**（git 直接讀檔，
+  完全繞開 shell）。**不要**再試 `-m "中文"`、`-F -` + heredoc、或加 `LC_ALL` —— 那三條都已實測失敗。
+  已污染的兩個訊息不 amend（共用 main 禁令），敘事以本 entry 為準。
 
 **驗證**：176 tests passed（含 4 個改寫 + 5 個新不變量）；活體 smoke 兩情境（trap TERM 的多行程
 group 被 SIGKILL 收乾淨回 True；聽話的 group 不升級到 SIGKILL 且未等滿 grace）；resume 路徑對
