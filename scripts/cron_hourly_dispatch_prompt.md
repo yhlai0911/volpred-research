@@ -87,7 +87,7 @@ PHASE 0.5 — **verify-only：reader-facing badge pool refill 狀態檢查**（2
 
 PHASE A — 檢查 compute queue 有無 completed 待 followup:
 1. 跑 `uv run python scripts/compute_queue.py list --completed-pending-followup --json`
-2. 若有 entries → 優先處理: 對最舊一條讀 `result_artifact`（若非 null，這是 agent 真正產出的檔）+ `job_metadata`（runner lifecycle receipt）+ `claude_followup.brief`，派 Claude interpretation agent 解讀（~25K tokens, light），不再做 compute。**禁止把 `job_metadata` 當研究結果**。派完跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。本小時派工結束。
+2. 若有 entries → 優先處理: 對最舊一條讀 `result_artifact`（若非 null，這是 agent 真正產出的檔）+ `job_metadata`（若非 null，這是 runner lifecycle receipt）+ `claude_followup.brief`，派 Claude interpretation agent 解讀（~25K tokens, light），不再做 compute。**禁止把 `job_metadata` 當研究結果**。派完跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。本小時派工結束。
 3. 若無待 followup → 進 PHASE B。
 
 PHASE B-PARALLEL — 草稿池低水位並行補寫（boss msg143 2026-07-04 硬性要求；2026-07-05 落地）:

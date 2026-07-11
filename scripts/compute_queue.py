@@ -16,9 +16,10 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
     env (dict[str,str])
     status (str)       — queued / running / completed / failed
     queued_at / started_at / completed_at (ISO UTC)
-    exit_code (int|null)
+    exit_code (int|null)       — job-level code (includes queue postconditions)
+    process_exit_code (int|null, optional) — raw rc when a postcondition fails
     stdout_file / stderr_file (str)
-    result_artifact (str|null)  — path Claude followup will read
+    result_artifact (str|null)  — declared output; a completed job must contain it
     job_metadata (str|null)     — runner lifecycle/validation receipt (agent jobs)
     claude_followup (dict|null) — { brief, task_type, priority }
     followup_dispatched (bool)  — true after hourly_dispatch creates next_task
