@@ -2485,6 +2485,117 @@ def _parse_codex_failover_ready_state(storage_dir: str, now: datetime) -> dict[s
     }
 
 
+LAZYPACK_STUCK_CRITICAL_HOURS = 24.0
+
+
+def _article_has_lazypack_section(storage_dir: str, article_id: str) -> bool:
+    """Does the live article already carry its 懶人包圖組 section?"""
+    from volpred.publisher.publisher import has_lazypack_section
+
+    feed = load_json(_storage_root(storage_dir).joinpath("reports", "feed.json"), [])
+    if not isinstance(feed, list):
+        return False
+    for item in feed:
+        if isinstance(item, dict) and item.get("id") == article_id:
+            return has_lazypack_section(str(item.get("content") or ""))
+    return False
+
+
+def _parse_lazypack_render_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """A failed 懶人包 render leaves its article stranded — does anything say so?
+
+    2026-07-11. A general-reader draft cannot be released until it carries a
+    `## 懶人包圖組` section (the release gate in `volpred.ops.content`). That
+    section is appended by the async render job. So when the render fails, the
+    article is quietly un-releasable — and *nothing* signalled that. The failure
+    surfaced only sideways, three shifts later, when PHASE-Z noticed an unowned
+    file in the worktree (mile_531e4c87, K1683).
+
+    The two earlier failures (mile_b5e264a5, mile_de666838) were caught by a
+    human eyeballing the queue and hand-enqueuing a `-r2` job. That is not a
+    mechanism; it is someone happening to look. This condition is the mechanism.
+
+    A job is *stranded* when it failed and no later run rescued it — neither a
+    retry that completed, nor the article having acquired the section some other
+    way. Both are checked, because either one means there is nothing left to fix.
+
+    warn on sight; critical past a day, by which point the publishing cadence has
+    a hole in it that readers can see.
+    """
+    queue_dir = _storage_root(storage_dir) / "ops" / "compute_queue"
+    stranded: list[dict[str, Any]] = []
+    oldest_age_h = 0.0
+
+    jobs: list[dict[str, Any]] = []
+    for path in sorted(queue_dir.glob("lazypack-*.json")):
+        try:
+            jobs.append(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, json.JSONDecodeError) as exc:
+            warn("lazypack_render_stuck", "compute-queue job unreadable",
+                 path=path.name, err=str(exc))
+
+    def _article_of(job: dict[str, Any]) -> str:
+        args = job.get("args") or []
+        for i, a in enumerate(args):
+            if a == "--article-id" and i + 1 < len(args):
+                return str(args[i + 1])
+        return ""
+
+    rescued = {
+        _article_of(j) for j in jobs
+        if j.get("status") in {"completed", "queued", "running"}
+    }
+
+    for job in jobs:
+        if job.get("status") != "failed":
+            continue
+        article_id = _article_of(job)
+        if not article_id or article_id in rescued:
+            continue  # a later run already carries this article
+        if _article_has_lazypack_section(storage_dir, article_id):
+            continue  # section landed some other way — nothing is stranded
+
+        finished = _parse_iso_datetime(job.get("completed_at"))
+        age_h = (now - finished).total_seconds() / 3600.0 if finished else 0.0
+        oldest_age_h = max(oldest_age_h, age_h)
+        stranded.append({
+            "job_id": job.get("id"),
+            "article_id": article_id,
+            "age_hours": round(age_h, 1),
+            "exit_code": job.get("exit_code"),
+        })
+
+    breached = bool(stranded)
+    level = "critical" if oldest_age_h >= LAZYPACK_STUCK_CRITICAL_HOURS else "warn"
+    listing = "\n".join(
+        f"- {s['article_id']}（job {s['job_id']}，失敗 {s['age_hours']}h 前，exit {s['exit_code']}）"
+        for s in stranded
+    )
+    body = "\n".join([
+        "## 觸發條件",
+        f"{len(stranded)} 篇文章的懶人包圖組沒生出來，render 工作失敗後沒有人接手：",
+        listing,
+        "",
+        "## 影響",
+        "一般讀者的文章要有懶人包圖組才會被放行上架。圖沒生出來，這幾篇就一直卡在草稿、"
+        "誰都不會發現 —— 發文節奏會靜靜地開一個洞。",
+        "",
+        "## 系統已自動執行",
+        "每小時的巡檢會自動把失敗的 render 重排一次（重跑是安全的：已經生好的圖不會重生）。"
+        "這則通知代表**自動重試也沒救回來**，需要人看一眼失敗原因："
+        "`storage/logs/compute/<job_id>.stderr`。",
+    ])
+    return {
+        "id": "lazypack_render_stuck",
+        "breached": breached,
+        "level": level if breached else "info",
+        "title": (f"{len(stranded)} 篇文章的懶人包圖沒生出來，卡在草稿出不去"
+                  if breached else "lazypack_render_stuck ok"),
+        "body": body if breached else "",
+        "details": {"stranded": stranded, "oldest_age_hours": round(oldest_age_h, 1)},
+    }
+
+
 # health_loop beats every 30s, and (since 2026-07-10) keeps beating while a
 # worker is in flight — so a 10min warn is a ~20x margin over the cadence and a
 # launchd restart (ThrottleInterval 60s + one beat) can never trip it.
@@ -3763,6 +3874,7 @@ def build_alert_condition_report(
         _parse_dispatch_duplicate_slot_state(storage_dir, current),  # 2026-07-11 同一 cron slot 服務 >1 次（不用延遲分鐘做代理）
         _parse_dispatch_supervisor_stale_code_state(storage_dir, current), # 2026-07-10 「修好了但沒重載」dead-man switch（三次靜默違反同日規則）
         _parse_gmail_poll_freshness_state(storage_dir, current),  # 2026-06-22 boss-email pipeline dead-man switch
+        _parse_lazypack_render_state(storage_dir, current),  # 2026-07-11 render 失敗 → 文章卡草稿出不去，此前完全無訊號
         _parse_telegram_poll_freshness_state(storage_dir, current),  # 2026-07-06 boss-request: Telegram poller dead-man switch
         _parse_host_cron_state(storage_dir, current),
         _parse_push_backlog_state(storage_dir, current),          # 2026-07-04 26h push-hold incident: persistent unpushed-backlog escalation

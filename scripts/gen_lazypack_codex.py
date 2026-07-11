@@ -64,6 +64,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import signal
 import subprocess
 import sys
 import tempfile
@@ -74,10 +76,17 @@ ROOT = Path(__file__).resolve().parents[1]
 CODEX_BIN = "codex"
 
 # One wall-clock budget for the whole generation; every phase draws from it.
-DEFAULT_BUDGET_S = 900
-# Writing a render script is a read-a-few-files-then-write-one-file job. If a
-# call is still going after this, it is thrashing, not thinking.
-CODEX_WRITE_TIMEOUT_S = 360
+# Stays under the 1800s compute_queue job timeout with room for the upload →
+# append → sync steps that follow a render.
+DEFAULT_BUDGET_S = 1500
+# Writing a render script scales with the panel count — each panel is another
+# layout codex has to compose and another set of evidence numbers to read. A
+# flat 360s starved a 3-panel plan: on 2026-07-11 mile_531e4c87's write took
+# ~1020s (measured off the orphan that outlived its own timeout), so budget the
+# write per panel with headroom over that.
+CODEX_WRITE_BASE_S = 420
+CODEX_WRITE_PER_PANEL_S = 240
+CODEX_WRITE_CEILING_S = 1200
 # Local matplotlib/PIL render of a handful of panels. Seconds in practice.
 RENDER_TIMEOUT_S = 240
 REPAIR_ROUNDS = 2
@@ -266,6 +275,24 @@ def _build_repair_prompt(script_path: Path, failure: str, out_dir: Path,
 """
 
 
+def _kill_process_group(proc: subprocess.Popen) -> None:
+    """SIGKILL the whole group `proc` leads. Best-effort by nature: the group is
+    already dying, and every failure mode here (it exited on its own, we lost
+    the right to signal it) means there is nothing left to kill."""
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+    except (ProcessLookupError, PermissionError) as e:
+        print(f"[gen_lazypack_codex] killpg skipped ({type(e).__name__}) — "
+              f"pid {proc.pid} already gone", file=sys.stderr)
+        proc.kill()
+
+
+def _codex_write_timeout(panels: list[dict]) -> float:
+    """Write budget for a plan. Scales with panels — see CODEX_WRITE_BASE_S."""
+    return min(CODEX_WRITE_CEILING_S,
+               CODEX_WRITE_BASE_S + CODEX_WRITE_PER_PANEL_S * max(1, len(panels)))
+
+
 def _run_codex(prompt: str, out_dir: Path, timeout_s: float,
                model: str | None) -> tuple[int, str]:
     """One bounded `codex exec`. Returns (rc, combined stdout+stderr tail).
@@ -273,22 +300,41 @@ def _run_codex(prompt: str, out_dir: Path, timeout_s: float,
     rc 3 = codex CLI missing, rc 2 = timed out. Never raises on codex failure —
     the caller decides whether the render script it was supposed to write
     actually landed, which is the only outcome that matters.
+
+    The call runs in its own process group so a timeout kills codex's workers
+    too. `subprocess.run(timeout=)` only kills the process we spawned: on
+    2026-07-11 mile_531e4c87 timed out at 360s, the surviving worker wrote
+    render_lazypack.py 11 minutes later, and that unowned file sat in the
+    worktree until PHASE-Z flagged it (3 shifts). A timeout must mean nothing
+    further lands, otherwise "failed" jobs keep writing behind our back.
     """
     cmd = [CODEX_BIN, "exec", "-s", "workspace-write", "-C", str(ROOT),
            "--add-dir", str(out_dir), "--skip-git-repo-check"]
     if model:
         cmd += ["-m", model]
     try:
-        proc = subprocess.run(
-            cmd, input=prompt, text=True, timeout=timeout_s,
-            cwd=str(ROOT), capture_output=True,
+        proc = subprocess.Popen(
+            cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, text=True, cwd=str(ROOT),
+            start_new_session=True,
         )
     except FileNotFoundError:
         return 3, "codex CLI not found on PATH (see CLAUDE.md dual-CLI note)"
+    try:
+        out, err = proc.communicate(input=prompt, timeout=timeout_s)
     except subprocess.TimeoutExpired:
-        return 2, f"codex exec timed out after {timeout_s:.0f}s"
-    out = (proc.stdout or "")
-    err = (proc.stderr or "")
+        _kill_process_group(proc)
+        try:
+            out, err = proc.communicate(timeout=30)
+        except Exception as e:  # noqa: BLE001
+            print(f"[gen_lazypack_codex] drain after kill failed: {e}",
+                  file=sys.stderr)
+            out, err = "", ""
+        tail = (out[-1000:] + "\n" + err[-1000:]).strip()
+        return 2, (f"codex exec timed out after {timeout_s:.0f}s "
+                   f"(process group killed)\n{tail}")
+    out = out or ""
+    err = err or ""
     if proc.returncode != 0:
         # 2026-07-10 incident: an API error (e.g. 400 model-not-supported) is
         # streamed mid-stdout while rc can still be 0 — surface it next to the
@@ -355,7 +401,7 @@ def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path
     for attempt in range(REPAIR_ROUNDS + 1):
         if prompt is not None:
             phase = "write" if attempt == 0 else f"repair {attempt}/{REPAIR_ROUNDS}"
-            codex_budget = min(CODEX_WRITE_TIMEOUT_S, remaining())
+            codex_budget = min(_codex_write_timeout(panels), remaining())
             if codex_budget <= 30:
                 print(f"ERROR: budget exhausted before codex {phase} "
                       f"({remaining():.0f}s left of {budget_s:.0f}s)", file=sys.stderr)
