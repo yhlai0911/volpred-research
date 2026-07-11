@@ -1,5 +1,12 @@
 # K1684 — forecast-tail-divergence E1：變異數目標尺度再校準 gating 實驗
 
+> [!CAUTION]
+> **2026-07-12 Codex review: BLOCKED.** 本版 results JSON 的原始表格可用來定位問題，
+> 但 `GATE_VERDICT=H2_REJECTED`、「純尺度錯配」與期刊路線**不可用於 knowledge、文章或論文 pivot**。
+> 必須先完成 active-contract / gap-complete RV、GJR ≥100 starts、VaR+ES、
+> placebo 與統計口徑重跑。完整 blocker 與已核對原始數字見
+> [`CODEX_REVIEW_BLOCKED.md`](CODEX_REVIEW_BLOCKED.md)。
+
 - **Experiment ID**: `k1684`
 - **Status**: completed
 - **執行日期**: 2026-07-12（台灣時間）
