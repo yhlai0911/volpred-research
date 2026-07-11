@@ -1,0 +1,5858 @@
+{
+  "scan_scope": "experiments/**/*.py (full population, static AST)",
+  "bug_class": "DM HAC bandwidth lag=h-1 applies zero HAC correction at h=1",
+  "canonical_owner": "volpred.stats.model_evaluation.dm_test",
+  "materiality_caveat": "Exposure is structural, not a proven error. Zero HAC at h=1 is the textbook DM formula and is only wrong when the loss differential is actually autocorrelated. Confirming materiality at any site requires re-running it and measuring the differential's acf.",
+  "total_local_dm_functions": 570,
+  "verdict_counts": {
+    "degenerate_at_h1": 139,
+    "unknown": 195,
+    "h_lags_inclusive": 21,
+    "hardcoded": 1,
+    "canonical_like": 204,
+    "delegates_to_canonical": 10
+  },
+  "structurally_exposed": 130,
+  "findings": [
+    {
+      "file": "experiments/K1048/k1048.py",
+      "function": "dm_test",
+      "lineno": 253,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/K1404/K1404.py",
+      "function": "dm_test",
+      "lineno": 133,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/K158/K158_wavelet_garch_modwt.py",
+      "function": "dm_test",
+      "lineno": 162,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/emd_garch_vol/emd_garch_vol.py",
+      "function": "dm_test",
+      "lineno": 276,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/gld_inventory_vol/gld_inventory_vol.py",
+      "function": "dm_test",
+      "lineno": 380,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1011/k1011.py",
+      "function": "dm_test",
+      "lineno": 341,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1013/k1013.py",
+      "function": "dm_test",
+      "lineno": 471,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1018/k1018.py",
+      "function": "dm_test",
+      "lineno": 351,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1263/k1263.py",
+      "function": "dm_hln",
+      "lineno": 315,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1312/k1312.py",
+      "function": "dm_hln",
+      "lineno": 478,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1318/k1318.py",
+      "function": "dm_test_hln",
+      "lineno": 144,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1347/k1347.py",
+      "function": "dm_test",
+      "lineno": 288,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1378/k1378.py",
+      "function": "dm_test",
+      "lineno": 290,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1402/k1402.py",
+      "function": "dm_test",
+      "lineno": 147,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1403/k1403.py",
+      "function": "dm_test",
+      "lineno": 119,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k142/k142_foundation_ml_vol.py",
+      "function": "diebold_mariano",
+      "lineno": 89,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1421/k1421.py",
+      "function": "dm_test_hln",
+      "lineno": 137,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1422/k1422.py",
+      "function": "dm_test_hln",
+      "lineno": 122,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1431/k1431.py",
+      "function": "dm_hln_test",
+      "lineno": 176,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k149/k149_regime_icl.py",
+      "function": "diebold_mariano",
+      "lineno": 86,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1492/k1492.py",
+      "function": "dm_hln",
+      "lineno": 148,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, horizon)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k150/k150_amihud_fragility.py",
+      "function": "diebold_mariano",
+      "lineno": 74,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k153/k153_vix_move_vecm.py",
+      "function": "dm_test",
+      "lineno": 495,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k154/k154_order_flow_imbalance.py",
+      "function": "dm_test",
+      "lineno": 150,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1617/k1617.py",
+      "function": "dm_hln",
+      "lineno": 298,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1619/k1619.py",
+      "function": "dm_hln",
+      "lineno": 221,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1623/k1623.py",
+      "function": "dm_hln",
+      "lineno": 514,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1661/k1661_harq_ohlc.py",
+      "function": "dm_hln",
+      "lineno": 255,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k186/k186_volume_displacement.py",
+      "function": "diebold_mariano",
+      "lineno": 147,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k187/k187_overnight_gap_structure.py",
+      "function": "diebold_mariano",
+      "lineno": 91,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k191/k191_put_call_ratio.py",
+      "function": "diebold_mariano",
+      "lineno": 82,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k194/k194_fractional_diff.py",
+      "function": "dm_test",
+      "lineno": 213,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k195/k195_tda_deep_dive.py",
+      "function": "diebold_mariano",
+      "lineno": 552,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k199/k199_vix_futures_basis.py",
+      "function": "dm_test",
+      "lineno": 556,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k216/k216_ensemble_forecast.py",
+      "function": "dm_test",
+      "lineno": 95,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k240/k240_tsmom_cross_asset.py",
+      "function": "diebold_mariano_test",
+      "lineno": 322,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k242/k242_vrp_harvesting.py",
+      "function": "dm_test",
+      "lineno": 543,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k243/k243_sector_rotation.py",
+      "function": "dm_test",
+      "lineno": 435,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k245/k245_gld_momentum_breakout.py",
+      "function": "dm_test",
+      "lineno": 344,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k261/k261_vol_contest.py",
+      "function": "dm_test",
+      "lineno": 456,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k350/k350_heston_vs_garch.py",
+      "function": "dm_test",
+      "lineno": 398,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k355/k355_transfer_learning.py",
+      "function": "dm_test",
+      "lineno": 95,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k374/k374_parkinson_garch.py",
+      "function": "dm_test",
+      "lineno": 109,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k380/k380_agriculture_vol.py",
+      "function": "dm_test",
+      "lineno": 85,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k429/k429_vix_term_structure.py",
+      "function": "dm_test",
+      "lineno": 202,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k432/k432_bayesian_garch.py",
+      "function": "dm_test",
+      "lineno": 421,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k433/k433_ssvs_garch.py",
+      "function": "dm_test",
+      "lineno": 838,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k435/k435_structural_break_garch.py",
+      "function": "dm_test",
+      "lineno": 564,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k438/k438_garchx_vrp.py",
+      "function": "dm_test",
+      "lineno": 770,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k440/k440_vrp_strategy.py",
+      "function": "diebold_mariano_returns",
+      "lineno": 335,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k442/k442_figarch.py",
+      "function": "dm_test",
+      "lineno": 368,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k446/k446_gpr_vol.py",
+      "function": "dm_test",
+      "lineno": 237,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k447/k447_skew_index.py",
+      "function": "dm_test",
+      "lineno": 204,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k451/k451_overnight_vol.py",
+      "function": "dm_test",
+      "lineno": 400,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k453/k453_semivar_cross_asset.py",
+      "function": "dm_test",
+      "lineno": 214,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k457/k457_weekly_vol.py",
+      "function": "dm_test",
+      "lineno": 413,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k459/k459_weekly_vrp_cross_oos.py",
+      "function": "dm_test",
+      "lineno": 184,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k463/k463_tvp_garchx_taiwan.py",
+      "function": "dm_test",
+      "lineno": 595,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k464/k464_threshold_sv.py",
+      "function": "dm_test",
+      "lineno": 408,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k468/k468_yang_zhang.py",
+      "function": "dm_test",
+      "lineno": 182,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k471/k471_higher_moments.py",
+      "function": "dm_test",
+      "lineno": 219,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k473/k473_attention_vol.py",
+      "function": "dm_test",
+      "lineno": 75,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k479/k479_wavelet_vol.py",
+      "function": "dm_test",
+      "lineno": 309,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k484/k484_ssvs_variance_eq.py",
+      "function": "dm_test",
+      "lineno": 886,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k485/k485_ssvs_vareq_cross_oos.py",
+      "function": "dm_test",
+      "lineno": 349,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k486/k486_gjr_vix_final.py",
+      "function": "diebold_mariano_test",
+      "lineno": 441,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k487/k487_gjr_vix_cross_asset.py",
+      "function": "diebold_mariano_test",
+      "lineno": 312,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k490/k490_gjrx_vix9d.py",
+      "function": "diebold_mariano_test",
+      "lineno": 447,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k506/k506_ewt_volspread_cross_oos.py",
+      "function": "dm_test",
+      "lineno": 492,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k507/k507_dynamic_allocation.py",
+      "function": "diebold_mariano_test",
+      "lineno": 286,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k522/k522_har_rv_pilot.py",
+      "function": "dm_test",
+      "lineno": 445,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k529/k529_rough_volatility.py",
+      "function": "dm_test",
+      "lineno": 88,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k537/k537_cross_asset_vol_momentum.py",
+      "function": "dm_test",
+      "lineno": 265,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k539/k539_vrp_carry.py",
+      "function": "dm_test",
+      "lineno": 262,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k542/k542_vix_term_structure.py",
+      "function": "dm_test",
+      "lineno": 151,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k545/k545_intraday_seasonality.py",
+      "function": "dm_test",
+      "lineno": 287,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k549/k549_multi_asset_expansion.py",
+      "function": "diebold_mariano_test",
+      "lineno": 264,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k550/k550_adaptive_vix_threshold.py",
+      "function": "dm_test",
+      "lineno": 358,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k560/k560_sector_rotation_vt.py",
+      "function": "diebold_mariano_test",
+      "lineno": 534,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k561/k561_bond_equity_switch.py",
+      "function": "diebold_mariano_test",
+      "lineno": 324,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k565/k565_btc_allocation.py",
+      "function": "dm_test",
+      "lineno": 216,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k576/k576_vol_clustering_vt.py",
+      "function": "dm_test",
+      "lineno": 207,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k583/k583_iv_surface.py",
+      "function": "dm_test",
+      "lineno": 92,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k591/k591_window_size_sweep.py",
+      "function": "dm_test",
+      "lineno": 128,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k621/k621_mf2_garch.py",
+      "function": "dm_test",
+      "lineno": 306,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k622/k622_window_sensitivity.py",
+      "function": "dm_test",
+      "lineno": 197,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k623/k623_mf2_garch_corrected.py",
+      "function": "dm_test",
+      "lineno": 375,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k624/k624_har_pd_daily.py",
+      "function": "dm_test",
+      "lineno": 244,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k631/k631_calendar_vol.py",
+      "function": "dm_test",
+      "lineno": 640,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k635/k635_fixed_vs_rolling_vt.py",
+      "function": "dm_test",
+      "lineno": 620,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k651/k651_fred_macro_vol.py",
+      "function": "dm_test",
+      "lineno": 374,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k733/k733_regime_rebalancing.py",
+      "function": "dm_test",
+      "lineno": 288,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k736/k736_calendar_anomaly_vt.py",
+      "function": "dm_test",
+      "lineno": 505,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k747/k747_equal_risk_contribution.py",
+      "function": "dm_test",
+      "lineno": 383,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k763/k763_regime_carry_filter.py",
+      "function": "dm_test",
+      "lineno": 290,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k764/k764_rough_vol_multivariate.py",
+      "function": "dm_test",
+      "lineno": 77,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k772/k772_overnight_vol.py",
+      "function": "dm_test",
+      "lineno": 622,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k773/k773_event_risk_budgeter.py",
+      "function": "dm_test",
+      "lineno": 389,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k774/k774_all_weather_vt.py",
+      "function": "dm_test",
+      "lineno": 549,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k775/k775_har_pd.py",
+      "function": "dm_test",
+      "lineno": 467,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k783/k783_window_sensitivity.py",
+      "function": "dm_test",
+      "lineno": 237,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k786/k786_vt_insurance_premium.py",
+      "function": "dm_test",
+      "lineno": 186,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k790v2/k790v2_taiwan_price_limit.py",
+      "function": "dm_test",
+      "lineno": 390,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k794/k794_multivariate_fbm.py",
+      "function": "dm_test",
+      "lineno": 79,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k795/k795_stlfsi4_regime.py",
+      "function": "dm_test",
+      "lineno": 292,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k807/k807_bond_stress_signal.py",
+      "function": "dm_test",
+      "lineno": 310,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k818/k818_ssvs_return_prediction.py",
+      "function": "dm_test",
+      "lineno": 549,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k838/k838_taifex_night_momentum.py",
+      "function": "dm_test",
+      "lineno": 361,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k843/k843_intraday_futures.py",
+      "function": "dm_test",
+      "lineno": 490,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k887/k887_financial_early_warning.py",
+      "function": "strategy_dm_test",
+      "lineno": 55,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k948/k948.py",
+      "function": "dm_test",
+      "lineno": 305,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k965/k965_wild_bootstrap_ohr.py",
+      "function": "dm_test",
+      "lineno": 495,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k966/k966_har_pd.py",
+      "function": "dm_test",
+      "lineno": 153,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k969/k969_bespoke_rv.py",
+      "function": "dm_test",
+      "lineno": 329,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k970/k970_mf2_garch.py",
+      "function": "dm_test",
+      "lineno": 271,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k971/k971_caviar_vt.py",
+      "function": "dm_test",
+      "lineno": 334,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k972/k972_mf2_taiwan.py",
+      "function": "dm_test",
+      "lineno": 331,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k973/k973_hurst_vol.py",
+      "function": "dm_test",
+      "lineno": 331,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k976/k976_mf2_slope.py",
+      "function": "dm_test",
+      "lineno": 396,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k980/k980_threshold_garch.py",
+      "function": "dm_test",
+      "lineno": 428,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k981/k981_wavelet_har.py",
+      "function": "dm_test",
+      "lineno": 360,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k982/k982_dispersion.py",
+      "function": "dm_test",
+      "lineno": 235,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k986/k986_adaptive_har.py",
+      "function": "dm_test",
+      "lineno": 427,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k993/k993_slope_medium_freq.py",
+      "function": "dm_test",
+      "lineno": 266,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/order_flow_vol/order_flow_vol.py",
+      "function": "dm_test",
+      "lineno": 226,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/tail_risk_parity/tail_risk_parity.py",
+      "function": "diebold_mariano_test",
+      "lineno": 426,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/vix_sufficiency_boundary/vix_sufficiency_boundary.py",
+      "function": "dm_test",
+      "lineno": 120,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/vix_term_structure_trading/vix_term_structure_trading.py",
+      "function": "dm_test",
+      "lineno": 385,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/vix_term_structure_vol_pred/vix_term_structure_vol_pred.py",
+      "function": "dm_test",
+      "lineno": 274,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/wavelet_vol_decomposition/wavelet_vol_decomposition.py",
+      "function": "dm_test",
+      "lineno": 78,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1621/k1621.py",
+      "function": "dm_hln",
+      "lineno": 213,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k1622/k1622.py",
+      "function": "dm_hln",
+      "lineno": 375,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, H)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k446/k446_gpr_vol_v2.py",
+      "function": "dm_hln",
+      "lineno": 203,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "min(h - 1, n - 1)",
+      "exercises_h1": false,
+      "notes": [
+        "lag = h-1 with no floor: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k530/k530_har_multiscale.py",
+      "function": "dm_test",
+      "lineno": 84,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k531/k531_sentiment_nlp_pilot.py",
+      "function": "dm_test",
+      "lineno": 383,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k532/k532_har_cross_asset.py",
+      "function": "dm_test",
+      "lineno": 104,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k535/k535_skew_predictor.py",
+      "function": "dm_test",
+      "lineno": 90,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k767/k767_har_5day_rv.py",
+      "function": "dm_test",
+      "lineno": 100,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/k806/k806_multivariate_fbm.py",
+      "function": "dm_test",
+      "lineno": 104,
+      "verdict": "degenerate_at_h1",
+      "lag_expr": "range(1, h)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h)`: HAC loop is empty when h == 1"
+      ]
+    },
+    {
+      "file": "experiments/K1313/K1313.py",
+      "function": "dm_test_hac",
+      "lineno": 167,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1404/K1404.py",
+      "function": "classify_dm_status",
+      "lineno": 259,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1544/K1544.py",
+      "function": "plot_dm_heatmap",
+      "lineno": 508,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1611/K1611.py",
+      "function": "dm_hln",
+      "lineno": 344,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1618/K1618.py",
+      "function": "dm_hln",
+      "lineno": 169,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1663_rcov_har_gmv/K1663_rcov_har_gmv.py",
+      "function": "dm_hln",
+      "lineno": 164,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1665/K1665.py",
+      "function": "dm_hln",
+      "lineno": 241,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/garch_midas_test/garch_midas_test.py",
+      "function": "dm_test",
+      "lineno": 103,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/jbf_robustness_suite/jbf_robustness_suite.py",
+      "function": "dm_test_nw",
+      "lineno": 461,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1014/k1014.py",
+      "function": "dm_test_func",
+      "lineno": 206,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1054/k1054.py",
+      "function": "dm_test",
+      "lineno": 577,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1072/k1072.py",
+      "function": "dm_test",
+      "lineno": 502,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1116/k1116.py",
+      "function": "dm_hln",
+      "lineno": 162,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1116b/k1116b.py",
+      "function": "dm_hln",
+      "lineno": 195,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1116c/k1116c.py",
+      "function": "dm_hln",
+      "lineno": 180,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1116d/k1116d.py",
+      "function": "dm_hln",
+      "lineno": 238,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1116d/k1116d.py",
+      "function": "dm_bootstrap_ci",
+      "lineno": 257,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1116f/k1116f.py",
+      "function": "dm_hln",
+      "lineno": 211,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1116f/k1116f.py",
+      "function": "plot_dm_heatmap",
+      "lineno": 415,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1117/k1117.py",
+      "function": "paired_dm",
+      "lineno": 395,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1117b/k1117b.py",
+      "function": "dm_hln",
+      "lineno": 181,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1118/k1118.py",
+      "function": "dm_hln",
+      "lineno": 200,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1118b/k1118b.py",
+      "function": "dm_hln",
+      "lineno": 344,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1120/k1120.py",
+      "function": "dm_hln",
+      "lineno": 250,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1120/k1120.py",
+      "function": "regime_split_dm",
+      "lineno": 377,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1120/k1120.py",
+      "function": "block_bootstrap_dm",
+      "lineno": 646,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1124/k1124.py",
+      "function": "dm_hln",
+      "lineno": 433,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1127/k1127.py",
+      "function": "dm_hln",
+      "lineno": 469,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1148/k1148.py",
+      "function": "dm_hln_stat",
+      "lineno": 681,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1148_d1/k1148_d1.py",
+      "function": "dm_hln_stat",
+      "lineno": 473,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1148_d2/k1148_d2.py",
+      "function": "dm_hln_stat",
+      "lineno": 562,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1149/k1149.py",
+      "function": "dm_hln",
+      "lineno": 742,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1149/k1149.py",
+      "function": "panel_dm",
+      "lineno": 761,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1149/k1149.py",
+      "function": "panel_dm_vs_gjr",
+      "lineno": 844,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1201/k1201.py",
+      "function": "dm_hln",
+      "lineno": 203,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1203/k1203.py",
+      "function": "dm_hln",
+      "lineno": 236,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1203/k1203.py",
+      "function": "plot_dm_bar_eem",
+      "lineno": 542,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1266/k1266.py",
+      "function": "dm_hln",
+      "lineno": 423,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1305/k1305.py",
+      "function": "dm_hln",
+      "lineno": 408,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1319/k1319.py",
+      "function": "dm_test",
+      "lineno": 142,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1386/k1386.py",
+      "function": "dm_test_harvey",
+      "lineno": 367,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1399/k1399_vix_decomp.py",
+      "function": "dm_hln_test",
+      "lineno": 269,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1403/k1403.py",
+      "function": "classify_dm_status",
+      "lineno": 229,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1465/k1465.py",
+      "function": "dm_test_vrp_dow",
+      "lineno": 241,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1500_treasury_auction_move_vol/k1500.py",
+      "function": "dm_test",
+      "lineno": 494,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k151/k151_sectoral_vol_dispersion.py",
+      "function": "dm_test",
+      "lineno": 528,
+      "verdict": "unknown",
+      "lag_expr": "min(5, n // 5)",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k152/k152_liquidity_ms_garch.py",
+      "function": "diebold_mariano",
+      "lineno": 103,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1524_translation_gap_pilot/k1524.py",
+      "function": "dm_test",
+      "lineno": 235,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1525_hf_tail_risk_premium_vrp/k1525_hf_tail_risk_premium_vrp.py",
+      "function": "dm_test",
+      "lineno": 265,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1526_hf_tail_risk_premium_vrp/k1526_hf_tail_risk_premium_vrp.py",
+      "function": "dm_test",
+      "lineno": 265,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1571/k1571.py",
+      "function": "dm_test_hac",
+      "lineno": 413,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k160/k160_copula_tail_dependence.py",
+      "function": "dm_test",
+      "lineno": 897,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k180/k180_directional_change.py",
+      "function": "dm_test",
+      "lineno": 114,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k188/k188_har_ceiling.py",
+      "function": "dm_test_hac",
+      "lineno": 342,
+      "verdict": "unknown",
+      "lag_expr": "int(np.floor(n ** (1.0 / 3.0)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k192/k192_google_trends_vol.py",
+      "function": "diebold_mariano_test",
+      "lineno": 242,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k197/k197_persistence_break.py",
+      "function": "dm_test",
+      "lineno": 296,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k198/k198_realized_garch.py",
+      "function": "dm_test",
+      "lineno": 130,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k217/k217_nonequity_optimal_vt.py",
+      "function": "dm_test",
+      "lineno": 606,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k230/k230_optimal_vt_param.py",
+      "function": "dm_test",
+      "lineno": 245,
+      "verdict": "unknown",
+      "lag_expr": "min(h, n - 1)",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k251/k251_gld_tlt_rotation.py",
+      "function": "dm_test",
+      "lineno": 338,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k360/k360_multi_freq_vol.py",
+      "function": "dm_test_from_errors",
+      "lineno": 648,
+      "verdict": "unknown",
+      "lag_expr": "int(np.floor(4 * (n / 100) ** (2 / 9)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k409/k409_options_mispricing.py",
+      "function": "dm_test",
+      "lineno": 207,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k431/k431_stgarch_v2.py",
+      "function": "dm_test",
+      "lineno": 313,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k437/k437_gas_model.py",
+      "function": "dm_test",
+      "lineno": 603,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k438/k438_garchx_vrp.py",
+      "function": "block_bootstrap_dm",
+      "lineno": 886,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k460/k460_semivar_cross_oos.py",
+      "function": "dm_test_losses",
+      "lineno": 94,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k465/k465_har_range_cross_oos.py",
+      "function": "dm_test",
+      "lineno": 383,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k469/k469_har_r2_proxy.py",
+      "function": "dm_test",
+      "lineno": 330,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k470/k470_har_vt_strategy.py",
+      "function": "dm_test_returns",
+      "lineno": 443,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k472/k472_taiwan_comprehensive.py",
+      "function": "dm_test",
+      "lineno": 257,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k488/k488_gjrx_vt_strategy.py",
+      "function": "dm_test_returns",
+      "lineno": 605,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k489/k489_vix_term_structure.py",
+      "function": "dm_test",
+      "lineno": 200,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k494/k494_forex_vol.py",
+      "function": "dm_test",
+      "lineno": 289,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k525/k525_har_rv_formal.py",
+      "function": "dm_test",
+      "lineno": 397,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k526/k526_garch_midas.py",
+      "function": "dm_test",
+      "lineno": 557,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k534/k534_copula_dcc.py",
+      "function": "dm_test",
+      "lineno": 355,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k546/k546_gld_timing.py",
+      "function": "diebold_mariano_test",
+      "lineno": 298,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k593/k593_window_cross_oos.py",
+      "function": "dm_test",
+      "lineno": 132,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k593/k593_window_cross_oos_v2.py",
+      "function": "dm_test",
+      "lineno": 109,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k593/k593_window_cross_oos_v2.py",
+      "function": "dm_test_aligned",
+      "lineno": 132,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k603/k603_dynamic_target_vol.py",
+      "function": "dm_test",
+      "lineno": 280,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k625/k625_hurst_volatility.py",
+      "function": "dm_test",
+      "lineno": 583,
+      "verdict": "unknown",
+      "lag_expr": "int(n ** (1.0 / 3.0))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k680/k680_percentile_cross_oos.py",
+      "function": "run_full_sample_dm",
+      "lineno": 480,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k684/k684_percentile_implementation.py",
+      "function": "dm_test",
+      "lineno": 186,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k730/k730_cross_asset_vol_momentum.py",
+      "function": "dm_test_func",
+      "lineno": 481,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k731/k731_vix_term_structure.py",
+      "function": "dm_test",
+      "lineno": 384,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k781/k781_mvf.py",
+      "function": "dm_test",
+      "lineno": 565,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k783b/k783b_cross_asset_window.py",
+      "function": "dm_test",
+      "lineno": 115,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k783c/k783c_cross_period_window.py",
+      "function": "dm_test",
+      "lineno": 64,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k785/k785_mf2_garch.py",
+      "function": "dm_test",
+      "lineno": 285,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k791/k791_overnight_intraday.py",
+      "function": "dm_test",
+      "lineno": 166,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k798/k798_decision_focused.py",
+      "function": "dm_test",
+      "lineno": 440,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k835/k835_taiwan_vix_blend.py",
+      "function": "run_dm_tests",
+      "lineno": 204,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k841/k841_futures_realtime_vt.py",
+      "function": "dm_test",
+      "lineno": 436,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k842/k842_futures_profit_trading.py",
+      "function": "dm_test_returns",
+      "lineno": 583,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k859/k859_robust_vt.py",
+      "function": "dm_test_vs_baseline",
+      "lineno": 354,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k859/k859_robust_vt.py",
+      "function": "dm_test_vs_bh",
+      "lineno": 408,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k864/k864_heterogeneous_abm.py",
+      "function": "paired_hln_test",
+      "lineno": 655,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k869/k869_sector_rotation.py",
+      "function": "dm_test_wrapper",
+      "lineno": 201,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k873/k873_weekend_vol.py",
+      "function": "dm_test_manual",
+      "lineno": 419,
+      "verdict": "unknown",
+      "lag_expr": "int(np.floor(4 * (n / 100) ** (2 / 9)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k915/k915_dcc_garch_dynamic_correlation.py",
+      "function": "dm_test",
+      "lineno": 545,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k960/k960_har_rv.py",
+      "function": "dm_test",
+      "lineno": 511,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k987/k987_vix_nonlinear.py",
+      "function": "dm_test",
+      "lineno": 131,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k989/k989_mf2_vix2.py",
+      "function": "dm_test",
+      "lineno": 455,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/research_cornish_fisher_regime_tail_adjustment_sector_rot/research_cornish_fisher_regime_tail_adjustment_sector_rot.py",
+      "function": "_dm_rows",
+      "lineno": 396,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1043/k1043.py",
+      "function": "dm_test_var",
+      "lineno": 460,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1424_hurst_garch_covariate/K1424_hurst_garch_covariate.py",
+      "function": "dm_test",
+      "lineno": 315,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1679-rev/K1679-rev.py",
+      "function": "dm_hln",
+      "lineno": 334,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1679-rev2/K1679-rev2.py",
+      "function": "dm_hln",
+      "lineno": 591,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/K1679/K1679.py",
+      "function": "dm_hln",
+      "lineno": 261,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1019/k1019.py",
+      "function": "dm_test",
+      "lineno": 722,
+      "verdict": "unknown",
+      "lag_expr": "int(n ** (1.0 / 3.0))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1031/k1031/k1031.py",
+      "function": "dm_test",
+      "lineno": 698,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1062/k1062.py",
+      "function": "dm_block",
+      "lineno": 646,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1066/k1066.py",
+      "function": "run_dm",
+      "lineno": 585,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1097/k1097.py",
+      "function": "dm_test",
+      "lineno": 645,
+      "verdict": "unknown",
+      "lag_expr": "int(n ** (1.0 / 3.0))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1097/k1097.py",
+      "function": "plot_dm_comparison",
+      "lineno": 1130,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1100d/k1100d.py",
+      "function": "dm_subperiod",
+      "lineno": 1336,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1115/k1115.py",
+      "function": "dm_hln_test",
+      "lineno": 360,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1118b/make_charts.py",
+      "function": "fig1_dm_matrix",
+      "lineno": 16,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1119/k1119.py",
+      "function": "dm_hln",
+      "lineno": 254,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1120b/k1120b.py",
+      "function": "dm_hln",
+      "lineno": 348,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1120b/k1120b.py",
+      "function": "regime_dm",
+      "lineno": 425,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1120b/k1120b.py",
+      "function": "plot_dm_comparison",
+      "lineno": 535,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1144/k1144.py",
+      "function": "harvey_dm_test",
+      "lineno": 432,
+      "verdict": "unknown",
+      "lag_expr": "int(np.floor(T ** (1.0 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1195/k1195.py",
+      "function": "dm_test_nw",
+      "lineno": 344,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1259/build_dm_ledger.py",
+      "function": "get_dm_stat",
+      "lineno": 141,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1314/k1314.py",
+      "function": "dm_hln_test",
+      "lineno": 228,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1337/K1337.py",
+      "function": "dm_test_hac",
+      "lineno": 219,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1337_v2/K1337_v2.py",
+      "function": "dm_test_hac",
+      "lineno": 295,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1371/k1371.py",
+      "function": "dm_test",
+      "lineno": 146,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1379/k1379.py",
+      "function": "dm_test",
+      "lineno": 359,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1393/k1393.py",
+      "function": "run_dm",
+      "lineno": 417,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1398/k1398.py",
+      "function": "dm_test",
+      "lineno": 208,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1415/k1415.py",
+      "function": "dm_test",
+      "lineno": 93,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1433/k1433.py",
+      "function": "dm_test",
+      "lineno": 62,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1434/k1434.py",
+      "function": "dm_test",
+      "lineno": 103,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k144/k144_mf2_cross_bond.py",
+      "function": "dm_test_onesided",
+      "lineno": 512,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1476/k1476.py",
+      "function": "dm_hln",
+      "lineno": 45,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1481_inventory_surprise_crude_rv_pilot/run.py",
+      "function": "dm_test",
+      "lineno": 250,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1493/k1493.py",
+      "function": "dm_tables",
+      "lineno": 189,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1513/k1513.py",
+      "function": "dm_test",
+      "lineno": 224,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1520/k1520.py",
+      "function": "dm_hac",
+      "lineno": 108,
+      "verdict": "unknown",
+      "lag_expr": "min(max_lag, n - 2)",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1523_realized_kurtosis_vol/k1523.py",
+      "function": "dm_test",
+      "lineno": 177,
+      "verdict": "unknown",
+      "lag_expr": "int(np.floor(4 * (n / 100) ** (2 / 9)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1529/k1529.py",
+      "function": "dm_test_pnl",
+      "lineno": 490,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k157/k157_correlation_forecasting.py",
+      "function": "dm_test_correlation",
+      "lineno": 421,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k1637/k1637.py",
+      "function": "dm_hac",
+      "lineno": 102,
+      "verdict": "unknown",
+      "lag_expr": "int(min(max_lag, n - 1))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k190/k190_realized_semivariance.py",
+      "function": "dm_test",
+      "lineno": 337,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k206/k206_asset_specific_vt.py",
+      "function": "dm_test",
+      "lineno": 478,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k213/k213_signature_vol.py",
+      "function": "diebold_mariano_test",
+      "lineno": 520,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k233/k233_three_asset.py",
+      "function": "dm_test_returns",
+      "lineno": 288,
+      "verdict": "unknown",
+      "lag_expr": "int(np.sqrt(n))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k253/k253_value_timing.py",
+      "function": "dm_test_returns",
+      "lineno": 340,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k340/k340_futures_basis.py",
+      "function": "dm_test",
+      "lineno": 378,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k359/k359_quantile_reg.py",
+      "function": "dm_test_returns",
+      "lineno": 396,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k370/k370_vix_ts_validation.py",
+      "function": "dm_test_hac",
+      "lineno": 119,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k431/k431_stgarch.py",
+      "function": "dm_test",
+      "lineno": 237,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k436/k436_vrp_robustness.py",
+      "function": "dm_test_hac",
+      "lineno": 226,
+      "verdict": "unknown",
+      "lag_expr": "int(np.floor(4 * (n / 100) ** (2 / 9)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k436/k436_vrp_robustness.py",
+      "function": "block_bootstrap_dm",
+      "lineno": 253,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k439/k439_cross_asset_vrp.py",
+      "function": "block_bootstrap_dm",
+      "lineno": 133,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k462/k462_taiwan_methods.py",
+      "function": "dm_test",
+      "lineno": 308,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k478/k478_entropy_vol.py",
+      "function": "dm_test",
+      "lineno": 262,
+      "verdict": "unknown",
+      "lag_expr": "min(int(hac_lag), n - 1)",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k508/k508_tw_price_limit.py",
+      "function": "dm_test",
+      "lineno": 155,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k533/k533_har_vt_strategy.py",
+      "function": "dm_test_sharpe",
+      "lineno": 149,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k551/k551_k548_validation.py",
+      "function": "test_harvey_dm",
+      "lineno": 210,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k557/k557_gold_regime.py",
+      "function": "dm_test",
+      "lineno": 255,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k569/k569_piecewise_vt_validation.py",
+      "function": "dm_test_nw",
+      "lineno": 223,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k570/k570_earnings_season.py",
+      "function": "dm_test_sharpe",
+      "lineno": 253,
+      "verdict": "unknown",
+      "lag_expr": "int(n ** (1.0 / 3.0))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k574/k574_complete_strategy_backtest.py",
+      "function": "compute_dm_tests",
+      "lineno": 870,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k595/k595_hybrid_multi_strategy.py",
+      "function": "dm_test",
+      "lineno": 329,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k598/k598_adaptive_debounce.py",
+      "function": "dm_test",
+      "lineno": 587,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k629/k629_disposition_vol.py",
+      "function": "dm_test",
+      "lineno": 587,
+      "verdict": "unknown",
+      "lag_expr": "int(4 * (n / 100) ** (2 / 9))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k662/k662_commodity_vt.py",
+      "function": "diebold_mariano_sharpe",
+      "lineno": 364,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k681/k681_percentile_global.py",
+      "function": "dm_test",
+      "lineno": 407,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k681/k681_percentile_global.py",
+      "function": "dm_test_portfolio",
+      "lineno": 448,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k681b/k681b_lookahead_fix.py",
+      "function": "dm_ttest_portfolio",
+      "lineno": 186,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k681b/k681b_lookahead_fix.py",
+      "function": "dm_ttest_single",
+      "lineno": 203,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k683/k683_percentile_vs_piecewise.py",
+      "function": "diebold_mariano_test",
+      "lineno": 286,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k685/k685_percentile_live_sim.py",
+      "function": "dm_test_comparison",
+      "lineno": 359,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k709/k709.py",
+      "function": "dm_hln_test",
+      "lineno": 202,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k745/k745_pilot_har_rv.py",
+      "function": "dm_test",
+      "lineno": 88,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k765/k765_xai_volatility.py",
+      "function": "dm_test",
+      "lineno": 84,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k766/k766_bond_stress_signal.py",
+      "function": "dm_test",
+      "lineno": 390,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k796v2/k796v2_vix_spike_taiwan.py",
+      "function": "dm_test",
+      "lineno": 299,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k796v2/k796v2_vix_spike_taiwan.py",
+      "function": "dm_vs_baseline",
+      "lineno": 380,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k797/k797_kan_garch.py",
+      "function": "dm_test",
+      "lineno": 267,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k797v2/k797v2_kan_garch.py",
+      "function": "dm_test",
+      "lineno": 239,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k821/k821_ssvs_variance_equation.py",
+      "function": "dm_test",
+      "lineno": 795,
+      "verdict": "unknown",
+      "lag_expr": "min(10, n // 5)",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k828/k828_vix_only_insurance.py",
+      "function": "manual_dm_test",
+      "lineno": 508,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k895/k895_ssvs_arx_garch.py",
+      "function": "dm_test_qlike",
+      "lineno": 876,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k910/k910_tci_vt_overlay.py",
+      "function": "dm_test",
+      "lineno": 525,
+      "verdict": "unknown",
+      "lag_expr": "int(n ** (1.0 / 3.0))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k910/k910_tci_vt_overlay.py",
+      "function": "pairwise_dm_test",
+      "lineno": 564,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k923/k923_copula_hedge_ratio.py",
+      "function": "dm_test_hedge",
+      "lineno": 561,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k933/k933.py",
+      "function": "dm_test",
+      "lineno": 597,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/k980v2/k980v2.py",
+      "function": "dm_test_hac",
+      "lineno": 532,
+      "verdict": "unknown",
+      "lag_expr": "int(12 * (T / 100) ** 0.25)",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k_reit_vol_article/compute_reit_vol.py",
+      "function": "dm_test",
+      "lineno": 121,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/research_horizon/research_horizon.py",
+      "function": "dm_hac",
+      "lineno": 120,
+      "verdict": "unknown",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "no bandwidth binding recognised -- inspect by hand"
+      ]
+    },
+    {
+      "file": "experiments/I1/I1_garch_ohr.py",
+      "function": "dm_test",
+      "lineno": 287,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/I1/I1_garch_ohr_supplemental.py",
+      "function": "dm_test",
+      "lineno": 128,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k1024/k1024.py",
+      "function": "dm_test_custom",
+      "lineno": 372,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k1024b/k1024b.py",
+      "function": "dm_test_custom",
+      "lineno": 375,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k1031/k1031.py",
+      "function": "dm_test",
+      "lineno": 681,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k1188/k1188.py",
+      "function": "dm_test_harvey",
+      "lineno": 239,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k252/k252_adaptive_vt.py",
+      "function": "dm_test",
+      "lineno": 226,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k254/k254_vol_dispersion_trade.py",
+      "function": "dm_test",
+      "lineno": 383,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k441/k441_range_vol.py",
+      "function": "dm_test",
+      "lineno": 375,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k461/k461_ssvs_taiwan.py",
+      "function": "dm_test",
+      "lineno": 591,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k548/k548_leveraged_risk_parity.py",
+      "function": "diebold_mariano_test",
+      "lineno": 263,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k556/k556_momentum_crash_filter.py",
+      "function": "diebold_mariano_test",
+      "lineno": 360,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k760/k760_alt_risk_premia.py",
+      "function": "dm_test",
+      "lineno": 354,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k808/k808_allweather_vt.py",
+      "function": "dm_test",
+      "lineno": 449,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k811/k811_insurance_premium_vov.py",
+      "function": "strategy_dm_test",
+      "lineno": 424,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k811v2/k811v2_insurance_premium_vov_fixed.py",
+      "function": "strategy_dm_test",
+      "lineno": 457,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k819/k819_tail_first_es.py",
+      "function": "strategy_dm_test",
+      "lineno": 157,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k945/k945.py",
+      "function": "dm_test_hedging",
+      "lineno": 268,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": true,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k1138b/k1138b.py",
+      "function": "dm_hln_test",
+      "lineno": 349,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k1657/k1657.py",
+      "function": "dm_test",
+      "lineno": 309,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k390/k390_move_index.py",
+      "function": "dm_test",
+      "lineno": 352,
+      "verdict": "h_lags_inclusive",
+      "lag_expr": "range(1, h + 1)",
+      "exercises_h1": false,
+      "notes": [
+        "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC degeneracy, but the bandwidth never grows with the sample"
+      ]
+    },
+    {
+      "file": "experiments/k801/k801_event_surprise.py",
+      "function": "dm_test",
+      "lineno": 165,
+      "verdict": "hardcoded",
+      "lag_expr": "5",
+      "exercises_h1": false,
+      "notes": [
+        "bandwidth fixed at 5, ignores h and sample size"
+      ]
+    },
+    {
+      "file": "experiments/K1049/K1049.py",
+      "function": "dm_test_qlike",
+      "lineno": 548,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/K1129/k1129.py",
+      "function": "dm_hln_test",
+      "lineno": 328,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/K1322/K1322.py",
+      "function": "_dm_test_hac",
+      "lineno": 84,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/K1329/K1329.py",
+      "function": "_dm_hln",
+      "lineno": 247,
+      "verdict": "canonical_like",
+      "lag_expr": "min(max_lag, n // 4)",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/K1544/K1544.py",
+      "function": "dm_hln",
+      "lineno": 237,
+      "verdict": "canonical_like",
+      "lag_expr": "min(bandwidth, n // 4)",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/btc_derivatives_vol/btc_derivatives_vol.py",
+      "function": "dm_test",
+      "lineno": 46,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1016/k1016.py",
+      "function": "dm_test",
+      "lineno": 366,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1057/k1057.py",
+      "function": "dm_test",
+      "lineno": 493,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1.0 / 3.0)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1063/k1063.py",
+      "function": "dm_test",
+      "lineno": 549,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1.0 / 3.0)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1084/k1084.py",
+      "function": "dm_test",
+      "lineno": 566,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1.0 / 3.0)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1133/k1133.py",
+      "function": "dm_hln_test",
+      "lineno": 326,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1133b/k1133b.py",
+      "function": "dm_hln_test",
+      "lineno": 427,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1133b/k1133b_robustness.py",
+      "function": "dm_hln_test",
+      "lineno": 601,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1134/k1134.py",
+      "function": "dm_hln_test",
+      "lineno": 419,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1135/k1135.py",
+      "function": "dm_hln_test",
+      "lineno": 494,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1136/k1136.py",
+      "function": "dm_hln_test",
+      "lineno": 421,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1137/k1137.py",
+      "function": "dm_hln_test",
+      "lineno": 460,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1138/k1138.py",
+      "function": "dm_hln_test",
+      "lineno": 457,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1139/k1139.py",
+      "function": "dm_hln_test",
+      "lineno": 306,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1143/k1143.py",
+      "function": "dm_hln_test",
+      "lineno": 539,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1241/k1241.py",
+      "function": "dm_hln",
+      "lineno": 463,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1254_rl_volatility_pilot/k1254_rl_volatility_pilot.py",
+      "function": "dm_hln_test",
+      "lineno": 176,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1257/k1257_bma_volatility.py",
+      "function": "dm_harvey",
+      "lineno": 598,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1265/k1265.py",
+      "function": "dm_hln",
+      "lineno": 212,
+      "verdict": "canonical_like",
+      "lag_expr": "max(int(np.floor(4.0 * (n / 100.0) ** (2.0 / 9.0))), h - 1)",
+      "exercises_h1": true,
+      "notes": [
+        "h-1 present but floored via max() -- does not degenerate"
+      ]
+    },
+    {
+      "file": "experiments/k1303/k1303.py",
+      "function": "_dm_test_hac",
+      "lineno": 96,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1315/k1315_forecast_combination.py",
+      "function": "dm_hln_test",
+      "lineno": 320,
+      "verdict": "canonical_like",
+      "lag_expr": "int(T ** (1 / 3))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1320/k1320.py",
+      "function": "dm_test_hln_hac",
+      "lineno": 925,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(T ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1324/k1324.py",
+      "function": "dm_hln",
+      "lineno": 44,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1325/k1325.py",
+      "function": "dm_hln",
+      "lineno": 43,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1432/k1432_tw_financial_stress.py",
+      "function": "dm_test",
+      "lineno": 277,
+      "verdict": "canonical_like",
+      "lag_expr": "max(h - 1, 0)",
+      "exercises_h1": true,
+      "notes": [
+        "h-1 present but floored via max() -- does not degenerate"
+      ]
+    },
+    {
+      "file": "experiments/k1600/k1600.py",
+      "function": "dm_hln",
+      "lineno": 151,
+      "verdict": "canonical_like",
+      "lag_expr": "max(0, h - 1)",
+      "exercises_h1": true,
+      "notes": [
+        "h-1 present but floored via max() -- does not degenerate"
+      ]
+    },
+    {
+      "file": "experiments/k1654/k1654.py",
+      "function": "dm_hln_test",
+      "lineno": 667,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1682/k1682.py",
+      "function": "hln_dm",
+      "lineno": 419,
+      "verdict": "canonical_like",
+      "lag_expr": "max(0, horizon - 1)",
+      "exercises_h1": true,
+      "notes": [
+        "h-1 present but floored via max() -- does not degenerate"
+      ]
+    },
+    {
+      "file": "experiments/k189/k189_attention_vol.py",
+      "function": "dm_test_qlike",
+      "lineno": 73,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k241/k241_tsmom_no_btc.py",
+      "function": "dm_test",
+      "lineno": 304,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k247/k247_dual_momentum.py",
+      "function": "dm_test",
+      "lineno": 440,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k249/k249_risk_on_off.py",
+      "function": "dm_test_sharpe",
+      "lineno": 320,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k250/k250_tsmom_vt_hybrid.py",
+      "function": "dm_test",
+      "lineno": 489,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.ceil(n ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k266/k266_amihud_validation.py",
+      "function": "dm_test_hac",
+      "lineno": 93,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k300/k300_vix_speed_validation.py",
+      "function": "dm_test_hac",
+      "lineno": 93,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k339/k339_esg_validation.py",
+      "function": "dm_test",
+      "lineno": 168,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k398/k398_total_crypto.py",
+      "function": "dm_test",
+      "lineno": 61,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k426/k426_efficient_ginn.py",
+      "function": "dm_test",
+      "lineno": 455,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k434/k434_bma_garch.py",
+      "function": "dm_test",
+      "lineno": 396,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k444/k444_dcc_garch.py",
+      "function": "dm_test",
+      "lineno": 483,
+      "verdict": "canonical_like",
+      "lag_expr": "min(int(np.ceil(T ** (1 / 3))), 20)",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k450/k450_vrp_semivar_combined.py",
+      "function": "dm_test",
+      "lineno": 359,
+      "verdict": "canonical_like",
+      "lag_expr": "max(lag, h)",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k474/k474_weekly_rv_vs_vix.py",
+      "function": "dm_test",
+      "lineno": 103,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.ceil(n ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k475/k475_validated_ensemble.py",
+      "function": "dm_test",
+      "lineno": 281,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.ceil(n ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k481/k481_model_confidence_set.py",
+      "function": "dm_test",
+      "lineno": 445,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k482/k482_mcs_weighted_ensemble.py",
+      "function": "dm_test",
+      "lineno": 283,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.ceil(n ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k483/k483_commodity_vol.py",
+      "function": "dm_test_hac",
+      "lineno": 194,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k498/k498_earnings_vol.py",
+      "function": "dm_test",
+      "lineno": 616,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k553/k553_leveraged_vt_taiwan.py",
+      "function": "dm_test_harvey",
+      "lineno": 186,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(4 * (n / 100) ** (2 / 9)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k559/k559_conditional_dispersion.py",
+      "function": "dm_test",
+      "lineno": 443,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** 0.25))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k566/k566_factor_timing_vt.py",
+      "function": "diebold_mariano_test",
+      "lineno": 590,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k618/k618_kan_volatility.py",
+      "function": "dm_test",
+      "lineno": 94,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k619/k619_kan_corrected.py",
+      "function": "dm_test",
+      "lineno": 99,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k630/k630_overnight_intraday.py",
+      "function": "dm_test",
+      "lineno": 593,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k639/k639_crypto_equity_vol.py",
+      "function": "dm_test",
+      "lineno": 60,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k680/k680_percentile_cross_oos.py",
+      "function": "dm_test",
+      "lineno": 189,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k686/k686_percentile_corrected.py",
+      "function": "dm_test_hac",
+      "lineno": 241,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k687/k687_definitive_ranking.py",
+      "function": "dm_test_hac",
+      "lineno": 349,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k699/k699_contrarian_cross_oos.py",
+      "function": "dm_test",
+      "lineno": 146,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(n ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k770/k770_mem_model.py",
+      "function": "dm_test",
+      "lineno": 421,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(max_lag, n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k770b/k770b_mem_unified_target.py",
+      "function": "dm_test",
+      "lineno": 380,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(max_lag, n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k776/k776_dmem.py",
+      "function": "dm_test",
+      "lineno": 573,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(max_lag, n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k777/k777_multi_target_fair.py",
+      "function": "dm_test",
+      "lineno": 387,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k778/k778_mem_r2_native.py",
+      "function": "dm_test",
+      "lineno": 455,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k782/k782_har_5d_rv.py",
+      "function": "dm_test",
+      "lineno": 437,
+      "verdict": "canonical_like",
+      "lag_expr": "max(h - 1, 0)",
+      "exercises_h1": true,
+      "notes": [
+        "h-1 present but floored via max() -- does not degenerate"
+      ]
+    },
+    {
+      "file": "experiments/k782v2/k782v2_har_5d_rv.py",
+      "function": "dm_test",
+      "lineno": 477,
+      "verdict": "canonical_like",
+      "lag_expr": "max(h - 1, 0)",
+      "exercises_h1": true,
+      "notes": [
+        "h-1 present but floored via max() -- does not degenerate"
+      ]
+    },
+    {
+      "file": "experiments/k784/k784_garch_gru.py",
+      "function": "dm_test",
+      "lineno": 482,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.ceil(n ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k799/k799_grand_evaluation.py",
+      "function": "dm_test",
+      "lineno": 336,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k800/k800_conformal_var.py",
+      "function": "dm_test",
+      "lineno": 417,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k800v2/k800v2_conformal_var.py",
+      "function": "dm_test",
+      "lineno": 487,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k802/k802_gjr_skewt.py",
+      "function": "dm_test",
+      "lineno": 466,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k804/k804_cross_asset_skewt.py",
+      "function": "dm_test",
+      "lineno": 305,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k805/k805_mem_model.py",
+      "function": "dm_test",
+      "lineno": 313,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k809/k809_dispersion_timing.py",
+      "function": "dm_test",
+      "lineno": 68,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k814/k814_bayesian_mcmc_garch.py",
+      "function": "dm_test",
+      "lineno": 664,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(n ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k814v2/k814v2_bayesian_mcmc_fixed.py",
+      "function": "dm_test",
+      "lineno": 797,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(n ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k824/k824_quantile_forecasting.py",
+      "function": "dm_test",
+      "lineno": 412,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k824v2/k824v2_quantile_fixed.py",
+      "function": "dm_test",
+      "lineno": 455,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k825/k825_conformal_var_proxy.py",
+      "function": "dm_test",
+      "lineno": 668,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k849/k849_har_rv_taifex.py",
+      "function": "dm_test",
+      "lineno": 513,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k850/k850_har_rv_var_taiwan.py",
+      "function": "dm_test",
+      "lineno": 554,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k851/k851_jump_dynamics.py",
+      "function": "dm_test",
+      "lineno": 673,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k852/k852_realized_garch.py",
+      "function": "dm_test",
+      "lineno": 705,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k852b/k852b_regime_har.py",
+      "function": "dm_test",
+      "lineno": 771,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k853/k853_proxy_ablation.py",
+      "function": "dm_test",
+      "lineno": 484,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k854/k854_common_sample_var.py",
+      "function": "dm_test",
+      "lineno": 707,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k868/k868_har_day_night.py",
+      "function": "dm_test_nw",
+      "lineno": 483,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(n ** (1 / 3))))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k874/k874_joint_har_overnight.py",
+      "function": "dm_test",
+      "lineno": 846,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k877/k877_gold_silver_ratio.py",
+      "function": "dm_test",
+      "lineno": 69,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k899/k899_unified_var_paper1.py",
+      "function": "dm_test",
+      "lineno": 532,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k902/k902_paper1_tables_supplement.py",
+      "function": "dm_test_hac",
+      "lineno": 439,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k903/k903.py",
+      "function": "dm_test_hac",
+      "lineno": 501,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k913/k913_vrp_return_prediction.py",
+      "function": "dm_test",
+      "lineno": 425,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(T ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k947/k947.py",
+      "function": "dm_test_qlike",
+      "lineno": 499,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/k951/k951.py",
+      "function": "dm_test_hedge",
+      "lineno": 229,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/paper3_E2_cross_market_copula/paper3_E2.py",
+      "function": "dm_test",
+      "lineno": 763,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/predictive_model_selection/predictive_model_selection.py",
+      "function": "dm_test",
+      "lineno": 258,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/research_har_mcs_spy_0050_tw_tx_tsfm_timesfm_ttm_log_har/research_har_mcs_spy_0050_tw_tx_tsfm_timesfm_ttm_log_har.py",
+      "function": "dm_hln",
+      "lineno": 253,
+      "verdict": "canonical_like",
+      "lag_expr": "max(0, h - 1)",
+      "exercises_h1": true,
+      "notes": [
+        "h-1 present but floored via max() -- does not degenerate"
+      ]
+    },
+    {
+      "file": "experiments/research_pm2_5_regressor_nber_w22753_heyes_neidell_saberi/research_pm2_5_regressor_nber_w22753_heyes_neidell_saberi.py",
+      "function": "dm_hac",
+      "lineno": 406,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(math.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/vol_cartography/vol_cartography.py",
+      "function": "dm_test",
+      "lineno": 232,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(T ** (1 / 3)))",
+      "exercises_h1": true,
+      "notes": []
+    },
+    {
+      "file": "experiments/K1038/k1038.py",
+      "function": "dm_test",
+      "lineno": 440,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/K1041/k1041.py",
+      "function": "dm_test_qlike",
+      "lineno": 752,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/K1387/K1387.py",
+      "function": "dm_test",
+      "lineno": 405,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(T ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/K1649/K1649.py",
+      "function": "dm_test_hac",
+      "lineno": 469,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(1.5 * n ** (1.0 / 3.0))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/caviar_test/caviar_test.py",
+      "function": "dm_test_rq",
+      "lineno": 505,
+      "verdict": "canonical_like",
+      "lag_expr": "max(int(T ** (1 / 3)), 1)",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1000/k1000.py",
+      "function": "dm_test",
+      "lineno": 330,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1002/k1002.py",
+      "function": "dm_test_nw",
+      "lineno": 642,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1004/k1004.py",
+      "function": "dm_test",
+      "lineno": 312,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1005/k1005.py",
+      "function": "dm_test",
+      "lineno": 559,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1010/k1010.py",
+      "function": "dm_test_custom",
+      "lineno": 422,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1015/k1015.py",
+      "function": "dm_test",
+      "lineno": 570,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1016b/k1016b.py",
+      "function": "dm_test_nw",
+      "lineno": 528,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1020/k1020.py",
+      "function": "dm_test",
+      "lineno": 769,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1021/k1021.py",
+      "function": "dm_test",
+      "lineno": 381,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1028/k1028.py",
+      "function": "dm_test",
+      "lineno": 565,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1.0 / 3.0)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1066/k1066.py",
+      "function": "newey_west_dm",
+      "lineno": 464,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(T ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1073/k1073.py",
+      "function": "newey_west_dm",
+      "lineno": 798,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(T ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1075/k1075.py",
+      "function": "hac_dm_test",
+      "lineno": 463,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1076/k1076.py",
+      "function": "hac_dm_test",
+      "lineno": 473,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1077/k1077.py",
+      "function": "hac_dm_test",
+      "lineno": 495,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1078/k1078.py",
+      "function": "hac_dm_test",
+      "lineno": 480,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1079/k1079.py",
+      "function": "hac_dm_test",
+      "lineno": 602,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1080/k1080.py",
+      "function": "hac_dm_test",
+      "lineno": 496,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1081/k1081.py",
+      "function": "hac_dm_test",
+      "lineno": 497,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1082/k1082.py",
+      "function": "hac_dm_test",
+      "lineno": 313,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1083/k1083.py",
+      "function": "hac_dm_test",
+      "lineno": 536,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1085/k1085.py",
+      "function": "hac_dm_test",
+      "lineno": 605,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1086/k1086.py",
+      "function": "hac_dm_test",
+      "lineno": 577,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1087/k1087.py",
+      "function": "hac_dm_test",
+      "lineno": 662,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1088/k1088.py",
+      "function": "hac_dm_test",
+      "lineno": 645,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1089/k1089.py",
+      "function": "hac_dm_test",
+      "lineno": 634,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1090b/k1090b.py",
+      "function": "hac_dm_test",
+      "lineno": 273,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1091/k1091.py",
+      "function": "hac_dm_test",
+      "lineno": 332,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1092/k1092.py",
+      "function": "dm_test",
+      "lineno": 735,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1093/k1093.py",
+      "function": "dm_test",
+      "lineno": 681,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1096/k1096.py",
+      "function": "hac_dm_test",
+      "lineno": 669,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1098/k1098.py",
+      "function": "hac_dm_test",
+      "lineno": 667,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1099/k1099.py",
+      "function": "hac_dm",
+      "lineno": 681,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100/k1100.py",
+      "function": "dm_test",
+      "lineno": 1157,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100b/k1100b.py",
+      "function": "dm_test",
+      "lineno": 672,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100c/k1100c.py",
+      "function": "dm_test",
+      "lineno": 1207,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100d/k1100d.py",
+      "function": "dm_test",
+      "lineno": 683,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100e/k1100e.py",
+      "function": "dm_test",
+      "lineno": 854,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100f/k1100f.py",
+      "function": "dm_test",
+      "lineno": 726,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100g_d1/k1100g_d1.py",
+      "function": "dm_test",
+      "lineno": 453,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100g_d2/k1100g_d2.py",
+      "function": "dm_test_hln",
+      "lineno": 265,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100g_d3/k1100g_d3.py",
+      "function": "dm_test_hln",
+      "lineno": 363,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100g_d4/k1100g_d4.py",
+      "function": "dm_test_hln",
+      "lineno": 281,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100g_d5/k1100g_d5.py",
+      "function": "dm_test_hln",
+      "lineno": 322,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100g_d6/k1100g_d6.py",
+      "function": "dm_test_hln",
+      "lineno": 442,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100g_d7/k1100g_d7.py",
+      "function": "dm_test_hln",
+      "lineno": 347,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100g_d8/k1100g_d8.py",
+      "function": "dm_test_hln",
+      "lineno": 584,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100g_d9.py",
+      "function": "dm_test_hln",
+      "lineno": 540,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100g_d9/k1100g_d9.py",
+      "function": "dm_test_hln",
+      "lineno": 540,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1100h/k1100h.py",
+      "function": "dm_test_hln",
+      "lineno": 313,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(4.0 * (n / 100.0) ** (2.0 / 9.0))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1200/k1200.py",
+      "function": "dm_harvey",
+      "lineno": 125,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1258/k1258_forgetting_factor_bma.py",
+      "function": "dm_harvey",
+      "lineno": 606,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1300/k1300_forgetting_bma.py",
+      "function": "dm_harvey",
+      "lineno": 340,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1304/k1304.py",
+      "function": "dm_harvey",
+      "lineno": 604,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1317/k1317.py",
+      "function": "dm_harvey",
+      "lineno": 424,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1377/k1377.py",
+      "function": "dm_test",
+      "lineno": 230,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(n ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1391/k1391.py",
+      "function": "dm_test_hac",
+      "lineno": 387,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1392/k1392.py",
+      "function": "dm_test_hac",
+      "lineno": 389,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1393/k1393.py",
+      "function": "dm_test_hac",
+      "lineno": 382,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1396/k1396.py",
+      "function": "dm_test_harvey",
+      "lineno": 330,
+      "verdict": "canonical_like",
+      "lag_expr": "min(int(n ** (1 / 3)), 12)",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1420/k1420.py",
+      "function": "dm_test",
+      "lineno": 282,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1605/k1605_formal.py",
+      "function": "dm_test",
+      "lineno": 41,
+      "verdict": "canonical_like",
+      "lag_expr": "max(h - 1, 0)",
+      "exercises_h1": false,
+      "notes": [
+        "h-1 present but floored via max() -- does not degenerate"
+      ]
+    },
+    {
+      "file": "experiments/k1651/k1651.py",
+      "function": "dm_test_hac",
+      "lineno": 574,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(math.floor(1.5 * n ** (1.0 / 3.0))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k1683/k1683.py",
+      "function": "hln_dm",
+      "lineno": 403,
+      "verdict": "canonical_like",
+      "lag_expr": "max(0, h - 1)",
+      "exercises_h1": false,
+      "notes": [
+        "h-1 present but floored via max() -- does not degenerate"
+      ]
+    },
+    {
+      "file": "experiments/k205/k205_btc_micro_vt.py",
+      "function": "diebold_mariano_test",
+      "lineno": 221,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k219/k219_risk_parity_vs_equal.py",
+      "function": "dm_test",
+      "lineno": 293,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k244/k244_combined_strategy.py",
+      "function": "dm_test",
+      "lineno": 547,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k248/k248_carry_trade.py",
+      "function": "dm_test",
+      "lineno": 297,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k334/k334_defi_vol.py",
+      "function": "dm_test",
+      "lineno": 71,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k408/k408_nonequity_vt.py",
+      "function": "dm_test_sharpe",
+      "lineno": 308,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k439/k439_cross_asset_vrp.py",
+      "function": "dm_test_hac",
+      "lineno": 101,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k495/k495_unified_guide.py",
+      "function": "dm_test",
+      "lineno": 167,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(n ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k497/k497_loss_sensitivity.py",
+      "function": "dm_test",
+      "lineno": 403,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k503/k503_vix_meanrevert_strategy.py",
+      "function": "dm_test_returns",
+      "lineno": 438,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k527/k527_volume_garch.py",
+      "function": "dm_test_hac",
+      "lineno": 455,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k540/k540_har_ensemble_vt.py",
+      "function": "dm_test_returns",
+      "lineno": 150,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(T ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k543/k543_drawdown_conditional_vt.py",
+      "function": "diebold_mariano_test",
+      "lineno": 301,
+      "verdict": "canonical_like",
+      "lag_expr": "min(h, int(np.floor(n ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k558/k558_k553_taiwan_validation.py",
+      "function": "dm_test_harvey",
+      "lineno": 264,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(4 * (n / 100) ** (2 / 9)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k568/k568_optimal_weight_function.py",
+      "function": "dm_test",
+      "lineno": 220,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k592/k592_mf2_garch.py",
+      "function": "dm_test",
+      "lineno": 493,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k695/k695_ewma_lambda.py",
+      "function": "dm_test_hac",
+      "lineno": 280,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k702/k702_optimal_static.py",
+      "function": "dm_test_returns",
+      "lineno": 311,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k704/k704_risk_parity_deep.py",
+      "function": "dm_test",
+      "lineno": 306,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k840/k840_return_prediction_pipeline.py",
+      "function": "manual_dm_test",
+      "lineno": 374,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k880/k880_prg_spy_validation.py",
+      "function": "pairwise_dm_tests",
+      "lineno": 944,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k880b/k880b_es_supplement.py",
+      "function": "dm_test_fz_scores",
+      "lineno": 749,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k880v2/k880v2_prg_fixed.py",
+      "function": "pairwise_dm_tests",
+      "lineno": 1007,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n_d ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k881/k881_prg_multi_asset.py",
+      "function": "pairwise_dm_tests",
+      "lineno": 985,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k881b/k881b_multi_asset_es.py",
+      "function": "dm_test_fz",
+      "lineno": 687,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k886/k886_prg_0050tw.py",
+      "function": "pairwise_dm_tests",
+      "lineno": 1030,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.floor(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k905/k905_quantile_vol_forecast.py",
+      "function": "dm_test_pinball",
+      "lineno": 596,
+      "verdict": "canonical_like",
+      "lag_expr": "int(np.ceil(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k967/k967_quantile_forecast.py",
+      "function": "dm_test_pinball",
+      "lineno": 397,
+      "verdict": "canonical_like",
+      "lag_expr": "int(n ** (1 / 3))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/k988_sens/k988_sens.py",
+      "function": "compute_dm",
+      "lineno": 354,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(np.floor(T ** (1 / 3))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/paper3_E1_individual_stocks_copula/paper3_E1.py",
+      "function": "dm_test",
+      "lineno": 695,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(n ** (1 / 3)))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/research_evt_pot_gpd_garch_filter_es_e_backtesting/research_evt_pot_gpd_garch_filter_es_e_backtesting.py",
+      "function": "dm_test_hac",
+      "lineno": 598,
+      "verdict": "canonical_like",
+      "lag_expr": "max(1, int(math.floor(1.5 * n ** (1.0 / 3.0))))",
+      "exercises_h1": false,
+      "notes": []
+    },
+    {
+      "file": "experiments/K1655/K1655.py",
+      "function": "hln_dm",
+      "lineno": 673,
+      "verdict": "delegates_to_canonical",
+      "lag_expr": "_nw_lag(horizon, n)",
+      "exercises_h1": true,
+      "notes": [
+        "wraps the canonical volpred dm_test"
+      ]
+    },
+    {
+      "file": "experiments/k1356/K1356.py",
+      "function": "pooled_dm",
+      "lineno": 329,
+      "verdict": "delegates_to_canonical",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "wraps the canonical volpred dm_test"
+      ]
+    },
+    {
+      "file": "experiments/k1560/k1560.py",
+      "function": "dm_and_mcs",
+      "lineno": 605,
+      "verdict": "delegates_to_canonical",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "wraps the canonical volpred dm_test"
+      ]
+    },
+    {
+      "file": "experiments/k1616_cointegration_ect_har_rv/k1616_cointegration_ect_har_rv.py",
+      "function": "hln_correct",
+      "lineno": 260,
+      "verdict": "delegates_to_canonical",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "wraps the canonical volpred dm_test"
+      ]
+    },
+    {
+      "file": "experiments/k1624_rv_long_memory_vs_level_shifts/k1624_rv_long_memory_vs_level_shifts.py",
+      "function": "dm_hln",
+      "lineno": 398,
+      "verdict": "delegates_to_canonical",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "wraps the canonical volpred dm_test"
+      ]
+    },
+    {
+      "file": "experiments/k1666/K1666.py",
+      "function": "date_clustered_dm",
+      "lineno": 441,
+      "verdict": "delegates_to_canonical",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "wraps the canonical volpred dm_test"
+      ]
+    },
+    {
+      "file": "experiments/k874b/k874b_logspace_cross_har.py",
+      "function": "compute_dm_tests",
+      "lineno": 621,
+      "verdict": "delegates_to_canonical",
+      "lag_expr": null,
+      "exercises_h1": true,
+      "notes": [
+        "wraps the canonical volpred dm_test"
+      ]
+    },
+    {
+      "file": "experiments/k1260/k1260_gjr_x_spy.py",
+      "function": "fmt_dm",
+      "lineno": 367,
+      "verdict": "delegates_to_canonical",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "wraps the canonical volpred dm_test"
+      ]
+    },
+    {
+      "file": "experiments/k1357/K1357.py",
+      "function": "pooled_dm",
+      "lineno": 321,
+      "verdict": "delegates_to_canonical",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "wraps the canonical volpred dm_test"
+      ]
+    },
+    {
+      "file": "experiments/k1358/K1358.py",
+      "function": "pooled_dm",
+      "lineno": 465,
+      "verdict": "delegates_to_canonical",
+      "lag_expr": null,
+      "exercises_h1": false,
+      "notes": [
+        "wraps the canonical volpred dm_test"
+      ]
+    }
+  ]
+}

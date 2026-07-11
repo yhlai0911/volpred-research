@@ -78,7 +78,14 @@ HAC** — 這個退化行為要當場警覺。硬規則：`lag = max(h-1, repo c
 **不要自寫 local DM/HLN 實作蓋掉 canonical** — canonical 存在就用它，要另寫必須以它為下限/對照。
 **K1655 教訓**：local `hln_dm` 用 `lag=h-1`，h=1→lag=0，loss differential acf(1)=0.68 → |t| 灌水；
 修正後 60 個 DM cell 的 Harvey-significant 由 26 掉到 18。腳本裡的 helper 欄位其實一直存著正確答案，
-只是沒人拿它當主檢定。
+只是沒人拿它當主檢定 — **真正的失效點是「哪個變體餵給對外結論」，不是「程式碼裡有沒有 h-1」**。
+
+**本條已機械化（2026-07-11 class sweep）**，這段散文現在只是 pointer：
+- **Enforcement owner**（唯一，anti-stacking 勿再加第二層）：`scripts/tests/test_dm_hac_lag_ratchet.py`
+  — 新寫的 local DM 若用 `range(1, h)` 當 HAC 迴圈，CI 直接 FAIL。
+- **稽核器**：`uv run python scripts/audit_dm_hac_lag.py`（全量 AST 掃 `experiments/**`，分類 bandwidth 規則）。
+- **凍結 backlog**：`storage/ops/dm_hac_lag_baseline.json`（139 站點，**只准變少**；修好一個就從 baseline 移除）。
+- **全量掃描結果**：`docs/governance/2026-07/dm_hac_lag_class_sweep.md`（含盲區分析與實質性 caveat）。
 
 ### 跨市場比較必 symmetric refinement
 若 benchmark 用 canonical spec（e.g. DEV refined EM）、alternative 用 unrefined EM-only，得到的係數差是 **asymmetric artifact 不是真效應**。必須**兩邊同步 refine** 或**兩邊同 EM-only**。**K1216b ρ=-0.071 教訓**：asymmetric refinement 下 spurious 負相關；K1216c 全 refine 後 ρ=+0.379 與 canonical +0.441 indistinguishable（null）。
