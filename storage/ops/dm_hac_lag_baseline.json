@@ -5,7 +5,7 @@
   "canonical": "volpred.stats.model_evaluation.dm_test",
   "policy": "Frozen backlog. The set may only shrink -- new entries fail CI.",
   "frozen_at": "2026-07-11 (K1655 class sweep)",
-  "count": 139,
+  "count": 137,
   "degenerate_sites": [
     "experiments/K1048/k1048.py::dm_test",
     "experiments/K1404/K1404.py::dm_test",
@@ -79,7 +79,6 @@
     "experiments/k487/k487_gjr_vix_cross_asset.py::diebold_mariano_test",
     "experiments/k490/k490_gjrx_vix9d.py::diebold_mariano_test",
     "experiments/k506/k506_ewt_volspread_cross_oos.py::dm_test",
-    "experiments/k507/k507_dynamic_allocation.py::diebold_mariano_test",
     "experiments/k522/k522_har_rv_pilot.py::dm_test",
     "experiments/k529/k529_rough_volatility.py::dm_test",
     "experiments/k530/k530_har_multiscale.py::dm_test",
@@ -98,7 +97,6 @@
     "experiments/k576/k576_vol_clustering_vt.py::dm_test",
     "experiments/k583/k583_iv_surface.py::dm_test",
     "experiments/k591/k591_window_size_sweep.py::dm_test",
-    "experiments/k621/k621_mf2_garch.py::dm_test",
     "experiments/k622/k622_window_sensitivity.py::dm_test",
     "experiments/k623/k623_mf2_garch_corrected.py::dm_test",
     "experiments/k624/k624_har_pd_daily.py::dm_test",
@@ -146,5 +144,17 @@
     "experiments/vix_term_structure_trading/vix_term_structure_trading.py::dm_test",
     "experiments/vix_term_structure_vol_pred/vix_term_structure_vol_pred.py::dm_test",
     "experiments/wavelet_vol_decomposition/wavelet_vol_decomposition.py::dm_test"
+  ],
+  "retired": [
+    {
+      "site": "experiments/k507/k507_dynamic_allocation.py::diebold_mariano_test",
+      "date": "2026-07-11",
+      "note": "swapped to canonical dm_test; re-run queued"
+    },
+    {
+      "site": "experiments/k621/k621_mf2_garch.py::dm_test",
+      "date": "2026-07-11",
+      "note": "swapped to canonical dm_test; re-run queued"
+    }
   ]
 }
