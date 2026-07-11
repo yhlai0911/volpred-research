@@ -152,6 +152,16 @@ assert_allow_cwd "commit msg mentions amend"   "$SHARED" "git commit -m 'ban --a
 assert_allow_cwd "commit -C reuse message"     "$SHARED" "git commit -C HEAD~1"
 assert_allow_cwd "plain commit on shared main" "$SHARED" "git commit -m normal"
 
+# 2026-07-11 strike 3：git commit -m 內嵌非 ASCII → 非 UTF-8 commit message，push 後不可回復
+assert_deny  "commit -m 中文"              "git commit -m '修正波動率計算'"
+assert_deny  "commit -m 中文（雙引號）"    "git commit -m \"修正波動率計算\""
+assert_deny  "commit --message 中文"       "git commit --message '修正'"
+assert_deny  "commit -m emoji"             "git commit -m 'fix: 🚫 ban this'"
+assert_deny  "git -C commit -m 中文"       "git -C /tmp/repo commit -m '中文訊息'"
+assert_allow "commit -F 中文檔（合法解）"  "git commit -F /tmp/中文訊息.txt"
+assert_allow "commit -m 純 ASCII"          "git commit -m 'fix: ban non-ascii -m'"
+assert_allow "非 commit 指令含中文"        "echo '中文' > /tmp/x"
+
 echo "---"
 echo "PASS=$PASS FAIL=$FAIL"
 [[ "$FAIL" -eq 0 ]]

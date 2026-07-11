@@ -76,6 +76,18 @@ _amend_target_is_shared_main() {
   [[ "$toplevel" == "$root_real" && "$branch" == "main" ]]
 }
 
+# 2026-07-11 hourly-22（strike 3）：`git commit -m` 內嵌非 ASCII 會產出非 UTF-8 的 commit 訊息
+# （git 自己會警告 `commit message did not conform to UTF-8`，但那只是 warning，commit 照樣成立）。
+# 訊息一旦 push 出去就只能 force push 才改得掉，而 force push 是禁止的 —— 亦即這個錯誤「不可回復」。
+# error_log 早在 2026-05 就寫了「中文 commit 一律 Write 檔案 + `git commit -F <file>`」，
+# 但 prose 擋不住趕時間的 agent：cea826ad0 中招、2369c7d07 又中招（同一週）。散文 → 機械 gate。
+# 判定用「commit 指令段 + `-m`/`--message` + 整行含非 ASCII 字元」；`-F` / `-C` / 純 ASCII 訊息不受影響。
+# 這裡刻意比對含引號的原始 COMMAND（不能用 COMMAND_NOQ —— 訊息本體正是被引號包住的那一段）。
+MESSAGE_FLAG='(-m|--m[[:alpha:]]*)'
+_commit_message_has_non_ascii() {
+  printf '%s' "$COMMAND" | LC_ALL=C grep -q '[^[:print:][:space:]]'
+}
+
 DENY_REASON=""
 if printf '%s' "$COMMAND" | grep -qE "${CMD_START}git${GIT_GLOBAL_OPTS}[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]]${FORCE_FLAG}([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止 git worktree remove --force（CLAUDE.md『絕對禁止』；K1032/K1618 誤刪未合併實驗事故）。改用 bash scripts/merge_worktree.sh 正常合併；worktree 從 stale base 分出時用 git checkout <branch> -- experiments/kXXXX/ path-scoped 抽取。"
@@ -88,6 +100,9 @@ elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}codex[[:space:]]+exec([[
 elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit${SEG_TAIL}[[:space:]]${AMEND_FLAG}([[:space:]]|\$)" \
      && _amend_target_is_shared_main; then
   DENY_REASON="🚫 禁止在共用 main checkout 的 main 分支上 git commit --amend（2026-07-10 hourly-23 事故：amend 打在另一個 agent 剛做的 commit 上，覆蓋其 message 並吞掉它 5 個未提交的在途檔案）。主 checkout 同時有 dispatch worker / codex-vscode / rescue agent 在 commit，HEAD 不保證是你做的。改法：要修訊息或補內容，就再疊一個 commit（歷史多一行，勝過覆蓋別人的一行）。在自己的 worktree 分支上 amend 不受此攔截。"
+elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit${SEG_TAIL}[[:space:]]${MESSAGE_FLAG}([[:space:]]|=|\$)" \
+     && _commit_message_has_non_ascii; then
+  DENY_REASON="🚫 禁止用 git commit -m 內嵌非 ASCII（中文 / emoji）訊息（strike 3：cea826ad0、2369c7d07 同週兩次；error_log 2026-05 的散文規則擋不住）。經過 shell 會產出非 UTF-8 的 commit message，git 只給 warning 照樣 commit，push 出去後只有 force push 改得掉 —— 而 force push 是禁止的，等於不可回復。改法：用 Write 工具把訊息寫成 /tmp/msg.txt，再 git commit -F /tmp/msg.txt。純 ASCII 訊息、-F、--amend 走既有規則，皆不受此攔截。"
 fi
 if [[ -n "$DENY_REASON" ]]; then
   printf '%s' "$INPUT" | jq --arg reason "$DENY_REASON" \

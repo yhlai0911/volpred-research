@@ -2,6 +2,53 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-11 巢狀模型用 raw DM 判 NULL —— 「沒過 Harvey 門檻」不能反推「沒有預測力」（K1681）
+
+**問題**：K1681（SMAD 作為波動/左尾預測子）把 NULL verdict 的一條腿架在
+「樣本外 DM t = −2.32，未過 Harvey (2016) |t| > 3.0 門檻」上。但 M2B = M1B + SMAD 欄位，
+**兩個模型是巢狀的**。巢狀比較下 raw Diebold-Mariano 在虛無假設之下不是標準常態：
+即使新變數的母體係數為零，大模型仍要多估參數，估計噪音會讓它的 MSPE 期望值偏高 —— 也就是
+**raw DM 系統性偏向懲罰大模型**。用它來「證明沒有增量預測力」是把偏誤當證據。
+
+**現象**：Codex primary-path review 在被 700s 上限砍掉前，自己重算了 Clark & West (2007)
+MSPE-adjusted 統計量：`y_rv` 的 CW t = **+6.71**（raw DM 是 −2.32）、`y_semivar` CW t = **+3.70**。
+統計那條腿整個翻面。
+
+**過程**：這與 K1655 的 DM/HAC lag 全庫稽核是**同一個 bug 家族** —— 失效點都不是「程式寫錯」
+（k1681.py 的 HAC bandwidth、shift(1)、forward-label gap、日期聚合 DM 全部正確），而是
+**「哪一個檢定變體被拿去支撐對外宣稱」**。腳本裡算對的東西，不一定是餵給結論的那個。
+
+**解決**：
+1. K1681 verdict 方向不變（仍是 NULL、仍不可交易），但**理由換一條腿**：改由**經濟顯著性**
+   單獨承擔（增量 R² = 0.287pp，僅 HAR 自身 R² 的 0.54%）—— 這個數字與檢定選擇無關。
+   README §8 完整記錄，摘要句與 §5.2 表格加警語。**未手改 results.json**（等 CW 正式實作後重跑）。
+2. **關鍵區分（別把 sweep 做成「把 NULL 全翻成 PASS」）**：CW 顯著只代表**母體係數不為零**，
+   不代表**有限樣本 MSPE 會改善**。K1681 的 `y_semivar` 就是實例 —— CW t = 3.70 顯著，
+   但 raw loss differential 的符號仍是反的（加了 SMAD 樣本外反而變差）。
+   問「這個變數有沒有資訊」用 CW；問「加進去會不會預測得比較準」用 raw MSPE。兩個問題不同。
+3. Follow-up 任務：`k1681_clark_west_nested_dm_rerun`（正式實作 CW + 重跑）、
+   `nested_dm_misuse_class_sweep`（全庫掃描 + 機械 ratchet gate，比照 `test_dm_hac_lag_ratchet.py`）。
+
+## 2026-07-11 `git commit -m` 內嵌中文 → 非 UTF-8 commit message（STRIKE 3，散文規則升級成機械 gate）
+
+**問題**：`git commit -m '中文訊息'` 經過 shell 會產出**非 UTF-8** 的 commit message。
+git 只給一句 warning（`commit message did not conform to UTF-8`），**commit 照樣成立**；
+訊息一旦 push 出去，只有 force push 改得掉 —— 而 force push 是禁止的。**等於不可回復**。
+
+**現象**：`cea826ad0` 與 `2369c7d07`（我，hourly-22）同一週兩次中招，origin 上的訊息是亂碼。
+`--amend` 想補救時被另一條 deny hook 正確擋下（共用 main checkout 不可 amend 別人的 commit）。
+
+**過程**：error_log 2026-05 早就寫了「中文 commit 訊息一律先 Write 成檔案，再 `git commit -F <file>`」
+（本檔 line 333）。**散文規則存在、被違反、再違反** —— 這正是 CLAUDE.md three-strike 說的
+「prose 提醒（strike 1）→ 機械 gate（strike 2+）」。趕時間的 agent 不會回頭讀 error_log。
+
+**解決（機械 gate，收編進既有 deny hook，不新開層 — anti-stacking）**：
+`.claude/hooks/pretooluse-bash-optimizer.sh` 第 6 條 deny —— 指令段是 `git commit`、帶
+`-m`/`--message`、且整行含非 ASCII 字元（中文 / emoji）→ 直接 deny，訊息裡直接給正解
+（Write 到 /tmp/msg.txt + `git commit -F`）。`-F`、`-C`、純 ASCII `-m` 皆不受影響。
+Regression: `scripts/tests/test_pretooluse_deny.sh` 新增 5 deny / 3 allow（含
+「`-F` 帶中文檔名要放行」「非 commit 指令含中文要放行」兩個 false-positive 防護），現 75 assertions 全綠。
+
 ## 2026-07-11 「已上線的圖 = 人眼認可過的版面」—— 這個校準前提是假的，兩篇線上文章一直掛著壞圖
 
 **問題**：懶人包版面 gate（`scripts/lazypack_layout_guard.py`）補「文字溢出容器」判準（OVERFLOW）時，
