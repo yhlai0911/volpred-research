@@ -395,9 +395,10 @@ def _run_render_script(script: Path, timeout_s: float) -> tuple[bool, str]:
     """Run the codex-written render script locally. (ok, failure_text).
 
     Under scripts/lazypack_layout_guard.py: a figure whose text is clipped by the
-    canvas or overlaps other text raises out of savefig, so a garbled panel fails
-    here and reaches the repair round. Without it "the PNG exists" was the whole
-    success criterion, and three unreadable panels shipped (2026-07-11).
+    canvas, overlaps other text, or bursts out of the card it is drawn on raises out
+    of savefig, so a garbled panel fails here and reaches the repair round. Without it
+    "the PNG exists" was the whole success criterion, and three unreadable panels
+    shipped (2026-07-11).
     """
     guard = ROOT / "scripts" / "lazypack_layout_guard.py"
     try:
