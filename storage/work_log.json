@@ -16377,5 +16377,13 @@
     "topology_override": "compute_queue->inline (86s script; no need to re-enqueue an agent)",
     "reviewer_source": "feature-dev:code-reviewer subagent (codex exec is prohibited inside a dispatch fire)",
     "verdict": "H2_UNSUPPORTED (null) — verdict robust to the fix"
+  },
+  {
+    "timestamp": "2026-07-12T22:15",
+    "task_type": "platform_ops",
+    "actor": "hourly-22",
+    "task_id": "supervisor_hang_alert_tests_red_on_main",
+    "summary": "Hang-alert tests were vacuously red: fakes skipped reserve_fire() so the worker took the loser branch. Fixed the fixtures to honor production's reserve-then-attach contract. Production alerting was never broken (owner did receive hang CRITICALs). Tests only, no daemon reload. 112 green.",
+    "commit": "c320ae486"
   }
 ]
