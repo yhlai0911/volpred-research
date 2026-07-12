@@ -97,8 +97,15 @@ were needed. Window *starts* span only 2018-04-18 to 2018-04-19 — each row tak
 | 9-stock mean γ | 0.0323 |
 | 10-security mean γ (incl. 0056) | 0.0512 |
 | TWII rolling γ | 0.1975 |
-| Amplification ratio (9-stock) | **6.12×** |
-| Amplification ratio (10-security) | 3.85× |
+| ~~Amplification ratio (9-stock)~~ | ~~6.12×~~ — **do not report; see §6.3** |
+| ~~Amplification ratio (10-security)~~ | ~~3.85×~~ — **do not report; see §6.3** |
+| **Difference** γ_TWII − γ̄_9stock | **0.184**, 95% CI [0.072, 0.298] ← **report this instead** |
+
+> **The amplification ratio must not be quoted as a point estimate.** Its denominator is a mean of nine
+> individually insignificant γ's whose bootstrap CI **covers zero**, which makes the ratio's Fieller
+> confidence set unbounded (bootstrap 95% CI: **[−26×, +34×]**). The ratios above are printed only
+> because the paper currently reports one and the comparison is owed. **§6.3 gives the two statistics
+> that are robust and should replace it.**
 
 **Not one of the nine individual stocks has a significant γ** (largest |t| = 1.56). Chunghwa Telecom's
 point estimate is *negative*. And the TAIEX's own rolling γ carries **t = 1.86 — not significant at
@@ -124,16 +131,23 @@ estimates.
 | Ratio (9-stock) | 5.0× | 6.53× | **6.12×** |
 | Ratio (10-security) | 4.5× | 3.75× | **3.85×** |
 
-### A correction the paper owes itself
+### The 2886 "3× off" self-accusation — withdraw it, but do **not** replace it with vindication
 
 `body_v3.tex` L155–181 currently self-reports: *"2886 legacy 0.179 → reproducible 0.054 (3× off)"*.
 
-**That accusation was itself an artifact of the stale window.** On the correct 2026 window, Mega
-Financial's γ is **0.170** — close to the legacy 0.179, not 3× away from it. The 0.054 came from a
-window that ended in January 2025. The paper currently accuses itself of a discrepancy that does not
-exist at the right sample, and the provenance comment must be corrected along with the numbers.
+An earlier draft of this README argued that the 2026 window gives 0.170 ≈ the legacy 0.179, so the
+paper's self-accusation was wrong. **That argument was motivated reasoning and is withdrawn.** §6 of this
+same README shows 2886's γ is *end-date dependent*; an agreement that can be reached by moving the
+terminal date is not evidence that N121 was computed correctly. It is a coin-flip agreement, and a
+referee would read it as one.
 
-(The *t*-statistic does move: 2.42 → 1.56. 2886 loses significance; its point estimate stands.)
+**The honest statement:** the 0.054-vs-0.179 gap is *not* evidence of a reproduction failure — it is
+inside the range this estimator spans as the end date moves. But N121 **remains untraceable** (no
+surviving source JSON), and its agreement with one particular window does not retire that provenance
+problem. The paper should drop the "3× off" claim as unfounded **and** keep treating N121 as
+unreproducible.
+
+(The *t*-statistic also moves: 2.42 → 1.56, so 2886 is not significant at the primary window either.)
 
 ---
 
@@ -177,35 +191,111 @@ common end monthly from 2025-01 to 2026-07 (figure: `end_date_sensitivity.png`):
 | TWII γ median implied SE | **0.082** |
 | 0056's rank among the 12 | **1st at every end date** |
 
-**Interpretation — and a claim we withdrew.** The first draft of this README argued that because the
-TWII γ spread across end dates (~0.11) is about the size of its own standard error (~0.08), the
-estimates are "imprecise rather than regime-unstable". **That inference is not valid and is withdrawn.**
-Consecutive end dates share ~97% of their observations, so their sampling errors are strongly
-*positively* correlated: the standard error of the *difference* between two overlapping estimates is far
-smaller than √2 × SE. Two such estimates can therefore be significantly different from each other even
-though their individual confidence intervals overlap almost entirely. Comparing a spread of dependent
-point estimates against marginal standard errors is not a test of anything, and the sweep is not a
-sampling distribution.
+**A claim we got backwards, twice.** The first draft argued the spread was "about one standard error
+wide, so the estimates are imprecise". The second draft withdrew that as *un-rigorous*. **Both were
+wrong, and in the same direction.** The overlap does not merely weaken the comparison — **it reverses
+it.**
 
-What can be said **without** that machinery:
+σ ≈ 0.08 is the marginal sampling SD of *one* estimate around the true γ. The spread is a dispersion of
+*differences between estimates that share most of their data*. Under a constant-parameter null, two
+windows of length *n* sharing a fraction ρ of their observations satisfy
 
-1. **Each individual estimate is imprecise on its own terms.** TWII's rolling γ at the primary window is
-   0.198 with **t = 1.86 — not significant at 5%**. Its 95% CI is roughly [−0.01, 0.41], which contains
-   every other end date's point estimate *and* contains the paper's rendered 0.272. The data do not
-   reject the legacy value; they simply cannot pin it down.
-2. **The estimates depend materially on the terminal date**, and the driver is identifiable (below):
-   specific extreme sessions entering and leaving the window.
-3. Therefore **no single end date's point estimate should be reported as a sharp structural constant.**
-   The rendered 5.0× ratio sits inside the swept interval, so the ratio's **order of magnitude survives**
-   — but its second digit is not identified.
+> **SD(γ̂₁ − γ̂₂) ≈ σ·√(2(1−ρ))**
 
-**What would settle whether the movement is *real*** (i.e. genuine parameter instability rather than
-noise): a formal parameter-stability test on the GJR coefficients (Nyblom / CUSUM), or a block bootstrap
-over the union sample that respects the overlap. **This experiment does not run either**, so it makes no
-claim about structural stability in the statistical sense — only the descriptive claim that the reported
-number moves with an arbitrary choice, which is enough to require the caveat in the paper.
+Adjacent end dates here have ρ ≈ 0.99, so the correct null SD is roughly **one seventh of σ** — not
+√2 × σ. Scoring the observed movement against σ *understates* it several-fold. And the worst offender is
+our own headline: **the 9-stock mean γ doubles (0.027 → 0.058) between two windows sharing 99% of their
+observations.** No constant-parameter DGP produces that from sampling noise.
 
-### Which observations actually drive it
+The two readings were also self-contradictory: §6 cannot say "just imprecision" twenty lines above §6.1
+saying "an event-driven statistic". **Noise is not attributable to nameable sessions.** The fact that we
+can point at 2025-04-07 is itself evidence against the noise reading.
+
+**So the sweep is tested properly instead of narrated** (`inference.py` → `inference_results.json`
+`.c_constant_gamma_null`): fit GJR to the full TWII sample, simulate paths in which γ is **constant by
+construction**, run the *identical* 19-date rolling sweep on each, and ask how often the swept max−min
+range is as large as the observed one. This handles the ~99% overlap **and** the max−min multiplicity
+exactly, with no asymptotics. Result in §6.2 below.
+
+**What this design can and cannot establish.** It *can* show the movement exceeds what a constant-γ
+process produces, and trace it to specific sessions. It **cannot** separate (i) genuine time-variation in
+γ from (ii) the GJR MLE's finite-sample sensitivity to a handful of influential negative returns. Both
+imply the same policy, and we do not adjudicate between them.
+
+**On the ratio.** The swept range 3.26×–6.80× is **a factor of 2.08 — the *first* significant digit is
+not identified.** That the paper's rendered 5.0× "sits inside" that interval is not validation; so would
+almost any number one might have written down. **Do not report a point ratio.** See §6.3 — the ratio is
+worse than imprecise, it is ill-posed.
+
+### 6.2 The movement is **not** sampling noise — tested, not asserted
+
+Constant-γ parametric bootstrap, B = 999 (`inference_results.json` `.c_constant_gamma_null`):
+
+| | |
+|---|---|
+| Observed sweep range (max − min TWII γ) | **0.1099** |
+| Null distribution of that range, 95th pct | 0.0326 |
+| Null 99th pct | 0.0413 |
+| **p-value** | **0.0010** |
+
+**Reject the constant-γ null.** The observed movement is more than three times the null's 95th
+percentile. Whatever it is, it is not what a constant-parameter GJR process does. (It still does not
+identify *which* of the two causes — genuine time-variation, or MLE sensitivity to a few influential
+shocks — and we do not claim it does.)
+
+### 6.3 The amplification ratio is **ill-posed** — do not report it
+
+This is independent of the sweep, and it is the single biggest referee risk in the package.
+
+The ratio is γ_TWII / γ̄_9stock. **Not one of the nine stock γ's is significant** (|t| = 0.27 … 1.56; 2412's
+is negative), and **the numerator is not significant either** (t = 1.86). A ratio whose denominator's
+confidence interval covers zero has an **unbounded Fieller confidence set**. The moving-block bootstrap
+(B = 999, 252-session blocks, date blocks resampled *jointly* across all ten securities so their
+cross-sectional dependence is preserved) confirms this is not a theoretical worry:
+
+| Quantity | Bootstrap 95% CI |
+|---|---|
+| Denominator γ̄_9stock | **[−0.016, 0.130]** — **covers zero** |
+| **Ratio** γ_TWII / γ̄_9stock | **[−26.2×, +33.6×]** (full range −2504× … +8205×) |
+
+**The ratio is not a usable statistic.** Reporting "6.12×" — or the paper's "5.0×" — as a point estimate,
+with the sweep range passed off as its uncertainty, would not survive review.
+
+**What to report instead.** Two things, both robust:
+
+| Statistic | Value | Inference |
+|---|---|---|
+| **Difference** D = γ_TWII − γ̄_9stock | **0.184** | 95% CI **[0.072, 0.298]**, **P(D ≤ 0) = 0.0000** |
+| **Ordering**: index γ exceeds *every* stock's γ | **9 / 9** | sign test **p = 0.0020**; Wilcoxon **p = 0.0020** |
+
+**The paper's diversification-amplification thesis survives — its quantification does not.** The index's
+leverage effect really is larger than the individual stocks', robustly and significantly. It simply
+cannot be expressed as a multiple. Say "the index γ exceeds every one of the nine constituents'
+(sign test p = 0.002), by 0.18 [0.07, 0.30] in absolute terms" — and drop the "×".
+
+*(Caveat on the block bootstrap: block resampling splices the GARCH recursion at block boundaries, which
+attenuates measured persistence. A 252-session block leaves only ~8 boundaries in 2000 sessions, so the
+distortion is small — but this is an approximate interval. The sign test is the assumption-light backstop
+and it agrees.)*
+
+### 6.4 Which observations actually drive it — **identified, not asserted**
+
+An earlier draft attributed the movement to specific segments by comparing two windows — which cannot
+work, because those windows differ at *both* ends (observations enter at the back **and** leave at the
+front). The identified test holds one window fixed and **ablates** the candidate sessions from inside it
+(`inference_results.json` `.b_event_ablation`):
+
+| Ablation | Window | γ with | γ without | Δ |
+|---|---|---|---|---|
+| **3 sessions**: 2025-04-07…09 (tariff shock) | primary, 2000 obs | TWII 0.1975 | 0.1673 | **−0.030** |
+| same 3 sessions | primary, 2000 obs | 9-stock mean 0.0323 | **0.0134** | **−0.019 (−58%)** |
+| **1 session**: 2018-02-06 (VIXmageddon) | 2026-04-17 window | TWII 0.2650 | 0.2315 | **−0.034** |
+
+**Three sessions out of two thousand carry more than half of the nine-stock leverage estimate.** One
+single session moves the index's γ by 0.034. That is the mechanism behind §6.2's rejection, and it is
+why the rolling block cannot carry a structural interpretation.
+
+### Segment description (context for the above)
 
 This is not random drift. It is a handful of extreme sessions moving in and out of an 8-year window
 whose boundaries are set by the arbitrary date of the data pull:
@@ -269,35 +359,61 @@ is a reason to keep the **full-sample Bollerslev–Wooldridge spec as the paper'
 
 ---
 
-## 9. Review
+## 9. Review — **CONDITIONAL_PASS**
 
 Independent adversarial review by a fresh-context `feature-dev:code-reviewer` subagent (Codex hijacked —
-see §8). Verdict and the disposition of every finding: **`review_notes.md`**.
+see §8). Verdict: **CONDITIONAL_PASS** — *"the estimates are trustworthy; the conclusions drawn from them
+are not."* It was right, and it caught two ship-blockers I had missed or got backwards:
+
+1. **The "imprecise, not regime-unstable" reading was backwards**, and the overlap *reverses* rather than
+   merely weakens the inference. → Tested properly (§6.2): **constant-γ null rejected, p = 0.001**.
+2. **The amplification ratio is ill-posed**, not merely imprecise — its denominator is not
+   distinguishable from zero. → Confirmed (§6.3): bootstrap ratio CI **[−26×, +34×]**. Replaced with the
+   difference and the sign test.
+
+It also caught that I had fixed the ablation ordering for 2317 but **not for the identical 0050 case**,
+that the multistart compared candidates against a *non-converged* incumbent, and that my 2886
+"vindication" (§4) was motivated reasoning. All fixed. Full findings and per-item disposition:
+**`review_notes.md`**.
 
 ## 10. Honesty ledger
 
 - **No lookahead, by construction.** γ is an in-sample descriptive MLE on the last 2000-observation
   window. No forecast, no OOS split, no train/test boundary, no signal — there is no channel through
   which future information could enter.
-- **Seeded.** The MLE is deterministic; `SEED = 20260713` is used only for perturbed restarts on
-  non-convergence. **No restart was needed** — all fits converged first try.
-- **Nothing hand-edited.** Every number in the results JSON is produced by the script from the committed
-  snapshots.
+- **Seeded.** MLE is deterministic; `SEED = 20260713` seeds the perturbed restarts and both bootstraps.
+- **"All fits converged, no restarts needed" is backed by a counter, not a spot check**:
+  `fit_diagnostics` in the results JSON covers **all 276 fits** in the run (3 named variants + the
+  ablation variant + every row of the 19-date sweep) — `max_restarts = 0`, `nonzero_convergence = 0`.
+- **Calendar alignment is an asserted invariant, not an observation.** `run_variant()` **raises** if the
+  12 rows do not share one `window_end`. It held across all 23 runs. (The 12 series do *not* share a
+  trading calendar — the stocks' windows start 2018-04-18, the index/ETF rows 2018-04-19 — so this could
+  silently regress without the assert.)
+- **Offline reproducibility is proven, not asserted**: the estimation script runs to completion with all
+  outbound socket connections blocked.
+- **Nothing hand-edited.** Every number in both results JSONs is produced by the scripts from the
+  committed snapshots.
+- **Two claims were withdrawn after they were already written** (§6, §4). Both are recorded rather than
+  quietly deleted, because a reader who saw the earlier version deserves to know which way the error ran.
 - **Reproduce** (offline, reads only `data/`):
-  `uv run python experiments/paper2_taiwan_indiv_rolling_gamma/paper2_taiwan_indiv_rolling_gamma.py`
-  To re-pull the snapshots (needs network):
-  `uv run python experiments/paper2_taiwan_indiv_rolling_gamma/fetch_snapshots.py`
+  ```
+  uv run python experiments/paper2_taiwan_indiv_rolling_gamma/paper2_taiwan_indiv_rolling_gamma.py
+  uv run python experiments/paper2_taiwan_indiv_rolling_gamma/inference.py
+  ```
+  To re-pull the snapshots (needs network): `... /fetch_snapshots.py`
 - **Scope.** This experiment produces numbers and narrative implications only. It does **not** touch
-  `paper/taiwan-vt/**`: the Table 2 rewrite, the §3.2 0056 rewrite, and the table-note correction are
-  main-thread work (CLAUDE.md paper narrative state machine).
+  `paper/taiwan-vt/**`: the Table 2 rewrite, the §3.2 0056 rewrite, the ratio→difference change, and the
+  table-note correction are main-thread work (CLAUDE.md paper narrative state machine).
 
 ## Files
 
 | File | |
 |---|---|
-| `fetch_snapshots.py` | one-off yfinance pull → `data/` (+ regression check against the old snapshots) |
-| `paper2_taiwan_indiv_rolling_gamma.py` | offline estimation: all variants, sensitivities, figure |
-| `paper2_taiwan_indiv_rolling_gamma_results.json` | all results |
+| `fetch_snapshots.py` | one-off yfinance pull → `data/` (+ regression check against the old snapshots, at the tolerance it claims) |
+| `paper2_taiwan_indiv_rolling_gamma.py` | offline **estimation**: variants, sensitivities, figure |
+| `inference.py` | offline **inference**: sign test, event ablation, constant-γ null, block bootstrap |
+| `paper2_taiwan_indiv_rolling_gamma_results.json` | estimation results |
+| `inference_results.json` | inference results — **read this before quoting any ratio** |
 | `end_date_sensitivity.png` | end-date sensitivity figure (§6) |
 | `data/` | committed offline snapshots + `MANIFEST.json` |
-| `review_notes.md` | independent review verdict + disposition |
+| `review_notes.md` | independent review verdict + per-finding disposition |

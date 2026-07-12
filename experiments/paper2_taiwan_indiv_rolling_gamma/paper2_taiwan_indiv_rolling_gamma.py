@@ -167,14 +167,20 @@ VARIANTS = {
     "legacy_2025_01_22": "2025-01-22",
 }
 
+# Every fit in the run, including the ~230 in the sweep, so the honesty ledger's
+# "all converged, no restarts needed" is backed by a counter rather than by a spot
+# check on three variants.
+_FIT_DIAGNOSTICS = {"fits": 0, "max_restarts": 0, "nonzero_convergence": 0}
+
 
 def load_returns(base: str, ticker: str) -> pd.Series:
-    """Log returns from the committed offline snapshot.
+    """Log returns from the committed offline snapshot. No exclusions applied here.
 
-    The 0050 split-date exclusion is applied here, to the series, because it is a
-    data-cleaning rule about a corrupt observation rather than an experimental
-    treatment. It lies outside every window used here, so it changes nothing --
-    it is applied so the script stays correct if the window is ever moved back.
+    Every exclusion -- the 0050 split date and the 2317 corruption alike -- is routed
+    through `last_window(ablate=...)` so it happens AFTER the window is cut. Dropping
+    rows from the series first would let the last-2000 slice reach further back to
+    refill itself, silently shifting that row's window start away from the other
+    eleven and de-aligning the very calendar we are trying to align.
     """
     path = os.path.join(DATA, f"{base}.csv")
     s = pd.read_csv(path, parse_dates=["date"]).set_index("date")["adj_close"]
@@ -182,8 +188,6 @@ def load_returns(base: str, ticker: str) -> pd.Series:
     if s.index.duplicated().any():
         raise RuntimeError(f"{ticker}: duplicate dates in snapshot")
     r = np.log(s / s.shift(1)).dropna()
-    for d in SPLIT_EXCLUSIONS.get(ticker, []):
-        r = r.drop(pd.Timestamp(d), errors="ignore")
     return r[r.index >= pd.Timestamp(SAMPLE_START)]
 
 
@@ -206,7 +210,14 @@ def estimate_gjr(returns: pd.Series) -> dict:
             f"{returns.index[0].date()}..{returns.index[-1].date()}; entering seeded multistart",
         )
         rng = np.random.default_rng(SEED)
-        best = res
+        # `best` tracks the best CONVERGED candidate only. Seeding it with the failed
+        # incumbent would be a trap: an optimizer that stopped at maxiter while still
+        # climbing, or parked at a non-stationary point, can carry a HIGHER
+        # log-likelihood than a legitimate converged optimum -- which would cause every
+        # good restart to be rejected and the whole multistart to fall through to the
+        # raise below. Compare converged candidates against each other, never against a
+        # failure.
+        best = None
         for restarts in range(1, 51):
             sv = pd.Series(
                 {
@@ -223,10 +234,12 @@ def estimate_gjr(returns: pd.Series) -> dict:
                 restart_failures.append(f"start {restarts}: {type(exc).__name__}: {exc}")
                 warn("rolling-gamma", f"multistart {restarts} raised {type(exc).__name__}: {exc}")
                 continue
-            if cand.convergence_flag == 0 and cand.loglikelihood > best.loglikelihood:
-                best = cand
-                break
-        res = best
+            if cand.convergence_flag == 0 and (
+                best is None or cand.loglikelihood > best.loglikelihood
+            ):
+                best = cand  # keep going: we want the best basin of 50, not the first
+        if best is not None:
+            res = best
         if res.convergence_flag != 0:
             # Do NOT quietly report the parameters of a failed optimisation as if they
             # were estimates. A package that will not converge is a numerical failure,
@@ -262,52 +275,77 @@ def estimate_gjr(returns: pd.Series) -> dict:
 
 
 def last_window(
-    returns: pd.Series, end_cutoff: pd.Timestamp, ablate: tuple[str, str] | None = None
+    returns: pd.Series,
+    end_cutoff: pd.Timestamp,
+    ablate: list[tuple[str, str]] | None = None,
 ) -> dict:
     """Estimate on the last WINDOW observations ending on/before `end_cutoff`.
 
-    `ablate` removes a date range AFTER the window is cut, never before. That
-    ordering matters. Excluding rows from the series first would leave the slice
-    reaching further back to refill its 2000 observations -- for the 2317 block
-    that means pulling in ~7 extra sessions from April 2018, right beside the
-    2018-Q1 volatility spike that we independently know moves gamma. The
-    sensitivity would then confound "removed the corrupt days" with "added days
-    from a high-asymmetry period". Cutting the window first and ablating inside it
-    keeps the calendar span identical to the primary, so the only thing that
-    changes is the contaminated observations. The cost is n < WINDOW, which is
-    recorded in n_obs.
+    `ablate` removes date ranges AFTER the window is cut, never before. That ordering
+    is the whole point. Excluding rows from the series first would leave the slice
+    reaching further back to refill its 2000 observations -- for the 2317 block that
+    means pulling in ~7 extra sessions from April 2018, right beside the 2018-Q1
+    volatility spike we independently show moves gamma, so the "sensitivity" would
+    confound *removed the corrupt days* with *added days from a high-asymmetry period*.
+    The same trap applies to the 0050 split date under any window that reaches back to
+    2014. Cutting the window first and ablating inside it holds the calendar span fixed,
+    so the ablated sample is a strict SUBSET of the primary one and the only thing that
+    changes is the observations we meant to remove.
+
+    Cost: n < WINDOW (recorded in n_obs and ablated_obs). That is fine -- gamma is a
+    descriptive MLE, not a forecast needing a fixed training size, and 1993 vs 2000
+    observations moves the SE by ~0.2%. Sample COMPOSITION dominates sample SIZE.
+
+    Note (disclosed rather than hidden): deleting mid-series rows splices the GARCH
+    recursion, so the session after an ablated block is treated as if it followed the
+    session before it. That is unavoidable for any ablation and is standard, but it is
+    why the ablation is a diagnostic, not the primary estimate.
     """
     r = returns[returns.index <= end_cutoff]
     if len(r) < WINDOW:
         raise ValueError(f"only {len(r)} obs before {end_cutoff.date()} < window {WINDOW}")
     w = r.iloc[-WINDOW:]
     span_start, span_end = w.index[0], w.index[-1]
-    if ablate is not None:
-        lo, hi = pd.Timestamp(ablate[0]), pd.Timestamp(ablate[1])
-        w = w[(w.index < lo) | (w.index > hi)]
+    if ablate:
+        for lo_s, hi_s in ablate:
+            lo, hi = pd.Timestamp(lo_s), pd.Timestamp(hi_s)
+            w = w[(w.index < lo) | (w.index > hi)]
     est = estimate_gjr(w)
     est["window"] = WINDOW
     # The calendar span of the window, which the ablation deliberately does NOT move.
     est["window_start"] = str(span_start.date())
     est["window_end"] = str(span_end.date())
-    if ablate is not None:
-        est["ablated_range"] = list(ablate)
+    if ablate:
+        est["ablated_ranges"] = [list(a) for a in ablate]
         est["ablated_obs"] = WINDOW - len(w)
     return est
+
+
+def _ablations(ticker: str, drop_corrupt_2317: bool) -> list[tuple[str, str]]:
+    """Every exclusion for a row, as post-slice ablation ranges (see last_window)."""
+    out = [(d, d) for d in SPLIT_EXCLUSIONS.get(ticker, [])]
+    if drop_corrupt_2317 and ticker == "2317.TW":
+        out.append(CORRUPT_2317)
+    return out
 
 
 def run_variant(end_cutoff: pd.Timestamp, drop_corrupt_2317: bool = False) -> dict:
     per_stock = {}
     for ticker, (name, base) in NINE_STOCKS.items():
-        ablate = CORRUPT_2317 if (drop_corrupt_2317 and ticker == "2317.TW") else None
-        est = last_window(load_returns(base, ticker), end_cutoff, ablate=ablate)
+        est = last_window(
+            load_returns(base, ticker), end_cutoff,
+            ablate=_ablations(ticker, drop_corrupt_2317),
+        )
         est.update({"name": name, "ticker": ticker, "price_source": f"data/{base}.csv"})
         if ticker in LEGACY_N121:
             est["legacy_n121"] = LEGACY_N121[ticker]
         per_stock[ticker] = est
 
     et_ticker, et_name, et_base = ETF_0056
-    etf = last_window(load_returns(et_base, et_ticker), end_cutoff)
+    etf = last_window(
+        load_returns(et_base, et_ticker), end_cutoff,
+        ablate=_ablations(et_ticker, drop_corrupt_2317),
+    )
     etf.update(
         {
             "name": et_name,
@@ -319,7 +357,10 @@ def run_variant(end_cutoff: pd.Timestamp, drop_corrupt_2317: bool = False) -> di
 
     index_rows = {}
     for key, (name, base) in INDEX_ROWS.items():
-        est = last_window(load_returns(base, key), end_cutoff)
+        est = last_window(
+            load_returns(base, key), end_cutoff,
+            ablate=_ablations(key, drop_corrupt_2317),
+        )
         est.update({"name": name, "ticker": key, "price_source": f"data/{base}.csv"})
         index_rows[key] = est
 
@@ -337,11 +378,29 @@ def run_variant(end_cutoff: pd.Timestamp, drop_corrupt_2317: bool = False) -> di
         key=lambda kv: -kv[1],
     )
 
+    all_rows = list(per_stock.values()) + [etf] + list(index_rows.values())
+
+    # The central claim of this experiment is that the rows are calendar-aligned. Assert
+    # it, do not merely record it. The 12 series do NOT share a trading calendar (the
+    # stocks' windows start 2018-04-18, the index/ETF rows 2018-04-19 -- the index rows
+    # contain a session the stocks lack), so at some cutoffs it is possible for one class
+    # of security to land on a different terminal date than another. That would be a
+    # silent regression to exactly the defect this run exists to fix.
+    window_ends = sorted({e["window_end"] for e in all_rows})
+    if len(window_ends) != 1:
+        raise RuntimeError(
+            f"CALENDAR MISALIGNMENT at cutoff {end_cutoff.date()}: rows ended on "
+            f"{window_ends}. Every row must share one window_end -- that is the whole point."
+        )
+    _FIT_DIAGNOSTICS["fits"] += len(all_rows)
+    _FIT_DIAGNOSTICS["max_restarts"] = max(
+        _FIT_DIAGNOSTICS["max_restarts"], *(e["restarts_used"] for e in all_rows)
+    )
+    _FIT_DIAGNOSTICS["nonzero_convergence"] += sum(1 for e in all_rows if e["convergence"] != 0)
+
     return {
         "common_end": str(end_cutoff.date()),
-        "window_end_all_rows": sorted(
-            {e["window_end"] for e in list(per_stock.values()) + [etf] + list(index_rows.values())}
-        ),
+        "window_end_all_rows": window_ends,
         "per_stock": per_stock,
         "etf_0056": etf,
         "index_rows": index_rows,
@@ -373,21 +432,25 @@ def end_date_sensitivity(first: str, last: pd.Timestamp) -> list[dict]:
     estimates are regime-sensitive, or they are simply imprecise. This sweep plus
     the implied standard errors settles which.
     """
-    ends = [d for d in pd.date_range(first, last, freq="ME")] + [last]
+    ends = sorted({*pd.date_range(first, last, freq="ME"), last})  # dedupe if last is a month end
     rows = []
     for end in ends:
-        v = run_variant(end)
+        v = run_variant(end)  # raises if the rows are not calendar-aligned at this cutoff
         a = v["averages_and_ratio"]
         twii = v["index_rows"]["TWII"]
         etf = v["etf_0056"]
+        t = twii["gamma_t"]
         rows.append(
             {
                 "common_end": str(end.date()),
+                # carried so the alignment invariant is auditable for the sweep too,
+                # not just for the three named variants
+                "window_end_all_rows": v["window_end_all_rows"],
                 "gamma_mean_9stock": a["gamma_mean_9stock"],
                 "gamma_mean_10security": a["gamma_mean_10security_incl_0056"],
                 "twii_gamma": twii["gamma"],
-                "twii_gamma_t": twii["gamma_t"],
-                "twii_gamma_se": abs(twii["gamma"] / twii["gamma_t"]) if twii["gamma_t"] else None,
+                "twii_gamma_t": t,
+                "twii_gamma_se": (abs(twii["gamma"] / t) if t else float("nan")),
                 "gamma_0056": etf["gamma"],
                 "gamma_0056_t": etf["gamma_t"],
                 "gamma_0056_rank_of_12": v["gamma_0056_rank_of_12"],
@@ -403,7 +466,7 @@ def end_date_sensitivity(first: str, last: pd.Timestamp) -> list[dict]:
     return rows
 
 
-def event_attribution() -> dict:
+def event_attribution(sens_rows: list[dict]) -> dict:
     """Which observations actually drive the end-date sensitivity.
 
     Pure data description (no estimation): the segments that enter and leave the
@@ -429,20 +492,45 @@ def event_attribution() -> dict:
             "worst_days": worst(a, b),
         }
 
+    # Read the swept aggregates rather than hardcoding them: these numbers live inside a
+    # results JSON and would silently go stale on the next data pull.
+    by_end = {r["common_end"]: r for r in sens_rows}
+
+    def g9_at(d: str) -> float | None:
+        r = by_end.get(d)
+        return None if r is None else float(r["gamma_mean_9stock"])
+
+    g9_mar25, g9_apr25 = g9_at("2025-03-31"), g9_at("2025-04-30")
+    g9_mar26 = g9_at("2026-03-31")
+    g9_last = float(sens_rows[-1]["gamma_mean_9stock"])
+    last_end = sens_rows[-1]["common_end"]
+
+    def fmt(x: float | None) -> str:
+        return "n/a" if x is None else f"{x:.3f}"
+
     return {
+        "caveat_on_causal_language": (
+            "The month-to-month contrasts below compare two windows that differ at BOTH ends "
+            "(observations enter at the back AND leave at the front), so on their own they cannot "
+            "attribute a move to the entering segment. The clean, identified test holds one window "
+            "fixed and ABLATES the candidate sessions from inside it -- that is run in inference.py "
+            "(.b_event_ablation), and it is what these attributions rest on. Read the segment "
+            "statistics here as description; read the ablation for the causal claim."
+        ),
         "entered_2025_04_tariff_shock": {
             **seg_stats("2025-04-01", "2025-04-30"),
             "effect": (
-                "Entering the window between the 2025-03-31 and 2025-04-30 end dates, this "
-                "segment more than DOUBLES the 9-stock mean gamma (0.027 -> 0.058). It contains "
-                "a -10.20% limit-down TAIEX session (2025-04-07) plus -5.96% and -4.10% "
-                "follow-through -- the single largest cluster of negative shocks in the sample."
+                "Enters the window between the 2025-03-31 and 2025-04-30 end dates, across which "
+                f"the 9-stock mean gamma moves {fmt(g9_mar25)} -> {fmt(g9_apr25)} (it roughly "
+                "doubles). The segment contains a -10.20% limit-down TAIEX session (2025-04-07) "
+                "plus -5.96% and -4.10% follow-through -- the largest cluster of negative shocks "
+                "in the sample. Ablation-identified in inference.py."
             ),
         },
         "left_2018_q1_vol_spike": {
             **seg_stats("2018-01-16", "2018-04-18"),
             "effect": (
-                "Leaving the window as the end date moves 2026-04-17 -> 2026-07-09 (the window "
+                "Leaves the window as the end date moves 2026-04-17 -> 2026-07-09 (the window "
                 "start slides 2018-01-16 -> 2018-04-19). It contains 2018-02-06 (-5.08%, the "
                 "'VIXmageddon' session). Dropping a large negative shock lowers gamma."
             ),
@@ -451,19 +539,21 @@ def event_attribution() -> dict:
             **seg_stats("2026-04-01", "2026-07-09"),
             "effect": (
                 "High volatility but roughly SYMMETRIC (skew ~0; the largest moves include "
-                "+4.51%, +4.47%, +4.47% sessions alongside the drawdowns). Volatility that is "
-                "not driven by negative shocks DILUTES the measured asymmetry, pushing gamma "
-                "down. Together with the 2018 spike leaving, this explains the decay from "
-                "gamma_9stock 0.055 (2026-03) to 0.032 (2026-07)."
+                "+4.51%, +4.47%, +4.47% sessions alongside the drawdowns). Volatility that is NOT "
+                "driven by negative shocks DILUTES the measured asymmetry. Together with the 2018 "
+                "spike leaving, this is the decay in the 9-stock mean gamma from "
+                f"{fmt(g9_mar26)} (2026-03) to {g9_last:.3f} ({last_end})."
             ),
         },
         "conclusion": (
-            "The rolling-w2000 last-window gamma is not a stable structural parameter -- it is "
-            "an event-driven statistic dominated by a handful of extreme sessions moving in and "
+            "The rolling-w2000 last-window gamma is an event-driven statistic, not a stable "
+            "structural parameter: it is dominated by a handful of extreme sessions moving in and "
             "out of an 8-year window whose boundaries are set by the arbitrary date of the data "
-            "pull. This is a reason to keep the FULL-SAMPLE Bollerslev-Wooldridge spec as the "
-            "paper's primary evidence (as body_v3.tex already does) and to report the rolling "
-            "block with an explicit imprecision caveat rather than as sharp point estimates."
+            "pull. Note this conclusion is INCOMPATIBLE with reading the end-date movement as mere "
+            "sampling noise -- noise is not attributable to nameable sessions. The formal test is "
+            "in inference.py (.c_constant_gamma_null). Practical consequence: keep the FULL-SAMPLE "
+            "Bollerslev-Wooldridge spec as the paper's primary evidence (as body_v3.tex already "
+            "does), and never report a rolling point estimate as a structural quantity."
         ),
     }
 
@@ -576,39 +666,43 @@ def main() -> None:
     g9s = [r["gamma_mean_9stock"] for r in sens_rows]
     tws = [r["twii_gamma"] for r in sens_rows]
     ratios = [r["amplification_ratio_9stock"] for r in sens_rows]
-    se_med = float(np.median([r["twii_gamma_se"] for r in sens_rows]))
+    se_med = float(np.nanmedian([r["twii_gamma_se"] for r in sens_rows]))
+    ratio_factor = max(ratios) / min(ratios)
     sensitivity_block = {
         "rows": sens_rows,
         "figure": "end_date_sensitivity.png",
         "range_gamma_mean_9stock": [float(min(g9s)), float(max(g9s))],
         "range_twii_gamma": [float(min(tws)), float(max(tws))],
         "range_amplification_ratio_9stock": [float(min(ratios)), float(max(ratios))],
+        "amplification_ratio_spread_factor": float(ratio_factor),
         "twii_gamma_median_implied_se": se_med,
         "gamma_0056_always_rank_1": all(r["gamma_0056_rank_of_12"] == 1 for r in sens_rows),
         "what_this_sweep_is_NOT": (
-            "NOT a sampling distribution. Consecutive end dates share ~97% of their observations, so "
-            "the estimates are strongly positively dependent. The SE of the DIFFERENCE between two "
-            "overlapping estimates is far smaller than sqrt(2)*SE, so two of them can be significantly "
-            "different from each other even while their individual CIs almost entirely overlap. "
-            "Comparing this spread against marginal standard errors is therefore NOT a test, and an "
-            "earlier draft's conclusion ('the spread is one SE wide, so the estimates are imprecise "
-            "rather than regime-unstable') is WITHDRAWN as invalid. Settling whether the movement is "
-            "real parameter instability would need a Nyblom/CUSUM stability test or a block bootstrap "
-            "over the union sample that respects the overlap -- neither of which this experiment runs."
+            "NOT a sampling distribution, and NOT to be compared against a marginal standard error. "
+            "Adjacent end dates share ~99% of their observations (the extremes ~85%), so under a "
+            "constant-parameter null the sampling errors are strongly POSITIVELY correlated: "
+            "SD(g1 - g2) ~= sigma*sqrt(2*(1-rho)), which at rho=0.99 is about a SEVENTH of sigma. "
+            "Scoring the observed movement against sigma therefore UNDERSTATES it several-fold -- the "
+            "overlap does not blur the comparison, it REVERSES it. An earlier draft concluded 'the "
+            "spread is about one SE wide, so these estimates are imprecise rather than regime-unstable'. "
+            "That is WITHDRAWN: it was not merely un-rigorous, it pointed the wrong way. The correct "
+            "null is computed in inference.py (constant-gamma parametric bootstrap) -- see "
+            "inference_results.json .c_constant_gamma_null."
         ),
         "interpretation": (
             f"Across every monthly end date from 2025-01 to {common_end.date()}, the TWII rolling gamma "
             f"spans [{min(tws):.3f}, {max(tws):.3f}], the 9-stock mean gamma spans "
             f"[{min(g9s):.3f}, {max(g9s):.3f}], and the amplification ratio spans "
-            f"[{min(ratios):.2f}x, {max(ratios):.2f}x]. What follows WITHOUT any dependence-aware "
-            "machinery: (1) each estimate is imprecise on its own terms -- TWII's rolling gamma at the "
-            f"primary window carries t=1.86, not significant at 5%, and its 95% CI contains every other "
-            "end date's point estimate as well as the paper's rendered 0.272; (2) the reported number "
-            "moves materially with the terminal date, and the driver is identifiable (see "
-            "event_attribution); (3) therefore no single end date's point estimate may be reported as a "
-            "sharp structural constant. The rendered 5.0x ratio sits inside the swept interval, so the "
-            "ratio's ORDER OF MAGNITUDE survives, but its second digit is not identified. 0056.TW ranks "
-            "first of twelve at EVERY end date -- that ordering, unlike the levels, is robust."
+            f"[{min(ratios):.2f}x, {max(ratios):.2f}x] -- a factor of {ratio_factor:.2f}, i.e. the "
+            "ratio's FIRST significant digit is not identified. That the paper's rendered 5.0x 'sits "
+            "inside' this interval is not validation: so would almost any number one might have written "
+            "down. Do not report a point ratio. What the sweep establishes: the reported number is "
+            "materially determined by an arbitrary choice -- the date of the data pull -- and the "
+            "movement is traceable to a handful of extreme sessions (see event_attribution), i.e. it is "
+            "larger than, and different in kind from, sampling noise (formally tested in inference.py). "
+            "This design cannot separate genuine time-variation in gamma from the GJR MLE's "
+            "finite-sample sensitivity to a few influential shocks; both imply the same policy. 0056.TW "
+            "ranks first of twelve at EVERY end date -- that ORDERING, unlike the levels, is robust."
         ),
     }
 
@@ -673,7 +767,25 @@ def main() -> None:
         },
         "variants": variants,
         "end_date_sensitivity": sensitivity_block,
-        "event_attribution": event_attribution(),
+        "event_attribution": event_attribution(sens_rows),
+        "fit_diagnostics": {
+            **_FIT_DIAGNOSTICS,
+            "covers": (
+                "EVERY GJR fit in this run -- the 3 named variants, the 2317 ablation variant, and "
+                "all rows of the end-date sweep. The honesty ledger's 'all converged, no restarts "
+                "needed' is backed by these counters, not by a spot check on three variants."
+            ),
+            "all_converged": _FIT_DIAGNOSTICS["nonzero_convergence"] == 0,
+            "no_restarts_needed": _FIT_DIAGNOSTICS["max_restarts"] == 0,
+        },
+        "inference": (
+            "The point estimates here are descriptive. The INFERENCE that the paper needs -- the "
+            "ordering sign test, the ablation-identified event attribution, the constant-gamma null "
+            "for the end-date movement, and the block-bootstrap interval for the TWII-minus-stocks "
+            "DIFFERENCE (the ratio is ill-posed: its denominator is not distinguishable from zero) "
+            "-- is in inference.py / inference_results.json. Do not quote a point ratio from this "
+            "file without reading that one."
+        ),
         "narrative_implication_0056": {
             "paper_currently_argues": (
                 "body_v3.tex section 3.2 ('Sensitivity to 0056.TW inclusion') rests on 0056 "

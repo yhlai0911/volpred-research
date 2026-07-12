@@ -1,97 +1,141 @@
 # Review notes — paper2_taiwan_indiv_rolling_gamma (2026-07-13)
 
+**Verdict: CONDITIONAL_PASS** — fresh-context `feature-dev:code-reviewer` subagent, adversarial brief.
+
+> *"Mechanics are sound. The interpretation is not. … The estimates are trustworthy. The conclusions
+> drawn from them are not, and the headline ratio needs an interval or a reframing before it can appear
+> in a journal table."*
+
+The reviewer independently recomputed the aggregates from the per-row γ's and reproduced them
+(Σγ/9 = 0.290442/9 = 0.032271 ✓; g10 = 0.051244 ✓; 0.197519/0.032271 = 6.1206 ✓), confirmed the
+persistence formula and the absence of any lookahead channel, and then took the interpretation apart.
+**It was right on both ship-blockers.** Every finding below is dispositioned; nothing is deferred.
+
+---
+
 ## Reviewer routing (and why it is not Codex)
 
-The project's primary code-review gate is `codex exec`. **It was hijacked, twice.** Both calls were
-given an explicit prompt naming the two files to review; both **ignored the prompt entirely** and went
-off to review `scripts/fb_realchrome_post.py`, an unrelated FB-posting script.
+The project's primary review gate is `codex exec`. **It was hijacked, twice.** Both calls were given an
+explicit prompt naming the two files; both **ignored the prompt entirely** and went off to review
+`scripts/fb_realchrome_post.py`, an unrelated FB-posting script.
 
-**Root cause**: `AGENTS.md` — which Codex auto-loads at session start — instructs the agent to *"claim a
-pending task from the task pool"*. Codex follows the repo instruction, abandons the caller's prompt, and
-does dispatcher work instead. This is not specific to this experiment: **any `codex exec` code review
-launched from this repo is liable to be hijacked the same way**, which means the review gate in front of
-`knowledge.json` writes may have been passing without actually reviewing. Flagged to the main thread in
-README §8 (`AGENTS.md` is outside a worktree agent's write scope).
+**Root cause**: `AGENTS.md` — which Codex auto-loads — instructs the agent to *"claim a pending task from
+the task pool"*. Codex obeys the repo instruction, abandons the caller's prompt, and does dispatcher work.
+**Any `codex exec` review launched from this repo is liable to be hijacked the same way**, which means the
+gate in front of `knowledge.json` writes may have been passing without reviewing anything. Per the
+two-strikes rule (`feedback_gates_fix_immediately_two_strikes_switch_model`), review was re-routed to the
+`code-reviewer` subagent — the fallback documented in `.claude/rules/experiments.md`.
 
-Per the two-strikes rule (`feedback_gates_fix_immediately_two_strikes_switch_model`), the review was
-re-routed to a fresh-context `feature-dev:code-reviewer` subagent — the fallback documented in
-`.claude/rules/experiments.md`.
+**This must be fixed, not routed around.** See README §8.
 
-## Findings raised and fixed *before* the external review returned
+---
 
-These were caught by the repo's own gates and by self-audit, and are recorded here because the fixes
-changed reported numbers.
+## Ship-blockers — both confirmed, both now settled by computation
 
-### 1. Ablation ordering was confounded — **FIXED** (changed a reported number)
+### SB1. "Imprecise, not regime-unstable" was **backwards** — REFUTED, and re-tested
 
-**Defect.** The 2317 data-quality sensitivity dropped the corrupted rows from the *series*, and only then
-took the last 2000 observations. Because the series was 7 rows shorter, the slice reached ~7 sessions
-further back — into **April 2018, right beside the 2018-Q1 volatility spike that we independently know
-raises γ**. The "sensitivity" therefore confounded two changes: *removing the corrupt days* and *adding
-days from a high-asymmetry period*.
+I wrote it, then withdrew it as merely *un-rigorous*. **Both drafts erred in the same direction.** The
+reviewer's point: the ~99% window overlap does not *blur* the inference, it **reverses** it.
 
-**Fix.** `last_window(..., ablate=...)` now cuts the window first and ablates **inside** it, holding the
-calendar span identical to the primary. Cost: n = 1993 rather than 2000, recorded in `n_obs`.
+σ ≈ 0.08 is the marginal sampling SD of *one* estimate. The spread is a dispersion of *differences between
+estimates sharing most of their data*. Under a constant-parameter null:
 
-**Effect on the result.** The corrected ablation reports 2317 γ = **0.0074**; the confounded one reported
-0.0085 — i.e. **the old ordering understated the contamination**. (9-stock mean 0.0309 vs 0.0310;
-ratio 6.39× vs 6.37×. Conclusions unaffected either way.)
+> **SD(γ̂₁ − γ̂₂) ≈ σ·√(2(1−ρ))**
 
-### 2. A statistical overclaim — **WITHDRAWN**
+At ρ ≈ 0.99 that is **~σ/7**, not √2·σ. Scoring the movement against σ **understates** it several-fold.
+The reviewer's decisive example is my own headline: the 9-stock mean γ **doubles between two windows
+sharing 99% of their observations** (z ≈ 5–14 under any plausible cross-sectional correlation). And §6
+was self-contradictory — "just imprecision" twenty lines above "an event-driven statistic". *Noise is not
+attributable to nameable sessions.*
 
-**Defect.** The first draft argued: the TWII γ spread across end dates (~0.11) is about the size of its
-own standard error (~0.08), *therefore* the estimates are "imprecise rather than regime-unstable".
+**Disposition — tested instead of narrated** (`inference.py` part C). Constant-γ parametric bootstrap,
+B = 999: fit GJR to the full TWII sample, simulate paths with γ **constant by construction**, run the
+identical 19-date sweep on each, compare the swept max−min range. Handles the overlap **and** the max−min
+multiplicity exactly.
 
-**Why that is invalid.** Consecutive end dates share **~97% of their observations**, so the estimates are
-strongly *positively* dependent. The standard error of the **difference** between two overlapping
-estimates is far smaller than √2 × SE — so two of them can be significantly different from one another
-even while their individual confidence intervals overlap almost completely. Comparing a spread of
-dependent point estimates against marginal standard errors is not a test of anything, and the sweep is
-not a sampling distribution.
+| | |
+|---|---|
+| Observed sweep range | **0.1099** |
+| Null 95th / 99th pct | 0.0326 / 0.0413 |
+| **p** | **0.0010 → reject constant γ** |
 
-**Fix.** The claim is withdrawn in both the README (§6) and the results JSON
-(`end_date_sensitivity.what_this_sweep_is_NOT`). What is now claimed is only what survives without
-dependence-aware machinery: each estimate is individually imprecise (TWII t = 1.86, 95% CI contains every
-other end date's estimate *and* the legacy 0.272); the number moves with the terminal date and the driver
-is identifiable; therefore no end date's estimate is a sharp structural constant. The README states
-explicitly that settling *real* parameter instability would require a **Nyblom/CUSUM stability test or an
-overlap-respecting block bootstrap**, and that **this experiment runs neither**.
+The reviewer predicted "given z ≈ 2.5 you reject, and the honest sentence becomes *stronger* than the one
+you have." Correct on both counts.
 
-### 3. Two silent fallbacks — **FIXED** (caught by the repo's pre-commit gate)
+### SB2. The amplification ratio is **ill-posed** — CONFIRMED, and replaced
 
-- `fetch_snapshots.py`: a missing legacy reference returned `None`, so the **regression check against the
-  old snapshot would silently not run** — a refreshed series could have reached the paper with nothing
-  having verified it. Now emits `warn(...)`, records the skip in `MANIFEST.json →
-  regression_check_coverage`, and reports which series were unchecked.
-- `paper2_taiwan_indiv_rolling_gamma.py`: the multistart loop swallowed exceptions with a bare
-  `except: continue`. Now each failure is logged, and — the substantive part — **a fit that still fails to
-  converge after 50 seeded restarts now raises** instead of quietly reporting a failed optimiser's
-  parameters as if they were estimates.
+Not one of the nine stock γ's is significant (|t| = 0.27 … 1.56; 2412's is negative — reviewer checked it
+is an interior point, α + γ = 0.155 > 0, so the *t* is valid). The numerator is not significant either
+(t = 1.86). **A ratio whose denominator's CI covers zero has an unbounded Fieller confidence set.**
 
-`scripts/audit_silent_fallbacks.py`: **no findings** for this experiment.
+**Disposition — moving-block bootstrap** (`inference.py` part D; B = 999, 252-session blocks, date blocks
+resampled *jointly* across all ten securities so their cross-sectional dependence is preserved — a naive
+√(Σσᵢ²)/9 assumes it away, as the reviewer noted):
 
-## Verification performed
+| | Bootstrap 95% CI |
+|---|---|
+| Denominator γ̄_9stock | **[−0.016, 0.130] — covers zero** |
+| Ratio | **[−26.2×, +33.6×]** (range −2504× … +8205×) |
+
+Not a theoretical worry. **The ratio is deleted as a reported statistic.** Replaced with the reviewer's
+(a) and (c):
+
+| | Value | Inference |
+|---|---|---|
+| **Difference** γ_TWII − γ̄_9stock | **0.184** | 95% CI **[0.072, 0.298]**, P(D ≤ 0) = **0.0000** |
+| **Ordering** (index γ > every stock's) | **9 / 9** | sign test **p = 0.0020**, Wilcoxon **p = 0.0020** |
+
+**The paper's diversification-amplification thesis survives; its quantification does not.**
+
+---
+
+## Findings I had already self-caught (reviewer confirmed)
+
+- **Ablation ordering** — reviewer **CONFIRMED** drop-after-slice is the defensible choice, and added a
+  reason I had missed: the ablated sample becomes a strict **subset** of the primary, making it the unique
+  ceteris-paribus contrast; drop-before-slice leaves them merely *overlapping*. Also noted preserving
+  n = 2000 has no inferential value here (1993 vs 2000 moves the SE ~0.2%): **composition dominates size**.
+- **Two silent fallbacks** (caught by the repo's pre-commit gate): the regression check silently not
+  running on a missing legacy reference, and a bare `except: continue` in the multistart. Both now `warn`,
+  and a fit that fails after 50 restarts now **raises** rather than reporting a failed optimiser's
+  parameters as estimates.
+
+## Findings I had **missed** — all fixed
+
+| # | Finding | Fix |
+|---|---|---|
+| **P2b** | I fixed the ablation ordering for 2317 but **left the identical 0050 split-date bug in place** — and my comment claimed it was written that way *for* correctness under a moved-back window, which is **exactly backwards**. | All exclusions now route through `last_window(ablate=...)`. Re-run: **numbers identical** → it was latent, not active. Comment corrected. |
+| **I1** | The multistart seeded `best` with the **non-converged** incumbent. A failed optimiser that stopped at `maxiter` while still climbing can carry a *higher* LL than a legitimate optimum → every good restart rejected → falls through to the `raise`. Docstring said "keep the best" but the code `break`s on first improvement. | `best = None`; compare converged candidates only; no early `break`. |
+| **I2** | The honesty ledger's "all fits converged first try" was **unverified for ~230 of the fits** — `convergence_all_zero` was computed per variant but discarded by the sweep. | `fit_diagnostics` now counts **all 276 fits**: `max_restarts = 0`, `nonzero_convergence = 0`. Claim is now backed by a counter. |
+| **I3** | Calendar alignment was *recorded* but never *asserted*, and the sweep dropped the field. The 12 series genuinely differ in trading calendar (stocks start 2018-04-18, index/ETF 2018-04-19), so a cutoff **could** silently misalign one class. | `run_variant()` now **raises** unless all 12 rows share one `window_end`; the sweep carries it. Held across all 23 runs. |
+| **I4** | My §4 "the paper's 2886 self-accusation was wrong because 0.170 ≈ 0.179" was **motivated reasoning** — §6 shows 2886's γ is end-date dependent, so an agreement reachable by moving the terminal date proves nothing. | Rewritten: drop the "3× off" claim as unfounded, **but N121 remains untraceable and that is not retired**. |
+| **I5** | `event_attribution()` asserted causality from two-ended window comparisons, which cannot attribute a change to the entering segment. | **Ablation-identified** (`inference.py` part B). Result is stronger than the assertion: removing **3 sessions** of 2000 drops the 9-stock mean γ **0.0323 → 0.0134 (−58%)**; removing **one** session (2018-02-06) moves TWII γ by **−0.034**. |
+| **I6** | Artifact staleness. | Already resolved by a re-run before the review landed (JSON `excl_2317_gamma` = 0.0074, README "0.020 → 0.007"). The reviewer had read a pre-re-run state. |
+| **m1** | Regression gate was `< 1e-4` while every artifact **claimed** `< 1e-6`. "A gate looser than the claim is a claim that nothing verifies." | Tolerance is now `TOL = 1e-6`, enforced, and **raises** on failure. |
+| **m2** | Convention string said `Adj Close` is "split adjusted" — contradicted by the manifest's own **−1.389** log return on 0050's 2014 split date. | Reworded: dividend-adjusted; split adjustment **unreliable**. |
+| **m3** | `event_attribution()` hardcoded aggregates in prose → would go stale on the next pull. | Now reads them from the sweep and f-strings them. |
+| **m4** | `np.median` over a list that could contain `None`; `date_range + [last]` could duplicate a month-end. | `nanmedian`; `sorted({...})`. |
+| **m5** | "^TWII posts one session behind" asserted as structural. | Reworded as a fetch-time observation. |
+
+## Verification
 
 | Check | Result |
 |---|---|
-| Offline reproducibility | **PROVEN at runtime** — the estimation script runs to completion with all outbound socket connections blocked. It imports no network library; the 3 mentions of yfinance are in docstrings. |
-| Refresh did not alter the data | Every series' log returns reproduce the previous canonical snapshots to **< 1e-6**; re-estimating the *old* window on the *new* data reproduces the 2026-07-07 run exactly. The refresh moved the window, not the data. |
-| Calendar alignment | All 12 rows share `window_end = 2026-07-09`. |
-| Convergence | All fits converged (`convergence = 0`) across all variants; **zero restarts needed**. |
-| Data quality | Full-population scan of all 12 series inside the estimation window for stale-price runs and \|r\| > 11% (Taiwan's ±10% limit). One genuine defect found (2317, §7 of README); the rest are ordinary microstructure zero-return days. |
-| Lookahead | None by construction — γ is an in-sample descriptive MLE; no forecast, no OOS split, no signal. |
+| Offline reproducibility | **Proven at runtime** — estimation script completes with all outbound sockets blocked |
+| Refresh altered data? | No — returns reproduce old snapshots to **< 1e-6** (now an enforced gate); old window on new data reproduces the prior run |
+| Calendar alignment | **Asserted invariant**, held across all 23 runs |
+| Convergence | 276/276 fits converged, 0 restarts |
+| Silent fallbacks | `scripts/audit_silent_fallbacks.py`: **no findings** |
+| Lookahead | None by construction (in-sample descriptive MLE) |
 
-## Independent review status
+## Standing instruction for the main thread
 
-A fresh-context `feature-dev:code-reviewer` subagent was dispatched with an adversarial brief covering
-(a) window/slicing correctness, (b) the ablation-ordering question, (c) the dependence problem in the
-end-date sweep, and (d) referee-facing embarrassments. **Its verdict had not returned when this
-experiment was committed.** The three substantive issues it was asked to arbitrate were all resolved by
-self-audit first (above), with the corrected numbers already in the results JSON.
+The review is a **fallback-path** verdict. Per `.claude/rules/experiments.md`, a `code-reviewer` subagent
+PASS is **not** a substitute for primary-path Codex once Codex is recoverable — and here the primary path
+is *broken*, not merely unavailable (`AGENTS.md` hijack, README §8).
 
-**Standing instruction for the main thread**: treat this experiment as **CONDITIONAL** on that review
-landing. The numbers are reproducible and the honesty defects are fixed, but per
-`.claude/rules/experiments.md` a subagent-fallback PASS is **not** a substitute for a primary-path review
-— and here even the fallback has not yet signed off. Do not write `knowledge.json` on the strength of
-this file alone. Re-run the review once the `AGENTS.md` hijack (README §8) is fixed, since that is what
-broke the primary path in the first place.
+1. **Fix the `AGENTS.md` hijack first** — it is the gate in front of every `knowledge.json` write, and it
+   is currently passing without reviewing.
+2. **Then re-run this review on the primary path**, and note the reviewer source in any knowledge entry.
+3. **Do not report an amplification ratio anywhere** — Table 2's footnote currently carries 5.0×/4.5×.
+   Replace with the difference (0.184 [0.072, 0.298]) and the ordering sign test (9/9, p = 0.002).

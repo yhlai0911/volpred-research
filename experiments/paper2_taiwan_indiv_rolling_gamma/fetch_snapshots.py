@@ -44,6 +44,7 @@ DATA = os.path.join(HERE, "data")
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 
 FETCH_START = "2007-01-01"  # buffer before the 2008-01-01 sample start
+TOL = 1e-6                  # the tolerance we CLAIM in the README, so the gate enforces it
 
 # yfinance ticker -> local snapshot basename
 SERIES = {
@@ -133,7 +134,12 @@ def main() -> None:
         "fetched_at_utc": fetch_date.isoformat(),
         "source": "yfinance",
         "yfinance_version": yf.__version__,
-        "convention": "auto_adjust=False; price column = 'Adj Close' (dividend+split adjusted)",
+        "convention": (
+            "auto_adjust=False; price column = 'Adj Close'. Dividend-adjusted. Split adjustment is "
+            "NOT reliable: 0050.TW's 4:1 split on 2014-01-02 still leaves a spurious -1.389 log "
+            "return in this column (see extreme_returns_gt_11pct), which is why the paper's "
+            "canonical rule excludes that date. Do not describe this series as 'split adjusted'."
+        ),
         "fetch_start": FETCH_START,
         "series": {},
     }
@@ -169,9 +175,19 @@ def main() -> None:
                     "reference": f"{LEGACY_REF[ticker][0]}:{LEGACY_REF[ticker][1]}",
                     "overlap_obs": int(len(j)),
                     "max_abs_logret_diff": md,
-                    "reproduces_old": bool(md < 1e-4),
+                    "tolerance": TOL,
+                    "reproduces_old": bool(md < TOL),
                     "duplicate_date_rows_in_old_source": _LEGACY_DUPES.get(ticker, 0),
                 }
+                # Fail loud, and at the tolerance we actually CLAIM. A gate looser than the
+                # claim is a claim that nothing verifies.
+                if md >= TOL:
+                    raise RuntimeError(
+                        f"{ticker}: refreshed log returns do NOT reproduce the previous canonical "
+                        f"snapshot (max|dr| = {md:.2e} >= {TOL:.0e}). Adjusted-price returns are "
+                        "vintage-invariant, so a real discrepancy means the series changed, not the "
+                        "vintage. Investigate before using this snapshot."
+                    )
 
         # Data-quality: Taiwan cash equities have a +/-10% daily price limit, so a
         # |log return| beyond ~0.11 in a stock/ETF series is a corporate-action or

@@ -1,7 +1,7 @@
 {
   "experiment_id": "paper2_taiwan_indiv_rolling_gamma",
   "title": "Calendar-aligned rolling-w2000 GJR gamma for Taiwan-VT Table 2 (refreshed snapshots; common end 2026)",
-  "timestamp": "2026-07-12T19:53:54.895827+00:00",
+  "timestamp": "2026-07-12T20:04:20.408386+00:00",
   "purpose": "Rebuild body_v3.tex tab:gamma's rolling block on snapshots that are BOTH calendar-aligned AND current. Supersedes the 2026-07-07 run, whose common end (2025-01-22) was an artifact of two expired offline snapshots rather than a market fact, and whose 'RESOLVED' stamp on the Codex caveat was therefore false.",
   "method": "GJR-GARCH(1,1) MLE (arch pkg), Constant mean, Normal innovations, returns*100; rolling w=2000 last window ending on/before the variant's common end date; Bollerslev-Wooldridge robust t-values; persistence = alpha + 0.5*gamma + beta",
   "data": {
@@ -301,6 +301,13 @@
           "window": 2000,
           "window_start": "2018-04-19",
           "window_end": "2026-07-09",
+          "ablated_ranges": [
+            [
+              "2014-01-02",
+              "2014-01-02"
+            ]
+          ],
+          "ablated_obs": 0,
           "name": "Yuanta Taiwan 50 ETF",
           "ticker": "0050.TW",
           "price_source": "data/0050_tw.csv"
@@ -641,6 +648,13 @@
           "window": 2000,
           "window_start": "2018-01-16",
           "window_end": "2026-04-17",
+          "ablated_ranges": [
+            [
+              "2014-01-02",
+              "2014-01-02"
+            ]
+          ],
+          "ablated_obs": 0,
           "name": "Yuanta Taiwan 50 ETF",
           "ticker": "0050.TW",
           "price_source": "data/0050_tw.csv"
@@ -981,6 +995,13 @@
           "window": 2000,
           "window_start": "2016-11-04",
           "window_end": "2025-01-22",
+          "ablated_ranges": [
+            [
+              "2014-01-02",
+              "2014-01-02"
+            ]
+          ],
+          "ablated_obs": 0,
           "name": "Yuanta Taiwan 50 ETF",
           "ticker": "0050.TW",
           "price_source": "data/0050_tw.csv"
@@ -1054,6 +1075,9 @@
     "rows": [
       {
         "common_end": "2025-01-31",
+        "window_end_all_rows": [
+          "2025-01-22"
+        ],
         "gamma_mean_9stock": 0.024112677173040966,
         "gamma_mean_10security": 0.041936604233764566,
         "twii_gamma": 0.1574686284424929,
@@ -1066,6 +1090,9 @@
       },
       {
         "common_end": "2025-02-28",
+        "window_end_all_rows": [
+          "2025-02-27"
+        ],
         "gamma_mean_9stock": 0.02218268639501434,
         "gamma_mean_10security": 0.03997000923956352,
         "twii_gamma": 0.15084098489395234,
@@ -1078,6 +1105,9 @@
       },
       {
         "common_end": "2025-03-31",
+        "window_end_all_rows": [
+          "2025-03-31"
+        ],
         "gamma_mean_9stock": 0.026521765714540554,
         "gamma_mean_10security": 0.04528242918835253,
         "twii_gamma": 0.15838255962699246,
@@ -1090,6 +1120,9 @@
       },
       {
         "common_end": "2025-04-30",
+        "window_end_all_rows": [
+          "2025-04-30"
+        ],
         "gamma_mean_9stock": 0.05808551240124271,
         "gamma_mean_10security": 0.08023018345538682,
         "twii_gamma": 0.18960854342819822,
@@ -1102,6 +1135,9 @@
       },
       {
         "common_end": "2025-05-31",
+        "window_end_all_rows": [
+          "2025-05-29"
+        ],
         "gamma_mean_9stock": 0.0537483943018001,
         "gamma_mean_10security": 0.07560269078824641,
         "twii_gamma": 0.19440156375708384,
@@ -1114,6 +1150,9 @@
       },
       {
         "common_end": "2025-06-30",
+        "window_end_all_rows": [
+          "2025-06-30"
+        ],
         "gamma_mean_9stock": 0.05585494913995486,
         "gamma_mean_10security": 0.078444838097767,
         "twii_gamma": 0.1965768188980758,
@@ -1126,6 +1165,9 @@
       },
       {
         "common_end": "2025-07-31",
+        "window_end_all_rows": [
+          "2025-07-31"
+        ],
         "gamma_mean_9stock": 0.05949133637849405,
         "gamma_mean_10security": 0.08150937434349366,
         "twii_gamma": 0.19717909063229402,
@@ -1138,6 +1180,9 @@
       },
       {
         "common_end": "2025-08-31",
+        "window_end_all_rows": [
+          "2025-08-29"
+        ],
         "gamma_mean_9stock": 0.0615331393541823,
         "gamma_mean_10security": 0.08402799700344711,
         "twii_gamma": 0.2129473448620783,
@@ -1150,6 +1195,9 @@
       },
       {
         "common_end": "2025-09-30",
+        "window_end_all_rows": [
+          "2025-09-30"
+        ],
         "gamma_mean_9stock": 0.06070237014716187,
         "gamma_mean_10security": 0.08317395333708674,
         "twii_gamma": 0.2135778484850943,
@@ -1162,6 +1210,9 @@
       },
       {
         "common_end": "2025-10-31",
+        "window_end_all_rows": [
+          "2025-10-31"
+        ],
         "gamma_mean_9stock": 0.05937761289780222,
         "gamma_mean_10security": 0.08208143470434301,
         "twii_gamma": 0.22138431953354581,
@@ -1174,6 +1225,9 @@
       },
       {
         "common_end": "2025-11-30",
+        "window_end_all_rows": [
+          "2025-11-28"
+        ],
         "gamma_mean_9stock": 0.061274054221879704,
         "gamma_mean_10security": 0.08419296238043109,
         "twii_gamma": 0.23584468827830038,
@@ -1186,6 +1240,9 @@
       },
       {
         "common_end": "2025-12-31",
+        "window_end_all_rows": [
+          "2025-12-31"
+        ],
         "gamma_mean_9stock": 0.060531670465028053,
         "gamma_mean_10security": 0.08361544406159285,
         "twii_gamma": 0.2352409286025706,
@@ -1198,6 +1255,9 @@
       },
       {
         "common_end": "2026-01-31",
+        "window_end_all_rows": [
+          "2026-01-30"
+        ],
         "gamma_mean_9stock": 0.0606435618369395,
         "gamma_mean_10security": 0.0845152479004075,
         "twii_gamma": 0.25136709488525616,
@@ -1210,6 +1270,9 @@
       },
       {
         "common_end": "2026-02-28",
+        "window_end_all_rows": [
+          "2026-02-26"
+        ],
         "gamma_mean_9stock": 0.05654428366078822,
         "gamma_mean_10security": 0.08033425508753558,
         "twii_gamma": 0.24256738182341211,
@@ -1222,6 +1285,9 @@
       },
       {
         "common_end": "2026-03-31",
+        "window_end_all_rows": [
+          "2026-03-31"
+        ],
         "gamma_mean_9stock": 0.055441031079224455,
         "gamma_mean_10security": 0.08071663445257478,
         "twii_gamma": 0.26077514288081616,
@@ -1234,6 +1300,9 @@
       },
       {
         "common_end": "2026-04-30",
+        "window_end_all_rows": [
+          "2026-04-30"
+        ],
         "gamma_mean_9stock": 0.04964763332783777,
         "gamma_mean_10security": 0.07328122685246187,
         "twii_gamma": 0.23845941189886216,
@@ -1246,6 +1315,9 @@
       },
       {
         "common_end": "2026-05-31",
+        "window_end_all_rows": [
+          "2026-05-29"
+        ],
         "gamma_mean_9stock": 0.037512781896771416,
         "gamma_mean_10security": 0.05741474345398704,
         "twii_gamma": 0.20268288550125294,
@@ -1258,6 +1330,9 @@
       },
       {
         "common_end": "2026-06-30",
+        "window_end_all_rows": [
+          "2026-06-30"
+        ],
         "gamma_mean_9stock": 0.03392751948631222,
         "gamma_mean_10security": 0.052967403000939606,
         "twii_gamma": 0.19859606910401534,
@@ -1270,6 +1345,9 @@
       },
       {
         "common_end": "2026-07-09",
+        "window_end_all_rows": [
+          "2026-07-09"
+        ],
         "gamma_mean_9stock": 0.03227118515850889,
         "gamma_mean_10security": 0.05124370350051595,
         "twii_gamma": 0.19751852117653682,
@@ -1294,12 +1372,14 @@
       3.264300091190065,
       6.799942180486063
     ],
+    "amplification_ratio_spread_factor": 2.0831240972109923,
     "twii_gamma_median_implied_se": 0.08211164777508143,
     "gamma_0056_always_rank_1": true,
-    "what_this_sweep_is_NOT": "NOT a sampling distribution. Consecutive end dates share ~97% of their observations, so the estimates are strongly positively dependent. The SE of the DIFFERENCE between two overlapping estimates is far smaller than sqrt(2)*SE, so two of them can be significantly different from each other even while their individual CIs almost entirely overlap. Comparing this spread against marginal standard errors is therefore NOT a test, and an earlier draft's conclusion ('the spread is one SE wide, so the estimates are imprecise rather than regime-unstable') is WITHDRAWN as invalid. Settling whether the movement is real parameter instability would need a Nyblom/CUSUM stability test or a block bootstrap over the union sample that respects the overlap -- neither of which this experiment runs.",
-    "interpretation": "Across every monthly end date from 2025-01 to 2026-07-09, the TWII rolling gamma spans [0.151, 0.261], the 9-stock mean gamma spans [0.022, 0.062], and the amplification ratio spans [3.26x, 6.80x]. What follows WITHOUT any dependence-aware machinery: (1) each estimate is imprecise on its own terms -- TWII's rolling gamma at the primary window carries t=1.86, not significant at 5%, and its 95% CI contains every other end date's point estimate as well as the paper's rendered 0.272; (2) the reported number moves materially with the terminal date, and the driver is identifiable (see event_attribution); (3) therefore no single end date's point estimate may be reported as a sharp structural constant. The rendered 5.0x ratio sits inside the swept interval, so the ratio's ORDER OF MAGNITUDE survives, but its second digit is not identified. 0056.TW ranks first of twelve at EVERY end date -- that ordering, unlike the levels, is robust."
+    "what_this_sweep_is_NOT": "NOT a sampling distribution, and NOT to be compared against a marginal standard error. Adjacent end dates share ~99% of their observations (the extremes ~85%), so under a constant-parameter null the sampling errors are strongly POSITIVELY correlated: SD(g1 - g2) ~= sigma*sqrt(2*(1-rho)), which at rho=0.99 is about a SEVENTH of sigma. Scoring the observed movement against sigma therefore UNDERSTATES it several-fold -- the overlap does not blur the comparison, it REVERSES it. An earlier draft concluded 'the spread is about one SE wide, so these estimates are imprecise rather than regime-unstable'. That is WITHDRAWN: it was not merely un-rigorous, it pointed the wrong way. The correct null is computed in inference.py (constant-gamma parametric bootstrap) -- see inference_results.json .c_constant_gamma_null.",
+    "interpretation": "Across every monthly end date from 2025-01 to 2026-07-09, the TWII rolling gamma spans [0.151, 0.261], the 9-stock mean gamma spans [0.022, 0.062], and the amplification ratio spans [3.26x, 6.80x] -- a factor of 2.08, i.e. the ratio's FIRST significant digit is not identified. That the paper's rendered 5.0x 'sits inside' this interval is not validation: so would almost any number one might have written down. Do not report a point ratio. What the sweep establishes: the reported number is materially determined by an arbitrary choice -- the date of the data pull -- and the movement is traceable to a handful of extreme sessions (see event_attribution), i.e. it is larger than, and different in kind from, sampling noise (formally tested in inference.py). This design cannot separate genuine time-variation in gamma from the GJR MLE's finite-sample sensitivity to a few influential shocks; both imply the same policy. 0056.TW ranks first of twelve at EVERY end date -- that ORDERING, unlike the levels, is robust."
   },
   "event_attribution": {
+    "caveat_on_causal_language": "The month-to-month contrasts below compare two windows that differ at BOTH ends (observations enter at the back AND leave at the front), so on their own they cannot attribute a move to the entering segment. The clean, identified test holds one window fixed and ABLATES the candidate sessions from inside it -- that is run in inference.py (.b_event_ablation), and it is what these attributions rest on. Read the segment statistics here as description; read the ablation for the causal claim.",
     "entered_2025_04_tariff_shock": {
       "n": 20,
       "std_pct": 3.892490761128898,
@@ -1309,7 +1389,7 @@
         "2025-04-09: -5.96%",
         "2025-04-08: -4.10%"
       ],
-      "effect": "Entering the window between the 2025-03-31 and 2025-04-30 end dates, this segment more than DOUBLES the 9-stock mean gamma (0.027 -> 0.058). It contains a -10.20% limit-down TAIEX session (2025-04-07) plus -5.96% and -4.10% follow-through -- the single largest cluster of negative shocks in the sample."
+      "effect": "Enters the window between the 2025-03-31 and 2025-04-30 end dates, across which the 9-stock mean gamma moves 0.027 -> 0.058 (it roughly doubles). The segment contains a -10.20% limit-down TAIEX session (2025-04-07) plus -5.96% and -4.10% follow-through -- the largest cluster of negative shocks in the sample. Ablation-identified in inference.py."
     },
     "left_2018_q1_vol_spike": {
       "n": 57,
@@ -1320,7 +1400,7 @@
         "2018-03-23: -1.67%",
         "2018-02-05: -1.63%"
       ],
-      "effect": "Leaving the window as the end date moves 2026-04-17 -> 2026-07-09 (the window start slides 2018-01-16 -> 2018-04-19). It contains 2018-02-06 (-5.08%, the 'VIXmageddon' session). Dropping a large negative shock lowers gamma."
+      "effect": "Leaves the window as the end date moves 2026-04-17 -> 2026-07-09 (the window start slides 2018-01-16 -> 2018-04-19). It contains 2018-02-06 (-5.08%, the 'VIXmageddon' session). Dropping a large negative shock lowers gamma."
     },
     "entered_2026_q2": {
       "n": 68,
@@ -1331,10 +1411,19 @@
         "2026-06-08: -3.54%",
         "2026-06-10: -3.36%"
       ],
-      "effect": "High volatility but roughly SYMMETRIC (skew ~0; the largest moves include +4.51%, +4.47%, +4.47% sessions alongside the drawdowns). Volatility that is not driven by negative shocks DILUTES the measured asymmetry, pushing gamma down. Together with the 2018 spike leaving, this explains the decay from gamma_9stock 0.055 (2026-03) to 0.032 (2026-07)."
+      "effect": "High volatility but roughly SYMMETRIC (skew ~0; the largest moves include +4.51%, +4.47%, +4.47% sessions alongside the drawdowns). Volatility that is NOT driven by negative shocks DILUTES the measured asymmetry. Together with the 2018 spike leaving, this is the decay in the 9-stock mean gamma from 0.055 (2026-03) to 0.032 (2026-07-09)."
     },
-    "conclusion": "The rolling-w2000 last-window gamma is not a stable structural parameter -- it is an event-driven statistic dominated by a handful of extreme sessions moving in and out of an 8-year window whose boundaries are set by the arbitrary date of the data pull. This is a reason to keep the FULL-SAMPLE Bollerslev-Wooldridge spec as the paper's primary evidence (as body_v3.tex already does) and to report the rolling block with an explicit imprecision caveat rather than as sharp point estimates."
+    "conclusion": "The rolling-w2000 last-window gamma is an event-driven statistic, not a stable structural parameter: it is dominated by a handful of extreme sessions moving in and out of an 8-year window whose boundaries are set by the arbitrary date of the data pull. Note this conclusion is INCOMPATIBLE with reading the end-date movement as mere sampling noise -- noise is not attributable to nameable sessions. The formal test is in inference.py (.c_constant_gamma_null). Practical consequence: keep the FULL-SAMPLE Bollerslev-Wooldridge spec as the paper's primary evidence (as body_v3.tex already does), and never report a rolling point estimate as a structural quantity."
   },
+  "fit_diagnostics": {
+    "fits": 276,
+    "max_restarts": 0,
+    "nonzero_convergence": 0,
+    "covers": "EVERY GJR fit in this run -- the 3 named variants, the 2317 ablation variant, and all rows of the end-date sweep. The honesty ledger's 'all converged, no restarts needed' is backed by these counters, not by a spot check on three variants.",
+    "all_converged": true,
+    "no_restarts_needed": true
+  },
+  "inference": "The point estimates here are descriptive. The INFERENCE that the paper needs -- the ordering sign test, the ablation-identified event attribution, the constant-gamma null for the end-date movement, and the block-bootstrap interval for the TWII-minus-stocks DIFFERENCE (the ratio is ill-posed: its denominator is not distinguishable from zero) -- is in inference.py / inference_results.json. Do not quote a point ratio from this file without reading that one.",
   "narrative_implication_0056": {
     "paper_currently_argues": "body_v3.tex section 3.2 ('Sensitivity to 0056.TW inclusion') rests on 0056 having the SECOND-highest gamma (rendered 0.112), so that including this diversified ETF in the stock average biases the amplification ratio DOWNWARD -- i.e. excluding it is the conservative choice.",
     "what_the_data_says": "0056.TW's rolling gamma is 0.222 (t=2.95) on the primary window -- the HIGHEST of all twelve rows, above every individual stock AND above the TAIEX itself. It ranks first at every end date in the sensitivity sweep, so this is not an artifact of the window choice.",
