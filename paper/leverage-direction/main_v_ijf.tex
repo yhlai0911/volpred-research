@@ -41,6 +41,7 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{threeparttable}
 \usepackage{natbib}
 \usepackage{setspace}
 \usepackage{hyperref}
@@ -77,8 +78,8 @@ carries through to better decisions. We ask whether refined volatility
 measurement actually improves portfolio allocation, and answer it with a
 pre-specified out-of-sample evaluation that carries each forecast through to
 a volatility-targeting allocation, across seven primary assets spanning
-equities, precious metals, government bonds, and cryptocurrency, extended to
-twenty-six assets. The answer is largely no. After correcting for multiple
+equities, precious metals, government bonds, and cryptocurrency, with a
+disjoint holdout re-test. The answer is largely no. After correcting for multiple
 testing, asymmetric model selection yields no robust out-of-sample forecast
 superiority over a symmetric benchmark; the cross-asset inverted-leverage
 signal is weak and statistically indistinguishable from zero; and the one
