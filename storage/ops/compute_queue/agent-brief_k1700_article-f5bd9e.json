@@ -1,0 +1,37 @@
+{
+  "id": "agent-brief_k1700_article-f5bd9e",
+  "title": "K1700 member_qa 文章：30 年 15% 的可行性（yaoxk1431）",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_k1700_article.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "medium",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1700_article-f5bd9e.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-12T15:28:15Z",
+  "started_at": "2026-07-12T15:30:00Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1700_article-f5bd9e.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1700_article-f5bd9e.stderr",
+  "result_artifact": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1700_article-f5bd9e.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research",
+  "claude_followup": {
+    "brief": "驗證文章已上線（feed + 前端）、兩張真圖有嵌、懶人包有附、誠實限制段落有寫、anti_ai_gate exit 0、問答頁已連結；並把 next_tasks 的 member_qa_e79a7097_evaluate 標 succeeded。",
+    "task_type": "member_qa",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}
