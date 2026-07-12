@@ -16540,5 +16540,17 @@
     "task_type": "experiment",
     "task_id": "research_rp_a02d0a5f75",
     "purpose": "用解出的容量派工：K1702 vol-managed factor zoo（Moreira-Muir 套 SMB/HML/MOM/QMJ 的 OOS + 淨成本崩潰再驗證）。餓死 114h 由 starvation lockout 指定；xhigh 研究 agent 走 compute queue（job agent-brief_vol_managed_factor_zoo-25df97），不在 fire 內 spawn。"
+  },
+  {
+    "timestamp": "2026-07-13T04:16:36+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-8b4cfd7c5",
+    "outcome": "succeeded",
+    "summary": "fix K1698 nested DM role isolation",
+    "commit": "8b4cfd7c5a2dd7ab91e832bb993b8641d9b04d04",
+    "owner": "codex",
+    "backfilled_at": "2026-07-12T20:17:14.487501+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1698"
   }
 ]
