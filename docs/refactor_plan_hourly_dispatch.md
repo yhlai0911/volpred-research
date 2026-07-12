@@ -402,3 +402,12 @@ launchctl bootout gui/501/com.volpred.dispatch-supervisor # stop supervisor
 *Updated 2026-07-04 16:31 台灣時間 by hourly-16 — cutover 落地：PHASE-Z ported+reviewed、real-run smoke PASS、legacy disabled、supervisor real-run 驗證。首輪 17:07 由 health.py + followup 確認。*
 
 **首輪 17:07 real fire — FULL PASS（2026-07-04 17:17 台灣，PID 64345）**：`last_fire_at=17:07:31`（離開 dry-run 值）✓、supervisor 16:30 起 `dry_run=False` ✓、log 有 `firing worker` + `worker attempt=1/3` ✓、legacy `hourly-dispatch` NOT loaded（無雙 fire）✓、排程精準（17:07:31 對 17:07:00）✓。Completion-side 也已驗證：`completions[-1].outcome=success`、`exit_code=0`、`attempts=1`、`final_model=claude-opus-4-8`、`duration_s=584.33`、`current_job=null` 無孤兒、supervisor log 有 `worker returned outcome=success attempts=1 duration=584.3s` + `phase_z outcome={'committed': False, 'reason': 'clean'}`。PHASE-Z 未產生 commit 是正確 clean no-op。→ 新 supervisor real-run 路徑（準點 fire、真 spawn、成功 completion、post-fire PHASE-Z、無雙派工）**fully PASS**；任務 `platform_ops_verify_supervisor_first_real_fire_1707` closure 由 Codex 17:20 完成。
+
+### Multi-slot pool（2026-07-13，task `platform-ops-dispatch-multislot`）
+
+- `current_jobs[]` 取代單一 canonical slot；`current_job` 暫留為 rolling-upgrade 相容投影。schema version 維持 1，legacy live job 以 deterministic ID 無損遷移。
+- `max_slots` 唯一 owner 是 `runtime_schedules.json` 的 daemon entry，預設 2、每 tick 熱重載。滿槽不 consume pending fire；半槽可啟第二個 background fire。
+- 每個 logical fire 有 immutable `job_id`、可重用的 `slot_id`、共用 `cohort_id`。retry/backoff/Codex failover 保留原 slot；state mutation 以 job+attempt+pid CAS，stale watchdog 不會清 sibling。
+- 每槽使用獨立 log、actor、worktree prefix。任何 repo 寫入必須進 slot-prefixed worktree；control-plane claim 仍走 canonical fcntl writer。
+- PHASE-Z 使用 persistent cohort drain：先完成者只留 token；最後 sibling 結束後才跑一次。daemon crash 會先 recovery PHASE-Z，期間拒絕新 admission。identity 未驗證或 kill 失敗的 orphan 只 quarantine 該 slot，不會對仍在寫檔的 process commit。
+- rollout：`max_slots=2` 先觀察一週；health / restart / alert dedup 全部 job-scoped。回歸鎖定 full-skip、half-fire、單 job death 不影響 sibling，以及 legacy migration / retry CAS / cohort drain。

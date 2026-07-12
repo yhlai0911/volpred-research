@@ -2783,7 +2783,15 @@ def _parse_dispatch_supervisor_heartbeat_state(storage_dir: str, now: datetime) 
     beat = _parse_iso_datetime(snapshot.get("last_heartbeat_at")) if snapshot else None
     age_minutes = round((now - beat).total_seconds() / 60.0, 2) if beat else None
     supervisor_pid = snapshot.get("supervisor_pid") if snapshot else None
-    running = bool(snapshot.get("current_job")) if snapshot else False
+    if snapshot:
+        jobs = snapshot.get("current_jobs")
+        if jobs is None:
+            jobs = [] if snapshot.get("current_job") is None else [snapshot["current_job"]]
+        running = bool(jobs)
+        active_count = len(jobs)
+    else:
+        running = False
+        active_count = 0
 
     # A missing file / never-written heartbeat is NOT a breach here: a running
     # daemon recreates `dispatch_state.json` within one 30s beat, so its absence
@@ -2816,7 +2824,7 @@ def _parse_dispatch_supervisor_heartbeat_state(storage_dir: str, now: datetime) 
             "2. 看它最後在做什麼：tail -50 ~/.volpred/logs/dispatch_supervisor.log",
             "3. 重啟：bash scripts/reload_dispatch_supervisor.sh --reason wedged_daemon",
             "   （wrapper 會寫 planned-restart marker 避免這次部署被誤報成崩潰，",
-            "    並在 current_job 非 null 時拒絕執行，不會殺掉在飛的 worker。",
+            "    並在 current_jobs 已達 max_slots 時拒絕執行，不會殺掉在飛的 worker。",
             "    真要殺一個卡死的 worker 才加 --force。）",
             "4. 讀全量狀態：uv run python -m scripts.dispatch_supervisor.cli status",
         ]
@@ -2838,6 +2846,7 @@ def _parse_dispatch_supervisor_heartbeat_state(storage_dir: str, now: datetime) 
             "age_minutes": age_minutes,
             "supervisor_pid": supervisor_pid,
             "current_job_running": running,
+            "current_jobs_running": active_count,
             "warn_minutes": DISPATCH_SUPERVISOR_HEARTBEAT_WARN_MINUTES,
             "critical_minutes": DISPATCH_SUPERVISOR_HEARTBEAT_CRITICAL_MINUTES,
         },

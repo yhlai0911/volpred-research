@@ -164,7 +164,7 @@ def dispatch_supervisor_state(now: datetime) -> dict:
     computed without touching the dead LaunchAgent / stale log:
       - daemon_alive: launchctl 有 dispatch-supervisor process
       - end:          completions[-1].completed_at (TPE) — 最後完成班
-      - running:      current_job 非 null (本班正在跑)
+      - running:      current_jobs 非空 (至少一班正在跑)
       - last_exit:    completions[-1].exit_code (str) — 非 0 → 標紅
       - error:        state 讀取失敗訊息 (None = ok)
     """
@@ -179,7 +179,10 @@ def dispatch_supervisor_state(now: datetime) -> dict:
         _warn_cron_review("dispatch_state.json parse failed", DISPATCH_STATE_PATH, exc)
         return {"daemon_alive": daemon_alive, "end": None, "running": False,
                 "last_exit": None, "error": f"state parse failed: {str(exc)[:120]}"}
-    running = state.get("current_job") is not None
+    jobs = state.get("current_jobs")
+    if jobs is None:
+        jobs = [] if state.get("current_job") is None else [state["current_job"]]
+    running = bool(jobs)
     # 最後完成班的唯一來源是 append-only 的 completions[] 末筆（唯一 writer 是
     # `state.record_completion()`）。此處曾另讀一個 `last_completion` 欄位當
     # freshest override，但全 repo 沒有任何 writer 設它 — 幽靈欄位，2026-07-10 移除。

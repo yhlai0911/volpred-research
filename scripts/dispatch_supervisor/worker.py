@@ -16,11 +16,13 @@ Codex failover (`codex_failover.py`) hands the hourly slot to `codex exec` when
 Claude cannot run at all. Ported back in 2026-07-10 after the 2026-07-04
 supervisor cutover orphaned it in the retired `cron_hourly_dispatch.sh`.
 
-Each attempt calls `state.reserve_fire()` BEFORE Popen spawn (atomic slot
-claim — Codex review §10 #5), `state.attach_process()` right after (records
-pid/pgid + a `ps`-derived start-time fingerprint for PID-reuse-safe identity
-checks — §10 #2), then `record_completion` AFTER. Health monitor (health.py)
-reads `current_job.age_seconds` from the same state file to independently
+Each logical fire reserves one state slot before the first Popen and keeps that
+same job_id/slot_id through retry backoff and Codex failover.  Attempts only
+update that reservation; the final outcome releases it.  This distinction is
+required once the scheduler can run more than one fire concurrently: releasing
+between attempts lets another fire steal the slot and makes a stale completion
+capable of closing the wrong process. Health monitor (health.py)
+reads every current_jobs entry from the same state file to independently
 detect frozen workers if THIS process itself hangs inside `wait()` (shouldn't
 happen with `timeout=` but health is the belt-and-suspenders layer).
 """
@@ -81,6 +83,8 @@ HANG_EXIT_CODES = {137, 142, 143}  # SIGKILL / SIGALRM / SIGTERM
 # SIGKILL) was misclassified as `hard_failure` and triggered a retry that
 # violated the no-retry-on-hang contract.
 TIMEOUT_KILLED_SENTINEL = -1000
+OWNERSHIP_LOST_SENTINEL = -1001
+TIMEOUT_SURVIVED_SENTINEL = -1002
 
 # stderr/stdout regex classifiers
 _AUTH_RE = re.compile(r"(Not logged in|Please run /login|invalid_api_key|authentication)", re.I)
@@ -102,8 +106,8 @@ _QUOTA_RE = re.compile(
 @dataclass
 class WorkerResult:
     exit_code: int
-    # success | failure | killed_timeout | auth_blocked | quota_blocked
-    # | codex_failover_recovered
+    # success | failure | killed_timeout | kill_failed_orphan | auth_blocked |
+    # quota_blocked | codex_failover_recovered | superseded
     outcome: str
     final_model: str
     attempts: int
@@ -126,7 +130,11 @@ def _normalize_signal_exit(exit_code: int) -> int:
 
 
 def _classify(exit_code: int, output: str) -> str:
-    """Return one of: success | hang | auth | quota | transient | hard_failure."""
+    """Classify one attempt using its private log only."""
+    if exit_code == OWNERSHIP_LOST_SENTINEL:
+        return "ownership_lost"
+    if exit_code == TIMEOUT_SURVIVED_SENTINEL:
+        return "hang_survived"
     if exit_code == TIMEOUT_KILLED_SENTINEL:
         return "hang"
     if exit_code == 0:
@@ -199,7 +207,7 @@ def _read_since(path: Path, offset: int, max_bytes: int = 2048) -> str:
         return ""
 
 
-def _kill_pgid(pgid: int, *, grace_s: float = GRACE_PERIOD_S) -> None:
+def _kill_pgid(pgid: int, *, grace_s: float = GRACE_PERIOD_S) -> bool:
     """SIGTERM whole process group; SIGKILL after grace_s if still alive.
 
     Codex review fix #5 (2026-07-04): the actual implementation moved to
@@ -208,10 +216,16 @@ def _kill_pgid(pgid: int, *, grace_s: float = GRACE_PERIOD_S) -> None:
     so both now share one implementation. Kept as a thin wrapper so existing
     callers/tests referencing `worker._kill_pgid` by name are unaffected.
     """
-    procutil.kill_pgid(pgid, grace_s=grace_s)
+    return procutil.kill_pgid(pgid, grace_s=grace_s)
 
 
-def _dispatch_actor(schedule_id: str, *, now: datetime | None = None) -> str:
+def _dispatch_actor(
+    schedule_id: str,
+    *,
+    slot_id: str | None = None,
+    job_id: str | None = None,
+    now: datetime | None = None,
+) -> str:
     """VOLPRED_ACTOR stamp injected into the spawned agent's env.
 
     Until 2026-07-10 no automated dispatch path exported VOLPRED_ACTOR, so every
@@ -223,7 +237,13 @@ def _dispatch_actor(schedule_id: str, *, now: datetime | None = None) -> str:
     `hourly-<HH>` convention already uses — so a writer_log line traces back to
     the dispatch that produced it instead of the pipeline-wide default.
     """
-    return f"dispatch-worker:{schedule_id}:{(now or datetime.now()).strftime('%H%M')}"
+    stamp = (now or datetime.now()).strftime("%H%M")
+    suffix = ""
+    if slot_id:
+        suffix += f":{slot_id}"
+    if job_id:
+        suffix += f":{job_id[:8]}"
+    return f"dispatch-worker:{schedule_id}:{stamp}{suffix}"
 
 
 def _spawn(
@@ -260,6 +280,8 @@ def _run_one_attempt(
     scheduled_for: str | None = None,
     fire_reason: str = "cron",
     state_path: Path,
+    job_id: str | None = None,
+    slot_id: str | None = None,
     claude_bin: str = CLAUDE_BIN,
     effort: str = DISPATCH_EFFORT,
 ) -> tuple[int, float]:
@@ -276,13 +298,33 @@ def _run_one_attempt(
         claude_bin, "-p", "--dangerously-skip-permissions",
         "--effort", effort, "--model", model, prompt_text,
     ]
-    # Codex review §10 #5: reserve the state slot BEFORE spawning so no other
-    # caller can pass a concurrent "current_job is None" check while we spawn.
-    state.reserve_fire(
-        schedule_id=schedule_id, attempt=attempt, model=model,
-        log_path=str(log_path), scheduled_for=scheduled_for,
-        fire_reason=fire_reason, path=state_path,
-    )
+    managed_state = True
+    if job_id is None:
+        # Compatibility for direct one-attempt smoke/tests. Production reserves
+        # the logical fire in scheduler/run_worker and always supplies job_id.
+        handle = state.reserve_fire(
+            schedule_id=schedule_id, attempt=attempt, model=model,
+            log_path=str(log_path), scheduled_for=scheduled_for,
+            fire_reason=fire_reason, path=state_path,
+        )
+        if handle is None:  # mocked legacy reserve in a unit test
+            job_id, slot_id = "direct-smoke", "slot-1"
+            managed_state = False
+        else:
+            job_id, slot_id = handle.job_id, f"slot-{handle.slot_id}"
+    else:
+        # The logical fire already owns a slot. Retry attempts mutate that exact
+        # job_id rather than releasing/re-reserving capacity.
+        handle = state.begin_attempt(
+            job_id=job_id, attempt=attempt, model=model, log_path=str(log_path),
+            expected_previous_attempt=attempt if attempt == 1 else attempt - 1,
+            path=state_path,
+        )
+        if handle is None:
+            raise RuntimeError(
+                f"begin_attempt CAS lost: job_id={job_id} attempt={attempt}"
+            )
+    slot_id = slot_id or "slot-1"
     # Record where the shared append-log ends BEFORE we spawn: classification
     # must only ever see THIS attempt's bytes (2026-07-05 cross-fire
     # contamination fix — see _read_since).
@@ -292,13 +334,20 @@ def _run_one_attempt(
     # attributable (see _dispatch_actor). Extend os.environ — the supervisor
     # boot set VOLPRED_ACTOR=dispatch-supervisor as a process default, which we
     # deliberately override here so AGENT writes carry the fire, not the daemon.
-    child_env = {**os.environ, "VOLPRED_ACTOR": _dispatch_actor(schedule_id)}
+    child_env = {
+        **os.environ,
+        "VOLPRED_ACTOR": _dispatch_actor(
+            schedule_id, slot_id=slot_id, job_id=job_id,
+        ),
+        "VOLPRED_DISPATCH_SLOT": slot_id,
+        "VOLPRED_DISPATCH_JOB_ID": job_id,
+    }
     try:
         proc = _spawn(argv=argv, log_path=log_path, env=child_env)
     except OSError:
         # Spawn itself failed (e.g. claude_bin missing) — free the slot we
         # just reserved so it doesn't wedge forever with no process behind it.
-        state.release_reservation(path=state_path)
+        state.release_reservation(job_id=job_id, path=state_path)
         raise
     pgid = os.getpgid(proc.pid)
     # Attach pid+pgid IMMEDIATELY (fast — os.getpgid() is a plain syscall) so
@@ -307,13 +356,19 @@ def _run_one_attempt(
     # pid-is-None branch, Codex review fix #2, 2026-07-04) is narrowed down
     # to the Popen() call itself, not the slower `ps`-based fingerprint call
     # that used to run first and be attached in the same step.
-    state.attach_process(pid=proc.pid, pgid=pgid, started_wall=None, path=state_path)
+    state.attach_process(
+        job_id=job_id, expected_attempt=attempt, pid=proc.pid, pgid=pgid,
+        started_wall=None, path=state_path,
+    )
     # Codex review §10 #2: fingerprint the process's OS start time so later
     # identity checks (health.py polling, restart orphan cleanup) can detect
     # PID reuse instead of trusting a bare `os.kill(pid, 0)`.
     started_wall = procutil.get_process_start_wall(proc.pid)
     if started_wall:
-        state.update_started_wall(pid=proc.pid, started_wall=started_wall, path=state_path)
+        state.update_started_wall(
+            job_id=job_id, expected_attempt=attempt, pid=proc.pid,
+            started_wall=started_wall, path=state_path,
+        )
     try:
         exit_code = proc.wait(timeout=timeout_s)
     except subprocess.TimeoutExpired:
@@ -323,7 +378,7 @@ def _run_one_attempt(
         # "hang" and short-circuit retry. Returning the sentinel makes the
         # classification path single-source and impossible to misread.
         LOG.warning("worker attempt=%d timeout=%ds — SIGTERM→SIGKILL pgid=%d", attempt, timeout_s, pgid)
-        _kill_pgid(pgid)
+        killed = bool(_kill_pgid(pgid))
         try:
             proc.wait(timeout=GRACE_PERIOD_S + 5)
         except subprocess.TimeoutExpired:
@@ -333,9 +388,23 @@ def _run_one_attempt(
                 pgid,
             )
         duration = time.time() - started
-        return TIMEOUT_KILLED_SENTINEL, duration, _read_since(log_path, log_offset)
+        attempt_output = _read_since(log_path, log_offset)
+        if not killed:
+            return TIMEOUT_SURVIVED_SENTINEL, duration, attempt_output
+        if managed_state and not state.mark_job_phase(
+            job_id=job_id, phase="classifying", expected_phase="running",
+            expected_attempt=attempt, expected_pid=proc.pid, path=state_path,
+        ):
+            return OWNERSHIP_LOST_SENTINEL, duration, attempt_output
+        return TIMEOUT_KILLED_SENTINEL, duration, attempt_output
     duration = time.time() - started
-    return _normalize_signal_exit(exit_code), duration, _read_since(log_path, log_offset)
+    attempt_output = _read_since(log_path, log_offset)
+    if managed_state and not state.mark_job_phase(
+        job_id=job_id, phase="classifying", expected_phase="running",
+        expected_attempt=attempt, expected_pid=proc.pid, path=state_path,
+    ):
+        return OWNERSHIP_LOST_SENTINEL, duration, attempt_output
+    return _normalize_signal_exit(exit_code), duration, attempt_output
 
 
 def _attempt_codex_failover(
@@ -347,6 +416,8 @@ def _attempt_codex_failover(
     model: str,
     log_tail: str,
     state_path: Path,
+    job_id: str,
+    slot_id: str,
 ) -> WorkerResult | None:
     """Hand this hourly slot to Codex. Returns a WorkerResult only if Codex recovered it.
 
@@ -354,8 +425,39 @@ def _attempt_codex_failover(
     and one that failed is worse. `None` means the caller should return its own
     Claude-side result (quota_blocked / auth_blocked) unchanged.
     """
+    def _track_started(pid: int, pgid: int) -> bool:
+        try:
+            state.attach_process(
+                job_id=job_id, expected_attempt=attempt, pid=pid, pgid=pgid,
+                started_wall=None, path=state_path,
+            )
+            wall = procutil.get_process_start_wall(pid)
+            if wall:
+                state.update_started_wall(
+                    job_id=job_id, expected_attempt=attempt, pid=pid,
+                    started_wall=wall, path=state_path,
+                )
+            return state.mark_job_phase(
+                job_id=job_id, phase="codex_failover", expected_phase="running",
+                expected_attempt=attempt, expected_pid=pid, path=state_path,
+            )
+        except RuntimeError as exc:
+            LOG.warning("codex failover lost slot before attach job_id=%s: %s", job_id, exc)
+            return False
+
+    def _track_finished(pid: int) -> None:
+        state.mark_job_phase(
+            job_id=job_id, phase="codex_failover", expected_phase="codex_failover",
+            expected_attempt=attempt, expected_pid=pid, detach_process=True,
+            path=state_path,
+        )
+
     try:
-        result = codex_failover.run_codex_failover(reason=reason)
+        result = codex_failover.run_codex_failover(
+            reason=reason, slot_id=slot_id, job_id=job_id,
+            on_process_started=_track_started,
+            on_process_finished=_track_finished,
+        )
     except Exception as exc:  # failover must never take the supervisor down
         LOG.exception("codex failover raised unexpectedly reason=%s", reason)
         alerts.send_codex_failover_alert(
@@ -370,13 +472,20 @@ def _attempt_codex_failover(
         detail=result.detail, attempted=result.attempted,
         output_tail=result.output_tail, state_path=state_path,
     )
+    if result.process_active:
+        state.mark_job_phase(
+            job_id=job_id, phase="kill_failed_orphan",
+            expected_phase="codex_failover", expected_attempt=attempt,
+            path=state_path,
+        )
+        return WorkerResult(
+            exit_code=137, outcome="kill_failed_orphan", final_model=CODEX_MODEL_LABEL,
+            attempts=attempt, duration_s=total_duration + result.duration_s,
+            log_tail=result.output_tail or log_tail,
+        )
     if not result.recovered:
         return None
 
-    state.record_completion(
-        exit_code=0, outcome="codex_failover_recovered", final_model=CODEX_MODEL_LABEL,
-        path=state_path,
-    )
     return WorkerResult(
         exit_code=0, outcome="codex_failover_recovered", final_model=CODEX_MODEL_LABEL,
         attempts=attempt, duration_s=total_duration + result.duration_s,
@@ -396,6 +505,9 @@ def run_worker(
     state_path: Path = state.STATE_PATH,
     claude_bin: str = CLAUDE_BIN,
     sleep_fn=time.sleep,
+    job_id: str | None = None,
+    slot_id: str | None = None,
+    max_slots: int = 2,
 ) -> WorkerResult:
     """Run prompt through claude -p with retry ladder.
 
@@ -403,10 +515,30 @@ def run_worker(
     """
     if state.read_state(state_path).get("auth_blocked"):
         LOG.warning("auth_blocked=true — refusing to spawn worker (manual unblock required)")
+        if job_id is not None:
+            state.record_completion(
+                job_id=job_id, exit_code=-2, outcome="auth_blocked",
+                final_model="(none)", path=state_path,
+            )
         return WorkerResult(
             exit_code=-2, outcome="auth_blocked", final_model="(none)",
             attempts=0, duration_s=0.0, log_tail="",
         )
+
+    if job_id is None:
+        lease = state.reserve_fire(
+            schedule_id=schedule_id, attempt=1, model=OPUS_MODEL,
+            log_path=str(log_path), scheduled_for=scheduled_for,
+            fire_reason=fire_reason, max_slots=max_slots, path=state_path,
+        )
+        job_id = lease.job_id
+        slot_id = f"slot-{lease.slot_id}"
+    elif slot_id is None:
+        raw_jobs = state.read_state(state_path).get("current_jobs") or []
+        active = {str(j.get("job_id")): j for j in raw_jobs}
+        if job_id not in active:
+            raise RuntimeError(f"reserved dispatch job is absent: {job_id}")
+        slot_id = f"slot-{active[job_id]['slot_id']}"
 
     total_duration = 0.0
     final_exit = 1
@@ -426,6 +558,7 @@ def run_worker(
             log_path=log_path, attempt=attempt, schedule_id=schedule_id,
             scheduled_for=scheduled_for, fire_reason=fire_reason,
             state_path=state_path, claude_bin=claude_bin,
+            job_id=job_id, slot_id=slot_id,
         )
         total_duration += duration
         final_exit = exit_code
@@ -437,8 +570,45 @@ def run_worker(
         category = _classify(exit_code, attempt_output)
         LOG.info("worker attempt=%d exit=%d category=%s duration=%.1fs", attempt, exit_code, category, duration)
 
+        if category == "ownership_lost":
+            LOG.info(
+                "worker attempt=%d lost state ownership to watchdog; no retry/failover",
+                attempt,
+            )
+            return WorkerResult(
+                exit_code=-1, outcome="superseded", final_model=model,
+                attempts=attempt, duration_s=total_duration, log_tail=log_tail,
+            )
+
+        if category == "hang_survived":
+            owned = state.mark_job_phase(
+                job_id=job_id, phase="kill_failed_orphan",
+                expected_phase="running", expected_attempt=attempt,
+                path=state_path,
+            )
+            if owned:
+                raw = next(
+                    (j for j in (state.read_state(state_path).get("current_jobs") or [])
+                     if str(j.get("job_id")) == job_id),
+                    {},
+                )
+                pgid = int(raw.get("pgid") or -1)
+                alerts.send_hang_alert(
+                    job={
+                        **raw, "survivors": procutil.pgid_members(pgid) if pgid > 0 else [],
+                        "slot_quarantined": True,
+                    },
+                    log_tail=log_tail, state_path=state_path,
+                )
+            return WorkerResult(
+                exit_code=137, outcome="kill_failed_orphan", final_model=model,
+                attempts=attempt, duration_s=total_duration, log_tail=log_tail,
+            )
+
         if category == "success":
             state.record_completion(
+                job_id=job_id, expected_attempt=attempt,
+                expected_phase="classifying",
                 exit_code=exit_code, outcome="success", final_model=model,
                 path=state_path,
             )
@@ -463,6 +633,8 @@ def run_worker(
             # within ~1s and would have cleared it out from under us — that race
             # is what mailed the owner blind pid=-1 hang alerts, 2026-07-12 00:57).
             entry = state.record_completion(
+                job_id=job_id, expected_attempt=attempt,
+                expected_phase="classifying",
                 exit_code=persisted_exit, outcome="killed_timeout", final_model=model,
                 path=state_path,
             )
@@ -474,7 +646,7 @@ def run_worker(
                 )
             else:
                 hung = entry["job"]
-                pgid = hung.get("pgid", -1)
+                pgid = int(hung.get("pgid") or -1)
                 alerts.send_hang_alert(
                     job={"pid": hung.get("pid", -1), "pgid": pgid,
                          "started_at": entry.get("fire_at"),
@@ -483,7 +655,7 @@ def run_worker(
                          # observed at alert time: macOS can and does refuse
                          # killpg, so report whether the SIGKILL actually landed
                          # rather than asserting it did (see procutil.kill_pgid).
-                         "survivors": procutil.pgid_members(pgid)},
+                         "survivors": procutil.pgid_members(pgid) if pgid > 0 else []},
                     log_tail=log_tail, state_path=state_path,
                 )
             return WorkerResult(
@@ -492,10 +664,16 @@ def run_worker(
             )
 
         if category == "auth":
-            state.record_completion(
-                exit_code=exit_code, outcome="auth_blocked", final_model=model,
-                path=state_path,
+            owned = state.mark_job_phase(
+                job_id=job_id, expected_attempt=attempt,
+                expected_phase="classifying", phase="codex_failover",
+                detach_process=True, path=state_path,
             )
+            if not owned:
+                return WorkerResult(
+                    exit_code=-1, outcome="superseded", final_model=model,
+                    attempts=attempt, duration_s=total_duration, log_tail=log_tail,
+                )
             state.set_auth_blocked(True, path=state_path)
             alerts.send_auth_alert(log_tail=log_tail, state_path=state_path)
             # Claude stays blocked until a human fixes the credential, but Codex
@@ -504,10 +682,24 @@ def run_worker(
             # auth_blocked remains set.
             recovered = _attempt_codex_failover(
                 reason="auth", attempt=attempt, total_duration=total_duration,
-                fallback_exit=exit_code, model=model, log_tail=log_tail, state_path=state_path,
+                fallback_exit=exit_code, model=model, log_tail=log_tail,
+                state_path=state_path, job_id=job_id, slot_id=slot_id,
             )
             if recovered is not None:
+                if recovered.outcome == "kill_failed_orphan":
+                    return recovered
+                state.record_completion(
+                    job_id=job_id, expected_attempt=attempt, exit_code=0,
+                    expected_phase="codex_failover",
+                    outcome=recovered.outcome, final_model=recovered.final_model,
+                    path=state_path,
+                )
                 return recovered
+            state.record_completion(
+                job_id=job_id, expected_attempt=attempt, exit_code=exit_code,
+                expected_phase="codex_failover",
+                outcome="auth_blocked", final_model=model, path=state_path,
+            )
             return WorkerResult(
                 exit_code=exit_code, outcome="auth_blocked", final_model=model,
                 attempts=attempt, duration_s=total_duration, log_tail=log_tail,
@@ -520,10 +712,16 @@ def run_worker(
             # at the provider's reset time, so the next hourly fire's single
             # attempt self-resumes the loop with zero manual intervention.
             # One warn email per outage (4h dedup in send_quota_alert).
-            state.record_completion(
-                exit_code=exit_code, outcome="quota_blocked", final_model=model,
-                path=state_path,
+            owned = state.mark_job_phase(
+                job_id=job_id, expected_attempt=attempt,
+                expected_phase="classifying", phase="codex_failover",
+                detach_process=True, path=state_path,
             )
+            if not owned:
+                return WorkerResult(
+                    exit_code=-1, outcome="superseded", final_model=model,
+                    attempts=attempt, duration_s=total_duration, log_tail=log_tail,
+                )
             alerts.send_quota_alert(log_tail=log_tail, state_path=state_path)
             # Codex runs on a separate (ChatGPT) quota — hand it the slot rather
             # than dropping the hour. 2026-07-10: this is the failover the
@@ -532,22 +730,37 @@ def run_worker(
             # hourly slot until the reset.
             recovered = _attempt_codex_failover(
                 reason="quota", attempt=attempt, total_duration=total_duration,
-                fallback_exit=exit_code, model=model, log_tail=log_tail, state_path=state_path,
+                fallback_exit=exit_code, model=model, log_tail=log_tail,
+                state_path=state_path, job_id=job_id, slot_id=slot_id,
             )
             if recovered is not None:
+                if recovered.outcome == "kill_failed_orphan":
+                    return recovered
+                state.record_completion(
+                    job_id=job_id, expected_attempt=attempt, exit_code=0,
+                    expected_phase="codex_failover",
+                    outcome=recovered.outcome, final_model=recovered.final_model,
+                    path=state_path,
+                )
                 return recovered
+            state.record_completion(
+                job_id=job_id, expected_attempt=attempt, exit_code=exit_code,
+                expected_phase="codex_failover",
+                outcome="quota_blocked", final_model=model, path=state_path,
+            )
             return WorkerResult(
                 exit_code=exit_code, outcome="quota_blocked", final_model=model,
                 attempts=attempt, duration_s=total_duration, log_tail=log_tail,
             )
 
         # transient or hard_failure — both fall through to retry loop
-        state.record_completion(
-            exit_code=exit_code, outcome="failure", final_model=model,
-            path=state_path,
-        )
         if attempt < max_attempts:
             wait_s = RETRY_BACKOFF_S if category == "transient" else max(5, RETRY_BACKOFF_S // 3)
+            state.record_completion(
+                job_id=job_id, expected_attempt=attempt, exit_code=exit_code,
+                outcome="failure", final_model=model, release_slot=False,
+                path=state_path,
+            )
             LOG.info("worker attempt=%d %s; sleeping %ds before retry", attempt, category, wait_s)
             sleep_fn(wait_s)
         attempt += 1
@@ -559,6 +772,12 @@ def run_worker(
         "attempts": attempt - 1, "final_model": final_model,
         "duration_s": round(total_duration, 2),
     }
+    state.record_completion(
+        job_id=job_id, expected_attempt=attempt - 1,
+        expected_phase="classifying",
+        exit_code=final_exit, outcome="failure", final_model=final_model,
+        path=state_path,
+    )
     alerts.send_completion_failure(entry=entry, log_tail=log_tail, state_path=state_path)
     return WorkerResult(
         exit_code=final_exit, outcome="failure", final_model=final_model,

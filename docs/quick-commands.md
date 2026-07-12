@@ -64,6 +64,11 @@ uv run volpred ops experiments scaffold --experiment-id k1121 --title "..."   # 
 uv run volpred ops experiments migrate --experiment-id k1121                  # 只看遷移計畫（dry-run）
 uv run volpred ops experiments migrate --experiment-id k1121 --apply          # 實際搬移該實驗的根層散檔
 
+# dispatch-supervisor multi-slot
+uv run python -m scripts.dispatch_supervisor.cli status        # current_jobs / phase_z_pending / completions
+jq '.daemons[] | select(.id=="volpred-dispatch-supervisor") | .max_slots' config/runtime_schedules.json
+bash scripts/reload_dispatch_supervisor.sh --defer --reason deploy
+
 # Zeabur CLI（部署 + 域名管理）
 # ⚠️ ID 唯一真實來源 = config/project_targets.json 的 .deploy（換伺服器只改那裡，別在文件硬編）
 #    取值： jq '.deploy' config/project_targets.json

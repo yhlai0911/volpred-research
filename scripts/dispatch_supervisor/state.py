@@ -8,25 +8,61 @@ Schema (version 1)::
       "supervisor_pid": int | null,              # os.getpid() of the live daemon
       "last_heartbeat_at": "<ISO>",              # liveness heartbeat (health_loop, every 30s)
       "last_fire_at": "<ISO|null>",              # last time a worker was actually spawned
-      "current_job": null | {                    # in-flight worker (None when idle)
+      "current_jobs": [                          # canonical in-flight workers (one per slot)
+        {
+          "job_id": str,                         # immutable CAS identity for this logical fire
+          "cohort_id": str,                      # immutable fire cohort (stable across retries)
+          "slot_id": int,                        # 1..max_slots, stable across retries
+          "phase": "reserved|running|classifying|retry_wait|codex_failover|restart_cleanup|kill_failed_orphan|timeout_unverified",
+          "pid": int | null,                     # null while reserved / between retry attempts
+          "pgid": int | null,
+          "started_wall": str | null,
+          "schedule_id": "hourly_dispatch",
+          "started_at": "<ISO>",                 # logical-fire start (stable across retries)
+          "attempt_started_at": "<ISO>",         # current attempt start
+          "attempt": int,
+          "model": "opus",
+          "log_path": str,
+          "scheduled_for": "<ISO|null>",
+          "fire_reason": "cron|requested:*|cron+requested:*",
+          "fire_key": str | null,                 # atomic cron-slot dedup identity
+          "restart_cleanup_pending": true,
+          "cleanup_recorded": true,
+          "cleanup_outcome": str
+        }
+      ],
+      "current_job": null | {                    # deprecated projection: lowest current_jobs slot
+        "job_id": str,                           # same object shape as current_jobs[]
+        "cohort_id": str,
+        "slot_id": int,
+        "phase": "reserved|running|classifying|retry_wait|codex_failover|restart_cleanup|kill_failed_orphan|timeout_unverified",
         "pid": int | null,                       # null during the reserve_fire()..attach_process() window
         "pgid": int | null,
         "started_wall": str | null,               # `ps -o lstart=` fingerprint (may lag pid/pgid — see update_started_wall)
         "schedule_id": "hourly_dispatch",
         "started_at": "<ISO>",
+        "attempt_started_at": "<ISO>",
         "attempt": int,                          # 1..3
         "model": "opus",                         # all attempts opus (2026-07-05 all-opus directive)
         "log_path": str,
         "scheduled_for": "<ISO|null>",            # cron slot this fire services (naive local ISO)
         "fire_reason": "cron|requested:*|cron+requested:*",
+        "fire_key": str | null,
         "restart_cleanup_pending": true,          # only present while a restart-orphan investigation is in flight
         "cleanup_recorded": true,                 # append_completion_entry() stamped this orphan's entry
         "cleanup_outcome": str                    # …and which outcome, so a crash-before-finalize retry
       },                                          #    knows whether to re-alert without re-appending
+      "phase_z_pending": [                       # released workers whose slot still drains PHASE-Z
+        {
+          "job_id": str, "cohort_id": str, "slot_id": int,
+          "created_at": "<ISO>"
+        }
+      ],
       "completions": [                           # ring buffer (max 100 entries)
         {
           "fire_at": "<ISO>", "completed_at": "<ISO>",
-          "scheduled_for": "<ISO|null>", "fire_reason": str,
+          "job_id": str, "cohort_id": str, "slot_id": int,
+          "scheduled_for": "<ISO|null>", "fire_reason": str, "fire_key": str | null,
           "exit_code": int, "duration_s": float,
           "attempts": int, "final_model": str,
           # 下三者只在 orphan 路徑（append_completion_entry 且 job 有 pid）出現，
@@ -91,11 +127,14 @@ absent from the output is a key that does not exist.
 from __future__ import annotations
 
 import fcntl
+import hashlib
 import json
 import logging
 import os
 import tempfile
+import uuid
 from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -134,6 +173,7 @@ SCHEMA_VERSION = 1
 # their first write; only a change that INVALIDATES existing values earns a bump.
 COMPLETIONS_MAX = 100  # ring buffer cap
 LOG = logging.getLogger(__name__)
+_IMPLICIT_JOB_ID: ContextVar[str | None] = ContextVar("dispatch_job_id", default=None)
 
 
 def _now() -> str:
@@ -154,7 +194,11 @@ def _empty_state() -> dict[str, Any]:
         "supervisor_pid": None,
         "last_heartbeat_at": None,
         "last_fire_at": None,
+        "current_jobs": [],
+        # Backward-compatible reader projection. All writers use current_jobs;
+        # _normalise_state refreshes this from the lowest occupied slot.
         "current_job": None,
+        "phase_z_pending": [],
         "completions": [],
         "auth_blocked": False,
         "auth_blocked_at": None,
@@ -165,6 +209,111 @@ def _empty_state() -> dict[str, Any]:
         "fire_request_reason": None,
         "alerts_dedup": {},
     }
+
+
+def _legacy_job_id(job: dict[str, Any], index: int) -> str:
+    """Deterministic identity for a pre-multislot current_job.
+
+    read_state() is intentionally read-only, so a random migration id there
+    would change on every read until the next writer happened to persist it.
+    A digest makes repeated reads stable and the next locked write durable.
+    """
+    raw = json.dumps(job, sort_keys=True, ensure_ascii=False, default=str)
+    digest = hashlib.sha256(f"{index}:{raw}".encode("utf-8")).hexdigest()[:24]
+    return f"legacy-{digest}"
+
+
+def _normalise_state(data: dict[str, Any]) -> dict[str, Any]:
+    """Migrate v1 single-slot state in memory without resetting live workers.
+
+    `current_jobs` is canonical. `current_job` remains a compatibility
+    projection for old readers during the rollout and is never consulted when
+    a canonical list is present. The schema version deliberately stays at 1:
+    bumping it would erase a live legacy worker before orphan cleanup can see it.
+    """
+    raw_jobs = data.get("current_jobs")
+    legacy_projection_present = "current_job" in data
+    legacy = data.get("current_job")
+    if not isinstance(raw_jobs, list):
+        raw_jobs = [legacy] if isinstance(legacy, dict) else []
+    elif legacy_projection_present:
+        # Mixed-version rollout safety. A still-running old daemon only knows
+        # current_job and preserves the unknown current_jobs key. Therefore
+        # [] + dict means old reserve/attach just created a live worker, while
+        # [job] + None means old completion just cleared it. New writers always
+        # call _sync_projection, so a consistent projection equals slot 1.
+        first = raw_jobs[0] if raw_jobs else None
+        if legacy is None and raw_jobs:
+            # An old daemon completed the projected (lowest-slot) legacy job.
+            # Preserve any siblings a new daemon admitted meanwhile.
+            raw_jobs = raw_jobs[1:]
+        elif isinstance(legacy, dict) and (
+            first is None
+            or any(legacy.get(key) != first.get(key) for key in ("job_id", "pid", "attempt", "log_path"))
+        ):
+            # Old reserve/attach mutated the projected job but knows nothing
+            # about later siblings. Replace only slot 1, never drop the tail.
+            raw_jobs = [legacy, *raw_jobs[1:]]
+
+    jobs: list[dict[str, Any]] = []
+    occupied_slots: set[int] = set()
+    for index, raw in enumerate(raw_jobs, start=1):
+        if not isinstance(raw, dict):
+            LOG.warning("ignoring malformed current_jobs[%d]: %r", index - 1, raw)
+            continue
+        job = dict(raw)
+        try:
+            slot_id = int(job.get("slot_id", index))
+        except (TypeError, ValueError):
+            slot_id = index
+        if slot_id < 1 or slot_id in occupied_slots:
+            slot_id = 1
+            while slot_id in occupied_slots:
+                slot_id += 1
+        occupied_slots.add(slot_id)
+        job["slot_id"] = slot_id
+        job_id = str(job.get("job_id") or _legacy_job_id(job, index))
+        job["job_id"] = job_id
+        job["cohort_id"] = str(job.get("cohort_id") or job_id)
+        job["phase"] = str(job.get("phase") or ("running" if job.get("pid") else "reserved"))
+        job["attempt_started_at"] = job.get("attempt_started_at") or job.get("started_at")
+        jobs.append(job)
+
+    jobs.sort(key=lambda item: (int(item["slot_id"]), str(item["job_id"])))
+    data["current_jobs"] = jobs
+    data["current_job"] = jobs[0] if jobs else None
+    if not isinstance(data.get("phase_z_pending"), list):
+        data["phase_z_pending"] = []
+    return data
+
+
+def _sync_projection(data: dict[str, Any]) -> None:
+    """Refresh the deprecated single-job view after a canonical mutation."""
+    jobs = data.get("current_jobs") or []
+    jobs.sort(key=lambda item: (int(item["slot_id"]), str(item["job_id"])))
+    data["current_jobs"] = jobs
+    data["current_job"] = jobs[0] if jobs else None
+
+
+def _resolve_job_id(job_id: str | None) -> str | None:
+    """Resolve a deprecated implicit handle only within its creating context.
+
+    Never infer identity from "the only remaining job": after A exits, a stale
+    A callback could otherwise clear the sole surviving sibling B.
+    """
+    return str(job_id) if job_id is not None else _IMPLICIT_JOB_ID.get()
+
+
+def _find_job(data: dict[str, Any], job_id: str | None) -> tuple[int, dict[str, Any]] | None:
+    """Find an exact logical job. Missing identity never falls back by count."""
+    jobs = data.get("current_jobs") or []
+    job_id = _resolve_job_id(job_id)
+    if job_id is None:
+        return None
+    for index, job in enumerate(jobs):
+        if str(job.get("job_id")) == str(job_id):
+            return index, job
+    return None
 
 
 def _warn_state_reset(path: Path, reason: str, detail: str) -> None:
@@ -311,7 +460,9 @@ def _locked_state(path: Path = STATE_PATH) -> Iterator[tuple[Any, dict[str, Any]
                     _state_schema_detail(data),
                 )
                 data = _empty_state()
+            _normalise_state(data)
             yield lock_fh, data
+            _sync_projection(data)
             _atomic_write_json(path, data)
         finally:
             fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
@@ -346,7 +497,7 @@ def read_state(path: Path = STATE_PATH) -> dict[str, Any]:
                     _state_schema_detail(data),
                 )
                 return _empty_state()
-            return data
+            return _normalise_state(data)
         finally:
             fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
     finally:
@@ -378,9 +529,11 @@ def mark_supervisor_started(path: Path = STATE_PATH) -> None:
         data["last_heartbeat_at"] = _now()
 
 
-def mark_restart_orphan_pending(path: Path = STATE_PATH) -> dict[str, Any] | None:
-    """Read `current_job` at boot and flag it for orphan investigation —
-    WITHOUT clearing it. Returns a copy of the job dict (or None if idle).
+def mark_restart_orphans_pending(path: Path = STATE_PATH) -> list[dict[str, Any]]:
+    """Flag every occupied slot for restart-orphan investigation atomically.
+
+    Returns immutable snapshots ordered by slot. Nothing is cleared here: a
+    second supervisor crash must be able to rediscover every sibling.
 
     Codex review fix #3 (2026-07-04, gate-blocking finding): the prior
     `claim_and_clear_current_job()` popped `current_job` to `None` in the
@@ -400,22 +553,40 @@ def mark_restart_orphan_pending(path: Path = STATE_PATH) -> dict[str, Any] | Non
     done) actually clears the slot.
     """
     with _locked_state(path) as (_fh, data):
-        job = data.get("current_job")
-        if job is None:
-            return None
-        job["restart_cleanup_pending"] = True
-        data["current_job"] = job
-        return dict(job)
+        result: list[dict[str, Any]] = []
+        for job in data.get("current_jobs") or []:
+            job["restart_cleanup_pending"] = True
+            job["phase"] = "restart_cleanup"
+            result.append(dict(job))
+        _sync_projection(data)
+        return result
 
 
-def finalize_restart_orphan_cleanup(path: Path = STATE_PATH) -> None:
-    """Clear `current_job` — call ONLY after the orphan flagged by
-    `mark_restart_orphan_pending()` has been identity-checked, killed (if
-    warranted), and its outcome recorded via `append_completion_entry()`.
-    This is the sole point a restart-orphan's slot transitions back to None;
-    see `mark_restart_orphan_pending()` for why clearing is deferred this far."""
+def mark_restart_orphan_pending(path: Path = STATE_PATH) -> dict[str, Any] | None:
+    """Deprecated single-slot wrapper for `mark_restart_orphans_pending()`."""
+    jobs = mark_restart_orphans_pending(path)
+    if not jobs:
+        return None
+    _IMPLICIT_JOB_ID.set(str(jobs[0]["job_id"]))
+    return jobs[0]
+
+
+def finalize_restart_orphan_cleanup(
+    path: Path = STATE_PATH, *, job_id: str | None = None,
+) -> bool:
+    """CAS-clear exactly one orphan after identity-check, kill, and record.
+
+    `job_id` is mandatory when more than one slot is occupied. Returning False
+    means another cleanup actor already won the transition.
+    """
     with _locked_state(path) as (_fh, data):
-        data["current_job"] = None
+        found = _find_job(data, job_id)
+        if found is None:
+            return False
+        index, _job = found
+        del data["current_jobs"][index]
+        _sync_projection(data)
+        return True
 
 
 def append_completion_entry(
@@ -452,8 +623,12 @@ def append_completion_entry(
         entry = {
             "fire_at": started_at,
             "completed_at": _now(),
+            "job_id": job.get("job_id"),
+            "cohort_id": job.get("cohort_id"),
+            "slot_id": job.get("slot_id"),
             "scheduled_for": job.get("scheduled_for"),
             "fire_reason": job.get("fire_reason") or "cron",
+            "fire_key": job.get("fire_key"),
             "exit_code": exit_code,
             "duration_s": round(duration_s, 2),
             "attempts": job.get("attempt", 1),
@@ -473,11 +648,24 @@ def append_completion_entry(
         if len(completions) > COMPLETIONS_MAX:
             completions = completions[-COMPLETIONS_MAX:]
         data["completions"] = completions
-        if mark_cleanup_recorded and data.get("current_job") is not None:
-            data["current_job"]["cleanup_recorded"] = True
+        if mark_cleanup_recorded:
+            found = _find_job(data, job.get("job_id"))
+            if found is not None:
+                _index, current = found
+                current["cleanup_recorded"] = True
             # Record the outcome so a crash-before-finalize retry knows whether
             # to re-alert (Codex review round-3 #1) without re-appending.
-            data["current_job"]["cleanup_outcome"] = outcome
+                current["cleanup_outcome"] = outcome
+                pending = data.get("phase_z_pending") or []
+                if not any(item.get("job_id") == job.get("job_id") for item in pending):
+                    pending.append({
+                        "job_id": job.get("job_id"),
+                        "cohort_id": job.get("cohort_id"),
+                        "slot_id": job.get("slot_id"),
+                        "created_at": _now(),
+                    })
+                data["phase_z_pending"] = pending
+                _sync_projection(data)
         return entry
 
 
@@ -536,6 +724,15 @@ def consume_fire_request(path: Path = STATE_PATH) -> str | None:
         return reason
 
 
+@dataclass(frozen=True)
+class JobHandle:
+    """Immutable identity returned by the atomic slot reservation."""
+
+    job_id: str
+    cohort_id: str
+    slot_id: int
+
+
 def reserve_fire(
     *,
     schedule_id: str,
@@ -544,9 +741,12 @@ def reserve_fire(
     log_path: str,
     scheduled_for: str | None = None,
     fire_reason: str = "cron",
+    fire_key: str | None = None,
+    max_slots: int = 2,
+    cohort_id: str | None = None,
     path: Path = STATE_PATH,
-) -> None:
-    """Atomically claim the job slot BEFORE spawning the child process.
+) -> JobHandle:
+    """Atomically claim the lowest free slot BEFORE spawning the child.
 
     Codex review §10 #5 fix (2026-06-15): the previous flow spawned the Popen
     child THEN called begin_fire(). Between "scheduler observed current_job is
@@ -559,28 +759,148 @@ def reserve_fire(
     placeholder (`pid=None`) current_job; the loser's call raises and MUST
     NOT spawn a child.
     """
+    try:
+        max_slots = int(max_slots)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"max_slots must be an integer, got {max_slots!r}") from exc
+    if max_slots < 1:
+        raise ValueError(f"max_slots must be >= 1, got {max_slots}")
+
     with _locked_state(path) as (_fh, data):
-        if data.get("current_job") is not None:
+        jobs = data.get("current_jobs") or []
+        pending = data.get("phase_z_pending") or []
+        if pending:
             raise RuntimeError(
-                f"reserve_fire while current_job in-flight: {data['current_job']}"
+                "reserve_fire while PHASE-Z drain is pending: "
+                f"current_jobs={jobs} phase_z_pending={pending}"
             )
-        data["current_job"] = {
+        if fire_key:
+            duplicate = next(
+                (
+                    item for item in [*jobs, *(data.get("completions") or [])]
+                    if item.get("fire_key") == fire_key
+                ),
+                None,
+            )
+            if duplicate is not None:
+                raise RuntimeError(f"reserve_fire duplicate fire_key={fire_key}")
+        occupied = {int(job["slot_id"]) for job in jobs}
+        occupied.update(
+            int(item["slot_id"]) for item in pending
+            if isinstance(item, dict) and item.get("slot_id") is not None
+        )
+        if len(occupied) >= max_slots:
+            raise RuntimeError(
+                f"reserve_fire while slots at max_slots={max_slots}: "
+                f"current_jobs={jobs} phase_z_pending={pending}"
+            )
+        slot_id = next((slot for slot in range(1, max_slots + 1) if slot not in occupied), None)
+        if slot_id is None:
+            raise RuntimeError(
+                f"reserve_fire while current_jobs at max_slots={max_slots}: {jobs}"
+            )
+        active_ids = {str(job.get("job_id")) for job in jobs}
+        job_id = uuid.uuid4().hex
+        while job_id in active_ids:  # defensive against a monkeypatched UUID source
+            job_id = uuid.uuid4().hex
+        cohort = str(cohort_id or uuid.uuid4().hex)
+        started_at = _now()
+        job = {
+            "job_id": job_id,
+            "cohort_id": cohort,
+            "slot_id": slot_id,
+            "phase": "reserved",
             "pid": None,
             "pgid": None,
             "started_wall": None,
             "schedule_id": schedule_id,
-            "started_at": _now(),
+            "started_at": started_at,
+            "attempt_started_at": started_at,
             "attempt": attempt,
             "model": model,
             "log_path": log_path,
             "scheduled_for": scheduled_for,
             "fire_reason": fire_reason,
+            "fire_key": fire_key,
         }
-        data["last_fire_at"] = _now()
+        jobs.append(job)
+        data["current_jobs"] = jobs
+        data["last_fire_at"] = started_at
+        _sync_projection(data)
+    _IMPLICIT_JOB_ID.set(job_id)
+    return JobHandle(job_id=job_id, cohort_id=cohort, slot_id=slot_id)
+
+
+def begin_attempt(
+    *, job_id: str, attempt: int, model: str, log_path: str,
+    expected_previous_attempt: int | None = None,
+    path: Path = STATE_PATH,
+) -> JobHandle | None:
+    """CAS-start a retry attempt while retaining the logical fire's slot."""
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            return None
+        _index, job = found
+        if expected_previous_attempt is not None and int(job.get("attempt", 0)) != int(expected_previous_attempt):
+            return None
+        if job.get("pid") is not None:
+            raise RuntimeError(f"begin_attempt while process still attached: job_id={job_id}")
+        attempt_started_at = _now()
+        job.update({
+            "phase": "reserved",
+            "pid": None,
+            "pgid": None,
+            "started_wall": None,
+            "attempt_started_at": attempt_started_at,
+            "attempt": int(attempt),
+            "model": model,
+            "log_path": log_path,
+        })
+        _sync_projection(data)
+        handle = JobHandle(
+            job_id=str(job["job_id"]), cohort_id=str(job["cohort_id"]),
+            slot_id=int(job["slot_id"]),
+        )
+    _IMPLICIT_JOB_ID.set(handle.job_id)
+    return handle
+
+
+def mark_job_phase(
+    *, job_id: str, phase: str, expected_phase: str | None = None,
+    expected_attempt: int | None = None, expected_pid: int | None = None,
+    detach_process: bool = False, path: Path = STATE_PATH,
+) -> bool:
+    """CAS-update phase and optionally detach an exited attempt process.
+
+    Detach before a long failover/backoff so the health watchdog cannot mistake
+    the intentionally exited Claude pid for a silent death. pid/attempt CAS
+    prevents a stale callback from detaching a newer retry attempt.
+    """
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            return False
+        _index, job = found
+        if expected_phase is not None and job.get("phase") != expected_phase:
+            return False
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
+            return False
+        if expected_pid is not None and job.get("pid") != expected_pid:
+            return False
+        job["phase"] = str(phase)
+        if detach_process:
+            job["pid"] = None
+            job["pgid"] = None
+            job["started_wall"] = None
+        _sync_projection(data)
+        return True
 
 
 def attach_process(
-    *, pid: int, pgid: int, started_wall: str | None, path: Path = STATE_PATH,
+    *, pid: int, pgid: int, started_wall: str | None,
+    job_id: str | None = None, expected_attempt: int | None = None,
+    path: Path = STATE_PATH,
 ) -> None:
     """Fill in real pid/pgid (and identity fingerprint, if already known)
     after a successful spawn following `reserve_fire()`. Raises if the
@@ -597,16 +917,28 @@ def attach_process(
     syscall itself, rather than spanning the whole fingerprint subprocess call.
     """
     with _locked_state(path) as (_fh, data):
-        job = data.get("current_job")
-        if job is None:
+        found = _find_job(data, job_id)
+        if found is None:
             raise RuntimeError("attach_process called with no active reservation")
+        _index, job = found
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
+            raise RuntimeError(
+                f"attach_process attempt CAS failed: job_id={job.get('job_id')} "
+                f"expected={expected_attempt} actual={job.get('attempt')}"
+            )
+        if job.get("pid") is not None:
+            raise RuntimeError(f"attach_process called twice: job_id={job.get('job_id')}")
         job["pid"] = pid
         job["pgid"] = pgid
         job["started_wall"] = started_wall
-        data["current_job"] = job
+        job["phase"] = "running"
+        _sync_projection(data)
 
 
-def update_started_wall(*, pid: int, started_wall: str, path: Path = STATE_PATH) -> None:
+def update_started_wall(
+    *, pid: int, started_wall: str, job_id: str | None = None,
+    expected_attempt: int | None = None, path: Path = STATE_PATH,
+) -> None:
     """Fill in the identity fingerprint after `attach_process()` already
     recorded pid/pgid without one (Codex review fix #2, 2026-07-04).
 
@@ -618,19 +950,45 @@ def update_started_wall(*, pid: int, started_wall: str, path: Path = STATE_PATH)
     a subsequent fire) by the time the `ps` call returned.
     """
     with _locked_state(path) as (_fh, data):
-        job = data.get("current_job")
-        if job is None or job.get("pid") != pid:
+        found = _find_job(data, job_id)
+        if found is None:
+            # Safe legacy fallback: pid identifies a currently attached OS
+            # process; unlike list length it cannot select an arbitrary sibling.
+            matches = [job for job in data.get("current_jobs") or [] if job.get("pid") == pid]
+            if len(matches) != 1:
+                return
+            job = matches[0]
+        else:
+            _index, job = found
+        if job.get("pid") != pid:
+            return
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
             return
         job["started_wall"] = started_wall
-        data["current_job"] = job
+        _sync_projection(data)
 
 
-def release_reservation(path: Path = STATE_PATH) -> None:
+def release_reservation(
+    path: Path = STATE_PATH, *, job_id: str | None = None,
+    expected_attempt: int | None = None,
+) -> bool:
     """Free the slot when spawn itself failed after `reserve_fire()` succeeded
     (e.g. `claude_bin` missing → `FileNotFoundError` before a pid ever existed).
     Without this the slot would wedge forever (current_job set, no process)."""
     with _locked_state(path) as (_fh, data):
-        data["current_job"] = None
+        found = _find_job(data, job_id)
+        if found is None:
+            return False
+        index, job = found
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
+            return False
+        if job.get("pid") is not None:
+            raise RuntimeError(f"release_reservation with attached process: job_id={job.get('job_id')}")
+        del data["current_jobs"][index]
+        _sync_projection(data)
+        if _IMPLICIT_JOB_ID.get() == str(job.get("job_id")):
+            _IMPLICIT_JOB_ID.set(None)
+        return True
 
 
 def record_completion(
@@ -638,6 +996,11 @@ def record_completion(
     exit_code: int,
     outcome: str,
     final_model: str,
+    job_id: str | None = None,
+    expected_attempt: int | None = None,
+    expected_pid: int | None = None,
+    expected_phase: str | None = None,
+    release_slot: bool = True,
     path: Path = STATE_PATH,
 ) -> dict[str, Any] | None:
     """Move current_job → completions ring buffer. Returns the completion entry,
@@ -660,10 +1023,19 @@ def record_completion(
     transition — rides along in the returned dict so the winner never has to look
     it up again. It is deliberately NOT persisted into the completions ring.
     """
+    managed_phase_z = job_id is not None
     with _locked_state(path) as (_fh, data):
-        job = data.get("current_job")
-        if job is None:
+        found = _find_job(data, job_id)
+        if found is None:
             return None
+        index, job = found
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
+            return None
+        if expected_pid is not None and job.get("pid") != expected_pid:
+            return None
+        if expected_phase is not None and job.get("phase") != expected_phase:
+            return None
+        job_snapshot = dict(job)
         started_at = job.get("started_at")
         try:
             started_dt = _parse_state_timestamp(started_at)
@@ -680,8 +1052,12 @@ def record_completion(
         entry = {
             "fire_at": started_at,
             "completed_at": _now(),
+            "job_id": job.get("job_id"),
+            "cohort_id": job.get("cohort_id"),
+            "slot_id": job.get("slot_id"),
             "scheduled_for": job.get("scheduled_for"),
             "fire_reason": job.get("fire_reason") or "cron",
+            "fire_key": job.get("fire_key"),
             "exit_code": exit_code,
             "duration_s": round(duration_s, 2),
             "attempts": job.get("attempt", 1),
@@ -693,10 +1069,59 @@ def record_completion(
         if len(completions) > COMPLETIONS_MAX:
             completions = completions[-COMPLETIONS_MAX:]
         data["completions"] = completions
-        data["current_job"] = None
+        cohort_drained = False
+        if release_slot:
+            del data["current_jobs"][index]
+            if managed_phase_z:
+                pending = data.get("phase_z_pending") or []
+                if not any(item.get("job_id") == job.get("job_id") for item in pending):
+                    pending.append({
+                        "job_id": job.get("job_id"),
+                        "cohort_id": job.get("cohort_id"),
+                        "slot_id": job.get("slot_id"),
+                        "created_at": _now(),
+                    })
+                data["phase_z_pending"] = pending
+            cohort_drained = not any(
+                sibling.get("cohort_id") == job.get("cohort_id")
+                for sibling in data.get("current_jobs") or []
+            )
+        else:
+            # Retain ownership while waiting to retry. pid=None means health
+            # has no process to inspect, but the occupied slot still blocks a
+            # scheduler from stealing it.
+            job.update({
+                "phase": "retry_wait",
+                "pid": None,
+                "pgid": None,
+                "started_wall": None,
+            })
+        _sync_projection(data)
+        if release_slot and _IMPLICIT_JOB_ID.get() == str(job.get("job_id")):
+            _IMPLICIT_JOB_ID.set(None)
         # `job` is returned but never persisted — the ring buffer keeps its
         # existing shape (see test_every_written_field_is_declared_in_empty_state).
-        return {**entry, "job": job}
+        return {
+            **entry,
+            "job": job_snapshot,
+            "phase_z_pending": bool(release_slot and managed_phase_z),
+            "cohort_drained": cohort_drained,
+        }
+
+
+def finish_phase_z(*, cohort_id: str, path: Path = STATE_PATH) -> int:
+    """Release every drained slot for one cohort after PHASE-Z finishes.
+
+    Returns the number of pending slot records removed. The exact cohort CAS
+    makes a duplicate finally callback harmless and cannot release another
+    concurrently draining cohort.
+    """
+    with _locked_state(path) as (_fh, data):
+        pending = data.get("phase_z_pending") or []
+        kept = [item for item in pending if str(item.get("cohort_id")) != str(cohort_id)]
+        removed = len(pending) - len(kept)
+        data["phase_z_pending"] = kept
+        return removed
 
 
 def set_auth_blocked(blocked: bool, path: Path = STATE_PATH) -> None:
@@ -846,45 +1271,59 @@ class CurrentJob:
     attempt: int
     model: str
     log_path: str
+    job_id: str = ""
+    cohort_id: str = ""
+    slot_id: int = 1
+    phase: str = "running"
     started_wall: str | None = None
     age_seconds: float = 0.0
 
 
-def get_current_job(path: Path = STATE_PATH) -> CurrentJob | None:
+def get_current_jobs(path: Path = STATE_PATH) -> list[CurrentJob]:
+    """Return every inspectable process, ordered by stable slot id.
+
+    Reserved/retry-wait jobs with pid=None still occupy capacity in raw state,
+    but are omitted because a watchdog has no OS process to inspect.
+    """
     snap = read_state(path)
-    job = snap.get("current_job")
-    if not job:
-        return None
-    if job.get("pid") is None:
-        # Reservation window (reserve_fire() ran, attach_process() has not yet
-        # — normally sub-millisecond, spanning only the Popen() call itself).
-        # No real pid to identity-check yet; treat as "no job to inspect" for
-        # this tick rather than crash on int(None) — reserve_fire()'s own
-        # non-null current_job already prevents a second concurrent fire.
-        return None
-    age = -1.0
-    try:
-        started_dt = _parse_state_timestamp(job["started_at"])
-        age = (datetime.now(timezone.utc) - started_dt).total_seconds()
-    except (KeyError, TypeError, ValueError) as exc:
-        LOG.warning(
-            "invalid current_job.started_at in %s: %r (%s: %s)",
-            path,
-            job.get("started_at"),
-            type(exc).__name__,
-            exc,
-        )
-    return CurrentJob(
-        pid=int(job["pid"]),
-        pgid=int(job.get("pgid") or job["pid"]),
-        schedule_id=str(job.get("schedule_id", "")),
-        started_at=str(job.get("started_at", "")),
-        attempt=int(job.get("attempt", 1)),
-        model=str(job.get("model", "")),
-        log_path=str(job.get("log_path", "")),
-        started_wall=job.get("started_wall"),
-        age_seconds=age,
-    )
+    result: list[CurrentJob] = []
+    for job in snap.get("current_jobs") or []:
+        if job.get("pid") is None or job.get("phase") == "classifying":
+            continue
+        age = -1.0
+        try:
+            started_dt = _parse_state_timestamp(job["attempt_started_at"] or job["started_at"])
+            age = (datetime.now(timezone.utc) - started_dt).total_seconds()
+        except (KeyError, TypeError, ValueError) as exc:
+            LOG.warning(
+                "invalid current_job.started_at in %s: %r (%s: %s)",
+                path,
+                job.get("attempt_started_at") or job.get("started_at"),
+                type(exc).__name__,
+                exc,
+            )
+        result.append(CurrentJob(
+            job_id=str(job.get("job_id", "")),
+            cohort_id=str(job.get("cohort_id", "")),
+            slot_id=int(job.get("slot_id", 0)),
+            pid=int(job["pid"]),
+            pgid=int(job.get("pgid") or job["pid"]),
+            schedule_id=str(job.get("schedule_id", "")),
+            started_at=str(job.get("started_at", "")),
+            attempt=int(job.get("attempt", 1)),
+            model=str(job.get("model", "")),
+            log_path=str(job.get("log_path", "")),
+            phase=str(job.get("phase", "running")),
+            started_wall=job.get("started_wall"),
+            age_seconds=age,
+        ))
+    return result
+
+
+def get_current_job(path: Path = STATE_PATH) -> CurrentJob | None:
+    """Deprecated lowest-slot projection; use get_current_jobs()."""
+    jobs = get_current_jobs(path)
+    return jobs[0] if jobs else None
 
 
 def get_supervisor_age_seconds(path: Path = STATE_PATH) -> float | None:

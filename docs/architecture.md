@@ -108,7 +108,7 @@
 
 **角色分工**：
 
-- **主線程 Claude Code（唯一 orchestrator）**：負責研究、派工、審查、修文件、發佈、governance。所有正式執行一律發生在這個 session 內。
+- **dispatch-supervisor orchestrator pool**：`config/runtime_schedules.json` 的 `volpred-dispatch-supervisor.max_slots` 控制並行 logical fires（2026-07-13 起預設 2）。每槽以 stable `job_id` / `slot_id` 隔離 state、log 與 worktree prefix；task-pool claim 仍由 canonical fcntl control plane 仲裁。
 - **Codex（ephemeral subagent）**：透過 `codex:codex-rescue` / `codex:review` 等 subagent 以 **ad-hoc** 方式被主線程派遣。共用 runtime、一次一個、任務結束即退出；**不是常駐 session，也不會主動 poll queue**。
 - **Worktree agents（ephemeral）**：僅產出 `experiments/kXXX/`，完成後由主線程 `scripts/merge_worktree.sh` 合併；不可寫共享狀態。
 - **Cloud triggers（遠端/host 層）**：Session cron 與 host crontab 只負責**把事件放進 queue**，不直接完成 task。

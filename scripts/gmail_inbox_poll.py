@@ -710,9 +710,9 @@ def _trigger_immediate_dispatch(queued: list[dict[str, Any]]) -> dict[str, Any]:
     3-strike refactor exists to kill). Now we write a fire-request flag into
     the supervisor's state file (same fcntl lock protocol via
     dispatch_supervisor.state); the scheduler consumes it on its next tick and
-    fires through the normal reserve_fire() single-slot path. If a job is in
-    flight the request stays pending and fires right after — ASAP, never in
-    parallel. Deliberately NO fallback to the legacy wrapper (that path IS the
+    fires through the normal reserve_fire() pool. If all configured slots are
+    occupied the request stays pending; a half-full pool can service it on the
+    next tick. Deliberately NO fallback to the legacy wrapper (that path IS the
     race): if the state write fails, the next hourly fire handles the email
     via its PHASE-0 anyway.
     """
@@ -733,13 +733,19 @@ def _trigger_immediate_dispatch(queued: list[dict[str, Any]]) -> dict[str, Any]:
     try:
         if str(ROOT) not in sys.path:
             sys.path.insert(0, str(ROOT))
+        from scripts.dispatch_supervisor import scheduler as dispatch_scheduler
         from scripts.dispatch_supervisor import state as dispatch_state
 
         snap = dispatch_state.read_state()
-        if snap.get("current_job"):
-            # Supervisor is mid-dispatch; that agent's PHASE-0 reads email
-            # first, so the reply is already about to be handled.
-            return {"fired": False, "reason": "dispatch_already_running"}
+        jobs = snap.get("current_jobs")
+        if jobs is None:
+            jobs = [] if not snap.get("current_job") else [snap["current_job"]]
+        max_slots = dispatch_scheduler.load_max_slots()
+        if len(jobs) >= max_slots:
+            return {
+                "fired": False, "reason": "dispatch_slots_full",
+                "active_slots": len(jobs), "max_slots": max_slots,
+            }
         task_ids = [q["task_id"] for q in pending]
         dispatch_state.request_fire(f"email_reply:{','.join(task_ids)[:150]}")
         _TRIGGER_MARKER.parent.mkdir(parents=True, exist_ok=True)

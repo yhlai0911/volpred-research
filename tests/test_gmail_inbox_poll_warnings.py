@@ -63,6 +63,8 @@ def test_trigger_immediate_dispatch_skips_when_supervisor_job_in_flight(
     monkeypatch.setattr(mod, "_TRIGGER_MARKER", tmp_path / ".last_email_immediate_dispatch")
 
     dispatch_state = _dispatch_state_module()
+    from scripts.dispatch_supervisor import scheduler as dispatch_scheduler
+    monkeypatch.setattr(dispatch_scheduler, "load_max_slots", lambda: 1)
     monkeypatch.setattr(dispatch_state, "read_state", lambda: {"current_job": {"pid": 123}})
 
     def _unexpected_fire(*args, **kwargs):
@@ -72,7 +74,32 @@ def test_trigger_immediate_dispatch_skips_when_supervisor_job_in_flight(
 
     result = mod._trigger_immediate_dispatch([{"task_id": "email_task_1"}])
 
-    assert result == {"fired": False, "reason": "dispatch_already_running"}
+    assert result == {
+        "fired": False, "reason": "dispatch_slots_full",
+        "active_slots": 1, "max_slots": 1,
+    }
+
+
+def test_trigger_immediate_dispatch_requests_when_pool_is_half_full(
+    tmp_path, monkeypatch,
+) -> None:
+    _redirect_logs(tmp_path, monkeypatch)
+    monkeypatch.setattr(mod, "_TRIGGER_MARKER", tmp_path / ".last_email_immediate_dispatch")
+    dispatch_state = _dispatch_state_module()
+    from scripts.dispatch_supervisor import scheduler as dispatch_scheduler
+
+    monkeypatch.setattr(dispatch_scheduler, "load_max_slots", lambda: 2)
+    monkeypatch.setattr(
+        dispatch_state, "read_state",
+        lambda: {"current_jobs": [{"job_id": "a", "pid": 123}]},
+    )
+    reasons: list[str] = []
+    monkeypatch.setattr(dispatch_state, "request_fire", reasons.append)
+
+    result = mod._trigger_immediate_dispatch([{"task_id": "email_task_2"}])
+
+    assert result["fired"] is True
+    assert reasons == ["email_reply:email_task_2"]
 
 
 def test_trigger_immediate_dispatch_warns_when_supervisor_state_unreadable(

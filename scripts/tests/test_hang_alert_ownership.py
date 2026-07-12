@@ -164,18 +164,22 @@ def _hang_worker(
     """Drive run_worker() through a hang. If `health_wins_the_race`, the max-age
     watchdog closes the slot before the worker's hang branch runs — the exact
     2026-07-12 00:57 interleaving. Returns captured hang alerts."""
-    def fake_attempt(*, state_path: Path, **_kw):
+    def fake_attempt(*, state_path: Path, job_id: str, attempt: int, **_kw):
         # what the real _run_one_attempt does before spawning
-        st.reserve_fire(
-            schedule_id="hourly_dispatch", attempt=1, model="opus",
-            log_path="/tmp/worker.log", path=state_path,
-        )
         st.attach_process(
-            pid=80516, pgid=80516, started_wall="Wed Jan  1 00:00:00 2026", path=state_path,
+            job_id=job_id, expected_attempt=attempt,
+            pid=80516, pgid=80516, started_wall="Wed Jan  1 00:00:00 2026",
+            path=state_path,
+        )
+        st.mark_job_phase(
+            job_id=job_id, expected_attempt=attempt, expected_phase="running",
+            expected_pid=80516, phase="classifying", path=state_path,
         )
         if health_wins_the_race:
             st.record_completion(
-                exit_code=-9, outcome="killed_timeout", final_model="opus", path=state_path,
+                job_id=job_id, expected_attempt=attempt, expected_pid=80516,
+                exit_code=-9, outcome="killed_timeout", final_model="opus",
+                path=state_path,
             )
         return worker.TIMEOUT_KILLED_SENTINEL, 3001.3, "worker wedged waiting on a subagent"
 

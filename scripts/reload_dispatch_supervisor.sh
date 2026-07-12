@@ -17,7 +17,7 @@
 # reload while a worker is in flight (the restart orphan-cleanup would kill it).
 #
 # Usage:  bash scripts/reload_dispatch_supervisor.sh [--force|--defer] [--reason <r>]
-#   --force   reload even if current_job is non-null (kills the in-flight worker)
+#   --force   reload even if current_jobs is non-empty (kills in-flight workers)
 #   --defer   if a worker is in flight, detach and reload once it finishes
 #   --reason  marker reason label (default: deploy)
 #
@@ -32,7 +32,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
 LABEL="com.volpred.dispatch-supervisor"
-STATE="storage/ops/dispatch_state.json"
+STATE="${DISPATCH_STATE_PATH:-storage/ops/dispatch_state.json}"
 REASON="deploy"
 FORCE=0
 DEFER=0
@@ -52,31 +52,37 @@ if [ "$FORCE" -eq 1 ] && [ "$DEFER" -eq 1 ]; then
   exit 2
 fi
 
-read_current_job() { jq -r '.current_job // "null"' "$STATE" 2>/dev/null || echo "null"; }
+read_active_count() {
+  jq -er '(((.current_jobs // []) as $jobs
+      | if ($jobs | length) > 0 then $jobs
+        elif .current_job then [.current_job] else [] end) | length)
+    + (if ((.phase_z_pending // []) | length) > 0 then 1 else 0 end)' \
+    "$STATE" 2>/dev/null || echo "ERR"
+}
 
 # 1. In-flight guard — never yank the rug from a running worker.
-CURRENT_JOB="$(read_current_job)"
-if [ "$CURRENT_JOB" != "null" ] && [ "$FORCE" -ne 1 ]; then
+ACTIVE_COUNT="$(read_active_count)"
+if [ "$ACTIVE_COUNT" != "0" ] && [ "$FORCE" -ne 1 ]; then
   if [ "$DEFER" -ne 1 ]; then
-    echo "REFUSED: current_job is not null (a worker is in flight):" >&2
-    jq -c '.current_job' "$STATE" >&2 || true
+    echo "REFUSED: current_jobs has ${ACTIVE_COUNT} in-flight worker(s):" >&2
+    jq -c '.current_jobs // (if .current_job then [.current_job] else [] end)' "$STATE" >&2 || true
     echo "Wait for it to finish, --defer to reload when it does, or --force (kills the worker)." >&2
     exit 1
   fi
   # Detached waiter: poll until the worker clears, then re-enter this script.
   # Re-entering (rather than inlining the reload) keeps the marker + kickstart
   # path single-source. `setsid`-equivalent detach so it outlives this fire.
-  echo "DEFERRED: worker in flight; reload will fire when current_job clears (max ${DEFER_MAX_WAIT_S}s)."
+  echo "DEFERRED: ${ACTIVE_COUNT} workers in flight; reload will fire when current_jobs clears (max ${DEFER_MAX_WAIT_S}s)."
   DEFER_LOG="${HOME}/.volpred/logs/supervisor_deferred_reload.log"
   mkdir -p "$(dirname "$DEFER_LOG")"
   nohup bash -c '
     deadline=$(( $(date +%s) + '"$DEFER_MAX_WAIT_S"' ))
     while [ "$(date +%s)" -lt "$deadline" ]; do
       sleep '"$DEFER_POLL_S"'
-      cj=$(jq -r ".current_job // \"null\"" "'"$REPO/$STATE"'" 2>/dev/null || echo null)
-      if [ "$cj" = "null" ]; then
+      active=$(jq -er "(((.current_jobs // []) as \$jobs | if (\$jobs | length) > 0 then \$jobs elif .current_job then [.current_job] else [] end) | length) + (if ((.phase_z_pending // []) | length) > 0 then 1 else 0 end)" "'"$REPO/$STATE"'" 2>/dev/null || echo ERR)
+      if [ "$active" = "0" ]; then
         echo "[$(date "+%F %T")] worker cleared — reloading (reason='"$REASON"')"
-        exec bash "'"$REPO"'/scripts/reload_dispatch_supervisor.sh" --reason "'"$REASON"'"
+        exec bash "'"$REPO"'/scripts/reload_dispatch_supervisor.sh" --defer --reason "'"$REASON"'"
       fi
     done
     echo "[$(date "+%F %T")] DEFER TIMED OUT after '"$DEFER_MAX_WAIT_S"'s — supervisor still running stale code."
@@ -84,6 +90,11 @@ if [ "$CURRENT_JOB" != "null" ] && [ "$FORCE" -ne 1 ]; then
   ' >> "$DEFER_LOG" 2>&1 < /dev/null &
   disown $! 2>/dev/null || true
   echo "Waiter detached (pid $!). Log: $DEFER_LOG"
+  exit 0
+fi
+
+if [ "${VOLPRED_RELOAD_CHECK_ONLY:-0}" = "1" ]; then
+  echo "SAFE: no current_jobs/current_job/phase_z_pending"
   exit 0
 fi
 

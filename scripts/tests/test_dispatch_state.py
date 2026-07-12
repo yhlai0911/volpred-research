@@ -52,6 +52,7 @@ def test_read_state_bootstraps_empty(tmp_state: Path) -> None:
     snap = st.read_state(tmp_state)
     assert snap["version"] == st.SCHEMA_VERSION
     assert snap["current_job"] is None
+    assert snap["current_jobs"] == []
     assert snap["completions"] == []
     assert snap["auth_blocked"] is False
 
@@ -272,11 +273,154 @@ def test_reserve_fire_refuses_when_in_flight(tmp_state: Path) -> None:
         schedule_id="hourly_dispatch", attempt=1, model="opus",
         log_path="/tmp/a.log", path=tmp_state,
     )
-    with pytest.raises(RuntimeError, match="current_job in-flight"):
+    with pytest.raises(RuntimeError, match="slots at max_slots=1"):
         st.reserve_fire(
             schedule_id="hourly_dispatch", attempt=1, model="opus",
-            log_path="/tmp/b.log", path=tmp_state,
+            log_path="/tmp/b.log", max_slots=1, path=tmp_state,
         )
+
+
+def test_multislot_completion_cas_does_not_clear_sibling(tmp_state: Path) -> None:
+    first = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a.log", max_slots=2, path=tmp_state,
+    )
+    st.attach_process(
+        job_id=first.job_id, expected_attempt=1,
+        pid=101, pgid=101, started_wall="a", path=tmp_state,
+    )
+    second = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/b.log", max_slots=2, path=tmp_state,
+    )
+    st.attach_process(
+        job_id=second.job_id, expected_attempt=1,
+        pid=202, pgid=202, started_wall="b", path=tmp_state,
+    )
+
+    won = st.record_completion(
+        job_id=first.job_id, expected_attempt=1, expected_pid=101,
+        exit_code=0, outcome="success", final_model="opus", path=tmp_state,
+    )
+    assert won is not None
+    snap = st.read_state(tmp_state)
+    assert [job["job_id"] for job in snap["current_jobs"]] == [second.job_id]
+    assert snap["current_job"]["job_id"] == second.job_id
+
+    # A late callback for A must not infer "the only remaining job" and clear B.
+    assert st.record_completion(
+        job_id=first.job_id, expected_attempt=1, expected_pid=101,
+        exit_code=-9, outcome="killed_timeout", final_model="opus", path=tmp_state,
+    ) is None
+    assert st.read_state(tmp_state)["current_jobs"][0]["job_id"] == second.job_id
+
+
+def test_reserve_fire_rejects_duplicate_cron_fire_key(tmp_state: Path) -> None:
+    st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a.log", max_slots=2,
+        fire_key="cron:2026-07-13T07:07:00", path=tmp_state,
+    )
+    with pytest.raises(RuntimeError, match="duplicate fire_key"):
+        st.reserve_fire(
+            schedule_id="hourly_dispatch", attempt=1, model="opus",
+            log_path="/tmp/b.log", max_slots=2,
+            fire_key="cron:2026-07-13T07:07:00", path=tmp_state,
+        )
+
+
+def test_retry_retains_job_slot_and_stale_attempt_cannot_close_it(tmp_state: Path) -> None:
+    handle = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a1.log", path=tmp_state,
+    )
+    st.attach_process(
+        job_id=handle.job_id, expected_attempt=1,
+        pid=101, pgid=101, started_wall="a", path=tmp_state,
+    )
+    first = st.record_completion(
+        job_id=handle.job_id, expected_attempt=1, expected_pid=101,
+        exit_code=1, outcome="failure", final_model="opus",
+        release_slot=False, path=tmp_state,
+    )
+    assert first is not None
+    waiting = st.read_state(tmp_state)["current_jobs"][0]
+    assert waiting["phase"] == "retry_wait"
+    assert waiting["slot_id"] == handle.slot_id
+    assert waiting["pid"] is None
+
+    retry = st.begin_attempt(
+        job_id=handle.job_id, attempt=2, expected_previous_attempt=1,
+        model="opus", log_path="/tmp/a2.log", path=tmp_state,
+    )
+    assert retry == handle
+    st.attach_process(
+        job_id=handle.job_id, expected_attempt=2,
+        pid=202, pgid=202, started_wall="b", path=tmp_state,
+    )
+    assert st.record_completion(
+        job_id=handle.job_id, expected_attempt=1, expected_pid=101,
+        exit_code=-9, outcome="killed_timeout", final_model="opus", path=tmp_state,
+    ) is None
+    current = st.read_state(tmp_state)["current_jobs"][0]
+    assert current["attempt"] == 2
+    assert current["pid"] == 202
+
+
+def test_stale_health_snapshot_cannot_close_classifying_attempt(tmp_state: Path) -> None:
+    handle = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a.log", path=tmp_state,
+    )
+    st.attach_process(
+        job_id=handle.job_id, expected_attempt=1,
+        pid=101, pgid=101, started_wall="a", path=tmp_state,
+    )
+    assert st.mark_job_phase(
+        job_id=handle.job_id, expected_attempt=1, expected_pid=101,
+        expected_phase="running", phase="classifying", path=tmp_state,
+    )
+
+    assert st.record_completion(
+        job_id=handle.job_id, expected_attempt=1, expected_pid=101,
+        expected_phase="running", exit_code=-1, outcome="failure",
+        final_model="opus", path=tmp_state,
+    ) is None
+    current = st.read_state(tmp_state)["current_jobs"][0]
+    assert current["job_id"] == handle.job_id
+    assert current["phase"] == "classifying"
+
+
+def test_phase_z_pending_holds_slot_until_exact_cohort_finish(tmp_state: Path) -> None:
+    handle = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a.log", max_slots=1, path=tmp_state,
+    )
+    st.attach_process(
+        job_id=handle.job_id, expected_attempt=1,
+        pid=101, pgid=101, started_wall="a", path=tmp_state,
+    )
+    token = st.record_completion(
+        job_id=handle.job_id, expected_attempt=1, expected_pid=101,
+        exit_code=0, outcome="success", final_model="opus", path=tmp_state,
+    )
+    assert token is not None
+    assert token["cohort_drained"] is True
+    assert token["phase_z_pending"] is True
+    assert st.read_state(tmp_state)["phase_z_pending"][0]["slot_id"] == handle.slot_id
+
+    with pytest.raises(RuntimeError, match="PHASE-Z drain is pending"):
+        st.reserve_fire(
+            schedule_id="hourly_dispatch", attempt=1, model="opus",
+            log_path="/tmp/b.log", max_slots=1, path=tmp_state,
+        )
+    assert st.finish_phase_z(cohort_id="wrong", path=tmp_state) == 0
+    assert st.finish_phase_z(cohort_id=handle.cohort_id, path=tmp_state) == 1
+    assert st.finish_phase_z(cohort_id=handle.cohort_id, path=tmp_state) == 0
+    st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/b.log", max_slots=1, path=tmp_state,
+    )
 
 
 def test_attach_process_fills_identity(tmp_state: Path) -> None:
@@ -399,6 +543,7 @@ def test_record_completion_warns_on_invalid_started_at(
     )
     snap = st.read_state(tmp_state)
     snap["current_job"]["started_at"] = "not-a-date"
+    snap["current_job"]["attempt_started_at"] = "not-a-date"
     tmp_state.write_text(json.dumps(snap), encoding="utf-8")
 
     with caplog.at_level(logging.WARNING, logger=st.__name__):
@@ -535,6 +680,7 @@ def test_get_current_job_warns_on_invalid_started_at(
     )
     snap = st.read_state(tmp_state)
     snap["current_job"]["started_at"] = "not-a-date"
+    snap["current_job"]["attempt_started_at"] = "not-a-date"
     tmp_state.write_text(json.dumps(snap), encoding="utf-8")
 
     with caplog.at_level(logging.WARNING, logger=st.__name__):
@@ -635,6 +781,58 @@ def test_new_optional_key_does_not_reset_preexisting_state(tmp_state: Path) -> N
     assert healed["current_job"]["pid"] == 4242  # still intact
 
 
+def test_rollout_migration_trusts_legacy_reserve_over_stale_empty_list(tmp_state: Path) -> None:
+    """A pre-reload daemon preserves unknown current_jobs=[] while writing A
+    into current_job. The new reader must not orphan that live A."""
+    mixed = st._empty_state()
+    mixed["current_job"] = {
+        "pid": 4242, "pgid": 4242, "attempt": 1, "model": "opus",
+        "schedule_id": "hourly_dispatch", "started_at": datetime.now(timezone.utc).isoformat(),
+        "log_path": "/tmp/legacy.log",
+    }
+    tmp_state.write_text(json.dumps(mixed), encoding="utf-8")
+
+    snap = st.read_state(tmp_state)
+    assert len(snap["current_jobs"]) == 1
+    assert snap["current_jobs"][0]["pid"] == 4242
+    assert snap["current_jobs"][0]["job_id"].startswith("legacy-")
+
+
+def test_rollout_migration_trusts_legacy_completion_over_stale_list(tmp_state: Path) -> None:
+    """The inverse mixed-version write is old record_completion clearing
+    current_job while preserving a stale current_jobs[A]. A must stay closed."""
+    handle = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a.log", path=tmp_state,
+    )
+    mixed = st.read_state(tmp_state)
+    assert mixed["current_jobs"][0]["job_id"] == handle.job_id
+    mixed["current_job"] = None
+    tmp_state.write_text(json.dumps(mixed), encoding="utf-8")
+
+    snap = st.read_state(tmp_state)
+    assert snap["current_jobs"] == []
+    assert snap["current_job"] is None
+
+
+def test_rollout_legacy_completion_preserves_new_sibling(tmp_state: Path) -> None:
+    first = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/a.log", max_slots=2, path=tmp_state,
+    )
+    second = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/b.log", max_slots=2, cohort_id=first.cohort_id,
+        path=tmp_state,
+    )
+    mixed = st.read_state(tmp_state)
+    mixed["current_job"] = None  # old daemon completed projected slot 1
+    tmp_state.write_text(json.dumps(mixed), encoding="utf-8")
+
+    snap = st.read_state(tmp_state)
+    assert [job["job_id"] for job in snap["current_jobs"]] == [second.job_id]
+
+
 def test_get_supervisor_age_seconds_when_alive(tmp_state: Path) -> None:
     st.mark_supervisor_started(tmp_state)
     age = st.get_supervisor_age_seconds(tmp_state)
@@ -723,7 +921,7 @@ def test_write_failure_does_not_corrupt_existing_state(tmp_state: Path, monkeypa
         try:
             Path(src).unlink()
         except FileNotFoundError:
-            pass
+            pass  # silent-ok: the atomic-write temp may already have been removed
         raise OSError("simulated atomic-write failure")
 
     monkeypatch.setattr(st.os, "replace", boom)
@@ -1109,25 +1307,58 @@ def _drive_every_writer(path: Path) -> None:
     st.mark_alert_sent("auth_blocked", path=path)  # 留一筆，扁平性斷言才有東西可驗
 
     # spawn 失敗路徑：reserve 之後還沒有 pid 就 release，slot 必須回收
-    st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
-                    log_path="/tmp/w.log", path=path)
-    st.release_reservation(path=path)
+    released = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                               log_path="/tmp/w.log", path=path)
+    st.release_reservation(path=path, job_id=released.job_id)
 
-    st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
-                    log_path="/tmp/x.log", path=path)
-    st.attach_process(pid=4242, pgid=4242, started_wall="w1", path=path)
-    st.update_started_wall(pid=4242, started_wall="w2", path=path)
+    orphan_handle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                                    log_path="/tmp/x.log", path=path)
+    st.attach_process(job_id=orphan_handle.job_id, expected_attempt=1,
+                      pid=4242, pgid=4242, started_wall="w1", path=path)
+    st.update_started_wall(job_id=orphan_handle.job_id, expected_attempt=1,
+                           pid=4242, started_wall="w2", path=path)
+    jobs = st.mark_restart_orphans_pending(path=path)
     job = st.mark_restart_orphan_pending(path=path)
+    assert jobs and job is not None
     st.append_completion_entry(job, exit_code=0, outcome="orphan_gone_or_reused",
                                final_model="opus", path=path, mark_cleanup_recorded=True)
-    st.finalize_restart_orphan_cleanup(path=path)
-    st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
-                    log_path="/tmp/y.log", path=path)
-    st.attach_process(pid=99, pgid=99, started_wall="w3", path=path)
-    st.record_completion(exit_code=0, outcome="success", final_model="opus", path=path)
-    # 最後留一個 in-flight job，好讓 current_job 這個容器現形
-    st.reserve_fire(schedule_id="hourly_dispatch", attempt=2, model="opus",
-                    log_path="/tmp/z.log", path=path)
+    st.finalize_restart_orphan_cleanup(path=path, job_id=orphan_handle.job_id)
+    st.finish_phase_z(cohort_id=orphan_handle.cohort_id, path=path)
+    retry_handle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                                   log_path="/tmp/y.log", path=path)
+    st.attach_process(job_id=retry_handle.job_id, expected_attempt=1,
+                      pid=99, pgid=99, started_wall="w3", path=path)
+    st.record_completion(job_id=retry_handle.job_id, expected_attempt=1, expected_pid=99,
+                         exit_code=1, outcome="failure", final_model="opus",
+                         release_slot=False, path=path)
+    st.begin_attempt(job_id=retry_handle.job_id, attempt=2, expected_previous_attempt=1,
+                     model="opus", log_path="/tmp/y2.log", path=path)
+    st.mark_job_phase(job_id=retry_handle.job_id, expected_attempt=2,
+                      phase="phase_z", path=path)
+    st.release_reservation(path=path, job_id=retry_handle.job_id, expected_attempt=2)
+
+    done = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                           log_path="/tmp/done.log", path=path)
+    st.attach_process(job_id=done.job_id, expected_attempt=1,
+                      pid=100, pgid=100, started_wall="wd", path=path)
+    token = st.record_completion(job_id=done.job_id, expected_attempt=1, expected_pid=100,
+                                 exit_code=0, outcome="success", final_model="opus", path=path)
+    assert token is not None
+    st.finish_phase_z(cohort_id=done.cohort_id, path=path)
+
+    pending = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                              log_path="/tmp/pending.log", path=path)
+    st.attach_process(job_id=pending.job_id, expected_attempt=1,
+                      pid=101, pgid=101, started_wall="wp", path=path)
+    # 第二槽先進 cohort；第一槽完成後留下 phase_z_pending，但 sibling
+    # 仍在 current_jobs，正是 multi-slot drain 的 nested shape。
+    sibling = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=2, model="opus",
+        log_path="/tmp/z.log", cohort_id=pending.cohort_id, path=path,
+    )
+    st.record_completion(job_id=pending.job_id, expected_attempt=1, expected_pid=101,
+                         exit_code=0, outcome="success", final_model="opus", path=path)
+    assert sibling.job_id == st.read_state(path)["current_job"]["job_id"]
 
 
 def _public_writers_of_state_module() -> set[str]:
@@ -1192,7 +1423,10 @@ def _container_shapes(node, path="$"):
 # state 樹的**完整**容器清單。前三個各有 schema 契約 gate 守著；`alerts_dedup`
 # 是動態 map（key = alert 名稱，由 caller 決定），沒有固定欄位可 gate，但它必須
 # 保持扁平 —— 一旦有人往裡面塞巢狀 dict，就是一個沒人 gate 的新層。
-KNOWN_CONTAINERS = {"$", "$.current_job", "$.completions[]", "$.alerts_dedup"}
+KNOWN_CONTAINERS = {
+    "$", "$.current_job", "$.current_jobs[]", "$.phase_z_pending[]",
+    "$.completions[]", "$.alerts_dedup",
+}
 
 
 def test_no_undocumented_nested_container(tmp_state):

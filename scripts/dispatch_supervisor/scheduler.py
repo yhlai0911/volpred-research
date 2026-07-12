@@ -7,16 +7,18 @@ Tick every TICK_INTERVAL_S (=60s). On each tick:
      liveness owner is `health.health_loop()` (30s, never blocks). Kept here so
      `--once` smoke runs, which skip health_loop, still stamp one beat.
   2. If `auth_blocked` true → log + skip (manual unblock via CLI)
-  3. If `current_job` non-null → log + skip (worker in flight; health watches)
+  3. If `len(current_jobs) >= max_slots` → skip; otherwise another fire may run
   4. Compute most recent scheduled fire time via croniter
   5. If due (and not dry_run) → `phase_z.run_pre_fire_guard()` — fail-open git
      conflict backstop, so the slot starts on a clean, valid tree
   6. If `last_fire_at < that fire time` → spawn worker (or DRY-RUN log only)
-  7. Block-wait for worker to return, then `phase_z.run_phase_z()`; loop
-     continues on next tick
+  7. Launch the worker as a supervised background asyncio task. The scheduler
+     keeps ticking so a later cron/request can fill another free slot.
 
-The worker call is blocking; we run it inside `asyncio.to_thread()` so the
-event loop stays responsive for health_loop concurrent execution.
+The worker call is blocking; each admitted fire runs inside `asyncio.to_thread()`.
+Overlapping fires share one checkout, so PHASE-Z is cohort-drained: an early
+finisher defers the safety commit and the final sibling runs it once all writers
+have stopped. This avoids committing a sibling's half-written files.
 
 In `dry_run=True` mode (shadow phase per refactor_plan §4 phase 2) the
 scheduler logs "WOULD enqueue at <fire_at>" + updates last_fire_at but
@@ -57,6 +59,14 @@ FALLBACK_CRON = "7 * * * *"
 # config/runtime_schedules.json id; cron field is often null because legacy
 # scheduling lived in LaunchAgent plist. Supervisor falls back to "7 * * * *".
 SCHEDULE_ID = "volpred-hourly-dispatch"
+DAEMON_ID = "volpred-dispatch-supervisor"
+DEFAULT_MAX_SLOTS = 2
+
+# Strong references keep launched fire tasks alive until their done callback
+# observes the result. Keys are immutable state job_ids, never reusable slots.
+_ACTIVE_FIRE_TASKS: dict[str, asyncio.Task] = {}
+_PHASE_Z_LOCK: asyncio.Lock | None = None
+_PHASE_Z_TERMINAL_REASONS = {"committed", "clean", "nothing_owned", "nothing_to_commit"}
 
 
 def load_cron_expr(*, schedules_path: Path = SCHEDULES_PATH, schedule_id: str = SCHEDULE_ID) -> str:
@@ -95,6 +105,190 @@ def load_cron_expr(*, schedules_path: Path = SCHEDULES_PATH, schedule_id: str = 
     LOG.info("schedule id=%s has no schedule/cron field; supervisor using fallback %r",
              schedule_id, FALLBACK_CRON)
     return FALLBACK_CRON
+
+
+def load_max_slots(
+    *, schedules_path: Path = SCHEDULES_PATH, daemon_id: str = DAEMON_ID,
+) -> int:
+    """Hot-load the daemon pool capacity from runtime_schedules.json.
+
+    The owner is ``daemons[id=volpred-dispatch-supervisor].max_slots``. Missing
+    or invalid values fall back to two; bool is rejected even though it is an
+    ``int`` subclass.  A config reduction never kills existing workers — it
+    only blocks new admission until occupancy falls below the new limit.
+    """
+    try:
+        data = json.loads(schedules_path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        LOG.warning("load_max_slots fallback=%d: %s", DEFAULT_MAX_SLOTS, exc)
+        return DEFAULT_MAX_SLOTS
+    for item in data.get("daemons") or []:
+        if not isinstance(item, dict) or item.get("id") != daemon_id:
+            continue
+        value = item.get("max_slots", DEFAULT_MAX_SLOTS)
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+            LOG.warning("max_slots %r invalid — using %d", value, DEFAULT_MAX_SLOTS)
+            return DEFAULT_MAX_SLOTS
+        return value
+    LOG.warning("daemon %s missing max_slots — using %d", daemon_id, DEFAULT_MAX_SLOTS)
+    return DEFAULT_MAX_SLOTS
+
+
+def _slot_log_path(base: Path, *, slot_id: str, job_id: str) -> Path:
+    """Per-job output prevents sibling auth/quota text contaminating classify."""
+    suffix = base.suffix or ".log"
+    return base.with_name(f"{base.stem}.{slot_id}.{job_id[:8]}{suffix}")
+
+
+def _slot_prompt(prompt: str, *, slot_id: str, job_id: str) -> str:
+    """Inject the stable namespace that every nested worktree must carry."""
+    prefix = f"dispatch-{slot_id}-{job_id[:8]}"
+    return (
+        "[Supervisor multi-slot context]\n"
+        f"slot_id={slot_id}; job_id={job_id}; worktree_prefix={prefix}.\n"
+        "此段隔離規則優先於後文 PHASE-Z：任何會改 repo 的 task 都必須先建立"
+        "名稱含 worktree_prefix 的 git worktree，在該 worktree 完成與 commit；"
+        "不得直接編輯共享 main checkout，也不得移除或操作其他 slot 的 worktree。"
+        "task-pool claim/complete 等有 fcntl 的 control-plane CLI 可在 canonical root 執行。\n\n"
+        + prompt
+    )
+
+
+def _phase_z_terminal(outcome: dict[str, Any] | None) -> bool:
+    """Only release persistent drain tokens after a verified terminal outcome."""
+    if not isinstance(outcome, dict):
+        return False
+    if outcome.get("committed") is True:
+        return True
+    reason = outcome.get("reason")
+    if reason is None:  # compatibility with injected legacy hooks in tests
+        return True
+    return reason in _PHASE_Z_TERMINAL_REASONS
+
+
+def _reap_fire_task(job_id: str, task: asyncio.Task) -> None:
+    _ACTIVE_FIRE_TASKS.pop(job_id, None)
+    if task.cancelled():
+        LOG.warning("fire task cancelled job_id=%s", job_id)
+        return
+    exc = task.exception()
+    if exc is not None:
+        LOG.error("fire task crashed job_id=%s: %s", job_id, exc, exc_info=exc)
+        alerts.send_loop_crash(
+            f"fire_task:{job_id[:8]}",
+            "".join(traceback.format_exception(type(exc), exc, exc.__traceback__)),
+        )
+
+
+async def _run_reserved_fire(
+    *,
+    job_id: str,
+    cohort_id: str,
+    slot_id: str,
+    prompt: str,
+    scheduled_for: str,
+    fire_reason: str,
+    log_path: Path,
+    state_path: Path,
+    repo_root: Path,
+) -> dict[str, Any]:
+    """Run one already-admitted logical fire and close its cohort safely."""
+    phase_z_outcome: dict | None = None
+    result = None
+    worker_exc: BaseException | None = None
+    try:
+        result = await asyncio.to_thread(
+            worker.run_worker,
+            prompt_text=prompt, schedule_id=SCHEDULE_ID,
+            scheduled_for=scheduled_for, fire_reason=fire_reason,
+            log_path=log_path, state_path=state_path,
+            job_id=job_id, slot_id=slot_id,
+        )
+        LOG.info(
+            "worker returned job_id=%s slot=%s outcome=%s attempts=%d duration=%.1fs",
+            job_id, slot_id, result.outcome, result.attempts, result.duration_s,
+        )
+        # Worker owns the normal close. This exact-id safety net covers a
+        # crashed/mocked worker that returned without recording completion; it
+        # can never close a sibling or a later job that reused the slot.
+        own = next(
+            (job for job in (state.read_state(state_path).get("current_jobs") or [])
+             if str(job.get("job_id")) == job_id),
+            None,
+        )
+        if own is not None and own.get("pid") is None and own.get("phase") not in {
+            "kill_failed_orphan", "timeout_unverified", "orphan_unverified_not_killed",
+        }:
+            state.record_completion(
+                job_id=job_id, expected_attempt=int(own.get("attempt", result.attempts)),
+                expected_pid=own.get("pid"), exit_code=result.exit_code,
+                outcome=result.outcome,
+                final_model=getattr(result, "final_model", str(own.get("model") or "unknown")),
+                path=state_path,
+            )
+    except BaseException as exc:  # preserve traceback after cohort cleanup
+        worker_exc = exc
+        own = next(
+            (job for job in (state.read_state(state_path).get("current_jobs") or [])
+             if str(job.get("job_id")) == job_id),
+            None,
+        )
+        if own is not None and own.get("pid") is None:
+            state.record_completion(
+                job_id=job_id, expected_attempt=int(own.get("attempt", 1)),
+                exit_code=-1, outcome="failure", final_model=str(own.get("model") or "unknown"),
+                path=state_path,
+            )
+    finally:
+        global _PHASE_Z_LOCK
+        if _PHASE_Z_LOCK is None:
+            _PHASE_Z_LOCK = asyncio.Lock()
+        async with _PHASE_Z_LOCK:
+            fresh = state.read_state(state_path)
+            remaining = fresh.get("current_jobs") or []
+            cohort_pending = [
+                item for item in (fresh.get("phase_z_pending") or [])
+                if str(item.get("cohort_id")) == cohort_id
+            ]
+            if remaining:
+                phase_z_outcome = {
+                    "committed": False,
+                    "reason": "deferred_until_cohort_drain",
+                    "remaining_jobs": len(remaining),
+                }
+                LOG.info(
+                    "phase_z deferred job_id=%s slot=%s remaining=%d",
+                    job_id, slot_id, len(remaining),
+                )
+            elif not cohort_pending:
+                phase_z_outcome = {
+                    "committed": False, "reason": "already_drained",
+                }
+            else:
+                try:
+                    phase_z_outcome = await asyncio.to_thread(
+                        phase_z.run_phase_z, repo_root=repo_root,
+                    )
+                    LOG.info("phase_z cohort drain job_id=%s outcome=%s", job_id, phase_z_outcome)
+                except Exception as exc:  # noqa: BLE001
+                    LOG.warning("phase_z safety-net failed (non-fatal): %s", exc)
+                if _phase_z_terminal(phase_z_outcome):
+                    cleared = state.finish_phase_z(cohort_id=cohort_id, path=state_path)
+                    LOG.info("phase_z cohort released cohort=%s pending=%d", cohort_id, cleared)
+                else:
+                    LOG.error(
+                        "phase_z non-terminal; retaining drain token cohort=%s outcome=%s",
+                        cohort_id, phase_z_outcome,
+                    )
+    if worker_exc is not None:
+        raise worker_exc
+    assert result is not None
+    return {
+        "action": "fired", "outcome": result.outcome,
+        "attempts": result.attempts, "exit_code": result.exit_code,
+        "phase_z": phase_z_outcome, "fire_reason": fire_reason,
+        "job_id": job_id, "slot_id": slot_id,
+    }
 
 
 PREGATE_SCRIPT = ROOT / "scripts" / "hourly_dispatch_pregate.py"
@@ -256,6 +450,7 @@ async def scheduler_loop(
                 state_path=state_path, cron_expr=cron_expr,
                 prompt_path=prompt_path, log_path=log_path,
                 dry_run=dry_run, schedules_path=schedules_path,
+                background=True,
             )
             # reload cron expr in case ops changed config mid-run
             cron_expr = load_cron_expr(schedules_path=schedules_path)
@@ -281,16 +476,58 @@ async def _tick_once(
     dry_run: bool,
     repo_root: Path = ROOT,
     schedules_path: Path = SCHEDULES_PATH,
+    background: bool = False,
+    max_slots: int | None = None,
 ) -> dict[str, Any]:
     """One tick. Returns a small dict describing the decision (for tests + audit log)."""
     state.heartbeat(path=state_path)
     snap = state.read_state(state_path)
+    pending_phase_z = snap.get("phase_z_pending") or []
+    if pending_phase_z:
+        still_running = snap.get("current_jobs") or []
+        if still_running:
+            return {
+                "action": "skip", "reason": "cohort_still_running",
+                "active_slots": len(still_running),
+                "phase_z_pending": len(pending_phase_z),
+            }
+        outcome: dict[str, Any] | None = None
+        global _PHASE_Z_LOCK
+        if _PHASE_Z_LOCK is None:
+            _PHASE_Z_LOCK = asyncio.Lock()
+        async with _PHASE_Z_LOCK:
+            # Re-read inside the process-local git mutex. A fire task may have
+            # drained/finished the cohort while this tick waited for the lock.
+            fresh = state.read_state(state_path)
+            pending_phase_z = fresh.get("phase_z_pending") or []
+            if fresh.get("current_jobs"):
+                return {"action": "skip", "reason": "cohort_still_running"}
+            if not pending_phase_z:
+                return {"action": "phase_z_already_drained", "phase_z": None}
+            outcome = await asyncio.to_thread(phase_z.run_phase_z, repo_root=repo_root)
+            if _phase_z_terminal(outcome):
+                for cohort in {str(item.get("cohort_id")) for item in pending_phase_z}:
+                    state.finish_phase_z(cohort_id=cohort, path=state_path)
+            else:
+                return {
+                    "action": "phase_z_recovery_pending", "phase_z": outcome,
+                    "pending_jobs": len(pending_phase_z),
+                }
+        return {
+            "action": "phase_z_recovered", "phase_z": outcome,
+            "pending_jobs": len(pending_phase_z),
+        }
     if snap.get("auth_blocked"):
         return {"action": "skip", "reason": "auth_blocked"}
-    if snap.get("current_job"):
-        # NOTE: a pending fire_requested_at deliberately survives this skip —
-        # "fire ASAP" means right after the in-flight job, never in parallel.
-        return {"action": "skip", "reason": "job_in_flight"}
+    current_jobs = snap.get("current_jobs") or []
+    capacity = max_slots if max_slots is not None else load_max_slots(schedules_path=schedules_path)
+    if len(current_jobs) >= capacity:
+        # A pending request deliberately survives a full-pool skip and is
+        # consumed only after a later tick sees capacity.
+        return {
+            "action": "skip", "reason": "slots_full",
+            "active_slots": len(current_jobs), "max_slots": capacity,
+        }
     if _parse_last_fire(snap.get("last_fire_at")) is None:
         # Cold start, or `dispatch_state.json` was lost / clobbered by an
         # external writer (the daemon logs its own resets; a silent loss is
@@ -341,7 +578,7 @@ async def _tick_once(
     # try/except is belt-and-suspenders: run_pre_fire_guard is already no-raise
     # and fail-open, but a guard must never be able to veto the dispatch it
     # guards (same rationale as the phase_z call below).
-    if not dry_run:
+    if not dry_run and not current_jobs:
         try:
             guard_outcome = await asyncio.to_thread(phase_z.run_pre_fire_guard, repo_root=repo_root)
             LOG.info("pre_fire_guard outcome=%s", guard_outcome)
@@ -376,7 +613,22 @@ async def _tick_once(
     if not prompt:
         LOG.error("empty prompt — refusing to fire")
         return {"action": "skip", "reason": "empty_prompt"}
-    LOG.info("firing worker prev_scheduled=%s log=%s", prev_fire.isoformat(), log_path)
+    cohort_id = str(current_jobs[0].get("cohort_id")) if current_jobs else None
+    lease = state.reserve_fire(
+        schedule_id=SCHEDULE_ID, attempt=1, model=worker.OPUS_MODEL,
+        log_path=str(log_path), scheduled_for=prev_fire.isoformat(),
+        fire_reason=fire_reason, max_slots=capacity, cohort_id=cohort_id,
+        fire_key=(f"cron:{prev_fire.isoformat()}" if fire_reason.startswith("cron") else None),
+        path=state_path,
+    )
+    job_id = lease.job_id
+    slot_id = f"slot-{lease.slot_id}"
+    job_log_path = _slot_log_path(log_path, slot_id=slot_id, job_id=job_id)
+    prompt = _slot_prompt(prompt, slot_id=slot_id, job_id=job_id)
+    LOG.info(
+        "firing worker job_id=%s slot=%s prev_scheduled=%s log=%s",
+        job_id, slot_id, prev_fire.isoformat(), job_log_path,
+    )
     # PHASE-Z safety net (post-fire deterministic commit) — port of the legacy
     # cron_hourly_dispatch.sh PHASE-Z block. Runs ONCE per real fire regardless
     # of worker outcome — success / hang / failure AND the case where the worker
@@ -388,25 +640,18 @@ async def _tick_once(
     # never crashes the tick (run_phase_z is itself no-raise, belt-and-suspenders
     # here too). If the worker raised, PHASE-Z still runs, then the exception
     # propagates to scheduler_loop's crash handler (which alerts).
-    phase_z_outcome: dict | None = None
-    try:
-        # Block in thread so health_loop keeps running concurrently
-        result = await asyncio.to_thread(
-            worker.run_worker,
-            prompt_text=prompt, schedule_id=SCHEDULE_ID,
-            scheduled_for=prev_fire.isoformat(), fire_reason=fire_reason,
-            log_path=log_path, state_path=state_path,
-        )
-        LOG.info("worker returned outcome=%s attempts=%d duration=%.1fs",
-                 result.outcome, result.attempts, result.duration_s)
-    finally:
-        try:
-            phase_z_outcome = await asyncio.to_thread(phase_z.run_phase_z, repo_root=repo_root)
-            LOG.info("phase_z outcome=%s", phase_z_outcome)
-        except Exception as exc:  # noqa: BLE001
-            LOG.warning("phase_z safety-net failed (non-fatal): %s", exc)
+    coro = _run_reserved_fire(
+        job_id=job_id, cohort_id=lease.cohort_id, slot_id=slot_id, prompt=prompt,
+        scheduled_for=prev_fire.isoformat(), fire_reason=fire_reason,
+        log_path=job_log_path, state_path=state_path, repo_root=repo_root,
+    )
+    if not background:
+        return await coro
+    task = asyncio.create_task(coro, name=f"dispatch-{slot_id}-{job_id[:8]}")
+    _ACTIVE_FIRE_TASKS[job_id] = task
+    task.add_done_callback(lambda done, jid=job_id: _reap_fire_task(jid, done))
     return {
-        "action": "fired", "outcome": result.outcome,
-        "attempts": result.attempts, "exit_code": result.exit_code,
-        "phase_z": phase_z_outcome, "fire_reason": fire_reason,
+        "action": "launched", "job_id": job_id, "slot_id": slot_id,
+        "fire_reason": fire_reason, "active_slots": len(current_jobs) + 1,
+        "max_slots": capacity,
     }

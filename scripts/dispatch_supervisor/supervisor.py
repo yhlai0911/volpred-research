@@ -116,9 +116,20 @@ def _handle_restart_orphan() -> None:
     # those defaults bind at function-DEFINITION time, so monkeypatching
     # `state.STATE_PATH` in a test would silently not apply to them.
     state_path = state.STATE_PATH
-    orphan = state.mark_restart_orphan_pending(state_path)
-    if orphan is None:
-        return
+    orphans = state.mark_restart_orphans_pending(state_path)
+    for orphan in orphans:
+        try:
+            _handle_one_restart_orphan(orphan, state_path=state_path)
+        except Exception:  # one bad orphan must not hide/clear its siblings
+            logging.exception(
+                "restart: orphan cleanup failed job_id=%s slot=%s; leaving it pending",
+                orphan.get("job_id"), orphan.get("slot_id"),
+            )
+
+
+def _handle_one_restart_orphan(orphan: dict, *, state_path) -> None:
+    """Identity-check, record, and exact-finalize one restart orphan."""
+    job_id = str(orphan.get("job_id") or "")
     if orphan.get("cleanup_recorded"):
         # Codex review round-2 low finding (2026-07-04): a prior restart's
         # cleanup already appended this orphan's completion entry (the
@@ -140,7 +151,7 @@ def _handle_restart_orphan() -> None:
             alerts.send_orphan_restart_alert(
                 job=orphan, killed=False, outcome=recorded_outcome, state_path=state_path,
             )
-        state.finalize_restart_orphan_cleanup(state_path)
+        state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
         return
     if orphan.get("pid") is None:
         # Codex review fix #2 (2026-07-04): supervisor crashed between
@@ -165,7 +176,7 @@ def _handle_restart_orphan() -> None:
         alerts.send_orphan_restart_alert(
             job=orphan, killed=False, outcome="reservation_abandoned_no_pid", state_path=state_path,
         )
-        state.finalize_restart_orphan_cleanup(state_path)
+        state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
         return
     pid = int(orphan["pid"])
     started_wall = orphan.get("started_wall")
@@ -175,8 +186,19 @@ def _handle_restart_orphan() -> None:
         logging.warning(
             "restart: orphan job pid=%d pgid=%d still alive (identity-verified) — killing", pid, pgid,
         )
-        worker._kill_pgid(pgid)
-        exit_code, outcome, killed = -9, "killed_supervisor_restart", True
+        killed = worker._kill_pgid(pgid)
+        if not killed:
+            outcome = "kill_failed_orphan"
+            state.mark_job_phase(
+                job_id=job_id, phase=outcome,
+                expected_attempt=int(orphan.get("attempt", 1)), expected_pid=pid,
+                path=state_path,
+            )
+            alerts.send_orphan_restart_alert(
+                job=orphan, killed=False, outcome=outcome, state_path=state_path,
+            )
+            return
+        exit_code, outcome = -9, "killed_supervisor_restart"
     elif identity == procutil.IDENTITY_UNVERIFIED:
         # Codex review fix #4: no fingerprint was recorded (attach raced
         # ahead of a slow/failed `ps` call). Do NOT kill an unverified
@@ -186,9 +208,38 @@ def _handle_restart_orphan() -> None:
             "restart: orphan job pid=%d alive but NO identity fingerprint recorded — "
             "NOT killing (unverified target), recording for manual check", pid,
         )
-        exit_code, outcome, killed = -1, "orphan_unverified_not_killed", False
+        outcome, killed = "orphan_unverified_not_killed", False
+        state.mark_job_phase(
+            job_id=job_id, phase=outcome, expected_attempt=int(orphan.get("attempt", 1)),
+            expected_pid=pid, path=state_path,
+        )
+        alerts.send_orphan_restart_alert(
+            job=orphan, killed=False, outcome=outcome, state_path=state_path,
+        )
+        return
     else:
-        logging.info("restart: stale current_job pid=%d already gone / pid reused — no kill needed", pid)
+        pgid = int(orphan.get("pgid") or pid)
+        survivors = procutil.pgid_members_checked(pgid)
+        if survivors is None or survivors:
+            # The leader can be dead while a descendant/subagent in its process
+            # group keeps writing. A failed probe is also not evidence of
+            # group death. Preserve the slot and block PHASE-Z until health can
+            # positively observe an empty group.
+            outcome = "kill_failed_orphan"
+            state.mark_job_phase(
+                job_id=job_id, phase=outcome,
+                expected_attempt=int(orphan.get("attempt", 1)), expected_pid=pid,
+                path=state_path,
+            )
+            alerts.send_orphan_restart_alert(
+                job={**orphan, "survivors": survivors}, killed=False,
+                outcome=outcome, state_path=state_path,
+            )
+            return
+        logging.info(
+            "restart: stale current_job pid=%d already gone / pid reused and pgid=%d empty",
+            pid, pgid,
+        )
         exit_code, outcome, killed = -1, "orphan_gone_or_reused", False
     state.append_completion_entry(
         orphan, exit_code=exit_code, outcome=outcome,
@@ -196,7 +247,7 @@ def _handle_restart_orphan() -> None:
         mark_cleanup_recorded=True,
     )
     alerts.send_orphan_restart_alert(job=orphan, killed=killed, outcome=outcome, state_path=state_path)
-    state.finalize_restart_orphan_cleanup(state_path)
+    state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
 
 
 async def _run_async(*, dry_run: bool) -> int:

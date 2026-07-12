@@ -47,6 +47,9 @@ import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
+
+from . import procutil
 
 LOG = logging.getLogger(__name__)
 
@@ -107,6 +110,7 @@ class FailoverResult:
     detail: str          # human-readable, goes into the alert body
     duration_s: float = 0.0
     output_tail: str = ""
+    process_active: bool = False  # tracked Popen may still be alive after refused kill
 
 
 def resolve_codex_bin() -> str | None:
@@ -196,6 +200,10 @@ def run_codex_failover(
     preflight_timeout_s: int = PREFLIGHT_TIMEOUT_S,
     reachability_timeout_s: int = REACHABILITY_TIMEOUT_S,
     enabled: bool | None = None,
+    slot_id: str | None = None,
+    job_id: str | None = None,
+    on_process_started: Callable[[int, int], bool] | None = None,
+    on_process_finished: Callable[[int], None] | None = None,
 ) -> FailoverResult:
     """Try to let `codex exec` cover this hourly slot. Never raises."""
     if enabled is None:
@@ -228,11 +236,53 @@ def run_codex_failover(
     LOG.info("codex failover start reason=%s cap=%ds version=%s", reason, cap_s, version)
     started = time.time()
     prompt = _read_prompt(prompt_path)
-    try:
-        result = subprocess.run(
-            [codex_bin, "exec", "--skip-git-repo-check", "-s", "workspace-write", prompt],
-            cwd=str(ROOT), capture_output=True, text=True, timeout=cap_s,
+    if slot_id and job_id:
+        prefix = f"dispatch-{slot_id}-{job_id[:8]}"
+        prompt = (
+            "[Supervisor multi-slot context]\n"
+            f"slot_id={slot_id}; job_id={job_id}; worktree_prefix={prefix}.\n"
+            "任何 repo 寫入都必須在名稱含 worktree_prefix 的 worktree 完成；"
+            "不得直接修改共享 main checkout。\n\n"
+            + prompt
         )
+    argv = [codex_bin, "exec", "--skip-git-repo-check", "-s", "workspace-write", prompt]
+    tracked_pid: int | None = None
+    process_confirmed_finished = False
+    try:
+        if on_process_started is None:
+            result = subprocess.run(
+                argv, cwd=str(ROOT), capture_output=True, text=True, timeout=cap_s,
+            )
+        else:
+            env = {
+                **os.environ,
+                "VOLPRED_ACTOR": f"codex-failover:{slot_id or 'slot'}:{(job_id or '')[:8]}",
+                "VOLPRED_DISPATCH_SLOT": slot_id or "",
+                "VOLPRED_DISPATCH_JOB_ID": job_id or "",
+            }
+            proc = subprocess.Popen(
+                argv, cwd=str(ROOT), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                stdin=subprocess.DEVNULL, text=True, start_new_session=True, env=env,
+            )
+            tracked_pid = proc.pid
+            pgid = os.getpgid(proc.pid)
+            if not on_process_started(proc.pid, pgid):
+                group_drained = procutil.kill_pgid(pgid)
+                stdout, _ = proc.communicate(timeout=10)
+                process_confirmed_finished = group_drained
+                result = subprocess.CompletedProcess(argv, proc.returncode or 1, stdout, "")
+            else:
+                try:
+                    stdout, _ = proc.communicate(timeout=cap_s)
+                except subprocess.TimeoutExpired as exc:
+                    group_drained = procutil.kill_pgid(pgid)
+                    stdout, _ = proc.communicate(timeout=15)
+                    process_confirmed_finished = group_drained
+                    raise subprocess.TimeoutExpired(
+                        cmd=exc.cmd, timeout=cap_s, output=stdout,
+                    ) from exc
+                result = subprocess.CompletedProcess(argv, proc.returncode, stdout, "")
+                process_confirmed_finished = procutil.pgid_members_checked(pgid) == []
     except subprocess.TimeoutExpired as exc:
         duration = time.time() - started
         tail = (exc.output or "")[-2000:] if isinstance(exc.output, str) else ""
@@ -245,13 +295,30 @@ def run_codex_failover(
             f"Codex 接手了，但任務沒在 {cap_s // 60} 分鐘內做完（ChatGPT 本身是通的——"
             "接手前已測過）。任務可能太大，需要切小或改走 compute queue",
             duration, tail,
+            process_active=tracked_pid is not None and not process_confirmed_finished,
         )
     except OSError as exc:
         duration = time.time() - started
-        return FailoverResult(True, False, RC_BINARY_MISSING, f"`codex exec` 無法啟動：{exc}", duration)
+        return FailoverResult(
+            True, False, RC_BINARY_MISSING, f"`codex exec` 無法啟動：{exc}", duration,
+            process_active=tracked_pid is not None and not process_confirmed_finished,
+        )
+    finally:
+        if tracked_pid is not None and process_confirmed_finished and on_process_finished is not None:
+            try:
+                on_process_finished(tracked_pid)
+            except Exception as exc:  # callback is observability, never mask result
+                LOG.warning("codex failover finish callback failed pid=%s: %s", tracked_pid, exc)
 
     duration = time.time() - started
     combined = ((result.stdout or "") + (result.stderr or ""))[-2000:]
+    if tracked_pid is not None and not process_confirmed_finished:
+        return FailoverResult(
+            True, False, RC_WORK_TIMEOUT,
+            "Codex parent 已退出，但同一 process group 仍有程序或無法確認已清空；"
+            "保留 PID 並隔離此 slot，禁止 PHASE-Z。",
+            duration, combined, process_active=True,
+        )
     recovered = result.returncode == 0
     LOG.info("codex failover rc=%d recovered=%s duration=%.1fs", result.returncode, recovered, duration)
     return FailoverResult(

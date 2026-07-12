@@ -12,9 +12,8 @@ Sub-modules:
   scheduler — asyncio tick → enqueue (croniter-driven)
   alerts    — send-alert shim with per-class dedup
 
-Status: Deliverable 5/8 — Codex review CONDITIONAL_PASS (2026-07-04, 2 rounds);
-shadow run started (dry-run LaunchAgent, `ops/launchd/com.volpred.dispatch-supervisor.plist`).
-Remaining: 7-day shadow observation, cutover, deprecate legacy shell, retro.
+Status: production daemon with a configurable multi-slot worker pool. Logical
+fires retain stable job/slot IDs across retry and use cohort-drained PHASE-Z.
 """
 
-__version__ = "0.4.0-d5"
+__version__ = "0.5.0-multislot"

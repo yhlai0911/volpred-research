@@ -128,6 +128,102 @@ def test_exec_success_marks_recovered(monkeypatch) -> None:
     assert "claimed task X" in result.output_tail
 
 
+def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(codex_failover, "preflight", lambda *_a, **_k: (True, 0, "codex"))
+    monkeypatch.setattr(codex_failover, "check_reachable", lambda *_a, **_k: (True, 0, "ok"))
+
+    class FakeProc:
+        pid = 777
+        returncode = 0
+
+        def communicate(self, timeout=None):
+            return "tracked work", None
+
+    monkeypatch.setattr(codex_failover.subprocess, "Popen", lambda *a, **k: FakeProc())
+    monkeypatch.setattr(codex_failover.os, "getpgid", lambda pid: 888)
+    monkeypatch.setattr(codex_failover.procutil, "pgid_members_checked", lambda pgid: [])
+    seen: list[tuple] = []
+
+    result = codex_failover.run_codex_failover(
+        reason="quota", enabled=True, slot_id="slot-2", job_id="abcdef123456",
+        on_process_started=lambda pid, pgid: bool(seen.append(("start", pid, pgid)) or True),
+        on_process_finished=lambda pid: seen.append(("finish", pid)),
+    )
+
+    assert result.recovered is True
+    assert seen == [("start", 777, 888), ("finish", 777)]
+
+
+def test_tracked_failover_keeps_pid_attached_when_timeout_kill_is_unverified(
+    monkeypatch,
+) -> None:
+    """A refused SIGKILL must leave the Codex child visible to the watchdog."""
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(codex_failover, "preflight", lambda *_a, **_k: (True, 0, "codex"))
+    monkeypatch.setattr(codex_failover, "check_reachable", lambda *_a, **_k: (True, 0, "ok"))
+
+    class FakeProc:
+        pid = 777
+        returncode = None
+        calls = 0
+
+        def communicate(self, timeout=None):
+            self.calls += 1
+            if self.calls == 1:
+                raise subprocess.TimeoutExpired(
+                    cmd="codex exec", timeout=timeout or 1, output="timed out",
+                )
+            self.returncode = 137
+            return "parent exited; descendant survived", None
+
+    monkeypatch.setattr(codex_failover.subprocess, "Popen", lambda *a, **k: FakeProc())
+    monkeypatch.setattr(codex_failover.os, "getpgid", lambda pid: 888)
+    monkeypatch.setattr(codex_failover.procutil, "kill_pgid", lambda pgid: False)
+    seen: list[tuple] = []
+
+    result = codex_failover.run_codex_failover(
+        reason="quota", enabled=True, slot_id="slot-2", job_id="abcdef123456",
+        on_process_started=lambda pid, pgid: bool(seen.append(("start", pid, pgid)) or True),
+        on_process_finished=lambda pid: seen.append(("finish", pid)),
+    )
+
+    assert result.recovered is False
+    assert result.process_active is True
+    assert seen == [("start", 777, 888)], "unverified live pid must not be detached"
+
+
+def test_tracked_failover_keeps_pid_when_parent_exits_but_descendant_survives(
+    monkeypatch,
+) -> None:
+    """A dead CLI leader is not proof that its process group drained."""
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(codex_failover, "preflight", lambda *_a, **_k: (True, 0, "codex"))
+    monkeypatch.setattr(codex_failover, "check_reachable", lambda *_a, **_k: (True, 0, "ok"))
+
+    class FakeProc:
+        pid = 777
+        returncode = 0
+
+        def communicate(self, timeout=None):
+            return "parent done", None
+
+    monkeypatch.setattr(codex_failover.subprocess, "Popen", lambda *a, **k: FakeProc())
+    monkeypatch.setattr(codex_failover.os, "getpgid", lambda pid: 888)
+    monkeypatch.setattr(codex_failover.procutil, "pgid_members_checked", lambda pgid: [999])
+    seen: list[tuple] = []
+
+    result = codex_failover.run_codex_failover(
+        reason="quota", enabled=True, slot_id="slot-2", job_id="abcdef123456",
+        on_process_started=lambda pid, pgid: bool(seen.append(("start", pid, pgid)) or True),
+        on_process_finished=lambda pid: seen.append(("finish", pid)),
+    )
+
+    assert result.recovered is False
+    assert result.process_active is True
+    assert seen == [("start", 777, 888)]
+
+
 def test_exec_failure_is_attempted_but_not_recovered(monkeypatch) -> None:
     monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
     monkeypatch.setattr(codex_failover.subprocess, "run", _fake_codex(
@@ -209,7 +305,7 @@ class _FailoverStub:
         self.recovered = recovered
         self.seen_reasons: list[str] = []
 
-    def __call__(self, *, reason: str):
+    def __call__(self, *, reason: str, **_kwargs):
         self.seen_reasons.append(reason)
         return codex_failover.FailoverResult(
             attempted=True, recovered=self.recovered, exit_code=0 if self.recovered else 1,
@@ -234,9 +330,16 @@ def _quiet_state_and_alerts(monkeypatch, tmp_path: Path):
 
 
 def _stub_attempt(monkeypatch, output: str, exit_code: int = 1) -> None:
+    def _attempt(**kwargs):
+        worker.state.mark_job_phase(
+            job_id=kwargs["job_id"], phase="classifying",
+            expected_attempt=kwargs["attempt"], path=kwargs["state_path"],
+        )
+        return exit_code, 1.0, output
+
     monkeypatch.setattr(
         worker, "_run_one_attempt",
-        lambda **kwargs: (exit_code, 1.0, output),
+        _attempt,
     )
 
 
@@ -296,7 +399,7 @@ def test_auth_break_hands_slot_to_codex_but_keeps_auth_blocked(
 def test_failover_exception_never_escapes_worker(monkeypatch, tmp_path, _quiet_state_and_alerts):
     _stub_attempt(monkeypatch, QUOTA_OUTPUT)
 
-    def _boom(*, reason: str):
+    def _boom(*, reason: str, **_kwargs):
         raise RuntimeError("codex module blew up")
 
     monkeypatch.setattr(worker.codex_failover, "run_codex_failover", _boom)

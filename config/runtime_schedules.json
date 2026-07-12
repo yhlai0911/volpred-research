@@ -1318,9 +1318,10 @@
       "entrypoint": "uv run python -m scripts.dispatch_supervisor.supervisor",
       "state_file": "storage/ops/dispatch_state.json",
       "log": "~/.volpred/logs/dispatch_supervisor.log",
+      "max_slots": 2,
       "fires": "hourly worker per volpred-hourly-dispatch `schedule` (croniter) + ASAP on state.fire_requested_at",
       "since": "2026-07-04T16:36:00+08:00",
-      "description": "Canonical hourly dispatcher after the 3-strike refactor cutover (docs/refactor_plan_hourly_dispatch.md). Long-lived asyncio supervisor: scheduler tick 60s + independent health monitor + retry ladder + PHASE-Z safety commit. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover it (single enforcement owner)."
+      "description": "Canonical hourly dispatcher after the 3-strike refactor cutover (docs/refactor_plan_hourly_dispatch.md). Long-lived asyncio supervisor: scheduler tick 60s + independent health monitor + max_slots worker pool + retry ladder + cohort-drained PHASE-Z safety commit. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover it (single enforcement owner)."
     }
   ]
 }

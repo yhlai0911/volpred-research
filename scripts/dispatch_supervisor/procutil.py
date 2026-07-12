@@ -107,8 +107,8 @@ def check_identity(pid: int, expected_start_wall: str | None) -> str:
 DEFAULT_KILL_GRACE_S = 10.0
 
 
-def pgid_members(pgid: int) -> list[int]:
-    """LIVE pids in process group `pgid` — zombies excluded.
+def pgid_members_checked(pgid: int) -> list[int] | None:
+    """LIVE non-zombie pids, or ``None`` when group liveness is unverified.
 
     Zombies are the whole reason this function is careful. A SIGKILL'd process
     stays in the process table as `Z` until its parent reaps it, and `ps -g`
@@ -123,6 +123,10 @@ def pgid_members(pgid: int) -> list[int]:
         kill HAD landed; the syscall's complaint was about the corpse.
 
     So "is the group still alive" must mean "does it hold a non-Z process".
+
+    ``[]`` is therefore positive evidence that the group drained. A failed or
+    malformed ``ps`` probe must not be collapsed into that answer: quarantine
+    and PHASE-Z callers need to distinguish "gone" from "could not check".
     """
     if pgid <= 0:
         return []
@@ -133,24 +137,42 @@ def pgid_members(pgid: int) -> list[int]:
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         LOG.warning("pgid_members pgid=%d ps invocation failed: %s", pgid, exc)
-        return []
+        return None
+    if result.returncode not in (0, 1):
+        LOG.warning(
+            "pgid_members pgid=%d ps returned rc=%d: %s",
+            pgid, result.returncode, (result.stderr or "").strip(),
+        )
+        return None
     live: list[int] = []
+    malformed = False
     for line in result.stdout.splitlines():
         parts = line.split()
         if len(parts) < 2:
             if line.strip():
                 LOG.warning("pgid_members pgid=%d unparseable ps row: %r", pgid, line)
+                malformed = True
             continue
         try:
             pid = int(parts[0])
         except ValueError:
             LOG.warning("pgid_members pgid=%d unparseable pid: %r", pgid, parts[0])
+            malformed = True
             continue
         if parts[1].startswith("Z"):
             continue  # dead already, just not reaped — not a survivor
         if pid != os.getpid():
             live.append(pid)
-    return live
+    return None if malformed else live
+
+
+def pgid_members(pgid: int) -> list[int]:
+    """Compatibility projection of :func:`pgid_members_checked`.
+
+    Observability-only callers historically expect a list. Safety decisions
+    must use ``pgid_members_checked`` so probe failure cannot mean "gone".
+    """
+    return pgid_members_checked(pgid) or []
 
 
 def kill_pgid(pgid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
@@ -186,7 +208,11 @@ def kill_pgid(pgid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
         except PermissionError as exc:
             LOG.warning("killpg %s denied pgid=%d: %s — falling back to per-pid",
                         sig, pgid, exc)
-        for pid in pgid_members(pgid):
+        members = pgid_members_checked(pgid)
+        if members is None:
+            LOG.warning("cannot enumerate pgid=%d for per-pid signal fallback", pgid)
+            return
+        for pid in members:
             try:
                 os.kill(pid, sig)
             except ProcessLookupError:
@@ -197,15 +223,18 @@ def kill_pgid(pgid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
     _signal_all(signal.SIGTERM)
     deadline = time.time() + grace_s
     while time.time() < deadline:
-        if not pgid_members(pgid):
+        members = pgid_members_checked(pgid)
+        if members == []:
             return True
         time.sleep(0.5)
 
     _signal_all(signal.SIGKILL)
     time.sleep(0.5)
-    survivors = pgid_members(pgid)
+    survivors = pgid_members_checked(pgid)
+    if survivors is None:
+        LOG.error("kill_pgid pgid=%d UNVERIFIED — final liveness probe failed", pgid)
+        return False
     if survivors:
-        LOG.error("kill_pgid pgid=%d FAILED — survivors still running: %s",
-                  pgid, survivors)
+        LOG.error("kill_pgid pgid=%d FAILED — survivors still running: %s", pgid, survivors)
         return False
     return True

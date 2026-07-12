@@ -139,7 +139,7 @@ def test_kill_pgid_reports_success_when_only_zombies_remain(monkeypatch) -> None
     """End of the same story: once the group holds nothing but zombies, the kill
     succeeded and kill_pgid must say so (not raise a false orphan alarm)."""
     monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: None)
-    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: [])  # zombies filtered out
+    monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [])  # zombies filtered out
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
     assert procutil.kill_pgid(69948, grace_s=1) is True
@@ -154,7 +154,7 @@ def test_kill_pgid_no_sigkill_when_group_dies_after_sigterm(monkeypatch) -> None
     """
     sigs: list[int] = []
     monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: sigs.append(sig))
-    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: [])  # gone after SIGTERM
+    monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [])  # gone after SIGTERM
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
     assert procutil.kill_pgid(456, grace_s=1) is True
@@ -164,7 +164,7 @@ def test_kill_pgid_no_sigkill_when_group_dies_after_sigterm(monkeypatch) -> None
 def test_kill_pgid_escalates_to_sigkill_when_group_survives(monkeypatch) -> None:
     sigs: list[int] = []
     monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: sigs.append(sig))
-    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: [777])  # never dies
+    monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [777])  # never dies
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
     # Survivors remain after SIGKILL → the caller must be told the kill FAILED.
@@ -193,7 +193,7 @@ def test_kill_pgid_falls_back_to_per_pid_when_killpg_denied(monkeypatch) -> None
 
     monkeypatch.setattr(procutil.os, "killpg", denied_killpg)
     monkeypatch.setattr(procutil.os, "kill", kill_one)
-    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: sorted(alive))
+    monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: sorted(alive))
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
     assert procutil.kill_pgid(999, grace_s=1) is True, \
@@ -210,7 +210,7 @@ def test_kill_pgid_reports_failure_when_every_signal_is_denied(monkeypatch) -> N
 
     monkeypatch.setattr(procutil.os, "killpg", denied)
     monkeypatch.setattr(procutil.os, "kill", denied)
-    monkeypatch.setattr(procutil, "pgid_members", lambda pgid: [4242])
+    monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [4242])
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
     assert procutil.kill_pgid(4242, grace_s=1) is False

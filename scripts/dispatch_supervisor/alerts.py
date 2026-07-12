@@ -202,7 +202,7 @@ def read_log_tail(log_path: str, *, limit: int = 2000) -> str:
 
 def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path = state.STATE_PATH) -> bool:
     """Hang-killed alert. Dedup 10min."""
-    key = "hang_killed"
+    key = f"hang_killed:{job.get('job_id') or job.get('pid') or 'unknown'}"
     if state.should_dedup_alert(key, window_s=600, path=state_path):
         return False
 
@@ -213,7 +213,11 @@ def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path
         impact = (
             f"- **pid {survivors} 仍在跑** — macOS 拒絕了 killpg（EPERM）。\n"
             f"- 這個孤兒可能還握著 worktree、還在寫 repo。請手動收：`kill -9 {' '.join(map(str, survivors))}`\n"
-            "- 派工 slot 已清掉，下個整點照常 fire（但孤兒不會自己消失）\n"
+            + (
+                "- 這個 slot 已隔離保留，不會對仍在寫檔的孤兒跑 PHASE-Z；其他 slot 可繼續。\n"
+                if job.get("slot_quarantined")
+                else "- 派工 slot 已清掉，下個整點照常 fire（但孤兒不會自己消失）\n"
+            )
         )
     else:
         headline = "# Supervisor SIGKILL'd 一個 worker（hang > 50min cap）"
@@ -245,7 +249,7 @@ def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path
 
 def send_silent_death_alert(*, job: dict[str, Any], state_path: Path = state.STATE_PATH) -> bool:
     """Worker PID died but no completion record. Dedup 10min."""
-    key = "silent_death"
+    key = f"silent_death:{job.get('job_id') or job.get('pid') or 'unknown'}"
     if state.should_dedup_alert(key, window_s=600, path=state_path):
         return False
     body = (
@@ -342,7 +346,7 @@ def send_orphan_restart_alert(
     reached a real pid before the crash (see `procutil.check_identity` and
     the `outcome` string, which names the exact case — passed straight from
     `supervisor._handle_restart_orphan()`'s completion-entry outcome)."""
-    key = "orphan_restart"
+    key = f"orphan_restart:{job.get('job_id') or job.get('pid') or 'unknown'}"
     if state.should_dedup_alert(key, window_s=60, path=state_path):
         return False
     body = (

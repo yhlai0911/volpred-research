@@ -38,6 +38,9 @@ LOG = logging.getLogger(__name__)
 
 CHECK_INTERVAL_S = 30
 MAX_JOB_AGE_S = 3000  # 50min — matches worker DEFAULT_TIMEOUT_S
+QUARANTINE_PHASES = {
+    "kill_failed_orphan", "timeout_unverified", "orphan_unverified_not_killed",
+}
 
 
 def _force_kill_pgid(pgid: int) -> bool:
@@ -50,16 +53,37 @@ def _force_kill_pgid(pgid: int) -> bool:
     return procutil.kill_pgid(pgid)
 
 
-def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JOB_AGE_S) -> str | None:
-    """Single non-async health pass. Returns action taken
-    ('killed' | 'silent_death' | 'timeout_unverified' | None).
-
-    Extracted as sync function so tests (and CLI smoke checks) can call without
-    spinning up asyncio.
-    """
-    job = state.get_current_job(state_path)
-    if job is None:
-        return None
+def _check_job(
+    job: state.CurrentJob, *, state_path: Path, max_age_s: float,
+) -> str | None:
+    """Inspect and, if needed, CAS-close exactly one logical job."""
+    job_id = job.job_id
+    if not job_id:
+        matches = [
+            raw for raw in (state.read_state(state_path).get("current_jobs") or [])
+            if raw.get("pid") == job.pid
+        ]
+        if len(matches) != 1:
+            return None
+        job_id = str(matches[0]["job_id"])
+    if job.phase in QUARANTINE_PHASES:
+        # The leader pid may exit before descendants/subagents in the same
+        # process group. Only a *confirmed empty* PGID can drain quarantine;
+        # a failed probe is deliberately sticky so PHASE-Z cannot commit while
+        # an unobserved descendant may still be writing.
+        survivors = procutil.pgid_members_checked(job.pgid)
+        if survivors is None or survivors:
+            LOG.error(
+                "health: quarantined job_id=%s pgid=%d remains blocked survivors=%s",
+                job_id, job.pgid, survivors if survivors is not None else "unverified",
+            )
+            return job.phase
+        closed = state.record_completion(
+            job_id=job_id, expected_attempt=job.attempt, expected_pid=job.pid,
+            expected_phase=job.phase, exit_code=-1,
+            outcome=f"{job.phase}_drained", final_model=job.model, path=state_path,
+        )
+        return "quarantine_drained" if closed is not None else None
     identity = procutil.check_identity(job.pid, job.started_wall)
     if job.age_seconds > max_age_s:
         if identity == procutil.IDENTITY_MATCH:
@@ -69,23 +93,21 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
                 log_tail = ("(killed by health monitor)\n\n"
                             + alerts.read_log_tail(job.log_path))
             else:
-                # The signals were refused and the group is still up. Say so:
-                # the slot must still be cleared (below) or the scheduler wedges
-                # forever, but claiming "killed" would hide a live orphan that
-                # is still holding a worktree / writing to the repo.
+                # The signals were refused and the group is still up. Keep the
+                # slot quarantined below: claiming "killed" or releasing it
+                # would hide a live orphan still writing to its worktree.
                 LOG.error("health: kill_pgid(%d) FAILED — orphan still alive", job.pgid)
                 exit_code, outcome = -9, "kill_failed_orphan"
                 log_tail = (
                     f"(hang detected but the kill was REFUSED — pid={job.pid} "
                     f"pgid={job.pgid} may still be running. Check `ps -g {job.pgid}` "
-                    f"and kill by hand; the slot was cleared so dispatch can resume.)"
+                    f"and kill by hand; this slot remains quarantined.)"
                 )
         elif identity == procutil.IDENTITY_UNVERIFIED:
             # Codex review fix #4: no fingerprint was ever recorded for this
             # job — we cannot confirm this pid is still our worker and not a
-            # PID-reuse collision, so we must NOT signal it. Clear the slot
-            # (via record_completion below) so the scheduler isn't wedged
-            # forever, but flag it distinctly so ops knows to check by hand.
+            # PID-reuse collision, so we must NOT signal it. Quarantine the
+            # slot until PGID emptiness is positively observed.
             LOG.warning(
                 "health: worker pid=%d aged out with NO identity fingerprint recorded — "
                 "NOT killing (unverified target), recording for manual check",
@@ -105,12 +127,36 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
             )
             exit_code, outcome = -1, "silent_death"
             log_tail = "(identity mismatch/dead at max-age check — not killed, recorded as silent_death)"
+        if outcome in {"kill_failed_orphan", "timeout_unverified"}:
+            # Process may still be writing. Multi-slot lets us quarantine only
+            # this slot while healthy siblings continue; freeing it would let
+            # PHASE-Z commit a live orphan's half-written files.
+            owned = state.mark_job_phase(
+                job_id=job_id, expected_attempt=job.attempt, expected_pid=job.pid,
+                phase=outcome, path=state_path,
+            )
+            if owned:
+                alerts.send_hang_alert(
+                    job={
+                        "job_id": job_id, "slot_id": job.slot_id,
+                        "pid": job.pid, "pgid": job.pgid,
+                        "started_at": job.started_at, "attempt": job.attempt,
+                        "model": job.model, "log_path": job.log_path,
+                        "survivors": procutil.pgid_members(job.pgid),
+                        "slot_quarantined": True,
+                    },
+                    log_tail=log_tail, state_path=state_path,
+                )
+            return outcome
         # Non-None == we won the atomic close and own the incident report. The
         # worker's own timeout fires on the same hang within ~1s; whoever loses
         # must not mail (see state.record_completion). We still hold a full `job`
         # here, so the alert is built from that, not from a post-close re-read.
         closed = state.record_completion(
-            exit_code=exit_code, outcome=outcome, final_model=job.model, path=state_path,
+            job_id=job_id, expected_attempt=job.attempt, expected_pid=job.pid,
+            expected_phase=job.phase,
+            exit_code=exit_code, outcome=outcome, final_model=job.model,
+            path=state_path,
         )
         if closed is None:
             LOG.info(
@@ -120,7 +166,8 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
             )
         else:
             alerts.send_hang_alert(
-                job={"pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
+                job={"job_id": job_id, "slot_id": job.slot_id,
+                     "pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
                      "attempt": job.attempt, "model": job.model,
                      "log_path": job.log_path,
                      "survivors": procutil.pgid_members(job.pgid)},
@@ -138,6 +185,8 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
         # Same ownership rule as the hang path: only the caller that actually
         # closed the slot reports it.
         closed = state.record_completion(
+            job_id=job_id, expected_attempt=job.attempt, expected_pid=job.pid,
+            expected_phase=job.phase,
             exit_code=-1, outcome="failure", final_model=job.model,
             path=state_path,
         )
@@ -149,7 +198,8 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
             )
         else:
             alerts.send_silent_death_alert(
-                job={"pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
+                job={"job_id": job_id, "slot_id": job.slot_id,
+                     "pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
                      "attempt": job.attempt, "model": job.model,
                      "log_path": job.log_path,
                      "survivors": procutil.pgid_members(job.pgid)},
@@ -160,6 +210,34 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
     # it alone. An unverified fingerprint here just means it hasn't been
     # captured yet, not that anything is actually wrong.
     return None
+
+
+def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JOB_AGE_S) -> str | None:
+    """Inspect every process-bearing slot without letting one failure mask siblings."""
+    actions: list[str] = []
+    jobs = state.get_current_jobs(state_path)
+    if not jobs:
+        legacy = state.get_current_job(state_path)
+        if legacy is not None:
+            jobs = [legacy]
+    for job in jobs:
+        try:
+            action = _check_job(job, state_path=state_path, max_age_s=max_age_s)
+        except Exception as exc:  # noqa: BLE001 — sibling isolation is the point
+            LOG.exception(
+                "health: check failed job_id=%s slot=%s: %s",
+                job.job_id, job.slot_id, exc,
+            )
+            alerts.send_loop_crash(
+                f"health_job:{job.job_id[:8] or job.pid}",
+                traceback.format_exc(), state_path=state_path,
+            )
+            continue
+        if action:
+            actions.append(action)
+    if not actions:
+        return None
+    return actions[0] if len(actions) == 1 else ",".join(actions)
 
 
 async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: int = CHECK_INTERVAL_S) -> None:
