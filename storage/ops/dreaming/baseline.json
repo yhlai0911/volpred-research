@@ -1,90 +1,125 @@
 {
   "schema": "dreaming_baseline.v1",
   "description": "Rolling per-signature consecutive-run strike counts. THREE_STRIKE consecutive runs escalate to critical.",
-  "updated_at": "2026-07-12T08:28:40.700993+00:00",
+  "updated_at": "2026-07-12T09:16:48.626840+00:00",
   "signatures": {
     "memory_skill_gap:uncodified_process": {
-      "strike_count": 16,
+      "strike_count": 17,
       "pattern_type": "memory_skill_gap",
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": null
     },
     "memory_hygiene:consolidation_review": {
-      "strike_count": 16,
+      "strike_count": 17,
       "pattern_type": "memory_hygiene",
       "first_seen": "2026-06-30T12:29:57.114601+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": null
     },
     "persistent_alert:e1aa596aac4a2172": {
       "strike_count": 3,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-08T22:00:03.711969+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": "2026-07-10T09:23:12.869354+00:00"
     },
     "persistent_alert:a4a7ca551f8626b2": {
       "strike_count": 2,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-09T22:00:03.400177+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": "2026-07-11T00:01:04.333485+00:00"
     },
     "missing_retry_strategy:K1679": {
-      "strike_count": 3,
+      "strike_count": 4,
       "pattern_type": "missing_retry_strategy",
       "first_seen": "2026-07-10T22:00:06.588059+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": null
     },
     "persistent_alert:aa6c059b3dc7e00d": {
       "strike_count": 2,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-10T22:00:06.588059+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": "2026-07-11T10:00:26.327269+00:00"
     },
     "persistent_alert:23ea72a6b5e1a28a": {
       "strike_count": 1,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-10T22:00:06.588059+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": "2026-07-10T18:00:20.794310+00:00"
     },
     "persistent_alert:828495642996f377": {
       "strike_count": 1,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-10T22:00:06.588059+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": "2026-07-10T15:26:43.794785+00:00"
     },
     "persistent_alert:e46b1923cd3787a9": {
       "strike_count": 2,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-10T22:00:06.588059+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": "2026-07-11T21:17:51.745683+00:00"
     },
     "missing_retry_strategy:fable0711_ftd_e1_scale_gating": {
-      "strike_count": 2,
+      "strike_count": 3,
       "pattern_type": "missing_retry_strategy",
       "first_seen": "2026-07-11T22:00:05.649440+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": null
     },
     "persistent_alert:4415ad115dc02afc": {
       "strike_count": 1,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-11T22:00:05.649440+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": "2026-07-11T11:00:24.332587+00:00"
     },
     "repeated_tool_failure:dispatch_supervisor:quota_blocked:exit1": {
-      "strike_count": 1,
+      "strike_count": 2,
       "pattern_type": "repeated_tool_failure",
       "first_seen": "2026-07-12T08:28:40.700993+00:00",
-      "last_seen": "2026-07-12T08:28:40.700993+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
+      "activity_marker": null
+    },
+    "orphaned_experiment:k1686": {
+      "strike_count": 1,
+      "pattern_type": "orphaned_experiment",
+      "first_seen": "2026-07-12T09:16:48.626840+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
+      "activity_marker": null
+    },
+    "orphaned_experiment:k1684": {
+      "strike_count": 1,
+      "pattern_type": "orphaned_experiment",
+      "first_seen": "2026-07-12T09:16:48.626840+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
+      "activity_marker": null
+    },
+    "orphaned_experiment:k1680": {
+      "strike_count": 1,
+      "pattern_type": "orphaned_experiment",
+      "first_seen": "2026-07-12T09:16:48.626840+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
+      "activity_marker": null
+    },
+    "orphaned_experiment:k1678": {
+      "strike_count": 1,
+      "pattern_type": "orphaned_experiment",
+      "first_seen": "2026-07-12T09:16:48.626840+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
+      "activity_marker": null
+    },
+    "orphaned_experiment:k1677": {
+      "strike_count": 1,
+      "pattern_type": "orphaned_experiment",
+      "first_seen": "2026-07-12T09:16:48.626840+00:00",
+      "last_seen": "2026-07-12T09:16:48.626840+00:00",
       "activity_marker": null
     }
   }
