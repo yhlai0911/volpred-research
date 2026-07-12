@@ -39,7 +39,7 @@ def _pending_by_priority(tasks_path: Path) -> Counter:
     try:
         tasks = json.loads(tasks_path.read_text())
     except (OSError, json.JSONDecodeError) as exc:
-        warn(f"slot-budget: 讀不到任務池 {tasks_path} ({exc}) — 退回 baseline cap")
+        warn("slot-budget", f"讀不到任務池 {tasks_path} ({exc}) — 退回 baseline cap")
         return Counter()
     if isinstance(tasks, dict):
         tasks = tasks.get("tasks", [])
@@ -52,7 +52,7 @@ def _auth_blocked(state_path: Path) -> bool:
     try:
         return bool(json.loads(state_path.read_text()).get("auth_blocked"))
     except (OSError, json.JSONDecodeError) as exc:
-        warn(f"slot-budget: 讀不到 supervisor state {state_path} ({exc}) — 當作未被擋")
+        warn("slot-budget", f"讀不到 supervisor state {state_path} ({exc}) — 當作未被擋")
         return False
 
 
