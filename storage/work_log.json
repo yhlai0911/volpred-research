@@ -16515,5 +16515,16 @@
     "owner": "hourly-02",
     "commit": null,
     "summary": "本班寫 work_log 時實地踩到 lost update：append 兩筆 → git add → commit 時檔案已回到前一個 writer 的快照，兩筆靜默消失。根因：work_log.json 約 12 個 writer 全部對整個 array 做無鎖 read-modify-write（next_tasks.json 自 cross-session claim race 後就有 fcntl.LOCK_EX，這個教訓從未套到 work log）。實測無鎖版在 6 行程 × 12 筆併發下不只丟 entry，還會讓 reader 讀到被截斷的檔案而 JSONDecodeError — canonical log 可能被寫成半截 JSON，同時違反 control-plane.md 的「canonical JSON writes must be pre-serializable and recoverable」。修法：建 scripts/append_work_log.py 作為單一帶鎖入口（flock + 全量預序列化 + os.replace 原子寫 + 非 array 時 fail loud 不覆蓋），tests/test_append_work_log.py 6 tests 全過（含 12 行程併發不丟 entry）；並用 /tmp teeth check 確認該併發測試對無鎖實作真的會失敗，不是空測。本班兩筆遺失的 entry 已用新入口補回。其餘 11 個 writer 的遷移 + 機械 gate（禁止繞過 helper 直寫）另立 P2 task platform_ops_migrate_work_log_writers_to_locked_append。"
+  },
+  {
+    "timestamp": "2026-07-13T02:35:04+08:00",
+    "task_type": "daily_article",
+    "task_id": "codex-commit-b9ecd7028",
+    "outcome": "succeeded",
+    "summary": "complete daily article draft refill",
+    "commit": "b9ecd702873ac98598c454fb5669c8fdf85dabdb",
+    "owner": "codex",
+    "backfilled_at": "2026-07-12T18:35:33.844222+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
