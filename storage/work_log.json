@@ -16357,5 +16357,13 @@
     "task_id": "event_article_cpi_us_2026-07-13_tminus2",
     "summary": "CPI T-2 更正文 mile_9560b9cc（draft, held for lazypack）+ event-date proxy bug class fix + K1442 回溯複驗排單",
     "commit": "pending"
+  },
+  {
+    "timestamp": "2026-07-12T20:17:55.532801+08:00",
+    "task_id": "email-12143-2de65b",
+    "task_type": "email_reply",
+    "actor": "hourly-20",
+    "summary": "boss 'immediately fix at the root': git-push-backup dead 9h on mojibake .py. Repaired 5 corrupted lines (byte-level recovery), push restored (f2ba64f5a); root fix = source-encoding gate moved into the existing pre-commit hook (2859a4788) - same class as the msg-481 silent-fallback incident. Repo-wide .py sweep: 0 remaining. cron exit=0. Close email sent.",
+    "verdict": "succeeded"
   }
 ]
