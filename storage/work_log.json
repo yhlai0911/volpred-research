@@ -16582,5 +16582,25 @@
     "owner": "hourly-04",
     "commit": null,
     "summary": "更正本班稍早的 K1701 收件判斷。我先把 K1701 merge 進 main，隨後 nested-DM ratchet 在 main 轉紅 —— 而且它是對的：K1701 的 primary family（HAR vs HAR+rdisp）是 nested pair，gate 卻用 raw DM 的 Harvey t、並對 DM p 值做 BH-FDR。DM 對 nested forecasts 偏向 null，而 K1701 的結論正是 NULL：等於用一個偏向 null 的檢定去宣告 null。不能靠換 Clark-West 解決（CW 是 MSPE 檢定，primary family 用 QLIKE loss；ratchet 明文禁止把 MSPE-CW 貼標成 general-loss 檢定），需要 nested-appropriate 的 general-loss 或 recursive-bootstrap 設計。已 revert merge 讓 main 回綠（ratchet 17 passed），成果保留在 d17c25926 / 7ee267018，開 P1 任務 k1701_primary_inference_nested_general_loss 重做。教訓：agent 自報的方法論自述（README 與註解都寫「Clark-West 承載 nested 宣稱」）不等於代碼實際的 claim sink——要讀 gate 表達式，不是讀註解。"
+  },
+  {
+    "timestamp": "2026-07-13T05:17:26+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-nested-dm-k1698",
+    "outcome": "completed",
+    "actor": "hourly-05",
+    "owner": "hourly-05",
+    "commit": "b784838ce",
+    "summary": "main Test Suite 紅了 4 班。表面是斷言過期（回傳 dict 多了 stale / worktree_detail 兩個 key），真因更難看：03 班把 occupancy 重構進 dispatch_slot_budget 後，continue_task_dispatch 的 WORKTREES_DIR / AGENTS_DIR 從此沒人讀，卻留在檔案裡。測試的 monkeypatch.setattr 對死 global 依然「成功」→ 靜默 no-op → 測試掉頭去讀真實的 .claude/worktrees（本機會撈到 k1702-factor-zoo）。它早就是非 hermetic 測試，只是 CI 的 worktree 目錄剛好空的所以靠運氣綠，直到 shape 漂移才炸。修法：(1) 刪死 global；(2) 把 warn 測試搬到 occupancy 的正牌 owner scripts/tests/test_dispatch_slot_budget.py，patch 真接縫 sb.AGENTS_DIR；(3) 加 gate test_dispatcher_keeps_no_occupancy_paths_of_its_own，dispatcher 再宣告 occupancy path 就紅（沿用同檔既有的 no_hardcoded_slot_cap 模式，不新增第二層機制）。反向驗證：加回 global → gate 紅；還原 → 40 passed。CI 已驗證回綠。教訓寫進 error_log：重構搬走職責時，同一 commit 必須刪掉舊模組的 re-export，否則下游 patch 靜默失效。"
+  },
+  {
+    "timestamp": "2026-07-13T05:17:26+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_orphan_branch_20260712",
+    "outcome": "completed",
+    "actor": "hourly-05",
+    "owner": "hourly-05",
+    "commit": null,
+    "summary": "alert_orphan_branch_20260712（critical）：claude/fervent-payne-f38a73 帶 3 個未合併 commit、51.9h 無人接。diff --stat vs main 顯示 68 萬行刪除 = stale base，diff 沒有判讀價值。改用 path-scoped 逐項核對它宣稱的四件工作：PHASE-Z 只 commit 本班產出（main 的 phase_z.py 有更新的三個 commit）、worktree deny 補 -C 前綴（hook 註解正是在講同一修正）、orphan_branch 反向盲區 detached worktree 無 ref（alerts.py:1159 已有）、撈回 crash-atomic 寫入（main 已 import fcntl，branch 的 diff 反而會刪掉它）。四項全部已被 main 的平行實作取代，且硬 merge 會靜默倒退 main 已有的 fcntl atomic 寫入與 dispatch duplicate-slot 偵測。依 alert 步驟 4 判定 superseded，git branch -D（SHA e0b7bacb5 / 2ac9f44ee / 5ab1a6988 記在 error_log，reflog 可救回）。這條 branch 的存在本身就是平行實作的證據——同樣四件事被做了兩次。"
   }
 ]

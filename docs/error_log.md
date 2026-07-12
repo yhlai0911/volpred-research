@@ -2,6 +2,60 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 05:20 — CI 紅 4 班：重構搬走接縫，舊 global 留在原地，monkeypatch 靜默 no-op
+
+**問題**：main Test Suite 自 2026-07-12 18:00 UTC 起連續 4 次紅，唯一失敗點
+`tests/test_dispatch_type_rotation.py::test_count_active_slots_warns_on_invalid_agent_record`。
+（同班另一失敗點 nested-DM ratchet / k1698 已由 d11f1e13c 修好，非本 entry。）
+
+**現象**：`assert slots == {"worktrees": [], "active_agents": [], "occupied": 0}` 失敗，
+實際回傳多了 `stale` / `worktree_detail` 兩個 key。表面看是「回傳 dict 長胖、斷言沒跟上」。
+
+**真因（比表面嚴重）**：2026-07-13 03 班的 `ops_slot_capacity_and_zombie_worktrees` 重構把 occupancy
+搬進 `scripts/dispatch_slot_budget.py`，`continue_task_dispatch.count_active_slots()` 變成 thin delegate。
+但 `continue_task_dispatch.py:58-59` 的 `WORKTREES_DIR` / `AGENTS_DIR` **留在原地且從此沒有任何程式讀它們**。
+測試仍 `monkeypatch.setattr(dispatch, "WORKTREES_DIR", tmp)` —— setattr 對死 global 依然**成功**，
+patch 靜默 no-op，測試於是掉頭去讀**真實的 `.claude/worktrees`**。本機跑會撈到 `k1702-factor-zoo`。
+也就是說：它早就是一個非 hermetic 測試，只是 CI 的 worktree 目錄剛好空的所以「靠運氣綠」；
+直到回傳 shape 漂移才炸。**炸點與缺陷點不是同一件事** —— 真正的缺陷是「no-op patch 不會發出任何聲音」。
+
+**解決方法**（commit b784838ce）：
+1. 刪掉那兩個死 global（留註解說明為何不可再宣告）。死 global 比沒有 global 更糟 ——
+   它給了測試一個「patch 得動但沒人讀」的名字。
+2. 把 invalid-agent-record 的 warn 測試**搬到** `scripts/tests/test_dispatch_slot_budget.py`
+   （occupancy 的正牌 owner），patch 真接縫 `sb.AGENTS_DIR`，斷言現行契約。
+   測試要放在它 patch 的接縫旁邊，不是留在原地等接縫搬走。
+3. 加機械 gate `test_dispatcher_keeps_no_occupancy_paths_of_its_own`：dispatcher 再宣告 occupancy path
+   就紅。沿用同檔 `test_dispatcher_has_no_hardcoded_slot_cap` 的既有模式（anti-stacking：不新增第二層機制）。
+4. 反向驗證：把 global 加回去 → gate 紅；還原 → 40 passed。自己寫的 gate 一定要先看它會紅。
+
+**教訓（bug class，非單點）**：重構搬走一個模組的職責時，**同一個 commit 必須刪掉舊模組的 re-export**。
+留著 = 下游 monkeypatch 靜默失效 = 測試無聲地開始讀真 repo。這與
+`feedback_hermetic_git_in_tests` 同一 class：測試誤讀真實 git 狀態，只是這次的入口是「patch 了一個沒人讀的名字」。
+
+## 2026-07-13 05:22 — orphan branch `claude/fervent-payne-f38a73`：三個 commit 全被平行實作取代，丟棄
+
+**問題**：`alert_orphan_branch_20260712`（critical）—— 無 worktree 但帶 3 個未合併 commit 的 branch，
+最後提交在 51.9h 前。
+
+**過程**：`git diff --stat main <branch>` 顯示 68 萬行刪除 —— 典型 **stale base**，diff-to-main 沒有判讀價值
+（見 `feedback_worktree_stale_base_extract_by_path`）。改用 path-scoped 逐項核對該 branch 宣稱的四件工作：
+
+| branch 宣稱的工作 | main 現況 | 判定 |
+|---|---|---|
+| PHASE-Z 只 commit 這班 fire 產出的檔 | `scripts/dispatch_supervisor/phase_z.py`（4d2b1728b、801ea3d07、528fd58eb 更新） | 已取代 |
+| worktree deny 補 `-C` 前綴 | `.claude/hooks/pretooluse-bash-optimizer.sh:24-27` 註解正是在講同一修正 | 已取代 |
+| orphan_branch 反向盲區（detached worktree 無 ref） | `src/volpred/ops/alerts.py:1159` `(B) detached-HEAD worktrees carrying commits absent from main` | 已取代 |
+| 撈回 crash-atomic 寫入 | main 的 `alerts.py` import `fcntl`；**branch 的 diff 反而會刪掉它** | 已取代且會倒退 |
+
+**解決方法**：四項全部已在 main（且 branch 若硬 merge 會**刪掉** main 已有的 fcntl atomic 寫入與
+dispatch duplicate-slot 偵測 —— 正是「不衝突的檔會被靜默採用」那個坑）。依 alert 步驟 4 判定為
+superseded，`git branch -D claude/fervent-payne-f38a73`（曾為 e0b7bacb5；另兩個 commit
+2ac9f44ee / 5ab1a6988，reflog 可救回）。
+
+**教訓**：stale-base branch 的 `diff --stat` 是雜訊，**逐項核對「它宣稱做了什麼」vs「main 現在有沒有」**
+才是判斷取代與否的方法。這條 branch 的存在本身是平行實作的證據 —— 同樣的四件事被做了兩次。
+
 ## 2026-07-13 01:10 — 警報把工作派給老闆：24/27 個 alert body 是寫給人看的待辦清單
 
 **問題**：老闆在一分鐘內回了兩封信罵同一件事 —— 「你要立即處理 不是只建議我」（email-12163）、
