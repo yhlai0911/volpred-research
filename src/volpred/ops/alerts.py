@@ -4150,6 +4150,20 @@ def check_alert_conditions(
     report = build_alert_condition_report(
         storage_dir=storage_dir, now=now, paper_root=paper_root
     )
+
+    # 2026-07-13 (owner, twice in one hour: 「你要立即處理 不是只建議我」): a breached
+    # alert is work for the platform, not a chore for the owner. Turn each breach into
+    # a queued task and rewrite the body to report what was done — BEFORE sending, so
+    # the email tells the truth about the state it describes. Never fatal: a failure to
+    # queue must still let the alert go out.
+    from .alert_remediation import remediate_report
+
+    try:
+        report["remediation"] = remediate_report(report, storage_dir=storage_dir, now=now)
+    except Exception as exc:  # noqa: BLE001
+        warn("alerts", "alert remediation bridge failed", err=str(exc))
+        report["remediation"] = []
+
     alerts: list[dict[str, Any]] = []
     for condition in report["conditions"]:
         if not condition.get("breached"):

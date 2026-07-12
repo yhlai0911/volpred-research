@@ -61,6 +61,16 @@ REPORT_PATH = ROOT / "storage" / "ops" / "dispatch_report_latest.json"
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 SLOT_CAP = 4
 
+# Hours a pending agentable task may age before dispatch is locked onto it.
+# The dispatcher only ever produced an advisory candidate list; which task a fire
+# actually took was the LLM's discretion, and the diversity rule (rotate away from
+# the last-3 task_types) actively pushed against repeatedly-skipped work. A P1
+# member_qa task therefore sat pending for 17 hours across ~17 fires while the
+# member_qa_stale alert emailed the owner an hourly to-do list (2026-07-13).
+# Age, not priority, is what starvation is made of — so age is what unlocks it.
+STARVATION_HOURS = {1: 6.0, 2: 24.0, 3: 72.0}
+STARVATION_HOURS_DEFAULT = 96.0
+
 from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 # 2026-07-01 3-STRIKE fix (dreaming persistent_alert draft_pool_low, 5x/73d):
 # `draft_pool_low` alert (src/volpred/ops/alerts.py::_parse_draft_pool_state)
@@ -309,6 +319,57 @@ def is_paper_task(task: dict) -> bool:
             re.IGNORECASE,
         )
     )
+
+
+def task_age_hours(task: dict, now: datetime | None = None) -> float | None:
+    """Hours since the task was created, or None when `created_at` is unusable."""
+    created = parse_iso_warn(
+        task.get("created_at"),
+        tag="dispatch_starvation",
+        field_name="created_at",
+        fallback=None,
+        task_id=task.get("id"),
+    )
+    if created is None:
+        return None
+    now = now or datetime.now(timezone.utc)
+    return (now - created).total_seconds() / 3600.0
+
+
+def starvation_threshold_hours(task: dict) -> float:
+    return STARVATION_HOURS.get(_coerce_priority(task.get("priority", 999)), STARVATION_HOURS_DEFAULT)
+
+
+def find_starved(tasks: list[dict], now: datetime | None = None) -> list[dict]:
+    """Agentable tasks that have aged past their priority's starvation threshold.
+
+    Ordered by priority first, then by how far past the threshold the task is.
+    Sorting purely by lateness would let a P3 that is 47h overdue outrank a P1
+    that just crossed its 6h line — which is the very starvation this function
+    exists to end, merely relocated inside the starved set.
+
+    A task with no parseable `created_at` can never be judged starved — it is
+    left in the normal queue rather than silently promoted or silently dropped.
+    """
+    now = now or datetime.now(timezone.utc)
+    starved: list[tuple[int, float, dict, float]] = []
+    for t in tasks:
+        age = task_age_hours(t, now)
+        if age is None:
+            continue
+        threshold = starvation_threshold_hours(t)
+        if age >= threshold:
+            starved.append((_coerce_priority(t.get("priority", 999)), age - threshold, t, age))
+    starved.sort(key=lambda row: (row[0], -row[1]))
+    return [
+        {
+            "task": t,
+            "age_hours": round(age, 1),
+            "threshold_hours": starvation_threshold_hours(t),
+            "over_by_hours": round(over, 1),
+        }
+        for _prio, over, t, age in starved
+    ]
 
 
 def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> dict:
@@ -825,7 +886,24 @@ def build_report(*, auto_refill: bool = True) -> dict:
         cats = categorize(pending, recent_type_counts=recent_type_counts)
 
     free_slots = max(0, SLOT_CAP - slots["occupied"])
-    candidates_to_dispatch = cats["agentable"][:free_slots]
+
+    # Starvation lockout. When agentable work has aged past its threshold, the
+    # candidate menu collapses to the starved tasks only — the fire cannot rotate
+    # away from them on diversity grounds, because there is nothing else on the
+    # menu to rotate to. Advisory prose ("please take the oldest P1") is what we
+    # had before, and it let a P1 sit for 17h; changing what is *offered* is the
+    # mechanical version of the same instruction.
+    starved = find_starved(cats["agentable"])
+    starved_ids = {s["task"].get("id") for s in starved}
+    # Main-thread tasks starve too (a boss-assigned P1 sat 27h — see `_coerce_priority`),
+    # but the fix there cannot be a lockout: nothing in the agent lane can claim them.
+    # Surface them so the fire has to look at them, and let the alert bridge nag.
+    starved_main_thread = find_starved(cats["main_thread"])
+    if starved:
+        candidates_to_dispatch = [s["task"] for s in starved][:free_slots]
+    else:
+        candidates_to_dispatch = cats["agentable"][:free_slots]
+
     pending_summary = {
         "agentable": len(cats["agentable"]),
         "main_thread": len(cats["main_thread"]),
@@ -847,6 +925,41 @@ def build_report(*, auto_refill: bool = True) -> dict:
         "pending_main_thread": len(cats["main_thread"]),
         "pending_blocked": len(cats["blocked"]),
         "pending_summary": pending_summary,
+        "starvation": {
+            "locked": bool(starved),
+            "starved_count": len(starved),
+            "thresholds_hours": {f"P{k}": v for k, v in STARVATION_HOURS.items()},
+            "directive": (
+                "⛔ STARVATION LOCKOUT — 以下任務已超過其優先序的容忍時數。"
+                "本班 dispatch_candidates 只列這些，diversity rotation 暫停："
+                "先清光餓死的任務，才能回到一般輪替。"
+                if starved
+                else "無餓死任務；一般 diversity rotation 適用。"
+            ),
+            "starved_tasks": [
+                {
+                    "id": s["task"].get("id"),
+                    "priority": s["task"].get("priority"),
+                    "task_type": s["task"].get("task_type"),
+                    "age_hours": s["age_hours"],
+                    "threshold_hours": s["threshold_hours"],
+                    "over_by_hours": s["over_by_hours"],
+                    "title": (s["task"].get("title") or "")[:120],
+                }
+                for s in starved[:10]
+            ],
+            "starved_main_thread_count": len(starved_main_thread),
+            "starved_main_thread": [
+                {
+                    "id": s["task"].get("id"),
+                    "priority": s["task"].get("priority"),
+                    "task_type": s["task"].get("task_type"),
+                    "age_hours": s["age_hours"],
+                    "title": (s["task"].get("title") or "")[:120],
+                }
+                for s in starved_main_thread[:10]
+            ],
+        },
         "dispatch_candidates": [
             {
                 "id": t.get("id"),
@@ -855,6 +968,8 @@ def build_report(*, auto_refill: bool = True) -> dict:
                 # 拓撲建議（task.topology 欄位優先，否則 task_type 預設）— orchestrator
                 # 依此選載具，僅明顯不合時 override 並在 work_log 記原因
                 "topology": pick_topology(t.get("task_type"), t)["topology"],
+                "starved": t.get("id") in starved_ids,
+                "age_hours": (lambda a: round(a, 1) if a is not None else None)(task_age_hours(t)),
             }
             for t in candidates_to_dispatch
         ],
@@ -903,8 +1018,18 @@ def print_report(report: dict) -> None:
         f"blocked={report.get('pending_blocked', 0)}"
     )
 
+    starvation = report.get("starvation") or {}
+    if starvation.get("locked"):
+        print(f"[dispatch] {starvation['directive']}")
+        for s in starvation.get("starved_tasks", []):
+            print(
+                f"  ! P{s['priority']} {s['id']} :: aged {s['age_hours']}h "
+                f"(threshold {s['threshold_hours']}h, over by {s['over_by_hours']}h)"
+            )
+
     if report["dispatch_candidates"]:
-        print(f"[dispatch] candidates to dispatch ({len(report['dispatch_candidates'])}):")
+        label = "STARVED — 本班只能從這裡挑" if starvation.get("locked") else "candidates to dispatch"
+        print(f"[dispatch] {label} ({len(report['dispatch_candidates'])}):")
         for c in report["dispatch_candidates"]:
             print(f"  - P{c['priority']} [{c['topology']}] {c['id']} :: {c['title']}")
     else:
@@ -915,6 +1040,14 @@ def print_report(report: dict) -> None:
         print("[dispatch] main-thread queue (top 5):")
         for c in report["main_thread_queue_top5"]:
             print(f"  - P{c['priority']} {c['id']} :: {c['title']}")
+
+    if starvation.get("starved_main_thread_count"):
+        print(
+            f"[dispatch] ⚠️ main-thread 餓死 {starvation['starved_main_thread_count']} 筆"
+            "（agent lane 無法認領 — 主線程本班要處理或改 lane）："
+        )
+        for s in starvation.get("starved_main_thread", []):
+            print(f"  ! P{s['priority']} {s['id']} :: aged {s['age_hours']}h :: {s['title']}")
 
     refill = report.get("refill") or {}
     if refill.get("added"):
