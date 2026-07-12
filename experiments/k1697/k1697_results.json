@@ -1,0 +1,1374 @@
+{
+  "experiment_id": "k1697",
+  "title": "taiwan-vt Table 2 rolling block \u2014 calendar-aligned fresh-snapshot rerun (P0-2, fable_deep_review_20260711 F2)",
+  "timestamp": "2026-07-12T09:56:45.517884+00:00",
+  "method": "GJR-GARCH(1,1) MLE (arch), Constant mean, Normal innov, log-returns*100; rolling w=2000 LAST window truncated to common calendar end; 100 seeded random multistarts + arch default per fit, best converged log-likelihood wins; robust (Bollerslev-Wooldridge) t; persistence=alpha+0.5*gamma+beta",
+  "data": {
+    "source": "yfinance pinned snapshots (auto_adjust=False), experiments/k1697/data/",
+    "sample_start": "2008-01-01",
+    "calendar_alignment_common_end": "2026-07-09",
+    "per_ticker_cleaning": {
+      "^TWII": {
+        "n_rows_raw": 4527,
+        "n_placeholder_dropped": 0,
+        "n_rows_clean": 4527,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-09"
+      },
+      "0050.TW": {
+        "n_rows_raw": 4287,
+        "n_placeholder_dropped": 16,
+        "n_rows_clean": 4271,
+        "first_date": "2009-01-05",
+        "last_date": "2026-07-09"
+      },
+      "2330.TW": {
+        "n_rows_raw": 4537,
+        "n_placeholder_dropped": 13,
+        "n_rows_clean": 4524,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-09"
+      },
+      "2317.TW": {
+        "n_rows_raw": 4537,
+        "n_placeholder_dropped": 22,
+        "n_rows_clean": 4515,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-09"
+      },
+      "2454.TW": {
+        "n_rows_raw": 4537,
+        "n_placeholder_dropped": 14,
+        "n_rows_clean": 4523,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-09"
+      },
+      "2383.TW": {
+        "n_rows_raw": 4537,
+        "n_placeholder_dropped": 17,
+        "n_rows_clean": 4520,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-09"
+      },
+      "2886.TW": {
+        "n_rows_raw": 4537,
+        "n_placeholder_dropped": 17,
+        "n_rows_clean": 4520,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-09"
+      },
+      "2412.TW": {
+        "n_rows_raw": 4537,
+        "n_placeholder_dropped": 56,
+        "n_rows_clean": 4481,
+        "first_date": "2008-01-09",
+        "last_date": "2026-07-09"
+      },
+      "2881.TW": {
+        "n_rows_raw": 4537,
+        "n_placeholder_dropped": 13,
+        "n_rows_clean": 4524,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-09"
+      },
+      "2882.TW": {
+        "n_rows_raw": 4537,
+        "n_placeholder_dropped": 13,
+        "n_rows_clean": 4524,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-09"
+      },
+      "2885.TW": {
+        "n_rows_raw": 4537,
+        "n_placeholder_dropped": 13,
+        "n_rows_clean": 4524,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-09"
+      },
+      "2891.TW": {
+        "n_rows_raw": 4537,
+        "n_placeholder_dropped": 13,
+        "n_rows_clean": 4524,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-09"
+      },
+      "0056.TW": {
+        "n_rows_raw": 4541,
+        "n_placeholder_dropped": 265,
+        "n_rows_clean": 4276,
+        "first_date": "2009-01-05",
+        "last_date": "2026-07-09"
+      },
+      "SPY": {
+        "n_rows_raw": 4659,
+        "n_placeholder_dropped": 0,
+        "n_rows_clean": 4659,
+        "first_date": "2008-01-02",
+        "last_date": "2026-07-10"
+      }
+    },
+    "placeholder_rule": "rows with Volume==0 and Open==High==Low==Close dropped (TWSE closure placeholders)"
+  },
+  "canonical_variant": "adjclose",
+  "variants": {
+    "adjclose": {
+      "per_security": {
+        "^TWII": {
+          "mu": 0.07321569191540331,
+          "omega": 0.10869229248529912,
+          "alpha": 0.04018339953672374,
+          "gamma": 0.19752090578887116,
+          "beta": 0.7813763231598101,
+          "gamma_t": 1.8576965822673044,
+          "alpha_t": 2.1492621648494707,
+          "beta_t": 7.466215713967733,
+          "persistence": 0.9203201755909693,
+          "n_obs": 2000,
+          "log_likelihood": -2975.3291800126794,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169710380,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand37",
+            "default_loglik": -2975.329180282096,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.19748686090833723,
+              0.19755707803828454
+            ]
+          },
+          "name": "Taiwan Weighted Index",
+          "ticker": "^TWII",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-19",
+          "window_end": "2026-07-09"
+        },
+        "0050.TW": {
+          "mu": 0.09409629177311525,
+          "omega": 0.0941240537894125,
+          "alpha": 0.05855309699493397,
+          "gamma": 0.10501589766865158,
+          "beta": 0.8364966428759579,
+          "gamma_t": 2.0076330452983657,
+          "alpha_t": 3.353152010901517,
+          "beta_t": 17.697049386525823,
+          "persistence": 0.9475576887052177,
+          "n_obs": 2000,
+          "log_likelihood": -3212.2960160861735,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712828,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand87",
+            "default_loglik": -3212.296016109633,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.10499868979140625,
+              0.10503317021809891
+            ]
+          },
+          "name": "Yuanta Taiwan 50 ETF",
+          "ticker": "0050.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-11",
+          "window_end": "2026-07-09"
+        },
+        "2330.TW": {
+          "mu": 0.11943529444626365,
+          "omega": 0.21265379530424522,
+          "alpha": 0.0680921227817751,
+          "gamma": 0.040205411882925354,
+          "beta": 0.8476603857560508,
+          "gamma_t": 1.2804856278784893,
+          "alpha_t": 2.5513024751417257,
+          "beta_t": 17.48711109421848,
+          "persistence": 0.9358552144792887,
+          "n_obs": 2000,
+          "log_likelihood": -3943.5981809818377,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712830,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand46",
+            "default_loglik": -3943.598181049422,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.04018938215398866,
+              0.040223697521950326
+            ]
+          },
+          "name": "TSMC",
+          "ticker": "2330.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2317.TW": {
+          "mu": 0.0364194054327435,
+          "omega": 0.16077374962624932,
+          "alpha": 0.1335329368778916,
+          "gamma": 0.01644479200483796,
+          "beta": 0.8220631893364615,
+          "gamma_t": 0.41953345785394924,
+          "alpha_t": 3.5877782937880527,
+          "beta_t": 24.34268492316838,
+          "persistence": 0.9638185222167721,
+          "n_obs": 2000,
+          "log_likelihood": -3922.317683777764,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712852,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand15",
+            "default_loglik": -3922.3176838288036,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.0164322098481827,
+              0.016464760380285264
+            ]
+          },
+          "name": "Hon Hai",
+          "ticker": "2317.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-03",
+          "window_end": "2026-07-09"
+        },
+        "2454.TW": {
+          "mu": 0.13508468158756837,
+          "omega": 0.36104652760708855,
+          "alpha": 0.06956471242530228,
+          "gamma": 0.016724097022008326,
+          "beta": 0.86453671978676,
+          "gamma_t": 0.8048180029238375,
+          "alpha_t": 3.6134600585138448,
+          "beta_t": 19.241893614993597,
+          "persistence": 0.9424634807230665,
+          "n_obs": 2000,
+          "log_likelihood": -4595.86219335524,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712854,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand50",
+            "default_loglik": -4595.862193461482,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.016713746174179336,
+              0.01674386283303862
+            ]
+          },
+          "name": "MediaTek",
+          "ticker": "2454.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2383.TW": {
+          "mu": 0.16252441279941598,
+          "omega": 0.3242297868378777,
+          "alpha": 0.04897608869897753,
+          "gamma": 0.02570222195845632,
+          "beta": 0.9050802695257804,
+          "gamma_t": 1.02826534790699,
+          "alpha_t": 1.9822402270383295,
+          "beta_t": 12.978894966192959,
+          "persistence": 0.9669074692039861,
+          "n_obs": 2000,
+          "log_likelihood": -5013.859350776141,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712857,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand72",
+            "default_loglik": -5013.859350801127,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.02568995646098013,
+              0.025712663639297823
+            ]
+          },
+          "name": "Elite Material",
+          "ticker": "2383.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2886.TW": {
+          "mu": 0.052875257040202135,
+          "omega": 0.2247002328169785,
+          "alpha": 0.0578361176782972,
+          "gamma": 0.17110395042875046,
+          "beta": 0.6450975200754356,
+          "gamma_t": 1.5752734663638692,
+          "alpha_t": 1.418085619210818,
+          "beta_t": 5.097277414812013,
+          "persistence": 0.788485612968108,
+          "n_obs": 2000,
+          "log_likelihood": -2797.8964645844253,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712879,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand21",
+            "default_loglik": -2797.8964646313607,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.17107779085757957,
+              0.17112883582175678
+            ]
+          },
+          "name": "Mega Financial",
+          "ticker": "2886.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2412.TW": {
+          "mu": 0.0334151229773284,
+          "omega": 0.0996101843823989,
+          "alpha": 0.1846914645990049,
+          "gamma": -0.029700164926644804,
+          "beta": 0.6257232570438152,
+          "gamma_t": -0.550999365757866,
+          "alpha_t": 3.9779365776915934,
+          "beta_t": 7.002370413852481,
+          "persistence": 0.7955646391794977,
+          "n_obs": 2000,
+          "log_likelihood": -2013.3689481139484,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712834,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand53",
+            "default_loglik": -2013.3689481514698,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              -0.02972463066501794,
+              -0.029671380415478735
+            ]
+          },
+          "name": "Chunghwa Telecom",
+          "ticker": "2412.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2881.TW": {
+          "mu": 0.06198325386968628,
+          "omega": 0.086785695586327,
+          "alpha": 0.11891756556962642,
+          "gamma": 0.008264926938905327,
+          "beta": 0.836097271990463,
+          "gamma_t": 0.2642936796715704,
+          "alpha_t": 4.494517480617568,
+          "beta_t": 29.401425474618257,
+          "persistence": 0.9591473010295422,
+          "n_obs": 2000,
+          "log_likelihood": -3315.223670656048,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712859,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand45",
+            "default_loglik": -3315.223670717989,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.00825015265674633,
+              0.008276635177533265
+            ]
+          },
+          "name": "Fubon",
+          "ticker": "2881.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2882.TW": {
+          "mu": 0.02923253143453509,
+          "omega": 0.09593114357603964,
+          "alpha": 0.10543192821517622,
+          "gamma": 0.024489848614707366,
+          "beta": 0.8402182561382604,
+          "gamma_t": 0.5723125070362111,
+          "alpha_t": 3.8766505580968134,
+          "beta_t": 17.08277636496672,
+          "persistence": 0.9578951086607903,
+          "n_obs": 2000,
+          "log_likelihood": -3386.397179970238,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712863,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand66",
+            "default_loglik": -3386.3971800038107,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.02447020862028387,
+              0.024510808077322685
+            ]
+          },
+          "name": "Cathay Financial",
+          "ticker": "2882.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2885.TW": {
+          "mu": 0.0971036581293855,
+          "omega": 0.20934321708642822,
+          "alpha": 0.15784097415332463,
+          "gamma": 0.024773561073611963,
+          "beta": 0.7222101709127587,
+          "gamma_t": 0.5058304372089282,
+          "alpha_t": 4.693890292832446,
+          "beta_t": 11.24861299729948,
+          "persistence": 0.8924379256028894,
+          "n_obs": 2000,
+          "log_likelihood": -3318.0664134211443,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712875,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand18",
+            "default_loglik": -3318.066413471175,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.02475087700996751,
+              0.0247976317676643
+            ]
+          },
+          "name": "Yuanta",
+          "ticker": "2885.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2891.TW": {
+          "mu": 0.06152860497956484,
+          "omega": 0.08248468237355215,
+          "alpha": 0.1307209478326119,
+          "gamma": 0.030915010214934428,
+          "beta": 0.8205023424661642,
+          "gamma_t": 0.665545657029094,
+          "alpha_t": 3.0072079423723856,
+          "beta_t": 20.65240605506862,
+          "persistence": 0.9666807954062433,
+          "n_obs": 2000,
+          "log_likelihood": -3246.991122938476,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712862,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand4",
+            "default_loglik": -3246.9911230149705,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.030897259119366523,
+              0.030927710908923097
+            ]
+          },
+          "name": "CTBC",
+          "ticker": "2891.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "0056.TW": {
+          "mu": 0.06979822290741407,
+          "omega": 0.1010837198731026,
+          "alpha": 0.09682147243455051,
+          "gamma": 0.222007813534425,
+          "beta": 0.6789751208949107,
+          "gamma_t": 2.94788795941407,
+          "alpha_t": 3.6982046333577525,
+          "beta_t": 14.765297118378475,
+          "persistence": 0.8868005000966738,
+          "n_obs": 2000,
+          "log_likelihood": -2467.693050152945,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169712852,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand95",
+            "default_loglik": -2467.693050227228,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.2219816783381282,
+              0.2220513657526703
+            ]
+          },
+          "name": "Yuanta High Div. ETF",
+          "ticker": "0056.TW",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-04-18",
+          "window_end": "2026-07-09"
+        },
+        "SPY": {
+          "mu": 0.054102379099068336,
+          "omega": 0.04472367949638123,
+          "alpha": 0.025657269068431365,
+          "gamma": 0.20041246200661977,
+          "beta": 0.8347752197957745,
+          "gamma_t": 4.0942807935857575,
+          "alpha_t": 0.7566646486064424,
+          "beta_t": 22.785910938824877,
+          "persistence": 0.9606387198675157,
+          "n_obs": 2000,
+          "log_likelihood": -2739.51542624544,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169707920,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand20",
+            "default_loglik": -2739.5154262650353,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.20038773647616834,
+              0.20042861205695542
+            ]
+          },
+          "name": "SPDR S&P 500",
+          "ticker": "SPY",
+          "price_column": "Adj Close",
+          "window": 2000,
+          "window_start": "2018-07-24",
+          "window_end": "2026-07-09"
+        }
+      },
+      "aggregates": {
+        "gamma_mean_9stock": 0.032079804814396366,
+        "gamma_mean_10security_incl_0056": 0.05107260568639923,
+        "alpha_mean_9stock": 0.11194585956113474,
+        "beta_mean_9stock": 0.7868365552528777,
+        "twii_rolling_gamma": 0.19752090578887116,
+        "amplification_ratio_9stock": 6.157172929563157,
+        "amplification_ratio_10security": 3.867453072625811,
+        "ratio_0050_based_9stock": 3.273582812496536,
+        "ratio_0050_based_10security": 2.0562079466530445
+      }
+    },
+    "rawclose": {
+      "per_security": {
+        "^TWII": {
+          "mu": 0.07321562196977566,
+          "omega": 0.10869216172457001,
+          "alpha": 0.0401833781661069,
+          "gamma": 0.197520779120305,
+          "beta": 0.7813765243046087,
+          "gamma_t": 1.8577030179396792,
+          "alpha_t": 2.1492631096229187,
+          "beta_t": 7.466253208942476,
+          "persistence": 0.9203202920308681,
+          "n_obs": 2000,
+          "log_likelihood": -2975.329180012677,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169710592,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand2",
+            "default_loglik": -2975.329180282096,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.19748106298219664,
+              0.19755218329592356
+            ]
+          },
+          "name": "Taiwan Weighted Index",
+          "ticker": "^TWII",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-19",
+          "window_end": "2026-07-09"
+        },
+        "0050.TW": {
+          "mu": 0.0805037611234377,
+          "omega": 0.10414406045958523,
+          "alpha": 0.0604320756833532,
+          "gamma": 0.10443211423221889,
+          "beta": 0.8292507232766106,
+          "gamma_t": 1.978135468302364,
+          "alpha_t": 3.2945632966396445,
+          "beta_t": 15.662996623204583,
+          "persistence": 0.9418988560760733,
+          "n_obs": 2000,
+          "log_likelihood": -3229.65404681971,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713094,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand28",
+            "default_loglik": -3229.654047100278,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.10441189229700423,
+              0.10445967053735866
+            ]
+          },
+          "name": "Yuanta Taiwan 50 ETF",
+          "ticker": "0050.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-11",
+          "window_end": "2026-07-09"
+        },
+        "2330.TW": {
+          "mu": 0.10774744054572553,
+          "omega": 0.22093248965085788,
+          "alpha": 0.07009708202872862,
+          "gamma": 0.038981742275954134,
+          "beta": 0.8441068829839307,
+          "gamma_t": 1.2374808708616574,
+          "alpha_t": 2.5636119837421605,
+          "beta_t": 17.119080461971258,
+          "persistence": 0.9336948361506363,
+          "n_obs": 2000,
+          "log_likelihood": -3950.0013521602405,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713096,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand85",
+            "default_loglik": -3950.0013521661313,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.03897058086165586,
+              0.038991923926287926
+            ]
+          },
+          "name": "TSMC",
+          "ticker": "2330.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2317.TW": {
+          "mu": 0.019330838892209115,
+          "omega": 0.17185391164900365,
+          "alpha": 0.13731241093279356,
+          "gamma": 0.009735900990574172,
+          "beta": 0.8194927211678474,
+          "gamma_t": 0.24666912594287285,
+          "alpha_t": 3.630928563533492,
+          "beta_t": 23.787913478389584,
+          "persistence": 0.9616730825959281,
+          "n_obs": 2000,
+          "log_likelihood": -3947.7891703677196,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713118,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand65",
+            "default_loglik": -3947.789170484365,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.009716977072768102,
+              0.009753502449553775
+            ]
+          },
+          "name": "Hon Hai",
+          "ticker": "2317.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-03",
+          "window_end": "2026-07-09"
+        },
+        "2454.TW": {
+          "mu": 0.11729950900678643,
+          "omega": 0.6557984181999803,
+          "alpha": 0.09515192710737486,
+          "gamma": 0.019558970729268765,
+          "beta": 0.7946769901359236,
+          "gamma_t": 0.5527303541923881,
+          "alpha_t": 3.228524371165378,
+          "beta_t": 9.79689626334231,
+          "persistence": 0.8996084026079328,
+          "n_obs": 2000,
+          "log_likelihood": -4634.341335422679,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713120,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand32",
+            "default_loglik": -4634.341335776023,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.0195474146966165,
+              0.019574341279559402
+            ]
+          },
+          "name": "MediaTek",
+          "ticker": "2454.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2383.TW": {
+          "mu": 0.1512863023057678,
+          "omega": 0.3217621873873673,
+          "alpha": 0.04818898638728999,
+          "gamma": 0.02481046576037331,
+          "beta": 0.9066696099350768,
+          "gamma_t": 1.0282733064784175,
+          "alpha_t": 2.1277945421916393,
+          "beta_t": 14.174885736092877,
+          "persistence": 0.9672638292025535,
+          "n_obs": 2000,
+          "log_likelihood": -5020.507828524852,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713123,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand2",
+            "default_loglik": -5020.507828540668,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.024796754050246995,
+              0.024820500371730052
+            ]
+          },
+          "name": "Elite Material",
+          "ticker": "2383.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2886.TW": {
+          "mu": 0.033135689995232885,
+          "omega": 0.3807689830086587,
+          "alpha": 0.0010718931242096313,
+          "gamma": 0.18422373165301137,
+          "beta": 0.5750355187173207,
+          "gamma_t": 3.3159189218549563,
+          "alpha_t": 0.040207781396414496,
+          "beta_t": 7.7648409570351244,
+          "persistence": 0.668219277668036,
+          "n_obs": 2000,
+          "log_likelihood": -2930.923366401239,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713145,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand24",
+            "default_loglik": -2930.9233664422336,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.18419897872265936,
+              0.18424816247320455
+            ]
+          },
+          "name": "Mega Financial",
+          "ticker": "2886.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2412.TW": {
+          "mu": 0.02156822905655493,
+          "omega": 0.20504564373261058,
+          "alpha": 0.1793119220758625,
+          "gamma": -0.013941685681578737,
+          "beta": 0.47825981545026747,
+          "gamma_t": -0.1133372064467878,
+          "alpha_t": 1.8182180529341485,
+          "beta_t": 3.6780887161561746,
+          "persistence": 0.6506008946853405,
+          "n_obs": 2000,
+          "log_likelihood": -2203.38613942488,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713100,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand29",
+            "default_loglik": -2203.3861394342703,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              -0.013984331194073454,
+              -0.013896062623945346
+            ]
+          },
+          "name": "Chunghwa Telecom",
+          "ticker": "2412.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2881.TW": {
+          "mu": 0.0490482423326857,
+          "omega": 0.08676093864180925,
+          "alpha": 0.12763472029695444,
+          "gamma": -0.024166313687182476,
+          "beta": 0.8459204460623565,
+          "gamma_t": -0.8267400210411718,
+          "alpha_t": 4.508855582108422,
+          "beta_t": 31.306640089777954,
+          "persistence": 0.9614720095157196,
+          "n_obs": 2000,
+          "log_likelihood": -3373.3127596721697,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713125,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand25",
+            "default_loglik": -3373.312759884377,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              -0.024181579165294884,
+              -0.024155206250104776
+            ]
+          },
+          "name": "Fubon",
+          "ticker": "2881.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2882.TW": {
+          "mu": 0.015295752643541754,
+          "omega": 0.08898354765084242,
+          "alpha": 0.11263694401329503,
+          "gamma": 0.007847864180306151,
+          "beta": 0.8486065935278219,
+          "gamma_t": 0.1704462132394767,
+          "alpha_t": 3.9998821856956592,
+          "beta_t": 15.35843208944613,
+          "persistence": 0.96516746963127,
+          "n_obs": 2000,
+          "log_likelihood": -3433.5333652553577,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713129,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand88",
+            "default_loglik": -3433.5333652589075,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.007835935180300591,
+              0.007862712092976705
+            ]
+          },
+          "name": "Cathay Financial",
+          "ticker": "2882.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2885.TW": {
+          "mu": 0.08918774771205779,
+          "omega": 0.2475085243260508,
+          "alpha": 0.1984571817208658,
+          "gamma": -0.027114739516311236,
+          "beta": 0.7068756453624783,
+          "gamma_t": -0.43557982787410937,
+          "alpha_t": 4.439124321829209,
+          "beta_t": 9.683148398690454,
+          "persistence": 0.8917754573251885,
+          "n_obs": 2000,
+          "log_likelihood": -3412.4011392360394,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713141,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand49",
+            "default_loglik": -3412.4011393185297,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              -0.027137798956295683,
+              -0.027084048023810346
+            ]
+          },
+          "name": "Yuanta",
+          "ticker": "2885.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "2891.TW": {
+          "mu": 0.05817251049822317,
+          "omega": 0.1454987458678049,
+          "alpha": 0.10753959585740605,
+          "gamma": 0.015542049787538172,
+          "beta": 0.8138714850766637,
+          "gamma_t": 0.34886607840120454,
+          "alpha_t": 2.3466502061257724,
+          "beta_t": 13.660835549824968,
+          "persistence": 0.9291821058278389,
+          "n_obs": 2000,
+          "log_likelihood": -3359.1023927655806,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713128,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 100,
+            "best_start": "rand12",
+            "default_loglik": -3359.102392766552,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.01552408295573115,
+              0.04007248055367098
+            ]
+          },
+          "name": "CTBC",
+          "ticker": "2891.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-17",
+          "window_end": "2026-07-09"
+        },
+        "0056.TW": {
+          "mu": 0.03503554564542221,
+          "omega": 0.12785650949563912,
+          "alpha": 0.08568754832817385,
+          "gamma": 0.14617505579279375,
+          "beta": 0.7213010673765301,
+          "gamma_t": 1.9229188547171794,
+          "alpha_t": 2.505358412747674,
+          "beta_t": 9.949566865866524,
+          "persistence": 0.8800761436011009,
+          "n_obs": 2000,
+          "log_likelihood": -2697.7211111541856,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169713118,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand83",
+            "default_loglik": -2697.7211111749857,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.1461500325282521,
+              0.1461994772581546
+            ]
+          },
+          "name": "Yuanta High Div. ETF",
+          "ticker": "0056.TW",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-04-18",
+          "window_end": "2026-07-09"
+        },
+        "SPY": {
+          "mu": 0.04768424226522132,
+          "omega": 0.0449330619171633,
+          "alpha": 0.025803543165816577,
+          "gamma": 0.19271253063593483,
+          "beta": 0.837752954984003,
+          "gamma_t": 4.032910042152921,
+          "alpha_t": 0.7677226208394706,
+          "beta_t": 22.833420858621714,
+          "persistence": 0.9599127634677871,
+          "n_obs": 2000,
+          "log_likelihood": -2750.3521688039577,
+          "convergence": 0,
+          "multistart": {
+            "seed": 169708078,
+            "n_starts_total": 101,
+            "n_converged": 101,
+            "n_at_best_basin": 101,
+            "best_start": "rand71",
+            "default_loglik": -2750.3521690030298,
+            "default_minus_best": -0.0,
+            "gamma_range_converged": [
+              0.19269606826168725,
+              0.192727349785643
+            ]
+          },
+          "name": "SPDR S&P 500",
+          "ticker": "SPY",
+          "price_column": "Close",
+          "window": 2000,
+          "window_start": "2018-07-24",
+          "window_end": "2026-07-09"
+        }
+      },
+      "aggregates": {
+        "gamma_mean_9stock": 0.021832916023999945,
+        "gamma_mean_10security_incl_0056": 0.034267130000879324,
+        "alpha_mean_9stock": 0.11192284239067243,
+        "beta_mean_9stock": 0.7543787583817507,
+        "twii_rolling_gamma": 0.197520779120305,
+        "amplification_ratio_9stock": 9.046926159711294,
+        "amplification_ratio_10security": 5.764147132112798,
+        "ratio_0050_based_9stock": 4.783241694211682,
+        "ratio_0050_based_10security": 3.0475885850241635
+      }
+    }
+  },
+  "comparison_table": {
+    "^TWII": {
+      "name": "Taiwan Weighted Index",
+      "legacy_n121": {
+        "gamma": 0.272,
+        "gamma_t": 3.18
+      },
+      "predecessor_aligned_20250122": {
+        "gamma": 0.1574686122811391,
+        "gamma_t": 2.568654155089173
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.19752090578887116,
+        "gamma_t": 1.8576965822673044
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.197520779120305,
+        "gamma_t": 1.8577030179396792
+      }
+    },
+    "0050.TW": {
+      "name": "Yuanta Taiwan 50 ETF",
+      "legacy_n121": null,
+      "predecessor_aligned_20250122": {
+        "gamma": 0.07888687704540936,
+        "gamma_t": 1.902880842495973
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.10501589766865158,
+        "gamma_t": 2.0076330452983657
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.10443211423221889,
+        "gamma_t": 1.978135468302364
+      }
+    },
+    "2330.TW": {
+      "name": "TSMC",
+      "legacy_n121": null,
+      "predecessor_aligned_20250122": null,
+      "k1697_fresh_aligned": {
+        "gamma": 0.040205411882925354,
+        "gamma_t": 1.2804856278784893
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.038981742275954134,
+        "gamma_t": 1.2374808708616574
+      }
+    },
+    "2317.TW": {
+      "name": "Hon Hai",
+      "legacy_n121": {
+        "gamma": 0.052,
+        "gamma_t": 1.14
+      },
+      "predecessor_aligned_20250122": {
+        "gamma": 0.015305234689842842,
+        "gamma_t": 0.4494096858127199
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.01644479200483796,
+        "gamma_t": 0.41953345785394924
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.009735900990574172,
+        "gamma_t": 0.24666912594287285
+      }
+    },
+    "2454.TW": {
+      "name": "MediaTek",
+      "legacy_n121": {
+        "gamma": 0.044,
+        "gamma_t": 0.96
+      },
+      "predecessor_aligned_20250122": {
+        "gamma": 0.027199902080425775,
+        "gamma_t": 1.2214248415210944
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.016724097022008326,
+        "gamma_t": 0.8048180029238375
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.019558970729268765,
+        "gamma_t": 0.5527303541923881
+      }
+    },
+    "2383.TW": {
+      "name": "Elite Material",
+      "legacy_n121": null,
+      "predecessor_aligned_20250122": {
+        "gamma": 0.03370723234899479,
+        "gamma_t": 0.7709912664035159
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.02570222195845632,
+        "gamma_t": 1.02826534790699
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.02481046576037331,
+        "gamma_t": 1.0282733064784175
+      }
+    },
+    "2886.TW": {
+      "name": "Mega Financial",
+      "legacy_n121": {
+        "gamma": 0.179,
+        "gamma_t": 2.42
+      },
+      "predecessor_aligned_20250122": {
+        "gamma": 0.05416319732997483,
+        "gamma_t": 1.4124641467973438
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.17110395042875046,
+        "gamma_t": 1.5752734663638692
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.18422373165301137,
+        "gamma_t": 3.3159189218549563
+      }
+    },
+    "2412.TW": {
+      "name": "Chunghwa Telecom",
+      "legacy_n121": null,
+      "predecessor_aligned_20250122": {
+        "gamma": -0.04090104394683821,
+        "gamma_t": -0.7366166251585629
+      },
+      "k1697_fresh_aligned": {
+        "gamma": -0.029700164926644804,
+        "gamma_t": -0.550999365757866
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": -0.013941685681578737,
+        "gamma_t": -0.1133372064467878
+      }
+    },
+    "2881.TW": {
+      "name": "Fubon",
+      "legacy_n121": null,
+      "predecessor_aligned_20250122": {
+        "gamma": 0.0008869366920390144,
+        "gamma_t": 0.03203365695836553
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.008264926938905327,
+        "gamma_t": 0.2642936796715704
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": -0.024166313687182476,
+        "gamma_t": -0.8267400210411718
+      }
+    },
+    "2882.TW": {
+      "name": "Cathay Financial",
+      "legacy_n121": null,
+      "predecessor_aligned_20250122": {
+        "gamma": 0.025634504726625845,
+        "gamma_t": 0.6535097469463101
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.024489848614707366,
+        "gamma_t": 0.5723125070362111
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.007847864180306151,
+        "gamma_t": 0.1704462132394767
+      }
+    },
+    "2885.TW": {
+      "name": "Yuanta",
+      "legacy_n121": null,
+      "predecessor_aligned_20250122": {
+        "gamma": 0.06327477619579948,
+        "gamma_t": 1.1186002092321985
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.024773561073611963,
+        "gamma_t": 0.5058304372089282
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": -0.027114739516311236,
+        "gamma_t": -0.43557982787410937
+      }
+    },
+    "2891.TW": {
+      "name": "CTBC",
+      "legacy_n121": null,
+      "predecessor_aligned_20250122": {
+        "gamma": 0.03774486729429473,
+        "gamma_t": 1.0795264152150286
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.030915010214934428,
+        "gamma_t": 0.665545657029094
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.015542049787538172,
+        "gamma_t": 0.34886607840120454
+      }
+    },
+    "0056.TW": {
+      "name": "Yuanta High Div. ETF",
+      "legacy_n121": {
+        "gamma": 0.112,
+        "gamma_t": 1.87
+      },
+      "predecessor_aligned_20250122": {
+        "gamma": 0.20234845964886694,
+        "gamma_t": 2.889697879477407
+      },
+      "k1697_fresh_aligned": {
+        "gamma": 0.222007813534425,
+        "gamma_t": 2.94788795941407
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.14617505579279375,
+        "gamma_t": 1.9229188547171794
+      }
+    },
+    "SPY": {
+      "name": "SPDR S&P 500",
+      "legacy_n121": null,
+      "predecessor_aligned_20250122": null,
+      "k1697_fresh_aligned": {
+        "gamma": 0.20041246200661977,
+        "gamma_t": 4.0942807935857575
+      },
+      "k1697_rawclose_sensitivity": {
+        "gamma": 0.19271253063593483,
+        "gamma_t": 4.032910042152921
+      }
+    }
+  },
+  "legacy_aggregates": {
+    "gamma_mean_9stock": 0.054,
+    "gamma_mean_10security": 0.06,
+    "ratio_9stock": 5.0,
+    "ratio_10security": 4.5
+  },
+  "predecessor": {
+    "experiment": "paper2_taiwan_indiv_rolling_gamma",
+    "calendar_alignment_common_end": "2025-01-22",
+    "aggregates": {
+      "gamma_mean_9stock": 0.024112845267906566,
+      "alpha_mean_9stock": 0.09508944527170413,
+      "beta_mean_9stock": 0.8012410633934371,
+      "gamma_mean_10security_incl_0056": 0.041936406706002606,
+      "n_stocks_9": 9,
+      "legacy_gamma_mean_9stock": 0.054,
+      "legacy_gamma_mean_10security": 0.06,
+      "gamma_mean_9stock_abs_diff_vs_legacy": 0.029887154732093434,
+      "twii_rolling_gamma_reproducible": 0.1574686122811391,
+      "twii_rolling_gamma_legacy_untraceable": 0.272,
+      "twii_rolling_gamma_note": "TWII rolling gamma RECOMPUTED on the calendar-aligned window (gamma=0.1575); the legacy body_v3.tex value 0.272 (N120) does NOT reproduce and is retained only for comparison.",
+      "ratio_base": "reproducible calendar-aligned TWII gamma",
+      "amplification_ratio_9stock": 6.53048657392269,
+      "amplification_ratio_10security": 3.7549381229794223,
+      "legacy_ratio_9stock": 5.0,
+      "legacy_ratio_10security": 4.5
+    },
+    "caveats_resolved_by_k1697": [
+      "common_end was stale (2025-01-22, bound by k1302 snapshots)",
+      "mixed adj-close / raw-close price columns across securities",
+      "single-start MLE (no multistart diagnostics)"
+    ]
+  },
+  "lookahead_free_certification": "In-sample descriptive MLE on the last 2000-obs window; no forecast, no OOS split, no signal generation. All random draws seeded (BASE_SEED=1697, per-(ticker,variant) derived seeds).",
+  "reconciliation_checks": {
+    "twii_simple_end_20260405_vs_k892": {
+      "gamma": 0.2614438923128772,
+      "gamma_t": 3.324497008744972,
+      "expected": {
+        "gamma": 0.2614,
+        "gamma_t": 3.32,
+        "source": "k892 rolling_w2000.last_window"
+      }
+    },
+    "^TWII_log_end_20250122_vs_predecessor": {
+      "gamma": 0.15745582831961885,
+      "gamma_t": 2.568656571665368,
+      "expected": {
+        "gamma": 0.158,
+        "gamma_t": 2.57,
+        "source": "paper2_taiwan_indiv_rolling_gamma (aligned)"
+      }
+    },
+    "2886.TW_log_end_20250122_vs_predecessor": {
+      "gamma": 0.05390511325757639,
+      "gamma_t": 1.421709414286342,
+      "expected": {
+        "gamma": 0.054,
+        "gamma_t": 1.41,
+        "source": "paper2_taiwan_indiv_rolling_gamma (aligned)"
+      }
+    },
+    "twii_log_end_20260405_isolation": {
+      "gamma": 0.26851440706199026,
+      "gamma_t": 3.3961689898472445,
+      "note": "log-vs-simple contributes ~0.007 at the same end date; the rest of the move to the canonical 2026-07-09 value is the window end date"
+    }
+  },
+  "t_stat_wording_note": "Reported t = arch robust MLE (Bollerslev-Wooldridge). Paper table note currently says 'Newey-West HAC' for rolling rows \u2014 wording must be fixed at rebind time (same discrepancy flagged by the predecessor experiment).",
+  "runtime_seconds": 55.0
+}
