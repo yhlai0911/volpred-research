@@ -586,10 +586,10 @@ def test_queueing_never_touches_the_real_repo_queue(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# detect_orphaned_experiments ï¿½€” research that ran and was then silently dropped
+# detect_orphaned_experiments â€” research that ran and was then silently dropped
 # ---------------------------------------------------------------------------
-# Regression cover for the 2026-07-12 owner escalation (Telegram: ï¿½€Œï¿½šï¿½†ï¿½”ç©¶ï¿½ï¿½žœ
-# ï¿½€ï¿½›ï¿½ï¿½Šï¿½­ï¿½ï¿½…’æµªè²»ï¿½€). Each test below is one of the conditions that let a finished
+# Regression cover for the 2026-07-12 owner escalation (Telegram: ã€Œåšäº†ç ”ç©¶çµæžœ
+# ä¸€ç›´è®Šå­¤å…’æµªè²»ã€). Each test below is one of the conditions that let a finished
 # experiment sit unconsumed: no downstream artifact, an owner-less "succeeded"
 # task, a producer that died before closing out.
 def _experiment(tmp_path: Path, name: str, *, age_days: float, results: bool = True) -> Path:
@@ -619,7 +619,7 @@ def test_orphaned_experiment_with_no_consumer_is_flagged(tmp_path):
     findings = dr.detect_orphaned_experiments(str(storage), {}, NOW)
     assert [f.signature for f in findings] == ["orphaned_experiment:k1630"]
     f = findings[0]
-    # Queued the same night, as a research closure ï¿½€” not a three-strike proposal
+    # Queued the same night, as a research closure â€” not a three-strike proposal
     # and not a platform_ops chore.
     assert f.remediation == "auto_dispatch"
     assert f.severity == "warn"
@@ -682,7 +682,7 @@ def test_orphan_findings_are_capped_but_backlog_is_disclosed(tmp_path):
         _experiment(tmp_path, f"k17{i:02d}", age_days=2 + i)
     findings = dr.detect_orphaned_experiments(str(storage), {}, NOW)
     assert len(findings) == dr.ORPHAN_EXPERIMENT_MAX_FINDINGS
-    # freshest first ï¿½€” closure is cheapest while the context is warm
+    # freshest first â€” closure is cheapest while the context is warm
     assert findings[0].signature == "orphaned_experiment:k1700"
     assert any("orphan backlog this run: 8" in e for e in findings[0].evidence)
 
