@@ -1,5 +1,7 @@
 #!/bin/bash
-# Pre-commit gate — stops a NEW silent fallback from ever entering a commit.
+# Pre-commit gate — stops a defect that pre-push already knows how to catch from
+# ever entering a commit in the first place. Two gates, both mirrored from
+# scripts/git_hooks/pre-push.
 #
 # Why (2026-07-11, boss via Telegram msg 481):
 #   The silent-fallback rule was only enforced at pre-push. So a new bare
@@ -8,10 +10,20 @@
 #   Same defect, same fix, over and over. Moving the gate one step earlier means
 #   the offending line never becomes a commit in the first place.
 #
-# Anti-stacking: this is NOT a new mechanism. The enforcement owner is still
-#   scripts/audit_silent_fallbacks.py + storage/qa/silent_fallback_baseline.json.
-#   pre-push stays (it audits the pushed commits and catches --no-verify /
-#   supervisor auto-commits); pre-commit is just the earliest trigger point.
+# Why gate 2 (2026-07-12, boss via email-12143: "立刻底層修好"):
+#   The encoding gate had the identical shape — pre-push only. Commit e23fc0b82
+#   landed 5 mojibake comment lines in tests/test_dreaming_review.py; every
+#   git-push-backup for the next 9 hours failed exit=1 and the repo went
+#   un-backed-up until the CRITICAL alert reached the owner. Same class as msg
+#   481, one gate later. So it gets the same fix, not a new watchdog.
+#
+# Anti-stacking: neither gate is a new mechanism. The enforcement owners stay
+#   scripts/audit_silent_fallbacks.py (+ storage/qa/silent_fallback_baseline.json)
+#   and scripts/audit_source_encoding.py. pre-push stays authoritative — it audits
+#   the pushed COMMIT TREE and so still catches --no-verify and supervisor
+#   auto-commits. pre-commit only moves the trigger point earlier, and audits the
+#   working tree (like the audits themselves do), which is what `git add` stages
+#   from in every real path.
 #
 # Escape hatch: git commit --no-verify (pre-push will still catch it).
 
@@ -26,6 +38,23 @@ if ! git diff --cached --name-only --diff-filter=ACM | grep -qE '\.py$'; then
 fi
 
 PY="$(command -v uv >/dev/null 2>&1 && echo "uv run python" || echo python3)"
+
+# --- Gate 1: source encoding (2026-07-12, zero tolerance) --------------------
+# Cheapest gate first: mojibake makes the file undecodable, so every downstream
+# audit and pytest collection on it silently stops running.
+ENC="scripts/audit_source_encoding.py"
+if [ -f "$ENC" ]; then
+  ENC_OUT="$($PY "$ENC" 2>&1)"
+  if [ $? -ne 0 ]; then
+    echo "[pre-commit] BLOCKED — corrupted (non-UTF-8) .py source:"
+    printf '%s\n' "$ENC_OUT" | grep '^BAD ' | sed 's/^/[pre-commit]   /' | head -20
+    echo "[pre-commit] Rebuild the damaged lines from git history or semantics; do NOT delete the file."
+    echo "[pre-commit] Cause is almost always non-ASCII text pushed through a shell heredoc/sed."
+    exit 1
+  fi
+fi
+
+# --- Gate 2: silent fallbacks (2026-07-11, baseline) ------------------------
 AUDIT="scripts/audit_silent_fallbacks.py"
 BL="storage/qa/silent_fallback_baseline.json"
 [ -f "$AUDIT" ] && [ -f "$BL" ] || exit 0

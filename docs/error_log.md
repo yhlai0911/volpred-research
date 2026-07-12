@@ -2,6 +2,37 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-12 20:15 — mojibake .py 卡死 git-push-backup 9 小時（encoding gate 只掛 pre-push）
+
+**現象**：`cron_git_push_backup.sh` 從 2026-07-12 11:00Z 起每小時 exit=1，repo 9 小時沒備份到
+origin。19:00 CRITICAL alert 寄到老闆信箱，老闆回信「你要馬上行動 立刻底層修好」(email-12143)。
+
+**根因（兩層）**：
+1. **資料面**：commit `e23fc0b82` 把 `tests/test_dreaming_review.py` 的 5 行註解寫成 mojibake —
+   多位元組字元的**首位元組被換成 U+FFFD**（`—` 的 `\xe2` → `\xef\xbf\xbd`，中文引文同理）。
+   pre-push 的 Source Encoding Gate **正確擋下** push，所以 gate 沒壞，壞的是它擋得太晚。
+2. **結構面（真正要修的）**：encoding gate **只存在於 pre-push**。壞檔進得了 commit，之後每一次
+   備份 push 都被擋 → 症狀不是「這個 commit 有問題」而是「整個 repo 停止備份」，且要等 alert
+   才被人看見。**這與 2026-07-11 老闆 Telegram msg 481 的 silent-fallback 事件是同一 class**
+   （同樣「只在 pre-push 擋 → 幾小時後以 push backup 卡住的形式浮現」），一天內換個 gate 復發。
+
+**修正**：
+- 資料：5 行從 `e23fc0b82` 的 commit message 原文重建（老闆 Telegram 原話「做了研究結果一直變孤兒
+  浪費」）；殘存的 byte tail 與原文**逐字對得上**（`81 9a`=做 / `86`=了 / `94`=研 / `90`=結 /
+  `9e 9c`=果），所以是 byte-level 復原，不是語意猜測。40 tests 綠，push 恢復（`f2ba64f5a`）。
+- 結構：把 encoding sweep 加進**既有的** `scripts/git_hooks/pre-commit`（anti-stacking：不新開
+  watchdog，enforcement owner 仍是 `scripts/audit_source_encoding.py`；pre-push 保留為
+  commit-tree 權威，仍能抓 `--no-verify` 與 supervisor auto-commit）。實測壞檔 commit 被擋 RC=1。
+- Class sweep：全 repo `.py` 掃描 → 0 個殘留損毀檔。
+
+**教訓（診斷用）**：
+- **非 ASCII 經過 shell（heredoc / sed / `git commit -m`）會被弄成非 UTF-8**。repo 已有
+  `git commit -m` 中文的機械攔截（要求走 `-F`），但**寫檔路徑沒有同等保護** — mojibake 的來源
+  幾乎都是這個。看到 `\xef\xbf\xbd` 後面跟著合法 UTF-8 尾位元組，就是這個 pattern。
+- **Bash 工具的 sandbox 會靜默吞掉檔案寫入**：本次第一輪修復在同一個 bash 呼叫內讀得到、pytest
+  也綠，離開後檔案卻回到 HEAD 版本。以為「被 stash / 被 revert」查了半天。**改檔後要用「另一次
+  獨立呼叫」驗證落地**（`git diff --stat`），或直接 `dangerouslyDisableSandbox: true`。
+
 ## 2026-07-12 15:00 — K1544 被兩個無關實驗共用；K189 文章審查誤進論文狀態機
 
 **現象**：`experiments/K1544/` 是 term-spread volatility 對 MOVE 的增量預測 NULL，
