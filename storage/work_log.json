@@ -16485,5 +16485,35 @@
     "owner": "hourly-01",
     "commit": "9ffcd1cef2a2ca8eadf056236a5b2e0b84e36396",
     "summary": "starvation lockout 首次生效派出：該 P3 experiment 已在 pending 躺 119h。K1701 realized dispersion（指數 vs 成分股）→ 指數 vol/tail 預測子。K-id atomically reserved、worktree k1701-dispersion 建好、brief 含 lookahead/DM-HAC-lag/survivorship-bias 防錯規則，已 enqueue-agent 進 compute queue（opus/xhigh，job agent-brief_k1701-5024c8），由 */15 detached worker 執行、後續 fire 在 PHASE A 收件。"
+  },
+  {
+    "timestamp": "2026-07-13T02:23:36+08:00",
+    "task_type": "platform_ops",
+    "task_id": "dedup_gate_thin_signature_guard",
+    "outcome": "completed",
+    "actor": "hourly-02",
+    "owner": "hourly-02",
+    "commit": "efe9b285a",
+    "summary": "P1 trending「AI營收/選擇權偏斜率」躺 20h，triage 發現是 90 天內第 5 篇同 arc（mile_f5f4cb43 / mile_8a5e80b0 / mile_0941e2f0 / mile_49616ac2 / mile_622a2b73），標 deprecated。根因不在選題而在 gate：無 K-id、無 ticker 的題目 entities=[]，find_arc_duplicates 在該情況直接 return []（arc_dedup.py L856），CLI 卻把「看不了」印成「看過了，乾淨」。修法：加 Gate 3 thin-signature guard — 維持 exit 0 fail-open（dedup-gate-audit.md 硬規則，fail-closed 曾造成 6/23 八天內容黑洞），但不再宣稱乾淨，改印 SIGNATURE TOO THIN + 詞彙相似度候選 + 寫 audit trail（warn_thin_signature）。實測把重複那篇以 overlap 0.579 排第一撈出。8 個新回歸測試（tests/test_check_arc_dedup_thin_signature.py），連同既有 dedup 測試共 67 passed。生產端（建 task 當下不查重）另立 P2 task platform_ops_trending_topic_dedup_at_generation。commit efe9b285a。"
+  },
+  {
+    "timestamp": "2026-07-13T02:23:36+08:00",
+    "task_type": "experiment",
+    "task_id": "fable0711_taiwanvt_rolling_gamma",
+    "outcome": "dispatched",
+    "actor": "hourly-02",
+    "owner": "hourly-02",
+    "commit": "efe9b285a",
+    "summary": "starvation lockout 唯一可派項（P2，已餓 27h）。查證發現前一輪的 codex_caveat_calendar_alignment=\"RESOLVED\" 是假的：對齊是靠把全部 10 個標的截斷到 2025-01-22 達成，而那只是 k1302 兩份過期快照（2383/2886）的最後日期 — 其餘 8 檔明明有到 2026 的資料，論文卻宣稱樣本期到 2026。這是誠實性問題，不只是精確度問題。Brief 要求：刷新離線快照（存實驗自己目錄，不覆寫 k1302 canonical）、共同終點推到 2026 重算、新舊數字對照、0056 敘事意涵（新視窗下若 gamma 最高，會推翻論文的 conservative bias 論證）。已 enqueue-agent 進 compute queue（opus/xhigh，job agent-taiwanvt-rolling-gamma，worktree taiwanvt-rolling-gamma），由 */15 detached worker 執行，後續 fire 在 PHASE A 收件。"
+  },
+  {
+    "timestamp": "2026-07-13T02:24:22+08:00",
+    "task_type": "platform_ops",
+    "task_id": "work_log_locked_append_path",
+    "outcome": "completed",
+    "actor": "hourly-02",
+    "owner": "hourly-02",
+    "commit": null,
+    "summary": "本班寫 work_log 時實地踩到 lost update：append 兩筆 → git add → commit 時檔案已回到前一個 writer 的快照，兩筆靜默消失。根因：work_log.json 約 12 個 writer 全部對整個 array 做無鎖 read-modify-write（next_tasks.json 自 cross-session claim race 後就有 fcntl.LOCK_EX，這個教訓從未套到 work log）。實測無鎖版在 6 行程 × 12 筆併發下不只丟 entry，還會讓 reader 讀到被截斷的檔案而 JSONDecodeError — canonical log 可能被寫成半截 JSON，同時違反 control-plane.md 的「canonical JSON writes must be pre-serializable and recoverable」。修法：建 scripts/append_work_log.py 作為單一帶鎖入口（flock + 全量預序列化 + os.replace 原子寫 + 非 array 時 fail loud 不覆蓋），tests/test_append_work_log.py 6 tests 全過（含 12 行程併發不丟 entry）；並用 /tmp teeth check 確認該併發測試對無鎖實作真的會失敗，不是空測。本班兩筆遺失的 entry 已用新入口補回。其餘 11 個 writer 的遷移 + 機械 gate（禁止繞過 helper 直寫）另立 P2 task platform_ops_migrate_work_log_writers_to_locked_append。"
   }
 ]
