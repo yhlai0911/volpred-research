@@ -1,0 +1,41 @@
+{
+  "id": "agent-brief_vol_managed_factor_zoo-25df97",
+  "title": "K1702 vol-managed factor zoo: OOS + 淨成本崩潰再驗證",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_vol_managed_factor_zoo.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    ".claude/worktrees/k1702-factor-zoo",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/k1702-factor-zoo/experiments/k1702/k1702_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_vol_managed_factor_zoo-25df97.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-12T19:19:55Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_vol_managed_factor_zoo-25df97.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_vol_managed_factor_zoo-25df97.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1702-factor-zoo/experiments/k1702/k1702_results.json",
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_vol_managed_factor_zoo-25df97.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1702-factor-zoo",
+  "claude_followup": {
+    "brief": "K1702 收件：(1) 驗 results.json 數字與 README 一致（agent 自述不可信，見 K1016 教訓）；(2) 查 HAC bandwidth 是否照 canonical、有無先量 acf；(3) 查 OOS 的 scaling 常數 c 有無 lookahead（不可用全樣本 c 回頭套 OOS）；(4) Codex review → 通過才由主線程寫 knowledge.json；(5) merge_worktree.sh 合併 k1702-factor-zoo。NULL result 是合法結果，如實記錄。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}
