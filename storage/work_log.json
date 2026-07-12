@@ -16290,5 +16290,20 @@
     "backfilled_at": "2026-07-12T07:16:23.733789+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1544"
+  },
+  {
+    "timestamp": "2026-07-12T16:32:26.584631+08:00",
+    "actor": "hourly-16",
+    "task_type": "platform_ops",
+    "task_id": "email-12123/12124/12126/12127",
+    "summary": "四封 owner 回信一次結案，三個根因皆為『開路迴圈』：(1) PHASE-Z 擁有權只認一份寫死的單檔名清單 → 其餘 daemon 狀態檔永遠成孤兒 + gc 刪除路徑永遠 deferred；改為 namespace 推導，17 檔積壓收清、工作區清空。(2) codex failover 用 600s cap 當『API 是否活著』的代理指標 → 砍健康工作並謊報 ChatGPT 不可用；改為真可達性探測 + cap 2400s。(3) dreaming 致動器兩端皆斷（cron 入口未傳 apply_auto；create_task 寫 receipts 目錄非派工池）→ findings 連提 15 晚零執行；改接 next_tasks.json，實跑 5 條入池，治理檔仍 propose-only。另：nested-DM 精修（測試紅）保存至分支未草率縮 baseline；發現 main 上 3 個 hang 告警測試本就是紅的（已開 P1）。",
+    "commits": [
+      "528fd58eb",
+      "658e02790"
+    ],
+    "tasks_queued": [
+      "nested_dm_fp_narrowing_baseline_audit",
+      "supervisor_hang_alert_tests_red_on_main"
+    ]
   }
 ]
