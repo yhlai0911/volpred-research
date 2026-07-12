@@ -42,6 +42,21 @@ WORK_LOG = ROOT / "storage" / "work_log.json"
 LOCK_PATH = ROOT / "storage" / ".work_log.lock"
 
 
+def _clean_argv_text(text: str | None) -> str | None:
+    """Strip lone surrogates that argv can carry in when the locale is not UTF-8.
+
+    Python decodes argv with `surrogateescape`, so under a C/POSIX locale a
+    non-ASCII `--summary` arrives as unpaired surrogates. Those serialize fine
+    until `json.dumps` refuses them, and the append dies at the last step
+    (2026-07-13, hourly-04: a Chinese summary raised UnicodeEncodeError on
+    '\\udc9b'). `--summary-file` is read as real UTF-8 and never has this
+    problem, which is why it exists -- this keeps the arg form honest too.
+    """
+    if text is None:
+        return None
+    return text.encode("utf-8", "replace").decode("utf-8")
+
+
 def append_entry(entry: dict, path: Path = WORK_LOG, lock_path: Path = LOCK_PATH) -> int:
     """Append `entry` to the work log; returns the new entry count.
 
@@ -95,7 +110,7 @@ def main() -> int:
     summary = (
         Path(args.summary_file).read_text(encoding="utf-8").strip()
         if args.summary_file
-        else args.summary
+        else _clean_argv_text(args.summary)
     )
     entry = {
         "timestamp": datetime.datetime.now(datetime.timezone.utc)

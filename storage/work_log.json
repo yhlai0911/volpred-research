@@ -16572,5 +16572,15 @@
     "owner": "hourly-04",
     "commit": "67d7f0812",
     "summary": "taiwan-vt Table 2 rolling gamma calendar-aligned 重跑收件 + merge main。前一版的 RESOLVED 對齊標記是假的（把 8 檔最新資料截回 2025-01 遷就 2 檔過期快照）；本版 12 檔共同終點 2026-07-09 且不丟資料。翻出 Paper 2 敘事反轉：0056.TW gamma 0.222 (t=2.95) 為 12 列最高而非次高，body_v3.tex 3.2 節的保守性論證方向錯了 -> 開 P1 paper_body task paper2_0056_gamma_narrative_inversion。"
+  },
+  {
+    "timestamp": "2026-07-13T04:37:47+08:00",
+    "task_type": "experiment",
+    "task_id": "k1701_primary_inference_nested_general_loss",
+    "outcome": "failed",
+    "actor": "hourly-04",
+    "owner": "hourly-04",
+    "commit": null,
+    "summary": "更正本班稍早的 K1701 收件判斷。我先把 K1701 merge 進 main，隨後 nested-DM ratchet 在 main 轉紅 —— 而且它是對的：K1701 的 primary family（HAR vs HAR+rdisp）是 nested pair，gate 卻用 raw DM 的 Harvey t、並對 DM p 值做 BH-FDR。DM 對 nested forecasts 偏向 null，而 K1701 的結論正是 NULL：等於用一個偏向 null 的檢定去宣告 null。不能靠換 Clark-West 解決（CW 是 MSPE 檢定，primary family 用 QLIKE loss；ratchet 明文禁止把 MSPE-CW 貼標成 general-loss 檢定），需要 nested-appropriate 的 general-loss 或 recursive-bootstrap 設計。已 revert merge 讓 main 回綠（ratchet 17 passed），成果保留在 d17c25926 / 7ee267018，開 P1 任務 k1701_primary_inference_nested_general_loss 重做。教訓：agent 自報的方法論自述（README 與註解都寫「Clark-West 承載 nested 宣稱」）不等於代碼實際的 claim sink——要讀 gate 表達式，不是讀註解。"
   }
 ]
