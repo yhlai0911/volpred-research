@@ -1,0 +1,206 @@
+{
+  "k_id": "K1701",
+  "fetched_at_utc": "2026-07-12T17:50:31.663248+00:00",
+  "sources": {
+    "sp500_wikipedia": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
+    "tw50_wikipedia": "https://zh.wikipedia.org/wiki/%E8%87%BA%E7%81%A350%E6%8C%87%E6%95%B8",
+    "prices": "yfinance (auto_adjust=True, adjusted close)"
+  },
+  "download_start": "2009-01-01",
+  "sample_start": "2010-01-01",
+  "index_proxies": {
+    "SPX": "SPY",
+    "TW50": "0050.TW"
+  },
+  "universe_size": {
+    "SPX": 866,
+    "TW50": 115
+  },
+  "price_panel_shape": {
+    "US": [
+      4407,
+      866
+    ],
+    "TW": [
+      4287,
+      115
+    ]
+  },
+  "pit_membership_coverage_by_year": {
+    "SPX": {
+      "2010": {
+        "members": 510,
+        "with_prices": 350,
+        "coverage": 0.6863
+      },
+      "2011": {
+        "members": 508,
+        "with_prices": 353,
+        "coverage": 0.6949
+      },
+      "2012": {
+        "members": 508,
+        "with_prices": 368,
+        "coverage": 0.7244
+      },
+      "2013": {
+        "members": 507,
+        "with_prices": 381,
+        "coverage": 0.7515
+      },
+      "2014": {
+        "members": 505,
+        "with_prices": 388,
+        "coverage": 0.7683
+      },
+      "2015": {
+        "members": 507,
+        "with_prices": 399,
+        "coverage": 0.787
+      },
+      "2016": {
+        "members": 509,
+        "with_prices": 420,
+        "coverage": 0.8251
+      },
+      "2017": {
+        "members": 509,
+        "with_prices": 432,
+        "coverage": 0.8487
+      },
+      "2018": {
+        "members": 507,
+        "with_prices": 439,
+        "coverage": 0.8659
+      },
+      "2019": {
+        "members": 507,
+        "with_prices": 448,
+        "coverage": 0.8836
+      },
+      "2020": {
+        "members": 507,
+        "with_prices": 463,
+        "coverage": 0.9132
+      },
+      "2021": {
+        "members": 507,
+        "with_prices": 469,
+        "coverage": 0.925
+      },
+      "2022": {
+        "members": 504,
+        "with_prices": 476,
+        "coverage": 0.9444
+      },
+      "2023": {
+        "members": 504,
+        "with_prices": 486,
+        "coverage": 0.9643
+      },
+      "2024": {
+        "members": 504,
+        "with_prices": 492,
+        "coverage": 0.9762
+      },
+      "2025": {
+        "members": 504,
+        "with_prices": 495,
+        "coverage": 0.9821
+      },
+      "2026": {
+        "members": 503,
+        "with_prices": 502,
+        "coverage": 0.998
+      }
+    },
+    "TW50": {
+      "2010": {
+        "members": 50,
+        "with_prices": 46,
+        "coverage": 0.92
+      },
+      "2011": {
+        "members": 50,
+        "with_prices": 47,
+        "coverage": 0.94
+      },
+      "2012": {
+        "members": 50,
+        "with_prices": 48,
+        "coverage": 0.96
+      },
+      "2013": {
+        "members": 50,
+        "with_prices": 48,
+        "coverage": 0.96
+      },
+      "2014": {
+        "members": 50,
+        "with_prices": 48,
+        "coverage": 0.96
+      },
+      "2015": {
+        "members": 50,
+        "with_prices": 48,
+        "coverage": 0.96
+      },
+      "2016": {
+        "members": 50,
+        "with_prices": 48,
+        "coverage": 0.96
+      },
+      "2017": {
+        "members": 50,
+        "with_prices": 48,
+        "coverage": 0.96
+      },
+      "2018": {
+        "members": 50,
+        "with_prices": 49,
+        "coverage": 0.98
+      },
+      "2019": {
+        "members": 50,
+        "with_prices": 49,
+        "coverage": 0.98
+      },
+      "2020": {
+        "members": 50,
+        "with_prices": 48,
+        "coverage": 0.96
+      },
+      "2021": {
+        "members": 50,
+        "with_prices": 50,
+        "coverage": 1.0
+      },
+      "2022": {
+        "members": 50,
+        "with_prices": 50,
+        "coverage": 1.0
+      },
+      "2023": {
+        "members": 50,
+        "with_prices": 50,
+        "coverage": 1.0
+      },
+      "2024": {
+        "members": 50,
+        "with_prices": 50,
+        "coverage": 1.0
+      },
+      "2025": {
+        "members": 50,
+        "with_prices": 50,
+        "coverage": 1.0
+      },
+      "2026": {
+        "members": 50,
+        "with_prices": 50,
+        "coverage": 1.0
+      }
+    }
+  },
+  "tw50_effective_date_convention": "Wikipedia records the review MONTH only; changes are stamped at month-END (deliberately late, never early, to avoid membership look-ahead)."
+}
