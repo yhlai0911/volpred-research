@@ -2,6 +2,33 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-12 22:15 — 空洞地紅：測試把「建立前提的那一步」mock 掉，於是紅得與 production 無關
+
+**問題**：`tests/test_dispatch_supervisor.py` 三個 hang 告警測試在 main 上是紅的（`hang_alerts` 長度 0，預期 1）。
+表面讀起來是「worker hang 了但不發告警」—— 也就是最可怕的那種**靜默的守門員**（跑了但不出聲，與健康在觀測上同形）。
+
+**現象 vs 真相**：production 完全正常。證據是老闆**真的收到過** hang CRITICAL 信（本檔 00:57 那則 entry 的整段主旨就是「收到的信是空的」——
+能收到空信，恰恰證明信有寄）。真正壞掉的是測試 fixture。
+
+**根因**：2026-07-12 00:57 修 blind-mail 時引入 race-winner token —— `state.record_completion()` 原子清空 slot，
+**拿到非 None 的人才擁有這次事故、才負責寄信**，輸家必須閉嘴。而這三個測試的 fake `_run_one_attempt` 把整個函式 mock 掉，
+跳過了 production 在 Popen 前必做的 `state.reserve_fire()`；沒有 current_job 可清 → `record_completion()` 回 None →
+worker 走**輸家分支** → 不寄信。於是測試斷言的是輸家路徑，卻以為自己在斷言贏家路徑。**不論 production 對錯，它都會紅**。
+
+**解決**：fake 必須遵守 production 的 state 契約。新增 `_reserve_like_production(kwargs)`（reserve → attach），
+三個 hang fake 各呼叫一行。改動只在 `tests/`，**production code 一行未動 → 不需重載 daemon**。
+
+**驗證（break-then-verify，在臨時 worktree 做，不在 daemon 腳下抽地毯）**：拔掉 `send_hang_alert` → 三個 hang 測試轉紅；
+拔掉輸家 guard（`if entry is None`）→ ownership 測試轉紅。修改前它們兩個方向都不咬。
+
+**教訓（bug class，比這次事故本身重要）**：
+1. **fake 掉的那一步若正好建立了斷言的前提，測試就是空洞的**。紅或綠都不帶資訊 —— 這比單純的紅更危險，因為它會把人推向錯誤的診斷
+   （這次差點被讀成「hang 告警壞了」而去動 production 的告警路徑）。凡 mock 一個函式，先問：**它在 production 還順手做了什麼副作用？**
+2. **測試紅 ≠ production 壞**。先找 production 真的做/沒做過那件事的**外部實證**（這次是老闆信箱裡那封信），再決定要修哪一邊。
+3. **anti-stacking**：本來想補一個「輸家必須靜默」的新測試，查證後發現 `scripts/tests/test_hang_alert_ownership.py`
+   早已端到端擁有這個契約（贏家/輸家 × worker/health、恰好一封信）。**撤掉重複層，只在 fixture 留一行指路**。
+   一個 concern 一個 enforcement owner。
+
 ## 2026-07-12 21:55 — **3-STRIKE（K1032 class）**：`.claude/worktrees/` 底下的「獨立 repo」對 merge 完全隱形 → K1684 連續三輪變孤兒
 
 **問題**：`.claude/worktrees/k1684-ftd-e1-rerun/` 有**自己的 `.git`**（獨立 object store），不是本 repo 註冊的 worktree。

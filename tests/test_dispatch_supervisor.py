@@ -22,6 +22,34 @@ def _tmp_state(tmp_path: Path) -> Path:
     return tmp_path / "dispatch_state.json"
 
 
+def _reserve_like_production(kwargs: dict, *, pid: int = 4242, pgid: int = 4242) -> None:
+    """Do the slot bookkeeping the real `_run_one_attempt` does before Popen.
+
+    Since the race-winner token landed (2026-07-12, state.record_completion),
+    a hang alert is only mailed by whoever atomically clears `current_job` —
+    the loser of the race against health.py's watchdog must stay silent, or it
+    mails a job it can no longer see. A fake `_run_one_attempt` that never
+    reserves the slot leaves nothing to clear, so `record_completion()` hands
+    back None and the worker takes the LOSER branch: no alert, on a path
+    production always alerts on. That is what turned the three hang tests red —
+    a stale fixture, not a regression. Fakes must honor the same state contract
+    as production: reserve, then attach.
+
+    The winner/loser contract itself is owned by
+    `scripts/tests/test_hang_alert_ownership.py` (both callers, both outcomes,
+    exactly-one-mail). Don't re-assert it here — the hang tests below only care
+    that a hang short-circuits retry and normalizes its exit code.
+    """
+    state.reserve_fire(
+        schedule_id=kwargs.get("schedule_id", "hourly_dispatch"),
+        attempt=kwargs["attempt"],
+        model=kwargs["model"],
+        log_path=str(kwargs["log_path"]),
+        path=kwargs["state_path"],
+    )
+    state.attach_process(pid=pid, pgid=pgid, started_wall=None, path=kwargs["state_path"])
+
+
 def _seed_due(state_path: Path) -> None:
     """Seed a stale last_fire_at so `_due_to_fire()` returns True — a genuinely due tick.
 
@@ -170,6 +198,7 @@ def test_worker_hang_alert_and_no_retry(tmp_path: Path, monkeypatch) -> None:
 
     def fake_run_one_attempt(**kwargs):
         attempts.append(kwargs["attempt"])
+        _reserve_like_production(kwargs)
         log_path.write_text("worker timed out", encoding="utf-8")
         return 137, 12.0, "worker timed out"
 
@@ -1252,6 +1281,7 @@ def test_worker_timeout_path_short_circuits_retry(tmp_path: Path, monkeypatch) -
 
     def fake_run_one_attempt(**kwargs):
         attempts.append(kwargs["attempt"])
+        _reserve_like_production(kwargs)
         log_path.write_text("timed out — SIGKILL'd by watchdog", encoding="utf-8")
         # Simulate what real `_run_one_attempt` returns when our timeout fires
         return worker.TIMEOUT_KILLED_SENTINEL, 12.0, "timed out — SIGKILL'd by watchdog"
@@ -1298,6 +1328,7 @@ def test_worker_signal_killed_outside_timeout_also_classified_as_hang(
 
     def fake_run_one_attempt(**kwargs):
         attempts.append(kwargs["attempt"])
+        _reserve_like_production(kwargs)
         log_path.write_text("external SIGTERM (e.g. launchd kill)", encoding="utf-8")
         # Externally signal-killed → negative is normalized at the boundary
         return worker._normalize_signal_exit(-15), 7.0, "external SIGTERM"  # → 143 SIGTERM
