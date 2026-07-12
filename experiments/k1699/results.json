@@ -1,0 +1,787 @@
+{
+  "experiment_id": "k1699",
+  "title": "Six-market close-convention (strict t-1) horserace: PRG_tminus1 vs GJR vs HAR",
+  "created_at": "2026-07-12T10:15:28.534738+00:00",
+  "random_seed": 1699,
+  "research_question": "Under the strict close-time convention (all forecast inputs in F^c_{d-1}), does PRG retain any advantage over daily GJR and HAR across the six K1544 markets, or is the canonical PRG headline advantage entirely a forecast-timing artifact?",
+  "method_summary": {
+    "close_convention": "PRG_tminus1 full-day forecast = h_ov_hat + h_in_hat issued at day d-1 close. Primary variant (exp): unobserved overnight shock replaced by model-consistent expectation h_ov_hat, leverage indicator by 1/2 (symmetric innovation). Robustness variant (lag): lagged realized overnight plug-in, replicating the K880-rerun PRG_Extended_tminus1.",
+    "baselines": "GJR(1,1) on close-to-close returns and HAR on log(sigma2_fullday), both strict one-step-ahead from d-1 close, expanding window, refit every 63 days.",
+    "loss": "canonical volpred qlike_pointwise (actual/predicted orientation)",
+    "dm": "canonical volpred.stats.model_evaluation.dm_test, h=1, Newey-West HAC bandwidth ceil(n^(1/3)); per-cell loss-diff acf(1) and 2x-bandwidth sensitivity t reported",
+    "no_lookahead_guard": "All PRG/GJR/HAR fits use observations strictly before the forecast origin; close-convention forecasts use no day-d information (no r2_overnight[d], no r_overnight[d], no target[d]).",
+    "harvey_threshold": "|t| > 3.0"
+  },
+  "data_snapshots": {
+    "SPY": {
+      "file": "experiments/k1699/data/SPY_snapshot.csv",
+      "sha256": "501af099f9e8205d4629b607ee2e30a147e7beef6ed5ce1282abc00ad2ae183b",
+      "origin": "snapshot"
+    },
+    "QQQ": {
+      "file": "experiments/k1699/data/QQQ_snapshot.csv",
+      "sha256": "b42eb032309215841faa55a7476366df9541b991dcb8b046ac4135c31fb4835d",
+      "origin": "snapshot"
+    },
+    "GLD": {
+      "file": "experiments/k1699/data/GLD_snapshot.csv",
+      "sha256": "0741addcf29a2769bd550ea80558a1f6579f6a0441d49039b5437e48b9395f35",
+      "origin": "snapshot"
+    },
+    "EEM": {
+      "file": "experiments/k1699/data/EEM_snapshot.csv",
+      "sha256": "924a7447754546c05852aee899951995f567cae5b23e37e2eccf7c8bef87d7c3",
+      "origin": "snapshot"
+    },
+    "0050.TW": {
+      "file": "experiments/k1699/data/0050_TW_snapshot.csv",
+      "sha256": "91ec88b94cc7692c5f3feaded96c28218f9b8408cd52105367bd296a388e8b0f",
+      "origin": "snapshot"
+    },
+    "TAIFEX": {
+      "sessions": {
+        "file": "experiments/k1699/data/TAIFEX_sessions_snapshot.csv",
+        "sha256": "59c21377aea941e9c18094a47d07a1d2caa3d0b73a66c7f97e8bd6b44f950acf"
+      },
+      "daily": {
+        "file": "experiments/k1699/data/TAIFEX_daily_snapshot.csv",
+        "sha256": "b573f0e2736532c7671bab7120c1872ef23b5682e50013c607a635790cf42588"
+      },
+      "origin": "built_from_ticks_then_pinned"
+    }
+  },
+  "markets": {
+    "SPY": {
+      "market": "SPY",
+      "metadata": {
+        "data_source": "yfinance via experiments/k880 (canonical 2026-06-13 rerun) load_spy_data",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "IS through 2018-12-31",
+        "n_total": 6601,
+        "n_is": 4778,
+        "n_oos": 1823,
+        "period": "2000-01-04 to 2026-04-02",
+        "overnight_variance_share_pct": 34.46641984231814,
+        "prg_refit_freq_days": 126,
+        "gjr_har_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2019-01-02",
+        "end": "2026-04-02",
+        "n_oos": 1823,
+        "n_common_valid": 1823
+      },
+      "qlike": {
+        "PRG_tminus1_exp": 0.858675074181862,
+        "PRG_tminus1_lag": 0.868192223243056,
+        "GJR": 0.854204525847525,
+        "HAR": 1.4635223871445977,
+        "PRG_canonical_diag": 0.7569888945223017
+      },
+      "qlike_ranking_close_convention": [
+        "GJR",
+        "PRG_tminus1_exp",
+        "PRG_tminus1_lag",
+        "HAR"
+      ],
+      "close_convention_winner": "GJR",
+      "dm_tests": {
+        "PRG_tminus1_exp_vs_GJR": {
+          "pair": "PRG_tminus1_exp_vs_GJR",
+          "t_stat": 0.3035926524755739,
+          "p_value": 0.7614729130368856,
+          "n": 1823,
+          "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": 0.044471941184229466,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": 0.2860397722528781,
+          "mean_loss_diff": 0.004470548334336922
+        },
+        "PRG_tminus1_exp_vs_HAR": {
+          "pair": "PRG_tminus1_exp_vs_HAR",
+          "t_stat": -6.792744721193656,
+          "p_value": 1.4846346374497443e-11,
+          "n": 1823,
+          "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.17674348251865016,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -6.545805217887317,
+          "mean_loss_diff": -0.6048473129627359
+        },
+        "PRG_tminus1_lag_vs_GJR": {
+          "pair": "PRG_tminus1_lag_vs_GJR",
+          "t_stat": 0.8581750276190129,
+          "p_value": 0.3909086985349046,
+          "n": 1823,
+          "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": 0.04255049443166549,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": 0.7995849575414278,
+          "mean_loss_diff": 0.013987697395531098
+        },
+        "PRG_tminus1_lag_vs_HAR": {
+          "pair": "PRG_tminus1_lag_vs_HAR",
+          "t_stat": -6.685695653713039,
+          "p_value": 3.046252139426997e-11,
+          "n": 1823,
+          "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.1847398579954443,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -6.407860932844482,
+          "mean_loss_diff": -0.5953301639015417
+        },
+        "GJR_vs_HAR": {
+          "pair": "GJR_vs_HAR",
+          "t_stat": -6.882547025133349,
+          "p_value": 8.058886891149086e-12,
+          "n": 1823,
+          "orientation": "negative t means GJR loss < HAR loss (GJR better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.17305405643998595,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -6.645949573330329,
+          "mean_loss_diff": -0.6093178612970727
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_tminus1_exp": {
+          "valid_oos": 1823
+        },
+        "PRG_tminus1_lag": {
+          "valid_oos": 1823
+        },
+        "GJR": {
+          "valid_oos": 1823
+        },
+        "HAR": {
+          "valid_oos": 1823
+        },
+        "PRG_canonical_diag": {
+          "valid_oos": 1823
+        }
+      }
+    },
+    "QQQ": {
+      "market": "QQQ",
+      "metadata": {
+        "data_source": "yfinance via k881 load_asset_data(QQQ)",
+        "description": "Tech equity (Nasdaq-100)",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample",
+        "n_total": 6601,
+        "n_is": 4620,
+        "n_oos": 1981,
+        "period": "2000-01-04 to 2026-04-02",
+        "overnight_variance_share_pct": 27.859899820884365,
+        "prg_refit_freq_days": 252,
+        "gjr_har_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2018-05-16",
+        "end": "2026-04-02",
+        "n_oos": 1981,
+        "n_common_valid": 1981
+      },
+      "qlike": {
+        "PRG_tminus1_exp": 0.8687722015359467,
+        "PRG_tminus1_lag": 0.8806772177656864,
+        "GJR": 0.8272560129406015,
+        "HAR": 1.3680547524561146,
+        "PRG_canonical_diag": 0.7679551820747412
+      },
+      "qlike_ranking_close_convention": [
+        "GJR",
+        "PRG_tminus1_exp",
+        "PRG_tminus1_lag",
+        "HAR"
+      ],
+      "close_convention_winner": "GJR",
+      "dm_tests": {
+        "PRG_tminus1_exp_vs_GJR": {
+          "pair": "PRG_tminus1_exp_vs_GJR",
+          "t_stat": 2.4637006785414304,
+          "p_value": 0.013835550332981006,
+          "n": 1981,
+          "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": -0.021096964404347662,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": 2.3938488691928197,
+          "mean_loss_diff": 0.041516188595345366
+        },
+        "PRG_tminus1_exp_vs_HAR": {
+          "pair": "PRG_tminus1_exp_vs_HAR",
+          "t_stat": -7.427886393158358,
+          "p_value": 1.63202784619898e-13,
+          "n": 1981,
+          "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.07633710061628608,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -7.296615465090049,
+          "mean_loss_diff": -0.4992825509201678
+        },
+        "PRG_tminus1_lag_vs_GJR": {
+          "pair": "PRG_tminus1_lag_vs_GJR",
+          "t_stat": 2.774031001484531,
+          "p_value": 0.005588587382197252,
+          "n": 1981,
+          "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": -0.010452329133189438,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": 2.6713538032126536,
+          "mean_loss_diff": 0.05342120482508523
+        },
+        "PRG_tminus1_lag_vs_HAR": {
+          "pair": "PRG_tminus1_lag_vs_HAR",
+          "t_stat": -7.317079380125076,
+          "p_value": 3.6637359812630166e-13,
+          "n": 1981,
+          "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.0835313030134248,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -7.156306160156615,
+          "mean_loss_diff": -0.4873775346904278
+        },
+        "GJR_vs_HAR": {
+          "pair": "GJR_vs_HAR",
+          "t_stat": -8.535426554743044,
+          "p_value": 0.0,
+          "n": 1981,
+          "orientation": "negative t means GJR loss < HAR loss (GJR better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.09290583626182443,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -8.347752017435901,
+          "mean_loss_diff": -0.5407987395155132
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_tminus1_exp": {
+          "valid_oos": 1981
+        },
+        "PRG_tminus1_lag": {
+          "valid_oos": 1981
+        },
+        "GJR": {
+          "valid_oos": 1981
+        },
+        "HAR": {
+          "valid_oos": 1981
+        },
+        "PRG_canonical_diag": {
+          "valid_oos": 1981
+        }
+      }
+    },
+    "GLD": {
+      "market": "GLD",
+      "metadata": {
+        "data_source": "yfinance via k881 load_asset_data(GLD)",
+        "description": "Gold ETF (no leverage effect)",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample",
+        "n_total": 5375,
+        "n_is": 3762,
+        "n_oos": 1613,
+        "period": "2004-11-19 to 2026-04-02",
+        "overnight_variance_share_pct": 53.086194119519995,
+        "prg_refit_freq_days": 252,
+        "gjr_har_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2019-10-31",
+        "end": "2026-04-02",
+        "n_oos": 1613,
+        "n_common_valid": 1613
+      },
+      "qlike": {
+        "PRG_tminus1_exp": 0.8985720980599681,
+        "PRG_tminus1_lag": 0.9008878850877431,
+        "GJR": 0.9001303172448863,
+        "HAR": 1.5172840257333413,
+        "PRG_canonical_diag": 0.8342188410185247
+      },
+      "qlike_ranking_close_convention": [
+        "PRG_tminus1_exp",
+        "GJR",
+        "PRG_tminus1_lag",
+        "HAR"
+      ],
+      "close_convention_winner": "PRG_tminus1_exp",
+      "dm_tests": {
+        "PRG_tminus1_exp_vs_GJR": {
+          "pair": "PRG_tminus1_exp_vs_GJR",
+          "t_stat": -0.17239050059427533,
+          "p_value": 0.863152179905117,
+          "n": 1613,
+          "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": 0.046288513427104494,
+          "hac_bandwidth_canonical": 12,
+          "t_stat_2x_bandwidth_sensitivity": -0.17312685647098594,
+          "mean_loss_diff": -0.0015582191849183836
+        },
+        "PRG_tminus1_exp_vs_HAR": {
+          "pair": "PRG_tminus1_exp_vs_HAR",
+          "t_stat": -6.603596277098307,
+          "p_value": 5.4328319620822185e-11,
+          "n": 1613,
+          "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.1756483135213158,
+          "hac_bandwidth_canonical": 12,
+          "t_stat_2x_bandwidth_sensitivity": -6.1948450544018865,
+          "mean_loss_diff": -0.6187119276733735
+        },
+        "PRG_tminus1_lag_vs_GJR": {
+          "pair": "PRG_tminus1_lag_vs_GJR",
+          "t_stat": 0.08254698069332288,
+          "p_value": 0.9342220088917279,
+          "n": 1613,
+          "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": 0.032132747010463106,
+          "hac_bandwidth_canonical": 12,
+          "t_stat_2x_bandwidth_sensitivity": 0.08277815520629274,
+          "mean_loss_diff": 0.0007575678428566455
+        },
+        "PRG_tminus1_lag_vs_HAR": {
+          "pair": "PRG_tminus1_lag_vs_HAR",
+          "t_stat": -6.561577531904913,
+          "p_value": 7.154654646512881e-11,
+          "n": 1613,
+          "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.17546082979438074,
+          "hac_bandwidth_canonical": 12,
+          "t_stat_2x_bandwidth_sensitivity": -6.14474823677311,
+          "mean_loss_diff": -0.6163961406455984
+        },
+        "GJR_vs_HAR": {
+          "pair": "GJR_vs_HAR",
+          "t_stat": -6.564426316293166,
+          "p_value": 7.022693537805935e-11,
+          "n": 1613,
+          "orientation": "negative t means GJR loss < HAR loss (GJR better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.17779166594604467,
+          "hac_bandwidth_canonical": 12,
+          "t_stat_2x_bandwidth_sensitivity": -6.174571369151163,
+          "mean_loss_diff": -0.6171537084884552
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_tminus1_exp": {
+          "valid_oos": 1613
+        },
+        "PRG_tminus1_lag": {
+          "valid_oos": 1613
+        },
+        "GJR": {
+          "valid_oos": 1613
+        },
+        "HAR": {
+          "valid_oos": 1613
+        },
+        "PRG_canonical_diag": {
+          "valid_oos": 1613
+        }
+      }
+    },
+    "EEM": {
+      "market": "EEM",
+      "metadata": {
+        "data_source": "yfinance via k881 load_asset_data(EEM)",
+        "description": "Emerging markets ETF",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample",
+        "n_total": 5778,
+        "n_is": 4044,
+        "n_oos": 1734,
+        "period": "2003-04-15 to 2026-04-02",
+        "overnight_variance_share_pct": 52.60859427916994,
+        "prg_refit_freq_days": 252,
+        "gjr_har_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2019-05-10",
+        "end": "2026-04-02",
+        "n_oos": 1734,
+        "n_common_valid": 1734
+      },
+      "qlike": {
+        "PRG_tminus1_exp": 0.7818982917349425,
+        "PRG_tminus1_lag": 0.7885864098547335,
+        "GJR": 0.7883481812137041,
+        "HAR": 1.2349774240174118,
+        "PRG_canonical_diag": 0.6573530214159495
+      },
+      "qlike_ranking_close_convention": [
+        "PRG_tminus1_exp",
+        "GJR",
+        "PRG_tminus1_lag",
+        "HAR"
+      ],
+      "close_convention_winner": "PRG_tminus1_exp",
+      "dm_tests": {
+        "PRG_tminus1_exp_vs_GJR": {
+          "pair": "PRG_tminus1_exp_vs_GJR",
+          "t_stat": -0.5653347279702056,
+          "p_value": 0.5719192911269693,
+          "n": 1734,
+          "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": -0.017333849635353386,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -0.5785399842396571,
+          "mean_loss_diff": -0.006449889478761543
+        },
+        "PRG_tminus1_exp_vs_HAR": {
+          "pair": "PRG_tminus1_exp_vs_HAR",
+          "t_stat": -5.6627617390492135,
+          "p_value": 1.7403150920358712e-08,
+          "n": 1734,
+          "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.17088536355583261,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -5.7633274455925285,
+          "mean_loss_diff": -0.45307913228246954
+        },
+        "PRG_tminus1_lag_vs_GJR": {
+          "pair": "PRG_tminus1_lag_vs_GJR",
+          "t_stat": 0.018276080743847987,
+          "p_value": 0.9854207128873824,
+          "n": 1734,
+          "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": -0.022519086774252874,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": 0.018755373301092258,
+          "mean_loss_diff": 0.00023822864102943932
+        },
+        "PRG_tminus1_lag_vs_HAR": {
+          "pair": "PRG_tminus1_lag_vs_HAR",
+          "t_stat": -5.545917005096339,
+          "p_value": 3.375590029719433e-08,
+          "n": 1734,
+          "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.1681593820935522,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -5.6518121785640085,
+          "mean_loss_diff": -0.4463910141626785
+        },
+        "GJR_vs_HAR": {
+          "pair": "GJR_vs_HAR",
+          "t_stat": -5.826902645762532,
+          "p_value": 6.717992384608351e-09,
+          "n": 1734,
+          "orientation": "negative t means GJR loss < HAR loss (GJR better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.18889406179843257,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -5.910256964579466,
+          "mean_loss_diff": -0.44662924280370797
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_tminus1_exp": {
+          "valid_oos": 1734
+        },
+        "PRG_tminus1_lag": {
+          "valid_oos": 1734
+        },
+        "GJR": {
+          "valid_oos": 1734
+        },
+        "HAR": {
+          "valid_oos": 1734
+        },
+        "PRG_canonical_diag": {
+          "valid_oos": 1734
+        }
+      }
+    },
+    "0050.TW": {
+      "market": "0050.TW",
+      "metadata": {
+        "data_source": "yfinance via k886 load_0050tw_data",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample",
+        "n_total": 4217,
+        "n_is": 2951,
+        "n_oos": 1266,
+        "period": "2009-01-05 to 2026-04-02",
+        "overnight_variance_share_pct": 46.145159877980014,
+        "prg_refit_freq_days": 252,
+        "gjr_har_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2021-01-08",
+        "end": "2026-04-02",
+        "n_oos": 1266,
+        "n_common_valid": 1251
+      },
+      "qlike": {
+        "PRG_tminus1_exp": 0.9731987754717462,
+        "PRG_tminus1_lag": 0.9859844793711107,
+        "GJR": 0.9687072104011141,
+        "HAR": 3.189008067856377,
+        "PRG_canonical_diag": 0.7880350948437578
+      },
+      "qlike_ranking_close_convention": [
+        "GJR",
+        "PRG_tminus1_exp",
+        "PRG_tminus1_lag",
+        "HAR"
+      ],
+      "close_convention_winner": "GJR",
+      "dm_tests": {
+        "PRG_tminus1_exp_vs_GJR": {
+          "pair": "PRG_tminus1_exp_vs_GJR",
+          "t_stat": 0.20847905959398577,
+          "p_value": 0.8348888960832119,
+          "n": 1251,
+          "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": -0.0715509424121809,
+          "hac_bandwidth_canonical": 11,
+          "t_stat_2x_bandwidth_sensitivity": 0.2043471080601139,
+          "mean_loss_diff": 0.004491565070632116
+        },
+        "PRG_tminus1_exp_vs_HAR": {
+          "pair": "PRG_tminus1_exp_vs_HAR",
+          "t_stat": -4.242169443793816,
+          "p_value": 2.3769754216251826e-05,
+          "n": 1251,
+          "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.10798571257754246,
+          "hac_bandwidth_canonical": 11,
+          "t_stat_2x_bandwidth_sensitivity": -3.6338207601262233,
+          "mean_loss_diff": -2.215809292384631
+        },
+        "PRG_tminus1_lag_vs_GJR": {
+          "pair": "PRG_tminus1_lag_vs_GJR",
+          "t_stat": 0.742635837651969,
+          "p_value": 0.45784171678525243,
+          "n": 1251,
+          "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": -0.031472630879164736,
+          "hac_bandwidth_canonical": 11,
+          "t_stat_2x_bandwidth_sensitivity": 0.7284545818847368,
+          "mean_loss_diff": 0.01727726896999671
+        },
+        "PRG_tminus1_lag_vs_HAR": {
+          "pair": "PRG_tminus1_lag_vs_HAR",
+          "t_stat": -4.231930077515699,
+          "p_value": 2.4862287391291815e-05,
+          "n": 1251,
+          "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.10839474028255976,
+          "hac_bandwidth_canonical": 11,
+          "t_stat_2x_bandwidth_sensitivity": -3.622950415484571,
+          "mean_loss_diff": -2.2030235884852662
+        },
+        "GJR_vs_HAR": {
+          "pair": "GJR_vs_HAR",
+          "t_stat": -4.220506008073241,
+          "p_value": 2.613764118808426e-05,
+          "n": 1251,
+          "orientation": "negative t means GJR loss < HAR loss (GJR better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.10752510393839129,
+          "hac_bandwidth_canonical": 11,
+          "t_stat_2x_bandwidth_sensitivity": -3.6213616908123964,
+          "mean_loss_diff": -2.220300857455263
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_tminus1_exp": {
+          "valid_oos": 1266
+        },
+        "PRG_tminus1_lag": {
+          "valid_oos": 1266
+        },
+        "GJR": {
+          "valid_oos": 1266
+        },
+        "HAR": {
+          "valid_oos": 1266
+        },
+        "PRG_canonical_diag": {
+          "valid_oos": 1266
+        }
+      }
+    },
+    "TAIFEX": {
+      "market": "TAIFEX",
+      "metadata": {
+        "data_source": "TAIFEX TX tick files via k883 (session series pinned to snapshot)",
+        "target": "rv_fullday = x_overnight + x_intraday",
+        "n_total": 2107,
+        "n_is": 1264,
+        "n_oos": 843,
+        "period": "2017-05-16 to 2025-12-31",
+        "overnight_variance_share_pct": 60.99100156255347,
+        "prg_refit_freq_sessions": 126,
+        "gjr_har_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2022-07-14",
+        "end": "2025-12-31",
+        "n_oos": 843,
+        "n_common_valid": 843
+      },
+      "qlike": {
+        "PRG_tminus1_exp": 0.24411904732321416,
+        "PRG_tminus1_lag": 0.24947686857189028,
+        "GJR": 0.255000905772963,
+        "HAR": 0.2847935569173425,
+        "PRG_canonical_diag": 0.12093172883376502
+      },
+      "qlike_ranking_close_convention": [
+        "PRG_tminus1_exp",
+        "PRG_tminus1_lag",
+        "GJR",
+        "HAR"
+      ],
+      "close_convention_winner": "PRG_tminus1_exp",
+      "dm_tests": {
+        "PRG_tminus1_exp_vs_GJR": {
+          "pair": "PRG_tminus1_exp_vs_GJR",
+          "t_stat": -0.4916235040962466,
+          "p_value": 0.6231136550628977,
+          "n": 843,
+          "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": -0.005363430579413621,
+          "hac_bandwidth_canonical": 10,
+          "t_stat_2x_bandwidth_sensitivity": -0.48093138432269794,
+          "mean_loss_diff": -0.010881858449748892
+        },
+        "PRG_tminus1_exp_vs_HAR": {
+          "pair": "PRG_tminus1_exp_vs_HAR",
+          "t_stat": -1.8235563654840061,
+          "p_value": 0.06857355910383545,
+          "n": 843,
+          "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": 0.26222386729859815,
+          "hac_bandwidth_canonical": 10,
+          "t_stat_2x_bandwidth_sensitivity": -1.7833467274953214,
+          "mean_loss_diff": -0.040674509594128314
+        },
+        "PRG_tminus1_lag_vs_GJR": {
+          "pair": "PRG_tminus1_lag_vs_GJR",
+          "t_stat": -0.22908538036200313,
+          "p_value": 0.8188581870436282,
+          "n": 843,
+          "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": -0.025262877466358618,
+          "hac_bandwidth_canonical": 10,
+          "t_stat_2x_bandwidth_sensitivity": -0.22579608116753824,
+          "mean_loss_diff": -0.00552403720107282
+        },
+        "PRG_tminus1_lag_vs_HAR": {
+          "pair": "PRG_tminus1_lag_vs_HAR",
+          "t_stat": -1.7154109874689567,
+          "p_value": 0.08663780003704669,
+          "n": 843,
+          "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": 0.2544671524710095,
+          "hac_bandwidth_canonical": 10,
+          "t_stat_2x_bandwidth_sensitivity": -1.6719207581662128,
+          "mean_loss_diff": -0.03531668834545224
+        },
+        "GJR_vs_HAR": {
+          "pair": "GJR_vs_HAR",
+          "t_stat": -0.7046950029811643,
+          "p_value": 0.4811949299140741,
+          "n": 843,
+          "orientation": "negative t means GJR loss < HAR loss (GJR better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": 0.20008482627811464,
+          "hac_bandwidth_canonical": 10,
+          "t_stat_2x_bandwidth_sensitivity": -0.6909782989746015,
+          "mean_loss_diff": -0.029792651144379415
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_tminus1_exp": {
+          "valid_oos": 843
+        },
+        "PRG_tminus1_lag": {
+          "valid_oos": 843
+        },
+        "GJR": {
+          "valid_oos": 843
+        },
+        "HAR": {
+          "valid_oos": 843
+        },
+        "PRG_canonical_diag": {
+          "valid_oos": 843
+        }
+      }
+    }
+  },
+  "headline": {
+    "prg_tminus1_wins_qlike": 3,
+    "n_markets": 6,
+    "harvey_significant_cells": {
+      "SPY": {
+        "exp_vs_gjr": false,
+        "exp_vs_har": true
+      },
+      "QQQ": {
+        "exp_vs_gjr": false,
+        "exp_vs_har": true
+      },
+      "GLD": {
+        "exp_vs_gjr": false,
+        "exp_vs_har": true
+      },
+      "EEM": {
+        "exp_vs_gjr": false,
+        "exp_vs_har": true
+      },
+      "0050.TW": {
+        "exp_vs_gjr": false,
+        "exp_vs_har": true
+      },
+      "TAIFEX": {
+        "exp_vs_gjr": false,
+        "exp_vs_har": false
+      }
+    }
+  },
+  "relation_to_prior": {
+    "K880_rerun_spy_tminus1_vs_gjr_dm_t": -1.476,
+    "K880v2_spy_close_convention_dm_t": -0.57,
+    "K1544_open_convention": "PRG open-known beats fair GJR-X in all six markets",
+    "note": "K1699 pins its own data snapshot (2026-07-12 vintage for yfinance markets); K880/K1544 numbers are directional anchors, not bit-identical targets."
+  },
+  "references": [
+    "Bollerslev and Ghysels (1996), Periodic autoregressive conditional heteroskedasticity.",
+    "Patton (2011), Volatility forecast comparison using imperfect volatility proxies.",
+    "Diebold and Mariano (1995), Comparing predictive accuracy.",
+    "Harvey, Leybourne, and Newbold (1997), Testing equality of prediction MSEs.",
+    "Harvey, Liu, and Zhu (2016), ...and the cross-section of expected returns.",
+    "Corsi (2009), A simple approximate long-memory model of realized volatility.",
+    "Linton and Wu (2020), A coupled component DCS-EGARCH model for intraday and overnight volatility."
+  ],
+  "runtime_seconds": 77.41242814064026
+}

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -49,24 +50,47 @@ def _nth_weekday_of_month(year: int, month: int, weekday: int, n: int) -> date:
     return first + timedelta(days=(n - 1) * 7)
 
 
-def gen_us_cpi(start: date, end: date) -> list[tuple[date, str]]:
-    """US CPI release: typically Wednesday in 2nd full week of month, mid-month.
+# BLS-published CPI release dates (08:30 ET). Source:
+# https://www.bls.gov/schedule/news_release/cpi.htm
+# A calendar proxy (e.g. "13th of month") drifts from the real date by 1-4 days
+# and produced a wrong event_date for the 2026-07 release (proxy said 07-13,
+# BLS says 07-14) — event articles must carry the real release date.
+# When BLS publishes the next year's schedule, extend this table; an event date
+# not covered here is skipped rather than guessed.
+BLS_CPI_RELEASE_DATES: dict[int, list[date]] = {
+    2026: [
+        date(2026, 1, 13),
+        date(2026, 2, 13),
+        date(2026, 3, 11),
+        date(2026, 4, 10),
+        date(2026, 5, 12),
+        date(2026, 6, 10),
+        date(2026, 7, 14),
+        date(2026, 8, 12),
+        date(2026, 9, 11),
+        date(2026, 10, 14),
+        date(2026, 11, 10),
+        date(2026, 12, 10),
+    ],
+}
 
-    Use 13th of month as approximation; user can override individual entries
-    after BLS announces actual date.
-    """
+
+def gen_us_cpi(start: date, end: date) -> list[tuple[date, str]]:
+    """US CPI release dates, from the BLS-published schedule (no calendar proxy)."""
     events = []
-    d = date(start.year, start.month, 1)
-    while d <= end:
-        # 13th of month as proxy
-        candidate = date(d.year, d.month, 13)
-        if start <= candidate <= end:
-            events.append((candidate, "CPI_US"))
-        if d.month == 12:
-            d = date(d.year + 1, 1, 1)
-        else:
-            d = date(d.year, d.month + 1, 1)
-    return events
+    for year in range(start.year, end.year + 1):
+        known = BLS_CPI_RELEASE_DATES.get(year)
+        if known is None:
+            logging.warning(
+                "gen_us_cpi: no BLS release schedule for %s — skipping "
+                "(extend BLS_CPI_RELEASE_DATES from bls.gov/schedule/news_release/cpi.htm)",
+                year,
+            )
+            continue
+        for candidate in known:
+            if start <= candidate <= end:
+                events.append((candidate, "CPI_US"))
+    return sorted(events)
 
 
 def gen_us_nfp(start: date, end: date) -> list[tuple[date, str]]:

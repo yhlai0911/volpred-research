@@ -1,11 +1,15 @@
 {
   "date": "2026-07-12",
   "scanned": true,
-  "scanned_at": "2026-07-11T22:00:05+00:00",
-  "trending_added": 1,
-  "event_added": 1,
-  "member_qa_added": 1,
+  "scanned_at": "2026-07-12T09:42:38+00:00",
+  "trending_added": 0,
+  "event_added": 0,
+  "member_qa_added": 0,
   "errors": [],
+  "trending_skipped": {
+    "reason": "no_scan_cmd_configured",
+    "hint": "set VOLPRED_TRENDING_SCAN_CMD to enable batch refill"
+  },
   "event_skipped": [
     {
       "id": "nfp-2026-06-05-t7",
@@ -56,6 +60,10 @@
       "reason": "out_of_horizon"
     },
     {
+      "id": "event_article_cpi_us_2026-07-13_tminus2",
+      "reason": "already_exists"
+    },
+    {
       "id": "cpi-us-2026-07-13-t0",
       "reason": "not_yet_in_window"
     },
@@ -82,10 +90,11 @@
     {
       "id": "nfp-2026-08-07-t2",
       "reason": "out_of_horizon"
-    },
-    {
-      "id": "nfp-2026-08-07-t0",
-      "reason": "out_of_horizon"
     }
-  ]
+  ],
+  "member_qa_result": {
+    "created": false,
+    "reason": "task_already_exists",
+    "task_id": "member_qa_e79a7097_evaluate"
+  }
 }
