@@ -881,7 +881,7 @@ boss 點名「M3 不該只盯現有論文，實驗那麼多難道沒長出新論
 | **P7** | **vix-sufficiency** | ✅ **READY — GREEN 98% (98/100)** + Sub1-6 closed (bundle + dividend + 5 divergence decisions + Table 6 K752 rewrite + source binding + reproduce.py synced) | Submission needs user click-submit on chosen journal (主線程 dispatch cover letter + journal selection rationale 待用戶解 standby) |
 | **P4ins** | **vt-insurance-cost** | ⚠️ **MAJOR REVISION — v3 S-02 completed, still not submission-ready**（2026-07-06）。reproduce gate 100% 9/9 仍有效；paper-review-cycle 已進 `review_history/v1`–`v3`，v3 修 S-01/S-03/C-01 並完成 S-02 six-window cross-OOS rerun。S2 VoV conditioning 只在 `2/6` windows 勝 S0，full-sample DM 未過 Harvey（S2 vs S0 `t=0.7487`）→ S2 已在 `main.tex` 降級為 hypothesis-generating in-sample accounting result，移出 contribution tier；robust contribution 保留為 opportunity/direct insurance-cost decomposition。 | 下一步需 fresh v4 paper-review-cycle（latex-academic-reviewer + citation-verifier + contribution gate）確認 S2 降級後 narrative 收斂；通過前不升 submission-ready。 |
 | P1 | leverage-direction | 🟡 **0 MISMATCH** + 28 MATCH + 9 NOTE + 19 UNTRACE (structural data-limit) | C1 ✅ K1256 3-spec / C2 ✅ Kupiec rounding / ✅ 7 figure scripts bundled MATCH / C3-C5 Tables 1/6/7/8/11/14 需 new experiments |
-| P3 | vt-trend-following | 🟡 **0 MISMATCH** (83%, 34 UNTRACE structural) | Table 4 M5 ✅ hybrid BAB / Table 3 period ✅ errata; 剩 Table 5 13-market + Table 6 MDD bootstrap 需 new experiments |
+| P3 | vt-trend-following | 🟡 **K1695 Table 5 evidence PASS；paper 尚未 rebind** | Table 4 M5 ✅ hybrid BAB / Table 3 period ✅ errata / Table 5 ✅ K1695 pinned 13-market + joint bootstrap；剩 Table 6 MDD bootstrap、Table/Figure/abstract 原子 rebind + reproduce gate |
 | P2 | taiwan-vt | 🟡 **0 MISMATCH** (6→0 本 session, 69% verified + 24 UNTRACE structural) | ✅ TSMC/0050.TW/TWII γ 3-spec footnotes + reproduce.py NOTE reclass / ✅ SSVS PIP UNTRACEABLE / ✅ GJR+Normal viol NOTE; 剩 24 UNTRACE 需 Table 4/5 VT + Sec 6 macro experiments |
 | P8 | volatility-absorption | 🔴 61.3% amber + **CRITICAL errata 識別** (2026-04-20 re-verified: 46 MATCH / 12 MISMATCH / 17 UNTRACE / 75 total — 無 drift since 2026-04-19) | `errata_pending.md`: CRITICAL (controlled t Harvey cross -3.14→-1.17) + HIGH (T10 2020-26 sign flip) + MEDIUM (10+ drifts). Path B 推薦 research-honest body revision。**Still awaiting user Path A/B/C decision**. |
 | P9 | garch-x-vix | 🟡 revision，**從未投稿**；K1685 P0-2 實證 gate PASS | K1685 延長 OOS primary t=+3.9656、symmetric multistart t=+3.0098，headline 只以 `GO_WITH_FRAGILITY_DISCLOSURE` 存活；P0-1 canonical rebind + sensitivity disclosure、P0-3 replication 除雷仍待主線程落地。另需修 `refresh_paper_snapshots.py` 的並行 append 去重根因，不手改含 10 個重複日期的舊 CSV。 |
@@ -897,6 +897,17 @@ AR(3)，full DM=−0.9950、CW=−0.1248，只能判未見改善證據。公開�
 已完成 v1/v2/v3 分版 errata 與 Supabase sync。**Paper 維持 MAJOR REVISION / working，禁止
 ready**；下一步由主線程做 narrative decision + body/reproduce 全面改寫，另需 K1025b v3
 對稱重跑、Granger HAC/wild-bootstrap robustness，再進 fresh review cycle。
+
+**2026-07-12 P3 / K1695 Table 5 evidence update**：以 pinned yfinance snapshot（paper cutoff
+2026-03-31）、明示 total return、前月末 12/VIX 月頻 lag、SHY + 10bps turnover、prior-day IRX
+重跑 13 國際市場。Inception-aware 13/13 MDD 改善、平均 +27.50pp；共同樣本
+2012-02-07..2026-03-31（N=3,557）平均 +12.61pp，跨市場同步 stationary bootstrap
+B=10,000／mean block=252 的 90% CI=[+4.22,+19.30]pp，block 63/126/504 下界皆 >4pp，
+預註冊 kill gate 未觸發。代價是平均 ΔSharpe −0.044（inception）／−0.091（common），
+CAGR cost −1.17／−2.18pp/year。**機制需降級**：VIX-sensitivity vs ΔMDD 在共同樣本
+不顯著（Pearson p=.311；Spearman p=.629），不可稱穩健 causal pricing mechanism；EWA 個別
+90% CI 也含 0，只能主張 average dependence-robust protection。Source：`experiments/k1695/`；
+paper body/reproduce 尚未改，須由 Claude 主線程依 source bindings 原子 rebind，完成前 P3 不升 ready。
 
 **2026-06-24 P6/K1544 update**：Codex completed `experiments/k1544_prg_fair_info_gjr/` for the true current-overnight GJR-X benchmark across all six markets. Direct current-ON GJR-X beats canonical PRG Extended on QLIKE in all six markets (Harvey-significant vs PRG in GLD/EEM/0050.TW/TAIFEX), so the old structural-only PRG dominance narrative is not supported under the canonical `h_overnight + h_intraday` timing. Diagnostic open-known PRG (`x_overnight + h_intraday`) beats current-ON GJR-X in all six markets, implying P6 must first decide/rewrite the full-day-at-open forecast convention before paper body integration. Source: `experiments/k1544_prg_fair_info_gjr/results.json`; no paper body edit yet.
 

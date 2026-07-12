@@ -38655,5 +38655,40 @@
     "results_sha256": "1fd7fd8488cdfa2c66c54acc07459d9d643303d60dc1b51c953b3b2f99c97ec3",
     "parameter_audit_sha256": "0e4fc56badfe208f965011f0d8e37f4ce3d852db930163557a14d12121bcacf4",
     "created_at": "2026-07-11T21:33:30.195901+00:00"
+  },
+  {
+    "item_id": "f4a73c83",
+    "category": "volatility_targeting_international",
+    "experiment_id": "K1695",
+    "verdict": "PASS",
+    "research_verdict": "AVERAGE_PROTECTION_PASS_MECHANISM_SAMPLE_DEPENDENT",
+    "title": "K1695: 國際 VT 平均 MDD 保護通過 joint bootstrap，但 VIX-sensitivity mechanism 不穩健",
+    "content": "[提出: Fable deep review P0-1, 執行: Codex failover] K1695 以 pinned yfinance auto_adjust=False snapshot（paper cutoff 2026-03-31）、Close+distributions 明示 total return、前月末 12/VIX 月頻 lag、SHY cash sleeve、10bps turnover cost、prior-day IRX Sharpe 與跨 13 市場同步 stationary bootstrap 重建 vt-trend-following Table 5。Inception-aware 13/13 市場 MDD 改善，平均 +27.5034pp；平均 ΔSharpe=-0.0440，平均 CAGR cost=-1.1741pp/year。共同樣本 2012-02-07..2026-03-31、N=3557，平均 ΔMDD=12.6139pp；joint bootstrap B=10000、mean block=252 的 90% CI=[4.2207,19.3018]pp，P(avg≤0)=0.0006，預註冊 kill gate 未觸發。Block 63/126/504 sensitivity 下界均 >4pp。但 VIX-sensitivity vs ΔMDD 關聯只在 inception-aware 截面顯著；共同樣本 Pearson r=+0.3048 (p=0.3113)、Spearman rho=+0.1484 (p=0.6286)，因此 mechanism 只能標 sample-dependent descriptive pattern，不可稱 causal pricing mechanism。個別市場 CI 亦非全數排除 0（EWA 含 0），對外只主張平均 dependence-robust protection。",
+    "evidence": [
+      "experiments/k1695/k1695_results.json",
+      "experiments/k1695/table5_rows.csv",
+      "experiments/k1695/common_sample_rows.csv",
+      "experiments/k1695/data/paired_common_returns.csv.gz",
+      "experiments/k1695/codex_review.md",
+      "Moreira and Muir (2017)",
+      "Harvey et al. (2018)",
+      "Politis and Romano (1994)"
+    ],
+    "confidence": 0.92,
+    "reviewer": "Codex primary-path pre-run PASS after two blocking fixes; post-run agent-result-verification PASS (2026-07-12)",
+    "reviewer_source": "two fresh-context Codex reviewers + main-thread independent artifact/bootstrap recomputation",
+    "codex_review": "PASS; results/CSV/hash/MDD/kill and B=10,000 primary bootstrap independently recomputed",
+    "sample_end": "2026-03-31",
+    "inception_avg_delta_mdd_pp": 27.503383107715724,
+    "inception_n_mdd_improved": 13,
+    "common_start": "2012-02-07",
+    "common_n": 3557,
+    "common_avg_delta_mdd_pp": 12.613879580350584,
+    "bootstrap_ci90_lower_pp": 4.220717849686448,
+    "bootstrap_ci90_upper_pp": 19.301780054907805,
+    "bootstrap_probability_le_zero": 0.0006,
+    "kill_triggered": false,
+    "snapshot_sha256": "38cb3a0bd286cbf27992caefda6b67fb558f460c125261366060e9c1ec7f7751",
+    "created_at": "2026-07-12T06:49:01.299146+00:00"
   }
 ]

@@ -9201,7 +9201,7 @@
     ],
     "data_range": "2016-01-05 to 2026-03-13 (N=2562)",
     "oos_range": "2023-01-01 to 2024-12-31 (N=502)",
-    "method": "Two-step: (1) GJR-GARCH for SPY + GARCH for GLD \u2192 standardized residuals, (2) DCC QML estimation",
+    "method": "Two-step: (1) GJR-GARCH for SPY + GARCH for GLD → standardized residuals, (2) DCC QML estimation",
     "parameters": {
       "a": 0.031602,
       "a_se": 0.005422,
@@ -9226,9 +9226,9 @@
     "key_findings": [
       "DCC parameters both highly significant (a: t=5.83, b: t=111.60)",
       "DCC significantly better than CCC (LR=88.39, p<1e-6)",
-      "Ljung-Box on DCC residuals: Q(10)=6.43, p=0.78 \u2192 model adequate",
+      "Ljung-Box on DCC residuals: Q(10)=6.43, p=0.78 → model adequate",
       "2-asset risk parity: correlation cancels analytically (w1*sigma1 = w2*sigma2)",
-      "MVP with DCC: Sharpe=1.753, MVP with rho=0: Sharpe=1.810 \u2192 difference NOT significant (p=0.30)",
+      "MVP with DCC: Sharpe=1.753, MVP with rho=0: Sharpe=1.810 → difference NOT significant (p=0.30)",
       "Target-vol DCC reduces vol-of-vol by 14% vs naive (0.0164 vs 0.0191)",
       "VaR 1% with DCC: 1.40% exceedance (Kupiec p=0.40, PASS)",
       "VaR 1% with rho=0: 2.40% exceedance (Kupiec p=0.008, FAIL)",
@@ -9296,7 +9296,7 @@
       }
     },
     "conclusion": "DCC-GARCH captures statistically significant time-varying correlation for SPY-GLD. However, for 2-asset risk parity, correlation cancels analytically. For MVP, the improvement is not statistically significant. The main practical value is in VaR estimation: DCC-based VaR passes Kupiec test (1.40% vs expected 1%) while naive fails (2.40%). Recommendation: use DCC for risk measurement/VaR, but inverse-vol weights remain optimal for 2-asset allocation.",
-    "attribution": "[\u63d0\u51fa: User, \u57f7\u884c: Claude]"
+    "attribution": "[提出: User, 執行: Claude]"
   },
   {
     "experiment_id": "207bcef7",
@@ -9333,7 +9333,7 @@
       "best_combined_rule": 0.0,
       "best_strategy_sharpe_improvement": 0.0
     },
-    "conclusion": "VVIX alone does NOT predict VaR violations (OOS AUC=0.44, worse than random). VIX/GARCH ratio remains the dominant predictor (AUC=0.76). VVIX adds no incremental info (LR p=0.61). However, combined rule VVIX>100 & VIX/GARCH>1.5 achieves 3.31x lift, capturing 58.3% violations in 17.6% of days \u2014 but this is driven by VIX/GARCH, not VVIX.",
+    "conclusion": "VVIX alone does NOT predict VaR violations (OOS AUC=0.44, worse than random). VIX/GARCH ratio remains the dominant predictor (AUC=0.76). VVIX adds no incremental info (LR p=0.61). However, combined rule VVIX>100 & VIX/GARCH>1.5 achieves 3.31x lift, capturing 58.3% violations in 17.6% of days — but this is driven by VIX/GARCH, not VVIX.",
     "status": "completed",
     "created_at": "2026-03-17T06:25:19.959533"
   },
@@ -9406,11 +9406,11 @@
       "weight_corr_tlt": 0.825
     },
     "conclusions": [
-      "GARCH risk budgeting Sharpe 0.791 vs RV22 0.771 \u2014 delta +0.021, NOT significant (p=0.748)",
+      "GARCH risk budgeting Sharpe 0.791 vs RV22 0.771 — delta +0.021, NOT significant (p=0.748)",
       "Both dynamic methods NOT significant vs Static (p>0.89)",
-      "GARCH has LOWER turnover than RV22 (14.6% vs 17.9%) \u2014 smoother weights",
+      "GARCH has LOWER turnover than RV22 (14.6% vs 17.9%) — smoother weights",
       "GARCH won COVID sub-period (Sharpe 1.59 vs 1.21), RV22 won rate hikes and recovery",
-      "Weight correlation 0.70-0.82 \u2014 methods largely agree",
+      "Weight correlation 0.70-0.82 — methods largely agree",
       "Confirms complexity ceiling: forward-looking GARCH adds negligible value over simple RV22 for risk budgeting",
       "Sub-period winners rotate: Static (pre-COVID), GARCH (COVID), RV22 (rate hikes, recovery)"
     ],
@@ -9422,7 +9422,7 @@
     "phase": "Phase_G",
     "title": "CNN Fear & Greed Index vs VT Strategy",
     "hypothesis": "CNN Fear & Greed Index provides incremental information beyond VIX for VT strategy overlays and return prediction",
-    "method": "Three experiments: (A) FG-based VT overlay (18/VIX in fear, 8/VIX in greed), (B) FG\u2192volatility prediction with VIX control, (C) FG\u2192return prediction with VIX control",
+    "method": "Three experiments: (A) FG-based VT overlay (18/VIX in fear, 8/VIX in greed), (B) FG→volatility prediction with VIX control, (C) FG→return prediction with VIX control",
     "result": "NULL",
     "details": {
       "period": "2020-07-14 to 2026-03-16",
@@ -9467,29 +9467,29 @@
   {
     "id": "T_sentiment_A",
     "date": "2026-03-17",
-    "name": "\u5916\u8cc75\u65e5\u6de8\u8cb7\u8d85\u52d5\u91cf for 0050",
-    "result": "NULL: Sharpe 0.13 vs SPY Mom 0.94. FI\u662f\u843d\u5f8c\u6307\u6a19(\u540c\u65e5r=0.33, \u9810\u6e2cr\u22480). Partial r=-0.032",
+    "name": "外資5日淨買超動量 for 0050",
+    "result": "NULL: Sharpe 0.13 vs SPY Mom 0.94. FI是落後指標(同日r=0.33, 預測r≈0). Partial r=-0.032",
     "status": "null"
   },
   {
     "id": "T_sentiment_B",
     "date": "2026-03-17",
-    "name": "\u878d\u8cc7\u878d\u5238\u9006\u5411overlay on VIX VT",
-    "result": "NULL: overlay Sharpe 0.64 < baseline 0.85. Partial r=0.027(t=1.28). \u60e1\u5316MDD -17.3% vs -13.9%",
+    "name": "融資融券逆向overlay on VIX VT",
+    "result": "NULL: overlay Sharpe 0.64 < baseline 0.85. Partial r=0.027(t=1.28). 惡化MDD -17.3% vs -13.9%",
     "status": "null"
   },
   {
     "id": "T_sentiment_C",
     "date": "2026-03-17",
-    "name": "PUT/CALL ratio\u6050\u614c\u9006\u5411 on VIX VT",
-    "result": "NULL: \u540c\u65e5r=0.41\u662fartifact. \u9810\u6e2cpartial r=0.0002(t=0.01). Overlay Sharpe 0.43 < baseline 0.83",
+    "name": "PUT/CALL ratio恐慌逆向 on VIX VT",
+    "result": "NULL: 同日r=0.41是artifact. 預測partial r=0.0002(t=0.01). Overlay Sharpe 0.43 < baseline 0.83",
     "status": "null"
   },
   {
     "id": "T_sentiment_D",
     "date": "2026-03-17",
-    "name": "\u53f0\u7a4d\u96fbPE\u4f30\u503c\u4fe1\u865f on VIX VT",
-    "result": "NULL: PE>25\u5e74\u5316+34.3%(\u65b9\u5411\u53cd). Monthly overlay +0.10\u53ef\u80fddata-mining. Partial r=0.015(t=0.75)",
+    "name": "台積電PE估值信號 on VIX VT",
+    "result": "NULL: PE>25年化+34.3%(方向反). Monthly overlay +0.10可能data-mining. Partial r=0.015(t=0.75)",
     "status": "null"
   },
   {
@@ -9498,7 +9498,7 @@
     "title": "Shiller CAPE as vol/return predictor",
     "hypothesis": "CAPE > 30 predicts higher future volatility and lower returns",
     "method": "Pearson/Spearman correlation, partial correlation (ctrl VIX), regime analysis, quintile sort, multivariate regression, VT overlay backtest with OOS split",
-    "result": "NULL \u2014 CAPE raw r=-0.22 with fwd vol vanishes to r=0.00 after controlling VIX. CAPE adds zero incremental R\u00b2 over VIX alone. Return prediction also NS (r=-0.10, p=0.097). CAPE VT overlay shows modest MDD improvement but no Sharpe improvement.",
+    "result": "NULL — CAPE raw r=-0.22 with fwd vol vanishes to r=0.00 after controlling VIX. CAPE adds zero incremental R² over VIX alone. Return prediction also NS (r=-0.10, p=0.097). CAPE VT overlay shows modest MDD improvement but no Sharpe improvement.",
     "conclusion": "CAPE is redundant for volatility prediction when VIX is available. Not useful as a standalone signal. May have marginal value as MDD-reducing overlay via CAPE Step rule.",
     "key_numbers": {
       "CAPE_fwd1m_rv_raw_r": -0.2177,
@@ -9615,5 +9615,33 @@
         "result": "no significant difference"
       }
     }
+  },
+  {
+    "experiment_id": "K1695",
+    "model_name": "Monthly 12/VIX volatility targeting vs buy-and-hold",
+    "asset": "13 international equity ETFs",
+    "config": {
+      "sample_end": "2026-03-31",
+      "inception_start": "2007-01-01",
+      "common_start": "2012-02-07",
+      "transaction_cost_bps": 10,
+      "bootstrap_reps": 10000,
+      "bootstrap_mean_block": 252,
+      "seed": 42
+    },
+    "metrics": {
+      "inception_avg_delta_mdd_pp": 27.503383107715724,
+      "common_avg_delta_mdd_pp": 12.613879580350584,
+      "bootstrap_ci90": [
+        4.220717849686448,
+        19.301780054907805
+      ],
+      "n_markets_mdd_improved": 13,
+      "kill_triggered": false
+    },
+    "fit_time": null,
+    "n_forecasts": 0,
+    "timestamp": "2026-07-12T06:49:01.299146+00:00",
+    "notes": "Empirical strategy rerun; canonical artifact experiments/k1695/k1695_results.json"
   }
 ]

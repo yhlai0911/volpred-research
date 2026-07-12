@@ -5912,5 +5912,14 @@
     "experiment_ids": [
       "K1683"
     ]
+  },
+  {
+    "id": "f1af2a8e",
+    "timestamp": "2026-07-12T14:49:01.495105",
+    "thought": "K1695 的 joint-bootstrap average protection 通過，但 common-period VIX-sensitivity correlation 消失。這把論文敘事拆成兩層：平均 drawdown protection 有證據；cross-sectional pricing mechanism 沒有跨樣本穩健性。因此下一步不是強化機制語氣，而是 Table/Figure/abstract 原子 rebind 時明確降級 mechanism，並保留 EWA 個別 CI 含 0。可靠性方面，初始 NAV MDD 與 snapshot truncation 都由 fresh review 在開跑前攔住；provider action rounding 則在任何策略結果產生前透明修訂 gate。",
+    "context": "K1695 post-verification decision logic",
+    "experiment_ids": [
+      "K1695"
+    ]
   }
 ]
