@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/Users/yhlai0911/volpred-research/.codex/worktrees/k1695-vttrend-table5/experiments/k1695/k1695.py", line 1137, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/yhlai0911/volpred-research/.codex/worktrees/k1695-vttrend-table5/experiments/k1695/k1695.py", line 1121, in main
+    results = run_experiment(
+              ^^^^^^^^^^^^^^^
+  File "/Users/yhlai0911/volpred-research/.codex/worktrees/k1695-vttrend-table5/experiments/k1695/k1695.py", line 883, in run_experiment
+    total_returns, return_diagnostics = _market_panel(snapshot)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yhlai0911/volpred-research/.codex/worktrees/k1695-vttrend-table5/experiments/k1695/k1695.py", line 667, in _market_panel
+    series, detail = explicit_total_returns(snapshot[snapshot["ticker"] == ticker])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yhlai0911/volpred-research/.codex/worktrees/k1695-vttrend-table5/experiments/k1695/k1695.py", line 397, in explicit_total_returns
+    raise ValueError(
+ValueError: explicit total-return cross-check failed: max_abs_diff=0.00059576
