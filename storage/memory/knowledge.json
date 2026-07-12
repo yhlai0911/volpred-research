@@ -38703,5 +38703,19 @@
     "kill_triggered": false,
     "snapshot_sha256": "38cb3a0bd286cbf27992caefda6b67fb558f460c125261366060e9c1ec7f7751",
     "created_at": "2026-07-12T06:49:01.299146+00:00"
+  },
+  {
+    "item_id": "0143902c",
+    "category": "research_correction",
+    "content": "[K1442 verdict=MIXED reviewer=Codex feed=mile_166eda01 correction=official-event-dates supersedes=c4f922bf] SUPERSEDES the 2026-06-10 K1442 knowledge item. Seven hard-coded CPI dates were wrong and one phantom event reduced the official sample from 29 to 28. The old T-5-to-T0 window included the release day, so it cannot support the published market-anticipated-CPI or timing claim. Corrected non-overlapping windows show MOVE release-day mean -3.45%, 22/28 negative, one-sided Wilcoxon p=0.000236, 97.5% bootstrap CI [-5.47%, -1.35%], passing the descriptive decline gate. VIX release-day mean -2.06% fails the full gate because its CI [-4.89%, +1.19%] crosses zero. Post-five-day MOVE -0.12% and VIX +4.51% are exploratory and not robust. P26 is only a historical rank, not mispricing. No CPI-specific causal, Fed-path, or trading inference is supported. Published article was formally corrected on 2026-07-12.",
+    "evidence": [
+      "experiments/k1442/k1442_results.json",
+      "experiments/k1442/k1442_cpi_events.csv",
+      "experiments/k1442/codex_review.md",
+      "experiments/k1442/README.md",
+      "storage/reports/mile_166eda01.json"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-07-12T21:14:50.640184"
   }
 ]

@@ -2,46 +2,366 @@
   "experiment_id": "k1442",
   "title": "MOVE/VIX 比值與 CPI 公布前後的隱含波動率定價",
   "sample": {
-    "data_source": "yfinance ^MOVE, ^VIX",
+    "data_source": "yfinance ^MOVE, ^VIX (auto_adjust=False)",
+    "event_date_source": "ALFRED release_id=10 (BLS Consumer Price Index release calendar)",
     "period": "2003-01-02 to 2026-06-09",
-    "n_days": 5794
+    "n_days": 5794,
+    "market_snapshot_file": "k1442_market_close.csv",
+    "market_snapshot_sha256": "8f0ea7c8f94c02c026e107c7739c6605e420bb9044344bb41e504b253f57a4af",
+    "research_type": "descriptive event study"
   },
   "current_snapshot": {
     "as_of": "2026-06-09",
-    "MOVE": 77.03279876708984,
+    "MOVE": 77.02999877929688,
     "VIX": 19.8700008392334,
-    "MOVE_VIX_ratio": 3.876839230675233,
+    "MOVE_VIX_ratio": 3.8766983153418306,
     "percentile_full_history": 26.02692440455644,
     "percentile_trailing_1y": 34.92063492063492,
-    "trailing_1y_mean_ratio": 4.279311729661907,
-    "full_history_mean_ratio": 4.831649721592273,
+    "trailing_1y_mean_ratio": 4.2793111704740765,
+    "full_history_mean_ratio": 4.8316496972713665,
     "full_history_median_ratio": 4.780518160814418,
-    "full_history_std_ratio": 1.4423789190243543
+    "full_history_std_ratio": 1.4423789351280136
   },
   "cpi_event_study": {
-    "n_events": 29,
-    "window_def": "T-5 to T+5 trading days around CPI release",
-    "move_T-5_to_T0_mean_pct": -3.245718319478327,
-    "move_T-5_to_T0_median_pct": -5.697874396655944,
-    "vix_T-5_to_T0_mean_pct": -1.8050624764780003,
-    "vix_T-5_to_T0_median_pct": -1.9278573844105806,
-    "move_T0_to_T+5_mean_pct": -0.38854060997203166,
-    "vix_T0_to_T+5_mean_pct": 5.351737895763348,
-    "move_drop_after_release_pct_events": 44.827586206896555,
-    "vix_drop_after_release_pct_events": 51.724137931034484,
+    "n_events": 28,
+    "window_def": "T-6 to T+5 trading days around CPI release",
+    "window_definitions": {
+      "true_pre": "T-6 close to T-1 close (five returns; excludes release day)",
+      "release_day": "T-1 close to T0 close (contains the release reaction)",
+      "post": "T0 close to T+5 close",
+      "legacy_comparable": "T-5 close to T0 close; retained only for date-only comparison with the shipped K1442 result and not called pre-CPI"
+    },
+    "move_T-5_to_T0_mean_pct": -5.197599766204307,
+    "move_T-5_to_T0_median_pct": -7.993724342056179,
+    "vix_T-5_to_T0_mean_pct": -2.94753755714354,
+    "vix_T-5_to_T0_median_pct": -0.6132857262674596,
+    "move_T-6_to_T-1_mean_pct": -2.525780792202828,
+    "move_T-6_to_T-1_median_pct": -2.8169871876604247,
+    "vix_T-6_to_T-1_mean_pct": -1.5974928243987796,
+    "vix_T-6_to_T-1_median_pct": -0.9317782587866474,
+    "move_T-1_to_T0_mean_pct": -3.4543231631582243,
+    "vix_T-1_to_T0_mean_pct": -2.059108587699161,
+    "move_T0_to_T+5_mean_pct": -0.11749021124697036,
+    "vix_T0_to_T+5_mean_pct": 4.512254419733705,
+    "move_drop_after_release_pct_events": 46.42857142857143,
+    "vix_drop_after_release_pct_events": 42.857142857142854,
     "paired_t_test_move_pre_vs_post": {
-      "t": -1.085950938528666,
-      "p": 0.28676187113113355
+      "t": -0.9655097018894853,
+      "p": 0.3428585763367901
     },
     "paired_t_test_vix_pre_vs_post": {
-      "t": -1.2805224066466414,
-      "p": 0.21086786314603628
+      "t": -1.0250558192635382,
+      "p": 0.3144335040309983
+    },
+    "legacy_comparable_paired_t_tests": {
+      "note": "T-5 to T0 includes release day; date-only comparison only",
+      "move": {
+        "t": -2.174289613159124,
+        "p": 0.0386185788897766
+      },
+      "vix": {
+        "t": -1.3130316584032589,
+        "p": 0.20022298370485977
+      }
+    },
+    "paired_bootstrap_move_post_minus_pre": {
+      "estimand": "mean(post_5d - pre_5d), percentage points",
+      "estimate": 2.4082905809558577,
+      "ci_level": 0.975,
+      "ci": [
+        -3.250989618045835,
+        7.6844371386586285
+      ],
+      "reps": 5000,
+      "seed": 42
+    },
+    "paired_bootstrap_vix_post_minus_pre": {
+      "estimand": "mean(post_5d - pre_5d), percentage points",
+      "estimate": 6.109747244132486,
+      "ci_level": 0.975,
+      "ci": [
+        -7.134298174717601,
+        19.73612553827832
+      ],
+      "reps": 5000,
+      "seed": 43
+    },
+    "primary_release_day_decline_tests": {
+      "family": "MOVE and VIX release-day changes versus zero",
+      "claim_scope": "descriptive association on CPI release dates; no non-event benchmark, surprise regression, or intraday causal identification",
+      "bonferroni_alpha": 0.025,
+      "MOVE": {
+        "hypothesis": "percentage change < 0",
+        "mean": -3.4543231631582243,
+        "median": -4.284359687309546,
+        "negative_count": 22,
+        "n_nonzero": 28,
+        "negative_frequency_pct": 78.57142857142857,
+        "wilcoxon_one_sided_p": 0.0002364516258239746,
+        "sign_test_one_sided_p": 0.0018595829606056213,
+        "bootstrap_mean": {
+          "estimand": "mean percentage change",
+          "estimate": -3.4543231631582243,
+          "ci_level": 0.975,
+          "ci": [
+            -5.4741806599693215,
+            -1.3488157749048943
+          ],
+          "reps": 5000,
+          "seed": 42
+        },
+        "bonferroni_alpha": 0.025,
+        "robust_decline": true
+      },
+      "VIX": {
+        "hypothesis": "percentage change < 0",
+        "mean": -2.059108587699161,
+        "median": -2.4648667076524857,
+        "negative_count": 20,
+        "n_nonzero": 28,
+        "negative_frequency_pct": 71.42857142857143,
+        "wilcoxon_one_sided_p": 0.012374557554721832,
+        "sign_test_one_sided_p": 0.017849069088697433,
+        "bootstrap_mean": {
+          "estimand": "mean percentage change",
+          "estimate": -2.059108587699161,
+          "ci_level": 0.975,
+          "ci": [
+            -4.890773983417262,
+            1.1945971126948425
+          ],
+          "reps": 5000,
+          "seed": 43
+        },
+        "bonferroni_alpha": 0.025,
+        "robust_decline": false
+      }
+    },
+    "secondary_post_5d_decline_tests": {
+      "family": "MOVE and VIX T0-to-T+5 changes versus zero",
+      "claim_gate": "exploratory only; unadjusted for overlapping FOMC/NFP/PPI/other news and cannot confirm a CPI effect",
+      "bonferroni_alpha": 0.025,
+      "MOVE": {
+        "hypothesis": "percentage change < 0",
+        "mean": -0.11749021124697036,
+        "median": 0.9920850911402712,
+        "negative_count": 13,
+        "n_nonzero": 28,
+        "negative_frequency_pct": 46.42857142857143,
+        "wilcoxon_one_sided_p": 0.5223389156162739,
+        "sign_test_one_sided_p": 0.7142059057950974,
+        "bootstrap_mean": {
+          "estimand": "mean percentage change",
+          "estimate": -0.11749021124697036,
+          "ci_level": 0.975,
+          "ci": [
+            -2.915205878050319,
+            2.7241786577093823
+          ],
+          "reps": 5000,
+          "seed": 44
+        },
+        "bonferroni_alpha": 0.025,
+        "robust_decline": false
+      },
+      "VIX": {
+        "hypothesis": "percentage change < 0",
+        "mean": 4.512254419733705,
+        "median": 1.242211088689571,
+        "negative_count": 12,
+        "n_nonzero": 28,
+        "negative_frequency_pct": 42.857142857142854,
+        "wilcoxon_one_sided_p": 0.8129605203866959,
+        "sign_test_one_sided_p": 0.8275357745587826,
+        "bootstrap_mean": {
+          "estimand": "mean percentage change",
+          "estimate": 4.512254419733705,
+          "ci_level": 0.975,
+          "ci": [
+            -3.091589410686363,
+            15.740816408044415
+          ],
+          "reps": 5000,
+          "seed": 45
+        },
+        "bonferroni_alpha": 0.025,
+        "robust_decline": false
+      }
+    },
+    "secondary_pre_vs_post_multiple_testing": {
+      "claim_gate": "exploratory only; no independent headline claim",
+      "tests": 2,
+      "bonferroni_alpha": 0.025,
+      "move_significant": false,
+      "vix_significant": false
+    }
+  },
+  "date_correction_audit": {
+    "reason": "legacy experiment hard-coded approximate CPI dates",
+    "event_date_source": "ALFRED release_id=10 (BLS Consumer Price Index release calendar)",
+    "legacy_results_file": "k1442_results_legacy_20260609.json",
+    "legacy_results_sha256": "f875a0c22472708700b9a6548839eea96808382241c1e093372219aa97c97d76",
+    "legacy_events_file": "k1442_cpi_events_legacy_20260609.csv",
+    "legacy_events_sha256": "36241b44ca8c581e38f9132aceaa0aa50ecf28ca943a1e5c8e468bef4948e189",
+    "legacy_dates": [
+      "2024-01-11",
+      "2024-02-13",
+      "2024-03-12",
+      "2024-04-10",
+      "2024-05-15",
+      "2024-06-12",
+      "2024-07-11",
+      "2024-08-14",
+      "2024-09-11",
+      "2024-10-10",
+      "2024-11-13",
+      "2024-12-11",
+      "2025-01-15",
+      "2025-02-12",
+      "2025-03-12",
+      "2025-04-10",
+      "2025-05-13",
+      "2025-06-11",
+      "2025-07-15",
+      "2025-08-12",
+      "2025-09-11",
+      "2025-10-15",
+      "2025-11-13",
+      "2025-12-10",
+      "2026-01-14",
+      "2026-02-11",
+      "2026-03-12",
+      "2026-04-10",
+      "2026-05-13"
+    ],
+    "official_dates": [
+      "2024-01-11",
+      "2024-02-13",
+      "2024-03-12",
+      "2024-04-10",
+      "2024-05-15",
+      "2024-06-12",
+      "2024-07-11",
+      "2024-08-14",
+      "2024-09-11",
+      "2024-10-10",
+      "2024-11-13",
+      "2024-12-11",
+      "2025-01-15",
+      "2025-02-12",
+      "2025-03-12",
+      "2025-04-10",
+      "2025-05-13",
+      "2025-06-11",
+      "2025-07-15",
+      "2025-08-12",
+      "2025-09-11",
+      "2025-10-24",
+      "2025-12-18",
+      "2026-01-13",
+      "2026-02-13",
+      "2026-03-11",
+      "2026-04-10",
+      "2026-05-12"
+    ],
+    "removed_legacy_dates": [
+      "2025-10-15",
+      "2025-11-13",
+      "2025-12-10",
+      "2026-01-14",
+      "2026-02-11",
+      "2026-03-12",
+      "2026-05-13"
+    ],
+    "added_official_dates": [
+      "2025-10-24",
+      "2025-12-18",
+      "2026-01-13",
+      "2026-02-13",
+      "2026-03-11",
+      "2026-05-12"
+    ],
+    "legacy_metrics": {
+      "n_events": 29,
+      "window_def": "T-5 to T+5 trading days around CPI release",
+      "move_T-5_to_T0_mean_pct": -3.245718319478327,
+      "move_T-5_to_T0_median_pct": -5.697874396655944,
+      "vix_T-5_to_T0_mean_pct": -1.8050624764780003,
+      "vix_T-5_to_T0_median_pct": -1.9278573844105806,
+      "move_T0_to_T+5_mean_pct": -0.38854060997203166,
+      "vix_T0_to_T+5_mean_pct": 5.351737895763348,
+      "move_drop_after_release_pct_events": 44.827586206896555,
+      "vix_drop_after_release_pct_events": 51.724137931034484,
+      "paired_t_test_move_pre_vs_post": {
+        "t": -1.085950938528666,
+        "p": 0.28676187113113355
+      },
+      "paired_t_test_vix_pre_vs_post": {
+        "t": -1.2805224066466414,
+        "p": 0.21086786314603628
+      }
+    },
+    "legacy_sample": {
+      "data_source": "yfinance ^MOVE, ^VIX",
+      "period": "2003-01-02 to 2026-06-09",
+      "n_days": 5794
+    },
+    "legacy_current_snapshot": {
+      "as_of": "2026-06-09",
+      "MOVE": 77.03279876708984,
+      "VIX": 19.8700008392334,
+      "MOVE_VIX_ratio": 3.876839230675233,
+      "percentile_full_history": 26.02692440455644,
+      "percentile_trailing_1y": 34.92063492063492,
+      "trailing_1y_mean_ratio": 4.279311729661907,
+      "full_history_mean_ratio": 4.831649721592273,
+      "full_history_median_ratio": 4.780518160814418,
+      "full_history_std_ratio": 1.4423789190243543
+    },
+    "legacy_rows_reproduction_max_abs_diff": 4.440892098500626e-14,
+    "date_only_comparison": {
+      "legacy": {
+        "n_events": 29,
+        "move_T-5_to_T0_mean_pct": -3.245718319478327,
+        "move_T0_to_T+5_mean_pct": -0.38854060997203166,
+        "vix_T-5_to_T0_mean_pct": -1.8050624764780003,
+        "vix_T0_to_T+5_mean_pct": 5.351737895763348
+      },
+      "official_dates_same_legacy_window": {
+        "n_events": 28,
+        "move_T-5_to_T0_mean_pct": -5.197599766204307,
+        "move_T0_to_T+5_mean_pct": -0.11749021124697036,
+        "vix_T-5_to_T0_mean_pct": -2.94753755714354,
+        "vix_T0_to_T+5_mean_pct": 4.512254419733705
+      }
     }
   },
   "interpretation_summary": {
     "ratio_position": "normal",
-    "pre_cpi_pattern_move": "MOVE 平均 下降 3.25% 在 CPI 前 5 日",
-    "post_cpi_pattern_move": "CPI 公布後 5 日 MOVE 下跌頻率 44.8%",
-    "vol_crush_evidence": "vol crush 不顯著（差距 < 2pct or p ≥ 0.05）"
-  }
+    "sample_true_pre_move_mean": "本樣本 CPI 前五個交易日 MOVE 平均 下降 2.53%",
+    "sample_post_5d_move_decline_frequency": "本樣本 T0→T+5 MOVE 下跌頻率 46.4%",
+    "release_day_decline_association": "descriptive release-date decline passes the pre-specified gate for MOVE",
+    "post_5d_association_scope": "exploratory unadjusted sample association only; no CPI-specific inference",
+    "conclusion_strength": "descriptive sample association only; no CPI-specific causal, mispricing, mechanism, or directional trading claim"
+  },
+  "references": [
+    {
+      "citation": "Andersen, Bollerslev, Diebold, and Vega (2007), Real-Time Price Discovery in Global Stock, Bond and Foreign Exchange Markets",
+      "source": "Journal of International Economics 73(2), 251-277",
+      "doi": "10.1016/j.jinteco.2007.02.004",
+      "design_relevance": "Macro-news reactions are concentrated immediately after release; daily close-to-close windows cannot identify the intraday jump."
+    },
+    {
+      "citation": "Jones, Lamont, and Lumsdaine (1998), Macroeconomic News and Bond Market Volatility",
+      "source": "Journal of Financial Economics 47, 315-337",
+      "doi": "10.1016/S0304-405X(97)00047-0",
+      "design_relevance": "Scheduled government announcement dates are distinct bond-volatility events and therefore require exact preannounced dates."
+    },
+    {
+      "citation": "Kroner (2025), How Markets Process Macro News: The Importance of Investor Attention",
+      "source": "Finance and Economics Discussion Series 2025-022",
+      "doi": "10.17016/FEDS.2025.022",
+      "design_relevance": "CPI reactions vary with attention and regime, so a 2024-2026 daily sample supports only descriptive, sample-specific conclusions."
+    }
+  ]
 }

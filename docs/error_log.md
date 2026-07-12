@@ -6450,3 +6450,16 @@ docstring 自陳「use 13th as approximation; user can override」— 沒有人 
 禁止硬編、禁止 proxy；取不到就不做，不猜。
 
 Commit: `8f74197dd`
+
+**2026-07-12 K1442 回溯更正**：同一 class sweep 再確認已發布的 K1442 也把 29 個 CPI 日期
+寫死在程式裡；7 個舊日期錯置且包含 1 個 phantom event，官方樣本為 28 場。更嚴重的是，
+舊文將 `T-5 close → T0 close` 稱為「公布前 5 日」，但 T0 收盤已包含 08:30 ET 發布後反應。
+修正後改用 `cpi_release_dates()` fail closed、固定市場快照與 legacy hashes，並拆成等長 true-pre、
+release-day、post 視窗。MOVE 發布日的描述性下跌通過預設 gate；VIX 的 97.5% bootstrap CI
+跨 0，未通過完整 gate。舊文的「提前消化」、Fed path 與交易時點推論全部撤回；
+`mile_166eda01` 已用正式 publisher 原地更正、寫入 errata、同步 Supabase 並驗證 live HTTP 200。
+舊 knowledge item `c4f922bf` 由 correction item `0143902c` 明確 supersede。
+
+污染掃描另建立三個 canonical follow-up：已發布 CPI T-2/T-7 `task_4751e8957898`、
+未發布 CPI T+0 `task_b3b91831f5a3`、NFP first-Friday proxy 與線上 metadata
+`task_7ef956506564`。完整逐項稽核在 `experiments/k1442/related_event_date_audit.md`。

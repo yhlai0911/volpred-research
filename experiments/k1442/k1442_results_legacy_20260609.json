@@ -1,0 +1,47 @@
+{
+  "experiment_id": "k1442",
+  "title": "MOVE/VIX 比值與 CPI 公布前後的隱含波動率定價",
+  "sample": {
+    "data_source": "yfinance ^MOVE, ^VIX",
+    "period": "2003-01-02 to 2026-06-09",
+    "n_days": 5794
+  },
+  "current_snapshot": {
+    "as_of": "2026-06-09",
+    "MOVE": 77.03279876708984,
+    "VIX": 19.8700008392334,
+    "MOVE_VIX_ratio": 3.876839230675233,
+    "percentile_full_history": 26.02692440455644,
+    "percentile_trailing_1y": 34.92063492063492,
+    "trailing_1y_mean_ratio": 4.279311729661907,
+    "full_history_mean_ratio": 4.831649721592273,
+    "full_history_median_ratio": 4.780518160814418,
+    "full_history_std_ratio": 1.4423789190243543
+  },
+  "cpi_event_study": {
+    "n_events": 29,
+    "window_def": "T-5 to T+5 trading days around CPI release",
+    "move_T-5_to_T0_mean_pct": -3.245718319478327,
+    "move_T-5_to_T0_median_pct": -5.697874396655944,
+    "vix_T-5_to_T0_mean_pct": -1.8050624764780003,
+    "vix_T-5_to_T0_median_pct": -1.9278573844105806,
+    "move_T0_to_T+5_mean_pct": -0.38854060997203166,
+    "vix_T0_to_T+5_mean_pct": 5.351737895763348,
+    "move_drop_after_release_pct_events": 44.827586206896555,
+    "vix_drop_after_release_pct_events": 51.724137931034484,
+    "paired_t_test_move_pre_vs_post": {
+      "t": -1.085950938528666,
+      "p": 0.28676187113113355
+    },
+    "paired_t_test_vix_pre_vs_post": {
+      "t": -1.2805224066466414,
+      "p": 0.21086786314603628
+    }
+  },
+  "interpretation_summary": {
+    "ratio_position": "normal",
+    "pre_cpi_pattern_move": "MOVE 平均 下降 3.25% 在 CPI 前 5 日",
+    "post_cpi_pattern_move": "CPI 公布後 5 日 MOVE 下跌頻率 44.8%",
+    "vol_crush_evidence": "vol crush 不顯著（差距 < 2pct or p ≥ 0.05）"
+  }
+}
