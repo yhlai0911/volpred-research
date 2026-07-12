@@ -97,7 +97,15 @@ PHASE B-PARALLEL — 草稿池低水位並行補寫（boss msg143 2026-07-04 硬
 
 **觸發**：`continue_task_dispatch.py --report` 顯示 draft-pool deficit ≥ 2（releasable drafts < floor 且缺口 ≥2）。deficit ≤1 → 跳過本段走一般 PHASE B。
 
-**規則**：**一次補到門檻，不是每小時 1 篇** — 本班 fire 並行派 `min(deficit, 2)` 個 draft-writer subagents（`opus`，per task-routing daily_article 並行上限 =2），與 PHASE B 一般派工共用 total slot cap=4。
+**規則**：**一次補到門檻，不是每小時 1 篇** — 本班 fire 並行派 `min(deficit, 2)` 個 draft-writer subagents（`opus`，per task-routing daily_article 並行上限 =2），與 PHASE B 一般派工共用 total slot cap（見下）。
+
+**Slot cap 由腳本決定，不由你判斷**（2026-07-13，Telegram msg 596/600）：
+```bash
+uv run python scripts/dispatch_slot_budget.py   # {cap, reason, p1_only_slots}
+```
+- baseline 4；**pending P1 ≥ 3 → 6**（多出來的 slot 5-6 **只能派 P1/P2**，不可拿去跑 P3/P4）
+- supervisor 的 `auth_blocked=true`（額度/認證被擋）→ **de-rate 到 2**：額度掛掉是整個 loop 死，不是一班死，這時候不加碼。
+- 這是唯一的 slot cap enforcement owner — 不要再另外寫死數字或加第二層 gate。
 
 **並行安全設計（必守）**：
 - 每個 writer **只寫 `storage/drafts/<kid>_<audience>_draft.md` + 圖表 assets，禁碰 feed.json / supabase**（feed 寫入無 per-writer lock，並行直發會 race）。
