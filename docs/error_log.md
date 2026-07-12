@@ -147,6 +147,16 @@ Worker log tail: (empty)
   strike-3 的 guard** —— 誤擋的成本是拆成兩個 Bash call，放寬錯的成本是不可回復的非 UTF-8 commit。
   正確修法是精準抽出 `-m` 的引數值再判斷，需要完整測試，另班處理。
 
+**2026-07-12 Codex failover 收尾（`hook_commit_m_nonascii_false_positive`）**：已把整條 COMMAND
+字元掃描換成無執行的 argv classifier。`scripts/hooks/commit_message_guard.py` 先以 stateful masker
+遮蔽 quoted / `<<-` / FIFO multi-heredoc body，套用 shell line-continuation 與 comment 邊界，再只檢查
+真正 `git … commit` 的 `-m` / clustered `-am` / `--message` / repeated message 與 inline trailer 值；
+author、`-C` 路徑、pathspec、前後指令與 heredoc 中文都不再誤擋。absolute git、global opts、
+`env` / `command` / compound-control / prefix-redirection 等等價執行形態同步納入。helper 不執行 expansion，
+missing helper、malformed quote/heredoc 或 lexical ambiguity 一律 fail closed，合法出口仍是 `git commit -F`。
+回歸從原本 **86 assertions 擴到 134 assertions，134/134 PASS**；另過 `bash -n`、Python `py_compile`
+與 `git diff --check`。這次修的是流程 owner，不改任何既有 commit 或歷史資料。
+
 ## 2026-07-11 FEVD 取錯軸：`decomp[-1]` 把「最後一個變數」當成「最後一個 horizon」（K865 全數字作廢）
 
 **問題**：`experiments/k865/k865_vol_spillover_network.py:116`（`fit_var_fevd`）用
