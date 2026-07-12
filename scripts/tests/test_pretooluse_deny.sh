@@ -156,11 +156,35 @@ assert_allow_cwd "plain commit on shared main" "$SHARED" "git commit -m normal"
 assert_deny  "commit -m 中文"              "git commit -m '修正波動率計算'"
 assert_deny  "commit -m 中文（雙引號）"    "git commit -m \"修正波動率計算\""
 assert_deny  "commit --message 中文"       "git commit --message '修正'"
+assert_deny  "commit --message=中文"       "git commit --message='修正'"
+assert_deny  "commit -m attached 中文"     "git commit -m修正"
+assert_deny  "commit -am 中文"             "git commit -am '修正'"
+assert_deny  "multiple -m one 中文"        "git commit -m 'fix: ascii subject' -m '中文 body'"
 assert_deny  "commit -m emoji"             "git commit -m 'fix: 🚫 ban this'"
 assert_deny  "git -C commit -m 中文"       "git -C /tmp/repo commit -m '中文訊息'"
+assert_deny  "dynamic -m literal 中文"      "git commit -m \"\$(printf '中文')\""
 assert_allow "commit -F 中文檔（合法解）"  "git commit -F /tmp/中文訊息.txt"
 assert_allow "commit -m 純 ASCII"          "git commit -m 'fix: ban non-ascii -m'"
 assert_allow "非 commit 指令含中文"        "echo '中文' > /tmp/x"
+
+# `_commit_message_has_non_ascii` 只能看 message argv，不能看整條 Bash command。
+# 2026-07-12 hourly-01 的實際 false positive：同一 tool call 先用 heredoc 寫中文，
+# 後面再以純 ASCII -m commit；舊版因整條 COMMAND 含中文而誤擋。
+assert_allow "中文 before ASCII commit"    "printf '%s' '中文' > /tmp/note && git commit -m 'fix: ascii only'"
+assert_allow "中文 after ASCII commit"     "git commit -m 'fix: ascii only' && printf '%s' '中文'"
+assert_allow "python -m 中文 + ASCII commit" "python -m 中文 && git commit -m 'fix: ascii only'"
+assert_allow "Unicode author + ASCII commit" "git commit --author='王小明 <x@example.com>' -m 'fix: ascii only'"
+assert_allow "Unicode path + ASCII commit" "git -C /tmp/中文 commit -m 'fix: ascii only'"
+assert_allow "Unicode pathspec + ASCII commit" "git commit -m 'fix: ascii only' -- 中文檔.txt"
+assert_allow "two ASCII -m + unrelated 中文" "printf '%s' '中文' && git commit -m 'fix: subject' -m 'ascii body'"
+
+HEREDOC_CJK_ASCII_COMMIT=$'python3 - <<\'PY\'\nprint("中文內容")\nPY\ngit commit -m "fix: ascii only"'
+assert_allow "中文 heredoc + ASCII commit" "$HEREDOC_CJK_ASCII_COMMIT"
+
+# heredoc body 裡的 `git commit -m 中文` 是被寫入檔案的資料，不是本次 shell 會執行的命令。
+# parser 必須跳過 body，不能只用 shlex 把每一行都當成 simple command。
+HEREDOC_FAKE_COMMIT=$'cat > /tmp/example.sh <<\'SCRIPT\'\ngit commit -m \'中文範例\'\nSCRIPT\ngit commit -m \'fix: ascii only\''
+assert_allow "heredoc fake 中文 commit + real ASCII commit" "$HEREDOC_FAKE_COMMIT"
 
 # ── 2026-07-12 3-STRIKE class sweep：fire 內無界 agentic 子程序 ──────────────
 # 7/11 只擋了 class 的一個成員（codex exec）；隔天同 root cause 換執行檔（claude -p）
