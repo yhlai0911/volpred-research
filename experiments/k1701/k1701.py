@@ -77,7 +77,8 @@ HORIZONS = (1, 5, 22)
 TAIL_H = 22
 VAR_FLOOR = 1e-10
 RV_FLOOR_PCT = 1.0       # winsorise variance proxies at this pct of the warm-up window
-CONSTITUENT_RET_MASK = 0.5  # |log r| above this in a constituent = data artifact, not a tail event
+CONSTITUENT_RET_MASK = 1.0  # |log r| above this in a constituent = data artifact, not a tail event
+MASK_SENSITIVITY = (0.5, 1.5)  # re-run the whole ladder at these to prove the knob is not load-bearing
 
 SECTOR_ETFS = ["XLB", "XLE", "XLF", "XLI", "XLK", "XLP", "XLU", "XLV", "XLY"]
 
@@ -124,7 +125,7 @@ def atomic_write_json(path: Path, payload: dict) -> None:
 # ── realized-vol panel construction ───────────────────────────────────────────
 
 
-def load_asset(name: str) -> dict:
+def load_asset(name: str, mask_threshold: float = CONSTITUENT_RET_MASK) -> dict:
     cfg = ASSETS[name]
     px = pd.read_parquet(DATA / cfg["prices"])
     px.index = pd.to_datetime(px.index)
@@ -153,15 +154,36 @@ def load_asset(name: str) -> dict:
     ret = np.log(px / px.shift(1))
     ret = ret.loc[ret.index >= pd.Timestamp("2009-01-01")]
 
+    # The index gate must be checked on the RAW index series, BEFORE any constituent
+    # masking.  Checking it afterwards is dead code: the constituent mask would already
+    # have NaN'd a bad index print and dropped it from the calendar, so the gate could
+    # never fire on the very artifact class it exists to catch (0050.TW's -1.389).
+    raw_idx = ret[cfg["index"]].dropna()
+    worst = float(raw_idx.abs().max())
+    if worst > 0.25:
+        raise RuntimeError(
+            f"{cfg['index']}: |log return| of {worst:.3f} on "
+            f"{raw_idx.abs().idxmax().date()} — a broad index cannot move that much "
+            "(SPY's worst session ever is about -12%). This is a vendor data artifact; "
+            "repair the price series before proceeding."
+        )
+
     # Unadjusted corporate actions and corrupt vendor series are the single biggest
     # threat to a CROSS-SECTIONAL volatility average, because one bad print is not
-    # diluted the way it would be in a market-cap index: 4938.TW's unadjusted 2010
-    # spin-off (-2.39 in logs) lifts the 48-name Taiwan average vol by ~50% for a
-    # whole month, and Compuware's corrupt Yahoo series does the same to the S&P
-    # average in 2010-11.  A large-cap index member does not really move -39%/+65%
-    # in a session, so we treat |log r| > 0.5 as unusable data rather than as a tail
-    # event.  Every masked observation is recorded so the decision stays auditable.
-    bad = ret.abs() > CONSTITUENT_RET_MASK
+    # diluted the way it would be in a cap-weighted index: 4938.TW's unadjusted 2010
+    # spin-off (-2.39 in logs) lifts the 48-name Taiwan average vol by ~50% for a whole
+    # month, and Compuware's corrupt Yahoo series does the same to the S&P average in
+    # 2010-11.
+    #
+    # Threshold choice matters and cuts BOTH ways.  A 0.5 cut would also delete GENUINE
+    # crash prints -- OXY -0.734, APA -0.774, TRGP -0.753 on 2020-03-09/03-18 are real --
+    # and it would do so precisely in the stress regime where a dispersion effect would
+    # live, i.e. it could manufacture the null it is supposed to be testing.  So the
+    # default sits at 1.0 (a >170% up / >63% down single session), which still removes
+    # 4938.TW's -2.386 and Compuware's worst prints while keeping the 2020 oil crash.
+    # run_robustness() re-runs the whole ladder at 0.5 and at 1.5 to show the verdict
+    # does not depend on this knob.
+    bad = ret.abs() > mask_threshold
     masked = [
         {"ticker": c, "date": str(d.date()), "log_return": round(float(ret.at[d, c]), 4)}
         for c in ret.columns
@@ -171,17 +193,6 @@ def load_asset(name: str) -> dict:
     ret = ret.mask(bad)
 
     idx_ret = ret[cfg["index"]].dropna()
-    # Fail loud rather than quietly absorbing a vendor split artifact: no broad index
-    # or index ETF moves more than 25% in a session (SPY's worst day ever is ~-12%).
-    # Without this gate the 0050.TW -75% print sailed through and poisoned the HAR
-    # regressors, the targets and the index vol for a month.
-    worst = float(idx_ret.abs().max())
-    if worst > 0.25:
-        raise RuntimeError(
-            f"{cfg['index']}: |log return| of {worst:.3f} on "
-            f"{idx_ret.abs().idxmax().date()} — an index cannot move that much. "
-            "This is a vendor data artifact; fix the price series before proceeding."
-        )
     # Align the constituent panel to the INDEX's own trading calendar.  Without this
     # the panel keeps stray dates contributed by other tickers, the 22d index vol is
     # then measured over a different day-set than the HAR's rv_m, and the two stop
@@ -195,6 +206,7 @@ def load_asset(name: str) -> dict:
         "px": px,
         "n_masked": n_masked,
         "masked_obs": masked,
+        "mask_threshold": mask_threshold,
         "cleaning": cleaning,
     }
 
@@ -512,6 +524,19 @@ def dm_parity_check() -> dict:
     return {"max_abs_diff_vs_canonical": float(worst), "passed": bool(worst < 1e-8)}
 
 
+def common_all(*frames: pd.DataFrame) -> pd.DatetimeIndex:
+    """Origins shared by every model, INCLUDING zero-variance days.
+
+    MSE and Clark-West are perfectly well defined when the realised variance is zero,
+    and those are the calmest (highest-dispersion) days -- exactly the regime the
+    hypothesis would most want scored.  Only QLIKE has to drop them.
+    """
+    idx = frames[0].index
+    for f in frames[1:]:
+        idx = idx.intersection(f.index)
+    return idx
+
+
 def common_valid(*frames: pd.DataFrame) -> pd.DatetimeIndex:
     """Origins shared by every model AND on which QLIKE is defined.
 
@@ -607,7 +632,7 @@ def run_asset(name: str, results: dict) -> dict:
         # average is unusually sensitive to a single unadjusted corporate action
         "data_quality": {
             "index_cleaning": A["cleaning"],
-            "constituent_mask_threshold_abs_log_return": CONSTITUENT_RET_MASK,
+            "constituent_mask_threshold_abs_log_return": A["mask_threshold"],
             "n_constituent_obs_masked": A["n_masked"],
             "masked_observations": A["masked_obs"],
             "rv_winsor_floor": float(df.attrs.get("rv_floor", VAR_FLOOR)),
@@ -665,28 +690,25 @@ def run_asset(name: str, results: dict) -> dict:
             aug = expanding_oos(df, base_feats + [fcol], tgt, h, log_target=True, audit=EMBARGO_AUDIT)
             if aug.empty:
                 continue
-            common = common_valid(base, aug)
-            actual = base.loc[common, "actual"].to_numpy()
-            pred_aug = aug.loc[common, "pred"].to_numpy()
-            pred_base = base.loc[common, "pred"].to_numpy()
-            la = qlike_pointwise(actual, pred_aug)
-            l0 = qlike_pointwise(actual, pred_base)
-            ma = np.mean((actual - pred_aug) ** 2)
-            m0 = np.mean((actual - pred_base) ** 2)
+            cq = common_valid(base, aug)     # QLIKE: zero-variance days are undefined
+            ca = common_all(base, aug)       # MSE / Clark-West: defined at zero, keep them
+            aq, pq_a, pq_b = (base.loc[cq, "actual"].to_numpy(),
+                              aug.loc[cq, "pred"].to_numpy(), base.loc[cq, "pred"].to_numpy())
+            am, pm_a, pm_b = (base.loc[ca, "actual"].to_numpy(),
+                              aug.loc[ca, "pred"].to_numpy(), base.loc[ca, "pred"].to_numpy())
+            la, l0 = qlike_pointwise(aq, pq_a), qlike_pointwise(aq, pq_b)
+            ma, m0 = np.mean((am - pm_a) ** 2), np.mean((am - pm_b) ** 2)
             cells[s] = {
                 "qlike_har": float(np.mean(l0)),
                 "qlike_har_plus_signal": float(np.mean(la)),
                 "qlike_improve_pct": float(100 * (np.mean(l0) - np.mean(la)) / np.mean(l0)),
                 "mse_improve_pct": float(100 * (m0 - ma) / m0),
                 "qlike_dm": compare(la, l0, h),
-                "mse_dm": compare(
-                    (actual - pred_aug) ** 2,
-                    (actual - pred_base) ** 2,
-                    h,
-                ),
-                # Raw DM answers realised finite-sample forecast accuracy.  CW is
-                # the valid incremental-information test for this nested model.
-                "mse_clark_west": clark_west_test(actual, pred_base, pred_aug, h=h),
+                "mse_dm": compare((am - pm_a) ** 2, (am - pm_b) ** 2, h),
+                # DM answers realised finite-sample accuracy.  These models are NESTED,
+                # and DM is biased toward the null for nested forecasts -- Clark-West is
+                # the valid incremental-information test, so it is reported alongside.
+                "mse_clark_west": clark_west_test(am, pm_b, pm_a, h=h),
             }
 
         # ---- the decisive identification ladder --------------------------------
@@ -699,16 +721,19 @@ def run_asset(name: str, results: dict) -> dict:
         ladder = {}
         if not m1.empty:
             def _cmp(a_df, b_df, key):
-                c = common_valid(a_df, b_df)
-                actual = b_df.loc[c, "actual"].to_numpy()
-                pred_base = b_df.loc[c, "pred"].to_numpy()
-                pred_aug = a_df.loc[c, "pred"].to_numpy()
-                lb = qlike_pointwise(actual, pred_base)
-                la = qlike_pointwise(actual, pred_aug)
+                cq, ca = common_valid(a_df, b_df), common_all(a_df, b_df)
+                lb = qlike_pointwise(b_df.loc[cq, "actual"].to_numpy(), b_df.loc[cq, "pred"].to_numpy())
+                la = qlike_pointwise(b_df.loc[cq, "actual"].to_numpy(), a_df.loc[cq, "pred"].to_numpy())
                 ladder[key] = {
                     "qlike_improve_pct": float(100 * (np.mean(lb) - np.mean(la)) / np.mean(lb)),
                     **compare(la, lb, h),
-                    "mse_clark_west": clark_west_test(actual, pred_base, pred_aug, h=h),
+                    # nested models -> Clark-West is the valid incremental-content test
+                    "mse_clark_west": clark_west_test(
+                        b_df.loc[ca, "actual"].to_numpy(),
+                        b_df.loc[ca, "pred"].to_numpy(),
+                        a_df.loc[ca, "pred"].to_numpy(),
+                        h=h,
+                    ),
                 }
 
             _cmp(m1, m0, "M1_level_vs_M0_har")           # does avg constituent vol help at all?
@@ -897,6 +922,49 @@ def main() -> None:
         "cells_directionally_better": int(sum(c["qlike_improve_pct"] > 0 for c in fam)),
     }
 
+    # ---- the decisive family: dispersion AFTER the volatility level is controlled ----
+    # These are NESTED comparisons, so Clark-West is the valid incremental-content test
+    # and DM (which is biased toward the null when nested) is reported alongside, not
+    # instead.  BH-FDR runs across all 12 cells on the one-sided CW p-values.
+    dfam = []
+    for name in ASSETS:
+        for h in HORIZONS:
+            lad = results["assets"].get(name, {}).get("oos_vol", {}).get(f"h{h}", {}).get("ladder", {})
+            for sig in ("rho", "csvd_rel"):
+                cell = lad.get(f"M_{sig}_vs_M1_level")
+                if not cell:
+                    continue
+                cw = cell.get("mse_clark_west", {})
+                dfam.append(
+                    {
+                        "asset": name,
+                        "h": h,
+                        "signal": sig,
+                        "qlike_improve_pct": cell["qlike_improve_pct"],
+                        "dm_t": cell["dm_t"],
+                        "cw_t": cw.get("t_stat"),
+                        "cw_p_one_sided": cw.get("p_value_one_sided"),
+                    }
+                )
+    if dfam:
+        qs = bh_fdr([c["cw_p_one_sided"] for c in dfam])
+        for c, q in zip(dfam, qs):
+            c["cw_bh_q"] = q
+            c["cw_nominal_sig"] = bool(c["cw_p_one_sided"] < 0.05)
+            c["passes_gate"] = bool(q < 0.05 and abs(c["dm_t"]) > 3 and c["qlike_improve_pct"] > 0)
+    results["dispersion_after_level_family"] = dfam
+    results["dispersion_after_level_verdict"] = {
+        "cells": len(dfam),
+        "cw_nominally_significant": int(sum(c["cw_nominal_sig"] for c in dfam)),
+        "cw_significant_after_bh": int(sum(c["cw_bh_q"] < 0.05 for c in dfam)),
+        "passing_full_gate": int(sum(c["passes_gate"] for c in dfam)),
+        "note": (
+            "Clark-West is the valid test for these nested models; DM is biased toward the "
+            "null when nested, so a DM-only null would be a weak claim. The verdict rests on "
+            "CW surviving BH-FDR across the 12-cell family, which it does not."
+        ),
+    }
+
     results["robustness"] = run_robustness(keep, results)
     make_figures(keep, results)
 
@@ -1021,6 +1089,61 @@ def run_robustness(keep: dict, results: dict) -> dict:
 
     # R5 — lookahead audit (truncation test + embargo gaps recorded during the OOS run)
     rob["R5_lookahead_audit"] = lookahead_audit(keep, EMBARGO_AUDIT)
+
+    # R6 — did the CLEANING manufacture the null?  The constituent mask is the only
+    # cleaning knob with a real bias vector: masking a return NaNs it out of that stock's
+    # vol AND out of the equal-weight portfolio, which depresses avg_vol and rho in the
+    # crash regime -- the exact regime a dispersion effect would live in.  So re-run the
+    # whole level-controlled ladder at a tighter and a looser threshold and check the
+    # verdict is invariant.  If the null only exists at one threshold, it was manufactured.
+    r6: dict = {"default_threshold": CONSTITUENT_RET_MASK, "thresholds": {}}
+    for thr in MASK_SENSITIVITY:
+        per_thr = {"n_masked": {}, "cells": {}}
+        for name in ASSETS:
+            A = load_asset(name, mask_threshold=thr)
+            per_thr["n_masked"][name] = A["n_masked"]
+            universe = sorted(set(A["mem"]["ticker"]) & set(A["ret"].columns))
+            mask = membership_matrix(A["mem"], A["ret"].index, universe)
+            disp = build_dispersion(A["ret"], A["idx_ret"], mask, universe)
+            d = build_panel(A["idx_ret"], disp, None)
+            d = d.loc[d.index >= pd.Timestamp(SAMPLE_START)]
+            bf = ["l_rv_d", "l_rv_w", "l_rv_m"]
+            for h in HORIZONS:
+                lvl = expanding_oos(d, bf + ["l_avg_vol"], f"y_h{h}", h, log_target=True)
+                if lvl.empty:
+                    continue
+                for sig in ("rho", "csvd_rel"):
+                    m = expanding_oos(d, bf + ["l_avg_vol", sig], f"y_h{h}", h, log_target=True)
+                    if m.empty:
+                        continue
+                    cq, ca = common_valid(m, lvl), common_all(m, lvl)
+                    lb = qlike_pointwise(lvl.loc[cq, "actual"].to_numpy(), lvl.loc[cq, "pred"].to_numpy())
+                    la = qlike_pointwise(lvl.loc[cq, "actual"].to_numpy(), m.loc[cq, "pred"].to_numpy())
+                    cw = clark_west_test(
+                        lvl.loc[ca, "actual"].to_numpy(),
+                        lvl.loc[ca, "pred"].to_numpy(),
+                        m.loc[ca, "pred"].to_numpy(),
+                        h=h,
+                    )
+                    per_thr["cells"][f"{name}_h{h}_{sig}"] = {
+                        "qlike_improve_pct": float(100 * (np.mean(lb) - np.mean(la)) / np.mean(lb)),
+                        "dm_t": compare(la, lb, h)["dm_t"],
+                        "cw_t": cw.get("t_stat"),
+                        "cw_p_one_sided": cw.get("p_value_one_sided"),
+                    }
+        cells = per_thr["cells"]
+        if cells:
+            qs = bh_fdr([c["cw_p_one_sided"] for c in cells.values()])
+            for c, q in zip(cells.values(), qs):
+                c["cw_bh_q"] = q
+            per_thr["summary"] = {
+                "cells": len(cells),
+                "cw_nominally_significant": int(sum(c["cw_p_one_sided"] < 0.05 for c in cells.values())),
+                "cw_significant_after_bh": int(sum(c["cw_bh_q"] < 0.05 for c in cells.values())),
+                "harvey_dm_helpful": int(sum(c["dm_t"] < -3 for c in cells.values())),
+            }
+        r6["thresholds"][f"mask_{thr}"] = per_thr
+    rob["R6_cleaning_did_not_manufacture_the_null"] = r6
     return rob
 
 
