@@ -59,7 +59,12 @@ WORKTREES_DIR = ROOT / ".claude" / "worktrees"
 AGENTS_DIR = ROOT / "storage" / "ops" / "agents"
 REPORT_PATH = ROOT / "storage" / "ops" / "dispatch_report_latest.json"
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
-SLOT_CAP = 4
+# Slot cap AND occupancy both live in `scripts/dispatch_slot_budget.py` — it is the
+# single enforcement owner. A hardcoded `SLOT_CAP = 4` used to sit here while the
+# budget module computed 4/6/2 dynamically; the two disagreed and this one won,
+# because it was the one the dispatcher actually read (2026-07-13). Do not
+# reintroduce a literal here — `scripts/tests/test_dispatch_slot_budget.py`
+# fails the build if one comes back.
 
 # Hours a pending agentable task may age before dispatch is locked onto it.
 # The dispatcher only ever produced an advisory candidate list; which task a fire
@@ -70,6 +75,10 @@ SLOT_CAP = 4
 # Age, not priority, is what starvation is made of — so age is what unlocks it.
 STARVATION_HOURS = {1: 6.0, 2: 24.0, 3: 72.0}
 STARVATION_HOURS_DEFAULT = 96.0
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+import dispatch_slot_budget as _slot_budget  # noqa: E402
 
 from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 # 2026-07-01 3-STRIKE fix (dreaming persistent_alert draft_pool_low, 5x/73d):
@@ -128,33 +137,16 @@ def _warn_dispatch(message: str) -> None:
 
 
 def count_active_slots() -> dict:
-    """Count occupied slots across worktrees + agent records."""
-    worktrees = []
-    if WORKTREES_DIR.exists():
-        for p in WORKTREES_DIR.iterdir():
-            if p.is_dir() and not p.name.startswith("."):
-                worktrees.append(p.name)
+    """Occupied slots. Thin delegate — `dispatch_slot_budget.occupancy()` owns this.
 
-    active_agents = []
-    if AGENTS_DIR.exists():
-        for f in AGENTS_DIR.glob("*.json"):
-            try:
-                data = json.loads(f.read_text(encoding="utf-8"))
-            except (json.JSONDecodeError, OSError) as exc:
-                _warn_dispatch(
-                    "agent record read failed; skipping "
-                    f"path={f} error={type(exc).__name__}: {exc}"
-                )
-                continue
-            status = (data.get("status") or "").lower()
-            if status in {"running", "active", "in_progress", "claimed"}:
-                active_agents.append(f.stem)
-
-    return {
-        "worktrees": worktrees,
-        "active_agents": active_agents,
-        "occupied": len(worktrees) + len(active_agents),
-    }
+    It used to count worktree DIRECTORIES, which meant a hung agent held a slot
+    forever: on 2026-07-13 four worktrees pinned the dispatcher at 4/4 with 34
+    tasks pending while two of them had produced nothing for two days. Occupancy
+    is now measured by progress (commits / dirty-file mtime), not by a directory
+    existing and not by a process being alive — both zombies still had live
+    processes. See the budget module's docstring.
+    """
+    return _slot_budget.occupancy()
 
 
 def load_pending_tasks() -> list[dict]:
@@ -885,7 +877,9 @@ def build_report(*, auto_refill: bool = True) -> dict:
         pending = load_pending_tasks()
         cats = categorize(pending, recent_type_counts=recent_type_counts)
 
-    free_slots = max(0, SLOT_CAP - slots["occupied"])
+    slot_budget = _slot_budget.budget()
+    slot_cap = slot_budget["cap"]
+    free_slots = max(0, slot_cap - slots["occupied"])
 
     # Starvation lockout. When agentable work has aged past its threshold, the
     # candidate menu collapses to the starved tasks only — the fire cannot rotate
@@ -917,7 +911,8 @@ def build_report(*, auto_refill: bool = True) -> dict:
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "slot_cap": SLOT_CAP,
+        "slot_cap": slot_cap,
+        "slot_budget": slot_budget,
         "slot_state": slots,
         "free_slots": free_slots,
         "pending_total": len(pending),
@@ -1007,11 +1002,22 @@ def print_report(report: dict) -> None:
         f"main_thread {report['pending_main_thread']} / "
         f"blocked {report.get('pending_blocked', 0)}",
     )
+    budget = report.get("slot_budget") or {}
     print(
         f"[dispatch] slots: occupied={s['occupied']}/{report['slot_cap']} "
         f"(worktrees={len(s['worktrees'])}, active_agents={len(s['active_agents'])}) "
         f"free={report['free_slots']}"
+        + (f" | cap: {budget['reason']}" if budget.get("reason") else "")
     )
+    # A stale worktree no longer holds a slot, but it must not become invisible —
+    # that is how it rotted for two days in the first place. Say it out loud.
+    for st in s.get("stale") or []:
+        idle = "unknown" if st.get("idle_hours") is None else f"{st['idle_hours']}h"
+        print(
+            f"  ⚠️ stale slot released: {st['name']} — 無進度 {idle}"
+            f"（>{_slot_budget.STALE_HOURS}h）；不再占 slot，清理走 "
+            f"scripts/reclaim_stale_worktrees.py"
+        )
     print(
         f"[dispatch] pending: total={report['pending_total']} "
         f"{pending_label} "
