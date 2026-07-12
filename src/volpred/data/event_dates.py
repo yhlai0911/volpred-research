@@ -105,7 +105,7 @@ def release_dates(event: str, start: str, end: str, *, use_cache: bool = True) -
 
     cache = _CACHE_DIR / f"{event}_{start}_{end}.json"
     if use_cache and cache.exists():
-        age = pd.Timestamp.utcnow().tz_localize(None) - pd.Timestamp(cache.stat().st_mtime, unit="s")
+        age = pd.Timestamp.now(tz="UTC").tz_localize(None) - pd.Timestamp(cache.stat().st_mtime, unit="s")
         if age < _CACHE_TTL:
             raw = json.loads(cache.read_text())
         else:
