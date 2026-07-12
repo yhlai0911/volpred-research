@@ -16552,5 +16552,25 @@
     "backfilled_at": "2026-07-12T20:17:14.487501+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1698"
+  },
+  {
+    "timestamp": "2026-07-13T04:31:36+08:00",
+    "task_type": "experiment",
+    "task_id": "research_rp_4855ddb7a9",
+    "outcome": "succeeded",
+    "actor": "hourly-04",
+    "owner": "hourly-04",
+    "commit": "d17c25926",
+    "summary": "K1701 realized dispersion (index vs constituents) -> NULL。Triage 了被 timeout 殺掉的 agent job：worktree 內成果完整，收尾 commit + merge main。Primary 6 cells 1 過 gate；incremental 12 cells 經 Clark-West + BH-FDR 後 0 存活。Codex primary-path review 走 compute queue（fire 內 Bash 600s 上限撐不住 codex exec，兩次撞界），knowledge.json 寫入 gated 在該 review。"
+  },
+  {
+    "timestamp": "2026-07-13T04:31:36+08:00",
+    "task_type": "experiment",
+    "task_id": "fable0711_taiwanvt_rolling_gamma",
+    "outcome": "succeeded",
+    "actor": "hourly-04",
+    "owner": "hourly-04",
+    "commit": "67d7f0812",
+    "summary": "taiwan-vt Table 2 rolling gamma calendar-aligned 重跑收件 + merge main。前一版的 RESOLVED 對齊標記是假的（把 8 檔最新資料截回 2025-01 遷就 2 檔過期快照）；本版 12 檔共同終點 2026-07-09 且不丟資料。翻出 Paper 2 敘事反轉：0056.TW gamma 0.222 (t=2.95) 為 12 列最高而非次高，body_v3.tex 3.2 節的保守性論證方向錯了 -> 開 P1 paper_body task paper2_0056_gamma_narrative_inversion。"
   }
 ]

@@ -1,0 +1,26 @@
+{
+  "id": "compute-k1701-codex-primary-path-review-dispersion-null-1783888166",
+  "title": "K1701 Codex primary-path review (dispersion NULL)",
+  "script_path": "scripts/review_jobs/codex_review_k1701.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-12T20:29:26Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1701-codex-primary-path-review-dispersion-null-1783888166.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1701-codex-primary-path-review-dispersion-null-1783888166.stderr",
+  "result_artifact": "storage/ops/reviews/k1701_codex_review.json",
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1701 Codex review 收件：讀 storage/ops/reviews/k1701_codex_review.json 的 verdict。PASS/CONDITIONAL PASS -> 寫 knowledge.json（NULL 結果，reviewer=codex primary path，含 6 cells 1 pass / 12 cells 0 survive BH-FDR、Clark-West for nested、rdisp 定義、survivorship 討論）；FAIL -> 依 Codex 指出的問題開修正 task，不寫 knowledge。實驗已合併 main（commit d17c25926），worktree 已移除。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 2700
+}
