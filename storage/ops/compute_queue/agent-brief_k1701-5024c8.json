@@ -1,0 +1,41 @@
+{
+  "id": "agent-brief_k1701-5024c8",
+  "title": "K1701 realized dispersion → index vol/tail predictor",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_k1701.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    ".claude/worktrees/k1701-dispersion",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/k1701-dispersion/experiments/k1701/k1701_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1701-5024c8.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-12T17:30:10Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1701-5024c8.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1701-5024c8.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1701-dispersion/experiments/k1701/k1701_results.json",
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1701-5024c8.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1701-dispersion",
+  "claude_followup": {
+    "brief": "K1701 收件：(1) 驗 results.json 數字與 README 一致（agent 自報數字不可信，K1016 教訓）(2) 檢查 DM 用的 HAC lag 不是 h-1、有報 acf 診斷與 lag sensitivity (3) 檢查 lookahead：dispersion 訊號有 .shift(1)、baseline 同 lag (4) 檢查 survivorship bias 有誠實討論 (5) Codex primary-path review 通過才寫 knowledge.json (6) bash scripts/merge_worktree.sh k1701-dispersion 合併（勿 cd 進 worktree）",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}

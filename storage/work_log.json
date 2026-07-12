@@ -16455,5 +16455,35 @@
     "owner": "codex",
     "backfilled_at": "2026-07-12T16:57:23.686423+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T01:30:41+08:00",
+    "task_type": "platform_ops",
+    "task_id": "email-12162-d588db+email-12163-95d6f0",
+    "outcome": "succeeded",
+    "actor": "hourly-01",
+    "owner": "hourly-01",
+    "commit": "3ef55ce71226fc73360c07d6aa7f9c25f71ac048",
+    "summary": "老闆連兩封信「你要立即處理不是只建議我」→ class 級修：alert-to-task bridge（27 alert 中 24 個 body 在丟待辦給老闆；breach 現在預設自動建任務，例外須登記）+ dispatch starvation lockout（P1 member_qa 躺 17h 跨 ~17 班的根因：候選清單只是建議，diversity rule 主動推開被跳過的工作）。17 tests + break-then-verify。close email 已寄。"
+  },
+  {
+    "timestamp": "2026-07-13T01:30:41+08:00",
+    "task_type": "platform_ops",
+    "task_id": "memory_index_compaction",
+    "outcome": "succeeded",
+    "actor": "hourly-01",
+    "owner": "hourly-01",
+    "commit": "9ffcd1cef2a2ca8eadf056236a5b2e0b84e36396",
+    "summary": "MEMORY.md 25.5KB→16.2KB（超過讀取上限）：每筆壓成一行鉤子、重編分類、補回 3 個壓縮前就沒被索引的孤兒記憶檔。驗證 125 筆連結全有效、零孤兒。"
+  },
+  {
+    "timestamp": "2026-07-13T01:30:41+08:00",
+    "task_type": "experiment",
+    "task_id": "research_rp_4855ddb7a9",
+    "outcome": "dispatched",
+    "actor": "hourly-01",
+    "owner": "hourly-01",
+    "commit": "9ffcd1cef2a2ca8eadf056236a5b2e0b84e36396",
+    "summary": "starvation lockout 首次生效派出：該 P3 experiment 已在 pending 躺 119h。K1701 realized dispersion（指數 vs 成分股）→ 指數 vol/tail 預測子。K-id atomically reserved、worktree k1701-dispersion 建好、brief 含 lookahead/DM-HAC-lag/survivorship-bias 防錯規則，已 enqueue-agent 進 compute queue（opus/xhigh，job agent-brief_k1701-5024c8），由 */15 detached worker 執行、後續 fire 在 PHASE A 收件。"
   }
 ]
