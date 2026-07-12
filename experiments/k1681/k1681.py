@@ -35,7 +35,8 @@ Inference
 * Out-of-sample: expanding-window refit with a gap of H days between the last
   training label window and the forecast origin (no forward-label leakage).
   The OOS loss differential is aggregated across assets *by date* first, then a
-  HAC t-test is run on the date series.
+  HAC t-test is run on the date series. Nested comparisons report raw DM for
+  realized finite-sample MSPE and Clark-West for incremental predictive content.
 
 Targets (all realized at t, all predictors dated t-1)
 -----------------------------------------------------
@@ -58,6 +59,8 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import yfinance as yf
+
+from volpred.stats.model_evaluation import clark_west_test
 
 warnings.filterwarnings("ignore")
 
@@ -355,7 +358,7 @@ def oos_evaluation(panel: dict[str, pd.DataFrame], target: str, horizon: int,
         dates = sub.index
 
         b1 = b2 = None
-        e1, e2, keep_dates = [], [], []
+        actual, pred1, pred2, e1, e2, keep_dates = [], [], [], [], [], []
         for i in range(init_train, len(sub)):
             if (i - init_train) % refit_every == 0:
                 stop = i - horizon                 # <-- no forward-label leakage
@@ -365,10 +368,17 @@ def oos_evaluation(panel: dict[str, pd.DataFrame], target: str, horizon: int,
                 b2 = np.linalg.lstsq(X2[:stop], y[:stop], rcond=None)[0]
             if b1 is None:
                 continue
-            e1.append(y[i] - X1[i] @ b1)
-            e2.append(y[i] - X2[i] @ b2)
+            p1 = float(X1[i] @ b1)
+            p2 = float(X2[i] @ b2)
+            actual.append(y[i])
+            pred1.append(p1)
+            pred2.append(p2)
+            e1.append(y[i] - p1)
+            e2.append(y[i] - p2)
             keep_dates.append(dates[i])
 
+        actual = np.asarray(actual)
+        pred1, pred2 = np.asarray(pred1), np.asarray(pred2)
         e1, e2 = np.asarray(e1), np.asarray(e2)
         if len(e1) < 252:
             continue
@@ -381,9 +391,14 @@ def oos_evaluation(panel: dict[str, pd.DataFrame], target: str, horizon: int,
             # Campbell-Thompson OOS R^2 of M2 against the M1 benchmark.
             "oos_r2_M2_vs_M1": float(1.0 - sse2 / sse1),
         })
-        loss_records.append(pd.DataFrame(
-            {"date": keep_dates, "ticker": tic, "dloss": e2 ** 2 - e1 ** 2}
-        ))
+        loss_records.append(pd.DataFrame({
+            "date": keep_dates,
+            "ticker": tic,
+            "actual": actual,
+            "pred_base": pred1,
+            "pred_augmented": pred2,
+            "dloss": e2 ** 2 - e1 ** 2,
+        }))
 
     if not loss_records:
         return pd.DataFrame(), {}
@@ -395,6 +410,24 @@ def oos_evaluation(panel: dict[str, pd.DataFrame], target: str, horizon: int,
     dm_t = float(dm.tvalues["const"])
     dm_p = float(dm.pvalues["const"])
 
+    # Preserve the same cross-sectional dependence treatment for Clark-West:
+    # cell-level adjustment first, then average assets by date, then HAC.
+    def pivot(column: str) -> np.ndarray:
+        return (
+            allloss.pivot(index="date", columns="ticker", values=column)
+            .sort_index()
+            .to_numpy()
+        )
+
+    cw = clark_west_test(
+        pivot("actual"),
+        pivot("pred_base"),
+        pivot("pred_augmented"),
+        h=horizon,
+        max_lag=hac_lag(len(by_date), horizon),
+        aggregate_axis=1,
+    )
+
     # Diagnostic only: the (inflated) stacked asset-day t-stat, for contrast.
     stacked = allloss["dloss"].to_numpy()
     stacked_t = float(stacked.mean() / (stacked.std(ddof=1) / np.sqrt(len(stacked))))
@@ -403,11 +436,16 @@ def oos_evaluation(panel: dict[str, pd.DataFrame], target: str, horizon: int,
         "mean_dloss_by_date": float(by_date.mean()),
         "dm_hac_t_date_aggregated": dm_t,     # PRIMARY
         "dm_hac_p_date_aggregated": dm_p,
+        "clark_west_date_aggregated": cw,
         "n_dates": int(len(by_date)),
         "hac_maxlag": hac_lag(len(by_date), horizon),
         "stacked_asset_day_t_DIAGNOSTIC_ONLY": stacked_t,
         "n_asset_days": int(len(stacked)),
-        "note": "negative dloss => M2 (with SMAD) has lower squared error than M1",
+        "note": (
+            "Raw DM: negative dloss means the augmented model realized lower finite-sample "
+            "MSPE. Clark-West: positive t means the nested increment carries predictive "
+            "content after correcting the larger model's estimation-noise penalty."
+        ),
     }
     return pd.DataFrame(per_asset), summary
 

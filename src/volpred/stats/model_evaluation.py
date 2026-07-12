@@ -117,6 +117,113 @@ def dm_test(loss1: np.ndarray, loss2: np.ndarray, h: int = 1) -> Tuple[float, fl
     return (float(t_stat), float(p_val))
 
 
+def clark_west_test(
+    actual: np.ndarray,
+    forecast_small: np.ndarray,
+    forecast_large: np.ndarray,
+    h: int = 1,
+    *,
+    max_lag: Optional[int] = None,
+    aggregate_axis: Optional[int] = None,
+) -> Dict:
+    """Clark-West (2007) MSPE-adjusted test for nested forecasts.
+
+    The adjusted loss differential is
+    ``e_small² - (e_large² - (forecast_small - forecast_large)²)``.
+    A positive statistic supports incremental predictive content in the larger
+    model. The formal test is one-sided; a two-sided p-value is also returned
+    for transparent comparison with older review artifacts.
+
+    ``aggregate_axis`` supports dependent panels. Cell-level adjusted losses
+    are averaged along that axis before HAC inference, so asset losses can be
+    aggregated by date instead of treating asset-days as independent.
+    """
+    if h < 1:
+        raise ValueError("h must be at least 1")
+
+    y = np.asarray(actual, dtype=np.float64)
+    f_small = np.asarray(forecast_small, dtype=np.float64)
+    f_large = np.asarray(forecast_large, dtype=np.float64)
+    if y.shape != f_small.shape or y.shape != f_large.shape:
+        raise ValueError("actual and both forecast arrays must have identical shapes")
+
+    valid = np.isfinite(y) & np.isfinite(f_small) & np.isfinite(f_large)
+    adjusted = np.full(y.shape, np.nan, dtype=np.float64)
+    adjusted[valid] = (
+        (y[valid] - f_small[valid]) ** 2
+        - (y[valid] - f_large[valid]) ** 2
+        + (f_small[valid] - f_large[valid]) ** 2
+    )
+
+    if aggregate_axis is not None:
+        if adjusted.ndim == 0:
+            raise ValueError("aggregate_axis requires an array with at least one dimension")
+        counts = np.sum(np.isfinite(adjusted), axis=aggregate_axis)
+        sums = np.nansum(adjusted, axis=aggregate_axis)
+        adjusted = np.divide(
+            sums,
+            counts,
+            out=np.full(np.shape(sums), np.nan, dtype=np.float64),
+            where=counts > 0,
+        )
+
+    d = np.asarray(adjusted, dtype=np.float64).reshape(-1)
+    d = d[np.isfinite(d)]
+    n = len(d)
+    if n < 10:
+        return {
+            "test": "Clark-West (2007) nested MSPE-adjusted",
+            "status": "insufficient_observations",
+            "n_obs": int(n),
+            "t_stat": 0.0,
+            "p_value_one_sided": 1.0,
+            "p_value_two_sided": 1.0,
+            "mean_adjusted_loss_diff": float(np.mean(d)) if n else None,
+            "hac_lag": 0,
+        }
+
+    d_mean = float(np.mean(d))
+    if max_lag is None:
+        max_lag = int(np.ceil(h ** (1 / 3) * n ** (1 / 3)))
+    if max_lag < 0:
+        raise ValueError("max_lag cannot be negative")
+    max_lag = min(int(max_lag), n - 1, n // 4)
+
+    centered = d - d_mean
+    long_run_var = float(np.mean(centered**2))
+    for lag in range(1, max_lag + 1):
+        weight = 1.0 - lag / (max_lag + 1.0)
+        autocov = float(np.mean(centered[lag:] * centered[:-lag]))
+        long_run_var += 2.0 * weight * autocov
+
+    if not np.isfinite(long_run_var) or long_run_var <= 0:
+        return {
+            "test": "Clark-West (2007) nested MSPE-adjusted",
+            "status": "nonpositive_long_run_variance",
+            "n_obs": int(n),
+            "t_stat": 0.0,
+            "p_value_one_sided": 1.0,
+            "p_value_two_sided": 1.0,
+            "mean_adjusted_loss_diff": d_mean,
+            "hac_lag": int(max_lag),
+        }
+
+    se = float(np.sqrt(long_run_var / n))
+    t_stat = float(d_mean / se)
+    return {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": int(n),
+        "t_stat": t_stat,
+        "p_value_one_sided": float(stats.norm.sf(t_stat)),
+        "p_value_two_sided": float(2.0 * stats.norm.sf(abs(t_stat))),
+        "mean_adjusted_loss_diff": d_mean,
+        "hac_lag": int(max_lag),
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model",
+    }
+
+
 def strategy_dm_test(
     returns1: np.ndarray,
     returns2: np.ndarray,

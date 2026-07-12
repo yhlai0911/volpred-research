@@ -137,6 +137,75 @@ def test_dm_test_equal_losses_returns_zero_stat():
     assert np.isnan(r["statistic"]) or r["p_value"] >= 0.05
 
 
+# ─── Clark-West — nested forecast comparisons ────────────────────
+
+
+def test_clark_west_matches_adjusted_mspe_formula():
+    from volpred.stats.model_evaluation import clark_west_test
+
+    actual = np.linspace(-2.0, 2.0, 20)
+    small = np.zeros(20)
+    large = 0.75 * actual
+    expected = np.mean(
+        (actual - small) ** 2
+        - (actual - large) ** 2
+        + (small - large) ** 2
+    )
+
+    result = clark_west_test(actual, small, large, max_lag=0)
+    assert result["status"] == "ok"
+    assert result["mean_adjusted_loss_diff"] == pytest.approx(expected)
+    assert result["t_stat"] > 0
+    assert result["p_value_one_sided"] < result["p_value_two_sided"]
+
+
+def test_clark_west_panel_aggregates_by_date_before_hac():
+    from volpred.stats.model_evaluation import clark_west_test
+
+    actual = np.column_stack([
+        np.linspace(-2.0, 1.0, 20),
+        np.linspace(0.5, 3.0, 20),
+    ])
+    small = np.zeros_like(actual)
+    large = 0.5 * actual
+    cell_adjusted = (
+        (actual - small) ** 2
+        - (actual - large) ** 2
+        + (small - large) ** 2
+    )
+
+    result = clark_west_test(
+        actual,
+        small,
+        large,
+        max_lag=0,
+        aggregate_axis=1,
+    )
+    assert result["n_obs"] == actual.shape[0]
+    assert result["mean_adjusted_loss_diff"] == pytest.approx(
+        np.mean(cell_adjusted.mean(axis=1))
+    )
+
+
+def test_clark_west_rejects_for_informative_nested_forecast():
+    from volpred.stats.model_evaluation import clark_west_test
+
+    actual = np.linspace(-3.0, 3.0, 80) ** 3
+    small = np.zeros(80)
+    large = 0.9 * actual
+    result = clark_west_test(actual, small, large, h=1, max_lag=1)
+
+    assert result["t_stat"] > 3.0
+    assert result["p_value_one_sided"] < 0.05
+
+
+def test_clark_west_rejects_shape_mismatch():
+    from volpred.stats.model_evaluation import clark_west_test
+
+    with pytest.raises(ValueError, match="identical shapes"):
+        clark_west_test(np.ones(20), np.ones(19), np.ones(20))
+
+
 # ─── Christoffersen — joint CC LR ─────────────────────────────────
 
 
