@@ -105,3 +105,9 @@
 ## 9. 接續提示詞（Resume Prompt）
 
 > 讀 `paper/volatility-absorption/EXECUTION.md` 與 `paper/volatility-absorption/review_history/fable_deep_review_20260711/README.md`，**從 P0-1 開始**：本篇是 make-or-break——開新 K（`ls experiments/` 取下一個可用編號 ≥ k1684），把 K897 的 day-t vol proxy 由 `h[t]` 改為 `h[t+1]`（contemporaneous null），同 seed 集重跑 10,000 sims，加 relative-threshold 與 sign-split 變體。**事前寫死判定規則**：empirical decline 仍在 95% null 外 → 論文升級走 JBF；落入 null 內 → 降級為機械分解、走重新框架（FRL note 或 archive）。判定以 experiment JSON 為準。P0-1 未裁決前不碰正文打磨、不標 ready、不投稿。完成後 Codex 複核 → 依結果更新 `main_v3.tex` §Robustness → 續走 P0-2/3/4。
+
+### 進度更新 2026-07-12 — P0-1 GATING 結果與裁定（主線程）
+- 2026-07-12 | **P0-1 已跑（K1686）：ABSORPTION CLAIM NOT SUPPORTED** — 主判定（變體 A）不拒絕 null（0.8165 落在 [0.0824,1.0596]，p=0.41）；更決定性的是機制層 sign-decomposition（不依賴 null 模型）：decline 住在 relief rally（ΔVIX<−2：+1.337）而非真恐慌衝擊（ΔVIX>+2：−0.123，CI [−0.729,0.583] 含 0）。K897 原 NULL REJECTED 結論不成立。
+- **主線程裁定（依事前規則「落入 null 內→重框或 archive」）**：**REFRAME 為 FRL 級方法論短文**，放棄 JBF 線。新主軸：「表面的 volatility absorption 梯度是 relief-rally 成分驅動的 — pooled 條件統計量可被反號成分主導」的警世/方法論發現。不 archive：K1686 的 sign-decomposition 本身是乾淨可發表的貢獻。
+- 後續：body 重寫（paper_body 主線程）依新主軸；舊 absorption 宣稱全文撤下；K897/k720 相關 knowledge 回溯更正列入重寫 checklist。
+- 依據：experiments/k1686/README.md §7 Verdict + 本檔事前判定規則。

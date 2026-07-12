@@ -142,3 +142,6 @@ canonical_tex: main_v3.tex
 | 日期 | 事件 | 狀態 | commit |
 |---|---|---|---|
 | 2026-07-11 | Fable deep review | 深審完成，待執行 P0 | `f913ed68c` |
+
+### 進度更新 2026-07-12
+- 2026-07-12 | P0-1 Table 5 嵌合體修復：全表 rebind K1695 canonical（13/13 inception-aware 列、joint-bootstrap CI [4.2,19.3]pp 取代 iid t=10.25、Sharpe 1/13、r=-0.817）；abstract/intro/prose/fig2/limitation 六處同步；fig2 重生（assert 通過）| 4360ecfaa

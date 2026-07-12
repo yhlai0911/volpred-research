@@ -129,3 +129,10 @@ Abstract（`main_v_ijf.tex:80-81`）+ 正文（`body_v_ijf.tex:170, 299`）宣�
 ## 接續提示詞
 
 讀 `paper/leverage-direction/EXECUTION.md` 後，從 **P0-1** 開始：新增「Pre-Specified Out-of-Sample Re-Test」小節，把中心 null 的證據（K1592）接進 `body_v_ijf.tex` —— **首要動作 = 建新表**（8 資產 × {rule-vs-GARCH, rule-vs-GJR} 的 DM t / Holm p / GJR share / MCS survivors，dev={SPY,QQQ,EEM,GLD,TLT} vs holdout={IWM,SLV,BTC} panel 分列）。每個數字**先讀 `experiments/k1592/k1592_results.json` 驗證再寫**（SPY rule-vs-GARCH `t=-2.85`、unadjusted `p=0.0045`、**Holm p=0.104**；0/8 assets Harvey-Holm 顯著），不臆造。同步在 methodology 補出**精確** multiple-testing 程序（frozen rule 定義、|t|>3+Holm p<0.05 判準、family 大小、monthly refit、date-clustered panel、decision log 檔名 `k1592_forecast_origin_decision_log.csv`），完整清單見上方 P0-1。落地後 xelatex 重編譯 + `reproduce.py` gate 新表 + 確認 §5.2 每個 null 句指得到稿內表格。修訂在**主線程**進行（不丟 background agent 改 `.tex`，paper-workflow 硬規則）。接著依序落地 P0-2（K1591 進稿 + gold regime 雙軌降級，讀 `experiments/k1591/README.md`）、P0-3（HM rebind K1256，讀 `experiments/k1256/k1256_results.json`）、P0-4（26/14-asset 處置）；P1 的 reproduce gate 升級與 package 衛生可與 P0 平行。**注意**：paper-update 前先確認 canonical 指向 `*_v_ijf.tex`（`main.tex`/`body.tex` 是 JBF-era 正向版，未封存前誤跑會發佈 stale 稿）。
+
+### 進度更新 2026-07-12
+- 2026-07-12 | P0-1 K1592 進稿（新小節 sec:prespec_retest + tab:prespec_retest 8資產全表 + methodology Holm family=23 精確化）| 46f1766c3
+- 2026-07-12 | P0-2 K1591 雙軌降級（ex-post 標 suggestive；ex-ante holdout CI [-0.71,+0.39] 跨零如實入稿）| 46f1766c3
+- 2026-07-12 | P0-3 HM rebind K1256 canonical（full t=-1.01 p=0.31；high-VIX t=-0.79 p=0.43 NS）| 46f1766c3
+- 2026-07-12 | P0-4 走 route(iii)：26/14-asset 宣稱裁到可證範圍（abstract+intro+data 三處），ρ=0.944 N=5 明標 descriptive | 46f1766c3
+- 注意：P0-1 的 reproduce.py 對新表的 MISMATCH-gating 尚未接（列入 P1 首項）；main_v_ijf.pdf 39pp 編譯 0 undefined
