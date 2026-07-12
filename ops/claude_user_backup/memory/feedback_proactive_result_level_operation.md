@@ -19,4 +19,6 @@ metadata:
 3. **不繞過正規流程**：文章一律走 feed-publisher（圖嵌 content 的 `![](url)`，非只放 details metadata）—— mile_7b95b816 因我自寫 publish script 用 details.charts 沒嵌正文 → 閱讀頁 0 圖。
 4. 時效性資料（盤中/tick/order flow）優先：錯過窗口可能永久無法補；data_freshness 維度緊盯。
 
+**2026-07-12 老闆 Telegram msg 602 再次確認（standing directive）**：「你是自主運營經理，富有 loop engineering / PDCA 概念進行各種底層『自我持續』優化，不用問我」。→ 底層自我優化（loop health、dispatch、gate、資料流、skill/rules 固化）一律自主動手，不寄選擇題、不等 ack；只有不可回復風險與研究方向 pivot 才問。見 [[project_loop_engineering_layer]] [[feedback_dont_ask_do]] [[feedback_own_judgment_dont_credit_user]]。
+
 關聯：[[project_platform_vision_full]]（全自動不間斷自我運營）、[[feedback_content_quality_patrol_gap]]（只有用戶會發現的問題=缺巡檢，本次正是該 gap 擴大版）、[[feedback_finish_task_before_standby]]。
