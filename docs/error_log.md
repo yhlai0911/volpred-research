@@ -2,6 +2,33 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 05:47 — K1701 巢狀 QLIKE 用 expanding raw DM 承載 NULL，修正後只能判 inconclusive
+
+**問題**：K1701 primary family 比較 HAR 與 HAR+`rdisp`；後者嚴格包含前者，卻把 expanding-window
+QLIKE loss 丟進 raw DM，再以 Harvey |t|>3 + BH-FDR 接到 verdict。巢狀虛無下，大模型多估係數造成的
+forecast noise 會讓 raw DM 偏向較小模型；「沒拒絕」因此不能反推「沒有增量」。Clark–West 只修正
+MSPE，不能貼標成 QLIKE general-loss inference。
+
+**根因**：舊實驗把三個不同問題混成一個 gate：(1) realized finite-sample loss 方向；(2) 巢狀模型是否有
+general-loss predictive ability；(3) 能否排除實質大小的增益。更細一層，HAR 與 HAR+signal 各自 dropna、
+各自 expanding refit，連訓練日期都未保證相同；即使把統計量改名，也不是合法的 bounded-window GW 設計。
+
+**解決**（commits `130c4ef76` / `fb5520f03`）：
+1. 新增 paired fixed-window engine：兩模型用 augmented complete-case mask、同一批 training dates、固定
+   756 筆，並逐 origin 強制 `j+h<i`；六格 audit 的 min/max train size 全為 756。
+2. primary 改 Giacomini–White (2006) equal-unconditional-predictive-ability test on Patton QLIKE；raw DM
+   明示 `diagnostic-only` / `feeds_gate=false`，nested-DM ratchet 不再報 K1701。
+3. 預先指定 1% relative QLIKE material-gain exclusion，Holm-FWER 跨六格；family 缺格、重複或多出
+   unexpected cell 一律 raise，封死 `all([])==True` 假 bounded-null。
+4. 結果：正向 GW gate 0/6；但 Holm 後排除 ≥1% gain 亦 0/6，因此正式 verdict 是
+   `INCONCLUSIVE_NO_EXACT_NULL_CLAIM`，不是 NULL。控制 avg-vol level 後的 rho/csvd_rel 另以同口徑
+   MSE + Clark–West + BH 判定，0/12 通過；只能說未發現穩健增量，不能說 exact zero。
+5. 27 個相關測試通過（K1701 10 + nested-DM ratchet 17）；README、fig4/fig7 與 results JSON 全部重綁
+   新 inference，results 仍採 temp → parse → `os.replace` 原子寫入。
+
+**教訓**：對巢狀 forecast comparison，檢定名稱、loss、estimation scheme、claim strength 必須四者對齊。
+valid test 的 fail-to-reject 仍不證明 null；若要寫 bounded null，必須先定 material margin 並反轉舉證責任。
+
 ## 2026-07-13 05:20 — CI 紅 4 班：重構搬走接縫，舊 global 留在原地，monkeypatch 靜默 no-op
 
 **問題**：main Test Suite 自 2026-07-12 18:00 UTC 起連續 4 次紅，唯一失敗點

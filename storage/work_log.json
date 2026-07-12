@@ -16602,5 +16602,15 @@
     "owner": "hourly-05",
     "commit": null,
     "summary": "alert_orphan_branch_20260712（critical）：claude/fervent-payne-f38a73 帶 3 個未合併 commit、51.9h 無人接。diff --stat vs main 顯示 68 萬行刪除 = stale base，diff 沒有判讀價值。改用 path-scoped 逐項核對它宣稱的四件工作：PHASE-Z 只 commit 本班產出（main 的 phase_z.py 有更新的三個 commit）、worktree deny 補 -C 前綴（hook 註解正是在講同一修正）、orphan_branch 反向盲區 detached worktree 無 ref（alerts.py:1159 已有）、撈回 crash-atomic 寫入（main 已 import fcntl，branch 的 diff 反而會刪掉它）。四項全部已被 main 的平行實作取代，且硬 merge 會靜默倒退 main 已有的 fcntl atomic 寫入與 dispatch duplicate-slot 偵測。依 alert 步驟 4 判定 superseded，git branch -D（SHA e0b7bacb5 / 2ac9f44ee / 5ab1a6988 記在 error_log，reflog 可救回）。這條 branch 的存在本身就是平行實作的證據——同樣四件事被做了兩次。"
+  },
+  {
+    "timestamp": "2026-07-13T05:47:44+08:00",
+    "task_type": "experiment",
+    "task_id": "k1701_primary_inference_nested_general_loss",
+    "outcome": "completed",
+    "actor": "codex-vscode",
+    "owner": "codex-vscode",
+    "commit": "130c4ef76",
+    "summary": "K1701 primary inference 已從 expanding raw DM 改為 paired fixed-756 rolling Giacomini-White + Patton QLIKE。正向 gate 0/6，Holm 後排除至少 1% gain 亦 0/6，正式 verdict 為 INCONCLUSIVE_NO_EXACT_NULL_CLAIM；控制波動水準後 MSE/Clark-West/BH 0/12。27 tests PASS，raw DM 僅保留 diagnostic。"
   }
 ]
