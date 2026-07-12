@@ -129,3 +129,7 @@ v2 的 8 個 MEDIUM citation 問題只修了 C-01；C-02–C-09 全數未動：
 ## 接續提示詞
 
 讀 `paper/vt-insurance-cost/EXECUTION.md` 後，**P0 已全數完成（package 衛生 + reproduce gate 9/9 真 green + main.tex 三處，commit `5183318c0`+`b0ea148e9`）**，從 **P1-1 citation 清理** 開始：讀 `review_history/v2/citation_check_report.md` 的 C-02–C-09（perchet 過度歸功與 year/key 不符、CRSP 佐證缺失建議刪、cboe2014 不可驗證、harvey/liu/fleming 支撐度措辭），一次修完 `main.tex` bibliography 與正文引用點 → 跑 `/citation-verifier` 複核目標 0 MAJOR。接著 P1-2（累積財富 + VoV regime 底色主圖）、P1-3（91% share stationary bootstrap 95% CI 固定 seed + net-of-payout 口徑澄清段）。修訂在主線程進行（不丟 background agent 改 .tex，paper-workflow 硬規則）。**投稿前硬 gate：main.tex 改動後先 xelatex 重編譯確認**，再 `uv run volpred ops paper-update --paper-id vt-insurance-cost` 同步線上驗證。禁止事項務必遵守：別動 headline 54 bps（改 63 與 K846 canonical 矛盾，gate 已用同口徑方案解決）、別 merge 進 vt-trend-following、與 P5 錯開投稿時序（P4 先行）。
+
+### 進度更新 2026-07-12
+- 2026-07-12 | P1 citation 清理 C-02..C-11 全落地（16 refs DOI+期號、cboe2012 rebind、perchet 2016、huang2019 key、五處過度歸因軟化）；main.pdf 15pp 0 undefined | 478d4006e
+- 2026-07-12 | P1 剩餘：主圖 + 91% share bootstrap CI（vtins-p1-assets agent 計算中，返回後主線程接線 .tex）
