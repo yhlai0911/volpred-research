@@ -169,6 +169,11 @@ class DreamFinding:
     # git-push-backup fired a burst 06-30→07-05 then went quiet, yet three daily
     # dreaming runs still saw it inside the 48h window and escalated to CRITICAL).
     activity_marker: str | None = None
+    # Task type the queue writer stamps on an auto-dispatched follow-up. Defaults to
+    # platform_ops (what every detector before 2026-07-12 wanted). An orphaned
+    # experiment needs a RESEARCH closure — Codex review + a knowledge.json entry —
+    # so it routes as `experiment` and picks up that type's effort tier.
+    task_type: str = "platform_ops"
 
     def key(self) -> str:
         return self.signature
@@ -634,6 +639,136 @@ def detect_persistent_alerts(
     return out
 
 
+# ---------------------------------------------------------------------------
+# Orphaned experiments — research that was done and then silently dropped
+# ---------------------------------------------------------------------------
+# Ownership of a RESULT used to be bound, implicitly, to the lifetime of the
+# process that produced it. Producers die: a fire hits its 3000s cap and is
+# SIGKILLed, an agent exits, a worktree is left behind on a stale base. Whatever
+# they made then belongs to nobody, because nothing outside the producer was ever
+# told it exists. The artifacts do reach main (file-level harvest works) — and
+# then nothing happens to them: no knowledge entry, no article, no paper cite, no
+# open task. The experiment ran, cost real tokens, and produced nothing anyone can
+# use. That is the waste the owner named on 2026-07-12 (Telegram: 「做了研究結果
+# 一直變孤兒浪費」/「這到底又要出現幾次孤兒 立刻從底層改好」).
+#
+# The fix is a domain-model correction, not another alert: a result belongs to a
+# TASK, never to a process. This detector is the reaper that re-attaches an owner.
+# It emits a closure TASK (auto_dispatch → queued the same night, no three-strike
+# wait — a finished-but-dropped experiment is unambiguous, and making it sit three
+# nights to even be noticed IS the waste), so nobody has to remember and the owner
+# never has to triage an alert.
+ORPHAN_EXPERIMENT_SETTLE_HOURS = 6  # a just-finished run may still be in flight
+ORPHAN_EXPERIMENT_MAX_AGE_DAYS = 30  # older = historical backlog; a separate sweep owns it
+ORPHAN_EXPERIMENT_MAX_FINDINGS = 5  # per run — the FULL count always ships in evidence
+_K_EXPERIMENT_DIR = re.compile(r"^(k\d{3,4})(?:[_-]|$)", re.IGNORECASE)
+
+
+def _consumer_blob(storage_dir: str) -> str:
+    """Everything downstream that could be consuming an experiment, lowercased.
+
+    knowledge.json / feed.json / paper .tex are the real downstream artifacts. An
+    OPEN task (pending|in_progress) counts too — someone is on their way to it, so
+    it is owned, not orphaned. A `succeeded` task that referenced the experiment
+    but left no artifact behind is deliberately NOT a consumer: "closed" without a
+    knowledge entry is exactly the failure this detector exists to catch.
+    """
+    root = project_path(storage_dir).parent
+    blob: list[str] = []
+    for rel in ("storage/memory/knowledge.json", "storage/reports/feed.json"):
+        try:
+            blob.append((root / rel).read_text(encoding="utf-8", errors="ignore").lower())
+        except OSError as exc:
+            warn("dreaming", "orphan_experiments: consumer source unreadable", path=rel, err=str(exc))
+    try:
+        for tex in sorted((root / "paper").rglob("*.tex")):
+            blob.append(tex.read_text(encoding="utf-8", errors="ignore").lower())
+    except OSError as exc:
+        warn("dreaming", "orphan_experiments: paper tree unreadable", err=str(exc))
+    open_tasks = [
+        t for t in _load_next_tasks(storage_dir)
+        if str(t.get("status") or "").lower() in ("pending", "in_progress")
+    ]
+    blob.append(json.dumps(open_tasks, ensure_ascii=False).lower())
+    return "\n".join(blob)
+
+
+def detect_orphaned_experiments(
+    storage_dir: str, snapshot: dict[str, Any], now: datetime
+) -> list[DreamFinding]:
+    """Experiments with results on disk that nothing downstream consumes."""
+    root = project_path(storage_dir).parent
+    exp_root = root / "experiments"
+    if not exp_root.is_dir():
+        return []
+    try:
+        consumers = _consumer_blob(storage_dir)
+    except (OSError, ValueError) as exc:  # fail-open: dreaming must not die on this
+        warn("dreaming", "orphan_experiments: consumer scan failed; skipping", err=str(exc))
+        return []
+
+    orphans: list[tuple[float, str, str]] = []  # (age_days, dir_name, kid)
+    aged_out = 0
+    for d in sorted(exp_root.iterdir()):
+        m = _K_EXPERIMENT_DIR.match(d.name) if d.is_dir() else None
+        if not m:
+            continue  # article / paper evidence dirs are not K-experiments
+        results = [
+            f for f in d.iterdir()
+            if f.is_file() and (f.name.endswith("_results.json") or f.name == "results.json")
+        ]
+        if not results:
+            continue  # never finished — an unfinished run is not an orphaned result
+        try:
+            newest = max(f.stat().st_mtime for f in results)
+        except OSError as exc:
+            warn("dreaming", "orphan_experiments: stat failed", path=str(d), err=str(exc))
+            continue
+        age_days = (now - datetime.fromtimestamp(newest, tz=timezone.utc)).total_seconds() / 86400
+        if age_days < ORPHAN_EXPERIMENT_SETTLE_HOURS / 24:
+            continue  # still settling; the producing fire may not have closed out yet
+        kid = m.group(1).lower()
+        if kid in consumers:
+            continue  # someone downstream is using it, or an open task owns it
+        if age_days > ORPHAN_EXPERIMENT_MAX_AGE_DAYS:
+            aged_out += 1
+            continue
+        orphans.append((age_days, d.name, kid))
+
+    if not orphans:
+        return []
+    orphans.sort()  # freshest first — closure is cheapest while the context is warm
+    shown = orphans[:ORPHAN_EXPERIMENT_MAX_FINDINGS]
+    out: list[DreamFinding] = []
+    for age_days, name, kid in shown:
+        out.append(
+            DreamFinding(
+                pattern_type="orphaned_experiment",
+                signature=f"orphaned_experiment:{kid}",
+                severity="warn",
+                remediation="auto_dispatch",
+                task_type="experiment",
+                evidence=[
+                    f"experiments/{name}/ has results but no consumer "
+                    f"(knowledge.json / feed.json / paper / open task all miss '{kid}')",
+                    f"finished {age_days:.1f} days ago",
+                    f"orphan backlog this run: {len(orphans)} within "
+                    f"{ORPHAN_EXPERIMENT_MAX_AGE_DAYS}d (queueing "
+                    f"{len(shown)}), plus {aged_out} older than "
+                    f"{ORPHAN_EXPERIMENT_MAX_AGE_DAYS}d not queued",
+                ],
+                proposal=(
+                    f"收尾 experiments/{name}/：讀 results.json → Codex review "
+                    f"（CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id "
+                    f"+ reviewer provenance）。Null result 照實寫，null 也是結果。"
+                    f"若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。"
+                ),
+                governance_target="storage/memory/knowledge.json",
+            )
+        )
+    return out
+
+
 DETECTORS = (
     detect_repeated_tool_failures,
     detect_recurring_errors,
@@ -643,6 +778,7 @@ DETECTORS = (
     detect_semantic_concentration,
     detect_memory_governance,
     detect_persistent_alerts,
+    detect_orphaned_experiments,
 )
 
 
@@ -944,7 +1080,7 @@ def apply_auto_dispatch(
                             f"治理檔（error_log / rules / knowledge.json）仍是 propose-only："
                             f"接手的 agent 判斷後決定是否改，dreaming 不自動改。"
                         ),
-                        "task_type": "platform_ops",
+                        "task_type": f.task_type,
                         "priority": 2 if f.severity == "critical" else 3,
                         "status": "pending",
                         "source": "dreaming",

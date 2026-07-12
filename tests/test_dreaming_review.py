@@ -583,3 +583,137 @@ def test_queueing_never_touches_the_real_repo_queue(tmp_path):
 
     real = Path(__file__).resolve().parents[1] / "storage" / "next_tasks.json"
     assert "sig:x" not in real.read_text(encoding="utf-8"), "must never write the live queue"
+
+
+# ---------------------------------------------------------------------------
+# detect_orphaned_experiments ï¿½€” research that ran and was then silently dropped
+# ---------------------------------------------------------------------------
+# Regression cover for the 2026-07-12 owner escalation (Telegram: ï¿½€Œï¿½šï¿½†ï¿½”ç©¶ï¿½ï¿½žœ
+# ï¿½€ï¿½›ï¿½ï¿½Šï¿½­ï¿½ï¿½…’æµªè²»ï¿½€). Each test below is one of the conditions that let a finished
+# experiment sit unconsumed: no downstream artifact, an owner-less "succeeded"
+# task, a producer that died before closing out.
+def _experiment(tmp_path: Path, name: str, *, age_days: float, results: bool = True) -> Path:
+    d = tmp_path / "experiments" / name
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "README.md").write_text("x", encoding="utf-8")
+    if results:
+        r = d / f"{name}_results.json"
+        r.write_text('{"verdict": "NULL"}', encoding="utf-8")
+        mtime = (NOW - timedelta(days=age_days)).timestamp()
+        import os
+
+        os.utime(r, (mtime, mtime))
+    return d
+
+
+def _consumers(storage: Path, *, knowledge="[]", feed="[]", tasks=None) -> None:
+    _write(storage / "memory" / "knowledge.json", json.loads(knowledge))
+    _write(storage / "reports" / "feed.json", json.loads(feed))
+    _write(storage / "next_tasks.json", tasks if tasks is not None else [])
+
+
+def test_orphaned_experiment_with_no_consumer_is_flagged(tmp_path):
+    storage = _storage(tmp_path)
+    _consumers(storage)
+    _experiment(tmp_path, "k1630", age_days=7)
+    findings = dr.detect_orphaned_experiments(str(storage), {}, NOW)
+    assert [f.signature for f in findings] == ["orphaned_experiment:k1630"]
+    f = findings[0]
+    # Queued the same night, as a research closure ï¿½€” not a three-strike proposal
+    # and not a platform_ops chore.
+    assert f.remediation == "auto_dispatch"
+    assert f.severity == "warn"
+    assert f.task_type == "experiment"
+
+
+def test_orphaned_experiment_consumed_by_knowledge_is_not_flagged(tmp_path):
+    storage = _storage(tmp_path)
+    _consumers(storage, knowledge='[{"experiment_id": "K1630", "verdict": "PASS"}]')
+    _experiment(tmp_path, "k1630", age_days=7)
+    assert dr.detect_orphaned_experiments(str(storage), {}, NOW) == []
+
+
+def test_orphaned_experiment_with_open_task_is_owned(tmp_path):
+    storage = _storage(tmp_path)
+    _consumers(storage, tasks=[{"id": "t1", "status": "pending", "title": "close K1630"}])
+    _experiment(tmp_path, "k1630", age_days=7)
+    assert dr.detect_orphaned_experiments(str(storage), {}, NOW) == []
+
+
+def test_succeeded_task_without_knowledge_is_still_an_orphan(tmp_path):
+    """The exact failure mode: a task claimed closure but left nothing behind."""
+    storage = _storage(tmp_path)
+    _consumers(storage, tasks=[{"id": "t1", "status": "succeeded", "title": "run K1630"}])
+    _experiment(tmp_path, "k1630", age_days=7)
+    assert [f.signature for f in dr.detect_orphaned_experiments(str(storage), {}, NOW)] == [
+        "orphaned_experiment:k1630"
+    ]
+
+
+def test_just_finished_experiment_is_left_to_settle(tmp_path):
+    """A producing fire may still be closing out; don't race it."""
+    storage = _storage(tmp_path)
+    _consumers(storage)
+    _experiment(tmp_path, "k1630", age_days=0.1)  # ~2.4h < 6h settle window
+    assert dr.detect_orphaned_experiments(str(storage), {}, NOW) == []
+
+
+def test_experiment_without_results_is_not_an_orphan(tmp_path):
+    storage = _storage(tmp_path)
+    _consumers(storage)
+    _experiment(tmp_path, "k1630", age_days=7, results=False)
+    assert dr.detect_orphaned_experiments(str(storage), {}, NOW) == []
+
+
+def test_non_k_evidence_dirs_are_ignored(tmp_path):
+    """trending_* / event_article_* dirs are article evidence, not K-experiments."""
+    storage = _storage(tmp_path)
+    _consumers(storage)
+    _experiment(tmp_path, "trending_mag7_jun2026_vol", age_days=7)
+    _experiment(tmp_path, "event_article_nfp_2026_07_03_t1", age_days=7)
+    assert dr.detect_orphaned_experiments(str(storage), {}, NOW) == []
+
+
+def test_orphan_findings_are_capped_but_backlog_is_disclosed(tmp_path):
+    """No silent caps: the full backlog count ships in the evidence."""
+    storage = _storage(tmp_path)
+    _consumers(storage)
+    for i in range(8):
+        _experiment(tmp_path, f"k17{i:02d}", age_days=2 + i)
+    findings = dr.detect_orphaned_experiments(str(storage), {}, NOW)
+    assert len(findings) == dr.ORPHAN_EXPERIMENT_MAX_FINDINGS
+    # freshest first ï¿½€” closure is cheapest while the context is warm
+    assert findings[0].signature == "orphaned_experiment:k1700"
+    assert any("orphan backlog this run: 8" in e for e in findings[0].evidence)
+
+
+def test_aged_out_orphans_are_counted_not_queued(tmp_path):
+    storage = _storage(tmp_path)
+    _consumers(storage)
+    _experiment(tmp_path, "k1400", age_days=90)
+    findings = dr.detect_orphaned_experiments(str(storage), {}, NOW)
+    assert findings == []
+
+
+def test_orphan_finding_queues_as_experiment_task_type(tmp_path):
+    """The queue writer must honour DreamFinding.task_type (default stays platform_ops)."""
+    storage = _storage(tmp_path)
+    _write(storage / "next_tasks.json", [])
+    orphan = dr.DreamFinding(
+        pattern_type="orphaned_experiment",
+        signature="orphaned_experiment:k1630",
+        severity="warn",
+        remediation="auto_dispatch",
+        task_type="experiment",
+    )
+    chore = dr.DreamFinding(
+        pattern_type="missing_retry_strategy",
+        signature="missing_retry_strategy:k9",
+        severity="warn",
+        remediation="auto_dispatch",
+    )
+    dr.apply_auto_dispatch([orphan, chore], str(storage), NOW)
+    queued = {t["id"]: t for t in json.loads((storage / "next_tasks.json").read_text())}
+    types = {t["title"]: t["task_type"] for t in queued.values()}
+    assert types["[dreaming] orphaned_experiment:k1630"] == "experiment"
+    assert types["[dreaming] missing_retry_strategy:k9"] == "platform_ops"
