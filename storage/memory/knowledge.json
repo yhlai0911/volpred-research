@@ -38757,5 +38757,26 @@
     },
     "results_sha256": "ffffe2a735571160c67eae277a6ee0b66e7d8d8a3e2d7a7731aa0194f4a3e392",
     "created_at": "2026-07-12T14:47:45.982537+00:00"
+  },
+  {
+    "category": "vol_managed_factor_zoo",
+    "experiment_id": "K1702",
+    "verdict": "CONDITIONAL_PASS",
+    "research_verdict": "NULL_OR_MIXED_INDIVIDUAL_FACTOR_OOS",
+    "reviewer_source": "code-reviewer subagent fallback (2 independent fresh-context reviews: pre-run + post-run). Primary-path Codex re-verify PENDING (queued) -- hourly fire forbids in-fire codex exec spawn.",
+    "title": "K1702：vol-managed factor zoo 的 OOS + 淨成本 NULL；並推翻 R3 的「MDD 改善」claim（scale artifact）",
+    "content": "[執行: worktree agent (compute-queue agent job), 收件+審查: hourly-06 主線程] K1702 檢驗 Moreira-Muir (2017) 的 vol-managed 效果能否推廣到整個因子動物園。資料 = Fama-French + AQR QMJ 官方 long-short paper factors（SMB/HML/RMW/CMA/MOM/QMJ + Mkt-RF 對照），日資料 1963-07-01～2026-04-30（15,813 obs），月頻 inverse-variance signal = (1/monthly_RV).shift(1)，leverage cap 3x，normalization 常數在 1963-07～1999-12 校準窗固定（不重估 → 真 OOS），OOS = 2000-01～2026-04（n=316 月），primary spec = capped_3x + 25bp overlay 成本，seed=42。\n\n結果 NULL：primary spec 下 6 個 zoo 因子只有 MOM 的 Sharpe 差為正（+0.265），zoo median Sharpe 差 = −0.231；BH-FDR 後 paired Sharpe bootstrap 0/6 顯著為正、spanning alpha 過 Harvey |t|>3 者 0/6（MOM alpha t=2.374、BH q=0.055，邊緣，不宣稱存活）；CMA 反而顯著變差。等權動物園組合 gross 只有 +0.036 Sharpe（不顯著），10bp 即翻負，50bp 時 −0.177。成本是主角：組合波動僅 5.85%，~0.64%/yr 的 overlay drag 就吃掉大半個 Sharpe 單位。同一 pipeline 的證偽測試能重現 MM 的市場結果（in-sample、vol-matched：alpha 4.70%/yr, t=2.70），但分解顯示該效果主要是 pre-1963 現象（1926-1963 alpha 7.7%/yr → 1963-1999 只剩 2.0%/yr, t=1.07），動物園的 null 因此並不意外。\n\n推翻既有 claim（研究誠實 #6）：院內 R3 宣稱「vol-managing 讓 MDD 改善（5/6 因子）」。raw MDD 確實 5/6 改善，但 raw MDD 不是 scale-invariant —— managed 序列的實現波動只有 unmanaged 的 1/2～1/4。改用 scale-invariant 的「MDD ÷ 實現波動」後只剩 1/6（僅 MOM）。院內 N107 早已指出 MDD 改善是機械性的；K1702 的增量是更強的一步：單位風險的回撤反而「變差」。範圍限定於 long-short paper factors —— K1265（SPY、VIX-managed）是不同設計，本實驗未測，不宣稱推翻，列入待重驗。\n\n方法論教訓（可推廣，最重要的產出）：比較兩個「曝險水準不同」的策略時，raw mean-return 的 DM 檢定與 raw max drawdown 都不是 scale-invariant —— 低曝險組合的 raw mean 機械性偏低、raw MDD 機械性偏淺，兩者會系統性地朝「低曝險=較差但較安全」誤導。gate 必須建在 Sharpe / spanning alpha t / 單位波動的 drawdown 上。本實驗因此把 DM 明確降級為診斷、不當 gate；也正是這個修正才暴露出 MDD 的 scale artifact。同理 spanning alpha 的「水準」也非 scale-invariant（只有 t 是），不同曝險的 alpha magnitude 不可對讀。\n\n限制：overlay 成本是下界（不含 constituent-level 換股 / 價差 / 放空 / 再平衡；long-short 實際 gross notional 約 2 倍）→ null 是保守的；paper factors 不可直接投資；固定 2000 切點只是一種 real-time 設計；AQR 重建 QMJ 全歷史故無 vintage。",
+    "evidence": [
+      "experiments/k1702/k1702_results.json",
+      "experiments/k1702/README.md",
+      "experiments/k1702/k1702.py",
+      "OOS 2000-01~2026-04, n=316 months, seed=42, primary=capped_3x+25bp",
+      "primary_gate: bootstrap_positive_fdr_factors=0, alpha_harvey_positive_fdr_factors=0, positive_sharpe_factors=1/6",
+      "drawdown_analysis: raw_mdd_improved_count=5 -> vol_normalized_mdd_improved_count=1",
+      "multifactor zoo gross Sharpe diff=+0.036 (ns); 10bp negative; 50bp -0.177",
+      "MM falsification (in-sample, vol-matched): alpha 4.70%/yr t=2.70; pre-1963 7.7%/yr vs 1963-1999 2.0%/yr (t=1.07)"
+    ],
+    "confidence": 0.85,
+    "experiment_path": "experiments/k1702"
   }
 ]
