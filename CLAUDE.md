@@ -296,7 +296,8 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 ## 自動化與控制面
 
 **核心 dispatch 規則（inline 保留）**：
-- 任務優先序：`user-assigned > scheduled > agent-discovered`；slot running < 4 可繼續 discovery（不必等 queue 清空）
+- 任務優先序：`user-assigned ≈ 時效性(event-driven) > scheduled > agent-discovered`；slot running < 4 可繼續 discovery（不必等 queue 清空）
+- **時效性 / 即時性的研究與發文一律 P1**（老闆 2026-07-12 Telegram msg 588）：event_article / trending_repost / 事件驅動實驗（財報、CPI/FOMC/NFP、突發市場事件、當下熱門主題）**與 user-assigned 同級**，插隊在所有 scheduled 研究與 ops 之前 — 時效過了價值歸零，非時效任務晚一天沒差。已機械化：`event_jobs.build_pending_event_task` + `refill_reader_facing_pool._build_trending_task` 都以 `priority=1` 建任務；**手動建時效任務時也必須寫 `priority: 1`**。
 - 同一 K 編號禁止雙 agent — 派前 `ls experiments/` + `ls .claude/worktrees/` 檢查
 - **Cron skip 用 stub**（slot 滿 / agent 仍跑 → 回覆 ≤15 字）
 - 每次 idle / discovery pass 必須產生可驗證輸出，不可空轉
