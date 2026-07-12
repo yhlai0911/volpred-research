@@ -59,6 +59,81 @@ from volpred.publisher.publisher import _log_dedup_decision  # noqa: E402
 # Feed statuses that are not reader-visible; they cannot constitute coverage.
 DEAD_STATUSES = ("unpublished", "retracted")
 
+# Overlap coefficient above which a live article is worth showing the caller as a
+# possible same-story hit. Tuned low on purpose: this list is advisory, never a
+# block, so a false positive costs one glance and a false negative costs an
+# article nobody needed.
+LEXICAL_HINT_THRESHOLD = 0.18
+LEXICAL_HINT_LIMIT = 5
+
+
+def _tokens(text: str) -> set[str]:
+    """Latin words + CJK character bigrams — a script-agnostic bag of tokens."""
+    toks: set[str] = set()
+    word = ""
+    cjk_run = ""
+
+    def flush_cjk() -> None:
+        for i in range(len(cjk_run) - 1):
+            toks.add(cjk_run[i : i + 2])
+
+    for ch in text.lower():
+        if ch.isascii() and ch.isalnum():
+            word += ch
+            flush_cjk()
+            cjk_run = ""
+        elif "一" <= ch <= "鿿":
+            cjk_run += ch
+            if len(word) >= 3:
+                toks.add(word)
+            word = ""
+        else:
+            if len(word) >= 3:
+                toks.add(word)
+            word = ""
+            flush_cjk()
+            cjk_run = ""
+    if len(word) >= 3:
+        toks.add(word)
+    flush_cjk()
+    return toks
+
+
+def find_lexical_hints(title: str, text: str, feed: list[dict]) -> list[dict]:
+    """Live articles whose titles share a lot of surface vocabulary with this one.
+
+    A crude stand-in for the arc gate, used only when the arc signature is too
+    thin for the arc gate to say anything (see Gate 3). Overlap coefficient
+    rather than Jaccard, because titles are short and a long draft body would
+    otherwise drown every candidate.
+    """
+    probe = _tokens(f"{title}\n{text[:400]}")
+    if not probe:
+        return []
+    hits: list[dict] = []
+    for item in feed:
+        if item.get("status") in DEAD_STATUSES:
+            continue
+        cand_title = str(item.get("title") or "")
+        cand = _tokens(cand_title)
+        if not cand:
+            continue
+        shared = probe & cand
+        score = len(shared) / min(len(probe), len(cand))
+        if score >= LEXICAL_HINT_THRESHOLD:
+            hits.append(
+                {
+                    "id": item.get("id", "?"),
+                    "title": cand_title,
+                    "status": item.get("status", "?"),
+                    "audience": _arc_item_audience(item),
+                    "published_at": (item.get("published_at") or item.get("created_at") or "")[:10],
+                    "score": round(score, 3),
+                }
+            )
+    hits.sort(key=lambda h: h["score"], reverse=True)
+    return hits[:LEXICAL_HINT_LIMIT]
+
 
 def find_k_coverage(k_id: str, feed: list[dict], audience: str | None) -> list[dict]:
     """Live feed articles already carrying this K-id (optionally same audience).
@@ -147,6 +222,29 @@ def main() -> int:
         args.title, text, feed, days=args.days, new_refs=new_refs, audience=args.audience
     )
     report["arc_duplicates"] = dups
+
+    # Gate 3 — thin signature. `find_arc_duplicates` bails out with [] when the
+    # piece has neither entities nor refs (arc_dedup.py ~L856: "with no entities
+    # AND no refs there is nothing to anchor a match on"). That [] means "I could
+    # not look", not "I looked and it is clean" — but this CLI used to render both
+    # as the same ✅. 2026-07-13: the trending task "AI營收不如預期？科技股選擇權偏斜率"
+    # carried no K-id and no ticker, so it scored entities=[] and passed with a
+    # green tick while four live articles already told that exact story
+    # (mile_8a5e80b0 / mile_0941e2f0 / mile_49616ac2 / mile_622a2b73).
+    # Per `.claude/rules/dedup-gate-audit.md` a fuzzy gate must fail OPEN, so this
+    # stays exit 0 — a thin signature is not evidence of duplication. What it must
+    # not do is claim the piece is clean. Show the lexical near-misses and put the
+    # judgement back on the caller, who still owes the 3-layer check either way.
+    thin = not report["entities"] and not new_refs
+    report["signature_thin"] = thin
+    hints = find_lexical_hints(args.title, text, feed) if thin else []
+    report["lexical_hints"] = hints
+    report["verdict"] = (
+        "block_k_coverage" if coverage
+        else "block_arc_dup" if dups
+        else "unjudged_thin_signature" if thin
+        else "clean"
+    )
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
     if coverage:
@@ -181,6 +279,29 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
+
+    if thin:
+        _log_dedup_decision(
+            storage_dir, "warn_thin_signature", args.title, None,
+            f"no entities and no refs -> arc gate cannot judge; "
+            f"{len(hints)} lexical hint(s); audience={args.audience or 'any'}",
+        )
+        listed = "\n".join(
+            f"    - {h['id']} [{h['status']}/{h['audience']}] {h['published_at']} "
+            f"(overlap {h['score']}) {h['title']}"
+            for h in hints
+        ) or "    (no lexical near-misses either — but that is still not a clean bill)"
+        print(
+            "\n⚠️  SIGNATURE TOO THIN — this topic has no experiment ref and no "
+            "recognisable entity (asset / ticker / index), so the arc gate had "
+            "nothing to match on. It did NOT clear you; it could not look.\n"
+            f"    Closest live articles by wording:\n{listed}\n"
+            "    Do the 3-layer check by hand (grep feed for the theme, not just "
+            "the title) before writing. If the topic is real, anchor it to a K-id "
+            "or a concrete asset and re-run — then the gate can actually work.",
+            file=sys.stderr,
+        )
+        return 0
 
     _log_dedup_decision(
         storage_dir, "pass_prewrite", args.title, None,
