@@ -55,8 +55,10 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
-WORKTREES_DIR = ROOT / ".claude" / "worktrees"
-AGENTS_DIR = ROOT / "storage" / "ops" / "agents"
+# No WORKTREES_DIR / AGENTS_DIR here: `dispatch_slot_budget` owns occupancy and
+# owns those paths. Re-declaring them would give a test something to monkeypatch
+# that nothing reads — a patch that silently no-ops and lets the test fall
+# through to the real repo. That is what broke CI on 2026-07-13.
 REPORT_PATH = ROOT / "storage" / "ops" / "dispatch_report_latest.json"
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 # Slot cap AND occupancy both live in `scripts/dispatch_slot_budget.py` — it is the

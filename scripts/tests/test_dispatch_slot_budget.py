@@ -150,3 +150,47 @@ def test_occupancy_only_counts_live_worktrees(fake_worktrees, monkeypatch):
     occ = sb.occupancy(now=later)
     assert occ["occupied"] == 0, "stale worktrees must not consume capacity"
     assert len(occ["stale"]) == 2, "…but they must still be reported, not silently dropped"
+
+
+def test_unreadable_agent_record_warns_and_holds_no_slot(tmp_path, monkeypatch, capsys):
+    """A corrupt agent record must not be swallowed: it frees the slot AND says so.
+
+    Moved here from tests/test_dispatch_type_rotation.py on 2026-07-13. There it
+    patched `continue_task_dispatch.{WORKTREES_DIR,AGENTS_DIR}` — globals that
+    stopped being read when occupancy moved into this module. The patch became a
+    no-op, so the test read the real `.claude/worktrees` and went red in CI.
+    """
+    agents = tmp_path / "agents"
+    agents.mkdir()
+    (agents / "bad-agent.json").write_text("{bad-json", encoding="utf-8")
+    monkeypatch.setattr(sb, "WORKTREES_DIR", tmp_path / "no-worktrees")
+    monkeypatch.setattr(sb, "AGENTS_DIR", agents)
+
+    occ = sb.occupancy()
+
+    assert occ["occupied"] == 0 and occ["active_agents"] == []
+    err = capsys.readouterr().err
+    assert "[slot-budget] WARN" in err and "bad-agent.json" in err, (
+        "an unparseable agent record must leave a trace (.claude/rules/"
+        f"no-silent-fallback.md); stderr was: {err!r}"
+    )
+
+
+def test_dispatcher_keeps_no_occupancy_paths_of_its_own():
+    """The dispatcher must not re-declare the paths occupancy is measured from.
+
+    A global nothing reads is worse than no global: `monkeypatch.setattr` still
+    succeeds against it, so a test patches a dead name, silently falls through to
+    the real repo, and only fails once the return shape drifts. That is the exact
+    2026-07-13 CI red. Cap and occupancy have one owner — this module.
+    """
+    src = (ROOT / "scripts" / "continue_task_dispatch.py").read_text(encoding="utf-8")
+    offenders = [
+        line.strip()
+        for line in src.splitlines()
+        if line.lstrip().startswith(("WORKTREES_DIR", "AGENTS_DIR")) and "=" in line
+    ]
+    assert not offenders, (
+        "continue_task_dispatch.py re-declared an occupancy path. Read it from "
+        f"dispatch_slot_budget instead. Offending: {offenders}"
+    )

@@ -112,22 +112,11 @@ def test_invalid_blocked_until_warns_and_keeps_explicit_block(capsys):
     assert "not-a-date" in captured.err
 
 
-def test_count_active_slots_warns_on_invalid_agent_record(tmp_path, monkeypatch, capsys):
-    worktrees = tmp_path / "worktrees"
-    agents = tmp_path / "agents"
-    worktrees.mkdir()
-    agents.mkdir()
-    (agents / "bad-agent.json").write_text("{bad-json", encoding="utf-8")
-    monkeypatch.setattr(dispatch, "WORKTREES_DIR", worktrees)
-    monkeypatch.setattr(dispatch, "AGENTS_DIR", agents)
-
-    slots = dispatch.count_active_slots()
-
-    assert slots == {"worktrees": [], "active_agents": [], "occupied": 0}
-    captured = capsys.readouterr()
-    assert "[dispatch] WARN agent record read failed; skipping" in captured.err
-    assert "bad-agent.json" in captured.err
-    assert "JSONDecodeError" in captured.err
+# `test_count_active_slots_warns_on_invalid_agent_record` used to live here. It
+# moved to scripts/tests/test_dispatch_slot_budget.py on 2026-07-13, together
+# with the behaviour: occupancy is `dispatch_slot_budget`'s, and a test belongs
+# next to the seam it patches. Left here it patched globals the dispatcher no
+# longer read, so it silently read the real repo instead.
 
 
 def test_load_recent_task_type_counts_warns_on_invalid_work_log(tmp_path, monkeypatch, capsys):
