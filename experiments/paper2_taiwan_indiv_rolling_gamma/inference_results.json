@@ -1,0 +1,141 @@
+{
+  "experiment_id": "paper2_taiwan_indiv_rolling_gamma",
+  "component": "inference",
+  "timestamp": "2026-07-12T20:06:52.129669+00:00",
+  "purpose": "Settle the two ship-blockers raised in review_notes.md: (1) the amplification ratio is ill-posed because its denominator is not distinguishable from zero; (2) the end-date movement was mis-diagnosed as sampling noise when the ~99% window overlap means the correct null SD is several times SMALLER than the marginal SE, not larger.",
+  "seed": 20260713,
+  "primary_window_end": "2026-07-09",
+  "a_ordering_sign_test": {
+    "test": "index gamma exceeds each individual stock's gamma",
+    "gaps_index_minus_stock": {
+      "2317.TW": 0.17779342331150405,
+      "2454.TW": 0.1807619252766538,
+      "2383.TW": 0.17226091086732306,
+      "2886.TW": 0.027479139755229892,
+      "2412.TW": 0.2273848554333491,
+      "2881.TW": 0.18893381546786547,
+      "2882.TW": 0.17314784656330043,
+      "2885.TW": 0.1728091434796507,
+      "2891.TW": 0.16665496400737487
+    },
+    "n_positive": 9,
+    "n_stocks": 9,
+    "sign_test_p_one_sided": 0.001953125,
+    "wilcoxon_stat": 45.0,
+    "wilcoxon_p_one_sided": 0.001953125,
+    "caveat": "Treats the nine stock gamma POINT ESTIMATES as the sample. It therefore ignores (i) each estimate's own sampling error and (ii) the cross-sectional dependence among nine stocks trading the same sessions, which makes the effective sample size smaller than nine. It is a test of the ORDERING claim ('the index gamma sits above the cross-section'), which is what the paper actually wants to assert, and it is assumption-light -- but it is not a test of the ratio's magnitude. Read it alongside the block bootstrap in part D."
+  },
+  "b_event_ablation": {
+    "tariff_cluster_2025_04": {
+      "ablated_range": [
+        "2025-04-07",
+        "2025-04-09"
+      ],
+      "sessions_removed": 3,
+      "window_end": "2026-07-09",
+      "twii_gamma_with": 0.19751852117653682,
+      "twii_gamma_without": 0.1672895696936702,
+      "twii_delta": -0.03022895148286661,
+      "gamma_mean_9stock_with": 0.03227118515850889,
+      "gamma_mean_9stock_without": 0.013398830034493893,
+      "gamma_mean_9stock_delta": -0.018872355124014993,
+      "reads_as": "Removing three sessions from a 2000-session window and watching gamma move is a DIRECT measure of their influence -- unlike comparing two windows that differ at both ends, which cannot attribute the change to the entering days."
+    },
+    "vixmageddon_2018_02_06": {
+      "ablated_range": [
+        "2018-02-06",
+        "2018-02-06"
+      ],
+      "sessions_removed": 1,
+      "window_end": "2026-04-17",
+      "note": "Tested on the 2026-04-17 window because that is the one whose span contains 2018-02-06. It is OUTSIDE the primary (2026-07-09) window -- which is exactly the mechanism claimed: the session drops out as the end date advances.",
+      "present_in_primary_window": false,
+      "twii_gamma_with": 0.26496569714121515,
+      "twii_gamma_without": 0.23146458938998526,
+      "twii_delta": -0.033501107751229886
+    }
+  },
+  "c_constant_gamma_null": {
+    "null_dgp": "GJR-GARCH(1,1) fitted to the FULL TWII sample; gamma constant by construction",
+    "null_params": {
+      "mu": 0.0393523606303622,
+      "omega": 0.031317103218027185,
+      "alpha[1]": 0.03422808233374202,
+      "gamma[1]": 0.11999532579538062,
+      "beta[1]": 0.880951642288921
+    },
+    "B": 999,
+    "replications_used": 999,
+    "replications_with_a_failed_fit": 0,
+    "sweep_end_dates": [
+      "2025-01-31",
+      "2025-02-28",
+      "2025-03-31",
+      "2025-04-30",
+      "2025-05-31",
+      "2025-06-30",
+      "2025-07-31",
+      "2025-08-31",
+      "2025-09-30",
+      "2025-10-31",
+      "2025-11-30",
+      "2025-12-31",
+      "2026-01-31",
+      "2026-02-28",
+      "2026-03-31",
+      "2026-04-30",
+      "2026-05-31",
+      "2026-06-30",
+      "2026-07-09"
+    ],
+    "observed_sweep_range_max_minus_min": 0.10993415798686382,
+    "null_range_mean": 0.0185175946534685,
+    "null_range_p50": 0.017264023595187528,
+    "null_range_p95": 0.03258354897183504,
+    "null_range_p99": 0.0402807843251043,
+    "p_value_one_sided": 0.001,
+    "reject_constant_gamma_at_5pct": true,
+    "reads_as": "p = P(sweep range >= observed | gamma truly constant). A small p means the movement across end dates is LARGER than a constant-parameter DGP produces, i.e. it is not sampling noise. It does NOT identify the cause: genuine time-variation in gamma and finite-sample sensitivity of the GJR MLE to a few influential negative returns both produce it. Both imply the same policy -- no single end date's rolling estimate is a structural quantity."
+  },
+  "d_block_bootstrap_difference": {
+    "method": "Moving-block bootstrap, block length 252 sessions (~1 trading year), B=999. Date blocks are resampled ONCE and applied to all ten securities jointly, so the cross-sectional dependence among nine stocks trading the same sessions is preserved -- a naive sqrt(sum var_i)/9 assumes it away.",
+    "caveat": "Block resampling breaks the GARCH volatility recursion at block boundaries, which attenuates measured persistence. A 252-session block leaves only ~8 boundaries in a 2000-session window, so the distortion is small, but this is an APPROXIMATE interval, not an exact one. The sign test (part A) is the assumption-light backstop for the ordering claim.",
+    "n_obs_common_panel": 1999,
+    "B": 999,
+    "replications_used": 999,
+    "replications_dropped": 0,
+    "difference_D_twii_minus_mean9": {
+      "point": 0.1837237830262594,
+      "se": 0.0616159968885508,
+      "ci95_percentile": [
+        0.07184825780118927,
+        0.29772391294167316
+      ],
+      "p_D_le_zero": 0.0
+    },
+    "denominator_mean9": {
+      "point": 0.054196662901232276,
+      "se": 0.03687302283694882,
+      "ci95_percentile": [
+        -0.015901641033738707,
+        0.13004870639123023
+      ],
+      "replications_with_denominator_le_zero": 70,
+      "fraction_le_zero": 0.07007007007007007
+    },
+    "ratio_twii_over_mean9": {
+      "ci95_percentile": [
+        -26.23081289171403,
+        33.61498225430415
+      ],
+      "ci80_percentile": [
+        2.039913332471501,
+        10.493086424082641
+      ],
+      "min": -2503.9751366104283,
+      "max": 8204.702412093491,
+      "verdict": "Reported to demonstrate that the ratio is NOT a usable statistic, not to be quoted. Its denominator is a mean of nine individually insignificant gammas and its bootstrap distribution is correspondingly wild. Whenever the denominator's interval covers zero the Fieller confidence set for the ratio is UNBOUNDED, and a percentile interval merely hides that. Report the DIFFERENCE, or the sign test on the ordering -- never a bare point ratio."
+    }
+  },
+  "lookahead_free_certification": "All quantities are in-sample descriptive MLEs and resampling functionals of them. No forecast, no OOS split, no signal. Bootstraps are seeded (SEED above)."
+}
