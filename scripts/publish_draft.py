@@ -850,6 +850,11 @@ def parse_draft(path: Path, require_frontmatter: bool = True) -> dict:
         content_type_fm = content_type_fm[0] if content_type_fm else ""
     content_type_fm = str(content_type_fm).strip().strip('"').strip("'")
 
+    proposer_fm = fm.get("proposer", "")
+    if isinstance(proposer_fm, list):
+        proposer_fm = proposer_fm[0] if proposer_fm else ""
+    proposer_fm = str(proposer_fm).strip().strip('"').strip("'")
+
     return {
         "title": fm.get("title", "").strip('"').strip("'"),
         "audience": fm.get("audience", "general"),
@@ -865,6 +870,10 @@ def parse_draft(path: Path, require_frontmatter: bool = True) -> dict:
         # populated for digests — forwarded into details_payload when non-empty.
         "content_type": content_type_fm,
         "digest_articles": _list_from("digest_articles"),
+        # member_qa 署名（proposer=會員名稱）。publish-milestone CLI 早就有
+        # --proposer，但這個 helper 之前沒轉發 → 走 publish_draft 的 member_qa
+        # 稿件署名一律掉成 null（feed 上 proposer=null 的舊 member_qa 即此因）。
+        "proposer": proposer_fm,
         "body": body,
     }
 
@@ -1722,6 +1731,8 @@ def main() -> int:
         "--tags", tags,
         "--details-json", json.dumps(details_payload),
     ]
+    if info.get("proposer"):
+        cmd += ["--proposer", info["proposer"]]
     result = subprocess.run(cmd, capture_output=True, text=True)
     print(f"\n[publish_draft] rc={result.returncode}")
     if result.stdout:

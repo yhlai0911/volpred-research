@@ -65,7 +65,7 @@ user-invocable: true
 9. 連結文章到問題：`uv run volpred ops question-answer <question_id> --answer "摘要" --article-id <article_slug>`
    - `question-answer` 綁 published 文章後，問題應直接進 `answered`
    - ⚠️ **不要手動 patch 問題狀態**——交給 `question-answer` / `question-finish` 正式流程
-10. 完成研究收尾：`uv run volpred ops question-finish --question-id <question_id> --actor claude`
+10. `question-answer` 綁定成功即為終態（回傳 `status=answered`）。**`question-finish` 這個 CLI 指令不存在**（2026-07-12 K1700 收尾時實測 `No such command`）——不要再呼叫它；候選池的清理走 `question-ops-maintain`。
 11. 回報：處理了哪個問題、發了什麼文章、問題狀態（`answered` / `completed`）
 
 ## 測試 / Spam 清理
