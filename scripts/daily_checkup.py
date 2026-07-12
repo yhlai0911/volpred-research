@@ -90,16 +90,77 @@ def _finding(dim: str, severity: str, msg: str, recovery: str | None = None) -> 
     return {"dimension": dim, "severity": severity, "message": msg, "recovery": recovery}
 
 
+# 排程未必每天跑（collect_tw 只跑週一到週五）。用固定小時窗口判 stale 會在週末
+# 誤報：週日 17:00 距離週五 15:00 已 50h > 30×1.5。改成「有沒有錯過上一次排定的
+# fire」——cron spec 從 config/runtime_schedules.json 讀，log stem 對應 job 名。
+CRON_GRACE_H = 3.0  # job 起跑到寫 log 的容忍延遲
+
+
+def _cron_map() -> dict[str, str]:
+    """log stem → cron spec，取自 canonical runtime_schedules.json。"""
+    try:
+        spec = json.loads((ROOT / "config" / "runtime_schedules.json").read_text())
+    except Exception as e:
+        print(f"[daily_checkup] WARN 無法讀 runtime_schedules.json，data_freshness 退回固定窗口: {e}",
+              file=sys.stderr)
+        return {}
+    out: dict[str, str] = {}
+
+    def walk(node):
+        if isinstance(node, dict):
+            cron, log = node.get("cron"), node.get("log_path")
+            if isinstance(cron, str) and isinstance(log, str):
+                out[Path(log).stem] = cron
+            for v in node.values():
+                walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+
+    walk(spec)
+    return out
+
+
+def _missed_fires(cron: str, log_mtime: datetime.datetime) -> int:
+    """log 最後寫入之後、距今超過 grace 的排定 fire 數（0 = 沒漏班）。"""
+    try:
+        from croniter import croniter
+    except ImportError as e:
+        print(f"[daily_checkup] WARN croniter 不可用，退回固定窗口: {e}", file=sys.stderr)
+        return -1
+    cutoff = _now - datetime.timedelta(hours=CRON_GRACE_H)
+    it = croniter(cron, log_mtime)
+    missed = 0
+    while missed < 10:
+        nxt = it.get_next(datetime.datetime)
+        if nxt > cutoff:
+            break
+        missed += 1
+    return missed
+
+
 # ── 1. data_freshness ───────────────────────────────────────────────────────
 def check_data_freshness() -> list[dict]:
     out = []
+    crons = _cron_map()
     for job, expected in DATA_JOBS_EXPECTED_H.items():
         log = STORAGE / "logs" / "cron" / f"{job}.log"
         a = _age_h(log)
         if a is None:
             out.append(_finding("data_freshness", "warn", f"{job}: 無 cron log（從未跑？）"))
             continue
-        if a > expected * 1.5:
+        cron = crons.get(job)
+        missed = _missed_fires(cron, datetime.datetime.fromtimestamp(os.path.getmtime(log))) if cron else -1
+        if missed >= 0:  # schedule-aware（primary）
+            if missed >= 1:
+                sev = "critical" if missed >= 3 else "warn"
+                out.append(_finding(
+                    "data_freshness", sev,
+                    f"{job}: 漏跑 {missed} 班（cron `{cron}`，最後跑完 {a:.0f}h 前）—— 資料可能落後/漏",
+                    recovery=f"uv run python scripts/{job}.py  # 或對應 wrapper",
+                ))
+            continue
+        if a > expected * 1.5:  # fallback：無 cron spec 或 croniter 不可用
             sev = "critical" if a > expected * 3 else "warn"
             out.append(_finding(
                 "data_freshness", sev,
