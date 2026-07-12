@@ -235,3 +235,234 @@ def test_clean_render_script_under_guard_still_succeeds(tmp_path):
     )
     assert proc.returncode == 0, proc.stderr
     assert out.exists() and out.stat().st_size > 1024
+
+
+def _run_pillow_script(tmp_path: Path, body: str, *, audit_only: bool = False):
+    script = tmp_path / "render_pillow.py"
+    source = (
+        "from pathlib import Path\n"
+        "from PIL import Image, ImageDraw\n\n"
+        f"OUT = Path(r\"{tmp_path}\")\n\n"
+        + textwrap.dedent(body).strip()
+        + "\n"
+    )
+    script.write_text(source, encoding="utf-8")
+    cmd = [sys.executable, str(GUARD)]
+    if audit_only:
+        cmd.append("--audit-only")
+    cmd.append(str(script))
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+
+
+def test_clean_pillow_render_under_guard_succeeds(tmp_path):
+    """Pillow was the structural blind spot: its clean path must stay usable."""
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.rounded_rectangle((20, 20, 480, 220), radius=16,
+                               fill="#f8fafc", outline="#94a3b8", width=2)
+        draw.text((45, 65), "Clean Pillow title", fill="#0f172a")
+        draw.text((45, 125), "Body on its own row", fill="#475569")
+        img.save(OUT / "clean.png")
+    """)
+    assert proc.returncode == 0, proc.stderr
+    assert (tmp_path / "clean.png").exists()
+
+
+def test_pillow_text_running_off_canvas_is_clipped(tmp_path):
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.text((455, 100), "far beyond the edge", fill="black")
+        img.save(OUT / "clipped.png")
+    """)
+    combined = proc.stderr + proc.stdout
+    assert proc.returncode != 0
+    assert "CLIPPED" in combined, combined
+    assert not (tmp_path / "clipped.png").exists()
+
+
+def test_pillow_text_on_text_is_overlap(tmp_path):
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.text((60, 90), "OVERLAPPING TITLE", fill="black")
+        draw.text((64, 90), "subtitle beneath", fill="#475569")
+        img.save(OUT / "overlap.png")
+    """)
+    combined = proc.stderr + proc.stdout
+    assert proc.returncode != 0
+    assert "OVERLAP" in combined, combined
+    assert not (tmp_path / "overlap.png").exists()
+
+
+def test_pillow_text_bursting_out_of_card_is_overflow(tmp_path):
+    """Still inside the image, but outside its rounded-rectangle card."""
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (700, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.rounded_rectangle((20, 20, 230, 220), radius=16,
+                               fill="#f8fafc", outline="#94a3b8", width=2)
+        draw.text((45, 100), "this sentence is much too long for the card", fill="black")
+        img.save(OUT / "overflow.png")
+    """)
+    combined = proc.stderr + proc.stdout
+    assert proc.returncode != 0
+    assert "OVERFLOW" in combined, combined
+    assert "CLIPPED" not in combined, combined
+    assert not (tmp_path / "overflow.png").exists()
+
+
+def test_pillow_label_hugging_its_pill_is_not_overflow(tmp_path):
+    """FP pin: pills/chips are deliberately sized to hug their label."""
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(img)
+        box = draw.textbbox((0, 0), "PILL")
+        w, h = box[2] - box[0], box[3] - box[1]
+        draw.rounded_rectangle((30, 30, 30 + w, 30 + h), radius=6, fill="#dbeafe")
+        draw.text((30, 30 - box[1]), "PILL", fill="#1d4ed8")
+        img.save(OUT / "pill.png")
+    """)
+    assert proc.returncode == 0, proc.stderr
+    assert (tmp_path / "pill.png").exists()
+
+
+def test_pillow_collects_every_bad_panel_in_one_run(tmp_path):
+    """Both rejected Pillow panels reach one repair prompt; the clean one still saves."""
+    proc = _run_pillow_script(tmp_path, """
+        for name, x in [("1_bad", 455), ("2_bad", 465), ("3_clean", 30)]:
+            img = Image.new("RGB", (500, 250), "white")
+            draw = ImageDraw.Draw(img)
+            draw.text((x, 100), "a long Pillow line", fill="black")
+            img.save(OUT / f"{name}.png")
+    """)
+    combined = proc.stderr + proc.stdout
+    assert proc.returncode != 0
+    assert "1_bad.png" in combined and "2_bad.png" in combined, combined
+    assert (tmp_path / "3_clean.png").exists()
+
+
+def test_pillow_audit_only_does_not_replace_clean_png(tmp_path):
+    """Corpus calibration must inspect production renderers without touching PNGs."""
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.text((30, 100), "clean audit panel", fill="black")
+        img.save(OUT / "audit.png")
+    """, audit_only=True)
+    assert proc.returncode == 0, proc.stderr
+    assert not (tmp_path / "audit.png").exists()
+
+
+def test_matplotlib_audit_only_does_not_replace_clean_png(tmp_path):
+    out = tmp_path / "matplotlib_audit.png"
+    script = tmp_path / "render_matplotlib_audit.py"
+    script.write_text(textwrap.dedent(f"""
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        fig = plt.figure(figsize=(10, 6), dpi=100)
+        fig.text(0.1, 0.8, "Clean audit title", fontsize=20)
+        fig.savefig(r"{out}")
+    """), encoding="utf-8")
+    proc = subprocess.run(
+        [sys.executable, str(GUARD), "--audit-only", str(script)],
+        capture_output=True, text=True, timeout=120,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert not out.exists()
+
+
+def test_pillow_multiline_text_is_recorded_once(tmp_path):
+    """Pillow delegates multiline_text to self.text; double-patching would self-overlap."""
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.multiline_text((30, 60), "line one\\nline two", fill="black", spacing=8)
+        img.save(OUT / "multiline.png")
+    """)
+    assert proc.returncode == 0, proc.stderr
+    assert (tmp_path / "multiline.png").exists()
+
+
+def test_pillow_textbbox_probe_is_not_phantom_text(tmp_path):
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.textbbox((490, 20), "measurement only")
+        img.save(OUT / "probe.png")
+    """)
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_pillow_font_size_kwarg_is_measured_at_actual_size(tmp_path):
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.text((420, 80), "XX", fill="black", font_size=80)
+        img.save(OUT / "font_size.png")
+    """)
+    combined = proc.stderr + proc.stdout
+    assert proc.returncode != 0
+    assert "CLIPPED" in combined, combined
+
+
+def test_pillow_anchor_is_forwarded_to_textbbox(tmp_path):
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.text((480, 60), "right aligned", anchor="ra", fill="black")
+        img.save(OUT / "anchor.png")
+    """)
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_pillow_invisible_rectangle_is_not_a_phantom_card(tmp_path):
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (700, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.rectangle((20, 20, 230, 220))
+        draw.text((45, 100), "this line crosses the nonexistent card edge", fill="black")
+        img.save(OUT / "invisible.png")
+    """)
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_pillow_nested_rectangle_coordinates_are_guarded(tmp_path):
+    proc = _run_pillow_script(tmp_path, """
+        img = Image.new("RGB", (700, 250), "white")
+        draw = ImageDraw.Draw(img)
+        draw.rectangle(((20, 20), (230, 220)), fill="#f8fafc", outline="#94a3b8")
+        draw.text((45, 100), "this sentence is much too long for the card", fill="black")
+        img.save(OUT / "nested.png")
+    """)
+    combined = proc.stderr + proc.stdout
+    assert proc.returncode != 0
+    assert "OVERFLOW" in combined, combined
+
+
+def test_matplotlib_vertical_edge_message_keeps_bottom_orientation():
+    fig = plt.figure(figsize=(10, 6), dpi=100)
+    fig.text(0.1, -0.05, "below canvas", fontsize=20)
+    violations = find_violations(fig)
+    assert any("bottom by" in v for v in violations if v.startswith("CLIPPED")), violations
+
+
+def test_collect_report_keeps_later_panel_visible_after_noisy_first(tmp_path):
+    """MAX_REPORTED must not let panel 1 hide panel 2 from the repair prompt."""
+    proc = _run_pillow_script(tmp_path, """
+        first = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(first)
+        for i in range(6):
+            draw.text((60 + i, 90), f"stacked {i}", fill="black")
+        first.save(OUT / "1_noisy.png")
+
+        second = Image.new("RGB", (500, 250), "white")
+        draw = ImageDraw.Draw(second)
+        draw.text((470, 90), "clipped second panel", fill="black")
+        second.save(OUT / "2_later.png")
+    """)
+    combined = proc.stderr + proc.stdout
+    assert proc.returncode != 0
+    assert "1_noisy.png" in combined and "2_later.png" in combined, combined

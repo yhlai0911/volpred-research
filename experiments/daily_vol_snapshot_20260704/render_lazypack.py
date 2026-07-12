@@ -51,7 +51,10 @@ def card(draw: ImageDraw.ImageDraw, xy: tuple[int, int], wh: tuple[int, int],
     draw.rectangle((x, y, x + 12, y + h), fill=color)
     text(draw, (x + 38, y + 28), title, 28, "#4b5563", bold=True)
     text(draw, (x + 38, y + 78), value, 58, color, bold=True)
-    text(draw, (x + 38, y + 158), subtitle, 25, "#374151", width=22)
+    # Pixel audit found that the old 25px/22-char copy exceeded this 330px card
+    # by 25-114px. At 20px/13 chars the longest copy wraps to two readable lines
+    # and stays inside the card both horizontally and vertically.
+    text(draw, (x + 38, y + 158), subtitle, 20, "#374151", width=13)
 
 
 def main() -> None:

@@ -10,8 +10,10 @@ Why (2026-07-11, boss email-12062/12066):
   reader actually looks at.
 
 How:
-  We patch Figure.savefig. Before the PNG is written we draw the figure, walk every
-  visible Text artist, and raise on three defects the eye catches instantly:
+  We patch both Matplotlib Figure.savefig and Pillow Image.save. Matplotlib text/card
+  geometry comes from artists; Pillow geometry is captured from ImageDraw.text plus
+  rectangle/rounded_rectangle calls and measured with the original textbbox. Before
+  the PNG is written, both backends raise on three defects the eye catches instantly:
     - clipped:  the text box runs outside the canvas (right/bottom edge cut off)
     - overlap:  two text boxes collide (title over subtitle, body over watermark)
     - overflow: the text runs out of the CARD it lives in, while still on canvas
@@ -23,11 +25,15 @@ How:
 
 Usage (how gen_lazypack_codex.py runs a render script):
   python scripts/lazypack_layout_guard.py <render_script.py>
+  python scripts/lazypack_layout_guard.py --audit-only <render_script.py>
 """
 from __future__ import annotations
 
+import inspect
 import runpy
 import sys
+import weakref
+from dataclasses import dataclass, field
 from pathlib import Path
 
 # Text boxes closer than this to the canvas edge are not treated as clipped —
@@ -93,6 +99,34 @@ CONTAINER_MAX_CANVAS_FRACTION = 0.98
 MAX_REPORTED = 12
 
 
+@dataclass(frozen=True)
+class _BBox:
+    """Backend-neutral box in display/image pixel coordinates."""
+
+    x0: float
+    y0: float
+    x1: float
+    y1: float
+
+
+@dataclass(frozen=True)
+class _PILText:
+    text: str
+    bbox: _BBox
+
+
+@dataclass
+class _PILLayout:
+    texts: list[_PILText] = field(default_factory=list)
+    cards: list[_BBox] = field(default_factory=list)
+
+
+# PIL.Image.Image is weak-referenceable but deliberately unhashable, so a
+# WeakKeyDictionary cannot own this state. Key by id and keep a weakref that
+# evicts the entry when the image dies; the identity check prevents id reuse.
+_PIL_LAYOUTS: dict[int, tuple[weakref.ReferenceType, _PILLayout]] = {}
+
+
 def _bbox_area(b) -> float:
     return max(0.0, b.x1 - b.x0) * max(0.0, b.y1 - b.y0)
 
@@ -154,6 +188,73 @@ def _container_for(text_bb, boxes):
     return best
 
 
+def _find_bbox_violations(
+    boxed: list[tuple[str, object]], containers: list, fw: float, fh: float,
+    *, y_down: bool = False,
+) -> list[str]:
+    """Shared CLIPPED / OVERFLOW / OVERLAP rules for Matplotlib and Pillow."""
+    violations: list[str] = []
+    y0_edge, y1_edge = ("top", "bottom") if y_down else ("bottom", "top")
+
+    for label, bb in boxed:
+        over = []
+        if bb.x0 < -EDGE_TOL_PX:
+            over.append(f"left by {-bb.x0:.0f}px")
+        if bb.y0 < -EDGE_TOL_PX:
+            over.append(f"{y0_edge} by {-bb.y0:.0f}px")
+        if bb.x1 > fw + EDGE_TOL_PX:
+            over.append(f"right by {bb.x1 - fw:.0f}px")
+        if bb.y1 > fh + EDGE_TOL_PX:
+            over.append(f"{y1_edge} by {bb.y1 - fh:.0f}px")
+        if over:
+            violations.append(
+                f"CLIPPED: 「{_snippet(label)}」 runs off the canvas "
+                f"({', '.join(over)}). Shorten it, shrink the font, or widen its box."
+            )
+
+    for label, bb in boxed:
+        card = _container_for(bb, containers)
+        if card is None:
+            continue
+        v_tol = max(OVERFLOW_TOL_PX, INK_WHITESPACE_FRAC * (bb.y1 - bb.y0))
+        out = []
+        if bb.x0 < card.x0 - OVERFLOW_TOL_PX:
+            out.append(f"left by {card.x0 - bb.x0:.0f}px")
+        if bb.y0 < card.y0 - v_tol:
+            out.append(f"{y0_edge} by {card.y0 - bb.y0:.0f}px")
+        if bb.x1 > card.x1 + OVERFLOW_TOL_PX:
+            out.append(f"right by {bb.x1 - card.x1:.0f}px")
+        if bb.y1 > card.y1 + v_tol:
+            out.append(f"{y1_edge} by {bb.y1 - card.y1:.0f}px")
+        if out:
+            violations.append(
+                f"OVERFLOW: 「{_snippet(label)}」 bursts out of its card "
+                f"({', '.join(out)}; card is "
+                f"{card.x1 - card.x0:.0f}x{card.y1 - card.y0:.0f}px). "
+                f"Wrap the line, shrink the font, or enlarge the card."
+            )
+
+    for i in range(len(boxed)):
+        for j in range(i + 1, len(boxed)):
+            a_label, a_bb = boxed[i]
+            b_label, b_bb = boxed[j]
+            inter = _intersection_area(a_bb, b_bb)
+            if inter <= 0:
+                continue
+            smaller = min(_bbox_area(a_bb), _bbox_area(b_bb))
+            if smaller <= 0:
+                continue
+            frac = inter / smaller
+            if frac >= OVERLAP_MIN_FRACTION:
+                violations.append(
+                    f"OVERLAP: 「{_snippet(a_label)}」 collides with "
+                    f"「{_snippet(b_label)}」 ({frac:.0%} of the smaller box). "
+                    f"Move one, or give each its own row."
+                )
+
+    return violations
+
+
 def find_violations(fig) -> list[str]:
     """Canvas clipping, text-on-text collisions, and text bursting out of its card."""
     from matplotlib.text import Text
@@ -181,67 +282,66 @@ def find_violations(fig) -> list[str]:
             continue
         boxed.append((artist, bb))
 
-    violations: list[str] = []
-
-    for artist, bb in boxed:
-        over = []
-        if bb.x0 < -EDGE_TOL_PX:
-            over.append(f"left by {-bb.x0:.0f}px")
-        if bb.y0 < -EDGE_TOL_PX:
-            over.append(f"bottom by {-bb.y0:.0f}px")
-        if bb.x1 > fw + EDGE_TOL_PX:
-            over.append(f"right by {bb.x1 - fw:.0f}px")
-        if bb.y1 > fh + EDGE_TOL_PX:
-            over.append(f"top by {bb.y1 - fh:.0f}px")
-        if over:
-            violations.append(
-                f"CLIPPED: 「{_snippet(artist.get_text())}」 runs off the canvas "
-                f"({', '.join(over)}). Shorten it, shrink the font, or widen its box."
-            )
-
     containers = _container_boxes(fig, renderer)
-    for artist, bb in boxed:
-        card = _container_for(bb, containers)
-        if card is None:
-            continue  # nothing encloses it (axes title, tick label, footer) — not overflow
-        # Vertical slack absorbs the font's own ascent/descent whitespace (see notes above).
-        v_tol = max(OVERFLOW_TOL_PX, INK_WHITESPACE_FRAC * (bb.y1 - bb.y0))
-        out = []
-        if bb.x0 < card.x0 - OVERFLOW_TOL_PX:
-            out.append(f"left by {card.x0 - bb.x0:.0f}px")
-        if bb.y0 < card.y0 - v_tol:
-            out.append(f"bottom by {card.y0 - bb.y0:.0f}px")
-        if bb.x1 > card.x1 + OVERFLOW_TOL_PX:
-            out.append(f"right by {bb.x1 - card.x1:.0f}px")
-        if bb.y1 > card.y1 + v_tol:
-            out.append(f"top by {bb.y1 - card.y1:.0f}px")
-        if out:
-            violations.append(
-                f"OVERFLOW: 「{_snippet(artist.get_text())}」 bursts out of its card "
-                f"({', '.join(out)}; card is "
-                f"{card.x1 - card.x0:.0f}x{card.y1 - card.y0:.0f}px). "
-                f"Wrap the line, shrink the font, or enlarge the card."
-            )
+    return _find_bbox_violations(
+        [(artist.get_text(), bb) for artist, bb in boxed], containers, fw, fh,
+    )
 
-    for i in range(len(boxed)):
-        for j in range(i + 1, len(boxed)):
-            a_art, a_bb = boxed[i]
-            b_art, b_bb = boxed[j]
-            inter = _intersection_area(a_bb, b_bb)
-            if inter <= 0:
-                continue
-            smaller = min(_bbox_area(a_bb), _bbox_area(b_bb))
-            if smaller <= 0:
-                continue
-            frac = inter / smaller
-            if frac >= OVERLAP_MIN_FRACTION:
-                violations.append(
-                    f"OVERLAP: 「{_snippet(a_art.get_text())}」 collides with "
-                    f"「{_snippet(b_art.get_text())}」 ({frac:.0%} of the smaller box). "
-                    f"Move one, or give each its own row."
-                )
 
-    return violations
+def _pil_layout(image) -> _PILLayout:
+    """Layout record for one Pillow image, safe against object-id reuse."""
+    key = id(image)
+    existing = _PIL_LAYOUTS.get(key)
+    if existing is not None and existing[0]() is image:
+        return existing[1]
+
+    layout = _PILLayout()
+
+    def discard(ref, *, image_id=key) -> None:
+        current = _PIL_LAYOUTS.get(image_id)
+        if current is not None and current[0] is ref:
+            _PIL_LAYOUTS.pop(image_id, None)
+
+    _PIL_LAYOUTS[key] = (weakref.ref(image, discard), layout)
+    return layout
+
+
+def _pil_box(xy) -> _BBox:
+    """Normalize Pillow's flat or two-point rectangle coordinates."""
+    if len(xy) == 2 and all(isinstance(p, (tuple, list)) for p in xy):
+        (x0, y0), (x1, y1) = xy
+    else:
+        x0, y0, x1, y1 = xy
+    return _BBox(float(min(x0, x1)), float(min(y0, y1)),
+                 float(max(x0, x1)), float(max(y0, y1)))
+
+
+def find_pil_violations(image) -> list[str]:
+    """Pillow equivalent of :func:`find_violations`, using captured draw calls."""
+    existing = _PIL_LAYOUTS.get(id(image))
+    if existing is None or existing[0]() is not image:
+        return []
+    layout = existing[1]
+    fw, fh = image.size
+    canvas_area = float(fw * fh)
+    containers: list[_BBox] = []
+    seen: set[tuple[float, float, float, float]] = set()
+    for bb in layout.cards:
+        key = (bb.x0, bb.y0, bb.x1, bb.y1)
+        if key in seen:
+            continue
+        seen.add(key)
+        width, height = bb.x1 - bb.x0, bb.y1 - bb.y0
+        if width < CONTAINER_MIN_SIDE_PX or height < CONTAINER_MIN_SIDE_PX:
+            continue
+        if canvas_area > 0 and _bbox_area(bb) / canvas_area >= CONTAINER_MAX_CANVAS_FRACTION:
+            continue
+        containers.append(bb)
+    boxed = [(record.text, record.bbox) for record in layout.texts
+             if _bbox_area(record.bbox) > 0]
+    return _find_bbox_violations(
+        boxed, containers, float(fw), float(fh), y_down=True,
+    )
 
 
 def _report(violations: list[str], header: str) -> str:
@@ -262,16 +362,8 @@ def _report(violations: list[str], header: str) -> str:
 COLLECTED: list[tuple[str, list[str]]] = []
 
 
-def install(collect: bool = False) -> None:
-    """Patch Figure.savefig so a broken layout cannot reach disk.
-
-    collect=False: raise on the first bad panel (library / test use).
-    collect=True:  record it, skip the write, and let the script carry on to the
-      remaining panels. Render scripts save panels one after another, so raising
-      on panel 2 means panel 3 is never even drawn — a repair round would then see
-      one complaint at a time and three panels could never converge inside the
-      round budget. Collecting hands codex every defect in a single round.
-    """
+def _install_matplotlib(collect: bool, write_clean: bool) -> None:
+    """Patch Figure.savefig so a broken Matplotlib layout cannot reach disk."""
     from matplotlib.figure import Figure
 
     if getattr(Figure.savefig, "_lazypack_guarded", False):
@@ -288,26 +380,151 @@ def install(collect: bool = False) -> None:
                 print(f"[layout_guard] REJECTED {target}", file=sys.stderr)
                 return None
             raise RuntimeError(_report(violations, "the panel would ship unreadable"))
+        if not write_clean:
+            return None
         return original(self, *args, **kwargs)
 
     guarded._lazypack_guarded = True  # type: ignore[attr-defined]
     Figure.savefig = guarded  # type: ignore[assignment]
 
 
+def _install_pillow(collect: bool, write_clean: bool) -> None:
+    """Capture Pillow text/cards and gate Image.save with the shared rules."""
+    from PIL import Image, ImageDraw
+
+    if getattr(Image.Image.save, "_lazypack_guarded", False):
+        return
+
+    original_text = ImageDraw.ImageDraw.text
+    original_textbbox = ImageDraw.ImageDraw.textbbox
+    original_rectangle = ImageDraw.ImageDraw.rectangle
+    original_rounded_rectangle = ImageDraw.ImageDraw.rounded_rectangle
+    original_save = Image.Image.save
+    text_signature = inspect.signature(original_text)
+    rectangle_signature = inspect.signature(original_rectangle)
+    rounded_rectangle_signature = inspect.signature(original_rounded_rectangle)
+
+    def guarded_text(self, xy, text, *args, **kwargs):
+        result = original_text(self, xy, text, *args, **kwargs)
+        if not str(text).strip():
+            return result
+        try:
+            bound = text_signature.bind(self, xy, text, *args, **kwargs)
+            bound.apply_defaults()
+            measure_names = (
+                "font", "anchor", "spacing", "align", "direction", "features",
+                "language", "stroke_width", "embedded_color", "font_size",
+            )
+            measure = {name: bound.arguments[name] for name in measure_names
+                       if name in bound.arguments}
+            extra_kwargs = bound.arguments.get("kwargs", {})
+            if "font_size" in extra_kwargs:
+                measure["font_size"] = extra_kwargs["font_size"]
+            raw = original_textbbox(self, xy, text, **measure)
+            layout = _pil_layout(self._image)
+            layout.texts.append(_PILText(str(text), _pil_box(raw)))
+        except Exception as exc:  # noqa: BLE001
+            print(f"[layout_guard] unmeasurable Pillow text skipped: "
+                  f"{_snippet(str(text))!r} ({type(exc).__name__}: {exc})",
+                  file=sys.stderr)
+        return result
+
+    def record_card(draw, xy, *, visible: bool) -> None:
+        if not visible:
+            return
+        try:
+            _pil_layout(draw._image).cards.append(_pil_box(xy))
+        except Exception as exc:  # noqa: BLE001
+            print(f"[layout_guard] unmeasurable Pillow card skipped: "
+                  f"{type(exc).__name__}: {exc}", file=sys.stderr)
+
+    def guarded_rectangle(self, xy, *args, **kwargs):
+        result = original_rectangle(self, xy, *args, **kwargs)
+        bound = rectangle_signature.bind(self, xy, *args, **kwargs)
+        bound.apply_defaults()
+        visible = bound.arguments.get("fill") is not None or (
+            bound.arguments.get("outline") is not None and bound.arguments.get("width", 1) > 0
+        )
+        record_card(self, xy, visible=visible)
+        return result
+
+    def guarded_rounded_rectangle(self, xy, *args, **kwargs):
+        result = original_rounded_rectangle(self, xy, *args, **kwargs)
+        bound = rounded_rectangle_signature.bind(self, xy, *args, **kwargs)
+        bound.apply_defaults()
+        visible = bound.arguments.get("fill") is not None or (
+            bound.arguments.get("outline") is not None and bound.arguments.get("width", 1) > 0
+        )
+        record_card(self, xy, visible=visible)
+        return result
+
+    def guarded_save(self, fp, *args, **kwargs):
+        violations = find_pil_violations(self)
+        if violations:
+            target = str(fp)
+            if collect:
+                COLLECTED.append((target, violations))
+                print(f"[layout_guard] REJECTED {target}", file=sys.stderr)
+                return None
+            raise RuntimeError(_report(violations, "the Pillow panel would ship unreadable"))
+        if not write_clean:
+            return None
+        return original_save(self, fp, *args, **kwargs)
+
+    guarded_text._lazypack_guarded = True  # type: ignore[attr-defined]
+    guarded_rectangle._lazypack_guarded = True  # type: ignore[attr-defined]
+    guarded_rounded_rectangle._lazypack_guarded = True  # type: ignore[attr-defined]
+    guarded_save._lazypack_guarded = True  # type: ignore[attr-defined]
+    ImageDraw.ImageDraw.text = guarded_text  # type: ignore[assignment]
+    ImageDraw.ImageDraw.rectangle = guarded_rectangle  # type: ignore[assignment]
+    ImageDraw.ImageDraw.rounded_rectangle = guarded_rounded_rectangle  # type: ignore[assignment]
+    Image.Image.save = guarded_save  # type: ignore[assignment]
+
+
+def install(collect: bool = False, *, write_clean: bool = True) -> None:
+    """Patch Matplotlib and Pillow save paths so a broken layout cannot reach disk.
+
+    collect=False: raise on the first bad panel (library / test use).
+    collect=True:  record it, skip the write, and let the script carry on to the
+      remaining panels. Render scripts save panels one after another, so raising
+      on panel 2 means panel 3 is never even drawn — a repair round would then see
+      one complaint at a time and three panels could never converge inside the
+      round budget. Collecting hands codex every defect in a single round.
+    write_clean=False: audit render calls without replacing existing PNGs.
+    """
+    _install_matplotlib(collect, write_clean)
+    _install_pillow(collect, write_clean)
+
+
 def main(argv: list[str]) -> int:
     if len(argv) < 2:
-        print("usage: lazypack_layout_guard.py <render_script.py>", file=sys.stderr)
+        print("usage: lazypack_layout_guard.py [--audit-only] <render_script.py>",
+              file=sys.stderr)
         return 2
-    script = Path(argv[1]).resolve()
-    install(collect=True)
-    sys.argv = [str(script), *argv[2:]]
+    args = list(argv[1:])
+    audit_only = bool(args and args[0] == "--audit-only")
+    if audit_only:
+        args.pop(0)
+    if not args:
+        print("usage: lazypack_layout_guard.py [--audit-only] <render_script.py>",
+              file=sys.stderr)
+        return 2
+    script = Path(args[0]).resolve()
+    COLLECTED.clear()
+    _PIL_LAYOUTS.clear()
+    install(collect=True, write_clean=not audit_only)
+    sys.argv = [str(script), *args[1:]]
     runpy.run_path(str(script), run_name="__main__")
 
     if COLLECTED:
         flat: list[str] = []
-        for target, violations in COLLECTED:
-            name = Path(target).name
-            flat.extend(f"[{name}] {v}" for v in violations)
+        # Round-robin keeps every bad panel visible before MAX_REPORTED truncates
+        # a noisy first panel. One repair prompt must describe the whole set.
+        longest = max(len(violations) for _, violations in COLLECTED)
+        for index in range(longest):
+            for target, violations in COLLECTED:
+                if index < len(violations):
+                    flat.append(f"[{Path(target).name}] {violations[index]}")
         print(_report(flat, f"{len(COLLECTED)} panel(s) would ship unreadable"),
               file=sys.stderr)
         return 1

@@ -179,7 +179,9 @@ def render_results(results: dict):
 
     # mini table: last 5 events
     ty0 = 450
-    table_h = 340
+    # Five 44px rows start at y=594; 340px made the final row straddle the
+    # card's y=790 border. The layout guard measured an 11-13px overflow.
+    table_h = 360
     card(draw, (80, ty0, 1520, ty0 + table_h), fill="#ffffff")
     text(draw, (120, ty0 + 24), "最近 5 次逐次拆開看", fill=INK, fnt=F_H2)
     cols = ["發佈日", "SPY 當日報酬", "VIX 當日變化"]
