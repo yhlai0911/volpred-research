@@ -104,7 +104,9 @@ def load_or_snapshot_ohlc(market: str, loader) -> tuple[pd.DataFrame, dict[str, 
     """
     path = DATA_DIR / f"{market.replace('.', '_')}_snapshot.csv"
     if path.exists():
-        df = pd.read_csv(path, index_col=0, parse_dates=True)
+        # round_trip parser: default C parser is up to 1 ulp off, which the
+        # non-convex PRG MLE amplifies into visibly different basins
+        df = pd.read_csv(path, index_col=0, parse_dates=True, float_precision="round_trip")
         origin = "snapshot"
     else:
         df = loader()
@@ -117,8 +119,8 @@ def load_or_snapshot_taifex(k883) -> tuple[pd.DataFrame, pd.DataFrame, dict[str,
     sess_path = DATA_DIR / "TAIFEX_sessions_snapshot.csv"
     daily_path = DATA_DIR / "TAIFEX_daily_snapshot.csv"
     if sess_path.exists() and daily_path.exists():
-        sess_df = pd.read_csv(sess_path, index_col=0)
-        daily_df = pd.read_csv(daily_path, index_col=0, parse_dates=True)
+        sess_df = pd.read_csv(sess_path, index_col=0, float_precision="round_trip")
+        daily_df = pd.read_csv(daily_path, index_col=0, parse_dates=True, float_precision="round_trip")
         origin = "snapshot"
     else:
         rv_df = k883.load_all_rv_data()
@@ -194,6 +196,7 @@ def prg_close_convention_forecasts(
     if has_forecast_day:
         # k881/k886 family: state kept as h after intraday of day t-1
         for t in range(is_end, n_days):
+            rebuilt = False
             if (t - is_end) % refit_freq == 0 or t == is_end:
                 params, _ll = estimator(
                     r_overnight[:t], r_intra[:t], r2_overnight[:t], r2_intra[:t],
@@ -205,11 +208,15 @@ def prg_close_convention_forecasts(
                         *(float(v) for v in current_params[:8]),
                         r_overnight[:t], r_intra[:t], r2_overnight[:t], r2_intra[:t], t,
                     )
+                    rebuilt = True
 
             if current_params is None or h_state is None:
                 continue
 
-            if (t - is_end) % refit_freq != 0 and t != is_end:
+            # propagate one day whenever the state was not rebuilt this
+            # iteration — including a failed scheduled refit, which would
+            # otherwise leave the forecast on a stale F_{t-2} state
+            if not rebuilt and t != is_end:
                 d = t - 1
                 x_prev = r2_intra[d - 1] if d > 0 else r2_overnight[0]
                 r_prev = r_intra[d - 1] if d > 0 else r_overnight[0]
@@ -339,9 +346,10 @@ def taifex_close_convention_forecasts(
 
         # robustness: lagged realized overnight (previous day's ON session)
         i_ov_prev = i_ov - 2
-        lev1l = g1 * x_arr[i_ov_prev] * (1.0 if r_arr[i_ov_prev] < 0.0 else 0.0)
-        h_in_l = o1 + a1 * x_arr[i_ov_prev] + lev1l + b1 * h_ov
-        out["tminus1_lag"][d] = h_ov + max(h_in_l, 1e-12)
+        if i_ov_prev >= 0:
+            lev1l = g1 * x_arr[i_ov_prev] * (1.0 if r_arr[i_ov_prev] < 0.0 else 0.0)
+            h_in_l = o1 + a1 * x_arr[i_ov_prev] + lev1l + b1 * h_ov
+            out["tminus1_lag"][d] = h_ov + max(h_in_l, 1e-12)
 
     _ = x_overnight_daily  # kept for parity with K1544 taifex path; not used here
     return out, is_end_days

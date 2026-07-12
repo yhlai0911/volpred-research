@@ -1,7 +1,7 @@
 {
   "experiment_id": "k1699",
   "title": "Six-market close-convention (strict t-1) horserace: PRG_tminus1 vs GJR vs HAR",
-  "created_at": "2026-07-12T10:15:28.534738+00:00",
+  "created_at": "2026-07-12T10:38:57.441149+00:00",
   "random_seed": 1699,
   "research_question": "Under the strict close-time convention (all forecast inputs in F^c_{d-1}), does PRG retain any advantage over daily GJR and HAR across the six K1544 markets, or is the canonical PRG headline advantage entirely a forecast-timing artifact?",
   "method_summary": {
@@ -47,7 +47,7 @@
         "file": "experiments/k1699/data/TAIFEX_daily_snapshot.csv",
         "sha256": "b573f0e2736532c7671bab7120c1872ef23b5682e50013c607a635790cf42588"
       },
-      "origin": "built_from_ticks_then_pinned"
+      "origin": "snapshot"
     }
   },
   "markets": {
@@ -61,7 +61,7 @@
         "n_is": 4778,
         "n_oos": 1823,
         "period": "2000-01-04 to 2026-04-02",
-        "overnight_variance_share_pct": 34.46641984231814,
+        "overnight_variance_share_pct": 34.46641984231787,
         "prg_refit_freq_days": 126,
         "gjr_har_refit_freq_days": 63
       },
@@ -72,11 +72,11 @@
         "n_common_valid": 1823
       },
       "qlike": {
-        "PRG_tminus1_exp": 0.858675074181862,
-        "PRG_tminus1_lag": 0.868192223243056,
-        "GJR": 0.854204525847525,
-        "HAR": 1.4635223871445977,
-        "PRG_canonical_diag": 0.7569888945223017
+        "PRG_tminus1_exp": 0.8663371934844765,
+        "PRG_tminus1_lag": 0.8780187107498333,
+        "GJR": 0.8533678975813833,
+        "HAR": 1.4635223871447431,
+        "PRG_canonical_diag": 0.7469334181272753
       },
       "qlike_ranking_close_convention": [
         "GJR",
@@ -88,63 +88,63 @@
       "dm_tests": {
         "PRG_tminus1_exp_vs_GJR": {
           "pair": "PRG_tminus1_exp_vs_GJR",
-          "t_stat": 0.3035926524755739,
-          "p_value": 0.7614729130368856,
+          "t_stat": 0.7414380136981461,
+          "p_value": 0.4585234555460451,
           "n": 1823,
           "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
           "harvey_pass_abs_t_gt_3": false,
-          "loss_diff_acf1": 0.044471941184229466,
+          "loss_diff_acf1": 0.035650010685532904,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": 0.2860397722528781,
-          "mean_loss_diff": 0.004470548334336922
+          "t_stat_2x_bandwidth_sensitivity": 0.7009575804018211,
+          "mean_loss_diff": 0.012969295903093139
         },
         "PRG_tminus1_exp_vs_HAR": {
           "pair": "PRG_tminus1_exp_vs_HAR",
-          "t_stat": -6.792744721193656,
-          "p_value": 1.4846346374497443e-11,
+          "t_stat": -6.48883405275782,
+          "p_value": 1.1116974008018587e-10,
           "n": 1823,
           "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.17674348251865016,
+          "loss_diff_acf1": 0.16012759375494812,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": -6.545805217887317,
-          "mean_loss_diff": -0.6048473129627359
+          "t_stat_2x_bandwidth_sensitivity": -6.2844254395413595,
+          "mean_loss_diff": -0.5971851936602669
         },
         "PRG_tminus1_lag_vs_GJR": {
           "pair": "PRG_tminus1_lag_vs_GJR",
-          "t_stat": 0.8581750276190129,
-          "p_value": 0.3909086985349046,
+          "t_stat": 1.252407542194058,
+          "p_value": 0.21058212930047926,
           "n": 1823,
           "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
           "harvey_pass_abs_t_gt_3": false,
-          "loss_diff_acf1": 0.04255049443166549,
+          "loss_diff_acf1": 0.039909089038562856,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": 0.7995849575414278,
-          "mean_loss_diff": 0.013987697395531098
+          "t_stat_2x_bandwidth_sensitivity": 1.1739754443781563,
+          "mean_loss_diff": 0.024650813168449998
         },
         "PRG_tminus1_lag_vs_HAR": {
           "pair": "PRG_tminus1_lag_vs_HAR",
-          "t_stat": -6.685695653713039,
-          "p_value": 3.046252139426997e-11,
+          "t_stat": -6.355852267874442,
+          "p_value": 2.612698946080627e-10,
           "n": 1823,
           "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.1847398579954443,
+          "loss_diff_acf1": 0.16915513961862666,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": -6.407860932844482,
-          "mean_loss_diff": -0.5953301639015417
+          "t_stat_2x_bandwidth_sensitivity": -6.113711809883333,
+          "mean_loss_diff": -0.5855036763949101
         },
         "GJR_vs_HAR": {
           "pair": "GJR_vs_HAR",
-          "t_stat": -6.882547025133349,
-          "p_value": 8.058886891149086e-12,
+          "t_stat": -6.8848437459095235,
+          "p_value": 7.933209644761519e-12,
           "n": 1823,
           "orientation": "negative t means GJR loss < HAR loss (GJR better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.17305405643998595,
+          "loss_diff_acf1": 0.17682413520953782,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": -6.645949573330329,
-          "mean_loss_diff": -0.6093178612970727
+          "t_stat_2x_bandwidth_sensitivity": -6.645750790144117,
+          "mean_loss_diff": -0.61015448956336
         }
       },
       "forecast_diagnostics": {
@@ -176,7 +176,7 @@
         "n_is": 4620,
         "n_oos": 1981,
         "period": "2000-01-04 to 2026-04-02",
-        "overnight_variance_share_pct": 27.859899820884365,
+        "overnight_variance_share_pct": 27.85989982088517,
         "prg_refit_freq_days": 252,
         "gjr_har_refit_freq_days": 63
       },
@@ -187,11 +187,11 @@
         "n_common_valid": 1981
       },
       "qlike": {
-        "PRG_tminus1_exp": 0.8687722015359467,
-        "PRG_tminus1_lag": 0.8806772177656864,
-        "GJR": 0.8272560129406015,
-        "HAR": 1.3680547524561146,
-        "PRG_canonical_diag": 0.7679551820747412
+        "PRG_tminus1_exp": 0.8626198910474699,
+        "PRG_tminus1_lag": 0.882928964032544,
+        "GJR": 0.8304791978786752,
+        "HAR": 1.36805475245619,
+        "PRG_canonical_diag": 0.7598453565485308
       },
       "qlike_ranking_close_convention": [
         "GJR",
@@ -203,63 +203,63 @@
       "dm_tests": {
         "PRG_tminus1_exp_vs_GJR": {
           "pair": "PRG_tminus1_exp_vs_GJR",
-          "t_stat": 2.4637006785414304,
-          "p_value": 0.013835550332981006,
+          "t_stat": 2.281878355410322,
+          "p_value": 0.022602206974625227,
           "n": 1981,
           "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
           "harvey_pass_abs_t_gt_3": false,
-          "loss_diff_acf1": -0.021096964404347662,
+          "loss_diff_acf1": -0.027970569789195817,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": 2.3938488691928197,
-          "mean_loss_diff": 0.041516188595345366
+          "t_stat_2x_bandwidth_sensitivity": 2.127259428571559,
+          "mean_loss_diff": 0.032140693168794816
         },
         "PRG_tminus1_exp_vs_HAR": {
           "pair": "PRG_tminus1_exp_vs_HAR",
-          "t_stat": -7.427886393158358,
-          "p_value": 1.63202784619898e-13,
+          "t_stat": -7.793038998622748,
+          "p_value": 1.0436096431476471e-14,
           "n": 1981,
           "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.07633710061628608,
+          "loss_diff_acf1": 0.08109448109439112,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": -7.296615465090049,
-          "mean_loss_diff": -0.4992825509201678
+          "t_stat_2x_bandwidth_sensitivity": -7.631045060224364,
+          "mean_loss_diff": -0.5054348614087198
         },
         "PRG_tminus1_lag_vs_GJR": {
           "pair": "PRG_tminus1_lag_vs_GJR",
-          "t_stat": 2.774031001484531,
-          "p_value": 0.005588587382197252,
+          "t_stat": 2.952297015222529,
+          "p_value": 0.0031913061451689373,
           "n": 1981,
           "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
           "harvey_pass_abs_t_gt_3": false,
-          "loss_diff_acf1": -0.010452329133189438,
+          "loss_diff_acf1": -0.013964539665118307,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": 2.6713538032126536,
-          "mean_loss_diff": 0.05342120482508523
+          "t_stat_2x_bandwidth_sensitivity": 2.71957190198523,
+          "mean_loss_diff": 0.05244976615386877
         },
         "PRG_tminus1_lag_vs_HAR": {
           "pair": "PRG_tminus1_lag_vs_HAR",
-          "t_stat": -7.317079380125076,
-          "p_value": 3.6637359812630166e-13,
+          "t_stat": -7.51924165605198,
+          "p_value": 8.304468224196171e-14,
           "n": 1981,
           "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.0835313030134248,
+          "loss_diff_acf1": 0.08989062490638204,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": -7.156306160156615,
-          "mean_loss_diff": -0.4873775346904278
+          "t_stat_2x_bandwidth_sensitivity": -7.293158617951841,
+          "mean_loss_diff": -0.48512578842364595
         },
         "GJR_vs_HAR": {
           "pair": "GJR_vs_HAR",
-          "t_stat": -8.535426554743044,
+          "t_stat": -8.533751087486088,
           "p_value": 0.0,
           "n": 1981,
           "orientation": "negative t means GJR loss < HAR loss (GJR better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.09290583626182443,
+          "loss_diff_acf1": 0.09782443871315094,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": -8.347752017435901,
-          "mean_loss_diff": -0.5407987395155132
+          "t_stat_2x_bandwidth_sensitivity": -8.363019964911903,
+          "mean_loss_diff": -0.5375755545775146
         }
       },
       "forecast_diagnostics": {
@@ -291,7 +291,7 @@
         "n_is": 3762,
         "n_oos": 1613,
         "period": "2004-11-19 to 2026-04-02",
-        "overnight_variance_share_pct": 53.086194119519995,
+        "overnight_variance_share_pct": 53.08619411951982,
         "prg_refit_freq_days": 252,
         "gjr_har_refit_freq_days": 63
       },
@@ -302,79 +302,79 @@
         "n_common_valid": 1613
       },
       "qlike": {
-        "PRG_tminus1_exp": 0.8985720980599681,
-        "PRG_tminus1_lag": 0.9008878850877431,
-        "GJR": 0.9001303172448863,
-        "HAR": 1.5172840257333413,
-        "PRG_canonical_diag": 0.8342188410185247
+        "PRG_tminus1_exp": 0.8978160249640208,
+        "PRG_tminus1_lag": 0.9002181081137873,
+        "GJR": 0.9020842691744925,
+        "HAR": 1.5172840257335256,
+        "PRG_canonical_diag": 0.820410372877124
       },
       "qlike_ranking_close_convention": [
         "PRG_tminus1_exp",
-        "GJR",
         "PRG_tminus1_lag",
+        "GJR",
         "HAR"
       ],
       "close_convention_winner": "PRG_tminus1_exp",
       "dm_tests": {
         "PRG_tminus1_exp_vs_GJR": {
           "pair": "PRG_tminus1_exp_vs_GJR",
-          "t_stat": -0.17239050059427533,
-          "p_value": 0.863152179905117,
+          "t_stat": -0.4361838818166097,
+          "p_value": 0.662761729302404,
           "n": 1613,
           "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
           "harvey_pass_abs_t_gt_3": false,
-          "loss_diff_acf1": 0.046288513427104494,
+          "loss_diff_acf1": 0.07220024644090631,
           "hac_bandwidth_canonical": 12,
-          "t_stat_2x_bandwidth_sensitivity": -0.17312685647098594,
-          "mean_loss_diff": -0.0015582191849183836
+          "t_stat_2x_bandwidth_sensitivity": -0.435888389267066,
+          "mean_loss_diff": -0.004268244210471635
         },
         "PRG_tminus1_exp_vs_HAR": {
           "pair": "PRG_tminus1_exp_vs_HAR",
-          "t_stat": -6.603596277098307,
-          "p_value": 5.4328319620822185e-11,
+          "t_stat": -6.532660104334005,
+          "p_value": 8.639133852739178e-11,
           "n": 1613,
           "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.1756483135213158,
+          "loss_diff_acf1": 0.16923457819915808,
           "hac_bandwidth_canonical": 12,
-          "t_stat_2x_bandwidth_sensitivity": -6.1948450544018865,
-          "mean_loss_diff": -0.6187119276733735
+          "t_stat_2x_bandwidth_sensitivity": -6.116758151704267,
+          "mean_loss_diff": -0.619468000769505
         },
         "PRG_tminus1_lag_vs_GJR": {
           "pair": "PRG_tminus1_lag_vs_GJR",
-          "t_stat": 0.08254698069332288,
-          "p_value": 0.9342220088917279,
+          "t_stat": -0.18223642827105027,
+          "p_value": 0.855420099570483,
           "n": 1613,
           "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
           "harvey_pass_abs_t_gt_3": false,
-          "loss_diff_acf1": 0.032132747010463106,
+          "loss_diff_acf1": 0.06331672285562895,
           "hac_bandwidth_canonical": 12,
-          "t_stat_2x_bandwidth_sensitivity": 0.08277815520629274,
-          "mean_loss_diff": 0.0007575678428566455
+          "t_stat_2x_bandwidth_sensitivity": -0.18010408038357936,
+          "mean_loss_diff": -0.001866161060705142
         },
         "PRG_tminus1_lag_vs_HAR": {
           "pair": "PRG_tminus1_lag_vs_HAR",
-          "t_stat": -6.561577531904913,
-          "p_value": 7.154654646512881e-11,
+          "t_stat": -6.473089384545195,
+          "p_value": 1.270910043871254e-10,
           "n": 1613,
           "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.17546082979438074,
+          "loss_diff_acf1": 0.16888329602811106,
           "hac_bandwidth_canonical": 12,
-          "t_stat_2x_bandwidth_sensitivity": -6.14474823677311,
-          "mean_loss_diff": -0.6163961406455984
+          "t_stat_2x_bandwidth_sensitivity": -6.049164332879157,
+          "mean_loss_diff": -0.6170659176197385
         },
         "GJR_vs_HAR": {
           "pair": "GJR_vs_HAR",
-          "t_stat": -6.564426316293166,
-          "p_value": 7.022693537805935e-11,
+          "t_stat": -6.512911770968275,
+          "p_value": 9.822009872095805e-11,
           "n": 1613,
           "orientation": "negative t means GJR loss < HAR loss (GJR better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.17779166594604467,
+          "loss_diff_acf1": 0.1771466207309552,
           "hac_bandwidth_canonical": 12,
-          "t_stat_2x_bandwidth_sensitivity": -6.174571369151163,
-          "mean_loss_diff": -0.6171537084884552
+          "t_stat_2x_bandwidth_sensitivity": -6.120165257912836,
+          "mean_loss_diff": -0.6151997565590334
         }
       },
       "forecast_diagnostics": {
@@ -406,7 +406,7 @@
         "n_is": 4044,
         "n_oos": 1734,
         "period": "2003-04-15 to 2026-04-02",
-        "overnight_variance_share_pct": 52.60859427916994,
+        "overnight_variance_share_pct": 52.6085942791703,
         "prg_refit_freq_days": 252,
         "gjr_har_refit_freq_days": 63
       },
@@ -417,79 +417,79 @@
         "n_common_valid": 1734
       },
       "qlike": {
-        "PRG_tminus1_exp": 0.7818982917349425,
-        "PRG_tminus1_lag": 0.7885864098547335,
-        "GJR": 0.7883481812137041,
-        "HAR": 1.2349774240174118,
-        "PRG_canonical_diag": 0.6573530214159495
+        "PRG_tminus1_exp": 0.7849694193172844,
+        "PRG_tminus1_lag": 0.7904491411273749,
+        "GJR": 0.7904912141722655,
+        "HAR": 1.2349774240174947,
+        "PRG_canonical_diag": 0.6663507253299814
       },
       "qlike_ranking_close_convention": [
         "PRG_tminus1_exp",
-        "GJR",
         "PRG_tminus1_lag",
+        "GJR",
         "HAR"
       ],
       "close_convention_winner": "PRG_tminus1_exp",
       "dm_tests": {
         "PRG_tminus1_exp_vs_GJR": {
           "pair": "PRG_tminus1_exp_vs_GJR",
-          "t_stat": -0.5653347279702056,
-          "p_value": 0.5719192911269693,
+          "t_stat": -0.5410235434998226,
+          "p_value": 0.5885608890903291,
           "n": 1734,
           "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
           "harvey_pass_abs_t_gt_3": false,
-          "loss_diff_acf1": -0.017333849635353386,
+          "loss_diff_acf1": -0.025349834552801553,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": -0.5785399842396571,
-          "mean_loss_diff": -0.006449889478761543
+          "t_stat_2x_bandwidth_sensitivity": -0.5333093990101204,
+          "mean_loss_diff": -0.00552179485498116
         },
         "PRG_tminus1_exp_vs_HAR": {
           "pair": "PRG_tminus1_exp_vs_HAR",
-          "t_stat": -5.6627617390492135,
-          "p_value": 1.7403150920358712e-08,
+          "t_stat": -5.734459558621307,
+          "p_value": 1.1518044296110475e-08,
           "n": 1734,
           "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.17088536355583261,
+          "loss_diff_acf1": 0.17545752093725833,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": -5.7633274455925285,
-          "mean_loss_diff": -0.45307913228246954
+          "t_stat_2x_bandwidth_sensitivity": -5.8395069480910475,
+          "mean_loss_diff": -0.45000800470021013
         },
         "PRG_tminus1_lag_vs_GJR": {
           "pair": "PRG_tminus1_lag_vs_GJR",
-          "t_stat": 0.018276080743847987,
-          "p_value": 0.9854207128873824,
+          "t_stat": -0.0035275315162252106,
+          "p_value": 0.9971858489004837,
           "n": 1734,
           "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
           "harvey_pass_abs_t_gt_3": false,
-          "loss_diff_acf1": -0.022519086774252874,
+          "loss_diff_acf1": -0.018162779932286682,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": 0.018755373301092258,
-          "mean_loss_diff": 0.00023822864102943932
+          "t_stat_2x_bandwidth_sensitivity": -0.003499879927209069,
+          "mean_loss_diff": -4.2073044890688336e-05
         },
         "PRG_tminus1_lag_vs_HAR": {
           "pair": "PRG_tminus1_lag_vs_HAR",
-          "t_stat": -5.545917005096339,
-          "p_value": 3.375590029719433e-08,
+          "t_stat": -5.613237642409202,
+          "p_value": 2.308039537268769e-08,
           "n": 1734,
           "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.1681593820935522,
+          "loss_diff_acf1": 0.1736472840045872,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": -5.6518121785640085,
-          "mean_loss_diff": -0.4463910141626785
+          "t_stat_2x_bandwidth_sensitivity": -5.722939884220421,
+          "mean_loss_diff": -0.4445282828901197
         },
         "GJR_vs_HAR": {
           "pair": "GJR_vs_HAR",
-          "t_stat": -5.826902645762532,
-          "p_value": 6.717992384608351e-09,
+          "t_stat": -5.81817143750995,
+          "p_value": 7.071303986805333e-09,
           "n": 1734,
           "orientation": "negative t means GJR loss < HAR loss (GJR better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.18889406179843257,
+          "loss_diff_acf1": 0.1877284288398081,
           "hac_bandwidth_canonical": 13,
-          "t_stat_2x_bandwidth_sensitivity": -5.910256964579466,
-          "mean_loss_diff": -0.44662924280370797
+          "t_stat_2x_bandwidth_sensitivity": -5.893510131757801,
+          "mean_loss_diff": -0.444486209845229
         }
       },
       "forecast_diagnostics": {
@@ -520,7 +520,7 @@
         "n_is": 2951,
         "n_oos": 1266,
         "period": "2009-01-05 to 2026-04-02",
-        "overnight_variance_share_pct": 46.145159877980014,
+        "overnight_variance_share_pct": 46.14515987798005,
         "prg_refit_freq_days": 252,
         "gjr_har_refit_freq_days": 63
       },
@@ -531,79 +531,79 @@
         "n_common_valid": 1251
       },
       "qlike": {
-        "PRG_tminus1_exp": 0.9731987754717462,
-        "PRG_tminus1_lag": 0.9859844793711107,
-        "GJR": 0.9687072104011141,
-        "HAR": 3.189008067856377,
-        "PRG_canonical_diag": 0.7880350948437578
+        "PRG_tminus1_exp": 0.9691986460854404,
+        "PRG_tminus1_lag": 0.9812185825905146,
+        "GJR": 0.9753383594588664,
+        "HAR": 3.189008067856544,
+        "PRG_canonical_diag": 0.7913306491994812
       },
       "qlike_ranking_close_convention": [
-        "GJR",
         "PRG_tminus1_exp",
+        "GJR",
         "PRG_tminus1_lag",
         "HAR"
       ],
-      "close_convention_winner": "GJR",
+      "close_convention_winner": "PRG_tminus1_exp",
       "dm_tests": {
         "PRG_tminus1_exp_vs_GJR": {
           "pair": "PRG_tminus1_exp_vs_GJR",
-          "t_stat": 0.20847905959398577,
-          "p_value": 0.8348888960832119,
+          "t_stat": -0.31751343506758134,
+          "p_value": 0.7509070750782723,
           "n": 1251,
           "orientation": "negative t means PRG_tminus1_exp loss < GJR loss (PRG_tminus1_exp better)",
           "harvey_pass_abs_t_gt_3": false,
-          "loss_diff_acf1": -0.0715509424121809,
+          "loss_diff_acf1": -0.0722991820094655,
           "hac_bandwidth_canonical": 11,
-          "t_stat_2x_bandwidth_sensitivity": 0.2043471080601139,
-          "mean_loss_diff": 0.004491565070632116
+          "t_stat_2x_bandwidth_sensitivity": -0.32063101442947506,
+          "mean_loss_diff": -0.006139713373425903
         },
         "PRG_tminus1_exp_vs_HAR": {
           "pair": "PRG_tminus1_exp_vs_HAR",
-          "t_stat": -4.242169443793816,
-          "p_value": 2.3769754216251826e-05,
+          "t_stat": -4.249847541940376,
+          "p_value": 2.2980675975059484e-05,
           "n": 1251,
           "orientation": "negative t means PRG_tminus1_exp loss < HAR loss (PRG_tminus1_exp better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.10798571257754246,
+          "loss_diff_acf1": 0.10807070694123631,
           "hac_bandwidth_canonical": 11,
-          "t_stat_2x_bandwidth_sensitivity": -3.6338207601262233,
-          "mean_loss_diff": -2.215809292384631
+          "t_stat_2x_bandwidth_sensitivity": -3.640945172288712,
+          "mean_loss_diff": -2.219809421771103
         },
         "PRG_tminus1_lag_vs_GJR": {
           "pair": "PRG_tminus1_lag_vs_GJR",
-          "t_stat": 0.742635837651969,
-          "p_value": 0.45784171678525243,
+          "t_stat": 0.27983997897900137,
+          "p_value": 0.7796465768841512,
           "n": 1251,
           "orientation": "negative t means PRG_tminus1_lag loss < GJR loss (PRG_tminus1_lag better)",
           "harvey_pass_abs_t_gt_3": false,
-          "loss_diff_acf1": -0.031472630879164736,
+          "loss_diff_acf1": -0.030043157018534685,
           "hac_bandwidth_canonical": 11,
-          "t_stat_2x_bandwidth_sensitivity": 0.7284545818847368,
-          "mean_loss_diff": 0.01727726896999671
+          "t_stat_2x_bandwidth_sensitivity": 0.2816469022309126,
+          "mean_loss_diff": 0.0058802231316482855
         },
         "PRG_tminus1_lag_vs_HAR": {
           "pair": "PRG_tminus1_lag_vs_HAR",
-          "t_stat": -4.231930077515699,
-          "p_value": 2.4862287391291815e-05,
+          "t_stat": -4.240985349316018,
+          "p_value": 2.389371739153212e-05,
           "n": 1251,
           "orientation": "negative t means PRG_tminus1_lag loss < HAR loss (PRG_tminus1_lag better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.10839474028255976,
+          "loss_diff_acf1": 0.10846689074779592,
           "hac_bandwidth_canonical": 11,
-          "t_stat_2x_bandwidth_sensitivity": -3.622950415484571,
-          "mean_loss_diff": -2.2030235884852662
+          "t_stat_2x_bandwidth_sensitivity": -3.631326646484943,
+          "mean_loss_diff": -2.207789485266029
         },
         "GJR_vs_HAR": {
           "pair": "GJR_vs_HAR",
-          "t_stat": -4.220506008073241,
-          "p_value": 2.613764118808426e-05,
+          "t_stat": -4.2129398640003695,
+          "p_value": 2.7016339097407638e-05,
           "n": 1251,
           "orientation": "negative t means GJR loss < HAR loss (GJR better)",
           "harvey_pass_abs_t_gt_3": true,
-          "loss_diff_acf1": 0.10752510393839129,
+          "loss_diff_acf1": 0.10747114415832978,
           "hac_bandwidth_canonical": 11,
-          "t_stat_2x_bandwidth_sensitivity": -3.6213616908123964,
-          "mean_loss_diff": -2.220300857455263
+          "t_stat_2x_bandwidth_sensitivity": -3.6159901245344166,
+          "mean_loss_diff": -2.2136697083976773
         }
       },
       "forecast_diagnostics": {
@@ -739,7 +739,7 @@
     }
   },
   "headline": {
-    "prg_tminus1_wins_qlike": 3,
+    "prg_tminus1_wins_qlike": 4,
     "n_markets": 6,
     "harvey_significant_cells": {
       "SPY": {
@@ -783,5 +783,5 @@
     "Corsi (2009), A simple approximate long-memory model of realized volatility.",
     "Linton and Wu (2020), A coupled component DCS-EGARCH model for intraday and overnight volatility."
   ],
-  "runtime_seconds": 77.41242814064026
+  "runtime_seconds": 10.971522092819214
 }

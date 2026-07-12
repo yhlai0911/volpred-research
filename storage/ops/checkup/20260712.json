@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T17:41:27.880643",
+  "generated_at": "2026-07-12T22:24:16.615584",
   "overall": "warn",
   "critical_count": 0,
   "warn_count": 2,
@@ -13,7 +13,7 @@
     {
       "dimension": "alert_conditions",
       "severity": "warn",
-      "message": "event_receipt_watchdog: Event receipt watchdog stale (queued_past_deadline)",
+      "message": "member_qa_stale: Member Q&A pending stale (max 25h)",
       "recovery": "uv run volpred ops check-alerts --storage-dir storage"
     },
     {

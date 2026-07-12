@@ -1,0 +1,63 @@
+{
+  "experiment": "K811v2 share bootstrap CI",
+  "timestamp": "2026-07-12T18:15:08+08:00",
+  "statistic": "opportunity-cost share of total VT insurance premium, %; share = OPP / (OPP + TX) over regime-known days",
+  "data": {
+    "source": "paper/vt-insurance-cost/data/*.csv bundled raw-Close snapshot",
+    "period_start": "2012-01-04",
+    "period_end": "2024-12-31",
+    "n_days": 3261,
+    "n_regime_known_days": 3201,
+    "resampled_series": "contiguous regime-known subseries only; the Unknown warm-up prefix is excluded before resampling"
+  },
+  "bootstrap": {
+    "method": "stationary bootstrap (Politis-Romano 1994), circular",
+    "expected_block_length_days": 21,
+    "p_restart": 0.047619047619047616,
+    "n_reps": 10000,
+    "seed": 42,
+    "ci_method": "percentile (2.5, 97.5) on R = OPP/TX, mapped through share = R/(1+R) (increasing on each branch of R != -1); when the R interval contains the pole at -1, no bounded connected 95% CI for the share exists and none is reported",
+    "joint_resampling": "S1 and S2 shares computed on identical resampled index paths"
+  },
+  "s1_share": {
+    "point_estimate_pct": 90.755,
+    "share_ci95_bounded": true,
+    "opp_to_direct_ratio_point": 9.8168,
+    "opp_to_direct_ratio_ci95": [
+      0.9987,
+      18.3097
+    ],
+    "n_reps_total_premium_le_0": 88,
+    "opportunity_cost_pct_yr_ci95": [
+      0.433,
+      7.706
+    ],
+    "total_premium_pct_yr_ci95": [
+      0.866,
+      8.128
+    ],
+    "ci95_lower_pct": 49.968,
+    "ci95_upper_pct": 94.821
+  },
+  "s2_share": {
+    "point_estimate_pct": 57.115,
+    "share_ci95_bounded": false,
+    "opp_to_direct_ratio_point": 1.3318,
+    "opp_to_direct_ratio_ci95": [
+      -6.2262,
+      6.5071
+    ],
+    "n_reps_total_premium_le_0": 2295,
+    "opportunity_cost_pct_yr_ci95": [
+      -3.158,
+      3.446
+    ],
+    "total_premium_pct_yr_ci95": [
+      -2.628,
+      3.99
+    ],
+    "ci95_lower_pct": null,
+    "ci95_upper_pct": null,
+    "no_bounded_ci_reason": "R interval contains the pole at -1: the total premium is not bounded away from zero under resampling (2295/10000 draws with total premium <= 0), so no bounded connected 95% CI for the share exists. Use the total-premium CI for the robustness statement instead."
+  }
+}
