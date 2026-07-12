@@ -112,7 +112,7 @@ uv run python scripts/dispatch_slot_budget.py   # {cap, reason, p1_only_slots}
 - 主線程（你）在所有 writers 完成後**串行**跑 `uv run python scripts/publish_draft.py`（發佈本身數秒，串行無瓶頸；每篇過既有 gates：anti-ai / arc-dedup / depth / lazypack async enqueue）。
 - 選題：主線程先做 3-layer 查重 + narrative-arc 檢查（per publishing.md），給每個 writer **不同主題軸**（跨 cluster），brief 寫死「不要做以下變奏：[list]」。
 - 每 writer brief 含 reader-facing 3 canonical paths + evidence-package 先於 prose（同 PHASE B 6(a)(b) 規則）。
-- 全部完成後在 work_log 記 N 筆（每篇一筆），PHASE Z 一次 commit。
+- 全部完成後在 work_log 記 N 筆（每篇一筆）；commit 由 PHASE-Z 統一收（你只在 PHASE Z 留 receipt）。
 
 **Why**：refill 機制會把 deficit 個 daily_article **任務**一次補進 pool，但舊節奏每班只消化 1 篇 → 池低時要 deficit 個小時才回滿，期間 release 節奏斷檔（boss 多次點名）。寫作（20-40min）並行、發佈（秒級）串行 = 吞吐 ×N 而 feed 寫入仍單線程。
 
@@ -219,41 +219,38 @@ PHASE B — 派新工:
 9. 嚴禁: force push, --no-verify, 寫 knowledge.json from agent (K1259), 假數字。研究誠實 > 一切。
 10. **完整完成 gate**：本 fire 結束前驗證 — (a) agent 跑完 + 結果 verify、(b) knowledge.json 或 work_log 已寫，**且本 fire 寫入的每筆 work_log entry 必含 `"actor": "hourly-<HH>"`（<HH> = 本班台北時兩位數，如 `hourly-14`；2026-07-10 pregate 歸因硬規 — 缺 actor 的 entry 無法被 skip-vs-產出交叉核對歸因，視同 (b) 未完成）**、(c) commit 已 push 主線 OR worktree merged、(d) 派出的 task next_tasks status 已標 succeeded/failed（不留 in_progress 殘留）。任一未完成 = 本 fire 未真正結束，繼續做完。下一輪 4h 後才開始下個新任務。
 
-PHASE Z — **Dispatch-end commit step**（2026-05-28 新增 hard rule，boss 抓 24h 60-file orphan incident）:
+PHASE Z — **本班收尾：交代「為什麼」**（2026-07-13 3-strike 重構；取代舊的「自己 git add + commit」）:
 
-本 fire 派完工 / agent 收完 / task 標完 status **之前**，**強制執行**:
+**你不再跑 git。** commit 這班的產出是 `scripts/dispatch_supervisor/phase_z.py` 的職責 —— 它在 fire 開始前
+記下工作區基線，結束後**只** commit 這班新產生的檔，別人的一律不碰。它比你準：你只能憑印象猜自己動過什麼，
+而那個猜測正是三次事故的成因（`docs/error_log.md` 2026-07-10：`git add -A` 收走被截斷的 `next_tasks.json`、
+把繞過測試閘門的改寫送進 main、把某互動 session 沒改完的 `merge_worktree.sh` commit 進不相干的訊息裡）。
+
+機器知道**改了哪些檔**；只有你知道**為什麼改**。所以你的 PHASE Z 只剩一件事 —— 把「為什麼」交出去：
 
 ```bash
-# 1. 看工作區現況（state/log noise 已全 gitignored，不會出現在此）
-git status -s
-
-# 2. 只 stage 你自己改的路徑。你知道你動過哪些檔 —— 列出來。
-#    main checkout 是共用的：互動 session、codex_loop、其他 agent 可能正在同時編輯。
-git add -- <你這班實際改動的路徑…>
-git commit -m "<task_id> | <一句話 what changed | why>"
-
-# 3. Verify: 你的檔案都進去了（不是「工作區全乾淨」）
-git status -s -- <你這班實際改動的路徑…> | wc -l  # 應該 0
+uv run python scripts/fire_receipt.py \
+  --task-id <task_id> \
+  --subject "<一句話 what changed | why>" \
+  --body "<細節：掃了什麼 / 改了什麼 / 怎麼驗證的>"
 ```
 
-**Why**: 沒 PHASE Z → agent 改檔 → dispatch 結束 → orphan 躺 working tree → boss 抓到一堆 uncommitted（2026-05-28 16:24 incident: 60 files）。
-
-**2026-07-10 更正（取代 2026-05-29 的「`git add -A` 變安全且更可靠」）**：`git add -A` 不安全。
-它的問題從來不是 gitignore noise，而是**它沒有作者的概念** —— 工作區裡髒的檔案不一定是你的。
-同一個假設造成三次事故（`docs/error_log.md` 2026-07-10）：收走被截斷的 `next_tasks.json`、
-把改寫繞過測試閘門送進 main、把某個互動 session 沒改完的 `merge_worktree.sh` commit 進不相干的訊息裡。
-**舊版收尾檢查 `git status -s | wc -l == 0` 正是幫兇** —— 別人的髒檔會讓它不為 0，於是你為了讓它變 0 就把別人的工作一起 commit。
-檢查只該問「**我的**檔案進去了嗎」。
-
-漏掉未追蹤的新檔怎麼辦？`scripts/dispatch_supervisor/phase_z.py` 是這件事的唯一 owner：
-它在 fire 開始前記下工作區的髒檔基線，fire 結束後只 commit 「這班新產生的」，別人的一律不碰、改用 alert 浮現。
-所以你漏 stage 的**自己的**新檔它會補收；別人的檔它不會替你收 —— 也不該。
+- **這班有產出 → 一定要跑**。它會成為 commit 的 subject/body。
+- **漏跑不會掉工作**：PHASE-Z 照樣 commit，只是訊息變成系統生成的，並發一則 warn（「agent 沒交代原因」）——
+  那是 audit trail 的缺口，不是資料遺失。
+- **這班沒產出**（只有 state churn）→ 不用跑。
 
 **禁止**:
-- ❌ `git add -A` / `git add .` / `git commit -a`（會收走別人正在編輯的檔）
-- ❌ commit message 寫 "ops update" / "wip" / "save progress"（無 audit 價值）
-- ❌ skip PHASE Z 直接 exit（違反「完整完成」原則）
-- ⚠️ 若你自己的新檔是 noise type（不該進 repo）→ 補 `.gitignore`，不要硬 commit
-- ⚠️ `git status` 顯示**你沒動過**的髒檔 → 那是別人的，不要碰、不要 commit、不要 stash
+- ❌ `git add` / `git commit` / `git add -A` / `git commit -a` —— **一律不要碰 git**。你跑只會製造 race
+  與「收走別人正在編輯的檔」的風險；PHASE-Z 會處理，而且它有你沒有的 fire 起始基線。
+- ❌ receipt 的 subject 寫 "ops update" / "wip" / "save progress"（無 audit 價值 — 等於沒交代）
+- ⚠️ 你自己的新檔若是 noise type（不該進 repo）→ 補 `.gitignore`，不要指望 PHASE-Z 幫你濾
 
-**Boss directive 2026-05-28**：「當次問題 當次解決 不要排到下次」— PHASE Z 是本 fire 範圍內的事，不可變成 followup。
+**Why 這樣改**（`docs/refactor_plan_agent_output_ownership.md`）：舊版把「commit 本班產出」同時交給
+prompt 散文（你，LLM 自律）與 phase_z.py（機器），**責任雙頭 → 必然一方鬆懈**。實測 24h 內 5 次 fire 都是
+機器在兜底、agent 沒 commit，而兜底 commit 的訊息寫著 `safety-net auto-commit (agent left uncommitted)`
+—— 於是每班巡檢都重報一次，老闆看起來像系統一直出錯（Telegram msg 576「還是一直出錯啊」）。
+修法依 CLAUDE.md anti-stacking：**一個 concern 一個 enforcement owner；機械化之後 prose 縮成 pointer**。
+git 歸機器，理由歸你。你的不可靠現在只會讓 commit message 變醜，不會再讓工作裸躺工作區或被下一班誤收。
+
+**Boss directive 2026-05-28**（仍有效）：「當次問題 當次解決 不要排到下次」— PHASE Z 是本 fire 範圍內的事，不可變成 followup。

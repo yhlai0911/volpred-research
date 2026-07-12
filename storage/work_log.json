@@ -16646,5 +16646,15 @@
     "owner": "hourly-06",
     "commit": "029c79f88",
     "summary": "K1702 收件（compute-queue agent job agent-brief_vol_managed_factor_zoo-25df97）：vol-managed factor zoo OOS + 淨成本 NULL。\n\n驗證（主線程，不採信 agent 自述）：signal `.shift(1)` 在位；normalization 常數只用 1963-1999 校準窗估、OOS 不重估（無 lookahead）；`canonical_hac_lag` 與 repo canonical `ceil(h^(1/3)*n^(1/3))` 逐字等價、h=1 時取 lag 7（未踩 `h-1` 退化）、先量 acf 再選 lag 並報 sensitivity；無 factor-month iid 串接；README 表格與 results.json 全量對帳逐位吻合；seed=42 齊備。\n\nReview：`feature-dev:code-reviewer` fresh-context 獨立審查（fire 內禁 spawn codex exec，走 experiments.md fallback 條款）→ CONDITIONAL_PASS。計算層七項全 PASS，CONDITIONAL 全在 claim 強度層，已於收件時修正：(a) 撤回「推翻 K1265」（SPY VIX-managed，本實驗未測）；(b) R3 的 5/6 改述為方向一致的計數巧合（因子宇宙不同）；(c) 補 N107 為院內先驗（MDD 機械性早已知）；(d) 補 spanning alpha 水準非 scale-invariant 的註記；(e) 回溯範圍擴為 raw-MDD claim class sweep。\n\n結果：primary（capped 3x、25bp、OOS 2000-2026、n=316）6 因子僅 MOM 正 Sharpe 差（+0.265），BH-FDR 後 0/6 顯著；等權 zoo gross +0.036（ns），10bp 翻負。**推翻 R3 的 MDD claim**：raw MDD 改善 5/6，但 vol-normalized 後只剩 1/6 — 那個「改善」是曝險變低的機械結果。\n\nknowledge.json 已寫 K1702（CONDITIONAL_PASS，reviewer_source 註明 subagent fallback）；provenance validator 0 violations。worktree k1702-factor-zoo 已 merge + 清理。\n\nFollow-up 已 queue：(1) primary-path Codex re-verify；(2) raw-MDD-improvement claim class sweep（R3/K1265/N80/N84/N106/N107/N118/N136/N168/N172/K40/Q16 + meta-analysis，含 reader-facing 更正）。"
+  },
+  {
+    "timestamp": "2026-07-13T07:25:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "refactor_agent_output_commit_ownership",
+    "outcome": "completed",
+    "actor": "hourly-07",
+    "owner": "hourly-07",
+    "commit": "",
+    "summary": "3-STRIKE 重構：agent 產出的 commit 歸屬（老闆 Telegram msg 576「還是一直出錯啊」根因）。\n\n診斷：「commit 本班產出」同時交給 prompt 散文（agent 自律）與 phase_z.py（機器）→ 責任雙頭。scheduler.py:385 註解自白「agent's own PHASE Z is prompt-discretion (~90% reliable)」，實測命中率 0/5（近 24h 5 個有產出的 fire 全部走 safety-net 兜底）。例外路徑 = 100% 主線，且兜底 commit 訊息寫 'agent left uncommitted' → 每班巡檢重報 → 老闆看起來像系統一直出錯。工作其實沒遺失，這是責任歸屬 + 觀感缺陷，但它每小時對老闆謊報一次健康狀態。\n\n關鍵洞察：「該 commit 哪些檔」是機械判斷（phase_z 有 fire 起始基線），「為什麼改」才是語意判斷（只有 agent 知道）。把機械判斷交給 LLM、再寫機器兜底 LLM 失誤 = 純負債。agent 的猜測已造成三次事故（error_log 2026-07-10 `git add -A` 收走他人的檔）。\n\n方案（依 anti-stacking：移除一個 owner，非新增第 N 層）：git 歸機器、理由歸 agent。(1) 新 scripts/fire_receipt.py — agent 的整個 PHASE Z 收斂成一行 CLI 留 commit 說明；(2) phase_z.py 加 receipt read-and-consume（git dir，同 pre-fire snapshot 慣例；單一呼叫點，任何 exit path 都無法洩漏到下一班），commit subject 改 `dispatch(HH:MM): <agent 的理由>`，移除正常路徑的 'safety-net'/'left uncommitted' 字樣；有產出但無 receipt → 仍 commit + warn（audit gap，非資料遺失）；(3) prompt PHASE Z 改寫成「不要碰 git，只留 receipt」。\n\n失敗模式位移（重構重點）：agent 漏做的成本從『工作裸躺工作區 / 被下一班誤收 / 別人的檔被收走』降到『commit message 變醜』。\n\n驗證：scripts/tests/test_phase_z_receipt.py 6 tests，每個釘一個 incident 觸發條件。Break-then-verify 在臨時 worktree 執行（control-plane.md：不在 daemon 腳下抽地毯）— 移除 consume 後 test_receipt_does_not_survive_its_fire 如預期紅燈。既有 phase_z/dispatch_state 測試 65 passed 無回歸。\n\nDoc: docs/refactor_plan_agent_output_ownership.md（三層診斷 + 方案 + 廢棄面 + 驗證 gate）。\n\nReload: --defer（in-flight guard 會拒、--force 會殺死自己 — reload script 註解明列此情境）。下班 fire 起走新流程。"
   }
 ]

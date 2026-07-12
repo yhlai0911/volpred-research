@@ -331,6 +331,119 @@ def _consume_pre_fire_snapshot(repo_root: Path, runner) -> None:
         LOG.warning("phase_z: cannot remove pre-fire snapshot (%s)", exc)
 
 
+# ── fire commit receipt ──────────────────────────────────────────────────────
+# The 3-strike fix (2026-07-13; docs/refactor_plan_agent_output_ownership.md).
+#
+# Committing is a MECHANICAL act. The fire-start baseline above already knows
+# exactly which paths this fire produced — better than the agent does, which can
+# only recall what it *thinks* it touched. That guess is how `git add -A` swept
+# three other sessions' half-finished edits into a dispatch commit
+# (docs/error_log.md 2026-07-10). So git belongs to this module, and the prompt
+# stops asking the agent to run it.
+#
+# What the agent alone knows is WHY. That is all it is still asked for: a receipt
+# carrying the commit subject/body. Moving the discretion here changes the failure
+# mode from structural to cosmetic — an agent that forgets its receipt costs an
+# audit-quality message, not a dirty tree, not a next-shift steal, not a lost
+# experiment.
+#
+# Same git-dir home as the pre-fire snapshot, for the same reasons (invisible to
+# `git status`, per-checkout, never committable) — see _SNAPSHOT_BASENAME.
+_RECEIPT_BASENAME = "volpred_fire_commit_msg.json"
+_RECEIPT_MAX_AGE_S = _SNAPSHOT_MAX_AGE_S  # a receipt goes stale exactly like a baseline
+_RECEIPT_SUBJECT_MAX = 120  # git convention; longer subjects wrap badly in `git log --oneline`
+
+
+def _receipt_path(repo_root: Path, runner) -> Path | None:
+    """`<git-dir>/volpred_fire_commit_msg.json` — see _snapshot_path for why git-dir."""
+    snap = _snapshot_path(repo_root, runner)
+    return None if snap is None else snap.with_name(_RECEIPT_BASENAME)
+
+
+def write_fire_receipt(
+    repo_root: Path,
+    *,
+    subject: str,
+    body: str = "",
+    task_id: str = "",
+    runner=subprocess.run,
+) -> bool:
+    """Record WHY this fire changed the tree. Called by the agent via scripts/fire_receipt.py.
+
+    Not an enforcement point — PHASE-Z commits with or without this. It only
+    upgrades the commit message from a generated fallback to the agent's own
+    account of what it did.
+    """
+    dest = _receipt_path(repo_root, runner)
+    if dest is None:
+        return False
+    subject = " ".join(subject.split())[:_RECEIPT_SUBJECT_MAX].strip()
+    if not subject:
+        LOG.warning("phase_z: refusing an empty receipt subject")
+        return False
+    payload = {
+        "written_at": datetime.now().timestamp(),
+        "subject": subject,
+        "body": body.strip(),
+        "task_id": task_id.strip(),
+    }
+    try:
+        tmp = dest.with_suffix(".tmp")
+        tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+        tmp.replace(dest)  # atomic: PHASE-Z must never read a half-written receipt
+        return True
+    except OSError as exc:
+        LOG.warning("phase_z: cannot persist fire receipt (%s) — commit will use a "
+                    "generated message", exc)
+        return False
+
+
+def _read_and_consume_fire_receipt(repo_root: Path, runner, now: float | None = None) -> dict | None:
+    """Read the receipt and delete it in the same breath — one fire, one receipt.
+
+    Read-and-consume (rather than read-now-delete-later) because run_phase_z has
+    many exit paths: a receipt left behind by a clean-tree fire would caption the
+    NEXT fire's commit with the previous fire's reasons. There is no exit path
+    from which this can leak, by construction.
+    """
+    src = _receipt_path(repo_root, runner)
+    if src is None:
+        return None
+    try:
+        raw = src.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return None  # silent-ok: no receipt is the documented fallback path, not an error
+    except OSError as exc:
+        LOG.warning("phase_z: fire receipt unreadable (%s)", exc)
+        return None
+    finally:
+        try:
+            src.unlink(missing_ok=True)
+        except OSError as exc:  # pragma: no cover — unlink of our own file
+            LOG.warning("phase_z: cannot remove fire receipt (%s)", exc)
+
+    try:
+        payload = json.loads(raw)
+        subject = " ".join(str(payload["subject"]).split()).strip()
+        written_at = float(payload["written_at"])
+    except (ValueError, TypeError, KeyError) as exc:
+        LOG.warning("phase_z: fire receipt malformed (%s) — using a generated message", exc)
+        return None
+    if not subject:
+        LOG.warning("phase_z: fire receipt has an empty subject — using a generated message")
+        return None
+
+    age = (now if now is not None else datetime.now().timestamp()) - written_at
+    if age > _RECEIPT_MAX_AGE_S or age < 0:
+        LOG.warning("phase_z: fire receipt is %.0fs old — refusing a stale message", age)
+        return None
+    return {
+        "subject": subject[:_RECEIPT_SUBJECT_MAX],
+        "body": str(payload.get("body") or "").strip(),
+        "task_id": str(payload.get("task_id") or "").strip(),
+    }
+
+
 # ── foreign paths that never clear ───────────────────────────────────────────
 # One fire finding a foreign path means a session is mid-edit; harmless. The same
 # path still foreign fire after fire means nobody is coming back for it, and a
@@ -770,6 +883,9 @@ def run_phase_z(
     repo_root = Path(repo_root)
     hhmm = now_hhmm or datetime.now().strftime("%H:%M")
     alert_fn = alert_fn or _default_alert
+    # Read-and-consume up front: every exit path below is now incapable of leaving
+    # a receipt behind to caption the next fire's commit. See the receipt block above.
+    receipt = _read_and_consume_fire_receipt(repo_root, runner)
 
     dirty_now = _dirty_paths(repo_root, runner)
     if dirty_now is None:
@@ -989,17 +1105,35 @@ def run_phase_z(
                 LOG.warning("phase_z: git add rc=%d: %s — aborting commit (partial-index risk)",
                             add.returncode, (add.stderr or "").strip()[:200])
                 return {"committed": False, "reason": "add_error", "untracked": untracked}
-        subject = (
-            f"ops(dispatch-supervisor {hhmm}): PHASE-Z safety-net auto-commit (agent left uncommitted)"
-            if owned else
-            f"ops(dispatch-supervisor {hhmm}): PHASE-Z state churn (no agent output this fire)"
+        # Committing the fire's output is this module's job, not a rescue of a
+        # delinquent agent — so the normal path no longer says "safety-net" or
+        # "agent left uncommitted". Those words made a working system read as a
+        # failing one every single shift (owner, Telegram msg 576: 「還是一直出錯啊」).
+        # What IS worth a distinct message: output that arrived with no account of
+        # why (no receipt) — that is the one case a human should look at.
+        if owned and receipt:
+            subject = f"dispatch({hhmm}): {receipt['subject']}"
+        elif owned:
+            subject = f"dispatch({hhmm}): 本班產出未附說明（agent 沒留 receipt）"
+        else:
+            subject = f"ops(dispatch-supervisor {hhmm}): PHASE-Z state churn (no agent output this fire)"
+        body_lines = []
+        if receipt:
+            if receipt["task_id"]:
+                body_lines.append(f"task: {receipt['task_id']}")
+            if receipt["body"]:
+                body_lines.append(receipt["body"])
+            if body_lines:
+                body_lines.append("")
+        body_lines.append(
+            f"Staged what this fire produced: {len(owned)} path(s), plus "
+            f"{len(churn)} daemon-written machine-churn path(s) this module owns.\n"
+            f"Left alone (dirty before the fire, another writer's): {len(foreign)} path(s)."
         )
         commit = _git(
             repo_root, "commit",
             "-m", subject,
-            "-m", (f"Staged what this fire produced: {len(owned)} path(s), plus "
-                   f"{len(churn)} daemon-written machine-churn path(s) this module owns.\n"
-                   f"Left alone (dirty before the fire, another writer's): {len(foreign)} path(s)."),
+            "-m", "\n".join(body_lines),
             timeout_s=_COMMIT_TIMEOUT_S, runner=runner,
         )
     except (subprocess.TimeoutExpired, OSError) as exc:
@@ -1020,6 +1154,28 @@ def run_phase_z(
             test_runner=test_runner or subprocess.run,
             alert_fn=alert_fn or _default_alert,
         )
+        if owned and not receipt:
+            # Not a rescue alert — the work IS committed. This flags a commit that
+            # landed in main history with a generated message instead of an account
+            # of why, i.e. an audit-trail gap. Rare by design: the only way here is
+            # an agent that produced output and skipped one CLI call.
+            alert_fn(
+                level="warn",
+                title=f"PHASE-Z {hhmm}: 這班的 {len(owned)} 個產出已 commit，但 agent 沒交代原因",
+                body="\n".join([
+                    "## 發生什麼",
+                    f"這班 fire 產出了 {len(owned)} 個檔案，PHASE-Z 已照常 commit（**工作沒有遺失**）。",
+                    "但 agent 沒有在收尾時留下 commit 說明（fire receipt），所以這筆 commit 的訊息是",
+                    "系統自動生成的 —— git log 上看不出這班到底做了什麼、為什麼做。",
+                    "",
+                    "## 現在該做什麼",
+                    "通常不用處理。若這筆 commit 之後要追溯，直接看 diff。",
+                    "同一個 agent 反覆漏 receipt → 檢查 dispatch prompt 的 PHASE Z 段是否被改壞。",
+                    "",
+                    "## 正確做法（給 agent）",
+                    "`uv run python scripts/fire_receipt.py --task-id <id> --subject '<一句話 what | why>'`",
+                ]),
+            )
         if foreign:
             alert_fn(
                 level="warn",
