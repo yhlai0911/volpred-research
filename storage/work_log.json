@@ -16385,5 +16385,29 @@
     "task_id": "supervisor_hang_alert_tests_red_on_main",
     "summary": "Hang-alert tests were vacuously red: fakes skipped reserve_fire() so the worker took the loser branch. Fixed the fixtures to honor production's reserve-then-attach contract. Production alerting was never broken (owner did receive hang CRITICALs). Tests only, no daemon reload. 112 green.",
     "commit": "c320ae486"
+  },
+  {
+    "timestamp": "2026-07-12T21:19:20+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-666c75d94",
+    "outcome": "succeeded",
+    "summary": "fix K1442 CPI date audit and published errata",
+    "commit": "666c75d94ddf6634b9170e7a85425343b8104fae",
+    "owner": "codex",
+    "backfilled_at": "2026-07-12T14:50:06.498426+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1442"
+  },
+  {
+    "timestamp": "2026-07-12T22:49:45+08:00",
+    "task_type": "experiment",
+    "task_id": "codex-commit-65447afe3",
+    "outcome": "succeeded",
+    "summary": "complete K1684 R3 primary review",
+    "commit": "65447afe3cdec23d68e38d41b85df2dce6f004c0",
+    "owner": "codex",
+    "backfilled_at": "2026-07-12T14:50:06.498080+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1684"
   }
 ]
