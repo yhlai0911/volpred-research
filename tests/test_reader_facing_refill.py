@@ -63,144 +63,52 @@ def test_load_json_warns_on_invalid_existing_file(tmp_path, capsys):
     assert "JSONDecodeError" in captured.err
 
 
-def test_refill_event_candidates_adds_only_in_horizon(tmp_path, monkeypatch):
-    next_tasks = tmp_path / "storage" / "next_tasks.json"
-    next_tasks.parent.mkdir(parents=True, exist_ok=True)
-    next_tasks.write_text("[]\n", encoding="utf-8")
-    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
-    monkeypatch.setattr(MODULE, "_now_utc", lambda: MODULE.datetime(2026, 5, 27, 0, 0, tzinfo=MODULE.timezone.utc))
-    monkeypatch.setattr(
-        MODULE,
-        "_load_runtime_event_items",
-        lambda: [
-            {
-                "id": "near",
-                "event_key": "CPI_US_2026_06_01",
-                "task_template": {
-                    "title": "near title",
-                    "description": "near desc",
-                    "payload_patch": {
-                        "event_type": "CPI_US",
-                        "event_date": "2026-06-01",
-                        "event_series_slot": "T-2",
-                    },
-                },
-            },
-            {
-                "id": "far",
-                "event_key": "CPI_US_2026_06_20",
-                "task_template": {
-                    "title": "far title",
-                    "description": "far desc",
-                    "payload_patch": {
-                        "event_type": "CPI_US",
-                        "event_date": "2026-06-20",
-                        "event_series_slot": "T-2",
-                    },
-                },
-            },
-        ],
-    )
+def test_refill_event_candidates_delegates_to_single_event_owner(monkeypatch):
+    calls = []
+
+    def fake_expand(*, storage_dir, now):
+        calls.append((storage_dir, now))
+        return {
+            "created": [
+                {
+                    "task": {"id": "event_article_cpi_us_2026-06-01_tminus2"},
+                    "queue_created": True,
+                }
+            ],
+            "skipped": [{"id": "future-window", "reason": "pending"}],
+            "expired_tasks": {"next_tasks": [], "legacy_receipts": []},
+        }
+
+    monkeypatch.setattr(MODULE, "expand_due_event_jobs", fake_expand)
 
     result = MODULE.refill_event_candidates(horizon_days=14)
 
+    assert len(calls) == 1
     assert result["added"] == ["event_article_cpi_us_2026-06-01_tminus2"]
-    data = json.loads(next_tasks.read_text(encoding="utf-8"))
-    assert len(data) == 1
+    assert result["skipped"] == [{"id": "future-window", "reason": "pending"}]
 
 
-def test_refill_event_candidates_respects_not_before(tmp_path, monkeypatch):
-    next_tasks = tmp_path / "storage" / "next_tasks.json"
-    next_tasks.parent.mkdir(parents=True, exist_ok=True)
-    next_tasks.write_text("[]\n", encoding="utf-8")
-    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+def test_refill_event_candidates_never_uses_legacy_append_writer(monkeypatch):
     monkeypatch.setattr(
-        MODULE, "_now_utc", lambda: MODULE.datetime(2026, 5, 28, 0, 0, tzinfo=MODULE.timezone.utc)
+        MODULE,
+        "_append_task",
+        lambda *_a, **_k: (_ for _ in ()).throw(AssertionError("legacy event writer called")),
     )
     monkeypatch.setattr(
         MODULE,
-        "_load_runtime_event_items",
-        lambda: [
-            {
-                "id": "future-window",
-                "event_key": "CPI_US_2026_06_11",
-                "not_before": "2026-06-09T08:00:00+08:00",
-                "task_template": {
-                    "title": "future window title",
-                    "description": "desc",
-                    "payload_patch": {
-                        "event_type": "CPI_US",
-                        "event_date": "2026-06-11",
-                        "event_series_slot": "T-2",
-                    },
-                },
-            },
-            {
-                "id": "open-window",
-                "event_key": "NFP_2026_05_29",
-                "not_before": "2026-05-27T08:00:00+08:00",
-                "task_template": {
-                    "title": "open window title",
-                    "description": "desc",
-                    "payload_patch": {
-                        "event_type": "NFP",
-                        "event_date": "2026-05-29",
-                        "event_series_slot": "T-2",
-                    },
-                },
-            },
-        ],
+        "expand_due_event_jobs",
+        lambda **_kwargs: {
+            "created": [],
+            "skipped": [],
+            "expired_tasks": {"next_tasks": [], "legacy_receipts": []},
+        },
     )
 
-    result = MODULE.refill_event_candidates(horizon_days=14)
-
-    assert result["added"] == ["event_article_nfp_2026-05-29_tminus2"]
-    not_yet = [s for s in result["skipped"] if s.get("reason") == "not_yet_in_window"]
-    assert [s["id"] for s in not_yet] == ["future-window"]
-    data = json.loads(next_tasks.read_text(encoding="utf-8"))
-    assert [task["id"] for task in data] == ["event_article_nfp_2026-05-29_tminus2"]
-
-
-def test_refill_event_candidates_warns_on_bad_event_date(tmp_path, monkeypatch, capsys):
-    next_tasks = tmp_path / "storage" / "next_tasks.json"
-    next_tasks.parent.mkdir(parents=True, exist_ok=True)
-    next_tasks.write_text("[]\n", encoding="utf-8")
-    schedules = tmp_path / "runtime_schedules.json"
-    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
-    monkeypatch.setattr(MODULE, "RUNTIME_SCHEDULES", schedules)
-    monkeypatch.setattr(
-        MODULE, "_now_utc", lambda: MODULE.datetime(2026, 5, 28, 0, 0, tzinfo=MODULE.timezone.utc)
-    )
-    monkeypatch.setattr(
-        MODULE,
-        "_load_runtime_event_items",
-        lambda: [
-            {
-                "id": "bad-date",
-                "event_key": "CPI_US_BAD",
-                "task_template": {
-                    "title": "bad date title",
-                    "description": "desc",
-                    "payload_patch": {
-                        "event_type": "CPI_US",
-                        "event_date": "not-a-date",
-                        "event_series_slot": "T-2",
-                    },
-                },
-            }
-        ],
-    )
-
-    result = MODULE.refill_event_candidates(horizon_days=14)
-
-    captured = capsys.readouterr()
-    assert result["added"] == []
-    assert result["skipped"] == [{"id": "bad-date", "reason": "bad_event_date"}]
-    assert "[reader_facing_refill] WARN event_date parse failed" in captured.err
-    assert "field=event_date" in captured.err
-    assert "raw=not-a-date" in captured.err
-    assert "item_id=bad-date" in captured.err
-    assert json.loads(next_tasks.read_text(encoding="utf-8")) == []
+    assert MODULE.refill_event_candidates() == {
+        "added": [],
+        "skipped": [],
+        "expired": {"next_tasks": [], "legacy_receipts": []},
+    }
 
 
 def test_refill_trending_skips_arc_duplicate(tmp_path, monkeypatch):
@@ -241,49 +149,6 @@ def test_refill_trending_skips_arc_duplicate(tmp_path, monkeypatch):
     data = json.loads(next_tasks.read_text(encoding="utf-8"))
     dup_ids = [t["id"] for t in data if "duplicate" in t.get("title", "")]
     assert dup_ids == []
-
-
-def test_refill_event_candidates_warns_and_skips_on_bad_not_before(tmp_path, monkeypatch, capsys):
-    next_tasks = tmp_path / "storage" / "next_tasks.json"
-    next_tasks.parent.mkdir(parents=True, exist_ok=True)
-    next_tasks.write_text("[]\n", encoding="utf-8")
-    schedules = tmp_path / "runtime_schedules.json"
-    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
-    monkeypatch.setattr(MODULE, "RUNTIME_SCHEDULES", schedules)
-    monkeypatch.setattr(
-        MODULE, "_now_utc", lambda: MODULE.datetime(2026, 5, 28, 0, 0, tzinfo=MODULE.timezone.utc)
-    )
-    monkeypatch.setattr(
-        MODULE,
-        "_load_runtime_event_items",
-        lambda: [
-            {
-                "id": "bad-window",
-                "event_key": "CPI_US_2026_06_11",
-                "not_before": "not-a-timestamp",
-                "task_template": {
-                    "title": "bad window title",
-                    "description": "desc",
-                    "payload_patch": {
-                        "event_type": "CPI_US",
-                        "event_date": "2026-06-11",
-                        "event_series_slot": "T-2",
-                    },
-                },
-            }
-        ],
-    )
-
-    result = MODULE.refill_event_candidates(horizon_days=14)
-
-    captured = capsys.readouterr()
-    assert result["added"] == []
-    assert result["skipped"] == [{"id": "bad-window", "reason": "bad_not_before"}]
-    assert "[reader_facing_refill] WARN not_before parse failed" in captured.err
-    assert "field=not_before" in captured.err
-    assert "raw=not-a-timestamp" in captured.err
-    assert "item_id=bad-window" in captured.err
-    assert json.loads(next_tasks.read_text(encoding="utf-8")) == []
 
 
 # --- Slot-aware event coverage (2026-07-03 NFP T+0 stale-duplicate fix) --------
@@ -365,92 +230,6 @@ def test_reaction_coverage_excludes_forward_preview():
     }]
     hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
     assert hit is None  # forward title excluded even though it's in the date window
-
-
-def _monkeypatch_event_env(tmp_path, monkeypatch, feed):
-    next_tasks = tmp_path / "storage" / "next_tasks.json"
-    next_tasks.parent.mkdir(parents=True, exist_ok=True)
-    next_tasks.write_text("[]\n", encoding="utf-8")
-    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
-    monkeypatch.setattr(MODULE, "DEDUP_LOG", tmp_path / "dedup_decisions.jsonl")
-    monkeypatch.setattr(
-        MODULE, "_now_utc", lambda: MODULE.datetime(2026, 7, 3, 0, 0, tzinfo=MODULE.timezone.utc)
-    )
-    monkeypatch.setattr(MODULE, "_load_feed_for_dedup", lambda: feed)
-    monkeypatch.setattr(
-        MODULE,
-        "_load_runtime_event_items",
-        lambda: [{
-            "id": "nfp-2026-07-03-t0",
-            "event_key": "NFP_2026_07_03",
-            "task_template": {
-                "title": "Event article: NFP_US 2026-07-03 T+0",
-                "description": "reaction",
-                "payload_patch": {
-                    "event_type": "NFP_US",
-                    "event_date": "2026-07-03",
-                    "event_series_slot": "T+0",
-                },
-            },
-        }],
-    )
-    return next_tasks
-
-
-def test_refill_skips_reaction_when_already_covered(tmp_path, monkeypatch):
-    """T+0 發過則 skip T+0."""
-    feed = [{
-        "id": "mile_35eef830",
-        "status": "published",
-        "title": "6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%",
-        "tags": ["NFP", "非農就業"],
-        "published_at": "2026-07-01T17:24:08+00:00",
-    }]
-    next_tasks = _monkeypatch_event_env(tmp_path, monkeypatch, feed)
-
-    result = MODULE.refill_event_candidates(horizon_days=14)
-
-    assert result["added"] == []
-    skipped = [s for s in result["skipped"] if s.get("reason") == "reaction_already_covered"]
-    assert skipped and skipped[0]["dup_of"] == "mile_35eef830"
-    assert json.loads(next_tasks.read_text(encoding="utf-8")) == []
-    # audit trail written
-    log = (tmp_path / "dedup_decisions.jsonl").read_text(encoding="utf-8")
-    assert "reaction_already_covered" in log and "event_reaction_coverage" in log
-
-
-def test_refill_generates_reaction_when_only_forward_covered(tmp_path, monkeypatch):
-    """T-7 發過但 T+0 仍生成（forward article 不覆蓋 reaction slot）."""
-    feed = [{
-        "id": "mile_forward",
-        "status": "published",
-        "title": "非農就業報告前7天：勞動市場到底在哪個位置？",
-        "tags": ["NFP", "非農就業"],
-        "published_at": "2026-07-01T09:00:00+00:00",
-    }]
-    next_tasks = _monkeypatch_event_env(tmp_path, monkeypatch, feed)
-
-    result = MODULE.refill_event_candidates(horizon_days=14)
-
-    assert result["added"] == ["event_article_nfp_us_2026-07-03_tplus0"]
-    data = json.loads(next_tasks.read_text(encoding="utf-8"))
-    assert [t["id"] for t in data] == ["event_article_nfp_us_2026-07-03_tplus0"]
-
-
-def test_refill_generates_reaction_for_brand_new_event(tmp_path, monkeypatch):
-    """全新 event 正常生成（feed 無覆蓋）."""
-    feed = [{
-        "id": "mile_unrelated",
-        "status": "published",
-        "title": "台積電六月營收再創高，記憶體需求回溫",
-        "tags": ["台積電", "半導體"],
-        "published_at": "2026-07-02T09:00:00+00:00",
-    }]
-    next_tasks = _monkeypatch_event_env(tmp_path, monkeypatch, feed)
-
-    result = MODULE.refill_event_candidates(horizon_days=14)
-
-    assert result["added"] == ["event_article_nfp_us_2026-07-03_tplus0"]
 
 
 def test_reaction_coverage_fails_open_on_bad_feed(monkeypatch):

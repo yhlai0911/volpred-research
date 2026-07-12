@@ -95,7 +95,7 @@ def test_parse_event_receipt_state_ignores_terminal_and_non_event_tasks(tmp_path
         {
             "id": "task_expired",
             "title": "Event article: FOMC T+0",
-            "status": "expired",
+            "status": "failed",
             "claimed_at": (now - timedelta(days=10)).isoformat(),
             "payload": {"event_key": "FOMC_2026_06_17"},
         },

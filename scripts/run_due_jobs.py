@@ -415,7 +415,7 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
     # but v12 downgraded it to advisory-only (CLAUDE.md §control-plane) and
     # its wrapper never runs on this host (scheduler_tick.log size=0 since
     # 2026-04-19). Piggy-backing on hourly check_alerts ensures one_shot
-    # event jobs (e.g. FOMC T-2 windows) materialize as control-plane tasks
+    # event jobs (e.g. FOMC T-2 windows) materialize in the canonical next_tasks queue
     # within ~60 min of their `not_before` timestamp. Cost is cheap: iterates
     # event_jobs.items and no-ops pending/expired entries.
     event_expansion: dict[str, Any] = {"ok": False, "reason": "not_attempted"}

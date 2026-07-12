@@ -314,11 +314,11 @@
       },
       {
         "id": "reader_facing_refill",
-        "label": "Reader-facing badge pool refill (event/trending/member_qa)",
+        "label": "Reader-facing badge pool refill (trending/member_qa; event delegated)",
         "cron": "0 6,12,18 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_reader_facing_refill.sh",
         "log_path": "storage/logs/cron/reader_facing_refill.log",
-        "description": "早/午/晚各 1 次補 reader-facing badge pool。統一處理 event_article / trending_repost / member_qa 的 candidate scan 與 next_tasks materialization，取代 hourly dispatch prompt PHASE 0.5 的人工掃描。trending source scan 走可插拔命令介面（VOLPRED_TRENDING_SCAN_CMD），event/member 走本地 canonical sources。",
+        "description": "早/午/晚各 1 次補 reader-facing badge pool。trending_repost / member_qa 由本 job materialize；event_article 僅委派給 event_jobs hourly single-owner（依 not_before/deadline 寫 next_tasks），不再維持第二套 event writer。trending source scan 走可插拔命令介面（VOLPRED_TRENDING_SCAN_CMD）。",
         "host_crontab_managed": true,
         "matchers": [
           "refill_reader_facing_pool.py",
@@ -644,7 +644,7 @@
   },
   "event_jobs": {
     "source_label": "Canonical one-shot and event-relative task spec",
-    "note": "Materialize due event windows into control-plane tasks with dedupe ledger protection.",
+    "note": "Materialize due event windows into the canonical next_tasks pending queue with dedupe-ledger audit protection.",
     "items": [
       {
         "id": "nfp-2026-06-05-t7",
