@@ -16656,5 +16656,27 @@
     "owner": "hourly-07",
     "commit": "",
     "summary": "3-STRIKE 重構：agent 產出的 commit 歸屬（老闆 Telegram msg 576「還是一直出錯啊」根因）。\n\n診斷：「commit 本班產出」同時交給 prompt 散文（agent 自律）與 phase_z.py（機器）→ 責任雙頭。scheduler.py:385 註解自白「agent's own PHASE Z is prompt-discretion (~90% reliable)」，實測命中率 0/5（近 24h 5 個有產出的 fire 全部走 safety-net 兜底）。例外路徑 = 100% 主線，且兜底 commit 訊息寫 'agent left uncommitted' → 每班巡檢重報 → 老闆看起來像系統一直出錯。工作其實沒遺失，這是責任歸屬 + 觀感缺陷，但它每小時對老闆謊報一次健康狀態。\n\n關鍵洞察：「該 commit 哪些檔」是機械判斷（phase_z 有 fire 起始基線），「為什麼改」才是語意判斷（只有 agent 知道）。把機械判斷交給 LLM、再寫機器兜底 LLM 失誤 = 純負債。agent 的猜測已造成三次事故（error_log 2026-07-10 `git add -A` 收走他人的檔）。\n\n方案（依 anti-stacking：移除一個 owner，非新增第 N 層）：git 歸機器、理由歸 agent。(1) 新 scripts/fire_receipt.py — agent 的整個 PHASE Z 收斂成一行 CLI 留 commit 說明；(2) phase_z.py 加 receipt read-and-consume（git dir，同 pre-fire snapshot 慣例；單一呼叫點，任何 exit path 都無法洩漏到下一班），commit subject 改 `dispatch(HH:MM): <agent 的理由>`，移除正常路徑的 'safety-net'/'left uncommitted' 字樣；有產出但無 receipt → 仍 commit + warn（audit gap，非資料遺失）；(3) prompt PHASE Z 改寫成「不要碰 git，只留 receipt」。\n\n失敗模式位移（重構重點）：agent 漏做的成本從『工作裸躺工作區 / 被下一班誤收 / 別人的檔被收走』降到『commit message 變醜』。\n\n驗證：scripts/tests/test_phase_z_receipt.py 6 tests，每個釘一個 incident 觸發條件。Break-then-verify 在臨時 worktree 執行（control-plane.md：不在 daemon 腳下抽地毯）— 移除 consume 後 test_receipt_does_not_survive_its_fire 如預期紅燈。既有 phase_z/dispatch_state 測試 65 passed 無回歸。\n\nDoc: docs/refactor_plan_agent_output_ownership.md（三層診斷 + 方案 + 廢棄面 + 驗證 gate）。\n\nReload: --defer（in-flight guard 會拒、--force 會殺死自己 — reload script 註解明列此情境）。下班 fire 起走新流程。"
+  },
+  {
+    "timestamp": "2026-07-13T07:47:47+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-435715842",
+    "outcome": "succeeded",
+    "summary": "platform ops: add multi-slot dispatch pool",
+    "commit": "4357158426422a115542919e099e77b03c8b1f4d",
+    "owner": "codex",
+    "backfilled_at": "2026-07-12T23:49:06.791060+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T07:48:42+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-83398a2ce",
+    "outcome": "succeeded",
+    "summary": "ops: complete multi-slot dispatcher task",
+    "commit": "83398a2ce0986ae21e0e7acd87241a7773de5f8f",
+    "owner": "codex",
+    "backfilled_at": "2026-07-12T23:49:06.790754+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
