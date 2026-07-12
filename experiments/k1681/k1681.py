@@ -831,6 +831,7 @@ def main():
         "seed": SEED,
         "data": {
             "source": "yfinance daily OHLC (auto_adjust=False)",
+            "methodology_type": "empirical predictive-association study",
             "tickers": sorted(panel),
             "n_assets": len(panel),
             "sample": "2010-01-01 .. 2026-07-10",
@@ -853,9 +854,17 @@ def main():
             "inference": (
                 "Per-asset Newey-West HAC + Benjamini-Hochberg FDR across assets; pooled "
                 "estimates use asset fixed effects with date-clustered SE; OOS loss "
-                "differentials are averaged across assets by date before the HAC t-test."
+                "differentials are averaged across assets by date before HAC inference. "
+                "Nested comparisons use Clark-West (2007) for incremental information; "
+                "raw DM remains a descriptive test of realized finite-sample MSPE."
             ),
         },
+        "references": [
+            "Clark and West (2007), Journal of Econometrics 138, 291-311",
+            "McCracken (2007), Journal of Econometrics 140, 719-752",
+            "Diebold and Mariano (1995), JBES 13, 253-263",
+            "Ko, Wang, and Yang (2025), Financial Analysts Journal 81(4), 121-141",
+        ],
         "targets": {},
     }
 
@@ -954,13 +963,21 @@ def main():
     sp = span_rv["pooled_date_clustered"]
     asym = abs(sp["coef_smad_neg"] / sp["coef_smad_pos"])
     oos_t = span_rv["oos_summary"]["dm_hac_t_date_aggregated"]
+    cw_rv = span_rv["oos_summary"]["clark_west_date_aggregated"]
+    cw_sv = sv["span_test_vs_M1B"]["oos_summary"]["clark_west_date_aggregated"]
     results["verdict"] = {
         "overall": "NULL",
         "summary": (
             "SMAD does NOT deliver usable volatility or left-tail predictability. "
-            "Left-tail: flat null. Downside semivariance: in-sample only, OOS null. "
-            "Next-day RV: a statistically robust but economically negligible increment "
-            "that fails the Harvey (2016) OOS bar."
+            "Left-tail is flat null. Clark-West detects incremental information for "
+            "next-day RV and downside semivariance, but next-day RV adds only 0.54% of "
+            "HAR's R2 and downside semivariance realizes worse OOS MSPE. Statistical "
+            "detectability therefore does not become economic usefulness."
+        ),
+        "forecast_test_interpretation": (
+            "Clark-West asks whether the nested increment carries population predictive "
+            "content after correcting estimation-noise bias. Raw DM/MSPE asks whether the "
+            "larger model actually forecast better in this finite OOS sample."
         ),
         "by_target": {
             "left_tail_hit_next": {
@@ -973,23 +990,26 @@ def main():
                 ),
             },
             "semivar_down_next": {
-                "verdict": "NULL (OOS)",
+                "verdict": "INCREMENTAL CONTENT DETECTED, NO OOS MSPE IMPROVEMENT",
                 "evidence": (
                     f"in-sample pooled incr R2 vs M1B = "
                     f"{sv['span_test_vs_M1B']['pooled_date_clustered']['incr_r2_vs_M1B']*100:.3f} pp "
-                    f"(p={sv['span_test_vs_M1B']['pooled_date_clustered']['joint_p_date_clustered']:.2g}), but the "
-                    f"date-aggregated OOS DM t = "
+                    f"(p={sv['span_test_vs_M1B']['pooled_date_clustered']['joint_p_date_clustered']:.2g}); "
+                    f"Clark-West t = {cw_sv['t_stat']:+.3f} "
+                    f"(one-sided p={cw_sv['p_value_one_sided']:.3g}), but raw OOS DM t = "
                     f"{sv['span_test_vs_M1B']['oos_summary']['dm_hac_t_date_aggregated']:+.3f} "
                     "(wrong sign: adding SMAD makes OOS forecasts worse)."
                 ),
             },
             "rv_next": {
-                "verdict": "STATISTICALLY REAL, ECONOMICALLY NEGLIGIBLE — fails Harvey OOS bar",
+                "verdict": "STATISTICALLY DETECTABLE, ECONOMICALLY NEGLIGIBLE",
                 "evidence": (
                     f"span-baseline incr R2 = {sp['incr_r2_vs_M1B']*100:.3f} pp "
                     f"= {sp['incr_r2_vs_M1B']/pooled_rv['r2_M0']*100:.2f}% of HAR's own R2; "
-                    f"20/20 assets reject at FDR 5%; but the date-aggregated OOS DM "
-                    f"t = {oos_t:+.3f}, short of the Harvey (2016) |t| > 3.0 threshold."
+                    f"Clark-West t = {cw_rv['t_stat']:+.3f} "
+                    f"(one-sided p={cw_rv['p_value_one_sided']:.3g}) detects incremental "
+                    f"content, while raw OOS DM t = {oos_t:+.3f} describes only a small "
+                    "realized MSPE improvement."
                 ),
             },
         },
@@ -1024,8 +1044,14 @@ def main():
     print("\n" + "=" * 70)
     print(f"VERDICT: {results['verdict']['overall']}")
     print(f"  left tail          : NULL (p={tail['joint_p_date_clustered']:.2f})")
-    print(f"  semivariance (H=5) : NULL out-of-sample (DM t={sv['span_test_vs_M1B']['oos_summary']['dm_hac_t_date_aggregated']:+.2f})")
-    print(f"  next-day RV        : +{sp['incr_r2_vs_M1B']*100:.3f} pp, OOS DM t={oos_t:+.2f} (< Harvey 3.0)")
+    print(
+        f"  semivariance (H=5) : CW t={cw_sv['t_stat']:+.2f}; raw DM t="
+        f"{sv['span_test_vs_M1B']['oos_summary']['dm_hac_t_date_aggregated']:+.2f}"
+    )
+    print(
+        f"  next-day RV        : +{sp['incr_r2_vs_M1B']*100:.3f} pp, "
+        f"CW t={cw_rv['t_stat']:+.2f}; raw DM t={oos_t:+.2f}"
+    )
     print(f"  asymmetry SMAD-/SMAD+ = {asym:.1f}x  (t={sp['t_smad_neg_clustered']:.1f} vs {sp['t_smad_pos_clustered']:.1f})")
     print("=" * 70)
     print(f"\n[done] wrote {HERE / 'k1681_results.json'}")

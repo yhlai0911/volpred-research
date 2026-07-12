@@ -1,10 +1,11 @@
 {
   "experiment_id": "k1681",
   "title": "Short-term Moving-Average Distance (SMAD) as a predictor of next-day volatility and left-tail risk",
-  "run_at_utc": "2026-07-11T06:24:49.378849+00:00",
+  "run_at_utc": "2026-07-12T05:18:50.969404+00:00",
   "seed": 1681,
   "data": {
     "source": "yfinance daily OHLC (auto_adjust=False)",
+    "methodology_type": "empirical predictive-association study",
     "tickers": [
       "AAPL",
       "DIA",
@@ -80,8 +81,14 @@
       "smad_neg"
     ],
     "identification": "SMAD is approximately a weighted sum of the past 10 daily returns, so its apparent volatility predictability is confounded with the leverage effect. The honest test is M2 vs M1 (which already contains r_{t-1}, r^-_{t-1}, cum10). M2 vs M0 is reported to quantify the contamination.",
-    "inference": "Per-asset Newey-West HAC + Benjamini-Hochberg FDR across assets; pooled estimates use asset fixed effects with date-clustered SE; OOS loss differentials are averaged across assets by date before the HAC t-test."
+    "inference": "Per-asset Newey-West HAC + Benjamini-Hochberg FDR across assets; pooled estimates use asset fixed effects with date-clustered SE; OOS loss differentials are averaged across assets by date before HAC inference. Nested comparisons use Clark-West (2007) for incremental information; raw DM remains a descriptive test of realized finite-sample MSPE."
   },
+  "references": [
+    "Clark and West (2007), Journal of Econometrics 138, 291-311",
+    "McCracken (2007), Journal of Econometrics 140, 719-752",
+    "Diebold and Mariano (1995), JBES 13, 253-263",
+    "Ko, Wang, and Yang (2025), Financial Analysts Journal 81(4), 121-141"
+  ],
   "targets": {
     "rv_next": {
       "horizon_days": 1,
@@ -614,11 +621,23 @@
         "mean_dloss_by_date": -0.009390545254886647,
         "dm_hac_t_date_aggregated": -3.8712945846398403,
         "dm_hac_p_date_aggregated": 0.00010825886507775755,
+        "clark_west_date_aggregated": {
+          "test": "Clark-West (2007) nested MSPE-adjusted",
+          "status": "ok",
+          "n_obs": 2957,
+          "t_stat": 7.33689330797937,
+          "p_value_one_sided": 1.0930436821029768e-13,
+          "p_value_two_sided": 2.1860873642059536e-13,
+          "mean_adjusted_loss_diff": 0.021721379150911223,
+          "hac_lag": 8,
+          "alternative": "larger nested model has incremental predictive content",
+          "direction": "positive t favors the larger nested model"
+        },
         "n_dates": 2957,
         "hac_maxlag": 8,
         "stacked_asset_day_t_DIAGNOSTIC_ONLY": -11.75333160669369,
         "n_asset_days": 59140,
-        "note": "negative dloss => M2 (with SMAD) has lower squared error than M1"
+        "note": "Raw DM: negative dloss means the augmented model realized lower finite-sample MSPE. Clark-West: positive t means the nested increment carries predictive content after correcting the larger model's estimation-noise penalty."
       },
       "block_bootstrap_incr_r2": {
         "n_boot": 1000,
@@ -1143,11 +1162,23 @@
           "mean_dloss_by_date": -0.0036380909007877552,
           "dm_hac_t_date_aggregated": -2.3156015046199063,
           "dm_hac_p_date_aggregated": 0.02058003662629431,
+          "clark_west_date_aggregated": {
+            "test": "Clark-West (2007) nested MSPE-adjusted",
+            "status": "ok",
+            "n_obs": 2957,
+            "t_stat": 6.711369008775558,
+            "p_value_one_sided": 9.640341635058789e-12,
+            "p_value_two_sided": 1.9280683270117577e-11,
+            "mean_adjusted_loss_diff": 0.011666937831944727,
+            "hac_lag": 8,
+            "alternative": "larger nested model has incremental predictive content",
+            "direction": "positive t favors the larger nested model"
+          },
           "n_dates": 2957,
           "hac_maxlag": 8,
           "stacked_asset_day_t_DIAGNOSTIC_ONLY": -5.607461312938305,
           "n_asset_days": 59140,
-          "note": "negative dloss => M2 (with SMAD) has lower squared error than M1"
+          "note": "Raw DM: negative dloss means the augmented model realized lower finite-sample MSPE. Clark-West: positive t means the nested increment carries predictive content after correcting the larger model's estimation-noise penalty."
         }
       }
     },
@@ -1682,11 +1713,23 @@
         "mean_dloss_by_date": 0.0069817538023399725,
         "dm_hac_t_date_aggregated": 0.9887438063155393,
         "dm_hac_p_date_aggregated": 0.32278850404600734,
+        "clark_west_date_aggregated": {
+          "test": "Clark-West (2007) nested MSPE-adjusted",
+          "status": "ok",
+          "n_obs": 2953,
+          "t_stat": 2.2809753339849945,
+          "p_value_one_sided": 0.01127495325395855,
+          "p_value_two_sided": 0.0225499065079171,
+          "mean_adjusted_loss_diff": 0.015440617090760535,
+          "hac_lag": 8,
+          "alternative": "larger nested model has incremental predictive content",
+          "direction": "positive t favors the larger nested model"
+        },
         "n_dates": 2953,
         "hac_maxlag": 8,
         "stacked_asset_day_t_DIAGNOSTIC_ONLY": 2.195604020007509,
         "n_asset_days": 59060,
-        "note": "negative dloss => M2 (with SMAD) has lower squared error than M1"
+        "note": "Raw DM: negative dloss means the augmented model realized lower finite-sample MSPE. Clark-West: positive t means the nested increment carries predictive content after correcting the larger model's estimation-noise penalty."
       },
       "subsamples": {
         "2010-2015": {
@@ -2202,11 +2245,23 @@
           "mean_dloss_by_date": 0.018098392479900267,
           "dm_hac_t_date_aggregated": 1.1083913474947638,
           "dm_hac_p_date_aggregated": 0.26769284006370353,
+          "clark_west_date_aggregated": {
+            "test": "Clark-West (2007) nested MSPE-adjusted",
+            "status": "ok",
+            "n_obs": 2953,
+            "t_stat": 3.6971142434365376,
+            "p_value_one_sided": 0.00010903211175305906,
+            "p_value_two_sided": 0.00021806422350611812,
+            "mean_adjusted_loss_diff": 0.05664542920936055,
+            "hac_lag": 8,
+            "alternative": "larger nested model has incremental predictive content",
+            "direction": "positive t favors the larger nested model"
+          },
           "n_dates": 2953,
           "hac_maxlag": 8,
           "stacked_asset_day_t_DIAGNOSTIC_ONLY": 2.6256187160443782,
           "n_asset_days": 59060,
-          "note": "negative dloss => M2 (with SMAD) has lower squared error than M1"
+          "note": "Raw DM: negative dloss means the augmented model realized lower finite-sample MSPE. Clark-West: positive t means the nested increment carries predictive content after correcting the larger model's estimation-noise penalty."
         }
       }
     },
@@ -2322,19 +2377,20 @@
   },
   "verdict": {
     "overall": "NULL",
-    "summary": "SMAD does NOT deliver usable volatility or left-tail predictability. Left-tail: flat null. Downside semivariance: in-sample only, OOS null. Next-day RV: a statistically robust but economically negligible increment that fails the Harvey (2016) OOS bar.",
+    "summary": "SMAD does NOT deliver usable volatility or left-tail predictability. Left-tail is flat null. Clark-West detects incremental information for next-day RV and downside semivariance, but next-day RV adds only 0.54% of HAR's R2 and downside semivariance realizes worse OOS MSPE. Statistical detectability therefore does not become economic usefulness.",
+    "forecast_test_interpretation": "Clark-West asks whether the nested increment carries population predictive content after correcting estimation-noise bias. Raw DM/MSPE asks whether the larger model actually forecast better in this finite OOS sample.",
     "by_target": {
       "left_tail_hit_next": {
         "verdict": "NULL",
         "evidence": "joint p (date-clustered) = 0.620; incremental pseudo-R2 = 0.023 pp. The raw quintile spread (8.96% vs 5.06% unconditional hit rate) is entirely absorbed by HAR + past returns."
       },
       "semivar_down_next": {
-        "verdict": "NULL (OOS)",
-        "evidence": "in-sample pooled incr R2 vs M1B = 0.099 pp (p=6.5e-05), but the date-aggregated OOS DM t = +1.108 (wrong sign: adding SMAD makes OOS forecasts worse)."
+        "verdict": "INCREMENTAL CONTENT DETECTED, NO OOS MSPE IMPROVEMENT",
+        "evidence": "in-sample pooled incr R2 vs M1B = 0.099 pp (p=6.5e-05); Clark-West t = +3.697 (one-sided p=0.000109), but raw OOS DM t = +1.108 (wrong sign: adding SMAD makes OOS forecasts worse)."
       },
       "rv_next": {
-        "verdict": "STATISTICALLY REAL, ECONOMICALLY NEGLIGIBLE \u2014 fails Harvey OOS bar",
-        "evidence": "span-baseline incr R2 = 0.287 pp = 0.54% of HAR's own R2; 20/20 assets reject at FDR 5%; but the date-aggregated OOS DM t = -2.316, short of the Harvey (2016) |t| > 3.0 threshold."
+        "verdict": "STATISTICALLY DETECTABLE, ECONOMICALLY NEGLIGIBLE",
+        "evidence": "span-baseline incr R2 = 0.287 pp = 0.54% of HAR's own R2; Clark-West t = +6.711 (one-sided p=9.64e-12) detects incremental content, while raw OOS DM t = -2.316 describes only a small realized MSPE improvement."
       }
     },
     "one_robust_regularity": {
