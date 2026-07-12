@@ -38717,5 +38717,45 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-07-12T21:14:50.640184"
+  },
+  {
+    "item_id": "56144649",
+    "category": "forecast_tail_divergence",
+    "experiment_id": "K1684",
+    "verdict": "CONDITIONAL_PASS",
+    "research_verdict": "H2_UNSUPPORTED",
+    "title": "K1684 R3：共同目標下 forecast-tail divergence 的 leg 1 無法建立",
+    "content": "[提出: Fable 深度審查, 執行: Codex primary path] K1684 R3 是 forecast-tail-divergence E1 的誠實 null。以 TAIFEX 全 TX 合約重建 13:30(D-1)→13:30(D) active-contract 5-min RV，配對 0050 調整後收盤報酬；OOS 2023-03-01～2024-12-31，n=450，seed=20260712。aligned 0050 r² QLIKE 的 HAR-RV vs GJR DM t=+1.476651 (p=.140493,n=436)，TX-RV target DM t=-2.096810 (p=.036569,n=450)，兩者均未過 Harvey |t|>3，因此 leg 1 無法建立，正式裁決為 H2_UNSUPPORTED；這不是 H2_REJECTED，也不是模型等價證明。五個 run 的 verdict 都是 H2_UNSUPPORTED，但 rescue counts 分別為 primary 0/3、theta-short 1/2、daily 0/3、burnin 3/3、legacy 0/3。R3 primary Codex review 驗證：HAR/GJR theta 與 tail pool 使用嚴格 [lo,i) 共同支撐；2,213 個 RV path 的 end date 全與 row date 相同且 0 筆晚於 13:30；30 個 lookahead perturbation assertions 全過；GJRf-a+HistSim 不進 decide_gate；Trinity 採 Kupiec+Christoffersen CC joint+Basel；214 個 alpha-cell records 0 mismatch，且全數含 Acerbi-Szekely Z1。方法論教訓是 realized measure 不可分 session 漏掉 boundary jumps、placebo correction pool 必須與主模型對稱、4-start GJR 在多峰 likelihood 下不足。限制：單一平靜市場且 n=450、scale/delta-c 使用 iid resampling、RGL 僅是 reduced-form log-GARCH-X comparator。沒有 feed/paper route；E2 必須在市場自己的 realized measure 上以 n>=2500、cross-OOS 與 block-bootstrap sensitivity 再驗證。",
+    "evidence": [
+      "experiments/k1684/k1684_ftd_e1_scale_gating.py",
+      "experiments/k1684/k1684_ftd_e1_scale_gating_results.json",
+      "experiments/k1684/k1684_rerun_r3_receipt.json",
+      "experiments/k1684/CODEX_REVIEW_R3.md",
+      "experiments/k1684/README.md",
+      "tests/test_k1684_r3_review.py"
+    ],
+    "confidence": 0.94,
+    "reviewer": "Codex primary path CONDITIONAL_PASS (2026-07-12)",
+    "reviewer_source": "Codex primary path + two fresh-context read-only auditors + canonical R3 rerun",
+    "codex_review": "CONDITIONAL_PASS: core timing/support/gate/result packet verified; use limited to null and methodology knowledge; E2 required before publication/paper routing.",
+    "oos_start": "2023-03-01",
+    "oos_end": "2024-12-31",
+    "oos_n": 450,
+    "aligned_dm_t": 1.476650676734999,
+    "aligned_dm_p": 0.14049284220507752,
+    "aligned_dm_n": 436,
+    "tx_rv_dm_t": -2.0968098035597666,
+    "tx_rv_dm_p": 0.036569275854432925,
+    "tx_rv_dm_n": 450,
+    "primary_rescued": "0/3",
+    "all_run_rescue_counts": {
+      "primary": "0/3",
+      "sens_theta_short": "1/2",
+      "sens_daily_refresh": "0/3",
+      "sens_burnin_tailpool": "3/3",
+      "sens_legacy_rv": "0/3"
+    },
+    "results_sha256": "ffffe2a735571160c67eae277a6ee0b66e7d8d8a3e2d7a7731aa0194f4a3e392",
+    "created_at": "2026-07-12T14:47:45.982537+00:00"
   }
 ]

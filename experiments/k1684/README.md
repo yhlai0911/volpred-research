@@ -1,21 +1,24 @@
-# K1684 R2 — forecast-tail-divergence E1：變異數目標尺度再校準 gating 實驗（canonical 重跑）
+# K1684 R3 — forecast-tail-divergence E1：變異數目標尺度再校準 gating 實驗（primary Codex rescue）
 
 > [!IMPORTANT]
-> **這是 R2 canonical 重跑**，取代 2026-07-12 被 Codex BLOCKED 的 R1。R1 的七項 blocker
-> （[`CODEX_REVIEW_BLOCKED.md`](CODEX_REVIEW_BLOCKED.md)）全部關閉，關閉證據機械記錄在
-> [`k1684_rerun_r2_receipt.json`](k1684_rerun_r2_receipt.json)。**R1 的任何數字都沒有被沿用。**
+> **這是 R3 primary-Codex-review rescue**，取代 2026-07-12 被 Codex BLOCKED 的 R1，也修正
+> R2/R3 交界處的共同支撐、provenance、資訊集與 canonical risk-test 漂移。R1 的七項 blocker
+> （[`CODEX_REVIEW_BLOCKED.md`](CODEX_REVIEW_BLOCKED.md)）關閉證據保留在歷史
+> [`k1684_rerun_r2_receipt.json`](k1684_rerun_r2_receipt.json)；本次收據是
+> [`k1684_rerun_r3_receipt.json`](k1684_rerun_r3_receipt.json)。**R1 的任何數字都沒有被沿用。**
 >
-> **裁決改變**：R1 宣稱 `H2_REJECTED`（+ FRL 短文路線）。R2 的裁決是 **`H2_UNSUPPORTED`** —
+> **裁決改變**：R1 宣稱 `H2_REJECTED`（+ FRL 短文路線）。R3 的裁決是 **`H2_UNSUPPORTED`** —
 > 在 Harvey 門檻下 leg 1 **兩個方向都不顯著**，本實驗**不支持任何論文路線**。
-> 在獨立 Codex review PASS 之前，**不得**寫入 `knowledge.json`、feed 或論文。
+> Primary Codex review 為 **CONDITIONAL_PASS**：可記錄 null/methodology knowledge；因 gate 為 null，
+> **不得**據此寫 feed 或選論文路線，必須先完成 E2。
 
-- **Experiment ID**: `k1684`（R2）｜ **Status**: completed — awaiting independent Codex review
+- **Experiment ID**: `k1684`（R3）｜ **Status**: completed — primary Codex review CONDITIONAL_PASS
 - **執行日期**: 2026-07-12（台灣時間）
 - **提出者**: Fable 深度審查 2026-07-11（§5.1 E1，P0 gate）；重跑由 Codex R1 review 下令
 - **父實驗**: `experiments/k850`、`experiments/k854`
 - **腳本**: `k1684_ftd_e1_scale_gating.py`（主）+ `k1684_rv_active.py`（RV builder）
-- **結果**: `k1684_ftd_e1_scale_gating_results.json` ｜ **收據**: `k1684_rerun_r2_receipt.json`
-- **Seed**: `20260712`（multistart grid、bootstrap、擾動 draw 全部同一顆 seed）｜ **執行時間**: 86 秒
+- **結果**: `k1684_ftd_e1_scale_gating_results.json` ｜ **收據**: `k1684_rerun_r3_receipt.json`
+- **Seed**: `20260712`（multistart grid、bootstrap、擾動 draw 全部同一顆 seed）｜ **R3 執行時間**: 83 秒
 
 ---
 
@@ -26,7 +29,7 @@
 
 「QLIKE 與尾部覆蓋正交」需要兩條腿同時成立：
 
-| | 命題需要的 | K1684 R2 實測（450 天共同樣本） |
+| | 命題需要的 | K1684 R3 實測（450 天共同樣本） |
 |---|---|---|
 | **腿 1（預測損失）** | HAR 在**共同目標**上 QLIKE 贏 GJR | **立不起來。** 對齊目標（0050 r²）DM **t = +1.48**（p = 0.140，n = 436）→ 方向偏 GJR，但 **\|t\| < 3**。**兩個方向都沒過 Harvey 門檻。** |
 | **腿 2（尾部覆蓋）** | HAR 的 VaR 失敗、GJR 過關，且尺度校正救不回來 | **成立。** 1% 下 HAR 家族 12 格**沒有一格** trinity PASS；GJR+CF（2/450）、RGL+CF（3/450）綠燈 PASS。三個尺度校正 rescue **0/3**（rescue 的定義是**兩個 α 都 PASS**）。 |
@@ -34,27 +37,27 @@
 **腿 2 成立、腿 1 立不起來 → 沒有「divergence」可談，但也不能宣稱 H2 被推翻。**
 
 R1 把 `t = +2.33`（R1 的數字）讀成「腿 1 反轉 → H2_REJECTED → 走 FRL 短文」，是把 p < 0.05 當結論門檻；
-本專案的正式門檻是 **Harvey |t| > 3**。R2 修好 RV 之後這個 t 掉到 **+1.48**，離門檻更遠。
+本專案的正式門檻是 **Harvey |t| > 3**。R3 使用修好的 RV 之後這個 t 掉到 **+1.48**，離門檻更遠。
 
-**R2 是一個誠實的 null**：它證明 K850/K854 的 headline 建立在**建構性瑕疵**上（§3、§6），
+**R3 是一個誠實的 null**：它證明 K850/K854 的 headline 建立在**建構性瑕疵**上（§3、§6），
 但**沒有**產生足以支撐任何一條論文路線的正面證據。要談 HAR-RV 本身，必須跑
 **E2（以自身 realized measure 評分的市場，n ≥ 2,500）**。
 
 ---
 
-## 2. R2 相對 R1 改了什麼（七項 blocker + review 過程中新抓到的四項）
+## 2. R2/R3 相對 R1 改了什麼（七項 blocker + review 過程中新抓到的項目）
 
-| Gate | R1 的問題 | R2 的做法 |
+| Gate | R1 的問題 | R2/R3 的做法 |
 |---|---|---|
 | **G1** | RV 用 `TX1` 單檔、三段 session 分開加總（**丟掉所有 boundary jump**）、日盤到 13:45 而 ETF 13:30 收盤（資訊集重疊） | 全 TX 合約 → 每日選**視窗內**成交量最大的 active contract → **單一連續 tick path 13:30(D−1) → 13:30(D)**，所有 boundary jump 都在路徑裡 |
 | **G2** | headline 靠 4-start GJR MLE | GJR 與 RealGARCH-Log **各 100 個 seeded starts**，每次 refit 存 convergence / objective / basin 分布；fragility probe **同時**跑 K854 原始 `fit_gjr` 與 R2 fitter |
 | **G3** | `Φ⁻¹(α)/Φ⁻¹(π̂)` 只在 Normal 下可識別卻套到 CF/HistSim；CI 上下界顛倒（154 格 lo > hi）；用未檢定的 `\|Δc\|<0.10` 判通道 | 改用**分布自由**的經驗尺度因子 `c = quantile_{1−α}(r/VaR)` + seeded bootstrap CI；參數版只留給 Normal 格且**在程式裡 assert 單調性**（顛倒即 raise）；`Δc` 改成**成對 bootstrap 檢定** H₀: c(1%) = c(5%) |
 | **G4** | placebo 用「near 1」帶過 | placebo 全表（**三種尾層** × 雙 α × IS/OOS × VaR+ES+FZ0）+ **對池 bootstrap 的 CI** |
 | **G5** | 用 p < 0.05 下結論；`decide_gate()` 宣稱檢查 leg 2 的「GJR PASS」卻沒實作 | 正式結論一律 **Harvey \|t\| > 3**；`decide_gate()` 真的檢查 GJR trinity；每個 DM pair 用自己的 pairwise mask 並報 n |
-| **G6** | 缺 1%/5% × IS/OOS × VaR+ES × joint loss | 雙 α；OOS 五 run + **12 格樣本內 panel**；每格都有 **ES** + **McNeil–Frey bootstrap ES 檢定** + **Fissler–Ziegel FZ0 joint loss**（Patton-Ziegel-Chen 2019）+ FZ0 的 canonical DM；每格加**精確二項（Clopper-Pearson）區間** |
+| **G6** | 缺 1%/5% × IS/OOS × VaR+ES × joint loss | 雙 α；OOS 五 run + **13 格樣本內 panel**；每格都有 canonical **Acerbi–Szekely Z1** + 補充的 **McNeil–Frey bootstrap ES 檢定** + **Fissler–Ziegel FZ0 joint loss**（Patton-Ziegel-Chen 2019）+ FZ0 的 canonical DM；每格加**精確二項（Clopper-Pearson）區間** |
 | **G7** | `open(final,'w')` 直接寫 | `tmp → json.load 驗證 → os.replace`；seed / provenance / lookahead 稽核齊全 |
 
-**Codex review 過程中新抓到、也一併修掉的四項**（不在 R1 的 blocker 清單裡）：
+**Codex review 過程中新抓到、也一併修掉的項目**（不在 R1 的 blocker 清單裡）：
 
 1. **active contract 的選擇本身會偷看未來** — 用「整日成交量」排序會用到 13:30–13:45（視窗關閉之後）的成交量。
    改成**只用視窗內成交量**排序（實測只有 **2 天**選擇不同）。
@@ -70,6 +73,11 @@ R1 把 `t = +2.33`（R1 的數字）讀成「腿 1 反轉 → H2_REJECTED → �
    從第 250 筆才給得出 σ、GJR 要到第 500 筆，於是池內仍差約 250 列（θ 池 1,235 vs 985 筆）。
    R3 改成兩邊都在**共同支撐集**（兩個 σ 來源都存在的交集）上估 θ，並加一道 `RuntimeError` 斷言
    兩池筆數必須相同。**這一修直接改變了結論**（見 §3）。
+5. **資訊集 audit 只查時鐘、沒查日期** — R3 同時要求 `path_end_ts` 的日期就是 RV row 的 D，且時間
+   ≤ 13:30；任一 missing/date mismatch/late row 都直接 `raise`。現有 2,213 列三種違規都是 0。
+6. **Trinity / ES canonical 規格漂移** — R3 的 Trinity 改為 Kupiec + Christoffersen **CC joint** + Basel；
+   ES 補上 Acerbi–Szekely Z1。舊 independence-only Trinity 在現有 214 格與 CC 版恰好 0 格翻轉，
+   所以主裁決不變；McNeil–Frey 留作補充診斷。
 
 ---
 
@@ -94,7 +102,7 @@ close-to-close 變異**，σ 少掉約 **14%**。R1 把「σ 低估約 30%」整
 
 ### 3.2 Placebo 也把「正確對齊」的 GJR 放大 12% — 尺度 miss **不是**目標錯配專有的
 
-| 校正 | R1（舊 RV） | **R3（修好的 RV + 共同支撐集）** | R3 的 95% CI（對殘差池 bootstrap） |
+| 校正 | R1（舊 RV） | **R3 OOS 日加權平均（修好 RV + 共同支撐）** | R3 最後一次更新估計與 95% CI（對殘差池 bootstrap） |
 |---|---|---|---|
 | (a) expanding std(z) | 1.354 | **1.159** | **1.184 [1.111, 1.258]**（最後一次更新的估計）→ **排除 1** |
 | (b) Mincer–Zarnowitz 隱含尺度 | 1.349 | **1.184** | — |
@@ -136,9 +144,9 @@ DM 一律用 canonical `volpred.stats.model_evaluation.dm_test`；HAC bandwidth 
 
 - R1（舊 RV）在錯配目標上是 t = **−5.13**；**修好 RV 後掉到 −2.10**。那個「著名的 t ≈ −5.6」
   有相當部分來自 HAR 在**自己那個少算跳空的 RV** 上的優勢。
-- 對齊目標上，尺度校正後的 HAR-a 與 GJR 打平（t = +0.03，p = 0.976）；
-  HAR-a vs HAR-RV（對齊目標）t = **−1.98**（p = 0.048，**未過** Harvey）。
-- 反過來在 **TX RV 目標**上，尺度校正是**有害的**（HAR-a vs HAR-RV：t = **+5.05**，**過 Harvey**）。
+- 對齊目標上，尺度校正後的 HAR-a 與 GJR 仍無差異（t = +0.25，p = 0.802）；
+  HAR-a vs HAR-RV（對齊目標）t = **−2.21**（p = 0.028，**未過** Harvey）。
+- 反過來在 **TX RV 目標**上，尺度校正是**有害的**（HAR-a vs HAR-RV：t = **+4.00**，**過 Harvey**）。
   同一個校正在兩個目標上一好一壞 —— 這是「目標錯配」本身的定量指紋。
 
 ---
@@ -151,21 +159,22 @@ Basel 口徑：**1% 是標準 250 天計數規則**（綠 ≤4 / 黃 5–9 / 紅
 
 ### 5.1 1% VaR（primary run，摘錄）
 
-| Cell | 違規 | 違規率 [精確 95% CI] | Kupiec p | Ind p | Basel | Trinity | 經驗 c | ES MF p |
+| Cell | 違規 | 違規率 [精確 95% CI] | Kupiec p | CC joint p | Basel | Trinity | 經驗 c | ES MF p |
 |---|---|---|---|---|---|---|---|---|
-| HAR+Normal | 11/450 | 2.44% [1.22, 4.33] | 0.009 | 0.261 | **red** | FAIL | 1.329 | 0.010 |
-| **HAR+CF**（K854 headline 對應格） | **14/450** | 3.11% [1.71, 5.16] | **0.000** | 0.447 | yellow | FAIL | **1.401** | 0.204 |
-| HAR+HistSim | 9/450 | 2.00% [0.91, 3.76] | 0.061 | 0.163 | yellow | FAIL | 1.300 | 0.080 |
-| HAR-a+CF（尺度校正後） | 7/450 | 1.56% [0.63, 3.18] | **0.273** | 0.638 | yellow | **FAIL** | 1.212 | 0.099 |
-| HAR-b+CF | 8/450 | 1.78% [0.77, 3.47] | 0.135 | 0.123 | yellow | **FAIL** | 1.175 | 0.240 |
-| HAR-c+CF | 9/450 | 2.00% [0.92, 3.76] | 0.060 | 0.163 | yellow | FAIL | 1.317 | 0.115 |
-| GJRf+CF（配對池的 GJR） | 11/450 | 2.44% | 0.009 | 0.261 | yellow | FAIL | 1.293 | 0.387 |
-| GJRf-a+CF（**placebo 校正後**） | 8/450 | 1.78% | 0.135 | 0.590 | **green** | **PASS** | 1.143 | 0.532 |
-| **GJR+CF** | **2/450** | 0.44% [0.05, 1.59] | 0.183 | 0.894 | **green** | **PASS** | 0.798 | n/a（<5 次超越） |
-| **RGL+CF** | **3/450** | 0.67% | 0.449 | 0.841 | **green** | **PASS** | 0.825 | n/a |
+| HAR+Normal | 11/450 | 2.44% [1.22, 4.33] | 0.009 | 0.018 | **red** | FAIL | 1.329 | 0.010 |
+| **HAR+CF**（K854 headline 對應格） | **14/450** | 3.11% [1.71, 5.16] | **0.000** | 0.001 | yellow | FAIL | **1.401** | 0.204 |
+| HAR+HistSim | 9/450 | 2.00% [0.91, 3.76] | 0.061 | 0.065 | yellow | FAIL | 1.300 | 0.080 |
+| HAR-a+CF（尺度校正後） | 7/450 | 1.56% [0.63, 3.18] | **0.273** | 0.491 | yellow | **FAIL** | 1.212 | 0.099 |
+| HAR-b+CF | 8/450 | 1.78% [0.77, 3.47] | 0.135 | 0.100 | yellow | **FAIL** | 1.175 | 0.240 |
+| HAR-c+CF | 9/450 | 2.00% [0.92, 3.76] | 0.060 | 0.065 | yellow | FAIL | 1.317 | 0.115 |
+| GJRf+CF（配對池的 GJR） | 11/450 | 2.44% | 0.009 | 0.018 | yellow | FAIL | 1.293 | 0.387 |
+| GJRf-a+CF（**placebo 校正後**） | 8/450 | 1.78% | 0.135 | 0.283 | **green** | **PASS** | 1.143 | 0.532 |
+| **GJR+CF** | **2/450** | 0.44% [0.05, 1.59] | 0.183 | 0.409 | **green** | **PASS** | 0.798 | n/a（<5 次超越） |
+| **RGL+CF** | **3/450** | 0.67% | 0.449 | 0.736 | **green** | **PASS** | 0.825 | n/a |
 
 **1% 下 HAR 家族 12 格沒有一格 trinity PASS。** 尺度校正把 Kupiec 救起來了（0.000 → 0.273），
-但 Basel 仍是黃燈（7 次違規落在最後 250 天的黃燈區），trinity 是三者的 AND → 仍 FAIL。
+但 Basel 仍是黃燈（7 次違規落在最後 250 天的黃燈區）。Trinity 的 canonical 定義是
+Kupiec + Christoffersen CC joint + Basel 三者的 AND → 仍 FAIL。
 **注意 placebo 的 GJRf-a+CF 反而 PASS** —— 同一套校正打在正確對齊的模型上會把它推過門檻，
 這再次說明這台機器不是中性的。
 
@@ -186,14 +195,19 @@ Basel 口徑：**1% 是標準 250 天計數規則**（綠 ≤4 / 黃 5–9 / 紅
 
 ### 5.3 ES 與 FZ0 joint loss
 
-- **McNeil–Frey ES 檢定**（超越日的標準化殘差均值是否 < 0，seeded bootstrap B = 10,000）：
+- **Acerbi–Szekely Z1 是 canonical ES gate**；McNeil–Frey 是補充的 exceedance-only 診斷。兩者都在
+  JSON 每格 `es` 物件中完整列出。Primary 的 CF headline 格：HAR+CF 在 1% / 5% 都 FAIL
+  （p = 0.011 / 0.0027）；GJR+CF 在 1% FAIL、5% PASS（p = 0.008 / 0.247）；reduced-form RGL+CF
+  在雙 α 都 PASS（p = 0.306 / 0.379）。因此「GJR+CF VaR Trinity PASS」**不等於**「其 ES 也全面 PASS」。
+  ES 不進 `decide_gate()`，所以不改 H2 null 裁決，但任何尾部充分性敘事都必須保留這項區分。
+- 以下是 **McNeil–Frey** 的直觀尾損讀數（seeded bootstrap B = 10,000）：
   **所有 Normal 尾層的格子都不及格**（1% 與 5% 皆然；例如 HAR+Normal 1% p = 0.010、5% p = 0.002；
   GJR+Normal 兩個 α 都 p < 0.04）—— 常態尾在 ES 上系統性低估實現損失，這是尺度校正**碰不到**的一層。
   **CF / HistSim 多數過關但不是全部**：HAR+CF 在 5% 仍不及格（p = 0.042），
-  HAR-b+HistSim 在 1% 不及格（p = 0.046）。
+  HAR-b+HistSim 在 1% 實際 p = 0.054，邊緣 PASS。
 - **Fissler–Ziegel FZ0**（Patton-Ziegel-Chen 2019，嚴格一致的 (VaR, ES) joint loss）+ canonical DM：
   `HAR+CF vs GJR+CF` t = +0.83（1%）/ +0.96（5%），GJR 較優但**未過 Harvey**；
-  `HAR-a+CF vs HAR+CF` t = −1.52 / −2.04（尺度校正有改善，**未過 Harvey**）。
+  `HAR-a+CF vs HAR+CF` t = −1.62 / −2.24（尺度校正有改善，**未過 Harvey**）。
   **FZ0 這個 joint loss 上，沒有任何一組比較過 Harvey 門檻。**
 
 ### 5.4 通道判定（尺度 vs 尾形）— 改成可檢定的形式
@@ -209,7 +223,7 @@ R1 用未檢定的 `|Δc| < 0.10` 當判準。R2 拆成兩個問題、兩個工�
 |---|---|---|---|---|
 | HAR+CF | 1.401 | 1.271 | 0.738 | **SCALE**（覆蓋被拒；c 跨 α 不動） |
 | HAR+Normal | 1.329 | 1.044 | 0.056 | SCALE（**邊緣**；Δc 幾乎顯著 → 常態尾另有 shape 成分） |
-| HAR-a+CF | 1.163 | 1.057 | 0.735 | 覆蓋未被拒 → 沒有需要 scale 故事去解釋的東西 |
+| HAR-a+CF | 1.212 | 1.102 | 0.735 | 覆蓋未被拒 → 沒有需要 scale 故事去解釋的東西 |
 | GJRf+CF（**配對池的 GJR**） | 1.293 | 1.182 | 0.714 | **SCALE** |
 | GJR+CF | 0.798 | 0.926 | 0.134 | 覆蓋未被拒 |
 
@@ -219,16 +233,16 @@ R1 用未檢定的 `|Δc| < 0.10` 當判準。R2 拆成兩個問題、兩個工�
 
 ---
 
-## 6. GJR MLE 的 basin 脆弱性：R1 的指控成立，而且 R2 修好了
+## 6. GJR MLE 的 basin 脆弱性：R1 的指控成立，而且 R3 修好了
 
 `gjr_fragility_probe()` 對報酬施加 **1e-6 相對擾動**（= yfinance 重新四捨五入的量級），
 重跑整條 OOS refit 迴圈 10 次（seeded），**兩個 fitter 各跑一次**（4-start 那組呼叫的是
-**K854 父檔的真正程式** `k854.fit_gjr`，不是把 R2 fitter 截成 4 starts）：
+**K854 父檔的真正程式** `k854.fit_gjr`，不是把 robust fitter 截成 4 starts）：
 
 | Fitter | σ 最大變動 | 1% 違規數範圍 | 5% 違規數範圍 | 違規數穩定？ |
 |---|---|---|---|---|
 | `k854.fit_gjr`（4 starts，**父檔原碼**） | **22.23%** | **[9, 10]** | **[20, 21]** | ❌ |
-| R2 `fit_gjr_robust`（100 starts） | 4.26% | [9, 9] | [21, 21] | ✅ |
+| `fit_gjr_robust`（100 starts） | 4.26% | [9, 9] | [21, 21] | ✅ |
 
 **R1 的指控復現**（R1 報 29.03%，本次樣本因 continuity gate 少 9 天，數字是 22.23%，**同一結論**）：
 數值上無關緊要的資料修訂會讓 4-start GJR 的違規數游走 —— 而 trinity 吃的正是違規數。
@@ -245,7 +259,8 @@ R1 用未檢定的 `|Δc| < 0.10` 當判準。R2 拆成兩個問題、兩個工�
 
 ## 7. 樣本內 vs 樣本外（G6）
 
-樣本內 panel（2017-01-03 ~ 2022-12-30，1,432 個可評分日；**參數、尺度校正、尾層全部 fit 在同一批
+樣本內 panel（2017-01-03 ~ 2022-12-30，1,454 個 aligned rows；扣除 HAR 的 22-day 起始 lag 後
+各表 1,432 個可評分日；**參數、尺度校正、尾層全部 fit 在同一批
 報酬上**，因此**沒有任何預測力宣稱**，只用來做 IS/OOS 對照）：
 
 | Cell | IS 1% 違規 | IS Kupiec p | IS Basel | IS trinity | OOS 1% trinity |
@@ -291,8 +306,9 @@ R1 用未檢定的 `|Δc| < 0.10` 當判準。R2 拆成兩個問題、兩個工�
 
 ## 9. Lookahead / 資訊集稽核（機械驗證，非口頭宣稱）
 
-1. **RV 資訊集**：2,213 天的 tick path，**結束時間全部 ≤ 13:30:00**（最晚 13:30:00、最早 13:29:51，
-   `n_days_path_ends_after_1330 = 0`）—— 即「收盤前最後一筆成交」。RV(D) 在 0050 收盤那一刻就已知，
+1. **RV 資訊集**：2,213 天的 tick path，`path_end_ts` **全部與 RV row 同日**且結束時間全部
+   ≤ 13:30:00（最晚 13:30:00、最早 13:29:51；date mismatch / late / missing 都是 0）——
+   即「D 日收盤前最後一筆成交」。RV(D) 在 0050 收盤那一刻就已知，
    正好是 r(D+1) 報酬視窗開啟的瞬間 → R1 的 13:30/13:45 重疊**封死**。
 2. **Continuity gate**：RV path 的起點必須等於 ETF 的**前一個交易日**（否則 realized measure 與它的
    目標描述的不是同一段區間）→ **丟掉 9 天並列名**（`2017-02-20` … `2025-04-24`），**OOS 內 0 天**。
@@ -317,6 +333,12 @@ R1 用未檢定的 `|Δc| < 0.10` 當判準。R2 拆成兩個問題、兩個工�
 7. **殘差池窗口是第三個通道**，本實驗只當診斷報告（§7 + `sens_burnin_tailpool`），未做完整通道分解。
 8. **continuity gate 丟掉的 9 天**都落在訓練期；它們仍會讓 GARCH recursion 把相鄰兩列當成連續交易日
    （報酬與 RV 視窗本身仍然對齊，見 `trading_calendar_audit`）。
+9. **尺度因子與 Δc 的 uncertainty 使用 iid resampling**，沒有保留序列依賴；E2 必須補 block-bootstrap
+   sensitivity，不能把這裡的 band 當成跨制度的精確區間。
+10. **0050 r² 的 aligned QLIKE 排除 14 個零報酬日**（log loss 在恰為 0 的 proxy 上未定義），因此
+    aligned DM n = 436，少於 TX-RV DM 的 450。
+11. **`RGL` 是 reduced-form log-GARCH-X comparator**（return likelihood + lagged log RV），不是含完整
+    measurement equation 的 Realized-GARCH system；它不進 `decide_gate()`，不可拿來做完整 RGL 主張。
 
 ---
 
@@ -324,7 +346,7 @@ R1 用未檢定的 `|Δc| < 0.10` 當判準。R2 拆成兩個問題、兩個工�
 
 | 來源 | 內容 | Snapshot |
 |---|---|---|
-| TAIFEX TX tick（`~/Dropbox/TAIFEXDATA/TAIFEXDATA/python/Daily_*TX.csv`，**全合約**） | 2,213 個交易日；每日視窗內成交量最大的 active contract（平均成交量佔比 97%+，108 個換月日）；連續 5-min path 13:30(D−1)→13:30(D) | `data/tx_rv_active_c2c_5min_2017_2025.csv` |
+| TAIFEX TX tick（`~/Dropbox/TAIFEXDATA/TAIFEXDATA/python/Daily_*TX.csv`，**全合約**） | 2,213 個交易日；每日視窗內成交量最大的 active contract（平均成交量佔比 **95.15%**，108 個換月日）；連續 5-min path 13:30(D−1)→13:30(D) | `data/tx_rv_active_c2c_5min_2017_2025.csv` |
 | 同上（R1/K854 建構，僅供對照） | TX1 檔、三 session 分開加總、日盤到 13:45 | `data/tx_rv_5min_daily_2017_2025.csv` |
 | yfinance `0050.TW` | 調整後收盤（`auto_adjust=True`） | `data/tw0050_adjclose_2016_2025.csv` |
 
@@ -344,7 +366,7 @@ R1 用未檢定的 `|Δc| < 0.10` 當判準。R2 拆成兩個問題、兩個工�
 uv run --extra dev python experiments/k1684/k1684_ftd_e1_scale_gating.py
 ```
 
-首跑會從 ~2,300 個 tick 檔重建 RV 並 pin 成 snapshot（約 90 秒）；之後每跑約 **86 秒**。
+首跑會從 ~2,300 個 tick 檔重建 RV 並 pin 成 snapshot（需數分鐘）；cached snapshot 後每跑約 **85 秒**。
 Seed = `20260712`。Lookahead audit 或 RV 資訊集稽核失敗時腳本 `raise`，**不會**輸出結果。
 結果 JSON 為**原子寫入**（tmp → `json.load` 驗證 → `os.replace`）。
 
@@ -362,7 +384,7 @@ Seed = `20260712`。Lookahead audit 或 RV 資訊集稽核失敗時腳本 `raise
 - ❌ 不可宣稱「校正機器只動錯配的模型」→ placebo 也把正確對齊的 GJR 放大 12%（CI 與 HAR 重疊）。
 - ❌ 不可宣稱「純尺度已被證實」→ Δc 檢定只是**無法拒絕** H₀，且 1% 的 band 很寬。
 - ❌ 不可據此選 FRL / IJF 任何一條路線 → 裁決是 **H2_UNSUPPORTED**，需要 E2 先跑。
-- ✅ 可以（在獨立 Codex review PASS 之後）記錄的**方法論教訓**：
+- ✅ 可以（本次 primary Codex review CONDITIONAL_PASS 後）記錄的**null 與方法論教訓**：
   1. session 分段加總的 realized measure 會系統性少掉 boundary jump（此處 **24%**）；
   2. 4-start GARCH MLE 在多峰似然面上幾乎抓不到 MLE（100 starts 中僅 **1.5%** 命中最佳 basin）；
   3. `Φ⁻¹(α)/Φ⁻¹(π̂)` 只在 Normal 下可識別，且**對 π 遞增**（R1 把 CI 上下界寫反）；

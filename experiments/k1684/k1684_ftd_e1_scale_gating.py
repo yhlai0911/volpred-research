@@ -1,10 +1,15 @@
 """
-K1684 R2 — forecast-tail-divergence E1: variance-target scale re-calibration GATING experiment.
+K1684 R3 — forecast-tail-divergence E1: variance-target scale re-calibration GATING experiment.
 
 This is the CANONICAL RERUN. The first pass (R1, 2026-07-12) was BLOCKED by Codex review on
-seven counts; every one of them is closed here and the closure is machine-checked in
-`k1684_rerun_r2_receipt.json`. R1's numbers are anchors only — nothing from R1 was carried
+seven counts; every one of them is closed here and the closure is machine-checked in the
+R2/R3 rerun receipts. R1's numbers are anchors only — nothing from R1 was carried
 forward, and nothing in this script is allowed to reuse an R1 result.
+
+R3 is the primary-Codex-review rescue of R2. It estimates HAR and GJR correction parameters on
+the exact same historical support, verifies both the timestamp date and clock time of every RV
+path end, uses the canonical Kupiec + Christoffersen-CC + Basel Trinity, and reports the canonical
+Acerbi-Szekely Z1 ES backtest alongside the McNeil-Frey diagnostic.
 
 The question
 ------------
@@ -104,7 +109,7 @@ np.random.seed(SEED)
 
 DATA_DIR = os.path.join(SCRIPT_DIR, 'data')
 RESULTS_PATH = os.path.join(SCRIPT_DIR, 'k1684_ftd_e1_scale_gating_results.json')
-RECEIPT_PATH = os.path.join(SCRIPT_DIR, 'k1684_rerun_r2_receipt.json')
+RECEIPT_PATH = os.path.join(SCRIPT_DIR, 'k1684_rerun_r3_receipt.json')
 RV_R2_SNAPSHOT = os.path.join(DATA_DIR, 'tx_rv_active_c2c_5min_2017_2025.csv')   # R2 (this run)
 RV_R1_SNAPSHOT = os.path.join(DATA_DIR, 'tx_rv_5min_daily_2017_2025.csv')        # R1/K854 legacy
 ETF_SNAPSHOT = os.path.join(DATA_DIR, 'tw0050_adjclose_2016_2025.csv')
@@ -201,17 +206,27 @@ def rv_information_set_audit(rv_df):
     end = rv_df['path_end_hhmmss'].dropna().astype(int)
     start = rv_df['path_start_hhmmss'].dropna().astype(int)
     late = int((end > rvb.ETF_CLOSE_HHMMSS).sum())
+    path_end_ts = pd.to_datetime(rv_df['path_end_ts'], errors='coerce')
+    if path_end_ts.dt.tz is not None:
+        path_end_ts = path_end_ts.dt.tz_localize(None)
+    row_day = pd.Series(pd.DatetimeIndex(rv_df.index).tz_localize(None).normalize(),
+                        index=rv_df.index)
+    path_end_day = path_end_ts.dt.normalize()
+    missing_end_ts = int(path_end_ts.isna().sum())
+    wrong_end_day = int((path_end_ts.notna() & (path_end_day != row_day)).sum())
     return {
         'rule': 'every RV(D) integrates a continuous price path that ENDS at the last trade at or '
-                'before 13:30:00 on D (0050 close) and STARTS at the last trade at or before '
+                'before 13:30:00 on the SAME calendar date D (0050 close) and STARTS at the last trade at or before '
                 '13:30:00 on D-1. RV(D) is therefore in the information set at the instant the '
                 'return window of r_{D+1} opens; the R1 13:30/13:45 overlap is closed.',
         'n_days': int(len(end)),
         'max_path_end_hhmmss': int(end.max()),
         'min_path_end_hhmmss': int(end.min()),
         'n_days_path_ends_after_1330': late,
+        'n_days_missing_path_end_ts': missing_end_ts,
+        'n_days_path_end_date_mismatch': wrong_end_day,
         'path_start_hhmmss_max': int(start.max()),
-        'passed': bool(late == 0),
+        'passed': bool(late == 0 and missing_end_ts == 0 and wrong_end_day == 0),
     }
 
 
@@ -705,6 +720,43 @@ def mcneil_frey_es_test(r, var_arr, es_arr, sigma_arr, n_boot=N_BOOT_ES, seed=SE
                     f'iid bootstrap, B={n_boot}, seed={seed}.'}
 
 
+def acerbi_szekely_z1_test(r, var_arr, es_arr, alpha):
+    """Acerbi-Szekely (2014) Z1 test for lower-tail return VaR/ES forecasts.
+
+    With negative return-space ES forecasts, correct conditional calibration implies
+    E[r_t 1{r_t < VaR_t} / (alpha ES_t)] = 1. The observation-level moment below therefore has
+    mean zero under H0. Its empirical standard error provides the asymptotic Z statistic. This is
+    the canonical project ES check; McNeil-Frey remains in the artifact as a complementary
+    exceedance-only diagnostic.
+    """
+    y = np.asarray(r, dtype=float)
+    v = np.asarray(var_arr, dtype=float)
+    e = np.asarray(es_arr, dtype=float)
+    ok = np.isfinite(y) & np.isfinite(v) & np.isfinite(e) & (e < 0)
+    y, v, e = y[ok], v[ok], e[ok]
+    n = len(y)
+    if n < 2:
+        return {'z1': None, 'z_stat': None, 'p_value': None, 'pass': None,
+                'n': int(n), 'n_exceedances': 0,
+                'note': 'fewer than 2 valid observations -- test not estimable'}
+    hit = y < v
+    moment = y * hit.astype(float) / (alpha * e) - 1.0
+    z1 = float(np.mean(moment))
+    se = float(np.std(moment, ddof=1) / np.sqrt(n))
+    if not np.isfinite(se) or se <= 0:
+        return {'z1': z1, 'z_stat': None, 'p_value': None, 'pass': None,
+                'n': int(n), 'n_exceedances': int(hit.sum()),
+                'note': 'zero or invalid empirical standard error -- test not estimable'}
+    z_stat = z1 / se
+    p_value = float(2.0 * (1.0 - norm.cdf(abs(z_stat))))
+    return {
+        'z1': z1, 'z_stat': float(z_stat), 'p_value': p_value,
+        'pass': bool(p_value > 0.05), 'n': int(n), 'n_exceedances': int(hit.sum()),
+        'note': 'Acerbi-Szekely (2014) Z1 calibration moment; two-sided asymptotic Z test with '
+                'an empirical observation-level standard error.',
+    }
+
+
 def var_backtest_r2(returns, var_arr, alpha):
     """Kupiec + Christoffersen + Basel, with the BOUNDARY cases handled correctly.
 
@@ -786,7 +838,9 @@ def var_backtest_r2(returns, var_arr, alpha):
                                     'note': 'LR_cc = LR_uc + LR_ind, df = 2 (Christoffersen 1998)'},
         'basel_traffic_light': traffic,
         'basel_violations_in_window': int(n_win), 'basel_window_size': int(win),
-        'trinity_pass': bool(p_uc > 0.05 and p_ind > 0.05 and traffic == 'green'),
+        'trinity_definition': 'Kupiec unconditional + Christoffersen conditional-coverage joint '
+                              '(LR_cc) + Basel traffic light; all must pass',
+        'trinity_pass': bool(p_uc > 0.05 and p_cc > 0.05 and traffic == 'green'),
     }
 
 
@@ -802,6 +856,8 @@ def backtest_cell(returns, var_arr, es_arr, sigma_arr, alpha, layer):
         'mean_es': float(np.mean(es_arr)),
         'mean_var': float(np.mean(var_arr)),
         'es_over_var': float(np.mean(es_arr) / np.mean(var_arr)),
+        'acerbi_szekely_z1': acerbi_szekely_z1_test(
+            returns, var_arr, es_arr, alpha),
         'mcneil_frey_test': mcneil_frey_es_test(returns, var_arr, es_arr, sigma_arr),
     }
     fz = fz0_loss(returns, var_arr, es_arr, alpha)
@@ -972,6 +1028,20 @@ def decide_gate(cells, dm_aligned, dm_mismatched):
 # G. One run
 # ============================================================
 
+def _common_support(lo, hi, src_a, src_b, returns):
+    """Return the strictly pre-origin index set shared by both forecast sources.
+
+    ``hi`` is the forecast origin and is deliberately excluded. Requiring both sources and the
+    realized return to be finite on one explicit intersection prevents HAR's longer history from
+    giving its scale estimator a different information set than the GJR placebo.
+    """
+    base = np.arange(lo, hi)
+    ok = (np.isfinite(src_a[base]) & (src_a[base] > 0)
+          & np.isfinite(src_b[base]) & (src_b[base] > 0)
+          & np.isfinite(returns[base]))
+    return base[ok]
+
+
 def build_cells(run_cfg, ctx):
     """Build every VaR/ES cell for one run configuration, on the identical evaluation sample."""
     run_id, theta_window, tail_pool, refresh, rv_variant, role = run_cfg
@@ -1023,24 +1093,10 @@ def build_cells(run_cfg, ctx):
     # out of (here) 8 estimates.
     theta_updates, last_pools = [], {}
 
-    def _common_support(lo, hi, src_a, src_b):
-        """The index set on which BOTH sigma sources exist.
-
-        HAR's expanding fit starts after 250 observations, GJR's after 500, so the naive pools
-        differ by ~250 days. Estimating the correction on one pool and the PLACEBO on another
-        makes any difference between them partly an artifact of the samples they happened to get
-        (.claude/rules/experiments.md: symmetric refinement). Both are estimated on the
-        intersection instead.
-        """
-        base = np.arange(lo, hi)
-        ok = (np.isfinite(src_a[base]) & (src_a[base] > 0)
-              & np.isfinite(src_b[base]) & (src_b[base] > 0) & np.isfinite(r[base]))
-        return base[ok]
-
     for k_ev, i in enumerate(eval_idx):
         if k_ev - last_refresh >= refresh or theta is None:
-            pool_theta = _common_support(theta_start, i, har_theta_src, gjr_theta_src)
-            pool_tail = _common_support(pool_start, i, har_tail_src, gjr_tail_src)
+            pool_theta = _common_support(theta_start, i, har_theta_src, gjr_theta_src, r)
+            pool_tail = _common_support(pool_start, i, har_tail_src, gjr_tail_src, r)
             th = estimate_theta(pool_theta, r, har_theta_src, rv)
             th_g = estimate_theta(pool_theta, r, gjr_theta_src, rv)
             tl = estimate_theta(pool_tail, r, har_tail_src, rv)
@@ -1271,8 +1327,13 @@ def run_one(run_cfg, ctx):
                 'loss': 'Fissler-Ziegel FZ0 joint (VaR, ES) loss, Patton-Ziegel-Chen (2019)'}
 
     def summ(arr, extra=None):
-        d = {'mean': float(np.nanmean(arr)), 'min': float(np.nanmin(arr)),
-             'max': float(np.nanmax(arr)), 'last': float(arr[-1])}
+        day_weighted_mean = float(np.nanmean(arr))
+        d = {'mean': day_weighted_mean,
+             'day_weighted_oos_mean': day_weighted_mean,
+             'mean_definition': 'arithmetic mean across OOS days; step-function values are '
+                                'weighted by the number of days they remain in force',
+             'min': float(np.nanmin(arr)), 'max': float(np.nanmax(arr)),
+             'last': float(arr[-1])}
         if extra:
             d.update(extra)
         return d
@@ -1341,6 +1402,10 @@ def run_one(run_cfg, ctx):
     return {
         'role': role, 'rv_construction': 'R2 (active contract, gap-complete, 13:30-anchored)'
         if rv_variant == 'r2' else 'R1/K854 legacy (TX1, three separate sessions, 13:45 close)',
+        'gate_eligible': bool(run_id == PRIMARY_RUN),
+        'gate_interpretation': ('formal experiment gate' if run_id == PRIMARY_RUN else
+                                'sensitivity/diagnostic only; the computed verdict is an internal '
+                                'consistency check and has no independent paper-route meaning'),
         'theta_window': theta_window, 'tail_pool': tail_pool, 'pool_refresh_days': refresh,
         'n_eval': int(n_eval),
         'cells_unavailable': {'cells': incomplete,
@@ -1463,7 +1528,7 @@ def in_sample_panel(r, rv, train_end_idx, dates):
 def main():
     t0 = time.time()
     log('=' * 78)
-    log('K1684 R2 — FTD E1 canonical rerun (all seven R1 blockers closed)')
+    log('K1684 R3 — FTD E1 primary-Codex-review rescue')
     log('=' * 78)
 
     log('\n[1] Data')
@@ -1476,7 +1541,8 @@ def main():
 
     is_audit = rv_information_set_audit(rv_r2_df)
     log(f"  RV information-set audit: passed={is_audit['passed']} "
-        f"(max path end {is_audit['max_path_end_hhmmss']}, n={is_audit['n_days']})")
+        f"(max path end {is_audit['max_path_end_hhmmss']}, "
+        f"wrong end date={is_audit['n_days_path_end_date_mismatch']}, n={is_audit['n_days']})")
     if not is_audit['passed']:
         raise RuntimeError('RV information-set audit FAILED — refusing to report results')
 
@@ -1496,11 +1562,14 @@ def main():
     # RV-window/return-window correspondence, which is what the numbers depend on.)
     prev_trading = pd.Series(etf_returns.index, index=etf_returns.index).shift(1)
     path_start_day = pd.to_datetime(rv_r2_df['path_start_ts']).dt.normalize()
+    path_end_day = pd.to_datetime(rv_r2_df['path_end_ts']).dt.normalize()
     keep, dropped = [], []
     for d in cand:
         need = prev_trading.get(d)
-        got = path_start_day.get(d)
-        if pd.isna(need) or pd.isna(got) or got != need:
+        got_start = path_start_day.get(d)
+        got_end = path_end_day.get(d)
+        if (pd.isna(need) or pd.isna(got_start) or pd.isna(got_end)
+                or got_start != need or got_end != pd.Timestamp(d).normalize()):
             dropped.append(str(pd.Timestamp(d).date()))
             continue
         keep.append(d)
@@ -1512,7 +1581,8 @@ def main():
         'n_candidates': int(len(cand)),
         'n_dropped': len(dropped),
         'dropped_dates': dropped[:20],
-        'reason': 'a missing TX tick file made the stitched path span more than one trading day',
+        'reason': 'a missing/misaligned TX tick path failed either the previous-trading-day start '
+                  'or same-calendar-day end requirement',
     }
     log(f'  continuity gate: dropped {len(dropped)} day(s) whose RV window did not match the '
         f'return window {dropped[:5] if dropped else ""}')
@@ -1740,8 +1810,8 @@ def main():
     prim = all_runs[PRIMARY_RUN]
     out = {
         'experiment_id': 'K1684',
-        'revision': 'R2 (canonical rerun; supersedes R1 2026-07-12, which Codex BLOCKED)',
-        'title': 'K1684 R2: FTD E1 — variance-target scale re-calibration gating experiment',
+        'revision': 'R3 (primary Codex rescue; symmetric support and canonical risk-test audit)',
+        'title': 'K1684 R3: FTD E1 — variance-target scale re-calibration gating experiment',
         'question': 'Is the K850/K854 QLIKE-vs-VaR divergence an artifact of the TX-RV / '
                     '0050-return variance-target mismatch?',
         'proposer': 'Fable deep review 2026-07-11 (§5.1 E1, P0 gate); rerun ordered by the '
@@ -1781,6 +1851,12 @@ def main():
                     'which is defined at the 1% level only. Inherited from K854 and labelled '
                     'wherever it is used.',
         },
+        'risk_test_definitions': {
+            'trinity': 'Kupiec unconditional coverage + Christoffersen conditional-coverage joint '
+                       'test + Basel traffic light; all must pass',
+            'es_canonical': 'Acerbi-Szekely (2014) Z1, two-sided asymptotic Z test',
+            'es_supplementary': 'McNeil-Frey (2000) exceedance-residual seeded bootstrap',
+        },
         'limitations': [
             f"n = {oos_stats['n']} < the >=500 house rule. At alpha = 1% only ~{oos_stats['n']*0.01:.1f} "
             'violations are expected, so Kupiec has low power and a single violation can move the '
@@ -1797,6 +1873,13 @@ def main():
             'The 5% Basel light is a custom extension, not a regulatory standard.',
             'In-sample results are scored on the data they were fitted to and carry no predictive '
             'claim; they are reported only for the IS/OOS contrast.',
+            'The scale-factor and delta-c uncertainty calculations use iid resampling. Serial '
+            'dependence is not preserved; E2 must include block-bootstrap sensitivity.',
+            'Aligned squared-return QLIKE omits the 14 zero-return OOS days because the log loss is '
+            'undefined at an exactly zero proxy, leaving n = 436 versus n = 450 for TX-RV QLIKE.',
+            'The object labelled RGL is a reduced-form log-GARCH-X return-likelihood model with '
+            'lagged log RV, not the full Realized-GARCH measurement-equation system. It is a '
+            'diagnostic comparator and never enters decide_gate().',
         ],
         'references': [
             'Hansen & Lunde (2005, J. Applied Econometrics 20) — scaling a realized measure to the c2c variance',
@@ -1886,6 +1969,7 @@ def write_atomic(path, payload):
 
 
 R1_RESULTS_SHA256 = 'c5768fa04dfb30d699c4a19931da160c05c8325b9678d0c94571200bd08f360b'
+R2_RESULTS_SHA256 = '99e80e1166318b9dcae32ccbd5f33c1d99af534e4f3aa9f421ec9e5e1559bb0a'
 
 
 def write_receipt(payload, all_runs, is_audit, look_audit, fragility, t0):
@@ -1896,22 +1980,31 @@ def write_receipt(payload, all_runs, is_audit, look_audit, fragility, t0):
     dm_all = prim['dm_tests']
     receipt = {
         'experiment_id': 'K1684',
-        'rerun': 'R2 canonical',
+        'rerun': 'R3 primary-Codex-review rescue',
         'timestamp': datetime.now(timezone.utc).isoformat(),
         'seed': SEED,
         'elapsed_sec': round(time.time() - t0, 1),
         'results_sha256_before_r1': R1_RESULTS_SHA256,
-        'results_sha256_after_r2': new_hash,
-        'hash_changed': bool(new_hash != R1_RESULTS_SHA256),
+        'results_sha256_before_r3_r2': R2_RESULTS_SHA256,
+        'results_sha256_after_r3': new_hash,
+        'hash_changed_from_r2': bool(new_hash != R2_RESULTS_SHA256),
         'gate_verdict_r1': 'H2_REJECTED (BLOCKED — never valid)',
-        'gate_verdict_r2': payload['GATE_VERDICT'],
+        'gate_verdict_r2': 'H2_UNSUPPORTED',
+        'gate_verdict_r3': payload['GATE_VERDICT'],
+        'r3_review_rescue': {
+            'symmetric_theta_and_tail_support': True,
+            'rv_path_end_same_day_and_by_1330_required': bool(is_audit['passed']),
+            'canonical_trinity_uses_cc_joint': True,
+            'canonical_acerbi_szekely_z1_reported': True,
+        },
         'blockers_closed': {
             'G1_active_contract_gap_complete_rv': {
                 'closed': bool(is_audit['passed']),
                 'evidence': f"RV rebuilt from ALL TX contracts (volume-maximal active contract per "
                             f"trade date); one continuous path 13:30(D-1)->13:30(D) with every "
                             f"boundary jump; {is_audit['n_days']} days audited, "
-                            f"{is_audit['n_days_path_ends_after_1330']} end after 13:30. "
+                            f"{is_audit['n_days_path_ends_after_1330']} end after 13:30 and "
+                            f"{is_audit['n_days_path_end_date_mismatch']} end on the wrong date. "
                             f"R2/R1 mean RV ratio "
                             f"{payload['rv_construction_comparison_r2_vs_r1']['mean_ratio_r2_over_r1']:.4f}.",
             },
@@ -1965,7 +2058,8 @@ def write_receipt(payload, all_runs, is_audit, look_audit, fragility, t0):
             'G6_alphas_is_oos_var_es_fz': {
                 'closed': True,
                 'evidence': 'Both alpha levels; in-sample panel (in_sample_panel) and OOS runs; ES '
-                            'for every cell with a McNeil-Frey bootstrap test; Fissler-Ziegel FZ0 '
+                            'for every cell with canonical Acerbi-Szekely Z1 and supplementary '
+                            'McNeil-Frey bootstrap tests; Fissler-Ziegel FZ0 '
                             'joint (VaR, ES) loss per cell plus canonical DM tests on the FZ0 '
                             'differentials.',
             },
@@ -1982,8 +2076,8 @@ def write_receipt(payload, all_runs, is_audit, look_audit, fragility, t0):
             'files_touched': ['experiments/k1684/** only'],
             'shared_state_untouched': ['storage/memory/knowledge.json', 'storage/reports/feed.json',
                                        'paper/**'],
-            'note': 'No knowledge/feed/paper write is permitted before an independent Codex PASS on '
-                    'this rerun.',
+            'note': 'Knowledge requires the independent primary Codex review artifact for R3. '
+                    'Feed/paper routing remains prohibited because the gate is H2_UNSUPPORTED.',
         },
     }
     write_atomic(RECEIPT_PATH, receipt)
@@ -2046,7 +2140,7 @@ def make_figures(primary, rv_cmp, fragility):
     ax.set_ylabel('c(1%) − c(5%)   [bootstrap 95% CI]')
     ax.set_title('H₀: pure scale ⇒ Δc = 0. A band that excludes 0 is a SHAPE channel.', fontsize=10)
     ax.grid(alpha=0.25, axis='y')
-    fig.suptitle('K1684 R2 Fig 1 — identified scale-vs-shape decomposition '
+    fig.suptitle('K1684 R3 Fig 1 — identified scale-vs-shape decomposition '
                  '(bootstrap test, not a hard-coded 0.10 rule)', fontsize=11, y=0.99)
     fig.tight_layout()
     p = os.path.join(SCRIPT_DIR, 'fig1_implied_c_by_alpha.png')
@@ -2074,7 +2168,7 @@ def make_figures(primary, rv_cmp, fragility):
         ax.set_ylabel('violation rate (%)')
         ax.set_title(f'{ak} VaR — colour = Basel light, hatched = trinity FAIL', fontsize=10)
         ax.grid(alpha=0.25, axis='y')
-    fig.suptitle(f"K1684 R2 Fig 2 — VaR trinity on the rebuilt RV "
+    fig.suptitle(f"K1684 R3 Fig 2 — VaR trinity on the rebuilt RV "
                  f"(identical {primary['n_eval']}-day sample; GJRf-a = placebo)", fontsize=11, y=0.99)
     fig.tight_layout()
     p = os.path.join(SCRIPT_DIR, 'fig2_trinity_before_after.png')
@@ -2129,12 +2223,12 @@ def make_figures(primary, rv_cmp, fragility):
         ax.text(x, v + max(fr4, fr100) * 0.02, f'{v:.2f}%', ha='center', fontsize=10,
                 fontweight='bold')
     ax.set_xticks([0, 1])
-    ax.set_xticklabels([f"K854 fitter\n4 starts", f"R2 fitter\n{GJR_N_STARTS} starts"], fontsize=9)
+    ax.set_xticklabels([f"K854 fitter\n4 starts", f"robust fitter\n{GJR_N_STARTS} starts"], fontsize=9)
     ax.set_ylabel('max σ move under a 1e-6 data revision (%)')
     ax.set_title('GJR likelihood-basin fragility\n(the R1 blocker, measured both ways)', fontsize=10)
     ax.grid(alpha=0.25, axis='y')
 
-    fig.suptitle('K1684 R2 Fig 3 — what the rerun actually changed: the realized measure, the '
+    fig.suptitle('K1684 R3 Fig 3 — what the rerun actually changed: the realized measure, the '
                  'corrections, and the GJR anchor', fontsize=11, y=0.99)
     fig.tight_layout()
     p = os.path.join(SCRIPT_DIR, 'fig3_scale_factors.png')

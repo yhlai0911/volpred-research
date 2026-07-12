@@ -1,11 +1,11 @@
 {
   "experiment_id": "K1684",
   "rerun": "R2 canonical",
-  "timestamp": "2026-07-12T13:11:51.188809+00:00",
+  "timestamp": "2026-07-12T11:26:26.412031+00:00",
   "seed": 20260712,
-  "elapsed_sec": 84.2,
+  "elapsed_sec": 85.6,
   "results_sha256_before_r1": "c5768fa04dfb30d699c4a19931da160c05c8325b9678d0c94571200bd08f360b",
-  "results_sha256_after_r2": "e48114532b9c398dd0e47369d1169f404fb1fce693bc4027fc92883d11f37f9b",
+  "results_sha256_after_r2": "99e80e1166318b9dcae32ccbd5f33c1d99af534e4f3aa9f421ec9e5e1559bb0a",
   "hash_changed": true,
   "gate_verdict_r1": "H2_REJECTED (BLOCKED — never valid)",
   "gate_verdict_r2": "H2_UNSUPPORTED",
@@ -26,7 +26,7 @@
     },
     "G4_placebo_full_report": {
       "closed": true,
-      "evidence": "Placebo scale factor 1.1171 (95% CI [1.0517931342280324, 1.1882950551504607], excludes 1 = True), against the HAR factor 1.1836. GJRf / GJRf-a are backtested on ALL THREE tail layers at both alphas with VaR, ES and FZ0 on the same sample as every other cell, and the placebo also runs in the in-sample panel. The CI is bootstrapped on the residual pool, not on the step function of daily values."
+      "evidence": "Placebo scale factor 1.1171 (95% CI [1.0517931342280324, 1.1882950551504607], excludes 1 = True), against the HAR factor 1.2186. GJRf / GJRf-a are backtested on ALL THREE tail layers at both alphas with VaR, ES and FZ0 on the same sample as every other cell, and the placebo also runs in the in-sample panel. The CI is bootstrapped on the residual pool, not on the step function of daily values."
     },
     "G5_harvey_bar_and_pairwise_masks": {
       "closed": true,
