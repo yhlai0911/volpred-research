@@ -16409,5 +16409,20 @@
     "backfilled_at": "2026-07-12T14:50:06.498080+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1684"
+  },
+  {
+    "timestamp": "2026-07-12T23:28",
+    "actor": "hourly-23",
+    "task_type": "member_qa",
+    "task_id": "member_qa_e79a7097_evaluate",
+    "title": "K1700: 30 年年化 15% 可行性拆解（會員 yaoxk1431 提問）",
+    "summary": "S&P500 1928-2026 含息 17,199 個 30 年滾動視窗：0 個達 15%，中位 10.8%，史上最佳 14.70%（1932-06 谷底起算）。報酬前十分位視窗 100% 有 >30% 回撤。槓桿（FRED 實際短率+1pp）2x 中位 13.7%/31.5% 達標但 MDD -75.3%；3x 更差。code-reviewer CONDITIONAL_PASS 的 C1/C2/C3+I2/I3 全數修正（真實逐年股息重建，建法誤差 -0.06pp/年）。文章寫作已 enqueue-agent（agent-brief_k1700_article-f5bd9e），task 留 in_progress 待 followup fire 收件發佈。",
+    "experiment_ids": [
+      "K1700"
+    ],
+    "commits": [
+      "d7ae87f34",
+      "5ec633b37"
+    ]
   }
 ]
