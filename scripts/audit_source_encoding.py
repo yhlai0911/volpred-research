@@ -41,8 +41,9 @@ def iter_py_files(roots: list[str]) -> list[Path]:
     files: list[Path] = []
     for root in roots:
         base = ROOT / root
-        for p in sorted(base.rglob("*.py")):
-            if SKIP_PARTS.intersection(p.parts):
+        candidates = [base] if base.is_file() else sorted(base.rglob("*.py"))
+        for p in candidates:
+            if p.suffix != ".py" or SKIP_PARTS.intersection(p.parts):
                 continue
             files.append(p)
     return files
@@ -101,13 +102,16 @@ def main() -> int:
         "--roots",
         nargs="+",
         default=list(DEFAULT_ROOTS),
-        help=f"directories under repo root to sweep (default: {' '.join(DEFAULT_ROOTS)})",
+        help=(
+            "directories or individual .py files under repo root to sweep "
+            f"(default: {' '.join(DEFAULT_ROOTS)})"
+        ),
     )
     args = ap.parse_args()
 
-    missing = [r for r in args.roots if not (ROOT / r).is_dir()]
+    missing = [r for r in args.roots if not (ROOT / r).exists()]
     if missing:
-        print(f"[audit-encoding] FAIL: root dir(s) not found: {missing}", file=sys.stderr)
+        print(f"[audit-encoding] FAIL: root path(s) not found: {missing}", file=sys.stderr)
         return 2
 
     files = iter_py_files(args.roots)

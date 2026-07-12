@@ -27,15 +27,37 @@
 #
 # Escape hatch: git commit --no-verify (pre-push will still catch it).
 
+# Scope (2026-07-13, hourly-00): both gates audit ONLY the .py files this commit
+#   stages — never the whole working tree. The main checkout is shared: a codex
+#   loop, an interactive session and a dispatch fire all edit it at once. A
+#   tree-wide gate therefore blocks author A for author B's half-written file,
+#   which is the same ownership bug PHASE Z already fixed for `git add -A`
+#   ("did MY files get in?", not "is the tree clean?"). Nothing is weakened:
+#   pre-push audits the pushed COMMIT TREE and CI re-runs both audits on the
+#   pushed head, so B's file is still caught — when B commits it, or at push.
+
 set -uo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT" || exit 0
 
 # Only pay the cost when Python actually changed.
-if ! git diff --cached --name-only --diff-filter=ACM | grep -qE '\.py$'; then
-  exit 0
-fi
+STAGED_PY=()
+while IFS= read -r f; do
+  [ -n "$f" ] && STAGED_PY+=("$f")
+done < <(git diff --cached --name-only --diff-filter=ACM | grep -E '\.py$')
+[ "${#STAGED_PY[@]}" -gt 0 ] || exit 0
+
+# Fail closed: a gate that scans nothing is the bug these gates exist to catch.
+# A staged path can be absent from the worktree (staged, then deleted). Auditing
+# it would scan an empty set, so sweep the whole tree in that case instead.
+for f in "${STAGED_PY[@]}"; do
+  if [ ! -f "$f" ]; then
+    echo "[pre-commit] staged path missing from worktree: $f — falling back to full sweep"
+    STAGED_PY=()
+    break
+  fi
+done
 
 PY="$(command -v uv >/dev/null 2>&1 && echo "uv run python" || echo python3)"
 
@@ -44,7 +66,11 @@ PY="$(command -v uv >/dev/null 2>&1 && echo "uv run python" || echo python3)"
 # audit and pytest collection on it silently stops running.
 ENC="scripts/audit_source_encoding.py"
 if [ -f "$ENC" ]; then
-  ENC_OUT="$($PY "$ENC" 2>&1)"
+  if [ "${#STAGED_PY[@]}" -gt 0 ]; then
+    ENC_OUT="$($PY "$ENC" --roots "${STAGED_PY[@]}" 2>&1)"
+  else
+    ENC_OUT="$($PY "$ENC" 2>&1)"
+  fi
   if [ $? -ne 0 ]; then
     echo "[pre-commit] BLOCKED — corrupted (non-UTF-8) .py source:"
     printf '%s\n' "$ENC_OUT" | grep '^BAD ' | sed 's/^/[pre-commit]   /' | head -20
@@ -59,7 +85,13 @@ AUDIT="scripts/audit_silent_fallbacks.py"
 BL="storage/qa/silent_fallback_baseline.json"
 [ -f "$AUDIT" ] && [ -f "$BL" ] || exit 0
 
-OUT="$($PY "$AUDIT" --strict --baseline "$BL" --limit 20 2>&1)"
+# bash 3.2 (macOS /bin/bash) errors on "${arr[@]}" when arr is empty under `set -u`,
+# so the full-sweep fallback must not go through the array expansion.
+if [ "${#STAGED_PY[@]}" -gt 0 ]; then
+  OUT="$($PY "$AUDIT" --strict --baseline "$BL" --limit 20 "${STAGED_PY[@]}" 2>&1)"
+else
+  OUT="$($PY "$AUDIT" --strict --baseline "$BL" --limit 20 2>&1)"
+fi
 RC=$?
 
 if [ "$RC" -ne 0 ]; then

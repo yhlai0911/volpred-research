@@ -2,6 +2,75 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 00:15 — pre-commit 閘門審了「你沒有要 commit 的檔」：A 作者被 B 作者寫到一半的檔擋死
+
+**問題**：00:07 的 hourly fire 做完 K1700 followup，要 commit 自己的產物（懶人包 panels、agent job receipt、work_log）時被 pre-commit BLOCKED，
+理由是 `src/volpred/ops/event_jobs.py:205` 有一個新的 silent fallback。**那個檔不是這班 fire 動的** —— 是同時在跑的 `codex_loop`
+（正在做 `platform_ops_event_receipt_to_next_tasks_bridge`，639 行 diff）寫到一半的工作區檔案。
+
+**根因**：`scripts/git_hooks/pre-commit` 兩道 gate 都跑**全工作區**掃描（`audit_source_encoding.py` 無參數、
+`audit_silent_fallbacks.py` 無 paths），但觸發條件是「本次 staged 有 .py」。於是只要你 commit 任何一個 .py，
+你就要為**別人**沒寫完的檔負責。main checkout 是共用的（dispatch fire / codex_loop / 互動 session 同時在寫），
+這個組合等於：任一作者的半成品可以擋住其他所有人的 commit —— 而且錯誤訊息還寫「this commit introduces new silent fallback(s)」，
+把別人的檔說成你的。
+
+這是 **PHASE Z 在 2026-07-10 已經修過的同一個歸屬 bug 換一層皮**：`git add -A` 的錯不在 gitignore noise，
+而在**它沒有作者的概念**。收尾檢查該問的是「**我的**檔進去了嗎」，不是「整棵樹乾淨嗎」。commit-time 的 gate 同理。
+
+**解決方法**（治 class，不是 patch 這一次）：
+1. `scripts/git_hooks/pre-commit`：兩道 gate 都只審 `git diff --cached` 出來的 .py。staged 檔若已從工作區消失（staged 後被刪）
+   → 退回全樹掃描（fail-closed；「掃了 0 個檔卻回報通過」正是這些 gate 存在的理由）。bash 3.2 下 `set -u` 展開空陣列會爆，
+   全掃分支不走陣列展開。
+2. `scripts/audit_source_encoding.py`：`--roots` 現在同時吃**目錄與單一 .py 檔**（原本 `is_dir()` 檢查會把檔案路徑判成
+   "root not found" → exit 2）。沒這一步，encoding gate 傳檔案就變成 fail-closed 亂擋。
+3. **沒有放寬任何東西**：`pre-push` 仍審**被 push 的 commit tree**、CI 仍在 pushed head 上重跑兩個 audit
+   （`.github/workflows/silent-fallbacks.yml`）。B 的檔照樣會被抓 —— 在 B 自己 commit 時、或在 push 時。
+4. **機械防線**：`scripts/tests/test_pre_commit_staged_scope.sh`（+ pytest wrapper `.py`）。case 1 = 本次 incident
+   （別人的髒檔不得擋我的 commit）、case 2/4 = scoping 沒開洞（staged 的違規/亂碼檔照擋）、case 3 = 反事實
+   （全樹 audit 在 case 1 的狀態下確實 new≥1，證明 case 1 不是恆真式）。已驗證：舊 hook 跑這套會 fail case 1。
+
+**教訓**：共用 checkout 上，任何「掃全樹」的 commit-time 閘門都是在替別人的未完成工作把關 —— 那不是你的責任範圍，
+也不是它該問的問題。閘門的作用域必須等於**這次動作的作用域**。
+
+## 2026-07-12 23:5x — event receipt 與 pending queue 雙 writer 漂移，TSMC T+0 到期前從未進 dispatcher — **FIXED**
+
+**現象**：`event_expander` 於 2026-07-10 15:00 台北時間建立 TSMC 月營收 T+0 的
+`task_b3a33689b6fc`，但該 row 只存在 `storage/ops/tasks/`、狀態一直是 `queued`；正式
+dispatcher 只讀 `storage/next_tasks.json`，所以直到 deadline 過期仍無人認領。CPI 看似有成功進池，
+實際上是 `refill_reader_facing_pool.py` 另建一筆不同 id 的 next_tasks row；CPI 的 ops receipt 也仍 queued，
+並不存在真正的 receipt bridge。
+
+**根因（deterministic timing + dual owner）**：
+
+1. `event_jobs._materialize_task()` 呼叫 `create_task()`，只寫 ops TaskRecord + event ledger；
+   `continue_task_dispatch.py` / `task_pool_claim.py` 完全不讀這個 pending source。
+2. 第二個 writer `refill_event_candidates()` 才會寫 next_tasks。07/10 06:00 掃描時 TSMC 尚未到
+   15:00 not_before；同日 12:00 / 18:00 又被 `already_scanned_today` 擋掉；07/11 首次重掃時，
+   `event_date < today` 先被判 `out_of_horizon`，即使 deadline 尚未到也永遠漏接。
+3. `event_receipt_watchdog` 只有 warn，沒有 queued-past-deadline 的狀態轉移，所以殭屍 receipt 不會自癒。
+
+**根治（single owner）**：
+
+- `src/volpred/ops/event_jobs.py` 成為唯一 event pending materializer：到 not_before 後，以 deterministic id、
+  `status=pending`、`task_type=event_article`、`dispatch_lane=main_thread` 在同一個 `fcntl.LOCK_EX`
+  read-modify-write 內落 `next_tasks.json`，並使用 shared serialize-first writer。ledger 改記
+  `next_task_id`，本身就是 materialization audit；新事件不再建立第二套 queued TaskRecord。
+- `refill_reader_facing_pool.refill_event_candidates()` 降為 compatibility adapter，只呼叫同一 owner；
+  不再自行判 horizon / append。原本 T+0 reaction coverage gate 已移入 canonical owner，沒有因 cutover 消失。
+- 每次 hourly expand 先 reconcile deadline：next_tasks 仍 pending 且過期時在 claim 同一把 flock 下轉
+  `expired`；claim/in_progress 勝出則不動。pre-cutover 的 legacy queued receipt 以 control-plane CAS 轉
+  `failed / deadline_expired_never_dispatched`，不偽造 claimed agent，也不誤關 agent session。
+- crash recovery 雙向冪等：queue 已寫、ledger 未寫會補 ledger；舊 ledger 已寫、queue 漏寫會補 queue，
+  均不重複建 task。
+
+**驗證**：聚焦 event/refiller/alerts 75 tests passed；scheduler/run_due_jobs/local-control-plane/status-vocab/
+dispatch rotation 64 passed、2 skipped。新增 regression 覆蓋 TSMC 15:00 前不可見、15:00 起立即可見、
+dispatcher main-thread lane、兩種 partial-write recovery、pending expiry、claim race、legacy receipt expiry，
+以及 reaction dedup 保留。
+
+**教訓**：pending lifecycle 只能有一個 owner。audit receipt 即使叫 `TaskRecord`，只要正式 dispatcher
+不讀它，就不能被當成「已排入任務池」；observer watchdog 也不能取代狀態機的自癒 transition。
+
 ## 2026-07-12 22:15 — 空洞地紅：測試把「建立前提的那一步」mock 掉，於是紅得與 production 無關
 
 **問題**：`tests/test_dispatch_supervisor.py` 三個 hang 告警測試在 main 上是紅的（`hang_alerts` 長度 0，預期 1）。
