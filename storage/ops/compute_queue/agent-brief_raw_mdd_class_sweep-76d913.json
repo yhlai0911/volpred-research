@@ -1,0 +1,41 @@
+{
+  "id": "agent-brief_raw_mdd_class_sweep-76d913",
+  "title": "agent: brief_raw_mdd_class_sweep",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_raw_mdd_class_sweep.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    ".",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/docs/governance/2026-07/raw_mdd_claim_class_sweep.md",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_raw_mdd_class_sweep-76d913.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-12T23:12:09Z",
+  "started_at": "2026-07-12T23:15:00Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_raw_mdd_class_sweep-76d913.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_raw_mdd_class_sweep-76d913.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/docs/governance/2026-07/raw_mdd_claim_class_sweep.md",
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_raw_mdd_class_sweep-76d913.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research",
+  "claude_followup": {
+    "brief": "收件：驗 audit doc 的 population count + 盲區分析是否可驗證；檢查 experiments/k1265b/ 有無真 results.json（不是建議補跑）；跑 ratchet test 確認會擋新違規；Codex 審 k1265b 程式碼；通過後主線程寫 knowledge.json + 處理 reader-facing 更正清單",
+    "task_type": "governance",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}
