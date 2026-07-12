@@ -111,3 +111,20 @@
 - **主線程裁定（依事前規則「落入 null 內→重框或 archive」）**：**REFRAME 為 FRL 級方法論短文**，放棄 JBF 線。新主軸：「表面的 volatility absorption 梯度是 relief-rally 成分驅動的 — pooled 條件統計量可被反號成分主導」的警世/方法論發現。不 archive：K1686 的 sign-decomposition 本身是乾淨可發表的貢獻。
 - 後續：body 重寫（paper_body 主線程）依新主軸；舊 absorption 宣稱全文撤下；K897/k720 相關 knowledge 回溯更正列入重寫 checklist。
 - 依據：experiments/k1686/README.md §7 Verdict + 本檔事前判定規則。
+
+### ⚠️ 回溯更正 2026-07-12 18:20 — 上條 REFRAME 裁定**撤回**（Codex primary-path review = FAIL）
+上一條裁定寫於 Codex 複核**返回之前**，採信的是 K1686 自身的 sign-decomposition verdict。Codex primary-path review（`storage/ops/codex_reviews/k1686_verdict.md`，**VERDICT: FAIL**）指出該 verdict 有兩個 blocking 缺陷，**REFRAME 的核心論據不成立**：
+
+1. **「decline 住在 relief rally」是內生分組 artifact**：變體 D 用**同期** `VIX_t` 分 calm/high regime，但 ambient fear 的定義（變體 E）是 `VIX_{t-1}`。正向 VIX 衝擊本身會推高 `VIX_t` → post-shock 內生排序，把 calm 格機械性稀釋到 n=10。Codex 以 D 的 sign-split × E 的 `VIX_{t-1}` 對齊重算（no-write 複核）：ambient-up 的 calm−high decline = **+1.0465**（stratified bootstrap CI [0.361, 1.733]；20-day moving-block CI [0.329, 1.763]，47 calm / 53 high）—— **與「fear shock 下 decline 消失（−0.123）」符號相反**。缺的那個 D×E 規格會翻轉原結論。
+2. **pooled vs up-only 的「顯著」對比從未被檢定**：bootstrap 只重抽 up-shock 四格得 up-only CI，再拿該 CI 上界與 pooled **點估計**比大小（code:747-752）。兩個都是估計量、且重疊；要宣稱顯著必須直接對「配對差」做 block bootstrap。10 個 calm up-shock 只夠支持「現行 current-VIX 分箱下未建立梯度」，不足以宣稱「機制決定性收斂」。
+
+**Codex 支持的部分（維持）**：(a) 變體 A 事前 gate **未拒絕 null**（0.8165 落在 [0.0824, 1.0596]，p=0.41）— 內部一致、無 lookahead、pre-registration 完整性通過（870af5d00 早於首個結果 commit 322cfeb38）；(b) **K897 應退役** — 其 `NULL REJECTED` 在 pointwise-identical path 上僅因 proxy timing 改變就翻掉（decline 分佈 mean 0.1734 CI [−0.281, 0.558] → mean 0.6190 CI [0.082, 1.060]），margin 是 timing-dependent。但這只支持「K897 的拒絕無效」，**不支持**「null 為真」或「absorption 為假」。
+
+**更正後的可辯護裁定（本檔 canonical）**：
+> 原 contemporaneous SAR 識別**未通過事前 gate**；**K897 退役**；**ambient-fear 機制仍未解（unresolved）**。
+
+- **FRL signed-composition 方法論短文 = 暫緩（on hold），不是已定案**。Codex：「The proposed FRL signed-composition note is currently too strong」— K1686 只支持一個較窄的 measurement 結果（published contemporaneous SAR 對 proxy timing / shock sign / threshold / calibration 高度敏感），**不足以宣稱 signed composition 取代了 ambient-fear absorption 作為解釋**。
+- **JBF 線暫不宣告放棄**（gate 仍 OPEN 而非 CLOSED-negative）；body 重寫**不啟動**，直到下述 K 收斂。
+- **不寫 knowledge.json**（FAIL verdict，per `.claude/rules/experiments.md` — CONDITIONAL PASS 以上才寫）。
+- **派修正實驗**（見 next_tasks `k1686_fix_ambient_sign_spec` P1）：在 empirical 與 same-seed null 兩側補跑**缺失的 ambient(`VIX_{t-1}`) × sign 規格**；pooled-vs-up-only 改用**直接配對 block bootstrap**；B/C/G 在 calibration failure 未解前不得稱 well-specified。該 K 裁決前不得再改本篇 narrative。
+- 依據：`storage/ops/codex_reviews/k1686_verdict.md`（Codex primary path，2026-07-12）。

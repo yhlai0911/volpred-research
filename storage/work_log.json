@@ -16316,5 +16316,18 @@
     "owner": "codex",
     "backfilled_at": "2026-07-12T09:00:56.635498+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-12T18:13:05.346765+08:00",
+    "actor": "hourly-18",
+    "task_type": "paper_review",
+    "task_id": "k1686_codex_primary_review",
+    "summary": "PHASE A followup triage x2。(1) K1686 Codex primary-path review = VERDICT: FAIL（2 blocking）→ 不寫 knowledge.json；回溯撤回 18:04 commit 9b1260cfa 的 volatility-absorption REFRAME 裁定（該裁定採信 K1686 自身 sign-decomposition verdict，但 Codex 證明變體 D 用同期 VIX_t 分組 = 內生 post-shock 排序、calm 格稀釋到 n=10；改以 VIX_{t-1} 正確對齊重算，decline 由 -0.123 翻成 +1.0465，20-day block-bootstrap CI [0.329,1.763] 不含 0 → 符號反轉）。更正 paper/volatility-absorption/EXECUTION.md + storage/paper_pipeline_status.json 為 Codex 可辯護裁定：pre-registered 變體 A 未拒絕 null（p=0.41）、K897 退役（其 NULL REJECTED 是 timing-dependent）、ambient-fear 機制 UNRESOLVED、FRL 方法論短文 on hold、JBF gate 仍 OPEN 而非 abandoned。派 P1 修正實驗 k1686_fix_ambient_sign_spec（補 ambient(VIX_{t-1})×sign 規格於 empirical+same-seed null 兩側 + pooled-vs-up-only 配對 block bootstrap）。(2) k1684 rerun R2 失敗根因 = 撞每週額度（01:45 啟動 4 秒內死，非程式錯誤；16:00 已重置）→ 重排 R3 進 compute queue。",
+    "outcome": "succeeded",
+    "artifacts": [
+      "paper/volatility-absorption/EXECUTION.md",
+      "storage/paper_pipeline_status.json",
+      "storage/ops/codex_reviews/k1686_verdict.md"
+    ]
   }
 ]

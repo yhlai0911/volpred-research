@@ -348,11 +348,11 @@
     },
     {
       "paper": "volatility-absorption",
-      "journal_target": "FRL (reframed methodological note)",
+      "journal_target": "JBF (gate OPEN; mechanism unresolved) | FRL note = on hold",
       "stage": "revision",
       "stage_entered_at": "2026-05-21T00:00:00+08:00",
       "last_advance_at": "2026-07-01T00:00:00+08:00",
-      "blocker": "K1686 pre-registered gating (2026-07-12): ABSORPTION CLAIM NOT SUPPORTED - decline lives in relief rallies (+1.337) not fear shocks (-0.123, CI incl 0); variant-A null not rejected (p=0.41). Main-thread decision per pre-registered rule: REFRAME as FRL-tier methodological note (sign-decomposition cautionary finding); JBF track abandoned; body rewrite queued. See paper/volatility-absorption/EXECUTION.md 2026-07-12 entry.",
+      "blocker": "K1686 gating + Codex primary-path review (2026-07-12, storage/ops/codex_reviews/k1686_verdict.md = VERDICT: FAIL). Defensible disposition: (a) pre-registered variant-A gate FAILS TO REJECT null (0.8165 in [0.0824,1.0596], p=0.41); (b) K897 RETIRED - its NULL REJECTED margin is timing-dependent (proxy h[t] vs h[t+1] on pointwise-identical paths); (c) ambient-fear mechanism REMAINS UNRESOLVED. The earlier 'decline lives in relief rallies / signed-composition' reframe is WITHDRAWN: variant D sorts regimes on contemporaneous VIX_t while ambient fear is VIX_{t-1} (endogenous post-shock sorting, calm cell thinned to n=10); Codex's D-sign-split x E-VIX_{t-1} recomputation REVERSES it (ambient-up calm-high decline +1.0465, block-bootstrap CI [0.329,1.763]). Pooled-vs-up-only 'significance' was never tested (CI endpoint compared to a point estimate; needs paired block bootstrap). FRL reframe ON HOLD (Codex: 'currently too strong'); JBF track NOT abandoned - gate still OPEN. No knowledge.json write (FAIL verdict). Blocked on next_tasks k1686_fix_ambient_sign_spec (ambient x sign spec on empirical + same-seed null, paired block bootstrap). See paper/volatility-absorption/EXECUTION.md 2026-07-12 18:20 correction entry.",
       "owner_decision_pending": false,
       "stage_entered_at_provenance": {
         "source": "git",
@@ -489,5 +489,5 @@
       }
     ]
   },
-  "last_update": "2026-07-12T15:00:21+08:00"
+  "last_update": "2026-07-12T18:20:00+08:00"
 }
