@@ -6384,3 +6384,38 @@ CW=−0.1248。獨立 reviewer 與獨立重算均 PASS。
 pre-spec；(2) lag-order information criterion 一律固定共同有效樣本並輸出 selection nobs；
 (3) optimizer warning 必須轉成可計數失敗，不可等同收斂；(4) 回溯文章先建立
 v1/v2/v3 claim-to-JSON mapping，再寫「舊版」摘要。
+
+## 2026-07-12 19:50 — CPI 事件研究的發布日是「每月 13 號」猜出來的（已發佈數字受污染）
+
+**症狀**：event_jobs 有 `CPI_US_2026_07_13`，但 BLS 官方 6 月 CPI 發布日是 **2026-07-14**。
+T+0 job 的 `not_before` 是 `2026-07-13T21:30+08:00` — 整整早一天，會在數據還不存在時發「CPI 出爐」文。
+
+**根因**：`scripts/populate_upcoming_events.py::gen_us_cpi` 用 `date(y, m, 13)` 當 proxy，
+docstring 自陳「use 13th as approximation; user can override」— 沒有人 override，也沒有機制提醒要 override。
+
+**污染範圍（比 config 嚴重）**：已發佈的 CPI 事件研究把發布日硬編進 analysis.py
+（`storage/event_articles/us_cpi_2026_06_11_t2/analysis.py:44`，13 個日期、無 provenance）。
+對照 ALFRED `release_id=10`（官方 CPI news release 日曆），**13 個裡有 7 個錯**：
+`2025-10-15 / 2025-11-13 / 2025-12-10 / 2026-01-14 / 2026-02-12 / 2026-03-12 / 2026-05-13`。
+其中 `2025-11-13` 是 **phantom event** — 2025 年 10 月 CPI 因政府停擺整場取消，那天沒有 CPI。
+（另 2025-11 的 CPI 由 12/10 延到 12/18；9 月 CPI 由 10/15 延到 10/24。）
+
+**後果不是小數點，是結論反轉**：用官方日期重算 CPI 當天 VIX 變動 →
+平均由 **+2.18% 翻成 -0.85%**（一般交易日 +0.47%）。舊 T-2 文章的「近 4 次 CPI 平均 +7.15%」
+內含 `2026-02-12` 的 +17.96%，而那天不是 CPI 日（官方 02-13）。兩個版本都不顯著
+（Welch p=0.45 / 0.40）→ 誠實結論是「CPI 日 VIX 沒有可靠方向性」，「CPI 日會跳」是錯日期造出來的假象。
+
+**修正**：
+1. `gen_us_cpi` 改讀 BLS 公布的 release 表（`BLS_CPI_RELEASE_DATES`），年份未涵蓋則 warn + skip，不再猜。
+2. config `CPI_US_2026_07_13` → `CPI_US_2026_07_14`，T+0 觸發窗口修正為 `2026-07-14T21:30+08:00`。
+3. 新 evidence package `storage/event_articles/us_cpi_2026_07_14_t2/` **在腳本裡直接打 ALFRED 取日期**，
+   不再硬編 — 這才是治本：事件日期是數據，不是常數。
+
+**教訓（可推廣到所有事件研究）**：**事件研究的事件日期本身就是數據，必須有 primary source**。
+一個「typically mid-month」的日曆 proxy 看起來無害，但它會 (a) 把非事件日算成事件日、
+(b) 把真事件日算成對照組，兩邊同時污染 → 效應估計沒有一致的偏誤方向，
+而且**看起來完全正常**（沒有 exception、沒有 NaN、圖表照畫）。
+凡是 macro event study（CPI / NFP / FOMC / 財報），日期一律從官方日曆或 ALFRED release API 取，
+禁止硬編、禁止 proxy；取不到就不做，不猜。
+
+Commit: `8f74197dd`
