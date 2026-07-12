@@ -705,12 +705,59 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>" 2>/dev/null; then
     echo ""
 }
 
+# K1684 (2026-07-12) STRIKE 3 of the K1032 class — "worktree work silently not merged".
+#
+# Every defence layer below this point assumes the directory under .claude/worktrees/ is a
+# REGISTERED git worktree of this repo. A directory holding its OWN .git (a standalone clone --
+# which is what `run_agent_job.py --cwd` had produced) is invisible to `git worktree list`, so
+# get_agent_worktrees() never yields it, merge_one_worktree() never sees it, and the script
+# reports "=== 完成 ===" having silently skipped an entire experiment. K1684 sat orphaned across
+# three agent runs for exactly this reason: its objects live in a different object store, so even
+# `git branch --contains` says the commits do not exist.
+#
+# Fail LOUD instead. The recovery is path-scoped extraction (never a cross-repo merge).
+detect_unregistered_worktree_dirs() {
+    local wt_root="$MAIN_DIR/.claude/worktrees"
+    [[ -d "$wt_root" ]] || return 0
+
+    local found=0 d name
+    for d in "$wt_root"/*/; do
+        [[ -d "$d" ]] || continue
+        name=$(basename "$d")
+        # registered? then the normal machinery owns it
+        if git -C "$MAIN_DIR" worktree list --porcelain | grep -q "^worktree ${d%/}$"; then
+            continue
+        fi
+        # not registered, but is it a git repo at all? (a stray non-git dir is not our problem)
+        git -C "${d%/}" rev-parse --git-dir >/dev/null 2>&1 || continue
+
+        found=1
+        UNREGISTERED_FOUND=1
+        local br
+        br=$(git -C "${d%/}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')
+        echo ""
+        echo "  [ABORT] $name 在 .claude/worktrees/ 底下，但**不是**本 repo 註冊的 worktree。"
+        echo "          它有自己的 .git（獨立 object store）→ 它的 commits 不在 main 的 object DB 裡，"
+        echo "          merge / rev-list / branch --contains 全部看不到它。這是 silent orphan。"
+        echo "          branch: $br"
+        echo "          復原（path-scoped 抽取，不要跨 repo merge）："
+        echo "            git -C \"$MAIN_DIR\" fetch .claude/worktrees/$name $br"
+        echo "            git -C \"$MAIN_DIR\" checkout FETCH_HEAD -- experiments/"
+        echo "            # 逐檔驗證內容後再 commit；確認無誤才刪目錄"
+    done
+    return $found
+}
+
+UNREGISTERED_FOUND=0
+
 # 主流程
 # 用 compatible 方式讀 array（macOS bash 3.x 無 mapfile）
 wt_array=()
 while IFS= read -r line; do
     [[ -n "$line" ]] && wt_array+=("$line")
 done < <(get_agent_worktrees)
+
+detect_unregistered_worktree_dirs || true
 
 if [[ ${#wt_array[@]} -eq 0 ]]; then
     echo "沒有找到 agent worktrees"
@@ -777,4 +824,12 @@ if [[ ${#remaining[@]} -gt 0 ]] && [[ -n "${remaining[0]}" ]]; then
     done
 else
     echo "所有 agent worktrees 已清理完成"
+fi
+
+# K1684: 有未註冊的 worktree 目錄 → 非零退出，讓 caller（hourly fire / supervisor）看得見。
+# 「完成」的訊息不可以掩蓋一個沒被合併的實驗。
+if [[ "$UNREGISTERED_FOUND" -eq 1 ]]; then
+    echo ""
+    echo "=== 有未註冊的 worktree 目錄未處理（見上方 [ABORT]）— exit 1 ==="
+    exit 1
 fi

@@ -2,6 +2,29 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-12 21:55 — **3-STRIKE（K1032 class）**：`.claude/worktrees/` 底下的「獨立 repo」對 merge 完全隱形 → K1684 連續三輪變孤兒
+
+**問題**：`.claude/worktrees/k1684-ftd-e1-rerun/` 有**自己的 `.git`**（獨立 object store），不是本 repo 註冊的 worktree。
+`git worktree list` 看不到它 → `merge_worktree.sh` 的 `get_agent_worktrees()` 從不 yield 它 → 5 層防護
+（rev-list / diff-tree / post-merge cat-file / -X ours 還原 / cwd anchor）**一層都沒被觸及**，script 照常印
+「=== 完成 ===」。連 `git branch --contains <commit>` 都說那些 commit 不存在——因為它們真的不在主 repo 的 object DB 裡。
+
+**現象**：K1684 的實驗成果在三輪 agent run（R1/R2/R3）之後仍在主線上看不到；本班還一度誤判成「merge script 把 worktree 砍了」。
+
+**根因（三層）**：
+1. **底層邏輯**：`run_agent_job.py --cwd` 收一個路徑，但**沒有人保證那個路徑是註冊過的 worktree**。它拿到的是一份獨立 clone。
+2. **流程**：merge 的發現機制單一依賴 `git worktree list`，對「目錄存在但沒註冊」這個狀態**沒有任何觀測**——這是靜默失敗，不是報錯。
+3. **架構**：`.claude/worktrees/` 是一個**慣例目錄**，不是被 enforce 的不變量；任何東西都能被放進去而不被任何 gate 看見。
+
+**修正**（本班落地）：
+- `scripts/merge_worktree.sh` 新增 `detect_unregistered_worktree_dirs()`：掃 `.claude/worktrees/*`，任何**是 git repo 但沒註冊**的目錄一律 fail loud，印出 path-scoped 復原指令（`git fetch <dir> <branch>` + `git checkout FETCH_HEAD -- experiments/`），並讓 script **exit 1**——「完成」的訊息不可以掩蓋一個沒被合併的實驗。
+- Regression gate：`scripts/tests/test_merge_worktree.sh` **Case 13**（4 assertions，含「rogue commit 確實不在 main object store」的前提驗證）。全 suite 現為 **13 cases / 36 assertions PASS**。
+- K1684 成果以 path-scoped 抽取進主線，歷史錨在 branch `k1684-r3-rescued`（防 gc），rogue 目錄移出到
+  `/tmp/k1684_rogue_repo_quarantine_20260712`（逐檔 sha256 驗證一致後才移）。
+
+**教訓**：**跨 repo 的工作不會被任何 in-repo 的 gate 抓到。** 防護層若全部建立在「它是我的 worktree」這個前提上，
+那麼「它不是我的 worktree」就是這些防護層的共同盲區。偵測 must 建在**目錄存在**（檔案系統事實）上，不是建在 git 的註冊表上。
+
 ## 2026-07-12 20:15 — mojibake .py 卡死 git-push-backup 9 小時（encoding gate 只掛 pre-push）
 
 **現象**：`cron_git_push_backup.sh` 從 2026-07-12 11:00Z 起每小時 exit=1，repo 9 小時沒備份到

@@ -680,6 +680,59 @@ test_case_11_stale_base_no_false_abort() {
 #   舊版 `git stash pop | head -5 || echo 失敗` 在 pipefail 下被 SIGPIPE 打成 rc=141，
 #   pop 成功也印失敗，還叫人 `git stash apply stash@{0}` —— 那已是別人的舊 stash。
 # ============================================================
+test_case_13_unregistered_standalone_repo_dir() {
+    # K1684 (2026-07-12), STRIKE 3 of the K1032 class. A directory under .claude/worktrees/ that
+    # carries its OWN .git is invisible to `git worktree list` — so every existing defence layer
+    # (rev-list, diff-tree, post-merge cat-file) is never even reached, and the script used to
+    # print "=== 完成 ===" while an entire experiment sat unmerged in a foreign object store.
+    echo "=== Case 13: .claude/worktrees/ 底下的獨立 repo（非註冊 worktree）→ 必須 fail loud ==="
+    local test_dir
+    test_dir=$(setup_test_env "case13")
+    cd "$test_dir"
+
+    # 一個「看起來像 worktree、其實是獨立 repo」的目錄
+    local rogue=".claude/worktrees/k9999-rogue"
+    mkdir -p "$rogue/experiments/k9999"
+    (
+        cd "$rogue"
+        git init -q -b agent/k9999-rogue-r2
+        git config user.email t@t; git config user.name t
+        echo '{"GATE_VERDICT": "H2_UNSUPPORTED"}' > experiments/k9999/k9999_results.json
+        git add -A && git commit -qm "k9999: 只存在於這個獨立 repo 的實驗結果"
+    ) >/dev/null 2>&1
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir")
+
+    # 13-1: 必須被偵測到並 fail loud（舊版是完全靜默）
+    if echo "$output" | grep -q "\[ABORT\] k9999-rogue"; then
+        pass "13-1: 未註冊的獨立 repo 目錄被偵測並 ABORT"
+    else
+        fail "13-1: 獨立 repo 目錄被靜默跳過（K1032 class silent orphan 復發）"
+    fi
+
+    # 13-2: 要給得出可執行的 path-scoped 復原指令，不是叫人跨 repo merge
+    if echo "$output" | grep -q "fetch .claude/worktrees/k9999-rogue agent/k9999-rogue-r2"; then
+        pass "13-2: 印出 path-scoped 復原指令（fetch + checkout）"
+    else
+        fail "13-2: 沒印出可執行的復原指令"
+    fi
+
+    # 13-3: 不可以在漏掉它的情況下宣告一切完成
+    if echo "$output" | grep -q "有未註冊的 worktree 目錄未處理"; then
+        pass "13-3: 收尾訊息沒有掩蓋未處理的目錄"
+    else
+        fail "13-3: script 照常宣告完成，掩蓋了未合併的實驗"
+    fi
+
+    # 13-4: 這個目錄的 commit 確實不在 main 的 object store（本 case 的前提要成立）
+    if git -C "$test_dir" log --all --oneline 2>/dev/null | grep -q "k9999"; then
+        fail "13-4: 前提不成立 — rogue commit 竟在 main object store（測試沒測到該測的東西）"
+    else
+        pass "13-4: rogue commit 確實不在 main object store（前提成立）"
+    fi
+}
+
 test_case_12_real_violation_aborts_and_stash_restores() {
     echo "=== Case 12: agent 真改 feed.json → ABORT；且 stash 還原不假警報 ==="
     local test_dir
@@ -765,12 +818,14 @@ test_case_11_stale_base_no_false_abort
 echo ""
 test_case_12_real_violation_aborts_and_stash_restores
 echo ""
+test_case_13_unregistered_standalone_repo_dir
+echo ""
 
 echo "================================"
 echo "Assertions PASS: $PASS"
 echo "Assertions FAIL: $FAIL"
-# Test case-level summary（12 cases = A/B/C/D + 5/6/7 + 8/9/10 + 11/12）
-TOTAL_CASES=12
+# Test case-level summary（13 cases = A/B/C/D + 5/6/7 + 8/9/10 + 11/12 + 13）
+TOTAL_CASES=13
 if [[ $FAIL -eq 0 ]]; then
     echo "Test cases: PASS $TOTAL_CASES/$TOTAL_CASES"
 else

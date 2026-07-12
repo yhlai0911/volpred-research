@@ -16365,5 +16365,17 @@
     "actor": "hourly-20",
     "summary": "boss 'immediately fix at the root': git-push-backup dead 9h on mojibake .py. Repaired 5 corrupted lines (byte-level recovery), push restored (f2ba64f5a); root fix = source-encoding gate moved into the existing pre-commit hook (2859a4788) - same class as the msg-481 silent-fallback incident. Repo-wide .py sweep: 0 remaining. cron exit=0. Close email sent.",
     "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-12T13:18:55Z",
+    "actor": "hourly-21",
+    "task_id": "dreaming_orphaned_experiment_k1684",
+    "task_type": "experiment",
+    "title": "K1684 R3 triage: rescue the SIGKILLed agent's uncommitted symmetric-theta-pool fix, rerun, resync README",
+    "summary": "compute_queue job k1684_..._r3 failed on TIMEOUT (5160s) with artifact_ok=False. Triage found the worktree was NOT a loss: the agent had done the work and left a coherent uncommitted fix to k1684_ftd_e1_scale_gating.py implementing the 4th Codex-found defect (asymmetric HAR/GJR theta pool). Rescued + committed (3976e1fd4), reran the script (84s, seed 20260712), resynced README (ad208d984). Effect: placebo factor unchanged 1.117 (the intersection IS the GJR pool); HAR factor 1.219 -> 1.184 [1.111,1.258] -- its edge was partly a 250-day sample artifact. Gate verdict UNCHANGED in all 5 runs: H2_UNSUPPORTED, rescued 0/3 (null result survives, better supported). Conclusion-level moves: 5% HAR-b+CF trinity PASS -> FAIL (Basel green -> yellow).",
+    "topology": "inline",
+    "topology_override": "compute_queue->inline (86s script; no need to re-enqueue an agent)",
+    "reviewer_source": "feature-dev:code-reviewer subagent (codex exec is prohibited inside a dispatch fire)",
+    "verdict": "H2_UNSUPPORTED (null) — verdict robust to the fix"
   }
 ]
