@@ -6,17 +6,8 @@ K1698 — FTD E1 v2: scale re-calibration gating (compliant rerun of K1684)
   files=40  verdict=night_precedes_day
 
 [1] Aligned RV (active contract, gap-complete, 13:30 window)
-  2192 all-contract TX files from 2017-01-01
-    parsed 400/2192
-    parsed 800/2192
-    parsed 1200/2192
-    parsed 1600/2192
-    parsed 2000/2192
-  aligned RV days=2191  roll days=108  anchor_missing=0  prev-file refetches=0
-  [pinned] /Users/yhlai0911/volpred-research/experiments/k1698/data/tx_rv_aligned_1330_active_contract_2017_2025.csv
+  [cache] tx_rv_aligned_1330_active_contract_2017_2025.csv
   boundary audit: 60 days, all_passed=True
-  [pinned copy of k1684 snapshot] /Users/yhlai0911/volpred-research/experiments/k1698/data/tx1_rv_tradedate_convention_2017_2025.csv
-  [pinned copy of k1684 snapshot] /Users/yhlai0911/volpred-research/experiments/k1698/data/tw0050_adjclose_2016_2025.csv
   common days (new RV ∩ old RV ∩ ETF) = 2184
   new-vs-old RV: corr=0.8197, mean ratio=1.2561
 
@@ -236,8 +227,8 @@ K1698 — FTD E1 v2: scale re-calibration gating (compliant rerun of K1684)
 
 ==============================================================================
 GATE VERDICT : H2_REJECTED
-REASON       : leg 1 fails at the Harvey calibre: on the ALIGNED target (0050 r^2) HAR-RV shows no Harvey-significant QLIKE win over the robust GJR (t=1.4694). Without a forecast-loss win on a common target there is no divergence to explain, whatever the tail layer does.
+REASON       : leg 1 fails the pre-registered t < -3 guardrail: on the ALIGNED target (0050 r^2) HAR-RV shows no qualifying QLIKE win over robust GJR (t=1.4694). Without a forecast-loss win on a common target there is no divergence to explain, whatever the tail layer does.
 ROUTE        : FRL / Journal of Forecasting SHORT NOTE (divergence is a construction artifact; the diagnostic is the contribution)
 ==============================================================================
 -> /Users/yhlai0911/volpred-research/experiments/k1698/k1698_results.json
-elapsed 142.4s
+elapsed 57.3s

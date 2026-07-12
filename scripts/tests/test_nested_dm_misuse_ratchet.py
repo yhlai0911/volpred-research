@@ -12,6 +12,7 @@ Run:
 
 from __future__ import annotations
 
+import ast
 import json
 import sys
 from pathlib import Path
@@ -68,7 +69,10 @@ def test_no_new_nested_raw_dm_sites(affected: set[str], baseline: set[str]) -> N
         "For QLIKE/pinball, do not relabel MSPE-CW: use an appropriate "
         "general-loss/encompassing or recursive-bootstrap design. If raw DM is "
         "only descriptive, make that role explicit with `nested-dm: "
-        "diagnostic-only` and ensure it does not feed the claim sink."
+        "diagnostic-only` and ensure it does not feed the claim sink. If the "
+        "primary raw DM is legal because its pair is nonnested, segregate and "
+        "inventory the pairs; do not add a file-level marker that washes real "
+        "nested comparisons clean."
     )
 
 
@@ -138,6 +142,59 @@ def test_reviewed_cw_controls_are_not_frozen(affected: set[str], safe: set[str])
     assert expected_safe.isdisjoint(affected)
 
 
+def test_k1698_nonnested_gate_is_outside_nested_audit_population(
+    affected: set[str], safe: set[str]
+) -> None:
+    site = "experiments/k1698/k1698.py"
+    assert site not in affected
+    assert site not in safe
+
+    path = REPO_ROOT / site
+    assert scan_file(path) is None
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    assignments = {
+        node.targets[0].id: ast.literal_eval(node.value)
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and len(node.targets) == 1
+        and isinstance(node.targets[0], ast.Name)
+        and node.targets[0].id
+        in {
+            "QLIKE_DM_PAIR_SPECS",
+            "QLIKE_NESTED_PAIRS_EXCLUDED_FROM_RAW_DM",
+            "FZ0_SAME_FAMILY_PAIRS_EXCLUDED_FROM_RAW_DM",
+        }
+    }
+    specs = assignments["QLIKE_DM_PAIR_SPECS"]
+    assert [spec for spec in specs if spec[2].startswith("primary_gate")] == [
+        ("HAR-RV", "GJR", "primary_gate_r2_0050_only")
+    ]
+    assert "HAR-a_vs_HAR-RV" in assignments[
+        "QLIKE_NESTED_PAIRS_EXCLUDED_FROM_RAW_DM"
+    ]
+    fz_excluded = set(assignments["FZ0_SAME_FAMILY_PAIRS_EXCLUDED_FROM_RAW_DM"])
+    assert fz_excluded == {
+        "GJR+Normal_vs_GJR+CF",
+        "GJR+Skewed-t_vs_GJR+CF",
+        "GJRf+CF_vs_GJR+CF",
+        "GJRf+Normal_vs_GJR+CF",
+        "GJRf-a+CF_vs_GJR+CF",
+        "GJRf-a+Normal_vs_GJR+CF",
+    }
+
+    gate = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "decide_gate_v2"
+    )
+    gate_source = ast.unparse(gate)
+    assert len(gate.args.args) == 2
+    assert "model_relation" in gate_source
+    assert "inference_role" in gate_source
+    assert "primary_nonnested" not in gate_source
+    assert "mismatched" not in gate_source
+
+
 def _write_fixture(tmp_path: Path, source: str) -> Path:
     path = tmp_path / "experiments" / "fixture" / "fixture.py"
     path.parent.mkdir(parents=True)
@@ -204,6 +261,43 @@ def test_explicit_dm_diagnostic_with_cw_primary_is_safe(tmp_path: Path) -> None:
     finding = scan_file(path, tmp_path)
     assert finding is not None
     assert finding.test_role == "diagnostic_with_cw_primary"
+
+
+def test_nonnested_word_is_not_nesting_evidence(tmp_path: Path) -> None:
+    path = _write_fixture(
+        tmp_path,
+        '"""Compare nonnested models."""\n'
+        "def classify(loss_har, loss_gjr):\n"
+        "    dm_t, _ = dm_test(loss_har, loss_gjr, h=1)\n"
+        "    return 'PASS' if dm_t < -3 else 'NULL'\n",
+    )
+    assert scan_file(path, tmp_path) is None
+
+
+def test_hyphenated_non_nested_word_is_not_nesting_evidence(tmp_path: Path) -> None:
+    path = _write_fixture(
+        tmp_path,
+        '"""Primary comparison is non-nested."""\n'
+        "def classify(loss_har, loss_gjr):\n"
+        "    dm_t, _ = dm_test(loss_har, loss_gjr, h=1)\n"
+        "    return 'PASS' if dm_t < -3 else 'NULL'\n",
+    )
+    assert scan_file(path, tmp_path) is None
+
+
+def test_nonnested_markers_cannot_impersonate_nested_safe_markers(tmp_path: Path) -> None:
+    path = _write_fixture(
+        tmp_path,
+        '"""nonnested-dm: none; nonnested-dm: diagnostic-only."""\n'
+        "base_cols = ['har']\n"
+        "aug_cols = base_cols + ['scale']\n"
+        "def classify(loss_base, loss_aug):\n"
+        "    dm_t, _ = dm_test(loss_aug, loss_base, h=1)\n"
+        "    return 'PASS' if dm_t < -3 else 'NULL'\n",
+    )
+    finding = scan_file(path, tmp_path)
+    assert finding is not None
+    assert finding.test_role == "primary_raw_dm"
 
 
 def test_parse_failure_is_reported_not_silently_dropped(tmp_path: Path) -> None:

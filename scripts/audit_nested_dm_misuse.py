@@ -16,7 +16,8 @@ This is deliberately a conservative static audit.  It never imports experiment
 code.  Findings are keyed by file because model construction, DM computation,
 and verdict logic are commonly split across functions.  Explicitly reviewed
 sites where Clark--West governs the verdict and raw DM is only directional or
-descriptive are returned separately as safe controls.
+descriptive are returned separately as safe controls.  Nonnested comparisons
+are outside the audit population rather than being washed clean by a marker.
 
 Usage:
     uv run python scripts/audit_nested_dm_misuse.py
@@ -44,7 +45,7 @@ BASE_WORDS = r"(?:base(?:line)?|restricted|small|parsimonious|null)"
 AUG_WORDS = r"(?:aug(?:mented)?|full|unrestricted|large|challenger)"
 
 EXPLICIT_NESTED_RE = re.compile(
-    r"nested[- ](?:model|forecast|comparison|ladder)|"
+    r"(?<!non-)\bnested[- ](?:model|forecast|comparison|ladder)|"
     r"(?:model|forecast)s?\s+(?:are|is)\s+nested|"
     r"巢狀(?:模型|比較)|嵌套(?:模型|比較)",
     re.IGNORECASE,
@@ -101,10 +102,11 @@ CLAIM_FUNCTION_RE = re.compile(
 # be washed clean.  The safe controls explicitly say DM is non-governing or CW
 # covers every primary comparison.
 DM_DIAGNOSTIC_RE = re.compile(
-    r"(?:ordinary\s+)?DM.{0,120}(?:directional cross-check|descriptive only|"
+    r"(?<![A-Za-z0-9_-])(?:ordinary\s+)?DM.{0,120}(?:directional cross-check|descriptive only|"
     r"diagnostic(?:[- ]only| only))|"
     r"(?:directional cross-check|descriptive only|diagnostic(?:[- ]only| only))"
-    r".{0,120}(?:ordinary\s+)?DM",
+    r".{0,120}(?<![A-Za-z0-9_-])(?:ordinary\s+)?DM|"
+    r"(?<![A-Za-z0-9_-])nested-dm:\s*diagnostic[- ]only",
     re.IGNORECASE | re.DOTALL,
 )
 FULL_CW_PRIMARY_RE = re.compile(
@@ -117,8 +119,6 @@ PRIMARY_DM_DECL_RE = re.compile(
     r"\bPRIMARY\b.{0,80}\b(?:DM|HLN)\b|\b(?:DM|HLN)\b.{0,80}\bPRIMARY\b",
     re.IGNORECASE,
 )
-
-
 @dataclass(frozen=True)
 class Evidence:
     line: int
@@ -319,9 +319,10 @@ def scan_file(path: Path, root: Path = REPO_ROOT) -> Finding | None:
     diagnostic = _regex_evidence(DM_DIAGNOSTIC_RE, lines)
     safe = full_cw or (diagnostic if not PRIMARY_DM_DECL_RE.search(source) else [])
     safe = _dedupe(safe)
-    role = "diagnostic_with_cw_primary" if safe else (
-        "primary_raw_dm" if claim else "review_required"
-    )
+    if full_cw or (diagnostic and not PRIMARY_DM_DECL_RE.search(source)):
+        role = "diagnostic_with_cw_primary"
+    else:
+        role = "primary_raw_dm" if claim else "review_required"
     return Finding(
         file=path.relative_to(root).as_posix(),
         test_role=role,

@@ -49,7 +49,10 @@ Every blocker in experiments/k1684/CODEX_REVIEW_BLOCKED.md is addressed here:
          same wedge, NOT independent evidence.
 
   B5  Gate and reporting calibre were too strong / inconsistent.
-      -> Formal DM conclusions use Harvey |t| > 3 (pre-registered below).
+      -> Formal raw-DM conclusions use the pre-registered |t| > 3 guardrail only for explicitly
+         nonnested model families (nonnested-dm: primary).  No nested raw-DM
+         comparison is run (nested-dm: none): same-family scale restrictions
+         and Normal-vs-CF tail restrictions remain descriptive mean losses only.
          decide_gate() now EXPLICITLY checks the leg-2 baseline pattern
          (HAR+CF trinity FAIL at 1% AND robust GJR+CF trinity PASS at 1%).
          Every DM pair uses its own pairwise common mask and reports n.
@@ -62,14 +65,16 @@ Every blocker in experiments/k1684/CODEX_REVIEW_BLOCKED.md is addressed here:
 
 PRE-REGISTERED GATE (fixed before the new numbers were seen; see GATE_RULES):
   leg 1 : HAR-RV (uncorrected) vs robust GJR, QLIKE on the ALIGNED target
-          (0050 r^2, Patton proxy-robust cross-model target), canonical dm_test.
-          "HAR wins" requires t < -3 (Harvey). |t| <= 3 = no significant win.
-  leg 2 : baseline divergence pattern = HAR+CF trinity FAIL at 1% AND robust
+          (0050 r^2, Patton proxy-robust cross-model target), canonical dm_test
+          on these two nonnested model families.
+          "HAR wins" requires t < -3 under the pre-registered conservative guardrail.
+          |t| <= 3 = no qualifying win.
+  leg 2 : uncorrected divergence pattern = HAR+CF trinity FAIL at 1% AND robust
           GJR+CF trinity PASS at 1% (both OOS).
   rescue: a corrected variant rescues HAR iff ANY of its tail layers passes the
           full trinity at BOTH alphas (Kupiec-only coverage reported separately).
   verdict:
-      H2_SURVIVES  iff leg1 HAR Harvey-win AND leg2 pattern present AND
+      H2_SURVIVES  iff leg1 HAR guardrail-win AND leg2 pattern present AND
                        zero estimable variants rescue.
       H2_REJECTED  iff (leg1 fails) OR (leg2 pattern absent) OR
                        (leg2 present AND every estimable variant rescues).
@@ -111,6 +116,7 @@ sys.path.insert(0, os.path.join(PROJECT_ROOT, 'experiments', 'k854'))
 
 import k854_common_sample_var as k854  # noqa: E402  (pipeline anchor)
 from volpred.stats.model_evaluation import dm_test, qlike_pointwise  # noqa: E402
+from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.utils import clean_tw50_data  # noqa: E402
 
 # ============================================================
@@ -165,7 +171,8 @@ GATE_RULES = {
     'leg1_forecast_loss': (
         'HAR-RV (uncorrected) vs robust GJR, QLIKE scored on the ALIGNED target '
         '(0050 r^2), canonical volpred dm_test (h=1, HAC bandwidth ceil(h^(1/3) n^(1/3))). '
-        'HAR wins iff t < -3 (Harvey). |t| <= 3 means no significant forecast-loss win '
+        'HAR wins iff t < -3 under the pre-registered conservative guardrail. '
+        '|t| <= 3 means no qualifying forecast-loss win '
         'and leg 1 FAILS. p<0.05 with |t|<=3 is reported but does NOT satisfy leg 1.'
     ),
     'leg2_baseline_pattern': (
@@ -179,7 +186,7 @@ GATE_RULES = {
         'alphas is reported separately as a secondary (weaker) criterion.'
     ),
     'verdict': (
-        'H2_SURVIVES iff leg1 Harvey-win AND leg2 pattern AND 0/estimable variants rescue. '
+        'H2_SURVIVES iff leg1 guardrail-win AND leg2 pattern AND 0/estimable variants rescue. '
         'H2_REJECTED iff (not leg1) OR (not leg2 pattern) OR (all estimable variants rescue). '
         'H2_PARTIAL otherwise.'
     ),
@@ -197,6 +204,30 @@ GATE_RULES = {
         'c CI excludes 1; else AMBIGUOUS.' % (BOOT_B, BOOT_BLOCK)
     ),
 }
+
+# Nesting does not invalidate raw DM for these cross-family comparisons; they
+# use the canonical nonnested DMW/West-style HAC approximation.
+# The one gate pair is declared separately so secondary comparisons cannot be
+# passed to decide_gate_v2 by accident.  Same-family restrictions are excluded
+# from raw DM below; Clark-West is not relabelled for QLIKE/FZ0 general loss.
+QLIKE_DM_PAIR_SPECS = (
+    ('HAR-RV', 'GJR', 'primary_gate_r2_0050_only'),
+    ('HAR-a', 'GJR', 'secondary'),
+    ('HAR-b', 'GJR', 'secondary'),
+    ('HAR-c', 'GJR', 'secondary'),
+    ('RGL', 'GJR', 'secondary'),
+)
+QLIKE_NESTED_PAIRS_EXCLUDED_FROM_RAW_DM = (
+    'HAR-a_vs_HAR-RV',
+)
+FZ0_SAME_FAMILY_PAIRS_EXCLUDED_FROM_RAW_DM = (
+    'GJR+Normal_vs_GJR+CF',
+    'GJR+Skewed-t_vs_GJR+CF',
+    'GJRf+CF_vs_GJR+CF',
+    'GJRf+Normal_vs_GJR+CF',
+    'GJRf-a+CF_vs_GJR+CF',
+    'GJRf-a+Normal_vs_GJR+CF',
+)
 
 TX_TIME = {
     'night_pm': (150000, 235959),
@@ -253,16 +284,22 @@ def parse_tx_file(filepath, top_k=4, only_delivery=None):
     try:
         parts = base.replace('Daily_', '').replace('TX.csv', '').split('_')
         file_date = f'{parts[0]}-{parts[1]}-{parts[2]}'
-    except Exception:
+    except Exception as exc:
+        warn('k1698_parse_tx', 'filename date parse failed',
+             path=filepath, err=str(exc))
         return None
     if os.path.getsize(filepath) < 100:
         return None
     try:
         df = pd.read_csv(filepath, encoding='big5', dtype=str, low_memory=False)
-    except Exception:
+    except Exception as big5_exc:
         try:
             df = pd.read_csv(filepath, encoding='cp950', dtype=str, low_memory=False)
-        except Exception:
+            warn('k1698_parse_tx', 'big5 decode failed; cp950 fallback succeeded',
+                 path=filepath, err=str(big5_exc))
+        except Exception as cp950_exc:
+            warn('k1698_parse_tx', 'both big5 and cp950 reads failed',
+                 path=filepath, big5_err=str(big5_exc), cp950_err=str(cp950_exc))
             return None
     if len(df) < 10:
         return None
@@ -281,7 +318,9 @@ def parse_tx_file(filepath, top_k=4, only_delivery=None):
         v = v[ok].astype(float).values
         td = td[ok].values
         dl = delivery[ok].values
-    except Exception:
+    except Exception as exc:
+        warn('k1698_parse_tx', 'required TX columns could not be parsed',
+             path=filepath, err=str(exc))
         return None
     if len(t) < 10:
         return None
@@ -1015,20 +1054,39 @@ def acf1(x):
     return float(np.corrcoef(x[:-1], x[1:])[0, 1])
 
 
-def dm_pair(l1, l2, label1, label2):
-    """Canonical DM on the PAIRWISE common mask, with n and Harvey calibre."""
+def dm_pair(l1, l2, label1, label2, *, inference_role):
+    """Raw DM for an explicitly nonnested pair on its pairwise common mask.
+
+    ``inference_role`` is a runtime boundary: only the pre-registered gate pair
+    may be labelled ``primary_gate``.  Nested QLIKE/FZ0 pairs must never reach
+    this helper; they require a general-loss/encompassing or recursive-bootstrap
+    design if formal inference is later needed.
+    """
+    if inference_role not in {'primary_gate', 'secondary'}:
+        raise ValueError(f'unsupported raw-DM inference role: {inference_role}')
     valid = np.isfinite(l1) & np.isfinite(l2)
     nd = int(valid.sum())
     if nd < 10:
-        return {'t_stat': None, 'n': nd, 'note': 'pairwise mask too small'}
+        return {
+            't_stat': None,
+            'n': nd,
+            'model_relation': 'nonnested',
+            'inference_role': inference_role,
+            'feeds_gate': bool(inference_role == 'primary_gate'),
+            'note': 'pairwise mask too small',
+        }
     t_stat, p_val = dm_test(l1[valid], l2[valid], h=1)
     d = l1[valid] - l2[valid]
     return {
         't_stat': round(float(t_stat), 4), 'p_value': round(float(p_val), 6), 'n': nd,
         'loss_diff_acf1': round(acf1(d), 4) if acf1(d) is not None else None,
-        'harvey_significant_t_gt_3': bool(abs(t_stat) > 3.0),
+        'passes_preregistered_abs_t_gt_3_guardrail': bool(abs(t_stat) > 3.0),
         'better_model': label1 if t_stat < 0 else label2,
-        'note': 'canonical volpred dm_test; pairwise common mask; formal calibre = Harvey |t|>3',
+        'model_relation': 'nonnested',
+        'inference_role': inference_role,
+        'feeds_gate': bool(inference_role == 'primary_gate'),
+        'note': ('canonical nonnested DMW/West-style HAC approximation; pairwise common '
+                 'mask; pre-registered conservative guardrail = |t|>3'),
     }
 
 
@@ -1276,7 +1334,10 @@ def run_var_es_eval(run_id, theta_window, tail_pool, refresh, role, stack, r, rv
             bt['fz0_n_invalid_rows'] = n_bad
             results[ak][name] = bt
 
-    # ---- FZ0 DM race vs the GJR+CF anchor (pairwise masks, Harvey calibre) ----
+    # ---- FZ0 raw-DM race vs GJR+CF: explicitly nonnested pairs only ----
+    # Every GJR-vs-GJR tail comparison is nested or otherwise overlapping on
+    # the same variance path, so all are conservatively excluded; their
+    # individual mean FZ0 losses remain in results.
     fz_dm = {}
     for a in ALPHA_LEVELS:
         ak = f'{int(a*100)}%'
@@ -1287,7 +1348,11 @@ def run_var_es_eval(run_id, theta_window, tail_pool, refresh, role, stack, r, rv
         for name, fz in fz_losses[ak].items():
             if name == 'GJR+CF':
                 continue
-            fz_dm[ak][f'{name}_vs_GJR+CF'] = dm_pair(fz, anchor, name, 'GJR+CF')
+            pair_name = f'{name}_vs_GJR+CF'
+            if pair_name in FZ0_SAME_FAMILY_PAIRS_EXCLUDED_FROM_RAW_DM:
+                continue
+            fz_dm[ak][pair_name] = dm_pair(
+                fz, anchor, name, 'GJR+CF', inference_role='secondary')
 
     # ---- distribution-free implied-scale bootstrap (paired across cells/alphas) ----
     boot = {}
@@ -1297,13 +1362,14 @@ def run_var_es_eval(run_id, theta_window, tail_pool, refresh, role, stack, r, rv
         boot[name] = bootstrap_c_emp(eval_r, {'1%': var_arrays['1%'][name],
                                               '5%': var_arrays['5%'][name]}, boot_idx)
 
-    # ---- QLIKE / DM on BOTH targets (pairwise masks) ----
+    # ---- QLIKE / raw DM on BOTH targets (nonnested pairs only) ----
     r2 = eval_r ** 2
     rv_ev = rv[eval_idx]
     models = {'HAR-RV': sigma2_cell['HAR'], 'HAR-a': sigma2_cell['HAR-a'],
               'HAR-b': sigma2_cell['HAR-b'], 'HAR-c': sigma2_cell['HAR-c'],
               'GJR': sigma2_cell['GJR'], 'RGL': sigma2_cell['RGL']}
-    qlike_out, dm_out = {}, {}
+    qlike_out = {}
+    dm_out = {'primary_nonnested': {}, 'secondary_nonnested': {}}
     for tgt_name, tgt in [('rv_tx_aligned', rv_ev), ('r2_0050', r2)]:
         tvalid = np.isfinite(tgt) & (tgt > 0)
         qlike_out[tgt_name] = {}
@@ -1315,16 +1381,25 @@ def run_var_es_eval(run_id, theta_window, tail_pool, refresh, role, stack, r, rv
             qlike_out[tgt_name][mname] = {
                 'qlike': float(np.mean(qlike_pointwise(tgt[mvalid], f_[mvalid]))),
                 'n': int(mvalid.sum())}
-        dm_out[tgt_name] = {}
-        for m1, m2 in [('HAR-RV', 'GJR'), ('HAR-a', 'GJR'), ('HAR-b', 'GJR'),
-                       ('HAR-c', 'GJR'), ('HAR-a', 'HAR-RV'), ('RGL', 'GJR')]:
+        dm_out['primary_nonnested'][tgt_name] = {}
+        dm_out['secondary_nonnested'][tgt_name] = {}
+        for m1, m2, declared_role in QLIKE_DM_PAIR_SPECS:
+            inference_role = (
+                'primary_gate'
+                if declared_role == 'primary_gate_r2_0050_only'
+                and tgt_name == 'r2_0050'
+                else 'secondary'
+            )
             f1, f2 = models[m1], models[m2]
             pair_ok = tvalid & np.isfinite(f1) & (f1 > 0) & np.isfinite(f2) & (f2 > 0)
             l1 = np.full(n_eval, np.nan)
             l2 = np.full(n_eval, np.nan)
             l1[pair_ok] = qlike_pointwise(tgt[pair_ok], f1[pair_ok])
             l2[pair_ok] = qlike_pointwise(tgt[pair_ok], f2[pair_ok])
-            dm_out[tgt_name][f'{m1}_vs_{m2}'] = dm_pair(l1, l2, m1, m2)
+            bucket = ('primary_nonnested' if inference_role == 'primary_gate'
+                      else 'secondary_nonnested')
+            dm_out[bucket][tgt_name][f'{m1}_vs_{m2}'] = dm_pair(
+                l1, l2, m1, m2, inference_role=inference_role)
 
     # ---- correction-factor summary + shared-data dependence of the estimators ----
     def summ(arr, extra=None):
@@ -1365,7 +1440,17 @@ def run_var_es_eval(run_id, theta_window, tail_pool, refresh, role, stack, r, rv
         'cells_unavailable': cells_unavailable,
         'var_results': results, 'fz0_dm_vs_gjr_cf': fz_dm,
         'implied_scale_bootstrap': boot,
-        'qlike': qlike_out, 'dm_tests': dm_out,
+        'qlike': qlike_out, 'qlike_dm_tests': dm_out,
+        'dm_pair_inventory': {
+            'qlike_nested_pairs_excluded_from_raw_dm':
+                list(QLIKE_NESTED_PAIRS_EXCLUDED_FROM_RAW_DM),
+            'fz0_same_family_pairs_excluded_from_raw_dm':
+                list(FZ0_SAME_FAMILY_PAIRS_EXCLUDED_FROM_RAW_DM),
+            'nested_pair_policy': (
+                'No raw DM inference. Individual mean QLIKE/FZ0 losses remain descriptive; '
+                'formal comparison would require a general-loss/encompassing or '
+                'recursive-bootstrap design.'),
+        },
         'correction_factors': factors, 'estimator_dependence': dep,
         'histsim_scale_equivariance_check': equivariance,
         '_var_arrays': var_arrays, '_es_arrays': es_arrays,
@@ -1491,11 +1576,11 @@ def run_insample_eval(r, rv, common_dates, oos_start_idx):
 # Part 9 — Gate (pre-registered; blocker 5)
 # ============================================================
 
-def decide_gate_v2(cells, dm_aligned, dm_mismatched):
+def decide_gate_v2(cells, aligned_har_rv_vs_gjr):
     def trinity(cell, ak):
         return bool(cells[ak][cell]['trinity_pass'])
 
-    # leg 2 baseline pattern — EXPLICITLY checked (K1684 said it, never checked it)
+    # leg 2 uncorrected pattern — EXPLICITLY checked (K1684 said it, never checked it)
     leg2_pattern = (not trinity('HAR+CF', '1%')) and trinity('GJR+CF', '1%')
 
     rescued = {}
@@ -1510,15 +1595,20 @@ def decide_gate_v2(cells, dm_aligned, dm_mismatched):
     n_rescued = sum(1 for v in rescued if rescued[v]['rescued'] is True)
     n_estimable = sum(1 for v in rescued if rescued[v]['rescued'] is not None)
 
-    aligned = dm_aligned['HAR-RV_vs_GJR']
-    mismatched = dm_mismatched['HAR-RV_vs_GJR']
+    aligned = aligned_har_rv_vs_gjr
+    if aligned.get('model_relation') != 'nonnested':
+        raise RuntimeError('gate received a non-nonnested aligned DM pair')
+    if aligned.get('inference_role') != 'primary_gate':
+        raise RuntimeError('gate received a non-primary aligned DM pair')
+    if aligned.get('feeds_gate') is not True:
+        raise RuntimeError('gate received an aligned pair not authorized for gate')
     t_al = aligned.get('t_stat')
-    leg1_win = bool(t_al is not None and t_al < -3.0)          # Harvey calibre
+    leg1_win = bool(t_al is not None and t_al < -3.0)
 
     if not leg1_win:
         verdict = 'H2_REJECTED'
-        why = ('leg 1 fails at the Harvey calibre: on the ALIGNED target (0050 r^2) HAR-RV '
-               f'shows no Harvey-significant QLIKE win over the robust GJR (t={t_al}). '
+        why = ('leg 1 fails the pre-registered t < -3 guardrail: on the ALIGNED target '
+               f'(0050 r^2) HAR-RV shows no qualifying QLIKE win over robust GJR (t={t_al}). '
                'Without a forecast-loss win on a common target there is no divergence to '
                'explain, whatever the tail layer does.')
     elif not leg2_pattern:
@@ -1531,7 +1621,8 @@ def decide_gate_v2(cells, dm_aligned, dm_mismatched):
         why = 'legs 1-2 present, but every estimable scale correction rescues HAR\'s VaR.'
     elif n_rescued == 0:
         verdict = 'H2_SURVIVES'
-        why = ('HAR beats GJR on the aligned target at the Harvey calibre AND still fails '
+        why = ('HAR beats GJR on the aligned target under the pre-registered guardrail '
+               'AND still fails '
                'the trinity after every scale correction.')
     else:
         verdict = 'H2_PARTIAL'
@@ -1542,9 +1633,10 @@ def decide_gate_v2(cells, dm_aligned, dm_mismatched):
         'verdict': verdict, 'reason': why, 'route': GATE_RULES['route'][verdict],
         'preregistered_rules': GATE_RULES,
         'leg1_qlike': {
-            'aligned_target_r2_0050': dict(aligned,
-                                           harvey_win_for_HAR=bool(leg1_win)),
-            'mismatched_target_tx_rv': mismatched,
+            'aligned_target_r2_0050': dict(
+                aligned,
+                passes_preregistered_t_lt_minus_3_guardrail=bool(leg1_win),
+            ),
         },
         'leg2_tail': {
             'baseline_pattern_har_cf_fail_and_gjr_cf_pass_1pct': bool(leg2_pattern),
@@ -1579,7 +1671,9 @@ def verify_session_alignment(n_files=40):
         file_date = pd.Timestamp(f'{parts[0]}-{parts[1]}-{parts[2]}')
         try:
             df = pd.read_csv(fp, encoding='big5', dtype=str, low_memory=False)
-        except Exception:
+        except Exception as exc:
+            warn('k1698_session_alignment', 'sample TX file could not be read',
+                 path=fp, err=str(exc))
             continue
         trade_date = pd.to_numeric(df.iloc[:, 0], errors='coerce')
         t_int = pd.to_numeric(df.iloc[:, 3], errors='coerce')
@@ -2040,8 +2134,11 @@ def main():
     log('\n[10] Figures')
     make_figures(prim)
 
-    gate = decide_gate_v2(prim['var_results'], prim['dm_tests']['r2_0050'],
-                          prim['dm_tests']['rv_tx_aligned'])
+    primary_dm = prim['qlike_dm_tests']['primary_nonnested']
+    gate = decide_gate_v2(
+        prim['var_results'],
+        primary_dm['r2_0050']['HAR-RV_vs_GJR'],
+    )
 
     def strip_private(run):
         return {k: v for k, v in run.items() if not k.startswith('_')}
@@ -2103,6 +2200,13 @@ def main():
             '(second-order difference at daily frequency).',
             'Skewed-t anchor tail fit keeps K854\'s single-start estimator (2 params, '
             'bounded), unlike the >=100-start GJR/RGL variance MLEs.',
+            'Raw DM inference is restricted to explicitly nonnested pairs. Same-family '
+            'QLIKE and Normal-vs-CF FZ0 restrictions are reported through individual mean '
+            'losses only; no nested equal-accuracy claim is made.',
+            'The nonnested gate uses the canonical HAC loss-difference statistic on '
+            'generated forecasts, without a full recursive re-estimation bootstrap. Its '
+            'positive t-statistic cannot support the pre-registered one-sided HAR-win '
+            'condition, but publication-grade size refinement remains a sensitivity task.',
         ],
         'references': [
             'Hansen & Lunde (2005, JAE 20) — realized-to-c2c scaling',
@@ -2110,11 +2214,21 @@ def main():
             'Duan (1983, JASA 78) — smearing retransformation',
             'Corsi (2009, JFEC 7) — HAR-RV',
             'Patton (2011, J Econometrics 160) — proxy-robust loss',
+            'West (1996, Econometrica 64) — predictive inference with estimated parameters',
             'Kupiec (1995); Christoffersen (1998) — VaR coverage tests',
             'McNeil & Frey (2000, J Empirical Finance 7) — ES exceedance residual test',
             'Acerbi & Szekely (2014, Risk) — direct ES backtests (Z2)',
             'Fissler & Ziegel (2016, Ann. Statist. 44) — joint VaR-ES elicitability (FZ0)',
-            'Harvey, Liu & Zhu (2016, RFS 29) — |t| > 3 calibre',
+            'Harvey, Liu & Zhu (2016, RFS 29) — multiple-testing motivation for the '
+            'conservative |t| > 3 house guardrail; not a DM critical-value result',
+            'Clark & West (2007, J Econometrics 138) — nested MSPE adjustment; not '
+            'relabelled for QLIKE/FZ0 general loss',
+            'Giacomini & White (2006, Econometrica 74) — conditional predictive ability '
+            'under general loss and fixed-window forecast procedures',
+            'Corradi & Swanson (2007, International Economic Review 48) — bootstrap '
+            'predictive inference under recursive estimation',
+            'McCracken (2007, J Econometrics 140) — nonstandard OOS distributions for '
+            'nested recursive forecast comparisons under smooth loss',
             'Gonzalez-Rivera, Lee & Mishra (2004, IJF 20); Bams et al. (2017, IJF 33)',
         ],
     }
