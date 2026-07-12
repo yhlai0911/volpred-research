@@ -359,17 +359,6 @@ def render_target(results: dict[str, Any]) -> None:
         transform=ax.transAxes,
         zorder=2,
     )
-    add_text(
-        ax,
-        0.50,
-        0.795,
-        f"{pct(target, 0)} 門檻未被跨過",
-        size=13,
-        color=RED,
-        weight="bold",
-        ha="center",
-        zorder=4,
-    )
     ax.text(
         0.50,
         0.795,
