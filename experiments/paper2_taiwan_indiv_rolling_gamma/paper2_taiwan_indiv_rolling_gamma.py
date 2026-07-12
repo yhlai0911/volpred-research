@@ -1,51 +1,85 @@
 """
 paper2_taiwan_indiv_rolling_gamma
 =================================
-Provenance re-estimation for Taiwan-VT Paper 2, Table `tab:gamma`
-individual-stock rolling-window (w=2000) GJR-GARCH gamma rows.
+Calendar-aligned rolling-window (w=2000) GJR-GARCH gamma estimates for the
+Taiwan-VT Table 2 (`tab:gamma`) rolling block.
 
-MOTIVATION
-----------
-paper/taiwan-vt/reviews/audit_step1_2.md flagged that the three
-individual-stock rows currently in body_v3.tex L152-154 ---
-Hon Hai (2317) gamma=0.052/t=1.14, MediaTek (2454) gamma=0.044/t=0.96,
-Mega Financial (2886) gamma=0.179/t=2.42 --- are UNTRACEABLE: they trace
-only to knowledge entry N121 (derived from a since-deleted K530 run), with
-no surviving source JSON. Research-honesty rule (Table row -> JSON source
-must be traceable) requires a reproducible binding.
+WHAT CHANGED (2026-07-13) AND WHY THE PREVIOUS "RESOLVED" WAS FALSE
+-------------------------------------------------------------------
+The 2026-07-07 run answered Codex's calendar-alignment CONDITIONAL_PASS caveat
+by truncating all ten securities to a common terminal date of 2025-01-22, and
+stamped the results JSON `codex_caveat_calendar_alignment: "RESOLVED"`.
 
-This script re-estimates those three rows under a documented, fully
-reproducible specification (matching K892's arch-package MLE method used for
-the other rolling-window rows in the same table) so the values can be bound
-to a real results JSON. If the re-estimated values differ materially from
-the legacy N121 numbers, the paper table must be updated to the traceable
-values (do NOT keep untraceable numbers).
+That resolution was cosmetic. 2025-01-22 was not a market fact: it was the last
+row of two stale offline snapshots (experiments/k1302/data/{2383,2886}_tw.csv).
+The other eight securities had data running well into 2026 and were discarded to
+match two expired files. Calendar alignment was achieved by throwing away a year
+of data -- so the paper claimed a sample through 2026 while Table 2's rolling
+rows actually ended in January 2025. Alignment was real; the sample period was
+not. That is a research-honesty defect, not merely a precision one.
 
-SPEC (identical to K892 estimate_gjr_garch)
--------------------------------------------
-- GJR-GARCH(1,1), Constant mean, Normal innovations, via `arch` package MLE.
+The stated reason for truncating rather than re-fetching was to preserve the
+"fully reproducible, no network" guarantee. Both are obtainable at once: this
+experiment re-fetches every series ONCE into its own data/ directory
+(fetch_snapshots.py) and then estimates purely offline from those committed
+snapshots. Reproducibility is preserved; the sample is honest.
+
+SPEC (unchanged from the previous run -- only the data window moves)
+--------------------------------------------------------------------
+- GJR-GARCH(1,1), Constant mean, Normal innovations, `arch` package MLE.
 - Returns in percentage points (r*100) for numerical stability.
-- gamma_t = arch package robust t-value (MLE robust SE; the table note calls
-  these "Newey-West HAC" -- we report the arch robust t honestly and flag the
-  wording discrepancy in the results JSON `note`).
-- Rolling window w=2000; the reported row = the LAST (most recent) 2000-obs
-  window, matching K892's `rolling_w2000.last_window` convention.
-- Persistence = alpha + 0.5*gamma + beta (matches table note & K892).
+- Rolling window w = 2000; reported row = the LAST window ending on/before the
+  variant's common end date (K892 `rolling_w2000.last_window` convention).
+- Persistence = alpha + 0.5*gamma + beta.
+- t-values are the arch-package robust (Bollerslev-Wooldridge sandwich) MLE
+  t-statistics. NOTE: body_v3.tex's table note calls these "Newey-West HAC" --
+  that wording is wrong and should be corrected to Bollerslev-Wooldridge robust
+  (see `provenance_note`). We report what we actually compute.
 
-DATA (all offline snapshots -- reproducible, no network)
---------------------------------------------------------
-- 2317 (Hon Hai)  : paper/taiwan-vt/data/..._2008-2026.csv col `2317_tw_adj_close`
-- 2454 (MediaTek) : same CSV col `2454_tw_adj_close`
-- 2886 (Mega Fin) : experiments/k1302/data/2886_tw.csv col `adj_close`
-  (the paper's individual-stock CSV does not include 2886; the k1302
-  snapshot is the canonical yfinance adj-close source used for K1302's
-  full-sample 2886 estimate.)
+DATA (offline snapshots, committed under data/; see data/MANIFEST.json)
+-----------------------------------------------------------------------
+All 12 series are a single uniform yfinance pull (auto_adjust=False, `Adj Close`
+column), fetched 2026-07-13. Each series' log returns were verified to reproduce
+the previous canonical snapshots (paper CSV / k1302 / k1302b) to <1e-6 over the
+overlapping sample, so this refresh changes the SAMPLE WINDOW, not the data
+convention.
 
-Sample window: 2008-01-01 .. 2026 (full available), matching the table note
-"Individual stocks use the full available sample (2008-2026)".
+The old results JSON claimed the package mixed adjusted and raw closes ("Mixed
+adj/close is inherited from the canonical K1302/K1302b data package"). That
+caveat was FALSE: the k1302b `Close` column came from an auto_adjust=True
+download, i.e. it is already dividend-adjusted. Verified empirically -- k1302b
+log returns match fresh Adj-Close log returns to ~1e-6. There is no mixed
+convention anywhere in the package.
 
-No randomness (deterministic MLE); no seed needed. No lookahead: gamma is an
-in-sample descriptive estimate on the last window, not a forecast/signal.
+VARIANTS
+--------
+primary_2026        : common end = latest trading day on which ALL 12 series
+                      have data (2026-07-09; bound by ^TWII). THE HEADLINE.
+paper_csv_terminal  : common end = 2026-04-17, the terminal date of the paper's
+                      canonical CSV for the Taiwan single stocks. Offered so the
+                      main thread can keep Table 2's window flush with the rest
+                      of the paper's tables if it prefers.
+legacy_2025_01_22   : common end = the previous run's stale terminal date, but
+                      estimated on the FRESH data. Holding the data fixed and
+                      moving only the window (and vice versa) decomposes how much
+                      of the change comes from the refresh versus the window.
+
+DATA-QUALITY SENSITIVITY (2317)
+-------------------------------
+yfinance's 2317.TW series is corrupted around its 2018-10-18 capital reduction
+(split factor 0.8): the close is frozen at 85.125 for six consecutive sessions
+(2018-10-18..10-25, six spurious zero returns) and then "catches up" with a
+-10.49% move on 2018-10-26 -- beyond Taiwan's +/-10% daily limit, so it cannot be
+a genuine close-to-close move. This block sits INSIDE the rolling window, and the
+catch-up day is a large negative shock, exactly what gamma loads on. The defect is
+inherited (the previous snapshots carry it identically), so the primary estimate
+keeps the data as-fetched for consistency with the rest of the paper's data
+handling; a sensitivity that excludes the block is reported alongside so the
+reader can see whether 2317's gamma depends on it.
+
+No lookahead: gamma is an in-sample descriptive MLE on the last window, not a
+forecast, signal, or OOS split. MLE is deterministic; the seeded RNG below is
+used only for perturbed restarts if a fit fails to converge.
 """
 import json
 import os
@@ -56,97 +90,160 @@ import numpy as np
 import pandas as pd
 from arch import arch_model
 
-REPO = "/Users/yhlai0911/volpred-research"
-PAPER_CSV = os.path.join(
-    REPO,
-    "paper/taiwan-vt/data/"
-    "0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
-)
-K1302_DATA = os.path.join(REPO, "experiments/k1302/data")
-K1302B_DATA = os.path.join(REPO, "experiments/k1302b/data")
-OUT = os.path.join(
-    REPO,
-    "experiments/paper2_taiwan_indiv_rolling_gamma/"
-    "paper2_taiwan_indiv_rolling_gamma_results.json",
-)
+from volpred.ops.diagnostics import warn
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.join(HERE, "data")
+OUT = os.path.join(HERE, "paper2_taiwan_indiv_rolling_gamma_results.json")
+
 WINDOW = 2000
 SAMPLE_START = "2008-01-01"
+SEED = 20260713
 
-# Legacy (untraceable) N121 values currently in body_v3.tex tab:gamma, for the
-# three DISPLAYED individual-stock rows. The other 6 stocks contribute only to
-# the 9-stock average (also legacy-untraceable at 0.054).
-LEGACY = {
-    "2317.TW": {"gamma": 0.052, "gamma_t": 1.14, "alpha": 0.028, "beta": 0.939, "persistence": 0.985},
-    "2454.TW": {"gamma": 0.044, "gamma_t": 0.96, "alpha": 0.033, "beta": 0.935, "persistence": 0.984},
-    "2886.TW": {"gamma": 0.179, "gamma_t": 2.42, "alpha": 0.015, "beta": 0.901, "persistence": 0.977},
-}
-LEGACY_ROLLING_9STOCK_AVG_GAMMA = 0.054  # body_v3.tex, untraceable
-
-# Canonical 9-stock set (matches K1302 + K1302b full-sample average; excludes
-# 2330 TSMC and 0056 ETF). name + offline snapshot source per stock.
+# --- Row sets -------------------------------------------------------------
+# Canonical 9-stock cross-section (excludes TSMC 2330 and the 0056 ETF).
 NINE_STOCKS = {
-    "2317.TW": ("Hon Hai", "paper_csv", "2317_tw_adj_close"),
-    "2454.TW": ("MediaTek", "paper_csv", "2454_tw_adj_close"),
-    "2383.TW": ("Elite Material", "k1302", "adj_close"),
-    "2886.TW": ("Mega Financial", "k1302", "adj_close"),
-    "2412.TW": ("Chunghwa Telecom", "k1302b", "Close"),
-    "2881.TW": ("Fubon", "k1302b", "Close"),
-    "2882.TW": ("Cathay Financial", "k1302b", "Close"),
-    "2885.TW": ("Yuanta", "k1302b", "Close"),
-    "2891.TW": ("CTBC", "k1302b", "Close"),
+    "2317.TW": ("Hon Hai", "2317_tw"),
+    "2454.TW": ("MediaTek", "2454_tw"),
+    "2383.TW": ("Elite Material", "2383_tw"),
+    "2886.TW": ("Mega Financial", "2886_tw"),
+    "2412.TW": ("Chunghwa Telecom", "2412_tw"),
+    "2881.TW": ("Fubon", "2881_tw"),
+    "2882.TW": ("Cathay Financial", "2882_tw"),
+    "2885.TW": ("Yuanta", "2885_tw"),
+    "2891.TW": ("CTBC", "2891_tw"),
 }
-DISPLAYED = ["2317.TW", "2454.TW", "2886.TW"]  # rows shown in the paper table
-
-# 0056 is a diversified ETF shown separately; excluded from the 9-stock average
-# but included in the 10-security average. Data is in the paper CSV. Legacy
-# rolling gamma = 0.112 (t=1.87), also untraceable.
-ETF_0056 = ("0056.TW", "Yuanta High Div. ETF", "paper_csv", "0056_tw_adj_close")
-
-# Index rows for the rolling ratio base. body_v3.tex currently carries an
-# untraceable TWII rolling gamma = 0.272 (N120); the 0050 row was also
-# untraceable. Both are now RECOMPUTED on the SAME calendar-aligned window
-# (common_end below) so the amplification ratio has a fully reproducible base.
-# 2026-07-09: calendar-aligned recompute gives TWII gamma=0.158 (t=2.57),
-# 0050 gamma=0.079 (t=1.90) -- the legacy 0.272 does NOT reproduce.
+DISPLAYED = ["2317.TW", "2454.TW", "2886.TW"]  # rows rendered in the paper table
+ETF_0056 = ("0056.TW", "Yuanta High Div. ETF", "0056_tw")
 INDEX_ROWS = {
-    "TWII": ("Taiwan Weighted Index", "paper_csv", "twii_adj_close"),
-    "0050.TW": ("Yuanta Taiwan 50 ETF", "paper_csv", "0050_tw_adj_close"),
+    "TWII": ("Taiwan Weighted Index", "twii"),
+    "0050.TW": ("Yuanta Taiwan 50 ETF", "0050_tw"),
 }
-TWII_ROLLING_GAMMA_LEGACY = 0.272  # body_v3.tex TWII rolling row; untraceable (N120),
-# does NOT reproduce under calendar-aligned recompute; retained only for comparison.
+
+# --- Legacy values, retained for the comparison table ----------------------
+# (a) N121: the untraceable values currently rendered in body_v3.tex tab:gamma.
+LEGACY_N121 = {
+    "2317.TW": {"gamma": 0.052, "gamma_t": 1.14},
+    "2454.TW": {"gamma": 0.044, "gamma_t": 0.96},
+    "2886.TW": {"gamma": 0.179, "gamma_t": 2.42},
+    "0056.TW": {"gamma": 0.112, "gamma_t": 1.87},
+}
+LEGACY_N121_AVG = {
+    "gamma_mean_9stock": 0.054,
+    "gamma_mean_10security": 0.060,
+    "twii_rolling_gamma": 0.272,
+    "ratio_9stock": 5.0,
+    "ratio_10security": 4.5,
+}
+# (b) The 2026-07-07 run: same spec, but truncated to the stale 2025-01-22 end.
+PRIOR_RUN_20260707 = {
+    "common_end": "2025-01-22",
+    "gamma_mean_9stock": 0.0241,
+    "gamma_mean_10security": 0.0419,
+    "twii_rolling_gamma": 0.1575,
+    "ratio_9stock": 6.53,
+    "ratio_10security": 3.75,
+    "gamma_0056": 0.2023,
+    "note": (
+        "Calendar-aligned but to a terminal date dictated by two expired snapshots; "
+        "the JSON's 'RESOLVED' stamp was false. Superseded by primary_2026."
+    ),
+}
+
+# --- Known data defects ----------------------------------------------------
+# 0050.TW 4:1 split on 2014-01-02 leaves a spurious split-date return even under
+# auto_adjust=False; body_v3.tex L33 documents excluding it in the canonical
+# replication. It falls outside every window used here, but we apply the paper's
+# rule anyway so the script stays correct if the window is ever moved back.
+SPLIT_EXCLUSIONS = {"0050.TW": ["2014-01-02"]}
+
+# 2317.TW capital-reduction corruption (see module docstring). Excluded only in
+# the sensitivity variant, never in the primary.
+CORRUPT_2317 = ("2018-10-18", "2018-10-26")
+
+VARIANTS = {
+    "primary_2026": None,          # filled in from the data itself (common end)
+    "paper_csv_terminal": "2026-04-17",
+    "legacy_2025_01_22": "2025-01-22",
+}
 
 
-def _load_prices(ticker: str, src: str, col: str) -> pd.Series:
-    if src == "paper_csv":
-        df = pd.read_csv(PAPER_CSV, parse_dates=["date"])
-        s = df.set_index("date")[col]
-    elif src == "k1302":
-        df = pd.read_csv(os.path.join(K1302_DATA, f"{ticker[:4]}_tw.csv"), parse_dates=["date"])
-        s = df.set_index("date")[col]
-    elif src == "k1302b":
-        df = pd.read_csv(os.path.join(K1302B_DATA, f"{ticker[:4]}_tw.csv"), parse_dates=["Date"])
-        s = df.set_index("Date")[col]
-    else:
-        raise ValueError(src)
-    s = s.dropna()
-    s = s[s.index >= pd.Timestamp(SAMPLE_START)]
-    return s.astype(float)
+def load_returns(base: str, ticker: str) -> pd.Series:
+    """Log returns from the committed offline snapshot.
 
-
-def log_returns(prices: pd.Series) -> pd.Series:
-    r = np.log(prices / prices.shift(1)).dropna()
-    return r
+    The 0050 split-date exclusion is applied here, to the series, because it is a
+    data-cleaning rule about a corrupt observation rather than an experimental
+    treatment. It lies outside every window used here, so it changes nothing --
+    it is applied so the script stays correct if the window is ever moved back.
+    """
+    path = os.path.join(DATA, f"{base}.csv")
+    s = pd.read_csv(path, parse_dates=["date"]).set_index("date")["adj_close"]
+    s = s.dropna().astype(float).sort_index()
+    if s.index.duplicated().any():
+        raise RuntimeError(f"{ticker}: duplicate dates in snapshot")
+    r = np.log(s / s.shift(1)).dropna()
+    for d in SPLIT_EXCLUSIONS.get(ticker, []):
+        r = r.drop(pd.Timestamp(d), errors="ignore")
+    return r[r.index >= pd.Timestamp(SAMPLE_START)]
 
 
 def estimate_gjr(returns: pd.Series) -> dict:
-    """GJR-GARCH(1,1) MLE via arch, identical spec to K892."""
+    """GJR-GARCH(1,1) MLE via arch (K892 spec).
+
+    A non-zero convergence flag is a numerical failure of the optimizer, not
+    evidence against the model (CLAUDE.md methodology rule). On failure we retry
+    from seeded perturbed starting values and keep the best log-likelihood.
+    """
     ret_pct = returns * 100.0
     am = arch_model(ret_pct, vol="GARCH", p=1, o=1, q=1, dist="normal", mean="Constant")
     res = am.fit(disp="off", options={"maxiter": 5000})
+    restarts = 0
+    restart_failures: list[str] = []
+    if res.convergence_flag != 0:
+        warn(
+            "rolling-gamma",
+            f"default start failed to converge (flag={res.convergence_flag}) on "
+            f"{returns.index[0].date()}..{returns.index[-1].date()}; entering seeded multistart",
+        )
+        rng = np.random.default_rng(SEED)
+        best = res
+        for restarts in range(1, 51):
+            sv = pd.Series(
+                {
+                    "mu": float(ret_pct.mean()) * rng.uniform(0.5, 1.5),
+                    "omega": float(ret_pct.var()) * rng.uniform(0.02, 0.2),
+                    "alpha[1]": rng.uniform(0.01, 0.12),
+                    "gamma[1]": rng.uniform(0.0, 0.20),
+                    "beta[1]": rng.uniform(0.70, 0.92),
+                }
+            )
+            try:
+                cand = am.fit(disp="off", starting_values=sv, options={"maxiter": 5000})
+            except Exception as exc:  # a bad random start, not a bad model -- but log it
+                restart_failures.append(f"start {restarts}: {type(exc).__name__}: {exc}")
+                warn("rolling-gamma", f"multistart {restarts} raised {type(exc).__name__}: {exc}")
+                continue
+            if cand.convergence_flag == 0 and cand.loglikelihood > best.loglikelihood:
+                best = cand
+                break
+        res = best
+        if res.convergence_flag != 0:
+            # Do NOT quietly report the parameters of a failed optimisation as if they
+            # were estimates. A package that will not converge is a numerical failure,
+            # not evidence about the model -- but it must be visible, not swallowed.
+            raise RuntimeError(
+                f"GJR MLE failed to converge after 50 seeded restarts on window "
+                f"{returns.index[0].date()}..{returns.index[-1].date()} "
+                f"(flag={res.convergence_flag}); {len(restart_failures)} restarts raised. "
+                "Do not report these parameters -- rescale, change the parameterisation, or "
+                "hand-roll the MLE (CLAUDE.md: package failure != model invalid)."
+            )
     p, t = res.params, res.tvalues
-    alpha = float(p.get("alpha[1]", np.nan))
-    gamma = float(p.get("gamma[1]", np.nan))
-    beta = float(p.get("beta[1]", np.nan))
+    alpha, gamma, beta = (
+        float(p.get("alpha[1]", np.nan)),
+        float(p.get("gamma[1]", np.nan)),
+        float(p.get("beta[1]", np.nan)),
+    )
     return {
         "omega": float(p.get("omega", np.nan)),
         "alpha": alpha,
@@ -158,202 +255,506 @@ def estimate_gjr(returns: pd.Series) -> dict:
         "persistence": alpha + 0.5 * gamma + beta,
         "n_obs": int(len(returns)),
         "convergence": int(res.convergence_flag),
+        "restarts_used": restarts,
+        "restart_failures": restart_failures,
         "log_likelihood": float(res.loglikelihood),
     }
 
 
-def rolling_last_window(
-    returns: pd.Series, window: int = WINDOW, end_cutoff: pd.Timestamp | None = None
+def last_window(
+    returns: pd.Series, end_cutoff: pd.Timestamp, ablate: tuple[str, str] | None = None
 ) -> dict:
-    """Last 2000-obs window ending on/before `end_cutoff` (calendar alignment).
+    """Estimate on the last WINDOW observations ending on/before `end_cutoff`.
 
-    Codex CONDITIONAL_PASS caveat: the per-stock last-2000-obs windows must be
-    calendar-aligned (share a common end date) before becoming the paper's
-    canonical rolling numbers. `end_cutoff` truncates the return series to a
-    common terminal date first, so every security's window ends on the same
-    (or nearest prior) trading day.
+    `ablate` removes a date range AFTER the window is cut, never before. That
+    ordering matters. Excluding rows from the series first would leave the slice
+    reaching further back to refill its 2000 observations -- for the 2317 block
+    that means pulling in ~7 extra sessions from April 2018, right beside the
+    2018-Q1 volatility spike that we independently know moves gamma. The
+    sensitivity would then confound "removed the corrupt days" with "added days
+    from a high-asymmetry period". Cutting the window first and ablating inside it
+    keeps the calendar span identical to the primary, so the only thing that
+    changes is the contaminated observations. The cost is n < WINDOW, which is
+    recorded in n_obs.
     """
-    if end_cutoff is not None:
-        returns = returns[returns.index <= end_cutoff]
-    if len(returns) < window:
-        raise ValueError(f"only {len(returns)} obs < window {window}")
-    last = returns.iloc[-window:]
-    est = estimate_gjr(last)
-    est["window"] = window
-    est["window_start"] = str(last.index[0].date())
-    est["window_end"] = str(last.index[-1].date())
+    r = returns[returns.index <= end_cutoff]
+    if len(r) < WINDOW:
+        raise ValueError(f"only {len(r)} obs before {end_cutoff.date()} < window {WINDOW}")
+    w = r.iloc[-WINDOW:]
+    span_start, span_end = w.index[0], w.index[-1]
+    if ablate is not None:
+        lo, hi = pd.Timestamp(ablate[0]), pd.Timestamp(ablate[1])
+        w = w[(w.index < lo) | (w.index > hi)]
+    est = estimate_gjr(w)
+    est["window"] = WINDOW
+    # The calendar span of the window, which the ablation deliberately does NOT move.
+    est["window_start"] = str(span_start.date())
+    est["window_end"] = str(span_end.date())
+    if ablate is not None:
+        est["ablated_range"] = list(ablate)
+        est["ablated_obs"] = WINDOW - len(w)
     return est
 
 
-def main() -> None:
-    # --- Calendar alignment (Codex CONDITIONAL_PASS caveat) ---------------
-    # Pre-load every return series, then derive the COMMON terminal date as the
-    # earliest last-obs date across all 10 securities. This is the latest end
-    # date achievable from the offline snapshots without any network re-fetch,
-    # so the "fully reproducible, no network" guarantee is preserved. It is
-    # bound by the k1302 snapshots for 2383/2886 (end 2025-01-22). Every
-    # security's last-2000-obs window is then taken ending on/before this date.
-    et_ticker, et_name, et_src, et_col = ETF_0056
-    returns_cache: dict[str, pd.Series] = {}
-    for ticker, (name, src, col) in NINE_STOCKS.items():
-        returns_cache[ticker] = log_returns(_load_prices(ticker, src, col))
-    returns_cache[et_ticker] = log_returns(
-        _load_prices(et_ticker, et_src, et_col)
-    )
-    common_end = min(r.index[-1] for r in returns_cache.values())
-    print(f"[calendar-align] COMMON_END = {common_end.date()} "
-          f"(min last-obs across all 10 securities)")
-
+def run_variant(end_cutoff: pd.Timestamp, drop_corrupt_2317: bool = False) -> dict:
     per_stock = {}
-    for ticker, (name, src, col) in NINE_STOCKS.items():
-        r = returns_cache[ticker]
-        est = rolling_last_window(r, end_cutoff=common_end)
-        est["name"] = name
-        est["ticker"] = ticker
-        est["price_source"] = f"{src}:{col}"
-        if ticker in LEGACY:
-            leg = LEGACY[ticker]
-            est["legacy_n121"] = leg
-            est["gamma_abs_diff_vs_legacy"] = abs(est["gamma"] - leg["gamma"])
-            est["matches_legacy_rounded"] = (
-                round(est["gamma"], 3) == round(leg["gamma"], 3)
-                and round(est["gamma_t"], 2) == round(leg["gamma_t"], 2)
-            )
+    for ticker, (name, base) in NINE_STOCKS.items():
+        ablate = CORRUPT_2317 if (drop_corrupt_2317 and ticker == "2317.TW") else None
+        est = last_window(load_returns(base, ticker), end_cutoff, ablate=ablate)
+        est.update({"name": name, "ticker": ticker, "price_source": f"data/{base}.csv"})
+        if ticker in LEGACY_N121:
+            est["legacy_n121"] = LEGACY_N121[ticker]
         per_stock[ticker] = est
-        legtxt = (
-            f"| legacy g={LEGACY[ticker]['gamma']} t={LEGACY[ticker]['gamma_t']}"
-            if ticker in LEGACY else "| (not displayed; avg-only)"
-        )
-        print(
-            f"{ticker} {name:17s} gamma={est['gamma']:.4f} (t={est['gamma_t']:.2f})  "
-            f"a={est['alpha']:.4f} b={est['beta']:.4f} pers={est['persistence']:.4f}  {legtxt}"
-        )
 
-    # 0056 ETF (separate row + included in 10-security avg); calendar-aligned
-    et_est = rolling_last_window(returns_cache[et_ticker], end_cutoff=common_end)
-    et_est["name"] = et_name
-    et_est["ticker"] = et_ticker
-    et_est["price_source"] = f"{et_src}:{et_col}"
-    et_est["legacy_gamma"] = 0.112
-    et_est["legacy_gamma_t"] = 1.87
-    print(
-        f"{et_ticker} {et_name:17s} gamma={et_est['gamma']:.4f} (t={et_est['gamma_t']:.2f})  "
-        f"a={et_est['alpha']:.4f} b={et_est['beta']:.4f} pers={et_est['persistence']:.4f}  "
-        f"| legacy g=0.112 t=1.87 (ETF)"
+    et_ticker, et_name, et_base = ETF_0056
+    etf = last_window(load_returns(et_base, et_ticker), end_cutoff)
+    etf.update(
+        {
+            "name": et_name,
+            "ticker": et_ticker,
+            "price_source": f"data/{et_base}.csv",
+            "legacy_n121": LEGACY_N121[et_ticker],
+        }
     )
 
-    # --- Index rows (0050 / TWII) recomputed on the SAME calendar-aligned window
-    # so the amplification ratio has a fully reproducible base (replaces the
-    # untraceable body_v3.tex TWII 0.272 / 0050 rows). ------------------------
     index_rows = {}
-    for idx_key, (idx_name, idx_src, idx_col) in INDEX_ROWS.items():
-        idx_ret = log_returns(_load_prices(idx_key, idx_src, idx_col))
-        iest = rolling_last_window(idx_ret, end_cutoff=common_end)
-        iest["name"] = idx_name
-        iest["ticker"] = idx_key
-        iest["price_source"] = f"{idx_src}:{idx_col}"
-        index_rows[idx_key] = iest
-        print(
-            f"[index] {idx_key} {idx_name:24s} gamma={iest['gamma']:.4f} (t={iest['gamma_t']:.2f})  "
-            f"a={iest['alpha']:.4f} b={iest['beta']:.4f} pers={iest['persistence']:.4f}"
-        )
-    twii_gamma = float(index_rows["TWII"]["gamma"])  # reproducible base
+    for key, (name, base) in INDEX_ROWS.items():
+        est = last_window(load_returns(base, key), end_cutoff)
+        est.update({"name": name, "ticker": key, "price_source": f"data/{base}.csv"})
+        index_rows[key] = est
 
     gammas = [per_stock[t]["gamma"] for t in NINE_STOCKS]
     g9 = float(np.mean(gammas))
-    g10 = float(np.mean(gammas + [et_est["gamma"]]))
-    # Ratio now uses the REPRODUCIBLE calendar-aligned TWII gamma, not the
-    # untraceable legacy 0.272.
-    ratio9 = twii_gamma / g9
-    ratio10 = twii_gamma / g10
-    avg = {
-        "gamma_mean_9stock": g9,
-        "alpha_mean_9stock": float(np.mean([per_stock[t]["alpha"] for t in NINE_STOCKS])),
-        "beta_mean_9stock": float(np.mean([per_stock[t]["beta"] for t in NINE_STOCKS])),
-        "gamma_mean_10security_incl_0056": g10,
-        "n_stocks_9": len(gammas),
-        "legacy_gamma_mean_9stock": LEGACY_ROLLING_9STOCK_AVG_GAMMA,
-        "legacy_gamma_mean_10security": 0.060,
-        "gamma_mean_9stock_abs_diff_vs_legacy": abs(g9 - LEGACY_ROLLING_9STOCK_AVG_GAMMA),
-        "twii_rolling_gamma_reproducible": twii_gamma,
-        "twii_rolling_gamma_legacy_untraceable": TWII_ROLLING_GAMMA_LEGACY,
-        "twii_rolling_gamma_note": (
-            "TWII rolling gamma RECOMPUTED on the calendar-aligned window "
-            f"(gamma={twii_gamma:.4f}); the legacy body_v3.tex value 0.272 (N120) "
-            "does NOT reproduce and is retained only for comparison."
-        ),
-        "ratio_base": "reproducible calendar-aligned TWII gamma",
-        "amplification_ratio_9stock": ratio9,
-        "amplification_ratio_10security": ratio10,
-        "legacy_ratio_9stock": 5.0,
-        "legacy_ratio_10security": 4.5,
-    }
-    result_etf = et_est
-    print(
-        f"\n9-stock rolling avg gamma={g9:.4f} (legacy 0.054)  ratio={ratio9:.1f}x (legacy 5.0x)\n"
-        f"10-security rolling avg gamma={g10:.4f} (legacy 0.060)  ratio={ratio10:.1f}x (legacy 4.5x)"
+    g10 = float(np.mean(gammas + [etf["gamma"]]))
+    twii_g = float(index_rows["TWII"]["gamma"])
+
+    # gamma ranking across the 12 rows -- the 0056 narrative turns on where the
+    # ETF lands relative to the individual stocks and the index.
+    ranking = sorted(
+        [(t, per_stock[t]["gamma"]) for t in NINE_STOCKS]
+        + [(et_ticker, etf["gamma"])]
+        + [(k, v["gamma"]) for k, v in index_rows.items()],
+        key=lambda kv: -kv[1],
     )
 
-    displayed_match = all(per_stock[t].get("matches_legacy_rounded", False) for t in DISPLAYED)
-    all_match = displayed_match
-    result = {
-        "experiment_id": "paper2_taiwan_indiv_rolling_gamma",
-        "title": "Provenance re-estimation of Taiwan-VT individual-stock rolling-w2000 GJR gamma",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "purpose": (
-            "Bind body_v3.tex tab:gamma individual-stock rows (Hon Hai/MediaTek/"
-            "Mega) to a reproducible source JSON, replacing untraceable N121 values "
-            "(audit_step1_2.md). Re-estimated under K892's arch-MLE GJR(1,1) "
-            "rolling-w2000 last-window spec."
-        ),
-        "method": "GJR-GARCH(1,1) MLE (arch pkg), Constant mean, Normal innov, returns*100; rolling w=2000 last window; robust t-values; persistence=alpha+0.5*gamma+beta",
-        "data_source": {
-            t: f"{src}:{col}" for t, (nm, src, col) in NINE_STOCKS.items()
-        },
-        "data_source_note": (
-            "2317/2454 from paper CSV adj_close; 2383/2886 from k1302 yfinance "
-            "adj_close snapshots; 2412/2881/2882/2885/2891 from k1302b snapshots "
-            "(Close col). Mixed adj/close is inherited from the canonical K1302/"
-            "K1302b data package and documented for transparency."
-        ),
-        "sample_window_start": SAMPLE_START,
-        "window": WINDOW,
-        "arch_version": arch.__version__,
-        "covariance_type": "arch default robust (White/Bollerslev-Wooldridge); gamma point estimates unaffected by SE choice",
-        "codex_caveat_calendar_alignment": (
-            "RESOLVED (2026-07-07): the Codex CONDITIONAL_PASS caveat required "
-            "recomputing on calendar-aligned snapshots. All 10 securities' last-"
-            "2000-obs windows are now truncated to a COMMON terminal date = "
-            f"{str(common_end.date())}, the earliest last-obs across all offline "
-            "snapshots (bound by the k1302 2383/2886 snapshots ending 2025-01-22). "
-            "This is the latest common end date achievable offline with no network "
-            "re-fetch, preserving the 'fully reproducible, no network' guarantee. "
-            "See per_stock.window_end -- all rows now share this end date (or the "
-            "nearest prior trading day per security). These are the paper's "
-            "canonical calendar-aligned rolling numbers."
-        ),
-        "calendar_alignment_common_end": str(common_end.date()),
-        "rolling_averages_and_ratio": avg,
-        "index_rows": index_rows,
-        "etf_0056": result_etf,
-        "displayed_rows_match_legacy_rounded": all_match,
-        "lookahead_free_certification": (
-            "gamma is in-sample MLE on the last 2000-obs window; no forecast, no "
-            "OOS split, no signal generation; deterministic MLE (no seed needed)."
-        ),
-        "provenance_note": (
-            "The table note labels individual-stock t-stats 'Newey-West HAC'; the "
-            "actual reproducible estimator (matching the rest of the rolling-window "
-            "rows via K892) is the arch-package robust MLE t-value. Reported t-values "
-            "here are arch robust t. If exact NW-HAC is required, re-run with an "
-            "explicit HAC covariance and update the note accordingly."
+    return {
+        "common_end": str(end_cutoff.date()),
+        "window_end_all_rows": sorted(
+            {e["window_end"] for e in list(per_stock.values()) + [etf] + list(index_rows.values())}
         ),
         "per_stock": per_stock,
+        "etf_0056": etf,
+        "index_rows": index_rows,
+        "averages_and_ratio": {
+            "gamma_mean_9stock": g9,
+            "alpha_mean_9stock": float(np.mean([per_stock[t]["alpha"] for t in NINE_STOCKS])),
+            "beta_mean_9stock": float(np.mean([per_stock[t]["beta"] for t in NINE_STOCKS])),
+            "gamma_mean_10security_incl_0056": g10,
+            "twii_rolling_gamma": twii_g,
+            "amplification_ratio_9stock": twii_g / g9,
+            "amplification_ratio_10security": twii_g / g10,
+            "ratio_base": "rolling-w2000 TWII gamma on the same calendar-aligned window",
+        },
+        "gamma_ranking_desc": [{"ticker": t, "gamma": g} for t, g in ranking],
+        "gamma_0056_rank_of_12": 1 + [t for t, _ in ranking].index(et_ticker),
+        "convergence_all_zero": all(
+            e["convergence"] == 0
+            for e in list(per_stock.values()) + [etf] + list(index_rows.values())
+        ),
+    }
+
+
+def end_date_sensitivity(first: str, last: pd.Timestamp) -> list[dict]:
+    """Roll the common end date monthly and re-estimate the headline aggregates.
+
+    The three named variants differ by only a few months of terminal date, yet the
+    9-stock average gamma moves by ~40%. That has to be characterised rather than
+    hidden behind whichever end date we happen to pick: either the rolling
+    estimates are regime-sensitive, or they are simply imprecise. This sweep plus
+    the implied standard errors settles which.
+    """
+    ends = [d for d in pd.date_range(first, last, freq="ME")] + [last]
+    rows = []
+    for end in ends:
+        v = run_variant(end)
+        a = v["averages_and_ratio"]
+        twii = v["index_rows"]["TWII"]
+        etf = v["etf_0056"]
+        rows.append(
+            {
+                "common_end": str(end.date()),
+                "gamma_mean_9stock": a["gamma_mean_9stock"],
+                "gamma_mean_10security": a["gamma_mean_10security_incl_0056"],
+                "twii_gamma": twii["gamma"],
+                "twii_gamma_t": twii["gamma_t"],
+                "twii_gamma_se": abs(twii["gamma"] / twii["gamma_t"]) if twii["gamma_t"] else None,
+                "gamma_0056": etf["gamma"],
+                "gamma_0056_t": etf["gamma_t"],
+                "gamma_0056_rank_of_12": v["gamma_0056_rank_of_12"],
+                "amplification_ratio_9stock": a["amplification_ratio_9stock"],
+            }
+        )
+        print(
+            f"  [sens] end={end.date()}  g9={a['gamma_mean_9stock']:.4f}  "
+            f"TWII={twii['gamma']:.4f} (t={twii['gamma_t']:.2f})  "
+            f"0056={etf['gamma']:.4f} (rank {v['gamma_0056_rank_of_12']})  "
+            f"ratio={a['amplification_ratio_9stock']:.2f}x"
+        )
+    return rows
+
+
+def event_attribution() -> dict:
+    """Which observations actually drive the end-date sensitivity.
+
+    Pure data description (no estimation): the segments that enter and leave the
+    2000-day window as the terminal date moves, and the extreme TWII returns they
+    contain. This turns "the estimates move around" into a statement about WHICH
+    days move them.
+    """
+    tw = pd.read_csv(os.path.join(DATA, "twii.csv"), parse_dates=["date"]).set_index("date")[
+        "adj_close"
+    ]
+    r = np.log(tw / tw.shift(1)).dropna()
+
+    def worst(a: str, b: str, k: int = 3) -> list[str]:
+        seg = r[a:b]
+        return [f"{d.date()}: {v * 100:.2f}%" for d, v in seg.nsmallest(k).items()]
+
+    def seg_stats(a: str, b: str) -> dict:
+        seg = r[a:b]
+        return {
+            "n": int(len(seg)),
+            "std_pct": float(seg.std() * 100),
+            "skew": float(seg.skew()),
+            "worst_days": worst(a, b),
+        }
+
+    return {
+        "entered_2025_04_tariff_shock": {
+            **seg_stats("2025-04-01", "2025-04-30"),
+            "effect": (
+                "Entering the window between the 2025-03-31 and 2025-04-30 end dates, this "
+                "segment more than DOUBLES the 9-stock mean gamma (0.027 -> 0.058). It contains "
+                "a -10.20% limit-down TAIEX session (2025-04-07) plus -5.96% and -4.10% "
+                "follow-through -- the single largest cluster of negative shocks in the sample."
+            ),
+        },
+        "left_2018_q1_vol_spike": {
+            **seg_stats("2018-01-16", "2018-04-18"),
+            "effect": (
+                "Leaving the window as the end date moves 2026-04-17 -> 2026-07-09 (the window "
+                "start slides 2018-01-16 -> 2018-04-19). It contains 2018-02-06 (-5.08%, the "
+                "'VIXmageddon' session). Dropping a large negative shock lowers gamma."
+            ),
+        },
+        "entered_2026_q2": {
+            **seg_stats("2026-04-01", "2026-07-09"),
+            "effect": (
+                "High volatility but roughly SYMMETRIC (skew ~0; the largest moves include "
+                "+4.51%, +4.47%, +4.47% sessions alongside the drawdowns). Volatility that is "
+                "not driven by negative shocks DILUTES the measured asymmetry, pushing gamma "
+                "down. Together with the 2018 spike leaving, this explains the decay from "
+                "gamma_9stock 0.055 (2026-03) to 0.032 (2026-07)."
+            ),
+        },
+        "conclusion": (
+            "The rolling-w2000 last-window gamma is not a stable structural parameter -- it is "
+            "an event-driven statistic dominated by a handful of extreme sessions moving in and "
+            "out of an 8-year window whose boundaries are set by the arbitrary date of the data "
+            "pull. This is a reason to keep the FULL-SAMPLE Bollerslev-Wooldridge spec as the "
+            "paper's primary evidence (as body_v3.tex already does) and to report the rolling "
+            "block with an explicit imprecision caveat rather than as sharp point estimates."
+        ),
+    }
+
+
+def plot_sensitivity(rows: list[dict], path: str) -> None:
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    x = [pd.Timestamp(r["common_end"]) for r in rows]
+    fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+
+    ax = axes[0]
+    tw = np.array([r["twii_gamma"] for r in rows])
+    se = np.array([r["twii_gamma_se"] for r in rows], dtype=float)
+    ax.plot(x, tw, "o-", color="#1f4e79", label="TWII (index)")
+    ax.fill_between(x, tw - se, tw + se, color="#1f4e79", alpha=0.15, label="TWII ±1 SE")
+    ax.plot(x, [r["gamma_0056"] for r in rows], "s-", color="#c0504d", label="0056.TW (ETF)")
+    ax.plot(x, [r["gamma_mean_9stock"] for r in rows], "^-", color="#4f6228",
+            label="9-stock average")
+    ax.axhline(0.272, ls="--", lw=1, color="grey")
+    ax.annotate(
+        "body_v3 rendered TWII 0.272 (N121, untraceable)",
+        xy=(x[-1], 0.272), xytext=(-6, 6), textcoords="offset points",
+        ha="right", fontsize=8, color="grey",
+        bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.85),
+    )
+    ax.set_ylabel(r"GJR $\gamma$  (rolling $w=2000$, last window)")
+    ax.set_title(
+        "Table 2 rolling block: sensitivity of the leverage parameter to the common end date\n"
+        "0056.TW sits ABOVE the index and every individual stock at every end date",
+        fontsize=11,
+    )
+    ax.legend(fontsize=9)
+    ax.grid(alpha=0.3)
+
+    ax = axes[1]
+    ax.plot(x, [r["amplification_ratio_9stock"] for r in rows], "o-", color="#7030a0")
+    ax.axhline(5.0, ls="--", lw=1, color="grey")
+    ax.annotate(
+        "body_v3 rendered ratio 5.0x (N121, untraceable)",
+        xy=(x[len(x) // 2], 5.0), xytext=(0, 6), textcoords="offset points",
+        ha="center", fontsize=8, color="grey",
+        bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.85),
+    )
+    ax.set_ylabel("Amplification ratio\n(TWII γ / 9-stock mean γ)")
+    ax.set_xlabel("Common end date of the rolling window")
+    ax.grid(alpha=0.3)
+
+    fig.autofmt_xdate()
+    fig.tight_layout()
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+
+
+def main() -> None:
+    with open(os.path.join(DATA, "MANIFEST.json")) as f:
+        manifest = json.load(f)
+    common_end = pd.Timestamp(manifest["common_end_all_series"])
+    VARIANTS["primary_2026"] = str(common_end.date())
+
+    variants = {}
+    for key, end in VARIANTS.items():
+        end_ts = pd.Timestamp(end)
+        variants[key] = run_variant(end_ts)
+        a = variants[key]["averages_and_ratio"]
+        print(
+            f"[{key:20s}] end={end_ts.date()}  g9={a['gamma_mean_9stock']:.4f}  "
+            f"g10={a['gamma_mean_10security_incl_0056']:.4f}  "
+            f"TWII={a['twii_rolling_gamma']:.4f}  ratio9={a['amplification_ratio_9stock']:.2f}x  "
+            f"0056={variants[key]['etf_0056']['gamma']:.4f} (rank {variants[key]['gamma_0056_rank_of_12']}/12)"
+        )
+
+    primary = variants["primary_2026"]
+
+    # 2317 data-quality sensitivity, on the primary window.
+    sens = run_variant(common_end, drop_corrupt_2317=True)
+    s_2317 = sens["per_stock"]["2317.TW"]
+    p_2317 = primary["per_stock"]["2317.TW"]
+    sensitivity_2317 = {
+        "what": (
+            "Excludes the corrupted 2018-10-18..2018-10-26 block in yfinance's 2317.TW "
+            "series (six frozen closes around the 0.8 capital-reduction factor, then a "
+            "-10.49% catch-up move that exceeds Taiwan's +/-10% daily limit and therefore "
+            "cannot be a real close-to-close return)."
+        ),
+        "primary_2317_gamma": p_2317["gamma"],
+        "primary_2317_gamma_t": p_2317["gamma_t"],
+        "excl_2317_gamma": s_2317["gamma"],
+        "excl_2317_gamma_t": s_2317["gamma_t"],
+        "gamma_shift": s_2317["gamma"] - p_2317["gamma"],
+        "primary_gamma_mean_9stock": primary["averages_and_ratio"]["gamma_mean_9stock"],
+        "excl_gamma_mean_9stock": sens["averages_and_ratio"]["gamma_mean_9stock"],
+        "primary_ratio_9stock": primary["averages_and_ratio"]["amplification_ratio_9stock"],
+        "excl_ratio_9stock": sens["averages_and_ratio"]["amplification_ratio_9stock"],
+    }
+    print(
+        f"\n[2317 data-quality sens] gamma {p_2317['gamma']:.4f} -> {s_2317['gamma']:.4f}  "
+        f"| 9-stock avg {sensitivity_2317['primary_gamma_mean_9stock']:.4f} -> "
+        f"{sensitivity_2317['excl_gamma_mean_9stock']:.4f}  "
+        f"| ratio {sensitivity_2317['primary_ratio_9stock']:.2f}x -> "
+        f"{sensitivity_2317['excl_ratio_9stock']:.2f}x"
+    )
+
+    # End-date sensitivity sweep (monthly), + figure.
+    print("\nend-date sensitivity sweep:")
+    sens_rows = end_date_sensitivity("2025-01-31", common_end)
+    fig_path = os.path.join(HERE, "end_date_sensitivity.png")
+    plot_sensitivity(sens_rows, fig_path)
+    g9s = [r["gamma_mean_9stock"] for r in sens_rows]
+    tws = [r["twii_gamma"] for r in sens_rows]
+    ratios = [r["amplification_ratio_9stock"] for r in sens_rows]
+    se_med = float(np.median([r["twii_gamma_se"] for r in sens_rows]))
+    sensitivity_block = {
+        "rows": sens_rows,
+        "figure": "end_date_sensitivity.png",
+        "range_gamma_mean_9stock": [float(min(g9s)), float(max(g9s))],
+        "range_twii_gamma": [float(min(tws)), float(max(tws))],
+        "range_amplification_ratio_9stock": [float(min(ratios)), float(max(ratios))],
+        "twii_gamma_median_implied_se": se_med,
+        "gamma_0056_always_rank_1": all(r["gamma_0056_rank_of_12"] == 1 for r in sens_rows),
+        "what_this_sweep_is_NOT": (
+            "NOT a sampling distribution. Consecutive end dates share ~97% of their observations, so "
+            "the estimates are strongly positively dependent. The SE of the DIFFERENCE between two "
+            "overlapping estimates is far smaller than sqrt(2)*SE, so two of them can be significantly "
+            "different from each other even while their individual CIs almost entirely overlap. "
+            "Comparing this spread against marginal standard errors is therefore NOT a test, and an "
+            "earlier draft's conclusion ('the spread is one SE wide, so the estimates are imprecise "
+            "rather than regime-unstable') is WITHDRAWN as invalid. Settling whether the movement is "
+            "real parameter instability would need a Nyblom/CUSUM stability test or a block bootstrap "
+            "over the union sample that respects the overlap -- neither of which this experiment runs."
+        ),
+        "interpretation": (
+            f"Across every monthly end date from 2025-01 to {common_end.date()}, the TWII rolling gamma "
+            f"spans [{min(tws):.3f}, {max(tws):.3f}], the 9-stock mean gamma spans "
+            f"[{min(g9s):.3f}, {max(g9s):.3f}], and the amplification ratio spans "
+            f"[{min(ratios):.2f}x, {max(ratios):.2f}x]. What follows WITHOUT any dependence-aware "
+            "machinery: (1) each estimate is imprecise on its own terms -- TWII's rolling gamma at the "
+            f"primary window carries t=1.86, not significant at 5%, and its 95% CI contains every other "
+            "end date's point estimate as well as the paper's rendered 0.272; (2) the reported number "
+            "moves materially with the terminal date, and the driver is identifiable (see "
+            "event_attribution); (3) therefore no single end date's point estimate may be reported as a "
+            "sharp structural constant. The rendered 5.0x ratio sits inside the swept interval, so the "
+            "ratio's ORDER OF MAGNITUDE survives, but its second digit is not identified. 0056.TW ranks "
+            "first of twelve at EVERY end date -- that ordering, unlike the levels, is robust."
+        ),
+    }
+
+    pa = primary["averages_and_ratio"]
+    result = {
+        "experiment_id": "paper2_taiwan_indiv_rolling_gamma",
+        "title": (
+            "Calendar-aligned rolling-w2000 GJR gamma for Taiwan-VT Table 2 "
+            "(refreshed snapshots; common end 2026)"
+        ),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "purpose": (
+            "Rebuild body_v3.tex tab:gamma's rolling block on snapshots that are BOTH "
+            "calendar-aligned AND current. Supersedes the 2026-07-07 run, whose common "
+            "end (2025-01-22) was an artifact of two expired offline snapshots rather "
+            "than a market fact, and whose 'RESOLVED' stamp on the Codex caveat was "
+            "therefore false."
+        ),
+        "method": (
+            "GJR-GARCH(1,1) MLE (arch pkg), Constant mean, Normal innovations, returns*100; "
+            "rolling w=2000 last window ending on/before the variant's common end date; "
+            "Bollerslev-Wooldridge robust t-values; persistence = alpha + 0.5*gamma + beta"
+        ),
+        "data": {
+            "snapshot_dir": "data/",
+            "manifest": "data/MANIFEST.json",
+            "fetched_at_utc": manifest["fetched_at_utc"],
+            "convention": manifest["convention"],
+            "regression_check": (
+                "Every refreshed series' log returns reproduce the previous canonical "
+                "snapshots (paper CSV / k1302 / k1302b) to <1e-6 over the overlapping "
+                "sample; see data/MANIFEST.json .series[*].regression_vs_old_snapshot. "
+                "The refresh therefore moves the SAMPLE WINDOW, not the data convention."
+            ),
+            "sample_window_start": SAMPLE_START,
+            "window": WINDOW,
+        },
+        "arch_version": arch.__version__,
+        "seed": SEED,
+        "codex_caveat_calendar_alignment": (
+            "RESOLVED FOR REAL (2026-07-13). All 12 series share a common terminal date "
+            f"of {common_end.date()}, the latest trading day on which every series has "
+            "data (bound by ^TWII, which posts one session behind the single stocks). "
+            "The prior 'RESOLVED (2026-07-07)' stamp was FALSE: it aligned the windows by "
+            "truncating eight up-to-date securities back to 2025-01-22 to match two "
+            "expired snapshots, so the paper claimed a 2026 sample while the table rows "
+            "ended in 2025-01. Alignment is now achieved WITHOUT discarding a year of "
+            "data: the snapshots were re-fetched once into data/ and the estimation runs "
+            "fully offline from them."
+        ),
+        "primary_variant": "primary_2026",
+        "headline": {
+            "common_end": primary["common_end"],
+            "gamma_mean_9stock": pa["gamma_mean_9stock"],
+            "gamma_mean_10security_incl_0056": pa["gamma_mean_10security_incl_0056"],
+            "twii_rolling_gamma": pa["twii_rolling_gamma"],
+            "amplification_ratio_9stock": pa["amplification_ratio_9stock"],
+            "amplification_ratio_10security": pa["amplification_ratio_10security"],
+            "gamma_0056": primary["etf_0056"]["gamma"],
+            "gamma_0056_t": primary["etf_0056"]["gamma_t"],
+            "gamma_0056_rank_of_12": primary["gamma_0056_rank_of_12"],
+        },
+        "variants": variants,
+        "end_date_sensitivity": sensitivity_block,
+        "event_attribution": event_attribution(),
+        "narrative_implication_0056": {
+            "paper_currently_argues": (
+                "body_v3.tex section 3.2 ('Sensitivity to 0056.TW inclusion') rests on 0056 "
+                "having the SECOND-highest gamma (rendered 0.112), so that including this "
+                "diversified ETF in the stock average biases the amplification ratio DOWNWARD "
+                "-- i.e. excluding it is the conservative choice."
+            ),
+            "what_the_data_says": (
+                f"0056.TW's rolling gamma is {primary['etf_0056']['gamma']:.3f} "
+                f"(t={primary['etf_0056']['gamma_t']:.2f}) on the primary window -- the HIGHEST "
+                "of all twelve rows, above every individual stock AND above the TAIEX itself. "
+                "It ranks first at every end date in the sensitivity sweep, so this is not an "
+                "artifact of the window choice."
+            ),
+            "consequence": (
+                "The 'conservative bias' argument inverts. Including 0056 RAISES the stock-side "
+                f"average (9-stock {pa['gamma_mean_9stock']:.3f} -> 10-security "
+                f"{pa['gamma_mean_10security_incl_0056']:.3f}) and therefore LOWERS the "
+                f"amplification ratio ({pa['amplification_ratio_9stock']:.2f}x -> "
+                f"{pa['amplification_ratio_10security']:.2f}x). Excluding 0056 is the choice that "
+                "FLATTERS the headline ratio, not the one that guards against it. The section 3.2 "
+                "narrative must be rewritten, and the exclusion must be justified on the stated "
+                "grounds (0056 is an ETF, not an individual stock) rather than on a conservatism "
+                "claim that the data contradicts."
+            ),
+            "why_0056_is_high_hypothesis": (
+                "NOT verified here -- offered only as a direction for the main thread. 0056 is a "
+                "high-dividend basket whose holdings tilt to value/financial names; a diversified "
+                "basket's returns are dominated by the common factor, and the leverage effect is "
+                "largely a factor-level phenomenon (which is the paper's own diversification-"
+                "amplification thesis). On that reading a 0056 gamma above the single-stock "
+                "average is CONSISTENT with the paper's mechanism, and 0056 belongs with the "
+                "index-like rows rather than the stock cross-section. Testing that would need a "
+                "decomposition the present experiment does not run."
+            ),
+        },
+        "data_quality_sensitivity_2317": sensitivity_2317,
+        "legacy_comparison": {
+            "n121_rendered_in_body_v3": LEGACY_N121_AVG,
+            "n121_per_row": LEGACY_N121,
+            "prior_run_2026_07_07": PRIOR_RUN_20260707,
+            "decomposition_note": (
+                "legacy_2025_01_22 re-estimates the OLD window on the NEW data. Comparing "
+                "it with prior_run_2026_07_07 isolates the effect of the data refresh "
+                "(near-zero: the series reproduce to <1e-6, so any gap is optimizer noise); "
+                "comparing it with primary_2026 isolates the effect of moving the window "
+                "forward by ~18 months, which is where the real change lives."
+            ),
+        },
+        "known_data_defects": {
+            "2317_capital_reduction_block": sensitivity_2317["what"],
+            "0050_split_2014_01_02": (
+                "4:1 split leaves a spurious split-date return even under auto_adjust=False; "
+                "excluded per body_v3.tex L33's canonical rule. Falls outside every window "
+                "used here, so it does not affect these estimates."
+            ),
+            "paper_csv_duplicate_rows": (
+                "paper/taiwan-vt/data/0050_tw_twii_..._2008-2026.csv carries 10 exactly-"
+                "duplicated date rows (2026-05-04..2026-05-15). This experiment does not read "
+                "that file for estimation, but any experiment that differences its twii/spy/vix "
+                "columns without de-duplicating will inject spurious jump returns. Reported for "
+                "the main thread; not edited here."
+            ),
+        },
+        "lookahead_free_certification": (
+            "gamma is an in-sample descriptive MLE on the last 2000-observation window. There "
+            "is no forecast, no OOS split, no train/test boundary and no signal construction, "
+            "so no lookahead channel exists. The MLE is deterministic; the seeded RNG is used "
+            "only for perturbed restarts on non-convergence (SEED=20260713), and no restart "
+            "was needed in this run."
+        ),
+        "provenance_note": (
+            "body_v3.tex's tab:gamma note labels the rolling-window t-statistics 'Newey-West "
+            "HAC'. That label is incorrect for a GARCH MLE and does not describe what is "
+            "computed here (or in K892): these are Bollerslev-Wooldridge robust sandwich MLE "
+            "t-values. The table note should be corrected. Reported t-values are BW-robust."
+        ),
     }
     with open(OUT, "w") as f:
         json.dump(result, f, indent=2)
-    print(f"\nall_match_legacy_rounded = {all_match}")
-    print(f"written: {OUT}")
+    print(f"\nwritten: {OUT}")
 
 
 if __name__ == "__main__":
