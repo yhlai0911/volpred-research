@@ -2,6 +2,47 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 01:10 — 警報把工作派給老闆：24/27 個 alert body 是寫給人看的待辦清單
+
+**問題**：老闆在一分鐘內回了兩封信罵同一件事 —— 「你要立即處理 不是只建議我」（email-12163）、
+「是你要立刻處理 不是叫我」（email-12162）。觸發點是 `member_qa_stale` 警報，它**連續 25 小時每小時**
+寄同一份 to-do list 給他：「主線程立即跑 question-ranking-workflow…」。
+
+**現象（兩層，缺一不可）**：
+1. **警報層**：全量掃 `alerts.py` 的 27 個 alert，**24 個**的 body 裡有 `## 建議行動` 區段，收件人是人類。
+   只有 3 個（publishing_freshness / lazypack_render_stuck / series_registry）會自己修。
+2. **派工層**：那筆 member question 其實**早就有對應的 P1 task**（`member_qa_e79a7097_evaluate`，
+   07-12 06:00 台灣建立），它在 pending 躺了 **17 小時、跨約 17 班 hourly fire** 才被 claim。
+   dispatcher 每小時都正確地把它列為最高優先候選 —— 但候選清單**只是建議**，真正挑哪個是該班 LLM 的
+   自由裁量，而 diversity rule（避開 last-3 task_type）**主動推開**已經被跳過的工作。
+   優先序救不了這件事：一個任務只要輸掉一次輪替，它每小時都會用同樣的方式再輸一次。
+
+**根因**：不是「alert 措辭不好」，是 framing 本身錯了。**在一個前提是「AI 全自動運營」的平台上，
+一個只有老闆能處理的 alert 是設計失敗，不是通知**。alert 本來就該等於 task。
+而光發任務也沒用 —— 任務會被餓死，這正是本次的實況。
+
+**解決方法（兩半合成一個修，缺任一半都無效）**：
+1. **Alert→task bridge**（`src/volpred/ops/alert_remediation.py`，單一 owner）：breach **預設**自動建任務，
+   registry 只列**例外** —— `SELF_REMEDIATING`（已自我修復，再建任務等於重工）與 `OWNER_DECISION`
+   （真正不可逆 / policy，目前只有 disk_usage）。**沒有「未分類」分支會靜靜退回騷擾老闆**：
+   新加的 alert 不管有沒有人記得分類，都會拿到任務。body 改成開頭講「已自動處理 + 任務 id」，
+   原本的步驟降級成「供執行者稽核」。每個 alert 每天冪等一筆（事故當天它寄了 25 次）。
+   只掛在 `check_alert_conditions`（會寄信的路徑）；唯讀 caller（dashboard / daily_checkup / summaries）
+   走 `build_alert_condition_report`，維持零副作用。
+2. **Starvation lockout**（`scripts/continue_task_dispatch.py`）：任務超過該優先序的容忍時數
+   （P1 6h / P2 24h / P3 72h）後，**候選菜單直接塌縮成只剩餓死的任務** —— diversity rotation 沒東西可以
+   輪過去。這是「請先吃最老的 P1」這句散文的機械版。餓死集合內部**按 priority 排、超時次之**：
+   純按超時排會讓超時 47h 的 P3 壓過剛餓死的 P1，那只是把餓死換個地方發生。
+
+**Gate**：`scripts/tests/test_dispatch_starvation.py`（6 tests，含 17h P1 的事故條件、菜單塌縮、
+排序不得讓 P3 壓 P1）+ `tests/test_alert_remediation.py`（11 tests，含「未分類 alert 預設建任務」、
+真實 email body 的 `建議行動` 降級、25 次 fire 只建 1 個任務、bridge 失敗要浮上 email 不可靜默）。
+兩組都做過 break-then-verify（舊排序確實會 FAIL 排序測試）。
+
+**教訓**：(a) 「已經有 alert 在盯」不代表事情會被做 —— alert 只證明**偵測**有效，不證明**處置**存在；
+(b) 建議性的候選清單 + 有裁量權的執行者 = 結構性餓死，優先序欄位救不了，只能改變**菜單上有什麼**；
+(c) 老闆連兩封信罵同一件事，代表這是 class 級問題不是單點 —— 全量掃描才看得到 24/27。
+
 ## 2026-07-13 00:15 — pre-commit 閘門審了「你沒有要 commit 的檔」：A 作者被 B 作者寫到一半的檔擋死
 
 **問題**：00:07 的 hourly fire 做完 K1700 followup，要 commit 自己的產物（懶人包 panels、agent job receipt、work_log）時被 pre-commit BLOCKED，
