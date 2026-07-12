@@ -1,0 +1,47 @@
+#!/bin/bash
+# Commit-message encoding owner.  Unlike PreToolUse, this hook sees the exact
+# bytes Git will store after shell quoting/expansion.  Git does not bypass
+# prepare-commit-msg with --no-verify, so this is the irreversible-error gate;
+# PreToolUse is only an earlier UX warning.
+set -uo pipefail
+
+MESSAGE_FILE="${1:-}"
+if [ -z "$MESSAGE_FILE" ] || [ ! -f "$MESSAGE_FILE" ]; then
+  echo "[prepare-commit-msg] BLOCKED: message file is missing" >&2
+  exit 1
+fi
+
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+PY="$ROOT/.venv/bin/python"
+[ -x "$PY" ] || PY="$(command -v python3 2>/dev/null)"
+if [ -z "${PY:-}" ] || [ ! -x "$PY" ]; then
+  echo "[prepare-commit-msg] BLOCKED: no Python interpreter for encoding validation" >&2
+  exit 1
+fi
+
+"$PY" - "$MESSAGE_FILE" <<'PY'
+from pathlib import Path
+import sys
+
+
+path = Path(sys.argv[1])
+try:
+    text = path.read_bytes().decode("utf-8", errors="strict")
+except (OSError, UnicodeDecodeError) as exc:
+    print(f"[prepare-commit-msg] BLOCKED: message is not strict UTF-8 ({exc})", file=sys.stderr)
+    raise SystemExit(1)
+
+bad = []
+for index, char in enumerate(text):
+    codepoint = ord(char)
+    if char == "\ufffd":
+        bad.append((index, "U+FFFD replacement character"))
+    elif (codepoint < 0x20 and char not in "\t\n\r") or 0x7F <= codepoint <= 0x9F:
+        bad.append((index, f"control U+{codepoint:04X}"))
+
+if bad:
+    sample = ", ".join(f"byte/char {offset}: {reason}" for offset, reason in bad[:5])
+    print(f"[prepare-commit-msg] BLOCKED: corrupted/control characters in message ({sample})", file=sys.stderr)
+    print("[prepare-commit-msg] Recreate the message as UTF-8; for Chinese use git commit -F <file>.", file=sys.stderr)
+    raise SystemExit(1)
+PY

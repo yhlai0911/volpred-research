@@ -50,7 +50,10 @@ say NOTE "  bash scripts/install_host_crontab.sh   # host crontab"
 # 5. 知識索引（LanceDB，gitignore，rebuild）
 uv run python scripts/build_knowledge_index.py update >/dev/null 2>&1 && say OK "知識索引 rebuilt" || say WARN "知識索引 rebuild 略過（缺 GOOGLE_CLOUD_API_KEY？）"
 
-# 6. 驗證
+# 6. Git safety hooks（pre-commit / prepare-commit-msg / pre-push）
+bash scripts/git_hooks/install.sh >/dev/null 2>&1 && say OK "Git safety hooks installed" || { say FAIL "Git hooks 安裝失敗"; warn=$((warn+1)); }
+
+# 7. 驗證
 echo ""; echo "=== 驗證 ==="
 uv run python scripts/daily_checkup.py 2>&1 | tail -3 || true
 

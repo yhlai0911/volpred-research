@@ -159,12 +159,48 @@ assert_deny  "commit --message 中文"       "git commit --message '修正'"
 assert_deny  "commit --message=中文"       "git commit --message='修正'"
 assert_deny  "commit -m attached 中文"     "git commit -m修正"
 assert_deny  "commit -am 中文"             "git commit -am '修正'"
+assert_deny  "commit -qm attached 中文"    "git commit -qm修正"
+assert_deny  "commit -im attached 中文"    "git commit -im修正"
+assert_deny  "commit -om 中文"             "git commit -om '中文訊息'"
+assert_deny  "commit -zm attached 中文"    "git commit -zm中文訊息"
+assert_deny  "commit unquoted hash 中文"   "git commit -m fix#中文"
 assert_deny  "multiple -m one 中文"        "git commit -m 'fix: ascii subject' -m '中文 body'"
 assert_deny  "commit -m emoji"             "git commit -m 'fix: 🚫 ban this'"
 assert_deny  "git -C commit -m 中文"       "git -C /tmp/repo commit -m '中文訊息'"
-assert_deny  "dynamic -m literal 中文"      "git commit -m \"\$(printf '中文')\""
+assert_deny  "git -c commit -m 中文"       "git -c user.name=test commit -m '中文訊息'"
+assert_deny  "git --no-pager commit 中文"  "git --no-pager commit --m='中文訊息'"
+assert_deny  "absolute git commit 中文"    "/usr/bin/git commit -m '中文訊息'"
+assert_deny  "env git commit 中文"         "env LC_ALL=C git commit -m '中文訊息'"
+assert_deny  "command git commit 中文"     "command git commit -m '中文訊息'"
+assert_deny  "assignment git commit 中文"  "LC_ALL=C git commit -m '中文訊息'"
+assert_deny  "if git commit 中文"          "if git commit -m '中文訊息'; then :; fi"
+assert_deny  "then git commit 中文"        "if true; then git commit -m '中文訊息'; fi"
+assert_deny  "brace git commit 中文"       "{ git commit -m '中文訊息'; }"
+assert_deny  "negated git commit 中文"     "! git commit -m '中文訊息'"
+assert_deny  "time git commit 中文"        "time -p git commit -m '中文訊息'"
+assert_deny  "exec git commit 中文"        "exec git commit -m '中文訊息'"
+assert_deny  "prefix redirect commit 中文" ">/tmp/commit.log git commit -m '中文訊息'"
+assert_deny  "fd redirect commit 中文"     "2>/tmp/commit.log git commit -m '中文訊息'"
+assert_deny  "env unset commit 中文"       "env -u LC_ALL git commit -m '中文訊息'"
+assert_deny  "else git commit 中文"        "if false; then :; else git commit -m '中文訊息'; fi"
+assert_deny  "append assignment 中文"      "PATH+=:/tmp git commit -m '中文訊息'"
+assert_deny  "quoted git executable 中文"  "'git' commit -m '中文訊息'"
+assert_deny  "continued git head 中文"     $'git \\\n  commit -m \'中文訊息\''
+assert_deny  "second commit has 中文"      "git commit -m 'fix: ascii' && git commit -m '中文訊息'"
+assert_deny  "inline trailer 中文"         "git commit -m 'fix: ascii' --trailer 'Reviewed-by: 王小明'"
+assert_deny  "abbrev trailer 中文"         "git commit -m 'fix: ascii' --tr='Reviewed-by: 王小明'"
+assert_allow "dynamic -m deferred to Git hook" "git commit -m \"\$(printf '中文')\""
+assert_deny  "line-continuation -m 中文"   $'git commit \\\n  -m \'中文訊息\''
+assert_deny  "multiline quoted 中文"       $'git commit -m \'第一行\n第二行\''
+assert_allow "malformed quote left to shell" "git commit -m '中文"
+assert_allow "expanded variable deferred"  'MSG=中文; git commit -m "$MSG"'
+assert_allow "ANSI-C escape deferred"      "git commit -m \$'\\u4e2d\\u6587'"
 assert_allow "commit -F 中文檔（合法解）"  "git commit -F /tmp/中文訊息.txt"
 assert_allow "commit -m 純 ASCII"          "git commit -m 'fix: ban non-ascii -m'"
+assert_allow "ASCII multiline -m"          $'git commit -m \'ascii subject\nascii body\''
+assert_allow "single-quoted dollar literal" "git commit -m '\$MSG'"
+assert_allow "command -v does not execute" "command -v git commit -m '中文訊息'"
+assert_allow "command -V does not execute" "command -V git commit -m '中文訊息'"
 assert_allow "非 commit 指令含中文"        "echo '中文' > /tmp/x"
 
 # `_commit_message_has_non_ascii` 只能看 message argv，不能看整條 Bash command。
@@ -177,6 +213,16 @@ assert_allow "Unicode author + ASCII commit" "git commit --author='王小明 <x@
 assert_allow "Unicode path + ASCII commit" "git -C /tmp/中文 commit -m 'fix: ascii only'"
 assert_allow "Unicode pathspec + ASCII commit" "git commit -m 'fix: ascii only' -- 中文檔.txt"
 assert_allow "two ASCII -m + unrelated 中文" "printf '%s' '中文' && git commit -m 'fix: subject' -m 'ascii body'"
+assert_allow "Unicode comment + ASCII commit" "git commit -m 'fix: ascii only' # 中文註解"
+assert_allow "Unicode -F then ASCII -m"    "git commit -F /tmp/中文訊息.txt && git commit -m 'fix: ascii only'"
+assert_allow "echo fake 中文 commit"       "echo \"git commit -m '中文'\" && git commit -m 'fix: ascii only'"
+assert_allow "unquoted echo fake 中文 commit" "echo git commit -m 中文 && git commit -m 'fix: ascii only'"
+assert_allow "line-continuation ASCII + 中文 elsewhere" $'printf 中文 && git commit \\\n  -m \'fix: ascii only\''
+assert_allow "arithmetic shift + ASCII commit" "(( x = 1 << 2 )); printf 中文; git commit -m 'fix: ascii only'"
+assert_allow "multiline ASCII message"     $'git commit -m \'first line\nsecond line\''
+assert_allow "command -v is lookup only"  "command -v git commit -m 中文"
+assert_allow "parameter text with shift token" "x=\${v:-a<<b}; git commit -m 'fix: ascii only'"
+assert_allow "array arithmetic shift"      "arr[1<<2]=x; git commit -m 'fix: ascii only'"
 
 HEREDOC_CJK_ASCII_COMMIT=$'python3 - <<\'PY\'\nprint("中文內容")\nPY\ngit commit -m "fix: ascii only"'
 assert_allow "中文 heredoc + ASCII commit" "$HEREDOC_CJK_ASCII_COMMIT"
@@ -185,6 +231,18 @@ assert_allow "中文 heredoc + ASCII commit" "$HEREDOC_CJK_ASCII_COMMIT"
 # parser 必須跳過 body，不能只用 shlex 把每一行都當成 simple command。
 HEREDOC_FAKE_COMMIT=$'cat > /tmp/example.sh <<\'SCRIPT\'\ngit commit -m \'中文範例\'\nSCRIPT\ngit commit -m \'fix: ascii only\''
 assert_allow "heredoc fake 中文 commit + real ASCII commit" "$HEREDOC_FAKE_COMMIT"
+
+HEREDOC_STRIP_TABS=$'cat <<-\'EOF\' > /tmp/note\n\t中文內容\n\tEOF\ngit commit -m \'fix: ascii only\''
+assert_allow "tab-stripped 中文 heredoc + ASCII commit" "$HEREDOC_STRIP_TABS"
+
+HEREDOC_FIFO=$'cat <<\'ONE\' <<\'TWO\' > /tmp/note\n第一段中文\nONE\n第二段中文\nTWO\ngit commit -m \'fix: ascii only\''
+assert_allow "two queued 中文 heredocs + ASCII commit" "$HEREDOC_FIFO"
+
+HEREDOC_HEADER_COMMIT=$'cat <<\'EOF\' > /tmp/note && git commit -m \'fix: ascii only\'\n中文內容\nEOF'
+assert_allow "same header heredoc + ASCII commit" "$HEREDOC_HEADER_COMMIT"
+
+HEREDOC_CONTINUED_HEADER=$'cat <<\'EOF\' > /tmp/note \\\n  && git commit -m \'中文訊息\'\nheredoc body\nEOF'
+assert_deny "continued heredoc header + 中文 commit" "$HEREDOC_CONTINUED_HEADER"
 
 # ── 2026-07-12 3-STRIKE class sweep：fire 內無界 agentic 子程序 ──────────────
 # 7/11 只擋了 class 的一個成員（codex exec）；隔天同 root cause 換執行檔（claude -p）

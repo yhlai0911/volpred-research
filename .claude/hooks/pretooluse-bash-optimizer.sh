@@ -81,11 +81,25 @@ _amend_target_is_shared_main() {
 # 訊息一旦 push 出去就只能 force push 才改得掉，而 force push 是禁止的 —— 亦即這個錯誤「不可回復」。
 # error_log 早在 2026-05 就寫了「中文 commit 一律 Write 檔案 + `git commit -F <file>`」，
 # 但 prose 擋不住趕時間的 agent：cea826ad0 中招、2369c7d07 又中招（同一週）。散文 → 機械 gate。
-# 判定用「commit 指令段 + `-m`/`--message` + 整行含非 ASCII 字元」；`-F` / `-C` / 純 ASCII 訊息不受影響。
-# 這裡刻意比對含引號的原始 COMMAND（不能用 COMMAND_NOQ —— 訊息本體正是被引號包住的那一段）。
-MESSAGE_FLAG='(-m|--m[[:alpha:]]*)'
+# 判定只看真正 `git … commit` argv 裡的 inline message/trailer 值；不能看整條
+# COMMAND（2026-07-12 hourly-01：前段 Python heredoc 有中文、後段純 ASCII -m 被誤擋）。
+# helper 先遮蔽 heredoc body，再做無執行的 shell lexical parse，僅負責提早提示；真正
+# fail-closed owner 是 prepare-commit-msg（看 shell expansion 後 Git 實際要存的 bytes）。
+# `-F` / `-C` / 純 ASCII 訊息不受影響。
+COMMIT_MESSAGE_GUARD="${BASH_SOURCE[0]%/*}/../../scripts/hooks/commit_message_guard.py"
 _commit_message_has_non_ascii() {
-  printf '%s' "$COMMAND" | LC_ALL=C grep -q '[^[:print:][:space:]]'
+  local rc
+  if printf '%s' "$COMMAND" | python3 "$COMMIT_MESSAGE_GUARD"; then
+    return 0
+  else
+    rc=$?
+  fi
+  # 10=explicit safe, 20=unsupported/ambiguous syntax: let Git parse it and let
+  # prepare-commit-msg validate the actual bytes. Any other helper failure
+  # stays fail-closed here; Python's default exception rc=1 cannot masquerade
+  # as an explicit ALLOW sentinel.
+  [[ "$rc" -eq 10 || "$rc" -eq 20 ]] && return 1
+  return 0
 }
 
 # ── 無界 agentic 子程序 class（2026-07-12 3-STRIKE class sweep）──────────────
@@ -127,7 +141,12 @@ elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}${BIN_PREFIX}codex[[:spa
 elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit${SEG_TAIL}[[:space:]]${AMEND_FLAG}([[:space:]]|\$)" \
      && _amend_target_is_shared_main; then
   DENY_REASON="🚫 禁止在共用 main checkout 的 main 分支上 git commit --amend（2026-07-10 hourly-23 事故：amend 打在另一個 agent 剛做的 commit 上，覆蓋其 message 並吞掉它 5 個未提交的在途檔案）。主 checkout 同時有 dispatch worker / codex-vscode / rescue agent 在 commit，HEAD 不保證是你做的。改法：要修訊息或補內容，就再疊一個 commit（歷史多一行，勝過覆蓋別人的一行）。在自己的 worktree 分支上 amend 不受此攔截。"
-elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit${SEG_TAIL}[[:space:]]${MESSAGE_FLAG}([[:space:]]|=|\$)" \
+# Candidate detection must not repeat a partial shell parser.  In particular,
+# `git \\` + newline + `commit ...` and a quoted executable (`'git' commit`)
+# are valid shell but defeated the old line-oriented/quote-stripped grep.
+# A broad raw-text fast path is cheap; the Python helper remains the sole
+# authority for deciding whether a real git-commit argv has an unsafe value.
+elif [[ "$COMMAND" == *commit* ]] \
      && _commit_message_has_non_ascii; then
   DENY_REASON="🚫 禁止用 git commit -m 內嵌非 ASCII（中文 / emoji）訊息（strike 3：cea826ad0、2369c7d07 同週兩次；error_log 2026-05 的散文規則擋不住）。經過 shell 會產出非 UTF-8 的 commit message，git 只給 warning 照樣 commit，push 出去後只有 force push 改得掉 —— 而 force push 是禁止的，等於不可回復。改法：用 Write 工具把訊息寫成 /tmp/msg.txt，再 git commit -F /tmp/msg.txt。純 ASCII 訊息、-F、--amend 走既有規則，皆不受此攔截。"
 fi

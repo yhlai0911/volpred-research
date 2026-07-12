@@ -152,10 +152,16 @@ Worker log tail: (empty)
 遮蔽 quoted / `<<-` / FIFO multi-heredoc body，套用 shell line-continuation 與 comment 邊界，再只檢查
 真正 `git … commit` 的 `-m` / clustered `-am` / `--message` / repeated message 與 inline trailer 值；
 author、`-C` 路徑、pathspec、前後指令與 heredoc 中文都不再誤擋。absolute git、global opts、
-`env` / `command` / compound-control / prefix-redirection 等等價執行形態同步納入。helper 不執行 expansion，
-missing helper、malformed quote/heredoc 或 lexical ambiguity 一律 fail closed，合法出口仍是 `git commit -F`。
-回歸從原本 **86 assertions 擴到 134 assertions，134/134 PASS**；另過 `bash -n`、Python `py_compile`
-與 `git diff --check`。這次修的是流程 owner，不改任何既有 commit 或歷史資料。
+`env` / `command` / compound-control / prefix-redirection 等等價執行形態同步納入。這層 parser 不執行
+runtime expansion；無法分類的 shell 語法會交回 Git，而不是因 unrelated Unicode 再次誤擋。
+
+硬性 enforcement owner 移到版本化的 `scripts/git_hooks/prepare-commit-msg`：它直接讀 Git 經 shell
+展開後準備寫入的 message bytes，要求 strict UTF-8、禁止 U+FFFD 與 C0/C1 controls（tab/LF/CR 除外），
+而且 `git commit --no-verify` 也不能跳過；合法中文出口仍是 `git commit -F`。installer 與換機 bootstrap
+都會安裝這個 hook。PreToolUse 現在只是早期 UX trigger，避免自行猜測 `$MSG` / ANSI-C quote / nested
+substitution 的最終值。回歸從原本 **86 assertions 擴到 150 assertions，150/150 PASS**；實際 message
+boundary 另有 **9/9 pytest PASS**（含 `--no-verify` 不能繞過與 UTF-8 中文 `-F` 可提交），並通過
+`bash -n`、Python `py_compile` 與 `git diff --check`。這次修的是流程，不改既有 commit 或歷史資料。
 
 ## 2026-07-11 FEVD 取錯軸：`decomp[-1]` 把「最後一個變數」當成「最後一個 horizon」（K865 全數字作廢）
 
