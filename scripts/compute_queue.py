@@ -21,6 +21,8 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
     stdout_file / stderr_file (str)
     result_artifact (str|null)  — declared output; a completed job must contain it
     job_metadata (str|null)     — runner lifecycle/validation receipt (agent jobs)
+    kind (str)         — compute / agent
+    cwd (str|null)     — agent working directory (worktree when explicit)
     claude_followup (dict|null) — { brief, task_type, priority }
     followup_dispatched (bool)  — true after hourly_dispatch creates next_task
     timeout_seconds (int)
@@ -28,7 +30,8 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
 Usage:
     enqueue:   uv run python scripts/compute_queue.py enqueue --script X --title Y ...
     list:      uv run python scripts/compute_queue.py list
-    list-completed-pending-followup: ...
+    list --pending-followup: completed collection + failed-agent triage
+    list --completed-pending-followup: legacy completed-only view
     run-next:  uv run python scripts/compute_queue.py run-next
     show:      uv run python scripts/compute_queue.py show <id>
     mark-followup-dispatched: ... --id <id>
@@ -141,6 +144,8 @@ def enqueue(args) -> int:
         "stderr_file": str(LOG_DIR / f"{job_id}.stderr"),
         "result_artifact": args.result_artifact,
         "job_metadata": getattr(args, "job_metadata", None),
+        "kind": getattr(args, "job_kind", "compute"),
+        "cwd": getattr(args, "job_cwd", None),
         "claude_followup": followup,
         "followup_dispatched": False,
         "timeout_seconds": args.timeout or 3600,
@@ -222,12 +227,87 @@ def enqueue_agent(args) -> int:
         env=None,
         result_artifact=str(artifact_path) if artifact_path is not None else None,
         job_metadata=str(metadata_path),
+        job_kind="agent",
+        job_cwd=str(workdir),
         followup_brief=args.followup_brief,
         followup_task_type=args.followup_task_type,
         followup_priority=args.followup_priority,
         timeout=outer_timeout,
     )
     return enqueue(inner)
+
+
+def _arg_value(args: Any, flag: str) -> str | None:
+    if not isinstance(args, list):
+        return None
+    if flag not in args:
+        return None
+    index = args.index(flag)
+    return args[index + 1] if index + 1 < len(args) else None
+
+
+def _agent_workdir(job: dict[str, Any]) -> str | None:
+    """Read new schema first, then infer legacy run_agent_job receipts."""
+    raw = None
+    if job.get("kind") == "agent" and job.get("cwd"):
+        raw = str(job["cwd"])
+    elif job.get("script_path") == "scripts/run_agent_job.py":
+        raw = _arg_value(job.get("args") or [], "--cwd")
+    if not raw:
+        return None
+    path = Path(raw)
+    if not path.is_absolute():
+        path = ROOT / path
+    path = path.resolve(strict=False)
+    if path == ROOT.resolve(strict=False):
+        return None
+    return str(path)
+
+
+def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
+    """Return a dispatch view with explicit success-vs-failure semantics."""
+    if job.get("followup_dispatched"):
+        return None
+
+    if job.get("status") == "completed" and job.get("claude_followup"):
+        row = dict(job)
+        row["followup_mode"] = "collect_completed"
+        return row
+
+    if job.get("status") != "failed":
+        return None
+    workdir = _agent_workdir(job)
+    if not workdir:
+        return None
+
+    original = job.get("claude_followup") or {}
+    if not isinstance(original, dict):
+        original = {}
+    original_brief = original.get("brief")
+    triage_lines = [
+        "TRIAGE FAILED AGENT JOB — this job did not complete successfully.",
+        f"Job: {job.get('id')} (exit_code={job.get('exit_code')})",
+        f"Worktree/cwd: {workdir}",
+        f"Result artifact (may be missing, partial, or stale): {job.get('result_artifact')}",
+        f"Runner metadata: {job.get('job_metadata')}",
+        f"stdout/stderr: {job.get('stdout_file')} | {job.get('stderr_file')}",
+        "Inspect what actually exists in the worktree. Decide whether to preserve/commit and continue, "
+        "re-enqueue from a fresh worktree, or document that nothing is salvageable. Do not treat any "
+        "artifact as a successful result without validation, and never force-remove the worktree.",
+    ]
+    if original_brief:
+        triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
+
+    row = dict(job)
+    row["followup_mode"] = "triage_failed"
+    original_priority = original.get("priority")
+    triage_priority = original_priority if isinstance(original_priority, int) else 2
+    row["claude_followup"] = {
+        "brief": "\n".join(triage_lines),
+        "task_type": "platform_ops",
+        "priority": min(triage_priority, 2),
+    }
+    return row
 
 
 def list_jobs(args) -> int:
@@ -239,7 +319,13 @@ def list_jobs(args) -> int:
             continue
         if args.status and j.get("status") != args.status:
             continue
-        if args.completed_pending_followup:
+        if getattr(args, "pending_followup", False):
+            view = _pending_followup_view(j)
+            if view is None:
+                continue
+            rows.append(view)
+            continue
+        if getattr(args, "completed_pending_followup", False):
             if j.get("status") != "completed" or j.get("followup_dispatched"):
                 continue
             if not j.get("claude_followup"):
@@ -425,6 +511,11 @@ def main():
 
     l = sub.add_parser("list")
     l.add_argument("--status")
+    l.add_argument(
+        "--pending-followup",
+        action="store_true",
+        help="List completed collection and failed-agent worktree triage followups.",
+    )
     l.add_argument("--completed-pending-followup", action="store_true")
     l.add_argument("--json", action="store_true")
     l.set_defaults(func=list_jobs)

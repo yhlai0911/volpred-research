@@ -36,6 +36,14 @@ queue 不會標 completed。regression test 用 fake agent 在 worktree 寫真 J
 不存在、真結果內容未被改寫、metadata 分流正確；另覆蓋 missing-artifact fail-closed 與 code-only job
 不虛構 artifact。
 
+**同日 failed-agent 收件缺口更正（Codex failover）**：上述修正只保證失敗後不再有 orphan 子程序，
+但 agent 被 timeout/非零退出時，worktree 仍可能已有值得保留的腳本或 partial result。舊 PHASE A 只查
+`status=completed`，所以 failed job 會永久靜默。compute queue 現在為 agent job 持久化 `kind=agent`
+與 explicit `cwd`，`list --pending-followup` 同時輸出 `collect_completed` 與 `triage_failed`：後者衍生
+platform_ops brief，明文要求檢視、驗證、續跑或正式記錄無可救援，且不得把殘留 artifact 當成功。
+legacy `run_agent_job.py --cwd` receipt 也可辨識；generic compute failure、main-cwd agent 與已派 followup
+仍排除。hourly PHASE A 已改按 mode 分流，避免 K1685 類 worktree 成果再靠偶然被人發現。
+
 **教訓（會再犯的兩點）**：
 1. **`execution_brief` 的 `for _ in range(3)` retry loop 是最毒的形態**：舊碼逾時後 `continue` 會**再 spawn 一個 claude**，而前一棵樹還活著 → 3 次 retry 可疊出 3 棵並行的孤兒樹，而我們只讀其中一棵的輸出。kill 必須發生在 retry 之前。
 2. **換掉 subprocess seam 會靜默弄壞 monkeypatch 測試**：`tests/test_execution_brief.py` patch 的是 `subprocess.run`，新 helper 走 `Popen` → patch 攔不到 → 測試**真的去 spawn `claude`**，掛 3 分鐘而不是 fail。改 subprocess 呼叫形態時，先 grep 誰在 patch 它。

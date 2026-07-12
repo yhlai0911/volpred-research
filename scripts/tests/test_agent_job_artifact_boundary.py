@@ -195,6 +195,8 @@ def test_enqueue_agent_resolves_result_from_worktree_and_separates_metadata(
 
     assert job["result_artifact"] == str(expected_result)
     assert job["job_metadata"] == str(expected_metadata)
+    assert job["kind"] == "agent"
+    assert job["cwd"] == str(worktree)
     result_index = job["args"].index("--result-artifact")
     metadata_index = job["args"].index("--job-metadata")
     assert job["args"][result_index + 1] == str(expected_result)
@@ -225,5 +227,7 @@ def test_enqueue_agent_without_result_does_not_invent_a_fake_artifact(
         (root / "storage/ops/compute_queue/agent-code-only.json").read_text()
     )
     assert job["result_artifact"] is None
+    assert job["kind"] == "agent"
+    assert job["cwd"] == str(worktree)
     assert "--result-artifact" not in job["args"]
     assert job["job_metadata"].endswith("storage/ops/agent_jobs/agent-code-only.json")

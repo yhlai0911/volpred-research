@@ -85,9 +85,12 @@ PHASE 0.5 — **verify-only：reader-facing badge pool refill 狀態檢查**（2
 
 這樣做的目的：把 reader-facing pool top-up 從 prompt-level 紀律改成 repo-level script + host cron，可測試、可重跑、可觀測。
 
-PHASE A — 檢查 compute queue 有無 completed 待 followup:
-1. 跑 `uv run python scripts/compute_queue.py list --completed-pending-followup --json`
-2. 若有 entries → 優先處理: 對最舊一條讀 `result_artifact`（若非 null，這是 agent 真正產出的檔）+ `job_metadata`（若非 null，這是 runner lifecycle receipt）+ `claude_followup.brief`，派 Claude interpretation agent 解讀（~25K tokens, light），不再做 compute。**禁止把 `job_metadata` 當研究結果**。派完跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。本小時派工結束。
+PHASE A — 檢查 compute queue 有無 completed collection / failed-agent triage followup:
+1. 跑 `uv run python scripts/compute_queue.py list --pending-followup --json`
+2. 若有 entries → 優先處理最舊一條，依 `followup_mode` 分流：
+   - `collect_completed`：讀 `result_artifact`（若非 null，這是 agent 真正產出的檔）+ `job_metadata`（若非 null，這是 runner lifecycle receipt）+ `claude_followup.brief`，派 interpretation/collection agent 解讀（~25K tokens, light），不再做 compute。**禁止把 `job_metadata` 當研究結果**。
+   - `triage_failed`：job **沒有成功**；派 platform_ops triage，照衍生的 `claude_followup.brief` 檢查 worktree/cwd 裡究竟有無可保留的腳本、partial result 或完整但未驗證的結果，再決定續跑 / fresh-worktree re-enqueue / 記錄無可救援。**不得把 failed job 或殘留 artifact 當成功結果，亦不得 force-remove worktree**。
+   兩種 mode 都在成功建出 next task 後跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。本小時派工結束。
 3. 若無待 followup → 進 PHASE B。
 
 PHASE B-PARALLEL — 草稿池低水位並行補寫（boss msg143 2026-07-04 硬性要求；2026-07-05 落地）:
