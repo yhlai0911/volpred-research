@@ -190,6 +190,89 @@ def _is_codex_eligible_task(task: dict[str, Any]) -> bool:
     return preferred_agent == "codex"
 
 
+def _expire_managed_event_before_claim(
+    task: dict[str, Any], *, owner: str
+) -> dict[str, Any] | None:
+    """Reject a canonical event claim that lost the race with its deadline."""
+
+    managed = _normalized_task_type(task) == "event_article" and (
+        str(task.get("source") or "").strip().lower() == "event_expander"
+        or bool(task.get("ref_event_job_id"))
+    )
+    if not managed:
+        return None
+
+    task_id = _task_key(task)
+    raw_deadline = task.get("deadline")
+    if not raw_deadline:
+        schema_error = "missing_deadline"
+        deadline = None
+    else:
+        deadline = parse_iso_warn(
+            raw_deadline,
+            tag="claim",
+            field_name="deadline",
+            fallback=None,
+            site="event_deadline_guard",
+            task_id=task_id,
+        )
+        schema_error = "invalid_deadline" if deadline is None else None
+    if schema_error:
+        now_text = _now()
+        previous = str(task.get("status") or "").strip().lower() or "pending"
+        task["status"] = "failed"
+        task["completed_at"] = now_text
+        task["failed_at"] = now_text
+        task["result"] = "managed event task has no valid deadline"
+        task["last_error"] = schema_error
+        _record_status_history(
+            task,
+            frm=previous,
+            to="failed",
+            by=owner,
+            note=f"claim_rejected_{schema_error}",
+        )
+        return {
+            "ok": False,
+            "reason": schema_error,
+            "task_id": task_id,
+            "status": "failed",
+        }
+
+    now_text = _now()
+    now = parse_iso_warn(
+        now_text,
+        tag="claim",
+        field_name="claim_now",
+        fallback=None,
+        site="event_deadline_guard",
+        task_id=task_id,
+    )
+    if now is None or now <= deadline:
+        return None
+
+    previous = str(task.get("status") or "").strip().lower() or "pending"
+    task["status"] = "expired"
+    task["expired_at"] = now_text
+    task["completed_at"] = now_text
+    task["result"] = "event_deadline_expired_before_dispatch"
+    task["last_error"] = "deadline_expired_never_dispatched"
+    _record_status_history(
+        task,
+        frm=previous,
+        to="expired",
+        by=owner,
+        note="claim_rejected_after_event_deadline",
+    )
+    return {
+        "ok": False,
+        "reason": "deadline_expired",
+        "task_id": task_id,
+        "status": "expired",
+        "deadline": deadline.isoformat(),
+    }
+
+
 def _is_codex_owner(owner: str) -> bool:
     normalized = str(owner or "").strip().lower()
     return normalized == "codex" or normalized.startswith("codex-") or normalized.startswith("codex_")
@@ -372,6 +455,10 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
             }
         if existing_status not in {"pending", "pending_main_thread", "claimed", "blocked", ""}:
             return {"ok": False, "reason": "wrong_status", "status": existing_status}
+        if existing_status != "claimed":
+            deadline_result = _expire_managed_event_before_claim(task, owner=args.owner)
+            if deadline_result is not None:
+                return deadline_result
         if _is_codex_owner(args.owner) and not _is_codex_eligible_task(task):
             return {
                 "ok": False,

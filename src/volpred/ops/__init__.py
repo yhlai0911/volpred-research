@@ -46,6 +46,7 @@ from .local_control_plane import (
     complete_task,
     create_task,
     curate_task,
+    expire_queued_task,
     fail_task,
     get_agent_session,
     get_agent_session_by_session_key,
@@ -59,6 +60,7 @@ from .local_control_plane import (
     requeue_task,
     reject_task,
     resolve_session_key,
+    supersede_queued_task,
     task_governance_area,
 )
 from .papers import get_paper, list_papers, migrate_paper_pdf_to_storage, upload_paper_pdf, upsert_paper_metadata
@@ -74,7 +76,12 @@ from .shared_lock import shared_state_lock
 from .agent_spec import check_agent_specs, import_agent_specs, render_agent_specs, sync_agent_specs
 from .session import session_bootstrap, session_finish_task, session_next_task, session_shutdown
 from .jobs import SUPPORTED_ACTIONS, enqueue_job, get_job, list_jobs, work_loop, work_once
-from .event_jobs import expand_due_event_jobs, gc_event_ledger, preview_event_jobs
+from .event_jobs import (
+    expand_due_event_jobs,
+    expire_overdue_event_tasks,
+    gc_event_ledger,
+    preview_event_jobs,
+)
 from .execution_brief import (
     build_execution_brief,
     ensure_execution_brief,
@@ -179,6 +186,8 @@ __all__ = [
     "ensure_article_local_backups",
     "enqueue_job",
     "expand_due_event_jobs",
+    "expire_overdue_event_tasks",
+    "expire_queued_task",
     "fail_task",
     "get_agent_session",
     "get_agent_session_by_session_key",
@@ -236,6 +245,7 @@ __all__ = [
     "set_execution_brief",
     "sync_all",
     "sync_agent_specs",
+    "supersede_queued_task",
     "task_brief_is_ready",
     "task_brief_is_stale",
     "task_governance_area",

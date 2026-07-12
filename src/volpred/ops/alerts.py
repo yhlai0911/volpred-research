@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import os
@@ -3379,7 +3380,9 @@ def _parse_content_quality_state(
 
 def _event_receipt_deadlines(storage_dir: str) -> dict[str, datetime]:
     ledger_root = _ops_path(storage_dir, "event_ledger")
+    tasks_root = _ops_path(storage_dir, "tasks")
     deadlines: dict[str, datetime] = {}
+    event_job_deadlines: dict[str, datetime] = {}
     if not ledger_root.exists():
         return deadlines
 
@@ -3391,13 +3394,65 @@ def _event_receipt_deadlines(storage_dir: str) -> dict[str, datetime]:
             continue
         if not isinstance(payload, dict):
             continue
-        task_id = str(payload.get("task_id") or "").strip()
         deadline = _parse_iso_datetime(payload.get("deadline"))
-        if not task_id or deadline is None:
+        if deadline is None:
             continue
-        current = deadlines.get(task_id)
-        if current is None or deadline < current:
-            deadlines[task_id] = deadline
+        task_ids = {
+            str(payload.get(key) or "").strip()
+            for key in ("task_id", "next_task_id", "receipt_task_id")
+        }
+        if isinstance(payload.get("receipt_task_ids"), list):
+            task_ids.update(str(value or "").strip() for value in payload["receipt_task_ids"])
+        for task_id in task_ids - {""}:
+            current = deadlines.get(task_id)
+            if current is None or deadline < current:
+                deadlines[task_id] = deadline
+            receipt_path = tasks_root / f"{task_id}.json"
+            if not receipt_path.exists():
+                continue
+            try:
+                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            except Exception as exc:  # noqa: BLE001 - alert parser must stay non-fatal
+                warn(
+                    "alerts",
+                    "linked event receipt read failed; skipping alias",
+                    path=str(receipt_path),
+                    err=str(exc),
+                )
+                continue
+            receipt_payload = receipt.get("payload") if isinstance(receipt, dict) else None
+            event_job_id = (
+                str(receipt_payload.get("event_job_id") or "").strip()
+                if isinstance(receipt_payload, dict)
+                else ""
+            )
+            if event_job_id:
+                current_event_deadline = event_job_deadlines.get(event_job_id)
+                if current_event_deadline is None or deadline < current_event_deadline:
+                    event_job_deadlines[event_job_id] = deadline
+
+    if event_job_deadlines and tasks_root.exists():
+        for path in sorted(tasks_root.glob("*.json")):
+            try:
+                receipt = json.loads(path.read_text(encoding="utf-8"))
+            except Exception as exc:  # noqa: BLE001 - alert parser must stay non-fatal
+                warn(
+                    "alerts",
+                    "event receipt alias scan failed; skipping",
+                    path=str(path),
+                    err=str(exc),
+                )
+                continue
+            payload = receipt.get("payload") if isinstance(receipt, dict) else None
+            event_job_id = (
+                str(payload.get("event_job_id") or "").strip()
+                if isinstance(payload, dict)
+                else ""
+            )
+            deadline = event_job_deadlines.get(event_job_id)
+            task_id = str(receipt.get("id") or path.stem) if isinstance(receipt, dict) else ""
+            if deadline is not None and task_id:
+                deadlines[task_id] = deadline
     return deadlines
 
 
@@ -3440,11 +3495,99 @@ def _parse_event_receipt_state(storage_dir: str, now: datetime) -> dict[str, Any
     a claimed FOMC T+0 zombie and queued NFP tasks whose deadline passed.
     """
     tasks_root = _ops_path(storage_dir, "tasks")
+    next_tasks_path = _storage_root(storage_dir) / "next_tasks.json"
     deadlines = _event_receipt_deadlines(storage_dir)
     ledger_task_ids = set(deadlines)
     stale: list[dict[str, Any]] = []
     checked = 0
+    checked_by_store = {"legacy_receipts": 0, "next_tasks": 0, "event_ledger_bridges": 0}
     read_errors: list[str] = []
+    canonical_task_ids: set[str] = set()
+    legacy_nonterminal_ids: set[str] = set()
+    canonical_queue_readable = True
+
+    def canonical_task_still_missing(task_id: str) -> bool | None:
+        """Reconfirm a bridge gap under the queue lock to avoid split-snapshot races."""
+
+        if not next_tasks_path.exists():
+            return True
+        try:
+            with next_tasks_path.open("r", encoding="utf-8") as handle:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
+                try:
+                    current = json.load(handle)
+                finally:
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        except Exception as exc:  # noqa: BLE001 - alert parser must stay non-fatal
+            warn(
+                "event_receipt_parse",
+                "bridge confirmation read failed",
+                path=_relative_repo_path(next_tasks_path),
+                err=f"{type(exc).__name__}: {exc}",
+            )
+            read_errors.append(f"{_relative_repo_path(next_tasks_path)}: {type(exc).__name__}")
+            return None
+        if isinstance(current, dict):
+            current = current.get("tasks", [])
+        if not isinstance(current, list):
+            return None
+        return not any(
+            isinstance(task, dict) and str(task.get("id") or "") == task_id
+            for task in current
+        )
+
+    def inspect_task(task: dict[str, Any], *, path: Path, store: str) -> None:
+        nonlocal checked
+        if not _is_event_receipt_task(task, ledger_task_ids=ledger_task_ids) and str(
+            task.get("task_type") or ""
+        ).strip().lower() != "event_article":
+            return
+        checked += 1
+        checked_by_store[store] += 1
+
+        status = str(task.get("status") or "").strip().lower()
+        if status in EVENT_RECEIPT_TERMINAL_STATUSES:
+            return
+
+        task_id = str(task.get("id") or path.stem)
+        if store == "legacy_receipts":
+            legacy_nonterminal_ids.add(task_id)
+        title = str(task.get("title") or task_id)
+        claimed_at = _parse_iso_datetime(task.get("claimed_at")) or _parse_iso_datetime(
+            task.get("started_at")
+        )
+        deadline = _event_receipt_deadline(task, deadlines)
+
+        reasons: list[str] = []
+        age_hours: float | None = None
+        if status in EVENT_RECEIPT_CLAIMED_STATUSES and claimed_at is not None:
+            age_hours = round((now - claimed_at).total_seconds() / 3600.0, 2)
+            if now - claimed_at > EVENT_RECEIPT_CLAIMED_WARN:
+                reasons.append("claimed_over_24h")
+
+        if status in EVENT_RECEIPT_QUEUE_STATUSES and deadline is not None and now > deadline:
+            reasons.append("queued_past_deadline")
+
+        if reasons:
+            overdue_hours = (
+                round((now - deadline).total_seconds() / 3600.0, 2)
+                if deadline is not None and now > deadline
+                else None
+            )
+            stale.append(
+                {
+                    "task_id": task_id,
+                    "status": status,
+                    "title": title,
+                    "reasons": reasons,
+                    "claimed_at": claimed_at.isoformat() if claimed_at else None,
+                    "claimed_age_hours": age_hours,
+                    "deadline": deadline.isoformat() if deadline else None,
+                    "deadline_overdue_hours": overdue_hours,
+                    "store": store,
+                    "path": _relative_repo_path(path),
+                }
+            )
 
     if tasks_root.exists():
         for path in sorted(tasks_root.glob("*.json")):
@@ -3461,57 +3604,151 @@ def _parse_event_receipt_state(storage_dir: str, now: datetime) -> dict[str, Any
                 continue
             if not isinstance(task, dict):
                 continue
-            if not _is_event_receipt_task(task, ledger_task_ids=ledger_task_ids):
-                continue
-            checked += 1
+            inspect_task(task, path=path, store="legacy_receipts")
 
-            status = str(task.get("status") or "").strip().lower()
-            if status in EVENT_RECEIPT_TERMINAL_STATUSES:
-                continue
-
-            task_id = str(task.get("id") or path.stem)
-            title = str(task.get("title") or task_id)
-            claimed_at = _parse_iso_datetime(task.get("claimed_at")) or _parse_iso_datetime(
-                task.get("started_at")
+    if next_tasks_path.exists():
+        try:
+            with next_tasks_path.open("r", encoding="utf-8") as handle:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
+                try:
+                    next_tasks = json.load(handle)
+                finally:
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        except Exception as exc:  # noqa: BLE001 - alert parser must stay non-fatal
+            warn(
+                "event_receipt_parse",
+                "canonical next_tasks json decode failed",
+                path=_relative_repo_path(next_tasks_path),
+                err=f"{type(exc).__name__}: {exc}",
             )
-            deadline = _event_receipt_deadline(task, deadlines)
-
-            reasons: list[str] = []
-            age_hours: float | None = None
-            if status in EVENT_RECEIPT_CLAIMED_STATUSES and claimed_at is not None:
-                age_hours = round((now - claimed_at).total_seconds() / 3600.0, 2)
-                if now - claimed_at > EVENT_RECEIPT_CLAIMED_WARN:
-                    reasons.append("claimed_over_24h")
-
-            if status in EVENT_RECEIPT_QUEUE_STATUSES and deadline is not None and now > deadline:
-                reasons.append("queued_past_deadline")
-
-            if reasons:
-                overdue_hours = (
-                    round((now - deadline).total_seconds() / 3600.0, 2)
-                    if deadline is not None and now > deadline
-                    else None
+            read_errors.append(f"{_relative_repo_path(next_tasks_path)}: {type(exc).__name__}")
+            canonical_queue_readable = False
+        else:
+            if isinstance(next_tasks, dict):
+                next_tasks = next_tasks.get("tasks", [])
+            if not isinstance(next_tasks, list):
+                read_errors.append(
+                    f"{_relative_repo_path(next_tasks_path)}: invalid_schema_{type(next_tasks).__name__}"
                 )
+                canonical_queue_readable = False
+            else:
+                for task in next_tasks:
+                    if isinstance(task, dict):
+                        task_id = str(task.get("id") or "").strip()
+                        if task_id:
+                            canonical_task_ids.add(task_id)
+                        inspect_task(task, path=next_tasks_path, store="next_tasks")
+
+    if canonical_queue_readable:
+        ledger_root = _ops_path(storage_dir, "event_ledger")
+        for path in (sorted(ledger_root.glob("*.json")) if ledger_root.exists() else []):
+            try:
+                ledger = json.loads(path.read_text(encoding="utf-8"))
+            except Exception as exc:  # noqa: BLE001 - alert parser must stay non-fatal
+                warn(
+                    "event_receipt_parse",
+                    "event ledger bridge json decode failed",
+                    path=_relative_repo_path(path),
+                    err=f"{type(exc).__name__}: {exc}",
+                )
+                read_errors.append(f"{_relative_repo_path(path)}: {type(exc).__name__}")
+                continue
+            if not isinstance(ledger, dict):
+                continue
+            next_task_id = str(ledger.get("next_task_id") or "").strip()
+            conflict_disposition = str(
+                ledger.get("canonical_conflict_disposition") or ""
+            ).strip()
+            if conflict_disposition.startswith("dual_active_lifecycle_conflict"):
+                checked += 1
+                checked_by_store["event_ledger_bridges"] += 1
+                deadline = _parse_iso_datetime(ledger.get("deadline"))
                 stale.append(
                     {
-                        "task_id": task_id,
-                        "status": status,
-                        "title": title,
-                        "reasons": reasons,
-                        "claimed_at": claimed_at.isoformat() if claimed_at else None,
-                        "claimed_age_hours": age_hours,
+                        "task_id": next_task_id
+                        or str(ledger.get("task_id") or "dual_active_event"),
+                        "status": "conflict",
+                        "title": str(ledger.get("event_key") or "dual active event lifecycle"),
+                        "reasons": ["dual_active_lifecycle_conflict"],
+                        "claimed_at": None,
+                        "claimed_age_hours": None,
                         "deadline": deadline.isoformat() if deadline else None,
-                        "deadline_overdue_hours": overdue_hours,
+                        "deadline_overdue_hours": None,
+                        "store": "event_ledger_bridges",
                         "path": _relative_repo_path(path),
                     }
                 )
+                continue
+            disposition = str(ledger.get("disposition") or "").strip()
+            if disposition == "reaction_already_covered" or disposition.startswith(
+                "legacy_receipt_conflict"
+            ):
+                if not (
+                    disposition.startswith("legacy_receipt_conflict")
+                    and conflict_disposition.startswith("canonical_already_terminal:succeeded")
+                ):
+                    continue
+                checked += 1
+                checked_by_store["event_ledger_bridges"] += 1
+                deadline = _parse_iso_datetime(ledger.get("deadline"))
+                stale.append(
+                    {
+                        "task_id": next_task_id
+                        or str(ledger.get("task_id") or "legacy_event_active"),
+                        "status": "conflict",
+                        "title": str(ledger.get("event_key") or "legacy event still active"),
+                        "reasons": ["legacy_active_after_canonical_succeeded"],
+                        "claimed_at": None,
+                        "claimed_age_hours": None,
+                        "deadline": deadline.isoformat() if deadline else None,
+                        "deadline_overdue_hours": None,
+                        "store": "event_ledger_bridges",
+                        "path": _relative_repo_path(path),
+                    }
+                )
+                continue
+            legacy_task_id = str(
+                ledger.get("receipt_task_id") or ledger.get("task_id") or ""
+            ).strip()
+            expects_bridge = bool(next_task_id) or (
+                str(ledger.get("record_kind") or "") == "next_tasks_materialization"
+                or legacy_task_id in legacy_nonterminal_ids
+            )
+            if not expects_bridge or (next_task_id and next_task_id in canonical_task_ids):
+                continue
+            if next_task_id:
+                still_missing = canonical_task_still_missing(next_task_id)
+                if still_missing is not True:
+                    continue
+            missing_task_id = next_task_id or f"missing_bridge_for:{legacy_task_id}"
+            checked += 1
+            checked_by_store["event_ledger_bridges"] += 1
+            deadline = _parse_iso_datetime(ledger.get("deadline"))
+            stale.append(
+                {
+                    "task_id": missing_task_id,
+                    "status": "missing",
+                    "title": str(ledger.get("event_key") or missing_task_id),
+                    "reasons": ["next_task_bridge_missing"],
+                    "claimed_at": None,
+                    "claimed_age_hours": None,
+                    "deadline": deadline.isoformat() if deadline else None,
+                    "deadline_overdue_hours": (
+                        round((now - deadline).total_seconds() / 3600.0, 2)
+                        if deadline is not None and now > deadline
+                        else None
+                    ),
+                    "store": "event_ledger_bridges",
+                    "path": _relative_repo_path(path),
+                }
+            )
 
     breached = bool(stale)
     reason_names = sorted({reason for item in stale for reason in item["reasons"]})
     lines = [
         "## 觸發條件",
-        "掃描 `storage/ops/tasks/*.json` event receipts；claimed/running 超過 "
-        "24h 或 queued/blocked/awaiting_approval 超過 event deadline 即 warn。",
+        "掃描 canonical `storage/next_tasks.json` 與 legacy event receipts；"
+        "claimed/running 超過 24h，或 queued 類狀態超過 deadline 即 warn。",
         f"- checked_event_receipts: {checked}",
         f"- stale_count: {len(stale)}",
     ]
@@ -3553,6 +3790,7 @@ def _parse_event_receipt_state(storage_dir: str, now: datetime) -> dict[str, Any
         "body": "\n".join(lines) if breached else "",
         "details": {
             "checked_event_receipts": checked,
+            "checked_by_store": checked_by_store,
             "stale_count": len(stale),
             "stale": stale,
             "read_errors": read_errors,

@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import volpred.ops.alerts as alerts_module
 from volpred.ops.alerts import (
     _format_telegram_alert_text,
     _parse_content_quality_state,
@@ -55,6 +56,209 @@ def test_parse_event_receipt_state_breaches_on_claimed_zombie(tmp_path: Path):
     assert stale[0]["claimed_age_hours"] > 24
 
 
+def test_parse_event_receipt_state_scans_canonical_event_zombie(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 12, 12, 0, tzinfo=timezone.utc)
+    _write_json(
+        storage_dir / "next_tasks.json",
+        [
+            {
+                "id": "event_article_fomc_2026-07-11_tplus0",
+                "task_type": "event_article",
+                "source": "event_expander",
+                "ref_event_job_id": "fomc-2026-07-11-t0",
+                "title": "[event_article] FOMC T+0",
+                "status": "in_progress",
+                "claimed_at": (now - timedelta(hours=25)).isoformat(),
+                "deadline": (now - timedelta(hours=1)).isoformat(),
+            }
+        ],
+    )
+
+    result = _parse_event_receipt_state(str(storage_dir), now)
+
+    assert result["breached"] is True
+    stale = result["details"]["stale"]
+    assert len(stale) == 1
+    assert stale[0]["task_id"] == "event_article_fomc_2026-07-11_tplus0"
+    assert stale[0]["reasons"] == ["claimed_over_24h"]
+    assert stale[0]["store"] == "next_tasks"
+    assert result["details"]["checked_by_store"]["next_tasks"] == 1
+
+
+def test_event_watchdog_flags_ledger_reference_missing_from_next_tasks(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 12, 12, 0, tzinfo=timezone.utc)
+    _write_json(storage_dir / "next_tasks.json", [])
+    _write_json(
+        storage_dir / "ops" / "event_ledger" / "cpi.json",
+        {
+            "record_kind": "next_tasks_materialization",
+            "next_task_id": "event_article_cpi_missing",
+            "event_key": "CPI_US_2026_07_14",
+            "deadline": (now + timedelta(hours=12)).isoformat(),
+        },
+    )
+
+    result = _parse_event_receipt_state(str(storage_dir), now)
+
+    assert result["breached"] is True
+    stale = result["details"]["stale"]
+    assert stale[0]["task_id"] == "event_article_cpi_missing"
+    assert stale[0]["reasons"] == ["next_task_bridge_missing"]
+    assert stale[0]["store"] == "event_ledger_bridges"
+
+
+def test_event_watchdog_flags_legacy_ledger_without_next_task_id(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 12, 12, 0, tzinfo=timezone.utc)
+    _write_json(storage_dir / "next_tasks.json", [])
+    _write_json(
+        storage_dir / "ops" / "tasks" / "task_tsmc_legacy.json",
+        {
+            "id": "task_tsmc_legacy",
+            "title": "Event article: TSMC T+0",
+            "status": "queued",
+            "payload": {"event_job_id": "tsmc-2026-07-10-t0"},
+        },
+    )
+    _write_json(
+        storage_dir / "ops" / "event_ledger" / "tsmc.json",
+        {
+            "task_id": "task_tsmc_legacy",
+            "event_key": "TSMC_REVENUE_2026_07_10",
+            "deadline": (now + timedelta(hours=12)).isoformat(),
+        },
+    )
+
+    result = _parse_event_receipt_state(str(storage_dir), now)
+
+    assert result["breached"] is True
+    stale = result["details"]["stale"]
+    bridge = next(row for row in stale if "next_task_bridge_missing" in row["reasons"])
+    assert bridge["task_id"] == "missing_bridge_for:task_tsmc_legacy"
+    assert bridge["store"] == "event_ledger_bridges"
+
+
+def test_event_watchdog_immediately_flags_dual_active_lifecycle(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 12, 12, 0, tzinfo=timezone.utc)
+    _write_json(
+        storage_dir / "next_tasks.json",
+        [
+            {
+                "id": "event_article_fomc_dual",
+                "task_type": "event_article",
+                "status": "in_progress",
+                "claimed_at": (now - timedelta(minutes=5)).isoformat(),
+                "deadline": (now + timedelta(hours=12)).isoformat(),
+            }
+        ],
+    )
+    _write_json(
+        storage_dir / "ops" / "event_ledger" / "fomc.json",
+        {
+            "task_id": "task_fomc_legacy_active",
+            "next_task_id": "event_article_fomc_dual",
+            "event_key": "FOMC_2026_07_12",
+            "deadline": (now + timedelta(hours=12)).isoformat(),
+            "disposition": "legacy_receipt_conflict:claimed",
+            "canonical_conflict_disposition": "dual_active_lifecycle_conflict:in_progress",
+        },
+    )
+
+    result = _parse_event_receipt_state(str(storage_dir), now)
+
+    assert result["breached"] is True
+    conflict = next(
+        row for row in result["details"]["stale"] if row["status"] == "conflict"
+    )
+    assert conflict["reasons"] == ["dual_active_lifecycle_conflict"]
+    assert conflict["task_id"] == "event_article_fomc_dual"
+
+
+def test_event_watchdog_reconfirms_bridge_gap_under_queue_lock(
+    tmp_path: Path, monkeypatch
+):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 12, 12, 0, tzinfo=timezone.utc)
+    task_id = "event_article_cpi_race"
+    queue_path = storage_dir / "next_tasks.json"
+    _write_json(
+        queue_path,
+        [{"id": task_id, "task_type": "event_article", "status": "pending"}],
+    )
+    _write_json(
+        storage_dir / "ops" / "event_ledger" / "cpi-race.json",
+        {
+            "record_kind": "next_tasks_materialization",
+            "next_task_id": task_id,
+            "event_key": "CPI_RACE",
+            "deadline": (now + timedelta(hours=12)).isoformat(),
+        },
+    )
+    real_load = alerts_module.json.load
+    first_queue_read = True
+
+    def split_snapshot_load(handle):
+        nonlocal first_queue_read
+        if Path(handle.name) == queue_path and first_queue_read:
+            first_queue_read = False
+            return []
+        return real_load(handle)
+
+    monkeypatch.setattr(alerts_module.json, "load", split_snapshot_load)
+
+    result = _parse_event_receipt_state(str(storage_dir), now)
+
+    assert result["breached"] is False
+    assert result["details"]["stale"] == []
+
+
+def test_event_watchdog_flags_legacy_active_after_canonical_succeeded(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 12, 12, 0, tzinfo=timezone.utc)
+    _write_json(
+        storage_dir / "next_tasks.json",
+        [
+            {
+                "id": "event_article_fomc_done",
+                "task_type": "event_article",
+                "status": "succeeded",
+            }
+        ],
+    )
+    _write_json(
+        storage_dir / "ops" / "tasks" / "task_fomc_legacy_active.json",
+        {
+            "id": "task_fomc_legacy_active",
+            "title": "Event article: legacy FOMC",
+            "status": "claimed",
+            "claimed_at": (now - timedelta(minutes=5)).isoformat(),
+            "payload": {"event_job_id": "fomc-old-id"},
+        },
+    )
+    _write_json(
+        storage_dir / "ops" / "event_ledger" / "fomc-terminal-conflict.json",
+        {
+            "task_id": "task_fomc_legacy_active",
+            "next_task_id": "event_article_fomc_done",
+            "event_key": "FOMC_DONE",
+            "deadline": (now + timedelta(hours=12)).isoformat(),
+            "disposition": "legacy_receipt_conflict:claimed",
+            "canonical_conflict_disposition": "canonical_already_terminal:succeeded",
+        },
+    )
+
+    result = _parse_event_receipt_state(str(storage_dir), now)
+
+    assert result["breached"] is True
+    conflict = next(
+        row for row in result["details"]["stale"] if row["status"] == "conflict"
+    )
+    assert conflict["reasons"] == ["legacy_active_after_canonical_succeeded"]
+
+
 def test_parse_event_receipt_state_breaches_on_queued_past_ledger_deadline(tmp_path: Path):
     storage_dir = tmp_path / "storage"
     now = datetime(2026, 7, 5, 12, 0, tzinfo=timezone.utc)
@@ -81,10 +285,11 @@ def test_parse_event_receipt_state_breaches_on_queued_past_ledger_deadline(tmp_p
     assert result["breached"] is True
     assert "queued_past_deadline" in result["title"]
     stale = result["details"]["stale"]
-    assert len(stale) == 1
-    assert stale[0]["task_id"] == "task_nfp"
-    assert stale[0]["reasons"] == ["queued_past_deadline"]
-    assert stale[0]["deadline_overdue_hours"] == 2.0
+    queued = next(row for row in stale if "queued_past_deadline" in row["reasons"])
+    bridge = next(row for row in stale if "next_task_bridge_missing" in row["reasons"])
+    assert queued["task_id"] == "task_nfp"
+    assert queued["deadline_overdue_hours"] == 2.0
+    assert bridge["task_id"] == "missing_bridge_for:task_nfp"
 
 
 def test_parse_event_receipt_state_ignores_terminal_and_non_event_tasks(tmp_path: Path):

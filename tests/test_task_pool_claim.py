@@ -625,6 +625,96 @@ def test_non_codex_owner_can_claim_reader_facing_task(tmp_path, monkeypatch, cap
     assert saved[0]["claimed_by"] == "hourly-dispatch"
 
 
+def test_claim_atomically_expires_managed_event_after_deadline(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "event_article_cpi_2000-01-01_tplus0",
+                    "task_type": "event_article",
+                    "source": "event_expander",
+                    "ref_event_job_id": "cpi-2000-01-01-t0",
+                    "status": "pending",
+                    "deadline": "2000-01-01T01:00:00+00:00",
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "claim",
+            "--id",
+            "event_article_cpi_2000-01-01_tplus0",
+            "--owner",
+            "hourly-dispatch",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["reason"] == "deadline_expired"
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "expired"
+    assert saved["last_error"] == "deadline_expired_never_dispatched"
+    assert "claimed_by" not in saved
+    assert saved["status_history"][-1]["to"] == "expired"
+
+
+@pytest.mark.parametrize(
+    ("deadline", "reason"),
+    [(None, "missing_deadline"), ("not-an-iso-date", "invalid_deadline")],
+)
+def test_claim_terminally_fails_managed_event_with_bad_deadline(
+    deadline, reason, tmp_path, monkeypatch, capsys
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    task = {
+        "id": f"event_article_bad_{reason}",
+        "task_type": "event_article",
+        "source": "event_expander",
+        "ref_event_job_id": f"bad-{reason}",
+        "status": "pending",
+    }
+    if deadline is not None:
+        task["deadline"] = deadline
+    next_tasks.write_text(json.dumps([task]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "claim",
+            "--id",
+            task["id"],
+            "--owner",
+            "hourly-dispatch",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["reason"] == reason
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "failed"
+    assert saved["last_error"] == reason
+    assert saved["status_history"][-1]["to"] == "failed"
+
+
 def _run(monkeypatch, *argv) -> int:
     monkeypatch.setattr(sys, "argv", ["task_pool_claim.py", *argv])
     return task_pool_claim.main()

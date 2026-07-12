@@ -40,6 +40,41 @@ def _write_runtime_schedules(
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _event_item(
+    event_id: str,
+    *,
+    event_type: str,
+    event_date: str,
+    slot: str,
+    not_before: str,
+    deadline: str,
+) -> dict:
+    return {
+        "id": event_id,
+        "event_key": f"{event_type}_{event_date.replace('-', '_')}",
+        "trigger_mode": "one_shot",
+        "not_before": not_before,
+        "deadline": deadline,
+        "dedupe_key": f"{event_id}:one_shot",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+            "title": f"Event article: {event_type} {slot}",
+            "description": "reader-facing event article",
+            "task_family": "content",
+            "priority": 15,
+            "preferred_agent": "claude",
+            "approval_mode": "auto",
+            "risk_level": "safe",
+            "payload_patch": {
+                "event_type": event_type,
+                "event_date": event_date,
+                "event_series_slot": slot,
+            },
+        },
+    }
+
+
 def test_coerce_datetime_warns_when_runtime_timezone_invalid(tmp_path: Path, monkeypatch, capsys):
     config_path = tmp_path / "runtime_schedules.json"
     _write_runtime_schedules(
@@ -174,6 +209,221 @@ def test_existing_ledger_missing_queue_is_recovered(tmp_path: Path, monkeypatch)
     assert len(ledger_files) == 1
     ledger = json.loads(ledger_files[0].read_text(encoding="utf-8"))
     assert ledger["next_task_id"] == task_id
+
+
+def test_legacy_receipt_is_cancelled_before_canonical_row_becomes_pending(
+    tmp_path: Path, monkeypatch
+):
+    now = datetime(2026, 7, 10, 7, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "tsmc-revenue-2026-07-10-t0",
+        event_type="TSMC_REVENUE",
+        event_date="2026-07-10",
+        slot="T+0",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=36)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = str(tmp_path / "storage")
+    legacy = create_task(
+        title="Event article: legacy TSMC receipt",
+        description="pre-cutover event receipt",
+        source="schedule",
+        task_family="content",
+        payload={"event_job_id": item["id"], "event_key": item["event_key"]},
+        created_by="event_expander",
+        storage_dir=storage_dir,
+    )
+    ledger_root = tmp_path / "storage" / "ops" / "event_ledger"
+    ledger_root.mkdir(parents=True, exist_ok=True)
+    ledger_path = event_jobs._ledger_path(item["dedupe_key"], storage_dir=storage_dir)
+    ledger_path.write_text(
+        json.dumps(
+            {
+                "task_id": legacy["id"],
+                "dedupe_key": item["dedupe_key"],
+                "event_key": item["event_key"],
+                "deadline": item["deadline"],
+                "gc_after": (now + timedelta(days=8)).isoformat(),
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = expand_due_event_jobs(storage_dir=storage_dir, now=now)
+
+    assert len(result["created"]) == 1
+    canonical_id = result["created"][0]["task"]["id"]
+    legacy_state = get_task(legacy["id"], storage_dir=storage_dir)
+    assert legacy_state is not None
+    assert legacy_state["status"] == "cancelled"
+    assert legacy_state["migration_candidate_id"] == canonical_id
+    assert legacy_state["claimed_by"] is None
+    assert legacy_state["executions"][0]["result_status"] == "cancelled"
+    assert legacy_state["executions"][0]["signal_payload"]["reason"] == (
+        "canonical_event_migration_prepared"
+    )
+    queue = json.loads((tmp_path / "storage" / "next_tasks.json").read_text(encoding="utf-8"))
+    assert [(row["id"], row["status"]) for row in queue] == [(canonical_id, "pending")]
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    assert ledger["receipt_task_id"] == legacy["id"]
+    assert ledger["next_task_id"] == canonical_id
+    assert ledger["legacy_receipt_disposition"] == "canonical_event_migration_prepared"
+
+
+def test_cutover_discovers_all_duplicate_legacy_receipts(tmp_path: Path):
+    now = datetime(2026, 7, 10, 7, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "tsmc-revenue-2026-07-10-t0",
+        event_type="TSMC_REVENUE",
+        event_date="2026-07-10",
+        slot="T+0",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=12)).isoformat(),
+    )
+    storage_dir = str(tmp_path / "storage")
+    receipts = [
+        create_task(
+            title=f"Event article: duplicate legacy {index}",
+            description="pre-cutover duplicate",
+            source="schedule",
+            task_family="content",
+            payload={"event_job_id": item["id"], "event_key": item["event_key"]},
+            created_by="event_expander",
+            storage_dir=storage_dir,
+        )
+        for index in range(2)
+    ]
+    active_path = (
+        tmp_path / "storage" / "ops" / "tasks" / f"{receipts[1]['id']}.json"
+    )
+    active = json.loads(active_path.read_text(encoding="utf-8"))
+    active["status"] = "claimed"
+    active["claimed_by"] = "legacy-worker"
+    active["claimed_at"] = now.isoformat()
+    active_path.write_text(json.dumps(active), encoding="utf-8")
+    ledger = {"task_id": receipts[0]["id"]}
+
+    result = event_jobs._prepare_legacy_receipt_cutover(
+        item,
+        ledger,
+        storage_dir=storage_dir,
+        now=now,
+    )
+
+    assert result["proceed"] is False
+    assert result["reason"] == "legacy_receipt_conflict:claimed"
+    assert set(ledger["receipt_task_ids"]) == {row["id"] for row in receipts}
+    states = {row["id"]: get_task(row["id"], storage_dir=storage_dir) for row in receipts}
+    assert states[receipts[0]["id"]]["status"] == "cancelled"
+    assert states[receipts[1]["id"]]["status"] == "claimed"
+
+
+def test_claimed_legacy_receipt_suppresses_existing_canonical_lifecycle(
+    tmp_path: Path, monkeypatch
+):
+    now = datetime(2026, 7, 10, 7, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "fomc-2026-07-11-t0",
+        event_type="FOMC",
+        event_date="2026-07-11",
+        slot="T+0",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=12)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = str(tmp_path / "storage")
+    legacy_event_job_id = "fomc-2026-07-10-t0"
+    legacy = create_task(
+        title="Event article: claimed legacy FOMC",
+        description="pre-cutover event receipt",
+        source="schedule",
+        task_family="content",
+        payload={"event_job_id": legacy_event_job_id, "event_key": item["event_key"]},
+        created_by="event_expander",
+        storage_dir=storage_dir,
+    )
+    legacy_path = tmp_path / "storage" / "ops" / "tasks" / f"{legacy['id']}.json"
+    claimed = json.loads(legacy_path.read_text(encoding="utf-8"))
+    claimed["status"] = "claimed"
+    claimed["claimed_by"] = "legacy-worker"
+    claimed["claimed_at"] = now.isoformat()
+    legacy_path.write_text(json.dumps(claimed), encoding="utf-8")
+    ledger_path = event_jobs._ledger_path(item["dedupe_key"], storage_dir=storage_dir)
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    ledger_path.write_text(
+        json.dumps(
+            {
+                "task_id": legacy["id"],
+                "deadline": item["deadline"],
+                "gc_after": (now + timedelta(days=8)).isoformat(),
+            }
+        ),
+        encoding="utf-8",
+    )
+    queue_path = tmp_path / "storage" / "next_tasks.json"
+    old_canonical = event_jobs.build_pending_event_task(item, now=now)
+    old_canonical["id"] = "event_article_fomc_2026-07-10_tplus0"
+    old_canonical["ref_event_job_id"] = legacy_event_job_id
+    queue_path.write_text(
+        json.dumps([old_canonical]), encoding="utf-8"
+    )
+
+    result = expand_due_event_jobs(storage_dir=storage_dir, now=now)
+
+    assert result["created"] == []
+    assert any(
+        row["reason"] == "legacy_receipt_conflict:claimed" for row in result["skipped"]
+    )
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    assert queue[0]["status"] == "superseded"
+    assert queue[0]["superseded_by"] == legacy["id"]
+    assert queue[0]["result"] == "legacy_event_receipt_already_active"
+    legacy_state = get_task(legacy["id"], storage_dir=storage_dir)
+    assert legacy_state is not None
+    assert legacy_state["status"] == "claimed"
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    assert ledger["canonical_conflict_disposition"] == (
+        "canonical_suppressed_for_active_legacy"
+    )
+
+
+def test_dual_active_event_lifecycle_is_reported_without_killing_either(tmp_path: Path):
+    now = datetime(2026, 7, 10, 7, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "fomc-2026-07-10-t0",
+        event_type="FOMC",
+        event_date="2026-07-10",
+        slot="T+0",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=12)).isoformat(),
+    )
+    storage_dir = str(tmp_path / "storage")
+    queue_path = tmp_path / "storage" / "next_tasks.json"
+    queue_path.parent.mkdir(parents=True, exist_ok=True)
+    canonical = event_jobs.build_pending_event_task(item, now=now)
+    canonical["status"] = "in_progress"
+    canonical["claimed_by"] = "canonical-worker"
+    queue_path.write_text(json.dumps([canonical]), encoding="utf-8")
+
+    result = event_jobs._suppress_canonical_for_legacy_conflict(
+        item,
+        legacy_receipt_id="task_legacy_active",
+        storage_dir=storage_dir,
+        now=now,
+    )
+
+    assert result["changed"] is False
+    assert result["reason"] == "dual_active_lifecycle_conflict:in_progress"
+    saved = json.loads(queue_path.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "in_progress"
+    assert saved["claimed_by"] == "canonical-worker"
 
 
 def test_queue_written_before_ledger_is_healed_without_duplicate(tmp_path: Path, monkeypatch):
@@ -317,6 +567,59 @@ def test_legacy_unclaimed_event_receipt_auto_fails_after_deadline(tmp_path: Path
     assert result["expired_tasks"]["legacy_receipts"] == [receipt["id"]]
 
 
+def test_legacy_expiry_discovers_unlinked_duplicate_receipts(tmp_path: Path, monkeypatch):
+    now = datetime(2026, 7, 12, 12, 0, tzinfo=timezone.utc)
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = str(tmp_path / "storage")
+    event_job_id = "legacy-nfp-duplicate-t0"
+    receipts = [
+        create_task(
+            title=f"Event article: duplicate legacy NFP {index}",
+            description="pre-cutover duplicate",
+            source="schedule",
+            task_family="content",
+            payload={"event_job_id": event_job_id, "event_key": "NFP_DUPLICATE"},
+            created_by="event_expander",
+            storage_dir=storage_dir,
+        )
+        for index in range(3)
+    ]
+    claimed_path = (
+        tmp_path / "storage" / "ops" / "tasks" / f"{receipts[2]['id']}.json"
+    )
+    claimed = json.loads(claimed_path.read_text(encoding="utf-8"))
+    claimed["status"] = "claimed"
+    claimed["claimed_by"] = "legacy-worker"
+    claimed["claimed_at"] = (now - timedelta(minutes=5)).isoformat()
+    claimed_path.write_text(json.dumps(claimed), encoding="utf-8")
+    ledger_root = tmp_path / "storage" / "ops" / "event_ledger"
+    ledger_root.mkdir(parents=True, exist_ok=True)
+    (ledger_root / "legacy-duplicates.json").write_text(
+        json.dumps(
+            {
+                # Pre-cutover shape: only one of the duplicate receipts was linked.
+                "task_id": receipts[0]["id"],
+                "event_key": "NFP_DUPLICATE",
+                "deadline": (now - timedelta(minutes=1)).isoformat(),
+                "gc_after": (now + timedelta(days=7)).isoformat(),
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = expand_due_event_jobs(storage_dir=storage_dir, now=now)
+
+    states = [get_task(row["id"], storage_dir=storage_dir) for row in receipts]
+    assert [state["status"] for state in states] == ["failed", "failed", "claimed"]
+    assert set(result["expired_tasks"]["legacy_receipts"]) == {
+        receipts[0]["id"],
+        receipts[1]["id"],
+    }
+
+
 def test_same_day_t0_becomes_visible_at_not_before_without_daily_scan(tmp_path: Path, monkeypatch):
     opens = datetime(2026, 7, 10, 7, 0, tzinfo=timezone.utc)  # 15:00 Asia/Taipei
     config_path = tmp_path / "runtime_schedules.json"
@@ -417,7 +720,8 @@ def test_reaction_coverage_is_preserved_in_single_owner(tmp_path: Path, monkeypa
     assert result["created"] == []
     covered = [row for row in result["skipped"] if row["reason"] == "reaction_already_covered"]
     assert covered[0]["covered_by"]["id"] == "mile_35eef830"
-    assert not (tmp_path / "storage" / "next_tasks.json").exists()
+    queue = json.loads((tmp_path / "storage" / "next_tasks.json").read_text(encoding="utf-8"))
+    assert queue == []
     ledger_files = list((tmp_path / "storage" / "ops" / "event_ledger").glob("*.json"))
     assert len(ledger_files) == 1
     ledger = json.loads(ledger_files[0].read_text(encoding="utf-8"))
@@ -426,6 +730,124 @@ def test_reaction_coverage_is_preserved_in_single_owner(tmp_path: Path, monkeypa
         encoding="utf-8"
     )
     assert "event_reaction_coverage" in audit
+
+
+def test_reaction_coverage_supersedes_existing_pending_row(tmp_path: Path, monkeypatch):
+    now = datetime(2026, 7, 3, 0, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "nfp-2026-07-03-t0",
+        event_type="NFP_US",
+        event_date="2026-07-03",
+        slot="T+0",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=36)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = str(tmp_path / "storage")
+
+    first = expand_due_event_jobs(storage_dir=storage_dir, now=now)
+    task_id = first["created"][0]["task"]["id"]
+    feed_path = tmp_path / "storage" / "reports" / "feed.json"
+    feed_path.parent.mkdir(parents=True, exist_ok=True)
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_nfp_reaction",
+                    "status": "published",
+                    "title": "非農就業結果出爐",
+                    "tags": ["NFP"],
+                    "published_at": now.isoformat(),
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    second = expand_due_event_jobs(storage_dir=storage_dir, now=now + timedelta(minutes=5))
+
+    assert second["created"] == []
+    assert any(row["reason"] == "reaction_already_covered" for row in second["skipped"])
+    queue = json.loads((tmp_path / "storage" / "next_tasks.json").read_text(encoding="utf-8"))
+    assert queue[0]["id"] == task_id
+    assert queue[0]["status"] == "superseded"
+    assert queue[0]["covered_by"]["id"] == "mile_nfp_reaction"
+    ledger_path = event_jobs._ledger_path(item["dedupe_key"], storage_dir=storage_dir)
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    assert ledger["disposition"] == "reaction_already_covered"
+    assert ledger["next_task_id"] == task_id
+
+
+def test_covered_reaction_cancels_legacy_without_fake_successor(tmp_path: Path, monkeypatch):
+    now = datetime(2026, 7, 3, 0, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "nfp-2026-07-03-t0",
+        event_type="NFP_US",
+        event_date="2026-07-03",
+        slot="T+0",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=36)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = str(tmp_path / "storage")
+    legacy = create_task(
+        title="Event article: legacy NFP",
+        description="pre-cutover receipt",
+        source="schedule",
+        task_family="content",
+        payload={"event_job_id": item["id"], "event_key": item["event_key"]},
+        created_by="event_expander",
+        storage_dir=storage_dir,
+    )
+    ledger_path = event_jobs._ledger_path(item["dedupe_key"], storage_dir=storage_dir)
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    ledger_path.write_text(
+        json.dumps(
+            {
+                "task_id": legacy["id"],
+                "deadline": item["deadline"],
+                "gc_after": (now + timedelta(days=8)).isoformat(),
+            }
+        ),
+        encoding="utf-8",
+    )
+    feed_path = tmp_path / "storage" / "reports" / "feed.json"
+    feed_path.parent.mkdir(parents=True, exist_ok=True)
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_nfp_done",
+                    "status": "published",
+                    "title": "非農結果出爐",
+                    "tags": ["NFP"],
+                    "published_at": now.isoformat(),
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    result = expand_due_event_jobs(storage_dir=storage_dir, now=now)
+
+    assert result["created"] == []
+    state = get_task(legacy["id"], storage_dir=storage_dir)
+    assert state is not None
+    assert state["status"] == "cancelled"
+    assert "superseded_by" not in state
+    assert state["migration_candidate_id"] == event_jobs._event_task_id(item)
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    assert ledger["disposition"] == "reaction_already_covered"
+    assert ledger["covered_by"]["id"] == "mile_nfp_done"
+    assert not ledger.get("next_task_id")
 
 
 def test_preview_event_jobs_status_and_gc(tmp_path: Path, monkeypatch):
@@ -518,6 +940,102 @@ def test_gc_event_ledger_preserves_unexpired(tmp_path: Path):
     assert "fresh.json" not in removed
     assert fresh.exists()
     assert not stale.exists()
+
+
+@pytest.mark.parametrize(
+    "corrupt_payload",
+    ['{"task_id":', '{"gc_after":"not-an-iso-date"}', "[]"],
+)
+def test_corrupt_ledger_is_rebuilt_without_duplicate_queue_row(
+    corrupt_payload: str, tmp_path: Path, monkeypatch
+):
+    now = datetime(2026, 7, 10, 7, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "cpi-2026-07-10-t2",
+        event_type="CPI_US",
+        event_date="2026-07-10",
+        slot="T-2",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=12)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = str(tmp_path / "storage")
+    first = expand_due_event_jobs(storage_dir=storage_dir, now=now)
+    task_id = first["created"][0]["task"]["id"]
+    ledger_path = event_jobs._ledger_path(item["dedupe_key"], storage_dir=storage_dir)
+    ledger_path.write_text(corrupt_payload, encoding="utf-8")
+
+    recovered = expand_due_event_jobs(storage_dir=storage_dir, now=now + timedelta(minutes=5))
+
+    assert recovered["created"] == []
+    queue = json.loads((tmp_path / "storage" / "next_tasks.json").read_text(encoding="utf-8"))
+    assert [row["id"] for row in queue] == [task_id]
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    assert ledger["next_task_id"] == task_id
+    assert ledger["dedupe_key"] == item["dedupe_key"]
+
+
+def test_invalid_not_before_skips_only_bad_event(tmp_path: Path, monkeypatch):
+    now = datetime(2026, 7, 10, 7, 0, tzinfo=timezone.utc)
+    bad = _event_item(
+        "bad-window",
+        event_type="CPI_US",
+        event_date="2026-07-10",
+        slot="T-2",
+        not_before="not-an-iso-date",
+        deadline=(now + timedelta(hours=12)).isoformat(),
+    )
+    good = _event_item(
+        "good-window",
+        event_type="FOMC",
+        event_date="2026-07-10",
+        slot="T-2",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=12)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[bad, good])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+
+    result = expand_due_event_jobs(storage_dir=str(tmp_path / "storage"), now=now)
+
+    assert [row["task"]["ref_event_job_id"] for row in result["created"]] == ["good-window"]
+    assert any(
+        row["id"] == "bad-window" and row["reason"] == "invalid_event_window"
+        for row in result["skipped"]
+    )
+
+
+def test_missing_event_id_cannot_attach_to_unrelated_queue_row(tmp_path: Path, monkeypatch):
+    now = datetime(2026, 7, 10, 7, 0, tzinfo=timezone.utc)
+    malformed = _event_item(
+        "temporary-id",
+        event_type="CPI_US",
+        event_date="2026-07-10",
+        slot="T-2",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=12)).isoformat(),
+    )
+    malformed.pop("id")
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[malformed])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = tmp_path / "storage"
+    queue_path = storage_dir / "next_tasks.json"
+    queue_path.parent.mkdir(parents=True, exist_ok=True)
+    unrelated = {"id": "ordinary-platform-task", "task_type": "platform_ops", "status": "pending"}
+    queue_path.write_text(json.dumps([unrelated]), encoding="utf-8")
+
+    result = expand_due_event_jobs(storage_dir=str(storage_dir), now=now)
+
+    assert result["created"] == []
+    assert {"id": None, "reason": "missing_id"} in result["skipped"]
+    assert json.loads(queue_path.read_text(encoding="utf-8")) == [unrelated]
 
 
 def test_expand_due_event_jobs_skips_past_deadline(tmp_path: Path, monkeypatch):

@@ -1096,6 +1096,142 @@ def requeue_task(task_id: str, *, actor: str, reason: str, storage_dir: str = "s
     return {"task": task, "receipt": receipt.to_dict()}
 
 
+def expire_queued_task(
+    task_id: str,
+    *,
+    reason: str,
+    summary: str,
+    actor: str = "system:event_expander",
+    now: str | None = None,
+    storage_dir: str = "storage",
+) -> dict[str, Any]:
+    """Fail an unclaimed queued TaskRecord whose external window expired.
+
+    ``storage/ops/tasks`` is an audit/control-plane receipt store, not the
+    canonical pending queue.  Legacy event expansion nevertheless left queued
+    TaskRecords here.  This compare-and-set helper closes only a still-unclaimed
+    ``queued`` row; it will not kill a claimed/running task that won the race.
+
+    TaskRecord's controlled vocabulary has no ``expired`` state, so the honest
+    terminal state is ``failed`` with a machine-readable expiry error.  Unlike
+    ``fail_task()``, this system transition does not invent a claimed agent or
+    close an agent session that never owned the task.
+    """
+
+    with _plane_lock(storage_dir):
+        task = _load_task(task_id, storage_dir=storage_dir)
+        if task is None:
+            raise ValueError(f"Unknown task: {task_id}")
+        status = str(task.get("status") or "").strip().lower()
+        if status in TERMINAL_TASK_STATUSES:
+            return {"task": task, "receipt": None, "changed": False, "reason": "terminal"}
+        if status != "queued" or any(
+            task.get(field)
+            for field in ("claimed_by", "claimed_by_session_key", "claimed_at", "started_at")
+        ):
+            return {
+                "task": task,
+                "receipt": None,
+                "changed": False,
+                "reason": f"race_lost:{status or 'unknown'}",
+            }
+
+        timestamp = now or _utc_now()
+        task["status"] = "failed"
+        task["finished_at"] = timestamp
+        task["updated_at"] = timestamp
+        task["expired_at"] = timestamp
+        task["result_summary"] = summary
+        task["last_error"] = reason
+        _atomic_write_json(_task_path(task_id, storage_dir=storage_dir), task)
+
+        receipt = ExecutionReceipt(
+            task_id=task_id,
+            run_id=f"run_{uuid.uuid4().hex[:12]}",
+            agent_name=actor,
+            result_status="failed",
+            summary=summary,
+            commands_run=[],
+            files_touched=[],
+            subagent_count=0,
+            session_id=task.get("session_id"),
+            rollback_point_id=task.get("rollback_point_id"),
+            signal_payload={"expiry_reason": reason},
+            timestamp=timestamp,
+            error=reason,
+        )
+        _write_execution(task_id, receipt, storage_dir=storage_dir)
+    return {"task": task, "receipt": receipt.to_dict(), "changed": True, "reason": reason}
+
+
+def supersede_queued_task(
+    task_id: str,
+    *,
+    replacement_task_id: str,
+    actor: str = "system:event_expander",
+    now: str | None = None,
+    storage_dir: str = "storage",
+) -> dict[str, Any]:
+    """Cancel an untouched legacy receipt before canonical materialization.
+
+    The compare-and-set is intentionally performed before the replacement row
+    becomes dispatchable. If a legacy worker has already claimed the receipt,
+    the caller gets a race-lost result and must not create a second lifecycle.
+    """
+
+    with _plane_lock(storage_dir):
+        task = _load_task(task_id, storage_dir=storage_dir)
+        if task is None:
+            raise ValueError(f"Unknown task: {task_id}")
+        status = str(task.get("status") or "").strip().lower()
+        if status in TERMINAL_TASK_STATUSES:
+            return {"task": task, "receipt": None, "changed": False, "reason": "terminal"}
+        if status != "queued" or any(
+            task.get(field)
+            for field in ("claimed_by", "claimed_by_session_key", "claimed_at", "started_at")
+        ):
+            return {
+                "task": task,
+                "receipt": None,
+                "changed": False,
+                "reason": f"race_lost:{status or 'unknown'}",
+            }
+
+        timestamp = now or _utc_now()
+        summary = f"Prepared migration to canonical event owner ({replacement_task_id})"
+        task["status"] = "cancelled"
+        task["finished_at"] = timestamp
+        task["updated_at"] = timestamp
+        task["result_summary"] = summary
+        task["migration_candidate_id"] = replacement_task_id
+        _atomic_write_json(_task_path(task_id, storage_dir=storage_dir), task)
+
+        receipt = ExecutionReceipt(
+            task_id=task_id,
+            run_id=f"run_{uuid.uuid4().hex[:12]}",
+            agent_name=actor,
+            result_status="cancelled",
+            summary=summary,
+            commands_run=[],
+            files_touched=[],
+            subagent_count=0,
+            session_id=task.get("session_id"),
+            rollback_point_id=task.get("rollback_point_id"),
+            signal_payload={
+                "reason": "canonical_event_migration_prepared",
+                "candidate_next_task_id": replacement_task_id,
+            },
+            timestamp=timestamp,
+        )
+        _write_execution(task_id, receipt, storage_dir=storage_dir)
+    return {
+        "task": task,
+        "receipt": receipt.to_dict(),
+        "changed": True,
+        "reason": "canonical_event_migration_prepared",
+    }
+
+
 def complete_task(
     task_id: str,
     *,
