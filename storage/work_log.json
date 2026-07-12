@@ -16526,5 +16526,19 @@
     "owner": "codex",
     "backfilled_at": "2026-07-12T18:35:33.844222+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T03:20:21+08:00",
+    "actor": "hourly-03",
+    "task_type": "platform_ops",
+    "task_id": "ops_slot_capacity_and_zombie_worktrees",
+    "purpose": "3-strike 重構：slot 佔用改由進度定義（非目錄存在、非 PID liveness），cap 收成 dispatch_slot_budget 單一 owner。dispatcher 由 occupied=4/4 free=0（34 pending 無人派）解到 2/6 free=4；2 個 51-52h 殭屍 worktree 回收（branch 保留）；機械 gate test_dispatch_slot_budget.py；86 測試綠。commit c591c5305"
+  },
+  {
+    "timestamp": "2026-07-13T03:20:21+08:00",
+    "actor": "hourly-03",
+    "task_type": "experiment",
+    "task_id": "research_rp_a02d0a5f75",
+    "purpose": "用解出的容量派工：K1702 vol-managed factor zoo（Moreira-Muir 套 SMB/HML/MOM/QMJ 的 OOS + 淨成本崩潰再驗證）。餓死 114h 由 starvation lockout 指定；xhigh 研究 agent 走 compute queue（job agent-brief_vol_managed_factor_zoo-25df97），不在 fire 內 spawn。"
   }
 ]
