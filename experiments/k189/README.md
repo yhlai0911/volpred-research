@@ -53,7 +53,7 @@
 
 - 主程式：`experiments/k189/k189_attention_vol.py`
 - 結果：`experiments/k189/k189_attention_vol_results.json`
-- 審查：`paper/k189_audit/codex_review_2026_06_11.md`
+- 審查：`experiments/k189/reviews/codex_review_2026_06_11.md`
 
 ## 待確認
 

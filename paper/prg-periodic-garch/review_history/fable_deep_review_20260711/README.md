@@ -56,6 +56,8 @@ v6 拆出的未完項（仍 open）：**BLOCKING #2 full fix**（→ 已由 K154
 
 `experiments/K1544/`（term-spread vol → NULL，worktree agent，06-24 03:31）與 `experiments/k1544_prg_fair_info_gjr/`（PRG 爭點實驗，Codex，06-24 06:14）**同日雙佔 K1544 編號**，違反「同一 K 編號禁止雙 agent」派工規則。knowledge/引用層面有誤指風險（本文所有 K1544 均指 `k1544_prg_fair_info_gjr`）。建議重編 term-spread 實驗為新號並全 repo grep 修引用。
 
+**2026-07-12 resolution**：治理已完成。term-spread NULL 整體重編為 K1696（`experiments/K1696/`）；PRG fair-information 保留 K1544，本文所有 K1544 語意不變。task、knowledge 與衍生 audit 引用一併遷移，根因記入 `docs/error_log.md`。
+
 ---
 
 ## 3. 學術深度檢視
@@ -136,7 +138,7 @@ PRG = PRS（Lai et al. 2024, APFM）去掉 Markov-switching 的簡化 + 六市�
 |---|---|---|
 | **P0-1** | K880 snapshot pin + SPY 數字 errata + reproduce gate 重建 | §5.1；不做則一切 review 都在漂移的地基上 |
 | **P0-2** | 派 K-new-A（六市場 Close-convention） | 敘事收斂的最後一塊實驗證據 |
-| **P0-3** | K1544 編號碰撞治理 | term-spread 實驗重編號 + 引用修正 + dispatch 檢查缺口記 error_log |
+| **P0-3 ✅ 2026-07-12** | K1544 編號碰撞治理 | term-spread → K1696；引用修正與 dispatch 缺口 error_log 已完成 |
 | **P1-1** | 雙 convention body rewrite（主線程） | 依 narrative state machine：≥3 互補實驗已備（K880v2、K880-rerun、K1544、K-new-A）→ 用戶 confirm 後進 body rewrite |
 | **P1-2** | K-new-B（intraday-target robustness + VT open-known + Sharpe test） | 可與 rewrite 並行 |
 | **P1-3** | FRL 減肥：正文砍到 ≤2,500 字 | VaR/ES 全表、appendix、參數表移 online appendix；主文只留 timing flip + 六市場雙 convention 主表 + ablation |

@@ -56,10 +56,10 @@ _最後更新：2026-07-11（Fable 深審輪）。本檔是 prg-periodic-garch �
   - 驗證「strict t−1 下 PRG 無優勢」是否六市場一般成立（目前僅 SPY 證據）；若高 overnight-share 市場（TAIFEX/GLD）close-time 下仍勝，是額外正面發現
   - _性質_：敘事收斂的最後一塊實驗證據。
 
-- [ ] **⬜ P0-3｜K1544 K 編號碰撞治理**
-  - `experiments/K1544/`（term-spread vol → NULL）與 `experiments/k1544_prg_fair_info_gjr/`（PRG 爭點）同日雙佔 K1544 編號，違反「同一 K 編號禁止雙 agent」
-  - term-spread 實驗重編號 + 全 repo grep 修引用（本論文所有 K1544 均指 `k1544_prg_fair_info_gjr`）
-  - dispatch 檢查缺口記 `docs/error_log.md`
+- [x] **✅ P0-3｜K1544 K 編號碰撞治理（2026-07-12）**
+  - term-spread vol NULL 已由 `experiments/K1544/` 重編為 `experiments/K1696/`
+  - PRG 爭點保留 K1544；本論文所有 K1544 仍明確指 `experiments/k1544_prg_fair_info_gjr/`
+  - task / knowledge / generated audit 引用已遷移，dispatch 缺口已記 `docs/error_log.md`
 
 ---
 
@@ -92,7 +92,7 @@ _最後更新：2026-07-11（Fable 深審輪）。本檔是 prg-periodic-garch �
 - [ ] ⬜ K-new-A（六市場 Close-convention）已落地並 Codex reviewed
 - [ ] ⬜ 雙時點框架 body rewrite 完成（headline = timing-convention flip；已刪「natural and admissible」辯護）
 - [ ] ⬜ 正文 ≤ 2,500 字、abstract ≤ 250 字、Highlights 檔齊
-- [ ] ⬜ K1544 編號碰撞已治理（引用全部指向 `k1544_prg_fair_info_gjr`）
+- [x] ✅ K1544 編號碰撞已治理（2026-07-12；term-spread → K1696，本論文 K1544 全指 `k1544_prg_fair_info_gjr`）
 - [ ] ⬜ v7 review cycle 收斂（latex + citation + Codex independent，無 BLOCKING）
 - [ ] ⬜ FRL 合規：author = Yi-Hao Lai only、無 volpred / AI / LLM 字樣、$200 fee、data availability Option C
 - [ ] ⬜ 開 Open-time 新 headline 下 SPY(2.12) / QQQ(2.97) 不過 3.0 門檻已誠實表述（4/6 過、2/6 marginal），不迴避
@@ -104,7 +104,7 @@ _最後更新：2026-07-11（Fable 深審輪）。本檔是 prg-periodic-garch �
 - **不可再辯護單一 timing convention**。現稿 §4.2「validates the Open convention as natural and admissible」的辯護語氣必刪；改雙時點對照框架。v6 的 "joint advantage" 措辭是 hedging 不是修復。
 - **不可再引用漂移的 SPY 舊值**（DM 6.00 / VaR 0.93% / p=0.77 / MCS=All / best=Ext 皆 stale，僅存於 git `74a01c5db^`）。一切 review / 表格 / abstract 用 6/13 重跑版 canonical。
 - **FRL 字數硬上限不可超**：正文 ≤ 2,500、abstract ≤ 250。照現結構（3,839 / 383 / 19 pp）投 FRL = desk-reject。
-- **K1544 編號碰撞未治理前，引用不可含糊**：所有 K1544 引用須明確指向 `k1544_prg_fair_info_gjr`；term-spread NULL 實驗須先重編號。
+- **K1544 引用仍不可含糊**：碰撞已於 2026-07-12 治理，所有 K1544 引用須明確指向 `k1544_prg_fair_info_gjr`；term-spread NULL 現為 K1696。
 - **reproduce gate RED 狀態下不可標 ready / submit**（paper-workflow 硬規則 2）。
 - **K1544 點估計脆弱**（非凸 MLE multistart，方向穩定但精確值需在 paper pipeline 內重現後才可入表）— 未 pipeline 內重現前不可硬 code 進 Table。
 - 不手改 canonical JSON 湊數；數字不符走「修腳本 / 修論文 / 明記 errata」三選一（paper-workflow 硬規則 4）。

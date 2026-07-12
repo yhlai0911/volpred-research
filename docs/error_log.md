@@ -2,6 +2,36 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-12 15:00 — K1544 被兩個無關實驗共用；K189 文章審查誤進論文狀態機
+
+**現象**：`experiments/K1544/` 是 term-spread volatility 對 MOVE 的增量預測 NULL，
+`experiments/k1544_prg_fair_info_gjr/` 卻是 PRG 六市場 fair-information benchmark；兩者
+都對外稱 K1544。另 `paper/k189_audit/` 只有兩份 feed article 的 Codex 審查紀錄，卻被放進
+`paper_pipeline_status.json` 的 `revision` stage，造成 stall detector、paper sync 與 M3 活動統計
+把非論文工作當論文。
+
+**時間線與根因**：term-spread 於 2026-06-24 03:33 提交，PRG 於 06:18 提交。原子配置器
+`scripts/kid_reserve.py` 雖已於 06-23 23:32 落地，但當時只接到部分 backlog generator；
+paper-followup、Codex VSCode 與 agent 手動命名入口沒有強制 reserve。PRG 任務 brief 仍寫
+`kXXXX`，執行者未呼叫配置器，也未在建立目錄前查同號實驗。K189 則是以 `paper/` 目錄存在
+與 review 檔日期誤推成 manuscript stage，沒有先驗證 `.tex` / PDF 是否存在。
+
+另一個偵測盲區是 `scripts/build_experiments_index.py` 只把精確 `K123` / `K123a` 目錄當 K-id；
+`k1544_prg_fair_info_gjr` 這種帶語義 suffix 的目錄不會與 `K1544` 被歸為同一 identity，因此
+`experiments/index.json` 當時只顯示 term-spread，無法代替 registry / worktree collision check。
+
+**修正**：以 registry 原子 reserve 的 K1696 重編 term-spread 實驗，整體遷移 script、results、
+README、knowledge item `514a3248`、task receipt、work log、DM audit 與 predictor-zoo 生成物；
+研究數字與 NULL verdict 不變。PRG fair-information 保留 K1544，因 paper/research_program 的既有
+K1544 語意全指向它。K189 兩份審查原樣移到 `experiments/k189/reviews/`，從 paper tracker 與
+`work_summary_6h.py` 的 paper slug 移除；歷史 compliance audit 保留舊路徑作當時快照。
+
+**防再犯**：新 K 一律先走 `uv run python scripts/kid_reserve.py reserve ...`，不能由 agent
+自行看最大號加一；建立實驗目錄前須同查 registry、`experiments/` 與 active worktrees。進 paper
+狀態機前至少須存在可提交的 `.tex` 或 PDF；article review 應落在 `experiments/<K>/reviews/`。
+本次另加 repository invariant test，若 K189 再進 tracker / `paper/`，或 term-spread 再佔 K1544，
+CI 會失敗。
+
 ## 2026-07-12 04:0x — **3-STRIKE TRIGGER**：agentic CLI 逾時只殺一個 pid，孫程序活著繼續寫（commits 3ea4e876d + 01a833e8d）
 
 **三次 incident（同根因、同症狀、不同檔案）**：

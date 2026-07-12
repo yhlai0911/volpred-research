@@ -24,7 +24,7 @@
 | eav-universal-magnitude | 2/5 | Major revision | 待定 | sign universality 站得住；magnitude ordering 被自家 θ_rel 欄反轉；abstract 自相矛盾；DM 無 HAC（稽核盲區） | 重估計級 |
 | crypto-fear-channel | 2/5 | No-Go / GO for salvage | 待定 | **7 輪審查全漏的致命 bug**：FEVD shape 誤切，iid 雜訊也算出 90% spillover；headline 隨 Cholesky 排序翻號 | generalized FEVD 重建後定 |
 
-另：`paper/k189_audit/` 非論文（只有 2 份 codex 審查檔）— 建議自 `storage/paper_pipeline_status.json` 移除或標 archive（governance 項，見 §5）。
+另：K189 的 2 份 Codex 檔是文章審查紀錄、不是論文；2026-07-12 已移至 `experiments/k189/reviews/`，並自 `storage/paper_pipeline_status.json` 移除（governance 項，見 §5）。
 
 ## 2. 跨論文系統性診斷（比單篇發現更重要）
 
@@ -83,8 +83,8 @@
 
 1. **LaTeX-binding gate**（根治 §2-1）：reproduce gate 增加「.tex 印出數字 ↔ canonical JSON」驗證層（pdftotext 或 tex-parse）；owner = 各論文 reproduce.py 慣例 + `scripts/check_paper_compliance.py`。同時加 comment-swallow lint（taiwan-vt 兩處 % 吞段教訓）。
 2. **dm_hac_lag 稽核器盲區補掃**：`scripts/audit_dm_hac_lag.py` 擴 pattern（`paper/*/experiments/*.py`、`dm_hln`/`var(d)/T` 變體、`t_stat` priority keys）；baseline 只准變少的 ratchet 不變。
-3. **k189_audit 移出 paper pipeline**（非論文）。
-4. **K1544 編號碰撞治理**：experiments/K1544（term-spread NULL）與 k1544_prg_fair_info_gjr 雙佔編號 → 重編號 + error_log。
+3. **k189_audit 移出 paper pipeline**（非論文；2026-07-12 完成，審查紀錄保存在 `experiments/k189/reviews/`）。
+4. **K1544 編號碰撞治理**：2026-07-12 完成；term-spread NULL 已重編為 K1696，PRG fair-information 保留 K1544，並記錄於 error log。
 5. **Null-input sanity check 慣例**：任何 spillover/decomposition 類 pipeline，投稿前必跑 iid 雜訊 placebo（crypto-fear FEVD 教訓）。
 6. **舊 GREEN PASS 全面除魅**：pipeline status 中凡引用 2026-06 前 verdict 的 stage 註記，以本輪 fable review 為準。
 

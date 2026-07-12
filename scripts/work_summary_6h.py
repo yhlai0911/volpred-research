@@ -300,7 +300,7 @@ def _mission_progress(commits: list[dict], articles: dict, work: list[dict]) -> 
     # 讓 review-cycle / body alignment / citation cleanup 等真實論文工作都計入。
     _paper_slugs = [
         "taiwan-vt", "vix-suff", "garch-x", "crypto-fear", "vol-absor", "vt-trend",
-        "leverage-dir", "vt-crowd", "prg-periodic", "eav-universal", "btc-gas", "k189_audit",
+        "leverage-dir", "vt-crowd", "prg-periodic", "eav-universal", "btc-gas",
     ]
     paper_commits = [
         c for c in commits

@@ -48,7 +48,7 @@
 | C9 | Analytics 回饋閉環：scripts/pull_reader_metrics.py 每日拉 top-N impressions/read-time → storage/analytics/ → 接進選題與 daily checkup | M1+M5+盈利 | P2 |
 | C10 | Newsletter Phase 1：Supabase newsletter_subscribers 表 + 文章頁尾 email capture + 週報 email（複用 email_notifier pipeline）| M5+盈利 | P2 |
 | C11 | Mirror sync 401：對齊 mirror-api Zeabur env OPS_ADMIN_TOKEN（既有 pool 任務，需 Zeabur console 權限確認）| M4 | P3 |
-| C12 | Paper review cycle 佇列：6/11 batch 四篇 + 零 review 兩篇（forecast-tail-divergence / k189_audit）+ vt-insurance-cost 首輪正式 review | M3 | P2 |
+| C12 | Paper review cycle 佇列：6/11 batch 四篇 + forecast-tail-divergence（outline，待成稿）+ vt-insurance-cost 首輪正式 review；`k189_audit` 已於 2026-07-12 確認為文章審查紀錄並移出 paper pipeline | M3 | P2 |
 | C13 | K1328/K1337 各開 v2 任務（Codex FAIL findings 當 brief）| M2 | P3 |
 | C14 | diversity_rule NULL-quartet 冷卻 38 天 → 評估解封 1 筆 ML 實驗試水 | M2 | P3 |
 
