@@ -53,6 +53,11 @@ SAMPLE_START, SAMPLE_END = "2006-01-01", "2026-04-05"
 SHOCK_ABS = 2.0                   # |delta VIX| > 2, same as paper Table 3
 ANN = np.sqrt(252.0)
 MIN_CELL = 5                      # need n_shock > 5 and n_normal > 5 (K897 convention)
+BOOT_REPS = 10_000
+BOOT_SEED = 20260712
+BOOT_PRIMARY_BLOCK = 20
+BOOT_BLOCK_LENGTHS = (10, BOOT_PRIMARY_BLOCK, 40, 63)
+MIN_BOOT_VALID = 1_000
 
 REGIME_NAMES = ["calm (<15)", "normal (15-20)", "elevated (20-25)", "high (25-30)", "crisis (>=30)"]
 REGIME_BOUNDS = [(0, 15), (15, 20), (20, 25), (25, 30), (30, 1e6)]
@@ -101,6 +106,35 @@ def sar_by_regime(abs_ret, level, shock, bounds=REGIME_BOUNDS):
     return np.array(out), np.array(occ), np.array(shock_n)
 
 
+def signed_sar_by_regime(abs_ret, level, signed_shock, any_shock, bounds=REGIME_BOUNDS):
+    """SAR for one shock sign, with the pooled non-shock days as denominator.
+
+    Keeping this in one helper prevents the empirical and simulated ambient x sign arms from
+    drifting apart. All four arrays must already refer to the same day-t observations.
+    """
+    abs_ret = np.asarray(abs_ret, dtype=float)
+    level = np.asarray(level, dtype=float)
+    signed_shock = np.asarray(signed_shock, dtype=bool)
+    any_shock = np.asarray(any_shock, dtype=bool)
+    if not (len(abs_ret) == len(level) == len(signed_shock) == len(any_shock)):
+        raise ValueError("signed SAR inputs must be day-aligned")
+
+    out, occ, shock_n, normal_n = [], [], [], []
+    for lo, hi in bounds:
+        m = (level >= lo) & (level < hi)
+        sm, nm = m & signed_shock, m & ~any_shock
+        ns, nn = int(sm.sum()), int(nm.sum())
+        occ.append(float(m.mean()))
+        shock_n.append(ns)
+        normal_n.append(nn)
+        if ns > MIN_CELL and nn > MIN_CELL:
+            out.append(float(abs_ret[sm].mean() / abs_ret[nm].mean()))
+        else:
+            out.append(np.nan)
+    return (np.asarray(out), np.asarray(occ), np.asarray(shock_n),
+            np.asarray(normal_n))
+
+
 def decay_only_drop_level(params, drop=SHOCK_ABS):
     """Lowest vol level at which the null can produce a `drop`-point one-day FALL.
 
@@ -143,6 +177,111 @@ def decline_nh(sars):
     if np.isnan(normal) or np.isnan(high):
         return np.nan
     return float(normal - high)
+
+
+def circular_block_indices(n, block_length, rng):
+    """Circular moving-block bootstrap indices, preserving paired day-level rows."""
+    if n <= 0 or block_length <= 0:
+        raise ValueError("n and block_length must be positive")
+    n_blocks = int(np.ceil(n / block_length))
+    starts = rng.randint(0, n, size=n_blocks)
+    offsets = np.arange(block_length)
+    return ((starts[:, None] + offsets[None, :]) % n).ravel()[:n]
+
+
+def _bootstrap_summary(values, point_estimate):
+    values = np.asarray(values, dtype=float)
+    values = values[np.isfinite(values)]
+    if len(values) < MIN_BOOT_VALID:
+        return {
+            "point_estimate": round(float(point_estimate), 4),
+            "n_valid": int(len(values)),
+            "ci95": None,
+        }
+    lo, hi = np.percentile(values, [2.5, 97.5])
+    return {
+        "point_estimate": round(float(point_estimate), 4),
+        "bootstrap_mean": round(float(values.mean()), 4),
+        "ci95": [round(float(lo), 4), round(float(hi), 4)],
+        "ci_contains_zero": bool(lo <= 0 <= hi),
+        "n_valid": int(len(values)),
+    }
+
+
+def paired_block_bootstrap_sign_tests(abs_ret, current_level, ambient_level, dlevel):
+    """Paired block inference for the two Codex-review blocking contrasts.
+
+    Each resampled row keeps (|r_t|, VIX_t, VIX_{t-1}, dVIX_t) together. The same block draw
+    is used for pooled, current-level up-only and ambient-level up-only SARs, so the overlapping
+    estimators are compared directly rather than by comparing one CI with another point estimate.
+    """
+    a = np.asarray(abs_ret, dtype=float)
+    cur = np.asarray(current_level, dtype=float)
+    amb = np.asarray(ambient_level, dtype=float)
+    dv = np.asarray(dlevel, dtype=float)
+    if not (len(a) == len(cur) == len(amb) == len(dv)):
+        raise ValueError("paired bootstrap inputs must be day-aligned")
+
+    any_shock = np.abs(dv) > SHOCK_ABS
+    up = dv > SHOCK_ABS
+    pooled_point = decline(sar_by_regime(a, cur, any_shock)[0])
+    current_up_point = decline(signed_sar_by_regime(a, cur, up, any_shock)[0])
+    ambient_up_point = decline(signed_sar_by_regime(a, amb, up, any_shock)[0])
+    diff_point = pooled_point - current_up_point
+
+    by_block = {}
+    primary_raw_ci = None
+    for block_length in BOOT_BLOCK_LENGTHS:
+        rng = np.random.RandomState(BOOT_SEED + block_length)
+        pooled_draws, current_up_draws, ambient_up_draws, diff_draws = [], [], [], []
+        for _ in range(BOOT_REPS):
+            idx = circular_block_indices(len(a), block_length, rng)
+            a_b, cur_b, amb_b, dv_b = a[idx], cur[idx], amb[idx], dv[idx]
+            any_b, up_b = np.abs(dv_b) > SHOCK_ABS, dv_b > SHOCK_ABS
+            pooled_b = decline(sar_by_regime(a_b, cur_b, any_b)[0])
+            current_up_b = decline(signed_sar_by_regime(a_b, cur_b, up_b, any_b)[0])
+            ambient_up_b = decline(signed_sar_by_regime(a_b, amb_b, up_b, any_b)[0])
+            if np.isfinite(pooled_b):
+                pooled_draws.append(pooled_b)
+            if np.isfinite(current_up_b):
+                current_up_draws.append(current_up_b)
+            if np.isfinite(ambient_up_b):
+                ambient_up_draws.append(ambient_up_b)
+            if np.isfinite(pooled_b) and np.isfinite(current_up_b):
+                diff_draws.append(pooled_b - current_up_b)
+
+        by_block[str(block_length)] = {
+            "seed": BOOT_SEED + block_length,
+            "pooled_current_decline": _bootstrap_summary(pooled_draws, pooled_point),
+            "up_only_current_decline": _bootstrap_summary(current_up_draws, current_up_point),
+            "paired_pooled_minus_up_current": _bootstrap_summary(diff_draws, diff_point),
+            "ambient_up_decline": _bootstrap_summary(ambient_up_draws, ambient_up_point),
+        }
+        if block_length == BOOT_PRIMARY_BLOCK and len(ambient_up_draws) >= MIN_BOOT_VALID:
+            primary_raw_ci = tuple(float(x) for x in np.percentile(ambient_up_draws, [2.5, 97.5]))
+
+    primary = by_block[str(BOOT_PRIMARY_BLOCK)]["ambient_up_decline"]
+    if primary_raw_ci is None:
+        gate = "NOT_EVALUABLE"
+    elif ambient_up_point > 0 and primary_raw_ci[0] > 0:
+        gate = "ABSORPTION_SURVIVES_AMBIENT_FEAR_SHOCK_GATE"
+    elif primary_raw_ci[0] <= 0 <= primary_raw_ci[1]:
+        gate = "MECHANISM_UNRESOLVED_CI_INCLUDES_ZERO"
+    else:
+        gate = "ABSORPTION_NOT_SUPPORTED_OR_DIRECTION_REVERSED"
+
+    return {
+        "method": ("paired circular moving-block bootstrap of full day-level rows; pooled and "
+                   "up-only statistics use identical resampled blocks"),
+        "reps": BOOT_REPS,
+        "primary_block_length": BOOT_PRIMARY_BLOCK,
+        "block_length_sensitivity": list(BOOT_BLOCK_LENGTHS),
+        "by_block_length": by_block,
+        "pre_registered_ambient_up_gate": gate,
+        "gate_rule": ("positive ambient-up calm-minus-high point estimate with primary 95% block "
+                      "CI excluding zero => absorption survives; CI containing zero => mechanism "
+                      "unresolved; otherwise absorption is not supported or direction is reversed"),
+    }
 
 
 # ====================================================================================
@@ -226,15 +365,9 @@ def simulate_one(args):
     shock_up, shock_dn = dP > SHOCK_ABS, dP < -SHOCK_ABS
     any_shock = np.abs(dP) > SHOCK_ABS
     for sfx, sm_flag in (("D_up", shock_up), ("D_down", shock_dn)):
-        vals = []
-        for lo, hi in REGIME_BOUNDS:
-            m = (P >= lo) & (P < hi)
-            sm, nm = m & sm_flag, m & ~any_shock
-            if int(sm.sum()) > MIN_CELL and int(nm.sum()) > MIN_CELL:
-                vals.append(float(abs_ret[sm].mean() / abs_ret[nm].mean()))
-            else:
-                vals.append(np.nan)
-        res[f"contemporaneous|{sfx}"] = np.array(vals)
+        res[f"contemporaneous|{sfx}"] = signed_sar_by_regime(
+            abs_ret, P, sm_flag, any_shock
+        )[0]
     res["shock_rate_D_up"] = float(shock_up.mean())
     res["shock_rate_D_down"] = float(shock_dn.mean())
 
@@ -242,6 +375,14 @@ def simulate_one(args):
     sars_e, occ_e, _ = sar_by_regime(abs_ret[1:], P[:-1], any_shock[1:])
     res["contemporaneous|E"] = sars_e
     res["occ_E"] = occ_e
+
+    # --- H: ambient x sign (the missing specification found by Codex primary review) ---
+    # Classify by P[t-1], then split the day-t shock by sign. This is the direct null-side
+    # counterpart of the paper's stated "ambient fear absorbs a fear shock" mechanism.
+    for sfx, sm_flag in (("H_up", shock_up), ("H_down", shock_dn)):
+        res[f"contemporaneous|{sfx}"] = signed_sar_by_regime(
+            abs_ret[1:], P[:-1], sm_flag[1:], any_shock[1:]
+        )[0]
 
     # --- G: doubly-corrected (POST-HOC): ambient regime AND relative threshold ---
     # Neither B, C nor E fixes more than one flaw at a time. G is the "most surgical" null the
@@ -328,17 +469,13 @@ def empirical_side():
 
     any_shock = np.abs(dV) > SHOCK_ABS
     for sfx, sm_flag in (("D_up", dV > SHOCK_ABS), ("D_down", dV < -SHOCK_ABS)):
-        vals = []
-        for lo, hi in REGIME_BOUNDS:
-            m = (V >= lo) & (V < hi)
-            sm, nm = m & sm_flag, m & ~any_shock
-            if int(sm.sum()) > MIN_CELL and int(nm.sum()) > MIN_CELL:
-                vals.append(float(a[sm].mean() / a[nm].mean()))
-            else:
-                vals.append(np.nan)
-        emp[sfx] = np.array(vals)
+        emp[sfx] = signed_sar_by_regime(a, V, sm_flag, any_shock)[0]
 
     emp["E"] = sar_by_regime(a[1:], V[:-1], any_shock[1:])[0]
+    for sfx, sm_flag in (("H_up", dV > SHOCK_ABS), ("H_down", dV < -SHOCK_ABS)):
+        emp[sfx] = signed_sar_by_regime(
+            a[1:], V[:-1], sm_flag[1:], any_shock[1:]
+        )[0]
     emp["F"] = emp["A"]   # F changes only the NULL's scale; the data side is variant A
     emp["G"] = sar_by_regime(a[1:], V[:-1], shock_c[1:])[0]   # ambient regime + relative threshold
 
@@ -373,6 +510,23 @@ def empirical_side():
             "up_share_of_shocks": round(n_up / (n_up + n_dn), 4) if (n_up + n_dn) else None,
         })
 
+    ambient_comp = []
+    a_amb, v_amb, dv_amb = a[1:], V[:-1], dV[1:]
+    shock_amb = np.abs(dv_amb) > SHOCK_ABS
+    for lo, hi in REGIME_BOUNDS:
+        m = (v_amb >= lo) & (v_amb < hi)
+        n_up = int((m & (dv_amb > SHOCK_ABS)).sum())
+        n_dn = int((m & (dv_amb < -SHOCK_ABS)).sum())
+        ambient_comp.append({
+            "regime": REGIME_NAMES[len(ambient_comp)],
+            "n_shock_up": n_up,
+            "n_shock_down": n_dn,
+            "n_normal": int((m & ~shock_amb).sum()),
+            "up_share_of_shocks": round(n_up / (n_up + n_dn), 4) if (n_up + n_dn) else None,
+            "mean_abs_return_up": round(float(a_amb[m & (dv_amb > SHOCK_ABS)].mean()), 6)
+                if n_up else None,
+        })
+
     # The up-only calm cell has n=10. A point estimate from 10 observations must not be stated
     # as settled fact (independent review H3), so bootstrap it and report the interval.
     rng_bs = np.random.RandomState(20260712)
@@ -388,31 +542,42 @@ def empirical_side():
         sc = d["calm_up"].mean() / d["calm_normal"].mean()
         sh = d["high_up"].mean() / d["high_normal"].mean()
         bs_sar_calm.append(sc), bs_sar_high.append(sh), bs_dec.append(sc - sh)
+    point_sar_calm = float(cells["calm_up"].mean() / cells["calm_normal"].mean())
+    point_sar_high = float(cells["high_up"].mean() / cells["high_normal"].mean())
+    point_decline = point_sar_calm - point_sar_high
     up_bs = {
         "n_calm_up_shocks": int(len(cells["calm_up"])),
-        "sar_up_calm": round(float(np.mean(bs_sar_calm)), 4),
+        "sar_up_calm": round(point_sar_calm, 4),
+        "sar_up_calm_bootstrap_mean": round(float(np.mean(bs_sar_calm)), 4),
         "sar_up_calm_ci95": [round(float(np.percentile(bs_sar_calm, 2.5)), 4),
                              round(float(np.percentile(bs_sar_calm, 97.5)), 4)],
         "sar_up_high_ci95": [round(float(np.percentile(bs_sar_high, 2.5)), 4),
                              round(float(np.percentile(bs_sar_high, 97.5)), 4)],
-        "up_decline_calm_minus_high": round(float(np.mean(bs_dec)), 4),
+        "up_decline_calm_minus_high": round(point_decline, 4),
+        "up_decline_bootstrap_mean": round(float(np.mean(bs_dec)), 4),
         "up_decline_ci95": [round(float(np.percentile(bs_dec, 2.5)), 4),
                             round(float(np.percentile(bs_dec, 97.5)), 4)],
         "up_decline_ci_contains_zero": bool(np.percentile(bs_dec, 2.5) <= 0 <= np.percentile(bs_dec, 97.5)),
-        "seed": 20260712,
+        "seed": BOOT_SEED,
         "note": ("The calm up-shock cell has only 10 days, so the up-only decline is imprecise. "
                  "What the interval CAN establish is reported; what it cannot is not asserted."),
     }
 
+    paired_block = paired_block_bootstrap_sign_tests(
+        a[1:], V[1:], V[:-1], dV[1:]
+    )
+
     diag = {
         "sample": f"{df.date.min():%Y-%m-%d} to {df.date.max():%Y-%m-%d}",
         "up_shock_bootstrap": up_bs,
+        "paired_block_bootstrap": paired_block,
         "n_observations": int(len(df)),
         "shock_rate_A": s,
         "n_shock_A": int(shock_a.sum()),
         "regime_occupancy": occ_a.tolist(),
         "n_shock_by_regime": ns_a.tolist(),
         "shock_sign_composition": comp,
+        "ambient_sign_composition": ambient_comp,
         "n_shock_up": int((dV > SHOCK_ABS).sum()),
         "n_shock_down": int((dV < -SHOCK_ABS).sum()),
         "relative_threshold_q": rel_q,
@@ -464,6 +629,18 @@ def regimewise(emp_sars, sim_matrix, label):
     return out, f"{n_out}/{n_tested}"
 
 
+def write_json_atomic(path, payload):
+    """Write, parse-verify, then atomically replace the result JSON."""
+    path = Path(path)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(tmp, "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+        f.flush()
+    with open(tmp) as f:
+        json.load(f)
+    tmp.replace(path)
+
+
 # ====================================================================================
 def main():
     print("=" * 78)
@@ -494,6 +671,7 @@ def main():
     print("\n[3/4] Assembling...")
     keys = ["k897_lagged|A", "contemporaneous|A", "contemporaneous|B", "contemporaneous|C",
             "contemporaneous|D_up", "contemporaneous|D_down", "contemporaneous|E",
+            "contemporaneous|H_up", "contemporaneous|H_down",
             "contemporaneous|F", "contemporaneous|G"]
     mats = {k: np.vstack([s[k] for s in sims]) for k in keys}
     declines = {k: np.array([decline(s[k]) for s in sims]) for k in keys}
@@ -526,6 +704,9 @@ def main():
             "C": "relative threshold |dP|/P_{t-1} > q, same unit-free q as empirical",
             "D": "sign-split: dP>+2 (vol up) vs dP<-2 (vol down); shared non-shock denominator",
             "E": "ambient regime: classify day t by the PRE-shock level P[t-1]",
+            "H": "AMBIENT x SIGN: classify by P[t-1], split dP>+2 and dP<-2, and use the "
+                 "shared pooled non-shock denominator. Added by the Codex FAIL follow-up and run "
+                 "symmetrically on empirical data and the same-seed null paths",
             "G": "POST-HOC (not pre-registered): doubly-corrected -- ambient regime AND relative "
                  "threshold, i.e. B/C/E's fixes combined (independent review M2)",
             "F": "POST-HOC (not pre-registered): VRP-calibrated -- affine-map the null proxy onto VIX's "
@@ -538,6 +719,14 @@ def main():
             "outside_95_ci": "identification HOLDS and strengthens; paper upgrades",
             "inside_95_ci": "absorption claim DOWNGRADED to mechanical decomposition; paper reframes",
             "committed_before_results": "git commit 870af5d00 (README pre-registration, no results present)",
+        },
+        "codex_fail_followup_rule": {
+            "statistic": "ambient(VIX_{t-1}) x up-shock SAR decline = calm minus high",
+            "inference": ("paired circular moving-block bootstrap, primary block=20 trading days, "
+                          "sensitivity blocks 10/20/40/63, B=10000"),
+            "positive_ci_excluding_zero": "absorption survives the ambient fear-shock gate; JBF line may continue",
+            "ci_including_zero": "mechanism unresolved; paper must be downgraded/reframed",
+            "source": "task k1686_fix_ambient_sign_spec, fixed before this rerun",
         },
     }
 
@@ -560,6 +749,8 @@ def main():
         "contemporaneous|B": decline(emp["B"]), "contemporaneous|C": decline(emp["C"]),
         "contemporaneous|D_up": decline(emp["D_up"]), "contemporaneous|D_down": decline(emp["D_down"]),
         "contemporaneous|E": decline(emp["E"]),
+        "contemporaneous|H_up": decline(emp["H_up"]),
+        "contemporaneous|H_down": decline(emp["H_down"]),
         "contemporaneous|F": emp_decline,   # F changes only the null's scale; data side = variant A
         "contemporaneous|G": decline(emp["G"]),
     }
@@ -576,7 +767,10 @@ def main():
         "contemporaneous|B": decline_nh(emp["B"]), "contemporaneous|C": decline_nh(emp["C"]),
         "contemporaneous|D_up": decline_nh(emp["D_up"]),
         "contemporaneous|D_down": decline_nh(emp["D_down"]),
-        "contemporaneous|E": decline_nh(emp["E"]), "contemporaneous|F": decline_nh(emp["A"]),
+        "contemporaneous|E": decline_nh(emp["E"]),
+        "contemporaneous|H_up": decline_nh(emp["H_up"]),
+        "contemporaneous|H_down": decline_nh(emp["H_down"]),
+        "contemporaneous|F": decline_nh(emp["A"]),
         "contemporaneous|G": decline_nh(emp["G"]),
     }
     out["sar_decline_normal_to_high_comparison"] = {
@@ -715,6 +909,10 @@ def main():
             rejects.append(k)
 
     bs = diag["up_shock_bootstrap"]
+    paired_block = diag["paired_block_bootstrap"]
+    paired_primary = paired_block["by_block_length"][str(BOOT_PRIMARY_BLOCK)]
+    ambient_up_primary = paired_primary["ambient_up_decline"]
+    pooled_minus_up_primary = paired_primary["paired_pooled_minus_up_current"]
     out["variant_disagreement"] = {
         "fails_to_reject_the_null": fails_to_reject,
         "rejects_the_null": rejects,
@@ -739,72 +937,84 @@ def main():
         ),
     }
 
-    # --- what survives WITHOUT any null model. This is what actually decides the paper. --------
+    # --- direct empirical inference requested by the Codex FAIL follow-up -----------------------
     out["null_free_evidence"] = {
         "pooled_decline_headline": round(emp_decline, 4),
-        "up_only_decline": bs["up_decline_calm_minus_high"],
-        "up_only_decline_ci95": bs["up_decline_ci95"],
-        "up_only_ci_excludes_pooled_headline":
-            bool(bs["up_decline_ci95"][1] < emp_decline),
+        "up_only_current_regime_decline": round(decline(emp["D_up"]), 4),
+        "ambient_up_decline": round(decline(emp["H_up"]), 4),
+        "paired_block_bootstrap": paired_block,
+        "paired_pooled_minus_up_current_primary": pooled_minus_up_primary,
+        "ambient_up_primary": ambient_up_primary,
         "down_only_decline": round(decline(emp["D_down"]), 4),
-        "n_calm_up_shocks": bs["n_calm_up_shocks"],
-        "n_calm_down_shocks": diag["shock_sign_composition"][0]["n_shock_down"],
+        "n_calm_up_shocks_current_regime": bs["n_calm_up_shocks"],
+        "n_calm_down_shocks_current_regime": diag["shock_sign_composition"][0]["n_shock_down"],
+        "n_calm_up_shocks_ambient_regime": diag["ambient_sign_composition"][0]["n_shock_up"],
+        "n_high_up_shocks_ambient_regime": diag["ambient_sign_composition"][3]["n_shock_up"],
         "finding": (
-            "Split the shock set by the SIGN of the VIX move and the paper's mechanism evaporates. "
-            f"Pooled decline {emp_decline:.4f}. Among genuine FEAR SPIKES (dVIX>+2) the decline is "
-            f"{bs['up_decline_calm_minus_high']:.4f}, bootstrap 95% CI {bs['up_decline_ci95']} -- it "
-            "contains ZERO (no absorption gradient can be established) AND its upper end sits BELOW "
-            f"the pooled headline {emp_decline:.4f}, so the headline is significantly larger than "
-            "anything fear spikes can account for. The decline lives in the RELIEF RALLIES "
-            f"(dVIX<-2): {decline(emp['D_down']):.4f}. And the calm anchor that sets the headline's "
-            f"magnitude rests on {bs['n_calm_up_shocks']} fear-spike days against "
-            f"{diag['shock_sign_composition'][0]['n_shock_down']} relief days. "
-            "This holds with NO null model, so it is immune to every calibration dispute above."
+            f"Current-VIX sign split gives up-only decline {decline(emp['D_up']):.4f}, but that "
+            "post-shock regime definition is endogenous and cannot decide the ambient mechanism. "
+            f"The required ambient(VIX_t-1) x up-shock decline is {decline(emp['H_up']):.4f}; "
+            f"its primary 20-day paired block-bootstrap CI is {ambient_up_primary['ci95']}. "
+            f"The direct paired pooled-minus-up-current contrast is {pooled_minus_up_primary['point_estimate']} "
+            f"with CI {pooled_minus_up_primary['ci95']}; this replaces the invalid comparison of an "
+            "up-only CI endpoint with the pooled point estimate."
         ),
-        "mechanism": (
-            "A 2-point VIX fall from 13 is a rare, large relief move that comes with a big rally; a "
-            "2-point fall from 27 is routine mean reversion with an ordinary return. So the shock "
-            "bucket's mean |r| is inflated at calm levels and deflated at high levels -- SAR declines. "
-            "That is signed-composition selection, not fear being absorbed."
-        ),
+        "inference_boundary": ("The paired bootstrap establishes only the registered ambient-up gate "
+                               "and the pooled-minus-up contrast. It does not by itself identify a "
+                               "structural causal channel."),
     }
 
-    # --- SYNTHESIS. The pre-registered primary is reported verbatim above and is binding as the
-    # answer to the test we said we would run. But the primary turned out to rest on a weak null
-    # (see variant_disagreement), so reporting ONLY "the null was not rejected" would be its own
-    # kind of overclaim. The claim the PAPER makes is decided by evidence that needs no null.
+    # --- SYNTHESIS. Preserve the original pre-registered A outcome, then apply the fixed follow-up
+    # rule that was materialised in task k1686_fix_ambient_sign_spec before this rerun.
     out["pre_registered_primary_outcome"] = out.pop("verdict")
     out["pre_registered_primary_detail"] = out.pop("verdict_detail")
-    out["verdict"] = "ABSORPTION CLAIM NOT SUPPORTED"
-    out["verdict_detail"] = (
-        "Three findings, in order of how much weight they can bear.\n\n"
-        "(1) NULL-FREE, DECISIVE -- the paper's mechanism is not what drives its statistic. "
-        f"Splitting shocks by the sign of the VIX move: the pooled decline is {emp_decline:.4f}, but "
-        f"among genuine FEAR SPIKES it is {bs['up_decline_calm_minus_high']:.4f} with bootstrap 95% CI "
-        f"{bs['up_decline_ci95']} -- containing zero AND lying entirely below the pooled headline. The "
-        f"decline lives in the RELIEF RALLIES ({decline(emp['D_down']):.4f}). The calm anchor rests on "
-        f"{bs['n_calm_up_shocks']} fear-spike days vs {diag['shock_sign_composition'][0]['n_shock_down']} "
-        "relief days. 'Ambient fear absorbs fear shocks' is therefore not what the SAR decline shows, "
-        "and this conclusion depends on NO null model.\n\n"
-        "(2) THE NULL COMPARISON IS INCONCLUSIVE, in both directions. The pre-registered primary "
-        f"(variant A) does not reject ({prim['empirical']} inside {prim['sim_ci_95']}, p="
-        f"{prim['p_value_monte_carlo']}), so by the letter of the pre-registered rule the absorption "
-        "claim is downgraded. But A's null earns its decline by letting plain decay cross the fixed "
-        "2-point threshold at high vol -- an artifact, not the data's mechanism -- so its "
-        "non-rejection is two artifacts cancelling. The corrected nulls (B, C, G) all reject. Neither "
-        "'it is just GARCH' nor 'it is absorption' is established by the null comparison.\n\n"
-        "(3) K897'S VERDICT DOES NOT SURVIVE REGARDLESS. Its NULL REJECTED rested on a null whose vol "
-        "proxy could not react to the same day's return; on the same seeds and params, making the "
-        "proxy contemporaneous moves the null's SAR levels from ~1.0-1.2 to ~1.6-2.4 and its decline "
-        f"from 0.1734 to {prim['sim_mean']}. The margin K897 reported was largely a timing artifact.\n\n"
-        "RECOMMENDATION: the paper cannot claim absorption. It CAN claim something real and "
-        "publishable -- that the SAR regime-decline is a signed-composition effect, and that it is "
-        "NOT reproduced by a well-specified GARCH null (B/C/G reject). That is a measurement note, "
-        "not the absorption hypothesis."
-    )
+    followup_gate = paired_block["pre_registered_ambient_up_gate"]
+    h_null = out["sar_decline_comparison"]["contemporaneous|H_up"]
+    out["codex_followup_gate"] = {
+        "verdict": followup_gate,
+        "empirical_ambient_up": ambient_up_primary,
+        "same_seed_null_comparison": h_null,
+        "paired_pooled_minus_up_current": pooled_minus_up_primary,
+        "block_length_sensitivity": {
+            k: v["ambient_up_decline"] for k, v in paired_block["by_block_length"].items()
+        },
+    }
+    if followup_gate == "NOT_EVALUABLE":
+        out["verdict"] = "AMBIENT-FEAR-SHOCK GATE NOT EVALUABLE"
+        out["verdict_detail"] = (
+            f"Fewer than {MIN_BOOT_VALID} valid paired block-bootstrap replications were available "
+            "for the ambient-up statistic. No positive or negative mechanism conclusion is allowed."
+        )
+    elif followup_gate == "ABSORPTION_SURVIVES_AMBIENT_FEAR_SHOCK_GATE":
+        out["verdict"] = "ABSORPTION SURVIVES AMBIENT-FEAR-SHOCK GATE"
+        out["verdict_detail"] = (
+            f"The omitted ambient(VIX_t-1) x fear-shock specification reverses the earlier D_up "
+            f"reading. Its empirical calm-minus-high decline is {ambient_up_primary['point_estimate']} "
+            f"with a primary 20-day paired block-bootstrap 95% CI {ambient_up_primary['ci95']}, "
+            "strictly positive under the fixed follow-up rule. The absorption mechanism therefore "
+            "survives this empirical gate; the prior FRL downgrade is not supported by K1686 alone. "
+            f"The same-seed GJR null comparison is reported separately (empirical {h_null.get('empirical')}, "
+            f"null CI {h_null.get('sim_ci_95')}, MC p={h_null.get('p_value_monte_carlo')}) and remains "
+            "subject to the documented level/increment calibration failures. The direct paired "
+            f"pooled-minus-current-up contrast is {pooled_minus_up_primary['point_estimate']} with CI "
+            f"{pooled_minus_up_primary['ci95']}; no inference is made by comparing separate intervals."
+        )
+    elif followup_gate == "MECHANISM_UNRESOLVED_CI_INCLUDES_ZERO":
+        out["verdict"] = "AMBIENT-FEAR MECHANISM UNRESOLVED"
+        out["verdict_detail"] = (
+            f"The ambient(VIX_t-1) x fear-shock decline is {ambient_up_primary['point_estimate']} "
+            f"with paired block-bootstrap CI {ambient_up_primary['ci95']}, which includes zero. "
+            "Under the fixed follow-up rule the paper must be downgraded/reframed."
+        )
+    else:
+        out["verdict"] = "ABSORPTION NOT SUPPORTED BY AMBIENT-FEAR-SHOCK GATE"
+        out["verdict_detail"] = (
+            f"The ambient(VIX_t-1) x fear-shock decline is {ambient_up_primary['point_estimate']} "
+            f"with paired block-bootstrap CI {ambient_up_primary['ci95']}; it does not satisfy the "
+            "pre-specified positive-CI gate."
+        )
 
-    with open(HERE / "k1686_contemporaneous_null_results.json", "w") as f:
-        json.dump(out, f, indent=2, default=str)
+    write_json_atomic(HERE / "k1686_contemporaneous_null_results.json", out)
 
     print("\n[4/4] Verdict")
     print("=" * 78)
@@ -819,8 +1029,10 @@ def main():
     print(f"  null comparison: rejects={[k.split('|')[1] for k in rejects]}  "
           f"fails-to-reject={[k.split('|')[1] for k in fails_to_reject]}  -> INCONCLUSIVE")
     print(f"  pre-registered primary (A): {out['pre_registered_primary_outcome']}")
-    print(f"  NULL-FREE: up-only decline {bs['up_decline_calm_minus_high']} CI {bs['up_decline_ci95']} "
-          f"(pooled headline {emp_decline:.4f} lies ABOVE this CI)")
+    print(f"  paired pooled-current minus up-current: "
+          f"{pooled_minus_up_primary['point_estimate']} CI {pooled_minus_up_primary['ci95']}")
+    print(f"  ambient(VIX_t-1) x up-shock decline: {ambient_up_primary['point_estimate']} "
+          f"CI {ambient_up_primary['ci95']} -> {followup_gate}")
     print("=" * 78)
     print(f"  VERDICT: {out['verdict']}")
     print(f"\n{out['verdict_detail']}")
@@ -841,7 +1053,7 @@ def make_figure(out, declines, emp_declines, emp, diag):
         ("contemporaneous|C", "C -- relative threshold\n|dP|/P > q"),
         ("contemporaneous|D_up", "D -- sign-split: vol UP shocks\n(genuine fear spikes)"),
         (None, None),  # slot 6 is the empirical sign-split panel, drawn below
-        ("contemporaneous|E", "E -- ambient regime\n(classify by pre-shock level)"),
+        ("contemporaneous|H_up", "H -- ambient x vol-UP shock\n(pre-shock regime; mechanism gate)"),
     ]
     fig, axes = plt.subplots(2, 4, figsize=(21, 9.5))
     flat = axes.ravel()
@@ -879,13 +1091,18 @@ def make_figure(out, declines, emp_declines, emp, diag):
     ax.plot(x, emp["D_down"], "^-", color="#2980b9", lw=2.2, label="vol DOWN shocks only (relief)")
     ax.axhline(1.0, color="grey", ls=":", lw=1)
     for i, c in enumerate(diag["shock_sign_composition"]):
-        ax.annotate(f"n↑={c['n_shock_up']}\nn↓={c['n_shock_down']}", (i, 3.63),
-                    ha="center", fontsize=6.5, color="#555")
+        ambient_c = diag["ambient_sign_composition"][i]
+        ax.annotate(
+            f"cur ↑/↓={c['n_shock_up']}/{c['n_shock_down']}\namb ↑={ambient_c['n_shock_up']}",
+            (i, 3.63), ha="center", fontsize=6.2, color="#555"
+        )
     ax.set_ylim(0.8, 3.95)
     ax.set_xticks(x)
     ax.set_xticklabels(["calm", "normal", "elev.", "high", "crisis"], fontsize=8)
     ax.set_ylabel("empirical SAR")
-    ax.set_title("THE DATA, WITHOUT ANY NULL:\nthe decline lives entirely in the relief rallies", fontsize=9.5)
+    ax.plot(x, emp["H_up"], "D--", color="#8e44ad", lw=2.0,
+            label="ambient VIX(t-1) x vol UP")
+    ax.set_title("EMPIRICAL SIGN SPLIT:\ncurrent vs pre-shock regime definitions", fontsize=9.5)
     ax.legend(fontsize=7, loc="lower left")
 
     # 8th panel: the mechanism. Where the null's within-regime shock rate runs above the data's,
@@ -902,8 +1119,7 @@ def make_figure(out, declines, emp_declines, emp, diag):
     ax.set_title("MECHANISM: is the null's shock bucket\nflooded by threshold-crossing decay?", fontsize=9.5)
     ax.legend(fontsize=7.5)
 
-    fig.suptitle("K1686: does the SAR decline survive a null whose vol proxy is contemporaneous with returns?",
-                 fontsize=13)
+    fig.suptitle("K1686 R2: timing, shock sign, and pre-shock ambient-fear gates", fontsize=13)
     fig.tight_layout(rect=[0, 0, 1, 0.95])
     fig.savefig(HERE / "k1686_null_distributions.png", dpi=140)
     print(f"\n  Figure: {HERE / 'k1686_null_distributions.png'}")

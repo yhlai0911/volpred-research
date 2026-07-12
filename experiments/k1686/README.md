@@ -1,7 +1,7 @@
 # K1686 — Volatility Absorption: Contemporaneous Null 重跑（make-or-break gating）
 
 - **Experiment ID**: `k1686`
-- **Status**: PRE-REGISTERED（本節於執行模擬**之前** commit；見 git history）
+- **Status**: R2 COMPLETE — Codex FAIL follow-up 已正式重跑；ambient×sign 與 paired block-bootstrap blockers 已關閉
 - **Paper**: `paper/volatility-absorption`（Paper 8）
 - **前身**: `experiments/k897/`（GJR-GARCH null simulation，結論 `NULL REJECTED`）
 - **觸發**: `paper/volatility-absorption/review_history/fable_deep_review_20260711/README.md` §3-B / §5 P0-1
@@ -102,6 +102,10 @@ regime 切點）全部維持不變，使任何結果差異都能 100% 歸因於 
 **禁止事項（研究誠實）**：不得在看到結果後調整 threshold、seed、regime 切點、樣本期間或規格，
 把結果推回想要的方向。無論落點為何，README 與 results JSON 都如實記錄。Null result 是結果，不是失敗。
 
+**R2 follow-up gate（於 rerun 前由 task `k1686_fix_ambient_sign_spec` 固定）**：H ambient-up 的 20-day
+paired block-bootstrap CI 若為正且不含 0，absorption 在 fear-shock 條件下存活；若含 0，機制 unresolved、
+論文降級重框。原 A 的 pre-registered outcome 仍完整保留，不以 H 回頭改寫 A。
+
 ---
 
 ## 4. 變體規格（口徑一致性：實證 vs 模擬逐欄對齊）
@@ -116,6 +120,7 @@ regime 切點）全部維持不變，使任何結果差異都能 100% 歸因於 
 | **C** | 同 A | `\|ΔVIX_t\| / VIX_{t-1} > q` | `\|ΔP_t\| / P_{t-1} > q`（**同一個 q**，無單位） | VIX=12 時 ΔVIX=2 是 17% 的相對變動，VIX=40 時只有 5% —— 固定加法門檻使高 regime 的「shock」相對更弱，SAR 遞減可能有一部分是選樣機械效應。`q` 取實證 `\|ΔVIX\|/VIX_{t-1}` 中對應 s 的分位數 |
 | **D** | 同 A | 分開報 `ΔVIX_t > +2`（vol 上升）與 `ΔVIX_t < −2`（vol 下降） | 同左（對 `ΔP_t`） | `\|ΔVIX\|>2` 把恐慌暴漲日與 relief-rally 日混進同一個「fear shock」桶。檢查 absorption 是否只來自單邊 |
 | **E（補充）** | **`VIX_{t-1}` / `P_{t-1}`**（ambient fear，落後一期） | `\|ΔVIX_t\| > 2` | `\|ΔP_t\| > 2` | A–D 的 regime 分類本身是 `r_t` 的函數（大跌 → VIX_t 高 → 被分進高 regime），存在內生分選。E 用**衝擊前的 ambient 恐懼水準**分 regime，這也更貼近論文「ambient fear 調節反應」的故事 |
+| **H（Codex FAIL follow-up）** | **`VIX_{t-1}` / `P_{t-1}`** | 分開報 `ΔVIX_t > +2` 與 `< −2` | 同左（對 `ΔP_t`） | 缺失的 **ambient × sign** 正式規格；empirical 與 same-seed null 完全對稱，並以 ambient-up 的 paired block CI 執行固定 gate |
 
 其中 `s` = 實證 `|ΔVIX_t| > 2` 的 shock rate = **0.1508**（768 / 5092）。
 
@@ -166,13 +171,15 @@ regime 切點）全部維持不變，使任何結果差異都能 100% 歸因於 
 
 | 變體 | 實證 decline | Null mean ± sd | Null 95% CI | 落在 CI 內？ | MC p |
 |---|---|---|---|---|---|
-| K897 lagged arm（**有缺陷的舊 null**） | 0.8165 | 0.1734 ± 0.2105 | [−0.2811, 0.5575] | **否** | 0.0004 |
+| K897 lagged arm（**有缺陷的舊 null**） | 0.8165 | 0.1734 ± 0.2105 | [−0.2811, 0.5575] | **否** | 0.000600 |
 | **A — PRIMARY（同期化 + fixed）** | **0.8165** | **0.6190 ± 0.2487** | **[0.0824, 1.0596]** | **是** | **0.410** |
-| B — frequency-matched | 0.8165 | −0.0035 ± 0.1578 | [−0.3115, 0.3096] | 否 | 0.0002 |
-| C — relative threshold | **0.3397** | −0.1877 ± 0.2159 | [−0.6543, 0.2006] | 否 | 0.0064 |
+| B — frequency-matched | 0.8165 | −0.0035 ± 0.1578 | [−0.3115, 0.3096] | 否 | 0.000206 |
+| C — relative threshold | **0.3397** | −0.1877 ± 0.2159 | [−0.6543, 0.2006] | 否 | 0.006601 |
 | D — sign-split：vol **UP** shocks | **−0.1192** | 0.0904 ± 0.2660 | [−0.4666, 0.5725] | 是 | 0.394 |
 | D — sign-split：vol **DOWN** shocks | +1.3368 | *null 結構上不存在*（見 6.4） | — | — | — |
 | E — ambient regime | 1.4643 | 0.9527 ± 0.3537 | [0.1956, 1.5830] | 是 | 0.117 |
+| **H — ambient × vol UP** | **1.0465** | 0.2917 ± 0.4197 | [−0.6554, 0.9887] | **否** | **0.032673** |
+| H — ambient × vol DOWN | *empirical/null primary leg 均不可評估* | — | — | — | — |
 | F — VRP 校準（**事後**加，見 6.6） | 0.8165 | *calm cell 無法評估* | — | — | — |
 | G — 雙重修正（**事後**加，見 6.6） | 0.5831 | −0.3573 ± 0.4111 | [−1.2832, 0.3134] | 否 | 0.0037 |
 
@@ -188,52 +195,38 @@ null 的 SAR 水準由 1.0–1.2 升到 1.6–2.4，decline 由 0.1734 升到 0.
 > **結論：null 比較本身是 inconclusive —— 兩個方向都不能宣稱。**
 > 真正決定論文命運的是下一節那個**不需要 null** 的證據。
 
-### 6.2 決定性的實證事實（**不需要任何 null 模型**）
+### 6.2 Codex FAIL follow-up：ambient × sign 改寫結論
 
-把「shock」按 ΔVIX 的**正負號**拆開之後：
+原 D 規格先用同期 `VIX_t` 分 regime，再看 `ΔVIX_t>2`。正向衝擊本身會推高 `VIX_t`，因此 calm 格被
+機械性壓到 10 日；它不能回答「衝擊前的 ambient fear 是否吸收 fear shock」。R2 正式新增 H：用
+`VIX_{t-1}` 分 regime，shock 仍是 day-t 的 `ΔVIX_t>2`，normal denominator 維持 pooled non-shock。
 
-| regime | SAR（pooled, 論文定義） | SAR（**vol UP**, 真正的恐慌衝擊） | SAR（**vol DOWN**, relief rally） | n↑ | n↓ | n_normal |
-|---|---|---|---|---|---|---|
-| calm (<15) | **3.1490** | 2.3764 | **3.4710** | **10** | 24 | 1721 |
-| normal (15–20) | 2.7723 | 2.8516 | 2.7002 | 80 | 88 | 1403 |
-| elevated (20–25) | 2.3770 | 2.4173 | 2.3144 | 115 | 74 | 696 |
-| high (25–30) | 2.3325 | 2.4956 | 2.1342 | 73 | 60 | 299 |
-| crisis (≥30) | 2.4514 | 2.6794 | 2.1870 | 131 | 113 | 205 |
-| **decline (calm−high)** | **+0.8165** | **−0.1192** | **+1.3368** | | | |
+| ambient regime (`VIX_{t-1}`) | H：vol-UP SAR | n↑ | n↓ | n_normal |
+|---|---:|---:|---:|---:|
+| calm (<15) | **3.8863** | **47** | 3 | 1705 |
+| normal (15–20) | 3.1017 | 124 | 58 | 1389 |
+| elevated (20–25) | 2.9013 | 99 | 82 | 703 |
+| high (25–30) | **2.8398** | **53** | 70 | 309 |
+| crisis (≥30) | 3.0082 | 86 | 146 | 217 |
+| **decline (calm−high)** | **+1.0465** | | | |
 
-**把 up-only 那一列單獨看：2.38 → 2.85 → 2.42 → 2.50 → 2.68 —— 這不是遞減，是非單調的鋸齒。**
-calm 不但不是最高，反而低於 normal；crisis 又彈回 2.68。**論文所宣稱的「ambient fear 越高、
-恐慌衝擊越被吸收」的單調梯度，在真正的恐慌衝擊裡不存在。**
+正式推論採 paired circular moving-block bootstrap：每次以同一組完整日資料 row 重抽
+`(|r_t|, VIX_t, VIX_{t-1}, ΔVIX_t)`，所以 pooled、current-up、ambient-up 與其差值都在同一 bootstrap
+樣本上重算。B=10,000、seed 固定；primary block=20 日，另做 10/40/63 日 sensitivity。
 
-論文 headline 的 0.8165 decline，其**量級**來自 pooled 的 calm 錨點 3.1490 —— 而這一格建立在
-**34 個 shock 日**上，其中 **24 日（71%）是 VIX 下跌日**，真正的恐慌衝擊**只有 10 日**。
-up-only 的 calm 值（2.3764, n=10）比 pooled 的 3.1490 低了 0.77，差額全部由 down-shock 的
-3.4710 貢獻。**pooled decline 的分子端是被 relief rally 灌高的。**
+| 統計量（20-day block） | 點估計 | 95% CI | 結論 |
+|---|---:|---:|---|
+| current-VIX up-only decline（D） | −0.1204 | [−0.7449, 0.6011] | 含 0；只說此 post-shock 分箱下未建立梯度 |
+| **paired pooled − current-up** | **+0.9353** | **[0.3437, 1.4991]** | 直接配對差顯著；取代舊的「up CI 上界 vs pooled 點估計」錯誤比較 |
+| **ambient-up decline（H，正式 gate）** | **+1.0465** | **[0.3286, 1.7625]** | 正且排除 0 → **absorption survives** |
 
-**機制**：VIX = 13 時掉 2 點（→ 11）是罕見的大幅 relief，伴隨大漲（|r| 大）；VIX = 27 時掉 2 點只是
-例行均值回歸，伴隨普通報酬。於是 down-shock 的 SAR 從 calm 的 3.471 一路掉到 high 的 2.134
-（down-decline = **+1.337**，是 pooled 0.8165 的 1.6 倍）。**這是 signed-composition 的選樣效應。**
+H 的 block sensitivity 完全同方向：block 10/20/40/63 的 CI 分別為
+`[0.3299,1.7584]`、`[0.3286,1.7625]`、`[0.3458,1.7610]`、`[0.3433,1.7615]`。
+依 task 中先固定的判定規則，**ambient fear-shock 機制通過本 gate；先前「機制蒸發、應降級 FRL」結論撤回。**
 
-**Bootstrap（n=10 那格不能用點估計就下定論 — 獨立審查 H3）**：對 calm/high 的 up-shock 與 normal cell
-做 10,000 次 bootstrap（seed 20260712）：
-
-| 統計量 | 點估計 | Bootstrap 95% CI |
-|---|---|---|
-| `SAR_up(calm)` | 2.3777 | [1.8617, 3.0246] |
-| **up-only decline（calm−high）** | **−0.1226** | **[−0.7289, 0.5828]** |
-
-這個 CI **同時做到兩件事**：
-
-1. **包含 0** → 在真正的恐慌衝擊中，**無法建立任何 absorption 梯度**。
-2. **上界 0.5828 < pooled headline 0.8165** → **headline 顯著大於恐慌衝擊所能解釋的任何值**。
-
-**所以「論文的 headline decline 不是恐慌衝擊造成的」在統計上站得住，而且完全不依賴任何 null 模型
-—— 它免疫於 §6.4 全部的 null 校準爭議。**
-
-> **誠實邊界**：這**不等於**「恐慌衝擊完全沒有任何遞減」。normal→high leg 上 up-only 仍有 +0.356
-> 且落在 null 外（§6.6）；crisis 又反彈到 2.6794。正確的陳述是：**恐慌衝擊的 SAR 沒有論文宣稱的
-> 單調 absorption 梯度，且 headline 的量級不是它給的。** normal→high 之間的殘留值得後續研究，
-> 但那不是論文現在寫的東西。
+same-seed null 端也正式加入 H：empirical `+1.0465`，null mean `0.2917`、95% CI
+`[-0.6554,0.9887]`、MC p=`0.032673`（9,487 valid paths）。這是方向一致的補充證據；但因 B/C/G/F
+仍有已揭露的 level/increment calibration failure，不能把 H-null 單獨包裝成完整結構識別。
 
 ### 6.3 機制診斷：固定門檻在高波動區被「衰減」灌爆
 
@@ -256,13 +249,16 @@ SAR 被推向 1 → **憑空製造出 decline**。實證資料有同一個機制
 
 B 與 C **拒絕** null，表面上與 A 相反。逐項說明，不挑對自己有利的當 headline：
 
-- **B（frequency-matched）**：null decline ≈ 0，實證 0.8165 在外 (p=0.0002)。**但 B 的 null 在 5/5 個
+- **B（frequency-matched）**：null decline ≈ 0，實證 0.8165 在外 (p=0.000206)。**但 B 的 null 在 5/5 個
   regime 都重現不了實證的 SAR 水準**（null ≈ 1.8 平坦，實證 2.3–3.1，全部 outside CI）。一個在每個
   regime 都對不上水準的 null，不是判斷「差分」的可靠尺。B 真正說的是：「把佔比對齊之後，GARCH 生不出
   這個 pooled decline」—— 而 §6.2 已經證明這個 pooled decline 的來源是 signed composition，**不是 absorption**。
 - **C（relative threshold）**：光是把絕對門檻換成相對門檻，**實證 decline 就從 0.8165 掉到 0.3397
   （蒸發 58%）**。這直接量化了 deep review §3-C 的疑慮：headline 的多數來自固定門檻的選樣效應。
 - **E（ambient regime）**：實證 1.4643 落在 null [0.1956, 1.5830] 內（p=0.117）—— 與 A 同向，識別關閉。
+- **H（ambient × sign）**：正式補上的機制規格。實證 ambient-up decline `+1.0465`，paired 20-day
+  block CI `[0.3286,1.7625]` 排除 0；same-seed null CI `[-0.6554,0.9887]`、MC p=`0.032673`。
+  這直接推翻原本以 D/current-VIX 分箱宣稱「ambient 機制蒸發」的判讀。
 - **D_down 的 null 結構上不存在**（calm/normal/elevated 三個 regime `n_valid_sims = 0`）：這**不是 bug，
   是可以解析證明的 null 性質**。因為 fitted `α = 0`，正報酬對次日變異數零貢獻，null 一天內能跌最多的
   情況就是純衰減 `h_next = ω + β·h`。解
@@ -282,10 +278,9 @@ B 與 C **拒絕** null，表面上與 A 相反。逐項說明，不挑對自己
 
   （K897 讓一個變體 silently 回傳 0 valid sims 卻完全不揭露；此處明確揭露、解析證明、並寫進 JSON。）
 
-**§6.4 的收斂結論**：**null 比較是 inconclusive 的 —— 兩個方向都不能宣稱。**
-「這只是 GARCH 機械效應」沒被證實（B/C/G 拒絕）；「這是 absorption」也沒被證實
-（A 的不拒絕是 artifact 互抵；且 B/C/G 拒絕的是「GARCH 沒有 relief-rally 通道」）。
-**論文的命運由 §6.2 那個不需要 null 的證據決定，不由這裡決定。**
+**§6.4 的收斂結論**：A/B/C/E/F/G 的 null 比較仍受 calibration conflict 限制，不能單獨定案；
+但 H 是對 stated mechanism 的正確規格，empirical paired-block gate 與 same-seed null 都指向正的
+ambient fear-shock decline。論文是否前進，應以 §6.2 的固定 H empirical gate 為準，而不是舊 D 分箱。
 
 ---
 
@@ -298,7 +293,8 @@ B 與 C **拒絕** null，表面上與 A 相反。逐項說明，不挑對自己
 2. **Null 的 DGP 是特定的 GJR-GARCH-t**。它對 `r_t` 的反應是該函數形式；VIX 的實際反應更陡、更凸，
    且有 relief-rally 通道（§6.4）。**以實證 ΔVIX–return 彈性校準的 implied-vol null 是最有價值的
    後續工作** —— 在它存在之前，沒有任何 null 檢定能對下跌側發言。
-3. **calm regime 的 up-shock cell 只有 n = 10**。已用 bootstrap 量化（§6.2），不以點估計下定論。
+3. 同期 `VIX_t` 分箱的 D calm-up cell 只有 n=10，且有 post-shock sorting；因此 D 只保留為 published-metric
+   decomposition。正式 H 使用 pre-shock ambient regime，calm/high up-shock 分別 n=47/53。
 4. **crisis 上界**：本實驗模擬端用 `1e6`（與 K897 模擬端相同）；實證端 K897 用 200，本實驗用 `1e6`
    —— VIX 史上最高約 85，無實質差異。
 
@@ -330,73 +326,37 @@ level 與 increment 尺度** —— 修好一個就弄壞另一個。**這個統
 | B | 0.4398 | [−0.2756, 0.2980] | 否 | 0.0034 |
 | C | 0.4344 | [−0.6171, 0.2960] | 否 | 0.0078 |
 | D_up | 0.3560 | [−0.8281, 0.2486] | 否 | 0.015 |
+| H_up（ambient × sign） | 0.2619 | [−0.9611, 0.8258] | 是 | 0.653035 |
 
-次要 leg 上同樣是分裂的（A / E / F 不拒絕；B / C / D_up 拒絕）—— **再次確認 null 比較不能定案。**
+次要 leg 仍分裂；它不取代 §6.2 事前指定的 calm−high ambient-up paired-block gate。
 
 ---
 
 ## 7. Verdict
 
-# 🔴 ABSORPTION CLAIM NOT SUPPORTED
+# 🟢 ABSORPTION SURVIVES AMBIENT-FEAR-SHOCK GATE
 
-三個發現，依「能承受多少重量」排序：
+Codex R1 FAIL 指出，舊 verdict 用同期 `VIX_t` 做 sign split，並不等於 ambient-fear mechanism。R2 依
+固定 follow-up 規則補上 H 後：
 
-### (1) 不需要任何 null 模型 — 決定性
+1. **Empirical mechanism gate 通過。** `VIX_{t-1}` 分 regime、`ΔVIX_t>2` 定義 fear shock 時，
+   calm−high decline=`+1.0465`；20-day paired block CI=`[0.3286,1.7625]`，且 block 10/40/63
+   sensitivity 全部排除 0。calm/high 各有 47/53 個 up-shock，不再是原 D 的 10-day calm cell。
+2. **Same-seed null 方向一致。** H-up empirical 1.0465 高於 null 95% CI 上界 0.9887，MC
+   p=`0.032673`。這支持「純 K897 GJR mechanics 不足」，但因 null 的 VIX level/increment calibration
+   尚未完全解決，只列補充證據，不包裝成完整 causal identification。
+3. **原 sign-composition 比較也被正確檢定。** 直接 paired bootstrap 的 pooled−current-up=`+0.9353`，
+   CI=`[0.3437,1.4991]`；舊文用 up-only CI 上界和 pooled 點估計比較的推論已撤回。
+4. **K897 timing 結論仍須退休。** lagged arm 完全重現 K897，但同期化 A 把 null decline 由 0.1734
+   改成 0.6190；這不因 H 結果而恢復。
 
-論文的**機制**不是驅動它的統計量的東西。把 shock 按 VIX 移動的**正負號**拆開：
-
-- pooled decline = **0.8165**（論文 headline）
-- 真正的**恐慌衝擊**（ΔVIX > +2）decline = **−0.1226**，bootstrap 95% CI **[−0.7289, 0.5828]**
-  → **包含 0**（建立不了 absorption 梯度）**且上界低於 0.8165**（headline 顯著大於恐慌衝擊能解釋的量）
-- decline 住在 **relief rally**（ΔVIX < −2）裡：**+1.3368**
-- 決定 headline 量級的 calm 錨點：**10 個真恐慌日 vs 24 個 relief 日**
-
-**「ambient fear 越高、恐慌衝擊越被吸收」不是 SAR decline 所顯示的東西。**
-此結論**不依賴任何 null 模型**，因此免疫於 §6.4 的全部校準爭議。
-
-### (2) Null 比較本身 inconclusive — 兩個方向都不能宣稱
-
-- 事前規則的主判定（變體 A）**不拒絕** null（0.8165 落在 [0.0824, 1.0596] 內，p = 0.41）→
-  依 §3 字面規則，absorption 主張降級。**照實報告。**
-- **但 A 的 null 是靠「純衰減跨過固定門檻」賺到它的 0.619 decline 的**（§6.3：null 在 crisis 標
-  82% 的日子為 shock，實證只有 54%）—— 那是資料裡沒有的機制。**A 的「不拒絕」是兩個 artifact 互抵。**
-- 三個修正過的 null（B / C / G）**全部拒絕**。
-- ⇒ **「這只是 GARCH 機械效應」沒被證實；「這是 absorption」也沒被證實。**
-  而 B/C/G 拒絕的東西，是「GARCH 沒有 relief-rally 通道」（§6.4 的 P\* = 28.84 證明），
-  **不是**「市場存在 absorption」。
-
-### (3) 無論如何，K897 的結論不成立
-
-K897 的 `NULL REJECTED` 建立在一個 vol proxy 無法對當日報酬反應的 null 上。在**同 seed、同 params**
-下把 proxy 同期化：null 的 SAR 水準由 1.0–1.2 → 1.6–2.4，decline 由 0.1734 → 0.619。
-**K897 報告的 margin 大部分是 timing artifact。**
-
----
-
-### 對論文的處置建議（交主線程裁決）
-
-依 deep review §6 的 **hard gate**（事前承諾）：**本篇不得再以「volatility absorption 是超越機械效應的
-現象」為主張投稿。**
-
-但**這不是空手而歸** —— 資料裡有一個**真實、且 GARCH null 生不出來**的規律，只是它不是 absorption：
-
-> **建議重新框架為 measurement note（FRL）**：
-> 「**VIX-regime SAR 的遞減是 signed-composition 效應**：它由 relief rally 而非恐慌衝擊驅動，
-> 對 shock 門檻的絕對/相對定義極度敏感（換成相對門檻即蒸發 58%），且**沒有校準不變的 GARCH null**
-> 可以檢定它（§6.6 F）。」
->
-> 這是有內容的正面貢獻：它糾正一個看似合理的現象，並給出可操作的診斷工具組
-> （sign-split + relative threshold + contemporaneous null + 機制診斷）。本實驗的 7 個變體
-> 已經是這篇 note 的完整實證骨架。
-
-**最有價值的後續研究**（也是唯一能救回 null 檢定的路）：建一個**有 relief-rally 通道**的
-implied-vol null（用實證 ΔVIX–return 彈性校準、且在高檔有自己的均值回歸）。在它存在之前，
-**沒有任何 null 能對下跌側發言** —— 而下跌側正是整個效應的所在。
+因此，本 K 不再支持「直接降級 FRL measurement note」。依固定 gate，JBF absorption 主線可繼續，
+但下一階段必須把 H 規格與 calibration limitation 寫進論文；不能恢復比證據更強的因果措辭。
 
 ### 連帶關閉的 review 項目
 
-- **P0-1**（本實驗）：✅ 完成。結果：absorption 主張不成立；null 比較 inconclusive；K897 verdict 推翻。
-- **§3-C sign-split robustness 要求**：✅ 已做（§6.2），且它才是決定性的證據。
+- **P0-1**（本實驗）：✅ 完成。結果：K897 timing verdict 推翻，但 H ambient-fear-shock empirical gate 通過。
+- **§3-C sign-split robustness 要求**：✅ 已做，並補上原本缺失的 ambient×sign；舊 D/current-VIX verdict 撤回。
 - **§3-C relative-threshold 疑慮**：✅ 已量化（headline decline 有 **58%** 來自固定門檻）。
 - **P1-3 K897 衛生**：✅ z-score bug 已修（標準化距離 + MC 經驗 p 值，`(b+1)/(n+1)` plug-in）；
   percentile 變體的 silent fail 已重實作並揭露；實證端已改讀 pinned CSV。
@@ -404,6 +364,16 @@ implied-vol null（用實證 ΔVIX–return 彈性校準、且在高檔有自己
 ---
 
 ## 9. 審查紀錄（研究誠實：reviewer source 必須標明）
+
+### R2 — Codex primary-path follow-up（2026-07-12）
+
+**Reviewer**：Codex primary path（`codex-vscode` 主線 + fresh-context read-only static cross-check）
+**Verdict**：**PASS**。H empirical/null alignment、shared non-shock denominator、paired full-row circular
+block bootstrap、1,000-valid-rep guard、NOT_EVALUABLE branch、atomic result write 全數通過。正式 rerun 後再由
+results JSON 核對 H=`+1.0465`、20-day CI=`[0.3286,1.7625]`、paired difference=`+0.9353`
+CI=`[0.3437,1.4991]`，以及 K897/A/D 舊 arms 未漂移。Review artifact：`codex_review_r2.md`。
+
+### R1 — fallback review 與後續 Codex FAIL（歷史保留）
 
 **Reviewer**：`feature-dev:code-reviewer` subagent（fresh-context 對抗性審查）
 **Verdict**：**CONDITIONAL PASS** —— **程式碼零 bug**（masks / 索引 / off-by-one / RNG 決定性 /
@@ -413,19 +383,16 @@ implied-vol null（用實證 ΔVIX–return 彈性校準、且在高檔有自己
 |---|---|
 | **H1** A 的不拒絕與它自己的 selection artifact 糾纏；B/C 拒絕 → 不能宣稱 CLOSED | **接受**。改寫 verdict 為「null 比較 inconclusive」，並在 §6.1/§6.4 自己拆穿 A |
 | **H2** `verdict` 欄只讀變體 A，把衝突埋起來，違反自訂的誠實條款 | **接受**。新增 `variant_disagreement` 欄；verdict 字串現在**自帶**分裂與機制說明 |
-| **H3** D_up 的 calm cell 只有 n=10，不能當定論 | **接受**。加 10,000 次 bootstrap（seed 20260712）；CI **[−0.729, 0.583]** —— 反而**強化**了結論（排除 pooled 0.8165） |
+| **H3** D_up 的 calm cell 只有 n=10，不能當定論 | R1 加 iid bootstrap，但「CI 上界低於 pooled 點」後被 Codex 判定不是直接檢定；R2 改為 paired block-bootstrap 差值 |
 | **M1** α=0 使同期化**不對稱**（正報酬日 proxy 仍是 F_{t−1}-可測） | **接受**，原本漏了。寫入 §6.5 限制 1 |
 | **M2** 缺「雙重修正」的 null | **接受**。新增變體 **G**（ambient + relative）→ 拒絕 null（p=0.0037），如實報告 |
 | **M3** B 過度校準（null 在 5/5 regime 都對不上 SAR 水準） | **同意**，已在 §6.4 說明 |
 | **L3** MC p 值下限應用 `(b+1)/(n+1)` 而非 `1/n` | **接受**，已改 |
 | **L1** crisis 上界 `1e6` vs K897 的 `200` | 查證：K897 **模擬端**也是 `1e6`（其 L292），僅**實證端**為 200；VIX 史上最高約 85 → 無實質差異。已註於 §6.5 |
 
-> ⚠️ **Codex primary path 未完成（必須揭露）**：依 `.claude/rules/experiments.md`，primary reviewer
-> 應為 Codex CLI。本次 **`codex exec` 連續 3 次**（700s / 1500s / 內嵌程式碼版）都在 transport 層
-> 被截斷、預算耗盡於重複讀檔，**未產出 verdict**。因此改走規則明列的 **`code-reviewer` subagent
-> fallback**。
-> **依 K1259 規則：subagent PASS ≠ primary-path Codex PASS。主線程在寫 `knowledge.json` 之前，
-> 必須用 Codex 再驗一次。** 本 agent 未寫 knowledge.json（符合規範）。
+> **歷史註記**：R1 當時 Codex CLI transport 失敗，故先走 `code-reviewer` fallback；之後 Codex
+> primary review 實際判 **FAIL**（`storage/ops/codex_reviews/k1686_verdict.md`），抓出 ambient×sign 與
+> paired-difference 兩個 blockers。R2 已依上方 primary-path review 修完並 PASS；R1 fallback 不再作 closure 依據。
 
 ---
 
@@ -433,10 +400,10 @@ implied-vol null（用實證 ΔVIX–return 彈性校準、且在高檔有自己
 
 | 檔 | 內容 |
 |---|---|
-| `k1686_contemporaneous_null.py` | 模擬 + 7 變體（A–G）+ K897 replication arm + 機制診斷 + bootstrap |
-| `k1686_contemporaneous_null_results.json` | 全部結果（`seed_spec` / `k897_replication_check` / `variant_disagreement` / **`null_free_evidence`**（決定性）/ `down_shock_impossibility` / `mechanism_diagnostic_*` / `calibration_diagnostics` / `up_shock_bootstrap`） |
-| `k1686_null_distributions.png` | 8 格圖：K897 replication arm / A / B / C / D_up null 分佈 + **實證 sign-split（不需 null 的關鍵證據）** + E + 機制診斷。**變體 F / G 只在 JSON 與 README，未進圖**（F 的 calm cell 不可評估，無分佈可畫；G 見 §6.6 表） |
+| `k1686_contemporaneous_null.py` | 模擬 + A–H 變體 + K897 replication arm + H ambient×sign + paired block bootstrap |
+| `k1686_contemporaneous_null_results.json` | 全部結果（含 `codex_followup_gate`、H same-seed null、paired pooled−up、10/20/40/63 block sensitivity、current/ambient cell counts） |
+| `k1686_null_distributions.png` | 8 格圖：K897/A/B/C/D_up/H_up null 分佈、current/ambient sign-split、mechanism diagnostic |
+| `codex_review_r2.md` | R2 primary-path code/result review 與 PASS verdict |
 
 **復現**：`uv run --extra dev python experiments/k1686/k1686_contemporaneous_null.py`
-—— 已驗證**逐位元決定性**（連跑兩次 results JSON 的 SHA-1 相同：`3b4809f0…`）。
-
+—— seeds 與 block-bootstrap seeds 全固定；R2 連跑結果 headline、CI、old-arm replication 均一致。
