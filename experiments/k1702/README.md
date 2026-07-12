@@ -3,8 +3,10 @@
 **Verdict: NULL。** 六個因子在 OOS + 淨成本後無一通過多重檢定；等權動物園組合 gross 只有 +0.036 Sharpe
 （不顯著），10bp 即翻負，50bp 時 Sharpe 變成 **−0.177**。
 
-**外加一個推翻既有結論的發現**：院內知識庫宣稱的「vol-managing 讓 drawdown 改善（5/6 因子）」
+**外加一個推翻既有結論的發現**：`R3` 宣稱的「vol-managing 讓 drawdown 改善（5/6 因子）」
 在 scale-invariant 檢驗下**崩潰到 1/6** —— 那個「改善」主要是**曝險變低的機械結果，不是避險技巧**。
+（範圍限定：本實驗只測 long-short paper factors。其他資產 / 訊號的 raw-MDD claim 須各自重驗，
+見 §十 的 class sweep 待辦。）
 
 ## 研究問題
 
@@ -19,8 +21,9 @@ Moreira and Muir (2017, JF) 顯示對**市場因子**做 inverse-variance scalin
 
 | 既有 | 內容 | K1702 |
 |---|---|---|
-| `R3`（2026-03-17，knowledge.json） | Factor VT OOS null；"MDD improvement robust (5/6 factors) but Sharpe unchanged" | 該 entry **無 `experiment_id` / 無 reviewer / 無 verdict — 不可復現的 orphan claim**。K1702 **確認**其 OOS null 方向，但**推翻**其 MDD claim（見下） |
-| `K1265` | VIX-managed NULL；「MM 主要壓 MDD 而非提 Sharpe」 | 同上：MDD 部分是 scale artifact |
+| `R3`（2026-03-17，knowledge.json） | Factor VT OOS null；"MDD improvement robust (5/6 factors) but Sharpe unchanged" | 該 entry **無 `experiment_id` / 無 reviewer / 無 verdict — 不可復現的 orphan claim**。K1702 **確認**其 OOS null 方向，但**推翻**其 MDD claim（見 5.4）。註：R3 的因子宇宙與本實驗不同（R3 含 Mkt-RF / UMD、無 QMJ，且 spec 為 GARCH vs RV22），兩邊都得到 5/6 是**方向一致的計數巧合，不是逐項複製** |
+| `N107` | 「MDD improvement is MECHANICAL（隨機 de-leveraging 下 99% 也會出現）」 | **院內早有此先驗**。K1702 的增量**不是**首次發現機械性，而是更強的一步：**vol-normalized 後 MDD 反而惡化**（5/6 → 1/6），即不只「不是技巧」，而是**單位風險的回撤更差** |
+| `K1265` | SPY、VIX/RV-managed、2004-2026；「MM 主要壓 MDD 而非提 Sharpe」 | **本實驗未測試該設計**（不同資產 / 訊號 / scaling rule），**不可宣稱推翻**。只能說：K1265 的 MDD claim 落在同一失效模式的射程內，**須以 vol-normalized 口徑重驗**（待辦，非本實驗結論） |
 | `K1574` | factor **ETF** implementation shortfall（ex-post audit） | K1702 用官方 long-short paper factors，問 timing 而非 implementation |
 | `research_factor_timing_regime` | ETF factor timing 不打敗 EW basket | K1702 是 vol-scaling（非 regime timing）+ 淨成本層 |
 
@@ -178,14 +181,14 @@ MOM 的負 acf 讓無 HAC **低估** |t|。所有結論對 lag 選擇 robust。
 
 即使 gross（零成本）也只有 1/6（MOM）。
 
-### 5.4 **推翻既有 claim：「MDD 改善」是 scale artifact**
+### 5.4 **推翻 R3 的 MDD claim：「改善」是 scale artifact**
 
-院內 `R3` 宣稱「MDD improvement robust (5/6 factors)」，`K1265` 宣稱「MM 主要壓 MDD 而非提 Sharpe」。
-本實驗**先確認、再推翻**：
+院內 `R3` 宣稱「MDD improvement robust (5/6 factors)」。本實驗**先確認、再推翻**（範圍：long-short
+paper factors；`K1265` 是 SPY VIX-managed 的另一組設計，本實驗沒測，不在推翻範圍內 — 見 §十）：
 
 | 檢驗方式 | 動物園 6 因子中改善的個數 |
 |---|---|
-| **raw max drawdown** | **5/6** ← 完全複製 R3 / K1265 的 claim |
+| **raw max drawdown** | **5/6** ← 與 R3 的 claim 方向一致 |
 | **MDD ÷ 實現波動**（scale-invariant） | **1/6** ← 崩潰 |
 
 | 因子 | raw MDD（unmgd → mgd） | **每單位波動的 MDD** | 年化波動（unmgd → mgd） |
@@ -220,8 +223,10 @@ drawdown 當然比較淺 —— 那叫**少冒險**，不叫**會擇時**。除�
    分散化後組合波動僅 5.85%，~0.64%/yr 的成本 drag 就吃掉大半個 Sharpe 單位。
 3. **MM 的原始效果是 pre-1963 現象。** 同一 pipeline 在 1926-1963 重現 alpha 7.7%/yr，
    到 1963-1999 只剩 2.0%/yr（t=1.07）。這讓動物園的 null 顯得理所當然。
-4. **「vol-managing 壓低 drawdown」在因子層是 scale artifact**（5/6 → 1/6）。此結論**推翻**
-   `R3` 與 `K1265` 的既有 claim，需回溯更正。
+4. **「vol-managing 壓低 drawdown」在因子層是 scale artifact**（5/6 → 1/6）。此結論**推翻 `R3`**
+   （同一類資產、同一類訊號）。院內 `N107` 早已指出 MDD 改善是機械性的；本實驗的增量是更強的一步 ——
+   **單位波動的 MDD 反而變差**。`K1265`（SPY、VIX-managed）本實驗未測，**不宣稱推翻**，列入待重驗。
+   整個 raw-MDD-improvement claim class 需要全量掃描（§十）。
 5. **MOM 是唯一方向為正的因子**（與 momentum-crash 文獻一致），**但多重檢定後不顯著（BH q=0.055，邊緣），
    本實驗不宣稱它存活。**
 6. **方法論教訓（可推廣）**：比較兩個**曝險水準不同**的策略時，**不可**用 raw mean return 的 DM 檢定，
@@ -239,6 +244,10 @@ drawdown 當然比較淺 —— 那叫**少冒險**，不叫**會擇時**。除�
 - **Managed 組合的 OOS 實現波動遠低於 unmanaged**（見 5.4 表）。Sharpe 與「成本的 Sharpe 衝擊」皆為
   **scale-invariant**（槓桿常數在分子分母同時消掉），故比較公平；但**不可**把 managed 的絕對報酬水準
   或 raw MDD 與 unmanaged 直接對比（這正是 5.4 的教訓）。
+- **spanning alpha 的「水準」也不是 scale-invariant，只有它的 t 統計量是。** §5.1 的 OOS alpha
+  （−0.8 … +1.6 %/yr）估在 β≈0.15 的低曝險 managed 序列上；§一 / §六-3 的 MM 複製 alpha
+  （+4.7 / 7.7 / 2.0 %/yr）估在 in-sample **vol-matched**（β≈0.62）序列上。**兩張表的 alpha
+  magnitude 不可互相對讀**（換算到同曝險後 OOS alpha 約放大 4 倍）。顯著性判定不受影響。
 - AQR 更新時重建 QMJ 完整歷史，此處無歷史 vintage 可用。
 - 與 AQR 日曆做 inner join 會裁掉部分 French 交易日，故 Mkt-RF 的 RV 不是純 French 複製
   （MM 證偽測試那條路徑用純 FF3，不受此影響）。
@@ -280,8 +289,19 @@ uv run python experiments/k1702/k1702.py
   另修：silent `except: pass`（AQR parser 改為計數 + 上限 fail-loud）、bootstrap p 的 `(1+k)/(B+1)`
   連續性修正、負財富時的 MDD guard、單位尺度 fail-loud guard、每格加 `is_primary_spec` /
   `multiple_testing_corrected` 標記（K1655 教訓）。
-- **Primary-path Codex review 仍待主線程執行**（`.claude/rules/experiments.md`：subagent fallback PASS
-  ≠ primary-path Codex PASS）。**在 Codex review 通過前，不得寫入 `knowledge.json`。**
-- 若 Codex review 通過，主線程需一併處理：**回溯更正 `R3` 與 `K1265` 的 MDD claim**（研究誠實原則：
-  推翻舊結論必回溯更正）。
+- **Post-run review**（2026-07-13，hourly-06 主線程收件）：第二個 `feature-dev:code-reviewer`
+  fresh-context 獨立審查，逐項核對 lookahead / HAC / gate 口徑 / 跨因子聚合 / 數字對帳 / seed。
+  **verdict = CONDITIONAL_PASS**：計算層七項全 PASS（signal `.shift(1)`；scale 常數只用 pre-2000
+  calibration window；`canonical_hac_lag` 與 repo canonical 逐字等價、h=1 時取 lag 7 未踩 `h-1` 退化；
+  無 factor-month iid 串接；README 表格與 `k1702_results.json` **全量**對帳逐位吻合；seed 齊備）。
+  **CONDITIONAL 的原因全在 claim 強度層，已於本次收件修正**：(a) 不再宣稱推翻 `K1265`（SPY
+  VIX-managed，本實驗未測）；(b) 「完全複製 R3」→「方向一致」（因子宇宙不同，5/6 是計數巧合）；
+  (c) 補 `N107` 為院內先驗（MDD 機械性早已知）並重新定位增量；(d) 補 alpha 水準非 scale-invariant
+  的註記；(e) 回溯範圍由「R3 + K1265 兩條」擴為 class sweep。
+- **Primary-path Codex re-verify 仍未做**（`.claude/rules/experiments.md`：subagent fallback PASS
+  ≠ primary-path Codex PASS；hourly fire 內禁 spawn `codex exec`）。已 queue 為獨立任務。
+  knowledge entry 以 **CONDITIONAL_PASS** 寫入、reviewer_source 標明 subagent fallback。
+- **回溯更正待辦（class sweep，非只兩條）**：raw-MDD-improvement claim class 全量掃描 ——
+  至少含 `R3` / `K1265` / `N80` / `N84` / `N106` / `N107` / `N118` / `N136` / `N168` / `N172` /
+  `K40` / `Q16` 及相關 meta-analysis entries；其中 reader-facing 的須一併更正。已 queue。
 </content>
