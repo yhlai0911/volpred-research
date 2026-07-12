@@ -568,7 +568,8 @@ def ensure_member_qa_task(
                 "description": _build_member_qa_task_description(candidate, mode=mode),
                 "task_type": "member_qa",
                 "dispatch_lane": "agent",
-                "priority": 2,
+                # 會員在等答案 = user-facing 且有時效感，與 user-assigned 同級（老闆 Telegram msg 590）
+                "priority": 1,
                 "status": "pending",
                 "tags": ["member_qa", source],
                 "created_at": _utc_now(),
