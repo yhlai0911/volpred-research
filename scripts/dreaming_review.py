@@ -37,7 +37,9 @@ Entry points:
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
+import re
 import sys
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -851,51 +853,119 @@ def send_dreaming_email(report: dict[str, Any], now: datetime, storage_dir: str)
     return send_alert(level, title, "\n".join(lines), storage_dir=storage_dir)
 
 
+# A finding this old has stopped being a proposal and started being a backlog item.
+# Dreaming re-derives the same signatures every night, so `occurrences` is literally
+# the number of nights it has gone unread.
+_ROT_THRESHOLD = 3
+
+
+def _dreaming_task_id(signature: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "_", signature.lower()).strip("_")[:60]
+    return f"dreaming_{slug}"
+
+
 def apply_auto_dispatch(
     findings: list[DreamFinding], storage_dir: str, now: datetime
 ) -> list[dict[str, Any]]:
-    """Create follow-up tasks for auto_dispatch findings (gated by --apply-auto).
+    """Turn findings into pending work. NEVER touches governance files.
 
-    Uses the canonical `create_task` API; NEVER touches governance files. Only
-    escalated (three-strike) auto_dispatch findings dispatch, to stay conservative.
+    2026-07-12 — the owner asked what dreaming actually does and whether it is
+    optimising anything (email-12126: 「那你 dreaming 到底在做什麼？你有在立刻優化嗎？」).
+    The honest answer was no, and the reason was structural: dreaming was a detector
+    whose actuator was disconnected at BOTH ends.
 
-    NOTE (honest limitation): `create_task` writes a control-plane TaskRecord
-    under `storage/ops/tasks/` (audit/receipt system), NOT the `next_tasks.json`
-    pending queue the hourly dispatcher reads. Bridging the TaskRecord into the
-    pending queue is a deliberate follow-up; until then an --apply-auto dispatch
-    surfaces the task in the control plane for the main thread to action. This is
-    why --apply-auto defaults OFF (the flow is unproven, per the approved design).
+      1. `--apply-auto` defaults off, and the cron wrapper never passed it.
+      2. Behind that switch, this function called `create_task`, which writes a
+         TaskRecord under `storage/ops/tasks/` — the receipts/audit trail. The hourly
+         dispatcher picks work out of `next_tasks.json`. So even fully enabled, a
+         dispatched finding landed in a directory nothing dispatches from. The old
+         docstring knew ("bridging the TaskRecord into the pending queue is a
+         deliberate follow-up") and shipped anyway.
+
+    Net effect: `memory_skill_gap` and `memory_hygiene` were re-proposed on fifteen
+    consecutive nights and acted on zero times. That is not a slow loop, it is an
+    open one, and it emailed the owner a WARN every morning to prove it.
+
+    So findings are written to the pending queue now — the file the dispatcher reads.
+    The propose-only boundary for GOVERNANCE FILES stands, and matters: nothing here
+    rewrites error_log / rules / knowledge.json. What lands is a *task* asking an
+    agent to look, which is exactly the human-in-the-loop the boundary was protecting,
+    minus the part where nobody ever looks.
+
+    Two classes qualify:
+      * `auto_dispatch`  — designed for this from the start (warn and up; a warn-level
+        orphaned failure is still a failure nobody retried).
+      * `propose_only` that has recurred >= _ROT_THRESHOLD nights — persistence is the
+        signal, the same rule PHASE-Z uses for a stuck foreign path. A proposal read
+        by nobody for three nights running does not become more true on the fourth.
     """
     actions: list[dict[str, Any]] = []
-    eligible = [f for f in findings if f.remediation == "auto_dispatch" and f.severity == "critical"]
+    eligible = [
+        f for f in findings
+        if (f.remediation == "auto_dispatch" and f.severity in ("warn", "critical"))
+        or (f.remediation == "propose_only" and (f.occurrences or 0) >= _ROT_THRESHOLD)
+    ]
     if not eligible:
         return actions
+
+    # The queue lives under `storage_dir`, not at a module-level constant. Reaching for
+    # task_pool_claim._locked_load() here would have been the obvious reuse — and it
+    # hardcodes the real repo's next_tasks.json, so every test that drove main() would
+    # have written the production queue (the exact bug class the canonical-write gate
+    # exists for). What is worth reusing is the hardened serializer underneath it:
+    # write_tasks_to_handle serializes fully before truncating, so a crash mid-write
+    # cannot leave a half a queue behind (incident 2026-07-05).
+    from volpred.ops.next_tasks import write_tasks_to_handle
+
+    queue = Path(storage_dir) / "next_tasks.json"
     try:
-        from volpred.ops.local_control_plane import create_task
-    except Exception as exc:
-        warn("dreaming", "create_task import failed; skipping auto-dispatch", err=str(exc))
-        return actions
-    for f in eligible:
-        try:
-            # create_task is keyword-only with a validated vocab: task_family ∈
-            # {ops,research,...}, source ∈ {agent,schedule,user}, priority is int
-            # (lower = higher; platform_ops convention ≈ 3). dreaming provenance
-            # rides in payload since "dreaming" is not a valid TASK_SOURCE.
-            task = create_task(
-                title=f"[dreaming] 調查 {f.signature}",
-                description=f.proposal or f.signature,
-                task_family="ops",
-                source="agent",
-                priority=3,
-                preferred_agent="claude",
-                payload={"origin": "dreaming", "signature": f.signature, "pattern_type": f.pattern_type},
-                storage_dir=storage_dir,
-            )
-            ref = task.get("id") if isinstance(task, dict) else str(task)
-            f.remediation_ref = f"ops_task:{ref}"
-            actions.append({"signature": f.signature, "action": "auto_dispatched", "task_id": ref})
-        except Exception as exc:
-            warn("dreaming", "create_task failed; finding stays propose-only", sig=f.signature, err=str(exc))
+        queue.parent.mkdir(parents=True, exist_ok=True)
+        if not queue.exists():
+            queue.write_text("[]", encoding="utf-8")
+        with queue.open("r+", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)  # same lock every queue writer takes
+            try:
+                tasks = json.load(fh)
+                if not isinstance(tasks, list):
+                    warn("dreaming", "next_tasks.json is not a list; refusing to queue")
+                    return []
+                existing = {t.get("id") for t in tasks if isinstance(t, dict)}
+                for f in eligible:
+                    task_id = _dreaming_task_id(f.signature)
+                    if task_id in existing:
+                        continue  # dreaming re-derives the same signature nightly — queue once
+                    tasks.append({
+                        "id": task_id,
+                        "title": f"[dreaming] {f.signature}",
+                        "description": (
+                            f"{f.proposal or f.signature}\n\n"
+                            f"— dreaming 連續 {f.occurrences} 晚偵測到此模式（首見 {f.first_seen}）。\n"
+                            f"證據：{'; '.join(f.evidence) if f.evidence else '(無)'}\n"
+                            f"治理檔（error_log / rules / knowledge.json）仍是 propose-only："
+                            f"接手的 agent 判斷後決定是否改，dreaming 不自動改。"
+                        ),
+                        "task_type": "platform_ops",
+                        "priority": 2 if f.severity == "critical" else 3,
+                        "status": "pending",
+                        "source": "dreaming",
+                        "created_at": now.isoformat(),
+                        "dreaming": {
+                            "signature": f.signature,
+                            "pattern_type": f.pattern_type,
+                            "occurrences": f.occurrences,
+                            "governance_target": f.governance_target,
+                        },
+                    })
+                    existing.add(task_id)
+                    f.remediation_ref = f"next_task:{task_id}"
+                    actions.append({"signature": f.signature, "action": "queued", "task_id": task_id})
+                if actions:
+                    write_tasks_to_handle(fh, tasks)
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    except (OSError, ValueError) as exc:
+        warn("dreaming", "queue write failed; findings stay propose-only", err=str(exc))
+        return []
     return actions
 
 
@@ -906,7 +976,12 @@ def main(
     storage_dir: str = "storage",
     *,
     dry_run: bool = False,
-    apply_auto: bool = False,
+    # Default ON since 2026-07-12. It was off, and the `volpred ops dreaming-run`
+    # entry point the nightly cron uses did not forward the flag at all — so the one
+    # path that runs every night had no way to reach the actuator, and fifteen nights
+    # of findings went nowhere. A default that every caller must remember to override
+    # is how a loop stays open. What this enables writes tasks, never governance files.
+    apply_auto: bool = True,
     now: datetime | None = None,
 ) -> int:
     current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
@@ -962,7 +1037,10 @@ def _cli() -> int:
     parser = argparse.ArgumentParser(description="Dreaming review — loop-engineering slow loop")
     parser.add_argument("--storage-dir", default="storage")
     parser.add_argument("--dry-run", action="store_true", help="Detect + write report only; no email/dispatch")
-    parser.add_argument("--apply-auto", action="store_true", help="Execute auto_dispatch remediation (default off)")
+    parser.add_argument(
+        "--no-apply-auto", dest="apply_auto", action="store_false",
+        help="Detect and report, but do not queue findings as tasks (they then go nowhere)",
+    )
     args = parser.parse_args()
     return main(storage_dir=args.storage_dir, dry_run=args.dry_run, apply_auto=args.apply_auto)
 

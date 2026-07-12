@@ -428,51 +428,61 @@ def test_main_non_dry_writes_baseline_and_emails(tmp_path, monkeypatch):
     assert len(sent) == 1  # new findings → one boss email
 
 
-def test_apply_auto_dispatch_calls_create_task_with_valid_vocab(tmp_path, monkeypatch):
-    # Lock in the create_task call shape: keyword-only, validated vocab. A prior
-    # bug passed task_type=/priority="P2"/source="dreaming" which would TypeError /
-    # fail validation. This test fails if the call shape regresses.
-    from volpred.ops.local_control_plane import TASK_FAMILIES, TASK_SOURCES
+def test_dispatch_does_not_go_to_the_receipts_trail(tmp_path, monkeypatch):
+    """Both of these tests used to assert the contract that broke dreaming.
 
-    captured = {}
-
-    def fake_create_task(**kwargs):
-        captured.update(kwargs)
-        return {"id": "task_abc123"}
-
-    monkeypatch.setattr("volpred.ops.local_control_plane.create_task", fake_create_task)
-    f = dr.DreamFinding(
-        pattern_type="missing_retry_strategy",
-        signature="missing_retry_strategy:K9",
-        severity="critical",  # three-strike escalated → eligible
-        remediation="auto_dispatch",
-    )
-    actions = dr.apply_auto_dispatch([f], str(tmp_path / "storage"), NOW)
-    assert actions and actions[0]["task_id"] == "task_abc123"
-    assert f.remediation_ref == "ops_task:task_abc123"
-    # Valid vocab (would have raised _validate_choice otherwise):
-    assert captured["task_family"] in TASK_FAMILIES
-    assert captured["source"] in TASK_SOURCES
-    assert isinstance(captured["priority"], int)
-    assert "task_type" not in captured  # the old invalid kwarg must be gone
-
-
-def test_apply_auto_dispatch_skips_non_critical(tmp_path, monkeypatch):
-    # warn-severity auto_dispatch findings must NOT dispatch (only three-strike).
+    This one pinned the `create_task` call shape. `create_task` writes a TaskRecord
+    under storage/ops/tasks/, which CLAUDE.md is explicit about: receipts and audit
+    trail, never a pending queue. The hourly dispatcher reads next_tasks.json. So the
+    call shape was correct and the destination was wrong, and a green test said so
+    every run. Assert the destination.
+    """
     called = []
     monkeypatch.setattr(
         "volpred.ops.local_control_plane.create_task",
-        lambda **k: called.append(k) or {"id": "x"},
+        lambda **k: called.append(k) or {"id": "task_abc123"},
     )
+    storage = _storage(tmp_path)
+    f = dr.DreamFinding(
+        pattern_type="missing_retry_strategy",
+        signature="missing_retry_strategy:K9",
+        severity="critical",
+        remediation="auto_dispatch",
+    )
+    actions = dr.apply_auto_dispatch([f], str(storage), NOW)
+
+    assert called == [], "the receipts trail is not a queue; nothing dispatches from it"
+    assert actions and actions[0]["task_id"] == "dreaming_missing_retry_strategy_k9"
+    assert f.remediation_ref == "next_task:dreaming_missing_retry_strategy_k9"
+    assert "missing_retry_strategy:K9" in (storage / "next_tasks.json").read_text(encoding="utf-8")
+
+
+def test_a_warn_level_orphaned_failure_still_gets_queued(tmp_path):
+    """The other stale contract: dispatch only on `critical`.
+
+    Every `missing_retry_strategy` finding the detector emits is severity=warn, and
+    escalation to critical needs a three-strike that today's report shows firing zero
+    times. Critical-only therefore made auto_dispatch unreachable in practice — the
+    remediation existed, was tested, and could never run. A warn-level orphaned
+    failure is still an experiment that failed and that nobody retried; queuing a
+    platform_ops task to look at it is the whole point of detecting it.
+
+    The conservatism that matters is kept elsewhere and still tested: governance files
+    are never rewritten, and a propose_only finding waits three nights before it
+    becomes work.
+    """
+    storage = _storage(tmp_path)
     f = dr.DreamFinding(
         pattern_type="missing_retry_strategy",
         signature="missing_retry_strategy:K9",
         severity="warn",
         remediation="auto_dispatch",
     )
-    actions = dr.apply_auto_dispatch([f], str(tmp_path / "storage"), NOW)
-    assert actions == []
-    assert called == []
+    actions = dr.apply_auto_dispatch([f], str(storage), NOW)
+
+    assert [a["action"] for a in actions] == ["queued"]
+    queued = json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
+    assert queued[0]["priority"] == 3, "warn is P3; critical would be P2"
 
 
 def test_main_exits_zero_even_when_all_detectors_fail(tmp_path, monkeypatch):
@@ -485,3 +495,91 @@ def test_main_exits_zero_even_when_all_detectors_fail(tmp_path, monkeypatch):
     monkeypatch.setattr(dr, "DETECTORS", tuple(_boom for _ in dr.DETECTORS))
     rc = dr.main(storage_dir=str(storage), dry_run=True, now=NOW)
     assert rc == 0
+
+
+# ---------------------------------------------------------------------------
+# The actuator (2026-07-12, email-12126: the owner asked what dreaming is actually
+# doing and whether it is optimising anything).
+#
+# The honest answer was "nothing, and no". Dreaming detected fine, and then its
+# actuator was disconnected at both ends: `--apply-auto` defaulted off and the
+# `volpred ops dreaming-run` entry point the nightly cron uses never forwarded the
+# flag; behind the flag, apply_auto_dispatch wrote a TaskRecord under
+# storage/ops/tasks/ (the receipts trail) while the dispatcher picks work out of
+# next_tasks.json. So findings could not have become work even fully enabled.
+# `memory_skill_gap` was re-proposed on fifteen consecutive nights, actioned zero
+# times, and emailed a WARN each morning to say so.
+# ---------------------------------------------------------------------------
+def _finding(sig: str, *, remediation: str, occurrences: int = 1, severity: str = "warn"):
+    return dr.DreamFinding(
+        pattern_type="test",
+        signature=sig,
+        severity=severity,
+        evidence=["e1"],
+        remediation=remediation,
+        occurrences=occurrences,
+    )
+
+
+def _queued_ids(storage: Path) -> list[str]:
+    raw = (storage / "next_tasks.json").read_text(encoding="utf-8")
+    return [t["id"] for t in json.loads(raw)]
+
+
+def test_findings_land_in_the_queue_the_dispatcher_actually_reads(tmp_path):
+    """The bug in one line: the dispatcher reads next_tasks.json, and dreaming wrote
+    somewhere else. A finding that cannot reach the queue cannot become work."""
+    storage = _storage(tmp_path)
+    actions = dr.apply_auto_dispatch(
+        [_finding("missing_retry:K1679", remediation="auto_dispatch")], str(storage), NOW,
+    )
+
+    assert [a["action"] for a in actions] == ["queued"]
+    queued = json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
+    assert len(queued) == 1
+    assert queued[0]["status"] == "pending", "must be claimable by the hourly dispatcher"
+    assert queued[0]["source"] == "dreaming"
+    assert queued[0]["task_type"] == "platform_ops"
+
+
+def test_a_proposal_nobody_read_for_three_nights_becomes_work(tmp_path):
+    """`memory_skill_gap` sat at occurrences=15. Persistence is the signal, the same
+    rule PHASE-Z uses for a foreign path nobody comes back for."""
+    storage = _storage(tmp_path)
+    dr.apply_auto_dispatch(
+        [
+            _finding("memory_skill_gap:uncodified", remediation="propose_only", occurrences=15),
+            _finding("seen_once_tonight", remediation="propose_only", occurrences=1),
+        ],
+        str(storage), NOW,
+    )
+
+    ids = _queued_ids(storage)
+    assert any("memory_skill_gap" in i for i in ids), "15 nights unread is a backlog item"
+    assert not any("seen_once" in i for i in ids), "one sighting is still just a proposal"
+
+
+def test_queueing_the_same_signature_every_night_does_not_pile_up(tmp_path):
+    """Dreaming re-derives its signatures nightly. Without this, one finding becomes
+    thirty tasks in a month."""
+    storage = _storage(tmp_path)
+    f = lambda: _finding("missing_retry:K1679", remediation="auto_dispatch")  # noqa: E731
+    dr.apply_auto_dispatch([f()], str(storage), NOW)
+    again = dr.apply_auto_dispatch([f()], str(storage), NOW)
+
+    assert again == [], "already queued: say nothing, add nothing"
+    assert len(_queued_ids(storage)) == 1
+
+
+def test_queueing_never_touches_the_real_repo_queue(tmp_path):
+    """apply_auto_dispatch is now on by default, so every test that drives main()
+    reaches it. The obvious reuse, task_pool_claim._locked_load(), hardcodes the
+    production next_tasks.json, which would make this suite write the real queue."""
+    storage = _storage(tmp_path)
+    dr.apply_auto_dispatch(
+        [_finding("sig:x", remediation="auto_dispatch")], str(storage), NOW,
+    )
+    assert (storage / "next_tasks.json").exists(), "the queue under storage_dir, and only it"
+
+    real = Path(__file__).resolve().parents[1] / "storage" / "next_tasks.json"
+    assert "sig:x" not in real.read_text(encoding="utf-8"), "must never write the live queue"

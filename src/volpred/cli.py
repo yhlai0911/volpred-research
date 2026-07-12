@@ -773,9 +773,16 @@ def ops_dreaming_run(storage_dir: str, dry_run: bool) -> None:
     """Dreaming review — slow loop: mine cross-session failure patterns.
 
     Reads work_log / cron logs / ops receipts / loop-health, detects repeated
-    tool failures, recurring errors, stale knowledge and missing retry
-    strategies, then auto-remediates low-risk derived state and PROPOSES (never
-    auto-applies) governance changes. Writes storage/ops/dreaming/<date>.json.
+    tool failures, recurring errors, stale knowledge and missing retry strategies,
+    then QUEUES what it finds into storage/next_tasks.json — the pending queue the
+    hourly dispatcher actually reads. Governance files (error_log / rules /
+    knowledge.json) remain propose-only: the queued task asks an agent to look, and
+    the agent decides. Writes storage/ops/dreaming/<date>.json.
+
+    Until 2026-07-12 this command could not dispatch at all — it did not forward
+    `apply_auto`, and the function behind it wrote to the receipts directory rather
+    than the queue. Findings accumulated for fifteen nights and were acted on zero
+    times (email-12126). Keep this path wired to the queue.
     """
     import sys as _sys
     from pathlib import Path as _Path

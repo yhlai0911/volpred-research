@@ -293,7 +293,7 @@ def test_baseline_never_dirties_the_tree(repo: Path) -> None:
 # coming back for it (email-12038, boss: "一直爆警告"). PHASE-Z owns it now — but
 # only when it can prove nobody is mid-write.
 
-CHURN = phase_z._MACHINE_CHURN_PATHS[0]  # storage/next_tasks.json
+CHURN = "storage/next_tasks.json"
 
 
 def _seed_churn(repo: Path, payload: str = '[{"id": "t1"}]\n') -> None:
@@ -371,3 +371,73 @@ def test_churn_held_by_a_writer_is_left_for_the_next_fire(repo: Path) -> None:
     assert outcome.get("churn", []) == []
     assert alerts == [], "a busy writer is normal, not an incident"
     assert CHURN in _dirty(repo), "still dirty — the next fire picks it up"
+
+
+# ── the class, not the instance ──────────────────────────────────────────────
+# The bug these three catch: ownership used to be a hand-written list of filenames
+# holding exactly one entry (next_tasks.json). Every other daemon-written state file
+# — dreaming runs, analytics snapshots, the event ledger, the token report — was
+# therefore "somebody else's", and PHASE-Z alerted on it hourly while being the only
+# thing that could ever have committed it. Eleven files were eight fires deep when the
+# owner escalated (email-12123 / email-12124).
+#
+# Enumerating those eleven would have fixed the instance and left the class: the next
+# daemon to write a new state file restarts the alarm on its first day. Ownership is
+# derived from the namespace now, and these lock that in.
+
+
+def test_a_state_file_no_rule_has_ever_heard_of_is_still_owned(repo: Path) -> None:
+    """The drift gate. This path is in no list — it is owned because of where it lives.
+    A daemon shipping tomorrow gets the same treatment without touching this module."""
+    novel = "storage/ops/some_daemon_invented_this_today.json"
+    _write(repo, novel, '{"runs": 1}\n')
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "seed novel state")
+    _write(repo, novel, '{"runs": 2}\n')  # the daemon rewrites it between fires
+
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    alerts: list = []
+    outcome = _fire(repo, alerts=alerts)
+
+    assert outcome["churn"] == [novel], "namespace ownership, not a filename lookup"
+    assert outcome["foreign"] == []
+    assert novel in _head_files(repo)
+    assert alerts == [], "no hourly alarm for a file that has an owner"
+
+
+def test_garbage_collected_state_is_committed_not_deferred_forever(repo: Path) -> None:
+    """The event ledger expires its own entries. A deleted path cannot be opened, so
+    the lock/parse gate raised ENOENT and filed it 'deferred — next fire will get it'.
+    For a file that is never coming back, the next fire says the same thing, forever."""
+    ledger = "storage/ops/event_ledger/deadbeef.json"
+    _write(repo, ledger, '{"gc_after": "2026-07-01"}\n')
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "seed ledger")
+    (repo / ledger).unlink()  # gc_event_ledger expires it
+
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    alerts: list = []
+    outcome = _fire(repo, alerts=alerts)
+
+    assert outcome["churn"] == [ledger]
+    assert ledger in _head_files(repo), "the deletion must land, not cycle"
+    assert ledger not in _dirty(repo)
+    assert alerts == []
+
+
+def test_code_left_behind_is_still_foreign(repo: Path) -> None:
+    """The boundary that makes adoption safe. Code carries a session owner who is
+    expected to commit it with a message and a green test run — adopting it silently
+    is incident #2 and #3. Widening ownership to daemon state must not widen it here."""
+    _write(repo, "scripts/some_audit.py", "print('v1')\n")
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "seed code")
+    _write(repo, "scripts/some_audit.py", "print('half-typed edit')\n")
+
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    alerts: list = []
+    outcome = _fire(repo, alerts=alerts)
+
+    assert outcome.get("churn", []) == [], "code is never machine churn"
+    assert outcome["foreign"] == ["scripts/some_audit.py"]
+    assert "scripts/some_audit.py" in _dirty(repo), "left for its author"

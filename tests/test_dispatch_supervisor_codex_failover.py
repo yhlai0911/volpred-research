@@ -81,50 +81,111 @@ def test_preflight_timeout_is_not_reported_as_broken_binary(monkeypatch) -> None
     assert "可能損壞" in broken.detail
 
 
+# The handover makes three distinct calls, and the tests below have to tell them
+# apart because the whole 2026-07-12 bug was the code failing to:
+#   1. `codex --version`   — is the binary here?           (local, says nothing about the API)
+#   2. `codex exec <probe>`— does ChatGPT answer?          (the only call that knows)
+#   3. `codex exec -s workspace-write <task>` — do the work.
+def _is_work_call(argv: list[str]) -> bool:
+    return "workspace-write" in argv
+
+
+def _fake_codex(*, probe=None, work=None):
+    """Route a faked subprocess.run to the right leg of the handover."""
+    def _run(argv, **_kwargs):
+        if argv[1:] == ["--version"]:
+            return SimpleNamespace(returncode=0, stdout="codex-cli 0.144.1", stderr="")
+        leg = work if _is_work_call(argv) else probe
+        if isinstance(leg, BaseException):
+            raise leg
+        return leg
+    return _run
+
+
+_PROBE_OK = SimpleNamespace(returncode=0, stdout="OK", stderr="")
+
+
 def test_exec_success_marks_recovered(monkeypatch) -> None:
     calls: list[list[str]] = []
 
+    inner = _fake_codex(
+        probe=_PROBE_OK,
+        work=SimpleNamespace(returncode=0, stdout="claimed task X; done", stderr=""),
+    )
+
     def _run(argv, **kwargs):
         calls.append(argv)
-        if argv[1:] == ["--version"]:
-            return SimpleNamespace(returncode=0, stdout="codex-cli 0.144.1", stderr="")
-        return SimpleNamespace(returncode=0, stdout="claimed task X; done", stderr="")
+        return inner(argv, **kwargs)
 
     monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
     monkeypatch.setattr(codex_failover.subprocess, "run", _run)
 
     result = codex_failover.run_codex_failover(reason="quota", enabled=True)
     assert (result.attempted, result.recovered, result.exit_code) == (True, True, 0)
-    assert calls[1][1] == "exec"
-    assert "workspace-write" in calls[1]
+    assert calls[1][1] == "exec", "reachability is probed before the slot is bet on it"
+    assert "workspace-write" not in calls[1], "the probe must not be able to write"
+    assert "workspace-write" in calls[2]
     assert "claimed task X" in result.output_tail
 
 
 def test_exec_failure_is_attempted_but_not_recovered(monkeypatch) -> None:
-    def _run(argv, **kwargs):
-        if argv[1:] == ["--version"]:
-            return SimpleNamespace(returncode=0, stdout="codex-cli 0.144.1", stderr="")
-        return SimpleNamespace(returncode=1, stdout="", stderr="401 unauthorized")
-
     monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
-    monkeypatch.setattr(codex_failover.subprocess, "run", _run)
+    monkeypatch.setattr(codex_failover.subprocess, "run", _fake_codex(
+        probe=_PROBE_OK,
+        work=SimpleNamespace(returncode=1, stdout="", stderr="401 unauthorized"),
+    ))
 
     result = codex_failover.run_codex_failover(reason="auth", enabled=True)
     assert (result.attempted, result.recovered, result.exit_code) == (True, False, 1)
 
 
-def test_exec_timeout_is_attempted_but_not_recovered(monkeypatch) -> None:
-    def _run(argv, **kwargs):
-        if argv[1:] == ["--version"]:
-            return SimpleNamespace(returncode=0, stdout="codex-cli 0.144.1", stderr="")
-        raise subprocess.TimeoutExpired(cmd="codex exec", timeout=600, output="partial work")
+# ── the 2026-07-12 misdiagnosis ──────────────────────────────────────────────
+# `codex exec` answered a smoke prompt in 13 seconds the same morning the platform
+# emailed the owner that it was unavailable. Nothing was wrong with Codex: the slot
+# handed it a whole hourly task (claim → finish → commit) inside a 600s cap, killed
+# it mid-flight, and reported the one thing it had never measured — 「ChatGPT 端可能
+# 同時不可用」. The owner went looking for a CLI regression that did not exist.
 
+def test_work_timeout_does_not_accuse_an_api_that_just_answered(monkeypatch) -> None:
     monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
-    monkeypatch.setattr(codex_failover.subprocess, "run", _run)
+    monkeypatch.setattr(codex_failover.subprocess, "run", _fake_codex(
+        probe=_PROBE_OK,  # ChatGPT demonstrably alive, seconds earlier
+        work=subprocess.TimeoutExpired(cmd="codex exec", timeout=2400, output="partial work"),
+    ))
 
     result = codex_failover.run_codex_failover(reason="quota", enabled=True)
+
     assert (result.attempted, result.recovered) == (True, False)
+    assert result.exit_code == codex_failover.RC_WORK_TIMEOUT
     assert "partial work" in result.output_tail
+    assert "不可用" not in result.detail, "the probe proved otherwise — do not guess"
+    assert "沒在" in result.detail and "分鐘內做完" in result.detail
+
+
+def test_unreachable_api_skips_the_slot_rather_than_blaming_the_task(monkeypatch) -> None:
+    """The other half: when ChatGPT really is down, the probe says so in seconds and
+    no task is claimed — `attempted=False`, a skipped slot, not a failed handover."""
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(codex_failover.subprocess, "run", _fake_codex(
+        probe=SimpleNamespace(returncode=1, stdout="", stderr="quota exceeded"),
+        work=SimpleNamespace(returncode=0, stdout="should never run", stderr=""),
+    ))
+
+    result = codex_failover.run_codex_failover(reason="quota", enabled=True)
+
+    assert result.attempted is False, "nothing was claimed — the slot was skipped"
+    assert result.exit_code == codex_failover.RC_UNREACHABLE
+    assert "額度" in result.detail
+    assert "quota exceeded" in result.detail, "say what ChatGPT actually replied"
+
+
+def test_work_cap_fits_the_work_it_hands_over(monkeypatch) -> None:
+    """The cap that caused the incident. The handover prompt is a full hourly task,
+    and real tasks run 20-60 minutes; 600s could only ever kill healthy work. If a
+    future edit shrinks this back under the task it dispatches, it fails here."""
+    assert codex_failover.FAILOVER_CAP_S >= 1800, "a real task does not fit in 10 minutes"
+    assert codex_failover.FAILOVER_CAP_S <= 3000, "must still end inside the fire's ceiling"
+    assert codex_failover.REACHABILITY_TIMEOUT_S <= 120, "liveness is a question of seconds"
 
 
 def test_missing_prompt_file_falls_back_and_logs(monkeypatch, caplog, tmp_path) -> None:

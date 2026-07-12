@@ -137,7 +137,42 @@ _LEAKED_STATE_PATHSPECS = (
 # 2026-07-10) committed a next_tasks.json truncated mid-write as if it were history.
 # See _classify_machine_churn — a file being written right now is left for the next
 # fire, and a file that does not parse is escalated, never committed.
-_MACHINE_CHURN_PATHS = ("storage/next_tasks.json",)
+#
+# Ownership is derived from the NAMESPACE, not from a list of filenames (2026-07-12).
+# The list used to hold exactly one entry — next_tasks.json — so every other file the
+# daemons write (dreaming runs, analytics snapshots, the compute queue, the event
+# ledger, the token-usage report, publication candidates) fell through to "another
+# session is still typing it" and was alerted on, hour after hour, by a module that
+# was in fact its only possible owner. Eleven files had been sitting there for eight
+# consecutive fires when the owner escalated (email-12123 / email-12124: 「不要再有
+# 這種做了以後浪費掉的狀況」).
+#
+# That is the class bug, and enumerating the eleven would only have fixed the
+# instance: the twelfth daemon to write a twelfth state file would have started the
+# same hourly alarm the day it shipped. A prefix says what is true — everything under
+# these roots is machine state with a scheduled writer and no commit step of its own —
+# so a new state file is owned the moment it appears.
+#
+# The boundary that matters is authorship, not location: code and research output
+# (scripts/, src/, experiments/, paper/, docs/, .claude/, storage/memory/) is written
+# by an agent who is expected to commit it with a message and a test run. Those stay
+# foreign, and a stuck one is a real leak worth an alert.
+_MACHINE_STATE_PREFIXES = (
+    "storage/ops/",              # dispatch/queue/dreaming/event-ledger/registry state
+    "storage/analytics/",        # reader metrics snapshots
+    "storage/reports/token_usage/",
+    "ops/claude_user_backup/",   # settings mirror written by the backup job
+)
+_MACHINE_STATE_FILES = (
+    "storage/next_tasks.json",       # the pending queue
+    "storage/publication_candidates.json",
+    "storage/reports/feed.json",     # scheduled-release cron writes it; only agents commit it
+)
+
+
+def _is_machine_state(rel: str) -> bool:
+    """True when `rel` is daemon-written state this module is the sole owner of."""
+    return rel in _MACHINE_STATE_FILES or rel.startswith(_MACHINE_STATE_PREFIXES)
 
 
 # ── ownership: what did THIS fire produce? ───────────────────────────────────
@@ -350,11 +385,21 @@ def _classify_machine_churn(repo_root: Path, candidates: list[str]) -> tuple[lis
 
     Only ``.json`` candidates are parse-checked; a future non-JSON churn path still
     gets the lock gate.
+
+    A candidate that no longer exists is a deletion, and deletions are how the
+    machine state garbage-collects itself (``gc_event_ledger`` expiring a ledger
+    entry). Staging one is the whole point; there is nothing to lock or parse. Until
+    2026-07-12 the open() below raised ENOENT on exactly these paths and filed them
+    as ``deferred`` — "leave it for the next fire" — which for a file that will never
+    come back means every fire, forever. One had been cycling that way for eight.
     """
     committable: list[str] = []
     deferred: list[str] = []
     corrupt: list[str] = []
     for rel in candidates:
+        if not (repo_root / rel).exists():
+            committable.append(rel)
+            continue
         try:
             with open(repo_root / rel, "r", encoding="utf-8") as fh:
                 try:
@@ -774,8 +819,8 @@ def run_phase_z(
     # Dirty-at-fire-start splits two ways, not one. A daemon-written churn path has
     # an owner (this module); only the rest is "another session is still typing it".
     churn, churn_deferred, churn_corrupt = _classify_machine_churn(
-        repo_root, [p for p in dirty_before if p in _MACHINE_CHURN_PATHS])
-    foreign = [p for p in dirty_before if p not in _MACHINE_CHURN_PATHS]
+        repo_root, [p for p in dirty_before if _is_machine_state(p)])
+    foreign = [p for p in dirty_before if not _is_machine_state(p)]
 
     if churn_corrupt:
         alert_fn(

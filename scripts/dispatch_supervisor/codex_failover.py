@@ -13,8 +13,30 @@ Design notes carried over from the shell version (both were incident fixes):
   broken binary aborts before we spend a task on it.
 * **Timeout ≠ broken binary.** A preflight that exceeds its ceiling means the host
   is loaded, not that codex is dead — reported as warn, retried next fire.
-* **Short failover cap (10min, not the 50min hourly cap).** If the ChatGPT API is
-  also down, the fire ends with room to spare before the next hourly slot.
+
+2026-07-12 — two bugs, one root cause (owner: 「立刻找出原因 為什麼 codex exec 不能用」):
+
+The original design note here read *"short failover cap (10min, not the 50min hourly
+cap): if the ChatGPT API is also down, the fire ends with room to spare."* That makes
+the cap do a job it cannot do. The cap measures how long the WORK takes; the thing it
+was asked to detect is whether the API is UP. Those come apart immediately, because
+the prompt we hand Codex is a full hourly task — claim a pending task, finish it,
+commit — and a real task takes 20-60 minutes. So a perfectly healthy Codex was being
+SIGKILLed at 600s on every failover, and the timeout branch then reported the one
+thing it had no evidence for: 「ChatGPT 端可能同時不可用」. It is the same shape as the
+3-STRIKE the hourly prompt already carries — a 60-minute job in a 10-minute container —
+and the false diagnosis is what sent the owner looking for a CLI regression that was
+never there (`codex exec` answered a smoke prompt in 13s the morning of the report).
+
+So the two concerns are now measured separately, each by something that can actually
+see it:
+
+* **Reachability probe** — a trivial `codex exec` round-trip. This is the only thing
+  here that touches ChatGPT, so it is the only thing entitled to claim the API is
+  down. Cheap (a few hundred tokens) and bounded in seconds.
+* **Work cap** — sized for the task we actually hand over, and applied only once the
+  probe says the API answers. A timeout past that point means the task ran long, and
+  says so; it no longer indicts an API that just proved it was alive.
 """
 from __future__ import annotations
 
@@ -45,7 +67,17 @@ FALLBACK_PROMPT = (
 )
 
 PREFLIGHT_TIMEOUT_S = int(os.environ.get("CODEX_PREFLIGHT_TIMEOUT_SEC", "30"))
-FAILOVER_CAP_S = int(os.environ.get("CODEX_FAILOVER_CAP_SEC", "600"))
+
+# Does ChatGPT answer at all? A round-trip with a throwaway prompt — the cheapest
+# question whose answer is the one the timeout branch used to guess at.
+REACHABILITY_TIMEOUT_S = int(os.environ.get("CODEX_REACHABILITY_TIMEOUT_SEC", "90"))
+REACHABILITY_PROMPT = "reply with exactly: OK"
+
+# Sized for the work, now that reachability is measured on its own. The handover
+# prompt is a whole hourly task (claim → finish → commit); at 600s it could only ever
+# have killed healthy work mid-flight. Kept under the fire's own 3000s ceiling so the
+# supervisor still ends the slot with room before the next hour.
+FAILOVER_CAP_S = int(os.environ.get("CODEX_FAILOVER_CAP_SEC", "2400"))
 
 # Escape hatch: VOLPRED_CODEX_FAILOVER=0 disables failover without a code change.
 ENABLED = os.environ.get("VOLPRED_CODEX_FAILOVER", "1") != "0"
@@ -63,6 +95,8 @@ def _under_pytest() -> bool:
 RC_BINARY_MISSING = 127
 RC_PREFLIGHT_TIMEOUT = 142  # matches the shell version's perl SIGALRM code
 RC_DISABLED = -3
+RC_UNREACHABLE = -4   # the probe could not get an answer out of ChatGPT
+RC_WORK_TIMEOUT = -5  # ChatGPT answered the probe; the task itself then ran long
 
 
 @dataclass
@@ -113,6 +147,35 @@ def preflight(codex_bin: str, *, timeout_s: int = PREFLIGHT_TIMEOUT_S) -> tuple[
     return True, 0, (result.stdout or "").strip()
 
 
+def check_reachable(codex_bin: str, *, timeout_s: int = REACHABILITY_TIMEOUT_S) -> tuple[bool, int, str]:
+    """Can we get an answer out of ChatGPT? Returns (ok, rc, detail).
+
+    `codex --version` never leaves the host, so nothing in the old preflight could
+    tell a dead API from a slow task — and the exec timeout branch filled that gap by
+    guessing. This is the probe that actually knows: a throwaway round-trip, bounded
+    in seconds, whose failure is real evidence the API is unavailable.
+    """
+    try:
+        result = subprocess.run(
+            [codex_bin, "exec", "--skip-git-repo-check", REACHABILITY_PROMPT],
+            cwd=str(ROOT), capture_output=True, text=True, timeout=timeout_s,
+        )
+    except subprocess.TimeoutExpired:
+        return False, RC_UNREACHABLE, (
+            f"ChatGPT 沒有回應（{timeout_s}s 內連一句話都答不出來）——"
+            "Codex 這條路這班走不通，下一班重試"
+        )
+    except OSError as exc:
+        return False, RC_BINARY_MISSING, f"`codex exec` 無法啟動：{exc}"
+    if result.returncode != 0:
+        tail = ((result.stdout or "") + (result.stderr or "")).strip()[-400:]
+        return False, RC_UNREACHABLE, (
+            f"ChatGPT 拒絕回應（rc={result.returncode}）——通常是額度用完或認證過期。"
+            f"輸出：{tail or '(無)'}"
+        )
+    return True, 0, "ChatGPT 有回應"
+
+
 def _read_prompt(prompt_path: Path) -> str:
     try:
         text = prompt_path.read_text(encoding="utf-8").strip()
@@ -131,6 +194,7 @@ def run_codex_failover(
     prompt_path: Path = PROMPT_PATH,
     cap_s: int = FAILOVER_CAP_S,
     preflight_timeout_s: int = PREFLIGHT_TIMEOUT_S,
+    reachability_timeout_s: int = REACHABILITY_TIMEOUT_S,
     enabled: bool | None = None,
 ) -> FailoverResult:
     """Try to let `codex exec` cover this hourly slot. Never raises."""
@@ -152,8 +216,16 @@ def run_codex_failover(
     if not ok:
         LOG.warning("codex preflight failed rc=%d: %s", rc, detail)
         return FailoverResult(False, False, rc, detail)
+    version = detail
 
-    LOG.info("codex failover start reason=%s cap=%ds version=%s", reason, cap_s, detail)
+    # Ask ChatGPT whether it is there, before betting the slot on it. `attempted=False`:
+    # no task was claimed, so this is a skipped slot, not a failed handover.
+    reachable, rc, detail = check_reachable(codex_bin, timeout_s=reachability_timeout_s)
+    if not reachable:
+        LOG.warning("codex unreachable rc=%d: %s", rc, detail)
+        return FailoverResult(False, False, rc, detail)
+
+    LOG.info("codex failover start reason=%s cap=%ds version=%s", reason, cap_s, version)
     started = time.time()
     prompt = _read_prompt(prompt_path)
     try:
@@ -165,9 +237,13 @@ def run_codex_failover(
         duration = time.time() - started
         tail = (exc.output or "")[-2000:] if isinstance(exc.output, str) else ""
         LOG.warning("codex exec timed out after %ds", cap_s)
+        # ChatGPT answered the probe minutes ago, so this is NOT an outage — it is a
+        # task that ran past its ceiling. Saying otherwise is what sent the owner
+        # hunting a CLI regression that did not exist (2026-07-12).
         return FailoverResult(
-            True, False, RC_PREFLIGHT_TIMEOUT,
-            f"`codex exec` 逾時（{cap_s}s 上限）——ChatGPT 端可能同時不可用",
+            True, False, RC_WORK_TIMEOUT,
+            f"Codex 接手了，但任務沒在 {cap_s // 60} 分鐘內做完（ChatGPT 本身是通的——"
+            "接手前已測過）。任務可能太大，需要切小或改走 compute queue",
             duration, tail,
         )
     except OSError as exc:
