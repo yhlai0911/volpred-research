@@ -1,4 +1,11 @@
-# K1684 Codex review — BLOCKED
+# K1684 Codex review — BLOCKED（R1 的歷史紀錄）
+
+> [!NOTE]
+> **本文件描述的是 R1（2026-07-12 被 BLOCKED 的那一版），保留作為歷史紀錄與 rerun 的驗收清單。**
+> **R2 canonical 重跑已完成**，七項 blocker 的關閉證據見 [`k1684_rerun_r2_receipt.json`](k1684_rerun_r2_receipt.json)，
+> 新結果與新裁決（`H2_UNSUPPORTED`，**不是** R1 的 `H2_REJECTED`）見 [`README.md`](README.md)。
+> 底下「已核對、可作為 rerun anchor 的原始數字」**全部是 R1 的數字**，R2 沒有沿用任何一個；
+> 引用時務必標明是 R1。R2 仍需獨立 Codex review PASS 後才可寫 knowledge / feed / paper。
 
 - Review date: 2026-07-12
 - Reviewer: `/root/k1684_orphan_review`

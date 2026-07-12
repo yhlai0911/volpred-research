@@ -1,0 +1,75 @@
+{
+  "experiment_id": "K1684",
+  "rerun": "R2 canonical",
+  "timestamp": "2026-07-12T13:11:51.188809+00:00",
+  "seed": 20260712,
+  "elapsed_sec": 84.2,
+  "results_sha256_before_r1": "c5768fa04dfb30d699c4a19931da160c05c8325b9678d0c94571200bd08f360b",
+  "results_sha256_after_r2": "e48114532b9c398dd0e47369d1169f404fb1fce693bc4027fc92883d11f37f9b",
+  "hash_changed": true,
+  "gate_verdict_r1": "H2_REJECTED (BLOCKED — never valid)",
+  "gate_verdict_r2": "H2_UNSUPPORTED",
+  "blockers_closed": {
+    "G1_active_contract_gap_complete_rv": {
+      "closed": true,
+      "evidence": "RV rebuilt from ALL TX contracts (volume-maximal active contract per trade date); one continuous path 13:30(D-1)->13:30(D) with every boundary jump; 2213 days audited, 0 end after 13:30. R2/R1 mean RV ratio 1.3116."
+    },
+    "G2_gjr_100_starts_convergence_basin": {
+      "closed": true,
+      "evidence": "GJR and RealGARCH-Log both fitted with 100 seeded starts; per-refit convergence rate, objective spread and basin share stored in gjr_basin_diagnostics_per_refit / rgl_basin_diagnostics_per_refit. Fragility under a 1e-6 data revision — sigma moves at most 22.23% (k854.fit_gjr, 4 starts) vs 4.26% (100 starts); violation counts stable at 100 starts = True.",
+      "fragility_resolved": true
+    },
+    "G3_implied_c_identification_and_ci": {
+      "closed": true,
+      "evidence": "Distribution-free empirical scale factor c = quantile_{1-alpha}(r/VaR) with a seeded bootstrap CI for every cell; the parametric Phi^-1(alpha)/Phi^-1(pi) is reported ONLY for Normal-tail cells and its monotonicity (c increasing in pi) is asserted in code — normal_implied_c raises if a band ever inverts. The untested |dc| < 0.10 rule is replaced by a paired bootstrap test of H0: c(1%) = c(5%).",
+      "n_inverted_bands": 0
+    },
+    "G4_placebo_full_report": {
+      "closed": true,
+      "evidence": "Placebo scale factor 1.1171 (95% CI [1.0517931342280324, 1.1882950551504607], excludes 1 = True), against the HAR factor 1.1836. GJRf / GJRf-a are backtested on ALL THREE tail layers at both alphas with VaR, ES and FZ0 on the same sample as every other cell, and the placebo also runs in the in-sample panel. The CI is bootstrapped on the residual pool, not on the step function of daily values."
+    },
+    "G5_harvey_bar_and_pairwise_masks": {
+      "closed": true,
+      "evidence": "decide_gate() requires |t| > 3 (Harvey) for a formal leg-1 conclusion and now actually evaluates leg 2's \"GJR passes the trinity\" clause. Every DM pair carries its own pairwise common mask and reports its own n.",
+      "aligned_dm": {
+        "t_stat": 1.476650676734999,
+        "p_value": 0.14049284220507752,
+        "n": 436,
+        "hac_lag_used": 8,
+        "loss_diff_acf1": 0.012691799101221578,
+        "harvey_significant_t_gt_3": false,
+        "better_model": "GJR",
+        "note": "canonical volpred.stats.model_evaluation.dm_test; HAC bandwidth ceil(h^(1/3) n^(1/3)); pairwise common mask"
+      },
+      "mismatched_dm": {
+        "t_stat": -2.0968098035597666,
+        "p_value": 0.036569275854432925,
+        "n": 450,
+        "hac_lag_used": 8,
+        "loss_diff_acf1": 0.22969110481091468,
+        "harvey_significant_t_gt_3": false,
+        "better_model": "HAR-RV",
+        "note": "canonical volpred.stats.model_evaluation.dm_test; HAC bandwidth ceil(h^(1/3) n^(1/3)); pairwise common mask"
+      }
+    },
+    "G6_alphas_is_oos_var_es_fz": {
+      "closed": true,
+      "evidence": "Both alpha levels; in-sample panel (in_sample_panel) and OOS runs; ES for every cell with a McNeil-Frey bootstrap test; Fissler-Ziegel FZ0 joint (VaR, ES) loss per cell plus canonical DM tests on the FZ0 differentials."
+    },
+    "G7_atomic_write_seed_provenance": {
+      "closed": true,
+      "evidence": "write_atomic(): tmp -> json.load parse-verify -> os.replace. Single SEED = 20260712 threads every random procedure (multistart grids, bootstraps, perturbation draws). Lookahead audit: 30 assertions, all_passed=True."
+    }
+  },
+  "scope_compliance": {
+    "files_touched": [
+      "experiments/k1684/** only"
+    ],
+    "shared_state_untouched": [
+      "storage/memory/knowledge.json",
+      "storage/reports/feed.json",
+      "paper/**"
+    ],
+    "note": "No knowledge/feed/paper write is permitted before an independent Codex PASS on this rerun."
+  }
+}
