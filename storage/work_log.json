@@ -16432,5 +16432,28 @@
     "task_id": "member_qa_e79a7097_evaluate",
     "summary": "收 K1700 agent job followup：驗證 mile_d84aa7d0 上線（live 200、fig1/fig2 + 4 張懶人包共 6 圖全 200、proposer=yaoxk1431、question_articles 關聯已寫、誠實限制段落齊、anti_ai_gate PASS），標 succeeded 並 mark-followup-dispatched",
     "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-12T23:53:35+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-c753cd2ac",
+    "outcome": "succeeded",
+    "summary": "add K1700 lazypack renderer",
+    "commit": "c753cd2ac946e74cc970370c4b501af1e5ad6b26",
+    "owner": "codex",
+    "backfilled_at": "2026-07-12T16:57:23.686784+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1700"
+  },
+  {
+    "timestamp": "2026-07-13T00:56:27+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-c45b982db",
+    "outcome": "succeeded",
+    "summary": "bridge event jobs to canonical queue",
+    "commit": "c45b982db71e1c6b0c1d9b33f19089d8bd9988d1",
+    "owner": "codex",
+    "backfilled_at": "2026-07-12T16:57:23.686423+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
