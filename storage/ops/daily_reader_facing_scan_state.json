@@ -1,15 +1,11 @@
 {
-  "date": "2026-07-11",
+  "date": "2026-07-12",
   "scanned": true,
-  "scanned_at": "2026-07-10T22:00:06+00:00",
+  "scanned_at": "2026-07-11T22:00:05+00:00",
   "trending_added": 1,
-  "event_added": 0,
-  "member_qa_added": 0,
+  "event_added": 1,
+  "member_qa_added": 1,
   "errors": [],
-  "trending_skipped": {
-    "reason": null,
-    "hint": null
-  },
   "event_skipped": [
     {
       "id": "nfp-2026-06-05-t7",
@@ -60,10 +56,6 @@
       "reason": "out_of_horizon"
     },
     {
-      "id": "cpi-us-2026-07-13-t2",
-      "reason": "not_yet_in_window"
-    },
-    {
       "id": "cpi-us-2026-07-13-t0",
       "reason": "not_yet_in_window"
     },
@@ -90,11 +82,10 @@
     {
       "id": "nfp-2026-08-07-t2",
       "reason": "out_of_horizon"
+    },
+    {
+      "id": "nfp-2026-08-07-t0",
+      "reason": "out_of_horizon"
     }
-  ],
-  "member_qa_result": {
-    "created": false,
-    "reason": "no_pending_member_qa_work",
-    "gated_min_age": 0
-  }
+  ]
 }
