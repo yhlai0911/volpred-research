@@ -50,62 +50,41 @@ def _nth_weekday_of_month(year: int, month: int, weekday: int, n: int) -> date:
     return first + timedelta(days=(n - 1) * 7)
 
 
-# BLS-published CPI release dates (08:30 ET). Source:
-# https://www.bls.gov/schedule/news_release/cpi.htm
-# A calendar proxy (e.g. "13th of month") drifts from the real date by 1-4 days
-# and produced a wrong event_date for the 2026-07 release (proxy said 07-13,
-# BLS says 07-14) — event articles must carry the real release date.
-# When BLS publishes the next year's schedule, extend this table; an event date
-# not covered here is skipped rather than guessed.
-BLS_CPI_RELEASE_DATES: dict[int, list[date]] = {
-    2026: [
-        date(2026, 1, 13),
-        date(2026, 2, 13),
-        date(2026, 3, 11),
-        date(2026, 4, 10),
-        date(2026, 5, 12),
-        date(2026, 6, 10),
-        date(2026, 7, 14),
-        date(2026, 8, 12),
-        date(2026, 9, 11),
-        date(2026, 10, 14),
-        date(2026, 11, 10),
-        date(2026, 12, 10),
-    ],
-}
+def _official_dates(event: str, start: date, end: date) -> list[tuple[date, str]]:
+    """Release dates from the official calendar (ALFRED). Never guesses.
+
+    Both of the calendar proxies this replaced were wrong in ways that silently
+    corrupt event studies:
+      - CPI "13th of month": 7 of 13 dates wrong over 2025-2026, including a day
+        on which the release was cancelled outright (Oct-2025, shutdown).
+      - NFP "1st Friday": misses every holiday shift — e.g. Jul-2026 NFP moved to
+        Thu 07-02 ahead of the observed Jul-4 holiday, not Fri 07-03.
+    If the calendar can't be reached we skip and warn. A missing event article is
+    recoverable; an event article dated to a day the data didn't exist is not.
+    """
+    from volpred.data.event_dates import release_dates
+
+    try:
+        dates = release_dates(event, start.isoformat(), end.isoformat())
+    except Exception as e:
+        logging.warning(
+            "populate_events: could not fetch official %s release dates (%s) — "
+            "skipping rather than guessing from a calendar proxy",
+            event,
+            e,
+        )
+        return []
+    return [(d.date(), event) for d in dates if start <= d.date() <= end]
 
 
 def gen_us_cpi(start: date, end: date) -> list[tuple[date, str]]:
-    """US CPI release dates, from the BLS-published schedule (no calendar proxy)."""
-    events = []
-    for year in range(start.year, end.year + 1):
-        known = BLS_CPI_RELEASE_DATES.get(year)
-        if known is None:
-            logging.warning(
-                "gen_us_cpi: no BLS release schedule for %s — skipping "
-                "(extend BLS_CPI_RELEASE_DATES from bls.gov/schedule/news_release/cpi.htm)",
-                year,
-            )
-            continue
-        for candidate in known:
-            if start <= candidate <= end:
-                events.append((candidate, "CPI_US"))
-    return sorted(events)
+    """US CPI release dates, from the official BLS/ALFRED calendar."""
+    return _official_dates("CPI_US", start, end)
 
 
 def gen_us_nfp(start: date, end: date) -> list[tuple[date, str]]:
-    """US NFP: 1st Friday of month."""
-    events = []
-    d = date(start.year, start.month, 1)
-    while d <= end:
-        fri = _first_weekday_of_month(d.year, d.month, 4)  # Friday=4
-        if start <= fri <= end:
-            events.append((fri, "NFP_US"))
-        if d.month == 12:
-            d = date(d.year + 1, 1, 1)
-        else:
-            d = date(d.year, d.month + 1, 1)
-    return events
+    """US NFP (Employment Situation) release dates, from the official calendar."""
+    return _official_dates("NFP_US", start, end)
 
 
 def gen_fomc(start: date, end: date) -> list[tuple[date, str]]:
