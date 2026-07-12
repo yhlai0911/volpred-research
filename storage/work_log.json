@@ -16612,5 +16612,29 @@
     "owner": "codex-vscode",
     "commit": "130c4ef76",
     "summary": "K1701 primary inference 已從 expanding raw DM 改為 paired fixed-756 rolling Giacomini-White + Patton QLIKE。正向 gate 0/6，Holm 後排除至少 1% gain 亦 0/6，正式 verdict 為 INCONCLUSIVE_NO_EXACT_NULL_CLAIM；控制波動水準後 MSE/Clark-West/BH 0/12。27 tests PASS，raw DM 僅保留 diagnostic。"
+  },
+  {
+    "timestamp": "2026-07-13T05:45:14+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-130c4ef76",
+    "outcome": "succeeded",
+    "summary": "K1701: replace nested raw DM with general-loss inference",
+    "commit": "130c4ef769e886c73a782ed86e61821be623dcf9",
+    "owner": "codex",
+    "backfilled_at": "2026-07-12T21:49:02.245371+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1701"
+  },
+  {
+    "timestamp": "2026-07-13T05:47:44+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-ef733b105",
+    "outcome": "succeeded",
+    "summary": "K1701: close general-loss inference task",
+    "commit": "ef733b105c2237ae60ad9f55de85650cc26913ba",
+    "owner": "codex",
+    "backfilled_at": "2026-07-12T21:49:02.244992+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1701"
   }
 ]
