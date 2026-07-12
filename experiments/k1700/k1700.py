@@ -28,6 +28,7 @@ Data: yfinance ^GSPC / ^SP500TR / ^TWII；Shiller ie_data（股息）；FRED TB3
 
 from __future__ import annotations
 
+import hashlib
 import io
 import json
 import re
@@ -51,6 +52,9 @@ TARGET_CAGR = 0.15
 WINDOW_YEARS = 30
 TR_SPLICE = pd.Timestamp("1988-01-04")  # ^SP500TR 起點
 BROKER_SPREAD = 0.01  # 槓桿借貸利差（短率之上），1pp
+# Shiller ie_data.xls 的雜湊 pin（2026-07-12 下載版本，資料到 2023-09）。
+# 上游更新檔案時此值會不符 → 腳本會 fail-loud，請人工核對後更新，不要 silent 接受新檔。
+SHILLER_SHA256 = "0df9392b7dacf91f756e92c8db508ad903c4588b43f3253680eec3dd8b40db68"
 
 plt.rcParams["font.sans-serif"] = ["Heiti TC", "Arial Unicode MS", "PingFang TC"]
 plt.rcParams["axes.unicode_minus"] = False
@@ -71,10 +75,20 @@ def shiller_dividend_yield() -> pd.Series:
     """Shiller ie_data 的逐月股息率（年化 D / P）。快取到 experiments/k1700/data/."""
     cache = DATA / "shiller_ie_data.xls"
     if not cache.exists():
-        url = "http://www.econ.yale.edu/~shiller/data/ie_data.xls"
+        url = "https://www.econ.yale.edu/~shiller/data/ie_data.xls"
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        cache.write_bytes(urllib.request.urlopen(req, timeout=120).read())
-    df = pd.ExcelFile(io.BytesIO(cache.read_bytes())).parse("Data", skiprows=7)
+        raw = urllib.request.urlopen(req, timeout=120).read(8 * 1024 * 1024)
+        digest = hashlib.sha256(raw).hexdigest()
+        if digest != SHILLER_SHA256:
+            raise RuntimeError(
+                f"Shiller ie_data.xls 雜湊不符（取得 {digest}，預期 {SHILLER_SHA256}）。"
+                "上游檔案更新或傳輸被竄改；請人工核對後更新 SHILLER_SHA256。"
+            )
+        cache.write_bytes(raw)
+    blob = cache.read_bytes()
+    if hashlib.sha256(blob).hexdigest() != SHILLER_SHA256:
+        raise RuntimeError("快取的 Shiller 檔雜湊不符，拒絕解析。")
+    df = pd.ExcelFile(io.BytesIO(blob)).parse("Data", skiprows=7)
     df = df[["Date", "P", "D"]].dropna()
     # Date 形如 1871.01 / 1871.1 (=十月)；用字串補位解析
     def _to_ts(v: float) -> pd.Timestamp:
