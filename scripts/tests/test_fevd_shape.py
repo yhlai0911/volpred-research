@@ -216,7 +216,15 @@ def test_no_bare_negative_index_on_fevd_decomp() -> None:
 
 def test_bug_reproduction_marker_is_not_being_used_to_smuggle_the_bug_back() -> None:
     """The escape hatch must stay a hatch. Only k1025 v3's before/after may use it."""
-    allowed = {"experiments/k1025/k1025_v3.py"}
+    allowed = {
+        "experiments/k1025/k1025_v3.py",
+        # Sanctioned 2026-07-14: same before/after purpose as k1025_v3. The
+        # function carrying the marker exists to MEASURE how wrong the v2
+        # numbers were (its docstring forbids reporting them as connectedness
+        # estimates), and the commit that added it — dd182b228 — is the one that
+        # retracted the published figures the bug produced.
+        "experiments/k1025b/k1025b_v2.py",
+    }
     this_file = Path(__file__).resolve()  # defines the marker; would otherwise flag itself
     marked = {
         str(path.relative_to(REPO_ROOT))

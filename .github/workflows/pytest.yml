@@ -55,6 +55,11 @@ jobs:
       VOLPRED_NO_REMOTE_WRITE: "1"
       VOLPRED_NO_EMAIL: "1"
       VOLPRED_NO_CANONICAL_WRITE: "1"
+      # The fourth guard was missing from this belt while the conftest that sets
+      # it was .gitignore'd — so between 2026-07-10 and 2026-07-14 the runner
+      # could issue live Supabase reads. conftest.py is tracked again; this line
+      # completes the belt that was always meant to survive a broken conftest.
+      VOLPRED_NO_REMOTE_READ: "1"
     steps:
       - uses: actions/checkout@v4
       - name: Install system test dependencies

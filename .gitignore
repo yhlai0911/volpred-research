@@ -121,8 +121,10 @@ storage/lazypack_jobs/*/panels/*_article.md
 # 3rd-party tool caches
 .antigravitycli/
 .codex-companion/
-# Stray root-level conftest (real test conftest is tests/conftest.py)
-/conftest.py
+# 2026-07-14: /conftest.py used to be ignored here as a 'stray'. On 2026-07-10 a
+# real root conftest was added to hold the four production guards for the whole
+# test tree — and this line silently kept it out of every CI checkout, so
+# scripts/tests/ ran on the runner with VOLPRED_NO_REMOTE_READ unset. Tracked now.
 
 # Supabase local
 supabase/.temp/

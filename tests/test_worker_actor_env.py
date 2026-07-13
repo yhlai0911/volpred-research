@@ -88,8 +88,14 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
     # extension, not replacement — PATH (auth, HOME, …) survive or the child
     # would lose its ability to exec / authenticate.
     assert env["PATH"] == "/usr/bin:/bin"
+    # The two keys the worker OWNS: it stamps both to locate the fire. Listing
+    # only VOLPRED_ACTOR made this test pass everywhere except inside a real
+    # dispatch fire — where VOLPRED_DISPATCH_JOB_ID is already in the ambient
+    # environment, so the loop compared the supervisor's job id against the one
+    # the worker just stamped. It went red the first time the hourly agent ran
+    # the suite (2026-07-14). A test must not depend on who is running it.
     for key, value in os.environ.items():
-        if key == "VOLPRED_ACTOR":
+        if key in ("VOLPRED_ACTOR", "VOLPRED_DISPATCH_JOB_ID"):
             continue
         assert env.get(key) == value
 
