@@ -646,6 +646,24 @@ def _knowledge_experiment_clusters(storage_dir: str) -> dict[str, str]:
     return out
 
 
+def _article_series(item: dict) -> str | None:
+    """Registered series this article belongs to (config/article_series.json is SoT).
+
+    A serialized 專題 (無人載具 EP0..EP-Final, 迷思實驗室, 事件溫度計) is ONE narrative
+    unit that ships as N chapters — not N articles flooding one cluster. Counting its
+    episodes individually deadlocks the release pool the moment 2 of them are live:
+    the cluster locks, the remaining episodes can never be released, and the pool goes
+    silently to zero-releasable (boss Telegram msg 662-664, 2026-07-13; a whole series
+    sat in the pool while the freshness dead-man switch fired).
+    """
+    try:
+        from volpred.publisher.arc_dedup import _series_of
+    except Exception as exc:  # noqa: BLE001
+        _warn_release_pool("series registry unavailable — series unit-collapse off", exc)
+        return None
+    return _series_of(str(item.get("title") or ""))
+
+
 def _article_narrative_cluster(item: dict, k_cluster: dict[str, str]) -> str | None:
     title = str(item.get("title") or "")
     tags = item.get("tags") if isinstance(item.get("tags"), list) else []
@@ -681,11 +699,20 @@ def _recent_narrative_cluster_pressure(
         key=lambda item: str(item.get("published_at") or ""),
         reverse=True,
     )[:_RELEASE_LAST_N_CLUSTER_WINDOW]
-    clusters = [
-        cluster
-        for item in recent
-        if (cluster := _article_narrative_cluster(item, k_cluster))
-    ]
+    # A registered series counts ONCE toward cluster pressure, however many of its
+    # episodes are in the window (see _article_series).
+    clusters: list[str] = []
+    seen_series: set[str] = set()
+    for item in recent:
+        cluster = _article_narrative_cluster(item, k_cluster)
+        if not cluster:
+            continue
+        series = _article_series(item)
+        if series:
+            if series in seen_series:
+                continue
+            seen_series.add(series)
+        clusters.append(cluster)
     counts = Counter(clusters)
     blocked = sorted(
         cluster
@@ -1237,6 +1264,19 @@ def release_pool_articles(
         filtered_candidates: list[dict] = []
         for item in candidates:
             candidate_cluster = _article_narrative_cluster(item, k_cluster)
+            candidate_series = _article_series(item)
+            if candidate_series and candidate_cluster in blocked_narrative_clusters:
+                # Serialized chapter of a registered series: the cluster gate exists to
+                # stop the same story flooding the feed, not to strand a 專題 mid-run.
+                # Same-episode reruns are still caught by the arc-dedup gate below.
+                _log_release_dedup_decision(
+                    storage_dir,
+                    target_id=item.get("id"),
+                    decision="pass",
+                    reason=f"registered_series_exempt_from_cluster_gate:{candidate_series}",
+                )
+                filtered_candidates.append(item)
+                continue
             if (
                 _article_audience(item) in _RELEASE_DEDUP_AUDIENCES
                 and candidate_cluster in blocked_narrative_clusters
@@ -1894,6 +1934,19 @@ def preview_release_pool_by_settings(
         filtered_candidates: list[dict] = []
         for item in candidates:
             candidate_cluster = _article_narrative_cluster(item, k_cluster)
+            candidate_series = _article_series(item)
+            if candidate_series and candidate_cluster in blocked_narrative_clusters:
+                # Serialized chapter of a registered series: the cluster gate exists to
+                # stop the same story flooding the feed, not to strand a 專題 mid-run.
+                # Same-episode reruns are still caught by the arc-dedup gate below.
+                _log_release_dedup_decision(
+                    storage_dir,
+                    target_id=item.get("id"),
+                    decision="pass",
+                    reason=f"registered_series_exempt_from_cluster_gate:{candidate_series}",
+                )
+                filtered_candidates.append(item)
+                continue
             if (
                 _article_audience(item) in _RELEASE_DEDUP_AUDIENCES
                 and candidate_cluster in blocked_narrative_clusters
