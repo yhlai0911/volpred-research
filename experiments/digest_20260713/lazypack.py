@@ -42,7 +42,7 @@ fig.savefig(f"{OUT}/1_four_gates.png", dpi=150, facecolor=BG, bbox_inches="tight
 
 # --- panel 2: 增量體檢結果 ---
 fig, ax = plt.subplots(figsize=(9, 11.5)); fig.patch.set_facecolor(BG)
-ax.set_position([.30, .10, .64, .70])
+ax.set_position([.30, .13, .64, .68])
 sig = sorted(R["signals"], key=lambda d: d["incremental_r2_pp"])
 lab = [short[s["signal"]] for s in sig]
 val = [s["incremental_r2_pp"] for s in sig]
@@ -52,13 +52,13 @@ for i, (v, o) in enumerate(zip(val, ok)):
     ax.text(v + .35, i, f"+{v:.2f} pp" + ("" if o else "  (不顯著)"), va="center", size=12,
             color=INK if o else "#94a3b8", weight="bold" if o else "normal")
 ax.set_xlim(0, max(val) * 1.45)
-ax.set_xlabel("增量解釋力（百分點）", size=12)
+ax.set_xlabel("增量解釋力（百分點）", size=12, labelpad=10)
 ax.tick_params(labelsize=13)
 ax.grid(axis="x", alpha=.25); ax.set_facecolor("white")
 fig.text(.5, .94, "扣掉「當下波動」之後，還剩多少？", ha="center", size=26, weight="bold", color=INK)
 fig.text(.5, .90, "相對「只看過去 20 日已實現波動」的 R² 增加量", ha="center", size=13, color="#475569")
-fig.text(.5, .055, "藍＝Holm 多重檢定校正後仍顯著；灰＝校正後不成立", ha="center", size=12, color="#475569")
-fig.text(.5, .022, f"目標：SPY 未來 5 日已實現波動｜HAC lag={R['hac_lag']}｜n={R['sample']['n_days']:,}",
+fig.text(.5, .045, "藍＝Holm 多重檢定校正後仍顯著；灰＝校正後不成立", ha="center", size=12, color="#475569")
+fig.text(.5, .015, f"目標：SPY 未來 5 日已實現波動｜HAC lag={R['hac_lag']}｜n={R['sample']['n_days']:,}",
          ha="center", size=11, color="#64748b")
 fig.savefig(f"{OUT}/2_incremental.png", dpi=150, facecolor=BG); plt.close(fig)
 
