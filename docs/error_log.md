@@ -2,6 +2,37 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 19:26 — **3-STRIKE TRIGGER**：每篇懶人包都讓 LLM 重寫 renderer，失敗不是偶發而是 domain model 錯誤
+
+**三次以上同類 incident**：(1) 兩個 2026-07-11 compute render 都精準撞上 900 秒上限；
+(2) `mile_531e4c87` 的腳本成功存檔，文字卻溢出／重疊，舊 gate 仍判成功；(3)
+`mile_aa4713db` 逾時被判 failed 後，逃脫的 worker 又在 5 分鐘後才寫出
+`render_lazypack.py`；同一批工作另有多次「逾時、沒有 render file」重排。前兩輪修補了
+process-tree kill、layout guard、repair/resume，卻都保留「自由 prose → agentic LLM 現寫一支 Python」
+這個根因，因此失敗只會換形狀。
+
+**底層根因**：內容規劃、數據解析、排版演算法與程式生成被塞進同一次非確定性呼叫。每篇文章重新發明
+word wrap、card geometry、font handling 與 JSON path；失敗後再叫同一種 agent 修同一種程式。
+`must_show` 又只是含數字的 prose，既不能機械證明數字來自哪個欄位，也不能在 enqueue 時 fail-loud。
+這不是 timeout 參數太小，而是 renderer 沒有 repository-owned domain model。
+
+**結構性修正**：
+
+1. 新增 `scripts/lazypack_render.py`，唯一輸入是 strict v1 `plan.json`：evidence path + SHA-256、
+   panel schema、逐值 `{source,path,format}` binding。舊 list／缺欄位／缺 JSON path／hash drift 全部 raise。
+2. repository-owned concept / method / results（takeaway 共用 results family）模板以實際 glyph bbox 先換行、
+   再縮字、按內容分配卡片高度；最低字級仍放不下就拒絕，不截字、不加省略號。每張仍經既有
+   `lazypack_layout_guard`，全組先寫 private staging，全部通過才原子 replace，避免半套成品。
+3. `lazypack_async_render.py` 主線直接執行確定性 renderer，移除 per-article script ownership、LLM 呼叫與
+   「PNG >1KB 就沿用」的 stale shortcut；重跑永遠依 hash-pinned plan 秒級重畫。
+   `gen_lazypack_codex.py` 明示降為 legacy/manual，只保留歷史重現與 timeout regression coverage。
+4. 遷移 `mile_b6a46796`、`mile_a8d79d6a` 兩份 plan；空目錄實測共 7 張 1600×1000 PNG，
+   各組分別約 0.70 / 0.55 秒、layout guard PASS、manifest 明示 `llm_calls=0`。回歸涵蓋缺欄位、
+   evidence hash/path、長繁中標題、路徑穿越、duplicate name、原子失敗、像素 determinism 與 async seam。
+
+**教訓**：Three-Strike 要翻掉反覆製造 incident 的抽象，不是替第三個症狀再加一次 retry。LLM 適合寫
+讀者內容與選 evidence 欄位；可重用的排版、型別、hash、layout 與 output ownership 必須是確定性程式。
+
 ## 2026-07-13 16:40 — CI 紅了 12.5 小時系統看不見：機器沒有訂閱自己的 CI 狀態
 
 **問題**：main Test Suite 從 04:00 紅到 16:26 才修好，期間老闆連傳 4 則 Telegram（msg 632/633/635/647/653）

@@ -48,7 +48,13 @@ DPI = 150
 SCHEMA_VERSION = 1
 FONT_FAMILY = "Heiti TC"
 PANEL_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
+BINDING_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+# Reader-visible identifiers may legitimately contain digits without being a
+# statistic.  Everything else numeric must arrive through an evidence binding.
+IDENTIFIER_NUMBER_RE = re.compile(
+    r"(?i)(?:\b(?:EP|K)\s*-?\d+\b|\b[0-9A-Z]{4,7}\.(?:TW|TWO)\b)"
+)
 INFO_TYPES = {"concept", "method", "results", "takeaway"}
 STYLES = {"professional", "editorial", "bento-grid", "scientific"}
 FORMAT_KINDS = {"text", "number", "percent", "integer", "date"}
@@ -172,6 +178,18 @@ def _require_nonempty_string(value: Any, where: str) -> str:
     return value
 
 
+def _reject_unbound_numbers(text: str, where: str) -> None:
+    """Prevent prose plans from smuggling statistics around JSON bindings."""
+    without_identifiers = IDENTIFIER_NUMBER_RE.sub("", text)
+    match = re.search(r"\d", without_identifiers)
+    if match:
+        token = without_identifiers[max(0, match.start() - 12):match.start() + 18]
+        raise PlanValidationError(
+            f"unbound numeric literal at {where}: {token!r}; bind reader-visible "
+            "numbers to an evidence JSON field"
+        )
+
+
 def _validate_format(spec: Any, where: str) -> None:
     if not isinstance(spec, dict):
         raise PlanValidationError(f"{where} must be an object")
@@ -185,13 +203,18 @@ def _validate_format(spec: Any, where: str) -> None:
         digits = spec["digits"]
         if not isinstance(digits, int) or isinstance(digits, bool) or not 0 <= digits <= 3:
             raise PlanValidationError(f"{where}.digits must be an integer from 0 to 3")
-    if "scale" in spec and (
-        not isinstance(spec["scale"], (int, float)) or isinstance(spec["scale"], bool)
-    ):
-        raise PlanValidationError(f"{where}.scale must be numeric")
+    if "scale" in spec:
+        scale = spec["scale"]
+        if (
+            not isinstance(scale, (int, float)) or isinstance(scale, bool)
+            or not math.isfinite(scale) or scale <= 0
+        ):
+            raise PlanValidationError(f"{where}.scale must be a positive finite number")
     for key in ("prefix", "suffix"):
         if key in spec and not isinstance(spec[key], str):
             raise PlanValidationError(f"{where}.{key} must be a string")
+        if key in spec:
+            _reject_unbound_numbers(spec[key], f"{where}.{key}")
     for key in ("show_plus", "absolute", "thousands"):
         if key in spec and not isinstance(spec[key], bool):
             raise PlanValidationError(f"{where}.{key} must be boolean")
@@ -212,6 +235,7 @@ def _validate_content(value: Any, where: str, evidence_aliases: set[str]) -> Non
     if isinstance(value, str):
         if not value.strip():
             raise PlanValidationError(f"{where} must not be empty")
+        _reject_unbound_numbers(value, where)
         return
     if not isinstance(value, dict):
         raise PlanValidationError(f"{where} must be a string or template object")
@@ -224,15 +248,26 @@ def _validate_content(value: Any, where: str, evidence_aliases: set[str]) -> Non
         raise PlanValidationError(f"{where}.bindings must be a non-empty object")
     for name, binding in bindings.items():
         _require_nonempty_string(name, f"{where}.bindings key")
+        if not BINDING_NAME_RE.fullmatch(name):
+            raise PlanValidationError(
+                f"{where}.bindings key must match {BINDING_NAME_RE.pattern!r}; got {name!r}"
+            )
         _validate_binding(binding, f"{where}.bindings.{name}", evidence_aliases)
     try:
-        fields = {
-            field_name
-            for _, field_name, _, _ in string.Formatter().parse(template)
-            if field_name is not None
-        }
+        parsed = list(string.Formatter().parse(template))
     except ValueError as exc:
         raise PlanValidationError(f"invalid template at {where}: {exc}") from exc
+    fields: set[str] = set()
+    for literal, field_name, format_spec, conversion in parsed:
+        _reject_unbound_numbers(literal, f"{where}.template literal")
+        if field_name is None:
+            continue
+        if conversion is not None or format_spec:
+            raise PlanValidationError(
+                f"{where}.template must not use conversion/format specifiers; "
+                "put all formatting in binding.format"
+            )
+        fields.add(field_name)
     if fields != set(bindings):
         missing = sorted(fields - set(bindings))
         unused = sorted(set(bindings) - fields)
@@ -248,13 +283,24 @@ def validate_plan(document: Any, *, plan_path: Path | None = None) -> dict[str, 
         raise PlanValidationError(f"{label} root must be an object, not a legacy panel list")
     _reject_unknown(document, ROOT_KEYS, "plan")
     version = _require(document, "schema_version", "plan")
-    if version != SCHEMA_VERSION:
+    if (
+        not isinstance(version, int) or isinstance(version, bool)
+        or version != SCHEMA_VERSION
+    ):
         raise PlanValidationError(
             f"plan.schema_version must equal {SCHEMA_VERSION}; got {version!r}"
         )
-    _require_nonempty_string(_require(document, "title", "plan"), "plan.title")
+    title = _require_nonempty_string(_require(document, "title", "plan"), "plan.title")
+    _reject_unbound_numbers(title, "plan.title")
     if "subtitle" in document:
-        _validate_content(document["subtitle"], "plan.subtitle", set(document.get("evidence", {})))
+        if not isinstance(document["subtitle"], str):
+            raise PlanValidationError(
+                "plan.subtitle must be literal text; panel-specific bound subtitles "
+                "belong in panel.subtitle so panel.sources stays complete"
+            )
+        _validate_content(
+            document["subtitle"], "plan.subtitle", set(document.get("evidence", {}))
+        )
 
     evidence = _require(document, "evidence", "plan")
     if not isinstance(evidence, dict) or not evidence:
@@ -295,10 +341,6 @@ def validate_plan(document: Any, *, plan_path: Path | None = None) -> dict[str, 
         style = _require_nonempty_string(_require(panel, "style", where), f"{where}.style")
         if style not in STYLES:
             raise PlanValidationError(f"{where}.style must be one of {sorted(STYLES)}")
-        _validate_content(_require(panel, "title", where), f"{where}.title", aliases)
-        if "subtitle" in panel:
-            _validate_content(panel["subtitle"], f"{where}.subtitle", aliases)
-        _require_nonempty_string(_require(panel, "alt", where), f"{where}.alt")
         sources = _require(panel, "sources", where)
         if not isinstance(sources, list) or not sources:
             raise PlanValidationError(f"{where}.sources must be a non-empty list")
@@ -308,6 +350,14 @@ def validate_plan(document: Any, *, plan_path: Path | None = None) -> dict[str, 
             )
         if len(sources) != len(set(sources)):
             raise PlanValidationError(f"{where}.sources must not contain duplicates")
+        panel_aliases = set(sources)
+        _validate_content(
+            _require(panel, "title", where), f"{where}.title", panel_aliases
+        )
+        if "subtitle" in panel:
+            _validate_content(panel["subtitle"], f"{where}.subtitle", panel_aliases)
+        alt = _require_nonempty_string(_require(panel, "alt", where), f"{where}.alt")
+        _reject_unbound_numbers(alt, f"{where}.alt")
         blocks = _require(panel, "blocks", where)
         if not isinstance(blocks, list) or not blocks:
             raise PlanValidationError(f"{where}.blocks must be a non-empty list")
@@ -320,18 +370,24 @@ def validate_plan(document: Any, *, plan_path: Path | None = None) -> dict[str, 
             kind = _require_nonempty_string(_require(block, "kind", bwhere), f"{bwhere}.kind")
             if kind == "text":
                 _reject_unknown(block, TEXT_BLOCK_KEYS, bwhere)
-                _validate_content(_require(block, "heading", bwhere), f"{bwhere}.heading", aliases)
+                _validate_content(
+                    _require(block, "heading", bwhere), f"{bwhere}.heading", panel_aliases
+                )
                 body = _require(block, "body", bwhere)
                 if not isinstance(body, list) or not body:
                     raise PlanValidationError(f"{bwhere}.body must be a non-empty list")
                 for body_index, item in enumerate(body):
-                    _validate_content(item, f"{bwhere}.body[{body_index}]", aliases)
+                    _validate_content(item, f"{bwhere}.body[{body_index}]", panel_aliases)
             elif kind == "metric":
                 _reject_unknown(block, METRIC_BLOCK_KEYS, bwhere)
-                _validate_content(_require(block, "label", bwhere), f"{bwhere}.label", aliases)
-                _validate_binding(_require(block, "value", bwhere), f"{bwhere}.value", aliases)
+                _validate_content(
+                    _require(block, "label", bwhere), f"{bwhere}.label", panel_aliases
+                )
+                _validate_binding(
+                    _require(block, "value", bwhere), f"{bwhere}.value", panel_aliases
+                )
                 if "note" in block:
-                    _validate_content(block["note"], f"{bwhere}.note", aliases)
+                    _validate_content(block["note"], f"{bwhere}.note", panel_aliases)
             else:
                 raise PlanValidationError(f"{bwhere}.kind must be 'text' or 'metric'")
     return document
@@ -358,7 +414,7 @@ def _load_evidence(document: dict[str, Any]) -> dict[str, Any]:
                 f"evidence hash mismatch for {alias!r}: expected {expected}, got {actual} ({path})"
             )
         try:
-            value = json.loads(raw)
+            value = json.loads(raw, object_pairs_hook=_reject_duplicate_json_keys)
         except json.JSONDecodeError as exc:
             raise PlanValidationError(f"invalid evidence JSON for {alias!r}: {path}: {exc}") from exc
         if not isinstance(value, dict):
@@ -371,11 +427,23 @@ def load_plan(plan_path: str | Path) -> tuple[dict[str, Any], dict[str, Any]]:
     """Read, fully validate, hash-check, and load a plan plus its evidence."""
     path = Path(plan_path).expanduser().resolve()
     try:
-        document = json.loads(path.read_text(encoding="utf-8"))
+        document = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=_reject_duplicate_json_keys,
+        )
     except json.JSONDecodeError as exc:
         raise PlanValidationError(f"invalid plan JSON: {path}: {exc}") from exc
     validate_plan(document, plan_path=path)
     return document, _load_evidence(document)
+
+
+def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise PlanValidationError(f"duplicate JSON key is ambiguous: {key!r}")
+        result[key] = value
+    return result
 
 
 def panel_specs(document: dict[str, Any]) -> list[tuple[str, str]]:
@@ -384,8 +452,16 @@ def panel_specs(document: dict[str, Any]) -> list[tuple[str, str]]:
 
 
 def _json_path(value: Any, dotted_path: str, where: str) -> Any:
+    """Resolve legacy dot paths or RFC 6901 pointers (preferred for dotted keys)."""
     current = value
-    for token in dotted_path.split("."):
+    if dotted_path.startswith("/"):
+        tokens = [
+            part.replace("~1", "/").replace("~0", "~")
+            for part in dotted_path[1:].split("/")
+        ]
+    else:
+        tokens = dotted_path.split(".")
+    for token in tokens:
         if token == "":
             raise EvidenceBindingError(f"empty JSON path component at {where}: {dotted_path!r}")
         if isinstance(current, dict):
@@ -418,6 +494,10 @@ def _format_value(value: Any, spec: dict[str, Any], where: str) -> str:
                 f"{where} format {kind!r} requires a string; got {type(value).__name__}"
             )
         return f"{prefix}{value}{suffix}"
+    if kind == "integer" and (not isinstance(value, int) or isinstance(value, bool)):
+        raise EvidenceBindingError(
+            f"{where} format 'integer' requires an integer; got {value!r}"
+        )
     if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value):
         raise EvidenceBindingError(
             f"{where} format {kind!r} requires a finite number; got {value!r}"
@@ -827,11 +907,67 @@ def render_plan(plan_path: str | Path, out_dir: str | Path) -> list[Path]:
                 if check.size != (WIDTH, HEIGHT) or check.format != "PNG":
                     raise RuntimeError(f"invalid rendered panel: {target}")
             staged.append(target)
-        for source, target in zip(staged, finals):
-            os.replace(source, target)
+        backups: dict[Path, Path] = {}
+        for target in finals:
+            if target.exists():
+                if target.is_symlink() or not target.is_file():
+                    raise RuntimeError(f"panel target must be a regular file: {target}")
+                backup = stage / f".backup-{target.name}"
+                shutil.copy2(target, backup)
+                backups[target] = backup
+        promoted: list[Path] = []
+        try:
+            for source, target in zip(staged, finals):
+                os.replace(source, target)
+                promoted.append(target)
+        except Exception:
+            # A set of separate PNG paths cannot share one filesystem rename.
+            # Restore every already-promoted member before surfacing the fault,
+            # so readers never see a mixed old/new set after a mid-loop error.
+            for target in reversed(promoted):
+                backup = backups.get(target)
+                if backup is not None and backup.exists():
+                    os.replace(backup, target)
+                else:
+                    target.unlink(missing_ok=True)
+            raise
     finally:
         shutil.rmtree(stage, ignore_errors=True)
     return finals
+
+
+def write_render_receipt(
+    receipt_path: str | Path,
+    *,
+    run_token: str,
+    plan_path: str | Path,
+    paths: Iterable[Path],
+) -> Path:
+    """Write fresh invocation proof for the async caller after promotion."""
+    if not run_token:
+        raise ValueError("run_token must not be empty")
+    receipt = Path(receipt_path).expanduser().resolve()
+    receipt.parent.mkdir(parents=True, exist_ok=True)
+    plan = Path(plan_path).expanduser().resolve()
+    payload = {
+        "schema_version": 1,
+        "renderer": "scripts/lazypack_render.py",
+        "run_token": run_token,
+        "plan_sha256": hashlib.sha256(plan.read_bytes()).hexdigest(),
+        "panels": [
+            {"name": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+            for path in paths
+        ],
+    }
+    fd, tmp_name = tempfile.mkstemp(prefix=f".{receipt.name}.", dir=receipt.parent)
+    os.close(fd)
+    tmp = Path(tmp_name)
+    try:
+        tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        os.replace(tmp, receipt)
+    finally:
+        tmp.unlink(missing_ok=True)
+    return receipt
 
 
 def _manifest(paths: Iterable[Path]) -> dict[str, Any]:
@@ -853,13 +989,25 @@ def main(argv: list[str] | None = None) -> int:
         "--validate-only", action="store_true",
         help="validate schema, evidence hashes, and every binding without writing PNGs",
     )
+    parser.add_argument(
+        "--receipt", help="write a fresh render receipt for an async caller"
+    )
+    parser.add_argument(
+        "--run-token", help="caller nonce that must be echoed in --receipt"
+    )
     args = parser.parse_args(argv)
+    if bool(args.receipt) != bool(args.run_token):
+        parser.error("--receipt and --run-token must be provided together")
     if args.validate_only:
         document, evidence = load_plan(args.plan)
         _resolve_panels(document, evidence)
         print(json.dumps({"valid": True, "panels": len(document["panels"])}, ensure_ascii=False))
         return 0
     paths = render_plan(args.plan, args.out_dir)
+    if args.receipt:
+        write_render_receipt(
+            args.receipt, run_token=args.run_token, plan_path=args.plan, paths=paths
+        )
     print(json.dumps(_manifest(paths), ensure_ascii=False, indent=2))
     return 0
 

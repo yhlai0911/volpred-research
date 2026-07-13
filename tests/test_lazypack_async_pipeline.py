@@ -58,7 +58,7 @@ def _make_plan(tmp_path: Path) -> dict:
         "panels": [
             {
                 "name": "1_framework", "info": "concept", "style": "professional",
-                "title": "核心問題", "alt": "懶人包圖 1", "sources": ["main"],
+                "title": "核心問題", "alt": "懶人包圖一", "sources": ["main"],
                 "blocks": [{
                     "kind": "text", "heading": "問題", "body": ["先分清楚熱度與成果。"],
                 }],
@@ -137,12 +137,13 @@ def test_enqueue_writes_selfcontained_compute_job(storage, tmp_path, monkeypatch
     assert "--experiment" in job["args"] and "K9001" in job["args"]
     assert job["claude_followup"] is None  # job completes itself — 0 Claude tokens
     # plan persisted next to the job artifacts (reproducible worker run)
-    stored_plan = storage / "lazypack_jobs" / "mile_lz1" / "plan.json"
+    run_dir = storage / "lazypack_jobs" / "mile_lz1" / "runs" / "lazypack-mile_lz1"
+    stored_plan = run_dir / "plan.json"
     assert stored_plan.exists()
     assert json.loads(stored_plan.read_text(encoding="utf-8")) == json.loads(
         (tmp_path / "plan.json").read_text(encoding="utf-8")
     )
-    panels_dir = storage / "lazypack_jobs" / "mile_lz1" / "panels"
+    panels_dir = run_dir / "panels"
     assert job["output_paths"] == [
         str(stored_plan),
         str(panels_dir / "1_framework.png"),
@@ -153,9 +154,26 @@ def test_enqueue_writes_selfcontained_compute_job(storage, tmp_path, monkeypatch
 def test_enqueue_idempotent_while_queued(storage, tmp_path, monkeypatch, capsys):
     qdir = _patch_queue(monkeypatch, tmp_path)
     assert lar.cmd_enqueue(_enqueue_ns(tmp_path)) == 0
+    stored = (
+        storage / "lazypack_jobs" / "mile_lz1" / "runs"
+        / "lazypack-mile_lz1" / "plan.json"
+    )
+    first = stored.read_bytes()
+    changed = json.loads((tmp_path / "plan.json").read_text(encoding="utf-8"))
+    changed["title"] = "第二版不應覆寫執行中的計畫"
+    (tmp_path / "plan.json").write_text(
+        json.dumps(changed, ensure_ascii=False), encoding="utf-8"
+    )
     assert lar.cmd_enqueue(_enqueue_ns(tmp_path)) == 0  # second call: skip
     assert len(list(qdir.glob("lazypack-mile_lz1*.json"))) == 1
+    assert stored.read_bytes() == first
     assert "already queued" in capsys.readouterr().out
+
+
+def test_enqueue_force_refuses_shared_path_race(storage, tmp_path, monkeypatch):
+    _patch_queue(monkeypatch, tmp_path)
+    assert lar.cmd_enqueue(_enqueue_ns(tmp_path)) == 0
+    assert lar.cmd_enqueue(_enqueue_ns(tmp_path, force=True)) == 2
 
 
 def test_enqueue_requeues_after_failure_with_suffix(storage, tmp_path, monkeypatch):
@@ -220,6 +238,23 @@ def test_upload_panels_fails_loud_on_missing_png(tmp_path):
                       uploader=lambda p: "https://x.test/ok.png")
 
 
+def test_upload_panel_object_name_is_content_addressed(tmp_path):
+    panel = tmp_path / "1_panel.png"
+    seen = []
+
+    def uploader(path):
+        seen.append(Path(path).name)
+        return f"https://x.test/{Path(path).name}"
+
+    panel.write_bytes(b"first")
+    first = upload_panels("mile_lz1", tmp_path, [("1_panel", "圖")], uploader=uploader)
+    panel.write_bytes(b"second")
+    second = upload_panels("mile_lz1", tmp_path, [("1_panel", "圖")], uploader=uploader)
+    assert seen[0] != seen[1]
+    assert "codex" not in seen[0] + seen[1]
+    assert first[0][0] != second[0][0]
+
+
 # ---------------------------------------------------------------- run mode ---
 
 def test_run_pipeline_end_to_end_with_stub_render_and_upload(
@@ -269,6 +304,24 @@ def test_run_fails_when_render_produces_no_pngs(storage, tmp_path):
     assert ns and lar.cmd_run(ns) == 3
 
 
+def test_run_does_not_accept_rc0_hook_that_reuses_stale_pngs(storage, tmp_path):
+    out_dir = tmp_path / "stale_panels"
+    out_dir.mkdir()
+    for stem in ("1_framework", "2_results"):
+        (out_dir / f"{stem}.png").write_bytes(b"OLD" * 800)
+    ns = argparse.Namespace(
+        article_id="mile_lz1",
+        experiment=[], source=[], title=None,
+        storage_dir=str(storage),
+        plan=str(tmp_path / "plan.json"),
+        out_dir=str(out_dir),
+        render_cmd=f"{sys.executable} -c pass",
+        upload_cmd=None,
+        no_sync=True,
+    )
+    assert lar.cmd_run(ns) == 3
+
+
 def test_run_default_is_deterministic_renderer_and_replaces_stale_pngs(
     storage, tmp_path, monkeypatch
 ):
@@ -289,6 +342,26 @@ def test_run_default_is_deterministic_renderer_and_replaces_stale_pngs(
         target.mkdir(parents=True, exist_ok=True)
         for panel in plan["panels"]:
             (target / f"{panel['name']}.png").write_bytes(b"N" * 2048)
+        receipt = Path(cmd[cmd.index("--receipt") + 1])
+        token = cmd[cmd.index("--run-token") + 1]
+        receipt.parent.mkdir(parents=True, exist_ok=True)
+        receipt.write_text(json.dumps({
+            "schema_version": 1,
+            "renderer": "scripts/lazypack_render.py",
+            "run_token": token,
+            "plan_sha256": hashlib.sha256(
+                Path(cmd[cmd.index("--plan") + 1]).read_bytes()
+            ).hexdigest(),
+            "panels": [
+                {
+                    "name": f"{panel['name']}.png",
+                    "sha256": hashlib.sha256(
+                        (target / f"{panel['name']}.png").read_bytes()
+                    ).hexdigest(),
+                }
+                for panel in plan["panels"]
+            ],
+        }), encoding="utf-8")
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(lar.subprocess, "run", fake_run)
@@ -325,8 +398,9 @@ def test_failed_render_writes_back_partial_panel_ownership(
     qdir = _patch_queue(monkeypatch, tmp_path)
     assert lar.cmd_enqueue(_enqueue_ns(tmp_path)) == 0
     job_path = qdir / "lazypack-mile_lz1.json"
-    stored_plan = storage / "lazypack_jobs" / "mile_lz1" / "plan.json"
-    out_dir = storage / "lazypack_jobs" / "mile_lz1" / "panels"
+    run_dir = storage / "lazypack_jobs" / "mile_lz1" / "runs" / "lazypack-mile_lz1"
+    stored_plan = run_dir / "plan.json"
+    out_dir = run_dir / "panels"
     stub = tmp_path / "partial_then_fail.py"
     stub.write_text(
         "import sys\n"
@@ -353,6 +427,34 @@ def test_failed_render_writes_back_partial_panel_ownership(
     assert job["output_paths_updated_at"]
     assert str(out_dir / "1_framework.png") in job["output_paths"]
     assert (out_dir / "1_framework.png").exists()
+
+
+def test_failed_render_does_not_claim_unchanged_stale_panels(
+    storage, tmp_path, monkeypatch
+):
+    _patch_queue(monkeypatch, tmp_path)
+    assert lar.cmd_enqueue(_enqueue_ns(tmp_path)) == 0
+    run_dir = storage / "lazypack_jobs" / "mile_lz1" / "runs" / "lazypack-mile_lz1"
+    stored_plan = run_dir / "plan.json"
+    out_dir = run_dir / "panels"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for stem in ("1_framework", "2_results"):
+        (out_dir / f"{stem}.png").write_bytes(b"OLD" * 800)
+    recorded = []
+    monkeypatch.setattr(cq, "record_output_paths", lambda job_id, paths: recorded.append(paths))
+    ns = argparse.Namespace(
+        job_id="lazypack-mile_lz1",
+        article_id="mile_lz1",
+        experiment=[], source=[], title=None,
+        storage_dir=str(storage),
+        plan=str(stored_plan),
+        out_dir=str(out_dir),
+        render_cmd=f"{sys.executable} -c 'raise SystemExit(9)'",
+        upload_cmd=None,
+        no_sync=True,
+    )
+    assert lar.cmd_run(ns) == 2
+    assert recorded == []
 
 
 # ------------------------------------------------------------- release gate --

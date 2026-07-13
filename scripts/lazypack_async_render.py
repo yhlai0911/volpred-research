@@ -2,8 +2,9 @@
 """Async lazypack (懶人包圖組) pipeline — enqueue + deterministic render/install.
 
 Root cause (docs/error_log.md 2026-07-02 15:15 #4): the writing agent's 50-min
-hard cap was shared between article body writing and the codex-exec lazypack
-render (2-4 poster PNGs, ~5-15 min), squeezing body depth. This moves the render
+hard cap was shared between article body writing and the old agentic lazypack
+render, squeezing body depth. The 2026-07-13 3-STRIKE refactor keeps this async
+install lane but makes rendering deterministic and sub-second for typical sets.
 off the writing fire onto the EXISTING compute_queue async lane
 (storage/ops/compute_queue/ + */15 compute-worker; 0 Claude tokens — same split
 as reference_compute_queue_token_split):
@@ -40,11 +41,14 @@ Each numeric value is a JSON-field binding; one PNG is emitted per panel.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shlex
 import subprocess
 import sys
+import tempfile
+import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -110,38 +114,8 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
         print(f"note: {a.article_id} already carries a 懶人包圖組 section — "
               f"the async render will REPLACE it on completion.")
 
-    # Persist the plan next to the job artifacts so the worker run is
-    # self-contained and reproducible.
     jobs_dir = storage_dir / "lazypack_jobs" / a.article_id
-    panels_dir = jobs_dir / "panels"
-    jobs_dir.mkdir(parents=True, exist_ok=True)
-    stored_plan = jobs_dir / "plan.json"
-    stored_plan.write_text(
-        json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-
-    # Idempotency: a queued/running render for this article means the writing
-    # fire double-called enqueue — skip instead of double-rendering.
     base_id = f"{JOB_ID_PREFIX}{a.article_id}"
-    existing = sorted(cq.QUEUE_DIR.glob(f"{base_id}*.json")) if cq.QUEUE_DIR.exists() else []
-    job_id = base_id
-    taken: set[str] = set()
-    for p in existing:
-        try:
-            j = json.loads(p.read_text(encoding="utf-8"))
-        except Exception as exc:
-            print(f"warn: unreadable queue file {p}: {exc}", file=sys.stderr)
-            taken.add(p.stem)
-            continue
-        taken.add(str(j.get("id") or p.stem))
-        if j.get("status") in ("queued", "running") and not a.force:
-            print(f"skip: lazypack job already {j.get('status')} for "
-                  f"{a.article_id} ({j.get('id')}); use --force to queue another")
-            return 0
-    n = 2
-    while job_id in taken:
-        job_id = f"{base_id}-r{n}"
-        n += 1
 
     def _rel(p: Path) -> str:
         try:
@@ -149,38 +123,92 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
         except ValueError:
             return str(p)
 
-    script_args = [
-        "run",
-        "--job-id", job_id,
-        "--article-id", a.article_id,
-        "--plan", _rel(stored_plan),
-        "--out-dir", _rel(panels_dir),
-        "--storage-dir", a.storage_dir,
-        "--title", a.title or f"{a.article_id} 懶人包",
-    ]
-    for k in a.experiment:
-        script_args += ["--experiment", k]
-    for s in a.source:
-        script_args += ["--source", s]
+    # The plan and output directory are shared by sequential retries for one
+    # article. Serialize check → persist → receipt creation so a duplicate fire
+    # cannot overwrite the plan underneath an already queued/running worker.
+    # Concurrent --force used to create two jobs racing on those same paths; it
+    # now fails explicitly instead of pretending isolation exists.
+    with cq._receipt_lock():
+        existing = (
+            sorted(cq.QUEUE_DIR.glob(f"{base_id}*.json"))
+            if cq.QUEUE_DIR.exists() else []
+        )
+        job_id = base_id
+        taken: set[str] = set()
+        active: dict | None = None
+        for path in existing:
+            try:
+                job = json.loads(path.read_text(encoding="utf-8"))
+            except Exception as exc:
+                print(f"warn: unreadable queue file {path}: {exc}", file=sys.stderr)
+                taken.add(path.stem)
+                continue
+            taken.add(str(job.get("id") or path.stem))
+            if job.get("status") in ("queued", "running"):
+                active = job
+                break
+        if active is not None:
+            if a.force:
+                print(
+                    f"error: cannot --force a concurrent lazypack render for "
+                    f"{a.article_id}; active job={active.get('id')} "
+                    f"status={active.get('status')}",
+                    file=sys.stderr,
+                )
+                return 2
+            print(
+                f"skip: lazypack job already {active.get('status')} for "
+                f"{a.article_id} ({active.get('id')})"
+            )
+            return 0
+        n = 2
+        while job_id in taken:
+            job_id = f"{base_id}-r{n}"
+            n += 1
 
-    ns = argparse.Namespace(
-        id=job_id,
-        title=f"lazypack render {a.article_id}",
-        script="scripts/lazypack_async_render.py",
-        interpreter="uv run python",
-        script_args=script_args,
-        env=None,
-        result_artifact=_rel(panels_dir),
-        output_paths=[
-            _rel(stored_plan),
-            *(_rel(panels_dir / f"{stem}.png") for stem, _ in _panel_specs(panels)),
-        ],
-        followup_brief=None,  # the job appends + syncs itself; no Claude followup
-        followup_task_type=None,
-        followup_priority=None,
-        timeout=a.timeout,
-    )
-    rc = cq.enqueue(ns)
+        run_dir = jobs_dir / "runs" / job_id
+        panels_dir = run_dir / "panels"
+        run_dir.mkdir(parents=True, exist_ok=True)
+        stored_plan = run_dir / "plan.json"
+        stored_plan.write_text(
+            json.dumps(document, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        script_args = [
+            "run",
+            "--job-id", job_id,
+            "--article-id", a.article_id,
+            "--plan", _rel(stored_plan),
+            "--out-dir", _rel(panels_dir),
+            "--storage-dir", a.storage_dir,
+            "--title", a.title or f"{a.article_id} 懶人包",
+        ]
+        for k in a.experiment:
+            script_args += ["--experiment", k]
+        for source in a.source:
+            script_args += ["--source", source]
+
+        ns = argparse.Namespace(
+            id=job_id,
+            title=f"lazypack render {a.article_id}",
+            script="scripts/lazypack_async_render.py",
+            interpreter="uv run python",
+            script_args=script_args,
+            env=None,
+            result_artifact=_rel(panels_dir),
+            output_paths=[
+                _rel(stored_plan),
+                *(
+                    _rel(panels_dir / f"{stem}.png")
+                    for stem, _ in _panel_specs(panels)
+                ),
+            ],
+            followup_brief=None,
+            followup_task_type=None,
+            followup_priority=None,
+            timeout=a.timeout,
+        )
+        rc = cq.enqueue(ns)
     if rc == 0:
         print(f"lazypack render queued for {a.article_id}; the */15 compute "
               f"worker will render + append + sync. Inspect: "
@@ -195,6 +223,7 @@ def _record_job_outputs(
     job_id: str | None,
     out_dir: Path,
     specs: list[tuple[str, str]],
+    before: dict[Path, tuple[int, str]],
 ) -> None:
     """Write back every file the renderer actually placed in its owned directory.
 
@@ -207,7 +236,10 @@ def _record_job_outputs(
     if not job_id:
         return
     candidates = [out_dir / f"{stem}.png" for stem, _ in specs]
-    actual = [path for path in candidates if path.is_file()]
+    actual = [
+        path for path in candidates
+        if path.is_file() and before.get(path) != _file_fingerprint(path)
+    ]
     if not actual:
         return
     try:
@@ -219,6 +251,54 @@ def _record_job_outputs(
         print(f"warn: output path write-back failed for {job_id}: {exc}", file=sys.stderr)
 
 
+def _file_fingerprint(path: Path) -> tuple[int, str] | None:
+    if not path.is_file():
+        return None
+    raw = path.read_bytes()
+    return len(raw), hashlib.sha256(raw).hexdigest()
+
+
+def _snapshot_outputs(
+    out_dir: Path, specs: list[tuple[str, str]],
+) -> dict[Path, tuple[int, str]]:
+    snapshot: dict[Path, tuple[int, str]] = {}
+    for stem, _ in specs:
+        path = out_dir / f"{stem}.png"
+        fingerprint = _file_fingerprint(path)
+        if fingerprint is not None:
+            snapshot[path] = fingerprint
+    return snapshot
+
+
+def _validate_render_receipt(
+    receipt_path: Path,
+    *,
+    run_token: str,
+    plan_path: Path,
+    out_dir: Path,
+    specs: list[tuple[str, str]],
+) -> None:
+    if not receipt_path.is_file():
+        raise RuntimeError(f"renderer produced no fresh receipt: {receipt_path}")
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if receipt.get("run_token") != run_token:
+        raise RuntimeError("renderer receipt run_token mismatch")
+    expected_plan = hashlib.sha256(plan_path.read_bytes()).hexdigest()
+    if receipt.get("plan_sha256") != expected_plan:
+        raise RuntimeError("renderer receipt plan hash mismatch")
+    expected = []
+    for stem, _ in specs:
+        path = out_dir / f"{stem}.png"
+        if not path.is_file():
+            raise RuntimeError(f"renderer receipt panel missing: {path}")
+        expected.append({
+            "name": path.name,
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        })
+    if receipt.get("panels") != expected:
+        raise RuntimeError("renderer receipt output set/hash mismatch")
+
+
 def cmd_run(a: argparse.Namespace) -> int:
     storage_dir = _resolve(a.storage_dir)
     plan_path = _resolve(a.plan)
@@ -228,6 +308,10 @@ def cmd_run(a: argparse.Namespace) -> int:
     panels = document["panels"]
     specs = _panel_specs(panels)
     job_id = getattr(a, "job_id", None)
+    run_token = uuid.uuid4().hex
+    receipt_dir = Path(tempfile.gettempdir()) / "volpred-lazypack-render-receipts"
+    receipt_dir.mkdir(parents=True, exist_ok=True)
+    receipt_path = receipt_dir / f"{run_token}.json"
 
     # 1) Render.  Deterministic rendering is cheap, so retries always recompute
     # from the hash-pinned plan instead of trusting stale PNGs by file size.
@@ -239,17 +323,46 @@ def cmd_run(a: argparse.Namespace) -> int:
         cmd = [
             sys.executable, str(ROOT / "scripts" / "lazypack_render.py"),
             "--plan", str(plan_path), "--out-dir", str(out_dir),
+            "--receipt", str(receipt_path), "--run-token", run_token,
         ]
 
+    before = _snapshot_outputs(out_dir, specs)
     try:
         proc = subprocess.run(cmd, cwd=str(ROOT))
     finally:
         # A test hook or interrupted renderer may have written a partial staging
         # result; record only final files that actually reached the owned path.
-        _record_job_outputs(job_id, out_dir, specs)
+        _record_job_outputs(job_id, out_dir, specs, before)
     if proc.returncode != 0:
+        receipt_path.unlink(missing_ok=True)
         print(f"error: render step failed rc={proc.returncode}", file=sys.stderr)
         return 2
+
+    after = {out_dir / f"{stem}.png": _file_fingerprint(out_dir / f"{stem}.png")
+             for stem, _ in specs}
+    if a.render_cmd:
+        stale = [str(path) for path, fingerprint in after.items()
+                 if fingerprint is None or before.get(path) == fingerprint]
+        if stale:
+            print(
+                f"error: test renderer returned success without freshly writing: {stale}",
+                file=sys.stderr,
+            )
+            return 3
+    else:
+        try:
+            _validate_render_receipt(
+                receipt_path,
+                run_token=run_token,
+                plan_path=plan_path,
+                out_dir=out_dir,
+                specs=specs,
+            )
+        except Exception as exc:
+            print(f"error: invalid render receipt: {exc}", file=sys.stderr)
+            return 3
+        finally:
+            receipt_path.unlink(missing_ok=True)
 
     # 2) Verify every expected panel PNG exists (belt-and-suspenders — the
     # deterministic renderer verifies too, but --render-cmd paths must not skip it).
@@ -309,10 +422,12 @@ def main() -> int:
 
     common = {
         "--article-id": dict(required=True, help="feed.json article id (mile_...)"),
-        "--experiment": dict(action="append", default=[],
-                             help="K-id evidence (repeatable)"),
+        "--experiment": dict(
+            action="append", default=[],
+            help="LEGACY metadata only; evidence must be declared in plan.json",
+        ),
         "--source": dict(action="append", default=[],
-                         help="extra evidence file (repeatable)"),
+                         help="LEGACY metadata only; ignored by the renderer"),
         "--title": dict(default=None),
         "--storage-dir": dict(default="storage",
                               help="storage root (tests only; default: storage)"),
@@ -326,7 +441,7 @@ def main() -> int:
                    help="strict data-bound panel plan JSON (lazypack_render.py schema)")
     e.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S)
     e.add_argument("--force", action="store_true",
-                   help="queue even if a render is already queued/running")
+                   help="deprecated; active concurrent renders are refused")
     e.set_defaults(func=cmd_enqueue)
 
     r = sub.add_parser("run", help="render + upload + append + sync "

@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-r"""Lazypack (懶人包圖組) generator — PRIMARY path via `codex exec`.
+r"""LEGACY lazypack code-writing harness (manual recovery only).
+
+Primary path since 2026-07-13 is ``scripts/lazypack_render.py``: a strict,
+versioned plan binds reader-visible numbers to hash-pinned JSON fields and a
+repository-owned renderer emits every panel in seconds with zero LLM calls.
+This historical harness remains only for inspecting/reproducing old jobs and
+for its process-timeout regression coverage.  It is not called by
+``lazypack_async_render.py`` and must not be used for new article plans.
 
 Boss directive (2026-06-30): generate reader-facing 懶人包 infographics with
 `codex exec` (ChatGPT-subscription Codex CLI — flat-rate, NOT per-image metered),
@@ -595,6 +602,11 @@ def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path
 
 
 def main() -> int:
+    print(
+        "[gen_lazypack_codex] LEGACY manual path: new jobs must use "
+        "scripts/lazypack_render.py with a strict data-bound plan.",
+        file=sys.stderr,
+    )
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--experiment", action="append", default=[],
                     help="K-id — auto-adds experiments/<k>/{<k>_results.json,README.md,draft.md}; repeatable")

@@ -3,7 +3,7 @@
 
 Upload each PNG to Supabase article-images → swap (or append) the `## 懶人包圖組`
 section in the article's feed.json content → single-article sync. Used to install
-codex-exec lazypack panels onto existing articles (manual / backfill path; the
+deterministic data-bound lazypack panels onto existing articles (manual / backfill path; the
 async pipeline path is scripts/lazypack_async_render.py).
 
 2026-07-02: core logic moved to volpred.publisher.lazypack_install (shared with
@@ -62,10 +62,10 @@ def main() -> int:
             a.article_id,
             urls,
             storage_dir=ROOT / "storage",
-            update_action="lazypack_codex_replace",
+            update_action="lazypack_deterministic_replace",
             update_summary=(
-                "Replaced the lazypack section with codex-exec generated, "
-                "data-bound infographic panels."
+                "Replaced the lazypack section with deterministic, data-bound "
+                "infographic panels."
             ),
         )
     except KeyError as exc:

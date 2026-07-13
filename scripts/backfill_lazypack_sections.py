@@ -9,10 +9,11 @@ superficial prose numbers (e.g. a "2% GDP target" instead of the article's actua
 share the same wrong headline. Output passed the enforce gate (a 懶人包圖組 section
 exists) but is LOW QUALITY and can MISREPRESENT the data.
 
-PRIMARY lazypack generator is now `scripts/gen_lazypack_codex.py` (codex exec writes
-a bespoke render script per article, numbers bound to results.json). Use THIS script
-only as a last-resort fallback when codex exec AND NotebookLM are both unavailable,
-and only after main-thread review of the output.
+PRIMARY lazypack path is a strict data-bound plan rendered by
+`scripts/lazypack_render.py`; it reads evidence JSON bindings and never asks an LLM
+to write or repair renderer code. Use THIS prose-scraping backfill script only for
+explicit legacy/manual historical repair after main-thread review. It is not a
+fallback for invalid plans, missing evidence fields, or layout failures.
 
 This is a deterministic, free renderer (never calls a paid image API). The generated
 draft is intended for:

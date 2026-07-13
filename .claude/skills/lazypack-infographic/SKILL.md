@@ -2,133 +2,142 @@
 name: lazypack-infographic
 description: |
   Use this skill when producing a 懶人包 (cheat-sheet) infographic SET for a
-  reader-facing article (audience='general', and reader-facing event/daily/
-  trending pieces). Generates multiple poster-session-style PNGs — concept /
-  method / results, each its own image. PRIMARY generator = codex exec (writes a
-  render script fed by the evidence package → data-accurate, reproducible, free on
-  the ChatGPT subscription); NotebookLM is the FALLBACK. Activates during article
-  writing and at the publish step (append to article end). Triggered by intent like
-  "幫這篇生懶人包圖" or the publishing rule that every general-reader article carries one.
+  reader-facing article (audience='general', including reader-facing event,
+  daily, digest, and trending pieces). The primary path is a strict data-bound
+  plan.json rendered by scripts/lazypack_render.py; an LLM may draft wording and
+  select evidence paths, but never writes or repairs rendering code.
 ---
 
-# lazypack-infographic — 懶人包資訊圖（多圖 poster 模式）
+# lazypack-infographic — 確定性懶人包圖組
 
-每篇**一般讀者**文章（`audience='general'`，以及 reader-facing 的 event / daily / trending）發佈時，**文末必附一組懶人包圖**（用戶 2026-06-04 硬性要求）。
+每篇一般讀者文章在 reader-visible 邊界必須有文末 `## 懶人包圖組`，通常含 2–4 張獨立 PNG。每張只講一種資訊型態：概念、方法、結果或結論；禁止把全部資訊塞進單張。
 
-## 生圖時機：draft 走 async、立即發佈走同步（2026-07-02，error_log 15:15 #4）
+## Primary path：strict plan → deterministic renderer
 
-codex render 一組圖要 ~5-15 min，**不可佔用寫作 agent 的 50 分鐘 cap**（曾擠壓正文深度 -49%）。兩條路：
+唯一 primary renderer 是：
 
-- **draft 文章（daily_article 等非時效）＝ PREDEFINED async 路徑**：寫作 agent 只寫正文 + 寫好 plan.json → publish draft → 一行 enqueue：
+```bash
+uv run python scripts/lazypack_render.py --plan <plan.json> --out-dir <dir>
+```
+
+這條路徑只讀結構化 plan 與 plan 宣告的 evidence JSON，以固定模板產生 PNG；不呼叫 Codex、Claude、NotebookLM 或影像模型，也不為每篇文章生成 Python 程式。模板目前支援 `concept`、`method`、`results`（`takeaway` 由結果型模板呈現）；自動折行、縮字與卡片配置由 renderer 負責。
+
+LLM 的責任只到：讀 evidence、選 panel、寫繁中短文、指定 JSON 欄位綁定。LLM 不得把 evidence 數字抄成 literal、不得寫 renderer、不得在 layout fail 後修補程式。
+
+## 生圖時機：draft async、立即發佈同步
+
+- **draft（一般 daily_article 等）**：正文 publish 成 draft 後 enqueue；compute worker 以同一 deterministic renderer 出圖、上傳、append section、單篇 re-sync。
+
   ```bash
   uv run python scripts/lazypack_async_render.py enqueue \
-    --article-id <mile_id> --experiment K1413 --plan /tmp/plan.json
+    --article-id <mile_id> --plan <plan.json>
+
+  uv run python scripts/compute_queue.py show lazypack-<mile_id>
   ```
-  `*/15` compute worker 自動跑 codex render → upload → append `## 懶人包圖組` → 單篇 re-sync（0 Claude token）。**draft 建檔不需懶人包**；release_pool 在 flip published 前 enforce（缺 section 不釋出，計數 3 次後 materialize fix task）。檢查 job：`uv run python scripts/compute_queue.py show lazypack-<mile_id>`。
-- **立即發佈（event_article / trending_repost，status=published）＝ 同步路徑**：時效文不能等 async，publish gate 仍要求發佈當下就有 section — 照本 skill 下方「一鍵指令」同步生完再 publish。
 
-Gate 邊界單一來源：`volpred.publisher.publisher.lazypack_required_at()`（draft/scheduled 放行、published enforce）。
+- **立即發佈（event_article / trending_repost / published daily_digest）**：先同步執行 renderer，完成上傳與 section append 後才 publish。
 
-## 生成方法：codex exec 為主，NotebookLM 為 fallback（用戶 2026-06-30 硬性糾正）
+Gate 邊界單一來源：`volpred.publisher.publisher.lazypack_required_at()`；draft/scheduled 建檔可先放行，published 必須已有 section。
 
-**PRIMARY = `codex exec`**：用 Codex CLI（ChatGPT 訂閱 auth，**flat-rate 非按張計費**）讓 codex **寫一支 render 程式**（PIL / SVG→PNG / matplotlib 自訂版面）餵 evidence package 出圖。為什麼優於 NotebookLM：
-- **數字精確**：圖上每個數字直接從 `<k>_results.json` 取，不經 AI 生圖的 hallucination 風險（研究誠實）。
-- **可復現**：render 程式存檔，同 input 同 output；審稿/回溯可重跑。
-- **零增量成本**：codex 走 ChatGPT 訂閱（flat），本機 render 不打任何按張計費影像 API。
-- **可控品質**：poster 版面（bento-grid / 分區 / 圖示 / 字級）由程式精準控制，不靠 AI 抽卡。
+## plan.json v1 契約
 
-**FALLBACK = NotebookLM**（`notebooklm` CLI / notebooklm-py，免費網頁產品）：只在 codex exec 不可用、或某張圖確實更適合 AI-poster 美術風時用。`scripts/gen_lazypack_infographic.py` 走此路。
+Root 必填 `schema_version: 1`、`title`、`evidence`、`panels`。`evidence` 是 alias map；每個 alias 必填 `{path, sha256, label}`。每個 panel 必填 `{name, info, style, title, alt, sources, blocks}`。`blocks` 以 `kind` 區分，只接受 `text` 與 `metric`；任何數值都必須由 `value: {source, path, format}` 綁 evidence JSON，其中 `format` 是格式物件。
 
-**仍然絕對禁止**：按張計費影像 API —— `gpt-image-2`（OpenAI 按張收費）、付費 Gemini key（`gemini_ask.py` 那支）。「零費用」的本意是禁 metered billing，**codex 訂閱與 NotebookLM 都不違反**。
+最小結構範例（`sha256` 要換成 evidence 實際值；production 必須有 2–4 個 panels）：
 
-## 三條鐵則（兩種生成法都適用）
-
-1. **零（增量）費用**：codex exec（訂閱 flat）或 NotebookLM（免費）；禁按張計費影像 API（見上）。
-2. **餵 source 數據，不是餵成品文字**（用戶 2026-06-04 糾正）：用「寫這篇文章的全部素材」生圖 —— `experiments/<k>/<k>_results.json` + `README.md` + `draft.md` + 任何 refs/數據檔。codex 路徑：把這些路徑當 context 餵給 codex exec，要求數字逐一對齊 results.json。文章 prose 是 lossy 壓縮；餵 source 數據才能把**方法圖**畫準、數字對得上 results.json。不要等文章寫完才用文字去生。
-3. **多圖、不要一張塞爆**（poster-session 感）：一篇通常 **2–4 張**，每張只講**一種資訊型態**：
-   - **概念/框架**（必）：這篇在講什麼、核心框架/名詞
-   - **方法**（文章有研究方法時）：怎麼量/怎麼算的，**非技術白話**（像研討會壁報的方法說明）
-   - **結果**（必）：主要發現 + 真實數字
-   - **結論/takeaway**（可選）：一句話的意涵
-   不同型態分不同張，**禁止**把框架+方法+結果全擠一張。
-
-## 一鍵指令
-
-### PRIMARY — codex exec（codex 寫 render 程式出圖）
-
-```bash
-# 推薦：scripts/gen_lazypack_codex.py（codex exec 驅動；2–4 panel；數字對齊 results.json）
-uv run python scripts/gen_lazypack_codex.py \
-  --experiment K1413 \                 # 自動帶 results.json + README + draft 當 context
-  --source experiments/k1413/refs.md \ # 額外 refs/數據（可重複）
-  --title "K1413 懶人包" \
-  --plan /tmp/plan.json \              # 每個 panel 一張圖（同下 plan.json 格式）
-  --out-dir /tmp/k1413_poster
-```
-codex exec 內部流程：餵 evidence package + panel plan → codex 寫 PIL/SVG/matplotlib render
-程式 → 本機跑出 PNG → 自我核對每個數字 vs results.json。零按張計費（ChatGPT 訂閱）。
-`--dry-run` 先看組出來的 codex prompt；`--model` 可覆寫 codex model。
-
-> 既有 data-bound Pillow 範例（codex 可參考的寫法）：`scripts/lazypack_render_example_spacex.py`
-> （SpaceX 文章專用 templates，僅供結構參考，每篇要重寫對應自己數據）。
-
-### FALLBACK — NotebookLM（AI poster；codex 不可用時）
-
-```bash
-# 多圖（poster）— 餵 evidence package + plan
-uv run python scripts/gen_lazypack_infographic.py \
-  --experiment K1413 \                 # 自動加 results.json + README + draft
-  --source experiments/k1413/refs.md \ # 額外 refs/數據（可重複）
-  --article-id mile_31b2b0bb \         # （可選）也把文章內容加進來
-  --title "K1413 懶人包" \
-  --plan /tmp/plan.json \              # 每個 panel 一張圖
-  --out-dir /tmp/k1413_poster
-
-# 單圖
-uv run python scripts/gen_lazypack_infographic.py \
-  --experiment K1413 --prompt "<好提示詞>" --out /tmp/x.png --style bento-grid
-```
-
-語言鎖 `zh_Hant`；`--wait --retry` 已內建；跑完自動刪 notebook（`--keep-notebook` 保留）。
-
-### plan.json 格式
 ```json
-[
-  {"name": "1_framework", "style": "professional", "prompt": "只講框架是什麼…"},
-  {"name": "2_method",    "style": "editorial",    "prompt": "只講方法怎麼量（白話）…"},
-  {"name": "3_results",   "style": "bento-grid",   "prompt": "只講主要結果與結論…"}
-]
+{
+  "schema_version": 1,
+  "title": "K1413 懶人包",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1413/k1413_results.json",
+      "sha256": "<64-character-lowercase-sha256>",
+      "label": "experiment K1413 results"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "先分清楚訊號與結果",
+      "alt": "訊號與結果的概念框架",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "讀法",
+          "body": ["先看資料在回答哪一個問題，再看數字大小。"]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本數",
+          "value": {
+            "source": "results",
+            "path": "summary.n_obs",
+            "format": {"kind": "integer", "suffix": " 筆"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "主要結果與研究邊界",
+      "alt": "主要結果與研究邊界",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "樣本數",
+          "value": {
+            "source": "results",
+            "path": "summary.n_obs",
+            "format": {"kind": "integer", "suffix": " 筆"}
+          }
+        }
+      ]
+    }
+  ]
+}
 ```
 
-## 好提示詞（用戶強調「要有好的提示詞」）
+完整欄位、format 與驗證方式以 `uv run python scripts/lazypack_render.py --help` 及 renderer tests 為準；不要把 renderer 實作複製進 skill。
 
-每個 panel 的 prompt 必含：
-1. **「只講 X 這一個主題」** + 明確排除別的（「不要放波動率數字」「不要重複方法」）→ 強制單一型態。
-2. **真實數字**，與 `<k>_results.json` 對齊（研究誠實；數字必對得上）。
-3. **非技術白話**（一般投資人看懂）；方法圖用比喻/步驟，不用統計術語。
-4. **版面要求**：分區、用圖示與數字、一眼看懂。
-5. **資料來源標註**：`資料來源：experiment K<id>`。
+### Data-bound 硬規則
 
-### 🚫 風格鐵則：專業、不卡通（用戶 2026-06-04 硬性）
-財務內容要**專業、資料導向**。**只用**：`professional`、`bento-grid`、`editorial`、`scientific`。
-**禁用卡通/可愛/手繪風**：`kawaii`、`anime`、`clay`、`bricks`、`sketch-note`、`instructional`（後兩者會放卡通小人/塗鴉,顯得不專業 — mile_71dd116b 踩過坑）。
-**prompt 內也要寫死**：「風格專業、簡潔、資料導向;**禁止卡通人物、可愛插畫、手繪塗鴉風**;用乾淨圖表、圖示與數字」。讓 style + prompt 雙重保險。
+1. `path` 指向 repo 內真實 evidence JSON；`sha256` 必須是該檔案當下內容雜湊。renderer 會驗證，不符即停。
+2. `sources` 只列該 panel 實際引用的 evidence aliases；圖底資料來源由這些 labels 產生。
+3. `metric.value.source` 必須存在於 root `evidence` 且列在該 panel 的 `sources`；`path` 必須解析到既有欄位。含點或斜線的 JSON key 用 RFC 6901 pointer（例如 `/weights/1515.TW`）。欄位不存在就 raise。
+4. 數字、日期、百分比、樣本數、倍數等不可藏在 `text` 或標題中硬編；使用 metric binding 與 renderer 支援的 format。
+5. 舊版 root list、缺少必填欄位、未知 block `kind` / info / style / format 一律 fail。**禁止**自動轉換、補預設值或 silent LLM fallback。
+
+## 內容與視覺規則
+
+- 全部繁體中文；一般讀者可讀，但不可刪掉證據強度與限制。
+- 來源用完整 evidence package，而不是只讀文章 prose；prose 是 lossy summary。
+- `concept`：核心框架或名詞；`method`：白話步驟與資料口徑；`results`：主要數字與限制；每 panel 聚焦一種型態。
+- 專業、簡潔、資料導向；style 只用 `professional`、`editorial`、`bento-grid`、`scientific`。禁卡通、可愛、anime、clay、手繪與塗鴉風。
+- renderer 完成後必跑 layout guard；任何 clipping、文字碰撞或卡片溢位都視為失敗，不准帶病發布。
+- 人工檢視 PNG，逐項核對 evidence path、格式化結果、來源 label 與 alt；歷史結果不得憑記憶填入。
+
+## Legacy / manual only
+
+`scripts/gen_lazypack_codex.py` 是歷史相容的 manual codegen 工具，`scripts/gen_lazypack_infographic.py` 是歷史 AI-poster 工具；兩者都不在 primary 或 async production path。只有明確的歷史修復任務、人工授權且人工覆核時才可使用，**不得**因 plan 驗證或 layout 失敗而自動 fallback。
+
+按張計費影像 API（`gpt-image-2`、付費 Gemini key 等）仍禁止用於此流程。
 
 ## 發佈後處理
 
-1. 每張 png → 上傳 Supabase `article-images` bucket（同既有圖流程 `publish_draft.py` 的 image upload helper）。
-2. append 到文章最後，做成「## 懶人包」圖區（多張依序）。
-3. `scripts/supabase_sync.py full` 推上線。
-
-## 限制 / 防錯
-
-- **Rate limit**：NotebookLM infographic 生成有 Google rate limit，連生多張可能 429 → `--retry 3`（指數退避）已內建；仍失敗就分批/隔幾分鐘。
-- **headless**：notebooklm-py 用 stored auth（`~/.notebooklm/`），cron 可跑（不需互動瀏覽器）—— 但 auth 過期要 `notebooklm login`（互動）。若 cron 報 auth 失敗，降級成「互動 session 補圖」。
-- **品質不過關**：數字錯/版面亂/塞太多 → 改 prompt 重生，不將就發佈（同 anti-ai-style 是 publish gate）。
-- **「codex 不能生圖」= PATH，不是 codex**（2026-07-11，error_log 21:55）：`codex` 裝在 nvm bin，只有互動 shell 會加進 PATH；Bash tool / subagent / 缺 PATH 的 launchd job 拿到 rc 3「codex CLI not found」，被誤讀成生圖功能壞掉。所有入口已自行解析絕對路徑（`gen_lazypack_codex.py::_resolve_codex_bin`、`codex_exec_bounded.sh`）。**看到生圖失敗先確認錯誤是「找不到 binary」還是「真的生不出來」，不要直接降級 NotebookLM。**
-- 驗證：生完用 Read 看圖、核對數字 vs results.json 再 append。
+1. 每張 PNG 上傳 Supabase `article-images` bucket。
+2. 依 panel 順序 append 到文章末尾 `## 懶人包圖組`，alt 使用 plan 的 `alt`。
+3. 走正式單篇 feed sync / queue completion 流程，不手改歷史 feed 或 Supabase 欄位補洞。
 
 ## 交叉參考
-- `.claude/rules/publishing.md`（每篇必備：一般讀者文章文末附懶人包圖）
-- `~/.claude/skills/notebooklm/SKILL.md`（NotebookLM CLI 全指令）
-- `scripts/gen_lazypack_infographic.py`（一鍵實作）
+
+- `scripts/lazypack_render.py --help`（plan schema、format、CLI）
+- renderer 與 async pipeline tests（合法/缺欄位/舊 list/layout regression）
+- `.claude/rules/publishing.md`（reader-visible gate）
+- `scripts/lazypack_async_render.py`（draft queue）

@@ -1016,9 +1016,9 @@ def check_lazypack_gate(body: str, audience: str, bypass: bool,
     print(f"\n  Per .claude/rules/publishing.md §4 + lazypack-infographic skill, "
           f"immediate-publish general articles need a `## 懶人包圖組` section with "
           f"2-4 poster-style PNGs (concept / method / results). Either generate "
-          f"synchronously (PRIMARY = codex exec):\n"
-          f"    uv run python scripts/gen_lazypack_codex.py --experiment K<id> \\\n"
-          f"      --title \"K<id> 懶人包\" --plan <plan.json> --out-dir <dir>\n"
+          f"synchronously from a strict data-bound plan (zero LLM calls):\n"
+          f"    uv run python scripts/lazypack_render.py \\\n"
+          f"      --plan <plan.json> --out-dir <dir>\n"
           f"  then append + retry — OR publish with --status draft and enqueue "
           f"the async render (scripts/lazypack_async_render.py enqueue). Use "
           f"`--no-lazypack-gate` only for genuinely non-reader pieces (rare).",

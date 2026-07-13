@@ -193,6 +193,21 @@ def test_missing_root_field_raises_with_field_name(tmp_path, field):
         lr.validate_plan(plan)
 
 
+@pytest.mark.parametrize("version", [True, 1.0, "1"])
+def test_schema_version_is_strict_integer(tmp_path, version):
+    plan = _base_plan(tmp_path)
+    plan["schema_version"] = version
+    with pytest.raises(lr.PlanValidationError, match="schema_version"):
+        lr.validate_plan(plan)
+
+
+def test_duplicate_json_keys_fail_loud(tmp_path):
+    path = tmp_path / "duplicate.json"
+    path.write_text('{"schema_version":1,"schema_version":1}', encoding="utf-8")
+    with pytest.raises(lr.PlanValidationError, match="duplicate JSON key"):
+        lr.load_plan(path)
+
+
 @pytest.mark.parametrize(
     "field", ["name", "info", "style", "title", "alt", "sources", "blocks"],
 )
@@ -218,6 +233,96 @@ def test_hash_mismatch_fails_before_render(tmp_path):
     path = _write_plan(tmp_path, plan)
     with pytest.raises(lr.PlanValidationError, match="hash mismatch"):
         lr.render_plan(path, tmp_path / "out")
+
+
+def test_unbound_reader_visible_number_is_rejected(tmp_path):
+    plan = _base_plan(tmp_path)
+    plan["panels"][0]["blocks"][0]["body"][1] = "這裡偷偷硬寫 12.3%，不應通過。"
+    with pytest.raises(lr.PlanValidationError, match="unbound numeric literal"):
+        lr.validate_plan(plan)
+
+
+@pytest.mark.parametrize("literal", ["結果 {12.3%}", "結果 12.3%"])
+def test_braces_cannot_hide_unbound_numbers(tmp_path, literal):
+    plan = _base_plan(tmp_path)
+    plan["panels"][0]["blocks"][0]["body"][1] = literal
+    with pytest.raises(lr.PlanValidationError, match="unbound numeric literal"):
+        lr.validate_plan(plan)
+
+
+def test_template_format_spec_and_numeric_suffix_are_rejected(tmp_path):
+    plan = _base_plan(tmp_path)
+    metric = plan["panels"][2]["blocks"][0]
+    metric["note"] = {
+        "template": "結果 {x:.2}",
+        "bindings": {"x": _binding("result.return", "percent", digits=1)},
+    }
+    with pytest.raises(lr.PlanValidationError, match="format specifiers"):
+        lr.validate_plan(plan)
+
+    plan = _base_plan(tmp_path)
+    plan["panels"][2]["blocks"][0]["value"]["format"]["suffix"] = "／999"
+    with pytest.raises(lr.PlanValidationError, match="unbound numeric literal"):
+        lr.validate_plan(plan)
+
+
+def test_template_binding_names_must_be_plain_identifiers(tmp_path):
+    plan = _base_plan(tmp_path)
+    plan["panels"][0]["blocks"][0]["body"][0] = {
+        "template": "共同窗口 {x.y}",
+        "bindings": {"x.y": _binding("window.start", "date")},
+    }
+    with pytest.raises(lr.PlanValidationError, match="bindings key must match"):
+        lr.validate_plan(plan)
+
+
+def test_root_bound_subtitle_is_rejected_to_keep_panel_sources_complete(tmp_path):
+    plan = _base_plan(tmp_path)
+    plan["subtitle"] = {
+        "template": "{claim}",
+        "bindings": {"claim": _binding("claim", "text")},
+    }
+    with pytest.raises(lr.PlanValidationError, match="must be literal text"):
+        lr.validate_plan(plan)
+
+
+def test_integer_format_does_not_round_float_counts(tmp_path):
+    plan = _base_plan(tmp_path)
+    plan["panels"][2]["blocks"][2]["value"] = _binding(
+        "result.volatility", "integer"
+    )
+    path = _write_plan(tmp_path, plan)
+    document, evidence = lr.load_plan(path)
+    with pytest.raises(lr.EvidenceBindingError, match="requires an integer"):
+        lr._resolve_panels(document, evidence)
+
+
+def test_binding_source_must_be_disclosed_in_panel_footer(tmp_path):
+    plan = _base_plan(tmp_path)
+    plan["evidence"]["other"] = copy.deepcopy(plan["evidence"]["main"])
+    plan["panels"][2]["blocks"][0]["value"]["source"] = "other"
+    with pytest.raises(lr.PlanValidationError, match="unknown evidence 'other'"):
+        lr.validate_plan(plan)
+
+
+def test_json_pointer_reaches_evidence_keys_containing_dots(tmp_path):
+    plan = _base_plan(tmp_path)
+    evidence_path = Path(plan["evidence"]["main"]["path"])
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    evidence["weights"] = {"1515.TW": {"share": 0.25}}
+    evidence_path.write_text(
+        json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    plan["evidence"]["main"]["sha256"] = hashlib.sha256(
+        evidence_path.read_bytes()
+    ).hexdigest()
+    plan["panels"][2]["blocks"][0]["value"] = _binding(
+        "/weights/1515.TW/share", "percent", digits=1
+    )
+    path = _write_plan(tmp_path, plan)
+    document, loaded = lr.load_plan(path)
+    resolved = lr._resolve_panels(document, loaded)
+    assert resolved[2]["blocks"][0]["value"] == "25.0%"
 
 
 def test_path_traversal_and_duplicate_panel_names_are_rejected(tmp_path):
@@ -250,6 +355,55 @@ def test_same_plan_and_evidence_have_identical_pixel_hashes(tmp_path):
     assert [hashlib.sha256(p.read_bytes()).hexdigest() for p in first] == [
         hashlib.sha256(p.read_bytes()).hexdigest() for p in second
     ]
+
+
+def test_mid_promotion_failure_rolls_back_complete_old_set(tmp_path, monkeypatch):
+    plan = _base_plan(tmp_path)
+    path = _write_plan(tmp_path, plan)
+    out = tmp_path / "out"
+    out.mkdir()
+    expected_old = {}
+    for panel in plan["panels"]:
+        target = out / f"{panel['name']}.png"
+        payload = f"old-{panel['name']}".encode()
+        target.write_bytes(payload)
+        expected_old[target] = payload
+
+    original_replace = lr.os.replace
+    promoted = 0
+    failed = False
+
+    def flaky_replace(source, target):
+        nonlocal promoted, failed
+        source_path = Path(source)
+        target_path = Path(target)
+        if (
+            target_path.parent == out and target_path.suffix == ".png"
+            and not source_path.name.startswith(".backup-")
+        ):
+            promoted += 1
+            if promoted == 2 and not failed:
+                failed = True
+                raise OSError("injected promotion fault")
+        return original_replace(source, target)
+
+    monkeypatch.setattr(lr.os, "replace", flaky_replace)
+    with pytest.raises(OSError, match="injected promotion fault"):
+        lr.render_plan(path, out)
+    assert {target: target.read_bytes() for target in expected_old} == expected_old
+
+
+def test_render_receipt_binds_nonce_plan_and_output_hashes(tmp_path):
+    plan = _base_plan(tmp_path)
+    path = _write_plan(tmp_path, plan)
+    outputs = lr.render_plan(path, tmp_path / "out")
+    receipt = lr.write_render_receipt(
+        tmp_path / "receipt.json", run_token="nonce", plan_path=path, paths=outputs
+    )
+    payload = json.loads(receipt.read_text(encoding="utf-8"))
+    assert payload["run_token"] == "nonce"
+    assert payload["plan_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+    assert [x["name"] for x in payload["panels"]] == [x.name for x in outputs]
 
 
 def test_later_text_fit_failure_leaves_no_partial_final_pngs(tmp_path):

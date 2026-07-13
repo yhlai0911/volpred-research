@@ -1365,7 +1365,7 @@ def release_pool_articles(
             str(body_text),
         )
         # 2026-07-02 lazypack async pipeline (error_log 15:15 #4): drafts are
-        # created WITHOUT the 懶人包圖組 section (the codex render runs on the
+        # created WITHOUT the 懶人包圖組 section (the deterministic render runs on the
         # compute_queue lane, not inside the writing agent's 50-min cap), but a
         # general article must not flip to published until the section landed.
         # Reuses the release-audit skip counter + fix-task escalation below

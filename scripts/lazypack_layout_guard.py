@@ -2,7 +2,7 @@
 """Fail a lazypack render when the LAYOUT is broken — not just when the PNG is missing.
 
 Why (2026-07-11, boss email-12062/12066):
-  gen_lazypack_codex.py's repair loop only ever saw two failure signals: the render
+  the legacy code-writing loop only ever saw two failure signals: the render
   script raised, or an expected PNG was absent. A script that cheerfully saved a
   figure whose text ran off the canvas and overlapped itself counted as SUCCESS —
   so mile_531e4c87 shipped three garbled panels to readers and no round of the
@@ -18,12 +18,11 @@ How:
     - overlap:  two text boxes collide (title over subtitle, body over watermark)
     - overflow: the text runs out of the CARD it lives in, while still on canvas
                 (the boss's first-named defect: 「文字溢出容器」)
-  The RuntimeError propagates out of the render script → rc != 0 → the EXISTING
-  repair round feeds the traceback back to codex, which now gets an actionable
-  layout complaint instead of silence. No new mechanism; the gate just gives the
-  loop that was already there something true to fail on.
+  The RuntimeError now propagates out of the repository-owned deterministic
+  renderer → rc != 0, so a broken layout cannot be installed. The legacy manual
+  harness can still use collect mode for its historical repair workflow.
 
-Usage (how gen_lazypack_codex.py runs a render script):
+Usage (legacy standalone-script audit; the primary renderer installs this guard directly):
   python scripts/lazypack_layout_guard.py <render_script.py>
   python scripts/lazypack_layout_guard.py --audit-only <render_script.py>
 """

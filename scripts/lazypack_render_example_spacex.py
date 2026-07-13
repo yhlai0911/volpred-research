@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Generate JSON-bound 懶人包 infographic PNGs with local free tooling.
+"""LEGACY article-specific SpaceX renderer retained as a historical example.
+
+Do not use this file or ``gen_lazypack_codex.py`` for new plans. The primary
+contract is the strict v1 schema rendered by ``scripts/lazypack_render.py``;
+see that CLI and ``scripts/tests/test_lazypack_render.py``. The old bespoke
+contract below is documented only so prior SpaceX artifacts remain explainable.
 
 This is the programmatic renderer counterpart to
 ``scripts/gen_lazypack_infographic.py``.  The NotebookLM path can produce good
@@ -8,7 +13,7 @@ workflow back to article prose.  This renderer binds every displayed number to a
 field in the evidence JSON, draws the posters locally with Pillow, and writes
 deterministic PNGs.  It never calls a paid image API.
 
-CLI shape intentionally mirrors the NotebookLM generator where useful:
+Historical CLI shape (legacy/manual only):
 
     uv run python scripts/gen_lazypack_codex.py \
         --evidence /tmp/spacex_trending/evidence_numbers.json \

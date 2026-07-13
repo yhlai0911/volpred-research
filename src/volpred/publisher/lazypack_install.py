@@ -16,6 +16,7 @@ racing release_pool / publisher writers (same lock namespace they use).
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from datetime import datetime, timezone
@@ -48,11 +49,17 @@ def upload_panels(
         src = panel_dir / f"{stem}.png"
         if not src.exists():
             raise FileNotFoundError(f"panel PNG missing: {src}")
-        # codex-tagged target name so Supabase serves a fresh object per install
-        # (no cache clash with the article's earlier chart uploads).
-        dst = Path(f"/tmp/{article_id}_lazypack_codex_{i}.png")
-        dst.write_bytes(src.read_bytes())
-        url = uploader(str(dst))
+        raw = src.read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()[:16]
+        # Content-address the upload object. Re-rendering a changed panel now
+        # produces a new URL instead of relying on CDN cache invalidation for an
+        # upserted fixed key; identical bytes intentionally deduplicate.
+        dst = Path(f"/tmp/{article_id}_lazypack_{i}_{digest}.png")
+        dst.write_bytes(raw)
+        try:
+            url = uploader(str(dst))
+        finally:
+            dst.unlink(missing_ok=True)
         if not url or not str(url).startswith("http"):
             raise RuntimeError(f"upload failed for {src}: {url!r}")
         urls.append((str(url), alt or f"懶人包 {i}"))
@@ -108,7 +115,7 @@ def install_lazypack_section(
         errata["update_at"] = now_iso
         errata["update_action"] = update_action
         errata["update_summary"] = update_summary or (
-            f"Installed codex-exec lazypack section ({len(urls)} panels)."
+            f"Installed deterministic data-bound lazypack section ({len(urls)} panels)."
         )
         hist = (
             errata.get("update_history")
