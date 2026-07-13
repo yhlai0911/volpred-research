@@ -27,6 +27,8 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 
+from volpred.stats.drawdown import compare_max_drawdown
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DRAFTS = ROOT / "storage" / "drafts"
@@ -164,11 +166,18 @@ def portfolio_metrics(asset_returns: pd.DataFrame, benchmark_returns: pd.Series,
     correlations = individual_log.corr().to_numpy()
     upper = correlations[np.triu_indices_from(correlations, k=1)]
     turnover = daily_rebalance_turnover(asset_returns, weights)
+    # 這個組合的波動遠高於 TWII，raw MDD 與大盤併陳會變成曝險假象（回撤淺可能只是部位小）。
+    # 走 canonical 比較器，一併給 MDD/vol 與同風險口徑 gap。
+    dd = compare_max_drawdown(daily, benchmark_returns.loc[daily.index])
     return {
         "n_names": int(len(weights)),
         "total_return": float((1.0 + daily).prod() - 1.0),
         "annualized_volatility": portfolio_vol,
-        "max_drawdown": max_drawdown(daily),
+        "max_drawdown": float(dd.strategy_mdd),
+        "max_drawdown_benchmark_twii": float(dd.benchmark_mdd),
+        "max_drawdown_per_vol": float(dd.strategy_mdd_per_vol),
+        "max_drawdown_exposure_matched_gap": float(dd.exposure_matched_gap),
+        "max_drawdown_exposure_mismatch": bool(dd.exposure_mismatch),
         "beta_vs_twii": covariance / bench_variance,
         "corr_vs_twii": float(log_daily.corr(log_bench)),
         "tracking_error": float((log_daily - log_bench).std(ddof=1) * np.sqrt(TRADING_DAYS)),

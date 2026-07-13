@@ -29,6 +29,7 @@ import requests
 import yfinance as yf
 
 from volpred.ops.diagnostics import warn
+from volpred.stats.drawdown import compare_max_drawdown
 
 TW = ZoneInfo("Asia/Taipei")
 OUT = Path("storage/drafts/drone_ep4_six_dim_evidence.json")
@@ -71,15 +72,21 @@ def market_metrics(px: pd.Series, bench: pd.Series) -> dict:
     ann_vol = float(ret.std() * np.sqrt(252))
     beta = float(np.cov(ret_c, bret_c)[0, 1] / np.var(bret_c)) if len(common) > 30 else None
     corr = float(ret_c.corr(bret_c)) if len(common) > 30 else None
-    running_max = px.cummax()
-    mdd = float((px / running_max - 1.0).min())
+
+    # 個股波動遠高於大盤，raw MDD 直接與 TWII 併陳是 scale artifact（回撤淺可能只是曝險小）。
+    # 走 canonical 比較器，一併輸出 MDD/vol 與同風險口徑 gap。
+    dd = compare_max_drawdown(ret_c, bret_c)
 
     return {
         "window_return": cum,
         "annualized_volatility": ann_vol,
         "beta_vs_twii": beta,
         "corr_vs_twii": corr,
-        "max_drawdown": mdd,
+        "max_drawdown": float(dd.strategy_mdd),
+        "max_drawdown_benchmark_twii": float(dd.benchmark_mdd),
+        "max_drawdown_per_vol": float(dd.strategy_mdd_per_vol),
+        "max_drawdown_exposure_matched_gap": float(dd.exposure_matched_gap),
+        "max_drawdown_exposure_mismatch": bool(dd.exposure_mismatch),
         "price_start": float(px.iloc[0]),
         "price_end": float(px.iloc[-1]),
         "first_date": px.index[0].strftime("%Y-%m-%d"),

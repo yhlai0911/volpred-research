@@ -72,6 +72,13 @@ def _recording_alert():
     return alert_fn, calls
 
 
+def _gate_alerts(calls: list[dict]) -> list[dict]:
+    """Only the test-gate's own red-light alerts. PHASE-Z also raises an
+    orthogonal warn when a commit lands without an agent-supplied reason; that
+    one is not this gate's concern and must not be counted here."""
+    return [c for c in calls if "紅燈" in c.get("title", "")]
+
+
 def test_gate_skips_when_commit_touches_only_docs_and_json(tmp_path: Path) -> None:
     # A drafted article / config edit is not gated code — the gate must not spend
     # a pytest run on it, and must record WHY it skipped (observable, not silent).
@@ -146,12 +153,12 @@ def test_gate_red_alerts_and_does_not_revert(tmp_path: Path) -> None:
     assert out["tests"]["reason"] == "red"
     assert out["tests"]["returncode"] == 1
     # a critical alert was raised through the injected alert path
-    assert len(alerts) == 1
-    assert alerts[0]["level"] == "critical"
-    assert "紅燈" in alerts[0]["title"]
+    gate = _gate_alerts(alerts)
+    assert len(gate) == 1
+    assert gate[0]["level"] == "critical"
     # NO auto-revert — the commit stays; only one new commit exists (no revert commit)
     assert _head_count(tmp_path) == before + 1
-    assert _head_subject(tmp_path).startswith("ops(dispatch-supervisor 16:07): PHASE-Z")
+    assert _head_subject(tmp_path).startswith("dispatch(16:07):")
 
 
 def test_gate_runner_timeout_is_observable_and_does_not_crash(tmp_path: Path) -> None:
@@ -176,7 +183,8 @@ def test_gate_runner_timeout_is_observable_and_does_not_crash(tmp_path: Path) ->
     assert out["committed"] is True
     assert out["tests"]["passed"] is None
     assert out["tests"]["reason"] == "timeout"
-    assert alerts == []  # a timeout is "could not verify", not a confirmed red
+    # a timeout is "could not verify", not a confirmed red → no red-light alert
+    assert _gate_alerts(alerts) == []
 
 
 def test_gate_records_code_change_with_no_matching_test(tmp_path: Path) -> None:
