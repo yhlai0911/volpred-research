@@ -1,23 +1,30 @@
 # Feed Index
 
-_Last built: 2026-07-13 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-13 06:35 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1792**  (with thumbnail: 76)
-- Last 30 days: **282**
-- Total chars (content): 5,452,186
+- Total articles: **1799**  (with thumbnail: 76)
+- Last 30 days: **286**
+- Total chars (content): 5,500,799
 
-**Status**: published=1592, archived=123, unpublished=62, retracted=12, draft=2, wont_fix=1
+**Status**: published=1594, archived=123, unpublished=62, retracted=12, draft=7, wont_fix=1
 
-**Audience**: research=1113, general=443, daily=140, unknown=77, member_qa=13, event=6
+**Audience**: research=1113, general=450, daily=140, unknown=77, member_qa=13, event=6
 
-**Category**: milestone=876, general=798, unknown=73, member_qa=13, research=10, daily_article=8, qa=5, event_article=4, experiment=4, diary=1
+**Category**: milestone=876, general=805, unknown=73, member_qa=13, research=10, daily_article=8, qa=5, event_article=4, experiment=4, diary=1
 
-## 最近 30 天 (282)
+## 最近 30 天 (286)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-13 | `mile_b6a46796` | 🛩️ 無人載具｜EP-Final：核心六檔剛好追上大盤，代價是兩倍波動與三倍回撤 | general | general | draft | 5536 |  | 一般讀者, 無人載具, 無人機, 無人艇, 台股, 國防 |
+| 2026-07-13 | `mile_abd517ba` | 🛩️ 無人載具｜EP3：2,100 億仍是草案，十家下游廠只有兩家走到量產或交船 | general | general | draft | 7180 |  | 一般讀者, 無人載具, 無人機, 無人艇, 台股, 國防 |
+| 2026-07-13 | `mile_aa4713db` | 🛩️ 無人載具｜EP4：六檔龍頭的六個面向，看多的全是熱度，撐得住的只有兩檔 | general | general | draft | 5125 |  | 一般讀者, 無人載具, 無人機, 個股分析, 台股, 國防 |
+| 2026-07-13 | `mile_cdc7f6e8` | 🛩️ 無人載具｜EP2：八家都能碰到機體、電池或馬達，零家拆出無人機營收 | general | general | draft | 5304 |  | 一般讀者, 無人載具, 無人機, 台股, 複合材料, 電池 |
+| 2026-07-13 | `mile_7bd0f673` | 🛩️ 無人載具｜EP1：上游 87% 的營收集中在三家晶片廠，而市場的無人機錢一塊也沒買它們 | general | general | draft | 7579 |  | 一般讀者, 無人載具, 無人機, 台股, 供應鏈, 財報 |
+| 2026-07-13 | `mile_ffb14405` | 事件擠成一週：你手上的六個「預警訊號」，實測只有一個真的會叫 | general | general | published | 10857 |  | 一般讀者, 精選導讀, VIX, 波動率, 信用利差, 事件交易 |
+| 2026-07-13 | `mile_a8d79d6a` | 🛩️ 無人載具｜EP0：29 檔台廠名冊、2,100 億預算，和一個跑輸大盤的題材 | general | general | published | 7032 |  | 一般讀者, 無人載具, 無人機, 台股, 國防, 供應鏈 |
 | 2026-07-13 | `mile_a49f9309` | 每日策略建議：VIX 15.03（正常）— 2026-07-13 | daily | general | published | 1476 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-13 | `mile_0363ef48` | 2026-07-13 本日持倉比率建議（依據 2026-07-10 收盤數據） | daily | milestone | published | 858 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-12 | `mile_824ee5bb` | 爆量之後會漲還會跌？九檔資產只留下鴻海一個例外 | general | general | published | 3695 |  | 一般讀者, 台股, 成交量, 技術分析, 風險管理, 0050 |
@@ -297,14 +304,14 @@ _Last built: 2026-07-13 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-13 | `mile_483425f2` | 同樣都在尾巴加保險，為什麼只有這個模型真的補對？ | general | general | published | 1851 |  | 一般讀者, SPY, 風險管理, 美股, 極端行情, 模型比較 |
 | 2026-06-13 | `mile_2c758888` | 強美元環境下，哪些資產的波動率真的會被拉高？HAC 校正後只剩 USO 站得住 | research | milestone | published | 3156 |  | 研究, 強勢美元, 跨資產波動, 商品波動, 黃金例外, 石油敏感度 |
 | 2026-06-13 | `mile_40c66bef` | 風險模型愈花俏愈準嗎？這次市場給了相反答案 | general | general | published | 1984 |  | 一般讀者, SPY, 風險管理, 美股, 極端行情, 模型比較 |
-| 2026-06-13 | `mile_e4002f4f` | 💬 會員提問｜東南亞前沿 ETF 真的能分散風險嗎：VNM/EIDO/THD/EPHE 的解耦事實與危機失效 | general | general | published | 5365 |  | 新興市場, ETF, 分散投資, 波動率, 相關性, VIX |
-| 2026-06-13 | `mile_1b56cf6b` | 股票加黃金還不夠？多放一點長債，報酬會少一點，但跌的時候真的差很多 | general | general | published | 1863 |  | 一般讀者, experiment, investing, bonds, portfolio, drawdown |
-| 2026-06-13 | `mile_862223de` | 波動率模型 PRG 在美股 SPY 也站得住腳 — 從台股驗到美股的跨市場故事 | research | milestone | published | 3216 |  | 研究, prg, spy, cross-market, garch, periodic-garch |
 
-<details><summary>## 2026-Q2 (838)</summary>
+<details><summary>## 2026-Q2 (841)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-13 | `mile_e4002f4f` | 💬 會員提問｜東南亞前沿 ETF 真的能分散風險嗎：VNM/EIDO/THD/EPHE 的解耦事實與危機失效 | general | general | published | 5365 |  | 新興市場, ETF, 分散投資, 波動率, 相關性, VIX |
+| 2026-06-13 | `mile_1b56cf6b` | 股票加黃金還不夠？多放一點長債，報酬會少一點，但跌的時候真的差很多 | general | general | published | 1863 |  | 一般讀者, experiment, investing, bonds, portfolio, drawdown |
+| 2026-06-13 | `mile_862223de` | 波動率模型 PRG 在美股 SPY 也站得住腳 — 從台股驗到美股的跨市場故事 | research | milestone | published | 3216 |  | 研究, prg, spy, cross-market, garch, periodic-garch |
 | 2026-06-12 | `mile_9d646fae` | 跌了就多買一點，真的比較聰明嗎？把 5 段歷史排開後，答案沒有想像中穩 | general | general | published | 1301 |  | 一般讀者, experiment, investing, contrarian, risk, asset-allocation |
 | 2026-06-12 | `mile_2fb1dfb3` | 投資策略是不是越複雜越厲害？我們把 14 套方法排在一起，答案有點反直覺 | general | general | published | 1662 |  | 一般讀者, experiment, investing, strategy, risk, asset-allocation |
 | 2026-06-12 | `mile_651c242d` | 好策略被成本吃掉 27%：11 個 VT 策略的實施費用拆解 | general | general | published | 3271 |  | 一般讀者, 實施成本, 稅負, 交易成本, VT策略, SPY |

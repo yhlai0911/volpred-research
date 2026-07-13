@@ -1,0 +1,746 @@
+{
+  "generated_at_tw": "2026-07-13 14:16:15",
+  "as_of_date": "2026-07-13",
+  "source_files": {
+    "ep0": {
+      "path": "storage/drafts/drone_ep0_market_snapshot.json",
+      "sha256": "b60f21aaac13944427cf8f2c1cd8be2b07959b1154aea25f75fc1c7907b3d3a6"
+    },
+    "ep2": {
+      "path": "storage/drafts/drone_ep2_midstream_evidence.json",
+      "sha256": "ad0b657e02f18123de7b3628fe3c732b8536e7416fa747ab08c2eeecdf8c8f10"
+    },
+    "ep3": {
+      "path": "storage/drafts/drone_ep3_downstream_evidence.json",
+      "sha256": "ab105fcf62c456e86a57c8f4112dfc68c775885045062e3a358996f66ab22143"
+    },
+    "ep4": {
+      "path": "storage/drafts/drone_ep4_six_dim_evidence.json",
+      "sha256": "cb7fd4ad13f9762ad1599b141a3b356bb3e8d0af62a5dc190adf748610972603"
+    }
+  },
+  "data_source": "yfinance adjusted close (auto_adjust=True); universes/stages/fundamentals from EP0/EP2/EP3/EP4 evidence JSON; official positioning sources attached",
+  "method": {
+    "price_window_requested": {
+      "start": "2025-06-30",
+      "end_exclusive": "2026-07-11"
+    },
+    "common_price_window": {
+      "start": "2025-06-30",
+      "end": "2026-07-09",
+      "price_observations": 250,
+      "return_observations": 249
+    },
+    "universe": "EP0 canonical 29 names as reconstructed ex post on 2026-07-13",
+    "daily_rebalancing": "fixed target weights reset after each trading day; no fees/taxes",
+    "monthly_sensitivity": "same target weights reset on first common trading day of each calendar month",
+    "return": "compound simple daily portfolio returns",
+    "volatility": "std(log(1 + daily portfolio return), ddof=1) * sqrt(252)",
+    "max_drawdown": "minimum wealth/running-peak - 1, including initial wealth 1.0",
+    "beta_correlation": "daily log portfolio returns versus ^TWII on the same common dates",
+    "var_es": "historical daily simple-return 5th percentile loss and mean loss beyond it",
+    "lookback_limit": "ex-post descriptive reconstruction; the 2026-07-13 roster/stages were not known at the 2025-06-30 start, so this is not a tradable backtest"
+  },
+  "roster": [
+    {
+      "name": "雷虎",
+      "ticker": "8033.TW",
+      "tier": "下游",
+      "confidence": "高"
+    },
+    {
+      "name": "昇達科",
+      "ticker": "3491.TWO",
+      "tier": "上游",
+      "confidence": "中"
+    },
+    {
+      "name": "聯發科",
+      "ticker": "2454.TW",
+      "tier": "上游",
+      "confidence": "低"
+    },
+    {
+      "name": "長榮航太",
+      "ticker": "2645.TW",
+      "tier": "下游",
+      "confidence": "高"
+    },
+    {
+      "name": "新唐",
+      "ticker": "4919.TW",
+      "tier": "上游",
+      "confidence": "中"
+    },
+    {
+      "name": "碳基",
+      "ticker": "7719.TWO",
+      "tier": "中游",
+      "confidence": "高"
+    },
+    {
+      "name": "千附精密",
+      "ticker": "6829.TWO",
+      "tier": "上游",
+      "confidence": "高"
+    },
+    {
+      "name": "中光電",
+      "ticker": "5371.TWO",
+      "tier": "下游",
+      "confidence": "高"
+    },
+    {
+      "name": "系統電",
+      "ticker": "5309.TWO",
+      "tier": "中游",
+      "confidence": "中"
+    },
+    {
+      "name": "合勤控",
+      "ticker": "3704.TW",
+      "tier": "上游",
+      "confidence": "中"
+    },
+    {
+      "name": "邑錡",
+      "ticker": "7402.TWO",
+      "tier": "上游",
+      "confidence": "中"
+    },
+    {
+      "name": "義隆",
+      "ticker": "2458.TW",
+      "tier": "上游",
+      "confidence": "中"
+    },
+    {
+      "name": "亞航",
+      "ticker": "2630.TW",
+      "tier": "下游",
+      "confidence": "高"
+    },
+    {
+      "name": "力山",
+      "ticker": "1515.TW",
+      "tier": "中游",
+      "confidence": "中"
+    },
+    {
+      "name": "龍德造船",
+      "ticker": "6753.TW",
+      "tier": "下游",
+      "confidence": "高"
+    },
+    {
+      "name": "晟田",
+      "ticker": "4541.TWO",
+      "tier": "上游",
+      "confidence": "高"
+    },
+    {
+      "name": "漢翔",
+      "ticker": "2634.TW",
+      "tier": "下游",
+      "confidence": "高"
+    },
+    {
+      "name": "融程電",
+      "ticker": "3416.TW",
+      "tier": "下游",
+      "confidence": "中"
+    },
+    {
+      "name": "永虹先進",
+      "ticker": "6618.TWO",
+      "tier": "中游",
+      "confidence": "中高"
+    },
+    {
+      "name": "全訊",
+      "ticker": "5222.TW",
+      "tier": "上游",
+      "confidence": "高"
+    },
+    {
+      "name": "聯詠",
+      "ticker": "3034.TW",
+      "tier": "上游",
+      "confidence": "低"
+    },
+    {
+      "name": "中信造船",
+      "ticker": "2644.TWO",
+      "tier": "下游",
+      "confidence": "中高"
+    },
+    {
+      "name": "台船",
+      "ticker": "2208.TW",
+      "tier": "下游",
+      "confidence": "中高"
+    },
+    {
+      "name": "亞光",
+      "ticker": "3019.TW",
+      "tier": "上游",
+      "confidence": "中高"
+    },
+    {
+      "name": "神基",
+      "ticker": "3005.TW",
+      "tier": "下游",
+      "confidence": "中"
+    },
+    {
+      "name": "加百裕",
+      "ticker": "3323.TWO",
+      "tier": "中游",
+      "confidence": "中高"
+    },
+    {
+      "name": "立積",
+      "ticker": "4968.TW",
+      "tier": "上游",
+      "confidence": "中"
+    },
+    {
+      "name": "富田",
+      "ticker": "4590.TW",
+      "tier": "中游",
+      "confidence": "中"
+    },
+    {
+      "name": "寶一",
+      "ticker": "8222.TW",
+      "tier": "上游",
+      "confidence": "高"
+    }
+  ],
+  "portfolio_comparison": {
+    "all_29_equal": {
+      "label": "全名冊 29 檔等權",
+      "weights": {
+        "8033.TW": 0.034482758620689655,
+        "3491.TWO": 0.034482758620689655,
+        "2454.TW": 0.034482758620689655,
+        "2645.TW": 0.034482758620689655,
+        "4919.TW": 0.034482758620689655,
+        "7719.TWO": 0.034482758620689655,
+        "6829.TWO": 0.034482758620689655,
+        "5371.TWO": 0.034482758620689655,
+        "5309.TWO": 0.034482758620689655,
+        "3704.TW": 0.034482758620689655,
+        "7402.TWO": 0.034482758620689655,
+        "2458.TW": 0.034482758620689655,
+        "2630.TW": 0.034482758620689655,
+        "1515.TW": 0.034482758620689655,
+        "6753.TW": 0.034482758620689655,
+        "4541.TWO": 0.034482758620689655,
+        "2634.TW": 0.034482758620689655,
+        "3416.TW": 0.034482758620689655,
+        "6618.TWO": 0.034482758620689655,
+        "5222.TW": 0.034482758620689655,
+        "3034.TW": 0.034482758620689655,
+        "2644.TWO": 0.034482758620689655,
+        "2208.TW": 0.034482758620689655,
+        "3019.TW": 0.034482758620689655,
+        "3005.TW": 0.034482758620689655,
+        "3323.TWO": 0.034482758620689655,
+        "4968.TW": 0.034482758620689655,
+        "4590.TW": 0.034482758620689655,
+        "8222.TW": 0.034482758620689655
+      },
+      "n_names": 29,
+      "total_return": 0.6907932962522569,
+      "annualized_volatility": 0.2937800476389684,
+      "max_drawdown": -0.22760150252009803,
+      "beta_vs_twii": 0.7244214670116313,
+      "corr_vs_twii": 0.5788531978952259,
+      "tracking_error": 0.24813863085084478,
+      "historical_var_95_daily_loss": 0.027163275480618428,
+      "historical_es_95_daily_loss": 0.0370978715186923,
+      "annualized_downside_deviation": 0.18182472229573857,
+      "sortino_zero_mar": 3.1635442965144,
+      "average_pairwise_correlation": 0.2981375118832798,
+      "diversification_ratio": 1.753569680324703,
+      "daily_rebalance_average_one_way_turnover": 0.009683783987795269,
+      "daily_rebalance_total_one_way_turnover": 2.411262212961022,
+      "monthly_rebalance_total_return": 0.7211921627483631,
+      "monthly_rebalance_annualized_volatility": 0.29685137141685697,
+      "monthly_rebalance_max_drawdown": -0.23492781749173863,
+      "daily_minus_monthly_return": -0.030398866496106125,
+      "construction": "fixed target weights, reset after every trading day; no fees/taxes"
+    },
+    "upstream_13_equal": {
+      "label": "上游 13 檔等權",
+      "weights": {
+        "3491.TWO": 0.07692307692307693,
+        "2454.TW": 0.07692307692307693,
+        "4919.TW": 0.07692307692307693,
+        "6829.TWO": 0.07692307692307693,
+        "3704.TW": 0.07692307692307693,
+        "7402.TWO": 0.07692307692307693,
+        "2458.TW": 0.07692307692307693,
+        "4541.TWO": 0.07692307692307693,
+        "5222.TW": 0.07692307692307693,
+        "3034.TW": 0.07692307692307693,
+        "3019.TW": 0.07692307692307693,
+        "4968.TW": 0.07692307692307693,
+        "8222.TW": 0.07692307692307693
+      },
+      "n_names": 13,
+      "total_return": 0.7075160118839612,
+      "annualized_volatility": 0.3101621487814476,
+      "max_drawdown": -0.18975304336588428,
+      "beta_vs_twii": 0.8845571309954211,
+      "corr_vs_twii": 0.6694783138098241,
+      "tracking_error": 0.23198653456006305,
+      "historical_var_95_daily_loss": 0.0308725537285032,
+      "historical_es_95_daily_loss": 0.04160006864968303,
+      "annualized_downside_deviation": 0.19951406292393117,
+      "sortino_zero_mar": 2.9574312388924424,
+      "average_pairwise_correlation": 0.31866282310486277,
+      "diversification_ratio": 1.6366163687531694,
+      "daily_rebalance_average_one_way_turnover": 0.009326297817715408,
+      "daily_rebalance_total_one_way_turnover": 2.3222481566111366,
+      "monthly_rebalance_total_return": 0.7557705161378103,
+      "monthly_rebalance_annualized_volatility": 0.3142932498657105,
+      "monthly_rebalance_max_drawdown": -0.1934826702488016,
+      "daily_minus_monthly_return": -0.04825450425384914,
+      "construction": "fixed target weights, reset after every trading day; no fees/taxes"
+    },
+    "midstream_6_equal": {
+      "label": "中游 6 檔等權",
+      "weights": {
+        "7719.TWO": 0.16666666666666666,
+        "5309.TWO": 0.16666666666666666,
+        "1515.TW": 0.16666666666666666,
+        "6618.TWO": 0.16666666666666666,
+        "3323.TWO": 0.16666666666666666,
+        "4590.TW": 0.16666666666666666
+      },
+      "n_names": 6,
+      "total_return": 0.5867924315704014,
+      "annualized_volatility": 0.34094745118565745,
+      "max_drawdown": -0.28837523805998744,
+      "beta_vs_twii": 0.5731490985612344,
+      "corr_vs_twii": 0.39462045042875366,
+      "tracking_error": 0.328912232698335,
+      "historical_var_95_daily_loss": 0.028789960406739142,
+      "historical_es_95_daily_loss": 0.04371690656216644,
+      "annualized_downside_deviation": 0.2144519233246792,
+      "sortino_zero_mar": 2.4514097827903094,
+      "average_pairwise_correlation": 0.1991376123520056,
+      "diversification_ratio": 1.7098127612995289,
+      "daily_rebalance_average_one_way_turnover": 0.011026391366613562,
+      "daily_rebalance_total_one_way_turnover": 2.745571450286777,
+      "monthly_rebalance_total_return": 0.5511187326421465,
+      "monthly_rebalance_annualized_volatility": 0.3474998342237389,
+      "monthly_rebalance_max_drawdown": -0.3154178519546328,
+      "daily_minus_monthly_return": 0.03567369892825489,
+      "construction": "fixed target weights, reset after every trading day; no fees/taxes"
+    },
+    "downstream_10_equal": {
+      "label": "下游 10 檔等權",
+      "weights": {
+        "8033.TW": 0.1,
+        "2645.TW": 0.1,
+        "5371.TWO": 0.1,
+        "2630.TW": 0.1,
+        "6753.TW": 0.1,
+        "2634.TW": 0.1,
+        "3416.TW": 0.1,
+        "2644.TWO": 0.1,
+        "2208.TW": 0.1,
+        "3005.TW": 0.1
+      },
+      "n_names": 10,
+      "total_return": 0.6748835545443135,
+      "annualized_volatility": 0.35490640673823154,
+      "max_drawdown": -0.3219108941669061,
+      "beta_vs_twii": 0.6074101864293013,
+      "corr_vs_twii": 0.40176088683840044,
+      "tracking_error": 0.33781750583810327,
+      "historical_var_95_daily_loss": 0.030428047910827666,
+      "historical_es_95_daily_loss": 0.04286662226951265,
+      "annualized_downside_deviation": 0.2105850700152924,
+      "sortino_zero_mar": 2.7809238734199746,
+      "average_pairwise_correlation": 0.4474371320156494,
+      "diversification_ratio": 1.3645845741597744,
+      "daily_rebalance_average_one_way_turnover": 0.007829335530157416,
+      "daily_rebalance_total_one_way_turnover": 1.9495045470091965,
+      "monthly_rebalance_total_return": 0.6593885569482254,
+      "monthly_rebalance_annualized_volatility": 0.3571665080975996,
+      "monthly_rebalance_max_drawdown": -0.3263262919637715,
+      "daily_minus_monthly_return": 0.015494997596088078,
+      "construction": "fixed target weights, reset after every trading day; no fees/taxes"
+    },
+    "layer_balanced": {
+      "label": "三層各 1/3",
+      "weights": {
+        "8033.TW": 0.03333333333333333,
+        "3491.TWO": 0.02564102564102564,
+        "2454.TW": 0.02564102564102564,
+        "2645.TW": 0.03333333333333333,
+        "4919.TW": 0.02564102564102564,
+        "7719.TWO": 0.05555555555555555,
+        "6829.TWO": 0.02564102564102564,
+        "5371.TWO": 0.03333333333333333,
+        "5309.TWO": 0.05555555555555555,
+        "3704.TW": 0.02564102564102564,
+        "7402.TWO": 0.02564102564102564,
+        "2458.TW": 0.02564102564102564,
+        "2630.TW": 0.03333333333333333,
+        "1515.TW": 0.05555555555555555,
+        "6753.TW": 0.03333333333333333,
+        "4541.TWO": 0.02564102564102564,
+        "2634.TW": 0.03333333333333333,
+        "3416.TW": 0.03333333333333333,
+        "6618.TWO": 0.05555555555555555,
+        "5222.TW": 0.02564102564102564,
+        "3034.TW": 0.02564102564102564,
+        "2644.TWO": 0.03333333333333333,
+        "2208.TW": 0.03333333333333333,
+        "3019.TW": 0.02564102564102564,
+        "3005.TW": 0.03333333333333333,
+        "3323.TWO": 0.05555555555555555,
+        "4968.TW": 0.02564102564102564,
+        "4590.TW": 0.05555555555555555,
+        "8222.TW": 0.02564102564102564
+      },
+      "n_names": 29,
+      "total_return": 0.6773369740263944,
+      "annualized_volatility": 0.29386689676535577,
+      "max_drawdown": -0.22344914199821597,
+      "beta_vs_twii": 0.6882687449446974,
+      "corr_vs_twii": 0.5498026183450018,
+      "tracking_error": 0.2561411332716952,
+      "historical_var_95_daily_loss": 0.025838739269748827,
+      "historical_es_95_daily_loss": 0.03696958885490691,
+      "annualized_downside_deviation": 0.1816497563943869,
+      "sortino_zero_mar": 3.122088256412363,
+      "average_pairwise_correlation": 0.2981375118832798,
+      "diversification_ratio": 1.7863785474234775,
+      "daily_rebalance_average_one_way_turnover": 0.009949963542859923,
+      "daily_rebalance_total_one_way_turnover": 2.4775409221721207,
+      "monthly_rebalance_total_return": 0.6961481661286353,
+      "monthly_rebalance_annualized_volatility": 0.29725772612804086,
+      "monthly_rebalance_max_drawdown": -0.23247580722682404,
+      "daily_minus_monthly_return": -0.018811192102240915,
+      "construction": "fixed target weights, reset after every trading day; no fees/taxes"
+    },
+    "core_6_equal": {
+      "label": "核心 6 檔等權",
+      "weights": {
+        "8033.TW": 0.16666666666666666,
+        "2634.TW": 0.16666666666666666,
+        "2630.TW": 0.16666666666666666,
+        "2645.TW": 0.16666666666666666,
+        "5371.TWO": 0.16666666666666666,
+        "6753.TW": 0.16666666666666666
+      },
+      "n_names": 6,
+      "total_return": 1.040253072441871,
+      "annualized_volatility": 0.45267672221719196,
+      "max_drawdown": -0.35636058314001984,
+      "beta_vs_twii": 0.7059879670847872,
+      "corr_vs_twii": 0.3661074435103388,
+      "tracking_error": 0.42686516754076825,
+      "historical_var_95_daily_loss": 0.03708961910428378,
+      "historical_es_95_daily_loss": 0.05408213588372427,
+      "annualized_downside_deviation": 0.2669875922761778,
+      "sortino_zero_mar": 3.091619266276103,
+      "average_pairwise_correlation": 0.6309597363263005,
+      "diversification_ratio": 1.1970045886299103,
+      "daily_rebalance_average_one_way_turnover": 0.0070421309470381005,
+      "daily_rebalance_total_one_way_turnover": 1.753490605812487,
+      "monthly_rebalance_total_return": 1.0217840277844665,
+      "monthly_rebalance_annualized_volatility": 0.4538388566446719,
+      "monthly_rebalance_max_drawdown": -0.3611976207358708,
+      "daily_minus_monthly_return": 0.01846904465740451,
+      "construction": "fixed target weights, reset after every trading day; no fees/taxes"
+    },
+    "air_core_5_equal": {
+      "label": "空中核心 5 檔等權",
+      "weights": {
+        "8033.TW": 0.2,
+        "2634.TW": 0.2,
+        "2630.TW": 0.2,
+        "2645.TW": 0.2,
+        "5371.TWO": 0.2
+      },
+      "n_names": 5,
+      "total_return": 1.1376660270989891,
+      "annualized_volatility": 0.45648803447688124,
+      "max_drawdown": -0.33989893716351594,
+      "beta_vs_twii": 0.7085940425909164,
+      "corr_vs_twii": 0.36439089848177936,
+      "tracking_error": 0.4305714357428585,
+      "historical_var_95_daily_loss": 0.036791475708468635,
+      "historical_es_95_daily_loss": 0.052973590382414795,
+      "annualized_downside_deviation": 0.266095803875203,
+      "sortino_zero_mar": 3.2867191183875666,
+      "average_pairwise_correlation": 0.6449487617693197,
+      "diversification_ratio": 1.1766322911956943,
+      "daily_rebalance_average_one_way_turnover": 0.006829636045091408,
+      "daily_rebalance_total_one_way_turnover": 1.7005793752277607,
+      "monthly_rebalance_total_return": 1.1254832557972954,
+      "monthly_rebalance_annualized_volatility": 0.45766459335428206,
+      "monthly_rebalance_max_drawdown": -0.3446287905481905,
+      "daily_minus_monthly_return": 0.012182771301693762,
+      "construction": "fixed target weights, reset after every trading day; no fees/taxes"
+    },
+    "sea_3_equal": {
+      "label": "海域 3 檔等權",
+      "weights": {
+        "6753.TW": 0.3333333333333333,
+        "2208.TW": 0.3333333333333333,
+        "2644.TWO": 0.3333333333333333
+      },
+      "n_names": 3,
+      "total_return": 0.26597255611631154,
+      "annualized_volatility": 0.39612221874933773,
+      "max_drawdown": -0.35455007747418466,
+      "beta_vs_twii": 0.4741926996294536,
+      "corr_vs_twii": 0.28101214050344386,
+      "tracking_error": 0.3996962422807629,
+      "historical_var_95_daily_loss": 0.037851281273656084,
+      "historical_es_95_daily_loss": 0.04839618390020876,
+      "annualized_downside_deviation": 0.23680732237263985,
+      "sortino_zero_mar": 1.341516263571725,
+      "average_pairwise_correlation": 0.4796560041716724,
+      "diversification_ratio": 1.2175652548189302,
+      "daily_rebalance_average_one_way_turnover": 0.006540363870689531,
+      "daily_rebalance_total_one_way_turnover": 1.6285506038016933,
+      "monthly_rebalance_total_return": 0.24948047440828103,
+      "monthly_rebalance_annualized_volatility": 0.39677503741775183,
+      "monthly_rebalance_max_drawdown": -0.36112244555868345,
+      "daily_minus_monthly_return": 0.016492081708030515,
+      "construction": "fixed target weights, reset after every trading day; no fees/taxes"
+    }
+  },
+  "benchmark": {
+    "window_return": 1.037858086497315,
+    "annualized_volatility": 0.23474666033177935,
+    "max_drawdown": -0.10423694442676568,
+    "beta_vs_twii": 1.0,
+    "corr_vs_twii": 0.9999999999999999,
+    "ticker": "^TWII",
+    "n_price_observations": 250
+  },
+  "diversification_summary": {
+    "n_names": 29,
+    "median_individual_annualized_volatility": 0.4914512561143778,
+    "all_29_annualized_volatility": 0.2937800476389684,
+    "volatility_reduction_vs_median_individual": 0.19767120847540937,
+    "n_names_beating_twii": 6,
+    "n_names_with_vol_above_twii": 29,
+    "interpretation_limit": "diversification lowers single-name volatility but cannot convert policy ceilings, prototypes or supplier qualifications into revenue"
+  },
+  "core_six": {
+    "selection": "EP0 名冊中信心=高、且屬整機/系統整合層的 6 檔（空中 5 + 海域 1）",
+    "selection_timing_limit": "selected using evidence available at the 2026-07-13 end date; descriptive only",
+    "n_companies": 6,
+    "n_underperforming_twii": 4,
+    "companies": [
+      {
+        "name": "雷虎",
+        "ticker": "8033.TW",
+        "segment": "空中·整機/系統整合",
+        "window_return": 2.808724929725722,
+        "annualized_volatility": 0.6634838991623792,
+        "max_drawdown": -0.4122340425531915,
+        "beta_vs_twii": 0.7016042467045621,
+        "corr_vs_twii": 0.24823398728502036,
+        "pe_asof": 398.2456140350877,
+        "pb_asof": 17.953179373615946,
+        "return_on_equity": 0.0448,
+        "revenue_yoy": 0.14373334040073793,
+        "operating_margin": -0.026249137188290618,
+        "valuation_asof_date": "2026-07-10"
+      },
+      {
+        "name": "漢翔",
+        "ticker": "2634.TW",
+        "segment": "空中·整機/機體/發動機",
+        "window_return": 0.4058376417166467,
+        "annualized_volatility": 0.4200205154151087,
+        "max_drawdown": -0.3303571243644644,
+        "beta_vs_twii": 0.5771944102107445,
+        "corr_vs_twii": 0.3225901002126846,
+        "pe_asof": 74.35897435897435,
+        "pb_asof": 3.0107973421926912,
+        "return_on_equity": 0.04121,
+        "revenue_yoy": -0.0987888017064279,
+        "operating_margin": 0.033082751304364506,
+        "valuation_asof_date": "2026-07-10"
+      },
+      {
+        "name": "亞航",
+        "ticker": "2630.TW",
+        "segment": "空中·整機整合",
+        "window_return": 0.5903285666643519,
+        "annualized_volatility": 0.5141002846858137,
+        "max_drawdown": -0.45883172980112885,
+        "beta_vs_twii": 0.6053349992528589,
+        "corr_vs_twii": 0.27640593419120885,
+        "pe_asof": 53.900001525878906,
+        "pb_asof": 3.3399430862485375,
+        "return_on_equity": 0.058569998,
+        "revenue_yoy": 0.04885601231986736,
+        "operating_margin": 0.05490079958049984,
+        "valuation_asof_date": "2026-07-10"
+      },
+      {
+        "name": "長榮航太",
+        "ticker": "2645.TW",
+        "segment": "空中·整機/MRO",
+        "window_return": 1.388571367420723,
+        "annualized_volatility": 0.4914512561143778,
+        "max_drawdown": -0.33086414622734406,
+        "beta_vs_twii": 0.6581214651549313,
+        "corr_vs_twii": 0.3143583704704623,
+        "pe_asof": 43.11926605504587,
+        "pb_asof": 6.953691374463678,
+        "return_on_equity": 0.19803,
+        "revenue_yoy": 0.11634898216095069,
+        "operating_margin": 0.1650776973775227,
+        "valuation_asof_date": "2026-07-10"
+      },
+      {
+        "name": "中光電",
+        "ticker": "5371.TWO",
+        "segment": "空中·整機方案/光學",
+        "window_return": 0.7642666219916097,
+        "annualized_volatility": 0.5965368541720795,
+        "max_drawdown": -0.4954198610333862,
+        "beta_vs_twii": 1.0064550991538017,
+        "corr_vs_twii": 0.39605595471238336,
+        "pe_asof": 98.1052599455181,
+        "pb_asof": 1.379882102221465,
+        "return_on_equity": 0.00818,
+        "revenue_yoy": -0.0023262026416988046,
+        "operating_margin": -0.0034795756539870147,
+        "valuation_asof_date": "2026-07-10"
+      },
+      {
+        "name": "龍德造船",
+        "ticker": "6753.TW",
+        "segment": "海域·無人艇",
+        "window_return": 0.5124873447107812,
+        "annualized_volatility": 0.5655438724097979,
+        "max_drawdown": -0.45700245700245723,
+        "beta_vs_twii": 0.694043141076338,
+        "corr_vs_twii": 0.2880842980397319,
+        "pe_asof": 25.919439579684763,
+        "pb_asof": 3.460369417816226,
+        "return_on_equity": 0.18778,
+        "revenue_yoy": 0.02485856833649791,
+        "operating_margin": 0.16339107715808357,
+        "valuation_asof_date": "2026-07-10"
+      }
+    ]
+  },
+  "sea_exposure": {
+    "names": [
+      "龍德造船",
+      "台船",
+      "中信造船"
+    ],
+    "tickers": [
+      "6753.TW",
+      "2208.TW",
+      "2644.TWO"
+    ],
+    "all_29_nominal_weight": 0.10344827586206896,
+    "downstream_10_nominal_weight": 0.3,
+    "layer_balanced_nominal_weight": 0.1,
+    "core_6_nominal_weight": 0.16666666666666666,
+    "interpretation_limit": "nominal weights describe portfolio construction, not verified unmanned-vehicle revenue exposure"
+  },
+  "business_evidence_gap": {
+    "n_ep2_plus_ep3_checked": 18,
+    "n_with_separately_disclosed_uav_usv_revenue_share": 0,
+    "n_with_public_binding_uav_usv_order_value_in_checked_sources": 0,
+    "ep2_stage_counts": {
+      "direct_product_or_shipment": 3,
+      "development_or_intent": 2,
+      "adjacent_capability_only": 3
+    },
+    "ep3_stage_counts": {
+      "mass_production_or_delivered": 2,
+      "product_prototype_or_collaboration": 6,
+      "qualification_or_capability": 2
+    },
+    "interpretation_limit": "zeros apply only to EP2/EP3 audited public sources; they do not prove there are no undisclosed contracts"
+  },
+  "policy": {
+    "status": "行政院通過草案，已送立法院並付委；尚未完成立法",
+    "budget_ceiling_twd": 210000000000,
+    "implementation_period": "2026-08 至 2031-12",
+    "small_expendable_usv_planned_quantity": 1320,
+    "next_scheduled_joint_committee_review": "2026-07-16",
+    "source_urls": [
+      "https://www.mnd.gov.tw/news/announcement/86952",
+      "https://ppg.ly.gov.tw/ppg/bills/202110223090000/details",
+      "https://ppg.ly.gov.tw/ppg/sittings/2026070904/details?meetingDate=115%2F07%2F16",
+      "https://www.ey.gov.tw/File/39A867B74E2BA985?A=C"
+    ],
+    "interpretation_limit": "上限、計畫數量與法案進度都不是個別公司的已得標訂單。"
+  },
+  "certification_check": {
+    "checked_at": "2026-07-13",
+    "blue_uas_source_urls": [
+      "https://www.diu.mil/blue-uas-cleared-list",
+      "https://www.diu.mil/latest/dius-blue-uas-list-to-transition-to-dcma"
+    ],
+    "green_uas_source_urls": [
+      "https://www.diu.mil/latest/diu-outlines-immediate-updates-to-blue-uas-lists-announces-initial",
+      "https://www.auvsi.org/certification-training/green-uas/cleared-list/"
+    ],
+    "result": "本次查核未取得足以把雷虎特定平台對上 Blue UAS Cleared 的官方公開證據；AUVSI Green UAS 是不同認證路徑，不能拿 Green 清單替代 Blue UAS 查核。",
+    "interpretation_limit": "公開證據不足不等於產品不合格或從未進入非公開流程；本文只撤回已取得 Blue UAS 的既成事實說法。"
+  },
+  "official_positioning": {
+    "checked_at": "2026-07-13",
+    "realized_2025_output_twd": 12900000000,
+    "realized_2025_export_output_twd": 2950000000,
+    "realized_2025_semiconductor_output_twd": 6838400000000,
+    "semiconductor_to_uav_output_ratio_2025": 530.1085271317829,
+    "target_2030_output_twd": 40000000000,
+    "target_2030_uav_share_of_2025_semiconductor_output": 0.00584932147870847,
+    "realized_2026_q1_complete_uav_exports_usd": 115000000,
+    "realized_2025_full_year_complete_uav_exports_usd": 93000000,
+    "government_planned_industry_investment_2025_2030_twd": 44200000000,
+    "delivered_commercial_military_uavs_asof_2026_05_21_minimum": 3000,
+    "commercial_military_uav_procurement_quantity": 3422,
+    "commercial_military_uav_procurement_twd": 6887000000,
+    "monthly_capacity_target": 15000,
+    "industry_alliance_members_minimum": 267,
+    "taiwan_companies_in_us_uav_supply_chain_minimum": 20,
+    "sources": [
+      "https://www.ey.gov.tw/Page/448DE008087A1971/e687d387-4bb4-4cd7-9b7d-cbeb83970623",
+      "https://www.ey.gov.tw/Page/9277F759E41CCD91/7fc92ece-9a9b-41cb-b4cc-98215c0a9e3d",
+      "https://www.ey.gov.tw/Page/5A8A0CB5B41DA11E/97980e62-02ab-4c1f-b727-c51233e2ffc2",
+      "https://www.moea.gov.tw/MNS/populace/news/wHandNews_File.ashx?file_id=125484",
+      "https://www.moea.gov.tw/MNS/populace/content/wHandMenuFile.ashx?file_id=38766",
+      "https://ws.ndc.gov.tw/Download.ashx?icon=.pdf&n=5ZyL5a6255m85bGV6KiI55WrKDExNOiHszExN%2BW5tCnmoLjlrprmnKwucGRm&u=LzAwMS9hZG1pbmlzdHJhdG9yLzEwL3JlbGZpbGUvMC8xNTY5NC81MzE5OTBlNC01YmE4LTRjNTItOTE0My0wNDBlNmJiMWE2ZGUucGRm"
+    ],
+    "interpretation_limits": [
+      "2030 output and monthly capacity are targets, not realized production",
+      "planned government investment is not the same as spent funds or company revenue",
+      "MOU, supply-chain entry and orders under discussion are not binding orders",
+      "air-vehicle evidence cannot be generalized to sea or underwater vehicles"
+    ]
+  },
+  "conclusion_evidence_grade": {
+    "democratic_supply_chain_node": "中高",
+    "large_integrated_platform_leader": "中低",
+    "global_sea_vehicle_competitiveness": "低",
+    "next_semiconductor_scale_economic_pillar": "低",
+    "national_security_supply_chain_resilience_cluster": "中高",
+    "basis": "realized output/export/delivery and alliance participation support a supply-chain-node role; scale, key-component, revenue-segmentation and binding-order gaps reject semiconductor-scale claims"
+  },
+  "disclaimer": "描述性統計，非投資建議；歷史不等於未來，法案上限、規畫數量與政策目標都不等於公司訂單或營收。"
+}
