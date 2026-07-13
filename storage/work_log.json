@@ -17061,5 +17061,16 @@
     "task_id": "k1025_family_cholesky_fevd_ordering",
     "actor": "hourly-00",
     "summary": "K1025b v2：Cholesky FEVD 排序假象稽核 → 推翻已發表的『BTC 淨接收者 -76.64pp』。主因是 FEVD 陣列誤切（非排序）；KPPS 重估 NET=+2.70pp（翻號、縮 28 倍）。全量下游回溯更正：main.tex 撤回 net-receiver + §Erratum；reproduce.py 投稿 gate 原釘在假象值（會 PASS 假象）改綁 KPPS 35/35 green；research_program 標撤回；k1025b.py 加 write guard 防覆寫發表紀錄。knowledge=e3e4b1fa。Reviewer=code-reviewer subagent fallback CONDITIONAL PASS（5 條件全修）；Codex primary-path 二次驗證已入池。"
+  },
+  {
+    "timestamp": "2026-07-14T01:40:39+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-3297ca728",
+    "outcome": "succeeded",
+    "summary": "fix dreaming umbrella alert ownership",
+    "commit": "3297ca7281c6cbc9c36dfc985e5f9cc02e8870d3",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T17:45:22.994287+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
