@@ -1,0 +1,168 @@
+{
+  "generated_at": "2026-07-13T02:21:59.902624+00:00",
+  "seed": 20260713,
+  "sample": {
+    "start": "2010-03-30",
+    "end": "2026-07-02",
+    "n_days": 4090
+  },
+  "target": "SPY 未來 5 日已實現波動（年化 %），t+1..t+5",
+  "control": "SPY 過去 20 日已實現波動（年化 %），t-19..t",
+  "hac_lag": 28,
+  "signals": [
+    {
+      "signal": "vix",
+      "label": "VIX 指數（恐慌指數本身）",
+      "raw_spearman_ic": 0.6297,
+      "partial_spearman_ic": 0.4443,
+      "hac_t_on_signal": 6.871,
+      "hac_p_on_signal": 0.0,
+      "r2_control_only": 0.3248,
+      "r2_with_signal": 0.4796,
+      "incremental_r2_pp": 15.476,
+      "holm_p": 0.0,
+      "holm_significant": true
+    },
+    {
+      "signal": "volume_z",
+      "label": "成交量擁擠度（SPY 量能 60 日 z 分數）",
+      "raw_spearman_ic": 0.2524,
+      "partial_spearman_ic": 0.218,
+      "hac_t_on_signal": 4.903,
+      "hac_p_on_signal": 0.0,
+      "r2_control_only": 0.3248,
+      "r2_with_signal": 0.3749,
+      "incremental_r2_pp": 5.008,
+      "holm_p": 0.0,
+      "holm_significant": true
+    },
+    {
+      "signal": "credit",
+      "label": "信用利差代理（HYG 相對 IEF 20 日落後幅度）",
+      "raw_spearman_ic": 0.2466,
+      "partial_spearman_ic": 0.1891,
+      "hac_t_on_signal": 3.466,
+      "hac_p_on_signal": 0.00053,
+      "r2_control_only": 0.3248,
+      "r2_with_signal": 0.3685,
+      "incremental_r2_pp": 4.361,
+      "holm_p": 0.00212,
+      "holm_significant": true
+    },
+    {
+      "signal": "vxn_gap",
+      "label": "科技股恐慌溢價（VXN − VIX）",
+      "raw_spearman_ic": 0.0336,
+      "partial_spearman_ic": -0.0118,
+      "hac_t_on_signal": -0.869,
+      "hac_p_on_signal": 0.3847,
+      "r2_control_only": 0.3248,
+      "r2_with_signal": 0.3264,
+      "incremental_r2_pp": 0.156,
+      "holm_p": 1.0,
+      "holm_significant": false
+    },
+    {
+      "signal": "bondvol_gap",
+      "label": "股債波動分歧（TLT 20 日波動 − SPY 20 日波動）",
+      "raw_spearman_ic": -0.3496,
+      "partial_spearman_ic": 0.0402,
+      "hac_t_on_signal": 0.953,
+      "hac_p_on_signal": 0.34054,
+      "r2_control_only": 0.3248,
+      "r2_with_signal": 0.3257,
+      "incremental_r2_pp": 0.087,
+      "holm_p": 1.0,
+      "holm_significant": false
+    },
+    {
+      "signal": "vvix_proxy",
+      "label": "波動的波動（VIX 20 日變動幅度）",
+      "raw_spearman_ic": 0.2093,
+      "partial_spearman_ic": -0.0828,
+      "hac_t_on_signal": -0.497,
+      "hac_p_on_signal": 0.6193,
+      "r2_control_only": 0.3248,
+      "r2_with_signal": 0.3252,
+      "incremental_r2_pp": 0.031,
+      "holm_p": 1.0,
+      "holm_significant": false
+    }
+  ],
+  "vix_tercile_forward_rv": {
+    "低 VIX（安靜）": {
+      "mean": 8.3,
+      "median": 7.34,
+      "std": 4.41,
+      "count": 1365
+    },
+    "中 VIX": {
+      "mean": 11.98,
+      "median": 11.07,
+      "std": 6.0,
+      "count": 1366
+    },
+    "高 VIX（緊張）": {
+      "mean": 21.07,
+      "median": 17.82,
+      "std": 14.38,
+      "count": 1359
+    }
+  },
+  "latest": {
+    "date": "2026-07-02",
+    "vix": 16.15,
+    "spy_rv20": 18.17,
+    "vxn_gap": 11.83,
+    "credit": -0.043,
+    "volume_z": 0.32
+  },
+  "baseline_rv20_plus_vix_r2": 0.4796,
+  "signals_given_vix": [
+    {
+      "signal": "credit",
+      "label": "信用利差代理（HYG 相對 IEF 20 日落後幅度）",
+      "hac_t": 3.559,
+      "hac_p": 0.00037,
+      "incremental_r2_pp_over_rv20_plus_vix": 2.062,
+      "holm_p": 0.00148,
+      "holm_significant": true
+    },
+    {
+      "signal": "volume_z",
+      "label": "成交量擁擠度（SPY 量能 60 日 z 分數）",
+      "hac_t": 3.802,
+      "hac_p": 0.00014,
+      "incremental_r2_pp_over_rv20_plus_vix": 1.106,
+      "holm_p": 0.0007,
+      "holm_significant": true
+    },
+    {
+      "signal": "vvix_proxy",
+      "label": "波動的波動（VIX 20 日變動幅度）",
+      "hac_t": 0.842,
+      "hac_p": 0.3998,
+      "incremental_r2_pp_over_rv20_plus_vix": 0.065,
+      "holm_p": 1.0,
+      "holm_significant": false
+    },
+    {
+      "signal": "vxn_gap",
+      "label": "科技股恐慌溢價（VXN − VIX）",
+      "hac_t": -0.579,
+      "hac_p": 0.56253,
+      "incremental_r2_pp_over_rv20_plus_vix": 0.038,
+      "holm_p": 1.0,
+      "holm_significant": false
+    },
+    {
+      "signal": "bondvol_gap",
+      "label": "股債波動分歧（TLT 20 日波動 − SPY 20 日波動）",
+      "hac_t": 0.032,
+      "hac_p": 0.97419,
+      "incremental_r2_pp_over_rv20_plus_vix": 0.0,
+      "holm_p": 1.0,
+      "holm_significant": false
+    }
+  ]
+}
