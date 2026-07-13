@@ -8,7 +8,8 @@ import sys
 from pathlib import Path
 
 import pytest
-from PIL import Image
+from matplotlib import font_manager
+from PIL import Image, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = ROOT / "scripts"
@@ -16,6 +17,56 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 import lazypack_render as lr  # noqa: E402
+
+
+@pytest.fixture
+def cjk_test_font(monkeypatch):
+    """Exercise rendering with a real CJK font available on each test host.
+
+    Production deliberately resolves ``Heiti TC`` with fallback disabled so a
+    missing CJK font cannot silently produce tofu.  GitHub's Ubuntu runner gets
+    Noto Sans CJK from the workflow; the development Mac uses Heiti TC.  Never
+    fall back to DejaVu because its missing-glyph boxes would make layout tests
+    pass without exercising Traditional Chinese glyphs.
+    """
+    path = None
+    for family in (lr.FONT_FAMILY, "Noto Sans CJK TC", "Noto Sans CJK JP"):
+        try:
+            candidate = font_manager.findfont(
+                font_manager.FontProperties(family=[family]),
+                fallback_to_default=False,
+            )
+        except ValueError:
+            continue  # silent-ok: test fixture probes approved CJK font candidates
+        probe = ImageFont.truetype(candidate, size=48)
+        signatures = {bytes(probe.getmask(char)) for char in "這繁體"}
+        if len(signatures) == 3:
+            path = candidate
+            break
+    if path is None:
+        pytest.fail("render tests require a font with real Traditional Chinese glyphs")
+    monkeypatch.setattr(lr, "_FONT_PATH", str(path))
+    lr._FONT_CACHE.clear()
+    yield
+    lr._FONT_CACHE.clear()
+
+
+def test_production_font_resolution_disables_fallback(monkeypatch):
+    observed = {}
+
+    def missing_font(properties, *, fallback_to_default):
+        observed["family"] = properties.get_family()
+        observed["fallback_to_default"] = fallback_to_default
+        raise ValueError("font unavailable")
+
+    monkeypatch.setattr(lr.font_manager, "findfont", missing_font)
+    monkeypatch.setattr(lr, "_FONT_PATH", None)
+    with pytest.raises(ValueError, match="font unavailable"):
+        lr._font_path()
+    assert observed == {
+        "family": ["Heiti TC"],
+        "fallback_to_default": False,
+    }
 
 
 def _write_evidence(tmp_path: Path) -> tuple[Path, str]:
@@ -336,7 +387,9 @@ def test_path_traversal_and_duplicate_panel_names_are_rejected(tmp_path):
         lr.validate_plan(plan)
 
 
-def test_long_traditional_chinese_title_wraps_without_overflow(tmp_path):
+def test_long_traditional_chinese_title_wraps_without_overflow(
+    tmp_path, cjk_test_font
+):
     plan = _base_plan(tmp_path, long_title=True)
     path = _write_plan(tmp_path, plan)
     outputs = lr.render_plan(path, tmp_path / "out")
@@ -347,7 +400,9 @@ def test_long_traditional_chinese_title_wraps_without_overflow(tmp_path):
             assert image.format == "PNG"
 
 
-def test_same_plan_and_evidence_have_identical_pixel_hashes(tmp_path):
+def test_same_plan_and_evidence_have_identical_pixel_hashes(
+    tmp_path, cjk_test_font
+):
     plan = _base_plan(tmp_path)
     path = _write_plan(tmp_path, plan)
     first = lr.render_plan(path, tmp_path / "out_a")
@@ -357,7 +412,9 @@ def test_same_plan_and_evidence_have_identical_pixel_hashes(tmp_path):
     ]
 
 
-def test_mid_promotion_failure_rolls_back_complete_old_set(tmp_path, monkeypatch):
+def test_mid_promotion_failure_rolls_back_complete_old_set(
+    tmp_path, monkeypatch, cjk_test_font
+):
     plan = _base_plan(tmp_path)
     path = _write_plan(tmp_path, plan)
     out = tmp_path / "out"
@@ -393,7 +450,9 @@ def test_mid_promotion_failure_rolls_back_complete_old_set(tmp_path, monkeypatch
     assert {target: target.read_bytes() for target in expected_old} == expected_old
 
 
-def test_render_receipt_binds_nonce_plan_and_output_hashes(tmp_path):
+def test_render_receipt_binds_nonce_plan_and_output_hashes(
+    tmp_path, cjk_test_font
+):
     plan = _base_plan(tmp_path)
     path = _write_plan(tmp_path, plan)
     outputs = lr.render_plan(path, tmp_path / "out")
@@ -406,7 +465,9 @@ def test_render_receipt_binds_nonce_plan_and_output_hashes(tmp_path):
     assert [x["name"] for x in payload["panels"]] == [x.name for x in outputs]
 
 
-def test_later_text_fit_failure_leaves_no_partial_final_pngs(tmp_path):
+def test_later_text_fit_failure_leaves_no_partial_final_pngs(
+    tmp_path, cjk_test_font
+):
     plan = _base_plan(tmp_path)
     plan["panels"][1]["blocks"][0]["body"] = ["極" * 2000]
     path = _write_plan(tmp_path, plan)
@@ -424,7 +485,9 @@ def test_renderer_has_no_agentic_or_subprocess_path():
 
 
 @pytest.mark.parametrize("article_id", ["mile_b6a46796", "mile_a8d79d6a"])
-def test_migrated_acceptance_plans_render_from_empty_directory(tmp_path, article_id):
+def test_migrated_acceptance_plans_render_from_empty_directory(
+    tmp_path, article_id, cjk_test_font
+):
     plan = ROOT / "storage" / "lazypack_jobs" / article_id / "plan.json"
     document, _ = lr.load_plan(plan)
     outputs = lr.render_plan(plan, tmp_path / article_id)
