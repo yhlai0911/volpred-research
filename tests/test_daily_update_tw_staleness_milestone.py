@@ -59,6 +59,28 @@ def test_milestone_tw50_no_data_omits_tw_line() -> None:
     assert "| 策略 | 配置 | 現金 |" in desc
 
 
+def test_milestone_always_discloses_data_sources() -> None:
+    """The short holdings article must carry the same provenance as its sibling.
+
+    Content-quality patrol scans the rendered body, not implementation details;
+    keeping the marker in this shared builder prevents future daily articles
+    from silently regressing to source-free output.
+    """
+    build_milestone_description = _import_build_milestone_description()
+    desc = build_milestone_description(
+        strat_list=_STRAT_LIST,
+        sigma_gjr_ann=12.0,
+        vix_level=18.0,
+        spy_date="2026-05-07",
+        tw50_close=None,
+        tw50_date=None,
+    )
+
+    assert "資料來源：yfinance（SPY、GLD、^VIX、0050.TW）" in desc
+    assert "主計總處資料" in desc
+    assert "配置比例由 VolPred 策略模型計算" in desc
+
+
 def test_milestone_tw50_fresh_no_staleness_warning() -> None:
     """When tw50_date == spy_date (typical fresh case), TW bullet is stamped
     with date but no staleness warning is rendered."""

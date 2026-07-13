@@ -244,6 +244,16 @@ _TW50_STALENESS_WARNING_TEMPLATE = (
     "今日台股實際收盤後請以官方 TWSE 數據為準。"
 )
 
+# Keep provenance identical across the two sibling daily articles.  The rich
+# strategy bulletin already carried a source note, but the shorter holdings
+# milestone did not, so the content-quality patrol correctly flagged every new
+# holdings article as missing its source marker.
+_DAILY_SOURCE_NOTE = (
+    "資料來源：yfinance（SPY、GLD、^VIX、0050.TW）；"
+    "若策略採用景氣領先訊號，另取主計總處資料。"
+    "配置比例由 VolPred 策略模型計算。"
+)
+
 
 def fit_garch(returns_pct, vol_type="GARCH", p=1, o=0, q=1):
     result = arch_model(returns_pct, vol=vol_type, p=p, o=o, q=q,
@@ -493,7 +503,7 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
 ---
 
 *本文由 VolPred 研究系統自動產生。策略權重基於 GJR-GARCH(1,1) 波動率預測與 VIX 情境分析。*
-*數據來源：yfinance（SPY/GLD/VIX/0050.TW），更新頻率：每個交易日。*
+*{_DAILY_SOURCE_NOTE}更新頻率：每個交易日。*
 *免責聲明：本文僅供研究參考，不構成投資建議。*
 """
 
@@ -581,6 +591,8 @@ def build_milestone_description(strat_list, sigma_gjr_ann, vix_level, spy_date,
                 tw50_date=tw50_date, spy_date=spy_date
             )
             desc += f"\n{staleness}\n"
+
+    desc += f"\n\n*{_DAILY_SOURCE_NOTE}*\n"
 
     return desc
 
