@@ -2,6 +2,27 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 16:40 — CI 紅了 12.5 小時系統看不見：機器沒有訂閱自己的 CI 狀態
+
+**問題**：main Test Suite 從 04:00 紅到 16:26 才修好，期間老闆連傳 4 則 Telegram（msg 632/633/635/647/653）
+罵「為什麼不能立刻解決底層問題」。修得慢不是不會修（收到訊息後一班內修完），是**根本不知道紅了** —
+GitHub Actions 失敗通知只寄老闆信箱/Telegram，本機沒有任何 poller 訂閱 CI 狀態，hourly dispatch 挑任務
+也不看 CI。「CI 紅」對系統是不可見狀態 = 只有老闆看得到 = `feedback_content_quality_patrol_gap` 同 class
+（缺巡檢維度，不是缺修復能力）。
+
+**根因（底層邏輯）**：alert 條件全部只看本機面（cron log、pool、queue、branch）；平台的**外部**健康面
+（GitHub CI）沒有 enforcement owner。備援與巡檢的通則（alert.md 2026-07-10「只在別的東西壞掉時才執行的
+路徑必須有主動探針」）同樣適用：老闆轉發通知 = 人肉探針，本身就是設計失敗。
+
+**解決**：CI watchdog 收編進 `scripts/check_alerts.py`（hourly tick 唯一可靠 trigger，anti-stacking 不另
+立 daemon）：`_auto_remediate_ci_red()` 以 `gh run list` 查 main 最新 completed Test Suite run，failure →
+立即 flock-append P1 platform_ops 修復任務（deduped by run id；任務內嵌 `gh run view --log-failed` 取證
+步驟 + codex gpt-5.6-sol 第二實作路徑）+ critical alert（「系統已自動執行」框架）。dispatch-supervisor
+下一 tick 即派工，全程不需老闆轉發。State：`storage/ops/ci_watch_state.json`。
+
+**機械防線**：`scripts/tests/test_ci_red_watchdog.py`（4 tests：red→P1+alert、同 run 冪等、新 run 各建
+各的、green 記 recovery 不誤動作）。Live + cron-env（`env -i` keyring auth）雙驗證通過。
+
 ## 2026-07-13 16:13 — compute job 執行失敗後，已生成產物沒有 Git owner
 
 **問題**：compute/lazypack receipt 只有 `result_artifact` 成功後置條件，沒有「哪些檔案屬於這個

@@ -260,6 +260,182 @@ def _auto_reap_orphan_deliverables() -> dict:
         return {"attempted": False, "error": str(exc)}
 
 
+# ---------------------------------------------------------------------------
+# CI red watchdog (2026-07-13, boss msgs 632/633/635/647/653): the boss saw a
+# red Test Suite before the system did — GitHub Actions failure notifications
+# only reach the boss's inbox, nothing on this machine subscribed to CI state,
+# so main stayed red for 12+ hours with the ops loop blind to it. Poll the
+# latest completed main-branch run every hourly tick; on failure, immediately
+# append a P1 platform_ops repair task (deduped by run id) so the
+# dispatch-supervisor's next tick dispatches the fix without the boss relaying
+# anything. Enforcement owner for "CI is red" = this check (anti-stacking).
+# ---------------------------------------------------------------------------
+CI_WATCH_STATE = PROJECT_ROOT / "storage" / "ops" / "ci_watch_state.json"
+CI_NEXT_TASKS = PROJECT_ROOT / "storage" / "next_tasks.json"
+CI_WORKFLOW = "Test Suite"
+
+
+def _gh_bin() -> str | None:
+    import shutil
+
+    found = shutil.which("gh")
+    if found:
+        return found
+    brew_gh = Path("/opt/homebrew/bin/gh")  # cron env PATH omits homebrew
+    return str(brew_gh) if brew_gh.exists() else None
+
+
+def _ci_latest_completed_run() -> dict | None:
+    """Latest completed main-branch Test Suite run via gh CLI; None on any failure."""
+    import subprocess
+
+    gh = _gh_bin()
+    if gh is None:
+        warn("ci_watch", "gh CLI not found; CI watchdog skipped")
+        return None
+    try:
+        proc = subprocess.run(
+            [gh, "run", "list", "--workflow", CI_WORKFLOW, "--branch", "main",
+             "--status", "completed", "--limit", "1",
+             "--json", "databaseId,conclusion,url,headSha,displayTitle,createdAt"],
+            capture_output=True, text=True, timeout=60, cwd=str(PROJECT_ROOT),
+        )
+        if proc.returncode != 0:
+            warn("ci_watch", "gh run list failed",
+                 rc=proc.returncode, stderr_tail=(proc.stderr or "")[-200:])
+            return None
+        runs = json.loads(proc.stdout or "[]")
+        return runs[0] if isinstance(runs, list) and runs else None
+    except Exception as exc:  # noqa: BLE001
+        warn("ci_watch", "gh run list error", err=str(exc))
+        return None
+
+
+def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
+    """flock-append one task to the pending queue (same discipline as refill scripts)."""
+    import fcntl
+
+    from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority
+
+    normalize_task_priority(task)
+    next_tasks_path.parent.mkdir(parents=True, exist_ok=True)
+    if not next_tasks_path.exists():
+        next_tasks_path.write_text("[]\n", encoding="utf-8")
+    with next_tasks_path.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            data = json.load(fh)
+            if not isinstance(data, list):
+                raise ValueError("next_tasks.json is not a list")
+            if any(isinstance(t, dict) and t.get("id") == task["id"] for t in data):
+                return False
+            data.append(task)
+            normalize_task_priorities(data)
+            fh.seek(0)
+            fh.truncate()
+            json.dump(data, fh, ensure_ascii=False, indent=2)
+            fh.write("\n")
+            return True
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+
+def _build_ci_repair_task(run: dict, *, now_iso: str) -> dict:
+    run_id = run.get("databaseId")
+    url = run.get("url") or f"https://github.com/yhlai0911/volpred-research/actions/runs/{run_id}"
+    sha = (run.get("headSha") or "")[:9]
+    return {
+        "id": f"ci-red-{run_id}",
+        "task_type": "platform_ops",
+        "priority": 1,
+        "source": "auto_discovered",
+        "status": "pending",
+        "created_at": now_iso,
+        "title": f"CI 紅燈修復（run {run_id}）— main Test Suite 最新班次 failure",
+        "description": (
+            f"GitHub Actions Test Suite 於 main 最新完成班次 failure。\n"
+            f"Run: {url}\nhead_sha: {sha}\n\n"
+            "行動（當班修到綠，不許只報告）：\n"
+            f"1. `gh run view {run_id} --log-failed | tail -300` 讀失敗測試與根因\n"
+            "2. 本地重現 → 修根因；同類站點做 class sweep"
+            "（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n"
+            "3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，"
+            "不等下一班（老闆指示：強模型直接嘗試）\n"
+            "4. commit + push 後 `gh run watch` 盯到綠燈才 finish\n"
+            "成功標準：main 最新 Test Suite run conclusion=success。"
+        ),
+    }
+
+
+def _handle_ci_run(
+    run: dict,
+    *,
+    now_iso: str,
+    next_tasks_path: Path = CI_NEXT_TASKS,
+    state_path: Path = CI_WATCH_STATE,
+    sender=None,
+) -> dict:
+    """Pure decision core (injectable for tests): red run → P1 task + critical alert."""
+    run_id = run.get("databaseId")
+    conclusion = (run.get("conclusion") or "").lower()
+    summary = {
+        "checked": True, "run_id": run_id, "conclusion": conclusion,
+        "task_added": False, "alert_sent": False,
+    }
+    state = _load_json_dict(state_path, label="ci_watch_state")
+    if conclusion != "failure":
+        # success / cancelled / skipped — record recovery, nothing to remediate.
+        state.update({"last_seen_run_id": run_id, "last_seen_conclusion": conclusion,
+                      "checked_at": now_iso})
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+        state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+        return summary
+
+    task = _build_ci_repair_task(run, now_iso=now_iso)
+    if state.get("last_task_id") == task["id"]:
+        summary["reason"] = "already_handled"
+        return summary
+    try:
+        summary["task_added"] = _append_next_task_locked(task, next_tasks_path)
+    except Exception as exc:  # noqa: BLE001
+        warn("ci_watch", "P1 repair task append failed", err=str(exc), task_id=task["id"])
+        summary["reason"] = f"append_failed: {exc}"
+        return summary
+
+    if sender is None:
+        from volpred.ops.alerts import send_alert as sender  # noqa: WPS433
+    body = (
+        "## 觸發條件\n"
+        f"main 最新 Test Suite run failure：{run.get('url')}（head {(run.get('headSha') or '')[:9]}）。\n\n"
+        "## 影響\n"
+        "CI 紅 = 之後所有 push 失去回歸保護；紅燈只有老闆看得到 = 巡檢缺口。\n\n"
+        "## 系統已自動執行\n"
+        f"已建 P1 修復任務 {task['id']}（pending queue 隊首），dispatch-supervisor 下一 tick 即派工；"
+        "任務含失敗 log 取得步驟與 codex(gpt-5.6-sol) 第二實作路徑。無需老闆行動。"
+    )
+    try:
+        sent = sender("critical", f"CI 紅燈（run {run_id}）→ 已自動建 P1 修復任務", body,
+                      storage_dir=str(PROJECT_ROOT / "storage"))
+        summary["alert_sent"] = bool(sent.get("sent")) if isinstance(sent, dict) else True
+    except Exception as exc:  # noqa: BLE001
+        warn("ci_watch", "alert send failed (task still queued)", err=str(exc))
+
+    state.update({"last_seen_run_id": run_id, "last_seen_conclusion": conclusion,
+                  "last_task_id": task["id"], "checked_at": now_iso})
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    return summary
+
+
+def _auto_remediate_ci_red() -> dict:
+    from datetime import timezone
+
+    run = _ci_latest_completed_run()
+    if run is None:
+        return {"checked": False, "reason": "gh_unavailable_or_no_runs"}
+    return _handle_ci_run(run, now_iso=datetime.now(timezone.utc).isoformat())
+
+
 # The monitor cannot meaningfully monitor itself; `host_crontab_managed: false`
 # means the entry documents something this host does not schedule.
 STALENESS_EXCLUDED_JOB_IDS = frozenset({"check_alerts"})
@@ -472,6 +648,10 @@ def main() -> int:
     # than surfaced as a discard/keep decision for the boss.
     orphan_reap = _auto_reap_orphan_deliverables()
 
+    # 2026-07-13 (boss msgs 632-653): CI red must become a P1 repair task the
+    # hour it happens, not when the boss forwards the GitHub notification.
+    ci_watch = _auto_remediate_ci_red()
+
     report = check_alert_conditions(storage_dir="storage")
     print("=== ops check-alerts ===")
     if due_summary.get("ok"):
@@ -525,6 +705,12 @@ def main() -> int:
         f"adopted={len(adopted)} held={len(orphan_reap.get('held') or [])} "
         f"job_deliveries={len(delivered_jobs)} "
         f"reason={orphan_reap.get('error') or orphan_reap.get('reason') or 'ok'}"
+    )
+    print(
+        f"  ci-watch: run={ci_watch.get('run_id')} "
+        f"conclusion={ci_watch.get('conclusion')} "
+        f"task_added={ci_watch.get('task_added')} "
+        f"reason={ci_watch.get('reason') or 'ok'}"
     )
     print(
         f"breaches={report.get('breach_count')} "
