@@ -17103,5 +17103,38 @@
     "owner": "hourly-03",
     "commit": "ff2813588",
     "summary": "work_log writer class sweep：實測推翻原假設 — 12 個候選檔中只有 1 個是活的無鎖 writer（backfill_work_log_from_commits.py:207），其餘 11 個逐一驗證為 reader 或 orchestrator（phase_z.py 只是字串命中、非 writer，故未動 supervisor code、無需 reload）。遷移該 writer 走 append_entries()（新增 batch API，單次持鎖）；其 dedup 原本在鎖外比對快照 → 併發時仍會重複 append，改為在鎖內跑 dedupe callback。修 helper 自身 bug：mkstemp 0600 經 os.replace 會靜默收緊 log 權限。機械 gate = scripts/tests/test_work_log_writer_gate.py（AST 掃 scripts/+src/+experiments/，5 種 write shape，allowlist 僅 helper，含 baseline-only-shrinks ratchet 與『不誤判 reader』自檢）。experiments/{K1387,K1655} 的一次性 write 腳本凍進 baseline 而非改寫（實驗產物是執行紀錄，研究誠實）。13 tests 綠、canonical work_log md5 前後不變。"
+  },
+  {
+    "timestamp": "2026-07-14T02:49:18+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-f44f25efb",
+    "outcome": "succeeded",
+    "summary": "fix guarded tests loading production env",
+    "commit": "f44f25efb26557cbc737d464a2b00c0532fea8fa",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T19:42:51.350389+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-14T02:54:47+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-2bcc0b836",
+    "outcome": "succeeded",
+    "summary": "snapshot: before operating docs drift audit",
+    "commit": "2bcc0b83613fb44a97507ce96d3c7a77302e6aa0",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T19:42:51.350381+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-14T03:42:18+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-38c0a624b",
+    "outcome": "succeeded",
+    "summary": "align operating docs with runtime",
+    "commit": "38c0a624b6e112fabfea690140eda5f912c9dead",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T19:42:51.350056+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
