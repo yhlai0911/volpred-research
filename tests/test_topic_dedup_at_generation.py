@@ -33,6 +33,7 @@ from volpred.ops.topic_dedup import (  # noqa: E402
     BLOCK_THEME_SATURATED,
     CLEAN,
     GATE_ERROR,
+    UNJUDGED_THIN_SIGNATURE,
     WARN_ARC_DUP,
     WARN_THEME_SATURATED,
     screen_topic,
@@ -174,18 +175,27 @@ def test_blocked_topic_exposes_audit_blob(crowded_feed):
 
 
 @pytest.mark.parametrize(
-    "title,desc",
+    "title,desc,expected",
     [
+        # The extractor knows carbon/ETS, so the arc gate could look and found nothing.
         ("碳權市場的波動結構：歐盟 ETS 期貨的季節性",
-         "檢視歐盟碳排放權交易體系 ETS 期貨的波動率季節性與到期效應。"),
+         "檢視歐盟碳排放權交易體系 ETS 期貨的波動率季節性與到期效應。",
+         CLEAN),
+        # It has NO vocabulary for USDT/USDC/DeFi -> entities=[] -> the arc gate
+        # never looked. It still must not block (that is what this test guards),
+        # but calling it `clean` was the 2026-07-13/14 lie: "I could not look" is
+        # not "I looked and it is clean". Documents a real blind spot — the entity
+        # vocabulary covers no crypto at all, so no crypto topic is arc-judgeable.
         ("穩定幣脫鉤事件的流動性傳染",
-         "USDT/USDC 脫鉤時，DeFi 池的流動性如何跨鏈傳染。"),
+         "USDT/USDC 脫鉤時，DeFi 池的流動性如何跨鏈傳染。",
+         UNJUDGED_THIN_SIGNATURE),
     ],
 )
-def test_novel_topic_passes(crowded_feed, title, desc):
+def test_novel_topic_passes(crowded_feed, title, desc, expected):
+    """The contract is NOT-BLOCKED. The verdict says whether the gate could see it."""
     screen = screen_topic(title, desc, feed=crowded_feed, mode="block")
     assert screen.blocked is False
-    assert screen.verdict == CLEAN
+    assert screen.verdict == expected
 
 
 def test_theme_gate_does_not_fire_on_legit_event_topic(crowded_feed):

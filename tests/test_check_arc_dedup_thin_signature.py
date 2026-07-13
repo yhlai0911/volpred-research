@@ -15,6 +15,18 @@ The fix cannot be a hard block: `.claude/rules/dedup-gate-audit.md` requires
 fuzzy gates to fail OPEN (a fail-closed dedup gate caused the 2026-06-23 eight-day
 content black hole). So the guard keeps exit 0 and instead refuses to claim the
 piece is clean, surfacing lexical near-misses for the caller to judge.
+
+2026-07-14 recurrence (one day later, same theme, same victims): the trending
+task 「AI變現挑戰：從期權波動率解析科技巨頭的資本定價分歧」 scored
+entities=[US_EQUITY] — non-empty, so the 2026-07-13 guard (`not entities and not
+refs`) did not fire, and the CLI printed `clean` against those same articles.
+US_EQUITY is a CORE entity, which `_is_significant_overlap` subtracts before
+matching, so a core-only entity list is exactly as unanchorable as an empty one.
+
+The guard now asks the matcher itself (`arc_dedup.is_arc_anchorless`) whether it
+had an anchor, so the CLI can no longer hold a narrower opinion than the matcher
+it is reporting on. These tests assert the PREDICATE, not just the hint list the
+old tests exercised — that gap is why the same hole leaked twice.
 """
 
 from __future__ import annotations
@@ -24,6 +36,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(ROOT / "src"))
+
+from volpred.publisher.arc_dedup import arc_signature, is_arc_anchorless  # noqa: E402
 
 from check_arc_dedup import _tokens, find_lexical_hints  # noqa: E402
 
@@ -97,3 +112,59 @@ def test_tokens_handle_cjk_and_latin():
 def test_tokens_drop_short_latin_words():
     """Two-letter noise ('AI', 'of') would match almost anything."""
     assert _tokens("AI of the") == {"the"}
+
+
+# --- the anchor predicate itself -------------------------------------------
+# The 2026-07-13 tests above only exercised find_lexical_hints — the guard's
+# *output*. Nothing asserted the guard actually FIRES on the incident topic, so
+# when the definition of "thin" turned out to be too narrow, no test objected.
+# These pin the predicate.
+
+# 2026-07-14: the topic that came back and passed as `clean`.
+CAPEX_TITLE = "AI變現挑戰：從期權波動率解析科技巨頭的資本定價分歧"
+CAPEX_TEXT = (
+    "隨著市場對 AI 變現速度的審視，高額資本支出面臨考驗。可量化角度：分析美股七巨頭的"
+    "歷史 CapEx 宣告日前後，其隱含波動率（IV）與歷史波動率（HV）的溢價擴張程度。"
+)
+
+
+def test_2026_07_13_incident_topic_is_anchorless():
+    """No K-id, no ticker -> entities=[] -> the matcher never looked."""
+    assert is_arc_anchorless(arc_signature(TOPIC_TITLE, TOPIC_TEXT), None) is True
+
+
+def test_2026_07_14_core_only_entities_is_anchorless():
+    """THE REGRESSION. entities=[US_EQUITY] is non-empty but core-only.
+
+    `_is_significant_overlap` subtracts _CORE_ENTITIES before matching, so this
+    signature can never produce an arc hit — it is exactly as unanchorable as an
+    empty one. The old CLI-local rule (`not entities and not refs`) called this
+    False and printed `clean` against four live twins.
+    """
+    sig = arc_signature(CAPEX_TITLE, CAPEX_TEXT)
+    assert set(sig["entities"]) <= {"US_EQUITY", "VIX", "TW_EQUITY"}, (
+        "fixture drifted: this topic is only a regression while it stays core-only"
+    )
+    assert is_arc_anchorless(sig, None) is True
+
+
+def test_distinctive_entity_is_anchorable():
+    """A non-core entity gives the matcher something to compare on -> not thin."""
+    sig = arc_signature(
+        "銅博士的波動率版本：金屬與股市的尾部連動",
+        "分析 HG=F 銅期貨與 SPY 的尾部相關性與波動率外溢。",
+    )
+    assert set(sig["entities"]) - {"US_EQUITY", "VIX", "TW_EQUITY"}
+    assert is_arc_anchorless(sig, None) is False
+
+
+def test_experiment_ref_alone_is_an_anchor():
+    """No entities at all, but a K-id -> the same-K short-circuit can still fire."""
+    sig = arc_signature("一個沒有標的的題目", "純方法論討論，不提任何資產。")
+    assert is_arc_anchorless(sig, {"K1054"}) is False
+
+
+def test_core_entities_are_never_anchors():
+    """Pin the core set the predicate mirrors, so a matcher change breaks a test."""
+    sig = {"entities": ["US_EQUITY", "VIX", "TW_EQUITY"], "conclusion_class": "descriptive"}
+    assert is_arc_anchorless(sig, None) is True

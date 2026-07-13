@@ -2,6 +2,62 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 06:20 — dedup gate 說 `clean`，其實是「我沒看」— **STRIKE 2，FIXED**（hourly-06）
+
+**現象**：本班 P1 時效任務 `trending_repost_2026_07_14_ai資本`（「AI變現挑戰：從期權波動率解析
+科技巨頭的資本定價分歧」）。生成端 `dedup_screen` 標 `clean`，pre-write CLI `check_arc_dedup.py`
+也回 `verdict=clean` / exit 0。但主線程 layer-2 grep 一查，feed 上同主題（AI 資本支出 × 波動率
+定價）的 general 文章**已經有 5 篇**：`mile_f5f4cb43` / `mile_8a5e80b0` / `mile_49616ac2` /
+`mile_622a2b73` / `mile_ed9e4626`。兩道 gate 各自從不同角度放行了同一篇鬼打牆。
+
+**這是 strike 2，而且是同一批受害文章**：2026-07-13 才發生過一次（trending 題目
+「AI營收不如預期？科技股選擇權偏斜率」，同樣綠燈，同樣是對著 `mile_8a5e80b0` / `mile_49616ac2` /
+`mile_622a2b73` / `mile_f5f4cb43` 這幾篇）。當天的修法是在 `check_arc_dedup.py` 內加一個
+`signature_thin` 判定：`thin = not entities and not refs`。**隔一天就從旁邊漏出去。**
+
+**根因（domain model 錯，不是校準錯）**：`find_arc_duplicates` 的每一條 match 路徑
+（含 descriptive 路徑的 A/B/C 三支）最後都要過 `_is_significant_overlap`，而它會先扣掉
+`_CORE_ENTITIES = {US_EQUITY, VIX, TW_EQUITY}` 再要求 ≥1 個 distinctive 實體。所以
+**「entities 全是 core」與「entities 是空的」對 matcher 而言完全等價 —— 兩者都錨不上任何東西**。
+7/13 那題是 `entities=[]`（抓到了）；7/14 這題是 `entities=[US_EQUITY]`（非空 → `thin=False`
+→ 回報 `clean`）。gate 回的 `[]` 意思是「我沒東西可比」，卻被渲染成「我比過了，很乾淨」。
+
+**真正的結構缺陷 = 判定住錯地方**：「什麼算錨點」是 **matcher** 的知識，7/13 卻把判定寫在
+**CLI** 裡自成一套。兩份定義必然漂移，而且只花了一天。這是 CLAUDE.md anti-stacking 講的
+「一個 concern 兩個 owner」。
+
+**解法（三層，非再 patch 一次）**：
+1. **底層邏輯** — 錨點判定收回定義錨點的模組：`arc_dedup.arc_match_anchors()` /
+   `is_arc_anchorless()` 成為唯一 owner，定義精確鏡射 matcher（distinctive entity **或**
+   experiment ref 才算錨；mechanism 不算 —— descriptive 的 (C) 支仍要求 entity overlap）。
+2. **流程** — `check_arc_dedup.py`（pre-write CLI）與 `topic_dedup.screen_topic`（生成端）
+   **都改呼叫同一個判定**。生成端新增 verdict `unjudged_thin_signature`，不再把「錨不上」
+   寫成 `clean` 進 task row。
+3. **fail-open 不變**（`.claude/rules/dedup-gate-audit.md`）：錨不上**不是**重複的證據，
+   exit 仍 0、仍不擋。改的只是**不准再宣稱 clean** —— 改為交出 lexical near-misses，把判斷
+   交回呼叫者。若改成 block，等於把所有沒有 ticker 的總經／主題型題目全殺掉 = 內容黑洞。
+
+**Regression test**：`tests/test_check_arc_dedup_thin_signature.py` 補**直接針對判定**的案例
+（7/13 的 `entities=[]` 與 7/14 的 `entities=[US_EQUITY]` 都必須判 anchorless）。7/13 那批測試
+只驗了 `find_lexical_hints` 這個附帶產物，**從沒斷言 verdict 本身會 fire** —— 這正是同一個洞
+能再漏一次的原因。已 break-then-verify：新案例對舊定義回 `CLEAN`（FAIL），對新定義回 unjudged。
+
+**順帶挖出的兩個真盲點（未在本班修，已併入既有 task
+`platform_ops_arc_gate_macro_false_positive_trending_lane`，不另開競爭 task）**：
+- **實體詞彙表對加密資產是全盲**：`extract_entities` 不認得 USDT / USDC / DeFi / 穩定幣 →
+  任何加密題目 `entities=[]` → arc gate 從來沒有真正審查過任何一篇加密文章（本次改動讓這件事
+  首次可見：`test_novel_topic_passes` 的穩定幣案例 verdict 從 `clean` 變成 `unjudged`）。
+- **theme_saturation 的 probe 被污染**：probe 直接吃 task title，而 title 帶著
+  `[trending_repost]` 前綴 → `trending` 被當成主題詞（本次事故 task 的 `theme_terms` 實際是
+  `["美股","trending","分析","科技","歷史","資本"]`）。固定 6 格的主題向量被 task-type 前綴與
+  `分析`/`歷史` 這類泛用詞佔位，擠掉 `支出`/`隱含`/`波動率` 等真訊號 → saturation 只數到 4，
+  差一篇沒過 threshold 5。**該 gate 的校準會同時影響發文端**（已知有 macro false-positive
+  問題），故不在本班順手動，交由該 task 一起重新校準。
+
+**教訓（寫進判斷習慣）**：gate 回「沒找到」時，先問**它有沒有能力找**。「我沒看」和「我看了很乾淨」
+在 JSON 上長得一模一樣 —— 這正是 `.claude/rules/dedup-gate-audit.md` 要求 audit trail 的理由。
+還有：**修 gate 時，測試要斷言 gate 會 fire，不能只斷言它的周邊產物會動。**
+
 ## 2026-07-14 05:45 — 護欄放在 fail-open 的 `try` 內，等於沒有護欄 — **FIXED**（hourly-05）
 
 **現象**：main Test Suite 從 2026-07-13 20:00 那班起連兩班紅（run 29280674231 / 29284651466）。

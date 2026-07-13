@@ -56,6 +56,7 @@ from volpred.publisher.arc_dedup import (  # noqa: E402
     find_arc_duplicates,
     find_k_coverage,
     find_lexical_hints,
+    is_arc_anchorless,
     tokenize as _tokens,
 )
 from volpred.publisher.publisher import _log_dedup_decision  # noqa: E402
@@ -133,19 +134,23 @@ def main() -> int:
     )
     report["arc_duplicates"] = dups
 
-    # Gate 3 — thin signature. `find_arc_duplicates` bails out with [] when the
-    # piece has neither entities nor refs (arc_dedup.py ~L856: "with no entities
-    # AND no refs there is nothing to anchor a match on"). That [] means "I could
-    # not look", not "I looked and it is clean" — but this CLI used to render both
-    # as the same ✅. 2026-07-13: the trending task "AI營收不如預期？科技股選擇權偏斜率"
-    # carried no K-id and no ticker, so it scored entities=[] and passed with a
-    # green tick while four live articles already told that exact story
-    # (mile_8a5e80b0 / mile_0941e2f0 / mile_49616ac2 / mile_622a2b73).
+    # Gate 3 — anchor-less signature. When the arc matcher has nothing to anchor
+    # on, its [] means "I could not look", not "I looked and it is clean", and
+    # this CLI must not render the two as the same ✅.
+    #
+    # What counts as an anchor is the MATCHER's business, so the predicate lives
+    # next to it (`arc_dedup.is_arc_anchorless`) instead of being re-derived here.
+    # This CLI used to own its own narrower version — `not entities and not refs`
+    # — and it leaked one day later: 2026-07-14's 「AI變現挑戰」 scored
+    # entities=[US_EQUITY], which is non-empty but core-only, hence just as
+    # unanchorable, so `thin` was False and the CLI printed `clean` against the
+    # same four articles the 2026-07-13 fix was written for.
+    #
     # Per `.claude/rules/dedup-gate-audit.md` a fuzzy gate must fail OPEN, so this
-    # stays exit 0 — a thin signature is not evidence of duplication. What it must
-    # not do is claim the piece is clean. Show the lexical near-misses and put the
+    # stays exit 0 — anchor-less is not evidence of duplication. What it must not
+    # do is claim the piece is clean. Show the lexical near-misses and put the
     # judgement back on the caller, who still owes the 3-layer check either way.
-    thin = not report["entities"] and not new_refs
+    thin = is_arc_anchorless(signature, new_refs)
     report["signature_thin"] = thin
     hints = find_lexical_hints(args.title, text, feed) if thin else []
     report["lexical_hints"] = hints

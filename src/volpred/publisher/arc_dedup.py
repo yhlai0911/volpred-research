@@ -651,6 +651,64 @@ def _entities_for_matching(sig: dict) -> set[str]:
     return set(sig.get("entities") or [])
 
 
+def arc_match_anchors(sig: dict, refs: set[str] | list[str] | None = None) -> dict:
+    """The signals `find_arc_duplicates` can actually anchor a comparison on.
+
+    Single source of truth for "could the arc gate even look?", deliberately
+    living in the module that DEFINES what an anchor is. The 2026-07-13 fix put
+    its own, narrower version of this test inside scripts/check_arc_dedup.py;
+    the two definitions drifted apart within a day (see `is_arc_anchorless`).
+
+    Anchors, mirroring the matcher exactly:
+      * distinctive entity — every match path runs through
+        `_is_significant_overlap`, which subtracts `_CORE_ENTITIES`
+        (US_EQUITY / VIX / TW_EQUITY). A core-only entity list can therefore
+        never produce a significant overlap.
+      * experiment ref — the same-K short-circuit.
+
+    Mechanisms are deliberately NOT an anchor: on the descriptive path, branch
+    (C) of `_descriptive_dup` still requires a significant entity overlap, so a
+    shared mechanism can never carry a match on its own.
+    """
+    ents = _entities_for_matching(sig)
+    ref_set = {_normalize_ref(r) for r in (refs or []) if str(r or "").strip()}
+    return {
+        "distinctive_entities": sorted(ents - _CORE_ENTITIES),
+        "experiment_refs": sorted(ref_set),
+    }
+
+
+def is_arc_anchorless(sig: dict, refs: set[str] | list[str] | None = None) -> bool:
+    """True when `find_arc_duplicates` has nothing to anchor an arc match on.
+
+    Its `[]` then means "I could not look", NOT "I looked and it is clean", and
+    no caller may render it as `clean`.
+
+    Two incidents, one day apart, same theme, same victims:
+
+      2026-07-13 — entities=[]. The trending topic 「AI營收不如預期？科技股選擇權
+      偏斜率」 carried no K-id and no ticker, and passed with a green tick while
+      four live articles already told that exact story. Fix defined thin as
+      `not entities and not refs`, in the CLI.
+
+      2026-07-14 — entities=[US_EQUITY]. The same theme returned as 「AI變現挑戰：
+      從期權波動率解析科技巨頭的資本定價分歧」. entities was non-empty, so `thin`
+      was False and the CLI again printed `clean` — against the very same
+      articles (mile_8a5e80b0 / mile_49616ac2 / mile_622a2b73 / mile_f5f4cb43).
+
+    A core-only entity list is exactly as anchor-less as an empty one, and only
+    the matcher knows that. Hence this predicate lives here, not at the call
+    site. The one path still open on an anchor-less piece is the legacy
+    near-identical-title check, which catches a byte-recycle but cannot see a
+    same-arc piece written fresh — that is a recycle detector, not an arc gate.
+
+    Callers stay fail-OPEN (`.claude/rules/dedup-gate-audit.md`): anchor-less is
+    not evidence of duplication. It just must never be reported as clean.
+    """
+    anchors = arc_match_anchors(sig, refs)
+    return not anchors["distinctive_entities"] and not anchors["experiment_refs"]
+
+
 def _title_tokens(title: str) -> set[str]:
     """Tokenize a title for Jaccard similarity.
 

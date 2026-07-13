@@ -51,8 +51,10 @@ from volpred.ops.canonical_write import guard_canonical_write
 from volpred.ops.diagnostics import warn as _diag_warn
 from volpred.publisher.arc_dedup import (
     THEME_SATURATION_THRESHOLD,
+    arc_signature,
     find_arc_duplicates,
     find_k_coverage,
+    is_arc_anchorless,
     theme_saturation,
 )
 
@@ -66,6 +68,9 @@ BLOCK_THEME_SATURATED = "block_theme_saturated"
 WARN_THEME_SATURATED = "warn_theme_saturated"
 WARN_ARC_DUP = "warn_arc_dup"
 WARN_K_COVERAGE = "warn_k_coverage"
+# Not a hit and not a pass: the arc gate had no anchor, so it never looked.
+# Never blocks (fail-open); it exists so the task row stops claiming `clean`.
+UNJUDGED_THIN_SIGNATURE = "unjudged_thin_signature"
 GATE_ERROR = "gate_error_fail_open"
 
 
@@ -207,6 +212,34 @@ def screen_topic(
                 reason=(
                     f"theme already covered by {saturation} live article(s) in "
                     f"{days}d (threshold {saturation_threshold}); closest: {ids}"
+                ),
+                matches=theme["matches"],
+                theme_terms=theme["theme_terms"],
+                saturation=saturation,
+            )
+
+        # The arc gate returning no hits only means "clean" if it had something to
+        # anchor on. A topic with no K-id and only core entities (US_EQUITY / VIX /
+        # TW_EQUITY) is unanchorable, so `find_arc_duplicates` could not have found
+        # a duplicate even if five of them were live — which is exactly what
+        # happened on 2026-07-13 and again on 2026-07-14 (see `is_arc_anchorless`).
+        # Saturation is an independent signal and may still have judged the topic;
+        # only when it ALSO came up short do we genuinely not know.
+        #
+        # Fail-open per `.claude/rules/dedup-gate-audit.md`: this never blocks.
+        # Blocking on "could not judge" would kill every macro/thematic topic that
+        # carries no ticker — a content black hole, the exact failure that rule
+        # forbids. The task is still created; it just carries an honest verdict and
+        # the near misses, so the dispatching main thread does the 3-layer check
+        # instead of trusting a green tick.
+        if is_arc_anchorless(arc_signature(title, description), new_refs):
+            return TopicScreen(
+                verdict=UNJUDGED_THIN_SIGNATURE,
+                blocked=False,
+                reason=(
+                    "arc gate had no anchor (no distinctive entity, no experiment ref) "
+                    f"— it did not look; theme saturation {saturation} < {saturation_threshold} "
+                    "is the only signal that ran. Caller must do the 3-layer dedup check."
                 ),
                 matches=theme["matches"],
                 theme_terms=theme["theme_terms"],
