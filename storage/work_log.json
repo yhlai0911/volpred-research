@@ -16860,5 +16860,13 @@
     "owner": "hourly-15",
     "commit": null,
     "summary": "dispatch-supervisor stale code（procutil.py 改了沒生效）：以 reload --defer 排入重載，等本班 fire 清空 current_job 後自動 kickstart（waiter pid 81041）。fire 自己就是 in-flight worker，不能當場 reload — 這正是 --defer 的設計用途。"
+  },
+  {
+    "timestamp": "2026-07-13T16:56:00+08:00",
+    "actor": "hourly-16",
+    "task_type": "experiment",
+    "task_id": "k865_gfevd_ordering_robust",
+    "summary": "K865b 收件：GFEVD/KPPS 推翻 K865 的 SPY-hub（Cholesky 排序假象）。回溯更正 knowledge K865→SUPERSEDED + 新增 K865b（Codex primary-path PASS）+ live 文章 mile_1597b341 第四層（線上驗證通過）。Class sweep 16 個 FEVD 站點 → 5 個同類站點，建 scripts/audit_fevd_ordering.py + 凍結 baseline + ratchet test（唯一 enforcement owner）。排 P1 k628b（假 GFEVD 標籤、被 live 文章引用）+ P2 k1025 家族。",
+    "verdict": "succeeded"
   }
 ]

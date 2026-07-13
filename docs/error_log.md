@@ -2,6 +2,30 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 16:13 — compute job 執行失敗後，已生成產物沒有 Git owner
+
+**問題**：compute/lazypack receipt 只有 `result_artifact` 成功後置條件，沒有「哪些檔案屬於這個
+job」的 ownership。lazypack 成功路徑曾在 install 完成後自行 commit panels，但 render 中途寫出
+一張圖再非零退出時會提早 return，commit 永遠走不到；PHASE-Z 又不能掃整棵共享工作區，產物遂成孤兒。
+
+**根因**：execution lifecycle 與 deliverable lifecycle 被混成一件事，且 queue schema 沒有 exact
+path ownership。拿 `result_artifact` 反推也不安全：它可能是目錄或 agent worktree 路徑；遞迴掃描還會
+把 gitignored `_article.md`、`__pycache__` 一起認領。這是 `git add -A` 共用 checkout 事故的同一類：
+沒有作者邊界就不能自動 commit。
+
+**解決**：(a) queue receipt 新增明示、逐檔 `output_paths`；`result_artifact` 不再被視為 ownership；
+(b) renderer 只回填 plan 已知的 `render_lazypack.py` 與 `<panel>.png`，worker 終態寫入前在同一
+`fcntl` receipt lock 內 reload/merge，避免覆蓋 child write-back；(c) hourly reaper 僅接受 main repo
+內、非 symlink、非 ignored 的 exact regular files，以 literal pathspec `git add` + `commit --only`
+提交，先拒絕 scoped pre-staged collision，任何失敗只清自己的 index entries；(d) execution
+`status=failed` 原樣保留，另標 `delivery_status=partial_delivered`，後續晚到 panel 仍可再次收編；
+(e) 移除 lazypack producer 自行 commit 與 PHASE-Z 對整棵 `storage/lazypack_jobs/` 的廣域 ownership，
+讓 reaper 成為單一 owner。
+
+**機械防線**：臨時 Git repo 測試重現「只產 panel 1 就失敗、panel 2 稍後落地」，並同時放入 foreign
+staged/untracked 檔；兩次 sweep 各只提交對應 panel，foreign stage 保持不動，receipt 始終誠實保留
+`status=failed`。另測 repo 外、目錄、symlink、ignored junk、agent worktree 全部 fail-closed。
+
 ## 2026-07-13 16:05 — populate_upcoming_events 寫 config 不 commit：排程 writer 缺 commit 步驟同類第 3 例
 
 **問題**：boss Telegram msg 633/635/640/641/647 連罵五則 —— PHASE-Z「N 個檔案不是這班產出的」

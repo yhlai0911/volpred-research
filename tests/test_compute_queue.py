@@ -85,6 +85,53 @@ def test_compute_queue_has_no_silent_fallback_audit_findings() -> None:
     assert findings == []
 
 
+def _enqueue_args(**over):
+    values = {
+        "id": "owned-output-job",
+        "title": "owned output job",
+        "script": "scripts/example.py",
+        "interpreter": "python",
+        "script_args": [],
+        "env": [],
+        "result_artifact": "results/final.json",
+        "output_paths": None,
+        "followup_brief": None,
+        "followup_task_type": None,
+        "followup_priority": None,
+        "timeout": 60,
+    }
+    values.update(over)
+    return SimpleNamespace(**values)
+
+
+def test_enqueue_requires_explicit_output_ownership(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+
+    assert module.enqueue(_enqueue_args()) == 0
+    job = json.loads((queue_dir / "owned-output-job.json").read_text())
+
+    assert job["result_artifact"] == "results/final.json"
+    assert job["output_paths"] == []  # postcondition is not Git ownership
+
+
+def test_enqueue_normalizes_and_deduplicates_explicit_output_paths(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+
+    args = _enqueue_args(output_paths=["results/a.json", "results/a.json", "results/b.png"])
+    assert module.enqueue(args) == 0
+    job = json.loads((queue_dir / "owned-output-job.json").read_text())
+
+    assert job["output_paths"] == ["results/a.json", "results/b.png"]
+
+
 def _queued_job(queue_dir: Path, log_dir: Path, *, artifact: Path | None) -> Path:
     path = queue_dir / "artifact-postcondition.json"
     path.write_text(
@@ -145,6 +192,34 @@ def test_run_next_completes_when_artifact_exists_or_is_not_declared(
     no_artifact_job = _queued_job(queue_dir, module.LOG_DIR, artifact=None)
     assert module.run_next(SimpleNamespace()) == 0
     assert json.loads(no_artifact_job.read_text())["status"] == "completed"
+
+
+def test_worker_preserves_child_output_writeback_on_nonzero_exit(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    job_path = _queued_job(queue_dir, module.LOG_DIR, artifact=None)
+    panel = tmp_path / "storage" / "lazypack_jobs" / "mile_x" / "panels" / "1.png"
+
+    def failed_child(*args, **kwargs):
+        panel.parent.mkdir(parents=True)
+        panel.write_bytes(b"panel")
+        assert module.record_output_paths("artifact-postcondition", [panel]) is True
+        return SimpleNamespace(returncode=9)
+
+    monkeypatch.setattr(module.subprocess, "run", failed_child)
+
+    assert module.run_next(SimpleNamespace()) == 0
+    job = json.loads(job_path.read_text())
+    assert job["status"] == "failed"
+    assert job["exit_code"] == 9
+    assert job["output_paths"] == [
+        "storage/lazypack_jobs/mile_x/panels/1.png"
+    ]
+    assert job["output_paths_updated_at"]
 
 
 def test_pending_followup_distinguishes_completed_collection_and_failed_agent_triage(

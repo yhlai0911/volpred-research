@@ -102,6 +102,7 @@ def test_enqueue_writes_selfcontained_compute_job(storage, tmp_path, monkeypatch
     assert job["script_path"] == "scripts/lazypack_async_render.py"
     assert job["interpreter"] == "uv run python"
     assert job["args"][0] == "run"
+    assert "--job-id" in job["args"] and "lazypack-mile_lz1" in job["args"]
     assert "--article-id" in job["args"] and "mile_lz1" in job["args"]
     assert "--experiment" in job["args"] and "K9001" in job["args"]
     assert job["claude_followup"] is None  # job completes itself — 0 Claude tokens
@@ -109,6 +110,13 @@ def test_enqueue_writes_selfcontained_compute_job(storage, tmp_path, monkeypatch
     stored_plan = storage / "lazypack_jobs" / "mile_lz1" / "plan.json"
     assert stored_plan.exists()
     assert json.loads(stored_plan.read_text(encoding="utf-8")) == _PLAN
+    panels_dir = storage / "lazypack_jobs" / "mile_lz1" / "panels"
+    assert job["output_paths"] == [
+        str(stored_plan),
+        str(panels_dir / "render_lazypack.py"),
+        str(panels_dir / "1_framework.png"),
+        str(panels_dir / "2_results.png"),
+    ]
 
 
 def test_enqueue_idempotent_while_queued(storage, tmp_path, monkeypatch, capsys):
@@ -228,6 +236,44 @@ def test_run_fails_when_render_produces_no_pngs(storage, tmp_path):
         no_sync=True,
     )
     assert ns and lar.cmd_run(ns) == 3
+
+
+def test_failed_render_writes_back_partial_panel_ownership(
+    storage,
+    tmp_path,
+    monkeypatch,
+):
+    qdir = _patch_queue(monkeypatch, tmp_path)
+    assert lar.cmd_enqueue(_enqueue_ns(tmp_path)) == 0
+    job_path = qdir / "lazypack-mile_lz1.json"
+    stored_plan = storage / "lazypack_jobs" / "mile_lz1" / "plan.json"
+    out_dir = storage / "lazypack_jobs" / "mile_lz1" / "panels"
+    stub = tmp_path / "partial_then_fail.py"
+    stub.write_text(
+        "import sys\n"
+        "from pathlib import Path\n"
+        "out = Path(sys.argv[2]); out.mkdir(parents=True, exist_ok=True)\n"
+        "(out / '1_framework.png').write_bytes(b'P' * 2048)\n"
+        "raise SystemExit(9)\n",
+        encoding="utf-8",
+    )
+    ns = argparse.Namespace(
+        job_id="lazypack-mile_lz1",
+        article_id="mile_lz1",
+        experiment=[], source=[], title=None,
+        storage_dir=str(storage),
+        plan=str(stored_plan),
+        out_dir=str(out_dir),
+        render_cmd=f"{sys.executable} {stub}",
+        upload_cmd=None,
+        no_sync=True,
+    )
+
+    assert lar.cmd_run(ns) == 2
+    job = json.loads(job_path.read_text(encoding="utf-8"))
+    assert job["output_paths_updated_at"]
+    assert str(out_dir / "1_framework.png") in job["output_paths"]
+    assert (out_dir / "1_framework.png").exists()
 
 
 # ------------------------------------------------------------- release gate --

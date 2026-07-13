@@ -21533,8 +21533,8 @@
   {
     "id": "K865",
     "experiment_id": "K865",
-    "title": "K865 [CORRECTED 2026-07-11]: Vol Spillover Network -- FEVD axis bug voided the original findings; SPY is a net transmitter in every window and BTC a net receiver",
-    "content": "[提出: Claude, 執行: Claude] [CORRECTED 2026-07-11: FEVD shape bug] K865 updates K356's vol spillover network with 2026 tariff data. Diebold-Yilmaz VAR(5) on 7 assets (SPY/QQQ/GLD/TLT/EEM/OIL/BTC), 2020-2026.\n\nRETRACTION: the original entry reported (a) a Total Spillover Index stable at ~90% across all regimes, (b) SPY flipping from net receiver to net transmitter during the 2026 tariff shock, and (c) BTC as the dominant transmitter / COVID-era contagion hub. ALL THREE ARE WRONG. `k865_vol_spillover_network.py:116` read the FEVD as `fevd.decomp[-1]`, but statsmodels returns shape (n, horizon, n): axis 0 is the variable being decomposed, not the horizon. The code therefore took one variable's horizon profile and treated it as the n x n spillover matrix. The ~90% constant TSI was an artifact of that mis-slice (a red flag in hindsight: BTC's net value of +536 exceeds what the measure can produce).\n\nCORRECTED FINDINGS (rerun after fixing to `fevd.decomp[:, -1, :]`): TSI varies with regime, it is NOT structural: COVID 61.2, post-COVID 26.7, rate-hike 33.1, calm 2024-25 32.8, tariff 39.6. SPY is a NET TRANSMITTER in all five windows (+103.8 to +182.7) with NO role flip. BTC is a NET RECEIVER in all five windows (-16 to -45), never a hub. The tariff-period rise in connectedness remains statistically insignificant (rolling TSI t=0.302, p=0.382) -- the one original claim that survives is a null. The corrected SPY-hub picture is consistent with K7 / K356; the old 'BTC dominant' result contradicted those priors and should have been read as a bug signal rather than a new finding.\n\nUNRESOLVED (do not over-claim): statsmodels' FEVD is Cholesky-orthogonalised and therefore ordering-dependent. SPY is ordered first, which biases it toward looking like a transmitter. The 'SPY is the hub' conclusion is NOT yet ordering-robust and needs a generalized-FEVD (KPPS) rerun before any strong claim is made. Rolling TSI is also over-parameterised (VAR(5) x 7 vars on 63 obs), so only relative movement is interpretable.\n\nDOWNSTREAM CORRECTIONS APPLIED 2026-07-11: feed article mile_8cc3dfe9 retracted (every headline number void); live digest mile_1597b341 layer-4 rewritten and its link to the retracted article removed. Mechanical gate added: scripts/tests/test_fevd_shape.py (synthetic-iid FEVD must yield TSI < 5%; the buggy slice yields ~80%; AST sweep bans `.decomp[-1]` repo-wide). Old results preserved at experiments/k865/k865_results_SUPERSEDED_fevd_bug.json. See docs/error_log.md 2026-07-11.",
+    "title": "K865 [SUPERSEDED 2026-07-13 by K865b]: Vol Spillover Network -- FEVD axis bug (fixed 2026-07-11) AND Cholesky ordering artifact; the SPY-hub / BTC-receiver directional claims are VOID",
+    "content": "[提出: Claude, 執行: Claude] [CORRECTED 2026-07-11: FEVD shape bug] K865 updates K356's vol spillover network with 2026 tariff data. Diebold-Yilmaz VAR(5) on 7 assets (SPY/QQQ/GLD/TLT/EEM/OIL/BTC), 2020-2026.\n\nRETRACTION: the original entry reported (a) a Total Spillover Index stable at ~90% across all regimes, (b) SPY flipping from net receiver to net transmitter during the 2026 tariff shock, and (c) BTC as the dominant transmitter / COVID-era contagion hub. ALL THREE ARE WRONG. `k865_vol_spillover_network.py:116` read the FEVD as `fevd.decomp[-1]`, but statsmodels returns shape (n, horizon, n): axis 0 is the variable being decomposed, not the horizon. The code therefore took one variable's horizon profile and treated it as the n x n spillover matrix. The ~90% constant TSI was an artifact of that mis-slice (a red flag in hindsight: BTC's net value of +536 exceeds what the measure can produce).\n\nCORRECTED FINDINGS (rerun after fixing to `fevd.decomp[:, -1, :]`): TSI varies with regime, it is NOT structural: COVID 61.2, post-COVID 26.7, rate-hike 33.1, calm 2024-25 32.8, tariff 39.6. SPY is a NET TRANSMITTER in all five windows (+103.8 to +182.7) with NO role flip. BTC is a NET RECEIVER in all five windows (-16 to -45), never a hub. The tariff-period rise in connectedness remains statistically insignificant (rolling TSI t=0.302, p=0.382) -- the one original claim that survives is a null. The corrected SPY-hub picture is consistent with K7 / K356; the old 'BTC dominant' result contradicted those priors and should have been read as a bug signal rather than a new finding.\n\nUNRESOLVED (do not over-claim): statsmodels' FEVD is Cholesky-orthogonalised and therefore ordering-dependent. SPY is ordered first, which biases it toward looking like a transmitter. The 'SPY is the hub' conclusion is NOT yet ordering-robust and needs a generalized-FEVD (KPPS) rerun before any strong claim is made. Rolling TSI is also over-parameterised (VAR(5) x 7 vars on 63 obs), so only relative movement is interpretable.\n\nDOWNSTREAM CORRECTIONS APPLIED 2026-07-11: feed article mile_8cc3dfe9 retracted (every headline number void); live digest mile_1597b341 layer-4 rewritten and its link to the retracted article removed. Mechanical gate added: scripts/tests/test_fevd_shape.py (synthetic-iid FEVD must yield TSI < 5%; the buggy slice yields ~80%; AST sweep bans `.decomp[-1]` repo-wide). Old results preserved at experiments/k865/k865_results_SUPERSEDED_fevd_bug.json. See docs/error_log.md 2026-07-11.\n\n[SUPERSEDED 2026-07-13 by K865b — ordering artifact] 上面 CORRECTED FINDINGS 裡的 'SPY is a NET TRANSMITTER in all five windows (+103.8 to +182.7)' 與 'BTC is a NET RECEIVER in all five windows' 兩句 **同樣作廢**。本條目自己標記的 UNRESOLVED（Cholesky ordering dependence）已由 K865b 查實：K865 把 SPY 排第一，而該排序在 52 個隨機排序中每個視窗都取到 SPY NET 的最大值；Spearman(SPY 位置, NET) = -0.67~-0.89 (p<0.0001)。改用 order-invariant GFEVD (KPPS) 後 SPY NET 縮為 +7.6~+20.6pp、關稅視窗翻為淨接收者 (-5.8)，僅 2/5 視窗為最大傳染源；BTC 在 COVID (+18.9) 與升息 (+23.5) 反而是淨傳染源。rolling TSI 與跨 regime TSI 比較亦全數作廢（無溢出虛無地板：63-obs 視窗 66.5%，實測僅高 5.9pp，且 61% 的 rolling VAR 非平穩）。**仍成立**：連動性存在（五視窗 TSI 皆遠超無溢出虛無，empirical p=0）、Granger 結果、RV 描述統計。方向性結論一律以 K865b 為準。",
     "tags": [
       "network",
       "spillover",
@@ -21549,11 +21549,13 @@
     "data_source": "yfinance (SPY, QQQ, GLD, TLT, EEM, CL=F, BTC-USD), 2020-2026",
     "category": "knowledge",
     "created_at": "2026-04-05T09:59:30.259688",
-    "updated_at": "2026-04-05T09:59:30.259696",
+    "updated_at": "2026-07-13T16:20:00+08:00",
     "superseded_content": "[提出: Claude, 執行: Claude] K865 updates K356 vol spillover network with 2026 tariff data. Diebold-Yilmaz VAR(5) on 7 assets (SPY/QQQ/GLD/TLT/EEM/OIL/BTC), 2020-2026. KEY FINDING: Total Spillover Index stable ~90% across ALL periods (COVID 90.9%, calm 90.5%, tariff 90.9%, t=0.92 NS). Network connectivity is structural, not crisis-dependent. BUT: SPY flipped from net vol RECEIVER (-35 to -51 in prior periods) to net TRANSMITTER (+14.4) during tariff crisis — US policy uncertainty now EXPORTS vol. Asymmetric impact: OIL RV 2.83x, EEM 2.04x, GLD 1.84x vs SPY only 1.02x — EM and commodities absorbed the shock. BTC dominates as transmitter in ALL periods. COVID had 31/42 Granger links vs tariff only 14/42 — tariff is sector-specific, not systemic. LIMITATION: data ends 04/02, April 3 crash not captured.",
     "superseded_title": "K865: Vol Spillover Network — SPY Flipped from Receiver to Transmitter During Tariff Crisis (TSI Stable ~90%)",
     "superseded_reason": "FEVD axis bug (fevd.decomp[-1] on a (n, horizon, n) array) voided all spillover-matrix numbers. Corrected and rerun 2026-07-11.",
-    "corrected_at": "2026-07-11"
+    "corrected_at": "2026-07-11",
+    "verdict": "SUPERSEDED",
+    "superseded_by": "K865b"
   },
   {
     "id": "K866",
@@ -38804,5 +38806,29 @@
     "experiment_path": "experiments/k1702",
     "supersedes_review_state": "K1702 CONDITIONAL_PASS entry with reviewer_source=code-reviewer subagent fallback",
     "created_at": "2026-07-13T09:29:50.981154+08:00"
+  },
+  {
+    "id": "K865b",
+    "experiment_id": "K865b",
+    "k_id": "K865b",
+    "title": "K865b: Diebold-Yilmaz 的 SPY-hub 結論是 Cholesky 排序假象 — order-invariant GFEVD (KPPS) 推翻方向性宣稱，但總溢出本身是真的",
+    "verdict": "PASS",
+    "reviewer": "Codex (codex-cli 0.144.1 / gpt-5.6-sol / ultra) — PASS；第二位 feature-dev:code-reviewer 交叉審查",
+    "reviewer_source": "codex_primary_path",
+    "experiment_path": "experiments/k865b/",
+    "confidence": 0.85,
+    "category": "methodology",
+    "content": "[提出: Claude, 執行: Claude, 審查: Codex primary-path PASS] K865b 檢驗 K865 自己標為 UNRESOLVED 的排序相依問題。資料同 K865：7 資產 (SPY/QQQ/GLD/TLT/EEM/OIL/BTC) VAR(5)，2020-2026 五個 regime 視窗。\n\n結論一（方向性作廢）：K865 的 'SPY 五視窗全為淨傳染源 (+103.8~+182.7)' 是 Cholesky 排序假象。Cholesky FEVD 依賴變數排序，K865 把 SPY 排第一。跨 52 個隨機排序，SPY 的 Cholesky NET 分布橫跨 -91 到 +107（COVID 視窗），fraction_positive 只有 0.42-0.60（等於擲銅板）；Spearman(SPY 排序位置, SPY NET) = -0.78 (COVID, p<1e-4)，即『SPY 排越前面 NET 越大』。K865 用的 identity ordering 恰好是讓 SPY 最像傳染源的那一種。\n\n結論二（GFEVD 才是正解）：改用 Pesaran-Shin KPPS generalized FEVD（order-invariant，實測跨 52 排序最大偏差 2.6e-12，確認不變性）後：SPY NET 只剩 covid 8.84 / post-covid 15.45 / rate-hike 7.64 / calm 20.63 / tariff **-5.79（淨接收者）**；最大淨傳染源逐視窗換人（QQQ / SPY / BTC / SPY / EEM）。'SPY 是 hub' 與 'BTC 是純接收者' 兩個宣稱都不成立。\n\n結論三（什麼倖存）：總溢出指數 (TSI) 本身是真的。對照『各資產獨立 AR(p)、真 TSI=0』的虛無 DGP（200 reps），五視窗實測 TSI 全部遠超虛無地板（covid 64.2 vs 地板中位 34.4；calm 44.3 vs 3.9；empirical p=0.0），連動性存在無疑。但**跨 regime 的 TSI 高低比較作廢**——虛無地板隨樣本數劇烈變動（136 obs 的 COVID 地板 34.4% vs 790 obs 的 calm 3.9%），扣掉地板後排序反轉。rolling TSI 亦作廢：63-obs 視窗地板高達 66.5%、實測僅高 5.9pp，且 61.2% 的 rolling VAR 非平穩（特徵根出單位圓；Codex 審查獨立查出）。\n\n方法論教訓（可複用，優先於本題結論）：(a) **Cholesky FEVD 的任何方向性結論，報告前必須做排序置換或直接改用 GFEVD**——單一排序的 NET 值無法區分『真傳染源』與『排在第一』；(b) **連通性指標必須對照 no-spillover 虛無地板**，因為 VAR(p)×n 在小樣本上會機械性生出高 TSI，裸值不可跨視窗比較；(c) rolling VAR 要查平穩性，非平穩 fit 的 FEVD 無意義。\n\n回溯更正已執行：knowledge K865 標 SUPERSEDED（方向性部分）；已發佈文章 mile_1597b341 第四層的『SPY 全期淨傳染源、BTC 全期淨接收者』正面宣稱撤回，改為『這張網路圖的方向性我們算不準，兩個版本都收回』。",
+    "evidence": [
+      "experiments/k865b/k865b_results.json",
+      "experiments/k865b/README.md",
+      "GFEVD 跨 52 排序最大偏差 2.6e-12（order-invariance 實證）",
+      "Spearman(SPY position, Cholesky NET) = -0.784, p<1e-4 (covid_crisis)",
+      "SPY GFEVD NET: covid 8.84 / post-covid 15.45 / rate-hike 7.64 / calm 20.63 / tariff -5.79",
+      "null floor (independent AR DGP, 200 reps): 五視窗 empirical p = 0.0",
+      "K865 reproduction check: 40 quantities, max_abs_diff 0.0083 < tol 0.05 (PASS)"
+    ],
+    "created_at": "2026-07-13T16:20:00+08:00",
+    "updated_at": "2026-07-13T16:20:00+08:00"
   }
 ]

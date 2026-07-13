@@ -12,6 +12,8 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -189,3 +191,162 @@ def test_phase_z_alert_never_offers_discard_as_an_exit():
     alert_bodies = src[src.index("def run_phase_z") if "def run_phase_z" in src else 0:]
     assert "丟掉" not in alert_bodies, "alert 不得建議丟掉未提交的檔案"
     assert "commit 或捨棄" not in alert_bodies, "alert 不得把『捨棄』列為二選一的出口"
+
+
+# ── Queue deliverables：failed renderer 也要保住已生成 panel ────────────────
+
+def _repo_git(root: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess:
+    env = os.environ.copy()
+    for key in reaper._GIT_ENV_KEYS:
+        env.pop(key, None)
+    return subprocess.run(
+        ["git", "-C", str(root), *args],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=check,
+    )
+
+
+def _init_git_repo(root: Path) -> None:
+    root.mkdir(parents=True)
+    _repo_git(root, "init", "-q")
+    _repo_git(root, "config", "user.email", "reaper@test.local")
+    _repo_git(root, "config", "user.name", "orphan-reaper-test")
+    _repo_git(root, "config", "commit.gpgsign", "false")
+    hooks = root / ".empty-hooks"
+    hooks.mkdir()
+    excludes = root / ".empty-global-ignore"
+    excludes.write_text("", encoding="utf-8")
+    _repo_git(root, "config", "core.hooksPath", str(hooks))
+    _repo_git(root, "config", "core.excludesFile", str(excludes))
+    (root / "seed.txt").write_text("seed\n", encoding="utf-8")
+    _repo_git(root, "add", "seed.txt")
+    _repo_git(root, "commit", "-qm", "seed")
+
+
+def test_failed_lazypack_commits_only_existing_declared_panels_and_reaps_late_arrival(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Codex writes panel 1 then fails; panel 2 arrives after the first sweep."""
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    queue = root / "storage" / "ops" / "compute_queue"
+    panels = root / "storage" / "lazypack_jobs" / "mile_partial" / "panels"
+    queue.mkdir(parents=True)
+    panels.mkdir(parents=True)
+    panel1 = panels / "1_framework.png"
+    panel2 = panels / "2_results.png"
+    panel1.write_bytes(b"P" * 2048)
+
+    # Stronger than an untracked foreign file: prove an already-staged foreign
+    # change is neither committed nor cleared by scoped cleanup.
+    foreign_staged = root / "foreign_staged.txt"
+    foreign_staged.write_text("another session\n", encoding="utf-8")
+    _repo_git(root, "add", "foreign_staged.txt")
+    foreign_untracked = root / "foreign_untracked.txt"
+    foreign_untracked.write_text("also another session\n", encoding="utf-8")
+
+    job_path = queue / "lazypack-mile_partial.json"
+    job_path.write_text(json.dumps({
+        "id": "lazypack-mile_partial",
+        "kind": "compute",
+        "status": "failed",
+        "exit_code": 9,
+        "output_paths": [
+            str(panel1.relative_to(root)),
+            str(panel2.relative_to(root)),
+        ],
+    }), encoding="utf-8")
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+
+    first_scan = reaper.scan_job_deliverables()
+    assert [item["job_id"] for item in first_scan["candidates"]] == [
+        "lazypack-mile_partial"
+    ]
+    first = reaper.deliver_job_outputs(first_scan["candidates"][0])
+    assert first["delivered"] is True
+    assert first["delivery_status"] == "partial_delivered"
+    first_head = _repo_git(root, "rev-parse", "HEAD").stdout.strip()
+    assert first["delivery_commit"] == first_head
+    assert _repo_git(root, "show", "--pretty=", "--name-only", "HEAD").stdout.split() == [
+        str(panel1.relative_to(root))
+    ]
+    assert _repo_git(root, "diff", "--cached", "--name-only").stdout.strip() == \
+        "foreign_staged.txt"
+    assert foreign_untracked.exists()
+    receipt = json.loads(job_path.read_text(encoding="utf-8"))
+    assert receipt["status"] == "failed"  # execution truth is never rewritten
+    assert receipt["delivery_status"] == "partial_delivered"
+    assert receipt["delivered_paths"] == [str(panel1.relative_to(root))]
+
+    # No new file means no duplicate commit.
+    assert reaper.scan_job_deliverables()["candidates"] == []
+    assert _repo_git(root, "rev-parse", "HEAD").stdout.strip() == first_head
+
+    # The escaped renderer lands panel 2 later. partial_delivered must remain
+    # re-openable so the next sweep preserves that file too.
+    panel2.write_bytes(b"Q" * 2048)
+    second_scan = reaper.scan_job_deliverables()
+    assert second_scan["candidates"][0]["paths"] == [str(panel2.relative_to(root))]
+    second = reaper.deliver_job_outputs(second_scan["candidates"][0])
+    assert second["delivered"] is True
+    assert second["delivery_status"] == "partial_delivered"
+    assert _repo_git(root, "show", "--pretty=", "--name-only", "HEAD").stdout.split() == [
+        str(panel2.relative_to(root))
+    ]
+    receipt = json.loads(job_path.read_text(encoding="utf-8"))
+    assert receipt["delivered_paths"] == sorted([
+        str(panel1.relative_to(root)), str(panel2.relative_to(root)),
+    ])
+    assert receipt["status"] == "failed"
+
+
+def test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    (root / ".gitignore").write_text("*.tmp\n", encoding="utf-8")
+    _repo_git(root, "add", ".gitignore")
+    _repo_git(root, "commit", "-qm", "ignore temp files")
+    queue = root / "storage" / "ops" / "compute_queue"
+    queue.mkdir(parents=True)
+    ignored = root / "storage" / "ignored.tmp"
+    ignored.parent.mkdir(parents=True, exist_ok=True)
+    ignored.write_text("junk", encoding="utf-8")
+    directory = root / "storage" / "not-a-file"
+    directory.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_text("outside", encoding="utf-8")
+    symlink = root / "storage" / "escape-link"
+    symlink.symlink_to(outside)
+    (queue / "compute-invalid.json").write_text(json.dumps({
+        "id": "compute-invalid", "kind": "compute", "status": "failed",
+        "output_paths": [str(ignored.relative_to(root)), str(directory.relative_to(root)),
+                         str(outside), str(symlink.relative_to(root))],
+    }), encoding="utf-8")
+    (queue / "agent-external.json").write_text(json.dumps({
+        "id": "agent-external", "kind": "agent", "status": "failed",
+        "output_paths": [str(outside)],
+    }), encoding="utf-8")
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+
+    result = reaper.scan_job_deliverables()
+    assert result["candidates"] == []
+    held = next(item for item in result["held"] if item["job_id"] == "compute-invalid")
+    reasons = {item["reason"] for item in held["rejected"]}
+    assert reasons == {"git_ignored", "missing_or_not_regular_file",
+                       "outside_repo", "symlink_not_owned"}
+
+
+def test_job_reaper_source_has_no_broad_git_add() -> None:
+    src = (REPO_ROOT / "scripts" / "reap_orphan_deliverables.py").read_text(
+        encoding="utf-8"
+    )
+    assert '_git("add", "-A"' not in src
+    assert '_git("add", "."' not in src

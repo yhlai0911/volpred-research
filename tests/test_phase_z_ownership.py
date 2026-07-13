@@ -182,6 +182,13 @@ def test_agent_work_is_committed_when_tree_was_clean(repo: Path) -> None:
     assert outcome["foreign"] == []
 
 
+def test_lazypack_outputs_are_not_broad_machine_churn() -> None:
+    """Exact queue output_paths + reaper own panels; PHASE-Z must not claim a tree."""
+    assert phase_z._is_machine_state(
+        "storage/lazypack_jobs/mile_x/panels/1_framework.png"
+    ) is False
+
+
 def test_agent_deletion_is_committed(repo: Path) -> None:
     """`git add -A -- <path>` stages the removal; a naive `git add <path>` does not."""
     phase_z.run_pre_fire_guard(repo_root=repo)

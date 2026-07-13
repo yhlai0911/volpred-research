@@ -194,6 +194,7 @@ def test_enqueue_agent_resolves_result_from_worktree_and_separates_metadata(
     expected_metadata = root / "storage/ops/agent_jobs/agent-artifact-test.json"
 
     assert job["result_artifact"] == str(expected_result)
+    assert job["output_paths"] == []  # worktree artifact is not main-repo Git ownership
     assert job["job_metadata"] == str(expected_metadata)
     assert job["kind"] == "agent"
     assert job["cwd"] == str(worktree)
@@ -227,6 +228,7 @@ def test_enqueue_agent_without_result_does_not_invent_a_fake_artifact(
         (root / "storage/ops/compute_queue/agent-code-only.json").read_text()
     )
     assert job["result_artifact"] is None
+    assert job["output_paths"] == []
     assert job["kind"] == "agent"
     assert job["cwd"] == str(worktree)
     assert "--result-artifact" not in job["args"]

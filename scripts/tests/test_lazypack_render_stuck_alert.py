@@ -73,6 +73,22 @@ def test_fires_on_the_incident_state(tmp_path):
     assert [s["article_id"] for s in stranded] == [ARTICLE]
 
 
+def test_partial_delivery_does_not_hide_execution_failure(tmp_path):
+    """Saving one panel is good, but the article is still stranded without its section."""
+    job = _job(f"lazypack-{ARTICLE}", "failed")
+    job.update({
+        "delivery_status": "partial_delivered",
+        "partial_delivered": True,
+        "delivered_paths": [f"storage/lazypack_jobs/{ARTICLE}/panels/1.png"],
+    })
+    storage = _storage(tmp_path, jobs=[job], article_content="")
+
+    result = _parse_lazypack_render_state(storage, NOW)
+
+    assert result["breached"] is True
+    assert result["details"]["stranded"][0]["job_id"] == f"lazypack-{ARTICLE}"
+
+
 def test_escalates_to_critical_after_a_day(tmp_path):
     storage = _storage(
         tmp_path,

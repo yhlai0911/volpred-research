@@ -19,6 +19,7 @@
 #     --script-args storage/ops/codex_reviews/kXXXX_prompt.md \
 #                   storage/ops/codex_reviews/kXXXX_verdict.md 2400 \
 #     --result-artifact storage/ops/codex_reviews/kXXXX_verdict.md \
+#     --output-path storage/ops/codex_reviews/kXXXX_verdict.md \
 #     --followup-brief '...' --followup-task-type experiment --timeout 2700
 #
 # Sandbox is read-only: a reviewer that can write is a reviewer that can "fix" the thing
