@@ -6726,3 +6726,19 @@ claim 必須使用 exposure-matched path null，circular phase null 要保留 si
 cost path；(3) 完整枚舉的 exact p 明列母體與分母，不套 Monte Carlo `+1` 修正；(4) 結果
 CSV/PNG/JSON 一律 atomic write，JSON 保存 script 與 artifact SHA-256；(5) null result 的語句
 只能寫「未偵測到證據」，不可寫成不存在。
+
+## 2026-07-13 — 無人載具系列把 Green UAS 當成 Blue UAS 的替代查核，並誤標立院議程
+
+**症狀**：EP0 把「雷虎已取得美國國防部 Blue UAS 認證」寫成既成事實；EP3 回溯時只查
+AUVSI Green UAS Cleared List，卻用它更正 Blue UAS 說法。EP3 同時把立法院 2026-07-16
+三委員會第 1 次聯席會議的「併案審查」誤寫成公聽會。
+
+**根因**：認證查核沒有先區分 Blue UAS 與 Green UAS 的制度邊界，議程則只看日期與頁面標題，
+未逐字核對立法院官方議事資訊。長榮航太的股東會手冊另直接連到已失效的文件 URL，使讀者
+無法回到公司目前的股東專區查證。
+
+**修正與防再犯**：EP0 正式撤回「已取得 Blue UAS」的說法；EP3 與證據產生程式改列 DIU
+Blue UAS 公開資料、清單移交公告及 Green→Blue 路徑說明，明示 Green 與 Blue 不可互相替代，
+也不把「未找到公開證據」寫成「未取得」。立院事件一律逐字使用官方議程名稱與會議性質；
+公司文件優先連可導覽的投資人專區，並在發佈前做 HTTP 狀態檢查。所有回溯更正均須同時修改
+來源稿、產生程式、正式文章 errata 與系列 registry，不能只修 reader-facing JSON。

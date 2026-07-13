@@ -1,0 +1,30 @@
+[
+  {
+    "name": "1_disclosure_ladder",
+    "info": "concept",
+    "style": "professional",
+    "alt": "十家下游廠的公開揭露階梯分成二、六、二三層",
+    "must_show": "只講公開證據階梯。十家公司分成互斥三層：量產或已交付 2 家、產品原型或合作 6 家、資格或能力 2 家；本次查核來源中，拆出無人載具營收占比 0 家、公開可核對具約束力無人載具訂單金額 0 家。核心提醒：資格不等於得標、原型不等於量產、公司總營收不等於無人載具營收。所有數字必須從 storage/drafts/drone_ep3_downstream_evidence.json 的 summary 與 companies 讀取，缺欄位 raise，禁止臆造。底部標示資料來源：drone_ep3_downstream_evidence.json（證據包未提供 experiment K 編號）。風格專業、簡潔、資料導向；禁止卡通人物、可愛插畫、手繪塗鴉風。"
+  },
+  {
+    "name": "2_method",
+    "info": "method",
+    "style": "editorial",
+    "alt": "EP3 的公司揭露、財報與共同股價窗口查核方法",
+    "must_show": "只講方法。公司範圍為下游整機、系統整合、地面控制站與無人艇 10 家；公司階段取截至 2026-07-13 找到的最高公開階段，三層互斥。財報使用 FY2025 年度損益表；價格取 yfinance 還原收盤價，十家公司與加權指數共同窗口 2025-06-30 至 2026-07-09，共 250 個交易日；等權籃用每日等權對數報酬、不含成本。政策與公司階段使用 evidence 附的官方／公司來源。Blue UAS 與 Green UAS 是不同查核路徑，不互相替代。所有日期與數字必須從 storage/drafts/drone_ep3_downstream_evidence.json 的 as_of_date、price_window_common、method、policy 與 certification_check 讀取，缺欄位 raise。底部標示資料來源：drone_ep3_downstream_evidence.json（證據包未提供 experiment K 編號）。風格專業、簡潔、資料導向；禁止卡通人物、可愛插畫、手繪塗鴉風。"
+  },
+  {
+    "name": "3_budget_vs_orders",
+    "info": "results",
+    "style": "bento-grid",
+    "alt": "二千一百億元法案上限與十家公司公開訂單證據的落差",
+    "must_show": "只講政策上限與公司單據的落差。法案經費上限 2,100 億元、規畫 1,320 艘小型自殺無人艇，查核日仍是已付委但未完成立法的草案，2026-07-16 排定三委員會聯席併案審查；這些不是個別公司的已得標訂單。十家公司中，量產或已交付只有中光電與龍德造船；仍沒有公司在本次來源中拆出具約束力無人載具訂單金額。所有數字與公司名必須從 storage/drafts/drone_ep3_downstream_evidence.json 的 policy、summary 與 companies 讀取，缺欄位 raise。底部標示資料來源：drone_ep3_downstream_evidence.json（證據包未提供 experiment K 編號）。風格專業、簡潔、資料導向；禁止卡通人物、可愛插畫、手繪塗鴉風。"
+  },
+  {
+    "name": "4_portfolio_risk",
+    "info": "takeaway",
+    "style": "scientific",
+    "alt": "十家公司等權籃落後加權指數且承受更高波動",
+    "must_show": "只講投資組合結果與下一步風險單據。共同窗口內，十家公司每日等權籃報酬 +57.9%、年化波動 35.4%；同期加權指數 +103.8%、年化波動 23.5%；籃子少 45.9 個百分點。把後續查核收在四張單據：決標公告、交貨紀錄、營收拆分、獲利與現金。明示這是描述性統計、等權籃未計成本、歷史不等於未來、非投資建議。數字必須從 storage/drafts/drone_ep3_downstream_evidence.json 的 summary、price_window_common 與 method 讀取，缺欄位 raise。底部標示資料來源：drone_ep3_downstream_evidence.json（證據包未提供 experiment K 編號）。風格專業、簡潔、資料導向；禁止卡通人物、可愛插畫、手繪塗鴉風。"
+  }
+]

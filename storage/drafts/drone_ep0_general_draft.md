@@ -29,13 +29,13 @@ series: 無人載具
 
 更一致的是波動這一側。29 檔的年化波動率**全部**高於加權指數的 23.4%，一檔例外都沒有。個股波動中位數 49.0%，是指數的兩倍出頭；碳基 94.3% 排第一，最低的聯詠也有 31.8%。
 
-![名冊 29 檔的風險與報酬座標](storage/drafts/assets/drone_ep0_risk_return.png)
+![名冊 29 檔的風險與報酬座標](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/drone_ep0_risk_return.png)
 
 散佈圖上那顆紅色星星是加權指數。它待在左上角，意思是低波動、高報酬；而幾乎所有名冊股都落在它的右側，付出了更高的波動，多數人卻沒換回更高的報酬。
 
 有趣的是等權籃的波動只有 29.4%，遠低於個股中位數的 49.0%。分散化確實把單檔的劇烈起伏抵消掉大半，代價是它同時也把雷虎那種 +280% 的爆發稀釋掉了，最後剩下一條落後大盤的曲線。
 
-![等權籃 vs 加權指數 累積報酬與滾動波動](storage/drafts/assets/drone_ep0_basket_vs_twii.png)
+![等權籃 vs 加權指數 累積報酬與滾動波動](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/drone_ep0_basket_vs_twii.png)
 
 上圖還藏了一段時間軸的故事。2025 年 9 月前後，籃子一度領先大盤將近 30 個百分點，那正是無人機題材最躁動的時候。之後大盤靠其他族群一路往上，籃子在原地震盪，領先幅度被吃光還倒欠。
 
@@ -45,7 +45,7 @@ series: 無人載具
 
 這個數字要記住。它說明所謂「無人機概念股」的市值規模，跟台股主流權值股完全不在同一個量級；真正純度較高的軍工與整機廠，多半是市值幾十億到幾百億的中小型股。
 
-![名冊 29 家的市值分佈](storage/drafts/assets/drone_ep0_market_cap.png)
+![名冊 29 家的市值分佈](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/drone_ep0_market_cap.png)
 
 它也解釋了前面那個「6 檔贏大盤」名單裡為什麼會出現聯發科。聯發科這一年的 +228.3%，主要是 AI 晶片行情推的，跟無人機幾乎無關。券商的概念股清單把它放進來，是因為飛控與邊緣運算 SoC 技術上說得通，但營收貢獻小到可以忽略。
 
@@ -125,13 +125,15 @@ series: 無人載具
 
 兩個數字擺在一起，缺口大約是 20 倍。經濟部的目標是 2028 年把月產能拉到 15,000 架、年產約 18 萬架，產值從 2025 年約 129 億元推到 2028 年突破 300 億元。這些是目標值，不是已實現的產出。
 
-所以「訂單會不會來」其實不是台灣鏈最先要回答的題。先要回答的是：訂單來了，機體、馬達、電池、飛控晶片能不能在 5 年內把產線翻 20 倍，還要通過軍規驗證。雷虎拿到美國國防部 Blue UAS 認證，是目前少數把驗證這關走完的例子，而驗證能力正是純題材與實質受惠的分水嶺。
+所以「訂單會不會來」其實不是台灣鏈最先要回答的題。先要回答的是：訂單來了，機體、馬達、電池、飛控晶片能不能在 5 年內把產線翻 20 倍，還要通過軍規驗證。驗證能力仍是純題材與實質受惠的分水嶺，但哪家公司走到哪一關，必須以官方清單或公司正式文件為準。
+
+> **更正（2026-07-13）**：本文初版曾寫「雷虎拿到美國國防部 Blue UAS 認證」。重新核對美國國防創新單位的 [Blue UAS 公開資料](https://www.diu.mil/blue-uas-cleared-list)與[清單移交公告](https://www.diu.mil/latest/dius-blue-uas-list-to-transition-to-dcma)後，仍找不到足以把雷虎特定平台對上 Blue UAS Cleared 的官方證據，因此撤回原說法。AUVSI Green UAS 與 Blue UAS 是不同路徑，不能拿其中一張清單替另一張下結論。公開證據不足不代表產品不合格，只代表本文不能把認證寫成既成事實。
 
 ## SWOT：把話講白
 
 | 面向 | 內容 |
 |---|---|
-| 優勢 | 半導體與電子供應鏈完整，飛控 MCU、射頻、感測、影像有現成台廠；造船與航太可跨域轉產無人艇與整機；已有先行者取得美軍規認證 |
+| 優勢 | 半導體與電子供應鏈完整，飛控 MCU、射頻、感測、影像有現成台廠；造船與航太可跨域轉產無人艇與整機 |
 | 劣勢 | 產能落後採購目標約 20 倍；高能量密度電池、飛控軟體、部分光學感測自主度仍不足；多數概念股的無人機營收佔比低，題材成分大於實質 |
 | 機會 | 非紅供應鏈重組把天花板從台灣國防預算，抬高到全球民主陣營採購；民用農噴、測繪、巡檢、災防撐起非軍用基本盤 |
 | 威脅 | 預算未定案且國產與對美軍購互相排擠；中國無人機的成本與規模碾壓民用市場；題材已先漲，本夢比先行、基本面未跟上時的回檔風險 |
@@ -151,3 +153,11 @@ series: 無人載具
 所有數字由 `scripts/drone_ep0_market_snapshot.py` 一次跑完並寫入 `storage/drafts/drone_ep0_market_snapshot.json`，重跑即可複現（市場資料會隨日期滾動更新）。政策與產值金額為公開媒體與官方新聞稿的轉述，已於文中標註日期與立法狀態。
 
 本文為產業與市場結構的描述性分析，不是投資建議，也不含任何目標價與報酬保證。個股報酬與波動皆為歷史統計，不代表未來表現；預算法案尚未定案，任何以政策金額推導的受惠評估都帶有高度不確定性。投資決策請自行評估風險。
+
+## 懶人包圖組
+
+![懶人包圖 1](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mile_a8d79d6a_lazypack_codex_1.png)
+
+![懶人包圖 2](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mile_a8d79d6a_lazypack_codex_2.png)
+
+![懶人包圖 3](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mile_a8d79d6a_lazypack_codex_3.png)

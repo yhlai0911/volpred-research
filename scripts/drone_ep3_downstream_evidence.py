@@ -90,7 +90,7 @@ COMPANIES: list[dict[str, Any]] = [
         "stage_group": "資格或能力",
         "evidence": "股東會手冊揭露已取得國防部軍商船用監偵型無人機供應商資格。",
         "source_urls": [
-            "https://www.egat.com.tw/documents/290/EGAT-2025_Annual_General_Shareholders_Meeting_HandbookCh.pdf"
+            "https://www.egat.com.tw/zh-hant/investor-services/investor-section/shareholders-meeting"
         ],
         "visibility": "取得資格不代表得標、交貨或認列營收；查核來源未揭露相關金額。",
     },
@@ -352,7 +352,7 @@ def main() -> None:
             "budget_ceiling_twd": 210_000_000_000,
             "implementation_period": "2026-08 至 2031-12",
             "small_expendable_usv_planned_quantity": 1_320,
-            "next_scheduled_committee_hearing": "2026-07-16",
+            "next_scheduled_joint_committee_review": "2026-07-16",
             "source_urls": [
                 "https://www.mnd.gov.tw/news/announcement/86952",
                 "https://ppg.ly.gov.tw/ppg/bills/202110223090000/details",
@@ -363,9 +363,21 @@ def main() -> None:
         },
         "certification_check": {
             "checked_at": "2026-07-13",
-            "source_url": "https://www.auvsi.org/certification-training/green-uas/cleared-list/",
-            "result": "查核當日公開 Green UAS Cleared List 未見本文十家公司或其台灣平台名稱。",
-            "interpretation_limit": "未列入公開清單不等於產品不合格；只代表本文不能宣稱已取得該項認證。",
+            "blue_uas_source_urls": [
+                "https://www.diu.mil/blue-uas-cleared-list",
+                "https://www.diu.mil/latest/dius-blue-uas-list-to-transition-to-dcma",
+            ],
+            "green_uas_source_urls": [
+                "https://www.diu.mil/latest/diu-outlines-immediate-updates-to-blue-uas-lists-announces-initial",
+                "https://www.auvsi.org/certification-training/green-uas/cleared-list/",
+            ],
+            "result": (
+                "本次查核未取得足以把雷虎特定平台對上 Blue UAS Cleared 的官方公開證據；"
+                "AUVSI Green UAS 是不同認證路徑，不能拿 Green 清單替代 Blue UAS 查核。"
+            ),
+            "interpretation_limit": (
+                "公開證據不足不等於產品不合格或從未進入非公開流程；本文只撤回已取得 Blue UAS 的既成事實說法。"
+            ),
         },
         "price_window_requested": {"start": START, "end_exclusive": END_EXCLUSIVE},
         "price_window_common": {

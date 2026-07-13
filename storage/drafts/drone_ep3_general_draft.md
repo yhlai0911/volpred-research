@@ -20,7 +20,7 @@ series: 無人載具
 
 國防部在 2026 年 7 月 1 日公布《強化防衛韌性及不對稱戰力之無人載具採購特別條例》草案，期間規畫為 2026 年 8 月至 2031 年 12 月，經費上限 2,100 億元，項目涵蓋岸置監偵無人機、濱海攻擊無人機與小型自殺無人艇。行政院公布的規畫數量包含 1,320 艘小型自殺無人艇。
 
-立法院[議案頁](https://ppg.ly.gov.tw/ppg/bills/202110223090000/details)顯示，草案在 7 月 3 日一讀後付委；聯席委員會的[公聽會](https://ppg.ly.gov.tw/ppg/sittings/2026070904/details?meetingDate=115%2F07%2F16)排在 7 月 16 日。本文查核日是 7 月 13 日，所以它仍未完成立法。國防部的[政策說明](https://www.mnd.gov.tw/news/announcement/86952)與行政院的[採購規畫](https://www.ey.gov.tw/File/39A867B74E2BA985?A=C)能告訴我們需求方向，不能替任何上市櫃公司證明已得標。
+立法院[議案頁](https://ppg.ly.gov.tw/ppg/bills/202110223090000/details)顯示，草案在 7 月 3 日一讀後付委；7 月 16 日排定的是財政、外交及國防、經濟三委員會的[第 1 次聯席會議](https://ppg.ly.gov.tw/ppg/sittings/2026070904/details?meetingDate=115%2F07%2F16)，議程為併案審查草案，不是公聽會。本文查核日是 7 月 13 日，所以它仍未完成立法。國防部的[政策說明](https://www.mnd.gov.tw/news/announcement/86952)與行政院的[採購規畫](https://www.ey.gov.tw/File/39A867B74E2BA985?A=C)能告訴我們需求方向，不能替任何上市櫃公司證明已得標。
 
 這個順序很要緊：法案上限要先變成通過的法律，再形成分年預算與採購案，接著才有投標、決標、交貨與營收認列。新聞標題一次跨完五步，財報不會。
 
@@ -33,7 +33,7 @@ series: 無人載具
 | 雷虎 8033 | 空中載具整合 | 直接產品／原型／合作 | [公司官網](https://www.thundertiger.com/tw/index.html)有空中、陸上與水面無人系統；與漢翔共同開發 [T-400 原型機](https://www.aidc.com.tw/tw/news/618) | 主合約金額、無人載具營收占比 |
 | 漢翔 2634 | 空中載具整合 | 共同開發／量產規畫 | 公開 T-400、[AIxVNAV](https://www.aidc.com.tw/tw/news/13638)、V-BAT 合作與[量產基地規畫](https://www.aidc.com.tw/tw/military/drone) | 公司總訂單中有多少屬無人載具 |
 | 亞航 2630 | 組裝／維修 | 組裝／維修能力 | [FY2025 年報](https://www.airasia.com.tw/userfiles/03.Investor_Relations/%E4%BA%9E%E8%88%AA114%E5%B9%B4%E5%A0%B1.pdf)列出光纖陀螺儀契約生產、無人機組裝與維修布局 | 無人機客戶、交期、訂單與營收 |
-| 長榮航太 2645 | 供應商／維修 | 供應商資格 | [股東會手冊](https://www.egat.com.tw/documents/290/EGAT-2025_Annual_General_Shareholders_Meeting_HandbookCh.pdf)揭露取得軍商船用監偵型無人機供應商資格 | 得標、交貨與認列金額 |
+| 長榮航太 2645 | 供應商／維修 | 供應商資格 | [公司股東專區](https://www.egat.com.tw/zh-hant/investor-services/investor-section/shareholders-meeting)所列股東會手冊揭露取得軍商船用監偵型無人機供應商資格 | 得標、交貨與認列金額 |
 | 中光電 5371 | 整機／光電酬載 | 量產／海外出貨 | [中光電智能機器人](https://www.coretronic-robotics.com/index)具整機與地面站能力；[永續報告](https://www.coretronic.com/en/csr/report/my5Aay/download/2024-Sustainability-Report_EN.pdf)揭露量產出貨熱顯像無人機至澳洲 | 海外出貨金額、無人載具營收占比 |
 | 神基 3005 | 地面控制站 | 直接產品 | 2026 年 3 月發表 [CommandCore](https://www.getac.com/us/news/getac-announces-commandcore-remote-drone-control-solution/)，可控制 UAV、USV 與 UGV | 客戶、出貨量與營收貢獻 |
 | 融程電 3416 | 地面控制站 | 直接產品 | 已公開 [UAV 地面控制站](https://www.winmate.com/StaticPages/newsletter/News_UAV-ground-control_20230504_Winmate-HQ_Global-EN.html)與[整合式套件](https://www.winmate.com/en/StaticPages/Newsletter/drone-kit-solution-20260528-News_Winmate-HQ_Global-EN.html) | 軍用／民用訂單與產品線營收 |
@@ -41,15 +41,15 @@ series: 無人載具
 | 台船 2208 | 無人艇 | 原型／規畫 | [公司刊物](https://www.csbcnet.com.tw/monthly_pub/files/009%E5%8F%B0%E8%88%B9%EF%BC%9A%E7%84%A1%E4%BA%BA%E8%88%B9%E4%BC%B0%E4%BB%8A%E5%B9%B4%E9%A6%96%E5%AD%A3%E4%BA%AE%E7%9B%B8%20100%E8%B6%B4%E5%8E%BB%E7%B4%85%E5%8C%96%E4%BE%9B%E6%87%89%E9%8F%88%281%29.pdf)收錄無人船原型與非紅供應鏈規畫 | 軍用無人艇主合約與交貨紀錄 |
 | 中信造船 2644 | 無人艇 | 原型／研發 | 公開[中信五號智慧無人船](https://www.jongshyn.com/news_info.asp?id=71)，股東會手冊列出無人船研發投資 | 既有海巡船訂單之外的無人艇訂單 |
 
-![十家公司公開揭露的最高階段](storage/drafts/assets/drone_ep3_disclosure_ladder.png)
+![十家公司公開揭露的最高階段](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/drone_ep3_disclosure_ladder.png)
 
 量產或已交付的兩家公司，證據也各有邊界。中光電可確認對澳洲量產出貨，公開資料沒有把金額與毛利拆出來；龍德造船可確認交付過兩艘無人水面載具，這不表示它已取得草案規畫的 1,320 艘小型自殺無人艇。海外合作、海外展會、全球產品頁，也都不能直接改寫成海外訂單。
 
-## 認證資料要更正：目前不能宣稱雷虎已在官方清單
+## 認證資料要更正：目前不能宣稱雷虎已取得 Blue UAS
 
-本次查核也回頭檢查系列 EP0 的一句話。EP0 曾寫「雷虎拿到美國國防部 Blue UAS 認證」，但查核當日的 [AUVSI Green UAS Cleared List](https://www.auvsi.org/certification-training/green-uas/cleared-list/) 未見雷虎、本文其他公司或其台灣平台名稱；漢翔 2026 年法說資料仍把取得 Green UAS 驗證寫成努力方向。本文找不到足以支持原句的官方證據，因此已把 EP0 改成「尚未能確認」。
+本次查核也回頭檢查系列 EP0 的一句話。EP0 曾寫「雷虎拿到美國國防部 Blue UAS 認證」。重新核對美國國防創新單位的 [Blue UAS 公開資料](https://www.diu.mil/blue-uas-cleared-list)與[清單移交公告](https://www.diu.mil/latest/dius-blue-uas-list-to-transition-to-dcma)後，本文仍找不到足以把雷虎特定平台對上 Blue UAS Cleared 的官方證據，因此撤回 EP0 原句。
 
-這項更正不代表產品不合格，也不否定公司可能正在申請、以合作夥伴名義進行，或出現在其他未公開流程。它只限制本文能說到哪裡：沒有官方清單或公司正式證明，就不把認證寫成既成事實。
+DIU 的[說明](https://www.diu.mil/latest/diu-outlines-immediate-updates-to-blue-uas-lists-announces-initial)把 AUVSI Green UAS 描述為通往 Blue UAS 的一條路徑，兩者不是同一張認證。這項更正不代表產品不合格，也不否定公司可能正在申請、以合作夥伴名義進行，或出現在其他未公開流程。它只限制本文能說到哪裡：沒有足以對上特定平台的官方清單或公司正式證明，就不把認證寫成既成事實。
 
 ## 整體財報有成長，仍看不出無人載具貢獻
 
@@ -74,11 +74,11 @@ series: 無人載具
 
 市場比較採 2025-06-30 至 2026-07-09、250 個共同交易日，價格為 yfinance 還原收盤價。十檔每日等權籃的報酬為 +57.9%，年化波動 35.4%；同期間加權指數報酬 +103.8%，年化波動 23.5%。下游籃少了 45.9 個百分點，波動多了 11.9 個百分點。
 
-![十家下游公司的共同窗口還原價格路徑](storage/drafts/assets/drone_ep3_price_paths.png)
+![十家下游公司的共同窗口還原價格路徑](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/drone_ep3_price_paths.png)
 
 雷虎 +280.9%、長榮航太 +138.9%，兩檔跑贏大盤；神基 +6.6%、台船 +8.5%、中信造船 +9.6%，則遠遠落後。十家公司都有無人載具故事，市場給的價格與風險卻分成好幾條路。
 
-![十家下游公司的報酬與年化波動](storage/drafts/assets/drone_ep3_risk_return.png)
+![十家下游公司的報酬與年化波動](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/drone_ep3_risk_return.png)
 
 這段行情不能用來推論誰會得標。等權籃假設每日重設權重，沒有交易成本與稅費，只是描述共同窗口；期間又碰上台股大盤大漲。個股歷史報酬反映全部公司消息，無法單獨抽出無人載具因素。
 
@@ -92,6 +92,10 @@ series: 無人載具
 4. **獲利與現金**：新產線、存貨與應收帳款增加後，毛利與營業現金是否跟上。
 
 EP3 的答案因此很克制。台灣確實已有整機、地面站與無人艇產品，海外量產出貨及實際交船也不是零；十家公司目前只有兩家走到這一層。2,100 億元仍是立法中的上限，1,320 艘仍是規畫數量。等決標、交貨、營收與毛利接上，才知道哪家公司把產業方向變成可持續的生意。
+
+## 系列前情
+
+這一集承接 [EP0 的 29 檔名冊](https://volpred.zeabur.app/v3/reports/mile_a8d79d6a)、[EP1 的上游去紅化盤點](https://volpred.zeabur.app/v3/reports/mile_7bd0f673)與 [EP2 的中游產能檢查](https://volpred.zeabur.app/v3/reports/mile_cdc7f6e8)。前三集把名冊與零組件攤開，EP3 再把下游公司的公開進度逐家對到單據。
 
 ## 資料來源、方法與限制
 
