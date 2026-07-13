@@ -30,6 +30,8 @@ Scripts co-located in paper folder:
 | `k811v2_sensitivity_th0_5.py` | K811v2 | Threshold sensitivity at z=0.5 (generates `k811v2_th0_5_results.json`) |
 | `k811v2_sensitivity_th1_0.py` | K811v2 | Threshold sensitivity at z=1.0 (generates `k811v2_th1_0_results.json`) |
 | `k811v2_sensitivity_th1_5.py` | K811v2 | Threshold sensitivity at z=1.5 (generates `k811v2_th1_5_results.json`) |
+| `k811v2_share_bootstrap_ci.py` | K811v2 | Stationary-bootstrap 95% CI for the opportunity-cost share (seed 42, 10,000 reps; generates `k811v2_share_bootstrap_ci_results.json`) — abstract, §3.1, §4.2, Conclusion |
+| `k811v2_fig1_wealth_regimes.py` | K811v2 | Figure 1 — cumulative wealth S0/S1/S2/S4 + VoV-regime shading (generates `figures/fig1_wealth_regimes.{pdf,png}`; asserts each curve's CAGR against Table 1 before writing) |
 | `k846_rebalancing_premium.py` | K846 | Rebalancing premium isolation |
 | `k860_prospect_theory_vt.py` | K860 | Prospect theory extension — unused in final draft |
 

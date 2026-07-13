@@ -380,11 +380,11 @@
     },
     {
       "paper": "vt-insurance-cost",
-      "journal_target": "decide",
+      "journal_target": "FRL",
       "stage": "revision",
       "stage_entered_at": "2026-05-21T00:00:00+08:00",
       "last_advance_at": "2026-07-01T00:00:00+08:00",
-      "blocker": "finishing/journal choice",
+      "blocker": "FRL format/word-limit gate (journal-review skill) not yet run; submission timing to be sequenced after vt-crowding-abm to avoid two concurrent VT letters at FRL. Academic content and replication package are closed out.",
       "owner_decision_pending": false,
       "stage_entered_at_provenance": {
         "source": "git",
@@ -392,7 +392,27 @@
         "commit_date": "2026-05-21",
         "confidence": "earliest_git_evidence_for_current_stage_or_blocker",
         "basis": "portfolio ready papers independent reviews rejected/downgraded after prior submission prep; current blocker remains finishing/journal choice"
-      }
+      },
+      "last_update": "2026-07-13T11:20:00+08:00",
+      "finishing_2026_07_13": {
+        "by": "hourly-11 (dispatch slot-1)",
+        "reproduce_gate": "green 9/9 at strict 5bps/same-basis tolerance, re-run against current main.tex",
+        "figure": "Figure 1 (wealth + VoV-regime shading) integrated into main.tex 4.3",
+        "uncertainty": "stationary-bootstrap CI integrated: S1 opportunity-cost share 90.8% [50.0, 94.8]; S2 premium NOT bounded away from zero (2295/10000 reps <= 0) -> S2 cost-reduction claim tempered in abstract/4.2/conclusion",
+        "compile": "xelatex exit 0, 17pp, 0 undefined refs/citations",
+        "remaining": [
+          "FRL format gate",
+          "submission timing (owner call)"
+        ]
+      },
+      "decision_log": [
+        {
+          "ts": "2026-07-13T11:20:00+08:00",
+          "by": "hourly-11 autonomous (per CLAUDE.md L19 + feedback_paper_autonomy_optimize_acceptance)",
+          "event": "journal_decision",
+          "value": "FRL (was 'decide') — per fable_deep_review_20260711 recommendation; fallbacks JAM / JPM"
+        }
+      ]
     },
     {
       "paper": "eav-universal-magnitude",
@@ -489,5 +509,5 @@
       }
     ]
   },
-  "last_update": "2026-07-12T18:20:00+08:00"
+  "last_update": "2026-07-13T11:20:00+08:00"
 }
