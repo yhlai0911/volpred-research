@@ -214,8 +214,8 @@ def _log_coverage_decision(
     *, storage_dir: str, target_id: str, covered_by: dict[str, str], now: datetime
 ) -> None:
     path = _dedup_log_path(storage_dir)
+    guard_canonical_write(path)
     try:
-        guard_canonical_write(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         entry = {
             "ts": now.isoformat(),

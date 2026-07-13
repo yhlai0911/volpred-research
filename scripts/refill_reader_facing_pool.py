@@ -33,6 +33,7 @@ ARC_DEDUP_WINDOW_DAYS = 90
 sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
+from volpred.ops.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.event_jobs import (  # noqa: E402
     build_pending_event_task,
@@ -191,6 +192,7 @@ def _looks_forward(title: str) -> bool:
 
 def _log_coverage_decision(target_id: str, decision: str, reason: str, dup_of: str = "") -> None:
     """Audit trail for the coverage gate (dedup-gate-audit rule). Never raises."""
+    guard_canonical_write(DEDUP_LOG)
     try:
         DEDUP_LOG.parent.mkdir(parents=True, exist_ok=True)
         entry = {
@@ -277,8 +279,10 @@ def _build_event_task(item: dict[str, Any]) -> dict[str, Any]:
     mode, so this can annotate a task but never block one.
     """
 
+    # Pass STORAGE explicitly: the callee's default is the relative "storage",
+    # which resolves against the caller's cwd rather than the repo root.
     return build_pending_event_task(
-        item, now=_now_utc(), feed=_load_feed_for_dedup()
+        item, now=_now_utc(), feed=_load_feed_for_dedup(), storage_dir=str(STORAGE)
     )
 
 

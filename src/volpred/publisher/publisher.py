@@ -92,8 +92,13 @@ def _log_dedup_decision(storage_dir: str, action: str, new_title: str | None,
     action ∈ {block_same_ref_recycle, allow_same_ref_companion, warn_near_dup,
     warn_arc_dup}. Fail-safe: logging must never break a publish.
     """
+    # Imported here, not at module scope: volpred.ops's __init__ pulls in
+    # ops.content, which imports this module (test_no_circular_imports).
+    from volpred.ops.canonical_write import guard_canonical_write
+
+    path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
+    guard_canonical_write(path)
     try:
-        path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         rec = {
             "ts": datetime.now(timezone.utc).isoformat(),
@@ -353,8 +358,11 @@ def _log_anti_ai_gate_decision(
     mode: str | None = None,
 ) -> None:
     """Append the anti-AI gate audit record; logging is fail-open."""
+    from volpred.ops.canonical_write import guard_canonical_write
+
+    path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
+    guard_canonical_write(path)
     try:
-        path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         rec = {
             "ts": datetime.now(timezone.utc).isoformat(),

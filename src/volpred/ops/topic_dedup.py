@@ -47,6 +47,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
+from volpred.ops.canonical_write import guard_canonical_write
 from volpred.ops.diagnostics import warn as _diag_warn
 from volpred.publisher.arc_dedup import (
     THEME_SATURATION_THRESHOLD,
@@ -104,8 +105,9 @@ def log_decision(
     Same JSONL as the publish-time gate (`storage/logs/dedup_decisions.jsonl`) so
     one audit tool sees every dedup decision the platform makes, at any stage.
     """
+    path = os.path.join(str(storage_dir), "logs", "dedup_decisions.jsonl")
+    guard_canonical_write(path)
     try:
-        path = os.path.join(str(storage_dir), "logs", "dedup_decisions.jsonl")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         rec = {
             "ts": datetime.now(timezone.utc).isoformat(),

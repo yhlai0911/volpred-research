@@ -18,6 +18,7 @@ from volpred.publisher.publisher import (
 )
 from volpred.topic_clusters import classify_topic_cluster, cluster_cap
 
+from .canonical_write import guard_canonical_write
 from .common import dump_json, load_json, project_path, write_ops_snapshot
 from .content_quality import DIGEST_TITLE_PREFIX
 from .next_tasks import normalize_task_priority, validate_task_status, write_tasks_to_handle
@@ -581,8 +582,9 @@ def _log_release_dedup_decision(
     matched_id: object | None = None,
 ) -> None:
     """Append release gate decisions; logging is fail-open."""
+    path = project_path(storage_dir, "logs", "dedup_decisions.jsonl")
+    guard_canonical_write(path)
     try:
-        path = project_path(storage_dir, "logs", "dedup_decisions.jsonl")
         path.parent.mkdir(parents=True, exist_ok=True)
         rec = {
             "ts": datetime.now(timezone.utc).isoformat(),

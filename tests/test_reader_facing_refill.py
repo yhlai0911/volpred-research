@@ -4,12 +4,27 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "refill_reader_facing_pool.py"
 SPEC = importlib.util.spec_from_file_location("reader_facing_refill", MODULE_PATH)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(MODULE)
+
+
+@pytest.fixture(autouse=True)
+def _redirect_storage(tmp_path, monkeypatch):
+    """Point every storage constant this module writes through at tmp_path.
+
+    Redirecting NEXT_TASKS alone leaves DEDUP_LOG (the coverage gate's audit
+    trail) and STORAGE (handed to build_pending_event_task, which logs through
+    topic_dedup) aimed at the live checkout, so the tests appended real decisions
+    to the shared audit trail. Autouse so a new test cannot forget one.
+    """
+    monkeypatch.setattr(MODULE, "STORAGE", tmp_path / "storage")
+    monkeypatch.setattr(MODULE, "DEDUP_LOG", tmp_path / "storage" / "logs" / "dedup_decisions.jsonl")
 
 
 def test_build_event_task_id_and_payload():

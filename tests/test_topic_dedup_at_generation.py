@@ -299,7 +299,7 @@ def test_gate_error_fails_open_and_is_reported(monkeypatch):
 # --- every generator path is actually wired to the screen ---------------------
 
 
-def test_event_task_is_screened_when_feed_supplied(crowded_feed):
+def test_event_task_is_screened_when_feed_supplied(crowded_feed, tmp_path):
     """build_pending_event_task must annotate (not block) a saturated event topic."""
     from volpred.ops.event_jobs import build_pending_event_task
 
@@ -317,7 +317,7 @@ def test_event_task_is_screened_when_feed_supplied(crowded_feed):
         },
     }
     task = build_pending_event_task(
-        item, now=datetime.now(timezone.utc), feed=crowded_feed, storage_dir="storage"
+        item, now=datetime.now(timezone.utc), feed=crowded_feed, storage_dir=str(tmp_path)
     )
     assert task["task_type"] == "event_article"
     assert task["priority"] == 1, "event tasks stay P1 time-sensitive"
