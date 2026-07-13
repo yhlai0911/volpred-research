@@ -45,6 +45,11 @@ from scipy import stats
 import statsmodels.api as sm
 from statsmodels.stats.diagnostic import het_arch
 
+from volpred.stats.drawdown import (
+    compare_max_drawdown,
+    max_drawdown as canonical_max_drawdown,
+)
+
 
 SEED = 42
 N_BOOT = 2_000
@@ -295,20 +300,17 @@ def annualized_metrics(returns: pd.Series) -> dict[str, float | int | bool]:
     # rather than a silently garbage max_drawdown number.  The uncapped variant is
     # the one at risk, and whether it triggers is data-vintage dependent.
     bankrupt = bool((returns <= -1.0).any())
-    if bankrupt:
-        max_drawdown: float | None = None
-    else:
-        wealth = (1.0 + returns).cumprod()
-        max_drawdown = float((wealth / wealth.cummax() - 1.0).min())
+    max_drawdown: float | None = (
+        None if bankrupt else canonical_max_drawdown(returns.to_numpy(float))
+    )
 
     annual_volatility = volatility * np.sqrt(12.0)
 
-    # Raw max drawdown is NOT scale-invariant.  A vol-managed series that simply
-    # runs at a quarter of the benchmark's exposure will show a shallower drawdown
-    # for purely mechanical reasons -- that is "taking less risk", not "timing risk
-    # well".  Reporting raw MDD improvement alone would overstate the case for
-    # vol-managing, so the drawdown per unit of realized volatility is reported
-    # alongside it; that ratio IS scale-invariant and is the honest comparison.
+    # Raw max drawdown is NOT scale-invariant.  MDD / realized volatility is a
+    # useful normalisation but is not invariant either: wealth compounds, so MDD
+    # is not homogeneous in leverage.  It is retained as a descriptive diagnostic;
+    # the actual timing gate is the exposure-matched MDD gap against the weight
+    # path's circular-shift null (see circular_shift_drawdown_randomization).
     max_drawdown_per_annual_vol = (
         None
         if (max_drawdown is None or annual_volatility <= 0)
@@ -401,6 +403,94 @@ def benjamini_hochberg(p_values: dict[str, float]) -> dict[str, float]:
     return {name: float(adjusted[idx]) for idx, name in enumerate(names)}
 
 
+def holm_bonferroni(p_values: dict[str, float]) -> dict[str, float]:
+    """Holm family-wise adjusted p-values, preserving the input key order."""
+    names = list(p_values)
+    values = np.asarray([p_values[name] for name in names], dtype=float)
+    order = np.argsort(values)
+    adjusted = np.empty(len(values), dtype=float)
+    running = 0.0
+    for rank, original_index in enumerate(order):
+        candidate = (len(values) - rank) * values[original_index]
+        running = max(running, candidate)
+        adjusted[original_index] = min(1.0, running)
+    return {name: float(adjusted[idx]) for idx, name in enumerate(names)}
+
+
+def circular_shift_drawdown_randomization(
+    factor_returns: pd.Series,
+    weights: pd.Series,
+    cost_bps: int,
+) -> dict[str, Any]:
+    """Exact phase-randomisation test for exposure-matched drawdown timing.
+
+    Every circular shift preserves the complete weight distribution, its circular
+    autocorrelation, and its turnover-cost sequence.  It destroys only alignment
+    between the weight path and factor returns.  The statistic is
+    MDD(managed) - MDD(constant-leverage benchmark with the same realized vol).
+
+    Turnover uses a circular boundary for *every* shift, including shift zero, so
+    all phases are exchangeable.  The production series uses the actual preceding
+    calibration-month weight; its descriptive MDD is reported separately.
+    """
+    aligned = pd.concat(
+        [factor_returns.rename("factor_return"), weights.rename("weight")], axis=1
+    ).dropna()
+    returns = aligned["factor_return"].to_numpy(float)
+    weight_path = aligned["weight"].to_numpy(float)
+    n = len(aligned)
+    if n < 24:
+        raise ValueError(f"circular-shift drawdown test needs >=24 months, got {n}")
+
+    gaps = np.empty(n, dtype=float)
+    comparisons: list[dict[str, float]] = []
+    for shift in range(n):
+        shifted = np.roll(weight_path, shift)
+        circular_turnover = np.abs(shifted - np.roll(shifted, 1))
+        managed = shifted * returns - circular_turnover * (cost_bps / 10_000.0)
+        comparison = compare_max_drawdown(managed, returns, periods_per_year=12)
+        gaps[shift] = comparison.exposure_matched_gap
+        if shift == 0:
+            comparisons.append(
+                {
+                    "managed_mdd": comparison.strategy_mdd,
+                    "unmanaged_mdd": comparison.benchmark_mdd,
+                    "managed_annual_volatility": comparison.strategy_vol,
+                    "unmanaged_annual_volatility": comparison.benchmark_vol,
+                    "matched_lambda": comparison.matched_lambda,
+                    "matched_benchmark_mdd": comparison.matched_benchmark_mdd,
+                }
+            )
+
+    observed = float(gaps[0])
+    exceedances = int(np.sum(gaps >= observed))
+    # Exact enumeration includes the observed phase (shift zero), so the exact
+    # randomisation p is k/n.  The Monte-Carlo (1+k)/(B+1) correction would
+    # double-count the observed draw here and make an already exact test needlessly
+    # conservative.
+    p_one_sided = float(exceedances / n)
+    return {
+        "n_months_and_shifts": n,
+        "cost_bps": int(cost_bps),
+        "observed_exposure_matched_gap": observed,
+        "observed_gap_pp": observed * 100.0,
+        "one_sided_p": p_one_sided,
+        "null_exceedance_count": exceedances,
+        "null_gap_quantiles": {
+            "q05": float(np.quantile(gaps, 0.05)),
+            "q50": float(np.quantile(gaps, 0.50)),
+            "q95": float(np.quantile(gaps, 0.95)),
+        },
+        "null_exposure_matched_gaps": gaps.tolist(),
+        "shift_zero_circular_cost_comparison": comparisons[0],
+        "boundary_convention": (
+            "All shifts, including zero, charge abs(w_t-w_{t-1}) with a circular "
+            "boundary. This preserves the exact turnover-cost path across phases; "
+            "production MDD uses the actual pre-OOS predecessor and is separate."
+        ),
+    }
+
+
 def canonical_hac_lag(n: int, h: int = 1) -> int:
     """Repo-canonical Newey-West bandwidth: ceil(h^(1/3) * n^(1/3)), capped at n//4.
 
@@ -429,16 +519,17 @@ def sample_acf(values: np.ndarray, max_lag: int = ACF_MAX_LAG) -> dict[str, floa
 def hac_spanning_regression(
     managed: pd.Series, unmanaged: pd.Series, h: int = 1
 ) -> dict[str, Any]:
-    """Moreira-Muir spanning regression with an acf-justified HAC bandwidth.
+    """Moreira-Muir regression with canonical HAC plus an ACF diagnostic.
 
     .claude/rules/experiments.md forbids fixing the Newey-West lag at ``h - 1``:
     at h = 1 that degenerates to zero lags (no HAC at all), and the residual
     autocorrelation of a volatility-managed series is driven by the persistence
     of the variance signal, not by forecast-window overlap.  The primary lag is
-    therefore ``max(h - 1, canonical)`` and the full lag grid is reported so the
-    alpha t-stat can be read against bandwidth sensitivity.  Omitting HAC is a
-    two-sided misspecification: positive residual autocorrelation inflates |t|,
-    negative autocovariance deflates it.
+    therefore ``max(h - 1, canonical)``.  ACF is measured after fitting as a
+    diagnostic rather than used to tune the primary lag; the full lag grid shows
+    that the conclusion does not depend on the bandwidth.  Lag zero is plain OLS,
+    so its difference from HAC reflects both heteroskedasticity and serial
+    dependence and is not attributed to the sign of ACF alone.
     """
     aligned = pd.concat(
         [managed.rename("managed"), unmanaged.rename("unmanaged")], axis=1
@@ -510,6 +601,24 @@ def atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
         os.fsync(handle.fileno())
     with tmp.open(encoding="utf-8") as handle:
         json.load(handle)
+    os.replace(tmp, path)
+
+
+def atomic_write_csv(frame: pd.DataFrame, path: Path, **kwargs: Any) -> None:
+    """Write a CSV completely before replacing the published artifact."""
+    tmp = path.with_name(f"{path.stem}.tmp{path.suffix}")
+    frame.to_csv(tmp, **kwargs)
+    with tmp.open("rb") as handle:
+        os.fsync(handle.fileno())
+    os.replace(tmp, path)
+
+
+def atomic_savefig(fig: Any, path: Path, **kwargs: Any) -> None:
+    """Render a figure to a sibling file, then publish it atomically."""
+    tmp = path.with_name(f"{path.stem}.tmp{path.suffix}")
+    fig.savefig(tmp, format=path.suffix.lstrip("."), **kwargs)
+    with tmp.open("rb") as handle:
+        os.fsync(handle.fileno())
     os.replace(tmp, path)
 
 
@@ -822,9 +931,10 @@ def main() -> None:
                 }
 
     summary = pd.DataFrame(rows)
-    summary.to_csv(SUMMARY_PATH, index=False, float_format="%.10g")
-    panel.loc[oos_mask].to_timestamp(how="end").to_csv(
-        PANEL_PATH, index_label="month", float_format="%.12g"
+    atomic_write_csv(summary, SUMMARY_PATH, index=False, float_format="%.10g")
+    atomic_write_csv(
+        panel.loc[oos_mask].to_timestamp(how="end"), PANEL_PATH,
+        index_label="month", float_format="%.12g"
     )
 
     # ── Cross-factor aggregation: the DeMiguel-Martin-Utrera-Uppal (2024) view ──
@@ -866,10 +976,15 @@ def main() -> None:
                 managed_metrics.get("sharpe_zero_rf", np.nan)
                 - unmanaged_metrics.get("sharpe_zero_rf", np.nan)
             ),
-            "strategy_dm_negative_t_managed_better": {
+            "strategy_dm_mean_return_SCALE_DEPENDENT_diagnostic": {
                 "t": dm_t,
                 "p": dm_p,
-                "harvey_pass": bool(dm_t < -3.0),
+                "_warning": (
+                    "NOT a risk-adjusted gate. The equal-weight managed zoo also "
+                    "runs at a different exposure, so this raw-mean-return DM is "
+                    "retained for transparency only. Use paired Sharpe bootstrap "
+                    "and spanning-alpha t for inference."
+                ),
             },
             "paired_stationary_bootstrap_sharpe_difference": bootstrap,
             "spanning_regression_hac": hac_spanning_regression(
@@ -892,9 +1007,9 @@ def main() -> None:
     # "managed is worse" verdict nearly impossible to avoid -- an instrument that
     # manufactures the null we already expected, which is exactly as untrustworthy
     # as one that manufactures a win.  The gate therefore uses the two
-    # scale-invariant statistics: the paired Sharpe bootstrap, and the spanning
-    # alpha (whose beta absorbs the exposure mismatch, and which is Moreira-Muir's
-    # own headline statistic).  The DM is retained as a labelled diagnostic only.
+    # scale-invariant statistics: the paired Sharpe bootstrap, and the spanning-
+    # alpha t (beta absorbs the exposure mismatch; alpha magnitude itself changes
+    # with scale).  The DM is retained as a labelled diagnostic only.
     primary_boot_p = {
         factor: full_oos_inference[primary_keys[factor]][
             "paired_stationary_bootstrap_sharpe_difference"
@@ -1011,7 +1126,7 @@ def main() -> None:
     ax.set_title("Fixed-calibration volatility management: 2000+ OOS")
     ax.legend(frameon=False)
     fig.tight_layout()
-    fig.savefig(BASE_DIR / "factor_sharpe_comparison.png", dpi=170)
+    atomic_savefig(fig, BASE_DIR / "factor_sharpe_comparison.png", dpi=170)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(9, 5))
@@ -1027,7 +1142,7 @@ def main() -> None:
     ax.set_title("Factor-level scaling cost sensitivity (lower-bound cost)")
     ax.legend(frameon=False, ncol=2)
     fig.tight_layout()
-    fig.savefig(BASE_DIR / "cost_sensitivity.png", dpi=170)
+    atomic_savefig(fig, BASE_DIR / "cost_sensitivity.png", dpi=170)
     plt.close(fig)
 
     def cell(cost_bps: int, period: str) -> pd.DataFrame:
@@ -1087,43 +1202,83 @@ def main() -> None:
         fontsize=12,
     )
     fig.tight_layout()
-    fig.savefig(BASE_DIR / "is_vs_oos_gross_vs_net.png", dpi=170)
+    atomic_savefig(fig, BASE_DIR / "is_vs_oos_gross_vs_net.png", dpi=170)
     plt.close(fig)
 
     # Does vol-managing actually REDUCE DRAWDOWN, or merely reduce EXPOSURE?
-    # The project knowledge base carries the claim (orphan entry "R3", and K1265)
-    # that "MDD improvement is robust (5/6 factors) while Sharpe is unchanged".
-    # But raw MDD is not scale-invariant: a series running at a quarter of the
-    # benchmark's exposure has a shallower drawdown mechanically.  So the claim is
-    # tested BOTH ways -- raw, and per unit of realized volatility.
-    drawdown_rows = {
-        factor: {
-            "managed_max_drawdown": float(primary_table.loc[factor, "managed_max_drawdown"]),
-            "unmanaged_max_drawdown": float(
-                primary_table.loc[factor, "unmanaged_max_drawdown"]
-            ),
-            "managed_mdd_per_annual_vol": float(
-                primary_table.loc[factor, "managed_mdd_per_annual_vol"]
-            ),
-            "unmanaged_mdd_per_annual_vol": float(
-                primary_table.loc[factor, "unmanaged_mdd_per_annual_vol"]
-            ),
-            "managed_annual_volatility": float(
-                primary_table.loc[factor, "managed_annual_volatility"]
-            ),
-            "unmanaged_annual_volatility": float(
-                primary_table.loc[factor, "unmanaged_annual_volatility"]
+    # Raw MDD cannot answer that across different realized volatility.  MDD / vol
+    # is descriptive but also not a true invariant under compound wealth.  The
+    # primary attribution test therefore compares the exposure-matched gap with
+    # its own circular-shift null, which preserves the weight path and destroys
+    # only its alignment with returns.
+    drawdown_rows: dict[str, Any] = {}
+    phase_tests: dict[str, Any] = {}
+    for factor in ZOO_FACTORS:
+        managed_oos = period_slice(
+            managed_returns[factor][PRIMARY_VARIANT][PRIMARY_COST_BPS], "2000-01", None
+        )
+        unmanaged_oos = period_slice(monthly_returns[factor], "2000-01", None)
+        weights_oos = period_slice(weights[factor][PRIMARY_VARIANT], "2000-01", None)
+        aligned = pd.concat(
+            [
+                managed_oos.rename("managed"),
+                unmanaged_oos.rename("unmanaged"),
+                weights_oos.rename("weight"),
+            ],
+            axis=1,
+        ).dropna()
+        production_comparison = compare_max_drawdown(
+            aligned["managed"].to_numpy(float),
+            aligned["unmanaged"].to_numpy(float),
+            periods_per_year=12,
+        )
+        drawdown_rows[factor] = {
+            "managed_max_drawdown": production_comparison.strategy_mdd,
+            "unmanaged_max_drawdown": production_comparison.benchmark_mdd,
+            "managed_mdd_per_annual_vol": production_comparison.strategy_mdd_per_vol,
+            "unmanaged_mdd_per_annual_vol": production_comparison.benchmark_mdd_per_vol,
+            "managed_annual_volatility": production_comparison.strategy_vol,
+            "unmanaged_annual_volatility": production_comparison.benchmark_vol,
+            "vol_ratio": production_comparison.vol_ratio,
+            "exposure_mismatch": production_comparison.exposure_mismatch,
+            "matched_lambda": production_comparison.matched_lambda,
+            "matched_benchmark_mdd": production_comparison.matched_benchmark_mdd,
+            "production_exposure_matched_gap": production_comparison.exposure_matched_gap,
+            "production_exposure_matched_gap_pp": (
+                production_comparison.exposure_matched_gap * 100.0
             ),
         }
-        for factor in ZOO_FACTORS
-    }
+        phase_tests[factor] = circular_shift_drawdown_randomization(
+            aligned["unmanaged"], aligned["weight"], PRIMARY_COST_BPS
+        )
     raw_mdd_improved = sum(
         row["managed_max_drawdown"] > row["unmanaged_max_drawdown"]
         for row in drawdown_rows.values()
     )
-    scaled_mdd_improved = sum(
+    mdd_per_vol_improved = sum(
         row["managed_mdd_per_annual_vol"] > row["unmanaged_mdd_per_annual_vol"]
         for row in drawdown_rows.values()
+    )
+    phase_raw_p = {
+        factor: float(phase_tests[factor]["one_sided_p"]) for factor in ZOO_FACTORS
+    }
+    phase_holm_q = holm_bonferroni(phase_raw_p)
+    for factor in ZOO_FACTORS:
+        test = phase_tests[factor]
+        test["holm_adjusted_p"] = phase_holm_q[factor]
+        test["positive_gap"] = bool(test["observed_exposure_matched_gap"] > 0)
+        test["survives_holm_5pct"] = bool(
+            test["positive_gap"] and phase_holm_q[factor] < 0.05
+        )
+        test["survives_holm_10pct"] = bool(
+            test["positive_gap"] and phase_holm_q[factor] < 0.10
+        )
+    phase_positive = int(sum(test["positive_gap"] for test in phase_tests.values()))
+    phase_survivors_5pct = int(
+        sum(test["survives_holm_5pct"] for test in phase_tests.values())
+    )
+    phase_survivors_10pct = int(
+        sum(test["survives_holm_10pct"] for test in phase_tests.values())
     )
     drawdown_analysis = {
         "_question": (
@@ -1131,20 +1286,51 @@ def main() -> None:
             "risk-timing skill, or a mechanical consequence of holding less exposure?"
         ),
         "raw_mdd_improved_count": int(raw_mdd_improved),
-        "vol_normalized_mdd_improved_count": int(scaled_mdd_improved),
+        "mdd_per_vol_improved_count_DESCRIPTIVE_ONLY": int(mdd_per_vol_improved),
         "zoo_factor_count": len(ZOO_FACTORS),
+        "exposure_matched_positive_gap_count": phase_positive,
+        "circular_shift_holm_survivors_5pct": phase_survivors_5pct,
+        "circular_shift_holm_survivors_10pct": phase_survivors_10pct,
         "_interpretation": (
-            "Raw MDD is NOT scale-invariant; MDD per unit of realized volatility is. "
-            "If the raw count is high but the vol-normalized count collapses, the "
-            "'drawdown benefit' is mostly just lower exposure, not better risk timing."
+            "Raw MDD is not comparable across the observed exposure mismatch. MDD/vol "
+            "is a descriptive normalisation, NOT a scale invariant. A positive "
+            "exposure-matched gap is necessary but insufficient; the claim gate is the "
+            "gap against the same weight path under all circular phase shifts, with "
+            "Holm correction across the six zoo factors."
         ),
+        "primary_randomization_test": {
+            "statistic": (
+                "MDD(managed) - MDD(constant-leverage benchmark scaled to managed "
+                "realized volatility)"
+            ),
+            "null": (
+                "all circular shifts of the exact capped weight path against the "
+                "unchanged factor-return path; turnover costs are shifted with weights"
+            ),
+            "alternative": "positive gap: managed drawdown is shallower",
+            "multiple_testing": "Holm family-wise correction across six zoo factors",
+            "assumption": (
+                "The weight process is approximately circularly stationary. Volatility "
+                "weights are persistent and not exactly stationary, so this is a strong "
+                "randomisation diagnostic rather than an exactly-sized parametric test."
+            ),
+            "per_factor": phase_tests,
+        },
         "per_factor": drawdown_rows,
     }
 
     mm_replication = moreira_muir_replication(ff3_path)
+    artifact_names = [
+        PANEL_PATH.name,
+        SUMMARY_PATH.name,
+        "factor_sharpe_comparison.png",
+        "cost_sensitivity.png",
+        "is_vs_oos_gross_vs_net.png",
+    ]
 
     payload: dict[str, Any] = {
         "experiment_id": "k1702",
+        "script_sha256": sha256(Path(__file__)),
         "moreira_muir_replication_check": mm_replication,
         "title": "Volatility-managed factor zoo: fixed-calibration real-time OOS audit",
         "run_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -1208,6 +1394,10 @@ def main() -> None:
                     "Benjamini-Hochberg across the six zoo factors; Mkt-RF is a "
                     "pre-specified replication reference and is excluded from the family"
                 ),
+                "drawdown_timing_test": (
+                    "Exposure-matched MDD gap against all circular shifts of the exact "
+                    "OOS weight path; Holm family-wise correction across six zoo factors"
+                ),
                 "cross_factor_pooling": (
                     "Equal-weight aggregation ACROSS factors WITHIN each month, then "
                     "time-series DM/HAC on the single monthly series. No stacked "
@@ -1221,7 +1411,7 @@ def main() -> None:
         "calibration": calibration,
         "primary_gate": {
             "_gate_statistics": (
-                "SCALE-INVARIANT only: paired Sharpe bootstrap and spanning alpha. "
+                "SCALE-INVARIANT only: paired Sharpe bootstrap and spanning-alpha t. "
                 "The mean-return DM is explicitly NOT a gate input -- the managed "
                 "series runs at much lower exposure, so its raw mean return is "
                 "mechanically lower and a DM gate could never fire."
@@ -1254,14 +1444,13 @@ def main() -> None:
             "AQR reconstructs full QMJ history on updates; no historical vintages were available here.",
             "The fixed 2000 split is one real-time design; it does not eliminate all specification uncertainty.",
             "The experiment covers US equity factors and has no like-for-like Taiwan QMJ factor series.",
+            "The exposure-matched lambda is a retrospective attribution device, not a tradeable benchmark.",
+            "Circular-shift inference assumes approximate circular stationarity of persistent volatility weights.",
         ],
-        "artifacts": [
-            PANEL_PATH.name,
-            SUMMARY_PATH.name,
-            "factor_sharpe_comparison.png",
-            "cost_sensitivity.png",
-            "is_vs_oos_gross_vs_net.png",
-        ],
+        "artifacts": artifact_names,
+        "artifact_sha256": {
+            name: sha256(BASE_DIR / name) for name in artifact_names
+        },
     }
     atomic_write_json(RESULTS_PATH, payload)
     print(json.dumps(json_ready(payload["primary_gate"]), indent=2))

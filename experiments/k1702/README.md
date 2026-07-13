@@ -1,10 +1,13 @@
 # K1702：波動率管理套用到「整個因子動物園」的 OOS 崩潰再驗證
 
-**Verdict: NULL。** 六個因子在 OOS + 淨成本後無一通過多重檢定；等權動物園組合 gross 只有 +0.036 Sharpe
-（不顯著），10bp 即翻負，50bp 時 Sharpe 變成 **−0.177**。
+**Verdict: `NULL_OR_MIXED_INDIVIDUAL_FACTOR_OOS`。** 六個因子在 OOS + 淨成本後無一個**正向效果**
+通過預設 gate；CMA 反而顯著受害。等權動物園組合 gross 只有 +0.036 Sharpe（不顯著），
+10bp 即翻負，50bp 時 Sharpe 變成 **−0.177**。
 
-**外加一個推翻既有結論的發現**：`R3` 宣稱的「vol-managing 讓 drawdown 改善（5/6 因子）」
-在 scale-invariant 檢驗下**崩潰到 1/6** —— 那個「改善」主要是**曝險變低的機械結果，不是避險技巧**。
+**外加一個回撤 claim 的正式反證**：`R3` 宣稱的「vol-managing 讓 drawdown 改善（5/6 因子）」
+不能由 raw MDD 支撐；六個因子的實現波動全部相差超過 canonical 20% 門檻。曝險匹配後只有 MOM 的 gap
+為正，而且把同一權重路徑枚舉全部 circular shifts、再做 Holm 校正後是 **0/6 存活**。因此資料不支持
+「回撤較淺來自 timing skill」；`MDD ÷ vol` 的 1/6 僅保留為描述性診斷，不再冒充 scale-invariant gate。
 （範圍限定：本實驗只測 long-short paper factors。其他資產 / 訊號的 raw-MDD claim 須各自重驗，
 見 §十 的 class sweep 待辦。）
 
@@ -21,15 +24,15 @@ Moreira and Muir (2017, JF) 顯示對**市場因子**做 inverse-variance scalin
 
 | 既有 | 內容 | K1702 |
 |---|---|---|
-| `R3`（2026-03-17，knowledge.json） | Factor VT OOS null；"MDD improvement robust (5/6 factors) but Sharpe unchanged" | 該 entry **無 `experiment_id` / 無 reviewer / 無 verdict — 不可復現的 orphan claim**。K1702 **確認**其 OOS null 方向，但**推翻**其 MDD claim（見 5.4）。註：R3 的因子宇宙與本實驗不同（R3 含 Mkt-RF / UMD、無 QMJ，且 spec 為 GARCH vs RV22），兩邊都得到 5/6 是**方向一致的計數巧合，不是逐項複製** |
-| `N107` | 「MDD improvement is MECHANICAL（隨機 de-leveraging 下 99% 也會出現）」 | **院內早有此先驗**。K1702 的增量**不是**首次發現機械性，而是更強的一步：**vol-normalized 後 MDD 反而惡化**（5/6 → 1/6），即不只「不是技巧」，而是**單位風險的回撤更差** |
-| `K1265` | SPY、VIX/RV-managed、2004-2026；「MM 主要壓 MDD 而非提 Sharpe」 | **本實驗未測試該設計**（不同資產 / 訊號 / scaling rule），**不可宣稱推翻**。只能說：K1265 的 MDD claim 落在同一失效模式的射程內，**須以 vol-normalized 口徑重驗**（待辦，非本實驗結論） |
+| `R3`（2026-03-17，knowledge.json） | Factor VT OOS null；"MDD improvement robust (5/6 factors) but Sharpe unchanged" | 該 entry **無 `experiment_id` / 無 reviewer / 無 verdict — 不可復現的 orphan claim**。K1702 確認其 OOS null 方向，並證明本次 long-short factor 樣本的 5/6 raw-MDD pattern **不能當 timing 證據**（phase-null 0/6）。註：R3 的因子宇宙與 spec 不同，兩邊 5/6 是方向一致的計數巧合，不是逐項複製 |
+| `N107` | 「MDD improvement is MECHANICAL（隨機 de-leveraging 下 99% 也會出現）」 | **院內早有此先驗**。K1702 的增量不是首次發現機械性，而是把 factor-zoo 的曝險匹配 gap 對完整 circular-shift null 做正式檢定：僅 MOM gap 為正，Holm 後 0/6 存活 |
+| `K1265` | SPY、VIX/RV-managed、2004-2026；「MM 主要壓 MDD 而非提 Sharpe」 | **本實驗未測試該設計**（不同資產 / 訊號 / scaling rule），**不可宣稱推翻**。只能說：K1265 的 MDD claim 落在同一失效模式的射程內，須用 **exposure-matched gap + circular-shift null** 重驗（待辦，非本實驗結論） |
 | `K1574` | factor **ETF** implementation shortfall（ex-post audit） | K1702 用官方 long-short paper factors，問 timing 而非 implementation |
 | `research_factor_timing_regime` | ETF factor timing 不打敗 EW basket | K1702 是 vol-scaling（非 regime timing）+ 淨成本層 |
 
 **K1702 的增量**：(1) **淨成本層**（R3 沒有）；(2) **QMJ**（R3 沒有）；(3) **固定校準常數的真 OOS**；
 (4) **正式 BH-FDR**；(5) **pipeline 證偽測試**；(6) **MM 效果的樣本期分解**；
-(7) **MDD claim 的 scale-invariant 反駁**。
+(7) **MDD claim 的曝險匹配 + circular-shift 反駁**。
 
 ---
 
@@ -54,8 +57,8 @@ Moreira and Muir (2017, JF) 顯示對**市場因子**做 inverse-variance scalin
 | 1963-07…1999-12（本實驗校準期） | 438 | +0.008 | +2.0%/yr | 1.07 |
 | 2000-01…2026-05（本實驗 OOS） | 317 | +0.024 | +3.3%/yr | 1.18 |
 
-**MM 的市場因子效果幾乎全部來自 1963 年之前**（大蕭條與二戰的極端波動期）。1963 之後連市場因子本身
-都已經沒有統計上站得住的 vol-managing 收益。動物園在 2000 年後全面失效，是這個趨勢的延續。
+在這個 in-sample 分解裡，MM 的市場因子效果**集中於 1963 年之前**；1963 年後的兩格都沒有統計上
+站得住的收益。這是樣本期診斷，未做正式跨子期差異檢定，不能把「集中」升格成結構性年代斷言。
 
 ---
 
@@ -81,7 +84,7 @@ Sharpe 說它**大幅變好**，raw mean return 說它**變差**。若拿 DM 當
 
 **因此本實驗的 gate 只用 scale-invariant 統計**：
 - **paired Sharpe bootstrap**（Sharpe 是 scale-invariant）
-- **spanning regression alpha**（β 吸收曝險落差，α 正是 MM 自己的 headline 統計量）
+- **spanning regression alpha t**（β 吸收曝險落差；alpha 水準本身會隨 scale 改變）
 
 DM 保留在 results JSON，但明確標記為 `strategy_dm_mean_return_SCALE_DEPENDENT_diagnostic`，**不進 gate**。
 
@@ -97,7 +100,7 @@ DM 保留在 results JSON，但明確標記為 `strategy_dm_mean_return_SCALE_DE
 | AQR Data Library | QMJ（USA 欄，daily） | — |
 
 - **共同樣本**：1963-07-01 … 2026-04-30，**15,813 個交易日 / 754 個月**（≫ 500 觀測要求）
-- **校準期**：1963-07 … 1999-12（437 個月）
+- **校準期**：1963-07 … 1999-12（438 個 calendar months；因 signal lag，實際可用 training rows = **437**）
 - **OOS**：2000-01 … 2026-04（**316 個月**），涵蓋 **2008 金融海嘯與 2020 疫情崩盤**（滿足「OOS 必含空頭」）
 - 下載檔 SHA-256 記於 results JSON。AQR 更新時重建完整歷史，故 QMJ 是「本次 vintage」估計，
   **不宣稱 point-in-time vintage robustness**。
@@ -119,7 +122,9 @@ DM 保留在 results JSON，但明確標記為 `strategy_dm_mean_return_SCALE_DE
 
 規則禁止把 Newey-West lag 固定在 `h−1`（h=1 時退化成 **0 lag = 根本沒做 HAC**）。
 本實驗用 `lag = max(h−1, canonical)`，canonical = `ceil(h^(1/3)·n^(1/3))`，與 repo canonical `dm_test` 同一條規則。
-**先量 acf 再決定，並報 lag sensitivity**（全存於 results JSON 的 `residual_acf` / `hac_lag_sensitivity`）：
+Primary lag 先按 canonical 公式決定；ACF 是事後診斷，另完整報 lag sensitivity（全存於 results JSON 的
+`residual_acf` / `hac_lag_sensitivity`）。lag 0 是 plain OLS，與 HAC 的差異同時含異質變異與序列相依，
+不把 t 值變化單獨歸因於 ACF 正負：
 
 | cell | n | primary lag | residual acf(1), acf(2) | alpha t @ lag0（**無 HAC**） | alpha t @ primary lag |
 |---|---|---|---|---|---|
@@ -127,8 +132,8 @@ DM 保留在 results JSON，但明確標記為 `strategy_dm_mean_return_SCALE_DE
 | CMA（OOS primary） | 316 | 7 | +0.095, −0.028 | −2.52 | −2.36 |
 | MOM（OOS primary） | 316 | 7 | −0.030, **−0.149** | 2.25 | **2.37 → |t| 反而變大** |
 
-這兩格正好演示規則說的「**遺漏 HAC 是雙向誤設**」：CMA 的正 acf 讓無 HAC **高估** |t|；
-MOM 的負 acf 讓無 HAC **低估** |t|。所有結論對 lag 選擇 robust。
+lag 0→primary 的 t 值可往任一方向移動；ACF 正負提供背景，但差異也包含異質變異，不能單獨歸因。
+重要的是所有結論在 0/3/6/primary/12 的完整 sensitivity 上都不跨越正向 Harvey gate。
 
 ### 跨因子聚合（避免 iid 誤設）
 
@@ -154,7 +159,7 @@ MOM 的負 acf 讓無 HAC **低估** |t|。所有結論對 lag 選擇 robust。
 - **無一因子的 spanning alpha 通過 Harvey |t| > 3。**
 - **五個因子的 Sharpe 變差**，其中 **CMA 是顯著被傷害**（bootstrap BH q = **0.012**）。
 - **MOM 的誠實處理**：它是唯一改善的因子（Sharpe +0.265，alpha +1.6%/yr，HAC t = 2.37），
-  與 Barroso and Santa-Clara (2015) 的 momentum-crash 保護一致，**不是雜訊**。
+  方向與 Barroso and Santa-Clara (2015) 的 momentum-crash 保護一致，**但本實驗無法排除雜訊**。
   **但** bootstrap CI **含 0**（[−0.05, 0.56]），alpha 的 **BH q = 0.055 > 0.05（邊緣不顯著）**，
   且 t = 2.37 未達 Harvey 門檻。**故本實驗不宣稱 MOM 存活** —— 六個因子挑最好的一個講故事，
   正是本實驗要防的事。留待專門的 momentum 實驗處理。
@@ -181,31 +186,31 @@ MOM 的負 acf 讓無 HAC **低估** |t|。所有結論對 lag 選擇 robust。
 
 即使 gross（零成本）也只有 1/6（MOM）。
 
-### 5.4 **推翻 R3 的 MDD claim：「改善」是 scale artifact**
+### 5.4 **R3 的 MDD claim 不受支持：曝險匹配 + circular-shift null**
 
-院內 `R3` 宣稱「MDD improvement robust (5/6 factors)」。本實驗**先確認、再推翻**（範圍：long-short
-paper factors；`K1265` 是 SPY VIX-managed 的另一組設計，本實驗沒測，不在推翻範圍內 — 見 §十）：
+院內 `R3` 宣稱「MDD improvement robust (5/6 factors)」。K1702 的 raw MDD 也得到 5/6，但六個 managed
+序列的實現波動都比 benchmark 低 45.6%–76.7%，遠超 canonical 20% mismatch 門檻，raw MDD 不能單獨比較。
+`MDD ÷ vol` 同樣不是不變量（財富複利使 MDD 對槓桿非一次齊次），所以 1/6 只列描述，不當 gate。
 
-| 檢驗方式 | 動物園 6 因子中改善的個數 |
-|---|---|
-| **raw max drawdown** | **5/6** ← 與 R3 的 claim 方向一致 |
-| **MDD ÷ 實現波動**（scale-invariant） | **1/6** ← 崩潰 |
+正式檢定分兩步：
 
-| 因子 | raw MDD（unmgd → mgd） | **每單位波動的 MDD** | 年化波動（unmgd → mgd） |
-|---|---|---|---|
-| SMB | −0.361 → −0.304 ✅ | −3.37 → **−6.83** ❌ | 10.7% → 4.4% |
-| HML | −0.560 → −0.435 ✅ | −4.65 → **−7.85** ❌ | 12.0% → 5.5% |
-| RMW | −0.220 → −0.130 ✅ | −2.21 → **−5.59** ❌ | 9.9% → 2.3% |
-| CMA | −0.269 → −0.321 ❌ | −3.44 → **−7.53** ❌ | 7.8% → 4.3% |
-| **MOM** | −0.562 → −0.092 ✅ | −3.23 → **−2.12** ✅ | 17.4% → 4.4% |
-| QMJ | −0.306 → −0.146 ✅ | −2.96 → **−5.39** ❌ | 10.3% → 2.7% |
+1. 把 benchmark 用**常數** λ 縮到與 managed 相同實現波動，計算 exposure-matched gap；
+2. 枚舉同一 capped weight path 的全部 316 個 circular shifts，保留權重值、持續性與 turnover-cost
+   路徑，只破壞它與報酬的 phase；以全 shifts 枚舉 tail fraction 作 p，再對六因子做 Holm 校正。
 
-**raw MDD 不是 scale-invariant。** managed 組合的波動只有 benchmark 的 1/2 到 1/4，
-drawdown 當然比較淺 —— 那叫**少冒險**，不叫**會擇時**。除以實現波動之後，
-**單位風險的 drawdown 反而普遍更深**（SMB −3.37 → −6.83）。
+| 因子 | raw MDD（unmgd → mgd） | production 同風險 gap | circular-null p | Holm p |
+|---|---|---:|---:|---:|
+| SMB | −0.361 → −0.304 ✅ | **−14.6pp** | 0.883 | 1.000 |
+| HML | −0.560 → −0.435 ✅ | **−13.4pp** | 0.797 | 1.000 |
+| RMW | −0.220 → −0.130 ✅ | **−7.5pp** | 0.756 | 1.000 |
+| CMA | −0.269 → −0.321 ❌ | **−16.6pp** | 0.747 | 1.000 |
+| **MOM** | −0.562 → −0.092 ✅ | **+8.2pp** | 0.158 | **0.949** |
+| QMJ | −0.306 → −0.146 ✅ | **−5.7pp** | 0.494 | 1.000 |
 
-**所以「vol-managing 至少能壓低回撤」這個安慰獎，在因子層是站不住的**（MOM 除外）。
-任何人只要把曝險等比例降到 1/4，都能得到同樣的 raw MDD 改善，不需要 vol-managing。
+只有 MOM 的同風險 gap 為正，但它並不罕見於錯 phase 的同一權重路徑；Holm 後 **0/6** 在 5% 或 10%
+水準存活。這支持的精確結論是：**本樣本沒有證據顯示較淺回撤來自 timing skill，R3 類 raw-MDD
+headline 不能成立**；不是「證明 timing 完全不存在」。R3 的 universe/spec 與本實驗不完全相同，
+故回溯 class sweep 仍須逐案重驗，不能把 K1702 的 p 值直接移植過去。
 
 ### 事前成功標準 vs 實際
 
@@ -217,21 +222,22 @@ drawdown 當然比較淺 —— 那叫**少冒險**，不叫**會擇時**。除�
 
 ## 六、結論（強度嚴格不超過證據）
 
-1. **NULL。** 把 MM 的 vol-scaling 套到因子動物園，**2000 年後樣本外、計入成本後全面不存活**。
-   無一因子的 spanning alpha 通過 Harvey；BH-FDR 後無一顯著改善；**CMA 反而顯著變差**。
+1. **正向 gate 為 NULL、個別結果為 MIXED。** 把 MM 的 vol-scaling 套到因子動物園，2000 年後樣本外、
+   計入成本後無一正向效果通過。無一因子的 spanning-alpha t 通過 Harvey；BH-FDR 後無一顯著改善；
+   **CMA 反而顯著變差**。
 2. **成本是主角不是配角。** 動物園組合 gross 的改善本就微弱（+0.036，不顯著），**10bp 即翻負**。
    分散化後組合波動僅 5.85%，~0.64%/yr 的成本 drag 就吃掉大半個 Sharpe 單位。
-3. **MM 的原始效果是 pre-1963 現象。** 同一 pipeline 在 1926-1963 重現 alpha 7.7%/yr，
-   到 1963-1999 只剩 2.0%/yr（t=1.07）。這讓動物園的 null 顯得理所當然。
-4. **「vol-managing 壓低 drawdown」在因子層是 scale artifact**（5/6 → 1/6）。此結論**推翻 `R3`**
-   （同一類資產、同一類訊號）。院內 `N107` 早已指出 MDD 改善是機械性的；本實驗的增量是更強的一步 ——
-   **單位波動的 MDD 反而變差**。`K1265`（SPY、VIX-managed）本實驗未測，**不宣稱推翻**，列入待重驗。
-   整個 raw-MDD-improvement claim class 需要全量掃描（§十）。
+3. **MM 複製中的效果集中在 pre-1963 子期。** 同一 in-sample pipeline 在 1926-1963 得到 alpha 7.7%/yr，
+   到 1963-1999 只剩 2.0%/yr（t=1.07）；這是樣本期診斷，不把它升格成結構性年代斷言。
+4. **「vol-managing 壓低 drawdown」在本因子樣本不受支持。** raw 5/6 全部有重大曝險 mismatch；
+   exposure-matched gap 只有 MOM 為正，對自身 circular-shift null 做 Holm 後 **0/6 存活**。
+   精確結論是沒有 timing 證據、R3 類 raw-MDD headline 不能成立，不是證明 timing 不存在。
+   `K1265`（SPY、VIX-managed）本實驗未測，不移植本案 p 值；整個 claim class 仍須逐案重驗。
 5. **MOM 是唯一方向為正的因子**（與 momentum-crash 文獻一致），**但多重檢定後不顯著（BH q=0.055，邊緣），
    本實驗不宣稱它存活。**
-6. **方法論教訓（可推廣）**：比較兩個**曝險水準不同**的策略時，**不可**用 raw mean return 的 DM 檢定，
-   也**不可**用 raw max drawdown —— 兩者都不是 scale-invariant，會系統性地朝「低曝險組合較差／較安全」
-   的方向誤導。必須用 Sharpe / spanning alpha / 單位波動的 drawdown。
+6. **方法論教訓（可推廣）**：比較兩個**曝險水準不同**的策略時，不可用 raw mean-return DM 或 raw MDD
+   承載 gate。報酬面用 Sharpe / spanning-alpha t；回撤面用 exposure-matched gap，再把 gap 對該權重路徑
+   的 phase-randomization null 檢定。`MDD ÷ vol` 只能當描述性 normalisation。
 
 ## 七、限制（不可略過）
 
@@ -252,6 +258,8 @@ drawdown 當然比較淺 —— 那叫**少冒險**，不叫**會擇時**。除�
 - 與 AQR 日曆做 inner join 會裁掉部分 French 交易日，故 Mkt-RF 的 RV 不是純 French 複製
   （MM 證偽測試那條路徑用純 FF3，不受此影響）。
 - 固定 2000 年切點是**一種** real-time 設計，不能消除全部 specification uncertainty。
+- exposure-matched λ 使用完整 OOS realized volatility，是事後 attribution benchmark，不可交易。
+- circular-shift test 假設 persistent volatility weights 近似 circularly stationary；不是 exactly-sized parametric test。
 - 美股因子；無對等的台股 QMJ 序列。
 - MM 複製測試的每一格**都是 in-sample**（常數在被評估的同一窗口上估），是 pipeline 診斷，**不是 OOS 主張**。
 
@@ -298,10 +306,12 @@ uv run python experiments/k1702/k1702.py
   VIX-managed，本實驗未測）；(b) 「完全複製 R3」→「方向一致」（因子宇宙不同，5/6 是計數巧合）；
   (c) 補 `N107` 為院內先驗（MDD 機械性早已知）並重新定位增量；(d) 補 alpha 水準非 scale-invariant
   的註記；(e) 回溯範圍由「R3 + K1265 兩條」擴為 class sweep。
-- **Primary-path Codex re-verify 仍未做**（`.claude/rules/experiments.md`：subagent fallback PASS
-  ≠ primary-path Codex PASS；hourly fire 內禁 spawn `codex exec`）。已 queue 為獨立任務。
-  knowledge entry 以 **CONDITIONAL_PASS** 寫入、reviewer_source 標明 subagent fallback。
+- **Primary-path Codex re-verify（2026-07-13）= PASS。** Primary review 先判原版 **FAIL**：
+  `MDD ÷ vol` 並非不變量、缺 exposure-matched/circular-shift gate，且 MDD 漏掉初始財富 1.0；另有 MOM
+  過強語氣、ACF 定位、multifactor raw-mean DM 命名與 artifact provenance 問題。全部修正後重新下載既定
+  French/AQR 來源並完整重跑；兩個 fresh-context final audit 再核對 224 summary rows、56 OOS inference cells、
+  65 HAC cells、六因子 × 316 phase shifts、script/artifact/source hashes。最終無 HIGH/MEDIUM blocker，
+  primary factor gate 維持 `1/6、0、0、1`，drawdown proper gate = Holm **0/6**。
 - **回溯更正待辦（class sweep，非只兩條）**：raw-MDD-improvement claim class 全量掃描 ——
   至少含 `R3` / `K1265` / `N80` / `N84` / `N106` / `N107` / `N118` / `N136` / `N168` / `N172` /
   `K40` / `Q16` 及相關 meta-analysis entries；其中 reader-facing 的須一併更正。已 queue。
-</content>
