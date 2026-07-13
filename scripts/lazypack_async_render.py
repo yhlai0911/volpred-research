@@ -231,7 +231,20 @@ def cmd_run(a: argparse.Namespace) -> int:
     title = a.title or f"{a.article_id} 懶人包"
 
     # 1) Render — codex exec writes + runs a data-bound render script.
-    if a.render_cmd:
+    # 產出即交付：if every expected panel is already on disk (an earlier run —
+    # or a hand-run of the generated render script — produced them before the
+    # job died), the artifacts are finished goods. Re-rendering can only lose
+    # them; deliver instead. This is what makes a retry of a failed job actually
+    # rescue the article rather than replay the same failing render step.
+    already = [
+        stem for stem, _ in specs
+        if (out_dir / f"{stem}.png").exists()
+        and (out_dir / f"{stem}.png").stat().st_size > 1024
+    ]
+    if len(already) == len(specs):
+        print(f"[lazypack_async] panels already rendered ({len(already)}/{len(specs)}) "
+              f"in {out_dir} — skipping render, delivering existing artifacts")
+    elif a.render_cmd:
         print(f"[lazypack_async] TEST HOOK ACTIVE: --render-cmd {a.render_cmd!r} "
               f"(bypasses gen_lazypack_codex.py; smoke/tests only)")
         cmd = shlex.split(a.render_cmd) + [str(plan_path), str(out_dir)]
@@ -243,10 +256,12 @@ def cmd_run(a: argparse.Namespace) -> int:
             cmd += ["--experiment", k]
         for s in a.source:
             cmd += ["--source", s]
-    proc = subprocess.run(cmd, cwd=str(ROOT))
-    if proc.returncode != 0:
-        print(f"error: render step failed rc={proc.returncode}", file=sys.stderr)
-        return 2
+
+    if len(already) != len(specs):
+        proc = subprocess.run(cmd, cwd=str(ROOT))
+        if proc.returncode != 0:
+            print(f"error: render step failed rc={proc.returncode}", file=sys.stderr)
+            return 2
 
     # 2) Verify every expected panel PNG exists (belt-and-suspenders — the
     # codex generator verifies too, but --render-cmd paths must not skip it).

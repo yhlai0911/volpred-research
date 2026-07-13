@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -255,6 +256,35 @@ def _iter_paper_csvs(paper_filter: str | None) -> list[Path]:
     return csvs
 
 
+def _commit_refreshed(paths: list[Path]) -> None:
+    """A job owns its output. A CSV this job rewrote and left uncommitted is not
+    "someone else's work in progress" — but that is exactly how PHASE-Z has to
+    read it, so every daily refresh left another foreign-file WARN behind and the
+    snapshots never landed in git. Commit path-scoped (never `git add -A`, which
+    would sweep in another session's WIP)."""
+    rels = [str(p.relative_to(ROOT)) for p in paths]
+    if not rels:
+        return
+    try:
+        subprocess.run(["git", "add", "--", *rels], cwd=str(ROOT), check=True)
+        staged = subprocess.run(
+            ["git", "diff", "--cached", "--name-only", "--", *rels],
+            cwd=str(ROOT), capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        if not staged:
+            return  # nothing actually changed on disk
+        subprocess.run(
+            ["git", "commit", "-m",
+             f"chore(paper-data): refresh {len(staged.splitlines())} snapshot CSV(s)",
+             "--", *rels],
+            cwd=str(ROOT), check=True,
+        )
+        print(f"[refresh] committed {len(staged.splitlines())} refreshed CSV(s)")
+    except subprocess.CalledProcessError as exc:
+        print(f"[refresh] WARN: commit of refreshed CSVs failed rc={exc.returncode} "
+              f"— files left uncommitted: {rels}", file=sys.stderr)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true", help="report only, no writes")
@@ -280,6 +310,9 @@ def main() -> int:
         "written": sum(1 for r in results if r.get("written") is True),
     }
     payload = {"summary": summary, "results": results}
+
+    if args.apply:
+        _commit_refreshed([csv for csv, r in zip(csvs, results) if r.get("written")])
 
     if args.json:
         print(json.dumps(payload, ensure_ascii=False, indent=2, default=str))
