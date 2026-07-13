@@ -16706,5 +16706,41 @@
     "owner": "hourly-09",
     "commit": null,
     "summary": "PHASE A 收件：raw-MDD claim class sweep 驗收關閉。auditor 複跑 455 站點 = frozen baseline（無新增違規）、ratchet test 13 passed、產出 commit a3858edbe 已在 main。compute-queue followup 標記 dispatched，task 由 in_progress 收為 succeeded。"
+  },
+  {
+    "timestamp": "2026-07-13T09:08:26+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-6f9e187a1",
+    "outcome": "succeeded",
+    "summary": "K1702: replace drawdown ratio with phase-null gate",
+    "commit": "6f9e187a102e1092a2b6f26833b0380dfde28d12",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T01:32:47.835712+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1702"
+  },
+  {
+    "timestamp": "2026-07-13T09:27:54+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-728a9ed66",
+    "outcome": "succeeded",
+    "summary": "Merge current main into K1702 reverify",
+    "commit": "728a9ed66f54ededa2f861d9c8a83cd3a1e82f6e",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T01:32:47.835703+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1702"
+  },
+  {
+    "timestamp": "2026-07-13T09:32:06+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-2e00aae8f",
+    "outcome": "succeeded",
+    "summary": "K1702: close primary-path reverify",
+    "commit": "2e00aae8f6b1b35f9cebec9759093823c9ee1076",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T01:32:47.835396+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1702"
   }
 ]
