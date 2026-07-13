@@ -241,7 +241,29 @@ TSI 差的 bootstrap 分布，本實驗未做。）
 
 ## 9. Codex 代碼審查
 
-**Verdict: PENDING**（尚未送審；審完才填。禁止預填 verdict。）
+**Verdict: PASS**（`codex exec`，codex-cli 0.144.1 / gpt-5.6-sol / ultra，2026-07-13）。
+
+### 9.1 Codex 獨立驗證的項目（**有鑑別力**，不是「看過說沒問題」）
+
+| 項目 | 方法 | 結果 |
+|---|---|---|
+| **KPPS 公式** | Codex **自己另寫一份三重迴圈直譯版**（照 Pesaran-Shin 原式，不看本腳本的向量化寫法），用 `rng(0)` 造 300×4 資料 fit VAR(2) 比對 | **一致，最大相對誤差 2.86e-16**（rtol 1e-10） |
+| ↳ σ_jj 除對軸了嗎 | 故意把 σ_jj 改除在「被分解變數 i」（列）而非「衝擊來源 j」（欄） | 錯軸版產生 **14.05% 相對誤差** → **本檢驗抓得到這個錯**，不是空過 |
+| **排序映射** | 對合成 VAR(2) 的**全部 24 種排序**重 fit，用 order-invariant 的 GFEVD 當 oracle 驗逆映射 | 映射後最大差 **2.22e-16**（正確）；故意用**錯的 forward permutation** 則差 **0.2868** → 檢驗有鑑別力 |
+| **排序敏感度是真的嗎** | 同上，看 Cholesky 跨排序的變異 | Cholesky 元素跨排序全距 **0.6504**，canonical vs 反向排序差 **0.5978** → **排序敏感度是真實效果，不是索引 bug 造出來的假變異** |
+| **VAR 平穩性**（Codex 主動查出，我原本漏了） | 對每個 rolling fit 跑 `is_stable()` | (63,5) **61.2% 非平穩** / (126,2) 9.7% / (252,2) 2.0% / (252,5) 4.0%；五個全窗 VAR 全部 stable |
+
+第 5 項是 Codex 找出的**新問題**，已採納並寫進腳本（`stability()`）、`k865b_results.json`
+與 §5 —— 它讓「K865 的 rolling TSI 不可引用」這個結論從「有偏」升級到「多數視窗上根本沒被定義」。
+
+### 9.2 第二位獨立審查者
+
+同一份 code 另派 `feature-dev:code-reviewer`（fresh context）做交叉審查。
+
+### 9.3 code-reviewer verdict
+
+**PENDING**（審查中；回來後填。不預填。）Codex 的 PASS 已足以支撐 §6 的結論；
+第二位審查者是額外的交叉檢查，若其發現與 Codex 衝突，以「更嚴格的那一方」為準並回頭修正。
 
 ## 10. 重跑方式
 
