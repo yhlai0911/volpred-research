@@ -1,0 +1,112 @@
+{
+  "experiment_id": "k1703",
+  "title": "選擇權月結算週（OpEx week）的波動壓抑與釋放：SPY 全歷史檢定",
+  "data": {
+    "symbol": "SPY",
+    "source": "yfinance (auto_adjust=True)",
+    "start": "1993-02-01",
+    "end": "2026-07-13",
+    "n_trading_days": 8418,
+    "n_weeks_analyzed": 1744
+  },
+  "method": {
+    "opex_definition": "每月第三個星期五所在的整週",
+    "post_opex_definition": "OpEx 週的下一個交易週",
+    "rv": "週內日對數報酬標準差 × sqrt(252)，以百分比表示",
+    "bootstrap": {
+      "n": 10000,
+      "seed": 42,
+      "unit": "week (natural block)"
+    },
+    "exclusions": "交易日 < 3 天的假期短週剔除"
+  },
+  "summary_by_week_type": {
+    "opex": {
+      "n_weeks": 393,
+      "mean_rv_annual_pct": 14.367836035747874,
+      "median_rv_annual_pct": 11.747840465014733,
+      "ci95_low": 13.28188448606134,
+      "ci95_high": 15.620077876743084,
+      "mean_abs_ret_pct": 0.7492819996983149,
+      "mean_hl_range_pct": 3.2822940705185553
+    },
+    "post_opex": {
+      "n_weeks": 393,
+      "mean_rv_annual_pct": 14.56932842365748,
+      "median_rv_annual_pct": 11.921672767357213,
+      "ci95_low": 13.586961244617438,
+      "ci95_high": 15.64072519574322,
+      "mean_abs_ret_pct": 0.7594641765936285,
+      "mean_hl_range_pct": 3.140264085190575
+    },
+    "normal": {
+      "n_weeks": 958,
+      "mean_rv_annual_pct": 15.302706670397873,
+      "median_rv_annual_pct": 12.239919399282229,
+      "ci95_low": 14.584682442266672,
+      "ci95_high": 16.072110761089096,
+      "mean_abs_ret_pct": 0.8000786463900217,
+      "mean_hl_range_pct": 3.329449167663114
+    }
+  },
+  "tests": {
+    "opex_vs_normal": {
+      "diff": -0.9348706346499984,
+      "ci_low": -2.282843781723793,
+      "ci_high": 0.490702665130382,
+      "p_value": 0.1826
+    },
+    "post_opex_vs_normal": {
+      "diff": -0.7333782467403935,
+      "ci_low": -2.0015259665824274,
+      "ci_high": 0.5623279416960887,
+      "p_value": 0.266
+    },
+    "post_opex_vs_opex": {
+      "diff": 0.2014923879096049,
+      "ci_low": -1.428421520392484,
+      "ci_high": 1.7537116335730734,
+      "p_value": 0.8022
+    },
+    "opexday_vs_other_friday_abs_ret": {
+      "diff": -0.11600860462339968,
+      "ci_low": -0.19715163255166543,
+      "ci_high": -0.031699921005730824,
+      "p_value": 0.009,
+      "mean_opex_friday_pct": 0.6831469119761746,
+      "mean_other_friday_pct": 0.7991555165995743,
+      "n_opex_fridays": 393,
+      "n_other_fridays": 1292
+    }
+  },
+  "by_decade": {
+    "1993-1999": {
+      "n_opex_weeks": 83,
+      "opex_mean": 11.889438729449262,
+      "normal_mean": 13.817462513780038,
+      "post_opex_mean": 13.644120404284921,
+      "opex_minus_normal": -1.928023784330776
+    },
+    "2000-2009": {
+      "n_opex_weeks": 117,
+      "opex_mean": 18.567349465312805,
+      "normal_mean": 18.36400640773363,
+      "post_opex_mean": 17.353106909970094,
+      "opex_minus_normal": 0.20334305757917548
+    },
+    "2010-2019": {
+      "n_opex_weeks": 118,
+      "opex_mean": 11.58438100454019,
+      "normal_mean": 12.638069337747872,
+      "post_opex_mean": 11.879812082547597,
+      "opex_minus_normal": -1.053688333207683
+    },
+    "2020-2026": {
+      "n_opex_weeks": 75,
+      "opex_mean": 14.938657353697142,
+      "normal_mean": 16.213842791782163,
+      "post_opex_mean": 15.482036569794978,
+      "opex_minus_normal": -1.2751854380850212
+    }
+  }
+}
