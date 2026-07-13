@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1702,
+  "last_k_id": 1708,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -760,8 +760,58 @@
       "status": "reserved",
       "topic": "vol-managed factor zoo OOS + net-of-cost re-verification",
       "topic_hash": "f2277b7d32076dad"
+    },
+    {
+      "claimed_at": "2026-07-13T23:52:31.821959+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1704",
+      "number": 1704,
+      "source_max": 1703,
+      "status": "reserved",
+      "topic": "偏誤波動代理的可靠度加權評估目標** — 以本機台指期逐筆資料同步產生 1/5/10 分鐘 RV、區間與日報酬代理；每個預測起點只用過去樣本估偏誤與權重，再以相同 HAR/GJR ledger 比較 ranking、DM-HLN 與 MCS，檢定模型優劣是否依賴單一不可靠目標。",
+      "topic_hash": "f1817e5a981f9529"
+    },
+    {
+      "claimed_at": "2026-07-13T23:52:31.912631+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1705",
+      "number": 1705,
+      "source_max": 1704,
+      "status": "reserved",
+      "topic": "相依結構預測評分的誠實度回溯稽核** — 對既有 Joe、DCC 結果重建單邊滾動 marginal PIT，先驗證邊際，再用 lexicographic 邊際＋相依分數與 two-step predictive-ability 檢定，並做非同步收盤敏感度。",
+      "topic_hash": "d87de703526eacfd"
+    },
+    {
+      "claimed_at": "2026-07-13T23:52:32.010139+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1706",
+      "number": 1706,
+      "source_max": 1705,
+      "status": "reserved",
+      "topic": "美國最小跳動單位試驗的 pre-spread 波動異質性** — 用官方隨機分組與市場品質表，按事前 spread `<10¢`／`>15¢` 固定分層，估 1¢→5¢ 對 small-cap RV、區間與流動性的 DiD／事件研究，配 randomization inference、placebo 與 Holm 檢定；不得事後改分箱。",
+      "topic_hash": "1862719c30fda14a"
+    },
+    {
+      "claimed_at": "2026-07-13T23:52:32.101548+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1707",
+      "number": 1707,
+      "source_max": 1706,
+      "status": "reserved",
+      "topic": "選擇權競價的 price-improvement／liquidity benefit 是否在壓力期崩解** — 用作者公開 replication sample 對接事前已知 VIX，預註冊競價×高波動 interaction，檢定 execution quality 與 dispersion；若公開樣本不含完整 OPRA 欄位，只稱 replication-sample stress diagnostic。",
+      "topic_hash": "ac690fd73fbe50a8"
+    },
+    {
+      "claimed_at": "2026-07-13T23:52:32.191799+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1708",
+      "number": 1708,
+      "source_max": 1707,
+      "status": "reserved",
+      "topic": "時變狀態空間 HAR 是否勝過固定／滾動 HAR** — 在 SPY/QQQ 與本機台指期相同 target、window、ledger 下比較 HAR、rolling HAR、SHARP/SHARP-SV；每個 origin 的 filtering 只看窗內資料，超參數由內層滾動驗證決定，再用 QLIKE/MSE、DM-HLN、GW、MCS 與 regime breakdown 檢定。",
+      "topic_hash": "9a49cb6578e83855"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-12T19:19:32.812121+00:00"
+  "updated_at": "2026-07-13T23:52:32.191799+00:00"
 }
