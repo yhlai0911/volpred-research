@@ -2,6 +2,41 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 05:45 — 護欄放在 fail-open 的 `try` 內，等於沒有護欄 — **FIXED**（hourly-05）
+
+**現象**：main Test Suite 從 2026-07-13 20:00 那班起連兩班紅（run 29280674231 / 29284651466）。
+pytest 本身 2582 全綠 —— 紅的是後面那步 `Assert the suite mutated no repo state`：測試把
+`storage/logs/dedup_decisions.jsonl` 寫進了真實 checkout。
+
+**根因（兩層）**：
+1. 這條 dedup audit trail 有 **6 個 writer**（`publisher` ×2 / `throttle` / `topic_dedup` /
+   `content` / `refill_reader_facing_pool` / `event_jobs`），其中 **5 個從來沒呼叫過**
+   `guard_canonical_write`。
+2. 唯一有呼叫的 `event_jobs`，把 `guard_canonical_write(path)` 寫在**自己 fail-open 的 `try` 內**
+   —— 於是 `CanonicalWriteBlocked` 被同一個函式的 `except Exception` 吞掉，降級成一則 warn。
+   **一個會被自己的 except 接住的 guard，不是 guard**：它擋得住寫入，卻擋不住「測試在真 storage
+   上跑 code path」這個真正的缺陷，而且觀測上與「沒有洩漏」完全同形。
+
+**解法（修 writer，不修測試）**：6 個 writer 一律在寫入前呼叫 `guard_canonical_write`，且**放在
+`try` 之外**，讓洩漏在測試下 loud fail（production 端 env flag 未開 = no-op，零風險）。
+`publisher` / `throttle` 用 function-local import 避開 `volpred.ops.__init__ -> content ->
+publisher` 的 import cycle（`email_notifier` 早就是這個寫法，沿用）。
+
+**Loud raise 立刻付現**：它揪出 3 個先前被靜默容忍、真的在寫真 storage 的測試 ——
+`test_reader_facing_refill` 兩支只 monkeypatch 了 `NEXT_TASKS`，漏掉 `DEDUP_LOG` 與 `STORAGE`
+（改 autouse fixture 一次導向 `tmp_path`，新測試無法再忘）；`test_topic_dedup_at_generation`
+直接傳 `storage_dir="storage"`。順帶抓出一個 production 潛在 bug：`refill_reader_facing_pool`
+呼叫 `build_pending_event_task` 沒傳 `storage_dir`，落到 callee 預設的相對路徑 `"storage"`
+（相對 **cwd** 而非 repo root）。
+
+**不加第二層 gate**（anti-stacking）：CI 的 `Assert the suite mutated no repo state` 這一步本來就是
+這個 bug class 的 enforcement owner，它抓到了、也抓對了。缺的不是偵測，是 writer 端的護欄。
+
+**教訓**：`guard_*` / `assert_*` 這類 fail-loud 元件，**永遠不要放進 fail-open 的 `try` 裡**。寫
+`try: guard(...)` 之前先問一句：「這個 except 會不會把我剛裝上的警報器一起接走？」
+
+commit `797c98446`；驗證 = worktree 全套件 2586 passed / 7 skipped + CI run 29286983116 綠。
+
 ## 2026-07-14 02:48 — pytest remote guards 已全開，collection 仍讀 production `.env.local` — **FIXED**
 
 **現象**：上一輪新增的 CI-parity gate 讓 `pytest tests/test_dreaming_review.py` 在 43 個 assertions

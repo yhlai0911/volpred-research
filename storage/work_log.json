@@ -17157,5 +17157,15 @@
     "owner": "codex",
     "backfilled_at": "2026-07-13T20:57:55.673327+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-14T05:46:25+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29280674231",
+    "outcome": "completed",
+    "actor": "hourly-05",
+    "owner": "hourly-05",
+    "commit": "797c98446",
+    "summary": "CI 紅燈修復（main Test Suite，run 29280674231 / 29284651466 連兩班 failure）。pytest 本身全綠，紅的是 \"Assert the suite mutated no repo state\" 護欄：測試把 storage/logs/dedup_decisions.jsonl 寫進真實 checkout。\n\n根因：這條 dedup audit trail 有 6 個 writer，只有 event_jobs 呼叫 guard_canonical_write，且放在 fail-open 的 try 內 → CanonicalWriteBlocked 被自己的 except 吞掉，洩漏被降級成 warn。其餘 5 個（publisher x2 / throttle / topic_dedup / content / refill_reader_facing_pool）完全沒護欄。\n\n修法：修在 writer 不修測試。6 個 writer 全部在寫入前呼叫 guard_canonical_write 並放在 try 之外，讓洩漏 loud fail（production gate 未開 = no-op，零風險）。publisher/throttle 用 function-local import 避開 volpred.ops -> content -> publisher 的 import cycle（沿用 email_notifier 既有寫法）。\n\nLoud raise 揪出 3 個真的在寫真 storage 的測試（先前被靜默容忍）：test_reader_facing_refill 兩支只 patch NEXT_TASKS 漏了 DEDUP_LOG/STORAGE（改 autouse fixture 一次導向 tmp_path）、test_topic_dedup_at_generation 直接傳 storage_dir=\"storage\"（改 tmp_path）。另修一個潛在 production bug：refill 呼叫 build_pending_event_task 沒傳 storage_dir，落到 callee 預設的相對路徑（相對 cwd 非 repo root）。\n\n不新增第二層 gate：CI 的 mutation 檢查步驟本身就是這個 bug class 的 enforcement owner（anti-stacking）。\n\n驗證：worktree 全套件 2586 passed / 7 skipped；CI 該步驟的等價本地檢查回傳空集合；push 後 main Test Suite run 29286983116 conclusion=success（綠燈）。"
   }
 ]
