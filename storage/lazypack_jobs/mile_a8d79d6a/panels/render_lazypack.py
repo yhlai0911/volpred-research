@@ -152,43 +152,33 @@ def extract_article_facts(article_text: str) -> dict[str, Any]:
         "名冊查證日",
     ).group(1)
 
-    admin = require_match(
-        r"\| 無人載具採購特別條例（行政院版） \| ([^|]+) \| "
-        r"(\d+) 年約 ([\d,]+) 億元、約 ([\d,]+) 萬架 \|",
+    policy = require_match(
+        r"\| 無人載具採購特別條例草案 \| "
+        r"(\d{4}-\d{2}-\d{2}) 排定三委員會聯席審查；尚未完成立法 \| "
+        r"上限 ([\d,]+) 億元；草案公開文本未列總採購數量 \|",
         article_text,
-        "行政院版政策",
+        "無人載具採購特別條例草案",
     )
-    opposition = require_match(
-        r"\| 在野研擬版本 \| ([^|]+) \| "
-        r"(\d+) 年約 ([\d,]+) 億元、回歸年度預算 \|",
+    planned_usv = require_match(
+        r"小型自殺無人艇 ([\d,]+) 艘",
         article_text,
-        "在野版政策",
+        "小型自殺無人艇規畫數量",
     )
-    asymmetric = require_match(
-        r"\| 強化不對稱戰力採購特別條例 \| ([^|]+) \| "
-        r"上限約 ([\d,]+) 億元 \|",
+    realized_output = require_match(
+        r"(\d{4}) 年無人機產值是 ([\d,]+) 億元",
         article_text,
-        "不對稱戰力政策",
+        "已實現無人機產值",
     )
-    current_capacity = require_match(
-        r"目前的年產能，公開資料的區間大約在 ([\d,]+) 到 ([\d,]+) 架",
+    monthly_capacity_target = require_match(
+        r"月產能 ([\d,]+) 架，是政策目標",
         article_text,
-        "現有年產能",
+        "月產能政策目標",
     )
-    target_capacity = require_match(
-        r"(\d{4}) 年把月產能拉到 ([\d,]+) 架、年產約 ([\d,]+) 萬架",
+    output_target = require_match(
+        r"(\d{4}) 年產值目標列為 ([\d,]+) 億元",
         article_text,
-        "目標年產能",
+        "產值政策目標",
     )
-    capacity_gap = require_match(
-        r"缺口大約是 ([\d,]+) 倍",
-        article_text,
-        "產能缺口",
-    )
-
-    admin_date = require_match(
-        r"(\d{4}-\d{2}-\d{2})", admin.group(1), "行政院版日期"
-    ).group(1)
 
     # These prose claims are required content but have no structured JSON field.
     for fragment, label in [
@@ -206,30 +196,26 @@ def extract_article_facts(article_text: str) -> dict[str, Any]:
         ("EP2 中游機體", "EP2"),
         ("EP3 下游整機", "EP3"),
         ("EP4 挑幾家純度最高", "EP4"),
-        ("EP5 收在投資組合與風險", "EP5"),
+        ("EP-Final 收在投資組合、風險與台灣的全球定位", "EP-Final"),
         ("主要是 AI 晶片行情推的，跟無人機幾乎無關", "聯發科歸因"),
-        ("付委後遭在野擋下", "行政院版狀態"),
-        ("研議中，尚未三讀", "在野版狀態"),
-        ("限對美軍購", "不對稱戰力限制"),
-        ("這些是目標值，不是已實現的產出", "產能目標限制"),
+        ("2,100 億是草案上限，不是公司訂單", "政策上限限制"),
+        ("目前公開草案文本沒有列出這個總採購數量", "總採購數量更正"),
+        ("撤回 21 萬架與 20 倍缺口兩項說法", "舊口徑撤回"),
+        ("不是目前已實現的月產量", "產能目標限制"),
+        ("不能再用媒體區間除以規畫數量", "產能倍數限制"),
     ]:
         require_fragment(article_text, fragment, label)
 
     return {
         "verify_date": verify_date,
-        "admin_years": int(admin.group(2)),
-        "admin_budget_e8": admin.group(3),
-        "admin_units_10k": admin.group(4),
-        "admin_date": admin_date,
-        "opposition_years": int(opposition.group(2)),
-        "opposition_budget_e8": opposition.group(3),
-        "asymmetric_budget_e8": asymmetric.group(2),
-        "current_capacity_low": int(current_capacity.group(1).replace(",", "")),
-        "current_capacity_high": int(current_capacity.group(2).replace(",", "")),
-        "target_year": int(target_capacity.group(1)),
-        "target_monthly": int(target_capacity.group(2).replace(",", "")),
-        "target_annual_10k": int(target_capacity.group(3).replace(",", "")),
-        "capacity_gap": int(capacity_gap.group(1).replace(",", "")),
+        "policy_review_date": policy.group(1),
+        "policy_budget_e8": int(policy.group(2).replace(",", "")),
+        "planned_usv_units": int(planned_usv.group(1).replace(",", "")),
+        "realized_output_year": int(realized_output.group(1)),
+        "realized_output_e8": int(realized_output.group(2).replace(",", "")),
+        "monthly_capacity_target": int(monthly_capacity_target.group(1).replace(",", "")),
+        "output_target_year": int(output_target.group(1)),
+        "output_target_e8": int(output_target.group(2).replace(",", "")),
     }
 
 
@@ -549,7 +535,7 @@ def render_framework(evidence: dict[str, Any]):
     ax.text(
         0.075,
         0.226,
-        "系列路線｜EP0 是總覽，EP1–EP5 逐層深挖",
+        "系列路線｜EP0 總覽，EP1–EP4 與 EP-Final 逐層深挖",
         ha="left",
         va="center",
         color=NAVY,
@@ -562,7 +548,7 @@ def render_framework(evidence: dict[str, Any]):
         ("EP2", "中游產能"),
         ("EP3", "下游＋USV"),
         ("EP4", "公司純度"),
-        ("EP5", "組合風險"),
+        ("EP-Final", "組合風險"),
     ]
     start_x = 0.075
     pill_w = 0.132
@@ -951,69 +937,57 @@ def render_results(evidence: dict[str, Any]):
     ax.text(
         0.365,
         0.397,
-        "政策三版本並存｜都要看狀態",
+        "政策上限｜還不是公司訂單",
         ha="left",
         va="center",
         color=GOLD,
         fontsize=13.6,
         fontweight="bold",
     )
-    policy_rows = [
-        (
-            "行政院版",
-            f"{evidence['admin_years']} 年 {evidence['admin_budget_e8']} 億／{evidence['admin_units_10k']} 萬架",
-            f"{evidence['admin_date']} 通過；付委遭擋",
-        ),
-        (
-            "在野版",
-            f"{evidence['opposition_years']} 年 {evidence['opposition_budget_e8']} 億",
-            "研議中，尚未三讀",
-        ),
-        (
-            "不對稱戰力",
-            f"{evidence['asymmetric_budget_e8']} 億",
-            "已三讀；限對美軍購",
-        ),
-    ]
-    for i, (name, amount, status) in enumerate(policy_rows):
-        row_y = 0.348 - i * 0.066
-        if i:
-            ax.plot([0.365, 0.685], [row_y + 0.034, row_y + 0.034], color=BORDER, lw=0.8)
-        ax.text(
-            0.365,
-            row_y,
-            name,
-            ha="left",
-            va="center",
-            color=INK,
-            fontsize=9.8,
-            fontweight="bold",
-        )
-        ax.text(
-            0.46,
-            row_y + 0.011,
-            amount,
-            ha="left",
-            va="center",
-            color=GOLD,
-            fontsize=10.4,
-            fontweight="bold",
-        )
-        ax.text(
-            0.46,
-            row_y - 0.016,
-            status,
-            ha="left",
-            va="center",
-            color=MUTED,
-            fontsize=8.6,
-        )
+    ax.text(
+        0.365,
+        0.337,
+        f"上限 {evidence['policy_budget_e8']:,} 億元",
+        ha="left",
+        va="center",
+        color=INK,
+        fontsize=19.5,
+        fontweight="bold",
+    )
+    ax.text(
+        0.365,
+        0.290,
+        f"{evidence['policy_review_date']}｜三委員會聯席審查",
+        ha="left",
+        va="center",
+        color=GOLD,
+        fontsize=9.6,
+        fontweight="bold",
+    )
+    ax.text(
+        0.365,
+        0.247,
+        f"小型自殺無人艇 {evidence['planned_usv_units']:,} 艘｜規畫數量",
+        ha="left",
+        va="center",
+        color=INK,
+        fontsize=9.3,
+    )
+    ax.text(
+        0.365,
+        0.207,
+        "尚未完成立法；草案未列總採購數量。",
+        ha="left",
+        va="center",
+        color=MUTED,
+        fontsize=8.8,
+    )
 
     add_card(ax, 0.725, 0.176, 0.22, 0.255, facecolor=PALE_TEAL, edgecolor=TEAL)
     ax.text(
         0.745,
         0.397,
-        "產能缺口",
+        "實績 ≠ 政策目標",
         ha="left",
         va="center",
         color=TEAL,
@@ -1023,21 +997,17 @@ def render_results(evidence: dict[str, Any]):
     ax.text(
         0.745,
         0.345,
-        f"約 {evidence['capacity_gap']} 倍",
+        f"{evidence['realized_output_e8']:,} 億",
         ha="left",
         va="center",
         color=INK,
         fontsize=21,
         fontweight="bold",
     )
-    current_low_k = evidence["current_capacity_low"] / 1000
-    current_high_k = evidence["current_capacity_high"] / 1000
-    if not current_low_k.is_integer() or not current_high_k.is_integer():
-        raise ValueError("Expected current capacity endpoints to convert exactly to k")
     ax.text(
         0.745,
         0.292,
-        f"現在｜年產 {int(current_low_k)}k–{int(current_high_k)}k 架",
+        f"{evidence['realized_output_year']}｜已實現產值",
         ha="left",
         va="center",
         color=INK,
@@ -1046,7 +1016,7 @@ def render_results(evidence: dict[str, Any]):
     ax.text(
         0.745,
         0.251,
-        f"{evidence['target_year']} 目標｜年產 {evidence['target_annual_10k']} 萬架",
+        f"月產 {evidence['monthly_capacity_target']:,} 架｜目標",
         ha="left",
         va="center",
         color=INK,
@@ -1055,7 +1025,7 @@ def render_results(evidence: dict[str, Any]):
     ax.text(
         0.745,
         0.208,
-        "目標值，尚非已實現產出",
+        f"{evidence['output_target_year']} 產值 {evidence['output_target_e8']:,} 億｜目標",
         ha="left",
         va="center",
         color=TEAL,

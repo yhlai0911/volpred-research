@@ -16797,5 +16797,15 @@
     "owner": "hourly-12",
     "commit": null,
     "summary": "無人載具 EP4 六檔龍頭六面向（經營/財務/市場/籌碼/技術/心理）逐檔真查真算 → 草稿 mile_aa4713db。熱度面 6/6 全票（RSI 64-85、法人 60 日買走雷虎 11.9% 股本），實績面站不住（雷虎/中光電營益率為負、4/6 營收年增<5%）；經營與財務最強名單只重疊龍德造船一家，其獲利來自軍艦 → 純度與獲利反向。估值倍數釘死於 2026-07-11 收盤價（棄用 yfinance 盤中浮動 trailingPE）。"
+  },
+  {
+    "timestamp": "2026-07-13T14:24:46+08:00",
+    "task_type": "platform_ops",
+    "task_id": "k865_gfevd_ordering_robust",
+    "outcome": "succeeded",
+    "actor": "hourly-14",
+    "owner": "hourly-14",
+    "commit": "932fd05b9",
+    "summary": "派 K865b（SPY-hub 排序穩健性，KPPS GFEVD 重跑）進 agent queue；並根治 lazypack render 的 orphan-worker 根因。\n\n1. K865b（task k865_gfevd_ordering_robust，in_progress）— K865 修完 FEVD axis bug 後的「SPY 五期全為淨傳染源」仍建立在 Cholesky 正交化上，而 SPY 恰好排第一（Cholesky 天生偏向把排前面的估成傳染源）。派 opus/xhigh agent 跑 KPPS generalized FEVD（order-invariant）+ ≥50 個隨機排序的置換敏感度 + rolling VAR(5)x7/63obs 過度參數化診斷。走 compute_queue enqueue-agent（job agent-brief_k865b-e0ae88），由 async worker 執行，成果由後續 fire 的 PHASE A 收。\n\n2. lazypack orphan-worker 根因（commit 932fd05b9）— alert lazypack_render_stuck 指向 mile_aa4713db。診斷：codex exec 逾時後被 kill，但 render 腳本在 kill 之後 5 分鐘才落地（mtime 13:10 vs kill ~13:05）。根因是 codex worker 自己 setsid() 逃出 process group，killpg 打不到。2026-07-11 mile_531e4c87 同根因（11 分鐘後落地），當時的修法沒擋住，因為回歸測試的假 worker 用 ( ... ) & 留在同一 group 裡 —— 假 worker 逃不掉，就證明不了擋得住逃脫。修法：procutil.py（既有的殺程序單一 owner）新增 kill_tree()，走 ps parent table 列舉整棵後代再殺並驗證；gen_lazypack_codex 改為委派（原本是第三份沒驗證的弱化 killpg 複本）；回歸測試補 setsid 逃脫的真實形狀。已 break-then-verify（舊碼 FAIL、新碼 PASS），17 tests passed。\n\n3. mile_aa4713db 搶救 — 孤兒寫出的 render 腳本其實是好的，執行後 4 張 PNG 正常（版面/數據/來源標註皆檢視過）。走正規 lazypack_async_render.py enqueue 重排（job lazypack-mile_aa4713db-r2），panels 已存在會走 resume 路徑收尾，未手改 queue JSON。\n\n4. 附帶發現並開單 — test_dispatch_state.py 的兩個 canonical 寫入防護測試在任何 worktree 內都 FAIL（已用乾淨 HEAD worktree 對照確認為既有問題，非本次 regression）。閘門正好在 agent 實際幹活的環境裡是瞎的。開 P2 task platform_ops_canonical_write_guard_blind_in_worktrees。"
   }
 ]

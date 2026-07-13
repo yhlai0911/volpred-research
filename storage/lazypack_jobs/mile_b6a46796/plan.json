@@ -1,0 +1,30 @@
+[
+  {
+    "name": "1_risk_layers",
+    "info": "concept",
+    "style": "professional",
+    "alt": "無人載具投資組合的三層風險：公司、題材、政策訂單",
+    "must_show": "只講三層風險框架。第一層是單一公司起伏，等權分散可以降低；第二層是整個題材的共同熱度與估值，核心六檔彼此相關較高；第三層是法案、決標與交貨，買更多概念股不能把草案上限或原型變成營收。可用 evidence 的 diversification_summary 與 portfolio_comparison 說明方向，但每個數字必須從 storage/drafts/drone_ep_final_portfolio_evidence.json 讀取，缺欄位 raise。底部標示資料來源：drone_ep_final_portfolio_evidence.json（未提供 experiment K 編號）。專業、簡潔、資料導向；禁止卡通人物、可愛插畫、手繪塗鴉風。"
+  },
+  {
+    "name": "2_portfolio_method",
+    "info": "method",
+    "style": "editorial",
+    "alt": "EP-Final 統一共同窗口與每日等權重算法",
+    "must_show": "只講方法。Universe 取 EP0 canonical 29 檔；核心六檔取 EP4（空中 5＋海域 1），海域三檔取 EP3。yfinance 還原收盤價，29 檔與加權指數共同窗口 2025-06-30 至 2026-07-09，250 筆價格、249 筆日報酬；每日重設目標權重，不計費稅，另用月度重設做敏感度。報酬用簡單日報酬複利，波動用 log(1+r) 標準差乘 sqrt(252)，最大回撤含初始財富 1。明示 universe 是 2026-07-13 才完成的 ex-post 回看，不是可交易回測。所有日期、樣本與口徑必須從 evidence 的 method/source_files 讀取，缺欄位 raise。底部標示資料來源：drone_ep_final_portfolio_evidence.json（未提供 experiment K 編號）。專業、簡潔、資料導向；禁止卡通人物、可愛插畫、手繪塗鴉風。"
+  },
+  {
+    "name": "3_risk_scoreboard",
+    "info": "results",
+    "style": "bento-grid",
+    "alt": "核心六檔報酬剛好追上大盤，但波動與最大回撤大幅較高",
+    "must_show": "只講統一算法的結果。核心六檔等權報酬 104.0%，加權指數 103.8%，但核心六檔年化波動 45.3% 對 23.5%，最大回撤 35.6% 對 10.4%；核心六檔改月度重設後報酬 102.2%，領先消失。全 29 檔等權報酬 69.1%、波動 29.4%；海域三檔 26.6%、波動 39.6%。個股只有 6/29 跑贏大盤，29/29 個股波動高於指數。數字必須從 evidence 的 portfolio_comparison、benchmark、diversification_summary 讀取並依原始小數格式化，缺欄位 raise。底部標示資料來源：drone_ep_final_portfolio_evidence.json（未提供 experiment K 編號）。專業、簡潔、資料導向；禁止卡通人物、可愛插畫、手繪塗鴉風。"
+  },
+  {
+    "name": "4_investability_gate",
+    "info": "takeaway",
+    "style": "scientific",
+    "alt": "台灣已是民主供應鏈節點，但可投資性仍卡在營收與訂單證據",
+    "must_show": "只講競爭定位與可投資性缺口。官方實績：2025 無人機產值 129 億元、外銷產值 29.5 億元，2026 Q1 整機出口 1.15 億美元高於 2025 全年 0.93 億美元，商規軍用無人機 3,422 架中截至 2026-05-21 已交付超過 3,000 架；產業聯盟超過 267 家、超過 20 家台廠進入美國供應鏈。目標與實績分開：2030 產值 400 億、月產 15,000 架、政府規畫投入 442 億都不是已實現。EP2＋EP3 查核 18 家，拆出無人載具營收占比 0/18、具約束力訂單金額 0/18。2025 半導體產值是無人機約 530 倍。結論：民主供應鏈節點／國安韌性群山證據中高；下一座半導體規模護國神山證據低。列四張待追單據：決標、交貨、營收拆分、獲利與現金。數字與證據強度必須從 evidence 的 official_positioning、business_evidence_gap、conclusion_evidence_grade 讀取，缺欄位 raise。底部標示官方來源＋drone_ep_final_portfolio_evidence.json（未提供 experiment K 編號）。專業、簡潔、資料導向；禁止卡通人物、可愛插畫、手繪塗鴉風。"
+  }
+]

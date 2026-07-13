@@ -2,6 +2,43 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 14:20 — codex worker 自己 setsid 逃出 process group，killpg 殺不到（同根因第 2 次）
+
+**問題**：`gen_lazypack_codex` 的 codex exec 逾時後，被判死的 worker 仍在寫檔。
+
+**現象**：lazypack render `mile_aa4713db` job 12:45 開跑、寫作預算 1200s、約 13:05 逾時被 kill，
+但 `render_lazypack.py` 的 mtime 是 **13:10** —— kill 之後 5 分鐘才落地。job 標 failed、文章卡在草稿
+出不去（alert `lazypack_render_stuck`）。而那個「孤兒」寫出來的 render 腳本**其實是好的**：主線程直接
+執行它，4 張 PNG 全部正常產出、版面正確、資料綁定無誤。
+
+**根因**：`killpg` 送 SIGKILL 給 **process group**，但 codex 的 worker 會自己 `setsid()` 開一個新
+session/新 group —— 它已經不在那個 group 裡，group 訊號**根本打不到它**。父程序用
+`Popen(start_new_session=True)` 只隔離了父自己，攔不住子程序再逃一次。
+
+**為什麼 2026-07-11 的修法沒擋住**（同根因 strike 2，mile_531e4c87 當時是 11 分鐘後落地）：
+當時補的回歸測試 `test_lazypack_codex_timeout_orphan.py`，假 codex 用 `( ... ) &` 生 worker ——
+那是**留在同一個 group 裡**的子程序，`killpg` 當然殺得掉 → 測試永遠綠、production 照樣漏。
+**一個逃不掉的假 worker，證明不了我們擋得住逃脫。** 這是測試盲點，不是修法方向錯。
+
+**解決方法**（commit 932fd05b9，anti-stacking：收編進既有 owner，不加第二層 watchdog）：
+- `scripts/dispatch_supervisor/procutil.py`（repo 唯一的殺程序 owner）新增 `kill_tree()`：
+  先走 `ps -eo pid=,ppid=` parent table **列舉整棵後代**（含已離開 group 的），再
+  TERM → group kill → 重新列舉 → SIGKILL 倖存者 → **驗證**。回傳「觀測到的狀態」而非 syscall 的說法。
+  一併補 `live_pids()` / `descendants_of()`，都 zombie-aware、probe 失敗回 `None` 不謊報乾淨。
+  **列舉必須在殺之前** —— 父一死，子就 reparent 到 launchd，線索就斷了。
+- `gen_lazypack_codex._kill_process_group` 改為委派 `kill_tree`（原本是本地第三份弱化版 killpg、
+  沒有驗證；procutil 的 docstring 早就警告過「worker.py / health.py 各抄一份 → 修一邊漏一邊」）。
+- 回歸測試補真實形狀：假 codex 的 worker 用 `start_new_session=True`（setsid）逃出群組。
+  **已 break-then-verify**：換回舊 killpg-only 時該測試 FAIL，換回 `kill_tree` 才 PASS。
+  17 tests passed（orphan / killpg / render-stuck-alert 三支）。
+
+**成品搶救**：`mile_aa4713db` 的 4 張 PNG 經人工執行孤兒腳本產出並檢視（版面/數據/來源標註皆正確），
+再走正規 `lazypack_async_render.py enqueue` 重排（job `lazypack-mile_aa4713db-r2`）—— panels 已存在
+會走 resume 路徑「reused — no codex call」直接收尾，**不手改 queue JSON**。
+
+**教訓**：(1) 假造的失敗情境若比真實情境溫和，測試就是安慰劑 —— 寫 kill/timeout 類測試時，
+假的子程序**必須真的會逃**。(2) 「成品已存在卻被流程丟棄」與 7/13 的 3-strike「產出即交付」同類。
+
 ## 2026-07-13 05:47 — K1701 巢狀 QLIKE 用 expanding raw DM 承載 NULL，修正後只能判 inconclusive
 
 **問題**：K1701 primary family 比較 HAR 與 HAR+`rdisp`；後者嚴格包含前者，卻把 expanding-window

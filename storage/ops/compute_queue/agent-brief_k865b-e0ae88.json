@@ -1,0 +1,41 @@
+{
+  "id": "agent-brief_k865b-e0ae88",
+  "title": "K865b: SPY-hub 排序穩健性檢驗（KPPS GFEVD 重跑 + Cholesky 排序置換）",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_k865b.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    ".claude/worktrees/dispatch-slot-1-854689f4-k865b",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-854689f4-k865b/experiments/k865b/k865b_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k865b-e0ae88.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-13T06:09:55Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k865b-e0ae88.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k865b-e0ae88.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-854689f4-k865b/experiments/k865b/k865b_results.json",
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k865b-e0ae88.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-854689f4-k865b",
+  "claude_followup": {
+    "brief": "收件：(1) 驗 k865b_results.json 五視窗 Cholesky vs GFEVD 的 SPY NET 對照 + 排序置換分布數字是否自洽；(2) 確認 Codex verdict ≥ CONDITIONAL_PASS；(3) merge worktree dispatch-slot-1-854689f4-k865b；(4) 若 SPY-hub 不穩健 → 依 README「需要回溯更正的下游」段更正 knowledge K865 + feed mile_1597b341；(5) 主線程寫 knowledge.json；(6) task_pool_claim complete k865_gfevd_ordering_robust",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}
