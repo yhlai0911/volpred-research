@@ -5,7 +5,14 @@
     "experiments/k1025/k1025.py",
     "experiments/k1025/k1025_v2.py",
     "experiments/k1025b/k1025b.py",
-    "experiments/k628b/k628b_vol_spillover.py",
     "experiments/k865/k865_vol_spillover_network.py"
+  ],
+  "resolved": [
+    {
+      "site": "experiments/k628b/k628b_vol_spillover.py",
+      "resolved_at": "2026-07-13",
+      "how": "compute_spillover_index 改用手刻 KPPS GFEVD (sigma_u + ma_rep)，Cholesky 降級為具名 order-dependent 診斷。方向性結論由 k628b_kpps_rerun.py 以 120 種排序全枚舉 + 無傳染 null floor 重估：SPY NET +43.7pp -> +14.6pp (原值恰為 120 種排序的最大值)；USO 由 RECEIVER 翻為 BALANCED。Granger 角色標籤不經 FEVD，逐項重現、全數存活。",
+      "evidence": "experiments/k628b/k628b_kpps_rerun_results.json"
+    }
   ]
 }
