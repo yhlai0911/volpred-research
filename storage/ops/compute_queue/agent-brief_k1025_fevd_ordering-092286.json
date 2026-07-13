@@ -1,0 +1,43 @@
+{
+  "id": "agent-brief_k1025_fevd_ordering-092286",
+  "title": "K1025 家族 Cholesky FEVD 排序假象稽核 + KPPS 重算",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_k1025_fevd_ordering.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    ".claude/worktrees/dispatch-slot-1-a28656d9-k1025",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-a28656d9-k1025/experiments/k1025b/k1025b_v2_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1025_fevd_ordering-092286.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-13T15:10:09Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1025_fevd_ordering-092286.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1025_fevd_ordering-092286.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-a28656d9-k1025/experiments/k1025b/k1025b_v2_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1025_fevd_ordering-092286.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-a28656d9-k1025",
+  "claude_followup": {
+    "brief": "收件時要做：(1) 驗 k1025b_v2_results.json 的 KPPS NET 值與翻號判定；(2) 讀 experiments/k1025b/ordering_audit.md 的下游污染清單，若 knowledge/feed/paper 有被 Cholesky NET 方向性結論污染 → 主線程回溯更正（agent 無權改 canonical）；(3) 派 Codex review k1025b_v2.py（KPPS 實作是否與 v3 一致、有無 lookahead）；(4) 通過才寫 knowledge.json；(5) bash scripts/merge_worktree.sh dispatch-slot-1-a28656d9-k1025；(6) 確認 fevd_ordering_baseline.json 三行已移除 + ratchet test 綠；(7) task_pool_claim complete k1025_family_cholesky_fevd_ordering",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}
