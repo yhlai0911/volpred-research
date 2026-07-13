@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -33,6 +34,11 @@ import pandas as pd
 import requests
 import yfinance as yf
 from scipy import stats
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+from plot_style import apply_cjk_style
+
+apply_cjk_style()
 
 SEED = 20260712
 np.random.seed(SEED)

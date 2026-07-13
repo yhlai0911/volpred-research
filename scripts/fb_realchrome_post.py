@@ -60,14 +60,30 @@ CLAIM_TTL_S = 300  # 5 min：超過視為前一次 claim 已死，可再 claim
 
 
 def _mile_id_from_draft(path: Path) -> str | None:
-    """從 FB draft 抽 mile_id：優先讀「# mile_id: mile_XXX」註解，退回檔名
-    fb_mile_XXX.md → mile_XXX。找不到回 None（guard 會 warn 但不硬擋）。"""
+    """從 FB draft 抽 mile_id，依可靠度依序嘗試：
+      1. 「# mile_id: mile_XXX」註解
+      2. 內文的 VolPred report 連結（第一則留言必含，例如 /reports/mile_XXX）
+      3. 檔名 fb_mile_XXX.md
+
+    (2) 是 2026-07-13 補的：event_article 的 draft 住在
+    storage/event_articles/<slug>/fb_draft.md，既無註解也不合檔名慣例 →
+    guard 抽不到 mile_id 就直接放行，等於對外發文完全沒有冪等保護
+    （違反 memory feedback_fb_post_idempotency_guard）。連結是每篇 draft
+    都有的欄位，拿它當 fallback 才涵蓋得到非 storage/drafts/ 的 draft。
+
+    找不到回 None（guard 會 warn 但不硬擋）。"""
     try:
-        m = re.search(r"#\s*mile_id:\s*(mile_[0-9a-fA-F]+)", path.read_text(encoding="utf-8"))
-        if m:
-            return m.group(1)
+        text = path.read_text(encoding="utf-8")
     except Exception as e:  # noqa: BLE001
         print(f"[WARN] 讀 draft 抽 mile_id 失敗: {e}", file=sys.stderr)
+        text = ""
+    for pattern in (
+        r"#\s*mile_id:\s*(mile_[0-9a-fA-F]+)",
+        r"/reports/(mile_[0-9a-fA-F]+)",
+    ):
+        m = re.search(pattern, text)
+        if m:
+            return m.group(1)
     m2 = re.match(r"fb_(mile_[0-9a-fA-F]+)\.md$", path.name)
     return m2.group(1) if m2 else None
 

@@ -1,3 +1,5 @@
+## 主貼文（純文字，不含連結）
+
 禮拜二晚上 8 點半，美國 6 月 CPI 要出來。
 
 我本來要寫「過去 CPI 當天市場怎麼反應」的預覽。寫之前先去 BLS 官網對日期，然後就對不下去了。
@@ -16,4 +18,14 @@
 
 現在 VIX 15.03，SPY 過去 20 天的實際波動年化 14.77%。市場等於沒為這場數據多付一毛保費。
 
-改別人的錯很快，改自己的比較慢。日期對照表跟兩張圖放留言。
+改別人的錯很快，改自己的比較慢。完整的日期對照跟數字放留言。
+
+## 第一則留言（貼連結）
+
+https://volpred.zeabur.app/v3/reports/mile_9560b9cc
+
+## 圖片（主貼文附圖）
+
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/cpi_2026_07_14/fig1_date_error.png
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/cpi_2026_07_14/fig2_cpi_day_reaction.png
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mile_9560b9cc_lazypack_codex_1.png

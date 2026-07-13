@@ -16947,5 +16947,19 @@
     "owner": "codex",
     "backfilled_at": "2026-07-13T11:50:35.087618+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T20:23:58+08:00",
+    "actor": "hourly-20",
+    "task_type": "event_article",
+    "task_id": "fb_post_cpi_2026_07_14_t2",
+    "summary": "CPI T-2 更正文 FB 雙發佈完成（Ivan Lai 個人頁，主貼文 3 圖 + 第一則留言貼 VolPred 連結）。發文前發現兩張圖表全是豆腐字且已上線 → 修 analysis.py 補 apply_cjk_style、重繪、upsert 覆蓋線上同 URL（hash 驗證一致）。順修 FB 工具鏈兩個 bug：idempotency guard 抽不出 mile_id（event_article draft 不在 storage/drafts/ → 對外發文零冪等保護）、canonical_fb_draft_path 解析不到非慣例路徑的 draft。豆腐字為同 class 第二次（前次 2026-06-11 k202）→ 建 audit_cjk_chart_fonts.py + baseline(47) + CI ratchet，並開 P1 task cjk_tofu_chart_remediation_20260713 處理線上其他受影響文章。",
+    "artifacts": [
+      "storage/event_articles/us_cpi_2026_07_14_t2/",
+      "scripts/audit_cjk_chart_fonts.py",
+      "scripts/tests/test_cjk_chart_font_ratchet.py",
+      "scripts/upsert_article_image.py",
+      "storage/qa/cjk_chart_font_baseline.json"
+    ]
   }
 ]

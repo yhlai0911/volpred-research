@@ -72,14 +72,34 @@ def _now_iso() -> str:
 
 
 def canonical_fb_draft_path(mile_id: str) -> Path:
-    """Canonical location for the finished FB post an interactive session reads.
+    """Resolve the FB draft for a feed id.
 
-    feed id `mile_08fefa59` → `storage/drafts/fb_mile_08fefa59.md`.
+    Canonical layout is `storage/drafts/fb_mile_08fefa59.md`, but the
+    event_article writer parks its FB copy at
+    `storage/event_articles/<slug>/fb_draft.md` instead. Every FB tool
+    (poster, idempotency guard, permalink anchor lookup) resolved through this
+    one function and therefore went blind to that second layout — the CPI T-2
+    post sat unposted for 24h, then went out with no idempotency guard at all
+    (2026-07-13). Resolving both layouts here keeps the fix at the single
+    accessor rather than at each call site.
+
+    Returns the canonical path when nothing exists, so callers keep reporting a
+    sensible "draft not found" location.
     """
     mid = (mile_id or "").strip()
     if not mid.startswith("mile_"):
         mid = f"mile_{mid}"
-    return DRAFTS_DIR / f"fb_{mid}.md"
+    canonical = DRAFTS_DIR / f"fb_{mid}.md"
+    if canonical.is_file():
+        return canonical
+    event_articles = ROOT / "storage" / "event_articles"
+    for candidate in sorted(event_articles.glob("*/fb_draft.md")):
+        try:
+            if mid in candidate.read_text(encoding="utf-8"):
+                return candidate
+        except OSError as e:
+            print(f"[WARN] 讀 FB draft 候選失敗 path={candidate} err={e}", file=sys.stderr)
+    return canonical
 
 
 class DraftRequiredError(ValueError):
