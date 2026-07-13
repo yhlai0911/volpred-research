@@ -168,7 +168,6 @@ _MACHINE_STATE_PREFIXES = (
     # else's uncommitted work", left them dirty, and the streak counter escalated
     # them to a critical「3 班沒人收」alert that nobody could ever action. Machine
     # state does not have an author to go ask.
-    "storage/lazypack_jobs/",    # async render job state + panels
     "storage/research/",         # arxiv candidate scans
     "storage/indicator_arena/",  # indicator review ledger
 )

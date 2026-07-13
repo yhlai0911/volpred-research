@@ -516,9 +516,14 @@ def main() -> int:
         )
     # 2026-07-13: orphan deliverable adoption (boss msg 624 — 產出即交付)
     adopted = [a for a in (orphan_reap.get("adopted") or []) if a.get("adopted")]
+    delivered_jobs = [
+        item for item in (orphan_reap.get("job_deliveries") or [])
+        if item.get("delivered")
+    ]
     print(
         f"  orphan-reap: orphans={orphan_reap.get('orphan_count', '?')} "
         f"adopted={len(adopted)} held={len(orphan_reap.get('held') or [])} "
+        f"job_deliveries={len(delivered_jobs)} "
         f"reason={orphan_reap.get('error') or orphan_reap.get('reason') or 'ok'}"
     )
     print(

@@ -17,9 +17,12 @@ dashboard 看不到。它唯一的痕跡是 `git status` 裡一行未追蹤檔�
 
 ## 這支程式怎麼修
 
-修的不是 git，是**交付路徑**。git 收養與否是 PHASE-Z 的事，這裡不碰；這裡負責讓成品
-走它本來就該走的正規入口（`publish_draft.py`），由那條路徑做完所有 gate 並註冊進池。
-檔案進了池，PHASE-Z 自然會在同一班把它連同 feed 一起 commit —— 因為那時它是**這班產的**。
+它處理兩種有不同 canonical 出口的成品：
+
+- 完整文章草稿走 `publish_draft.py`，由正式 gate 註冊進池。
+- compute/lazypack job 的檔案走 receipt 的 `output_paths` ownership；只提交逐一宣告、實際存在、
+  位於 main repo 內的普通檔案。job 執行失敗仍保留 `status=failed`，交付面另標
+  `delivery_status=partial_delivered`，所以產物不丟、失敗也不會被粉飾。
 
 三條硬規則：
 1. **永不刪除、永不 checkout**。認不出來源的成品只會被「保留 + 回報」，不會被丟棄。
@@ -28,6 +31,8 @@ dashboard 看不到。它唯一的痕跡是 `git status` 裡一行未追蹤檔�
    漏收的代價是延遲，重複發佈的代價是網站上出現兩篇一樣的文章。
 3. **只管 cutover 之後的成品**。`storage/ops/orphan_draft_baseline.json` 凍結了改動前
    已存在的草稿（多數早已發佈，只是當年沒留下 provenance 欄位）。baseline 只准變少。
+4. **Git ownership 只認 exact files**。不遞迴 result directory、不接受 repo 外路徑、目錄、
+   symlink 或 ignored junk；commit 使用相同的 literal pathspec，永遠不掃整棵工作區。
 
 ## 交付憑證
 
@@ -43,11 +48,14 @@ dashboard 看不到。它唯一的痕跡是 `git status` 裡一行未追蹤檔�
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
+import os
 import re
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -60,6 +68,7 @@ FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 TASKS_PATH = ROOT / "storage" / "next_tasks.json"
 BASELINE_PATH = ROOT / "storage" / "ops" / "orphan_draft_baseline.json"
 REPORT_PATH = ROOT / "storage" / "ops" / "orphan_reap_report.json"
+QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
 
 # A draft younger than this is presumed to still have an author typing into it.
 # Adopting mid-write would publish half an article — the one failure mode worse
@@ -70,6 +79,7 @@ GRACE_SECONDS = 2 * 3600
 # once, something upstream is broken and dumping ten articles onto the site is
 # not the fix — the report will say so and the next run takes the next two.
 DEFAULT_MAX_ADOPT = 2
+DEFAULT_MAX_JOB_COMMITS = 4
 
 # Below this, a "draft" is a stub or a scratch note, not a deliverable. Held for
 # the author, never discarded.
@@ -130,6 +140,272 @@ def _k_ids(fm: dict, body: str) -> set[str]:
 def load_baseline() -> set[str]:
     data = _load_json(BASELINE_PATH, {})
     return set(data.get("drafts", []))
+
+
+# ── queue-owned deliverables ─────────────────────────────────────────────────
+
+_TERMINAL_JOB_STATES = {"completed", "failed"}
+_GIT_ENV_KEYS = {
+    "GIT_DIR",
+    "GIT_WORK_TREE",
+    "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+}
+
+
+def _git(*args: str) -> subprocess.CompletedProcess[str]:
+    """Run git against ROOT without inheriting a caller's repository override."""
+    env = os.environ.copy()
+    for key in _GIT_ENV_KEYS:
+        env.pop(key, None)
+    # `check-ignore` rejects Git's global `--literal-pathspecs` option.  Its
+    # caller accepts only pathspec-safe filenames; every mutating command keeps
+    # the literal flag mechanically enforced.
+    command = ["git", *args] if args and args[0] == "check-ignore" else [
+        "git", "--literal-pathspecs", *args,
+    ]
+    return subprocess.run(
+        command,
+        cwd=str(ROOT),
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+
+
+@contextmanager
+def _receipt_lock():
+    """Share the compute queue's receipt lock while merging delivery metadata."""
+    QUEUE_DIR.mkdir(parents=True, exist_ok=True)
+    with (QUEUE_DIR / ".receipts.lock").open("a+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def _write_job_receipt(path: Path, payload: dict) -> None:
+    """Replace one terminal receipt without exposing partially written JSON."""
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.{time.time_ns()}.tmp")
+    tmp.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    tmp.replace(path)
+
+
+def _exact_repo_file(raw: object) -> tuple[str | None, str | None]:
+    """Validate one ownership declaration as an exact regular file in ROOT."""
+    if not isinstance(raw, str) or not raw.strip():
+        return None, "not_a_nonempty_string"
+    candidate = Path(raw)
+    candidate = candidate if candidate.is_absolute() else ROOT / candidate
+    if candidate.is_symlink():
+        return None, "symlink_not_owned"
+    resolved = candidate.resolve(strict=False)
+    try:
+        rel = resolved.relative_to(ROOT.resolve(strict=False))
+    except ValueError:
+        return None, "outside_repo"
+    if not resolved.is_file():
+        return None, "missing_or_not_regular_file"
+    if rel.parts and rel.parts[0] == ".git":
+        return None, "git_internal_path"
+    if rel.as_posix().startswith(":") or any(ch in rel.as_posix() for ch in "*?["):
+        return None, "pathspec_unsafe_name"
+    ignored = _git("check-ignore", "-q", "--", rel.as_posix())
+    if ignored.returncode == 0:
+        return None, "git_ignored"
+    if ignored.returncode not in {0, 1}:
+        return None, "git_ignore_check_failed"
+    return rel.as_posix(), None
+
+
+def _path_is_dirty(rel: str) -> bool:
+    status = _git("status", "--porcelain=v1", "--untracked-files=all", "--", rel)
+    # Fail closed toward preserving the file: if git cannot classify it, make
+    # the delivery attempt surface the concrete error instead of skipping it.
+    return status.returncode != 0 or bool(status.stdout.strip())
+
+
+def scan_job_deliverables() -> dict:
+    """Find terminal compute jobs whose exact declared files need delivery."""
+    candidates: list[dict] = []
+    held: list[dict] = []
+    if not QUEUE_DIR.is_dir():
+        return {"candidates": candidates, "held": held}
+
+    for job_path in sorted(QUEUE_DIR.glob("*.json")):
+        try:
+            job = json.loads(job_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            warn("reap_job_deliverable", "queue receipt unreadable — held",
+                 path=str(job_path), err=str(exc))
+            held.append({"job_id": job_path.stem, "reason": "unreadable_job",
+                         "detail": str(exc)})
+            continue
+        if not isinstance(job, dict):
+            held.append({"job_id": job_path.stem, "reason": "invalid_job_schema"})
+            continue
+        if job.get("status") not in _TERMINAL_JOB_STATES:
+            continue
+        # Agent outputs belong to their worktree merge/review workflow.  This
+        # reaper owns only main-checkout compute/lazypack deliverables.
+        if job.get("kind") == "agent":
+            continue
+        declared = job.get("output_paths")
+        if not isinstance(declared, list) or not declared:
+            continue
+
+        exact: list[str] = []
+        rejected: list[dict] = []
+        for raw in declared:
+            rel, reason = _exact_repo_file(raw)
+            if rel is not None:
+                exact.append(rel)
+            else:
+                rejected.append({"path": raw, "reason": reason})
+        exact = list(dict.fromkeys(exact))
+        if not exact:
+            # Do not finalize the job: a timed-out producer may still land a
+            # declared file before the next sweep, and preserving it is the goal.
+            held.append({"job_id": str(job.get("id") or job_path.stem),
+                         "reason": "no_existing_declared_files",
+                         "rejected": rejected})
+            continue
+        previously_delivered = job.get("delivered_paths") or []
+        if not isinstance(previously_delivered, list):
+            previously_delivered = []
+        previous = {str(path) for path in previously_delivered}
+        pending = [path for path in exact if path not in previous or _path_is_dirty(path)]
+        if not pending:
+            if rejected:
+                held.append({
+                    "job_id": str(job.get("id") or job_path.stem),
+                    "reason": "declared_outputs_not_yet_deliverable",
+                    "rejected": rejected,
+                })
+            continue
+        candidates.append({
+            "job_id": str(job.get("id") or job_path.stem),
+            "job_path": str(job_path),
+            "execution_status": job.get("status"),
+            "paths": pending,
+            "existing_paths": exact,
+            "previously_delivered_paths": sorted(previous),
+            "rejected": rejected,
+        })
+    return {"candidates": candidates, "held": held}
+
+
+def deliver_job_outputs(candidate: dict) -> dict:
+    """Commit only one job's exact declared files, then stamp its receipt."""
+    job_id = str(candidate["job_id"])
+    job_path = Path(candidate["job_path"])
+    requested_paths = list(candidate["paths"])
+    outcome = {"job_id": job_id, "paths": requested_paths, "delivered": False}
+
+    with _receipt_lock():
+        latest = json.loads(job_path.read_text(encoding="utf-8"))
+        previous = latest.get("delivered_paths") or []
+        if not isinstance(previous, list):
+            previous = []
+        previous_set = {str(path) for path in previous}
+        # A second reaper may have completed this candidate while we waited for
+        # the lock.  Re-evaluate ownership instead of replaying a stale scan.
+        paths = [
+            path for path in requested_paths
+            if path not in previous_set or _path_is_dirty(path)
+        ]
+        if not paths:
+            outcome["reason"] = "no_pending_paths"
+            return outcome
+
+        pre_staged = _git("diff", "--cached", "--name-only", "--", *paths)
+        if pre_staged.returncode != 0:
+            outcome.update(reason="git_preflight_failed",
+                           stderr=(pre_staged.stderr or "")[-500:])
+            return outcome
+        collisions = [line for line in pre_staged.stdout.splitlines() if line]
+        if collisions:
+            outcome.update(reason="pre_staged_collision", collisions=collisions)
+            return outcome
+
+        index_owned = True  # preflight proved these scoped index entries were empty
+        try:
+            add = _git("add", "--", *paths)
+            if add.returncode != 0:
+                outcome.update(reason="git_add_failed", stderr=(add.stderr or "")[-500:])
+                return outcome
+            staged = _git("diff", "--cached", "--name-only", "--", *paths)
+            if staged.returncode != 0:
+                outcome.update(reason="git_diff_failed", stderr=(staged.stderr or "")[-500:])
+                return outcome
+            staged_paths = [line for line in staged.stdout.splitlines() if line]
+
+            if staged_paths:
+                safe_job_id = re.sub(r"[\x00-\x1f\x7f]+", "_", job_id)[:120]
+                commit = _git(
+                    "commit", "--only", "-m",
+                    f"chore(deliverables): commit {safe_job_id} outputs",
+                    "--", *paths,
+                )
+                if commit.returncode != 0:
+                    outcome.update(reason="git_commit_failed",
+                                   stderr=(commit.stderr or commit.stdout or "")[-500:])
+                    return outcome
+                index_owned = False
+                evidence = _git("log", "-1", "--format=%H", "--", *staged_paths)
+            else:
+                # Clean paths are deliverable only if Git already tracks them;
+                # HEAD alone is not evidence that this job's file is in history.
+                for path in paths:
+                    tracked = _git("ls-files", "--error-unmatch", "--", path)
+                    if tracked.returncode != 0:
+                        outcome.update(reason="clean_path_not_tracked", path=path)
+                        return outcome
+                evidence = _git("log", "-1", "--format=%H", "--", *paths)
+
+            if evidence.returncode != 0 or not evidence.stdout.strip():
+                outcome.update(reason="delivery_commit_not_found",
+                               stderr=(evidence.stderr or "")[-500:])
+                return outcome
+            commit_hash = evidence.stdout.strip().splitlines()[0]
+
+            delivered_union = previous_set | set(paths)
+            existing = set(candidate.get("existing_paths") or paths)
+            rejected = candidate.get("rejected") or []
+            execution_status = latest.get("status")
+            complete = (
+                execution_status == "completed"
+                and not rejected
+                and existing.issubset(delivered_union)
+            )
+            delivery_status = "delivered" if complete else "partial_delivered"
+            latest.update({
+                "delivery_status": delivery_status,
+                "partial_delivered": not complete,
+                "delivery_commit": commit_hash,
+                "delivered_paths": sorted(delivered_union),
+                "delivered_at": _now().isoformat(),
+                "delivery_source": "reap_orphan_deliverables",
+            })
+            _write_job_receipt(job_path, latest)
+            outcome.update(
+                delivered=True,
+                delivery_status=delivery_status,
+                delivery_commit=commit_hash,
+                reason="committed" if staged_paths else "already_committed",
+            )
+            return outcome
+        finally:
+            if index_owned and not outcome["delivered"]:
+                # Preflight proved no one else owned these scoped index entries,
+                # so cleanup cannot erase a foreign staged change. Working files
+                # remain intact for the next sweep.
+                _git("reset", "-q", "HEAD", "--", *paths)
 
 
 def is_registered(rel: str, fm: dict, body: str, feed: list[dict]) -> tuple[bool, str]:
@@ -285,6 +561,8 @@ def main() -> int:
                     help="實際收編（跑 publish_draft 入池）。預設只掃描回報。")
     ap.add_argument("--max", type=int, default=DEFAULT_MAX_ADOPT,
                     help=f"單次最多收編幾份（預設 {DEFAULT_MAX_ADOPT}）")
+    ap.add_argument("--max-jobs", type=int, default=DEFAULT_MAX_JOB_COMMITS,
+                    help=f"單次最多提交幾個 queue job 的產物（預設 {DEFAULT_MAX_JOB_COMMITS}）")
     ap.add_argument("--init-baseline", action="store_true",
                     help="一次性 cutover：把現存草稿全數凍結為 baseline（豁免）")
     ap.add_argument("--json", action="store_true", help="只輸出 JSON")
@@ -303,8 +581,12 @@ def main() -> int:
         return 0
 
     result = scan()
+    job_scan = scan_job_deliverables()
+    job_deliveries: list[dict] = []
     adopted: list[dict] = []
     if args.apply:
+        for candidate in job_scan["candidates"][: args.max_jobs]:
+            job_deliveries.append(deliver_job_outputs(candidate))
         for entry in result["adoptable"][: args.max]:
             outcome = adopt(entry)
             adopted.append(outcome)
@@ -315,6 +597,9 @@ def main() -> int:
                   f"{len(result['adoptable']) - args.max} 份待下次收編（沒有丟棄）")
     result["adopted"] = adopted
     result["applied"] = args.apply
+    result["job_deliverable_candidates"] = job_scan["candidates"]
+    result["job_deliverable_held"] = job_scan["held"]
+    result["job_deliveries"] = job_deliveries
 
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n",
@@ -326,6 +611,9 @@ def main() -> int:
 
     print(f"[reap] 孤兒成品 {result['orphan_count']} 份："
           f"可收編 {len(result['adoptable'])}、保留待確認 {len(result['held'])}")
+    delivered_jobs = [item for item in job_deliveries if item.get("delivered")]
+    print(f"[reap] queue 產物：候選 {len(job_scan['candidates'])}、"
+          f"已交付 {len(delivered_jobs)}、保留 {len(job_scan['held'])}")
     print(f"[reap] 略過：{result['skipped']}")
     for h in result["held"][:10]:
         print(f"  - 保留 {h['path']} — {h['detail']}")

@@ -20,6 +20,8 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
     process_exit_code (int|null, optional) — raw rc when a postcondition fails
     stdout_file / stderr_file (str)
     result_artifact (str|null)  — declared output; a completed job must contain it
+    output_paths (list[str])    — job-owned deliverables eligible for path-scoped commit
+    output_paths_updated_at (ISO UTC|null) — producer write-back timestamp
     job_metadata (str|null)     — runner lifecycle/validation receipt (agent jobs)
     kind (str)         — compute / agent
     cwd (str|null)     — agent working directory (worktree when explicit)
@@ -39,6 +41,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import os
 import re
@@ -47,6 +50,7 @@ import subprocess
 import sys
 import time
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -98,6 +102,97 @@ def _read_job_file(path: Path, *, context: str) -> dict[str, Any] | None:
     return payload
 
 
+def _write_job_file(path: Path, payload: dict[str, Any]) -> None:
+    """Atomically replace one queue receipt.
+
+    The worker and its child producer can both add lifecycle metadata to the same
+    receipt.  A temp-file + replace prevents readers from observing truncated
+    JSON; callers still merge the keys they own before writing.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp")
+    try:
+        tmp.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        os.replace(tmp, path)
+    finally:
+        try:
+            tmp.unlink()
+        except FileNotFoundError:
+            pass  # silent-ok: os.replace already consumed the temp file.
+
+
+@contextmanager
+def _receipt_lock():
+    """Serialize receipt read/merge/write operations across worker processes."""
+    QUEUE_DIR.mkdir(parents=True, exist_ok=True)
+    lock_path = QUEUE_DIR / ".receipts.lock"
+    with lock_path.open("a+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def _normalize_output_path(raw: str | Path) -> str:
+    path = Path(raw)
+    absolute = path if path.is_absolute() else ROOT / path
+    absolute = absolute.resolve(strict=False)
+    try:
+        return str(absolute.relative_to(ROOT.resolve(strict=False)))
+    except ValueError:
+        return str(absolute)
+
+
+def record_output_paths(job_id: str, paths: list[str | Path]) -> bool:
+    """Merge producer-observed deliverables into a queue receipt.
+
+    Enqueue-time declarations make failure recovery possible even if the child
+    dies abruptly.  This write-back records what the producer actually placed on
+    disk (for example a panel written before Codex exits non-zero).  The worker
+    merges these keys back before its terminal write so they cannot be clobbered.
+    """
+    if not job_id or Path(job_id).name != job_id:
+        print(f"[compute_queue] WARN invalid job id for output write-back: {job_id!r}",
+              file=sys.stderr)
+        return False
+    job_path = QUEUE_DIR / f"{job_id}.json"
+    observed = [_normalize_output_path(path) for path in paths if str(path).strip()]
+    if not observed:
+        return True
+    with _receipt_lock():
+        job = _read_job_file(job_path, context="record-output-paths")
+        if job is None:
+            return False
+        current = job.get("output_paths") or []
+        if not isinstance(current, list):
+            current = []
+        job["output_paths"] = list(dict.fromkeys([*(str(p) for p in current), *observed]))
+        job["output_paths_updated_at"] = utc_now()
+        _write_job_file(job_path, job)
+    return True
+
+
+def _merge_runtime_output_paths(job_path: Path, job: dict[str, Any]) -> None:
+    """Preserve child write-backs before the worker records terminal status."""
+    latest = _read_job_file(job_path, context="merge-runtime-output-paths")
+    if latest is None:
+        return
+    current = job.get("output_paths") or []
+    runtime = latest.get("output_paths") or []
+    if not isinstance(current, list):
+        current = []
+    if not isinstance(runtime, list):
+        runtime = []
+    job["output_paths"] = list(dict.fromkeys([*(str(p) for p in current),
+                                                *(str(p) for p in runtime)]))
+    if latest.get("output_paths_updated_at"):
+        job["output_paths_updated_at"] = latest["output_paths_updated_at"]
+
+
 def _declared_result_artifact(job: dict[str, Any]) -> Path | None:
     """Resolve a queue result artifact on the worker side of the boundary."""
     raw = job.get("result_artifact")
@@ -128,6 +223,12 @@ def enqueue(args) -> int:
             "priority": args.followup_priority or 3,
         }
 
+    # `result_artifact` is a validation contract, not an ownership contract.
+    # In particular, agent artifacts can live in a worktree and lazypack's
+    # legacy result_artifact is a directory.  Only explicit, exact output paths
+    # are eligible for the reaper's path-scoped commit.
+    declared_outputs = getattr(args, "output_paths", None) or []
+
     entry = {
         "id": job_id,
         "title": args.title or args.script,
@@ -143,6 +244,10 @@ def enqueue(args) -> int:
         "stdout_file": str(LOG_DIR / f"{job_id}.stdout"),
         "stderr_file": str(LOG_DIR / f"{job_id}.stderr"),
         "result_artifact": args.result_artifact,
+        "output_paths": list(dict.fromkeys(
+            _normalize_output_path(path) for path in declared_outputs
+        )),
+        "output_paths_updated_at": None,
         "job_metadata": getattr(args, "job_metadata", None),
         "kind": getattr(args, "job_kind", "compute"),
         "cwd": getattr(args, "job_cwd", None),
@@ -150,8 +255,7 @@ def enqueue(args) -> int:
         "followup_dispatched": False,
         "timeout_seconds": args.timeout or 3600,
     }
-    with job_path.open("w", encoding="utf-8") as f:
-        json.dump(entry, f, ensure_ascii=False, indent=2)
+    _write_job_file(job_path, entry)
     print(f"enqueued: {job_id}")
     return 0
 
@@ -226,6 +330,7 @@ def enqueue_agent(args) -> int:
         script_args=script_args,
         env=None,
         result_artifact=str(artifact_path) if artifact_path is not None else None,
+        output_paths=None,
         job_metadata=str(metadata_path),
         job_kind="agent",
         job_cwd=str(workdir),
@@ -403,13 +508,15 @@ def run_next(args) -> int:
         # Mark running
         job["status"] = "running"
         job["started_at"] = utc_now()
-        job_path.write_text(json.dumps(job, ensure_ascii=False, indent=2))
+        with _receipt_lock():
+            _write_job_file(job_path, job)
         print(f"running: {job['id']} ({job['script_path']})")
 
         # Build command
         cmd_parts = shlex.split(job["interpreter"]) + [job["script_path"]] + (job.get("args") or [])
         env = os.environ.copy()
         env.update(job.get("env") or {})
+        env["VOLPRED_COMPUTE_JOB_ID"] = str(job["id"])
         stdout_p = Path(job["stdout_file"])
         stderr_p = Path(job["stderr_file"])
         stdout_p.parent.mkdir(parents=True, exist_ok=True)
@@ -451,8 +558,10 @@ def run_next(args) -> int:
             job["exit_code"] = -2
             stderr_p.write_text(stderr_p.read_text() + f"\n[EXCEPTION] {e}\n")
 
-        job["completed_at"] = utc_now()
-        job_path.write_text(json.dumps(job, ensure_ascii=False, indent=2))
+        with _receipt_lock():
+            _merge_runtime_output_paths(job_path, job)
+            job["completed_at"] = utc_now()
+            _write_job_file(job_path, job)
         print(f"done: {job['id']} status={job['status']} exit={job['exit_code']}")
         return 0
     finally:
@@ -464,13 +573,21 @@ def mark_followup_dispatched(args) -> int:
     if not p.exists():
         print(f"error: not found {args.id}", file=sys.stderr)
         return 2
-    j = json.loads(p.read_text())
-    j["followup_dispatched"] = True
-    j["followup_dispatched_at"] = utc_now()
-    if args.next_task_id:
-        j["followup_next_task_id"] = args.next_task_id
-    p.write_text(json.dumps(j, ensure_ascii=False, indent=2))
+    with _receipt_lock():
+        j = json.loads(p.read_text())
+        j["followup_dispatched"] = True
+        j["followup_dispatched_at"] = utc_now()
+        if args.next_task_id:
+            j["followup_next_task_id"] = args.next_task_id
+        _write_job_file(p, j)
     print(f"marked: {args.id} followup_dispatched=true")
+    return 0
+
+
+def record_output_paths_cli(args) -> int:
+    if not record_output_paths(args.id, args.path):
+        return 2
+    print(f"recorded: {args.id} output_paths={len(args.path)}")
     return 0
 
 
@@ -486,6 +603,12 @@ def main():
     e.add_argument("--script-args", nargs="*")
     e.add_argument("--env", nargs="*", help="KEY=VAL")
     e.add_argument("--result-artifact")
+    e.add_argument(
+        "--output-path",
+        dest="output_paths",
+        action="append",
+        help="Job-owned deliverable path eligible for path-scoped auto-commit (repeatable).",
+    )
     e.add_argument("--followup-brief")
     e.add_argument("--followup-task-type")
     e.add_argument("--followup-priority", type=int)
@@ -531,6 +654,14 @@ def main():
     m.add_argument("--id", required=True)
     m.add_argument("--next-task-id")
     m.set_defaults(func=mark_followup_dispatched)
+
+    o = sub.add_parser(
+        "record-output-paths",
+        help="Producer write-back: merge paths actually written by the running job.",
+    )
+    o.add_argument("--id", required=True)
+    o.add_argument("--path", action="append", required=True)
+    o.set_defaults(func=record_output_paths_cli)
 
     args = p.parse_args()
     return args.func(args)

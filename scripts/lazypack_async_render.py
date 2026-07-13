@@ -41,6 +41,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import subprocess
 import sys
@@ -153,6 +154,7 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
 
     script_args = [
         "run",
+        "--job-id", job_id,
         "--article-id", a.article_id,
         "--plan", _rel(stored_plan),
         "--out-dir", _rel(panels_dir),
@@ -172,6 +174,11 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
         script_args=script_args,
         env=None,
         result_artifact=_rel(panels_dir),
+        output_paths=[
+            _rel(stored_plan),
+            _rel(panels_dir / "render_lazypack.py"),
+            *(_rel(panels_dir / f"{stem}.png") for stem, _ in _panel_specs(panels)),
+        ],
         followup_brief=None,  # the job appends + syncs itself; no Claude followup
         followup_task_type=None,
         followup_priority=None,
@@ -187,38 +194,36 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
 
 # -------------------------------------------------------------------- run ----
 
-def _commit_panels(out_dir: Path, article_id: str) -> None:
-    """產生者自己收自己的產物。
 
-    Panels + render script 依 .gitignore 的設計是 tracked 的，但 render job 從來
-    沒有 commit 它們 —— 沒有任何一班 fire 認領這些檔，於是每班 PHASE-Z 都重新
-    flag 一次並丟回人工。Ownership 屬於產出它的 job，不屬於下一班巡檢。
+def _record_job_outputs(
+    job_id: str | None,
+    out_dir: Path,
+    specs: list[tuple[str, str]],
+) -> None:
+    """Write back every file the renderer actually placed in its owned directory.
+
+    This runs even when the render subprocess exits non-zero.  The enqueue-time
+    declaration is the recovery floor; this observation is the precise receipt.
+    A failed metadata write does not hide the render result because the hourly
+    reaper can still inspect the declared paths.
     """
-    from volpred.ops.diagnostics import warn
+    job_id = job_id or os.environ.get("VOLPRED_COMPUTE_JOB_ID")
+    if not job_id:
+        return
+    candidates = [
+        out_dir / "render_lazypack.py",
+        *(out_dir / f"{stem}.png" for stem, _ in specs),
+    ]
+    actual = [path for path in candidates if path.is_file()]
+    if not actual:
+        return
+    try:
+        import compute_queue as cq
 
-    try:
-        rel = str(out_dir.resolve().relative_to(ROOT))
-    except ValueError:  # silent-ok: out_dir 在 repo 外（測試 tmp_path）→ 無 orphan 可收
-        return  # silent-ok: 不碰真 repo 的 git index
-    try:
-        subprocess.run(["git", "add", "--", rel], cwd=str(ROOT),
-                       check=True, capture_output=True, text=True)
-        staged = subprocess.run(
-            ["git", "diff", "--cached", "--name-only", "--", rel],
-            cwd=str(ROOT), check=True, capture_output=True, text=True,
-        ).stdout.strip()
-        if not staged:
-            return
-        subprocess.run(
-            ["git", "commit", "-m",
-             f"chore(lazypack): commit panels for {article_id}", "--", rel],
-            cwd=str(ROOT), check=True, capture_output=True, text=True,
-        )
-        print(f"[lazypack_async] committed panels: {rel}")
-    except subprocess.CalledProcessError as e:
-        warn("lazypack_commit", "panel commit failed — orphan will be re-flagged",
-             article_id=article_id, path=rel, rc=e.returncode,
-             stderr=(e.stderr or "")[:200])
+        if not cq.record_output_paths(job_id, actual):
+            print(f"warn: could not record output paths for {job_id}", file=sys.stderr)
+    except Exception as exc:  # metadata must not mask the renderer's real result
+        print(f"warn: output path write-back failed for {job_id}: {exc}", file=sys.stderr)
 
 
 def cmd_run(a: argparse.Namespace) -> int:
@@ -229,6 +234,7 @@ def cmd_run(a: argparse.Namespace) -> int:
     panels = _load_panels(plan_path)
     specs = _panel_specs(panels)
     title = a.title or f"{a.article_id} 懶人包"
+    job_id = getattr(a, "job_id", None)
 
     # 1) Render — codex exec writes + runs a data-bound render script.
     # 產出即交付：if every expected panel is already on disk (an earlier run —
@@ -258,10 +264,17 @@ def cmd_run(a: argparse.Namespace) -> int:
             cmd += ["--source", s]
 
     if len(already) != len(specs):
-        proc = subprocess.run(cmd, cwd=str(ROOT))
+        try:
+            proc = subprocess.run(cmd, cwd=str(ROOT))
+        finally:
+            # Codex can write one or more panels and still return non-zero.  The
+            # receipt must be updated before this function propagates failure.
+            _record_job_outputs(job_id, out_dir, specs)
         if proc.returncode != 0:
             print(f"error: render step failed rc={proc.returncode}", file=sys.stderr)
             return 2
+    else:
+        _record_job_outputs(job_id, out_dir, specs)
 
     # 2) Verify every expected panel PNG exists (belt-and-suspenders — the
     # codex generator verifies too, but --render-cmd paths must not skip it).
@@ -303,8 +316,6 @@ def cmd_run(a: argparse.Namespace) -> int:
         sync=not a.no_sync,
     )
     print(json.dumps(result, ensure_ascii=False))
-
-    _commit_panels(out_dir, a.article_id)
 
     if result["status"] == "published" and not a.no_sync and result["synced"] is False:
         # A live article's remote copy is now stale — surface as job failure so
@@ -349,6 +360,8 @@ def main() -> int:
         r.add_argument(flag, **kw)
     r.add_argument("--plan", required=True)
     r.add_argument("--out-dir", required=True)
+    r.add_argument("--job-id", default=None,
+                   help="compute_queue receipt id for producer output write-back")
     r.add_argument("--render-cmd", default=None,
                    help="TEST HOOK: replace the codex render step; invoked as "
                         "`<cmd> <plan> <out_dir>`")
