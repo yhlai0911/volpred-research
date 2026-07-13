@@ -87,6 +87,21 @@
         "mile_e3cede77"
       ],
       "note": "帶 event_series_slot 標記者 4 篇（皆 published）已納入。更早的 event-flavored 文章（NFP/CPI 預告/盤後）未帶 marker → 未溯及品牌化；如需擴大 scope boss 指示即可。going-forward：event_article 發佈時把 id 加進 members_published 後跑 scripts/series_registry.py --apply。"
+    },
+    "taiwan_uav": {
+      "display_name": "無人載具",
+      "emoji": "🛩️",
+      "branding": "title_prefix",
+      "prefix": "🛩️ 無人載具｜",
+      "no_episode_numbers": false,
+      "episode_scheme": "EP0 總覽 → EP1 上游 → EP2 中游 → EP3 下游 → EP4 核心個股六面向 → EP-Final 投資組合收尾",
+      "definition": "台灣無人載具（廣義：無人機 + 無人艇/USV）產業投資專題。主軸探問：美中/俄烏催化的『非紅供應鏈』訂單移轉，台灣接得穩嗎（產能、驗證、關鍵零組件自主度、訂單能見度、預算落地風險）。boss 2026-07-09 定調 scope 含無人艇。與其他系列不同：本系列有集數 EP。",
+      "membership_criteria": "台灣無人載具產業鏈的產業/個股/政策分析；內部任務線代號 drone_series_*。",
+      "members_published": [],
+      "members_draft": [
+        "mile_a8d79d6a"
+      ],
+      "excluded_dups": {}
     }
   }
 }
