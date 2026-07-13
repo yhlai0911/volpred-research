@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 # 自動化排程
 
 **Canonical source**：`config/runtime_schedules.json`

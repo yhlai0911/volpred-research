@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 # Deploy And Runtime
 
 這份文件是 `admin-ops` 的 runtime / deploy 入口。

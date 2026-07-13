@@ -379,7 +379,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 **論文**：第二篇 `paper/taiwan-vt/main.tex`（34 頁）涵蓋台灣 VT + TZ 資訊傳遞
 
 
-> **Codex / Gemini / 用戶歷史建議**已移至 [`agent-specs/references/research_program_archive_2026Q2.md`](agent-specs/references/research_program_archive_2026Q2.md#archive-codexgemini-用戶-歷史建議2026-03-26--2026-04-14)。新建議請直接 append 此處或該歷史檔。
+> **Codex / Gemini / 用戶歷史建議**已移至 [`docs/research_program_archive_2026Q2.md`](docs/research_program_archive_2026Q2.md#archive-codexgemini-用戶-歷史建議2026-03-26--2026-04-14)。新建議請直接 append 此處或該歷史檔。
 
 ## 前沿文獻方向（2025-2026）
 
@@ -736,7 +736,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 
 ---
 
-> **研究發現與成果 / 歷史 Next Session Priorities** 已移至 [`agent-specs/references/research_program_archive_2026Q2.md`](agent-specs/references/research_program_archive_2026Q2.md)。保留此檔的體積在 bootstrap 範圍內。
+> **研究發現與成果 / 歷史 Next Session Priorities** 已移至 [`docs/research_program_archive_2026Q2.md`](docs/research_program_archive_2026Q2.md)。保留此檔的體積在 bootstrap 範圍內。
 
 
 ## 重要事件日曆（當月+下月，每月更新覆蓋）

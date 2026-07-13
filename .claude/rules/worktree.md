@@ -35,8 +35,14 @@ paths:
 
 - Brief 必含 6 要素（任務 / 動機 / context 指引 / 規範引用 / 成功標準 / scope 限制）— 完整說明見 `.claude/rules/agent-delegation.md`。
 - 標準 template：`.claude/skills/autonomous-research/references/agent-brief-template.md`
-- **Claude-based agent** 引用 `.claude/skills/*.md` 路徑
-- **Codex agent** 引用 `.agents/skills/*.md` 路徑（Codex 讀不到 `.claude/`）
+- **所有 agent（含 Codex）一律引用 `.claude/skills/<name>/SKILL.md`** —— `.claude/` 是唯一 canonical surface。
+  舊規則寫「Codex agent 引用 `.agents/skills/*.md`（Codex 讀不到 `.claude/`）」，**兩句都不成立**：
+  (a) Codex 是有完整檔案系統存取的 CLI，你把路徑寫進 brief 它就讀得到 `.claude/` —— 它只是不會
+  *自動* 發現那裡的 skill（Codex 0.144.1 的 skill auto-discovery 只走 plugin marketplace
+  `<home>/.agents/plugins/marketplace.json`，binary 對 `agents/skills` 命中 0 次）；
+  (b) 因此 `.agents/skills/` 從來就沒有被 Codex 載入過 —— 它是個沒有讀者的 render 複本，
+  已於 2026-07-14 廢止（gate: `tests/test_skill_surface_single_source.py`；決策記錄:
+  `docs/skill-registry.md`）。派 Codex 時**在 brief 裡明寫要讀哪個 `.claude/skills/...` 路徑**。
 
 ## 踩過的坑
 

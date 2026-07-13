@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 # Platform Surfaces
 
 這份文件是 `admin-ops` skill 的快速索引，目的是讓 Claude Code 先知道：

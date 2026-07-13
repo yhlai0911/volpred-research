@@ -13,7 +13,6 @@ def patched_session_bootstrap(monkeypatch):
         "volpred.ops.session.create_rollback_point",
         lambda **kwargs: {"point_id": kwargs.get("point_id") or "rollback:test"},
     )
-    monkeypatch.setattr("volpred.ops.execution_brief.check_agent_specs", lambda: {"clean": True, "issues": []})
 
 
 def test_session_bootstrap_claim_finish_and_shutdown(tmp_path: Path, patched_session_bootstrap):
@@ -91,7 +90,6 @@ why_this_agent: "code template"
         lambda **kwargs: {"point_id": kwargs.get("point_id") or "rollback:test"},
     )
     monkeypatch.setattr("volpred.ops.execution_brief.BRIEF_TEMPLATES_ROOT", templates_root)
-    monkeypatch.setattr("volpred.ops.execution_brief.check_agent_specs", lambda: {"clean": True, "issues": []})
 
     storage_dir = str(tmp_path / "storage")
     session_bootstrap("codex", storage_dir=storage_dir, session_id="codex:worker")

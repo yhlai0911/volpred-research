@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 # Volatility Models Reference
 
 ## Registered Models (14 total)

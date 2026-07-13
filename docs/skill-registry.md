@@ -1,6 +1,49 @@
 # `.claude/` Skill Registry
 
-`\.claude/` 是本專案的 canonical skill 母本。`\.agents/` 只是複製品，本次整理不修改。
+## Canonical source（2026-07-14 定案，唯一）
+
+**`.claude/` 是唯一的 agent surface。沒有 render step，所以沒有 drift 可言。**
+
+- Canonical：`.claude/skills/`、`.claude/rules/`、`.claude/agents/`、`CLAUDE.md`（Claude Code 直接讀）
+- **已廢止**：`agent-specs/`（render 母本）、`.agents/skills/`（Codex render 複本）、
+  `src/volpred/ops/agent_spec.py` + `ops agent-spec import|render|check|sync` CLI
+- Enforcement owner（唯一，勿加第二層）：`tests/test_skill_surface_single_source.py`
+  —— CI (`pytest.yml`) 與 pre-push hook 都會跑整個 `tests/`。第二個 skill surface 一旦
+  復活（含 `.gitignore` 偷偷藏起來），測試直接 fail。
+
+### 為什麼是「刪掉」而不是「補 render + 加 gate」
+
+`agent-specs/` canonical 早在 2026-04-18（commit `e64a19072`，用戶確認不再用 Codex 終端機版）
+就被刪掉，但 render 機械沒有一起退場，於是留下三個孤兒：
+
+1. `ops agent-spec render` 是一把上膛的槍 —— 它會先 `rmtree('.claude/skills')` 再從一個
+   **不存在**的 canonical 重建。`ops session-bootstrap` 也曾因為找不到 `agent-specs/guide.md`
+   而炸掉（見 `paper/prg-periodic-garch/review_history/pre_submission_audit_v1/`）。
+2. `.agents/skills/` 變成 gitignored 的 untracked 複本：**沒有任何 clone / worktree 有它**，
+   也不會出現在任何 diff。三個月內 26 個共用 skill 有 18 個內容已與 `.claude/skills/` 分岔。
+3. `.claude/**` 有 26 個檔案還掛著 `AUTO-GENERATED FROM agent-specs/. Edit canonical sources
+   instead.` 的 header —— 叫下一個 agent 去改一個 2026-04-18 起就不存在的目錄。
+
+關鍵事實（2026-07-14 實測，非推測）：**`.agents/skills/` 沒有任何 consumer**。
+Codex CLI 0.144.1 只透過 plugin marketplace 發現 skill
+（`<home>/.agents/plugins/marketplace.json` → `plugins/<name>/skills/`）；其 binary 對字串
+`agents/skills` 命中 **0** 次，本 repo 也沒有 `.agents/plugins/marketplace.json`。
+Claude Code 讀 `.claude/skills/`。`scripts/check_skills_complete.sh` 更早就把 SKILL.md 裡的
+`.agents/` 路徑當成 legacy typo 自動翻譯成 `.claude/`。
+
+一個零 consumer 的 surface 不需要 render pipeline，也不需要 drift gate —— 需要的是**消失**。
+再幫它蓋一層 render + 一層 watchdog 就是 CLAUDE.md 明文禁止的疊床架屋。
+
+### `.gitignore` 的處置
+
+`.agents/skills/` 的 ignore rule **已移除**（不是改成 tracked）。理由：ignore 正是它能隱形
+分岔三個月的原因 —— untracked ⇒ 不進 clone、不進 worktree、不進 diff。現在它既不 tracked
+也不 ignored，任何人重新造出這個目錄都會被 `git status` 和上述測試同時抓到。
+
+（`.agents/skills/` 內唯一 `.claude/skills/` 沒有的 entry 是 `source-command-deploy`，
+內容是 `.claude/commands/deploy.md` 的 wrapper render —— 零獨有內容，刪除無損失。）
+
+---
 
 本表的目的不是重述每個 skill 全文，而是回答四件事：
 

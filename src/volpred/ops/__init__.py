@@ -73,7 +73,6 @@ from .schedules import (
     previous_scheduled_fire,
 )
 from .shared_lock import shared_state_lock
-from .agent_spec import check_agent_specs, import_agent_specs, render_agent_specs, sync_agent_specs
 from .session import session_bootstrap, session_finish_task, session_next_task, session_shutdown
 from .jobs import SUPPORTED_ACTIONS, enqueue_job, get_job, list_jobs, work_loop, work_once
 from .event_jobs import (
@@ -171,7 +170,6 @@ __all__ = [
     "build_token_usage_maintenance",
     "run_knowledge_index_maintenance",
     "run_token_usage_maintenance",
-    "check_agent_specs",
     "claim_next_task",
     "cleanup_test_post",
     "complete_task",
@@ -198,7 +196,6 @@ __all__ = [
     "health_snapshot",
     "heartbeat_agent",
     "infer_experiment_id",
-    "import_agent_specs",
     "is_schedule_governance_task",
     "list_agent_sessions",
     "list_pending_curations",
@@ -220,7 +217,6 @@ __all__ = [
     "resolve_session_key",
     "release_pool_articles",
     "release_pool_by_settings",
-    "render_agent_specs",
     "run_executor_task",
     "run_scheduler_live_smoke",
     "run_scheduler_smoke",
@@ -244,7 +240,6 @@ __all__ = [
     "SUPPORTED_ACTIONS",
     "set_execution_brief",
     "sync_all",
-    "sync_agent_specs",
     "supersede_queued_task",
     "task_brief_is_ready",
     "task_brief_is_stale",

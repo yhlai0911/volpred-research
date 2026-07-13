@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 ---
 name: fresh-context-worker
 description: Use for tasks that are unrelated to the current thread, loaded skills, or active project files, so the main conversation stays clean.

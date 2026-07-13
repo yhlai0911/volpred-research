@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 # Session Cron Workflows
 
 這份文件給本地 **Claude Code / Codex + local control plane** 使用。目的不是定義研究內容，而是把**平台層工作**包成穩定、可重複採用的節奏。

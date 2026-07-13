@@ -19,7 +19,6 @@ from scripts.dispatch_supervisor import procutil  # noqa: E402
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from .agent_spec import check_agent_specs
 from .common import project_path
 from .local_control_plane import (
     ExecutionReceipt,
@@ -808,16 +807,6 @@ def preflight_executor_task(task_id: str, *, agent_name: str, storage_dir: str =
     task = _load_task(task_id, storage_dir=storage_dir)
     if task is None:
         raise RuntimeError(f"Unknown task: {task_id}")
-    agent_spec = check_agent_specs()
-    if not agent_spec["clean"]:
-        _block_task(
-            task_id,
-            actor=agent_name,
-            error="agent-spec drift detected",
-            brief_status=task.get("brief_status"),
-            storage_dir=storage_dir,
-        )
-        raise RuntimeError("agent_spec_drift")
     repo_root = Path(str(brief.get("repo_root") or project_path()))
     if repo_root != project_path():
         _block_task(

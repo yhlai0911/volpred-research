@@ -54,7 +54,6 @@ frontend-v2/.env.local
 # Tracking both .agents/skills/ and .claude/skills/ creates 3-way drift.
 # Canonical: agent-specs/ → rendered to .claude/skills/ (actively read by Claude Code).
 # .agents/skills/ is a legacy third copy — gitignore from 2026-04-17 to simplify canonical governance.
-.agents/skills/
 .claude/scheduled_tasks.lock
 
 # Local control-plane runtime state

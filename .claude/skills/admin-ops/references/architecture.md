@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 # 網站架構（v4 Supabase + Admin CMS + Mirror API）
 
 完整細節見 `docs/architecture.md`

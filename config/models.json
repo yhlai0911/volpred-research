@@ -1,20 +1,20 @@
 {
   "_meta": {
     "purpose": "Single source of truth for Claude model roster + task-tier -> model mapping used when dispatching subagents. agent-delegation.md's model table points here.",
-    "authoritative_availability_source": "The Claude Desktop model selector (bottom-right of the app) is the ground truth for which models are AVAILABLE right now. The Agent/Workflow tool `model` enum lists dispatchable ALIASES but does NOT reflect live availability (e.g. fable is a valid alias yet currently unavailable). When reconciling, trust the desktop selector for availability.",
+    "authoritative_availability_source": "A LIVE DISPATCH PROBE is the ground truth: spawn a throwaway subagent with the alias (Agent tool `model` param, or `claude -p --model <id>`) and see whether it answers. That is a direct availability signal and costs seconds. The Agent/Workflow tool `model` enum on its own is NOT a live signal — it lists aliases the harness will accept, not models the backend will serve. The Claude Desktop model selector (bottom-right, incl. its 'More models >' submenu) remains the best way to ENUMERATE the roster (the probe can only confirm an alias you already know about), but do not use it as the availability field's only evidence when a probe is one call away.",
     "main_loop_policy": "Main-thread (interactive) model is fixed by the session and CANNOT be hot-swapped per task. Owner directive 2026-07-01: keep main loop on opus. Owner directive 2026-07-05: ALL SUBAGENTS also use opus (4.8) — the per-task sonnet<->opus pick is retired; only `effort` still varies by task difficulty, across the full 5-tier `claude --effort` scale low<medium<high<xhigh<max (max = ceiling). effort is now actually applied via `--effort` on the spawned `claude -p` (it was inert before 2026-07-05).",
-    "last_reconciled": "2026-07-02",
-    "reconciled_via": "owner /model switch in live session + headless -p smoke test (both succeeded 2026-07-02)",
+    "availability_vs_routing": "AVAILABLE and ROUTED are orthogonal and must never be conflated again. `models.<alias>.available` = can the backend serve it (evidence: live probe). `dispatchable_now` = the alias is servable. The default subagent rotation is a separate POLICY (subagent_policy: all-opus, owner directive 2026-07-05) — sonnet, haiku and fable are all available and all OFF the default rotation. 2026-07-14: this file contradicted itself in four places because 'not routed by default' had been written down as 'unavailable'.",
+    "last_reconciled": "2026-07-14",
+    "reconciled_via": "live dispatch probe 2026-07-14 (Agent tool, model=fable, trivial prompt → returned in 3.3s) resolving a 4-way self-contradiction about fable. Prior: owner /model switch + headless `claude -p --model claude-fable-5` smoke test, both succeeded 2026-07-02.",
     "known_gaps": "The desktop selector shows a 'More models >' submenu that has not been enumerated — the roster below may be incomplete. Expand it (owner screenshot, since main thread cannot drive the native desktop UI) to complete."
   },
   "dispatchable_now": [
     "opus",
     "sonnet",
-    "haiku"
-  ],
-  "known_but_unavailable": [
+    "haiku",
     "fable"
   ],
+  "known_but_unavailable": [],
   "models": {
     "opus": {
       "display": "Opus 4.8",
@@ -40,7 +40,7 @@
       "display": "Fable 5",
       "id": "claude-fable-5",
       "available": true,
-      "note": "Mythos-class, ABOVE Opus, $10/$50, 1M ctx, best for long-horizon autonomous work. 2026-07-02 availability CONFIRMED: owner /model 切換本 session 成功 + headless `claude -p --model claude-fable-5` 實測回應成功（16:06 台灣）。可作 TG responder owner 顯式指定 / 未來長時程自主任務頂層。"
+      "note": "Mythos-class, ABOVE Opus, $10/$50, 1M ctx, best for long-horizon autonomous work. Availability CONFIRMED TWICE by live probe: (1) 2026-07-02 16:06 台灣 — owner /model 切換本 session 成功 + headless `claude -p --model claude-fable-5` 回應成功；(2) 2026-07-14 — Agent tool `model=fable` 派一個 throwaway subagent，3.3s 內正常回應。AVAILABLE 但**不進 default subagent rotation**（見 subagent_policy；all-opus 是 policy 決定，與 availability 無關）。可作 TG responder owner 顯式指定 / 未來長時程自主任務頂層。"
     }
   },
   "subagent_policy": {
@@ -58,20 +58,21 @@
       "status": "OFF the default rotation. Valid alias; not auto-routed."
     },
     "fable": {
-      "status": "UNAVAILABLE now; when it reopens, re-evaluate as the top tier for ambitious long-horizon autonomous work (multi-day agentic, large migrations, deep multi-stage research)"
+      "status": "AVAILABLE (live-probed 2026-07-14) but OFF the default subagent rotation, same as sonnet/haiku — the all-opus directive (2026-07-05) is a policy, not an availability constraint. Route here only on an explicit owner request, or when a task is genuinely long-horizon/agentic enough to justify the top tier (multi-day agentic work, large migrations, deep multi-stage research). Note the price: $10/$50 vs opus."
     }
   },
   "rules": [
     "Respect skill frontmatter model default first; override via Agent tool `model` param only when skill has none or the task clearly escalates.",
     "ALL subagents use opus (owner directive 2026-07-05). Only `effort` varies by difficulty across the 5-tier scale low<medium<high<xhigh<max (max = ceiling; matches `claude --effort`) — never route a subagent to sonnet/haiku by default. effort is applied via the `--effort` flag on the spawned `claude -p` (was inert before 2026-07-05).",
     "Procedural side-tasks (browser automation, scans, large search) still get FORKED to a subagent (context: fork) rather than run inline on the main loop — but that subagent is now opus/low, not sonnet. 2026-07-01 gap: FB posting ran inline on the main loop.",
-    "Do NOT route to a model whose available=false (e.g. fable now)."
+    "Do NOT route to a model whose available=false. As of 2026-07-14 no roster alias is available=false — every alias in `dispatchable_now` will answer. 'Not on the default rotation' (sonnet / haiku / fable) is a POLICY, not unavailability: it means do not auto-route there, NOT that the model is dead. Do not write policy into the availability fields."
   ],
   "reconcile": {
-    "authoritative": "Claude Desktop model selector (bottom-right). Owner can screenshot it (incl. expanding 'More models >'). Main thread canNOT click the native desktop UI (its computer-use is Chrome-tab-scoped), so this reconcile depends on an owner screenshot or a future OS-level computer-use tool.",
-    "secondary": "Agent/Workflow tool `model` enum = dispatchable aliases, but NOT a live availability signal.",
+    "authoritative": "Live dispatch probe: spawn a throwaway subagent with the alias (Agent tool `model` param, or `claude -p --model <id> 'reply OK'`). Answers in seconds; a failure to dispatch is the availability signal. This is the ONLY instrument that directly tests availability, and it needs neither the owner nor an API key.",
+    "enumeration": "Claude Desktop model selector (bottom-right, incl. 'More models >') is still how you DISCOVER aliases you don't know about — the probe can only confirm one you can already name. Main thread cannot click the native desktop UI (its computer-use is Chrome-tab-scoped), so enumeration depends on an owner screenshot; AVAILABILITY does not.",
+    "secondary": "Agent/Workflow tool `model` enum = aliases the harness accepts. NOT a live availability signal on its own — probe before you trust it.",
     "cadence": "Session start + monthly governance; scripts/check_model_roster.py warns when last_reconciled is stale.",
-    "why_not_cron": "No ANTHROPIC_API_KEY, and a script cannot read the in-session tool enum nor the native desktop selector. Detection is a main-thread + owner-assisted discipline, not a cron.",
+    "why_not_cron": "No ANTHROPIC_API_KEY, and a script cannot read the in-session tool enum nor the native desktop selector. Detection is a main-thread discipline (probe), with owner help only for enumerating unknown aliases.",
     "version_bumps_auto": "Within-tier alias bumps (sonnet 4.6->5) still dispatch via the same alias; only update the display/id + availability here for accuracy."
   }
 }

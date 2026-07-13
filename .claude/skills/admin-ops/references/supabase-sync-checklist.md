@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 # Supabase Sync Checklist
 
 建立時間: 2026-04-17（回應 market_daily silent-400 事件，已是同一 bug class 第 3 次犯）。

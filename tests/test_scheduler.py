@@ -316,7 +316,6 @@ why_this_agent: "ops template"
 """.strip(),
     )
     monkeypatch.setattr("volpred.ops.execution_brief.BRIEF_TEMPLATES_ROOT", templates_root)
-    monkeypatch.setattr("volpred.ops.execution_brief.check_agent_specs", lambda: {"clean": True, "issues": []})
 
     storage_dir = str(tmp_path / "storage")
     task = create_task(

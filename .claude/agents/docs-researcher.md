@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 ---
 name: docs-researcher
 description: Read-only documentation verifier for official docs, repository docs, and configuration references.
