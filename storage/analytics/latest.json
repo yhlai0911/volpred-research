@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-07-12T22:30:00.285407+00:00",
+  "generated_at": "2026-07-13T22:30:00.514753+00:00",
   "window_days": 30,
-  "since_date": "2026-06-12",
+  "since_date": "2026-06-13",
   "top_n": 20,
-  "articles_with_activity": 174,
-  "raw_impression_rows": 341,
+  "articles_with_activity": 191,
+  "raw_impression_rows": 370,
   "raw_reaction_rows": 0,
   "data_source_errors": {
     "article_impressions": null,
@@ -14,7 +14,7 @@
     "read_time_is_proxy": true,
     "read_time_bounce_filter_sec": 5,
     "read_time_outlier_cap_sec": 1200,
-    "read_time_outliers_excluded_total": 24,
+    "read_time_outliers_excluded_total": 26,
     "engaged_threshold_sec": 30,
     "score_formula": "impressions*10 + likes*25 + bookmarks*40 + shares*60 + avg_read_time_sec/10 (mirrors frontend admin-analytics.ts weighted_views)"
   },
@@ -24,7 +24,7 @@
       "slug": "mile_bb62fc66",
       "title": "VIX 在 2026 衝到 31，標普同期漲 8.5%：恐慌指數最常被誤讀的一件事",
       "audience": "general",
-      "impressions": 34,
+      "impressions": 35,
       "avg_read_time_sec": 28,
       "median_read_time_sec": 28,
       "read_completion_rate_proxy": 0.0,
@@ -35,7 +35,7 @@
         "bookmark": 0,
         "share": 0
       },
-      "score": 343
+      "score": 353
     },
     {
       "article_id": "888ef394-a380-435a-8f95-05e1899e66a2",
@@ -186,6 +186,24 @@
       "slug": "mile_8cafdb97",
       "title": "每日策略建議：VIX 18.41（正常）— 2026-06-27",
       "audience": "daily",
+      "impressions": 8,
+      "avg_read_time_sec": null,
+      "median_read_time_sec": null,
+      "read_completion_rate_proxy": 0.0,
+      "read_time_is_proxy": true,
+      "read_time_outliers_excluded": 0,
+      "reactions": {
+        "like": 0,
+        "bookmark": 0,
+        "share": 0
+      },
+      "score": 80
+    },
+    {
+      "article_id": "19a832ec-92ae-4872-b880-1cf4590d4255",
+      "slug": "mile_3ef6edd5",
+      "title": "你買的不是台股，你買的是台積電的七折波動",
+      "audience": "general",
       "impressions": 8,
       "avg_read_time_sec": null,
       "median_read_time_sec": null,
@@ -360,24 +378,6 @@
         "share": 0
       },
       "score": 48
-    },
-    {
-      "article_id": "6018f307-3c0e-4a18-92ae-5b782194af59",
-      "slug": "mile_eda69bfb",
-      "title": "VIX 體制決定一切：195 次非農公佈日，波動率差距達 3 倍",
-      "audience": "general",
-      "impressions": 3,
-      "avg_read_time_sec": 159,
-      "median_read_time_sec": 159.0,
-      "read_completion_rate_proxy": 0.6667,
-      "read_time_is_proxy": true,
-      "read_time_outliers_excluded": 0,
-      "reactions": {
-        "like": 0,
-        "bookmark": 0,
-        "share": 0
-      },
-      "score": 46
     }
   ]
 }

@@ -1,0 +1,411 @@
+{
+  "schema": "dreaming_review.v1",
+  "generated_at": "2026-07-13T22:00:02.811164+00:00",
+  "window_days": 14,
+  "dry_run": false,
+  "loop_health": {
+    "generated_at": "2026-07-13T22:00:02.811164+00:00",
+    "window_days": 14,
+    "overall": "ok",
+    "first_pass_success": {
+      "status": "ok",
+      "signal": "derived",
+      "window_days": 14,
+      "total_succeeded": 629,
+      "traced": 594,
+      "coverage": 0.944,
+      "first_pass": 573,
+      "retried": 21,
+      "first_pass_rate": 0.965,
+      "retry_rate": 0.035
+    },
+    "task_outcome": {
+      "status": "ok",
+      "signal": "supported",
+      "window_days": 14,
+      "success": 629,
+      "fail": 6,
+      "blocked": 12,
+      "other": 46,
+      "success_rate": 0.972
+    },
+    "error_recurrence": {
+      "status": "ok",
+      "signal": "supported",
+      "window_days": 14,
+      "distinct_signatures": 0,
+      "recurring": 0,
+      "recurrence_rate": 0.0,
+      "distinct_signatures_all": 14,
+      "recurring_all": 9,
+      "recurrence_rate_all": 0.643,
+      "top_recurring": [
+        {
+          "signature": "git_push_backup.log:exit1:push_held_guard",
+          "count": 15,
+          "first_seen": "2026-06-29T23:00:34.396358+00:00",
+          "last_seen": "2026-07-03T02:00:19+00:00",
+          "source": "cron_log",
+          "root_cause": "push_held_guard",
+          "recovered": true,
+          "span_days": 3.12,
+          "known": false
+        },
+        {
+          "signature": "dispatch_supervisor:quota_blocked:exit1",
+          "count": 13,
+          "first_seen": "2026-07-10T18:15:39.922050+00:00",
+          "last_seen": "2026-07-12T07:08:03.538525+00:00",
+          "source": "dispatch_state.completions",
+          "recovered": true,
+          "span_days": 1.54,
+          "known": false
+        },
+        {
+          "signature": "codex_work_log_backfill.log:exit1",
+          "count": 4,
+          "first_seen": "2026-07-09T21:00:30.332468+00:00",
+          "last_seen": "2026-07-09T23:10:07.211324+00:00",
+          "source": "cron_log",
+          "recovered": true,
+          "span_days": 0.09,
+          "known": false
+        },
+        {
+          "signature": "hourly_dispatch.log:exit142",
+          "count": 4,
+          "first_seen": "2026-07-03T00:57:11+00:00",
+          "last_seen": "2026-07-04T06:57:23+00:00",
+          "source": "cron_log",
+          "recovered": true,
+          "span_days": 1.25,
+          "known": true
+        },
+        {
+          "signature": "git_push_backup.log:exit1:auth",
+          "count": 3,
+          "first_seen": "2026-06-30T10:17:04+00:00",
+          "last_seen": "2026-06-30T20:17:03+00:00",
+          "source": "cron_log",
+          "root_cause": "auth",
+          "recovered": true,
+          "span_days": 0.42,
+          "known": false
+        }
+      ]
+    },
+    "correction_trend": {
+      "status": "ok",
+      "signal": "supported",
+      "weeks": 4,
+      "weekly_counts_recent_first": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "slope_per_week": -0.3,
+      "trend": "flat",
+      "current_correction_report_high": null,
+      "current_correction_report_medium": null
+    }
+  },
+  "findings": [
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:research_rp_4855ddb7a9",
+      "severity": "warn",
+      "evidence": [
+        "task research_rp_4855ddb7a9 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task research_rp_4855ddb7a9 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "governance_target": null,
+      "occurrences": 2,
+      "first_seen": "2026-07-12T22:00:14.861047+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:fable0711_ftd_e1_scale_gating",
+      "severity": "critical",
+      "evidence": [
+        "task fable0711_ftd_e1_scale_gating (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task fable0711_ftd_e1_scale_gating has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "governance_target": null,
+      "occurrences": 5,
+      "first_seen": "2026-07-11T22:00:05.649440+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "memory_skill_gap",
+      "signature": "memory_skill_gap:uncodified_process",
+      "severity": "info",
+      "evidence": [
+        "- [reference_notebooklm_rag_workflow.md](reference_notebooklm_rag_workflow.md) — 外部文獻 RAG 走 NotebookLM 的觸發時機",
+        "- [reference_fb_chrome_browser_autoselect.md](reference_fb_chrome_browser_autoselect.md) — FB 發文自選 Chrome，中文用 pbcopy 貼上",
+        "- [project_strategy_lifecycle_standing_directive.md](project_strategy_lifecycle_standing_directive.md) — 策略持續增減走既有 gate",
+        "- [feedback_paper_autonomy_optimize_acceptance.md](feedback_paper_autonomy_optimize_acceptance.md) — 論文方法/期刊/投稿時機自主判斷",
+        "- [feedback_content_quality_patrol_gap.md](feedback_content_quality_patrol_gap.md) — 只有老闆會發現的問題=缺巡檢",
+        "- [feedback_handoff_routine_maintenance.md](feedback_handoff_routine_maintenance.md) — handoff 平常持續維護，非 compact 才寫"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "這些記憶描述 recurring process/cadence 但無對應 skill；評估 promote 成 skill 或加排程/cadence（見 pdca-operations 技能治理 + operations-cadence）。",
+      "governance_target": ".claude/skills/",
+      "occurrences": 19,
+      "first_seen": "2026-06-30T12:29:57.114601+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "memory_hygiene",
+      "signature": "memory_hygiene:consolidation_review",
+      "severity": "info",
+      "evidence": [
+        "91 條 feedback 記憶（>=45，疑有重疊）"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "feedback 記憶量大：月度做整併/去重/澄清，讓記憶更清楚易用（避免垃圾桶化）。",
+      "governance_target": "memory/",
+      "occurrences": 19,
+      "first_seen": "2026-06-30T12:29:57.114601+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:52425890cc2f99a1",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=52425890cc2f99a1 title='git-push-backup: push 失敗' send_count=4 span=14.0d (first 2026-06-28T10:28:38.987914+00:00 → last 2026-07-12T11:00:27.918469+00:00) — no fire in 35.0h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `git-push-backup: push 失敗` fired 4× over 14.0d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-12T22:00:14.861047+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": "2026-07-12T11:00:27.918469+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:542378afb7b6a3b9",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=542378afb7b6a3b9 title='發文脫班（無新文超過 release 節奏門檻）' send_count=5 span=10.0d (first 2026-07-03T08:00:30.344539+00:00 → last 2026-07-13T09:00:44.626272+00:00) — no fire in 13.0h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `發文脫班（無新文超過 release 節奏門檻）` fired 5× over 10.0d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-13T22:00:02.811164+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": "2026-07-13T09:00:44.626272+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:2d99bdcd3277e3cc",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=2d99bdcd3277e3cc title='內容品質巡檢：發文間隔過久' send_count=4 span=9.3d (first 2026-07-04T01:00:45.625562+00:00 → last 2026-07-13T09:00:49.374583+00:00) — no fire in 13.0h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `內容品質巡檢：發文間隔過久` fired 4× over 9.3d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-13T22:00:02.811164+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": "2026-07-13T09:00:49.374583+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:e1aa596aac4a2172",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=e1aa596aac4a2172 title='發文脫班補救失敗：force-release/refill 皆為 0' send_count=10 span=8.8d (first 2026-07-04T13:00:41.508373+00:00 → last 2026-07-13T09:00:32.222642+00:00) — no fire in 13.0h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `發文脫班補救失敗：force-release/refill 皆為 0` fired 10× over 8.8d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-13T22:00:02.811164+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": "2026-07-13T09:00:32.222642+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "orphaned_experiment",
+      "signature": "orphaned_experiment:k1701",
+      "severity": "warn",
+      "evidence": [
+        "experiments/k1701/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1701')",
+        "finished 1.0 days ago",
+        "orphan backlog this run: 60 within 30d (queueing 5), plus 26 older than 30d not queued"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_orphaned_experiment_k1701",
+      "proposal": "收尾 experiments/k1701/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。",
+      "governance_target": "storage/memory/knowledge.json",
+      "occurrences": 1,
+      "first_seen": "2026-07-13T22:00:02.811164+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": null,
+      "task_type": "experiment"
+    },
+    {
+      "pattern_type": "orphaned_experiment",
+      "signature": "orphaned_experiment:k1698",
+      "severity": "warn",
+      "evidence": [
+        "experiments/k1698/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1698')",
+        "finished 1.1 days ago",
+        "orphan backlog this run: 60 within 30d (queueing 5), plus 26 older than 30d not queued"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_orphaned_experiment_k1698",
+      "proposal": "收尾 experiments/k1698/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。",
+      "governance_target": "storage/memory/knowledge.json",
+      "occurrences": 1,
+      "first_seen": "2026-07-13T22:00:02.811164+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": null,
+      "task_type": "experiment"
+    },
+    {
+      "pattern_type": "orphaned_experiment",
+      "signature": "orphaned_experiment:k1623",
+      "severity": "warn",
+      "evidence": [
+        "experiments/k1623/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1623')",
+        "finished 9.6 days ago",
+        "orphan backlog this run: 60 within 30d (queueing 5), plus 26 older than 30d not queued"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_orphaned_experiment_k1623",
+      "proposal": "收尾 experiments/k1623/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。",
+      "governance_target": "storage/memory/knowledge.json",
+      "occurrences": 1,
+      "first_seen": "2026-07-13T22:00:02.811164+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": null,
+      "task_type": "experiment"
+    },
+    {
+      "pattern_type": "orphaned_experiment",
+      "signature": "orphaned_experiment:k1609",
+      "severity": "warn",
+      "evidence": [
+        "experiments/K1609/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1609')",
+        "finished 10.9 days ago",
+        "orphan backlog this run: 60 within 30d (queueing 5), plus 26 older than 30d not queued"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_orphaned_experiment_k1609",
+      "proposal": "收尾 experiments/K1609/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。",
+      "governance_target": "storage/memory/knowledge.json",
+      "occurrences": 1,
+      "first_seen": "2026-07-13T22:00:02.811164+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": null,
+      "task_type": "experiment"
+    },
+    {
+      "pattern_type": "orphaned_experiment",
+      "signature": "orphaned_experiment:k1608",
+      "severity": "warn",
+      "evidence": [
+        "experiments/k1608/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1608')",
+        "finished 10.9 days ago",
+        "orphan backlog this run: 60 within 30d (queueing 5), plus 26 older than 30d not queued"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_orphaned_experiment_k1608",
+      "proposal": "收尾 experiments/k1608/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。",
+      "governance_target": "storage/memory/knowledge.json",
+      "occurrences": 1,
+      "first_seen": "2026-07-13T22:00:02.811164+00:00",
+      "last_seen": "2026-07-13T22:00:02.811164+00:00",
+      "activity_marker": null,
+      "task_type": "experiment"
+    }
+  ],
+  "new_findings": [
+    "persistent_alert:542378afb7b6a3b9",
+    "persistent_alert:2d99bdcd3277e3cc",
+    "persistent_alert:e1aa596aac4a2172",
+    "orphaned_experiment:k1701",
+    "orphaned_experiment:k1698",
+    "orphaned_experiment:k1623",
+    "orphaned_experiment:k1609",
+    "orphaned_experiment:k1608"
+  ],
+  "resolved_findings": [
+    "persistent_alert:a4a7ca551f8626b2",
+    "missing_retry_strategy:K1679",
+    "persistent_alert:aa6c059b3dc7e00d",
+    "persistent_alert:e46b1923cd3787a9",
+    "persistent_alert:4415ad115dc02afc",
+    "orphaned_experiment:k1699",
+    "orphaned_experiment:k1697",
+    "orphaned_experiment:k1649",
+    "orphaned_experiment:k1630",
+    "orphaned_experiment:k1625"
+  ],
+  "escalations": [
+    "missing_retry_strategy:fable0711_ftd_e1_scale_gating"
+  ],
+  "auto_remediation": [
+    {
+      "signature": "orphaned_experiment:k1701",
+      "action": "queued",
+      "task_id": "dreaming_orphaned_experiment_k1701"
+    },
+    {
+      "signature": "orphaned_experiment:k1698",
+      "action": "queued",
+      "task_id": "dreaming_orphaned_experiment_k1698"
+    },
+    {
+      "signature": "orphaned_experiment:k1623",
+      "action": "queued",
+      "task_id": "dreaming_orphaned_experiment_k1623"
+    },
+    {
+      "signature": "orphaned_experiment:k1609",
+      "action": "queued",
+      "task_id": "dreaming_orphaned_experiment_k1609"
+    },
+    {
+      "signature": "orphaned_experiment:k1608",
+      "action": "queued",
+      "task_id": "dreaming_orphaned_experiment_k1608"
+    }
+  ],
+  "counts": {
+    "findings": 13,
+    "new": 8,
+    "resolved": 10,
+    "escalations": 1,
+    "propose_only": 6,
+    "auto_dispatch_eligible": 7
+  }
+}
