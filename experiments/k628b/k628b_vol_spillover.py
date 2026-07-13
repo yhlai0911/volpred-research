@@ -5,6 +5,29 @@ K628b: Cross-Asset Volatility Spillover Network
 Jump exploration: volatility transmission across major asset classes
 (SPY, GLD, TLT, 0050.TW, USO) using network/spillover framework.
 
+!! 2026-07-13 CORRECTION -- the directional spillover numbers this script originally
+!! produced were an ORDERING ARTIFACT and have been withdrawn.
+!!
+!! `compute_spillover_index` documented itself as a "generalized FEVD (Pesaran & Shin,
+!! 1998)" but called statsmodels' `results.fevd()`, which is the CHOLESKY decomposition
+!! and depends on the order of the variables. SPY is listed first here, which is the
+!! position that mechanically maximises a variable's NET spillover -- and SPY was duly
+!! reported as the dominant net transmitter at +43.7%. Enumerating all 120 orderings of
+!! these five assets shows SPY's Cholesky NET ranges -16.1pp to +43.7pp: the reported
+!! figure is the maximum of that range.
+!!
+!! The decomposition below is now a real KPPS GFEVD. Under it:
+!!   SPY +14.6pp (still the largest net transmitter, but a third of the claimed size)
+!!   TLT  -9.1pp (still the largest net receiver)
+!!   USO  +1.0pp (SIGN FLIP -- was reported as a -12.4pp net RECEIVER)
+!! The Granger network, the Forbes-Rigobon test and the OOS portfolio never touched the
+!! FEVD and are unaffected.
+!!
+!! Re-estimation, ordering enumeration, no-spillover null floor and the downstream
+!! correction list: `k628b_kpps_rerun.py` -> `k628b_kpps_rerun_results.json`.
+!! Pre-correction output preserved verbatim: `k628b_results_SUPERSEDED_cholesky_ordering.json`.
+!! Same defect class as K865 (see `experiments/k865b/`).
+
 Builds on K455 (Diebold-Yilmaz US→Asia) and K422 (commodity spillover)
 but with different asset mix and adds:
   - Forbes-Rigobon contagion test
@@ -36,6 +59,7 @@ from scipy import stats
 from statsmodels.tsa.api import VAR
 from statsmodels.tsa.stattools import grangercausalitytests, adfuller
 from statsmodels.stats.diagnostic import acorr_ljungbox, het_arch
+from volpred.ops.diagnostics import warn
 
 warnings.filterwarnings('ignore')
 BASE_DIR = Path(__file__).resolve().parent
@@ -277,59 +301,115 @@ print("=" * 60)
 
 FORECAST_HORIZON = 10
 
+# ── 2026-07-13 CORRECTION ────────────────────────────────────────────────────
+# This block used to call `results.fevd(h)` while documenting itself as a
+# "generalized FEVD (Pesaran & Shin, 1998)". statsmodels has NO generalized FEVD:
+# `.fevd()` is the ORTHOGONALISED (Cholesky) decomposition, whose directional output
+# depends on the order the variables were handed to the VAR. This script orders SPY
+# first -- the position that maximises a variable's estimated exogeneity -- and then
+# concluded that SPY is the dominant net transmitter (+43.7%).
+#
+# Across all 120 orderings of these five assets, SPY's Cholesky NET runs from -16.1pp
+# to +43.7pp. The value this script reported is the MAXIMUM of that range. Under the
+# real KPPS decomposition below it is +14.6pp.
+#
+# The decomposition is now the genuine KPPS GFEVD, so the label and the arithmetic
+# agree. The Cholesky matrix is still computed, but only as an explicitly-named
+# order-dependent diagnostic -- never as the directional result.
+#
+# Re-estimation, ordering enumeration, no-spillover null and the downstream correction
+# list: experiments/k628b/k628b_kpps_rerun.py -> k628b_kpps_rerun_results.json.
+# The pre-correction numbers are preserved in k628b_results.json under
+# `_correction_2026_07_13`. Same defect class as K865 (see experiments/k865b/).
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _kpps_gfevd(results, h):
+    """KPPS generalized FEVD (Koop-Pesaran-Potter 1996; Pesaran-Shin 1998).
+
+        theta_ij(H) = sigma_jj^-1 * sum_h (e_i' A_h Sigma e_j)^2
+                                  / sum_h (e_i' A_h Sigma A_h' e_i)
+
+    Shocks are NOT orthogonalised, so this does not depend on the variable ordering.
+    Rows do not sum to 1 before normalisation; the caller row-normalises (DY 2012).
+    """
+    sigma = np.asarray(results.sigma_u)
+    phi = results.ma_rep(maxn=h - 1)           # (h, n, n), phi[0] = I
+    assert phi.shape[0] == h, f"ma_rep gave {phi.shape[0]} steps, expected {h}"
+
+    sig_jj = np.diag(sigma)
+    num = np.zeros_like(sigma)
+    den = np.zeros(sigma.shape[0])
+    for step in range(h):
+        a_sigma = phi[step] @ sigma
+        num += a_sigma ** 2
+        den += np.diag(a_sigma @ phi[step].T)
+    return (num / sig_jj[None, :]) / den[:, None]
+
+
+def _cholesky_fevd(results, h):
+    """Orthogonalised (Cholesky) FEVD -- ORDER DEPENDENT. Diagnostic only.
+
+    `decomp` is (n, h, n): axis 0 = decomposed variable, axis 1 = horizon, axis 2 =
+    shock. The shape assert is the 2026-07-11 K865 axis gate.
+    """
+    decomp = results.fevd(h).decomp
+    n = decomp.shape[0]
+    assert decomp.shape == (n, h, n), \
+        f"unexpected FEVD shape {decomp.shape}, expected ({n}, {h}, {n})"
+    return decomp[:, -1, :]
+
+
 def compute_spillover_index(data, max_lag=5, h=10):
     """
-    Compute Diebold-Yilmaz spillover index using generalized FEVD.
-    Returns: total spillover, directional spillovers, FEVD matrix.
-    """
-    # Fit VAR
-    model = VAR(data)
-    # Select lag by AIC
-    try:
-        lag_order = model.select_order(maxlags=max_lag)
-        selected_lag = lag_order.aic
-        if selected_lag == 0:
-            selected_lag = 1
-    except:
-        selected_lag = min(5, max_lag)
+    Diebold-Yilmaz spillover index from the KPPS GENERALIZED FEVD (order-invariant).
 
+    Returns the generalized decomposition as the directional result, plus the Cholesky
+    matrix under explicitly-named keys so the ordering artifact stays visible instead of
+    being quietly dropped.
+    """
+    model = VAR(data)
+    lag_order = model.select_order(maxlags=max_lag)
+    selected_lag = int(lag_order.aic) if lag_order.aic and lag_order.aic > 0 else 1
     results = model.fit(selected_lag)
 
-    # Generalized FEVD (Pesaran & Shin, 1998)
-    fevd = results.fevd(h)
+    def _row_normalize(mat):
+        out = mat / mat.sum(axis=1, keepdims=True)
+        assert np.allclose(out.sum(axis=1), 1.0, atol=1e-8), \
+            f"row sums are not 1: {out.sum(axis=1)}"
+        return out
 
-    # fevd.decomp is a list of n_assets arrays, each (h, n_assets)
-    # decomp[i][-1] = h-step FEVD for variable i (row i of the matrix)
-    n = len(fevd.decomp)
-    fevd_matrix = np.zeros((n, n))
-    for i in range(n):
-        fevd_matrix[i, :] = fevd.decomp[i][-1]  # h-step-ahead row
+    def _dy(mat):
+        from_others = np.sum(mat, axis=1) - np.diag(mat)   # row ex-diag: what i RECEIVES
+        to_others = np.sum(mat, axis=0) - np.diag(mat)     # col ex-diag: what i TRANSMITS
+        total = (np.sum(mat) - np.trace(mat)) / mat.shape[0] * 100
+        return total, from_others, to_others, to_others - from_others
 
-    # Normalize rows to sum to 1
-    row_sums = fevd_matrix.sum(axis=1, keepdims=True)
-    fevd_norm = fevd_matrix / np.where(row_sums > 0, row_sums, 1.0)
+    gfevd = _row_normalize(_kpps_gfevd(results, h))
+    chol = _row_normalize(_cholesky_fevd(results, h))
 
-    n = fevd_norm.shape[0]
-
-    # Total spillover index = (sum of off-diagonal / sum of all) * 100
-    total = np.sum(fevd_norm) - np.trace(fevd_norm)
-    total_spillover = (total / n) * 100
-
-    # Directional spillovers
-    # "FROM others" = row sum minus diagonal (how much i is influenced by others)
-    from_others = np.sum(fevd_norm, axis=1) - np.diag(fevd_norm)
-    # "TO others" = column sum minus diagonal (how much i influences others)
-    to_others = np.sum(fevd_norm, axis=0) - np.diag(fevd_norm)
-    # NET = TO - FROM
-    net_spillover = to_others - from_others
+    total_spillover, from_others, to_others, net_spillover = _dy(gfevd)
+    chol_total, chol_from, chol_to, chol_net = _dy(chol)
 
     return {
+        # Directional result == generalized (order-invariant) decomposition.
+        'decomposition': 'KPPS generalized FEVD (Pesaran & Shin, 1998) -- order-invariant',
         'total_spillover': float(total_spillover),
-        'fevd_matrix': fevd_norm.tolist(),
+        'fevd_matrix': gfevd.tolist(),
         'from_others': from_others.tolist(),
         'to_others': to_others.tolist(),
         'net_spillover': net_spillover.tolist(),
         'selected_lag': int(selected_lag),
+        # Order-dependent diagnostic. NOT a directional result. Kept so the size of the
+        # ordering artifact stays auditable against the pre-2026-07-13 numbers.
+        'cholesky_diagnostic_ORDER_DEPENDENT': {
+            'warning': ('Depends on the column order of `data`. Do not draw transmitter / '
+                        'receiver conclusions from these. See k628b_kpps_rerun_results.json.'),
+            'asset_order': list(data.columns),
+            'total_spillover': float(chol_total),
+            'from_others': chol_from.tolist(),
+            'to_others': chol_to.tolist(),
+            'net_spillover': chol_net.tolist(),
+        },
     }
 
 # Full-sample spillover
@@ -385,12 +465,15 @@ n_total = len(var_data)
 rolling_spillover_dates = []
 rolling_spillover_values = []
 rolling_spy_net = []
+rolling_spillover_failures = []   # dropped windows are reported, never swallowed
 
 print(f"  Computing rolling spillover (window={ROLL_SPILL_WINDOW}, step={ROLL_STEP})...")
 print(f"  Total windows: ~{(n_total - ROLL_SPILL_WINDOW) // ROLL_STEP}")
 
 for start_idx in range(0, n_total - ROLL_SPILL_WINDOW, ROLL_STEP):
     window_data = var_data.iloc[start_idx:start_idx + ROLL_SPILL_WINDOW]
+    # A silently dropped window is not neutral: the fits that fail are the ones where the
+    # VAR is worst behaved, so swallowing them flatters the estimator. Count and report.
     try:
         sp = compute_spillover_index(window_data, max_lag=3, h=10)
         rolling_spillover_dates.append(window_data.index[-1])
@@ -398,8 +481,11 @@ for start_idx in range(0, n_total - ROLL_SPILL_WINDOW, ROLL_STEP):
         # SPY net spillover
         spy_idx = assets.index('SPY')
         rolling_spy_net.append(sp['net_spillover'][spy_idx] * 100)
-    except:
-        pass
+    except Exception as exc:
+        rolling_spillover_failures.append(
+            {'window_end': str(window_data.index[-1].date()), 'error': repr(exc)})
+        warn('k628b', 'rolling spillover window failed -- window DROPPED from the series',
+             window_end=str(window_data.index[-1].date()), error=repr(exc))
 
 print(f"  Computed {len(rolling_spillover_values)} windows")
 if rolling_spillover_values:
@@ -507,6 +593,7 @@ print(f"  Low vol regime: {(~high_regime).sum()} days")
 
 # Granger causality in each regime
 regime_granger = {'high_vol': {}, 'low_vol': {}}
+regime_granger_failures = []
 for regime_name, mask in [('high_vol', high_regime), ('low_vol', ~high_regime)]:
     regime_rvol = rvol[mask].dropna()
     if len(regime_rvol) < 100:
@@ -527,8 +614,13 @@ for regime_name, mask in [('high_vol', high_regime), ('low_vol', ~high_regime)]:
                 if min_pval < 0.05:
                     sig_links += 1
                     regime_granger[regime_name][f"{cause}->{effect}"] = float(min_pval)
-            except:
-                pass
+            except Exception as exc:
+                # A swallowed failure here would silently lower the link count for this
+                # regime, which is exactly the quantity being compared across regimes.
+                regime_granger_failures.append(
+                    {'regime': regime_name, 'pair': f"{cause}->{effect}", 'error': repr(exc)})
+                warn('k628b', 'regime Granger test failed -- link NOT counted',
+                     regime=regime_name, pair=f"{cause}->{effect}", error=repr(exc))
 
     print(f"  {regime_name}: {sig_links} significant Granger links")
 
@@ -549,6 +641,7 @@ OOS_START = '2020-01-01'  # OOS period
 print("  Computing rolling Granger causality (SPY -> 0050.TW)...")
 rolling_granger_dates = []
 rolling_granger_fstat = []
+rolling_granger_failures = []
 
 rvol_data = rvol[['0050.TW', 'SPY']].dropna()
 for start_idx in range(0, len(rvol_data) - LOOK_BACK, 5):  # step=5 for speed
@@ -558,8 +651,13 @@ for start_idx in range(0, len(rvol_data) - LOOK_BACK, 5):  # step=5 for speed
         best_f = max(test[lag][0]['ssr_ftest'][0] for lag in range(1, 4))
         rolling_granger_dates.append(window.index[-1])
         rolling_granger_fstat.append(best_f)
-    except:
-        pass
+    except Exception as exc:
+        # This series drives the OOS strategy's signal; a dropped window is a hole in the
+        # signal, so it is recorded rather than silently forward-filled over.
+        rolling_granger_failures.append(
+            {'window_end': str(window.index[-1].date()), 'error': repr(exc)})
+        warn('k628b', 'rolling Granger window failed -- window DROPPED from the signal',
+             window_end=str(window.index[-1].date()), error=repr(exc))
 
 if rolling_granger_dates:
     granger_series = pd.Series(rolling_granger_fstat, index=rolling_granger_dates)
@@ -750,12 +848,12 @@ if rolling_spillover_values:
         ('2022 Bear', '2022-01-01', '2022-10-01'),
     ]:
         try:
-            s = pd.Timestamp(start_d)
-            e = pd.Timestamp(end_d)
-            ax1.axvspan(s, e, alpha=0.15, color='red')
-            ax1.text(s, ax1.get_ylim()[1] * 0.95, label, fontsize=8, color='red')
-        except:
-            pass
+            s_ts = pd.Timestamp(start_d)
+            e_ts = pd.Timestamp(end_d)
+            ax1.axvspan(s_ts, e_ts, alpha=0.15, color='red')
+            ax1.text(s_ts, ax1.get_ylim()[1] * 0.95, label, fontsize=8, color='red')
+        except Exception:  # silent-ok: cosmetic crisis shading on a chart; failing to
+            pass           # draw a red band changes no number and no conclusion.
 
 # Panel B: SPY net spillover
 if rolling_spy_net:
@@ -794,26 +892,22 @@ print("=" * 60)
 
 findings = []
 
-# Q1: Is SPY dominant transmitter?
-if directional_roles:
-    spy_role = directional_roles.get('SPY', {})
-    spy_net = spy_role.get('net_pct', 0)
-    if spy_net > 5:
-        findings.append(f"SPY is dominant NET TRANSMITTER (net={spy_net:.1f}%)")
-    else:
-        findings.append(f"SPY net spillover is modest ({spy_net:.1f}%)")
+# The role assigned below is the one from `directional_roles`, i.e. it respects the
+# +/-5pp BALANCED band. The pre-2026-07-13 version of this block ignored that band and
+# called anything with net < 0 a "RECEIVER", so GLD and 0050.TW were reported as
+# receivers while the role table right above called them BALANCED. Same defect family as
+# the fake GFEVD label: the headline said something the arithmetic did not.
+for asset in ('SPY', 'GLD', '0050.TW', 'TLT', 'USO'):
+    if asset in directional_roles:
+        r = directional_roles[asset]
+        findings.append(f"{asset} is {r['role']} (KPPS GFEVD net={r['net_pct']:+.1f}pp)")
 
-# Q2: GLD role
 if directional_roles:
-    gld_role = directional_roles.get('GLD', {})
-    gld_net = gld_role.get('net_pct', 0)
-    findings.append(f"GLD is {'RECEIVER' if gld_net < 0 else 'TRANSMITTER'} (net={gld_net:.1f}%)")
-
-# Q3: 0050.TW in network
-if directional_roles:
-    tw_role = directional_roles.get('0050.TW', {})
-    tw_net = tw_role.get('net_pct', 0)
-    findings.append(f"0050.TW is {'RECEIVER' if tw_net < 0 else 'TRANSMITTER'} (net={tw_net:.1f}%)")
+    findings.append(
+        "NET sums to zero by construction, so 'X's NET exceeds the other four combined' "
+        "is an identity whenever X is the sole net transmitter -- not evidence. The "
+        "pre-2026-07-13 write-up made exactly that claim about SPY."
+    )
 
 # Q4: Contagion
 spy_tw_contagion = contagion_results.get('SPY->0050.TW', {})
@@ -830,6 +924,24 @@ results = {
     'experiment_id': 'K628b',
     'title': 'Cross-Asset Volatility Spillover Network',
     'timestamp': datetime.now(timezone.utc).isoformat(),
+    '_correction_2026_07_13': {
+        'what_changed': (
+            'The spillover decomposition is now a real KPPS generalized FEVD (order-invariant). '
+            'It was previously statsmodels\' Cholesky FEVD mislabelled as generalized, with SPY '
+            'ordered first -- the position that maximises a variable\'s NET spillover.'
+        ),
+        'withdrawn': {
+            'SPY_net_pct': '+43.68 (Cholesky, SPY ordered first) -- the maximum over all 120 orderings',
+            'TLT_net_pct': '-24.92 (Cholesky)',
+            'USO_net_pct': '-12.37 (Cholesky) -- SIGN FLIPS to +1.0 under GFEVD',
+            'total_spillover': '11.63 (Cholesky full sample); rolling mean 25.8 (Cholesky)',
+        },
+        'unaffected': ['granger_causality', 'contagion_test', 'rolling_correlation',
+                       'portfolio_application', 'descriptive_statistics', 'regime_granger'],
+        'pre_correction_output': 'k628b_results_SUPERSEDED_cholesky_ordering.json',
+        'evidence': 'k628b_kpps_rerun_results.json (120-ordering enumeration + no-spillover null)',
+        'defect_class': 'Same as K865 -- see experiments/k865b/ and storage/ops/fevd_ordering_baseline.json',
+    },
     'type': 'empirical analysis',
     'data_source': 'yfinance',
     'data_period': f'{START} to {END}',
@@ -877,6 +989,19 @@ results = {
         'details': regime_granger,
     },
     'portfolio_application': portfolio_results,
+    'estimation_failures': {
+        'note': ('Windows/tests that failed to estimate. These are DROPPED from the series '
+                 'above, so a non-zero count means the reported means/ranges are computed on '
+                 'a biased subsample -- the failures are the badly-behaved fits.'),
+        'rolling_spillover_dropped': len(rolling_spillover_failures),
+        'rolling_granger_dropped': len(rolling_granger_failures),
+        'regime_granger_dropped': len(regime_granger_failures),
+        'detail': {
+            'rolling_spillover': rolling_spillover_failures,
+            'rolling_granger': rolling_granger_failures,
+            'regime_granger': regime_granger_failures,
+        },
+    },
     'key_findings': findings,
     'plots': {
         'network': 'k628b_spillover_network.png',
