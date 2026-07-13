@@ -1,0 +1,388 @@
+{
+  "generated_at_tw": "2026-07-13 10:40:29",
+  "price_window_requested": {
+    "start": "2025-06-30",
+    "end_exclusive": "2026-07-11"
+  },
+  "price_window_common": {
+    "start": "2025-06-30",
+    "end": "2026-07-09",
+    "observations": 250,
+    "reason": "公平比較採所有標的與加權指數都有還原收盤價的日期交集。"
+  },
+  "data_source": "yfinance adjusted close (auto_adjust=True) and annual income statement; company linkage statements use the per-row public source URLs",
+  "method": {
+    "return": "common-window adjusted-close total return",
+    "volatility": "daily log-return standard deviation * sqrt(252)",
+    "basket": "eight-stock equal-weight daily log-return basket, rebalanced daily",
+    "financials": "latest two annual income statements available from yfinance",
+    "disclosure_classification": "公開揭露強度的描述性分類；直接產品／合作／出貨、開發／意向、相鄰能力三層。",
+    "caveat": "公司整體營收與股價不可解讀為無人機業務表現；未單獨揭露的營收占比與訂單金額一律不估。"
+  },
+  "summary": {
+    "n_companies": 8,
+    "n_direct_product_or_shipment": 3,
+    "n_development_or_intent": 2,
+    "n_adjacent_capability_only": 3,
+    "n_with_separately_disclosed_uav_revenue_share": 0,
+    "n_with_public_binding_uav_order_value_in_checked_sources": 0,
+    "n_positive_revenue_growth": 4,
+    "n_operating_loss": 6,
+    "median_revenue_yoy": -0.00025374367625263794,
+    "median_operating_margin": -0.005250734335269309,
+    "basket_return_common_window": 0.3005871078731338,
+    "basket_annualized_volatility": 0.3298516310140227,
+    "twii_return_common_window": 1.037858086497315,
+    "twii_annualized_volatility": 0.23474666033177952,
+    "return_gap_basket_minus_twii": -0.7372709786241812,
+    "stage_counts": {
+      "航太相鄰能力": 2,
+      "直接產品／製造": 1,
+      "共同開發／意向": 1,
+      "相鄰能力": 1,
+      "直接產品／合作": 1,
+      "開發／展會": 1,
+      "開始出貨": 1
+    }
+  },
+  "companies": [
+    {
+      "name": "碳基",
+      "ticker": "7719.TWO",
+      "segment": "複材／機體",
+      "linkage_stage": "直接產品／製造",
+      "evidence": "公司官網明列無人機配件、複材零組件與無人飛行載具機體製造。",
+      "source_url": "https://www.uaver.com/?lang=tw",
+      "visibility": "有直接產品證據；未見無人機營收占比或具約束力訂單金額拆分。",
+      "price_start": 25.299999237060547,
+      "price_end": 55.29999923706055,
+      "common_window_return": 1.185770786745902,
+      "annualized_volatility": 0.9445397886601,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": -0.2648074901116507,
+      "by_year": {
+        "2025": {
+          "revenue": 29368000.0,
+          "gross_profit": -37386000.0,
+          "operating_income": -96145000.0,
+          "net_income": -97835000.0,
+          "gross_margin": -1.2730182511577226,
+          "operating_margin": -3.2738014165077636
+        },
+        "2024": {
+          "revenue": 39946000.0,
+          "gross_profit": -16370000.0,
+          "operating_income": -69833000.0,
+          "net_income": -70646000.0,
+          "gross_margin": -0.40980323436639465,
+          "operating_margin": -1.7481850498172533
+        },
+        "2023": {
+          "revenue": 69908000.0,
+          "gross_profit": -6718000.0,
+          "operating_income": -53574000.0,
+          "net_income": -52941000.0,
+          "gross_margin": -0.09609772844309664,
+          "operating_margin": -0.7663500600789609
+        }
+      }
+    },
+    {
+      "name": "永虹先進",
+      "ticker": "6618.TWO",
+      "segment": "複材／機體",
+      "linkage_stage": "共同開發／意向",
+      "evidence": "公司具航太級碳纖複材能力；2026-01 公告 Cougar 無人機共同開發採購意向書。",
+      "source_url": "https://www.uht.com.tw/zh-tw/news",
+      "secondary_source_url": "https://goodinfo.tw/tw/StockAnnounceDetail.asp?CLAIM_TIME=2026%2F01%2F12+19%3A20%3A52&STOCK_ID=6618&SUBJECT=%E3%80%8CCougar%E7%84%A1%E4%BA%BA%E6%A9%9F%E3%80%8D%E5%85%B1%E5%90%8C%E9%96%8B%E7%99%BC%E6%8E%A1%E8%B3%BC%E5%90%88%E7%B4%84%E6%84%8F%E5%90%91%E6%9B%B8",
+      "visibility": "意向書不等於具約束力主合約；未見營收占比或確定訂單金額。",
+      "price_start": 15.649999618530273,
+      "price_end": 20.399999618530273,
+      "common_window_return": 0.30351438439498724,
+      "annualized_volatility": 0.6767264371496683,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 6.887208827135268,
+      "by_year": {
+        "2025": {
+          "revenue": 19300000.0,
+          "gross_profit": 1159000.0,
+          "operating_income": -103752000.0,
+          "net_income": -117510000.0,
+          "gross_margin": 0.06005181347150259,
+          "operating_margin": -5.375751295336787
+        },
+        "2024": {
+          "revenue": 2447000.0,
+          "gross_profit": 489000.0,
+          "operating_income": -78518000.0,
+          "net_income": -61883000.0,
+          "gross_margin": 0.19983653453208008,
+          "operating_margin": -32.087454025337145
+        },
+        "2023": {
+          "revenue": 44231000.0,
+          "gross_profit": 14091000.0,
+          "operating_income": -113145000.0,
+          "net_income": -134413000.0,
+          "gross_margin": 0.31857746829146977,
+          "operating_margin": -2.5580475232303135
+        }
+      }
+    },
+    {
+      "name": "加百裕",
+      "ticker": "3323.TWO",
+      "segment": "電池／能源",
+      "linkage_stage": "相鄰能力",
+      "evidence": "公司公開電動載具鋰電池組、BMS 與安全認證能力，但查核頁面未單列無人機。",
+      "source_url": "https://zh-tw.celxpert.com.tw/e-mobility",
+      "visibility": "只能確認電池模組能力；不可由此推論無人機訂單或營收。",
+      "price_start": 34.72389602661133,
+      "price_end": 34.900001525878906,
+      "common_window_return": 0.005071593899849791,
+      "annualized_volatility": 0.5101183759816413,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": -0.09180258296182098,
+      "by_year": {
+        "2025": {
+          "revenue": 4947657000.0,
+          "gross_profit": 425461000.0,
+          "operating_income": -198604000.0,
+          "net_income": -182624000.0,
+          "gross_margin": 0.0859924202506358,
+          "operating_margin": -0.04014102028495508
+        },
+        "2024": {
+          "revenue": 5447777000.0,
+          "gross_profit": 474845000.0,
+          "operating_income": -107322000.0,
+          "net_income": -98413000.0,
+          "gross_margin": 0.08716307587480178,
+          "operating_margin": -0.01970014558231734
+        },
+        "2023": {
+          "revenue": 7203544000.0,
+          "gross_profit": 466349000.0,
+          "operating_income": -201056000.0,
+          "net_income": -270647000.0,
+          "gross_margin": 0.06473882855438934,
+          "operating_margin": -0.02791070617462738
+        }
+      }
+    },
+    {
+      "name": "系統電",
+      "ticker": "5309.TWO",
+      "segment": "電池／系統",
+      "linkage_stage": "直接產品／合作",
+      "evidence": "公司法說揭露自主 X-DRONE、Vantage Robotics 與 Quantum Systems 合作及在地化角色。",
+      "source_url": "https://www.sysgration.com/uploads/investor-conference-information/TW/Sysgration_Investor_Presentation_TW_20251212.pdf",
+      "visibility": "工業電腦產品線包含無人機，但未單獨拆出無人機營收與訂單金額。",
+      "price_start": 35.87085723876953,
+      "price_end": 63.099998474121094,
+      "common_window_return": 0.7590881102758278,
+      "annualized_volatility": 0.5393752489813632,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.0912950956093157,
+      "by_year": {
+        "2025": {
+          "revenue": 3393871000.0,
+          "gross_profit": 798481000.0,
+          "operating_income": -22813000.0,
+          "net_income": 52939000.0,
+          "gross_margin": 0.23527146435442006,
+          "operating_margin": -0.0067218229567358335
+        },
+        "2024": {
+          "revenue": 3109948000.0,
+          "gross_profit": 751831000.0,
+          "operating_income": 75137000.0,
+          "net_income": 116045000.0,
+          "gross_margin": 0.24175034437874846,
+          "operating_margin": 0.0241602110388984
+        },
+        "2023": {
+          "revenue": 3278708000.0,
+          "gross_profit": 810868000.0,
+          "operating_income": 200356000.0,
+          "net_income": 255484000.0,
+          "gross_margin": 0.2473132709591705,
+          "operating_margin": 0.061108217017190915
+        }
+      }
+    },
+    {
+      "name": "力山",
+      "ticker": "1515.TW",
+      "segment": "馬達／動力",
+      "linkage_stage": "開發／展會",
+      "evidence": "公司法說把無人機列入機電新事業，並揭露參與海外無人機展。",
+      "source_url": "https://www.rexon.net/data/report/1724806778FCBF1.pdf",
+      "visibility": "屬新事業布局；未見無人機營收占比、客戶或確定訂單金額。",
+      "price_start": 26.320755004882812,
+      "price_end": 40.150001525878906,
+      "common_window_return": 0.5254122276671245,
+      "annualized_volatility": 0.39206004897555125,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": -0.11148763970077813,
+      "by_year": {
+        "2025": {
+          "revenue": 5419291000.0,
+          "gross_profit": 689949000.0,
+          "operating_income": -20483000.0,
+          "net_income": 176307000.0,
+          "gross_margin": 0.1273135175800672,
+          "operating_margin": -0.0037796457138027833
+        },
+        "2024": {
+          "revenue": 6099286000.0,
+          "gross_profit": 939379000.0,
+          "operating_income": 221867000.0,
+          "net_income": 318832000.0,
+          "gross_margin": 0.15401458465794193,
+          "operating_margin": 0.03637589711320308
+        },
+        "2023": {
+          "revenue": 6708461000.0,
+          "gross_profit": 1116220000.0,
+          "operating_income": 479851000.0,
+          "net_income": 308768000.0,
+          "gross_margin": 0.16638987690321222,
+          "operating_margin": 0.07152922257429833
+        }
+      }
+    },
+    {
+      "name": "富田",
+      "ticker": "4590.TW",
+      "segment": "馬達／動力",
+      "linkage_stage": "開始出貨",
+      "evidence": "公司公開開發高扭矩密度小型馬達；公司主管表示無人機馬達已開始對台灣客戶出貨。",
+      "source_url": "https://www.fukuta-motor.com.tw/images/csr/2024-FUKUTA-ESG_Report-tw.pdf",
+      "secondary_source_url": "https://www.cna.com.tw/news/afe/202411040177.aspx",
+      "visibility": "有出貨敘述，但未公開無人機馬達營收金額或客戶集中度。",
+      "price_start": 94.89605712890625,
+      "price_end": 90.4000015258789,
+      "common_window_return": -0.047378739845006734,
+      "annualized_volatility": 0.4349179047886548,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": -0.4110561755255602,
+      "by_year": {
+        "2025": {
+          "revenue": 1295528000.0,
+          "gross_profit": 378128000.0,
+          "operating_income": -3795000.0,
+          "net_income": 139087000.0,
+          "gross_margin": 0.2918717310625475,
+          "operating_margin": -0.0029293075873311884
+        },
+        "2024": {
+          "revenue": 2199748000.0,
+          "gross_profit": 479583000.0,
+          "operating_income": 91732000.0,
+          "net_income": 140410000.0,
+          "gross_margin": 0.21801724561177008,
+          "operating_margin": 0.04170114031243579
+        },
+        "2023": {
+          "revenue": 2863457000.0,
+          "gross_profit": 195955000.0,
+          "operating_income": -235424000.0,
+          "net_income": -173873000.0,
+          "gross_margin": 0.06843301645528464,
+          "operating_margin": -0.08221670519236014
+        }
+      }
+    },
+    {
+      "name": "寶一",
+      "ticker": "8222.TW",
+      "segment": "航太精密件",
+      "linkage_stage": "航太相鄰能力",
+      "evidence": "公司官網可確認航太引擎零件、超合金與鈦合金加工及長期民航客戶。",
+      "source_url": "https://www.aerowin.com/Content_Layout.php?Id=p1-1",
+      "visibility": "官方頁面未把既有長約拆成無人機用途；不可直接列為無人機訂單。",
+      "price_start": 50.4541130065918,
+      "price_end": 40.0,
+      "common_window_return": -0.20720041208981266,
+      "annualized_volatility": 0.4176647700788139,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.1660935384137492,
+      "by_year": {
+        "2025": {
+          "revenue": 961015000.0,
+          "gross_profit": 177992000.0,
+          "operating_income": 64291000.0,
+          "net_income": 37446000.0,
+          "gross_margin": 0.1852125096902754,
+          "operating_margin": 0.06689905984818136
+        },
+        "2024": {
+          "revenue": 824132000.0,
+          "gross_profit": 185252000.0,
+          "operating_income": 72546000.0,
+          "net_income": 102088000.0,
+          "gross_margin": 0.22478437920139008,
+          "operating_margin": 0.08802716069755816
+        },
+        "2023": {
+          "revenue": 683831000.0,
+          "gross_profit": 133740000.0,
+          "operating_income": 36965000.0,
+          "net_income": 60626000.0,
+          "gross_margin": 0.1955746375932065,
+          "operating_margin": 0.05405575354144518
+        }
+      }
+    },
+    {
+      "name": "晟田",
+      "ticker": "4541.TWO",
+      "segment": "航太精密件",
+      "linkage_stage": "航太相鄰能力",
+      "evidence": "公司法說產品含發動機、起落架、飛控致動器與航太精密零件。",
+      "source_url": "https://maicl.com/upload/sponsor/2024062010004194.pdf",
+      "visibility": "公開資料未拆出無人機用途營收或訂單；本文只視為可轉用製程。",
+      "price_start": 43.24045181274414,
+      "price_end": 61.0,
+      "common_window_return": 0.4107160643039729,
+      "annualized_volatility": 0.5019960132424348,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.16061009315180663,
+      "by_year": {
+        "2025": {
+          "revenue": 1644010000.0,
+          "gross_profit": 375887000.0,
+          "operating_income": 221695000.0,
+          "net_income": 137009000.0,
+          "gross_margin": 0.22864033673761108,
+          "operating_margin": 0.13485015297960476
+        },
+        "2024": {
+          "revenue": 1416505000.0,
+          "gross_profit": 214497000.0,
+          "operating_income": 59458000.0,
+          "net_income": 84912000.0,
+          "gross_margin": 0.15142692754349615,
+          "operating_margin": 0.04197514304573581
+        },
+        "2023": {
+          "revenue": 1199739000.0,
+          "gross_profit": 40144000.0,
+          "operating_income": -110258000.0,
+          "net_income": -75958000.0,
+          "gross_margin": 0.033460611016229366,
+          "operating_margin": -0.09190165527668935
+        }
+      }
+    }
+  ]
+}
