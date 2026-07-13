@@ -23,7 +23,12 @@ FEED_PATH = STORAGE / "reports" / "feed.json"
 RUNTIME_SCHEDULES = ROOT / "config" / "runtime_schedules.json"
 LOCAL_TZ = ZoneInfo("Asia/Taipei")
 TRENDING_SCAN_CMD_ENV = "VOLPRED_TRENDING_SCAN_CMD"
-ARC_DEDUP_WINDOW_DAYS = 30
+# 90d, not 30d: the 2026-07-13 incident was the 5th same-theme piece within 90
+# days, and the theme-saturation threshold (6) was calibrated on the 90d live
+# corpus. A 30d window would have scored the incident below threshold and let it
+# through again. At generation time a wider window is the cheap direction — a
+# false positive costs one swapped topic.
+ARC_DEDUP_WINDOW_DAYS = 90
 
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -34,6 +39,7 @@ from volpred.ops.event_jobs import (  # noqa: E402
     expand_due_event_jobs,
 )
 from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
+from volpred.ops.topic_dedup import TopicScreen, log_decision, screen_topic  # noqa: E402
 
 _diag_warn = warn  # legacy alias used by _warn_refill_reader (was undefined -> NameError)
 
@@ -332,22 +338,29 @@ def _build_trending_task(candidate: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _is_arc_duplicate(title: str, description: str, feed: list[dict] | None) -> dict | None:
-    """Return first arc-duplicate match or None.
+def _screen_trending_topic(title: str, description: str, feed: list[dict] | None) -> TopicScreen:
+    """Generation-time dedup screen for a trending candidate (BLOCK mode).
 
     Pre-write gate (release-layer recycling root cause, 2026-06-23): trending
     scan kept producing pending tasks for arcs already covered (Fed-pivot 22
     dups, AI capex 2 dups) because no upstream check existed. Publisher arc
     block fires only at publish time — the task still wastes a dispatch slot.
+
+    2026-07-14: the previous version called `find_arc_duplicates` alone and
+    swallowed every exception into `return None` (a silent fallback). It could
+    not have caught the 2026-07-13 incident anyway — the arc gate is
+    entity-anchored and the incident's five siblings do not arc-match each other
+    (0 of 10 pairs; see volpred.publisher.arc_dedup.theme_saturation). The screen
+    now also runs theme saturation, which does catch it (saturation 11 >= 6), and
+    every decision — including a gate error — is logged, never swallowed.
     """
-    if not feed:
-        return None
-    try:
-        from volpred.publisher.arc_dedup import find_arc_duplicates
-    except Exception:
-        return None
-    dups = find_arc_duplicates(title, description, feed, days=ARC_DEDUP_WINDOW_DAYS)
-    return dups[0] if dups else None
+    return screen_topic(
+        title,
+        description,
+        feed=feed,
+        days=ARC_DEDUP_WINDOW_DAYS,
+        mode="block",
+    )
 
 
 def _load_feed_for_dedup() -> list[dict]:
@@ -385,14 +398,22 @@ def refill_trending_candidates() -> dict[str, Any]:
     skipped: list[dict[str, str]] = []
     for candidate in _extract_trending_candidates(payload):
         task = _build_trending_task(candidate)
-        dup = _is_arc_duplicate(task["title"], task.get("description", ""), feed)
-        if dup:
+        screen = _screen_trending_topic(task["title"], task.get("description", ""), feed)
+        # Audit trail is written for EVERY verdict (pass / block / gate error),
+        # so "why was this task never created?" is always answerable. Silent skip
+        # is what let the 2026-07-13 dup sit in the pool for 20 hours.
+        log_decision(str(STORAGE), "trending_repost", task["id"], screen)
+        if screen.blocked:
             skipped.append({
                 "id": task["id"],
-                "reason": "arc_duplicate",
-                "dup_of": dup.get("id", ""),
+                "reason": screen.verdict,
+                "detail": screen.reason,
+                "dup_of": ",".join(str(m.get("id")) for m in screen.matches[:3]),
             })
             continue
+        # Not blocked, but the screen still has something to say -> hand the near
+        # misses to the writer agent instead of dropping them on the floor.
+        task["dedup_screen"] = screen.as_task_field()
         if _append_task(task):
             added.append(task["id"])
             if len(added) >= 1:

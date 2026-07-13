@@ -46,124 +46,34 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.publisher.arc_dedup import (  # noqa: E402
-    _arc_item_audience,
+    DEAD_STATUSES,
+    LEXICAL_HINT_LIMIT,
+    LEXICAL_HINT_THRESHOLD,
     _normalize_ref,
-    _refs_from_feed_item,
     arc_signature,
     classify_narrative_axis,
     extract_entities,
     find_arc_duplicates,
+    find_k_coverage,
+    find_lexical_hints,
+    tokenize as _tokens,
 )
 from volpred.publisher.publisher import _log_dedup_decision  # noqa: E402
 
-# Feed statuses that are not reader-visible; they cannot constitute coverage.
-DEAD_STATUSES = ("unpublished", "retracted")
-
-# Overlap coefficient above which a live article is worth showing the caller as a
-# possible same-story hit. Tuned low on purpose: this list is advisory, never a
-# block, so a false positive costs one glance and a false negative costs an
-# article nobody needed.
-LEXICAL_HINT_THRESHOLD = 0.18
-LEXICAL_HINT_LIMIT = 5
-
-
-def _tokens(text: str) -> set[str]:
-    """Latin words + CJK character bigrams — a script-agnostic bag of tokens."""
-    toks: set[str] = set()
-    word = ""
-    cjk_run = ""
-
-    def flush_cjk() -> None:
-        for i in range(len(cjk_run) - 1):
-            toks.add(cjk_run[i : i + 2])
-
-    for ch in text.lower():
-        if ch.isascii() and ch.isalnum():
-            word += ch
-            flush_cjk()
-            cjk_run = ""
-        elif "一" <= ch <= "鿿":
-            cjk_run += ch
-            if len(word) >= 3:
-                toks.add(word)
-            word = ""
-        else:
-            if len(word) >= 3:
-                toks.add(word)
-            word = ""
-            flush_cjk()
-            cjk_run = ""
-    if len(word) >= 3:
-        toks.add(word)
-    flush_cjk()
-    return toks
-
-
-def find_lexical_hints(title: str, text: str, feed: list[dict]) -> list[dict]:
-    """Live articles whose titles share a lot of surface vocabulary with this one.
-
-    A crude stand-in for the arc gate, used only when the arc signature is too
-    thin for the arc gate to say anything (see Gate 3). Overlap coefficient
-    rather than Jaccard, because titles are short and a long draft body would
-    otherwise drown every candidate.
-    """
-    probe = _tokens(f"{title}\n{text[:400]}")
-    if not probe:
-        return []
-    hits: list[dict] = []
-    for item in feed:
-        if item.get("status") in DEAD_STATUSES:
-            continue
-        cand_title = str(item.get("title") or "")
-        cand = _tokens(cand_title)
-        if not cand:
-            continue
-        shared = probe & cand
-        score = len(shared) / min(len(probe), len(cand))
-        if score >= LEXICAL_HINT_THRESHOLD:
-            hits.append(
-                {
-                    "id": item.get("id", "?"),
-                    "title": cand_title,
-                    "status": item.get("status", "?"),
-                    "audience": _arc_item_audience(item),
-                    "published_at": (item.get("published_at") or item.get("created_at") or "")[:10],
-                    "score": round(score, 3),
-                }
-            )
-    hits.sort(key=lambda h: h["score"], reverse=True)
-    return hits[:LEXICAL_HINT_LIMIT]
-
-
-def find_k_coverage(k_id: str, feed: list[dict], audience: str | None) -> list[dict]:
-    """Live feed articles already carrying this K-id (optionally same audience).
-
-    Exact-match gate — no text classifier in the path. `audience=None` means
-    "any audience", which is the right default only for callers that genuinely
-    span audiences; writers should pass the audience they are about to write, or
-    a research sibling will look like coverage of a general piece.
-    """
-    want = _normalize_ref(k_id)
-    want_audience = str(audience or "").strip().lower() or None
-    hits: list[dict] = []
-    for item in feed:
-        if item.get("status") in DEAD_STATUSES:
-            continue
-        if want not in _refs_from_feed_item(item):
-            continue
-        item_audience = _arc_item_audience(item)
-        if want_audience and item_audience not in (want_audience, "uncategorized"):
-            continue
-        hits.append(
-            {
-                "id": item.get("id", "?"),
-                "title": item.get("title", "?"),
-                "status": item.get("status", "?"),
-                "audience": item_audience,
-                "published_at": (item.get("published_at") or item.get("created_at") or "")[:10],
-            }
-        )
-    return hits
+# NOTE (2026-07-14): `_tokens` / `find_lexical_hints` / `find_k_coverage` /
+# DEAD_STATUSES used to be DEFINED here. They are library-grade and the task
+# GENERATORS needed them too, so they now live in volpred.publisher.arc_dedup and
+# are re-exported here (same names, same behaviour) for this CLI and its tests.
+# One implementation, no drift.
+__all__ = [
+    "DEAD_STATUSES",
+    "LEXICAL_HINT_LIMIT",
+    "LEXICAL_HINT_THRESHOLD",
+    "_tokens",
+    "find_k_coverage",
+    "find_lexical_hints",
+    "main",
+]
 
 
 def main() -> int:

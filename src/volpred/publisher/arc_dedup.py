@@ -1140,3 +1140,233 @@ def _descriptive_dup(
     if specific_shared:
         return True
     return False
+
+
+# --- Shared dedup primitives (moved from scripts/check_arc_dedup.py) --------
+# These were library-grade all along but lived in a CLI script, so the task
+# GENERATORS (refill_reader_facing_pool / event_jobs) could not reuse them and
+# shipped duplicate topics instead. Kept here as the single implementation;
+# scripts/check_arc_dedup.py re-imports them.
+
+# Feed statuses that are not reader-visible; they cannot constitute coverage.
+DEAD_STATUSES = ("unpublished", "retracted")
+
+LEXICAL_HINT_THRESHOLD = 0.18
+LEXICAL_HINT_LIMIT = 5
+
+
+def tokenize(text: str) -> set[str]:
+    """Latin words + CJK character bigrams — a script-agnostic bag of tokens."""
+    toks: set[str] = set()
+    word = ""
+    cjk_run = ""
+
+    def flush_cjk() -> None:
+        for i in range(len(cjk_run) - 1):
+            toks.add(cjk_run[i : i + 2])
+
+    for ch in text.lower():
+        if ch.isascii() and ch.isalnum():
+            word += ch
+            flush_cjk()
+            cjk_run = ""
+        elif "一" <= ch <= "鿿":
+            cjk_run += ch
+            if len(word) >= 3:
+                toks.add(word)
+            word = ""
+        else:
+            if len(word) >= 3:
+                toks.add(word)
+            word = ""
+            flush_cjk()
+            cjk_run = ""
+    if len(word) >= 3:
+        toks.add(word)
+    flush_cjk()
+    return toks
+
+
+def find_lexical_hints(title: str, text: str, feed: list[dict]) -> list[dict]:
+    """Live articles whose titles share a lot of surface vocabulary with this one.
+
+    ADVISORY ONLY — never a block. 2026-07-14 calibration on the real incident
+    proved title-only overlap cannot discriminate: the incident title scored
+    0.25 against a true dup and 0.25 against an unrelated article. Use
+    `theme_saturation` for an actual verdict.
+    """
+    probe = tokenize(f"{title}\n{text[:400]}")
+    if not probe:
+        return []
+    hits: list[dict] = []
+    for item in feed:
+        if item.get("status") in DEAD_STATUSES:
+            continue
+        cand_title = str(item.get("title") or "")
+        cand = tokenize(cand_title)
+        if not cand:
+            continue
+        shared = probe & cand
+        score = len(shared) / min(len(probe), len(cand))
+        if score >= LEXICAL_HINT_THRESHOLD:
+            hits.append(
+                {
+                    "id": item.get("id", "?"),
+                    "title": cand_title,
+                    "status": item.get("status", "?"),
+                    "audience": _arc_item_audience(item),
+                    "published_at": (item.get("published_at") or item.get("created_at") or "")[:10],
+                    "score": round(score, 3),
+                }
+            )
+    hits.sort(key=lambda h: h["score"], reverse=True)
+    return hits[:LEXICAL_HINT_LIMIT]
+
+
+def find_k_coverage(k_id: str, feed: list[dict], audience: str | None) -> list[dict]:
+    """Live feed articles already carrying this K-id (optionally same audience).
+
+    Exact-match gate — no text classifier in the path.
+    """
+    want = _normalize_ref(k_id)
+    want_audience = str(audience or "").strip().lower() or None
+    hits: list[dict] = []
+    for item in feed:
+        if item.get("status") in DEAD_STATUSES:
+            continue
+        if want not in _refs_from_feed_item(item):
+            continue
+        item_audience = _arc_item_audience(item)
+        if want_audience and item_audience not in (want_audience, "uncategorized"):
+            continue
+        hits.append(
+            {
+                "id": item.get("id", "?"),
+                "title": item.get("title", "?"),
+                "status": item.get("status", "?"),
+                "audience": item_audience,
+                "published_at": (item.get("published_at") or item.get("created_at") or "")[:10],
+            }
+        )
+    return hits
+
+
+# --- Theme saturation ------------------------------------------------------
+# Why this exists (2026-07-13 trending incident, root-caused 2026-07-14):
+#
+# The arc gate is ENTITY-ANCHORED. Measured on the five same-story articles of
+# the incident (mile_f5f4cb43 / mile_8a5e80b0 / mile_0941e2f0 / mile_49616ac2 /
+# mile_622a2b73), `extract_entities` mapped ONE underlying subject (AI capex ->
+# tech/semi option skew) onto five near-disjoint entity sets -- {USD},
+# {NASDAQ,USD}, {SEMIS,VIX}, {US_EQUITY}, {USD} -- and every conclusion class
+# collapsed to "descriptive". Consequence, verified: those five articles do not
+# arc-match EACH OTHER (0 of 10 pairs). So the arc gate could never have caught
+# this family, at publish time or at generation time. Wiring find_arc_duplicates
+# into the generators was necessary but NOT sufficient.
+#
+# The signal that does survive is thematic vocabulary. Rather than pairwise
+# similarity (proved useless above), we ask a COUNT question:
+#
+#   "How many live articles in the window already crowd this topic's theme?"
+#
+# Distinctive terms only: a term appearing in >12% of the corpus is ambient
+# platform vocabulary (波動率 / 市場), not a theme marker, so it is dropped --
+# a crude IDF filter.
+#
+# Calibrated 2026-07-14 against the real 90-day live corpus (832 live articles),
+# measured through THIS function (not a reimplementation):
+#     incident (AI/tech skew) ............ 6-12  -> block  (varies with phrasing)
+#     TAIFEX night-session order flow .....   9  -> block  (5 prior pieces; real dup)
+#     FOMC event preview ..................   2  -> pass
+#     stablecoin depeg contagion .......... 0-2  -> pass
+#     EU carbon/ETS seasonality ...........   0  -> pass
+#
+# Threshold 5, not 6. The incident's LOWEST observed score across phrasings is 6,
+# so a threshold of 6 sits exactly on the boundary — a slightly reworded variant
+# scoring 5 would slip through, which is precisely the false negative that caused
+# the incident. 5 keeps a 2.5x margin over the highest legitimate topic (2) while
+# covering incident variants down to 5. The asymmetry is deliberate: at GENERATION
+# time a false positive costs one swapped topic; a false negative costs a duplicate
+# article. Regression-pinned in tests/test_topic_dedup_at_generation.py so corpus
+# drift cannot silently move it.
+
+THEME_SATURATION_THRESHOLD = 5
+THEME_TERM_COUNT = 6
+THEME_MIN_TERMS = 3
+THEME_MIN_SHARED = 3
+THEME_AMBIENT_DF_RATIO = 0.12
+# Floor for the ambient-vocabulary cutoff. Without it a SMALL corpus silently
+# disables the gate: at N=9 the ratio cutoff is 1.08, so every term appearing in
+# >=2 articles is discarded as "ambient", the theme comes out empty, and the gate
+# no-ops while reporting saturation 0 (indistinguishable from "clean"). A silent
+# no-op is the exact failure class this module exists to kill. On the production
+# corpus (N=832 live/90d) the ratio gives 99.8 and dominates the floor, so this
+# does not move the calibrated numbers -- it only makes small corpora behave.
+THEME_AMBIENT_DF_MIN = 3
+
+
+def _recent_live(feed: list[dict], days: int) -> list[dict]:
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    out = []
+    for item in feed:
+        if item.get("status") in DEAD_STATUSES:
+            continue
+        stamp = str(item.get("published_at") or item.get("created_at") or "")
+        if stamp and stamp < cutoff:
+            continue
+        out.append(item)
+    return out
+
+
+def theme_saturation(
+    title: str,
+    description: str,
+    feed: list[dict],
+    days: int = 90,
+) -> dict:
+    """Count live articles in the window that already crowd this topic's theme.
+
+    Returns {"theme_terms": [...], "saturation": int, "matches": [...]}.
+    `saturation` is the number of live articles sharing >= THEME_MIN_SHARED of
+    the topic's distinctive theme terms. A topic whose theme is too thin to
+    characterise (< THEME_MIN_TERMS distinctive terms) returns saturation 0 with
+    an empty theme -- "could not judge", NOT "clean"; callers must not read that
+    as a pass.
+    """
+    corpus = _recent_live(feed, days)
+    if not corpus:
+        return {"theme_terms": [], "saturation": 0, "matches": []}
+
+    docs: list[tuple[dict, set[str]]] = []
+    df: dict[str, int] = {}
+    for item in corpus:
+        tags = " ".join(str(t) for t in (item.get("tags") or []))
+        toks = tokenize(f"{item.get('title', '')} {tags}")
+        docs.append((item, toks))
+        for tok in toks:
+            df[tok] = df.get(tok, 0) + 1
+
+    ambient_cutoff = max(THEME_AMBIENT_DF_MIN, THEME_AMBIENT_DF_RATIO * len(corpus))
+    probe = tokenize(f"{title} {description}")
+    scored = [(t, df.get(t, 0)) for t in probe if 0 < df.get(t, 0) <= ambient_cutoff]
+    scored.sort(key=lambda x: (-x[1], x[0]))
+    theme = [t for t, _ in scored[:THEME_TERM_COUNT]]
+    if len(theme) < THEME_MIN_TERMS:
+        return {"theme_terms": theme, "saturation": 0, "matches": []}
+
+    theme_set = set(theme)
+    matches: list[dict] = []
+    for item, toks in docs:
+        shared = theme_set & toks
+        if len(shared) >= THEME_MIN_SHARED:
+            matches.append(
+                {
+                    "id": item.get("id", "?"),
+                    "title": str(item.get("title") or "")[:80],
+                    "status": item.get("status", "?"),
+                    "shared_terms": sorted(shared),
+                    "published_at": (item.get("published_at") or item.get("created_at") or "")[:10],
+                }
+            )
+    matches.sort(key=lambda m: len(m["shared_terms"]), reverse=True)
+    return {"theme_terms": theme, "saturation": len(matches), "matches": matches[:8]}

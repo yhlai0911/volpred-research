@@ -131,20 +131,31 @@ def test_refill_trending_skips_arc_duplicate(tmp_path, monkeypatch):
     monkeypatch.setattr(MODULE.subprocess, "run", lambda *a, **kw: _FakeProc())
     monkeypatch.setattr(MODULE, "_load_feed_for_dedup", lambda: [{"id": "mile_existing"}])
 
-    def _fake_is_dup(title, desc, feed):
-        if "duplicate" in title:
-            return {"id": "mile_existing"}
-        return None
+    # 2026-07-14: `_is_arc_duplicate` was replaced by `_screen_trending_topic`,
+    # which returns a TopicScreen (arc dup + K coverage + theme saturation) instead
+    # of a bare match dict, and blocks with an explicit verdict + reason.
+    from volpred.ops.topic_dedup import BLOCK_ARC_DUP, CLEAN, TopicScreen
 
-    monkeypatch.setattr(MODULE, "_is_arc_duplicate", _fake_is_dup)
+    def _fake_screen(title, desc, feed):
+        if "duplicate" in title:
+            return TopicScreen(
+                verdict=BLOCK_ARC_DUP,
+                blocked=True,
+                reason="narrative-arc duplicate of mile_existing",
+                matches=[{"id": "mile_existing"}],
+            )
+        return TopicScreen(verdict=CLEAN, blocked=False, reason="clean")
+
+    monkeypatch.setattr(MODULE, "_screen_trending_topic", _fake_screen)
 
     result = MODULE.refill_trending_candidates()
 
     assert result["ok"] is True
     assert result["added"] == ["dup_topic"] or result["added"] == ["fresh_topic"]
-    # exactly one fresh task added, dup must appear in skipped with arc_duplicate reason
-    skipped_dup = [s for s in result["skipped"] if s.get("reason") == "arc_duplicate"]
+    # dup must appear in skipped with the arc-dup verdict AND a human-readable reason
+    skipped_dup = [s for s in result["skipped"] if s.get("reason") == BLOCK_ARC_DUP]
     assert any(s.get("dup_of") == "mile_existing" for s in skipped_dup)
+    assert all(s.get("detail") for s in skipped_dup), "a skip with no detail is a silent skip"
     # the dup id must not appear in next_tasks.json
     data = json.loads(next_tasks.read_text(encoding="utf-8"))
     dup_ids = [t["id"] for t in data if "duplicate" in t.get("title", "")]
