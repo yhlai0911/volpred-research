@@ -62,6 +62,19 @@
    | GLD | 2 | 3 | −1 | RECEIVER |
    | 0050.TW | **0** | 2 | −2 | RECEIVER（純接收者）|
 
+   **角色標籤還扛過了多重檢定校正**（Codex review 提出）。K628b 對 20 個配對各取 5 個 lag 的
+   **最小 p 值**、且未做校正 = 100 次檢定。補做 Bonferroni：
+
+   | 校正 | 顯著連結數 | SPY | GLD | TLT | 0050.TW | USO |
+   |---|---|---|---|---|---|---|
+   | 未校正（K628b）| 13 | T | R | T | R | B |
+   | Bonferroni ×5（lag）| 11 | T | R | T | R | B |
+   | Bonferroni ×100（全部）| 8 | T | R | T | R | B |
+
+   → **角色標籤三種校正下完全相同**（存活）。但**連結「數量」不是** —
+   「13 條顯著連結」與「高波動 regime 網絡密度翻倍（11 vs 4）」都是**未校正**的數字，
+   **不可當成已校正的結果引用**。
+
 5. **Forbes-Rigobon 無傳染結論**（相關係數法，不經 VAR）、**滾動相關危機 vs 平靜**、
    **OOS spillover-informed 組合 NULL**（由 rolling Granger F-stat 驅動，不經 FEVD）— 全數不受影響。
 
@@ -92,6 +105,21 @@
 只有「超出 null 的部分」與「時序變化」站得住。
 
 ---
+
+## Code review
+
+**Codex（gpt-5.6-sol, ultra）primary-path review，2026-07-13 → VERDICT = PASS**。逐項確認：
+KPPS 公式合乎 Pesaran-Shin (1998)（分子分母軸向、`sigma_jj` 除在 column、h=0..H-1）、
+Diebold-Yilmaz 的 from/to 方向沒顛倒、排序的逆映射正確、AR null 的 `phi[0]` 與 `[::-1]` 對齊、
+無 lookahead、Granger 確實不經 FEVD。
+
+Codex 另提三個**寫作 caveat**（已納入本 README 與 results JSON 的 `caveats`）：
+
+1. **這是回顧式的樣本內網路描述，不是即時訊號**。log-vs-level 的決策與 null 的 AR 校準
+   都用了全樣本 — **不可包裝成可交易 / 即時可得的訊號**。
+2. **Granger 角色免疫於 FEVD 排序 ≠ 結構因果**。它仍是雙變量預測關係，
+   一樣受共同因子、遺漏變數、lag/spec 選擇影響。
+3. **多重檢定**（見上表）。
 
 ## 檔案
 

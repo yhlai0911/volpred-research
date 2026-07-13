@@ -2,7 +2,7 @@
   "experiment_id": "K628b_kpps_rerun",
   "parent_experiment": "K628b",
   "title": "K628b directional spillover re-estimated with a real KPPS generalized FEVD",
-  "timestamp": "2026-07-13T10:24:53.108878+00:00",
+  "timestamp": "2026-07-13T10:59:09.947495+00:00",
   "motivation": "k628b_vol_spillover.py documents its decomposition as 'generalized FEVD (Pesaran & Shin, 1998)' but calls statsmodels' results.fevd(), which is the ORTHOGONALISED (Cholesky) FEVD and depends on the order of the variables. K628b ordered SPY first -- the position that mechanically maximises estimated exogeneity -- and then reported SPY as the dominant net transmitter. This re-run replaces the decomposition and changes nothing else.",
   "data_source": "yfinance (daily close, auto_adjust; cached at experiments/k628b/data/prices.csv)",
   "data_period": "2010-01-01 to 2026-03-27",
@@ -22,7 +22,7 @@
     "rolling_window": 200,
     "rolling_step": 20,
     "rolling_max_lag": 3,
-    "n_null_reps": 200,
+    "n_null_reps": 1000,
     "null_burn_in": 1000,
     "n_orderings": 120,
     "orderings_exhaustive": true,
@@ -54,7 +54,7 @@
     "log_transform_applied": false
   },
   "cholesky_reproduction_check": {
-    "reference": "experiments/k628b/k628b_results.json",
+    "reference": "experiments/k628b/k628b_results_SUPERSEDED_cholesky_ordering.json",
     "stored_var_lag": 5,
     "rerun_var_lag": 5,
     "stored_n_obs": 4211,
@@ -87,15 +87,29 @@
         "from": 0.0
       }
     },
-    "tolerance_pp": 0.5,
+    "tolerance_pp": 0.01,
     "status": "PASS",
-    "note": "Data are re-downloaded from yfinance, so exact equality is not expected; the check is that the Cholesky arm lands on the stored numbers, which is what makes the GFEVD gap attributable to the decomposition."
+    "note": "The committed price cache is pinned. The Cholesky arm must land on the frozen pre-correction snapshot; otherwise the GFEVD gap cannot be attributed solely to the decomposition."
   },
   "full_sample": {
     "n_obs": 4190,
     "var_lag_aic": 5,
     "var_is_stable": true,
     "var_max_eigenvalue": 0.9764,
+    "residual_diagnostics": {
+      "portmanteau_whiteness_adjusted": {
+        "nlags": 10,
+        "test_statistic": 278.0106598314857,
+        "p_value": 1.1907631007728126e-13,
+        "passes_5pct": false
+      },
+      "normality": {
+        "test_statistic": 575926707.125632,
+        "p_value": 0.0,
+        "passes_5pct": false
+      },
+      "interpretation": "Diagnostics are reported, not used to select a favorable specification. The overlapping 22-day volatility proxy mechanically induces strong serial dependence, so connectedness is descriptive/predictive rather than structural."
+    },
     "axis_equivalence_check": {
       "k628b_indexing": "decomp[i][-1]",
       "canonical_indexing": "decomp[:, -1, :]",
@@ -794,6 +808,43 @@
     "reproduction_vs_stored": {
       "status": "PASS",
       "mismatches": {}
+    },
+    "multiple_testing_robustness": {
+      "note": "K628b takes min p over 5 lags for each of 20 pairs (= 100 tests) and applies no correction. The LINK COUNT is inflated by this; the ROLE LABELS are not.",
+      "by_correction": {
+        "uncorrected": {
+          "n_significant_links": 13,
+          "roles": {
+            "SPY": "TRANSMITTER",
+            "GLD": "RECEIVER",
+            "TLT": "TRANSMITTER",
+            "0050.TW": "RECEIVER",
+            "USO": "BALANCED"
+          }
+        },
+        "bonferroni_5_lags": {
+          "n_significant_links": 11,
+          "roles": {
+            "SPY": "TRANSMITTER",
+            "GLD": "RECEIVER",
+            "TLT": "TRANSMITTER",
+            "0050.TW": "RECEIVER",
+            "USO": "BALANCED"
+          }
+        },
+        "bonferroni_100_tests": {
+          "n_significant_links": 8,
+          "roles": {
+            "SPY": "TRANSMITTER",
+            "GLD": "RECEIVER",
+            "TLT": "TRANSMITTER",
+            "0050.TW": "RECEIVER",
+            "USO": "BALANCED"
+          }
+        }
+      },
+      "role_labels_identical_under_all_corrections": true,
+      "implication": "Role labels (SPY/TLT transmitters, GLD/0050.TW receivers, USO balanced) survive Bonferroni. The counts \"13 significant links\" and the regime comparison \"11 vs 4 links\" are UNCORRECTED and must not be quoted as if they were."
     }
   },
   "rolling_spillover": {
@@ -1842,65 +1893,65 @@
   "null_floor_rolling": {
     "n_obs": 200,
     "var_lag": 3,
-    "reps": 200,
+    "reps": 1000,
     "dgp": "independent AR(p) per asset (own persistence kept, TRUE cross-spillover = 0)",
     "tsi_cholesky": {
-      "mean": 11.73,
-      "median": 11.29,
-      "p95": 17.89,
-      "max": 21.96
+      "mean": 11.43,
+      "median": 11.05,
+      "p95": 17.13,
+      "max": 25.26
     },
     "tsi_gfevd": {
-      "mean": 12.66,
-      "median": 12.4,
-      "p95": 19.42,
-      "max": 25.57
+      "mean": 12.34,
+      "median": 11.94,
+      "p95": 18.34,
+      "max": 30.06
     },
     "cholesky": {
-      "mean": 11.73,
-      "median": 11.29,
-      "p95": 17.89,
-      "max": 21.96
+      "mean": 11.43,
+      "median": 11.05,
+      "p95": 17.13,
+      "max": 25.26
     },
     "gfevd": {
-      "mean": 12.66,
-      "median": 12.4,
-      "p95": 19.42,
-      "max": 25.57
+      "mean": 12.34,
+      "median": 11.94,
+      "p95": 18.34,
+      "max": 30.06
     },
     "observed_cholesky_tsi": 25.85,
     "observed_gfevd_tsi": 29.79,
-    "gfevd_excess_over_null_median_pp": 17.39,
-    "gfevd_empirical_p_value": 0.0,
+    "gfevd_excess_over_null_median_pp": 17.85,
+    "gfevd_empirical_p_value": 0.001,
     "cholesky_empirical_p_value": 0.0
   },
   "null_floor_full_sample": {
     "n_obs": 4190,
     "var_lag": 5,
-    "reps": 200,
+    "reps": 1000,
     "dgp": "independent AR(p) per asset (own persistence kept, TRUE cross-spillover = 0)",
     "tsi_cholesky": {
       "mean": 0.4,
       "median": 0.39,
-      "p95": 0.59,
+      "p95": 0.61,
       "max": 0.88
     },
     "tsi_gfevd": {
-      "mean": 0.44,
+      "mean": 0.45,
       "median": 0.43,
-      "p95": 0.67,
+      "p95": 0.68,
       "max": 1.04
     },
     "cholesky": {
       "mean": 0.4,
       "median": 0.39,
-      "p95": 0.59,
+      "p95": 0.61,
       "max": 0.88
     },
     "gfevd": {
-      "mean": 0.44,
+      "mean": 0.45,
       "median": 0.43,
-      "p95": 0.67,
+      "p95": 0.68,
       "max": 1.04
     },
     "observed_cholesky_tsi": 11.63,
@@ -1911,52 +1962,52 @@
     "net_vs_null": {
       "SPY": {
         "observed_net_gfevd_pp": 14.58,
-        "null_net_mean": 0.08,
-        "null_net_sd": 0.33,
-        "null_net_p05": -0.5,
-        "null_net_p95": 0.59,
-        "null_net_abs_max": 1.02,
+        "null_net_mean": 0.07,
+        "null_net_sd": 0.37,
+        "null_net_p05": -0.58,
+        "null_net_p95": 0.71,
+        "null_net_abs_max": 1.5,
         "two_sided_empirical_p": 0.0,
         "distinguishable_from_no_spillover_at_5pct": true
       },
       "GLD": {
         "observed_net_gfevd_pp": -3.69,
-        "null_net_mean": -0.01,
-        "null_net_sd": 0.43,
-        "null_net_p05": -0.66,
-        "null_net_p95": 0.66,
-        "null_net_abs_max": 1.38,
+        "null_net_mean": -0.02,
+        "null_net_sd": 0.4,
+        "null_net_p05": -0.65,
+        "null_net_p95": 0.62,
+        "null_net_abs_max": 1.62,
         "two_sided_empirical_p": 0.0,
         "distinguishable_from_no_spillover_at_5pct": true
       },
       "TLT": {
         "observed_net_gfevd_pp": -9.12,
         "null_net_mean": 0.02,
-        "null_net_sd": 0.38,
-        "null_net_p05": -0.54,
+        "null_net_sd": 0.39,
+        "null_net_p05": -0.58,
         "null_net_p95": 0.61,
-        "null_net_abs_max": 1.43,
+        "null_net_abs_max": 1.88,
         "two_sided_empirical_p": 0.0,
         "distinguishable_from_no_spillover_at_5pct": true
       },
       "0050.TW": {
         "observed_net_gfevd_pp": -2.75,
-        "null_net_mean": -0.09,
-        "null_net_sd": 0.42,
-        "null_net_p05": -0.8,
-        "null_net_p95": 0.58,
-        "null_net_abs_max": 1.32,
+        "null_net_mean": -0.06,
+        "null_net_sd": 0.39,
+        "null_net_p05": -0.72,
+        "null_net_p95": 0.57,
+        "null_net_abs_max": 1.64,
         "two_sided_empirical_p": 0.0,
         "distinguishable_from_no_spillover_at_5pct": true
       },
       "USO": {
         "observed_net_gfevd_pp": 0.98,
-        "null_net_mean": 0.0,
-        "null_net_sd": 0.42,
-        "null_net_p05": -0.69,
-        "null_net_p95": 0.61,
-        "null_net_abs_max": 1.46,
-        "two_sided_empirical_p": 0.035,
+        "null_net_mean": -0.0,
+        "null_net_sd": 0.43,
+        "null_net_p05": -0.71,
+        "null_net_p95": 0.7,
+        "null_net_abs_max": 1.85,
+        "two_sided_empirical_p": 0.032,
         "distinguishable_from_no_spillover_at_5pct": true
       }
     }
@@ -1989,52 +2040,52 @@
       "net_vs_no_spillover_null": {
         "SPY": {
           "observed_net_gfevd_pp": 14.58,
-          "null_net_mean": 0.08,
-          "null_net_sd": 0.33,
-          "null_net_p05": -0.5,
-          "null_net_p95": 0.59,
-          "null_net_abs_max": 1.02,
+          "null_net_mean": 0.07,
+          "null_net_sd": 0.37,
+          "null_net_p05": -0.58,
+          "null_net_p95": 0.71,
+          "null_net_abs_max": 1.5,
           "two_sided_empirical_p": 0.0,
           "distinguishable_from_no_spillover_at_5pct": true
         },
         "GLD": {
           "observed_net_gfevd_pp": -3.69,
-          "null_net_mean": -0.01,
-          "null_net_sd": 0.43,
-          "null_net_p05": -0.66,
-          "null_net_p95": 0.66,
-          "null_net_abs_max": 1.38,
+          "null_net_mean": -0.02,
+          "null_net_sd": 0.4,
+          "null_net_p05": -0.65,
+          "null_net_p95": 0.62,
+          "null_net_abs_max": 1.62,
           "two_sided_empirical_p": 0.0,
           "distinguishable_from_no_spillover_at_5pct": true
         },
         "TLT": {
           "observed_net_gfevd_pp": -9.12,
           "null_net_mean": 0.02,
-          "null_net_sd": 0.38,
-          "null_net_p05": -0.54,
+          "null_net_sd": 0.39,
+          "null_net_p05": -0.58,
           "null_net_p95": 0.61,
-          "null_net_abs_max": 1.43,
+          "null_net_abs_max": 1.88,
           "two_sided_empirical_p": 0.0,
           "distinguishable_from_no_spillover_at_5pct": true
         },
         "0050.TW": {
           "observed_net_gfevd_pp": -2.75,
-          "null_net_mean": -0.09,
-          "null_net_sd": 0.42,
-          "null_net_p05": -0.8,
-          "null_net_p95": 0.58,
-          "null_net_abs_max": 1.32,
+          "null_net_mean": -0.06,
+          "null_net_sd": 0.39,
+          "null_net_p05": -0.72,
+          "null_net_p95": 0.57,
+          "null_net_abs_max": 1.64,
           "two_sided_empirical_p": 0.0,
           "distinguishable_from_no_spillover_at_5pct": true
         },
         "USO": {
           "observed_net_gfevd_pp": 0.98,
-          "null_net_mean": 0.0,
-          "null_net_sd": 0.42,
-          "null_net_p05": -0.69,
-          "null_net_p95": 0.61,
-          "null_net_abs_max": 1.46,
-          "two_sided_empirical_p": 0.035,
+          "null_net_mean": -0.0,
+          "null_net_sd": 0.43,
+          "null_net_p05": -0.71,
+          "null_net_p95": 0.7,
+          "null_net_abs_max": 1.85,
+          "two_sided_empirical_p": 0.032,
           "distinguishable_from_no_spillover_at_5pct": true
         }
       }
@@ -2081,9 +2132,9 @@
       "full_sample_cholesky_tsi": 11.63,
       "rolling_gfevd_tsi_mean": 29.79,
       "rolling_cholesky_tsi_mean": 25.85,
-      "rolling_null_floor_gfevd_median": 12.4,
-      "rolling_gfevd_excess_over_null_pp": 17.39,
-      "rolling_gfevd_empirical_p": 0.0
+      "rolling_null_floor_gfevd_median": 11.94,
+      "rolling_gfevd_excess_over_null_pp": 17.85,
+      "rolling_gfevd_empirical_p": 0.001
     },
     "unaffected_by_this_defect": [
       "Granger causality network + out-in degree roles (pairwise, no FEVD)",
@@ -2091,8 +2142,179 @@
       "Rolling correlation crisis-vs-calm comparison",
       "OOS spillover-informed portfolio (driven by rolling Granger F-stat, not FEVD)",
       "Descriptive statistics, ADF, ARCH-LM"
-    ]
+    ],
+    "vacuous_claim_flagged": "K628b's article claims SPY's NET '+43.68% is far above the other four combined'. NET sums to zero by construction (every unit transmitted is a unit received), so whenever SPY is the ONLY net transmitter its NET\u5fc5\u7136 equals the sum of the other four's magnitudes. The statement is an identity, not evidence, under EITHER decomposition. It should not be restated in the corrected text."
   },
+  "corrections_required": {
+    "knowledge_json_K628b": {
+      "note": "PROPOSAL ONLY. knowledge.json is written by the main thread (K1259 rule).",
+      "current_title": "K628b: \u2605\u2605 Cross-Asset Vol Spillover Network \u2014 SPY dominant transmitter, 0050.TW pure receiver",
+      "proposed_title": "K628b: \u2605\u2605 Cross-Asset Vol Spillover Network \u2014 SPY is the largest net transmitter, but the +43.7% magnitude was a Cholesky ordering artifact (corrected to +14.6pp by KPPS re-run)",
+      "field_level_diff": [
+        {
+          "claim": "SPY \u662f\u4e3b\u8981\u50b3\u64ad\u8005\uff08net +43.7%\uff09",
+          "status": "MAGNITUDE WITHDRAWN, DIRECTION SURVIVES",
+          "replace_with": "SPY \u662f\u6700\u5927\u6de8\u50b3\u51fa\u8005\uff08KPPS GFEVD net +14.6pp\uff09\u3002\u539f\u5831\u7684 +43.7% \u4f86\u81ea Cholesky FEVD \u4e14 SPY \u88ab\u6392\u5728\u7b2c\u4e00\u4f4d\u2014\u2014\u5168 120 \u7a2e\u6392\u5e8f\u4e2d\u8a72\u503c\u57df\u70ba -16.1 \u5230 +43.7pp\uff0cK628b \u53d6\u5230\u7684\u6b63\u662f\u6700\u5927\u503c\u3002"
+        },
+        {
+          "claim": "0050.TW \u662f\u7d14\u63a5\u6536\u8005\uff08OUT=0, IN=2\uff09",
+          "status": "SURVIVES",
+          "reason": "OUT=0/IN=2 \u662f Granger out-in degree\uff0c\u4e0d\u7d93 FEVD\uff0c\u8207\u6392\u5e8f\u7121\u95dc\uff1b\u672c\u6b21\u91cd\u8dd1\u9010\u9805\u91cd\u73fe\uff08ALL MATCH\uff09\u3002"
+        },
+        {
+          "claim": "\u9ad8\u6ce2\u52d5 regime \u7db2\u7d61\u5bc6\u5ea6\u7ffb\u500d\uff0811 vs 4 Granger links\uff09",
+          "status": "SURVIVES",
+          "reason": "Granger-based, no FEVD."
+        },
+        {
+          "claim": "Forbes-Rigobon\uff1a\u7121\u50b3\u67d3\uff08p>0.20\uff09\uff0c\u53ea\u662f\u76f8\u4e92\u4f9d\u5b58",
+          "status": "SURVIVES",
+          "reason": "\u76f8\u95dc\u4fc2\u6578\u6cd5\uff0c\u4e0d\u7d93 VAR/FEVD\u3002"
+        },
+        {
+          "claim": "Total spillover \u5747\u503c 25.8%\uff089.5%-51.6%\uff09",
+          "status": "DECOMPOSITION-SPECIFIC \u2014 RESTATE",
+          "replace_with": "\u8a72\u5340\u9593\u662f Cholesky TSI\u3002order-invariant \u7684 GFEVD \u4e0b rolling TSI \u5747\u503c 29.8%\uff089.9-54.2%\uff09\u3002\u5169\u8005\u6642\u5e8f\u9ad8\u5ea6\u540c\u6b65 (Spearman 0.917)\uff0c\u4f46 200 \u65e5\u8996\u7a97\u7684\u7121\u50b3\u67d3 null floor \u4e2d\u4f4d\u6578\u5df2\u9054 11.9%\uff0c\u6545 TSI \u7684\u300e\u6c34\u6e96\u300f\u4e0d\u53ef\u55ae\u7368\u89e3\u8b80\uff1b\u8d85\u51fa null \u7684\u90e8\u5206\u4ecd\u986f\u8457 (empirical p=0.001)\u3002"
+        },
+        {
+          "claim": "Spillover-informed \u914d\u7f6e NULL\uff08Sharpe 1.15 vs equal weight 1.21\uff09",
+          "status": "SURVIVES",
+          "reason": "\u7531 rolling Granger F-stat \u9a45\u52d5\uff0c\u4e0d\u7d93 FEVD\u3002"
+        },
+        {
+          "claim": "\u8ad6\u6587\u5f15\u7528\u50f9\u503c\uff1a\u652f\u6301 Taiwan VT \u8ad6\u6587\u7684 'US lead-lag' narrative",
+          "status": "DOWNGRADE",
+          "replace_with": "\u53ef\u652f\u6301\u300c\u7f8e\u80a1\u662f\u6700\u5927\u6de8\u50b3\u51fa\u8005\u300d\u7684\u65b9\u5411\u6027\u6558\u4e8b\uff0c\u4f46\u4e0d\u53ef\u5f15\u7528 +43.7% \u9019\u500b\u91cf\u7d1a\uff0c\u4e5f\u4e0d\u53ef\u5ba3\u7a31\u300cSPY \u50b3\u51fa\u91cf\u662f\u63a5\u6536\u91cf\u7684 10 \u500d\u300d\u3002"
+        }
+      ],
+      "must_add_caveat": "FEVD \u65b9\u5411\u6027\u6578\u5b57\u5df2\u65bc 2026-07-13 \u7531 KPPS GFEVD \u91cd\u4f30\uff08experiments/k628b/k628b_kpps_rerun_results.json\uff09\u3002\u539f Cholesky \u6578\u5b57\u4fdd\u7559\u65bc k628b_results.json \u7684 _correction_2026_07_13 \u5340\u584a\uff0c\u50c5\u4f9b\u6b77\u53f2\u5c0d\u7167\uff0c\u4e0d\u53ef\u518d\u5f15\u7528\u3002"
+    },
+    "article_mile_55758994": {
+      "title": "\u7f8e\u80a1\u6253\u5674\u568f\uff0c\u53f0\u80a1\u771f\u7684\u611f\u5192\uff1f16 \u5e74\u6578\u64da\u62c6\u89e3\u8de8\u5e02\u5834\u6ce2\u52d5\u50b3\u67d3\u93c8",
+      "status_in_feed": "archived (\u4f46 live \u5c0e\u8b80 mile_1597b341 \u7684\u300c\u672c\u671f\u7cbe\u9078\u300d\u4ecd\u9023\u5230\u5b83)",
+      "severity": "HIGH \u2014 \u9019\u7bc7\u662f FEVD \u65b9\u5411\u6027\u6578\u5b57\u7684\u4e3b\u8981\u5c0d\u5916\u8f09\u9ad4\uff0c\u6574\u500b\u300c\u7d50\u679c\u4e00\u300d\u6bb5\u843d\u5efa\u7acb\u5728\u6392\u5e8f\u5047\u8c61\u4e0a",
+      "sentences_to_correct": [
+        {
+          "locator": "\u65b9\u6cd5\u6bb5\uff1a\u300c\u7528 Diebold-Yilmaz\uff082012\uff09\u7684\u65b9\u5411\u6027 spillover \u5206\u89e3\u300d",
+          "problem": "\u672a\u63ed\u9732\u7528\u7684\u662f Cholesky \u6b63\u4ea4\u5316 FEVD \u4e14\u65b9\u5411\u6027\u4f9d\u8cf4\u8b8a\u6578\u6392\u5e8f\uff1bDY(2012) \u539f\u6587\u7528\u7684\u662f KPPS generalized FEVD\uff0c\u672c\u5be6\u9a57\u7576\u6642\u4e26\u6c92\u6709\u3002",
+          "fix": "\u660e\u8b1b\u539f\u7248\u7528 Cholesky FEVD\uff08order-dependent\uff09\uff0c\u5df2\u6539\u7528 KPPS GFEVD \u91cd\u4f30\u3002"
+        },
+        {
+          "locator": "\u7d50\u679c\u4e00\u8868\u683c\uff1aSPY 4.60 / 48.28 / **+43.68** / \u6de8\u767c\u9001\u8005",
+          "problem": "\u6574\u5217\u90fd\u662f\u6392\u5e8f\u5047\u8c61\uff08SPY \u6392\u7b2c\u4e00 \u2192 NET \u53d6\u5230 120 \u7a2e\u6392\u5e8f\u4e2d\u7684\u6700\u5927\u503c\uff09\u3002",
+          "fix": "\u6539\u70ba KPPS GFEVD\uff1aSPY FROM 25.51 / TO 40.08 / NET +14.58pp\u3002"
+        },
+        {
+          "locator": "\u7d50\u679c\u4e00\u8868\u683c\uff1aTLT -24.92\uff08\u6700\u5927\u6de8\u63a5\u6536\u8005\uff09",
+          "problem": "\u65b9\u5411\u5c0d\uff0c\u91cf\u7d1a\u932f\u3002",
+          "fix": "\u6539\u70ba GFEVD NET -9.12pp\uff08\u4ecd\u662f\u6700\u5927\u6de8\u63a5\u6536\u8005\uff09\u3002"
+        },
+        {
+          "locator": "\u7d50\u679c\u4e00\u8868\u683c\uff1aUSO -12.37\uff08\u6de8\u63a5\u6536\u8005\uff09",
+          "problem": "SIGN FLIP \u2014 \u9019\u662f\u552f\u4e00\u89d2\u8272\u6a19\u7c64\u7ffb\u6389\u7684\u8cc7\u7522\u3002",
+          "fix": "\u6539\u70ba GFEVD NET +0.98pp \u2192 \u89d2\u8272\u7531\u300c\u6de8\u63a5\u6536\u8005\u300d\u6539\u70ba\u300c\u5e73\u8861\u300d\uff08|NET| < 5pp \u9580\u6abb\uff09\u3002\u300c\u539f\u6cb9\u662f\u6ce2\u52d5\u63a5\u6536\u8005\u300d\u9019\u53e5\u8a71\u5fc5\u9808\u522a\u6389\u3002"
+        },
+        {
+          "locator": "\u7d50\u679c\u4e00\u8868\u683c\uff1a0050.TW -1.75\uff08\u6de8\u63a5\u6536\u8005\uff0c\u63a5\u6536\u91cf\u4e0d\u5927\uff09",
+          "problem": "\u91cf\u7d1a\u5fae\u8abf\uff0c\u65b9\u5411\u8207\u300c\u4e0d\u662f\u4e3b\u8981\u7bc0\u9ede\u300d\u7684\u7d50\u8ad6\u4e0d\u8b8a\u3002",
+          "fix": "\u6539\u70ba GFEVD NET -2.75pp\uff1b\u300c\u63a5\u6536\u8005\u4f46\u4e0d\u662f\u4e3b\u8981\u7bc0\u9ede\u300d\u7684\u7d50\u8ad6\u7dad\u6301\u3002"
+        },
+        {
+          "locator": "\u300cSPY \u7684 net spillover +43.68% \u5728\u4e94\u500b\u8cc7\u7522\u4e2d\u9060\u9ad8\u65bc\u5176\u4ed6\u56db\u500b\u52a0\u7e3d\u300d",
+          "problem": "\u96d9\u91cd\u932f\u8aa4\uff1a(1) 43.68 \u662f\u6392\u5e8f\u5047\u8c61\uff1b(2) NET \u4f9d\u5b9a\u7fa9\u52a0\u7e3d\u70ba\u96f6\uff0c\u53ea\u8981 SPY \u662f\u552f\u4e00\u6de8\u50b3\u51fa\u8005\uff0c\u300c\u9ad8\u65bc\u5176\u4ed6\u56db\u500b\u52a0\u7e3d\u300d\u5c31\u662f\u6046\u7b49\u5f0f\uff0c\u672c\u4f86\u5c31\u4e0d\u662f\u8b49\u64da\u3002",
+          "fix": "\u6574\u53e5\u522a\u9664\uff0c\u4e0d\u8981\u7528\u65b0\u6578\u5b57\u91cd\u5beb\u6210\u540c\u6a23\u7684\u53e5\u578b\u3002"
+        },
+        {
+          "locator": "\u300cSPY \u6ce2\u52d5\u50b3\u51fa\u7684\u91cf\uff0848.28%\uff09\u662f\u5176\u63a5\u6536\u7684\uff084.60%\uff09\u7684 10 \u500d\u4ee5\u4e0a\uff0c\u5728\u4e94\u500b\u4e3b\u8981\u8cc7\u7522\u985e\u5225\u4e2d\u5730\u4f4d\u6c92\u6709\u4efb\u4f55\u8cc7\u7522\u63a5\u8fd1\u5b83\u300d",
+          "problem": "10 \u500d\u6bd4\u503c\u5b8c\u5168\u662f\u6392\u5e8f\u7522\u7269\uff08SPY \u6392\u7b2c\u4e00 \u2192 \u63a5\u6536\u91cf\u88ab\u58d3\u5230\u6700\u4f4e\uff09\u3002",
+          "fix": "\u6539\u70ba GFEVD\uff1aTO 40.1% vs FROM 25.5%\uff08\u6bd4\u503c\u7d04 1.6 \u500d\uff0c\u4e0d\u662f 10 \u500d\uff09\u3002\u300c\u6c92\u6709\u4efb\u4f55\u8cc7\u7522\u63a5\u8fd1\u5b83\u300d\u9700\u964d\u7d1a\uff1aSPY \u5728 120 \u7a2e\u6392\u5e8f\u4e2d\u53ea\u6709 33% \u662f\u6700\u5927\u50b3\u51fa\u8005\uff0c\u4f46\u5728 order-free \u7684 GFEVD \u4e0b\u5b83\u78ba\u5be6\u662f\u6700\u5927\u7684\u90a3\u4e00\u500b\u3002"
+        },
+        {
+          "locator": "\u300cTLT \u7684 net -24.92% \u78ba\u8a8d\u4e86 flight-to-quality \u7684\u65b9\u5411\u6027\u300d",
+          "problem": "\u65b9\u5411\u7ad9\u5f97\u4f4f\uff0c\u6578\u5b57\u932f\u3002",
+          "fix": "\u6539\u70ba -9.12pp\uff1bflight-to-quality \u7684\u65b9\u5411\u6027\u7d50\u8ad6\u4fdd\u7559\u3002"
+        },
+        {
+          "locator": "\u300c\u77e5\u9053 SPY \u662f\u4e3b\u8981\u767c\u9001\u8005\uff0cTLT \u662f\u4e3b\u8981\u63a5\u6536\u8005\u300d\uff08OOS \u6bb5\u843d\uff09",
+          "problem": "\u6b64\u53e5\u672c\u8eab\u5728 GFEVD \u4e0b\u4ecd\u6210\u7acb\uff08\u65b9\u5411\u4e0d\u8b8a\uff09\uff0c\u4f46\u5b83\u6240\u4f9d\u9644\u7684\u91cf\u7d1a\u4f86\u81ea\u820a\u8868\u3002",
+          "fix": "\u53e5\u5b50\u53ef\u7559\uff0c\u4f46\u5f15\u7528\u7684\u8868\u683c\u5fc5\u9808\u63db\u6210 GFEVD \u7248\u672c\u3002"
+        },
+        {
+          "locator": "\u300cTotal spillover \u5747\u503c 25.8%\u300d\u985e\u6558\u8ff0\uff08\u82e5\u6587\u4e2d\u6709\uff09",
+          "problem": "Cholesky-specific\uff0c\u4e14 200 \u65e5\u8996\u7a97\u7684\u7121\u50b3\u67d3 null floor \u5df2\u9054 12.4%\u3002",
+          "fix": "\u6539\u70ba GFEVD 29.8%\uff0c\u4e26\u63ed\u9732 null floor 11.9%\u2014\u2014TSI \u7684\u7d55\u5c0d\u6c34\u6e96\u7d04\u6709\u4e00\u534a\u662f\u6709\u9650\u6a23\u672c\u504f\u8aa4\u3002"
+        }
+      ],
+      "recommended_action": "\u6587\u7ae0\u5df2 archived\u3002\u5efa\u8b70 (a) \u5728\u6587\u9996\u52a0\u66f4\u6b63\u8072\u660e\uff08\u6bd4\u7167 mile_1597b341 2026-07-11 \u7684 K865 \u66f4\u6b63\u683c\u5f0f\uff09\uff0c(b) \u63db\u6389\u7d50\u679c\u4e00\u6574\u5f35\u8868\uff0c(c) \u82e5\u4e0d\u91cd\u5beb\u5247\u5f9e mile_1597b341\u300c\u672c\u671f\u7cbe\u9078\u300d\u79fb\u9664\u9023\u7d50\uff0c\u907f\u514d live \u5c0e\u8b80\u628a\u8b80\u8005\u5c0e\u5411\u672a\u66f4\u6b63\u7684\u9801\u9762\u3002"
+    },
+    "article_mile_1597b341": {
+      "title": "\u5206\u6563\u6295\u8cc7\u7684\u5e7b\u89ba\uff1a\u4f60\u4ee5\u70ba\u7121\u95dc\u7684\u8cc7\u7522\uff0c\u5176\u5be6\u5077\u5077\u727d\u52d5\u8457\u4f60\u6574\u500b\u7d44\u5408",
+      "status_in_feed": "published (LIVE)",
+      "severity": "LOW-MEDIUM \u2014 \u9019\u7bc7\u5f15\u7528 K628b \u7684\u6b63\u6587\u6bb5\u843d\uff08\u7b2c\u4e8c\u5c64\uff09\u53ea\u7528 Granger + Forbes-Rigobon\uff0c\u5169\u8005\u90fd\u4e0d\u53d7 FEVD \u6392\u5e8f\u5f71\u97ff\uff0c\u56e0\u6b64\u6b63\u6587\u8ad6\u8ff0\u672c\u8eab\u7ad9\u5f97\u4f4f\u3002",
+      "sentences_to_correct": [
+        {
+          "locator": "\u7b2c\u4e8c\u5c64\uff1a\u300cGranger \u56e0\u679c\u6aa2\u5b9a\u7684\u986f\u8457\u6c34\u6e96\u5728\u9ad8\u6ce2\u52d5\u671f\u9593\u9054\u5230\u6975\u9ad8\u2026\u2026\u7528 Forbes-Rigobon \u6821\u6b63\u5f8c\uff0c\u76f8\u95dc\u4fc2\u6578\u53ea\u5269 0.063\u300d",
+          "problem": "NONE \u2014 Granger \u8207 FR \u90fd\u4e0d\u7d93 FEVD\uff0c\u672c\u6b21\u91cd\u8dd1\u9010\u9805\u91cd\u73fe\u3002",
+          "fix": "\u4e0d\u9700\u66f4\u52d5\u3002"
+        },
+        {
+          "locator": "\u300c\u672c\u671f\u7cbe\u9078\u300d\u6e05\u55ae\u4e2d\u9023\u5f80 mile_55758994 \u7684\u90a3\u4e00\u5217",
+          "problem": "\u8a72\u9023\u7d50\u6307\u5411\u7684\u6587\u7ae0\u6574\u500b\u300c\u7d50\u679c\u4e00\u300d\u662f\u6392\u5e8f\u5047\u8c61\u3002live \u5c0e\u8b80\u628a\u8b80\u8005\u5c0e\u5411\u672a\u66f4\u6b63\u7684\u65b9\u5411\u6027\u6578\u5b57\u3002",
+          "fix": "\u5f85 mile_55758994 \u66f4\u6b63\u5f8c\u624d\u4fdd\u7559\u9023\u7d50\uff1b\u5426\u5247\u79fb\u9664\u8a72\u5217\u3002"
+        },
+        {
+          "locator": "\u6587\u9996 2026-07-11 \u66f4\u6b63\u8072\u660e\uff1a\u300c\u672c\u6587\u5176\u9918\u5404\u5c64\uff08\u2026\u2026K628b \u7f8e\u53f0\u50b3\u67d3\u2026\u2026\uff09\u4e0d\u53d7\u5f71\u97ff\u300d",
+          "problem": "\u9019\u53e5\u8a71\u5728\u300c\u672c\u6587\u5f15\u7528 K628b \u7684\u90e8\u5206\u300d\u5c64\u6b21\u4ecd\u6b63\u78ba\uff0c\u4f46\u6703\u8b93\u8b80\u8005\u4ee5\u70ba K628b \u6574\u500b\u5be6\u9a57\u6c92\u554f\u984c\u3002K628b \u7684 FEVD \u65b9\u5411\u6027\u5176\u5be6\u8207 K865 \u662f\u540c\u4e00\u500b class \u7684\u7f3a\u9677\u3002",
+          "fix": "\u88dc\u4e00\u53e5\uff1aK628b \u7684 Granger / Forbes-Rigobon \u7d50\u8ad6\uff08\u672c\u6587\u5f15\u7528\u7684\u90e8\u5206\uff09\u4e0d\u53d7\u5f71\u97ff\uff1b\u4f46 K628b \u53e6\u6709\u4e00\u7d44 FEVD \u65b9\u5411\u6027\u6578\u5b57\uff08\u672c\u6587\u672a\u5f15\u7528\uff09\u5df2\u65bc 2026-07-13 \u56e0\u540c\u985e\u6392\u5e8f\u554f\u984c\u66f4\u6b63\uff0c\u8a73\u898b\u8a72\u5be6\u9a57\u3002"
+        },
+        {
+          "locator": "\u5716\u8868 caption\u300c\u8cc7\u6599\u4f86\u6e90\uff1a\u5be6\u9a57 K1445 / K628b / K1412 / K819 / K1011\u300d",
+          "problem": "\u5716\u662f\u76f8\u95dc\u4fc2\u6578\uff0c\u4e0d\u662f FEVD\u3002\u4e0d\u53d7\u5f71\u97ff\u3002",
+          "fix": "\u4e0d\u9700\u66f4\u52d5\u3002"
+        }
+      ],
+      "recommended_action": "\u6b63\u6587\u8ad6\u8ff0\u4e0d\u9700\u63a8\u7ffb\u3002\u5fc5\u8981\u52d5\u4f5c\u662f (a) \u64f4\u5145\u6587\u9996\u66f4\u6b63\u8072\u660e\u4e00\u53e5\u8a71\uff0c(b) \u8655\u7406\u300c\u672c\u671f\u7cbe\u9078\u300d\u6307\u5411 mile_55758994 \u7684\u9023\u7d50\u3002"
+    },
+    "article_mile_530a28bc": {
+      "title": "20\u5e74\u6578\u64da\u89e3\u8b80\u53f0\u7063\u7d93\u6fdf\u8108\u7d61\uff08unpublished\uff09",
+      "status_in_feed": "unpublished",
+      "severity": "LOW \u2014 \u5c1a\u672a\u5c0d\u5916\uff1b\u767c\u4f48\u524d\u5fc5\u9808\u5148\u5957\u7528\u4e0a\u8ff0\u66f4\u6b63\u3002",
+      "recommended_action": "\u82e5\u5f15\u7528 K628b \u7684 FEVD \u65b9\u5411\u6027\u6578\u5b57\uff0c\u767c\u4f48\u524d\u63db\u6210 GFEVD \u7248\u672c\u3002"
+    },
+    "baseline_removal": {
+      "file": "storage/ops/fevd_ordering_baseline.json",
+      "site": "experiments/k628b/k628b_vol_spillover.py",
+      "precondition": "k628b_vol_spillover.py \u5fc5\u9808\u771f\u7684\u6539\u7528\u624b\u523b KPPS\uff08sigma_u + ma_rep\uff09\uff0caudit_fevd_ordering.py \u624d\u6703\u628a\u5b83\u5f9e VIOLATION/MISLABELED \u6539\u5224 OK_GFEVD\u3002\u5075\u6e2c\u5668\u300c\u4e0d\u4fe1\u8a3b\u89e3\uff0c\u53ea\u4fe1\u547c\u53eb\u300d\u2014\u2014\u53ea\u6539 docstring \u4e0d\u6703\u904e\u3002"
+    }
+  },
+  "reviewer": "Codex (gpt-5.6-sol, ultra) \u2014 primary-path code review, 2026-07-13",
+  "review_verdict": "PASS",
+  "review_checks_passed": [
+    "KPPS GFEVD formula matches Pesaran-Shin (1998): num[i,j], den[i], sigma_jj on axis 1, h=0..H-1",
+    "Diebold-Yilmaz orientation: row ex-diag = FROM/received, col ex-diag = TO/transmitted, NET = TO-FROM",
+    "Permutation inverse-mapping canonical (i,j) <- permuted (pos[i], pos[j]) is correct",
+    "AR null recursion: phi[0] is the lag-1 coefficient and y[t-p:t][::-1] aligns with it",
+    "No lookahead (in-sample network description; rolling windows stamped at w.index[-1])",
+    "Granger out-in-degree roles do not touch the FEVD / Cholesky / VAR ordering"
+  ],
+  "caveats": [
+    {
+      "raised_by": "Codex review",
+      "caveat": "This is a RETROSPECTIVE IN-SAMPLE network description, not a real-time signal. The log-vs-level decision and the AR calibration of the null both use the full sample. Nothing here may be packaged as a tradeable or real-time-available signal."
+    },
+    {
+      "raised_by": "Codex review",
+      "caveat": "Granger role labels being immune to the FEVD ORDERING problem does not make them structural causality. They remain bivariate predictive relations, still exposed to common factors, omitted variables and lag/specification choices."
+    },
+    {
+      "raised_by": "Codex review",
+      "caveat": "Granger p-values are the MINIMUM over 5 lags for each of 20 pairs (100 tests, uncorrected). The role labels survive Bonferroni (see granger_causality.multiple_testing_robustness) but the LINK COUNTS do not: \"13 significant links\" and the regime comparison \"11 vs 4\" are uncorrected."
+    },
+    {
+      "raised_by": "this rerun",
+      "caveat": "Rolling TSI LEVELS carry large finite-sample bias: a 200-day window with 5 assets reports a median TSI of 12.4% when the true spillover is exactly zero. Only the excess over that floor, and the time variation, are interpretable."
+    }
+  ],
   "charts": {
     "net_comparison": "k628b_kpps_rerun_net_comparison.png",
     "ordering_distribution": "k628b_kpps_rerun_ordering_distribution.png",
@@ -2104,5 +2326,5 @@
     "Diebold & Yilmaz (2012) IJF 28(1), 57-66",
     "K865b (same KPPS implementation; same defect found in K865)"
   ],
-  "runtime_seconds": 13.1
+  "runtime_seconds": 43.6
 }

@@ -62,6 +62,7 @@ References
 
 import argparse
 import json
+import os
 import warnings
 from datetime import datetime, timezone
 from itertools import permutations
@@ -75,6 +76,7 @@ import pandas as pd
 from scipy import stats
 from statsmodels.tsa.api import VAR
 from statsmodels.tsa.stattools import adfuller, grangercausalitytests
+from statsmodels.stats.multitest import multipletests
 
 warnings.filterwarnings('ignore')
 
@@ -92,8 +94,23 @@ ROLL_SPILL_WINDOW = 200     # rolling spillover window
 ROLL_STEP = 20
 ROLL_MAX_LAG = 3            # K628b uses maxlags=3 inside the rolling loop
 
-N_NULL_REPS = 200
+N_NULL_REPS = 1000
 BURN_IN = 1000
+
+
+def atomic_write_json(path: Path, payload: dict) -> None:
+    """Write a results JSON atomically and prove the staged file is parseable."""
+    tmp = path.with_name(f'.{path.name}.tmp')
+    try:
+        with tmp.open('w', encoding='utf-8') as fh:
+            json.dump(payload, fh, indent=2, default=str, ensure_ascii=False)
+            fh.flush()
+            os.fsync(fh.fileno())
+        with tmp.open(encoding='utf-8') as fh:
+            json.load(fh)
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -192,6 +209,8 @@ def generalized_fevd(res, horizon: int = FEVD_HORIZON) -> np.ndarray:
     assert phi.shape[0] == horizon, f"ma_rep gave {phi.shape[0]} steps, expected {horizon}"
 
     sig_jj = np.diag(sigma)
+    assert np.all(np.isfinite(sigma)), 'residual covariance contains non-finite values'
+    assert np.all(sig_jj > 0), f'non-positive residual variances: {sig_jj}'
     num = np.zeros_like(sigma)
     den = np.zeros(sigma.shape[0])
     for h in range(horizon):
@@ -199,11 +218,17 @@ def generalized_fevd(res, horizon: int = FEVD_HORIZON) -> np.ndarray:
         num += a_sigma ** 2                     # (i,j) = (e_i' A_h Sigma e_j)^2
         den += np.diag(a_sigma @ phi[h].T)      # (i)   = e_i' A_h Sigma A_h' e_i
 
-    return (num / sig_jj[None, :]) / den[:, None]
+    assert np.all(den > 0), f'non-positive forecast-error variance denominators: {den}'
+    out = (num / sig_jj[None, :]) / den[:, None]
+    assert np.all(np.isfinite(out)), 'GFEVD contains non-finite values'
+    return out
 
 
 def row_normalize(mat: np.ndarray) -> np.ndarray:
-    out = mat / mat.sum(axis=1, keepdims=True)
+    assert np.all(np.isfinite(mat)), 'FEVD matrix contains non-finite values'
+    row_sums = mat.sum(axis=1, keepdims=True)
+    assert np.all(row_sums > 0), f'FEVD has non-positive row sums: {row_sums.ravel()}'
+    out = mat / row_sums
     assert np.allclose(out.sum(axis=1), 1.0, atol=1e-8), f"row sums not 1: {out.sum(axis=1)}"
     return out
 
@@ -219,11 +244,15 @@ def dy_metrics(theta_norm: np.ndarray, labels: list[str]) -> dict:
     m = theta_norm * 100.0
     from_ = m.sum(axis=1) - np.diag(m)
     to_ = m.sum(axis=0) - np.diag(m)
+    tsi = float((m.sum() - np.trace(m)) / n)
+    net = to_ - from_
+    assert -1e-8 <= tsi <= 100.0 + 1e-8, f'TSI outside [0, 100]: {tsi}'
+    assert abs(float(net.sum())) < 1e-8, f'NET does not sum to zero: {net.sum()}'
     return {
-        'total_spillover_index': float((m.sum() - np.trace(m)) / n),
+        'total_spillover_index': tsi,
         'from_others': {labels[i]: float(from_[i]) for i in range(n)},
         'to_others': {labels[i]: float(to_[i]) for i in range(n)},
-        'net_spillover': {labels[i]: float(to_[i] - from_[i]) for i in range(n)},
+        'net_spillover': {labels[i]: float(net[i]) for i in range(n)},
         'matrix': [[float(m[i, j]) for j in range(n)] for i in range(n)],
     }
 
@@ -267,6 +296,9 @@ def full_sample_analysis(var_input: pd.DataFrame) -> dict:
     roots = np.asarray(res.roots)
     max_eig = float(1.0 / np.min(np.abs(roots)))
     is_stable = bool(res.is_stable(verbose=False))
+    whiteness_lags = max(10, lag + 5)
+    whiteness = res.test_whiteness(nlags=whiteness_lags, adjusted=True)
+    normality = res.test_normality()
 
     print(f"\n  n={len(data)}, VAR lag (AIC)={lag}, stable={is_stable}, max|eig|={max_eig:.4f}")
     print(f"  axis check: {axis_check['verdict']}")
@@ -295,6 +327,24 @@ def full_sample_analysis(var_input: pd.DataFrame) -> dict:
         'var_lag_aic': lag,
         'var_is_stable': is_stable,
         'var_max_eigenvalue': round(max_eig, 4),
+        'residual_diagnostics': {
+            'portmanteau_whiteness_adjusted': {
+                'nlags': whiteness_lags,
+                'test_statistic': float(whiteness.test_statistic),
+                'p_value': float(whiteness.pvalue),
+                'passes_5pct': bool(whiteness.pvalue > 0.05),
+            },
+            'normality': {
+                'test_statistic': float(normality.test_statistic),
+                'p_value': float(normality.pvalue),
+                'passes_5pct': bool(normality.pvalue > 0.05),
+            },
+            'interpretation': (
+                'Diagnostics are reported, not used to select a favorable specification. '
+                'The overlapping 22-day volatility proxy mechanically induces strong serial '
+                'dependence, so connectedness is descriptive/predictive rather than structural.'
+            ),
+        },
         'axis_equivalence_check': axis_check,
         'cholesky': chol,
         'gfevd': gen,
@@ -303,12 +353,14 @@ def full_sample_analysis(var_input: pd.DataFrame) -> dict:
 
 
 def reproduction_check(full: dict) -> dict:
-    """The Cholesky arm here must reproduce experiments/k628b/k628b_results.json.
+    """The Cholesky arm must reproduce the frozen pre-correction snapshot.
 
     Without this, any Cholesky-vs-GFEVD gap could be a data-vintage or pipeline
-    difference between the two scripts rather than a property of the estimator.
+    difference between the two scripts rather than a property of the estimator. The
+    live ``k628b_results.json`` is now GFEVD and is therefore intentionally NOT the
+    reproduction target.
     """
-    ref_path = HERE / 'k628b_results.json'
+    ref_path = HERE / 'k628b_results_SUPERSEDED_cholesky_ordering.json'
     ref = json.loads(ref_path.read_text())
     roles = ref['directional_roles']
 
@@ -323,8 +375,8 @@ def reproduction_check(full: dict) -> dict:
     diffs.append(d_tsi)
 
     max_diff = float(max(diffs))
-    ok = max_diff < 0.5           # pp; loose enough for yfinance re-download drift
-    print(f"\n  Reproduction of k628b_results.json (Cholesky arm): "
+    ok = max_diff < 0.01          # pp; pinned prices make a much tighter gate possible
+    print(f"\n  Reproduction of frozen pre-correction results (Cholesky arm): "
           f"max |diff| = {max_diff:.3f}pp over {len(diffs)} quantities -> "
           f"{'PASS' if ok else 'FAIL'}")
     if not ok:
@@ -332,18 +384,18 @@ def reproduction_check(full: dict) -> dict:
               "GFEVD comparison below is then NOT apples-to-apples and must not be read "
               "as an estimator effect.")
     return {
-        'reference': 'experiments/k628b/k628b_results.json',
+        'reference': 'experiments/k628b/k628b_results_SUPERSEDED_cholesky_ordering.json',
         'stored_var_lag': ref['diebold_yilmaz']['selected_lag'],
         'rerun_var_lag': full['var_lag_aic'],
         'stored_n_obs': ref['n_observations'],
         'max_abs_diff_pp': round(max_diff, 3),
         'tsi_diff_pp': round(d_tsi, 3),
         'per_asset_abs_diff_pp': detail,
-        'tolerance_pp': 0.5,
+        'tolerance_pp': 0.01,
         'status': 'PASS' if ok else 'FAIL',
-        'note': ('Data are re-downloaded from yfinance, so exact equality is not expected; '
-                 'the check is that the Cholesky arm lands on the stored numbers, which is '
-                 'what makes the GFEVD gap attributable to the decomposition.'),
+        'note': ('The committed price cache is pinned. The Cholesky arm must land on the frozen '
+                 'pre-correction snapshot; otherwise the GFEVD gap cannot be attributed solely '
+                 'to the decomposition.'),
     }
 
 
@@ -519,6 +571,36 @@ def granger_network(rvol: pd.DataFrame) -> dict:
                   != (roles[a]['out_degree'], roles[a]['in_degree'], roles[a]['role'])}
 
     total_links = int(np.sum(net_mat > 0))
+
+    # Multiple testing. K628b takes the MINIMUM p-value over 5 lags for each of 20 pairs and
+    # calls it significant at 5%. That is 100 tests with no correction, and min-over-lags is
+    # itself a selection. The LINK COUNT is therefore inflated -- so check whether the ROLE
+    # LABELS (the thing being claimed) survive correction, rather than assuming they do.
+    # Raised by the Codex review of this rerun.
+    mt = {}
+    for name, factor in (('uncorrected', 1), ('bonferroni_5_lags', 5), ('bonferroni_100_tests', 100)):
+        m = np.zeros((n, n))
+        for i, cause in enumerate(ASSETS):
+            for j, effect in enumerate(ASSETS):
+                if i == j:
+                    continue
+                r = results[f"{cause}->{effect}"]
+                if min(1.0, r['p_value'] * factor) < 0.05:
+                    m[i, j] = r['f_stat']
+        rl = {}
+        for i, a in enumerate(ASSETS):
+            o, inn = int(np.sum(m[i, :] > 0)), int(np.sum(m[:, i] > 0))
+            rl[a] = 'TRANSMITTER' if o > inn else ('RECEIVER' if o < inn else 'BALANCED')
+        mt[name] = {'n_significant_links': int(np.sum(m > 0)), 'roles': rl}
+
+    roles_identical = all(mt[k]['roles'] == mt['uncorrected']['roles'] for k in mt)
+    print(f"\n  Multiple-testing robustness of the ROLE LABELS "
+          f"(p is min over 5 lags for each of 20 pairs = 100 tests, uncorrected in K628b):")
+    for name, d in mt.items():
+        print(f"    {name:<22} links={d['n_significant_links']:2d}  "
+              f"roles={ {a: d['roles'][a][0] for a in ASSETS} }")
+    print(f"    -> role labels identical under all three: {roles_identical}  "
+          f"(the LINK COUNT is not; do not quote '13 links' or '11 vs 4' as corrected)")
     print(f"\n  {'asset':<10} {'OUT':>4} {'IN':>4} {'NET':>5}  {'role':>12}   {'stored (K628b)':>22}")
     print(f"  {'-' * 66}")
     for a in ASSETS:
@@ -543,6 +625,16 @@ def granger_network(rvol: pd.DataFrame) -> dict:
         'reproduction_vs_stored': {
             'status': 'PASS' if not mismatches else 'MISMATCH',
             'mismatches': mismatches,
+        },
+        'multiple_testing_robustness': {
+            'note': ('K628b takes min p over 5 lags for each of 20 pairs (= 100 tests) and applies '
+                     'no correction. The LINK COUNT is inflated by this; the ROLE LABELS are not.'),
+            'by_correction': mt,
+            'role_labels_identical_under_all_corrections': bool(roles_identical),
+            'implication': ('Role labels (SPY/TLT transmitters, GLD/0050.TW receivers, USO balanced) '
+                            'survive Bonferroni. The counts "13 significant links" and the regime '
+                            'comparison "11 vs 4 links" are UNCORRECTED and must not be quoted as if '
+                            'they were.'),
         },
     }
 
@@ -1104,6 +1196,36 @@ def main():
         'null_floor_full_sample': floor_full,
         'verdict': verdict,
         'corrections_required': results_corrections,
+        'reviewer': 'Codex (gpt-5.6-sol, ultra) — primary-path code review, 2026-07-13',
+        'review_verdict': 'PASS',
+        'review_checks_passed': [
+            'KPPS GFEVD formula matches Pesaran-Shin (1998): num[i,j], den[i], sigma_jj on axis 1, h=0..H-1',
+            'Diebold-Yilmaz orientation: row ex-diag = FROM/received, col ex-diag = TO/transmitted, NET = TO-FROM',
+            'Permutation inverse-mapping canonical (i,j) <- permuted (pos[i], pos[j]) is correct',
+            'AR null recursion: phi[0] is the lag-1 coefficient and y[t-p:t][::-1] aligns with it',
+            'No lookahead (in-sample network description; rolling windows stamped at w.index[-1])',
+            'Granger out-in-degree roles do not touch the FEVD / Cholesky / VAR ordering',
+        ],
+        'caveats': [
+            {'raised_by': 'Codex review',
+             'caveat': ('This is a RETROSPECTIVE IN-SAMPLE network description, not a real-time '
+                        'signal. The log-vs-level decision and the AR calibration of the null both '
+                        'use the full sample. Nothing here may be packaged as a tradeable or '
+                        'real-time-available signal.')},
+            {'raised_by': 'Codex review',
+             'caveat': ('Granger role labels being immune to the FEVD ORDERING problem does not make '
+                        'them structural causality. They remain bivariate predictive relations, still '
+                        'exposed to common factors, omitted variables and lag/specification choices.')},
+            {'raised_by': 'Codex review',
+             'caveat': ('Granger p-values are the MINIMUM over 5 lags for each of 20 pairs (100 tests, '
+                        'uncorrected). The role labels survive Bonferroni (see '
+                        'granger_causality.multiple_testing_robustness) but the LINK COUNTS do not: '
+                        '"13 significant links" and the regime comparison "11 vs 4" are uncorrected.')},
+            {'raised_by': 'this rerun',
+             'caveat': ('Rolling TSI LEVELS carry large finite-sample bias: a 200-day window with 5 '
+                        'assets reports a median TSI of 12.4% when the true spillover is exactly zero. '
+                        'Only the excess over that floor, and the time variation, are interpretable.')},
+        ],
         'charts': {
             'net_comparison': 'k628b_kpps_rerun_net_comparison.png',
             'ordering_distribution': 'k628b_kpps_rerun_ordering_distribution.png',
