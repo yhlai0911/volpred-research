@@ -214,6 +214,110 @@ def _auto_remediate_publish_drought() -> dict:
         return {"attempted": False, "error": str(exc)}
 
 
+def _write_json_atomic(path: Path, payload: dict) -> None:
+    """Serialize fully, then replace. A half-written receipt would make the alert
+    body lie about what the system did (per control-plane rule: never leave partial
+    JSON behind a truncate)."""
+    blob = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(blob, encoding="utf-8")
+    tmp.replace(path)
+
+
+def _auto_remediate_release_deadlock() -> dict:
+    """2026-07-13 boss msg 660: 「不是補救，是立刻從底層徹底處理。」
+
+    Deadlock = a release is due, the pool has drafts, and every one of them is
+    blocked by a gate. The pool is not empty, so refilling it *by count* — which is
+    all `refill_reader_facing_pool` ever knew how to do — would add more drafts that
+    are just as blocked. What is scarce is not drafts; it is drafts in a cluster the
+    gate will still let through.
+
+    So the remediation is to refill with a *shape* constraint: `required_clusters` =
+    the clusters that are not currently blocked. That is the one fact the deadlock
+    detector has and a count-based refiller does not.
+
+    Writes a receipt to storage/ops/release_deadlock_remediation.json, which
+    `volpred.ops.alerts` reads to tell the boss what was already done (rather than
+    handing him a to-do list — per `.claude/rules/alert.md`).
+    """
+    from datetime import datetime, timezone
+
+    now = datetime.now(timezone.utc)
+    receipt_path = PROJECT_ROOT / "storage" / "ops" / "release_deadlock_remediation.json"
+    receipt: dict = {"attempted": False, "ran_at": now.isoformat()}
+    try:
+        from volpred.ops.content import preview_release_pool_by_settings
+
+        preview = preview_release_pool_by_settings(storage_dir="storage")
+        counts = preview.get("pool_counts") or {}
+        pressure = preview.get("narrative_cluster_pressure") or {}
+        draft = counts.get("draft")
+        eligible = counts.get("eligible")
+        deadlocked = (
+            preview.get("due_now") is True
+            and isinstance(draft, int)
+            and draft > 0
+            and isinstance(eligible, int)
+            and eligible == 0
+        )
+        if not deadlocked:
+            receipt.update({"reason": "not_deadlocked", "draft": draft, "eligible": eligible})
+            _write_json_atomic(receipt_path, receipt)
+            return receipt
+
+        blocked = [str(c) for c in (pressure.get("blocked_clusters") or [])]
+        known = [str(c) for c in (pressure.get("clusters") or [])]
+        # Clusters the gate would still pass. If every known cluster is blocked we
+        # cannot name a safe one — say so rather than guessing, and let the writer
+        # pick any cluster outside the blocked set.
+        required = [c for c in known if c not in blocked]
+
+        task_id = f"release_deadlock_refill_{now.strftime('%Y%m%d_%H')}"
+        task = {
+            "id": task_id,
+            "title": "【P1 自動補救】release 死鎖：補可放行 cluster 的草稿",
+            "description": (
+                "release_pool 偵測到死鎖：草稿池有 "
+                f"{draft} 篇但 eligible=0（due_now=true）。\n\n"
+                f"目前被 narrative_cluster gate 擋住的 cluster：{', '.join(blocked) or '(none)'}\n"
+                f"**只准補這些 cluster 的草稿**：{', '.join(required) or '(blocked 集合以外的任一 cluster)'}\n\n"
+                "重點：池子不缺草稿，缺的是**還能通過 gate 的 cluster** 的草稿。"
+                "補同 cluster 的稿子只會再被擋一次。\n"
+                "選題走 publication-candidates skill；寫作前必跑 check_arc_dedup.py（帶 --audience）。"
+            ),
+            "task_type": "daily_article",
+            "priority": 1,
+            "status": "pending",
+            "source": "auto_remediation",
+            "created_at": now.isoformat(),
+            "required_clusters": required,
+            "blocked_clusters": blocked,
+            "trigger": "release_pool_deadlock",
+        }
+        created = _append_next_task_locked(task, PROJECT_ROOT / "storage" / "next_tasks.json")
+        receipt.update(
+            {
+                "attempted": True,
+                "draft": draft,
+                "eligible": eligible,
+                "blocked_clusters": blocked,
+                "required_clusters": required,
+                ("task_id" if created else "existing_task_id"): task_id,
+            }
+        )
+    except Exception as exc:  # noqa: BLE001 — fail-open, but never silently
+        warn(
+            "release_deadlock_remediation",
+            "auto-remediation failed",
+            err=f"{type(exc).__name__}: {exc}",
+        )
+        receipt.update({"attempted": False, "error": f"{type(exc).__name__}: {str(exc)[:200]}"})
+    _write_json_atomic(receipt_path, receipt)
+    return receipt
+
+
 def _auto_reap_orphan_deliverables() -> dict:
     """2026-07-13 boss msg 624: a finished article must never end up discarded.
 
@@ -636,6 +740,13 @@ def main() -> int:
     # cron :03 boundaries and .release_settings.json last_released_at.
     release_trigger = _auto_trigger_release_pool_if_due()
 
+    # 2026-07-13 (boss msg 660): if the release we just attempted was due, had drafts
+    # to choose from, and still released nothing, the pool is gate-deadlocked. Run
+    # this AFTER the release attempt (so we judge the real outcome, not a prediction)
+    # and BEFORE the report, so the alert can say what was already done instead of
+    # asking the boss to go write an article.
+    deadlock_remediation = _auto_remediate_release_deadlock()
+
     # 2026-07-03 (boss email-12559): the 發文脫班 (publishing_freshness) dead-man
     # switch must DIRECTLY REMEDIATE, not email the boss a to-do list. Run the
     # single-owner remediation ladder (force-release → refill fresh topics)
@@ -677,6 +788,17 @@ def main() -> int:
             f"  release-pool-auto: skip "
             f"reason={release_trigger.get('reason', 'unknown')}"
         )
+    # 2026-07-13: release gate-deadlock auto-remediation (boss msg 660)
+    if deadlock_remediation.get("attempted"):
+        _task = deadlock_remediation.get("task_id") or deadlock_remediation.get("existing_task_id")
+        print(
+            f"  release-deadlock-remediation: draft={deadlock_remediation.get('draft')} "
+            f"eligible=0 blocked={deadlock_remediation.get('blocked_clusters')} "
+            f"required={deadlock_remediation.get('required_clusters')} task={_task}"
+        )
+    elif deadlock_remediation.get("error"):
+        print(f"  release-deadlock-remediation: ERROR {deadlock_remediation['error']}")
+
     # 2026-07-03: publish-drought auto-remediation ladder (boss email-12559)
     if drought_remediation.get("attempted"):
         steps = drought_remediation.get("steps", [])

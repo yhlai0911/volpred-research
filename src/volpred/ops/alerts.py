@@ -164,10 +164,71 @@ def _release_pool_preview_for_alert(storage_dir: str) -> dict[str, Any]:
 
     pool_counts = preview.get("pool_counts") if isinstance(preview, dict) else None
     next_candidates = preview.get("next_candidates") if isinstance(preview, dict) else None
+    cluster_pressure = preview.get("narrative_cluster_pressure") if isinstance(preview, dict) else None
     return {
         "pool_counts": pool_counts if isinstance(pool_counts, dict) else {},
         "next_candidates": next_candidates if isinstance(next_candidates, list) else [],
+        # 2026-07-13: the deadlock branch below needs to know whether a release is
+        # actually owed right now and which clusters are holding the gate shut.
+        # Dropping these was why starvation could only ever be seen in arrears.
+        "due_now": bool(preview.get("due_now")) if isinstance(preview, dict) else False,
+        "narrative_cluster_pressure": cluster_pressure if isinstance(cluster_pressure, dict) else {},
     }
+
+
+RELEASE_DEADLOCK_RECEIPT = ("ops", "release_deadlock_remediation.json")
+
+
+def _read_release_deadlock_receipt(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Read what the remediator did about the current deadlock (no side effects).
+
+    Written by `scripts/check_alerts.py::_auto_remediate_release_deadlock`, which
+    runs before the report is built. A receipt older than the release interval is
+    stale (it describes a deadlock we already got out of), so it is not reported
+    as if it were this one's remediation.
+    """
+    path = _storage_root(storage_dir).joinpath(*RELEASE_DEADLOCK_RECEIPT)
+    receipt = load_json(path, {})
+    if not isinstance(receipt, dict) or not receipt:
+        return {"attempted": False, "reason": "no_receipt"}
+    ran_at = _parse_iso_datetime(receipt.get("ran_at"))
+    if ran_at is None or (now - ran_at) > timedelta(hours=2):
+        return {
+            "attempted": False,
+            "reason": "receipt_stale",
+            "ran_at": receipt.get("ran_at"),
+        }
+    return receipt
+
+
+def _render_release_deadlock_remediation(remediation: dict[str, Any]) -> list[str]:
+    if not remediation.get("attempted"):
+        reason = remediation.get("reason", "unknown")
+        return [
+            f"- ⚠️ 自動補救**沒有執行**（reason={reason}）—— 這本身是缺陷，不是預期狀態。",
+            "  修 `scripts/check_alerts.py::_auto_remediate_release_deadlock`，不要手動補一篇了事。",
+        ]
+    lines: list[str] = []
+    task_id = remediation.get("task_id")
+    required = remediation.get("required_clusters") or []
+    if task_id:
+        lines.append(
+            f"- 已自動建 **P1 補池任務** `{task_id}`，指定只補仍可放行的 cluster："
+            f"{', '.join(str(c) for c in required) or '(任意)'}。"
+        )
+    elif remediation.get("existing_task_id"):
+        lines.append(
+            f"- P1 補池任務 `{remediation['existing_task_id']}` 已在池中（不重複建）。"
+        )
+    released = remediation.get("released")
+    if isinstance(released, int) and released > 0:
+        lines.append(f"- 同時直接放行了 **{released}** 篇（gate 重新評估後可發）。")
+    if remediation.get("error"):
+        lines.append(f"- ⚠️ 補救過程有錯誤：{remediation['error']}")
+    if not lines:
+        lines.append("- 補救已執行但無可報告的動作。")
+    lines.append("- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。")
+    return lines
 
 
 def _notification_path(storage_dir: str, notification_id: str) -> Path:
@@ -618,16 +679,88 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
             "details": base_details,
         }
 
-    # 2) Machinery healthy but nothing released for >2x interval → release
+    # 2) Release deadlock — the LEADING indicator (2026-07-13, boss msg 660:
+    #    「不是補救，是立刻從底層徹底處理」).
+    #
+    #    A release is owed right now, the pool is NOT empty, and yet every draft in
+    #    it is blocked by a gate. The next fire is therefore guaranteed to release
+    #    nothing — and it will exit 0 while doing so, because "fired successfully"
+    #    and "published an article" were never the same event. That is exactly how
+    #    2026-07-13 lost 6.5 hours: release_pool fired at 07:00/08:00/09:00 UTC,
+    #    each exit 0, each releasing nothing, and the only thing that eventually
+    #    spoke up was a downstream 發文間隔過久 WARN whose advice was "go write an
+    #    article" — remediation aimed at the symptom.
+    #
+    #    Branch (3) below can only see this in arrears (it waits 2x the interval),
+    #    and by then the reader-facing gap has already happened. Here we can prove
+    #    the next fire is dead before it fires, so we say so at CRITICAL and hand
+    #    the remediator the one fact it needs: which clusters are still passable.
+    preview_summary = _release_pool_preview_for_alert(storage_dir)
+    pool_counts = preview_summary.get("pool_counts") or {}
+    draft_count = pool_counts.get("draft")
+    eligible_count = pool_counts.get("eligible")
+    cluster_pressure = preview_summary.get("narrative_cluster_pressure") or {}
+    blocked_clusters = cluster_pressure.get("blocked_clusters") or []
+    deadlocked = (
+        preview_summary.get("due_now") is True
+        and isinstance(draft_count, int)
+        and draft_count > 0
+        and isinstance(eligible_count, int)
+        and eligible_count == 0
+    )
+    if deadlocked:
+        title = f"Release pool deadlocked — {draft_count} drafts, 0 eligible (due now)"
+        # Read-only: the remediation itself runs in the side-effecting layer
+        # (scripts/check_alerts.py::_auto_remediate_release_deadlock), which fires
+        # BEFORE the report is built and leaves a receipt here. Keep it that way —
+        # build_alert_condition_report is also called to render dashboards, and a
+        # report builder that creates P1 tasks as a side effect would mint one
+        # every time somebody looked at the dashboard.
+        remediation = _read_release_deadlock_receipt(storage_dir, now)
+        body = "\n".join(
+            [
+                "## 觸發條件",
+                f"釋出已到期（due_now），草稿池有 {draft_count} 篇，但通過所有 gate 的只有 **0 篇**。",
+                "下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。",
+                f"- draft: {draft_count}",
+                f"- eligible_before_dedup: {pool_counts.get('eligible_before_dedup', 'unknown')}",
+                f"- dedup_flagged: {pool_counts.get('dedup_flagged', 'unknown')}",
+                f"- eligible_after_dedup: {eligible_count}",
+                f"- 被 narrative_cluster gate 擋住的 cluster: {', '.join(str(c) for c in blocked_clusters) or '(none)'}",
+                "",
+                "## 系統已自動執行",
+                *_render_release_deadlock_remediation(remediation),
+                "",
+                "## 影響",
+                "池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。",
+                "此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，",
+                "exit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
+            ]
+        )
+        return {
+            "id": "release_pool_deadlock",
+            "breached": True,
+            "level": "critical",
+            "title": title,
+            "body": body,
+            "details": {
+                **base_details,
+                "release_preview": preview_summary,
+                "blocked_clusters": blocked_clusters,
+                "remediation": remediation,
+            },
+        }
+
+    # 3) Machinery healthy but nothing released for >2x interval → release
     #    starvation. Draft pool is theme-saturated (dedup correctly skipping) or
     #    due-order keeps surfacing saturated themes without falling through to
     #    fresh-theme drafts. Content problem (Mission #1/#5), surfaced as WARN.
+    #    This is the LAGGING net for anything branch (2) could not prove ahead of
+    #    time (e.g. an empty pool, which is a refill problem, not a gate deadlock).
     release_starved = release_last is None or (now - release_last) > critical_threshold
     if release_starved:
         title = f"Release pool starved > {critical_hours}h (cron healthy)"
         release_text = release_last.isoformat() if release_last else "missing"
-        preview_summary = _release_pool_preview_for_alert(storage_dir)
-        pool_counts = preview_summary.get("pool_counts", {})
         preview_error = preview_summary.get("preview_error")
         if pool_counts:
             preview_lines = [
