@@ -17146,5 +17146,16 @@
     "owner": "hourly-04",
     "commit": "898a216be",
     "summary": "governance: 收斂 agent skill surface 到單一 canonical + models.json fable 去矛盾。\n\n根因不是 parity 落差，是「render 孤兒」：agent-specs/ canonical 早在 e64a19072 (2026-04-18) 被刪，render 機械卻整套留著，於是 .agents/skills/（gitignored、27 個、與 .claude/skills 18 個已分岔）成了無來源的隱形 surface。實測 .agents/skills 零 consumer（Codex CLI 0.144.1 只走 plugin marketplace，binary 對 'agents/skills' 命中 0 次），故正解是消滅 surface 而非再蓋 render + drift watchdog（anti-stacking）。\n\n順帶修掉兩個真實故障：ops agent-spec render 會先 rmtree('.claude/skills') 再從不存在的 canonical 重建；execution_brief 的 check_agent_specs preflight 實際會丟 FileNotFoundError，但四個測試全把它 monkeypatch 掉，所以從未被真正執行（正是 session-bootstrap 炸掉的那條）。\n\nGate: tests/test_skill_surface_single_source.py 接手已刪的 test_agent_spec.py 位置（CI + pre-push 既有跑 tests/，不新增第三層）。break-then-verify 已實測：重建 .agents/skills → 立刻 FAIL。\nmodels.json: live probe 確認 fable AVAILABLE（Agent tool model=fable, 3.3s 回應）；四處矛盾根因是把 policy（不進 default rotation）寫進 availability 欄位，已分離 available vs routed。\nresearch_program.md 的 archive 死連結（2026-04-18 起斷）以 e64a19072^ 的 byte-identical 原文還原至 docs/。"
+  },
+  {
+    "timestamp": "2026-07-14T04:57:32+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-1c27bbd85",
+    "outcome": "succeeded",
+    "summary": "ops: materialize daily checkup LaunchAgent",
+    "commit": "1c27bbd85c90f2ed11483e7f9477ba34a78d417a",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T20:57:55.673327+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
