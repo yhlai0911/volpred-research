@@ -135,6 +135,28 @@ RENDER_TIMEOUT_S = 240
 REPAIR_ROUNDS = 3
 RENDER_SCRIPT_NAME = "render_lazypack.py"
 
+# Second writer. codex sometimes ends its turn having only *talked* about the
+# render script without writing it (2026-07-13 mile_aa4713db: rc=2, "codex write
+# produced no render_lazypack.py" — the transcript is codex narrating what the
+# renderer *would* do). One provider refusing to emit a file must not strand the
+# article in draft, so a different model gets the same prompt before we give up.
+CLAUDE_FALLBACK_MODEL = os.environ.get("LAZYPACK_FALLBACK_MODEL", "claude-fable-5")
+
+
+def _resolve_claude_bin() -> str:
+    found = shutil.which("claude")
+    if found:
+        return found
+    for candidate in (Path.home() / ".claude" / "local" / "claude",
+                      Path("/opt/homebrew/bin/claude"),
+                      Path("/usr/local/bin/claude")):
+        if os.access(candidate, os.X_OK):
+            return str(candidate)
+    return "claude"
+
+
+CLAUDE_BIN = _resolve_claude_bin()
+
 # Ordered by how well they render zh-Hant on macOS. Resolved locally so codex
 # never has to discover a font (the old flow's worst time sink).
 _CJK_FONT_CANDIDATES = (
@@ -401,6 +423,62 @@ def _run_codex(prompt: str, out_dir: Path, timeout_s: float,
     return proc.returncode, (out[-2000:] + "\n" + err[-2000:]).strip()
 
 
+def _run_claude(prompt: str, out_dir: Path, timeout_s: float,
+                model: str) -> tuple[int, str]:
+    """Fallback writer: headless Claude CLI, same prompt, different provider.
+
+    Same contract as `_run_codex` — never raises, the caller only checks whether
+    the render script landed. rc 3 = CLI missing, rc 2 = timed out.
+    """
+    cmd = [CLAUDE_BIN, "-p", "--model", model,
+           "--permission-mode", "bypassPermissions",
+           "--add-dir", str(out_dir)]
+    try:
+        proc = subprocess.Popen(
+            cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, text=True, cwd=str(ROOT),
+            start_new_session=True,
+        )
+    except FileNotFoundError:
+        return 3, "claude CLI not found on PATH"
+    try:
+        out, err = proc.communicate(input=prompt, timeout=timeout_s)
+    except subprocess.TimeoutExpired:
+        _kill_process_group(proc)
+        try:
+            out, err = proc.communicate(timeout=30)
+        except Exception as e:  # noqa: BLE001
+            print(f"[gen_lazypack_codex] drain after kill failed: {e}",
+                  file=sys.stderr)
+            out, err = "", ""
+        tail = ((out or "")[-1000:] + "\n" + (err or "")[-1000:]).strip()
+        return 2, f"claude -p timed out after {timeout_s:.0f}s\n{tail}"
+    return proc.returncode, ((out or "")[-2000:] + "\n" + (err or "")[-2000:]).strip()
+
+
+def _write_script(prompt: str, script: Path, out_dir: Path, budget_s: float,
+                  model: str | None) -> tuple[int, str, str]:
+    """Drive writers until `script` exists. Returns (rc, tail, writer_used).
+
+    codex first (flat-rate ChatGPT subscription). If it ends its turn without
+    writing the file, hand the identical prompt to a second model rather than
+    failing the job — a writer that talks instead of writing is a per-provider
+    failure, not a reason to leave the article without its 懶人包.
+    """
+    rc, tail = _run_codex(prompt, out_dir, budget_s, model)
+    if script.exists():
+        return rc, tail, "codex"
+    print(f"[gen_lazypack_codex] codex produced no {script.name} (rc={rc}) — "
+          f"escalating to {CLAUDE_FALLBACK_MODEL}", file=sys.stderr)
+    rc2, tail2 = _run_claude(prompt, out_dir, budget_s, CLAUDE_FALLBACK_MODEL)
+    if script.exists():
+        print(f"[gen_lazypack_codex] fallback writer {CLAUDE_FALLBACK_MODEL} "
+              f"wrote {script.name}", file=sys.stderr)
+        return rc2, tail2, CLAUDE_FALLBACK_MODEL
+    return (rc2 or rc or 1), f"codex(rc={rc}):\n{tail}\n\n" \
+                             f"{CLAUDE_FALLBACK_MODEL}(rc={rc2}):\n{tail2}", "none"
+
+
 def _run_render_script(script: Path, timeout_s: float) -> tuple[bool, str]:
     """Run the codex-written render script locally. (ok, failure_text).
 
@@ -473,11 +551,15 @@ def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path
                 return 2
             print(f"[gen_lazypack_codex] codex {phase} (≤{codex_budget:.0f}s) "
                   f"→ {script}", file=sys.stderr)
-            rc, tail = _run_codex(prompt, out_dir, codex_budget, model)
+            rc, tail, writer = _write_script(prompt, script, out_dir,
+                                             codex_budget, model)
             if not script.exists():
-                print(f"ERROR: codex {phase} produced no {script} (rc={rc})\n{tail}",
-                      file=sys.stderr)
+                print(f"ERROR: no writer produced {script} during {phase} "
+                      f"(rc={rc})\n{tail}", file=sys.stderr)
                 return 2 if rc in (2, 3) else 1
+            if writer != "codex":
+                print(f"[gen_lazypack_codex] {phase} completed by fallback "
+                      f"writer: {writer}", file=sys.stderr)
 
         render_budget = min(RENDER_TIMEOUT_S, remaining())
         if render_budget <= 10:
