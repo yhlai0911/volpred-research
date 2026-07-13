@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-04T11:09:33.551776+00:00",
+  "generated_at": "2026-07-13T16:04:50.863259+00:00",
   "cadence_hint": "每 6 小時檢查 pending_questions，評分後呼叫 question-rerank；既有榜單相對順序不應變動。",
   "table_columns": [
     "排名",
@@ -12,11 +12,11 @@
     "active_ranked": 0,
     "pending_evaluation": 0,
     "researching": 0,
-    "answered": 16,
+    "answered": 17,
     "scored_questions": 17,
     "candidate_pool": 0,
-    "latest_member_question_at": "2026-06-18T01:30:03.846431+00:00",
-    "latest_answered_at": "2026-06-19T11:31:13.870613+00:00"
+    "latest_member_question_at": "2026-07-11T13:23:01.53456+00:00",
+    "latest_answered_at": "2026-07-12T15:38:17.536594+00:00"
   },
   "ranked_table": [],
   "pending_questions": [],
@@ -32,7 +32,7 @@
   ],
   "evaluation_template": [],
   "next_commands": {
-    "read_summary": "uv run python -m volpred.cli ops question-ranking-summary --source user --limit 20",
+    "read_summary": "uv run python -m volpred.cli ops question-ranking-summary --source user --limit 5",
     "apply_rerank": "uv run python -m volpred.cli ops question-rerank --evaluations-json /path/to/evaluations.json"
   }
 }

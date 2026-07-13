@@ -50,6 +50,9 @@ def _rel_diff(actual: float, paper: float) -> float:
 
 def main() -> int:
     k1025 = _load("k1025/k1025_v2_results.json")
+    # Connectedness numbers only: v2's spillover_index is a withdrawn artifact.
+    k1025_v3 = _load("k1025/k1025_v3_results.json")
+    k1025b_v2 = _load("k1025b/k1025b_v2_results.json")
 
     paper_claims = [
         {
@@ -234,25 +237,50 @@ def main() -> int:
             "actual": k1025["dcc_correlation_by_regime"]["Crisis"]["mean"],
             "tol_pct": 1.0,
         },
+        # Connectedness checks bind to k1025_v3 (order-invariant KPPS), NOT to
+        # k1025_v2.spillover_index. The v2 values (90.11% total, -74.41pp BTC net)
+        # came from a mis-sliced FEVD array and are withdrawn; see main.tex
+        # \subsec{r_erratum}. Pinning the gate to them made it certify an artifact.
         {
-            "metric": "DY: total spillover mean (%)",
-            "paper_value": 90.11,
-            "source_path": "k1025_v2.spillover_index.mean_total",
-            "actual": k1025["spillover_index"]["mean_total"],
+            "metric": "Connectedness: generalized total index (%)",
+            "paper_value": 19.52,
+            "source_path": "k1025_v3.connectedness_full_sample.generalized_kpps.total_connectedness",
+            "actual": k1025_v3["connectedness_full_sample"]["generalized_kpps"]["total_connectedness"],
             "tol_pct": 0.5,
         },
         {
-            "metric": "DY: total spillover std (%)",
-            "paper_value": 0.22,
-            "source_path": "k1025_v2.spillover_index.std_total",
-            "actual": k1025["spillover_index"]["std_total"],
-            "tol_pct": 5.0,
+            "metric": "Connectedness: rolling generalized total mean (%)",
+            "paper_value": 22.75,
+            "source_path": "k1025_v3.rolling_connectedness.generalized_total.mean",
+            "actual": k1025_v3["rolling_connectedness"]["generalized_total"]["mean"],
+            "tol_pct": 0.5,
         },
         {
-            "metric": "DY: BTC net spillover (pp)",
-            "paper_value": -74.41,
-            "source_path": "k1025_v2.spillover_index.mean_net_btc",
-            "actual": k1025["spillover_index"]["mean_net_btc"],
+            "metric": "Connectedness: BTC generalized net (pp)",
+            "paper_value": -0.95,
+            "source_path": "k1025_v3.connectedness_full_sample.generalized_kpps.net.BTC_RV",
+            "actual": k1025_v3["connectedness_full_sample"]["generalized_kpps"]["net"]["BTC_RV"],
+            "tol_pct": 1.0,
+        },
+        {
+            "metric": "Connectedness: BTC net-receiver share of rolling windows (%)",
+            "paper_value": 72.5,
+            "source_path": "k1025_v3.rolling_connectedness.btc_net_receiver_share_pct",
+            "actual": k1025_v3["rolling_connectedness"]["btc_net_receiver_share_pct"],
+            "tol_pct": 0.5,
+        },
+        {
+            "metric": "Cholesky ordering gap in BTC net (pp) -- why KPPS is used",
+            "paper_value": 18.66,
+            "source_path": "k1025_v3.connectedness_full_sample.order_sensitivity.cholesky_btc_net_gap_pp",
+            "actual": k1025_v3["connectedness_full_sample"]["order_sensitivity"]["cholesky_btc_net_gap_pp"],
+            "tol_pct": 1.0,
+        },
+        {
+            "metric": "Cross-panel (QQQ/VXN): BTC generalized net (pp)",
+            "paper_value": 2.70,
+            "source_path": "k1025b_v2.verdict.kpps_net_btc_pp",
+            "actual": k1025b_v2["verdict"]["kpps_net_btc_pp"],
             "tol_pct": 1.0,
         },
         {

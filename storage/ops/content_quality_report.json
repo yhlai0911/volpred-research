@@ -1,22 +1,22 @@
 {
-  "generated_at": "2026-07-05T01:19:50.171899+00:00",
+  "generated_at": "2026-07-13T16:14:41.755933+00:00",
   "publish_rhythm": {
-    "status": "ok",
-    "in_active_window": true,
-    "tpe_hour": 9,
+    "status": "inactive_window",
+    "in_active_window": false,
+    "tpe_hour": 0,
     "recent_count": 10,
-    "newest_published_at": "2026-07-05T01:13:05.428005+00:00",
-    "age_since_newest_min": 6.75,
+    "newest_published_at": "2026-07-13T14:00:34.516092+00:00",
+    "age_since_newest_min": 134.12,
     "gaps_min_newest_first": [
-      42.35,
-      30.12,
-      273.02,
-      234.28,
-      30.46,
-      62.39,
-      479.98,
-      272.39,
-      536.73
+      266.83,
+      421.72,
+      31.54,
+      117.22,
+      0.16,
+      181.85,
+      325.63,
+      154.98,
+      246.58
     ],
     "burst_pairs": [],
     "burst_gap_threshold_min": 30,
@@ -24,15 +24,9 @@
   },
   "daily_digest_uniqueness": {
     "status": "ok",
-    "date_tpe": "2026-07-05",
-    "published_count": 1,
-    "items": [
-      {
-        "id": "mile_c5bc3eb1",
-        "title": "股災保險不要只買一個商品：黃金、VIX 與尾部煞車的三道安檢",
-        "published_at": "2026-07-05T01:13:05.428005+00:00"
-      }
-    ]
+    "date_tpe": "2026-07-14",
+    "published_count": 0,
+    "items": []
   },
   "title_format": {
     "status": "ok",
@@ -43,45 +37,39 @@
   "arc_diversity": {
     "status": "ok",
     "sample": 20,
-    "distinct_axes": 18,
+    "distinct_axes": 19,
     "top_axis": "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive",
     "top_share": 0.1,
     "threshold": 0.5,
     "distribution": {
       "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive": 2,
-      "TW_EQUITY|US_EQUITY::null_no_info": 2,
-      "GOLD|LONG_BOND|RISK_PARITY|US_EQUITY|VIX::null_no_info": 1,
-      "USD|US_EQUITY|VIX::null_no_info": 1,
-      "GOLD|USD|US_EQUITY|VIX::null_no_info": 1,
-      "COPPER|TW_EQUITY|US_EQUITY::descriptive": 1,
-      "TW_EQUITY|US_EQUITY|VIX::descriptive": 1,
-      "COMMODITY_BROAD|GOLD|LONG_BOND|US_BOND|US_EQUITY|VOL_TARGETING::null_no_info": 1,
-      "TW_EQUITY::null_no_info": 1,
-      "CREDIT_SPREAD|USD|US_BOND|VIX::null_no_info": 1,
-      "GOLD|TW_EQUITY|USD|US_EQUITY|VIX::null_no_info": 1,
-      "JPY|US_EQUITY|VIX::systemic_crowding": 1,
-      "SEMIS|TW_EQUITY|US_EQUITY|VIX|VVIX::descriptive": 1,
-      "SEMIS|TSMC|TW_EQUITY|US_EQUITY|VIX|YIELD_CURVE::descriptive": 1,
-      "MOMENTUM|SILVER::null_no_info": 1,
-      "SILVER|USD|US_BOND::null_no_info": 1,
-      "GOLD|HIGH_YIELD|LONG_BOND|NASDAQ|US_BOND|US_EQUITY|US_SMALLCAP::null_no_info": 1,
-      "GOLD|LONG_BOND|OIL|US_EQUITY|VIX|VOL_TARGETING::descriptive": 1
+      "TW_EQUITY::descriptive": 1,
+      "SEMIS|TW_EQUITY::null_no_info": 1,
+      "CREDIT_SPREAD|FOMC|GOLD|HIGH_YIELD|LONG_BOND|MID_BOND|NASDAQ|SILVER|TSMC|USD|US_EQUITY|VIX|VVIX::null_no_info": 1,
+      "SEMIS|TW_EQUITY|USD::descriptive": 1,
+      "NASDAQ|TSMC|TW_EQUITY|US_EQUITY|US_SMALLCAP::descriptive": 1,
+      "TW_EQUITY|US_EQUITY::null_no_info": 1,
+      "US_EQUITY|VIX::null_no_info": 1,
+      "CREDIT_SPREAD|ENERGY_SECTOR|GOLD|LONG_BOND|OIL|USD|US_EQUITY|VIX::null_no_info": 1,
+      "COMMODITY_BROAD|GOLD|HIGH_YIELD|IG_CREDIT|LONG_BOND|MID_BOND|NASDAQ|RISK_PARITY|US_BOND|US_EQUITY|US_SMALLCAP::null_no_info": 1,
+      "TW_EQUITY|US_EQUITY|VIX::null_no_info": 1,
+      "LONG_BOND|MANAGED_FUTURES|MID_BOND|USD|US_BOND|US_EQUITY::null_no_info": 1,
+      "HIGH_YIELD|MERGER_ARB|US_EQUITY|US_SMALLCAP|VIX::descriptive": 1,
+      "FIN_SECTOR|SILVER::descriptive": 1,
+      "SILVER|US_EQUITY|VIX::descriptive": 1,
+      "LOW_VOL_FACTOR|USD|US_EQUITY::null_no_info": 1,
+      "FIN_SECTOR|JAPAN_EQ|NASDAQ|SEMIS|SILVER|TSMC|TW_EQUITY|US_EQUITY|US_SMALLCAP|VIX|VOL_TARGETING::null_no_info": 1,
+      "SEMIS|US_EQUITY|UTILITIES|VOL_TARGETING::descriptive": 1,
+      "TW_EQUITY|VIX|YIELD_CURVE::null_no_info": 1
     }
   },
   "content_completeness": {
-    "status": "incomplete",
+    "status": "ok",
     "scanned": 12,
-    "findings": [
-      {
-        "id": "mile_0fa841ed",
-        "missing_chart": false,
-        "missing_source": true,
-        "title": "燒最多錢的科技巨頭，選擇權市場現在沒有多收「下跌保費」"
-      }
-    ],
+    "findings": [],
     "lazypack": {
-      "general_total": 11,
-      "with_lazypack": 11,
+      "general_total": 9,
+      "with_lazypack": 9,
       "coverage": 1.0,
       "threshold": 0.6,
       "below_threshold": false,
@@ -92,10 +80,10 @@
     "status": "ok",
     "exists": true,
     "candidate_counts": {
-      "candidates": 682,
-      "top_10_uncovered": 6
+      "candidates": 697,
+      "top_10_uncovered": 10
     },
-    "total": 688
+    "total": 707
   },
   "frontend_render": {
     "status": "unknown",

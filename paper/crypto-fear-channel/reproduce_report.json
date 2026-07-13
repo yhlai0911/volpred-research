@@ -5,8 +5,8 @@
   "alert_level": "green",
   "gate_status": "pass",
   "match_rate_pct": 100.0,
-  "matched": 32,
-  "total_checks": 32,
+  "matched": 35,
+  "total_checks": 35,
   "checks": [
     {
       "metric": "Sample N (§3.1, abstract)",
@@ -243,31 +243,58 @@
       "source_path": "k1025_v2.dcc_correlation_by_regime.Crisis.mean"
     },
     {
-      "metric": "DY: total spillover mean (%)",
-      "paper_value": 90.11,
-      "actual_value": 90.11034077935554,
+      "metric": "Connectedness: generalized total index (%)",
+      "paper_value": 19.52,
+      "actual_value": 19.51532811783214,
       "tol_pct": 0.5,
-      "rel_diff_pct": 0.0003781815065360854,
+      "rel_diff_pct": 0.02393382258124413,
       "status": "match",
-      "source_path": "k1025_v2.spillover_index.mean_total"
+      "source_path": "k1025_v3.connectedness_full_sample.generalized_kpps.total_connectedness"
     },
     {
-      "metric": "DY: total spillover std (%)",
-      "paper_value": 0.22,
-      "actual_value": 0.22314977971272604,
-      "tol_pct": 5.0,
-      "rel_diff_pct": 1.4317180512391074,
+      "metric": "Connectedness: rolling generalized total mean (%)",
+      "paper_value": 22.75,
+      "actual_value": 22.74518565725673,
+      "tol_pct": 0.5,
+      "rel_diff_pct": 0.02116194612426313,
       "status": "match",
-      "source_path": "k1025_v2.spillover_index.std_total"
+      "source_path": "k1025_v3.rolling_connectedness.generalized_total.mean"
     },
     {
-      "metric": "DY: BTC net spillover (pp)",
-      "paper_value": -74.41,
-      "actual_value": -74.40520998232779,
+      "metric": "Connectedness: BTC generalized net (pp)",
+      "paper_value": -0.95,
+      "actual_value": -0.9477552864301728,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.006437330563374088,
+      "rel_diff_pct": 0.23628563892917256,
       "status": "match",
-      "source_path": "k1025_v2.spillover_index.mean_net_btc"
+      "source_path": "k1025_v3.connectedness_full_sample.generalized_kpps.net.BTC_RV"
+    },
+    {
+      "metric": "Connectedness: BTC net-receiver share of rolling windows (%)",
+      "paper_value": 72.5,
+      "actual_value": 72.4609375,
+      "tol_pct": 0.5,
+      "rel_diff_pct": 0.05387931034482758,
+      "status": "match",
+      "source_path": "k1025_v3.rolling_connectedness.btc_net_receiver_share_pct"
+    },
+    {
+      "metric": "Cholesky ordering gap in BTC net (pp) -- why KPPS is used",
+      "paper_value": 18.66,
+      "actual_value": 18.656427436013814,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.01914557334504761,
+      "status": "match",
+      "source_path": "k1025_v3.connectedness_full_sample.order_sensitivity.cholesky_btc_net_gap_pp"
+    },
+    {
+      "metric": "Cross-panel (QQQ/VXN): BTC generalized net (pp)",
+      "paper_value": 2.7,
+      "actual_value": 2.704762966286655,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.17640615876498605,
+      "status": "match",
+      "source_path": "k1025b_v2.verdict.kpps_net_btc_pp"
     },
     {
       "metric": "T6: OOS DM t-stat",
@@ -297,7 +324,7 @@
       "source_path": "k1025_v2.forecast_evaluation.oos_n"
     }
   ],
-  "generated_at": "2026-06-11T01:18:35+00:00",
+  "generated_at": "2026-07-13T16:23:49+00:00",
   "stage": "major-revision manuscript after 2026-06-11 audit sync",
   "notes": [
     "2026-06-11 gate scope aligned to the active manuscript after removing legacy K1025b claims.",

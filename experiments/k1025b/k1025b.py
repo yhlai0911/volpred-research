@@ -70,7 +70,14 @@ warnings.filterwarnings('ignore')
 np.random.seed(42)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-RESULTS_FILE = os.path.join(SCRIPT_DIR, 'k1025b_results.json')
+
+# k1025b_results.json holds the PUBLISHED (defective) numbers and is the audit
+# trail that paper/crypto-fear-channel/reproduce.py and the errata are written
+# against. This script now emits corrected KPPS values, so writing back to that
+# path would silently destroy the record of what was actually published while
+# keeping the same legacy key names. Emit to a distinct file instead.
+PUBLISHED_RECORD_FILE = os.path.join(SCRIPT_DIR, 'k1025b_results.json')
+RESULTS_FILE = os.path.join(SCRIPT_DIR, 'k1025b_results_kpps.json')
 
 # ============================================================
 # 1. DATA COLLECTION
@@ -482,7 +489,7 @@ if len(rolling_spillover) > 0:
     }
     print(f"  Total spillover: mean={spillover_summary['mean_total']:.2f}%, max={spillover_summary['max_total']:.2f}%, min={spillover_summary['min_total']:.2f}%")
     print(f"  From BTC: mean={spillover_summary['mean_from_btc']:.2f}%")
-    print(f"  Net BTC (from - to): mean={spillover_summary['mean_net_btc']:.2f}%")
+    print(f"  Net BTC (to - from; DY convention): mean={spillover_summary['mean_net_btc']:.2f}%")
 else:
     spillover_summary = {'error': 'No valid windows'}
     print("  ERROR: No valid spillover windows computed")
@@ -943,6 +950,13 @@ results = {
         'spillover_direction': spillover_summary.get('mean_net_btc', 'N/A'),
     }
 }
+
+if os.path.abspath(RESULTS_FILE) == os.path.abspath(PUBLISHED_RECORD_FILE):
+    raise RuntimeError(
+        "Refusing to overwrite k1025b_results.json: it is the immutable record of "
+        "the published (defective) numbers. Corrected output belongs in "
+        "k1025b_results_kpps.json."
+    )
 
 with open(RESULTS_FILE, 'w') as f:
     json.dump(results, f, indent=2, default=str)

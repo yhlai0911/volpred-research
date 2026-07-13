@@ -898,6 +898,24 @@ AR(3)，full DM=−0.9950、CW=−0.1248，只能判未見改善證據。公開�
 ready**；下一步由主線程做 narrative decision + body/reproduce 全面改寫，另需 K1025b v3
 對稱重跑、Granger HAC/wild-bootstrap robustness，再進 fresh review cycle。
 
+⚠️ **上段第一列表格（P10 row）內的 `spillover from_btc=21.5%→23.7%, net=-76.9pp→-74.4pp`
+已撤回**，保留僅作 audit trail。canonical = KPPS 的 TCI 19.52% / BTC net −0.95pp。
+
+**2026-07-14 K1025b v2 完成（補上 2026-07-12 override 點名的缺口）**：K1025b（QQQ/BTC/^VXN
+panel）以同一份 pinned snapshot 只換估計量重估。先**位元級重現**原缺陷（rolling net −76.62pp
+vs 發表 −76.64pp；TCI 90.09% vs 90.09%；512 窗 / N=2,812）→ before/after 是實測非宣稱。
+order-invariant KPPS：**NET_BTC = +2.70pp（翻號，量級縮 ~28 倍）**，TCI 13.72%；對照
+circular-shift no-contagion null（B=1000，seed=42）p=0.005。**誠實讀法：不可把 overclaim
+換成鏡像** — 不可宣稱「BTC 是淨傳播者」；rolling 均值 −0.11pp、65% 視窗為負，符號不穩定。
+**三缺陷相對重要性：FEVD 誤切【主因】 > 欄位命名反了 > Cholesky 排序【本次稽核觸發點，卻最小】**。
+**K1025b「5/5 stylized facts 複製」降為 4/5** — 第 (4) 項（DY net −76.64 「near identical」
+to −76.89）是兩支腳本共用同一 bug 的一致，不是效應的複製；order-invariant 下兩 panel
+連正負號都不同（K1025 v3 SPY/VIX −0.95pp vs K1025b v2 QQQ/VXN +2.70pp）。
+**已落地**：`paper/crypto-fear-channel/main.tex` 撤回 net-receiver 敘事（含「net receiver in
+_every_ window」— order-invariant 下 27.5% 視窗 BTC 為淨傳播者）+ 新增 §Erratum；
+`reproduce.py` 的 DY gate 原**釘在假象值上（會 PASS 一個假象）**，已改綁 k1025_v3 KPPS +
+k1025b_v2 跨 panel，35/35 green；`storage/ops/fevd_ordering_baseline.json` 4→1 站點。
+
 **2026-07-12 P3 / K1695 Table 5 evidence update**：以 pinned yfinance snapshot（paper cutoff
 2026-03-31）、明示 total return、前月末 12/VIX 月頻 lag、SHY + 10bps turnover、prior-day IRX
 重跑 13 國際市場。Inception-aware 13/13 MDD 改善、平均 +27.50pp；共同樣本

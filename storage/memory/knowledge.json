@@ -38855,5 +38855,19 @@
       "experiments/K1679/K1679_results.json"
     ],
     "confidence": 0.75
+  },
+  {
+    "item_id": "e3e4b1fa",
+    "category": "self-correction",
+    "content": "K1025b v2 — Cholesky FEVD 排序假象稽核：推翻「BTC 是波動淨接收者 NET=-76.64pp」。【撤回】k1025b 發表的 rolling mean_net_btc=-76.64pp / TCI=90.09%（QQQ/BTC/^VXN panel）是三個缺陷的產物，非效應。三缺陷相對重要性：(1) FEVD 陣列誤切【主因】— statsmodels fevd.decomp 實為 (n_vars, horizon, n_vars)，腳本註解成 (horizon, n, n) 並取 decomp[-1]，取到最後一個『變數』的表、n_vars 被讀成 10；TCI 因此被機械推到 ~90%（純雜訊上也是），NET 變成跨維度相減。單這一條就足以生出 -76.64pp。(2) 欄位命名反了（mean_from_btc 實為 column sum = 傳出）— 已 runtime assert 實測：NET 公式 column-row=to-from 結構正確，誤差 8.9e-16pp，故為標籤缺陷非符號錯誤。(3) Cholesky 排序相依 — 本次稽核的觸發點，卻是三者中最小的一條（NET 跨 6 排序跨度 11.55pp 且變號）。【更正】order-invariant KPPS 重估（pinned snapshot，seed=42，只換估計量不動樣本）：全樣本 NET_BTC=+2.70pp（翻號、量級縮 ~28 倍），TCI=13.72%；對照 circular-shift no-contagion null（B=1000）p=0.005。【誠實讀法 — 不可把 overclaim 換成鏡像】不可宣稱『BTC 是淨傳播者』。rolling 252d KPPS 均值 -0.11pp、65% 視窗為負 → 符號不穩定；全樣本 +2.70pp 雖過 null 但相對它取代的 -76.6pp 在經濟意義上可忽略。【跨 panel 複製失效】K1025b 原宣稱 5/5 複製 K1025，降為 4/5：第 (4) 項（DY net -76.64 'near identical' to -76.89）是兩支腳本共用同一 bug 的一致，不是效應的複製；order-invariant 下兩 panel 連正負號都不同（K1025 v3 SPY/VIX -0.95pp vs K1025b v2 QQQ/VXN +2.70pp）。【前置證明】先在同期 re-pinned snapshot 上重現原缺陷（rolling net -76.62 vs 發表 -76.64；TCI 90.09% vs 90.09%；512 窗 / N=2812）→ before/after 是實測非宣稱。注意不可稱『位元級』重現：對齊處理刻意改過，輸入非 byte-identical。【下游回溯更正已落地】paper/crypto-fear-channel/main.tex 撤回 net-receiver 敘事（含被直接推翻的『net receiver in every window』— order-invariant 下 27.5% 視窗 BTC 為淨傳播者）+ 新增 §Erratum；reproduce.py 的投稿 gate 原 byte-match 釘在假象值上（會 PASS 一個假象），已改綁 k1025_v3 KPPS + k1025b_v2 跨 panel，35/35 green；research_program.md L888 標撤回；storage/ops/fevd_ordering_baseline.json 4→1 站點，ratchet test 2 passed。【方法論教訓】audit 偵測器 scripts/audit_fevd_ordering.py 原判準只認『檔案自己文字裡有 sigma_u/ma_rep』→ 複製第二套 KPPS 判 OK、import 既有正解判 MISLABELED，等於獎勵實作分歧、處罰正確重用；已加 RE_KPPS_REUSE 辨識真正綁定 canonical 符號。",
+    "evidence": [
+      "experiments/k1025b/k1025b_v2.py",
+      "experiments/k1025b/k1025b_v2_results.json",
+      "experiments/k1025b/ordering_audit.md",
+      "experiments/k1025/k1025_v3_results.json",
+      "paper/crypto-fear-channel/reproduce_report.json"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-07-14T00:28:00.792480"
   }
 ]

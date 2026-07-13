@@ -19,10 +19,11 @@ product of THREE independent defects, not one:
   (2) MISLABELLED DIRECTIONAL FIELDS. `from_btc` is the COLUMN sum, which is what
       BTC TRANSMITS, but Diebold-Yilmaz's `FROM_i` means what i RECEIVES. So the
       published `spillover_index.mean_from_btc = 22.0` carries the opposite
-      meaning to its name. NOTE, and this is verified rather than assumed: the
-      NET formula itself (`column - row` = `to - from`) is STRUCTURALLY CORRECT
-      -- fed a proper (3, 3) matrix it reproduces the canonical
-      `connectedness()` net to 1e-9. This is a labelling defect that misleads a
+      meaning to its name. NOTE, and this is measured at runtime (see the
+      net-formula equivalence assert in main(), reported as
+      `net_formula_equivalence_check` in the results JSON): the NET formula itself
+      (`column - row` = `to - from`) is STRUCTURALLY CORRECT -- fed a proper (3, 3)
+      matrix it reproduces the canonical `connectedness()` net to within 1e-9pp. This is a labelling defect that misleads a
       reader, not a sign error. Defect (1) is what destroys the number: on the
       (10, 3) slab the column sums over 10 row-normalised rows while the row sums
       over 3, so the subtraction is dimensionally incoherent.
@@ -121,8 +122,9 @@ connectedness = _v3.connectedness  # DY table; row=receives, col=transmits
 def buggy_k1025b_index(res, horizon: int = FEVD_HORIZON) -> dict:
     """Reproduce k1025b.py's `compute_spillover_index` EXACTLY, defects included.
 
-    Reproduced so the before/after is MEASURED on identical data rather than
-    asserted. The returned numbers are a diagnostic of the error's size and must
+    Reproduced so the before/after is MEASURED on a re-pinned snapshot of the same
+    period rather than asserted (not a byte-identical input -- see load/align note
+    below). The returned numbers are a diagnostic of the error's size and must
     never be reported as connectedness estimates.
     """
     decomp = res.fevd(horizon).decomp
@@ -328,6 +330,26 @@ def main() -> dict:
     print(f"\n  KPPS (order-invariant)     TCI={gen['total_connectedness']:6.2f}%  "
           f"NET_BTC={gen['net']['BTC_RV']:+7.2f}pp")
 
+    # Defect (2) is a LABELLING defect, not a sign error -- but that has to be
+    # measured, not asserted. Feed a correctly-sliced (3, 3) matrix through the
+    # published script's own `column - row` formula and check it lands on the
+    # canonical net. If this ever fails, defect (2) is worse than we claim.
+    m_ok = generalized_fevd(res_var)
+    m_ok = m_ok / m_ok.sum(axis=1, keepdims=True)
+    btc = VAR_NAMES.index("BTC_RV")
+    legacy_net_btc = (m_ok[:, btc].sum() - m_ok[btc, btc]) - (
+        m_ok[btc, :].sum() - m_ok[btc, btc]
+    )
+    legacy_net_btc_pp = float(legacy_net_btc * 100.0)
+    canonical_net_btc_pp = float(gen["net"]["BTC_RV"])
+    net_formula_abs_err_pp = abs(legacy_net_btc_pp - canonical_net_btc_pp)
+    assert net_formula_abs_err_pp < 1e-9, (
+        f"published NET formula does not reproduce canonical net: "
+        f"{legacy_net_btc_pp} vs {canonical_net_btc_pp}"
+    )
+    print(f"  NET-formula equivalence check: |legacy - canonical| = "
+          f"{net_formula_abs_err_pp:.2e}pp  (labelling defect, not sign error)")
+
     # KPPS permutation invariance check
     gen_perm_nets = []
     for perm in permutations(VAR_NAMES):
@@ -429,8 +451,21 @@ def main() -> dict:
             "reproduced_rolling_net_btc_pp": float(roll.buggy_net_btc.mean()),
             "published_rolling_total_pct": 90.09,
             "reproduced_rolling_total_pct": float(roll.buggy_total.mean()),
-            "note": "Bit-level reproduction on identical data: the before/after below is "
-                    "MEASURED, not asserted.",
+            "note": "Reproduced on a re-pinned snapshot of the same period, NOT on a "
+                    "byte-identical input: the original script downloaded each ticker on "
+                    "its own index, while this one pins a single union CSV (see the "
+                    "alignment note in load_panel). Agreement is to 0.02pp on rolling net "
+                    "and 0.001pp on rolling total, with window count (512) and sample size "
+                    "(2,812) matching exactly. So the before/after is MEASURED, not "
+                    "asserted -- but 'bit-level' would be an overclaim.",
+        },
+        "net_formula_equivalence_check": {
+            "legacy_column_minus_row_net_btc_pp": legacy_net_btc_pp,
+            "canonical_connectedness_net_btc_pp": canonical_net_btc_pp,
+            "abs_err_pp": net_formula_abs_err_pp,
+            "note": "Measured, not asserted: on a correctly-sliced (3,3) matrix the "
+                    "published script's own column-minus-row formula lands on the canonical "
+                    "net. Defect (2) is therefore a labelling defect, not a sign error.",
         },
         "what_is_true_now": (
             f"Full sample, KPPS: NET_BTC = {obs_net:+.2f}pp (p={p_all:.3f} vs a "
@@ -458,10 +493,11 @@ def main() -> dict:
             "non-commensurable dimensions (a column summed over 10 row-normalised rows "
             "minus a row summed over 3). This alone produces the -76.64pp. "
             "(2) MISLABELLED FIELDS: `mean_from_btc` is the column sum = what BTC "
-            "TRANSMITS, while DY's FROM_i means what i RECEIVES. Verified, not assumed: "
-            "the NET formula (column - row = to - from) is structurally CORRECT and "
-            "reproduces canonical connectedness() to 1e-9 on a proper matrix -- so this "
-            "is a labelling defect, not a sign error. "
+            "TRANSMITS, while DY's FROM_i means what i RECEIVES. Measured at runtime "
+            "(see net_formula_equivalence_check): the NET formula (column - row = "
+            "to - from) is structurally CORRECT and reproduces canonical "
+            "connectedness() to <1e-9pp on a proper matrix -- so this is a labelling "
+            "defect, not a sign error. "
             f"(3) CHOLESKY ORDER DEPENDENCE: NET_BTC spans {chol_net_range:.2f}pp across "
             "the 6 orderings and changes sign, so even a correctly-sliced Cholesky "
             "cannot carry a directional claim."
