@@ -17177,5 +17177,16 @@
     "owner": "hourly-06",
     "commit": "ecc5e9bc7",
     "summary": "拒寫 P1 trending 題目「AI變現挑戰：從期權波動率解析科技巨頭的資本定價分歧」—— 主線程 3-layer 查重（layer-2 grep feed）發現同 narrative arc「AI 資本支出 × 波動率定價」的 general 文章已有 5 篇（mile_f5f4cb43 / mile_8a5e80b0 / mile_49616ac2 / mile_622a2b73 / mile_ed9e4626），本題是換外殼的第 6 篇。task 標 failed。\n\n關鍵在於：生成端 dedup_screen 與 pre-write CLI check_arc_dedup.py **兩道 gate 都回報 clean**。追根因發現這是 2026-07-13 同一 bug class 的 STRIKE 2（隔一天、同主題、同一批受害文章）。\n\n根因不是校準是 domain model：find_arc_duplicates 的每條 match 路徑最後都要過 _is_significant_overlap，而它先扣掉 _CORE_ENTITIES（US_EQUITY/VIX/TW_EQUITY）才要求 ≥1 distinctive 實體 → 「entities 全是 core」與「entities 空的」對 matcher 完全等價，都錨不上。7/13 修的 thin 判定寫成 `not entities and not refs`，只涵蓋後者，而且**住在 CLI 裡** —— 「什麼算錨點」是 matcher 的知識，判定放在 CLI 必然漂移，實測只花一天就漏出來。\n\n三層修正（commit ecc5e9bc7，非再 patch 一次）：\n- 底層邏輯：arc_dedup.arc_match_anchors() / is_arc_anchorless() 成為唯一 owner，精確鏡射 matcher\n- 流程：check_arc_dedup.py 與 topic_dedup.screen_topic 都改呼叫同一判定；生成端新增 verdict unjudged_thin_signature，不再把「錨不上」寫成 clean 進 task row\n- fail-open 不變（dedup-gate-audit.md）：exit 仍 0、仍不擋，只是不准再宣稱 clean，改交出 lexical near-misses。改成 block 會殺光所有無 ticker 的總經題 = 內容黑洞\n\n驗證：全套 2037 passed / 6 skipped。break-then-verify 已做 —— 新 regression 案例對舊定義回 CLEAN（FAIL）、對新定義回 unjudged。端到端跑 CLI，verdict 已變 unjudged_thin_signature 且主動交出 mile_f5f4cb43 / mile_622a2b73 / mile_d716099a 三篇雙胞胎（正是我手動 grep 找到的那批）。\n\n順帶讓兩個既有盲點首次可見（未在本班修，已併入既有 task platform_ops_arc_gate_macro_false_positive_trending_lane 的 (4)(5)，不另開競爭 task —— 校準會同時影響發文端，須與該 task 的 false-positive 一起處理）：\n(a) extract_entities 對加密資產全盲（USDT/USDC/DeFi 不認得 → 加密文章從未被 arc 審查過）\n(b) theme_saturation 的 probe 吃進 task title 的 [trending_repost] 前綴，污染固定 6 格的主題向量 → saturation 少算，差一篇沒過門檻\n\n教訓：gate 回「沒找到」時要先問**它有沒有能力找**；「我沒看」和「我看了很乾淨」在 JSON 上長得一模一樣。且修 gate 時測試要斷言 gate 會 fire，不能只斷言周邊產物會動 —— 7/13 那批測試只驗了 find_lexical_hints，從沒斷言 verdict 本身，這正是同一個洞能再漏一次的原因。"
+  },
+  {
+    "timestamp": "2026-07-14T06:36:43+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-81f5f0476",
+    "outcome": "succeeded",
+    "summary": "test: pin worktree side-effect guards",
+    "commit": "81f5f04769b511cd5499403af0fbbf8d59171a2d",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T22:37:08.884895+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
