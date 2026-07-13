@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import subprocess
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -216,6 +217,45 @@ def build_event_item(event_date: date, event_type: str, slot: str, days_before: 
     }
 
 
+def _schedule_dirty_before_write() -> bool:
+    """Is runtime_schedules.json already dirty before this job touches it?
+
+    If yes, someone else's edit is in the working tree; self-committing after our
+    write would sweep it into our commit (the exact theft PHASE-Z refuses to do).
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "diff", "--quiet", "--", str(SCHEDULE_PATH.relative_to(ROOT))],
+            cwd=str(ROOT), capture_output=True,
+        )
+    except OSError as exc:
+        print(f"[populate_events] WARN: git probe failed ({exc}) — skipping self-commit",
+              file=sys.stderr)
+        return True
+    return proc.returncode != 0
+
+
+def _commit_own_output(n_added: int) -> None:
+    """A job owns its output. This script is a scheduled writer of a TRACKED config
+    file; without a commit step its output sat foreign in the working tree for 9
+    consecutive fires (2026-07-13), escalating an hourly critical alert PHASE-Z
+    could never resolve — its authorship model correctly refuses to adopt config/
+    paths. Path-scoped commit only (never `git add -A`)."""
+    rel = str(SCHEDULE_PATH.relative_to(ROOT))
+    try:
+        subprocess.run(["git", "add", "--", rel], cwd=str(ROOT), check=True)
+        subprocess.run(
+            ["git", "commit", "-m",
+             f"ops(event-jobs): auto-populate {n_added} upcoming event slot(s)",
+             "--", rel],
+            cwd=str(ROOT), check=True,
+        )
+        print(f"[populate_events] committed {rel}")
+    except subprocess.CalledProcessError as exc:
+        print(f"[populate_events] WARN: self-commit failed rc={exc.returncode} — "
+              f"{rel} left uncommitted", file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true")
@@ -226,6 +266,8 @@ def main():
     if not (args.dry_run or args.apply):
         print("error: must specify --dry-run or --apply", file=sys.stderr)
         return 2
+
+    schedule_was_dirty = _schedule_dirty_before_write() if args.apply else False
 
     today = date.today()
     end = today + timedelta(days=args.days)
@@ -256,6 +298,12 @@ def main():
         with open(SCHEDULE_PATH, "w") as f:
             json.dump(cfg, f, ensure_ascii=False, indent=2)
         print(f"[populate_events] applied — event_jobs.items now {len(items)}")
+        if schedule_was_dirty:
+            print("[populate_events] WARN: runtime_schedules.json was already dirty "
+                  "before this run — leaving commit to that edit's author",
+                  file=sys.stderr)
+        else:
+            _commit_own_output(len(new_items))
     elif args.dry_run:
         print("[populate_events] dry-run only; rerun with --apply to write")
     return 0
