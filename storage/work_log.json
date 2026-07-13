@@ -17032,5 +17032,27 @@
     "task_id": "k1025_family_cholesky_fevd_ordering",
     "summary": "K1025 家族 Cholesky FEVD 排序假象：主線程完成前置診斷（v3 已自行改 KPPS 並帶 order_sensitivity；k1025b 仍用 Cholesky，mean_net_btc=-76.64 為主要暴露點；knowledge K1025 摘要未引用 FEVD 方向性數字，待 agent 全量核對）。研究型 xhigh agent 已 enqueue 至 compute queue（job agent-brief_k1025_fevd_ordering-092286，worktree dispatch-slot-1-a28656d9-k1025），不在 fire 內 spawn 以免撞 3000s cap。",
     "result": "enqueued_agent_job"
+  },
+  {
+    "timestamp": "2026-07-14T00:08:43+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-24a2b9aae",
+    "outcome": "succeeded",
+    "summary": "add provenance to daily holdings articles",
+    "commit": "24a2b9aae8dc95408f2b725c681fadbe0400a413",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T16:17:11.124528+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-14T00:16:29+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-bba8b8c6e",
+    "outcome": "succeeded",
+    "summary": "close content quality remediation",
+    "commit": "bba8b8c6e3d69fa97e86fdf7d806f4a0e30be4d7",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T16:17:11.124203+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
