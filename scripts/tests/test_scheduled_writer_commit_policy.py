@@ -192,6 +192,10 @@ def test_declared_concrete_outputs_are_tracked_in_the_correct_git_root() -> None
         ):
             return
         if output.startswith(frontend_prefix):
+            # frontend-v2-fix 是巢狀 git repo，被主 repo .gitignore —— CI checkout 沒有它。
+            # 該面向由前端 repo 自己的 gate 覆蓋，這裡只在本機有 checkout 時驗。
+            if not (frontend_root / ".git").exists():
+                return
             pathspec = output.removeprefix(frontend_prefix)
             matches = _git(frontend_root, "ls-files", "--", pathspec).stdout.splitlines()
         else:
