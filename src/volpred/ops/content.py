@@ -729,6 +729,64 @@ def _recent_narrative_cluster_pressure(
     }
 
 
+def release_cluster_planner_state(*, storage_dir: str = "storage") -> dict:
+    """What the REFILL side needs to know about the release-side cluster gate.
+
+    2026-07-13 layer-2 rootfix (boss msg 660「從底層徹底處理」). Layer 1 stopped a
+    registered series from locking itself out of release. But refill still topped the
+    pool up by COUNT alone, so it could queue N article tasks that all land in one
+    cluster — a pool that looks stocked and is entirely unreleasable. Refill must plan
+    against the same gate release enforces, so this exposes that gate's own state
+    instead of letting refill grow a second cluster heuristic (anti-stacking: the gate
+    is defined here, in one place).
+
+    `pipeline_counts` is the cluster composition of the drafts already waiting, i.e.
+    what a new task would be piling onto.
+    """
+    feed = load_feed(storage_dir)
+    k_cluster = _knowledge_experiment_clusters(storage_dir)
+    pressure = _recent_narrative_cluster_pressure(feed, k_cluster=k_cluster)
+    pipeline: Counter = Counter()
+    for item in feed:
+        if not isinstance(item, dict) or item.get("status") != "draft":
+            continue
+        cluster = _article_narrative_cluster(item, k_cluster)
+        if cluster:
+            pipeline[cluster] += 1
+    return {
+        "window": pressure["window"],
+        "threshold": pressure["threshold"],
+        "blocked_clusters": list(pressure["blocked_clusters"]),
+        "recent_counts": dict(pressure["counts"]),
+        "pipeline_counts": dict(pipeline),
+    }
+
+
+def make_narrative_cluster_classifier(*, storage_dir: str = "storage"):
+    """Classify a not-yet-written article (title/tags/K-ids) into a narrative cluster.
+
+    Same code path release uses on real feed items, so refill's idea of "what cluster
+    will this article land in" cannot drift from the gate that later judges it. Loads
+    the knowledge K→cluster map ONCE (knowledge.json is large) and returns a closure —
+    callers classify many candidates without re-reading it.
+    """
+    k_cluster = _knowledge_experiment_clusters(storage_dir)
+
+    def classify(
+        title: str, tags: list | None = None, k_ids: list | None = None
+    ) -> str | None:
+        item = {"title": str(title or ""), "tags": list(tags or [])}
+        cluster = _article_narrative_cluster(item, k_cluster)
+        if cluster:
+            return cluster
+        for kid in sorted(str(k).upper() for k in (k_ids or [])):
+            if kid in k_cluster:
+                return k_cluster[kid]
+        return None
+
+    return classify
+
+
 # Theme-flood gate: content-bigram catches near-COPIES, but the 2026-06-15
 # incident was same-THEME-different-wording (36 "complex model doesn't beat
 # simple" articles, bigram Jaccard < 0.45 between them). A theme signature +

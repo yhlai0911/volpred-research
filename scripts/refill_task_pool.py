@@ -1219,6 +1219,96 @@ def _ensure_candidates_fresh(max_age_hours: float = CANDIDATES_STALE_HOURS) -> d
         }
 
 
+class _ClusterBudget:
+    """Keep refill from stocking the pool with drafts release can never let out.
+
+    2026-07-13 layer-2 rootfix (boss msg 660). The release gate blocks a narrative
+    cluster once `threshold` of the last `window` published articles share it. Refill
+    was blind to that: it topped the pool up by COUNT, so a run could queue several
+    same-cluster article tasks. They became drafts, the gate blocked every one of
+    them, and the pool sat at "7 drafts / 0 releasable" while publishing droughted for
+    6.5h before a downstream WARN noticed.
+
+    The invariant here: a cluster may occupy at most `threshold` slots of the
+    pipeline (drafts waiting + article tasks in flight + what this run adds). Beyond
+    that the gate cannot drain them anyway, so queueing more is manufacturing dead
+    stock. This is a diversification budget, NOT a content block — the first task of
+    any cluster always passes, and when the candidate supply is monocultural we
+    honestly add fewer (surfacing the real content-supply gap) rather than padding the
+    pool with articles that can't ship.
+    """
+
+    def __init__(self, tasks: list):
+        self.enabled = True
+        self.blocked: set[str] = set()
+        self.counts: dict[str, int] = {}
+        self.cap = 2
+        self.constrained = 0
+        try:
+            from volpred.ops.content import (
+                make_narrative_cluster_classifier,
+                release_cluster_planner_state,
+            )
+
+            state = release_cluster_planner_state()
+            self._classify = make_narrative_cluster_classifier()
+            self.blocked = set(state.get("blocked_clusters") or [])
+            self.counts = dict(state.get("pipeline_counts") or {})
+            self.cap = max(1, int(state.get("threshold") or 2))
+        except Exception as e:  # noqa: BLE001 — fail-open: a planner fault must not dry the pool
+            _warn_refill(
+                "cluster budget unavailable; refill proceeds WITHOUT cluster planning "
+                "(pool may re-stock a blocked cluster)",
+                e,
+            )
+            self.enabled = False
+            return
+        # Article tasks already queued are pipeline stock too — they become drafts in
+        # this same cluster, so they must be charged against the budget or a slow
+        # writer queue lets refill re-stack the cluster tick after tick.
+        active = {"pending", "pending_main_thread", "in_progress", "claimed", "running"}
+        for t in tasks:
+            if not isinstance(t, dict) or str(t.get("task_type") or "") != "daily_article":
+                continue
+            if str(t.get("status") or "pending").lower() not in active:
+                continue
+            cluster = self._classify(str(t.get("title") or ""))
+            if cluster:
+                self.counts[cluster] = self.counts.get(cluster, 0) + 1
+
+    def cluster_of(self, cand: dict) -> str | None:
+        if not self.enabled:
+            return None
+        kid = cand.get("k_id")
+        return self._classify(
+            str(cand.get("title") or ""),
+            cand.get("tags") if isinstance(cand.get("tags"), list) else [],
+            [kid] if kid else [],
+        )
+
+    def is_blocked(self, cluster: str | None) -> bool:
+        return bool(cluster) and cluster in self.blocked
+
+    def allows(self, cluster: str | None) -> bool:
+        # Unclassifiable candidates are never budgeted — we can't reason about a
+        # cluster we can't name, and refusing them would dry the pool on a guess.
+        if not self.enabled or not cluster:
+            return True
+        return self.counts.get(cluster, 0) < self.cap
+
+    def charge(self, cluster: str | None) -> None:
+        if cluster:
+            self.counts[cluster] = self.counts.get(cluster, 0) + 1
+
+    def reject(self, kid: str, cluster: str) -> None:
+        self.constrained += 1
+        print(
+            f"  [refill] skip {kid}: cluster '{cluster}' already holds "
+            f"{self.counts.get(cluster, 0)}/{self.cap} pipeline slots "
+            "(release gate could not drain more)"
+        )
+
+
 def refill(
     target: int,
     dry_run: bool = False,
@@ -1357,6 +1447,10 @@ def refill(
     # can't meet target (better fewer-but-diverse than more-of-same).
     breached = _breached_clusters()
     deferred_dominant: list[dict] = []
+    # 2026-07-13 layer-2 rootfix: plan against the release-side cluster gate so the
+    # pool can't fill with drafts that gate will never let out (see _ClusterBudget).
+    budget = _ClusterBudget(tasks)
+    deferred_cluster_blocked: list[dict] = []
     for cand in pool:
         if len(new_entries) >= target:
             break
@@ -1436,6 +1530,18 @@ def refill(
         if _is_arc_duplicate_candidate(cand):
             print(f"  [refill] skip {kid}: narrative-arc duplicate (publisher would reject)")
             continue
+        # 10th belt (2026-07-13 layer-2 rootfix): the release-side narrative-cluster
+        # gate. A cluster it currently blocks is deferred (the block is transient —
+        # it clears as other clusters publish — so those candidates are retried in the
+        # last pass, not dropped); a cluster that already fills its pipeline quota is
+        # skipped outright, because more of it is dead stock.
+        cluster = budget.cluster_of(cand)
+        if budget.is_blocked(cluster):
+            deferred_cluster_blocked.append(cand)
+            continue
+        if not budget.allows(cluster):
+            budget.reject(kid, str(cluster))
+            continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         # Pick retry suffix if base id already used by terminal task
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
@@ -1447,6 +1553,7 @@ def refill(
         ):
             continue
         new_entries.append(_make_article_task(cand, priority, retry_suffix, emergency=emergency))
+        budget.charge(cluster)
 
     # Fill remaining target from deferred dominant-cluster candidates only if the
     # contrarian/non-dominant pool was insufficient (avoid a dry pool).
@@ -1468,6 +1575,10 @@ def refill(
         needed_audience = "general" if "general" not in audiences_covered else "research"
         if reader_facing_only and needed_audience == "research":
             continue
+        cluster = budget.cluster_of(cand)
+        if not budget.allows(cluster):
+            budget.reject(kid, str(cluster))
+            continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
         if (
@@ -1478,6 +1589,35 @@ def refill(
         ):
             continue
         new_entries.append(_make_article_task(cand, priority, retry_suffix, emergency=emergency))
+        budget.charge(cluster)
+
+    # Last pass: candidates whose cluster the release gate blocks RIGHT NOW. The block
+    # is transient (it clears once other clusters publish), so they're better stock
+    # than an empty pool — but still only up to the cluster's pipeline quota, which is
+    # what stops the pool from re-filling with an unreleasable monoculture.
+    for cand in deferred_cluster_blocked:
+        if len(new_entries) >= target:
+            break
+        kid = cand["k_id"]
+        cluster = budget.cluster_of(cand)
+        if not budget.allows(cluster):
+            budget.reject(kid, str(cluster))
+            continue
+        audiences_covered = cand.get("audiences_covered") or []
+        needed_audience = "general" if "general" not in audiences_covered else "research"
+        if reader_facing_only and needed_audience == "research":
+            continue
+        priority = _score_to_priority(int(cand.get("score") or 0))
+        retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
+        if (
+            needed_audience == "general"
+            and retry_suffix
+            and kid.upper() in any_feed_kids
+            and kid.upper() in succeeded_general_kids
+        ):
+            continue
+        new_entries.append(_make_article_task(cand, priority, retry_suffix, emergency=emergency))
+        budget.charge(cluster)
 
     # Research-backlog fallback (2026-06-08 boss mandate「徹底解決 warning」):
     # when the article candidate pool is exhausted (all uncovered K's are
@@ -1508,15 +1648,27 @@ def refill(
             new_entries.extend(journal_tasks)
             fallback_reason = "journal_discovery_dispatch"
 
+    # A refill that fell short because every remaining candidate sat in a cluster the
+    # release gate can't drain is a real content-supply gap, not a healthy no-op. Say
+    # so in the result so dispatch / dreaming can't read the shortfall as "pool fine".
+    cluster_note = (
+        {"cluster_constrained": budget.constrained}
+        if budget.constrained and len(new_entries) < target
+        else {}
+    )
+
     if not new_entries:
         return {
             "ok": True,
             "added": 0,
             "reason": (
-                "no_reader_facing_candidates_passing_filter"
+                "cluster_quota_exhausted"
+                if budget.constrained
+                else "no_reader_facing_candidates_passing_filter"
                 if reader_facing_only
                 else "no_new_candidates_passing_filter"
             ),
+            **cluster_note,
             **({"reader_facing_only": True} if reader_facing_only else {}),
             **({"candidates_freshness": freshness} if freshness else {}),
         }
@@ -1527,6 +1679,7 @@ def refill(
             "dry_run": True,
             "would_add": len(new_entries),
             "preview_ids": [e["id"] for e in new_entries],
+            **cluster_note,
             **({"fallback": fallback_reason} if fallback_reason else {}),
         **({"candidates_freshness": freshness} if freshness else {}),
         }
@@ -1537,6 +1690,7 @@ def refill(
         "ok": True,
         "added": len(new_entries),
         "added_ids": [e["id"] for e in new_entries],
+        **cluster_note,
         **({"fallback": fallback_reason} if fallback_reason else {}),
         **({"candidates_freshness": freshness} if freshness else {}),
     }
