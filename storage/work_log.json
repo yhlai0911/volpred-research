@@ -16840,5 +16840,25 @@
     "owner": "codex",
     "backfilled_at": "2026-07-13T06:53:13.636784+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T15:17:29+08:00",
+    "task_type": "paper_body",
+    "task_id": "abm_p0_1_narrative_unify",
+    "outcome": "succeeded",
+    "actor": "hourly-15",
+    "owner": "hourly-15",
+    "commit": "d37775ac9",
+    "summary": "vt-crowding-abm P0-1 敘事單一化：全文 11 處 tipping-point 殘留清除（brief 只點名 5 處），Figure 1 用 K1471 M=500 真資料重畫（無安全區/引爆區色帶，腳本綁 JSON 不硬編），§3.4 Welch t 保留但改寫為 pairwise level 比較。xelatex 33 頁乾淨，已 paper-update 同步。父任務 fable0711（餓死 40h）拆成 abm_p0_1..p0_5 五段。"
+  },
+  {
+    "timestamp": "2026-07-13T15:17:30+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_dispatch_supervisor_stale_code_20260713",
+    "outcome": "succeeded",
+    "actor": "hourly-15",
+    "owner": "hourly-15",
+    "commit": null,
+    "summary": "dispatch-supervisor stale code（procutil.py 改了沒生效）：以 reload --defer 排入重載，等本班 fire 清空 current_job 後自動 kickstart（waiter pid 81041）。fire 自己就是 in-flight worker，不能當場 reload — 這正是 --defer 的設計用途。"
   }
 ]
