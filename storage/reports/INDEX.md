@@ -1,12 +1,12 @@
 # Feed Index
 
-_Last built: 2026-07-13 06:35 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-13 06:51 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
 - Total articles: **1799**  (with thumbnail: 76)
 - Last 30 days: **286**
-- Total chars (content): 5,500,799
+- Total chars (content): 5,501,396
 
 **Status**: published=1594, archived=123, unpublished=62, retracted=12, draft=7, wont_fix=1
 
@@ -18,7 +18,7 @@ _Last built: 2026-07-13 06:35 UTC — source: `storage/reports/feed.json` (do NO
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
-| 2026-07-13 | `mile_b6a46796` | 🛩️ 無人載具｜EP-Final：核心六檔剛好追上大盤，代價是兩倍波動與三倍回撤 | general | general | draft | 5536 |  | 一般讀者, 無人載具, 無人機, 無人艇, 台股, 國防 |
+| 2026-07-13 | `mile_b6a46796` | 🛩️ 無人載具｜EP-Final：核心六檔剛好追上大盤，代價是兩倍波動與三倍回撤 | general | general | draft | 6133 |  | 一般讀者, 無人載具, 無人機, 無人艇, 台股, 國防 |
 | 2026-07-13 | `mile_abd517ba` | 🛩️ 無人載具｜EP3：2,100 億仍是草案，十家下游廠只有兩家走到量產或交船 | general | general | draft | 7180 |  | 一般讀者, 無人載具, 無人機, 無人艇, 台股, 國防 |
 | 2026-07-13 | `mile_aa4713db` | 🛩️ 無人載具｜EP4：六檔龍頭的六個面向，看多的全是熱度，撐得住的只有兩檔 | general | general | draft | 5125 |  | 一般讀者, 無人載具, 無人機, 個股分析, 台股, 國防 |
 | 2026-07-13 | `mile_cdc7f6e8` | 🛩️ 無人載具｜EP2：八家都能碰到機體、電池或馬達，零家拆出無人機營收 | general | general | draft | 5304 |  | 一般讀者, 無人載具, 無人機, 台股, 複合材料, 電池 |
