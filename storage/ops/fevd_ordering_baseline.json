@@ -2,9 +2,6 @@
   "_doc": "K865b class sweep 凍結 backlog：Cholesky-FEVD 排序假象。**只准變少** — 修好一個就從 sites 移除。新增站點會被 scripts/tests/test_fevd_ordering_ratchet.py 擋下。",
   "frozen_at": "2026-07-13",
   "sites": [
-    "experiments/k1025/k1025.py",
-    "experiments/k1025/k1025_v2.py",
-    "experiments/k1025b/k1025b.py",
     "experiments/k865/k865_vol_spillover_network.py"
   ],
   "resolved": [
@@ -13,6 +10,24 @@
       "resolved_at": "2026-07-13",
       "how": "compute_spillover_index 改用手刻 KPPS GFEVD (sigma_u + ma_rep)，Cholesky 降級為具名 order-dependent 診斷。方向性結論由 k628b_kpps_rerun.py 以 120 種排序全枚舉 + 無傳染 null floor 重估：SPY NET +43.7pp -> +14.6pp (原值恰為 120 種排序的最大值)；USO 由 RECEIVER 翻為 BALANCED。Granger 角色標籤不經 FEVD，逐項重現、全數存活。",
       "evidence": "experiments/k628b/k628b_kpps_rerun_results.json"
+    },
+    {
+      "site": "experiments/k1025/k1025.py",
+      "resolved_at": "2026-07-13",
+      "how": "compute_spillover_index 改用 canonical KPPS GFEVD（import k1025_v3.generalized_fevd，不再刻第二套）；Cholesky 降級為具名 order-dependent 診斷。方向性結論早於 2026-07-12 由 k1025_v3 推翻：TCI 90.11% -> 19.52%，BTC net -76.89pp -> -0.95pp。真正主因是 decomp[-1] 誤切（(n_vars,horizon,n_vars) 被當成 (horizon,n_vars,n_vars)），排序只是第三順位缺陷。",
+      "evidence": "experiments/k1025/k1025_v3_results.json"
+    },
+    {
+      "site": "experiments/k1025/k1025_v2.py",
+      "resolved_at": "2026-07-13",
+      "how": "同 k1025.py（v2 原封不動繼承 v1 的誤切）。published 90.1% / BTC net -74.4pp 全數撤回；canonical 值見 k1025_v3_results.json。注意 paper/crypto-fear-channel/main.tex 仍引用k1025_v2_results.json 的 -74.4pp，主線程須回溯更正。",
+      "evidence": "experiments/k1025/k1025_v3_results.json"
+    },
+    {
+      "site": "experiments/k1025b/k1025b.py",
+      "resolved_at": "2026-07-13",
+      "how": "compute_spillover_index 改用 canonical KPPS GFEVD；Cholesky 降級為具名診斷。k1025b_v2.py 在同一份資料上位元級重現原缺陷（rolling net -76.62 vs published -76.64，total 90.09 vs 90.09，512 窗），再做 3!=6 排序全枚舉 + 無傳染 null floor：BTC net -76.64pp -> +2.70pp（翻號，量級縮 28 倍，p=0.005 vs circular-shift null）；rolling KPPS 均值 -0.11pp、65% 窗為負 -> 無穩定方向。Cholesky NET across 6 orderings 跨 11.6pp 且變號。另發現：K1025b「5/5 複製 K1025」的第 (4) 項（DY net -76.64 vs -76.89「near identical」）是兩支腳本共用同一個 bug 的一致，不是效應的複製 —— order-invariant 下兩個 panel 連正負號都不同。",
+      "evidence": "experiments/k1025b/k1025b_v2_results.json"
     }
   ]
 }

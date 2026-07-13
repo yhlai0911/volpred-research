@@ -1,4 +1,20 @@
 """
+
+!! 2026-07-13 CORRECTION -- the Diebold-Yilmaz DIRECTIONAL numbers this script produced
+!! are WITHDRAWN. `compute_spillover_index` sliced statsmodels' FEVD as `decomp[-1]`,
+!! annotating it `(horizon, n_vars, n_vars)`. The real array is
+!! `(n_vars, horizon, n_vars)`, so that slice returned the last VARIABLE's table and the
+!! forecast horizon was read as assets. The ~90% total connectedness and the BTC
+!! "net receiver" figure are artifacts of that mis-slice, reproducible on pure noise.
+!! Compounding it, `results.fevd()` is the CHOLESKY decomposition, whose NET depends on
+!! the variable ordering (K865b class defect).
+!!
+!! Superseded by `k1025_v3.py` -> `k1025_v3_results.json` (pinned snapshot, KPPS
+!! generalized FEVD): TCI 19.52%, BTC net -0.95pp (was: 90.11% and -76.89pp).
+!! The decomposition below is now a real KPPS GFEVD, so RE-RUNNING THIS SCRIPT WILL NOT
+!! REPRODUCE the withdrawn spillover fields still stored in `k1025_results.json` --
+!! that file is kept unedited as the historical record of what was published.
+!! Granger / asymmetry / quantile results never touched the FEVD and are unaffected.
 K1025: Crypto Fear Channel — BTC Vol Spillover to Equity
 =========================================================
 
@@ -325,8 +341,33 @@ print(f"    β(0.95)/β(0.50) = {beta_95/beta_50:.2f} (right tail amplification)
 print("\n[5/7] Rolling Diebold-Yilmaz Spillover Index (252d window)...")
 from statsmodels.tsa.api import VAR
 
+import sys
+from pathlib import Path as _Path
+
+_REPO_ROOT = _Path(__file__).resolve().parents[2]
+# --- 2026-07-13 CORRECTION: canonical order-invariant FEVD -------------------------
+def _canonical_fevd():
+    """Load the canonical KPPS/Cholesky FEVD functions from k1025_v3.py.
+
+    Imported, not re-implemented. k1025_v3 guards its entrypoint with __main__, so
+    loading it here has no side effects.
+    """
+    import importlib.util
+
+    path = _REPO_ROOT / "experiments" / "k1025" / "k1025_v3.py"
+    spec = importlib.util.spec_from_file_location("k1025_v3", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def compute_spillover_index(data, horizon=10):
-    """Compute Diebold-Yilmaz (2012) spillover index from VAR."""
+    """Diebold-Yilmaz (2012) spillover index from the KPPS GENERALIZED FEVD.
+
+    Order-invariant (Koop-Pesaran-Potter 1996; Pesaran-Shin 1998). The Cholesky
+    table is returned alongside under explicitly order-dependent keys so the
+    ordering artifact stays visible instead of being quietly dropped.
+    """
     try:
         model = VAR(data)
         # Select optimal lag by AIC, cap at 5 for stability
@@ -337,37 +378,50 @@ def compute_spillover_index(data, horizon=10):
 
         results = model.fit(optimal_lag)
 
-        # Forecast error variance decomposition
-        fevd = results.fevd(horizon)
+        # 2026-07-13 CORRECTION. The previous body was:
+        #     decomp = fevd.decomp        # annotated (horizon, n_vars, n_vars)
+        #     spillover_matrix = decomp[-1]
+        # statsmodels' FEVD.decomp is (n_vars, horizon, n_vars), so decomp[-1] returned
+        # the last VARIABLE's (horizon, n) table -- forecast horizon steps were read as
+        # assets. `n = shape[0]` then became the horizon (10) instead of n_vars (3),
+        # which drives the total index to ~90% on ANY data (including pure noise) and
+        # makes the NET subtraction dimensionally incoherent. Every directional number
+        # this function used to return is withdrawn; see the banner at the top.
+        #
+        # The order-invariant KPPS estimator is IMPORTED from k1025_v3.py, never
+        # re-implemented here: a second hand-rolled GFEVD is how two implementations
+        # silently drift apart.
+        _v3 = _canonical_fevd()
+        names = tuple(data.columns)
+        btc = names[0]
 
-        # Spillover matrix: each row i shows proportion of variable i's
-        # forecast error variance due to shocks in variable j
-        decomp = fevd.decomp  # shape: (horizon, n_vars, n_vars)
-        # Use the last horizon step
-        spillover_matrix = decomp[-1]  # (n_vars, n_vars)
-
-        # Normalize rows to sum to 1
-        row_sums = spillover_matrix.sum(axis=1, keepdims=True)
-        spillover_matrix_norm = spillover_matrix / row_sums
-
-        # Total spillover index: sum of off-diagonal / total * 100
-        n = spillover_matrix_norm.shape[0]
-        off_diag = spillover_matrix_norm.sum() - np.trace(spillover_matrix_norm)
-        total_spillover = off_diag / n * 100
-
-        # Directional: from BTC to others
-        # BTC is column 0 (or whichever index)
-        from_btc = spillover_matrix_norm[:, 0].sum() - spillover_matrix_norm[0, 0]
-        to_btc = spillover_matrix_norm[0, :].sum() - spillover_matrix_norm[0, 0]
+        gen = _v3.connectedness(_v3.generalized_fevd(results, horizon), names=names)
+        chol = _v3.connectedness(_v3.cholesky_fevd(results, horizon), names=names)
 
         return {
-            'total_spillover': float(total_spillover),
-            'from_btc': float(from_btc * 100),
-            'to_btc': float(to_btc * 100),
-            'net_btc': float((from_btc - to_btc) * 100),
-            'lag': int(optimal_lag)
+            'total_spillover': float(gen['total_connectedness']),
+            # Diebold-Yilmaz convention: FROM_i = what i RECEIVES, TO_i = what i
+            # TRANSMITS. The withdrawn fields of these same names carried the OPPOSITE
+            # meaning (`from_btc` was the column sum, i.e. what BTC transmits).
+            'from_btc': float(gen['from_others'][btc]),
+            'to_btc': float(gen['to_others'][btc]),
+            'net_btc': float(gen['net'][btc]),
+            'lag': int(optimal_lag),
+            'cholesky_order_dependent_diagnostic': {
+                'variable_order': list(names),
+                'total_spillover': float(chol['total_connectedness']),
+                'net_btc': float(chol['net'][btc]),
+                'warning': (
+                    'Cholesky NET depends on the variable ORDER and cannot separate a '
+                    'true transmitter from one that happens to be listed first. '
+                    'Diagnostic only -- never a directional result.'
+                ),
+            },
         }
     except Exception as e:
+        # no-silent-fallback: a swallowed failure here used to return None and vanish.
+        print(f"  [warn] compute_spillover_index failed: {type(e).__name__}: {e}",
+              file=sys.stderr)
         return None
 
 # Prepare data for VAR: use changes in RV and VIX for stationarity

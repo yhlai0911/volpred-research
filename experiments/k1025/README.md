@@ -3,6 +3,25 @@
 > **v3 (2026-07-12) 是 canonical。`k1025_v2_results.json` 與 `k1025_results.json` 的所有
 > Diebold-Yilmaz 數字 SUPERSEDED — 它們建立在一個 FEVD 取軸 bug 上（見 §v3）。
 > 兩份舊 JSON 依「永遠修流程，不修資料」原則原地保留，未手改。**
+>
+> ### 2026-07-13 補充：排序 robustness 已完成 + 腳本已停用舊估計量
+>
+> **排序假象檢查（K865b class sweep 觸發）已做完，結論 order-invariant：**
+> - Cholesky NET_BTC 跨排序 gap = **18.66pp**（會翻號）→ Cholesky **無法**承載方向性結論
+> - KPPS generalized FEVD 跨排序 gap = **5.6e-12pp** → order-invariant ✅
+> - Canonical 值：TCI **19.52%**、BTC NET **−0.95pp**（原 v1/v2：90.11%、−76.89pp）
+>
+> **`k1025.py` / `k1025_v2.py` 的 `compute_spillover_index` 已改用 canonical KPPS**
+> （import `k1025_v3.generalized_fevd`，不重寫第二套），Cholesky 降級為具名
+> `cholesky_order_dependent_diagnostic`，並加 `!!` 撤回 banner。
+> ⚠️ 因此**重跑舊腳本不會再重現** `k1025_results.json` / `k1025_v2_results.json` 裡
+> 已撤回的 spillover 欄位 —— 那兩份 JSON 是「當時發表了什麼」的歷史紀錄，刻意不改。
+>
+> **姊妹實驗 K1025b（QQQ/^VXN panel）同樣已更正** → `experiments/k1025b/k1025b_v2.py`：
+> BTC NET **−76.64pp → +2.70pp（翻號）**。注意 K1025b 原本宣稱「DY net 與 K1025 near-identical，
+> 5/5 複製」—— 那是**兩支腳本共用同一個 bug** 的一致，order-invariant 下兩 panel 連正負號都不同。
+> 完整下游污染清單（含 `paper/crypto-fear-channel/main.tex` 與 `reproduce.py` gate）：
+> **[`../k1025b/ordering_audit.md`](../k1025b/ordering_audit.md)**
 
 ## 動機
 
