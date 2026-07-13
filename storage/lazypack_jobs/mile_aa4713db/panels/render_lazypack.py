@@ -183,10 +183,10 @@ def require_article_phrases(article: str) -> None:
         "量產出貨熱顯像無人機到澳洲",
         "已交付兩艘無人水面載具",
         "長榮航太是取得國防部監偵型無人機的供應商資格",
-        "龍德造船的獲利來自造軍艦",
-        "股東權益報酬率來自飛機維修這門老生意",
+        "公開資料沒有拆出無人艇的營收與獲利",
+        "同樣沒有揭露無人機營收占比",
         "最像純無人機股的雷虎，本業還在虧",
-        "純度和獲利，目前是反向的",
+        "純度與獲利，目前沒有公開證據能畫上等號",
         "帳面上的稅後淨利",
         "來自業外損益",
     )
@@ -954,14 +954,14 @@ def render_panel_4(pkg: Package, stats: dict[str, Any]) -> None:
     pill(fig, tracked, 0.385, 0.542, 0.230, 0.042, "兩張名單唯一交集：龍德造船", face=NAVY, color=PAPER, size=9.3, name="p4-overlap")
 
     box(fig, 0.055, 0.430, 0.890, 0.085, face=AMBER_SOFT, edge="#E8D0A4")
-    add_text(fig, tracked, 0.082, 0.494, "純度與獲利，目前是反向的", size=20.0, color=INK, weight="bold", name="p4-conclusion")
+    add_text(fig, tracked, 0.082, 0.494, "純度 ≠ 已證明的獲利來源", size=18.0, color=INK, weight="bold", name="p4-conclusion")
     thunder_margin = latest_num(pkg, "雷虎", "operating_margin")
     add_text(
         fig,
         tracked,
         0.500,
         0.493,
-        f"龍德獲利主體是軍艦；長榮是飛機維修、無人機僅供應商資格；雷虎本業 {pct(thunder_margin, 1)}。",
+        f"龍德、長榮均未拆無人載具營收與獲利；長榮僅具供應商資格；雷虎本業 {pct(thunder_margin, 1)}。",
         size=9.2,
         color=AMBER,
         wrap=42,
