@@ -46,6 +46,17 @@ RE_SM_FEVD = re.compile(r"\.fevd\s*\(")
 RE_KPPS_SIGNAL = re.compile(
     r"sigma_u|ma_rep|irf\s*\([^)]*orth\s*=\s*False|orth\s*=\s*False", re.I
 )
+# 重用 canonical KPPS：從別的模組取得 order-invariant estimator，而非自己再刻一份。
+# 2026-07-13 加：原本只認「檔案自己的文字裡有 sigma_u / ma_rep」，於是
+# **複製貼上第二份實作 = 通過，import 既有正解 = 被判違規** —— 偵測器獎勵了會製造
+# 分歧的行為，處罰了正確的行為（k1025b_v2.py 沿用 k1025_v3.generalized_fevd 卻被判
+# MISLABELED）。這裡認的是「真的綁定了 canonical 符號」（module 屬性存取或 import），
+# 不是散文裡提到 generalized —— 只寫註解宣稱自己是 GFEVD 仍然抓得到。
+RE_KPPS_REUSE = re.compile(
+    r"from\s+[\w.]*\s+import[^\n]*\bgeneralized_fevd\b"  # from x import generalized_fevd
+    r"|\b\w+\.generalized_fevd\b"  # _v3.generalized_fevd
+    r"|\bgeneralized_fevd\s*=\s*\w+\.\w+",  # generalized_fevd = _v3.generalized_fevd
+)
 # 方向性宣稱：淨傳染源 / 淨接收者
 RE_DIRECTIONAL = re.compile(
     r"\bnet_|\bnet\s*=|['\"]net['\"]|transmitter|receiver|淨傳染|淨接收", re.I
@@ -70,7 +81,7 @@ def classify(path: Path) -> Site | None:
 
     calls_sm = bool(RE_SM_FEVD.search(src))
     # 只在「有估 FEVD」的檔案上判斷；沒碰 FEVD 的不入池
-    if not calls_sm and not RE_KPPS_SIGNAL.search(src):
+    if not calls_sm and not RE_KPPS_SIGNAL.search(src) and not RE_KPPS_REUSE.search(src):
         return None
     if not calls_sm and not RE_CLAIMS_GENERALIZED.search(src):
         # 有 sigma_u 但完全沒提 FEVD/GFEVD — 不是連通性實驗（例：GARCH 殘差共變異）
@@ -80,12 +91,20 @@ def classify(path: Path) -> Site | None:
     # 判準是「有沒有手刻 KPPS」，**不是**「有沒有呼叫 .fevd()」。正確的排序穩健實驗
     # （k865b / k1025_v3）會刻意兩者都算：Cholesky 當對照組，KPPS 當正解。若因為
     # 它也呼叫了 .fevd() 就判它違規，等於處罰做對的人。
-    has_kpps = bool(RE_KPPS_SIGNAL.search(src))
+    hand_rolled_kpps = bool(RE_KPPS_SIGNAL.search(src))
+    reuses_kpps = bool(RE_KPPS_REUSE.search(src))
+    has_kpps = hand_rolled_kpps or reuses_kpps
     directional = bool(RE_DIRECTIONAL.search(src))
     claims_gen = bool(RE_CLAIMS_GENERALIZED.search(src))
 
     if has_kpps:
-        cls, note = "OK_GFEVD", "手刻 KPPS，order-invariant"
+        cls = "OK_GFEVD"
+        note = (
+            "手刻 KPPS，order-invariant"
+            if hand_rolled_kpps
+            else "重用 canonical KPPS（import generalized_fevd），order-invariant — "
+            "重用優於再刻一份，兩套實作分歧才是下一個 bug"
+        )
     elif not directional:
         cls, note = (
             "OK_NO_DIR",
