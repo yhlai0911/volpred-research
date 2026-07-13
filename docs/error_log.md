@@ -6850,3 +6850,38 @@ Blue UAS 公開資料、清單移交公告及 Green→Blue 路徑說明，明示
 也不把「未找到公開證據」寫成「未取得」。立院事件一律逐字使用官方議程名稱與會議性質；
 公司文件優先連可導覽的投資人專區，並在發佈前做 HTTP 狀態檢查。所有回溯更正均須同時修改
 來源稿、產生程式、正式文章 errata 與系列 registry，不能只修 reader-facing JSON。
+
+## 2026-07-13 — 排程 writer 沒有 Git owner 是類別漏洞，不能逐案補 `git commit`
+
+**症狀**：`refresh_paper_snapshots`、lazypack、`populate_upcoming_events` 先後把有效產出留在共享
+worktree；PHASE-Z 因 authorship boundary 正確拒絕代收，卻只能每班把同一批 foreign files 重複告警。
+既有兩個自提交流程也不完整：paper snapshot 沒有 pre-write dirty guard；event populate 只用
+`git diff --quiet`，會漏掉 staged-only target。work-log wrapper 的舊 `git commit` 無 pathspec，可能夾帶
+另一 session 已 staged 的檔案。
+
+**全量根因**：系統沒有 canonical 的「schedule declaration → 實際 tracked output → 唯一 commit owner」
+契約，稽核也只看已出事的 instance。完整走訪 `runtime_schedules.json` 後，母體是 79 筆（44 個直接
+process、2 remote、9 session、24 event）及 19 個 installed LaunchAgent；漏網還包括 23 個 FRED CSV、
+daily update 的 metrics/report indices/failed queue/closure config、nested frontend metrics 與 5 個 PDF、
+market closure、failed-sync drain，以及 conditional feed writer。只看 `.gitignore` 也會漏掉
+tracked-but-ignored 的空 lock sentinel。
+
+**修正**：新增 `config/scheduled_writer_ownership.json` 與唯一 ratchet
+`scripts/tests/test_scheduled_writer_commit_policy.py`，對 process/session/event ID 做 exact-set coverage；
+concrete output 必須在正確 Git root 確實 tracked，豁免需附理由。共用 self-commit helper 先逐路徑用
+`git status --porcelain=v1 --untracked-files=all` 捕捉 staged、unstaged、untracked、deletion；髒路徑在
+寫入前即排除／中止，寫完只用 literal pathspec + `git commit --only`。`.failed_supabase_syncs.json` 與
+`.knowledge_index_state.json` 補進 exact PHASE-Z machine-state boundary；nested frontend 在自己的 Git
+root 獨立 guard/commit。完整清單見
+`docs/governance/2026-07/scheduled_writer_commit_class_sweep.md`。
+
+**仍未宣稱解決的邊界**：本機有五個 job 同時由 crontab 與 loaded LaunchAgent 觸發；兩份同 job 都在
+probe 時看見 clean，仍可能形成 snapshot→write TOCTOU，必須另做 trigger 去重或共用 lock。開工前已
+dirty 的 nested metrics/PDF 也未被本次偷 commit；新 writer 只會跳過。動態 session/event output 仍由
+receipt exact paths + supervisor pre-fire baseline 定義 owner，不可擴大 PHASE-Z 去吞 authored code、paper
+或 research output。
+
+**防再犯**：新增/改排程時，除了 wrapper manifest，必須同時更新 scheduled-writer ownership policy；
+任何 tracked writer 只能三選一：安全 self-commit、明確 PHASE-Z machine state、或附可驗證理由的 delivery/
+no-output exemption。`git add -- path` 不足以保證安全，commit 也必須 `--only -- path`；dirty check 必須
+發生在寫入前且涵蓋 index，不能只在寫完後決定「不 commit」。

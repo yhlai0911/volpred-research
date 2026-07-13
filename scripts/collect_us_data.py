@@ -18,6 +18,13 @@ import io
 
 PROJECT = Path(__file__).resolve().parent.parent
 VENV_PYTHON = PROJECT / ".venv" / "bin" / "python"
+sys.path.insert(0, str(PROJECT / "src"))
+
+from volpred.ops.scheduled_writer_commit import (  # noqa: E402
+    commit_owned_outputs,
+    dirty_paths_before_write,
+    writable_output_paths,
+)
 
 # 所有策略和研究需要的日頻資產
 DAILY_TICKERS = ["SPY", "GLD", "TLT", "QQQ", "EEM", "^VIX", "^VIX3M", "^N225"]
@@ -139,6 +146,20 @@ def _collect_fred():
 
     api_url = "https://api.stlouisfed.org/fred/series/observations"
     macro_dir = PROJECT / "storage" / "macro"
+    output_paths = [macro_dir / f"fred_{ticker}.csv" for ticker in sorted(FRED_TICKERS)]
+    dirty_before = dirty_paths_before_write(
+        PROJECT,
+        output_paths,
+        label="collect_us_data",
+    )
+    writable_paths = set(
+        writable_output_paths(
+            PROJECT,
+            output_paths,
+            dirty_before=dirty_before,
+            label="collect_us_data",
+        )
+    )
     updated = 0
     failed = 0
     stale_warn = []
@@ -166,6 +187,11 @@ def _collect_fred():
 
     for ticker in sorted(FRED_TICKERS):
         outpath = macro_dir / f"fred_{ticker}.csv"
+        output_rel = outpath.relative_to(PROJECT).as_posix()
+        if output_rel not in writable_paths:
+            print(f"  ⚠️  {ticker:20s}: pre-existing dirty output; skipped")
+            failed += 1
+            continue
         try:
             params = {
                 "series_id": ticker,
@@ -202,6 +228,13 @@ def _collect_fred():
     print(f"  FRED: {updated} updated, {failed} failed")
     if stale_warn:
         print(f"  ⚠️  FRED daily series >14d stale (check FRED publish): {stale_warn}")
+    commit_owned_outputs(
+        PROJECT,
+        output_paths,
+        dirty_before=dirty_before,
+        message=f"data(fred): refresh {updated} scheduled macro series",
+        label="collect_us_data",
+    )
 
 
 if __name__ == "__main__":

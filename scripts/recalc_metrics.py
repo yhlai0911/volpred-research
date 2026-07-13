@@ -134,7 +134,7 @@ def calc_metrics(entries: list, initial_capital: int = 1000000) -> dict:
     }
 
 
-def recalc_all():
+def recalc_all(*, frontend_targets: list[Path] | None = None):
     """Recalculate metrics for all strategies in paper_trading.json."""
     pt_path = PROJECT / "storage" / "paper_trading.json"
     if not pt_path.exists():
@@ -171,7 +171,12 @@ def recalc_all():
 
     synced_targets = []
     metrics_json = json.dumps(metrics, indent=2, ensure_ascii=False)
-    for target_path in get_strategy_metrics_sync_paths(active_only=True):
+    targets = (
+        get_strategy_metrics_sync_paths(active_only=True)
+        if frontend_targets is None
+        else frontend_targets
+    )
+    for target_path in targets:
         target_path.parent.mkdir(parents=True, exist_ok=True)
         target_path.write_text(metrics_json)
         synced_targets.append(str(target_path.relative_to(PROJECT)))

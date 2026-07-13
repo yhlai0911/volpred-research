@@ -1,0 +1,431 @@
+{
+  "metadata": {
+    "purpose": "Full-population ownership policy for unattended runtime writers of Git-tracked paths.",
+    "runtime_process_sections": [
+      "system_crontab.items",
+      "cron_jobs",
+      "daemons"
+    ],
+    "non_process_sections": {
+      "remote_triggers.items": {
+        "ids": ["platform_ops_patrol", "token_usage_daily_report"],
+        "policy": "inactive_remote_trigger",
+        "tracked_outputs": [],
+        "reason": "Both remote triggers are disabled compatibility declarations; they do not execute a local writer."
+      },
+      "session_crons.items": {
+        "jobs": {
+          "daily_planning": {
+            "policy": "agent_delivery_contract",
+            "tracked_outputs": ["storage/next_tasks.json"],
+            "reason": "A prompt-driven session may materialize queue work; the agent/supervisor delivery path owns the resulting exact paths."
+          },
+          "continue_task": {
+            "policy": "agent_delivery_contract",
+            "tracked_outputs": ["storage/next_tasks.json", "storage/.failed_supabase_syncs.json", "dynamic task outputs"],
+            "reason": "The session dispatches normal agents and remediation; PHASE-Z owns machine state and each agent owns its declared deliverables."
+          },
+          "platform_patrol": {
+            "policy": "agent_delivery_contract",
+            "tracked_outputs": ["storage/next_tasks.json", "dynamic remediation outputs"],
+            "reason": "Prompt-driven findings become queue rows or normal agent work, not an unattended static writer."
+          },
+          "git_sync": {
+            "policy": "git_maintainer_contract",
+            "tracked_outputs": ["dynamic already-authored paths"],
+            "reason": "The session is an explicit Git maintainer and may only commit already-attributed work after inspecting status."
+          },
+          "knowledge_index_check": {
+            "policy": "phase_z_machine_state",
+            "tracked_outputs": ["storage/.knowledge_index_state.json"],
+            "reason": "The fixed index freshness ledger is scheduled machine state; the index database itself is ignored."
+          },
+          "token_usage_daily": {
+            "policy": "phase_z_machine_state",
+            "tracked_outputs": ["storage/reports/token_usage/**"],
+            "reason": "Daily and weekly token reports already sit inside the token-usage PHASE-Z namespace."
+          },
+          "ndc_indicator_refresh": {
+            "policy": "agent_delivery_contract",
+            "tracked_outputs": ["storage/macro/tw_dgbas_bci_m.csv"],
+            "reason": "The scheduled check is read-only; a stale result explicitly expands into an agent-reviewed manual update."
+          },
+          "codex_quota_resume_2026_04_24": {
+            "policy": "expired_one_shot_agent_contract",
+            "tracked_outputs": ["storage/next_tasks.json", "storage/work_log.json", "dynamic task outputs"],
+            "reason": "Past-dated one-shot prompt; any replay uses the normal queue and agent delivery contracts."
+          },
+          "journal_topic_scan": {
+            "policy": "agent_delivery_contract",
+            "tracked_outputs": ["research_program.md", "storage/next_tasks.json"],
+            "reason": "Authored research planning is reviewed and committed by the spawned agent/session; it must never be adopted as machine state."
+          }
+        }
+      },
+      "event_jobs.items": {
+        "ids": [
+          "nfp-2026-06-05-t7", "nfp-2026-06-05-t2", "nfp-2026-06-05-t0",
+          "fomc-2026-06-17-t7", "fomc-2026-06-17-t2", "fomc-2026-06-17-t0",
+          "tsmc-revenue-2026-06-10-t0",
+          "cpi-us-2026-06-11-t2", "cpi-us-2026-06-11-t0",
+          "nfp-2026-07-03-t7", "nfp-2026-07-03-t2", "nfp-2026-07-03-t0",
+          "cpi-us-2026-07-14-t2", "cpi-us-2026-07-14-t0",
+          "tsmc-revenue-2026-07-10-t0",
+          "fomc-2026-07-29-t7", "fomc-2026-07-29-t2", "fomc-2026-07-29-t0",
+          "nfp-2026-08-07-t7", "nfp-2026-08-07-t2", "nfp-2026-08-07-t0",
+          "cpi-us-2026-08-12-t2", "cpi-us-2026-08-12-t0",
+          "tsmc-revenue-2026-08-10-t0"
+        ],
+        "policy": "event_delivery_contract",
+        "tracked_outputs": ["storage/next_tasks.json", "storage/ops/event_ledger/**", "dynamic article outputs"],
+        "reason": "Each template first materializes PHASE-Z queue/ledger state; the later content agent owns and commits its declared article outputs."
+      },
+      "idle_policy": {
+        "policy": "configuration_only",
+        "tracked_outputs": [],
+        "reason": "Selection policy only; it has no executable entrypoint."
+      }
+    }
+  },
+  "jobs": {
+    "log_rotate": {
+      "entrypoint": "scripts/cron_log_rotate.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Only rotates ignored cron and ~/.volpred log files."
+    },
+    "codex_update": {
+      "entrypoint": "scripts/cron_codex_update.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Updates the external npm installation and may send a notification; repository outputs are logs only."
+    },
+    "arxiv_scan": {
+      "entrypoint": "scripts/scan_arxiv_topics.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/research/arxiv_candidates.json"],
+      "phase_z_probe_paths": ["storage/research/arxiv_candidates.json"],
+      "reason": "Candidate staging is scheduled machine state under storage/research/."
+    },
+    "collect_tw_data": {
+      "entrypoint": "scripts/collect_tw_data.py",
+      "policy": "tracked_content_invariant",
+      "tracked_outputs": ["data/vixtwn/.vixtwn_daily.lock"],
+      "reason": "The only tracked path opened by the job is a permanently empty flock sentinel; touch/flock changes no Git-tracked bytes. All market data outputs are ignored."
+    },
+    "collect_us_data": {
+      "entrypoint": "scripts/collect_us_data.py",
+      "commit_owner": "scripts/collect_us_data.py",
+      "policy": "self_commit",
+      "tracked_outputs": ["storage/macro/fred_*.csv"],
+      "reason": "The Monday FRED branch rewrites tracked macro CSVs and now guards and commits only its clean-before-write paths."
+    },
+    "daily_update": {
+      "entrypoint": "scripts/daily_update.py",
+      "commit_owner": "scripts/daily_update.py",
+      "policy": "self_commit",
+      "tracked_outputs": [
+        "storage/paper_trading.json",
+        "storage/reports/feed.json",
+        "storage/strategy_metrics.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/.failed_supabase_syncs.json",
+        "config/market_closures_adhoc.json",
+        "frontend-v2-fix/data/strategy_metrics.json"
+      ],
+      "reason": "The morning writer has both parent-repo and nested-frontend tracked outputs; each Git root is guarded and committed separately."
+    },
+    "daily_update_intraday": {
+      "entrypoint": "scripts/daily_update.py",
+      "commit_owner": "scripts/daily_update.py",
+      "policy": "self_commit",
+      "tracked_outputs": [
+        "storage/paper_trading.json",
+        "storage/reports/feed.json",
+        "storage/strategy_metrics.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/.failed_supabase_syncs.json",
+        "config/market_closures_adhoc.json",
+        "frontend-v2-fix/data/strategy_metrics.json"
+      ],
+      "reason": "The intraday wrapper invokes the same guarded writer as the morning job."
+    },
+    "radar_strategy_snapshot": {
+      "entrypoint": "scripts/radar_strategy_snapshot_daily.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Writes the Supabase radar_strategy_snapshots table only."
+    },
+    "release_pool": {
+      "entrypoint": "scripts/cron_release_pool.sh",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/reports/feed.json", "storage/.failed_supabase_syncs.json"],
+      "phase_z_probe_paths": ["storage/reports/feed.json"],
+      "reason": "Cadence release mutates the canonical feed, which is an exact PHASE-Z machine-state file."
+    },
+    "market_calendar_sync": {
+      "entrypoint": "scripts/cron_market_cal.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Writes ignored storage/market_status.json and Supabase state."
+    },
+    "shared_scheduler_tick": {
+      "entrypoint": "scripts/run_scheduler_tick.sh",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/ops/scheduler_state.json", "storage/next_tasks.json"],
+      "phase_z_probe_paths": ["storage/ops/scheduler_state.json", "storage/next_tasks.json"],
+      "reason": "Scheduler state, event ledgers, and materialized queue rows are declared machine state."
+    },
+    "check_alerts": {
+      "entrypoint": "scripts/check_alerts.py",
+      "policy": "delegated_delivery_contract",
+      "tracked_outputs": ["storage/ops/**", "storage/next_tasks.json", "storage/publication_candidates.json", "storage/reports/feed.json", "storage/.failed_supabase_syncs.json", "dynamic exact output_paths"],
+      "reason": "Direct state is PHASE-Z-owned; due jobs retain their own row policy, and compute/lazypack outputs use exact output_paths in the central reaper."
+    },
+    "memory_health_daily": {
+      "entrypoint": "scripts/cron_memory_health.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Reads memory state and emits ignored notification/log output only."
+    },
+    "dreaming_review": {
+      "entrypoint": "scripts/dreaming_review.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/ops/dreaming/**", "storage/ops/autonomous_decisions.jsonl", "storage/next_tasks.json"],
+      "phase_z_probe_paths": ["storage/ops/dreaming/baseline.json", "storage/ops/autonomous_decisions.jsonl", "storage/next_tasks.json"],
+      "reason": "Dreaming findings and baseline are scheduled ops state; proposed governance edits are never applied by this job."
+    },
+    "publication_candidates_refresh": {
+      "entrypoint": "scripts/build_publication_candidates.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/publication_candidates.json"],
+      "phase_z_probe_paths": ["storage/publication_candidates.json"],
+      "reason": "The derived publication candidate pool is an exact PHASE-Z machine-state file."
+    },
+    "refresh_paper_snapshots": {
+      "entrypoint": "scripts/refresh_paper_snapshots.py",
+      "commit_owner": "scripts/refresh_paper_snapshots.py",
+      "policy": "self_commit",
+      "tracked_outputs": ["paper/*/data/*.csv"],
+      "reason": "Paper data is authored/reproducibility output outside machine-state boundaries, so the writer guards and commits exact refreshed CSVs."
+    },
+    "release_settings_audit": {
+      "entrypoint": "scripts/audit_release_settings.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Reads ignored storage/.release_settings.json and patches Supabase only."
+    },
+    "paper_sync_all": {
+      "entrypoint": "src/volpred/ops/papers.py",
+      "commit_owner": "src/volpred/ops/papers.py",
+      "policy": "self_commit",
+      "tracked_outputs": [
+        "frontend-v2-fix/public/paper/leverage-direction-matters.pdf",
+        "frontend-v2-fix/public/paper/taiwan-vt-tz-arbitrage.pdf",
+        "frontend-v2-fix/public/paper/vt-trend-following.pdf",
+        "frontend-v2-fix/public/paper/volatility-absorption.pdf",
+        "frontend-v2-fix/public/paper/vix-sufficiency.pdf"
+      ],
+      "reason": "Scheduled PDF mirroring writes a separate frontend Git repository; sync_all_papers guards and commits only its five mapped public PDFs there."
+    },
+    "populate_events_weekly": {
+      "entrypoint": "scripts/populate_upcoming_events.py",
+      "commit_owner": "scripts/populate_upcoming_events.py",
+      "policy": "self_commit",
+      "tracked_outputs": ["config/runtime_schedules.json"],
+      "reason": "The generated event schedule is authored config outside PHASE-Z; staged and unstaged pre-existing edits both block adoption."
+    },
+    "research_backlog_daily": {
+      "entrypoint": "scripts/generate_research_backlog.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json", "storage/ops/k_id_registry.json"],
+      "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/k_id_registry.json"],
+      "reason": "Only materializes pending queue rows."
+    },
+    "digest_daily_enqueue": {
+      "entrypoint": "scripts/enqueue_daily_digest.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json"],
+      "phase_z_probe_paths": ["storage/next_tasks.json"],
+      "reason": "Only materializes a pending digest task."
+    },
+    "question_research": {
+      "entrypoint": "scripts/cron_question_ops_maintain.sh",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json", "storage/ops/**"],
+      "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/question-ranking-workflow-latest.json"],
+      "reason": "Question maintenance writes queue and ops receipts; the later member task owns article output."
+    },
+    "reader_facing_refill": {
+      "entrypoint": "scripts/refill_reader_facing_pool.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json", "storage/ops/**"],
+      "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/daily_reader_facing_scan_state.json"],
+      "reason": "Refill writes the pending queue and scan state only."
+    },
+    "work_summary_6h": {
+      "entrypoint": "scripts/work_summary_6h.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Reads work/feed state and sends an ignored notification; no tracked report is persisted."
+    },
+    "audit_publish_sync": {
+      "entrypoint": "scripts/audit_publish_sync.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Audit is read-only apart from logs/notifications."
+    },
+    "audit_fb_pipeline": {
+      "entrypoint": "scripts/audit_fb_pipeline.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/reports/feed.json"],
+      "phase_z_probe_paths": ["storage/reports/feed.json"],
+      "reason": "The audit conditionally auto-expires stale Facebook rows by invoking the tracked feed status writer."
+    },
+    "fb_ttl_expire": {
+      "entrypoint": "scripts/mark_fb_post_status.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/reports/feed.json"],
+      "phase_z_probe_paths": ["storage/reports/feed.json"],
+      "reason": "The scheduled --auto-expire invocation mutates feed status only; draft creation is unreachable in that invocation."
+    },
+    "ops_dashboard": {
+      "entrypoint": "scripts/ops_dashboard.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Dashboard snapshot is ignored; the scheduled render does not invoke the interactive task-mutation endpoint."
+    },
+    "boss_report_4h": {
+      "entrypoint": "scripts/boss_report.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Renders to /tmp and sends a notification."
+    },
+    "gmail_poll": {
+      "entrypoint": "scripts/gmail_inbox_poll.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json"],
+      "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/gmail_inbox_state.json"],
+      "reason": "Poller writes queue rows and inbox state only."
+    },
+    "telegram_poll": {
+      "entrypoint": "scripts/telegram_poll.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json"],
+      "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/telegram_state.json"],
+      "reason": "Poller writes queue rows and telegram state only."
+    },
+    "handoff_regen": {
+      "entrypoint": "scripts/generate_handoff.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json"],
+      "phase_z_probe_paths": ["storage/next_tasks.json"],
+      "reason": "Handoff and stale-claim cleanup are machine queue/ops state."
+    },
+    "supabase_sync_drain": {
+      "entrypoint": "scripts/drain_failed_supabase_syncs.py",
+      "commit_owner": "scripts/drain_failed_supabase_syncs.py",
+      "policy": "self_commit",
+      "tracked_outputs": ["storage/.failed_supabase_syncs.json"],
+      "reason": "The queue is shared PHASE-Z machine state, but the drain also performs an ownership-safe immediate commit so resolved rows do not wait for the next dispatch."
+    },
+    "indicator_arena_daily": {
+      "entrypoint": "scripts/indicator_arena_daily.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/indicator_arena/**"],
+      "phase_z_probe_paths": ["storage/indicator_arena/registry.json"],
+      "reason": "Forward signal/review ledgers are scheduled machine state."
+    },
+    "codex_work_log_backfill": {
+      "entrypoint": "scripts/cron_backfill_work_log_from_commits.sh",
+      "commit_owner": "scripts/cron_backfill_work_log_from_commits.sh",
+      "policy": "self_commit",
+      "tracked_outputs": ["storage/work_log.json"],
+      "reason": "The wrapper checks target status before mutation and commits with --only plus the exact work_log path."
+    },
+    "git_push_backup": {
+      "entrypoint": "scripts/cron_git_push_backup.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Reads/audits the checkout and pushes existing commits; it does not generate repository state."
+    },
+    "backup_user_claude": {
+      "entrypoint": "scripts/backup_user_claude.sh",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["ops/claude_user_backup/**"],
+      "phase_z_probe_paths": ["ops/claude_user_backup/settings.json.ref"],
+      "reason": "The scheduled user-level mirror has no session author and its exact root is PHASE-Z machine state."
+    },
+    "token_report_daily": {
+      "entrypoint": "scripts/token_report_email.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "The scheduled no-argument invocation sends a notification; config/token_quota_calibration.json is written only by the manual --calibrate mode."
+    },
+    "reader_metrics_daily": {
+      "entrypoint": "scripts/pull_reader_metrics.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/analytics/**"],
+      "phase_z_probe_paths": ["storage/analytics/latest.json"],
+      "reason": "Reader snapshots are scheduled analytics machine state."
+    },
+    "market_closure_detect": {
+      "entrypoint": "scripts/detect_market_closure.py",
+      "commit_owner": "scripts/detect_market_closure.py",
+      "policy": "self_commit",
+      "tracked_outputs": ["config/market_closures_adhoc.json"],
+      "reason": "Emergency closure config is authored state outside PHASE-Z and is committed only when clean before detection."
+    },
+    "volpred-hourly-dispatch": {
+      "entrypoint": "scripts/cron_hourly_dispatch.sh",
+      "policy": "deprecated",
+      "tracked_outputs": [],
+      "reason": "LaunchAgent is disabled; the wrapper is a one-command rollback artifact. The active supervisor owns delivery."
+    },
+    "volpred-compute-worker": {
+      "entrypoint": "scripts/compute_queue.py",
+      "policy": "delegated_delivery_contract",
+      "tracked_outputs": ["dynamic exact output_paths", "storage/ops/compute_queue/**"],
+      "reason": "Each job records literal output_paths; check_alerts invokes the single reaper owner, which collision-checks and commits with --only."
+    },
+    "volpred-fred-backfill-guard": {
+      "entrypoint": "scripts/fred_backfill_guard.py",
+      "commit_owner": "scripts/collect_us_data.py",
+      "policy": "self_commit",
+      "tracked_outputs": ["storage/macro/fred_*.csv"],
+      "reason": "The guard delegates to _collect_fred, whose shared implementation now guards and commits every refreshed series."
+    },
+    "volpred-dispatch-supervisor": {
+      "entrypoint": "scripts/dispatch_supervisor/supervisor.py",
+      "policy": "delegated_delivery_contract",
+      "tracked_outputs": ["storage/ops/**", "agent fire-owned paths"],
+      "reason": "Supervisor state is machine-owned; each fire takes a pre-fire dirty snapshot and PHASE-Z commits only fire-owned or declared machine paths."
+    }
+  },
+  "launchagents": {
+    "com.volpred.check-alerts": {"job_id": "check_alerts", "status": "active"},
+    "com.volpred.collect-tw-data": {"job_id": "collect_tw_data", "status": "active"},
+    "com.volpred.collect-us-data": {"job_id": "collect_us_data", "status": "active"},
+    "com.volpred.compute-worker": {"job_id": "volpred-compute-worker", "status": "active"},
+    "com.volpred.daily-update": {"job_id": "daily_update", "status": "active"},
+    "com.volpred.daily-update-intraday": {"job_id": "daily_update_intraday", "status": "active"},
+    "com.volpred.dispatch-supervisor": {"job_id": "volpred-dispatch-supervisor", "status": "active"},
+    "com.volpred.gmail-poll": {"job_id": "gmail_poll", "status": "active"},
+    "com.volpred.handoff-regen": {"job_id": "handoff_regen", "status": "active"},
+    "com.volpred.hourly-dispatch": {"job_id": "volpred-hourly-dispatch", "status": "retired"},
+    "com.volpred.market-calendar-sync": {"job_id": "market_calendar_sync", "status": "active"},
+    "com.volpred.market-closure-detect": {"job_id": "market_closure_detect", "status": "active"},
+    "com.volpred.memory-health-daily": {"job_id": "memory_health_daily", "status": "active"},
+    "com.volpred.reader-facing-refill": {"job_id": "reader_facing_refill", "status": "active"},
+    "com.volpred.reader-metrics-daily": {"job_id": "reader_metrics_daily", "status": "active"},
+    "com.volpred.release-pool": {"job_id": "release_pool", "status": "active"},
+    "com.volpred.telegram-poll": {"job_id": "telegram_poll", "status": "active"},
+    "com.volpred.work-summary": {"job_id": "work_summary_6h", "status": "active"},
+    "com.volpred.work-dashboard": {
+      "status": "host_only_exception",
+      "reason": "Host-only UI daemon is not periodic; its only repository mutation is a human POST delegated to mark_task_blocked.py for PHASE-Z-owned storage/next_tasks.json."
+    }
+  }
+}

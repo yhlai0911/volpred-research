@@ -39,6 +39,13 @@ from urllib.request import Request, urlopen
 REPO_ROOT = Path(__file__).resolve().parents[1]
 OVERRIDE_PATH = REPO_ROOT / "config" / "market_closures_adhoc.json"
 NCDR_FEED = "https://alerts.ncdr.nat.gov.tw/RssAtomFeed.ashx?AlertType=33"
+sys.path.insert(0, str(REPO_ROOT / "src"))
+
+from volpred.ops.scheduled_writer_commit import (  # noqa: E402
+    commit_owned_outputs,
+    dirty_paths_before_write,
+    writable_output_paths,
+)
 
 # TWSE follows 臺北市 full-day work suspension for its own closure decision.
 TWSE_TRIGGER_CITY = "臺北市"
@@ -208,9 +215,35 @@ def main() -> int:
     ap.add_argument("--json", action="store_true", help="print machine-readable result")
     args = ap.parse_args()
 
+    dirty_before = (
+        dirty_paths_before_write(
+            REPO_ROOT,
+            [OVERRIDE_PATH],
+            label="detect_market_closure",
+        )
+        if not args.dry_run
+        else frozenset()
+    )
+    if not args.dry_run and not writable_output_paths(
+        REPO_ROOT,
+        [OVERRIDE_PATH],
+        dirty_before=dirty_before,
+        label="detect_market_closure",
+    ):
+        return 1
     result = detect_and_apply(apply=not args.dry_run)
 
     if result["added"] and not args.dry_run:
+        commit_owned_outputs(
+            REPO_ROOT,
+            [OVERRIDE_PATH],
+            dirty_before=dirty_before,
+            message=(
+                "ops(market-calendar): record "
+                f"{len(result['added'])} emergency market closure(s)"
+            ),
+            label="detect_market_closure",
+        )
         result["resynced"] = _resync_supabase()
         _send_alert(result["added"])
 

@@ -17,9 +17,31 @@ from arch import arch_model
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from volpred.config.runtime import get_default_mirror_url, get_local_data_sync_dirs
+from volpred.config.runtime import (
+    get_default_mirror_url,
+    get_frontend_path,
+    get_local_data_sync_dirs,
+    get_strategy_metrics_sync_paths,
+)
 from volpred.data.manager import DataManager
+from volpred.ops.scheduled_writer_commit import (
+    commit_owned_outputs,
+    dirty_paths_before_write,
+    writable_output_paths,
+)
 from volpred.publisher.publisher import Publisher
+
+ROOT = Path(__file__).resolve().parent.parent
+DAILY_TRACKED_OUTPUTS = (
+    ROOT / "storage" / "paper_trading.json",
+    ROOT / "storage" / "reports" / "feed.json",
+    ROOT / "storage" / "strategy_metrics.json",
+    ROOT / "storage" / "reports" / "INDEX.md",
+    ROOT / "storage" / "reports" / "index.json",
+    ROOT / "storage" / ".failed_supabase_syncs.json",
+    ROOT / "config" / "market_closures_adhoc.json",
+)
+
 
 def _load_json_retry(path: Path, default, retries: int = 4, delay: float = 0.25):
     """Load JSON, tolerating a concurrent writer mid-truncate.
@@ -566,6 +588,44 @@ def build_milestone_description(strat_list, sigma_gjr_ann, vix_level, spy_date,
 def main():
     today = datetime.now().strftime("%Y-%m-%d")
     print(f"=== Daily Update: {today} ===")
+    dirty_before = dirty_paths_before_write(
+        ROOT,
+        DAILY_TRACKED_OUTPUTS,
+        label="daily_update",
+    )
+    writable_parent_paths = writable_output_paths(
+        ROOT,
+        DAILY_TRACKED_OUTPUTS,
+        dirty_before=dirty_before,
+        label="daily_update",
+    )
+    if len(writable_parent_paths) != len(DAILY_TRACKED_OUTPUTS):
+        print("  ❌ tracked output already dirty; aborting before daily writes")
+        return 1
+    frontend_root = get_frontend_path()
+    frontend_metrics = get_strategy_metrics_sync_paths(active_only=True)
+    frontend_dirty_before = (
+        dirty_paths_before_write(
+            frontend_root,
+            frontend_metrics,
+            label="daily_update_frontend",
+        )
+        if frontend_metrics and frontend_root.is_dir()
+        else frozenset()
+    )
+    writable_frontend_metrics = (
+        [
+            frontend_root / rel
+            for rel in writable_output_paths(
+                frontend_root,
+                frontend_metrics,
+                dirty_before=frontend_dirty_before,
+                label="daily_update_frontend",
+            )
+        ]
+        if frontend_metrics and frontend_root.is_dir()
+        else []
+    )
 
     # 2026-07-10 (boss「颱風休市網頁還顯示台股開盤中指示」): refresh the adhoc-closure
     # override BEFORE any content gating. exchange_calendars is blind to same-day
@@ -1368,7 +1428,7 @@ def main():
     try:
         from recalc_metrics import recalc_all
         print("\n--- Recalculating strategy metrics ---")
-        recalc_all()
+        recalc_all(frontend_targets=writable_frontend_metrics)
     except Exception as e:
         print(f"  Metrics recalc skipped: {e}")
 
@@ -1407,6 +1467,21 @@ def main():
     # --- Ops alert checks (2026-04-19: release_pool gap / draft pool low / host cron fail) ---
     _run_alert_checks()
 
+    commit_owned_outputs(
+        ROOT,
+        DAILY_TRACKED_OUTPUTS,
+        dirty_before=dirty_before,
+        message=f"ops(daily-update): refresh tracked outputs for {today}",
+        label="daily_update",
+    )
+    if frontend_metrics and frontend_root.is_dir():
+        commit_owned_outputs(
+            frontend_root,
+            frontend_metrics,
+            dirty_before=frontend_dirty_before,
+            message=f"data(strategies): refresh scheduled metrics for {today}",
+            label="daily_update_frontend",
+        )
     print(f"\n✓ Done!")
 
 
@@ -1515,4 +1590,4 @@ def _run_alert_checks() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main() or 0)

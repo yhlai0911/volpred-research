@@ -172,6 +172,8 @@ _MACHINE_STATE_PREFIXES = (
     "storage/indicator_arena/",  # indicator review ledger
 )
 _MACHINE_STATE_FILES = (
+    "storage/.failed_supabase_syncs.json",  # shared publisher/drain retry queue
+    "storage/.knowledge_index_state.json",  # scheduled index freshness ledger
     "storage/next_tasks.json",       # the pending queue
     "storage/publication_candidates.json",
     "storage/reports/feed.json",     # scheduled-release cron writes it; only agents commit it

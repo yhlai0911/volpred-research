@@ -14,7 +14,7 @@ cd "$REPO_ROOT" || exit 1
 
 echo "=== [codex_work_log_backfill] fire at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 
-if [ -n "$(/usr/bin/git status --porcelain -- storage/work_log.json 2>/dev/null)" ]; then
+if [ -n "$(/usr/bin/git status --porcelain=v1 --untracked-files=all -- storage/work_log.json 2>/dev/null)" ]; then
   echo "[codex_work_log_backfill] storage/work_log.json already dirty; skip to avoid mixing state"
   echo "=== [codex_work_log_backfill] exit 0 at $(date '+%Y-%m-%d %H:%M:%S %Z') (dirty-skip) ==="
   exit 0
@@ -33,8 +33,8 @@ PY
 RC=$?
 
 if [ "$RC" -eq 0 ] && [ -n "$(/usr/bin/git status --porcelain -- storage/work_log.json 2>/dev/null)" ]; then
-  /usr/bin/git add storage/work_log.json
-  /usr/bin/git commit -m "ops(codex-loop): daily work_log backfill"
+  /usr/bin/git add -- storage/work_log.json
+  /usr/bin/git commit --only -m "ops(codex-loop): daily work_log backfill" -- storage/work_log.json
 fi
 
 echo "=== [codex_work_log_backfill] exit $RC at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="

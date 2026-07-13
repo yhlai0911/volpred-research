@@ -22,11 +22,24 @@ from ..config.runtime import (
     iter_frontend_paper_public_dirs,
 )
 from .common import project_path
+from .scheduled_writer_commit import (
+    commit_owned_outputs,
+    dirty_paths_before_write,
+    writable_output_paths,
+)
 
 PAPER_SELECT = (
     "id,title,authors,abstract,status,target_journal,pdf_url,pages,figures,tables,"
     "citations,score,tags,display_order,storage_bucket,storage_path,created_at,updated_at"
 )
+
+PAPER_FRONTEND_SLUGS = {
+    "leverage-direction": "leverage-direction-matters.pdf",
+    "taiwan-vt": "taiwan-vt-tz-arbitrage.pdf",
+    "vt-trend-following": "vt-trend-following.pdf",
+    "volatility-absorption": "volatility-absorption.pdf",
+    "vix-sufficiency": "vix-sufficiency.pdf",
+}
 
 
 def _utc_now() -> str:
@@ -493,6 +506,37 @@ def sync_all_papers(
     if not paper_root.is_dir():
         return []
 
+    # The scheduled sync also mirrors current PDFs into the active frontend,
+    # which is a separate Git repository.  Parent PHASE-Z cannot see that
+    # worktree, so the producer must establish ownership and commit there.
+    frontend_root = get_frontend_path()
+    frontend_paper_dir = get_active_frontend_paper_dir()
+    frontend_outputs = (
+        [frontend_paper_dir / slug for slug in PAPER_FRONTEND_SLUGS.values()]
+        if frontend_paper_dir is not None
+        else []
+    )
+    canonical_run = paper_root.resolve() == (PROJECT / "paper").resolve()
+    frontend_dirty_before = (
+        dirty_paths_before_write(
+            frontend_root,
+            frontend_outputs,
+            label="paper_sync_all_frontend",
+        )
+        if canonical_run and not dry_run and frontend_root.is_dir() and frontend_outputs
+        else frozenset()
+    )
+    writable_frontend_outputs = set(
+        writable_output_paths(
+            frontend_root,
+            frontend_outputs,
+            dirty_before=frontend_dirty_before,
+            label="paper_sync_all_frontend",
+        )
+        if canonical_run and not dry_run and frontend_root.is_dir() and frontend_outputs
+        else ()
+    )
+
     # Existing papers in Supabase (id → updated_at)
     existing_papers = {p["id"]: p for p in list_papers()}
 
@@ -543,7 +587,18 @@ def sync_all_papers(
                 continue
 
         try:
-            paper = update_paper_full(paper_id=paper_id, paper_dir=paper_dir)
+            frontend_slug = PAPER_FRONTEND_SLUGS.get(paper_id)
+            copy_frontend = True
+            if frontend_slug and frontend_paper_dir is not None:
+                frontend_rel = (frontend_paper_dir / frontend_slug).relative_to(
+                    frontend_root
+                ).as_posix()
+                copy_frontend = frontend_rel in writable_frontend_outputs
+            paper = update_paper_full(
+                paper_id=paper_id,
+                paper_dir=paper_dir,
+                copy_frontend=copy_frontend,
+            )
             results.append({
                 "paper_id": paper_id,
                 "action": "updated",
@@ -554,6 +609,14 @@ def sync_all_papers(
         except Exception as exc:
             results.append({"paper_id": paper_id, "action": "update_failed", "error": str(exc)})
 
+    if canonical_run and not dry_run and frontend_root.is_dir() and frontend_outputs:
+        commit_owned_outputs(
+            frontend_root,
+            frontend_outputs,
+            dirty_before=frontend_dirty_before,
+            message="docs(papers): refresh scheduled public PDFs",
+            label="paper_sync_all_frontend",
+        )
     return results
 
 
@@ -561,6 +624,7 @@ def update_paper_full(
     *,
     paper_id: str,
     paper_dir: str | Path | None = None,
+    copy_frontend: bool = True,
 ) -> dict[str, Any]:
     """One-command paper update: auto-detect metrics from .tex → upload PDF → sync metadata.
 
@@ -609,15 +673,8 @@ def update_paper_full(
         paper = upsert_paper_metadata(**kwargs)
 
     # 5. Copy to frontend
-    slug_map = {
-        "leverage-direction": "leverage-direction-matters.pdf",
-        "taiwan-vt": "taiwan-vt-tz-arbitrage.pdf",
-        "vt-trend-following": "vt-trend-following.pdf",
-        "volatility-absorption": "volatility-absorption.pdf",
-        "vix-sufficiency": "vix-sufficiency.pdf",
-    }
-    frontend_name = slug_map.get(paper_id)
-    if frontend_name:
+    frontend_name = PAPER_FRONTEND_SLUGS.get(paper_id)
+    if frontend_name and copy_frontend:
         frontend_dir = get_frontend_path()
         frontend_paper_dir = get_active_frontend_paper_dir()
         if frontend_paper_dir is not None and frontend_dir.exists():

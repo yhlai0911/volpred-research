@@ -25,7 +25,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -34,6 +33,13 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 PAPER_ROOT = ROOT / "paper"
+sys.path.insert(0, str(ROOT / "src"))
+
+from volpred.ops.scheduled_writer_commit import (  # noqa: E402
+    commit_owned_outputs,
+    dirty_paths_before_write,
+    writable_output_paths,
+)
 
 # Per paper-workflow.md: yfinance pulls MUST use auto_adjust=False so
 # unadjusted close + adj_close coexist in the same snapshot. Splits/divs
@@ -256,35 +262,6 @@ def _iter_paper_csvs(paper_filter: str | None) -> list[Path]:
     return csvs
 
 
-def _commit_refreshed(paths: list[Path]) -> None:
-    """A job owns its output. A CSV this job rewrote and left uncommitted is not
-    "someone else's work in progress" — but that is exactly how PHASE-Z has to
-    read it, so every daily refresh left another foreign-file WARN behind and the
-    snapshots never landed in git. Commit path-scoped (never `git add -A`, which
-    would sweep in another session's WIP)."""
-    rels = [str(p.relative_to(ROOT)) for p in paths]
-    if not rels:
-        return
-    try:
-        subprocess.run(["git", "add", "--", *rels], cwd=str(ROOT), check=True)
-        staged = subprocess.run(
-            ["git", "diff", "--cached", "--name-only", "--", *rels],
-            cwd=str(ROOT), capture_output=True, text=True, check=True,
-        ).stdout.strip()
-        if not staged:
-            return  # nothing actually changed on disk
-        subprocess.run(
-            ["git", "commit", "-m",
-             f"chore(paper-data): refresh {len(staged.splitlines())} snapshot CSV(s)",
-             "--", *rels],
-            cwd=str(ROOT), check=True,
-        )
-        print(f"[refresh] committed {len(staged.splitlines())} refreshed CSV(s)")
-    except subprocess.CalledProcessError as exc:
-        print(f"[refresh] WARN: commit of refreshed CSVs failed rc={exc.returncode} "
-              f"— files left uncommitted: {rels}", file=sys.stderr)
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true", help="report only, no writes")
@@ -298,8 +275,27 @@ def main() -> int:
         return 2
 
     csvs = _iter_paper_csvs(args.paper)
+    dirty_before = (
+        dirty_paths_before_write(ROOT, csvs, label="refresh") if args.apply else frozenset()
+    )
+    writable_paths = set(
+        writable_output_paths(
+            ROOT,
+            csvs,
+            dirty_before=dirty_before,
+            label="refresh",
+        )
+        if args.apply
+        else ()
+    )
     results = []
     for csv in csvs:
+        if args.apply and csv.relative_to(ROOT).as_posix() not in writable_paths:
+            results.append({
+                "file": str(csv.relative_to(ROOT)),
+                "skipped": "preexisting_dirty_output",
+            })
+            continue
         results.append(_refresh_yf_snapshot(csv, dry_run=args.dry_run))
 
     summary = {
@@ -312,7 +308,14 @@ def main() -> int:
     payload = {"summary": summary, "results": results}
 
     if args.apply:
-        _commit_refreshed([csv for csv, r in zip(csvs, results) if r.get("written")])
+        written = [csv for csv, r in zip(csvs, results) if r.get("written")]
+        commit_owned_outputs(
+            ROOT,
+            written,
+            dirty_before=dirty_before,
+            message=f"chore(paper-data): refresh {len(written)} snapshot CSV(s)",
+            label="refresh",
+        )
 
     if args.json:
         print(json.dumps(payload, ensure_ascii=False, indent=2, default=str))

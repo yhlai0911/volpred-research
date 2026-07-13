@@ -34,6 +34,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(ROOT / "src"))
+
+from volpred.ops.scheduled_writer_commit import (  # noqa: E402
+    commit_owned_outputs,
+    dirty_paths_before_write,
+    writable_output_paths,
+)
 
 QUEUE_PATH = ROOT / "storage" / ".failed_supabase_syncs.json"
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
@@ -67,6 +74,18 @@ def main() -> int:
     if not queue:
         print("[drain] queue empty — nothing to do")
         return 0
+    dirty_before = (
+        dirty_paths_before_write(ROOT, [QUEUE_PATH], label="drain_failed_syncs")
+        if not args.dry_run
+        else frozenset()
+    )
+    if not args.dry_run and not writable_output_paths(
+        ROOT,
+        [QUEUE_PATH],
+        dirty_before=dirty_before,
+        label="drain_failed_syncs",
+    ):
+        return 1
 
     from supabase_sync import sync_article  # noqa: E402
 
@@ -103,6 +122,13 @@ def main() -> int:
         current = _load_list(QUEUE_PATH)
         remaining = [mid for mid in current if mid not in resolved]
         QUEUE_PATH.write_text(json.dumps(remaining), encoding="utf-8")
+        commit_owned_outputs(
+            ROOT,
+            [QUEUE_PATH],
+            dirty_before=dirty_before,
+            message=f"ops(sync): drain {len(resolved)} failed Supabase sync(s)",
+            label="drain_failed_syncs",
+        )
 
     print(json.dumps({
         "dry_run": args.dry_run,
