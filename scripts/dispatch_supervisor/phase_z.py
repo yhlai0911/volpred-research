@@ -833,10 +833,13 @@ def _post_commit_test_gate(
     except (subprocess.TimeoutExpired, OSError) as exc:
         LOG.warning("phase_z: test-gate could not resolve commit sha (%s)", exc)
 
-    title = f"PHASE-Z auto-commit 測試紅燈 {hhmm}（{short_sha or 'HEAD'}）"
+    # title 不帶 hhmm：時間戳會讓每次 fire 的 dedup key 都不同，24h 去重形同虛設
+    # （2026-07-13 老闆被同一 warn 每 64 秒轟炸的根因）。時間放 body。
+    title = f"PHASE-Z auto-commit 測試紅燈（{short_sha or 'HEAD'}）"
     body = "\n".join([
         "## 觸發條件",
         "safety-net 自動 commit 直接進 main，補跑受影響測試後亮紅燈。",
+        f"- fire 時間: {hhmm}",
         f"- commit: {short_sha or 'HEAD'}",
         f"- 變更程式檔: {', '.join(code_files)}",
         f"- 跑的測試: {' '.join(targets)}" + (f" -k \"{k_expr}\"" if k_expr else ""),
@@ -923,7 +926,7 @@ def run_phase_z(
                     len(dirty_now))
         alert_fn(
             level="warn",
-            title=f"PHASE-Z 沒有 fire 起始基線 {hhmm} — 這班不自動 commit",
+            title="PHASE-Z 沒有 fire 起始基線 — 這班不自動 commit",
             body="\n".join([
                 "## 發生什麼",
                 f"PHASE-Z 看到 {len(dirty_now)} 個未提交檔案，但拿不到「這班 fire 開始時工作區長怎樣」"
@@ -935,6 +938,7 @@ def run_phase_z(
                 "",
                 "## 現在該做什麼",
                 "檔案仍在工作區、沒有遺失。確認是誰的工作後由該作者 commit。",
+                f"- fire 時間: {hhmm}",
                 f"- 未提交檔案數: {len(dirty_now)}",
                 f"- 基線檔: <git-dir>/{_SNAPSHOT_BASENAME}（缺失或過期）",
             ]),
@@ -959,8 +963,10 @@ def run_phase_z(
     if churn_corrupt:
         alert_fn(
             level="critical",
-            title=f"PHASE-Z {hhmm}: 控制檔內容壞掉，拒絕提交 — {', '.join(churn_corrupt)}",
+            title=f"PHASE-Z 控制檔內容壞掉，拒絕提交 — {', '.join(churn_corrupt)}",
             body="\n".join([
+                f"（fire 時間: {hhmm}）",
+                "",
                 "## 發生什麼",
                 "任務池等控制檔的內容無法解析（可能是某次寫入被中斷截斷）。PHASE-Z 沒有把它 commit "
                 "進歷史 —— 曾經有一次截斷的任務池被當成正常歷史提交，這道閘門就是為了擋那件事。",
@@ -984,8 +990,12 @@ def run_phase_z(
                     len(stuck), _FOREIGN_STREAK_CRITICAL, stuck[:10])
         alert_fn(
             level="critical",
-            title=f"PHASE-Z {hhmm}: {len(stuck)} 個檔案已連續 {worst_streak} 班沒人收 — 遺留變成堆積",
+            # streak 每班 +1、count 會浮動 — 進 title 就等於每班一個新 dedup key，
+            # 同一批卡住檔案會變成連環 critical。細節全放 body。
+            title="PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積",
             body="\n".join([
+                f"（fire 時間: {hhmm}；{len(stuck)} 個檔案，最長已連續 {worst_streak} 班）",
+                "",
                 "## 發生什麼",
                 f"這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 {worst_streak} 班都還在工作區。"
                 "單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— "
@@ -1026,8 +1036,10 @@ def run_phase_z(
                     "foreign": foreign, "stuck": stuck}
         alert_fn(
             level="warn",
-            title=f"PHASE-Z {hhmm}: {len(foreign)} 個檔案未提交，但不是這班產出的",
+            title="PHASE-Z 有檔案未提交，但不是這班產出的",
             body="\n".join([
+                f"（fire 時間: {hhmm}；{len(foreign)} 個檔案）",
+                "",
                 "## 發生什麼",
                 "這班 fire 沒有留下任何自己的未提交變更，但工作區裡有別人的未提交檔案"
                 "（fire 開始前就髒了）。PHASE-Z 不碰它們。",
@@ -1185,8 +1197,10 @@ def run_phase_z(
             # an agent that produced output and skipped one CLI call.
             alert_fn(
                 level="warn",
-                title=f"PHASE-Z {hhmm}: 這班的 {len(owned)} 個產出已 commit，但 agent 沒交代原因",
+                title="PHASE-Z 產出已 commit，但 agent 沒交代原因",
                 body="\n".join([
+                    f"（fire 時間: {hhmm}；{len(owned)} 個檔案）",
+                    "",
                     "## 發生什麼",
                     f"這班 fire 產出了 {len(owned)} 個檔案，PHASE-Z 已照常 commit（**工作沒有遺失**）。",
                     "但 agent 沒有在收尾時留下 commit 說明（fire receipt），所以這筆 commit 的訊息是",
@@ -1203,8 +1217,10 @@ def run_phase_z(
         if foreign:
             alert_fn(
                 level="warn",
-                title=f"PHASE-Z {hhmm}: 有 {len(foreign)} 個檔案不是這班產出的，已略過",
+                title="PHASE-Z 有檔案不是這班產出的，已略過",
                 body="\n".join([
+                    f"（fire 時間: {hhmm}；{len(foreign)} 個檔案）",
+                    "",
                     "## 發生什麼",
                     f"這班 fire 的 {len(owned)} 個檔案已自動 commit。另外 {len(foreign)} 個檔案"
                     "在 fire 開始前就已經是未提交狀態 —— 那是別的 session 正在做的事，PHASE-Z 沒有動它們。",
