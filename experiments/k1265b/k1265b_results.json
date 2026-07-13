@@ -1,9 +1,10 @@
 {
   "experiment_id": "k1265b",
-  "title": "K1265 raw-MDD improvement: real effect or scale artifact?",
-  "audits": "K1265 (SPY VIX/RV vol-managed, OOS 2004-2026)",
-  "triggered_by": "K1702 s5.4 -- raw MDD is not scale-invariant (factor zoo: 5/6 -> 1/6)",
+  "title": "K1265's raw-MDD improvement: real timing effect, or scale artifact?",
+  "audits": "K1265 (SPY, VIX/RV vol-managed, OOS 2004-2026)",
+  "triggered_by": "K1702 §5.4 — raw MDD is not comparable across different exposure levels",
   "seed": 42,
+  "reviewer": "Codex (gpt-5.6-sol, ultra) — v1 returned FAIL; this is the v2 rewrite",
   "data": {
     "source": "yfinance SPY auto_adjust=True + ^VIX Close",
     "snapshot": "experiments/k1265b/data/k1265b_spy_vix_1993_2026.csv",
@@ -20,6 +21,45 @@
   "calibration": {
     "c_rv": 0.015154988469585394,
     "c_vix": 0.031187017854931512
+  },
+  "replication_check": {
+    "note": "K1265's published OOS numbers are reproduced exactly; only the scoring is new.",
+    "k1265_published": {
+      "buy_hold": {
+        "sharpe": 0.639,
+        "mdd": -0.552
+      },
+      "vol_target_static": {
+        "sharpe": 0.768,
+        "mdd": -0.338
+      },
+      "mm_rv_managed": {
+        "sharpe": 0.67,
+        "mdd": -0.467
+      },
+      "mm_vix_managed": {
+        "sharpe": 0.743,
+        "mdd": -0.276
+      }
+    },
+    "k1265b_reproduced": {
+      "buy_hold": {
+        "sharpe": 0.639,
+        "mdd": -0.552
+      },
+      "vol_target_static": {
+        "sharpe": 0.768,
+        "mdd": -0.338
+      },
+      "mm_rv_managed": {
+        "sharpe": 0.67,
+        "mdd": -0.467
+      },
+      "mm_vix_managed": {
+        "sharpe": 0.743,
+        "mdd": -0.276
+      }
+    }
   },
   "metrics_oos": {
     "buy_hold": {
@@ -59,46 +99,32 @@
       "calmar": 0.4381135947967594
     }
   },
-  "test1_scale_invariant": {
-    "definition": "max_drawdown / annualized realized volatility (K1702 canonical)",
-    "raw_mdd_improved": [
-      "vol_target_static",
-      "mm_rv_managed",
-      "mm_vix_managed"
-    ],
-    "raw_mdd_improved_count": "3/3",
-    "vol_normalized_mdd_improved": [
-      "vol_target_static",
-      "mm_rv_managed",
-      "mm_vix_managed"
-    ],
-    "vol_normalized_mdd_improved_count": "3/3",
-    "paired_stationary_bootstrap_vs_buy_hold": {
-      "vol_target_static": {
-        "mean_diff": 0.10188935911566442,
-        "ci95_lo": -0.4849602504996146,
-        "ci95_hi": 0.8184076604832711,
-        "p_no_improvement": 0.4182,
-        "n_boot_used": 10000
-      },
-      "mm_rv_managed": {
-        "mean_diff": 0.11940638523923285,
-        "ci95_lo": -0.9491463145342468,
-        "ci95_hi": 1.209724695462276,
-        "p_no_improvement": 0.4147,
-        "n_boot_used": 10000
-      },
-      "mm_vix_managed": {
-        "mean_diff": 0.2034441379252243,
-        "ci95_lo": -0.7428180946229302,
-        "ci95_hi": 1.1250685807458527,
-        "p_no_improvement": 0.3215,
-        "n_boot_used": 10000
+  "descriptive": {
+    "raw_mdd_improved": "3/3",
+    "mdd_per_vol_improved": "3/3",
+    "mdd_per_vol_is_NOT_scale_invariant": {
+      "why": "wealth compounds, so MDD is not homogeneous of degree 1 in leverage. Rescaling the SAME buy&hold path by each matched lambda moves its MDD/vol ratio away from the unscaled value — an invariant would not move.",
+      "evidence": {
+        "vol_target_static": {
+          "lambda": 0.7389842554694667,
+          "bh_ratio_unscaled": -2.9505310658650337,
+          "bh_ratio_at_this_lambda": -3.1570682203224836
+        },
+        "mm_rv_managed": {
+          "lambda": 1.0717496002162854,
+          "bh_ratio_unscaled": -2.9505310658650337,
+          "bh_ratio_at_this_lambda": -2.894722766513706
+        },
+        "mm_vix_managed": {
+          "lambda": 0.8705334535320555,
+          "bh_ratio_unscaled": -2.9505310658650337,
+          "bh_ratio_at_this_lambda": -3.0523906785343278
+        }
       }
     }
   },
-  "test2_exposure_matched_counterfactual": {
-    "definition": "buy_hold scaled by a CONSTANT lambda = vol(managed)/vol(buy_hold); same realized vol, zero timing ability. Raw-MDD comparison is fair here.",
+  "exposure_matched_counterfactual": {
+    "definition": "buy&hold scaled by a CONSTANT lambda = vol(managed)/vol(buy&hold): identical realized volatility, zero timing ability. Exact, but retrospective (lambda uses full-OOS realized vol) and matches only the second moment — it rules out 'purely lower exposure', it does not by itself prove skill.",
     "per_spec": {
       "vol_target_static": {
         "lambda": 0.7389842554694667,
@@ -106,8 +132,8 @@
         "matched_bh_mdd": -0.4363900700824692,
         "managed_vol": 0.13822636687841147,
         "matched_bh_vol": 0.13822636687841147,
-        "managed_beats_matched_bh": true,
-        "mdd_gap_pp": 9.809514856445444
+        "gap_pp": 9.809514856445444,
+        "managed_beats_matched_bh": true
       },
       "mm_rv_managed": {
         "lambda": 1.0717496002162854,
@@ -115,8 +141,8 @@
         "matched_bh_mdd": -0.5803046019535061,
         "managed_vol": 0.200469837273019,
         "matched_bh_vol": 0.200469837273019,
-        "managed_beats_matched_bh": true,
-        "mdd_gap_pp": 11.318170584784493
+        "gap_pp": 11.318170584784493,
+        "managed_beats_matched_bh": true
       },
       "mm_vix_managed": {
         "lambda": 0.8705334535320555,
@@ -124,46 +150,184 @@
         "matched_bh_mdd": -0.49702849912818226,
         "managed_vol": 0.16283253078431018,
         "matched_bh_vol": 0.16283253078431015,
-        "managed_beats_matched_bh": true,
-        "mdd_gap_pp": 22.071647736241886
+        "gap_pp": 22.071647736241886,
+        "managed_beats_matched_bh": true
       }
     }
   },
-  "test3_weight_shuffle_null": {
-    "definition": "circular block bootstrap (block=22) of the weight path: same de-leveraging dosage and autocorrelation, no alignment with returns. p = fraction of timing-free weight paths whose MDD matches or beats the real strategy.",
+  "primary_circular_shift_randomization": {
+    "definition": "all n circular shifts of the weight path vs the untouched return path; statistic = exposure-matched MDD gap; p = (#null >= actual + 1)/(n+1), one-sided; Holm across the 3 managed specs at alpha=0.10.",
+    "assumption": "requires approximate circular stationarity of the weight process. Weights are a function of lagged volatility (persistent, not exactly stationary), so this is a strong diagnostic rather than an exactly-sized test.",
     "per_spec": {
       "vol_target_static": {
-        "actual_mdd": -0.33829492151801477,
-        "null_mdd_mean": -0.5075486864652704,
-        "null_mdd_p05": -0.5618189510303804,
-        "null_mdd_p95": -0.4282464397990314,
-        "null_mean_weight": 0.893809603689625,
-        "null_vol_mean": 0.17076736265624412,
-        "p_null_beats_actual": 0.001,
-        "n_draw_used": 5000
+        "actual_gap_pp": 9.809514856445444,
+        "actual_lambda": 0.7389842554694667,
+        "null_gap_mean_pp": 0.7113224407716237,
+        "null_gap_p50_pp": -0.5801525527610707,
+        "null_gap_p95_pp": 8.571007058255578,
+        "n_shifts": 5617,
+        "n_null_ge_actual": 195,
+        "p_one_sided": 0.034709861160555355
       },
       "mm_rv_managed": {
-        "actual_mdd": -0.46712289610566116,
-        "null_mdd_mean": -0.7159273193444335,
-        "null_mdd_p05": -0.9142026465087623,
-        "null_mdd_p95": -0.5015428055869875,
-        "null_mean_weight": 1.284405694304929,
-        "null_vol_mean": 0.3149167999085173,
-        "p_null_beats_actual": 0.0278,
-        "n_draw_used": 5000
+        "actual_gap_pp": 11.318170584784493,
+        "actual_lambda": 1.0717496002162854,
+        "null_gap_mean_pp": 6.167507087610613,
+        "null_gap_p50_pp": 6.085731459725807,
+        "null_gap_p95_pp": 24.44823317483868,
+        "n_shifts": 5617,
+        "n_null_ge_actual": 1783,
+        "p_one_sided": 0.31737273050907794
       },
       "mm_vix_managed": {
-        "actual_mdd": -0.2763120217657634,
-        "null_mdd_mean": -0.6410861300981087,
-        "null_mdd_p05": -0.7987958926701466,
-        "null_mdd_p95": -0.4662555452994687,
-        "null_mean_weight": 1.1892142225502442,
-        "null_vol_mean": 0.2540978438848471,
-        "p_null_beats_actual": 0.0,
-        "n_draw_used": 5000
+        "actual_gap_pp": 22.071647736241886,
+        "actual_lambda": 0.8705334535320555,
+        "null_gap_mean_pp": 6.060706946917663,
+        "null_gap_p50_pp": 5.401600720508837,
+        "null_gap_p95_pp": 25.31574001192059,
+        "n_shifts": 5617,
+        "n_null_ge_actual": 702,
+        "p_one_sided": 0.12495550017799929
+      }
+    },
+    "holm_10pct": {
+      "vol_target_static": {
+        "p": 0.034709861160555355,
+        "holm_threshold": 0.03333333333333333,
+        "reject_at_10pct": false
+      },
+      "mm_vix_managed": {
+        "p": 0.12495550017799929,
+        "holm_threshold": 0.05,
+        "reject_at_10pct": false
+      },
+      "mm_rv_managed": {
+        "p": 0.31737273050907794,
+        "holm_threshold": 0.1,
+        "reject_at_10pct": false
+      }
+    },
+    "survivors": []
+  },
+  "secondary_bootstrap_block_ladder": {
+    "definition": "paired stationary bootstrap of Delta(MDD/vol) vs buy&hold across mean block lengths 22/126/252/504/1000. ALL block lengths reported. Short blocks shatter the long contiguous 2008/2020 drawdown episodes that generate MDD, so results are expected to strengthen with block length — that is a caveat to disclose, NOT a licence to discard the block lengths one dislikes.",
+    "per_block": {
+      "block_22": {
+        "vol_target_static": {
+          "mean_diff": 0.10189774991634884,
+          "ci95_lo": -0.4849602504996146,
+          "ci95_hi": 0.8184076604832711,
+          "p_no_improvement": 0.41825817418258177,
+          "n_boot_used": 10000
+        },
+        "mm_rv_managed": {
+          "mean_diff": 0.11938549812605788,
+          "ci95_lo": -0.9491463145342468,
+          "ci95_hi": 1.209724695462276,
+          "p_no_improvement": 0.41485851414858516,
+          "n_boot_used": 10000
+        },
+        "mm_vix_managed": {
+          "mean_diff": 0.20345041494083135,
+          "ci95_lo": -0.7428180946229302,
+          "ci95_hi": 1.1250685807458527,
+          "p_no_improvement": 0.32156784321567844,
+          "n_boot_used": 10000
+        }
+      },
+      "block_126": {
+        "vol_target_static": {
+          "mean_diff": 0.25507828754384115,
+          "ci95_lo": -0.306168600534341,
+          "ci95_hi": 0.9078726703148668,
+          "p_no_improvement": 0.20887911208879112,
+          "n_boot_used": 10000
+        },
+        "mm_rv_managed": {
+          "mean_diff": 0.3923653934619661,
+          "ci95_lo": -0.774275658382841,
+          "ci95_hi": 1.5891907389473021,
+          "p_no_improvement": 0.2713728627137286,
+          "n_boot_used": 10000
+        },
+        "mm_vix_managed": {
+          "mean_diff": 0.4674154767519073,
+          "ci95_lo": -0.5042903458898943,
+          "ci95_hi": 1.3655434246406517,
+          "p_no_improvement": 0.1690830916908309,
+          "n_boot_used": 10000
+        }
+      },
+      "block_252": {
+        "vol_target_static": {
+          "mean_diff": 0.2802031110058738,
+          "ci95_lo": -0.22289220267261317,
+          "ci95_hi": 0.8810976662023414,
+          "p_no_improvement": 0.1608839116088391,
+          "n_boot_used": 10000
+        },
+        "mm_rv_managed": {
+          "mean_diff": 0.4551465003986526,
+          "ci95_lo": -0.7734896541201283,
+          "ci95_hi": 1.7300119174333994,
+          "p_no_improvement": 0.25007499250074994,
+          "n_boot_used": 10000
+        },
+        "mm_vix_managed": {
+          "mean_diff": 0.5816383418969643,
+          "ci95_lo": -0.3627203522793824,
+          "ci95_hi": 1.4793643674091792,
+          "p_no_improvement": 0.12008799120087991,
+          "n_boot_used": 10000
+        }
+      },
+      "block_504": {
+        "vol_target_static": {
+          "mean_diff": 0.29929588976528937,
+          "ci95_lo": -0.13999869324472558,
+          "ci95_hi": 0.7971272276173679,
+          "p_no_improvement": 0.10478952104789521,
+          "n_boot_used": 10000
+        },
+        "mm_rv_managed": {
+          "mean_diff": 0.5095398220852273,
+          "ci95_lo": -0.6823029617847592,
+          "ci95_hi": 1.819221568772302,
+          "p_no_improvement": 0.2545745425457454,
+          "n_boot_used": 10000
+        },
+        "mm_vix_managed": {
+          "mean_diff": 0.700460133066862,
+          "ci95_lo": -0.24228179380352025,
+          "ci95_hi": 1.5521283126431709,
+          "p_no_improvement": 0.0770922907709229,
+          "n_boot_used": 10000
+        }
+      },
+      "block_1000": {
+        "vol_target_static": {
+          "mean_diff": 0.328562890550037,
+          "ci95_lo": -0.07023849434841714,
+          "ci95_hi": 0.7250237431460359,
+          "p_no_improvement": 0.06479352064793521,
+          "n_boot_used": 10000
+        },
+        "mm_rv_managed": {
+          "mean_diff": 0.5773275051942414,
+          "ci95_lo": -0.5458642814009982,
+          "ci95_hi": 1.8369061558667585,
+          "p_no_improvement": 0.22177782221777823,
+          "n_boot_used": 10000
+        },
+        "mm_vix_managed": {
+          "mean_diff": 0.823822545585586,
+          "ci95_lo": -0.09020097422107354,
+          "ci95_hi": 1.5741577033603171,
+          "p_no_improvement": 0.0413958604139586,
+          "n_boot_used": 10000
+        }
       }
     }
   },
-  "verdict": "K1265's MDD claim is a SCALE ARTIFACT (no managed spec survives)",
-  "survives_all_three": []
+  "verdict": "K1265's MDD claim is NOT SUPPORTED. Every managed spec does draw down less than an exposure-matched constant-leverage benchmark (gap 9.8-22.1pp) — but a positive gap is NOT evidence of timing: a merely DISPERSED weight path earns one even with backwards timing, because matching realized volatility does not match the volatility PATH. That shows up directly here: the timing-free null median gap is already +6.1pp / +5.4pp for the two convex specs. Against the correct null — the same weight path with its phase randomised — NO spec survives Holm correction (p = 0.0347, 0.3174, 0.1250). Correct reading: the raw '50-62% MDD reduction' headline materially overstates the effect, the word 'significant' was never tested, and on the proper test the drawdown benefit is statistically unproven. Absence of evidence is not evidence of absence — MDD is a single extreme statistic and the test has limited power — but the claim as written cannot stand."
 }

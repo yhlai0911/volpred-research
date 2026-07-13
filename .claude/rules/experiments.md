@@ -93,5 +93,31 @@ loss differential acf(1)=-0.18，補上 HAC 後 |t| 由 2.26 **升到** 3.64（p
 - **凍結 backlog**：`storage/ops/dm_hac_lag_baseline.json`（139 站點，**只准變少**；修好一個就從 baseline 移除）。
 - **全量掃描結果**：`docs/governance/2026-07/dm_hac_lag_class_sweep.md`（含盲區分析與實質性 caveat）。
 
+### Raw max drawdown 不可跨「不同曝險」比較（scale artifact）
+
+**Raw MDD 不是 scale-invariant。** 曝險只有 benchmark 1/4 的策略，回撤機械性偏淺 —— 那叫**少冒險**，
+不叫**會擇時**。任何人把部位等比例縮小都能複製整個「改善」。
+
+**硬規則**：兩序列的**實現波動差 > 20%** 時，raw MDD 的差異**不可單獨報告**，更不可當成風險管理
+有效的證據。必須同時報**曝險匹配的 MDD gap**（把 benchmark 用常數 λ 縮放到與策略相同的實現波動）。
+
+**但 gap > 0 是必要、不充分條件 —— 這是最容易再犯的一步。** 正的 exposure-matched gap **不能**證明
+擇時能力：把策略設計成**時機完全相反**（動盪時加槓桿），它一樣拿得到正 gap。因為匹配「無條件波動」
+沒有匹配到**波動的路徑** —— 離散權重把風險集中成爆發，而回撤是持續失血累積的。
+**唯一誠實的判準是 gap 對照它自己的相位隨機化 null（circular-shift randomization），不是對照 0。**
+
+**Calmar 不算佐證**（K1265 三個 spec 的 Calmar 全部改善，仍然沒通過檢定）。
+**`MDD ÷ 波動` 也不是真正的不變量**（財富複利 → MDD 對槓桿非一次齊次；同一條路徑在不同 λ 下比率會動）。
+
+**本條已機械化，這段散文只是 pointer**：
+- **Enforcement owner**（唯一，anti-stacking 勿加第二層）：`scripts/tests/test_mdd_scale_artifact_ratchet.py`
+- **Runtime 規則本體**：`volpred.stats.drawdown.compare_max_drawdown` / `assert_drawdown_comparison_is_fair`
+  （>20% 波動差就 flag / raise，並算出 exposure-matched gap）
+- **稽核器**：`uv run python scripts/audit_mdd_scale_artifact.py --violations-only`
+- **凍結 backlog**：`storage/ops/mdd_scale_artifact_baseline.json`（455 sites，**只准變少**）
+- **全量掃描報告**：`docs/governance/2026-07/raw_mdd_claim_class_sweep.md`
+- **證據**：K1702 §5.4（因子動物園 raw 5/6 → vol-normalized 1/6）、K1265b（SPY VIX-managed：
+  raw「50–62% 改善」→ 同風險口徑只剩 9.8–22.1pp，且 Holm 校正後 0/3 存活）
+
 ### 跨市場比較必 symmetric refinement
 若 benchmark 用 canonical spec（e.g. DEV refined EM）、alternative 用 unrefined EM-only，得到的係數差是 **asymmetric artifact 不是真效應**。必須**兩邊同步 refine** 或**兩邊同 EM-only**。**K1216b ρ=-0.071 教訓**：asymmetric refinement 下 spurious 負相關；K1216c 全 refine 後 ρ=+0.379 與 canonical +0.441 indistinguishable（null）。
