@@ -118,6 +118,111 @@ _BENIGN_CRON_EXIT_CODES = frozenset({"120"})
 _CRON_EXIT_RE = re.compile(r"===.*?\bexit\s+(\d+)\b", re.IGNORECASE)
 _DISPATCH_OUTCOME_RE = re.compile(r"\bworker returned outcome=(?P<outcome>[a-z_]+)\b", re.IGNORECASE)
 
+# ---------------------------------------------------------------------------
+# Root-cause granularity (2026-07-14, boss telegram-583 "每個關卡徹底修好")
+#
+# A signature keyed only on `<log>:exit<code>` merges every root cause a job can
+# fail on into ONE bucket. For git_push_backup that meant a fixed 07-01 credential
+# error, a fixed 07-12 mojibake gate, and transient network blips all counted as
+# `git_push_backup.log:exit1` (count=33). Two bugs follow, and they compound:
+#
+#   1. RECOVERY NEVER FIRES for a fixed root cause. `recovered` keys off the
+#      signature's `last_seen`; a NEW root cause refreshes it, so the root cause
+#      that was fixed two weeks ago keeps reading "active" forever.
+#   2. THE COUNT IS A LIE. 3 network blips + 2 mojibake fires = count 5 → crosses
+#      RECURRENCE_WARN_COUNT, even though no single root cause recurred at all.
+#
+# So we classify each failing fire by the error text in its own block and key the
+# signature on the root cause. Unclassifiable fires keep the legacy
+# `<log>:exit<code>` shape — a job that logs nothing is honestly one bucket.
+#
+# The table is ordered: first match wins, most specific first. Labels are stable
+# (they are the dedupe key across dreaming runs) and readable (they land in the
+# boss's email verbatim).
+# ---------------------------------------------------------------------------
+_ROOT_CAUSE_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    # The silent-fallback guard protectively HELD a push (CI would have gone red).
+    # The guard worked; this is a findings signal, not a broken job. Since 2026-07-06
+    # it exits 120 (benign, not counted at all) — but the 14d window still contains
+    # pre-120 fires that exited 1, and they must not be lumped in with real failures.
+    ("push_held_guard", re.compile(
+        r"\bheld\b[^\n]*silent fallback|silent fallback\(s\) at head|not pushing",
+        re.IGNORECASE)),
+    ("auth", re.compile(
+        r"could not read (?:username|password)|authentication failed|"
+        r"invalid credentials?|permission denied \(publickey\)|"
+        r"403 forbidden|401 unauthorized|bad credentials|keychain",
+        re.IGNORECASE)),
+    ("mojibake", re.compile(
+        r"mojibake|unicodedecodeerror|decode error|codec can't decode|"
+        r"invalid (?:utf-?8|start byte)",
+        re.IGNORECASE)),
+    ("network", re.compile(
+        r"could not resolve host|connection (?:timed out|refused|reset)|"
+        r"failed to connect|network is unreachable|temporary failure in name resolution|"
+        r"ssl.*(?:handshake|eof)|operation timed out",
+        re.IGNORECASE)),
+    ("push_rejected", re.compile(
+        r"\[rejected\]|non-fast-forward|failed to push some refs|"
+        r"updates were rejected",
+        re.IGNORECASE)),
+    ("merge_conflict", re.compile(
+        r"merge conflict|automatic merge failed|conflict \(content\)|"
+        r"you have unmerged paths",
+        re.IGNORECASE)),
+    ("git_lock", re.compile(
+        r"index\.lock|unable to create.*\.lock|another git process",
+        re.IGNORECASE)),
+    ("quota", re.compile(
+        r"quota|rate limit|429 too many requests|usage limit",
+        re.IGNORECASE)),
+    ("timeout", re.compile(
+        r"\btimed? ?out\b|sigalrm|deadline exceeded|killed by signal",
+        re.IGNORECASE)),
+    ("disk", re.compile(
+        r"no space left|disk (?:full|quota)",
+        re.IGNORECASE)),
+)
+
+# Lines worth classifying at all. Anything else in a fire block is progress noise
+# (fetch banners, "pushed N commits OK", etc.) and must not seed a root cause.
+_ERROR_LINE_RE = re.compile(
+    r"\b(?:fatal|error|failed|failure|exception|traceback|denied|rejected|"
+    r"cannot|could not|unable to|bad|invalid|held|aborted)\b|失敗|錯誤",
+    re.IGNORECASE,
+)
+
+# A fire block can be long (full traceback + git chatter). Only the tail matters
+# for classification, and an unbounded buffer on a 100 MB log is a memory hazard.
+_FIRE_BLOCK_MAX_LINES = 400
+
+# Cron wrappers write TWO exit banners per fire — one local-time, one UTC-ISO —
+# for the same instant:
+#   === [git_push_backup] exit 0 at 2026-07-14 01:00:43 CST (duration=11s) ===
+#   === [git_push_backup] exit 0 at 2026-07-13T17:00:44.116238+00:00 (duration=11.5s) ===
+# They are one fire with two receipts. Counting both doubled every signature's
+# count against RECURRENCE_WARN_COUNT / DEGRADING_COUNT, and (once signatures became
+# root-cause-keyed) the second receipt — whose block is already consumed — would
+# classify as "no root cause" and spawn a phantom legacy-shaped signature that never
+# recovers. Two banners with the same exit code this close together are one fire.
+_DUPLICATE_EXIT_BANNER_SECONDS = 120
+
+
+def _classify_root_cause(block_lines: list[str]) -> str | None:
+    """Root-cause label for one failing fire, or None if nothing diagnosable.
+
+    Scans only lines that read like errors, newest first — the last error before
+    the exit banner is the one that actually killed the fire; earlier ones are
+    often retried-and-survived noise.
+    """
+    for ln in reversed(block_lines):
+        if not _ERROR_LINE_RE.search(ln):
+            continue
+        for label, pattern in _ROOT_CAUSE_PATTERNS:
+            if pattern.search(ln):
+                return label
+    return None
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -389,12 +494,21 @@ def _scan_cron_exit_signatures(
     (fail-open toward inclusion) but do not move first/last_seen.
 
     2026-06-29 (boss demand: handle resolved criticals at the architecture level,
-    not on a fixed timer): a signature is marked `recovered` when the job's MOST
-    RECENT fire is exit 0 AND its last failure is older than RECOVERY_GRACE_HOURS.
-    This is RECOVERY-AWARE — a finding clears as soon as the cron actually recovers
-    (evidence: recent clean fires), instead of lingering as a false-critical until
-    the historical spike ages out of the 14d window (which made the 06-28-fixed
-    hourly_dispatch keychain incident still read CRITICAL 35h later).
+    not on a fixed timer): a signature is marked `recovered` when a CLEAN fire has
+    happened since its last occurrence AND that occurrence is older than
+    RECOVERY_GRACE_HOURS. This is RECOVERY-AWARE — a finding clears as soon as the
+    cron actually recovers (evidence: a clean fire after it), instead of lingering
+    as a false-critical until the historical spike ages out of the 14d window
+    (which made the 06-28-fixed hourly_dispatch keychain incident still read
+    CRITICAL 35h later).
+
+    2026-07-14 (telegram-583): signatures are keyed on the ROOT CAUSE, not just the
+    exit code — see `_ROOT_CAUSE_PATTERNS`. Recovery is therefore evaluated PER ROOT
+    CAUSE, and the clean-fire test replaces the old "job's LATEST fire is exit 0"
+    test. That old test tied every root cause of a job to a single global condition:
+    while the job was still failing on ANY cause, a root cause fixed weeks earlier
+    could never clear. Now a fixed credential error recovers on schedule even while
+    the same job keeps failing on a fresh, unrelated mojibake gate.
     """
     sigs: dict[str, dict[str, Any]] = {}
     logs_dir = project_path(storage_dir) / "logs" / "cron"
@@ -410,32 +524,61 @@ def _scan_cron_exit_signatures(
             warn("loop_health_cron", "cron log read failed; skipping", path=str(log_path), err=str(exc))
             continue
         last_ts: datetime | None = None
-        last_exit_code: str | None = None  # most recent exit banner, ANY code
+        block: list[str] = []           # lines of the fire currently being read
+        clean_fire_times: list[datetime] = []  # exit-0 / benign fires, for recovery
         log_sigs: list[str] = []
+        prev_exit_code: str | None = None
+        prev_exit_ts: datetime | None = None
         for ln in lines:
             ts = _parse_banner_ts(ln)
             if ts is not None:
                 last_ts = ts
             m = _CRON_EXIT_RE.search(ln)
             if not m:
+                block.append(ln)
+                if len(block) > _FIRE_BLOCK_MAX_LINES:
+                    del block[:-_FIRE_BLOCK_MAX_LINES]
                 continue
+
+            # An exit banner closes the current fire block.
             code = m.group(1)
-            last_exit_code = code  # track recovery: latest fire's exit code
+            # ...unless it is the same fire's second receipt (local-time + UTC-ISO).
+            if (
+                code == prev_exit_code
+                and last_ts is not None
+                and prev_exit_ts is not None
+                and abs((last_ts - prev_exit_ts).total_seconds()) <= _DUPLICATE_EXIT_BANNER_SECONDS
+            ):
+                block = []
+                continue
+            prev_exit_code, prev_exit_ts = code, last_ts
+
             if code == "0" or code in _BENIGN_CRON_EXIT_CODES:
+                if last_ts is not None:
+                    clean_fire_times.append(last_ts)
+                block = []
                 continue
             if last_ts is not None and last_ts < cutoff:
+                block = []
                 continue
-            sig = f"{log_path.name}:exit{code}"
+            root = _classify_root_cause(block)
+            sig = f"{log_path.name}:exit{code}" + (f":{root}" if root else "")
             _merge_signature(sigs, sig, seen_at=last_ts, source="cron_log")
+            if root:
+                sigs[sig]["root_cause"] = root
             if sig not in log_sigs:
                 log_sigs.append(sig)
-        # Recovery: the job's latest fire succeeded AND its failures are old →
-        # the underlying problem is fixed; clear the false-critical immediately.
-        if last_exit_code == "0" or last_exit_code in _BENIGN_CRON_EXIT_CODES:
-            for sig in log_sigs:
-                ls = _parse_iso(sigs[sig].get("last_seen"))
-                if ls is not None and (now - ls) >= timedelta(hours=RECOVERY_GRACE_HOURS):
-                    sigs[sig]["recovered"] = True
+            block = []
+
+        # Recovery, per root cause: this failure has not recurred since a clean fire,
+        # and enough time has passed to trust it. A job still failing on a DIFFERENT
+        # root cause no longer keeps this one alive.
+        for sig in log_sigs:
+            ls = _parse_iso(sigs[sig].get("last_seen"))
+            if ls is None or (now - ls) < timedelta(hours=RECOVERY_GRACE_HOURS):
+                continue
+            if any(t > ls for t in clean_fire_times):
+                sigs[sig]["recovered"] = True
     return sigs
 
 
@@ -649,14 +792,16 @@ def compute_error_recurrence(
                 "top_recurring": [],
             }
 
-        recurring = [s for s, e in sigs.items() if e["count"] >= 2]
-        rate = round(len(recurring) / len(sigs), 3)
-        ranked = sorted(sigs.items(), key=lambda kv: kv[1]["count"], reverse=True)
-
         def _is_known(sig: str) -> bool:
-            return any(sig.endswith(sfx) for sfx in _KNOWN_SELF_HEALING_SUFFIXES)
+            # Root-cause keying appends `:<cause>`, so a known suffix is no longer
+            # necessarily terminal: `hourly_dispatch.log:exit142` may now read
+            # `...:exit142:timeout`. Match the suffix as a segment, not just an end.
+            return any(
+                sig.endswith(sfx) or f"{sfx}:" in sig
+                for sfx in _KNOWN_SELF_HEALING_SUFFIXES
+            )
 
-        top = [
+        rows = [
             {
                 "signature": s,
                 **e,
@@ -664,14 +809,34 @@ def compute_error_recurrence(
                 "known": _is_known(s),
                 "recovered": bool(e.get("recovered")),
             }
-            for s, e in ranked[:5]
+            for s, e in sigs.items()
         ]
+        # ACTIVE = still a live problem: root not fixed, not structurally self-healing.
+        # Everything else stays VISIBLE (honest data) but must not drive the headline.
+        active = [r for r in rows if not r["known"] and not r["recovered"]]
 
-        # Status is driven only by signatures NOT already structurally tracked
-        # (self-healing exit142 etc.) and NOT already recovered (root fixed, recent
-        # fires clean) — they stay visible but don't re-raise noise / false-critical.
-        escalating = [t for t in top if not t["known"] and not t["recovered"]]
-        worst = escalating[0] if escalating else None
+        # 2026-07-14 (telegram-583): the rate is computed over ACTIVE signatures only.
+        # It used to divide recurring-including-recovered by all-including-recovered,
+        # so a loop whose every failure had already been fixed still reported
+        # recurrence_rate=0.583 — a permanent false "degrading" that only decayed when
+        # the 14d window rolled. `*_all` keeps the raw denominators visible so nobody
+        # has to trust this narrowing blindly.
+        recurring_active = [r for r in active if r["count"] >= 2]
+        rate = round(len(recurring_active) / len(active), 3) if active else 0.0
+        recurring_all = [r for r in rows if r["count"] >= 2]
+
+        # Rank ACTIVE first, then by count. A live failure must never be pushed off
+        # the list by high-count signatures that are already recovered — that is what
+        # dreaming reads to decide whether anything is actually broken.
+        ranked = sorted(
+            rows,
+            key=lambda r: (not (not r["known"] and not r["recovered"]), -r["count"]),
+        )
+        top = ranked[:5]
+
+        # Status is driven only by ACTIVE signatures — and by ALL of them, not just
+        # the ones that made the top-5 cut.
+        worst = max(active, key=lambda r: r["count"], default=None)
         status = "ok"
         if worst:
             if worst["count"] >= RECURRENCE_DEGRADING_COUNT and (worst["span_days"] or 0) >= RECURRENCE_DEGRADING_SPAN_DAYS:
@@ -682,9 +847,12 @@ def compute_error_recurrence(
             "status": status,
             "signal": "supported",
             "window_days": window_days,
-            "distinct_signatures": len(sigs),
-            "recurring": len(recurring),
+            "distinct_signatures": len(active),
+            "recurring": len(recurring_active),
             "recurrence_rate": rate,
+            "distinct_signatures_all": len(rows),
+            "recurring_all": len(recurring_all),
+            "recurrence_rate_all": round(len(recurring_all) / len(rows), 3),
             "top_recurring": top,
         }
     except Exception as exc:

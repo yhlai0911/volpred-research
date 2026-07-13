@@ -190,6 +190,149 @@ def test_error_recurrence_skips_audit_logs(tmp_path):
     assert r["distinct_signatures"] == 0
 
 
+# ---------------------------------------------------------------------------
+# Root-cause signature granularity (2026-07-14, telegram-583)
+#
+# Regression gate for the "假 degrading" bug: a signature keyed only on
+# `<log>:exit<code>` merged every root cause a job can fail on into one bucket, so
+# (a) a root cause fixed weeks ago never cleared — a NEWER, unrelated failure kept
+# refreshing the shared `last_seen`, and (b) the count crossed the warn threshold
+# without any single root cause having actually recurred.
+# ---------------------------------------------------------------------------
+def _fire(job: str, days_ago: float, code: int, body: list[str] | None = None) -> list[str]:
+    """One cron fire: start banner, optional body, exit banner."""
+    ts = (NOW - timedelta(days=days_ago)).strftime("%Y-%m-%d %H:%M:%S")
+    return [
+        f"=== [{job}] {ts} start ===",
+        *(body or []),
+        f"=== [{job}] exit {code} at {ts} CST (duration=3s) ===",
+    ]
+
+
+def _write_fires(storage: Path, job: str, fires: list[list[str]]) -> None:
+    lines = [ln for f in fires for ln in f]
+    (storage / "logs" / "cron" / f"{job}.log").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+AUTH_ERR = "fatal: could not read Username for 'https://github.com': terminal prompts disabled"
+MOJIBAKE_ERR = "BAD tests/test_x.py: invalid utf-8 (more decode errors truncated)"
+NETWORK_ERR = "fatal: unable to access 'https://github.com/': Could not resolve host: github.com"
+
+
+def test_root_causes_in_one_log_get_separate_signatures(tmp_path):
+    """Distinct root causes must not share one `<log>:exit<code>` bucket."""
+    storage = _storage(tmp_path)
+    _write_fires(storage, "myjob", [
+        _fire("myjob", 10, 1, [AUTH_ERR]),
+        _fire("myjob", 9, 1, [AUTH_ERR]),
+        _fire("myjob", 2, 1, [MOJIBAKE_ERR]),
+        _fire("myjob", 1, 1, [NETWORK_ERR]),
+    ])
+    sigs = lh._scan_cron_exit_signatures(str(storage), NOW - timedelta(days=14), NOW)
+    assert set(sigs) == {
+        "myjob.log:exit1:auth",
+        "myjob.log:exit1:mojibake",
+        "myjob.log:exit1:network",
+    }
+    assert sigs["myjob.log:exit1:auth"]["count"] == 2
+
+
+def test_fixed_root_cause_recovers_while_job_still_fails_on_another(tmp_path):
+    """THE bug: an old, fixed root cause must clear even though the job is still
+    failing — on a DIFFERENT root cause. Under the old per-log recovery rule the
+    job's latest fire was non-zero, so the fixed credential error could never
+    recover and kept the 14d window reading degrading forever."""
+    storage = _storage(tmp_path)
+    _write_fires(storage, "myjob", [
+        _fire("myjob", 12, 1, [AUTH_ERR]),        # credential era — fixed since
+        _fire("myjob", 11, 1, [AUTH_ERR]),
+        _fire("myjob", 10, 0),                    # clean fire → credentials fixed
+        _fire("myjob", 1, 1, [MOJIBAKE_ERR]),     # a NEW, unrelated failure, still live
+        _fire("myjob", 0.2, 1, [MOJIBAKE_ERR]),
+    ])
+    sigs = lh._scan_cron_exit_signatures(str(storage), NOW - timedelta(days=14), NOW)
+    assert sigs["myjob.log:exit1:auth"]["recovered"] is True
+    assert sigs["myjob.log:exit1:mojibake"].get("recovered", False) is False
+
+
+def test_recurrence_rate_excludes_recovered_signatures(tmp_path):
+    """A loop whose every failure is already fixed must not report a nonzero
+    recurrence rate (the false 0.583 the boss kept seeing on a healthy loop)."""
+    storage = _storage(tmp_path)
+    _write_fires(storage, "myjob", [
+        *[_fire("myjob", d, 1, [AUTH_ERR]) for d in (12, 11, 10, 9, 8)],
+        _fire("myjob", 1, 0),  # clean fire → recovered
+    ])
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+    assert r["top_recurring"][0]["recovered"] is True
+    assert r["distinct_signatures"] == 0      # no ACTIVE signature
+    assert r["recurrence_rate"] == 0.0        # → headline rate is honest
+    assert r["recurring_all"] == 1            # but the raw data stays visible
+    assert r["status"] == "ok"
+
+
+def test_duplicate_exit_banners_count_as_one_fire(tmp_path):
+    """Cron wrappers emit two banners per fire (local + UTC-ISO). Counting both
+    doubled every count against the warn/degrading thresholds."""
+    storage = _storage(tmp_path)
+    ts_local = (NOW - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+    ts_utc = (NOW - timedelta(days=1, hours=8)).strftime("%Y-%m-%dT%H:%M:%S.123456+00:00")
+    (storage / "logs" / "cron" / "myjob.log").write_text("\n".join([
+        "=== [myjob] start ===",
+        AUTH_ERR,
+        f"=== [myjob] exit 1 at {ts_local} CST (duration=3s) ===",
+        "[cron-mark-last-run] myjob last_run=...",
+        f"=== [myjob] exit 1 at {ts_utc} (duration=3.1s) ===",
+    ]) + "\n", encoding="utf-8")
+    sigs = lh._scan_cron_exit_signatures(str(storage), NOW - timedelta(days=14), NOW)
+    assert list(sigs) == ["myjob.log:exit1:auth"]  # not a phantom unclassified twin
+    assert sigs["myjob.log:exit1:auth"]["count"] == 1
+
+
+def test_active_signature_not_crowded_out_of_top_recurring(tmp_path):
+    """A live failure must stay visible even when recovered signatures out-count it —
+    `top_recurring` is what dreaming reads to decide if anything is broken."""
+    storage = _storage(tmp_path)
+    for i in range(5):  # 5 recovered jobs, each with a big historical spike
+        _write_fires(storage, f"old{i}", [
+            *[_fire(f"old{i}", d, 1, [AUTH_ERR]) for d in (12, 11, 10, 9, 8, 7)],
+            _fire(f"old{i}", 1, 0),
+        ])
+    _write_fires(storage, "live", [  # small but ACTIVE
+        _fire("live", 0.5, 1, [NETWORK_ERR]),
+        _fire("live", 0.2, 1, [NETWORK_ERR]),
+    ])
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+    assert r["top_recurring"][0]["signature"] == "live.log:exit1:network"
+    assert r["top_recurring"][0]["recovered"] is False
+
+
+def test_unclassifiable_fire_keeps_legacy_signature(tmp_path):
+    """A job that logs nothing diagnosable is honestly one bucket — keep the old
+    `<log>:exit<code>` shape rather than inventing a fake root cause."""
+    storage = _storage(tmp_path)
+    _write_fires(storage, "myjob", [
+        _fire("myjob", 2, 1, ["...working..."]),
+        _fire("myjob", 1, 1, ["...working..."]),
+    ])
+    sigs = lh._scan_cron_exit_signatures(str(storage), NOW - timedelta(days=14), NOW)
+    assert list(sigs) == ["myjob.log:exit1"]
+
+
+def test_known_self_healing_still_detected_with_root_cause_suffix(tmp_path):
+    """exit142 stays `known` (must not escalate) even once a root cause is appended."""
+    storage = _storage(tmp_path)
+    _write_fires(storage, "hourly_dispatch", [
+        _fire("hourly_dispatch", d, 142, ["fatal: killed by signal SIGALRM"])
+        for d in (8, 7, 6, 5, 4, 3, 2, 1)
+    ])
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+    top = r["top_recurring"][0]
+    assert top["signature"] == "hourly_dispatch.log:exit142:timeout"
+    assert top["known"] is True
+    assert r["status"] == "ok"
+
+
 def _dispatch_completion(days_ago: float, outcome: str, exit_code: int = 1) -> dict:
     ts = _iso(days_ago)
     return {
