@@ -156,3 +156,7 @@ L243 現宣稱 gate 只排除「RR_MR in cell3 + cell2-TF@φ=30%」，且承諾�
 ## 接續提示詞
 
 讀 `paper/vt-crowding-abm/EXECUTION.md` 後，從 **P0-1** 開始：**敘事單一化 pass**——現稿是新（monotone-erosion）舊（70% tipping-point）雙敘事嫁接稿，同稿互撞至少 5 處，首要動作 = 消除 split-brain（刪 L197 phase-transition 句、§3.4 全段重寫刪 structural break 語言、Figure 1 caption 去紅綠區帶、§3.7 三段式 threshold、§3.6 headline 70%/calibration is exact），完整清單見上方 P0-1。與 P0-1 同批必做：**P0-3 誠實補報 K1471 TF/MR**（gate 失效全表 + RR_TF 5/5 惡化 p=0.001 + footprint-scale caveat「not crowded flow at VT's footprint scale」+ 修 L243 錯誤 gate 敘述）與 **P0-2 scope 收斂 VT-only**（Tables 3/4 + knife-edge 移 appendix、刪 L317 循環校準句、family-level 撤/降級）。本篇 P0 是**純寫作工作量，無需重跑任何模擬**。每項改動的來源數字先讀 `k1471_full_results.json` 驗證再寫，不臆造；修訂在主線程進行（不丟 background agent 改 .tex，paper-workflow 硬規則）。落地後 xelatex 重編譯 + `reproduce.py` 擴充 K1471 兩表轉 green + `paper-update` 同步線上驗證。**期刊改推 QF（primary）→ JEBO**；v4 GREEN PASS 已作廢不可引用。P1-1（cell1 補 80%/90%）是獨立 compute job，可與 P0 平行。
+
+### 進度更新 2026-07-13
+- 2026-07-13 | **P0-2 + P0-3 落地（主線程）**：§cross_strategy 重寫 — 新增 tab:tfmr_gate（K1471 gate 全表：TF 4/5 excluded、MR 5/5 excluded、RR_TF/RR_MR 5/5 顯著 p=0.001）；RR_TF 惡化誠實補報；「per se」無條件識別改 footprint-scale-dependent（abstract/intro/L239/§cross 四處）；循環校準錨段刪除；舊 detector 兩表降級 superseded continuity；OAT 17/17 與 family ordering 主張全面撤回（L411/L451/L464）；L243 gate 錯誤敘述修正；abstract \% source 洩漏修復 + 94,500 因式分解修正（27 combos×7×500）。34pp 編譯 0 undefined、pdftotext 零洩漏。
+- P0-1 敘事單一化已由背景 session 完成（d37775ac9）。剩：P0-4 reproduce.py K1471 擴充、P0-5 殘餘機械項（52% 歸因、sims 口徑、φ=100%、Kyle 頁碼、README metadata）。

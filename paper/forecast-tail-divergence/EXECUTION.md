@@ -128,3 +128,8 @@ k850/k854 是 headline 骨幹，但 README 為 planning stub、`knowledge.json` 
 ## 接續提示詞
 
 讀 `paper/forecast-tail-divergence/EXECUTION.md` 後，從 **P0-1** 開始：跑 **E1 尺度再校準 gating 實驗**（next_tasks `fable0711_ftd_e1_scale_gating`，experiment lane）—— 重用 k850/k854 pipeline，跑三個 variant（(a) σ×rolling std(z) expanding 無 lookahead；(b) Mincer-Zarnowitz 變異數映射 log r²~log RV_forecast；(c) overnight-inclusive 校正），重算 1%+5% VaR trinity + implied scale factor 表。**這是全篇的 make-or-break 決策點**：校正後 HAR 兩個 α 皆 trinity PASS ⇒ divergence 是尺度 artifact → 改走 FRL 方法論短文；仍 FAIL ⇒ 殘餘正交存活 → 進完整論文投 IJF ——**任一結果都誠實寫入論文**（分解診斷章），null 也發表。E1 跑完前**不得**把「QLIKE 贏家 fail VaR」歸因於「中心與尾部正交」（原 outline 命題已被 IJF 兩篇 preempt + 恐為 k850 混淆 artifact，禁止直接進 body）。E1 是 compute job（新 K，實驗三件套 + 固定 seed + Codex primary-path review PASS 才寫 knowledge.json）；可與 P0-2（k850/k854 補 README + 過 review gate）、P0-3（outline 三處誠實修正）平行。P1（E2 matched-target 美股 headline + E3 2×2 因子辨識）僅在 E1=Go 後啟動；body.tex 一律主線程寫（paper-workflow 硬規則）。每項改動的來源數字先讀 results JSON 驗證再寫，不臆造。
+
+### 進度更新 2026-07-13 — E1 gating 結果與裁定（主線程）
+- **K1698（E1 v2，合規重跑）GATE_VERDICT = H2_REJECTED**：尺度再校準後「中心⊥尾部分歧」不存活 — 原 outline 命題確認為 k850 尺度混淆 artifact。K1684 的 Codex blockers 已逐項解決（active-contract RV、GJR ≥100 starts、VaR+ES、placebo）。
+- **主線程裁定（依事前 gating 規則）**：走 **FRL / Journal of Forecasting 方法論短文**路線，不建完整 IJF 論文。短文主軸：「plug-in VaR 失敗的尺度/尾形分解 + implied scale factor 作為通道判別診斷」——方法論貢獻本身站得住。
+- 後續：短文 outline 重寫（P1）；k850/k854 下游 knowledge 引用依 K1698 更正。
