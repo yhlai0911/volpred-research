@@ -104,6 +104,11 @@ ROLLING_CONFIGS = [
 ROLLING_STEP = 5
 N_PERMUTATIONS = 50
 N_NULL_REPS = 200
+# The fitted AR(p) are near-unit-root (window VAR max eigenvalue 0.979-0.997), so a
+# short burn-in could leave the simulated series still walking away from the y=0
+# start. 1000 is deliberately generous; the floors are unchanged vs burn=200 (see
+# README 5.2), which is what makes it a checked assumption rather than a hope.
+BURN_IN = 1000
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -474,7 +479,7 @@ def fit_ar_params(series: np.ndarray, lag: int) -> tuple[float, np.ndarray, floa
 
 
 def simulate_independent_ar(ar_params: list, n_obs: int, rng: np.random.Generator,
-                            burn: int = 200) -> np.ndarray:
+                            burn: int = BURN_IN) -> np.ndarray:
     """Simulate each asset's own AR(p) INDEPENDENTLY: own persistence preserved,
     true cross-asset spillover exactly zero. Any TSI estimated on this data is
     pure finite-sample bias of the estimator."""
@@ -494,7 +499,15 @@ def simulate_independent_ar(ar_params: list, n_obs: int, rng: np.random.Generato
 
 def null_tsi_floor(rv_source: pd.DataFrame, n_obs: int, lag: int, label: str,
                    reps: int = N_NULL_REPS) -> dict:
-    """Distribution of the estimated TSI when the TRUE TSI is 0."""
+    """Distribution of the estimated TSI when the TRUE TSI is 0.
+
+    ``rv_source`` is the FULL sample: the AR(p) persistence parameters are estimated
+    once on 2020-2026 and reused for every window and every rolling setting, so the
+    only thing that varies across the floors reported below is the SAMPLE SIZE. That
+    is the point -- if each window estimated its own AR, a difference in floors could
+    be a difference in persistence rather than in n, and the floors would no longer
+    isolate the small-sample bias we are trying to measure.
+    """
     rng = np.random.default_rng(SEED)
     ar_params = [fit_ar_params(rv_source[lab].values, lag) for lab in LABELS]
 
@@ -827,6 +840,8 @@ def main():
             'rolling_step': ROLLING_STEP,
             'n_permutations': N_PERMUTATIONS,
             'n_null_reps': N_NULL_REPS,
+            'null_burn_in': BURN_IN,
+            'null_ar_estimated_on': 'full sample (only n varies across floors)',
             'seed': SEED,
         },
         'methodology': (
