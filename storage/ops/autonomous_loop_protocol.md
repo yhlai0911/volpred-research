@@ -1,13 +1,13 @@
-# Autonomous Loop Protocol (interactive-session ScheduleWakeup)
+# Autonomous Loop Protocol (autonomous-fire only)
 
-**Last updated**: 2026-05-28 15:35 台灣時間 (boss directive)
+**Last updated**: 2026-07-14 03:00 台灣時間
 
-Interactive session 用 ScheduleWakeup + `<<autonomous-loop-dynamic>>` sentinel 跑自主 ops loop 時，每次 fire 結尾**強制 4 步**：
+只有最後一則真人訊息是 `<<autonomous-loop-dynamic>>` sentinel 的 autonomous fire 才走本流程。互動 turn 禁用 `ScheduleWakeup`，由文字回覆收尾；24/7 persistence 由 `com.volpred.dispatch-supervisor` 與 host cron 負責。
 
 ## Step 1 — Run ops cycle
 - Check `storage/ops/dashboard_latest.json` breaches
 - Diff `storage/ops/handoff_latest.md` since last fire
-- Verify last hourly cron fire (`storage/logs/cron/hourly_dispatch.log` exit code)
+- Verify canonical dispatcher state (`storage/ops/dispatch_state.json`: heartbeat, current jobs, latest completion)
 - Triage critical email backlog (`scripts/task_pool_claim.py list --status pending` filter email_reply)
 - Commit any orphan deliverables (`git status` for uncommitted refactor pieces)
 - Dispatch 1 task from next_tasks if pool > 0 and slot < 4
@@ -19,7 +19,7 @@ Write `/tmp/loop_summary_$(date +%Y%m%dT%H%M%S).md` containing:
 
 ## 過去 30 min ops cycle 結論
 - breaches: <count or 0>
-- hourly fire <last_HH:07>: exit <0/1>
+- dispatch supervisor: heartbeat <ts>; last completion <outcome/exit_code>
 - email backlog: <count>
 - ...
 
@@ -58,6 +58,7 @@ ScheduleWakeup(
 
 | ❌ Don't | ✅ Do |
 |---|---|
+| Interactive turn 呼叫 ScheduleWakeup | 以文字回覆收尾；讓 OS backbone 維持 24/7 |
 | ScheduleWakeup without sending email | Always email first, then schedule |
 | Generic email body "loop fire complete" | Concrete summary with breach count, commits, blockers |
 | 2 consecutive fires with same idle summary | Expand scope — proactively dispatch task instead |

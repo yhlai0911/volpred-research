@@ -17083,5 +17083,25 @@
     "topology_override": "subagent→inline（診斷已在主線程完成：讀完 loop_health.py + 實測真實 log 訊號；派 subagent 只會重推導一遍且易偏離規格）",
     "commit": "4541e1266",
     "result": "git_push_backup 由 1 桶 exit1(count=33) 拆成 3 個根因 signature（push_held_guard=15/auth=3/mojibake=2），auth 標 recovered；recurrence_rate 只算 active（0.583→0.0，假 degrading 消失）；另修 duplicate exit banner 灌水 2x + top_recurring 擠掉 active 訊號。24 tests passed（6/7 新測試在舊碼 FAIL），dreaming 下游 67 passed，silent-fallback audit new=0。"
+  },
+  {
+    "timestamp": "2026-07-14T03:36:14+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_trending_topic_dedup_at_generation",
+    "outcome": "completed",
+    "actor": "hourly-03",
+    "owner": "hourly-03",
+    "commit": "62b256940",
+    "summary": "生成端查重落地：新增 src/volpred/ops/topic_dedup.py 為單一 enforcement owner。實測推翻原假設 — 既有 arc gate 是 entity-anchored，對 incident 那 5 篇同 arc 文章零 match（entity 集合近乎不相交、conclusion 全塌 descriptive），title lexical 門檻也無鑑別力（真 dup 與無關文同為 0.25）。改用 theme-saturation gate（IDF 過濾主題詞，數近 90 天同主題活文章數），於真實 832 篇語料校準 threshold=5（incident 得 6/9/10 → BLOCK；FOMC preview 得 2 → PASS）。trending lane=block、event lane=warn（event 是設計上的 T-7/T-2/T+0 系列，硬擋會殺掉下次 FOMC → P1 時效內容黑洞；其 blocking owner 已是 _coverage_for_item）。順帶修：event 第二條生成路徑 screen 原本是死碼（gate 沒接線等於沒 gate）、silent fallback except:return None、ambient cutoff 小語料靜默失效。17 tests 綠。"
+  },
+  {
+    "timestamp": "2026-07-14T03:36:15+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_migrate_work_log_writers_to_locked_append",
+    "outcome": "completed",
+    "actor": "hourly-03",
+    "owner": "hourly-03",
+    "commit": "ff2813588",
+    "summary": "work_log writer class sweep：實測推翻原假設 — 12 個候選檔中只有 1 個是活的無鎖 writer（backfill_work_log_from_commits.py:207），其餘 11 個逐一驗證為 reader 或 orchestrator（phase_z.py 只是字串命中、非 writer，故未動 supervisor code、無需 reload）。遷移該 writer 走 append_entries()（新增 batch API，單次持鎖）；其 dedup 原本在鎖外比對快照 → 併發時仍會重複 append，改為在鎖內跑 dedupe callback。修 helper 自身 bug：mkstemp 0600 經 os.replace 會靜默收緊 log 權限。機械 gate = scripts/tests/test_work_log_writer_gate.py（AST 掃 scripts/+src/+experiments/，5 種 write shape，allowlist 僅 helper，含 baseline-only-shrinks ratchet 與『不誤判 reader』自檢）。experiments/{K1387,K1655} 的一次性 write 腳本凍進 baseline 而非改寫（實驗產物是執行紀錄，研究誠實）。13 tests 綠、canonical work_log md5 前後不變。"
   }
 ]
