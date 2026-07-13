@@ -16895,5 +16895,16 @@
     "task_id": "nested_dm_fp_narrowing_baseline_audit",
     "summary": "145 站點 nested-DM false-positive 全量稽核 → compute queue（agent-brief_nested_dm_fp_audit-2659b9, opus/high）；超過 fire 50min cap 故 enqueue，留 in_progress 等 followup",
     "topology": "compute_queue"
+  },
+  {
+    "timestamp": "2026-07-13T17:58:22+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-94928252f",
+    "outcome": "succeeded",
+    "summary": "close scheduled writer ownership gaps",
+    "commit": "94928252f1c74041b75e8bfc546d14ecb7f1f3b5",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T09:59:02.846591+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
