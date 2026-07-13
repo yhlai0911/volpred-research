@@ -238,3 +238,153 @@ def kill_pgid(pgid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
         LOG.error("kill_pgid pgid=%d FAILED — survivors still running: %s", pgid, survivors)
         return False
     return True
+
+
+def live_pids(pids: list[int]) -> list[int] | None:
+    """Which of `pids` are alive and not zombies. ``None`` if the probe failed.
+
+    Same zombie caveat as :func:`pgid_members_checked`: a SIGKILL'd process sits
+    in the table as `Z` until reaped, and counting a corpse as a survivor makes
+    every successful kill look failed.
+    """
+    if not pids:
+        return []
+    try:
+        result = subprocess.run(
+            ["ps", "-o", "pid=,stat=", "-p", ",".join(str(p) for p in pids)],
+            capture_output=True, text=True, timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        LOG.warning("live_pids ps invocation failed: %s", exc)
+        return None
+    if result.returncode not in (0, 1):  # 1 = none of the pids exist
+        LOG.warning("live_pids ps returned rc=%d: %s",
+                    result.returncode, (result.stderr or "").strip())
+        return None
+    live: list[int] = []
+    for line in result.stdout.splitlines():
+        parts = line.split()
+        if len(parts) < 2:
+            continue
+        try:
+            pid = int(parts[0])
+        except ValueError:
+            LOG.warning("live_pids unparseable pid: %r", parts[0])
+            return None
+        if parts[1].startswith("Z"):
+            continue  # dead already, just not reaped — not a survivor
+        if pid != os.getpid():
+            live.append(pid)
+    return live
+
+
+def descendants_of(root_pid: int) -> list[int] | None:
+    """Every live descendant of `root_pid`, at any depth. ``None`` on probe failure.
+
+    Walks the full `ps -eo pid=,ppid=` parent table rather than asking about a
+    process group, because the whole point of this function is to find children
+    that are NOT in the group any more. macOS has no `/proc`, so `ps` is it.
+    """
+    if root_pid <= 0:
+        return []
+    try:
+        result = subprocess.run(
+            ["ps", "-eo", "pid=,ppid="], capture_output=True, text=True, timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        LOG.warning("descendants_of pid=%d ps invocation failed: %s", root_pid, exc)
+        return None
+    if result.returncode != 0:
+        LOG.warning("descendants_of pid=%d ps returned rc=%d", root_pid, result.returncode)
+        return None
+    children: dict[int, list[int]] = {}
+    for line in result.stdout.splitlines():
+        parts = line.split()
+        if len(parts) < 2:
+            continue
+        try:
+            pid, ppid = int(parts[0]), int(parts[1])
+        except ValueError:
+            continue  # silent-ok: ps header/blank rows carry no pid
+        children.setdefault(ppid, []).append(pid)
+    found: list[int] = []
+    stack = [root_pid]
+    while stack:
+        for child in children.get(stack.pop(), []):
+            if child not in found and child != os.getpid():
+                found.append(child)
+                stack.append(child)
+    return found
+
+
+def kill_tree(pid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
+    """Kill `pid`, its process group, AND any descendant that left the group.
+
+    Returns True only when every target is confirmed gone.
+
+    `kill_pgid` is not enough on its own. A child that calls `setsid()` gets a
+    brand-new session and process group, so `killpg(our_group)` never reaches
+    it — and `subprocess.Popen(start_new_session=True)` on the parent does
+    nothing to stop the child from doing the same. That is not hypothetical:
+    codex's worker does exactly this. On 2026-07-11 (mile_531e4c87) and again on
+    2026-07-13 (mile_aa4713db) a codex render worker outlived a killpg-based
+    timeout and wrote render_lazypack.py 11 and 5 minutes respectively after the
+    job had been declared dead. Both times the pipeline was quietly depending on
+    a process it believed it had killed.
+
+    The escaped child is invisible to every group-shaped query, so we reach it
+    the only way macOS allows: walk the `ps` parent table and signal the
+    descendants by pid. Enumerate BEFORE signalling — once the parent dies its
+    children reparent to launchd and the trail to them is gone.
+    """
+    if pid <= 0:
+        return True
+
+    try:
+        pgid = os.getpgid(pid)
+    except (ProcessLookupError, PermissionError):
+        pgid = 0  # already gone, or not ours — descendants still worth checking
+
+    kin = descendants_of(pid)
+    if kin is None:
+        LOG.warning("kill_tree pid=%d could not enumerate descendants — "
+                    "group kill only, escaped children may survive", pid)
+        kin = []
+    targets = [pid, *kin]
+
+    def _signal(sig: int, pids: list[int]) -> None:
+        for target in pids:
+            try:
+                os.kill(target, sig)
+            except ProcessLookupError:
+                continue  # silent-ok: exited between ps and kill.
+            except PermissionError as exc:
+                LOG.warning("kill_tree kill %s denied pid=%d: %s", sig, target, exc)
+
+    _signal(signal.SIGTERM, targets)
+    if pgid > 0:
+        kill_pgid(pgid, grace_s=grace_s)  # group path: TERM → grace → KILL → verify
+
+    # Re-enumerate: the group kill may have freed children, and a slow spawner
+    # may have produced new ones while we were signalling.
+    late = descendants_of(pid)
+    survivors = live_pids(sorted(set(targets + (late or []))))
+    if survivors is None:
+        LOG.error("kill_tree pid=%d UNVERIFIED — liveness probe failed", pid)
+        return False
+    if not survivors:
+        return True
+
+    LOG.warning("kill_tree pid=%d SIGKILLing %d escaped survivor(s): %s",
+                pid, len(survivors), survivors)
+    _signal(signal.SIGKILL, survivors)
+    time.sleep(0.5)
+
+    final = live_pids(survivors)
+    if final is None:
+        LOG.error("kill_tree pid=%d UNVERIFIED — final liveness probe failed", pid)
+        return False
+    if final:
+        LOG.error("kill_tree pid=%d FAILED — survivors still running: %s", pid, final)
+        return False
+    return True

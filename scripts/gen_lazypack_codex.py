@@ -75,6 +75,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from dispatch_supervisor.procutil import kill_tree  # noqa: E402
+
 
 def _resolve_codex_bin() -> str:
     """Absolute codex path, so a caller's PATH cannot decide whether we can render.
@@ -322,16 +325,23 @@ def _build_repair_prompt(script_path: Path, failure: str, out_dir: Path,
 """
 
 
-def _kill_process_group(proc: subprocess.Popen) -> None:
-    """SIGKILL the whole group `proc` leads. Best-effort by nature: the group is
-    already dying, and every failure mode here (it exited on its own, we lost
-    the right to signal it) means there is nothing left to kill."""
-    try:
-        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-    except (ProcessLookupError, PermissionError) as e:
-        print(f"[gen_lazypack_codex] killpg skipped ({type(e).__name__}) — "
-              f"pid {proc.pid} already gone", file=sys.stderr)
-        proc.kill()
+def _kill_process_group(proc: subprocess.Popen) -> bool:
+    """Kill codex and everything it spawned. True only if confirmed all gone.
+
+    Delegates to `procutil.kill_tree` — the repo's single owner for killing a
+    process and its escaped descendants. This used to be a local `killpg`, which
+    cannot reach a child that `setsid()`s into its own group, and codex's worker
+    does exactly that (2026-07-11 mile_531e4c87, 2026-07-13 mile_aa4713db: both
+    wrote render_lazypack.py minutes after we declared the job dead). Group-only
+    kills are why a "failed" job kept writing to disk behind our back.
+    """
+    ok = kill_tree(proc.pid)
+    if not ok:
+        print(f"[gen_lazypack_codex] WARNING: could not confirm codex pid "
+              f"{proc.pid} and its children are dead — a surviving worker may "
+              f"still write to the output dir", file=sys.stderr)
+    proc.kill()  # reap our own handle; the tree kill already covered the group
+    return ok
 
 
 def _codex_write_timeout(panels: list[dict]) -> float:
