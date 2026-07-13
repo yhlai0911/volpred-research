@@ -207,14 +207,14 @@ def _write_alert_dedup(storage: Path, alerts: dict) -> None:
     )
 
 
-def test_detect_persistent_alerts_flags_recurring_root_cause(tmp_path):
-    """Same alert_key fired N times across M days → root cause unhandled."""
+def test_detect_persistent_alerts_flags_recurring_alert_condition(tmp_path):
+    """A recurring single-scope alert is surfaced without inventing causality."""
     storage = _storage(tmp_path)
     _write_alert_dedup(
         storage,
         {
             "abc123def456" + "0" * 52: {
-                "title": "Host cron failure detected",
+                "title": "Supabase sync queue stuck",
                 "send_count": 26,
                 "first_sent_at": _iso(60),
                 "last_sent_at": _iso(0.5),  # last fire 12h ago — still active
@@ -229,6 +229,83 @@ def test_detect_persistent_alerts_flags_recurring_root_cause(tmp_path):
     assert f.remediation == "propose_only"
     assert f.governance_target == "docs/error_log.md"
     assert "26" in f.evidence[0]  # send_count surfaced
+    assert "key alone does not prove one root cause" in f.proposal
+
+
+def test_detect_persistent_alerts_skips_host_cron_umbrella_owned_by_error_recurrence(
+    tmp_path,
+):
+    """Host-cron title spans different jobs; per-job recurrence owns the signal."""
+    storage = _storage(tmp_path)
+    alert_key = (
+        "a4a7ca551f8626b22c4d5db9ac9d8bd"
+        "0f08d40bf9ce96a5214f73ee575ada4c0"
+    )
+    _write_alert_dedup(
+        storage,
+        {
+            alert_key: {
+                "title": "Host cron failure detected",
+                "send_count": 33,
+                "first_sent_at": _iso(84.2),
+                "last_sent_at": _iso(0.5),
+            }
+        },
+    )
+
+    findings = dr.detect_persistent_alerts(str(storage), {}, NOW)
+    assert findings == []
+
+    # The old false aggregate signature resolves naturally on the next run;
+    # no historical state file needs a manual patch.
+    signature = f"persistent_alert:{alert_key[:16]}"
+    baseline = {
+        signature: {
+            "strike_count": 3,
+            "pattern_type": "persistent_alert",
+            "first_seen": _iso(3),
+            "last_seen": _iso(1),
+            "activity_marker": _iso(0.5),
+        }
+    }
+    _, resolved, _ = dr.reconcile(findings, baseline, NOW)
+    assert resolved == [signature]
+    assert signature not in baseline
+
+
+def test_host_cron_recurrence_remains_job_scoped(tmp_path):
+    """The delegated owner keeps distinct cron jobs in distinct signatures."""
+    snapshot = {
+        "error_recurrence": {
+            "top_recurring": [
+                {
+                    "signature": "token_report.log:exit1",
+                    "known": False,
+                    "recovered": False,
+                    "count": 5,
+                    "first_seen": _iso(5),
+                    "last_seen": _iso(0.1),
+                    "span_days": 4.9,
+                },
+                {
+                    "signature": "git_push_backup.log:exit1",
+                    "known": False,
+                    "recovered": False,
+                    "count": 1,
+                    "first_seen": _iso(0.2),
+                    "last_seen": _iso(0.1),
+                    "span_days": 0.1,
+                },
+            ]
+        }
+    }
+
+    findings = dr.detect_repeated_tool_failures(
+        str(tmp_path / "storage"), snapshot, NOW
+    )
+    assert [f.signature for f in findings] == [
+        "repeated_tool_failure:token_report.log:exit1"
+    ]
 
 
 def test_detect_persistent_alerts_skips_recovered_past_incident(tmp_path):

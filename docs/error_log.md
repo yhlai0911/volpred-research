@@ -2,6 +2,38 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 01:40 — dreaming 把 umbrella alert dedup key 當成 root-cause identity — **FIXED**
+
+**現象**：`persistent_alert:a4a7ca551f8626b2` 把 `Host cron failure detected` 33 次發送、
+84.2 天跨度直接解讀為「同一根因未修」，連續三次 dreaming run 後升為 CRITICAL 並建立
+platform-ops task。
+
+**根因**：`alerts._alert_key()` 只雜湊 `level + title`；`host_cron_fail` 刻意用固定標題作
+24h email 去重，實際故障 job 只在 `details.failing_logs`。`alert_dedup.json` 的 `send_count` 又是
+跨 incident 終身累加。dreaming 卻把這個「通知類別 identity」當成「根因 identity」，與既有
+`loop_health.error_recurrence` 的 per-job `<log>.log:exit<code>` detector 雙頭擁有同一責任。
+
+**證據**：這次三個 strike 分別是 7/9 `codex_work_log_backfill.log`、7/11 `token_report.log`、
+7/12 `git_push_backup.log`，是三個不同 job，不是一個未解根因。稽核時三者最新 fire 均已
+`exit 0`；host-cron condition 也已恢復 healthy。
+
+**修正**：
+- `detect_persistent_alerts` 新增 delegated-owner map；`Host cron failure detected` 的跨日根因追蹤單一交給
+  `loop_health.error_recurrence`，不再用 umbrella key 另建一個 false Three-Strike。
+- 保留 email 的 umbrella title 與 24h dedup，避免多 job 組合產生大量通知 key；真故障仍由 per-job
+  signature 捕捉，沒有把警報靜音。
+- 一般 persistent-alert 文案改為「同一 alert condition 復發」，明說 key 本身不能證明同一根因；
+  必須先查 per-fire evidence 才能升級因果結論。
+
+**驗證**：新增 regression 覆蓋 (1) generic single-scope alert 仍會正常提示；(2) a4a7 host-cron
+umbrella 不再產生 persistent finding，舊 baseline 會自然 resolve；(3) `token_report` 與
+`git_push_backup` 仍保持分開的 per-job signature。
+
+**教訓**：dedup identity 是「通知去重邊界」，不是「事件／根因邊界」。來源細節放在 body/details 的
+umbrella alert，不得僅憑 title hash 做 Three-Strike 因果合併；必須交給更細粒度的 canonical owner。
+
+---
+
 ## 2026-07-13 22:48 — CJK 圖表豆腐字第二次復發：有 helper、沒有 enforcement
 
 **現象**：CPI T-2 文章 `mile_9560b9cc` 的兩張已上線圖把繁體中文畫成方框。這是

@@ -97,12 +97,23 @@ RECOVERED_THRESHOLD_HOURS = 48
 # Flag when this fraction of recent NON-daily articles are semantic rehashes.
 SEMANTIC_REHASH_WARN_RATE = 0.30
 # Persistent-alert detector thresholds (boss email-12281 / handoff 2026-06-30):
-# same alert_key fired ≥N times across ≥M days = root cause unhandled, surface
-# it before the boss has to. Aligned with detect_repeated_tool_failures' 48h
+# same alert condition fired ≥N times across ≥M days = investigate whether
+# an upstream cause persists. An alert_key hashes only level+title, so it is NOT
+# itself a root-cause identity. Aligned with detect_repeated_tool_failures' 48h
 # recovered guard so a one-off spike that resolved isn't kept alive.
 PERSISTENT_ALERT_MIN_FIRE_COUNT = 3
 PERSISTENT_ALERT_MIN_SPAN_DAYS = 3
 PERSISTENT_ALERT_RECOVERED_HOURS = 48
+
+# Anti-stacking ownership: these umbrella alert titles intentionally aggregate
+# heterogeneous incidents, while a more granular detector already owns their
+# recurrence. `Host cron failure detected` stores the actual job only in
+# details.failing_logs; loop_health.error_recurrence tracks it canonically as
+# <log>.log:exit<code>. Feeding the umbrella key through this detector as well
+# merges unrelated jobs into one false Three-Strike finding.
+PERSISTENT_ALERT_DELEGATED_OWNERS = {
+    "Host cron failure detected": "loop_health.error_recurrence",
+}
 
 # 2026-07-01 fix (boss email-12419: CRITICAL email for something already fixed):
 # memory_skill_gap / memory_hygiene are periodic-curation findings, not acute
@@ -570,7 +581,7 @@ def detect_memory_governance(
 def detect_persistent_alerts(
     storage_dir: str, snapshot: dict[str, Any], now: datetime
 ) -> list[DreamFinding]:
-    """Same alert_key recurring across multiple days = root cause unhandled.
+    """Surface alert conditions that recur across multiple days.
 
     Reads `storage/ops/alert_dedup.json` and surfaces any alert where
     `send_count ≥ PERSISTENT_ALERT_MIN_FIRE_COUNT` AND
@@ -579,15 +590,12 @@ def detect_persistent_alerts(
     Three-strike across consecutive dreaming runs escalates to critical.
 
     Why (boss email-12281 / handoff 2026-06-30): historical examples that the
-    system NEVER surfaced and only the boss caught — "Host cron failure"
-    fired 26× over 2 months, "Release pool starved" 6× over 9 days,
-    "hourly-dispatch auth preflight failed" 6× over 16 days. Same key
-    recurring means the upstream condition isn't being fixed; the dreaming
-    slow loop already audits cross-session trails, so this is the right
-    place to surface it. Communication noise (ACK / Re: / boss-report
-    summaries) is naturally filtered: each carries unique content → a unique
-    alert_key with send_count=1, so the threshold excludes them without a
-    title allowlist.
+    system NEVER surfaced and only the boss caught include "Release pool
+    starved" firing 6× over 9 days and "hourly-dispatch auth preflight failed"
+    firing 6× over 16 days. A key hashes level+title, not the alert body: its
+    recurrence proves a condition class recurred, but does not by itself prove
+    one root cause remained open. Umbrella classes with a granular canonical
+    owner are excluded here to prevent duplicate/false Three-Strike findings.
     """
     out: list[DreamFinding] = []
     dedup_path = project_path(storage_dir) / "ops" / "alert_dedup.json"
@@ -610,6 +618,9 @@ def detect_persistent_alerts(
     for key, entry in alerts.items():
         if not isinstance(entry, dict):
             continue
+        raw_title = str(entry.get("title") or "")
+        if raw_title in PERSISTENT_ALERT_DELEGATED_OWNERS:
+            continue
         try:
             send_count = int(entry.get("send_count") or 0)
         except (TypeError, ValueError) as e:
@@ -625,7 +636,7 @@ def detect_persistent_alerts(
             continue  # recovered: last fire >48h ago → past incident, not active
         if (last - first) < min_span:
             continue  # short burst (e.g. 5 fires in one hour) — not multi-day persistence
-        title = str(entry.get("title") or "")[:80] or key[:16]
+        title = raw_title[:80] or key[:16]
         span_days = (last - first).total_seconds() / 86400
         # 2026-07-01: same recency annotation as detect_repeated_tool_failures —
         # "send_count=N over M days" alone reads as "still broken" even when the
@@ -652,9 +663,10 @@ def detect_persistent_alerts(
                 ],
                 remediation="propose_only",
                 proposal=(
-                    f"Alert `{title}` fired {send_count}× over {span_days:.1f}d — same "
-                    f"alert_key recurring = root cause unhandled (fix the source, not "
-                    f"the symptom). Investigate the upstream condition; if sustained "
+                    f"Alert `{title}` fired {send_count}× over {span_days:.1f}d — the "
+                    f"same alert condition recurred. The key alone does not prove one "
+                    f"root cause: inspect per-fire evidence, then fix the responsible "
+                    f"source rather than the symptom. If the same cause is sustained "
                     f"across 3 dreaming runs, open docs/refactor_plan_<topic>.md "
                     f"(Three-Strike)."
                 ),
