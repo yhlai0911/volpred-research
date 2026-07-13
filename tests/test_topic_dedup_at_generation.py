@@ -296,6 +296,73 @@ def test_gate_error_fails_open_and_is_reported(monkeypatch):
     assert "corpus exploded" in screen.reason
 
 
+# --- every generator path is actually wired to the screen ---------------------
+
+
+def test_event_task_is_screened_when_feed_supplied(crowded_feed):
+    """build_pending_event_task must annotate (not block) a saturated event topic."""
+    from volpred.ops.event_jobs import build_pending_event_task
+
+    item = {
+        "id": "evt_ai_skew",
+        "event_key": "ai_capex",
+        "task_template": {
+            "title": INCIDENT_TITLE,
+            "description": INCIDENT_DESC,
+            "payload_patch": {
+                "event_type": "ai_capex",
+                "event_date": "2026-07-20",
+                "event_series_slot": "T-2",
+            },
+        },
+    }
+    task = build_pending_event_task(
+        item, now=datetime.now(timezone.utc), feed=crowded_feed, storage_dir="storage"
+    )
+    assert task["task_type"] == "event_article"
+    assert task["priority"] == 1, "event tasks stay P1 time-sensitive"
+    assert "dedup_screen" in task, "saturated event topic must be annotated for the writer"
+    assert task["dedup_screen"]["near_misses"], "annotation must name the near misses"
+
+
+def test_event_task_without_feed_is_unscreened_but_still_built():
+    """No corpus -> no annotation, but the event still ships (fail-open)."""
+    from volpred.ops.event_jobs import build_pending_event_task
+
+    item = {
+        "id": "evt_x",
+        "event_key": "fomc",
+        "task_template": {
+            "title": "FOMC 前夕",
+            "description": "利率決議前的定價。",
+            "payload_patch": {
+                "event_type": "fomc",
+                "event_date": "2026-07-20",
+                "event_series_slot": "T-2",
+            },
+        },
+    }
+    task = build_pending_event_task(item, now=datetime.now(timezone.utc), feed=None)
+    assert task["task_type"] == "event_article"
+    assert "dedup_screen" not in task
+
+
+def test_refill_event_path_passes_the_feed():
+    """Regression: `_build_event_task` once called the builder WITHOUT a feed,
+    leaving that second event path silently unscreened — the screen was dead code
+    on it. Pin the wiring, not just the gate."""
+    import importlib.util
+    import inspect
+
+    path = ROOT / "scripts" / "refill_reader_facing_pool.py"
+    spec = importlib.util.spec_from_file_location("reader_facing_refill_dedupcheck", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    src = inspect.getsource(mod._build_event_task)
+    assert "feed=" in src, "_build_event_task must pass a feed or the screen never runs"
+
+
 # --- the finding that justifies this gate's existence ------------------------
 
 

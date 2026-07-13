@@ -268,9 +268,18 @@ def _reaction_already_covered(
 
 
 def _build_event_task(item: dict[str, Any]) -> dict[str, Any]:
-    """Compatibility wrapper; event_jobs owns the canonical task schema."""
+    """Compatibility wrapper; event_jobs owns the canonical task schema.
 
-    return build_pending_event_task(item, now=_now_utc())
+    The feed MUST be passed: `build_pending_event_task` only runs the
+    generation-time topic screen when it has a corpus, so omitting it here would
+    silently leave this second event-task path unscreened — the exact "generator
+    never looks at the feed" hole this change closes. Event lane screens in WARN
+    mode, so this can annotate a task but never block one.
+    """
+
+    return build_pending_event_task(
+        item, now=_now_utc(), feed=_load_feed_for_dedup()
+    )
 
 
 def refill_event_candidates(*, horizon_days: int = 14) -> dict[str, Any]:
