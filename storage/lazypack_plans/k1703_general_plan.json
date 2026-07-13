@@ -1,0 +1,245 @@
+{
+  "schema_version": 1,
+  "title": "K1703 懶人包：選擇權結算週真的會壓抑波動嗎",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1703/k1703_results.json",
+      "sha256": "35f234088d80a18aff2b40f48eaf8523cb6fb8d4e3d08014b0c351af79310408",
+      "label": "experiment K1703 results (SPY OpEx week volatility)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "市場傳說拆成兩句話",
+      "alt": "把結算週傳說拆成壓抑句與釋放句兩個可檢定的主張",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "壓抑句",
+          "body": [
+            "結算週因做市商避險把指數釘住，波動比一般週低。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "釋放句",
+          "body": [
+            "結算一過部位解除，下一週波動放開、比一般週高。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "檢定用交易日",
+          "value": {
+            "source": "results",
+            "path": "data.n_trading_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "完整交易週",
+          "value": {
+            "source": "results",
+            "path": "data.n_weeks_analyzed",
+            "format": {
+              "kind": "integer",
+              "suffix": " 週"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "怎麼測的",
+      "alt": "SPY 全歷史日線，三組週別比較，bootstrap 一萬次",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "分組",
+          "body": [
+            "結算週：含當月第三個星期五的整週。",
+            "結算後一週：結算週的下一個交易週。",
+            "一般週：其餘週。假期短週剔除。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "統計",
+          "body": [
+            "以週為重抽樣單位做 bootstrap，種子固定，可完整複現。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "結算週樣本",
+          "value": {
+            "source": "results",
+            "path": "summary_by_week_type.opex.n_weeks",
+            "format": {
+              "kind": "integer",
+              "suffix": " 週"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "一般週樣本",
+          "value": {
+            "source": "results",
+            "path": "summary_by_week_type.normal.n_weeks",
+            "format": {
+              "kind": "integer",
+              "suffix": " 週"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "週的尺度：看得到差距，站不住統計",
+      "alt": "結算週與一般週的年化波動率比較，差距不顯著；結算後一週反而更低",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "結算週年化波動",
+          "value": {
+            "source": "results",
+            "path": "summary_by_week_type.opex.mean_rv_annual_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "一般週年化波動",
+          "value": {
+            "source": "results",
+            "path": "summary_by_week_type.normal.mean_rv_annual_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "壓抑句的 p 值",
+          "value": {
+            "source": "results",
+            "path": "tests.opex_vs_normal.p_value",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "結算後一週年化波動",
+          "value": {
+            "source": "results",
+            "path": "summary_by_week_type.post_opex.mean_rv_annual_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀",
+          "body": [
+            "結算週看起來較低，但信賴區間跨過零，統計上分不出來。",
+            "結算後一週比一般週還低，方向與釋放句相反。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "真正成立的只有一天",
+      "alt": "結算日當天絕對報酬顯著低於其他星期五，是唯一站得住的結果",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "結算日當天平均振幅",
+          "value": {
+            "source": "results",
+            "path": "tests.opexday_vs_other_friday_abs_ret.mean_opex_friday_pct",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "其他星期五平均振幅",
+          "value": {
+            "source": "results",
+            "path": "tests.opexday_vs_other_friday_abs_ret.mean_other_friday_pct",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "這個差距的 p 值",
+          "value": {
+            "source": "results",
+            "path": "tests.opexday_vs_other_friday_abs_ret.p_value",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "帶走三句話",
+          "body": [
+            "釘住是真的，但只釘一天，不是一整週。",
+            "結算後的波動釋放沒有發生，別為它預留子彈。",
+            "二〇〇〇年代那十年方向翻正：市場真在怕的時候，日曆效應會失效。"
+          ]
+        }
+      ]
+    }
+  ]
+}
