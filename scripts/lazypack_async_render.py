@@ -187,6 +187,40 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
 
 # -------------------------------------------------------------------- run ----
 
+def _commit_panels(out_dir: Path, article_id: str) -> None:
+    """產生者自己收自己的產物。
+
+    Panels + render script 依 .gitignore 的設計是 tracked 的，但 render job 從來
+    沒有 commit 它們 —— 沒有任何一班 fire 認領這些檔，於是每班 PHASE-Z 都重新
+    flag 一次並丟回人工。Ownership 屬於產出它的 job，不屬於下一班巡檢。
+    """
+    from volpred.ops.diagnostics import warn
+
+    try:
+        rel = str(out_dir.resolve().relative_to(ROOT))
+    except ValueError:  # silent-ok: out_dir 在 repo 外（測試 tmp_path）→ 無 orphan 可收
+        return  # silent-ok: 不碰真 repo 的 git index
+    try:
+        subprocess.run(["git", "add", "--", rel], cwd=str(ROOT),
+                       check=True, capture_output=True, text=True)
+        staged = subprocess.run(
+            ["git", "diff", "--cached", "--name-only", "--", rel],
+            cwd=str(ROOT), check=True, capture_output=True, text=True,
+        ).stdout.strip()
+        if not staged:
+            return
+        subprocess.run(
+            ["git", "commit", "-m",
+             f"chore(lazypack): commit panels for {article_id}", "--", rel],
+            cwd=str(ROOT), check=True, capture_output=True, text=True,
+        )
+        print(f"[lazypack_async] committed panels: {rel}")
+    except subprocess.CalledProcessError as e:
+        warn("lazypack_commit", "panel commit failed — orphan will be re-flagged",
+             article_id=article_id, path=rel, rc=e.returncode,
+             stderr=(e.stderr or "")[:200])
+
+
 def cmd_run(a: argparse.Namespace) -> int:
     storage_dir = _resolve(a.storage_dir)
     plan_path = _resolve(a.plan)
@@ -254,6 +288,8 @@ def cmd_run(a: argparse.Namespace) -> int:
         sync=not a.no_sync,
     )
     print(json.dumps(result, ensure_ascii=False))
+
+    _commit_panels(out_dir, a.article_id)
 
     if result["status"] == "published" and not a.no_sync and result["synced"] is False:
         # A live article's remote copy is now stale — surface as job failure so
