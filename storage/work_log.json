@@ -17002,5 +17002,27 @@
     "owner": "hourly-22",
     "commit": "86dfa4967",
     "summary": "CI 紅燈期間本地修復未 push 的 75 分鐘空窗根治（老闆 msg 677）。根因不是閾值太鬆，是順序：\ncheck_alerts._handle_ci_run 對同一個紅 run 第二次就 already_handled 直接 return，而「已修好但沒推」\n的整段空窗恰好活在那道 dedup gate 後面 —— 紅 run 會一直是最新完成的 run，直到有人 push 出新的。\n修法：把 origin/main..main 探測搬到 dedup 之前；有 CI 沒看過的 commit 就呼叫既有 cron_git_push_backup.sh\n（同一套 pre-push gate，exit 120 held 照擋不繞過，held 原因寫進 alert body）。CI 跑的就是本地 HEAD →\n紅燈是真的，不推。收編進既有 ci_watch owner，未新增第二層 watchdog。\n驗證：9 tests；break-then-verify（push 移回 dedup 之後 → test_repeat_sighting_of_same_red_run_still_pushes FAIL）；\n真實 git 探測回 ahead=1 / ci_saw_head=false（正確判定會推）；silent-fallback strict audit new=0。"
+  },
+  {
+    "timestamp": "2026-07-13T22:58:27+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-b08246acb",
+    "outcome": "succeeded",
+    "summary": "eliminate CJK tofu chart font debt",
+    "commit": "b08246acb25c11462c0427a66e51eb2c88e11ff3",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T15:01:22.147441+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T23:00:22+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-e1d4d4456",
+    "outcome": "succeeded",
+    "summary": "complete CJK tofu remediation task",
+    "commit": "e1d4d4456b72daa7a67d773f76b41989e7e301fc",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T15:01:22.147038+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
