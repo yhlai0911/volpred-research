@@ -5,6 +5,7 @@ Produces 2 figures:
   fig2: Past 6 FOMC T-1 bar chart (MOVE water level + SPY 5d post return)
 """
 import json
+import sys
 import warnings
 from pathlib import Path
 
@@ -16,6 +17,9 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
 from matplotlib.lines import Line2D
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style
 
 warnings.filterwarnings("ignore")
 
@@ -58,6 +62,8 @@ plt.rcParams.update({
     "font.family":      "DejaVu Sans",
     "font.size":        11,
 })
+
+apply_cjk_style()
 
 # ─── Figure 1: MOVE + VIX dual-axis, 1-year window ───────────────────────────
 cutoff_1y = pd.Timestamp("2025-06-15")

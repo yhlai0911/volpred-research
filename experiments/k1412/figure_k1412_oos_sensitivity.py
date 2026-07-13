@@ -4,6 +4,7 @@ K1412 Figure — OOS Sensitivity: 5 起點 × Student-t vs Clayton DM 統計量
 """
 import json
 import os
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -11,6 +12,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style
+
+apply_cjk_style()
 
 # ── 讀取結果 ────────────────────────────────────────────────────────────────
 results_path = Path(__file__).parent / "k1412_results.json"

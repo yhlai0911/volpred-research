@@ -8,10 +8,16 @@ Reproducible: seed=42. No lookahead: month-end return -> month-end withdrawal.
 """
 from __future__ import annotations
 import json
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style
+
+apply_cjk_style()
 
 ROOT = Path(__file__).parent
 REPO = ROOT.parent.parent

@@ -4,12 +4,18 @@ Harvey ±3.0 threshold lines included.
 Output: experiments/k1378/k1378_dm_subperiods.png
 """
 import json
+import sys
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style
+
+apply_cjk_style()
 
 HERE = Path(__file__).parent
 results_path = HERE / "k1378_results.json"

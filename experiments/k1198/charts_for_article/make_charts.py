@@ -7,10 +7,16 @@ Chart 2: C3 gold-regime gamma — 76 個 window 的 trailing 252-day return vs g
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+from plot_style import apply_cjk_style
+
+apply_cjk_style()
 
 HERE = Path(__file__).resolve().parent
 RESULTS = json.load(open(HERE.parent / "k1198_results.json"))

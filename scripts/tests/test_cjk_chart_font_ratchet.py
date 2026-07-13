@@ -6,8 +6,9 @@ only a human looking at the PNG can see it. It has now happened twice
 (2026-06-11 k202/mile_872abdc3; 2026-07-13 CPI T-2/mile_9560b9cc), because the
 first fix shipped a helper (`scripts/plot_style.py`) with no enforcement.
 
-This test is that enforcement. The 47 pre-existing violations are frozen in
-`storage/qa/cjk_chart_font_baseline.json` and may only shrink.
+This test is that enforcement. The original 47 pre-existing violations were
+remediated on 2026-07-13; `storage/qa/cjk_chart_font_baseline.json` is now empty,
+so every future violation fails CI.
 
 Fix a flagged script by calling `apply_cjk_style()` from scripts/plot_style.py
 before any savefig, then remove it from the baseline.
@@ -81,6 +82,16 @@ def test_detector_accepts_apply_cjk_style(audit):
     )
     assert audit._draws_cjk_text(ast.parse(src))
     assert audit._establishes_cjk_font(src)
+
+
+def test_detector_rejects_uninvoked_apply_cjk_style_import(audit):
+    """Importing the helper without calling it must not satisfy the gate."""
+    src = (
+        "import matplotlib.pyplot as plt\n"
+        "from plot_style import apply_cjk_style\n"
+        'plt.title("波動率")\n'
+    )
+    assert not audit._establishes_cjk_font(src)
 
 
 def test_detector_ignores_chinese_docstrings(audit):

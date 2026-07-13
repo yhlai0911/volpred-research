@@ -17,9 +17,15 @@
 from __future__ import annotations
 
 import os
+import sys
+
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch, Circle, FancyBboxPatch

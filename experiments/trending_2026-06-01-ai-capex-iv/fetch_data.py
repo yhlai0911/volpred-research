@@ -14,14 +14,20 @@ Output:
 - capex_hv_chart.png: dual-axis bar+line chart
 """
 
+import sys
+from pathlib import Path
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
-from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -126,6 +132,7 @@ for ticker in TICKERS:
                 'HV30_pct_mean': round(hv_val, 1) if not np.isnan(hv_val) else np.nan,
             })
         except Exception as e:
+            print(f"Warning: skipping {ticker} CapEx quarter {col_date}: {e}")
             pass
 
 qdf = pd.DataFrame(rows).sort_values(['Ticker', 'Quarter'])

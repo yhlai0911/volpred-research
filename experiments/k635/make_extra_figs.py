@@ -6,11 +6,17 @@
 Numbers read directly from k635_results.json — no hard-coding.
 """
 import json
+import sys
 from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
+
+import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np
 
 BASE = Path(__file__).resolve().parent

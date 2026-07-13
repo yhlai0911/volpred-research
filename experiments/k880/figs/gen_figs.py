@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 """Generate K880 article figures: qlike_bar.png and cross_recursion_value.png"""
+import sys
+from pathlib import Path
+
 import matplotlib
 matplotlib.use("Agg")
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np

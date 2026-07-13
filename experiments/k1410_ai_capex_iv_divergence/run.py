@@ -19,7 +19,14 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import json
 import os
+import sys
 from datetime import datetime, timedelta
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style
+
+apply_cjk_style()
 
 SEED = 20260606
 np.random.seed(SEED)

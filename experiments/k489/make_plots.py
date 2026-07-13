@@ -1,8 +1,16 @@
 """K489 publication plots: bar chart, heatmap, slope-RV scatter."""
 import json
-import numpy as np
-import matplotlib.pyplot as plt
+import sys
 from pathlib import Path
+
+import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
+
+import matplotlib.pyplot as plt  # noqa: E402
 
 EXP_DIR = Path(__file__).resolve().parent
 RESULTS = json.loads((EXP_DIR / 'k489_vix_term_structure_results.json').read_text())

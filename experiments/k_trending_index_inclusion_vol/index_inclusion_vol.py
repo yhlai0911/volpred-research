@@ -26,14 +26,20 @@ Outputs:
 """
 
 import json
+import sys
 import warnings
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import matplotlib
 
 matplotlib.use("Agg")
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
 import matplotlib.pyplot as plt
 import yfinance as yf
 

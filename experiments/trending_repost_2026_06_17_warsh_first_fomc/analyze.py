@@ -7,13 +7,19 @@ All analysis is backward-looking on historical price data.
 """
 import json
 import os
+import sys
 import warnings
+from pathlib import Path
 warnings.filterwarnings('ignore')
 
 import pandas as pd
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')  # headless
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 

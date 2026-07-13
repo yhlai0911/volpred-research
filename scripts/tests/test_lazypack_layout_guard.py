@@ -20,11 +20,13 @@ import matplotlib
 import pytest
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.patches import Ellipse, Rectangle  # noqa: E402
-
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
+import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.patches import Ellipse, Rectangle  # noqa: E402
 
 from lazypack_layout_guard import find_violations, install  # noqa: E402
 

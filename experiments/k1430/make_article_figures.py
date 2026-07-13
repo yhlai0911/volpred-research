@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
+
+import matplotlib.pyplot as plt  # noqa: E402
 
 
 HERE = Path(__file__).resolve().parent

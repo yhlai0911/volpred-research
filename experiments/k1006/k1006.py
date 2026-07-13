@@ -24,6 +24,7 @@ Seed: 42
 
 import os
 import glob
+import sys
 import numpy as np
 import pandas as pd
 import json
@@ -32,6 +33,12 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from datetime import datetime
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style
+
+apply_cjk_style()
 
 warnings.filterwarnings('ignore')
 np.random.seed(42)
@@ -139,7 +146,7 @@ def load_tx_daily_ohlc(data_dir, start_year=2012, end_year=2026):
             })
 
         except Exception as e:
-            # Skip problematic files
+            print(f"Warning: skipping unreadable TX file {fpath}: {e}")
             continue
 
     if not daily_records:

@@ -4,9 +4,15 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
+
+import matplotlib.pyplot as plt  # noqa: E402
 import pandas as pd
 
 HERE = Path(__file__).resolve().parent
@@ -35,6 +41,7 @@ def plot_market_coverage(results: dict) -> None:
     twdx["normalized"] = twdx["close"] / twdx["close"].iloc[0] * 100
 
     plt.style.use("default")
+    apply_cjk_style()
     fig, ax = plt.subplots(figsize=(10, 5.8))
     ax.plot(tw50["date"], tw50["normalized"], label="0050.TW", color="#0b6e4f", linewidth=2.2)
     ax.plot(twdx["date"], twdx["normalized"], label="USD/TWD", color="#c05621", linewidth=2.0)

@@ -16,6 +16,7 @@ Seed: N/A (no stochastic procedure in this script; pure descriptive stats).
 from __future__ import annotations
 
 import json
+import sys
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -229,6 +230,10 @@ def main():
     # ---- Figures ----
     import matplotlib
     matplotlib.use("Agg")
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+    from plot_style import apply_cjk_style
+
+    apply_cjk_style()
     import matplotlib.pyplot as plt
 
     # Figure 1: VIX vs VIX9D term structure, last 60 trading days

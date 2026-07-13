@@ -6,12 +6,20 @@ Two charts from k208_implied_realized_gap_results.json:
 """
 
 import json
+import sys
+from pathlib import Path
+
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
+
+import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.patches as mpatches
-from pathlib import Path
 
 np.random.seed(42)
 

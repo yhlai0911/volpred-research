@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -6,6 +7,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style
+
+apply_cjk_style()
 
 ROOT = Path(__file__).resolve().parent
 RESULTS_PATH = ROOT / "k1373_results.json"

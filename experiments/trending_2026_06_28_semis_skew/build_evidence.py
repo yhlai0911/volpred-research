@@ -6,11 +6,18 @@ Data sources: yfinance (NVDA, SMH price history + options)
 Sample period: 2024-01-01 to 2026-06-27
 """
 
+import sys
+from pathlib import Path
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import json

@@ -2,6 +2,33 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 22:48 — CJK 圖表豆腐字第二次復發：有 helper、沒有 enforcement
+
+**現象**：CPI T-2 文章 `mile_9560b9cc` 的兩張已上線圖把繁體中文畫成方框。這是
+2026-06-11 `k202` / `mile_872abdc3` 後同 class 第二次；前次雖新增
+`scripts/plot_style.py`，但呼叫完全靠作者記得，新的繪圖腳本仍可無聲漏掉。
+
+**根因**：修復只有可選 helper，沒有 repository-wide 機械 gate。matplotlib 儲存 PNG 時不會因缺少
+CJK glyph 失敗，數值與檔案大小也都正常，所以既有測試、上傳與發佈流程全部會放行，只有看圖才會發現。
+
+**修正**：
+- 原 baseline 47 支繪圖腳本全部在繪圖前以 cwd-independent 路徑呼叫 `apply_cjk_style()`；
+  `storage/qa/cjk_chart_font_baseline.json` 由 47 降為 0，往後任何一筆都是 regression。
+- `scripts/audit_cjk_chart_fonts.py` + `scripts/tests/test_cjk_chart_font_ratchet.py` 成為單一 enforcement owner；
+  正／負控制確保 detector 會抓到「matplotlib + CJK 繪圖文字 + 無字型鏈」；AST 明確要求實際
+  呼叫 helper，只有 import 但漏掉 call 也會失敗。
+- 完整解析 1,596 篇 published 文章的 1,859 個圖片引用（1,698 個唯一 URL）。原 baseline 產圖反查到
+  34 篇、53 個唯一 URL；53 張線上 PNG 均下載後與本地檔 SHA-256 完全一致，並以 5 張 contact sheet
+  逐張確認繁中文字形正常，因此本輪沒有不必要地重繪或覆寫正確線上內容。完整紀錄：
+  `storage/qa/cjk_chart_damage_audit_20260713.json`。已知受損的 `mile_9560b9cc` 兩張圖已由前一班完成
+  重繪、同 URL upsert 與 hash 驗證。
+
+**教訓**：字型缺 glyph 是 silent failure；「提供 helper」不等於修好。任何依賴作者記憶、且失敗仍會
+產出合法 PNG 的規則，都必須升級成掃描器 + 空 baseline 的 CI gate；線上修復則先做 hash 與視覺取證，
+只覆寫確認受損的物件。
+
+---
+
 ## 2026-07-13 22:20 — 第三根因（也是最深的一層）：修好的程式碼從來沒有上線 — daemon 自我重載
 
 **老闆的問題**：「你不是說你修好了嗎？為什麼在你說修好之後還一直寄來？你身為自主營運經理

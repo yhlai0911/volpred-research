@@ -10,11 +10,17 @@
 用途：daily_article（一般讀者向）文章配圖。不含隨機程序，無需 seed。
 """
 import json
+import sys
 from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style
+
+apply_cjk_style()
 
 HERE = Path(__file__).parent
 RESULTS = json.loads((HERE / "k1074_results.json").read_text())

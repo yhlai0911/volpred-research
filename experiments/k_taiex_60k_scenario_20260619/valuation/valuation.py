@@ -49,6 +49,7 @@ Out:  valuation_results.json  +  valuation_percentile.png / sector_heatmap.png
 """
 from __future__ import annotations
 import json
+import sys
 import time
 import datetime as dt
 from pathlib import Path
@@ -58,6 +59,10 @@ import pandas as pd
 import requests
 import matplotlib
 matplotlib.use("Agg")
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
 import matplotlib.pyplot as plt
 import warnings
 

@@ -100,8 +100,21 @@ def _draws_cjk_text(tree: ast.AST) -> bool:
 
 
 def _establishes_cjk_font(source: str) -> bool:
-    if any(h in source for h in STYLE_HELPERS):
-        return True
+    # Merely importing a helper is not enough: the rcParams only change when
+    # the helper is actually called. Requiring an AST Call prevents an
+    # import-only script from silently passing this gate.
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        tree = None
+    if tree is not None:
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            fn = node.func
+            name = fn.attr if isinstance(fn, ast.Attribute) else getattr(fn, "id", "")
+            if name in STYLE_HELPERS:
+                return True
     # Explicit rcParams font chain naming a real CJK face, e.g.
     #   plt.rcParams["font.sans-serif"] = ["PingFang HK", ...]
     for line in source.splitlines():

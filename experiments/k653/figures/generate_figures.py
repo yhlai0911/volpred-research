@@ -2,12 +2,21 @@
 K653 Figure Generator — wealth_paths.png and sharpe_mdd_scatter.png
 """
 import json
+import os
+import sys
+from pathlib import Path
+
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
+
+import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.patches as mpatches
 import numpy as np
-import os
 
 # Load results
 results_path = os.path.join(os.path.dirname(__file__), '..', 'k653_results.json')

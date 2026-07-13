@@ -1,8 +1,14 @@
 """K562 chart 2 — momentum window curve + transaction cost sensitivity."""
 import json
+import sys
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style  # noqa: E402
+
+apply_cjk_style()
+
+import matplotlib.pyplot as plt  # noqa: E402
 
 ROOT = Path(__file__).parent
 RESULTS = ROOT / "k562_k560_sector_validation_results.json"
