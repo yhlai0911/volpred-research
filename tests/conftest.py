@@ -17,45 +17,11 @@ if str(SRC) not in sys.path:
 
 os.environ.setdefault("PYTHONHASHSEED", "0")
 
-# 2026-04-20: test runs must never send real emails. Previously
-# tests/test_content_release_pool.py fixtures mile_first_run / mile_sched_1
-# triggered real SMTP via release_pool_by_settings → admin notifications
-# reached user inbox describing non-existent articles. This gate is checked
-# in email_notifier.py _send_email; must be set BEFORE any test imports
-# that might transitively load the notifier.
-os.environ["VOLPRED_NO_EMAIL"] = "1"
-
-# 2026-06-23: test runs must never WRITE to production Supabase. A publish-style
-# test (test_daily_digest_dup_exemption.py) whose per-test sync stub failed to
-# apply synced two stub daily_digest rows (phase='test', identical MOVE-VIX
-# content: mile_46918766 / mile_6d06f91c) to the LIVE feed — they surfaced on the
-# 精選導讀 tab and had to be retracted. supabase_sync._post / _patch_where /
-# _patch_where_returning honor this flag and no-op, so even with creds present
-# (loaded from .env.local at import) and a missing per-test stub, no test can
-# mutate prod. Structural backstop mirroring VOLPRED_NO_EMAIL above.
-os.environ["VOLPRED_NO_REMOTE_WRITE"] = "1"
-
-# 2026-07-10: writes were blocked, reads were not. A test with an incomplete stub still
-# queried LIVE production, so its verdict depended on today's prod data rather than its
-# fixtures. tests/test_feed_sync.py stubbed `_fetch_supabase_articles` but not
-# `_fetch_supabase_article_tags`; two of its tests were observed flipping between pass
-# and fail across runs 40 minutes apart with no code change on that path.
-# supabase_sync._urlopen raises on GET when this is set — loudly, because a silently
-# empty read is indistinguishable from "nothing in the DB" and would let a missing stub
-# produce a green test asserting the wrong thing.
-os.environ["VOLPRED_NO_REMOTE_READ"] = "1"
-
-# 2026-07-10: test runs must never rewrite canonical local state under storage/.
-# test_refill_task_pool.py::test_research_reader_friendly_still_allows_general_companion
-# monkeypatched refill_task_pool.CANDIDATES to a tmp_path file but left ROOT alone;
-# the tmp file had no `generated_at`, so _ensure_candidates_fresh() read the age as
-# unknown, judged the candidates stale, and shelled out to the real
-# scripts/build_publication_candidates.py — which writes the live
-# storage/publication_candidates.json. volpred.ops.canonical_write.guard_canonical_write
-# honors this flag at the writer (env is inherited by subprocesses, so `uv run` children
-# are covered too). Same failure class as VOLPRED_NO_REMOTE_WRITE above, one layer in:
-# that gate protects prod, this one protects the repo's own source of truth.
-os.environ["VOLPRED_NO_CANONICAL_WRITE"] = "1"
+# The four production side-effect guards are deliberately owned by the tracked
+# repo-root conftest.py so they apply to BOTH tests/ and scripts/tests/. Do not
+# re-state them here: a nested duplicate previously hid the fact that worktree
+# agents had no root conftest at all. scripts/tests/test_dispatch_state.py pins
+# the root owner and the four values mechanically.
 
 # Keep legacy publisher fixtures deterministic across the anti-AI gate's
 # 2026-07-13 production escalation date. Strict/blocking behavior is covered by
@@ -96,7 +62,7 @@ def _stat_pair(path: Path) -> tuple[int, int] | None:
     try:
         st = path.stat()
     except OSError:
-        return None
+        return None  # silent-ok: test fingerprint records a missing path as state
     return (st.st_mtime_ns, st.st_size)
 
 

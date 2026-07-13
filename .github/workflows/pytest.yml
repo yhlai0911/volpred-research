@@ -11,11 +11,13 @@ name: Test Suite
 # Until this workflow existed, all of them were gates that only fired when a
 # human happened to run them locally.
 #
-# Safety belts, all three already honoured by conftest.py — set here too so a broken
-# conftest cannot let a CI run touch production:
+# The tracked repo-root conftest.py is the single pytest owner of all four
+# guards. Repeat them at the runner boundary as an independent fail-closed belt
+# so a broken/missing conftest cannot let CI touch production before tests fail:
 #   VOLPRED_NO_REMOTE_WRITE=1     no Supabase POST/PATCH (2026-06-23 leak incident)
 #   VOLPRED_NO_EMAIL=1            no SMTP
 #   VOLPRED_NO_CANONICAL_WRITE=1  no writes under storage/ (2026-07-10 leak incident)
+#   VOLPRED_NO_REMOTE_READ=1      no production Supabase GET
 
 # Enabled for push/PR only once a credential-less clean checkout ran green:
 # 1683 passed, 8 skipped, 0 failed (2026-07-10, fresh worktree, no `.env.local`).

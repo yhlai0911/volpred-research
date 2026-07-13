@@ -1,7 +1,7 @@
 """Structural backstop: forbid writes to canonical `storage/` state under test.
 
-Sibling of the `VOLPRED_NO_EMAIL` / `VOLPRED_NO_REMOTE_WRITE` gates set in
-`tests/conftest.py`. Those two stop a test from reaching the outside world
+Sibling of the `VOLPRED_NO_EMAIL` / `VOLPRED_NO_REMOTE_WRITE` gates set in the
+repo-root `conftest.py`. Those two stop a test from reaching the outside world
 (SMTP, Supabase); this one stops a test from rewriting the repo's own
 single-source-of-truth JSON.
 

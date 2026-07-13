@@ -14,9 +14,9 @@ if str(ROOT) not in sys.path:
 # `scripts/tests/` ran with ALL of them unset — free to send real email, write
 # production Supabase, read live Supabase, and rewrite canonical `storage/`
 # state. Probed directly: a throwaway test dropped into `scripts/tests/` printed
-# `None` for all three of the first flags. The guards are stated here, at the
-# repo root, so no test tree can be born outside them; `tests/conftest.py` keeps
-# the incident history behind each one and re-asserts the same values.
+# `None` for all four flags. The guards are stated here, at the
+# repo root, so no test tree can be born outside them. This is the single Python
+# enforcement owner; nested conftests must not re-state these assignments.
 os.environ["VOLPRED_NO_EMAIL"] = "1"
 os.environ["VOLPRED_NO_REMOTE_WRITE"] = "1"
 os.environ["VOLPRED_NO_REMOTE_READ"] = "1"

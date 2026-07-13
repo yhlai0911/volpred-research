@@ -2,7 +2,7 @@
 
 Focus on the safety guards + bookkeeping behaviors that previously caused
 incidents (2026-04-20 test fixture leak into user inbox). Real SMTP send is
-disabled globally via tests/conftest.py VOLPRED_NO_EMAIL=1; these tests verify
+disabled globally via root conftest.py VOLPRED_NO_EMAIL=1; these tests verify
 the guards are honored AND that bookkeeping (notification_log + per-id JSON)
 is updated correctly even when send is suppressed.
 """

@@ -61,7 +61,7 @@ def _require_gate_armed():
 
 def test_conftest_enables_the_gate():
     """If this fails, every other guard in this file is inert."""
-    assert canonical_writes_disabled(), f"{ENV_FLAG} must be set by tests/conftest.py"
+    assert canonical_writes_disabled(), f"{ENV_FLAG} must be set by root conftest.py"
 
 
 @pytest.mark.parametrize(

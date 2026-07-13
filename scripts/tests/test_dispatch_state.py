@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import subprocess
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -92,6 +93,37 @@ def test_side_effect_guards_are_armed_outside_the_tests_tree() -> None:
         "VOLPRED_NO_CANONICAL_WRITE",
     ):
         assert os.environ.get(flag) == "1", f"{flag} not armed under scripts/tests/"
+
+
+def test_versioned_root_conftest_is_single_pytest_guard_owner() -> None:
+    """CI env vars can make the test above pass even if root conftest vanishes.
+
+    Pin the versioned distribution artifact independently, and prohibit the
+    nested duplicate that used to mask an unarmed scripts/tests worktree.
+    """
+    root = Path(__file__).resolve().parents[2]
+    tracked = subprocess.run(
+        ["git", "ls-files", "--error-unmatch", "conftest.py"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert tracked.returncode == 0, "repo-root conftest.py must be Git-tracked"
+
+    owner_path = root / "conftest.py"
+    assert owner_path.is_file(), "repo-root conftest.py must exist"
+    owner = owner_path.read_text(encoding="utf-8")
+    nested = (root / "tests/conftest.py").read_text(encoding="utf-8")
+    for flag in (
+        "VOLPRED_NO_EMAIL",
+        "VOLPRED_NO_REMOTE_WRITE",
+        "VOLPRED_NO_REMOTE_READ",
+        "VOLPRED_NO_CANONICAL_WRITE",
+    ):
+        assignment = f'os.environ["{flag}"] = "1"'
+        assert assignment in owner, f"root conftest does not own {flag}"
+        assert assignment not in nested, f"nested conftest duplicates {flag}"
 
 
 def test_mark_supervisor_started_sets_timestamps(tmp_state: Path) -> None:

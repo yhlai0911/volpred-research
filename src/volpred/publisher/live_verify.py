@@ -59,7 +59,7 @@ def verify_article_live(
 
     The `_http_check`, `_sleep`, `_now` hooks exist for deterministic testing.
 
-    2026-07-04: when `VOLPRED_NO_REMOTE_WRITE=1` (tests/conftest.py backstop —
+    2026-07-04: when `VOLPRED_NO_REMOTE_WRITE=1` (root conftest.py backstop —
     nothing was synced to the live site, so polling it can NEVER succeed and
     only burns the full `max_wait_s` per published-status fixture; found via
     faulthandler after test_audience_inference.py hung a 3-min pytest run),

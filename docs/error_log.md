@@ -58,6 +58,33 @@
 在 JSON 上長得一模一樣 —— 這正是 `.claude/rules/dedup-gate-audit.md` 要求 audit trail 的理由。
 還有：**修 gate 時，測試要斷言 gate 會 fire，不能只斷言它的周邊產物會動。**
 
+## 2026-07-14 06:07 — pytest guard 曾只存在於被忽略的 root conftest，worktree 無防護 — **FIXED**
+
+**現象**：在歷史基準 `dd182b228` 建立乾淨 worktree 後，`scripts/tests/` 下的 pytest 看不到
+`VOLPRED_NO_EMAIL`、`VOLPRED_NO_REMOTE_WRITE`、`VOLPRED_NO_REMOTE_READ`、
+`VOLPRED_NO_CANONICAL_WRITE`；安全的 tmp-target probe 證明 writer gate 不會 raise。原因不是 worktree
+的 `.git` 形態，而是當時 root `conftest.py` 被 `.gitignore` 排除，只有主 checkout 的未追蹤副本；
+worktree 根本拿不到它。
+
+**處理重疊**：本 task 被 claim 時，核心修復其實已由 `e51c28f3f` 落地：root conftest 已納入版本控制、
+四個 guard 已移到 repo root，CI 亦有 runner-level safety belt。不過 `tests/conftest.py` 仍重複指定四個
+值，會重新製造「巢狀測試全綠、`scripts/tests/` 實際裸奔」的遮蔽；現有 runtime assertion 也可被 CI
+預先設定的 env vars 蒙混，即使 root conftest 消失仍可能綠燈。
+
+**解法（single owner + distribution gate）**：root `conftest.py` 成為唯一 Python enforcement owner；
+刪除 nested conftest 的四份重複 assignment，保留 GitHub Actions env 作為獨立、fail-closed 的 runner
+safety belt。新增靜態回歸 gate，機械確認 root conftest (1) 被 Git 追蹤、(2) 實際存在、(3) 精確持有
+四個 assignment，並確認 nested conftest 不得重複；因此 gate 不依賴 pytest 當下環境是否已被 CI 設值。
+
+**驗證**：把未提交 patch 套到乾淨 detached worktree，清除四個 env 後相關 suites 為
+`113 passed, 1 skipped`；四個核心 guard tests 為 `4 passed`。負控制在同一臨時 worktree 隱藏 root
+conftest、但手動預設四個 CI env，新的 distribution gate 仍按預期失敗：
+`AssertionError: repo-root conftest.py must exist`。臨時 worktree 還原至 clean 後正常移除。
+
+**教訓**：安全設定的 runtime test 不能同時充當 packaging test。只要 runner 也會預設同一 env，
+就必須另外驗證真正被分發到 clean checkout / worktree 的 owner；nested conftest 不得重複安全設定，
+否則會把作用域缺口偽裝成全綠。
+
 ## 2026-07-14 05:45 — 護欄放在 fail-open 的 `try` 內，等於沒有護欄 — **FIXED**（hourly-05）
 
 **現象**：main Test Suite 從 2026-07-13 20:00 那班起連兩班紅（run 29280674231 / 29284651466）。

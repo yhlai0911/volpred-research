@@ -349,7 +349,7 @@ def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
 
     2026-07-10 writer-level gate: a test that forgets to redirect `STATE_PATH`
     used to write the LIVE daemon state (`supervisor.main()` did exactly that —
-    see its call-time-lookup NOTE). `tests/conftest.py` backstopped it with a
+    see its call-time-lookup NOTE). The repo-root `conftest.py` backstopped it with a
     per-test fingerprint of canonical files, but `dispatch_state.json` is also
     where the running daemon stamps a heartbeat every 30s, so that detector
     failed a random test on every run whose span crossed a beat — and PHASE-Z,

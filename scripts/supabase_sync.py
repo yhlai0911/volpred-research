@@ -111,7 +111,7 @@ def _urlopen(req, timeout: int = 15):
     if req.get_method() == "GET" and _remote_reads_blocked():
         raise RuntimeError(
             f"Blocked live Supabase read of {req.full_url.split('?')[0]} because "
-            "VOLPRED_NO_REMOTE_READ=1 (set by tests/conftest.py). A test reached "
+            "VOLPRED_NO_REMOTE_READ=1 (set by root conftest.py). A test reached "
             "production Supabase, which makes its result depend on live data. Stub "
             "the fetch helper this call path uses instead of relaxing the switch."
         )
