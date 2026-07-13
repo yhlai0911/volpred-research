@@ -16906,5 +16906,25 @@
     "owner": "codex",
     "backfilled_at": "2026-07-13T09:59:02.846591+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T18:10:57+08:00",
+    "task_type": "platform_ops",
+    "task_id": "nested_dm_fp_narrowing_baseline_audit",
+    "outcome": "succeeded",
+    "actor": "hourly-18",
+    "owner": "hourly-18",
+    "commit": "a2d58ecc3",
+    "summary": "nested-DM 收窄提案 141 站點 FP 全量稽核 → 否決收窄（會抹掉 109 筆真巢狀誤用）。改採 32 筆具名 adjudicated allowlist 退場 FP；偵測器僅加書目過濾。baseline 220→188+32，invariant 對帳通過，ratchet 21 tests 綠（含 4 條擋未來重演收窄）。"
+  },
+  {
+    "timestamp": "2026-07-13T18:22:03+08:00",
+    "task_type": "platform_ops",
+    "task_id": "release-starvation-rootfix-20260713",
+    "outcome": "partial",
+    "actor": "hourly-18",
+    "owner": "hourly-18",
+    "commit": "ac1156198",
+    "summary": "release 死鎖第 3 層（observability + 自動補救）落地：新增領先指標 release_pool_deadlock（due_now + 有草稿 + eligible=0 → CRITICAL，收編進既有 _parse_release_pool_state，不加第四層 watchdog），自動補救建 P1 補池任務帶 required_clusters（走既有 check_alerts remediation 層）。偵測維持純讀以免 dashboard 渲染長任務。6 個 regression test；break-then-verify 舊 code 3 紅/新 code 6 綠。線上實測不誤報。**第 2 層（refill 例行補池 cluster-aware）尚未做，任務仍 pending。**"
   }
 ]
