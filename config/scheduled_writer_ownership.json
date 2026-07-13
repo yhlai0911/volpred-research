@@ -371,6 +371,13 @@
       "phase_z_probe_paths": ["storage/analytics/latest.json"],
       "reason": "Reader snapshots are scheduled analytics machine state."
     },
+    "daily_checkup": {
+      "entrypoint": "scripts/daily_checkup.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/ops/checkup/**"],
+      "phase_z_probe_paths": ["storage/ops/checkup/"],
+      "reason": "Daily result-level health reports and alert receipts are scheduled operations machine state."
+    },
     "market_closure_detect": {
       "entrypoint": "scripts/detect_market_closure.py",
       "commit_owner": "scripts/detect_market_closure.py",
@@ -409,6 +416,7 @@
     "com.volpred.collect-tw-data": {"job_id": "collect_tw_data", "status": "active"},
     "com.volpred.collect-us-data": {"job_id": "collect_us_data", "status": "active"},
     "com.volpred.compute-worker": {"job_id": "volpred-compute-worker", "status": "active"},
+    "com.volpred.daily-checkup": {"job_id": "daily_checkup", "status": "active"},
     "com.volpred.daily-update": {"job_id": "daily_update", "status": "active"},
     "com.volpred.daily-update-intraday": {"job_id": "daily_update_intraday", "status": "active"},
     "com.volpred.dispatch-supervisor": {"job_id": "volpred-dispatch-supervisor", "status": "active"},

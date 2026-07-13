@@ -19,9 +19,23 @@ SCRIPTS_DIR = PROJECT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from run_due_jobs import _job_is_due, _parse_iso, _write_pending_sessions  # noqa: E402
+from run_due_jobs import _job_is_due, _parse_iso, _write_pending_sessions, main  # noqa: E402
 
 TAIPEI = ZoneInfo("Asia/Taipei")
+
+
+def test_cli_rejects_unknown_dry_run_before_scheduler_executes(monkeypatch):
+    called = False
+
+    def should_not_run():
+        nonlocal called
+        called = True
+
+    monkeypatch.setattr("run_due_jobs.run_due_jobs", should_not_run)
+    with pytest.raises(SystemExit) as exc_info:
+        main(["--dry-run"])
+    assert exc_info.value.code == 2
+    assert called is False
 
 
 def test_job_is_due_fires_when_never_ran_and_scheduled_in_last_24h():

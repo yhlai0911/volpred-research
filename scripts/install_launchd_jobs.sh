@@ -20,10 +20,36 @@
 set -euo pipefail
 
 USER_UID="$(id -u)"
-LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
-PROJECT_ROOT="$HOME/volpred-research"
-SCHEDULE_JSON="$PROJECT_ROOT/config/runtime_schedules.json"
-LAUNCHD_LOG_DIR="$HOME/.volpred/logs"
+LAUNCH_AGENTS_DIR="${VOLPRED_LAUNCH_AGENTS_DIR:-$HOME/Library/LaunchAgents}"
+PROJECT_ROOT="${VOLPRED_PROJECT_ROOT:-$HOME/volpred-research}"
+SCHEDULE_JSON="${VOLPRED_SCHEDULE_JSON:-$PROJECT_ROOT/config/runtime_schedules.json}"
+LAUNCHD_LOG_DIR="${VOLPRED_LAUNCHD_LOG_DIR:-$HOME/.volpred/logs}"
+
+TARGET_ID=""
+RENDER_ONLY=0
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --id)
+            [[ $# -ge 2 ]] || { echo "[ERROR] --id requires a job id" >&2; exit 2; }
+            TARGET_ID="$2"
+            shift 2
+            ;;
+        --render-only)
+            RENDER_ONLY=1
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: $0 [--id JOB_ID] [--render-only]"
+            echo "  --id selects one explicit LaunchAgent job without touching other labels."
+            echo "  --render-only writes plist(s) but does not call launchctl."
+            exit 0
+            ;;
+        *)
+            echo "[ERROR] unknown argument: $1" >&2
+            exit 2
+            ;;
+    esac
+done
 
 mkdir -p "$LAUNCH_AGENTS_DIR" "$LAUNCHD_LOG_DIR"
 
@@ -170,8 +196,12 @@ echo "[derive] reading $SCHEDULE_JSON ..."
 
 # Use jq to enumerate items, filter to host_crontab_managed != false
 LABELS=()
+MATCHED=0
 while IFS= read -r item; do
     id=$(echo "$item" | jq -r '.id')
+    if [[ -n "$TARGET_ID" && "$id" != "$TARGET_ID" ]]; then
+        continue
+    fi
     cron=$(echo "$item" | jq -r '.cron')
     wrapper=$(echo "$item" | jq -r '.wrapper_script')
     log_path=$(echo "$item" | jq -r '.log_path')
@@ -179,14 +209,27 @@ while IFS= read -r item; do
     # Use has() to distinguish absent-key (default true) from explicit false.
     host_managed=$(echo "$item" | jq -r 'if has("host_crontab_managed") then .host_crontab_managed else true end')
 
-    # Skip non-host-managed items (e.g. shared_scheduler_tick when v12 advisory)
-    if [[ "$host_managed" == "false" ]]; then
+    configured_label=$(echo "$item" | jq -r '.launchagent_label // .launchd_label // empty')
+    mechanism=$(echo "$item" | jq -r '.mechanism // empty')
+
+    # Default mode preserves the historical bulk migration behavior. Targeted
+    # mode is the safe path for an explicit LaunchAgent owner: it may (and
+    # normally should) be host_crontab_managed=false to guarantee single fire.
+    if [[ -z "$TARGET_ID" && "$host_managed" == "false" ]]; then
         echo "[skip] $id (host_crontab_managed=false)"
         continue
     fi
+    if [[ -n "$TARGET_ID" && "$mechanism" != "launchd" && -z "$configured_label" ]]; then
+        echo "[ERROR] $id is not declared as an explicit LaunchAgent owner" >&2
+        exit 1
+    fi
+    if [[ -z "$cron" || "$cron" == "null" ]]; then
+        echo "[ERROR] $id has no calendar cron; daemon-style jobs need their dedicated installer" >&2
+        exit 1
+    fi
 
-    # Derive label, logbase from id
-    label="com.volpred.${id//_/-}"
+    # Explicit config label wins; legacy bulk jobs retain deterministic derivation.
+    label="${configured_label:-com.volpred.${id//_/-}}"
     logbase=$(basename "$log_path" .log)
 
     interval_minutes=$(echo "$item" | jq -r '.launchd_interval_minutes // empty')
@@ -198,8 +241,19 @@ while IFS= read -r item; do
 
     write_plist "$label" "$wrapper" "$schedule_xml" "$logbase"
     LABELS+=("$label")
+    MATCHED=$((MATCHED + 1))
     echo "  $id  cron='$cron'  wrapper=$(basename "$wrapper")"
 done < <(jq -c '.system_crontab.items[]' "$SCHEDULE_JSON")
+
+if [[ -n "$TARGET_ID" && "$MATCHED" -ne 1 ]]; then
+    echo "[ERROR] targeted job not found exactly once: $TARGET_ID (matched=$MATCHED)" >&2
+    exit 1
+fi
+
+if [[ "$RENDER_ONLY" -eq 1 ]]; then
+    echo "[render-only] wrote ${#LABELS[@]} plist(s); launchctl unchanged"
+    exit 0
+fi
 
 echo ""
 echo "[bootstrap] (re)loading ${#LABELS[@]} plists into launchd gui/$USER_UID domain..."

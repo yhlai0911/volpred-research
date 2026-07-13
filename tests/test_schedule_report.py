@@ -22,6 +22,7 @@ def test_build_schedule_report_matches_live_items(monkeypatch):
                         "id": "daily_update",
                         "label": "每日更新",
                         "matchers": ["daily_update.py"],
+                        "host_crontab_managed": False,
                     },
                 ]
             },
@@ -49,9 +50,9 @@ def test_build_schedule_report_matches_live_items(monkeypatch):
 
     assert report["session_cron_count"] == 2
     assert report["remote_trigger_count"] == 1
-    assert report["expected_system_task_count"] == 2
+    assert report["expected_system_task_count"] == 1
     assert report["matched_system_tasks"] == ["台股收集"]
-    assert report["missing_system_tasks"] == ["每日更新"]
+    assert report["missing_system_tasks"] == []
 
 
 def test_cron_matches_date_weekday_guard():

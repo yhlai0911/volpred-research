@@ -527,6 +527,22 @@
         ]
       },
       {
+        "id": "daily_checkup",
+        "label": "每日 result-level 大體檢",
+        "cron": "40 9 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_daily_checkup.sh",
+        "log_path": "storage/logs/cron/daily_checkup.log",
+        "launchagent_label": "com.volpred.daily-checkup",
+        "mechanism": "launchd",
+        "host_crontab_managed": false,
+        "description": "每日 09:40 Asia/Taipei 在 reader metrics、daily update、radar 與 09:00 digest 後執行八維 result-level 大體檢；LaunchAgent com.volpred.daily-checkup 是唯一 owner，host crontab 與 run_due_jobs piggy-back 均因 host_crontab_managed=false 排除。findings 寫 storage/ops/checkup，warn/critical 由 --alert 通知。",
+        "matchers": [
+          "daily_checkup.py",
+          "cron_daily_checkup.sh",
+          "com.volpred.daily-checkup"
+        ]
+      },
+      {
         "id": "market_closure_detect",
         "label": "台股臨時休市偵測（颱風）",
         "cron": "0 * * * *",

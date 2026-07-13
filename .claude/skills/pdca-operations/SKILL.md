@@ -38,13 +38,15 @@ PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調�
 ### P — Plan（找問題 + 找機會，定計畫）
 兩條輸入並行掃，產出本輪 to-do：
 1. **每日大體檢（result-level）**：`uv run python scripts/daily_checkup.py`
-   —— 7 維度查「結果好不好」非「程式有沒有報錯」：
+   —— 8 維度查「結果好不好」非「程式有沒有報錯」：
    - `data_freshness`：資料收集 job 照排程跑？關鍵檔新鮮？（時效性 tick/order flow 優先，錯過窗口=永久損失）
    - `cron_completion`：排程 job 最近一輪真的 fire + exit0？
    - `content_pipeline`：草稿池 ≥4？published 文章皆含**真圖表（正文嵌 `![](url)`）+ 數據表**（非純散文）？
    - `live_freshness`：線上 API data_date ≈ 最新交易日？（抓「頁面卡舊資料」）
    - `live_cache`：data 頁非長效靜態快取？（抓「網頁卡 cache」）
    - `mission_progress`：backlog 在前進？
+   - `alert_conditions`：既有 canonical alerts 是否有 live breach？（本檢查只讀，不重複寄信）
+   - `reader_metrics`：讀者互動資料是否落地且在 48 小時 freshness 門檻內？
 2. **5 Missions 主動掃**（沒問題也要找機會 — 沒錯誤≠沒事做）：
    - M1 內容：池夠嗎？主題多樣嗎？有沒有新研究值得寫？
    - M2 研究：**持續擴展研究主題 + 技術精進是常態，要一直做**。backlog 薄 → 派 journal-discovery（`scripts/agent_prompts/journal_topic_scan.md`，週一/四 cron，從 JBF/JFE/RFS/JoE + JPM/FAJ/CFA 等頂刊挖 contrarian 方向，落檔 `research_program.md`，見 memory `feedback_journal_topic_discovery`）；新方法/技術也要持續學習引入。reviewed 實驗（含 null）寫 knowledge。
@@ -106,7 +108,7 @@ PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調�
 
 ## 排程
 
-- `daily_checkup.py` **必須**每日一次 + 每 autonomous tick 開頭跑；截至 2026-07-14，wrapper 存在但 host schedule 尚未 materialize，缺口由 `platform_ops_materialize_daily_checkup_schedule` 追蹤。未修前不可宣稱「每日 cron 已排」。
+- `daily_checkup.py` **每日 09:40 Asia/Taipei** 由 `com.volpred.daily-checkup` LaunchAgent 執行，另在每個 autonomous tick 開頭跑。Canonical schedule 在 `config/runtime_schedules.json`；`host_crontab_managed=false` 保證 host cron / piggy-back 不會成為第二個 owner。
 - 有 critical/warn finding → 直接修；真需用戶才 `--alert` 寄信（且信裡寫「我已做了什麼」非「請你做」）。
 
 ## Skill 治理（避免 proliferation — 2026-06-30 用戶 + Anthropic 官方指引）

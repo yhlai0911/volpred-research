@@ -7124,3 +7124,35 @@ receipt exact paths + supervisor pre-fire baseline 定義 owner，不可擴大 P
 任何 tracked writer 只能三選一：安全 self-commit、明確 PHASE-Z machine state、或附可驗證理由的 delivery/
 no-output exemption。`git add -- path` 不足以保證安全，commit 也必須 `--only -- path`；dirty check 必須
 發生在寫入前且涵蓋 index，不能只在寫完後決定「不 commit」。
+
+### 2026-07-14 — daily_checkup 有 wrapper 卻沒有排程 trigger
+
+**症狀**：PDCA skill 宣稱每日大體檢是固定流程，但 `scripts/daily_checkup.py` 與 runtime wrapper 雖存在，
+`runtime_schedules.json`、LaunchAgent、application log 與成功 marker 全都沒有 daily schedule；人工執行留下的
+每日 JSON 讓缺口不易被察覺。既有 57 個相關測試全部通過，卻沒有任何 gate 驗證「wrapper 必須有 owner」。
+
+**根因與修正**：artifact existence 被誤當成 deployed trigger。新增每日 09:40 的
+`com.volpred.daily-checkup` 單一 LaunchAgent owner，明列 `host_crontab_managed=false` 排除 host cron 與
+piggy-back；wrapper 補 lock、300 秒 ceiling、canonical log、start/exit banner 與 `cron_last_run` marker；
+scheduled-writer registry 宣告 checkup reports 為 PHASE-Z machine state。targeted LaunchAgent renderer 與
+config/wrapper parity test 機械固定 label、時間、owner exclusion。實際 kickstart 於 04:52 完成，runs=1、
+last exit=0、report/marker 皆更新；這只證明 execution path，首次自然 calendar fire 仍須由後續 cadence review
+觀察。
+
+### 2026-07-14 — run_due_jobs.py 未拒絕未知 `--dry-run`，驗證誤觸正式 due jobs
+
+**症狀**：排程驗證時假設 script 支援 `--dry-run`；舊 main 完全不解析 `sys.argv`，因此旗標被靜默忽略並
+真的執行 scheduler，觸發當時到期的 7 個例行 job（均由正式 wrapper 成功完成）。
+
+**修正**：CLI 入口改由 `argparse` fail-fast；任何未知參數在呼叫 `run_due_jobs()` 前 exit 2。Regression
+同時斷言 `--dry-run` 不可到達 scheduler，並以 state hash 驗證拒絕路徑沒有改寫 marker。教訓：有副作用的
+CLI 不可默默忽略 argv；未實作的 safety flag 必須明確拒絕，不能退化成 production run。
+
+### 2026-07-14 — task_pool `complete` 留下 terminal task 的 active claim metadata
+
+**症狀**：正式 `task_pool_claim.py complete` 已把任務設為 `succeeded`，但仍保留 `claimed_by`、
+`claimed_at`、`claim_session_id`；terminal receipt 看起來仍被 session 擁有，與 control-plane invariant 矛盾。
+
+**修正**：complete writer 在寫入 history 後原子清除三個 claim 欄位；同 status 的 idempotent complete 也會
+清理舊資料，讓既有壞 row 可由正式 CLI 自我修復。Regression 同時覆蓋首次 complete 與 terminal 重跑，
+禁止用手改 `next_tasks.json` 收尾。

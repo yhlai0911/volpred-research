@@ -538,7 +538,14 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
         prev_status = (task.get("status") or "").lower() or "in_progress"
+        completion_owner = task.get("claimed_by") or "complete"
         if prev_status in TERMINAL_STATUSES and prev_status == args.status:
+            # Idempotent repair path: terminal rows are historical receipts,
+            # never active ownership. Older complete() versions left these
+            # fields behind, so a safe re-run must clean them too.
+            task.pop("claimed_by", None)
+            task.pop("claimed_at", None)
+            task.pop("claim_session_id", None)
             return {
                 "ok": True,
                 "task_id": args.id,
@@ -551,8 +558,11 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
             task,
             frm=prev_status,
             to=args.status,
-            by=task.get("claimed_by") or "complete",
+            by=completion_owner,
         )
+        task.pop("claimed_by", None)
+        task.pop("claimed_at", None)
+        task.pop("claim_session_id", None)
         result_text = args.result or ""
         if args.result:
             existing = task.get("result") or ""

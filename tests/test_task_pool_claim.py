@@ -53,6 +53,47 @@ def test_complete_accepts_blocked_status(tmp_path, monkeypatch) -> None:
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "blocked"
     assert "Needs interactive session" in saved[0]["result"]
+    assert "claimed_by" not in saved[0]
+    assert "claimed_at" not in saved[0]
+    assert "claim_session_id" not in saved[0]
+
+
+def test_complete_idempotently_clears_stale_terminal_claim(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "already_done",
+                    "status": "succeeded",
+                    "claimed_by": "stale-worker",
+                    "claimed_at": "2026-07-14T00:00:00+00:00",
+                    "claim_session_id": "stale-session",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "complete",
+            "--id",
+            "already_done",
+            "--status",
+            "succeeded",
+        ],
+    )
+
+    assert task_pool_claim.main() == 0
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "succeeded"
+    assert "claimed_by" not in saved
+    assert "claimed_at" not in saved
+    assert "claim_session_id" not in saved
 
 
 def test_handoff_main_thread_clears_claim_and_sets_note(tmp_path, monkeypatch) -> None:

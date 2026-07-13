@@ -28,6 +28,7 @@ Output: JSON status dict reporting which jobs fired, which skipped, any errors.
 
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 import sys
@@ -442,6 +443,17 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
     return summary
 
 
-if __name__ == "__main__":
+def main(argv: list[str] | None = None) -> int:
+    # This entry point intentionally has no mutation flags. argparse makes
+    # misspelled/assumed options (notably `--dry-run`) fail before any due job
+    # can fire; silently ignoring sys.argv would turn a verification command
+    # into a production scheduler run.
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.parse_args(argv)
     summary = run_due_jobs()
     print(json.dumps(summary, ensure_ascii=False, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

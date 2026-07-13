@@ -73,6 +73,7 @@ JOBS = {
     "collect_us":       ("com.volpred.collect-us-data",      "collect_us.log",      30,  "collect_us_data",       "collect_us_data"),
     "daily_update":     ("com.volpred.daily-update",         "daily_update.log",    30,  "daily_update",          "daily_update"),
     "daily_update_intraday": ("com.volpred.daily-update-intraday", "daily_update_intraday.log", 30, None,              "daily_update_intraday"),
+    "daily_checkup":    ("com.volpred.daily-checkup",        "daily_checkup.log",   30,  "daily_checkup",         "daily_checkup"),
     "publication_candidates": ("com.volpred.publication-candidates", "publication_candidates_refresh.log", 30, "publication_candidates_refresh", "publication_candidates_refresh"),
     "release_pool":     ("com.volpred.release-pool",         "release_pool.log",    8,   "release_pool",          "release_pool"),
     "market_cal":       ("com.volpred.market-calendar-sync", "market_cal.log",      200, "market_calendar_sync",  "market_calendar_sync"),

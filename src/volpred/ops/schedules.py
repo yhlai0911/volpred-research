@@ -256,15 +256,21 @@ def read_system_crontab() -> dict[str, Any]:
 def build_schedule_report() -> dict[str, Any]:
     config = load_runtime_schedules()
     system_spec_items = config.get("system_crontab", {}).get("items", [])
+    # This report compares canonical items with the live *host crontab* only.
+    # LaunchAgent/piggy-back owners deliberately set host_crontab_managed=false;
+    # counting them here as missing produces a false schedule-drift alarm.
+    host_spec_items = [
+        item
+        for item in system_spec_items
+        if isinstance(item, dict) and item.get("host_crontab_managed") is not False
+    ]
     session_items = config.get("session_crons", {}).get("items", [])
     remote_items = config.get("remote_triggers", {}).get("items", [])
     live = read_system_crontab()
 
     matched: list[str] = []
     missing: list[str] = []
-    for item in system_spec_items:
-        if not isinstance(item, dict):
-            continue
+    for item in host_spec_items:
         label = str(item.get("label") or item.get("id") or "unknown")
         matchers = item.get("matchers") or []
         if not isinstance(matchers, list):
@@ -283,7 +289,7 @@ def build_schedule_report() -> dict[str, Any]:
         "canonical_path": str(get_runtime_schedules_path()),
         "session_cron_count": len(session_items),
         "remote_trigger_count": len(remote_items),
-        "expected_system_task_count": len(system_spec_items),
+        "expected_system_task_count": len(host_spec_items),
         "matched_system_tasks": matched,
         "missing_system_tasks": missing,
         "live_system_crontab_available": live["available"],
