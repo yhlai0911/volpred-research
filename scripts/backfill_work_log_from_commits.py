@@ -27,8 +27,11 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from append_work_log import WORK_LOG, append_entries  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
-WORK_LOG = REPO_ROOT / "storage" / "work_log.json"
 
 # Classification regex (subject patterns → task_type).
 # Order matters — first match wins. Anchor on common codex commit verbs.
@@ -136,6 +139,18 @@ def existing_commit_shas(entries: list[dict]) -> set[str]:
     return shas
 
 
+def drop_seen_commits(existing: list[dict], candidates: list[dict]) -> list[dict]:
+    """Filter `candidates` down to entries whose commit sha is not yet in `existing`.
+
+    Backfill's idempotency key is the commit sha, so this is the whole safety
+    story for re-running it: same window, same commits, no duplicates. It is a
+    pure function precisely so it can be handed to `append_entries(dedupe=...)`
+    and re-evaluated against the log as it stands *under the lock*.
+    """
+    seen = existing_commit_shas(existing)
+    return [e for e in candidates if e.get("commit") not in seen]
+
+
 def build_entry(row: dict[str, str]) -> dict:
     task_type, k_id = classify(row["subject"])
     subject_clean = CODEX_PREFIX.sub("", row["subject"]).strip()
@@ -176,22 +191,16 @@ def main() -> int:
         print(f"[backfill] no [codex] commits in window since={since} until={until}")
         return 0
 
-    existing = load_work_log()
-    seen_shas = existing_commit_shas(existing)
+    # Preview pass. This snapshot is for the human-readable listing only — the
+    # authoritative sha filter runs again inside the lock (see `_dedupe`), so a
+    # concurrent writer that lands one of these shas between here and the write
+    # cannot cause a duplicate.
+    preview = drop_seen_commits(load_work_log(), [build_entry(row) for row in commits])
+    preview.sort(key=lambda e: e["timestamp"])
 
-    new_entries: list[dict] = []
-    skipped = 0
-    for row in commits:
-        if row["sha"] in seen_shas:
-            skipped += 1
-            continue
-        new_entries.append(build_entry(row))
-
-    # Sort by timestamp ascending so chronological order matches existing log.
-    new_entries.sort(key=lambda e: e["timestamp"])
-
-    print(f"[backfill] commits scanned={len(commits)} already_in_log={skipped} new={len(new_entries)}")
-    for entry in new_entries:
+    skipped = len(commits) - len(preview)
+    print(f"[backfill] commits scanned={len(commits)} already_in_log={skipped} new={len(preview)}")
+    for entry in preview:
         kid = f" [{entry.get('k_id')}]" if entry.get("k_id") else ""
         print(f"  + {entry['timestamp']}  {entry['task_type']:<14}{kid}  {entry['summary'][:70]}")
 
@@ -199,16 +208,17 @@ def main() -> int:
         print("[backfill] dry-run; pass --apply to write")
         return 0
 
-    if not new_entries:
+    if not preview:
         print("[backfill] no new entries to write")
         return 0
 
-    combined = existing + new_entries
-    WORK_LOG.write_text(
-        json.dumps(combined, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    print(f"[backfill] wrote {len(new_entries)} entries → {WORK_LOG}")
+    def _dedupe(existing: list[dict], candidates: list[dict]) -> list[dict]:
+        fresh = drop_seen_commits(existing, candidates)
+        fresh.sort(key=lambda e: e["timestamp"])
+        return fresh
+
+    appended, total = append_entries(preview, path=WORK_LOG, dedupe=_dedupe)
+    print(f"[backfill] wrote {len(appended)} entries → {WORK_LOG} (now {total} total)")
     return 0
 
 
