@@ -58,17 +58,22 @@ paths:
 - **靜默的守門員最危險**。`git_conflict_guard` 比 pregate 更晚被發現，因為它在乾淨樹上**無輸出、
   無 side-effect log** —— 「沒在跑」與「跑了但沒事」在觀測上同形，沒有任何被動訊號。凡
   **fail-open + 乾淨時 no-op** 的防護元件，上線當下就要同步立「它是否仍被呼叫」的機械 gate。
-- **「程式碼寫完」不等於「上線」**。常駐 daemon 讀的是啟動時載入的記憶體副本；改了
-  `scripts/dispatch_supervisor/**` 的**程式碼**必須重載才生效（只有 `config/` 欄位是每 tick
-  熱重載）。宣告完成前確認：改的是 config 還是 code？code 的話，誰重載？
-  **本條散文已於同日第 3 次違反後機械化** → `volpred.ops.alerts` 的
-  `dispatch_supervisor_stale_code` 告警條件（比對 `scripts/dispatch_supervisor/*.py` 的 mtime
-  與 `supervisor_started_at`；20 分鐘 grace 讓 agent 邊寫邊存不誤報，>2h 升 critical）。
-  2026-07-10 三個修復（quota no-retry / fire-request race / restart noise）寫完、commit、
-  task 標 succeeded，daemon 卻跑了三個多小時的舊碼 —— 跑舊碼的 daemon 與健康的 daemon 在
-  觀測上完全同形（心跳新鮮、任務照跑、零告警）。**散文撐不過 agent 之間的交接**，這條規則
-  在寫下的當天就被違反三次。這段散文現在只是 pointer；重載一律走
-  `bash scripts/reload_dispatch_supervisor.sh --reason <why>`。
+- **「程式碼寫完」不等於「上線」—— 已由 daemon 自己收尾，不再是你的紀律**。常駐 daemon 跑的是
+  開機時載入的記憶體副本，改 `scripts/dispatch_supervisor/**` 的**程式碼**必須重啟才生效
+  （只有 `config/` 是每 tick 熱重載）。
+  **Enforcement owner（唯一，anti-stacking 勿加第二層）**：`scripts/dispatch_supervisor/selfreload.py`
+  —— health loop 每 30s 比對 `*.py` mtime 與 `supervisor_started_at`，發現自己在跑舊碼且
+  **當下沒有 in-flight job** 時，寫 planned-restart marker 後 SIGTERM 自己，launchd `KeepAlive`
+  用新碼把它接回來。你 commit 完就不用管了。
+  手動重載仍走 `bash scripts/reload_dispatch_supervisor.sh --reason <why>`（趕時間、或要跳過
+  90s quiesce 時用）；**禁止裸 `kickstart -k`**（漏寫 marker → 老闆收部署噪音 alert）。
+  **為什麼要做到這一步**：這條規則 2026-07-10 寫下**當天就被違反三次**（quota no-retry /
+  fire-request race / restart noise 三個修復全部寫完、commit、task 標 succeeded，daemon 卻跑了
+  三小時舊碼）；當天補的 `dispatch_supervisor_stale_code` 告警**只會發信叫人去按按鈕**，於是
+  2026-07-13 又漏了兩次（15:19 procutil、21:53 phase_z）—— 後者讓老闆整整 23 分鐘每 64 秒收一封
+  「我們已經修好」的那個 bug 發出的警報。**跑舊碼的 daemon 與健康的 daemon 觀測上完全同形**
+  （心跳新鮮、任務照跑、零告警），所以散文撐不過交接，告警也撐不過「人沒空按」。偵測器與重載器
+  兩邊本來都是對的，缺的只是它們之間那條線。
 - **驗證 gate 會不會咬，不可在 production checkout 上做**。「故意弄壞再看 gate 是否 FAIL」是
   必要紀律（兩邊都會過的測試等於沒有測試），但 `scripts/dispatch_supervisor/**` 正是常駐
   daemon 開機時讀取的來源。2026-07-10 我以 `perl -pi` 就地改壞 `health.py` / `state.py` /

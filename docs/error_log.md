@@ -2,6 +2,55 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 22:20 — 第三根因（也是最深的一層）：修好的程式碼從來沒有上線 — daemon 自我重載
+
+**老闆的問題**：「你不是說你修好了嗎？為什麼在你說修好之後還一直寄來？你身為自主營運經理
+為什麼沒辦法解決這底層問題？不是問我接下來怎麼處理，而是要立刻問為什麼從底層邏輯會這樣。」
+
+**答案**：因為今晚修的東西，**一個都沒有真正在跑**。
+
+**證據鏈**：
+- `com.volpred.dispatch-supervisor` daemon **17:58:29 啟動**（`ps -o lstart`）。
+- livelock 修復 `65de88c18` **21:53:29** commit；dedup-title 修復 `3efaf3dc0` **22:04** commit。
+- daemon 是常駐 Python process，`phase_z` 是 **in-process import** —— 它跑的是 17:58 載入的
+  記憶體副本。兩個修復晚了 4 小時落地，**從未被執行過**。
+- 所以老闆看到的行為，正是「修好之前」的行為。他問的完全對。
+
+**這是同一 class 當天第二次**：`~/.volpred/logs/supervisor_deferred_reload.log` 15:19 有一筆
+`stale-code: procutil.py descendant-tree kill fix not live` —— 同樣的「寫完了但沒上線」。
+
+**三層根因**：
+1. **底層邏輯**：「完成」被定義成「code 進了 main」。對常駐 daemon 而言
+   `code committed ≠ code running`，而系統從不把「running process 的程式碼版本」當可觀測狀態。
+2. **流程**：偵測器（`dispatch_supervisor_stale_code`，2026-07-10 加）**只會發信叫人去按按鈕** ——
+   正是老闆點名過的「alert 當雜事丟給老闆」反模式（memory `feedback_alerts_auto_act_not_suggest`）。
+   重載器（`reload_dispatch_supervisor.sh`）也早就存在且正確。**兩邊都對，缺的是它們之間那條線。**
+3. **程式架構**：跑舊碼的 daemon 與健康的 daemon **觀測上完全同形**（心跳新鮮、任務照跑、零告警），
+   沒有任何被動訊號會揭露它。散文撐不過 agent 交接；告警撐不過「人沒空按」。
+
+**修法（把人移出迴圈，不是再加一層提醒）**：`scripts/dispatch_supervisor/selfreload.py` ——
+health loop（30s 週期、唯一不阻塞 worker 的迴圈）比對 `*.py` mtime 與 `supervisor_started_at`；
+發現自己在跑舊碼、且**當下沒有 in-flight job**、且最新一次編輯已靜置 90s，就寫 planned-restart
+marker 後 SIGTERM 自己，launchd `KeepAlive` 用新碼接回。收編既有偵測器與既有重載路徑，未新增
+第二層 watchdog（anti-stacking）。
+
+**安全設計（最危險的是解藥不是病）**：
+- **in-flight guard**：fire 進行中重啟會連 worker 的 process group 一起帶走 —— agent 未提交的工作全毀。
+  `test_defers_while_a_job_is_in_flight` 是絕不能誤綠的那條；已做 break-then-verify（拿掉 guard →
+  該測試 FAIL 且 log 顯示它會在 fire 中途重啟）。
+- **不會 boot loop**：boot 時間每次重啟都會重新戳記，重載後所有檔案都比 boot 舊；未來時間戳
+  （時鐘偏移）明確排除為「非 stale」，否則比較會永遠為真。另加每 process 只重載一次的保險。
+- **90s quiesce**：agent 連續存好幾個檔時不會在改到一半就重啟。
+
+**測試**：`tests/test_selfreload.py`（8 條）；supervisor 全組 114 passed。
+**規則降級**：`.claude/rules/control-plane.md` 的「程式碼寫完不等於上線」散文改為指向 selfreload
+的 pointer —— 那條紀律現在由機器執行。
+
+**教訓**：偵測到問題卻只發信給老闆，等於沒解決。**alert 的預設終點應該是「已自動修復」，
+不是「請你去按按鈕」。** 一個只有老闆能收尾的 alert，是設計失敗。
+
+---
+
 ## 2026-07-13 22:10 — PHASE-Z 警報轟炸第二根因：title 帶 {hhmm} 使 24h dedup 永不命中（Telegram msg 697-707）
 
 **現象**：21:55 修完 livelock（65de88c18）後，21:37–21:52 老闆仍每 64 秒收到一封
