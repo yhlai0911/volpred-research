@@ -32,7 +32,7 @@ import logging
 import traceback
 from pathlib import Path
 
-from . import alerts, procutil, state
+from . import alerts, procutil, selfreload, state
 
 LOG = logging.getLogger(__name__)
 
@@ -252,6 +252,11 @@ async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: 
     responsive", which is what the field is supposed to assert. Stamped BEFORE
     `check_once()` so a crash inside the health pass still leaves proof the
     process was alive (and the except-branch below alerts on it).
+
+    2026-07-13: this loop also owns self-reload. It is the only place in the
+    daemon that runs on a fixed cadence without ever blocking on a worker, which
+    is exactly what "notice my own code changed, restart when idle" needs. See
+    `selfreload` for why a detector that only emails a human was not enough.
     """
     LOG.info("health_loop start interval=%ds", check_interval_s)
     while True:
@@ -259,6 +264,10 @@ async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: 
             await asyncio.sleep(check_interval_s)
             state.heartbeat(path=state_path)
             check_once(state_path=state_path)
+            # Last: a reload SIGTERMs this process, so anything after it in the
+            # tick would not run. The heartbeat and the hang check are what keep
+            # the platform safe; deploying a fix is what keeps it improving.
+            selfreload.maybe_self_reload(state_path=state_path)
         except asyncio.CancelledError:
             LOG.info("health_loop cancelled")
             raise
