@@ -1,0 +1,458 @@
+{
+  "generated_at_tw": "2026-07-13T12:27:32.627774+08:00",
+  "as_of_date": "2026-07-13",
+  "method": {
+    "universe": "EP0 名冊中信心=高、且屬整機/系統整合層的 6 檔（空中 5 + 海域 1）",
+    "price_source": "yfinance 還原除權息收盤價",
+    "price_window": [
+      "2025-06-30",
+      "2026-07-11"
+    ],
+    "financial_source": "yfinance income_stmt / get_info（公司年報揭露值）",
+    "chip_source": "TWSE T86 三大法人買賣超日報（僅上市；上櫃無同口徑歷史）",
+    "chip_lookback_trading_days": 60,
+    "chip_date_range": [
+      "20260415",
+      "20260709"
+    ],
+    "chip_fetch_failed_dates": [],
+    "chip_cell_parse_failures": 0,
+    "benchmark": "^TWII",
+    "disclaimer": "全部為公開資料的描述性統計，非投資建議；不預測價格、不保證報酬。"
+  },
+  "benchmark": {
+    "ticker": "^TWII",
+    "window_return": 1.037858086497315,
+    "annualized_volatility": 0.23464860134688048,
+    "beta_vs_twii": 1.0040160642570277,
+    "corr_vs_twii": 1.0,
+    "max_drawdown": -0.10423694442676568,
+    "price_start": 22256.01953125,
+    "price_end": 45354.609375,
+    "first_date": "2025-06-30",
+    "last_date": "2026-07-09"
+  },
+  "companies": [
+    {
+      "name": "雷虎",
+      "ticker": "8033.TW",
+      "code": "8033",
+      "board": "上市",
+      "segment": "空中·整機/系統整合",
+      "market": {
+        "window_return": 2.808724929725722,
+        "annualized_volatility": 0.6723895457946605,
+        "beta_vs_twii": 0.7096726640484986,
+        "corr_vs_twii": 0.24654582976297423,
+        "max_drawdown": -0.4122340425531915,
+        "price_start": 59.599998474121094,
+        "price_end": 227.0,
+        "first_date": "2025-06-30",
+        "last_date": "2026-07-10"
+      },
+      "technical": {
+        "vs_ma20": 0.35380945281049647,
+        "vs_ma60": 0.509571747755549,
+        "vs_ma200": 0.5727613581295363,
+        "rsi14": 84.55284552845528,
+        "drawdown_from_52w_high": -0.00219780219780219,
+        "return_60d": 0.6569343065693432
+      },
+      "fundamental": {
+        "fy_rows": {
+          "2025": {
+            "revenue": 1424123000.0,
+            "gross_profit": 531702000.0,
+            "operating_income": -37382000.0,
+            "net_income": 87643000.0,
+            "gross_margin": 0.3733539869800572,
+            "operating_margin": -0.026249137188290618,
+            "net_margin": 0.06154173480801869
+          },
+          "2024": {
+            "revenue": 1245153000.0,
+            "gross_profit": 529000000.0,
+            "operating_income": 38467000.0,
+            "net_income": 71759000.0,
+            "gross_margin": 0.42484738823261076,
+            "operating_margin": 0.030893392217663213,
+            "net_margin": 0.05763066868087697
+          }
+        },
+        "revenue_yoy": 0.14373334040073793,
+        "latest_fy": "2025",
+        "previous_fy": "2024",
+        "latest_is_profitable": true,
+        "market_cap": 40334295040,
+        "shares_outstanding": 164629775,
+        "return_on_equity": 0.0448,
+        "debt_to_equity": 68.471,
+        "trailing_eps": 0.57,
+        "book_value_per_share": 12.644,
+        "live_trailing_pe_unpinned": 429.82455,
+        "pe_asof": 398.2456140350877,
+        "pb_asof": 17.953179373615946,
+        "valuation_asof_date": "2026-07-10"
+      },
+      "chip": {
+        "source": "TWSE T86 三大法人買賣超日報",
+        "trading_days": 60,
+        "foreign_net_shares": 22887034.0,
+        "trust_net_shares": 0.0,
+        "dealer_net_shares": 0.0,
+        "total_net_shares": 19591240.0,
+        "total_net_pct_of_shares_out": 0.11900180268119785
+      }
+    },
+    {
+      "name": "漢翔",
+      "ticker": "2634.TW",
+      "code": "2634",
+      "board": "上市",
+      "segment": "空中·整機/機體/發動機",
+      "market": {
+        "window_return": 0.4058376417166467,
+        "annualized_volatility": 0.4255292984952708,
+        "beta_vs_twii": 0.5796563135632677,
+        "corr_vs_twii": 0.31818977241993335,
+        "max_drawdown": -0.3303571243644642,
+        "price_start": 41.25654220581055,
+        "price_end": 58.0,
+        "first_date": "2025-06-30",
+        "last_date": "2026-07-10"
+      },
+      "technical": {
+        "vs_ma20": 0.11087485799301766,
+        "vs_ma60": 0.192427258347023,
+        "vs_ma200": 0.1288193743206052,
+        "rsi14": 68.77323457363069,
+        "drawdown_from_52w_high": -0.12525138947412506,
+        "return_60d": 0.2323501777642618
+      },
+      "fundamental": {
+        "fy_rows": {
+          "2025": {
+            "revenue": 35452130000.0,
+            "gross_profit": 2532089000.0,
+            "operating_income": 1172854000.0,
+            "net_income": 733068000.0,
+            "gross_margin": 0.07142276077629187,
+            "operating_margin": 0.033082751304364506,
+            "net_margin": 0.020677685656686918
+          },
+          "2024": {
+            "revenue": 39338315000.0,
+            "gross_profit": 3724445000.0,
+            "operating_income": 2218459000.0,
+            "net_income": 2168067000.0,
+            "gross_margin": 0.09467728854171817,
+            "operating_margin": 0.05639435751124572,
+            "net_margin": 0.055113367209551296
+          }
+        },
+        "revenue_yoy": -0.0987888017064279,
+        "latest_fy": "2025",
+        "previous_fy": "2024",
+        "latest_is_profitable": true,
+        "market_cap": 60091113472,
+        "shares_outstanding": 941867000,
+        "return_on_equity": 0.04121,
+        "debt_to_equity": 131.614,
+        "trailing_eps": 0.78,
+        "book_value_per_share": 19.264,
+        "live_trailing_pe_unpinned": 81.794876,
+        "pe_asof": 74.35897435897435,
+        "pb_asof": 3.0107973421926912,
+        "valuation_asof_date": "2026-07-10"
+      },
+      "chip": {
+        "source": "TWSE T86 三大法人買賣超日報",
+        "trading_days": 60,
+        "foreign_net_shares": 15722809.0,
+        "trust_net_shares": 355000.0,
+        "dealer_net_shares": 0.0,
+        "total_net_shares": 19501265.0,
+        "total_net_pct_of_shares_out": 0.02070490313388196
+      }
+    },
+    {
+      "name": "亞航",
+      "ticker": "2630.TW",
+      "code": "2630",
+      "board": "上市",
+      "segment": "空中·整機整合",
+      "market": {
+        "window_return": 0.5903285666643519,
+        "annualized_volatility": 0.519617485616501,
+        "beta_vs_twii": 0.6174775707959812,
+        "corr_vs_twii": 0.2775770778358079,
+        "max_drawdown": -0.4588317298011293,
+        "price_start": 33.89236831665039,
+        "price_end": 53.900001525878906,
+        "first_date": "2025-06-30",
+        "last_date": "2026-07-10"
+      },
+      "technical": {
+        "vs_ma20": 0.15578430923857334,
+        "vs_ma60": 0.17962469696077243,
+        "vs_ma200": 0.08600033169691823,
+        "rsi14": 72.44897959183673,
+        "drawdown_from_52w_high": -0.24530480108918762,
+        "return_60d": 0.15541264229065654
+      },
+      "fundamental": {
+        "fy_rows": {
+          "2025": {
+            "revenue": 5454110000.0,
+            "gross_profit": 564525000.0,
+            "operating_income": 299435000.0,
+            "net_income": 209725000.0,
+            "gross_margin": 0.10350451311029664,
+            "operating_margin": 0.05490079958049984,
+            "net_margin": 0.038452653136808755
+          },
+          "2024": {
+            "revenue": 5200056000.0,
+            "gross_profit": 462359000.0,
+            "operating_income": 197395000.0,
+            "net_income": 140609000.0,
+            "gross_margin": 0.0889142347697794,
+            "operating_margin": 0.03796016812126639,
+            "net_margin": 0.02703990110875729
+          }
+        },
+        "revenue_yoy": 0.04885601231986736,
+        "latest_fy": "2025",
+        "previous_fy": "2024",
+        "latest_is_profitable": true,
+        "market_cap": 11602865152,
+        "shares_outstanding": 209438000,
+        "return_on_equity": 0.058569998,
+        "debt_to_equity": 40.213,
+        "trailing_eps": 1.0,
+        "book_value_per_share": 16.138,
+        "live_trailing_pe_unpinned": 55.4,
+        "pe_asof": 53.900001525878906,
+        "pb_asof": 3.3399430862485375,
+        "valuation_asof_date": "2026-07-10"
+      },
+      "chip": {
+        "source": "TWSE T86 三大法人買賣超日報",
+        "trading_days": 60,
+        "foreign_net_shares": -1974647.0,
+        "trust_net_shares": 0.0,
+        "dealer_net_shares": 0.0,
+        "total_net_shares": -1893939.0,
+        "total_net_pct_of_shares_out": -0.009042957820452831
+      }
+    },
+    {
+      "name": "長榮航太",
+      "ticker": "2645.TW",
+      "code": "2645",
+      "board": "上市",
+      "segment": "空中·整機/MRO",
+      "market": {
+        "window_return": 1.388571367420723,
+        "annualized_volatility": 0.49718329432557284,
+        "beta_vs_twii": 0.6618993464442492,
+        "corr_vs_twii": 0.31097896799754504,
+        "max_drawdown": -0.3308641462273444,
+        "price_start": 98.38516998291016,
+        "price_end": 235.0,
+        "first_date": "2025-06-30",
+        "last_date": "2026-07-10"
+      },
+      "technical": {
+        "vs_ma20": 0.24691516023403381,
+        "vs_ma60": 0.3985334490905814,
+        "vs_ma200": 0.49826758141265315,
+        "rsi14": 74.53874441137994,
+        "drawdown_from_52w_high": 0.0,
+        "return_60d": 0.563517809489718
+      },
+      "fundamental": {
+        "fy_rows": {
+          "2025": {
+            "revenue": 18179185000.0,
+            "gross_profit": 3696603000.0,
+            "operating_income": 3000978000.0,
+            "net_income": 2044756000.0,
+            "gross_margin": 0.2033426140940862,
+            "operating_margin": 0.1650776973775227,
+            "net_margin": 0.1124778696074659
+          },
+          "2024": {
+            "revenue": 16284500000.0,
+            "gross_profit": 3120261000.0,
+            "operating_income": 2430797000.0,
+            "net_income": 1837104000.0,
+            "gross_margin": 0.19160926033958672,
+            "operating_margin": 0.1492705947373269,
+            "net_margin": 0.11281304307777335
+          }
+        },
+        "revenue_yoy": 0.11634898216095069,
+        "latest_fy": "2025",
+        "previous_fy": "2024",
+        "latest_is_profitable": true,
+        "market_cap": 92331745280,
+        "shares_outstanding": 374570962,
+        "return_on_equity": 0.19803,
+        "debt_to_equity": 57.28,
+        "trailing_eps": 5.45,
+        "book_value_per_share": 33.795,
+        "live_trailing_pe_unpinned": 45.22936,
+        "pe_asof": 43.11926605504587,
+        "pb_asof": 6.953691374463678,
+        "valuation_asof_date": "2026-07-10"
+      },
+      "chip": {
+        "source": "TWSE T86 三大法人買賣超日報",
+        "trading_days": 60,
+        "foreign_net_shares": 14523443.0,
+        "trust_net_shares": -1536900.0,
+        "dealer_net_shares": 0.0,
+        "total_net_shares": 13385304.0,
+        "total_net_pct_of_shares_out": 0.0357350284937464
+      }
+    },
+    {
+      "name": "中光電",
+      "ticker": "5371.TWO",
+      "code": "5371",
+      "board": "上櫃",
+      "segment": "空中·整機方案/光學",
+      "market": {
+        "window_return": 0.7642666219916097,
+        "annualized_volatility": 0.6001075487961613,
+        "beta_vs_twii": 1.01108995686533,
+        "corr_vs_twii": 0.39355702785017804,
+        "max_drawdown": -0.49541986103338653,
+        "price_start": 52.826480865478516,
+        "price_end": 93.19999694824219,
+        "first_date": "2025-06-30",
+        "last_date": "2026-07-10"
+      },
+      "technical": {
+        "vs_ma20": 0.14469015452109701,
+        "vs_ma60": 0.2407907625778698,
+        "vs_ma200": 0.07993782928213133,
+        "rsi14": 63.63636160240095,
+        "drawdown_from_52w_high": -0.2832639611129111,
+        "return_60d": 0.24856946470869312
+      },
+      "fundamental": {
+        "fy_rows": {
+          "2025": {
+            "revenue": 39576665000.0,
+            "gross_profit": 6829674000.0,
+            "operating_income": -137710000.0,
+            "net_income": 371914000.0,
+            "gross_margin": 0.17256820401617973,
+            "operating_margin": -0.0034795756539870147,
+            "net_margin": 0.009397305204973689
+          },
+          "2024": {
+            "revenue": 39668943000.0,
+            "gross_profit": 7050165000.0,
+            "operating_income": 173685000.0,
+            "net_income": 820326000.0,
+            "gross_margin": 0.17772505307237452,
+            "operating_margin": 0.004378362186257395,
+            "net_margin": 0.020679300681139903
+          }
+        },
+        "revenue_yoy": -0.0023262026416988046,
+        "latest_fy": "2025",
+        "previous_fy": "2024",
+        "latest_is_profitable": true,
+        "market_cap": 38292062208,
+        "shares_outstanding": 390981110,
+        "return_on_equity": 0.00818,
+        "debt_to_equity": 55.968,
+        "trailing_eps": 0.95,
+        "book_value_per_share": 67.542,
+        "live_trailing_pe_unpinned": 100.84211,
+        "pe_asof": 98.1052599455181,
+        "pb_asof": 1.379882102221465,
+        "valuation_asof_date": "2026-07-10"
+      },
+      "chip": {
+        "source": null,
+        "note": "上櫃股，TWSE T86 不含；TPEx 開放資料僅提供最近一日，無法建立同口徑 60 日累計 → 本次未取得"
+      }
+    },
+    {
+      "name": "龍德造船",
+      "ticker": "6753.TW",
+      "code": "6753",
+      "board": "上市",
+      "segment": "海域·無人艇",
+      "market": {
+        "window_return": 0.5124873447107812,
+        "annualized_volatility": 0.5710284748121771,
+        "beta_vs_twii": 0.6926273847690475,
+        "corr_vs_twii": 0.28332635649247817,
+        "max_drawdown": -0.457002457002457,
+        "price_start": 97.85205841064453,
+        "price_end": 148.0,
+        "first_date": "2025-06-30",
+        "last_date": "2026-07-10"
+      },
+      "technical": {
+        "vs_ma20": 0.10633526443655383,
+        "vs_ma60": 0.11754341807198587,
+        "vs_ma200": 0.09786176585130635,
+        "rsi14": 66.12903225806451,
+        "drawdown_from_52w_high": -0.2727272727272727,
+        "return_60d": 0.05714285714285716
+      },
+      "fundamental": {
+        "fy_rows": {
+          "2025": {
+            "revenue": 5246333000.0,
+            "gross_profit": 1044457000.0,
+            "operating_income": 857204000.0,
+            "net_income": 683741000.0,
+            "gross_margin": 0.19908324538301325,
+            "operating_margin": 0.16339107715808357,
+            "net_margin": 0.13032741154631244
+          },
+          "2024": {
+            "revenue": 5119080000.0,
+            "gross_profit": 1164404000.0,
+            "operating_income": 1005162000.0,
+            "net_income": 706623000.0,
+            "gross_margin": 0.2274635286027958,
+            "operating_margin": 0.19635598584120584,
+            "net_margin": 0.13803710823038515
+          }
+        },
+        "revenue_yoy": 0.02485856833649791,
+        "latest_fy": "2025",
+        "previous_fy": "2024",
+        "latest_is_profitable": true,
+        "market_cap": 18056996864,
+        "shares_outstanding": 117253224,
+        "return_on_equity": 0.18778,
+        "debt_to_equity": 51.542,
+        "trailing_eps": 5.71,
+        "book_value_per_share": 42.77,
+        "live_trailing_pe_unpinned": 26.970228,
+        "pe_asof": 25.919439579684763,
+        "pb_asof": 3.460369417816226,
+        "valuation_asof_date": "2026-07-10"
+      },
+      "chip": {
+        "source": "TWSE T86 三大法人買賣超日報",
+        "trading_days": 60,
+        "foreign_net_shares": -657812.0,
+        "trust_net_shares": 0.0,
+        "dealer_net_shares": 0.0,
+        "total_net_shares": 230925.0,
+        "total_net_pct_of_shares_out": 0.001969455441156995
+      }
+    }
+  ]
+}
