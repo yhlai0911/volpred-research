@@ -24,7 +24,7 @@ AUTONOMOUS_MARKERS = ("<<autonomous-loop", "autonomous-loop-dynamic")
 DENY_MSG = (
     "互動 turn 禁用 ScheduleWakeup（CLAUDE.md 最高指引，2026-07-02 五犯後機械 enforce）。"
     "用戶正在等回覆 — 這個 tool call 會讓你把回合收掉、回覆永遠寫不出來。"
-    "自主迴圈由 OS backbone（hourly-dispatch LaunchAgent 等）維持，不需要 session 內 wakeup。"
+    "自主迴圈由 OS backbone（dispatch-supervisor、host cron 等）維持，不需要 session 內 wakeup。"
     "直接繼續完成工作，然後以文字回覆收尾。"
 )
 

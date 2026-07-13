@@ -191,7 +191,7 @@
 - 每次 idle / discovery pass 必須真的產生可驗證輸出，不可空轉
 - **Cron skip 用 stub** — slot 滿或 agent 仍在跑時，回覆 ≤15 字省 token（例：`跳過：slot 4/4`）
 - **next_tasks 主動補滿**（2026-04-17）：每次 cron tick check，若 P4 pending < 2 **或** P3 pending < 5，主動從 `research_program.md` / knowledge.json / 最近實驗 NULL 衍生新任務補齊；不必等 queue 清空才 refill。
-  - 這裡的「補滿」指的是 discovery / planning view 的補充；正式可執行任務仍要 materialize 進 `storage/ops/` control plane。若同步 `storage/next_tasks.json`，也只屬 legacy working list，不是 canonical queue。
+  - 這裡的「補滿」就是以帶鎖 writer 把可執行任務 materialize 進 canonical `storage/next_tasks.json` pending queue；`storage/ops/` 只保存 execution receipts / audit trail，不是另一套 pending queue。
 - **論文 narrative state machine**（防 Paper 2/4 單一實驗觸發反覆 pivot）：
   - 單一實驗不可直接改 paper body.tex — 只能更新 `research_program.md` + knowledge.json
   - 必須 ≥ 3 個互補實驗（OOS-verified + Codex/Gemini reviewed）都完成才進 narrative decision

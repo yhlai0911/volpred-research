@@ -70,6 +70,8 @@ PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調�
 ### A — Act（把贏固化 + 不行就調整，然後回 P）
 - 成功 → **標準化**：新建/調整/優化 **skill**、修正**指引文件**（CLAUDE.md / rules / docs）、
   寫 **memory**（教訓 + 為何未來用到）。讓下一輪不再犯。
+- 每週 operating-doc drift audit 的 cadence / 觸發與交付物由
+  `references/operations-cadence.md` 統一列管；不要在本檔複製會漂移的 task checklist。
 - 失敗 → 調整假設，再 cycle。
 - 一定要**回到 P 繼續下一輪** —— PDCA 是連續迴圈不是一次性。
 
@@ -104,7 +106,7 @@ PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調�
 
 ## 排程
 
-- `daily_checkup.py` 排每日早上一次（host cron）+ 每 autonomous tick 開頭跑一次。
+- `daily_checkup.py` **必須**每日一次 + 每 autonomous tick 開頭跑；截至 2026-07-14，wrapper 存在但 host schedule 尚未 materialize，缺口由 `platform_ops_materialize_daily_checkup_schedule` 追蹤。未修前不可宣稱「每日 cron 已排」。
 - 有 critical/warn finding → 直接修；真需用戶才 `--alert` 寄信（且信裡寫「我已做了什麼」非「請你做」）。
 
 ## Skill 治理（避免 proliferation — 2026-06-30 用戶 + Anthropic 官方指引）
@@ -146,6 +148,7 @@ type=schema）。「雜亂」整理依認知科學/KM：
 - 每次踩坑 = 學習機會（PDCA 的 Check→Act）；系統要「每跑一輪變好」，不是反覆犯同類錯。
 
 ## 關聯
+- `references/operations-cadence.md` — 常態工作的 cadence / trigger / monitoring single source
 - memory `feedback_proactive_result_level_operation`、`feedback_content_quality_patrol_gap`、
   `feedback_finish_task_before_standby`、`feedback_dont_deflect_act_on_repeated_complaints`
 - CLAUDE.md「自主運營 = 主動 + result-level + PDCA」段

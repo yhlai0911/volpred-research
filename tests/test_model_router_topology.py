@@ -27,12 +27,21 @@ def test_type_defaults_match_hard_rules() -> None:
     assert mr.pick_topology("paper_decision")["topology"] == "inline"    # 主線程 state machine
     assert mr.pick_topology("daily_article")["topology"] == "subagent"   # writer subagent
     assert mr.pick_topology("email_reply")["topology"] == "inline"       # PHASE 0 自做
+    assert mr.pick_topology("code_review")["topology"] == "codex_exec"   # Codex primary path
 
 
-def test_all_13_canonical_types_covered() -> None:
+def test_all_model_routed_types_have_topology() -> None:
     # TASK_TYPE_TO_MODEL 的每個型別都必須有 topology 對照（避免兩表 drift）
     for task_type in mr.TASK_TYPE_TO_MODEL:
         assert task_type in mr.TASK_TYPE_TO_TOPOLOGY, f"{task_type} missing topology"
+
+
+def test_codex_eligible_types_have_mechanical_routes() -> None:
+    from task_pool_claim import CODEX_ELIGIBLE_TASK_TYPES
+
+    for task_type in CODEX_ELIGIBLE_TASK_TYPES:
+        assert task_type in mr.TASK_TYPE_TO_MODEL, f"{task_type} missing model route"
+        assert task_type in mr.TASK_TYPE_TO_TOPOLOGY, f"{task_type} missing topology route"
 
 
 def test_all_topology_values_valid() -> None:

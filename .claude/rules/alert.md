@@ -20,7 +20,7 @@ paths:
 - 條件檢查入口：`uv run volpred ops check-alerts --storage-dir storage`。
 - 一鍵 script：`uv run python scripts/check_alerts.py`（log 友善輸出，適合 cron）。
 - 手動測試旁路 dedup：`uv run volpred ops send-alert --level info --title "..." --body "..." --force`
-- `check-alerts` 目前正式接線的 3 個條件（單一 source: `src/volpred/ops/alerts.py`）：
+- 下列是高影響條件的設計備註，**不是完整 inventory，也不維護固定數量**；實際接線以 `src/volpred/ops/alerts.py` 與當次 `check-alerts` 輸出為準：
   1. `release_pool_gap` — `storage/logs/cron/release_pool.log` 最後 fire 時間距今 > 2 小時 → critical（>4h）/ warn
   2. `draft_pool_low` — `feed.json` 中 `draft` 文章數 < 4 → warn（=0 升級為 critical）
   3. `host_cron_fail` — **v12 後僅看** `storage/logs/cron/*.log` 最新 `=== exit N ===` 非 0 → critical。

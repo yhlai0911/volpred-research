@@ -10,7 +10,7 @@
 
 | 工作 | skill / 工具 | 觸發 | 大體檢監控 |
 |---|---|---|---|
-| 大體檢（result-level 7 維度） | `pdca-operations` / `volpred ops daily-checkup` | cron `cron_daily_checkup.sh` + 每 tick 開頭 | 自己 |
+| 大體檢（result-level 7 維度） | `pdca-operations` / `scripts/daily_checkup.py` | **GAP**：wrapper 已有、host schedule 尚未 materialize（task `platform_ops_materialize_daily_checkup_schedule`）；目前每 tick / 手動 | 自己 |
 | 資料收集（美股/台股 EOD + 盤後） | `data-collection-ops` | cron collect_us(07:03)/collect_tw(15:00)/daily_update(08:03+15:05) | data_freshness |
 | 內容釋出（6h 一篇） | `feed-publisher` | cron release_pool（`7 */6`，piggy-back） | content_pipeline |
 | 補草稿池（< 4 即補） | `publication-candidates`+`feed-publisher` | cron reader_facing_refill + 大體檢 finding | content_pipeline |
@@ -30,6 +30,7 @@
 | 策略 lifecycle 審查（上/下架） | `admin-ops` | 週度 + 新策略/MDD>20% | project_strategy_lifecycle_standing_directive |
 | 趨勢部落格掃描 | `trending-repost` | 週度 | reference_trending_blog_sources |
 | arXiv 前沿掃描 | — | cron arxiv_scan | 技術精進來源 |
+| 運作指示文件 doc-drift audit | `pdca-operations` Act | 日期化 successor 先以 `blocked_until` 等待；hourly `unblock_expired_blocked_tasks.py --apply` 到期轉 pending | 比對 CLAUDE/rules/skills 與實作、驗 path-trigger、縮已機械化 prose、合併矛盾；輸出 `docs/governance/YYYY-MM/` 報告。不得重用 task id 或立即 pending |
 
 ## 每月（MONTHLY）
 

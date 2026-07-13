@@ -6,9 +6,11 @@
 
 ---
 
-## 系統任務類型 × Skill 對應（10 類）
+## Workflow × Skill 對應（概念分組）
 
-派工前先識別任務類型，再選對應 skill。每類 brief 格式差異見對應 skill 的 `references/`。
+本表是概念分組，不是 canonical task-type inventory。派工前先用
+`.claude/rules/task-routing.md` + `scripts/model_router.py` 判斷 capability / topology，
+再選對應 skill；brief 格式差異見各 skill 的 `references/`。
 
 | # | 任務類型 | 範例 | 對應 skill |
 |---|---|---|---|
@@ -173,7 +175,7 @@ CLAUDE.md「研究誠實原則 §3」規定 README 必備。**底層動機是 de
 ├─ 文章發佈間隔 >3h → 偏 type 5/6
 └─ 無 alert → 依 next_tasks priority
           ↓
-依 task_type 查「10 類任務 × Skill 對應」→ 派對應 skill agent
+依 task_type 查 canonical routing，再用本表選對應 skill agent
           ↓
 若派 agent：brief 必含 6 要素（含 skill 路徑 .claude/ vs .agents/）
 若主線程做：按該類 skill references 執行

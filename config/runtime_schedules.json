@@ -423,7 +423,7 @@
         "cron": "50 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_handoff_regen.sh",
         "log_path": "storage/logs/cron/handoff_regen.log",
-        "description": "Every hour at :50 — regenerate storage/ops/handoff_latest.md (task-pool snapshot + email replies + active agents + 接續提示詞) AND auto-release claims older than 6h. Fires 10 min before hourly-dispatch at :07 so dispatch reads fresh handoff. LaunchAgent canonical (com.volpred.handoff-regen). 2026-05-25 added per user directive '統一任務池並每小時建立 handoff 文件與任務接續提示詞'.",
+        "description": "Every hour at :50 — regenerate storage/ops/handoff_latest.md (task-pool snapshot + email replies + active agents + 接續提示詞) AND auto-release claims older than 2h. Fires 17 min before the next hourly-dispatch at :07 so dispatch reads fresh handoff. LaunchAgent canonical (com.volpred.handoff-regen). 2026-05-25 added per user directive '統一任務池並每小時建立 handoff 文件與任務接續提示詞'.",
         "host_crontab_managed": false,
         "launchagent_label": "com.volpred.handoff-regen",
         "matchers": [

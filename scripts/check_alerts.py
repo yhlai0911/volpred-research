@@ -6,9 +6,9 @@ Hook points:
     0 * * * * cd /path/to/volpred-research && uv run python scripts/check_alerts.py >> storage/logs/cron/check_alerts.log 2>&1
 
 Behavior:
-- 3 conditions: release_pool_gap (>2h since last release-pool fire),
-  draft_pool_low (<4 drafts), host_cron_fail (scheduler stale or
-  cron wrapper exit != 0).
+- Runs the condition registry owned by
+  ``volpred.ops.alerts.build_alert_condition_report``. Do not duplicate its
+  changing condition count or inventory in this wrapper docstring.
 - Dedup window 24h via storage/ops/alert_dedup.json (sha256(level + title)).
 - Recipient defaults to alerts.ALERT_RECIPIENT (yihao.lai@gmail.com).
 

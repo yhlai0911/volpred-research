@@ -51,12 +51,14 @@ TASK_TYPE_TO_MODEL: dict[str, tuple[str, str]] = {
 
     # 寫作 / 程序型 — opus / medium
     "paper_review":       ("opus", "medium"),  # latex-academic-reviewer + citation-verifier
+    "code_review":        ("opus", "medium"),  # source/result review；預設走 Codex primary path
     "event_article":      ("opus", "medium"),  # 事件驅動文章 (時效但結構化)
     "daily_article":      ("opus", "medium"),  # 日常文章 (feed-publisher 流程)
     "daily_digest":       ("opus", "medium"),  # 每日精選導讀 (reader-facing article flow)
     "trending_repost":    ("opus", "medium"),  # 熱門改寫 (style enforcement)
     "member_qa":          ("opus", "medium"),  # 會員問題答覆
     "email_reply":        ("opus", "medium"),  # 用戶回信處理
+    "telegram_reply":     ("opus", "medium"),  # Telegram 即時 owner-message responder
 
     # Ops / 驗證 / governance — opus / low (短流程 + checklist，effort 低即可)
     "platform_ops":       ("opus", "low"),     # bug fix / refactor / cron 修整
@@ -85,6 +87,7 @@ TOPOLOGIES = ("inline", "subagent", "worktree", "codex_exec", "compute_queue", "
 TASK_TYPE_TO_TOPOLOGY: dict[str, str] = {
     "experiment":         "worktree",   # 隔離產出 experiments/kXXX/；merge_worktree.sh 收
     "paper_review":       "subagent",   # 並行 reviewer（serialize per paper）
+    "code_review":        "codex_exec", # Codex primary-path review；重活可 override 到 compute_queue
     "paper_body":         "inline",     # 主線程 only（CLAUDE.md hard rule：禁 agent 寫 .tex）
     "paper_decision":     "inline",     # 主線程 only + narrative state machine
     "strategy_lifecycle": "inline",     # 固定 gate pipeline（evaluate → review → sensitivity → MDD）
@@ -94,6 +97,7 @@ TASK_TYPE_TO_TOPOLOGY: dict[str, str] = {
     "member_qa":          "inline",
     "trending_repost":    "inline",
     "email_reply":        "inline",     # PHASE 0 orchestrator 自做（跨 tick mini-orchestrator）
+    "telegram_reply":     "inline",     # dedicated Telegram responder；不進一般 subagent lane
     "platform_ops":       "subagent",   # Claude/Codex claim 制
     "governance":         "subagent",
     "lookup":             "inline",

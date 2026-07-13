@@ -1,4 +1,3 @@
-
 ---
 paths:
   - "frontend-v2-fix/**/*"

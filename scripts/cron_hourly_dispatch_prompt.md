@@ -2,7 +2,7 @@ Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-con
 
 **完整完成原則（HARD RULE）**：本次 fire 派的 task 必須**徹底完成 task goal 才能停止** — 派 agent 後 wait 完成、驗證結果、寫 knowledge.json/work_log、commit。**禁止做一半丟給下一輪**。若任務太大 50min cap 內完不成，**必須 scope 切小**到能在 50min 內收尾的單位（不要 partial 提交）。Heavy compute（GARCH MLE / Bootstrap / 全期 backtest）強制走 `scripts/compute_queue.py enqueue` 給 async worker，不要塞進 hourly fire。Cap 50min（3000s）；hang detect 由 cron script 處理，不該變成「做一半算了」的藉口。
 
-**Routing canonical**：`.claude/rules/task-routing.md` — 12 task types × Claude/Codex/並行/skill 對照表 + email_reply 特殊兩段流程。派工前 grep `task_type` 對應行。
+**Routing canonical**：`.claude/rules/task-routing.md`（capability / concurrency / workflow exceptions）+ `scripts/model_router.py`（model / effort / topology）。派工前依 `task_type` 查兩個 owner，不在本 prompt 維護固定型別數。
 
 **統一任務池 + claim 流程（HARD RULE，2026-05-25 用戶要求）**：
 1. **第一動作必讀 `storage/ops/handoff_latest.md`**（由 com.volpred.handoff-regen LaunchAgent 每小時 :50 自動生成）— 取得任務池快照 / claim 狀態 / email_reply 待處理 / dashboard 訊號。
@@ -119,7 +119,7 @@ uv run python scripts/dispatch_slot_budget.py   # {cap, reason, p1_only_slots}
 PHASE B — 派新工:
 
 1. 跑 `uv run python scripts/continue_task_dispatch.py --report` 看 dispatch state + agentable candidates。
-2. 多樣性檢查: `jq '[.[-5:] | .[] | .task_type]' storage/work_log.json` — 從 11 type 池選不在 last-3 的 type（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance / **trending_repost**）。
+2. 多樣性檢查: `jq '[.[-5:] | .[] | .task_type]' storage/work_log.json` — 依 `.claude/rules/task-routing.md` 的當前 task pool，選不在 last-3 的 type；不要在 prompt 複製會漂移的 inventory。
 
    **trending_repost daily cap = 2/day**（per `.claude/skills/trending-repost/SKILL.md`）：
    ```bash
@@ -132,20 +132,16 @@ PHASE B — 派新工:
    a. 若 last-3 work_log 已有 ≥2 paper_review/paper_body/paper_decision → 禁挑 paper_*，必 rotate 到其他 type。違反 = 整盤 diversity 崩。
    b. 否則考量 paper R1 backlog (Paper 2 還剩 3 SEVERE) + M3 monetization weight。
    c. 每天至少 1 次 experiment 類（生新 research direction），避免長期 maintenance 化 + 30 天無新發現累積。新 experiment 必 grounded in research_program.md Open Question OR 文獻 last 7 天 + monetization angle。
-   d. 從 10 type 池選不在 last-3 的 type — 嚴格 enforce，不再 audit 鎖死 paper R1。
+   d. 從 canonical task pool 選不在 last-3 的 type — 嚴格 enforce，不再 audit 鎖死 paper R1。
 4. Override: reactive K-experiment autogen brief（K1310-K1330 GARCH-Neural / HAR-GNN / Transformer / KAN / Conformal 等 ML novel-method NULL 4 連後 diversity decline）→ skip 改派非 ML K 或 paper_review。
 4.5. **模型分流（2026-05-25 強制）**：派 subagent 前 query router 取 task-type-specific model：
    ```bash
    MODEL_INFO=$(uv run python scripts/model_router.py --task-type <task_type>)
-   MODEL=$(echo "$MODEL_INFO" | jq -r .agent_short)  # 一律 opus（2026-07-05 起）
-   EFFORT=$(echo "$MODEL_INFO" | jq -r .effort)      # low/medium/high/xhigh/max（5 檔，依難度）
+   MODEL=$(echo "$MODEL_INFO" | jq -r .agent_short)  # router-selected alias
+   EFFORT=$(echo "$MODEL_INFO" | jq -r .effort)      # router-selected effort
    ```
-   **分流原則（2026-07-05 owner directive：所有 subagent 一律 `opus` 4.8）**：模型不再有選擇，只有 `effort` 依難度變化（router 已內建）。**effort 是 5 檔**（對齊 `claude --effort`）：`low < medium < high < xhigh < max`（`max` 是天花板）：
-   - **experiment / paper_decision / strategy_lifecycle** → `opus / xhigh`（研究與 narrative；失敗沿 ladder 升 max）
-   - **paper_body** → `opus / high`（主線程才能跑）
-   - **paper_review / event_article / daily_article / daily_digest / trending_repost / member_qa / email_reply** → `opus / medium`（寫作）
-   - **platform_ops / governance / lookup / verify / classification** → `opus / low`（短流程/checklist，effort 低但仍 opus）
-   - 派 Agent tool 時 `model: "opus"`
+   `MODEL_INFO` 的輸出就是決策；task-type mapping 與 effort ladder 只由 router 維護，本 prompt 不複製。所有 subagent 目前仍依 router 回傳使用 opus，只有 effort 隨任務與 attempt 變化。
+   - 派 Agent tool 時用 router 回傳的 `MODEL`
    - **⚠️ effort 要真的生效必須傳 `--effort`**：Agent/Task tool **無 effort 旋鈕**，若任務 effort 是 `xhigh`/`max`（研究類），跑 Agent tool 會拿 CLI 預設 effort、拿不到升級（2026-07-05 教訓）。**但解法不是在本班 fire 裡 spawn `claude -p`** —— 見下條。
    - 🚫 **絕對禁止在 fire 內 spawn `claude -p` / `agy -p` / `codex exec`**（2026-07-12 3-STRIKE，已由 PreToolUse hook 機械攔截）。fire 有 **3000s hard cap**，研究 agent 要跑 20-60 分鐘：**父等子 → 燒完 cap 被 SIGKILL**（7/12 三次 hang，duration 全是 3001.3s）；**父先走 → 子變 ppid=1 孤兒、worktree 成果沒人收**（K1681 整份實驗白做）。這不是 timeout 調太小，是**把 60 分鐘的工作塞進 50 分鐘的容器**。
    - ✅ **長 agent（xhigh/max、研究類）的唯一合法路徑 = 進 queue**：
@@ -163,18 +159,16 @@ PHASE B — 派新工:
      `--result-artifact` 相對 `--cwd` 解析，runner 只驗存在、絕不寫入；runner 自己的摘要另存 `storage/ops/agent_jobs/<job_id>.json`。agent 由 ***/15 的 detached compute worker** 執行（不受 fire cap 限制、有 lock、有自己的 timeout），成果由**後續某一班 fire 在 PHASE A 收**。這正是 heavy compute 一直在走的路 —— agentic 長工作只是同一條路上的另一種 job。
    - **本班 fire 的職責到 enqueue 為止**：enqueue 完就往下走 / 收尾，**不要坐在那裡等 agent**。這不違反「完整完成原則」—— 完成的單位是 **task**，不是 fire。一個 60 分鐘的 agent 在 50 分鐘的 fire 裡「等到底」只有一種結局：被 SIGKILL、成果全毀，那才是真正的沒完成。
    - **短任務**（≤10min、`low`/`medium` effort：lookup / verify / classification / 短 review）→ 用 **Agent tool**（`run_in_background: false`，同步跑完）。這類本來就塞得進 fire，不必進 queue。
-   - Brief 必含一行 `**Model**: opus / <effort> (per task_type routing)`，便於 audit
-   - 違反（例：任何 subagent 派 sonnet/haiku）= 違反 owner directive，下次 boss_report 會抓
+   - Brief 必含一行 `**Model**: <MODEL> / <EFFORT> (per model_router)`，便於 audit
 
    **Effort escalation on failure（2026-05-29 boss directive；2026-07-05 補滿 5 檔）**：任務若**可驗證地失敗**（test fail / verdict FAIL / exception / 不收斂 / Codex reject），重派時沿 ladder 調高 effort：
    ```bash
-   # attempt 0 失敗 → attempt 1 重派（ladder 上爬一階）
+   # attempt N 交給 router 沿 canonical ladder 升級
    MODEL_INFO=$(uv run python scripts/model_router.py --task-type <type> --attempt <N>)
-   # ladder (2026-07-05 全 5 檔): opus/low → opus/medium → opus/high → opus/xhigh → opus/max（CEILING；到頂改策略不再重試）
    ```
-   - `at_ceiling=true` → 已到 opus/max，這是最強 reasoning，無法再調高
+   - `at_ceiling=true` → 已到 router ceiling，無法再調高
    - `exhausted=true` → escalation 已超天花板 → **禁止繼續同法重試**，改觸發 **3-strike rule**：拆解問題 / 補文獻 context / 派 Codex 二審 / escalate email 給老闆（`--needs-reply`）
-   - Attempt cap = ladder 長度（最多到 opus/max）；每個 task 的 escalation 次數記在 next_tasks task 的 `escalation_attempts` 欄位，避免無限重試 token 燒爆
+   - Attempt cap = router ladder 長度；每個 task 的 escalation 次數記在 next_tasks task 的 `escalation_attempts` 欄位，避免無限重試 token 燒爆
 
 5. 分流決策（token 節省）:
    - **拓撲以機械路由為準（2026-07-10 topology-audit）**：dispatch report 的每個 candidate 已帶 `topology` 欄位（task 自帶欄位優先，否則 `model_router.py` 的 task_type 預設表）— `inline`（主線程自做）/ `subagent` / `worktree` / `codex_exec` / `compute_queue` / `agent_team`。**依欄位選載具**；僅在欄位明顯不合本 task 實況時 override，且 override 必須在 work_log entry 記 `topology_override: <from>→<to> 原因`（override 是可觀測例外，不是常態）。

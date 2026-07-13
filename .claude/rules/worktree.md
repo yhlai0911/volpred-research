@@ -1,14 +1,15 @@
 ---
 paths:
   - ".claude/worktrees/**"
+  - ".codex/worktrees/**"
   - "scripts/merge_worktree.sh"
-  - "scripts/bootstrap_agent_session.sh"
+  - "scripts/reclaim_stale_worktrees.py"
   - "experiments/**/*"
 ---
 
 # Worktree / Agent 規則
 
-當 Claude 觸及 `.claude/worktrees/**`、`scripts/merge_worktree.sh`、`scripts/bootstrap_agent_session.sh`、或 `experiments/**` 路徑時自動觸發。
+以內建 Read/open 讀取 `.claude/worktrees/**`、`.codex/worktrees/**`、`scripts/merge_worktree.sh`、`scripts/reclaim_stale_worktrees.py` 或 `experiments/**` 時 auto-load；Bash `git` / `rg` 不觸發，派 worktree 前仍須由 experiment / dispatch workflow 顯式載入。
 
 ## Worktree agent 禁忌（硬規則）
 
@@ -28,7 +29,7 @@ paths:
 3. **絕對禁止** `git worktree remove --force` — 以免未 merge 的 commits 消失（2026-04-18 K1032 教訓有記）。
 4. Merge 後**主線程手動 check**：`git log --oneline -5` 驗證 commits 真的進了 main。
 5. **K1143-v2 (2026-04-19) hardening**：script 若偵測到 `rev-list=0` 但 worktree `experiments/` 仍有主目錄沒有的檔，會主動 ABORT 並顯示手動 copy 指令。**看到 ABORT 不是 bug，是防禦**；按 hint 執行即可。
-6. Regression test：`bash scripts/tests/test_merge_worktree.sh`（修 script 後必跑；預期 PASS 7/7 cases / 17 assertions，K1262-v4 後新增 case 5/6/7）。
+6. Regression test：`bash scripts/tests/test_merge_worktree.sh`（修 script 後必跑；case / assertion 數以 script 當次 summary 為準，不在規則重複硬編）。
 
 ## Agent brief 規範
 

@@ -12,6 +12,8 @@ paths:
   - "storage/publication_candidates.json"
   - "storage/next_draft_candidate_*.md"
   - ".claude/skills/publication-candidates/**"
+  - "config/article_series.json"
+  - "scripts/series_registry.py"
   # 寫文前引用實驗數字
   - "experiments/*/results.json"
   - "experiments/*/*_results.json"
@@ -23,12 +25,12 @@ paths:
 
 # 發佈 + Storage 規則（合併 publish-checklist + storage-and-publishing）
 
-觸及 feed / publisher / mile_ / feed-publisher skill / trending-repost skill / publication-candidates / experiment results / next_draft_candidate / paper_trading / daily_update / supabase_sync / recalc_metrics 路徑時 auto-load。對應 Mission 第 1 條「把文章寫好」+ 第 5 條「把曝光流量拉高」。
+以內建 Read/open 讀取 feed / publisher / mile_ / feed-publisher skill / trending-repost skill / publication-candidates / experiment results / next_draft_candidate / paper_trading / daily_update / supabase_sync / recalc_metrics 路徑時 auto-load。Bash `rg`/`jq` 不觸發；選題/派工階段須由 CLAUDE.md pointer、dispatch prompt 或顯式讀本 rule / 對應 skill 載入。對應 Mission 第 1 條「把文章寫好」+ 第 5 條「把曝光流量拉高」。
 
 ## 觸發時機對應 workflow 階段
 
-- **選題階段** → `publication_candidates.json` / `next_draft_candidate_*.md` / `publication-candidates skill` → 規則在主線程挑主題時 auto-load，提醒 3-layer dedup
-- **查數字階段** → `experiments/*/results.json` → 規則在 agent brief 引用 K 數字前 auto-load
+- **選題階段** → 顯式讀本 rule / `publication-candidates` skill；frontmatter paths 只補強內建 Read，不把 Bash 查詢誤當 trigger
+- **查數字階段** → 內建 Read `experiments/*/results.json` 時可 auto-load；若用 Bash 投影，brief 必先顯式引用本 rule
 - **寫文階段** → `feed-publisher skill` / `feed.json` / `mile_*.json` → 規則照舊觸發
 - **熱門改寫 / 專欄文階段** → `trending-repost skill` → 套用雙發佈與 style-reference 規則
 - **Pipeline 校驗** → `supabase_sync.py` / `publisher/**` → 照舊

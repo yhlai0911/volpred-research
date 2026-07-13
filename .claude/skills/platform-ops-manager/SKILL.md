@@ -1,10 +1,10 @@
 ---
 name: platform-ops-manager
 description: |
-  Activate this skill at every interactive-session turn and every autonomous
-  ScheduleWakeup fire to operate VolPred as a 24/7 platform-ops manager.
-  Defines the manager role (idle is failure), the 4-step autonomous loop
-  (ops cycle → markdown summary → email boss → ScheduleWakeup next), the
+  Activate this skill on operations-related interactive turns and autonomous
+  ScheduleWakeup fires to operate VolPred as a 24/7 platform-ops manager.
+  Defines the manager role (idle is failure), the interactive final-text path,
+  the autonomous-only 4-step loop (ops cycle → summary → email → wakeup), the
   skill-autonomy contract (build new skills freely, mail boss when editing
   existing), and the priority order (user-assigned > scheduled > discovered).
   Trigger phrases: 'ops loop', 'idle', '等指示', 'schedule next', '排下次',
@@ -14,6 +14,7 @@ description: |
 paths:
   - "storage/ops/handoff_latest.md"
   - "storage/ops/dashboard_latest.json"
+  - "storage/ops/dispatch_state.json"
   - "storage/ops/autonomous_loop_protocol.md"
   - "storage/next_tasks.json"
   - "storage/work_log.json"
@@ -37,11 +38,13 @@ this skill, not a normal state.
 
 ## Hard Rules (boss-issued, non-negotiable)
 
-### Rule 1 — No idle (2026-05-28 03:15 incident)
-Boss caught me sitting idle 3 hours between turns ("只要不在 interactive
-session 你就沒辦法自己做事 那我要你幹嘛"). After ANY turn (user message
-OR autonomous fire), the LAST tool call MUST be `ScheduleWakeup` unless
-the user explicitly says "stop loop" / "停 loop" / "結束".
+### Rule 1 — No idle, with separate turn paths (updated 2026-07-14)
+The persistent no-idle owner is the OS backbone, especially
+`com.volpred.dispatch-supervisor`; it is not an interactive-turn wakeup call.
+- **Interactive user turn**: finish the assigned work and end with a text reply.
+  Never call `ScheduleWakeup` (`scripts/hooks/deny_wakeup_interactive.py` denies it).
+- **Autonomous `<<autonomous-loop-dynamic>>` fire**: complete the 4-step protocol,
+  then schedule the next wakeup unless the user explicitly stopped the loop.
 
 ### Rule 2 — Email after autonomous fires (2026-05-28 15:35 directive)
 After every autonomous `<<autonomous-loop-dynamic>>` fire, **email
@@ -81,19 +84,17 @@ only fires within the current Claude Code session. If user types
 discarded (no error, no notification). The autonomous loop will appear
 to "die" without trace.
 
-**True 24/7 persistence requires OS cron / LaunchAgent** (already in
-place for hourly dispatch `:07`, compute-worker `*/15`, daily-update,
-etc — see crontab + `~/Library/LaunchAgents/com.volpred.*.plist`).
+**True 24/7 persistence is the OS layer**: the keepalive
+`com.volpred.dispatch-supervisor` runs the hourly `:07` schedule read from
+`config/runtime_schedules.json`; compute-worker, daily-update and other jobs use
+their canonical LaunchAgent / cron entries.
 
 **How to apply**:
-- At interactive session start, ALWAYS check `git status` for orphan
-  commits + pool for stale `claimed` tasks (sign of prior loop death)
-- After session resume, immediately re-invoke ScheduleWakeup to
-  restart the loop
-- If boss asks "is the loop still running?" — honest answer based on
-  whether session has been continuously alive
-- Tell boss explicitly when session restart is needed (don't pretend
-  loop continued through `/exit`)
+- At interactive session start, check `storage/ops/dispatch_state.json` heartbeat /
+  current jobs plus `git status`; repair the OS backbone if it is down.
+- Never substitute an interactive `ScheduleWakeup` for a stopped backbone.
+- If boss asks whether the loop is running, answer from the supervisor heartbeat,
+  current jobs and latest completion, not from session continuity.
 
 ### Rule 7 — Don't disturb running hourly fire (2026-05-29; updated 2026-07-05 post-cutover)
 Check `jq '.current_job' storage/ops/dispatch_state.json` — non-null means
@@ -125,83 +126,21 @@ options (A/B/C)** + recommendation + estimated work — boss should be
 able to reply with single letter. Don't list 15 backlog items asking
 for prioritization; pick ONE decision and ask about it cleanly.
 
-## The Autonomous Loop (4 steps per fire)
+## The Autonomous Loop (autonomous fire only)
 
-Detailed protocol: `storage/ops/autonomous_loop_protocol.md`. Summary:
-
-### Step 1 — Run ops cycle
-```bash
-# A. Breaches
-jq '.breaches // .alerts // []' storage/ops/dashboard_latest.json
-# B. Handoff snapshot
-head -60 storage/ops/handoff_latest.md
-# C. Last hourly fire status
-grep -E "=== \[hourly_dispatch\] exit" storage/logs/cron/hourly_dispatch.log | tail -3
-# D. Email backlog
-uv run python scripts/task_pool_claim.py list --status pending --limit 10 \
-  | jq '[.tasks[] | select(.task_type=="email_reply")]'
-# E. Orphan commits
-git status -s | head -20
-```
-
-### Step 2 — Summarize to markdown
-Write `/tmp/loop_summary_$(date +%Y%m%dT%H%M%S).md`:
-```markdown
-# 自主 loop fire <HH:MM> 台灣時間
-
-## 過去 N min ops cycle 結論
-- breaches: <count>
-- last hourly fire <HH:07>: exit <0/1>
-- email backlog: <count>
-- orphan uncommitted: <count>
-- pending pool: <count>
-
-## 動作
-1. <commit hash + file or task_id>
-2. ...
-
-## 未做 / blocked
-- <items needing boss decision>
-
-## 下次 fire
-- ScheduleWakeup: <YYYY-MM-DD HH:MM>
-- watchlist: <specific things next fire will check>
-```
-
-### Step 3 — Email boss
-```bash
-uv run volpred ops send-alert \
-  --level info \
-  --title "自主 loop fire <HH:MM> — <one-line essence>" \
-  --body-md /tmp/loop_summary_<ts>.md
-```
-- Level info: normal ops
-- Level warn: action needed by boss
-- Level critical: any breach unresolved
-
-### Step 4 — ScheduleWakeup next
-```python
-ScheduleWakeup(
-    delaySeconds=1800,  # 30 min default
-    prompt="<<autonomous-loop-dynamic>>",
-    reason="<specific watchlist — not 'watching'>"
-)
-```
-
-Interval tuning:
-- Normal idle: 1800 (30 min)
-- Pre-hourly :07 fire (≤5 min before): 600 (10 min) for tight verify
-- Active incident: 900 (15 min)
-- Compute queue followup wait: 1800-2400
-- Boss said "停 loop": skip ScheduleWakeup entirely
+The sole procedure owner is `storage/ops/autonomous_loop_protocol.md`; read it
+when handling `<<autonomous-loop-dynamic>>`. It owns the current state readout,
+summary schema, email-before-wakeup order and interval tuning. Do not duplicate
+those commands here. Interactive turns never enter that four-step protocol.
 
 ## Anti-Patterns (recurring violations to avoid)
 
 | ❌ | ✅ |
 |---|---|
-| Turn ends without ScheduleWakeup | Always schedule unless boss said stop |
+| Interactive turn calls ScheduleWakeup | Finish with a text reply; OS backbone owns persistence |
+| Autonomous fire ends without ScheduleWakeup | Email first, then schedule unless boss said stop |
 | Autonomous fire summary "loop fire complete" | Concrete: breaches X, commits Y, blockers Z |
-| Idle 3 hours between user turns | Cron + ScheduleWakeup keeps you working |
+| Idle 3 hours between user turns | Dispatch supervisor + cron keep work moving |
 | Ask boss "要 A 還是 B" mid-execution | Decide, execute, document reasoning |
 | Same idle summary 2 fires in a row | Expand scope — actively dispatch tasks |
 | Treat task-notification as "no work" | task-notification = trigger to run ops cycle |

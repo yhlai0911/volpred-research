@@ -4,38 +4,41 @@ paths:
   - "scripts/task_pool_claim.py"
   - "scripts/continue_task_dispatch.py"
   - "scripts/cron_hourly_dispatch_prompt.md"
+  - "scripts/model_router.py"
+  - "config/models.json"
+  - "docs/workflow-index.md"
   - "AGENTS.md"
   - ".claude/skills/autonomous-research/references/delegation-playbook.md"
 ---
 
 # Task Pool — Routing & Capability Matrix
 
-Canonical mapping of `task_type` → who can claim, concurrency rules, **model tier**, special constraints.
-**Updated 2026-05-25**: backfill applied (0 null types remaining); experiment_review collapsed into paper_review; email_reply added; **model column added** (per `scripts/model_router.py`).
-**Updated 2026-07-10（topology-audit）**: **協作拓撲已機械路由** — canonical 對照表在 `scripts/model_router.py` 的 `TASK_TYPE_TO_TOPOLOGY`（`uv run python scripts/model_router.py --list` 看全表；task 自帶 `topology` 欄位優先）。dispatch report 的 candidate 直接帶 `topology` 欄位，orchestrator 依欄位選載具、override 須記 work_log。本檔下方 prose 的執行模式描述自此為 pointer 性質，以 model_router 為準。
+Human-only capability / concurrency / workflow constraints live here. Model,
+effort and topology are mechanically owned by `scripts/model_router.py`; query
+them with `uv run python scripts/model_router.py --task-type <type>` rather than
+copying that mapping into prose. Codex eligibility is enforced by
+`scripts/task_pool_claim.py::CODEX_ELIGIBLE_TASK_TYPES`.
 
-## 13 canonical task types
+## Capability and workflow exceptions
 
-| task_type | Claude | Codex | 並行 | **Model** | Skill / Workflow canonical | 特殊規則 |
-|---|---|---|---|---|---|---|
-| **experiment** | ✅ | ✅ | up to 4 | **opus / xhigh** | `autonomous-research` | worktree only; Codex review before knowledge.json write (K1259 gate) |
-| **paper_review** | ✅ | ✅ (small text fix) | serialize per paper | **opus / medium** | `paper-review-cycle` | latex-academic-reviewer + citation-verifier 並行 |
-| **paper_body** | ✅ only | ❌ | serialize per paper | **opus / high** | `paper-update` | **禁止 background agent 寫 .tex** (CLAUDE.md hard rule); main thread only |
-| **paper_decision** | ✅ only | ❌ | one at a time | **opus / xhigh** | `paper-stage-classifier` | 需 ≥3 互補實驗 + user confirm 才進 `decision_made_awaiting_body_rewrite` |
-| **daily_article** | ✅ | ✅ | up to 2 | **opus / medium** | `feed-publisher` + `anti-ai-style` | reader-facing 3-canonical 必讀；publication-candidates 選題；3-layer dedup |
-| **daily_digest** | ✅ | ✅ | 1/day | **opus / medium** | `feed-publisher` + `anti-ai-style` | 每日精選導讀＝**專題策展**（選一 theme + 撈 archive 同主題 3-6 篇舊文 + 時事 hook + 串敘事弧，**非逐篇 recap 當天文章**）；立即 published；`details.content_type='daily_digest'`；curated slug 寫 `details.digest_articles`；title 用專題式標題且**不可**以 `每日精選導讀｜` 起頭（前端已顯示此區塊標頭）；tags 含 `精選導讀`；勿混 EMAIL 用 `send-daily-digest` |
-| **event_article** | ✅ only | ❌ | one at a time | **opus / medium** | `feed-publisher` + event templates | 即時性需要主線程判斷；直接 `published` 不入 draft pool；**FB 雙發佈強制**（2026-05-25 起；共用 trending-repost FB SOP，不算 trending daily cap） |
-| **member_qa** | ✅ only | ❌ | one at a time | **opus / medium** | `member-questions` | 4 維度評分 → question-rerank → research → publish；每 6h cron |
-| **trending_repost** | ✅ only | ❌ | **daily cap = 2/day** | **opus / medium** | `trending-repost` | VolPred angle 改寫 + 無 source citation；雙發佈 feed + Ivan Lai FB（**同 event_article 共用 FB SOP**） |
-| **strategy_lifecycle** | ✅ only | ⚠️ (review 子任務) | one at a time | **opus / xhigh** | strategy-registry + `scripts/evaluate_new_strategy.py` | 同期間比較 + cross-OOS + Codex review + sensitivity + MDD gate |
-| **platform_ops** | ✅ | ✅ | up to 4 | **opus / low** | (varies — admin-ops / specific script) | bug fix / refactor / cron 維修 / data pipeline 修補 |
-| **governance** | ✅ | ✅ (skill/rule 修整) | serialize | **opus / low** | (depends on target — rules/skills/docs) | 改 governance 檔前先 commit snapshot；snapshot: prefix |
-| **email_reply** | ✅ only | ❌ (但**接 linked sub-tasks**) | one at a time | **opus / medium** | `cron_hourly_dispatch_prompt.md` PHASE 0 | filter: from owner + Re: + 含 `[VolPred`；兩段式 plan email + close email |
-| **lookup / verify / classification**（任務內 routine 用，非主 task type） | ✅ | ✅ | inline | **opus / low** | — | 純查詢 / 簡單 grep / boolean classification |
-
-**Orchestrator (hourly-dispatch)** = `opus / high`。**2026-07-05 owner directive：所有 subagent 一律 opus（4.8）**，Model 欄的 model 全為 opus，只有 effort 依難度變化；sonnet/haiku 退出預設 rotation。（高風險決策：triage / claim / routing / brief 撰寫）。Subagent 派工後由 `scripts/model_router.py --task-type <type>` 查 model 並寫進 brief。
-
-**Effort 是 5 檔（2026-07-05 owner 更正 + wired）**：`low < medium < high < xhigh < max`（`max` 是天花板，對齊 `claude --effort` 旗標）。研究類（experiment / paper_decision / strategy_lifecycle）起於 `xhigh`，可驗證失敗時沿 ladder 升到 `max`（原本錯設封頂在 high）。**effort 現在真的透過 `--effort` 套用**在 spawn 的 `claude -p` 上——`dispatch_supervisor/worker.py`（`DISPATCH_EFFORT`，預設 high，`VOLPRED_DISPATCH_EFFORT` env 可調）+ `telegram_responder.sh`（預設 high）+ legacy cron；2026-07-05 前 effort 只被算出來、從沒傳給任何 dispatch（inert metadata）。缺口：Agent/Task tool 無 effort 旋鈕，orchestrator 若要讓研究 subagent 真的吃到 xhigh/max，需改用 `claude -p --effort` spawn。
+| task_type | Claude | Codex | 並行 | Skill / Workflow canonical | 特殊規則 |
+|---|---|---|---|---|---|
+| **experiment** | ✅ | ✅ | up to 4 | `autonomous-research` | worktree only; Codex review before knowledge.json write (K1259 gate) |
+| **code_review** | ✅ | ✅ | up to 4 | target-specific review skill | read-only unless the task explicitly includes fixes |
+| **paper_review** | ✅ | ✅ | serialize per paper | `paper-review-cycle` | Codex 可做完整 read-only review / report；任何 `.tex` new section、methodology rewrite 或結構性寫入改列 `paper_body` 由主線程處理 |
+| **paper_body** | ✅ only | ❌ | serialize per paper | `paper-update` | **禁止 background agent 寫 .tex** (CLAUDE.md hard rule); main thread only |
+| **paper_decision** | ✅ only | ❌ | one at a time | `paper-stage-classifier` | 需 ≥3 互補實驗 + user confirm 才進 `decision_made_awaiting_body_rewrite` |
+| **daily_article** | ✅ | ✅ | up to 2 | `feed-publisher` + `anti-ai-style` | reader-facing 3-canonical 必讀；publication-candidates 選題；3-layer dedup |
+| **daily_digest** | ✅ | ✅ | 1/day | `feed-publisher` + `anti-ai-style` | 每日精選導讀＝**專題策展**（選一 theme + 撈 archive 同主題 3-6 篇舊文 + 時事 hook + 串敘事弧，**非逐篇 recap 當天文章**）；立即 published；`details.content_type='daily_digest'`；curated slug 寫 `details.digest_articles`；title 用專題式標題且**不可**以 `每日精選導讀｜` 起頭（前端已顯示此區塊標頭）；tags 含 `精選導讀`；勿混 EMAIL 用 `send-daily-digest` |
+| **event_article** | ✅ only | ❌ | one at a time | `feed-publisher` + event templates | 即時性需要主線程判斷；直接 `published` 不入 draft pool；**FB 雙發佈強制**（2026-05-25 起；共用 trending-repost FB SOP，不算 trending daily cap） |
+| **member_qa** | ✅ only | ❌ | one at a time | `member-questions` | 4 維度評分 → question-rerank → research → publish；每 6h cron |
+| **trending_repost** | ✅ only | ❌ | **daily cap = 2/day** | `trending-repost` | VolPred angle 改寫 + 無 source citation；雙發佈 feed + Ivan Lai FB（**同 event_article 共用 FB SOP**） |
+| **strategy_lifecycle** | ✅ only | ⚠️ (review 子任務) | one at a time | strategy-registry + `scripts/evaluate_new_strategy.py` | 同期間比較 + cross-OOS + Codex review + sensitivity + MDD gate |
+| **platform_ops** | ✅ | ✅ | up to 4 | (varies — admin-ops / specific script) | bug fix / refactor / cron 維修 / data pipeline 修補 |
+| **governance** | ✅ | ✅ (skill/rule 修整) | serialize | (depends on target — rules/skills/docs) | 改 governance 檔前先 commit snapshot；snapshot: prefix |
+| **email_reply** | ✅ only | ❌ (但**接 linked sub-tasks**) | one at a time | `cron_hourly_dispatch_prompt.md` PHASE 0 | filter: from owner + Re: + 含 `[VolPred`；gmail-poll 收件時 ACK，hourly 完工後寄 CLOSE |
+| **telegram_reply** | Telegram responder / Claude | ❌ | one at a time | `scripts/telegram_responder.sh` | P1 即時 ingress；完成實事後用 Telegram 短回覆，不進一般 hourly/Codex claim |
+| **lookup / verify / classification**（任務內 routine 用，非主 task type） | ✅ | ✅ | inline | — | 純查詢 / 簡單 grep / boolean classification |
 
 ## Routing decision tree（dispatcher 用）
 
@@ -54,17 +57,17 @@ tree below and then to free-text markers. Do not encode ownership solely in
 
 ```
 任務 in pending:
-  ├─ task_type == "email_reply"
-  │     └─ Claude PHASE 0 only（最高優先；Codex skip）
+  ├─ task_type in {email_reply, telegram_reply}
+  │     └─ owner-message responder / Claude only（最高優先；Codex skip）
   │
   ├─ task_type in {paper_body, paper_decision, event_article, member_qa, trending_repost, strategy_lifecycle}
   │     └─ Claude only（主線程紀律 / API 一致性需求）
   │
   ├─ task_type == "paper_review"
-  │     ├─ description 含 errata / footnote / typo / table-fix → Codex 可接
-  │     └─ 含 structural / new section / methodology change → Claude only
+  │     ├─ read-only review / review report / small text fix → Codex 可接
+  │     └─ new section / methodology rewrite / structural .tex write → 改列 paper_body，Claude main thread only
   │
-  └─ task_type in {experiment, daily_article, daily_digest, platform_ops, governance}
+  └─ task_type in {experiment, code_review, daily_article, daily_digest, platform_ops, governance}
         └─ Claude OR Codex — claim 機制決定 (fcntl atomic, 先到先得)
 ```
 
@@ -77,12 +80,14 @@ tree below and then to free-text markers. Do not encode ownership solely in
   - paper_*: serialize per paper（同篇論文同時只一個 agent 動）
   - trending_repost: 2/day（daily cap，per `.claude/skills/trending-repost/SKILL.md`）
 
-## Email reply 的特殊兩段流程
+## Email reply 的 ACK + close 流程
 
-`email_reply` 是唯一 lifecycle 跨 multiple ticks 的類型：
+`email_reply` 是唯一 lifecycle 跨 multiple ticks 的類型。ACK 的唯一 owner
+是 gmail-poll；hourly dispatcher 不再寄 plan email：
 
 ```
-Tick N: Phase 0.B claim → ANALYZE → PLAN → send PLAN email → execute / 派 sub-tasks → 
+Receive: gmail-poll → send ACK once
+Tick N: Phase 0.B claim → ANALYZE → PLAN → execute / 派 sub-tasks →
         write plan + linked_task_ids + needs_close_reply=true → 留 in_progress
 Tick N+1..M: Phase 0.A check linked_task_ids 全完成？→ send CLOSE email → complete
 ```
@@ -95,3 +100,4 @@ Linked sub-tasks 用一般 task_type（描述含 `parent_email_task_id` 反向�
 |---|---|
 | 2026-05-25 | 初版 — backfill 60 個 null/experiment_review tasks；email_reply 加入；本表落地 |
 | 2026-07-10 | topology 機械路由（topology-audit）— `TASK_TYPE_TO_TOPOLOGY` + `pick_topology()` 落地 `scripts/model_router.py`；`continue_task_dispatch.py` candidate 帶 `topology` 欄位；orchestrator prompt step 5 改讀欄位、override 記 work_log |
+| 2026-07-14 | 移除 model/effort/topology 重複表；補 code_review/telegram_reply；email lifecycle 對齊 gmail-poll ACK + hourly CLOSE |

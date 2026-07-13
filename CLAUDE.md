@@ -42,8 +42,7 @@
 
 **最高指引 — 平台運營經理自主迴圈**（2026-05-28 用戶補強，**凌駕一切**）：
 
-**ScheduleWakeup 只准在 autonomous fire 的 turn 使用，互動 turn（用戶在等回覆時）全面禁用**（2026-07-02 五犯後根治：該工具回應「Nothing more to do this turn」會誘導把 tool call 當回合終點，回覆永遠寫不出來 — 規則怎麼改序列都擋不住，唯一解是互動路徑移除此工具）。自主迴圈的存續**不靠** session 內 wakeup：OS backbone（hourly-dispatch / compute-worker / check-alerts 等 LaunchAgent+cron）session-independent 常駐，session 關掉迴圈照跑。autonomous fire 的 turn 結尾才排下一次 wakeup。互動 turn 的唯一收尾動作 = 文字回覆。
-Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup self-pace 讓 session 變 24/7 自主迴圈。
+**ScheduleWakeup 只准在 autonomous fire 的 turn 使用，互動 turn（用戶在等回覆時）全面禁用**（2026-07-02 五犯後根治；`scripts/hooks/deny_wakeup_interactive.py` 機械 enforce）。24/7 與 no-idle 由 OS backbone（`com.volpred.dispatch-supervisor`、compute-worker、check-alerts 等 LaunchAgent/cron）負責，session 關掉仍照跑；autonomous fire 才能在完成 email protocol 後排下一次 wakeup。互動 turn 的唯一收尾動作 = 文字回覆。
 
 **Turn 最終輸出必須是給用戶的文字（與上一條同位階；enforcement owner = Stop hook）**：互動 turn 收尾 = 文字回報（結果 + 時間戳）；寫在 tool calls 之間的文字用戶看不到；email 不能替代 session 內回覆。2026-07-02 三犯後由 `scripts/hooks/enforce_final_text.py`（Stop hook）機械 enforce — 被擋下時直接補文字回報（why 與 incident 史見 error_log 2026-07-02 14:25、memory `feedback_final_text_after_schedulewakeup`）。
 
@@ -55,13 +54,9 @@ Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup sel
 2. 用戶 message 含「啟動 loop / 開始 / start autonomous / 接續」→ 立即啟動
 3. 其他情況（含一般 task request）→ 預設啟動（背景跑不打擾用戶）
 
-啟動方式 = 驗證 backbone 排程活著（`launchctl list | grep volpred` + 最近 hourly log）；backbone 斷了才修 backbone，不用 session 內 wakeup 替代。
+啟動方式 = 驗證 backbone 活著（`launchctl list | grep dispatch-supervisor` + `storage/ops/dispatch_state.json` heartbeat / latest completion）；backbone 斷了才修 backbone，不用 session 內 wakeup 替代。
 
-**Autonomous fire 4-step protocol**（每次 `<<autonomous-loop-dynamic>>` fire）：
-1. Run ops cycle（dashboard breaches / handoff diff / hourly fire verify / email backlog / orphan commit）
-2. Summarize to `/tmp/loop_summary_<ts>.md`
-3. **`uv run volpred ops send-alert --level info --title "自主 loop fire <HH:MM> — <要點>" --body-md <summary>`** ← 寄 email 給老闆（沒寄不可 schedule next，老闆無能見度 = 違反規則）
-4. `ScheduleWakeup` 排下次（30 min 預設）
+**Autonomous fire 4-step protocol**：僅 `<<autonomous-loop-dynamic>>` turn 適用；完整步驟與 canonical supervisor health readout 見 `storage/ops/autonomous_loop_protocol.md`，本 bootstrap 不再複製程序細節。
 
 **Skill autonomy**（per user memory `feedback_skill_autonomy`）：
 - **新建 skill**: 自主用 `/skill-creator:skill-creator` 或直接 Write `.claude/skills/<name>/SKILL.md`，下次互動口頭通知
@@ -96,12 +91,12 @@ Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup sel
 
 ### Rule path-trigger 時序原則（2026-04-20 補）
 
-**規則只在 Claude 真正 touch `paths:` frontmatter 列出的 path 時 auto-load**。若規則 intent 是「在 X 階段就要提醒」但 paths 只匹配「執行 X 之後」才會 touch 的 path，規則永遠不 load — silent failure。
+**Path-scoped rule 只在 Claude 以內建 Read/open 讀取 `paths:` frontmatter 命中的檔案時 auto-load**。Bash 內的 `rg` / `grep` / `jq` / `cat`，以及只在 command 文字出現檔名，**都不算觸發**（Claude Code 2.1.206 fresh-session A/B，2026-07-14）。若 workflow 的 token-safe 查詢本來就走 Bash，不能靠多補 paths 解決；需要在 selection 前出現的規則，必須由 CLAUDE.md 一行 pointer、dispatch prompt 或顯式讀取 rule/skill 保證載入。
 
 **寫新規則或改現有規則 paths 時，強制問三個問題**：
 1. 這規則**應該在什麼 workflow 階段** auto-load？（planning / selection / execution / verification）
-2. 在該階段我會 **touch 哪些 path**？（query / grep / read / jq / read memo 等）
-3. 規則的 `paths:` 是否 covers 那些 pre-action touches？若否 → **補 paths**
+2. 在該階段會用內建 Read/open 哪些 path？若只會 Bash `rg`/`jq`，答案是「沒有」。
+3. 有 pre-action Read → 補對應 paths；沒有 → 在 bootstrap / dispatch prompt 放一行 pointer 或明確要求先讀 rule/skill，禁止假設 Bash 查詢會觸發。
 
 **典型 path class 對應 workflow 階段**：
 - Planning/selection → `storage/publication_candidates.json` / `storage/next_draft_candidate_*.md` / `.claude/skills/*/SKILL.md` / `research_program.md` / `docs/error_log.md`
@@ -109,7 +104,7 @@ Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup sel
 - Execution → 對應寫入目標（`feed.json`, `paper/*.tex`, `config/*.json`）
 - Verification → test 檔、reproduce_report.json、sync log
 
-**歷史 incident**（2026-04-20）：`.claude/rules/publish-checklist.md` 原 paths 只覆蓋 feed.json/supabase_sync.py 等「已經在寫 feed」的路徑 — 主線程**派 agent 前** query publication_candidates / read memo / ls experiments 時規則完全不 load，3-layer dedup rule 在最需要它的選題階段 silent skip。session 6 次 dispatch，5/6 沒做 3-layer dedup 就是因為規則 never surfaced. Fix: 補 `storage/publication_candidates.json`, `storage/next_draft_candidate_*.md`, `.claude/skills/publication-candidates/**`, `experiments/*/*_results.json` 到 paths。
+**歷史 incident**（2026-04-20；2026-07-14 修正根因模型）：`.claude/rules/publish-checklist.md` 在派 agent 前沒有 surface，session 6 次 dispatch 有 5 次漏做 3-layer dedup。早期只補 selection paths，仍無法涵蓋 Bash query；現在由本 bootstrap 的 publishing pointer + dispatch/skill 顯式載入負責 pre-action，paths 只作內建 Read 的補強。
 
 ## 研究誠實原則（最高優先，不可違反）
 
@@ -129,7 +124,7 @@ Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup sel
 - 本機多 agent 研究系統：Claude 偏主研究與整合，Codex 與 Antigravity (agy) 偏審查、第二意見、針對性修正與分擔工作。
 - **AI CLI 可用性**（2026-05-20 更新）：
   - **Codex CLI** `codex-cli 0.144.1` ✅（2026-07-10 升級）— ChatGPT auth（`Logged in using ChatGPT`），預設 `gpt-5.6-sol` ultra reasoning（`~/.codex/config.toml` 控制；升級日 smoke 驗證通過）；headless 入口 `codex exec`；`-s workspace-write`。中文 prompt 必 heredoc + stdin。reinstall 要 `npm install -g @openai/codex@latest --include=optional`（缺 darwin-arm64 binary 會 crash）。⚠️ config 的 model 與已裝 CLI 版本必須同步 smoke 驗證 — 2026-07-10 曾因 config 指到舊 CLI 不支援的 model，全平台 codex 流程回 400 靜默失敗（見 error_log 當日 entry + experiments.md 診斷 SOP）。
-  - **Antigravity CLI** `agy 1.0.0` ✅ — Google OAuth，預設 `gemini-3.5-flash`（`ANTIGRAVITY_MODEL` env 換模型）；headless 入口 `agy -p "<prompt>"`（真 stdout pipe，2026-05-20 實測單行/多行中文 prompt 皆通過）；agentic 工作加 `--dangerously-skip-permissions`。**第三個 agentic CLI，與 Codex 並列分擔審查 / 第二意見 / 針對性修正**。`-p` 吃參數不吃 stdin — 中文多行 prompt 用 heredoc 存變數再 `agy -p "$VAR"`。
+  - **Antigravity CLI** `agy` ✅（版本以 `agy --version` 當次輸出為準，不在治理文件硬編）— Google OAuth，預設 `gemini-3.5-flash`（`ANTIGRAVITY_MODEL` env 換模型）；headless 入口 `agy -p "<prompt>"`（真 stdout pipe，2026-05-20 實測單行/多行中文 prompt 皆通過）；agentic 工作加 `--dangerously-skip-permissions`。**第三個 agentic CLI，與 Codex 並列分擔審查 / 第二意見 / 針對性修正**。`-p` 吃參數不吃 stdin — 中文多行 prompt 用 heredoc 存變數再 `agy -p "$VAR"`。
   - **Gemini 輕量 Q&A（fallback）** → `scripts/gemini_ask.py` ✅ — 直打 Gemini API（`GOOGLE_CLOUD_API_KEY`），預設 `gemini-3.1-pro-preview`，真 stdout pipe；獨立於 gemini-cli（6/18 停服不影響）。**定位是 `agy` 的 fallback**：只在 agy 不可用、或需純 pipe 一次性呼叫時用。⚠️ **每次成功呼叫會打 PAID API → 自動 email 通知 admin + 記 `storage/logs/gemini_ask_usage.jsonl`**（用戶 2026-05-20 硬性要求）。用法 `uv run python scripts/gemini_ask.py "prompt"` / stdin `... | gemini_ask.py -` / `--model` override。
   - **分工**：agentic 多步工作（code review、針對性修正、獨立子任務）→ Codex CLI 或 `agy`；一次性問答 / fact-check → 優先 `agy -p`，`gemini_ask.py` 僅 fallback。
   - **已放棄**：`gemini-cli`（2026-06-18 Google 停服，由 `agy` 繼承）。
@@ -158,7 +153,7 @@ Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup sel
 - Frontend target / Zeabur service / paper public dir / Mirror 預設 URL → `config/project_targets.json`；排程 → `config/runtime_schedules.json`（不反推 cron）
 - v12 task/schedule sources（雙軌實際分工，2026-05-04 audit 後明確）：
   - **`storage/next_tasks.json`** = de-facto **pending queue**（priority sorted；37+ pending P1-P4），dispatcher 從這挑下個任務派工 — 由 `scripts/continue_task_dispatch.py` 讀
-  - **`storage/ops/`**（TaskRecord / AgentSession / ExecutionReceipt）= **execution receipts / audit trail**（已 claim/run/finish 的歷史，56 succeeded + 7 failed + 1 awaiting_approval），dispatch 完成後寫入
+  - **`storage/ops/`**（TaskRecord / AgentSession / ExecutionReceipt）= **execution receipts / audit trail**；即時數量由該目錄 / ops CLI 查詢，不在 bootstrap 硬編，dispatch 完成後寫入
   - 完成的 task 同步：`scripts/sync_next_tasks_status.py` 反查 experiments/<id>/results.json + knowledge.json，把 next_tasks 已實際完成的 K 標 succeeded（避免 stale pending 被 dispatcher 誤再派）
   - `config/runtime_schedules.json` + `event_jobs` + `storage/ops/event_ledger/` = canonical schedule spec
   - **歷史背景**：原 v12 設計把 `next_tasks.json` 標 legacy，但 `storage/ops/tasks/` 從未被任何 caller 用作 pending queue（全是 receipts），導致 next_tasks 是唯一有 pending 的池。2026-05-04 audit 確認此實際分工 + `continue_task_dispatch.py` 落地 + 規則改成符合現實。原 「不可覆蓋 storage/ops/」改為「dispatch 完成後寫入 storage/ops/ 作 receipt」
@@ -273,6 +268,7 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 
 文章細節與檢查清單：
 
+- `.claude/rules/publishing.md`（選題 / 派工前顯式讀；Bash `rg`/`jq` 不會觸發 path rule）
 - `.claude/skills/feed-publisher/SKILL.md`
 - `docs/architecture.md`
 - `research_program.md` 的發佈規範段
@@ -311,13 +307,13 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 
 ## 系統任務類型與派工
 
-11 類任務（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance / **trending_repost**）× 對應 skill 映射 + 主 agent 依 `storage/work_log.json` 做多樣化決策的完整表格、schema、decision tree，全在 `.claude/rules/agent-delegation.md`（Claude 碰 `.claude/skills/**` 或 `scripts/agent_prompts/**` 時自動載入）。
+任務 capability / concurrency / workflow 例外見 `.claude/rules/task-routing.md`；model / effort / topology 由 `scripts/model_router.py` 機械決定。本 bootstrap 不複製會隨新增 task type 漂移的固定數量或清單。
 
-**`trending_repost` 是 11 類中唯一帶 daily cap**（≤2/day）— 熱門主題改寫文章，VolPred 角度 + 無 source citation + 無抄襲；雙發佈（VolPred feed + Ivan Lai FB）；完整 SOP 在 `.claude/skills/trending-repost/SKILL.md`。
+**`trending_repost` 帶 daily cap**（≤2/day）— 熱門主題改寫文章，VolPred 角度 + 無 source citation + 無抄襲；雙發佈（VolPred feed + Ivan Lai FB）；完整 SOP 在 `.claude/skills/trending-repost/SKILL.md`。
 
 **跨類型歧義澄清**：
-- **交易策略研究**：設計階段（backtest/檢定）= 類型 1 experiment；上架階段（registry/metrics）= 類型 8 strategy_lifecycle
-- **一般文章**（類型 6 daily_article）：**所有非事件驅動**文章都算，包含 research/general/methodology/market-analysis/回顧，不只「補池」
+- **交易策略研究**：設計階段（backtest/檢定）=`experiment`；上架階段（registry/metrics）=`strategy_lifecycle`
+- **一般文章**（`daily_article`）：**所有非事件驅動**文章都算，包含 research/general/methodology/market-analysis/回顧，不只「補池」
 
 ### Subagent vs Agent Team
 

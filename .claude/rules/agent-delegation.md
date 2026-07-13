@@ -2,6 +2,12 @@
 paths:
   - ".claude/skills/**"
   - "scripts/agent_prompts/**"
+  - "config/agent_prompts/**"
+  - "config/brief_templates/**"
+  - "config/models.json"
+  - "scripts/model_router.py"
+  - "docs/workflow-index.md"
+  - "storage/next_tasks.json"
   - "AGENTS.md"
   - "CLAUDE.md"
 ---
@@ -10,7 +16,7 @@ paths:
 
 **核心原則**：主線程 context 有限且昂貴；能在主線程完成的小事就別派，會污染主線但可 self-contained 的 side task 才 fork subagent。`agent team` 只留給真的需要多 session 協作、互相討論或交叉挑戰假說的任務，不作日常預設。
 
-**詳細 playbook**（10 類任務 × skill 對照表、6 要素 brief 範本、task decomposition 範例、work_log schema、decision tree、場景例子）：`.claude/skills/autonomous-research/references/delegation-playbook.md`（skill 觸發時才載）。
+**詳細 playbook**（workflow × skill 對照、6 要素 brief 範本、task decomposition 範例、work_log schema、decision tree、場景例子）：`.claude/skills/autonomous-research/references/delegation-playbook.md`（skill 觸發時才載）。task type 的即時 capability / topology 仍以 `.claude/rules/task-routing.md` + `scripts/model_router.py` 為準。
 
 **快速路由入口**：先看 `docs/workflow-index.md` 決定 workflow / 執行模式 / 預設 model，再按需讀對應 skill。
 
