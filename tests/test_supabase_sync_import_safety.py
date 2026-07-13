@@ -49,6 +49,67 @@ def test_imports_without_credentials(tmp_path, monkeypatch):
     assert ns["SUPABASE_KEY"] is None
 
 
+def test_import_does_not_load_env_when_all_remote_access_is_blocked(
+    tmp_path, monkeypatch
+):
+    """A guarded test process must not depend on the developer's credentials."""
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_WRITE", "1")
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_READ", "1")
+    monkeypatch.syspath_prepend(str(REPO))
+
+    fake_dir = tmp_path / "scripts"
+    fake_dir.mkdir()
+    fake_file = fake_dir / "supabase_sync.py"
+    (tmp_path / ".env.local").write_text(
+        "SUPABASE_URL=https://production.example\n"
+        "SUPABASE_SERVICE_ROLE_KEY=production-secret\n",
+        encoding="utf-8",
+    )
+
+    namespace: dict = {"__name__": "supabase_sync_guarded", "__file__": str(fake_file)}
+    code = compile(SOURCE.read_text(encoding="utf-8"), str(fake_file), "exec")
+    exec(code, namespace)  # noqa: S102 — executing our own source under test
+
+    assert namespace["SUPABASE_URL"] is None
+    assert namespace["SUPABASE_KEY"] is None
+
+
+@pytest.mark.parametrize(
+    ("read_guard", "write_guard"),
+    [("1", "0"), ("0", "1")],
+)
+def test_import_still_loads_env_when_one_remote_direction_is_allowed(
+    tmp_path, monkeypatch, read_guard, write_guard
+):
+    """The skip is an AND gate; an allowed read or write still needs credentials."""
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_READ", read_guard)
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_WRITE", write_guard)
+    monkeypatch.syspath_prepend(str(REPO))
+
+    fake_dir = tmp_path / "scripts"
+    fake_dir.mkdir()
+    fake_file = fake_dir / "supabase_sync.py"
+    (tmp_path / ".env.local").write_text(
+        "SUPABASE_URL=https://allowed.example\n"
+        "SUPABASE_SERVICE_ROLE_KEY=allowed-secret\n",
+        encoding="utf-8",
+    )
+
+    namespace: dict = {
+        "__name__": "supabase_sync_one_way",
+        "__file__": str(fake_file),
+    }
+    code = compile(SOURCE.read_text(encoding="utf-8"), str(fake_file), "exec")
+    exec(code, namespace)  # noqa: S102 — executing our own source under test
+
+    assert namespace["SUPABASE_URL"] == "https://allowed.example"
+    assert namespace["SUPABASE_KEY"] == "allowed-secret"
+
+
 def test_isolation_actually_hides_the_repo_env_file(tmp_path, monkeypatch):
     """Self-check: if `.env.local` leaked in, every test here would pass vacuously
     (creds present → no raise → looks import-safe even if the raise came back).

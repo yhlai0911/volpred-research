@@ -2,6 +2,30 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 02:48 — pytest remote guards 已全開，collection 仍讀 production `.env.local` — **FIXED**
+
+**現象**：上一輪新增的 CI-parity gate 讓 `pytest tests/test_dreaming_review.py` 在 43 個 assertions
+全數通過後仍 exit 1；證據是 collection 讀取 gitignored `.env.local`。乾淨 CI checkout 沒有該檔，
+因此本機與 CI 載入的是不同環境。
+
+**根因**：root `conftest.py` 已在 collection 前設好 `VOLPRED_NO_REMOTE_WRITE=1` 與
+`VOLPRED_NO_REMOTE_READ=1`，但 `dreaming_review -> volpred.ops.__init__ -> content ->
+scripts.supabase_sync` 的 eager import 鏈仍在 module import 時讀 `.env.local`。遠端讀寫都被禁止時，
+載入 production credentials 沒有用途，只會讓測試結果依賴開發機秘密檔。
+
+**修正**：`supabase_sync.py` 新增 `_all_remote_access_blocked()`；只有讀或寫至少一側仍允許時，
+缺少環境變數才 fallback 讀 `.env.local`。正式 runtime 未設兩個 test guards，credential 載入行為不變；
+pytest 則在最上游不再碰秘密檔，不用把 `.env.local` 加入 CI-parity baseline。
+
+**驗證**：新增含真實形狀 fake `.env.local` 的 isolated-import regression，確認兩個 remote guards 全開時
+`SUPABASE_URL/KEY` 保持 `None`；並重跑原本紅燈的 dreaming suite，default local CI-parity gate 必須
+exit 0。
+
+**教訓**：安全 guard 不只要阻止 request；測試若已宣告「完全禁止 remote access」，credential discovery
+本身也應停止。否則 production secret 仍會在 collection 階段滲入，讓 clean-checkout parity 永遠不成立。
+
+---
+
 ## 2026-07-14 01:40 — dreaming 把 umbrella alert dedup key 當成 root-cause identity — **FIXED**
 
 **現象**：`persistent_alert:a4a7ca551f8626b2` 把 `Host cron failure detected` 33 次發送、

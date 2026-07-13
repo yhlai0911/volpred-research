@@ -24,7 +24,21 @@ except ImportError:
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
-if not SUPABASE_URL or not SUPABASE_KEY:
+
+def _all_remote_access_blocked() -> bool:
+    """True when the process is forbidden from both reading and writing Supabase.
+
+    Pytest sets both guards before collection. Loading production credentials in
+    that state is unnecessary and makes collection depend on the gitignored
+    `.env.local` that a clean CI checkout cannot have.
+    """
+    return (
+        os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1"
+        and os.environ.get("VOLPRED_NO_REMOTE_READ") == "1"
+    )
+
+
+if (not SUPABASE_URL or not SUPABASE_KEY) and not _all_remote_access_blocked():
     # Try loading from .env.local
     _env_file = Path(__file__).resolve().parent.parent / ".env.local"
     if _env_file.exists():
