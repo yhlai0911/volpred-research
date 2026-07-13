@@ -38830,5 +38830,25 @@
     ],
     "created_at": "2026-07-13T16:20:00+08:00",
     "updated_at": "2026-07-13T16:20:00+08:00"
+  },
+  {
+    "id": "K1679-rev2",
+    "k_id": "K1679-rev2",
+    "title": "K1679: 銀行存款流失對 regional-bank (KRE) 波動無穩健增量預測力 — genuine ALFRED PIT 下 safe_null；first-release 口徑下訊號反而顯著變差",
+    "category": "empirical",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex (codex-cli / gpt-5.6-sol) — CONDITIONAL_PASS（v3；v1/v2 皆 FAIL）",
+    "reviewer_source": "codex_primary_path",
+    "experiment_id": "K1679-rev2",
+    "experiment_path": "experiments/K1679-rev2/",
+    "content": "[提出: Claude, 執行: Claude, 審查: Codex primary-path CONDITIONAL_PASS] K1679 三輪（K1679 → K1679-rev → K1679-rev2）檢驗「銀行存款流失是否領先 regional-bank 波動」。資料：FRED/ALFRED 商業銀行存款週報（DPSSCBW027SBOG 小型行 / DPSLCBW027SBOG 大型行）+ yfinance KRE/XLF/SPY/^VIX。設計：baseline = OLS 1 + HAR(d,w,m) + SPY 21d RV + VIX level；augmented = baseline + deposit-flight 訊號（唯一差異）。OOS = expanding refit、embargo j+H<i；DM 用 NW HAC lag=H + HLN；巢狀比較另跑 Clark-West(2007) 全 8 個 primary cell；Bonferroni + BH over m=8；moving-block bootstrap 2000 reps；seed=42。\n\n結論（以 genuine ALFRED point-in-time vintage 為判準訊號）：**safe_null**。8 個 primary cell（KRE × {dep_flight_4w, dep_flight_13w} × {RV, downside semivariance} × H∈{5,21}）無一 raw p<0.05；最強格 dep_flight_13w·DSV·H=5 的 DM t_hln=1.946 (p=0.052)，但**方向是 'hurts'（加入訊號讓預測變差）**，Bonferroni=0.414、BH q=0.319；Clark-West t_hln=-2.019（單尾 p=0.978）完全不拒絕。存款流失對 KRE forward RV/DSV 沒有穩健增量預測力。\n\n三個 vintage 口徑的對照本身是這個 K 的方法論價值：(a) genuine PIT → safe_null；(b) current-vintage（今日下載的修訂後歷史）→ 亦 safe_null，但有 1 格 Clark-West raw reject（dep_flight_4w·RV·H=5, CW t=2.259, p=0.012），Bonferroni 後即消失；(c) first-release-only → **documented_negative**：dep_flight_13w·RV·H=5 的 DM t_hln=2.772 (p=0.0057) 且 Bonferroni=0.045 存活 —— 方向仍是 'hurts'。即「加入訊號顯著變差」是有紀錄的負面結果，不是 FDR artifact。\n\nNULL 的範圍限定：只證明「沒有穩健的預測改善」，不等同證明兩模型完全相等。\n\n審查史（過程本身是教訓）：v1 Codex FAIL（用 current vintage 冒充 PIT、巢狀模型卻用標準 DM、floor 裁切零值 cell）；v2 Codex FAIL（PIT 有顯著格但仍有殘留問題）；v3 起初應判 FAIL —— ALFRED wide query 的 API count 為 281,186 / 274,847 但程式各只讀 100,000 列，兩序列因此只到 2009-07-08，223 個假 signal row 共用同一 available date 被 merge_asof 變成 std=0 常數，舊的 safe_null 其實是浮點噪音。修正 pagination（依 API count 完整取回、少頁或 row-count mismatch 即 fail closed）後才是可信的 safe_null。",
+    "evidence": [
+      "experiments/K1679-rev2/K1679-rev2_results.json",
+      "experiments/K1679-rev2/CODEX_REVIEW.md",
+      "experiments/K1679-rev2/README.md",
+      "experiments/K1679-rev/K1679-rev_results.json",
+      "experiments/K1679/K1679_results.json"
+    ],
+    "confidence": 0.75
   }
 ]

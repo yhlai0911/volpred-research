@@ -16879,5 +16879,21 @@
     "owner": "codex",
     "backfilled_at": "2026-07-13T08:21:07.197868+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T17:16:57+08:00",
+    "task_type": "platform_ops",
+    "actor": "hourly-17",
+    "task_id": "dreaming_missing_retry_strategy_k1679",
+    "summary": "dreaming missing_retry_strategy 誤報根治：偵測器補 id 血緣判定（-rev/_v2/b 後綴）+ regression test，commit c488b4c9b；順補 K1679-rev2 knowledge entry（safe_null, CONDITIONAL_PASS）",
+    "topology": "inline"
+  },
+  {
+    "timestamp": "2026-07-13T17:16:57+08:00",
+    "task_type": "platform_ops",
+    "actor": "hourly-17",
+    "task_id": "nested_dm_fp_narrowing_baseline_audit",
+    "summary": "145 站點 nested-DM false-positive 全量稽核 → compute queue（agent-brief_nested_dm_fp_audit-2659b9, opus/high）；超過 fire 50min cap 故 enqueue，留 in_progress 等 followup",
+    "topology": "compute_queue"
   }
 ]

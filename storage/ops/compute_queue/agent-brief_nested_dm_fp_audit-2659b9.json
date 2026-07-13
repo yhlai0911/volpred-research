@@ -1,0 +1,43 @@
+{
+  "id": "agent-brief_nested_dm_fp_audit-2659b9",
+  "title": "nested-DM 偵測器收窄：145 站點 false-positive 全量稽核",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_nested_dm_fp_audit.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "high",
+    "--cwd",
+    ".claude/worktrees/dispatch-slot-1-068134b1-nested-dm",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-068134b1-nested-dm/docs/governance/2026-07/nested_dm_fp_narrowing_audit.md",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_nested_dm_fp_audit-2659b9.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-13T09:11:41Z",
+  "started_at": "2026-07-13T09:15:00Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_nested_dm_fp_audit-2659b9.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_nested_dm_fp_audit-2659b9.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-068134b1-nested-dm/docs/governance/2026-07/nested_dm_fp_narrowing_audit.md",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_nested_dm_fp_audit-2659b9.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-068134b1-nested-dm",
+  "claude_followup": {
+    "brief": "收件：驗證 (1) 報告含掃描範圍/盲區分析/可驗證證據三段 (2) baseline 只縮掉裁決為 (a) 的站點、(b) 類仍在 (3) ratchet 測試綠 (4) path-scoped 抽取沒把 stash 的 496 檔雜訊帶進來。通過後 merge_worktree.sh 合併，並在 next_tasks 標 nested_dm_fp_narrowing_baseline_audit succeeded。",
+    "task_type": "platform_ops",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}

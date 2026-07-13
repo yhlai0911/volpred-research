@@ -1,14 +1,60 @@
 {
-  "generated_at": "2026-07-13T08:00:33.062411+00:00",
+  "generated_at": "2026-07-13T09:00:39.973594+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 0,
-    "grace": 1,
+    "registered": 1,
+    "grace": 0,
     "inflight": 0
   },
   "orphan_count": 0,
   "adopted": [],
-  "applied": true
+  "applied": true,
+  "job_deliverable_candidates": [
+    {
+      "job_id": "lazypack-mile_a8d79d6a-r2",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_a8d79d6a-r2.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/1_framework.png",
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/2_method.png",
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/3_results.png",
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/render_lazypack.py"
+      ],
+      "existing_paths": [
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/1_framework.png",
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/2_method.png",
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/3_results.png",
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/render_lazypack.py"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": [
+        {
+          "path": "storage/lazypack_jobs/mile_a8d79d6a/panels/__pycache__/render_lazypack.cpython-312.pyc",
+          "reason": "git_ignored"
+        },
+        {
+          "path": "storage/lazypack_jobs/mile_a8d79d6a/panels/mile_a8d79d6a_article.md",
+          "reason": "git_ignored"
+        }
+      ]
+    }
+  ],
+  "job_deliverable_held": [],
+  "job_deliveries": [
+    {
+      "job_id": "lazypack-mile_a8d79d6a-r2",
+      "paths": [
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/1_framework.png",
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/2_method.png",
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/3_results.png",
+        "storage/lazypack_jobs/mile_a8d79d6a/panels/render_lazypack.py"
+      ],
+      "delivered": true,
+      "delivery_status": "partial_delivered",
+      "delivery_commit": "5532365c07b3020010bf6558410a0c360cf23250",
+      "reason": "already_committed"
+    }
+  ]
 }
