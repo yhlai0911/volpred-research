@@ -118,3 +118,7 @@ canonical tex = `main_v3.tex`（`\input{body_v3}`）→ `main_v3.pdf`（49pp，2
 > 2. sign-off 後：全文替換 0.272 → canonical（intro L10/L14、Table 1 L51、Table 2 L150、§3.2 footnote、conclusion L539）+ 跨國比較句重寫 + 修 conclusion spec 標籤錯置。
 > 3. 接著平行推進 P0-3（comment-swallow，不需 owner）、P0-4（§7 窗口）、P0-5（措辭降級），P0-2（rolling block）走 follow-up agent 任務 `fable0711_taiwanvt_rolling_gamma`（calendar-aligned 重跑）。
 > 4. P0 六項清完 → xelatex → `reproduce.py` 0 MISMATCH → `paper-update --paper-id taiwan-vt` → 更新本檔 BADGE / DoD 勾選 + 進度日誌加一行。
+
+### 進度更新 2026-07-13
+- 2026-07-13 | **P0-1 TWII γ 全文替換（owner sign-off 2026-07-12 已取得）**：0.272/3.18 全數退役 → canonical 全樣本 0.105/5.31（provenance 實驗，K892 0.109/5.62 佐證）；tab:summary_stats 與 tab:gamma 兩表列 + intro/results/conclusion 三處 prose；跨國敘事誠實反轉（TAIEX 顯著但點估計低於 SPY；賣點改 amplification）；rolling 平均 0.054→0.032、0.060→0.051（K1697）；main_v3.pdf 49pp 0 undefined
+- P0-2 rolling block 已由 K1697 aligned 重估支撐（前段 c567e7889 已載入 0056 反轉；本次補平均列與表注 canonical 語句）
