@@ -66,7 +66,55 @@ DEFAULT_MAX_SLOTS = 2
 # observes the result. Keys are immutable state job_ids, never reusable slots.
 _ACTIVE_FIRE_TASKS: dict[str, asyncio.Task] = {}
 _PHASE_Z_LOCK: asyncio.Lock | None = None
-_PHASE_Z_TERMINAL_REASONS = {"committed", "clean", "nothing_owned", "nothing_to_commit"}
+_PHASE_Z_TERMINAL_REASONS = {"committed", "clean", "nothing_owned", "nothing_to_commit",
+                             # ownership_unknown = no fire-start baseline. The baseline is
+                             # written ONLY by the pre-fire guard at fire time, so no amount
+                             # of retrying can produce one — retrying is a livelock, and the
+                             # alert inside run_phase_z re-fires every tick (2026-07-13:
+                             # 12+ identical warns to the boss in 14 min). One alert, done.
+                             "ownership_unknown"}
+# Retrying a non-terminal drain only helps transient git hiccups (index.lock,
+# probe timeout). Deterministic failures (a pre-commit gate block) would retry
+# every ~64s tick forever. Three attempts ≈ 3 min of transient tolerance, then
+# one give-up alert and the token is released.
+_PHASE_Z_MAX_DRAIN_ATTEMPTS = 3
+
+
+def _phase_z_drain_exhausted(*, cohort_id: str, outcome: dict[str, Any] | None,
+                             state_path: Path) -> bool:
+    """Bump the cohort's drain-attempt counter; True → retries exhausted.
+
+    The counter lives on the pending token itself so it survives daemon
+    restarts — a restart must not grant a stuck cohort three fresh retries
+    per boot, which is just the livelock with extra steps.
+    """
+    attempts = 0
+    with state._locked_state(state_path) as (_fh, data):
+        for item in data.get("phase_z_pending") or []:
+            if str(item.get("cohort_id")) == str(cohort_id):
+                attempts = int(item.get("drain_attempts") or 0) + 1
+                item["drain_attempts"] = attempts
+                break
+    if attempts < _PHASE_Z_MAX_DRAIN_ATTEMPTS:
+        return False
+    reason = (outcome or {}).get("reason", "crashed")
+    detail = str((outcome or {}).get("commit_tail") or "").strip()
+    phase_z._default_alert(
+        level="warn",
+        title=f"PHASE-Z 重試 {attempts} 次仍無法收班（{reason}）— 停止重試，不再連發此警報",
+        body="\n".join([
+            "## 發生什麼",
+            f"PHASE-Z 連續 {attempts} 次無法完成這班的自動 commit（原因：{reason}）。"
+            "已停止重試 —— 這是最後一封，不會再為同一班連發。",
+            "檔案仍在工作區、沒有遺失。",
+            "",
+            "## 現在該做什麼",
+            "確認未提交檔案的作者後由該作者 commit。"
+            "若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。",
+            *(["", "## git commit 輸出（尾段）", detail] if detail else []),
+        ]),
+    )
+    return True
 
 
 def load_cron_expr(*, schedules_path: Path = SCHEDULES_PATH, schedule_id: str = SCHEDULE_ID) -> str:
@@ -275,6 +323,11 @@ async def _run_reserved_fire(
                 if _phase_z_terminal(phase_z_outcome):
                     cleared = state.finish_phase_z(cohort_id=cohort_id, path=state_path)
                     LOG.info("phase_z cohort released cohort=%s pending=%d", cohort_id, cleared)
+                elif _phase_z_drain_exhausted(cohort_id=cohort_id, outcome=phase_z_outcome,
+                                              state_path=state_path):
+                    cleared = state.finish_phase_z(cohort_id=cohort_id, path=state_path)
+                    LOG.error("phase_z gave up after retries; token released cohort=%s "
+                              "outcome=%s pending=%d", cohort_id, phase_z_outcome, cleared)
                 else:
                     LOG.error(
                         "phase_z non-terminal; retaining drain token cohort=%s outcome=%s",
@@ -509,6 +562,22 @@ async def _tick_once(
                 for cohort in {str(item.get("cohort_id")) for item in pending_phase_z}:
                     state.finish_phase_z(cohort_id=cohort, path=state_path)
             else:
+                # Same bounded retry as the fire-time drain: one run_phase_z per
+                # tick serves the whole backlog, so every pending cohort's counter
+                # moves together and exhausted ones die instead of spinning.
+                released = 0
+                for cohort in {str(item.get("cohort_id")) for item in pending_phase_z}:
+                    if _phase_z_drain_exhausted(cohort_id=cohort, outcome=outcome,
+                                                state_path=state_path):
+                        state.finish_phase_z(cohort_id=cohort, path=state_path)
+                        released += 1
+                if released:
+                    LOG.error("phase_z gave up after retries; released %d token(s) outcome=%s",
+                              released, outcome)
+                    return {
+                        "action": "phase_z_gave_up", "phase_z": outcome,
+                        "released": released,
+                    }
                 return {
                     "action": "phase_z_recovery_pending", "phase_z": outcome,
                     "pending_jobs": len(pending_phase_z),

@@ -901,8 +901,10 @@ def run_phase_z(
     dirty_now = _dirty_paths(repo_root, runner)
     if dirty_now is None:
         # e.g. not a git repository / index lock. Do NOT misreport as "clean" —
-        # that would silently skip a real safety-net on a dirty tree.
-        _consume_pre_fire_snapshot(repo_root, runner)
+        # that would silently skip a real safety-net on a dirty tree. The snapshot
+        # is NOT consumed here: a transient probe failure retries next tick, and
+        # destroying the baseline turns that retry into ownership_unknown forever
+        # (2026-07-13: 12+ identical 「沒有基線」 warns in 14 minutes).
         return {"committed": False, "reason": "status_error"}
 
     if not dirty_now:
@@ -941,7 +943,12 @@ def run_phase_z(
 
     owned = sorted(dirty_now - baseline)
     dirty_before = sorted(dirty_now & baseline)
-    _consume_pre_fire_snapshot(repo_root, runner)
+    # The snapshot is consumed only on a SETTLED outcome (committed / clean /
+    # nothing_owned / nothing_to_commit — the scheduler's terminal set). A failed
+    # commit attempt (pre-commit gate block, add/reset error) keeps the baseline,
+    # so the scheduler's bounded retry still knows what this fire owns instead of
+    # degrading to ownership_unknown. "One snapshot, one fire" still holds: the
+    # next fire's pre-fire guard overwrites it unconditionally.
 
     # Dirty-at-fire-start splits two ways, not one. A daemon-written churn path has
     # an owner (this module); only the rest is "another session is still typing it".
@@ -1009,6 +1016,7 @@ def run_phase_z(
                  len(churn_deferred), churn_deferred)
 
     if not owned and not churn:
+        _consume_pre_fire_snapshot(repo_root, runner)  # settled: nothing of ours to commit
         LOG.info("phase_z: nothing this fire produced — %d foreign path(s) left alone", len(foreign))
         if not foreign:
             return {"committed": False, "reason": "nothing_owned", "foreign": []}
@@ -1163,6 +1171,7 @@ def run_phase_z(
 
     out = ((commit.stdout or "") + (commit.stderr or "")).strip()
     if commit.returncode == 0:
+        _consume_pre_fire_snapshot(repo_root, runner)  # settled: the fire's work landed
         LOG.info("phase_z: committed — %s", out.splitlines()[-1] if out else "(no output)")
         tests = _post_commit_test_gate(
             repo_root, hhmm=hhmm, runner=runner,
@@ -1215,7 +1224,13 @@ def run_phase_z(
     # dirty was a leaked-ignored file already rm --cached'd, or a race cleaned
     # it) from a genuine commit failure.
     if "nothing to commit" in out.lower():
+        _consume_pre_fire_snapshot(repo_root, runner)  # settled: benign no-op
         LOG.info("phase_z: nothing to commit after staging (benign)")
         return {"committed": False, "reason": "nothing_to_commit", "untracked": untracked}
+    # Snapshot kept: the scheduler retries with ownership intact, then gives up
+    # loudly. `commit_tail` feeds its give-up alert — a pre-commit gate block is
+    # the one actionable fact (2026-07-13: the boss got 12 "no baseline" warns
+    # and zero mention of the silent-fallback gate that actually blocked it).
     LOG.warning("phase_z: git commit rc=%d: %s", commit.returncode, out[:300])
-    return {"committed": False, "reason": "commit_nonzero", "untracked": untracked}
+    return {"committed": False, "reason": "commit_nonzero", "untracked": untracked,
+            "commit_tail": out[-600:]}

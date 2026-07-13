@@ -2,6 +2,60 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 21:55 — PHASE-Z「沒有 fire 起始基線」warn 每 64 秒連發轟炸老闆：snapshot 消耗時機 + 無界重試雙重設計缺陷（Telegram msg 679-689）
+
+**現象**：21:29 起老闆每分鐘收到一封相同的「PHASE-Z 沒有 fire 起始基線 — 這班不自動 commit」
+WARN（21:31/21:32/21:34/21:35…連發 14+ 封），質問「你不是說修好了嗎、為什麼還一直寄」。
+
+**根因鏈（三層，全在設計不在偶發）**：
+1. **觸發事件**：21:29 PHASE-Z 嘗試 commit 這班 fire 的產出時被 pre-commit silent-fallback gate
+   擋下（agent 產出含新 silent fallback）→ `commit_nonzero`。gate 本身運作正確。
+2. **snapshot 消耗時機錯**：`run_phase_z` 在「嘗試 commit 之前」就 `_consume_pre_fire_snapshot`
+   （one snapshot, one fire）。commit 失敗後基線已毀 → 之後任何重試都退化成 `ownership_unknown`。
+   `status_error`（暫時性 git probe 失敗）路徑同病：consume 後重試必變 ownership_unknown。
+3. **無界重試 livelock**：scheduler 對非 terminal outcome 每 tick（~64s）重跑 `run_phase_z`，
+   而基線只可能在 fire 時由 pre-fire guard 寫入 —— `ownership_unknown` 重試**在數學上不可能自癒**。
+   加上 ownership_unknown 路徑**每次呼叫都發 alert、無 dedup** → 每分鐘一封轟炸。
+   而真正 actionable 的事實（pre-commit gate 擋下、擋的是什麼）**從頭到尾沒進任何 alert**。
+
+**修正**（`scripts/dispatch_supervisor/{phase_z,scheduler}.py`）：
+- snapshot 只在 settled outcome（committed / clean / nothing_owned / nothing_to_commit）消耗；
+  失敗路徑（commit_nonzero / add_error / unstage_error / status_error 等）保留基線供重試。
+- `ownership_unknown` 加入 `_PHASE_Z_TERMINAL_REASONS`：重試不可能生出基線，一封 alert 收班。
+- 非 terminal 重試上限 3 次（`drain_attempts` 記在 pending token 上、跨 daemon restart 存活），
+  用盡發一封 give-up alert（含 `commit_tail` = git commit / pre-commit gate 輸出尾段）後釋放 token。
+- Regression: `scripts/tests/test_phase_z_drain_retry.py`（覆蓋三個觸發條件）。
+
+**教訓**：(a) 「重試直到 terminal」的迴圈，必須先問「這個 reason 重試會不會有新資訊」——
+不可能自癒的 reason 重試就是 livelock；(b) 任何在重試路徑內的 alert 天生就是 spam 放大器，
+alert 要嘛在 terminal 化時發一次、要嘛掛 dedupe；(c) 失敗時 alert 要帶「真正擋住的原因」
+（這次 boss 收了 14 封「沒基線」卻一個字沒提 silent-fallback gate）。
+
+## 2026-07-13 21:45 — 「修好 CI」宣告後老闆連環收 failure 信：修復不完整 + 修復 commit 未 push 雙重根因（Telegram msg 677）
+
+**現象**：deterministic lazypack renderer cutover（d6b8e4247）後 CI 全紅（`test_lazypack_render.py`
+34 個測試 `ValueError: Failed to find font Heiti TC`）。21:06 codex 修復 commit d07508f61 落地後
+CI 仍紅、GitHub failure 通知持續寄給老闆 → 老闆質問「你不是說修好了嗎」。
+
+**根因（兩層）**：
+1. **修復不完整**：d07508f61 只在 workflow 裝 `fonts-noto-cjk` + 改測試，但 renderer 本身
+   `rcParams` 與 `_font_path()` 都寫死 macOS 專有的 `Heiti TC` —— 字型裝了，沒有任何程式去要它。
+   「裝依賴」不等於「使用依賴」；驗證必須在 CI 環境（或等遠端綠燈），本機 macOS 測試天生測不到。
+2. **修復 commit 未 push**：d07508f61 躺在本地 75+ 分鐘，origin/main 停在舊 commit，GitHub CI
+   一直跑舊 code。`push_backlog` alert 閾值 3h、push backup cron 每小時一班 —— CI 紅燈期間這個
+   空窗等於「修了但世界看不見」。附帶發現：本地 git user 被 pre-push 測試殘留污染成
+   `prepush test <test@example.com>`（已 unset local config 回落 global）。
+
+**修正**：
+- 5e67bc69a：renderer 依序找 `Heiti TC / PingFang TC / Noto Sans CJK`，全缺才 fail-loud
+  RuntimeError（禁豆腐字沉默通過）；`except ValueError: continue` 標 `# silent-ok`（walk 合法路徑）。
+  本地 37 passed + push + `gh run watch` 盯遠端綠燈才回報。
+- P1 任務 `ci-red-unpushed-fix-gap-20260713`：ci_watch 在 conclusion=failure 且本地 ahead of
+  origin 時直接觸發既有 push backup（走 pre-push gate，不繞過），收編進 ci_watch owner（anti-stacking）。
+
+**教訓**：「修好」的定義 = 遠端 CI 綠燈，不是本地測試過、也不是 commit 落地。跨平台依賴
+（字型/系統庫）的修復，本機驗證天生不覆蓋 CI 環境，宣告前必須等遠端跑完。
+
 ## 2026-07-13 19:26 — **3-STRIKE TRIGGER**：每篇懶人包都讓 LLM 重寫 renderer，失敗不是偶發而是 domain model 錯誤
 
 **三次以上同類 incident**：(1) 兩個 2026-07-11 compute render 都精準撞上 900 秒上限；
