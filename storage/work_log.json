@@ -16936,5 +16936,16 @@
     "owner": "hourly-19",
     "commit": null,
     "summary": "K628b 假 GFEVD 標籤回溯更正（研究誠實 #6）。收 PHASE A 的 agent job (exit 0, Codex primary-path PASS)：程式註解寫 Pesaran-Shin，實際呼叫 statsmodels Cholesky .fevd()，且把 SPY 排第一。120 種排序全枚舉 → SPY 的 Cholesky NET 值域 -16.1~+43.7pp，原報 +43.68pp 恰為最大值（SPY 僅 33% 排序中為最大傳出者）。改用手刻 KPPS GFEVD（order-invariance 驗證 <1e-6）重估：SPY +14.58pp 仍是最大淨傳出者且與無溢出虛無可區分（empirical p=0.000），方向存活、量級收回 2/3；TLT -24.92→-9.12pp；USO 角色翻盤（淨接收者→平衡 +0.98pp）。Granger / Forbes-Rigobon 不經 FEVD，逐項重現全存活。主線程落地：merge worktree（experiments 完整性驗證通過）→ knowledge.json K628b 就地更正（provenance CI 0 violations、索引 +110）→ 文章層更正 mile_55758994（換整張方向性表 + 撤回「10 倍」「+43.68%」宣稱 + 方法段揭露 Cholesky）與 live 導讀 mile_1597b341（限定「K628b 不受影響」的範圍 + 移除指向 404 archived 文的死連結）→ feed-sync 兩輪（updated 135, failed 0）→ 線上驗證 rendered dead link = 0、更正聲明已上線。FEVD ratchet 綠（baseline sites 4 = 現況 4 VIOLATION，k628b 移入 resolved）。"
+  },
+  {
+    "timestamp": "2026-07-13T19:50:06+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-d6b8e4247",
+    "outcome": "succeeded",
+    "summary": "finish deterministic lazypack renderer cutover",
+    "commit": "d6b8e424735fe5ca8fb68f78c73032c86608bd7c",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T11:50:35.087618+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
