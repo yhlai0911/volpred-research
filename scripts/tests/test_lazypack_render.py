@@ -51,22 +51,43 @@ def cjk_test_font(monkeypatch):
     lr._FONT_CACHE.clear()
 
 
-def test_production_font_resolution_disables_fallback(monkeypatch):
-    observed = {}
+def test_font_resolution_probes_every_approved_family_and_never_falls_back(monkeypatch):
+    """A host with no CJK font must fail loudly, not draw 豆腐字.
+
+    Naming a single macOS-only family here is what kept CI red on 2026-07-13: the
+    Ubuntu runner had Noto CJK installed but the renderer only ever asked for Heiti
+    TC. So the contract is now: probe every approved family, each with fallback
+    disabled, and raise if none resolve.
+    """
+    probed = []
 
     def missing_font(properties, *, fallback_to_default):
-        observed["family"] = properties.get_family()
-        observed["fallback_to_default"] = fallback_to_default
+        probed.append((properties.get_family(), fallback_to_default))
         raise ValueError("font unavailable")
 
     monkeypatch.setattr(lr.font_manager, "findfont", missing_font)
     monkeypatch.setattr(lr, "_FONT_PATH", None)
-    with pytest.raises(ValueError, match="font unavailable"):
+    with pytest.raises(RuntimeError, match="豆腐字"):
         lr._font_path()
-    assert observed == {
-        "family": ["Heiti TC"],
-        "fallback_to_default": False,
-    }
+
+    assert [family for family, _ in probed] == [
+        [family] for family in lr.FONT_FAMILY_CANDIDATES
+    ], "every approved CJK family must be tried"
+    assert all(fallback is False for _, fallback in probed), "fallback must stay disabled"
+
+
+def test_font_resolution_takes_the_first_available_family(monkeypatch):
+    """CI has no Heiti TC but does have Noto — that must resolve, not raise."""
+    monkeypatch.setattr(lr, "_FONT_PATH", None)
+
+    def only_noto(properties, *, fallback_to_default):
+        family = properties.get_family()[0]
+        if family != "Noto Sans CJK TC":
+            raise ValueError("font unavailable")
+        return "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc"
+
+    monkeypatch.setattr(lr.font_manager, "findfont", only_noto)
+    assert lr._font_path().endswith("NotoSansCJK-Regular.ttc")
 
 
 def _write_evidence(tmp_path: Path) -> tuple[Path, str]:

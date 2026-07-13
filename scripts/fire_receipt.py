@@ -40,15 +40,24 @@ def main(argv: list[str] | None = None) -> int:
                     help="一句話 what changed | why（會成為 commit subject）")
     ap.add_argument("--body", default="",
                     help="細節：掃了什麼、改了什麼、驗證方式（成為 commit body）")
+    ap.add_argument("--body-file", default="",
+                    help="從檔案讀 body（UTF-8）。多行 / 中文 body 用這個，"
+                         "不要在 shell 裡 heredoc 出暫存檔再 --body \"$(cat ...)\" —— "
+                         "agent shell 的 heredoc 會寫出壞掉的 CJK 位元組，"
+                         "receipt 端讀到就炸 UnicodeDecodeError（2026-07-13 實際踩到）")
     ap.add_argument("--task-id", default="",
                     help="next_tasks.json 的 task id，用於反查")
     ap.add_argument("--repo-root", default=str(REPO_ROOT))
     args = ap.parse_args(argv)
 
+    body = args.body
+    if args.body_file:
+        body = Path(args.body_file).read_text(encoding="utf-8")
+
     ok = write_fire_receipt(
         Path(args.repo_root),
         subject=args.subject,
-        body=args.body,
+        body=body,
         task_id=args.task_id,
     )
     if not ok:

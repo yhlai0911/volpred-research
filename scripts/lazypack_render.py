@@ -38,7 +38,19 @@ matplotlib.use("Agg")
 from matplotlib import font_manager, rcParams  # noqa: E402
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
-rcParams["font.sans-serif"] = ["Heiti TC"]
+# Ordered CJK families, first available wins. Production (macOS) has Heiti TC;
+# Linux CI has Noto Sans CJK. Naming ONE macOS-only family here was why CI stayed
+# red on 2026-07-13 even after the workflow installed fonts-noto-cjk: the font was
+# present but nothing ever asked for it. Fallback stays disabled below — a host with
+# no CJK font must fail loudly, never quietly render 豆腐字.
+FONT_FAMILY_CANDIDATES = (
+    "Heiti TC",
+    "PingFang TC",
+    "Noto Sans CJK TC",
+    "Noto Sans CJK SC",
+    "Noto Sans CJK JP",
+)
+rcParams["font.sans-serif"] = list(FONT_FAMILY_CANDIDATES)
 rcParams["axes.unicode_minus"] = False
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,7 +58,7 @@ WIDTH = 1600
 HEIGHT = 1000
 DPI = 150
 SCHEMA_VERSION = 1
-FONT_FAMILY = "Heiti TC"
+FONT_FAMILY = FONT_FAMILY_CANDIDATES[0]
 PANEL_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 BINDING_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -146,11 +158,25 @@ _FONT_CACHE: dict[int, ImageFont.FreeTypeFont] = {}
 def _font_path() -> str:
     global _FONT_PATH
     if _FONT_PATH is None:
-        # The project guarantees this exact family on the render host.  Ask the
-        # same Matplotlib font registry used by the house style for its file;
-        # fallback is deliberately disabled so tofu never passes silently.
-        prop = font_manager.FontProperties(family=[FONT_FAMILY])
-        _FONT_PATH = font_manager.findfont(prop, fallback_to_default=False)
+        # Ask the same Matplotlib font registry the house style uses, walking the
+        # approved CJK families in order. Fallback stays disabled per family, so a
+        # host with none of them raises instead of silently drawing tofu boxes.
+        tried: list[str] = []
+        for family in FONT_FAMILY_CANDIDATES:
+            prop = font_manager.FontProperties(family=[family])
+            try:
+                _FONT_PATH = font_manager.findfont(prop, fallback_to_default=False)
+            except ValueError:
+                tried.append(family)
+                continue  # silent-ok: font-candidate walk; all-miss raises RuntimeError below
+            break
+        else:
+            raise RuntimeError(
+                "no CJK font on this host — refusing to render 豆腐字. "
+                f"Tried: {', '.join(tried)}. "
+                "macOS: Heiti TC ships with the OS. "
+                "Debian/Ubuntu: apt-get install fonts-noto-cjk."
+            )
     return _FONT_PATH
 
 

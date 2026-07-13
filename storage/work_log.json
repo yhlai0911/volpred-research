@@ -16972,5 +16972,25 @@
     "owner": "codex",
     "backfilled_at": "2026-07-13T13:07:42.702385+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T21:20:30+08:00",
+    "task_type": "platform_ops",
+    "task_id": "release-starvation-rootfix-20260713",
+    "outcome": "succeeded",
+    "actor": "hourly-21",
+    "owner": "hourly-21",
+    "commit": "e96554041",
+    "summary": "release starvation layer-2 rootfix: refill 現在會看 release 的 narrative-cluster gate。\n新增 content.release_cluster_planner_state / make_narrative_cluster_classifier（gate 狀態的唯一來源），\nrefill_task_pool._ClusterBudget 限制單一 cluster 在管線最多佔 threshold 個名額，\n候選全同 cluster 時誠實少補（cluster_constrained）而非補進發不出去的草稿。\n5 個 regression test；break-then-verify 確認 gate 會咬。\n線上驗證：planner 讀到 production 池 taiwan=4 > cap=2（會擋），release preview eligible=4 無 blocked。"
+  },
+  {
+    "timestamp": "2026-07-13T21:27:11+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29248233696",
+    "outcome": "succeeded",
+    "actor": "hourly-21",
+    "owner": "hourly-21",
+    "commit": null,
+    "summary": "CI 紅燈根治：lazypack renderer 的字型解析改為候選清單（Heiti TC / PingFang TC / Noto Sans CJK TC/SC/JP），\n第一個找得到的勝出，全部找不到就 raise（維持「絕不靜默畫豆腐字」）。\n前一次修復（d07508f61）只在 CI 裝了 fonts-noto-cjk 並改了一個測試的 fixture，\n但程式仍指名要 Heiti TC → Linux 上照樣 ValueError，另外三個測試（pixel hash / rollback / receipt）\n沒套 fixture 所以仍紅。這是半套修復。\n驗證：本機 37 passed；模擬 Linux（第一順位不存在）確認會順到下一個真實字型且繁中字形非豆腐；\n全缺字型時大聲失敗。CI 綠燈需等 push 後的 run；若仍紅，check_alerts._auto_remediate_ci_red 會自動開新任務。"
   }
 ]
