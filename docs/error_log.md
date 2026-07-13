@@ -2,6 +2,28 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 22:10 — PHASE-Z 警報轟炸第二根因：title 帶 {hhmm} 使 24h dedup 永不命中（Telegram msg 697-707）
+
+**現象**：21:55 修完 livelock（65de88c18）後，21:37–21:52 老闆仍每 64 秒收到一封
+「PHASE-Z 沒有 fire 起始基線 21:XX」warn（16 封），怒問「你這些訊息在幹嘛」「你壞掉了？」。
+
+**根因（與 livelock 正交的第二層）**：`volpred.ops.alerts` 的 dedup key =
+`hash(level + title)`（24h window），而 phase_z.py **7 個 alert title 全插了 `{hhmm}`**
+（其一還插每班 +1 的 `{worst_streak}`）→ 每分鐘 title 都不同 → dedup key 永不重複 →
+去重形同虛設。就算 livelock 修好，只要 ownership_unknown 連續發生，每 tick 仍是「新」警報。
+另外昨晚的 regression 測試檔 `test_phase_z_drain_retry.py` 漏 commit 留在工作區 —
+它本身就是讓工作區 dirty、餵養 ownership_unknown 的來源之一。
+
+**修正**（3efaf3dc0）：7 個 title 的時間戳/計數全移入 body，title 固定字串；
+Pin 4 迴歸測試 `test_alert_titles_carry_no_time_varying_tokens`（掃 phase_z.py 原始碼，
+title 不得帶 `{hhmm}`/`{now`/`strftime`/`{worst_streak}`）；漏 commit 的測試檔一併入庫。
+daemon 以 `reload_dispatch_supervisor.sh --defer` 排定重載（當時有 in-flight worker）。
+
+**教訓**：(a) alert title 是 dedup key 的一部分 — **title 帶任何時變 token（時間戳、
+每 tick 遞增的計數）= 繞過去重**，時間與計數一律放 body；(b) 修 spam 事故時要驗證
+dedup 鏈的每一環（發送頻率 × 去重命中率），只修發送端頻率不夠；(c) 修復的 regression
+測試檔沒 commit，自己就變成下一輪警報的 dirty 來源 — push 前 `git status` 看 untracked。
+
 ## 2026-07-13 21:55 — PHASE-Z「沒有 fire 起始基線」warn 每 64 秒連發轟炸老闆：snapshot 消耗時機 + 無界重試雙重設計缺陷（Telegram msg 679-689）
 
 **現象**：21:29 起老闆每分鐘收到一封相同的「PHASE-Z 沒有 fire 起始基線 — 這班不自動 commit」
