@@ -56,6 +56,20 @@ BASE_AUG_PROSE_RE = re.compile(
     re.IGNORECASE,
 )
 
+# A reference-list entry citing Clark--West is bibliography, not a statement
+# that this file compares nested models.  Everything else in the nesting
+# channel stays deliberately broad: the 2026-07-13 audit
+# (docs/governance/2026-07/nested_dm_fp_narrowing_audit.md) established that a
+# lexical narrowing tight enough to drop the false positives also drops 109
+# genuinely nested comparisons.  False positives are retired by recorded
+# adjudication in storage/ops/nested_dm_misuse_baseline.json, not by loosening
+# what counts as evidence here.
+BIBLIOGRAPHIC_NESTED_RE = re.compile(
+    r"[\"']?title[\"']?\s*:|Tests of Equal Forecast Accuracy and "
+    r"Encompassing for Nested Models",
+    re.IGNORECASE,
+)
+
 RAW_DM_CALL_RE = re.compile(
     r"(?:^|_)(?:dm(?:_test(?:_func|_hac)?|_hln|_stat)?|hln_dm|"
     r"diebold_mariano(?:_test)?|mariano_test)(?:_|$)",
@@ -292,7 +306,11 @@ def scan_file(path: Path, root: Path = REPO_ROOT) -> Finding | None:
     lines = source.splitlines()
     tree = ast.parse(source, filename=str(path))
 
-    nested = _regex_evidence(EXPLICIT_NESTED_RE, lines)
+    nested = [
+        evidence
+        for evidence in _regex_evidence(EXPLICIT_NESTED_RE, lines)
+        if not BIBLIOGRAPHIC_NESTED_RE.search(evidence.text)
+    ]
     if not nested:
         prose = _regex_evidence(BASE_AUG_PROSE_RE, lines)
         nested.extend(prose[:3])

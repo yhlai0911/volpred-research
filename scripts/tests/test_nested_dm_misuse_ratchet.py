@@ -35,8 +35,23 @@ def audit():
 
 
 @pytest.fixture(scope="module")
-def affected(audit) -> set[str]:
+def flagged(audit) -> set[str]:
     return {finding.file for finding in audit.findings}
+
+
+@pytest.fixture(scope="module")
+def reviewed_nonnested(baseline_payload: dict) -> set[str]:
+    return {entry["site"] for entry in baseline_payload["reviewed_nonnested"]}
+
+
+@pytest.fixture(scope="module")
+def affected(flagged: set[str], reviewed_nonnested: set[str]) -> set[str]:
+    # The auditor stays lexically broad on purpose: the 2026-07-13 audit showed
+    # that narrowing the prose channel enough to silence the false positives
+    # also silences 109 genuinely nested comparisons.  False positives are
+    # instead retired one at a time, by a recorded adjudication with a reason,
+    # never by a marker an author can apply to their own file.
+    return flagged - reviewed_nonnested
 
 
 @pytest.fixture(scope="module")
@@ -82,8 +97,43 @@ def test_baseline_only_contains_active_sites(
     stale = baseline - affected
     assert not stale, (
         "Repaired/stale nested-DM sites must be pruned from the baseline: "
-        f"{sorted(stale)}"
+        f"{sorted(stale)}\n\n"
+        "If a detector change made these go quiet, that is not a repair. The "
+        "2026-07-13 audit adjudicated every baseline site: a narrowing that "
+        "silences them is dropping real nested-DM debt on the floor. See "
+        "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md before "
+        "pruning anything here."
     )
+
+
+def test_reviewed_nonnested_entries_carry_an_adjudication(
+    baseline_payload: dict,
+) -> None:
+    entries = baseline_payload["reviewed_nonnested"]
+    sites = [entry["site"] for entry in entries]
+    assert sites == sorted(set(sites))
+    assert baseline_payload["reviewed_nonnested_count"] == len(entries)
+    for entry in entries:
+        assert entry["reason"].strip(), entry["site"]
+        assert entry["adjudicated_at"], entry["site"]
+        assert entry["audit"], entry["site"]
+
+
+def test_reviewed_nonnested_cannot_silence_a_baseline_site(
+    baseline: set[str], reviewed_nonnested: set[str]
+) -> None:
+    # The allowlist retires false positives.  It must never be used to make a
+    # site that is already frozen as nested debt disappear.
+    assert baseline.isdisjoint(reviewed_nonnested)
+
+
+def test_reviewed_nonnested_sites_are_still_flagged(
+    flagged: set[str], reviewed_nonnested: set[str]
+) -> None:
+    # An allowlisted site that the auditor no longer flags is dead weight: the
+    # entry must be deleted rather than left to mask a future regression.
+    dead = reviewed_nonnested - flagged
+    assert not dead, f"Allowlist entries no longer flagged, delete them: {sorted(dead)}"
 
 
 def test_retired_sites_cannot_resurrect(
@@ -298,6 +348,19 @@ def test_nonnested_markers_cannot_impersonate_nested_safe_markers(tmp_path: Path
     finding = scan_file(path, tmp_path)
     assert finding is not None
     assert finding.test_role == "primary_raw_dm"
+
+
+def test_bibliographic_nested_title_is_not_local_nesting(tmp_path: Path) -> None:
+    path = _write_fixture(
+        tmp_path,
+        "reference = {'title': 'Tests of Equal Forecast Accuracy and "
+        "Encompassing for Nested Models'}\n"
+        "def evaluate(loss_a, loss_b):\n"
+        "    dm_t, dm_p = dm_test(loss_a, loss_b, h=1)\n"
+        "    verdict = 'PASS' if dm_t < -3 else 'NULL'\n"
+        "    return verdict\n",
+    )
+    assert scan_file(path, tmp_path) is None
 
 
 def test_parse_failure_is_reported_not_silently_dropped(tmp_path: Path) -> None:
