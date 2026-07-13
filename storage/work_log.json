@@ -16992,5 +16992,15 @@
     "owner": "hourly-21",
     "commit": null,
     "summary": "CI 紅燈根治：lazypack renderer 的字型解析改為候選清單（Heiti TC / PingFang TC / Noto Sans CJK TC/SC/JP），\n第一個找得到的勝出，全部找不到就 raise（維持「絕不靜默畫豆腐字」）。\n前一次修復（d07508f61）只在 CI 裝了 fonts-noto-cjk 並改了一個測試的 fixture，\n但程式仍指名要 Heiti TC → Linux 上照樣 ValueError，另外三個測試（pixel hash / rollback / receipt）\n沒套 fixture 所以仍紅。這是半套修復。\n驗證：本機 37 passed；模擬 Linux（第一順位不存在）確認會順到下一個真實字型且繁中字形非豆腐；\n全缺字型時大聲失敗。CI 綠燈需等 push 後的 run；若仍紅，check_alerts._auto_remediate_ci_red 會自動開新任務。"
+  },
+  {
+    "timestamp": "2026-07-13T22:15:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-unpushed-fix-gap-20260713",
+    "outcome": "succeeded",
+    "actor": "hourly-22",
+    "owner": "hourly-22",
+    "commit": "86dfa4967",
+    "summary": "CI 紅燈期間本地修復未 push 的 75 分鐘空窗根治（老闆 msg 677）。根因不是閾值太鬆，是順序：\ncheck_alerts._handle_ci_run 對同一個紅 run 第二次就 already_handled 直接 return，而「已修好但沒推」\n的整段空窗恰好活在那道 dedup gate 後面 —— 紅 run 會一直是最新完成的 run，直到有人 push 出新的。\n修法：把 origin/main..main 探測搬到 dedup 之前；有 CI 沒看過的 commit 就呼叫既有 cron_git_push_backup.sh\n（同一套 pre-push gate，exit 120 held 照擋不繞過，held 原因寫進 alert body）。CI 跑的就是本地 HEAD →\n紅燈是真的，不推。收編進既有 ci_watch owner，未新增第二層 watchdog。\n驗證：9 tests；break-then-verify（push 移回 dedup 之後 → test_repeat_sighting_of_same_red_run_still_pushes FAIL）；\n真實 git 探測回 ahead=1 / ci_saw_head=false（正確判定會推）；silent-fallback strict audit new=0。"
   }
 ]
