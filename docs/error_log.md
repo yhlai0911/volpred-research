@@ -2,6 +2,32 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-13 16:05 — populate_upcoming_events 寫 config 不 commit：排程 writer 缺 commit 步驟同類第 3 例
+
+**問題**：boss Telegram msg 633/635/640/641/647 連罵五則 —— PHASE-Z「N 個檔案不是這班產出的」
+警報反覆發，14:24 的 3-strike 修正（d36a418cb + phase_z class sweep）後 15:19 仍發
+「1 個檔案已連續 9 班沒人收」critical。
+
+**現象**：卡住的是 `config/runtime_schedules.json`（`.git/volpred_phase_z_foreign_streak.json`
+記 streak=9）。diff 是 `populate_upcoming_events.py` 自動 append 的 3 個事件排程 entry
+（CPI_US 2026-08-12 T-2/T+0、TSMC revenue 2026-08-10 T+0）—— 純機器產出。
+
+**根因**：同一個 bug class 的第 3 個 instance（前兩例：refresh_paper_snapshots、lazypack，
+同日 d36a418cb 修）：**排程 writer 寫 git-tracked 檔案卻無 commit 步驟**。14:24 的 class sweep
+只掃了 `storage/` 命名空間（補 `_MACHINE_STATE_PREFIXES`），漏掉 `config/` 的 writer ——
+PHASE-Z 歸屬模型把 config/ 視為 authored（正確：config 載 governance 指令，盲目收養 = 偷），
+所以這條路徑永遠不可能靠 PHASE-Z 解，只能由 writer 自己 commit。**子集 sweep 把 false
+negative 留在掃描範圍外的盲區**（同 K1259 教訓，這次發生在 ops 層）。
+
+**解決**：(a) 5dff54fee 先 commit 卡住的 3 個 entry，streak 歸零止血；(b) e78291a55 給
+populate_upcoming_events.py 加 path-scoped 自我 commit + 寫入前已髒則不代收的防偷 guard
+（照 d36a418cb 模式）；(c) 真正的 class sweep 排入 P1 governance task
+`governance_scheduled_writer_commit_class_sweep`：全量走訪 runtime_schedules.json 所有 job
+的 script、列出每支寫入的 tracked 路徑、無 commit 者補齊、留 ratchet test 機械 gate。
+
+**教訓**：class sweep 的「class」邊界要用 bug 的定義（排程 writer × tracked 檔案）圈，
+不是用第一個 instance 所在的目錄圈。掃 `storage/` 只是掃了「第一例的鄰居」。
+
 ## 2026-07-13 14:20 — codex worker 自己 setsid 逃出 process group，killpg 殺不到（同根因第 2 次）
 
 **問題**：`gen_lazypack_codex` 的 codex exec 逾時後，被判死的 worker 仍在寫檔。
