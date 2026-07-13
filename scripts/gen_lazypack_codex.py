@@ -430,8 +430,11 @@ def _run_claude(prompt: str, out_dir: Path, timeout_s: float,
     Same contract as `_run_codex` — never raises, the caller only checks whether
     the render script landed. rc 3 = CLI missing, rc 2 = timed out.
     """
+    # acceptEdits + a write-only allowlist, not bypassPermissions: this writer
+    # only has to emit one render script, so it never needs Bash or network.
     cmd = [CLAUDE_BIN, "-p", "--model", model,
-           "--permission-mode", "bypassPermissions",
+           "--permission-mode", "acceptEdits",
+           "--allowedTools", "Write,Edit,Read",
            "--add-dir", str(out_dir)]
     try:
         proc = subprocess.Popen(
