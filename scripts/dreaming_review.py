@@ -343,14 +343,33 @@ def detect_stale_knowledge(
     return out
 
 
+def _is_followup_id(parent_id: str, candidate_id: str) -> bool:
+    """True when candidate_id names a retry of parent_id by id lineage.
+
+    Retries are conventionally named off the parent's id — `K1679-rev`,
+    `K1679-rev2`, `k1025_v2`, `k628b`. A suffix must start with a separator or a
+    lowercase letter, so a numerically adjacent id (`K16791` vs `K1679`) is not
+    mistaken for a descendant.
+    """
+    if not parent_id or candidate_id == parent_id:
+        return False
+    if not candidate_id.startswith(parent_id):
+        return False
+    return bool(re.fullmatch(r"[-_.].+|[a-z][\w-]*", candidate_id[len(parent_id) :]))
+
+
 def detect_missing_retry_strategy(
     storage_dir: str, snapshot: dict[str, Any], now: datetime
 ) -> list[DreamFinding]:
     """Execution-failed tasks with no controlled block-reason and no follow-up.
 
     An orphaned failure = a failed task that was never parked (no blocked_reason
-    in the controlled vocab) and has no later task sharing its k_id. These silently
-    drop work; surfacing them lets the main thread decide to retry or retire.
+    in the controlled vocab) and has no successor. A successor is either a task
+    sharing its k_id, or one whose id descends from it (`K1679` → `K1679-rev`).
+    Tasks carrying no k_id are the common case, so id lineage — not k_id alone —
+    is what keeps a retried failure from being re-flagged every night. These
+    silently drop work; surfacing them lets the main thread decide to retry or
+    retire.
     """
     out: list[DreamFinding] = []
     cutoff = now.astimezone(timezone.utc) - timedelta(days=LOOP_HEALTH_WINDOW_DAYS)
@@ -362,6 +381,8 @@ def detect_missing_retry_strategy(
         kid = str(t.get("k_id") or "").strip()
         if kid:
             by_kid.setdefault(kid, []).append((_task_terminal_time(t), str(t.get("status") or "")))
+
+    ids_and_status = [(str(t.get("id") or ""), str(t.get("status") or "")) for t in tasks]
 
     for t in tasks:
         if not _is_execution_failure(t.get("status")):
@@ -381,6 +402,13 @@ def detect_missing_retry_strategy(
                 if sib_status == t.get("status"):
                     continue
                 if not _is_execution_failure(sib_status):
+                    has_followup = True
+                    break
+        # id lineage: a descendant task (K1679 → K1679-rev / K1679-rev2) that did
+        # not itself fail is the retry. Covers the (common) k_id-less tasks.
+        if not has_followup:
+            for cand_id, cand_status in ids_and_status:
+                if _is_followup_id(tid, cand_id) and not _is_execution_failure(cand_status):
                     has_followup = True
                     break
         # status text itself naming a successor (e.g. *_superseded_by_v2)

@@ -116,6 +116,43 @@ def test_detect_missing_retry_strategy_flags_orphaned_failure(tmp_path):
     assert findings[0].remediation == "auto_dispatch"  # low-risk derived state
 
 
+def test_detect_missing_retry_strategy_honours_id_lineage(tmp_path):
+    """K1679 (2026-07-13): a retried failure carrying no k_id was re-flagged 3 nights.
+
+    Follow-ups are named off the parent id (`K1679-rev`, `k1025_v2`, `k628b`), and
+    most tasks have no k_id at all — so k_id-only sibling matching never saw the retry.
+    """
+    storage = _storage(tmp_path)
+    _write(
+        storage / "next_tasks.json",
+        [
+            # the real incident: failed, no k_id, retried as <id>-rev / <id>-rev2
+            {"id": "K1679", "status": "failed", "completed_at": _iso(2)},
+            {"id": "K1679-rev", "status": "succeeded", "completed_at": _iso(1)},
+            {"id": "K1679-rev2", "status": "succeeded", "completed_at": _iso(1)},
+            # underscore + bare-letter retry conventions
+            {"id": "k1025", "status": "failed", "completed_at": _iso(2)},
+            {"id": "k1025_v2", "status": "succeeded", "completed_at": _iso(1)},
+            {"id": "k628", "status": "failed", "completed_at": _iso(2)},
+            {"id": "k628b", "status": "succeeded", "completed_at": _iso(1)},
+            # genuinely orphaned: no descendant at all → must still be flagged
+            {"id": "K999", "status": "failed", "completed_at": _iso(2)},
+            # a numerically adjacent id is NOT a descendant of K999
+            {"id": "K9991", "status": "succeeded", "completed_at": _iso(1)},
+            # retry chain whose only descendant also failed → tail still surfaces
+            {"id": "K777", "status": "failed", "completed_at": _iso(2)},
+            {"id": "K777-rev", "status": "failed", "completed_at": _iso(1)},
+        ],
+    )
+    sigs = {f.signature for f in dr.detect_missing_retry_strategy(str(storage), {}, NOW)}
+    assert "missing_retry_strategy:K1679" not in sigs
+    assert "missing_retry_strategy:k1025" not in sigs
+    assert "missing_retry_strategy:k628" not in sigs
+    assert "missing_retry_strategy:K999" in sigs  # no follow-up → still flagged
+    assert "missing_retry_strategy:K777" in sigs  # retry failed too → chain still broken
+    assert "missing_retry_strategy:K777-rev" in sigs
+
+
 def test_detect_semantic_concentration_flags_high_rehash(tmp_path, monkeypatch):
     # High semantic rehash rate → finding (boss email-12139 semantic directive).
     monkeypatch.setattr(
