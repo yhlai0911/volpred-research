@@ -16926,5 +16926,15 @@
     "owner": "hourly-18",
     "commit": "ac1156198",
     "summary": "release 死鎖第 3 層（observability + 自動補救）落地：新增領先指標 release_pool_deadlock（due_now + 有草稿 + eligible=0 → CRITICAL，收編進既有 _parse_release_pool_state，不加第四層 watchdog），自動補救建 P1 補池任務帶 required_clusters（走既有 check_alerts remediation 層）。偵測維持純讀以免 dashboard 渲染長任務。6 個 regression test；break-then-verify 舊 code 3 紅/新 code 6 綠。線上實測不誤報。**第 2 層（refill 例行補池 cluster-aware）尚未做，任務仍 pending。**"
+  },
+  {
+    "timestamp": "2026-07-13T19:21:16+08:00",
+    "task_type": "experiment",
+    "task_id": "k628b_fake_gfevd_label_rerun",
+    "outcome": "succeeded",
+    "actor": "hourly-19",
+    "owner": "hourly-19",
+    "commit": null,
+    "summary": "K628b 假 GFEVD 標籤回溯更正（研究誠實 #6）。收 PHASE A 的 agent job (exit 0, Codex primary-path PASS)：程式註解寫 Pesaran-Shin，實際呼叫 statsmodels Cholesky .fevd()，且把 SPY 排第一。120 種排序全枚舉 → SPY 的 Cholesky NET 值域 -16.1~+43.7pp，原報 +43.68pp 恰為最大值（SPY 僅 33% 排序中為最大傳出者）。改用手刻 KPPS GFEVD（order-invariance 驗證 <1e-6）重估：SPY +14.58pp 仍是最大淨傳出者且與無溢出虛無可區分（empirical p=0.000），方向存活、量級收回 2/3；TLT -24.92→-9.12pp；USO 角色翻盤（淨接收者→平衡 +0.98pp）。Granger / Forbes-Rigobon 不經 FEVD，逐項重現全存活。主線程落地：merge worktree（experiments 完整性驗證通過）→ knowledge.json K628b 就地更正（provenance CI 0 violations、索引 +110）→ 文章層更正 mile_55758994（換整張方向性表 + 撤回「10 倍」「+43.68%」宣稱 + 方法段揭露 Cholesky）與 live 導讀 mile_1597b341（限定「K628b 不受影響」的範圍 + 移除指向 404 archived 文的死連結）→ feed-sync 兩輪（updated 135, failed 0）→ 線上驗證 rendered dead link = 0、更正聲明已上線。FEVD ratchet 綠（baseline sites 4 = 現況 4 VIOLATION，k628b 移入 resolved）。"
   }
 ]

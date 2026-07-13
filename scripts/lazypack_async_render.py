@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Async lazypack (懶人包圖組) pipeline — `enqueue` (writing agent) + `run` (compute worker).
+"""Async lazypack (懶人包圖組) pipeline — enqueue + deterministic render/install.
 
 Root cause (docs/error_log.md 2026-07-02 15:15 #4): the writing agent's 50-min
 hard cap was shared between article body writing and the codex-exec lazypack
@@ -11,8 +11,8 @@ as reference_compute_queue_token_split):
     writing agent : body done → publish draft (lazypack NOT required at draft
                     stage) → `lazypack_async_render.py enqueue --article-id
                     mile_x --experiment Kxxxx --plan plan.json`
-    compute worker: `run` → gen_lazypack_codex.py (codex exec writes+runs a
-                    data-bound render script) → upload PNGs → append
+    compute worker: `run` → lazypack_render.py (strict plan + JSON evidence,
+                    no LLM/code generation) → upload PNGs → append
                     `## 懶人包圖組` to the article → single-article re-sync
     release gate  : release_pool refuses to flip a general draft/scheduled
                     article to published until the section exists
@@ -34,8 +34,8 @@ Usage:
     --plan storage/lazypack_jobs/mile_31b2b0bb/plan.json \
     --out-dir storage/lazypack_jobs/mile_31b2b0bb/panels
 
-plan.json = gen_lazypack_codex.py panel schema: [{name, info, must_show?,
-style?, alt?}] — one PNG per panel; optional `alt` overrides the image alt text.
+plan.json uses the strict, versioned schema owned by scripts/lazypack_render.py.
+Each numeric value is a JSON-field binding; one PNG is emitted per panel.
 """
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ for _p in (str(ROOT), str(ROOT / "src"), str(ROOT / "scripts")):
         sys.path.insert(0, _p)
 
 JOB_ID_PREFIX = "lazypack-"
-DEFAULT_TIMEOUT_S = 1800  # codex render ≤900s + upload/append/sync headroom
+DEFAULT_TIMEOUT_S = 300  # deterministic render is seconds; keep upload/sync headroom
 
 
 def _resolve(path_like: str | Path) -> Path:
@@ -61,16 +61,12 @@ def _resolve(path_like: str | Path) -> Path:
     return p if p.is_absolute() else ROOT / p
 
 
-def _load_panels(plan_path: Path) -> list[dict]:
-    panels = json.loads(plan_path.read_text(encoding="utf-8"))
-    if isinstance(panels, dict) and isinstance(panels.get("panels"), list):
-        panels = panels["panels"]
-    if not isinstance(panels, list) or not panels:
-        raise ValueError(f"--plan must be a non-empty JSON list: {plan_path}")
-    for i, p in enumerate(panels, 1):
-        if not isinstance(p, dict):
-            raise ValueError(f"plan panel {i} must be an object: {p!r}")
-    return panels
+def _load_plan(plan_path: Path) -> dict:
+    """Use the renderer's single validator; legacy free-prose lists fail closed."""
+    from lazypack_render import load_plan
+
+    document, _evidence = load_plan(plan_path)
+    return document
 
 
 def _panel_specs(panels: list[dict]) -> list[tuple[str, str]]:
@@ -106,7 +102,8 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
         return 2
 
     plan_src = _resolve(a.plan)
-    panels = _load_panels(plan_src)  # validate before queueing
+    document = _load_plan(plan_src)  # validate evidence and every binding before queueing
+    panels = document["panels"]
 
     from volpred.publisher.publisher import has_lazypack_section
     if has_lazypack_section(str(art.get("content") or "")):
@@ -120,7 +117,7 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
     jobs_dir.mkdir(parents=True, exist_ok=True)
     stored_plan = jobs_dir / "plan.json"
     stored_plan.write_text(
-        json.dumps(panels, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 
     # Idempotency: a queued/running render for this article means the writing
@@ -176,7 +173,6 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
         result_artifact=_rel(panels_dir),
         output_paths=[
             _rel(stored_plan),
-            _rel(panels_dir / "render_lazypack.py"),
             *(_rel(panels_dir / f"{stem}.png") for stem, _ in _panel_specs(panels)),
         ],
         followup_brief=None,  # the job appends + syncs itself; no Claude followup
@@ -210,10 +206,7 @@ def _record_job_outputs(
     job_id = job_id or os.environ.get("VOLPRED_COMPUTE_JOB_ID")
     if not job_id:
         return
-    candidates = [
-        out_dir / "render_lazypack.py",
-        *(out_dir / f"{stem}.png" for stem, _ in specs),
-    ]
+    candidates = [out_dir / f"{stem}.png" for stem, _ in specs]
     actual = [path for path in candidates if path.is_file()]
     if not actual:
         return
@@ -231,53 +224,35 @@ def cmd_run(a: argparse.Namespace) -> int:
     plan_path = _resolve(a.plan)
     out_dir = _resolve(a.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    panels = _load_panels(plan_path)
+    document = _load_plan(plan_path)
+    panels = document["panels"]
     specs = _panel_specs(panels)
-    title = a.title or f"{a.article_id} 懶人包"
     job_id = getattr(a, "job_id", None)
 
-    # 1) Render — codex exec writes + runs a data-bound render script.
-    # 產出即交付：if every expected panel is already on disk (an earlier run —
-    # or a hand-run of the generated render script — produced them before the
-    # job died), the artifacts are finished goods. Re-rendering can only lose
-    # them; deliver instead. This is what makes a retry of a failed job actually
-    # rescue the article rather than replay the same failing render step.
-    already = [
-        stem for stem, _ in specs
-        if (out_dir / f"{stem}.png").exists()
-        and (out_dir / f"{stem}.png").stat().st_size > 1024
-    ]
-    if len(already) == len(specs):
-        print(f"[lazypack_async] panels already rendered ({len(already)}/{len(specs)}) "
-              f"in {out_dir} — skipping render, delivering existing artifacts")
-    elif a.render_cmd:
+    # 1) Render.  Deterministic rendering is cheap, so retries always recompute
+    # from the hash-pinned plan instead of trusting stale PNGs by file size.
+    if a.render_cmd:
         print(f"[lazypack_async] TEST HOOK ACTIVE: --render-cmd {a.render_cmd!r} "
-              f"(bypasses gen_lazypack_codex.py; smoke/tests only)")
+              f"(bypasses lazypack_render.py; smoke/tests only)")
         cmd = shlex.split(a.render_cmd) + [str(plan_path), str(out_dir)]
     else:
-        cmd = [sys.executable, str(ROOT / "scripts" / "gen_lazypack_codex.py"),
-               "--plan", str(plan_path), "--out-dir", str(out_dir),
-               "--title", title, "--article-id", a.article_id]
-        for k in a.experiment:
-            cmd += ["--experiment", k]
-        for s in a.source:
-            cmd += ["--source", s]
+        cmd = [
+            sys.executable, str(ROOT / "scripts" / "lazypack_render.py"),
+            "--plan", str(plan_path), "--out-dir", str(out_dir),
+        ]
 
-    if len(already) != len(specs):
-        try:
-            proc = subprocess.run(cmd, cwd=str(ROOT))
-        finally:
-            # Codex can write one or more panels and still return non-zero.  The
-            # receipt must be updated before this function propagates failure.
-            _record_job_outputs(job_id, out_dir, specs)
-        if proc.returncode != 0:
-            print(f"error: render step failed rc={proc.returncode}", file=sys.stderr)
-            return 2
-    else:
+    try:
+        proc = subprocess.run(cmd, cwd=str(ROOT))
+    finally:
+        # A test hook or interrupted renderer may have written a partial staging
+        # result; record only final files that actually reached the owned path.
         _record_job_outputs(job_id, out_dir, specs)
+    if proc.returncode != 0:
+        print(f"error: render step failed rc={proc.returncode}", file=sys.stderr)
+        return 2
 
     # 2) Verify every expected panel PNG exists (belt-and-suspenders — the
-    # codex generator verifies too, but --render-cmd paths must not skip it).
+    # deterministic renderer verifies too, but --render-cmd paths must not skip it).
     missing = [
         str(out_dir / f"{stem}.png")
         for stem, _ in specs
@@ -348,7 +323,7 @@ def main() -> int:
     for flag, kw in common.items():
         e.add_argument(flag, **kw)
     e.add_argument("--plan", required=True,
-                   help="panel plan JSON (gen_lazypack_codex.py schema)")
+                   help="strict data-bound panel plan JSON (lazypack_render.py schema)")
     e.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S)
     e.add_argument("--force", action="store_true",
                    help="queue even if a render is already queued/running")
@@ -363,7 +338,7 @@ def main() -> int:
     r.add_argument("--job-id", default=None,
                    help="compute_queue receipt id for producer output write-back")
     r.add_argument("--render-cmd", default=None,
-                   help="TEST HOOK: replace the codex render step; invoked as "
+                   help="TEST HOOK: replace the deterministic render step; invoked as "
                         "`<cmd> <plan> <out_dir>`")
     r.add_argument("--upload-cmd", default=None,
                    help="TEST HOOK: replace Supabase upload; invoked as "

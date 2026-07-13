@@ -16,8 +16,10 @@ Covers the three seams that moved the codex render off the writing agent's
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
+from types import SimpleNamespace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -36,10 +38,38 @@ from volpred.publisher.lazypack_install import (  # noqa: E402
 )
 from volpred.publisher.publisher import has_lazypack_section  # noqa: E402
 
-_PLAN = [
-    {"name": "1_framework", "info": "concept", "must_show": "核心問題"},
-    {"name": "2_results", "info": "results", "must_show": "主要數字", "alt": "結果圖"},
-]
+def _make_plan(tmp_path: Path) -> dict:
+    evidence = tmp_path / "evidence.json"
+    evidence.write_text(
+        json.dumps({"result": {"value": 0.123}}, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    digest = hashlib.sha256(evidence.read_bytes()).hexdigest()
+    binding = {
+        "source": "main", "path": "result.value",
+        "format": {"kind": "percent", "digits": 1},
+    }
+    return {
+        "schema_version": 1,
+        "title": "測試懶人包",
+        "evidence": {
+            "main": {"path": str(evidence), "sha256": digest, "label": "測試 evidence.json"}
+        },
+        "panels": [
+            {
+                "name": "1_framework", "info": "concept", "style": "professional",
+                "title": "核心問題", "alt": "懶人包圖 1", "sources": ["main"],
+                "blocks": [{
+                    "kind": "text", "heading": "問題", "body": ["先分清楚熱度與成果。"],
+                }],
+            },
+            {
+                "name": "2_results", "info": "results", "style": "bento-grid",
+                "title": "主要數字", "alt": "結果圖", "sources": ["main"],
+                "blocks": [{"kind": "metric", "label": "結果", "value": binding}],
+            },
+        ],
+    }
 
 
 def _write_feed(storage_dir: Path, items: list[dict]) -> Path:
@@ -66,7 +96,7 @@ def _enqueue_ns(tmp_path: Path, **over) -> argparse.Namespace:
         title=None,
         storage_dir=str(tmp_path / "storage"),
         plan=str(tmp_path / "plan.json"),
-        timeout=1800,
+        timeout=300,
         force=False,
     )
     base.update(over)
@@ -84,7 +114,7 @@ def storage(tmp_path: Path) -> Path:
         "content": "# 標題\n\n正文，白話故事。\n",
     }])
     (tmp_path / "plan.json").write_text(
-        json.dumps(_PLAN, ensure_ascii=False), encoding="utf-8"
+        json.dumps(_make_plan(tmp_path), ensure_ascii=False), encoding="utf-8"
     )
     return storage_dir
 
@@ -109,11 +139,12 @@ def test_enqueue_writes_selfcontained_compute_job(storage, tmp_path, monkeypatch
     # plan persisted next to the job artifacts (reproducible worker run)
     stored_plan = storage / "lazypack_jobs" / "mile_lz1" / "plan.json"
     assert stored_plan.exists()
-    assert json.loads(stored_plan.read_text(encoding="utf-8")) == _PLAN
+    assert json.loads(stored_plan.read_text(encoding="utf-8")) == json.loads(
+        (tmp_path / "plan.json").read_text(encoding="utf-8")
+    )
     panels_dir = storage / "lazypack_jobs" / "mile_lz1" / "panels"
     assert job["output_paths"] == [
         str(stored_plan),
-        str(panels_dir / "render_lazypack.py"),
         str(panels_dir / "1_framework.png"),
         str(panels_dir / "2_results.png"),
     ]
@@ -203,7 +234,7 @@ def test_run_pipeline_end_to_end_with_stub_render_and_upload(
         "from pathlib import Path\n"
         "plan, out = json.loads(Path(sys.argv[1]).read_text()), Path(sys.argv[2])\n"
         "out.mkdir(parents=True, exist_ok=True)\n"
-        "for p in plan:\n"
+        "for p in plan['panels']:\n"
         "    (out / (p['name'] + '.png')).write_bytes(b'P' * 2048)\n",
         encoding="utf-8",
     )
@@ -236,6 +267,54 @@ def test_run_fails_when_render_produces_no_pngs(storage, tmp_path):
         no_sync=True,
     )
     assert ns and lar.cmd_run(ns) == 3
+
+
+def test_run_default_is_deterministic_renderer_and_replaces_stale_pngs(
+    storage, tmp_path, monkeypatch
+):
+    from volpred.publisher import lazypack_install
+
+    out_dir = storage / "lazypack_jobs" / "mile_lz1" / "panels"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stale = out_dir / "1_framework.png"
+    stale.write_bytes(b"S" * 2048)
+    captured = []
+
+    def fake_run(cmd, cwd):
+        captured.append(cmd)
+        assert Path(cmd[1]).name == "lazypack_render.py"
+        assert "gen_lazypack_codex.py" not in " ".join(cmd)
+        plan = json.loads(Path(cmd[cmd.index("--plan") + 1]).read_text(encoding="utf-8"))
+        target = Path(cmd[cmd.index("--out-dir") + 1])
+        target.mkdir(parents=True, exist_ok=True)
+        for panel in plan["panels"]:
+            (target / f"{panel['name']}.png").write_bytes(b"N" * 2048)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(lar.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        lazypack_install, "upload_panels",
+        lambda article_id, panel_dir, specs, uploader=None: [
+            (f"https://x.test/{stem}.png", alt) for stem, alt in specs
+        ],
+    )
+    monkeypatch.setattr(
+        lazypack_install, "install_lazypack_section",
+        lambda *args, **kwargs: {"status": "draft", "synced": False, "panels": 2},
+    )
+    ns = argparse.Namespace(
+        article_id="mile_lz1",
+        experiment=[], source=[], title=None,
+        storage_dir=str(storage),
+        plan=str(tmp_path / "plan.json"),
+        out_dir=str(out_dir),
+        render_cmd=None,
+        upload_cmd=None,
+        no_sync=True,
+    )
+    assert lar.cmd_run(ns) == 0
+    assert len(captured) == 1  # stale file-size heuristic no longer bypasses render
+    assert stale.read_bytes() == b"N" * 2048
 
 
 def test_failed_render_writes_back_partial_panel_ownership(

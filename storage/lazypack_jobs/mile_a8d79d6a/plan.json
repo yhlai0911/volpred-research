@@ -1,17 +1,326 @@
-[
-  {
-    "name": "1_framework",
-    "info": "concept",
-    "must_show": "這篇在問什麼：俄烏戰場證明「用百萬攔截彈打幾萬元無人機」防守方會先破產 → 民主陣營要「非紅供應鏈」→ 台灣被點名複製半導體劇本。核心問題：台灣接得穩嗎？白話解釋三個名詞：無人載具（含無人機＋無人艇 USV）、非紅供應鏈（不含中國零件）、概念股純度（無人機營收佔比 vs 只是技術上說得通）。標明這是 6 集系列的 EP0（總覽），後續為 EP1–EP4 與 EP-Final。"
+{
+  "schema_version": 1,
+  "title": "無人載具 EP0：台灣接得住非紅供應鏈嗎？",
+  "subtitle": "先把名冊、算法與市場結果放在同一張地圖上",
+  "evidence": {
+    "main": {
+      "path": "storage/drafts/drone_ep0_market_snapshot.json",
+      "sha256": "b60f21aaac13944427cf8f2c1cd8be2b07959b1154aea25f75fc1c7907b3d3a6",
+      "label": "drone_ep0_market_snapshot.json"
+    }
   },
-  {
-    "name": "2_method",
-    "info": "method",
-    "must_show": "怎麼算的（白話，不用統計術語）：(1) 先盤出 29 檔上市櫃名冊，股票代碼與板別 2026-07-09 用 yfinance 逐檔查證存在且屬台股，關聯證據不足的（經緯航太停止公開發行、世紀鋼/佳龍查無明確業務）不列入。(2) 把 29 檔等權買進持有一年（每日重設權重、不計交易成本），窗口 2025-06-30 至 2026-07-10 共 252 個交易日。(3) 跟直接買台股加權指數 ^TWII 比報酬與波動。強調：這是描述性截面統計，不是可交易策略、不是投資建議。"
-  },
-  {
-    "name": "3_results",
-    "info": "results",
-    "must_show": "主要數字：29 檔等權籃近一年 +69.1%，同期加權指數 +103.8%，落後 34.7 個百分點。只有 6/29 檔跑贏大盤；29/29 檔年化波動全部高於指數的 23.4%（個股波動中位數 49.0%）。市值極度集中：29 家合計 7.30 兆，聯發科一家佔 85.8%，而它的 +228.3% 主要來自 AI 晶片行情、與無人機幾乎無關。政策口徑：2,100 億元是尚未完成立法的草案上限；1,320 艘小型自殺無人艇是規畫數量，不是公司訂單；目前公開草案文本未列總採購數量，撤回舊版 21 萬架與 20 倍產能缺口說法。2025 年無人機產值 129 億元，月產能 15,000 架是政策目標、不是現況。一句結論：題材熱度寫在新聞裡，成本寫在波動率裡 — 值得研究，跟值得現在整籃買進，是兩回事。"
-  }
-]
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "新聞題材、供應鏈角色與投資價值是三件事",
+      "subtitle": "先定義研究問題，再談概念股名冊",
+      "alt": "EP0 用供應鏈角色與概念股純度拆解台灣無人載具題材",
+      "sources": [
+        "main"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "核心問題",
+          "body": [
+            "戰場把低成本無人載具與高成本攔截的落差攤在陽光下，民主陣營因而加速尋找非紅供應鏈。真正要問的是：台灣接得穩嗎？"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "無人載具",
+          "body": [
+            "範圍不只空中的無人機，也包括海上的無人艇；不同載具的技術、訂單與供應鏈證據不能混為一談。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "非紅供應鏈",
+          "body": [
+            "重點是不依賴中國零組件與產能，但被列入供應鏈不等於已取得具約束力訂單。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "概念股純度",
+          "body": [
+            "要區分能說出技術關聯的公司，與已能拆出無人載具營收、獲利與現金的公司。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "系列地圖",
+          "body": [
+            "EP0 先做總覽；EP1–EP4 逐層查核供應鏈與龍頭，EP-Final 再回到組合風險。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "editorial",
+      "title": "先盤名冊，再用同一窗口比較",
+      "subtitle": "描述性市場快照，不是可交易策略",
+      "alt": "EP0 名冊、共同價格窗口與等權籃比較方法",
+      "sources": [
+        "main"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "建立名冊",
+          "body": [
+            {
+              "template": "納入 {names} 檔有公開市場資料且具業務關聯證據的上市櫃公司；證據不足者不為了湊數納入。",
+              "bindings": {
+                "names": {
+                  "source": "main",
+                  "path": "basket.n_names",
+                  "format": {
+                    "kind": "integer"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "共同窗口",
+          "body": [
+            {
+              "template": "還原收盤價窗口為 {start} 至 {end}，共 {days} 個交易日。",
+              "bindings": {
+                "start": {
+                  "source": "main",
+                  "path": "window.start",
+                  "format": {
+                    "kind": "date"
+                  }
+                },
+                "end": {
+                  "source": "main",
+                  "path": "window.end",
+                  "format": {
+                    "kind": "date"
+                  }
+                },
+                "days": {
+                  "source": "main",
+                  "path": "window.trading_days",
+                  "format": {
+                    "kind": "integer",
+                    "thousands": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "組合口徑",
+          "body": [
+            {
+              "template": "{construction}。",
+              "bindings": {
+                "construction": {
+                  "source": "main",
+                  "path": "basket.construction",
+                  "format": {
+                    "kind": "text"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "比較基準",
+          "body": [
+            {
+              "template": "以台股加權指數 {ticker} 比較累積報酬與年化波動。",
+              "bindings": {
+                "ticker": {
+                  "source": "main",
+                  "path": "benchmark.ticker",
+                  "format": {
+                    "kind": "text"
+                  }
+                }
+              }
+            },
+            "結果是事後描述性統計，不含交易成本，也不構成投資建議。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "整籃上漲，仍明顯落後加權指數",
+      "subtitle": "報酬、波動、廣度與市值集中同時看",
+      "alt": "無人載具概念股等權籃報酬落後大盤且波動較高",
+      "sources": [
+        "main"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "等權籃累積報酬",
+          "value": {
+            "source": "main",
+            "path": "basket.ret_1y",
+            "format": {
+              "kind": "percent",
+              "digits": 1,
+              "show_plus": true
+            }
+          },
+          "note": "正報酬不代表跑贏市場"
+        },
+        {
+          "kind": "metric",
+          "label": "加權指數累積報酬",
+          "value": {
+            "source": "main",
+            "path": "benchmark.ret_1y",
+            "format": {
+              "kind": "percent",
+              "digits": 1,
+              "show_plus": true
+            }
+          },
+          "note": "同一價格窗口"
+        },
+        {
+          "kind": "metric",
+          "label": "相對大盤差距",
+          "value": {
+            "source": "main",
+            "path": "basket.excess_ret_vs_bench",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "scale": 100,
+              "suffix": " 個百分點"
+            }
+          },
+          "note": "等權籃減去加權指數"
+        },
+        {
+          "kind": "text",
+          "heading": "贏家不多",
+          "body": [
+            {
+              "template": "跑贏加權指數的個股只有 {beat}/{total}。",
+              "bindings": {
+                "beat": {
+                  "source": "main",
+                  "path": "n_beat_bench",
+                  "format": {
+                    "kind": "integer"
+                  }
+                },
+                "total": {
+                  "source": "main",
+                  "path": "basket.n_names",
+                  "format": {
+                    "kind": "integer"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "波動成本",
+          "body": [
+            {
+              "template": "等權籃年化波動 {basket_vol}，加權指數 {bench_vol}；個股中有 {high_vol}/{total} 的年化波動高於指數。",
+              "bindings": {
+                "basket_vol": {
+                  "source": "main",
+                  "path": "basket.vol_ann",
+                  "format": {
+                    "kind": "percent",
+                    "digits": 1
+                  }
+                },
+                "bench_vol": {
+                  "source": "main",
+                  "path": "benchmark.vol_ann",
+                  "format": {
+                    "kind": "percent",
+                    "digits": 1
+                  }
+                },
+                "high_vol": {
+                  "source": "main",
+                  "path": "n_vol_above_bench",
+                  "format": {
+                    "kind": "integer"
+                  }
+                },
+                "total": {
+                  "source": "main",
+                  "path": "basket.n_names",
+                  "format": {
+                    "kind": "integer"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "市值高度集中",
+          "body": [
+            {
+              "template": "名冊合計市值約 {total_mcap}；其中聯發科約 {mediatek_mcap}，窗口報酬 {mediatek_return}。單一大型權值股行情會顯著影響名冊敘事。",
+              "bindings": {
+                "total_mcap": {
+                  "source": "main",
+                  "path": "total_mcap_e8",
+                  "format": {
+                    "kind": "number",
+                    "digits": 2,
+                    "scale": 0.0001,
+                    "suffix": " 兆元"
+                  }
+                },
+                "mediatek_mcap": {
+                  "source": "main",
+                  "path": "names.2.mcap_e8",
+                  "format": {
+                    "kind": "number",
+                    "digits": 2,
+                    "scale": 0.0001,
+                    "suffix": " 兆元"
+                  }
+                },
+                "mediatek_return": {
+                  "source": "main",
+                  "path": "names.2.ret_1y",
+                  "format": {
+                    "kind": "percent",
+                    "digits": 1,
+                    "show_plus": true
+                  }
+                }
+              }
+            },
+            "題材值得研究，與值得現在整籃買進，是兩回事。"
+          ]
+        }
+      ]
+    }
+  ]
+}

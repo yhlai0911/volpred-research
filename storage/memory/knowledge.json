@@ -16741,8 +16741,8 @@
   },
   {
     "id": "K628b",
-    "title": "K628b: ★★ Cross-Asset Vol Spillover Network — SPY dominant transmitter, 0050.TW pure receiver",
-    "content": "[提出: 跳躍探索/網絡模型, 執行: Claude] Diebold-Yilmaz spillover index + Granger causality + Forbes-Rigobon contagion test，5 資產（SPY/GLD/TLT/0050.TW/USO），2010-2026。SPY 是主要傳播者（net +43.7%），0050.TW 是純接收者（OUT=0, IN=2）。高波動 regime 網絡密度翻倍（11 vs 4 Granger links）。Forbes-Rigobon：無傳染（p>0.20），只是相互依存——危機時相關性上升完全由方差增加解釋。Total spillover 均值 25.8%（9.5%-51.6%），COVID 和 2022 bear market 峰值。Spillover-informed 配置 NULL（Sharpe 1.15 vs equal weight 1.21）。論文引用價值：支持 Taiwan VT 論文的 'US lead-lag' narrative。",
+    "title": "K628b [CORRECTED 2026-07-13: Cholesky 排序假象]: Cross-Asset Vol Spillover Network — SPY 仍是最大淨傳出者，但 +43.7pp 的量級是排序產物（KPPS GFEVD 重估為 +14.6pp）",
+    "content": "[提出: 跳躍探索/網絡模型, 執行: Claude] [CORRECTED 2026-07-13: Cholesky FEVD 排序假象 — 審查: Codex primary-path PASS]\n\nRETRACTION（方向性量級作廢，方向本身存活）：原條目報的「SPY 是主要傳播者（net +43.7%）」來自 statsmodels 的 Cholesky `.fevd()`，但程式註解寫的是 Pesaran-Shin GFEVD — 標籤與實作不符。Cholesky FEVD 依賴變數排序，而 K628b 把 SPY 排在第一位。全枚舉 5 資產的 120 種排序後，SPY 的 Cholesky NET 值域是 -16.1pp 到 +43.7pp — 原報的 +43.7pp 恰恰就是這個值域的最大值，且 SPY 只在 33% 的排序中是最大傳出者。\n\n改用 order-invariant 的真 KPPS GFEVD（手刻 sigma_u + MA representation，order-invariance 已驗證：跨排序偏差 < 1e-6）重估後：\n- SPY NET +43.68pp → **+14.58pp**（縮為原本的 1/3），但**仍是最大淨傳出者**，且與「無溢出」虛無分布可區分（empirical p=0.000，null NET sd=0.37pp）。方向性結論存活。\n- SPY 的 TO/FROM 比由「10 倍」降為約 1.6 倍（TO 40.1% vs FROM 25.5%）。原本的 10 倍是排序產物（SPY 排第一 → 接收量被機械性壓到最低）。\n- TLT NET -24.92pp → -9.12pp（仍是最大淨接收者，flight-to-quality 方向不變）。\n- **USO 角色標籤翻盤**：NET -12.37pp → +0.98pp，由「淨接收者」改判 BALANCED。「原油是波動接收者」這句話必須撤回。\n- 0050.TW NET -1.75pp → -2.75pp（接收者但非主要節點，結論不變）。\n- Total spillover 均值 25.8%（Cholesky）→ **29.8%（GFEVD，9.9-54.2%）**。兩者時序高度同步（Spearman 0.917），但 200 日視窗的無傳染 null floor 中位數已達 11.9% — TSI 的絕對『水準』不可單獨解讀（約一半是有限樣本偏誤）；超出 null 的部分仍顯著（empirical p=0.001）。\n\n不受影響（不經 FEVD，逐項重現 ALL MATCH）：0050.TW 純接收者（OUT=0, IN=2，Granger out-in degree）、高波動 regime 網絡密度翻倍（11 vs 4 Granger links）、Forbes-Rigobon 無傳染（p>0.20，只是相互依存）、Spillover-informed 配置 NULL（Sharpe 1.15 vs equal weight 1.21，由 rolling Granger F-stat 驅動）。\n\n論文引用價值（降級）：可支持「美股是最大淨傳出者」的方向性敘事，但**不可引用 +43.7% 這個量級**，也不可宣稱「SPY 傳出量是接收量的 10 倍」。\n\n教訓（bug class）：與 K865 同 class — Cholesky FEVD 掛 GFEVD 標籤下方向性結論。已由 scripts/audit_fevd_ordering.py + scripts/tests/test_fevd_ordering_ratchet.py 機械 gate 攔截（偵測器不信註解、只信呼叫）。舊 Cholesky 數字保留於 experiments/k628b/k628b_results.json 的 _correction_2026_07_13 區塊，僅供歷史對照，不可再引用。\n\n--- 以下為原始（已更正）條目全文，僅供對照 ---\n[提出: 跳躍探索/網絡模型, 執行: Claude] Diebold-Yilmaz spillover index + Granger causality + Forbes-Rigobon contagion test，5 資產（SPY/GLD/TLT/0050.TW/USO），2010-2026。SPY 是主要傳播者（net +43.7%），0050.TW 是純接收者（OUT=0, IN=2）。高波動 regime 網絡密度翻倍（11 vs 4 Granger links）。Forbes-Rigobon：無傳染（p>0.20），只是相互依存——危機時相關性上升完全由方差增加解釋。Total spillover 均值 25.8%（9.5%-51.6%），COVID 和 2022 bear market 峰值。Spillover-informed 配置 NULL（Sharpe 1.15 vs equal weight 1.21）。論文引用價值：支持 Taiwan VT 論文的 'US lead-lag' narrative。",
     "tags": [
       "spillover",
       "network",
@@ -16756,7 +16756,12 @@
     "data_source": "yfinance SPY/GLD/TLT/0050.TW/USO 2010-2026",
     "experiment_id": "k628b",
     "created_at": "2026-03-29T01:49:31.554015",
-    "importance": 3
+    "importance": 3,
+    "reviewer": "Codex (gpt-5.6-sol, ultra) — primary-path code review, 2026-07-13",
+    "reviewer_source": "codex_primary_path",
+    "corrected_at": "2026-07-13",
+    "correction_source": "experiments/k628b/k628b_kpps_rerun_results.json",
+    "supersedes_claim": "SPY net +43.7% (Cholesky ordering artifact)"
   },
   {
     "id": "K629",
