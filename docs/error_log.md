@@ -6704,3 +6704,25 @@ release-day、post 視窗。MOVE 發布日的描述性下跌通過預設 gate；
 污染掃描另建立三個 canonical follow-up：已發布 CPI T-2/T-7 `task_4751e8957898`、
 未發布 CPI T+0 `task_b3b91831f5a3`、NFP first-Friday proxy 與線上 metadata
 `task_7ef956506564`。完整逐項稽核在 `experiments/k1442/related_event_date_audit.md`。
+
+## 2026-07-13 — K1702 把 MDD/vol 比率誤當尺度不變，原 Codex gate 因此失效
+
+**症狀**：K1702 原稿用 raw MDD 的改善數（5/6）除以各策略波動率後改成 1/6，並把這個
+MDD/vol 比率稱為「scale-invariant」，據此宣稱 drawdown 改善主要只是曝險縮放、缺乏 timing
+skill。primary-path Codex 重審確認這個推論不成立：MDD 對槓桿與複利路徑都是非線性的，
+MDD/vol 只能當描述性比率，不能替代 exposure-matched path null。舊 `max_drawdown` 另漏把
+初始財富 1.0 納入 peak；本樣本數字恰巧未變，但實作仍不符合 canonical 定義。
+
+**修正**：K1702 改用 canonical initial-wealth MDD，對每個 factor 的 managed strategy 做
+exposure-matched circular-shift phase randomization，完整枚舉 OOS 的 316 個 shift；交易成本也
+隨 circular signal path 重算。exact tail fraction 採 `exceedances / 316`，再對六個 factor 做
+Holm–Bonferroni。raw MDD 仍是 5/6 改善，但 exposure-matched production gap 只有 MOM 為正；
+MOM 的 phase-null p=0.1582、Holm p=0.9494，六個 factor 在 5% 與 10% 都是 0/6 通過。
+這支持「沒有偵測到 timing 證據」，不等於證明 timing 不存在。原 primary gate 結果不變：
+正 Sharpe 1/6、paired bootstrap FDR 0/6、spanning-alpha t gate 0/6、雙子期同號 1/6。
+
+**防再犯**：(1) MDD/vol 僅可標成 descriptive，不得稱 scale-invariant；(2) drawdown timing
+claim 必須使用 exposure-matched path null，circular phase null 要保留 signal dependence 與
+cost path；(3) 完整枚舉的 exact p 明列母體與分母，不套 Monte Carlo `+1` 修正；(4) 結果
+CSV/PNG/JSON 一律 atomic write，JSON 保存 script 與 artifact SHA-256；(5) null result 的語句
+只能寫「未偵測到證據」，不可寫成不存在。

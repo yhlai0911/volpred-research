@@ -38778,5 +38778,31 @@
     ],
     "confidence": 0.85,
     "experiment_path": "experiments/k1702"
+  },
+  {
+    "item_id": "8cf5e73d",
+    "category": "vol_managed_factor_zoo",
+    "experiment_id": "K1702",
+    "verdict": "PASS",
+    "research_verdict": "NULL_OR_MIXED_INDIVIDUAL_FACTOR_OOS",
+    "reviewer": "Codex primary-path PASS plus two fresh-context full-population audits (2026-07-13)",
+    "reviewer_source": "primary Codex code/claim review; independent code audit; independent claim/artifact reconstruction",
+    "title": "K1702 primary-path re-verify: factor-zoo OOS null remains; MDD/vol claim replaced by exposure-matched phase null",
+    "content": "K1702 primary-path Codex re-verify supersedes the prior CONDITIONAL_PASS review state; the research verdict remains NULL_OR_MIXED_INDIVIDUAL_FACTOR_OOS. Official Fama-French and AQR paper-factor data cover 1963-07-01 through 2026-04-30 (15,813 common daily observations); the fixed real-time OOS is 2000-01 through 2026-04 (316 months), with the inverse-variance signal lagged one month and its normalization fixed from the pre-2000 calibration sample. The primary capped-3x plus 25bp specification is unchanged: positive Sharpe delta 1/6 (MOM), paired Sharpe bootstrap positive after BH-FDR 0/6, spanning-alpha t gate positive after BH-FDR 0/6, and positive Sharpe delta in both subperiods 1/6. CMA is significantly harmed; the equal-weight zoo gross Sharpe delta is only +0.036, turns negative at 10bp, and is -0.177 at 50bp.\n\nThe prior drawdown inference was invalid because MDD divided by realized volatility is descriptive, not scale invariant. K1702 now uses canonical initial-wealth MDD and an exposure-matched circular-shift phase null that enumerates all 316 OOS shifts while recomputing the transaction-cost path. Raw MDD improves for 5/6 factors, but the exposure-matched production MDD gap is positive only for MOM. MOM has exact phase-null p=0.1582 and Holm-adjusted p=0.9494; 0/6 factors survive at either 5% or 10%. This is no detected evidence of drawdown timing skill, not proof that timing skill is absent. The scale-dependent raw-mean DM statistic remains diagnostic only and is excluded from the primary gate. Two independent fresh-context auditors reconstructed the full 6x316 shift population and the primary Codex path verified code, artifacts, hashes, and claims.",
+    "evidence": [
+      "experiments/k1702/k1702_results.json",
+      "experiments/k1702/README.md",
+      "experiments/k1702/k1702.py",
+      "experiments/k1702/summary_table.csv",
+      "OOS 2000-01 through 2026-04; n=316 months; common daily n=15,813; seed=42",
+      "primary gate: positive Sharpe delta=1/6; paired bootstrap positive BH-FDR=0/6; spanning-alpha t positive BH-FDR=0/6; both-subperiod positive=1/6",
+      "drawdown: raw MDD improved=5/6; exposure-matched production gap positive=1/6; circular-shift Holm survivors=0/6 at 5% and 10%",
+      "MOM phase-null exact p=0.158228; Holm p=0.949367; all 316 shifts enumerated",
+      "artifact verification: 224 summary rows; 56 inference rows; 65 HAC rows; 1,896 phase-shift cells; script and artifact SHA-256 verified"
+    ],
+    "confidence": 0.92,
+    "experiment_path": "experiments/k1702",
+    "supersedes_review_state": "K1702 CONDITIONAL_PASS entry with reviewer_source=code-reviewer subagent fallback",
+    "created_at": "2026-07-13T09:29:50.981154+08:00"
   }
 ]
