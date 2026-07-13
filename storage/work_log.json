@@ -17072,5 +17072,16 @@
     "owner": "codex",
     "backfilled_at": "2026-07-13T17:45:22.994287+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-14T02:17:59+08:00",
+    "actor": "hourly-02",
+    "task_type": "platform_ops",
+    "task_id": "platform-ops-loophealth-signature-granularity",
+    "title": "loop-health error_recurrence 根因級 signature",
+    "outcome": "succeeded",
+    "topology_override": "subagent→inline（診斷已在主線程完成：讀完 loop_health.py + 實測真實 log 訊號；派 subagent 只會重推導一遍且易偏離規格）",
+    "commit": "4541e1266",
+    "result": "git_push_backup 由 1 桶 exit1(count=33) 拆成 3 個根因 signature（push_held_guard=15/auth=3/mojibake=2），auth 標 recovered；recurrence_rate 只算 active（0.583→0.0，假 degrading 消失）；另修 duplicate exit banner 灌水 2x + top_recurring 擠掉 active 訊號。24 tests passed（6/7 新測試在舊碼 FAIL），dreaming 下游 67 passed，silent-fallback audit new=0。"
   }
 ]
