@@ -1,0 +1,543 @@
+{
+  "generated_at_tw": "2026-07-13 12:00:40",
+  "as_of_date": "2026-07-13",
+  "policy": {
+    "status": "行政院通過草案，已送立法院並付委；尚未完成立法",
+    "budget_ceiling_twd": 210000000000,
+    "implementation_period": "2026-08 至 2031-12",
+    "small_expendable_usv_planned_quantity": 1320,
+    "next_scheduled_committee_hearing": "2026-07-16",
+    "source_urls": [
+      "https://www.mnd.gov.tw/news/announcement/86952",
+      "https://ppg.ly.gov.tw/ppg/bills/202110223090000/details",
+      "https://ppg.ly.gov.tw/ppg/sittings/2026070904/details?meetingDate=115%2F07%2F16",
+      "https://www.ey.gov.tw/File/39A867B74E2BA985?A=C"
+    ],
+    "interpretation_limit": "上限、計畫數量與法案進度都不是個別公司的已得標訂單。"
+  },
+  "certification_check": {
+    "checked_at": "2026-07-13",
+    "source_url": "https://www.auvsi.org/certification-training/green-uas/cleared-list/",
+    "result": "查核當日公開 Green UAS Cleared List 未見本文十家公司或其台灣平台名稱。",
+    "interpretation_limit": "未列入公開清單不等於產品不合格；只代表本文不能宣稱已取得該項認證。"
+  },
+  "price_window_requested": {
+    "start": "2025-06-30",
+    "end_exclusive": "2026-07-11"
+  },
+  "price_window_common": {
+    "start": "2025-06-30",
+    "end": "2026-07-09",
+    "observations": 250,
+    "reason": "公平比較採十家公司與加權指數都有還原收盤價的日期交集。"
+  },
+  "data_source": "yfinance adjusted close (auto_adjust=True) and annual income statement; policy and company stages use the attached official/public primary source URLs",
+  "method": {
+    "return": "common-window adjusted-close total return",
+    "volatility": "daily log-return standard deviation * sqrt(252)",
+    "basket": "ten-company equal-weight daily log return, rebalanced daily, no costs",
+    "financials": "latest two or three annual income statements available from yfinance",
+    "disclosure_stage": "highest public stage found by 2026-07-13; mutually exclusive, not an investment rating"
+  },
+  "summary": {
+    "n_companies": 10,
+    "n_mass_production_or_delivered": 2,
+    "n_product_prototype_or_collaboration": 6,
+    "n_qualification_or_capability": 2,
+    "n_with_separately_disclosed_uav_usv_revenue_share": 0,
+    "n_with_public_binding_uav_usv_order_value_in_checked_sources": 0,
+    "n_positive_revenue_growth": 8,
+    "n_operating_loss": 3,
+    "median_revenue_yoy": 0.11115499319795275,
+    "median_operating_margin": 0.04830487339185992,
+    "basket_return_common_window": 0.5786750765182614,
+    "basket_annualized_volatility": 0.3537709884260601,
+    "twii_return_common_window": 1.037858086497315,
+    "twii_annualized_volatility": 0.23474666033177952,
+    "return_gap_basket_minus_twii": -0.4591830099790536,
+    "stage_counts": {
+      "量產或已交付": 2,
+      "產品、原型或合作": 6,
+      "資格或能力": 2
+    }
+  },
+  "companies": [
+    {
+      "name": "雷虎",
+      "ticker": "8033.TW",
+      "segment": "空中載具整合",
+      "highest_public_stage": "直接產品／原型／合作",
+      "stage_group": "產品、原型或合作",
+      "evidence": "官網列有空中、陸上與水面無人系統；漢翔揭露雙方共同開發 T-400 原型機。",
+      "source_urls": [
+        "https://www.thundertiger.com/tw/index.html",
+        "https://www.aidc.com.tw/tw/news/618"
+      ],
+      "visibility": "可確認產品與原型合作；查核來源未揭露具約束力訂單金額或無人載具營收占比。",
+      "price_start": 59.599998474121094,
+      "price_end": 227.0,
+      "common_window_return": 2.808724929725722,
+      "annualized_volatility": 0.663483899162379,
+      "separate_uav_usv_revenue_share_disclosed": false,
+      "binding_uav_usv_order_value_disclosed": false,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.14373334040073793,
+      "by_year": {
+        "2025": {
+          "revenue": 1424123000.0,
+          "gross_profit": 531702000.0,
+          "operating_income": -37382000.0,
+          "net_income": 87643000.0,
+          "gross_margin": 0.3733539869800572,
+          "operating_margin": -0.026249137188290618
+        },
+        "2024": {
+          "revenue": 1245153000.0,
+          "gross_profit": 529000000.0,
+          "operating_income": 38467000.0,
+          "net_income": 71759000.0,
+          "gross_margin": 0.42484738823261076,
+          "operating_margin": 0.030893392217663213
+        },
+        "2023": {
+          "revenue": 985135000.0,
+          "gross_profit": 391006000.0,
+          "operating_income": -55814000.0,
+          "net_income": -25872000.0,
+          "gross_margin": 0.39690600780603674,
+          "operating_margin": -0.05665619432869607
+        }
+      }
+    },
+    {
+      "name": "漢翔",
+      "ticker": "2634.TW",
+      "segment": "空中載具整合",
+      "highest_public_stage": "共同開發／量產規劃",
+      "stage_group": "產品、原型或合作",
+      "evidence": "公司揭露 T-400、AIxVNAV、V-BAT 等合作，以及建立量產基地的規劃。",
+      "source_urls": [
+        "https://www.aidc.com.tw/tw/military/drone",
+        "https://www.aidc.com.tw/tw/news/13638",
+        "https://www.aidc.com.tw/tw/news/618"
+      ],
+      "visibility": "公司整體在手訂單不等於無人機訂單；查核來源未拆分無人載具營收或具約束力訂單金額。",
+      "price_start": 41.25654220581055,
+      "price_end": 58.0,
+      "common_window_return": 0.4058376417166467,
+      "annualized_volatility": 0.42002051541510893,
+      "separate_uav_usv_revenue_share_disclosed": false,
+      "binding_uav_usv_order_value_disclosed": false,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": -0.0987888017064279,
+      "by_year": {
+        "2025": {
+          "revenue": 35452130000.0,
+          "gross_profit": 2532089000.0,
+          "operating_income": 1172854000.0,
+          "net_income": 733068000.0,
+          "gross_margin": 0.07142276077629187,
+          "operating_margin": 0.033082751304364506
+        },
+        "2024": {
+          "revenue": 39338315000.0,
+          "gross_profit": 3724445000.0,
+          "operating_income": 2218459000.0,
+          "net_income": 2168067000.0,
+          "gross_margin": 0.09467728854171817,
+          "operating_margin": 0.05639435751124572
+        },
+        "2023": {
+          "revenue": 39100002000.0,
+          "gross_profit": 4357949000.0,
+          "operating_income": 2785472000.0,
+          "net_income": 2225899000.0,
+          "gross_margin": 0.1114564904625836,
+          "operating_margin": 0.07123968945065527
+        }
+      }
+    },
+    {
+      "name": "亞航",
+      "ticker": "2630.TW",
+      "segment": "組裝／維修",
+      "highest_public_stage": "組裝／維修能力",
+      "stage_group": "資格或能力",
+      "evidence": "年報揭露光纖陀螺儀契約生產、無人機組裝能力與無人機維修布局。",
+      "source_urls": [
+        "https://www.airasia.com.tw/userfiles/03.Investor_Relations/%E4%BA%9E%E8%88%AA114%E5%B9%B4%E5%A0%B1.pdf"
+      ],
+      "visibility": "能力與既有軍機維修合約不能直接視為無人機訂單；未拆分無人載具營收。",
+      "price_start": 33.89236831665039,
+      "price_end": 53.900001525878906,
+      "common_window_return": 0.5903285666643519,
+      "annualized_volatility": 0.5141002846858135,
+      "separate_uav_usv_revenue_share_disclosed": false,
+      "binding_uav_usv_order_value_disclosed": false,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.04885601231986736,
+      "by_year": {
+        "2025": {
+          "revenue": 5454110000.0,
+          "gross_profit": 564525000.0,
+          "operating_income": 299435000.0,
+          "net_income": 209725000.0,
+          "gross_margin": 0.10350451311029664,
+          "operating_margin": 0.05490079958049984
+        },
+        "2024": {
+          "revenue": 5200056000.0,
+          "gross_profit": 462359000.0,
+          "operating_income": 197395000.0,
+          "net_income": 140609000.0,
+          "gross_margin": 0.0889142347697794,
+          "operating_margin": 0.03796016812126639
+        },
+        "2023": {
+          "revenue": 4863682000.0,
+          "gross_profit": 337426000.0,
+          "operating_income": 99018000.0,
+          "net_income": 57120000.0,
+          "gross_margin": 0.069376657437719,
+          "operating_margin": 0.02035865009266642
+        }
+      }
+    },
+    {
+      "name": "長榮航太",
+      "ticker": "2645.TW",
+      "segment": "供應商／維修",
+      "highest_public_stage": "供應商資格",
+      "stage_group": "資格或能力",
+      "evidence": "股東會手冊揭露已取得國防部軍商船用監偵型無人機供應商資格。",
+      "source_urls": [
+        "https://www.egat.com.tw/documents/290/EGAT-2025_Annual_General_Shareholders_Meeting_HandbookCh.pdf"
+      ],
+      "visibility": "取得資格不代表得標、交貨或認列營收；查核來源未揭露相關金額。",
+      "price_start": 98.38516998291016,
+      "price_end": 235.0,
+      "common_window_return": 1.388571367420723,
+      "annualized_volatility": 0.49145125611437684,
+      "separate_uav_usv_revenue_share_disclosed": false,
+      "binding_uav_usv_order_value_disclosed": false,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.11634898216095069,
+      "by_year": {
+        "2025": {
+          "revenue": 18179185000.0,
+          "gross_profit": 3696603000.0,
+          "operating_income": 3000978000.0,
+          "net_income": 2044756000.0,
+          "gross_margin": 0.2033426140940862,
+          "operating_margin": 0.1650776973775227
+        },
+        "2024": {
+          "revenue": 16284500000.0,
+          "gross_profit": 3120261000.0,
+          "operating_income": 2430797000.0,
+          "net_income": 1837104000.0,
+          "gross_margin": 0.19160926033958672,
+          "operating_margin": 0.1492705947373269
+        },
+        "2023": {
+          "revenue": 14781798000.0,
+          "gross_profit": 2640105000.0,
+          "operating_income": 1988788000.0,
+          "net_income": 1833032000.0,
+          "gross_margin": 0.1786051331509198,
+          "operating_margin": 0.13454303732198208
+        }
+      }
+    },
+    {
+      "name": "中光電",
+      "ticker": "5371.TWO",
+      "segment": "整機／光電酬載",
+      "highest_public_stage": "量產／海外出貨",
+      "stage_group": "量產或已交付",
+      "evidence": "永續報告揭露取得軍用無人機採購案，並量產出貨熱顯像無人機至澳洲。",
+      "source_urls": [
+        "https://www.coretronic-robotics.com/index",
+        "https://www.coretronic.com/en/csr/report/my5Aay/download/2024-Sustainability-Report_EN.pdf"
+      ],
+      "visibility": "可確認海外量產出貨；查核來源未拆分無人載具營收占比或具約束力訂單金額。",
+      "price_start": 52.826480865478516,
+      "price_end": 93.19999694824219,
+      "common_window_return": 0.7642666219916097,
+      "annualized_volatility": 0.5965368541720794,
+      "separate_uav_usv_revenue_share_disclosed": false,
+      "binding_uav_usv_order_value_disclosed": false,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": -0.0023262026416988046,
+      "by_year": {
+        "2025": {
+          "revenue": 39576665000.0,
+          "gross_profit": 6829674000.0,
+          "operating_income": -137710000.0,
+          "net_income": 371914000.0,
+          "gross_margin": 0.17256820401617973,
+          "operating_margin": -0.0034795756539870147
+        },
+        "2024": {
+          "revenue": 39668943000.0,
+          "gross_profit": 7050165000.0,
+          "operating_income": 173685000.0,
+          "net_income": 820326000.0,
+          "gross_margin": 0.17772505307237452,
+          "operating_margin": 0.004378362186257395
+        },
+        "2023": {
+          "revenue": 39491708000.0,
+          "gross_profit": 7871701000.0,
+          "operating_income": 941541000.0,
+          "net_income": 1391923000.0,
+          "gross_margin": 0.19932541281830607,
+          "operating_margin": 0.023841485913954394
+        }
+      }
+    },
+    {
+      "name": "神基",
+      "ticker": "3005.TW",
+      "segment": "地面控制站",
+      "highest_public_stage": "直接產品",
+      "stage_group": "產品、原型或合作",
+      "evidence": "公司 2026-03 發表 CommandCore，可控制 UAV、USV 與 UGV，並有完整地面站產品頁。",
+      "source_urls": [
+        "https://www.getac.com/us/news/getac-announces-commandcore-remote-drone-control-solution/",
+        "https://www.getac.com/tw/products/laptops/Ground-Control-Stations/"
+      ],
+      "visibility": "可確認商用產品；查核來源未揭露無人載具營收占比或確定訂單金額。",
+      "price_start": 105.06625366210938,
+      "price_end": 112.0,
+      "common_window_return": 0.06599403801138082,
+      "annualized_volatility": 0.33717589187627134,
+      "separate_uav_usv_revenue_share_disclosed": false,
+      "binding_uav_usv_order_value_disclosed": false,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.1059610042349548,
+      "by_year": {
+        "2025": {
+          "revenue": 39447844000.0,
+          "gross_profit": 12546741000.0,
+          "operating_income": 6197813000.0,
+          "net_income": 5226971000.0,
+          "gross_margin": 0.3180589793449802,
+          "operating_margin": 0.1571141124975043
+        },
+        "2024": {
+          "revenue": 35668386000.0,
+          "gross_profit": 11327689000.0,
+          "operating_income": 5202118000.0,
+          "net_income": 4447803000.0,
+          "gross_margin": 0.3175834477063246,
+          "operating_margin": 0.14584674506998999
+        },
+        "2023": {
+          "revenue": 34792557000.0,
+          "gross_profit": 9735429000.0,
+          "operating_income": 3966563000.0,
+          "net_income": 3744542000.0,
+          "gross_margin": 0.2798135532263409,
+          "operating_margin": 0.11400607894383848
+        }
+      }
+    },
+    {
+      "name": "融程電",
+      "ticker": "3416.TW",
+      "segment": "地面控制站",
+      "highest_public_stage": "直接產品",
+      "stage_group": "產品、原型或合作",
+      "evidence": "公司公開 UAV 地面控制站，2026-05 再推出整合式 drone kit solution。",
+      "source_urls": [
+        "https://www.winmate.com/StaticPages/newsletter/News_UAV-ground-control_20230504_Winmate-HQ_Global-EN.html",
+        "https://www.winmate.com/en/StaticPages/Newsletter/drone-kit-solution-20260528-News_Winmate-HQ_Global-EN.html"
+      ],
+      "visibility": "可確認商用產品；查核來源未揭露無人載具營收占比或確定訂單金額。",
+      "price_start": 129.8987579345703,
+      "price_end": 181.5,
+      "common_window_return": 0.39724199742865207,
+      "annualized_volatility": 0.37331542699569115,
+      "separate_uav_usv_revenue_share_disclosed": false,
+      "binding_uav_usv_order_value_disclosed": false,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.19067603565535762,
+      "by_year": {
+        "2025": {
+          "revenue": 3640617000.0,
+          "gross_profit": 1450830000.0,
+          "operating_income": 690909000.0,
+          "net_income": 591003000.0,
+          "gross_margin": 0.3985121203356464,
+          "operating_margin": 0.18977799642203505
+        },
+        "2024": {
+          "revenue": 3057605000.0,
+          "gross_profit": 1222555000.0,
+          "operating_income": 609036000.0,
+          "net_income": 559453000.0,
+          "gross_margin": 0.39984072501189655,
+          "operating_margin": 0.1991872723912997
+        },
+        "2023": {
+          "revenue": 2598533000.0,
+          "gross_profit": 1039004000.0,
+          "operating_income": 580110000.0,
+          "net_income": 505952000.0,
+          "gross_margin": 0.3998425265332401,
+          "operating_margin": 0.22324519257596498
+        }
+      }
+    },
+    {
+      "name": "龍德造船",
+      "ticker": "6753.TW",
+      "segment": "無人艇",
+      "highest_public_stage": "已交付",
+      "stage_group": "量產或已交付",
+      "evidence": "公司沿革明載已交付兩艘無人水面載具。",
+      "source_urls": [
+        "https://www.lungteh.com/zh/about-us"
+      ],
+      "visibility": "可確認交付紀錄；頁面未揭露軍用小型自殺無人艇訂單或無人艇營收占比。",
+      "price_start": 97.85205841064453,
+      "price_end": 148.0,
+      "common_window_return": 0.5124873447107812,
+      "annualized_volatility": 0.5655438724097975,
+      "separate_uav_usv_revenue_share_disclosed": false,
+      "binding_uav_usv_order_value_disclosed": false,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.02485856833649791,
+      "by_year": {
+        "2025": {
+          "revenue": 5246333000.0,
+          "gross_profit": 1044457000.0,
+          "operating_income": 857204000.0,
+          "net_income": 683741000.0,
+          "gross_margin": 0.19908324538301325,
+          "operating_margin": 0.16339107715808357
+        },
+        "2024": {
+          "revenue": 5119080000.0,
+          "gross_profit": 1164404000.0,
+          "operating_income": 1005162000.0,
+          "net_income": 706623000.0,
+          "gross_margin": 0.2274635286027958,
+          "operating_margin": 0.19635598584120584
+        },
+        "2023": {
+          "revenue": 4987411000.0,
+          "gross_profit": 954115000.0,
+          "operating_income": 804589000.0,
+          "net_income": 574998000.0,
+          "gross_margin": 0.19130466689029638,
+          "operating_margin": 0.16132398152067276
+        }
+      }
+    },
+    {
+      "name": "台船",
+      "ticker": "2208.TW",
+      "segment": "無人艇",
+      "highest_public_stage": "原型／規劃",
+      "stage_group": "產品、原型或合作",
+      "evidence": "公司刊物收錄無人船原型與非紅供應鏈規劃。",
+      "source_urls": [
+        "https://www.csbcnet.com.tw/monthly_pub/files/009%E5%8F%B0%E8%88%B9%EF%BC%9A%E7%84%A1%E4%BA%BA%E8%88%B9%E4%BC%B0%E4%BB%8A%E5%B9%B4%E9%A6%96%E5%AD%A3%E4%BA%AE%E7%9B%B8%20100%E8%B6%B4%E5%8E%BB%E7%B4%85%E5%8C%96%E4%BE%9B%E6%87%89%E9%8F%88%281%29.pdf"
+      ],
+      "visibility": "屬原型與路線圖；查核來源未揭露具約束力軍用無人艇訂單金額。",
+      "price_start": 18.200000762939453,
+      "price_end": 19.75,
+      "common_window_return": 0.0851647896749983,
+      "annualized_volatility": 0.4839875132003339,
+      "separate_uav_usv_revenue_share_disclosed": false,
+      "binding_uav_usv_order_value_disclosed": false,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.5026716967656424,
+      "by_year": {
+        "2025": {
+          "revenue": 21780245000.0,
+          "gross_profit": -2211700000.0,
+          "operating_income": -2929844000.0,
+          "net_income": -2259943000.0,
+          "gross_margin": -0.10154614881513041,
+          "operating_margin": -0.13451841336036394
+        },
+        "2024": {
+          "revenue": 14494347000.0,
+          "gross_profit": -3057298000.0,
+          "operating_income": -3712431000.0,
+          "net_income": -2779850000.0,
+          "gross_margin": -0.21093037168214615,
+          "operating_margin": -0.256129579345658
+        },
+        "2023": {
+          "revenue": 21476365000.0,
+          "gross_profit": -2411316000.0,
+          "operating_income": -3161985000.0,
+          "net_income": -4030606000.0,
+          "gross_margin": -0.11227765965050417,
+          "operating_margin": -0.1472309210613621
+        }
+      }
+    },
+    {
+      "name": "中信造船",
+      "ticker": "2644.TWO",
+      "segment": "無人艇",
+      "highest_public_stage": "原型／研發",
+      "stage_group": "產品、原型或合作",
+      "evidence": "公司公開中信五號智慧無人船，股東會手冊列出無人船研發投資。",
+      "source_urls": [
+        "https://www.jongshyn.com/news_info.asp?id=71",
+        "https://www.jongshyn.com/upload/ckeditor/files/2_%E4%B8%AD%E4%BF%A1115%E5%B9%B4%E8%82%A1%E6%9D%B1%E5%B8%B8%E6%9C%83%E8%AD%B0%E4%BA%8B%E6%89%8B%E5%86%8A%E4%B8%8A%E5%82%B3%E7%89%88.pdf"
+      ],
+      "visibility": "可確認原型與研發；既有海巡船訂單不可視為無人艇訂單。",
+      "price_start": 77.28118896484375,
+      "price_end": 84.69999694824219,
+      "common_window_return": 0.09599759117025686,
+      "annualized_volatility": 0.3973825650228005,
+      "separate_uav_usv_revenue_share_disclosed": false,
+      "binding_uav_usv_order_value_disclosed": false,
+      "latest_fy": 2025,
+      "previous_fy": 2024,
+      "revenue_yoy": 0.26909026086808896,
+      "by_year": {
+        "2025": {
+          "revenue": 6129692000.0,
+          "gross_profit": 433520000.0,
+          "operating_income": 255663000.0,
+          "net_income": 29535000.0,
+          "gross_margin": 0.0707245975817382,
+          "operating_margin": 0.04170894720322
+        },
+        "2024": {
+          "revenue": 4829989000.0,
+          "gross_profit": 298438000.0,
+          "operating_income": 128514000.0,
+          "net_income": 37154000.0,
+          "gross_margin": 0.061788546516358525,
+          "operating_margin": 0.026607514012971872
+        },
+        "2023": {
+          "revenue": 4310544000.0,
+          "gross_profit": 321452000.0,
+          "operating_income": 153390000.0,
+          "net_income": 33992000.0,
+          "gross_margin": 0.0745734181114959,
+          "operating_margin": 0.03558483569591216
+        }
+      }
+    }
+  ]
+}
