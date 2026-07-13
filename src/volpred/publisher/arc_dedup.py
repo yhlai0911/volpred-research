@@ -26,9 +26,11 @@ Callers:
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -799,6 +801,64 @@ def _arc_item_audience(item: dict) -> str:
     return "uncategorized"
 
 
+_SERIES_REGISTRY_PATH = (
+    Path(__file__).resolve().parents[3] / "config" / "article_series.json"
+)
+_SERIES_PREFIX_CACHE: list[str] | None = None
+
+
+def _series_prefixes() -> list[str]:
+    """Registered title_prefix series (config/article_series.json is the SoT)."""
+    global _SERIES_PREFIX_CACHE
+    if _SERIES_PREFIX_CACHE is None:
+        prefixes: list[str] = []
+        try:
+            raw = json.loads(_SERIES_REGISTRY_PATH.read_text(encoding="utf-8"))
+            for spec in (raw.get("series") or {}).values():
+                prefix = str(spec.get("prefix") or "").strip()
+                if prefix and spec.get("branding") == "title_prefix":
+                    prefixes.append(prefix)
+        except Exception as exc:
+            LOG.warning(
+                "arc_dedup series registry unreadable path=%s (%s: %s) — series exemption off",
+                _SERIES_REGISTRY_PATH, type(exc).__name__, exc,
+            )
+        _SERIES_PREFIX_CACHE = prefixes
+    return _SERIES_PREFIX_CACHE
+
+
+def _series_of(title: str) -> str | None:
+    t = (title or "").strip()
+    for prefix in _series_prefixes():
+        if t.startswith(prefix):
+            return prefix
+        # 前綴的 emoji 可能被去掉/換掉，退回比對「系列名｜」部分
+        name_part = prefix.split(" ", 1)[-1]
+        if name_part and t.startswith(name_part):
+            return prefix
+    return None
+
+
+def _same_series_different_episode(
+    new_title: str, old_title: str, shared_refs: set[str]
+) -> bool:
+    """Two chapters of the SAME registered series are not duplicates of each other.
+
+    Boss directive 2026-07-13 (Telegram msg 662): a multi-part series published in
+    one week is by design a sequence of chapters over one entity family with one
+    conclusion family — exactly the shape arc dedup is built to catch. Blocking a
+    series is a false positive. But we do NOT open a blanket hole: the exemption
+    only applies when the two episode titles are genuinely different AND they do
+    not rest on the same experiment refs (which is what a real re-run looks like).
+    """
+    series = _series_of(new_title)
+    if not series or series != _series_of(old_title):
+        return False
+    if shared_refs:
+        return False
+    return _title_jaccard(new_title, old_title) < 0.6
+
+
 def find_arc_duplicates(
     title: str,
     content: str,
@@ -900,6 +960,12 @@ def find_arc_duplicates(
         ex_horizon = str(ex_sig.get("time_horizon") or "unspecified")
         ex_refs = _refs_from_feed_item(existing)
         shared_refs = new_ref_set & ex_refs
+        if _same_series_different_episode(title, existing.get("title", ""), shared_refs):
+            LOG.info(
+                "arc_dedup series exemption: %r vs %r (same registered series, different episode)",
+                title, existing.get("title", ""),
+            )
+            continue
         axis_raw_backstop = False
         legacy_fuzzy_match = False
 

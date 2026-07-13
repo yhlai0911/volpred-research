@@ -17,6 +17,7 @@ from volpred.publisher.arc_dedup import (
     classify_time_horizon,
     extract_entities,
     find_arc_duplicates,
+    _same_series_different_episode,
 )
 
 
@@ -906,3 +907,47 @@ def test_audience_omitted_keeps_cross_audience_behaviour():
         new_refs=["K1574"],
     )
     assert dups, "audience=None must not silently narrow the corpus"
+
+
+# --- Registered-series episode exemption (boss Telegram msg 662, 2026-07-13) ---
+# A multi-part series published inside one week is by design a sequence of
+# chapters over one entity family with one conclusion family — the exact shape
+# the arc gate is built to catch. Blocking a series is a false positive.
+
+def _series_episode(title: str, published_at: str = "2026-07-13T02:00:00+00:00") -> dict:
+    return {
+        "id": "mile_series_" + str(abs(hash(title)) % 10**6),
+        "title": title,
+        "summary": "台灣無人機供應鏈與大盤的報酬與波動比較，無人機題材沒有帶來超額報酬。",
+        "published_at": published_at,
+        "status": "published",
+        "audience": "general",
+    }
+
+
+def test_same_series_different_episode_not_blocked():
+    existing = [
+        _series_episode("🛩️ 無人載具｜EP1：上游 87% 的營收集中在三家晶片廠"),
+        _series_episode("🛩️ 無人載具｜EP2：八家都能碰到機體、電池或馬達，零家拆出無人機營收"),
+    ]
+    dups = find_arc_duplicates(
+        "🛩️ 無人載具｜EP5：下游整機廠訂單能見度只有兩家撐得住",
+        "台灣無人機下游整機廠的訂單與量產進度，與大盤比較報酬與波動。",
+        existing, days=14,
+    )
+    assert not dups, "registered-series episodes must not dedup against each other"
+
+
+def test_same_series_same_episode_still_blocked():
+    """The exemption is per-episode, not a blanket hole: republishing the same
+    episode (near-identical title) must still be caught."""
+    title = "🛩️ 無人載具｜EP2：八家都能碰到機體、電池或馬達，零家拆出無人機營收"
+    existing = [_series_episode(title)]
+    assert _same_series_different_episode(title, title, set()) is False
+
+
+def test_series_exemption_off_when_experiment_refs_shared():
+    a = "🧪 迷思實驗室｜VIX 破 30 抄底，勝率其實沒比較高"
+    b = "🧪 迷思實驗室｜恐慌指數衝高就進場？十年資料說不行"
+    assert _same_series_different_episode(a, b, set()) is True
+    assert _same_series_different_episode(a, b, {"K1633"}) is False
