@@ -471,6 +471,108 @@ def _build_ci_repair_task(run: dict, *, now_iso: str) -> dict:
     }
 
 
+def _ci_local_ahead(run: dict) -> dict:
+    """Does this machine hold commits GitHub has never seen?
+
+    While main is red, the repair commit lives locally until something pushes it.
+    Nothing did: `push_backlog` only fires at 3h, the push-backup cron runs hourly
+    on its own clock, and the red run itself is `already_handled` after the first
+    tick. 2026-07-13 (boss msg 677) that gap ran 75 minutes with CI re-testing
+    stale code and the boss collecting failure mail the whole time.
+    """
+    import subprocess
+
+    def _git(*args: str) -> str | None:
+        try:
+            proc = subprocess.run(["git", *args], capture_output=True, text=True,
+                                  timeout=30, cwd=str(PROJECT_ROOT))
+        except Exception as exc:  # noqa: BLE001
+            warn("ci_watch", "git probe error", args=" ".join(args), err=str(exc))
+            return None
+        if proc.returncode != 0:
+            warn("ci_watch", "git probe failed", args=" ".join(args),
+                 rc=proc.returncode, stderr_tail=(proc.stderr or "")[-160:])
+            return None
+        return proc.stdout.strip()
+
+    ahead_raw = _git("rev-list", "--count", "origin/main..main")
+    head_sha = _git("rev-parse", "main")
+    if ahead_raw is None or head_sha is None:
+        return {"probe_ok": False, "ahead": 0}
+    try:
+        ahead = int(ahead_raw)
+    except ValueError:
+        warn("ci_watch", "git rev-list count not an int", raw=ahead_raw[:40])
+        return {"probe_ok": False, "ahead": 0}
+    run_sha = run.get("headSha") or ""
+    return {
+        "probe_ok": True,
+        "ahead": ahead,
+        "head_sha": head_sha,
+        "run_sha": run_sha,
+        # CI already tested this exact tree → pushing changes nothing; the red is real.
+        "ci_saw_head": bool(run_sha) and run_sha == head_sha,
+    }
+
+
+def _ci_push_local_commits() -> dict:
+    """Push via the existing backup script — same pre-push gates, no bypass."""
+    import subprocess
+
+    from volpred.ops.alerts import _PUSH_HELD_EXIT_CODE  # single source for exit 120
+
+    script = PROJECT_ROOT / "scripts" / "cron_git_push_backup.sh"
+    try:
+        proc = subprocess.run(["bash", str(script)], capture_output=True, text=True,
+                              timeout=300, cwd=str(PROJECT_ROOT))
+    except Exception as exc:  # noqa: BLE001
+        warn("ci_watch", "push script error", err=str(exc))
+        return {"pushed": False, "rc": None, "outcome": "error", "err": str(exc)}
+    rc = proc.returncode
+    if rc == 0:
+        return {"pushed": True, "rc": 0, "outcome": "pushed"}
+    if rc == _PUSH_HELD_EXIT_CODE:
+        # Guard held on purpose (new silent fallback at HEAD). Never bypass it —
+        # surface the hold so the class fix, not the push, is the next action.
+        warn("ci_watch", "push HELD by pre-push gate while CI is red",
+             rc=rc, hint="scripts/audit_silent_fallbacks.py --strict")
+        return {"pushed": False, "rc": rc, "outcome": "held"}
+    warn("ci_watch", "push failed while CI is red", rc=rc,
+         stderr_tail=(proc.stderr or "")[-200:])
+    return {"pushed": False, "rc": rc, "outcome": "failed"}
+
+
+def _remediate_unpushed_fix(run: dict, *, ahead_probe=None, pusher=None) -> dict:
+    """Red CI + local commits GitHub hasn't seen → push them now."""
+    probe = (ahead_probe or _ci_local_ahead)(run)
+    if not probe.get("probe_ok"):
+        return {"attempted": False, "reason": "git_probe_failed"}
+    if probe.get("ahead", 0) <= 0:
+        return {"attempted": False, "reason": "nothing_unpushed"}
+    if probe.get("ci_saw_head"):
+        return {"attempted": False, "reason": "ci_already_tested_head",
+                "ahead": probe["ahead"]}
+    result = (pusher or _ci_push_local_commits)()
+    return {"attempted": True, "ahead": probe["ahead"],
+            "head_sha": (probe.get("head_sha") or "")[:9], **result}
+
+
+def _ci_push_body_line(push: dict) -> str:
+    """One boss-readable line about the unpushed-fix remediation."""
+    if not push.get("attempted"):
+        return ""
+    outcome = push.get("outcome")
+    ahead = push.get("ahead")
+    if outcome == "pushed":
+        return (f"另：本地有 {ahead} 個 CI 沒看過的 commit（含可能的修復），已自動 push，"
+                "GitHub 會用新碼重跑。\n")
+    if outcome == "held":
+        return (f"另：本地有 {ahead} 個未 push 的 commit，但 pre-push 品質閘門擋下（HEAD 帶新的 "
+                "silent fallback）。系統不繞過閘門；修復任務會先清掉違規再推。\n")
+    return (f"另：本地有 {ahead} 個未 push 的 commit，自動 push 失敗（rc={push.get('rc')}）；"
+            "修復任務會處理。\n")
+
+
 def _handle_ci_run(
     run: dict,
     *,
@@ -478,6 +580,8 @@ def _handle_ci_run(
     next_tasks_path: Path = CI_NEXT_TASKS,
     state_path: Path = CI_WATCH_STATE,
     sender=None,
+    ahead_probe=None,
+    pusher=None,
 ) -> dict:
     """Pure decision core (injectable for tests): red run → P1 task + critical alert."""
     run_id = run.get("databaseId")
@@ -495,9 +599,18 @@ def _handle_ci_run(
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
         return summary
 
+    # Push BEFORE the dedup gate. The unpushed-fix window lives entirely inside
+    # `already_handled` territory: the run stays the newest completed one until a
+    # push produces a newer one, so anything behind the gate never runs again.
+    push = _remediate_unpushed_fix(run, ahead_probe=ahead_probe, pusher=pusher)
+    summary["push"] = push
+    state["last_push_remediation"] = {**push, "at": now_iso}
+
     task = _build_ci_repair_task(run, now_iso=now_iso)
     if state.get("last_task_id") == task["id"]:
         summary["reason"] = "already_handled"
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+        state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
         return summary
     try:
         summary["task_added"] = _append_next_task_locked(task, next_tasks_path)
@@ -515,7 +628,8 @@ def _handle_ci_run(
         "CI 紅 = 之後所有 push 失去回歸保護；紅燈只有老闆看得到 = 巡檢缺口。\n\n"
         "## 系統已自動執行\n"
         f"已建 P1 修復任務 {task['id']}（pending queue 隊首），dispatch-supervisor 下一 tick 即派工；"
-        "任務含失敗 log 取得步驟與 codex(gpt-5.6-sol) 第二實作路徑。無需老闆行動。"
+        "任務含失敗 log 取得步驟與 codex(gpt-5.6-sol) 第二實作路徑。無需老闆行動。\n"
+        f"{_ci_push_body_line(push)}"
     )
     try:
         sent = sender("critical", f"CI 紅燈（run {run_id}）→ 已自動建 P1 修復任務", body,
@@ -832,6 +946,7 @@ def main() -> int:
         f"  ci-watch: run={ci_watch.get('run_id')} "
         f"conclusion={ci_watch.get('conclusion')} "
         f"task_added={ci_watch.get('task_added')} "
+        f"push={(ci_watch.get('push') or {}).get('outcome') or (ci_watch.get('push') or {}).get('reason') or '-'} "
         f"reason={ci_watch.get('reason') or 'ok'}"
     )
     print(
