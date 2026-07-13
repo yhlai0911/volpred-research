@@ -1705,6 +1705,14 @@ def main() -> int:
         return 0
 
     details_payload: dict[str, object] = {"experiment_refs": refs}
+    # Delivery receipt. Until this existed, nothing linked a draft file to the
+    # article it became — "has this draft shipped?" could only be answered by
+    # matching titles, and the drafts it could not answer for were the ones that
+    # got written off as orphans (boss msg 624). With the back-link,
+    # `scripts/reap_orphan_deliverables.py` can tell "already delivered" from
+    # "finished but never registered" by lookup instead of by guess.
+    if draft_path.is_relative_to(ROOT):
+        details_payload["source_draft"] = str(draft_path.relative_to(ROOT))
     if image_url_field:
         # Persist HTTPS image_url so frontend list/share previews use the
         # canonical URL (frontend reads this top-level field). Surfaces that

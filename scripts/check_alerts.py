@@ -214,6 +214,52 @@ def _auto_remediate_publish_drought() -> dict:
         return {"attempted": False, "error": str(exc)}
 
 
+def _auto_reap_orphan_deliverables() -> dict:
+    """2026-07-13 boss msg 624: a finished article must never end up discarded.
+
+    Same shape as `_auto_remediate_publish_drought` above, and for the same reason:
+    a producer outside the fire lane (a codex-vscode session, an async render job)
+    can write a complete draft and exit without registering it. Nothing then owns
+    it — feed has never heard of it, release cron cannot schedule it, and its only
+    trace is a line in `git status`. PHASE-Z rightly declines to blind-commit
+    foreign paths, so the file sat there until an alert asked the boss to choose
+    between committing it and throwing it away. Deep articles were dying in that
+    second column.
+
+    The reaper routes such drafts through the canonical intake instead, so the fix
+    is a delivery fix, not a git fix. Bounded subprocess (publish does network I/O);
+    non-fatal — a failure here must never stop the alert fire.
+    """
+    from datetime import datetime, timezone
+    import subprocess
+
+    script = PROJECT_ROOT / "scripts" / "reap_orphan_deliverables.py"
+    try:
+        start = datetime.now(timezone.utc)
+        proc = subprocess.run(
+            ["/opt/homebrew/bin/uv", "run", "python", str(script), "--apply", "--json"],
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=600,
+        )
+        summary: dict = {}
+        for line in reversed((proc.stdout or "").splitlines()):
+            line = line.strip()
+            if line.startswith("{"):
+                try:
+                    summary = json.loads(line)
+                    break
+                except json.JSONDecodeError:
+                    continue  # silent-ok: scanning stdout in reverse for last valid JSON line
+        summary["returncode"] = proc.returncode
+        summary["ran_at"] = start.isoformat()
+        return summary or {"attempted": False, "reason": "no_json_output",
+                           "stderr_tail": (proc.stderr or "")[-200:]}
+    except Exception as exc:  # noqa: BLE001
+        return {"attempted": False, "error": str(exc)}
+
+
 # The monitor cannot meaningfully monitor itself; `host_crontab_managed: false`
 # means the entry documents something this host does not schedule.
 STALENESS_EXCLUDED_JOB_IDS = frozenset({"check_alerts"})
@@ -421,6 +467,11 @@ def main() -> int:
     # email (if it still fires) truthfully reports what the system already did.
     drought_remediation = _auto_remediate_publish_drought()
 
+    # 2026-07-13 (boss msg 624): adopt finished-but-unregistered deliverables into
+    # the pool before the alert fires, so a completed article is delivered rather
+    # than surfaced as a discard/keep decision for the boss.
+    orphan_reap = _auto_reap_orphan_deliverables()
+
     report = check_alert_conditions(storage_dir="storage")
     print("=== ops check-alerts ===")
     if due_summary.get("ok"):
@@ -463,6 +514,13 @@ def main() -> int:
             f"  publish-drought-remediation: skip "
             f"reason={drought_remediation.get('reason', drought_remediation.get('error', 'unknown'))}"
         )
+    # 2026-07-13: orphan deliverable adoption (boss msg 624 — 產出即交付)
+    adopted = [a for a in (orphan_reap.get("adopted") or []) if a.get("adopted")]
+    print(
+        f"  orphan-reap: orphans={orphan_reap.get('orphan_count', '?')} "
+        f"adopted={len(adopted)} held={len(orphan_reap.get('held') or [])} "
+        f"reason={orphan_reap.get('error') or orphan_reap.get('reason') or 'ok'}"
+    )
     print(
         f"breaches={report.get('breach_count')} "
         f"sent={report.get('sent_count')} "

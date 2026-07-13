@@ -162,11 +162,21 @@ _MACHINE_STATE_PREFIXES = (
     "storage/analytics/",        # reader metrics snapshots
     "storage/reports/token_usage/",
     "ops/claude_user_backup/",   # settings mirror written by the backup job
+    # 2026-07-13 class sweep (boss msg 624). Same authorship test as the four
+    # above — a scheduled writer, no commit step, no session to hand it back to —
+    # but they were missing from the list, so every fire saw them as "someone
+    # else's uncommitted work", left them dirty, and the streak counter escalated
+    # them to a critical「3 班沒人收」alert that nobody could ever action. Machine
+    # state does not have an author to go ask.
+    "storage/lazypack_jobs/",    # async render job state + panels
+    "storage/research/",         # arxiv candidate scans
+    "storage/indicator_arena/",  # indicator review ledger
 )
 _MACHINE_STATE_FILES = (
     "storage/next_tasks.json",       # the pending queue
     "storage/publication_candidates.json",
     "storage/reports/feed.json",     # scheduled-release cron writes it; only agents commit it
+    "storage/paper_trading.json",    # forward-tracking recalc; never hand-edited (publishing.md)
 )
 
 
@@ -974,9 +984,12 @@ def run_phase_z(
                 "它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。",
                 "",
                 "## 現在該做什麼",
-                "人工判斷後二選一：確認內容正確就 `git add <檔案> && git commit`；"
-                "是廢棄的半成品就 `git checkout HEAD -- <檔案>` 丟掉。"
-                "（PHASE-Z 不自動收養 —— 自動收養正是先前三次事故的成因。）",
+                "**沒有任何檔案會被丟棄。** 成品（草稿 / 實驗產出）由 "
+                "`uv run python scripts/reap_orphan_deliverables.py --apply` 走正規入池路徑自動收編 —— "
+                "每小時 check_alerts 會自己跑一次，通常不必手動介入。",
+                "剩下這些是它認不出來源的檔案：確認內容正確就由作者 commit。"
+                "PHASE-Z 本身不自動收養（盲目收養正是先前三次事故的成因），但**不收養不等於丟棄** —— "
+                "檔案留在工作區，沒有人會刪它。",
                 "",
                 "## 卡住的檔案（連續班數）",
                 *[f"- {p} — {streaks[p]} 班" for p in stuck[:30]],
@@ -1011,8 +1024,9 @@ def run_phase_z(
                 "（fire 開始前就髒了）。PHASE-Z 不碰它們。",
                 "",
                 "## 現在該做什麼",
-                "若這些是某個已結束 session 的遺留，請人工判斷後 commit 或捨棄；"
-                "自動收養正是先前三次事故的成因。",
+                "多半不用做什麼：成品（草稿 / 實驗產出）由 `reap_orphan_deliverables` 每小時自動收編入池；"
+                "其餘檔案留在工作區等作者 commit。PHASE-Z 不自動收養（那是三次事故的成因），"
+                "但**不收養不等於丟棄** —— 沒有任何流程會刪掉它們。",
                 "",
                 "## 檔案",
                 *[f"- {p}" for p in foreign[:30]],
