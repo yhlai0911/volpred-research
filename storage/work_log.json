@@ -16807,5 +16807,38 @@
     "owner": "hourly-14",
     "commit": "932fd05b9",
     "summary": "派 K865b（SPY-hub 排序穩健性，KPPS GFEVD 重跑）進 agent queue；並根治 lazypack render 的 orphan-worker 根因。\n\n1. K865b（task k865_gfevd_ordering_robust，in_progress）— K865 修完 FEVD axis bug 後的「SPY 五期全為淨傳染源」仍建立在 Cholesky 正交化上，而 SPY 恰好排第一（Cholesky 天生偏向把排前面的估成傳染源）。派 opus/xhigh agent 跑 KPPS generalized FEVD（order-invariant）+ ≥50 個隨機排序的置換敏感度 + rolling VAR(5)x7/63obs 過度參數化診斷。走 compute_queue enqueue-agent（job agent-brief_k865b-e0ae88），由 async worker 執行，成果由後續 fire 的 PHASE A 收。\n\n2. lazypack orphan-worker 根因（commit 932fd05b9）— alert lazypack_render_stuck 指向 mile_aa4713db。診斷：codex exec 逾時後被 kill，但 render 腳本在 kill 之後 5 分鐘才落地（mtime 13:10 vs kill ~13:05）。根因是 codex worker 自己 setsid() 逃出 process group，killpg 打不到。2026-07-11 mile_531e4c87 同根因（11 分鐘後落地），當時的修法沒擋住，因為回歸測試的假 worker 用 ( ... ) & 留在同一 group 裡 —— 假 worker 逃不掉，就證明不了擋得住逃脫。修法：procutil.py（既有的殺程序單一 owner）新增 kill_tree()，走 ps parent table 列舉整棵後代再殺並驗證；gen_lazypack_codex 改為委派（原本是第三份沒驗證的弱化 killpg 複本）；回歸測試補 setsid 逃脫的真實形狀。已 break-then-verify（舊碼 FAIL、新碼 PASS），17 tests passed。\n\n3. mile_aa4713db 搶救 — 孤兒寫出的 render 腳本其實是好的，執行後 4 張 PNG 正常（版面/數據/來源標註皆檢視過）。走正規 lazypack_async_render.py enqueue 重排（job lazypack-mile_aa4713db-r2），panels 已存在會走 resume 路徑收尾，未手改 queue JSON。\n\n4. 附帶發現並開單 — test_dispatch_state.py 的兩個 canonical 寫入防護測試在任何 worktree 內都 FAIL（已用乾淨 HEAD worktree 對照確認為既有問題，非本次 regression）。閘門正好在 agent 實際幹活的環境裡是瞎的。開 P2 task platform_ops_canonical_write_guard_blind_in_worktrees。"
+  },
+  {
+    "timestamp": "2026-07-13T13:45:04+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-7ca3f671b",
+    "outcome": "succeeded",
+    "summary": "complete drone EP3 evidence corrections",
+    "commit": "7ca3f671b5b8be7dd5afa83327379322ca0beb34",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T06:53:13.637108+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T14:50:05+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-0bda1cbb4",
+    "outcome": "succeeded",
+    "summary": "complete drone EP-Final portfolio synthesis",
+    "commit": "0bda1cbb4ca1a63f4b5c762ec631c996e1a0112c",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T06:53:13.637100+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-13T14:51:17+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-3be1c41fa",
+    "outcome": "succeeded",
+    "summary": "install EP-Final lazypack panels",
+    "commit": "3be1c41fa6ec3b867a8de0ac8caf516cc1fb5df4",
+    "owner": "codex",
+    "backfilled_at": "2026-07-13T06:53:13.636784+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
