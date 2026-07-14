@@ -2,6 +2,59 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 12:41 — CI 紅燈 notify-first：把修復中間狀態丟給老闆 — **FIXED**（codex）
+
+**現象**：`scripts/check_alerts.py` 看見 main Test Suite failure 後，雖然會建 P1 task，卻同一刻
+發 CRITICAL email + Telegram 說「已建任務、等 dispatch」。run 29299985391 在 03:00Z 就因此通知，
+真正修復與綠燈在後面；老闆看到的是系統內部排隊，不是已驗證結果。
+
+**根因**：watchdog 只有 `last_task_id`，沒有跨 tick incident state。三個後果同源：
+1. 首紅直接通知；green 反而只寫 state、不通知。
+2. 每次 red run id 都進 alert title，24h dedup key 不同，連紅會每班各寄一封。
+3. `gh run list --limit 1 --status completed` 只看最新一班；一小時內連跑 F1/F2/F3，只會看見 F3
+   一次，「超過兩個 CI cycle 才求援」根本無法正確計數。
+
+**修法（單一 owner，不加 daemon/queue）**：
+- `check_alerts.py` 改成 history-aware incident reducer；cycle key=`run_id:attempt`，按時間 reduce 所有
+  unseen completed attempts。同一 run 重見只重試 push/outbox，不重計 cycle。`gh run list` 其實只回
+  每個 run id 的最新 attempt，故 provider 另以 bounded parallel `gh run view --attempt N` 展開被隱藏的
+  舊 attempts；failed log 也固定帶該 attempt，避免把歷史失敗錯配成最新 rerun。
+- 首紅抓 failed log 一行根因、建立 `dispatch_lane=agent` + `dispatch_preempt=true` P1，並走既有
+  `dispatch_supervisor.state.request_fire()` 立即派工；中間 phase 只寫 check-alerts log、
+  `ci_watch_state.json` 與既有 ops dashboard。dispatcher starvation lockout 仍排除一般 fresh task，但會把
+  incident preempt 放在 candidate 首位；task 還是 pending 時每 poll 重送 generic fire request。
+- 只有「succeeded repair task 的同一筆 structured receipt 提供 `root_cause` + `repair_commit`，且
+  GitHub completed `success` 的 head 涵蓋該 commit」才結案並發一則 INFO（確認根因 + repair commit +
+  green URL）；watcher 推上的共享 local HEAD 只算 ops push 證據，不冒稱 causal repair。同 SHA flaky
+  rerun、曾涵蓋該 commit 仍跑紅的 head、或 prior attempts 尚未完整展開，都不宣稱程式已修。驗證成功時原子把尚未
+  開始的 repair P1 關成 `closed_no_action`。第三個 distinct failure、連續第三次無進展 poll、task
+  failed/blocked、enqueue/dispatch hard-fail 才發一次 CRITICAL。cancelled/skipped 不算綠，也不會遮蔽
+  已成立的 recovery/escalation outbox；單一 poll red→red→green 只發 recovery。
+- state 改 flock + atomic replace；incident shell、派工、push-intent、terminal outbox 都在耗時網路動作前
+  checkpoint，避免外層 300s cap 在 push 後才殺掉唯一 incident 證據。固定 incident title，讓 send 後、
+  state save 前 crash 可由 24h dedup 收口。即使 GitHub poll 暫時不可用，既有 incident 仍會重送
+  dispatch request 並按「不同小時」推進 stall watchdog，不會永久凍結。
+- CI 呼叫 push wrapper 時設 `VOLPRED_SUPPRESS_PUSH_ALERTS=1`，避免 child wrapper 另寄中間狀態；
+  wrapper rc=0 後仍以 `origin/main..main == 0` 驗證真 push，堵住 transient suppress 的假成功。
+- CI poll 移到 hourly main 的最前面。舊位置前方有 240–600s 補救 subprocess、外層 cap 僅 300s，
+  watchdog 可能尚未執行就被殺。
+
+**回溯勘誤（不改寫舊紀錄，追加更正）**：11:15 條目把壞測試 introducer 寫成 `0fef6fa3b`，
+git tree 證據顯示真正首次新增 `tests/test_arc_dedup_calibration.py` 的 commit 是 `3b5e4effb`；
+`0fef6fa3b` 只是繼承壞樹再跑紅。實際恢復缺失 symbols 的 repair 是 `5440ffab8`（第一個 green
+run 29302820474 的 head `40622204a` 包含它）；`9395eb9c8` 是事後的 class-prevention gate，不能冒稱
+讓 293028 轉綠的 causal fix。
+
+**驗證**：注入測試覆蓋 first-red 0 notification、red→verified-repair→green 恰一則、同 SHA green
+不誤報、三紅/三次 stall 才 critical、同 run 冪等且重送 fire、一次 poll red/red/red/green 只 recovery、
+newer in-progress 阻止過早 recovery、neutral 不吞 terminal outbox、sender retry/dedup crash recovery、
+pending task 退休、terminal/append failure escalation、真實 attempt expansion 與精確 log attribution、
+repair commit ancestry、push rc=0 postcondition、starvation preemption 與 dashboard projection。
+
+**邊界**：`send_alert` 的 email 是 canonical、Telegram 是 fail-open mirror；此修正保證 incident-level
+邏輯只送一個終態，但無法在兩個外部 transport 間提供分散式 exactly-once。GitHub 帳號自己的原生
+Actions failure subscription email 也不受 repo 程式控制。
+
 ## 2026-07-14 12:30 — K1709 重犯 30 小時前才修好的 K1701 教訓：ratchet 抓得到，但它在 worktree 裡沒牙齒（hourly-12）
 
 **現象**：K1709（spot BTC/ETH ETF flow → RV）由 worktree agent 跑完，自帶 26 個測試全綠、README 寫得
@@ -49,6 +102,22 @@
     `INCONCLUSIVE_NO_EXACT_NULL_CLAIM`，不准為了故事好看把 inconclusive 寫成 NULL」；
 (e) P1 governance task `governance_experiment_gates_blind_in_worktrees` — 把 repo 的實驗完整性 gate
     推到 agent 手上（見下）。
+
+**RESOLVED 2026-07-14 13:20（hourly-13）— commit `1f6097af4`**：
+- `scripts/experiment_gates.py` = 單一入口（`run --path experiments/<kid>`），detector / verdict set /
+  baseline 全部 import 自原 auditor module，**不重造第二套判定**。已凍結的 legacy debt 放行 ——
+  agent 不該為不是自己造的債被擋，否則一週內就會有人繞過它。
+- **接進 `compute_queue.run_next` 的 choke point**：標 `completed` 前對 `--result-artifact` 所在的
+  `experiments/` 目錄跑 gate，不過就標 `failed` + `experiment_gate_failed` → 自動走 `triage_failed`。
+  選 (b) runner-enforced 而非 (a) brief 自律：agent 自律正是這次失效的東西。
+- 驗收：k1709.py v1 當 fixture，gate 回 `primary_raw_dm` FAIL（與 Codex CRITICAL #1 同一處）；
+  k1698 / k1680（乾淨）與 k1681（baseline 內）皆 PASS。
+- **守門員自己也有守門員**：`test_experiment_gates.py` 用 AST 斷言 `run_next` 仍呼叫 gate、且
+  `status="completed"` 只有一個賦值點。實測把 gate 呼叫改成 `gate = None` 後該斷言轉 False ——
+  沒接線的偵測器正是本 entry 的 bug class，不能讓它以新的形式復發。
+- 姊妹 P2 `platform_ops_canonical_write_guard_blind_in_worktrees` **實測已不復現**：根因是
+  `conftest.py` 曾被 `.gitignore` 排除（worktree checkout 從來拿不到它），今日 un-ignore 並追蹤後，
+  worktree 內 `test_dispatch_state.py` 68 tests 全過。同 class 兩例一次收斂。
 
 **教訓（兩條，都是這個系統反覆在繳的學費）**：
 1. **一道只在 CI/main 跑的 gate，對 worktree agent 等於不存在。** agent 的自帶測試永遠只證明

@@ -893,21 +893,27 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
     free_slots = max(0, slot_cap - slots["occupied"])
 
     # Starvation lockout. When agentable work has aged past its threshold, the
-    # candidate menu collapses to the starved tasks only — the fire cannot rotate
-    # away from them on diversity grounds, because there is nothing else on the
-    # menu to rotate to. Advisory prose ("please take the oldest P1") is what we
-    # had before, and it let a P1 sit for 17h; changing what is *offered* is the
-    # mechanical version of the same instruction.
+    # candidate menu collapses to starved tasks plus explicit incident preemption.
+    # ``dispatch_preempt`` is reserved for already-materialized P1 response work
+    # (currently CI red repair): request_fire only wakes this generic dispatcher,
+    # so omitting a fresh incident under lockout would consume the wake-up on an
+    # unrelated old task and leave CI red. Ordinary fresh work remains excluded.
     starved = find_starved(cats["agentable"], now=now)
     starved_ids = {s["task"].get("id") for s in starved}
     # Main-thread tasks starve too (a boss-assigned P1 sat 27h — see `_coerce_priority`),
     # but the fix there cannot be a lockout: nothing in the agent lane can claim them.
     # Surface them so the fire has to look at them, and let the alert bridge nag.
     starved_main_thread = find_starved(cats["main_thread"], now=now)
+    preemptive = [task for task in cats["agentable"] if task.get("dispatch_preempt") is True]
+    preempt_ids = {task.get("id") for task in preemptive}
     if starved:
-        candidates_to_dispatch = [s["task"] for s in starved][:free_slots]
+        candidates_to_dispatch = (
+            preemptive + [s["task"] for s in starved if s["task"].get("id") not in preempt_ids]
+        )[:free_slots]
     else:
-        candidates_to_dispatch = cats["agentable"][:free_slots]
+        candidates_to_dispatch = (
+            preemptive + [task for task in cats["agentable"] if task.get("id") not in preempt_ids]
+        )[:free_slots]
 
     pending_summary = {
         "agentable": len(cats["agentable"]),
@@ -933,11 +939,13 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
         "pending_summary": pending_summary,
         "starvation": {
             "locked": bool(starved),
+            "incident_preempt_count": len(preemptive),
             "starved_count": len(starved),
             "thresholds_hours": {f"P{k}": v for k, v in STARVATION_HOURS.items()},
             "directive": (
                 "⛔ STARVATION LOCKOUT — 以下任務已超過其優先序的容忍時數。"
-                "本班 dispatch_candidates 只列這些，diversity rotation 暫停："
+                "本班 dispatch_candidates 只列 incident preempt 與這些餓死任務，"
+                "diversity rotation 暫停："
                 "先清光餓死的任務，才能回到一般輪替。"
                 if starved
                 else "無餓死任務；一般 diversity rotation 適用。"
@@ -953,6 +961,15 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
                     "title": (s["task"].get("title") or "")[:120],
                 }
                 for s in starved[:10]
+            ],
+            "incident_preempt_tasks": [
+                {
+                    "id": task.get("id"),
+                    "priority": task.get("priority"),
+                    "task_type": task.get("task_type"),
+                    "title": (task.get("title") or "")[:120],
+                }
+                for task in preemptive[:10]
             ],
             "starved_main_thread_count": len(starved_main_thread),
             "starved_main_thread": [
@@ -975,6 +992,7 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
                 # 依此選載具，僅明顯不合時 override 並在 work_log 記原因
                 "topology": pick_topology(t.get("task_type"), t)["topology"],
                 "starved": t.get("id") in starved_ids,
+                "dispatch_preempt": t.get("dispatch_preempt") is True,
                 "age_hours": (lambda a: round(a, 1) if a is not None else None)(task_age_hours(t)),
             }
             for t in candidates_to_dispatch

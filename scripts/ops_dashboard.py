@@ -94,6 +94,49 @@ def section(name, status, tldr, next_action=None, **details):
     return {"section": name, "status": status, "tldr": tldr, "next": next_action, **details}
 
 
+def ci_watch_section(state: dict | None) -> dict:
+    """Read-only projection of the single CI incident state machine.
+
+    CI deliberately does not enter the generic alert registry: that registry's
+    remediation bridge would materialize a second repair task. The dashboard may
+    observe this state, but ``scripts/check_alerts.py`` remains its sole action and
+    notification owner.
+    """
+    state = state if isinstance(state, dict) else {}
+    incident = state.get("active_incident")
+    if not isinstance(incident, dict):
+        closed = state.get("last_closed_incident") or {}
+        green = closed.get("verified_green_run") or {}
+        suffix = f"; last green run={green.get('run_id')}" if green.get("run_id") else ""
+        return section(
+            "health_ci_watch",
+            "ok",
+            f"no active CI incident{suffix}",
+            None,
+            phase="idle",
+            failure_cycles=0,
+        )
+
+    phase = str(incident.get("phase") or "remediating")
+    failure_cycles = len(incident.get("failure_run_keys") or [])
+    is_escalated = phase in {"escalation_pending", "escalation_notification_pending", "escalated"}
+    status = "critical" if is_escalated else "warn"
+    return section(
+        "health_ci_watch",
+        status,
+        f"CI incident {incident.get('incident_id')} phase={phase} failures={failure_cycles}",
+        "CI watcher owns repair/verification; inspect task + failed log only if phase is escalated"
+        if is_escalated
+        else None,
+        phase=phase,
+        incident_id=incident.get("incident_id"),
+        failure_cycles=failure_cycles,
+        repair_tasks=incident.get("repair_task_statuses") or {},
+        latest_failure=incident.get("latest_failure"),
+        recovery_candidate=incident.get("recovery_candidate"),
+    )
+
+
 def write_dashboard_latest(payload: dict) -> None:
     path = REPO / "storage" / "ops" / "dashboard_latest.json"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -510,6 +553,12 @@ def main():
         stale=stale,
         warnings=cron_warnings[:10],
     ))
+
+    # L4 CI remediation — read the dedicated incident owner without registering a
+    # generic alert condition (which would create a duplicate repair task).
+    ci_state_path = REPO / "storage" / "ops" / "ci_watch_state.json"
+    ci_state = jl(ci_state_path, {}) if ci_state_path.exists() else {}
+    out.append(ci_watch_section(ci_state))
 
     # L4 alerts — reflect CURRENT breached conditions, not historical notification
     # rows. Otherwise a resolved incident can keep dashboard red for hours merely

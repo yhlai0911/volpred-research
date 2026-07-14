@@ -104,6 +104,7 @@ def test_lockout_collapses_the_candidate_menu(monkeypatch: pytest.MonkeyPatch) -
     fresh = _task("fresh_p2", 2, 0.5, task_type="experiment")
 
     monkeypatch.setattr(ctd, "count_active_slots", lambda: {"occupied": 0, "worktrees": 0, "active_agents": 0})
+    monkeypatch.setattr(ctd._slot_budget, "budget", lambda: {"cap": 4})
     monkeypatch.setattr(ctd, "_maybe_retire_covered_article_tasks", lambda **_kw: None)
     monkeypatch.setattr(ctd, "load_pending_tasks", lambda: [starving, fresh])
     monkeypatch.setattr(ctd, "load_recent_task_type_counts", lambda: None)
@@ -119,3 +120,81 @@ def test_lockout_collapses_the_candidate_menu(monkeypatch: pytest.MonkeyPatch) -
     assert report["starvation"]["locked"] is True
     assert [c["id"] for c in report["dispatch_candidates"]] == ["starving_p1"]
     assert report["dispatch_candidates"][0]["starved"] is True
+
+
+def test_ci_incident_preempts_starvation_but_ordinary_fresh_work_stays_excluded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A generic request_fire must actually offer its fresh CI P1 to the worker."""
+    import continue_task_dispatch as ctd
+
+    starving = _task("starving_p1", 1, 17.0)
+    ci_red = _task(
+        "ci-red-123",
+        1,
+        0.1,
+        task_type="platform_ops",
+        dispatch_lane="agent",
+        dispatch_preempt=True,
+    )
+    ordinary = _task("fresh_p1", 1, 0.1, task_type="platform_ops", dispatch_lane="agent")
+
+    monkeypatch.setattr(
+        ctd,
+        "count_active_slots",
+        lambda: {"occupied": 0, "worktrees": 0, "active_agents": 0},
+    )
+    monkeypatch.setattr(ctd._slot_budget, "budget", lambda: {"cap": 2})
+    monkeypatch.setattr(ctd, "_maybe_retire_covered_article_tasks", lambda **_kw: None)
+    monkeypatch.setattr(ctd, "load_pending_tasks", lambda: [ordinary, starving, ci_red])
+    monkeypatch.setattr(ctd, "load_recent_task_type_counts", lambda: None)
+    monkeypatch.setattr(ctd, "_maybe_refill", lambda *_a, **_kw: {})
+    monkeypatch.setattr(ctd, "_maybe_refill_draft_pool", lambda **_kw: {})
+
+    report = ctd.build_report(auto_refill=False, now=NOW)
+
+    assert report["starvation"]["locked"] is True
+    assert report["starvation"]["incident_preempt_count"] == 1
+    assert [item["id"] for item in report["dispatch_candidates"]] == [
+        "ci-red-123",
+        "starving_p1",
+    ]
+    assert report["dispatch_candidates"][0]["dispatch_preempt"] is True
+
+
+def test_ci_incident_preempts_normal_rotation_when_only_one_slot_is_free(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import continue_task_dispatch as ctd
+
+    ordinary = _task(
+        "aaa-ordinary-p1",
+        1,
+        0.1,
+        task_type="platform_ops",
+        dispatch_lane="agent",
+    )
+    ci_red = _task(
+        "zzz-ci-red",
+        1,
+        0.1,
+        task_type="platform_ops",
+        dispatch_lane="agent",
+        dispatch_preempt=True,
+    )
+    monkeypatch.setattr(
+        ctd,
+        "count_active_slots",
+        lambda: {"occupied": 0, "worktrees": 0, "active_agents": 0},
+    )
+    monkeypatch.setattr(ctd._slot_budget, "budget", lambda: {"cap": 1})
+    monkeypatch.setattr(ctd, "_maybe_retire_covered_article_tasks", lambda **_kw: None)
+    monkeypatch.setattr(ctd, "load_pending_tasks", lambda: [ordinary, ci_red])
+    monkeypatch.setattr(ctd, "load_recent_task_type_counts", lambda: None)
+    monkeypatch.setattr(ctd, "_maybe_refill", lambda *_a, **_kw: {})
+    monkeypatch.setattr(ctd, "_maybe_refill_draft_pool", lambda **_kw: {})
+
+    report = ctd.build_report(auto_refill=False, now=NOW)
+
+    assert report["starvation"]["locked"] is False
+    assert [item["id"] for item in report["dispatch_candidates"]] == ["zzz-ci-red"]

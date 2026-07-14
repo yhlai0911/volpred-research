@@ -22,8 +22,16 @@ source "$REPO/scripts/cron_lib.sh"
 # 即便 push 成功也不會 heal。違反 .claude/rules/hooks-exit-code.md。trap EXIT
 # 確保即便 set -uo pipefail 提早 exit 也 emit。
 _GPB_START=$SECONDS
-trap 'cron_emit_exit "git_push_backup" "$?" "$_GPB_START" >> "$LOG" 2>&1' EXIT
-cron_emit_start "git_push_backup" >> "$LOG"
+if [ "${VOLPRED_SUPPRESS_PUSH_ALERTS:-0}" = "1" ]; then
+  # On-demand CI remediation is not a scheduled git_push_backup fire. Recording
+  # its real rc in cron_emit_exit would make the generic host_cron_fail owner send
+  # a second intermediate alert after the CI watcher deliberately stayed quiet.
+  trap 'rc=$?; echo "=== [git_push_backup] ci-remediation exit $rc at $(date -u +%Y-%m-%dT%H:%M:%SZ) ===" >> "$LOG"' EXIT
+  echo "=== [git_push_backup] ci-remediation start at $(date -u +%Y-%m-%dT%H:%M:%SZ) ===" >> "$LOG"
+else
+  trap 'cron_emit_exit "git_push_backup" "$?" "$_GPB_START" >> "$LOG" 2>&1' EXIT
+  cron_emit_start "git_push_backup" >> "$LOG"
+fi
 git_auth() {
   git \
     -c credential.helper= \
@@ -46,9 +54,13 @@ behind=$(git rev-list --count main..origin/main 2>/dev/null)
 if [ -n "$behind" ] && [ "$behind" != "0" ]; then
   # 偵測到分岔 → 不強推，發 alert 讓主線程處理（絕不 force / 絕不自動複雜 merge）
   echo "[$(ts)] WARN: remote ahead by $behind — divergence, NOT pushing" >> "$LOG"
-  "$UV_BIN" run volpred ops send-alert --level warn \
-    --title "git-push-backup: 偵測到 origin 分岔" \
-    --body "origin/main 領先本地 ${behind} commit，可能有未知 push 源（雲端 routines 應已全關）。自動 push 已暫停避免複雜 merge，需主線程檢查 RemoteTrigger list + git log。" >> "$LOG" 2>&1 || true
+  if [ "${VOLPRED_SUPPRESS_PUSH_ALERTS:-0}" != "1" ]; then
+    "$UV_BIN" run volpred ops send-alert --level warn \
+      --title "git-push-backup: 偵測到 origin 分岔" \
+      --body "origin/main 領先本地 ${behind} commit，可能有未知 push 源（雲端 routines 應已全關）。自動 push 已暫停避免複雜 merge，需主線程檢查 RemoteTrigger list + git log。" >> "$LOG" 2>&1 || true
+  else
+    echo "[$(ts)] child alert suppressed — CI incident watcher owns terminal notification" >> "$LOG"
+  fi
   exit 1
 fi
 
@@ -66,10 +78,14 @@ if [ "$AUDIT_RC" -ne 0 ] && [ -n "$NEW_COUNT" ] && [ "$NEW_COUNT" -gt 0 ]; then
   echo "[$(ts)] HELD: ${NEW_COUNT} new silent fallback(s) at HEAD — NOT pushing (CI would go red)" >> "$LOG"
   echo "$AUDIT_OUT" | grep "^NEW " >> "$LOG"
   NEWLINES=$(echo "$AUDIT_OUT" | grep "^NEW " | head -10)
-  "$UV_BIN" run volpred ops send-alert --level warn \
-    --title "git-push-backup: push held — ${NEW_COUNT} new silent fallback(s)" \
-    --body "本地領先 ${ahead} commit 但 HEAD 帶 ${NEW_COUNT} 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push 保護 CI（紅碼不上 origin、CI 不會紅）。主線程收到此信會**當班立即修**（每處加 'from volpred.ops.diagnostics import warn' 再 fallback，或標 '# silent-ok: 理由'）並重跑本 wrapper 解封 — 不留待下一班。新發現：
+  if [ "${VOLPRED_SUPPRESS_PUSH_ALERTS:-0}" != "1" ]; then
+    "$UV_BIN" run volpred ops send-alert --level warn \
+      --title "git-push-backup: push held — ${NEW_COUNT} new silent fallback(s)" \
+      --body "本地領先 ${ahead} commit 但 HEAD 帶 ${NEW_COUNT} 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push 保護 CI（紅碼不上 origin、CI 不會紅）。主線程收到此信會**當班立即修**（每處加 'from volpred.ops.diagnostics import warn' 再 fallback，或標 '# silent-ok: 理由'）並重跑本 wrapper 解封 — 不留待下一班。新發現：
 ${NEWLINES}" >> "$LOG" 2>&1 || true
+  else
+    echo "[$(ts)] child alert suppressed — CI incident watcher owns terminal notification" >> "$LOG"
+  fi
   # 2026-07-03: distinct exit 120 (NOT 1) for the held path. The guard ran fine and
   # made a correct protective decision + self-sent its own targeted WARN above — it is
   # NOT a cron infra failure. alerts.py `_BENIGN_FINDINGS_EXIT_CODES` treats 120 as a
@@ -107,8 +123,12 @@ else
       fi
     fi
   fi
-  "$UV_BIN" run volpred ops send-alert --level warn \
-    --title "git-push-backup: push 失敗" \
-    --body "git push origin main 失敗，本地領先 ${ahead} commit 未備份到遠端。最近 90 min 內無成功 push（已超 piggy-back 寬限）。需檢查認證 / 網路 / gh keychain。" >> "$LOG" 2>&1 || true
+  if [ "${VOLPRED_SUPPRESS_PUSH_ALERTS:-0}" != "1" ]; then
+    "$UV_BIN" run volpred ops send-alert --level warn \
+      --title "git-push-backup: push 失敗" \
+      --body "git push origin main 失敗，本地領先 ${ahead} commit 未備份到遠端。最近 90 min 內無成功 push（已超 piggy-back 寬限）。需檢查認證 / 網路 / gh keychain。" >> "$LOG" 2>&1 || true
+  else
+    echo "[$(ts)] child alert suppressed — CI incident watcher owns terminal notification" >> "$LOG"
+  fi
   exit 1
 fi
