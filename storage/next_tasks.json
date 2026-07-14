@@ -30344,10 +30344,32 @@
     "description": "來源：docs/governance/2026-07/dm_hac_lag_class_sweep.md §盲區分析。稽核器有 195 個 local DM 的 bandwidth 無法靜態解析。已知混雜三類：(a) 正確的雙變體實作（如 K1611 dm_hln 同時算 t_hln 與 t_hac 且主檢定用 t_hac — 這是模範）；(b) 純名字撞到的 helper（plot_dm_heatmap / classify_dm_status）；(c) 真的無法解析。逐一過眼分類，把 (a)(b) 排除、(c) 判定是否退化。額外檢查（稽核器抓不到、但正是 K1655 的真實失效點）：檔案就算 bandwidth 正確，也要確認**README/knowledge/文章引用的是哪個變體** — canonical helper 存在但主檢定用錯變體，靜態掃描看不出來。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent_discovered",
     "created_at": "2026-07-11T18:16:10.820886+08:00",
-    "status_history": []
+    "status_history": [
+      {
+        "ts": "2026-07-14T17:28:19.392667+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:28:19.615927+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:28:19.841724+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-01"
+      }
+    ],
+    "started_at": "2026-07-14T17:28:19.615912+00:00",
+    "completed_at": "2026-07-14T17:28:19.841706+00:00",
+    "result": "78/78 unknown 站點逐一開檔分類（無抽樣）：a=11（正確雙變體）/ b=1（名字撞到的 helper）/ c=66。真正需修 5 個，全是 K1655 bug class；其中 3 個可能改變已發表結論（k1386 |t|=3.26 僅超門檻 8%、k841 策略報酬 DM、k1379 餵 Paper 9 horse race）。主線程抽驗 k1386 / k1379 / k841 三處原始碼確認判定屬實。副產物：稽核器 PLAIN_VARIANCE_RE 有 false negative（認不出手算變異數 idiom）。產出 docs/governance/2026-07/dm_hac_unknown_bucket_triage.md + storage/ops/dm_hac_unknown_triage.json（commit 2448bc505），已開 5 筆修復任務。"
   },
   {
     "id": "telegram-481",
@@ -30478,7 +30500,7 @@
     "title": "K1572: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1572 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: K1572 — DNN Quantile VaR vs K1571 fair baseline plateau\n\nverdict: NULL\nreviewer: Codex (codex-cli, 2026-06-29 hourly tick)\nexperiment_id: k1572\nexperiment_path: experiments/k1572/\nk_id: K1572\nparent_k_id: K1571\n\nDesign: TLT/HYG daily returns, yfinance adjusted close cache from K1",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1572",
@@ -30488,7 +30510,23 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-11T13:52:00+00:00",
-    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜"
+    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
+    "status_history": [
+      {
+        "ts": "2026-07-14T17:31:47.091592+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:31:47.320182+00:00",
+        "from": "claimed",
+        "to": "blocked",
+        "by": "hourly-01"
+      }
+    ],
+    "completed_at": "2026-07-14T17:31:47.320168+00:00",
+    "result": "已交 agent queue（writer 20-40min > fire cap，依規則走 detached worker）。主線程已跑查重：check_arc_dedup verdict=clean + feed 層 grep 0 命中。草稿產出後 PHASE A followup 驗數字 + 串行發佈。"
   },
   {
     "id": "telegram-492",
@@ -31259,7 +31297,7 @@
     "title": "K1681: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1681 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1681：SMAD = (P - MA10)/MA10 對次日 RV / 未來 5 日下行半變異數 / 左尾命中率的增量預測力。20 檔美股 ETF 與大型股，2010-01 至 2026-07，79,140 asset-days，seed 1681。\n\n【核心設計 — span baseline】SMAD 的一階近似是過去 10 日報酬的遞減加權和，其表面預測力與槓桿效應糾纏。把 10 個 individual lagged returns 全放進基準（張成所有線性重新加權）後，天真 HAR-only 基準記給 SMAD 的 1.90pp 增量 R²",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1681",
@@ -31269,7 +31307,23 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-11T17:07:37+00:00",
-    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜"
+    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
+    "status_history": [
+      {
+        "ts": "2026-07-14T17:31:47.757351+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:31:48.002112+00:00",
+        "from": "claimed",
+        "to": "blocked",
+        "by": "hourly-01"
+      }
+    ],
+    "completed_at": "2026-07-14T17:31:48.002097+00:00",
+    "result": "已交 agent queue（writer 20-40min > fire cap，依規則走 detached worker）。主線程已跑查重：check_arc_dedup verdict=clean + feed 層 grep 0 命中。草稿產出後 PHASE A followup 驗數字 + 串行發佈。"
   },
   {
     "id": "email-12084-9b55bc",
@@ -33911,7 +33965,7 @@
     "description": "K1702 has completed primary-path Codex review with two independent full-population audits. Write a general-audience milestone article from experiments/k1702 only. The empirical verdict is NULL_OR_MIXED_INDIVIDUAL_FACTOR_OOS: primary positive Sharpe delta 1/6, paired bootstrap BH-FDR 0/6, spanning-alpha t gate BH-FDR 0/6. The corrected drawdown lesson is that MDD/vol is descriptive, not scale invariant; exposure-matched 316-shift phase-null leaves only MOM with a positive production gap, p=0.1582 and Holm p=0.9494, so 0/6 survive. Say no detected timing evidence, never proof timing is absent. Follow feed-publisher, anti-ai-style, publishing dedup, and lazypack requirements; all numbers must be read from K1702 evidence artifacts.",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "tags": [
       "publish_milestone_article",
       "audience-general",
@@ -33923,7 +33977,23 @@
     "k_id": "K1702",
     "experiment_path": "experiments/k1702",
     "dispatch_lane": "agent",
-    "priority_note": "2026-07-15 01:15 主線程升 P1：draft 池可發=0、16:00 後脫班（owner 直接點名），內容產線斷糧優先於非時效 ops"
+    "priority_note": "2026-07-15 01:15 主線程升 P1：draft 池可發=0、16:00 後脫班（owner 直接點名），內容產線斷糧優先於非時效 ops",
+    "status_history": [
+      {
+        "ts": "2026-07-14T17:29:54.066809+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:29:54.291305+00:00",
+        "from": "claimed",
+        "to": "blocked",
+        "by": "hourly-01"
+      }
+    ],
+    "completed_at": "2026-07-14T17:29:54.291291+00:00",
+    "result": "已交 agent queue（writer 需 20-40min，超出 fire 50min cap → 依規則走 detached worker，不在 fire 內 spawn）。主線程已先跑 check_arc_dedup（k1702/general → verdict=clean）。草稿產出後由 PHASE A followup 驗數字 + 串行發佈。"
   },
   {
     "id": "telegram-623",
@@ -37240,13 +37310,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-14T16:50:29.523819+00:00",
+    "completed_at": "2026-07-14T17:33:14.543303+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T16:50:29.523819+00:00",
-      "last_clean_observed_at": "2026-07-14T16:50:29.523819+00:00"
+      "resolved_at": "2026-07-14T17:33:14.543303+00:00",
+      "last_clean_observed_at": "2026-07-14T17:33:14.543303+00:00"
     }
   },
   {
@@ -37382,5 +37452,45 @@
     "status": "pending",
     "source": "main_thread",
     "created_at": "2026-07-14T17:13:16.384826+00:00"
+  },
+  {
+    "id": "dm_hac_fix_k1379_paper9",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-15T01:28:07+08:00",
+    "description": "K1655 bug class 必修 #1（最高曝險）：experiments/k1379/k1379.py:359 的 dm_test **完全沒有 autocovariance 迴圈** — `gamma0 = np.mean(d**2) - d_bar**2` 直接當長期變異數，等於零 HAC 修正（已由主線程開檔抽驗確認）。此檢定餵 **Paper 9 (garch-x-vix) horse race** + 6 篇 feed 文章。另有第二 bug：HLN 因子寫成 `(T+1-2+1/T)/T`，h=1 的正確式是 `(T-1)/T`。做法：改用 canonical `volpred.stats.model_evaluation.dm_test`（bandwidth=max(1,min(ceil(h^(1/3)n^(1/3)), n//4))），先量 loss differential 的 acf(1) 再重跑，回報哪些 Harvey-significant 翻轉；若結論有變，必回溯更正 Paper 9 與 feed 文章（研究誠實 §6）。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md"
+  },
+  {
+    "id": "dm_hac_fix_k1386_borderline",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-15T01:28:07+08:00",
+    "description": "K1655 bug class 必修 #2（門檻邊緣，最可能翻盤）：experiments/k1386/k1386.py:367 `for k in range(1, max(1, h))` 在 h=1 是空迴圈 → gamma_sum=0 → 零 HAC（已抽驗確認）。README 報 |t|=3.26，只超 Harvey 門檻 3.0 八個百分點 —— 補 HAC 後極可能跌破。曝險：feed×6。做法同上：改 canonical dm_test、先量 acf、重跑、若翻轉則回溯更正 README 與 6 篇文章。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md"
+  },
+  {
+    "id": "dm_hac_fix_k841_strategy_dm",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-15T01:28:07+08:00",
+    "description": "K1655 bug class 必修 #3：experiments/k841/k841_futures_realtime_vt.py:436 用 `for k in range(h)`（正確應為 range(1,h+1)）→ h=1 時只取 gamma[0]，無 HAC。這是**策略報酬差的 DM**，自相關是常態不是例外。results.json 目前標 harvey_significant=True（t=10.82/−7.13/−1.97），曝險 feed×5。做法同上。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md"
+  },
+  {
+    "id": "dm_hac_fix_k1525_k1526_pair",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-07-15T01:28:07+08:00",
+    "description": "K1655 bug class 必修 #4/#5（必須同輪修，否則兩份 README 數字分岔）：k1525.py:265 與 k1526.py:265（逐字複製）雙重退化 — 空迴圈 + Newey-West 權重 `1-k/h` 在 h=1,k=1 時歸零。k1525 README 的 headline null（t=-0.85, p=0.397）就建在這上面。注意：null 不代表安全 —— k621 前例是負自協方差讓 |t| 由 2.26 升到 3.64、p 由 0.0237 掉到 0.0003，補 HAC 後 null 可能翻成顯著。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md"
+  },
+  {
+    "id": "dm_hac_auditor_false_negative_regex",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-15T01:28:07+08:00",
+    "description": "稽核器本身有 false negative（enforcement owner 漏抓 = 比單一實驗的 bug 更嚴重）：scripts/audit_dm_hac_lag.py 的 PLAIN_VARIANCE_RE 只認 np.var / np.std，認不出手算的 `np.mean(d**2) - np.mean(d)**2` idiom —— k1379 因此被丟進 unknown 而非 no_hac。修 regex 後**必須重掃全母體**（不只 unknown bucket），因為同一 idiom 若出現在已被判成其他 verdict 的檔案裡，這輪一樣抓不到。修完更新 storage/ops/dm_hac_lag_baseline.json 與 scripts/tests/test_dm_hac_lag_ratchet.py。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md §盲區分析"
   }
 ]

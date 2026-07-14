@@ -1,0 +1,30 @@
+{
+  "id": "k1711_tsfm_har_mcs",
+  "title": "K1711 TSFM×HAR 組合的 MCS/DM 誠實檢定（續完 salvaged pipeline）",
+  "script_path": ".claude/worktrees/dispatch-slot-1-eeb5a46e-tsfm-har/experiments/k1711/k1711.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-14T17:12:31Z",
+  "started_at": "2026-07-14T17:15:03Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1711_tsfm_har_mcs.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1711_tsfm_har_mcs.stderr",
+  "result_artifact": ".claude/worktrees/dispatch-slot-1-eeb5a46e-tsfm-har/experiments/k1711/k1711_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1711 結果已產出於 worktree dispatch-slot-1-eeb5a46e-tsfm-har。收件時要做：(1) 讀 primary cell（window=pseudo_oos / proxy=rv / loss=qlike / h=1 / alpha=0.10，每資產）— 問兩件事：superior set 是否含任何 TSFM-bearing model？base pool 的 superior set 有無因加入 TSFM 而改變？NULL 是可發表結果，不可包裝成勝利。(2) 在 worktree 內跑 uv run python scripts/experiment_gates.py run --path experiments/k1711。(3) 跑 experiment_gates.py verdict-template 產 review_verdict.json，派 Codex（或 feature-dev:code-reviewer fallback）審 k1711.py + README；PASS 且 sha 未漂移才可 merge。(4) bash scripts/merge_worktree.sh dispatch-slot-1-eeb5a46e-tsfm-har（主線程、勿 cd 進 worktree）。(5) 主線程寫 knowledge.json（含 reviewer 欄位）+ 跑 k1711_charts.py 出圖；有結論就排 daily_article。(6) 完成後 task_pool_claim.py complete --id research_har_mcs_spy_0050_tw_tx_tsfm_timesfm_ttm_log_har。注意：README.md 尚未寫，需一併補（實驗三件套）。",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 10800,
+  "brief_source": null,
+  "brief_snapshot": null
+}

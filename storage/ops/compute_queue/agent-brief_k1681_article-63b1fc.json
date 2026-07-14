@@ -1,0 +1,43 @@
+{
+  "id": "agent-brief_k1681_article-63b1fc",
+  "title": "agent: brief_k1681_article",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1681_article-63b1fc.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "medium",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/storage/drafts/k1681_general_draft.md",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1681_article-63b1fc.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-14T17:31:47Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1681_article-63b1fc.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1681_article-63b1fc.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/storage/drafts/k1681_general_draft.md",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1681_article-63b1fc.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research",
+  "claude_followup": {
+    "brief": "K1681 一般讀者草稿已產出。主線程：(1) 驗數字對得上 experiments/k1681/ 的 results JSON（不可信 agent 自報）；(2) 重跑 anti_ai_gate.py 確認 exit 0；(3) publish_draft.py 串行發佈；(4) 標 K1681_article_general succeeded。",
+    "task_type": "daily_article",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1681_article.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1681_article-63b1fc.md"
+}

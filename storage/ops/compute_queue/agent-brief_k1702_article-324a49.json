@@ -1,0 +1,43 @@
+{
+  "id": "agent-brief_k1702_article-324a49",
+  "title": "agent: brief_k1702_article",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1702_article-324a49.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "medium",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/storage/drafts/k1702_general_draft.md",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1702_article-324a49.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-14T17:29:53Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1702_article-324a49.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1702_article-324a49.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/storage/drafts/k1702_general_draft.md",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1702_article-324a49.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research",
+  "claude_followup": {
+    "brief": "K1702 一般讀者草稿已產出。主線程要做：(1) 讀草稿驗數字全部對得上 experiments/k1702/k1702_results.json（不可信 agent 自報）；(2) 重跑 anti_ai_gate.py 確認 exit 0；(3) uv run python scripts/publish_draft.py 串行發佈（過 anti-ai / arc-dedup / depth / lazypack gates）；(4) 標 publish_milestone_k1702_phase_null succeeded。注意 draft 池仍低（發完後檢查是否要觸發 PHASE B-PARALLEL 補池，另有 K1572/K1681/K1685/K1583/K1695 五篇 P1 文章餓死 54-75h）。",
+    "task_type": "daily_article",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1702_article.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1702_article-324a49.md"
+}
