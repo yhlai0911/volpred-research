@@ -1,80 +1,14 @@
 {
-  "generated_at": "2026-07-14T10:10:30.801028",
-  "overall": "critical",
-  "critical_count": 2,
-  "warn_count": 10,
+  "generated_at": "2026-07-14T10:15:25.335993",
+  "overall": "warn",
+  "critical_count": 0,
+  "warn_count": 1,
   "findings": [
-    {
-      "dimension": "data_freshness",
-      "severity": "warn",
-      "message": "daily_update: 無 cron log（從未跑？）",
-      "recovery": null
-    },
-    {
-      "dimension": "data_freshness",
-      "severity": "warn",
-      "message": "collect_tw: 無 cron log（從未跑？）",
-      "recovery": null
-    },
-    {
-      "dimension": "data_freshness",
-      "severity": "warn",
-      "message": "collect_us: 無 cron log（從未跑？）",
-      "recovery": null
-    },
-    {
-      "dimension": "data_freshness",
-      "severity": "warn",
-      "message": "fred_backfill_guard: 無 cron log（從未跑？）",
-      "recovery": null
-    },
-    {
-      "dimension": "data_freshness",
-      "severity": "warn",
-      "message": "radar_strategy_snapshot: 無 cron log（從未跑？）",
-      "recovery": null
-    },
-    {
-      "dimension": "data_freshness",
-      "severity": "warn",
-      "message": "indicator_arena_daily: 無 cron log（從未跑？）",
-      "recovery": null
-    },
-    {
-      "dimension": "data_freshness",
-      "severity": "warn",
-      "message": "populate_events: 無 cron log（從未跑？）",
-      "recovery": null
-    },
-    {
-      "dimension": "data_freshness",
-      "severity": "warn",
-      "message": "twse_orderflow: 資料目錄無檔（data/intraday/twse_orderflow/*.csv）—— 從未收集？",
-      "recovery": "uv run python scripts/collect_twse_orderflow.py --date today  # 或回補 --backfill"
-    },
-    {
-      "dimension": "data_freshness",
-      "severity": "warn",
-      "message": "taifex_5min_rv: 資料目錄無檔（data/intraday/taifex_5min_rv.csv）—— 從未收集？",
-      "recovery": "uv run python scripts/collect_taifex_tick.py"
-    },
     {
       "dimension": "content_pipeline",
       "severity": "warn",
       "message": "草稿池僅 3 篇（門檻 4）—— Mission 1 缺產出",
       "recovery": "主動派寫作 agent 補池（feed-publisher，新鮮非 spy 主題）"
-    },
-    {
-      "dimension": "alert_conditions",
-      "severity": "critical",
-      "message": "release_pool_gap: Release pool cron gap > 7.0h (interval=360min)",
-      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
-    },
-    {
-      "dimension": "alert_conditions",
-      "severity": "critical",
-      "message": "gmail_poll_freshness: gmail-poll 停擺（state 過期未更新）",
-      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
     },
     {
       "dimension": "reader_metrics",

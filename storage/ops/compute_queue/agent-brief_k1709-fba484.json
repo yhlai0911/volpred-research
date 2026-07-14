@@ -1,0 +1,43 @@
+{
+  "id": "agent-brief_k1709-fba484",
+  "title": "K1709: Spot BTC/ETH ETF 淨流入對 BTC/ETH RV 的增量預測力（HAR baseline + DM）",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_k1709.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    ".claude/worktrees/dispatch-slot-2-c873d04d-k1709",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1709-fba484.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-14T02:12:32Z",
+  "started_at": "2026-07-14T02:15:04Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1709-fba484.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1709-fba484.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1709-fba484.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709",
+  "claude_followup": {
+    "brief": "收件時要做的事：(1) 讀 experiments/k1709/k1709_results.json 的 data_diagnostics — 核對 Farside 解析是否正確（括號負值已轉負、Total/Seed 列已丟、負值佔比合理、樣本數 BTC~642 / ETH~504）；(2) 驗 lookahead — 檢查 k1709.py 有顯式 .shift(1) 且 flow→crypto 日曆對齊函式正確；(3) 驗結論強度 — verdict 必須由 OOS QLIKE + DM 決定，不是 in-sample t 值；多重檢定套 Harvey |t|>3；(4) 派 Codex review 代碼；(5) 通過才由主線程寫 knowledge.json（agent 不可寫）；(6) bash scripts/merge_worktree.sh 合併 dispatch-slot-2-c873d04d-k1709；(7) 若 verdict=PASS 或有趣的 NULL → 排 daily_article（迷思實驗室系列：ETF 資金流能不能預測波動率）。task_pool complete --id research_spot_bitcoin_etf_flow_shock_btc_eth_vol。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}

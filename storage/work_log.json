@@ -17227,5 +17227,35 @@
     "summary": "CI �����修復���綠��run 29298521097�����3-strike: CJK ��������������� CI ratchet ������ publish gate��第��次�������������次�������������� push ��������k1703 ������張���已�����修������starvation 測試����������� ��� build_report ���������注������",
     "commit": "cdb605940",
     "verification": "full pytest 2607 passed / 7 skipped��gh run 29298521097 conclusion=success������ Supabase ��� curl �����������確����������常"
+  },
+  {
+    "timestamp": "2026-07-14T10:14:36+08:00",
+    "task_type": "experiment",
+    "task_id": "research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
+    "outcome": "dispatched",
+    "actor": "hourly-10",
+    "owner": "hourly-10",
+    "commit": null,
+    "summary": "K1709 派工（starvation lockout 清理 1/2）：Spot BTC/ETH ETF 淨流入對 BTC/ETH RV 的增量預測力。\n\ndispatch 前完成描述要求的「驗證資料覆蓋」：\n- Farside 每日淨流入（真 creation/redemption，非成交量代理）：BTC 642 obs (2024-01-11→2026-07-13)、ETH 504 obs — 皆過 ≥500 樣本門檻。\n- yfinance BTC-USD/ETH-USD 1138 obs；ETF 價量 626 obs。\n- 實測到 3 個解析陷阱已寫進 brief：括號=負值（贖回，不轉換則 H2 作廢）、\"-\"=NaN 而非 0、BTC 表尾 Total 列與 ETH 表 Seed/Fee 列須丟。\n\n方法論硬性要求（brief 寫死）：(1) lookahead — flow 盤後才公佈，必 shift(1) + flow→crypto 24/7 日曆對齊函式；(2) 反向因果 — baseline 必為 HAR-RV，判準用 OOS QLIKE + DM，不是 in-sample t 值；(3) 多重檢定套 Harvey |t|>3 + 門檻 sensitivity sweep；(4) NULL 如實報告。\n\ntopology=worktree + compute_queue（router: opus/xhigh）。xhigh 研究 agent 依規則不在 fire 內 spawn（3000s cap 會 SIGKILL 或留孤兒）→ enqueue-agent job=agent-brief_k1709-fba484，worktree=dispatch-slot-2-c873d04d-k1709，由 */15 compute worker 執行，後續 fire 在 PHASE A 收件。"
+  },
+  {
+    "timestamp": "2026-07-14T10:15:31+08:00",
+    "task_type": "platform_ops",
+    "task_id": "research_private_market_rv_correlation_regime",
+    "outcome": "completed",
+    "actor": "hourly-10",
+    "owner": "hourly-10",
+    "commit": null,
+    "summary": "SWF private-market RV/correlation regime 任務（starvation lockout 清理 2/2）— 不 dispatch，標 failed（INFEASIBLE AS SPECIFIED）。\n\n根因是 treatment 變數不可行，不是執行失敗。任務描述自己要求「dispatch 前驗證覆蓋」，驗證結果：其指定資料源「SWF allocation / annual report / Global SWF summary」= 年頻揭露（十餘個觀測）；即使改用揭露最勤的 NBIM / GPIF 季報也僅數十個觀測。以慢速年度趨勢變數解釋日頻 public-market RV / correlation regime = spurious-trend 陷阱，距 ≥500 樣本門檻與 Harvey |t|>3 差 1-2 個數量級 → 派 xhigh agent 等於預先保證產出一份不可信的研究。研究誠實 > 有產出。\n\nRE-SCOPE 建議已寫入 task result（保留研究意圖）：treatment 換成日頻、市場定價的 private-market 風險偏好代理（BX/KKR/APO/ARES 或 PSP/PEX），對 SPY/HYG/VNQ/IGF basket 做 regime 檢定。但那是實質不同的研究問題（市場定價代理 != 實際配置比重），須經正式 research-direction pass 重新立題後才入池。\n\n流程層發現（值得後續 platform_ops 處理）：starvation lockout 目前沒有「任務不可行」的出口 —— 一個 infeasible task 會永遠餓死、每小時觸發 lockout、永久壓住 diversity rotation。本次靠人工判定終結；治本應在 refill / topic-discovery 階段就對 treatment 變數頻率做可行性 gate（backlog 入池前驗證資料頻率 vs 樣本門檻），而非等它餓死 72h 後才被發現。"
+  },
+  {
+    "timestamp": "2026-07-14T10:17:55+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12095-33466d",
+    "outcome": "completed",
+    "actor": "hourly-10",
+    "owner": "hourly-10",
+    "commit": "4356f520c",
+    "summary": "老闆回信「立刻從底層邏輯流程去修復 不要只是表面修補」（回 04:52 大體檢 2 warn）。\n\nwarn 1 live_freshness — 根治（commit 4356f520c）。根因不是門檻，是判準的 domain model 錯：check_live_freshness 用『now - data_date > 3 個日曆天』，暗含「體檢一定在資料更新之後跑」的假設。daily-checkup 排 09:40，但 launchd 睡眠喚醒會補跑漏班（當天 04:52 補跑，log 兩筆 fire）。資料鏈 collect_us(週二~六 07:03) → daily_update(週一~六 08:03) 推上站；週二凌晨網站本來就只該有上週五數字（跨週末=4 日曆天）→ 在設計上正常的時點寄警報。漏報是同一枚硬幣背面且更嚴重：週四真落後 2 個交易日只有 3 日曆天，躲過 >3，舊碼回 [] 一聲不吭。實測舊碼：@週二04:52/data=07-10 → warn（誤報）；@週四/落後2交易日 → []（漏報）。改法：_expected_live_session() 從 canonical runtime_schedules 讀 daily_update cron（=讓網站變新的 job，非 collect_us），croniter 取上一班已跑完(+1h grace)的 fire，再用 exchange_calendars XNYS 真實交易日曆取該 fire 前最後一個 session；只有 實際<應該 才報警（1 session=warn、≥2=critical）。判準與『體檢何時被觸發』脫鉤，且吃得到美股假日。Gate: tests/test_daily_checkup_live_freshness.py（5 cases，含 04:52 誤報重現 + 舊碼躲過的 2-session 漏報）。error_log 已記。\n\nwarn 2 series_registry 品牌漂移 — 今早 09:53 commit 3b5e4effb 已拆掉 dual source of truth（registry 存第二份 status 但發佈流程從不回寫 → 每次 release 必漂移）；status 唯一真相回歸 feed.json，wrong_status 這個 drift kind 結構上不可能發生。驗證 drift=0。\n\n併發現（已建任務，未自行處理）：(a) main HEAD 紅 — test_arc_dedup_calibration 已 import ARC_SIGNATURE_SCHEMA_VERSION 但實作仍在 codex-vscode slot 未提交工作區（依 slot 隔離不碰）；(b) P2 platform_ops_merge_worktree_stashes_other_slots_wip — merge_worktree.sh 合併時 stash 掉其他 slot 未提交的 20 檔（本次逐檔驗證零遺失，但 stash@{1} 顯示已發生≥2次），根因是該腳本假設『main checkout 獨佔』，multi-slot cutover 後不成立。\n\nClose email 已寄（含 Telegram msg 732）。"
   }
 ]
