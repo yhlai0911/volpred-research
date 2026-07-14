@@ -6,10 +6,10 @@
   "scan_scope": [
     "experiments/**/*.py"
   ],
-  "frozen_at": "2026-07-13",
+  "frozen_at": "2026-07-14",
   "scanned_python_files": 1826,
-  "count": 188,
-  "exposed_count": 96,
+  "count": 196,
+  "exposed_count": 104,
   "diagnostic_only_count": 92,
   "active": {
     "exposed": [
@@ -64,6 +64,7 @@
       "experiments/k1314/k1314_placebo.py",
       "experiments/k1315/k1315_forecast_combination.py",
       "experiments/k1332/k1332.py",
+      "experiments/k1351/k1351.py",
       "experiments/k1396/k1396.py",
       "experiments/k1421/k1421.py",
       "experiments/k1530_tw_retail_interaction_rv/k1530_tw_retail_interaction_rv.py",
@@ -79,7 +80,11 @@
       "experiments/k1682/k1682.py",
       "experiments/k1683/k1683.py",
       "experiments/k191/k191_put_call_ratio.py",
+      "experiments/k193/k193_copula_tail_dep.py",
       "experiments/k195/k195_tda_deep_dive.py",
+      "experiments/k258/k258_skew_dynamics.py",
+      "experiments/k367/k367_short_interest.py",
+      "experiments/k430/k430_vrp_predictability.py",
       "experiments/k431/k431_stgarch.py",
       "experiments/k431/k431_stgarch_v2.py",
       "experiments/k450/k450_vrp_semivar_combined.py",
@@ -108,7 +113,10 @@
       "experiments/k948/k948.py",
       "experiments/k973/k973_hurst_vol.py",
       "experiments/k980/k980_threshold_garch.py",
-      "experiments/research_friday_triple_witching_closing_auction_concentra/research_friday_triple_witching_closing_auction_concentra.py"
+      "experiments/research_friday_triple_witching_closing_auction_concentra/research_friday_triple_witching_closing_auction_concentra.py",
+      "experiments/research_hedge_fund_alpha_dispersion_regime_strategy_etf/research_hedge_fund_alpha_dispersion_regime_strategy_etf.py",
+      "experiments/research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test/research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test.py",
+      "experiments/research_tips_breakeven_volatility_corporate_bond_return/research_tips_breakeven_volatility_corporate_bond_return.py"
     ],
     "diagnostic_only": [
       "experiments/K1053/K1053.py",
@@ -362,10 +370,24 @@
       "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
     },
     {
+      "site": "experiments/k570b/k570b.py",
+      "reason": "比較 volatility-targeting 策略與 baseline 的投資組合日報酬，非巢狀預測模型的 loss differential",
+      "dm_pairs": "策略報酬",
+      "adjudicated_at": "2026-07-14",
+      "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
+    },
+    {
       "site": "experiments/k574/k574_complete_strategy_backtest.py",
       "reason": "BH / VT / 槓桿變體之組合報酬兩兩比較",
       "dm_pairs": "策略報酬",
       "adjudicated_at": "2026-07-13",
+      "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
+    },
+    {
+      "site": "experiments/k671/k671_vix_roll_yield.py",
+      "reason": "比較 VIX roll-yield 策略與 12/VIX baseline 的投資組合日報酬，非預測模型巢狀 loss",
+      "dm_pairs": "策略報酬",
+      "adjudicated_at": "2026-07-14",
       "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
     },
     {
@@ -430,7 +452,14 @@
       "dm_pairs": "VaR 校準法",
       "adjudicated_at": "2026-07-13",
       "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
+    },
+    {
+      "site": "experiments/rate_hike_vt_experiment/rate_hike_vt_experiment.py",
+      "reason": "比較升息期 volatility-targeting 策略與 baseline 的投資組合日報酬，非巢狀預測模型的 loss differential",
+      "dm_pairs": "策略報酬",
+      "adjudicated_at": "2026-07-14",
+      "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
     }
   ],
-  "reviewed_nonnested_count": 32
+  "reviewed_nonnested_count": 35
 }

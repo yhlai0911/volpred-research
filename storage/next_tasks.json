@@ -30714,44 +30714,15 @@
   },
   {
     "id": "fable0711_ftd_e1_scale_gating",
-    "title": "K-new: forecast-tail-divergence E1 尺度再校準 gating 實驗",
-    "description": "深審 P0-1：k850 尺度混淆（TX RV σ 打 0050 c2c VaR）。E1=尺度再校準 HAR（std(z)/MZ/overnight 三 variant）重跑 k850/k854 trinity — 結果決定完整論文 vs FRL 方法論短文。Brief=paper/forecast-tail-divergence/review_history/fable_deep_review_20260711/README.md §5。",
-    "priority": 1,
     "status": "failed",
     "task_type": "experiment",
-    "dispatch_lane": "agent",
+    "title": "K-new: forecast-tail-divergence E1 尺度再校準 gating 實驗",
+    "priority": 1,
     "source": "fable_deep_review_20260711",
-    "tags": [
-      "fable-deep-review",
-      "paper-gating"
-    ],
     "created_at": "2026-07-11T14:53:58.104564+00:00",
-    "claimed_by": "hourly-01",
-    "claimed_at": "2026-07-11T17:08:07.569632+00:00",
-    "claim_session_id": "b4711414d1c3",
-    "status_history": [
-      {
-        "ts": "2026-07-11T17:08:07.569649+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-11T17:08:23.590721+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-11T18:25:40.868576+00:00",
-        "from": "in_progress",
-        "to": "failed",
-        "by": "hourly-01"
-      }
-    ],
-    "started_at": "2026-07-11T17:08:23.590708+00:00",
     "completed_at": "2026-07-11T18:25:40.868563+00:00",
-    "result": "Orphan agent commit cf614a11f recovered, but independent Codex review BLOCKED the H2_REJECTED verdict: unstable 4-start GJR, incomplete/TX1 RV, reversed implied-c CI, missing VaR+ES and non-atomic JSON. Result quarantined; canonical rerun queued as k1684_ftd_e1_review_blocked_rerun."
+    "tombstone": true,
+    "archived_at": "2026-07-14T19:00:33.804334+00:00"
   },
   {
     "id": "fable0711_garchx_k1393_oos",
@@ -31313,38 +31284,14 @@
   },
   {
     "id": "collect_k1684_orphan_worktree",
-    "title": "回收 K1684 孤兒 agent 成果（worktree agent/k1690-ftd-e1）",
-    "task_type": "experiment",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "回收 K1684 孤兒 agent 成果（worktree agent/k1690-ftd-e1）",
+    "priority": 1,
     "created_at": "2026-07-11T17:48:25.411324+00:00",
-    "description": "2026-07-12 hang_killed 事故遺留。K1684（forecast-tail-divergence E1 尺度再校準 gating）的 claude -p agent 在 01:07 班被 spawn，父 worker 先 exit → agent reparent 到 init（ppid=1，原 pid 84974）裸跑，無人回收。做法：(1) 確認 agent 已結束 (2) git log agent/k1690-ftd-e1 看有無 commit (3) bash scripts/merge_worktree.sh 合併（merge 前勿 cd 進 worktree）(4) 驗數字 + Codex 審 + 寫 knowledge.json。若無可用產出 → 走新的 compute_queue enqueue-agent 重派，禁止再在 fire 內 spawn。",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-11T18:13:50.859890+00:00",
-    "claim_session_id": "b343da2a30d5",
-    "status_history": [
-      {
-        "ts": "2026-07-11T18:13:50.859905+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-11T18:13:51.116276+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-11T18:25:41.131817+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-11T18:13:51.116260+00:00",
     "completed_at": "2026-07-11T18:25:41.131797+00:00",
-    "result": "Recovered and merged all 8 K1684 experiment artifacts, terminated the stable orphan process group without force, and independently verified raw JSON anchors. Verdict failed review, so no knowledge/feed/paper pivot was written; README quarantine + CODEX_REVIEW_BLOCKED.md committed and corrected background rerun queued as k1684_ftd_e1_review_blocked_rerun."
+    "tombstone": true,
+    "archived_at": "2026-07-14T19:00:33.804334+00:00"
   },
   {
     "id": "hook_commit_m_nonascii_false_positive",
@@ -31383,40 +31330,15 @@
   },
   {
     "id": "email-12083-62a2a3",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] supervisor hang_killed",
-    "description": "Gmail UID: 12083\nMessage-ID: <56496BC3-EBDE-4F8D-9DE2-D0E285486A03@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sun, 12 Jul 2026 01:24:59 +0800\nSubject: Re: [VolPred Alert][CRITICAL] supervisor hang_killed\n\n--- 用戶回信內容 ---\n又來 你到底要出幾次這樣的狀況 立刻從底層優化修改\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月12日 00:57 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> supervisor hang_killed\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> Supervisor SIGKILL'd 一個 worker（hang > 50min cap）\r\n> \r\n> Job\r\n> \r\n> pid: -1\r\n> pgid: -1\r\n> started_at: None\r\n> attempt: 1\r\n> model: claude-opus-4-8\r\n> log: (unknown)\r\n> 影響\r\n> \r\n> 本輪 hourly fire 沒派工成功；pool 沒消化\r\n> 該行程已確認消失；Supervisor 仍存活，下個整點會嘗試新 fire\r\n> Worker log tail\r\n> \r\n> (empty)\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-11T18:00:04.438142+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] supervisor hang_killed",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12083,
-    "email_message_id": "<56496BC3-EBDE-4F8D-9DE2-D0E285486A03@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] supervisor hang_killed",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "hourly-02",
-    "claimed_at": "2026-07-11T18:01:14.201208+00:00",
-    "claim_session_id": "7e69c20583a4",
-    "status_history": [
-      {
-        "ts": "2026-07-11T18:01:14.201224+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-02"
-      },
-      {
-        "ts": "2026-07-11T18:11:30.947758+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "hourly-02"
-      }
-    ],
+    "created_at": "2026-07-11T18:00:04.438142+00:00",
     "completed_at": "2026-07-11T18:11:30.947742+00:00",
-    "result": "hang 告警雙擁有者競態修復 (commit 68886b7b9)。區分兩件事：hang 成因昨天已修(5aa8cd180)、00:57 那次發生在修正落地前；告警本體是空的(pid:-1/started_at:None/tail:empty)是獨立結構性缺陷 — hang 有兩個獨立偵測器相隔1秒觸發，record_completion 原子關單後輸家仍照常寄信且 worker 是 read-after-clear，哪封寄出由 10min dedup 抽籤。修正=關單者才有資格報案 + 交還關單當下快照，輸家閉嘴（不新增機制）。驗證: 新測試 9/9 PASS、舊碼 3 FAIL(含事故重現)、既有 63 條零回歸。部署走 reload --defer。close email 已寄。"
+    "tombstone": true,
+    "archived_at": "2026-07-14T19:00:33.804334+00:00"
   },
   {
     "id": "k1685_collect_orphaned_results",
@@ -32429,7 +32351,7 @@
     "title": "K1685: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1685 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1685 以 pinned yfinance SPY/VIX snapshot（2000-01-03～2026-07-10）延長 K988/K1393-faithful A4f vs GJR 的 OOS。完整 OOS 2019-01-02～2026-07-10、n=1,890：GJR QLIKE=1.515680，A4f=1.431558，A4f 相對改善 5.550%；canonical HAC-DM d=loss_GJR-loss_A4f，t=+3.9656、p=0.00007595、lag=13。K1393 legacy anchor t=3.6",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1685",
@@ -32440,9 +32362,6 @@
     "topic_cluster": "garch",
     "created_at": "2026-07-12T11:07:49+00:00",
     "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
-    "claimed_by": "hourly-02",
-    "claimed_at": "2026-07-14T18:10:05.279654+00:00",
-    "claim_session_id": "82af9071e269",
     "status_history": [
       {
         "ts": "2026-07-14T18:10:05.279669+00:00",
@@ -32455,16 +32374,24 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-14T18:31:13.536327+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-02"
       }
     ],
-    "started_at": "2026-07-14T18:10:05.728583+00:00"
+    "started_at": "2026-07-14T18:10:05.728583+00:00",
+    "completed_at": "2026-07-14T18:31:13.536314+00:00",
+    "result": "已發佈進草稿池 mile_0f710450（status=draft，audience=general）。改寫一輪把學術術語移出正文（audience gate 原會覆寫成 research，而 research 版是 arc duplicate），數字/脆弱性揭露一句未刪。3 張真圖已上 Supabase，懶人包已 enqueue（lazypack-mile_0f710450），release_pool 會在懶人包落地後放行。anti_ai_gate exit 0，未用 force。"
   },
   {
     "id": "K1583_article_general_v2",
     "title": "K1583: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1583 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K1380_v4 17 個 SPY vol forecast spec（GARCH-X A1-A5/A2f/A4f/A3f/A2n/A4n + MIDAS B1-B3/C2-C3/B0；C1 因 0 valid 排除→16 specs）在 Model Confidence Set 三層分析全 retained：\n1. Unconditional MCS (B=1000, α=0.10)：16/16 全保留，p_set=0.438\n2. Conditional MCS (VIX high≥20 / mid / low<15)：每 regime 同樣 16/",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1583",
@@ -32485,14 +32412,37 @@
     ],
     "topic_cluster": "garch",
     "created_at": "2026-07-12T11:07:50+00:00",
-    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜"
+    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
+    "status_history": [
+      {
+        "ts": "2026-07-14T19:08:58.580075+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-14T19:08:58.812583+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-14T19:29:59.991490+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-03"
+      }
+    ],
+    "started_at": "2026-07-14T19:08:58.812570+00:00",
+    "completed_at": "2026-07-14T19:29:59.991469+00:00",
+    "result": "已發佈 mile_7b02f9e2（audience=general, status=draft, 3118 chars, 2 真圖上 Supabase）。通過 AUDIENCE GATE（sanitize_applied=0，非 sanitizer 救回）+ anti_ai_gate exit 0 + content-vs-source audit PASS。懶人包 plan 已產出並 enqueue（lazypack-mile_7b02f9e2），*/15 worker 出圖後 release_pool 解鎖 flip。validate_feed_audience 確認本篇不在違規名單。"
   },
   {
     "id": "K1695_article_general",
     "title": "K1695: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1695 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: [提出: Fable deep review P0-1, 執行: Codex failover] K1695 以 pinned yfinance auto_adjust=False snapshot（paper cutoff 2026-03-31）、Close+distributions 明示 total return、前月末 12/VIX 月頻 lag、SHY cash sleeve、10bps turnover cost、prior-day IRX Sharpe 與跨 13 市場同步 stationary bootstrap 重建 vt-trend-",
     "priority": 1,
-    "status": "in_progress",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1695",
@@ -32503,9 +32453,6 @@
     "topic_cluster": "vix",
     "created_at": "2026-07-12T11:07:51+00:00",
     "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
-    "claimed_by": "hourly-02",
-    "claimed_at": "2026-07-14T18:10:05.505131+00:00",
-    "claim_session_id": "92c16ac2e466",
     "status_history": [
       {
         "ts": "2026-07-14T18:10:05.505146+00:00",
@@ -32518,9 +32465,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-14T18:26:31.024556+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-02"
       }
     ],
-    "started_at": "2026-07-14T18:10:05.956932+00:00"
+    "started_at": "2026-07-14T18:10:05.956932+00:00",
+    "completed_at": "2026-07-14T18:26:31.024543+00:00",
+    "result": "草稿已寫成（誠實的 null 版本，在 worktree dispatch-slot-1-3217f0b2-k1695），但發佈 HELD：寫作過程發現 K1695 招牌結論是 exposure artifact，主線程獨立重算證實（raw +12.61pp → 同曝險 -0.87pp，13/13 市場 exposure_mismatch）。先發文等於用未認證分析推翻已認證實驗，順序反了。已建 P1 更正任務 k1695_exposure_matched_correction + paper_vt_trend_table5_exposure_hold + 根因 gate。證據：storage/ops/k1695_exposure_artifact_verification.md"
   },
   {
     "id": "email-12143-2de65b",
@@ -36623,14 +36578,33 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T18:50:01.481663+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-14T18:50:16.441942+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T18:50:16.704436+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-14T16:00:15.115949+00:00",
-    "last_released_at": "2026-07-14T08:50:02.485381+00:00",
+    "started_at": "2026-07-14T18:50:16.704420+00:00",
+    "last_released_at": "2026-07-14T18:50:01.481655+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-14T16:00:14.889532+00:00",
-    "claim_session_id": "58568d69eba3"
+    "claimed_at": "2026-07-14T18:50:16.441926+00:00",
+    "claim_session_id": "021204768aef"
   },
   {
     "id": "gate-fail-verdict-blocks-merge",
@@ -37249,9 +37223,6 @@
     "created_at": "2026-07-14T13:23:32.692943+00:00",
     "title": "nested-DM auditor has no third role: the fixed-window bounded-memory GW unconditional special case",
     "description": "K1709 rev3 撞出來的。scripts/audit_nested_dm_misuse.py 用字面規則判角色：PRIMARY_DM_DECL_RE 只要看到 PRIMARY 與 DM 在 80 字元內就判 primary_raw_dm（違規）。它只認得兩種安全角色：DM 是 diagnostic-only，或 Clark-West 覆蓋全部 primary。但存在合法的第三種：在 paired fixed rolling window（bounded-memory forecasting method）下，DM 形式的統計量正是 GW(2006) Sec 3.4 的無條件特例，巢狀比較下有效 —— 使它合法的是 estimation scheme，不是公式。K1709 rev2 用模糊的『GW gate』措辭時稽核器判它安全；rev3 依 Codex FAIL 誠實改成『primary family 由無條件 GW/DM 裁決』後反而被判違規。這是稽核器在訓練科學對它說謊 —— 修法方向不是把實驗改回含糊。讓 ratchet 能接受第三種角色，但必須要求證據（marker + 檔案內確有 fixed/rolling bounded-memory scheme 的實證），不可變成人人可蓋的免死金牌 —— ratchet 開後門就是 ratchet 死亡的方式。Codex 已在 K1709 rev3 重審 brief 裡被要求對這個設計問題給裁決（compute job agent-brief_k1709_rev3_review-580bae），先收他的意見再動手。注意：另一 slot 正在改 pre-commit Gate 0（branch fix/gate0-trusted-auditor-from-main），別撞同一批檔。現況：experiments/k1709/test_k1709.py::test_repo_nested_dm_auditor_marks_this_file_safe 與 scripts/tests/test_nested_dm_misuse_ratchet.py::test_no_new_nested_raw_dm_sites 都紅著，K1709 在 worktree 不進 main，故未污染 main CI。\n\n== Codex rev3 裁決（2026-07-14T15:25Z，已收）==\nauditor 的 two-role model 判定為【錯的】。GW(2006) Sec 3.4 明確定義 fixed-memory forecasting methods 的無條件檢定：HAC 標準化平均 loss differential + 標準常態參考分布，統計量與 DM 一致；只有 conditional test 才需要 instrument vector / Wald / chi-square。→ 不可為了取悅 lexical scanner 把科學文字改回模糊的『GW gate』；正解是加第三種角色（如 primary_unconditional_dm_fixed_memory）。但第三角色必須靠證據取得，不可自填 marker。Ratchet 接受第三角色前的 7 項門檻（逐字見 storage/ops/codex_reviews/k1709_rev3_verdict.json 的 ratchet_ruling_q4.required_evidence_before_ratchet_accepts_third_role）：(1) pair/cell-level 版本化 machine-readable manifest（非 file-level escape hatch）；(2) 每個 claim-bearing cell 的 runtime provenance 證明整條 forecasting method 為 bounded-memory（base/aug 同 fixed window、同 complete-case mask、同 training dates、同 embargo；上游 feature estimator 亦不得 expanding）；(3) statistic provenance（paired unadjusted loss differential、HAC estimator/bandwidth、有限正 LRV、normal reference、明確的 unconditional average-loss estimand）；(4) gate wiring 證明只有通過證據的 record 可 feeds_gate=true（bounded_memory=True 或註解不可自我認證）；(5) reader-facing claim 必須就地寫明 unconditional 並揭露 regime-offsetting 效果未被排除；(6) repo 外部的 adjudication receipt，綁 file SHA + cell-manifest hash + reviewer，bytes 一漂移即失效；(7) adversarial fixtures 必須繼續 FAIL（偽 marker、mixed fixed/expanding cells、fixed final regression 但 expanding preprocessing、conditional wording、file-level marker 洗白其他 cells）。",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-14T16:17:14.041788+00:00",
-    "claim_session_id": "57e6d035c4dc",
     "status_history": [
       {
         "ts": "2026-07-14T16:17:14.041807+00:00",
@@ -37264,9 +37235,33 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T18:50:01.481687+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-14T18:50:16.966781+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T18:50:17.234329+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-14T16:17:14.319380+00:00"
+    "started_at": "2026-07-14T18:50:17.234312+00:00",
+    "last_released_at": "2026-07-14T18:50:01.481673+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-14T18:50:16.966765+00:00",
+    "claim_session_id": "179e0501c702"
   },
   {
     "id": "alert_internal_git_push_backup_hold_3f4834ce7a_clean_watermark",
@@ -37277,13 +37272,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-14T17:00:51.204616+00:00",
+    "completed_at": "2026-07-14T19:00:49.487673+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T17:00:51.204616+00:00",
-      "last_clean_observed_at": "2026-07-14T17:00:51.204616+00:00"
+      "resolved_at": "2026-07-14T19:00:49.487673+00:00",
+      "last_clean_observed_at": "2026-07-14T19:00:49.487673+00:00"
     }
   },
   {
@@ -37295,13 +37290,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-14T17:33:14.543303+00:00",
+    "completed_at": "2026-07-14T19:33:15.794000+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T17:33:14.543303+00:00",
-      "last_clean_observed_at": "2026-07-14T17:33:14.543303+00:00"
+      "resolved_at": "2026-07-14T19:33:15.794000+00:00",
+      "last_clean_observed_at": "2026-07-14T19:33:15.794000+00:00"
     }
   },
   {
@@ -37353,7 +37348,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "claimed",
+    "status": "in_progress",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29343425525",
@@ -37361,17 +37356,39 @@
     "created_at": "2026-07-14T16:00:05.539127+00:00",
     "title": "CI 紅燈修復（run 29343425525, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29343425525\nattempt: 1\nhead_sha: 0c0036be0\n偵測摘要（仍須讀完整 failed log）：2026-07-14T15:10:17.4840673Z E AssertionError: stale worktree blocked by Gate 0:\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29343425525 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "claimed_by": "hourly-00",
-    "claimed_at": "2026-07-14T16:00:41.762523+00:00",
-    "claim_session_id": "f8408b8607a7",
     "status_history": [
       {
         "ts": "2026-07-14T16:00:41.762538+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "hourly-00"
+      },
+      {
+        "ts": "2026-07-14T18:50:01.481700+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "hourly-00",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-14T19:00:45.887894+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-14T19:00:46.161850+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-03"
       }
-    ]
+    ],
+    "last_released_at": "2026-07-14T18:50:01.481698+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-07-14T19:00:45.887880+00:00",
+    "claim_session_id": "fd033a473443",
+    "started_at": "2026-07-14T19:00:46.161835+00:00"
   },
   {
     "id": "alert_release_pool_gap_20260714",
@@ -37485,7 +37502,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-14T18:00:01+00:00",
     "source": "internal_alert_remediation_router",
     "tags": [
@@ -37501,30 +37518,60 @@
       "attempt_number": 1,
       "last_seen_at": "2026-07-14T18:00:38+00:00",
       "consecutive_remediation_failures": 0,
-      "attempt_history": [],
-      "escalation_due": false
-    }
+      "attempt_history": [
+        {
+          "observed_at": "2026-07-14T19:00:01+00:00",
+          "completed_at": "2026-07-14T18:26:30.509599+00:00",
+          "status": "succeeded",
+          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因不是那 3 行 silent fallback，而是 gate 量錯樹：cron_git_push_backup.sh 掃工作區而非它要 gate 的 HEAD。共享 checkout 上 codex-vscode 未提交的編輯把 4 個乾淨 commit 擋了整晚，alert 卻寫「HEAD 帶 3 個」。實證：工作區 new=3、HEAD new=0。修法：audit_silent_fallbacks.py 加 --rev（抽該 rev 的子樹到 temp dir 當 --root），wrapper 傳 --rev HEAD。+2 hermetic-git regression test，21 passed。commit f5415afaf"
+        }
+      ],
+      "escalation_due": false,
+      "counted_as_failure_at": "2026-07-14T19:00:01+00:00",
+      "resolved_at": "2026-07-14T19:00:06+00:00",
+      "final_consecutive_remediation_failures": 1
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-14T18:26:30.289697+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-14T18:26:30.509610+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-02"
+      }
+    ],
+    "completed_at": "2026-07-14T18:26:30.509599+00:00",
+    "result": "根因不是那 3 行 silent fallback，而是 gate 量錯樹：cron_git_push_backup.sh 掃工作區而非它要 gate 的 HEAD。共享 checkout 上 codex-vscode 未提交的編輯把 4 個乾淨 commit 擋了整晚，alert 卻寫「HEAD 帶 3 個」。實證：工作區 new=3、HEAD new=0。修法：audit_silent_fallbacks.py 加 --rev（抽該 rev 的子樹到 temp dir 當 --root），wrapper 傳 --rev HEAD。+2 hermetic-git regression test，21 passed。commit f5415afaf"
   },
   {
     "id": "telegram-768",
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-07-14T18:08:27.349613+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 768）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n所以你這個到底是告訴我你解決了還是你又開始建議我而不是自己開始動？\n你跟我保證不會再出現錯誤，那這個到底算不算錯誤\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] git_conflict_guard 自動清理 0 衝突檔\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\n• git_conflict_guard 偵測到 orphaned AUTO_MERGE + 0 個 conflict-marker 檔，已自動清理\n• 受影響檔案：(僅 AUTO_MERGE，無 marker 檔)\n\n📌 影響\n• 這些是 live 站 + dispatcher 讀的 canonical 狀態檔；未清理會被下一次 commit 永久污染。已還原 HEAD canonical 版本，運作不中斷。\n\n🛠️ 建議行動\n• 結構根因 = 雙 dispatcher（Claude hourly + codex_loop）並發寫同分支。已用 .gitattributes merge=ours + 本 guard 止血；長期解見 docs/error_log.md 2026-06-28 entry（single-writer / commit-lock 決策）。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "claimed_by": "telegram-responder",
-    "claimed_at": "2026-07-14T18:10:36.272313+00:00",
-    "claim_session_id": "c024b9b25563",
     "status_history": [
       {
         "ts": "2026-07-14T18:10:36.272325+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-14T18:12:27.957111+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
       }
-    ]
+    ],
+    "completed_at": "2026-07-14T18:12:27.957097+00:00"
   },
   {
     "id": "ops-git-single-writer-2026-07-15",
@@ -37535,5 +37582,166 @@
     "created_at": "2026-07-14T18:10:49.204313+00:00",
     "title": "根因：雙 dispatcher 並發寫同分支 → 落實 single-writer / commit-lock",
     "description": "git_conflict_guard 是止血層，不是解。根因 = Claude hourly dispatcher 與 codex_loop 並發 commit 同一分支，產生 orphaned AUTO_MERGE / conflict markers 在 canonical 狀態檔。\n要做：(1) 盤點所有會 commit 主分支的 writer（hourly dispatch、codex_loop、compute-worker、merge_worktree.sh、各 cron）；(2) 落實 single-writer 或跨 process commit-lock（flock on .git 寫入路徑）；(3) 廢棄 .gitattributes merge=ours 的掩蓋式 workaround，不留兩套；(4) regression test 覆蓋「兩個 writer 同時 commit」情境；(5) 寫 docs/error_log.md entry（先前 alert body 引用的 2026-06-28 entry 其實不存在）。\nCommit 開頭：refactor(3-strike): git single-writer。"
+  },
+  {
+    "id": "k1695_exposure_matched_correction",
+    "title": "K1695 更正：招牌 drawdown protection 是 exposure artifact（同曝險下 +12.61pp → -0.87pp）",
+    "description": "主線程 hourly-02 已用 canonical volpred.stats.drawdown.compare_max_drawdown + pinned experiments/k1695/data/paired_common_returns.csv.gz 獨立驗證：raw ΔMDD +12.61pp (13/13 為正) 但 exposure-matched -0.87pp (只剩 7/13)；compare_max_drawdown 對 13/13 市場亮 exposure_mismatch (vol ratio 0.61-0.68，遠超 .claude/rules/experiments.md:140 的 20% 門檻)；k1695_results.json 無任何 exposure 欄位。完整證據：storage/ops/k1695_exposure_artifact_verification.md。\n要做：(1) 重跑 K1695 並用 compare_max_drawdown，results.json 補 exposure-matched 欄位；(2) 補 circular-shift / phase-randomized null（本班未做，故目前只能說『約等於零』不能說『顯著為負』）；(3) .inference.primary 的 90% CI 與 decision.kill_triggered 需以同曝險口徑重算；(4) Codex 審；(5) 更正 knowledge.json 的 K1695 條目 + 寫 docs/error_log.md。文章草稿（已誠實寫成 null）在 worktree dispatch-slot-1-3217f0b2-k1695，等認證後才可發。",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-15T02:38:00+08:00",
+    "source": "agent"
+  },
+  {
+    "id": "paper_vt_trend_table5_exposure_hold",
+    "title": "paper vt-trend-following：Table 5 + 第三項 contribution 暫緩（繼承 K1695 exposure artifact）",
+    "description": "K1695 的 international drawdown protection 在同曝險口徑下消失（見 storage/ops/k1695_exposure_artifact_verification.md，主線程已獨立驗證）。paper vt-trend-following 的 Table 5 與第三項 contribution 直接建立在該結論上。\n要做：(1) 先擋住 —— 在論文 narrative state 標記此 contribution 為 awaiting_correction，不得在 body 進一步 claim；(2) 等 k1695_exposure_matched_correction 的認證結果；(3) 依同曝險數字重寫 Table 5 或撤下該 contribution。同 bug class: K1265b / K1702。",
+    "task_type": "paper_review",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-15T02:38:00+08:00",
+    "source": "agent"
+  },
+  {
+    "id": "gate_experiments_must_use_compare_max_drawdown",
+    "title": "根因：MDD audit 抓得到 K1695 但沒被執行到（K1709 同 class 復發）— 接成硬 gate",
+    "description": "**訂正原假設**：不是缺 gate。既有 scripts/audit_mdd_scale_artifact.py 對 experiments/k1695/k1695.py 回報 5 個 [RAW_COMPARISON] finding（lines 558/620/774/897/1134）—— **audit 抓得到，但沒有任何流程強制它在 K1695 交件前跑**。這與 docs/error_log.md 2026-07-14 K1709 的教訓（「ratchet 抓得到，但它在 worktree 裡沒牙齒」）是**同一個 class 的復發**，不是新問題。\n要做：查 experiment_gates.py certify / compute_queue runner 為什麼沒對 K1695 執行到這支 audit（是 worktree 路徑？是 certify 沒把 audit_mdd_scale_artifact 納入？還是 K1695 根本沒走 runner？）→ 把它接成硬 gate（RAW_COMPARISON > baseline = certify FAIL）→ regression test 用 K1695 這組數字覆蓋。證據：storage/ops/k1695_exposure_artifact_verification.md",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-15T02:38:00+08:00",
+    "source": "agent"
+  },
+  {
+    "id": "alert_internal_git_push_backup_hold_3f4834ce7a_20260714T180001000000Z_a2",
+    "title": "[internal alert] git-push-backup: push held — 3 new silent fallback(s)",
+    "description": "由內部可自癒 alert_key `git_push_backup_hold` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n本地領先 5 commit 但 HEAD 帶 3 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push 保護 CI（紅碼不上 origin、CI 不會紅）。路由器會建立固定 P1 任務，當班修每個 NEW 位置（先留下 warn，或對合法例外標 '# silent-ok: 理由'）並重跑本 wrapper 解封；首次與修復進行中不寄信。新發現：\nNEW scripts/audit_nested_dm_misuse.py:384 except OSError: return None\nNEW scripts/audit_nested_dm_misuse.py:1001 except OverflowError|TypeError|ValueError: return False\nNEW scripts/audit_nested_dm_misuse.py:2089 except OSError: continue",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-07-14T19:00:01+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "git_push_backup_hold"
+    ],
+    "alert_key": "git_push_backup_hold",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260714T180001000000Z",
+      "episode_started_at": "2026-07-14T18:00:01+00:00",
+      "attempt_number": 2,
+      "last_seen_at": "2026-07-14T19:00:01+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [
+        {
+          "observed_at": "2026-07-14T19:00:01+00:00",
+          "completed_at": "2026-07-14T18:26:30.509599+00:00",
+          "status": "succeeded",
+          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因不是那 3 行 silent fallback，而是 gate 量錯樹：cron_git_push_backup.sh 掃工作區而非它要 gate 的 HEAD。共享 checkout 上 codex-vscode 未提交的編輯把 4 個乾淨 commit 擋了整晚，alert 卻寫「HEAD 帶 3 個」。實證：工作區 new=3、HEAD new=0。修法：audit_silent_fallbacks.py 加 --rev（抽該 rev 的子樹到 temp dir 當 --root），wrapper 傳 --rev HEAD。+2 hermetic-git regression test，21 passed。commit f5415afaf"
+        }
+      ],
+      "escalation_due": false,
+      "resolved_at": "2026-07-14T19:00:06+00:00",
+      "final_consecutive_remediation_failures": 1
+    },
+    "completed_at": "2026-07-14T19:00:06+00:00",
+    "result": "internal alert cleared before dispatch",
+    "status_history": [
+      {
+        "ts": "2026-07-14T19:00:06+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "alert_remediation_router",
+        "note": "condition_cleared_automatically"
+      }
+    ]
+  },
+  {
+    "id": "K1598_article_general",
+    "title": "K1598: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1598 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'cross-market/universal']) but no general article in feed.json.  Verdict preview: K1598 [CONDITIONAL_PASS/COVERAGE_COMPETITIVE_NO_PANEL_EDGE]：測試 Liu, Dobriban & Orabona (2026, arXiv:2602.03168) universal-portfolio 風格的線上 conformal 校準（UP_AggACI_lite，Cover-style 對 ACI 專家做指數混合）能否改善波動率縮放報酬區間，優於 rolling conformal 與 ACI baseline。資料：experiments/k1552 frozen prices.par",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1598",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-14T19:07:58+00:00"
+  },
+  {
+    "id": "K1678_article_general",
+    "title": "K1678: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1678 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1678：以 SEC Litigation Release 26532（2026-04-20 立案，*SEC v. Harsh V. Patel*，解析 439 筆表格列/412 個股票代碼/1079 個唯一 ticker-date 配對）作操縱交易弱標籤，配合 Wikimedia Analytics 公開 topic pageviews（Pump_and_dump/WallStreetBets/Short_squeeze 等）過去 126 日 z-score 作公眾關注度 shock，檢驗是否放大操縱標籤後 t+1/t+5 崩盤風險。yfinance",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1678",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-14T19:08:03+00:00"
+  },
+  {
+    "id": "K1348_article_general",
+    "title": "K1348: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1348 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1348 [CONDITIONAL_PASS]：檢定ETF(SPY/IVV/VTI/QQQ)季末heartbeat trade是否對成分股造成微結構vol pressure。資料：yfinance日頻，2014-01-01~2026-06-17，panel N=59,489。Volume channel：2/4 ETF顯著擴張（IVV t=+3.46,p=0.0006；VTI t=+3.24,p=0.0013），panel OLS(HC1,asset/year FE)係數+0.0417,t=+5.84。range_vol channel：0/4顯著，p",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1348",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-14T19:08:06+00:00"
+  },
+  {
+    "id": "content_audience_mislabel_backlog_45",
+    "title": "Feed 有 45 篇 audience=general 但實為研究向（歷史錯標）— 重新分類 + 補真正的 general 覆蓋",
+    "description": "`uv run python scripts/validate_feed_audience.py` 回報 45 個 violations：feed entry 宣告 audience='general'，但 title+content+tags 命中 ≥2 個學術關鍵詞，publisher 的 _infer_audience 會判定它們其實是 research。\n\n為什麼要修（不只是 CI 紅字）：\n1. 讀者拿到「一般讀者向」的標籤，點進去讀到滿篇 QLIKE / GARCH / bootstrap → 直接跳出。這是 Mission #1（把文章寫好）與 #5（曝光流量）的直接損失。\n2. 這 45 篇佔著 general 覆蓋的位置，但實際沒覆蓋到 → publication_candidates 的 uncovered 判定失真。\n\n根因線索（2026-07-15 hourly-03 於 K1583 發佈時發現）：publish_draft.py 的 AUDIENCE GATE 是 2026-05-29 才加的（fail fast，擋住 silent upcast）。這 45 篇很可能是 gate 上線前發佈的存量。池子裡 K672 已 retry-v4、K492/K709 retry-v2 — 同一個坑在反覆咬人，值得一併查是不是同源。\n\n建議做法：\n- 先跑 validate_feed_audience 取完整 45 個 id 清單，按「改標 research」vs「改寫成真 general」分流\n- 純研究內容 → 直接改標 research（backfill patch），並讓 publication_candidates 重新把該 K 列為 missing_general\n- 標題/主題本來就適合一般讀者、只是術語沒清乾淨 → 排進 daily_article 改寫\n- 完成後 validate_feed_audience 應 exit 0；把它接進 CI 防復發\n\n參考：本次 K1583 (mile_7b02f9e2) 的改寫手法可直接複用 — 語言層改寫、數字與限制段一字不動、sanitize_applied=0 才算真的乾淨。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "agent_discovered",
+    "tags": [
+      "audience",
+      "content-quality",
+      "feed",
+      "backlog",
+      "ci"
+    ],
+    "created_at": "2026-07-14T19:31:12.099039+00:00",
+    "discovered_by": "hourly-03"
+  },
+  {
+    "id": "ops_claim_owner_collides_across_slots",
+    "title": "claim owner `hourly-$(date +%H)` 在多 slot 並發下會撞名 — 一個 slot 可能誤清另一個 slot 的在途任務",
+    "description": "2026-07-15 03:31 hourly-03 (slot-2) 在跑「完整完成 gate」的『無 in_progress 殘留』檢查時，查到一筆 claimed_by='hourly-03' 的 in_progress 任務 (ci-red-29343425525)。但那筆其實是 **slot-1** 在同一小時 claim 的（fire_reason=requested:ci_red），不是 slot-2 的殘留。\n\n根因：dispatch prompt 規定 claim owner = `hourly-$(date +%H)`，**只帶小時、不帶 slot_id**。supervisor 現在是多 slot 並發（cohort 內同時跑 slot-1 / slot-2），同一小時的兩個 slot 會拿到**完全相同的 owner 字串** → 從 owner 欄位無法區分是誰 claim 的。\n\n危害（尚未發生，但這次差一步）：\n- fire 收尾時的『清掉我自己的 in_progress 殘留』動作，會把**另一個 slot 正在跑的任務**誤判成自己的殘留而 release/complete\n- stale-claim 回收器若按 owner 比對，同樣會誤傷\n- work_log 的 actor 歸因也會混淆兩個 slot 的產出\n\n修法建議（改流程不改資料）：\n- owner 改成帶 slot 的唯一字串，例如 `hourly-<HH>-<slot_id>` 或直接用 supervisor 的 job_id\n- enforcement owner 應是 supervisor（它知道 slot_id），不是 prompt 裡的 shell 字串 — 讓 prompt 從環境變數讀 supervisor 注入的 owner，而非自己 `date +%H` 拼\n- 同步更新 cron_hourly_dispatch_prompt.md 的 claim 範例\n- 加 regression test：兩個 slot 同小時 claim 不同 task，斷言 owner 不相同\n\n發現者：hourly-03 (slot-2, job 5ddfeb00)，於 K1583 發佈收尾時。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "agent_discovered",
+    "tags": [
+      "dispatch",
+      "supervisor",
+      "claim",
+      "race",
+      "multi-slot"
+    ],
+    "created_at": "2026-07-14T19:32:15.966944+00:00",
+    "discovered_by": "hourly-03"
   }
 ]

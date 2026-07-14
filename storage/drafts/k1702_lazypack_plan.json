@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "title": "懶人包｜「回撤變淺」是本事，還是只是少冒險？",
+  "subtitle": "六個經典因子套上波動率調控，本世紀樣本外的誠實檢定",
+  "evidence": {
+    "k1702": {
+      "path": "experiments/k1702/k1702_results.json",
+      "sha256": "30dd5d3dd41867679aad0a7d22a950352a2e5856259a9b78512e3aec9ee0d261",
+      "label": "實驗 K1702 完整結果 JSON"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "一個很好賣的說法",
+      "alt": "概念說明：波動率調控宣稱能壓低回撤，但少賠也可能只是因為部位變小",
+      "sources": [
+        "k1702"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "規則本身很單純",
+          "body": [
+            "市場波動變大就減碼，行情平靜再加回來，學界叫它波動率調控。",
+            "行銷簡報上永遠只講一句話：回撤變小了。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "但少賠有兩種來源",
+          "body": [
+            "一種是真的會擇時，在崩盤前先跑掉。",
+            "另一種是從頭到尾只押四分之一的部位，賠的時候當然也少賠。",
+            "帳面上這兩種長得一模一樣。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "受測因子數",
+          "value": {
+            "source": "k1702",
+            "path": "primary_gate.zoo_factor_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "小型股、價值、高獲利、保守投資、動能、品質"
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "怎麼比才算公平",
+      "alt": "方法說明：縮放常數固定在本世紀之前，樣本外逐月推進，並做曝險匹配與相位隨機化",
+      "sources": [
+        "k1702"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "真樣本外",
+          "body": [
+            "縮放常數用本世紀以前的資料算好，之後完全不再回頭調整。",
+            "成本抓每次調整曝險二十五個基點，槓桿上限三倍。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "把風險拉到同一條線",
+          "body": [
+            "調控後的部位普遍縮到原來的一半以下，直接比回撤並不公平。",
+            "所以把原始因子等比例縮到同樣的實現波動，再比一次。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本外月數",
+          "value": {
+            "source": "k1702",
+            "path": "data.oos_observations",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個月"
+            }
+          },
+          "note": "本世紀至今，完全不回頭調參數"
+        },
+        {
+          "kind": "metric",
+          "label": "動能原始年化波動",
+          "value": {
+            "source": "k1702",
+            "path": "drawdown_analysis.per_factor.MOM.unmanaged_annual_volatility",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "動能調控後年化波動",
+          "value": {
+            "source": "k1702",
+            "path": "drawdown_analysis.per_factor.MOM.managed_annual_volatility",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": "不到原來的四分之一，回撤本來就會變淺"
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "成績單：換個比法，五個正的變一個",
+      "alt": "主要結果：帳面回撤多數改善，曝險匹配後只剩動能，時點隨機化後無一存活",
+      "sources": [
+        "k1702"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "帳面回撤變淺的因子",
+          "value": {
+            "source": "k1702",
+            "path": "drawdown_analysis.raw_mdd_improved_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "六個因子中，沒調曝險直接比大小"
+        },
+        {
+          "kind": "metric",
+          "label": "曝險匹配後仍變淺",
+          "value": {
+            "source": "k1702",
+            "path": "drawdown_analysis.exposure_matched_positive_gap_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "六個因子中，同樣風險再比只剩動能"
+        },
+        {
+          "kind": "metric",
+          "label": "時點隨機化後存活",
+          "value": {
+            "source": "k1702",
+            "path": "drawdown_analysis.circular_shift_holm_survivors_5pct",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "六個因子中，把加減碼時點整段挪開照樣變淺"
+        },
+        {
+          "kind": "metric",
+          "label": "動能：亂猜時點的單尾 p",
+          "value": {
+            "source": "k1702",
+            "path": "drawdown_analysis.primary_randomization_test.per_factor.MOM.one_sided_p",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "多數假訊號打得跟真訊號一樣好，不顯著"
+        },
+        {
+          "kind": "metric",
+          "label": "夏普值變好的因子",
+          "value": {
+            "source": "k1702",
+            "path": "cost_survival.25.zoo_positive_sharpe_difference_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "六個因子中，計入交易成本後只有動能"
+        },
+        {
+          "kind": "metric",
+          "label": "六因子夏普值變化中位數",
+          "value": {
+            "source": "k1702",
+            "path": "cost_survival.25.zoo_median_sharpe_difference",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          },
+          "note": "多數因子被調控拖累"
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "帶走這三句，還有這篇沒說的事",
+      "alt": "結論與研究邊界：成本會吃掉薄優勢；本實驗只測學術多空因子",
+      "sources": [
+        "k1702"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "看到「回撤變小」先問倉位",
+          "body": [
+            "部位砍到四分之一，回撤本來就會變淺，那是算術不是本事。",
+            "該問的是：同樣的風險預算下，它有沒有比單純減碼更好。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "等權組合毛效果",
+          "value": {
+            "source": "k1702",
+            "path": "multifactor_equal_weight_zoo.0.sharpe_difference",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          },
+          "note": "完全不計成本時的夏普值提升"
+        },
+        {
+          "kind": "metric",
+          "label": "毛效果的 p 值",
+          "value": {
+            "source": "k1702",
+            "path": "multifactor_equal_weight_zoo.0.paired_stationary_bootstrap_sharpe_difference.p_two_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "跟零沒有分別"
+        },
+        {
+          "kind": "metric",
+          "label": "成本偏高時調控後夏普",
+          "value": {
+            "source": "k1702",
+            "path": "multifactor_equal_weight_zoo.50.managed.sharpe_zero_rf",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          },
+          "note": "高換手策略，先算成本再談績效"
+        },
+        {
+          "kind": "text",
+          "heading": "研究邊界",
+          "body": [
+            "本實驗只測學術用的多空因子組合，月頻、官方資料、單一縮放規則。",
+            "換成其他訊號或其他資產的做法，沒有在這裡被測到，得各自重驗。"
+          ]
+        }
+      ]
+    }
+  ]
+}
