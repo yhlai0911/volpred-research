@@ -1,0 +1,145 @@
+[
+  {
+    "experiment": "k1291",
+    "k_id": "K1291",
+    "category": "experiment_result",
+    "verdict": "UNVERIFIED",
+    "content": "K1291 [UNVERIFIED]：DEX priority-fee pressure 作為 crypto RV covariate 的實驗。results.json 明確標記 status=\"scaffold_only_not_run\"，只有規劃中的資料源（ETH-USD/BTC-USD yfinance）、方法設計（HAR baseline vs chain-augmented，DM-HLN Harvey |t|>3 gate）與 lookahead policy，`result_fields_reserved` 全部為 null（sample/data_quality/oos_loss_table/dm_hln_tests/hac_diagnostics/verdict 皆空）。research_honesty_notes 明寫「No empirical results have been computed」。此實驗尚未產生任何統計數字，不可視為已完成研究。若要解鎖需先取得真正的 priority-fee/mempool-pressure 資料源（非僅平均 gas price，否則會與 K1566 proxy 限制重複）。",
+    "evidence": ["experiments/k1291/README.md", "experiments/k1291/k1291_results.json"],
+    "confidence": 0.1,
+    "needs_human": true,
+    "gap": "實驗完全未執行（scaffold only），沒有任何實證數字可寫入知識庫；需要人工判斷是否值得投入取得更好的 ETH priority-fee 資料源後才重開此題，或直接歸檔為 backlog 擱置。"
+  },
+  {
+    "experiment": "K1343_bdc_pressure_private_credit_vol_signal",
+    "k_id": "K1343",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1343 [NULL]：BDC（BIZD/ARCC/BXSL/OBDC/FSK 等權重籃）價格壓力是否對 HYG/KRE/IWM 5/10/21 日 QLIKE 有增量預測力。資料來源 yfinance，2013-01-01 至 2026-06-12，OOS 自 2021-01-04 起，每 cell n=1354。9 個 primary cells（3 目標 x 3 horizon）加入 BDC 訊號後 QLIKE 全數惡化（-0.46% 至 -4.00%），DM t 絕對值最大僅 1.82（KRE 21d，p=0.069），Bonferroni α=0.05/9=0.00556 下 9/9 未過。Event-study diagnostic 顯示壓力事件後 HYG/IWM 21 日 forward variance 上升（p≈0.032/0.020）但屬 descriptive only，不推翻主結果因為受控 expanding model 全數惡化。結論：上市 BDC 壓力不應作為 HYG/KRE/IWM 的獨立私募信貸早期預警波動率指標，與 K1499 的謹慎結論一致（BDC stress 多為 broad beta，非乾淨的私募信貸傳導管道）。",
+    "evidence": ["experiments/K1343_bdc_pressure_private_credit_vol_signal/README.md", "experiments/K1343_bdc_pressure_private_credit_vol_signal/K1343_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1363",
+    "k_id": "K1363",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1363 [NULL_PUBLIC_DICTIONARY_PROXY]：between-meeting Fed speech 用透明 dictionary score 建構 forecast-revision shock，檢驗是否對 SPY/QQQ/TLT/IEF 波動與 5 日左尾風險有增量預測力。資料為 Fed 官網 speech corpus，2020-01-08 至 2026-06-22，解析 526 篇 speech、477 篇排除 FOMC ±1 營業日後的 between-meeting speech；市場樣本 1625 交易日。12 個 primary asset-target tests（4 資產 x 3 target）：positive Harvey |t|>=3 通過 0/12；BH q<=0.05 discovery pass 0/12。最強正向 cell 為 SPY log_rv_1d，係數 +0.0332，HAC t=+1.60，BH q=0.654；最負 cell 為 SPY left_tail5，係數 -0.0085，HAC t=-2.65，BH q=0.097（方向不支持 tail-risk prior 且未達 Harvey 絕對門檻）。Secondary top-quintile diagnostic（top 48 天）SPY/QQQ/TLT/IEF forward 5d RV Welch p 分別為 0.880/0.607/0.808/0.497，同樣不支持。結論：免費 Fed Board speech + dictionary score 不支持 between-meeting fedspeak forecast-revision shock 是 robust equity/bond tail-vol prior 的假說；不反駁原始文獻（Gorodnichenko et al. 2025），因缺完整 FOMC member speech corpus、Reserve Bank presidents、高頻事件窗與 multimodal NLP forecast-revision classifier。",
+    "evidence": ["experiments/k1363/README.md", "experiments/k1363/K1363_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1428",
+    "k_id": "K1428",
+    "category": "literature",
+    "verdict": "UNVERIFIED",
+    "content": "K1428 是結構化文獻回顧實驗（非市場資料實證），彙整 6 篇 primary sources（含 Leushuis & Petkov 2025 *Financial Innovation* DOI:10.1186/s40854-025-00809-5、Branco/Rubesam/Zevallos 2024 *Journal of Empirical Finance*、Gunnarsson et al. 2024 *IRFA* 等）關於 realized volatility forecasting 方法論的共識與分歧。json 標 label=\"ACTIONABLE_REVIEW\"，核心結論：2025 年文獻不支持「深度學習已普遍打敗 HAR/線性 RV baseline」的一般性 claim，最大問題仍是 benchmark discipline（target mismatch、loss-function 不一致、formal significance 報告不足），而非 model novelty；economic-value-aware combination 比純 accuracy horse race 更有新意；realized-measure（5-min RV/MedRV/range-based）選擇本身可能翻轉排序。建議後續研究優先序：(1) HAR-RV/Realized GARCH/HEAVY baseline battle → (2) realized-measure ablation → (3) economic-value combination → (4) 才考慮 ML/transformer 延伸。此實驗本身不含任何市場資料或統計檢定量，是方向性文獻綜述而非可檢定實證結果。",
+    "evidence": ["experiments/k1428/README.md", "experiments/k1428/k1428_results.json"],
+    "confidence": 0.55,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1458_h1_trough_decomposition",
+    "k_id": "K1458",
+    "category": "vt_strategy",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1458：Paper 6（VT trend-following）body 對 Gemini v4 review H1 質疑的量化回應 — 分解 PureVT 相對 Buy-and-Hold 在 2009-03 與 2020-03 兩次 MDD trough 附近（±63 交易日窗）的貢獻，來源是 VIX-timing 還是機械性 TSMOM 反向避險（rebound 時 sign(12個月報酬)=-1 使避險項在正報酬日產生正貢獻）。5 資產（SPY/50-50 SPY+GLD/DIA/QQQ/IWM），加法恆等式 PureVT_excess = VIX_timing_contrib + TSMOM_hedge_contrib 逐資產驗證成立（如 SPY 2020-03：-0.0843+0.1220=+0.0377 ✓）。2009-03 trough：cross-asset median PureVT−BH=-0.050，VIX-timing=-0.050，TSMOM-hedge≈+0.000（3/5 資產因 rolling-beta 於樣本早期被 `.clip(0,0.5)` 綁在 0 而全零）→ Gemini H1 機械避險假說在 2009-03 未獲驗證。2020-03 trough：median PureVT−BH=-0.043，VIX-timing=-0.078，TSMOM-hedge(全窗)=+0.030，TSMOM-hedge(僅TSMOM<0天)=+0.300（SPY 全窗+12pp，QQQ TSMOM<0天+56pp）→ 機械避險確實存在且量級可觀，但 PureVT 整體仍跑輸 BH（VIX-timing 虧損主導）。結論：H1 假說在 2020 部分成立、在 2009 不成立，body.tex 需依此更新為條件式敘述而非單一方向 caveat。",
+    "evidence": ["experiments/k1458_h1_trough_decomposition/README.md", "experiments/k1458_h1_trough_decomposition/k1458_results.json"],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1482",
+    "k_id": "K1482",
+    "category": "research_methodology",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1482 [BLOCKED_ON_DATA]：green-minus-brown transition-risk 波動價差（ICLN/TAN vs XLE/XOP 的 RV spread 作氣候政策轉型情緒指標）的 feasibility audit。系統性檢查 `storage/`、`experiments/`、`data/`、`docs/` 後確認：(1) 四檔核心 ETF（ICLN/TAN/XLE/XOP）本地皆無可重用價格快取；(2) repo 內無 canonical climate/transition-policy 事件表（缺 event_date/event_name/event_type/jurisdiction/source_url 欄位）；(3) 既有相關 artifact（K148 named climate events、K335 ESG leaders vs laggards）皆非本題等價替代，直接借用會置換研究問題而非完成它。結論：目前離線環境下無法誠實完成完整研究，最誠實的完成方式是本次的 feasibility audit 而非硬湊回歸。解鎖條件明列：需先建立 `storage/macro/yf_{ICLN,TAN,XLE,XOP}.csv` 本地快取與帶完整欄位的 canonical policy event table。此結論本身即為有價值的知識（防止未來重複踩同一資料缺口去嘗試硬做）。",
+    "evidence": ["experiments/k1482/README.md", "experiments/k1482/k1482_results.json"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1497",
+    "k_id": "K1497",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1497：重驗 realized volatility roughness（Hurst H<0.5）跨資產穩定性，以及加入 roughness 訊息後 HAR 類模型是否有可重現 OOS 預測增益。資料來源 `paper/garch-x-vix/data/`，6 資產（SPY/QQQ/EEM/FEZ/GLD/USO），Parkinson variance proxy，各資產樣本至 2026-05-19。Roughness 本身是穩定的描述性事實：全部資產 full-sample 與 rolling 504-day H 多數落在 rough 區（json: all_assets_full_sample_rough=true, all_assets_rolling_mostly_rough=true）。OOS 起自 2022-01-03，HAR-Rough（用 trailing 504-day H_{t-1} 對日/月分量保守重加權）在 3/6 資產（QQQ/EEM/FEZ）QLIKE 優於 plain HAR，但 0/6 資產通過 Harvey 顯著門檻，pooled DM test（HAR-Rough vs HAR）t=0.6059, p=0.5446, harvey_sig=false。結論：roughness 是穩定現象，但把它轉成 forecasting predictor 未能帶來穩健 OOS 增益，延續 K764/K1386 的 pattern（優勢在 HAR baseline 前消失）。",
+    "evidence": ["experiments/k1497/README.md", "experiments/k1497/k1497_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1557_taiex_newhigh_crash_reversal",
+    "k_id": "K1557",
+    "category": "market_context",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1557：系統性驗證 FinLab 財經實驗室 FB 貼文宣稱 — TAIEX 創一年新高後 3-4 天內急殺、抱一年輸給買進持有。資料 `^TWII` yfinance 1997-07 至 2026-06（7102 交易日，event 限 1999 年起）。主規格（lookback5, percentile2）偵測 13 次事件（FinLab 稱 10 次但其 filter 未明確定義，事件數對 filter 高度敏感）。3M forward：事件後中位 +4.0%、勝率 75%，但無條件隨便買 3M 也有中位 +2.82%，10000 次 placebo bootstrap 顯示事件報酬落在隨機分佈第 69 百分位（統計上與雜訊無異）。6M：中位 +5.4%（反駁 FinLab 宣稱的 -0.2%），placebo 第 61 百分位。1Y：主規格中位 -5.6%，placebo 第 3 百分位（p≈0.03）但 lookback∈{3,5,7}×percentile∈{2,3,5} 的 9 種切法 sensitivity 範圍為 -5.6%~+3.4%（換一種合理切法就翻正），9 種切法下 multiple-testing 本就預期會撞到一個 p<0.05，n=11 信賴區間極寬，不 robust。2007-11 事件 1 年後 -49.1%（≈ FinLab 宣稱 -47.6%）但只是 13 次中撞上 2008 金融海嘯的單一個案，非規律。無條件 baseline 1Y +9.1%（≈ FinLab 宣稱的 +8.5%，驗證其 baseline 陳述正確）。結論：創一年新高後急殺沒有可靠、可下注的 edge；FinLab 的「一年詛咒」敘事建立在約 13 個事件、特定 filter 與 multiple-testing 巧合之上。",
+    "evidence": ["experiments/k1557_taiex_newhigh_crash_reversal/README.md", "experiments/k1557_taiex_newhigh_crash_reversal/k1557_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1594",
+    "k_id": "K1594",
+    "category": "vol_prediction",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1594 [MIXED_WEAK]：KOWCPI 式 kernel-weighted conformal 下尾分位數是否能改善 TLT/HYG 日頻 VaR。資料凍結自 K1571 cache（yfinance），OOS 2015-01-01 至 2026-06-30，calibration window trailing 1000 交易日，bandwidth 於 2013-2014 驗證。比較 HS250/HS1000/VIXRegime1000/KOWCPI-lite 於 alpha={5%,1%}。結果：KOWCPI-lite 在 4 個 cell 中 3 個有最低 mean pinball loss，且寬度常較窄；但 0/4 通過 Trinity（Kupiec+Christoffersen）— TLT 5%（HS250 最佳，Kupiec p=0.0175, Christoffersen p=0.0426, no）、TLT 1%（KOWCPI 最佳但 Kupiec p=0.0053, no）、HYG 5%（KOWCPI, Kupiec p=0.5170 但 Christoffersen p=0.0030, no）、HYG 1%（KOWCPI, Christoffersen p=0.0007, no）。無任何 KOWCPI DM 比較通過本專案 strict |t|>3 + Holm 校正。結論：KOWCPI 式 kernel 加權能縮窄 VaR 寬度、降低 pinball loss（尤其 HYG），但未解決核心 VaR 風控問題（違約仍聚集），非可部署的 VaR 升級。",
+    "evidence": ["experiments/k1594/README.md", "experiments/k1594/k1594_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "K1609",
+    "k_id": "K1609",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1609 [DATA_LIMITATION_PROXY_NULL]：COMEX 倉庫稀缺性（registered/eligible 庫存）proxy 是否可預測貴金屬波動、下方半變異數與金銀/實質殖利率關係。原設計用 CME `Gold_Stocks.xls`/`Silver_stocks.xls`，但本次 runtime 兩 endpoint 皆 ReadTimeout、回傳 0 bytes，無法取得真實 COMEX 庫存序列（此為決定性限制）。改用 yfinance（GLD/SLV/GC=F/SI=F/^VIX）+ FRED DFII10 建構弱 proxy（futures/ETF basis z-score + dollar-volume z-score，皆 shift(1)），樣本 2061 個週五 origin（黃金 1038 個、白銀 1023 個），2006-01-06 至 2026-05-29。Fallback 結果：黃金 next-week log RV 係數 0.0165, HAC t=1.40（bootstrap CI 跨零）；白銀係數 0.0147, t=1.10（CI 跨零）；黃金 21 日 return-real yield 相關係數 -0.0157, t=-2.05（CI 仍跨零）；白銀 t=-1.63（CI 跨零）。結論：無 COMEX 真實庫存數據可用，fallback 市場緊張度 proxy 不支持能預測次週貴金屬 RV 的假說，且不可將此結果延伸為對真實 COMEX registered/eligible 庫存的任何宣稱。",
+    "evidence": ["experiments/K1609/README.md", "experiments/K1609/K1609_results.json"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "K1678",
+    "k_id": "K1678",
+    "category": "market_context",
+    "verdict": "NULL",
+    "content": "K1678：以 SEC Litigation Release 26532（2026-04-20 立案，*SEC v. Harsh V. Patel*，解析 439 筆表格列/412 個股票代碼/1079 個唯一 ticker-date 配對）作操縱交易弱標籤，配合 Wikimedia Analytics 公開 topic pageviews（Pump_and_dump/WallStreetBets/Short_squeeze 等）過去 126 日 z-score 作公眾關注度 shock，檢驗是否放大操縱標籤後 t+1/t+5 崩盤風險。yfinance 覆蓋 250/252 個標籤股票有足夠歷史，H=1 匹配 525 列/205 檔/302 事件群集，H=5 匹配 345 列/204 檔/242 群集，皆用同 ticker 最近 3 個未重疊配對控制組。8 個 primary cells（RV/DSV/left-tail loss/downside gap × H=1/5）：係數範圍 -0.798 至 +71.565，HAC t 絕對值最大僅 1.258，所有 Bonferroni p=1.0，全部 8 個 2000-rep moving-block bootstrap CI 跨零，0/8 達 Harvey t=3，0/8 通過 BH。Pump_and_dump-only 與 21 日 composite 敏感度分析同樣 |t|<1.54。獨立重算驗證：8 個 HAC 係數/t值/p值誤差小於 1e-12，第二次快取執行產生 byte-identical 輸出。結論（NULL_NO_ROBUST_SALIENCY_AMPLIFICATION）：免費市場層級 topic pageviews 對辨別「哪些」SEC 標籤事件後續風險更高過於粗糙；不反駁使用 exogenous 中國專屬顯著度的原始 JBF/JEF 文獻機制，也不排除 ticker-specific 搜尋/Reddit/新聞/order-flow 數據可能有效。",
+    "evidence": ["experiments/K1678/README.md", "experiments/K1678/K1678_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k759",
+    "k_id": "K759",
+    "category": "vol_prediction",
+    "verdict": "UNVERIFIED",
+    "content": "K759：台股金融壓力指數 FSI（用 0050/2330 TSMC/2881 Fubon/2882 Cathay/^VIX 組成）是否對 TSMC 波動有領先預警力。yfinance 2010-01-04 至 2026-03-27。json 顯示 FSI p75=0.2461，987 個壓力日、395 嚴重壓力日；lead_1d 時 P(spike|stress)=15.82% vs P(spike|no stress)=1.15%（lift 13.77x，隨 horizon 拉長遞減至 lead_20d 僅 1.86x）。迴歸部分：VIX-only 模型 R²=0.1404，VIX+FSI 模型 R²=0.2493（ΔR²=0.1089，FSI 係數 t=15.14）；DM test：mean loss diff=0.000777, HAC t=2.237, p=0.0253。ROC：AUC(VIX-only)=0.8019 vs AUC(combo)=0.8608（ΔAUC=0.059），但 5000 次 bootstrap 的 AUC 差異 95% CI 為 [-0.0404, 0.0444]，跨零。策略部分：VT+FSI Override 策略 Sharpe=0.402，低於單純 VIX-based VT 策略 Sharpe=0.464（json summary 自己標註 override_improves_sharpe=false），5 個 OOS 期間 override 勝率僅 3/5。**研究誠實缺口**：README 全為「待補充」stub，無正式敘事、無 verdict 欄位、目錄下無 codex_review.md，未經 Codex 審查即留在 repo。DM t=2.237 雖傳統 p<0.05，但未達本專案 Harvey |t|>=3 discovery 門檻，而 summary 卻自行標記 `dm_test_significant: true`，與專案現行標準不一致，屬於潛在 overclaim。",
+    "evidence": ["experiments/k759/README.md", "experiments/k759/k759_financial_early_warning_results.json"],
+    "confidence": 0.35,
+    "needs_human": true,
+    "gap": "無正式 verdict 欄位、無 Codex review、README 未寫（stub）；json 內部宣稱的統計顯著性（DM t=2.237, p=0.0253）未達本專案現行 Harvey |t|>=3 discovery gate，需要人工依現行標準重新判定此實驗真實結論是 NULL 還是弱支持，並決定是否需要補做 Codex review 才能寫入 knowledge.json。"
+  },
+  {
+    "experiment": "k837",
+    "k_id": "K837",
+    "category": "vol_prediction",
+    "verdict": "FAIL",
+    "content": "K837：BTC regime-switching VaR 能否同時通過 1% 與 5% 的 Trinity backtest（解決 K830 發現的 1%/5% 互斥問題）。GJR-GARCH(1,1) + 4 種 regime 方法（RV-Regime/VIX-Regime/GMM-Regime/Adaptive-Blend）vs Normal/Student-t baseline，Student-t scale 用 sqrt((df-2)/df) 修正（K824v2）。OOS 2023-01-01 至 2024-12-31，n=731，每 63 天 refit 共 12 次。Trinity 結果：Normal 通過 1% 失敗 5%；Student-t 失敗 1% 通過 5%；4 種 regime 方法全部「通過 1% 失敗 5%」，與 Normal 完全一致（json: hypothesis_confirmed=false, methods_passing_both=[]）。根因量化：2023-2024 有 87-92% 為低波動 regime（RV-Regime 僅 59/731=8.1% 分類為高波動；VIX-Regime 僅 101/731=13.8% VIX>=20；Adaptive-Blend mean weight=0.137，僅 2.9% 天數接近 Student-t），regime 切換因此退化成近乎純 Normal。DM test 顯示 VIX-Regime 在 5% pinball loss 顯著優於 Normal（DM=-3.49, p<0.001, Harvey 顯著）但仍未通過 Trinity。結論：簡單 regime-switching 無法解決 BTC VaR 1%/5% 互斥，根因是 GARCH 變異數在牛市期間過度預測（2023-2024 平均日報酬 0.27%），而非分佈設定錯誤；建議改善方向為 variance model 本身（較低 persistence/variance targeting/regime-switching GARCH 分開參數集）而非在分佈間切換。README 為「待補充」stub，但 results.json 本身自洽完整（含 Kupiec/Christoffersen/DM/Trinity 全套統計量），可信度不受 README 缺失影響。",
+    "evidence": ["experiments/k837/README.md", "experiments/k837/k837_btc_regime_var_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  }
+]

@@ -1,0 +1,145 @@
+[
+  {
+    "experiment": "experiments/k1311",
+    "k_id": "K1311",
+    "category": "data_property",
+    "verdict": "UNVERIFIED",
+    "content": "K1311 [UNVERIFIED]：VIXTWN/VIX ratio 252-day 穩定性驗證的 readiness gate diagnostic，非完整實驗。本地 vixtwn_daily.csv 累積樣本數僅 112 個交易日（current_n=112），距 target_n=252 天門檻完成度 44.4%（pct_complete），還差 140 個交易日（remaining_trading_days=140）。Verdict=NOT_READY_BELOW_252D_GATE，executed_full_experiment=false，本輪刻意不新增正式結論，僅延續 K1308（119 天樣本，UNSTABLE，mean=1.5737, CV=0.204）作為最新中期證據。正式 252-day 穩定性驗證（mean/median/std/CV/quantiles、30/60/90d rolling、time trend）待樣本滿 252 天後才可執行。",
+    "evidence": ["experiments/k1311/k1311_results.json", "experiments/k1311/README.md"],
+    "confidence": 0.3,
+    "needs_human": true,
+    "gap": "本地 VIXTWN 樣本僅 112 天，距 252-day gate 差 140 天；正式穩定性驗證（rolling/trend/quantile）尚未執行，需等樣本量足夠後重跑才能給出實質結論。"
+  },
+  {
+    "experiment": "experiments/K1344_private_credit_software_spillover",
+    "k_id": "K1344",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1344 [NULL]：測試上市 BDC 壓力代理指標對 IGV（軟體 ETF）與 HYG（高收益信用）未來波動率的增量預測力。資料：yfinance 2013-01-01至2026-06-12日頻，BDC basket（BIZD/ARCC/BXSL/OBDC/FSK）等權，OOS start 2021-01-04，OOS n=1367。4 個 forecast cells（IGV/HYG × h=5/21）OOS QLIKE improvement 分別 +1.91%(t=0.47,p=0.635)、+7.19%(t=1.35,p=0.178)、+2.98%(t=0.74,p=0.462)、+5.44%(t=0.86,p=0.388)，Bonferroni alpha=0.0125 下全數未過。Event-study 診斷顯示 21d BDC-stress events（n=13）後 IGV 波動率較高（bootstrap p_gt_0=0.005），但為描述性，主 forecast test 不支持可交易/可預測的穩健結論。",
+    "evidence": ["experiments/K1344_private_credit_software_spillover/K1344_results.json", "experiments/K1344_private_credit_software_spillover/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/K1366",
+    "k_id": "K1366",
+    "category": "cross_asset",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1366 [CONDITIONAL_PASS]：用 EWMA(λ=0.94) 條件共變異數建構 SPY/TLT/UUP/GLD/HYG 歷史衝擊後 variance response template pilot（非結構性 BEKK/DCC）。樣本 2016-01-05至2026-06-22，2630 個日頻報酬列，1000 次 placebo 事件抽樣（seed=42）。4 個歷史事件中 2 個通過 total-variance placebo gate：2018Q4 equity/credit selloff（2018-10-10）peak lift +360.5%, p=0.026, 58d 未衰減；2025 tariff shock（2025-04-03）peak lift +476.6%, p=0.015, half-life 24d。2020 COVID（peak +66.2%, p=0.324）與 2022 rate shock（peak +41.8%, p=0.469）未通過。所有事件的相關性回應 gate 皆未過（p 範圍 0.175-0.740），故 verdict=PARTIAL_VARIANCE_TEMPLATE_CORR_NULL：可支持窄範圍的 variance scenario template，不支持結構性 covariance-network VIRF 宣稱。",
+    "evidence": ["experiments/K1366/K1366_results.json", "experiments/K1366/README.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1430",
+    "k_id": "K1430",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "k1430 [NULL]（PARTIAL_NULL）：測試 autoencoder（7→3→1→3→7 bottleneck，random_state=42）壓縮 7 個 realized measures 成 synthetic measure，是否優於單一 measure 做 SPY RV 預測。資料：SPY 5-min，99 個原始 intraday 交易日（2026-01-14至2026-06-05），對齊後 98 天可用，train/test=69/29。OOS QLIKE 排名（越前越好）：BPV > RV_5min > PCA_1D > AE_1D > GarmanKlass > Parkinson > OC2，AE_1D 未贏過 raw RV，也未贏過 PCA_1D，且所有 DM 比較皆不顯著。AE synthetic measure 在此短樣本下未展現優於既有單一 measure（含 BPV、PCA）的增量價值，但流程本身可行，建議待 252+ 天樣本與跨資產重跑後再評估 arXiv:2411.17136 的 upstream claim。",
+    "evidence": ["experiments/k1430/k1430_results.json", "experiments/k1430/README.md"],
+    "confidence": 0.6,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1462_har_jump_macro_regime_proxy",
+    "k_id": "K1462",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "k1462 [NULL]（NULL_FOR_ABSORPTION）：檢驗 macro regime state（CFNAI<0/NFCI>0/INDPRO<0）是否吸收 SPY 隔夜 gap-jump proxy（log(Open_t/Close_{t-1})^2）對 Parkinson variance 的預測力。樣本 2006-02-03至2026-04-16，OOS 2016-01-04至2026-04-16共2586筆，train window 1000日、每63日refit。Full-sample HAC：jump proxy 三個 state 規格皆顯著（CFNAI p=1.39e-21、NFCI p=6.92e-44、INDPRO p=2.92e-37），但 jump×state interaction 全部不顯著（p=0.340/0.758/0.945）。OOS QLIKE：HAR=0.5241、HAR+Jump=0.4922（DM t=2.82,p=0.0048，未達本專案 Harvey|t|>3 gate）、加 NFCI 反而顯著更差（DM t=-4.00,p<1e-4）。macro regime 未吸收 jump 訊號，但本實驗僅用 overnight gap proxy，非正式 BNS jump decomposition，不能推翻文獻假說本身。",
+    "evidence": ["experiments/k1462_har_jump_macro_regime_proxy/k1462_results.json", "experiments/k1462_har_jump_macro_regime_proxy/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1483",
+    "k_id": "K1483",
+    "category": "data_property",
+    "verdict": "UNVERIFIED",
+    "content": "k1483 [UNVERIFIED]（BLOCKED_ON_DATA）：檢查是否能完成極端高溫/颶風對保險與公用 ETF（KIE/KBWP/XLU）的 vol event study feasibility audit。掃描 storage/、experiments/、data/、docs/ 後確認本地完全沒有 KIE/KBWP/XLU 價格快取，也沒有獨立整理的 canonical NOAA event table（欄位需含 event_date/event_name/event_category/damage_usd_billion/source_url）；既有 K148 的手工命名災害清單不能替代。Verdict=BLOCKED_ON_DATA，本輪未執行任何統計檢定或回測，純為資料可行性稽核。解鎖需先補 storage/macro/yf_{KIE,KBWP,XLU}.csv 與正式 NOAA event table，才能進行 RV event study 與 damage/severity dose-response 分析。",
+    "evidence": ["experiments/k1483/k1483_results.json", "experiments/k1483/README.md"],
+    "confidence": 0.2,
+    "needs_human": true,
+    "gap": "缺 KIE/KBWP/XLU 本地價格快取與 canonical NOAA event table；沒有這兩項無法組成 RV panel，本題完全未執行任何統計分析，僅為資料 gap 盤點。"
+  },
+  {
+    "experiment": "experiments/k1500_treasury_auction_move_vol",
+    "k_id": "K1500",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "k1500 [NULL]：測試 Treasury auction bid-to-cover ratio 弱勢訊號（weakness=-z(BTC)）是否領先預測 ^MOVE index 對數變動（h=1,5,10）。資料：Treasury Fiscal Data API 1,028 場 auctions（2010-01-11至2026-06-11，≥5年期），^MOVE yfinance 4,053 個交易日（2010-01-04至2026-06-12）。Event study：180 個 weak events（z≥1）的 CAR(t..t+5)=-0.0025（95%CI [-0.016,+0.011]），與隨機控制組 Welch t=0.49,p=0.625，無差異。IS regression β on weakness_t-1（h=5）=0.00068,t=0.23,R²=0.0073。OOS：h=5 full model RMSE=0.0940 vs AR(1)=0.0938（DM t=1.71,p=0.088，marginal worse）；h=10 DM t=2.74,p=0.006，full model顯著更差於AR(1)。Auction 弱勢訊號對 MOVE 無穩健增量預測力。附註：README/artifacts 列出 codex_review.md 但實際檔案不存在，process-review 狀態待確認，惟數值結論由腳本自算的 event study/regression/DM 檢定，不受此影響。",
+    "evidence": ["experiments/k1500_treasury_auction_move_vol/k1500_results.json", "experiments/k1500_treasury_auction_move_vol/README.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/K1581",
+    "k_id": "K1581",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1581 [NULL]：檢驗 NY Fed GSCPI 月度衝擊 Δz 對下月（t+1..t+22交易日）USO/DBA/XRT/IYT 累計實現波動率的線性領先預測力。樣本：GSCPI月頻(NY Fed Liberty Street) 2018-01起、ETF日頻yfinance，panel n=99個月末交易日。HAC-Newey-West(lag=6) OLS：USO β=0.1663,p=0.328；DBA β=0.0076,p=0.667；XRT β=0.0798,p=0.232；IYT β=0.0541,p=0.425，4/4 皆不顯著，bootstrap 95%CI(1000 reps,seed=42)全跨0。高壓(z>1.5,n=11) vs benign(|z|<0.5,n=32) Welch t-test：僅DBA邊界(t=1.94,p=0.070,d=+0.70)，其餘p≥0.24。Verdict=NULL(0/4 p<0.10)。附註：README 標示 Codex review 尚待主線程後續處理，本次數值為腳本自算的 HAC/bootstrap/Welch 統計量，非依賴審查完成才成立。",
+    "evidence": ["experiments/K1581/k1581_results.json", "experiments/K1581/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1595",
+    "k_id": "K1595",
+    "category": "model_behavior",
+    "verdict": "NULL",
+    "content": "k1595 [NULL]（NULL_OR_NEGATIVE，Codex CONDITIONAL_PASS）：檢驗 pooled MultiTransformerLite（3個獨立seed TransformerLite平均）能否在 SPY/QQQ/IWM/XLF/XLE/XLU 六檔 OOS 打敗 HAR/Ridge/EWMA/GJR-GARCH。資料：frozen local cache 2005-2026，OOS 2016-01-01至2026-06-26共15,678 asset-days（每檔2,613筆）。Mean QLIKE六檔全部由GJR-GARCH-Annual奪冠（如SPY GJR=1.578 vs MultiTransformer=3.472）；MultiTransformerLite-GJR的DM檢定六檔全部顯著偏向GJR（t=10.31至14.86），Holm校正後對GJR 0勝、對per-asset pairwise family 15次顯著落敗。Codex review verdict=CONDITIONAL_PASS（僅LOW findings：非完整MTL-GARCH replication、未做VaR/ES回測）。Lite attention ensemble 在日頻ETF波動率預測上未展現增量價值。",
+    "evidence": ["experiments/k1595/k1595_results.json", "experiments/k1595/README.md", "experiments/k1595/codex_review.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1623",
+    "k_id": "K1623",
+    "category": "research_methodology",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "k1623 [CONDITIONAL_PASS]：識別 RV 表觀長記憶是真分數整合(ARFIMA, d∈(0,0.5))還是 level-shift 假象（Diebold-Inoue 2001），並測其 OOS 可交易性。資料：VIX/SPY/TW0050/QQQ/N225 daily Parkinson RV（VIX用(VIX/100)^2），樣本涵蓋2008-2026(依資產不同)。ELW估計 raw d̂ 全部顯著>0（0.50-0.72）；break-demean 後（Bai-Perron多斷點）仍顯著>0（BIC下界0.46-0.65），level-shift貢獻依資產夾擠[7%,63%]（VIX最低[11%,20%]、N225最高達63%）——純假象假說被拒絕，確有真long-memory成分。但OOS一步預測（最後750 obs）中，ARFIMA(0,d,0)與BreakRobustHAR皆未顯著勝樸素HAR（QQQ甚至ARFIMA顯著更差，t_HLN=2.47,p=0.014）。Codex review：無CRITICAL/HIGH finding。長記憶真實存在但不可交易，訊號已被HAR的multi-scale結構吸收。",
+    "evidence": ["experiments/k1623/k1623_results.json", "experiments/k1623/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1680",
+    "k_id": "K1680",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "k1680 [NULL]（RETROSPECTIVE_NULL，Codex verdict=PASS_RETROSPECTIVE_NULL）：測試HQ州相對全美Google Trends attention（local_excess）能否領先預測次週RV/gap/Corwin-Schultz spread/national attention。六檔固定股票（AAPL/AMZN/BAC/CVX/AIG/ABBV），Google Trends週頻2021-06-27至2026-06-28。因Google Trends是當次一次性回溯下載（current vintage），僅能稱retrospective pseudo-OOS diagnostic而非genuine real-time OOS。Clark-West one-sided nested-MSPE + Holm校正 + Harvey t≥3 gate：4個target（RV/gap/CS spread/national attention）全數FAIL（CW t=1.880/-1.318/0.850/1.669，Holm p=0.120/0.906/0.396/0.143），0/4通過。官方Harvard Dataverse RCFS demo sanity arm（10,400 rows）方向性一致但因4-firm demo無法重建原論文動態序列，不併入主樣本。本proxy定義下無證據支持地理attention領先預測波動，範圍限於這6檔與這次vintage。",
+    "evidence": ["experiments/k1680/K1680_results.json", "experiments/k1680/README.md", "experiments/k1680/codex_review.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k775",
+    "k_id": "K775",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "k775 [NULL]：測試HAR-PD（在HAR-ABS基礎上加入vol_trend/vol_momentum/cum_ret/max_dd四個路徑相依特徵）能否改善SPY絕對報酬波動率預測。資料：yfinance SPY 2007-12-31至2026-03-30，expanding window(init=500d,refit=50d)，OOS n=4590。QLIKE：HAR-ABS=0.5017 vs HAR-PD=0.5118（HAR-PD反而更差，改善-2.029%），DM test：har_abs_vs_har_pd t=-1.69, p=0.091, Harvey threshold 3.0未達（harvey_pass=False）。整體模型排名：amem > gjr > har_abs > ewma > har_pd（amem QLIKE=0.4721最佳，DM對har_abs/har_pd皆顯著t=9.10/7.15）。HAR-PD路徑相依特徵未能改善HAR-ABS。README為模板stub（'待補充'），數字全部取自k775_har_pd_results.json，未見Codex review記錄。",
+    "evidence": ["experiments/k775/k775_har_pd_results.json", "experiments/k775/README.md"],
+    "confidence": 0.65,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k838",
+    "k_id": "K838",
+    "category": "vt_strategy",
+    "verdict": "NULL",
+    "content": "k838 [NULL]（HYPOTHESIS REJECTED）：測試TAIFEX TX期貨夜盤(15:00-05:00)報酬能否預測同日日盤方向。資料：TAIFEX TX1 tick，2017-05-16至2026-04-02，n_trading_days=2158。同日相關：Pearson night-day=-0.0824（負相關，方向一致率48.4%），Spearman=-0.0368,p=0.088。落後一日訊號（t-1夜盤→t日盤）Pearson=+0.1399，方向一致率51.2%，策略Sharpe=0.35，但DM vs buy-and-hold |t|=0.90<3.0不顯著（p=0.369）。5個策略(S1/S1_lag/S2/S3/S4)對buy-and-hold的DM test皆不顯著(p=0.076-0.369)，交易成本後無策略勝過買入持有。同一商品(TX期貨)夜盤資訊已於日盤開盤前定價，無真實資訊傳遞，與跨市場lead-lag(美股→台股)本質不同。README為模板stub，數字取自k838_taifex_night_momentum_results.json，未見Codex review記錄。",
+    "evidence": ["experiments/k838/k838_taifex_night_momentum_results.json", "experiments/k838/README.md"],
+    "confidence": 0.65,
+    "needs_human": false,
+    "gap": ""
+  }
+]

@@ -1,0 +1,198 @@
+[
+  {
+    "experiment": "k1254_rl_volatility_pilot",
+    "k_id": "K1254",
+    "category": "vol_prediction",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1254 [INCONCLUSIVE]: RL（PPO）日頻波動率預測 pilot，僅完成 smoke test（單一 slab 2024-06-07~2026-06-05、單一 seed=0、25,000 PPO env steps），非 README §3.5 規劃的 6M-step 多 seed 完整跑。SPY 資料 2010-02-08起，n=4107。Smoke 結果：RL PPO QLIKE=2.8197，明顯輸給 HAR-RV（2.2853）、GJR-GARCH（1.6355）、rolling-22d（1.7978）；DM 對 HAR t=12.07、對 GJR t=10.08、對 rolling t=6.57，皆為 baseline 顯著較優（p≈0）。README 與 results.json 皆明確聲明 smoke test 不承載研究 verdict（'draws NO research verdict'），完整多 slab/多 seed 跑從未執行。",
+    "evidence": [
+      "experiments/k1254_rl_volatility_pilot/k1254_rl_volatility_pilot_results.json",
+      "experiments/k1254_rl_volatility_pilot/README.md"
+    ],
+    "confidence": 0.35,
+    "needs_human": true,
+    "gap": "完整6M-step多slab多seed跑從未執行，僅是single-seed single-slab smoke test；README/results.json皆明確聲明此結果不承載研究verdict，需要主線程排入compute queue執行完整版本才能寫入正式knowledge verdict。"
+  },
+  {
+    "experiment": "k1325",
+    "k_id": "K1325",
+    "category": "vol_prediction",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1325 [INCONCLUSIVE]: 0050.TW 5-min HAR-RV pipeline 續跑檢查點（K1307→K1318→K1322→K1324→K1325），資料 82天原始檔、22天warm-up後60列，train/test=42/18。HAR QLIKE=0.265 優於 RW QLIKE=0.375，方向正確但 DM-HLN t=0.88（p=0.390），遠低於 Harvey |t|>3。verdict=UNTRUSTWORTHY_SMALL_SAMPLE，revisit gate（n_total_days≥200 或 n_test≥50）未達成（現況82天/18天）。結論：pipeline 可重跑無 lookahead，但樣本太小不足以支撐正式發表級結論，僅適合作方法論 checkpoint。",
+    "evidence": [
+      "experiments/k1325/k1325_results.json",
+      "experiments/k1325/README.md"
+    ],
+    "confidence": 0.55,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1354",
+    "k_id": "K1354",
+    "category": "market_context",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1354 [DOCUMENTED_NEGATIVE]: SPY monthly OPEX（第三個週五）gamma-cliff 日內波動事件研究，yfinance 1993-02-01至2026-06-18，8403個交易日，399個可評估月度OPEX事件（132次quad-witching）。Parkinson range variance 為 proxy。Primary gate 全數未過：pre3-control t=+0.31(p=0.760)、post3-pre3 t=-0.51(p=0.607)，皆遠低於預先設定 |t|>3.0 與 Bonferroni α=0.0125 門檻；expiration-day下降雖 t=-2.22但仍未過嚴格 gate。verdict=NULL：daily OHLC proxy 不支持『到期前3日壓縮、到期後3日釋放』的 gamma-cliff 機制假說，但不能證偽真實選擇權市場的 gamma 動態。",
+    "evidence": [
+      "experiments/k1354/K1354_results.json",
+      "experiments/k1354/README.md"
+    ],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1418",
+    "k_id": "K1418",
+    "category": "cross_asset",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1418 [CONDITIONAL_PASS]: 論文8 volatility-absorption cross-asset NSI regression（NSI_t=α+β·V_t+ε，shock filter|dV|>2，Newey-West lag=10，percent-return convention），在2026-04-19 pinned snapshot下重跑，樣本2006-01-20至2026-04-08。SPY β=-2.73×10⁻⁴(t=-1.85,N=769)、GLD β=-4.34×10⁻⁴(t=-2.90,N=769)、TLT β=-4.37×10⁻⁴(t=-3.31,N=769)、0050.TW β=+0.92×10⁻⁴(t=+0.28,N=614)。與main_v3.tex line 67 footnote(SPY β=-0.000267,t=-1.77,N=768)獨立重現差距<2%。US三檔負β方向不變但t值全面弱化（SPY -3.42→-1.85等），0050.TW方向仍相反，支持論文『VIX非美股非主要fear gauge』論點；主文Table cross_asset_detail待更新為此數字。",
+    "evidence": [
+      "experiments/k1418/k1418_results.json",
+      "experiments/k1418/README.md"
+    ],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1446",
+    "k_id": "K1446",
+    "category": "cross_asset",
+    "verdict": "PASS",
+    "content": "K1446 [PASS]: USMV等4檔factor ETF（MTUM/QUAL/USMV/VLUE）加SPY，共同樣本2013-07-19至2026-06-09(n=3242)風險輪廓描述性比較。全樣本USMV年化vol=13.84%（MTUM19.90/QUAL17.17/VLUE18.75/SPY17.05皆更高），downside dev=10.02%（皆最低），MDD=-33.10%（皆最淺）。不重疊21日block配對檢定(Wilcoxon+5000次bootstrap,Bonferroni α=0.00625)，USMV對4個對手在realized vol與downside deviation兩項全數顯著較低（rv_pass=4/4,downside_dev_pass=4/4，peer-USMV mean diff皆為正，bootstrap P(peer>USMV)=1.0）。verdict=PASS，但僅限於『USMV低風險定位確實成立』的描述性結論，不涉及alpha或timing能力。",
+    "evidence": [
+      "experiments/k1446/k1446_results.json",
+      "experiments/k1446/README.md"
+    ],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1477",
+    "k_id": "K1477",
+    "category": "market_context",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1477 [CONDITIONAL_PASS]: SPY 0DTE時代波動結構轉變檢驗，yfinance 2018-01-03至2026-06-10(n=2120)，外生breakpoint=2022-05-02。隔夜平方報酬均值7.95e-05→4.31e-05(約-45.8%)，日內平方報酬8.67e-05→7.95e-05(約-8.3%)，Parkinson range variance 9.84e-05→7.23e-05(約-26.5%)：兩者皆降但隔夜降更快。intraday_share_oc從0.553升至0.584(Welch p=0.041)，range_share從0.695升至0.716(p=0.067)。Tue/Thu×post interaction不顯著(intraday_share_oc interaction t=0.55,p=0.584；range_share t=-0.13,p=0.895)，不支持額外weekday 0DTE到期效應。verdict=CONDITIONAL_PASS：結構確有位移，但主因隔夜壓縮快於日內放大，非日內波動本身抬升。",
+    "evidence": [
+      "experiments/k1477/k1477_results.json",
+      "experiments/k1477/README.md"
+    ],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1492",
+    "k_id": "K1492",
+    "category": "cross_asset",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1492 [CONDITIONAL_PASS]: Stablecoin(USDT/USDC) redemption pressure與peg deviation對crypto/Treasury波動預測力測試，DefiLlama供給資料+yfinance，OOS起自2024-01-01。四資產結果分歧：BTC-USD(n=895) QLIKE改善+0.00535，DM-HLN p=0.0000004，通過；ETH-USD(n=895)改善-0.00207,p=0.463；SHY(n=614)改善-0.13576,p=0.079；TLT(n=614)改善-0.00056,p=0.485，三者皆NULL。BTC horse race顯示peg-only模型(QLIKE改善+0.00521,p=0.0000002)已抓住幾乎全部訊號，flow-only無效(改善-0.00000,p=0.983)。verdict=BTC_ONLY：stablecoin peg壓力對BTC有增量資訊，但主因peg deviation而非供給流出，且此channel未延伸至ETH或Treasury ETF日頻RV。",
+    "evidence": [
+      "experiments/k1492/k1492_results.json",
+      "experiments/k1492/README.md"
+    ],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1535_ml_garch_adjudication_equity",
+    "k_id": "K1535",
+    "category": "vol_prediction",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1535 [INCONCLUSIVE]: 復現並裁決Aljadani et al.(2025,JRFM)論文『PatchTST-lite優於GARCH/HAR』宣稱，僅完成單一index(^GSPC)/單一horizon(h=1)/單一seed(0)/400 OOS origins的smoke run，非README規劃的多index/多horizon/5-seed完整版，verdict明確標示SMOKE_PENDING_FULL_RUN。Smoke發現：噪音proxy(rv_cc)下PatchTST-lite QLIKE=14.54遠劣於GARCH(1,1)的1.79；換成平滑proxy(rv_park)才重現論文原始排名。在rv_park上，DL模型顯著贏weak baseline（如Transformer vs GARCH-X DM=-4.06），但無DL模型對HAR-RV-X(同樣資訊集)顯著（PatchTST vs HAR-RV-X DM=+0.90），MCS保留全部10個模型。結論指向論文優勢來自資訊集而非架構，但因僅是smoke run，不能作最終claim。",
+    "evidence": [
+      "experiments/k1535_ml_garch_adjudication_equity/k1535_ml_garch_adjudication_equity_results.json",
+      "experiments/k1535_ml_garch_adjudication_equity/README.md"
+    ],
+    "confidence": 0.35,
+    "needs_human": true,
+    "gap": "僅完成單一index/单一horizon/单一seed的smoke run，README與results.json verdict明確標示SMOKE_PENDING_FULL_RUN；需要主線程排入完整多index/多horizon/多seed跑並經primary-path Codex review後才能寫入正式verdict（agy review只是fallback，非primary-path）。"
+  },
+  {
+    "experiment": "k1589",
+    "k_id": "K1589",
+    "category": "market_context",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1589 [DOCUMENTED_NEGATIVE]: 再保險/cat-bond相關股(RNR/EG/ACGL/AXS)對Atlantic颶風登陸類別(Saffir-Simpson)的波動dose-response檢定，NOAA HURDAT2+yfinance，2010-2024年42次Cat1+登陸事件(Cat1:24,Cat2:5,Cat3:4,Cat4:6,Cat5:3)。個股層級β：RNR+0.0142(t=1.30,Holm p=0.195)、EG+0.0275(t=1.92,Holm p=0.137)、ACGL+0.0323(t=3.45,Holm p=0.002通過)、AXS+0.0234(t=2.00,Holm p=0.137)。但正式KIE benchmark基準測試(stacked Category×Reinsurer interaction)β=+0.0071(clustered SE,t=0.50,p=0.615)未過，無法區分再保險特定曝險與保險業整體共同波動。verdict_internal=NULL；Codex review：方法論CONDITIONAL_PASS、假說NULL。",
+    "evidence": [
+      "experiments/k1589/k1589_results.json",
+      "experiments/k1589/README.md"
+    ],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1600",
+    "k_id": "K1600",
+    "category": "vol_prediction",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1600 [CONDITIONAL_PASS]: 低頻proxy版HARQ測量誤差修正檢定(BPQ 2016機制)，SPY/QQQ/0050.TW各自獨立估計(不pooling)，yfinance 2010-2026，OOS約n=3200-3300/資產/horizon。9個資產×horizon cell中，QLIKE loss ratio(HARQ/HAR)僅2格<1(皆|DM t|<1不顯著)，其餘7格HARQ更差；DM-HLN在'挑戰者更優'方向0/9 Harvey顯著；β1Q僅1/9顯著(0050.TW h=22,t=-3.11)但該格loss ratio=0.995無實質改善。自動verdict=CONDITIONAL_PASS(觸發於單一β1Q顯著)，但README明確標註『honest reading本質上是NULL』：日頻quarticity proxy無法承載measurement-error correction訊號，且額外參數多數情況下傷害OOS QLIKE。",
+    "evidence": [
+      "experiments/k1600/k1600_results.json",
+      "experiments/k1600/README.md"
+    ],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1637",
+    "k_id": "K1637",
+    "category": "vol_prediction",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1637 [CONDITIONAL_PASS]: Markov-switching multifractal(MSM_GMM,4-component binary)波動預測，對比HAR/FIGARCH_lite/MS_vol_lite/CONST/EWMA_094，5資產(SPY/QQQ/GLD/TLT/0050.TW)按日期pooling，n_unique_dates=1948。Pooled QLIKE：EWMA_094最優1.5556，MSM_GMM次之1.7696，HAR最差2.2671。DM-HAC(按日期聚合)顯示MSM_GMM顯著贏HAR(改善+21.94%,t=-7.32,Harvey pass)與MS_vol_lite(改善+4.02%,t=-3.34,Harvey pass)，但顯著輸給EWMA_094(改善-13.76%,t=+3.70,against MSM)。verdict='CONDITIONAL_NULL_MSM_BEATS_HAR_BUT_LOSES_TO_EWMA'：MSM機制優於HAR等基準，但簡單EWMA(0.94)仍是最佳pooled模型，非可部署升級。",
+    "evidence": [
+      "experiments/k1637/k1637_results.json",
+      "experiments/k1637/README.md"
+    ],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1701",
+    "k_id": "K1701",
+    "category": "vol_prediction",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1701 [INCONCLUSIVE]: SPX/TW50成分股realized dispersion對指數波動預測力，改用Giacomini-White(2006) bounded-window(756筆固定)test取代原有巢狀模型下失效的expanding raw DM，樣本2010-01-04至2026-07-10。正式2資產×3horizon(h=1/5/22)家族6格：正向GW discovery gate(改善>0,GW z<-3,BH q<0.05)0/6通過；1%material-gain exclusion(Holm校正)0/6排除。控制成分股波動水準後再測真正離散度(rho/csvd_rel)，12格MSE/Clark-West+BH-FDR 0/12通過。verdict=INCONCLUSIVE_NO_EXACT_NULL_CLAIM：推翻舊版『NULL已證實』的過度推論，正確結論是證據不足以宣稱穩健增量、也不足以排除實質增益或宣告exact null。",
+    "evidence": [
+      "experiments/k1701/k1701_results.json",
+      "experiments/k1701/README.md"
+    ],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k833",
+    "k_id": "K833",
+    "category": "vt_strategy",
+    "verdict": "UNVERIFIED",
+    "content": "K833 [UNVERIFIED]: CBOE IV weekly short-straddle驗證(VRP proxy: straddle_pnl=IV_weekly-|weekly_return|)，SPY/QQQ/GLD三資產，yfinance 2010-01-15至2025-01-03(n_weekly=782)。三策略(S1 always-short/S2 VRP-timing/S3 GARCH-enhanced)均報極高Sharpe(SPY S1 Sharpe=3.686,AnnRet=36.47%,t=15.12；QQQ/GLD類似)，且無對照baseline的顯著性檢定(僅單樣本t-stat)、無gamma/delta避險。README為空白模板('待補充')，未見Codex review紀錄。CLAUDE.md研究誠實原則明訂'Sharpe遠高於baseline時先懷疑bug'，此結果未經該流程檢視即留在repo，數字本身雖逐字取自results.json，但可信度需人工複核。",
+    "evidence": [
+      "experiments/k833/k833_iv_straddle_results.json",
+      "experiments/k833/README.md"
+    ],
+    "confidence": 0.25,
+    "needs_human": true,
+    "gap": "無對照baseline顯著性檢定、無Codex review紀錄、README為空白模板，且Sharpe數值(3.68等)遠高於平台常態基準——依CLAUDE.md規則『Sharpe遠高於baseline時先懷疑bug』，需要人工重新審視代碼是否有lookahead或成本低估等問題，才能決定是否可信。"
+  },
+  {
+    "experiment": "k844",
+    "k_id": "K844",
+    "category": "vt_strategy",
+    "verdict": "NULL",
+    "content": "K844 [NULL]: TX期貨VT vs 0050.TW現貨VT比較，TAIFEX TX tick+yfinance(^VIX,0050.TW)，2017-05-16至2026-04-02(n_days=2152)。S2(TX全日VT) Sharpe=1.465優於S1(0050現貨VT)Sharpe=1.370，MDD -10.66%優於-11.09%，但DM檢定S2 vs S1 dm_stat=0.216,p=0.829,Harvey FAIL，改善不具統計顯著性。交易成本上TX年省218bp(S1總成本19.22% vs S2僅0.57%)；跨4個OOS子期間S2贏S1其中3/4。夜盤佔TX全日報酬73.7%，日盤僅10.5%。README為空白模板('待補充')，結論來自results.json的'conclusion'欄位：TX期貨對高頻再平衡者有結構性成本優勢，但VT績效改善本身未達統計顯著。",
+    "evidence": [
+      "experiments/k844/k844_futures_vs_stock_vt_results.json",
+      "experiments/k844/README.md"
+    ],
+    "confidence": 0.65,
+    "needs_human": false,
+    "gap": ""
+  }
+]

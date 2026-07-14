@@ -1,0 +1,145 @@
+[
+  {
+    "experiment": "experiments/k1268b",
+    "k_id": "K1268b",
+    "category": "research_methodology",
+    "verdict": "UNVERIFIED",
+    "content": "K1268b [UNVERIFIED]：此為 scaffold-only 實驗，僅建立資料契約與程式骨架，尚未執行。原始問題為 GDELT 5分鐘事件/情緒強度是否領先 SPY 5分鐘 realized variance（crisis days: 2020-03-12、2023-03-13、2024-08-05），但因 yfinance 不提供這些歷史日期的分鐘級 SPY 資料，缺乏付費資料源（Polygon/Databento/自建歸檔）而無法執行。results.json 內 per_date、headline_verdict 均為空值/null，coverage 欄位（gdelt_rows/spy_intraday_rows/aligned_5min_rows）皆為 null。此紀錄目的是防止未來重複嘗試同一 scaffold，直到取得付費 intraday SPY 資料源為止。",
+    "evidence": ["experiments/k1268b/README.md", "experiments/k1268b/k1268b_results.json"],
+    "confidence": 0.2,
+    "needs_human": true,
+    "gap": "缺付費 intraday SPY 資料源，實驗從未真正執行，無任何統計量可驗證；需要人工確認是否值得採購資料或放棄此方向。"
+  },
+  {
+    "experiment": "experiments/K1342",
+    "k_id": "K1342",
+    "category": "strategy",
+    "verdict": "NULL",
+    "content": "K1342 [NULL]：以 yfinance 2分鐘 OHLCV 代理 signed-volume pressure（15:30-15:48 ET）測試能否預測 late-close drift。標的 SPY/QQQ/IWM/AAPL/MSFT/NVDA/AMZN/GOOGL/META/TSLA，樣本 2026-05-01至2026-06-11 共 290 ticker-days/29 交易日，high-pressure 子集 58 ticker-days/17 日。淨報酬（扣 3.4bp 來回成本）：全樣本 15:52-close NW t=-3.11、close-次日open t=+0.21、close-次日close t=+0.81；high-pressure 子集 t=-4.92/-0.19/+0.07。5,000 次 block bootstrap（block=5日，seed=42）與 Bonferroni 校正後全部未顯著（p 皆 ≥0.18，Bonferroni p=1.0）。結論：public signed-volume proxy 未偵測到可交易 late-close drift，僅可作為付費 MOC imbalance feed 的篩選訊號候選。",
+    "evidence": ["experiments/K1342/README.md", "experiments/K1342/K1342_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1358",
+    "k_id": "K1358",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1358 [NULL]（原始 verdict: NULL_PROXY）：測試 AI 勞動曝險（Felten/Raj/Seamans AIIE 分數對應 11 檔 sector ETF）與 AI/labor 新聞衝擊（GDELT）、BLS/FRED 勞動數據對 sector realized volatility 的關係。資料 2017-01-01起、OOS 自 2020-01-01，樣本 26,180 panel rows（可用 24,905）。Event DID：AI 衝擊日（410日）vs 非衝擊日（1929日），forward 5日 RV 高低曝險差為負（point=-0.0001007，CI[-0.0001812,-0.0000196]），downside semivariance 不顯著（CI 跨零），SPY 相關性 DID 正向顯著（point=+0.0147，CI[+0.0014,+0.0280]）。OOS 預測：HAR_VIX_AI_LABOR vs HAR_VIX pooled QLIKE DM t=+1.790（p=0.0736，未達顯著），僅 2/11 sectors 改善。結論：高 AI 曝險 sector 未顯示更高波動或下檔風險，預測模型整體劣於 baseline，非可推廣發現。",
+    "evidence": ["experiments/k1358/README.md", "experiments/k1358/K1358_results.json"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1420",
+    "k_id": "K1420",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1420 [NULL]（原始 verdict: NULL_RESULT）：測試 3-state HMM regime-weighted conformal VaR（RWC）能否改善 SPY 與 0050.TW 的 next-day 5% VaR/ES。資料 2012-01-01至2025-12-31，OOS 自2023-01-01，rolling refit window=2000、conformal calibration window=500、每63日refit、HMM multistart=20，seed=42。SPY：RWC violation=6.12%（GJR-Normal 5.05%），DM(FZ, base=GJR-Normal) t=-7.77，RWC 劣於 baseline；0050.TW：RWC violation=6.22%，FZ 平均分數最低但 coverage 惡化，DM t=+0.70 未達 Harvey 顯著。success rule（CC 不差於 plain conformal 且 violation 在nominal±1.5%內）在兩資產上 pass_count=0/2。結論：把 regime 從外生 VIX threshold 換成內生 HMM state 並未複製出 K1390 的增量優勢。",
+    "evidence": ["experiments/k1420/README.md", "experiments/k1420/k1420_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1451",
+    "k_id": "K1451",
+    "category": "cross_asset",
+    "verdict": "NULL",
+    "content": "K1451 [NULL]：檢驗 HYG/LQD 信用利差代理（22日對數變化，t-1 落後）能否預測 SPY 未來21日 realized volatility，並檢查扣除 VIX_{t-1} 後是否仍有增量資訊。資料來源 yfinance（HYG/LQD/SPY/^VIX），樣本 2008-05-12至2026-05-07，n=4,526。單變量 HAC 回歸：coef=-1.114，HAC p=0.025；加入 vix_lag1 後 coef 降至-0.041、HAC p=0.868，vix_lag1 本身 coef=+0.883、p≈6.5e-25、R²=0.462。z-score版與 wide_credit_stress bucket 版同樣不顯著（p=0.999、p=0.305）。4個 primary tests 經 Bonferroni 校正後最小 p=0.102，0/4 存活。結論：HYG/LQD 與未來波動方向一致，但訊號幾乎完全被 VIX_{t-1} 吸收，非獨立 lead-lag 訊號。",
+    "evidence": ["experiments/k1451/README.md", "experiments/k1451/k1451_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1480",
+    "k_id": "K1480",
+    "category": "data_property",
+    "verdict": "UNVERIFIED",
+    "content": "K1480 [UNVERIFIED]（原始 verdict: BLOCKED_ON_DATA）：評估能否誠實完成 0050 成分調整（納入/剔除）fragility event study。稽核發現 repo 內雖有 0050 價格資料（如 storage/macro/yf_0050.TW.csv、多份 experiments/*/data/0050.TW.csv），但完全沒有 canonical 歷史成分調整事件表（announcement_date/effective_date/ticker/event_type），公網快速搜尋也未能在短時間內取得可程式化、可批量回溯的官方（TWSE/FTSE Russell/Yuanta）歷史資料。因此本輪未執行任何回測，僅記錄資料缺口：需先建立 0050_constituent_change_events.csv 才能進行後續 event study（DiD on abs_ret/park_var/idio_vol）。此紀錄目的是避免未來重複嘗試同一題目卻同樣卡在資料缺口。",
+    "evidence": ["experiments/k1480/README.md", "experiments/k1480/k1480_results.json"],
+    "confidence": 0.3,
+    "needs_human": true,
+    "gap": "缺歷史成分調整事件表（official FTSE/TWSE/Yuanta archive），需要人工找到或建立資料源後才能真正執行 event study。"
+  },
+  {
+    "experiment": "experiments/k1496",
+    "k_id": "K1496",
+    "category": "vol_prediction",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1496 [CONDITIONAL_PASS]：用 TAIFEX TX1 day session 5分鐘 realized variance 面板（2017-05-16至2026-05-08，日資料2,186筆，來源 experiments/k1303/data/_tx1_daily_cj_2017-2026.parquet）測試 HAR-style window長度（5/10/22/63日）是否應隨 regime（expanding tertile分類）調整。Primary rolling-1000 OOS QLIKE：高波動 regime 下 5d=156.53、10d=253.26、22d=643.93、63d=1323.59，短窗口在4種穩健性設定（rolling 504/1000/1500、expanding 1000）中全部一致最優（4/4）；低波動 regime 最優窗口在 5d 與 63d 間不穩定切換。Split-half adaptive rule 樣本外測試比固定5d表現明顯更差。結論：高波動時應縮短記憶窗口是穩健結論，但低波動時應延長至63d的證據不穩健，不建議上production。README 明確註明尚未寫入 knowledge.json，需先經 code/result review。",
+    "evidence": ["experiments/k1496/README.md", "experiments/k1496/k1496_results.json"],
+    "confidence": 0.55,
+    "needs_human": true,
+    "gap": "README 明確要求先做 code/result review 才能寫入 knowledge.json；本筆為稽核提案，尚待正式審查確認。"
+  },
+  {
+    "experiment": "experiments/k1542_muni_convenience_premium_tax_liquidity_stress",
+    "k_id": "K1542",
+    "category": "cross_asset",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1542 [INCONCLUSIVE]（原始 verdict: WEAK_DIAGNOSTIC_ONLY）：測試 muni ETF（MUB/TFI/HYD/TAXF）相對 taxable/credit beta 的利差代理（tax_liquidity_stress，5項 lagged z-score 平均）能否預測 muni/credit ETF 未來波動。資料 yfinance 2007-2026 + FRED（W070RC1Q027SBEA/STLFSI4等）。In-sample HAC 通過 gate（t≥3, Bonferroni p<0.05）：MUB_fwd_rv5 t=4.25 p=0.00030、TFI_fwd_rv5 t=4.12 p=0.00053、HYG_fwd_rv5 t=3.00 p=0.03750。但 OOS 全數未通過 DM gate（|t|≥3）：MUB MSE改善+10.84%但DM t=-1.39，TFI+9.36%/t=-1.40，皆FAIL。結論：muni tax-liquidity stress 是有意義的診斷訊號，但未達可上線的 cross-asset volatility prior 標準，需搭配 muni 資金流或 bond-level 利差資料才能升級。",
+    "evidence": ["experiments/k1542_muni_convenience_premium_tax_liquidity_stress/README.md", "experiments/k1542_muni_convenience_premium_tax_liquidity_stress/k1542_muni_convenience_premium_tax_liquidity_stress_results.json"],
+    "confidence": 0.7,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1593",
+    "k_id": "K1593",
+    "category": "model_behavior",
+    "verdict": "NULL",
+    "content": "K1593 [NULL]（原始 verdict: NULL_VS_HARX）：測試 CNN-Transformer hybrid 對 Parkinson realized variance 的 OOS 預測是否優於同資訊集的 HAR-X/Ridge baseline。資料 paper/leverage-direction 內 SPY/QQQ/EEM/GLD/TLT/IWM/SLV 2010-2026，train至2020-12-31、valid 2021-2022、OOS 2023-01-01至2026-06-30。Asset-level DM（vs HAR-X）：僅 TLT 顯著改善（DM t=-5.45, Holm p=0.0000005），其餘6資產皆未過（SPY t=+1.16、QQQ t=+0.50等，Holm p多為0.929-1.000）。Panel-level（641共同交易日）：最佳模型為 RollingMean22（QLIKE=0.434），CNNTransformer最差（0.511），CNN vs HAR-X panel DM t=+1.34(p=0.180)，MCS(α=0.10)全4模型皆存活。結論：CNN-Transformer 架構在固定OOS設定下不是穩健贏家，僅TLT單一資產獲益，延續「日頻波動預測ML天花板」既有發現。",
+    "evidence": ["experiments/k1593/README.md", "experiments/k1593/k1593_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1608",
+    "k_id": "K1608",
+    "category": "market_context",
+    "verdict": "NULL",
+    "content": "K1608 [NULL]：以 Wikipedia 年度周末票房冠軍作 blockbuster attention shock 代理（gross_z≥1.5, shift(1)判定），測試對 SPY/QQQ/IWM/XLY 及娛樂類股（DIS/NFLX/AMC等）未來5日報酬與RV是否有影響。樣本2005-01-09至2026-06-21共1,098週末觀測（1,072有訊號歷史，96為衝擊事件）。SPY次週報酬：shock係數=-0.0020，HAC t=-0.898；SPY次週RV ratio：係數=+0.0018，HAC t=0.034。皆遠低於primary gate（|t|≥3）。娛樂股籃子報酬t=0.54、RV t=0.70，同樣不顯著。年度cluster bootstrap（5,000次,seed=42）CI皆跨零。結論：免費Wikipedia週末票房代理未能在此樣本偵測到穩健的次週SPY報酬或波動訊號，屬public-proxy null，不否定文獻中真正release-level blockbuster效應的存在。",
+    "evidence": ["experiments/k1608/README.md", "experiments/k1608/k1608_results.json"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/K1677-rev",
+    "k_id": "K1677-rev",
+    "category": "cross_asset",
+    "verdict": "NULL",
+    "content": "K1677-rev [NULL]（原始 verdict: CONTROLLED_RV_NULL_NO_STRICT_SECONDARY_ASSOCIATION_UNDERPOWERED）：修訂版 K1677（Codex原判FAIL），測試28件詐欺/裁罰揭露事件後同業peer的波動/流動性是否上升。Complete-event primary（20事件/13連通time cluster，fail-closed要求peer完整49+10日報酬）：RV market-adjusted cluster t=-0.30（BH q=0.705）、RV clean-placebo z t=0.33（BH q=0.498），皆NULL；Corwin-Schultz利差 market-adjusted cluster t=3.19但exact cluster-sign BH q=0.075未過strict gate。Available-peer sensitivity（28事件/16 cluster，含存活者偏誤）利差cluster t=4.206, BH q=0.0031確實顯著，但因排除下市/不可得peer而僅列敏感性、不promote為knowledge-grade發現。結論：peer RV contagion在兩種設定下皆NULL；流動性訊號方向一致但依賴peer-availability政策，需CRSP/WRDS等級歷史peer universe重建才能升級。",
+    "evidence": ["experiments/K1677-rev/README.md", "experiments/K1677-rev/K1677-rev_results.json"],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k508",
+    "k_id": "K508",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K508 [NULL]：測試 Taiwan price limit（漲跌停）事件是否能透過 GJR-GARCH-X 改善 0050.TW / 2330.TW 的 OOS 波動預測。OOS期間2023-01-03至2025-12-31（0050.TW n=724、2330.TW n=723），rolling window=2000、每21日refit。0050.TW：strict limit count=9、near limit=10，spillover t=2.811(p=0.0)，但最佳模型GJR_censored僅QLIKE改善-0.02%（DM t=0.805, p=0.421）；GJRX系列（limit_dummy/near_limit/spillover_count）DM t介於-1.78至-1.88（p 0.06-0.08），皆未達顯著改善。結論：漲跌停調整對0050.TW/2330.TW的OOS改善微不足道，主因是ETF與權值股鮮少觸及漲跌停、事件過於稀少，無法實質影響GARCH預測；censored-GARCH方法可能對更常觸及漲跌停的小型股更有意義。",
+    "evidence": ["experiments/k508/README.md", "experiments/k508/k508_tw_price_limit_results.json"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k836",
+    "k_id": "K836",
+    "category": "vol_prediction",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K836 [CONDITIONAL_PASS]：測試 EVT-POT（GPD tail）方法對 0050.TW VaR 的 Trinity coverage test 表現，並與 K829（Normal/Student-t/HistSim 皆FAIL）比較。OOS期間2023-01-01至2024-12-31（n=481），每63日refit共8次，EVT threshold取5%/10%/15%三種。1%尾部：Normal/Student-t/HistSim/EVT-POT(5%/10%/15%，皆未加safety margin)全數Trinity FAIL（violations各9/6/6/7/6/6次，Basel yellow）；僅Cornish-Fisher（violations=3, green, PASS）與EVT-POT+10% safety margin（violations=4, green, PASS）通過。5%尾部：全部8種方法皆PASS。GPD參數穩定（mean xi=0.0657, mean beta=0.603, 8/8 refits皆估出合理heavy tail）。結論：EVT-POT本身在1%尾部未必優於傳統方法，需額外10% safety margin才能通過Trinity test；README與conclusion欄位皆為空，此為由results.json重建的稽核摘要，尚待人工補完敘事與方法論細節。",
+    "evidence": ["experiments/k836/README.md", "experiments/k836/k836_tw_evt_var_results.json"],
+    "confidence": 0.5,
+    "needs_human": true,
+    "gap": "README為空白模板（待補充），results.json 的 conclusion 欄位為 null，且無 attribution；EVT-POT+10% safety margin 的推導依據與是否過度校準（overfit to OOS）需要人工審查後才能定調。"
+  }
+]

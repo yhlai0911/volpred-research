@@ -1,0 +1,156 @@
+[
+  {
+    "experiment": "experiments/k1221",
+    "k_id": "K1221",
+    "category": "research_methodology",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1221 [CONDITIONAL_PASS]：Paper 6（prg-periodic-garch，main.tex commit 7d35418b，投稿目標 Finance Research Letters）投稿前 checklist 稽核，2026-04-17 完成。對照 docs/paper-guide.md replication-package 硬規則逐項檢查 24 項：PASS 17、FAIL(blocker) 3、WARN(remediable) 3、N/A 1，readiness=NEEDS-MINOR-FIX，估計修復時間 blockers 80 分鐘、含 polish 165 分鐘。body_numbers_spot_checked=10，全數與 main.tex 相符（body_numbers_match=10）。三個 blocker：(1) main.tex 未 cross-reference Appendix A / K1200 defensibility 分析；(2) Table 1 0050.TW OOS 起始日與 main.tex 標示不符（2019/12 vs 實際 2021/01）；(3) 缺 data_sources.md 說明 TAIFEX tick 資料的 Zenodo/LFS 或 contact-author 條款。此為 filesystem-level 稽核，未修改 paper 或任何共享 JSON。",
+    "evidence": ["experiments/k1221/k1221_checklist_results.json", "experiments/k1221/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1323",
+    "k_id": "K1323",
+    "category": "data_property",
+    "verdict": "NULL",
+    "content": "K1323 [NULL]：VIXTWN / VIX ratio 252 天穩定性驗證（研究方向 Q6）readiness update，2026-05-29。截至抓取當日 VIXTWN 累積 unique days = 116，僅達 252 天門檻的 46.0%，尚未達 gate。同時發現本地共享 VIX pairing source（`vix_close`）已 stale 至 2026-05-19，落後 VIXTWN 的 2026-05-28 達 9 天，使 primary local gate 交集只剩 108 天。額外拉取 experiment-scoped 新鮮 `^VIX` yfinance snapshot 補齊到 115 天交集後重算：primary gate mean ratio=1.5182、CV=0.1851；fresh-VIX gate mean ratio=1.5527、CV=0.1968；兩者皆遠高於 K1181 baseline mean=1.3906（t 檢定 vs K1181：primary t=4.72 p<0.0001，fresh t=5.69 p<0.0001），且 time trend 顯著為正（trend_pvalue≈0）。結論：VERDICT=NOT_READY_AND_UNSTABLE — 252 天 gate 尚未達成，且即使補上新鮮 VIX 資料，ratio 仍不穩定（不是 source staleness 造成的假象）。",
+    "evidence": ["experiments/k1323/k1323_results.json", "experiments/k1323/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1352",
+    "k_id": "K1352",
+    "category": "research_methodology",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1352 [DOCUMENTED_NEGATIVE]：任務「美元指數（DXY/UUP）作為跨資產 vol 條件變數：強弱美元 regime 下 EM/商品/黃金 vol 差異」為 research_program.md 同一行重複自動產生的任務，判定 SUPERSEDED_BY_K1439_AND_K1330（K1330 已於 2026-06-14 正式去重）。本 tick 重新執行 canonical 實驗 `experiments/k1439/reproduce.py` 驗證仍成立：樣本期間 2010-01-04 至 2026-06-05，n_obs=4131，資產為 UUP regime 下的 EEM/GLD/DBC/USO/DBB 21 日 realized volatility 差異。Naive Welch 顯著資產為 DBB/DBC/EEM/USO 四個，但套用 HAC + Bonferroni 後僅 USO 在 level 與 trend 兩種美元 regime 定義下都通過（hac_level_and_trend_robust_assets=[USO]），GLD 為 null，EEM/DBC/DBB 方向為正但未達 paper-grade 顯著。verdict_reason：1/5 資產通過 HAC+Bonferroni，效果不具普遍性、僅侷限於 USO。knowledge_write 欄位標記 skipped_duplicate_governance_receipt，因為這是去重治理 receipt 而非新實證發現。",
+    "evidence": ["experiments/k1352/K1352_results.json", "experiments/k1352/README.md"],
+    "confidence": 0.7,
+    "needs_human": true,
+    "gap": "本身是 duplicate-closure governance receipt（非新實證），artifact 明確標註不應寫入 knowledge.json；若要收錄，建議以 K1439/K1330 為 canonical entry 主體，本筆僅作交叉引用備註，需人工決定是否要真的寫入或僅留作 dedup audit trail。"
+  },
+  {
+    "experiment": "experiments/k1409",
+    "k_id": "K1409",
+    "category": "experiment_result",
+    "verdict": "PASS",
+    "content": "K1409 [PASS]：「0056/00878/00919 月月配息 1 萬」退休現金流規劃的 block-bootstrap 檢驗。資料來源 yfinance，抓取日 2026-05-29，三檔共同重疊期 2022-11 至 2026-05（43 個月），本金約新台幣 161 萬。方法：joint block bootstrap（block=3 個月，共用同一組起點保留跨資產連動），配息保留真實除息月曆、僅對每股配息金額 bootstrap，seed=20260530，N_SIM=5000；Codex review CONDITIONAL_PASS（配息不重複計、無 lookahead、seed 決定性等均通過，唯一 caveat 為非循環 block bootstrap 邊界效應，非 bug）。主要結果：12 個日曆月全數涵蓋配息（季配錯開），但「有配息月單月達 1 萬」機率僅 33.9%（中位數 NT$9,216），「平均月配息達 1 萬」機率僅 2.7%（中位數 NT$9,418，約目標 94%）。36 個月淨值中位數 2,435,184、5% 分位 1,663,027（僅較本金 +3.6%，反映母體嚴重偏多頭）；MDD 中位數 −9.5%、5% 最壞 −16.4%。圖中隱含現金殖利率 9.7%，模擬可實現殖利率中位數僅 7.04%（P(可實現≥9.7%)=0.0%），與抓取日 TTM 實測 7.7% 互相印證。結論：隱含殖利率明顯過度樂觀，且因母體僅 43 個月、幾乎未經歷長空頭，真實下檔與斷配風險被低估。",
+    "evidence": ["experiments/k1409/k1409_results.json", "experiments/k1409/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1438",
+    "k_id": "K1438",
+    "category": "data_property",
+    "verdict": "UNVERIFIED",
+    "content": "K1438 [UNVERIFIED/BLOCKED_DATA_UNAVAILABLE]：「VIX1D 作為 SPY 日內 RV covariate」的 feasibility audit（非正式預測實驗）。掃描發現：本地 SPY 5-min 資料存在但僅覆蓋 2026-01-14 至 2026-06-08，共 100 個 trading days，低於 formal HAR-RV OOS 常用的 252 天門檻（has_sufficient_har_history=false）。repo 內雖有 12 處提及 VIX1D 的文字（research_findings.md、experiments/k182 等），但掃描 paper/garch-x-vix/data/ 下四份 snapshot CSV（0050_tw_vix、gld_vix_gvz、spy_vix_qqq_eem_fez、uso_vix_ovx）皆無 vix1d 欄位，has_local_vix1d_series=false，故沒有本地可重現的 VIX1D canonical time series。結論 status=BLOCKED_DATA_UNAVAILABLE：在 VIX1D 本地資料未 materialize 前，不能誠實完成 HAR-RV+VIX1D 的 forecasting 比較；下一步需先建立 canonical VIX1D 歷史資料源再重跑。",
+    "evidence": ["experiments/k1438/k1438_results.json", "experiments/k1438/README.md"],
+    "confidence": 0.3,
+    "needs_human": true,
+    "gap": "此為資料可行性稽核而非正式預測實驗，沒有可供比較的統計量或 verdict enum 明確對應值；需人工確認是否要以「data gap 記錄」形式寫入 knowledge.json（防止重複稽核）或僅留 experiments/ 供追蹤。"
+  },
+  {
+    "experiment": "experiments/k1472_har_illiquidity_proxy",
+    "k_id": "K1472",
+    "category": "vol_prediction",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1472 [INCONCLUSIVE/BROAD_NULL_WITH_ONE_QQQ_AMIHUD_EXCEPTION]：日頻 Amihud(2002) 與 Corwin-Schultz(2012) illiquidity proxy 加入嚴格 lag 的 HAR baseline，能否改善 SPY/QQQ/0050.TW 的 OOS 波動預測。資料：SPY/QQQ 2000-01-03至2026-04-16、0050.TW 2018-01-02至2024-12-30，rolling window（SPY/QQQ 1000 obs、0050.TW 700 obs）、每21期 refit，OOS 起點 max(train_window, 0.7×樣本)。結果：Corwin-Schultz 在任一資產都未在 DM 檢定上顯著優於 HAR（SPY dm_t=-1.04 p=0.30；QQQ dm_t=-0.67 p=0.50；0050.TW dm_t=-0.24 p=0.81）。Amihud 表現混合：QQQ 顯著改善（rel_improvement=+5.47%，dm_t=-3.14，p=0.0017，harvey_pass=true，是全表唯一 harvey_pass 的 cell），但 SPY 惡化（rel_improvement=-0.88%）、0050.TW 明顯惡化（rel_improvement=-9.36%）。跨資產平均 rel_improvement：Amihud -1.59%、Corwin-Schultz +1.76%、兩者合併 -0.66%，均不支持普遍性 illiquidity 加值宣稱。verdict='BROAD_NULL_WITH_ONE_QQQ_AMIHUD_EXCEPTION'：廣泛的 incremental-illiquidity 宣稱不成立，QQQ 上的 Amihud 訊號屬單一資產利基現象、不具一般性。",
+    "evidence": ["experiments/k1472_har_illiquidity_proxy/k1472_results.json", "experiments/k1472_har_illiquidity_proxy/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1486",
+    "k_id": "K1486",
+    "category": "data_property",
+    "verdict": "UNVERIFIED",
+    "content": "K1486 [UNVERIFIED/BLOCKED_ON_DATA]：「現貨 BTC ETF 上市對加密貨幣 vol 時段結構改變」題目的 feasibility audit。原題要求用 BTC-USD 小時資料拆分美股時段/非時段/週末 realized volatility，檢查 2024-01 現貨 ETF 上市前後結構斷點。稽核發現：repo 內僅有多份 BTC 日線快取（experiments/k1206、k1186、k1090、k1090b 的 BTC_USD.csv），沒有可重用的 24/7 小時級 canonical panel，無法拆出美股時段/非時段/週末結構；也沒有本地 IBIT/FBTC/ARKB/BITB 現貨 BTC ETF 價格快取或 ETF 事件 metadata。既有 K916（BTC 與 VIX 日頻結構）資料僅涵蓋 VIX 可用的 business days，不能替代本題所需的 24/7 時段分解。verdict.overall=BLOCKED_ON_DATA，can_honestly_run_full_study_now=false：阻塞點是資料頻率與結構完整性，不是模型設計問題。解鎖需要：(A) BTC 小時級 OHLCV 含 UTC 時戳；(B) 可重建的美股時段/非時段/週末分類規則（需固定時區避免 DST 漂移）；(C) 本地 ETF 事件 metadata。",
+    "evidence": ["experiments/k1486/k1486_results.json", "experiments/k1486/README.md"],
+    "confidence": 0.3,
+    "needs_human": true,
+    "gap": "純資料可行性稽核，無統計檢定結果；需人工確認是否值得記錄為「data gap」條目以防重複派工，或僅留在 experiments/ 供未來查找。"
+  },
+  {
+    "experiment": "experiments/k1524_translation_gap_pilot",
+    "k_id": "K1524",
+    "category": "vol_prediction",
+    "verdict": "PASS",
+    "content": "K1524 [PASS]：「Translation Gap」系列 #7，系統性 3×3 矩陣量化波動率預測模型在統計準則（QLIKE / cross-sectional rank ρ）上的贏家是否也是投組績效（vol-targeting Sharpe）贏家。Universe：SPY + 10 大型股，期間 2018-01-01至2025-12-31、OOS=2022-01-01至2025-12-31，RV=5日 rolling std annualised，模型為 HAR-RV（expanding OLS）、GJR-GARCH(1,1)（arch 套件）、RandomForest（100 trees depth 5, seed=42），皆用 .shift(1) 避免 lookahead。結果：QLIKE winner=RF（0.232，比 HAR 0.341 低約 32%，比 GJR 0.557 低約 58%）；Rank ρ winner=HAR（0.863，RF 0.859 幾乎平手）；EW Sharpe winner=HAR（1.148 vs RF 1.108，差距僅 3.6%）；Single-asset Sharpe median winner=RF（0.670）。DM test（QLIKE）：HAR vs GJR t=-3.11 p=0.0018（HAR顯著優）；HAR vs RF t=1.60 p=0.110（不顯著）；GJR vs RF t=24.0 p≈0（RF大幅優）。verdict=PASS：確認 translation gap 現象存在（QLIKE winner≠Sharpe winner），但幅度（3.6%）小於 K533/K594 先前的 anecdotal 報告；RF 把 QLIKE 砍掉 1/3，卻未能把統計優勢完全轉化為投組績效改善，HAR 仍是投組配置的可靠選擇。Limitations：僅 11 檔 pilot scope（非 K1523 規劃全 universe）、未計交易成本、RV proxy 為粗糙的 5日 rolling std。",
+    "evidence": ["experiments/k1524_translation_gap_pilot/k1524_results.json", "experiments/k1524_translation_gap_pilot/README.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1587",
+    "k_id": "K1587",
+    "category": "vol_prediction",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1587 [DOCUMENTED_NEGATIVE/NULL]：檢驗 NYC PM2.5 空氣污染（延伸自 Heyes, Neidell & Saberian NBER WP 22753 的同日情緒效應論文）能否改善 SPY 日頻波動率預測。資料：EPA AirData 每日 PM2.5（88101 參數，2018-2025，NYC 五個郡）與 SPY/VIX（paper/garch-x-vix 面板），最終面板 2,011 個 SPY 交易日（2018-01-02至2025-12-31），回歸樣本 1-day RV n=1755、5-day RV n=1753。PM2.5 訊號嚴格 shift(1)，OOS 用 expanding OLS log-RV、Patton QLIKE 為主要 loss，seed=42。結果：1日 horizon baseline QLIKE=1.752521 vs PM2.5 augmented QLIKE=1.761369（改善 -0.505%，DM t=1.072 p=0.284，方向為惡化）；5日 horizon baseline=0.318720 vs augmented=0.323605（改善 -1.533%，DM t=1.480 p=0.139，同樣惡化）。In-sample adjusted R2 亦下降（1日 delta=-0.00149，5日 delta=-0.00111）。高 AQI（≥100，n=5）與 top-decile PM2.5（n=209）事件後的 RV 皆未顯著高於對照組（one-sided p 分別為 1.000 與 0.998/1.000）。Codex review（codex_review.md）verdict=PASS_WITH_NULL_FINDING，確認可復現、無 lookahead、seed 固定。結論：滯後 NYC PM2.5 在 VIX/HAR 控制後不能改善 SPY OOS 波動率預測，不推翻 Heyes-Neidell-Saberian 原論文（該論文檢驗的是同日報酬/情緒，非本實驗的跨期波動率預測）。",
+    "evidence": ["experiments/k1587/K1587_results.json", "experiments/k1587/README.md", "experiments/k1587/codex_review.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1598",
+    "k_id": "K1598",
+    "category": "research_methodology",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1598 [CONDITIONAL_PASS/COVERAGE_COMPETITIVE_NO_PANEL_EDGE]：測試 Liu, Dobriban & Orabona (2026, arXiv:2602.03168) universal-portfolio 風格的線上 conformal 校準（UP_AggACI_lite，Cover-style 對 ACI 專家做指數混合）能否改善波動率縮放報酬區間，優於 rolling conformal 與 ACI baseline。資料：experiments/k1552 frozen prices.parquet，12 檔 ETF（SPY/QQQ/IWM/XLB/XLE/XLF/XLI/XLK/XLP/XLU/XLV/XLY），train 起 2005-01-01、OOS 起 2016-01-01，score=|r_t|/EWMA_sigma_t（lambda=0.94）。Panel 12 資產×2 alpha=24 cells。結果：UP_AggACI_lite 平均 miss rate=0.07347、平均 abs miss gap=0.00219（優於 Rolling252 的 0.00417，接近 AggACI_grid 的 0.00246），但平均 pinball loss=0.126089，並未優於 FixedIS 的 0.125958 或 AggACI_grid 的 0.126065。Holm 校正後嚴格顯著勝場僅 1 個（XLB, alpha=0.10, vs Rolling252, t=-3.542, Holm p=0.0388），無嚴格顯著敗場。Codex review verdict=CONDITIONAL_PASS，確認資料 provenance、lookahead 控制、96 個測試的 Holm 校正皆通過，唯一 caveat 為 UP_AggACI_lite 是離散 Cover-style 混合、非原論文精確 UP-OCP 更新，且僅為 centered interval 而非單邊 VaR/ES。Safe claim：UP 風格混合能改善 rolling conformal 的 coverage 追蹤穩定性，但無 panel-level pinball loss 優勢，不足以取代 ACI/AggACI 家族或宣稱穩健預測貢獻。",
+    "evidence": ["experiments/k1598/k1598_results.json", "experiments/k1598/README.md", "experiments/k1598/codex_review.md", "experiments/k1598/knowledge_handoff.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1631",
+    "k_id": "K1631",
+    "category": "market_context",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1631 [DOCUMENTED_NEGATIVE/NULL_NO_ROBUST_TOP_SIGNAL]：檢驗坊間迷思「融資餘額創新高＝股市要見頂」。資料：TWSE 市場融資餘額日資料（exchangeReport/MI_MARGN）與 0050.TW（`adj_close`），分析期 2014-01-01起，有效 joined daily observations=3,034（2014-01-02至2026-07-03）。事件定義：全樣本創高（252日warmup+20日cooldown去重）、一年新高、及以 TWSE「前日餘額」做嚴格 one-report-lag robustness。方法：後續 5/20/60 日 log return 均值比較、Fisher exact 下跌機率檢定、後續年化 realized volatility、OLS dummy + Newey-West HAC（maxlags=horizon）、moving-block bootstrap（block=20, n_boot=2000, seed=42）。結果：全樣本新高 n=10，後續 20 日報酬 event 組 +4.53% vs non-event +1.60%（差 +2.93pp，HAC t=+1.42 p=0.155，bootstrap 95% CI [-1.39pp, +7.37pp]，橫跨0）；下跌機率 Fisher p=0.751，無顯著差異。但後續 20 日年化波動 event 組 25.40% vs non-event 17.19%（差 +8.21pp，HAC t=+3.31 p=0.00094，顯著）。一年新高（n=36-37）在各 horizon 皆未顯示報酬顯著變差。one-report-lag robustness 下方向與顯著性結論一致（波動差 HAC t=+3.34 顯著，報酬差不顯著）。結論：融資餘額創新高並非可靠的股市見頂訊號（後續報酬未顯著轉差，點估甚至為正但樣本小），但確實伴隨後續波動顯著升高，可視為風險升溫（非見頂）訊號。Limitations：0050.TW 非官方 TAIEX、全樣本新高事件僅10個、市場總融資非全體散戶、無個股 panel。",
+    "evidence": ["experiments/k1631/k1631_results.json", "experiments/k1631/README.md", "experiments/k1631/codex_review.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1699",
+    "k_id": "K1699",
+    "category": "vol_prediction",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1699 [CONDITIONAL_PASS/CONFIRMED_NULL]：prg-periodic-garch 論文「雙時點 convention」敘事的六市場補證（SPY/QQQ/GLD/EEM/0050.TW/TAIFEX），回答嚴格 close-time（t-1）convention 下 PRG 對 GJR 是否仍有優勢，並檢查高 overnight-share 市場（TAIFEX ON share 61%、GLD 53%）是否為例外。方法：PRG_tminus1 兩變體（exp=model-consistent 期望代入、lag=lagged realized plug-in，複製 K880 重跑）vs GJR(1,1)/HAR，皆 one-step-ahead、canonical dm_test（Newey-West HAC, bandwidth=ceil(n^(1/3))），seed=1699，pinned snapshot（SHA256 記錄）。樣本：SPY N=1823(2019-2026)、QQQ N=1981、GLD N=1613、EEM N=1734、0050.TW N=1251、TAIFEX N=843(sessions)。結果：PRG_tminus1 vs GJR 六市場全數 Harvey 不顯著（|t|>3.0 門檻）：SPY exp t=+0.74(p=.46)、QQQ t=+2.28(p=.023，未過Bonferroni)、GLD t=-0.44(p=.66)、EEM t=-0.54(p=.59)、0050.TW t=-0.32(p=.75)、TAIFEX t=-0.49(p=.62)；lag 變體結論完全一致。高 overnight-share 市場（TAIFEX、GLD）同樣無例外。QQQ 是唯一方向上偏向 GJR 較佳的市場（未達顯著）。PRG_tminus1 對 HAR 則 5/6 市場 Harvey 顯著勝出（TAIFEX 除外），但 GJR vs HAR 同樣 5/6 顯著，主因是 HAR 在 r² proxy target 上普遍弱於 GARCH 族，非 PRG 結構功勞。Codex review（codex_review.md）verdict=PASS_WITH_CAVEAT，reproduce_report.json 事後重跑 outcome.status=pass_tolerated（在預宣告容忍度內完全可復現）。裁定意義：完成雙時點框架六市場證據鏈——open convention 下 PRG 全勝（K1544, 4/6 過3.0），close convention 下與 GJR 無異（本實驗 0/6），混合時點（K880 canonical +5.06）確認為 ill-posed timing artifact，須從論文 headline 移除。",
+    "evidence": ["experiments/k1699/k1699_results.json", "experiments/k1699/README.md", "experiments/k1699/codex_review.md", "experiments/k1699/reproduce_report.json"],
+    "confidence": 0.9,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k829",
+    "k_id": "K829",
+    "category": "vt_strategy",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K829 [CONDITIONAL_PASS]：跨資產 VaR 驗證（QQQ、GLD、BTC-USD、0050.TW），方法為 GJR-GARCH(1,1) expanding window + Normal/Student-t/Historical-Simulation 三種 VaR 分布假設，資料源 yfinance，OOS 期間 2023-01-01至2024-12-31，每63日 refit。Trinity gate（Kupiec + Christoffersen + Basel traffic-light）逐資產×alpha(1%/5%)結果：QQQ 1% Normal FAIL/Student-t FAIL/HistSim PASS，5% 三者皆PASS；GLD 1%與5%三種方法全PASS；BTC-USD 1% Normal PASS/Student-t FAIL/HistSim FAIL，5% Normal FAIL/Student-t PASS/HistSim PASS；0050.TW 1% 三者皆FAIL，5% 三者皆PASS。整體 pass_rates（8 個資產×alpha 組合）：Normal 5/8、Student-t 5/8、HistSim 6/8，HistSim 表現最穩健。註：README.md 本身為未填寫的 stub 模板（僅有『待補充』），實際數據與方法描述完全來自 results.json 內的 method/summary_trinity/pass_rates 欄位。",
+    "evidence": ["experiments/k829/k829_crossasset_var_results.json", "experiments/k829/README.md"],
+    "confidence": 0.55,
+    "needs_human": true,
+    "gap": "README.md 是未填寫的空白模板（全部欄位『待補充』），內容完全依賴 JSON 反推；沒有明確 top-level verdict 欄位（用 pass_rates/summary_trinity 間接推斷 CONDITIONAL_PASS），也沒有找到 codex_review 或 seed 記錄。需人工確認：(1) 是否曾經過 Codex review、(2) 這是否已被更新的實驗（如K804/K824v2，已在references提及）取代、(3) 若要正式收錄需補齊 README 敘事。"
+  },
+  {
+    "experiment": "experiments/k841",
+    "k_id": "K841",
+    "category": "vt_strategy",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K841 [DOCUMENTED_NEGATIVE]：TAIFEX 夜盤即時 VT 避險可行性檢驗（TAIFEX TX tick + yfinance VIX/0050.TW，資料期 2017-05-16至2026-04-02，n_trading_days=2157）。比較 6 個策略：S0=Buy&Hold 0050.TW、S1=8.63/VIX 次日調整、S2=S1+TX夜盤避險(always)、S3=VIX spike guard、S4=條件式夜盤避險(VIX>20)、S5=Full VT(日+夜)。結果（Sharpe/MDD）：S0 Sharpe=1.001/MDD=-33.83%；S1 Sharpe=1.359/MDD=-12.32%（表現最佳）；S2 Sharpe=0.768/MDD=-35.80%；S3 Sharpe=0.913/MDD=-33.41%；S4 Sharpe=0.788/MDD=-35.91%；S5 Sharpe=0.744/MDD=-17.76%。DM檢定：S2 vs S1 t=10.82(p<0.0001，S1顯著較佳)；S5 vs S1 t=-0.76(p=0.448，不顯著)。main_finding：夜盤避險並未改善 S1，S1（純日盤 VIX 調整）仍是台股最佳 VT 策略；夜盤避險在平常時期產生正 drift 成本(~+0.046%/夜)侵蝕報酬。根本限制是時機延遲：夜盤 15:00 開盤時最新 VIX 已是 T-2（2個交易日前），使『即時』避險在日頻VIX下不可行。COVID子期間 S5 MDD最佳(-4.83% vs S1 -5.08%)但正常時期犧牲過多報酬，S5 vs S1 全期無顯著差異。結論：TAIFEX 夜盤非 VIX-based 策略的可行即時避險管道，根因是資訊延遲一天。",
+    "evidence": ["experiments/k841/k841_futures_realtime_vt_results.json", "experiments/k841/README.md"],
+    "confidence": 0.6,
+    "needs_human": true,
+    "gap": "README.md 亦為未填寫 stub（全『待補充』），內容完全依賴 JSON 的 conclusions/main_finding 欄位重建；未見 codex_review 或 seed 欄位記錄。此外多個策略間 ann_vol 差異達 2倍以上（例如 S1 8.61% vs S0 19.74%），MDD 直接比較未見 exposure-matched gap 分析（依 repo 現行 mdd_scale_artifact 規則），建議人工複核 MDD 相關結論（尤其 S5 COVID MDD 優於 S1 的宣稱）是否需要 exposure-matched 重新驗證才能正式寫入 knowledge.json。"
+  }
+]

@@ -1,0 +1,156 @@
+[
+  {
+    "experiment": "experiments/k1253",
+    "k_id": "K1253",
+    "category": "research_methodology",
+    "verdict": "PASS",
+    "content": "K1253 [PASS]: 這是 2026-04-18 系統從備份還原後的環境 smoke test，非研究發現。用 SPY 2020-01-03～2026-04-17（1580 天）日報酬，GARCH(1,1) rolling 1-step QLIKE，OOS 從 2025-01-01 起共 323 天，QLIKE mean=0.8815（std=2.4041），落在常識範圍，估計每步皆收斂無例外。結論：資料下載→模型估計→評估→JSON 產出的端到端 pipeline 在還原後完全通暢（yfinance/arch/numpy/pandas 相容）。README 明確聲明「本實驗目的是環境驗證，不作為研究結論引用」，故此筆只應作為 pipeline health 記錄，不可當作 GARCH(1,1) 對 SPY 的研究性 QLIKE 基準引用。",
+    "evidence": ["experiments/k1253/README.md", "experiments/k1253/k1253_results.json"],
+    "confidence": 0.5,
+    "needs_human": true,
+    "gap": "本實驗定位為環境驗證非研究結論；寫入 knowledge.json 前需確認是否要標記為 non-citable / infra-only 類別，避免被誤用當作 GARCH baseline QLIKE 引用。"
+  },
+  {
+    "experiment": "experiments/k1324",
+    "k_id": "K1324",
+    "category": "vol_prediction",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1324 [INCONCLUSIVE]: 台灣 0050.TW 5-min 重建日 RV 的 HAR-RV 續跑（沿用 K1322 規格），資料截至 2026-05-28，raw 5-min 檔案 80 天，HAR warm-up 後 58 列，70/30 chronological split 為 40/18。HAR QLIKE=0.353 優於 Random Walk QLIKE=0.536（HAR OOS R²=-0.140 vs RW -0.763），方向正確，但 DM-HLN t=0.99（p=0.329），遠未達 Harvey |t|>3。相較 K1322 的 t≈1.82，只多 4 個交易日 t-stat 就大幅下滑，證明樣本仍處於高噪音 small-sample fragility regime。Verdict 明確標為 UNTRUSTWORTHY_SMALL_SAMPLE，README 建議 revisit gate 為 n_total_days≥200 或 n_test≥50 才升級為正式研究結論。",
+    "evidence": ["experiments/k1324/README.md", "experiments/k1324/k1324_results.json"],
+    "confidence": 0.6,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1353",
+    "k_id": "K1353",
+    "category": "research_methodology",
+    "verdict": "NULL",
+    "content": "K1353 [NULL]（重複任務關閉紀錄）: 任務題目「軟體/科技集中型私募信貸壓力外溢（BDC 籃 vs IGV/HYG）」與 K1344 完全重複。K1344 已用 BIZD/ARCC/BXSL/OBDC/FSK 為 BDC proxy、IGV/HYG 為 target、SPY/QQQ 為 control，horizon 5/21 日，OOS 2021-01-04 起 n_oos=1367，做 Newey-West HAC + moving-block bootstrap（1000 reps）+ Bonferroni（alpha=0.0125）檢定，結果為 NULL：IGV h5 QLIKE improvement +1.91%（DM t=0.47, p=0.635）、IGV h21 +7.19%（t=1.35, p=0.178）、HYG h5 +2.98%（t=0.74, p=0.462）、HYG h21 +5.44%（t=0.86, p=0.388），皆未過 Bonferroni 門檻。K1353 本身的角色只是確認重複並關閉，results.json 明確標註 knowledge_write=skipped_duplicate_null_receipt，不應另外產生新的 knowledge entry。",
+    "evidence": ["experiments/k1353/README.md", "experiments/k1353/K1353_results.json"],
+    "confidence": 0.3,
+    "needs_human": true,
+    "gap": "此為 K1344 的重複任務關閉紀錄，非新研究發現；寫入 knowledge.json 前必須先確認 K1344 是否已有對應 entry，若有則此筆不應重複計入，只需在 experiment_experiences 或 dedup registry 標記 K1353→K1344 supersession 關係。"
+  },
+  {
+    "experiment": "experiments/k1413",
+    "k_id": "K1413",
+    "category": "market_context",
+    "verdict": "UNVERIFIED",
+    "content": "K1413 [UNVERIFIED]（描述統計，無正式檢定）: 用 yfinance adjusted close，2023-01-04～2026-06-02（855 交易日），對 AI 五層產業鏈籃子（L1能源電力 VST/CEG/VRT/ETN、L2晶片 NVDA/TSM/AVGO/MRVL/MU、L3基建 SMCI/DELL/ANET、L4/L5模型應用 MSFT/GOOGL/AMZN/META、基準 SPY）做 rolling 63 日年化波動率、三段期間（2023/2024/2025-至今）相關性矩陣、±5 日 lead-lag cross-correlation。結果：全期波動率 L3基建51.7%＞L1能源41.2%＞L2晶片40.9%＞L4/L5模型25.1%＞SPY15.1%；四層滾動波動率同步於2025-04-25觸頂（關稅衝擊，L1 85.1%/L3 81.0%/L2 74.3%）；平均跨層相關由2023年0.494升至2025年0.645，L1-L2相關由0.51升至0.79；lead-lag 對晶片層的最強相關全落在同日（lag=0），無穩定領先/落後。README 明確聲明「未做正式統計檢定（DM/bootstrap）」，僅為描述性統計。",
+    "evidence": ["experiments/k1413/README.md", "experiments/k1413/k1413_results.json"],
+    "confidence": 0.4,
+    "needs_human": true,
+    "gap": "全部為描述性統計（rolling 波動率、相關矩陣、cross-correlation），未經任何正式假設檢定；寫入 knowledge.json 前需人工確認是否要補做顯著性檢定，或僅以 market_context/descriptive 標籤收錄，避免被誤讀為有統計顯著性支撐的因果或預測性結論。"
+  },
+  {
+    "experiment": "experiments/k1443",
+    "k_id": "K1443",
+    "category": "cross_asset",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1443 [CONDITIONAL_PASS]: BTC-USD/ETH-USD vs SPY 在 SPY 交易日 panel（2018-01-02～2026-04-16，2083 個價格觀測）上，用 log(r²) 波動衝擊 proxy 做 pairwise Granger（lag≤5, BIC選lag）、三變數 conditional VAR、pairwise DCC-GARCH（最近1000個SPY交易日）。主規格結果：BTC→SPY p=0.282、SPY→BTC p=0.160、ETH→SPY p=0.225、SPY→ETH p=0.094（僅此組接近10%邊界但未過5%）；三變數條件VAR：BTC→SPY|ETH p=0.440、ETH→SPY|BTC p=0.621、聯合 p=0.511，皆不顯著。DCC 顯示中度持續相關：BTC/SPY mean ρ=0.361（p10/p90=0.179/0.514）、ETH/SPY mean ρ=0.376（p10/p90=0.210/0.502）。21日 rolling RV 版本雖出現雙向強顯著（如BTC→SPY p=2.46e-08），但因 overlapping window 機械放大 persistence，明確排除為主裁決依據。結論：crypto 與 SPY 條件相關中度且持續，但在日頻主規格下無穩健 lead-lag，crypto 不是 SPY 波動的日頻領先指標。",
+    "evidence": ["experiments/k1443/README.md", "experiments/k1443/k1443_results.json", "experiments/k1443/figures/rv21_timeseries.png", "experiments/k1443/figures/dcc_correlations.png"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1473_har_vs_dl_horizon_proxy",
+    "k_id": "K1473",
+    "category": "model_behavior",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1473 [CONDITIONAL_PASS]: 用 SPY/QQQ 日資料（2000-01-03～2026-04-16，本地快照），日平方對數報酬變異數 proxy，OOS 從2021-01-04起，固定 seed=42，檢定「HAR 只在中/長 horizon 輸給輕量 DL」的 backlog 假說。結果：TinyTransformer 在 h=1 就顯著贏過 HAR——SPY h=1 相對QLIKE改善+30.83%（DM t=-6.85）、QQQ h=1 +31.56%（DM t=-10.20）、QQQ h=5 +25.44%（DM t=-3.77），並非只在 h=5/22 出現；LSTM1 多數 horizon 無顯著優勢（如 SPY h=1改善僅+1.68%, t=-0.22）。原始「DL只在中長horizon贏」假說不成立，但「部分輕量DL規格能在此日頻proxy設定下贏HAR」得到部分支持。README明確聲明此為 daily close-to-close variance proxy（非5分鐘RV），不能直接推論到 paper-grade intraday RV 設定。",
+    "evidence": ["experiments/k1473_har_vs_dl_horizon_proxy/README.md", "experiments/k1473_har_vs_dl_horizon_proxy/k1473_results.json", "experiments/k1473_har_vs_dl_horizon_proxy/k1473_horizon_qlike.png"],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1489",
+    "k_id": "K1489",
+    "category": "data_property",
+    "verdict": "UNVERIFIED",
+    "content": "K1489 [UNVERIFIED，BLOCKED_ON_DATA]: 題目為 Caldara-Iacoviello GPRD 拆 GPRA(acts)/GPRT(threats) 對 SPY/GLD/XLE/ITA 不同 horizon 波動預測力的不對稱檢定。本輪因 sandbox 無法解析外部 DNS，官方 GPR daily XLS 與 yfinance SPY 下載皆失敗；本地也只找到 SPY/GLD/VIX 的部分 paper snapshot，缺 XLE/ITA 價格與 canonical raw GPRD/GPRD_ACT/GPRD_THREAT 檔，因此完整 HAR-RV 實證未執行，結論標記 BLOCKED_ON_DATA。README 明確禁止用 K446 結果反推重建 raw GPR series 或手造 XLE/ITA 價格。無任何回歸、DM 或 bootstrap 統計量產出，僅完成文獻與資料可行性稽核。",
+    "evidence": ["experiments/k1489/README.md", "experiments/k1489/k1489_results.json"],
+    "confidence": 0.2,
+    "needs_human": true,
+    "gap": "本輪未執行任何實證分析，僅為資料可行性稽核（BLOCKED_ON_DATA）。需人工補齊 experiments/k1489/data/gpr_daily_recent.csv（GPRD/GPRD_ACT/GPRD_THREAT）與 prices_spy_gld_xle_ita_vix.csv 後才能繼續跑 HAR-RV baseline/+VIX/+ACT+THREAT 比較，目前無可寫入 knowledge.json 的研究結論。"
+  },
+  {
+    "experiment": "experiments/k1526_hf_tail_risk_premium_vrp",
+    "k_id": "K1526",
+    "category": "vol_prediction",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1526 [CONDITIONAL_PASS]: SPY/VIX/IRX 月頻資料（2010-01～2026-05，n=197個月），檢定高頻/日頻尾端風險 proxy 對次月 SPY 超額報酬與 VRP 的預測力。單變量 RDSV（realized downside semi-variance）在HAC SE下 t=+3.36（p=0.0008），過 Harvey|t|>3門檻，in-sample顯著；但加入 VIX 後（M4）RDSV邊際效力消失，ES係數反轉為負（多重共線性）。focal spec（ES+VIX）預測次月報酬的 rolling-window R²_OOS=-0.045（DM t=-0.85, p=0.397, n=137個OOS月），bootstrap 95% CI R²_OOS=[-0.144,+0.095]；ES係數bootstrap 95%CI=[-3.06,+1.56]（sign-unstable）。VIX預測次月RV則穩健（t=1.97,p=0.049,R²=21.4%），為既有VRP文獻的複現。5分鐘channel僅4個月觀測，僅作概念驗證。整體結論：日內尾端 proxy 有 in-sample 訊號但無 OOS edge，可發表為方法論/null-OOS文章，不可包裝成策略宣稱。",
+    "evidence": ["experiments/k1526_hf_tail_risk_premium_vrp/README.md", "experiments/k1526_hf_tail_risk_premium_vrp/k1526_hf_tail_risk_premium_vrp_results.json"],
+    "confidence": 0.7,
+    "needs_human": true,
+    "gap": "README 第9節寫「Codex review pending at time of write」，但資料夾內未見 codex_review.md 產出；寫入 knowledge.json 前應確認 Codex/等效審查是否已完成，避免未過 code review 就落地為 CONDITIONAL_PASS knowledge entry。"
+  },
+  {
+    "experiment": "experiments/k1588",
+    "k_id": "K1588",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1588 [NULL]: 檢定 county-level Social Connectedness Index（HDX SCI）centrality 是否解釋財報公布附近 volatility jump/decay。樣本2018-01-01～2026-06-30，112檔US-headquartered tickers，2663個earnings events，15978筆event profile rows，2024-01-01前後切train/OOS。主回歸（cluster-robust OLS by ticker，控制sector/year FE、VIX regime、earnings surprise）：jump_log_abs 上 county_sci_z 係數=+0.0213（p=0.7430），decay_speed_log_abs 係數=+0.0228（p=0.7117），皆不顯著；OOS係數分別為+0.0666與+0.0613。High vs low SCI tercile Welch t 檢定：jump_log_abs t=-2.69（p=0.0071）、decay_speed_log_abs t=-3.06（p=0.0023）——方向反向於假說（高SCI county的jump與decay speed反而較低）。結論：公開SCI snapshot proxy版本下，沒有支持「社交連結解釋財報事件波動反應」的穩健證據。",
+    "evidence": ["experiments/k1588/README.md", "experiments/k1588/k1588_results.json", "experiments/k1588/figures/k1588_event_profile_by_sci_tercile.png"],
+    "confidence": 0.7,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1599",
+    "k_id": "K1599",
+    "category": "vol_prediction",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1599 [CONDITIONAL_PASS]（Codex 已審查，verdict CONDITIONAL_PASS）: 12檔ETF（SPY/QQQ/IWM/XLB/XLE/XLF/XLI/XLK/XLP/XLU/XLV/XLY，2005起，OOS從2016-01-01）用日頻BNS-style rolling bipower scale偵測jump（|r_t|/sqrt((pi/2)*rolling_mean(|r_t-1|*|r_t-2|))>2.5），檢定跨ETF co-jump proxy是否改善次日平方報酬QLIKE預測。結果：HAR_CJ_proxy平均QLIKE=2.2489，優於HAR_J_proxy 2.2638與HAR_daily 2.2915；HAR_CJ_proxy在全部12檔資產皆為最佳模型，記錄18個Harvey/Holm嚴格勝場、0個嚴格敗場。事件層級：high co-jump日次日mean r²=0.000473 vs low co-jump 0.000184（Welch t=3.07,p=0.00239），mean abs return 0.013586 vs 0.009061（t=4.60,p=6.68e-6）。明確限定為日頻proxy診斷，非高頻BNS/Lee-Mykland HAR-CJ複現，避免重蹈K1303的overclaim。",
+    "evidence": ["experiments/k1599/README.md", "experiments/k1599/k1599_results.json", "experiments/k1599/codex_review.md", "experiments/k1599/knowledge_handoff.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1632",
+    "k_id": "K1632",
+    "category": "vol_prediction",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1632 [DOCUMENTED_NEGATIVE]（迷思證偽，verdict MYTH_MOSTLY_FALSE_LOW_VOL_PERSISTS）: 檢定「盤整越久、噴得越兇」在SPY（2016-01-04～2026-07-02, n=2639）與0050.TW（2009-01-02～2026-07-03, n=4282）是否成立。低波動盤整定義為20日realized vol與20日收盤區間皆低於自身trailing 252日第20百分位（皆用.shift(1)歷史分位數，無lookahead）。主要事前可交易訊號（盤整達10天）結果：事件後20日年化波動SPY 11.48% vs 其他日14.85%（差-3.37pp, HAC t=-2.90, p=0.00377, block bootstrap 95%CI[-5.77pp,-1.04pp]）；0050.TW 14.79% vs 17.81%（差-3.03pp, t=-2.93, p=0.00339）——兩市場皆偏向更安靜而非更震盪。盤整結束當天絕對報酬確實較高（SPY +0.38pp Welch p=0.0271；0050.TW +0.88pp p=0.000754），但屬描述性、非事前訊號。結論：「盤整越久噴越兇」作為可交易預測訊號不成立，低波動常是regime延續。",
+    "evidence": ["experiments/k1632/README.md", "experiments/k1632/k1632_results.json", "experiments/k1632/codex_review.md", "experiments/k1632/fig_squeeze_future_vol.png"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1700",
+    "k_id": "K1700",
+    "category": "market_context",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1700 [CONDITIONAL_PASS]（feature-dev:code-reviewer 審查，v2修正C1-C3+I2-I3後過關）: 回答會員提問「未來30年每年穩定成長15%」的歷史可行性。用^GSPC（1927-1988）+^SP500TR（1988起）建含息序列，Shiller股息率日化重建1927-1988段（重疊區1988-2023驗證年化誤差僅-0.06pp）。近百年17,199個30年滾動視窗中達成年化15%者：0個，中位數僅10.8%；史上最佳30年視窗（1932-06起）年化14.70%，仍差0.3pp到不了15%；報酬最高前10%視窗100%經歷過>30%回撤、74%經歷過>40%回撤。槓桿路徑：2x每日再平衡（借貸成本=歷史短率+1pp）30年年化中位13.7%、31.5%視窗達15%，但最大回撤中位-75.3%；3x更差（中位12.9%，回撤-89.5%）。^TWII 1997起20年滾動視窗價格年化中位5.5%，無一達15%。副發現：yfinance的0050.TW歷史序列有錯價（2014-02-05收13.95，實際約57），會產生-77.9%假回撤，本題已棄用改採^TWII。",
+    "evidence": ["experiments/k1700/README.md", "experiments/k1700/k1700_results.json", "experiments/k1700/fig1_rolling_30y_cagr.png", "experiments/k1700/fig2_leverage_tradeoff.png"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k830",
+    "k_id": "K830",
+    "category": "vol_prediction",
+    "verdict": "FAIL",
+    "content": "K830 [FAIL]（README為未填寫stub，結論全部來自results.json）: 檢定Skewed-t（xi>1捕捉BTC正偏態）能否修正K829發現的「Student-t在BTC 1% VaR過度保守」矛盾。BTC-USD，OOS 2023-01-01～2024-12-31（n=731），GJR-GARCH為變異數模型。結果：hypothesis_rejected=true。所有重尾方法（Student-t/HistSim/Skewed-t/Asym-HistSim）在1% VaR僅產生1/731次違反，全部未過Kupiec檢定（p=0.003）；僅Normal通過（3/731）。根因：raw BTC報酬skew=+0.619，但GJR-GARCH標準化殘差skew=-0.19（GJR不對稱槓桿項已吸收方向性偏態），Skewed-t估得xi=1.036接近對稱，無意義可建模的偏態剩餘；真正問題是BTC殘差自由度df≈3.2造成雙側極端厚尾，非分佈設定錯誤。5% VaR則Student-t（33/731, Trinity相關pinball=0.00275）與HistSim較優，Normal反而under-cover（22/731）。結論明確為regime-specific（2023-2024為BTC多頭）：Skewed-t不能修正該矛盾。",
+    "evidence": ["experiments/k830/README.md", "experiments/k830/k830_btc_skewed_var_results.json"],
+    "confidence": 0.7,
+    "needs_human": true,
+    "gap": "README.md 本身仍是未填寫的 stub（問題描述/動機/方法/結論全標「待補充」），所有結論僅來自 results.json 的 conclusion 欄位；建議人工補齊 README 使其與 results.json 一致，避免未來稽核誤判此實驗未完成。"
+  },
+  {
+    "experiment": "experiments/k842",
+    "k_id": "K842",
+    "category": "vt_strategy",
+    "verdict": "NULL",
+    "content": "K842 [NULL]（README為未填寫stub，結論全部來自results.json）: 檢定「SPY日報酬可作為台指期(TX)夜盤方向性交易訊號」，2017-05-16～2026-04-02（n=2158交易日）。保守版（SPY(D-2)→TX file-date D，嚴格可交易，訊號在夜盤開盤前已知）：S1策略年化Sharpe=-0.95，勝率47.83%，比隨機還差；DM檢定 t=3.38（p=0.000746，顯著劣於buy-and-hold night session baseline Sharpe=1.0092）。同期SPY(D-1)→TX D的concurrent版本Sharpe高達8.10（勝率89.46%），但明確判定為tautological：SPY與TX夜盤在時間上重疊（相關r=0.72），非真正可交易的事前預測（concurrent DM t=-12.64但不具經濟意義）。VIX regime細分：高VIX時保守版S1表現更差（年化報酬-29.1%）。結論：SPY資訊在能被實際使用時（考慮1日lag）已被TX price in，保守可交易版本無正Sharpe優勢。",
+    "evidence": ["experiments/k842/README.md", "experiments/k842/k842_futures_profit_trading_results.json"],
+    "confidence": 0.75,
+    "needs_human": true,
+    "gap": "README.md 本身仍是未填寫的 stub（問題描述/動機/方法/結論全標「待補充」），所有結論僅來自 results.json；建議人工補齊 README 使其與 results.json 一致。"
+  }
+]

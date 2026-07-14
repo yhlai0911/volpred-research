@@ -20,11 +20,11 @@
     "5280"
   ],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queued_at": "2026-07-14T09:17:30Z",
   "started_at": "2026-07-14T10:45:05Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-14T10:57:32Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_kb_backfill-a796f4.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_kb_backfill-a796f4.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/storage/ops/kb_backfill/proposed_entries.json",
@@ -38,6 +38,11 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
-  "timeout_seconds": 5400
+  "followup_dispatched": true,
+  "timeout_seconds": 5400,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "followup_dispatched_at": "2026-07-14T11:14:32Z",
+  "followup_next_task_id": "kb_backfill_needs_human_adjudication"
 }

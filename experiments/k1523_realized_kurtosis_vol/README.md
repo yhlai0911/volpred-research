@@ -12,10 +12,17 @@ Test realized kurtosis (RKt) — daily-return 22-day rolling 4th moment proxy �
 - Specs: HAR, HAR + RSk, HAR + RKt, HAR-Full (all 4 features)
 - DM HAC test vs HAR baseline; Bonferroni over 16 tests
 
-## Verdict (Codex CONDITIONAL PASS, 2026-06-17)
-- SPY: NULL (best HAR-Full t=-2.69, fails Harvey −3)
-- TWII: H1 PASS (t=-3.14), H2 PASS (t=-3.15) — RKt has incremental predictive power over HAR & RSk
-- TWII H3 (RKt over SV): NULL
+## Verdict: NULL（2026-07-14 更正，以 `k1523_results.json` 為準）
+`k1523_results.json` 的 `verdict` 是 `NULL`，六個假設全部 `supported: false`（無一通過 Harvey |t|>3，
+亦無一通過 Bonferroni α=0.003125，family_size=16）：
+
+- SPY: H1 t=-2.27、H2 t=-2.44、H3 t=-1.06 — 全 NULL
+- TWII: H1 t=-2.87、H2 t=-2.71、H3 t=-1.29 — 全 NULL（**RKt 對 HAR / RSk 沒有增量預測力**）
+
+**本節原本寫「Codex CONDITIONAL PASS；TWII H1 PASS (t=-3.14)、H2 PASS (t=-3.15)」，與結果檔直接矛盾**
+（兩個數字都剛好被寫成越過 |t|≥3 門檻，而結果檔是 -2.87 / -2.71）。推測是 K1520→K1523 worktree salvage
+時 README 未隨結果同步。2026-07-14 kb-backfill 稽核（`storage/ops/kb_backfill/README.md` §不可靠案例 1）
+發現後更正。結論以結果檔為準：**這是一個 null result，不得被引用為 RKt 有預測力的證據。**
 
 ## Codex review caveats
 - DM HAC lag=16 sufficient for 5-day overlap

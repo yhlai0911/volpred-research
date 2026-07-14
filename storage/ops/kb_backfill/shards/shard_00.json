@@ -1,0 +1,156 @@
+[
+  {
+    "experiment": "experiments/k1208",
+    "k_id": "K1208",
+    "category": "cross_asset",
+    "verdict": "PASS",
+    "content": "K1208 [PASS]（consolidation，非新估計）：彙整 K1116c/K1116f/K1201/K1203 四個已完成的跨資產 PIT 實驗，做 Paper 4 §5 markdown 改寫稿。7/7 資產覆蓋（SPY/^VIX、QQQ/^VXN、GLD/^GVZ、USO/^OVX、TLT/^MOVE、BTC-USD/rv30、EEM/^VIX spillover），QLIKE 5% gate 全部未過（僅 TLT finstress pit_shift0 +0.50% 為唯一正值），VIX-sufficiency null 在多數資產上普遍成立；TLT 是唯一離群（base_t=+1.43, finstress_t=+3.74，判為 regime artefact）。narrative-state-machine gate 依三準則（≥3 互補實驗、7/7 覆蓋、無未解釋離群）全數 PASS，unlocked，允許主線程改寫論文 §5。所有數字逐字取自來源 experiments 的 results.json，本身無新資料/新估計。",
+    "evidence": ["experiments/k1208/README.md", "experiments/k1208/k1208_results.json", "experiments/k1208/k1208_panorama_table.csv"],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1321",
+    "k_id": "K1321",
+    "category": "data_property",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1321 [DOCUMENTED_NEGATIVE]：檢查 VIXTWN/VIX ratio 在滿 252 個交易日前是否仍可視為穩定常數。資料源 data/vixtwn/vixtwn_daily.csv（去重後 112 個交易日，2025-12-01～2026-05-22）與本地 VIX 序列，交集 n=111。結果：mean ratio=1.5326（前次 K1181 基準為 1.3906），CV=0.1896（K1181 為 0.098），前半期均值 1.3787、後半期 1.6837，OLS 時間趨勢 slope=0.00662/日（p=5.14e-20），單樣本 t 檢定 vs K1181 均值：t=5.15, p=1.34e-06。結論：ratio 在 252 天目標達成前（目前僅 44.4%進度、112/252天）已不穩定，需在 252 天正式驗證前先修正對 K1181 的沿用假設。",
+    "evidence": ["experiments/k1321/README.md", "experiments/k1321/k1321_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1350",
+    "k_id": "K1350",
+    "category": "research_methodology",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1350 [INCONCLUSIVE，需人工複核]：這是一份 provenance/scope 稽核，不是新實驗——目的是檢查『HAR ceiling』backlog 題目（對應 Los Flamingos 2025 摘要之 arXiv:2406.08041 HARd-to-Beat）是否仍是 open item。腳本讀取 6 個既有實驗的 frozen JSON（K530/K764/K1377/K1349/K1521/K966），彙整 11 筆證據列（4 筆本地 paper-grade、5 筆支持 HAR ceiling 泛稱、3 筆因 OOS<252 只算 pilot），得出 verdict='PROVENANCE_CONFIRMED_LOCAL_CEILING_COVERED_EXACT_REPLICATION_DATA_UNAVAILABLE'：本地泛稱的 HAR ceiling 題目視為已有證據覆蓋，但精確重現 Los Flamingos/HARd-to-Beat（需 1,445 檔美股 2015-2023 高頻 RV panel）因本地缺該資料集而未完成。Codex review 明確標註 PASS with scope limitation，並直接建議『不應以此寫入 knowledge.json 新發現，因為這是範圍解析稽核，不是新的 paper-grade 預測發現』。",
+    "evidence": ["experiments/k1350/README.md", "experiments/k1350/K1350_results.json"],
+    "confidence": 0.3,
+    "needs_human": true,
+    "gap": "此為 provenance/scope 稽核而非新實驗；Codex review 明確建議不要寫入 knowledge.json 當作新發現。需人工決定是否僅記為 methodology-audit 分類且不算作 paper-grade finding，並確認底層 6 個來源實驗（K530/K764/K1377/K1349/K1521/K966）是否各自已個別進 knowledge.json（本輪未逐一查證）。"
+  },
+  {
+    "experiment": "experiments/k1407",
+    "k_id": "K1407",
+    "category": "research_methodology",
+    "verdict": "PASS",
+    "content": "K1407 [PASS]：用真實歷史價格（非模擬）比較 lump-sum 與定期定額（DCA）在 SPY（2005-01-03～2026-05-29，5,385 個交易日）與 0050.TW（2009-01-02～2026-05-28，4,257 個交易日）上，TWR（時間加權年化報酬）vs IRR（資金加權年化報酬）的分歧。單筆 IRR==CAGR 在 36/36 起始年份驗證成立。DCA 結果：SPY 20 個進場年份 TWR−IRR 中位數 −1.14pp（範圍 −8.33～+0.51pp，2022 進場最分歧 −8.33pp）；0050.TW 16 個進場年份 TWR−IRR 中位數 −9.17pp（範圍 −19.50～−3.73pp），16/16 年份皆 TWR<IRR。合併中位數 −3.15pp，機制：早跌後漲路徑下 DCA 資金在低點加碼、IRR 系統性高於 TWR，corr(早段−後段報酬, TWR−IRR)=+0.56。因 Codex usage-limit，本輪用三重獨立解析驗證（TWR因子鏈/IRR閉式解/單筆IRR=CAGR），尚待 Codex 恢復後做 primary-path 二次審查。",
+    "evidence": ["experiments/k1407/README.md", "experiments/k1407/k1407_results.json"],
+    "confidence": 0.65,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1436",
+    "k_id": "K1436",
+    "category": "data_property",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1436 [DOCUMENTED_NEGATIVE]：BTC perpetual funding rate 作為 HAR-RV covariate 的 feasibility audit（非正式實驗）。本地搜尋確認：0 筆 canonical funding-rate 檔案、0 筆 Binance/perp/perpetual 命名檔案、0 筆 BTC intraday（5-min/1h）快取，僅有 7 個 BTC 日頻 OHLCV CSV（如 experiments/k1090/data/BTC-USD.csv 等）。既有 experiments/btc_derivatives_vol/ 測的是 volume/weekend/VIX proxy，不是 funding rate，不能替代。結論 status='BLOCKED_DATA_UNAVAILABLE'：阻塞點是資料層（缺 funding-rate canonical series + 缺 BTC intraday RV target 資料），不是模型層。要解鎖需先建本地 canonical funding-rate 歷史檔與 BTC intraday bar cache，再跑正式 HAR-RV vs HAR-RV+funding OOS 比較。",
+    "evidence": ["experiments/k1436/README.md", "experiments/k1436/k1436_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1465",
+    "k_id": "K1465",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1465 [NULL]：SPY 2010-01-05～2026-06-10（4,129 個交易日，IS 2010-2022 n=3,266、OOS 2023-2026 n=862）檢定 overnight/intraday 平方報酬與 VRP（IV²−RV_5d, BTZ 2009）是否有 day-of-week 群聚，及可否交易。Kruskal-Wallis：overnight r² H=16.47 p=0.0025（拒絕，有 DoW 結構）、intraday r² H=11.29 p=0.024（拒絕），但 VRP 全期 H=2.30 p=0.680、OOS H=0.73 p=0.948（皆不拒絕——VRP 無 DoW 結構，因 IV² 已隨 RV 同步定價抵銷）。VRP×DoW 均值差<7bps，落噪音內。以 IS 選出的最佳 DoW（週一）做 OOS backtest：Sharpe −2.09 遠輸 buy-and-hold +1.39（t=−3.87），DM(HLN) OOS t=1.53 p=0.125 不顯著。主假設（VRP 有可交易的 DoW 結構）NULL，但側面發現 SPY close-to-close 仍存在顯著 Monday effect（純股票 anomaly，非 VRP anomaly）。",
+    "evidence": ["experiments/k1465/README.md", "experiments/k1465/k1465_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1485",
+    "k_id": "K1485",
+    "category": "data_property",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1485 [DOCUMENTED_NEGATIVE]：FINRA off-exchange short volume ratio 對次日波動預測力題目的 feasibility audit。本地搜尋 storage/、experiments/、data/、docs/ 後確認：無 canonical FINRA/TRF off-exchange short-volume 原始日資料表（無 date/ticker/short_volume/total_volume 欄位的檔案）。既有 K186（dark-pool/volume displacement proxy）與 K367（inverse ETF/VIX-based short-interest proxy）皆為 proxy study，其程式本身承認沒有真實 FINRA short-volume 資料，不能包裝成本題已完成。結論 verdict.overall='BLOCKED_ON_DATA'：阻塞點是資料建設（缺 FINRA 原始表、缺 ratio construction layer、缺與次日波動 target 對齊的 canonical panel），不是模型設計問題。",
+    "evidence": ["experiments/k1485/README.md", "experiments/k1485/k1485_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1523_realized_kurtosis_vol",
+    "k_id": "K1523",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1523 [NULL，README 與 results.json 有出入需人工核對]：測 realized kurtosis（22 日 rolling 4th moment daily proxy, RKt）對 5 日 forward RV 的增量預測力，SPY + TWII 2010-2026（16年日頻），HAR/HAR+RSk/HAR+RKt/HAR-Full 對比，DM HAC lag=8，Bonferroni over 16 tests（alpha=0.003125）。results.json 頂層 verdict 明確為 'NULL'：SPY 三假設（H1 RKt over HAR t=-2.27, H2 RKt over RSk t=-2.44, H3 RKt over SV t=-1.06）與 TWII 三假設（H1 t=-2.87 p=0.0042, H2 t=-2.71 p=0.0068, H3 t=-1.82 p=0.069）皆 harvey_sig=false 且 supported=false。**注意**：README 文字宣稱『TWII: H1 PASS (t=-3.14), H2 PASS (t=-3.15)』，與 results.json 實際數字（t=-2.87/-2.71）不符，且 JSON 本身標記全部 supported=false。判定以機器產出的 results.json 為準，README 敘述疑似沿用了 K1520 salvage 前的舊版本或誤植。",
+    "evidence": ["experiments/k1523_realized_kurtosis_vol/README.md", "experiments/k1523_realized_kurtosis_vol/k1523_results.json"],
+    "confidence": 0.4,
+    "needs_human": true,
+    "gap": "README 文字宣稱 TWII H1/H2 PASS（t=-3.14/-3.15），與 results.json 實際 DM t-stat（H1 t=-2.87, H2 t=-2.71）不符，且 JSON 頂層 verdict 與 per_asset_findings 的 supported 欄位皆為 false/NULL。需人工核對是否 README 沿用了 K1520 worktree salvage 前的舊跑法輸出、或 results.json 重跑後未同步更新 README，才能決定最終要記錄的 verdict。"
+  },
+  {
+    "experiment": "experiments/k1585",
+    "k_id": "K1585",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1585 [NULL/WEAK_RAW_ONLY]：測試 SPF disagreement（Philadelphia Fed D2 workbook, 226 季 1968Q4-2026Q2）能否在 VIX 之外增量改善 SPY forward RV 預測與 tail risk。SPY/VIX 日頻 panel 6,670 天（2000-01-03～2026-06-26）。原始 regime 對比：高VIX/低SPF-disagreement 組 21日forward RV均值 0.007739（年化30.47%）vs 高VIX/高disagreement組 0.004946（24.36%），差 0.002793，moving-block bootstrap 單邊 p=0.044（但雙邊95% CI含0）。正式增量預測檢定：5日與21日 horizon 的 VIX+SPF augmented 模型 OOS QLIKE 皆劣於 baseline（改善率 -0.714%、-3.174%），DM t 分別 0.874(p=0.382)、1.809(p=0.071)，未達 t<-3 的強支持門檻。Codex review verdict=CONDITIONAL_PASS（artifact 面），明確要求『不可推廣為正面預測發現』，結論維持 WEAK_RAW_ONLY：SPF disagreement 不改善 VIX-based 波動預測。",
+    "evidence": ["experiments/k1585/README.md", "experiments/k1585/k1585_results.json", "experiments/k1585/codex_review.md"],
+    "confidence": 0.6,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1597",
+    "k_id": "K1597",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1597 [NULL]：TAIFEX TX 期貨日盤 5分鐘 RV（2017-05-16～2021-12-30，1,138 個交易日）測試 stable-tail/codifference/LFSM-lite 特徵能否改善 HAR/HARQ 的次日 RV 預測。Roughness：frequency-ratio H=0.0545、variogram H=0.1428(R²=0.979)。非高斯性明確（Δlog RV 超峰態1.13, Jarque-Bera p=6.8e-17, Student-t df=8.94），但 Hill tail alpha（top10%=3.63、top5%=4.21）與 log-log alpha(3.58)均遠高於2，不支持 alpha-stable 無窮方差假設。OOS（2020-01-02～2021-12-30, n=488）：mean QLIKE CodiffAR=0.2203 為最低（優於 HARQ 0.2245, HAR 0.2444），但 DM vs HAR t=-1.319(p=0.188)、vs HARQ t=-0.576(p=0.565)，Holm校正後 p 皆>0.87，零 strict win。Codex review verdict=CONDITIONAL_PASS。安全結論：TAIFEX日盤RV確實rough且非高斯，但本檢定未發現alpha-stable/codifference對HAR/HARQ有可證明的預測增益。",
+    "evidence": ["experiments/k1597/README.md", "experiments/k1597/k1597_results.json", "experiments/k1597/codex_review.md"],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1630",
+    "k_id": "K1630",
+    "category": "market_context",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1630 [DOCUMENTED_NEGATIVE]：檢驗『Sell in May / Halloween 效應』在近15年（2011-2026）是否仍成立，對照全樣本。S&P500全樣本(1928-2026, N=1181月)：冬夏差β=+0.404pp/月, HAC p=0.141（不顯著）；近15年(N=185)：β=+0.235pp/月, p=0.669（不顯著），Sharpe輸buy-and-hold（0.68 vs 0.90）。TAIEX全樣本(1997-2026, N=347月)：β=+2.089pp/月, HAC p=0.0049（顯著，bootstrap 95%CI[0.57,3.67]不含0）；但近15年(N=186)：β=+1.063pp/月, p=0.147（不顯著，CI[-0.44,2.45]含0）。結論：美股Halloween效應近百年皆未達5%顯著，近15年幾乎消失；台股歷史上曾強且顯著，但近15年效應減半且轉為不顯著，與McLean & Pontiff(2016)公開後anomaly衰退的框架一致。誠實但保守：台股點估計仍為正，樣本power有限（N≈186），不能說『效應已被證明為零』。",
+    "evidence": ["experiments/k1630/README.md", "experiments/k1630/k1630_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1698",
+    "k_id": "K1698",
+    "category": "vol_prediction",
+    "verdict": "FAIL",
+    "content": "K1698 [FAIL/H2_REJECTED]：K1684 因方法論缺陷被 BLOCK 後的合規重跑，測 K850/K854『HAR QLIKE大勝 GJR + VaR大敗』敘事是否成立，用重建的 gap-complete aligned RV（單一active合約、13:30(D-1)→13:30(D)視窗、108個roll日、0個anchor缺失）。事前寫死gate：腿1要求 aligned target(0050 r²) 上 HAR vs robust GJR(120-start multistart) QLIKE DM t<-3。實際結果：HAR自家RV target上 t=-2.06(p=0.040，未過原-5.25的t)；aligned target上 t=+1.469(p=0.142, n=436)——方向反而是GJR較優，無顯著差異。GATE_VERDICT='H2_REJECTED'（腿1未過guardrail，命題終結），改走FRL/Journal of Forecasting方法論短文而非完整IJF論文。Bridge run完全復現K1684/K854的舊世界（own-target t=-5.25，因子1.354/1.349/1.204），確認差異全部來自RV建構本身。2026-07-13 primary-path Codex review PASS。",
+    "evidence": ["experiments/k1698/README.md", "experiments/k1698/k1698_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k825",
+    "k_id": "K825",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K825 [NULL，README為空白stub需人工補]：README全部欄位僅『待補充』，但results.json含完整回測。SPY GJR-GARCH(1,1) expanding window, OOS 2023-01-01～2024-12-31(n=502)，比較3種conformal VaR校正法(C1 naive/C2 proxy-robust QLIKE-based/C3 exchangeability-guard split conformal)對3個baseline(Normal/Student-t/HistSim)。1%層級：C2_Proxy_Robust 0違規(kupiec p=0.0015, FAIL——過度保守)；C1/C3 6違規(trinity PASS, green)；DM檢定C2 vs baselines t=6.06~7.27(harvey_pass=true，但方向是baseline贏，C2輸)；C1/C3 vs baselines皆|t|<1(harvey_pass=false，無顯著差異)。Exchangeability runs test 10/10 exchangeable(avg p=0.493)。結論：本地數據顯示無conformal方法在Harvey門檻下顯著贏過baseline，C2甚至顯著輸。",
+    "evidence": ["experiments/k825/README.md", "experiments/k825/k825_conformal_var_proxy_results.json"],
+    "confidence": 0.4,
+    "needs_human": true,
+    "gap": "README 全部欄位為『待補充』空白 stub，未寫任何 verdict/interpretation；results.json 本身也沒有頂層 verdict 欄位（只有逐 cell 的 kupiec/christoffersen/trinity_pass 與 dm_tests）。content 是稽核 agent 從裸數字直接推導的暫定 NULL，非原作者聲明的正式結論。需人工確認原始設計預期、是否要補寫 README，才能定案要不要以 PASS/NULL/CONDITIONAL_PASS 記錄。"
+  },
+  {
+    "experiment": "experiments/k840",
+    "k_id": "K840",
+    "category": "market_context",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K840 [DOCUMENTED_NEGATIVE]：README為空白stub，但results.json含完整結論欄位。SPY+^VIX日頻2005-01-05～2024-12-31(n=5031)，OOS 2023-01-01～2024-12-31(n=502)。測試VIX_Change/Momentum/Mean_Reversion/Combined四個簡單方向訊號(皆signal.shift(1))能否打敗buy-and-hold。OOS表現：BH_SPY Sharpe=1.85(年化報酬23.7%)遠優於所有訊號(VIX_Change Sharpe=1.17、Momentum=0.73、Mean_Rev=0.79、Combined=0.94)。DM檢定 vs BH：Momentum t=-3.09(p=0.0021,harvey顯著)、Mean_Rev t=-3.77(p=0.0002,harvey顯著)、Combined t=-3.17(p=0.0016,harvey顯著)，皆顯著輸給buy-and-hold；VIX_Change t=-2.33未達harvey門檻。命中率全樣本皆貼近50%(49.7%-50.9%)。results.json明確結論：'emh_holds':true，驗證K818 SSVS null結果——SPY日頻報酬方向無法用標準訊號經濟可行地預測，符合EMH。",
+    "evidence": ["experiments/k840/README.md", "experiments/k840/k840_return_prediction_pipeline_results.json"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  }
+]

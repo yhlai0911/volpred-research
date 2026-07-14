@@ -1,0 +1,156 @@
+[
+  {
+    "experiment": "experiments/k1266",
+    "k_id": "K1266",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1266 [NULL]: 多變量 rough Bergomi 波動率模型（模擬 arXiv:2412.14353 簡化版）在 SPY/QQQ/IWM 三資產 panel 上，全面輸給 DCC-GARCH(1,1) baseline。資料源 yfinance，OOS 期間 2019-01-02 至 2026-04-29（n=1,841 交易日，IS 2010-01-05至2018-12-31 n=2,263）。多變量 QLIKE：DCC-GARCH -26.04 vs multivariate rough vol -23.54，相對變差 9.58%；DM-HLN t=+13.90（p<0.001，DCC 顯著勝出），3 個子期間 0/3 rough vol 勝出。逐資產 QLIKE DCC 全勝，優勢 27%-32%（SPY 1.552 vs 2.048、QQQ 1.513 vs 1.814、IWM 1.393 vs 1.686）。日頻 Hurst 估計 SPY/QQQ≈0.015、IWM≈0.10（接近雜訊，非文獻 5 分鐘 RV 之 H≈0.10），顯示日頻下 rough vol regime 難以觀測。這是本 repo 第 8 個 rough/frontier-NN ceiling failure。Seed=42，全 closed-form 無 MC，lookahead 明確以 shift 前置資訊控制。",
+    "evidence": ["experiments/k1266/k1266_results.json", "experiments/k1266/README.md"],
+    "confidence": 0.9,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/K1330",
+    "k_id": "K1330",
+    "category": "research_methodology",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1330 [治理性結案，非新實驗；enum 無「SUPERSEDED」選項故標 INCONCLUSIVE]: 本 K 為美元指數（DXY/UUP）作為跨資產 vol 條件變數題目的去重結案，未產生新統計結果，正式判定 SUPERSEDED_BY_K1439。理由：K1439（已於 2026-06-14 重現驗證）已用更嚴格方法（HAC/Newey-West 修正 21 日 RV overlap 自相關）回答同一問題。K1439 canonical findings：樣本 2010-01-04 至 2026-06-05（N=4,131 日），資產 EEM/GLD/DBC/USO/DBB；naive Welch 下 4/5 資產在強美元 regime 下 RV 較高，但 HAC+Bonferroni 校正後僅 USO 在 level 與 trend 兩種 regime 定義下都穩健顯著（K1439 verdict=CONDITIONAL_PASS）；GLD 為 NULL。K878 已否定「美元直接預測單一股市波動」路徑。知識庫用途：此題目不應再派新實驗重跑，未來遇到類似 backlog item 應直接引用 K1439 canonical 版本，不需重跑 K1330。",
+    "evidence": ["experiments/K1330/K1330_results.json", "experiments/K1330/README.md"],
+    "confidence": 0.65,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1356",
+    "k_id": "K1356",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1356 [NULL]: 免費 GDELT DOC API 每日新聞注意力代理（oil-market 關鍵字文章數）對原油/能源類 ETF 隔日已實現波動率預測沒有穩健增量資訊。資料源 yfinance (CL=F, USO, XLE, XOP) + GDELT DOC 2.0 TimelineVolRaw + EIA WCESTUS1 週度庫存，樣本 2017-01-01 起（GDELT公開歷史窗口），OOS 從 2020-01-01，1,626 個 pooled 日期。Baseline HAR_INV（HAR range-variance + EIA 庫存變化控制）vs 挑戰者 HAR_INV_NEWS（+滯後 GDELT news z-score）：date-clustered pooled QLIKE 損失差 -0.000571，DM t=-0.744，p=0.457（不顯著）。絕對新聞衝擊變體 HAR_INV_NEWS_ABS 損失差 +0.002907，DM t=+1.070，p=0.285（方向更差）。逐資產 QLIKE 改善：CL=F +0.10%、USO +0.95%、XLE -0.53%、XOP -0.26%，僅 2/4 資產改善，未達預先設定 3/4 廣度門檻。lookahead 明確以 news_signal.shift(1)、inventory_signal.shift(1) 控制，seed=42。結論：免費 GDELT 文章數注意力代理不能支持超越 HAR+庫存控制的穩健 OOS 日頻能源波動率資訊宣稱，也不能驗證原始 FAJ Reuters 全文主題模型結果。",
+    "evidence": ["experiments/k1356/K1356_results.json", "experiments/k1356/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/K1418_concentration_dispersion_2026",
+    "k_id": "K1418",
+    "category": "market_context",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1418（此 K 為 trending_repost evidence package，非本知識庫另一個 k1418 目錄）[CONDITIONAL_PASS — 描述性 evidence package，非預測模型]: S&P 500 前五大成分股（AAPL/MSFT/NVDA/AMZN/GOOG）集中度與指數/個股已實現波動率缺口的描述性量化。資料源 yfinance（SPY + 5 檔個股，2020-01-01至2026-06-04，auto_adjust=True）+ SPDR SPY Fact Sheet 歷史 top-5 權重估算。核心數字：Top-5 權重從 2020 年 17.8% 升至 2026 年 32.8%（+15.0pp）；2024-2026 平均 SPY RV 13.87% vs 平均 Top-5 個股 RV 30.21%，vol gap 16.35pp（2020-2024 期間 gap 16.64pp，相近）；最新一日（2026-06-03）vol gap 擴大至 20.25pp。個股 RV（2024-2026 均值）：NVDA 45.84%、AMZN 29.56%、GOOG 28.53%、AAPL 24.78%、MSFT 22.36%。重要限制（研究誠實已標注）：無法取得付費期權隱含波動率數據，全程以 21 日滾動已實現波動率代理 IV；集中度為 SPDR Fact Sheet 估算值非精確歷史數據；本實驗僅為結構描述，不構成 dispersion trade 可獲利的證據。Codex review：CONDITIONAL_PASS（修正「超過三分之一」措辭與變異數分解公式 notation 後過關）；anti_ai_gate PASS。",
+    "evidence": ["experiments/K1418_concentration_dispersion_2026/K1418_results.json", "experiments/K1418_concentration_dispersion_2026/README.md"],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1448",
+    "k_id": "K1448",
+    "category": "cross_asset",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1448 [CONDITIONAL_PASS]: TIP/IEF 與 TIP/TLT 相對表現作為通膨預期 regime proxy，檢驗對 SPY/IEF/TLT 未來 21 日已實現波動率與股債相關的影響。資料源 yfinance（TIP, IEF, TLT, SPY），期間 2010-01-04至2026-06-09，n=4,133 聯合觀測日。訊號 = log(TIP/asset).diff(63).shift(1)（63日≈一季，shift(1)避免 lookahead）。HAC/Newey-West（maxlags=21）推論 + Bonferroni/BH 多重比較校正（2 proxies × 5 outcomes = 10 個主檢定）。結果：TIP/IEF regime 對 forward RV 效果弱（SPY ΔRV=-2.67pp, p=0.011；IEF/TLT 不顯著）；TIP/TLT 對 forward RV 全不顯著（SPY p=0.266、IEF p=0.270、TLT p=0.780），但對股債 forward correlation 效果強且通過 Bonferroni：SPY-IEF Δcorr=+0.209（p=1.91e-06）、SPY-TLT Δcorr=+0.202（p=1.91e-06）。10 個主檢定中僅 2/10（皆為 TIP/TLT→股債相關）在 Bonferroni alpha=0.005 下存活。結論限定為：通膨預期 proxy 對「股債避險品質」比對「短期波動率水準」更有資訊——rising inflation-expectation regime 主要訊號是股債去負相關化，而非全面高波動。",
+    "evidence": ["experiments/k1448/k1448_results.json", "experiments/k1448/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1478",
+    "k_id": "K1478",
+    "category": "model_behavior",
+    "verdict": "NULL",
+    "content": "K1478 [NULL — 主假說；次要訊號需後續驗證]: 檢驗槓桿 ETF（TQQQ k=+3, SQQQ k=-3, SSO k=+2）機械再平衡壓力代理是否放大 QQQ 最後一小時波動或隔夜延續。資料源 yfinance 1h bar，QQQ/TQQQ/SQQQ/SSO，期間 2023-07-17至2026-06-09，719 個有效交易日，seed=42。壓力代理 = Σ|k_i²-k_i|×|r_QQQ,t|×LETF同日交易美元量（因無歷史 AUM 資料，誠實標注為 proxy 非真實 rebalancing ticket）。描述性比較：高壓力日（前25%）vs 其餘：same_sign_last_hour 0.095% vs 0.018%（Welch p=0.0043）、last_hour_range_var 1.13e-05 vs 4.77e-06（p=3.1e-05）。但主迴歸控制當日絕對報酬後，尾盤放大效應消失：same_sign_last_hour ~ log_pressure + |daily_ret|，β_pressure t=-0.19, p=0.852；last_hour_range_var 迴歸 β_pressure t=-0.25, p=0.801。即高壓力日尾盤更躁動主要來自「那天本來就是大波動日」，非 LETF 額外放大的獨立效應。次要發現：隔夜延續 overnight_cont ~ log_pressure + |daily_ret| 有較弱但顯著關聯，β_pressure t=2.48, p=0.0133（但不足以證明因果，可能是共同新聞流因子）。整體 verdict（逐字取自 results.json）：NULL_PRIMARY_EFFECT（same_day_tail_amplification_supported=false, overnight_continuation_signal_supported=true）。",
+    "evidence": ["experiments/k1478/k1478_results.json", "experiments/k1478/README.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1493",
+    "k_id": "K1493",
+    "category": "vt_strategy",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1493 [CONDITIONAL_PASS — 混合結果，results.json verdict=MIXED_EDGE_EROSION]: 檢驗 VRP（變異數風險溢酬）下降論述是否對應到短波策略經濟優勢消失。資料源 yfinance adjusted close（SPY, ^VIX, SVXY, VIXY, VXX, BIL），VRP proxy 樣本 2006-01-03至2026（pre: 2006-2017 n=3,020；post: 2018-2026 n=2,088，forward RV21 需完整視窗）。VRP_t = (VIX_t/100)² - forward_RV21_t（事後診斷，非可交易訊號）。結果：(1) VRP 均值下降但不顯著——pre 均值 0.00873（NW t=1.97）、post 均值 0.00711（NW t=1.18），post-pre 差 -0.00162，Welch t=-0.83, p=0.407，不能拒絕均值相等。(2) 實際短波產品經濟優勢明顯惡化——SVXY 年化 Sharpe 從 2011-2017 的 0.81 降至 2018-2026 的 -0.25，MDD 從 -67.9% 惡化至 -95.2%，worst-day 從 -26.4% 惡化至 -82.9%。DM test（negative-return loss vs SPY/BIL）：pre-2018 經濟上強但未達 Harvey |t|>3（vs SPY t=-1.76, p=0.078）；post-2018 不再優於 SPY 或 BIL。結論：免費日頻公開資料不能證明底層 VRP 本身已消失，但可交易短波產品的 edge 確實明顯變差，機制部分來自尾部虧損與產品槓桿設計而非純 VRP 均值下降。Codex review：PASS with caveats（無高嚴重性問題，但需標明 VRP proxy 為 ex-post 診斷非交易訊號、SVXY 混合多種風險因子）。",
+    "evidence": ["experiments/k1493/k1493_results.json", "experiments/k1493/README.md", "experiments/k1493/reviews/codex_review_20260614.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1536",
+    "k_id": "K1536",
+    "category": "cross_asset",
+    "verdict": "NULL",
+    "content": "K1536 [NULL — results.json verdict=NULL_HIGHER_RV_REJECTED]: 高生物多樣性足跡商品 ETF/ETN 代理（CORN/SOYB/WEAT/CANE/JO/WOOD/DBA）相對控制組商品（GLD/SLV/CPER/USO/UNG/PDBC）的已實現波動率、下行半變異數與自然資本政策事件後定價反應檢驗，全樣本結果拒絕「高生物多樣性足跡商品波動較高」假說。資料源 yfinance adjusted close，2018-01-03至2026-06-22，2,128 個聯集交易日，seed=42。全樣本 HAC(21) 檢定：RV 高減控制平均差 -0.0754，HAC t=-7.51，p=5.78e-14；下行半變異數差 -0.0449，HAC t=-6.32，p=2.57e-10（皆與假說方向相反且高度顯著）。事件研究（Kunming宣言/Kunming-Montreal GBF/EU森林砍伐法規/TNFD最終建議/EU自然恢復法規，6個事件，bootstrap 5,000 draws）方向與假說一致但檢定力低：log RV ratio +0.2426（bootstrap 95% CI [-0.1769, 0.6539], p=0.283）、log downside ratio +0.3834（CI [-0.1786, 0.9323], p=0.177）、事件後-前異常累積報酬 +0.0029（CI [-0.0144, 0.0232], p=0.821），三者 CI 皆涵蓋 0。Codex review：PASS with limitations，確認 null 結果如實呈報、lookahead 控制得當（pre-window [-20,-1] 早於事件日）。結論：公開 ETF 代理不支持生物多樣性足跡商品普遍波動率較高的宣稱，事件窗口方向性正但統計上不夠穩健。",
+    "evidence": ["experiments/k1536/k1536_results.json", "experiments/k1536/README.md", "experiments/k1536/codex_review.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1591",
+    "k_id": "K1591",
+    "category": "model_behavior",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1591 [INCONCLUSIVE — results.json status=directionally_supportive 但未達顯著]: 檢驗能否用純滯後外部工具變數（VIX壓力門檻、DXY 63日趨勢、10Y減13週殖利率曲線）重建 GLD 槓桿方向（news impact asymmetry）的 regime-dependent 版本，取代先前被降級的無條件宣稱。資料：GLD/VIX 用論文既有 pin 住的快照，DXY/10Y/13週殖利率用 yfinance，有效樣本 2010-04-07至2026-06-26（n=4,091），train 至2018-12-31，holdout 2019-2026起。Regime 分類皆滯後一日。Holdout 2019-2026 主迴歸（GLD r² 對正負滯後報酬的不對稱係數 gamma_diff=beta_neg-beta_pos，HAC(5)）：safe_haven_stress regime（n=166）gamma_diff=-0.0870, HAC t=-0.66（方向反轉但不顯著）；liquidation_stress（n=239）gamma_diff=+0.0428, HAC t=0.27（方向為標準但不顯著）；全 holdout gamma_diff=+0.0509, HAC t=0.29（無穩健無條件效應）。1,000 次 10 日區塊 bootstrap：safe-haven減liquidation對比中位數 -0.1385，95% CI [-0.7105, 0.3940]（跨零），69.8% 抽樣為負。Rolling GJR-GARCH 次要診斷全期平均 gamma 為負（-0.0545，93.3%為負），但 ex-ante 壓力窗口樣本極少（僅4個safe-haven、3個liquidation窗口），不能當作 regime-level 證明。結論：僅支持謹慎的 regime-dependent 論述（安全避風港壓力日傾向反轉的新聞衝擊），不能恢復無條件的黃金槓桿反轉宣稱；train 期 liquidation stress 僅27個觀測，需更多穩健性檢驗（黃金期貨或機構流量資料）才能成為 JBF 論文核心貢獻。",
+    "evidence": ["experiments/k1591/k1591_results.json", "experiments/k1591/README.md"],
+    "confidence": 0.7,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1601",
+    "k_id": "K1601",
+    "category": "vol_prediction",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1601 [INCONCLUSIVE — results.json verdict=DIRECTIONAL_ONLY]: 檢驗預測分歧（agreed vs disagreed uncertainty）資訊是否能在 VIX 之外額外預測 SPY 未來波動率或左尾風險。資料：SPY（yfinance）+ VIX（FRED VIXCLS）+ JLN 總體不確定性指數（FRED JLNUM3M，2個月已知滯後）+ Philadelphia Fed SPF RGDP 分歧度（下一季開始已知），全 shift(1)，最終面板 8,137 日（1994-01-28至2026-05-29）。Regime 診斷（高 VIX 條件下）：agreed高不確定 forward vol 18.50% vs disagreed 23.96%，差-5.45個百分點，HAC t=-2.97；高 JLN 條件下 agreed 13.89% vs disagreed 22.33%，差-8.44個百分點，HAC t=-4.71（符號與「agreed uncertainty較差」的素樸敘事相反）。但 OOS 預測 21日已實現變異數（expanding OLS, Patton QLIKE, DM h=21, Harvey門檻|t|>3, MCS alpha=0.10 n_boot=1000）未通過門檻：最佳增強模型 VIX_SPF_JLN 相對 VIX baseline 僅改善 QLIKE +0.84%，DM t=-0.38，遠低於 Harvey 門檻；VIX_SPF 反而惡化-1.19%（t=+0.72）；JLN_SPF 大幅惡化-68.57%（t=+4.76，未入 MCS）。OOS 樣本7,116筆（1998-02-13至2026-05-29）。Codex review：CONDITIONAL_PASS。結論：SPF 分歧度有描述性 regime 資訊（識別哪些高不確定狀態更動盪），但此 pilot 未展現超越 VIX 的統計上可辯護增量預測力。",
+    "evidence": ["experiments/k1601/K1601_results.json", "experiments/k1601/README.md", "experiments/k1601/codex_review.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/K1649",
+    "k_id": "K1649",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1649 [NULL — results.json verdict=NULL_NO_EXPECTILE_EDGE_VS_LINEARQR]: 檢驗 expectile 型風險測度（ALSExpectile-VaR / CARE-SAV）是否在 TLT/HYG 日報酬 VaR backtest 中穩健打敗傳統 quantile-VaR baseline（LinearQR）。資料源 Yahoo Finance adjusted close，2010-01-04至2026-07-02，OOS 從2015-01-01（common obs=2,891/asset-alpha），quarterly expanding refit，VaR alpha=5%/1%，seed=42，Harvey門檻|t|>3.0。全部特徵與 HS 皆用 shift(1)，refit 僅用 df[df.index<ts]。DM test（expectile vs LinearQR，4個asset-alpha組合共8個檢定）：TLT 5% ALSExpectile t=-0.865(p=0.387)、CARE-SAV t=-1.485(p=0.138)；TLT 1% ALSExpectile t=+1.911(p=0.056)、CARE-SAV t=+1.111(p=0.267)；HYG 5% ALSExpectile t=+0.539(p=0.590)、CARE-SAV t=+0.858(p=0.391)；HYG 1% ALSExpectile t=-0.097(p=0.922)、CARE-SAV t=-0.436(p=0.663)。全部8個DM檢定皆未達Harvey |t|>3.0 門檻（harvey_pass全為false）。Mean pinball loss 上 expectile 類模型在4個asset-alpha組合中有4個優於LinearQR（如TLT 5% CARE-SAV 0.000958 vs LinearQR 0.000977），也普遍優於HS250 baseline，但這不是主要成功標準。結論：expectile/CARE 提供理論上吸引人、calibration可控的替代估計法，但在此資料集上不能宣稱穩健打敗 quantile-VaR（LinearQR）。",
+    "evidence": ["experiments/K1649/K1649_results.json", "experiments/K1649/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1703",
+    "k_id": "K1703",
+    "category": "market_context",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1703 [CONDITIONAL_PASS — 部分成立]: 檢驗美股月選擇權結算週「波動壓抑」與結算後「波動釋放」兩個常見市場說法，拆開分別驗證。資料源 SPY 日線 yfinance（auto_adjust=True），1993-02-01至2026-07-13，8,418交易日，1,744個可用週（剔除短週<3日），seed=42，週級 block bootstrap N=10,000。結果：週級別「壓抑」不成立——結算週年化RV 14.37% vs 一般週15.30%，均值差-0.93pp，95% CI [-2.28,+0.49]，p=0.183（不顯著）。「釋放」完全不成立——結算後一週14.57%，較一般週差-0.73pp（p=0.266），較結算週本身差+0.20pp（p=0.802，無差異）。但日級別壓抑顯著成立：結算日當天平均絕對報酬0.683%（n=393）顯著低於其他星期五0.799%（n=1,292），差-0.116pp，95% CI [-0.197,-0.032]，p=0.009。分年代穩健性有限：1993-1999、2010-2019、2020-2026三個年代結算週RV皆較低，但2000-2009翻正（+0.20pp）。結論：市場傳說「一半是真的（結算日當天確實較平靜），一半是假的（週級別壓抑與結算後釋放皆不成立）」，方向性訊號不足以支撐週級別交易決策。",
+    "evidence": ["experiments/k1703/k1703_results.json", "experiments/k1703/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k834",
+    "k_id": "K834",
+    "category": "cross_asset",
+    "verdict": "NULL",
+    "content": "K834（README.md 為空模板「待補充」，結論完全依據 k834_iv_connectedness_results.json 逐字提取）[NULL]: 檢驗跨資產隱含波動連結度（Diebold-Yilmaz 2012 TCI，基於 VIX/VXN/GVZ/OVX 滾動 VAR(5)→FEVD(10)）是否可作為系統性風險 regime filter，用於 VT 策略調節。資料源 yfinance，2008-06-03至2025-12-30，n_obs_merged=4,170，VAR全部成功收斂（n_var_fail=0）。TCI統計：均值36.27，std 4.40。預測力（Spearman）：TCI對未來5日報酬 r=0.0437(p=0.0048)、對未來22日報酬 r=0.1044(p=1.6e-11)、對VIX水準 r=0.2957(p=6.0e-85)、對未來5日波動 r=0.1682(p=8.1e-28)。關鍵：控制VIX後偏相關 partial_tci_vs_fwd_5d_return_given_vix r=-0.0032(p=0.838)——TCI對未來報酬幾乎無增量資訊；partial_tci_vs_fwd_5d_vol_given_vix r=-0.0716(p=3.7e-6)雖顯著但方向為負、量級小。OOS策略比較（1,258日）：S2_TCI_VT（TCI條件VT）年化Sharpe 0.897 vs S1_12VIX（簡單12/VIX）Sharpe 0.895，差異0.002，DM test t=-0.679(p=0.497)不顯著；S3_FROM_SPY（方向性溢出VT）Sharpe 1.000 vs S1 DM t=-2.001(p=0.046，未達Harvey）。Cross-OOS 5個2年期子期間：S2對Buy&Hold SPY僅2/5勝出。結論（逐字取自results.json conclusions欄位）：TCI對5日報酬預測力可忽略、TCI對VIX之外沒有增量資訊、TCI-conditional VT策略與簡單12/VIX策略無統計顯著差異。",
+    "evidence": ["experiments/k834/k834_iv_connectedness_results.json"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k845",
+    "k_id": "K845",
+    "category": "vt_strategy",
+    "verdict": "FAIL",
+    "content": "K845（README.md 為空模板「待補充」，結論完全依據 k845_tx_vt_listing_eval_results.json 逐字提取）[FAIL]: 台指期貨（TX Futures）8.63/VIX volatility-targeting 策略之上架評估，5項上架關卡（listing evaluation gates）之 Test 1 未通過。資料源：TAIFEX TX tick資料 + yfinance（^VIX, 0050.TW, SPY, GLD），期間2017-05-16至2026-04-02，n=2,158交易日，交易成本0.0001，VIX anchor=8.63。Test 1（同期比較）FAIL：同期（2023-01-04至2026-04-02，n=778）TX VT策略Sharpe=1.757，低於現有已上架策略同期Sharpe中位數2.283（14個現有策略中位數，範圍1.197至3.316）。Test 2（cross-OOS）PASS：5個2年期子期間中，TX VT對Buy&Hold 50/50 SPY/GLD勝出4/5期間（僅2023H2-2025H1輸，Sharpe 1.075 vs 2.640）。Test 4（敏感度）PASS：VIX anchor在±20%範圍內Sharpe僅變動0.24%（8.63基準1.476，最差案例10.36時1.473）。Test 5（MDD）PASS：全期MDD -10.66%，同期MDD -10.66%（一致）。DM test：TX VT vs BH50/50 t=1.362(p=0.173，未達Harvey)；TX VT vs 0050 VT t=0.092(p=0.927)。全期指標：年化報酬11.69%、年化波動7.92%、Sharpe 1.476、MDD -10.66%、Calmar 1.130。最終結論（逐字取自results.json）：「TX VT strategy FAILS listing: Test 1 (Sharpe 1.757 < median 2.283).」——因未通過與現有已上架策略同期比較關卡，此策略不應上架。限制：TX期貨不含股利（vs 0050.TW約2-3%/年缺口）、未明確建模轉倉成本（約12次/年）、夜盤流動性僅日盤約57%、BH50/50 benchmark用USD報酬未計入台幣匯率效果。",
+    "evidence": ["experiments/k845/k845_tx_vt_listing_eval_results.json"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  }
+]

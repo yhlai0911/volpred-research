@@ -1,0 +1,145 @@
+[
+  {
+    "experiment": "k1319",
+    "k_id": "K1319",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1319 [NULL]：以SPY日頻r²（squared log return）為proxy，測試HAR加入DWT(db4,4-level)wavelet係數特徵（HAR-W）能否改善波動預測。資料源 paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv，IS 2010-01-01~2019-12-31，OOS 2020-01-01~2026-05-20，N=1613。OOS結果：HAR QLIKE=-8.175（最佳）、MSE=3.18e-7；HAR-W QLIKE=-7.974（惡化2.46%）、MSE=7.03e-7（惡化121%）。DM test（Harvey-Leybourne-Newbold 1997校正）HAR-W vs HAR：t=+6.29，p<0.001，HAR-W顯著更差。根因：日頻r²高噪音，wavelet energy特徵放大噪音而非萃取多尺度結構；HAR滾動平均本身即為有效低通濾波。5-min RV版本延至2026 Q2驗證。",
+    "evidence": ["experiments/k1319/k1319_results.json", "experiments/k1319/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1348",
+    "k_id": "K1348",
+    "category": "market_context",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1348 [CONDITIONAL_PASS]：檢定ETF(SPY/IVV/VTI/QQQ)季末heartbeat trade是否對成分股造成微結構vol pressure。資料：yfinance日頻，2014-01-01~2026-06-17，panel N=59,489。Volume channel：2/4 ETF顯著擴張（IVV t=+3.46,p=0.0006；VTI t=+3.24,p=0.0013），panel OLS(HC1,asset/year FE)係數+0.0417,t=+5.84。range_vol channel：0/4顯著，panel係數+0.00009,t=0.77(p=0.44)為NULL。c2c_rv panel係數-0.00006,t=-4.34，方向相反（季末RV反而下降）。結論：季末成交量擴張存在，但未外溢至日頻realized vol——tax-driven flow走in-kind exchange機制，未造成cash market vol impact。",
+    "evidence": ["experiments/k1348/k1348_results.json", "experiments/k1348/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1406",
+    "k_id": "K1406",
+    "category": "strategy",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1406 [CONDITIONAL_PASS]：以conditional block bootstrap（block=20日,circular,seed=20260530）驗證兩投資時機命題。資料：SPY(2005-01-03~2026-05-29)、0050.TW(2009-01-02~2026-05-28)，yfinance。命題A（Lump Sum總報酬勝、IRR資金效率近似相等）：confirmed，Lump Sum整體終值勝率SPY 1y/3y及0050 1y/3y分別74.1%/73.4%/74.1%/74.7%；四cell IRR年化中位差皆在±0.8pp內（整體約+0.03pp）。命題B（囤現金等回檔輸持續投入）：confirmed，10%回檔門檻下dip-buying勝率僅41-43%(<50%)，平均閒置現金時間20-62%，短horizon下最高約30%路徑「等不到回檔」。Codex review verdict=CONDITIONAL_PASS，caveat為dip-buying訊號t-1觀察、t日收盤價成交之執行時點假設。",
+    "evidence": ["experiments/k1406/k1406_results.json", "experiments/k1406/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1433",
+    "k_id": "K1433",
+    "category": "vol_prediction",
+    "verdict": "PASS",
+    "content": "K1433 [PASS，README無明文verdict字，由文中pre-registered success criteria比對結果數字推定]：測試BTC-USD(2020-01-31~2026-04-13,N=2265,Parkinson variance proxy)HAR加入weekend/weekday calendar dummy能否改善次日波動OOS預測。IS 2020-01-31~2023-12-31,OOS 2024-01-01~2026-04-13(N=834,expanding window,h=1)。In-sample：is_weekend係數-0.975,t=-18.55；dow_sat係數-1.593,t=-19.68（皆p<1e-70），weekend/weekday效應極顯著。OOS QLIKE：HAR=-6.237,HAR+weekend=-6.352,HAR+weekday=-6.387（皆優於baseline）。DM test：HAR vs HAR+weekend t=4.00,p=0.000068；HAR vs HAR+weekday t=4.08,p=0.000049，兩者皆滿足文中success criteria(|t|>2,p<0.05)。",
+    "evidence": ["experiments/k1433/k1433_results.json", "experiments/k1433/README.md"],
+    "confidence": 0.6,
+    "needs_human": true,
+    "gap": "README與results.json皆無明文『verdict』欄位或字樣，PASS是由main thread比對文中列出的success criteria(DM |t|>2, p<0.05)與OOS結果數字推定得出，非artifact逐字宣告。建議人工確認是否正式核可此PASS措辭與經濟顯著性（calendar dummy改善幅度是否具實務意義）後再寫入knowledge.json。"
+  },
+  {
+    "experiment": "k1463_free_attention_sentiment_vol",
+    "k_id": "K1463",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1463 [NULL（README原文verdict=MOSTLY_NULL_AFTER_VIX，部分DOCUMENTED_NEGATIVE）]：檢定免費attention/sentiment proxy(CNN Fear&Greed、AAII、USEPU、UMCSENT)在HAR+VIX之後是否仍有增量OOS預測力。Target=SPY日頻Parkinson variance，共同樣本2011-02-03~2023-12-29，train window=1000,refit=63日。HAR OOS QLIKE=0.5319→HAR+VIX=0.4504（VIX本身大幅有效）。加proxy後：+CNNFG=0.4481(DM t=0.41,p=0.679)、+AAII=0.4482(t=0.65,p=0.515)、+USEPU=0.4515(t=-0.30,p=0.762)，皆不顯著。+UMCSENT=0.5051(t=-3.73,p=0.0002)與+ALL=0.4848(t=-2.43,p=0.015)顯著變差。結論：VIX已吃掉多數前瞻風險資訊，免費sentiment proxy無穩健OOS增量，堆疊過多反而有害。",
+    "evidence": ["experiments/k1463_free_attention_sentiment_vol/k1463_results.json", "experiments/k1463_free_attention_sentiment_vol/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1484",
+    "k_id": "K1484",
+    "category": "data_property",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1484 [INCONCLUSIVE，README原文verdict=BLOCKED_ON_DATA，可行性稽核非計算實驗]：評估「颱風登陸與台股波動」題目在目前本地資料下能否誠實完成。稽核結果：本地僅有storage/macro/yf_0050.TW.csv，缺canonical TAIEX/TXF市場層級序列；repo內無颱風假事件表（登陸日/警報日/停市日/復市日）；亦無一般連假對照表以區分颱風假與一般長假機制。三項阻塞條件皆為資料建設缺口而非方法問題。需補建颱風假事件表(event_date/landfall_date/market_closed/reopen_date)、TAIEX/TXF價格快取、holiday control table三者後才能解鎖復市日gap/RV檢定。",
+    "evidence": ["experiments/k1484/k1484_results.json", "experiments/k1484/README.md"],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1517_taiex_overnight_intraday_vrp",
+    "k_id": "K1517",
+    "category": "cross_asset",
+    "verdict": "NULL",
+    "content": "K1517 [NULL]：檢定TAIEX(^TWII)是否如EFA呈現overnight variance dominance，並測lagged overnight pseudo-VRP能否預測次日session variance。資料storage/macro/yf_TWII.csv，OOS 2007-01-03~2026-03-17(N=4691)，方法與parent研究(SPY/QQQ/IWM/EFA,verdict NULL)完全一致(GARCH(1,1)pseudo-VRP,HAC-5 lag,1000-rep moving-block bootstrap,seed=42)。TAIEX overnight share=0.420(95% CI[0.378,0.460])，CI上界未達0.5，不具overnight dominance(SPY 0.426/QQQ 0.379/IWM 0.397皆同，僅EFA 0.646具overnight優勢)。Predictive regression：overnight pseudo-VRP係數-0.068,HAC t=-2.68(方向錯誤且未達pre-specified gate t>3)。兩項pre-specified gate皆未通過，跨市場結論：GARCH pseudo-VRP框架在SPY/QQQ/IWM/TAIEX上均為NULL。",
+    "evidence": ["experiments/k1517_taiex_overnight_intraday_vrp/k1517_taiex_overnight_intraday_vrp_results.json", "experiments/k1517_taiex_overnight_intraday_vrp/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1584",
+    "k_id": "K1584",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1584 [NULL]：以TAIFEX TX active-contract日頻(2017-05-16~2026-06-29,N=2219,OOS=1697,min training=500)測試HAR加入co-jump/HAR-CJ jump軸能否改善次日RV預測。模型HAR(baseline)、HAR_C、HAR_RVJ、HAR_CJ、HAR_CJ_cluster，Patton QLIKE+DM test(h=1)+moving-block bootstrap(B=1000,block=5,seed=42)。結果：HAR mean QLIKE=0.168677為最佳；HAR_CJ_cluster=0.170121，QLIKE惡化0.856%，DM t=1.704,p=0.089，方向為候選模型loss更高。所有變體皆未通過strong gate(candidate QLIKE更低且DM t<-3)。附帶SPY/0050.TW同曆日co-jump診斷(N=98天,非同步時區,non-gateable)：co-jump天數39天(獨立假設期望值36.23)，permutation p=0.156，無顯著co-jump聚集證據。",
+    "evidence": ["experiments/k1584/k1584_results.json", "experiments/k1584/README.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1596",
+    "k_id": "K1596",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K1596 [NULL（README原文verdict=NULL_OR_NEGATIVE），Codex review verdict=CONDITIONAL_PASS]：測試Multiplicative Volatility Factor(MVF)-lite共同因子分解能否改善12檔ETF日頻次日變異數預測。資料experiments/k1552/data/prices.parquet，OOS 2016-01-01~2026-06-26(31,608 asset-days,每資產2634列)。模型含EWMA94/HAR_LogOLS/GJR_GARCH_Annual/CommonFactorOnly/MVF_StaticExposure/MVF_LogARExposure。Gate結果：MVF best mean-QLIKE資產數=0/12；MVF vs annual GJR-GARCH的strict Holm-adjusted wins=0；MVF family全部pairwise DM family的strict Holm losses=66，wins=25(多數僅贏弱的HAR_LogOLS)。annual GJR-GARCH穩定為12檔中最佳模型。結論：daily ETF squared-return proxy下MVF-lite未能將comovement轉換成校準較佳的one-step變異數預測。",
+    "evidence": ["experiments/k1596/k1596_results.json", "experiments/k1596/README.md", "experiments/k1596/codex_review.md"],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1625",
+    "k_id": "K1625",
+    "category": "vol_prediction",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1625 [INCONCLUSIVE，README原文verdict=MIXED_WEAK_SINGLE_CELL]：檢定Binance永續合約funding rate極端值能否預測BTC/ETH未來5日high-RV regime。資料：BTCUSDT(2019-09-10~2026-07-04,N=2490)、ETHUSDT(2019-11-28~2026-07-04,N=2411)，皆lag1日。Pre-specified gate要求≥2個h=5 high-RV regime cell達Harvey|t|>=3才算SIGNAL_CANDIDATE。結果：僅BTC funding z-score單一cell達標(coef+0.0682,HAC t=+3.79,p=0.00015)；ETH同項不顯著(t=+1.36,p=0.173)不能複製；positive-vs-negative funding asymmetry對比檢定亦不顯著(BTC t=-1.58,p=0.114)。僅1個cell達標，未達≥2 cell門檻，故僅作後續假說，非可用交易訊號。",
+    "evidence": ["experiments/k1625/k1625_results.json", "experiments/k1625/README.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k1697",
+    "k_id": "K1697",
+    "category": "research_methodology",
+    "verdict": "DOCUMENTED_NEGATIVE",
+    "content": "K1697 [DOCUMENTED_NEGATIVE，論文Table 2 rebind reconciliation實驗，非PASS/NULL假說檢定]：為paper taiwan-vt body_v3.tex Table 2 rolling-window(w=2000)列做calendar-aligned fresh-snapshot重跑，解除前作(paper2_taiwan_indiv_rolling_gamma)三個caveat(stale common_end/混用價格欄/single-start MLE)。14檔台股+SPY pinned yfinance snapshot，common_end=2026-07-09，每次估計101個seeded隨機起點(K1213 multistart規則，101/101起點收斂單一basin)。Reconciliation：把新snapshot截斷到前人端點、換回前人convention重估，四項檢查全部精確命中(如TWII simple returns端點2026-04-05：γ=0.2614/t=3.32對照值0.2614/3.32)。Headline結果：legacy渲染值TWII rolling γ=0.272,t=3.18無存活JSON、不可復現；K1697 canonical(adjclose,端點2026-07-09)重估為γ=0.198,t=1.86，跌出5%顯著門檻。0056.TW rolling γ=0.222為全場最高(高於TWII)，t=2.95顯著；個股rolling γ全數不顯著。",
+    "evidence": ["experiments/k1697/k1697_results.json", "experiments/k1697/README.md"],
+    "confidence": 0.6,
+    "needs_human": true,
+    "gap": "README與results.json皆無明文『verdict』欄位；本實驗性質為論文Table rebind reconciliation，數字(canonical γ/t值、reconciliation checks)皆有徵且可復現，但README明寫『rebind走向(a)/(b)由主線程裁決』，即是否/如何把此發現寫回paper body與knowledge.json的最終措辭尚待人工/主線程確認，故標記needs_human。"
+  },
+  {
+    "experiment": "k781",
+    "k_id": "K781",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K781 [NULL]：Multiplicative Volatility Factor(MVF,5參數:σ²=exp(f_t)×g_t)在SPY日頻r²(Patton 2011 proxy-robust)上是否優於GJR-GARCH。README為空白樣板，結論取自k781_mvf_results.json。資料yfinance，2007-01-04~2026-03-31，OOS 2009-12-24~2026-03-31(N_oos=4090,N_total=4840)。QLIKE排名：GJR-GARCH=1.536481(第1)、MVF=1.549047(第2)、AMEM-r2=1.571453、GARCH=1.581942、HAR-r2=1.658306(第5)。MVF vs GJR-GARCH DM檢定：DM=0.6942,p=0.4876,Harvey t=0.69，FAIL(未達顯著)。MCS(α=0.1,5000 boot)存活模型僅MVF與GJR-GARCH(p=0.4984)，HAR-r2/GARCH/AMEM-r2被剔除。結論(JSON原文)：MVF乘法分解(slow exp(f)×fast GARCH)未能改善標準GJR-GARCH。",
+    "evidence": ["experiments/k781/k781_mvf_results.json", "experiments/k781/README.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "k839",
+    "k_id": "K839",
+    "category": "vol_prediction",
+    "verdict": "NULL",
+    "content": "K839 [NULL]：Hierarchical Bayesian GJR-GARCH跨4資產(SPY/QQQ/GLD/0050.TW)共享先驗(hyperprior gamma~N(0.1169,0.1035)，源自MLE cross-section)是否優於獨立MLE/獨立Bayesian估計。README為空白樣板，結論取自k839_hierarchical_bayesian_results.json。資料yfinance，IS 2006-01-01~2022-12-31，OOS 2023-01-01~2024-12-31。Best method by QLIKE：MLE勝1/4(SPY)、IndepBayes勝1/4(GLD)、Hierarchical勝2/4(QQQ,0050.TW)。DM檢定：SPY hier_vs_mle t=1.96(p=0.050，邊際)；QQQ/GLD/0050.TW的hier_vs_mle、hier_vs_indep、hier_r2_vs_mle全數|t|<1.6，遠低於Harvey(2016)|t|>3.0門檻。結論(JSON原文)：No DM test reached Harvey(2016) significance—differences are noise；hierarchical shrinkage對2個小樣本資產(GLD/0050.TW)方向上有改善但統計不顯著。",
+    "evidence": ["experiments/k839/k839_hierarchical_bayesian_results.json", "experiments/k839/README.md"],
+    "confidence": 0.8,
+    "needs_human": false,
+    "gap": ""
+  }
+]

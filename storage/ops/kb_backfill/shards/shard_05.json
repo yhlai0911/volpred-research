@@ -1,0 +1,202 @@
+[
+  {
+    "experiment": "experiments/k1268",
+    "k_id": "K1268",
+    "category": "experiment_result",
+    "verdict": "FAIL",
+    "content": "K1268 FAIL_NO_DATA：測試 GDELT 2.0 5分鐘事件密度是否領先 SPY 5分鐘已實現變異（H2 VIX sufficiency 的頻率邊界檢定）。GDELT 端資料抓取成功（864 bars×3 事件日：2024-08-05 日圓套利平倉、2020-03-12 COVID、2023-03-13 SVB），但 yfinance 1分鐘資料僅回溯30天、5分鐘僅60天，三個預註冊危機日全部落在可用視窗外，導致 SPY 5分鐘 RV 無法重建。此為資料管線缺口非方法論失敗；Codex pre-run review 已抓出並修正1個時區 blocking bug。教訓：高頻歷史股價資料需先確認來源可行性（Polygon/Databento/Kibot 或自建 rolling archive），K1268b 待補資料源後重跑同方法論。",
+    "evidence": [
+      "experiments/k1268/README.md",
+      "experiments/k1268/k1268_results.json",
+      "experiments/k1268/aggregate_summary.json"
+    ],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/K1331",
+    "k_id": "K1331",
+    "category": "experiment_result",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1331 MIXED：用 SPY 相對20檔大型股（2014-01-31至2026-05-14，n=3,090）的21日已實現變異差距/比值，測試無選擇權資料的離散度/相關性代理。結果：離散度與相關代理皆強烈均值回歸（HAC t=-11.31/-12.70，R²≈0.42）；但作為OOS預測特徵，加入離散度/相關proxy的模型（M1-M3, M5）皆未通過Harvey |t|>3 門檻，最佳模型是VIX+當期RV（DM t=-2.74，仍未過關）。簡單降曝險擇時規則（S1-S3）改善下行風險指標（1%分位數DM t約-3.4至-4.5），但buy-hold Sharpe 0.756 vs 策略0.78-0.80差異小，屬曝險降低而非報酬alpha。",
+    "evidence": [
+      "experiments/K1331/README.md",
+      "experiments/K1331/K1331_results.json"
+    ],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1357",
+    "k_id": "K1357",
+    "category": "experiment_result",
+    "verdict": "INCONCLUSIVE",
+    "content": "K1357 EVENT_ONLY_WEAK：檢驗市場做市成本衝擊後的價差不對稱footprint（RLMM微觀結構代理，SPY/QQQ/IWM+7大型股，2012年起，OOS 2020起）。事件研究：負向市場衝擊日後次日Corwin-Schultz價差變化，比正向衝擊日高+0.0457（bootstrap 95% CI [0.0006, 0.0896]，908個負向 vs 1,062個正向衝擊日），CI不含零，通過事件不對稱門檻。但預測面失敗：HAR+VIX+量+價差不對稱模型 vs baseline，pooled DM t=+0.626 (p=0.531)，僅3/10資產QLIKE改善，未達CONDITIONAL_PASS_PROXY所需的Harvey OOS門檻。結論：日頻價差proxy有單邊流動性惡化跡象，但不能轉化為穩健的短期RV預測改善，不可宣稱為強發現。",
+    "evidence": [
+      "experiments/k1357/README.md",
+      "experiments/k1357/K1357_results.json"
+    ],
+    "confidence": 0.75,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1419",
+    "k_id": "K1419",
+    "category": "vol_prediction",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1419 pilot_offline_first_pass：因SPY/QQQ/0050本地5分鐘RV歷史過短或缺失（SPY僅99筆、0050僅72筆、QQQ無檔），改用Parkinson range-based log變異數為共同target，比較HAR點預測+高斯/經驗殘差分位數 vs 直接分位數HAR（qHAR），SPY/QQQ/0050.TW樣本2023-01-03起、OOS 2025-01-02起、每21日refit，τ∈{0.05,0.25,0.5,0.75,0.95}。結果：SPY全部分位數由高斯baseline勝出，無訊號；QQQ的qHAR在τ=0.5/0.75 pinball loss較低但未過Harvey門檻；僅0050.TW在τ=0.05通過Harvey gate（qHAR vs Gaussian baseline DM t=-4.84），τ=0.25亦通過（summary.assets_with_any_harvey_pass=1，harvey_pass_assets=[0050.TW]）。結論：分位數增益訊號集中在台股proxy-vol，美股無效，屬工程可行性pilot非正式論文規格（target是Parkinson proxy非真正HAR-RV）。",
+    "evidence": [
+      "experiments/k1419/README.md",
+      "experiments/k1419/k1419_probabilistic_rv_quantile_results.json"
+    ],
+    "confidence": 0.6,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1450",
+    "k_id": "K1450",
+    "category": "cross_asset",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1450 CONDITIONAL_PASS：檢驗VNQ在升息/降息regime（^TNX 63日落後變化訊號）下的未來21日已實現波動與相關性差異，2005-01-01至2026-06-09（有效樣本2005-04-06至2026-05-07，n=5,301，regime almost balanced：rate_down 2,651/rate_up 2,650）。HAC(21) OLS檢定：VNQ forward RV rate_down 23.85% vs rate_up 19.76%（p=0.0599，未過多重檢定）；SPY forward RV差異p=0.0355；TLT p=0.221；VNQ-SPY forward correlation幾乎不變（0.625 vs 0.628, p=0.897）。5個主檢定經Bonferroni/BH校正後僅1個存活：VNQ-TLT forward correlation由rate_down的-0.077轉為rate_up的+0.041（HAC p=0.0030，Bonferroni調整後p=0.0150）。結論：VNQ與SPY的高相關性本質上一直存在且regime間穩定，真正改變的是升息期VNQ失去對TLT的避險關聯，而非變得更像股票。",
+    "evidence": [
+      "experiments/k1450/README.md",
+      "experiments/k1450/k1450_results.json"
+    ],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1479",
+    "k_id": "K1479",
+    "category": "experiment_result",
+    "verdict": "NULL",
+    "content": "K1479 NULL：檢驗單股槓桿ETF（TSLL/NVDL/CONL）上市是否放大標的股（TSLA/NVDA/COIN）尾盤波動。因yfinance 1小時intraday資料僅回溯約730天，無法取得上市前intraday視窗（TSLL 2022-08-09上市但1h資料僅回溯至2023-07-17），改用日頻event-study DiD proxy（park_var、signed_clv、abs_ret），事件窗前後各126日曆日，控制組為同業（F/GM、AMD/AVGO、HOOD/MSTR），HAC(5) robust SE。三個標的的DiD交乘項全部不顯著：TSLA abs_ret p=0.991、park_var p=0.234、signed_clv p=0.529；NVDA對應p=0.963/0.717/0.772；COIN對應p=0.193/0.490/0.894。標的股本身雖比同業更波動，但DiD顯示上市未造成額外放大。結論：在免費資料條件下，無證據支持單股槓桿ETF上市顯著放大標的尾盤波動。",
+    "evidence": [
+      "experiments/k1479/README.md",
+      "experiments/k1479/k1479_results.json"
+    ],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1495",
+    "k_id": "K1495",
+    "category": "vol_prediction",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1495 PARTIAL_PASS（Codex review PASS）：用SPY相對RSP的21日落後累積報酬差作為cap-weight集中度pulse代理（expanding 80百分位定義高regime，避免偷看未來），檢驗其對未來21日市場波動的條件資訊，樣本2004-05-28至2026-05-13，n=5,524。H1 PASS：高集中regime下SPY未來21日RV=18.16% vs 非高regime 14.41%，Welch t=9.47（p≈7.5e-21），stationary bootstrap 95% CI [+0.95pp, +7.39pp]不跨零。H2 FAIL：SPY-RSP的未來vol gap並未在高集中regime顯著擴大（點估計-0.39pp，CI跨零），顯示效應同時反映在RSP。H3 PASS：控制當期RV後，HAC(21)迴歸中high_regime係數+2.03pp（t=2.05, p=0.041），63日版本更強（+2.63pp, t=2.51, p=0.012）。結論：集中度pulse是廣泛市場動盪regime描述子，而非cap-weight獨有的尾端脆弱度預測器。",
+    "evidence": [
+      "experiments/k1495/README.md",
+      "experiments/k1495/k1495_results.json",
+      "experiments/k1495/reviews/codex_review_20260614.md"
+    ],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1541_convertible_vol_management_beta_timing",
+    "k_id": "K1541",
+    "category": "strategy",
+    "verdict": "NULL",
+    "content": "K1541 NULL_OR_BETA_TIMING_DOMINATED：檢驗可轉債ETF（CWB、ICVT；CONV因yfinance無資料無法測）波動管理擇時是否有超越equity/credit beta timing的獨立edge。用21日落後年化波動反向縮放權重（clip 0.10/vol, 0, 2），對照對同一VM scalar套用在SPY/QQQ/HYG/LQD滾動252日beta複製上的benchmark。三項gate（Sharpe差為正、bootstrap CI下界為正、DM t≤-3）全部FAIL：CWB VM vs VM-beta Sharpe差-0.105（DM t=-0.23，bootstrap CI [-0.367,+0.145]）；ICVT對應+0.030（DM t=-1.20，CI[-0.362,+0.396]）。HAC alpha測試亦不顯著（CWB t=0.30；ICVT t=1.22）。UMCSENT情緒regime切分未能挽救結論。結論：可轉債ETF波動管理降低回撤但也降低CAGR（扣除周轉成本後），其風險管理效益大部分可被同一VM scalar套用在流動性因子beta複製上複製，無穩健證據顯示其超越beta timing。",
+    "evidence": [
+      "experiments/k1541_convertible_vol_management_beta_timing/README.md",
+      "experiments/k1541_convertible_vol_management_beta_timing/k1541_convertible_vol_management_beta_timing_results.json"
+    ],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1592",
+    "k_id": "K1592",
+    "category": "vt_strategy",
+    "verdict": "NULL",
+    "content": "K1592 NULL_OR_WEAK：對leverage-direction論文審查質疑的gamma-rule模型選擇故事，重建為凍結、預註冊的未來OOS賽馬（正gamma門檻>1.65時用GJR否則GARCH），development資產SPY/QQQ/EEM/GLD/TLT + disjoint holdout資產IWM/SLV/BTC-USD，OOS期間2023-01-03至2026-06-26（8個資產873-1202個觀測），論文專屬pinned CSV，21日refit，canonical Patton QLIKE + DM-HAC(h=1) + Holm校正 + MCS(B=1000)。結果：gamma rule在3/8資產（EEM/TLT/IWM）平均損失最低，但0個資產通過嚴格Harvey+Holm優越性門檻。disjoint holdout panel（關鍵JBF檢定）MCS保留全部三模型（GARCH/GJR/GammaRule）。結論：gamma rule與最佳固定GJR基準統計上不可區分，論文headline「never significantly beaten」「genuine OOS gains」須刪除或降級為model-selection diagnostic敘事，非預測alpha規則。",
+    "evidence": [
+      "experiments/k1592/README.md",
+      "experiments/k1592/k1592_results.json"
+    ],
+    "confidence": 0.85,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k1607",
+    "k_id": "K1607",
+    "category": "market_context",
+    "verdict": "UNVERIFIED",
+    "content": "K1607：MAG7單一時點（2026-07-02T22:18:02Z）選擇權市場擁擠度橫斷面快照，非預測模型也非假設檢定（README/JSON明確標示by design）。同到期日2026-08-07(DTE=36)橫斷面比較25-delta put-call skew、ATM IV-RV21缺口、put/call成交量比。結果：composite crowding排名NVDA(+1.31)>GOOGL(+0.28)>AMZN(+0.04)>AAPL(-0.11)>MSFT(-0.32)>META(-0.50)>TSLA(-0.70)；四大AI資本支出巨頭（MSFT/GOOGL/AMZN/META）並未呈現最高下行保護擁擠度，反而是晶片供應商NVDA的25-delta skew最高(+2.49 vol pts)且P/C量比達2.93。n=7橫斷面相關（skew vs P/C量比corr=+0.618）僅作描述性統計，未做顯著性檢定。Codex review v1 CONDITIONAL_PASS（2個CRITICAL已修：OTM+流動性過濾25-delta選擇），v2待Codex最終確認。此為單日快照非趨勢宣稱。",
+    "evidence": [
+      "experiments/k1607/README.md",
+      "experiments/k1607/k1607_results.json",
+      "experiments/k1607/codex_review.md"
+    ],
+    "confidence": 0.5,
+    "needs_human": true,
+    "gap": "Codex v2 re-confirmation 狀態未在README中確認完成（v1僅CONDITIONAL_PASS）；n=7橫斷面relationships與composite crowding排名均為描述性單日快照，無顯著性檢定支持，需人工確認是否已完成v2 review、以及是否需要後續多週期追蹤才能升級為knowledge-grade結論。"
+  },
+  {
+    "experiment": "experiments/K1677",
+    "k_id": "K1677",
+    "category": "experiment_result",
+    "verdict": "FAIL",
+    "content": "K1677 Codex review FAIL（2026-07-11）：檢驗詐欺/執法揭露事件（n=28手工整理）對同產業peer的波動/尾部/流動性傳染效應，README原始雙尾檢定結論為NULL（主指標市場調整RV t=0.77, p=0.45, BH=0.622；唯一邊際訊號是價差上升t=2.86但多重檢定未存活）。但Codex review發現關鍵方向錯置：程式全用雙尾檢定但claim是方向性假說，按事前方向重算單尾BH後，spread q=.032與worst-day q=.039皆通過5%門檻（主指標RV仍NULL, q=.321）。另外peer universe非point-in-time（128次peer occurrence缺9個含Archegos的CS、RIDE的NKLA/FSR，明顯偏向NULL）、placebo未排除60日前窗與其他事件重疊、downside semivariance定義非標準。結論：現行README「無顯著傳染」敘事不成立（方向性下illiquidity/worst-day確有顯著傳染訊號，RV仍NULL），需K1677-rev五項修正（單尾方向檢定、point-in-time universe、placebo全覆蓋、標準semivariance、Amihud t+1修正）後才可寫入knowledge。K1677本身因provenance gate未寫入knowledge.json。",
+    "evidence": [
+      "experiments/K1677/README.md",
+      "experiments/K1677/K1677_results.json"
+    ],
+    "confidence": 0.6,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/K1710",
+    "k_id": "K1710",
+    "category": "vol_prediction",
+    "verdict": "PASS",
+    "content": "K1710 PASS（Codex review PASS，兩輪修正後）：為prg-periodic-garch論文三時點convention flip主表補齊open/mixed兩面板，在K1699 pinned vintage（六市場SHA256驗證一致，未重新下載資料）上重跑。DM全表（canonical dm_test, h=1, HAC）：Open面板（PRG open-known vs Fair GJR-X）六市場全負t，5/6通過Harvey |t|>3（SPY -3.557, GLD -3.643, EEM -10.137, 0050.TW -3.670, TAIFEX -5.503; QQQ -1.563例外）；Mixed面板（PRG canonical vs GJR）六市場全部強負t（-4.328至-6.405）皆通過Harvey。對比K1699 Close面板（PRG_tminus1 vs GJR）0/6顯著、SPY +0.74，證實「同一模型同一資料，DM僅因forecast-timing convention就從強勝(mixed -5.8)→中等(open -3.6)→翻至約0(close +0.7)」的論文headline在單一pinned vintage上成立。K1710與K1699的PRG_canonical_mixed/GJR OOS QLIKE逐市場差=0.00e+00（bit-identical交叉驗證），兩趟determinism pass一致，K1544/K880 anchor方向全一致。",
+    "evidence": [
+      "experiments/K1710/README.md",
+      "experiments/K1710/K1710_results.json",
+      "experiments/K1710/codex_review.md"
+    ],
+    "confidence": 0.9,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k835",
+    "k_id": "K835",
+    "category": "vt_strategy",
+    "verdict": "NULL",
+    "content": "K835 NULL：測試VIX/VIXTWN混合策略是否優於純VIX擇時策略於0050.TW，樣本期0050.TW/VIX 2025-10-01至2026-04-02、VIXTWN因資料起始較晚僅2025-12-01至2026-03-30（OOS重疊約74-76交易日）。結果：S1(8.63門檻/VIX-only)為最佳策略Sharpe=4.0203，所有VIX/VIXTWN混合策略（S2-S4）與S1的成對DM檢定t值介於-1.97至+0.97，皆未達Harvey |t|>3.0顯著門檻（p值0.05-0.73）。VIX與VIXTWN水準相關高達0.9137，但變化量相關僅-0.1128，顯示VIXTWN在短樣本下對VIX-only策略增添雜訊而非訊號。README明確標註：僅74個交易日，結果屬探索性非決定性結論。",
+    "evidence": [
+      "experiments/k835/README.md",
+      "experiments/k835/k835_taiwan_vix_blend_results.json"
+    ],
+    "confidence": 0.55,
+    "needs_human": false,
+    "gap": ""
+  },
+  {
+    "experiment": "experiments/k847",
+    "k_id": "K847",
+    "category": "data_property",
+    "verdict": "PASS",
+    "content": "K847：用TAIFEX TX期貨tick資料分解0050.TW隔夜跳空報酬/變異來源，樣本2017-05-16至2026-04-02（n=2,151合併日）。將全時段拆為5個時段：gap_a(13:45→15:00,不可交易)、slot_b(15:00→21:30,可交易)、slot_c(21:30→04:00,可交易/美股時段)、slot_d(04:00→05:00,可交易)、gap_e(05:00→開盤09:00,不可交易)。變異數分解：slot_c占39.8%、gap_e占23.6%、slot_b占16.2%，可交易時段(B+C+D)合計占跳空變異61.3%、報酬均值69.2%（年化Sharpe 1.008 vs 不可交易時段A+E的Sharpe 0.204）。迴歸模型（全時段對總跳空）R²=0.8307，各時段beta介於0.61-0.99，皆t值>19顯著（p<0.001）。呼應K843夜盤Sharpe 0.788、K817/K812既有發現（77-93%的c2c報酬落在隔夜跳空）。限制：TX期貨與0050現貨存在basis risk，SPY日期對齊為近似，README本身未填寫敘事（僅結果JSON有完整數據）。",
+    "evidence": [
+      "experiments/k847/README.md",
+      "experiments/k847/k847_overnight_gap_decomposition_results.json"
+    ],
+    "confidence": 0.65,
+    "needs_human": false,
+    "gap": ""
+  }
+]
