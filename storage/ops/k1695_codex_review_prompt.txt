@@ -1,0 +1,36 @@
+你是 K1695 exposure-matched 更正的獨立審查者。請審**代碼與統計口徑**，不是審結論是否討喜。
+
+## 背景
+K1695 原本宣稱「12/VIX overlay 在 13 個國際股市提供 drawdown protection，raw ΔMDD +27.50pp
+(inception) / +12.61pp (common)，13/13 為正，通過預註冊 gate」。這是 raw max-drawdown 的
+scale artifact：VT 實現波動只有 BH 的 0.52–0.68 倍。2026-07-15 的更正把結論改成撤回。
+
+## 要審的檔（凍結中，審完我不會再動）
+- experiments/k1695/k1695.py（重點看 2026-07-15 新增的部分）
+- experiments/k1695/test_k1695.py
+- experiments/k1695/README.md
+- experiments/k1695/k1695_results.json
+參考規則：.claude/rules/experiments.md 的「Raw max drawdown 不可跨不同曝險比較」段。
+canonical helper：src/volpred/stats/drawdown.py。先例：experiments/k1265b/k1265b.py。
+
+## 請具體檢查（逐條回答，不要只給總評）
+1. 同曝險統計量正確嗎：exposure_matched_mdd_by_column / assert_vectorized_matches_canonical
+   是否真的等價於 canonical compare_max_drawdown？λ = vol(VT)/vol(BH) 的定義與 rescale 對嗎？
+2. circular-shift null 設計對嗎：
+   - 在日曆月空間循環位移月度權重向量、13 市場共用同一位移 —— 是否正確保留跨市場相依性？
+   - shift 0 納入 reference set、p = #{gap_s >= gap_obs}/(n_shifts+1) —— 這個 p-value 定義對嗎？
+   - null 是否真的只破壞「權重與報酬的對齊」而保留權重的邊際分佈與自相關？有沒有偷偷改變曝險？
+   - 窮舉所有相位（無抽樣）→ 宣稱「確定性、不需 seed」，這個宣稱成立嗎？
+3. 向量化 simulator（simulate_monthly_hold_scenarios）是否與 canonical scalar simulator
+   simulate_monthly_hold 完全等價？特別是月初再平衡的 turnover/cost 時點、初始配置不計 turnover、
+   月內權重漂移。有沒有 off-by-one？
+4. Lookahead：月底 VIX → 下月權重的 lag 在循環位移後是否仍然成立？位移會不會意外引入未來資訊？
+5. bootstrap：λ 在每個 replication 內重估（而非固定用全樣本 λ）—— 這對嗎？會不會有偏誤？
+6. 結論強度是否超過證據：README 與 results.json 的 decision 區塊有沒有把「不顯著」寫成
+   「顯著為負」？inception 的 +4.96pp（p=0.216）有沒有被誤述？有沒有任何 raw 數字被刪掉
+   （不該刪）或被單獨當結論（不該）？
+7. 有沒有 silent fallback、bare except、未 seed 的隨機程序？
+
+## 輸出格式
+逐條 1-7 給 PASS / FAIL / CONDITIONAL + 具體理由（引 file:line）。
+最後給一行 FINAL VERDICT: PASS | CONDITIONAL_PASS | FAIL，並列出所有 blocking defects。
