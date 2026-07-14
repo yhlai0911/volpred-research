@@ -54,6 +54,22 @@ def main(argv: list[str] | None = None) -> int:
     if args.body_file:
         body = Path(args.body_file).read_text(encoding="utf-8")
 
+    # A CJK --subject/--body handed in as a shell argument can arrive as surrogates:
+    # the agent shell emits bytes that are not valid UTF-8, and Python's argv decoder
+    # parks them as lone \udc80-\udcff. Nothing complains until the receipt is written,
+    # where f.write() dies with "surrogates not allowed" — an error that says nothing
+    # about the actual fix. Same family as the 2026-07-13 --body-file note above.
+    # Say it at the boundary instead, in the one place the caller can act on.
+    for flag, value in (("--subject", args.subject), ("--body", args.body)):
+        if any("\ud800" <= ch <= "\udfff" for ch in value):
+            print(
+                f"[fire_receipt] {flag} 的位元組不是合法 UTF-8（經過 shell 時壞掉了）。\n"
+                f"[fire_receipt] 改法：用 Write 工具把文字寫成 /tmp/receipt.txt，再 --body-file /tmp/receipt.txt。\n"
+                f"[fire_receipt] --subject 若含中文，用 SUBJ=$(cat /tmp/subject.txt) 再帶入。",
+                file=sys.stderr,
+            )
+            return 2
+
     ok = write_fire_receipt(
         Path(args.repo_root),
         subject=args.subject,
