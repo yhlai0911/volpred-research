@@ -30,7 +30,6 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 import subprocess
 import time
 from dataclasses import dataclass
@@ -38,7 +37,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
-from . import alerts, codex_failover, procutil, state
+from . import alerts, codex_failover, failure_class, procutil, state
 
 LOG = logging.getLogger(__name__)
 
@@ -86,21 +85,10 @@ TIMEOUT_KILLED_SENTINEL = -1000
 OWNERSHIP_LOST_SENTINEL = -1001
 TIMEOUT_SURVIVED_SENTINEL = -1002
 
-# stderr/stdout regex classifiers
-_AUTH_RE = re.compile(r"(Not logged in|Please run /login|invalid_api_key|authentication)", re.I)
-_TRANSIENT_RE = re.compile(r"(529|Overloaded|ECONNRESET|ETIMEDOUT|Connection reset|rate.?limit)", re.I)
-# 2026-07-05 incident: the weekly Claude Code quota ran out 11:07-16:00 and
-# "You've hit your weekly limit · resets 4pm" matched NO class → hard_failure →
-# the full retry ladder (opus→opus→sonnet) burned on every hourly fire (15
-# wasted attempts + completion noise over 5h). Quota exhaustion is neither
-# transient (retrying in 90s cannot help) nor auth (it auto-resolves at the
-# reset time; requiring a manual unblock would strand the loop). Its own class:
-# abort THIS fire without retries, do NOT set auth_blocked — the next hourly
-# fire is a single cheap attempt that self-resumes the moment quota resets.
-_QUOTA_RE = re.compile(
-    r"(hit your (?:weekly|5.?hour|monthly|usage|session) limit|usage limit (?:reached|exceeded))",
-    re.I,
-)
+# stderr/stdout regex classifiers — shared with scripts/run_agent_job.py, the
+# other place that spawns `claude -p` and must tell auth/quota/transient apart.
+# See failure_class.py for why each class exists and what it obliges the caller
+# to do.
 
 
 @dataclass
@@ -141,15 +129,7 @@ def _classify(exit_code: int, output: str) -> str:
         return "success"
     if exit_code in HANG_EXIT_CODES:
         return "hang"
-    if _AUTH_RE.search(output or ""):
-        return "auth"
-    # quota BEFORE transient: both are "come back later", but transient's 90s
-    # backoff is pointless against an hours-long quota window.
-    if _QUOTA_RE.search(output or ""):
-        return "quota"
-    if _TRANSIENT_RE.search(output or ""):
-        return "transient"
-    return "hard_failure"
+    return failure_class.classify_output(output) or "hard_failure"
 
 
 def _read_tail(path: Path, max_bytes: int = 2048) -> str:

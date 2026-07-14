@@ -56,6 +56,9 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+from volpred.ops.diagnostics import warn  # noqa: E402
+
 QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
 LOCK_FILE = QUEUE_DIR / ".worker.lock"
 LOG_DIR = ROOT / "storage" / "logs" / "compute"
@@ -450,6 +453,28 @@ def _arg_value(args: Any, flag: str) -> str | None:
     return args[index + 1] if index + 1 < len(args) else None
 
 
+def _runner_failure_class(job: dict[str, Any]) -> str | None:
+    """What the runner said killed the agent — `auth`, `quota`, `transient`, or None.
+
+    Written by scripts/run_agent_job.py into the job_metadata receipt. Absent on
+    jobs that predate the field, which read as None: the old triage brief.
+    """
+    meta_path = job.get("job_metadata")
+    if not meta_path:
+        return None
+    path = Path(meta_path)
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        meta = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as e:
+        warn("compute_queue", "job_metadata unreadable; falling back to generic triage",
+             job=job.get("id"), path=str(path), err=str(e))
+        return None
+    value = meta.get("failure_class")
+    return value if isinstance(value, str) else None
+
+
 def _agent_workdir(job: dict[str, Any]) -> str | None:
     """Read new schema first, then infer legacy run_agent_job receipts."""
     raw = None
@@ -488,19 +513,39 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
     if not isinstance(original, dict):
         original = {}
     original_brief = original.get("brief")
-    triage_lines = [
-        "TRIAGE FAILED AGENT JOB — this job did not complete successfully.",
-        f"Job: {job.get('id')} (exit_code={job.get('exit_code')})",
-        f"Worktree/cwd: {workdir}",
-        f"Result artifact (may be missing, partial, or stale): {job.get('result_artifact')}",
-        f"Runner metadata: {job.get('job_metadata')}",
-        f"stdout/stderr: {job.get('stdout_file')} | {job.get('stderr_file')}",
-        "Inspect what actually exists in the worktree. Decide whether to preserve/commit and continue, "
-        "re-enqueue from a fresh worktree, or document that nothing is salvageable. Do not treat any "
-        "artifact as a successful result without validation, and never force-remove the worktree.",
-    ]
-    if original_brief:
-        triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
+
+    # An auth-class death is not a failure of the WORK — the runner exhausted its
+    # retries against a login wall and the agent never started. Sending a fire to
+    # "inspect what exists in the worktree" would waste it: nothing exists. Say so,
+    # and ask for the one action that can help.
+    if _runner_failure_class(job) == "auth":
+        triage_lines = [
+            "AGENT JOB BLOCKED ON AUTH — the `claude` CLI was not logged in, so the agent never ran.",
+            f"Job: {job.get('id')} (exit_code={job.get('exit_code')})",
+            f"Runner metadata (attempts, failure_class): {job.get('job_metadata')}",
+            f"stdout/stderr: {job.get('stdout_file')} | {job.get('stderr_file')}",
+            f"Worktree/cwd is untouched and still holds the pre-job state: {workdir}",
+            "The runner already retried through its backoff ladder. Confirm the CLI can authenticate "
+            "now (the supervisor's own fires are the cheapest signal — if they are landing, auth is back), "
+            "then simply RE-ENQUEUE the same brief with enqueue-agent. Do NOT triage the worktree for "
+            "salvage and do NOT record any research verdict: no work was performed.",
+        ]
+        if original_brief:
+            triage_lines.append(f"Followup to run once it completes (context only): {original_brief}")
+    else:
+        triage_lines = [
+            "TRIAGE FAILED AGENT JOB — this job did not complete successfully.",
+            f"Job: {job.get('id')} (exit_code={job.get('exit_code')})",
+            f"Worktree/cwd: {workdir}",
+            f"Result artifact (may be missing, partial, or stale): {job.get('result_artifact')}",
+            f"Runner metadata: {job.get('job_metadata')}",
+            f"stdout/stderr: {job.get('stdout_file')} | {job.get('stderr_file')}",
+            "Inspect what actually exists in the worktree. Decide whether to preserve/commit and continue, "
+            "re-enqueue from a fresh worktree, or document that nothing is salvageable. Do not treat any "
+            "artifact as a successful result without validation, and never force-remove the worktree.",
+        ]
+        if original_brief:
+            triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
 
     row = dict(job)
     row["followup_mode"] = "triage_failed"

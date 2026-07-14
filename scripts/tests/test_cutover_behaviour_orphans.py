@@ -46,9 +46,9 @@ _CARRIED_ACROSS: dict[str, str] = {
     # The orphan this gate was born from. Restored 2026-07-10.
     "run_codex_failover": "run_codex_failover",
     # Quota classification: the shell tagged the string, worker.py regex-classifies it.
-    "_note_quota": "_QUOTA_RE",
+    "_note_quota": "QUOTA_RE",
     # Auth probe before spending a fire on a dead credential.
-    "run_auth_preflight": "_AUTH_RE",
+    "run_auth_preflight": "AUTH_RE",
     "send_auth_preflight_alert": "send_auth_alert",
     # Alert plumbing: `volpred ops send-alert --body-md <tmp>`.
     "run_send_alert": "send-alert",

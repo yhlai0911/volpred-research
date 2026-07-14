@@ -32,18 +32,92 @@ import json
 import os
 import subprocess
 import sys
+import threading
+import time
+from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from scripts.dispatch_supervisor import procutil  # noqa: E402
+from scripts.dispatch_supervisor import failure_class, procutil  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CLAUDE_BIN = os.environ.get("VOLPRED_CLAUDE_BIN", "claude")
 
 
+# An auth wall costs five seconds and zero tokens: the CLI answers "Not logged in"
+# and exits before the agent exists. It is worth a couple of retries because the
+# usual cause is a credential refresh racing the spawn (2026-07-14: the compute
+# worker's 13:45 agent job died this way while the supervisor's own fires at
+# 13:24 and 22:07 authenticated fine). If it is instead a real logout, three
+# cheap attempts cost four minutes and then say so — still far better than the
+# old behaviour, which filed a 60-minute research job as a research failure and
+# spent a whole later fire discovering the agent had never started.
+AUTH_MAX_ATTEMPTS = 3
+AUTH_BACKOFF_S = 120
+# Don't start an attempt that has no room to finish the actual work.
+AUTH_RETRY_MIN_BUDGET_S = 600
+# Enough to carry the CLI's auth/quota banner; not enough to hold a research log.
+_TAIL_LINES = 200
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _run_attempt(
+    argv: list[str], workdir: Path, env: dict[str, str], timeout: int
+) -> tuple[int, bool, str]:
+    """Run the agent once. Returns (exit_code, timed_out, tail_of_its_output).
+
+    The output is teed, not swallowed: every line still reaches the compute log on
+    its original stream. We keep a bounded tail only so the caller can classify
+    what killed the attempt — and only THIS attempt's output, because a stale
+    `Not logged in` from an earlier one would be read as a fresh auth verdict.
+    """
+    tail: deque[str] = deque(maxlen=_TAIL_LINES)
+
+    def _pump(src, dst) -> None:
+        for line in iter(src.readline, ""):
+            dst.write(line)
+            dst.flush()
+            tail.append(line)
+        src.close()
+
+    # start_new_session: the agent leads its own process group, so on timeout the
+    # whole tree (agent + the compute it shelled out to) dies as a unit. Killing
+    # only the agent pid would leave its compute orphaned and still writing — see
+    # _kill_agent_tree.
+    proc = subprocess.Popen(
+        argv, cwd=str(workdir), env=env, start_new_session=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1,
+    )
+    pumps = [
+        threading.Thread(target=_pump, args=(proc.stdout, sys.stdout), daemon=True),
+        threading.Thread(target=_pump, args=(proc.stderr, sys.stderr), daemon=True),
+    ]
+    for t in pumps:
+        t.start()
+
+    timed_out = False
+    try:
+        exit_code = proc.wait(timeout=max(timeout, 1))
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        exit_code = -1
+        print(f"[run_agent_job] TIMEOUT after {timeout}s — killing agent tree",
+              file=sys.stderr, flush=True)
+        _kill_agent_tree(proc)
+    for t in pumps:
+        t.join(timeout=5)
+    return exit_code, timed_out, "".join(tail)
+
+
+def _should_retry_auth(failure: str | None, attempts: int, deadline: float) -> bool:
+    if failure != "auth" or attempts >= AUTH_MAX_ATTEMPTS:
+        return False
+    remaining = deadline - time.monotonic() - AUTH_BACKOFF_S
+    return remaining >= AUTH_RETRY_MIN_BUDGET_S
 
 
 def _kill_agent_tree(proc: subprocess.Popen) -> bool:
@@ -168,20 +242,25 @@ def main() -> int:
     started = _utc_now()
     print(f"[run_agent_job] start {started} model={args.model} effort={args.effort} cwd={workdir}", flush=True)
 
-    timed_out = False
-    # start_new_session: the agent leads its own process group, so on timeout the
-    # whole tree (agent + the compute it shelled out to) dies as a unit. Killing
-    # only the agent pid would leave its compute orphaned and still writing — see
-    # _kill_agent_tree.
-    proc = subprocess.Popen(argv, cwd=str(workdir), env=env, start_new_session=True)
-    try:
-        exit_code = proc.wait(timeout=args.timeout)
-    except subprocess.TimeoutExpired:
-        timed_out = True
-        exit_code = -1
-        print(f"[run_agent_job] TIMEOUT after {args.timeout}s — killing agent tree",
-              file=sys.stderr, flush=True)
-        _kill_agent_tree(proc)
+    deadline = time.monotonic() + args.timeout
+    attempts = 0
+    failure = None
+    while True:
+        attempts += 1
+        remaining = int(deadline - time.monotonic())
+        exit_code, timed_out, output = _run_attempt(argv, workdir, env, remaining)
+        if exit_code == 0:
+            failure = None
+            break
+        failure = failure_class.classify_output(output)
+        if not _should_retry_auth(failure, attempts, deadline):
+            break
+        print(
+            f"[run_agent_job] attempt {attempts} hit an auth wall ({exit_code}) — "
+            f"the agent never ran. Retrying in {AUTH_BACKOFF_S}s.",
+            file=sys.stderr, flush=True,
+        )
+        time.sleep(AUTH_BACKOFF_S)
 
     finished = _utc_now()
     artifact_exists = result_artifact.exists() if result_artifact is not None else None
@@ -196,6 +275,12 @@ def main() -> int:
         "finished_at": finished,
         "exit_code": exit_code,
         "timed_out": timed_out,
+        # Which wall the job hit, so the collecting fire routes on the failure's
+        # NATURE and not merely on "nonzero": an `auth` job computed nothing and
+        # needs re-enqueueing, whereas a `hard_failure` (None) has a worktree
+        # worth triaging.
+        "failure_class": failure,
+        "attempts": attempts,
         "result_artifact": str(result_artifact) if result_artifact is not None else None,
         "result_artifact_exists": artifact_exists,
         "validation_ok": validation_ok,
