@@ -9144,7 +9144,7 @@
     "figure_5_y_label": "one-cell rejection rate",
     "figure_5_80_line_label": "80% one-cell power",
     "figure_5_nominal_line_label": "nominal 5% one-cell gate level",
-    "figure_5_suptitle": "Power scope: one h=1 cell, one injected alternative, 1000 simulated OOS paths per point, nominal gate. The 10-cell Holm family is less powerful. Power is not an exclusion and does not bound either UNCONDITIONAL average or conditional/regime-specific effects.",
+    "figure_5_suptitle": "Power scope: one h=1 cell, one injected alternative, 1000 simulated OOS paths per point, nominal gate.\nThe 10-cell Holm family is less powerful. Power is not an exclusion and does not bound\neither UNCONDITIONAL average or conditional/regime-specific effects.",
     "reproducibility_limitation": "Neither the Farside flow response nor the Yahoo price response was archived point-in-time. The source URLs and sample endpoint identify what was queried, but cannot reconstruct the exact vendor bytes. Any live rerun may therefore change any statistic, gate count, bound or verdict; only --relabel and JSON-only rendering preserve this frozen numerical artefact.",
     "fig2_event_day_limitation": "The frozen fig2 is descriptive and has a one-day label shift: its x=0 is the first RV target day after the lagged flow observation, so the actual flow day is x=-1. It feeds no estimate, test or verdict. Future renders centre x=0 on the recorded flow source date explicitly.",
     "bound_inversion_limitation": "The frozen UNCONDITIONAL average-loss QLIKE upper bounds were produced by a binary inversion that assumed the rejection set was an upper tail. The primary streams were later found mildly non-monotone; a dense independent audit found one crossing per stream, so the published crossings did not move, but the frozen JSON does not archive the loss paths needed to reproduce that audit. Future runs verify the full rejection topology before reporting a bound.",
@@ -9153,7 +9153,7 @@
   },
   "nested_dm_fixed_memory_evidence_v1": {
     "schema": "nested_dm_fixed_memory_runtime.v1",
-    "manifest_sha256": "e1ac343b175e6fa3e98c1d28ce09285052c524cbd8b927a6b8b76e86ed7a0340",
+    "manifest_sha256": "06e1212ca13aaef7e92106b44aef8acdc8da7686bae0b0287e362ad7bc40eb21",
     "cell_inventory": "primary_cells",
     "gate_inventory": "multiple_testing.primary_family",
     "registry_inventory": "multiple_testing.full_family_holm",

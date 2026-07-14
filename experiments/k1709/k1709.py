@@ -195,6 +195,11 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         "runtime_multiple_testing_record": "multiple_testing",
         "claim_surface_files": [
             "README.md",
+            "fig1_flow_vs_rv.png",
+            "fig2_event_window.png",
+            "fig3_oos_qlike.png",
+            "fig4_threshold_sensitivity.png",
+            "fig5_simulated_power.png",
             "k1709.py",
             "k1709_results.json",
             "render_readme.py",
@@ -2743,9 +2748,10 @@ def build_verdict_basis(
         "figure_5_nominal_line_label": "nominal 5% one-cell gate level",
         "figure_5_suptitle": (
             f"Power scope: one h=1 cell, one injected alternative, {POWER_REPS} "
-            "simulated OOS paths per point, nominal gate. The 10-cell Holm family "
-            "is less powerful. Power is not an exclusion and does not bound either "
-            "UNCONDITIONAL average or conditional/regime-specific effects."
+            "simulated OOS paths per point, nominal gate.\n"
+            "The 10-cell Holm family is less powerful. Power is not an exclusion "
+            "and does not bound\n"
+            "either UNCONDITIONAL average or conditional/regime-specific effects."
         ),
         "reproducibility_limitation": (
             "Neither the Farside flow response nor the Yahoo price response was "
@@ -3874,7 +3880,7 @@ def make_frozen_result_plots(res: dict) -> None:
             ax.legend(fontsize=7.5, loc="lower right")
         axes[0].set_ylabel(vb["figure_5_y_label"])
         fig.suptitle(vb["figure_5_suptitle"], fontsize=9.5)
-        fig.tight_layout()
+        fig.tight_layout(rect=(0, 0, 1, 0.86))
         fig.savefig(OUT / "fig5_simulated_power.png", dpi=130)
         plt.close(fig)
 

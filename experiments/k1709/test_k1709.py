@@ -64,6 +64,7 @@ from k1709 import (  # noqa: E402
     GW_TRAIN_WINDOW,
     HAR_M,
     MATERIAL_GAIN_MARGIN,
+    NESTED_DM_FIXED_MEMORY_MANIFEST_V1,
     REGISTRY,
     SPECS,
     Panel,
@@ -1367,6 +1368,27 @@ def test_every_inferential_figure_label_is_explicitly_unconditional():
         "power of the GW gate",
     ):
         assert stale not in src
+
+
+def test_every_reader_facing_figure_is_bound_into_the_review_receipt():
+    exp = Path(__file__).parent
+    figures = {path.name for path in exp.glob("fig*.png")}
+    declared = set(
+        NESTED_DM_FIXED_MEMORY_MANIFEST_V1["implementation"][
+            "claim_surface_files"
+        ]
+    )
+    readme = (exp / "README.md").read_text()
+
+    assert figures == {
+        "fig1_flow_vs_rv.png",
+        "fig2_event_window.png",
+        "fig3_oos_qlike.png",
+        "fig4_threshold_sensitivity.png",
+        "fig5_simulated_power.png",
+    }
+    assert figures <= declared
+    assert all(name in readme for name in figures)
 
 
 def test_main_has_no_unresolved_global_references():
