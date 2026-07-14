@@ -17354,5 +17354,15 @@
     "owner": "codex",
     "backfilled_at": "2026-07-14T06:43:29.423100+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-14T15:19:16+08:00",
+    "task_type": "experiment",
+    "task_id": "k1709_rev2_readjudicate",
+    "outcome": "succeeded",
+    "actor": "hourly-15",
+    "owner": "hourly-15",
+    "commit": null,
+    "summary": "PHASE A 收件 k1709_rev2_readjudicate，發現該 job 的裁決根本沒產出：agent 在 15:05 把 codex 審查丟到背景（task bsdu24vo3）後 15:07 自己結束，codex 隨父進程死亡（實測無存活 process、worktree 15:03 後無新檔）。job 卻被判 completed，因為 result_artifact 指向 k1709_results.json（agent 確實更新過它）——「口頭承諾的交付物」不是「契約上的交付物」，這是已知 background-codex 孤兒反模式的復發。\n\n實驗本身狀態（我逐項驗證，非採信 agent 自述）：凍結 SHA c97d690c、worktree 乾淨；前一份 codex review 指的阻斷性缺陷已修（C6 cell-key 碰撞：primary_cells 從被污染的 54 筆回到 10 筆、cell key 已加 family/proxy/flow-lag 命名空間；size_at_beta_0 key drift 清零；README verdict 已是 INCONCLUSIVE_NO_EXACT_NULL_CLAIM）。缺的只剩一件事：**沒有任何 Codex 對這個凍結 SHA 判過 PASS**。\n\n處置：把「對凍結 SHA 的獨立裁決」enqueue 成它自己的 review-only job（k1709_rev2_codex_verdict），而不是某個 agent 的背景子進程——後者正是連兩次落空的結構性根因。job 有自己的 runner、timeout、收件流程；agent 被明令 review-only、期間不得碰任何檔。\n\n本班踩到並記錄的流程缺口：(a) worker 15:15:02 撿走 job、我 15:15:50 才修好 brief → agent 讀到舊版 brief（verdict schema 與 merge gate 對不上），因為 brief 是 run-time 讀而非 enqueue 時 snapshot；(b) queued job 的 spec 無法經 CLI 修正（無 cancel/update，重複 id 直接報錯）。兩者合成一個 P2 任務 platform_ops_compute_queue_spec_amend_race。不殺 job 重跑：codex 對凍結 bytes 的裁決才是昂貴且不可替代的產出，schema 外殼可在收件時用凍結 bytes 機械重算。收件指示（含必跑 experiment_gates.py certify，因為 path-scoped 抽取繞過 merge_worktree.sh 這個唯一 gate 掛載點）已寫成 P1 任務 k1709-collect-codex-verdict。"
   }
 ]

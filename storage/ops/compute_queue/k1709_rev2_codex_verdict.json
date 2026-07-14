@@ -1,0 +1,43 @@
+{
+  "id": "k1709_rev2_codex_verdict",
+  "title": "K1709-rev2: Codex 對凍結 SHA c97d690c 的獨立裁決（review-only，前景執行）",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_k1709_rev2_codex_verdict.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "high",
+    "--cwd",
+    ".claude/worktrees/dispatch-slot-2-c873d04d-k1709",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/review_verdict.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/k1709_rev2_codex_verdict.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-14T07:12:54Z",
+  "started_at": "2026-07-14T07:15:02Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1709_rev2_codex_verdict.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1709_rev2_codex_verdict.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/review_verdict.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/k1709_rev2_codex_verdict.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709",
+  "claude_followup": {
+    "brief": "收件時：(1) 讀 experiments/k1709/review_verdict.json 的 final_verdict；(2) 驗證 head_after_review == c97d690c684d288a90aa306c6756e6d658669045 且 worktree_clean_during_review==true（否則裁決無效、重審，不得採信）；(3) 驗證 codex_review_rev2_c97d690c.txt 第一行的 REVIEWED_COMMIT 相符；(4) PASS → 主線程寫 knowledge.json（K1709 verdict=INCONCLUSIVE_NO_EXACT_NULL_CLAIM，誠實記 null/inconclusive）+ path-scoped 抽取 experiments/k1709/ 進 main（勿用 merge_worktree.sh，會 stash 其他 slot 在途工作）+ 標 k1709-redo succeeded；(5) FAIL → 逐條列缺陷建修正 task，實驗續留 worktree，不得進 main（per gate-fail-verdict-blocks-merge）。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}

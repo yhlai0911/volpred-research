@@ -404,6 +404,34 @@ def check_mission_progress() -> list[dict]:
         out.append(_finding("mission_progress", "warn",
                             f"next_tasks.json 有 {len(null_id)} 筆 id=null —— jq test() 報錯 + 無法追蹤",
                             recovery="uv run python scripts/backfill_null_task_ids.py --apply"))
+    # blocked >30d 必須 escalate-or-close（2026-07-14 refactor_plan_token_ops_waste
+    # WS2c：46 筆 blocked 有 36 筆滯留 1-2 個月無人收割）。有 blocked_until 的
+    # 有 auto-recheck 出口不算 rot；無 until 且 30 天沒動的浮出。
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    cutoff = _dt.now(_tz.utc) - _td(days=30)
+    rotting = []
+    for t in tasks:
+        if not isinstance(t, dict) or t.get("status") != "blocked" or t.get("blocked_until"):
+            continue
+        ts_raw = t.get("blocked_at") or t.get("created_at")
+        if not ts_raw:
+            rotting.append(t.get("id"))
+            continue
+        try:
+            ts = _dt.fromisoformat(str(ts_raw).replace("Z", "+00:00"))
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=_tz.utc)
+            if ts < cutoff:
+                rotting.append(t.get("id"))
+        except ValueError:
+            rotting.append(t.get("id"))
+    if rotting:
+        out.append(_finding(
+            "mission_progress", "warn",
+            f"{len(rotting)} 筆 blocked 任務滯留 >30 天且無 blocked_until 出口"
+            f"（前 5：{rotting[:5]}）—— escalate-or-close，不可無限停放",
+            recovery="逐筆裁決：可自主解的解、需 owner 的併決策 email、死的 closed_no_action/expired",
+        ))
     return out
 
 

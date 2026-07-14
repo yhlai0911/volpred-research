@@ -115,10 +115,10 @@
 
 | # | 項目 | 層級 | 狀態 |
 |---|---|---|---|
-| 1 | 計畫留檔 + snapshot commit | - | 🔄 進行中 |
-| 2 | WS3a retention 規則 + WS3b 一次清理 + WS3c spec 修正 | 架構 | ⬜ |
-| 3 | WS4d circular import | 架構 | ⬜ |
-| 4 | WS1b ops_snapshot.py + 接線 | 邏輯 | ⬜ |
+| 1 | 計畫留檔 + snapshot commit | - | ✅ b3ac2a9e5 |
+| 2 | WS3a retention 規則 + WS3b 一次清理 + WS3c spec 修正 | 架構 | ✅ f96482a6a（1.7GB+3,254 檔已清；crontab 16→33 條對齊 spec；codex worktree 4.6GB 回收；K1709 worktree 留待 merge 任務） |
+| 3 | WS4d circular import | 架構 | ✅ f96482a6a（雙向 import 實測 + token_report dry-run 通過） |
+| 4 | WS1b ops_snapshot.py + 接線 | 邏輯 | ✅ f96482a6a（0.4s 實測；3 消費端已接） |
 | 5 | WS2a/2b 歸檔流 + 詞彙收斂 | 邏輯 | ⬜ |
 | 6 | WS2c blocked triage | 流程 | ⬜ |
 | 7 | WS1c bootstrap 減肥（snapshot→edit→email diff） | 流程 | ⬜ |

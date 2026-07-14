@@ -259,6 +259,107 @@ def _normalize_priorities_tolerant(tasks: list[Any]) -> int:
     return changed
 
 
+# ---------------------------------------------------------------------------
+# Terminal-task tombstone compaction (2026-07-14 refactor_plan_token_ops_waste
+# WS2a). The queue file carried 2,296 succeeded full records (4.5MB) that every
+# dispatcher/claim/refill pass re-parsed. Readers dedup by task id across ANY
+# status (refill_task_pool, build_publication_candidates, ...), so records must
+# NOT leave the file -- instead old terminal records collapse to a tombstone
+# (id/status/type/title + timestamps) and the full record is appended to
+# storage/next_tasks_archive/YYYY-MM.jsonl. Id-based dedup semantics are
+# preserved for every reader with zero reader changes.
+# ---------------------------------------------------------------------------
+
+TERMINAL_COMPACTABLE_STATUSES: frozenset[str] = frozenset(
+    {
+        "succeeded",
+        "succeeded_null_result",
+        "failed",
+        "superseded",
+        "closed_no_action",
+        "cancelled",
+        "expired",
+    }
+)
+
+_TOMBSTONE_KEEP_FIELDS = (
+    "id",
+    "status",
+    "task_type",
+    "title",
+    "priority",
+    "source",
+    "created_at",
+    "completed_at",
+)
+
+
+def _task_terminal_ts(task: dict) -> str | None:
+    """Best-effort terminal timestamp for age gating; None = not compactable."""
+    for key in ("completed_at", "finished_at", "closed_at", "updated_at"):
+        v = task.get(key)
+        if v:
+            return str(v)
+    hist = task.get("status_history")
+    if isinstance(hist, list) and hist:
+        last = hist[-1]
+        if isinstance(last, dict) and last.get("at"):
+            return str(last["at"])
+    return None
+
+
+def compact_terminal_tasks(
+    tasks: list[Any],
+    *,
+    age_days: int = 30,
+    now: "datetime | None" = None,
+) -> tuple[int, list[dict]]:
+    """Collapse old terminal records to tombstones; return (n, full_records).
+
+    Mutates ``tasks`` in place. Conservative skips: non-dict rows, statuses
+    outside ``TERMINAL_COMPACTABLE_STATUSES`` (the 27 frozen legacy rows are
+    out-of-vocab and therefore never touched -- 永遠修流程，不修資料), rows
+    already tombstoned, rows younger than ``age_days``, and rows with no
+    parseable terminal timestamp. Caller must persist the returned full
+    records to the archive BEFORE writing the compacted queue.
+    """
+    from datetime import datetime, timedelta, timezone as _tz
+
+    now_dt = now or datetime.now(_tz.utc)
+    cutoff = now_dt - timedelta(days=age_days)
+    archived: list[dict] = []
+    for i, task in enumerate(tasks):
+        if not isinstance(task, dict) or task.get("tombstone"):
+            continue
+        status = str(task.get("status") or "").strip().lower()
+        if status not in TERMINAL_COMPACTABLE_STATUSES:
+            continue
+        ts_raw = _task_terminal_ts(task)
+        if not ts_raw:
+            continue
+        try:
+            ts = datetime.fromisoformat(ts_raw.replace("Z", "+00:00"))
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=_tz.utc)
+        except ValueError:
+            warn(
+                "next_tasks_compact",
+                "unparseable terminal timestamp; leaving row uncompacted",
+                task_id=str(task.get("id") or ""),
+                ts=ts_raw[:40],
+            )
+            continue
+        if ts > cutoff:
+            continue
+        archived.append(dict(task))
+        stone = {k: task[k] for k in _TOMBSTONE_KEEP_FIELDS if k in task}
+        stone["tombstone"] = True
+        stone.setdefault("completed_at", ts_raw)
+        stone["archived_at"] = now_dt.isoformat()
+        tasks[i] = stone
+    return len(archived), archived
+
+
 def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
     """Serialize ``tasks`` to an already-open, ``LOCK_EX``-held handle.
 
