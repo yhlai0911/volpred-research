@@ -37131,10 +37131,33 @@
     "title": "Dispatch writer 隔離設計：platform_ops/governance 類比照實驗走 worktree + gate-green 才 merge",
     "description": "refactor_plan_write_boundary_quality.md WS#6（架構層）。先出設計文件不動 code：盤點各 task_type 的寫入面 → worktree 隔離的成本（setup 時間/磁碟/merge 複雜度）與收益（PHASE-Z 基線問題天生消失、gate 在 merge 邊界跑）→ 分階段 cutover 方案。動 supervisor 前需 owner 過目設計。",
     "task_type": "governance",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 2,
     "source": "owner_correction_20260714_evening",
-    "created_at": "2026-07-14T11:16:52.864957+00:00"
+    "created_at": "2026-07-14T11:16:52.864957+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-14T14:45:04.647204+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T14:45:04.876486+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T14:58:23.740694+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-14T14:45:04.876466+00:00",
+    "completed_at": "2026-07-14T14:58:23.740672+00:00",
+    "result": "完成 WS#6 架構設計：盤點全 task_type 寫入面，量測當下 worktree/磁碟成本，定義 write_intent、non-stashing landing、gate receipt 與分階段 cutover。獨立架構終驗 APPROVE；文件明示 runtime 尚未改動，動 supervisor 前仍需 owner 核准。"
   },
   {
     "id": "ci-red-29328352646",
