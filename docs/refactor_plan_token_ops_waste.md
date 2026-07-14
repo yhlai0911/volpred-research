@@ -126,7 +126,7 @@
 | 9 | WS4b dreaming Act 端 | 流程 | ✅ **經查 2026-07-12 已閉環**（apply_auto 預設 ON + rot≥3 晚自動 queue task + queue-once dedup；兩個復發 finding 的 task 已 pending 待派）— 無需新機制 |
 | 10 | WS1a pregate attribution 修復 | 流程 | ✅ 5ff007b98（儀器修復：window-scoped coverage 10.3%→92.3%；**gate 裁定不翻 enforce** — strict_mismatch 50%，12 班 would-skip 有 6 班有實質產出；且 07-12 起池常有 P1/P2、would_skip=0%，skip 節省前提目前不成立。enforce 前提 = pregate demand heuristic 重設計，暫不立案） |
 | 11 | WS4c error_log 壓縮 | 流程 | ✅ 5e78c6a6c（7,739 行/433 條 → 271 行 16-class 索引 + 季度歸檔；守恆 433=433 主線程機械複驗、逐字抽驗通過；回滾 tag `error_log_pre_compaction`；4 處 rules stale 引用已改指 archive。偏差已裁定：近 30 天全文 6,023 行 > 800 上限，改歸檔+主檔近 2 日指標列，可執行性優先） |
-| 12 | WS5 治理疊層收斂 | 流程 | 🔄 2026-07-14 16:5x 已派 subagent（serialize 於 WS4c 後；scope=rules/docs 層，CLAUDE.md 與 skill 編輯回報主線程處理） |
+| 12 | WS5 治理疊層收斂 | 流程 | ✅ 8e41feddc..ccb7716b6（rules/docs 層：worktree-merge 降 2 層、3-strike/dedup pointer 銳化；**誠實發現 3/6 concern 早已收斂**。5b 評估報告落檔：不合併 8 skill、定向去重 ~53 行 + AI-footnote 矛盾 + dual stage machine→S1 分析任務 P3。5c 歸檔 1 檔。skill 層 M1-M3 已派 follow-up agent，完成後寄 skill 修改通知信） |
 | 13 | WS1d 模型分層 | 決策 | ✅ **owner 2026-07-14 裁決：維持全 Opus**（不改 model_router；成本優化改由 WS1a/1b/1c 的結構面承擔） |
 | 14 | K1709 worktree 正規合併（WS3b 發現） | - | 🔜 enqueued P2 main-thread；⚠️ 依賴 k1709_rev2 GW 措辭修正先行（15:45 Codex 裁決） |
 | 15 | paid data 裁決（WS2c 併入決策信） | 決策 | ✅ **owner 2026-07-14 裁決：不採購**。K1268b/K1310 closed；intraday 線改用自有 TAIFEX tick（新任務 `taifexdata_dropbox_organize` P2 + `research_taifex_intraday_rv_line` P3） |
