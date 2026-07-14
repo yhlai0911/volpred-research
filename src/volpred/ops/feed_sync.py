@@ -46,7 +46,7 @@ if str(_SCRIPTS_DIR) not in sys.path:
 
 from supabase_sync import (  # noqa: E402
     _select_rows,
-    _delete_where,
+    reconcile_article_deletes,
     sync_article,
 )
 
@@ -308,14 +308,24 @@ def apply_diff(
             failed += 1
             failures.append({"slug": slug, "op": "update"})
 
+    # Destructive deletes are delegated to the single guarded owner
+    # (supabase_sync.reconcile_article_deletes) rather than looping raw
+    # _delete_where here. That owner enforces the floor/cap/dump invariants and
+    # is also the step sync_full() runs, so both paths share one delete
+    # implementation (anti-stacking). It recomputes ghosts from the same
+    # feed.json/remote source of truth as compute_diff, so the removed set
+    # matches diff["delete"] barring concurrent edits.
+    reconcile: dict | None = None
     if allow_delete:
-        for slug in diff.get("delete", []):
-            ok = _delete_where("articles", {"slug": slug})
-            if ok:
-                deleted += 1
-            else:
-                failed += 1
-                failures.append({"slug": slug, "op": "delete"})
+        reconcile = reconcile_article_deletes(storage_dir, apply=True)
+        deleted = reconcile.get("deleted", 0)
+        # An abort (floor/cap breach) means nothing was deleted — surface the
+        # attempted-but-skipped count so the caller does not read it as success.
+        if reconcile.get("aborted"):
+            failed += reconcile.get("ghost_count", 0)
+            failures.append({"op": "delete", "aborted": reconcile.get("reason")})
+        else:
+            failed += reconcile.get("failed", 0)
 
     return {
         "inserted": inserted,
@@ -324,6 +334,7 @@ def apply_diff(
         "skipped_deletes": 0 if allow_delete else len(diff.get("delete", [])),
         "failed": failed,
         "failures": failures,
+        "reconcile": reconcile,
     }
 
 

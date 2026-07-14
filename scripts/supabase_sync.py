@@ -833,18 +833,23 @@ def sync_article_status(slug: str, status: str) -> bool:
 
 
 def delete_article(slug: str) -> bool:
-    """Hard-delete an article row by slug. Manual cascade: article_impressions
-    has NO ON DELETE CASCADE (per migrations/001), so we must pre-delete it.
+    """Hard-delete an article row by slug.
+
+    FK note: migration 021 (2026-04-18) set article_impressions.article_id to
+    ON DELETE CASCADE, so the DB now removes impressions automatically. The
+    explicit pre-delete below is kept as defence-in-depth (idempotent no-op when
+    the cascade is present; a safety net if 021 was not applied to some row).
+    article_reactions / question_articles / article_tags / comments are ON
+    DELETE CASCADE (schema 001), so the final articles DELETE handles them.
 
     Returns True iff articles row is actually gone; False on any HTTP error.
     """
     # Resolve UUID first (article_impressions uses article_id uuid FK)
     article_id = _get_article_id(slug)
     if article_id:
-        # Pre-delete the only non-CASCADE FK reference (BUG-001 fix 2026-04-18)
+        # Pre-delete the impressions FK reference (belt-and-suspenders; BUG-001
+        # fix 2026-04-18 / migration 021 made this ON DELETE CASCADE at the DB).
         _delete_where("article_impressions", {"article_id": article_id})
-        # article_reactions / question_articles / article_tags / comments are
-        # ON DELETE CASCADE (schema 001), so the final articles DELETE handles them.
     ok = _delete_where("articles", {"slug": slug})
     if not ok:
         # 409 / other error — don't silently succeed. Caller (cleanup_test_post)
@@ -863,6 +868,191 @@ def _get_article_id(slug: str) -> str | None:
             return data[0]["id"] if data else None
     except Exception:
         return None  # silent-ok: best-effort id lookup; None = caller treats as not-found
+
+
+def _reconcile_dump_path(storage_dir: str | Path, stamp: str | None = None) -> Path:
+    """storage/ops/supabase_reconcile_removed_YYYYMMDD.jsonl (recovery dump)."""
+    from datetime import datetime
+    stamp = stamp or datetime.now().strftime("%Y%m%d")
+    return Path(storage_dir) / "ops" / f"supabase_reconcile_removed_{stamp}.jsonl"
+
+
+def reconcile_article_deletes(
+    storage_dir: str | Path = "storage",
+    *,
+    apply: bool = True,
+    floor: int = 500,
+    max_deletes: int = 300,
+) -> dict:
+    """Delete Supabase `articles` rows whose slug is absent from local feed.json.
+
+    Closes the push-only mirror drift: sync_full()/sync_article() only ever
+    UPSERT, never DELETE. A row for an article that was pruned from — or never
+    existed in — the canonical feed.json therefore accumulates as a "ghost" on
+    Supabase (2026-07-14 incident: 200 ghosts ~= 156 draft + 44 retracted,
+    inflating the admin content count to 2003 vs the local 1803). feed.json is
+    the single source of truth (a one-way projection to Supabase), so any remote
+    slug not present locally IS drift.
+
+    This is the single guarded delete owner for the articles mirror. Both the
+    scheduled push path (sync_full) and the manual diff tool
+    (feed_sync.apply_diff) route destructive article deletes through here rather
+    than calling _delete_where("articles", ...) directly, so the floor/cap/dump
+    invariants below can never be bypassed.
+
+    Safety invariants (any breach => delete NOTHING, aborted=True):
+      floor:       refuse unless local feed loaded >= `floor` articles. Guards an
+                   empty / corrupt / half-written feed.json from wiping the table.
+      max_deletes: abort if the drift exceeds `max_deletes`. Guards canonical
+                   corruption (e.g. a bad edit dropping most articles) from
+                   triggering a mass delete instead of a targeted reconcile.
+      dump:        every row to be removed — plus its article_impressions, which
+                   ON DELETE CASCADE (migration 021) would otherwise destroy — is
+                   appended to storage/ops/supabase_reconcile_removed_YYYYMMDD.jsonl
+                   BEFORE any DELETE, so a mistaken removal is fully recoverable.
+
+    apply=False performs a read-only preview (computes ghosts, writes nothing).
+
+    Returns counters: {local_count, remote_count, ghost_count, deleted, failed,
+    impressions_dumped, dump_path, aborted, reason, sample}.
+    """
+    storage = Path(storage_dir)
+    result = {
+        "local_count": 0,
+        "remote_count": 0,
+        "ghost_count": 0,
+        "deleted": 0,
+        "failed": 0,
+        "impressions_dumped": 0,
+        "dump_path": None,
+        "aborted": False,
+        "reason": "",
+        "sample": [],
+    }
+
+    # --- local canonical id set (source of truth) ---
+    feed_path = storage / "reports" / "feed.json"
+    try:
+        feed = json.loads(feed_path.read_text())
+    except Exception as e:
+        result["aborted"] = True
+        result["reason"] = "canonical_load_failed"
+        print(
+            f"[reconcile] WARN abort: cannot load {feed_path}: "
+            f"{type(e).__name__}: {e}"
+        )
+        return result
+    if isinstance(feed, dict):
+        feed = feed.get("items", [])
+    local_ids = {
+        a.get("id") for a in feed if isinstance(a, dict) and a.get("id")
+    }
+    result["local_count"] = len(local_ids)
+
+    # floor guard — refuse to delete against a suspiciously small canonical set
+    if len(local_ids) < floor:
+        result["aborted"] = True
+        result["reason"] = f"canonical_below_floor(<{floor})"
+        print(
+            f"[reconcile] WARN abort: local feed has {len(local_ids)} articles "
+            f"(< floor {floor}); refusing to delete (guards empty/corrupt feed)."
+        )
+        return result
+
+    # --- remote projection (paginates past the 1000-row cap) ---
+    remote_rows = _select_rows(
+        "articles",
+        select="id,slug,status,title,published_at,updated_at",
+        order_by="id",
+    )
+    result["remote_count"] = len(remote_rows)
+    ghosts = [
+        r for r in remote_rows if r.get("slug") and r["slug"] not in local_ids
+    ]
+    result["ghost_count"] = len(ghosts)
+    result["sample"] = [
+        {"slug": g.get("slug"), "status": g.get("status")} for g in ghosts[:5]
+    ]
+
+    if not ghosts:
+        result["reason"] = "no_drift"
+        return result
+
+    # cap guard — a drift larger than max_deletes smells like canonical corruption
+    if len(ghosts) > max_deletes:
+        result["aborted"] = True
+        result["reason"] = f"exceeds_max_deletes({len(ghosts)}>{max_deletes})"
+        print(
+            f"[reconcile] WARN abort: {len(ghosts)} ghosts exceed max_deletes "
+            f"{max_deletes}; refusing bulk delete (suspected canonical "
+            f"corruption). Investigate feed.json before re-running."
+        )
+        return result
+
+    if not apply:
+        result["reason"] = "preview"
+        return result
+
+    # --- dump-before-delete (recoverable), incl. cascade-impacted impressions ---
+    from datetime import datetime, timezone
+    now_iso = datetime.now(timezone.utc).isoformat()
+    ghost_uuids = [str(g["id"]) for g in ghosts if g.get("id")]
+    impressions_by_article: dict[str, list] = {}
+    for i in range(0, len(ghost_uuids), 100):
+        chunk = ghost_uuids[i:i + 100]
+        try:
+            imp_rows = _select_rows_in(
+                "article_impressions", "article_id", chunk, select="*"
+            )
+        except Exception as e:
+            imp_rows = []
+            print(
+                f"[reconcile] WARN impressions fetch failed for a chunk "
+                f"(dump proceeds without them): {type(e).__name__}: {e}"
+            )
+        for row in imp_rows:
+            aid = str(row.get("article_id") or "")
+            impressions_by_article.setdefault(aid, []).append(row)
+
+    dump_path = _reconcile_dump_path(storage)
+    dump_path.parent.mkdir(parents=True, exist_ok=True)
+    imp_total = 0
+    with dump_path.open("a", encoding="utf-8") as fh:
+        for g in ghosts:
+            imps = impressions_by_article.get(str(g.get("id")), [])
+            imp_total += len(imps)
+            fh.write(
+                json.dumps(
+                    {
+                        "deleted_at": now_iso,
+                        "reason": "supabase_reconcile_ghost_not_in_feed",
+                        "article": g,
+                        "impressions": imps,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+    result["impressions_dumped"] = imp_total
+    result["dump_path"] = str(dump_path)
+
+    # --- delete (FK-safe via delete_article: impressions pre-delete + loud fail) ---
+    for g in ghosts:
+        slug = g.get("slug")
+        if not slug:
+            continue
+        if delete_article(slug):
+            result["deleted"] += 1
+        else:
+            result["failed"] += 1
+
+    print(
+        f"[reconcile] local={result['local_count']} "
+        f"remote={result['remote_count']} ghosts={result['ghost_count']} "
+        f"deleted={result['deleted']} failed={result['failed']} "
+        f"impressions_dumped={imp_total} dump={dump_path}"
+    )
+    return result
 
 
 def sync_paper_trade(strategy: str, entry: dict, trade_date: str) -> bool:
@@ -981,9 +1171,16 @@ def _save_sync_state(storage: Path, state: dict):
     state_path.write_text(json.dumps(state, indent=2))
 
 
-def sync_full(storage_dir: str | Path = "storage") -> dict:
+def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = True) -> dict:
     """Incremental sync: only upsert items changed since last sync.
-    Falls back to full sync on first run or if state file is missing."""
+    Falls back to full sync on first run or if state file is missing.
+
+    reconcile_deletes: after pushing, run reconcile_article_deletes() to remove
+    Supabase `articles` rows whose slug is absent from the canonical feed.json.
+    The push is upsert-only, so without this the mirror drifts upward forever
+    (ghost drafts/retracted rows never leave). Guarded (floor/cap/dump) so a
+    corrupt feed can never trigger a mass delete. Default on for the scheduled
+    path; pass False to skip (e.g. a push-only smoke test)."""
     storage = Path(storage_dir)
     counts = {}
     backup_audit = ensure_local_article_backups(storage, repair=True)
@@ -1082,6 +1279,17 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
                     ok += 1
             counts[mem_type] = ok
             state[f"{mem_type}_count"] = len(entries)
+
+    # Delete reconcile — the push above is upsert-only, so remote rows for
+    # articles absent from canonical feed.json accumulate as ghosts. Close the
+    # drift here (guarded: floor/cap/dump). Skipped when reads are blocked so a
+    # test that reaches sync_full without stubbing does not crash.
+    if reconcile_deletes and not _remote_reads_blocked():
+        try:
+            counts["reconcile"] = reconcile_article_deletes(storage)
+        except Exception as e:
+            counts["reconcile"] = {"aborted": True, "reason": f"error:{type(e).__name__}"}
+            print(f"[reconcile] WARN sync_full reconcile step failed: {type(e).__name__}: {e}")
 
     _save_sync_state(storage, state)
     return counts

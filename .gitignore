@@ -66,6 +66,10 @@ storage/ops/*.lock
 storage/ops/compute_queue/*.lock
 storage/ops/locks/
 storage/ops/writer_log.jsonl
+# Supabase delete-reconcile recovery dumps (rows removed from articles mirror) —
+# local recovery artifact written by scripts/supabase_sync.reconcile_article_deletes,
+# not canonical source. Kept on disk for recoverability, out of git (like writer_log).
+storage/ops/supabase_reconcile_removed_*.jsonl
 # Telegram responder runtime state (message log + poll cursor) — runtime noise, not canonical
 storage/ops/telegram_inbox.jsonl
 storage/ops/telegram_state.json
