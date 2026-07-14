@@ -36,6 +36,7 @@ NEXT_TASKS_PATH = ROOT / "storage/next_tasks.json"
 sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.ops.canonical_write import guard_canonical_write
+from volpred.publication_gate import publication_block_reason
 from volpred.topic_clusters import classify_topic_cluster, cluster_gate_status
 
 
@@ -355,6 +356,7 @@ def main():
 
     # For each K, check feed coverage
     incomplete_research_count = 0
+    publication_blocked: list[dict] = []
     candidates = []
     for k_id, entry in by_k.items():
         # 2026-05-09 K728/K924 incidents: K experiments without *_results.json are
@@ -369,6 +371,18 @@ def main():
             incomplete_research_count += 1
             continue
         if _is_invalidated_artifact(entry):
+            continue
+        # A reviewer can clear an experiment as research while withholding it
+        # from publication (K1684: CONDITIONAL_PASS, "E2 required before
+        # publication/paper routing"). Such a K must never surface as an
+        # article candidate — see volpred.publication_gate.
+        block_reason = publication_block_reason(entry)
+        if block_reason:
+            publication_blocked.append({
+                "k_id": k_id,
+                "verdict": entry.get("verdict"),
+                "reason": block_reason,
+            })
             continue
         covering_articles = []
         for article in feed:
@@ -600,9 +614,11 @@ def main():
                 "to avoid refill treadmill loops."
             ),
         },
+        "publication_blocked": publication_blocked,
         "summary": {
             "total_k": total,
             "incomplete_research_filtered": incomplete_research_count,
+            "publication_blocked": len(publication_blocked),
             "uncovered": uncovered,
             "high_priority_uncovered": len(high_uncovered),
             "missing_general_audience": len(missing_general),
@@ -641,6 +657,10 @@ def main():
 
     # Print concise summary
     print(f"Scanned {total} K experiments ({incomplete_research_count} filtered: no results JSON).")
+    if publication_blocked:
+        print(f"  Publication-blocked by reviewer (excluded from all pools): {len(publication_blocked)}")
+        for row in publication_blocked:
+            print(f"    - {row['k_id']} [{row['verdict']}] {row['reason'][:110]}")
     print(f"  Uncovered: {uncovered}")
     print(f"  High-priority uncovered (score≥5): {len(high_uncovered)}")
     print(f"  Covered but missing general audience: {len(missing_general)}")
