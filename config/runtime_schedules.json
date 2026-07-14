@@ -340,10 +340,10 @@
       {
         "id": "work_summary_6h",
         "label": "6h 工作摘要 email (HTML, 用戶 2026-05-17 要求)",
-        "cron": "5 */6 * * *",
+        "cron": "5 20 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_work_summary.sh",
         "log_path": "storage/logs/cron/work_summary.log",
-        "description": "每 6h 寄送 HTML 工作摘要 email 給 yihao.lai@gmail.com（涵蓋 git commits + work_log + 文章 + worktree agents + notifications，窗口 SINCE=NOW-6h）。LaunchAgent canonical (host_crontab_managed=false 同 check_alerts pattern)。Fire times: 00:05/06:05/12:05/18:05 UTC。",
+        "description": "每日 20:05 一班工作日結 email（git commits + work_log + 文章 + worktree agents + notifications，窗口 24h）。2026-07-14 WS4a 由每 6h 降為每日一班；待 WS5 併入 boss_report 後本 entry 廢棄。LaunchAgent canonical (com.volpred.work-summary, host_crontab_managed=false)。",
         "host_crontab_managed": false,
         "launchagent_label": "com.volpred.work-summary",
         "matchers": [
@@ -392,10 +392,10 @@
       },
       {
         "id": "boss_report_4h",
-        "cron": "10 */4 * * *",
+        "cron": "10 8,14,20 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_boss_report.sh",
         "log_path": "storage/logs/cron/boss_report.log",
-        "description": "Every 4h: send boss HTML email report (state + decisions + recommendations)",
+        "description": "台灣時間 08:10/14:10/20:10 三班寄 boss HTML 報告（state + decisions + recommendations）。2026-07-14 refactor_plan_token_ops_waste WS4a：原每 4h 六班與 work_summary 每 6h 四班重疊，老闆日收 ~14 封系統信 → 降為 3+1 班；完整合併（work_summary 內容併入 boss_report、單一 owner）排 WS5 治理收斂任務。",
         "host_crontab_managed": true,
         "piggy_back_enabled": true
       },

@@ -1,6 +1,17 @@
 # Project Improvement Status
 
-Last updated: **2026-05-04 (system audit + 4-phase improvement plan)**
+Last updated: **2026-07-14 (token/ops 浪費結構性優化)**
+
+## 2026-07-14 Token/Ops 浪費重構（active）
+
+Owner 指示對「浪費且無意義的流程」全面盤點後的結構性優化。計畫 + 三層診斷 + 執行狀態
+= `docs/refactor_plan_token_ops_waste.md`（§4 狀態表為 canonical，本檔不重複）。
+當日完成：定位儀器 ops_snapshot、queue tombstone 壓縮（-64%）、retention as flow
+（回收 ~6.3GB）、報告面降頻（老闆信 ~14→~5-6 封/天）、CLAUDE.md 396→333、blocked
+triage 46→29、circular import / FRED guard 空轉 / spec drift 根治。剩餘 WS（pregate
+attribution、error_log 壓縮、治理疊層收斂、K1709 合併）已進 next_tasks P2 由排程消化。
+
+## 2026-05-04 系統性 audit + 4-phase 優化計劃
 
 ## 2026-05-04 系統性 audit + 4-phase 優化計劃
 

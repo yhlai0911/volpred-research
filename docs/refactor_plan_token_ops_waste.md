@@ -119,15 +119,20 @@
 | 2 | WS3a retention 規則 + WS3b 一次清理 + WS3c spec 修正 | 架構 | ✅ f96482a6a（1.7GB+3,254 檔已清；crontab 16→33 條對齊 spec；codex worktree 4.6GB 回收；K1709 worktree 留待 merge 任務） |
 | 3 | WS4d circular import | 架構 | ✅ f96482a6a（雙向 import 實測 + token_report dry-run 通過） |
 | 4 | WS1b ops_snapshot.py + 接線 | 邏輯 | ✅ f96482a6a（0.4s 實測；3 消費端已接） |
-| 5 | WS2a/2b 歸檔流 + 詞彙收斂 | 邏輯 | ⬜ |
-| 6 | WS2c blocked triage | 流程 | ⬜ |
-| 7 | WS1c bootstrap 減肥（snapshot→edit→email diff） | 流程 | ⬜ |
-| 8 | WS4a 報告面合併 | 流程 | ⬜ |
-| 9 | WS4b dreaming Act 端 | 流程 | ⬜ |
-| 10 | WS1a pregate attribution 修復 | 流程 | 🔜 enqueued P2（修蓋章→重評→gate 達標才翻 enforce） |
-| 11 | WS4c error_log 壓縮 | 流程 | 🔜 enqueued P2 |
-| 12 | WS5 治理疊層收斂 | 流程 | 🔜 enqueued P2（月度 skill audit 併入） |
-| 13 | WS1d 模型分層 | 決策 | ✉️ decision email 已寄，等 owner 裁決 |
+| 5 | WS2a/2b 歸檔流 + 詞彙收斂 | 邏輯 | ✅ b61789d26（2a：tombstone 壓縮 4.5MB→1.6MB、-64%，未達 <500KB 目標 — 殘量 = tombstone 本體 + <3d 窗口，判定可接受；2b：**既有機制已完成**，TASK_STATUSES + CI baseline gate，無需新工） |
+| 6 | WS2c blocked triage | 流程 | ✅ 46→29（9 expired / 2 closed / 5 誤標回 pending / paid×2 設 until；rot >30d 監測收編 daily_checkup，首跑浮出 10 筆） |
+| 7 | WS1c bootstrap 減肥 | 流程 | ✅ be8e69b20（396→333 行、-16%；未達 ≤250 — 剩餘全為 operative 規則，深度收斂屬 WS5；MEMORY.md 整併由 dreaming 已排的 consolidation task 收）|
+| 8 | WS4a 報告面合併 | 流程 | ✅ 降頻生效（boss_report 6→3 班/天、work_summary 4→1 班/天，LaunchAgent 重生驗證；預估老闆信 ~14→~5-6 封/天；單一 owner 完整合併併入 WS5） |
+| 9 | WS4b dreaming Act 端 | 流程 | ✅ **經查 2026-07-12 已閉環**（apply_auto 預設 ON + rot≥3 晚自動 queue task + queue-once dedup；兩個復發 finding 的 task 已 pending 待派）— 無需新機制 |
+| 10 | WS1a pregate attribution 修復 | 流程 | 🔜 enqueued P2（`topology-audit-20260710-pregate-enforce-flip` 已重規格：修蓋章→重評→gate 達標才翻 enforce） |
+| 11 | WS4c error_log 壓縮 | 流程 | 🔜 enqueued P2（`ws4c_error_log_compaction`） |
+| 12 | WS5 治理疊層收斂 | 流程 | 🔜 enqueued P2（`ws5_governance_layer_consolidation`；月度 skill audit 併入） |
+| 13 | WS1d 模型分層 | 決策 | ✉️ decision email 2026-07-14 已寄，等 owner 裁決 |
+| 14 | K1709 worktree 正規合併（WS3b 發現） | - | 🔜 enqueued P2 main-thread（`k1709_worktree_merge_verification`） |
+
+**執行日 meta-發現（2026-07-14）**：計畫的 5 個「待建機制」中有 3 個其實已存在但未啟用/未被知悉
+（pregate 只差 config flip、dreaming apply_auto 7/12 已 ON、status 詞彙 gate 已有 CI baseline）。
+教訓固化至 memory `feedback_check_existing_mechanism_before_building`。
 
 ## 5. 驗證 Gate（宣告完成前必過）
 - 每 WS 的 Check 指標用**線上實測數據**驗證（token 週報 / du / jq 統計 / 信件計數），
