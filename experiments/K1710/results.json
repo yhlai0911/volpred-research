@@ -1,0 +1,703 @@
+{
+  "experiment_id": "K1710",
+  "title": "Open-convention + mixed-timing anchor panels for the PRG three-convention main table",
+  "created_at": "2026-07-14T04:11:13.079692+00:00",
+  "random_seed": 1710,
+  "research_question": "On the K1699 pinned snapshot vintage, reproduce the two panels missing from the PRG three-forecast-timing-convention main table: (A) the open-convention panel (PRG open-known vs fair-information GJR-X, both issued at the day-d open with the current overnight realized) and (B) the mixed-timing anchor (PRG canonical vs close-to-close GJR, the old paper headline object). Do the directions reproduce K1544 / K880 so all three main-table panels share one vintage and pass the reproduce gate?",
+  "sign_convention": "Every DM cell is dm_cell(A, B) -> pair 'A_vs_B', NEGATIVE t means model A has lower loss (A better). Same orientation as K1699's close panel so the three-panel table is internally consistent. K1544 used the opposite orientation (fair minus PRG, positive = PRG better); the anchor cross-check flips the sign explicitly.",
+  "method_summary": {
+    "open_convention": "PRG_open_known full-day = r2_overnight[t] (realized at day-d open) + h_in_hat(r2_overnight[t]); FairGJRX = omega + alpha r2_c2c[t-1] + gamma I(r<0) r2 + beta h[t-1] + delta r2_overnight[t] (current overnight, K1544 spec), estimated on data strictly before the forecast origin, expanding window, refit every 63 days.",
+    "mixed_timing_anchor": "PRG_canonical_mixed = h_ov_hat (issued d-1 close) + h_in_hat(r2_overnight[t]) (intraday fed day-d realized overnight); GJR = close-to-close GJR(1,1), identical to the K1699 baseline. This is the old paper headline object.",
+    "loss": "canonical volpred qlike_pointwise (actual/predicted orientation)",
+    "dm": "canonical volpred.stats.model_evaluation.dm_test, h=1, Newey-West HAC bandwidth ceil(n^(1/3)); per-cell loss-diff acf(1) and 2x-bandwidth sensitivity t reported",
+    "no_lookahead_guard": "All PRG/GJR-X/GJR fits use observations strictly before the forecast origin. Open-convention forecasts use only day-d information realized at the market open (r2_overnight[t]); they never use r_c2c[t], the intraday return, or the full-day target[t].",
+    "overnight_variance_share": "oos_overnight_variance_share = sum(r2_overnight) / sum(r2_overnight + r2_intra) over the OOS window, from the pinned snapshot (paper Data table).",
+    "harvey_threshold": "|t| > 3.0"
+  },
+  "data_snapshots": {
+    "SPY_snapshot.csv": {
+      "file": "experiments/K1710/data/SPY_snapshot.csv",
+      "sha256": "501af099f9e8205d4629b607ee2e30a147e7beef6ed5ce1282abc00ad2ae183b",
+      "matches_k1699": true
+    },
+    "QQQ_snapshot.csv": {
+      "file": "experiments/K1710/data/QQQ_snapshot.csv",
+      "sha256": "b42eb032309215841faa55a7476366df9541b991dcb8b046ac4135c31fb4835d",
+      "matches_k1699": true
+    },
+    "GLD_snapshot.csv": {
+      "file": "experiments/K1710/data/GLD_snapshot.csv",
+      "sha256": "0741addcf29a2769bd550ea80558a1f6579f6a0441d49039b5437e48b9395f35",
+      "matches_k1699": true
+    },
+    "EEM_snapshot.csv": {
+      "file": "experiments/K1710/data/EEM_snapshot.csv",
+      "sha256": "924a7447754546c05852aee899951995f567cae5b23e37e2eccf7c8bef87d7c3",
+      "matches_k1699": true
+    },
+    "0050_TW_snapshot.csv": {
+      "file": "experiments/K1710/data/0050_TW_snapshot.csv",
+      "sha256": "91ec88b94cc7692c5f3feaded96c28218f9b8408cd52105367bd296a388e8b0f",
+      "matches_k1699": true
+    },
+    "TAIFEX_sessions_snapshot.csv": {
+      "file": "experiments/K1710/data/TAIFEX_sessions_snapshot.csv",
+      "sha256": "59c21377aea941e9c18094a47d07a1d2caa3d0b73a66c7f97e8bd6b44f950acf",
+      "matches_k1699": true
+    },
+    "TAIFEX_daily_snapshot.csv": {
+      "file": "experiments/K1710/data/TAIFEX_daily_snapshot.csv",
+      "sha256": "b573f0e2736532c7671bab7120c1872ef23b5682e50013c607a635790cf42588",
+      "matches_k1699": true
+    }
+  },
+  "data_vintage_note": "Data is the K1699 2026-07-12 pinned vintage (SHA256-verified). K1544 open panel (2026-06-24 unpinned) and K880 mixed anchor are DIRECTIONAL anchors, not bit-identical targets: yfinance auto_adjust retro-adjusts history so point values differ at the vintage/ulp level; the robust claim is the DM direction, which must reproduce.",
+  "determinism": {
+    "two_pass_bit_identical": true,
+    "global_seed": 1710,
+    "note": "PRG estimators use their base-module internal multistart seeds; FairGJRX reuses K1544's internal RandomState(1544). All fits deterministic; two full pipeline passes assert bit-identical numeric core."
+  },
+  "anchor_validation": {
+    "open_panel_vs_k1544": {
+      "SPY": {
+        "open_panel_prg_vs_fairgjrx_t": -3.556722171277927,
+        "open_panel_prg_better": true,
+        "k1544_open_anchor_fair_minus_prg_t": 2.1149,
+        "k1544_orientation_equivalent_t": 3.556722171277927,
+        "open_direction_matches_k1544": true,
+        "mixed_anchor_prg_vs_gjr_t": -5.826535365210632,
+        "mixed_anchor_prg_better": true
+      },
+      "QQQ": {
+        "open_panel_prg_vs_fairgjrx_t": -1.5632371252371544,
+        "open_panel_prg_better": true,
+        "k1544_open_anchor_fair_minus_prg_t": 2.9668,
+        "k1544_orientation_equivalent_t": 1.5632371252371544,
+        "open_direction_matches_k1544": true,
+        "mixed_anchor_prg_vs_gjr_t": -4.781182219927142,
+        "mixed_anchor_prg_better": true
+      },
+      "GLD": {
+        "open_panel_prg_vs_fairgjrx_t": -3.643330704041451,
+        "open_panel_prg_better": true,
+        "k1544_open_anchor_fair_minus_prg_t": 3.6253,
+        "k1544_orientation_equivalent_t": 3.643330704041451,
+        "open_direction_matches_k1544": true,
+        "mixed_anchor_prg_vs_gjr_t": -6.105800850260218,
+        "mixed_anchor_prg_better": true
+      },
+      "EEM": {
+        "open_panel_prg_vs_fairgjrx_t": -10.137308158211296,
+        "open_panel_prg_better": true,
+        "k1544_open_anchor_fair_minus_prg_t": 10.1305,
+        "k1544_orientation_equivalent_t": 10.137308158211296,
+        "open_direction_matches_k1544": true,
+        "mixed_anchor_prg_vs_gjr_t": -6.404814533553168,
+        "mixed_anchor_prg_better": true
+      },
+      "0050.TW": {
+        "open_panel_prg_vs_fairgjrx_t": -3.6702744878805573,
+        "open_panel_prg_better": true,
+        "k1544_open_anchor_fair_minus_prg_t": 3.8697,
+        "k1544_orientation_equivalent_t": 3.6702744878805573,
+        "open_direction_matches_k1544": true,
+        "mixed_anchor_prg_vs_gjr_t": -5.194315839449924,
+        "mixed_anchor_prg_better": true
+      },
+      "TAIFEX": {
+        "open_panel_prg_vs_fairgjrx_t": -5.503475538655458,
+        "open_panel_prg_better": true,
+        "k1544_open_anchor_fair_minus_prg_t": 5.6075,
+        "k1544_orientation_equivalent_t": 5.503475538655458,
+        "open_direction_matches_k1544": true,
+        "mixed_anchor_prg_vs_gjr_t": -4.328342906473849,
+        "mixed_anchor_prg_better": true
+      }
+    },
+    "mixed_anchor_vs_k880_spy": {
+      "k880_reference": {
+        "orientation_note": "K880 key 'GJR_vs_PRG_Extended': positive t => GJR worse => PRG_Extended better; equivalent K1710 PRG-first t = -(that value).",
+        "directional_prior_note": "K880 2026-06-13 rerun and K1699 README cite SPY mixed-timing DM ~ +5.06 in GJR-vs-PRG orientation (PRG better); the checked-in original artifact value below may differ at the vintage level. Both agree PRG_Extended beats GJR; K1710's own pinned mixed-anchor t is the reproduction of record.",
+        "source_file": "paper/prg-periodic-garch/experiments/k880_results.json",
+        "source_key": "layer5_dm_tests.GJR_vs_PRG_Extended.t_stat",
+        "k880_gjr_vs_prg_extended_t_positive_prg_better": 6.453705298688368,
+        "k880_prg_first_equivalent_t_negative_prg_better": -6.453705298688368
+      },
+      "k1710_spy_mixed_anchor_prg_first_t_negative_prg_better": -5.826535365210632,
+      "k1710_spy_mixed_anchor_prg_better": true,
+      "direction_matches_k880": true,
+      "note": "Direction check only: K880 has PRG_Extended beating GJR (GJR-vs-PRG t positive ~ +5 to +6.45 across vintages); K1710's PRG-first mixed-anchor t must be large NEGATIVE (PRG better). Point value is not a bit-identical target across vintages."
+    }
+  },
+  "markets": {
+    "SPY": {
+      "market": "SPY",
+      "metadata": {
+        "data_source": "K1699 pinned SPY snapshot (yfinance via k880 load_spy_data, 2026-07-12 vintage)",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "IS through 2018-12-31",
+        "n_total": 6601,
+        "n_is": 4778,
+        "n_oos": 1823,
+        "period": "2000-01-04 to 2026-04-02",
+        "prg_refit_freq_days": 126,
+        "fair_gjr_refit_freq_days": 63,
+        "gjr_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2019-01-02",
+        "end": "2026-04-02",
+        "n_oos": 1823,
+        "n_common_valid": 1823
+      },
+      "oos_overnight_variance_share": 0.44807385896364776,
+      "qlike": {
+        "PRG_open_known": 0.669736591836922,
+        "FairGJRX": 0.726691330058789,
+        "PRG_canonical_mixed": 0.7469334181272753,
+        "GJR": 0.8533678975813833
+      },
+      "dm_tests": {
+        "open_panel_main": {
+          "pair": "PRG_open_known_vs_FairGJRX",
+          "t_stat": -3.556722171277927,
+          "p_value": 0.00038510711926753594,
+          "n": 1823,
+          "orientation": "negative t means PRG_open_known loss < FairGJRX loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.012933160616157043,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -3.6713165206271814,
+          "mean_loss_diff": -0.05695473822186697
+        },
+        "mixed_anchor_main": {
+          "pair": "PRG_canonical_mixed_vs_GJR",
+          "t_stat": -5.826535365210632,
+          "p_value": 6.676302843899862e-09,
+          "n": 1823,
+          "orientation": "negative t means PRG_canonical_mixed loss < GJR loss (PRG_canonical_mixed better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.0027591104480311724,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -5.622775568516165,
+          "mean_loss_diff": -0.106434479454108
+        },
+        "secondary_fairgjrx_vs_gjr": {
+          "pair": "FairGJRX_vs_GJR",
+          "t_stat": -6.192464514820912,
+          "p_value": 7.30189020359262e-10,
+          "n": 1823,
+          "orientation": "negative t means FairGJRX loss < GJR loss (FairGJRX better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.014127365264488677,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -6.14335437725774,
+          "mean_loss_diff": -0.1266765675225942
+        },
+        "secondary_open_known_vs_gjr": {
+          "pair": "PRG_open_known_vs_GJR",
+          "t_stat": -6.431797011785101,
+          "p_value": 1.606994537439732e-10,
+          "n": 1823,
+          "orientation": "negative t means PRG_open_known loss < GJR loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.017542504020395776,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -6.423624874754073,
+          "mean_loss_diff": -0.18363130574446115
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_open_known": {
+          "valid_oos": 1823
+        },
+        "FairGJRX": {
+          "valid_oos": 1823
+        },
+        "PRG_canonical_mixed": {
+          "valid_oos": 1823
+        },
+        "GJR": {
+          "valid_oos": 1823
+        }
+      }
+    },
+    "QQQ": {
+      "market": "QQQ",
+      "metadata": {
+        "data_source": "K1699 pinned QQQ snapshot (yfinance via k881, 2026-07-12 vintage)",
+        "description": "Tech equity (Nasdaq-100)",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample",
+        "n_total": 6601,
+        "n_is": 4620,
+        "n_oos": 1981,
+        "period": "2000-01-04 to 2026-04-02",
+        "prg_refit_freq_days": 252,
+        "fair_gjr_refit_freq_days": 63,
+        "gjr_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2018-05-16",
+        "end": "2026-04-02",
+        "n_oos": 1981,
+        "n_common_valid": 1981
+      },
+      "oos_overnight_variance_share": 0.3854748125547527,
+      "qlike": {
+        "PRG_open_known": 0.7096347654560087,
+        "FairGJRX": 0.7423098643611417,
+        "PRG_canonical_mixed": 0.7598453565485308,
+        "GJR": 0.8304791978786752
+      },
+      "dm_tests": {
+        "open_panel_main": {
+          "pair": "PRG_open_known_vs_FairGJRX",
+          "t_stat": -1.5632371252371544,
+          "p_value": 0.11815663437023072,
+          "n": 1981,
+          "orientation": "negative t means PRG_open_known loss < FairGJRX loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": false,
+          "loss_diff_acf1": -0.01501875651908763,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -1.5973811808239708,
+          "mean_loss_diff": -0.03267509890513291
+        },
+        "mixed_anchor_main": {
+          "pair": "PRG_canonical_mixed_vs_GJR",
+          "t_stat": -4.781182219927142,
+          "p_value": 1.8711323339637431e-06,
+          "n": 1981,
+          "orientation": "negative t means PRG_canonical_mixed loss < GJR loss (PRG_canonical_mixed better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.031591938957779356,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -4.938488740902729,
+          "mean_loss_diff": -0.07063384133014441
+        },
+        "secondary_fairgjrx_vs_gjr": {
+          "pair": "FairGJRX_vs_GJR",
+          "t_stat": -5.66459674364683,
+          "p_value": 1.689331119436588e-08,
+          "n": 1981,
+          "orientation": "negative t means FairGJRX loss < GJR loss (FairGJRX better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.004527242249641264,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -5.9109621162005865,
+          "mean_loss_diff": -0.08816933351753353
+        },
+        "secondary_open_known_vs_gjr": {
+          "pair": "PRG_open_known_vs_GJR",
+          "t_stat": -4.360273646252602,
+          "p_value": 1.3656521938854027e-05,
+          "n": 1981,
+          "orientation": "negative t means PRG_open_known loss < GJR loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.016912852585736014,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -4.451954800068084,
+          "mean_loss_diff": -0.12084443242266643
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_open_known": {
+          "valid_oos": 1981
+        },
+        "FairGJRX": {
+          "valid_oos": 1981
+        },
+        "PRG_canonical_mixed": {
+          "valid_oos": 1981
+        },
+        "GJR": {
+          "valid_oos": 1981
+        }
+      }
+    },
+    "GLD": {
+      "market": "GLD",
+      "metadata": {
+        "data_source": "K1699 pinned GLD snapshot (yfinance via k881, 2026-07-12 vintage)",
+        "description": "Gold ETF (no leverage effect)",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample",
+        "n_total": 5375,
+        "n_is": 3762,
+        "n_oos": 1613,
+        "period": "2004-11-19 to 2026-04-02",
+        "prg_refit_freq_days": 252,
+        "fair_gjr_refit_freq_days": 63,
+        "gjr_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2019-10-31",
+        "end": "2026-04-02",
+        "n_oos": 1613,
+        "n_common_valid": 1613
+      },
+      "oos_overnight_variance_share": 0.6094237506099783,
+      "qlike": {
+        "PRG_open_known": 0.5535320450412095,
+        "FairGJRX": 0.5871973050825737,
+        "PRG_canonical_mixed": 0.820410372877124,
+        "GJR": 0.9020842691744925
+      },
+      "dm_tests": {
+        "open_panel_main": {
+          "pair": "PRG_open_known_vs_FairGJRX",
+          "t_stat": -3.643330704041451,
+          "p_value": 0.0002776569417151098,
+          "n": 1613,
+          "orientation": "negative t means PRG_open_known loss < FairGJRX loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.02044231311500967,
+          "hac_bandwidth_canonical": 12,
+          "t_stat_2x_bandwidth_sensitivity": -3.6392991599879676,
+          "mean_loss_diff": -0.03366526004136429
+        },
+        "mixed_anchor_main": {
+          "pair": "PRG_canonical_mixed_vs_GJR",
+          "t_stat": -6.105800850260218,
+          "p_value": 1.2791472325801578e-09,
+          "n": 1613,
+          "orientation": "negative t means PRG_canonical_mixed loss < GJR loss (PRG_canonical_mixed better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.022146556189875138,
+          "hac_bandwidth_canonical": 12,
+          "t_stat_2x_bandwidth_sensitivity": -5.993704631443887,
+          "mean_loss_diff": -0.08167389629736853
+        },
+        "secondary_fairgjrx_vs_gjr": {
+          "pair": "FairGJRX_vs_GJR",
+          "t_stat": -10.877569043474866,
+          "p_value": 0.0,
+          "n": 1613,
+          "orientation": "negative t means FairGJRX loss < GJR loss (FairGJRX better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.01898119173030268,
+          "hac_bandwidth_canonical": 12,
+          "t_stat_2x_bandwidth_sensitivity": -10.504763669009453,
+          "mean_loss_diff": -0.31488696409191885
+        },
+        "secondary_open_known_vs_gjr": {
+          "pair": "PRG_open_known_vs_GJR",
+          "t_stat": -12.910281641944785,
+          "p_value": 0.0,
+          "n": 1613,
+          "orientation": "negative t means PRG_open_known loss < GJR loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.004936579643793823,
+          "hac_bandwidth_canonical": 12,
+          "t_stat_2x_bandwidth_sensitivity": -12.680718491101565,
+          "mean_loss_diff": -0.34855222413328313
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_open_known": {
+          "valid_oos": 1613
+        },
+        "FairGJRX": {
+          "valid_oos": 1613
+        },
+        "PRG_canonical_mixed": {
+          "valid_oos": 1613
+        },
+        "GJR": {
+          "valid_oos": 1613
+        }
+      }
+    },
+    "EEM": {
+      "market": "EEM",
+      "metadata": {
+        "data_source": "K1699 pinned EEM snapshot (yfinance via k881, 2026-07-12 vintage)",
+        "description": "Emerging markets ETF",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample",
+        "n_total": 5778,
+        "n_is": 4044,
+        "n_oos": 1734,
+        "period": "2003-04-15 to 2026-04-02",
+        "prg_refit_freq_days": 252,
+        "fair_gjr_refit_freq_days": 63,
+        "gjr_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2019-05-10",
+        "end": "2026-04-02",
+        "n_oos": 1734,
+        "n_common_valid": 1734
+      },
+      "oos_overnight_variance_share": 0.7065152225072248,
+      "qlike": {
+        "PRG_open_known": 0.43853904242512287,
+        "FairGJRX": 0.527365892181575,
+        "PRG_canonical_mixed": 0.6663507253299814,
+        "GJR": 0.7904912141722655
+      },
+      "dm_tests": {
+        "open_panel_main": {
+          "pair": "PRG_open_known_vs_FairGJRX",
+          "t_stat": -10.137308158211296,
+          "p_value": 0.0,
+          "n": 1734,
+          "orientation": "negative t means PRG_open_known loss < FairGJRX loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.033287498098860495,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -9.759327234554421,
+          "mean_loss_diff": -0.08882684975645222
+        },
+        "mixed_anchor_main": {
+          "pair": "PRG_canonical_mixed_vs_GJR",
+          "t_stat": -6.404814533553168,
+          "p_value": 1.9342261126098492e-10,
+          "n": 1734,
+          "orientation": "negative t means PRG_canonical_mixed loss < GJR loss (PRG_canonical_mixed better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.0068553716952479095,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -5.9444947300866655,
+          "mean_loss_diff": -0.12414048884228407
+        },
+        "secondary_fairgjrx_vs_gjr": {
+          "pair": "FairGJRX_vs_GJR",
+          "t_stat": -9.855118978931332,
+          "p_value": 0.0,
+          "n": 1734,
+          "orientation": "negative t means FairGJRX loss < GJR loss (FairGJRX better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.017749431053402837,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -9.291556850355539,
+          "mean_loss_diff": -0.26312532199069044
+        },
+        "secondary_open_known_vs_gjr": {
+          "pair": "PRG_open_known_vs_GJR",
+          "t_stat": -12.964423122001941,
+          "p_value": 0.0,
+          "n": 1734,
+          "orientation": "negative t means PRG_open_known loss < GJR loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.02722124314887929,
+          "hac_bandwidth_canonical": 13,
+          "t_stat_2x_bandwidth_sensitivity": -12.460349340528525,
+          "mean_loss_diff": -0.35195217174714266
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_open_known": {
+          "valid_oos": 1734
+        },
+        "FairGJRX": {
+          "valid_oos": 1734
+        },
+        "PRG_canonical_mixed": {
+          "valid_oos": 1734
+        },
+        "GJR": {
+          "valid_oos": 1734
+        }
+      }
+    },
+    "0050.TW": {
+      "market": "0050.TW",
+      "metadata": {
+        "data_source": "K1699 pinned 0050.TW snapshot (yfinance via k886, 2026-07-12 vintage)",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample",
+        "n_total": 4217,
+        "n_is": 2951,
+        "n_oos": 1266,
+        "period": "2009-01-05 to 2026-04-02",
+        "prg_refit_freq_days": 252,
+        "fair_gjr_refit_freq_days": 63,
+        "gjr_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2021-01-08",
+        "end": "2026-04-02",
+        "n_oos": 1266,
+        "n_common_valid": 1251
+      },
+      "oos_overnight_variance_share": 0.6348768012782159,
+      "qlike": {
+        "PRG_open_known": 0.5684059811481311,
+        "FairGJRX": 0.6256245260920575,
+        "PRG_canonical_mixed": 0.7913306491994812,
+        "GJR": 0.9753383594588664
+      },
+      "dm_tests": {
+        "open_panel_main": {
+          "pair": "PRG_open_known_vs_FairGJRX",
+          "t_stat": -3.6702744878805573,
+          "p_value": 0.00025249883082478775,
+          "n": 1251,
+          "orientation": "negative t means PRG_open_known loss < FairGJRX loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.009745412934564381,
+          "hac_bandwidth_canonical": 11,
+          "t_stat_2x_bandwidth_sensitivity": -3.2800109450912096,
+          "mean_loss_diff": -0.05721854494392646
+        },
+        "mixed_anchor_main": {
+          "pair": "PRG_canonical_mixed_vs_GJR",
+          "t_stat": -5.194315839449924,
+          "p_value": 2.396970335549753e-07,
+          "n": 1251,
+          "orientation": "negative t means PRG_canonical_mixed loss < GJR loss (PRG_canonical_mixed better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.042665905809344165,
+          "hac_bandwidth_canonical": 11,
+          "t_stat_2x_bandwidth_sensitivity": -5.170402055411339,
+          "mean_loss_diff": -0.1840077102593853
+        },
+        "secondary_fairgjrx_vs_gjr": {
+          "pair": "FairGJRX_vs_GJR",
+          "t_stat": -7.57111147365444,
+          "p_value": 7.149836278586008e-14,
+          "n": 1251,
+          "orientation": "negative t means FairGJRX loss < GJR loss (FairGJRX better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.030880544838368537,
+          "hac_bandwidth_canonical": 11,
+          "t_stat_2x_bandwidth_sensitivity": -7.145750538590748,
+          "mean_loss_diff": -0.34971383336680884
+        },
+        "secondary_open_known_vs_gjr": {
+          "pair": "PRG_open_known_vs_GJR",
+          "t_stat": -8.920743694797572,
+          "p_value": 0.0,
+          "n": 1251,
+          "orientation": "negative t means PRG_open_known loss < GJR loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.022004662843857107,
+          "hac_bandwidth_canonical": 11,
+          "t_stat_2x_bandwidth_sensitivity": -8.615033966768049,
+          "mean_loss_diff": -0.40693237831073525
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_open_known": {
+          "valid_oos": 1266
+        },
+        "FairGJRX": {
+          "valid_oos": 1266
+        },
+        "PRG_canonical_mixed": {
+          "valid_oos": 1266
+        },
+        "GJR": {
+          "valid_oos": 1266
+        }
+      }
+    },
+    "TAIFEX": {
+      "market": "TAIFEX",
+      "metadata": {
+        "data_source": "K1699 pinned TAIFEX session/daily snapshots (TX tick via k883)",
+        "target": "rv_fullday = x_overnight + x_intraday",
+        "n_total": 2107,
+        "n_is": 1264,
+        "n_oos": 843,
+        "period": "2017-05-16 to 2025-12-31",
+        "prg_refit_freq_sessions": 126,
+        "fair_gjr_refit_freq_days": 63,
+        "gjr_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2022-07-14",
+        "end": "2025-12-31",
+        "n_oos": 843,
+        "n_common_valid": 843
+      },
+      "oos_overnight_variance_share": 0.688979923119202,
+      "qlike": {
+        "PRG_open_known": 0.0392907889368349,
+        "FairGJRX": 0.058561080507333635,
+        "PRG_canonical_mixed": 0.12093172883376502,
+        "GJR": 0.255000905772963
+      },
+      "dm_tests": {
+        "open_panel_main": {
+          "pair": "PRG_open_known_vs_FairGJRX",
+          "t_stat": -5.503475538655458,
+          "p_value": 4.9440749938511885e-08,
+          "n": 843,
+          "orientation": "negative t means PRG_open_known loss < FairGJRX loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.35802357908044763,
+          "hac_bandwidth_canonical": 10,
+          "t_stat_2x_bandwidth_sensitivity": -4.841853047764342,
+          "mean_loss_diff": -0.019270291570498733
+        },
+        "mixed_anchor_main": {
+          "pair": "PRG_canonical_mixed_vs_GJR",
+          "t_stat": -4.328342906473849,
+          "p_value": 1.682903873256869e-05,
+          "n": 843,
+          "orientation": "negative t means PRG_canonical_mixed loss < GJR loss (PRG_canonical_mixed better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": -0.002439301549343774,
+          "hac_bandwidth_canonical": 10,
+          "t_stat_2x_bandwidth_sensitivity": -4.394944394782732,
+          "mean_loss_diff": -0.13406917693919804
+        },
+        "secondary_fairgjrx_vs_gjr": {
+          "pair": "FairGJRX_vs_GJR",
+          "t_stat": -5.1594700536917415,
+          "p_value": 3.09024414724135e-07,
+          "n": 843,
+          "orientation": "negative t means FairGJRX loss < GJR loss (FairGJRX better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.0012283812630035282,
+          "hac_bandwidth_canonical": 10,
+          "t_stat_2x_bandwidth_sensitivity": -5.112759382142779,
+          "mean_loss_diff": -0.19643982526562945
+        },
+        "secondary_open_known_vs_gjr": {
+          "pair": "PRG_open_known_vs_GJR",
+          "t_stat": -5.719866301282184,
+          "p_value": 1.4808589687831386e-08,
+          "n": 843,
+          "orientation": "negative t means PRG_open_known loss < GJR loss (PRG_open_known better)",
+          "harvey_pass_abs_t_gt_3": true,
+          "loss_diff_acf1": 0.01862785191915166,
+          "hac_bandwidth_canonical": 10,
+          "t_stat_2x_bandwidth_sensitivity": -5.688156987534866,
+          "mean_loss_diff": -0.21571011683612817
+        }
+      },
+      "forecast_diagnostics": {
+        "PRG_open_known": {
+          "valid_oos": 843
+        },
+        "FairGJRX": {
+          "valid_oos": 843
+        },
+        "PRG_canonical_mixed": {
+          "valid_oos": 843
+        },
+        "GJR": {
+          "valid_oos": 843
+        }
+      }
+    }
+  },
+  "relation_to_prior": {
+    "K1699": "close-convention panel (strict t-1), same pinned vintage, 0/6 Harvey vs GJR",
+    "K1544": "open-convention panel, UNPINNED 2026-06-24 data (vintage-fragile caveat)",
+    "K880": "mixed-timing canonical headline (ill-posed timing artifact): PRG_Extended beats GJR on SPY with GJR-vs-PRG t ~ +5.06 (2026-06-13 rerun, directional) to +6.4537 (checked-in original artifact); both = PRG better. See anchor_validation.mixed_anchor_vs_k880_spy for the pinned provenance.",
+    "role": "K1710 supplies panels A (open) and B (mixed) on the K1699 vintage so the paper's three-convention main table is single-vintage and reproduce-gated."
+  },
+  "references": [
+    "Bollerslev and Ghysels (1996), Periodic autoregressive conditional heteroskedasticity.",
+    "Patton (2011), Volatility forecast comparison using imperfect volatility proxies.",
+    "Diebold and Mariano (1995), Comparing predictive accuracy.",
+    "Harvey, Leybourne, and Newbold (1997), Testing equality of prediction MSEs.",
+    "Harvey, Liu, and Zhu (2016), ...and the cross-section of expected returns.",
+    "Linton and Wu (2020), A coupled component DCS-EGARCH model for intraday and overnight volatility."
+  ],
+  "runtime_seconds": 37.79918599128723
+}
