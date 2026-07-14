@@ -1,0 +1,43 @@
+{
+  "id": "agent-brief_k1695_correction-c841cc",
+  "title": "K1695 exposure-matched correction (P1: gates paper Table5 + feed corrections)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1695_correction-c841cc.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/experiments/k1695/k1695_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1695_correction-c841cc.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-14T21:16:42Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1695_correction-c841cc.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1695_correction-c841cc.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/experiments/k1695/k1695_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1695_correction-c841cc.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research",
+  "claude_followup": {
+    "brief": "收件：(1) 逐條核對 k1695_results.json 的 exposure-matched ΔMDD 與 null p-value，不採信 agent 敘述、自己重算一次；(2) 確認 raw 口徑數字未被刪除；(3) Codex 審過才寫 knowledge.json 更正 K1695 條目；(4) 解除 paper vt-trend-following 的 blocker（storage/paper_pipeline_status.json）並依同曝險數字重寫 Table 5 或撤下第三項 contribution；(5) 派 feed 回溯更正（見 next_tasks: feed_correction_k1695_exposure_artifact）",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1695_correction.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1695_correction-c841cc.md"
+}

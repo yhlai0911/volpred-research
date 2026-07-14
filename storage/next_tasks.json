@@ -31402,39 +31402,15 @@
   },
   {
     "id": "platform_ops_execution_brief_killpg",
-    "title": "execution_brief.py 的 3 個 claude -p 站點補 process-group kill",
-    "description": "src/volpred/ops/execution_brief.py:622/800/822 用 subprocess.run(['claude','-p',...], timeout=...)，逾時只殺一個 pid，claude 的子行程會變孤兒繼續跑。同 bug class 已在 gen_lazypack_codex(7/11) 與 run_agent_job + scan_trending_agy + prepublish_audit(7/12) 修過。改法固定：Popen(start_new_session=True) + communicate(timeout) + procutil.kill_pgid。它在 coordinator/executor retry loop 裡，retry 語意要一併驗。目前凍在 scripts/tests/test_agentic_cli_timeout_killpg.py 的 KNOWN_UNFIXED；修好後必須把那筆刪掉（gate 有 ratchet，修好卻沒刪會 fail）。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "execution_brief.py 的 3 個 claude -p 站點補 process-group kill",
+    "priority": 2,
     "source": "agent_discovered",
     "created_at": "2026-07-11T20:21:53.374757+00:00",
-    "claimed_by": "hourly-04",
-    "claimed_at": "2026-07-11T20:32:15.313647+00:00",
-    "claim_session_id": "22035278c171",
-    "started_at": "2026-07-11T20:32:15.578105+00:00",
     "completed_at": "2026-07-11T20:32:15.843983+00:00",
-    "result": "本班同時完成：3 個 claude/codex 站點改走 _run_agentic (Popen + start_new_session + procutil.kill_pgid)；tests/test_execution_brief.py 的 5 個 monkeypatch seam 從 subprocess.run 移到 _run_agentic（原本我改完後測試會真的去 spawn claude 而掛住，已修，14 passed in 0.37s）；gate 的 KNOWN_UNFIXED 已清空。",
-    "status_history": [
-      {
-        "ts": "2026-07-11T20:32:15.313663+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-11T20:32:15.578120+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-11T20:32:15.844001+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-04"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-14T21:08:12.830049+00:00"
   },
   {
     "id": "platform_ops_failed_agent_job_still_needs_collection",
@@ -37289,13 +37265,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-14T20:01:01.776262+00:00",
+    "completed_at": "2026-07-14T21:00:52.109538+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T20:01:01.776262+00:00",
-      "last_clean_observed_at": "2026-07-14T20:01:01.776262+00:00"
+      "resolved_at": "2026-07-14T21:00:52.109538+00:00",
+      "last_clean_observed_at": "2026-07-14T21:00:52.109538+00:00"
     }
   },
   {
@@ -37307,13 +37283,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-14T20:31:56.416232+00:00",
+    "completed_at": "2026-07-14T21:22:29.071586+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T20:31:56.416232+00:00",
-      "last_clean_observed_at": "2026-07-14T20:31:56.416232+00:00"
+      "resolved_at": "2026-07-14T21:22:29.071586+00:00",
+      "last_clean_observed_at": "2026-07-14T21:22:29.071586+00:00"
     }
   },
   {
@@ -37629,9 +37605,45 @@
     "description": "主線程 hourly-02 已用 canonical volpred.stats.drawdown.compare_max_drawdown + pinned experiments/k1695/data/paired_common_returns.csv.gz 獨立驗證：raw ΔMDD +12.61pp (13/13 為正) 但 exposure-matched -0.87pp (只剩 7/13)；compare_max_drawdown 對 13/13 市場亮 exposure_mismatch (vol ratio 0.61-0.68，遠超 .claude/rules/experiments.md:140 的 20% 門檻)；k1695_results.json 無任何 exposure 欄位。完整證據：storage/ops/k1695_exposure_artifact_verification.md。\n要做：(1) 重跑 K1695 並用 compare_max_drawdown，results.json 補 exposure-matched 欄位；(2) 補 circular-shift / phase-randomized null（本班未做，故目前只能說『約等於零』不能說『顯著為負』）；(3) .inference.primary 的 90% CI 與 decision.kill_triggered 需以同曝險口徑重算；(4) Codex 審；(5) 更正 knowledge.json 的 K1695 條目 + 寫 docs/error_log.md。文章草稿（已誠實寫成 null）在 worktree dispatch-slot-1-3217f0b2-k1695，等認證後才可發。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-15T02:38:00+08:00",
-    "source": "agent"
+    "source": "agent",
+    "status_history": [
+      {
+        "ts": "2026-07-14T21:16:42.128698+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-14T21:16:52.565723+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-14T21:20:03.000572+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-14T21:20:30.706541+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-14T21:20:30.938243+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-05"
+      }
+    ],
+    "started_at": "2026-07-14T21:20:30.938228+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-07-14T21:20:30.706525+00:00",
+    "claim_session_id": "5a5240a7f4df"
   },
   {
     "id": "paper_vt_trend_table5_exposure_hold",
@@ -37639,9 +37651,25 @@
     "description": "K1695 的 international drawdown protection 在同曝險口徑下消失（見 storage/ops/k1695_exposure_artifact_verification.md，主線程已獨立驗證）。paper vt-trend-following 的 Table 5 與第三項 contribution 直接建立在該結論上。\n要做：(1) 先擋住 —— 在論文 narrative state 標記此 contribution 為 awaiting_correction，不得在 body 進一步 claim；(2) 等 k1695_exposure_matched_correction 的認證結果；(3) 依同曝險數字重寫 Table 5 或撤下該 contribution。同 bug class: K1265b / K1702。",
     "task_type": "paper_review",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T02:38:00+08:00",
-    "source": "agent"
+    "source": "agent",
+    "status_history": [
+      {
+        "ts": "2026-07-14T21:13:29.427301+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-14T21:20:02.767948+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-05"
+      }
+    ],
+    "completed_at": "2026-07-14T21:20:02.767925+00:00",
+    "result": "步驟(1) 先擋住 = 已交付。storage/paper_pipeline_status.json 的 vt-trend-following 新增 awaiting_correction 區塊 + blocker HOLD：點名 4 項受污染的 claim（Table 5 的 13 國際 ETF dMDD 與 31.3/23.0pp 平均、第三項 contribution 的 US VIX 全球 de-risking 信號與 r=-0.817 insurance pricing、摘要那句 12.6pp CI [4.2,19.3]、Section 4 國際 panel），寫明 release_condition 與 bug class，並註記 5-asset TSMOM-retention（Tables 3-4）是不同比較、未被此發現直接推翻但也未做 exposure audit、不得視為已清。paper_pipeline_check.py 仍能解析、stalled=true。步驟(2)(3) 依賴 K1695 認證：已派 compute queue agent job agent-brief_k1695_correction-c841cc（xhigh），其 followup brief 第 4 項明確接手『解除 blocker 並依同曝險數字重寫 Table 5 或撤下 contribution』，故非懸空。額外 class sweep 發現：此 artifact 已流到讀者端（3 篇 published + 2 篇 archived），另建 P1 task feed_correction_k1695_exposure_artifact（blocked 等認證）。"
   },
   {
     "id": "gate_experiments_must_use_compare_max_drawdown",
@@ -37649,9 +37677,32 @@
     "description": "**訂正原假設**：不是缺 gate。既有 scripts/audit_mdd_scale_artifact.py 對 experiments/k1695/k1695.py 回報 5 個 [RAW_COMPARISON] finding（lines 558/620/774/897/1134）—— **audit 抓得到，但沒有任何流程強制它在 K1695 交件前跑**。這與 docs/error_log.md 2026-07-14 K1709 的教訓（「ratchet 抓得到，但它在 worktree 裡沒牙齒」）是**同一個 class 的復發**，不是新問題。\n要做：查 experiment_gates.py certify / compute_queue runner 為什麼沒對 K1695 執行到這支 audit（是 worktree 路徑？是 certify 沒把 audit_mdd_scale_artifact 納入？還是 K1695 根本沒走 runner？）→ 把它接成硬 gate（RAW_COMPARISON > baseline = certify FAIL）→ regression test 用 K1695 這組數字覆蓋。證據：storage/ops/k1695_exposure_artifact_verification.md",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T02:38:00+08:00",
-    "source": "agent"
+    "source": "agent",
+    "status_history": [
+      {
+        "ts": "2026-07-14T20:47:49.475065+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T20:47:49.704442+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T21:14:48.868991+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-14T20:47:49.704426+00:00",
+    "completed_at": "2026-07-14T21:14:48.868976+00:00",
+    "result": "根因訂正：K1695 早於 auditor/runner；現役缺口是 merge certify 只驗 review SHA。certify 現已用 trusted stdlib MDD owner 阻擋新 RAW_COMPARISON/UNKNOWN，含 symlink 與 candidate self-waiver 逃逸，事故紀錄亦已訂正。驗證：跨 gate 164 passed/1 skipped；merge 16/16（43 assertions）；獨立對抗性 review PASS。"
   },
   {
     "id": "alert_internal_git_push_backup_hold_3f4834ce7a_20260714T180001000000Z_a2",
@@ -37783,5 +37834,22 @@
     ],
     "created_at": "2026-07-14T19:32:15.966944+00:00",
     "discovered_by": "hourly-03"
+  },
+  {
+    "id": "feed_correction_k1695_exposure_artifact",
+    "title": "回溯更正：3 篇已發佈文章的『US VIX 全球抗跌信號』結論是 exposure artifact",
+    "task_type": "daily_article",
+    "priority": 1,
+    "status": "blocked",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_note": "等 k1695_exposure_matched_correction 認證完成才有可信的同曝險數字可寫；沒有 null 分佈前只能說『約等於零』不能說『顯著為負』。認證後解除。",
+    "blocked_at": "2026-07-14T21:18:46.499586+00:00",
+    "source": "agent_discovered",
+    "created_at": "2026-07-14T21:18:46.499586+00:00",
+    "created_by": "hourly-05",
+    "description": "K1695 的『13 個國際市場全部 MDD 改善、平均 +12.61pp』在同曝險口徑下崩為 -0.87pp（7/13），已由主線程獨立驗證（storage/ops/k1695_exposure_artifact_verification.md）。raw 數字沒造假，但據以推出的『美國 VIX 是全球通用避險信號 / VT 提供抗跌保護』結論是 exposure artifact —— 衡量的是「少放部位」，不是「會擇時」。研究誠實原則第 6 條：推翻舊結論必回溯更正。\n\n受影響（主線程 grep feed.json 精確定位，非推測）：\n- mile_0d595dfb [published/research] 13 個國際市場實測：美國 VIX 是全球股票的通用避險信號嗎？（招牌那篇，整篇結論建立在此）\n- mile_2d4edb65 [published/general] 一套方法在 13 個市場都有效，卻不代表它會幫你賺更多\n- mile_ee473d5a [published/research] 波動率擇時（VT）完全指南（含 13 市場 MDD 段落）\n- mile_f2e26f43 [archived/research] 280 場實驗後的最後答案\n- mile_9eaadbd1 [archived/research] 盤點 270 場實驗\n\n要做（等 K1695 認證後）：(1) 用認證後的同曝險數字改寫上述 published 文章的結論段，明寫舊結論被推翻與推翻理由（不是偷偷改數字）；(2) feed.json 與 storage/reports/<id>.json 同步（feedback_report_content_sync）；(3) 同步平台；(4) 寫 docs/error_log.md。archived 兩篇評估是否加註或維持封存。\n\n同 bug class: K1265b / K1702。canonical 工具 volpred.stats.drawdown.compare_max_drawdown。",
+    "depends_on": [
+      "k1695_exposure_matched_correction"
+    ]
   }
 ]

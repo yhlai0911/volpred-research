@@ -238,7 +238,23 @@
       "stage": "revision",
       "stage_entered_at": "2026-07-01T03:18:00+08:00",
       "last_advance_at": "2026-07-01T04:15:00+08:00",
-      "blocker": "codex contribution-gate (gpt-5.x) verdict: BORDERLINE — Major revision required; NOT arXiv-ready. 10 reframing items remaining (K-id scrub item resolved 04:15): stale Figure 2, pending Calmar cells in Table 3, BAB source/sample conflict, abstract overload, missing cover letter.",
+      "blocker": "HOLD (2026-07-15 05:17, hourly-05): the international drawdown-protection claim is an EXPOSURE ARTIFACT — Table 5, the third contribution, and the abstract sentence built on it are awaiting_correction and MUST NOT be advanced, re-claimed, or strengthened in the body until experiment K1695 is re-certified. Independently verified by main thread (storage/ops/k1695_exposure_artifact_verification.md): raw common-sample average dMDD +12.61pp (13/13 positive) collapses to -0.87pp (7/13) under exposure matching; volpred.stats.drawdown.compare_max_drawdown flags exposure_mismatch on 13/13 markets (VT realized vol is only 0.61-0.68x buy-and-hold, far past the 20% threshold in .claude/rules/experiments.md:140, which forbids reporting raw MDD differences alone). The paper currently reports the raw 12.6pp with a joint stationary-bootstrap 90% CI of [4.2, 19.3] pp — a significant-looking interval around a number that does not survive exposure matching. PRIOR blocker (still open): codex contribution-gate (gpt-5.x) verdict BORDERLINE — Major revision required; NOT arXiv-ready. 10 reframing items remaining (K-id scrub item resolved 04:15): stale Figure 2, pending Calmar cells in Table 3, BAB source/sample conflict, abstract overload, missing cover letter.",
+      "awaiting_correction": {
+        "declared_at": "2026-07-15T05:17:00+08:00",
+        "declared_by": "hourly-05",
+        "reason": "K1695 international drawdown protection is an exposure artifact (raw +12.61pp -> exposure-matched -0.87pp)",
+        "evidence": "storage/ops/k1695_exposure_artifact_verification.md",
+        "held_claims": [
+          "Table 5 (13 international equity ETFs, dMDD column and the developed/emerging 31.3pp / 23.0pp averages)",
+          "Third contribution (US VIX as a broad global de-risking signal; 'insurance pricing' r = -0.817)",
+          "Abstract sentence: 'all 13 equity markets see positive MDD improvement ... common-sample average 12.6 pp with a joint stationary-bootstrap 90% CI of [4.2, 19.3] pp'",
+          "Figure/Section 4 international panel derived from the same raw-exposure numbers"
+        ],
+        "blocked_on": "k1695_exposure_matched_correction (P1; dispatched to compute queue as agent-brief_k1695_correction-c841cc)",
+        "release_condition": "K1695 re-run reports raw AND exposure-matched dMDD with exposure fields, a seeded circular-shift/phase-randomized null, exposure-matched 90% CI, and passes Codex review. Then either rewrite Table 5 on the exposure-matched basis or withdraw the contribution.",
+        "bug_class": "raw MDD compared across mismatched exposure (same class as K1265b / K1702); canonical fix = volpred.stats.drawdown.compare_max_drawdown",
+        "note": "The 5-asset TSMOM-retention claims (Tables 3-4) are a DIFFERENT comparison (VT vs TSMOM-hedged VT) and are not directly voided by this finding, but they have NOT been exposure-audited — do not treat them as cleared."
+      },
       "owner_decision_pending": false,
       "compliance_scrub_done": true,
       "compliance_note": "RESOLVED 2026-07-01 04:15 (hourly-04 fire): mechanical K-id scrub of body_v3.tex — 11 unique visible K-ids removed across 57 violations (K687/K688/K697/K898/K1178/K1192/K1193/K1376/K1417/K1457/K1458). Numbers/citations/narrative preserved. xelatex recompile OK (main_v3.pdf 40pp, 282KB). scripts/check_paper_compliance.py vt-trend-following → CLEAN (0 findings). Compliance gate item 2 of reframing agenda closed; remaining 10 items still gate arXiv readiness.",
