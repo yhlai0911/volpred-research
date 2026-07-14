@@ -177,6 +177,42 @@ def test_drain_gives_up_after_bounded_attempts(tmp_path: Path, monkeypatch):
     assert pending[0]["drain_attempts"] == scheduler._PHASE_Z_MAX_DRAIN_ATTEMPTS
 
 
+def test_silent_fallback_drain_giveup_reuses_internal_task_without_paging(
+    tmp_path: Path,
+    monkeypatch,
+):
+    state_path = tmp_path / "dispatch_state.json"
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [{"cohort_id": "c1"}]
+    internal: list[dict] = []
+    monkeypatch.setattr(
+        phase_z,
+        "_default_internal_alert",
+        lambda **kwargs: internal.append(kwargs) or {"sent": False},
+    )
+    monkeypatch.setattr(
+        phase_z,
+        "_default_alert",
+        lambda **kwargs: pytest.fail("internal gate retry must not page owner"),
+    )
+    outcome = {
+        "committed": False,
+        "reason": "commit_nonzero",
+        "commit_tail": "[silent-fallback-audit] new=1",
+        "internal_alert_key": "silent_fallback_new",
+    }
+
+    for _ in range(scheduler._PHASE_Z_MAX_DRAIN_ATTEMPTS):
+        scheduler._phase_z_drain_exhausted(
+            cohort_id="c1",
+            outcome=outcome,
+            state_path=state_path,
+        )
+
+    assert len(internal) == 1
+    assert internal[0]["alert_key"] == "silent_fallback_new"
+
+
 def test_alert_titles_carry_no_time_varying_tokens():
     """Pin 4 (2026-07-13 22:00 incident): alert dedup keys on hash(level+title),
     so a title that interpolates the fire time (or a per-tick counter like the

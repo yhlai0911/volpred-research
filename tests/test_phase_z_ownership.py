@@ -186,6 +186,64 @@ def test_agent_work_is_committed_when_tree_was_clean(repo: Path) -> None:
     assert outcome["foreign"] == []
 
 
+def test_clean_tree_resolves_prior_internal_phase_z_episodes(repo: Path) -> None:
+    resolved: list[str] = []
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        test_runner=_no_tests,
+        alert_fn=lambda **_kwargs: {},
+        internal_resolve_fn=lambda **kwargs: resolved.append(kwargs["alert_key"]) or {
+            "resolved": True
+        },
+    )
+
+    assert outcome["reason"] == "clean"
+    assert resolved == ["phase_z_baseline_missing", "silent_fallback_new"]
+
+
+def test_successful_candidate_resolves_internal_silent_fallback_episode(repo: Path) -> None:
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "ours.txt", "candidate bytes\n")
+    resolved: list[str] = []
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        test_runner=_no_tests,
+        alert_fn=lambda **_kwargs: {},
+        internal_resolve_fn=lambda **kwargs: resolved.append(kwargs["alert_key"]) or {
+            "resolved": True
+        },
+    )
+
+    assert outcome["committed"] is True
+    assert resolved == ["phase_z_baseline_missing", "silent_fallback_new"]
+
+
+def test_candidate_success_does_not_resolve_foreign_dirty_python_incident(repo: Path) -> None:
+    _write(repo, "foreign.py", "def broken():\n    return None\n")
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "owned.md", "safe non-Python output\n")
+    resolved: list[str] = []
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        test_runner=_no_tests,
+        alert_fn=lambda **_kwargs: {},
+        internal_resolve_fn=lambda **kwargs: resolved.append(kwargs["alert_key"]) or {
+            "resolved": True
+        },
+    )
+
+    assert outcome["committed"] is True
+    assert "phase_z_baseline_missing" in resolved
+    assert "silent_fallback_new" not in resolved
+    assert "foreign.py" in _dirty(repo)
+
+
 def test_candidate_adoption_cas_rejects_concurrent_head_advance(repo: Path) -> None:
     """A commit arriving during the candidate gate wins; PHASE-Z never overwrites it."""
     phase_z.run_pre_fire_guard(repo_root=repo)
@@ -301,12 +359,18 @@ def test_missing_immutable_hook_fails_closed(repo: Path) -> None:
 def test_candidate_cannot_modify_its_own_trusted_gate(repo: Path) -> None:
     phase_z.run_pre_fire_guard(repo_root=repo)
     _write(repo, "scripts/audit_test_imports.py", "raise SystemExit(0)\n")
+    _write(repo, "scripts/audit_silent_fallbacks.py", "raise SystemExit(0)\n")
+    _write(repo, "storage/qa/silent_fallback_baseline.json", "[]\n")
 
     outcome = _fire(repo)
 
     assert outcome["committed"] is False
     assert outcome["reason"] == "candidate_gate_self_modification"
-    assert outcome["gate_changes"] == ["scripts/audit_test_imports.py"]
+    assert outcome["gate_changes"] == [
+        "scripts/audit_silent_fallbacks.py",
+        "scripts/audit_test_imports.py",
+        "storage/qa/silent_fallback_baseline.json",
+    ]
 
 
 def test_candidate_gate_blocks_test_without_its_foreign_script(repo: Path) -> None:
@@ -421,6 +485,61 @@ def test_missing_baseline_declines_to_commit(repo: Path) -> None:
     assert _git(repo, "rev-parse", "HEAD").stdout == before
     assert "someones_work.txt" in _dirty(repo)
     assert alerts and alerts[0][0] == "warn"
+
+
+def test_missing_baseline_uses_internal_p1_router_not_generic_alert(repo: Path) -> None:
+    _write(repo, "someones_work.txt", "who wrote this?\n")
+    generic: list[dict] = []
+    internal: list[dict] = []
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        test_runner=_no_tests,
+        alert_fn=lambda **kwargs: generic.append(kwargs) or {"sent": True},
+        internal_alert_fn=lambda **kwargs: internal.append(kwargs) or {"sent": False},
+        internal_resolve_fn=lambda **kwargs: {"resolved": False},
+    )
+
+    assert outcome["reason"] == "ownership_unknown"
+    assert generic == []
+    assert len(internal) == 1
+    assert internal[0]["alert_key"] == "phase_z_baseline_missing"
+
+
+def test_silent_fallback_gate_routes_internally_but_other_gates_do_not(repo: Path) -> None:
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "echo '[pre-commit] BLOCKED — this commit introduces new silent fallback(s):' >&2\n"
+        "echo '[silent-fallback-audit] findings=1 new=1' >&2\n"
+        "exit 1\n",
+        encoding="utf-8",
+    )
+    hook.chmod(0o755)
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "owned.py", "def f():\n    return None\n")
+    generic: list[dict] = []
+    internal: list[dict] = []
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        test_runner=_no_tests,
+        alert_fn=lambda **kwargs: generic.append(kwargs) or {"sent": True},
+        internal_alert_fn=lambda **kwargs: internal.append(kwargs) or {"sent": False},
+        internal_resolve_fn=lambda **kwargs: {"resolved": False},
+    )
+
+    assert outcome["reason"] == "commit_nonzero"
+    assert outcome["internal_alert_key"] == "silent_fallback_new"
+    assert generic == []
+    assert internal[0]["alert_key"] == "silent_fallback_new"
+    assert phase_z._is_silent_fallback_gate_output("[pre-commit] BLOCKED — fake gate") is False
+    assert phase_z._is_silent_fallback_clean_gate_output(
+        "[pre-commit] silent-fallback-audit passed new=0 scope=2"
+    ) is True
+    assert phase_z._is_silent_fallback_clean_gate_output("exit 0 without Gate 2") is False
 
 
 def test_stale_baseline_is_refused(repo: Path) -> None:

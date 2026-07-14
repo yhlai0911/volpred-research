@@ -13,7 +13,8 @@ Usage:
 
 The audit is intentionally heuristic. It reports suspect exception handlers in
 `scripts/` and `src/` that contain `pass`, `continue`, or default-ish `return`
-statements without a nearby print/log/warn/error call. Report mode exits 0;
+statements without a nearby print/log/warn/error call or a conservatively proven
+returned diagnostic collector. Report mode exits 0;
 `--strict` exits 1 when any finding remains unless a baseline is supplied. With
 `--baseline`, strict mode fails only for findings not already present in the
 baseline.
@@ -98,14 +99,304 @@ def _call_name(call: ast.Call) -> str:
     return ""
 
 
-def _has_observable_diagnostic(node: ast.ExceptHandler) -> bool:
+def _walk_lexical_scope(scope: ast.AST) -> Iterable[ast.AST]:
+    """Walk one function without borrowing evidence from nested definitions."""
+
+    stack = list(reversed(list(ast.iter_child_nodes(scope))))
+    while stack:
+        node = stack.pop()
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            continue
+        yield node
+        stack.extend(reversed(list(ast.iter_child_nodes(node))))
+
+
+def _nearest_function(
+    node: ast.AST,
+    parent_map: dict[ast.AST, ast.AST],
+) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
+    current = parent_map.get(node)
+    while current is not None:
+        if isinstance(current, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            return current
+        current = parent_map.get(current)
+    return None
+
+
+def _target_binds_name(target: ast.AST, name: str) -> bool:
+    if isinstance(target, ast.Name):
+        return target.id == name
+    if isinstance(target, (ast.Tuple, ast.List)):
+        return any(_target_binds_name(item, name) for item in target.elts)
+    return False
+
+
+def _target_mutates_name(target: ast.AST, name: str) -> bool:
+    """True for rebinding or item/slice assignment on the collector."""
+
+    if _target_binds_name(target, name):
+        return True
+    return bool(
+        isinstance(target, ast.Subscript)
+        and isinstance(target.value, ast.Name)
+        and target.value.id == name
+    )
+
+
+def _empty_list_initializer(value: ast.AST | None) -> bool:
+    return bool(
+        isinstance(value, ast.List)
+        and not value.elts
+        or isinstance(value, ast.Call)
+        and isinstance(value.func, ast.Name)
+        and value.func.id == "list"
+        and not value.args
+        and not value.keywords
+    )
+
+
+def _collector_initializer_line(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    *,
+    name: str,
+    before_line: int,
+) -> int | None:
+    args = [
+        *function.args.posonlyargs,
+        *function.args.args,
+        *function.args.kwonlyargs,
+    ]
+    if any(arg.arg == name for arg in args):
+        return None
+
+    bindings: list[tuple[ast.AST | None, int]] = []
+    for node in _walk_lexical_scope(function):
+        if getattr(node, "lineno", before_line) >= before_line:
+            continue
+        if isinstance(node, ast.Assign) and any(
+            _target_binds_name(target, name) for target in node.targets
+        ):
+            bindings.append((node.value, node.lineno))
+        elif isinstance(node, ast.AnnAssign) and _target_binds_name(node.target, name):
+            bindings.append((node.value, node.lineno))
+        elif isinstance(node, (ast.For, ast.AsyncFor)) and _target_binds_name(node.target, name):
+            bindings.append((None, node.lineno))
+        elif isinstance(node, (ast.With, ast.AsyncWith)):
+            if any(
+                item.optional_vars is not None
+                and _target_binds_name(item.optional_vars, name)
+                for item in node.items
+            ):
+                bindings.append((None, node.lineno))
+    if len(bindings) != 1 or not _empty_list_initializer(bindings[0][0]):
+        return None
+    return bindings[0][1]
+
+
+def _direct_exception_collectors(node: ast.ExceptHandler) -> set[str]:
+    """Collectors directly appended before a continue/pass with exception detail."""
+
+    exception_name = node.name if isinstance(node.name, str) else None
+    if not exception_name:
+        return set()
+    collectors: set[str] = set()
+    for stmt in node.body:
+        action = _silent_action(stmt)
+        if action is not None:
+            # A default return makes the later function-level return unreachable.
+            if isinstance(stmt, ast.Return):
+                return set()
+            break
+        if not isinstance(stmt, ast.Expr) or not isinstance(stmt.value, ast.Call):
+            continue
+        call = stmt.value
+        if not (
+            isinstance(call.func, ast.Attribute)
+            and call.func.attr == "append"
+            and isinstance(call.func.value, ast.Name)
+        ):
+            continue
+        def preserves_exception_detail(payload: ast.AST) -> bool:
+            if isinstance(payload, ast.Name):
+                return payload.id == exception_name
+            if isinstance(payload, ast.Attribute):
+                return preserves_exception_detail(payload.value)
+            if isinstance(payload, ast.FormattedValue):
+                return preserves_exception_detail(payload.value)
+            if isinstance(payload, ast.JoinedStr):
+                return any(
+                    preserves_exception_detail(value)
+                    for value in payload.values
+                    if isinstance(value, ast.FormattedValue)
+                )
+            if isinstance(payload, ast.Call):
+                return bool(
+                    isinstance(payload.func, ast.Name)
+                    and payload.func.id in {"repr", "str"}
+                    and len(payload.args) == 1
+                    and not payload.keywords
+                    and preserves_exception_detail(payload.args[0])
+                )
+            if isinstance(payload, (ast.Tuple, ast.List, ast.Set)):
+                return any(preserves_exception_detail(item) for item in payload.elts)
+            if isinstance(payload, ast.Dict):
+                return any(
+                    item is not None and preserves_exception_detail(item)
+                    for item in payload.values
+                )
+            if isinstance(payload, ast.BinOp) and isinstance(payload.op, ast.Add):
+                return preserves_exception_detail(payload.left) or preserves_exception_detail(
+                    payload.right
+                )
+            return False
+
+        payload_nodes = [*call.args, *(kw.value for kw in call.keywords)]
+        if any(preserves_exception_detail(payload) for payload in payload_nodes):
+            collectors.add(call.func.value.id)
+    return collectors
+
+
+def _collector_return_line(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    *,
+    name: str,
+    after_line: int,
+) -> int | None:
+    # Only an unconditional top-level return is accepted.  A nested/conditional
+    # return is not proof that every swallowed exception reaches an observer.
+    def directly_returns_collector(value: ast.AST) -> bool:
+        if isinstance(value, ast.Name):
+            return value.id == name
+        if isinstance(value, (ast.Tuple, ast.List, ast.Set)):
+            return any(directly_returns_collector(item) for item in value.elts)
+        if isinstance(value, ast.Dict):
+            return any(
+                item is not None and directly_returns_collector(item)
+                for item in value.values
+            )
+        return False
+
+    for stmt in function.body:
+        if not isinstance(stmt, ast.Return) or stmt.lineno <= after_line or stmt.value is None:
+            continue
+        if directly_returns_collector(stmt.value):
+            return stmt.lineno
+    return None
+
+
+def _collector_survives_to_return(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    *,
+    name: str,
+    initializer_line: int,
+    return_line: int,
+) -> bool:
+    scope_nodes = list(_walk_lexical_scope(function))
+    parent_map = {
+        child: parent
+        for parent in [function, *scope_nodes]
+        for child in ast.iter_child_nodes(parent)
+    }
+
+    for node in scope_nodes:
+        line = getattr(node, "lineno", -1)
+        if not initializer_line < line < return_line:
+            continue
+        if isinstance(node, ast.Name) and node.id == name and isinstance(node.ctx, ast.Load):
+            parent = parent_map.get(node)
+            call = parent_map.get(parent) if parent is not None else None
+            # This deliberately tiny proof accepts exactly a direct list.append
+            # receiver.  Any other read can leak an alias before or after the
+            # handler (`identity(bad)`, `[bad]`, attributes, subscripts, etc.),
+            # so it is not evidence that the diagnostic reaches the caller.
+            if not (
+                isinstance(parent, ast.Attribute)
+                and parent.value is node
+                and parent.attr == "append"
+                and isinstance(call, ast.Call)
+                and call.func is parent
+            ):
+                return False
+        if isinstance(node, ast.Return):
+            # Any earlier conditional/default return is a path on which the
+            # collector never reaches the accepted top-level return.
+            return False
+        if isinstance(node, (ast.Raise, ast.Yield, ast.YieldFrom)):
+            return False
+        if (
+            isinstance(node, ast.While)
+            and isinstance(node.test, ast.Constant)
+            and node.test.value is True
+        ):
+            return False
+        if (
+            isinstance(node, ast.Assign)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == name
+        ):
+            return False
+        if (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == name
+        ):
+            return False
+        if isinstance(node, ast.Assign) and any(
+            _target_mutates_name(target, name) for target in node.targets
+        ):
+            return False
+        if isinstance(node, ast.AnnAssign) and _target_mutates_name(node.target, name):
+            return False
+        if isinstance(node, ast.AugAssign) and _target_mutates_name(node.target, name):
+            return False
+        if isinstance(node, ast.Delete) and any(
+            _target_mutates_name(target, name) for target in node.targets
+        ):
+            return False
+    return True
+
+
+def _has_returned_diagnostic_collector(
+    node: ast.ExceptHandler,
+    parent_map: dict[ast.AST, ast.AST],
+) -> bool:
+    function = _nearest_function(node, parent_map)
+    if function is None:
+        return False
+    for name in _direct_exception_collectors(node):
+        initializer_line = _collector_initializer_line(
+            function,
+            name=name,
+            before_line=node.lineno,
+        )
+        if initializer_line is None:
+            continue
+        return_line = _collector_return_line(
+            function,
+            name=name,
+            after_line=node.lineno,
+        )
+        if return_line is not None and _collector_survives_to_return(
+            function,
+            name=name,
+            initializer_line=initializer_line,
+            return_line=return_line,
+        ):
+            return True
+    return False
+
+
+def _has_observable_diagnostic(
+    node: ast.ExceptHandler,
+    parent_map: dict[ast.AST, ast.AST],
+) -> bool:
     for subnode in ast.walk(node):
         if not isinstance(subnode, ast.Call):
             continue
         name = _call_name(subnode)
         if name in OBSERVABLE_CALL_NAMES or name.startswith("_warn"):
             return True
-    return False
+    return _has_returned_diagnostic_collector(node, parent_map)
 
 
 def _reraises(node: ast.ExceptHandler) -> bool:
@@ -233,7 +524,7 @@ def audit_file(path: Path, *, root: Path = ROOT) -> list[Finding]:
     for node in ast.walk(tree):
         if not isinstance(node, ast.ExceptHandler):
             continue
-        if _has_observable_diagnostic(node) or _reraises(node):
+        if _has_observable_diagnostic(node, parent_map) or _reraises(node):
             continue
         for stmt in node.body:
             action = _silent_action(stmt)

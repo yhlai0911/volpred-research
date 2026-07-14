@@ -99,13 +99,13 @@ def _phase_z_drain_exhausted(*, cohort_id: str, outcome: dict[str, Any] | None,
         return False
     reason = (outcome or {}).get("reason", "crashed")
     detail = str((outcome or {}).get("commit_tail") or "").strip()
-    phase_z._default_alert(
-        level="warn",
-        title=f"PHASE-Z 重試 {attempts} 次仍無法收班（{reason}）— 停止重試，不再連發此警報",
-        body="\n".join([
+    alert_payload = {
+        "level": "warn",
+        "title": f"PHASE-Z 重試 {attempts} 次仍無法收班（{reason}）— 停止重試，不再連發此警報",
+        "body": "\n".join([
             "## 發生什麼",
             f"PHASE-Z 連續 {attempts} 次無法完成這班的自動 commit（原因：{reason}）。"
-            "已停止重試 —— 這是最後一封，不會再為同一班連發。",
+            "已停止重試 —— 同一班不再重跑。",
             "檔案仍在工作區、沒有遺失。",
             "",
             "## 現在該做什麼",
@@ -113,7 +113,18 @@ def _phase_z_drain_exhausted(*, cohort_id: str, outcome: dict[str, Any] | None,
             "若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。",
             *(["", "## git commit 輸出（尾段）", detail] if detail else []),
         ]),
-    )
+    }
+    if str((outcome or {}).get("internal_alert_key") or "") == "silent_fallback_new":
+        # The candidate already created one stable P1 task.  Drain retries are
+        # transport retries, not failed task attempts, so they must not page the
+        # owner or advance the two-attempt escalation threshold.
+        phase_z._default_internal_alert(
+            alert_key="silent_fallback_new",
+            observed_at=(outcome or {}).get("internal_alert_observed_at"),
+            **alert_payload,
+        )
+    else:
+        phase_z._default_alert(**alert_payload)
     return True
 
 

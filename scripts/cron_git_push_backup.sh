@@ -67,28 +67,34 @@ fi
 # 2.5) silent-fallback gate (2026-06-28, boss「這問題一直無法解決」)
 # CI Silent Fallback Gate 反覆紅的根因：codex/agent commit 帶新 silent fallback
 # → push 上 origin → CI 才抓 → 紅信轟炸 boss。改成 push 前本地擋：HEAD 帶 new>0
-# 就 hold push（紅碼永不到 origin、CI 不會紅），發 calmer warn；主線程/當班 dispatch
-# 收信即當班修（per feedback_fix_silent_fallback_immediately / alerts_auto_act_not_suggest）。
+# 就 hold push（紅碼永不到 origin、CI 不會紅），建立固定 P1 給當班修；首次與
+# 修復進行中不寄信（per feedback_fix_silent_fallback_immediately）。
 # Fail-open：audit 本身出錯（uv 缺 / baseline 缺）→ 照推，備份優先不被 audit 故障擋。
+AUDIT_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 AUDIT_OUT=$("$UV_BIN" run python "$REPO/scripts/audit_silent_fallbacks.py" --strict \
   --baseline "$REPO/storage/qa/silent_fallback_baseline.json" 2>&1)
 AUDIT_RC=$?
+AUDIT_FINISHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 NEW_COUNT=$(echo "$AUDIT_OUT" | grep -oE "new=[0-9]+" | head -1 | cut -d= -f2)
 if [ "$AUDIT_RC" -ne 0 ] && [ -n "$NEW_COUNT" ] && [ "$NEW_COUNT" -gt 0 ]; then
   echo "[$(ts)] HELD: ${NEW_COUNT} new silent fallback(s) at HEAD — NOT pushing (CI would go red)" >> "$LOG"
   echo "$AUDIT_OUT" | grep "^NEW " >> "$LOG"
   NEWLINES=$(echo "$AUDIT_OUT" | grep "^NEW " | head -10)
-  if [ "${VOLPRED_SUPPRESS_PUSH_ALERTS:-0}" != "1" ]; then
-    "$UV_BIN" run volpred ops send-alert --level warn \
-      --title "git-push-backup: push held — ${NEW_COUNT} new silent fallback(s)" \
-      --body "本地領先 ${ahead} commit 但 HEAD 帶 ${NEW_COUNT} 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push 保護 CI（紅碼不上 origin、CI 不會紅）。主線程收到此信會**當班立即修**（每處加 'from volpred.ops.diagnostics import warn' 再 fallback，或標 '# silent-ok: 理由'）並重跑本 wrapper 解封 — 不留待下一班。新發現：
-${NEWLINES}" >> "$LOG" 2>&1 || true
-  else
-    echo "[$(ts)] child alert suppressed — CI incident watcher owns terminal notification" >> "$LOG"
+  # The hold and its silent-fallback NEW cause are one root incident.  Even a
+  # CI-owned invocation must create the P1; it suppresses only child transport.
+  INTERNAL_ROUTE_ARGS=(--internal-remediable-key git_push_backup_hold \
+    --observed-at "$AUDIT_STARTED_AT" --level warn)
+  if [ "${VOLPRED_SUPPRESS_PUSH_ALERTS:-0}" = "1" ]; then
+    INTERNAL_ROUTE_ARGS+=(--suppress-owner-transport)
+    echo "[$(ts)] child transport suppressed — CI incident watcher owns terminal notification" >> "$LOG"
   fi
+  "$UV_BIN" run volpred ops send-alert "${INTERNAL_ROUTE_ARGS[@]}" \
+    --title "git-push-backup: push held — ${NEW_COUNT} new silent fallback(s)" \
+    --body "本地領先 ${ahead} commit 但 HEAD 帶 ${NEW_COUNT} 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push 保護 CI（紅碼不上 origin、CI 不會紅）。路由器會建立固定 P1 任務，當班修每個 NEW 位置（先留下 warn，或對合法例外標 '# silent-ok: 理由'）並重跑本 wrapper 解封；首次與修復進行中不寄信。新發現：
+${NEWLINES}" >> "$LOG" 2>&1 || true
   # 2026-07-03: distinct exit 120 (NOT 1) for the held path. The guard ran fine and
-  # made a correct protective decision + self-sent its own targeted WARN above — it is
-  # NOT a cron infra failure. alerts.py `_BENIGN_FINDINGS_EXIT_CODES` treats 120 as a
+  # made a correct protective decision + routed its repair task above — it is NOT a
+  # cron infra failure. alerts.py `_BENIGN_FINDINGS_EXIT_CODES` treats 120 as a
   # benign, self-reported findings signal (exempt from host_cron_fail), while the real
   # failure paths below (divergence line ~52, push failure line ~103) keep exit 1 →
   # host_cron_fail CRITICAL. Root cause of the 4-day 28x false-CRITICAL: a single
@@ -98,6 +104,14 @@ ${NEWLINES}" >> "$LOG" 2>&1 || true
   exit 120
 elif [ "$AUDIT_RC" -ne 0 ]; then
   echo "[$(ts)] WARN audit rc=$AUDIT_RC new=${NEW_COUNT:-?} — audit error not a fallback breach, pushing anyway (backup priority)" >> "$LOG"
+fi
+
+# A clean strict verdict is the explicit end of the internal incident.  Reset
+# its episode so a future, unrelated NEW finding starts from zero attempts.
+if [ "$AUDIT_RC" -eq 0 ] && [ "${NEW_COUNT:-0}" = "0" ]; then
+  "$UV_BIN" run volpred ops resolve-internal-alert \
+    --alert-key git_push_backup_hold --observed-at "$AUDIT_FINISHED_AT" >> "$LOG" 2>&1 || \
+    echo "[$(ts)] WARN: could not mark git_push_backup_hold resolved" >> "$LOG"
 fi
 
 # 3) fast-forward push

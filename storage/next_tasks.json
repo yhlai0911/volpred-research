@@ -37130,13 +37130,10 @@
     "title": "Alert 分層：內部可自癒的 warn 改 auto-task 不寄老闆信（連續失敗才升級）",
     "description": "refactor_plan_write_boundary_quality.md WS#4+#5。範圍：(a) git_push_backup hold、phase_z baseline missing、silent-fallback NEW 三類 alert 改為：只建 P1 task（idempotent by alert_key）+ 不寄 email；同一 alert_key 連續 ≥2 班自動修復失敗才升級寄信（body 用『已自動嘗試 X 次，失敗原因』框架）。(b) audit_silent_fallbacks 偵測器認得 bad.append/findings-collector 類 observable 出口（2026-07-14 兩個誤報 class），加回歸測試。Enforcement owner 不變（alerts.py 路由層 + no-silent-fallback 機械層）；anti-stacking：不建新通知機制，改路由。完成 Check：連續 7 天老闆信箱零內部乒乓。",
     "task_type": "platform_ops",
-    "status": "in_progress",
+    "status": "succeeded",
     "priority": 1,
     "source": "owner_correction_20260714_evening",
     "created_at": "2026-07-14T11:16:52.864957+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-14T12:41:24.946867+00:00",
-    "claim_session_id": "7d44ac6bd2e4",
     "status_history": [
       {
         "ts": "2026-07-14T12:41:24.946884+00:00",
@@ -37149,9 +37146,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T13:43:00.244937+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-14T12:41:25.197143+00:00"
+    "started_at": "2026-07-14T12:41:25.197143+00:00",
+    "completed_at": "2026-07-14T13:43:00.244923+00:00",
+    "result": "完成三類 internal-remediable alert stable-key P1 路由：首次/active 靜音，兩次 completed-but-still-breached 才以失敗原因升級；加入 explicit causal resolver、episode/delivery retry 與 CI child-transport suppression。silent-fallback auditor 支援保守 returned-collector proof，並 fail-closed 防 alias/escape 與 PHASE-Z gate 自我竄改；focused 145+新增 suppression 測試、wrappers/canonical/pre-commit suites 全綠，獨立終驗 APPROVE。"
   },
   {
     "id": "dispatch_writer_isolation_design",

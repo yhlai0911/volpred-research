@@ -24,11 +24,31 @@ def test_git_push_backup_uses_cron_safe_auth_helpers() -> None:
 def test_ci_owned_push_suppresses_child_notifications() -> None:
     script = (ROOT / "scripts" / "cron_git_push_backup.sh").read_text(encoding="utf-8")
 
-    # Divergence, pre-push hold, and real push failure all retain their normal
-    # standalone alert, but a CI incident invocation has one terminal notifier.
+    # Only the two externally owned branches retain the whole-alert guard.  The
+    # internal hold must always create its P1 and suppress transport separately.
     guard = 'if [ "${VOLPRED_SUPPRESS_PUSH_ALERTS:-0}" != "1" ]; then'
-    assert script.count(guard) == 3
+    assert script.count(guard) == 2
     assert script.count("CI incident watcher owns terminal notification") == 3
+    assert "INTERNAL_ROUTE_ARGS+=(--suppress-owner-transport)" in script
     assert "ci-remediation start" in script
     assert "ci-remediation exit" in script
     assert "On-demand CI remediation is not a scheduled git_push_backup fire" in script
+
+
+def test_silent_fallback_hold_routes_to_stable_p1_before_any_notification() -> None:
+    script = (ROOT / "scripts" / "cron_git_push_backup.sh").read_text(encoding="utf-8")
+
+    assert script.count("--internal-remediable-key git_push_backup_hold") == 1
+    assert "resolve-internal-alert" in script
+    assert "--alert-key git_push_backup_hold" in script
+    hold_block = script[
+        script.index("# 2.5) silent-fallback gate"):script.index("# 3) fast-forward push")
+    ]
+    assert 'send-alert "${INTERNAL_ROUTE_ARGS[@]}"' in hold_block
+    assert '--observed-at "$AUDIT_STARTED_AT"' in hold_block
+    assert "--suppress-owner-transport" in hold_block
+    assert '--observed-at "$AUDIT_FINISHED_AT"' in hold_block
+    # Divergence and a real transport failure remain owner-facing alerts; only
+    # the guard-held, mechanically repairable branch is suppressed.
+    assert 'title "git-push-backup: 偵測到 origin 分岔"' in script
+    assert 'title "git-push-backup: push 失敗"' in script

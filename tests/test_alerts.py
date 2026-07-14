@@ -1526,6 +1526,113 @@ def test_push_backlog_warns_after_3h(tmp_path: Path, monkeypatch):
     assert "建議行動" in result["body"]
 
 
+def test_push_backlog_routes_only_when_latest_cause_is_silent_fallback_hold(
+    tmp_path: Path,
+    monkeypatch,
+):
+    from volpred.ops.alerts import _parse_push_backlog_state
+
+    storage = tmp_path / "storage"
+    now = datetime(2026, 7, 4, 12, 0, tzinfo=timezone.utc)
+    oldest = int((now - timedelta(hours=4)).timestamp())
+    _patch_git(monkeypatch, ahead=5, oldest_epoch=oldest)
+    _write_text(
+        storage / "logs" / "cron" / "git_push_backup.log",
+        "[2026-07-04 11:17:00] HELD: 2 new silent fallback(s) at HEAD — NOT pushing\n",
+    )
+
+    held = _parse_push_backlog_state(str(storage), now)
+    _write_text(
+        storage / "logs" / "cron" / "git_push_backup.log",
+        "[2026-07-04 11:17:00] PUSH FAILED\n",
+    )
+    outage = _parse_push_backlog_state(str(storage), now)
+
+    assert held["details"]["cause"] == "silent_fallback_new"
+    assert held["details"]["internal_alert_key"] == "git_push_backup_hold"
+    assert outage["details"]["cause"] == "push_failed"
+    assert outage["details"]["internal_alert_key"] is None
+
+
+def test_held_push_backlog_creates_p1_without_email_or_telegram(
+    tmp_path: Path,
+    monkeypatch,
+):
+    storage = tmp_path / "storage"
+    _write_json(storage / "next_tasks.json", [])
+    condition = {
+        "id": "push_backlog",
+        "breached": True,
+        "level": "warn",
+        "title": "push_backlog: dynamic 5 commits / 4.0 hours",
+        "body": "held by NEW silent fallback",
+        "details": {"internal_alert_key": "git_push_backup_hold"},
+    }
+    monkeypatch.setattr(
+        alerts_module,
+        "build_alert_condition_report",
+        lambda **kwargs: {
+            "generated_at": "2026-07-14T12:00:00+00:00",
+            "recipient": "yihao.lai@gmail.com",
+            "conditions": [condition],
+            "breach_count": 1,
+        },
+    )
+    monkeypatch.setattr(
+        alerts_module,
+        "send_alert",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("suppressed internal route reached email/Telegram transport")
+        ),
+    )
+
+    report = check_alert_conditions(
+        storage_dir=str(storage),
+        now=datetime(2026, 7, 14, 12, 0, tzinfo=timezone.utc),
+    )
+
+    assert report["alerts"][0]["skip_reason"] == "internal_auto_remediation"
+    tasks = json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
+    assert len(tasks) == 1
+    assert tasks[0]["priority"] == 1
+    assert tasks[0]["alert_key"] == "git_push_backup_hold"
+
+
+def test_healthy_push_backlog_resolves_only_the_backup_hold_key(
+    tmp_path: Path,
+    monkeypatch,
+):
+    condition = {
+        "id": "push_backlog",
+        "breached": False,
+        "level": "info",
+        "title": "push_backlog ok",
+        "body": "",
+        "details": {"ahead_count": 0, "cause": "recovered"},
+    }
+    monkeypatch.setattr(
+        alerts_module,
+        "build_alert_condition_report",
+        lambda **kwargs: {
+            "generated_at": "2026-07-14T12:00:00+00:00",
+            "recipient": "yihao.lai@gmail.com",
+            "conditions": [condition],
+            "breach_count": 0,
+        },
+    )
+    resolved: list[str] = []
+    monkeypatch.setattr(
+        alerts_module,
+        "resolve_internal_remediable_alert",
+        lambda **kwargs: resolved.append(kwargs["alert_key"]) or {"resolved": True},
+    )
+
+    report = check_alert_conditions(storage_dir=str(tmp_path / "storage"))
+
+    assert report["alerts"] == []
+    assert resolved == ["git_push_backup_hold"]
+
+
 def test_push_backlog_critical_after_8h(tmp_path: Path, monkeypatch):
     from volpred.ops.alerts import _parse_push_backlog_state
 

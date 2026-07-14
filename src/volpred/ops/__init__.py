@@ -26,6 +26,8 @@ from .alerts import (
     ALERT_RECIPIENT,
     build_alert_condition_report,
     check_alert_conditions,
+    resolve_internal_remediable_alert,
+    route_internal_remediable_alert,
     send_alert,
 )
 from .health import health_snapshot
@@ -142,6 +144,8 @@ __all__ = [
     "answer_internal_question",
     "build_question_rerank_workflow",
     "check_alert_conditions",
+    "resolve_internal_remediable_alert",
+    "route_internal_remediable_alert",
     "archive_question",
     "claim_question_for_research",
     "build_platform_cycle_summary",

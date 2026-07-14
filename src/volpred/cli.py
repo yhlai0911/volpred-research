@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import click
@@ -48,6 +49,18 @@ LOCAL_AGENT_CHOICES = ("claude", "codex")
 LOCAL_SESSION_KEY_CHOICES = ("claude-supervisor", "claude-worker", "codex-worker")
 LOCAL_AGENT_ROLE_CHOICES = ("supervisor", "worker")
 LOCAL_GOVERNANCE_AREA_CHOICES = ("schedule",)
+
+
+def _parse_observed_at(raw: str | None) -> datetime | None:
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise click.UsageError("--observed-at must be an ISO-8601 timestamp") from exc
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def _resolve_agent_session_cli(
@@ -2432,6 +2445,27 @@ def ops_telegram_send(text: str, silent: bool) -> None:
         raise SystemExit(1)
 
 
+@ops.command("resolve-internal-alert")
+@click.option("--alert-key", required=True, help="Registered internal-remediable alert key")
+@click.option("--observed-at", default=None, help="ISO-8601 time when recovery was observed")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_resolve_internal_alert(alert_key: str, observed_at: str | None, storage_dir: str) -> None:
+    """Close an internal alert episode after the detector observes recovery."""
+
+    from volpred.ops import resolve_internal_remediable_alert
+
+    result = resolve_internal_remediable_alert(
+        alert_key=alert_key,
+        storage_dir=storage_dir,
+        now=_parse_observed_at(observed_at),
+    )
+    if result.get("reason") in {"enqueue_failed", "next_tasks_not_a_list"}:
+        raise click.ClickException(
+            f"internal alert resolver failed: {result.get('error') or result.get('reason')}"
+        )
+    _print_json({"action": "resolve_internal_alert", **result})
+
+
 @ops.command("send-alert")
 @click.option(
     "--level",
@@ -2444,16 +2478,48 @@ def ops_telegram_send(text: str, silent: bool) -> None:
 @click.option("--body-md", "body_md_file", default=None, type=click.Path(exists=True), help="Read markdown body from file (use for long emails with tables/headings)")
 @click.option("--force", "force_send", is_flag=True, help="Bypass 24h dedup and resend once")
 @click.option("--needs-reply", "needs_reply", is_flag=True, help="Mark this email as requiring boss decision — adds 🔴【需老闆回信】title prefix + red prominent banner at top")
+@click.option(
+    "--internal-remediable-key",
+    default=None,
+    help="Route a registered internal alert to an idempotent P1 task; email only after two failed repairs",
+)
+@click.option("--observed-at", default=None, help="ISO-8601 time when the condition was observed")
+@click.option(
+    "--suppress-owner-transport",
+    is_flag=True,
+    help="Still route internal P1 work, but leave any escalation delivery to the parent watcher",
+)
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
-def ops_send_alert(level: str, title: str, body: str | None, body_md_file: str | None, force_send: bool, needs_reply: bool, storage_dir: str) -> None:
+def ops_send_alert(
+    level: str,
+    title: str,
+    body: str | None,
+    body_md_file: str | None,
+    force_send: bool,
+    needs_reply: bool,
+    internal_remediable_key: str | None,
+    observed_at: str | None,
+    suppress_owner_transport: bool,
+    storage_dir: str,
+) -> None:
     """Send a general-purpose ops alert email (HTML auto-rendered from markdown body)."""
     from pathlib import Path as _Path
-    from volpred.ops import ALERT_RECIPIENT, send_alert
+    from volpred.ops import ALERT_RECIPIENT, route_internal_remediable_alert, send_alert
 
     if body_md_file:
         body = _Path(body_md_file).read_text(encoding="utf-8")
     if not body or not body.strip():
         raise click.UsageError("Must provide --body or --body-md")
+    if internal_remediable_key and (force_send or needs_reply):
+        raise click.UsageError(
+            "--internal-remediable-key cannot be combined with --force or --needs-reply"
+        )
+    if observed_at and not internal_remediable_key:
+        raise click.UsageError("--observed-at requires --internal-remediable-key")
+    if suppress_owner_transport and not internal_remediable_key:
+        raise click.UsageError(
+            "--suppress-owner-transport requires --internal-remediable-key"
+        )
 
     # 2026-05-29: boss-decision-needed marker. Prefix title + prepend red banner
     # so boss can spot decision-needed emails immediately in inbox vs ops noise.
@@ -2466,16 +2532,32 @@ def ops_send_alert(level: str, title: str, body: str | None, body_md_file: str |
         )
         body = banner + body
 
-    result = send_alert(
-        level,
-        title,
-        body,
-        recipient=ALERT_RECIPIENT,
-        storage_dir=storage_dir,
-        force_send=force_send,
-    )
+    if internal_remediable_key:
+        result = route_internal_remediable_alert(
+            alert_key=internal_remediable_key,
+            level=level,
+            title=title,
+            body=body,
+            recipient=ALERT_RECIPIENT,
+            storage_dir=storage_dir,
+            now=_parse_observed_at(observed_at),
+            suppress_owner_transport=suppress_owner_transport,
+        )
+    else:
+        result = send_alert(
+            level,
+            title,
+            body,
+            recipient=ALERT_RECIPIENT,
+            storage_dir=storage_dir,
+            force_send=force_send,
+        )
     if result.get("skipped"):
-        console.print("[yellow]Alert skipped[/yellow] duplicate within 24h window")
+        if result.get("skip_reason") == "internal_auto_remediation":
+            task_id = (result.get("remediation") or {}).get("task_id")
+            console.print(f"[green]Internal alert routed[/green] P1 task={task_id}")
+        else:
+            console.print("[yellow]Alert skipped[/yellow] duplicate within 24h window")
     elif result.get("sent"):
         console.print(f"[green]Alert sent[/green] {result['notification_id']}")
     else:

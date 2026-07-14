@@ -45,6 +45,20 @@ ALERT_RECIPIENT = "yihao.lai@gmail.com"
 ALERT_LEVELS = ("info", "warn", "critical")
 ALERT_DEDUP_WINDOW = timedelta(hours=24)
 TELEGRAM_ALERT_MAX_CHARS = 4096
+
+# These alerts describe repair work the platform can perform itself.  They must
+# enter the task pool first and stay out of email/Telegram until two completed
+# remediation attempts fail to clear the same stable root-cause key.
+# The backup hold and PHASE-Z candidate gate use separate keys because their
+# recovery proofs differ: a clean HEAD audit cannot prove that a rejected dirty
+# candidate was repaired (and vice versa).
+INTERNAL_REMEDIABLE_ALERT_KEYS = frozenset(
+    {
+        "git_push_backup_hold",
+        "phase_z_baseline_missing",
+        "silent_fallback_new",
+    }
+)
 SCHEDULER_STALE_WINDOW = timedelta(minutes=30)
 RELEASE_POOL_GAP_BUFFER = timedelta(minutes=60)  # grace on top of configured interval
 HOST_CRON_RECENCY_GRACE = timedelta(minutes=10)
@@ -573,6 +587,197 @@ def send_alert(
     return result
 
 
+def route_internal_remediable_alert(
+    *,
+    alert_key: str,
+    level: str,
+    title: str,
+    body: str,
+    recipient: str = ALERT_RECIPIENT,
+    storage_dir: str = "storage",
+    now: datetime | None = None,
+    suppress_owner_transport: bool = False,
+) -> dict[str, Any]:
+    """Queue an internal repair and notify only after two failed attempts.
+
+    `alert_key` is an explicit root-cause identity, not the presentation title.
+    This is important for PHASE-Z and push-hold messages whose titles/bodies may
+    contain changing counts.  Suppressed results intentionally look like an
+    alert skip to existing report/log consumers, but no email or Telegram call
+    is made on that path.
+    """
+
+    normalized_key = str(alert_key or "").strip().lower()
+    if normalized_key not in INTERNAL_REMEDIABLE_ALERT_KEYS:
+        raise ValueError(f"Unsupported internal-remediable alert_key: {alert_key}")
+    normalized_level = str(level or "warn").strip().lower()
+    if normalized_level not in ALERT_LEVELS:
+        raise ValueError(f"Unsupported alert level: {level}")
+
+    from .alert_remediation import remediate_internal_alert
+
+    condition = {
+        "id": normalized_key,
+        "breached": True,
+        "level": normalized_level,
+        "title": str(title),
+        "body": str(body),
+    }
+    remediation = remediate_internal_alert(
+        condition,
+        alert_key=normalized_key,
+        storage_dir=storage_dir,
+        now=now,
+    )
+    remediation_reason = str(remediation.get("reason") or "")
+    if remediation_reason in {"enqueue_failed", "next_tasks_not_a_list"}:
+        # Suppression is safe only after the promised P1 exists.  A broken task
+        # writer is a separate infrastructure failure and must fail loud; it is
+        # not counted as one of the alert's completed remediation attempts.
+        warn(
+            "internal_alert_router",
+            "could not queue internal remediation; escalating router failure",
+            alert_key=normalized_key,
+            reason=remediation_reason,
+        )
+        delivery = send_alert(
+            "critical",
+            f"內部自動修復路由失敗（{normalized_key}）",
+            "\n".join(
+                [
+                    "## 路由失敗",
+                    f"alert_key `{normalized_key}` 的 P1 任務未能建立，因此不能安全靜音。",
+                    f"失敗原因：{remediation.get('error') or remediation_reason}",
+                    "這不計入原警報的自動修復嘗試次數。",
+                    "",
+                    "## 原始警報",
+                    str(body),
+                ]
+            ),
+            recipient=recipient,
+            storage_dir=storage_dir,
+        )
+        return {
+            **delivery,
+            "internal_alert_key": normalized_key,
+            "escalated": False,
+            "routing_failure": True,
+            "remediation": remediation,
+        }
+    if not remediation.get("escalate"):
+        return {
+            "level": normalized_level,
+            "title": str(title),
+            "recipient": recipient,
+            "internal_alert_key": normalized_key,
+            "sent": False,
+            "skipped": True,
+            "skip_reason": "internal_auto_remediation",
+            "notification_id": None,
+            "escalated": False,
+            "remediation": remediation,
+        }
+    if suppress_owner_transport:
+        # A parent incident watcher may own the only terminal notification.
+        # Keep escalation_due unacknowledged so the next standalone detector
+        # can deliver it; suppression never skips task creation or failure count.
+        return {
+            "level": normalized_level,
+            "title": str(title),
+            "recipient": recipient,
+            "internal_alert_key": normalized_key,
+            "sent": False,
+            "skipped": True,
+            "skip_reason": "internal_owner_transport_suppressed",
+            "notification_id": None,
+            "escalated": False,
+            "remediation": remediation,
+        }
+
+    attempts = int(remediation.get("consecutive_remediation_failures") or 0)
+    failure_reason = str(remediation.get("last_failure_reason") or "未留下失敗原因")
+    episode_id = str(remediation.get("episode_id") or "unknown")
+    # Stable within one episode (so a delivery crash dedups), distinct after an
+    # explicit recovery (so a genuinely new incident within 24h still emails).
+    escalation_title = f"內部自動修復連續失敗（{normalized_key}；episode {episode_id}）"
+    escalation_body = "\n".join(
+        [
+            "## 自動修復失敗",
+            f"同一 alert_key `{normalized_key}` 已自動嘗試 {attempts} 次，仍未解除。",
+            f"失敗原因：{failure_reason}",
+            f"P1 任務：`{remediation.get('task_id')}`（已再次排入任務池）",
+            "",
+            "## 原始警報",
+            str(body),
+        ]
+    )
+    delivery = send_alert(
+        normalized_level,
+        escalation_title,
+        escalation_body,
+        recipient=recipient,
+        storage_dir=storage_dir,
+    )
+    owner_reached = bool(
+        delivery.get("sent")
+        or (
+            delivery.get("skipped")
+            and delivery.get("skip_reason") == "dedup_24h"
+        )
+    )
+    escalation_ack: dict[str, Any] | None = None
+    if owner_reached:
+        from .alert_remediation import mark_internal_alert_escalated
+
+        escalation_ack = mark_internal_alert_escalated(
+            alert_key=normalized_key,
+            task_id=str(remediation.get("task_id") or ""),
+            storage_dir=storage_dir,
+            notification_id=(
+                str(delivery.get("notification_id"))
+                if delivery.get("notification_id")
+                else None
+            ),
+            now=now,
+        )
+    return {
+        **delivery,
+        "internal_alert_key": normalized_key,
+        "escalated": True,
+        "escalation_ack": escalation_ack,
+        "remediation": remediation,
+    }
+
+
+def resolve_internal_remediable_alert(
+    *,
+    alert_key: str,
+    storage_dir: str = "storage",
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Reset one internal alert episode after its condition is observably clear."""
+
+    normalized_key = str(alert_key or "").strip().lower()
+    if normalized_key not in INTERNAL_REMEDIABLE_ALERT_KEYS:
+        raise ValueError(f"Unsupported internal-remediable alert_key: {alert_key}")
+    from .alert_remediation import resolve_internal_alert
+
+    return resolve_internal_alert(
+        alert_key=normalized_key,
+        storage_dir=storage_dir,
+        now=now,
+    )
+
+
+def _internal_condition_alert_key(condition: dict[str, Any]) -> str | None:
+    """Return a registered internal key only when the detector proved the cause."""
+
+    details = condition.get("details")
+    candidate = details.get("internal_alert_key") if isinstance(details, dict) else None
+    normalized = str(candidate or "").strip().lower()
+    return normalized if normalized in INTERNAL_REMEDIABLE_ALERT_KEYS else None
+
+
 def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     log_path = _cron_logs_dir(storage_dir).joinpath("release_pool.log")
     last_fire_at = None
@@ -1099,6 +1304,30 @@ _PUSH_BACKLOG_WARN_HOURS = 3.0
 _PUSH_BACKLOG_CRITICAL_HOURS = 8.0
 
 
+def _latest_push_backlog_cause(storage_dir: str) -> str:
+    """Classify the latest backup attempt without over-silencing real outages."""
+
+    log_path = _cron_logs_dir(storage_dir) / "git_push_backup.log"
+    try:
+        lines = log_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError as exc:
+        warn("push_backlog", "git backup log read failed", path=str(log_path), err=str(exc))
+        return "unknown"
+    for raw in reversed(lines[-500:]):
+        line = raw.lower()
+        if "held:" in line and "silent fallback" in line:
+            return "silent_fallback_new"
+        if "remote ahead by" in line or "divergence" in line:
+            return "divergence"
+        if "push failed" in line:
+            return "push_failed"
+        if "pushed " in line and " commit(s) ok" in line:
+            return "recovered"
+        if "nothing to push" in line:
+            return "recovered"
+    return "unknown"
+
+
 def _parse_push_backlog_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     """git-push-backup dead-man switch — watches UNPUSHED-BACKLOG AGE, not exit codes.
 
@@ -1122,6 +1351,7 @@ def _parse_push_backlog_state(storage_dir: str, now: datetime) -> dict[str, Any]
     ahead_count = 0
     oldest_age_hours: float | None = None
     note = ""
+    cause = _latest_push_backlog_cause(storage_dir)
     try:
         rev_list = subprocess.run(
             ["git", "-C", str(repo_root), "rev-list", "--count", "origin/main..main"],
@@ -1183,6 +1413,8 @@ def _parse_push_backlog_state(storage_dir: str, now: datetime) -> dict[str, Any]
             "ahead_count": ahead_count,
             "oldest_unpushed_age_hours": round(oldest_age_hours, 2) if oldest_age_hours is not None else None,
             "note": note,
+            "cause": cause,
+            "internal_alert_key": "git_push_backup_hold" if cause == "silent_fallback_new" else None,
         },
     }
 
@@ -4439,6 +4671,7 @@ def check_alert_conditions(
     report = build_alert_condition_report(
         storage_dir=storage_dir, now=now, paper_root=paper_root
     )
+    report_observed_at = _parse_iso_datetime(report.get("generated_at")) or now
 
     # 2026-07-13 (owner, twice in one hour: 「你要立即處理 不是只建議我」): a breached
     # alert is work for the platform, not a chore for the owner. Turn each breach into
@@ -4447,15 +4680,64 @@ def check_alert_conditions(
     # queue must still let the alert go out.
     from .alert_remediation import remediate_report
 
+    internally_routed = {
+        id(condition)
+        for condition in report.get("conditions", [])
+        if _internal_condition_alert_key(condition)
+    }
+    ordinary_report = {
+        **report,
+        "conditions": [
+            condition
+            for condition in report.get("conditions", [])
+            if id(condition) not in internally_routed
+        ],
+    }
     try:
-        report["remediation"] = remediate_report(report, storage_dir=storage_dir, now=now)
+        report["remediation"] = remediate_report(
+            ordinary_report,
+            storage_dir=storage_dir,
+            now=now,
+        )
     except Exception as exc:  # noqa: BLE001
         warn("alerts", "alert remediation bridge failed", err=str(exc))
         report["remediation"] = []
 
+    for condition in report.get("conditions", []):
+        if str(condition.get("id")) != "push_backlog" or condition.get("breached"):
+            continue
+        details = condition.get("details") if isinstance(condition.get("details"), dict) else {}
+        if details.get("ahead_count") == 0 or details.get("cause") == "recovered":
+            resolution = resolve_internal_remediable_alert(
+                alert_key="git_push_backup_hold",
+                storage_dir=storage_dir,
+                now=report_observed_at,
+            )
+            report["remediation"].append(
+                {
+                    "disposition": "internal_resolution",
+                    "alert_id": "push_backlog",
+                    **resolution,
+                }
+            )
+
     alerts: list[dict[str, Any]] = []
     for condition in report["conditions"]:
         if not condition.get("breached"):
+            continue
+        internal_key = _internal_condition_alert_key(condition)
+        if internal_key:
+            routed = route_internal_remediable_alert(
+                alert_key=internal_key,
+                level=str(condition["level"]),
+                title=str(condition["title"]),
+                body=str(condition["body"]),
+                recipient=recipient,
+                storage_dir=storage_dir,
+                now=report_observed_at,
+            )
+            report["remediation"].append(routed["remediation"])
+            alerts.append(routed)
             continue
         alerts.append(
             send_alert(

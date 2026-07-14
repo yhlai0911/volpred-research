@@ -230,7 +230,7 @@ def audit(root: Path) -> tuple[list[str], int, int]:
             tree = ast.parse(test_file.read_text(encoding="utf-8", errors="replace"), filename=str(test_file))
         except SyntaxError as exc:
             bad.append(f"BAD {rel_test}:{exc.lineno} — test module does not parse: {exc.msg}")
-            continue  # silent-ok: 失敗已記入 bad[]（本 audit 的 findings 輸出，可觀測）
+            continue
 
         importlib_names, import_module_names = _dynamic_import_aliases(tree)
 
@@ -272,7 +272,7 @@ def audit(root: Path) -> tuple[list[str], int, int]:
             except SyntaxError as exc:
                 rel_source = module_file.relative_to(root)
                 bad.append(f"BAD {rel_source}:{exc.lineno} — source module does not parse: {exc.msg}")
-                continue  # silent-ok: 失敗已記入 bad[]（本 audit 的 findings 輸出，可觀測）
+                continue
             if opaque:
                 continue
 

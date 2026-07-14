@@ -62,7 +62,7 @@ import subprocess
 import sys
 import tempfile
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
@@ -83,8 +83,10 @@ _TEST_GATE_TIMEOUT_S = 600
 # are research artifacts, not the runtime the gate protects.
 _GATED_CODE_PREFIXES = ("src/volpred/", "scripts/", "tests/")
 _TRUSTED_GATE_PATHS = {
+    "scripts/audit_silent_fallbacks.py",
     "scripts/audit_test_imports.py",
     "scripts/git_hooks/pre-commit",
+    "storage/qa/silent_fallback_baseline.json",
 }
 # pytest exit 5 = "no tests collected" — a keyword `-k` that matched nothing, NOT
 # a failure. Classified as no_tests (observable), never as red.
@@ -843,6 +845,78 @@ def _default_alert(*, level: str, title: str, body: str) -> dict:
         return {"sent": False, "error": str(exc)[:200]}
 
 
+def _coerce_observed_at(value) -> datetime | None:
+    if value is None or isinstance(value, datetime):
+        return value
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError as exc:
+        LOG.warning("phase_z: invalid internal alert observed_at=%r (%s)", value, exc)
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def _default_internal_alert(
+    *,
+    alert_key: str,
+    level: str,
+    title: str,
+    body: str,
+    observed_at=None,
+) -> dict:
+    """Route a mechanically repairable PHASE-Z signal to P1 work first."""
+
+    try:
+        from volpred.ops.alerts import route_internal_remediable_alert
+
+        return route_internal_remediable_alert(
+            alert_key=alert_key,
+            level=level,
+            title=title,
+            body=body,
+            now=_coerce_observed_at(observed_at),
+        )
+    except Exception as exc:  # noqa: BLE001 — routing failure is observable, tick remains alive
+        LOG.warning("phase_z: internal alert routing failed (%s)", exc)
+        return {"sent": False, "error": str(exc)[:200]}
+
+
+def _default_internal_resolve(*, alert_key: str, storage_dir: str, observed_at=None) -> dict:
+    """Close a prior PHASE-Z internal incident after the detector recovers."""
+
+    try:
+        from volpred.ops.alerts import resolve_internal_remediable_alert
+
+        return resolve_internal_remediable_alert(
+            alert_key=alert_key,
+            storage_dir=storage_dir,
+            now=_coerce_observed_at(observed_at),
+        )
+    except Exception as exc:  # noqa: BLE001 — observable housekeeping, tick remains alive
+        LOG.warning("phase_z: internal alert resolution failed (%s)", exc)
+        return {"resolved": False, "error": str(exc)[:200]}
+
+
+def _is_silent_fallback_gate_output(output: str) -> bool:
+    """True only for Gate 2's explicit NEW-silent-fallback verdict."""
+
+    normalized = " ".join(str(output or "").lower().split())
+    return (
+        "introduces new silent fallback" in normalized
+        and "silent-fallback-audit" in normalized
+        and re.search(r"\bnew=[1-9][0-9]*\b", normalized) is not None
+    )
+
+
+def _is_silent_fallback_clean_gate_output(output: str) -> bool:
+    """True only when trusted Gate 2 emitted its explicit clean receipt."""
+
+    normalized = " ".join(str(output or "").lower().split())
+    return "silent-fallback-audit passed new=0 scope=" in normalized
+
+
 def _test_files_referencing_stem(tests_dir: Path, stem: str) -> list[Path]:
     """Test files whose filename or source references ``stem``.
 
@@ -1184,6 +1258,8 @@ def run_phase_z(
     runner=subprocess.run,
     test_runner=None,
     alert_fn=None,
+    internal_alert_fn=None,
+    internal_resolve_fn=None,
     pre_fire_dirty: set[str] | list[str] | None = None,
 ) -> dict:
     """Deterministic post-fire commit. Returns an observability dict.
@@ -1201,12 +1277,32 @@ def run_phase_z(
     with the exact parent OID. Only newly failing node ids emit CRITICAL. The
     ``tests`` dict is absent on non-committing paths — nothing landed to verify.
 
-    ``test_runner`` / ``alert_fn`` are injectable (same style as ``runner``) so the
-    gate's own tests fake the pytest run instead of recursively spawning pytest.
+    ``test_runner`` / ``alert_fn`` / ``internal_alert_fn`` /
+    ``internal_resolve_fn`` are injectable (same style as ``runner``) so the
+    gate's own tests fake notifications and pytest instead of recursively
+    spawning either production path.
     """
     repo_root = Path(repo_root)
     hhmm = now_hhmm or datetime.now().strftime("%H:%M")
+    supplied_alert_fn = alert_fn
     alert_fn = alert_fn or _default_alert
+    if internal_alert_fn is None:
+        if supplied_alert_fn is None:
+            internal_alert_fn = _default_internal_alert
+        else:
+            # Backward-compatible test seam: existing callers inject one three-
+            # argument alert collector.  Production uses the dedicated router.
+            def internal_alert_fn(
+                *, alert_key: str, level: str, title: str, body: str, observed_at=None
+            ) -> dict:
+                del alert_key, observed_at
+                return supplied_alert_fn(level=level, title=title, body=body)
+    if internal_resolve_fn is None:
+        internal_resolve_fn = (
+            _default_internal_resolve
+            if supplied_alert_fn is None
+            else lambda **_kwargs: {"resolved": False, "reason": "injected_alert_test_seam"}
+        )
     # Read-and-consume up front: every exit path below is now incapable of leaving
     # a receipt behind to caption the next fire's commit. See the receipt block above.
     receipt = _read_and_consume_fire_receipt(repo_root, runner)
@@ -1222,10 +1318,22 @@ def run_phase_z(
 
     if not dirty_now:
         LOG.info("phase_z: working tree clean — agent committed everything")
+        clean_observed_at = datetime.now(timezone.utc)
+        internal_resolve_fn(
+            alert_key="phase_z_baseline_missing",
+            storage_dir=str(repo_root / "storage"),
+            observed_at=clean_observed_at,
+        )
+        internal_resolve_fn(
+            alert_key="silent_fallback_new",
+            storage_dir=str(repo_root / "storage"),
+            observed_at=clean_observed_at,
+        )
         _consume_pre_fire_snapshot(repo_root, runner)
         _bump_foreign_streaks(repo_root, runner, [])  # nothing foreign left → streaks die here
         return {"committed": False, "reason": "clean"}
 
+    baseline_observed_at = datetime.now(timezone.utc)
     baseline = set(pre_fire_dirty) if pre_fire_dirty is not None else _read_pre_fire_snapshot(repo_root, runner)
     if baseline is None:
         # Ownership unknown. The old code committed anyway (`git add -A`), which
@@ -1234,7 +1342,9 @@ def run_phase_z(
         # rewrites someone else's history under someone else's name.
         LOG.warning("phase_z: no fire-start baseline — declining to commit %d dirty path(s)",
                     len(dirty_now))
-        alert_fn(
+        internal_alert_fn(
+            alert_key="phase_z_baseline_missing",
+            observed_at=baseline_observed_at,
             level="warn",
             title="PHASE-Z 沒有 fire 起始基線 — 這班不自動 commit",
             body="\n".join([
@@ -1255,6 +1365,11 @@ def run_phase_z(
         )
         return {"committed": False, "reason": "ownership_unknown", "dirty": len(dirty_now)}
 
+    internal_resolve_fn(
+        alert_key="phase_z_baseline_missing",
+        storage_dir=str(repo_root / "storage"),
+        observed_at=datetime.now(timezone.utc),
+    )
     owned = sorted(dirty_now - baseline)
     dirty_before = sorted(dirty_now & baseline)
     # The snapshot is consumed only on a SETTLED outcome (committed / clean /
@@ -1533,6 +1648,7 @@ def run_phase_z(
             })
             if trusted_auditor.is_file():
                 hook_env["VOLPRED_TRUSTED_TEST_IMPORT_AUDITOR"] = str(trusted_auditor)
+            hook_observed_at = datetime.now(timezone.utc)
             hook = runner(
                 ["bash", str(trusted_hook)], cwd=str(candidate_root), env=hook_env,
                 capture_output=True, text=True, timeout=_COMMIT_TIMEOUT_S, check=False,
@@ -1541,15 +1657,45 @@ def run_phase_z(
             if hook.returncode != 0:
                 LOG.warning("phase_z: candidate pre-commit blocked; alternate index discarded: %s",
                             hook_out[-400:])
-                alert_fn(
-                    level="warn",
-                    title="PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-                    body=("候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n"
-                          + (hook_out[-1200:] or "(hook returned non-zero without output)")),
-                )
+                silent_fallback_blocked = _is_silent_fallback_gate_output(hook_out)
+                alert_payload = {
+                    "level": "warn",
+                    "title": "PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
+                    "body": (
+                        "候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n"
+                        + (hook_out[-1200:] or "(hook returned non-zero without output)")
+                    ),
+                }
+                if silent_fallback_blocked:
+                    internal_alert_fn(
+                        alert_key="silent_fallback_new",
+                        observed_at=hook_observed_at,
+                        **alert_payload,
+                    )
+                else:
+                    alert_fn(**alert_payload)
                 return {"committed": False, "reason": "commit_nonzero", "untracked": untracked,
-                        "commit_tail": hook_out[-600:], "rolled_back": True}
+                        "commit_tail": hook_out[-600:], "rolled_back": True,
+                        "internal_alert_observed_at": hook_observed_at.isoformat(),
+                        "internal_alert_key": (
+                            "silent_fallback_new" if silent_fallback_blocked else None
+                        )}
 
+            # Gate 2 audits only candidate-owned Python paths; a foreign dirty
+            # Python file can be the rejected candidate from an earlier cohort
+            # and is absent from this alternate index.  Resolve only when the
+            # successful gate covered all dirty Python state (or none remains).
+            no_dirty_python = not any(path.endswith(".py") for path in dirty_now)
+            clean_gate_receipt = _is_silent_fallback_clean_gate_output(hook_out)
+            if no_dirty_python or (
+                clean_gate_receipt
+                and not any(path.endswith(".py") for path in dirty_before)
+            ):
+                internal_resolve_fn(
+                    alert_key="silent_fallback_new",
+                    storage_dir=str(repo_root / "storage"),
+                    observed_at=datetime.now(timezone.utc),
+                )
             tree_after = _git(
                 repo_root, "write-tree", timeout_s=_SHORT_TIMEOUT_S,
                 runner=runner, env=candidate_env,

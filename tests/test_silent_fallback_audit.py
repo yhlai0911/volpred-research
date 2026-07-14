@@ -77,6 +77,257 @@ def b():
     assert findings == []
 
 
+def test_audit_accepts_returned_exception_findings_collector(tmp_path: Path) -> None:
+    """`bad.append(exc); continue` is observable when the collector truly escapes."""
+
+    source = tmp_path / "sample.py"
+    source.write_text(
+        """
+def audit(items):
+    bad: list[str] = []
+    checked = 0
+    for item in items:
+        try:
+            parse(item)
+        except SyntaxError as exc:
+            bad.append(f"BAD {item}: {exc}")
+            continue
+        checked += 1
+    return bad, checked
+""",
+        encoding="utf-8",
+    )
+
+    assert audit_silent_fallbacks.audit_file(source, root=tmp_path) == []
+
+
+def test_audit_does_not_whitelist_arbitrary_append_collectors(tmp_path: Path) -> None:
+    source = tmp_path / "sample.py"
+    source.write_text(
+        """
+def dead_local(items):
+    findings = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            findings.append(str(exc))
+            continue
+    return []
+
+def payload_omits_exception(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append("generic failure")
+            continue
+    return bad
+
+def cleared_before_return(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    bad.clear()
+    return bad
+
+def default_return_is_unobservable(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            return None
+    return bad
+
+def conditional_append_is_not_enough(items, verbose):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            if verbose:
+                bad.append(str(exc))
+            continue
+    return bad
+
+def clear_result_is_not_the_collector(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    return bad.clear()
+
+def length_is_not_the_collector(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    return len(bad)
+
+def intermediate_return_can_hide_the_collector(items, stop):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    if stop:
+        return None
+    return bad
+
+def slice_clear_destroys_the_collector(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    bad[:] = []
+    return bad
+
+def boolean_exception_marker_loses_the_detail(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(bool(exc))
+            continue
+    return bad
+
+def alias_can_clear_the_collector(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    alias = bad
+    alias.clear()
+    return bad
+
+def annotated_alias_can_clear_the_collector(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    alias: list = bad
+    alias.clear()
+    return bad
+
+def raise_makes_the_return_unreachable(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    raise RuntimeError("stop")
+    return bad
+
+def multiplying_detail_away_is_not_observable(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc) * 0)
+            continue
+    return bad
+
+def escaped_collector_can_be_cleared_by_callee(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    zap(bad)
+    return bad
+
+def unknown_collector_method_can_mutate(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    bad.__setitem__(slice(None), [])
+    return bad
+
+def pre_handler_call_alias_can_mutate(items):
+    bad = []
+    alias = identity(bad)
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    alias.clear()
+    return bad
+
+def post_handler_container_alias_can_mutate(items):
+    bad = []
+    for item in items:
+        try:
+            parse(item)
+        except ValueError as exc:
+            bad.append(str(exc))
+            continue
+    aliases = [bad]
+    aliases[0].clear()
+    return bad
+""",
+        encoding="utf-8",
+    )
+
+    findings = audit_silent_fallbacks.audit_file(source, root=tmp_path)
+
+    assert [finding.action for finding in findings] == [
+        "continue",
+        "continue",
+        "continue",
+        "return None",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+    ]
+
+
 def test_audit_ignores_inline_silent_ok_comments(tmp_path: Path) -> None:
     source = tmp_path / "sample.py"
     source.write_text(

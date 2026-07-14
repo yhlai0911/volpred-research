@@ -334,6 +334,8 @@ def compact_terminal_tasks(
     for i, task in enumerate(tasks):
         if not isinstance(task, dict) or task.get("tombstone"):
             continue
+        if task.get("internal_alert_watermark") is True:
+            continue
         status = str(task.get("status") or "").strip().lower()
         if status not in TERMINAL_COMPACTABLE_STATUSES:
             continue

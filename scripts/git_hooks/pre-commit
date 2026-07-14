@@ -164,7 +164,10 @@ fi
 # --- Gate 2: silent fallbacks (2026-07-11, baseline) ------------------------
 AUDIT="scripts/audit_silent_fallbacks.py"
 BL="storage/qa/silent_fallback_baseline.json"
-[ -f "$AUDIT" ] && [ -f "$BL" ] || exit 0
+if [ ! -f "$AUDIT" ] || [ ! -f "$BL" ]; then
+  echo "[pre-commit] BLOCKED — silent-fallback gate inputs missing: $AUDIT / $BL"
+  exit 1
+fi
 
 # bash 3.2 (macOS /bin/bash) errors on "${arr[@]}" when arr is empty under `set -u`,
 # so the full-sweep fallback must not go through the array expansion.
@@ -183,5 +186,7 @@ if [ "$RC" -ne 0 ]; then
   echo "[pre-commit] Rule: .claude/rules/no-silent-fallback.md"
   exit 1
 fi
+
+echo "[pre-commit] silent-fallback-audit passed new=0 scope=${#STAGED_PY[@]}"
 
 exit 0
