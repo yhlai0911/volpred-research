@@ -2,6 +2,42 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 10:15 — live_freshness 拿日曆天當交易日曆，同時誤報與漏報 — **FIXED**（hourly-10）
+
+**觸發**：老闆回信「立刻從底層邏輯流程去修復 不要只是表面修補有這麼難嗎？」——
+回的是 04:52 那封大體檢 WARN（`線上績效最新 data_date=2026-07-10（已 4 天）`）。
+
+**現象**：警報在 04:52 寄出，09:40 那班就自己好了。看起來像「跑一下 daily_update 就沒事」的
+雜訊，過去也一直被這樣消化掉。
+
+**根因（不是門檻，是判準本身）**：`check_live_freshness` 用 `now - data_date > 3 個日曆天`。
+這個判準暗含一個假設：**檢查一定在資料更新之後才跑**。假設是錯的 —— daily-checkup 排 09:40，
+但 launchd 會在睡眠喚醒後補跑漏掉的班（當天 04:52 就補跑了一次，log 有兩筆 fire）。而資料鏈是
+`collect_us`（週二~六 07:03）收美股 session → `daily_update`（週一~六 08:03）重算 paper_trading
+推上站。週二凌晨補跑時，線上本來就只該有上週五的數字 = 4 個日曆天 → 在一個**設計上完全正常的
+時點**寄警報給老闆。
+
+漏報是同一枚硬幣的背面，而且更嚴重：週四線上還停在週一（真的落後 2 個交易日）只有 3 個日曆天，
+**剛好躲過 `>3`，舊碼回空陣列、一聲不吭**。實測兩面（見 commit 的 test）：
+- 舊碼 @ 週二 04:52 / data=07-10 → `warn`（該閉嘴時鬼叫）
+- 舊碼 @ 週四 / 落後 2 個交易日 → `[]`（該叫時瞎掉）
+
+**修法**：換掉 domain model，不是調門檻。「線上該有多新」是排程問題不是日曆問題 ——
+`_expected_live_session()` 從 canonical `runtime_schedules.json` 讀 **daily_update**（=讓網站變新的
+那個 job，不是收原始資料的 `collect_us`）的 cron，用 croniter 找出上一班已跑完（+1h grace）的 fire，
+再用 `exchange_calendars` XNYS 日曆取該 fire 之前最後一個真實 session。只有 `實際 < 應該` 才報警，
+落後 1 個 session → warn、≥2 → critical。判準因此**與檢查何時被觸發無關**，補跑、手動跑、半夜跑
+都不會誤報；美股假日也吃得到（真交易日曆，不是 weekday 近似）。
+
+**Gate**：`tests/test_daily_checkup_live_freshness.py`（5 cases）—— 含 04:52 incident 的重現、
+以及舊碼躲得過的那個 2-session 漏報。croniter / exchange_calendars 不可用時 fail-open 退回舊粗判準，
+但**印 stderr WARN**（no-silent-fallback）。
+
+**教訓（同 class 已第 N 次）**：這是 handoff meta-lesson C「測量太粗 → 誤報合法模式 → 噪音 →
+真問題被淹沒」的又一例（前有 cluster spy catch-all、publish_rhythm burst、quota anchor 漂移）。
+**判準若隱含「我一定在某個時間點被呼叫」的假設，它遲早會在別的時間點被呼叫。** 監控的正確錨點
+是「產生這份資料的排程」，不是牆上的日曆。
+
 ## 2026-07-14 09:07 — 豆腐字圖表第三次上線 + CI 時間炸彈測試 — **3-STRIKE TRIGGER，FIXED**（hourly-09）
 
 **觸發**：main 的 Test Suite 紅燈（run 29294703782，head_sha 112811a3c），兩個 failure。

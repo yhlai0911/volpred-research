@@ -260,6 +260,66 @@ def _get_json(url: str, timeout: int = 25):
         return r.status, json.loads(r.read()), dict(r.headers)
 
 
+# 「線上績效該有多新」不是日曆問題，是排程問題。資料鏈是：
+#   collect_us（週二~六 07:03 台北）收前一個已收盤的美股 session
+#   → daily_update（週一~六 08:03）重算 paper_trading 並推上站
+# 網站要到 daily_update 跑完才看得到新 session，所以錨點是 daily_update，不是 collect_us。
+# 任一時刻**應該**已經在線上的最新 data_date = 上一班跑完的 daily_update 推上去的那個
+# NYSE session —— 跟「今天幾號」「過了幾天」無關。
+#
+# 舊判準（now - data_date > 3 個日曆天）暗含「檢查一定在資料更新之後跑」的假設。這假設是
+# 錯的：daily-checkup 排 09:40，但 launchd 會在睡眠喚醒後補跑漏掉的班（2026-07-14 04:52
+# 就補跑過一次）。週二凌晨補跑時，線上本來就只該有上週五的數字 —— 4 個日曆天 —— 於是它
+# 在一個設計上完全正常的時點寄了警報給老闆。同一個粗判準也會漏報：週間真的落後 2 個
+# session 卻只有 3 個日曆天，剛好躲過 >3。誤報與漏報同源，調門檻救不了，要換判準本身。
+PUBLISH_GRACE_H = 1.0  # daily_update 起跑到線上反映的容忍延遲
+
+
+def _expected_live_session(now: datetime.datetime) -> datetime.date | None:
+    """此刻「應該」已經上線的最新美股 session；判不出來回 None（呼叫端退回舊判準）。"""
+    cron = _cron_map().get("daily_update")
+    if not cron:
+        print("[daily_checkup] WARN runtime_schedules 查無 daily_update cron，"
+              "live_freshness 退回日曆天判準", file=sys.stderr)
+        return None
+    try:
+        from croniter import croniter
+        import exchange_calendars as xcals
+    except ImportError as exc:
+        print(f"[daily_checkup] WARN {exc} —— live_freshness 退回日曆天判準", file=sys.stderr)
+        return None
+    try:
+        # 上一班「已經跑完」（含推上站的 grace）的 daily_update。還在 grace 內的那班不算數。
+        it = croniter(cron, now)
+        fire = it.get_prev(datetime.datetime)
+        if (now - fire).total_seconds() / 3600 < PUBLISH_GRACE_H:
+            fire = it.get_prev(datetime.datetime)
+        # 那一班推上去的是它開跑前最後一個已收盤的 session（美股當地日 = 台北日 - 1）。
+        nyse = xcals.get_calendar("XNYS")
+        prior = fire.date() - datetime.timedelta(days=1)
+        sessions = nyse.sessions_in_range(prior - datetime.timedelta(days=14), prior)
+        if len(sessions) == 0:
+            print("[daily_checkup] WARN NYSE 日曆在該區間無 session，"
+                  "live_freshness 退回日曆天判準", file=sys.stderr)
+            return None
+        return sessions[-1].date()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[daily_checkup] WARN 交易日曆/cron 解析失敗: {exc} —— "
+              "live_freshness 退回日曆天判準", file=sys.stderr)
+        return None
+
+
+def _sessions_behind(latest: datetime.date, expected: datetime.date) -> int:
+    """latest 之後到 expected 為止漏掉幾個交易日。"""
+    try:
+        import exchange_calendars as xcals
+        nyse = xcals.get_calendar("XNYS")
+        return len(nyse.sessions_in_range(latest + datetime.timedelta(days=1), expected))
+    except Exception as exc:  # noqa: BLE001
+        print(f"[daily_checkup] WARN session 差距計算失敗: {exc}，改用日曆天近似", file=sys.stderr)
+        return (expected - latest).days
+
+
 def check_live_freshness() -> list[dict]:
     out = []
     try:
@@ -272,17 +332,34 @@ def check_live_freshness() -> list[dict]:
         e = (it.get("paper_trading") or {}).get("entries") or []
         if e:
             dates.append(e[-1].get("data_date") or e[-1].get("trade_date"))
-    if dates:
-        latest = max(d for d in dates if d)
-        try:
-            age_days = (_now.date() - datetime.date.fromisoformat(latest)).days
-        except ValueError:
-            age_days = None
-        # 扣掉週末：>3 自然日 = 約 >1 交易日落後
-        if age_days is not None and age_days > 3:
+    if not dates:
+        return out
+    try:
+        latest = datetime.date.fromisoformat(max(d for d in dates if d))
+    except ValueError as exc:
+        return [_finding("live_freshness", "warn", f"線上績效 data_date 格式無法解析: {exc}")]
+
+    expected = _expected_live_session(_now)
+    if expected is None:  # fallback：croniter / 交易日曆不可用時的粗判準（會誤報，僅保底）
+        age_days = (_now.date() - latest).days
+        if age_days > 3:
             out.append(_finding("live_freshness", "warn",
-                                f"線上績效最新 data_date={latest}（已 {age_days} 天）—— 頁面顯示舊資料",
+                                f"線上績效最新 data_date={latest}（已 {age_days} 天，粗判準）"
+                                "—— 頁面顯示舊資料",
                                 recovery="跑 daily_update + 確認頁面非靜態快取（見 live_cache）"))
+        return out
+
+    if latest >= expected:
+        return out
+    behind = _sessions_behind(latest, expected)
+    sev = "critical" if behind >= 2 else "warn"
+    out.append(_finding(
+        "live_freshness", sev,
+        f"線上績效最新 data_date={latest}，但應已收到 {expected}"
+        f"（落後 {behind} 個交易日）—— 頁面顯示舊資料",
+        recovery="查 collect_us 是否漏班（storage/logs/cron/collect_us.log）→ "
+                 "跑 daily_update + 確認頁面非靜態快取（見 live_cache）",
+    ))
     return out
 
 
