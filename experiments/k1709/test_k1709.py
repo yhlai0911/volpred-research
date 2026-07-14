@@ -1369,6 +1369,25 @@ def test_every_inferential_figure_label_is_explicitly_unconditional():
     ):
         assert stale not in src
 
+    for key in (
+        "power_cli_reached_band",
+        "power_cli_unreached_band",
+        "power_cli_summary",
+    ):
+        assert f'verdict_basis["{key}"]' in src, key
+    assert "fires on pure noise" not in src
+    cli_scope = vb["power_cli_summary"].lower()
+    for token in (
+        "one injected alternative",
+        "not textbook size",
+        "power is not an exclusion",
+        "conditional/regime-specific",
+        "not tested or excluded",
+    ):
+        assert token in cli_scope
+    assert "one-cell power" in vb["power_cli_reached_band"].lower()
+    assert "one-cell power" in vb["power_cli_unreached_band"].lower()
+
 
 def test_every_reader_facing_figure_is_bound_into_the_review_receipt():
     exp = Path(__file__).parent

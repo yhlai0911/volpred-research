@@ -1648,6 +1648,20 @@ def build_claim_surface_prose(
             "| Assumed RV uplift per 1-sd shock | BTC one-cell power | ETH one-cell "
             "power |"
         ),
+        "power_cli_reached_band": (
+            "80% one-cell power lies only in the tested-grid bracket "
+            "+{lower}%...+{upper}% assumed RV uplift"
+        ),
+        "power_cli_unreached_band": (
+            "80% one-cell power is not reached on the tested grid through "
+            "+{maximum}% assumed RV uplift"
+        ),
+        "power_cli_summary": (
+            "  power[{asset}] (one h={h} cell; one injected alternative; nominal "
+            "gate): beta=0 rejection rate {false_positive:.3f} (not textbook size) "
+            "| {band}; power is not an exclusion, and conditional/regime-specific "
+            "effects are not tested or excluded"
+        ),
         "power_is_not_exclusion_readme": (
             "**Power is not an exclusion.** This table says how often a one-cell "
             "gate fires against an assumed effect. It does not bound the true "
@@ -3696,16 +3710,21 @@ def main() -> None:
         pw = res["power_simulation"][a]
         br = pw["power_80pct_bracket"]
         if br["reached_on_grid"]:
-            band = (
-                f"between +{br['lower_rv_uplift_pct']}% and "
-                f"+{br['upper_rv_uplift_pct']}% RV uplift"
+            band = verdict_basis["power_cli_reached_band"].format(
+                lower=br["lower_rv_uplift_pct"],
+                upper=br["upper_rv_uplift_pct"],
             )
         else:
-            band = f"NOT REACHED even at +{pw['max_uplift_tested_pct']}%"
+            band = verdict_basis["power_cli_unreached_band"].format(
+                maximum=pw["max_uplift_tested_pct"]
+            )
         print(
-            f"  power[{a}] (h={pw['horizon']}, single cell, nominal gate): "
-            f"fires on pure noise {pw['false_positive_rate_at_beta_0']:.3f}  |  "
-            f"80% power {band}"
+            verdict_basis["power_cli_summary"].format(
+                asset=a,
+                h=pw["horizon"],
+                false_positive=pw["false_positive_rate_at_beta_0"],
+                band=band,
+            )
         )
     print(f"\nVERDICT: {verdict}")
     print(verdict_basis["claim_strength"])
