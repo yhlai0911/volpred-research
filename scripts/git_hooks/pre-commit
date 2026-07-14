@@ -57,8 +57,8 @@ if [ -f "$DEPLOYED_HOOK" ] && [ -f "$HOOK_SRC" ]; then
     SRC_BLOB="$(cat "$HOOK_SRC")"
   fi
   if [ -n "$SRC_BLOB" ] && ! printf '%s\n' "$SRC_BLOB" | diff -q - "$DEPLOYED_HOOK" >/dev/null 2>&1; then
-    echo "[pre-commit] BLOCKED — .git/hooks/pre-commit 與 $HOOK_SRC 不一致（hook 先上源沒跟上 = 今日死鎖 class）。"
-    echo "[pre-commit] 修法：同一個 commit 內同步兩者 — cp $HOOK_SRC 到 .git/hooks/ 或反向，然後 git add $HOOK_SRC。"
+    echo "[pre-commit] BLOCKED — .git/hooks/pre-commit 與 ${HOOK_SRC} 不一致（hook 先上源沒跟上 = 今日死鎖 class）。"
+    echo "[pre-commit] 修法：同一個 commit 內同步兩者 — cp ${HOOK_SRC} 到 .git/hooks/ 或反向，然後 git add ${HOOK_SRC}。"
     exit 1
   fi
 fi

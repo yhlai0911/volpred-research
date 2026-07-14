@@ -320,6 +320,9 @@ def test_candidate_gate_blocks_test_without_its_foreign_script(repo: Path) -> No
     _git(repo, "add", "scripts/git_hooks/pre-commit", "scripts/audit_test_imports.py",
          "src/volpred/__init__.py")
     _git(repo, "commit", "-qm", "seed canonical dependency gate")
+    installed_hook = repo / ".git" / "hooks" / "pre-commit"
+    shutil.copyfile(repo / "scripts" / "git_hooks" / "pre-commit", installed_hook)
+    installed_hook.chmod(0o755)
 
     _write(repo, "scripts/reproduce_check.py", "VALUE = 1\n")  # foreign before fire
     phase_z.run_pre_fire_guard(repo_root=repo)
@@ -349,6 +352,9 @@ def test_foreign_worktree_hook_cannot_weaken_pinned_base_gate(repo: Path) -> Non
     _git(repo, "add", "scripts/git_hooks/pre-commit", "scripts/audit_test_imports.py",
          "src/volpred/__init__.py")
     _git(repo, "commit", "-qm", "seed canonical dependency gate")
+    installed_hook = repo / ".git" / "hooks" / "pre-commit"
+    shutil.copyfile(repo / "scripts" / "git_hooks" / "pre-commit", installed_hook)
+    installed_hook.chmod(0o755)
 
     # Foreign before the fire: old implementation executed this live copy and
     # let the partial candidate through.

@@ -368,7 +368,12 @@ def test_notification_writer_refuses_canonical_path():
     from any test used to persist a real notification into storage/notifications/."""
     from volpred.publisher.email_notifier import EmailNotifier
 
-    notifier = EmailNotifier()  # default storage_dir="storage" → repo-relative
+    # Bypass construction so this method-level probe is hermetic in both the
+    # live checkout (where storage/notifications may already exist) and a clean
+    # clone (where __init__ correctly blocks creating it). Constructor behavior
+    # is covered independently below.
+    notifier = object.__new__(EmailNotifier)
+    notifier.notifications_dir = ROOT / "storage" / "notifications"
 
     with pytest.raises(CanonicalWriteBlocked):
         notifier._write_notification_file({"id": "guard_probe", "body": "x"})
