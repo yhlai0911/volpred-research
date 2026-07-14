@@ -1,0 +1,158 @@
+REVIEWED_COMMIT: c97d690c684d288a90aa306c6756e6d658669045
+
+## 1. SCOPE & WHAT I RAN
+
+- Confirmed `HEAD` equals the requested commit. `git status --short` showed only a pre-existing untracked `codex_review_rev2_c97d690c.txt`; I did not read or use it.
+- Read the complete source, tests, renderer, README, and relevant portions of the prior audit; queried the JSON rather than dumping it.
+- Ran:
+  - `python -m pytest experiments/k1709/test_k1709.py -q -p no:cacheprovider` → **62 passed**.
+  - `python -m pytest scripts/tests/test_nested_dm_misuse_ratchet.py -q -p no:cacheprovider` → **21 passed**.
+  - Exhaustive `rg` searches for old/new power keys, cache writes, cell joins, random procedures, instruments/test functions, and conditional-GW machinery.
+  - Python/jq cross-checks of cell counts, key sets, exclusion p-values, Holm adjustments, pointwise bounds, and simultaneous bounds.
+  - Renderer from `/tmp` against the frozen JSON → 238 lines; SHA-256 exactly matched the tracked README.
+  - A `/tmp` `main()` smoke run with synthetic fetches and reduced power reps → exit 0, 10 primary/54 total cells, five PNGs, verdict JSON, and atomic write all completed.
+  - A live-data full run reached all panels/cells and the 1000-rep power simulation; I interrupted it during the expensive simulation. A second reduced run was stopped by an external Farside TLS timeout, not an internal exception.
+  - Reconstructed the ten primary loss streams using the production flow parser and equivalent Yahoo daily history endpoint; all reported raw exclusion p-values and simultaneous bounds matched the frozen artifact bit-for-bit.
+- Consulted the primary [Giacomini–White (2006) paper](https://onlinelibrary.wiley.com/doi/pdf/10.1111/j.1468-0262.2006.00718.x), especially Sections 3.2–3.4.
+
+No repository file was modified.
+
+## 2. ADJUDICATION OF PRIOR DEFECTS
+
+### (A) C6 cell-key collision — FIXED
+
+The key is now namespaced by family, asset/horizon, alternative, RV proxy, flow lag, and—where applicable—smearing, train window, and variant. Duplicate keys raise before any write: [k1709.py:220–250](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:220).
+
+Write/join sites:
+
+1. The sole production `LOSS_CACHE[...]` write is after the uniqueness check at [k1709.py:1374–1375](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1374).
+2. GW, raw-DM, and CW registry records deliberately share that same cell key at [k1709.py:1376–1409](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1376).
+3. The eight evaluation branches—primary H1/H2, H4, RV proxy, flow lag, smearing, transforms, thresholds, and ETH window—are at [k1709.py:2018–2145](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2018).
+4. `primary_cells` is now a copy, not an alias; `all_cells` is assigned later: [k1709.py:2037–2040](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2037), [k1709.py:2147](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2147).
+5. The verdict join checks `len(by_cell)==len(cells)` and verifies every primary registry key resolves to the primary snapshot: [k1709.py:2198–2207](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2198).
+6. The renderer independently joins on the full key at [render_readme.py:40–41](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/render_readme.py:40).
+
+The tests have teeth:
+
+- Repeating the identical cell must raise: [test_k1709.py:682–692](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/test_k1709.py:682).
+- Family/threshold/window variants must produce four distinct keys: [test_k1709.py:695–707](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/test_k1709.py:695).
+
+Under the old last-write-wins implementation, the first test would not raise and the second would see one unique key instead of four; both would fail.
+
+Artifact checks found `primary_cells=10/10 unique`, `all_cells=54/54 unique`, and identical primary key sets across `primary_cells`, `all_cells`, and `multiple_testing.primary_family`. Raw exclusion p, Holm p, and joined pointwise bounds had maximum discrepancy `0.0`.
+
+| Primary cell | Raw exclusion p | Simultaneous upper bound (%) |
+|---|---:|---:|
+| BTC h1 H1 | 0.0030544460 | 0.851469 |
+| BTC h1 H2 | 0.1162065321 | 4.206776 |
+| BTC h5 H1 | 0.2030673150 | 2.152368 |
+| BTC h5 H2 | 0.0131241667 | 1.535782 |
+| ETH h1 H1 | 0.0457268923 | 2.118544 |
+| ETH h1 H2 | 0.1233468283 | 2.959712 |
+| ETH h5 H1 | 0.1828445373 | 2.045605 |
+| ETH h5 H2 | 0.0504426448 | 1.665145 |
+| ETH h1 H4 | 0.0244179502 | 1.264642 |
+| ETH h5 H4 | 0.0169688761 | 1.396875 |
+
+The maximum, `4.2067757023%`, exactly equals the JSON family-wide bound. The four formerly overwritten primary p-values now remain distinct from their robustness counterparts. These numbers are trustworthy for the frozen artifact.
+
+### (B) End-to-end runnability / key drift — FIXED
+
+The only remaining `size_at_beta_0` occurrence outside prior-audit text is a historical test comment. Executable consumers consistently use `false_positive_rate_at_beta_0`:
+
+- Producer: [k1709.py:1752](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1752)
+- Console: [k1709.py:2501](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2501)
+- Figure 5: [k1709.py:2633](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2633)
+- Renderer: [render_readme.py:375–376](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/render_readme.py:375)
+
+The completed `/tmp` smoke run exercised `make_plots`, all five figures, verdict construction, and JSON serialization. The renderer output exactly matches the tracked README. No dangling-key failure remains.
+
+### (C) README/JSON claim surface — FIXED
+
+The live verdict is explicitly `INCONCLUSIVE_NO_EXACT_NULL_CLAIM`, with “negative finding, not a proven zero”: [README.md:3–5](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/README.md:3).
+
+The former hard `NULL` and `+16.2% RV` statements occur only inside clearly marked retractions: [README.md:9–14](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/README.md:9). The final summary again denies exact zero and any RV-space exclusion: [README.md:224–236](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/README.md:224).
+
+JSON verdict, claim strength, and withdrawal agree: [k1709_results.json:8922](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709_results.json:8922), [k1709_results.json:8950–8951](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709_results.json:8950). The `+16.2%` power-grid row is not asserted as an exclusion.
+
+### R1 power over-claim — FIXED
+
+The simulation is now explicitly scoped to one h=1 H1-style cell and its nominal gate, not the ten-cell Holm family: [k1709.py:57–65](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:57), [README.md:127](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/README.md:127). Power is not used as exclusion.
+
+### R2 coarse `_first_at` point estimate — FIXED
+
+`_first_at` is now internal to `_bracket`; public output contains only interval endpoints or “not reached”: [k1709.py:1663–1707](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1663). Point-estimate fields are absent and regression-tested at [test_k1709.py:847–882](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/test_k1709.py:847).
+
+### R3 beta=0 called “size” — FIXED
+
+The key and prose now call this a false-positive diagnostic and explicitly deny textbook-size interpretation: [k1709.py:1752–1765](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1752), [README.md:121–129](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/README.md:121).
+
+### R4 fixed-window raw DM called nested-biased — FIXED
+
+The diagnostic distinguishes schemes correctly: expanding-window DM is invalid for the nested comparison; fixed-window DM uses the valid bounded-memory loss stream and is not described as biased: [k1709.py:1217–1289](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1217). The discriminating regression test is at [test_k1709.py:924–956](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/test_k1709.py:924).
+
+### R5 unsupported bounded-null language — FIXED
+
+The live verdict requires every primary exclusion null to be rejected before a bounded-null verdict is possible: [k1709.py:2268–2275](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2268), [k1709.py:2343–2385](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2343). Only 5/10 reject the 1% null, so README explicitly says the bounded null is not established: [README.md:90–105](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/README.md:90).
+
+The separate `4.2%` statement is an inverted simultaneous bound in average QLIKE-loss space, not an exact/bounded-null verdict or RV-space bound.
+
+### R6 `unexpected_z` expanding window — FIXED
+
+The AR fit uses targets and lags strictly before day `i`; the current flow only enters after its prior-only prediction is formed. The residual scaler also uses `.shift(1)`: [k1709.py:602–649](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:602).
+
+Mutating all flows after a cutoff changed earlier raw z-scores and standardized AR surprises by exactly `0.0`. There is no look-ahead.
+
+The AR estimator does have expanding memory, but both affected robustness cells are now flagged `bounded_memory=false`; none is primary, and results are re-evaluated without them: [k1709.py:2097–2120](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2097), [k1709.py:2277–2331](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2277).
+
+## 3. INDEPENDENT FINDINGS
+
+### (E) GW versus DM — BLOCKING MISLABEL/SPECIFICATION DEFECT
+
+The implementation is not a conditional GW test:
+
+- It constructs only scalar `diff = loss_aug - loss_base`.
+- It tests `mean(diff)` with a scalar Bartlett HAC standard error and normal z.
+- Its `h` argument is forecast horizon/bandwidth input, not an information-set test function.
+- There is no instrument \(h_t\), vector moment \(h_t\Delta L_t\), \(q\times q\) covariance, Wald statistic, or \(\chi_q^2\) reference distribution: [k1709.py:1039–1091](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1039).
+
+Thus it is algebraically an unconditional DM statistic. The artifact itself shows the near identity and attributes the tiny difference to covariance scaling.
+
+The nuance matters: GW (2006) Section 3.4 explicitly defines an unconditional fixed-memory forecasting-method test and states that its statistic coincides with DM. Therefore the numeric p-values are defensible for the weaker claim “equal average expected QLIKE loss under a bounded-window forecasting method.” The code’s detailed metadata even says “equal unconditional predictive ability.”
+
+However, under this audit’s mandatory taxonomy—constant \(h_t\) is the DM special case and calling it GW is a mislabel—the reader-facing “GW gate/GW z/Giacomini-White on QLIKE” terminology remains unacceptable: [README.md:30–38](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/README.md:30), [README.md:69–82](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/README.md:69). It cannot support a conditional/state-dependent predictive-ability claim and could miss offsetting gains and losses across regimes.
+
+Parameters are not estimated once and frozen. They are re-estimated at every origin using the most recent 250 admissible observations: [k1709.py:949–998](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:949). This is fixed-length rolling estimation, not recursive/expanding estimation. Contrary to the “fixed parameters only” premise, GW’s bounded-memory asymptotics permit this rolling scheme; the fixed-once scheme is another allowed special case. The rolling re-estimation is therefore not a defect.
+
+For the unconditional loss differential actually tested, the Bartlett HAC estimator and bandwidth are appropriate: [k1709.py:840–846](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:840), [k1709.py:1023–1075](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1023). The bandwidth grows approximately as \(n^{1/3}\), remains \(o(n)\), and exceeds \(h-1\), accommodating overlap and rolling-estimation dependence.
+
+### (F) Look-ahead and seeding — NO BLOCKING DEFECT
+
+No claim-bearing look-ahead was found:
+
+- RV is reindexed to a complete daily calendar before any positional shift: [k1709.py:481–497](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:481).
+- HAR and return controls use `state_lag`; flow variables use a separate `flow_lag`: [k1709.py:721–745](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:721).
+- Primary target τ therefore uses predictors from τ−1; h=5 targets cover τ through τ+4: [k1709.py:747–762](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:747).
+- Flow scaling uses only the previous 20 flow days: [k1709.py:589–599](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:589).
+- OOS training labels must close strictly before the forecast origin: [k1709.py:981–998](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:981).
+- Shock thresholds are fixed literals, not full-sample-selected breakpoints: [k1709.py:2123–2135](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2123).
+- There is no randomized train/test split.
+
+All stochastic procedures are seeded:
+
+- Global seed: [k1709.py:112–113](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:112)
+- Bootstrap RNG and explicit per-cell seed: [k1709.py:1184–1203](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1184), [k1709.py:1342](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1342)
+- Per-beta power RNG: [k1709.py:1615–1618](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:1615)
+
+## 4. BLOCKING_DEFECTS:
+
+1. The claim-bearing “GW” gate is only the scalar unconditional DM special case \(h_t\equiv1\), with no instrument moments, vector covariance, or chi-square conditional-GW statistic; under the audit’s mandatory taxonomy it is materially mislabeled and cannot support a conditional predictive-ability claim.
+
+## 5. NON-BLOCKING OBSERVATIONS
+
+- `qlike_gain_upper_bound` assumes `z(m)` is globally increasing, which is not generally true; four primary streams are mildly non-monotone. Dense checks through \(m<1\) found exactly one crossing at both pointwise and Bonferroni critical values, so every frozen bound remains valid, but the inversion should verify the full rejection set rather than assume monotonicity.
+- Figure 2 treats a panel-indexed, already lagged flow regressor as event day zero, shifting the displayed flow-shock date one day forward: [k1709.py:2530–2555](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709.py:2530). It does not feed inference.
+- README’s statement that future live-data reruns will leave h=1 statistics, verdict, counts, and bounds unchanged is not guaranteeable under new observations or vendor revisions: [README.md:209](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/README.md:209).
+- Farside/Yahoo point-in-time vintages are not archived. The code has no internal look-ahead, but later vendor revisions limit strict historical reproducibility.
+
+FINAL_VERDICT: FAIL
