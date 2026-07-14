@@ -1,32 +1,35 @@
 # Feed Index
 
-_Last built: 2026-07-13 06:51 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-14 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1799**  (with thumbnail: 76)
-- Last 30 days: **286**
-- Total chars (content): 5,501,396
+- Total articles: **1802**  (with thumbnail: 77)
+- Last 30 days: **282**
+- Total chars (content): 5,510,027
 
-**Status**: published=1594, archived=123, unpublished=62, retracted=12, draft=7, wont_fix=1
+**Status**: published=1601, archived=123, unpublished=62, retracted=12, draft=3, wont_fix=1
 
-**Audience**: research=1113, general=450, daily=140, unknown=77, member_qa=13, event=6
+**Audience**: research=1113, general=451, daily=142, unknown=77, member_qa=13, event=6
 
-**Category**: milestone=876, general=805, unknown=73, member_qa=13, research=10, daily_article=8, qa=5, event_article=4, experiment=4, diary=1
+**Category**: milestone=877, general=807, unknown=73, member_qa=13, research=10, daily_article=8, qa=5, event_article=4, experiment=4, diary=1
 
-## 最近 30 天 (286)
+## 最近 30 天 (282)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-14 | `mile_191ae925` | 每日策略建議：VIX 17.16（正常）— 2026-07-14 | daily | general | published | 1518 | Y | 每日建議, VIX, 策略配置 |
+| 2026-07-14 | `mile_aac75839` | 2026-07-14 本日持倉比率建議（依據 2026-07-13 收盤數據） | daily | milestone | published | 941 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
+| 2026-07-13 | `mile_2b424e20` | 這週五是選擇權結算日，市場真的會被「釘」住嗎？8,418 個交易日給的答案是：只有一天 | general | general | published | 4687 |  | 一般讀者, 選擇權, 結算日, 波動率, 市場結構, 日曆效應 |
+| 2026-07-13 | `mile_abd517ba` | 🛩️ 無人載具｜EP3：2,100 億仍是草案，十家下游廠只有兩家走到量產或交船 | general | general | published | 7180 |  | 一般讀者, 無人載具, 無人機, 無人艇, 台股, 國防 |
+| 2026-07-13 | `mile_aa4713db` | 🛩️ 無人載具｜EP4：六檔龍頭的六個面向，看多的全是熱度，撐得住的只有兩檔 | general | general | published | 5125 |  | 一般讀者, 無人載具, 無人機, 個股分析, 台股, 國防 |
+| 2026-07-13 | `mile_cdc7f6e8` | 🛩️ 無人載具｜EP2：八家都能碰到機體、電池或馬達，零家拆出無人機營收 | general | general | published | 5304 |  | 一般讀者, 無人載具, 無人機, 台股, 複合材料, 電池 |
+| 2026-07-13 | `mile_7bd0f673` | 🛩️ 無人載具｜EP1：上游 87% 的營收集中在三家晶片廠，而市場的無人機錢一塊也沒買它們 | general | general | published | 7578 |  | 一般讀者, 無人載具, 無人機, 台股, 供應鏈, 財報 |
 | 2026-07-13 | `mile_b6a46796` | 🛩️ 無人載具｜EP-Final：核心六檔剛好追上大盤，代價是兩倍波動與三倍回撤 | general | general | draft | 6133 |  | 一般讀者, 無人載具, 無人機, 無人艇, 台股, 國防 |
-| 2026-07-13 | `mile_abd517ba` | 🛩️ 無人載具｜EP3：2,100 億仍是草案，十家下游廠只有兩家走到量產或交船 | general | general | draft | 7180 |  | 一般讀者, 無人載具, 無人機, 無人艇, 台股, 國防 |
-| 2026-07-13 | `mile_aa4713db` | 🛩️ 無人載具｜EP4：六檔龍頭的六個面向，看多的全是熱度，撐得住的只有兩檔 | general | general | draft | 5125 |  | 一般讀者, 無人載具, 無人機, 個股分析, 台股, 國防 |
-| 2026-07-13 | `mile_cdc7f6e8` | 🛩️ 無人載具｜EP2：八家都能碰到機體、電池或馬達，零家拆出無人機營收 | general | general | draft | 5304 |  | 一般讀者, 無人載具, 無人機, 台股, 複合材料, 電池 |
-| 2026-07-13 | `mile_7bd0f673` | 🛩️ 無人載具｜EP1：上游 87% 的營收集中在三家晶片廠，而市場的無人機錢一塊也沒買它們 | general | general | draft | 7579 |  | 一般讀者, 無人載具, 無人機, 台股, 供應鏈, 財報 |
 | 2026-07-13 | `mile_ffb14405` | 事件擠成一週：你手上的六個「預警訊號」，實測只有一個真的會叫 | general | general | published | 10857 |  | 一般讀者, 精選導讀, VIX, 波動率, 信用利差, 事件交易 |
 | 2026-07-13 | `mile_a8d79d6a` | 🛩️ 無人載具｜EP0：29 檔台廠名冊、2,100 億預算，和一個跑輸大盤的題材 | general | general | published | 7032 |  | 一般讀者, 無人載具, 無人機, 台股, 國防, 供應鏈 |
 | 2026-07-13 | `mile_a49f9309` | 每日策略建議：VIX 15.03（正常）— 2026-07-13 | daily | general | published | 1476 | Y | 每日建議, VIX, 策略配置 |
-| 2026-07-13 | `mile_0363ef48` | 2026-07-13 本日持倉比率建議（依據 2026-07-10 收盤數據） | daily | milestone | published | 858 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
+| 2026-07-13 | `mile_0363ef48` | 2026-07-13 本日持倉比率建議（依據 2026-07-10 收盤數據） | daily | milestone | published | 940 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-12 | `mile_824ee5bb` | 爆量之後會漲還會跌？九檔資產只留下鴻海一個例外 | general | general | published | 3695 |  | 一般讀者, 台股, 成交量, 技術分析, 風險管理, 0050 |
 | 2026-07-12 | `mile_0174a1e8` | 銀行風險看存款、房地產還是股價？三種公開指標的預測邊界 | general | general | draft | 3962 |  | 一般讀者, 區域銀行, 商用不動產, 存款外流, 銀行股, KRE |
 | 2026-07-12 | `mile_d84aa7d0` | 💬 會員提問｜史上最好的 30 年是 14.70%——年化 15% 這個目標，近百年沒發生過 | member_qa | member_qa | published | 4261 |  | 會員提問, 長期投資, 複利, 槓桿, 回撤, 美股 |
@@ -177,7 +180,7 @@ _Last built: 2026-07-13 06:51 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-25 | `mile_bdd3b732` | 尾部風控不是預言明天：低波動、厚尾與風險模型的煞車距離 | general | general | published | 2977 |  | 一般讀者, 精選導讀, 風險管理, VaR, 尾部風險, 模型比較 |
 | 2026-06-25 | `mile_57a86c37` | 每日策略建議：VIX 18.63（正常）— 2026-06-25 | daily | general | published | 1649 | Y | 每日建議, VIX, 策略配置 |
 | 2026-06-25 | `mile_61f6e2b6` | 2026-06-25 本日持倉比率建議（依據 2026-06-24 收盤數據） | daily | milestone | published | 1047 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
-| 2026-06-24 | `mile_1597b341` | 分散投資的幻覺：你以為無關的資產，其實偷偷牽動著你整個組合 | general | general | published | 5463 |  | 一般讀者, 精選導讀, 跨資產, 相關性, 分散投資, 風險管理 |
+| 2026-06-24 | `mile_1597b341` | 分散投資的幻覺：你以為無關的資產，其實偷偷牽動著你整個組合 | general | general | published | 5815 |  | 一般讀者, 精選導讀, 跨資產, 相關性, 分散投資, 風險管理 |
 | 2026-06-24 | `mile_f3e389cf` | 隔夜波動率：學術上很重要，實戰裡很尷尬 | general | general | unpublished | 3956 |  | 一般讀者, 精選導讀, 隔夜波動率, SPY, 台指期, PRG模型 |
 | 2026-06-24 | `mile_366ef29b` | 每日策略建議：VIX 19.49（正常）— 2026-06-24 | daily | general | published | 1708 | Y | 每日建議, VIX, 策略配置 |
 | 2026-06-24 | `mile_964dbe85` | 2026-06-24 本日持倉比率建議（依據 2026-06-23 收盤數據） | daily | milestone | published | 1069 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
@@ -297,6 +300,11 @@ _Last built: 2026-07-13 06:51 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-14 | `mile_c11a2ced` | 把兩個工具換著用，反而更差？台股波動率策略的一場假設破功 | general | milestone | published | 3051 |  | 一般讀者, 波動率, 台股, 0050, 事件研究, 研究觀察 |
 | 2026-06-14 | `mile_ec28b1cc` | 如果愈來愈多人都用同一套避險規則，市場會更安全嗎？ | general | general | retracted | 1517 |  | 一般讀者, 波動率目標, 市場結構, 風險管理, 模擬研究, VIX |
 | 2026-06-14 | `mile_1a6d9369` | 分散策略不一定救得了市場：波動率目標的模型陷阱 | research | milestone | published | 3708 |  | 研究, 波動率目標, VT策略, 群聚風險, 代理人模擬, 閃崩 |
+
+<details><summary>## 2026-Q2 (848)</summary>
+
+| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
+|---|---|---|---|---|---|---|---|---|
 | 2026-06-14 | `mile_cea70f87` | 台股 VT 參數一定要調到最準嗎？這份實驗給了一個很務實的答案 | general | general | published | 1849 |  | 一般讀者, 0050, 台股, 風險管理, 參數穩健性, VIX |
 | 2026-06-13 | `mile_312204b2` | 砍人和燒錢同時進行：為什麼大型科技股的波動率是 SPY 的兩倍半 | general | general | published | 3016 |  | 一般讀者, trending, tech-layoffs, volatility, idiosyncratic-risk, capex |
 | 2026-06-13 | `mile_74d12ac6` | 0DTE 真的把 SPY 的波動搬進日內了嗎？2022 斷點檢定只答對一半 | general | general | published | 3392 |  | 一般讀者, 0DTE, SPY, 波動率, 市場微結構, 美股 |
@@ -304,11 +312,6 @@ _Last built: 2026-07-13 06:51 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-13 | `mile_483425f2` | 同樣都在尾巴加保險，為什麼只有這個模型真的補對？ | general | general | published | 1851 |  | 一般讀者, SPY, 風險管理, 美股, 極端行情, 模型比較 |
 | 2026-06-13 | `mile_2c758888` | 強美元環境下，哪些資產的波動率真的會被拉高？HAC 校正後只剩 USO 站得住 | research | milestone | published | 3156 |  | 研究, 強勢美元, 跨資產波動, 商品波動, 黃金例外, 石油敏感度 |
 | 2026-06-13 | `mile_40c66bef` | 風險模型愈花俏愈準嗎？這次市場給了相反答案 | general | general | published | 1984 |  | 一般讀者, SPY, 風險管理, 美股, 極端行情, 模型比較 |
-
-<details><summary>## 2026-Q2 (841)</summary>
-
-| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
-|---|---|---|---|---|---|---|---|---|
 | 2026-06-13 | `mile_e4002f4f` | 💬 會員提問｜東南亞前沿 ETF 真的能分散風險嗎：VNM/EIDO/THD/EPHE 的解耦事實與危機失效 | general | general | published | 5365 |  | 新興市場, ETF, 分散投資, 波動率, 相關性, VIX |
 | 2026-06-13 | `mile_1b56cf6b` | 股票加黃金還不夠？多放一點長債，報酬會少一點，但跌的時候真的差很多 | general | general | published | 1863 |  | 一般讀者, experiment, investing, bonds, portfolio, drawdown |
 | 2026-06-13 | `mile_862223de` | 波動率模型 PRG 在美股 SPY 也站得住腳 — 從台股驗到美股的跨市場故事 | research | milestone | published | 3216 |  | 研究, prg, spy, cross-market, garch, periodic-garch |
@@ -545,7 +548,7 @@ _Last built: 2026-07-13 06:51 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-05-25 | `mile_227257a3` | EWMA 平滑參數最佳值：Lag 修正後的誠實答案 | research | general | published | 6215 |  | 研究, 波動率, 風險平價, EWMA, 資產配置, 回測誠實 |
 | 2026-05-25 | `mile_281d2ea7` | 同樣都叫恐慌指標，9 天版為什麼比 30 天版更有用？K490 給了明確答案 | research | general | archived | 2020 |  | 研究, VIX, VIX9D, 波動率預測, 風險管理, GARCH |
 | 2026-05-25 | `mile_c64f8bcb` | VT 的 alpha 只是 Sell in May 嗎？K736 的答案是否定的 | research | general | archived | 2171 |  | 研究, VIX, 波動率策略, 資產配置, 季節性, Sell in May |
-| 2026-05-25 | `mile_55758994` | 美股打噴嚏，台股真的感冒？16 年數據拆解跨市場波動傳染鏈 | research | milestone | archived | 5336 |  | 研究, vol-spillover, cross-asset, Diebold-Yilmaz, Forbes-Rigobon, SPY |
+| 2026-05-25 | `mile_55758994` | 美股打噴嚏，台股真的感冒？16 年數據拆解跨市場波動傳染鏈 | research | milestone | archived | 6388 |  | 研究, vol-spillover, cross-asset, Diebold-Yilmaz, Forbes-Rigobon, SPY |
 | 2026-05-25 | `mile_45120cd4` | 越複雜不一定越好：K747 告訴你，這次 50/50 就贏了風險平價 | research | general | archived | 2172 |  | 研究, 資產配置, 風險平價, ERC, 投資組合, 風險管理 |
 | 2026-05-25 | `mile_334a3f26` | 跨產業檢驗個股波動率的 VIX 敏感度：誠實的負面結果 | research | general | published | 5741 |  | 研究, individual-stocks, sector-heterogeneity, EAV, GARCH, taiwan-equity |
 | 2026-05-25 | `mile_a1c488b0` | VIX 遠月近月比值真的能讓策略更強嗎？K731 的答案很克制 | research | general | archived | 2165 |  | 研究, VIX, 期限結構, 資產配置, 波動率策略, 風險管理 |
