@@ -81,8 +81,10 @@ def main() -> None:
         "C1": (
             "Nested comparison inferred with raw Diebold-Mariano + a mislabelled "
             "Clark-West",
-            "Giacomini-White (2006) on Patton QLIKE from a **paired fixed rolling "
-            "window**; raw DM and CW demoted to `feeds_gate=false`",
+            "Giacomini-White (2006) **Sec 3.4 unconditional special case** "
+            "(h_t = 1, equals a HAC Diebold-Mariano) on Patton QLIKE from a "
+            "**paired fixed rolling window**; raw DM and CW demoted to "
+            "`feeds_gate=false`",
         ),
         "C2": (
             "\"MDE\" was one injection into one noise path — no repeated sampling, "
@@ -134,13 +136,23 @@ def main() -> None:
     A(f"- **Claim scope**: bounded in QLIKE-loss space only. {vb['four_way_alignment']}")
     A("")
     A(
-        "**Why Giacomini-White, and why this is not just Diebold-Mariano renamed.** "
-        "The arithmetic really is nearly the same — a mean loss difference over a "
-        "Bartlett HAC standard error — and on the same loss stream the two statistics "
-        "agree to about three decimal places (they differ only in a small-sample HAC "
-        "scaling: GW divides each lag covariance by *n*, the canonical DM helper by "
-        "*n − lag*). The results file reports both, side by side, rather than hiding "
-        "the coincidence."
+        "> ### What this study did NOT test\n"
+        ">\n"
+        f"> {vb['conditional_predictive_ability_not_tested']}"
+    )
+    A("")
+    A(
+        "**Why the word Giacomini-White appears at all, given that the statistic is a "
+        "HAC Diebold-Mariano.** It is the same arithmetic — a mean loss difference "
+        "over a Bartlett HAC standard error — and on the same loss stream the two "
+        "statistics agree to about three decimal places (they differ only in a "
+        "small-sample HAC scaling: this file divides each lag covariance by *n*, the "
+        "canonical DM helper by *n − lag*). The results file reports both, side by "
+        "side, rather than hiding the coincidence. GW (2006) Sec 3.4 is precisely the "
+        "case where the coincidence is expected: set the instrument h_t = 1 and their "
+        "conditional test collapses onto the unconditional one. **The conditional "
+        "machinery — a non-trivial h_t, a q × q moment covariance, a Wald χ²_q — is "
+        "not built anywhere in this file, and no claim here depends on it.**"
     )
     A("")
     A(
@@ -245,7 +257,7 @@ def main() -> None:
     )
     A("")
     A(
-        "| Cell | n OOS | QLIKE Δ | GW z | Holm p | Rules out "
+        "| Cell | n OOS | QLIKE Δ | uncond. GW/DM z | Holm p | Rules out "
         f"≥{vb['material_gain_margin_pct']:.0f}% gain? |"
     )
     A("|---|---|---|---|---|---|")
@@ -260,7 +272,7 @@ def main() -> None:
     A("")
     A(
         "`QLIKE Δ` is the flow model's improvement over the baseline — **negative "
-        "means the flow model is worse**. `GW z < 0` would favour flow; the gate "
+        "means the flow model is worse**. `z < 0` would favour flow; the gate "
         f"needs `z < -1.645` *and* Holm `p < 0.05` *and* a positive QLIKE Δ. "
         f"Cells passing: **{vb['cells_passing_flow_gate']} / "
         f"{vb['cells_in_primary_family']}**."
@@ -299,7 +311,7 @@ def main() -> None:
         )
     A("")
     A(
-        "**Why these p-values are unadjusted, while the Giacomini-White ones above "
+        "**Why these p-values are unadjusted, while the detection ones above "
         "are Holm-corrected.** The two claims have opposite logical structure, and "
         "the correction has to follow the claim, not the habit. *\"Flow helps "
         "somewhere\"* is a **union** of alternatives — ten shots at finding an effect "
@@ -419,7 +431,7 @@ def main() -> None:
     A("")
     A(
         "The β=0 row is **not** \"size\" in the textbook sense, and it should sit "
-        "*below* 5% rather than at it. Under Giacomini-White's method-level null with "
+        "*below* 5% rather than at it. Under the method-level null with "
         "a fixed window, an irrelevant extra regressor makes the augmented method "
         "genuinely worse — it pays an estimation cost and buys nothing — so "
         "E[L_flow − L_base] > 0 strictly. A one-sided flow-favouring gate is therefore "
@@ -494,7 +506,7 @@ def main() -> None:
         ("threshold", "Shock threshold dummies (|z| ≥ 1.0 … 2.5)"),
         ("eth_window", "Shorter ETH burn-in (200)"),
     ]
-    A("| Family | Cells | Best (most flow-favouring) GW z | Any cell passing the gate? |")
+    A("| Family | Cells | Best (most flow-favouring) uncond. z | Any cell passing the gate? |")
     A("|---|---|---|---|")
     for key, label in fams:
         rows = [c for c in r["all_cells"] if c["family"] == key]
@@ -512,7 +524,7 @@ def main() -> None:
     mt = r["multiple_testing"]
     A(
         f"Across **all {mt['n_gate_eligible_gw_tests']}** gate-eligible "
-        f"Giacomini-White tests in the study, "
+        f"unconditional GW/DM tests in the study, "
         f"**{mt['n_full_family_holm_significant_at_05']}** survive the full-family "
         f"Holm correction in the flow-favouring direction. "
         f"({mt['n_diagnostic_only_tests']} further tests are registered as "
@@ -531,7 +543,7 @@ def main() -> None:
     )
     A("")
     A(
-        "Giacomini-White's limiting experiment assumes the **forecasting method** has "
+        "GW's limiting experiment assumes the **forecasting method** has "
         "bounded estimator memory. Every cell here fits its regression on a fixed "
         "250-day rolling window, so the final fit always satisfies that. But the "
         "condition is on the *whole method*, not on the last regression: "
@@ -676,8 +688,8 @@ def main() -> None:
     A("| `codex_review_20260714.md` | The independent review that FAILed v1 |")
     A("| `fig1_flow_vs_rv.png` | Flow vs realized volatility |")
     A("| `fig2_event_window.png` | log-RV path around large flow shocks |")
-    A("| `fig3_oos_qlike.png` | OOS QLIKE + Giacomini-White z, primary cells |")
-    A("| `fig4_threshold_sensitivity.png` | GW z by shock threshold |")
+    A("| `fig3_oos_qlike.png` | OOS QLIKE + unconditional GW/DM z, primary cells |")
+    A("| `fig4_threshold_sensitivity.png` | Unconditional GW/DM z by shock threshold |")
     A("| `fig5_simulated_power.png` | Simulated power (replaces v1's \"MDE\" curve) |")
     A("")
 

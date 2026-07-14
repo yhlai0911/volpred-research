@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -142,8 +142,37 @@ def test_old_v3_signature_recomputes_with_v4_vocabulary_without_legacy_fallback(
     assert matches[0]["match_reason"] == "descriptive_strict"
 
 
+def test_default_arc_scan_does_not_hide_matches_after_first_300_items():
+    fillers = [
+        _article(f"mile_filler_{i}", f"無關主題 {i}", "純方法介紹。")
+        for i in range(300)
+    ]
+    target = _article(
+        "mile_usdc_oldest",
+        "USDC 脫鉤時 DeFi 流動性如何傳染",
+        "USDC stablecoin 與 DeFi pool 的流動性傳染。",
+        published_at=(datetime.now(timezone.utc) - timedelta(days=1)).isoformat(),
+    )
+    feed = fillers + [target]
+    args = (
+        "USDC 脫鉤時 DeFi 流動性如何傳染",
+        "USDC stablecoin 與 DeFi pool 的流動性傳染。",
+        feed,
+    )
+
+    assert find_arc_duplicates(*args)[0]["id"] == "mile_usdc_oldest"
+    assert find_arc_duplicates(*args, max_scan=300) == []
+
+
 def test_calibration_probe_contract(monkeypatch):
     def fake_theme(title, description, feed, days=90):
+        if "非農" in title:
+            return {
+                "theme_terms": ["美元", "nfp", "就業", "日內", "非農", "實現"],
+                "saturation": 3,
+                "matches": [],
+                "corpus_size": 831,
+            }
         return {
             "theme_terms": ["科技", "資本", "capex", "定價", "支出", "巨頭"],
             "saturation": 8,
@@ -162,8 +191,13 @@ def test_calibration_probe_contract(monkeypatch):
     result = topic_gate.audit_topic_dedup_calibration([{}])
     assert result["ok"] is True
     assert result["metrics"]["incident_margin"] == 3
+    assert result["metrics"]["incident_screen_blocked"] is True
+    assert result["metrics"]["incident_screen_verdict"] == topic_gate.BLOCK_THEME_SATURATED
+    assert result["metrics"]["nfp_control_saturation"] == 3
+    assert result["metrics"]["nfp_screen_blocked"] is False
     assert result["metrics"]["fomc_hard_matches"] == 0
     assert result["metrics"]["fomc_near_misses"] == 1
+    assert result["metrics"]["fomc_screen_verdict"] == topic_gate.WARN_THEME_SATURATED
 
 
 def test_calibration_probe_warns_on_threshold_margin_drift(monkeypatch):
@@ -181,3 +215,60 @@ def test_calibration_probe_warns_on_threshold_margin_drift(monkeypatch):
     result = topic_gate.audit_topic_dedup_calibration([{}])
     assert result["ok"] is False
     assert any("margin" in issue for issue in result["issues"])
+
+
+def test_calibration_probe_warns_when_incident_final_verdict_stops_blocking(monkeypatch):
+    real_screen = topic_gate.screen_topic
+
+    def fake_screen(title, *args, **kwargs):
+        if title == topic_gate._CALIBRATION_AI_TITLE:
+            return topic_gate.TopicScreen(
+                verdict=topic_gate.WARN_THEME_SATURATED,
+                blocked=False,
+                reason="simulated policy drift",
+            )
+        return real_screen(title, *args, **kwargs)
+
+    monkeypatch.setattr(topic_gate, "screen_topic", fake_screen)
+    result = topic_gate.audit_topic_dedup_calibration([{}])
+
+    assert result["ok"] is False
+    assert any("calibrated theme block" in issue for issue in result["issues"])
+
+
+def test_calibration_probe_rejects_fomc_gate_error(monkeypatch):
+    real_screen = topic_gate.screen_topic
+
+    def fake_screen(title, *args, **kwargs):
+        if "FOMC" in title:
+            return topic_gate.TopicScreen(
+                verdict=topic_gate.GATE_ERROR,
+                blocked=False,
+                reason="simulated dependency failure",
+            )
+        return real_screen(title, *args, **kwargs)
+
+    monkeypatch.setattr(topic_gate, "screen_topic", fake_screen)
+    result = topic_gate.audit_topic_dedup_calibration([{}])
+
+    assert result["ok"] is False
+    assert any("calibrated warning" in issue for issue in result["issues"])
+
+
+def test_calibration_probe_rejects_nfp_hard_block(monkeypatch):
+    real_screen = topic_gate.screen_topic
+
+    def fake_screen(title, *args, **kwargs):
+        if "非農" in title:
+            return topic_gate.TopicScreen(
+                verdict=topic_gate.BLOCK_ARC_DUP,
+                blocked=True,
+                reason="simulated arc regression",
+            )
+        return real_screen(title, *args, **kwargs)
+
+    monkeypatch.setattr(topic_gate, "screen_topic", fake_screen)
+    result = topic_gate.audit_topic_dedup_calibration([{}])
+
+    assert result["ok"] is False
+    assert any("NFP/DXY" in issue for issue in result["issues"])

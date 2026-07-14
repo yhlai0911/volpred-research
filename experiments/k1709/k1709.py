@@ -893,7 +893,7 @@ def paired_oos(
     `train_window=None` reproduces v1's EXPANDING window. It is retained for one
     purpose only: to show, in the results file, what the design change did to the
     statistic. Expanding-window losses never feed a verdict here -- see
-    `giacomini_white` for why the scheme is the whole ballgame.
+    `gw_unconditional_dm` for why the scheme is the whole ballgame.
 
     Why fixed and not expanding (this is the whole point of the C1 fix):
     Giacomini-White (2006) tests equal predictive ability of FORECASTING METHODS
@@ -1036,28 +1036,32 @@ def _bartlett_lrv(x: np.ndarray, max_lag: int) -> float:
     return lrv
 
 
-def giacomini_white(loss_aug: np.ndarray, loss_base: np.ndarray, h: int) -> dict:
-    """GW (2006) equal-unconditional-predictive-ability test under general loss.
+def gw_unconditional_dm(loss_aug: np.ndarray, loss_base: np.ndarray, h: int) -> dict:
+    """GW (2006) Sec 3.4 UNCONDITIONAL special case: instrument h_t = 1.
 
-    READ THIS BEFORE CONCLUDING WE JUST RENAMED DM.
-    The arithmetic here -- mean loss difference over a Bartlett HAC standard
-    error -- is algebraically the same as a HAC Diebold-Mariano t. On the same
-    loss stream the two statistics COINCIDE, and the results file shows them
-    coinciding. That is not a bug and it is not a relabelling.
+    WHAT THIS IS NOT (rev3, after independent review).
+    This is NOT the conditional Giacomini-White test. No instrument vector h_t is
+    ever constructed; there is no q x q moment covariance, no Wald statistic and
+    no chi-square_q reference distribution anywhere in this file. Calling the
+    output a "GW gate" without that qualifier -- as rev2's README did -- claims
+    conditional, state-dependent predictive ability that this design cannot
+    deliver, and would let a positive and a negative effect in different regimes
+    cancel to nothing while the write-up reports "no predictive content".
+    What is implemented is the h_t = 1 special case GW themselves flag (Sec 3.4),
+    in which their statistic coincides with a HAC Diebold-Mariano t. It licenses
+    exactly one claim: equal *unconditional* expected loss.
 
-    What makes this a legal test under nesting is the ESTIMATION SCHEME, not the
-    formula. GW tests equal predictive ability of forecasting METHODS -- the
-    fitted-parameter noise is part of the object being compared, not a nuisance
-    to be purged. For that limiting experiment to hold, the estimator must have
-    BOUNDED MEMORY, i.e. a fixed-length rolling window. Feed it fixed-window
-    forecasts and the statistic is asymptotically standard normal even when the
-    models are nested. Feed it EXPANDING-window forecasts -- what v1 did -- and
-    the nested null is degenerate, the statistic is biased toward the smaller
-    model, and no reference distribution rescues it.
-
-    So: same number, different scheme, different null, different validity. The
-    expanding-window value is reported alongside as a diagnostic precisely so a
-    reader can see what the scheme change did.
+    So why say GW at all? Because under NESTING the formula is not what makes the
+    test legal -- the ESTIMATION SCHEME is. GW compare forecasting METHODS, with
+    fitted-parameter noise part of the object being compared rather than a
+    nuisance to be purged, and that limiting experiment requires the estimator to
+    have BOUNDED MEMORY, i.e. a fixed-length rolling window. Fed fixed-window
+    forecasts, the statistic is asymptotically standard normal even for nested
+    models. Fed EXPANDING-window forecasts -- what v1 did -- the nested null is
+    degenerate, the statistic is biased toward the smaller model, and no
+    reference distribution rescues it. Same arithmetic, different scheme,
+    different null, different validity. The expanding-window value is reported
+    alongside as a diagnostic so a reader can see what the scheme change did.
 
     Moment: E[L_aug - L_base] = 0.  Negative z favours the flow model.
     """
@@ -1331,7 +1335,7 @@ def evaluate_cell(
     qb, qa = float(np.mean(lb)), float(np.mean(la))
     improve = (qb - qa) / qb * 100.0
 
-    gw = giacomini_white(la, lb, h)
+    gw = gw_unconditional_dm(la, lb, h)
     excl = material_gain_exclusion(la, lb, h)
     excl["qlike_gain_upper_bound_95pct"] = qlike_gain_upper_bound(la, lb, h, alpha=0.05)
     excl["upper_bound_note"] = (
@@ -1630,7 +1634,7 @@ def power_simulation(
                 if len(po.actual) < GW_MIN_LOSSES:
                     fails += 1
                     continue
-                gw = giacomini_white(
+                gw = gw_unconditional_dm(
                     qlike_pointwise(po.actual, po.pred_aug),
                     qlike_pointwise(po.actual, po.pred_base),
                     horizon,
@@ -1821,6 +1825,206 @@ def _serialize(rec: TestRecord, holm_p: float | None = None) -> dict:
     if holm_p is not None:
         d["holm_adjusted_p"] = holm_p
     return d
+
+
+def build_verdict_basis(
+    verdict: str,
+    *,
+    n_cells: int,
+    n_pass: int,
+    n_excl: int,
+    n_excl_holm: int,
+    margin_pct: float,
+    family_bound: float | None,
+    per_cell_upper_bounds: dict,
+) -> dict:
+    """Counts in, claim sentences out. Touches no data, estimates nothing.
+
+    Every sentence this study asserts about itself is written here and nowhere
+    else, and all of it is a pure function of counts that have already been
+    computed. That separation is what makes rev3 possible at all: an independent
+    review FAILed rev2 over a LABEL (an unconditional test presented as a "GW
+    gate"), never over the arithmetic. The vendor flow vintage is not archived,
+    so re-running the study to correct a word would silently re-estimate it on a
+    later sample -- the numbers would move for reasons having nothing to do with
+    the correction, and the reviewer's frozen artefact would cease to exist. So
+    the words are re-derivable from the frozen counts alone
+    (`python k1709.py --relabel`), and the estimates stay exactly where the
+    reviewer saw them.
+    """
+    if verdict == "BOUNDED_NULL_NO_MATERIAL_QLIKE_GAIN":
+        claim = (
+            f"BOUNDED NULL. No cell shows incremental UNCONDITIONAL predictive "
+            f"content, and all {n_excl}/{n_cells} primary cells REJECT the "
+            f"hypothesis that adding ETF flow improves expected QLIKE by at least "
+            f"{margin_pct:.0f}% (intersection-union test, each cell unadjusted; "
+            f"{n_excl_holm}/{n_cells} also survive the conservative Holm variant). "
+            f"Defensible claim: 'spot BTC/ETH ETF net flow buys no material "
+            f"({margin_pct:.0f}%+) QLIKE improvement over a HAR-RV baseline, out of "
+            f"sample.' The bound lives in QLIKE-LOSS space. It is NOT a bound on "
+            f"RV-uplift magnitude and NOT a proof of exact zero."
+        )
+    elif verdict == "INCONCLUSIVE_NO_EXACT_NULL_CLAIM":
+        bound_txt = (
+            f"The inverted one-sided 95% upper confidence bound on the relative "
+            f"QLIKE gain is {family_bound:.1f}% simultaneously across all "
+            f"{n_cells} cells (Bonferroni): gains LARGER than that are excluded by "
+            f"the data; anything smaller is not."
+            if family_bound is not None
+            else (
+                "The design cannot even exclude a 90% relative QLIKE gain in every "
+                "cell, so NO upper bound can be stated. That is how little this "
+                "sample can say about the effect size."
+            )
+        )
+        claim = (
+            f"INCONCLUSIVE. No cell shows incremental UNCONDITIONAL predictive "
+            f"content, but only {n_excl}/{n_cells} primary cells can rule out the "
+            f"pre-specified {margin_pct:.0f}% QLIKE gain, so the bounded null is NOT "
+            f"established. Failure to reject equal accuracy is not evidence of "
+            f"equality. The honest headline is: 'no robust incremental UNCONDITIONAL "
+            f"predictive evidence was found for spot BTC/ETH ETF flow over a HAR-RV "
+            f"baseline' -- a negative finding, not a proven zero. {bound_txt}"
+        )
+    else:
+        claim = (
+            f"POSITIVE. {n_pass}/{n_cells} primary cells clear the pre-specified "
+            f"flow gate (unconditional predictive ability)."
+        )
+
+    return {
+        "test": (
+            "TWO pre-specified objects, with OPPOSITE multiplicity treatments, and "
+            "the verdict is a function of both. (1) DETECTION -- Giacomini-White "
+            "(2006) Sec 3.4 UNCONDITIONAL special case (instrument h_t = 1, which "
+            "coincides with a HAC Diebold-Mariano t; NOT the conditional GW test -- "
+            "no instrument vector, no Wald statistic, no chi-square_q), one-sided "
+            "and flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union "
+            "of alternatives: ten shots at finding an effect). (2) EXCLUSION -- the "
+            "pre-specified one-sided material-gain test, run as an INTERSECTION-UNION "
+            "test with each cell UNADJUSTED (Berger 1982): the bounded null may be "
+            "asserted only if EVERY cell rejects its own exclusion null, which needs "
+            "no correction. Holm-adjusted exclusion p-values are also reported as a "
+            "conservative sensitivity, but they are NOT the test. The verdict is "
+            "INCONCLUSIVE precisely because (1) finds nothing and (2) does not hold "
+            "in every cell."
+        ),
+        "test_detection": (
+            "Giacomini-White (2006) Sec 3.4 unconditional special case (h_t = 1; "
+            "equals HAC Diebold-Mariano), one-sided flow-favouring, Holm-adjusted "
+            "across the 10-cell primary family"
+        ),
+        "test_exclusion": (
+            "pre-specified one-sided material-gain exclusion, intersection-union "
+            "across the 10-cell primary family, each cell UNADJUSTED"
+        ),
+        "conditional_predictive_ability_not_tested": (
+            "The conditional GW test (h_t a non-trivial instrument, q x q moment "
+            "covariance, Wald chi-square_q) is NOT run anywhere in this study. Every "
+            "claim below is therefore UNCONDITIONAL: it is about the AVERAGE loss "
+            "differential over the OOS sample. A flow effect that helps in one "
+            "regime and hurts in another, netting to zero on average, would be "
+            "invisible to this design and is NOT excluded by it."
+        ),
+        "loss": "Patton QLIKE on the variance level",
+        "estimation_scheme": (
+            f"paired fixed rolling window of {GW_TRAIN_WINDOW} flow days; both specs "
+            "share the augmented complete-case mask, the training dates and the "
+            "forward-label embargo (y_end_date < forecast origin). Every one of the "
+            "10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which "
+            "is the condition GW's limiting experiment needs. The one registered cell "
+            "that is not (`flow_transform/unexpected_z`, whose regressor comes from an "
+            "expanding-window AR(5)) sits in the robustness family, is flagged "
+            "`bounded_memory=false`, and is shown in "
+            "`multiple_testing.bounded_memory_sensitivity` not to move the family-wise "
+            "conclusion."
+        ),
+        "gate": (
+            f"qlike_improve > 0 AND unconditional GW/DM z < {POWER_GATE_Z} "
+            "AND Holm p < 0.05"
+        ),
+        "cells_in_primary_family": n_cells,
+        "cells_passing_flow_gate": n_pass,
+        "cells_excluding_material_gain": n_excl,
+        "cells_excluding_material_gain_holm_conservative": n_excl_holm,
+        "exclusion_multiplicity_rationale": (
+            "The exclusion family is an INTERSECTION-UNION test (Berger 1982): the "
+            "bounded-null claim requires EVERY cell to reject its own exclusion null, "
+            "so the conjunction holds at level alpha with each cell tested "
+            "unadjusted. A Holm adjustment here would buy no type-I protection and "
+            "only inflate type-II error. The detection family is the mirror image -- "
+            "a union of alternatives, ten shots at finding an effect -- so it IS "
+            "Holm-adjusted. Both numbers are reported; "
+            f"{n_excl}/{n_cells} cells exclude unadjusted, "
+            f"{n_excl_holm}/{n_cells} under the conservative Holm variant."
+        ),
+        "material_gain_margin_pct": margin_pct,
+        "qlike_gain_upper_bound_95pct_per_cell": per_cell_upper_bounds,
+        "qlike_gain_upper_bound_family_simultaneous_pct": family_bound,
+        "upper_bound_method": (
+            "Inverted one-sided exclusion test (Bonferroni alpha/m across the "
+            f"{n_cells} primary cells). This -- not the power curve -- is the object "
+            "that can bound an effect. It lives in QLIKE-LOSS space, not RV-uplift "
+            "space."
+        ),
+        "claim_strength": claim,
+        "withdrawn_v1_claim": (
+            "v1 claimed it could 'rule out an RV uplift of >= +16.2% per 1-sd flow "
+            "shock'. That number came from reading a single-path power curve "
+            "backwards. Power is not an exclusion. The claim is WITHDRAWN and is not "
+            "replaced by an RV-space bound of any size."
+        ),
+        "four_way_alignment": (
+            "test = GW(2006) Sec 3.4 unconditional special case (= HAC DM) | "
+            "loss = Patton QLIKE | scheme = paired fixed rolling window | "
+            "claim = no UNCONDITIONAL incremental predictive ability, bounded in "
+            "QLIKE-loss space only. These four match by construction; v1's did not, "
+            "and rev2's claim was broader than its test."
+        ),
+    }
+
+
+def relabel_frozen_results() -> None:
+    """Rewrite only the claim SENTENCES in the frozen results JSON.
+
+    Every non-string field is asserted byte-identical afterwards. If this
+    function ever moves a number, it raises instead of writing.
+    """
+    path = OUT / "k1709_results.json"
+    with open(path) as fh:
+        res = json.load(fh)
+    old = res["verdict_basis"]
+    new = build_verdict_basis(
+        res["verdict"],
+        n_cells=old["cells_in_primary_family"],
+        n_pass=old["cells_passing_flow_gate"],
+        n_excl=old["cells_excluding_material_gain"],
+        n_excl_holm=old["cells_excluding_material_gain_holm_conservative"],
+        margin_pct=old["material_gain_margin_pct"],
+        family_bound=old["qlike_gain_upper_bound_family_simultaneous_pct"],
+        per_cell_upper_bounds=old["qlike_gain_upper_bound_95pct_per_cell"],
+    )
+    for key, was in old.items():
+        if isinstance(was, str):
+            continue
+        if new[key] != was:
+            raise SystemExit(f"relabel would change a NUMBER ({key}) -- refusing")
+    frozen_elsewhere = {k: v for k, v in res.items() if k != "verdict_basis"}
+    res["verdict_basis"] = new
+    tmp = OUT / "k1709_results.json.tmp"
+    with open(tmp, "w") as fh:
+        json.dump(res, fh, indent=2, default=str)
+    with open(tmp) as fh:
+        back = json.load(fh)
+    if {k: v for k, v in back.items() if k != "verdict_basis"} != frozen_elsewhere:
+        raise SystemExit("relabel perturbed the results outside verdict_basis")
+    os.replace(tmp, path)
+    changed = [k for k, v in old.items() if isinstance(v, str) and new[k] != v]
+    added = [k for k in new if k not in old]
+    print(f"relabelled {len(changed)} claim sentence(s): {', '.join(changed)}")
+    if added:
+        print(f"added: {', '.join(added)}")
+    print("every numeric field verified unchanged")
 
 
 def main() -> None:
@@ -2349,122 +2553,18 @@ def main() -> None:
         verdict = "INCONCLUSIVE_NO_EXACT_NULL_CLAIM"
     res["verdict"] = verdict
 
-    margin_pct = 100 * MATERIAL_GAIN_MARGIN
-    if verdict == "BOUNDED_NULL_NO_MATERIAL_QLIKE_GAIN":
-        claim = (
-            f"BOUNDED NULL. No cell shows incremental predictive content, and all "
-            f"{n_excl}/{len(primary_rows)} primary cells REJECT the hypothesis that "
-            f"adding ETF flow improves expected QLIKE by at least {margin_pct:.0f}% "
-            f"(intersection-union test, each cell unadjusted; "
-            f"{n_excl_holm}/{len(primary_rows)} also survive the conservative Holm "
-            f"variant). Defensible claim: 'spot BTC/ETH ETF net flow buys no "
-            f"material ({margin_pct:.0f}%+) QLIKE improvement over a HAR-RV baseline, "
-            f"out of sample.' The bound lives in QLIKE-LOSS space. It is NOT a bound "
-            f"on RV-uplift magnitude and NOT a proof of exact zero."
-        )
-    elif verdict == "INCONCLUSIVE_NO_EXACT_NULL_CLAIM":
-        bound_txt = (
-            f"The inverted one-sided 95% upper confidence bound on the relative "
-            f"QLIKE gain is {family_bound:.1f}% simultaneously across all "
-            f"{len(primary_rows)} cells (Bonferroni): gains LARGER than that are "
-            f"excluded by the data; anything smaller is not."
-            if family_bound is not None
-            else (
-                "The design cannot even exclude a 90% relative QLIKE gain in every "
-                "cell, so NO upper bound can be stated. That is how little this "
-                "sample can say about the effect size."
-            )
-        )
-        claim = (
-            f"INCONCLUSIVE. No cell shows incremental predictive content, but only "
-            f"{n_excl}/{len(primary_rows)} primary cells can rule out the "
-            f"pre-specified {margin_pct:.0f}% QLIKE gain, so the bounded null is NOT "
-            f"established. Failure to reject equal accuracy is not evidence of "
-            f"equality. The honest headline is: 'no robust incremental predictive "
-            f"evidence was found for spot BTC/ETH ETF flow over a HAR-RV baseline' "
-            f"-- a negative finding, not a proven zero. {bound_txt}"
-        )
-    else:
-        claim = (
-            f"POSITIVE. {n_pass}/{len(primary_rows)} primary cells clear the "
-            f"pre-specified flow gate."
-        )
-
-    res["verdict_basis"] = {
-        "test": (
-            "TWO pre-specified objects, with OPPOSITE multiplicity treatments, and "
-            "the verdict is a function of both. (1) DETECTION -- Giacomini-White "
-            "(2006) equal unconditional predictive ability, one-sided and "
-            "flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union of "
-            "alternatives: ten shots at finding an effect). (2) EXCLUSION -- the "
-            "pre-specified one-sided material-gain test, run as an INTERSECTION-UNION "
-            "test with each cell UNADJUSTED (Berger 1982): the bounded null may be "
-            "asserted only if EVERY cell rejects its own exclusion null, which needs "
-            "no correction. Holm-adjusted exclusion p-values are also reported as a "
-            "conservative sensitivity, but they are NOT the test. The verdict is "
-            "INCONCLUSIVE precisely because (1) finds nothing and (2) does not hold "
-            "in every cell."
-        ),
-        "test_detection": (
-            "Giacomini-White (2006) EUPA, one-sided flow-favouring, Holm-adjusted "
-            "across the 10-cell primary family"
-        ),
-        "test_exclusion": (
-            "pre-specified one-sided material-gain exclusion, intersection-union "
-            "across the 10-cell primary family, each cell UNADJUSTED"
-        ),
-        "loss": "Patton QLIKE on the variance level",
-        "estimation_scheme": (
-            f"paired fixed rolling window of {GW_TRAIN_WINDOW} flow days; both specs "
-            "share the augmented complete-case mask, the training dates and the "
-            "forward-label embargo (y_end_date < forecast origin). Every one of the "
-            "10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which "
-            "is the condition GW's limiting experiment needs. The one registered cell "
-            "that is not (`flow_transform/unexpected_z`, whose regressor comes from an "
-            "expanding-window AR(5)) sits in the robustness family, is flagged "
-            "`bounded_memory=false`, and is shown in "
-            "`multiple_testing.bounded_memory_sensitivity` not to move the family-wise "
-            "conclusion."
-        ),
-        "gate": f"qlike_improve > 0 AND GW z < {POWER_GATE_Z} AND Holm p < 0.05",
-        "cells_in_primary_family": len(primary_rows),
-        "cells_passing_flow_gate": n_pass,
-        "cells_excluding_material_gain": n_excl,
-        "cells_excluding_material_gain_holm_conservative": n_excl_holm,
-        "exclusion_multiplicity_rationale": (
-            "The exclusion family is an INTERSECTION-UNION test (Berger 1982): the "
-            "bounded-null claim requires EVERY cell to reject its own exclusion null, "
-            "so the conjunction holds at level alpha with each cell tested "
-            "unadjusted. A Holm adjustment here would buy no type-I protection and "
-            "only inflate type-II error. The GW family is the mirror image -- a union "
-            "of alternatives, ten shots at finding an effect -- so it IS Holm-"
-            "adjusted. Both numbers are reported; "
-            f"{n_excl}/{len(primary_rows)} cells exclude unadjusted, "
-            f"{n_excl_holm}/{len(primary_rows)} under the conservative Holm variant."
-        ),
-        "material_gain_margin_pct": margin_pct,
-        "qlike_gain_upper_bound_95pct_per_cell": {
+    res["verdict_basis"] = build_verdict_basis(
+        verdict,
+        n_cells=len(primary_rows),
+        n_pass=n_pass,
+        n_excl=n_excl,
+        n_excl_holm=n_excl_holm,
+        margin_pct=100 * MATERIAL_GAIN_MARGIN,
+        family_bound=family_bound,
+        per_cell_upper_bounds={
             row["cell"]: row["qlike_gain_upper_bound_95pct"] for row in primary_rows
         },
-        "qlike_gain_upper_bound_family_simultaneous_pct": family_bound,
-        "upper_bound_method": (
-            "Inverted one-sided exclusion test (Bonferroni alpha/m across the "
-            f"{m} primary cells). This -- not the power curve -- is the object that "
-            "can bound an effect. It lives in QLIKE-LOSS space, not RV-uplift space."
-        ),
-        "claim_strength": claim,
-        "withdrawn_v1_claim": (
-            "v1 claimed it could 'rule out an RV uplift of >= +16.2% per 1-sd flow "
-            "shock'. That number came from reading a single-path power curve "
-            "backwards. Power is not an exclusion. The claim is WITHDRAWN and is not "
-            "replaced by an RV-space bound of any size."
-        ),
-        "four_way_alignment": (
-            "test = Giacomini-White | loss = Patton QLIKE | scheme = paired fixed "
-            "rolling window | claim = bounded in QLIKE-loss space only. These four "
-            "match by construction; v1's did not."
-        ),
-    }
+    )
 
     make_plots(flows, rvs, panels, res)
 
@@ -2476,7 +2576,7 @@ def main() -> None:
     os.replace(tmp, OUT / "k1709_results.json")
 
     print("\n" + "=" * 78)
-    print("PRIMARY FAMILY (paired fixed-window Giacomini-White on QLIKE):")
+    print("PRIMARY FAMILY (paired fixed-window UNCONDITIONAL GW/DM on QLIKE):")
     for r in primary_rows:
         label = f"{r['asset']} h={r['horizon']} {r['alt']}"
         ub = r["qlike_gain_upper_bound_95pct"]
@@ -2662,4 +2762,7 @@ def make_plots(flows, rvs, panels, res) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if "--relabel" in sys.argv:
+        relabel_frozen_results()
+    else:
+        main()

@@ -2,7 +2,7 @@
 
 **Verdict: `INCONCLUSIVE_NO_EXACT_NULL_CLAIM`**
 
-> INCONCLUSIVE. No cell shows incremental predictive content, but only 5/10 primary cells can rule out the pre-specified 1% QLIKE gain, so the bounded null is NOT established. Failure to reject equal accuracy is not evidence of equality. The honest headline is: 'no robust incremental predictive evidence was found for spot BTC/ETH ETF flow over a HAR-RV baseline' -- a negative finding, not a proven zero. The inverted one-sided 95% upper confidence bound on the relative QLIKE gain is 4.2% simultaneously across all 10 cells (Bonferroni): gains LARGER than that are excluded by the data; anything smaller is not.
+> INCONCLUSIVE. No cell shows incremental UNCONDITIONAL predictive content, but only 5/10 primary cells can rule out the pre-specified 1% QLIKE gain, so the bounded null is NOT established. Failure to reject equal accuracy is not evidence of equality. The honest headline is: 'no robust incremental UNCONDITIONAL predictive evidence was found for spot BTC/ETH ETF flow over a HAR-RV baseline' -- a negative finding, not a proven zero. The inverted one-sided 95% upper confidence bound on the relative QLIKE gain is 4.2% simultaneously across all 10 cells (Bonferroni): gains LARGER than that are excluded by the data; anything smaller is not.
 
 **This is a revision.** The first version of this experiment was FAILed by an independent review on 2026-07-14 (`codex_review_20260714.md`), and the project's own mechanical gate (`scripts/tests/test_nested_dm_misuse_ratchet.py`) agreed. Two headline claims did not survive. What follows is the rebuilt study.
 
@@ -17,7 +17,7 @@
 
 | # | Defect | Fix |
 |---|---|---|
-| C1 | Nested comparison inferred with raw Diebold-Mariano + a mislabelled Clark-West | Giacomini-White (2006) on Patton QLIKE from a **paired fixed rolling window**; raw DM and CW demoted to `feeds_gate=false` |
+| C1 | Nested comparison inferred with raw Diebold-Mariano + a mislabelled Clark-West | Giacomini-White (2006) **Sec 3.4 unconditional special case** (h_t = 1, equals a HAC Diebold-Mariano) on Patton QLIKE from a **paired fixed rolling window**; raw DM and CW demoted to `feeds_gate=false` |
 | C2 | "MDE" was one injection into one noise path — no repeated sampling, no false-positive check, non-monotone, and then read backwards as an exclusion | A real power simulation (1000 simulated OOS paths per point) **plus** a pre-specified material-gain exclusion test and an inverted confidence bound — the only objects that can legitimately bound an effect |
 | C3 | 16 BTC / 10 ETH US market holidays kept as genuine `Total=0.0` flow days, polluting the 20-day rolling scaler | NYSE session-calendar filter (`exchange_calendars` XNYS); holidays are MISSING, not zero |
 | C4 | `pub_lag=2` robustness also lagged the HAR and return controls, handicapping its own baseline | `state_lag` and `flow_lag` are separate parameters with separately verified source dates |
@@ -27,13 +27,17 @@
 
 ## How the claim is now established
 
-- **Test**: TWO pre-specified objects, with OPPOSITE multiplicity treatments, and the verdict is a function of both. (1) DETECTION -- Giacomini-White (2006) equal unconditional predictive ability, one-sided and flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union of alternatives: ten shots at finding an effect). (2) EXCLUSION -- the pre-specified one-sided material-gain test, run as an INTERSECTION-UNION test with each cell UNADJUSTED (Berger 1982): the bounded null may be asserted only if EVERY cell rejects its own exclusion null, which needs no correction. Holm-adjusted exclusion p-values are also reported as a conservative sensitivity, but they are NOT the test. The verdict is INCONCLUSIVE precisely because (1) finds nothing and (2) does not hold in every cell.
+- **Test**: TWO pre-specified objects, with OPPOSITE multiplicity treatments, and the verdict is a function of both. (1) DETECTION -- Giacomini-White (2006) Sec 3.4 UNCONDITIONAL special case (instrument h_t = 1, which coincides with a HAC Diebold-Mariano t; NOT the conditional GW test -- no instrument vector, no Wald statistic, no chi-square_q), one-sided and flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union of alternatives: ten shots at finding an effect). (2) EXCLUSION -- the pre-specified one-sided material-gain test, run as an INTERSECTION-UNION test with each cell UNADJUSTED (Berger 1982): the bounded null may be asserted only if EVERY cell rejects its own exclusion null, which needs no correction. Holm-adjusted exclusion p-values are also reported as a conservative sensitivity, but they are NOT the test. The verdict is INCONCLUSIVE precisely because (1) finds nothing and (2) does not hold in every cell.
 - **Loss**: Patton QLIKE on the variance level
 - **Estimation scheme**: paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin). Every one of the 10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which is the condition GW's limiting experiment needs. The one registered cell that is not (`flow_transform/unexpected_z`, whose regressor comes from an expanding-window AR(5)) sits in the robustness family, is flagged `bounded_memory=false`, and is shown in `multiple_testing.bounded_memory_sensitivity` not to move the family-wise conclusion.
-- **Gate**: `qlike_improve > 0 AND GW z < -1.645 AND Holm p < 0.05`
-- **Claim scope**: bounded in QLIKE-loss space only. test = Giacomini-White | loss = Patton QLIKE | scheme = paired fixed rolling window | claim = bounded in QLIKE-loss space only. These four match by construction; v1's did not.
+- **Gate**: `qlike_improve > 0 AND unconditional GW/DM z < -1.645 AND Holm p < 0.05`
+- **Claim scope**: bounded in QLIKE-loss space only. test = GW(2006) Sec 3.4 unconditional special case (= HAC DM) | loss = Patton QLIKE | scheme = paired fixed rolling window | claim = no UNCONDITIONAL incremental predictive ability, bounded in QLIKE-loss space only. These four match by construction; v1's did not, and rev2's claim was broader than its test.
 
-**Why Giacomini-White, and why this is not just Diebold-Mariano renamed.** The arithmetic really is nearly the same — a mean loss difference over a Bartlett HAC standard error — and on the same loss stream the two statistics agree to about three decimal places (they differ only in a small-sample HAC scaling: GW divides each lag covariance by *n*, the canonical DM helper by *n − lag*). The results file reports both, side by side, rather than hiding the coincidence.
+> ### What this study did NOT test
+>
+> The conditional GW test (h_t a non-trivial instrument, q x q moment covariance, Wald chi-square_q) is NOT run anywhere in this study. Every claim below is therefore UNCONDITIONAL: it is about the AVERAGE loss differential over the OOS sample. A flow effect that helps in one regime and hurts in another, netting to zero on average, would be invisible to this design and is NOT excluded by it.
+
+**Why the word Giacomini-White appears at all, given that the statistic is a HAC Diebold-Mariano.** It is the same arithmetic — a mean loss difference over a Bartlett HAC standard error — and on the same loss stream the two statistics agree to about three decimal places (they differ only in a small-sample HAC scaling: this file divides each lag covariance by *n*, the canonical DM helper by *n − lag*). The results file reports both, side by side, rather than hiding the coincidence. GW (2006) Sec 3.4 is precisely the case where the coincidence is expected: set the instrument h_t = 1 and their conditional test collapses onto the unconditional one. **The conditional machinery — a non-trivial h_t, a q × q moment covariance, a Wald χ²_q — is not built anywhere in this file, and no claim here depends on it.**
 
 What makes the test legal under nesting is therefore **not the formula** but the *estimation scheme*. Giacomini and White compare forecasting **methods**, with fitted-parameter noise treated as part of the object being compared rather than a nuisance to be purged — and that limiting experiment requires the estimator to have **bounded memory**, i.e. a fixed-length rolling window. Feed the same formula expanding-window forecasts, as v1 did, and the nested null is degenerate: the statistic is biased toward the smaller model and no reference distribution rescues it. Every cell therefore also reports the expanding-window value under `expanding_window_diagnostic_v1_design`, so the effect of the scheme change is auditable rather than asserted.
 
@@ -66,7 +70,7 @@ Flow is contemporaneously correlated with the same day's return and volatility, 
 
 10 pre-specified cells. `H1` adds |z| (flow shock magnitude); `H2` adds an extra loading on redemptions; `H4` tests whether BTC's flow shock predicts **ETH** volatility once ETH's own flow is controlled for.
 
-| Cell | n OOS | QLIKE Δ | GW z | Holm p | Rules out ≥1% gain? |
+| Cell | n OOS | QLIKE Δ | uncond. GW/DM z | Holm p | Rules out ≥1% gain? |
 |---|---|---|---|---|---|
 | BTC h=1 H1_absflow | 355 | -0.561% | 1.30 | 1.000 | **yes** |
 | BTC h=1 H2_asym | 355 | -0.948% | 0.62 | 1.000 | no |
@@ -79,7 +83,7 @@ Flow is contemporaneously correlated with the same day's return and volatility, 
 | ETH h=1 H4_plus_btc | 223 | +0.154% | -0.34 | 1.000 | **yes** |
 | ETH h=5 H4_plus_btc | 218 | -0.389% | 0.66 | 1.000 | **yes** |
 
-`QLIKE Δ` is the flow model's improvement over the baseline — **negative means the flow model is worse**. `GW z < 0` would favour flow; the gate needs `z < -1.645` *and* Holm `p < 0.05` *and* a positive QLIKE Δ. Cells passing: **0 / 10**.
+`QLIKE Δ` is the flow model's improvement over the baseline — **negative means the flow model is worse**. `z < 0` would favour flow; the gate needs `z < -1.645` *and* Holm `p < 0.05` *and* a positive QLIKE Δ. Cells passing: **0 / 10**.
 
 ### The bound: what can actually be ruled out
 
@@ -100,7 +104,7 @@ Failing to reject equal accuracy is **not** evidence of equality — that is the
 | ETH h=1 H4_plus_btc | 1.97 | 0.024 | **yes** | 0.171 | ≤ 0.86% |
 | ETH h=5 H4_plus_btc | 2.12 | 0.017 | **yes** | 0.136 | ≤ 0.64% |
 
-**Why these p-values are unadjusted, while the Giacomini-White ones above are Holm-corrected.** The two claims have opposite logical structure, and the correction has to follow the claim, not the habit. *"Flow helps somewhere"* is a **union** of alternatives — ten shots at finding an effect — so the family-wise error rate must be controlled. *"Flow helps nowhere by ≥1%"* is an **intersection**: it may be asserted only if *every* cell rejects its own exclusion null, which is an intersection-union test (Berger 1982) and holds at level α with each cell tested unadjusted. Holm there would inflate type-II error and buy no type-I protection. The Holm column is reported anyway so the choice is auditable — and note it does not change the verdict either way.
+**Why these p-values are unadjusted, while the detection ones above are Holm-corrected.** The two claims have opposite logical structure, and the correction has to follow the claim, not the habit. *"Flow helps somewhere"* is a **union** of alternatives — ten shots at finding an effect — so the family-wise error rate must be controlled. *"Flow helps nowhere by ≥1%"* is an **intersection**: it may be asserted only if *every* cell rejects its own exclusion null, which is an intersection-union test (Berger 1982) and holds at level α with each cell tested unadjusted. Holm there would inflate type-II error and buy no type-I protection. The Holm column is reported anyway so the choice is auditable — and note it does not change the verdict either way.
 
 **5 / 10** cells reject H₀ at the pre-specified 1% margin. That margin is the project standard carried over from K1701 — it was fixed before the results were seen, not tuned until the null looked good. Because most cells cannot reject it, **the bounded null is not established** and the verdict is `INCONCLUSIVE`, not `NULL`.
 
@@ -126,7 +130,7 @@ Those are **intervals, not thresholds**. β runs on a coarse 8-point grid, so th
 
 **Read the scope before quoting any of this.** The simulation covers *one cell* of the design: **h = 1 only** (the primary family also contains h = 5), a **single injected |flow| shock** (the H2 asymmetry and the cross-asset H4 alternative are never simulated, so this says nothing about power against *them*), and the **nominal single-cell gate** — not the ten-cell Holm-corrected family that actually produces the verdict, which is strictly less powerful. This is not "the power of the study", and it must not be quoted as such.
 
-The β=0 row is **not** "size" in the textbook sense, and it should sit *below* 5% rather than at it. Under Giacomini-White's method-level null with a fixed window, an irrelevant extra regressor makes the augmented method genuinely worse — it pays an estimation cost and buys nothing — so E[L_flow − L_base] > 0 strictly. A one-sided flow-favouring gate is therefore conservative at β=0 by construction. What the row establishes is the thing that matters: **this gate does not manufacture flow signals out of noise**. A rate materially *above* 5% would have been the alarm.
+The β=0 row is **not** "size" in the textbook sense, and it should sit *below* 5% rather than at it. Under the method-level null with a fixed window, an irrelevant extra regressor makes the augmented method genuinely worse — it pays an estimation cost and buys nothing — so E[L_flow − L_base] > 0 strictly. A one-sided flow-favouring gate is therefore conservative at β=0 by construction. What the row establishes is the thing that matters: **this gate does not manufacture flow signals out of noise**. A rate materially *above* 5% would have been the alarm.
 
 Per-β detail (BTC / ETH rejection rate at the 5% gate):
 
@@ -149,7 +153,7 @@ Note how much blunter this honest reading is than v1's. v1 advertised a minimum 
 
 Every run below is registered in the same in-code test registry as the primary family, so the full-family Holm correction sees all of them. v1's hand-written "EVERY DM test" list silently omitted 8.
 
-| Family | Cells | Best (most flow-favouring) GW z | Any cell passing the gate? |
+| Family | Cells | Best (most flow-favouring) uncond. z | Any cell passing the gate? |
 |---|---|---|---|
 | RV proxy (Parkinson / r² / true hourly RV) | 6 | 0.37 | no |
 | Conservative flow lag (flow usable only at end of t+1; state lag stays 1) | 4 | -0.31 | no |
@@ -159,11 +163,11 @@ Every run below is registered in the same in-code test registry as the primary f
 | Shock threshold dummies (|z| ≥ 1.0 … 2.5) | 16 | -0.82 | no |
 | Shorter ETH burn-in (200) | 2 | 0.03 | no |
 
-Across **all 54** gate-eligible Giacomini-White tests in the study, **0** survive the full-family Holm correction in the flow-favouring direction. (108 further tests are registered as diagnostic-only and are barred from any gate by construction.)
+Across **all 54** gate-eligible unconditional GW/DM tests in the study, **0** survive the full-family Holm correction in the flow-favouring direction. (108 further tests are registered as diagnostic-only and are barred from any gate by construction.)
 
 ### 2 of those tests are not bounded-memory tests — and they are labelled
 
-Giacomini-White's limiting experiment assumes the **forecasting method** has bounded estimator memory. Every cell here fits its regression on a fixed 250-day rolling window, so the final fit always satisfies that. But the condition is on the *whole method*, not on the last regression: `flow_transform|BTC_h1|T_unexpected_z|rv_gk|fl1`, `flow_transform|ETH_h1|T_unexpected_z|rv_gk|fl1` build their regressor from an **AR(5) refitted on an expanding window** of flow history. There is no lookahead in it — day *i*'s own value never enters its own fit — but it is not a bounded-memory forecasting method, and a blanket sentence claiming all 54 registered tests are one would be false.
+GW's limiting experiment assumes the **forecasting method** has bounded estimator memory. Every cell here fits its regression on a fixed 250-day rolling window, so the final fit always satisfies that. But the condition is on the *whole method*, not on the last regression: `flow_transform|BTC_h1|T_unexpected_z|rv_gk|fl1`, `flow_transform|ETH_h1|T_unexpected_z|rv_gk|fl1` build their regressor from an **AR(5) refitted on an expanding window** of flow history. There is no lookahead in it — day *i*'s own value never enters its own fit — but it is not a bounded-memory forecasting method, and a blanket sentence claiming all 54 registered tests are one would be false.
 
 They **are not dropped**. Removing a test once its result is known is selection, not rigour. They stay in the family, they are corrected for, they carry `bounded_memory=false` in the registry, and the family-wise count is re-run without them so a reader can see whether anything hangs on them: **0** Holm-surviving cells across all 54 tests, **0** across the 52 bounded-memory tests. The verdict does **not** depend on them. All 10 primary cells are bounded-memory.
 
@@ -217,8 +221,8 @@ Seed `1709` throughout (OLS is deterministic; the block bootstrap and the power 
 | `codex_review_20260714.md` | The independent review that FAILed v1 |
 | `fig1_flow_vs_rv.png` | Flow vs realized volatility |
 | `fig2_event_window.png` | log-RV path around large flow shocks |
-| `fig3_oos_qlike.png` | OOS QLIKE + Giacomini-White z, primary cells |
-| `fig4_threshold_sensitivity.png` | GW z by shock threshold |
+| `fig3_oos_qlike.png` | OOS QLIKE + unconditional GW/DM z, primary cells |
+| `fig4_threshold_sensitivity.png` | Unconditional GW/DM z by shock threshold |
 | `fig5_simulated_power.png` | Simulated power (replaces v1's "MDE" curve) |
 
 ## What this study does and does not say

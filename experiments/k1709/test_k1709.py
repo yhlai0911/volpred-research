@@ -72,7 +72,7 @@ from k1709 import (  # noqa: E402
     evaluate_cell,
     filter_to_sessions,
     flow_zscore,
-    giacomini_white,
+    gw_unconditional_dm,
     holm,
     make_flow_features,
     material_gain_exclusion,
@@ -535,7 +535,7 @@ def test_gw_direction_negative_z_favours_the_flow_model():
     when the data says the opposite."""
     rng = np.random.default_rng(11)
     loss_base = np.abs(rng.normal(1.0, 0.2, 400))
-    gw = giacomini_white(loss_base - 0.10, loss_base, h=1)   # augmented is BETTER
+    gw = gw_unconditional_dm(loss_base - 0.10, loss_base, h=1)   # augmented is BETTER
     assert gw["z_stat"] < 0
     assert gw["p_value_one_sided_flow_better"] < 0.01
 
