@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "title": "K1685 懶人包｜把 VIX 放進波動率模型",
+  "subtitle": "SPY 波動率預測，GJR-GARCH 對上加了 VIX 的 GARCH-X",
+  "evidence": {
+    "k1685": {
+      "path": "experiments/k1685/k1685_garchx_oos_extension_results.json",
+      "sha256": "1fd7fd8488cdfa2c66c54acc07459d9d643303d60dc1b51c953b3b2f99c97ec3",
+      "label": "實驗 K1685 完整結果 JSON"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "為什麼要讓模型看 VIX",
+      "alt": "概念說明：只看股價的波動率模型與加入 VIX 的模型差在哪裡",
+      "sources": ["k1685"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "只看股價的模型",
+          "body": [
+            "GARCH 家族只吃報酬率的歷史：昨天跳得凶，今天大概也不安分。",
+            "它要等波動先發生，才有東西可學。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "多一隻眼睛：VIX",
+          "body": [
+            "VIX 是選擇權市場對未來一個月波動的定價，是真金白銀押出來的看法。",
+            "把前一天收盤的 VIX 餵進模型，等於在恐慌砸下來之前先聽到市場的說法。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "對答案的交易日",
+          "value": {
+            "source": "k1685",
+            "path": "dm_reports.full_extended_oos.n",
+            "format": {"kind": "integer", "suffix": " 天"}
+          },
+          "note": "完整樣本外測試期，逐日一步預測"
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "兩個模型，同一份考卷",
+      "alt": "方法說明：滾動視窗估計、定期重估參數、只用前一天資料預測",
+      "sources": ["k1685"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "公平比較的規則",
+          "body": [
+            "兩個模型設定完全相同，差別只在有沒有吃 VIX。",
+            "預測當天只讀得到昨天的報酬與昨天的 VIX，今天的答案收盤才揭曉。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "訓練視窗",
+          "value": {
+            "source": "k1685",
+            "path": "configuration.window",
+            "format": {"kind": "integer", "suffix": " 個交易日"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "多久重估一次參數",
+          "value": {
+            "source": "k1685",
+            "path": "configuration.refit_every",
+            "format": {"kind": "integer", "suffix": " 天"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "檢定的 HAC 落後期",
+          "value": {
+            "source": "k1685",
+            "path": "dm_reports.full_extended_oos.dm_hac_lag",
+            "format": {"kind": "integer", "suffix": " 期"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "成績單：誤差分數越低越準",
+      "alt": "主要結果：完整測試期與崩盤期的 QLIKE 誤差分數與檢定統計量",
+      "sources": ["k1685"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "只看股價 QLIKE",
+          "value": {
+            "source": "k1685",
+            "path": "dm_reports.full_extended_oos.qlike_mean_gjr_canonical",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "加了 VIX QLIKE",
+          "value": {
+            "source": "k1685",
+            "path": "dm_reports.full_extended_oos.qlike_mean_a4f_canonical",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "檢定統計量 t",
+          "value": {
+            "source": "k1685",
+            "path": "dm_reports.full_extended_oos.dm_t_canonical",
+            "format": {"kind": "number", "digits": 3, "show_plus": true}
+          },
+          "note": "正值代表加了 VIX 比較準，且已通過多重檢定的嚴格門檻"
+        },
+        {
+          "kind": "metric",
+          "label": "崩盤期只看股價",
+          "value": {
+            "source": "k1685",
+            "path": "dm_reports.extended_covid_window.qlike_mean_gjr_canonical",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "崩盤期加了 VIX",
+          "value": {
+            "source": "k1685",
+            "path": "dm_reports.extended_covid_window.qlike_mean_a4f_canonical",
+            "format": {"kind": "number", "digits": 3}
+          },
+          "note": "崩盤期差距最大，但樣本只有百餘天，檢定不顯著"
+        },
+        {
+          "kind": "metric",
+          "label": "逐月切點翻盤次數",
+          "value": {
+            "source": "k1685",
+            "path": "endpoint_scan_summary.n_gjr_ahead",
+            "format": {"kind": "integer", "suffix": " 次"}
+          },
+          "note": "把測試期終點逐月往後拉，重算多次都沒翻盤"
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "研究邊界：這篇沒有說的事",
+      "alt": "研究限制：預測誤差不是交易報酬，且結論對估計設定有敏感度",
+      "sources": ["k1685"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "預測準不等於能賺錢",
+          "body": [
+            "QLIKE 量的是波動率預測誤差，不是損益。",
+            "手續費、滑價、部位大小與進出時機都沒有在這個實驗裡被測試。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "多組起始點重估後的 t",
+          "value": {
+            "source": "k1685",
+            "path": "dm_reports.multistart_full_extended_oos.dm_t_canonical",
+            "format": {"kind": "number", "digits": 3, "show_plus": true}
+          },
+          "note": "對兩個模型對稱加入隨機起始點，t 掉到門檻線上"
+        },
+        {
+          "kind": "metric",
+          "label": "改用較短落後期的 t",
+          "value": {
+            "source": "k1685",
+            "path": "dm_reports.multistart_full_extended_oos.hac_lag_sensitivity.lag_10",
+            "format": {"kind": "number", "digits": 3, "show_plus": true}
+          },
+          "note": "同一組估計換 HAC 落後期，會落到門檻下面"
+        },
+        {
+          "kind": "metric",
+          "label": "最新一段窗口的 t",
+          "value": {
+            "source": "k1685",
+            "path": "dm_reports.extension_window_only.dm_t_canonical",
+            "format": {"kind": "number", "digits": 3, "show_plus": true}
+          },
+          "note": "短窗口很吵，方向一致但不顯著"
+        }
+      ]
+    }
+  ]
+}

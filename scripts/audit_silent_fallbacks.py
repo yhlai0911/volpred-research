@@ -25,7 +25,10 @@ import argparse
 import ast
 import hashlib
 import json
+import subprocess
 import sys
+import tarfile
+import tempfile
 from collections import Counter, defaultdict, deque
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -37,6 +40,54 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def default_targets(root: Path = ROOT) -> tuple[Path, ...]:
     return (root / "scripts", root / "src" / "volpred", root / ".claude" / "hooks")
+
+
+def extract_rev(repo: Path, rev: str, dest: Path) -> None:
+    """Materialise the audited subtrees at `rev` under `dest` so they can serve as a root.
+
+    Only the audit's own targets are extracted — the rest of the repo is irrelevant, and
+    `paper/` carries absolute symlinks that tarfile's `data` filter (rightly) refuses.
+
+    Raises on any failure: a push gate that cannot read the commit it is about to push
+    must fail loudly, never quietly audit whatever is on disk instead.
+    """
+    resolved = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "--verify", "--quiet", f"{rev}^{{commit}}"],
+        capture_output=True,
+    )
+    if resolved.returncode != 0:
+        raise RuntimeError(f"git cannot resolve rev {rev!r} in {repo}")
+
+    candidates = [str(target.relative_to(ROOT)) for target in default_targets(ROOT)]
+    # `git archive` is fatal on a pathspec the rev does not contain, so ask first.
+    pathspecs = [
+        spec
+        for spec in candidates
+        if subprocess.run(
+            ["git", "-C", str(repo), "cat-file", "-e", f"{rev}:{spec}"],
+            capture_output=True,
+        ).returncode
+        == 0
+    ]
+    if not pathspecs:
+        raise RuntimeError(f"{rev} contains none of the audited trees: {candidates}")
+
+    archive = dest / ".rev.tar"
+    with archive.open("wb") as fh:
+        proc = subprocess.run(
+            ["git", "-C", str(repo), "archive", "--format=tar", rev, "--", *pathspecs],
+            stdout=fh,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"git archive {rev} failed (rc={proc.returncode}): "
+            f"{proc.stderr.decode('utf-8', 'replace').strip()}"
+        )
+    with tarfile.open(archive) as tar:
+        tar.extractall(dest, filter="data")
+    archive.unlink()
 
 
 DEFAULT_TARGETS = default_targets()
@@ -728,6 +779,15 @@ def main() -> int:
             "temp dir, where __file__ says nothing about the tree being audited."
         ),
     )
+    parser.add_argument(
+        "--rev",
+        help=(
+            "audit the tree at this git revision instead of the working tree: the rev is "
+            "extracted to a temp dir which becomes --root. A push gate must judge what it "
+            "pushes (a commit), not what happens to be lying in a shared checkout — an "
+            "unrelated session's uncommitted edits are not part of the push."
+        ),
+    )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--strict", action="store_true")
     parser.add_argument(
@@ -747,9 +807,19 @@ def main() -> int:
         help="maximum human rows to print; 0 means no limit",
     )
     args = parser.parse_args()
-    root = args.root.resolve()
+    repo = args.root.resolve()
 
-    findings = audit_paths(args.paths or list(default_targets(root)), root=root)
+    if args.rev:
+        if args.paths:
+            parser.error("--rev audits the whole extracted tree; positional paths are unsupported")
+        with tempfile.TemporaryDirectory(prefix="silent_fallback_rev_") as tmp:
+            root = Path(tmp)
+            extract_rev(repo, args.rev, root)
+            findings = audit_paths(list(default_targets(root)), root=root)
+    else:
+        root = repo
+        findings = audit_paths(args.paths or list(default_targets(root)), root=root)
+
     if args.write_baseline:
         write_baseline(args.write_baseline, findings)
         print(f"[silent-fallback-audit] wrote baseline={args.write_baseline} findings={len(findings)}")

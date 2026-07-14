@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "title": "K1572 懶人包｜換個對手，深度學習就從贏變輸",
+  "subtitle": "債券 ETF 風險值預測：神經網路對上兩種基準",
+  "evidence": {
+    "k1572": {
+      "path": "experiments/k1572/k1572_results.json",
+      "sha256": "6cfb9be48872624f75bc9c3df21eea2ad5dd0ab441a25622a9cbf45924b4b8f6",
+      "label": "實驗 K1572 完整結果 JSON"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "同一份預測，兩種對手",
+      "alt": "概念說明：神經網路的風險值預測，分別對上歷史模擬法與吃同樣訊號的傳統模型",
+      "sources": [
+        "k1572"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "風險值在問什麼",
+          "body": [
+            "明天這檔 ETF 最壞會跌多少，才有九成五的把握不會被跌破？",
+            "銀行拿它算資本，基金拿它設停損。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "弱對手 vs 公平對手",
+          "body": [
+            "歷史模擬法只把過去的報酬抄一遍，看不到 VIX、看不到信用利差。",
+            "公平對手是吃同樣訊號、同樣重估頻率的傳統模型，逐日取中位數。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "每格對答案的交易日",
+          "value": {
+            "source": "k1572",
+            "path": "by_asset_alpha.TLT_05.per_model.DNN-QR.obs",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": "樣本外評估期橫跨十一年半，每個標的與信心水準組合各一格"
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "怎麼比才叫公平",
+      "alt": "方法說明：五個落後一天的特徵、每月重估、兩檔債券 ETF、兩個信心水準",
+      "sources": [
+        "k1572"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "同一份資訊集",
+          "body": [
+            "神經網路與傳統模型讀同樣五個訊號：已實現波動、兩檔債券動能、信用利差變化、VIX。",
+            "所有輸入一律落後一個交易日，模型看不到今天的答案。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "同一份考卷",
+          "body": [
+            "標的：TLT 與 HYG。信心水準：九成五與九成九。",
+            "每個月用當時看得到的歷史重新訓練一次，逐日一步預測。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "第一層神經元",
+          "value": {
+            "source": "k1572",
+            "path": "meta.dnn_config.hidden_1",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "小型前饋網路"
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "換個對手，答案翻面",
+      "alt": "結果：對歷史模擬法誤差降低近三成，對公平基準誤差反而惡化",
+      "sources": [
+        "k1572"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "HYG 九成九風險值：對歷史模擬法，誤差降低",
+          "value": {
+            "source": "k1572",
+            "path": "by_asset_alpha.HYG_01.dnn_vs_hs250_mean_pinball_pct",
+            "format": {
+              "kind": "percent",
+              "scale": 1.0,
+              "digits": 2,
+              "absolute": true
+            }
+          },
+          "note": "看起來像大勝"
+        },
+        {
+          "kind": "metric",
+          "label": "同一份預測：對公平基準，誤差惡化",
+          "value": {
+            "source": "k1572",
+            "path": "by_asset_alpha.HYG_01.dnn_vs_plateau_mean_pinball_pct",
+            "format": {
+              "kind": "percent",
+              "scale": 1.0,
+              "digits": 2
+            }
+          },
+          "note": "沒有改任何一行程式碼，只換了對照線"
+        },
+        {
+          "kind": "metric",
+          "label": "四格中唯一統計顯著的落後：HYG 九成五，檢定值",
+          "value": {
+            "source": "k1572",
+            "path": "by_asset_alpha.HYG_05.dm_pairs.DNN-QR_vs_PlateauMedianLoss.stat",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          },
+          "note": "其餘三格統計上分不出勝負"
+        },
+        {
+          "kind": "metric",
+          "label": "該格巧合機率",
+          "value": {
+            "source": "k1572",
+            "path": "by_asset_alpha.HYG_05.dm_pairs.DNN-QR_vs_PlateauMedianLoss.p",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "Diebold-Mariano 檢定"
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "讀報告時該問的三件事",
+      "alt": "結論：檢查對手的資訊集、對手有沒有調校、勝差是否集中在單一事件",
+      "sources": [
+        "k1572"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一、對手吃得到同樣的資訊嗎",
+          "body": [
+            "主角看得到 VIX、對手看不到，勝差裡有多少是模型的功勞？"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "二、對手有沒有被認真調校",
+          "body": [
+            "抓一個沒調過的舊模型來挨打，得到的結論不能拿來談模型能力。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "三、勝差是否集中在單一事件",
+          "body": [
+            "累積損失曲線顯示，歷史模擬法的落後幾乎全在崩盤那幾週一次拉開。",
+            "那衡量的是舊方法有多慢，不是新方法有多聰明。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "HYG 九成九風險值：神經網路的實際違規率",
+          "value": {
+            "source": "k1572",
+            "path": "by_asset_alpha.HYG_01.per_model.DNN-QR.kupiec.rate",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "目標違規率是百分之一；這一格它的校準反而比傳統模型誠實"
+        }
+      ]
+    }
+  ]
+}

@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import importlib.util
+import os
+import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "audit_silent_fallbacks.py"
@@ -563,3 +567,75 @@ def test_iter_python_files_skips_test_directories_by_default(tmp_path: Path) -> 
     files = audit_silent_fallbacks.iter_python_files([scripts])
 
     assert files == [prod]
+
+
+def _git(repo: Path, *args: str) -> None:
+    subprocess.run(
+        ["git", "-C", str(repo), *args],
+        check=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "GIT_AUTHOR_NAME": "t",
+            "GIT_AUTHOR_EMAIL": "t@example.com",
+            "GIT_COMMITTER_NAME": "t",
+            "GIT_COMMITTER_EMAIL": "t@example.com",
+        },
+    )
+
+
+def test_extract_rev_audits_the_commit_not_a_co_tenants_dirty_worktree(tmp_path: Path) -> None:
+    """The push gate must judge the commit it pushes, not whatever is lying in the checkout.
+
+    2026-07-14: the checkout is shared (several dispatch slots + an interactive session +
+    codex-vscode all work in one tree). The gate audited the working tree, so three silent
+    fallbacks living in *another session's uncommitted diff* held four clean commits off
+    origin all night — while the alert insisted they were "at HEAD". They were not.
+    """
+    repo = tmp_path / "repo"
+    (repo / "scripts").mkdir(parents=True)
+    module = repo / "scripts" / "mod.py"
+    module.write_text(
+        "def parse(raw):\n"
+        "    try:\n"
+        "        return int(raw)\n"
+        "    except ValueError as exc:\n"
+        "        raise RuntimeError('bad') from exc\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "init", "-q", str(repo)], check=True, capture_output=True)
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-q", "-m", "clean commit")
+
+    # A co-tenant's edit — saved to disk, deliberately NOT committed.
+    module.write_text(
+        module.read_text(encoding="utf-8")
+        + "\n\ndef read(path):\n"
+        "    try:\n"
+        "        return open(path).read()\n"
+        "    except OSError:\n"
+        "        return None\n",
+        encoding="utf-8",
+    )
+
+    dirty = audit_silent_fallbacks.audit_paths([repo / "scripts"], root=repo)
+    assert [f.line for f in dirty], "the uncommitted silent fallback should be visible on disk"
+
+    dest = tmp_path / "snapshot"
+    dest.mkdir()
+    audit_silent_fallbacks.extract_rev(repo, "HEAD", dest)
+    committed = audit_silent_fallbacks.audit_paths([dest / "scripts"], root=dest)
+
+    assert committed == [], "HEAD is clean; the co-tenant's uncommitted edit must not hold the push"
+
+
+def test_extract_rev_raises_on_unknown_rev(tmp_path: Path) -> None:
+    """A gate that cannot read the commit it is about to push fails loudly, never silently."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q", str(repo)], check=True, capture_output=True)
+    dest = tmp_path / "dest"
+    dest.mkdir()
+
+    with pytest.raises(RuntimeError, match="cannot resolve rev"):
+        audit_silent_fallbacks.extract_rev(repo, "no-such-rev", dest)

@@ -1,0 +1,216 @@
+{
+  "schema_version": 1,
+  "title": "懶人包｜跌破均線隔天更容易崩？",
+  "subtitle": "二十檔美股 ETF 與大型股，十六年半，近八萬個資產日",
+  "evidence": {
+    "k1681": {
+      "path": "experiments/k1681/k1681_results.json",
+      "sha256": "4dd1c71fad3eb9f189907d5107daa77e7a12e9f079ad1b58c76bfbcfb72d164a",
+      "label": "實驗 K1681 完整結果 JSON"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "被驗的那句話",
+      "alt": "概念說明：技術分析通說認為股價離均線越遠，隔天波動越大、越容易崩",
+      "sources": ["k1681"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "通說",
+          "body": [
+            "股價離十日均線越遠，代表情緒失控，隔天波動要放大、甚至直接崩一根。",
+            "看盤軟體上真的常常應驗，所以很少人回頭查。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "原始證據確實嚇人",
+          "body": [
+            "把所有日子按離均線的位置排成五等分，跌破最深的那一等分，隔天出現大跌的機率明顯高於平常。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "跌破最深那一等分，隔天大跌機率",
+          "value": {
+            "source": "k1681",
+            "path": "quintile_profile_signed_smad.0.left_tail_hit_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "接近平常水準的一點八倍"
+        },
+        {
+          "kind": "metric",
+          "label": "不分位置的平常機率",
+          "value": {
+            "source": "k1681",
+            "path": "targets.left_tail_hit_next.pooled_logit.base_rate_left_tail",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "左尾大跌的定義是跌破自己歷史上最差的那一小段，門檻只用當期看得到的資料算"
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "為什麼要換一個對照組",
+      "alt": "方法說明：均線距離幾乎就是過去十天報酬的加權和，對照組必須先把那些報酬吃乾淨",
+      "sources": ["k1681"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "均線距離不是新資訊",
+          "body": [
+            "十日均線就是過去十天收盤價的平均。跌破它很多，只代表這十天在跌。",
+            "而市場剛跌過的時候，波動本來就已經高了。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "公平對照組怎麼設",
+          "body": [
+            "把過去十天的報酬一天一天分開，全部放進對照組。",
+            "這樣的對照組能複製任何一種加權方式，包括均線距離自己那一種。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本檔數",
+          "value": {
+            "source": "k1681",
+            "path": "data.n_assets",
+            "format": {
+              "kind": "integer",
+              "suffix": " 檔"
+            }
+          },
+          "note": "美股大盤、產業與個股都涵蓋；每檔近四千個交易日"
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "對照組一公平，訊號就垮了",
+      "alt": "結果：額外解釋力大幅縮水，左尾檢定完全歸零，只剩不對稱站得住",
+      "sources": ["k1681"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "天真對照組記給均線距離的額外解釋力",
+          "value": {
+            "source": "k1681",
+            "path": "verdict.leverage_contamination.incr_r2_vs_M0_naive",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "suffix": " 個百分點"
+            }
+          },
+          "note": "只跟波動歷史比，沒控制最近的漲跌"
+        },
+        {
+          "kind": "metric",
+          "label": "公平對照組下只剩",
+          "value": {
+            "source": "k1681",
+            "path": "verdict.leverage_contamination.incr_r2_vs_M1B_span_baseline",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "suffix": " 個百分點"
+            }
+          },
+          "note": "約八成五蒸發，那部分是槓桿效應被記錯了帳"
+        },
+        {
+          "kind": "metric",
+          "label": "均線距離對隔天會不會大跌的額外預測力，巧合機率",
+          "value": {
+            "source": "k1681",
+            "path": "targets.left_tail_hit_next.pooled_logit.joint_p_date_clustered",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "完全可以用隨機波動解釋，那個嚇人的比率歸零"
+        },
+        {
+          "kind": "metric",
+          "label": "跌破那半邊的斜率，是衝高那半邊的",
+          "value": {
+            "source": "k1681",
+            "path": "verdict.one_robust_regularity.asymmetry_ratio_neg_over_pos",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 倍"
+            }
+          },
+          "note": "唯一通過公平對照組的規律，全部標的一致成立"
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "帶得走的三句話",
+      "alt": "結論：距離是假議題、方向才有訊號、統計顯著不等於能下單",
+      "sources": ["k1681"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "距離是假議題，方向才有訊號",
+          "body": [
+            "有訊號的只有跌破均線那一邊。衝高離開均線那一邊，斜率不只小得多，方向還是離越遠、波動越低。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "統計顯著不等於能下單",
+          "body": [
+            "均線距離對次日波動的額外資訊偵測得到，但幅度小到扣掉交易成本什麼都不剩。",
+            "測未來一週的下行風險時，把它加進模型，樣本外誤差反而變大。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "看到技術指標的績效，先問對照組是誰",
+          "body": [
+            "任何用過去報酬拼出來的指標，都要跟已經包含那些報酬的對照組比。",
+            "否則你測到的永遠是槓桿效應，只是掛上了你自己指標的名字。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "跌破均線那半邊的訊號強度",
+          "value": {
+            "source": "k1681",
+            "path": "verdict.one_robust_regularity.smad_neg_t",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "absolute": true
+            }
+          },
+          "note": "衝高那半邊只有它的三分之一出頭"
+        }
+      ]
+    }
+  ]
+}

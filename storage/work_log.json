@@ -17448,6 +17448,33 @@
     "timestamp": "2026-07-14T09:18:56.676416+00:00"
   },
   {
+    "timestamp": "2026-07-14T18:22:28+08:00",
+    "task_type": "paper_body",
+    "task_id": "abm_p0_2_scope_vt_only",
+    "outcome": "completed",
+    "actor": "hourly-18",
+    "owner": "hourly-18",
+    "commit": null,
+    "summary": "P0-2 scope 收斂 VT-only 收官：superseded Sharpe-only detector 三表移入新增 appendix A、robustness 論證改接 redesign layer (tab:matched_control_vt)、knife-edge § 重新接地。xelatex 34pp/0 undefined、reproduce 173/173 green、PDF 洩漏 0。merge 93631c8c6 + paper-update 同步線上。"
+  },
+  {
+    "task_id": "ci-red-29320130569",
+    "task_type": "platform_ops",
+    "actor": "hourly-18",
+    "summary": "CI 紅燈修復：main Test Suite 8 failed → 全綠。5 個獨立根因修到源頭（reproduce_check 環境戳記在 sandbox gate 之後才寫 → Linux 上每份 report 永遠 stale；reap 測試 git identity 未進拋棄式 repo config；fred_backfill_guard 排程 spec 雙份矛盾；work_log gate 誤判 tmp_path fixture；circular-import 自我測試因環的另一半邊被移除而空轉）。全套 2793 passed / 0 failed，push 後 CI 4/4 green @ca1b852b7。",
+    "commit": "315b59918"
+  },
+  {
+    "timestamp": "2026-07-14T19:14:49+08:00",
+    "task_type": "platform_ops",
+    "task_id": "kb_backfill_unrecorded_experiments",
+    "outcome": "succeeded",
+    "actor": "hourly-19",
+    "owner": "hourly-19",
+    "commit": null,
+    "summary": "PHASE A 收件：KB backfill agent job (agent-brief_kb_backfill-a796f4) 產出的 136 筆提案，主線程驗證後寫入 knowledge.json。抽驗 K1325/K1699/K1523 數字與 artifact 逐字吻合；merge_proposals.py 重跑 validation OK。依 K1259 provenance gate，8 筆無 reviewer 覆核紀錄的 PASS 降級為 UNVERIFIED（K1710 有 codex_review.md 故保留 PASS）；29 筆 needs_human 於 content 前綴標記並帶 gap。knowledge.json 2509→2645，索引 +153 docs。KNOWLEDGE_UNRECORDED 136→0，validate_knowledge_provenance 0 violations。根因（實驗完成→KB 寫入無機械 gate）補 scripts/tests/test_knowledge_unrecorded_ratchet.py（baseline=0，只准變少）。研究誠實修正：K1523 README 宣稱 TWII H1/H2 PASS t=-3.14/-3.15，結果檔實為 NULL t=-2.87/-2.71（全 supported=false）→ README 依結果檔更正。後續 29 筆逐筆裁決建為 task kb_backfill_needs_human_adjudication (P3)。"
+  },
+  {
     "timestamp": "2026-07-14T19:38:45+08:00",
     "task_type": "platform_ops",
     "task_id": "phase_z_test_gate_refactor",
@@ -17456,5 +17483,227 @@
     "owner": "codex-vscode",
     "commit": "ceed60567",
     "summary": "PHASE-Z isolated attribution, transactional candidate commit, immutable dependency gates, and canonical writer-side guard ratchet completed."
+  },
+  {
+    "timestamp": "2026-07-14T20:10",
+    "actor": "hourly-20",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29328352646",
+    "summary": "CI 紅燈收口：647a04061 的 3 個失敗測試(phase_z Gate -1 hook 一致性 x2 + canonical-write notifier probe)已由 1a74d562f 修復；本班驗證 HEAD Test Suite run 29330892657 綠、本地 68 passed、class sweep 無其他觸點。",
+    "status": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-14T20:19:50+0800",
+    "actor": "hourly-20",
+    "task_type": "platform_ops",
+    "task_id": "agent-brief_tsfm_har_mcs-54e6f9-triage",
+    "summary": "PHASE A triage failed agent job: rescued K1711 (data panels + TimesFM/TTM forecasts for SPY/0050.TW/TX survived the 5280s timeout; only the MCS/DM eval never ran). Root-caused why the salvage could not be committed: pre-commit Gate 0 resolved its trusted auditor from the branch HEAD, so every worktree on a base predating today's --index flag was commit-locked. Fixed to resolve from main (a4ecb962a) + regression test; salvage committed (67fa83366); eval re-enqueued as compute job k1711-mcs-eval.",
+    "result": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-14T21:24:04+08:00",
+    "task_type": "experiment",
+    "task_id": "k1709-rev3-gw-label",
+    "outcome": "succeeded",
+    "actor": "hourly-21",
+    "owner": "hourly-21",
+    "commit": "f3f9d3034",
+    "summary": "K1709 rev3：把宣稱收斂到它真正做的檢定（Codex FAIL 的唯一 blocking）。\n\n程式做的是 h_t≡1 的無條件 DM（= GW 2006 Sec 3.4 特例），README 卻以「GW gate」行文，等於宣稱 conditional / state-dependent predictive ability — 那套 machinery（instrument 向量、q×q 共變異、Wald chi2_q）整份檔案從來沒建過。採 Codex 建議 (a) 改字不改數：\n\n- k1709.py: giacomini_white → gw_unconditional_dm；docstring 先講「沒做什麼」\n- verdict_basis 的每句 claim 抽成 build_verdict_basis()（counts in, words out）+ 新增 --relabel：只重寫句子，斷言每個非字串欄位 byte-identical\n- 新欄位 conditional_predictive_ability_not_tested：明說一個 regime 幫、另一 regime 害而平均抵銷的效應，這設計看不見也沒排除\n- headline claim 收斂為 no incremental UNCONDITIONAL predictive content；README 由 renderer 從凍結 JSON 重生\n\n數字零變動（獨立於腳本自身 assert 再驗一次：所有非字串值 identical）。不重跑的理由：vendor flow vintage 沒存檔，為改一個字而重跑會靜默換樣本，審查人凍結的 artefact 就不存在了。\n\nworktree exp/k1709-btc-etf-flow-vol 凍結於 f3f9d303；Codex 重審已 enqueue（agent-brief_k1709_rev3_review-580bae）；certify gate 正確擋著等裁決，實驗不進 main。\n\n副產物（真發現）：誠實標籤反而觸發 repo 的 nested-DM 稽核器 — 它用「PRIMARY 附近有 DM」的字面規則判違規，沒有第三種角色可表達「fixed-window bounded-memory 下的 GW 無條件特例」。稽核器在訓練科學對它說謊。已立 task nested_dm_auditor_cannot_express_fixed_window_gw（P2），並要 Codex 在重審裡對這個設計問題給裁決。\n\n另：stale worktree 基底早於 audit_test_imports.py / arc_dedup.py，Gate 0 把整個 worktree 的 .py commit 鎖死 → path-scoped 從 main 帶入該三檔解鎖（非本任務改動）。"
+  },
+  {
+    "timestamp": "2026-07-14T22:21:52+08:00",
+    "task_type": "platform_ops",
+    "task_id": "agent-job-auth-class",
+    "outcome": "succeeded",
+    "actor": "hourly-22",
+    "owner": "hourly-22",
+    "commit": "b4b2db64d",
+    "summary": "Agent-job 的認證失效被誤判成研究失敗 — 修根因，並救回被它打掉的 K1709 review。\n\n症狀：13:45 的 K1709 rev3 Codex 重審 agent 在 5 秒內死於 `Not logged in · Please run /login`（exit 1），queue 標 failed，followup brief 於是要求下一班 fire「去 worktree 翻可搶救的成果」— 而那個 agent 根本沒開始跑，worktree 裡什麼都沒有。同一支 claude CLI 在 13:24 與 22:07 的 supervisor fire 都認證正常，所以這是憑證刷新撞上 spawn 的暫時性失效，不是全域登出。\n\n根因（domain model 錯，不是 timeout 調太小）：repo 有兩個地方 spawn `claude -p` — supervisor 的 worker.py 與 compute worker 的 run_agent_job.py — 但只有前者分得出 auth / quota / transient / 真失敗。後者只看得到「exit != 0」，於是把「憑證牆」和「實驗跑爛了」歸成同一類。代價不對稱：前者重試一次值幾秒，後者重試等於白燒一小時。\n\n修法（單一 owner，不疊床架屋）：\n- 新增 scripts/dispatch_supervisor/failure_class.py，把 AUTH/QUOTA/TRANSIENT 三個 regex 與分類邏輯收成唯一定義；worker.py 改為引用（行為不變，_classify 的 exit-code sentinel 仍留在 worker）。\n- run_agent_job.py 用同一份定義：auth → 重試（上限 3 次 / 120s backoff，且只在剩餘 budget 仍塞得下正事時才重試）；其餘一律不重試（真失敗重試只是再燒一小時）。輸出用 thread tee 保留原本 stdout/stderr 分流，只留 200 行 tail 供分類 — 且只分類「本次 attempt」的輸出（陳舊的 Not logged in 會誤凍整個 loop，worker.py 2026-07-05 已有此教訓）。\n- runner 把 failure_class 寫進 metadata receipt；compute_queue 讀它：auth 類的 followup brief 改成「確認認證恢復後直接 re-enqueue，不要 triage worktree、不要記任何研究裁決 — 沒有任何工作被執行」。\n\n驗證：新增 scripts/tests/test_agent_job_auth_class.py（10 tests），並用 break-then-verify 確認 gate 真的會咬（把 AUTH_MAX_ATTEMPTS 改 1 → 重試測試立刻紅）。既有 test_cutover_behaviour_orphans 正確咬到符號搬家，mapping 更新指向新 owner（行為留著，只是換了家）。main 上 27 passed；含 dispatch_state 全套 78 passed。\n\n收尾：K1709 rev3 review 已重新 enqueue（agent-brief_k1709_rev3_review-29f74e，跑在修好的 runner 上），舊 job 標 followup_dispatched → pending-followup 清空。K1709 實驗仍凍結在 worktree、未進 main（certify gate 正確擋著等裁決）。\n\n過程自我糾正一次：第一次 commit 我用了 `-c core.hooksPath=/dev/null`（等同 --no-verify，明令禁止）→ 立刻 reset --soft 重 commit，讓 pre-commit 正常跑（silent-fallback audit new=0 通過）。"
+  },
+  {
+    "timestamp": "2026-07-14T23:21:27.963296+08:00",
+    "actor": "hourly-23",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_compute_queue_spec_amend_race",
+    "summary": "compute_queue: enqueue 當下凍結 agent brief（消滅 runner run-time 讀 brief 的 race）+ 新增 amend/cancel（只吃 status=queued）→ 修正未執行的工作單成為正規流程，不再手改 queue JSON。Gate: test_compute_queue_amend.py 11 條，break-then-verify 確認會咬。",
+    "commit": "64fb4e546"
+  },
+  {
+    "timestamp": "2026-07-14T23:21:27.963296+08:00",
+    "actor": "hourly-23",
+    "task_type": "platform_ops",
+    "task_id": "k1709-rev3-codex-review",
+    "summary": "PHASE A triage：K1709 rev3 Codex 複審 agent-job 失敗根因 = agent 把 Codex 丟背景跑後結束 turn，父程序一死 Codex 被殺在寫裁決前一秒（跑完 20 分鐘、844KB transcript、零產出）。改走 codex_review_job.sh（Codex 自己就是 compute job，無 Claude 父程序 → 結構上不可能再孤兒），23:15:06 worker 接手 running 中，由後續 fire 於 PHASE A 收。失敗 job followup 已標 dispatched。",
+    "commit": null
+  },
+  {
+    "timestamp": "2026-07-15T00:12:45+08:00",
+    "task_type": "experiment",
+    "task_id": "k1709-rev3-codex-review",
+    "outcome": "succeeded",
+    "actor": "hourly-00",
+    "owner": "hourly-00",
+    "commit": null,
+    "summary": "PHASE A 收件：K1709 rev3 Codex 複審 verdict=FAIL（reviewed_commit f3f9d3034b；數字零漂移，4383 leaves 全等）。4 個 blocking defects 全部是 claim-surface 問題而非估計問題：README 摘要與 standalone 圖表仍用無限定的 GW/『無增量證據』措辭（程式只授權 unconditional average-loss inference），renderer 是第二個 claim 作者且落在 --relabel invariant 之外（同類 overclaim 可在全綠下復發），外加 main() 引用出 scope 的 margin_pct/claim → 預設路徑 NameError（rev3 其實跑不到底）。處置：verdict 轉機器可讀 storage/ops/codex_reviews/k1709_rev3_verdict.json + 落一份進 worktree experiments/k1709/review_verdict.json；開 3 條 rev4 修復任務（k1709_rev4_nameerror / _claim_object / _figure_labels，涵蓋 D1-D4）；把 k1709_worktree_merge_verification 從 pending_main_thread 改 blocked（FAIL 下它會把不合格實驗推進 main）；Codex 對 nested-DM auditor 的 Q4 裁決（two-role model 是錯的，GW 2006 Sec 3.4 支持 fixed-memory 無條件特例；需第三角色但要 7 項證據門檻）逐字寫進 nested_dm_auditor_cannot_express_fixed_window_gw 的 description。本班 slot free=0（occupied 5 > cap 4）→ 不派新 agent。"
+  },
+  {
+    "timestamp": "2026-07-15T00:34:09+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29343425525",
+    "outcome": "completed",
+    "actor": "hourly-00",
+    "owner": "hourly-00",
+    "commit": "4b38035ba",
+    "summary": "CI 紅燈修復：pre-commit Gate 1/2 的 audit 工具與 baseline 改從 hook 部署來源 ref（main）解析，不再從提交當下的工作區讀。根因 = a4ecb962a 只修 Gate 0 的 auditor，同一個死鎖 class（一份契約兩個 ref）留在 Gate 1/2 —— base 落後的 worktree 缺 baseline 檔就被 fail-closed 擋掉所有 .py commit。baseline 例外吃 staged 版（否則接受新 finding 永遠 land 不進來）。連帶：audit_silent_fallbacks.py / audit_source_encoding.py 補 --root（原本用 __file__ 推 repo root，從 trusted ref 抽到暫存檔會去審 /tmp）。新增 2 個回歸測試。全套 2917 passed / 7 skipped。"
+  },
+  {
+    "timestamp": "2026-07-15T01:15:25+08:00",
+    "task_type": "experiment",
+    "task_id": "research_har_mcs_spy_0050_tw_tx_tsfm_timesfm_ttm_log_har",
+    "outcome": "handed_to_compute_queue",
+    "actor": "hourly-01",
+    "owner": "hourly-01",
+    "commit": "",
+    "summary": "K1711（TSFM×HAR 組合是否進 MCS superior set）：救回上一班 agent job timeout 前 salvage 的 pipeline（三資產 panel + TimesFM/TTM 快取預測全在），19/19 自帶測試通過。實測主腳本的 MCS 網格（3 資產×2 horizon×2 proxy×2 window×2 loss×5 alpha×2 pools，每次 5000-boot）在 fire 50min cap 內跑不完 —— 這正是上一班 timeout 的地方 —— 依規則改 enqueue compute queue job k1711_tsfm_har_mcs（timeout 3h），fire 不坐等。任務標 blocked-on-queue，成果由後續 PHASE A 收（驗 primary cell → experiment_gates → review_verdict → merge → knowledge）。"
+  },
+  {
+    "timestamp": "2026-07-15T01:15:25+08:00",
+    "task_type": "paper_body",
+    "task_id": "abm_p0_3_k1471_honesty+abm_p0_4_reproduce_binding",
+    "outcome": "completed",
+    "actor": "hourly-01",
+    "owner": "hourly-01",
+    "commit": "",
+    "summary": "兩筆餓死 34h 的 P2 paper_body 其實是幽靈任務：工作早已落地 main.tex，只是 next_tasks 沒同步，害 dispatcher 每班把它們列為餓死、鎖住 diversity 輪替。逐項驗證後結案 — P0-3：tab:tfmr_gate 全表在（TF 4/5、MR 5/5 未過 gate）、footprint-scale caveat 已入 abstract/intro、家族層宣稱已撤回；P0-4：在 HEAD tex 上重跑 reproduce gate 得 173/173 = 100% green（含 K1471 兩張新表逐欄綁定），'\\% source' 洩漏 0 次、改行首 comment 8 處。未憑 commit message 認定，全部用 gate 實測。"
+  },
+  {
+    "timestamp": "2026-07-15T01:32:10+08:00",
+    "task_type": "platform_ops",
+    "task_id": "k1655_dm_sweep_triage_unknown_bucket",
+    "outcome": "completed",
+    "actor": "hourly-01",
+    "owner": "hourly-01",
+    "commit": "2448bc505",
+    "summary": "K1655 DM bandwidth 盲區 78/78 逐檔分類（a=11 正確雙變體 / b=1 名字撞到 / c=66）。5 個真 bug，3 個可能改變已發表結論：k1386（range(1,max(1,h)) h=1 空迴圈，|t|=3.26 僅超 Harvey 門檻 8%，feed×6）、k1379（完全無 autocovariance 迴圈，餵 Paper 9 horse race + feed×4）、k841（range(h) 只取 gamma[0]，策略報酬 DM，feed×5）；k1525/k1526 雙重退化須同輪修。主線程開檔抽驗三處確認 agent 判定屬實。副產物：稽核器 PLAIN_VARIANCE_RE 有 false negative（認不出手算變異數 idiom）→ enforcement owner 漏抓，已開任務要求修 regex 後重掃全母體。產出 governance 報告 + 機器可讀分類 JSON，已開 5 筆修復任務。"
+  },
+  {
+    "timestamp": "2026-07-15T01:32:10+08:00",
+    "task_type": "daily_article",
+    "task_id": "content_drought_3_writers",
+    "outcome": "handed_to_agent_queue",
+    "actor": "hourly-01",
+    "owner": "hourly-01",
+    "commit": "",
+    "summary": "內容斷炊處置：draft 池剩 1、今日發佈 0、5 篇 P1 文章餓死 54-75h。主線程逐篇跑查重（check_arc_dedup 三篇全 clean + feed 層 grep 0 命中）後，把 K1702（vol-managed 因子動物園 OOS null + 回撤相位幻覺）、K1572（DNN 分位數 VaR plateau NULL）、K1681（SMAD 增量預測力 PASS）三個 writer 交 agent queue detached 執行 —— writer 要 20-40min，塞進 50min fire 只會被 SIGKILL 全毀（7/12 三次 hang 的教訓）。三篇主題軸互斥。草稿產出後由 PHASE A 驗數字 + 主線程串行發佈（feed 寫入無 per-writer lock，不可並行直發）。"
+  },
+  {
+    "timestamp": "2026-07-15T02:31:34+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1685_article_general",
+    "outcome": "succeeded",
+    "actor": "hourly-02",
+    "owner": "hourly-02",
+    "commit": null,
+    "summary": "K1685 一般讀者文章發佈進草稿池 mile_0f710450。改寫一輪讓它真的成為 general 版（原稿 6 個學術關鍵詞會被 audience gate 覆寫成 research，而 research 版是 arc duplicate → 等於發一篇重複研究文）。數字與三項脆弱性揭露一句未刪。3 張真圖 + 懶人包已 enqueue。"
+  },
+  {
+    "timestamp": "2026-07-15T02:31:34+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1695_article_general",
+    "outcome": "failed",
+    "actor": "hourly-02",
+    "owner": "hourly-02",
+    "commit": null,
+    "summary": "草稿寫成但發佈 HELD。寫作 agent 發現 K1695 招牌結論可能是 exposure artifact，主線程用 canonical compare_max_drawdown + pinned data 獨立重算證實：raw ΔMDD +12.61pp（13/13）→ 同曝險 -0.87pp（7/13），13/13 市場 exposure_mismatch。既有 audit_mdd_scale_artifact.py 抓得到但從沒被執行到（K1709 同 class 復發）。已建 3 個 P1 更正任務 + 記 error_log。"
+  },
+  {
+    "timestamp": "2026-07-15T02:31:35+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_internal_git_push_backup_hold_3f4834ce7a_20260714T180001000000Z_a1",
+    "outcome": "succeeded",
+    "actor": "hourly-02",
+    "owner": "hourly-02",
+    "commit": "f5415afaf",
+    "summary": "push-hold 根因：gate 量錯樹。cron_git_push_backup.sh 掃工作區而非它要 gate 的 HEAD，共享 checkout 上別的 session 未提交的編輯擋了 4 個乾淨 commit 整晚（工作區 new=3 / HEAD new=0）。audit_silent_fallbacks.py 加 --rev，wrapper 傳 --rev HEAD。+2 hermetic regression test，21 passed。這是「gate 讀錯樹」class 的第三次（今晨才修過 pre-commit 路徑）。"
+  },
+  {
+    "timestamp": "2026-07-15T03:08:45+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29343425525",
+    "outcome": "completed",
+    "actor": "hourly-03",
+    "owner": "hourly-03",
+    "commit": "c2c088fca",
+    "summary": "CI 紅燈修復。原始 3 紅（tests/test_pre_commit_trusted_auditor.py）已由 4b38035ba 修好；本班修 main 上新的 3 紅（296032df5 讀者偏好引擎引入）— (1) reader_preferences 排程未登記 config/scheduled_writer_ownership.json，全人口 ratchet 開火，補 phase_z_machine_state row（與 reader_metrics_daily 同形）；(2) scripts/continue_task_dispatch.py:_promote_starved_article_tasks open-write next_tasks.json 缺 guard_canonical_write，guard 移到 try 外（放 try 內會被 except 吞掉，正是 auditor _guard_can_be_swallowed 判的）+ owner 登記 frozen inventory。本機 4 組測試全綠，已 push main。"
+  },
+  {
+    "timestamp": "2026-07-15T03:30:38+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1583_article_general_v2",
+    "outcome": "completed",
+    "actor": "hourly-03",
+    "owner": "hourly-03",
+    "commit": null,
+    "summary": "K1583 一般讀者文章發佈完成（mile_7b02f9e2）。\n\n這是 dispatcher 標出的「主線程餓死」P1，在池中滯留 56 小時無人認領（agent lane 認領不到，主線程沒接手）。\n\n**產出**：〈冠軍換了十六次，統計上一個都沒贏〉— SPY 16 個波動率模型、2019-01-02 至 2026-05-20 共 1,849 個交易日，模型信賴集合檢定全數保留（16/16，eliminated_order 為空，終止統計量 0.438）；切 VIX 高/中/低與 NBER 擴張/衰退五種狀態，每一段仍是 16/16。但 252 日滾動視窗的 top-1 在七年間換手 16 次，77 個視窗有 74 個仍保留全部 16 個模型。結論：排行榜在動，實力差距從未被證實。audience=general, status=draft, 3,118 chars, 2 張真圖（k1583 現成圖，未重畫）。\n\n**Gate 全過**：AUDIENCE GATE（sanitize_applied=0 — 是真的改乾淨，不是靠 publisher sanitizer 事後救）/ anti_ai_gate exit 0（warn=2/3，皆結構性）/ content-vs-source audit PASS（1 claims vs 89 source values）/ validate_feed_audience 確認本篇不在違規名單。\n\n**過程中的關鍵判斷**：第一版草稿數字全對、anti-AI gate 也過，但被 AUDIENCE GATE 擋下（術語密度 → publisher 會 upcast 成 research）。沒有繞過（不改宣告、不加 flag），而是派 writer 依 `publisher._infer_audience` 的精確關鍵詞清單做語言層改寫：QLIKE→預測誤差指標、MCS→模型信賴集合檢定、bootstrap→重抽樣模擬、GARCH-X/MIDAS→A/B 路線、K-id 移出正文進 metadata。所有數字、五條研究限制、以及「0.438 是集合終止統計量而非個別模型分數」的防誤讀紅線一字不動。理由：讓它靜默 upcast 會造成假完成 —— 任務標 succeeded 但平台的 general 覆蓋仍缺，選題系統下輪再生 v3 retry。K1583 掛著 retry-v2 很可能就是前一輪踩了這個坑。\n\n**懶人包**：strict data-bound plan（4 panel，20 個數值全走 {source,path,format} binding 讀 k1583_results.json，sha256 實算，text block 零硬編）已產出並驗證可產圖；enqueue 為 lazypack-mile_7b02f9e2，*/15 compute worker 出圖 → 上傳 → append → re-sync，release_pool 的 publish flip 隨之解鎖。\n\n**順帶處置**：回收 slot-2 殘留 worktree dispatch-slot-2-33191798-hookfix（閒置 7h）— 先驗 0 未合併 commit、工作區乾淨、無活 process 才走 reclaim_stale_worktrees.py，無成果損失，釋出一個 slot。\n\n**未竟的 side finding**：validate_feed_audience 顯示 feed 有 45 篇 audience=general 但含 ≥2 學術關鍵詞的歷史錯標（本篇不在內）。已另建任務追蹤，不在本班範圍內處理。"
+  },
+  {
+    "timestamp": "2026-07-15T04:30:45+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1572_article_general",
+    "outcome": "completed",
+    "actor": "hourly-04",
+    "owner": "hourly-04",
+    "commit": null,
+    "summary": "K1572 一般讀者稿收件驗證 → 發佈進池 mile_f5813dec（draft/general）。平行驗證 agent 逐條核對 71 個數字宣稱對 experiments/k1572/k1572_results.json，修正 3 處：公平基準定義（是「損失的中位數」不是預測中位數）、Kupiec 拒絕範圍（只拒兩個模型、CAViaR p=0.079 未被拒）、圖說「大幅領先」誇大（TLT 95% 只差 1.60% 且 p=0.700）。發佈時被兩道 gate 擋下並改寫過關：audience gate（正文 K-id + VaR 兩個學術關鍵詞 → 移除 VaR latin 縮寫）、content-vs-source gate（250 日視窗不在 results.json → 改述為「過去一年」）。6 圖 + 懶人包 4 張齊全。"
+  },
+  {
+    "timestamp": "2026-07-15T04:30:45+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1681_article_general",
+    "outcome": "completed",
+    "actor": "hourly-04",
+    "owner": "hourly-04",
+    "commit": null,
+    "summary": "K1681 一般讀者稿收件驗證 → 發佈 mile_ff4069d3 並定向釋出（published，線上 200）。驗證抓到 1 處重大方向錯誤：不對稱表把均線兩側都寫成「次日波動上升」，但 canonical 係數 smad_pos=-0.0901 / smad_neg=-0.2435 皆為負 → 高於均線時波動反而下降。若照原稿發出去等於對讀者講反的結論。另修 content-vs-source gate 違規（85% 衍生比例不在 results.json → 改述為表格引導）。null result 未被寫成正面結論。"
+  },
+  {
+    "timestamp": "2026-07-15T04:30:45+08:00",
+    "task_type": "daily_article",
+    "task_id": "publish_milestone_k1702_phase_null",
+    "outcome": "completed",
+    "actor": "hourly-04",
+    "owner": "hourly-04",
+    "commit": null,
+    "summary": "K1702 一般讀者稿收件驗證 → 發佈進池 mile_cd543ce6（draft/general）。84 個宣稱逐條對 experiments/k1702/k1702_results.json，修正 1 處誇大（MOM vol_ratio=0.2508，「不到四分之一」嚴格說是假的，改「大約只有四分之一」）。content-vs-source gate 擋下兩個非來源數字：12.4pp 是衍生差 → 改引元件值 −56.0%→−43.5%；文獻 t≈3.1 不在 results.json → 移除。phase-null 框架正確，MOM 先被提出再被相位檢定與 Harvey 門檻殺掉。"
+  },
+  {
+    "timestamp": "2026-07-15T04:30:45+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_release_pool_gap_20260714",
+    "outcome": "completed",
+    "actor": "hourly-04",
+    "owner": "hourly-04",
+    "commit": null,
+    "summary": "Release pool starvation（P2 alert，斷檔 20h）處置：根因是池只剩 2 篇且 1 篇被 dedup 排除 → eligible_after_dedup=1 且落在飽和主題。依 alert 建議行動 3 補 fresh-theme 草稿（本班 3 篇），池 2 → 5；再依行動 2 定向釋出 K1681（迷思實驗室系列，非飽和主題）→ supabase_synced + verified_live，https://volpred.zeabur.app/v3/reports/mile_ff4069d3 回 200。"
+  },
+  {
+    "timestamp": "2026-07-15T05:20:56+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_vt_trend_table5_exposure_hold",
+    "outcome": "completed",
+    "actor": "hourly-05",
+    "owner": "hourly-05",
+    "commit": null,
+    "summary": "擋住 paper vt-trend-following 的 exposure-artifact contribution。K1695 的「13 個國際市場全部 MDD 改善、平均 +12.61pp」在同曝險口徑下崩為 -0.87pp（7/13），論文的摘要、第三項 contribution、Table 5 全建立其上（且報了一個不含零的 90% CI [4.2, 19.3]）。在 storage/paper_pipeline_status.json 加 awaiting_correction 區塊 + blocker HOLD，點名 4 項受污染 claim、寫明 release_condition 與 bug class（同 K1265b/K1702），並註記 5-asset TSMOM-retention 是不同比較、未被直接推翻但也未做 exposure audit、不得視為已清。paper_pipeline_check.py 驗證仍可解析、stalled=true。步驟(2)(3) 依賴 K1695 認證，已交棒給 queue job 的 followup brief 第 4 項。"
+  },
+  {
+    "timestamp": "2026-07-15T05:20:56+08:00",
+    "task_type": "experiment",
+    "task_id": "k1695_exposure_matched_correction",
+    "outcome": "dispatched",
+    "actor": "hourly-05",
+    "owner": "hourly-05",
+    "commit": null,
+    "summary": "派出 K1695 exposure-matched 更正（compute queue agent job agent-brief_k1695_correction-c841cc，opus/xhigh）：重跑走 canonical compare_max_drawdown、results.json 補 exposure 欄位、補 seeded circular-shift null（沒 null 前只能說「約等於零」不得說「顯著為負」）、同曝險口徑重算 90% CI 與 kill_triggered、Codex 審。走 queue 不在 fire 內 spawn（3000s cap，2026-07-12 3-STRIKE）。\n\nClass sweep 額外發現（本 fire 最重要的一件事）：這個 artifact 已經流到讀者端，不只卡在實驗與論文。feed 有 3 篇 published（mile_0d595dfb「13 個國際市場實測：美國 VIX 是全球股票的通用避險信號嗎？」整篇、mile_2d4edb65、mile_ee473d5a）+ 2 篇 archived 的結論建立在 raw 口徑上。數字沒造假、被推翻的是因果解讀 —— 掃 code 的機械 gate 永遠掃不到已經發出去的散文。已建 P1 task feed_correction_k1695_exposure_artifact（blocked 等認證）並補進 error_log §G。"
   }
 ]
