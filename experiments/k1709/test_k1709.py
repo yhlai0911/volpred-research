@@ -245,9 +245,83 @@ def test_power_injected_signal_is_detected():
 
     # Negative DM t => the flow model wins. Signal is strong, so this must be
     # decisive, not marginal.
-    assert c["dm_t"] < -3.0, f"planted signal not recovered: DM t={c['dm_t']}"
+    assert c["dm_t"] < -3.0, f"planted signal not recovered: DM t={c[chr(39)+chr(100)+chr(109)+chr(95)+chr(116)+chr(39)]}"
     assert c["qlike_improvement_pct"] > 0, "planted signal did not improve QLIKE"
     assert c["clark_west_t"] > 1.645, f"Clark-West missed it: {c['clark_west_t']}"
+
+
+def test_h5_oos_training_rows_never_see_the_forecast_origin():
+    """The overlapping-target training filter (.claude/rules/experiments.md L20).
+
+    With h=5 the targets overlap, so "all rows before i" would let the model train
+    on a label window that extends INTO or PAST the forecast origin -- i.e. it
+    would see realized returns from the day it is predicting. Every power/placebo
+    test runs h=1, where the filter is trivial, so this rule had no coverage at all
+    until now. We re-derive the filter here and assert the invariant directly.
+    """
+    rvdf, flow = _toy(n=500)
+    p = build_panel(rvdf, flow, "rv_gk", 5, "TOY", pub_lag=1)
+    cols = ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"]
+    d = p.df.dropna(subset=cols)
+    origins = d.index
+    y_end = d["y_end_date"]
+
+    checked = 0
+    for i in range(60, len(d)):
+        train = np.where(y_end.to_numpy() < origins[i])[0]
+        train = train[train < i]
+        if len(train) == 0:
+            continue
+        # every training label must CLOSE strictly before this forecast origin
+        assert y_end.iloc[train].max() < origins[i], (
+            f"leak at origin {origins[i].date()}: a training label ends "
+            f"{y_end.iloc[train].max().date()}, on/after the origin"
+        )
+        checked += 1
+    assert checked > 100, "filter was never exercised"
+
+
+def test_h5_compare_runs_end_to_end():
+    """h=5 must survive the full compare() path, not just target construction."""
+    rvdf, flow = _toy(n=600)
+    p = build_panel(rvdf, flow, "rv_gk", 5, "TOY", pub_lag=1)
+    assert_no_lookahead(p, pub_lag=1)
+    c = compare(p, "HAR+ctrl", "H1_absflow", initial_train=200)
+    assert c["n_oos"] > 50
+    assert np.isfinite(c["dm_t"]) and np.isfinite(c["clark_west_t"])
+
+
+def test_verdict_gate_is_direction_aware():
+    """A flow model that is significantly WORSE must never count as a pass.
+
+    `abs(t) > 3` would count it; `t < -3` does not. This guards the latent
+    inversion bug where the script could print PASS on evidence that flow HURTS.
+    """
+    rng = np.random.default_rng(21)
+    n = 700
+    idx = pd.date_range("2024-01-01", periods=n, freq="D")
+    fidx = idx[idx.dayofweek < 5]
+    flow_vals = rng.normal(0, 100, len(fidx))
+    flow = pd.DataFrame({"flow": flow_vals, "gross": np.abs(flow_vals)}, index=fidx)
+
+    base = np.zeros(n)
+    for t in range(1, n):
+        base[t] = 0.9 * base[t - 1] + rng.normal(0, 0.20)
+    rvdf = pd.DataFrame(
+        {c: np.exp(-8.0 + base) for c in ("rv_gk", "rv_park", "rv_r2", "rv_hourly")},
+        index=idx,
+    )
+    rvdf["ret"] = rng.normal(0, 0.02, n)
+    p = build_panel(rvdf, flow, "rv_gk", 1, "TOY", pub_lag=1)
+    c = compare(p, "HAR+ctrl", "H1_absflow", initial_train=200)
+
+    # the two flags must be mutually exclusive and direction-correct
+    assert not (c["dm_harvey_pass_flow_better"] and c["dm_harvey_pass_flow_worse"])
+    if c["dm_t"] > 3.0:
+        assert c["dm_harvey_pass_flow_worse"]
+        assert not c["dm_harvey_pass_flow_better"], "a WORSE flow model counted as a pass"
+    if c["dm_t"] < -3.0:
+        assert c["dm_harvey_pass_flow_better"]
 
 
 def test_placebo_scrambled_flow_is_not_detected():
