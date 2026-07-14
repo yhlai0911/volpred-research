@@ -1,0 +1,34 @@
+{
+  "id": "k1709-rev3-codex-review",
+  "title": "K1709 rev3 Codex re-review (codex-as-job; no Claude parent)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1709_rev3_prompt.md",
+    "storage/ops/codex_reviews/k1709_rev3_verdict.md",
+    "3000"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-14T15:11:05Z",
+  "started_at": "2026-07-14T15:15:06Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1709-rev3-codex-review.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1709-rev3-codex-review.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1709_rev3_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1709_rev3_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1709 rev3 verdict 收件：讀 storage/ops/codex_reviews/k1709_rev3_verdict.md。(1) 逐條核 Codex 對 5 問的裁決，特別是 Q5 renderer 散文漏網（README \"Does say\" 第一條缺 UNCONDITIONAL 限定詞，來自 render_readme.py else-branch 寫死散文，--relabel 不變量掃不到）。(2) 把 verdict JSON block 逐字轉寫進 worktree 的 experiments/k1709/review_verdict.json（主線程落檔，reviewer 無寫權）。(3) PASS → 從 main checkout 跑 experiment_gates.py certify → path-scoped 抽取 experiments/k1709/ 進 main → 主線程寫 knowledge.json（verdict=INCONCLUSIVE_NO_EXACT_NULL_CLAIM；誠實記錄 0/10 gate pass、5/10 排除 1% margin；不美化）→ k1709-redo 標 succeeded。(4) FAIL → 每個 blocking defect 開一條 fix task，實驗留在 worktree 不得進 main。(5) Q4 ratchet 裁決另開 task 給 nested_dm_auditor_cannot_express_fixed_window_gw（已在池中 P2）。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3300
+}

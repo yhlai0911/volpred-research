@@ -28293,7 +28293,7 @@
     "title": "研究 backlog fallback: 時序基礎模型 × HAR 的預測組合誠實檢定（問組合是否進 MCS，不是問誰贏）— 對 SPY/0050.TW/TX，把免費開源 TSFM（TimesFM/TTM 權重）與 Log-HAR 做 equal-weight 與 bias-corrected 組合，用 MCS + DM-HLN 檢定組合是否穩定進 superior set；免費開源模型 + yfinance/TAIFEX（來源：2025-26 TSFM vs 計量 benchmark + corrected forecast combinations 熱潮）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 時序基礎模型 × HAR 的預測組合誠實檢定（問組合是否進 MCS，不是問誰贏）— 對 SPY/0050.TW/TX，把免費開源 TSFM（TimesFM/TTM 權重）與 Log-HAR 做 equal-weight 與 bias-corrected 組合，用 MCS + DM-HLN 檢定組合是否穩定進 superior set；免費開源模型 + yfinance/TAIFEX（來源：2025-26 TSFM vs 計量 benchmark + corrected forecast combinations 熱潮）。差異化：庫內 ML ceiling 9 次確認 → 定位為 forecas | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -28358,16 +28358,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-20"
+      },
+      {
+        "ts": "2026-07-14T14:50:03.521146+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-20",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-14T12:18:32.413374+00:00",
     "completed_at": "2026-07-08T19:42:11.902789+00:00",
     "result": "Created diagnostic experiment + HAR/EWMA/MCS harness for SPY, 0050.TW, TAIFEX_TX. Primary TimesFM/TTM evaluation blocked: TimesFM weights not cached after >150s smoke test; TTM dry-run would downgrade project scikit-learn. Results explicitly BLOCKED, no fake TSFM forecasts.",
-    "last_released_at": "2026-07-14T11:50:00.474770+00:00",
-    "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "hourly-20",
-    "claimed_at": "2026-07-14T12:18:32.182527+00:00",
-    "claim_session_id": "e315a2c1929c"
+    "last_released_at": "2026-07-14T14:50:03.521138+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "trending_repost_2026_07_08_ai估值",
@@ -29946,66 +29950,15 @@
   },
   {
     "id": "research_smad_vol_left_tail_predictor",
-    "title": "研究 backlog fallback: 短期移動平均距離（SMAD）作為 vol / left-tail predictor",
-    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 短期移動平均距離（SMAD）作為 vol / left-tail predictor — 用 yfinance 美股/ETF universe 的 close 與 10d moving-average distance 建 salience gap，目標改成 next-day range RV、downside semivariance、left-tail hit rate，而非原始報酬；所有 SMAD signal `shift(1)`，用 FDR/Harvey gate 檢查是否只是技術分析資料探勘。與既有 MA/TF 策略賽馬正交——這裡不交易均線，而是測均線距離是否預示波動/左尾（來源 | 來源 section: 期刊主題挖掘 batch 2026-07-05（journal_discovery_20260705_0；websearch fed/feds/imf gfsr/faj/cfa/ssrn 2025-26 趨勢層級；task pool json 修復後派 fresh-context general-purpose agent；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "experiment",
-    "dispatch_lane": "agent",
+    "title": "研究 backlog fallback: 短期移動平均距離（SMAD）作為 vol / left-tail predictor",
+    "priority": 3,
     "source": "auto_research_fallback",
-    "research_slug": "smad_vol_left_tail_predictor",
-    "tags": [
-      "auto-research-fallback",
-      "research-program-backlog"
-    ],
     "created_at": "2026-07-11T00:36:11+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-11T06:10:00.250108+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-14"
-      },
-      {
-        "ts": "2026-07-11T06:10:00.532311+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-14"
-      },
-      {
-        "ts": "2026-07-11T08:50:01.624938+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-14",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-11T14:13:39.624274+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-22"
-      },
-      {
-        "ts": "2026-07-11T14:13:39.886357+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-22"
-      },
-      {
-        "ts": "2026-07-11T14:33:28.288614+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-22"
-      }
-    ],
-    "started_at": "2026-07-11T14:13:39.886342+00:00",
-    "last_released_at": "2026-07-11T08:50:01.624929+00:00",
-    "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "hourly-22",
-    "claimed_at": "2026-07-11T14:13:39.624260+00:00",
-    "claim_session_id": "9fff280841a0",
     "completed_at": "2026-07-11T14:33:28.288601+00:00",
-    "result": "K1681 完成：SMAD 對次日 RV / 下行半變異數 / 左尾均無可用預測力（NULL）。span baseline 顯示 85% 表面預測力是槓桿效應回收。Codex review 撞出巢狀模型誤用 raw DM，Clark-West 後統計腿翻面（t=+6.71），NULL 改由經濟顯著性 0.54% 單獨承擔。knowledge 9c74b106；follow-up: k1681_clark_west_nested_dm_rerun + nested_dm_misuse_class_sweep"
+    "tombstone": true,
+    "archived_at": "2026-07-14T15:07:24.195757+00:00"
   },
   {
     "id": "research_private_market_rv_correlation_regime",
@@ -30357,39 +30310,15 @@
   },
   {
     "id": "k1655_dm_sweep_rerun_article_bound",
-    "title": "DM HAC class sweep P2：重跑有 knowledge 宣稱的暴露實驗（95 個，分批）",
-    "description": "來源：docs/governance/2026-07/dm_hac_lag_class_sweep.md。130 個結構性暴露站點中 95 個有 knowledge.json 記錄（活的下游宣稱）。分批處理，每批 ≤5 個，優先挑 DM 顯著性是「頭條結論」的（非 diagnostic-only）。每個站點：量 acf(1) → 若自相關顯著則改用 canonical dm_test 重跑 → 結論有變就回溯更正 knowledge/文章 → 從 baseline 移除。清單見 storage/ops/dm_hac_lag_audit.json。重要：這是 exposure 不是 confirmed bug，多數可能不受影響 — 如實報告，不可為了「有產出」而誇大。",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "DM HAC class sweep P2：重跑有 knowledge 宣稱的暴露實驗（95 個，分批）",
+    "priority": 2,
     "source": "agent_discovered",
     "created_at": "2026-07-11T18:16:10.820886+08:00",
-    "status_history": [
-      {
-        "ts": "2026-07-11T13:47:56.405213+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-11T13:48:12.306053+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-11T14:43:36.821892+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-11T13:47:56.405191+00:00",
-    "claim_session_id": "d601b0cf5718",
-    "started_at": "2026-07-11T13:48:12.306038+00:00",
     "completed_at": "2026-07-11T14:43:36.821876+00:00",
-    "result": "Batch 1 完成 K1402/K1403/K1404：五資產 canonical HAC DM |t| 仍全數 >3，headline verdict 不變；三篇既有文章已原地更正並 feed-sync，knowledge=a4a9eacc。剩餘 class sweep 已原子排入 batch 2（K486/K565/K432/K969/K1422）。"
+    "tombstone": true,
+    "archived_at": "2026-07-14T15:07:24.195757+00:00"
   },
   {
     "id": "k1655_dm_sweep_triage_unknown_bucket",
@@ -36779,10 +36708,33 @@
     "title": "compute_queue: queued job 的 spec 無法修正 + brief-file 是 run-time 讀 → enqueue 後改 brief 是 race",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-15",
     "created_at": "2026-07-14T07:18:41.893250+00:00",
-    "description": "2026-07-14 15:15 實例：我 enqueue 了 k1709_rev2_codex_verdict，隨即發現 brief 裡的 verdict schema 與 merge gate（experiment_gates.py）對不上。想修時發現兩個缺口：\n\n(1) **queued job 的 spec 改不了**：`enqueue` 對重複 id 直接 exit 2（compute_queue.py:313），且沒有 `cancel` / `update-followup` 子指令 → 一個還沒跑的 job，它的 followup_brief 只能手改 JSON（違反「不手動改控制面」）或放著爛。\n(2) **brief-file 是 run-time 讀**（run_agent_job.py:125），不是 enqueue 時 snapshot → 「enqueue 後修 brief」看似安全，其實是跟 worker（*/15）的 race。我這次晚了 48 秒，agent 讀到舊 brief，產出的 verdict 檔注定過不了 gate。\n\n修法方向（擇一或並用，收編進既有 owner，勿另加一層）：\n- `enqueue-agent` 時把 brief **複製進 job 記錄或 storage/ops/agent_briefs/<job_id>.md**，runner 讀那份 snapshot → spec 在 enqueue 當下就凍結，消滅 race（也順便解掉 brief 放 /tmp 可能被清掉的脆弱性）。\n- 加 `compute_queue.py cancel --id <id>`（僅限 status=queued）+ `update-followup --id <id>`，兩者都對 job 檔上 flock 並斷言 status=queued，讓「未執行的 spec 可修正」成為正規流程而非手改 JSON。"
+    "description": "2026-07-14 15:15 實例：我 enqueue 了 k1709_rev2_codex_verdict，隨即發現 brief 裡的 verdict schema 與 merge gate（experiment_gates.py）對不上。想修時發現兩個缺口：\n\n(1) **queued job 的 spec 改不了**：`enqueue` 對重複 id 直接 exit 2（compute_queue.py:313），且沒有 `cancel` / `update-followup` 子指令 → 一個還沒跑的 job，它的 followup_brief 只能手改 JSON（違反「不手動改控制面」）或放著爛。\n(2) **brief-file 是 run-time 讀**（run_agent_job.py:125），不是 enqueue 時 snapshot → 「enqueue 後修 brief」看似安全，其實是跟 worker（*/15）的 race。我這次晚了 48 秒，agent 讀到舊 brief，產出的 verdict 檔注定過不了 gate。\n\n修法方向（擇一或並用，收編進既有 owner，勿另加一層）：\n- `enqueue-agent` 時把 brief **複製進 job 記錄或 storage/ops/agent_briefs/<job_id>.md**，runner 讀那份 snapshot → spec 在 enqueue 當下就凍結，消滅 race（也順便解掉 brief 放 /tmp 可能被清掉的脆弱性）。\n- 加 `compute_queue.py cancel --id <id>`（僅限 status=queued）+ `update-followup --id <id>`，兩者都對 job 檔上 flock 並斷言 status=queued，讓「未執行的 spec 可修正」成為正規流程而非手改 JSON。",
+    "status_history": [
+      {
+        "ts": "2026-07-14T15:13:22.796659+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-14T15:13:23.028417+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-14T15:21:16.626560+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-23"
+      }
+    ],
+    "started_at": "2026-07-14T15:13:23.028401+00:00",
+    "completed_at": "2026-07-14T15:21:16.626544+00:00",
+    "result": "enqueue-agent 在入列當下把 brief 凍結成 storage/ops/agent_briefs/<job_id>.md（runner 讀快照，消滅 run-time 讀 brief 的 race）；新增 compute_queue.py amend/cancel（receipt lock + 只吃 status=queued，拒絕時大聲說原因）→ 「修正未執行的工作單」成為正規流程，不再需要手改 queue JSON。Gate: scripts/tests/test_compute_queue_amend.py 11 條 hermetic 測試，break-then-verify 確認會咬（拿掉凍結 → 3 紅）。線上驗證：對 running 的 k1709-rev3-codex-review job amend → 正確拒絕。commit 64fb4e546"
   },
   {
     "id": "k1709_worktree_merge_verification",
@@ -37271,13 +37223,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-14T14:00:03+00:00",
+    "completed_at": "2026-07-14T15:00:50.937108+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T14:00:03+00:00",
-      "last_clean_observed_at": "2026-07-14T14:00:03+00:00"
+      "resolved_at": "2026-07-14T15:00:50.937108+00:00",
+      "last_clean_observed_at": "2026-07-14T15:00:50.937108+00:00"
     }
   },
   {
@@ -37289,13 +37241,31 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-14T14:23:36.415828+00:00",
+    "completed_at": "2026-07-14T15:23:38.566241+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T14:23:36.415828+00:00",
-      "last_clean_observed_at": "2026-07-14T14:23:36.415828+00:00"
+      "resolved_at": "2026-07-14T15:23:38.566241+00:00",
+      "last_clean_observed_at": "2026-07-14T15:23:38.566241+00:00"
+    }
+  },
+  {
+    "id": "alert_internal_silent_fallback_new_c67bec28dd_clean_watermark",
+    "title": "[internal alert watermark] silent_fallback_new",
+    "description": "Monotonic clean-observation receipt; never dispatched.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "internal_alert_remediation_router",
+    "created_at": "2026-07-14T14:23:43.126507+00:00",
+    "completed_at": "2026-07-14T14:23:43.126507+00:00",
+    "alert_key": "silent_fallback_new",
+    "internal_remediable": true,
+    "internal_alert_watermark": true,
+    "internal_alert_state": {
+      "resolved_at": "2026-07-14T14:23:43.126507+00:00",
+      "last_clean_observed_at": "2026-07-14T14:23:43.126507+00:00"
     }
   }
 ]
