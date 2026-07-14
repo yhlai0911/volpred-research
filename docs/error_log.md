@@ -2,6 +2,42 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 14:20 — Review 對移動中的樹裁決：verdict 沒綁 commit SHA，一落地就過期（hourly-14 / slot-2）
+
+**現象**：K1709-rev 的 agent 在 worktree 內自跑 Codex review，產出 `codex_review_rev1_20260714.txt`
+判 **FAIL、不可認證／發佈**（C6 cell-key 碰撞污染 exclusion p、C2 figure code key drift、README 仍宣稱
+已撤回的 NULL 與 +16.2%）。但主線程對**已 commit 的版本**逐條實測，這些 blocking 指控**全部不成立**：
+`primary_cells` 是 10 筆不是 54；碰撞已由 `_assert_unique_cell` + `raise AssertionError` 擋掉（不再
+last-write-wins）；三處全是 `false_positive_rate_at_beta_0`；README 第 3 行已是 `INCONCLUSIVE`。
+
+**根因**：**review 跑的時候 agent 還在改檔** —— Codex 自己在結論裡註記「本裁決鎖定 13:14 快照，
+`k1709.py` SHA-256 `e42b0885…`；審查期間檔案曾被外部程序修改」。檔案 mtime 是 13:30–13:38，
+最終 commit 在 review 之後。也就是說：**這份 FAIL 打的是一個已經不存在的樹**。
+
+**這不是 Codex 判錯，是流程缺陷**。verdict 是一個「關於某棵樹的斷言」，但我們從來沒要求它**指名**
+那棵樹。於是：
+- **stale FAIL** → 一個已經修好的 K 被永久擋在門外（本次；若照 verdict 判死就白殺一份 rev）
+- **stale PASS** → 一個審過之後又被改壞的 K 被放行進 main（更危險，且觀測上完全無聲）
+
+**對 `gate-fail-verdict-blocks-merge`（P1，slot-1 進行中）的設計需求**：一個只 grep「FAIL」字樣的
+merge gate **解不了這個問題，還會製造新的 false negative**。gate 必須要求 verdict **綁定 commit SHA**：
+1. review artifact 檔頭記錄它裁決的 commit SHA；
+2. merge 前比對該 SHA == 待併入的 HEAD；**不相等 = 沒有有效裁決**，一律拒絕（fail closed），
+   而不是去讀那份過期裁決的 PASS/FAIL 字樣；
+3. review 期間 worktree 有改動 → 該次 review 作廢，必須對新 SHA 重跑。
+
+**處置（本班）**：K1709-rev **不併入 main**（維持 562eaf958 的撤回狀態，CI 不再紅）。派
+`k1709_rev2_readjudicate` 進 compute queue，對**凍結的 `34c291a49`** 重跑獨立裁決，並修 6 項
+**真正殘留**的方法論缺陷（那些不是 stale-code，是口徑問題）：family power 過度宣稱、`_first_at()`
+把粗網格 crossing 報成精確 80%/90% point、β=0 誤稱 size calibration、fixed-window raw DM 誤標
+`nested-biased`、bounded-null 文字仍寫「Holm-adjusted」但實際已改 intersection-union、
+`unexpected_z` 的 AR(5) 用擴張窗卻列入 fixed-memory family。verdict 仍鎖死
+`INCONCLUSIVE_NO_EXACT_NULL_CLAIM`，禁止復活 bounded null 或 +16.2% RV exclusion。
+
+**教訓（class）**：任何「審查 → 放行」的 gate，被審對象都必須是**不可變的快照**。審一個還在動的
+工作區，等於沒審 —— 而且結論會以「看起來很權威」的形式留下來誤導下一個人（本次差點就據此把一份
+已修好的實驗判死）。
+
 ## 2026-07-14 12:41 — CI 紅燈 notify-first：把修復中間狀態丟給老闆 — **FIXED**（codex）
 
 **現象**：`scripts/check_alerts.py` 看見 main Test Suite failure 後，雖然會建 P1 task，卻同一刻

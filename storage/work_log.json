@@ -17314,5 +17314,24 @@
     "owner": "codex",
     "backfilled_at": "2026-07-14T05:31:24.303047+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-14T14:14:52+08:00",
+    "task_type": "experiment",
+    "task_id": "k1709_rev_adjudication",
+    "outcome": "succeeded",
+    "actor": "hourly-14",
+    "owner": "hourly-14",
+    "commit": null,
+    "summary": "PHASE A 收件 K1709-rev：worktree 內的 Codex review 判 FAIL，但實測發現它裁決的是 13:14 中途快照（Codex 自己註記檔案審查期間被改），committed 版本上 C6 cell-key 碰撞（已由 _assert_unique_cell + AssertionError 擋掉）、C2 key drift、README stale 三條 blocking 指控全部不成立。判定：不據過期 verdict 判死，也不自行放行 — K1709 維持不併入 main（CI 保持綠），改派 k1709_rev2_readjudicate 進 compute queue 對凍結 SHA 34c291a49 重跑獨立裁決 + 修 6 項真正殘留的方法論口徑缺陷（family power 過度宣稱、_first_at 粗網格點估計、beta=0 誤稱 size、raw-DM 誤標 nested-biased、bounded-null 文字仍寫 Holm、unexpected_z 擴張窗）。verdict 鎖死 INCONCLUSIVE_NO_EXACT_NULL_CLAIM。根因（review 未綁 commit SHA → stale FAIL 誤殺 / stale PASS 放行）已寫 error_log，並列為 slot-1 verdict-gate 的設計需求。"
+  },
+  {
+    "timestamp": "2026-07-14T06:20:30Z",
+    "actor": "hourly-14",
+    "task_type": "platform_ops",
+    "task_id": "gate-fail-verdict-blocks-merge",
+    "summary": "merge 路徑加『綁定 bytes 的 PASS 裁決』認證 gate（commit 7f6adcbd2）",
+    "detail": "K1709 被 Codex 判 FAIL 仍 merge 進 main（CI 連紅 4 次）。但單純『FAIL 就擋』不夠：agent 事後修好了兩個 CRITICAL，那份 FAIL 講的是已不存在的 k1709.py @e42b0885。故裁決必須綁定其審查的快照：certify 比對 claim surface 的 sha256。三入口全擋（無裁決/FAIL/sha 漂移）。測試 11 + 16 cases/43 assertions 全綠。已驗證 gate 正確擋住尚未認證的 k1709；K1709 rev2 重裁決 job 已在其他線 running，未重複派工。",
+    "verdict": "succeeded"
   }
 ]

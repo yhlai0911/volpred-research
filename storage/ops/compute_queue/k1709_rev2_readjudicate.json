@@ -1,0 +1,43 @@
+{
+  "id": "k1709_rev2_readjudicate",
+  "title": "K1709-rev2: 對凍結 commit 34c291a4 重新裁決 + 修 6 項殘留方法論缺陷（上一份 Codex FAIL 打的是中途快照）",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_k1709_rev2_readjudicate.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    ".claude/worktrees/dispatch-slot-2-c873d04d-k1709",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/k1709_rev2_readjudicate.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-14T06:13:40Z",
+  "started_at": "2026-07-14T06:15:04Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1709_rev2_readjudicate.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1709_rev2_readjudicate.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/k1709_rev2_readjudicate.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709",
+  "claude_followup": {
+    "brief": "收件時：(1) 確認 review artifact 檔頭記錄的 commit SHA == 該次 review 當下的 HEAD，且 review 期間 worktree 無改動（這是上一輪作廢的根因，不可再犯）；(2) 確認 verdict 仍為 INCONCLUSIVE_NO_EXACT_NULL_CLAIM，未偷偷復活 bounded null 或 +16.2% RV exclusion；(3) 確認 6 項殘留（family power 過度宣稱 / _first_at 粗網格點估計 / beta=0 誤稱 size / raw-DM 誤標 nested-biased / bounded-null 文字仍寫 Holm / unexpected_z AR(5) 擴張窗）逐項有處置；(4) 確認 test_nested_dm_misuse_ratchet.py + test_k1709.py 全綠且主程式端到端可重跑；(5) 只有 codex 對凍結 SHA 判 PASS 才由主線程寫 knowledge.json；(6) path-scoped 抽取 experiments/k1709/ 到 main（勿用 merge_worktree.sh — 會 stash 掉其他 slot 在途工作）；(7) 仍 FAIL 則不得進 main，續留 worktree。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}
