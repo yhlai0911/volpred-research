@@ -17218,5 +17218,14 @@
     "outcome": "succeeded",
     "commit": "9c2754caa",
     "summary": "修根因：reviewer 的『不得發佈』條件過不了候選池。K1684 Codex review 為 CONDITIONAL_PASS 但明令 E2 required before publication，refill 仍 auto-生出 K1684_article_general（P3 pending，等 writer agent）。build_publication_candidates 只有 _is_invalidated_artifact 一道 belt，只認整份作廢標記，讀不到『研究可信但不准發表』。新增 volpred.publication_gate 接在同一 belt，被擋 K 連理由寫進 publication_blocked（可觀測）。刻意不用 verdict 一刀切（110/825 是 CONDITIONAL_PASS，全擋會餓死文章池）；全庫命中 2/790 皆真禁令。候選池已重建：K1684 移除、uncovered 仍 10 筆。11 筆 regression test（含 over-match 上界）；88 passed。原文章任務 complete=failed（不寫此文）。"
+  },
+  {
+    "timestamp": "2026-07-14T09:34:53+08:00",
+    "actor": "hourly-09",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29294703782",
+    "summary": "CI �����修復���綠��run 29298521097�����3-strike: CJK ��������������� CI ratchet ������ publish gate��第��次�������������次�������������� push ��������k1703 ������張���已�����修������starvation 測試����������� ��� build_report ���������注������",
+    "commit": "cdb605940",
+    "verification": "full pytest 2607 passed / 7 skipped��gh run 29298521097 conclusion=success������ Supabase ��� curl �����������確����������常"
   }
 ]

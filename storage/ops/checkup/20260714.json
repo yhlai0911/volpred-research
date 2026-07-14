@@ -1,20 +1,14 @@
 {
-  "generated_at": "2026-07-14T07:37:55.305964",
+  "generated_at": "2026-07-14T08:54:18.685683",
   "overall": "warn",
   "critical_count": 0,
-  "warn_count": 3,
+  "warn_count": 2,
   "findings": [
     {
       "dimension": "content_pipeline",
       "severity": "warn",
       "message": "草稿池僅 3 篇（門檻 4）—— Mission 1 缺產出",
       "recovery": "主動派寫作 agent 補池（feed-publisher，新鮮非 spy 主題）"
-    },
-    {
-      "dimension": "live_freshness",
-      "severity": "warn",
-      "message": "線上績效最新 data_date=2026-07-10（已 4 天）—— 頁面顯示舊資料",
-      "recovery": "跑 daily_update + 確認頁面非靜態快取（見 live_cache）"
     },
     {
       "dimension": "alert_conditions",

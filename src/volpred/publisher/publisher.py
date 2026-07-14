@@ -2132,7 +2132,15 @@ class Publisher:
         # 2026-06-18: persist release-layer arc schema for future dedup/backfill.
         # Historical feed entries may lack this and are recomputed on demand by
         # arc_dedup; new writes should carry the schema explicitly.
-        if not details_clean.get('arc_signature'):
+        _stored_arc_sig = details_clean.get('arc_signature')
+        try:
+            from volpred.publisher.arc_dedup import ARC_SIGNATURE_SCHEMA_VERSION
+        except Exception:
+            ARC_SIGNATURE_SCHEMA_VERSION = "arc_dedup_v4"
+        if (
+            not isinstance(_stored_arc_sig, dict)
+            or _stored_arc_sig.get('schema_version') != ARC_SIGNATURE_SCHEMA_VERSION
+        ):
             try:
                 from volpred.publisher.arc_dedup import arc_signature
 
