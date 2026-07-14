@@ -7315,3 +7315,23 @@ CLI 不可默默忽略 argv；未實作的 safety flag 必須明確拒絕，不�
 **修正**：complete writer 在寫入 history 後原子清除三個 claim 欄位；同 status 的 idempotent complete 也會
 清理舊資料，讓既有壞 row 可由正式 CLI 自我修復。Regression 同時覆蓋首次 complete 與 terminal 重跑，
 禁止用手改 `next_tasks.json` 收尾。
+
+## 2026-07-14 09:50 — series_registry 品牌漂移：registry 存了第二份 status（dual source of truth）
+
+**症狀**：每日大體檢反覆報 `series_registry: 文章系列品牌漂移（4 處）`，全是
+`wrong_status: registry says draft, feed says 'published'`（taiwan_uav 4 篇 EP）。
+
+**根因（結構性，非資料問題）**：`config/article_series.json` 用 `members_published` /
+`members_draft` 兩份清單維護成員，等於把 `feed.json` 的 `status` 複製了一份到 registry。
+publish / release_pool 把 draft flip 成 published 時**沒有任何流程回寫 registry** → 每 release
+一篇就漂移一篇。過去的處理都是手動把 id 搬清單（修資料），下一次 release 必然再犯。
+
+**修法（底層，非修補）**：status 從 registry 拿掉，兩份清單合併為單一 `members`（registry 只
+擁有「成員關係」這個它真正是 SoT 的維度；status 的 SoT 是 feed.json）。`wrong_status` 這個
+drift kind 因此**結構上不可能發生**，不是被抑制。`series_registry.py` 的 audit 移除 status 比對，
+`_members()` 向後相容舊欄位並印 WARN。
+
+**Gate**：`tests/test_alerts.py::test_series_registry_stores_no_status_copy` — registry 任一 series
+出現 `members_published` / `members_draft` / `status` 即 fail，擋 reintroduce。
+治理：`.claude/rules/publishing.md` §系列前綴慣例 鐵律 (4)。
+**驗證**：`series_registry.py --audit` → CLEAN；`check-alerts` → breach_count=0（原本 1）。

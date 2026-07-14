@@ -5,18 +5,22 @@ The registry (config/article_series.json) is the SINGLE SOURCE OF TRUTH for
 reader-facing article series. This tool makes series branding mechanical instead
 of hand-retitled (which caused the 2026-07-06 迷思實驗室 4-mistake incident):
 
-  --audit  (default) : report drift — registered members missing their prefix,
-                       members with the wrong status, orphan-branded articles
-                       (carry a series prefix but aren't registered), digest
-                       titles that wrongly start with the masthead name, and
-                       excluded dups that aren't 'unpublished'. Exit 1 if drift.
+  --audit  (default) : report drift — registered members missing their prefix or
+                       missing from the feed, orphan-branded articles (carry a
+                       series prefix but aren't registered), digest titles that
+                       wrongly start with the masthead name, and excluded dups
+                       that aren't 'unpublished'. Exit 1 if drift.
   --apply            : idempotently prepend each title_prefix series' prefix to
-                       its registered members (published + draft) that lack it,
-                       and keep matching reports/<id>.json in sync. Byte-exact
-                       indent=2 round-trip on feed.json.
+                       its registered members that lack it, and keep matching
+                       reports/<id>.json in sync. Byte-exact indent=2 round-trip
+                       on feed.json.
 
-Ground-truth rule: membership + status are read from the registry + feed.json,
-never inferred from titles or published_at.
+Ground-truth rule (2026-07-14 schema): the registry owns MEMBERSHIP ONLY
+(`members`), never status. An article's status lives in feed.json alone. The old
+`members_published` / `members_draft` split stored a second copy of status that
+nothing wrote back when a draft was released, so it drifted on every release
+(07-14: 4 taiwan_uav episodes flagged as draft while live). Membership + status
+are still never inferred from titles or published_at.
 
 Usage:
   uv run python scripts/series_registry.py            # audit
@@ -44,6 +48,20 @@ def _load_feed() -> list:
     return json.loads(FEED.read_text(encoding="utf-8"))
 
 
+def _members(s: dict) -> list[str]:
+    """Membership of a series — status-free by design (feed.json owns status).
+
+    Tolerates the pre-2026-07-14 `members_published` / `members_draft` split so a
+    stale hand-edited registry still audits instead of silently reading empty.
+    """
+    ids = list(s.get("members") or [])
+    legacy = list(s.get("members_published") or []) + list(s.get("members_draft") or [])
+    if legacy:
+        print(f"[series_registry] WARN legacy status-split membership fields found; "
+              f"merge them into `members` (status belongs to feed.json)", file=sys.stderr)
+    return list(dict.fromkeys(ids + legacy))
+
+
 def audit(series: dict, feed: list) -> list[dict]:
     """Return a list of drift findings (empty = clean)."""
     by_id = {a.get("id"): a for a in feed}
@@ -58,18 +76,16 @@ def audit(series: dict, feed: list) -> list[dict]:
 
         if branding == "title_prefix":
             prefix = s.get("prefix") or ""
-            # 1. explicit members must carry the prefix + have the expected status
-            for status_field, ids in (("published", s.get("members_published", [])),
-                                      ("draft", s.get("members_draft", []))):
-                for aid in ids:
-                    art = by_id.get(aid)
-                    if art is None:
-                        findings.append({"series": key, "id": aid, "kind": "member_missing", "detail": f"registered {status_field} member not in feed"})
-                        continue
-                    if not (art.get("title") or "").startswith(prefix):
-                        findings.append({"series": key, "id": aid, "kind": "missing_prefix", "detail": f"member lacks prefix '{prefix}'"})
-                    if art.get("status") != status_field:
-                        findings.append({"series": key, "id": aid, "kind": "wrong_status", "detail": f"registry says {status_field}, feed says '{art.get('status')}'"})
+            # 1. explicit members must exist in the feed and carry the prefix.
+            #    Status is NOT checked: feed.json owns it, the registry doesn't
+            #    mirror it, so there is nothing that can drift.
+            for aid in _members(s):
+                art = by_id.get(aid)
+                if art is None:
+                    findings.append({"series": key, "id": aid, "kind": "member_missing", "detail": "registered member not in feed"})
+                    continue
+                if not (art.get("title") or "").startswith(prefix):
+                    findings.append({"series": key, "id": aid, "kind": "missing_prefix", "detail": f"member lacks prefix '{prefix}'"})
             # 2. excluded dups must be unpublished
             for aid, why in (s.get("excluded_dups") or {}).items():
                 art = by_id.get(aid)
@@ -94,7 +110,7 @@ def audit(series: dict, feed: list) -> list[dict]:
         for prefix, skey in prefixed_series.items():
             if title.startswith(prefix):
                 s = series[skey]
-                registered = set(s.get("members_published", [])) | set(s.get("members_draft", []))
+                registered = set(_members(s))
                 # member_qa/by-content-type series: membership is by content_type, not explicit list
                 by_ct = "content_type" in (s.get("membership_criteria") or "")
                 if art.get("id") not in registered and not by_ct:
@@ -140,7 +156,7 @@ def apply(series: dict, feed: list) -> tuple[int, list[str]]:
         display_name = s.get("display_name", "")
         emoji = s.get("emoji", "")
         legacy = s.get("legacy_prefixes", [])
-        for aid in list(s.get("members_published", [])) + list(s.get("members_draft", [])):
+        for aid in _members(s):
             art = by_id.get(aid)
             if art is None:
                 log.append(f"  !! {key}/{aid} not in feed")

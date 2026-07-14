@@ -953,6 +953,21 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     assert duplicate_slot_calls == [str(storage_dir)]
 
 
+def test_series_registry_stores_no_status_copy():
+    """Registry = membership only. A status field here is a second source of truth
+    that nothing writes back on publish, so it drifts on every draft release
+    (2026-07-14: 4 taiwan_uav episodes). Reintroducing one must fail the build.
+    """
+    registry_path = Path(__file__).resolve().parents[1] / "config" / "article_series.json"
+    series = json.loads(registry_path.read_text(encoding="utf-8"))["series"]
+    for key, definition in series.items():
+        banned = {"members_published", "members_draft", "status"} & set(definition)
+        assert not banned, (
+            f"series '{key}' stores status in the registry ({sorted(banned)}); "
+            "status belongs to storage/reports/feed.json only — use `members`"
+        )
+
+
 def test_parse_series_registry_state_reads_injected_storage_feed(tmp_path: Path):
     """The alert audit must not leak the production feed into isolated runs."""
     registry_path = Path(__file__).resolve().parents[1] / "config" / "article_series.json"
@@ -960,18 +975,21 @@ def test_parse_series_registry_state_reads_injected_storage_feed(tmp_path: Path)
     articles: dict[str, dict[str, str]] = {}
     target_id: str | None = None
 
+    # The registry owns membership only; status lives in feed.json. Alternate the
+    # fixture status so a member whose live status differs from any registry-side
+    # guess still audits clean — that is the 2026-07-14 drift (4 taiwan_uav
+    # episodes released from draft) which the status-free schema makes impossible.
     for definition in series.values():
         if definition.get("branding") != "title_prefix":
             continue
         prefix = definition["prefix"]
-        for status, key in (("published", "members_published"), ("draft", "members_draft")):
-            for article_id in definition.get(key) or []:
-                articles[article_id] = {
-                    "id": article_id,
-                    "title": f"{prefix}fixture {article_id}",
-                    "status": status,
-                }
-                target_id = target_id or article_id
+        for idx, article_id in enumerate(definition.get("members") or []):
+            articles[article_id] = {
+                "id": article_id,
+                "title": f"{prefix}fixture {article_id}",
+                "status": "published" if idx % 2 == 0 else "draft",
+            }
+            target_id = target_id or article_id
 
     assert target_id is not None, "registry fixture needs at least one explicit member"
     storage_dir = tmp_path / "storage"
