@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""PRG v7 reproduce gate: bind every printed number in main.tex to canonical JSONs.
+"""PRG v7 reproduce gate: bind every printed data-result number (claim) in main.tex to canonical JSONs.
+
+Scope note: method constants, dates, and deliberately-unbound historical values
+(e.g. the retired SPY 6.00 in the data-section footnote) are traceable but not
+mechanically gated — see review_history/v7_review_20260714/README.md "Uncovered
+numbers" for the audited list.
 
 v7 architecture (2026-07-14 rewrite): the paper's entire quantitative surface is
 the flip table (Table 2) + data table + a handful of prose numbers, all sourced
@@ -50,13 +55,15 @@ checks: list[dict] = []
 
 
 def check(name: str, needle: str) -> None:
+    """tex_binding: the JSON-derived string must appear in the manuscript."""
     ok = re.sub(r"\s+", " ", needle) in TEX
-    checks.append({"check": name, "expected": needle, "match": ok})
+    checks.append({"check": name, "kind": "tex_binding", "expected": needle, "match": ok})
     print(("  OK  " if ok else "  FAIL") + f" {name}: {needle[:90]}")
 
 
 def invariant(name: str, ok: bool, detail: str) -> None:
-    checks.append({"check": name, "expected": detail, "match": bool(ok)})
+    """json_invariant: verifies a claim-truth in the JSONs; does NOT guard the tex."""
+    checks.append({"check": name, "kind": "json_invariant", "expected": detail, "match": bool(ok)})
     print(("  OK  " if ok else "  FAIL") + f" {name}: {detail}")
 
 
@@ -97,7 +104,6 @@ for m in MARKETS:
     share = K1710["markets"][m]["oos_overnight_variance_share"] * 100
     n = K1699["markets"][m]["dm_tests"]["PRG_tminus1_exp_vs_GJR"]["n"]
     n_tex = f"{n:,}".replace(",", "{,}")
-    check(f"datatable_{m}_N_and_share", f"{n_tex} & 20") if False else None
     # Bind N and ON share on the same data-table row (source/period text between them).
     label = "TAIFEX TX" if m == "TAIFEX" else m
     pattern = re.compile(
@@ -106,7 +112,12 @@ for m in MARKETS:
     )
     ok = bool(pattern.search(TEX_NO_COMMENT))
     checks.append(
-        {"check": f"datatable_{m}", "expected": f"{label} .. {n_tex} .. {share:.1f}", "match": ok}
+        {
+            "check": f"datatable_{m}",
+            "kind": "tex_binding",
+            "expected": f"{label} .. {n_tex} .. {share:.1f}",
+            "match": ok,
+        }
     )
     print(("  OK  " if ok else "  FAIL") + f" datatable_{m}: N={n_tex} share={share:.1f}")
 
@@ -186,6 +197,8 @@ report = {
     ],
     "n_checks": total,
     "n_matched": matched,
+    "n_tex_bindings": sum(1 for c in checks if c.get("kind") == "tex_binding"),
+    "n_json_invariants": sum(1 for c in checks if c.get("kind") == "json_invariant"),
     "match_rate": round(match_rate, 2),
     "overall_match_rate_pct": round(match_rate, 2),
     "alert_level": alert,

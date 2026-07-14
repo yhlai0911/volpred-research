@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-14T04:22:59.168218+00:00",
+  "generated_at": "2026-07-14T04:46:19.414378+00:00",
   "tex": "main.tex",
   "sources": [
     "experiments/k1699/k1699_results.json",
@@ -7,137 +7,165 @@
   ],
   "n_checks": 26,
   "n_matched": 26,
+  "n_tex_bindings": 19,
+  "n_json_invariants": 7,
   "match_rate": 100.0,
   "overall_match_rate_pct": 100.0,
   "alert_level": "green",
   "checks": [
     {
       "check": "table2_row_SPY",
+      "kind": "tex_binding",
       "expected": "SPY & 1,823 & $+5.83^{***}$ ($<$0.001) & $-0.74$ (0.46) & $+3.56^{***}$ ($<$0.001) \\\\",
       "match": true
     },
     {
       "check": "table2_row_QQQ",
+      "kind": "tex_binding",
       "expected": "QQQ & 1,981 & $+4.78^{***}$ ($<$0.001) & $-2.28$ (0.02) & $+1.56$ (0.12) \\\\",
       "match": true
     },
     {
       "check": "table2_row_GLD",
+      "kind": "tex_binding",
       "expected": "GLD & 1,613 & $+6.11^{***}$ ($<$0.001) & $+0.44$ (0.66) & $+3.64^{***}$ ($<$0.001) \\\\",
       "match": true
     },
     {
       "check": "table2_row_EEM",
+      "kind": "tex_binding",
       "expected": "EEM & 1,734 & $+6.40^{***}$ ($<$0.001) & $+0.54$ (0.59) & $+10.14^{***}$ ($<$0.001) \\\\",
       "match": true
     },
     {
       "check": "table2_row_0050.TW",
+      "kind": "tex_binding",
       "expected": "0050.TW & 1,251 & $+5.19^{***}$ ($<$0.001) & $+0.32$ (0.75) & $+3.67^{***}$ ($<$0.001) \\\\",
       "match": true
     },
     {
       "check": "table2_row_TAIFEX",
+      "kind": "tex_binding",
       "expected": "TAIFEX & 843 & $+4.33^{***}$ ($<$0.001) & $+0.49$ (0.62) & $+5.50^{***}$ ($<$0.001) \\\\",
       "match": true
     },
     {
       "check": "table2_summary_counts",
+      "kind": "tex_binding",
       "expected": "Harvey-significant ($|t|>3$) & & 6/6 & 0/6 & 5/6",
       "match": true
     },
     {
       "check": "datatable_SPY",
+      "kind": "tex_binding",
       "expected": "SPY .. 1{,}823 .. 44.8",
       "match": true
     },
     {
       "check": "datatable_QQQ",
+      "kind": "tex_binding",
       "expected": "QQQ .. 1{,}981 .. 38.5",
       "match": true
     },
     {
       "check": "datatable_GLD",
+      "kind": "tex_binding",
       "expected": "GLD .. 1{,}613 .. 60.9",
       "match": true
     },
     {
       "check": "datatable_EEM",
+      "kind": "tex_binding",
       "expected": "EEM .. 1{,}734 .. 70.7",
       "match": true
     },
     {
       "check": "datatable_0050.TW",
+      "kind": "tex_binding",
       "expected": "0050.TW .. 1{,}251 .. 63.5",
       "match": true
     },
     {
       "check": "datatable_TAIFEX",
+      "kind": "tex_binding",
       "expected": "TAIFEX TX .. 843 .. 68.9",
       "match": true
     },
     {
       "check": "prose_mixed_range",
+      "kind": "tex_binding",
       "expected": "$+4.3$ to $+6.4$",
       "match": true
     },
     {
       "check": "prose_span",
+      "kind": "tex_binding",
       "expected": "$-2.3$ to $+10.1$",
       "match": true
     },
     {
       "check": "prose_inflation",
+      "kind": "tex_binding",
       "expected": "$3.8$ to $7.1$",
       "match": true
     },
     {
       "check": "prose_max_spread",
+      "kind": "tex_binding",
       "expected": "$9.6$ $t$-units",
       "match": true
     },
     {
       "check": "prose_qqq_open",
+      "kind": "tex_binding",
       "expected": "QQQ ($t=+1.56$",
       "match": true
     },
     {
       "check": "prose_rank_order_sentence",
+      "kind": "tex_binding",
       "expected": "EEM (70.7\\%, $t=+10.14$) down to QQQ (38.5\\%, $t=+1.56$",
       "match": true
     },
     {
       "check": "open_positive_all_six",
+      "kind": "json_invariant",
       "expected": "open-panel t > 0 in all six markets (paper orientation)",
       "match": true
     },
     {
       "check": "close_zero_of_six_harvey",
+      "kind": "json_invariant",
       "expected": "close panel 0/6 Harvey",
       "match": true
     },
     {
       "check": "close_lag_variant_zero_harvey",
+      "kind": "json_invariant",
       "expected": "lag variant 0/6 Harvey",
       "match": true
     },
     {
       "check": "open_t_rank_ordered_in_on_share",
+      "kind": "json_invariant",
       "expected": "open-panel t perfectly rank-ordered in OOS overnight variance share",
       "match": true
     },
     {
       "check": "k1710_bit_identical_recorded",
+      "kind": "json_invariant",
       "expected": "K1710 two-pass bit-identical determinism recorded",
       "match": true
     },
     {
       "check": "snapshot_metadata_present",
+      "kind": "json_invariant",
       "expected": "K1699 pinned snapshot metadata present (K1710 asserts SHA equality at runtime)",
       "match": true
     },
     {
       "check": "no_leftover_placeholders",
+      "kind": "json_invariant",
       "expected": "no placeholder tokens left in tex",
       "match": true
     }
