@@ -30477,7 +30477,7 @@
     "id": "K1572_article_general",
     "title": "K1572: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1572 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: K1572 — DNN Quantile VaR vs K1571 fair baseline plateau\n\nverdict: NULL\nreviewer: Codex (codex-cli, 2026-06-29 hourly tick)\nexperiment_id: k1572\nexperiment_path: experiments/k1572/\nk_id: K1572\nparent_k_id: K1571\n\nDesign: TLT/HYG daily returns, yfinance adjusted close cache from K1",
-    "priority": 4,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -30487,7 +30487,8 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-11T13:52:00+00:00"
+    "created_at": "2026-07-11T13:52:00+00:00",
+    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜"
   },
   {
     "id": "telegram-492",
@@ -31257,7 +31258,7 @@
     "id": "K1681_article_general",
     "title": "K1681: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1681 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1681：SMAD = (P - MA10)/MA10 對次日 RV / 未來 5 日下行半變異數 / 左尾命中率的增量預測力。20 檔美股 ETF 與大型股，2010-01 至 2026-07，79,140 asset-days，seed 1681。\n\n【核心設計 — span baseline】SMAD 的一階近似是過去 10 日報酬的遞減加權和，其表面預測力與槓桿效應糾纏。把 10 個 individual lagged returns 全放進基準（張成所有線性重新加權）後，天真 HAR-only 基準記給 SMAD 的 1.90pp 增量 R²",
-    "priority": 4,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -31267,7 +31268,8 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-11T17:07:37+00:00"
+    "created_at": "2026-07-11T17:07:37+00:00",
+    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜"
   },
   {
     "id": "email-12084-9b55bc",
@@ -32423,7 +32425,7 @@
     "id": "K1685_article_general",
     "title": "K1685: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1685 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1685 以 pinned yfinance SPY/VIX snapshot（2000-01-03～2026-07-10）延長 K988/K1393-faithful A4f vs GJR 的 OOS。完整 OOS 2019-01-02～2026-07-10、n=1,890：GJR QLIKE=1.515680，A4f=1.431558，A4f 相對改善 5.550%；canonical HAC-DM d=loss_GJR-loss_A4f，t=+3.9656、p=0.00007595、lag=13。K1393 legacy anchor t=3.6",
-    "priority": 4,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -32433,13 +32435,14 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-07-12T11:07:49+00:00"
+    "created_at": "2026-07-12T11:07:49+00:00",
+    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜"
   },
   {
     "id": "K1583_article_general_v2",
     "title": "K1583: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1583 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K1380_v4 17 個 SPY vol forecast spec（GARCH-X A1-A5/A2f/A4f/A3f/A2n/A4n + MIDAS B1-B3/C2-C3/B0；C1 因 0 valid 排除→16 specs）在 Model Confidence Set 三層分析全 retained：\n1. Unconditional MCS (B=1000, α=0.10)：16/16 全保留，p_set=0.438\n2. Conditional MCS (VIX high≥20 / mid / low<15)：每 regime 同樣 16/",
-    "priority": 4,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -32460,13 +32463,14 @@
       "retry-v2"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-07-12T11:07:50+00:00"
+    "created_at": "2026-07-12T11:07:50+00:00",
+    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜"
   },
   {
     "id": "K1695_article_general",
     "title": "K1695: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1695 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: [提出: Fable deep review P0-1, 執行: Codex failover] K1695 以 pinned yfinance auto_adjust=False snapshot（paper cutoff 2026-03-31）、Close+distributions 明示 total return、前月末 12/VIX 月頻 lag、SHY cash sleeve、10bps turnover cost、prior-day IRX Sharpe 與跨 13 市場同步 stationary bootstrap 重建 vt-trend-",
-    "priority": 4,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -32476,7 +32480,8 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-07-12T11:07:51+00:00"
+    "created_at": "2026-07-12T11:07:51+00:00",
+    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜"
   },
   {
     "id": "email-12143-2de65b",
@@ -34380,28 +34385,74 @@
     "title": "paper_body P0-3: K1471 TF/MR 誠實補報（B3、B4）",
     "description": "補 gate 失效全表（TF 4/5、MR 5/5 + baseline Sharpe）、RR_TF 5/5 惡化 + footprint-scale caveat（『not crowded flow per se』改為『not crowded flow at VT's footprint scale』）、修正 L243 錯誤 gate 敘述。 主線程執行（平台規則：論文 .tex 不派 background agent）。Brief=paper/vt-crowding-abm/review_history/fable_deep_review_20260711/README.md §5。父任務 fable0711_abm_honesty_pass 的第 N 段；完成後 xelatex 編譯 + uv run volpred ops paper-update --paper-id vt-crowding-abm。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_body",
     "topology": "inline",
     "source": "decompose:fable0711_abm_honesty_pass",
     "parent_task_id": "fable0711_abm_honesty_pass",
     "series_order": 2,
     "paper_id": "vt-crowding-abm",
-    "created_at": "2026-07-13T07:10:29+00:00"
+    "created_at": "2026-07-13T07:10:29+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-14T17:15:06.789253+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:15:07.017208+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:15:07.249263+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-01"
+      }
+    ],
+    "started_at": "2026-07-14T17:15:07.017196+00:00",
+    "completed_at": "2026-07-14T17:15:07.249253+00:00",
+    "result": "驗證後結案（工作早已落地、任務未同步）：main.tex 已含 Table tab:tfmr_gate 全表（TF treatment 5 cell 中 4 個未過 baseline-Sharpe floor、MR 5/5 未過），abstract/intro 已改 footprint-scale 口徑（'at VT's footprint scale' + TF 尺度下 RR 控制組同樣惡化），L247 gate 敘述已正確。家族層宣稱已撤回、機制證據收斂 VT-only。"
   },
   {
     "id": "abm_p0_4_reproduce_binding",
     "title": "paper_body P0-4: reproduce.py 擴充 K1471 section + caption binding（B5、B6）",
     "description": "reproduce.py 加 K1471 section（兩張新表逐欄 binding + match_rate gate）；修 caption binding 路徑；'\\% source' 全部改行首 '%' comment。完成後 reproduce_report.json 必須 PASS。 主線程執行（平台規則：論文 .tex 不派 background agent）。Brief=paper/vt-crowding-abm/review_history/fable_deep_review_20260711/README.md §5。父任務 fable0711_abm_honesty_pass 的第 N 段；完成後 xelatex 編譯 + uv run volpred ops paper-update --paper-id vt-crowding-abm。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_body",
     "topology": "inline",
     "source": "decompose:fable0711_abm_honesty_pass",
     "parent_task_id": "fable0711_abm_honesty_pass",
     "series_order": 3,
     "paper_id": "vt-crowding-abm",
-    "created_at": "2026-07-13T07:10:29+00:00"
+    "created_at": "2026-07-13T07:10:29+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-14T17:15:07.474156+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:15:07.709432+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:15:07.998939+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-01"
+      }
+    ],
+    "started_at": "2026-07-14T17:15:07.709419+00:00",
+    "completed_at": "2026-07-14T17:15:07.998924+00:00",
+    "result": "本班在 HEAD tex 上重跑 reproduce gate 實測驗證：173/173 checks matched = 100.0%，alert_level=green，tables 含 table5_vt_monotone_curve / table6_matched_control_vt / table7_tfmr_gate（K1471 兩張新表已逐欄綁定）。B6 洩漏已修：'\\\\% source' 出現 0 次、行首 '% source' comment 8 處（投稿 PDF 不再印出內部 repo 路徑）。"
   },
   {
     "id": "abm_p0_5_mechanical_batch",

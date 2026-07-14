@@ -652,6 +652,63 @@ def _draft_pool_deficit() -> int:
         return 0
 
 
+def _promote_starved_article_tasks(limit: int) -> int:
+    """Releasable-drought escalation：把餓死的 pending 文章任務**一次批次**升 P1。
+
+    2026-07-15 owner 指令（「你要補滿文章補到最低門檻 不是一篇一篇補」，01:0x）：
+    當晚 releasable drafts=0，但 next_tasks 有 6 個 pending daily_article 掛在
+    P3/P4 —— `_draft_pool_deficit()` 把它們算成 in-flight 庫存（deficit=0，refill
+    不動），dispatch 卻每班都被 ops P1/P2 搶走，pending 是「餓死的庫存」。
+    Pending ≠ pipeline，除非 dispatch 優先序真的搆得到它。
+
+    修法：釋出池真乾涸（releasable==0）時，晉升既有 pending 文章任務到 P1（最多
+    `limit` 個、一次到位），而不是加開新任務 —— 保留 in-flight 自我節制（防
+    pile-up），只修 dispatch 搆不到的問題。Fail-open：任何錯誤回 0 並留 trace。
+    """
+    try:
+        if not NEXT_TASKS.exists():
+            return 0
+        with open(NEXT_TASKS, "r+", encoding="utf-8") as fh:
+            fcntl.flock(fh, fcntl.LOCK_EX)
+            fh.seek(0)
+            tasks = json.load(fh)
+            if not isinstance(tasks, list):
+                _warn_dispatch("promote_starved_articles: next_tasks not a list; skip")
+                return 0
+            promoted = 0
+            for t in tasks:
+                if promoted >= limit:
+                    break
+                try:
+                    pri = int(t.get("priority") or 9)
+                except (TypeError, ValueError):
+                    pri = 9
+                if (
+                    isinstance(t, dict)
+                    and str(t.get("task_type") or "") == "daily_article"
+                    and str(t.get("status") or "pending").lower() == "pending"
+                    and pri > 1
+                ):
+                    t["priority"] = 1
+                    t["priority_note"] = (
+                        "auto-promoted to P1 by _promote_starved_article_tasks: "
+                        "releasable drafts=0 while this task sat below dispatch reach "
+                        "(owner rule 2026-07-15: fill to floor in one batch)"
+                    )
+                    promoted += 1
+            if promoted:
+                from volpred.ops.next_tasks import write_tasks_to_handle
+
+                write_tasks_to_handle(fh, tasks)
+                _warn_dispatch(
+                    f"promote_starved_articles: promoted {promoted} pending daily_article task(s) to P1"
+                )
+            return promoted
+    except Exception as e:  # noqa: BLE001 — fail-open, but observable
+        _warn_dispatch(f"promote_starved_articles: failed ({e!r}); promoted nothing")
+        return 0
+
+
 def _maybe_refill_draft_pool(*, auto_refill: bool) -> dict | None:
     """Force a daily_article-specific top-up when feed.json draft count is low.
 
@@ -670,6 +727,15 @@ def _maybe_refill_draft_pool(*, auto_refill: bool) -> dict | None:
     """
     if not auto_refill:
         return None
+    # 2026-07-15 owner order（「補滿到最低門檻 不是一篇一篇補」）：releasable==0 是
+    # 真乾涸訊號 —— 下面的 deficit 會被 in-flight pending 遮住（設計上防 pile-up），
+    # 但 pending 掛在 P>1 時 dispatch 永遠搆不到。先批次晉升，再談要不要加新任務。
+    try:
+        _releasable_now = _releasable_draft_count()
+    except Exception:  # noqa: BLE001 — 訊號取不到就不晉升，refill 路徑照舊
+        _releasable_now = None
+    if _releasable_now == 0:
+        _promote_starved_article_tasks(DRAFT_POOL_FLOOR)
     deficit = _draft_pool_deficit()
     if deficit <= 0:
         return None
