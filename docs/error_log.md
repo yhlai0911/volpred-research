@@ -2,6 +2,62 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 12:30 — K1709 重犯 30 小時前才修好的 K1701 教訓：ratchet 抓得到，但它在 worktree 裡沒牙齒（hourly-12）
+
+**現象**：K1709（spot BTC/ETH ETF flow → RV）由 worktree agent 跑完，自帶 26 個測試全綠、README 寫得
+漂亮、還自稱做過「獨立審查 6 項必修全數落地」，結論是「NULL，且可排除 ≥+16.2% RV/1sd 的效果」。
+收件時派 Codex 審，判 **FAIL**：兩個 CRITICAL 直接打掉兩根招牌支柱。
+
+**Codex 的兩個 CRITICAL**：
+1. 巢狀比較（`HAR+ctrl` vs `HAR+ctrl+flow`）把 expanding-window QLIKE loss 丟進 raw DM 承載 verdict，
+   另外那個「Clark-West」算的其實是 MSPE estimand —— 三個不同的東西混成同一個 NULL gate。
+2. MDE 不是功效分析：每個 β 只在**同一條實際噪音路徑**注入一次取 first crossing，沒有重複模擬、
+   沒有預設 power、結果甚至**不單調**（BTC CW 在 β=.15 時 t=1.713，β=.8 反而降到 1.623）。
+   **power 不能證明效果小於 MDE** —— 「可排除 ≥16%」是無效推論。
+
+**這不是新 bug。** 第 1 點就是 2026-07-13 05:47 K1701 條目的教訓，**距今 30 小時**。當時的修正還
+建了一道機械 gate：`scripts/audit_nested_dm_misuse.py` + `scripts/tests/test_nested_dm_misuse_ratchet.py`。
+
+**根因 —— 偵測器是對的，但它在 agent 幹活的地方是瞎的**：
+把 k1709.py 抽到 main 後跑 ratchet，它**精準地抓到了**，錯誤訊息幾乎和 Codex 的 CRITICAL #1 逐字重合。
+所以 gate 沒壞。壞的是**它從來沒被執行到**：
+- worktree agent 只跑自己的 `experiments/k1709/test_k1709.py`（26 passed，全綠），**不會跑 `scripts/tests/`**；
+- branch 沒 merge 進 main，**CI 因此從沒看過這份代碼**；
+- 於是 agent 一路寫出 README、宣稱、五張圖，全部建立在一個 repo 早就明文禁止的推論設計上。
+整份實驗（xhigh effort、數十分鐘 compute）**白做**，而擋下它的不是任何自動化，是收件時人工派的 Codex。
+
+這與 pool 裡開著的 P2 `platform_ops_canonical_write_guard_blind_in_worktrees`（canonical 寫入防護閘門
+在 worktree 內不會 arm）是**同一個 class 的第 2 例**：**閘門正好在 agent 幹活的地方沒有牙齒**。
+按 CLAUDE.md Three-Strike「一旦看見結構性 root cause 就立刻重構，不等次數累積到 3」，不再 patch 單點。
+
+**另外 3 個 MAJOR**（都會位移統計量，但不翻轉主結論）：
+- 美股休市日（MLK/Good Friday/Memorial Day/Juneteenth/Thanksgiving/Christmas）的 `Total=0.0` 被當成
+  真實 flow day（BTC 16 個、ETH 10 個）。`sum(skipna=True)` 把整列 dash 的基金欄加成 0.0，連 parser
+  cross-check 都抓不到，假零還進了 20-day rolling SD。Codex 實測：只留 session day，BTC h=1 H1 的
+  DM 從 0.140 位移到 **1.542**。
+- `pub_lag=2` robustness 把 HAR / return controls 也一起 lag 2（只有 flow 該 lag 2，state 仍該 lag 1）
+  → robustness run 用了一個被自我削弱的 baseline。
+- 掛著 HLN modified-DM 的名，實際只有 HAC-DM + Harvey `|t|>3` heuristic，沒有 finite-sample factor；
+  單尾 p 還用 normal CDF，與 helper 的 Student-t 不一致。
+
+**處置**：
+(a) **未寫 knowledge.json、未發文**（Codex gate 未過 = 硬 gate，`check_arc_dedup` 雖回 clean 也不發）；
+(b) Codex 審查全文存 `experiments/k1709/codex_review_20260714.md`，與 code 同目錄長存；
+(c) task `research_spot_bitcoin_etf_flow_shock_btc_eth_vol` 標 **failed**（不是 succeeded — 跑完 ≠ 成立）；
+(d) 修訂版 enqueue `agent-brief_k1709_rev-b4a0a9`（xhigh），brief 要求**複用 K1701 已建好的 paired
+    fixed-window GW engine**，不准重造；並明寫「若撐不起 bounded null 就誠實判
+    `INCONCLUSIVE_NO_EXACT_NULL_CLAIM`，不准為了故事好看把 inconclusive 寫成 NULL」；
+(e) P1 governance task `governance_experiment_gates_blind_in_worktrees` — 把 repo 的實驗完整性 gate
+    推到 agent 手上（見下）。
+
+**教訓（兩條，都是這個系統反覆在繳的學費）**：
+1. **一道只在 CI/main 跑的 gate，對 worktree agent 等於不存在。** agent 的自帶測試永遠只證明
+   「我寫的東西照我想的跑」，證明不了「我沒違反 repo 的規矩」—— 那需要 repo 的測試，而它從沒被載入
+   agent 的執行路徑。**gate 必須放在 agent 構得到的地方，否則它只是一份沒人讀的報告。**
+2. **agent 自稱「已做獨立審查」不是證據。** K1709 的 README 明寫「獨立審查 6 項必修全數落地」，
+   26 個測試全綠 —— 而它同時違反著 repo 一天前才立的明文規則。**self-review 不能替代 out-of-loop
+   review**；收件時的 Codex gate 是這次唯一真正咬住的東西，不可因為「agent 說他審過了」而跳過。
+
 ## 2026-07-14 11:15 — 測試先上、原始碼沒跟上，main Test Suite 紅了兩班 — **FIXED**（hourly-11）
 
 **現象**：main 的 Test Suite 連續紅燈，訊息是

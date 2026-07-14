@@ -17287,5 +17287,13 @@
     "task_type": "daily_digest",
     "outcome": "succeeded",
     "summary": "發佈每日精選導讀 mile_5dd7c135（避風港出勤表）。時事驅動：中東衝突推油價 +4%、黃金反而連跌兩天（GLD -2.66% vs SPY -0.77%）。8 篇跨 archive 來源，發佈日跨度 115 天。所有數字對應 k1628/k713/k997 results.json。含一段主動回溯更正（3/17 舊結論被 7/05 K1628 條件檢定推翻）。gates: arc_dedup 0 / anti_ai 0。線上 200 驗證。"
+  },
+  {
+    "timestamp": "2026-07-14T12:31+08:00",
+    "actor": "hourly-12",
+    "task_type": "experiment",
+    "task_id": "research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
+    "summary": "K1709（ETF flow → BTC/ETH RV）收件：Codex 審查 FAIL，未過 knowledge gate。2 CRITICAL：巢狀比較用 raw DM + 混口徑 CW 承載 verdict（重犯 K1701 教訓，repo 自己的 nested-DM ratchet test 也 FAIL）；MDE 非功效分析、不能支撐『可排除 ≥16% RV 效果』。3 MAJOR：美股休市日 Total=0.0 當真實 flow day（BTC 16/ETH 10 天，DM 0.140→1.542）、pub_lag=2 誤 lag HAR controls、非真 HLN modified DM。未寫 knowledge.json、未發文。修訂版 enqueue agent-brief_k1709_rev-b4a0a9。結構性發現：ratchet 偵測正確但在 worktree 內從沒被執行到（agent 只跑自帶測試、branch 未 merge 故 CI 也沒看過）→ 與 platform_ops_canonical_write_guard_blind_in_worktrees 同 class 第 2 例，建 P1 governance_experiment_gates_blind_in_worktrees。",
+    "status": "failed"
   }
 ]

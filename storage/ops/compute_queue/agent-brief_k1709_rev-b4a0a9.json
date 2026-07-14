@@ -1,0 +1,43 @@
+{
+  "id": "agent-brief_k1709_rev-b4a0a9",
+  "title": "K1709-rev: 修正巢狀推論設計（GW-on-QLIKE）+ 休市日過濾 + 正式 power 分析 — Codex FAIL 後修訂",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_k1709_rev.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    ".claude/worktrees/dispatch-slot-2-c873d04d-k1709",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1709_rev-b4a0a9.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-14T04:29:16Z",
+  "started_at": "2026-07-14T04:30:03Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1709_rev-b4a0a9.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1709_rev-b4a0a9.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709/experiments/k1709/k1709_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1709_rev-b4a0a9.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c873d04d-k1709",
+  "claude_followup": {
+    "brief": "收件時：(1) 確認 scripts/tests/test_nested_dm_misuse_ratchet.py 通過（C1 硬 gate，不通過即退回）；(2) 確認 verdict 由 GW-on-QLIKE 決定，verdict_basis 的檢定/loss/estimation scheme/宣稱強度四者對齊；(3) 若 verdict 仍宣稱 bounded null（可排除某個效果大小），必須看到 ≥1000 次 bootstrap 的正式 power 分析或 equivalence test，否則要求改判 INCONCLUSIVE_NO_EXACT_NULL_CLAIM；(4) 確認休市日已用 US equity session calendar 過濾且 data_diagnostics 記了 dropped dates；(5) 派 Codex 二審（重點看 C1/C2 是否真的修好，而非改個名字）；(6) 通過才由主線程寫 knowledge.json；(7) path-scoped 抽取 experiments/k1709/ 到 main（勿用 merge_worktree.sh，會 stash 掉其他 slot 在途工作）；(8) 通過後才可排 daily_article。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}
