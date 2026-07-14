@@ -3,8 +3,10 @@
 Research question
 -----------------
 Do daily *net creation/redemption flows* of spot Bitcoin/Ethereum ETFs carry
-incremental predictive content for BTC/ETH realized volatility at t+1 and t+5,
-once the standard HAR-RV volatility dynamics are controlled for?
+incremental **unconditional average-loss** predictive content for BTC/ETH
+realized volatility at t+1 and t+5, once the standard HAR-RV volatility
+dynamics are controlled for? Conditional/state-dependent predictive ability is
+a different question and is not tested here.
 
 Orthogonality declaration
 -------------------------
@@ -43,14 +45,15 @@ What the claim actually rests on:
     uncertainty in the limiting experiment, which is exactly what makes it legal
     for nested *methods* where a vanishing-estimation-error scheme is not.
     Bounded estimator memory is a condition on the whole FORECASTING METHOD, not
-    just on the final regression: the two asset-specific robustness rows whose regressor is
-    itself built from an expanding-window AR(5) (`flow_transform/unexpected_z`)
-    therefore does NOT satisfy it, is flagged as such in the registry
-    (`bounded_memory=false`), and is reported with a sensitivity that re-runs the
-    full-family correction without it. None of the 10 primary cells uses it.
+    just on the final regression: the two asset-specific robustness rows whose
+    regressors are built from expanding-window AR(5) fits
+    (`flow_transform/unexpected_z`) therefore do NOT satisfy it, are flagged as
+    such in the registry (`bounded_memory=false`), and are diagnostic-only. None
+    of the 10 primary cells uses them.
   * A pre-specified one-sided MATERIAL-GAIN EXCLUSION test. Failing to reject
     equal accuracy is not evidence of equality; only this test can license a
-    bounded null, and only in QLIKE-loss space.
+    bound on the UNCONDITIONAL average QLIKE-loss estimand. It cannot bound
+    conditional or regime-specific gains.
   * Clark-West is retained but reported strictly as evidence about a SEPARATE
     MSPE estimand. It is never relabelled as a QLIKE general-loss test.
 
@@ -1150,10 +1153,10 @@ def paired_oos(
     `gw_unconditional_dm` for why the scheme is the whole ballgame.
 
     Why fixed and not expanding (this is the whole point of the C1 fix):
-    Giacomini-White (2006) tests equal predictive ability of FORECASTING METHODS
-    -- estimation error included -- and its asymptotics need the estimator to
-    have bounded memory. An expanding window does not. v1 ran an expanding
-    window and then applied a test whose null assumed otherwise.
+    Giacomini-White (2006) tests equal UNCONDITIONAL predictive ability of
+    FORECASTING METHODS here -- estimation error included -- and its asymptotics
+    need the estimator to have bounded memory. An expanding window does not. v1
+    ran an expanding window and then applied a test whose null assumed otherwise.
 
     Both specs are fit on the AUGMENTED model's complete-case mask, so they see
     the exact same rows, the exact same targets, and the exact same embargo. That
@@ -1167,7 +1170,9 @@ def paired_oos(
     Smearing (log -> variance level). The augmented spec has more parameters ->
     lower training residual variance -> a smaller exp(s^2/2) multiplier -> lower
     variance forecasts. QLIKE is asymmetric, so this channel could in principle
-    MANUFACTURE the null we are reporting.
+    bias the UNCONDITIONAL average QLIKE comparison against flow and make a
+    negative finding look stronger. It cannot manufacture a conditional claim,
+    and this study reports an INCONCLUSIVE verdict rather than a null.
       "own"    -- each spec uses its own s^2  (primary)
       "none"   -- no smearing at all, forecast = exp(mu)
       "shared" -- both specs use the BASELINE's s^2, neutralising the channel
@@ -1390,13 +1395,311 @@ def gw_unconditional_dm(loss_aug: np.ndarray, loss_base: np.ndarray, h: int) -> 
     }
 
 
+def build_claim_surface_prose(
+    *,
+    n_cells: int = 10,
+    margin_pct: float = 100 * MATERIAL_GAIN_MARGIN,
+    family_bound: float | None = None,
+    unbounded_memory_cells: tuple[str, ...] | list[str] = (),
+    n_registered_tests: int = 0,
+    n_gate_eligible_tests: int = 0,
+    n_full_family_significant: int = 0,
+    n_diagnostic_tests: int = 0,
+) -> dict[str, str]:
+    """Single author for every substantive claim-scope sentence.
+
+    The renderer, live experiment, and ``--relabel`` path all consume these exact
+    strings.  In particular, every quantitative QLIKE bound names its estimand
+    locally: an UNCONDITIONAL average loss differential.  A blanket disclaimer
+    elsewhere in the README is deliberately not treated as sufficient.
+    """
+    margin = f"{margin_pct:.0f}%"
+    material_gain_null = (
+        "the flow method's UNCONDITIONAL expected QLIKE loss is at least "
+        f"{margin} lower than the baseline's"
+    )
+    material_gain_alternative = (
+        "the UNCONDITIONAL average relative QLIKE-loss gain is smaller than "
+        f"{margin}"
+    )
+    upper_bound_note = (
+        "One-sided 95% upper confidence bound on the UNCONDITIONAL average "
+        "relative QLIKE-loss gain, obtained by inverting the exclusion test. "
+        "Gains above it on that estimand are excluded by the data; gains below it "
+        "are not. Conditional or regime-specific gains are not bounded. None = "
+        "even a 90% unconditional average gain cannot be excluded."
+    )
+    if family_bound is not None:
+        family_bound_statement = (
+            "For the UNCONDITIONAL average-loss estimand, holding "
+            f"**simultaneously across all {n_cells} cells** (Bonferroni), the "
+            "relative QLIKE-loss gain from adding ETF flow is "
+            f"**≤ {family_bound:.1f}%**. Anything larger on that estimand is "
+            "ruled out; anything smaller is not. Gains that vary by regime or "
+            "state are outside this result."
+        )
+    else:
+        family_bound_statement = (
+            "For the UNCONDITIONAL average-loss estimand, **no simultaneous "
+            "family bound can be stated at all**: at least one cell cannot exclude "
+            "even a 90% relative QLIKE-loss gain. Gains that vary by regime or "
+            "state are likewise not bounded by this design."
+        )
+
+    unbounded = tuple(sorted(unbounded_memory_cells))
+    n_unbounded = len(unbounded)
+    if n_unbounded:
+        rows = "`, `".join(unbounded)
+        bounded_memory_heading = (
+            f"{n_unbounded} registered diagnostic "
+            f"{'row fails' if n_unbounded == 1 else 'rows fail'} the "
+            "bounded-memory gate"
+        )
+        bounded_memory_issue = (
+            "GW's limiting experiment assumes the forecasting METHOD has bounded "
+            "estimator memory. Every final regression here uses a fixed 250-day "
+            "rolling window, but the condition is on the whole method. "
+            f"`{rows}` "
+            f"{'builds its regressor' if n_unbounded == 1 else 'build their regressors'} "
+            "from an AR(5) refitted on an EXPANDING window of flow history. There "
+            "is no lookahead, but "
+            f"{'that row is' if n_unbounded == 1 else 'those rows are'} not "
+            "bounded-memory forecasting methods. It would therefore be false to "
+            f"call all {n_registered_tests} registered tests bounded-memory. The "
+            "affected rows are diagnostic-only and cannot enter a verdict."
+        )
+    else:
+        bounded_memory_heading = "All registered methods pass the bounded-memory gate"
+        bounded_memory_issue = (
+            "Every registered forecasting method has bounded estimator memory."
+        )
+
+    return {
+        "bounded_null_test_scope": (
+            "One-sided exclusion of a pre-specified material UNCONDITIONAL average "
+            f"relative QLIKE-loss gain of {margin}. This is the only test here that "
+            "can license an upper bound on that estimand; it does not bound "
+            "conditional or regime-specific gains."
+        ),
+        "c2_fix_summary": (
+            "A repeated-sampling power simulation plus a pre-specified exclusion "
+            "test and inverted confidence bound for the UNCONDITIONAL average "
+            "QLIKE-loss estimand. Only the latter two can bound that estimand; none "
+            "of them bounds conditional or regime-specific gains."
+        ),
+        "gw_name_explanation": (
+            "**Why the word Giacomini-White appears when the statistic has HAC-DM "
+            "form.** With h_t=1, GW (2006) Sec. 3.4 reduces to a mean loss "
+            "differential over a Bartlett HAC standard error and targets only "
+            "UNCONDITIONAL expected loss. This file builds no non-trivial instrument "
+            "vector, q x q moment covariance, Wald statistic, or chi-square_q "
+            "reference distribution, so it performs no conditional GW test and "
+            "licenses no conditional or state-dependent claim."
+        ),
+        "nested_fixed_memory_explanation": (
+            "Validity under nesting comes from the estimation scheme, not the "
+            "DM-form arithmetic. GW compares forecasting methods with fitted-"
+            "parameter noise included, and this limiting experiment requires "
+            "bounded estimator memory. The paired fixed rolling window satisfies "
+            "that condition; an expanding window does not and produces a degenerate "
+            "nested null. Expanding-window values are retained only as "
+            "diagnostic, feeds_gate=false records."
+        ),
+        "endogeneity_claim_scope": (
+            "Flow is contemporaneously correlated with the same day's return and "
+            "volatility, so a contemporaneous regression of RV on flow is "
+            "uninterpretable. Every inferential predictive claim below concerns "
+            "the UNCONDITIONAL average loss differential of paired out-of-sample "
+            "forecasting methods relative to a HAR-RV baseline; no conditional or "
+            "state-dependent predictive-ability claim is made."
+        ),
+        "primary_section_heading": (
+            "Primary family — does flow improve UNCONDITIONAL average OOS QLIKE?"
+        ),
+        "primary_design_scope": (
+            f"{n_cells} pre-specified cells. `H1` adds |z| (flow-shock magnitude); "
+            "`H2` adds an extra loading on redemptions; `H4` asks whether BTC flow "
+            "improves ETH's UNCONDITIONAL average out-of-sample QLIKE after "
+            "controlling for ETH's own flow. None tests conditional or "
+            "state-dependent predictive ability."
+        ),
+        "qlike_delta_interpretation": (
+            "`QLIKE Δ` is the sample-average QLIKE-loss improvement of the flow "
+            "method over the baseline; a negative value means worse average QLIKE. "
+            "Negative unconditional GW/DM z favours flow. The gate requires "
+            "`z < -1.645`, Holm `p < 0.05`, and positive QLIKE Δ."
+        ),
+        "primary_table_header": (
+            "| Cell | n OOS | QLIKE Δ | uncond. GW/DM z | Holm p | Rules out "
+            f"≥{margin} UNCONDITIONAL average QLIKE gain? |"
+        ),
+        "bound_section_heading": (
+            "The UNCONDITIONAL average QLIKE-loss bound: what can be ruled out"
+        ),
+        "bound_test_intro": (
+            "Failing to reject equal UNCONDITIONAL expected loss is not evidence of "
+            "equality. A bound on the average QLIKE-loss estimand requires reversing "
+            "the burden of proof and testing the material-gain null directly; this "
+            "does not bound conditional or regime-specific gains."
+        ),
+        "bound_ci_heading": (
+            "What CAN be bounded: the UNCONDITIONAL average-loss confidence interval"
+        ),
+        "exclusion_table_header": (
+            "| Cell | exclusion z | p (unadjusted, IU) | excludes? | p (Holm, "
+            "conservative) | 95% upper bound on the UNCONDITIONAL average QLIKE "
+            "gain |"
+        ),
+        "in_sample_claim_scope": (
+            "Descriptive only. The verdict rests on the UNCONDITIONAL average loss "
+            "differential of paired out-of-sample forecasting methods, not on an "
+            "in-sample coefficient; conditional or state-dependent predictive "
+            "ability is not tested."
+        ),
+        "h3_weekend_claim_scope": (
+            "In-sample only. The study's verdict concerns the UNCONDITIONAL average "
+            "loss differential of paired out-of-sample forecasting methods, so "
+            "this weekend coefficient is descriptive and enters no verdict. It "
+            "does not test conditional or state-dependent predictive ability."
+        ),
+        "material_gain_null": material_gain_null,
+        "material_gain_alternative": material_gain_alternative,
+        "material_gain_rejection_interpretation": (
+            "Rejecting H0 rules out a gain that large only for the UNCONDITIONAL "
+            "average-loss estimand."
+        ),
+        "material_gain_scope": (
+            "rules out a material UNCONDITIONAL average relative QLIKE-loss gain; "
+            "does NOT prove exact equality and does not bound conditional or "
+            "regime-specific gains or RV-uplift magnitude"
+        ),
+        "upper_bound_note": upper_bound_note,
+        "exclusion_multiplicity_readme": (
+            "**Why these p-values are unadjusted, while the detection ones above "
+            "are Holm-corrected.** The two UNCONDITIONAL average-loss claims have "
+            "opposite logical structure. *\"Flow improves average loss somewhere\"* "
+            "is a **union** of alternatives — ten shots at finding an effect — so "
+            "the family-wise error rate must be controlled. *\"Flow improves "
+            f"average loss nowhere by ≥{margin}\"* is an **intersection**: it may "
+            "be asserted only if every cell rejects its own exclusion null. That "
+            "intersection-union test holds at level alpha with each cell tested "
+            "unadjusted (Berger 1982). Holm there would inflate type-II error and "
+            "buy no type-I protection; its values are reported only as a "
+            "conservative sensitivity. Neither claim addresses conditional or "
+            "regime-specific gains."
+        ),
+        "upper_bound_explanation_readme": (
+            "The last column is the one-sided 95% **upper confidence bound** on the "
+            "UNCONDITIONAL average relative QLIKE-loss gain, obtained by inverting "
+            "the exclusion test. Gains larger than the bound on that estimand are "
+            "excluded; gains smaller than it are not. Unlike a power curve, this "
+            "is an inference about the average-loss estimand rather than a property "
+            "of the design under an assumed truth. It says nothing about "
+            "conditional or regime-specific gains."
+        ),
+        "family_bound_statement": family_bound_statement,
+        "bound_literal_scope": (
+            "**Read the bound literally.** It lives in QLIKE-loss space and bounds "
+            "only UNCONDITIONAL average forecast accuracy. It does not bound a "
+            "conditional or regime-specific gain, an RV uplift per flow shock, or "
+            "the true effect at exactly zero."
+        ),
+        "power_scope_warning": (
+            "POWER IS NOT AN EXCLUSION. This says how often the gate fires against "
+            "an effect of a given size; it does not bound the truth at the 80%-power "
+            "point. The only upper bound this study defends is produced by the "
+            "material-gain exclusion test, lives in QLIKE-loss space, and applies "
+            "only to the UNCONDITIONAL average-loss estimand — not to conditional "
+            "or regime-specific gains. The simulation is per-cell power at the "
+            "nominal 5% gate, h=1, against one injected alternative. The actual "
+            f"verdict applies Holm across {n_cells} cells, includes h=5, and includes "
+            "alternatives not simulated here, so family-wise power is lower."
+        ),
+        "power_dgp_readme": (
+            f"{POWER_REPS} simulated OOS paths per point. The DGP is the fitted "
+            "calendar-day HAR law of motion with block-bootstrapped innovations; "
+            "real flow shocks and returns are retained, and the effect is injected "
+            "into the law of motion so it propagates through HAR lags."
+        ),
+        "power_grid_note": (
+            "The beta grid is coarse, so 80%- and 90%-power crossings are intervals, "
+            "not thresholds. No point estimate of a crossing is reported."
+        ),
+        "power_false_positive_note": (
+            "The beta=0 row is not textbook size. Under the fixed-window method-level "
+            "null, an irrelevant extra regressor raises the augmented method's "
+            "UNCONDITIONAL expected loss through estimation cost, so the one-sided "
+            "flow-favouring gate is conservative. A rejection rate materially above "
+            "5% would be alarming; a lower rate does not establish conditional or "
+            "state-dependent validity."
+        ),
+        "power_section_heading": (
+            "Power — one h=1 cell, one injected alternative, nominal gate"
+        ),
+        "power_curve_intro": (
+            "Per-beta rejection rates for the h=1, one-cell nominal gate:"
+        ),
+        "power_curve_table_header": (
+            "| Assumed RV uplift per 1-sd shock | BTC one-cell power | ETH one-cell "
+            "power |"
+        ),
+        "power_is_not_exclusion_readme": (
+            "**Power is not an exclusion.** This table says how often a one-cell "
+            "gate fires against an assumed effect. It does not bound the true "
+            "effect at the 80%-power point. The separate material-gain test bounds "
+            "only the UNCONDITIONAL average relative QLIKE-loss gain; conditional "
+            "or regime-specific gains are not bounded. The primary family also "
+            f"applies Holm across {n_cells} cells, so family-wise power is lower "
+            "than the table shows."
+        ),
+        "smearing_scope": (
+            "The augmented method has more parameters, which can lower its training "
+            "residual variance and lognormal smearing multiplier. Because QLIKE is "
+            "asymmetric, that channel could bias the UNCONDITIONAL average QLIKE "
+            "comparison against flow. The residual variance is dof-corrected; two "
+            "diagnostic panels also remove smearing or force the baseline multiplier "
+            "onto both methods. Those non-gate diagnostics do not change the "
+            "INCONCLUSIVE primary verdict, and they say nothing about conditional "
+            "or regime-specific gains."
+        ),
+        "h3_motivation": (
+            "Crypto trades through the weekend but the ETFs do not, so Friday flow "
+            "is the last ETF-flow observation before a two-day gap. This in-sample "
+            "descriptive coefficient asks where an association might be most "
+            "visible; it does not test out-of-sample, conditional, or "
+            "state-dependent predictive ability."
+        ),
+        "bounded_memory_heading": bounded_memory_heading,
+        "bounded_memory_issue": bounded_memory_issue,
+        "robustness_registry_intro": (
+            "Every robustness row is registered with the primary family, but only "
+            "pre-specified, bounded-memory primary rows can feed the claim gate. "
+            "Non-primary rows remain diagnostic regardless of their p-values."
+        ),
+        "robustness_table_header": (
+            "| Diagnostic family | Rows | Best flow-favouring UNCONDITIONAL z |"
+        ),
+        "robustness_outcome_readme": (
+            f"Across all **{n_gate_eligible_tests}** gate-eligible tests of the "
+            "UNCONDITIONAL average QLIKE-loss differential, "
+            f"**{n_full_family_significant}** survive Holm in the flow-favouring "
+            f"direction. Another {n_diagnostic_tests} registered tests are "
+            "diagnostic-only and barred from every claim gate. This result does not "
+            "address gains that vary by regime or state."
+        ),
+        "smearing_heading": (
+            "Could smearing bias the UNCONDITIONAL average QLIKE comparison?"
+        ),
+    }
+
+
 def material_gain_exclusion(
     loss_aug: np.ndarray,
     loss_base: np.ndarray,
     h: int,
     margin: float = MATERIAL_GAIN_MARGIN,
 ) -> dict:
-    """Can a pre-specified relative QLIKE gain be RULED OUT? (C2b)
+    """Can a pre-specified UNCONDITIONAL average QLIKE gain be ruled out? (C2b)
 
     This is the only test in the file that can license a bounded null, and it is
     the one v1 never ran.
@@ -1406,12 +1709,13 @@ def material_gain_exclusion(
     Rejecting H0 (positive z, small p) means a gain that large is NOT there.
 
     Note what this does and does not buy. It reverses the burden of proof, so a
-    rejection is a genuine upper bound on the effect -- but the bound lives in
-    QLIKE-LOSS space ("no >=1% relative QLIKE improvement"), NOT in RV-uplift
-    space. v1's "we can rule out a >=16% RV rise per 1-sd shock" came from
-    reading a power curve backwards, which is not an inference at all. Failing to
-    reject equal accuracy never proves equality; only this does, and only for
-    what it actually measures.
+    rejection is a genuine upper bound on the UNCONDITIONAL average-loss
+    estimand -- but the bound lives in QLIKE-LOSS space ("no >=1% average relative
+    QLIKE improvement"), NOT in conditional/regime-specific or RV-uplift space.
+    v1's "we can rule out a >=16% RV rise per 1-sd shock" came from reading a
+    power curve backwards, which is not an inference at all. Failing to reject
+    equal accuracy never proves equality; only this does, and only for what it
+    actually measures.
     """
     if not 0 < margin < 1:
         raise ValueError("margin must lie strictly in (0, 1)")
@@ -1426,37 +1730,37 @@ def material_gain_exclusion(
     lrv = _bartlett_lrv(moment, bw)
     se = math.sqrt(lrv / n)
     z = float(np.mean(moment)) / se
+    prose = build_claim_surface_prose(margin_pct=100 * margin)
     return {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
         "margin_relative_qlike": float(margin),
-        "null": f"flow method improves expected QLIKE by at least {100 * margin:.1f}%",
-        "alternative": f"any QLIKE gain is smaller than {100 * margin:.1f}%",
+        "null": prose["material_gain_null"],
+        "alternative": prose["material_gain_alternative"],
         "n": int(n),
         "mean_margin_moment": float(np.mean(moment)),
         "z_stat": float(z),
         "p_value_one_sided": float(stats.norm.sf(z)),
         "hac_lag_used": int(bw),
-        "scope": (
-            "rules out a material QLIKE gain; does NOT prove exact equality, and "
-            "says nothing about RV-uplift magnitude"
-        ),
+        "scope": prose["material_gain_scope"],
     }
 
 
 def qlike_gain_upper_bound(
     loss_aug: np.ndarray, loss_base: np.ndarray, h: int, alpha: float = 0.05
 ) -> float | None:
-    """One-sided (1-alpha) UPPER CONFIDENCE BOUND on the relative QLIKE gain, in %.
+    """Upper confidence bound on the UNCONDITIONAL average QLIKE gain, in %.
 
     This inverts `material_gain_exclusion`: it returns the supremum of the margins
     whose one-sided null is not rejected. Gains larger than the bound are excluded
-    by the data; gains smaller than it are not.
+    only for this unconditional average-loss estimand; gains smaller than it are
+    not. Conditional or regime-specific gains are not bounded.
 
     Why this and not the power curve. Both answer "how big an effect could this
     design have seen?", but only ONE of them is an inference about the effect. A
     power curve is a property of the design under an assumed truth; a confidence
-    bound is a statement about the truth given the data. v1 reached for the power
-    curve and read it backwards. This is the object it should have reported.
+    bound is a statement about the unconditional average-loss estimand given the
+    data. v1 reached for the power curve and read it backwards. This is the object
+    it should have reported.
 
     Returns None when even a 90% gain cannot be excluded, i.e. the design says
     essentially nothing about the effect size.
@@ -1706,11 +2010,7 @@ def evaluate_cell(
     gw = gw_unconditional_dm(la, lb, h)
     excl = material_gain_exclusion(la, lb, h)
     excl["qlike_gain_upper_bound_95pct"] = qlike_gain_upper_bound(la, lb, h, alpha=0.05)
-    excl["upper_bound_note"] = (
-        "One-sided 95% upper confidence bound on the RELATIVE QLIKE gain, obtained "
-        "by inverting the exclusion test. Gains above it are excluded by the data; "
-        "gains below it are not. None = even a 90% gain cannot be excluded."
-    )
+    excl["upper_bound_note"] = build_claim_surface_prose()["upper_bound_note"]
     boot = block_bootstrap_ci(la, lb, h, seed=SEED + h)
     dm = raw_dm_diagnostic(la, lb, h, scheme="fixed")
 
@@ -1969,9 +2269,10 @@ def power_simulation(
         design's power against THEM.
       * The beta = 0 row is a FALSE-POSITIVE DIAGNOSTIC, not a size calibration:
         under GW's method-level null with a fixed window, an irrelevant regressor
-        makes the augmented method genuinely worse, so the flow-favouring
-        one-sided test is CONSERVATIVE at beta = 0 by construction. A rate below
-        5% there is the correct behaviour, not evidence of a calibrated size.
+        raises the augmented method's UNCONDITIONAL expected loss, so the
+        flow-favouring one-sided test is CONSERVATIVE at beta = 0 by construction.
+        A rate below 5% there is the expected behaviour, not evidence about a
+        conditional test or calibrated textbook size.
 
     What this function establishes: for an effect of size beta, how often would
     that one gate fire? Nothing more.
@@ -2132,48 +2433,16 @@ def power_simulation(
         "dgp_persistence_phi_sum": round(dgp["persistence"], 4),
         "dgp_resid_sd": round(dgp["resid_sd"], 4),
         "false_positive_rate_at_beta_0": size["power_gw_one_sided_5pct"] if size else None,
-        "false_positive_note": (
-            "This is the rejection rate of the flow-favouring gate when the true "
-            "effect is ZERO, and it must be read carefully -- it is NOT 'size' in "
-            "the textbook sense. Under GW's method-level null with a fixed window, "
-            "an irrelevant extra regressor makes the augmented METHOD genuinely "
-            "worse: it pays an estimation cost and buys nothing, so "
-            "E[L_aug - L_base] > 0 strictly. The one-sided flow-favouring test is "
-            "therefore CONSERVATIVE at beta = 0 by construction, and a rate well "
-            "below the nominal 5% is the expected, correct behaviour -- not a bug "
-            "and not a calibration failure. What it does establish is the thing we "
-            "need: this gate does not manufacture flow signals out of noise. A rate "
-            "materially ABOVE 5% would have been the alarming result."
-        ),
+        "false_positive_note": build_claim_surface_prose()[
+            "power_false_positive_note"
+        ],
         "curve": rows,
         "power_80pct_bracket": _bracket(0.80),
         "power_90pct_bracket": _bracket(0.90),
-        "grid_note": (
-            "beta is evaluated on a COARSE grid of 8 points, so the effect size at "
-            "which power first reaches a target is BRACKETED, never solved. The "
-            "brackets above are the only admissible reading: a crossing lies "
-            "somewhere inside [lower_rv_uplift_pct, upper_rv_uplift_pct]. This "
-            "object deliberately emits NO point estimate of an 80%- or 90%-power "
-            "effect size -- an earlier revision printed the upper grid point as if "
-            "it were the threshold, which is the same 'coarse curve, precise number' "
-            "move that got v1 failed, only smaller."
-        ),
+        "grid_note": build_claim_surface_prose()["power_grid_note"],
         "max_beta_tested": max(betas),
         "max_uplift_tested_pct": round((math.exp(max(betas)) - 1) * 100, 2),
-        "scope_warning": (
-            "POWER IS NOT AN EXCLUSION. This says how often the gate fires against "
-            "an effect of a given size. It does NOT say the true effect is smaller "
-            "than the 80%-power point -- that inversion is exactly the error v1 "
-            "made when it claimed to 'rule out >= +16% RV per 1-sd shock'. The only "
-            "upper bound this study can defend is the material-gain exclusion test, "
-            "and it lives in QLIKE-loss space. "
-            "Also note the SCOPE (see `scope`): this is PER-CELL power at the nominal "
-            "5% gate, at h = 1, against ONE injected alternative. The verdict's family "
-            "additionally applies a Holm correction, spans h = 5 as well, and includes "
-            "alternatives that are not simulated here -- so the family-wise design has "
-            "LESS power than the curve below, and the curve says nothing at all about "
-            "power against H2_asym or H4_plus_btc."
-        ),
+        "scope_warning": build_claim_surface_prose()["power_scope_warning"],
     }
 
 
@@ -2215,31 +2484,47 @@ def build_verdict_basis(
     margin_pct: float,
     family_bound: float | None,
     per_cell_upper_bounds: dict,
+    unbounded_memory_cells: tuple[str, ...] | list[str],
+    n_registered_tests: int,
+    n_gate_eligible_tests: int,
+    n_full_family_significant: int,
+    n_diagnostic_tests: int,
 ) -> dict:
-    """Counts in, final verdict/figure words out. Touches no data or estimates.
+    """Counts/provenance in, every substantive claim-scope sentence out.
 
-    Every result claim in the final ``Does say`` / ``Does not say`` summary and
-    every inferential figure label is returned here. The renderer and the frozen-
-    result plotter consume those strings instead of independently paraphrasing
-    them. Explanatory methods and provenance prose still live in their natural
-    sections of the renderer; they are not represented as count-derived claims.
+    Final summary bullets, quantitative bounds, in-sample/OOS scope statements,
+    power warnings, bounded-memory provenance and inferential figure labels are
+    returned here. The renderer and frozen result record consume the exact strings
+    instead of independently paraphrasing them.
 
     This separation makes a wording-only correction possible without fetching an
     unarchived, later vendor vintage. ``--relabel`` derives these strings from the
     frozen counts and refuses to write if any pre-existing non-string leaf moves.
     """
+    prose = build_claim_surface_prose(
+        n_cells=n_cells,
+        margin_pct=margin_pct,
+        family_bound=family_bound,
+        unbounded_memory_cells=unbounded_memory_cells,
+        n_registered_tests=n_registered_tests,
+        n_gate_eligible_tests=n_gate_eligible_tests,
+        n_full_family_significant=n_full_family_significant,
+        n_diagnostic_tests=n_diagnostic_tests,
+    )
     if verdict == "BOUNDED_NULL_NO_MATERIAL_QLIKE_GAIN":
         claim = (
             f"BOUNDED NULL. No primary cell clears the pre-specified Holm-adjusted "
             f"UNCONDITIONAL detection gate, and all {n_excl}/{n_cells} primary "
             f"cells REJECT the "
-            f"hypothesis that adding ETF flow improves expected QLIKE by at least "
+            "hypothesis that adding ETF flow improves UNCONDITIONAL expected QLIKE "
+            "by at least "
             f"{margin_pct:.0f}% (intersection-union test, each cell unadjusted; "
             f"{n_excl_holm}/{n_cells} also survive the conservative Holm variant). "
             f"Defensible claim: 'spot BTC/ETH ETF net flow buys no material "
-            f"({margin_pct:.0f}%+) QLIKE improvement over a HAR-RV baseline, out of "
-            f"sample.' The bound lives in QLIKE-LOSS space. It is NOT a bound on "
-            f"RV-uplift magnitude and NOT a proof of exact zero."
+            f"({margin_pct:.0f}%+) UNCONDITIONAL average QLIKE-loss improvement "
+            f"over a HAR-RV baseline, out of sample.' The bound does not cover "
+            "conditional or regime-specific gains, RV-uplift magnitude, or exact "
+            "zero."
         )
         detection_outcome = (
             f"The bounded-null verdict follows because no primary cell clears the "
@@ -2255,23 +2540,20 @@ def build_verdict_basis(
         )
         does_say_2 = ""
         does_say_3 = ""
-    elif verdict == "INCONCLUSIVE_NO_EXACT_NULL_CLAIM":
-        bound_txt = (
-            f"The inverted one-sided 95% upper confidence bound on the relative "
-            f"QLIKE gain is {family_bound:.1f}% simultaneously across all "
-            f"{n_cells} cells (Bonferroni): gains LARGER than that are excluded by "
-            f"the data; anything smaller is not."
-            if family_bound is not None
-            else (
-                "The design cannot even exclude a 90% relative QLIKE gain in every "
-                "cell, so NO upper bound can be stated. That is how little this "
-                "sample can say about the effect size."
-            )
+        exclusion_outcome_readme = (
+            f"**{n_excl} / {n_cells}** cells reject H0 at the pre-specified "
+            f"{margin_pct:.0f}% UNCONDITIONAL average relative QLIKE-loss margin. "
+            "That margin was carried from K1701 and fixed before these results. "
+            "Because every cell rejects it, the intersection-union bounded-null "
+            "condition is established for that estimand only."
         )
+    elif verdict == "INCONCLUSIVE_NO_EXACT_NULL_CLAIM":
+        bound_txt = prose["family_bound_statement"]
         claim = (
             f"INCONCLUSIVE. No primary cell clears the pre-specified Holm-adjusted "
             f"UNCONDITIONAL detection gate, but only {n_excl}/{n_cells} primary "
-            f"cells can rule out the pre-specified {margin_pct:.0f}% QLIKE gain, so "
+            f"cells can rule out the pre-specified {margin_pct:.0f}% UNCONDITIONAL "
+            "average relative QLIKE-loss gain, so "
             f"the bounded null is NOT established. Failure to reject equal accuracy "
             f"is not evidence of equality. The honest headline is: 'no robust "
             f"incremental UNCONDITIONAL predictive evidence was found for spot "
@@ -2302,6 +2584,13 @@ def build_verdict_basis(
             f"{margin_pct:.0f}% gain, so this is a **negative finding, not a "
             "proven zero**. Calling it a null result would overstate the evidence."
         )
+        exclusion_outcome_readme = (
+            f"**{n_excl} / {n_cells}** cells reject H0 at the pre-specified "
+            f"{margin_pct:.0f}% UNCONDITIONAL average relative QLIKE-loss margin. "
+            "That margin was carried from K1701 and fixed before these results. "
+            "Because the intersection-union conjunction fails, **the bounded null "
+            "is not established** and the verdict is `INCONCLUSIVE`, not `NULL`."
+        )
     else:
         claim = (
             f"POSITIVE. {n_pass}/{n_cells} primary cells clear the pre-specified "
@@ -2315,8 +2604,14 @@ def build_verdict_basis(
         does_say_1 = claim
         does_say_2 = ""
         does_say_3 = ""
+        exclusion_outcome_readme = (
+            f"{n_excl}/{n_cells} cells reject the pre-specified UNCONDITIONAL "
+            f"average relative QLIKE-loss margin of {margin_pct:.0f}%. That margin "
+            "was carried from K1701 and fixed before these results."
+        )
 
     return {
+        **prose,
         "test": (
             "TWO pre-specified objects, with OPPOSITE multiplicity treatments, and "
             "the verdict is a function of both. (1) DETECTION -- Giacomini-White "
@@ -2370,6 +2665,12 @@ def build_verdict_basis(
         "cells_passing_flow_gate": n_pass,
         "cells_excluding_material_gain": n_excl,
         "cells_excluding_material_gain_holm_conservative": n_excl_holm,
+        "primary_detection_outcome_readme": (
+            "For the UNCONDITIONAL average-loss primary family, "
+            f"**{n_pass} / {n_cells}** cells pass the pre-specified Holm-adjusted "
+            "flow-detection gate."
+        ),
+        "exclusion_outcome_readme": exclusion_outcome_readme,
         "exclusion_multiplicity_rationale": (
             "The exclusion family is an INTERSECTION-UNION test (Berger 1982): the "
             "bounded-null claim requires EVERY cell to reject its own exclusion null, "
@@ -2387,8 +2688,8 @@ def build_verdict_basis(
         "upper_bound_method": (
             "Inverted one-sided exclusion test (Bonferroni alpha/m across the "
             f"{n_cells} primary cells). This -- not the power curve -- is the object "
-            "that can bound an effect. It lives in QLIKE-LOSS space, not RV-uplift "
-            "space."
+            "that can bound the UNCONDITIONAL average-loss estimand. It lives in "
+            "QLIKE-LOSS space, not conditional/regime-specific or RV-uplift space."
         ),
         "claim_strength": claim,
         "does_say_1_primary_evidence": does_say_1,
@@ -2404,7 +2705,7 @@ def build_verdict_basis(
         ),
         "does_not_say_2_rv_uplift": (
             "That an RV uplift of any particular size is excluded. The only reported "
-            "bound is in relative QLIKE-loss space."
+            "bound is on the UNCONDITIONAL average relative QLIKE-loss gain."
         ),
         "does_not_say_3_conditional_effect": (
             "That flow lacks conditional or state-dependent predictive ability. The "
@@ -2430,6 +2731,22 @@ def build_verdict_basis(
         "figure_5_power_label": (
             "power of one-cell UNCONDITIONAL GW/DM gate (z < -1.645)"
         ),
+        "figure_5_bracket_label": (
+            "80% one-cell power in +{lower}...+{upper}% RV-uplift bracket"
+        ),
+        "figure_5_panel_title": (
+            "{asset}: one-cell power (beta=0 rejection rate {false_positive})"
+        ),
+        "figure_5_x_label": "assumed RV uplift per 1-sd flow shock (%)",
+        "figure_5_y_label": "one-cell rejection rate",
+        "figure_5_80_line_label": "80% one-cell power",
+        "figure_5_nominal_line_label": "nominal 5% one-cell gate level",
+        "figure_5_suptitle": (
+            f"Power scope: one h=1 cell, one injected alternative, {POWER_REPS} "
+            "simulated OOS paths per point, nominal gate. The 10-cell Holm family "
+            "is less powerful. Power is not an exclusion and does not bound either "
+            "UNCONDITIONAL average or conditional/regime-specific effects."
+        ),
         "reproducibility_limitation": (
             "Neither the Farside flow response nor the Yahoo price response was "
             "archived point-in-time. The source URLs and sample endpoint identify "
@@ -2445,13 +2762,13 @@ def build_verdict_basis(
             "renders centre x=0 on the recorded flow source date explicitly."
         ),
         "bound_inversion_limitation": (
-            "The frozen QLIKE upper bounds were produced by a binary inversion that "
-            "assumed the rejection set was an upper tail. The primary streams were "
-            "later found mildly non-monotone; a dense independent audit found one "
-            "crossing per stream, so the published crossings did not move, but the "
-            "frozen JSON does not archive the loss paths needed to reproduce that "
-            "audit. Future runs verify the full rejection topology before reporting "
-            "a bound."
+            "The frozen UNCONDITIONAL average-loss QLIKE upper bounds were produced "
+            "by a binary inversion that assumed the rejection set was an upper "
+            "tail. The primary streams were later found mildly non-monotone; a "
+            "dense independent audit found one crossing per stream, so the "
+            "published crossings did not move, but the frozen JSON does not archive "
+            "the loss paths needed to reproduce that audit. Future runs verify the "
+            "full rejection topology before reporting a bound."
         ),
         "withdrawn_v1_claim": (
             "v1 claimed it could 'rule out an RV uplift of >= +16.2% per 1-sd flow "
@@ -2468,6 +2785,46 @@ def build_verdict_basis(
             "its test."
         ),
     }
+
+
+def _apply_canonical_claim_surface_strings(res: dict, verdict_basis: dict) -> None:
+    """Write canonical claim prose into every frozen JSON presentation site.
+
+    Only strings are assigned. ``--relabel`` snapshots all typed leaves before
+    calling this function and aborts if any number, boolean, null or container
+    shape moves.
+    """
+    res["inference_design"]["bounded_null_test"] = verdict_basis[
+        "bounded_null_test_scope"
+    ]
+    res["inference_design"]["power_is_not_exclusion"] = verdict_basis[
+        "power_scope_warning"
+    ]
+    res["endogeneity_note"] = verdict_basis["endogeneity_claim_scope"]
+    res["in_sample_note"] = verdict_basis["in_sample_claim_scope"]
+
+    for collection in ("primary_cells", "all_cells"):
+        for cell in res.get(collection, []):
+            exclusion = cell.get("material_gain_exclusion")
+            if not isinstance(exclusion, dict):
+                continue
+            exclusion["null"] = verdict_basis["material_gain_null"]
+            exclusion["alternative"] = verdict_basis["material_gain_alternative"]
+            exclusion["scope"] = verdict_basis["material_gain_scope"]
+            exclusion["upper_bound_note"] = verdict_basis["upper_bound_note"]
+
+    for row in res.get("h3_weekend_in_sample", {}).values():
+        row["note"] = verdict_basis["h3_weekend_claim_scope"]
+    for row in res.get("power_simulation", {}).values():
+        row["scope_warning"] = verdict_basis["power_scope_warning"]
+        row["grid_note"] = verdict_basis["power_grid_note"]
+        row["false_positive_note"] = verdict_basis["power_false_positive_note"]
+
+    sensitivity = res.get("multiple_testing", {}).get(
+        "bounded_memory_sensitivity"
+    )
+    if isinstance(sensitivity, dict):
+        sensitivity["issue"] = verdict_basis["bounded_memory_issue"]
 
 
 def _non_string_leaf_surface(value, path: tuple = ()) -> dict:
@@ -2731,8 +3088,20 @@ def relabel_frozen_results() -> None:
         margin_pct=old["material_gain_margin_pct"],
         family_bound=old["qlike_gain_upper_bound_family_simultaneous_pct"],
         per_cell_upper_bounds=old["qlike_gain_upper_bound_95pct_per_cell"],
+        unbounded_memory_cells=res["multiple_testing"][
+            "bounded_memory_sensitivity"
+        ]["unbounded_memory_cells"],
+        n_registered_tests=res["multiple_testing"]["n_tests_registered_total"],
+        n_gate_eligible_tests=res["multiple_testing"][
+            "n_gate_eligible_gw_tests"
+        ],
+        n_full_family_significant=res["multiple_testing"][
+            "n_full_family_holm_significant_at_05"
+        ],
+        n_diagnostic_tests=res["multiple_testing"]["n_diagnostic_only_tests"],
     )
     res["verdict_basis"] = new
+    _apply_canonical_claim_surface_strings(res, new)
     res["nested_dm_fixed_memory_evidence_v1"] = (
         build_fixed_memory_runtime_evidence(res)
     )
@@ -2745,9 +3114,16 @@ def relabel_frozen_results() -> None:
         tmp.unlink(missing_ok=True)
         raise SystemExit("relabel moved a non-string JSON leaf -- refusing")
     os.replace(tmp, path)
-    changed = [k for k, v in old.items() if isinstance(v, str) and new[k] != v]
+    changed = [
+        k
+        for k, v in old.items()
+        if isinstance(v, str) and k in new and new[k] != v
+    ]
+    removed = [k for k in old if k not in new]
     added = [k for k in new if k not in old]
     print(f"relabelled {len(changed)} claim sentence(s): {', '.join(changed)}")
+    if removed:
+        print(f"removed obsolete claim sentence(s): {', '.join(removed)}")
     if added:
         print(f"added: {', '.join(added)}")
     print(
@@ -2796,11 +3172,9 @@ def main() -> None:
                 "the augmented complete-case mask, the training dates, the embargo "
                 "and the window length)."
             ),
-            "bounded_null_test": (
-                "One-sided material-gain exclusion at a pre-specified "
-                f"{100 * MATERIAL_GAIN_MARGIN:.0f}% relative-QLIKE margin. This is "
-                "the ONLY test here that can license an upper bound on the effect."
-            ),
+            "bounded_null_test": build_claim_surface_prose()[
+                "bounded_null_test_scope"
+            ],
             "diagnostic_only": (
                 "Raw Diebold-Mariano (HAC, canonical bandwidth) and Clark-West are "
                 "reported but tagged feeds_gate=false -- for two DIFFERENT reasons, "
@@ -2814,14 +3188,9 @@ def main() -> None:
                 "general-loss test -- that relabelling is what the review flagged as "
                 "CRITICAL in v1."
             ),
-            "power_is_not_exclusion": (
-                "Simulated power is reported for ONE cell of the design at h = 1 "
-                "against ONE injected alternative, but power cannot prove the effect "
-                "is smaller than the minimum detectable effect. v1 made that "
-                "inversion and claimed to rule out a >=16% RV uplift. Withdrawn. The "
-                "curve is also NOT the family's power: the verdict applies a Holm "
-                "correction over 10 cells, which is strictly less powerful."
-            ),
+            "power_is_not_exclusion": build_claim_surface_prose()[
+                "power_scope_warning"
+            ],
         },
         "v1_defects_fixed": {
             "C1": "nested comparison no longer inferred with raw DM / mislabelled CW",
@@ -2919,12 +3288,9 @@ def main() -> None:
             "n": int(len(j)),
         }
     res["endogeneity_diagnostic"] = endo
-    res["endogeneity_note"] = (
-        "Flow is contemporaneously correlated with same-day return and volatility, "
-        "which is exactly why a contemporaneous OLS of RV on flow would be "
-        "uninterpretable. All predictive claims below are strictly out-of-sample "
-        "and conditional on a HAR-RV baseline."
-    )
+    res["endogeneity_note"] = build_claim_surface_prose()[
+        "endogeneity_claim_scope"
+    ]
 
     btc_z_cal = feats["BTC"].z
 
@@ -2946,10 +3312,7 @@ def main() -> None:
         for spec in ("HAR", "HAR+ctrl", "H1_absflow", "H2_asym"):
             insample[f"{a}_h{h}_{spec}"] = in_sample(p, spec)
     res["in_sample"] = insample
-    res["in_sample_note"] = (
-        "Descriptive. The verdict rests on out-of-sample predictive ability, not "
-        "on an in-sample coefficient."
-    )
+    res["in_sample_note"] = build_claim_surface_prose()["in_sample_claim_scope"]
 
     # --- PRIMARY family: H1 / H2 on both assets and horizons ------------------
     cells = []
@@ -3100,10 +3463,7 @@ def main() -> None:
             "description": "Friday ETF flow -> mean GK RV over Sat+Sun (weekend gap)",
             "inference": "in-sample HAC t on the abs_z coefficient",
             "feeds_gate": False,
-            "note": (
-                "In-sample only. The study's claim is about out-of-sample predictive "
-                "content, so this is descriptive and does not enter any verdict."
-            ),
+            "note": build_claim_surface_prose()["h3_weekend_claim_scope"],
             "n_fridays": int(len(fri)),
             "coef": {
                 nm: {
@@ -3234,17 +3594,10 @@ def main() -> None:
         ],
         "n_full_family_holm_significant_at_05": n_sig_all,
         "bounded_memory_sensitivity": {
-            "issue": (
-                "GW's limiting experiment assumes the forecasting METHOD has bounded "
-                "estimator memory. Every cell here uses a fixed 250-day rolling "
-                "regression window, so the final fit always satisfies it -- but the "
-                "condition is on the whole method. The `flow_transform/unexpected_z` "
-                "rows build their regressor from an AR(5) refitted on an EXPANDING "
-                "window of flow history, so those rows do not. There is no "
-                "lookahead in it; it simply is not a bounded-memory forecasting "
-                "method, and the write-up must not claim in one blanket sentence "
-                "that every registered test is one."
-            ),
+            "issue": build_claim_surface_prose(
+                unbounded_memory_cells=tuple(sorted({r.cell for r in gw_unbounded})),
+                n_registered_tests=len(REGISTRY),
+            )["bounded_memory_issue"],
             "n_gw_tests_all": len(gw_registered),
             "n_gw_tests_bounded_memory": len(gw_bm),
             "unbounded_memory_cells": sorted(
@@ -3293,8 +3646,20 @@ def main() -> None:
         per_cell_upper_bounds={
             row["cell"]: row["qlike_gain_upper_bound_95pct"] for row in primary_rows
         },
+        unbounded_memory_cells=res["multiple_testing"][
+            "bounded_memory_sensitivity"
+        ]["unbounded_memory_cells"],
+        n_registered_tests=res["multiple_testing"]["n_tests_registered_total"],
+        n_gate_eligible_tests=res["multiple_testing"][
+            "n_gate_eligible_gw_tests"
+        ],
+        n_full_family_significant=res["multiple_testing"][
+            "n_full_family_holm_significant_at_05"
+        ],
+        n_diagnostic_tests=res["multiple_testing"]["n_diagnostic_only_tests"],
     )
     res["verdict_basis"] = verdict_basis
+    _apply_canonical_claim_surface_strings(res, verdict_basis)
     res["nested_dm_fixed_memory_evidence_v1"] = (
         build_fixed_memory_runtime_evidence(res)
     )
@@ -3476,9 +3841,15 @@ def make_frozen_result_plots(res: dict) -> None:
                 label=vb["figure_5_power_label"],
             )
             ax.fill_between(x, y - 1.96 * se, y + 1.96 * se, color="#2a9d8f", alpha=.18)
-            ax.axhline(0.80, color="#e76f51", ls="--", lw=1.0, label="80% power")
+            ax.axhline(
+                0.80,
+                color="#e76f51",
+                ls="--",
+                lw=1.0,
+                label=vb["figure_5_80_line_label"],
+            )
             ax.axhline(0.05, color="grey", ls=":", lw=1.0,
-                       label="nominal 5% gate level")
+                       label=vb["figure_5_nominal_line_label"])
             fp = pw[a]["false_positive_rate_at_beta_0"]
             # The 80%-power effect is BRACKETED by the grid, never solved. Draw the
             # interval, not a line: a vline here would redraw the exact "coarse
@@ -3488,23 +3859,21 @@ def make_frozen_result_plots(res: dict) -> None:
                 ax.axvspan(
                     br["lower_rv_uplift_pct"], br["upper_rv_uplift_pct"],
                     color="#264653", alpha=.12,
-                    label=(
-                        f"80% power somewhere in "
-                        f"+{br['lower_rv_uplift_pct']}…+{br['upper_rv_uplift_pct']}% "
-                        "(bracket, not a threshold)"
+                    label=vb["figure_5_bracket_label"].format(
+                        lower=br["lower_rv_uplift_pct"],
+                        upper=br["upper_rv_uplift_pct"],
                     ),
                 )
-            ax.set_title(f"{a}: simulated power  (fires on pure noise: {fp:.1%})")
-            ax.set_xlabel("TRUE RV uplift per 1-sd flow shock (%)")
+            ax.set_title(
+                vb["figure_5_panel_title"].format(
+                    asset=a, false_positive=f"{fp:.1%}"
+                )
+            )
+            ax.set_xlabel(vb["figure_5_x_label"])
             ax.set_ylim(0, 1.02)
             ax.legend(fontsize=7.5, loc="lower right")
-        axes[0].set_ylabel("rejection rate")
-        fig.suptitle(
-            f"What ONE CELL of this design could have SEEN — {POWER_REPS} simulated OOS "
-            "paths per point, h=1, nominal single-cell gate (the 10-cell Holm family is "
-            "weaker).\nPower is not an exclusion: it does not bound the true effect.",
-            fontsize=9.5,
-        )
+        axes[0].set_ylabel(vb["figure_5_y_label"])
+        fig.suptitle(vb["figure_5_suptitle"], fontsize=9.5)
         fig.tight_layout()
         fig.savefig(OUT / "fig5_simulated_power.png", dpi=130)
         plt.close(fig)

@@ -90,9 +90,7 @@ def build_readme(r: dict) -> str:
             "\"MDE\" was one injection into one noise path — no repeated sampling, "
             "no false-positive check, non-monotone, and then read backwards as an "
             "exclusion",
-            "A real power simulation (1000 simulated OOS paths per point) **plus** a "
-            "pre-specified material-gain exclusion test and an inverted confidence "
-            "bound — the only objects that can legitimately bound an effect",
+            vb["c2_fix_summary"],
         ),
         "C3": (
             "16 BTC / 10 ETH US market holidays kept as genuine `Total=0.0` flow days, "
@@ -133,7 +131,7 @@ def build_readme(r: dict) -> str:
     A(f"- **Loss**: {vb['loss']}")
     A(f"- **Estimation scheme**: {vb['estimation_scheme']}")
     A(f"- **Gate**: `{vb['gate']}`")
-    A(f"- **Claim scope**: bounded in QLIKE-loss space only. {vb['four_way_alignment']}")
+    A(f"- **Claim scope**: {vb['four_way_alignment']}")
     A("")
     A(
         "> ### What this study did NOT test\n"
@@ -141,32 +139,9 @@ def build_readme(r: dict) -> str:
         f"> {vb['conditional_predictive_ability_not_tested']}"
     )
     A("")
-    A(
-        "**Why the word Giacomini-White appears at all, given that the statistic is a "
-        "HAC Diebold-Mariano.** It is the same arithmetic — a mean loss difference "
-        "over a Bartlett HAC standard error — and on the same loss stream the two "
-        "statistics agree to about three decimal places (they differ only in a "
-        "small-sample HAC scaling: this file divides each lag covariance by *n*, the "
-        "canonical DM helper by *n − lag*). The results file reports both, side by "
-        "side, rather than hiding the coincidence. GW (2006) Sec 3.4 is precisely the "
-        "case where the coincidence is expected: set the instrument h_t = 1 and their "
-        "conditional test collapses onto the unconditional one. **The conditional "
-        "machinery — a non-trivial h_t, a q × q moment covariance, a Wald χ²_q — is "
-        "not built anywhere in this file, and no claim here depends on it.**"
-    )
+    A(vb["gw_name_explanation"])
     A("")
-    A(
-        "What makes the test legal under nesting is therefore **not the formula** but "
-        "the *estimation scheme*. Giacomini and White compare forecasting **methods**, "
-        "with fitted-parameter noise treated as part of the object being compared "
-        "rather than a nuisance to be purged — and that limiting experiment requires "
-        "the estimator to have **bounded memory**, i.e. a fixed-length rolling window. "
-        "Feed the same formula expanding-window forecasts, as v1 did, and the nested "
-        "null is degenerate: the statistic is biased toward the smaller model and no "
-        "reference distribution rescues it. Every cell therefore also reports the "
-        "expanding-window value under `expanding_window_diagnostic_v1_design`, so the "
-        "effect of the scheme change is auditable rather than asserted."
-    )
+    A(vb["nested_fixed_memory_explanation"])
     A("")
 
     # ---- data --------------------------------------------------------------
@@ -237,29 +212,15 @@ def build_readme(r: dict) -> str:
             f"| {num(endo[a]['corr_absflow_vs_same_day_logrv'], 3)} |"
         )
     A("")
-    A(
-        "Flow is contemporaneously correlated with the same day's return and "
-        "volatility, so a contemporaneous regression of RV on flow is "
-        "uninterpretable — it cannot tell \"flow moves volatility\" from \"volatility "
-        "attracts flow\". Everything below is strictly out-of-sample and conditional "
-        "on a HAR-RV baseline."
-    )
+    A(vb["endogeneity_claim_scope"])
     A("")
 
     # ---- primary results ---------------------------------------------------
-    A("## Primary family — does ETF flow beat HAR out-of-sample?")
+    A(f"## {vb['primary_section_heading']}")
     A("")
-    A(
-        f"{vb['cells_in_primary_family']} pre-specified cells. `H1` adds |z| (flow "
-        "shock magnitude); `H2` adds an extra loading on redemptions; `H4` tests "
-        "whether BTC's flow shock predicts **ETH** volatility once ETH's own flow is "
-        "controlled for."
-    )
+    A(vb["primary_design_scope"])
     A("")
-    A(
-        "| Cell | n OOS | QLIKE Δ | uncond. GW/DM z | Holm p | Rules out "
-        f"≥{vb['material_gain_margin_pct']:.0f}% gain? |"
-    )
+    A(vb["primary_table_header"])
     A("|---|---|---|---|---|---|")
     for f in fam:
         c = by_cell[f["cell"]]
@@ -270,34 +231,21 @@ def build_readme(r: dict) -> str:
             f"| {'**yes**' if f['excludes_material_gain'] else 'no'} |"
         )
     A("")
-    A(
-        "`QLIKE Δ` is the flow model's improvement over the baseline — **negative "
-        "means the flow model is worse**. `z < 0` would favour flow; the gate "
-        f"needs `z < -1.645` *and* Holm `p < 0.05` *and* a positive QLIKE Δ. "
-        f"Cells passing: **{vb['cells_passing_flow_gate']} / "
-        f"{vb['cells_in_primary_family']}**."
-    )
+    A(vb["qlike_delta_interpretation"])
+    A(vb["primary_detection_outcome_readme"])
     A("")
 
     # ---- exclusion ---------------------------------------------------------
-    A("### The bound: what can actually be ruled out")
+    A(f"### {vb['bound_section_heading']}")
+    A("")
+    A(vb["bound_test_intro"])
     A("")
     A(
-        "Failing to reject equal accuracy is **not** evidence of equality — that is "
-        "the trap v1 fell into. To claim a bound you have to reverse the burden of "
-        "proof and test it directly:"
+        f"> **H₀**: {vb['material_gain_null']}. "
+        f"{vb['material_gain_rejection_interpretation']}"
     )
     A("")
-    A(
-        f"> **H₀**: adding ETF flow improves expected QLIKE by at least "
-        f"{vb['material_gain_margin_pct']:.0f}% (relative). Rejecting H₀ means a gain "
-        f"that large is not there."
-    )
-    A("")
-    A(
-        "| Cell | exclusion z | p (unadjusted, IU) | excludes? | p (Holm, conservative) "
-        "| 95% upper bound on the gain |"
-    )
+    A(vb["exclusion_table_header"])
     A("|---|---|---|---|---|---|")
     for f in fam:
         ex = by_cell[f["cell"]]["material_gain_exclusion"]
@@ -310,141 +258,36 @@ def build_readme(r: dict) -> str:
             f"| {'≤ ' + num(ub, 2) + '%' if ub is not None else 'none'} |"
         )
     A("")
-    A(
-        "**Why these p-values are unadjusted, while the detection ones above "
-        "are Holm-corrected.** The two claims have opposite logical structure, and "
-        "the correction has to follow the claim, not the habit. *\"Flow helps "
-        "somewhere\"* is a **union** of alternatives — ten shots at finding an effect "
-        "— so the family-wise error rate must be controlled. *\"Flow helps nowhere by "
-        "≥1%\"* is an **intersection**: it may be asserted only if *every* cell "
-        "rejects its own exclusion null, which is an intersection-union test "
-        "(Berger 1982) and holds at level α with each cell tested unadjusted. Holm "
-        "there would inflate type-II error and buy no type-I protection. The Holm "
-        "column is reported anyway so the choice is auditable — and note it does not "
-        "change the verdict either way."
-    )
+    A(vb["exclusion_multiplicity_readme"])
     A("")
-    A(
-        f"**{vb['cells_excluding_material_gain']} / {vb['cells_in_primary_family']}** "
-        f"cells reject H₀ at the pre-specified {vb['material_gain_margin_pct']:.0f}% "
-        "margin. That margin is the project standard carried over from K1701 — it "
-        "was fixed before the results were seen, not tuned until the null looked "
-        "good. Because most cells cannot reject it, **the bounded null is not "
-        "established** and the verdict is `INCONCLUSIVE`, not `NULL`."
-    )
+    A(vb["exclusion_outcome_readme"])
     A("")
-    A("### What CAN be bounded: the inverted confidence interval")
+    A(f"### {vb['bound_ci_heading']}")
     A("")
-    A(
-        "The last column above is the honest quantitative answer. It is the "
-        "one-sided 95% **upper confidence bound** on the relative QLIKE gain, "
-        "obtained by inverting the exclusion test: gains *larger* than the bound are "
-        "excluded by the data; gains *smaller* than it are not. Unlike a power curve, "
-        "this is an inference about the effect rather than a property of the design "
-        "under an assumed truth — which is exactly the distinction v1 collapsed."
-    )
+    A(vb["upper_bound_explanation_readme"])
     A("")
-    fb = vb.get("qlike_gain_upper_bound_family_simultaneous_pct")
-    if fb is not None:
-        A(
-            f"Holding **simultaneously across all {vb['cells_in_primary_family']} "
-            f"cells** (Bonferroni): the relative QLIKE gain from adding ETF flow is "
-            f"**≤ {fb:.1f}%**. Anything larger is ruled out; anything smaller is not."
-        )
-    else:
-        A(
-            "Simultaneously across the family, **no bound can be stated at all** — "
-            "at least one cell cannot exclude even a 90% relative QLIKE gain. That is "
-            "how little this sample constrains the effect size, and it is the "
-            "clearest possible refutation of v1's confident \"≥16% is excluded\"."
-        )
+    A(vb["family_bound_statement"])
     A("")
-    A(
-        "**Read the bound literally.** It lives in QLIKE-loss space: it is about "
-        "*forecast accuracy*. It is **not** a statement that the RV uplift per flow "
-        "shock is smaller than any particular percentage, and it is **not** a proof "
-        "of exact zero."
-    )
+    A(vb["bound_literal_scope"])
     A("")
     A(f"**Frozen-bound limitation.** {vb['bound_inversion_limitation']}")
     A("")
 
     # ---- power -------------------------------------------------------------
-    A("## Power — what this design could have seen")
+    A(f"## {vb['power_section_heading']}")
     A("")
     pw = r["power_simulation"]
-    A(
-        f"{pw['BTC']['reps_per_beta']} simulated OOS paths per point. The DGP is the "
-        "fitted calendar-day HAR law of motion with block-bootstrapped innovations, "
-        "the real flow shocks and the real returns retained, and the effect injected "
-        "**into the law of motion** so it propagates through the HAR lags — exactly "
-        "as a genuine effect would, and exactly as the baseline would partially "
-        "absorb it."
-    )
+    A(vb["power_dgp_readme"])
     A("")
-    A("| | BTC | ETH |")
-    A("|---|---|---|")
-    A(
-        f"| Rejection rate when the true effect is 0 | "
-        f"{num(pw['BTC']['false_positive_rate_at_beta_0'], 3)} "
-        f"| {num(pw['ETH']['false_positive_rate_at_beta_0'], 3)} |"
-    )
-    for lbl, key in (
-        ("80% power crossing lies in", "power_80pct_bracket"),
-        ("90% power crossing lies in", "power_90pct_bracket"),
-    ):
-        row = [lbl]
-        for a in ("BTC", "ETH"):
-            br = pw[a][key]
-            if not br["reached_on_grid"]:
-                row.append(
-                    f"never reached — not even at +{pw[a]['max_uplift_tested_pct']}% "
-                    "RV uplift"
-                )
-            elif br["lower_rv_uplift_pct"] is None:
-                row.append(f"at or below +{br['upper_rv_uplift_pct']}% RV uplift")
-            else:
-                row.append(
-                    f"+{br['lower_rv_uplift_pct']}% … +{br['upper_rv_uplift_pct']}% "
-                    f"RV uplift (power {br['lower_grid_power']:.2f} → "
-                    f"{br['upper_grid_power']:.2f})"
-                )
-        A(f"| {row[0]} | {row[1]} | {row[2]} |")
+    A(vb["power_grid_note"])
     A("")
-    A(
-        "Those are **intervals, not thresholds**. β runs on a coarse 8-point grid, so "
-        "the effect size at which power crosses a target can only be bracketed — it "
-        "sits somewhere strictly inside the interval. The results JSON deliberately "
-        "publishes **no point estimate** of an 80%- or 90%-power effect: turning a "
-        "coarse curve into a precise-sounding number is exactly the move that got v1 "
-        "failed, and a smaller version of it is still that move."
-    )
+    A(vb["power_scope_warning"])
     A("")
-    A(
-        "**Read the scope before quoting any of this.** The simulation covers *one "
-        "cell* of the design: **h = 1 only** (the primary family also contains h = 5), "
-        "a **single injected |flow| shock** (the H2 asymmetry and the cross-asset H4 "
-        "alternative are never simulated, so this says nothing about power against "
-        "*them*), and the **nominal single-cell gate** — not the ten-cell Holm-"
-        "corrected family that actually produces the verdict, which is strictly less "
-        "powerful. This is not \"the power of the study\", and it must not be quoted "
-        "as such."
-    )
+    A(vb["power_false_positive_note"])
     A("")
-    A(
-        "The β=0 row is **not** \"size\" in the textbook sense, and it should sit "
-        "*below* 5% rather than at it. Under the method-level null with "
-        "a fixed window, an irrelevant extra regressor makes the augmented method "
-        "genuinely worse — it pays an estimation cost and buys nothing — so "
-        "E[L_flow − L_base] > 0 strictly. A one-sided flow-favouring gate is therefore "
-        "conservative at β=0 by construction. What the row establishes is the thing "
-        "that matters: **this gate does not manufacture flow signals out of noise**. "
-        "A rate materially *above* 5% would have been the alarm."
-    )
+    A(vb["power_curve_intro"])
     A("")
-    A("Per-β detail (BTC / ETH rejection rate at the 5% gate):")
-    A("")
-    A("| True RV uplift per 1-sd shock | BTC power | ETH power |")
+    A(vb["power_curve_table_header"])
     A("|---|---|---|")
     for rb, re_ in zip(pw["BTC"]["curve"], pw["ETH"]["curve"]):
         A(
@@ -453,51 +296,12 @@ def build_readme(r: dict) -> str:
             f"| {num(re_['power_gw_one_sided_5pct'], 2)} |"
         )
     A("")
-    A(
-        "**Power is not an exclusion.** This table says how often the gate fires "
-        "against an effect of a given size. It does *not* say the true effect is "
-        "smaller than the 80%-power point — that inversion is precisely the error "
-        "v1 made. It is also per-cell power at the nominal gate; the primary family "
-        "additionally applies a Holm correction, so the family-wise design has "
-        "*less* power than the table shows."
-    )
+    A(vb["power_is_not_exclusion_readme"])
     A("")
-    btc80 = pw["BTC"]["power_80pct_bracket"]
-    eth80 = pw["ETH"]["power_80pct_bracket"]
-    if btc80["reached_on_grid"]:
-        btc_txt = (
-            f"somewhere between +{btc80['lower_rv_uplift_pct']}% and "
-            f"+{btc80['upper_rv_uplift_pct']}% (BTC)"
-        )
-    else:
-        btc_txt = f"more than +{pw['BTC']['max_uplift_tested_pct']}% (BTC)"
-    eth_txt = (
-        "80% power is never reached anywhere on the grid"
-        if not eth80["reached_on_grid"]
-        else (
-            f"the interval is +{eth80['lower_rv_uplift_pct']}% … "
-            f"+{eth80['upper_rv_uplift_pct']}%"
-        )
-    )
-    A(
-        "Note how much blunter this honest reading is than v1's. v1 advertised a "
-        "minimum detectable effect of +16.2% and then used it as an exclusion. In "
-        f"reality even this single-cell, single-alternative gate needs an uplift of "
-        f"{btc_txt} before it reaches 80% power, and for ETH {eth_txt}. The instrument "
-        "is far cruder than v1 claimed — which is one more reason the RV-space "
-        "\"exclusion\" had to go, and why the verdict is INCONCLUSIVE rather than a "
-        "bounded NULL."
-    )
-    A("")
-
     # ---- robustness --------------------------------------------------------
     A("## Robustness")
     A("")
-    A(
-        "Every run below is registered in the same in-code test registry as the "
-        "primary family, so the full-family Holm correction sees all of them. v1's "
-        "hand-written \"EVERY DM test\" list silently omitted 8."
-    )
+    A(vb["robustness_registry_intro"])
     A("")
     fams = [
         ("rv_proxy", "RV proxy (Parkinson / r² / true hourly RV)"),
@@ -508,93 +312,34 @@ def build_readme(r: dict) -> str:
         ("threshold", "Shock threshold dummies (|z| ≥ 1.0 … 2.5)"),
         ("eth_window", "Shorter ETH burn-in (200)"),
     ]
-    A("| Family | Cells | Best (most flow-favouring) uncond. z | Any cell passing the gate? |")
-    A("|---|---|---|---|")
+    A(vb["robustness_table_header"])
+    A("|---|---|---|")
     for key, label in fams:
         rows = [c for c in r["all_cells"] if c["family"] == key]
         if not rows:
             continue
         zs = [c["primary_inference_gw_qlike"]["z_stat"] for c in rows]
         best = min(zs)
-        passed = any(
-            f["passes_flow_gate"]
-            for f in r["multiple_testing"]["full_family_holm"]
-            if f["family"] == key and "passes_flow_gate" in f
-        )
-        A(f"| {label} | {len(rows)} | {num(best, 2)} | {'yes' if passed else 'no'} |")
+        A(f"| {label} | {len(rows)} | {num(best, 2)} |")
     A("")
     mt = r["multiple_testing"]
-    A(
-        f"Across **all {mt['n_gate_eligible_gw_tests']}** gate-eligible "
-        f"unconditional GW/DM tests in the study, "
-        f"**{mt['n_full_family_holm_significant_at_05']}** survive the full-family "
-        f"Holm correction in the flow-favouring direction. "
-        f"({mt['n_diagnostic_only_tests']} further tests are registered as "
-        "diagnostic-only and are barred from any gate by construction.)"
-    )
+    A(vb["robustness_outcome_readme"])
     A("")
-    bm = mt["bounded_memory_sensitivity"]
-    n_unb = len(bm["unbounded_memory_cells"])
-    cells_txt = "`" + "`, `".join(bm["unbounded_memory_cells"]) + "`"
-    A(
-        f"### {'One' if n_unb == 1 else n_unb} registered diagnostic "
-        f"{'row fails' if n_unb == 1 else 'rows fail'} the bounded-memory gate"
-    )
+    A(f"### {vb['bounded_memory_heading']}")
     A("")
-    A(
-        "GW's limiting experiment assumes the **forecasting method** has "
-        "bounded estimator memory. Every cell here fits its regression on a fixed "
-        "250-day rolling window, so the final fit always satisfies that. But the "
-        "condition is on the *whole method*, not on the last regression: "
-        f"{cells_txt} "
-        f"{'builds its regressor' if n_unb == 1 else 'build their regressor'} from "
-        "an **AR(5) refitted on an expanding window** of flow history. There is no "
-        "lookahead in it — day *i*'s own value never enters its own fit — but it is "
-        "not a bounded-memory forecasting method, and a blanket sentence claiming all "
-        f"{bm['n_gw_tests_all']} registered tests are one would be false."
-    )
-    A("")
-    it, they = (("It", "it") if n_unb == 1 else ("They", "they"))
-    A(
-        f"{it} remain{'s' if n_unb == 1 else ''} visible in the frozen historical "
-        f"sensitivity inventory, but {they} {'carries' if n_unb == 1 else 'carry'} "
-        "both `bounded_memory=false` and `feeds_gate=false`. That eligibility is "
-        "fixed from method provenance before any p-value is read; the rows cannot "
-        "enter a GW family or verdict. The archived 54-row sensitivity and the "
-        f"{bm['n_gw_tests_bounded_memory']}-row eligible family both happen to have "
-        f"**{bm['n_full_family_holm_significant_at_05_bounded_memory_only']}** "
-        f"Holm-surviving cells, but only the latter is inferentially licensed."
-        + (
-            " All 10 primary cells are bounded-memory."
-            if bm["primary_family_is_entirely_bounded_memory"]
-            else ""
-        )
-    )
+    A(vb["bounded_memory_issue"])
     A("")
 
     # ---- smearing note -----------------------------------------------------
-    A("### Is the null an artifact of the log → variance mapping?")
+    A(f"### {vb['smearing_heading']}")
     A("")
-    A(
-        "A live threat, and worth spelling out. The flow model has more parameters → "
-        "a lower training residual variance → a smaller `exp(s²/2)` smearing "
-        "multiplier → systematically lower variance forecasts. QLIKE is asymmetric, "
-        "so in principle this channel could *manufacture* the null we are reporting. "
-        "Three defences: the residual variance is dof-corrected (`N − k`), which "
-        "makes its expectation spec-invariant under the null; the study re-scores "
-        "with no smearing at all; and it re-scores again with the *baseline's* "
-        "multiplier forced onto both models. The verdict does not move."
-    )
+    A(vb["smearing_scope"])
     A("")
 
     # ---- H3 ----------------------------------------------------------------
     A("### H3 — Friday flow → weekend volatility (in-sample, descriptive)")
     A("")
-    A(
-        "Crypto trades through the weekend but the ETFs do not, so a Friday flow "
-        "shock is the last piece of ETF information before a two-day gap. If flow "
-        "carried volatility news anywhere, this is where it should be loudest."
-    )
+    A(vb["h3_motivation"])
     A("")
     A("| | n Fridays | β(\\|z\\|) | HAC t | two-sided p |")
     A("|---|---|---|---|---|")
@@ -605,10 +350,7 @@ def build_readme(r: dict) -> str:
             f"| {num(h3['abs_z_t'], 2)} | {num(h3['abs_z_p_two_sided'], 3)} |"
         )
     A("")
-    A(
-        "**In-sample only**, and it does not feed any verdict — the study's claim is "
-        "about out-of-sample predictive content."
-    )
+    A(vb["h3_weekend_claim_scope"])
     A("")
 
     # ---- files -------------------------------------------------------------
@@ -617,16 +359,7 @@ def build_readme(r: dict) -> str:
     if resid:
         A("## What a second, independent re-review still found — and what changed")
         A("")
-        A(
-            "The rebuilt study was re-reviewed against a *frozen* commit. Six residuals "
-            "survived the first rebuild. **Not one of them moved an estimate**; every "
-            "one of them moved what a reader would have been entitled to conclude from "
-            "the estimates, which is the more dangerous kind of defect and the kind "
-            "this experiment already got caught by once. (The *h*=5 statistics do "
-            "differ in the third decimal from the pre-fix run — because Yahoo "
-            "back-filled a calendar day between the two runs, adding one out-of-sample "
-            "observation. That is the data moving, not the fixes. See *Reproducing*.)"
-        )
+        A(resid["note"])
         A("")
         A("| # | Residual | What changed |")
         A("|---|---|---|")

@@ -706,10 +706,10 @@ def test_power_rises_with_the_effect_and_does_not_fire_on_noise():
 
     A real power curve must (a) not fire when the effect is zero and (b) rise with
     the effect. Note (a) is asserted as an UPPER bound only: under GW's
-    method-level null a useless extra regressor makes the augmented method
-    genuinely worse, so the flow-favouring one-sided gate is conservative at
-    beta=0 by construction. A rate far BELOW 5% is correct behaviour; a rate above
-    it would be the alarm.
+    method-level null a useless extra regressor raises the augmented method's
+    UNCONDITIONAL expected loss, so the flow-favouring one-sided gate is
+    conservative at beta=0 by construction. A rate far BELOW 5% is expected; a
+    rate above it would be the alarm.
     """
     rv, flow = _make_world(n_days=800)
     pw = power_simulation(
@@ -721,7 +721,8 @@ def test_power_rises_with_the_effect_and_does_not_fire_on_noise():
     assert curve[0.80] > curve[0.0]
     assert curve[0.80] > 0.50
     assert pw["false_positive_rate_at_beta_0"] == curve[0.0]
-    assert "CONSERVATIVE at beta = 0" in pw["false_positive_note"]
+    assert "conservative" in pw["false_positive_note"].lower()
+    assert "UNCONDITIONAL expected loss" in pw["false_positive_note"]
 
 
 def test_a_planted_effect_is_recovered_end_to_end():
@@ -999,10 +1000,11 @@ def test_power_scope_admits_it_is_not_the_studys_power():
 def test_beta0_row_is_a_false_positive_check_not_a_size_calibration():
     """R3: 'size-calibrated' is the wrong word and it was in the module docstring.
 
-    Under GW's method-level null with a fixed window, an irrelevant regressor makes
-    the augmented METHOD genuinely worse, so the one-sided flow-favouring test is
-    conservative at beta=0 BY CONSTRUCTION. A rate below 5% is correct behaviour,
-    not a calibrated size — so the file must not advertise size calibration.
+    Under GW's method-level null with a fixed window, an irrelevant regressor raises
+    the augmented METHOD's UNCONDITIONAL expected loss, so the one-sided
+    flow-favouring test is conservative at beta=0 BY CONSTRUCTION. A rate below 5%
+    is expected, not a calibrated size — so the file must not advertise size
+    calibration.
     """
     src = (Path(__file__).parent / "k1709.py").read_text(encoding="utf-8")
     doc = ast.get_docstring(ast.parse(src)) or ""
@@ -1013,7 +1015,7 @@ def test_beta0_row_is_a_false_positive_check_not_a_size_calibration():
     pw = power_simulation(
         rv, make_flow_features(flow), "SYN", horizon=1, reps=20, betas=(0.0, 0.5)
     )
-    assert "NOT 'size' in" in pw["false_positive_note"]
+    assert "not textbook size" in pw["false_positive_note"].lower()
 
 
 def test_fixed_window_raw_dm_is_not_labelled_biased():
@@ -1157,6 +1159,15 @@ def test_frozen_verdict_words_are_exactly_rederived_from_frozen_counts():
         margin_pct=old["material_gain_margin_pct"],
         family_bound=old["qlike_gain_upper_bound_family_simultaneous_pct"],
         per_cell_upper_bounds=old["qlike_gain_upper_bound_95pct_per_cell"],
+        unbounded_memory_cells=r["multiple_testing"][
+            "bounded_memory_sensitivity"
+        ]["unbounded_memory_cells"],
+        n_registered_tests=r["multiple_testing"]["n_tests_registered_total"],
+        n_gate_eligible_tests=r["multiple_testing"]["n_gate_eligible_gw_tests"],
+        n_full_family_significant=r["multiple_testing"][
+            "n_full_family_holm_significant_at_05"
+        ],
+        n_diagnostic_tests=r["multiple_testing"]["n_diagnostic_only_tests"],
     )
     assert rebuilt == old
 
@@ -1199,17 +1210,156 @@ def test_final_claim_bullets_have_one_author_and_include_conditional_caveat():
     assert "That the true effect is exactly zero" not in renderer
 
 
+def test_every_substantive_claim_scope_sentence_has_one_canonical_author():
+    r = _frozen_results()
+    vb = r["verdict_basis"]
+    rendered = build_readme(r)
+    renderer_source = (Path(__file__).parent / "render_readme.py").read_text()
+
+    assert r["inference_design"]["bounded_null_test"] == vb[
+        "bounded_null_test_scope"
+    ]
+    assert r["inference_design"]["power_is_not_exclusion"] == vb[
+        "power_scope_warning"
+    ]
+    assert r["endogeneity_note"] == vb["endogeneity_claim_scope"]
+    assert r["in_sample_note"] == vb["in_sample_claim_scope"]
+    assert all(
+        row["note"] == vb["h3_weekend_claim_scope"]
+        for row in r["h3_weekend_in_sample"].values()
+    )
+    assert all(
+        row["scope_warning"] == vb["power_scope_warning"]
+        and row["grid_note"] == vb["power_grid_note"]
+        and row["false_positive_note"] == vb["power_false_positive_note"]
+        for row in r["power_simulation"].values()
+    )
+    assert (
+        r["multiple_testing"]["bounded_memory_sensitivity"]["issue"]
+        == vb["bounded_memory_issue"]
+    )
+
+    for collection in ("primary_cells", "all_cells"):
+        for cell in r[collection]:
+            exclusion = cell["material_gain_exclusion"]
+            for key in (
+                "material_gain_null",
+                "material_gain_alternative",
+                "material_gain_scope",
+                "upper_bound_note",
+            ):
+                json_key = key.removeprefix("material_gain_")
+                assert exclusion[json_key] == vb[key]
+            for key in ("null", "alternative", "scope", "upper_bound_note"):
+                wording = exclusion[key].lower()
+                assert "unconditional" in wording
+                assert "average" in wording or "expected" in wording
+
+    canonical_renderer_fields = (
+        "endogeneity_claim_scope",
+        "exclusion_multiplicity_readme",
+        "upper_bound_explanation_readme",
+        "family_bound_statement",
+        "bound_literal_scope",
+        "power_is_not_exclusion_readme",
+        "bounded_memory_issue",
+        "h3_weekend_claim_scope",
+        "primary_detection_outcome_readme",
+        "exclusion_outcome_readme",
+        "c2_fix_summary",
+        "primary_section_heading",
+        "primary_design_scope",
+        "qlike_delta_interpretation",
+        "bound_section_heading",
+        "bound_test_intro",
+        "bound_ci_heading",
+        "power_section_heading",
+        "power_dgp_readme",
+        "power_grid_note",
+        "power_scope_warning",
+        "power_false_positive_note",
+        "robustness_registry_intro",
+        "robustness_outcome_readme",
+        "smearing_heading",
+        "smearing_scope",
+        "h3_motivation",
+        "gw_name_explanation",
+        "nested_fixed_memory_explanation",
+        "primary_table_header",
+        "exclusion_table_header",
+        "power_curve_intro",
+        "power_curve_table_header",
+        "robustness_table_header",
+    )
+    assert all(vb[key] in rendered for key in canonical_renderer_fields)
+    for stale in (
+        "Everything below is strictly out-of-sample and conditional on a HAR-RV baseline",
+        "Anything larger is ruled out; anything smaller is not",
+        "the study's claim is about out-of-sample predictive content",
+        "The two claims have opposite logical structure",
+        "does ETF flow beat HAR out-of-sample",
+        "the only objects that can legitimately bound an effect",
+        "manufacture the null we are reporting",
+        "where it should be loudest",
+        "This is not \"the power of the study\"",
+        "The verdict does not move",
+        "The conditional machinery",
+        "What makes the test legal under nesting",
+    ):
+        assert stale not in renderer_source
+        assert stale not in rendered
+
+    for key in (
+        "bounded_null_test_scope",
+        "endogeneity_claim_scope",
+        "in_sample_claim_scope",
+        "h3_weekend_claim_scope",
+        "material_gain_alternative",
+        "material_gain_scope",
+        "upper_bound_note",
+        "upper_bound_explanation_readme",
+        "family_bound_statement",
+        "bound_literal_scope",
+        "power_scope_warning",
+        "power_is_not_exclusion_readme",
+        "upper_bound_method",
+        "primary_detection_outcome_readme",
+        "exclusion_outcome_readme",
+        "c2_fix_summary",
+        "primary_section_heading",
+        "primary_design_scope",
+        "qlike_delta_interpretation",
+        "bound_section_heading",
+        "bound_test_intro",
+        "bound_ci_heading",
+        "power_false_positive_note",
+        "robustness_outcome_readme",
+        "smearing_heading",
+        "smearing_scope",
+        "gw_name_explanation",
+        "primary_table_header",
+        "exclusion_table_header",
+    ):
+        wording = vb[key].lower()
+        assert "unconditional" in wording, key
+        assert "average" in wording or "expected" in wording, key
+    assert "vary by regime or state" in vb["family_bound_statement"].lower()
+    assert "those rows" in vb["bounded_memory_issue"]
+    assert "alone" not in vb["bounded_memory_issue"]
+
+
 def test_every_inferential_figure_label_is_explicitly_unconditional():
     vb = _frozen_results()["verdict_basis"]
+    src = (Path(__file__).parent / "k1709.py").read_text()
     labels = {
         key: value for key, value in vb.items() if key.startswith("figure_")
     }
     assert labels
     for key, value in labels.items():
+        assert f'vb["{key}"]' in src, key
         if "GW" in value or "Giacomini-White" in value:
             assert "uncond" in value.lower() or "sec. 3.4" in value.lower(), key
 
-    src = (Path(__file__).parent / "k1709.py").read_text()
     for stale in (
         'f"GW z=',
         "Giacomini-White on QLIKE",
