@@ -78,6 +78,7 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "scripts/continue_task_dispatch.py:_materialize_pool_dry_diagnostic_task": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
     },
+    "scripts/continue_task_dispatch.py:_promote_starved_article_tasks": {"open-write": 1},
     "scripts/daily_update.py:main": {"write_text": 1},
     "scripts/decompose_drone_series.py:main": {"open-write": 1},
     "scripts/dedupe_next_tasks.py:main": {"open-write": 1},

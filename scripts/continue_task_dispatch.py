@@ -665,9 +665,13 @@ def _promote_starved_article_tasks(limit: int) -> int:
     `limit` 個、一次到位），而不是加開新任務 —— 保留 in-flight 自我節制（防
     pile-up），只修 dispatch 搆不到的問題。Fail-open：任何錯誤回 0 並留 trace。
     """
+    if not NEXT_TASKS.exists():
+        return 0
+    # Outside the try on purpose: the guard's whole job is to abort a write from a
+    # context that must not touch canonical storage, and an except that swallows it
+    # would turn that abort back into the write it exists to stop.
+    guard_canonical_write(NEXT_TASKS)
     try:
-        if not NEXT_TASKS.exists():
-            return 0
         with open(NEXT_TASKS, "r+", encoding="utf-8") as fh:
             fcntl.flock(fh, fcntl.LOCK_EX)
             fh.seek(0)

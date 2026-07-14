@@ -371,6 +371,16 @@
       "phase_z_probe_paths": ["storage/analytics/latest.json"],
       "reason": "Reader snapshots are scheduled analytics machine state."
     },
+    "reader_preferences": {
+      "entrypoint": "scripts/analyze_reader_preferences.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/analytics/**"],
+      "phase_z_probe_paths": [
+        "storage/analytics/reader_preferences.json",
+        "storage/analytics/reader_preferences.md"
+      ],
+      "reason": "The weekly preference analysis derives from the same reader snapshots and writes only its own analytics artifacts; it runs no git command of its own."
+    },
     "daily_checkup": {
       "entrypoint": "scripts/daily_checkup.py",
       "policy": "phase_z_machine_state",
