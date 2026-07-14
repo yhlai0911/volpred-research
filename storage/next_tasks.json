@@ -30661,41 +30661,15 @@
   },
   {
     "id": "k1655_dm_sweep_rerun_article_bound_b02",
-    "title": "DM HAC class sweep P2 batch 2：重跑 5 個 headline-bound 暴露站點",
-    "description": "延續 k1655_dm_sweep_rerun_article_bound；batch 1 已完成 K1402/K1403/K1404。本批固定 <=5 個：K486、K565、K432、K969、K1422。逐站先量 loss differential ACF，再改用 canonical volpred.stats.model_evaluation.dm_test 重跑；若結論改變，回溯更正 knowledge/文章；完成後自 storage/ops/dm_hac_lag_baseline.json 退休。 exposure 不等於 confirmed bug，不可預設修正方向或誇大結果。",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "DM HAC class sweep P2 batch 2：重跑 5 個 headline-bound 暴露站點",
+    "priority": 2,
     "source": "agent_discovered",
-    "dispatch_lane": "agent",
-    "parent_task_id": "k1655_dm_sweep_rerun_article_bound",
     "created_at": "2026-07-11T14:43:15.798726+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-11T15:46:54.693362+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-11T15:46:54.954101+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-11T17:09:11.197225+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-11T15:46:54.693347+00:00",
-    "claim_session_id": "c02859211c48",
-    "started_at": "2026-07-11T15:46:54.954085+00:00",
     "completed_at": "2026-07-11T17:09:11.197210+00:00",
-    "result": "完成 5 個 headline-bound 站點 canonical Newey-West HAC 重跑：K565 headline Harvey 4→0；K486 0/5，K432/K969/K1422 邊界與核心保留結果均已逐格驗證。回溯更正 7 篇文章與 7 張圖、寫入 knowledge 904b647b，DM baseline 133→128；ratchet 3 tests、auditor、feed sync 全綠。"
+    "tombstone": true,
+    "archived_at": "2026-07-14T18:07:26.686174+00:00"
   },
   {
     "id": "fable0711_volabs_contemp_null",
@@ -31327,40 +31301,15 @@
   },
   {
     "id": "email-12084-9b55bc",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] supervisor hang_killed",
-    "description": "Gmail UID: 12084\nMessage-ID: <4A51E666-FCDE-4B69-88A8-D0593FCB4EC7@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sun, 12 Jul 2026 01:25:20 +0800\nSubject: Re: [VolPred Alert][CRITICAL] supervisor hang_killed\n\n--- 用戶回信內容 ---\n又來 你到底要出幾次這樣的狀況 立刻從底層優化修改\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月12日 00:57 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> supervisor hang_killed\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響讀者看到的網站狀態與平台可信度。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> Supervisor SIGKILL'd 一個 worker（hang > 50min cap）\r\n> \r\n> Job\r\n> \r\n> pid: 80516\r\n> pgid: 80516\r\n> started_at: 2026-07-11T16:07:03.694346+00:00\r\n> attempt: 1\r\n> model: claude-opus-4-8\r\n> log: /Users/yhlai0911/.volpred/logs/dispatch_supervisor_worker.log\r\n> 影響\r\n> \r\n> 本輪 hourly fire 沒派工成功；pool 沒消化\r\n> 該行程已確認消失；Supervisor 仍存活，下個整點會嘗試新 fire\r\n> Worker log tail\r\n> \r\n> d`。\r\n> \r\n> **另立一張 P2 單**：11 個語料有 5 個是 PIL 繪製的，guard 攔的是 matplotlib 的存檔函式，這 5 條路徑三類違規**一個都檢查不到** —— 結構性覆蓋缺口，下一班收編進同一個 guard。\r\n> \r\n> ⏱ 開始 2026-07-11 21:51:39（台灣時間）\r\n> ⏱ 停止 2026-07-11 22:11:30（台灣時間）— 耗時約 20 分鐘\r\n> ⏭ 下次任務 2026-07-11 22:15:00（台灣時間）— compute worker 接手兩篇壞圖重畫；下一班 dispatch 22:07 已過，接續班次 23:07\r\n> ⏱ 開始 2026-07-11 22:12:40（台灣時間）\r\n> \r\n> ## 本班（hourly-22）結果摘要\r\n> \r\n> **核心發現：一個 NULL 結論的理由站錯了腿。**\r\n> \r\n> 先收爛攤 —— `k1681-smad` worktree 的實驗早就跑完（SMAD = 價格離 10 日均線多遠，能否預示隔天波動與大跌），但 agent 已死、成果卡在分支上沒合併回主線，等於白做。已收編、驗證、寫進知識庫。\r\n> \r\n> 實驗本身很紮實：散戶信的「離均線太遠就要變天」，在控制掉「最近本來就在跌、波動本來就高」之後**完全歸零**（joint p = 0.62）；表面上的 1.90pp 預測力有 **85% 是槓桿效應的回收再包裝**。\r\n> \r\n> Codex 審查時自己重算，撞出真問題：比較的兩個模型是**巢狀**的（大模型 = 小模型 + SMAD 欄位），此時 raw DM 會系統性偏向懲罰大模型 —— 「DM 沒過 Harvey 門檻」**不能反推**「沒有預測力」。換成正確的 Clark-West：次日波動 t 從 −2.32 變 **+6.71**，下行風險從 +1.11 變 **+3.70**。\r\n> \r\n> **但結論不翻案，只換理由**：SMAD 的增量只有 HAR 自身解釋力的 **0.54%**，這個判斷跟用哪個檢定無關。統計上偵測得到、經濟上可忽略，是兩件事。NULL 方向不變（仍不可交易），但不可再用「沒過門檻」當理由。沒有手改 `results.json`，等 CW 正式重跑；README §8 誠實記錄整段修正。\r\n> \r\n> ## 三件已落地\r\n> \r\n> 1. **K1681 收編完成** — 合併、README §8、knowledge `9c74b106`（verdict=NULL）、任務標 succeeded\r\n> 2. **立案全庫掃描** — 「巢狀比較誤用 DM」很可能不只這一站，與 K1655 的 DM/HAC 稽核同一家族（失效點都是「哪個檢定變體被拿去餵對外結論」）。已排兩個 P2：`k1681_clark_west_nested_dm_rerun` + `nested_dm_misuse_class_sweep`\r\n> 3. **修掉三犯的老問題** — `git commit -m` 塞中文會產出亂碼訊息，push 出去只有 force push 能改（而 force push 禁止）＝不可回復。散文規則躺在 error_log 兩個月照樣被違反（我今天也犯，`2369c7d07` 就是亂的）。已升級成機械 deny 收編進既有 hook，regression 75 assertions 全綠，下一個 commit 訊息正常顯示 —— 當場驗證有效\r\n> \r\n> 另外解掉 6 個積壓 7.9 小時沒推上 GitHub 的 commit（備份斷線 warn），並以 `--defer` 排定派工 daemon 的延後重載。email 已寄（message id 497）。\r\n> \r\n> **刻意不碰**：工作區的 3 個 K1404/k1402/k1403 README 改動是 codex-vscode 在途的工作，依 PHASE-Z 規則不代收。\r\n> \r\n> ⏱ 停止 2026-07-11 22:38:10（台灣時間）｜總時長 25 分 30 秒\r\n> ⏭ 下次任務 2026-07-11 23:07:00（台灣時間）— 下一班 hourly-dispatch\r\n> 這是稍早那個背景同步任務的完成通知（把被撤回文章從 `digest_articles` metadata 移除並同步 Supabase），exit code 0。這一步的結果我已經驗證過了：commit `716e67473` 已 push，線上 v3 與原版兩個路由都確認「被撤回文章不再被推薦」。\r\n> \r\n> 沒有新工作產生，本班維持已收尾的狀態。\r\n> \r\n> ⏱ 2026-07-11 23:39（台灣時間）確認背景任務收乾淨\r\n> ⏭ 下次任務 2026-07-11 23:45（台灣時間）— compute-worker 例行掃描；下一班 hourly-dispatch 為 2026-07-12 00:07。\r\n>\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-11T17:30:06.880525+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] supervisor hang_killed",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12084,
-    "email_message_id": "<4A51E666-FCDE-4B69-88A8-D0593FCB4EC7@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] supervisor hang_killed",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "hourly-01",
-    "claimed_at": "2026-07-11T17:31:18.422751+00:00",
-    "claim_session_id": "618144184b2f",
-    "status_history": [
-      {
-        "ts": "2026-07-11T17:31:18.422767+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-11T17:45:12.113775+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "hourly-01"
-      }
-    ],
+    "created_at": "2026-07-11T17:30:06.880525+00:00",
     "completed_at": "2026-07-11T17:45:12.113761+00:00",
-    "result": "3-strike root cause: fire 3000s cap 內 spawn 20-60min agent。三層修正: compute_queue enqueue-agent 出路 + PreToolUse class deny (claude -p/agy -p/codex exec, actor-scoped) + prompt 刪除違規指令。regression 75->86 全綠。commit 5aa8cd180"
+    "tombstone": true,
+    "archived_at": "2026-07-14T18:07:26.686174+00:00"
   },
   {
     "id": "collect_k1684_orphan_worktree",
@@ -32480,7 +32429,7 @@
     "title": "K1685: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1685 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1685 以 pinned yfinance SPY/VIX snapshot（2000-01-03～2026-07-10）延長 K988/K1393-faithful A4f vs GJR 的 OOS。完整 OOS 2019-01-02～2026-07-10、n=1,890：GJR QLIKE=1.515680，A4f=1.431558，A4f 相對改善 5.550%；canonical HAC-DM d=loss_GJR-loss_A4f，t=+3.9656、p=0.00007595、lag=13。K1393 legacy anchor t=3.6",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1685",
@@ -32490,7 +32439,25 @@
     ],
     "topic_cluster": "garch",
     "created_at": "2026-07-12T11:07:49+00:00",
-    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜"
+    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-07-14T18:10:05.279654+00:00",
+    "claim_session_id": "82af9071e269",
+    "status_history": [
+      {
+        "ts": "2026-07-14T18:10:05.279669+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-14T18:10:05.728599+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-02"
+      }
+    ],
+    "started_at": "2026-07-14T18:10:05.728583+00:00"
   },
   {
     "id": "K1583_article_general_v2",
@@ -32525,7 +32492,7 @@
     "title": "K1695: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1695 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: [提出: Fable deep review P0-1, 執行: Codex failover] K1695 以 pinned yfinance auto_adjust=False snapshot（paper cutoff 2026-03-31）、Close+distributions 明示 total return、前月末 12/VIX 月頻 lag、SHY cash sleeve、10bps turnover cost、prior-day IRX Sharpe 與跨 13 市場同步 stationary bootstrap 重建 vt-trend-",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1695",
@@ -32535,7 +32502,25 @@
     ],
     "topic_cluster": "vix",
     "created_at": "2026-07-12T11:07:51+00:00",
-    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜"
+    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-07-14T18:10:05.505131+00:00",
+    "claim_session_id": "92c16ac2e466",
+    "status_history": [
+      {
+        "ts": "2026-07-14T18:10:05.505146+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-14T18:10:05.956956+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-02"
+      }
+    ],
+    "started_at": "2026-07-14T18:10:05.956932+00:00"
   },
   {
     "id": "email-12143-2de65b",
@@ -37492,5 +37477,63 @@
     "status": "pending",
     "created_at": "2026-07-15T01:28:07+08:00",
     "description": "稽核器本身有 false negative（enforcement owner 漏抓 = 比單一實驗的 bug 更嚴重）：scripts/audit_dm_hac_lag.py 的 PLAIN_VARIANCE_RE 只認 np.var / np.std，認不出手算的 `np.mean(d**2) - np.mean(d)**2` idiom —— k1379 因此被丟進 unknown 而非 no_hac。修 regex 後**必須重掃全母體**（不只 unknown bucket），因為同一 idiom 若出現在已被判成其他 verdict 的檔案裡，這輪一樣抓不到。修完更新 storage/ops/dm_hac_lag_baseline.json 與 scripts/tests/test_dm_hac_lag_ratchet.py。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md §盲區分析"
+  },
+  {
+    "id": "alert_internal_git_push_backup_hold_3f4834ce7a_20260714T180001000000Z_a1",
+    "title": "[internal alert] git-push-backup: push held — 3 new silent fallback(s)",
+    "description": "由內部可自癒 alert_key `git_push_backup_hold` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n本地領先 4 commit 但 HEAD 帶 3 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push 保護 CI（紅碼不上 origin、CI 不會紅）。路由器會建立固定 P1 任務，當班修每個 NEW 位置（先留下 warn，或對合法例外標 '# silent-ok: 理由'）並重跑本 wrapper 解封；首次與修復進行中不寄信。新發現：\nNEW scripts/audit_nested_dm_misuse.py:382 except OSError: return None\nNEW scripts/audit_nested_dm_misuse.py:999 except OverflowError|TypeError|ValueError: return False\nNEW scripts/audit_nested_dm_misuse.py:2091 except OSError: continue",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-14T18:00:01+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "git_push_backup_hold"
+    ],
+    "alert_key": "git_push_backup_hold",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260714T180001000000Z",
+      "episode_started_at": "2026-07-14T18:00:01+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-14T18:00:38+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false
+    }
+  },
+  {
+    "id": "telegram-768",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "claimed",
+    "created_at": "2026-07-14T18:08:27.349613+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 768）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n所以你這個到底是告訴我你解決了還是你又開始建議我而不是自己開始動？\n你跟我保證不會再出現錯誤，那這個到底算不算錯誤\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] git_conflict_guard 自動清理 0 衝突檔\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\n• git_conflict_guard 偵測到 orphaned AUTO_MERGE + 0 個 conflict-marker 檔，已自動清理\n• 受影響檔案：(僅 AUTO_MERGE，無 marker 檔)\n\n📌 影響\n• 這些是 live 站 + dispatcher 讀的 canonical 狀態檔；未清理會被下一次 commit 永久污染。已還原 HEAD canonical 版本，運作不中斷。\n\n🛠️ 建議行動\n• 結構根因 = 雙 dispatcher（Claude hourly + codex_loop）並發寫同分支。已用 .gitattributes merge=ours + 本 guard 止血；長期解見 docs/error_log.md 2026-06-28 entry（single-writer / commit-lock 決策）。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-14T18:10:36.272313+00:00",
+    "claim_session_id": "c024b9b25563",
+    "status_history": [
+      {
+        "ts": "2026-07-14T18:10:36.272325+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      }
+    ]
+  },
+  {
+    "id": "ops-git-single-writer-2026-07-15",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "telegram-responder",
+    "status": "pending",
+    "created_at": "2026-07-14T18:10:49.204313+00:00",
+    "title": "根因：雙 dispatcher 並發寫同分支 → 落實 single-writer / commit-lock",
+    "description": "git_conflict_guard 是止血層，不是解。根因 = Claude hourly dispatcher 與 codex_loop 並發 commit 同一分支，產生 orphaned AUTO_MERGE / conflict markers 在 canonical 狀態檔。\n要做：(1) 盤點所有會 commit 主分支的 writer（hourly dispatch、codex_loop、compute-worker、merge_worktree.sh、各 cron）；(2) 落實 single-writer 或跨 process commit-lock（flock on .git 寫入路徑）；(3) 廢棄 .gitattributes merge=ours 的掩蓋式 workaround，不留兩套；(4) regression test 覆蓋「兩個 writer 同時 commit」情境；(5) 寫 docs/error_log.md entry（先前 alert body 引用的 2026-06-28 entry 其實不存在）。\nCommit 開頭：refactor(3-strike): git single-writer。"
   }
 ]

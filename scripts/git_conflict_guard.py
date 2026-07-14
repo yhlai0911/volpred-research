@@ -98,22 +98,27 @@ def _files_with_markers() -> list[str]:
 
 
 def _send_alert(cleaned: list[str], orphan: bool) -> None:
+    # 沒有任何 marker 檔被還原 = guard 清掉一個空的 half-merge state，無資料受污染。
+    # 這是自我修復的 no-op，不佔用老闆的收件匣。
+    if not cleaned:
+        _log("orphan-only cleanup (0 marker files) — no owner alert")
+        return
     try:
         body = "\n".join(
             [
                 "## 觸發條件",
                 f"- git_conflict_guard 偵測到 {'orphaned AUTO_MERGE + ' if orphan else ''}"
-                f"{len(cleaned)} 個 conflict-marker 檔，已自動清理",
-                "- 受影響檔案：" + (", ".join(cleaned) if cleaned else "(僅 AUTO_MERGE，無 marker 檔)"),
+                f"{len(cleaned)} 個 conflict-marker 檔",
+                "- 受影響檔案：" + ", ".join(cleaned),
                 "",
                 "## 影響",
                 "- 這些是 live 站 + dispatcher 讀的 canonical 狀態檔；未清理會被下一次 commit "
-                "永久污染。已還原 HEAD canonical 版本，運作不中斷。",
+                "永久污染。",
                 "",
-                "## 建議行動",
-                "- 結構根因 = 雙 dispatcher（Claude hourly + codex_loop）並發寫同分支。"
-                "已用 .gitattributes merge=ours + 本 guard 止血；長期解見 docs/error_log.md "
-                "2026-06-28 entry（single-writer / commit-lock 決策）。",
+                "## 已自動處理",
+                "- 已還原每個受污染檔的 HEAD canonical 版本，平台運作未中斷，老闆無須動作。",
+                "- 結構根因（雙 dispatcher 並發寫同分支）由任務池的 single-writer / commit-lock "
+                "任務負責收斂；本 guard 只做止血。",
             ]
         )
         tmp = ROOT / "storage" / "logs" / "_git_guard_alert.md"
