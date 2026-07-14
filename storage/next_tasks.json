@@ -30500,7 +30500,7 @@
     "title": "K1572: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1572 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: K1572 — DNN Quantile VaR vs K1571 fair baseline plateau\n\nverdict: NULL\nreviewer: Codex (codex-cli, 2026-06-29 hourly tick)\nexperiment_id: k1572\nexperiment_path: experiments/k1572/\nk_id: K1572\nparent_k_id: K1571\n\nDesign: TLT/HYG daily returns, yfinance adjusted close cache from K1",
     "priority": 1,
-    "status": "blocked",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1572",
@@ -30523,10 +30523,29 @@
         "from": "claimed",
         "to": "blocked",
         "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T20:29:04.113652+00:00",
+        "from": "blocked",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-14T20:29:04.351230+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-14T20:29:19.355359+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
       }
     ],
-    "completed_at": "2026-07-14T17:31:47.320168+00:00",
-    "result": "已交 agent queue（writer 20-40min > fire cap，依規則走 detached worker）。主線程已跑查重：check_arc_dedup verdict=clean + feed 層 grep 0 命中。草稿產出後 PHASE A followup 驗數字 + 串行發佈。"
+    "completed_at": "2026-07-14T20:29:19.355341+00:00",
+    "result": "已交 agent queue（writer 20-40min > fire cap，依規則走 detached worker）。主線程已跑查重：check_arc_dedup verdict=clean + feed 層 grep 0 命中。草稿產出後 PHASE A followup 驗數字 + 串行發佈。\n\n一般讀者稿發佈進池 mile_f5813dec（draft/general，含 6 圖 + 懶人包 4 張）。驗證：71 個數字宣稱對 k1572_results.json，修正 3 處（基準定義=損失中位數、Kupiec 拒絕範圍、圖說誇大）；改寫過 audience gate（移除 VaR 縮寫）與 content-vs-source gate（250 日視窗改述為一年）。",
+    "started_at": "2026-07-14T20:29:04.351216+00:00"
   },
   {
     "id": "telegram-492",
@@ -31130,65 +31149,15 @@
   },
   {
     "id": "fable0711_cryptofear_k1025v3",
-    "title": "K1025_v3: crypto-fear FEVD 修正重跑（KPPS generalized + pinned snapshot）",
-    "description": "深審 P0-1：修 k1025_v2.py:368 FEVD.decomp shape 誤切（(neqs,periods,neqs) 被當 (horizon,n,n)）+ 改 KPPS generalized FEVD（排序不變）+ pinned snapshot（auto_adjust=False、return 定義統一）+ QR 加 lagged-VIX 控制存活測試 + subsample DM 補 HAC。修正後預期 total spillover ~18-22%（非 90.11% 恆等式）。同時把 iid-noise FEVD placebo 寫成機械 gate 進 scripts/tests/。Brief=paper/crypto-fear-channel/review_history/fable_deep_review_20260711/README.md §5 + 同目錄 dy_corrected_diagnostic.py。固定 seed；完成後 Codex 語義級複核。",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "experiment",
-    "dispatch_lane": "agent",
+    "title": "K1025_v3: crypto-fear FEVD 修正重跑（KPPS generalized + pinned snapshot）",
+    "priority": 1,
     "source": "fable_deep_review_20260711",
-    "tags": [
-      "fable-deep-review",
-      "paper-gating"
-    ],
     "created_at": "2026-07-11T14:55:56.010876+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-11T16:07:36.905275+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-00"
-      },
-      {
-        "ts": "2026-07-11T16:09:05.260922+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-00"
-      },
-      {
-        "ts": "2026-07-11T18:50:03.656449+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-00",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-11T19:27:04.672139+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-11T19:27:04.932271+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-11T20:02:28.050749+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-11T19:27:04.932258+00:00",
-    "last_released_at": "2026-07-11T18:50:03.656441+00:00",
-    "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-11T19:27:04.672124+00:00",
-    "claim_session_id": "ef18f9f12366",
     "completed_at": "2026-07-11T20:02:28.050733+00:00",
-    "result": "Codex 語義複核 PASS：恢復 VAR maxlags=5／rolling252，修正共同樣本 AR AIC、QR 收斂與原子輸出；24 tests + 獨立重算通過。Pinned v3 TCI=19.5153%、BTC net=-0.9478pp，QR tail 不存活、OOS 未見改善；knowledge 與 mile_113ce9d1 已更正並同步，Paper 10 維持 major revision。"
+    "tombstone": true,
+    "archived_at": "2026-07-14T20:07:59.065770+00:00"
   },
   {
     "id": "fable0711_k865_fevd_retro_correction",
@@ -31242,7 +31211,7 @@
     "title": "K1681: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1681 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1681：SMAD = (P - MA10)/MA10 對次日 RV / 未來 5 日下行半變異數 / 左尾命中率的增量預測力。20 檔美股 ETF 與大型股，2010-01 至 2026-07，79,140 asset-days，seed 1681。\n\n【核心設計 — span baseline】SMAD 的一階近似是過去 10 日報酬的遞減加權和，其表面預測力與槓桿效應糾纏。把 10 個 individual lagged returns 全放進基準（張成所有線性重新加權）後，天真 HAR-only 基準記給 SMAD 的 1.90pp 增量 R²",
     "priority": 1,
-    "status": "blocked",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1681",
@@ -31265,10 +31234,29 @@
         "from": "claimed",
         "to": "blocked",
         "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T20:29:04.585987+00:00",
+        "from": "blocked",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-14T20:29:04.821170+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-14T20:29:19.588979+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
       }
     ],
-    "completed_at": "2026-07-14T17:31:48.002097+00:00",
-    "result": "已交 agent queue（writer 20-40min > fire cap，依規則走 detached worker）。主線程已跑查重：check_arc_dedup verdict=clean + feed 層 grep 0 命中。草稿產出後 PHASE A followup 驗數字 + 串行發佈。"
+    "completed_at": "2026-07-14T20:29:19.588962+00:00",
+    "result": "已交 agent queue（writer 20-40min > fire cap，依規則走 detached worker）。主線程已跑查重：check_arc_dedup verdict=clean + feed 層 grep 0 命中。草稿產出後 PHASE A followup 驗數字 + 串行發佈。\n\n一般讀者稿發佈進池 mile_ff4069d3（draft/general，含 3 圖 + 懶人包 4 張）。驗證：34 個宣稱對 k1681_results.json，修正 1 處重大方向錯誤（不對稱表把兩側都寫成『波動上升』，canonical 係數為負 → 高於均線波動反而降）；改寫過 content-vs-source gate（85% 衍生比例改述）。null result 未被寫成正面結論。",
+    "started_at": "2026-07-14T20:29:04.821156+00:00"
   },
   {
     "id": "email-12084-9b55bc",
@@ -33905,7 +33893,7 @@
     "description": "K1702 has completed primary-path Codex review with two independent full-population audits. Write a general-audience milestone article from experiments/k1702 only. The empirical verdict is NULL_OR_MIXED_INDIVIDUAL_FACTOR_OOS: primary positive Sharpe delta 1/6, paired bootstrap BH-FDR 0/6, spanning-alpha t gate BH-FDR 0/6. The corrected drawdown lesson is that MDD/vol is descriptive, not scale invariant; exposure-matched 316-shift phase-null leaves only MOM with a positive production gap, p=0.1582 and Holm p=0.9494, so 0/6 survive. Say no detected timing evidence, never proof timing is absent. Follow feed-publisher, anti-ai-style, publishing dedup, and lazypack requirements; all numbers must be read from K1702 evidence artifacts.",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "blocked",
+    "status": "succeeded",
     "tags": [
       "publish_milestone_article",
       "audience-general",
@@ -33930,10 +33918,29 @@
         "from": "claimed",
         "to": "blocked",
         "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T20:29:05.063205+00:00",
+        "from": "blocked",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-14T20:29:05.303394+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-14T20:29:19.828034+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
       }
     ],
-    "completed_at": "2026-07-14T17:29:54.291291+00:00",
-    "result": "已交 agent queue（writer 需 20-40min，超出 fire 50min cap → 依規則走 detached worker，不在 fire 內 spawn）。主線程已先跑 check_arc_dedup（k1702/general → verdict=clean）。草稿產出後由 PHASE A followup 驗數字 + 串行發佈。"
+    "completed_at": "2026-07-14T20:29:19.828015+00:00",
+    "result": "已交 agent queue（writer 需 20-40min，超出 fire 50min cap → 依規則走 detached worker，不在 fire 內 spawn）。主線程已先跑 check_arc_dedup（k1702/general → verdict=clean）。草稿產出後由 PHASE A followup 驗數字 + 串行發佈。\n\n一般讀者稿發佈進池 mile_cd543ce6（draft/general，含 3 圖 + 懶人包 4 張）。驗證：84 個宣稱對 k1702_results.json，修正 1 處誇大（vol_ratio=0.2508 不是『不到四分之一』）；改寫過 content-vs-source gate（12.4pp 衍生差改成 −56.0%→−43.5% 元件值、移除文獻 t=3.1）。phase-null 框架正確、未把 null 說成正結果。",
+    "started_at": "2026-07-14T20:29:05.303380+00:00"
   },
   {
     "id": "telegram-623",
@@ -36543,7 +36550,7 @@
     "task_type": "experiment",
     "priority": 1,
     "source": "agent-discovered",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-14T05:42:35.257885+00:00",
     "title": "K1709 重做 — ETF flow → RV 增量預測（CW/general-loss primary，撤回版）",
     "description": "原 K1709 被 Codex (gpt-5.6-sol ultra) 判 FAIL 並已撤出 canonical experiments/（見 experiments/_rejected/k1709/）。重做硬性要求：(1) 巢狀比較不得用 raw DM 承載 verdict — MSPE 用 Clark-West，QLIKE/pinball 用適當 general-loss/encompassing/recursive-bootstrap，禁止把 MSPE-CW 貼標成 QLIKE inference；(2) 宣稱強度不得超過證據（可寫『未發現穩健增量證據』，不得寫『NULL 成立』或『可排除 ≥16% 效果』）；(3) provenance 測試要能證明每個 predictor 的真實來源日期（現行 assert 可被同列複製繞過）。開工前必跑 scripts/tests/test_nested_dm_misuse_ratchet.py。",
@@ -36597,14 +36604,19 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T19:44:37.889306+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
     "started_at": "2026-07-14T18:50:16.704420+00:00",
     "last_released_at": "2026-07-14T18:50:01.481655+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-14T18:50:16.441926+00:00",
-    "claim_session_id": "021204768aef"
+    "completed_at": "2026-07-14T19:44:37.889290+00:00",
+    "result": "K1709 rev6 已在 dba627028aec9924d4ee0e167a9d7b99b6c8de77 完成獨立 PASS，綁定 10 個 claim-surface 檔（含 5 圖）；74 tests、gate、certify 全 PASS，估計值未移動。認證 branch tip 0c1072d4c3feb12ae00416e35471d29fb1250f4f。"
   },
   {
     "id": "gate-fail-verdict-blocks-merge",
@@ -37218,7 +37230,7 @@
     "id": "nested_dm_auditor_cannot_express_fixed_window_gw",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "agent_discovered",
     "created_at": "2026-07-14T13:23:32.692943+00:00",
     "title": "nested-DM auditor has no third role: the fixed-window bounded-memory GW unconditional special case",
@@ -37254,14 +37266,19 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T19:44:38.114588+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
     "started_at": "2026-07-14T18:50:17.234312+00:00",
     "last_released_at": "2026-07-14T18:50:01.481673+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-14T18:50:16.966765+00:00",
-    "claim_session_id": "179e0501c702"
+    "completed_at": "2026-07-14T19:44:38.114572+00:00",
+    "result": "新增 fail-closed primary_unconditional_gw_dm_fixed_memory 第三角色，要求 source/runtime/claim-surface/trusted receipt 全證據並涵蓋 reader-facing figures。129 tests PASS；全庫 1,830 檔掃描維持 231 affected、0 errors；獨立對抗複核 PASS。"
   },
   {
     "id": "alert_internal_git_push_backup_hold_3f4834ce7a_clean_watermark",
@@ -37272,13 +37289,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-14T19:00:49.487673+00:00",
+    "completed_at": "2026-07-14T20:01:01.776262+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T19:00:49.487673+00:00",
-      "last_clean_observed_at": "2026-07-14T19:00:49.487673+00:00"
+      "resolved_at": "2026-07-14T20:01:01.776262+00:00",
+      "last_clean_observed_at": "2026-07-14T20:01:01.776262+00:00"
     }
   },
   {
@@ -37290,13 +37307,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-14T19:33:15.794000+00:00",
+    "completed_at": "2026-07-14T20:31:56.416232+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T19:33:15.794000+00:00",
-      "last_clean_observed_at": "2026-07-14T19:33:15.794000+00:00"
+      "resolved_at": "2026-07-14T20:31:56.416232+00:00",
+      "last_clean_observed_at": "2026-07-14T20:31:56.416232+00:00"
     }
   },
   {
@@ -37396,13 +37413,36 @@
     "description": "由 alert `release_pool_gap` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n## 觸發條件\n釋出機器 cron 正常 fire（machinery_gap=0.0h），但已超過 8.0h 沒有任何文章成功釋出。\n- last_released_at: 2026-07-14T08:00:56.867821+00:00\n- release_gap_hours: 8.0\n- machinery_last_at: 2026-07-14T16:00:56+00:00\n\n## release preview\n- draft: 2\n- scheduled: 0\n- eligible_before_dedup: 2\n- dedup_flagged: 1\n- eligible_after_dedup: 1\n\n## 影響\n通常是 due 草稿全落在已飽和主題、dedup 正確 skip 但釋出算法未 fall-through 到 fresh-theme 草稿；\n讀者端看不到新內容（Mission 第 1/5 條），但這不是 cron 停擺，是內容釋出層問題。\n\n## 建議行動\n1. 若 eligible_after_dedup=0：不要強行釋出已被 dedup TTL 排除的草稿，先補 fresh-theme draft 或等 TTL 到期。\n2. 若還有 eligible_after_dedup>0：定向釋出一篇 fresh-theme 草稿（避開 model_complexity / vt_strategy / spy / vix / garch）：\n   jq '[.[]|select(.status==\"draft\")]|.[].title' storage/reports/feed.json 挑非飽和主題\n   VOLPRED_ACTOR=claude uv run volpred ops release-pool --pub-id <id> --include-drafts\n3. 若 draft 池主題全飽和：派 daily_article 補 fresh-theme 草稿（publication-candidates skill）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-14T16:01:10.804145+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "release_pool_gap"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-14T20:30:52.115147+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-14T20:30:52.349031+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-14T20:30:52.582545+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
+      }
+    ],
+    "started_at": "2026-07-14T20:30:52.349014+00:00",
+    "completed_at": "2026-07-14T20:30:52.582533+00:00",
+    "result": "補池 3 篇（2→5）+ 定向釋出 mile_ff4069d3（迷思實驗室｜跌破均線），supabase synced、線上 200。斷檔 20h 已解除。"
   },
   {
     "id": "k1709_rev4_nameerror",

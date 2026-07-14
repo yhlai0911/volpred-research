@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-14T19:00:49.157639+00:00",
+  "generated_at": "2026-07-14T20:01:01.008579+00:00",
   "adoptable": [],
   "held": [
     {
@@ -11,13 +11,35 @@
   "skipped": {
     "baseline": 519,
     "registered": 2,
-    "grace": 1,
+    "grace": 5,
     "inflight": 0
   },
   "orphan_count": 1,
   "adopted": [],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "lazypack-mile_0f710450",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_0f710450.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/plan.json",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/1_concept.png",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/2_method.png",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/3_results.png",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/4_takeaway.png"
+      ],
+      "existing_paths": [
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/plan.json",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/1_concept.png",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/2_method.png",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/3_results.png",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/4_takeaway.png"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [
     {
       "job_id": "lazypack-mile_a8d79d6a-r2",
@@ -34,7 +56,22 @@
       ]
     }
   ],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "lazypack-mile_0f710450",
+      "paths": [
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/plan.json",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/1_concept.png",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/2_method.png",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/3_results.png",
+        "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/4_takeaway.png"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "50db0bff1a401250e30e7b16a3f12fa333c0ad2b",
+      "reason": "committed"
+    }
+  ],
   "paper_artifact_collectable": [],
   "paper_artifact_held": [],
   "paper_collections": []

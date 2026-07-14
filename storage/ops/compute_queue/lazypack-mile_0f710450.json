@@ -21,11 +21,11 @@
     "K1685"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queued_at": "2026-07-14T18:30:19Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-14T20:00:05Z",
+  "completed_at": "2026-07-14T20:00:12Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_0f710450.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_0f710450.stderr",
   "result_artifact": "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels",
@@ -36,7 +36,7 @@
     "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/3_results.png",
     "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/4_takeaway.png"
   ],
-  "output_paths_updated_at": null,
+  "output_paths_updated_at": "2026-07-14T20:00:06Z",
   "job_metadata": null,
   "kind": "compute",
   "cwd": null,
@@ -44,5 +44,20 @@
   "followup_dispatched": false,
   "timeout_seconds": 300,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "50db0bff1a401250e30e7b16a3f12fa333c0ad2b",
+  "delivered_paths": [
+    "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/1_concept.png",
+    "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/2_method.png",
+    "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/3_results.png",
+    "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/panels/4_takeaway.png",
+    "storage/lazypack_jobs/mile_0f710450/runs/lazypack-mile_0f710450/plan.json"
+  ],
+  "delivered_at": "2026-07-14T20:01:01.745356+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }
