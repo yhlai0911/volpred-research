@@ -17303,5 +17303,16 @@
     "task_id": "governance_experiment_gates_blind_in_worktrees",
     "summary": "實驗完整性 gate 推進 agent 構得到的地方（commit 1f6097af4）。K1709 白做一整份 xhigh 實驗，不是因為偵測器不對 —— nested-DM ratchet 抓得到且錯誤訊息與 Codex CRITICAL 逐字重合 —— 而是它從沒被執行到：worktree agent 只跑自帶 test_kXXXX.py，不跑 scripts/tests/，branch 未 merge 故 CI 也沒看過。(1) scripts/experiment_gates.py 單一入口 run --path experiments/<kid>，detector/verdict set/baseline 全部 import 自原 auditor module（nested-DM、DM HAC lag、FEVD ordering、MDD scale），不重造第二套判定；已凍結 legacy debt 放行，agent 不為別人的債被擋。(2) 接進 compute_queue.run_next 標 completed 前的 choke point（每個 worktree 實驗必經）：不過 → failed + experiment_gate_failed → 走既有 triage_failed。選 runner-enforced 而非 brief 自律，因為 agent 自律正是這次失效的東西。(3) audit_nested_dm_misuse exit 0 不再假裝是 pass，明說 enforcement owner。(4) test_experiment_gates.py：k1709 v1 fixture 驗 FAIL、gate 在非 canonical checkout 仍咬、AST 斷言 runner 仍接線（break-then-verify：拆線後斷言轉 False）。驗證 k1709 FAIL(primary_raw_dm)、k1698/k1680/k1681 PASS、6+68 tests 綠。姊妹 P2 canonical_write_guard_blind_in_worktrees 實測已不復現（根因 conftest.py 曾被 gitignore，worktree checkout 拿不到；今日 un-ignore 後 68 tests 全過）→ 同 class 兩例一次收斂，一併結案。未用 merge_worktree.sh（它會對共享 checkout 下 git stash push，會捲進 slot-2 在途的 k1709），改 path-scoped 抽取只搬本班 5 個檔。",
     "status": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-14T13:30:56+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-0603fbf6d",
+    "outcome": "succeeded",
+    "summary": "fix(ci): repair first and notify after verification",
+    "commit": "0603fbf6d384e1da7bf877e856e0d8ffeaec92ce",
+    "owner": "codex",
+    "backfilled_at": "2026-07-14T05:31:24.303047+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
