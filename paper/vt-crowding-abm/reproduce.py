@@ -20,6 +20,13 @@ Tables / sections covered:
                                             P5-style Sharpe-only detector
   §5.4 Knife-edge rebuttal                — joint robustness counts
                                             (17/17 + NoiseControl 5/5+12/12)
+  Table tab:vt_monotone_curve (§3.1)      — K1471 canonical-cell VT Sharpe
+                                            curve + path-bootstrap CIs
+  Table tab:matched_control_vt (§3.2)     — K1471 VT vs RR_VT across 5 cells
+  Table tab:tfmr_gate (§cross_strategy)   — K1471 applicability-gate outcomes
+                                            + RR_TF/RR_MR random-direction ctrls
+  Abstract + RR_TF erosion narrative      — K1471 factorization (94,500),
+                                            footprint-scale identification
 
 Usage:
   uv run python paper/vt-crowding-abm/reproduce.py [--skip-live]
@@ -313,6 +320,277 @@ PAPER_CLAIMS = {
         "source_json_field": "computed: 12 (K1262 strategy-spec) + 5 (K1262b microstructure)",
     },
 }
+
+# =====================================================================
+# K1471 exogenous-detector redesign (M=500, 94,500 sims) — headline layer
+# ---------------------------------------------------------------------
+# Binds every printed number in the three K1471 tables now carried in
+# main.tex plus the abstract factorization and the RR_TF erosion narrative:
+#   Table tab:vt_monotone_curve  — canonical-cell VT Sharpe curve + CIs (§3.1)
+#   Table tab:matched_control_vt — VT vs RR_VT across five cells (§3.2)
+#   Table tab:tfmr_gate          — cross-strategy applicability gate (§cross)
+#   Abstract / §cross RR_TF erosion narrative (footprint-scale identification)
+# Source JSON: experiments/k1471_vt_crowding_redesign/k1471_full_results.json
+# Path convention (canonical; the caption's old
+#   treatment_results.VT_baseline.cell1 path does NOT exist in the JSON):
+#   cells.<cell>.treatments.<treat>.per_adoption.<phi>.{sharpe.mean,boot_ci,_turnover}
+#   cells.<cell>.detector.<treat>.{status,baseline_mean_sharpe,p_value,threshold}
+# Tolerances: Sharpe / CI / Δ = 0.01 (3-decimal table precision, stored
+# deterministic source); sup-Wald p = 0.0005; footprint magnitudes as noted.
+# =====================================================================
+K1471_CELLS = ["cell1_baseline", "cell2_lambda_low", "cell3_lambda_high",
+               "cell4_gamma_low", "cell5_gamma_high"]
+
+# Paper printed values, tab:vt_monotone_curve (canonical cell1).
+# phi -> (mean, ci_lo, ci_hi, delta_vs_prev)
+_K1471_VT_CURVE = {
+    "10%":  (0.510,  0.484,  0.534,  None),
+    "30%":  (0.481,  0.454,  0.506, -0.029),
+    "40%":  (0.405,  0.380,  0.427, -0.076),
+    "50%":  (0.338,  0.313,  0.362, -0.067),
+    "60%":  (0.203,  0.182,  0.225, -0.135),
+    "70%":  (0.091,  0.073,  0.108, -0.112),
+    "100%": (-0.271, -0.283, -0.260, -0.362),
+}
+# Paper printed values, tab:matched_control_vt.
+# cell -> (VT_S10, VT_S100, VT_delta, RRVT_S10, RRVT_S100, RRVT_delta, RRVT_p)
+_K1471_MC_VT = {
+    "cell1_baseline":    (0.510, -0.271, -0.781, 0.447, 0.541, 0.093, 0.001),
+    "cell2_lambda_low":  (0.497,  0.077, -0.421, 0.446, 0.541, 0.095, 0.001),
+    "cell3_lambda_high": (0.507, -0.393, -0.899, 0.437, 0.517, 0.080, 0.003),
+    "cell4_gamma_low":   (0.508, -0.208, -0.715, 0.445, 0.543, 0.098, 0.001),
+    "cell5_gamma_high":  (0.508, -0.284, -0.792, 0.445, 0.534, 0.089, 0.002),
+}
+# Paper printed values, tab:tfmr_gate.
+# cell -> (TF_status, TF_baseSh, MR_status, MR_baseSh,
+#          RR_TF_p, RR_TF_baseSh, RR_MR_p, RR_MR_baseSh)
+_K1471_GATE = {
+    "cell1_baseline":    ("excluded", -0.825, "excluded", -1.776, 0.001, -0.037, 0.001, -0.007),
+    "cell2_lambda_low":  ("passes",   -0.444, "excluded", -0.688, 0.001, -0.012, 0.001, -0.011),
+    "cell3_lambda_high": ("excluded", -1.254, "excluded", -5.485, 0.001, -0.040, 0.001, -0.057),
+    "cell4_gamma_low":   ("excluded", -0.823, "excluded", -1.776, 0.001, -0.037, 0.001, -0.011),
+    "cell5_gamma_high":  ("excluded", -0.826, "excluded", -1.776, 0.001, -0.034, 0.001, -0.011),
+}
+
+
+def _k1471_build_claims() -> dict:
+    """Programmatically build one PAPER_CLAIMS entry per printed table cell."""
+    claims: dict = {}
+    # ---- tab:vt_monotone_curve (canonical cell) ----
+    for phi, (m, lo, hi, dl) in _K1471_VT_CURVE.items():
+        base = f"cells.cell1_baseline.treatments.VT_baseline.per_adoption.{phi}"
+        claims[f"K1471 vt_curve Sharpe @ {phi} (cell1)"] = {
+            "paper": m, "tol": 0.01,
+            "source_paper_loc": f"Table tab:vt_monotone_curve row phi={phi} (VT Sharpe mean)",
+            "source_json_field": f"{base}.sharpe.mean",
+        }
+        claims[f"K1471 vt_curve CI-lo @ {phi} (cell1)"] = {
+            "paper": lo, "tol": 0.01,
+            "source_paper_loc": f"Table tab:vt_monotone_curve row phi={phi} (95% path-boot CI low)",
+            "source_json_field": f"{base}.sharpe.boot_ci.ci_lo",
+        }
+        claims[f"K1471 vt_curve CI-hi @ {phi} (cell1)"] = {
+            "paper": hi, "tol": 0.01,
+            "source_paper_loc": f"Table tab:vt_monotone_curve row phi={phi} (95% path-boot CI high)",
+            "source_json_field": f"{base}.sharpe.boot_ci.ci_hi",
+        }
+        if dl is not None:
+            claims[f"K1471 vt_curve delta @ {phi} (cell1)"] = {
+                "paper": dl, "tol": 0.01,
+                "source_paper_loc": f"Table tab:vt_monotone_curve row phi={phi} (Δ vs previous level)",
+                "source_json_field": f"computed: {base}.sharpe.mean - previous-level mean",
+            }
+    # ---- tab:matched_control_vt ----
+    for cell, (v10, v100, vd, r10, r100, rd, rp) in _K1471_MC_VT.items():
+        vt = f"cells.{cell}.treatments.VT_baseline.per_adoption"
+        rr = f"cells.{cell}.treatments.RR_VT.per_adoption"
+        claims[f"K1471 mc_vt VT S@10% ({cell})"] = {
+            "paper": v10, "tol": 0.01,
+            "source_paper_loc": f"Table tab:matched_control_vt {cell} VT S_10%",
+            "source_json_field": f"{vt}.10%.sharpe.mean"}
+        claims[f"K1471 mc_vt VT S@100% ({cell})"] = {
+            "paper": v100, "tol": 0.01,
+            "source_paper_loc": f"Table tab:matched_control_vt {cell} VT S_100%",
+            "source_json_field": f"{vt}.100%.sharpe.mean"}
+        claims[f"K1471 mc_vt VT delta ({cell})"] = {
+            "paper": vd, "tol": 0.01,
+            "source_paper_loc": f"Table tab:matched_control_vt {cell} VT Δ_10→100",
+            "source_json_field": f"computed: {vt}.100%.sharpe.mean - {vt}.10%.sharpe.mean"}
+        claims[f"K1471 mc_vt RR_VT S@10% ({cell})"] = {
+            "paper": r10, "tol": 0.01,
+            "source_paper_loc": f"Table tab:matched_control_vt {cell} RR_VT S_10%",
+            "source_json_field": f"{rr}.10%.sharpe.mean"}
+        claims[f"K1471 mc_vt RR_VT S@100% ({cell})"] = {
+            "paper": r100, "tol": 0.01,
+            "source_paper_loc": f"Table tab:matched_control_vt {cell} RR_VT S_100%",
+            "source_json_field": f"{rr}.100%.sharpe.mean"}
+        claims[f"K1471 mc_vt RR_VT delta ({cell})"] = {
+            "paper": rd, "tol": 0.01,
+            "source_paper_loc": f"Table tab:matched_control_vt {cell} RR_VT Δ_10→100",
+            "source_json_field": f"computed: {rr}.100%.sharpe.mean - {rr}.10%.sharpe.mean"}
+        claims[f"K1471 mc_vt RR_VT sup-Wald p ({cell})"] = {
+            "paper": rp, "tol": 0.0005,
+            "source_paper_loc": f"Table tab:matched_control_vt {cell} RR_VT sup-Wald p",
+            "source_json_field": f"cells.{cell}.detector.RR_VT.p_value"}
+    # ---- tab:tfmr_gate ----
+    for cell, (tfs, tfb, mrs, mrb, rtfp, rtfb, rmrp, rmrb) in _K1471_GATE.items():
+        det = f"cells.{cell}.detector"
+        claims[f"K1471 gate TF status ({cell})"] = {
+            "paper": tfs, "tol": 0.0,
+            "source_paper_loc": f"Table tab:tfmr_gate {cell} TF gate word",
+            "source_json_field": f"{det}.TF.status (mapped: not_applicable_saturated_loss->excluded, ok->passes)"}
+        claims[f"K1471 gate TF baseline Sharpe ({cell})"] = {
+            "paper": tfb, "tol": 0.01,
+            "source_paper_loc": f"Table tab:tfmr_gate {cell} TF 10% baseline Sharpe",
+            "source_json_field": f"{det}.TF.baseline_mean_sharpe"}
+        claims[f"K1471 gate MR status ({cell})"] = {
+            "paper": mrs, "tol": 0.0,
+            "source_paper_loc": f"Table tab:tfmr_gate {cell} MR gate word",
+            "source_json_field": f"{det}.MR.status (mapped)"}
+        claims[f"K1471 gate MR baseline Sharpe ({cell})"] = {
+            "paper": mrb, "tol": 0.01,
+            "source_paper_loc": f"Table tab:tfmr_gate {cell} MR 10% baseline Sharpe",
+            "source_json_field": f"{det}.MR.baseline_mean_sharpe"}
+        claims[f"K1471 gate RR_TF sup-Wald p ({cell})"] = {
+            "paper": rtfp, "tol": 0.0005,
+            "source_paper_loc": f"Table tab:tfmr_gate {cell} RR_TF sup-Wald p",
+            "source_json_field": f"{det}.RR_TF.p_value"}
+        claims[f"K1471 gate RR_TF baseline Sharpe ({cell})"] = {
+            "paper": rtfb, "tol": 0.01,
+            "source_paper_loc": f"Table tab:tfmr_gate {cell} RR_TF 10% baseline Sharpe",
+            "source_json_field": f"{det}.RR_TF.baseline_mean_sharpe"}
+        claims[f"K1471 gate RR_MR sup-Wald p ({cell})"] = {
+            "paper": rmrp, "tol": 0.0005,
+            "source_paper_loc": f"Table tab:tfmr_gate {cell} RR_MR sup-Wald p",
+            "source_json_field": f"{det}.RR_MR.p_value"}
+        claims[f"K1471 gate RR_MR baseline Sharpe ({cell})"] = {
+            "paper": rmrb, "tol": 0.01,
+            "source_paper_loc": f"Table tab:tfmr_gate {cell} RR_MR 10% baseline Sharpe",
+            "source_json_field": f"{det}.RR_MR.baseline_mean_sharpe"}
+    return claims
+
+
+PAPER_CLAIMS.update(_k1471_build_claims())
+PAPER_CLAIMS.update({
+    # ---- Abstract factorization (94,500 = 27 combos x 7 treatments x 500) ----
+    "K1471 total simulations (abstract 94,500)": {
+        "paper": 94500, "tol": 0,
+        "source_paper_loc": "Abstract '94,500 Monte Carlo simulations'",
+        "source_json_field": "total_sims",
+    },
+    "K1471 cell-adoption combinations (abstract 27)": {
+        "paper": 27, "tol": 0,
+        "source_paper_loc": "Abstract '27 cell--adoption combinations'",
+        "source_json_field": "computed: len(adoption_grid_cell1) + 4*len(adoption_grid_other)",
+    },
+    "K1471 treatment/control count (abstract 7)": {
+        "paper": 7, "tol": 0,
+        "source_paper_loc": "Abstract 'x 7 treatments/controls'",
+        "source_json_field": "computed: len(cells.cell1_baseline.treatments)",
+    },
+    "K1471 MC per combination (abstract 500)": {
+        "paper": 500, "tol": 0,
+        "source_paper_loc": "Abstract 'x 500 MC'",
+        "source_json_field": "n_sims_per_batch",
+    },
+    "K1471 VT sup-Wald p=0.001 in 5/5 cells (abstract)": {
+        "paper": 5, "tol": 0,
+        "source_paper_loc": "Abstract/§3.1 'sup-Wald test rejects flatness in all five cells (p=0.001 in every cell)'",
+        "source_json_field": "computed: count cells with detector.VT_baseline.p_value == 0.001",
+    },
+    "K1471 VT descriptive drop>70% at 70% in 3/5 cells (abstract)": {
+        "paper": 3, "tol": 0,
+        "source_paper_loc": "Abstract '70% threshold survives as descriptive level-crossing (drop>70%) in 3 of 5 cells'",
+        "source_json_field": "computed: count cells with robustness_drop_grid.VT_baseline['drop>70%'] == '70%'",
+    },
+    # ---- tab:matched_control_vt narrative (§3.2 L239) ----
+    "K1471 mean VT 10->100 drop across 5 cells (-0.722)": {
+        "paper": -0.722, "tol": 0.01,
+        "source_paper_loc": "§3.2 'mean VT 10%-to-100% Sharpe drop is -0.722'",
+        "source_json_field": "computed: mean over 5 cells of (VT S@100% - VT S@10%)",
+    },
+    "K1471 smallest VT decline = cell2 (-0.421)": {
+        "paper": -0.421, "tol": 0.01,
+        "source_paper_loc": "§3.2 'cell2 lambda low showing the smallest decline at -0.421'",
+        "source_json_field": "computed: max (least negative) VT delta across cells",
+    },
+    "K1471 mean RR_VT change across 5 cells (+0.091)": {
+        "paper": 0.091, "tol": 0.01,
+        "source_paper_loc": "§3.2 'mean RR_VT change is +0.091'",
+        "source_json_field": "computed: mean over 5 cells of (RR_VT S@100% - RR_VT S@10%)",
+    },
+    "K1471 VT degrades in 5/5 cells": {
+        "paper": 5, "tol": 0,
+        "source_paper_loc": "§3.2 'VT degrades in 5 of 5 microstructure cells'",
+        "source_json_field": "computed: count cells with VT delta < 0",
+    },
+    "K1471 RR_VT degrades in 0/5 cells": {
+        "paper": 0, "tol": 0,
+        "source_paper_loc": "§3.2 'RR_VT degrades in 0 of 5'",
+        "source_json_field": "computed: count cells with RR_VT delta < 0",
+    },
+    # ---- §cross_strategy RR_TF erosion narrative (L326) ----
+    "K1471 gate excludes TF in 4/5 cells": {
+        "paper": 4, "tol": 0,
+        "source_paper_loc": "§cross 'the gate excludes TF in four of five cells'",
+        "source_json_field": "computed: count cells with detector.TF.status == not_applicable_saturated_loss",
+    },
+    "K1471 gate excludes MR in 5/5 cells": {
+        "paper": 5, "tol": 0,
+        "source_paper_loc": "§cross 'MR in all five'",
+        "source_json_field": "computed: count cells with detector.MR.status == not_applicable_saturated_loss",
+    },
+    "K1471 RR_TF sup-Wald p=0.001 in 5/5 cells": {
+        "paper": 5, "tol": 0,
+        "source_paper_loc": "§cross 'RR_TF sup-Wald rejects flatness at p=0.001 in 5 of 5 cells'",
+        "source_json_field": "computed: count cells with detector.RR_TF.p_value == 0.001",
+    },
+    "K1471 RR_MR sup-Wald p=0.001 in 5/5 cells": {
+        "paper": 5, "tol": 0,
+        "source_paper_loc": "§cross 'and RR_MR likewise'",
+        "source_json_field": "computed: count cells with detector.RR_MR.p_value == 0.001",
+    },
+    "K1471 RR_TF level-crossing min adoption (40%)": {
+        "paper": "40%", "tol": 0.0,
+        "source_paper_loc": "§cross 'descriptive level-crossings at 40--70% adoption' (min)",
+        "source_json_field": "computed: min numeric of detector.RR_TF.threshold across cells",
+    },
+    "K1471 RR_TF level-crossing max adoption (70%)": {
+        "paper": "70%", "tol": 0.0,
+        "source_paper_loc": "§cross 'descriptive level-crossings at 40--70% adoption' (max)",
+        "source_json_field": "computed: max numeric of detector.RR_TF.threshold across cells",
+    },
+    "K1471 TF/MR excluded baseline ceiling (-0.69)": {
+        "paper": -0.69, "tol": 0.01,
+        "source_paper_loc": "§cross 'structurally loss-making (baseline Sharpe -0.69 to -5.49)' (least negative)",
+        "source_json_field": "computed: max baseline_mean_sharpe over excluded TF/MR cells",
+    },
+    "K1471 TF/MR excluded baseline floor (-5.49)": {
+        "paper": -5.49, "tol": 0.01,
+        "source_paper_loc": "§cross 'structurally loss-making (baseline Sharpe -0.69 to -5.49)' (most negative)",
+        "source_json_field": "computed: min baseline_mean_sharpe over excluded TF/MR cells",
+    },
+    "K1471 TF footprint |dw| on the order of 1.5 (s=10)": {
+        "paper": 1.5, "tol": 0.1,
+        "source_paper_loc": "§cross 'coordinated footprint |Δw| on the order of 1.5 at s=10' (approx)",
+        "source_json_field": "computed: max over adoptions of cell1 TF per_adoption._turnover.dw_mean",
+    },
+    "K1471 VT footprint floor (0.004)": {
+        "paper": 0.004, "tol": 0.001,
+        "source_paper_loc": "§cross 'versus VT's 0.004--0.008' (min)",
+        "source_json_field": "computed: min over adoptions of cell1 VT per_adoption._turnover.dw_mean",
+    },
+    "K1471 VT footprint ceiling (0.008)": {
+        "paper": 0.008, "tol": 0.001,
+        "source_paper_loc": "§cross 'versus VT's 0.004--0.008' (max)",
+        "source_json_field": "computed: max over adoptions of cell1 VT per_adoption._turnover.dw_mean",
+    },
+    "K1471 TF-vs-VT footprint separation (two orders of magnitude)": {
+        "paper": 2, "tol": 0,
+        "source_paper_loc": "Abstract/§3.2/§cross 'footprints two orders of magnitude larger'",
+        "source_json_field": "computed: int(log10(TF footprint peak / VT footprint floor))",
+    },
+})
 
 
 def find_result_file(result_name: str, kid_hint: str | None = None) -> Path | None:
@@ -690,6 +968,185 @@ if d_1262b:
     checks.append(record_check("K1262b MR<=VT in 5/5 cells (incl. null saturation)", mr_le_vt))
 
 # ---------------------------------------------------------------------
+# K1471: exogenous-detector redesign headline layer.
+# Forced skip-live: the M=500 full run takes ~1,756s and must NEVER be
+# live-rerun inside the reproduce gate; the committed JSON is canonical.
+# ---------------------------------------------------------------------
+d_1471, _ = run_experiment(
+    "k1471_vt_crowding_redesign.py",
+    "k1471_full_results.json",
+    "K1471: exogenous-detector redesign (VT curve + matched control + gate)",
+    kid_hint="k1471_vt_crowding_redesign",
+    force_skip_live=True,
+)
+if d_1471:
+    cellsd = d_1471.get("cells", {})
+
+    def k1471_sharpe(cell, treat, phi):
+        return (cellsd.get(cell, {}).get("treatments", {}).get(treat, {})
+                .get("per_adoption", {}).get(phi, {}).get("sharpe", {}).get("mean"))
+
+    def k1471_ci(cell, treat, phi, side):
+        return (cellsd.get(cell, {}).get("treatments", {}).get(treat, {})
+                .get("per_adoption", {}).get(phi, {}).get("sharpe", {})
+                .get("boot_ci", {}).get(side))
+
+    def k1471_det(cell, treat, field):
+        return cellsd.get(cell, {}).get("detector", {}).get(treat, {}).get(field)
+
+    def k1471_dw(cell, treat, phi):
+        return (cellsd.get(cell, {}).get("treatments", {}).get(treat, {})
+                .get("per_adoption", {}).get(phi, {}).get("_turnover", {}).get("dw_mean"))
+
+    def gate_word(status):
+        # main.tex tab:tfmr_gate prints 'excluded' for the saturated-loss
+        # gate outcome and 'passes' otherwise.
+        return "excluded" if status == "not_applicable_saturated_loss" else "passes"
+
+    def th_rank(th):
+        try:
+            return int(str(th).rstrip("%"))
+        except Exception:  # silent-ok: threshold string parse; null/non-numeric -> None sentinel, caller filters these out before min/max
+            return None
+
+    # ---- Table tab:vt_monotone_curve (canonical cell1 VT curve) ----
+    prev_mean = None
+    for phi in _K1471_VT_CURVE:
+        m = k1471_sharpe("cell1_baseline", "VT_baseline", phi)
+        checks.append(record_check(f"K1471 vt_curve Sharpe @ {phi} (cell1)", m))
+        checks.append(record_check(f"K1471 vt_curve CI-lo @ {phi} (cell1)",
+                                   k1471_ci("cell1_baseline", "VT_baseline", phi, "ci_lo")))
+        checks.append(record_check(f"K1471 vt_curve CI-hi @ {phi} (cell1)",
+                                   k1471_ci("cell1_baseline", "VT_baseline", phi, "ci_hi")))
+        if prev_mean is not None and m is not None:
+            checks.append(record_check(f"K1471 vt_curve delta @ {phi} (cell1)",
+                                       round(m - prev_mean, 4)))
+        if m is not None:
+            prev_mean = m
+
+    # ---- Table tab:matched_control_vt (VT vs RR_VT, five cells) ----
+    vt_deltas, rr_deltas, gaps = [], [], []
+    for cell in K1471_CELLS:
+        v10 = k1471_sharpe(cell, "VT_baseline", "10%")
+        v100 = k1471_sharpe(cell, "VT_baseline", "100%")
+        r10 = k1471_sharpe(cell, "RR_VT", "10%")
+        r100 = k1471_sharpe(cell, "RR_VT", "100%")
+        vd = round(v100 - v10, 4) if (v10 is not None and v100 is not None) else None
+        rd = round(r100 - r10, 4) if (r10 is not None and r100 is not None) else None
+        checks.append(record_check(f"K1471 mc_vt VT S@10% ({cell})", v10))
+        checks.append(record_check(f"K1471 mc_vt VT S@100% ({cell})", v100))
+        checks.append(record_check(f"K1471 mc_vt VT delta ({cell})", vd))
+        checks.append(record_check(f"K1471 mc_vt RR_VT S@10% ({cell})", r10))
+        checks.append(record_check(f"K1471 mc_vt RR_VT S@100% ({cell})", r100))
+        checks.append(record_check(f"K1471 mc_vt RR_VT delta ({cell})", rd))
+        checks.append(record_check(f"K1471 mc_vt RR_VT sup-Wald p ({cell})",
+                                   k1471_det(cell, "RR_VT", "p_value")))
+        if vd is not None:
+            vt_deltas.append(vd)
+        if rd is not None:
+            rr_deltas.append(rd)
+        if v100 is not None and r100 is not None:
+            gaps.append(r100 - v100)
+
+    checks.append(record_check("K1471 mean VT 10->100 drop across 5 cells (-0.722)",
+                               (sum(vt_deltas) / len(vt_deltas)) if vt_deltas else None))
+    checks.append(record_check("K1471 smallest VT decline = cell2 (-0.421)",
+                               max(vt_deltas) if vt_deltas else None))
+    checks.append(record_check("K1471 mean RR_VT change across 5 cells (+0.091)",
+                               (sum(rr_deltas) / len(rr_deltas)) if rr_deltas else None))
+    checks.append(record_check("K1471 VT degrades in 5/5 cells",
+                               sum(1 for d in vt_deltas if d < 0)))
+    checks.append(record_check("K1471 RR_VT degrades in 0/5 cells",
+                               sum(1 for d in rr_deltas if d < 0)))
+    min_gap = min(gaps) if gaps else None
+    checks.append({
+        "metric": "K1471 min RR_VT-VT gap @100% >= 0.36",
+        "paper_value": ">=0.36",
+        "reproduced_value": round(min_gap, 4) if min_gap is not None else None,
+        "tol": 0.0,
+        "match": bool(min_gap is not None and min_gap >= 0.36),
+        "source_paper_loc": "§3.2 'RR_VT Sharpe at 100% exceeds VT at same level by at least 0.36'",
+        "source_json_field": "computed: min over cells of (RR_VT S@100% - VT S@100%)",
+    })
+
+    # ---- Table tab:tfmr_gate (cross-strategy applicability gate) ----
+    for cell in K1471_CELLS:
+        checks.append(record_check(f"K1471 gate TF status ({cell})",
+                                   gate_word(k1471_det(cell, "TF", "status"))))
+        checks.append(record_check(f"K1471 gate TF baseline Sharpe ({cell})",
+                                   k1471_det(cell, "TF", "baseline_mean_sharpe")))
+        checks.append(record_check(f"K1471 gate MR status ({cell})",
+                                   gate_word(k1471_det(cell, "MR", "status"))))
+        checks.append(record_check(f"K1471 gate MR baseline Sharpe ({cell})",
+                                   k1471_det(cell, "MR", "baseline_mean_sharpe")))
+        checks.append(record_check(f"K1471 gate RR_TF sup-Wald p ({cell})",
+                                   k1471_det(cell, "RR_TF", "p_value")))
+        checks.append(record_check(f"K1471 gate RR_TF baseline Sharpe ({cell})",
+                                   k1471_det(cell, "RR_TF", "baseline_mean_sharpe")))
+        checks.append(record_check(f"K1471 gate RR_MR sup-Wald p ({cell})",
+                                   k1471_det(cell, "RR_MR", "p_value")))
+        checks.append(record_check(f"K1471 gate RR_MR baseline Sharpe ({cell})",
+                                   k1471_det(cell, "RR_MR", "baseline_mean_sharpe")))
+
+    # ---- Abstract factorization (94,500 = 27 x 7 x 500) ----
+    cfg = d_1471.get("config", {})
+    grid1 = cfg.get("adoption_grid_cell1", [])
+    grid_o = cfg.get("adoption_grid_other", [])
+    n_treat = len(cellsd.get("cell1_baseline", {}).get("treatments", {}))
+    checks.append(record_check("K1471 total simulations (abstract 94,500)",
+                               d_1471.get("total_sims")))
+    checks.append(record_check("K1471 cell-adoption combinations (abstract 27)",
+                               (len(grid1) + 4 * len(grid_o)) if (grid1 and grid_o) else None))
+    checks.append(record_check("K1471 treatment/control count (abstract 7)", n_treat))
+    checks.append(record_check("K1471 MC per combination (abstract 500)",
+                               d_1471.get("n_sims_per_batch")))
+    checks.append(record_check("K1471 VT sup-Wald p=0.001 in 5/5 cells (abstract)",
+                               sum(1 for c in K1471_CELLS
+                                   if k1471_det(c, "VT_baseline", "p_value") == 0.001)))
+    checks.append(record_check("K1471 VT descriptive drop>70% at 70% in 3/5 cells (abstract)",
+                               sum(1 for c in K1471_CELLS
+                                   if cellsd.get(c, {}).get("robustness_drop_grid", {})
+                                      .get("VT_baseline", {}).get("drop>70%") == "70%")))
+
+    # ---- §cross_strategy RR_TF erosion narrative ----
+    checks.append(record_check("K1471 gate excludes TF in 4/5 cells",
+                               sum(1 for c in K1471_CELLS
+                                   if k1471_det(c, "TF", "status") == "not_applicable_saturated_loss")))
+    checks.append(record_check("K1471 gate excludes MR in 5/5 cells",
+                               sum(1 for c in K1471_CELLS
+                                   if k1471_det(c, "MR", "status") == "not_applicable_saturated_loss")))
+    checks.append(record_check("K1471 RR_TF sup-Wald p=0.001 in 5/5 cells",
+                               sum(1 for c in K1471_CELLS if k1471_det(c, "RR_TF", "p_value") == 0.001)))
+    checks.append(record_check("K1471 RR_MR sup-Wald p=0.001 in 5/5 cells",
+                               sum(1 for c in K1471_CELLS if k1471_det(c, "RR_MR", "p_value") == 0.001)))
+    rr_tf_ths = [th_rank(k1471_det(c, "RR_TF", "threshold")) for c in K1471_CELLS]
+    rr_tf_ths = [t for t in rr_tf_ths if t is not None]
+    checks.append(record_check("K1471 RR_TF level-crossing min adoption (40%)",
+                               f"{min(rr_tf_ths)}%" if rr_tf_ths else None))
+    checks.append(record_check("K1471 RR_TF level-crossing max adoption (70%)",
+                               f"{max(rr_tf_ths)}%" if rr_tf_ths else None))
+    excl_base = [k1471_det(c, t, "baseline_mean_sharpe")
+                 for c in K1471_CELLS for t in ("TF", "MR")
+                 if k1471_det(c, t, "status") == "not_applicable_saturated_loss"]
+    checks.append(record_check("K1471 TF/MR excluded baseline ceiling (-0.69)",
+                               max(excl_base) if excl_base else None))
+    checks.append(record_check("K1471 TF/MR excluded baseline floor (-5.49)",
+                               min(excl_base) if excl_base else None))
+    tf_dw = [x for x in (k1471_dw("cell1_baseline", "TF", phi) for phi in _K1471_VT_CURVE)
+             if x is not None]
+    vt_dw = [x for x in (k1471_dw("cell1_baseline", "VT_baseline", phi) for phi in _K1471_VT_CURVE)
+             if x is not None]
+    tf_peak = max(tf_dw) if tf_dw else None
+    vt_floor = min(vt_dw) if vt_dw else None
+    checks.append(record_check("K1471 TF footprint |dw| on the order of 1.5 (s=10)", tf_peak))
+    checks.append(record_check("K1471 VT footprint floor (0.004)", vt_floor))
+    checks.append(record_check("K1471 VT footprint ceiling (0.008)",
+                               max(vt_dw) if vt_dw else None))
+    checks.append(record_check("K1471 TF-vs-VT footprint separation (two orders of magnitude)",
+                               int(math.log10(tf_peak / vt_floor))
+                               if (tf_peak and vt_floor and vt_floor > 0) else None))
+
+# ---------------------------------------------------------------------
 # Joint robustness: 12 strategy-spec + 5 microstructure = 17/17
 # ---------------------------------------------------------------------
 joint = 0
@@ -743,13 +1200,13 @@ print(f"Match rate: {matched}/{total} = {match_rate:.1f}%")
 alert_level = "green" if match_rate >= 95.0 else ("yellow" if match_rate >= 80.0 else "red")
 report = {
     "paper_id": "vt-crowding-abm",
-    "paper_title": "When Positive-Feedback Strategies Crowd: A Family-Level Threshold Framework via Agent-Based Simulation",
-    "target_journal": "Finance Research Letters (FRL)",
+    "paper_title": "Monotone Strategy-Specific Erosion under Volatility-Targeting Crowding: Matched-Control Identification via Agent-Based Simulation",
+    "target_journal": "Quantitative Finance (QF) -> JEBO",
     "audit_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-    "auditor": "reproduce.py (Paper 5 v3 — K1261/K1262/K1262b expansion)",
+    "auditor": "reproduce.py (Paper 5 v4 — K1261/K1262/K1262b + K1471 redesign expansion)",
     "mode": {"skip_live": skip_live},
     "match_summary": {
-        "tables_verified": 4,
+        "tables_verified": 7,
         "checks_total": total,
         "checks_matched": matched,
         "overall_match_rate_pct": round(match_rate, 2),
@@ -775,6 +1232,18 @@ report = {
             "source": "experiments/k1262b/k1262b_results.json (5-cell OAT)",
             "section": "main.tex Table tab:oat_robustness (§4.5) + §5.4 knife-edge rebuttal",
         },
+        "table5_vt_monotone_curve": {
+            "source": "experiments/k1471_vt_crowding_redesign/k1471_full_results.json (cells.cell1_baseline.treatments.VT_baseline.per_adoption)",
+            "section": "main.tex Table tab:vt_monotone_curve (§3.1) + abstract canonical-cell curve",
+        },
+        "table6_matched_control_vt": {
+            "source": "experiments/k1471_vt_crowding_redesign/k1471_full_results.json (cells.*.treatments.{VT_baseline,RR_VT} + cells.*.detector.RR_VT)",
+            "section": "main.tex Table tab:matched_control_vt (§3.2) + matched-control narrative",
+        },
+        "table7_tfmr_gate": {
+            "source": "experiments/k1471_vt_crowding_redesign/k1471_full_results.json (cells.*.detector.{TF,MR,RR_TF,RR_MR})",
+            "section": "main.tex Table tab:tfmr_gate (§cross_strategy) + RR_TF erosion narrative",
+        },
     },
     "checks": checks,
     "joint_robustness": {
@@ -786,8 +1255,10 @@ report = {
     },
     "actor_message_to_user": (
         f"{alert_level.upper()}: {matched}/{total} = {match_rate:.1f}% match vs paper claims. "
-        "Tables 1+2+3+4 verified across K827v3 + K1261 + K1262 + K1262b. "
-        "v3 expansion adds cross-strategy + lambda/gamma OAT verification (§4.4 + §4.5 + §5.4)."
+        "Tables 1-4 verified across K827v3 + K1261 + K1262 + K1262b; "
+        "v4 expansion binds the K1471 exogenous-detector redesign headline layer "
+        "(tab:vt_monotone_curve + tab:matched_control_vt + tab:tfmr_gate) plus the "
+        "abstract factorization and RR_TF footprint-scale erosion narrative."
     ),
 }
 out_path = PAPER_DIR / "reproduce_report.json"

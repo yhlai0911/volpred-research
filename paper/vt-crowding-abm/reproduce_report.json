@@ -1,16 +1,16 @@
 {
   "paper_id": "vt-crowding-abm",
-  "paper_title": "When Positive-Feedback Strategies Crowd: A Family-Level Threshold Framework via Agent-Based Simulation",
-  "target_journal": "Finance Research Letters (FRL)",
-  "audit_date": "2026-04-27",
-  "auditor": "reproduce.py (Paper 5 v3 \u2014 K1261/K1262/K1262b expansion)",
+  "paper_title": "Monotone Strategy-Specific Erosion under Volatility-Targeting Crowding: Matched-Control Identification via Agent-Based Simulation",
+  "target_journal": "Quantitative Finance (QF) -> JEBO",
+  "audit_date": "2026-07-14",
+  "auditor": "reproduce.py (Paper 5 v4 \u2014 K1261/K1262/K1262b + K1471 redesign expansion)",
   "mode": {
-    "skip_live": false
+    "skip_live": true
   },
   "match_summary": {
-    "tables_verified": 4,
-    "checks_total": 47,
-    "checks_matched": 47,
+    "tables_verified": 7,
+    "checks_total": 173,
+    "checks_matched": 173,
     "overall_match_rate_pct": 100.0
   },
   "alert_level": "green",
@@ -33,6 +33,18 @@
     "table4_oat_robustness": {
       "source": "experiments/k1262b/k1262b_results.json (5-cell OAT)",
       "section": "main.tex Table tab:oat_robustness (\u00a74.5) + \u00a75.4 knife-edge rebuttal"
+    },
+    "table5_vt_monotone_curve": {
+      "source": "experiments/k1471_vt_crowding_redesign/k1471_full_results.json (cells.cell1_baseline.treatments.VT_baseline.per_adoption)",
+      "section": "main.tex Table tab:vt_monotone_curve (\u00a73.1) + abstract canonical-cell curve"
+    },
+    "table6_matched_control_vt": {
+      "source": "experiments/k1471_vt_crowding_redesign/k1471_full_results.json (cells.*.treatments.{VT_baseline,RR_VT} + cells.*.detector.RR_VT)",
+      "section": "main.tex Table tab:matched_control_vt (\u00a73.2) + matched-control narrative"
+    },
+    "table7_tfmr_gate": {
+      "source": "experiments/k1471_vt_crowding_redesign/k1471_full_results.json (cells.*.detector.{TF,MR,RR_TF,RR_MR})",
+      "section": "main.tex Table tab:tfmr_gate (\u00a7cross_strategy) + RR_TF erosion narrative"
     }
   },
   "checks": [
@@ -469,6 +481,1240 @@
       "source_json_field": "computed: rank-compare MR vs VT per cell with null-as-saturation rule"
     },
     {
+      "metric": "K1471 vt_curve Sharpe @ 10% (cell1)",
+      "paper_value": 0.51,
+      "reproduced_value": 0.51,
+      "abs_diff": 0.0,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=10% (VT Sharpe mean)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 vt_curve CI-lo @ 10% (cell1)",
+      "paper_value": 0.484,
+      "reproduced_value": 0.4842,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=10% (95% path-boot CI low)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.10%.sharpe.boot_ci.ci_lo"
+    },
+    {
+      "metric": "K1471 vt_curve CI-hi @ 10% (cell1)",
+      "paper_value": 0.534,
+      "reproduced_value": 0.5344,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=10% (95% path-boot CI high)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.10%.sharpe.boot_ci.ci_hi"
+    },
+    {
+      "metric": "K1471 vt_curve Sharpe @ 30% (cell1)",
+      "paper_value": 0.481,
+      "reproduced_value": 0.4809,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=30% (VT Sharpe mean)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.30%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 vt_curve CI-lo @ 30% (cell1)",
+      "paper_value": 0.454,
+      "reproduced_value": 0.454,
+      "abs_diff": 0.0,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=30% (95% path-boot CI low)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.30%.sharpe.boot_ci.ci_lo"
+    },
+    {
+      "metric": "K1471 vt_curve CI-hi @ 30% (cell1)",
+      "paper_value": 0.506,
+      "reproduced_value": 0.5059,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=30% (95% path-boot CI high)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.30%.sharpe.boot_ci.ci_hi"
+    },
+    {
+      "metric": "K1471 vt_curve delta @ 30% (cell1)",
+      "paper_value": -0.029,
+      "reproduced_value": -0.0291,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=30% (\u0394 vs previous level)",
+      "source_json_field": "computed: cells.cell1_baseline.treatments.VT_baseline.per_adoption.30%.sharpe.mean - previous-level mean"
+    },
+    {
+      "metric": "K1471 vt_curve Sharpe @ 40% (cell1)",
+      "paper_value": 0.405,
+      "reproduced_value": 0.4047,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=40% (VT Sharpe mean)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.40%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 vt_curve CI-lo @ 40% (cell1)",
+      "paper_value": 0.38,
+      "reproduced_value": 0.3802,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=40% (95% path-boot CI low)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.40%.sharpe.boot_ci.ci_lo"
+    },
+    {
+      "metric": "K1471 vt_curve CI-hi @ 40% (cell1)",
+      "paper_value": 0.427,
+      "reproduced_value": 0.427,
+      "abs_diff": 0.0,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=40% (95% path-boot CI high)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.40%.sharpe.boot_ci.ci_hi"
+    },
+    {
+      "metric": "K1471 vt_curve delta @ 40% (cell1)",
+      "paper_value": -0.076,
+      "reproduced_value": -0.0762,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=40% (\u0394 vs previous level)",
+      "source_json_field": "computed: cells.cell1_baseline.treatments.VT_baseline.per_adoption.40%.sharpe.mean - previous-level mean"
+    },
+    {
+      "metric": "K1471 vt_curve Sharpe @ 50% (cell1)",
+      "paper_value": 0.338,
+      "reproduced_value": 0.338,
+      "abs_diff": 0.0,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=50% (VT Sharpe mean)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.50%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 vt_curve CI-lo @ 50% (cell1)",
+      "paper_value": 0.313,
+      "reproduced_value": 0.3134,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=50% (95% path-boot CI low)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.50%.sharpe.boot_ci.ci_lo"
+    },
+    {
+      "metric": "K1471 vt_curve CI-hi @ 50% (cell1)",
+      "paper_value": 0.362,
+      "reproduced_value": 0.3621,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=50% (95% path-boot CI high)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.50%.sharpe.boot_ci.ci_hi"
+    },
+    {
+      "metric": "K1471 vt_curve delta @ 50% (cell1)",
+      "paper_value": -0.067,
+      "reproduced_value": -0.0666,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=50% (\u0394 vs previous level)",
+      "source_json_field": "computed: cells.cell1_baseline.treatments.VT_baseline.per_adoption.50%.sharpe.mean - previous-level mean"
+    },
+    {
+      "metric": "K1471 vt_curve Sharpe @ 60% (cell1)",
+      "paper_value": 0.203,
+      "reproduced_value": 0.2034,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=60% (VT Sharpe mean)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.60%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 vt_curve CI-lo @ 60% (cell1)",
+      "paper_value": 0.182,
+      "reproduced_value": 0.1815,
+      "abs_diff": 0.0005,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=60% (95% path-boot CI low)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.60%.sharpe.boot_ci.ci_lo"
+    },
+    {
+      "metric": "K1471 vt_curve CI-hi @ 60% (cell1)",
+      "paper_value": 0.225,
+      "reproduced_value": 0.2255,
+      "abs_diff": 0.0005,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=60% (95% path-boot CI high)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.60%.sharpe.boot_ci.ci_hi"
+    },
+    {
+      "metric": "K1471 vt_curve delta @ 60% (cell1)",
+      "paper_value": -0.135,
+      "reproduced_value": -0.1346,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=60% (\u0394 vs previous level)",
+      "source_json_field": "computed: cells.cell1_baseline.treatments.VT_baseline.per_adoption.60%.sharpe.mean - previous-level mean"
+    },
+    {
+      "metric": "K1471 vt_curve Sharpe @ 70% (cell1)",
+      "paper_value": 0.091,
+      "reproduced_value": 0.0909,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=70% (VT Sharpe mean)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.70%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 vt_curve CI-lo @ 70% (cell1)",
+      "paper_value": 0.073,
+      "reproduced_value": 0.0732,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=70% (95% path-boot CI low)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.70%.sharpe.boot_ci.ci_lo"
+    },
+    {
+      "metric": "K1471 vt_curve CI-hi @ 70% (cell1)",
+      "paper_value": 0.108,
+      "reproduced_value": 0.1079,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=70% (95% path-boot CI high)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.70%.sharpe.boot_ci.ci_hi"
+    },
+    {
+      "metric": "K1471 vt_curve delta @ 70% (cell1)",
+      "paper_value": -0.112,
+      "reproduced_value": -0.1126,
+      "abs_diff": 0.0006,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=70% (\u0394 vs previous level)",
+      "source_json_field": "computed: cells.cell1_baseline.treatments.VT_baseline.per_adoption.70%.sharpe.mean - previous-level mean"
+    },
+    {
+      "metric": "K1471 vt_curve Sharpe @ 100% (cell1)",
+      "paper_value": -0.271,
+      "reproduced_value": -0.2714,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=100% (VT Sharpe mean)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 vt_curve CI-lo @ 100% (cell1)",
+      "paper_value": -0.283,
+      "reproduced_value": -0.2832,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=100% (95% path-boot CI low)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.100%.sharpe.boot_ci.ci_lo"
+    },
+    {
+      "metric": "K1471 vt_curve CI-hi @ 100% (cell1)",
+      "paper_value": -0.26,
+      "reproduced_value": -0.2595,
+      "abs_diff": 0.0005,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=100% (95% path-boot CI high)",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.100%.sharpe.boot_ci.ci_hi"
+    },
+    {
+      "metric": "K1471 vt_curve delta @ 100% (cell1)",
+      "paper_value": -0.362,
+      "reproduced_value": -0.3623,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:vt_monotone_curve row phi=100% (\u0394 vs previous level)",
+      "source_json_field": "computed: cells.cell1_baseline.treatments.VT_baseline.per_adoption.100%.sharpe.mean - previous-level mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT S@10% (cell1_baseline)",
+      "paper_value": 0.51,
+      "reproduced_value": 0.51,
+      "abs_diff": 0.0,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell1_baseline VT S_10%",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT S@100% (cell1_baseline)",
+      "paper_value": -0.271,
+      "reproduced_value": -0.2714,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell1_baseline VT S_100%",
+      "source_json_field": "cells.cell1_baseline.treatments.VT_baseline.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT delta (cell1_baseline)",
+      "paper_value": -0.781,
+      "reproduced_value": -0.7815,
+      "abs_diff": 0.0005,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell1_baseline VT \u0394_10\u2192100",
+      "source_json_field": "computed: cells.cell1_baseline.treatments.VT_baseline.per_adoption.100%.sharpe.mean - cells.cell1_baseline.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT S@10% (cell1_baseline)",
+      "paper_value": 0.447,
+      "reproduced_value": 0.4474,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell1_baseline RR_VT S_10%",
+      "source_json_field": "cells.cell1_baseline.treatments.RR_VT.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT S@100% (cell1_baseline)",
+      "paper_value": 0.541,
+      "reproduced_value": 0.5406,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell1_baseline RR_VT S_100%",
+      "source_json_field": "cells.cell1_baseline.treatments.RR_VT.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT delta (cell1_baseline)",
+      "paper_value": 0.093,
+      "reproduced_value": 0.0932,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell1_baseline RR_VT \u0394_10\u2192100",
+      "source_json_field": "computed: cells.cell1_baseline.treatments.RR_VT.per_adoption.100%.sharpe.mean - cells.cell1_baseline.treatments.RR_VT.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT sup-Wald p (cell1_baseline)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell1_baseline RR_VT sup-Wald p",
+      "source_json_field": "cells.cell1_baseline.detector.RR_VT.p_value"
+    },
+    {
+      "metric": "K1471 mc_vt VT S@10% (cell2_lambda_low)",
+      "paper_value": 0.497,
+      "reproduced_value": 0.4971,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell2_lambda_low VT S_10%",
+      "source_json_field": "cells.cell2_lambda_low.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT S@100% (cell2_lambda_low)",
+      "paper_value": 0.077,
+      "reproduced_value": 0.0766,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell2_lambda_low VT S_100%",
+      "source_json_field": "cells.cell2_lambda_low.treatments.VT_baseline.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT delta (cell2_lambda_low)",
+      "paper_value": -0.421,
+      "reproduced_value": -0.4206,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell2_lambda_low VT \u0394_10\u2192100",
+      "source_json_field": "computed: cells.cell2_lambda_low.treatments.VT_baseline.per_adoption.100%.sharpe.mean - cells.cell2_lambda_low.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT S@10% (cell2_lambda_low)",
+      "paper_value": 0.446,
+      "reproduced_value": 0.4459,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell2_lambda_low RR_VT S_10%",
+      "source_json_field": "cells.cell2_lambda_low.treatments.RR_VT.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT S@100% (cell2_lambda_low)",
+      "paper_value": 0.541,
+      "reproduced_value": 0.5413,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell2_lambda_low RR_VT S_100%",
+      "source_json_field": "cells.cell2_lambda_low.treatments.RR_VT.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT delta (cell2_lambda_low)",
+      "paper_value": 0.095,
+      "reproduced_value": 0.0953,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell2_lambda_low RR_VT \u0394_10\u2192100",
+      "source_json_field": "computed: cells.cell2_lambda_low.treatments.RR_VT.per_adoption.100%.sharpe.mean - cells.cell2_lambda_low.treatments.RR_VT.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT sup-Wald p (cell2_lambda_low)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell2_lambda_low RR_VT sup-Wald p",
+      "source_json_field": "cells.cell2_lambda_low.detector.RR_VT.p_value"
+    },
+    {
+      "metric": "K1471 mc_vt VT S@10% (cell3_lambda_high)",
+      "paper_value": 0.507,
+      "reproduced_value": 0.5066,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell3_lambda_high VT S_10%",
+      "source_json_field": "cells.cell3_lambda_high.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT S@100% (cell3_lambda_high)",
+      "paper_value": -0.393,
+      "reproduced_value": -0.3927,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell3_lambda_high VT S_100%",
+      "source_json_field": "cells.cell3_lambda_high.treatments.VT_baseline.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT delta (cell3_lambda_high)",
+      "paper_value": -0.899,
+      "reproduced_value": -0.8993,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell3_lambda_high VT \u0394_10\u2192100",
+      "source_json_field": "computed: cells.cell3_lambda_high.treatments.VT_baseline.per_adoption.100%.sharpe.mean - cells.cell3_lambda_high.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT S@10% (cell3_lambda_high)",
+      "paper_value": 0.437,
+      "reproduced_value": 0.4369,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell3_lambda_high RR_VT S_10%",
+      "source_json_field": "cells.cell3_lambda_high.treatments.RR_VT.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT S@100% (cell3_lambda_high)",
+      "paper_value": 0.517,
+      "reproduced_value": 0.5172,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell3_lambda_high RR_VT S_100%",
+      "source_json_field": "cells.cell3_lambda_high.treatments.RR_VT.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT delta (cell3_lambda_high)",
+      "paper_value": 0.08,
+      "reproduced_value": 0.0803,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell3_lambda_high RR_VT \u0394_10\u2192100",
+      "source_json_field": "computed: cells.cell3_lambda_high.treatments.RR_VT.per_adoption.100%.sharpe.mean - cells.cell3_lambda_high.treatments.RR_VT.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT sup-Wald p (cell3_lambda_high)",
+      "paper_value": 0.003,
+      "reproduced_value": 0.003,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell3_lambda_high RR_VT sup-Wald p",
+      "source_json_field": "cells.cell3_lambda_high.detector.RR_VT.p_value"
+    },
+    {
+      "metric": "K1471 mc_vt VT S@10% (cell4_gamma_low)",
+      "paper_value": 0.508,
+      "reproduced_value": 0.5077,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell4_gamma_low VT S_10%",
+      "source_json_field": "cells.cell4_gamma_low.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT S@100% (cell4_gamma_low)",
+      "paper_value": -0.208,
+      "reproduced_value": -0.2077,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell4_gamma_low VT S_100%",
+      "source_json_field": "cells.cell4_gamma_low.treatments.VT_baseline.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT delta (cell4_gamma_low)",
+      "paper_value": -0.715,
+      "reproduced_value": -0.7154,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell4_gamma_low VT \u0394_10\u2192100",
+      "source_json_field": "computed: cells.cell4_gamma_low.treatments.VT_baseline.per_adoption.100%.sharpe.mean - cells.cell4_gamma_low.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT S@10% (cell4_gamma_low)",
+      "paper_value": 0.445,
+      "reproduced_value": 0.4455,
+      "abs_diff": 0.0005,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell4_gamma_low RR_VT S_10%",
+      "source_json_field": "cells.cell4_gamma_low.treatments.RR_VT.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT S@100% (cell4_gamma_low)",
+      "paper_value": 0.543,
+      "reproduced_value": 0.5432,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell4_gamma_low RR_VT S_100%",
+      "source_json_field": "cells.cell4_gamma_low.treatments.RR_VT.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT delta (cell4_gamma_low)",
+      "paper_value": 0.098,
+      "reproduced_value": 0.0977,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell4_gamma_low RR_VT \u0394_10\u2192100",
+      "source_json_field": "computed: cells.cell4_gamma_low.treatments.RR_VT.per_adoption.100%.sharpe.mean - cells.cell4_gamma_low.treatments.RR_VT.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT sup-Wald p (cell4_gamma_low)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell4_gamma_low RR_VT sup-Wald p",
+      "source_json_field": "cells.cell4_gamma_low.detector.RR_VT.p_value"
+    },
+    {
+      "metric": "K1471 mc_vt VT S@10% (cell5_gamma_high)",
+      "paper_value": 0.508,
+      "reproduced_value": 0.508,
+      "abs_diff": 0.0,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell5_gamma_high VT S_10%",
+      "source_json_field": "cells.cell5_gamma_high.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT S@100% (cell5_gamma_high)",
+      "paper_value": -0.284,
+      "reproduced_value": -0.2845,
+      "abs_diff": 0.0005,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell5_gamma_high VT S_100%",
+      "source_json_field": "cells.cell5_gamma_high.treatments.VT_baseline.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt VT delta (cell5_gamma_high)",
+      "paper_value": -0.792,
+      "reproduced_value": -0.7924,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell5_gamma_high VT \u0394_10\u2192100",
+      "source_json_field": "computed: cells.cell5_gamma_high.treatments.VT_baseline.per_adoption.100%.sharpe.mean - cells.cell5_gamma_high.treatments.VT_baseline.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT S@10% (cell5_gamma_high)",
+      "paper_value": 0.445,
+      "reproduced_value": 0.4451,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell5_gamma_high RR_VT S_10%",
+      "source_json_field": "cells.cell5_gamma_high.treatments.RR_VT.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT S@100% (cell5_gamma_high)",
+      "paper_value": 0.534,
+      "reproduced_value": 0.5339,
+      "abs_diff": 0.0001,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell5_gamma_high RR_VT S_100%",
+      "source_json_field": "cells.cell5_gamma_high.treatments.RR_VT.per_adoption.100%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT delta (cell5_gamma_high)",
+      "paper_value": 0.089,
+      "reproduced_value": 0.0887,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell5_gamma_high RR_VT \u0394_10\u2192100",
+      "source_json_field": "computed: cells.cell5_gamma_high.treatments.RR_VT.per_adoption.100%.sharpe.mean - cells.cell5_gamma_high.treatments.RR_VT.per_adoption.10%.sharpe.mean"
+    },
+    {
+      "metric": "K1471 mc_vt RR_VT sup-Wald p (cell5_gamma_high)",
+      "paper_value": 0.002,
+      "reproduced_value": 0.002,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:matched_control_vt cell5_gamma_high RR_VT sup-Wald p",
+      "source_json_field": "cells.cell5_gamma_high.detector.RR_VT.p_value"
+    },
+    {
+      "metric": "K1471 mean VT 10->100 drop across 5 cells (-0.722)",
+      "paper_value": -0.722,
+      "reproduced_value": -0.7218,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "\u00a73.2 'mean VT 10%-to-100% Sharpe drop is -0.722'",
+      "source_json_field": "computed: mean over 5 cells of (VT S@100% - VT S@10%)"
+    },
+    {
+      "metric": "K1471 smallest VT decline = cell2 (-0.421)",
+      "paper_value": -0.421,
+      "reproduced_value": -0.4206,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "\u00a73.2 'cell2 lambda low showing the smallest decline at -0.421'",
+      "source_json_field": "computed: max (least negative) VT delta across cells"
+    },
+    {
+      "metric": "K1471 mean RR_VT change across 5 cells (+0.091)",
+      "paper_value": 0.091,
+      "reproduced_value": 0.091,
+      "abs_diff": 0.0,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "\u00a73.2 'mean RR_VT change is +0.091'",
+      "source_json_field": "computed: mean over 5 cells of (RR_VT S@100% - RR_VT S@10%)"
+    },
+    {
+      "metric": "K1471 VT degrades in 5/5 cells",
+      "paper_value": 5,
+      "reproduced_value": 5,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "\u00a73.2 'VT degrades in 5 of 5 microstructure cells'",
+      "source_json_field": "computed: count cells with VT delta < 0"
+    },
+    {
+      "metric": "K1471 RR_VT degrades in 0/5 cells",
+      "paper_value": 0,
+      "reproduced_value": 0,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "\u00a73.2 'RR_VT degrades in 0 of 5'",
+      "source_json_field": "computed: count cells with RR_VT delta < 0"
+    },
+    {
+      "metric": "K1471 min RR_VT-VT gap @100% >= 0.36",
+      "paper_value": ">=0.36",
+      "reproduced_value": 0.4647,
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "\u00a73.2 'RR_VT Sharpe at 100% exceeds VT at same level by at least 0.36'",
+      "source_json_field": "computed: min over cells of (RR_VT S@100% - VT S@100%)"
+    },
+    {
+      "metric": "K1471 gate TF status (cell1_baseline)",
+      "paper_value": "excluded",
+      "reproduced_value": "excluded",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell1_baseline TF gate word",
+      "source_json_field": "cells.cell1_baseline.detector.TF.status (mapped: not_applicable_saturated_loss->excluded, ok->passes)"
+    },
+    {
+      "metric": "K1471 gate TF baseline Sharpe (cell1_baseline)",
+      "paper_value": -0.825,
+      "reproduced_value": -0.8246,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell1_baseline TF 10% baseline Sharpe",
+      "source_json_field": "cells.cell1_baseline.detector.TF.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate MR status (cell1_baseline)",
+      "paper_value": "excluded",
+      "reproduced_value": "excluded",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell1_baseline MR gate word",
+      "source_json_field": "cells.cell1_baseline.detector.MR.status (mapped)"
+    },
+    {
+      "metric": "K1471 gate MR baseline Sharpe (cell1_baseline)",
+      "paper_value": -1.776,
+      "reproduced_value": -1.7757,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell1_baseline MR 10% baseline Sharpe",
+      "source_json_field": "cells.cell1_baseline.detector.MR.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate RR_TF sup-Wald p (cell1_baseline)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell1_baseline RR_TF sup-Wald p",
+      "source_json_field": "cells.cell1_baseline.detector.RR_TF.p_value"
+    },
+    {
+      "metric": "K1471 gate RR_TF baseline Sharpe (cell1_baseline)",
+      "paper_value": -0.037,
+      "reproduced_value": -0.0367,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell1_baseline RR_TF 10% baseline Sharpe",
+      "source_json_field": "cells.cell1_baseline.detector.RR_TF.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate RR_MR sup-Wald p (cell1_baseline)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell1_baseline RR_MR sup-Wald p",
+      "source_json_field": "cells.cell1_baseline.detector.RR_MR.p_value"
+    },
+    {
+      "metric": "K1471 gate RR_MR baseline Sharpe (cell1_baseline)",
+      "paper_value": -0.007,
+      "reproduced_value": -0.0075,
+      "abs_diff": 0.0005,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell1_baseline RR_MR 10% baseline Sharpe",
+      "source_json_field": "cells.cell1_baseline.detector.RR_MR.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate TF status (cell2_lambda_low)",
+      "paper_value": "passes",
+      "reproduced_value": "passes",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell2_lambda_low TF gate word",
+      "source_json_field": "cells.cell2_lambda_low.detector.TF.status (mapped: not_applicable_saturated_loss->excluded, ok->passes)"
+    },
+    {
+      "metric": "K1471 gate TF baseline Sharpe (cell2_lambda_low)",
+      "paper_value": -0.444,
+      "reproduced_value": -0.4444,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell2_lambda_low TF 10% baseline Sharpe",
+      "source_json_field": "cells.cell2_lambda_low.detector.TF.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate MR status (cell2_lambda_low)",
+      "paper_value": "excluded",
+      "reproduced_value": "excluded",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell2_lambda_low MR gate word",
+      "source_json_field": "cells.cell2_lambda_low.detector.MR.status (mapped)"
+    },
+    {
+      "metric": "K1471 gate MR baseline Sharpe (cell2_lambda_low)",
+      "paper_value": -0.688,
+      "reproduced_value": -0.688,
+      "abs_diff": 0.0,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell2_lambda_low MR 10% baseline Sharpe",
+      "source_json_field": "cells.cell2_lambda_low.detector.MR.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate RR_TF sup-Wald p (cell2_lambda_low)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell2_lambda_low RR_TF sup-Wald p",
+      "source_json_field": "cells.cell2_lambda_low.detector.RR_TF.p_value"
+    },
+    {
+      "metric": "K1471 gate RR_TF baseline Sharpe (cell2_lambda_low)",
+      "paper_value": -0.012,
+      "reproduced_value": -0.0125,
+      "abs_diff": 0.0005,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell2_lambda_low RR_TF 10% baseline Sharpe",
+      "source_json_field": "cells.cell2_lambda_low.detector.RR_TF.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate RR_MR sup-Wald p (cell2_lambda_low)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell2_lambda_low RR_MR sup-Wald p",
+      "source_json_field": "cells.cell2_lambda_low.detector.RR_MR.p_value"
+    },
+    {
+      "metric": "K1471 gate RR_MR baseline Sharpe (cell2_lambda_low)",
+      "paper_value": -0.011,
+      "reproduced_value": -0.0106,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell2_lambda_low RR_MR 10% baseline Sharpe",
+      "source_json_field": "cells.cell2_lambda_low.detector.RR_MR.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate TF status (cell3_lambda_high)",
+      "paper_value": "excluded",
+      "reproduced_value": "excluded",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell3_lambda_high TF gate word",
+      "source_json_field": "cells.cell3_lambda_high.detector.TF.status (mapped: not_applicable_saturated_loss->excluded, ok->passes)"
+    },
+    {
+      "metric": "K1471 gate TF baseline Sharpe (cell3_lambda_high)",
+      "paper_value": -1.254,
+      "reproduced_value": -1.2544,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell3_lambda_high TF 10% baseline Sharpe",
+      "source_json_field": "cells.cell3_lambda_high.detector.TF.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate MR status (cell3_lambda_high)",
+      "paper_value": "excluded",
+      "reproduced_value": "excluded",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell3_lambda_high MR gate word",
+      "source_json_field": "cells.cell3_lambda_high.detector.MR.status (mapped)"
+    },
+    {
+      "metric": "K1471 gate MR baseline Sharpe (cell3_lambda_high)",
+      "paper_value": -5.485,
+      "reproduced_value": -5.4852,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell3_lambda_high MR 10% baseline Sharpe",
+      "source_json_field": "cells.cell3_lambda_high.detector.MR.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate RR_TF sup-Wald p (cell3_lambda_high)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell3_lambda_high RR_TF sup-Wald p",
+      "source_json_field": "cells.cell3_lambda_high.detector.RR_TF.p_value"
+    },
+    {
+      "metric": "K1471 gate RR_TF baseline Sharpe (cell3_lambda_high)",
+      "paper_value": -0.04,
+      "reproduced_value": -0.0395,
+      "abs_diff": 0.0005,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell3_lambda_high RR_TF 10% baseline Sharpe",
+      "source_json_field": "cells.cell3_lambda_high.detector.RR_TF.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate RR_MR sup-Wald p (cell3_lambda_high)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell3_lambda_high RR_MR sup-Wald p",
+      "source_json_field": "cells.cell3_lambda_high.detector.RR_MR.p_value"
+    },
+    {
+      "metric": "K1471 gate RR_MR baseline Sharpe (cell3_lambda_high)",
+      "paper_value": -0.057,
+      "reproduced_value": -0.0567,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell3_lambda_high RR_MR 10% baseline Sharpe",
+      "source_json_field": "cells.cell3_lambda_high.detector.RR_MR.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate TF status (cell4_gamma_low)",
+      "paper_value": "excluded",
+      "reproduced_value": "excluded",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell4_gamma_low TF gate word",
+      "source_json_field": "cells.cell4_gamma_low.detector.TF.status (mapped: not_applicable_saturated_loss->excluded, ok->passes)"
+    },
+    {
+      "metric": "K1471 gate TF baseline Sharpe (cell4_gamma_low)",
+      "paper_value": -0.823,
+      "reproduced_value": -0.823,
+      "abs_diff": 0.0,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell4_gamma_low TF 10% baseline Sharpe",
+      "source_json_field": "cells.cell4_gamma_low.detector.TF.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate MR status (cell4_gamma_low)",
+      "paper_value": "excluded",
+      "reproduced_value": "excluded",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell4_gamma_low MR gate word",
+      "source_json_field": "cells.cell4_gamma_low.detector.MR.status (mapped)"
+    },
+    {
+      "metric": "K1471 gate MR baseline Sharpe (cell4_gamma_low)",
+      "paper_value": -1.776,
+      "reproduced_value": -1.7757,
+      "abs_diff": 0.0003,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell4_gamma_low MR 10% baseline Sharpe",
+      "source_json_field": "cells.cell4_gamma_low.detector.MR.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate RR_TF sup-Wald p (cell4_gamma_low)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell4_gamma_low RR_TF sup-Wald p",
+      "source_json_field": "cells.cell4_gamma_low.detector.RR_TF.p_value"
+    },
+    {
+      "metric": "K1471 gate RR_TF baseline Sharpe (cell4_gamma_low)",
+      "paper_value": -0.037,
+      "reproduced_value": -0.0366,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell4_gamma_low RR_TF 10% baseline Sharpe",
+      "source_json_field": "cells.cell4_gamma_low.detector.RR_TF.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate RR_MR sup-Wald p (cell4_gamma_low)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell4_gamma_low RR_MR sup-Wald p",
+      "source_json_field": "cells.cell4_gamma_low.detector.RR_MR.p_value"
+    },
+    {
+      "metric": "K1471 gate RR_MR baseline Sharpe (cell4_gamma_low)",
+      "paper_value": -0.011,
+      "reproduced_value": -0.0106,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell4_gamma_low RR_MR 10% baseline Sharpe",
+      "source_json_field": "cells.cell4_gamma_low.detector.RR_MR.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate TF status (cell5_gamma_high)",
+      "paper_value": "excluded",
+      "reproduced_value": "excluded",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell5_gamma_high TF gate word",
+      "source_json_field": "cells.cell5_gamma_high.detector.TF.status (mapped: not_applicable_saturated_loss->excluded, ok->passes)"
+    },
+    {
+      "metric": "K1471 gate TF baseline Sharpe (cell5_gamma_high)",
+      "paper_value": -0.826,
+      "reproduced_value": -0.8258,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell5_gamma_high TF 10% baseline Sharpe",
+      "source_json_field": "cells.cell5_gamma_high.detector.TF.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate MR status (cell5_gamma_high)",
+      "paper_value": "excluded",
+      "reproduced_value": "excluded",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell5_gamma_high MR gate word",
+      "source_json_field": "cells.cell5_gamma_high.detector.MR.status (mapped)"
+    },
+    {
+      "metric": "K1471 gate MR baseline Sharpe (cell5_gamma_high)",
+      "paper_value": -1.776,
+      "reproduced_value": -1.7764,
+      "abs_diff": 0.0004,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell5_gamma_high MR 10% baseline Sharpe",
+      "source_json_field": "cells.cell5_gamma_high.detector.MR.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate RR_TF sup-Wald p (cell5_gamma_high)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell5_gamma_high RR_TF sup-Wald p",
+      "source_json_field": "cells.cell5_gamma_high.detector.RR_TF.p_value"
+    },
+    {
+      "metric": "K1471 gate RR_TF baseline Sharpe (cell5_gamma_high)",
+      "paper_value": -0.034,
+      "reproduced_value": -0.0342,
+      "abs_diff": 0.0002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell5_gamma_high RR_TF 10% baseline Sharpe",
+      "source_json_field": "cells.cell5_gamma_high.detector.RR_TF.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 gate RR_MR sup-Wald p (cell5_gamma_high)",
+      "paper_value": 0.001,
+      "reproduced_value": 0.001,
+      "abs_diff": 0.0,
+      "tol": 0.0005,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell5_gamma_high RR_MR sup-Wald p",
+      "source_json_field": "cells.cell5_gamma_high.detector.RR_MR.p_value"
+    },
+    {
+      "metric": "K1471 gate RR_MR baseline Sharpe (cell5_gamma_high)",
+      "paper_value": -0.011,
+      "reproduced_value": -0.011,
+      "abs_diff": 0.0,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "Table tab:tfmr_gate cell5_gamma_high RR_MR 10% baseline Sharpe",
+      "source_json_field": "cells.cell5_gamma_high.detector.RR_MR.baseline_mean_sharpe"
+    },
+    {
+      "metric": "K1471 total simulations (abstract 94,500)",
+      "paper_value": 94500,
+      "reproduced_value": 94500,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "Abstract '94,500 Monte Carlo simulations'",
+      "source_json_field": "total_sims"
+    },
+    {
+      "metric": "K1471 cell-adoption combinations (abstract 27)",
+      "paper_value": 27,
+      "reproduced_value": 27,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "Abstract '27 cell--adoption combinations'",
+      "source_json_field": "computed: len(adoption_grid_cell1) + 4*len(adoption_grid_other)"
+    },
+    {
+      "metric": "K1471 treatment/control count (abstract 7)",
+      "paper_value": 7,
+      "reproduced_value": 7,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "Abstract 'x 7 treatments/controls'",
+      "source_json_field": "computed: len(cells.cell1_baseline.treatments)"
+    },
+    {
+      "metric": "K1471 MC per combination (abstract 500)",
+      "paper_value": 500,
+      "reproduced_value": 500,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "Abstract 'x 500 MC'",
+      "source_json_field": "n_sims_per_batch"
+    },
+    {
+      "metric": "K1471 VT sup-Wald p=0.001 in 5/5 cells (abstract)",
+      "paper_value": 5,
+      "reproduced_value": 5,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "Abstract/\u00a73.1 'sup-Wald test rejects flatness in all five cells (p=0.001 in every cell)'",
+      "source_json_field": "computed: count cells with detector.VT_baseline.p_value == 0.001"
+    },
+    {
+      "metric": "K1471 VT descriptive drop>70% at 70% in 3/5 cells (abstract)",
+      "paper_value": 3,
+      "reproduced_value": 3,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "Abstract '70% threshold survives as descriptive level-crossing (drop>70%) in 3 of 5 cells'",
+      "source_json_field": "computed: count cells with robustness_drop_grid.VT_baseline['drop>70%'] == '70%'"
+    },
+    {
+      "metric": "K1471 gate excludes TF in 4/5 cells",
+      "paper_value": 4,
+      "reproduced_value": 4,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'the gate excludes TF in four of five cells'",
+      "source_json_field": "computed: count cells with detector.TF.status == not_applicable_saturated_loss"
+    },
+    {
+      "metric": "K1471 gate excludes MR in 5/5 cells",
+      "paper_value": 5,
+      "reproduced_value": 5,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'MR in all five'",
+      "source_json_field": "computed: count cells with detector.MR.status == not_applicable_saturated_loss"
+    },
+    {
+      "metric": "K1471 RR_TF sup-Wald p=0.001 in 5/5 cells",
+      "paper_value": 5,
+      "reproduced_value": 5,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'RR_TF sup-Wald rejects flatness at p=0.001 in 5 of 5 cells'",
+      "source_json_field": "computed: count cells with detector.RR_TF.p_value == 0.001"
+    },
+    {
+      "metric": "K1471 RR_MR sup-Wald p=0.001 in 5/5 cells",
+      "paper_value": 5,
+      "reproduced_value": 5,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'and RR_MR likewise'",
+      "source_json_field": "computed: count cells with detector.RR_MR.p_value == 0.001"
+    },
+    {
+      "metric": "K1471 RR_TF level-crossing min adoption (40%)",
+      "paper_value": "40%",
+      "reproduced_value": "40%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'descriptive level-crossings at 40--70% adoption' (min)",
+      "source_json_field": "computed: min numeric of detector.RR_TF.threshold across cells"
+    },
+    {
+      "metric": "K1471 RR_TF level-crossing max adoption (70%)",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'descriptive level-crossings at 40--70% adoption' (max)",
+      "source_json_field": "computed: max numeric of detector.RR_TF.threshold across cells"
+    },
+    {
+      "metric": "K1471 TF/MR excluded baseline ceiling (-0.69)",
+      "paper_value": -0.69,
+      "reproduced_value": -0.688,
+      "abs_diff": 0.002,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'structurally loss-making (baseline Sharpe -0.69 to -5.49)' (least negative)",
+      "source_json_field": "computed: max baseline_mean_sharpe over excluded TF/MR cells"
+    },
+    {
+      "metric": "K1471 TF/MR excluded baseline floor (-5.49)",
+      "paper_value": -5.49,
+      "reproduced_value": -5.4852,
+      "abs_diff": 0.0048,
+      "tol": 0.01,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'structurally loss-making (baseline Sharpe -0.69 to -5.49)' (most negative)",
+      "source_json_field": "computed: min baseline_mean_sharpe over excluded TF/MR cells"
+    },
+    {
+      "metric": "K1471 TF footprint |dw| on the order of 1.5 (s=10)",
+      "paper_value": 1.5,
+      "reproduced_value": 1.5598,
+      "abs_diff": 0.0598,
+      "tol": 0.1,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'coordinated footprint |\u0394w| on the order of 1.5 at s=10' (approx)",
+      "source_json_field": "computed: max over adoptions of cell1 TF per_adoption._turnover.dw_mean"
+    },
+    {
+      "metric": "K1471 VT footprint floor (0.004)",
+      "paper_value": 0.004,
+      "reproduced_value": 0.0037,
+      "abs_diff": 0.0003,
+      "tol": 0.001,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'versus VT's 0.004--0.008' (min)",
+      "source_json_field": "computed: min over adoptions of cell1 VT per_adoption._turnover.dw_mean"
+    },
+    {
+      "metric": "K1471 VT footprint ceiling (0.008)",
+      "paper_value": 0.008,
+      "reproduced_value": 0.0081,
+      "abs_diff": 0.0001,
+      "tol": 0.001,
+      "match": true,
+      "source_paper_loc": "\u00a7cross 'versus VT's 0.004--0.008' (max)",
+      "source_json_field": "computed: max over adoptions of cell1 VT per_adoption._turnover.dw_mean"
+    },
+    {
+      "metric": "K1471 TF-vs-VT footprint separation (two orders of magnitude)",
+      "paper_value": 2,
+      "reproduced_value": 2,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "Abstract/\u00a73.2/\u00a7cross 'footprints two orders of magnitude larger'",
+      "source_json_field": "computed: int(log10(TF footprint peak / VT footprint floor))"
+    },
+    {
       "metric": "Joint 17/17 robustness checks",
       "paper_value": 17,
       "reproduced_value": 17,
@@ -485,5 +1731,5 @@
     "ordering_preserved": "TF/MR <= VT in 12/12 strategy-spec + 5/5 microstructure cells",
     "noise_control_falsifiability": "5/5 OAT + 12/12 strategy-spec cells: NoiseControl never crosses"
   },
-  "actor_message_to_user": "GREEN: 47/47 = 100.0% match vs paper claims. Tables 1+2+3+4 verified across K827v3 + K1261 + K1262 + K1262b. v3 expansion adds cross-strategy + lambda/gamma OAT verification (\u00a74.4 + \u00a74.5 + \u00a75.4)."
+  "actor_message_to_user": "GREEN: 173/173 = 100.0% match vs paper claims. Tables 1-4 verified across K827v3 + K1261 + K1262 + K1262b; v4 expansion binds the K1471 exogenous-detector redesign headline layer (tab:vt_monotone_curve + tab:matched_control_vt + tab:tfmr_gate) plus the abstract factorization and RR_TF footprint-scale erosion narrative."
 }
