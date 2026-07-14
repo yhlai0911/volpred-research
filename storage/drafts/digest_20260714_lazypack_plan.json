@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "title": "避風港出勤表：四道點名",
+  "evidence": {
+    "gold": {
+      "path": "experiments/k1628/k1628_results.json",
+      "sha256": "1b454eecfe6696f367e0fc997755a66fe98a06de1282906c69c13297f84c423b",
+      "label": "K1628 黃金避風港條件檢定（SPY/GLD/VIX）"
+    },
+    "ladder": {
+      "path": "experiments/k713/k713_results.json",
+      "sha256": "548cdd2a8c71ac1fa7d32510731a45187c6748692270b40d1f425e6484424cce",
+      "label": "K713 股金組合加長債配置階梯"
+    },
+    "thermo": {
+      "path": "experiments/k997/k997_results.json",
+      "sha256": "b7aeffc0b77ad12171430b4bcbfd43c86f7b89b17d4889668d4e38cb10b781e2",
+      "label": "K997 資產專屬恐慌指數預測力"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "避風港出勤表：四道點名",
+      "alt": "懶人包框架：避風港出勤表的四道點名",
+      "sources": [
+        "gold"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "核心觀念",
+          "body": [
+            "避風港是一個資產在壓力日的出勤紀錄，不能靠板塊標籤或名字認定。",
+            "手上任何號稱抗跌、防禦、避險的部位，都拿這四道點名查一次。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "① 出勤率",
+          "body": [
+            "在最壞的那些交易日，它真的收紅了嗎？平均相關性低不算數，要看火災那幾天。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "② 同源檢查",
+          "body": [
+            "它下跌的理由，和你股票下跌的理由是同一個因子嗎？同源就代表分散是假的。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "③ 養護費",
+          "body": [
+            "沒出事的日子，養它一年吃掉多少報酬？說不出保費，等於不知道自己買了什麼。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "④ 體溫計",
+          "body": [
+            "你量它的溫度，用對儀器了嗎？拿股市的恐慌指數去量黃金，讀不到資訊。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "黃金這一輪點名的樣本",
+          "value": {
+            "source": "gold",
+            "path": "data.n_common_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個共同交易日"
+            }
+          },
+          "note": "美股與黃金 ETF 的共同交易日"
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "editorial",
+      "title": "四道點名怎麼查：資料口徑",
+      "alt": "懶人包方法：四道點名的資料口徑與判準",
+      "sources": [
+        "gold",
+        "ladder",
+        "thermo"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "① 出勤率怎麼量",
+          "body": [
+            "把樣本切成條件組：全樣本、股市下跌、股市大跌、恐慌前段。",
+            "每組分別算避險資產的收紅率、平均日報酬、與股市的同日相關性。",
+            "強避險門檻：大跌日同日相關性不為正，且該資產平均報酬不為負。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "② 同源檢查怎麼量",
+          "body": [
+            "把壓力期拆開看驅動因子。通膨與升息型危機會同時打股票與黃金；成長恐慌型不會。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "③ 養護費怎麼量",
+          "body": [
+            "固定再平衡規則，逐步加碼避險資產，記錄年化報酬讓出多少、最大回撤削掉多少。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "④ 體溫計怎麼量",
+          "body": [
+            "用各資產的專屬恐慌指數做樣本外預測，統計強度要跨過嚴格門檻才算真的有效。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "配置階梯回測樣本",
+          "value": {
+            "source": "ladder",
+            "path": "metadata.sample_size",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆價格"
+            }
+          },
+          "note": "美股、黃金、長債；年度再平衡"
+        },
+        {
+          "kind": "metric",
+          "label": "體溫計樣本外天數",
+          "value": {
+            "source": "thermo",
+            "path": "assets.GLD.n_oos",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": "黃金 ETF 的樣本外預測期間"
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "點名結果：黃金四道都有條件",
+      "alt": "懶人包結果：黃金在四道點名下的實測數字與研究限制",
+      "sources": [
+        "gold",
+        "ladder",
+        "thermo"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "① 股市大跌日，黃金收紅率",
+          "value": {
+            "source": "gold",
+            "path": "conditions.spy_below_minus_2pct.gld_positive_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": {
+            "template": "比擲硬幣低（共 {n} 天）",
+            "bindings": {
+              "n": {
+                "source": "gold",
+                "path": "conditions.spy_below_minus_2pct.n",
+                "format": {
+                  "kind": "integer"
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "① 大跌日的股金同日相關性",
+          "value": {
+            "source": "gold",
+            "path": "conditions.spy_below_minus_2pct.spy_gld_corr",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          },
+          "note": {
+            "template": "全樣本僅 {c}",
+            "bindings": {
+              "c": {
+                "source": "gold",
+                "path": "conditions.all_days.spy_gld_corr",
+                "format": {
+                  "kind": "number",
+                  "digits": 3,
+                  "show_plus": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "② 股市重挫日，黃金平均報酬",
+          "value": {
+            "source": "gold",
+            "path": "conditions.spy_below_minus_3pct.gld_mean_return",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "平均是負的；樣本小"
+        },
+        {
+          "kind": "metric",
+          "label": "③ 純股金組合的最大回撤",
+          "value": {
+            "source": "ladder",
+            "path": "tlt_0.mdd",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          },
+          "note": "股金各半，未加長債"
+        },
+        {
+          "kind": "metric",
+          "label": "③ 加入長債後的最大回撤",
+          "value": {
+            "source": "ladder",
+            "path": "tlt_25.mdd",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          },
+          "note": "回撤削掉逾十個百分點"
+        },
+        {
+          "kind": "metric",
+          "label": "③ 保費：年化報酬剩下",
+          "value": {
+            "source": "ladder",
+            "path": "tlt_25.cagr",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          },
+          "note": {
+            "template": "原本 {c}%",
+            "bindings": {
+              "c": {
+                "source": "ladder",
+                "path": "tlt_0.cagr",
+                "format": {
+                  "kind": "number",
+                  "digits": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "④ 用股市恐慌指數量黃金",
+          "value": {
+            "source": "thermo",
+            "path": "assets.GLD.models.A4f_VIX.dm_t_vs_gjr",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "absolute": true
+            }
+          },
+          "note": "未過嚴格門檻"
+        },
+        {
+          "kind": "metric",
+          "label": "④ 改用黃金專屬恐慌指數",
+          "value": {
+            "source": "thermo",
+            "path": "assets.GLD.models.A4f_GVZ.dm_t_vs_gjr",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "absolute": true
+            }
+          },
+          "note": "跨過嚴格門檻"
+        },
+        {
+          "kind": "text",
+          "heading": "研究限制",
+          "body": [
+            "K1628 為描述性同日共動檢定，非交易回測。",
+            "K713 為描述性配置結果，特定期間、年度再平衡。",
+            "換標的或換期間必須重測。"
+          ]
+        }
+      ]
+    }
+  ]
+}

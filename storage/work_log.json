@@ -17268,5 +17268,24 @@
     "owner": "codex",
     "backfilled_at": "2026-07-14T03:05:01.094527+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-14T11:22:33+08:00",
+    "actor": "hourly-11",
+    "owner": "hourly-11-slot1",
+    "task_id": "ci-red-29299985391",
+    "task_type": "platform_ops",
+    "outcome": "succeeded",
+    "commit": "9395eb9c8",
+    "summary": "main Test Suite �����修復 + class gate���根������ partial commit��0fef6fa3b ������ test_arc_dedup_calibration.py������ import �������� arc_dedup 符��������� commit �������������� pytest ���������段 ImportError���修復 commit 5440ffab8 push �� CI 綠��run 29302820474�����Class ������������ scripts/audit_test_imports.py��AST �� test ��� volpred import ���被��������� tree 裡��������義��+ ���編��� pre-push Gate 3 + scripts/tests/test_audit_test_imports.py 8 cases��第�����就������次�����形���������� 0fef6fa3b 實測精�������� 3 ���缺���符������� HEAD 256 ��/444 imports/0 bad���"
+  },
+  {
+    "timestamp": "2026-07-14T11:30:32+08:00",
+    "actor": "hourly-11",
+    "owner": "hourly-11-slot1",
+    "task_id": "daily_digest_20260714",
+    "task_type": "daily_digest",
+    "outcome": "succeeded",
+    "summary": "發佈每日精選導讀 mile_5dd7c135（避風港出勤表）。時事驅動：中東衝突推油價 +4%、黃金反而連跌兩天（GLD -2.66% vs SPY -0.77%）。8 篇跨 archive 來源，發佈日跨度 115 天。所有數字對應 k1628/k713/k997 results.json。含一段主動回溯更正（3/17 舊結論被 7/05 K1628 條件檢定推翻）。gates: arc_dedup 0 / anti_ai 0。線上 200 驗證。"
   }
 ]
