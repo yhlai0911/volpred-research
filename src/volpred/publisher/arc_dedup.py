@@ -33,6 +33,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
+ARC_SIGNATURE_SCHEMA_VERSION = "arc_dedup_v4"
+ARC_NEAR_MISS_REASONS = frozenset({"descriptive_fuzzy_mechanism"})
 
 # --- Canonical entity dictionary -------------------------------------------
 # Maps surface forms (tickers, Chinese names, English names) to one canonical
@@ -54,7 +56,10 @@ _ENTITY_SURFACE: dict[str, str] = {
     "move": "MOVE_INDEX",
     # metals
     "cper": "COPPER", "銅": "COPPER", "copper": "COPPER",
-    "slv": "SILVER", "銀": "SILVER", "silver": "SILVER", "白銀": "SILVER",
+    # Bare 「銀」 also occurs in 銀行 and used to turn every bank article into
+    # SILVER.  Keep only unambiguous metal/product surfaces.
+    "slv": "SILVER", "silver": "SILVER", "白銀": "SILVER",
+    "銀價": "SILVER", "銀期貨": "SILVER", "銀市場": "SILVER",
     "gld": "GOLD", "黃金": "GOLD", "gold": "GOLD", "金價": "GOLD",
     "金銀比": "GOLD_SILVER_RATIO",
     # energy / commodities
@@ -79,6 +84,12 @@ _ENTITY_SURFACE: dict[str, str] = {
     # crypto
     "btc": "BITCOIN", "比特幣": "BITCOIN", "bitcoin": "BITCOIN",
     "eth": "ETHEREUM", "以太": "ETHEREUM",
+    "usdt": "STABLECOIN", "tether": "STABLECOIN", "泰達幣": "STABLECOIN",
+    "usdc": "STABLECOIN", "usd coin": "STABLECOIN",
+    "stablecoin": "STABLECOIN", "stablecoins": "STABLECOIN",
+    "穩定幣": "STABLECOIN", "稳定币": "STABLECOIN",
+    "defi": "DEFI", "decentralized finance": "DEFI",
+    "去中心化金融": "DEFI", "去中心化金融服務": "DEFI",
     # sectors / styles
     "xlk": "TECH_SECTOR", "xle": "ENERGY_SECTOR", "xlu": "UTILITIES", "xlp": "STAPLES",
     "xlf": "FIN_SECTOR", "金融股": "FIN_SECTOR",
@@ -339,9 +350,64 @@ _TIME_HORIZON_KEYWORDS: dict[str, list[str]] = {
 }
 
 
+_ZH_EXCLUSION_MARKERS = (
+    r"不涉及|不包含|不討論|不分析|不採用|不處理|不研究|禁做|"
+    r"不納入|排除在外|(?:本文|本題|本研究)排除"
+)
+# 「不看／不做」常是正向依存（「不看 VIX 就無法理解 USDC」），不能
+# 單獨視為排除。只有句子後面明確 pivot 到另一個主題時才清掉前半句。
+_ZH_PIVOT_ONLY_EXCLUSION_MARKERS = r"不看|不做"
+_ZH_POSITIVE_PIVOTS = r"而是|改看|改用|改為|聚焦|只看|只討論|轉向|但是|但"
+_ZH_EXCLUSION_WITH_PIVOT_RE = re.compile(
+    rf"(?:{_ZH_EXCLUSION_MARKERS}|{_ZH_PIVOT_ONLY_EXCLUSION_MARKERS}|不是|並非|非\s+)\s*"
+    rf"[^。！？!?；;\n]*?(?:[，,；;]\s*)?(?={_ZH_POSITIVE_PIVOTS})",
+    flags=re.IGNORECASE,
+)
+_ZH_EXCLUSION_CLAUSE_RE = re.compile(
+    rf"(?:{_ZH_EXCLUSION_MARKERS}|(?:這|本文|本題|本研究|此文|主題)\s*(?:不是|並非)|非\s+)"
+    rf"\s*[^。！？!?；;，,\n]*",
+    flags=re.IGNORECASE,
+)
+_EN_EXCLUSION_HEAD = (
+    r"(?:(?:does\s+not|doesn't|do\s+not|don't)\s+"
+    r"(?:cover|include|discuss|analy[sz]e|use|involve|focus\s+on)"
+    r"|(?:is\s+not|isn't|not)\s+(?:about|focused\s+on)"
+    r"|exclud(?:e|es|ed|ing)|without\s+"
+    r"(?:covering|including|discussing|analy[sz]ing|using))"
+)
+_EN_EXCLUSION_WITH_PIVOT_RE = re.compile(
+    rf"\b{_EN_EXCLUSION_HEAD}\b\s*[^.!?;\n]*?\b(?:but|instead)\b\s*",
+    flags=re.IGNORECASE,
+)
+_EN_EXCLUSION_CLAUSE_RE = re.compile(
+    rf"\b{_EN_EXCLUSION_HEAD}\b\s*[^.!?;\n]*",
+    flags=re.IGNORECASE,
+)
+
+
+def strip_exclusion_scopes(text: str) -> str:
+    """Remove explicit *exclusion lists* before building an arc signature.
+
+    Topic briefs commonly explain differentiation with clauses such as
+    ``不涉及油價、財報、Fed、VIX``.  Treating those rejected subjects as positive
+    evidence manufactured entities/mechanisms and made the gate punish the
+    briefs that documented their scope most carefully.  This deliberately
+    targets explicit scope verbs and ``不是 X，而是 Y`` pivots; ordinary
+    statistical negation (for example ``結果不顯著``) is left untouched so the
+    conclusion classifier keeps its meaning.
+    """
+    cleaned = str(text or "")
+    cleaned = _ZH_EXCLUSION_WITH_PIVOT_RE.sub("", cleaned)
+    cleaned = _EN_EXCLUSION_WITH_PIVOT_RE.sub("", cleaned)
+    cleaned = _ZH_EXCLUSION_CLAUSE_RE.sub("", cleaned)
+    cleaned = _EN_EXCLUSION_CLAUSE_RE.sub("", cleaned)
+    return cleaned
+
+
 def extract_entities(text: str) -> set[str]:
     """Extract canonical asset entities from title+content text."""
     found: set[str] = set()
+    text = strip_exclusion_scopes(text)
     lower = text.lower()
     for surface in _SURFACE_SORTED:
         if surface.isascii():
@@ -473,11 +539,11 @@ def arc_signature(title: str, content: str | None = "") -> dict:
     able to recompute it from title/content because historical articles may not
     have been backfilled yet.
     """
-    text = f"{title or ''}\n{content or ''}"
+    text = strip_exclusion_scopes(f"{title or ''}\n{content or ''}")
     entities = extract_entities(text)
     narrative_axis = classify_narrative_axis(text)
     return {
-        "schema_version": "arc_dedup_v3",
+        "schema_version": ARC_SIGNATURE_SCHEMA_VERSION,
         "entities": sorted(entities),
         "entity_groups": _entity_groups_for_axis(entities, narrative_axis),
         "conclusion_class": classify_conclusion(text),
@@ -505,12 +571,23 @@ def _feed_item_text(item: dict) -> str:
     )
 
 
-def _has_valid_stored_v3_signature(item: dict) -> bool:
+def arc_signature_from_feed_item(item: dict) -> dict:
+    """Recompute a signature from the canonical feed-item text surface.
+
+    Runtime stale-schema reads, migrations, and new Publisher writes must use
+    the same title/content/tags inputs.  Keeping this as one public helper avoids
+    a rollout where a backfilled v4 row differs from the v4 signature that the
+    matcher computed immediately before the backfill.
+    """
+    return arc_signature("", _feed_item_text(item))
+
+
+def _has_valid_stored_signature(item: dict) -> bool:
     details = item.get("details") or {}
     sig = details.get("arc_signature") if isinstance(details, dict) else None
     return (
         isinstance(sig, dict)
-        and sig.get("schema_version") == "arc_dedup_v3"
+        and sig.get("schema_version") == ARC_SIGNATURE_SCHEMA_VERSION
         and isinstance(sig.get("entities"), list)
         and isinstance(sig.get("conclusion_class"), str)
         and isinstance(sig.get("narrative_axis"), str)
@@ -523,15 +600,24 @@ def _has_legacy_arc_signature_marker(item: dict) -> bool:
 
     Missing details on synthetic callers/tests should use the normal recomputed
     signature path. The fuzzy fallback is intentionally limited to articles that
-    carry an arc_signature field but not a valid v3 signature, especially
+    carry an arc_signature field but not a valid current signature, especially
     historical ``arc_signature=None`` rows.
     """
     details = item.get("details") or {}
-    return (
-        isinstance(details, dict)
-        and "arc_signature" in details
-        and not _has_valid_stored_v3_signature(item)
-    )
+    if not isinstance(details, dict) or "arc_signature" not in details:
+        return False
+    sig = details.get("arc_signature")
+    if _has_valid_stored_signature(item):
+        return False
+    # A previous, structurally valid schema is recomputed from article text; it
+    # is stale vocabulary, not the title-only legacy hole this fuzzy fallback
+    # exists for.  Treating every v3 row as legacy after the v4 bump would turn
+    # on a second, looser matcher for 139 production articles at once.
+    if isinstance(sig, dict) and re.fullmatch(
+        r"arc_dedup_v\d+", str(sig.get("schema_version") or "")
+    ):
+        return False
+    return True
 
 
 def _signature_from_feed_item(item: dict) -> dict:
@@ -545,14 +631,14 @@ def _signature_from_feed_item(item: dict) -> dict:
         horizon = sig.get("time_horizon")
         entity_groups = sig.get("entity_groups")
         if (
-            sig.get("schema_version") == "arc_dedup_v3"
+            sig.get("schema_version") == ARC_SIGNATURE_SCHEMA_VERSION
             and isinstance(entities, list)
             and isinstance(conclusion, str)
             and isinstance(narrative_axis, str)
             and isinstance(entity_groups, dict)
         ):
             return {
-                "schema_version": "arc_dedup_v3",
+                "schema_version": ARC_SIGNATURE_SCHEMA_VERSION,
                 "entities": sorted(str(e) for e in entities),
                 "entity_groups": {
                     "reader_narrative": sorted(
@@ -569,7 +655,7 @@ def _signature_from_feed_item(item: dict) -> dict:
                 "mechanisms": sorted(_axis_values(mechanisms)),
                 "time_horizon": str(horizon or "unspecified"),
             }
-    return arc_signature("", _feed_item_text(item))
+    return arc_signature_from_feed_item(item)
 
 
 def _normalize_ref(raw: str) -> str:
@@ -666,9 +752,8 @@ def arc_match_anchors(sig: dict, refs: set[str] | list[str] | None = None) -> di
         never produce a significant overlap.
       * experiment ref — the same-K short-circuit.
 
-    Mechanisms are deliberately NOT an anchor: on the descriptive path, branch
-    (C) of `_descriptive_dup` still requires a significant entity overlap, so a
-    shared mechanism can never carry a match on its own.
+    Mechanisms are deliberately NOT an anchor. They can corroborate a soft
+    near-miss, but never make a hard match without an entity/ref anchor.
     """
     ents = _entities_for_matching(sig)
     ref_set = {_normalize_ref(r) for r in (refs or []) if str(r or "").strip()}
@@ -922,9 +1007,10 @@ def find_arc_duplicates(
     content: str,
     feed: list[dict],
     days: int = 90,
-    max_scan: int = 300,
+    max_scan: int | None = None,
     new_refs: set[str] | list[str] | None = None,
     audience: str | None = None,
+    include_fuzzy: bool = False,
 ) -> list[dict]:
     """Return feed articles that are narrative-arc duplicates of the new piece.
 
@@ -946,6 +1032,11 @@ def find_arc_duplicates(
     (2026-07-11) and still skips general candidates at task refill. Callers that
     genuinely span audiences (the publish-time warn) leave this None and keep the
     old cross-audience behaviour.
+
+    `include_fuzzy`: additionally return descriptive entity+mechanism near
+    misses.  They carry ``match_level="near_miss"`` and must never be treated as
+    hard duplicates.  The default preserves the historical list API; callers
+    that render a verdict should opt in so the evidence stays visible.
     """
     new_sig = arc_signature(title, content)
     new_ents = _entities_for_matching(new_sig)
@@ -968,8 +1059,8 @@ def find_arc_duplicates(
     # model-robustness piece whose conclusion wording isn't in _CONCLUSION_KEYWORDS
     # falls to 'descriptive' and bypasses arc dedup entirely. So on the
     # descriptive path we apply a STRICTER, separate test (`_descriptive_dup`):
-    # require significant entity overlap PLUS a strong same-article signal
-    # (near-identical title OR shared specific mechanism OR shared experiment_ref).
+    # require a strong same-article signal (near-identical title or shared
+    # experiment_ref). Entity+mechanism alone is advisory when include_fuzzy=True.
     descriptive_mode = (new_cls == "descriptive")
     # With no entities AND no refs there is nothing to anchor a match on.
     if not new_ents and not new_ref_set:
@@ -981,7 +1072,9 @@ def find_arc_duplicates(
     dups: list[dict] = []
     recent = sorted(
         feed, key=lambda x: x.get("published_at") or x.get("created_at", ""), reverse=True
-    )[:max_scan]
+    )
+    if max_scan is not None:
+        recent = recent[:max_scan]
     for existing in recent:
         if existing.get("status") in ("unpublished", "retracted"):
             continue
@@ -1026,6 +1119,7 @@ def find_arc_duplicates(
             continue
         axis_raw_backstop = False
         legacy_fuzzy_match = False
+        descriptive_fuzzy_match = False
 
         if descriptive_mode:
             # Stricter descriptive-path test (vuln 1 fix). Avoids the SpaceX
@@ -1035,7 +1129,6 @@ def find_arc_duplicates(
             match = _descriptive_dup(
                 new_ents, ex_ents,
                 title, existing.get("title", ""),
-                new_mechanisms, ex_mechanisms,
                 shared_refs,
             )
             if not match:
@@ -1048,7 +1141,18 @@ def find_arc_duplicates(
                     )
                 )
                 if not legacy_fuzzy_match:
-                    continue
+                    specific_shared = (
+                        (new_mechanisms & ex_mechanisms)
+                        - _GENERIC_MECHANISMS
+                        - {"unspecified"}
+                    )
+                    descriptive_fuzzy_match = bool(
+                        include_fuzzy
+                        and _is_significant_overlap(new_ents, ex_ents)
+                        and specific_shared
+                    )
+                    if not descriptive_fuzzy_match:
+                        continue
         else:
             axes_compatible = _narrative_axes_compatible(new_axis, ex_axis)
             axis_raw_backstop = (
@@ -1123,19 +1227,26 @@ def find_arc_duplicates(
                 "time_horizon": new_horizon,
                 "existing_time_horizon": ex_horizon,
                 "shared_experiment_refs": sorted(shared_refs),
+                "match_level": (
+                    "near_miss" if descriptive_fuzzy_match else "duplicate"
+                ),
                 "match_reason": (
                     "legacy_title_entity_fuzzy"
                     if legacy_fuzzy_match
                     else (
-                        "descriptive_strict"
-                        if descriptive_mode
+                        "descriptive_fuzzy_mechanism"
+                        if descriptive_fuzzy_match
                         else (
-                            "shared_experiment_ref"
-                            if (
-                                shared_refs
-                                and not _is_significant_overlap(new_ents, ex_ents)
+                            "descriptive_strict"
+                            if descriptive_mode
+                            else (
+                                "shared_experiment_ref"
+                                if (
+                                    shared_refs
+                                    and not _is_significant_overlap(new_ents, ex_ents)
+                                )
+                                else "entity_conclusion_arc"
                             )
-                            else "entity_conclusion_arc"
                         )
                     )
                 ),
@@ -1144,13 +1255,19 @@ def find_arc_duplicates(
     return dups
 
 
+def is_arc_near_miss(match: dict) -> bool:
+    """True for advisory evidence that must never become a hard arc block."""
+    return (
+        str(match.get("match_level") or "") == "near_miss"
+        or str(match.get("match_reason") or "") in ARC_NEAR_MISS_REASONS
+    )
+
+
 def _descriptive_dup(
     new_ents: set[str],
     old_ents: set[str],
     new_title: str,
     old_title: str,
-    new_mechanisms: set[str],
-    old_mechanisms: set[str],
     shared_refs: set[str],
 ) -> bool:
     """Stricter duplicate test for the 'descriptive' (unclassifiable) path.
@@ -1162,16 +1279,12 @@ def _descriptive_dup(
 
       (A) shared experiment_ref (same K-id) AND (entity overlap OR near title) —
           this is the K1054 ghost-recycle case (same K, ~identical title); OR
-      (B) significant entity overlap AND near-identical title (token Jaccard
+      (B) any entity overlap AND near-identical title (token Jaccard
           >= threshold) — catches recycled descriptive pieces with no ref; OR
-      (C) significant entity overlap AND a shared *specific* (non-generic)
-          mechanism AND near-identical title.
-
     SpaceX (mile_6159728d) vs big-tech-vol (mile_312204b2): no shared ref,
     distinctive entity overlap is only {USD} (a core/incidental ratio), titles
-    share few tokens → none of (A)/(B)/(C) fire → NOT blocked. ✓
+    share few tokens → neither (A) nor (B) fires → NOT blocked. ✓
     """
-    sig_overlap = _is_significant_overlap(new_ents, old_ents)
     title_sim = _title_jaccard(new_title, old_title)
     near_title = title_sim >= _DESCRIPTIVE_TITLE_JACCARD
 
@@ -1189,14 +1302,9 @@ def _descriptive_dup(
     # {US_EQUITY, VIX} with a ~0.8 title overlap.
     if near_title and bool(new_ents & old_ents):
         return True
-    if not sig_overlap:
-        return False
-    # (C) significant entity overlap + shared specific mechanism (no near-title
-    # requirement here: a distinctive entity + a specific mechanism is a strong
-    # arc even with reworded titles, mirroring the non-descriptive path).
-    specific_shared = (new_mechanisms & old_mechanisms) - _GENERIC_MECHANISMS - {"unspecified"}
-    if specific_shared:
-        return True
+    # A shared mechanism without a shared K or near-identical title is fuzzy,
+    # not duplicate evidence.  The removed mechanism-only branch blocked a real
+    # FOMC preview against an NFP article and a generic VIX explainer.
     return False
 
 
@@ -1331,19 +1439,21 @@ def find_k_coverage(k_id: str, feed: list[dict], audience: str | None) -> list[d
 # platform vocabulary (波動率 / 市場), not a theme marker, so it is dropped --
 # a crude IDF filter.
 #
-# Calibrated 2026-07-14 against the real 90-day live corpus (832 live articles),
+# Calibrated 2026-07-14 against the real 90-day live corpus (831 live articles),
 # measured through THIS function (not a reimplementation):
-#     incident (AI/tech skew) ............ 6-12  -> block  (varies with phrasing)
+#     incident (AI/tech skew) ............ 12    -> block  (canonical probe)
 #     TAIFEX night-session order flow .....   9  -> block  (5 prior pieces; real dup)
-#     FOMC event preview ..................   2  -> pass
+#     NFP/DXY event preview ...............   3  -> pass
+#     FOMC event preview ..................   8  -> warn  (recurring event-window)
 #     stablecoin depeg contagion .......... 0-2  -> pass
 #     EU carbon/ETS seasonality ...........   0  -> pass
 #
-# Threshold 5, not 6. The incident's LOWEST observed score across phrasings is 6,
-# so a threshold of 6 sits exactly on the boundary — a slightly reworded variant
-# scoring 5 would slip through, which is precisely the false negative that caused
-# the incident. 5 keeps a 2.5x margin over the highest legitimate topic (2) while
-# covering incident variants down to 5. The asymmetry is deliberate: at GENERATION
+# Threshold 5 preserves a clear labelled-probe gap: the canonical incident is
+# 12 while the NFP control is 3. FOMC is intentionally evaluated separately:
+# its recurring event-window theme score is advisory even above the threshold,
+# while any exact K/high-confidence arc match still blocks. The daily live-corpus
+# sentinel warns if these calibrated verdicts drift. The asymmetry is deliberate:
+# at GENERATION
 # time a false positive costs one swapped topic; a false negative costs a duplicate
 # article. Regression-pinned in tests/test_topic_dedup_at_generation.py so corpus
 # drift cannot silently move it.
@@ -1358,9 +1468,50 @@ THEME_AMBIENT_DF_RATIO = 0.12
 # >=2 articles is discarded as "ambient", the theme comes out empty, and the gate
 # no-ops while reporting saturation 0 (indistinguishable from "clean"). A silent
 # no-op is the exact failure class this module exists to kill. On the production
-# corpus (N=832 live/90d) the ratio gives 99.8 and dominates the floor, so this
+# corpus (N=831 live/90d) the ratio gives 99.7 and dominates the floor, so this
 # does not move the calibrated numbers -- it only makes small corpora behave.
 THEME_AMBIENT_DF_MIN = 3
+
+# Generator metadata and generic writing verbs are not topic evidence.  The
+# six-term theme vector is intentionally tiny, so one leaked task-type prefix
+# or boilerplate verb can displace the actual subject and flip the verdict.
+_THEME_TASK_PREFIXES = (
+    "trending_repost", "event_article", "daily_article", "daily_digest",
+    "member_qa", "research_article", "paper_review",
+)
+_THEME_PROBE_PREFIX_RE = re.compile(
+    rf"^\s*(?:\[(?:{'|'.join(_THEME_TASK_PREFIXES)})\]\s*)+",
+    flags=re.IGNORECASE,
+)
+_THEME_GENERIC_PHRASES = (
+    "量化角度", "歷史分析", "historical analysis", "quantitative angle",
+    # Instrument/measurement boilerplate is not a subject. On the real 831-item
+    # corpus these six high-DF tokens displaced NFP/DXY from a six-slot vector
+    # and falsely saturated a new payroll preview against eight AI/earnings
+    # option articles.
+    "隱含波動率", "隐含波动率", "隱含波動", "隐含波动",
+    "選擇權", "选择权", "下一次", "本次",
+    "implied volatility", "定價", "定价",
+    "分析", "歷史", "量化", "角度", "解析", "觀察", "檢視", "检视", "探討", "美股",
+    "本文", "本篇", "文章", "主題", "報告", "研究",
+    "analysis", "history", "historical", "topic", "report",
+)
+_THEME_GENERIC_PHRASE_RE = re.compile(
+    "|".join(re.escape(p) for p in sorted(_THEME_GENERIC_PHRASES, key=len, reverse=True)),
+    flags=re.IGNORECASE,
+)
+_THEME_PROBE_STOPWORDS = {
+    "trending", "repost", "article", "daily", "general", "report",
+    "analysis", "history", "historical", "topic", "option", "options",
+    "分析", "歷史", "文章", "主題", "本文", "本篇", "報告", "研究", "定價", "定价",
+}
+
+
+def _theme_probe_tokens(title: str, description: str) -> set[str]:
+    clean_title = _THEME_PROBE_PREFIX_RE.sub("", str(title or ""))
+    clean_text = strip_exclusion_scopes(f"{clean_title} {description or ''}")
+    clean_text = _THEME_GENERIC_PHRASE_RE.sub(" ", clean_text)
+    return tokenize(clean_text) - _THEME_PROBE_STOPWORDS
 
 
 def _recent_live(feed: list[dict], days: int) -> list[dict]:
@@ -1384,7 +1535,10 @@ def theme_saturation(
 ) -> dict:
     """Count live articles in the window that already crowd this topic's theme.
 
-    Returns {"theme_terms": [...], "saturation": int, "matches": [...]}.
+    Returns {"theme_terms": [...], "saturation": int, "matches": [...],
+    "corpus_size": int}.  Exposing the denominator lets the daily calibration
+    sentinel detect a shrunken/expanded corpus instead of silently trusting a
+    threshold fitted on a different regime.
     `saturation` is the number of live articles sharing >= THEME_MIN_SHARED of
     the topic's distinctive theme terms. A topic whose theme is too thin to
     characterise (< THEME_MIN_TERMS distinctive terms) returns saturation 0 with
@@ -1393,7 +1547,7 @@ def theme_saturation(
     """
     corpus = _recent_live(feed, days)
     if not corpus:
-        return {"theme_terms": [], "saturation": 0, "matches": []}
+        return {"theme_terms": [], "saturation": 0, "matches": [], "corpus_size": 0}
 
     docs: list[tuple[dict, set[str]]] = []
     df: dict[str, int] = {}
@@ -1405,12 +1559,17 @@ def theme_saturation(
             df[tok] = df.get(tok, 0) + 1
 
     ambient_cutoff = max(THEME_AMBIENT_DF_MIN, THEME_AMBIENT_DF_RATIO * len(corpus))
-    probe = tokenize(f"{title} {description}")
+    probe = _theme_probe_tokens(title, description)
     scored = [(t, df.get(t, 0)) for t in probe if 0 < df.get(t, 0) <= ambient_cutoff]
     scored.sort(key=lambda x: (-x[1], x[0]))
     theme = [t for t, _ in scored[:THEME_TERM_COUNT]]
     if len(theme) < THEME_MIN_TERMS:
-        return {"theme_terms": theme, "saturation": 0, "matches": []}
+        return {
+            "theme_terms": theme,
+            "saturation": 0,
+            "matches": [],
+            "corpus_size": len(corpus),
+        }
 
     theme_set = set(theme)
     matches: list[dict] = []
@@ -1427,4 +1586,9 @@ def theme_saturation(
                 }
             )
     matches.sort(key=lambda m: len(m["shared_terms"]), reverse=True)
-    return {"theme_terms": theme, "saturation": len(matches), "matches": matches[:8]}
+    return {
+        "theme_terms": theme,
+        "saturation": len(matches),
+        "matches": matches[:8],
+        "corpus_size": len(corpus),
+    }

@@ -284,6 +284,10 @@ def _load_feed_for_screen(storage_dir: str) -> list[dict[str, Any]] | None:
     """
     feed_path = _feed_path(storage_dir)
     if not feed_path.exists():
+        _warn_event_jobs(
+            "feed missing during topic screen; allowing task with gate-error annotation",
+            FileNotFoundError(str(feed_path)),
+        )
         return None
     try:
         feed = json.loads(feed_path.read_text(encoding="utf-8"))
@@ -322,10 +326,11 @@ def build_pending_event_task(
 ) -> dict[str, Any]:
     """Build the one canonical dispatcher row for an event window.
 
-    `feed`: when supplied, the topic is screened for duplication at GENERATION
-    time (2026-07-13 incident: generators created tasks without ever looking at
-    the feed). The event lane screens in WARN mode — a hit annotates the task via
-    `dedup_screen` but NEVER blocks it.
+    `feed`: the topic is always screened for duplication at GENERATION time
+    (2026-07-13 incident: generators created tasks without ever looking at the
+    feed). The event lane screens in WARN mode — a hit annotates the task via
+    `dedup_screen` but NEVER blocks it. None/empty corpus produces an explicit
+    nonblocking gate-error annotation instead of silently skipping the screen.
 
     Why warn-only here, while the trending lane blocks: event articles are a
     designed T-7 / T-2 / T+0 series about one event, and every FOMC resembles the
@@ -356,14 +361,19 @@ def build_pending_event_task(
     task_payload.setdefault("preconditions", template.get("preconditions") or [])
 
     task_id = _event_task_id(item)
-    dedup_screen: dict[str, Any] | None = None
-    if feed:
-        from volpred.ops.topic_dedup import log_decision, screen_topic
+    from volpred.ops.topic_dedup import log_decision, screen_topic
 
-        screen = screen_topic(title, description, feed=feed, mode="warn")
-        log_decision(str(project_path(storage_dir)), "event_article", task_id, screen)
-        if screen.verdict != "clean":
-            dedup_screen = screen.as_task_field()
+    screen = screen_topic(
+        title,
+        description,
+        feed=feed,
+        audience="event",
+        mode="warn",
+    )
+    log_decision(str(project_path(storage_dir)), "event_article", task_id, screen)
+    dedup_screen: dict[str, Any] | None = None
+    if screen.verdict != "clean":
+        dedup_screen = screen.as_task_field()
 
     task = {
         "id": task_id,

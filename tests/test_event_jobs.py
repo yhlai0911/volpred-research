@@ -368,7 +368,11 @@ def test_claimed_legacy_receipt_suppresses_existing_canonical_lifecycle(
         encoding="utf-8",
     )
     queue_path = tmp_path / "storage" / "next_tasks.json"
-    old_canonical = event_jobs.build_pending_event_task(item, now=now)
+    old_canonical = event_jobs.build_pending_event_task(
+        item,
+        now=now,
+        storage_dir=storage_dir,
+    )
     old_canonical["id"] = "event_article_fomc_2026-07-10_tplus0"
     old_canonical["ref_event_job_id"] = legacy_event_job_id
     queue_path.write_text(
@@ -407,7 +411,11 @@ def test_dual_active_event_lifecycle_is_reported_without_killing_either(tmp_path
     storage_dir = str(tmp_path / "storage")
     queue_path = tmp_path / "storage" / "next_tasks.json"
     queue_path.parent.mkdir(parents=True, exist_ok=True)
-    canonical = event_jobs.build_pending_event_task(item, now=now)
+    canonical = event_jobs.build_pending_event_task(
+        item,
+        now=now,
+        storage_dir=storage_dir,
+    )
     canonical["status"] = "in_progress"
     canonical["claimed_by"] = "canonical-worker"
     queue_path.write_text(json.dumps([canonical]), encoding="utf-8")

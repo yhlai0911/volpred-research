@@ -51,12 +51,11 @@ from volpred.publisher.arc_dedup import (  # noqa: E402
     LEXICAL_HINT_THRESHOLD,
     _normalize_ref,
     arc_signature,
-    classify_narrative_axis,
-    extract_entities,
     find_arc_duplicates,
     find_k_coverage,
     find_lexical_hints,
     is_arc_anchorless,
+    is_arc_near_miss,
     tokenize as _tokens,
 )
 from volpred.publisher.publisher import _log_dedup_decision  # noqa: E402
@@ -108,12 +107,11 @@ def main() -> int:
 
     feed = json.loads((ROOT / "storage" / "reports" / "feed.json").read_text(encoding="utf-8"))
     storage_dir = str(ROOT / "storage")
-    full = f"{args.title}\n{text}"
     signature = arc_signature(args.title, text)
     report = {
-        "entities": sorted(extract_entities(full)),
+        "entities": signature["entities"],
         "conclusion_class": signature["conclusion_class"],
-        "narrative_axis": classify_narrative_axis(full),
+        "narrative_axis": signature["narrative_axis"],
         "entity_groups": signature.get("entity_groups", {}),
         "mechanisms": signature["mechanisms"],
         "time_horizon": signature["time_horizon"],
@@ -129,10 +127,19 @@ def main() -> int:
     # Gate 2 — narrative arc (fuzzy). new_refs/audience have always been
     # parameters of find_arc_duplicates; this CLI simply never passed them.
     new_refs = {_normalize_ref(args.k_id)} if args.k_id else None
-    dups = find_arc_duplicates(
-        args.title, text, feed, days=args.days, new_refs=new_refs, audience=args.audience
+    arc_matches = find_arc_duplicates(
+        args.title,
+        text,
+        feed,
+        days=args.days,
+        new_refs=new_refs,
+        audience=args.audience,
+        include_fuzzy=True,
     )
+    dups = [m for m in arc_matches if not is_arc_near_miss(m)]
+    near_misses = [m for m in arc_matches if is_arc_near_miss(m)]
     report["arc_duplicates"] = dups
+    report["arc_near_misses"] = near_misses
 
     # Gate 3 — anchor-less signature. When the arc matcher has nothing to anchor
     # on, its [] means "I could not look", not "I looked and it is clean", and
@@ -157,6 +164,7 @@ def main() -> int:
     report["verdict"] = (
         "block_k_coverage" if coverage
         else "block_arc_dup" if dups
+        else "warn_arc_near_miss" if near_misses
         else "unjudged_thin_signature" if thin
         else "clean"
     )
@@ -194,6 +202,27 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
+
+    if near_misses:
+        for hit in near_misses:
+            _log_dedup_decision(
+                storage_dir,
+                "warn_arc_near_miss",
+                args.title,
+                hit.get("id"),
+                f"advisory arc match: {hit.get('match_reason', '?')}",
+            )
+        listed = "\n".join(
+            f"    - {h.get('id')} {h.get('title')}"
+            for h in near_misses[:5]
+        )
+        print(
+            "\n⚠️  ARC NEAR-MISS — shared entity + mechanism is advisory, not "
+            f"duplicate evidence. Review these before writing:\n{listed}\n"
+            "    The gate remains fail-open, but this is not a green clearance.",
+            file=sys.stderr,
+        )
+        return 0
 
     if thin:
         _log_dedup_decision(

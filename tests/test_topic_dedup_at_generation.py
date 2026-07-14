@@ -35,7 +35,9 @@ from volpred.ops.topic_dedup import (  # noqa: E402
     GATE_ERROR,
     UNJUDGED_THIN_SIGNATURE,
     WARN_ARC_DUP,
+    WARN_ARC_NEAR_MISS,
     WARN_THEME_SATURATED,
+    _is_recurring_macro_event,
     screen_topic,
 )
 from volpred.publisher.arc_dedup import (  # noqa: E402
@@ -82,8 +84,9 @@ INCIDENT_TITLE = "AI營收不如預期？科技股選擇權偏斜率（Skew）�
 INCIDENT_DESC = "AI 資本支出疑慮升溫，科技股與半導體的選擇權偏斜率(skew)走陡，市場在為下跌買保險。"
 
 
-# Unrelated filler so the corpus resembles production (832 live articles in 90d)
-# rather than a 9-article toy. Corpus size drives the ambient-vocabulary cutoff,
+# Unrelated filler avoids the degenerate nine-article regime; the live
+# calibration sentinel separately checks the real 831-article corpus.
+# Corpus size drives the ambient-vocabulary cutoff,
 # so a toy corpus exercises a regime the gate never sees in production.
 #
 # Every filler title must be UNIQUE and thematically dispersed. An earlier version
@@ -106,7 +109,12 @@ FILLER_TITLES = [
 @pytest.fixture
 def crowded_feed() -> list[dict]:
     """Feed where the AI/tech-skew theme is saturated, inside a realistic corpus."""
-    feed = [_article(aid, title) for aid, title in INCIDENT_SIBLINGS + INCIDENT_NEIGHBOURS]
+    # Production theme documents are title + tags. The live siblings carry the
+    # common AI/科技股/資本支出 taxonomy even when a headline uses a synonym.
+    feed = [
+        _article(aid, title, tags=["AI", "科技股", "資本支出"])
+        for aid, title in INCIDENT_SIBLINGS + INCIDENT_NEIGHBOURS
+    ]
     for j, t in enumerate(FILLER_TITLES):
         feed.append(_article(f"mile_filler_{j}", t, days_ago=10 + (j % 40)))
     return feed
@@ -118,7 +126,7 @@ def crowded_feed() -> list[dict]:
 def test_theme_saturation_catches_the_incident_family(crowded_feed):
     """The core new capability, tested directly: the theme IS measurably crowded.
 
-    On the real 90d corpus this scored 11 (threshold 6). Here we assert the gate
+    On the real 90d corpus the canonical probe scores 12 (threshold 5). Here we assert the gate
     fires on the real titles, independent of which verdict `screen_topic` reaches.
     """
     result = theme_saturation(INCIDENT_TITLE, INCIDENT_DESC, crowded_feed, days=90)
@@ -166,6 +174,7 @@ def test_blocked_topic_exposes_audit_blob(crowded_feed):
     screen = screen_topic(INCIDENT_TITLE, INCIDENT_DESC, feed=crowded_feed, mode="block")
     blob = screen.as_task_field()
     assert blob["verdict"] in (BLOCK_ARC_DUP, BLOCK_THEME_SATURATED)
+    assert blob["blocked"] is True
     assert blob["reason"]
     assert blob["near_misses"]
     assert blob["screened_at"]
@@ -181,14 +190,11 @@ def test_blocked_topic_exposes_audit_blob(crowded_feed):
         ("碳權市場的波動結構：歐盟 ETS 期貨的季節性",
          "檢視歐盟碳排放權交易體系 ETS 期貨的波動率季節性與到期效應。",
          CLEAN),
-        # It has NO vocabulary for USDT/USDC/DeFi -> entities=[] -> the arc gate
-        # never looked. It still must not block (that is what this test guards),
-        # but calling it `clean` was the 2026-07-13/14 lie: "I could not look" is
-        # not "I looked and it is clean". Documents a real blind spot — the entity
-        # vocabulary covers no crypto at all, so no crypto topic is arc-judgeable.
+        # STABLECOIN/DEFI are distinctive anchors, so the gate can now judge the
+        # topic and correctly finds no duplicate in this fixture.
         ("穩定幣脫鉤事件的流動性傳染",
          "USDT/USDC 脫鉤時，DeFi 池的流動性如何跨鏈傳染。",
-         UNJUDGED_THIN_SIGNATURE),
+         CLEAN),
     ],
 )
 def test_novel_topic_passes(crowded_feed, title, desc, expected):
@@ -199,17 +205,12 @@ def test_novel_topic_passes(crowded_feed, title, desc, expected):
 
 
 def test_theme_gate_does_not_fire_on_legit_event_topic(crowded_feed):
-    """The THEME gate must not fire on an FOMC preview. Calibration anchor.
+    """The toy corpus leaves an FOMC preview below threshold.
 
-    Scoped deliberately to `theme_saturation`, the gate this change ADDS, rather
-    than to the whole screen. On the real corpus the FOMC topic scores saturation
-    2 (vs the incident's 9-12) — comfortably clean — but the PRE-EXISTING arc gate
-    blocks it anyway via `descriptive_strict`, matching an NFP piece and a VIX
-    explainer. That arc behaviour is identical at 30d and 90d (measured), so it is
-    not a regression from this change and is not this gate's to fix; asserting
-    `screen.blocked is False` here would be asserting something untrue of the real
-    feed. The event lane — where FOMC actually lives — is warn-only, so it is
-    insulated either way (see test_event_lane_warns_but_never_blocks).
+    The live-corpus sentinel is the production calibration authority: there the
+    FOMC probe currently scores 8 and is correctly rendered as a recurring-event
+    warning, not a hard block. The former descriptive arc false positive is
+    covered separately as a non-blocking near-miss.
     """
     result = theme_saturation(
         "FOMC 前夕：市場在為降息還是鷹派押注？",
@@ -219,6 +220,51 @@ def test_theme_gate_does_not_fire_on_legit_event_topic(crowded_feed):
     )
     assert result["saturation"] < THEME_SATURATION_THRESHOLD, (
         "theme gate is too tight — it would block a legitimate event topic"
+    )
+
+
+def test_theme_probe_ignores_trending_prefix_and_generic_words(crowded_feed):
+    plain = theme_saturation(INCIDENT_TITLE, INCIDENT_DESC, crowded_feed, days=90)
+    prefixed = theme_saturation(
+        f"[trending_repost] {INCIDENT_TITLE}",
+        "量化角度：歷史分析。" + INCIDENT_DESC,
+        crowded_feed,
+        days=90,
+    )
+    assert prefixed["theme_terms"] == plain["theme_terms"]
+    assert prefixed["saturation"] == plain["saturation"]
+    assert {"trending", "分析", "歷史", "量化", "角度"}.isdisjoint(
+        prefixed["theme_terms"]
+    )
+
+
+def test_theme_probe_does_not_strip_real_bracket_subject(crowded_feed):
+    bracketed = theme_saturation(
+        "[BTC] 比特幣礦工賣壓估算",
+        "BTC 礦工賣壓與波動率。",
+        crowded_feed,
+        days=90,
+    )
+    assert "btc" in bracketed["theme_terms"] or "比特" in bracketed["theme_terms"]
+
+
+def test_nfp_control_is_not_saturated_by_generic_option_articles(crowded_feed):
+    feed = list(crowded_feed) + [
+        _article("mile_nfp_1", "非農 NFP 就業報告前瞻"),
+        _article("mile_nfp_2", "非農 NFP 就業數字公布後"),
+        _article("mile_nfp_3", "NFP 非農就業事件溫度計"),
+    ]
+    result = theme_saturation(
+        "下一次非農公布前：就業分歧是否先進入美元波動率？",
+        "下一次 NFP 公布前，分析美元 DXY 日內已實現波動與"
+        "選擇權隱含波動的定價差。",
+        feed,
+        days=90,
+    )
+    assert result["saturation"] == 3
+    assert result["saturation"] < THEME_SATURATION_THRESHOLD
+    assert {"選擇", "擇權", "定價", "隱含", "含波", "一次"}.isdisjoint(
+        result["theme_terms"]
     )
 
 
@@ -306,6 +352,143 @@ def test_gate_error_fails_open_and_is_reported(monkeypatch):
     assert "corpus exploded" in screen.reason
 
 
+def test_invalid_mode_fails_open_instead_of_defaulting_to_block(crowded_feed):
+    screen = screen_topic(
+        INCIDENT_TITLE,
+        INCIDENT_DESC,
+        feed=crowded_feed,
+        mode="blokc",
+    )
+    assert screen.blocked is False
+    assert screen.verdict == GATE_ERROR
+    assert "invalid" in screen.reason
+
+
+def test_macro_mechanism_similarity_warns_but_does_not_block():
+    feed = [
+        _article(
+            "mile_nfp",
+            "非農後 Fed 政策選擇權怎麼走",
+            content="Fed 政策與 FOMC 前後的利率選擇權定價結構。",
+            audience="general",
+        )
+    ]
+    screen = screen_topic(
+        "FOMC 前夕：市場在為降息還是鷹派押注？",
+        "本週 FOMC 利率決議前，選擇權市場的定價與波動率結構。",
+        feed=feed,
+        audience="general",
+        mode="block",
+    )
+    assert screen.blocked is False
+    assert screen.verdict == WARN_ARC_NEAR_MISS
+    assert screen.matches[0]["match_level"] == "near_miss"
+
+
+def test_recurring_fomc_theme_saturation_is_advisory_not_blocking():
+    feed = [
+        _article(
+            f"mile_curve_{i}",
+            f"VIX 期限結構研究第 {i} 篇",
+            tags=["期限結構", "波動率期限結構"],
+        )
+        for i in range(8)
+    ]
+    # Production-sized dispersed fillers keep the ambient-DF regime realistic.
+    feed.extend(
+        _article(f"mile_fill_{i}", title)
+        for i, title in enumerate(FILLER_TITLES)
+    )
+    screen = screen_topic(
+        "2026-07-29 FOMC 前夕：市場在為降息還是鷹派押注？",
+        "本次 FOMC 利率決議前，選擇權市場的定價與波動率期限結構。",
+        feed=feed,
+        audience="general",
+        mode="block",
+    )
+    assert screen.saturation >= THEME_SATURATION_THRESHOLD
+    assert screen.blocked is False
+    assert screen.verdict == WARN_THEME_SATURATED
+    assert "recurring event-window" in screen.reason
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        "美國CPI公布前：市場如何定價？",
+        "本次FOMC決議前的期限結構",
+        "NFP公布前：美元波動率",
+    ],
+)
+def test_recurring_macro_identity_accepts_cjk_adjacent_acronyms(title):
+    assert _is_recurring_macro_event(title, "") is True
+
+
+@pytest.mark.parametrize("title", ["SCPI公布前", "CPIAUCSL公布前"])
+def test_recurring_macro_identity_rejects_ascii_substrings(title):
+    assert _is_recurring_macro_event(title, "") is False
+
+
+def test_recurring_fomc_identity_survives_incidental_axis_terms():
+    feed = [
+        _article(
+            f"mile_curve_{i}",
+            f"VIX 期限結構研究第 {i} 篇",
+            tags=["期限結構", "波動率期限結構"],
+        )
+        for i in range(8)
+    ]
+    feed.extend(
+        _article(f"mile_fill_{i}", title)
+        for i, title in enumerate(FILLER_TITLES)
+    )
+    screen = screen_topic(
+        "2026-07-29 FOMC 前夕：市場在為降息還是鷹派押注？",
+        "本次 FOMC 利率決議前，選擇權市場的定價、波動率期限結構與流動性。",
+        feed=feed,
+        audience="general",
+        mode="block",
+    )
+    assert screen.saturation >= THEME_SATURATION_THRESHOLD
+    assert screen.blocked is False
+    assert screen.verdict == WARN_THEME_SATURATED
+
+
+def test_one_off_announcement_cannot_use_recurring_macro_exemption(crowded_feed):
+    screen = screen_topic(
+        "AI 資本支出財報公告前：科技巨頭的定價分歧",
+        "財報公告前後，分析 AI 資本支出與科技股風險定價。",
+        feed=crowded_feed,
+        audience="general",
+        mode="block",
+    )
+    assert screen.saturation >= THEME_SATURATION_THRESHOLD
+    assert screen.blocked is True
+    assert screen.verdict == BLOCK_THEME_SATURATED
+
+
+@pytest.mark.parametrize(
+    "control_text",
+    [
+        "並以 CPI 公布前後作為總體控制。",
+        "並控制下一次 FOMC 會議前後的市場狀態。",
+    ],
+)
+def test_incidental_macro_control_in_description_cannot_grant_exemption(
+    crowded_feed, control_text
+):
+    screen = screen_topic(
+        INCIDENT_TITLE,
+        INCIDENT_DESC + control_text,
+        feed=crowded_feed,
+        audience="general",
+        mode="block",
+    )
+    assert screen.saturation >= THEME_SATURATION_THRESHOLD
+    assert screen.blocked is True
+    assert screen.verdict == BLOCK_THEME_SATURATED
+
+
 # --- every generator path is actually wired to the screen ---------------------
 
 
@@ -335,8 +518,8 @@ def test_event_task_is_screened_when_feed_supplied(crowded_feed, tmp_path):
     assert task["dedup_screen"]["near_misses"], "annotation must name the near misses"
 
 
-def test_event_task_without_feed_is_unscreened_but_still_built():
-    """No corpus -> no annotation, but the event still ships (fail-open)."""
+def test_event_task_without_feed_is_gate_error_annotated_but_still_built(tmp_path):
+    """No corpus -> explicit gate-error annotation, while event still ships."""
     from volpred.ops.event_jobs import build_pending_event_task
 
     item = {
@@ -352,9 +535,15 @@ def test_event_task_without_feed_is_unscreened_but_still_built():
             },
         },
     }
-    task = build_pending_event_task(item, now=datetime.now(timezone.utc), feed=None)
+    task = build_pending_event_task(
+        item,
+        now=datetime.now(timezone.utc),
+        feed=None,
+        storage_dir=str(tmp_path),
+    )
     assert task["task_type"] == "event_article"
-    assert "dedup_screen" not in task
+    assert task["dedup_screen"]["verdict"] == GATE_ERROR
+    assert task["dedup_screen"]["blocked"] is False
 
 
 def test_refill_event_path_passes_the_feed():

@@ -8,7 +8,14 @@ from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
 from scripts.article_backups import ensure_local_article_backups
-from volpred.publisher.arc_dedup import classify_narrative_axis, find_arc_duplicates
+from volpred.publisher.arc_dedup import (
+    ARC_SIGNATURE_SCHEMA_VERSION,
+    arc_signature,
+    arc_signature_from_feed_item,
+    find_arc_duplicates,
+    is_arc_anchorless,
+    is_arc_near_miss,
+)
 from volpred.publisher.publisher import (
     Publisher,
     _audit_general_content,
@@ -291,7 +298,7 @@ _RELEASE_DEDUP_FLAG_TTL_DAYS = 2
 # version makes a logic change self-invalidating: bump this whenever the block
 # rules change and the next run re-decides from scratch instead of trusting a
 # verdict the current code would no longer reach.
-_RELEASE_DEDUP_GATE_VERSION = 2
+_RELEASE_DEDUP_GATE_VERSION = 3
 _RELEASE_DEDUP_JACCARD = 0.45
 _RELEASE_DEDUP_AUDIENCES = {"general", "research"}
 _RELEASE_LAST_N_CLUSTER_WINDOW = 3
@@ -407,15 +414,17 @@ def _item_narrative_axis(item: dict) -> str:
         details = item.get("details")
         if isinstance(details, dict):
             sig = details.get("arc_signature")
-            if isinstance(sig, dict) and sig.get("schema_version") == "arc_dedup_v3":
+            if (
+                isinstance(sig, dict)
+                and sig.get("schema_version") == ARC_SIGNATURE_SCHEMA_VERSION
+            ):
                 axis = sig.get("narrative_axis")
                 if isinstance(axis, str) and axis:
                     return axis
-        text = (
-            f"{item.get('title') or ''}\n"
-            f"{item.get('content') or item.get('description') or ''}"
+        return str(
+            arc_signature_from_feed_item(item).get("narrative_axis")
+            or "unspecified"
         )
-        return classify_narrative_axis(text)
     except Exception as exc:  # noqa: BLE001
         from .diagnostics import warn
 
@@ -1517,13 +1526,56 @@ def release_pool_articles(
                     or _item_details.get("experiment_ids")
                     or []
                 )
-            arc_dups = find_arc_duplicates(
-                str(item.get("title") or ""),
-                str(item.get("content") or item.get("description") or ""),
+            _item_title = str(item.get("title") or "")
+            _item_text = str(item.get("content") or item.get("description") or "")
+            arc_matches = find_arc_duplicates(
+                _item_title,
+                _item_text,
                 recent_pub_for_dedup,
                 days=_RELEASE_DEDUP_WINDOW_DAYS,
                 new_refs=_item_refs,
+                include_fuzzy=True,
             )
+            arc_dups = [m for m in arc_matches if not is_arc_near_miss(m)]
+            arc_near_misses = [m for m in arc_matches if is_arc_near_miss(m)]
+            if arc_near_misses and not arc_dups:
+                d = arc_near_misses[0]
+                print(
+                    f"  [release_pool] ARC-NEAR-MISS {item.get('id')} — "
+                    f"advisory similarity to {d.get('id')}; releasing."
+                )
+                _log_release_dedup_decision(
+                    storage_dir,
+                    target_id=item.get("id"),
+                    matched_id=d.get("id"),
+                    decision="warn",
+                    reason="descriptive_fuzzy_mechanism_near_miss",
+                )
+                _d = item.get("details")
+                if not isinstance(_d, dict):
+                    _d = {}
+                    item["details"] = _d
+                _d["release_arc_near_miss_of"] = d.get("id")
+                _d["release_arc_near_miss_at"] = now.isoformat()
+            elif not arc_dups and is_arc_anchorless(
+                arc_signature(_item_title, _item_text), _item_refs
+            ):
+                print(
+                    f"  [release_pool] ARC-UNJUDGED {item.get('id')} — "
+                    "signature has no distinctive entity/ref; releasing."
+                )
+                _log_release_dedup_decision(
+                    storage_dir,
+                    target_id=item.get("id"),
+                    matched_id=None,
+                    decision="warn",
+                    reason="anchorless_signature_not_clean",
+                )
+                _d = item.get("details")
+                if not isinstance(_d, dict):
+                    _d = {}
+                    item["details"] = _d
+                _d["release_arc_unjudged_at"] = now.isoformat()
             dup = _release_content_dup(item, recent_pub_for_dedup)
             flood = _release_theme_flood(item, recent_pub_for_dedup)
 
@@ -1574,8 +1626,8 @@ def release_pool_articles(
                     _d["release_arc_warn_at"] = now.isoformat()
                 arc_dups = blocking_arc_dups
 
-            # Narrative-axis waiver (2026-06-24): mirror arc_dedup v3 on the
-            # release gate's surface-text checks. The Jaccard near-dup and the
+            # Narrative-axis waiver (2026-06-24): mirror the current arc schema
+            # on the release gate's surface-text checks. The Jaccard near-dup and the
             # theme-flood gate are blind to reader-facing narrative axis: a
             # paper methodology-robustness note and an ETF product-myth piece
             # can be text-similar yet tell different reader stories. When the

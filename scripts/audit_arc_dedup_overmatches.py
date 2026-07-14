@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audit recent arc-dedup skips for likely narrative-axis over-matches.
 
-This is a read-only helper for the 2026-06-24 arc_dedup v3 incident. It scans
+This is a read-only helper for the 2026-06-24 arc-dedup incident. It scans
 drafts that release_pool skipped as arc duplicates and reports cases where the
 candidate and the blocker have different known narrative axes. Those are
 dup-waiver / rewrite candidates for an interactive session to review.
@@ -20,7 +20,10 @@ ROOT = Path(__file__).resolve().parents[1]
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 sys.path.insert(0, str(ROOT / "src"))
 
-from volpred.publisher.arc_dedup import arc_signature  # noqa: E402
+from volpred.publisher.arc_dedup import (  # noqa: E402
+    ARC_SIGNATURE_SCHEMA_VERSION,
+    arc_signature,
+)
 from volpred.ops.diagnostics import warn  # noqa: E402
 
 
@@ -46,7 +49,10 @@ def _parse_dt(raw: object) -> datetime | None:
 def _signature(item: dict) -> dict:
     details = item.get("details") if isinstance(item.get("details"), dict) else {}
     stored = details.get("arc_signature") if isinstance(details, dict) else None
-    if isinstance(stored, dict) and stored.get("schema_version") == "arc_dedup_v3":
+    if (
+        isinstance(stored, dict)
+        and stored.get("schema_version") == ARC_SIGNATURE_SCHEMA_VERSION
+    ):
         return stored
     return arc_signature(str(item.get("title") or ""), _article_text(item))
 

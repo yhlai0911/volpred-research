@@ -1601,10 +1601,21 @@ class Publisher:
         # boss directive it must not silently kill a publish. Logged for audit.
         if not (details or {}).get('dup_waiver') and not _is_digest:
             try:
-                from volpred.publisher.arc_dedup import find_arc_duplicates
-                arc_dups = find_arc_duplicates(
-                    title, description or '', feed, new_refs=new_refs,
+                from volpred.publisher.arc_dedup import (
+                    arc_signature,
+                    find_arc_duplicates,
+                    is_arc_anchorless,
+                    is_arc_near_miss,
                 )
+                arc_matches = find_arc_duplicates(
+                    title,
+                    description or '',
+                    feed,
+                    new_refs=new_refs,
+                    include_fuzzy=True,
+                )
+                arc_dups = [m for m in arc_matches if not is_arc_near_miss(m)]
+                arc_near_misses = [m for m in arc_matches if is_arc_near_miss(m)]
                 if arc_dups:
                     d = arc_dups[0]
                     print(f"  ⚠️ ARC-DUP (warn, publishing anyway) of {d['id']} "
@@ -1613,6 +1624,27 @@ class Publisher:
                     _log_dedup_decision(_dedup_storage_dir, "warn_arc_dup",
                                         title, d['id'],
                                         f"entities={d['shared_entities']} class={d['conclusion_class']}")
+                elif arc_near_misses:
+                    d = arc_near_misses[0]
+                    print(f"  ⚠️ ARC NEAR-MISS (publishing) of {d['id']} "
+                          f"'{d['title'][:50]}'; manual 3-layer review required.")
+                    _log_dedup_decision(
+                        _dedup_storage_dir,
+                        "warn_arc_near_miss",
+                        title,
+                        d['id'],
+                        f"reason={d.get('match_reason')} entities={d.get('shared_entities')}",
+                    )
+                elif is_arc_anchorless(arc_signature(title, description or ''), new_refs):
+                    print("  ⚠️ ARC UNJUDGED (publishing) — signature has no "
+                          "distinctive entity/ref; manual 3-layer review required.")
+                    _log_dedup_decision(
+                        _dedup_storage_dir,
+                        "warn_arc_unjudged",
+                        title,
+                        None,
+                        "anchorless signature; empty match list is not a clean clearance",
+                    )
             except ImportError:
                 pass  # silent-ok: optional arc-dedup module; absent → skip arc-dup check
 
@@ -2134,19 +2166,23 @@ class Publisher:
         # arc_dedup; new writes should carry the schema explicitly.
         _stored_arc_sig = details_clean.get('arc_signature')
         try:
-            from volpred.publisher.arc_dedup import ARC_SIGNATURE_SCHEMA_VERSION
-        except Exception:
-            ARC_SIGNATURE_SCHEMA_VERSION = "arc_dedup_v4"
-        if (
-            not isinstance(_stored_arc_sig, dict)
-            or _stored_arc_sig.get('schema_version') != ARC_SIGNATURE_SCHEMA_VERSION
-        ):
-            try:
-                from volpred.publisher.arc_dedup import arc_signature
-
-                details_clean['arc_signature'] = arc_signature(title, description or '')
-            except Exception as _arc_sig_exc:
-                print(f"  [arc_dedup] arc_signature metadata skipped: {_arc_sig_exc}")
+            from volpred.publisher.arc_dedup import (
+                ARC_SIGNATURE_SCHEMA_VERSION,
+                arc_signature_from_feed_item,
+            )
+            if (
+                not isinstance(_stored_arc_sig, dict)
+                or _stored_arc_sig.get('schema_version') != ARC_SIGNATURE_SCHEMA_VERSION
+            ):
+                details_clean['arc_signature'] = arc_signature_from_feed_item(
+                    {
+                        'title': title,
+                        'content': description or '',
+                        'tags': tag_list,
+                    }
+                )
+        except Exception as _arc_sig_exc:
+            print(f"  [arc_dedup] arc_signature metadata skipped: {_arc_sig_exc}")
         # 2026-06-11: content_type 強制落地（boss badge-精確性 feedback 的底層修正）。
         # 歷史 1210/1320 篇 details.content_type 為空 → 前端 badge 只能靠 audience 猜。
         # 從本次起每篇必有 content_type：caller 顯式傳的優先，否則由 audience/category 推導。

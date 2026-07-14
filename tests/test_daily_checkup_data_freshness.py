@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 from scripts import daily_checkup
+from volpred.ops import topic_dedup
 
 
 def _only_file_jobs(monkeypatch, tmp_path: Path, jobs: list[tuple]) -> None:
@@ -77,3 +78,68 @@ def test_taifex_increment_reuses_single_collect_tw_schedule() -> None:
     assert len(jobs) == 1
     assert jobs[0]["cron"] == "0 15 * * 1-5"
     assert "TAIFEX" in jobs[0]["description"]
+
+
+def test_dedup_calibration_clean_result_adds_no_finding(monkeypatch, tmp_path: Path) -> None:
+    storage = tmp_path / "storage"
+    (storage / "reports").mkdir(parents=True)
+    (storage / "reports" / "feed.json").write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(daily_checkup, "STORAGE", storage)
+    monkeypatch.setattr(
+        topic_dedup,
+        "audit_topic_dedup_calibration",
+        lambda feed: {"ok": True, "issues": [], "metrics": {}},
+    )
+
+    assert daily_checkup.check_dedup_calibration() == []
+
+
+def test_dedup_calibration_drift_is_warning_with_metrics(monkeypatch, tmp_path: Path) -> None:
+    storage = tmp_path / "storage"
+    (storage / "reports").mkdir(parents=True)
+    (storage / "reports" / "feed.json").write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(daily_checkup, "STORAGE", storage)
+    monkeypatch.setattr(
+        topic_dedup,
+        "audit_topic_dedup_calibration",
+        lambda feed: {
+            "ok": False,
+            "issues": ["known duplicate margin is only 1"],
+            "metrics": {
+                "corpus_size": 831,
+                "incident_saturation": 6,
+                "theme_threshold": 5,
+                "incident_margin": 1,
+                "nfp_control_saturation": 3,
+                "fomc_theme_saturation": 8,
+                "fomc_hard_matches": 0,
+            },
+        },
+    )
+
+    findings = daily_checkup.check_dedup_calibration()
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "warn"
+    assert "margin is only 1" in findings[0]["message"]
+    assert "corpus=831" in findings[0]["message"]
+
+
+def test_dedup_calibration_audit_exception_becomes_structured_warning(
+    monkeypatch, tmp_path: Path
+) -> None:
+    storage = tmp_path / "storage"
+    (storage / "reports").mkdir(parents=True)
+    (storage / "reports" / "feed.json").write_text("[null]", encoding="utf-8")
+    monkeypatch.setattr(daily_checkup, "STORAGE", storage)
+    monkeypatch.setattr(
+        topic_dedup,
+        "audit_topic_dedup_calibration",
+        lambda feed: (_ for _ in ()).throw(TypeError("bad feed row")),
+    )
+
+    findings = daily_checkup.check_dedup_calibration()
+
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "warn"
+    assert "校準執行失敗" in findings[0]["message"]
+    assert "bad feed row" in findings[0]["message"]

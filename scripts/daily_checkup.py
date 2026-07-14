@@ -8,7 +8,7 @@
 靜默落後的資料（daily_update 卡 6/26、collect_us、twse_orderflow 死 12 天）、卡 1 年的
 頁面 cache，全部漏網，最後靠老闆當 QA 發現。本檢查補上 result-level 維度。
 
-八大維度（每個失敗都產生具體 finding，可被 alert 消費）：
+九大維度（每個失敗都產生具體 finding，可被 alert 消費）：
 1. data_freshness   — 所有資料收集 job 是否照排程跑 + 關鍵資料檔是否新鮮（時效性資料優先）
 2. cron_completion  — 所有排程 job 最近一輪是否真的 fire + exit0
 3. content_pipeline — 草稿池 ≥ 門檻、今日有產出、published 文章皆含真圖表+數據表（非純散文）
@@ -17,6 +17,7 @@
 6. mission_progress — 研究 backlog / 實驗 / 論文是否在前進（非停滯）
 7. reader_metrics   — 讀者互動 metrics 是否已落地且足夠新鮮
 8. recovery_actions — 對可自動修復的 finding 列出建議 recovery 指令
+9. dedup_calibration — 真實 90d feed 上的 arc/theme 固定 probes 與 threshold margin
 
 用法：
   uv run python scripts/daily_checkup.py            # 印報告
@@ -494,6 +495,51 @@ def check_alert_conditions() -> list[dict]:
     return out
 
 
+# ── 9. dedup_calibration ───────────────────────────────────────────────────
+def check_dedup_calibration() -> list[dict]:
+    """Warn when live-corpus dedup behaviour drifts outside calibrated bounds."""
+    feed_path = STORAGE / "reports" / "feed.json"
+    try:
+        feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [_finding("dedup_calibration", "warn", f"feed.json 讀取失敗: {exc}")]
+    if not isinstance(feed, list):
+        return [_finding("dedup_calibration", "warn", "feed.json 不是 list，校準無法執行")]
+
+    from volpred.ops.topic_dedup import audit_topic_dedup_calibration
+
+    try:
+        audit = audit_topic_dedup_calibration(feed)
+    except Exception as exc:  # noqa: BLE001 — structured warning, never silent
+        return [
+            _finding(
+                "dedup_calibration",
+                "warn",
+                f"arc/theme 校準執行失敗: {type(exc).__name__}: {exc}",
+                recovery="uv run python scripts/daily_checkup.py --json  # 檢查 dedup_calibration",
+            )
+        ]
+    if audit["ok"]:
+        return []
+    metrics = audit["metrics"]
+    summary = (
+        f"corpus={metrics['corpus_size']}, AI saturation="
+        f"{metrics['incident_saturation']} (threshold={metrics['theme_threshold']}, "
+        f"margin={metrics['incident_margin']}), NFP control="
+        f"{metrics['nfp_control_saturation']}, FOMC theme="
+        f"{metrics['fomc_theme_saturation']} / hard="
+        f"{metrics['fomc_hard_matches']}"
+    )
+    return [
+        _finding(
+            "dedup_calibration",
+            "warn",
+            f"arc/theme 校準漂移：{'; '.join(audit['issues'])}；{summary}",
+            recovery="uv run python scripts/daily_checkup.py --json  # 檢查 dedup_calibration",
+        )
+    ]
+
+
 def run_all() -> dict:
     dims = {
         "data_freshness": check_data_freshness,
@@ -504,6 +550,7 @@ def run_all() -> dict:
         "mission_progress": check_mission_progress,
         "alert_conditions": check_alert_conditions,
         "reader_metrics": check_reader_metrics,
+        "dedup_calibration": check_dedup_calibration,
     }
     findings = []
     for name, fn in dims.items():

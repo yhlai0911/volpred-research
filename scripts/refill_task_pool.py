@@ -659,7 +659,13 @@ def _is_arc_duplicate_candidate(cand: dict) -> bool:
         src = str(ROOT / "src")
         if src not in sys.path:
             sys.path.insert(0, src)
-        from volpred.publisher.arc_dedup import _normalize_ref, find_arc_duplicates  # noqa: E402
+        from volpred.publisher.arc_dedup import (  # noqa: E402
+            _normalize_ref,
+            arc_signature,
+            find_arc_duplicates,
+            is_arc_anchorless,
+            is_arc_near_miss,
+        )
     except Exception as exc:
         _warn_refill("arc duplicate filter unavailable; candidate not blocked", exc)
         return False
@@ -690,12 +696,30 @@ def _is_arc_duplicate_candidate(cand: dict) -> bool:
     audiences_covered = cand.get("audiences_covered") or []
     needed_audience = "general" if "general" not in audiences_covered else "research"
     try:
-        dups = find_arc_duplicates(
-            title_hint, text, feed, days=90, new_refs=[k_id], audience=needed_audience
+        arc_matches = find_arc_duplicates(
+            title_hint,
+            text,
+            feed,
+            days=90,
+            new_refs=[k_id],
+            audience=needed_audience,
+            include_fuzzy=True,
         )
     except Exception as exc:
         _warn_refill(f"arc duplicate check failed for {k_id}; candidate not blocked", exc)
         return False
+    dups = [m for m in arc_matches if not is_arc_near_miss(m)]
+    near_misses = [m for m in arc_matches if is_arc_near_miss(m)]
+    if near_misses and not dups:
+        print(
+            f"  [refill] arc-near-miss {k_id}: advisory matches "
+            f"{[m.get('id') for m in near_misses[:3]]}; not hard-skipping"
+        )
+    elif not dups and is_arc_anchorless(arc_signature(title_hint, text), [k_id]):
+        print(
+            f"  [refill] arc-unjudged {k_id}: no distinctive entity/ref; "
+            "not a clean clearance"
+        )
     k_norm = _normalize_ref(k_id)
     blocking: list[dict] = []
     for d in dups:

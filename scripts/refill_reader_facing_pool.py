@@ -364,13 +364,14 @@ def _screen_trending_topic(title: str, description: str, feed: list[dict] | None
     not have caught the 2026-07-13 incident anyway — the arc gate is
     entity-anchored and the incident's five siblings do not arc-match each other
     (0 of 10 pairs; see volpred.publisher.arc_dedup.theme_saturation). The screen
-    now also runs theme saturation, which does catch it (saturation 11 >= 6), and
+    now also runs theme saturation, which does catch it (saturation 12 >= 5), and
     every decision — including a gate error — is logged, never swallowed.
     """
     return screen_topic(
         title,
         description,
         feed=feed,
+        audience="general",
         days=ARC_DEDUP_WINDOW_DAYS,
         mode="block",
     )

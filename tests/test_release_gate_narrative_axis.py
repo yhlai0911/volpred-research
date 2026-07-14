@@ -80,7 +80,7 @@ _LZ = (
 
 
 def _arc_sig(axis: str) -> dict:
-    return {"schema_version": "arc_dedup_v3", "narrative_axis": axis}
+    return {"schema_version": "arc_dedup_v4", "narrative_axis": axis}
 
 
 # ===========================================================================
@@ -120,6 +120,21 @@ def test_item_narrative_axis_prefers_persisted_signature():
 
 def test_item_narrative_axis_falls_back_to_unspecified_for_neutral_text():
     item = {"id": "x", "title": "中性標題", "content": _BASE_BODY}
+    assert content._item_narrative_axis(item) == "unspecified"
+
+
+def test_item_narrative_axis_recomputes_stale_schema_with_exclusion_sanitizer():
+    item = {
+        "id": "x",
+        "title": "選擇權到期日曆效應",
+        "content": "研究到期效應；不涉及財報、Fed。",
+        "details": {
+            "arc_signature": {
+                "schema_version": "arc_dedup_v3",
+                "narrative_axis": "event_window",
+            }
+        },
+    }
     assert content._item_narrative_axis(item) == "unspecified"
 
 
@@ -470,6 +485,19 @@ def test_same_audience_shared_k_still_blocks():
 
 
 # --- cooldown flag must not outlive the logic that produced it --------------
+
+def test_release_gate_version_invalidates_pre_calibration_v2_flags():
+    now = datetime(2026, 7, 14, 12, 0, tzinfo=timezone.utc)
+    stale = {
+        "details": {
+            "release_dedup_skipped": True,
+            "release_dedup_skipped_at": now.isoformat(),
+            "release_dedup_gate_version": 2,
+        }
+    }
+    assert content._RELEASE_DEDUP_GATE_VERSION == 3
+    assert content._release_dedup_flag_active(stale, now=now) is False
+
 
 def test_cooldown_flag_from_an_older_gate_version_is_re_evaluated():
     """A cooldown flag caches a gate verdict. When the gate logic changes the

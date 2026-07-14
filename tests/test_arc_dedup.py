@@ -492,11 +492,66 @@ class TestPublisherGateWiring:
         feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
         assert feed[0]["id"] == returned
         sig = feed[0]["details"]["arc_signature"]
-        assert sig["schema_version"] == "arc_dedup_v3"
+        assert sig["schema_version"] == "arc_dedup_v4"
         assert "narrative_axis" in sig
         assert "entity_groups" in sig
         assert "private_credit_stress" in sig["mechanisms"]
         assert sig["time_horizon"] == "multi_horizon"
+
+    def test_publish_milestone_recomputes_stale_v3_signature(self, tmp_path):
+        import json as _json
+
+        storage = tmp_path / "storage"
+        (storage / "reports").mkdir(parents=True)
+        (storage / "reports" / "feed.json").write_text("[]", encoding="utf-8")
+        from volpred.publisher.publisher import Publisher
+
+        stale = {
+            "schema_version": "arc_dedup_v3",
+            "entities": [],
+            "entity_groups": {"reader_narrative": [], "paper_methodology": []},
+            "conclusion_class": "descriptive",
+            "narrative_axis": "unspecified",
+            "mechanisms": [],
+            "time_horizon": "unspecified",
+        }
+        Publisher(storage_dir=str(storage)).publish_milestone(
+            title="USDC 脫鉤時 DeFi 流動性如何傳染",
+            description="USDC stablecoin 與 DeFi pool 的流動性傳染。",
+            phase="Phase_X",
+            audience="research",
+            status="draft",
+            details={"arc_signature": stale},
+            audit_strict=False,
+        )
+
+        feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
+        sig = feed[0]["details"]["arc_signature"]
+        assert sig["schema_version"] == "arc_dedup_v4"
+        assert {"STABLECOIN", "DEFI"} <= set(sig["entities"])
+
+    def test_publish_milestone_signature_uses_final_tags_surface(self, tmp_path):
+        import json as _json
+
+        storage = tmp_path / "storage"
+        (storage / "reports").mkdir(parents=True)
+        (storage / "reports" / "feed.json").write_text("[]", encoding="utf-8")
+        from volpred.publisher.publisher import Publisher
+
+        Publisher(storage_dir=str(storage)).publish_milestone(
+            title="流動性觀察",
+            description="市場結構追蹤。",
+            phase="Phase_X",
+            audience="research",
+            status="draft",
+            tags=["USDC", "DeFi"],
+            audit_strict=False,
+        )
+
+        feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
+        sig = feed[0]["details"]["arc_signature"]
+        assert sig["schema_version"] == "arc_dedup_v4"
+        assert {"STABLECOIN", "DEFI"} <= set(sig["entities"])
 
 
 class TestK1054GhostRecycle:
