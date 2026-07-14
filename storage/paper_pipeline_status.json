@@ -354,7 +354,7 @@
       "stage": "revision",
       "stage_entered_at": "2026-05-21T00:00:00+08:00",
       "last_advance_at": "2026-07-14T00:00:00+08:00",
-      "blocker": "P0-1 CLOSED 2026-07-14: K1686 R2 (commit 2c764c69d) closed both Codex blockers; Codex primary-path R2 review = PASS (experiments/k1686/codex_review_r2.md). Pre-fixed follow-up gate: H ambient-up decline +1.0465, 20-day paired block CI [0.3286,1.7625] excludes 0 (block 10/40/63 same direction; calm/high up-shock n=47/53); paired pooled-minus-current-up +0.9353 CI [0.3437,1.4991]; same-seed null MC p=0.033 (supplementary). Ruling: absorption survives fear-shock conditioning -> JBF track continues, FRL reframe cancelled. knowledge.json written (da9ac9d2). Remaining: body revision must honestly integrate (1) K897 retirement, (2) null comparisons inconclusive (calibration failure; no calibration-invariant null exists for this statistic), (3) 58% of headline decline is fixed-threshold selection artifact, (4) identification weight moves to H spec + limitations. Then P0-2 C1-C5, P0-3 Table 3 SAR rebuild, P0-4 reproduce gate extension, P1 citations/prior-art, multi-round review.",
+      "blocker": "P0 COMPLETE 2026-07-14 (e947c9e25 -> 8a3974b11): K1686 R2 adjudicated (absorption survives ambient-fear-shock gate, JBF track continues, FRL reframe cancelled); body integrated (new null_reexam section: K897 retired, null panel inconclusive, 58% threshold artifact, H gate +1.05 CI [0.33,1.76]); C1-C5 fixed; Table 2/3 rebuilt on pinned snapshot with paired block-bootstrap inference (honest new finding: calm-to-normal step p=0.103 NS); reproduce gate 95/95 GREEN; orphan citations resolved; 42pp compiles clean; synced. Remaining: P1-2 prior-art paragraph (Low 2004 / Hibbert 2008 / FOW 1995, needs literature verification) + multi-round 3-track review (latex-academic-reviewer + citation-verifier + Codex adversarial w/ transcript) + journal decision finalization.",
       "owner_decision_pending": false,
       "stage_entered_at_provenance": {
         "source": "git",
@@ -362,7 +362,8 @@
         "commit_date": "2026-05-21",
         "confidence": "earliest_git_evidence_for_current_stage_or_blocker",
         "basis": "portfolio ready papers independent reviews rejected/downgraded; current blocker remains reproduce/convergence finishing"
-      }
+      },
+      "narrative_status": "k1686_integrated_body_done_2026_07_14"
     },
     {
       "paper": "vt-crowding-abm",
@@ -511,5 +512,5 @@
       }
     ]
   },
-  "last_update": "2026-07-14T14:20:37.295908"
+  "last_update": "2026-07-14T14:51:05.041120"
 }
