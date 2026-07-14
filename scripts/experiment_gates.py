@@ -43,6 +43,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -50,6 +51,8 @@ from typing import Any, Callable, Iterable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+from experiment_claim_surface import is_experiment_claim_surface_file  # noqa: E402
 
 BASELINE_DIR = REPO_ROOT / "storage" / "ops"
 
@@ -103,6 +106,23 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+def _candidate_root(path: Path) -> Path:
+    cwd = path if path.is_dir() else path.parent
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return REPO_ROOT
+    if proc.returncode == 0:
+        return Path(proc.stdout.strip()).resolve()
+    return REPO_ROOT
+
+
 # --- gate adapters -----------------------------------------------------------
 # Each adapter yields (site_key, verdict) for the violating sites in one file.
 # Detection and verdict semantics come from the auditor module; nothing is
@@ -115,7 +135,7 @@ def _scan_nested_dm(path: Path) -> Iterable[tuple[str, str]]:
     # the volpred package has not been installed in that interpreter.
     import audit_nested_dm_misuse as nested_dm
 
-    finding = nested_dm.scan_file(path, REPO_ROOT)
+    finding = nested_dm.scan_file(path, _candidate_root(path))
     if finding is not None and finding.test_role not in nested_dm.SAFE_ROLES:
         yield finding.file, finding.test_role
 
@@ -224,7 +244,7 @@ def run_gates(target: Path) -> list[Violation]:
         frozen = _baseline_sites(gate.baseline)
         for path in files:
             for site, verdict in gate.scan(path):
-                if site in frozen:
+                if site in frozen and verdict != "invalid_fixed_memory_evidence":
                     continue
                 violations.append(
                     Violation(gate=gate.name, site=site, verdict=verdict, remedy=gate.remedy)
@@ -243,7 +263,8 @@ CERT_REMEDY = (
     '      {"kid": "k1709", "verdict": "PASS", "reviewer": "codex/gpt-5.6-sol",\n'
     '       "reviewed_at": "<ISO8601>", "review_artifact": "<the review file>",\n'
     '       "reviewed_sha256": {"<relpath>": "<sha256>", ...}}\n'
-    "    Every file in the claim surface (*.py, README.md, *_results.json) must "
+    "    Every file in the claim surface (*.py, README.md, *_results.json, and "
+    "reader-facing figures) must "
     "be listed with its sha256 AT REVIEW TIME. If you then edit or re-run the "
     "experiment, the hashes stop matching and this gate blocks again — that is "
     "the point. Re-review the new bytes; do not hand-edit the verdict.\n"
@@ -260,11 +281,12 @@ def _sha256(path: Path) -> str:
 
 
 def claim_surface(exp_dir: Path) -> list[Path]:
-    """The files a reader would believe. Code, the write-up, and the numbers.
+    """The files a reader would believe: code, prose, numbers, and figures.
 
     A verdict that only pins the .py is not worth much: README and the results
-    JSON are where an overclaim actually reaches a human (K1709 v1 shipped a
-    README asserting a bound the code never established).
+    JSON and rendered figures are where an overclaim actually reaches a human
+    (K1709 v1 shipped a README asserting a bound the code never established;
+    rev4 initially left stale scope labels inside its tracked power figure).
     """
     out: list[Path] = []
     for path in sorted(exp_dir.rglob("*")):
@@ -272,7 +294,7 @@ def claim_surface(exp_dir: Path) -> list[Path]:
             continue
         if path.name == CERT_FILENAME:
             continue
-        if path.suffix == ".py" or path.name == "README.md" or path.name.endswith("_results.json"):
+        if is_experiment_claim_surface_file(path):
             out.append(path)
     return out
 

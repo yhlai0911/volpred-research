@@ -75,6 +75,10 @@ def _portable_checkout(tmp_path: Path) -> Path:
     (root / "storage" / "ops").mkdir(parents=True)
 
     shutil.copy2(GATE, root / "scripts" / "experiment_gates.py")
+    shutil.copy2(
+        REPO_ROOT / "scripts" / "experiment_claim_surface.py",
+        root / "scripts" / "experiment_claim_surface.py",
+    )
     for gate in eg.GATES:
         shutil.copy2(
             REPO_ROOT / "storage" / "ops" / gate.baseline,
@@ -163,6 +167,42 @@ def test_frozen_legacy_debt_does_not_block_a_new_agent(tmp_path: Path) -> None:
         f"{baselined} is frozen in the baseline; the gate must not re-litigate "
         "it.\n" + proc.stdout + proc.stderr
     )
+
+
+def test_invalid_fixed_memory_role_can_never_hide_behind_legacy_baseline(
+    tmp_path: Path,
+) -> None:
+    root = _portable_checkout(tmp_path)
+    baselined = json.loads(
+        (root / "storage" / "ops" / "nested_dm_misuse_baseline.json").read_text()
+    )["active"]["exposed"][0]
+    source = (
+        '"""Nested PRIMARY GW/DM verdict; nested-dm: diagnostic-only."""\n'
+        "NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {'schema': 'fake'}\n"
+        "base_cols = ['x']\n"
+        "aug_cols = base_cols + ['s']\n"
+        "def classify(loss_base, loss_aug):\n"
+        "    dm_t, _ = dm_test(loss_aug, loss_base, h=1)\n"
+        "    return 'PASS' if dm_t < -3 else 'NULL'\n"
+    )
+    path = root / baselined
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(source, encoding="utf-8")
+    proc = _run_gate(root, str(path.parent))
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "invalid_fixed_memory_evidence" in proc.stderr
+
+
+def test_repeated_experiments_segment_cannot_alias_a_baselined_site(
+    tmp_path: Path,
+) -> None:
+    root = _portable_checkout(tmp_path)
+    path = root / "experiments" / "new" / "experiments" / "k1681" / "k1681.py"
+    path.parent.mkdir(parents=True)
+    path.write_text(K1709_V1, encoding="utf-8")
+    proc = _run_gate(root, str(root / "experiments" / "new"))
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "experiments/new/experiments/k1681/k1681.py" in proc.stderr
 
 
 def test_every_gate_has_a_baseline_and_a_named_owner() -> None:

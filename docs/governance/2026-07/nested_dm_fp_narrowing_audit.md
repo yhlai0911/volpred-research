@@ -369,3 +369,104 @@ uv run --extra dev python -m pytest scripts/tests/test_nested_dm_misuse_ratchet.
    （20/32 的 FP 屬此類，且方法論上本就不在巢狀 CW 的問題域內）。
    本輪未做，是因為靜態上難以在不誤傷 `k945`（避險比 QH/MV 巢狀，DM 作用在避險後報酬）
    這類站點的前提下寫出安全判準 —— 需要獨立設計 + 以本報告的 (b) 集合當 regression guard。
+
+---
+
+## 8. 2026-07-14 補充稽核：paired-loss HAC dataflow
+
+第三角色（fixed rolling、bounded-memory、unconditional GW/DM）實作時，對抗性審查發現
+舊 detector 只認 `loss_diff` / `dloss` 等少數變數名。像
+`delta = err_aug - err_base; OLS(delta, ...).fit(cov_type="HAC")` 的等價
+unconditional loss-mean test 可以完全躲過。新 AST channel 追蹤「augmented/base 成對差值 →
+HAC/OLS/mean test」後，多抓到 11 個既有檔；本輪逐檔追到實際 claim sink，而不是把新增
+偵測結果直接塞進 baseline。
+
+### 8.1 新增 active debt（8，皆 exposed）
+
+| site | 巢狀關係與 raw test | claim sink |
+|---|---|---|
+| `experiments/k1351/k1351.py` | `base_cols` / `aug_cols = base + oil features`（448–457），QLIKE baseline−augmented loss 後跑 Newey-West mean t（496–503） | `pass_gate` 直接要求 HAC t > 3（508–515），再決定 verdict（605–625） |
+| `experiments/k193/k193_copula_tail_dep.py` | GARCH+TDA 的 `(alpha, beta, gamma)=(0, 1, 0)` 可還原 GARCH baseline（489–498、620–633）；QLIKE DM/HAC（679–699） | `dm_pval` 直接決定 NULL/MARGINAL/POSITIVE（973–991） |
+| `experiments/k258/k258_skew_dynamics.py` | GJR baseline 對 `[1, GJR forecast, SKEW feature]` augmented OLS（431–449、502–507），QLIKE DM/HAC（512–540） | `garchx_passes` 直接餵總結論（915–943） |
+| `experiments/k367/k367_short_interest.py` | `VIX+RV` baseline 對 `VIX+RV+SH/SPY` augmented（617–626），raw iid mean-loss t（663–674） | `dm_p < .05` 參與結論（811–817） |
+| `experiments/k430/k430_vrp_predictability.py` | lagged-RV baseline 對 VRP augmentation（183–199、260–266），HAC loss-mean DM（294–326） | M4 DM 顯著性直接寫入 conclusions（578–609） |
+| `experiments/research_hedge_fund_alpha_dispersion_regime_strategy_etf/research_hedge_fund_alpha_dispersion_regime_strategy_etf.py` | `aug_cols = base_cols + STRATEGY_SIGNAL_COLS`（524–526），QLIKE/MSE HAC mean tests（341–360） | `positive_harvey` 決定 verdict/conclusion（566–595） |
+| `experiments/research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test/research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test.py` | `aug_cols = base_cols + run_pressure_lag1`（491–493），QLIKE/MSE HAC mean tests（371–395） | variance-cell `qlike_dm_t` 決定 verdict/conclusion（535–564）；correlation cell 雖是 diagnostic-only，不能替主要 variance cells 豁免 |
+| `experiments/research_tips_breakeven_volatility_corporate_bond_return/research_tips_breakeven_volatility_corporate_bond_return.py` | 兩個 target 都是 `aug_cols = base_cols + VOL_COLS`（450–458、509–518），QLIKE/MSE HAC mean tests（283–302） | `qlike_dm_t > 3` 決定 mixed-positive/null conclusion（561–591） |
+
+這 8 筆只被凍結成既有債務；本補充稽核沒有替它們改數字或結論。
+
+### 8.2 新增 reviewed-nonnested（3）
+
+| site | 裁決 |
+|---|---|
+| `experiments/k570b/k570b.py` | volatility-targeting 策略 vs baseline 的投資組合日報酬差；不是巢狀 forecast-loss comparison。 |
+| `experiments/k671/k671_vix_roll_yield.py` | VIX roll-yield 策略 vs 12/VIX baseline 的投資組合日報酬差；不是預測模型的受限/非受限 pair。 |
+| `experiments/rate_hike_vt_experiment/rate_hike_vt_experiment.py` | 升息期 VT 策略 vs baseline 的投資組合日報酬差；不是 nested forecast loss。 |
+
+補充後的 ratchet invariant：`231 flagged = 196 active + 35 reviewed_nonnested`；
+active 分成 `104 exposed + 92 diagnostic_only`。三個 strategy-return FP 均保留逐檔
+`dm_pairs` 裁決，不能靠一般詞彙豁免洗掉未來新增的 forecast comparison。
+
+---
+
+## 9. 2026-07-14 第三角色：fixed-memory unconditional GW/DM
+
+K1709 rev3 證明原本的 two-role model 不完整：巢狀模型的 raw DM 不能直接裁決，但在
+**整條 forecasting method 都是 bounded-memory 的 paired fixed rolling window** 時，
+GW (2006) Sec. 3.4 的 unconditional special case 正是 HAC 標準化的平均 loss
+differential，公式呈 DM form。把誠實的「primary unconditional GW/DM」文字改回模糊的
+「GW gate」不是修復；ratchet 現在承認第三角色
+`primary_unconditional_gw_dm_fixed_memory`，但 declaration 本身沒有豁免力。
+
+接受第三角色前，auditor 逐一要求：
+
+1. literal、versioned、cell-level manifest，列出每個 claim-bearing nested pair；
+2. base/aug 的 fixed window、complete-case mask、training schedule、origin schedule、label
+   embargo 完全相同，上游 predictor stages 也都只有有限記憶；
+3. runtime 保存 paired unadjusted loss differential、Bartlett HAC、canonical bandwidth、
+   finite-positive LRV、standard-normal reference 與 unconditional average-loss estimand；
+4. manifest、runtime primary inventory、registry inventory、Holm p 值、gate flag 與 verdict
+   counts 精確一致，只有全證據成立的 record 可 `feeds_gate=true`；
+5. reader-facing claim 就地寫明 unconditional，並明示 conditional/regime-offsetting effects
+   未測且未排除；
+6. trusted main checkout 的外部 PASS receipt 綁定 reviewed commit、source、manifest、runtime、
+   exact primary cells 與整個 claim surface 的 SHA-256；
+7. declaration 缺欄、mixed fixed/expanding、expanding preprocessing、schedule/mask 漂移、
+   truthy gate、shadow gate、conditional wording、stale receipt 或 commit-byte mismatch
+   一律 fail closed。
+
+獨立 rev5 review 另抓到一個原 gate 的盲點：tracked Figure 5 還留著舊 scope label，
+但 review certification 與第三角色 receipt 當時只發現 Python／README／results JSON，
+PNG 完全不在 hash inventory。這不是「圖不在 brief」可以豁免的問題，因為 README 直接把
+圖交給讀者。`scripts/experiment_claim_surface.py` 現為兩個 gate 的共同、stdlib-only
+discovery owner；除 code/prose/results 外，也納入 PNG/JPEG/SVG/WebP/GIF/PDF。測試固定了
+兩個方向：審後新增 reader-facing figure 必須使 certification 失效；manifest 漏列任何
+既有 figure 必須使第三角色失效。
+
+目前 regression suite：
+
+```text
+scripts/tests/test_nested_dm_misuse_ratchet.py
+scripts/tests/test_experiment_gates.py
+scripts/tests/test_experiment_certification.py
+=> 129 passed
+```
+
+第三角色仍不是密碼學證明：外部 receipt 的信任根是 main checkout 的治理與獨立 reviewer。
+它解決的是「candidate 自填 marker 就能自我豁免」與「reviewed bytes 漂移」；若 trusted main
+本身遭未審修改，仍需正常 code review、branch protection 與 CI 保護。
+
+### 靜態威脅模型界線
+
+這個 auditor 是**保守的 accidental-bypass 靜態 ratchet，不是 Python sandbox**：它不 import、
+不執行候選實驗，也不宣稱能解任意 alias、反射、動態字串或跨函式資料流。它會攔截 AST
+可直接證明的模組綁定（含一般控制流、`global`、current-module mapping/object、built-in
+mapping mutator 與 literal `exec`/`eval`）；import-only reference 則不算 declaration。
+
+這個界線不形成第三角色的 escape hatch。任何動態或別名寫法都**不能取得** fixed-memory
+角色；接受條件仍是唯一一個 top-level AST-literal manifest，接著逐項通過 source、runtime、
+claim-surface 與 trusted external receipt 驗證。上文的「fail closed」精確指這條 acceptance
+protocol：一旦 direct declaration 被辨識，任何證據錯誤都禁止退回較鬆的 lexical marker。
+若未來要把 auditor 升級成惡意 Python 的語義分析器，必須另立 sandbox／data-flow threat
+model，不能把那個尚未承諾的能力冒充成本 ratchet 已有的保證。

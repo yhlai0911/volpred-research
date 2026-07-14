@@ -32,6 +32,7 @@ import hashlib
 import json
 import math
 import re
+import statistics
 import subprocess
 import sys
 from dataclasses import asdict, dataclass, field
@@ -39,7 +40,9 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "src"))
+from experiment_claim_surface import is_experiment_claim_surface_file  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 
 SCAN_GLOB = "experiments/**/*.py"
@@ -252,6 +255,26 @@ def _nested_ast_evidence(tree: ast.AST, lines: list[str]) -> list[Evidence]:
 
 def _raw_dm_ast_evidence(tree: ast.AST, lines: list[str]) -> list[Evidence]:
     evidence: list[Evidence] = []
+    paired_differences: set[str] = set()
+    aug_re = re.compile(r"aug|alt|unrestricted|candidate|new_model", re.I)
+    base_re = re.compile(r"base|restricted|benchmark|old_model", re.I)
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+            continue
+        value = node.value
+        if not isinstance(value, ast.BinOp) or not isinstance(value.op, ast.Sub):
+            continue
+        left = ast.unparse(value.left)
+        right = ast.unparse(value.right)
+        if not (
+            (aug_re.search(left) and base_re.search(right))
+            or (base_re.search(left) and aug_re.search(right))
+        ):
+            continue
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        paired_differences.update(
+            target.id for target in targets if isinstance(target, ast.Name)
+        )
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
@@ -268,7 +291,12 @@ def _raw_dm_ast_evidence(tree: ast.AST, lines: list[str]) -> list[Evidence]:
             re.search(r"\bdm\w*\s*(?:,\s*\w+)?\s*=", source_line, re.I)
             and re.search(r"hac|newey|one_sample|mean_test|intercept|ols_hac", name, re.I)
         )
-        if raw_name or generic_loss_test:
+        paired_hac_mean_test = bool(
+            paired_differences
+            and any(re.search(rf"\b{re.escape(variable)}\b", call_text) for variable in paired_differences)
+            and re.search(r"hac|newey|cov_type|ols|mean|intercept|ttest", call_text, re.I)
+        )
+        if raw_name or generic_loss_test or paired_hac_mean_test:
             evidence.append(_line(lines, node.lineno))
     return _dedupe(evidence)
 
@@ -324,17 +352,48 @@ def _canonical_sha256(value: object) -> str:
 
 
 def _logical_experiment_site(path: Path, root: Path) -> str:
-    """Strip a worktree prefix so one receipt binds the eventual merge path."""
+    """Return the exact scan-root-relative site; never collapse repeated segments."""
     resolved = path.resolve()
     try:
-        parts = resolved.relative_to(root.resolve()).parts
-    except ValueError:
-        parts = resolved.parts
-    try:
-        index = len(parts) - 1 - tuple(reversed(parts)).index("experiments")
+        return resolved.relative_to(root.resolve()).as_posix()
     except ValueError:
         return resolved.as_posix()
-    return Path(*parts[index:]).as_posix()
+
+
+def _canonical_experiment_site(site: str) -> bool:
+    parts = Path(site).parts
+    return (
+        len(parts) >= 3
+        and parts[0] == "experiments"
+        and parts.count("experiments") == 1
+        and parts[-1].endswith(".py")
+    )
+
+
+def _trusted_repo_root(scan_root: Path) -> Path | None:
+    """Resolve the shared main checkout, never a candidate worktree registry."""
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            cwd=scan_root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+    except OSError as exc:
+        warn(
+            "audit_nested_dm_misuse",
+            "trusted repository root cannot be resolved",
+            scan_root=str(scan_root),
+            err=str(exc),
+        )
+        return None
+    if proc.returncode == 0:
+        common_dir = Path(proc.stdout.strip()).resolve()
+        if common_dir.name == ".git" and common_dir.parent.is_dir():
+            return common_dir.parent
+    return None
 
 
 def _literal_assignment(tree: ast.AST, name: str) -> tuple[object | None, int | None, str | None]:
@@ -359,6 +418,383 @@ def _literal_assignment(tree: ast.AST, name: str) -> tuple[object | None, int | 
         return None, node.lineno, f"{name} is not an AST-literal manifest: {exc}"
 
 
+class _ModuleBindingVisitor(ast.NodeVisitor):
+    """Find a binding executed in module scope without entering local scopes."""
+
+    def __init__(self, name: str):
+        self.name = name
+        self.found = False
+
+    def visit_Name(self, node: ast.Name) -> None:
+        if isinstance(node.ctx, ast.Store) and node.id == self.name:
+            self.found = True
+
+    @staticmethod
+    def _zero_arg_call(node: ast.AST, name: str) -> bool:
+        return (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == name
+            and not node.args
+            and not node.keywords
+        )
+
+    def _static_string_value(self, node: ast.AST) -> str | None:
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return node.value
+        if isinstance(node, ast.JoinedStr):
+            values = [self._static_string_value(value) for value in node.values]
+            return "".join(values) if all(value is not None for value in values) else None
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            left = self._static_string_value(node.left)
+            right = self._static_string_value(node.right)
+            return left + right if left is not None and right is not None else None
+        return None
+
+    def _globals_subscript_store(
+        self, node: ast.AST, *, module_locals: bool = False
+    ) -> bool:
+        return (
+            isinstance(node, ast.Subscript)
+            and isinstance(node.ctx, ast.Store)
+            and self._current_module_mapping(
+                node.value, module_locals=module_locals
+            )
+            and self._static_string_value(node.slice) == self.name
+        )
+
+    @staticmethod
+    def _sys_modules_mapping(node: ast.AST) -> bool:
+        return (
+            isinstance(node, ast.Attribute)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "sys"
+            and node.attr == "modules"
+        )
+
+    @classmethod
+    def _current_module_object(cls, node: ast.AST) -> bool:
+        direct_subscript = (
+            isinstance(node, ast.Subscript)
+            and cls._sys_modules_mapping(node.value)
+            and isinstance(node.slice, ast.Name)
+            and node.slice.id == "__name__"
+        )
+        mapping_method = (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and cls._sys_modules_mapping(node.func.value)
+            and node.func.attr in {"get", "__getitem__", "setdefault"}
+            and 1 <= len(node.args) <= 2
+            and not node.keywords
+            and isinstance(node.args[0], ast.Name)
+            and node.args[0].id == "__name__"
+        )
+        operator_getitem = (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "operator"
+            and node.func.attr == "getitem"
+            and len(node.args) == 2
+            and not node.keywords
+            and cls._sys_modules_mapping(node.args[0])
+            and isinstance(node.args[1], ast.Name)
+            and node.args[1].id == "__name__"
+        )
+        return direct_subscript or mapping_method or operator_getitem
+
+    def _current_module_mapping(
+        self, node: ast.AST, *, module_locals: bool = False
+    ) -> bool:
+        return (
+            self._zero_arg_call(node, "globals")
+            or (
+                module_locals
+                and (
+                    self._zero_arg_call(node, "locals")
+                    or self._zero_arg_call(node, "vars")
+                )
+            )
+            or (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "vars"
+                and len(node.args) == 1
+                and not node.keywords
+                and self._current_module_object(node.args[0])
+            )
+            or (
+                isinstance(node, ast.Attribute)
+                and node.attr == "__dict__"
+                and self._current_module_object(node.value)
+            )
+        )
+
+    def _namespace_mutation_binding(
+        self, node: ast.AST, *, module_locals: bool = False
+    ) -> bool:
+        if (
+            isinstance(node, ast.Attribute)
+            and isinstance(node.ctx, ast.Store)
+            and node.attr == self.name
+            and self._current_module_object(node.value)
+        ):
+            return True
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "setattr"
+            and len(node.args) >= 3
+            and self._current_module_object(node.args[0])
+            and self._static_string_value(node.args[1]) == self.name
+        ):
+            return True
+        if not isinstance(node, ast.Call):
+            return False
+
+        method: str | None = None
+        args = node.args
+        if (
+            isinstance(node.func, ast.Attribute)
+            and self._current_module_mapping(
+                node.func.value, module_locals=module_locals
+            )
+        ):
+            method = node.func.attr
+        elif (
+            isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "dict"
+            and node.args
+            and self._current_module_mapping(
+                node.args[0], module_locals=module_locals
+            )
+        ):
+            # Unbound built-in descriptor calls mutate their first argument:
+            # dict.update(globals(), NAME=value), dict.__setitem__(...), etc.
+            method = node.func.attr
+            args = node.args[1:]
+        elif (
+            isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "operator"
+            and node.func.attr in {"setitem", "ior"}
+            and node.args
+            and self._current_module_mapping(
+                node.args[0], module_locals=module_locals
+            )
+        ):
+            # operator.setitem/ior are the public function forms of the same
+            # mutations. Keep them in the same matcher so aliases cannot make
+            # the protocol declaration fail open accidentally.
+            method = "__setitem__" if node.func.attr == "setitem" else "__ior__"
+            args = node.args[1:]
+        if method is None:
+            return False
+
+        if method in {"__setitem__", "setdefault"}:
+            return bool(
+                args
+                and self._static_string_value(args[0]) == self.name
+            )
+        if method in {"update", "__ior__", "__init__"}:
+            if any(keyword.arg == self.name for keyword in node.keywords):
+                return True
+            if any(
+                keyword.arg is None
+                and self._tree_mentions_static_key(keyword.value)
+                for keyword in node.keywords
+            ):
+                return True
+            return any(self._tree_mentions_static_key(argument) for argument in args)
+        return False
+
+    def _tree_mentions_static_key(self, node: ast.AST) -> bool:
+        """Recognize literal mapping keys, including ``dict(NAME=value)``."""
+        return any(
+            (
+                self._static_string_value(child) == self.name
+            )
+            or (
+                isinstance(child, ast.keyword)
+                and child.arg == self.name
+            )
+            for child in ast.walk(node)
+        )
+
+    def _static_exec_binding(self, node: ast.AST, *, require_globals: bool) -> bool:
+        if not isinstance(node, ast.Call):
+            return False
+        builtin_exec = (
+            isinstance(node.func, ast.Name)
+            and node.func.id in {"exec", "eval"}
+        ) or (
+            isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id in {"builtins", "__builtins__"}
+            and node.func.attr in {"exec", "eval"}
+        )
+        if not builtin_exec or not node.args:
+            return False
+        payload = self._static_string_value(node.args[0])
+        if payload is None:
+            return False
+        direct_assignment = bool(
+            re.search(
+                rf"\b{re.escape(self.name)}\b\s*(?::=|=)", payload
+            )
+        )
+        explicit_namespace = any(
+            self._current_module_mapping(argument, module_locals=False)
+            for argument in node.args[1:]
+        )
+        payload_global = False
+        try:
+            payload_tree = ast.parse(payload)
+        except SyntaxError:
+            payload_tree = None
+        if payload_tree is not None:
+            payload_global = any(
+                (
+                    isinstance(child, ast.Global)
+                    and self.name in child.names
+                )
+                or self._globals_subscript_store(
+                    child, module_locals=not require_globals or explicit_namespace
+                )
+                or self._namespace_mutation_binding(
+                    child, module_locals=not require_globals or explicit_namespace
+                )
+                for child in ast.walk(payload_tree)
+            )
+        if payload_global:
+            return True
+        return direct_assignment and (not require_globals or explicit_namespace)
+
+    def _scan_skipped_scope_for_global_bindings(self, node: ast.AST) -> None:
+        for child in ast.walk(node):
+            if isinstance(child, ast.Global) and self.name in child.names:
+                self.found = True
+            elif self._globals_subscript_store(child):
+                self.found = True
+            elif self._namespace_mutation_binding(child):
+                self.found = True
+            elif self._static_exec_binding(child, require_globals=True):
+                self.found = True
+
+    def _visit_definition_expressions(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> None:
+        if node.name == self.name:
+            self.found = True
+        for expression in node.decorator_list:
+            self.visit(expression)
+        for expression in (*node.args.defaults, *node.args.kw_defaults):
+            if expression is not None:
+                self.visit(expression)
+        annotations = [
+            *(arg.annotation for arg in node.args.posonlyargs),
+            *(arg.annotation for arg in node.args.args),
+            *(arg.annotation for arg in node.args.kwonlyargs),
+            node.args.vararg.annotation if node.args.vararg else None,
+            node.args.kwarg.annotation if node.args.kwarg else None,
+            node.returns,
+        ]
+        for annotation in annotations:
+            if annotation is not None:
+                self.visit(annotation)
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._visit_definition_expressions(node)
+        self._scan_skipped_scope_for_global_bindings(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._visit_definition_expressions(node)
+        self._scan_skipped_scope_for_global_bindings(node)
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        if node.name == self.name:
+            self.found = True
+        for expression in (*node.decorator_list, *node.bases):
+            self.visit(expression)
+        for keyword in node.keywords:
+            self.visit(keyword.value)
+        self._scan_skipped_scope_for_global_bindings(node)
+
+    def visit_Lambda(self, node: ast.Lambda) -> None:
+        # Defaults execute in the surrounding scope when the lambda is created;
+        # its body and parameter bindings remain local.
+        for expression in (*node.args.defaults, *node.args.kw_defaults):
+            if expression is not None:
+                self.visit(expression)
+        self._scan_skipped_scope_for_global_bindings(node.body)
+
+    def visit_Subscript(self, node: ast.Subscript) -> None:
+        # Straightforward dynamic module binding: globals()["NAME"] = value.
+        if self._globals_subscript_store(node, module_locals=True):
+            self.found = True
+        self.generic_visit(node)
+
+    def visit_Attribute(self, node: ast.Attribute) -> None:
+        if self._namespace_mutation_binding(node, module_locals=True):
+            self.found = True
+        self.generic_visit(node)
+
+    def visit_Call(self, node: ast.Call) -> None:
+        # A static protocol assignment hidden in exec/eval otherwise bypasses
+        # every normal AST assignment channel. Dynamically constructed strings
+        # remain outside what a non-executing auditor can prove.
+        if self._static_exec_binding(node, require_globals=False):
+            self.found = True
+        if self._namespace_mutation_binding(node, module_locals=True):
+            self.found = True
+        self.generic_visit(node)
+
+    def _visit_comprehension(self, node: ast.AST) -> None:
+        # Generator targets are local to the comprehension. Its expressions are
+        # evaluated in the surrounding scope, where a named expression can bind.
+        for generator in node.generators:
+            self.visit(generator.iter)
+            for condition in generator.ifs:
+                self.visit(condition)
+        for attribute in ("elt", "key", "value"):
+            expression = getattr(node, attribute, None)
+            if expression is not None:
+                self.visit(expression)
+
+    visit_ListComp = _visit_comprehension
+    visit_SetComp = _visit_comprehension
+    visit_DictComp = _visit_comprehension
+    visit_GeneratorExp = _visit_comprehension
+
+    def visit_ExceptHandler(self, node: ast.ExceptHandler) -> None:
+        if node.name == self.name:
+            self.found = True
+        self.generic_visit(node)
+
+    def visit_MatchAs(self, node: ast.MatchAs) -> None:
+        if node.name == self.name:
+            self.found = True
+        self.generic_visit(node)
+
+    def visit_MatchStar(self, node: ast.MatchStar) -> None:
+        if node.name == self.name:
+            self.found = True
+
+    def visit_MatchMapping(self, node: ast.MatchMapping) -> None:
+        if node.rest == self.name:
+            self.found = True
+        self.generic_visit(node)
+
+
+def _has_module_scope_binding(tree: ast.AST, name: str) -> bool:
+    """Imports/references are harmless; any module-scope binding is a declaration."""
+    visitor = _ModuleBindingVisitor(name)
+    visitor.visit(tree)
+    return visitor.found
+
+
 def _function(tree: ast.AST, name: str) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
     matches = [
         node
@@ -366,6 +802,135 @@ def _function(tree: ast.AST, name: str) -> ast.FunctionDef | ast.AsyncFunctionDe
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name
     ]
     return matches[0] if len(matches) == 1 else None
+
+
+def _root_name(node: ast.AST | None) -> str | None:
+    while isinstance(node, (ast.Subscript, ast.Attribute)):
+        node = node.value
+    return node.id if isinstance(node, ast.Name) else None
+
+
+def _contains_name(node: ast.AST | None, name: str) -> bool:
+    return node is not None and any(
+        isinstance(child, ast.Name) and child.id == name for child in ast.walk(node)
+    )
+
+
+def _safe_manifest_id_projection(node: ast.AST | None) -> bool:
+    """Allow only ``[row['id'] for row in MANIFEST[...]]`` as a non-aliasing read."""
+    if not isinstance(node, ast.ListComp) or len(node.generators) != 1:
+        return False
+    generator = node.generators[0]
+    if generator.ifs or generator.is_async or not isinstance(generator.target, ast.Name):
+        return False
+    if _root_name(generator.iter) != FIXED_MEMORY_MANIFEST_NAME:
+        return False
+    elt = node.elt
+    return (
+        isinstance(elt, ast.Subscript)
+        and isinstance(elt.value, ast.Name)
+        and elt.value.id == generator.target.id
+        and isinstance(elt.slice, ast.Constant)
+        and elt.slice.value == "id"
+    )
+
+
+def _unwrap_bool_call(node: ast.AST) -> ast.AST | None:
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "bool"
+        and len(node.args) == 1
+        and not node.keywords
+    ):
+        return node.args[0]
+    return None
+
+
+def _canonical_hash_helper_is_pure(tree: ast.AST, name: str) -> bool:
+    helper = _function(tree, name)
+    if (
+        helper is None
+        or len(helper.args.args) != 1
+        or helper.args.defaults
+        or helper.args.kw_defaults
+        or helper.decorator_list
+        or len(helper.body) != 2
+        or not isinstance(helper.body[0], ast.Assign)
+        or not isinstance(helper.body[1], ast.Return)
+    ):
+        return False
+    argument = helper.args.args[0].arg
+    assignment = helper.body[0]
+    if len(assignment.targets) != 1 or not isinstance(assignment.targets[0], ast.Name):
+        return False
+    payload_name = assignment.targets[0].id
+    encode = assignment.value
+    if not (
+        isinstance(encode, ast.Call)
+        and isinstance(encode.func, ast.Attribute)
+        and encode.func.attr == "encode"
+        and len(encode.args) == 1
+        and isinstance(encode.args[0], ast.Constant)
+        and encode.args[0].value == "utf-8"
+        and not encode.keywords
+    ):
+        return False
+    dump = encode.func.value
+    if not (
+        isinstance(dump, ast.Call)
+        and isinstance(dump.func, ast.Attribute)
+        and isinstance(dump.func.value, ast.Name)
+        and dump.func.value.id == "json"
+        and dump.func.attr == "dumps"
+        and len(dump.args) == 1
+        and isinstance(dump.args[0], ast.Name)
+        and dump.args[0].id == argument
+    ):
+        return False
+    keywords = {keyword.arg: keyword.value for keyword in dump.keywords}
+    separators = keywords.get("separators")
+    if not (
+        set(keywords) == {"sort_keys", "ensure_ascii", "separators"}
+        and isinstance(keywords["sort_keys"], ast.Constant)
+        and keywords["sort_keys"].value is True
+        and isinstance(keywords["ensure_ascii"], ast.Constant)
+        and keywords["ensure_ascii"].value is False
+        and isinstance(separators, ast.Tuple)
+        and len(separators.elts) == 2
+        and all(isinstance(item, ast.Constant) for item in separators.elts)
+        and tuple(item.value for item in separators.elts) == (",", ":")
+    ):
+        return False
+    returned = helper.body[1].value
+    return bool(
+        isinstance(returned, ast.Call)
+        and isinstance(returned.func, ast.Attribute)
+        and returned.func.attr == "hexdigest"
+        and not returned.args
+        and not returned.keywords
+        and isinstance(returned.func.value, ast.Call)
+        and isinstance(returned.func.value.func, ast.Attribute)
+        and isinstance(returned.func.value.func.value, ast.Name)
+        and returned.func.value.func.value.id == "hashlib"
+        and returned.func.value.func.attr == "sha256"
+        and len(returned.func.value.args) == 1
+        and isinstance(returned.func.value.args[0], ast.Name)
+        and returned.func.value.args[0].id == payload_name
+        and not returned.func.value.keywords
+    )
+
+
+def _safe_manifest_hash_call(node: ast.AST | None, helper: str, pure: bool) -> bool:
+    return bool(
+        pure
+        and isinstance(node, ast.Call)
+        and _call_name(node) == helper
+        and len(node.args) == 1
+        and isinstance(node.args[0], ast.Name)
+        and node.args[0].id == FIXED_MEMORY_MANIFEST_NAME
+        and not node.keywords
+    )
 
 
 def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
@@ -380,6 +945,7 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
         "regime_offsetting_effects_excluded",
         "implementation",
         "method_contract",
+        "decision_contract",
         "feature_stages",
         "expected_primary_cell_count",
         "primary_cells",
@@ -406,8 +972,28 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
         "statistic_function",
         "gate_registry_inference",
         "train_window_constant",
+        "model_spec_registry",
+        "base_model_parameter",
+        "augmented_model_parameter",
+        "paired_result_variable",
+        "gate_function",
+        "registry_record_constructor",
+        "gate_eligibility_variable",
+        "whole_method_eligibility_variable",
+        "bounded_memory_parameter",
+        "paired_audit_attribute",
+        "paired_eligibility_key",
+        "base_design_variable",
+        "augmented_design_variable",
+        "fit_function",
         "runtime_evidence_file",
         "runtime_evidence_key",
+        "runtime_cell_inventory",
+        "runtime_gate_inventory",
+        "runtime_registry_inventory",
+        "runtime_claim_record",
+        "runtime_statistic_record",
+        "runtime_multiple_testing_record",
         "claim_surface_files",
     }
     if set(implementation) != expected_implementation:
@@ -417,16 +1003,64 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
         "statistic_function",
         "gate_registry_inference",
         "train_window_constant",
+        "model_spec_registry",
+        "base_model_parameter",
+        "augmented_model_parameter",
+        "paired_result_variable",
+        "gate_function",
+        "registry_record_constructor",
+        "gate_eligibility_variable",
+        "whole_method_eligibility_variable",
+        "bounded_memory_parameter",
+        "paired_audit_attribute",
+        "paired_eligibility_key",
+        "base_design_variable",
+        "augmented_design_variable",
+        "fit_function",
         "runtime_evidence_file",
         "runtime_evidence_key",
+        "runtime_cell_inventory",
+        "runtime_gate_inventory",
+        "runtime_registry_inventory",
+        "runtime_claim_record",
+        "runtime_statistic_record",
+        "runtime_multiple_testing_record",
     ):
         if not isinstance(implementation.get(key), str) or not implementation[key].strip():
             errors.append(f"implementation.{key} is missing")
+    identifier_keys = {
+        "paired_forecast_function",
+        "statistic_function",
+        "train_window_constant",
+        "model_spec_registry",
+        "base_model_parameter",
+        "augmented_model_parameter",
+        "paired_result_variable",
+        "gate_function",
+        "registry_record_constructor",
+        "gate_eligibility_variable",
+        "whole_method_eligibility_variable",
+        "bounded_memory_parameter",
+        "paired_audit_attribute",
+        "paired_eligibility_key",
+        "base_design_variable",
+        "augmented_design_variable",
+        "fit_function",
+    }
+    for key in identifier_keys:
+        value = implementation.get(key)
+        if isinstance(value, str) and not value.isidentifier():
+            errors.append(f"implementation.{key} must be a Python identifier")
+    if implementation.get("base_model_parameter") == implementation.get(
+        "augmented_model_parameter"
+    ):
+        errors.append("implementation model parameters must be distinct")
     claim_files = implementation.get("claim_surface_files")
     if (
         not isinstance(claim_files, list)
         or not claim_files
         or any(not isinstance(name, str) or Path(name).name != name for name in claim_files)
+        or len(claim_files) != len(set(claim_files))
     ):
         errors.append("implementation.claim_surface_files must be non-empty basenames")
 
@@ -464,7 +1098,11 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
     for key, expected in exact.items():
         if method.get(key) != expected:
             errors.append(f"method_contract.{key} must equal {expected!r}")
-    if type(method.get("train_window")) is not int or method.get("train_window", 0) <= 0:
+    if (
+        type(method.get("train_window")) is not int
+        or method.get("train_window", 0) <= 0
+        or method.get("train_window", 0) > 1_000_000_000
+    ):
         errors.append("method_contract.train_window must be a positive fixed integer")
     if not isinstance(method.get("loss"), str) or not method["loss"].strip():
         errors.append("method_contract.loss is missing")
@@ -477,9 +1115,68 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
         "hac_bandwidth_rule"
     ].strip():
         errors.append("method_contract.hac_bandwidth_rule is missing")
+    elif method["hac_bandwidth_rule"] != "max(h-1, canonical_bandwidth(h,n))":
+        errors.append("method_contract.hac_bandwidth_rule is not a supported canonical rule")
     estimand = str(method.get("estimand", "")).lower()
     if "unconditional" not in estimand or "average" not in estimand:
         errors.append("method_contract.estimand must say unconditional average loss")
+
+    decision = manifest.get("decision_contract")
+    expected_decision = {
+        "gate_direction",
+        "raw_p_field",
+        "multiplicity",
+        "family_alpha",
+        "critical_value",
+        "gate_flag_field",
+        "holm_adjusted_p_field",
+        "registry_stat_field",
+        "registry_stat_decimals",
+        "registry_raw_p_field",
+        "gate_count_field",
+        "claim_family_count_field",
+        "claim_pass_count_field",
+    }
+    if not isinstance(decision, dict) or set(decision) != expected_decision:
+        errors.append("decision_contract keys do not match the v1 schema")
+        decision = {}
+    if decision.get("gate_direction") != "lower":
+        errors.append("decision_contract.gate_direction must be lower")
+    if decision.get("raw_p_field") != "p_value_one_sided_flow_better":
+        errors.append("decision_contract.raw_p_field is unsupported")
+    if decision.get("multiplicity") != "Holm":
+        errors.append("decision_contract.multiplicity must be Holm")
+    if type(decision.get("family_alpha")) is not float or not 0 < decision.get(
+        "family_alpha", 0
+    ) <= 0.05:
+        errors.append("decision_contract.family_alpha must be a float in (0,0.05]")
+    if type(decision.get("critical_value")) not in (int, float) or not _finite_number(
+        decision.get("critical_value")
+    ):
+        errors.append("decision_contract.critical_value must be finite")
+    elif type(decision.get("family_alpha")) is float and 0 < decision["family_alpha"] <= 0.05:
+        expected_critical = statistics.NormalDist().inv_cdf(decision["family_alpha"])
+        if not math.isclose(
+            float(decision["critical_value"]), expected_critical, abs_tol=0.001
+        ):
+            errors.append("decision_contract.critical_value disagrees with family_alpha")
+    if decision.get("gate_flag_field") != "passes_flow_gate":
+        errors.append("decision_contract.gate_flag_field is unsupported")
+    if decision.get("holm_adjusted_p_field") != "holm_adjusted_p":
+        errors.append("decision_contract.holm_adjusted_p_field is unsupported")
+    if decision.get("registry_stat_field") != "stat":
+        errors.append("decision_contract.registry_stat_field is unsupported")
+    if (
+        type(decision.get("registry_stat_decimals")) is not int
+        or not 3 <= decision.get("registry_stat_decimals", -1) <= 12
+    ):
+        errors.append("decision_contract.registry_stat_decimals is invalid")
+    if decision.get("registry_raw_p_field") != "p_one_sided_raw":
+        errors.append("decision_contract.registry_raw_p_field is unsupported")
+    for key in ("gate_count_field", "claim_family_count_field", "claim_pass_count_field"):
+        value = decision.get(key)
+        if not isinstance(value, str) or not value or not value.isidentifier():
+            errors.append(f"decision_contract.{key} must be a field identifier")
 
     stages = manifest.get("feature_stages")
     if not isinstance(stages, list) or not stages:
@@ -487,13 +1184,14 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
         stages = []
     stage_by_id: dict[str, dict] = {}
     output_owner: dict[str, str] = {}
+    final_stage_ids: set[str] = set()
     bounded_stage_roles = {"observed", "finite_lag", "fixed_rolling"}
     for index, stage in enumerate(stages):
         prefix = f"feature_stages[{index}]"
         if not isinstance(stage, dict):
             errors.append(f"{prefix} is not an object")
             continue
-        if set(stage) != {"id", "outputs", "memory", "max_observations"}:
+        if set(stage) != {"id", "role", "outputs", "memory", "max_observations"}:
             errors.append(f"{prefix} keys do not match the v1 schema")
         stage_id = stage.get("id")
         if not isinstance(stage_id, str) or not stage_id:
@@ -502,6 +1200,16 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
         if stage_id in stage_by_id:
             errors.append(f"duplicate feature stage id: {stage_id}")
         stage_by_id[stage_id] = stage
+        if stage.get("role") == "paired_final_estimator":
+            final_stage_ids.add(stage_id)
+            if stage.get("memory") != "fixed_rolling":
+                errors.append(f"{prefix} final-estimator memory must be fixed_rolling")
+            if stage.get("max_observations") != method.get("train_window"):
+                errors.append(
+                    f"{prefix} final-estimator memory must equal method_contract.train_window"
+                )
+        elif stage.get("role") != "predictor_feature":
+            errors.append(f"{prefix}.role is not recognised")
         outputs = stage.get("outputs")
         if (
             not isinstance(outputs, list)
@@ -515,13 +1223,18 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
             if output in output_owner:
                 errors.append(f"feature output has multiple owners: {output}")
             output_owner[output] = stage_id
-        if stage.get("memory") not in bounded_stage_roles:
+        if (
+            not isinstance(stage.get("memory"), str)
+            or stage.get("memory") not in bounded_stage_roles
+        ):
             errors.append(f"{prefix}.memory is not bounded")
         if (
             type(stage.get("max_observations")) is not int
             or stage.get("max_observations", 0) <= 0
         ):
             errors.append(f"{prefix}.max_observations must be positive")
+    if len(final_stage_ids) != 1:
+        errors.append("feature_stages must declare exactly one paired_final_estimator")
 
     cells = manifest.get("primary_cells")
     if not isinstance(cells, list) or not cells:
@@ -534,16 +1247,12 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
     ids: list[str] = []
     cell_keys = {
         "id",
+        "id_components",
         "family",
-        "asset",
         "base",
         "augmented",
         "strictly_nested",
         "horizon",
-        "rv_proxy",
-        "state_lag",
-        "flow_lag",
-        "smearing",
         "feeds_gate",
         "base_predictors",
         "augmented_predictors",
@@ -561,15 +1270,25 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
             errors.append(f"{prefix}.id is missing")
         else:
             ids.append(cell_id)
-        for key in ("family", "asset", "base", "augmented", "rv_proxy", "smearing"):
+        for key in ("family", "base", "augmented"):
             if not isinstance(cell.get(key), str) or not cell[key].strip():
                 errors.append(f"{prefix}.{key} is missing")
-        expected_id = (
-            f"{cell.get('family')}|{cell.get('asset')}_h{cell.get('horizon')}|"
-            f"{cell.get('augmented')}|{cell.get('rv_proxy')}|fl{cell.get('flow_lag')}"
-        )
+        components = cell.get("id_components")
+        if (
+            not isinstance(components, list)
+            or len(components) < 3
+            or any(not isinstance(value, str) or not value for value in components)
+        ):
+            errors.append(f"{prefix}.id_components must be at least three strings")
+            components = []
+        expected_id = "|".join(components)
         if cell_id != expected_id:
             errors.append(f"{prefix}.id is not derivable from its declared fields")
+        if components and (
+            components[0] != cell.get("family")
+            or cell.get("augmented") not in components
+        ):
+            errors.append(f"{prefix}.id_components omit family or augmented model")
         if cell.get("family") != "primary":
             errors.append(f"{prefix}.family must be primary")
         if cell.get("base") == cell.get("augmented"):
@@ -578,8 +1297,12 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
             errors.append(f"{prefix}.strictly_nested must be true")
         if cell.get("feeds_gate") is not True:
             errors.append(f"{prefix}.feeds_gate must be true")
-        for key in ("horizon", "state_lag", "flow_lag"):
-            if type(cell.get(key)) is not int or cell.get(key, 0) <= 0:
+        for key in ("horizon",):
+            if (
+                type(cell.get(key)) is not int
+                or cell.get(key, 0) <= 0
+                or cell.get(key, 0) > 1_000_000
+            ):
                 errors.append(f"{prefix}.{key} must be a positive integer")
         base_predictors = cell.get("base_predictors")
         aug_predictors = cell.get("augmented_predictors")
@@ -594,7 +1317,11 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
                 or len(predictors) != len(set(predictors))
             ):
                 errors.append(f"{prefix}.{key} must contain unique predictor names")
-        if isinstance(base_predictors, list) and isinstance(aug_predictors, list):
+        if (
+            isinstance(base_predictors, list)
+            and isinstance(aug_predictors, list)
+            and all(isinstance(value, str) for value in [*base_predictors, *aug_predictors])
+        ):
             if not set(base_predictors) < set(aug_predictors):
                 errors.append(f"{prefix} predictor lists are not a proper subset")
         used = cell.get("used_stage_ids")
@@ -609,20 +1336,32 @@ def _fixed_memory_manifest_errors(manifest: object) -> list[str]:
         unknown = set(used) - set(stage_by_id)
         if unknown:
             errors.append(f"{prefix} uses unknown feature stages: {sorted(unknown)}")
-        if "paired_log_variance_fit" not in used:
+        if not final_stage_ids <= set(used):
             errors.append(f"{prefix} omits the paired final-estimation stage")
-        if isinstance(aug_predictors, list):
+        if isinstance(aug_predictors, list) and all(
+            isinstance(predictor, str) for predictor in aug_predictors
+        ):
             uncovered = [
                 predictor
                 for predictor in aug_predictors
                 if output_owner.get(predictor) not in set(used)
+                or stage_by_id.get(output_owner.get(predictor), {}).get("role")
+                != "predictor_feature"
             ]
             if uncovered:
-                errors.append(f"{prefix} has predictors without a used stage: {uncovered}")
+                errors.append(
+                    f"{prefix} has predictors without a used predictor-feature stage: "
+                    f"{uncovered}"
+                )
     if len(ids) != len(set(ids)):
         errors.append("primary cell ids are not unique")
-    if "expanding" in json.dumps(manifest, sort_keys=True).lower():
-        errors.append("primary fixed-memory manifest contains an expanding stage")
+    try:
+        manifest_text = json.dumps(manifest, sort_keys=True)
+    except (TypeError, ValueError) as exc:
+        errors.append(f"fixed-memory manifest is not canonical JSON: {exc}")
+    else:
+        if "expanding" in manifest_text.lower():
+            errors.append("primary fixed-memory manifest contains an expanding stage")
     return errors
 
 
@@ -638,20 +1377,40 @@ def _resolve_runtime_path(value: object, dotted: object) -> object | None:
 
 
 def _finite_number(value: object) -> bool:
-    return type(value) in (int, float) and math.isfinite(value)
+    if type(value) not in (int, float):
+        return False
+    try:
+        return math.isfinite(value)
+    except (OverflowError, TypeError, ValueError) as exc:
+        warn(
+            "audit_nested_dm_misuse",
+            "runtime numeric evidence cannot be checked for finiteness",
+            value_type=type(value).__name__,
+            err=str(exc),
+        )
+        return False
+
+
+def _numbers_close(left: object, right: object, *, abs_tol: float = 1e-12) -> bool:
+    return (
+        _finite_number(left)
+        and _finite_number(right)
+        and math.isclose(float(left), float(right), rel_tol=1e-10, abs_tol=abs_tol)
+    )
 
 
 def _fixed_memory_runtime_errors(path: Path, manifest: dict) -> list[str]:
     errors: list[str] = []
     implementation = manifest["implementation"]
     method = manifest["method_contract"]
+    decision = manifest["decision_contract"]
     runtime_name = implementation["runtime_evidence_file"]
     if Path(runtime_name).name != runtime_name:
         return ["runtime evidence file must be a sibling basename"]
     runtime_path = path.parent / runtime_name
     try:
         runtime = json.loads(runtime_path.read_text(encoding="utf-8"))
-    except (OSError, ValueError) as exc:
+    except (OSError, ValueError, RecursionError) as exc:
         return [f"runtime evidence unavailable: {exc}"]
     if not isinstance(runtime, dict):
         return ["runtime evidence is not a JSON object"]
@@ -678,6 +1437,18 @@ def _fixed_memory_runtime_errors(path: Path, manifest: dict) -> list[str]:
         errors.append("runtime evidence manifest hash is stale")
     if envelope.get("claim_scope") != manifest.get("claim_scope"):
         errors.append("runtime evidence claim scope disagrees with the manifest")
+    envelope_bindings = {
+        "cell_inventory": "runtime_cell_inventory",
+        "gate_inventory": "runtime_gate_inventory",
+        "registry_inventory": "runtime_registry_inventory",
+        "claim_record": "runtime_claim_record",
+        "statistic_record": "runtime_statistic_record",
+    }
+    for envelope_key, implementation_key in envelope_bindings.items():
+        if envelope.get(envelope_key) != implementation.get(implementation_key):
+            errors.append(
+                f"runtime evidence {envelope_key} is not the manifest-pinned path"
+            )
 
     cells = _resolve_runtime_path(runtime, envelope.get("cell_inventory"))
     gate_rows = _resolve_runtime_path(runtime, envelope.get("gate_inventory"))
@@ -712,6 +1483,40 @@ def _fixed_memory_runtime_errors(path: Path, manifest: dict) -> list[str]:
     runtime_evidence = indexed(evidence_cells, "id", "runtime evidence envelope")
     manifest_cells = {cell["id"]: cell for cell in manifest["primary_cells"]}
     expected_ids = set(manifest_cells)
+
+    allowed_true_gate_prefixes = {
+        tuple(implementation["runtime_gate_inventory"].split(".")),
+        tuple(implementation["runtime_registry_inventory"].split(".")),
+    }
+
+    stack: list[tuple[object, tuple[str, ...]]] = [(runtime, ())]
+    visited_nodes = 0
+    while stack:
+        value, path_parts = stack.pop()
+        visited_nodes += 1
+        if visited_nodes > 1_000_000:
+            errors.append("runtime evidence exceeds the audit node limit")
+            break
+        if isinstance(value, dict):
+            if "feeds_gate" in value and type(value["feeds_gate"]) is not bool:
+                errors.append("runtime contains a non-boolean feeds_gate field")
+            if value.get("feeds_gate") is True and not any(
+                len(path_parts) == len(prefix) + 1
+                and path_parts[: len(prefix)] == prefix
+                and path_parts[-1].isdigit()
+                for prefix in allowed_true_gate_prefixes
+            ):
+                errors.append(
+                    "runtime contains a gate-bearing row outside the manifest-pinned inventories"
+                )
+            stack.extend(
+                (child, (*path_parts, str(key))) for key, child in value.items()
+            )
+        elif isinstance(value, list):
+            stack.extend(
+                (child, (*path_parts, str(index)))
+                for index, child in enumerate(value)
+            )
     for label, inventory in (
         ("runtime primary cell", by_id),
         ("runtime claim-bearing gate", gates),
@@ -730,18 +1535,17 @@ def _fixed_memory_runtime_errors(path: Path, manifest: dict) -> list[str]:
         "aug_training_schedule_sha256",
         "origin_schedule_sha256",
         "eligibility",
+        "base_predictors",
+        "augmented_predictors",
     }
     metadata_map = {
         "family": "family",
-        "asset": "asset",
         "horizon": "horizon",
-        "rv_proxy": "rv_proxy",
         "base": "base",
         "augmented": "alt",
-        "state_lag": "state_lag",
-        "flow_lag": "flow_lag",
-        "smearing": "smearing",
     }
+    raw_p_by_id: dict[str, float] = {}
+    z_by_id: dict[str, float] = {}
     for cell_id in sorted(expected_ids):
         declared = manifest_cells[cell_id]
         cell = by_id.get(cell_id)
@@ -782,7 +1586,16 @@ def _fixed_memory_runtime_errors(path: Path, manifest: dict) -> list[str]:
             errors.append(f"{cell_id}: runtime evidence cell keys are malformed")
         if evidence.get("eligibility") != "whole_method_fixed_memory_verified":
             errors.append(f"{cell_id}: runtime eligibility is not verified")
-        for key in digest_keys - {"id", "eligibility"}:
+        if evidence.get("base_predictors") != declared["base_predictors"]:
+            errors.append(f"{cell_id}: runtime base predictors disagree with manifest")
+        if evidence.get("augmented_predictors") != declared["augmented_predictors"]:
+            errors.append(f"{cell_id}: runtime augmented predictors disagree with manifest")
+        for key in digest_keys - {
+            "id",
+            "eligibility",
+            "base_predictors",
+            "augmented_predictors",
+        }:
             digest = evidence.get(key)
             if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
                 errors.append(f"{cell_id}: {key} is not a SHA-256 digest")
@@ -803,25 +1616,65 @@ def _fixed_memory_runtime_errors(path: Path, manifest: dict) -> list[str]:
                 errors.append(f"{cell_id}: statistic loss disagrees with the manifest")
             if statistic.get("estimand") != method["runtime_estimand"]:
                 errors.append(f"{cell_id}: statistic estimand disagrees with the manifest")
+            for key in ("hac_kernel", "hac_bandwidth_rule", "reference_distribution"):
+                if statistic.get(key) != method[key]:
+                    errors.append(
+                        f"{cell_id}: statistic {key} disagrees with the manifest"
+                    )
             if "fixed rolling" not in str(statistic.get("forecast_scheme", "")).lower():
                 errors.append(f"{cell_id}: statistic is not tied to fixed rolling estimation")
             mean = statistic.get("mean_loss_diff_aug_minus_base")
             standard_error = statistic.get("standard_error")
+            z_stat = statistic.get("z_stat")
+            raw_p = statistic.get(decision["raw_p_field"])
+            two_sided_p = statistic.get("p_value_two_sided")
             if not _finite_number(mean):
                 errors.append(f"{cell_id}: statistic mean loss differential is not finite")
             if not _finite_number(standard_error) or standard_error <= 0:
                 errors.append(f"{cell_id}: statistic standard_error is not finite-positive")
             if _finite_number(standard_error) and type(n_origins) is int:
-                implied_lrv = standard_error**2 * n_origins
-                if not math.isfinite(implied_lrv) or implied_lrv <= 0:
+                try:
+                    implied_lrv = standard_error * standard_error * n_origins
+                except (OverflowError, TypeError, ValueError):
+                    implied_lrv = math.inf
+                if not _finite_number(implied_lrv) or implied_lrv <= 0:
                     errors.append(f"{cell_id}: implied long-run variance is not finite-positive")
-            if (
-                type(statistic.get("hac_lag_used")) is not int
-                or statistic.get("hac_lag_used", -1) < declared["horizon"] - 1
-            ):
-                errors.append(f"{cell_id}: HAC lag is missing or below h-1")
+            if not _finite_number(z_stat):
+                errors.append(f"{cell_id}: statistic z is not finite")
+            elif _finite_number(mean) and _finite_number(standard_error) and standard_error > 0:
+                expected_z = float(mean) / float(standard_error)
+                if not _numbers_close(z_stat, expected_z):
+                    errors.append(f"{cell_id}: statistic z does not equal mean/SE")
+                expected_one_sided = 0.5 * (
+                    1.0 + math.erf(float(z_stat) / math.sqrt(2.0))
+                )
+                expected_two_sided = math.erfc(abs(float(z_stat)) / math.sqrt(2.0))
+                if not _numbers_close(raw_p, expected_one_sided):
+                    errors.append(
+                        f"{cell_id}: one-sided p-value disagrees with the normal reference"
+                    )
+                if not _numbers_close(two_sided_p, expected_two_sided):
+                    errors.append(
+                        f"{cell_id}: two-sided p-value disagrees with the normal reference"
+                    )
+                if _finite_number(raw_p) and 0 <= raw_p <= 1:
+                    raw_p_by_id[cell_id] = float(raw_p)
+                    z_by_id[cell_id] = float(z_stat)
+            lag = statistic.get("hac_lag_used")
+            if type(lag) is not int or type(n_origins) is not int or n_origins <= 0:
+                errors.append(f"{cell_id}: HAC lag cannot be verified")
+            elif declared["horizon"] >= n_origins or n_origins > 1_000_000_000:
+                errors.append(f"{cell_id}: horizon/sample size is outside audit bounds")
+            else:
+                h = declared["horizon"]
+                canonical = max(1, min(math.ceil(h ** (1 / 3) * n_origins ** (1 / 3)), n_origins // 4))
+                expected_lag = max(h - 1, canonical)
+                if lag != expected_lag or not (h - 1 <= lag < n_origins):
+                    errors.append(
+                        f"{cell_id}: HAC lag does not implement the declared canonical rule"
+                    )
 
-        for key in ("family", "asset", "horizon", "base"):
+        for key in ("family", "horizon", "base"):
             if gate.get(key) != cell.get(key):
                 errors.append(f"{cell_id}: gate {key} disagrees with the runtime cell")
         if gate.get("alt") != cell.get("alt"):
@@ -837,18 +1690,42 @@ def _fixed_memory_runtime_errors(path: Path, manifest: dict) -> list[str]:
                 errors.append(f"{cell_id}: {key} disagrees with n_origins")
         if isinstance(statistic, dict) and statistic.get("n") != n_origins:
             errors.append(f"{cell_id}: statistic.n disagrees with n_origins")
+        if isinstance(statistic, dict):
+            decimals = decision["registry_stat_decimals"]
+            runtime_z = statistic.get("z_stat")
+            for label, row in (("gate", gate), ("registry", registry.get(cell_id, {}))):
+                if _finite_number(runtime_z):
+                    expected_rounded_z = round(float(runtime_z), decimals)
+                    if not _numbers_close(
+                        row.get(decision["registry_stat_field"]),
+                        expected_rounded_z,
+                        abs_tol=0.5 * 10 ** (-decimals) + 1e-12,
+                    ):
+                        errors.append(f"{cell_id}: {label} statistic disagrees with runtime z")
+                if not _numbers_close(
+                    row.get(decision["registry_raw_p_field"]),
+                    statistic.get(decision["raw_p_field"]),
+                ):
+                    errors.append(f"{cell_id}: {label} raw p-value disagrees with runtime")
 
     primary_registry_ids = {
         cell_id for cell_id, row in registry.items() if row.get("family") == "primary"
     }
     if primary_registry_ids != expected_ids:
         errors.append("registry primary-cell set does not exactly match the manifest")
+    feed_registry_ids = {
+        cell_id for cell_id, row in registry.items() if row.get("feeds_gate") is True
+    }
+    if feed_registry_ids != expected_ids:
+        errors.append("registry gate-bearing set does not exactly match the manifest")
     for cell_id, row in registry.items():
         if row.get("inference") != inference:
             errors.append(f"{cell_id}: registry inventory contains a foreign inference")
             continue
         if row.get("feeds_gate") is True and row.get("bounded_memory") is not True:
             errors.append(f"{cell_id}: an unbounded record reaches a gate")
+        if cell_id not in expected_ids and row.get("feeds_gate") is True:
+            errors.append(f"{cell_id}: an unmanifested non-primary record reaches a gate")
         if row.get("bounded_memory") is False:
             if row.get("feeds_gate") is not False or row.get("claim_role") != (
                 "invalid_for_nested_inference_diagnostic_only"
@@ -857,33 +1734,118 @@ def _fixed_memory_runtime_errors(path: Path, manifest: dict) -> list[str]:
         elif cell_id in expected_ids:
             if row.get("claim_role") != "primary_unconditional_detection_gate":
                 errors.append(f"{cell_id}: primary registry claim role is wrong")
-        elif row.get("claim_role") != "robustness_unconditional_sensitivity":
+            cell = by_id.get(cell_id, {})
+            gate = gates.get(cell_id, {})
+            for key in ("family", "horizon", "base", "alt"):
+                if row.get(key) != cell.get(key) or row.get(key) != gate.get(key):
+                    errors.append(
+                        f"{cell_id}: primary registry {key} disagrees with cell/gate"
+                    )
+            for key in ("inference", "estimand", "n", "feeds_gate", "bounded_memory"):
+                if row.get(key) != gate.get(key):
+                    errors.append(
+                        f"{cell_id}: primary registry {key} disagrees with gate"
+                    )
+        elif row.get("feeds_gate") is not False or row.get("claim_role") != (
+            "non_primary_diagnostic_only"
+        ):
             errors.append(f"{cell_id}: non-primary registry claim role is undeclared")
-    multiple_testing = runtime.get("multiple_testing")
+
+    if set(raw_p_by_id) != expected_ids:
+        errors.append("primary raw p-value family is incomplete")
+    else:
+        ordered = sorted(raw_p_by_id, key=lambda cell_id: (raw_p_by_id[cell_id], cell_id))
+        adjusted: dict[str, float] = {}
+        running = 0.0
+        family_size = len(ordered)
+        for rank, cell_id in enumerate(ordered):
+            running = max(running, (family_size - rank) * raw_p_by_id[cell_id])
+            adjusted[cell_id] = min(1.0, running)
+        alpha = decision["family_alpha"]
+        critical = decision["critical_value"]
+        gate_flag = decision["gate_flag_field"]
+        holm_field = decision["holm_adjusted_p_field"]
+        for cell_id in expected_ids:
+            gate = gates.get(cell_id, {})
+            expected_pass = bool(
+                z_by_id[cell_id] < critical and adjusted[cell_id] < alpha
+            )
+            for label, row in (("gate", gate), ("registry", registry.get(cell_id, {}))):
+                if not _numbers_close(row.get(holm_field), adjusted[cell_id]):
+                    errors.append(
+                        f"{cell_id}: {label} Holm-adjusted p-value is not reproducible"
+                    )
+                if label == "gate" or gate_flag in row:
+                    if row.get(gate_flag) is not expected_pass:
+                        errors.append(
+                            f"{cell_id}: {label} flag is not derived from z and Holm p"
+                        )
+    multiple_testing = _resolve_runtime_path(
+        runtime, implementation["runtime_multiple_testing_record"]
+    )
     if isinstance(multiple_testing, dict):
         true_gate_count = sum(row.get("feeds_gate") is True for row in registry.values())
-        if multiple_testing.get("n_gate_eligible_gw_tests") != true_gate_count:
+        if multiple_testing.get(decision["gate_count_field"]) != true_gate_count:
             errors.append("registry gate-eligible count disagrees with its rows")
+        if true_gate_count != len(expected_ids):
+            errors.append("registry gate-eligible count does not equal the manifest family")
+    else:
+        errors.append("runtime multiple-testing record is missing")
 
     if not isinstance(claims, dict):
         errors.append("runtime claim record is missing")
     else:
-        for key, value in claims.items():
-            lower = str(value).lower()
-            if (
-                isinstance(value, str)
-                and value
-                and "predict" in lower
-                and (key.startswith("does_say_") or "claim" in key)
-                and "unconditional" not in lower
-            ):
+        observed_pass_count = sum(
+            gates.get(cell_id, {}).get(decision["gate_flag_field"]) is True
+            for cell_id in expected_ids
+        )
+        claim_keys = {
+            key
+            for key, value in claims.items()
+            if isinstance(value, str)
+            and value
+            and (
+                key.startswith("does_say_")
+                or key == "claim_strength"
+                or re.search(r"headline|conclusion|verdict|evidence", key, re.I)
+            )
+        }
+        for key in claim_keys:
+            lower = str(claims[key]).lower()
+            if "unconditional" not in lower:
                 errors.append(f"runtime final claim is not locally unconditional: {key}")
+            if re.search(r"\bevery regime\b|\bstate[- ]dependent\b|(?<!un)\bconditional\b", lower):
+                errors.append(f"runtime final claim overreaches into conditional ability: {key}")
         headline = str(claims.get("claim_strength", "")).lower()
         if "unconditional" not in headline or "evidence" not in headline:
             errors.append("runtime headline is not an unconditional evidence statement")
+        if observed_pass_count == 0:
+            if not (
+                "inconclusive" in headline
+                or "negative finding" in headline
+                or re.search(r"\bno\b.{0,80}\bevidence\b", headline)
+            ):
+                errors.append("runtime headline polarity contradicts zero passing cells")
+            if re.search(
+                r"\b(?:strong|overwhelming|positive|robust)\b.{0,60}\bevidence\b"
+                r".{0,30}\b(?:was found|supports|shows|proves)\b",
+                headline,
+            ) and not re.search(r"\bno\b.{0,60}\bevidence\b", headline):
+                errors.append("runtime headline asserts positive evidence with zero passing cells")
+        elif re.search(r"\bno\b.{0,80}\bevidence\b", headline):
+            errors.append("runtime headline denies evidence despite passing cells")
         all_claim_text = " ".join(str(value).lower() for value in claims.values())
         if not all(token in all_claim_text for token in ("conditional", "regime", "not excluded")):
             errors.append("runtime final summary omits the conditional/regime caveat")
+        if claims.get(decision["claim_family_count_field"]) != len(expected_ids):
+            errors.append("runtime claim primary-family count is stale")
+        if claims.get(decision["claim_pass_count_field"]) != observed_pass_count:
+            errors.append("runtime claim passing-cell count is stale")
+        verdict = runtime.get("verdict")
+        if observed_pass_count > 0 and verdict != "POSITIVE_INCREMENTAL_PREDICTIVE_CONTENT":
+            errors.append("runtime verdict does not reflect passing primary cells")
+        if observed_pass_count == 0 and verdict == "POSITIVE_INCREMENTAL_PREDICTIVE_CONTENT":
+            errors.append("runtime positive verdict has no passing primary cell")
     return errors
 
 
@@ -895,11 +1857,7 @@ def _fixed_memory_claim_surface_errors(path: Path, manifest: dict) -> list[str]:
         if candidate.is_file()
         and "__pycache__" not in candidate.parts
         and candidate.name != "review_verdict.json"
-        and (
-            candidate.suffix == ".py"
-            or candidate.name == "README.md"
-            or candidate.name.endswith("_results.json")
-        )
+        and is_experiment_claim_surface_file(candidate)
     }
     declared = set(manifest["implementation"]["claim_surface_files"])
     if declared != actual:
@@ -917,15 +1875,48 @@ def _fixed_memory_source_errors(tree: ast.AST, source: str, manifest: dict) -> l
     paired_name = implementation["paired_forecast_function"]
     statistic_name = implementation["statistic_function"]
     window_name = implementation["train_window_constant"]
+    base_parameter = implementation["base_model_parameter"]
+    augmented_parameter = implementation["augmented_model_parameter"]
+    result_variable = implementation["paired_result_variable"]
+    gate_function_name = implementation["gate_function"]
+    record_constructor = implementation["registry_record_constructor"]
+    gate_variable = implementation["gate_eligibility_variable"]
+    whole_variable = implementation["whole_method_eligibility_variable"]
+    bounded_parameter = implementation["bounded_memory_parameter"]
+    audit_attribute = implementation["paired_audit_attribute"]
+    eligibility_key = implementation["paired_eligibility_key"]
+    base_design = implementation["base_design_variable"]
+    augmented_design = implementation["augmented_design_variable"]
+    fit_function = implementation["fit_function"]
 
     window, _, window_error = _literal_assignment(tree, window_name)
     if window_error or window != method["train_window"]:
         errors.append("source train-window constant does not match the manifest")
 
     _, manifest_line, _ = _literal_assignment(tree, FIXED_MEMORY_MANIFEST_NAME)
+    mutator_methods = {
+        "append",
+        "extend",
+        "insert",
+        "remove",
+        "pop",
+        "clear",
+        "sort",
+        "reverse",
+        "update",
+        "setdefault",
+        "__setitem__",
+        "__delitem__",
+    }
+    canonical_hash_helper = "_canonical_object_sha256"
+    canonical_hash_is_pure = _canonical_hash_helper_is_pure(
+        tree, canonical_hash_helper
+    )
     for node in ast.walk(tree):
-        if getattr(node, "lineno", 0) <= (manifest_line or 0):
-            continue
+        if isinstance(node, ast.NamedExpr) and _contains_name(
+            node.value, FIXED_MEMORY_MANIFEST_NAME
+        ):
+            errors.append("fixed-memory manifest is aliased by an assignment expression")
         if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
             targets = (
                 node.targets
@@ -933,40 +1924,127 @@ def _fixed_memory_source_errors(tree: ast.AST, source: str, manifest: dict) -> l
                 else [node.target]
             )
             for target in targets:
-                root = target
-                while isinstance(root, (ast.Subscript, ast.Attribute)):
-                    root = root.value
-                if isinstance(root, ast.Name) and root.id == FIXED_MEMORY_MANIFEST_NAME:
+                is_declaration = (
+                    getattr(node, "lineno", 0) == manifest_line
+                    and isinstance(target, ast.Name)
+                    and target.id == FIXED_MEMORY_MANIFEST_NAME
+                )
+                if not is_declaration and _root_name(target) == FIXED_MEMORY_MANIFEST_NAME:
                     errors.append("fixed-memory manifest is mutated after declaration")
                 value = getattr(node, "value", None)
-                if isinstance(value, ast.Name) and value.id == FIXED_MEMORY_MANIFEST_NAME:
+                if (
+                    not is_declaration
+                    and _contains_name(value, FIXED_MEMORY_MANIFEST_NAME)
+                    and not _safe_manifest_id_projection(value)
+                    and not _safe_manifest_hash_call(
+                        value, canonical_hash_helper, canonical_hash_is_pure
+                    )
+                ):
                     errors.append("fixed-memory manifest is aliased for later mutation")
+        if isinstance(node, ast.Delete) and any(
+            _root_name(target) == FIXED_MEMORY_MANIFEST_NAME for target in node.targets
+        ):
+            errors.append("fixed-memory manifest is mutated after declaration")
+        if isinstance(node, (ast.For, ast.AsyncFor)) and _contains_name(
+            node.iter, FIXED_MEMORY_MANIFEST_NAME
+        ):
+            errors.append("fixed-memory manifest is aliased by iteration")
+        if isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+            if any(
+                _contains_name(generator.iter, FIXED_MEMORY_MANIFEST_NAME)
+                for generator in node.generators
+            ) and not _safe_manifest_id_projection(node):
+                errors.append("fixed-memory manifest is aliased by a comprehension")
+        if isinstance(node, ast.Match) and _contains_name(
+            node.subject, FIXED_MEMORY_MANIFEST_NAME
+        ):
+            errors.append("fixed-memory manifest is aliased by pattern matching")
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            defaults = [*node.args.defaults, *node.args.kw_defaults]
+            if any(
+                _contains_name(default, FIXED_MEMORY_MANIFEST_NAME)
+                for default in defaults
+                if default is not None
+            ):
+                errors.append("fixed-memory manifest is captured in a callable default")
         if (
             isinstance(node, ast.Call)
             and isinstance(node.func, ast.Attribute)
-            and isinstance(node.func.value, ast.Name)
-            and node.func.value.id == FIXED_MEMORY_MANIFEST_NAME
-            and node.func.attr in {"update", "setdefault", "pop", "clear"}
+            and _contains_name(node.func.value, FIXED_MEMORY_MANIFEST_NAME)
+            and node.func.attr in mutator_methods
         ):
             errors.append("fixed-memory manifest is mutated after declaration")
+        if isinstance(node, ast.Call) and any(
+            _contains_name(argument, FIXED_MEMORY_MANIFEST_NAME)
+            for argument in [*node.args, *(keyword.value for keyword in node.keywords)]
+        ) and not (
+            _call_name(node) == canonical_hash_helper and canonical_hash_is_pure
+        ):
+            errors.append("fixed-memory manifest is passed to an unverified callable")
+        if (
+            isinstance(node, (ast.Return, ast.Yield, ast.YieldFrom))
+            and _contains_name(node.value, FIXED_MEMORY_MANIFEST_NAME)
+            and not _safe_manifest_hash_call(
+                node.value, canonical_hash_helper, canonical_hash_is_pure
+            )
+        ):
+            errors.append("fixed-memory manifest escapes from a callable")
 
-    specs, _, specs_error = _literal_assignment(tree, "SPECS")
+    spec_name = implementation["model_spec_registry"]
+    specs, spec_line, specs_error = _literal_assignment(tree, spec_name)
     if specs_error or not isinstance(specs, dict):
-        errors.append("source SPECS registry is missing or non-literal")
-    else:
-        for cell in manifest["primary_cells"]:
-            if specs.get(cell["base"]) != cell["base_predictors"]:
-                errors.append(f"{cell['id']}: source base predictors disagree with manifest")
-            if specs.get(cell["augmented"]) != cell["augmented_predictors"]:
-                errors.append(
-                    f"{cell['id']}: source augmented predictors disagree with manifest"
+        errors.append("source model-spec registry is missing or non-literal")
+        specs = {}
+    primary_spec_names: set[str] = set()
+    for cell in manifest["primary_cells"]:
+        primary_spec_names.update((cell["base"], cell["augmented"]))
+        if specs.get(cell["base"]) != cell["base_predictors"]:
+            errors.append(f"{cell['id']}: source base predictors disagree with manifest")
+        if specs.get(cell["augmented"]) != cell["augmented_predictors"]:
+            errors.append(f"{cell['id']}: source augmented predictors disagree with manifest")
+    for node in ast.walk(tree):
+        targets: list[ast.AST] = []
+        if isinstance(node, ast.Assign):
+            targets = list(node.targets)
+        elif isinstance(node, (ast.AnnAssign, ast.AugAssign)):
+            targets = [node.target]
+        elif isinstance(node, ast.Delete):
+            targets = list(node.targets)
+        for target in targets:
+            if (
+                getattr(node, "lineno", 0) == spec_line
+                and isinstance(target, ast.Name)
+                and target.id == spec_name
+            ):
+                continue
+            if _root_name(target) != spec_name:
+                continue
+            key = target.slice if isinstance(target, ast.Subscript) else None
+            safe_nonprimary_key = (
+                isinstance(key, ast.Constant)
+                and isinstance(key.value, str)
+                and key.value not in primary_spec_names
+            )
+            if isinstance(key, ast.JoinedStr):
+                prefix = ""
+                for part in key.values:
+                    if isinstance(part, ast.Constant) and isinstance(part.value, str):
+                        prefix += part.value
+                    else:
+                        break
+                safe_nonprimary_key = bool(prefix) and not any(
+                    name.startswith(prefix) for name in primary_spec_names
                 )
+            if not safe_nonprimary_key:
+                errors.append("source mutates a primary model-spec binding")
 
     paired = _function(tree, paired_name)
     if paired is None:
         errors.append("paired forecast function is missing or duplicated")
     else:
         args = [arg.arg for arg in paired.args.args]
+        if base_parameter not in args or augmented_parameter not in args:
+            errors.append("paired forecast function omits declared model parameters")
         if "train_window" not in args:
             errors.append("paired forecast function has no train_window argument")
         else:
@@ -975,37 +2053,17 @@ def _fixed_memory_source_errors(tree: ast.AST, source: str, manifest: dict) -> l
             if not isinstance(default, ast.Name) or default.id != window_name:
                 errors.append("paired forecast train_window does not default to the fixed constant")
 
-        fit_spans = {
-            tuple(ast.unparse(arg) for arg in call.args[:4])
-            for call in ast.walk(paired)
-            if isinstance(call, ast.Call)
-            and isinstance(call.func, ast.Name)
-            and call.func.id == "fit"
-            and len(call.args) >= 4
-        }
-        if not {
-            ("Xb", "origins", "start", "end"),
-            ("Xa", "origins", "start", "end"),
-        } <= fit_spans:
-            errors.append(
-                "base and augmented fits do not visibly share row ids/start/end windows"
-            )
-
-        paired_text = ast.unparse(paired)
-        required_tokens = (
-            ".dropna(subset=cols)",
-            "end - train_window",
+        required_audit_keys = {
             "fixed_window_held",
             "same_training_dates_for_both_models",
             "embargo_ok",
             "base_training_schedule_sha256",
             "aug_training_schedule_sha256",
             "common_complete_case_mask_sha256",
+            "origin_schedule_sha256",
             "gw_fixed_memory_eligible",
-        )
-        for token in required_tokens:
-            if token not in paired_text:
-                errors.append(f"paired forecast provenance token missing: {token}")
+        }
+        audit_mappings: list[dict[str, ast.AST]] = []
         for node in ast.walk(paired):
             if not isinstance(node, ast.Dict):
                 continue
@@ -1014,30 +2072,156 @@ def _fixed_memory_source_errors(tree: ast.AST, source: str, manifest: dict) -> l
                 for key, value in zip(node.keys, node.values)
                 if isinstance(key, ast.Constant) and isinstance(key.value, str)
             }
-            same_dates = mapping.get("same_training_dates_for_both_models")
-            if same_dates is not None and isinstance(same_dates, ast.Constant):
-                errors.append("same_training_dates_for_both_models is hardcoded, not derived")
+            if required_audit_keys <= set(mapping):
+                audit_mappings.append(mapping)
+        if len(audit_mappings) != 1:
+            errors.append("paired forecast function must emit one complete audit record")
+        else:
+            audit_mapping = audit_mappings[0]
+            for key in (
+                "fixed_window_held",
+                "same_training_dates_for_both_models",
+                "embargo_ok",
+                "gw_fixed_memory_eligible",
+            ):
+                if isinstance(audit_mapping[key], ast.Constant):
+                    errors.append(f"paired forecast provenance is hardcoded: {key}")
+        registry_reads = {
+            node.slice.id
+            for node in ast.walk(paired)
+            if isinstance(node, ast.Subscript)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == spec_name
+            and isinstance(node.slice, ast.Name)
+            and node.slice.id in {base_parameter, augmented_parameter}
+        }
+        if registry_reads != {base_parameter, augmented_parameter}:
+            errors.append("paired forecast function does not read both declared model specs")
+        design_bindings: dict[str, list[ast.AST]] = {base_design: [], augmented_design: []}
+        for node in ast.walk(paired):
+            if not isinstance(node, ast.Assign):
+                continue
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id in design_bindings:
+                    design_bindings[target.id].append(node.value)
+        expected_design_params = {
+            base_design: base_parameter,
+            augmented_design: augmented_parameter,
+        }
+        for design_name, parameter in expected_design_params.items():
+            bindings = design_bindings[design_name]
+            if len(bindings) != 1 or not any(
+                isinstance(node, ast.Subscript)
+                and isinstance(node.value, ast.Name)
+                and node.value.id == spec_name
+                and isinstance(node.slice, ast.Name)
+                and node.slice.id == parameter
+                for node in ast.walk(bindings[0])
+            ):
+                errors.append(
+                    f"paired forecast design {design_name} is not bound to {parameter}"
+                )
+        expected_subset = f"set({spec_name}[{base_parameter}]) < set({spec_name}[{augmented_parameter}])"
+        if not any(
+            isinstance(node, ast.Compare)
+            and len(node.ops) == 1
+            and isinstance(node.ops[0], ast.Lt)
+            and ast.unparse(node) == expected_subset
+            for node in ast.walk(paired)
+        ):
+            errors.append("paired forecast function does not enforce strict predictor nesting")
+        fit_calls: dict[str, list[ast.Call]] = {base_design: [], augmented_design: []}
+        for node in ast.walk(paired):
+            if (
+                isinstance(node, ast.Call)
+                and _call_name(node) == fit_function
+                and node.args
+                and isinstance(node.args[0], ast.Name)
+                and node.args[0].id in fit_calls
+            ):
+                fit_calls[node.args[0].id].append(node)
+        if any(len(calls) != 1 for calls in fit_calls.values()):
+            errors.append("paired forecast function must fit each declared design exactly once")
+        else:
+            base_call = fit_calls[base_design][0]
+            augmented_call = fit_calls[augmented_design][0]
+            if (
+                len(base_call.args) < 5
+                or len(augmented_call.args) < 5
+                or [ast.dump(arg) for arg in base_call.args[1:5]]
+                != [ast.dump(arg) for arg in augmented_call.args[1:5]]
+            ):
+                errors.append("base and augmented fits do not share the paired schedule")
 
     statistic = _function(tree, statistic_name)
     if statistic is None:
         errors.append("unconditional GW/DM statistic function is missing or duplicated")
     else:
-        statistic_text = ast.unparse(statistic)
+        statistic_text = ast.unparse(statistic).lower()
+        statistic_literals = {
+            node.value
+            for node in ast.walk(statistic)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str)
+        }
         for token in (
-            "_bartlett_lrv",
-            "stats.norm",
             "mean_loss_diff_aug_minus_base",
             "hac_lag_used",
             "standard_error",
-            "E[QLIKE_aug - QLIKE_base]",
+            "hac_kernel",
+            "hac_bandwidth_rule",
+            "reference_distribution",
+            method["runtime_estimand"],
+            method["loss"],
+            method["hac_kernel"],
+            method["hac_bandwidth_rule"],
+            method["reference_distribution"],
         ):
-            if token not in statistic_text:
+            if token not in statistic_literals:
                 errors.append(f"statistic provenance token missing: {token}")
+        if "bartlett" not in statistic_text or "norm" not in statistic_text:
+            errors.append("statistic source does not visibly implement Bartlett/normal inference")
 
     inference = implementation["gate_registry_inference"]
+    gate_function = _function(tree, gate_function_name)
+    gate_tree: ast.AST = gate_function if gate_function is not None else tree
+    if gate_function is None:
+        errors.append("gate function is missing or duplicated")
+    else:
+        gate_args = {arg.arg for arg in gate_function.args.args}
+        required_gate_args = {
+            "register_gate",
+            "family",
+            bounded_parameter,
+            base_parameter,
+            augmented_parameter,
+        }
+        if not required_gate_args <= gate_args:
+            errors.append("gate function omits provenance/model parameters")
+        paired_result_assignments = [
+            node
+            for node in ast.walk(gate_function)
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == result_variable
+                for target in node.targets
+            )
+            and isinstance(node.value, ast.Call)
+            and _call_name(node.value) == paired_name
+        ]
+        if len(paired_result_assignments) != 1:
+            errors.append("gate function does not bind exactly one paired forecast result")
+        else:
+            paired_call_names = {
+                node.id
+                for argument in paired_result_assignments[0].value.args
+                for node in ast.walk(argument)
+                if isinstance(node, ast.Name)
+            }
+            if not {base_parameter, augmented_parameter} <= paired_call_names:
+                errors.append("gate function does not pass both declared model specs")
     gate_records = []
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Call) or _call_name(node) != "TestRecord":
+    for node in ast.walk(gate_tree):
+        if not isinstance(node, ast.Call) or _call_name(node) != record_constructor:
             continue
         keywords = {kw.arg: kw.value for kw in node.keywords if kw.arg}
         value = keywords.get("inference")
@@ -1048,37 +2232,96 @@ def _fixed_memory_source_errors(tree: ast.AST, source: str, manifest: dict) -> l
     for record in gate_records:
         feed = record.get("feeds_gate")
         bounded = record.get("bounded_memory")
-        if not isinstance(feed, ast.Name) or feed.id != "gate_eligible":
+        if not isinstance(feed, ast.Name) or feed.id != gate_variable:
             errors.append("fixed-memory TestRecord gate sink is not derived from eligibility")
-        if not isinstance(bounded, ast.Name) or bounded.id != "whole_method_fixed_memory":
+        if not isinstance(bounded, ast.Name) or bounded.id != whole_variable:
             errors.append("fixed-memory TestRecord does not carry whole-method provenance")
 
     gate_assignments = [
         node
-        for node in ast.walk(tree)
+        for node in ast.walk(gate_tree)
         if isinstance(node, ast.Assign)
-        and any(isinstance(target, ast.Name) and target.id == "gate_eligible" for target in node.targets)
+        and any(isinstance(target, ast.Name) and target.id == gate_variable for target in node.targets)
     ]
     if len(gate_assignments) != 1:
         errors.append("gate_eligible must have exactly one source assignment")
     else:
-        gate_text = ast.unparse(gate_assignments[0].value)
-        if "register_gate" not in gate_text or "whole_method_fixed_memory" not in gate_text:
+        gate_expr = _unwrap_bool_call(gate_assignments[0].value)
+        valid_family = lambda node: (
+            isinstance(node, ast.Compare)
+            and len(node.ops) == 1
+            and isinstance(node.ops[0], ast.Eq)
+            and len(node.comparators) == 1
+            and (
+                (
+                    isinstance(node.left, ast.Name)
+                    and node.left.id == "family"
+                    and isinstance(node.comparators[0], ast.Constant)
+                    and node.comparators[0].value == "primary"
+                )
+                or (
+                    isinstance(node.left, ast.Constant)
+                    and node.left.value == "primary"
+                    and isinstance(node.comparators[0], ast.Name)
+                    and node.comparators[0].id == "family"
+                )
+            )
+        )
+        if not (
+            isinstance(gate_expr, ast.BoolOp)
+            and isinstance(gate_expr.op, ast.And)
+            and len(gate_expr.values) == 3
+            and sum(isinstance(value, ast.Name) and value.id == "register_gate" for value in gate_expr.values) == 1
+            and sum(isinstance(value, ast.Name) and value.id == whole_variable for value in gate_expr.values) == 1
+            and sum(valid_family(value) for value in gate_expr.values) == 1
+        ):
             errors.append("gate_eligible is not the provenance conjunction")
     whole_assignments = [
         node
-        for node in ast.walk(tree)
+        for node in ast.walk(gate_tree)
         if isinstance(node, ast.Assign)
         and any(
-            isinstance(target, ast.Name) and target.id == "whole_method_fixed_memory"
+            isinstance(target, ast.Name) and target.id == whole_variable
             for target in node.targets
         )
     ]
     if len(whole_assignments) != 1:
         errors.append("whole_method_fixed_memory must have exactly one source assignment")
     else:
-        whole_text = ast.unparse(whole_assignments[0].value)
-        if "bounded_memory" not in whole_text or "gw_fixed_memory_eligible" not in whole_text:
+        whole_expr = _unwrap_bool_call(whole_assignments[0].value)
+        provenance_compare = False
+        bounded_operand = False
+        if isinstance(whole_expr, ast.BoolOp) and isinstance(whole_expr.op, ast.And):
+            bounded_operand = sum(
+                isinstance(value, ast.Name) and value.id == bounded_parameter
+                for value in whole_expr.values
+            ) == 1
+            provenance_compare = sum(
+                isinstance(value, ast.Compare)
+                and len(value.ops) == 1
+                and isinstance(value.ops[0], ast.Is)
+                and len(value.comparators) == 1
+                and isinstance(value.comparators[0], ast.Constant)
+                and value.comparators[0].value is True
+                and isinstance(value.left, ast.Call)
+                and isinstance(value.left.func, ast.Attribute)
+                and value.left.func.attr == "get"
+                and isinstance(value.left.func.value, ast.Attribute)
+                and isinstance(value.left.func.value.value, ast.Name)
+                and value.left.func.value.value.id == result_variable
+                and value.left.func.value.attr == audit_attribute
+                and len(value.left.args) == 1
+                and isinstance(value.left.args[0], ast.Constant)
+                and value.left.args[0].value == eligibility_key
+                for value in whole_expr.values
+            ) == 1
+        if not (
+            isinstance(whole_expr, ast.BoolOp)
+            and isinstance(whole_expr.op, ast.And)
+            and len(whole_expr.values) == 2
+            and bounded_operand
+            and provenance_compare
+        ):
             errors.append("whole-method eligibility omits upstream or paired-fit provenance")
 
     lower = source.lower()
@@ -1090,19 +2333,20 @@ def _fixed_memory_source_errors(tree: ast.AST, source: str, manifest: dict) -> l
 
 
 def _fixed_memory_receipt_errors(
-    path: Path, trust_root: Path, manifest: dict
+    path: Path, trust_root: Path, logical_site: str, manifest: dict
 ) -> tuple[list[str], dict | None]:
     errors: list[str] = []
     registry_path = trust_root / FIXED_MEMORY_ADJUDICATIONS
     try:
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
-    except (OSError, ValueError) as exc:
+    except (OSError, ValueError, RecursionError) as exc:
         return [f"external adjudication registry unavailable: {exc}"], None
     if not isinstance(registry, dict):
         return ["external adjudication registry is not a JSON object"], None
     if registry.get("schema") != "nested_dm_fixed_memory_adjudications.v1":
         return ["external adjudication registry has the wrong schema"], None
-    logical_site = _logical_experiment_site(path, trust_root)
+    if not _canonical_experiment_site(logical_site):
+        return [f"candidate site is not canonical: {logical_site}"], None
     raw_entries = registry.get("entries")
     if not isinstance(raw_entries, list) or any(
         not isinstance(entry, dict) for entry in raw_entries
@@ -1161,11 +2405,11 @@ def _fixed_memory_receipt_errors(
     if not isinstance(artifact_rel, str) or not artifact_rel:
         errors.append("external adjudication review_artifact is missing")
     else:
-        artifact = (trust_root / artifact_rel).resolve()
         try:
+            artifact = (trust_root / artifact_rel).resolve()
             artifact.relative_to(trust_root.resolve())
-        except ValueError:
-            errors.append("external adjudication artifact escapes the repository")
+        except (OSError, ValueError) as exc:
+            errors.append(f"external adjudication artifact path is invalid: {exc}")
         else:
             if not artifact.is_file():
                 errors.append("external adjudication artifact is missing")
@@ -1174,7 +2418,7 @@ def _fixed_memory_receipt_errors(
             else:
                 try:
                     receipt = json.loads(artifact.read_text(encoding="utf-8"))
-                except (OSError, ValueError) as exc:
+                except (OSError, ValueError, RecursionError) as exc:
                     errors.append(f"external adjudication artifact is not JSON: {exc}")
                 else:
                     if not isinstance(receipt, dict):
@@ -1201,6 +2445,19 @@ def _fixed_memory_receipt_errors(
                                 )
 
     if re.fullmatch(r"[0-9a-f]{40}", reviewed_commit):
+        try:
+            object_type = subprocess.run(
+                ["git", "cat-file", "-t", reviewed_commit],
+                cwd=trust_root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+        except OSError as exc:
+            errors.append(f"external adjudication commit cannot be inspected: {exc}")
+            object_type = subprocess.CompletedProcess([], 127, b"", b"")
+        if object_type.returncode != 0 or object_type.stdout.strip() != b"commit":
+            errors.append("external adjudication reviewed_commit is not a commit object")
         committed_files = {
             logical_site: entry.get("source_sha256"),
             **{
@@ -1210,13 +2467,25 @@ def _fixed_memory_receipt_errors(
             },
         }
         for relative, expected_hash in committed_files.items():
-            proc = subprocess.run(
-                ["git", "show", f"{reviewed_commit}:{relative}"],
-                cwd=trust_root,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=False,
-            )
+            try:
+                proc = subprocess.run(
+                    ["git", "show", f"{reviewed_commit}:{relative}"],
+                    cwd=trust_root,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    check=False,
+                )
+            except OSError as exc:
+                errors.append(
+                    f"external adjudication commit file cannot be inspected: {relative}: {exc}"
+                )
+                warn(
+                    "audit_nested_dm_misuse",
+                    "external adjudication commit file cannot be inspected",
+                    relative=relative,
+                    err=str(exc),
+                )
+                continue
             if proc.returncode != 0:
                 errors.append(
                     f"external adjudication commit does not contain reviewed file: {relative}"
@@ -1229,7 +2498,11 @@ def _fixed_memory_receipt_errors(
 
 
 def _fixed_memory_role_evidence(
-    path: Path, scan_root: Path, trust_root: Path, tree: ast.AST, source: str
+    path: Path,
+    scan_root: Path,
+    trust_root: Path | None,
+    tree: ast.AST,
+    source: str,
 ) -> tuple[list[Evidence], list[str]]:
     manifest, line, literal_error = _literal_assignment(
         tree, FIXED_MEMORY_MANIFEST_NAME
@@ -1245,10 +2518,16 @@ def _fixed_memory_role_evidence(
         errors.extend(_fixed_memory_runtime_errors(path, manifest))
     receipt = None
     if not errors:
-        receipt_errors, receipt = _fixed_memory_receipt_errors(
-            path, trust_root, manifest
-        )
-        errors.extend(receipt_errors)
+        if trust_root is None:
+            errors.append("trusted repository root cannot be established")
+        else:
+            receipt_errors, receipt = _fixed_memory_receipt_errors(
+                path,
+                trust_root,
+                _logical_experiment_site(path, scan_root),
+                manifest,
+            )
+            errors.extend(receipt_errors)
     if errors:
         return [], errors
     return [
@@ -1261,11 +2540,15 @@ def scan_file(
     path: Path,
     root: Path = REPO_ROOT,
     *,
-    trust_root: Path = REPO_ROOT,
+    trust_root: Path | None = None,
 ) -> Finding | None:
+    trust_root = trust_root.resolve() if trust_root is not None else _trusted_repo_root(root)
     source = path.read_text(encoding="utf-8")
     lines = source.splitlines()
     tree = ast.parse(source, filename=str(path))
+    fixed_memory_declared = _has_module_scope_binding(
+        tree, FIXED_MEMORY_MANIFEST_NAME
+    )
 
     nested = [
         evidence
@@ -1277,7 +2560,7 @@ def scan_file(
         nested.extend(prose[:3])
     nested.extend(_nested_ast_evidence(tree, lines))
     nested = _dedupe(nested)
-    if not nested:
+    if not nested and not fixed_memory_declared:
         return None
 
     raw = _raw_dm_ast_evidence(tree, lines)
@@ -1285,7 +2568,7 @@ def scan_file(
     # retain narrow textual evidence as a second channel.
     raw.extend(_regex_evidence(GENERIC_LOSS_TEST_RE, lines))
     raw = _dedupe(raw)
-    if not raw:
+    if not raw and not fixed_memory_declared:
         return None
 
     claim = _claim_ast_evidence(tree, lines)
@@ -1298,7 +2581,6 @@ def scan_file(
     diagnostic = _regex_evidence(DM_DIAGNOSTIC_RE, lines)
     fixed_memory_safe: list[Evidence] = []
     fixed_memory_errors: list[str] = []
-    fixed_memory_declared = FIXED_MEMORY_MANIFEST_NAME in source
     if fixed_memory_declared:
         fixed_memory_safe, fixed_memory_errors = _fixed_memory_role_evidence(
             path, root, trust_root, tree, source
@@ -1339,7 +2621,7 @@ def scan_population(root: Path = REPO_ROOT) -> AuditResult:
     for path in paths:
         try:
             finding = scan_file(path, root)
-        except (OSError, UnicodeError, SyntaxError) as exc:
+        except (OSError, UnicodeError, SyntaxError, RecursionError) as exc:
             message = (
                 f"{path.relative_to(root).as_posix()}: "
                 f"{type(exc).__name__}: {exc}"

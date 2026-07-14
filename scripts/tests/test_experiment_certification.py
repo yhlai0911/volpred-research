@@ -21,7 +21,7 @@ a verdict that certified nothing, and both readings of it were wrong:
     work because someone asserted "I fixed it".
 
 A verdict is only worth its snapshot.  So certification pins sha256 over the
-whole claim surface -- code, README, results -- and drift is a block:
+whole claim surface -- code, README, results, rendered figures -- and drift is a block:
 "reviewed one thing, shipped another" is not a certification.  That also makes
 it safe for the agent to invoke the reviewer itself: edit after the PASS and
 the hashes stop matching.
@@ -49,7 +49,7 @@ def _sha(path: Path) -> str:
 
 
 def _experiment(tmp_path: Path, kid: str = "k1709") -> Path:
-    """A minimal but complete experiment: code, write-up, numbers."""
+    """A minimal but complete experiment: code, write-up, numbers, figure."""
     exp = tmp_path / "experiments" / kid
     exp.mkdir(parents=True)
     (exp / f"{kid}.py").write_text("print('flow -> rv')\n", encoding="utf-8")
@@ -57,6 +57,7 @@ def _experiment(tmp_path: Path, kid: str = "k1709") -> Path:
     (exp / f"{kid}_results.json").write_text(
         json.dumps({"verdict": "INCONCLUSIVE_NO_EXACT_NULL_CLAIM"}), encoding="utf-8"
     )
+    (exp / "fig1_result.png").write_bytes(b"reader-facing result figure")
     return exp
 
 
@@ -105,7 +106,9 @@ def test_uncertified_experiment_blocks_merge(tmp_path: Path) -> None:
     assert any("no review_verdict.json" in v for v in _verdicts(exp))
 
 
-@pytest.mark.parametrize("target", ["k1709.py", "README.md", "k1709_results.json"])
+@pytest.mark.parametrize(
+    "target", ["k1709.py", "README.md", "k1709_results.json", "fig1_result.png"]
+)
 def test_pass_verdict_goes_stale_when_the_reviewed_bytes_change(
     tmp_path: Path, target: str
 ) -> None:
@@ -116,7 +119,7 @@ def test_pass_verdict_goes_stale_when_the_reviewed_bytes_change(
     _certify(exp, "PASS")
     assert gates.certification_violations(exp) == []
 
-    (exp / target).write_text("# repaired after the reviewer looked\n", encoding="utf-8")
+    (exp / target).write_bytes(b"repaired after the reviewer looked\n")
 
     stale = _verdicts(exp)
     assert any("changed after review" in v for v in stale), stale
@@ -130,6 +133,15 @@ def test_new_claim_bearing_file_slipped_in_after_review_blocks(tmp_path: Path) -
     exp = _experiment(tmp_path)
     _certify(exp, "PASS")
     (exp / "k1709_extra_analysis.py").write_text("print('unreviewed claim')\n", encoding="utf-8")
+    assert any("never reviewed" in v for v in _verdicts(exp))
+
+
+def test_new_reader_facing_figure_slipped_in_after_review_blocks(tmp_path: Path) -> None:
+    exp = _experiment(tmp_path)
+    _certify(exp, "PASS")
+    (exp / "fig2_unreviewed_claim.svg").write_text(
+        "<svg><text>unreviewed claim</text></svg>", encoding="utf-8"
+    )
     assert any("never reviewed" in v for v in _verdicts(exp))
 
 
@@ -184,7 +196,12 @@ def test_the_template_pins_the_whole_claim_surface(tmp_path: Path) -> None:
     exp = _experiment(tmp_path)
     pinned = gates.verdict_template(exp)["reviewed_sha256"]
 
-    assert set(pinned) == {"k1709.py", "README.md", "k1709_results.json"}
+    assert set(pinned) == {
+        "k1709.py",
+        "README.md",
+        "k1709_results.json",
+        "fig1_result.png",
+    }
     assert pinned["k1709.py"] == _sha(exp / "k1709.py")
 
 
@@ -214,7 +231,12 @@ def test_verdict_template_cli_writes_a_gate_shaped_file(tmp_path: Path) -> None:
 
     assert proc.returncode == 0, proc.stderr
     written = json.loads(out.read_text(encoding="utf-8"))
-    assert set(written["reviewed_sha256"]) == {"k1709.py", "README.md", "k1709_results.json"}
+    assert set(written["reviewed_sha256"]) == {
+        "k1709.py",
+        "README.md",
+        "k1709_results.json",
+        "fig1_result.png",
+    }
     assert written["verdict"].startswith("FILL")
 
 
