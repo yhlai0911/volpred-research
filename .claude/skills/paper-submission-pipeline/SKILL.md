@@ -84,10 +84,10 @@ no AI-style phrasing/symbols）+ 機械 gate **`scripts/check_paper_compliance.p
 前必跑該 compliance audit；本 skill 不重複清單。
 
 ### Run reviews via codex to save tokens (boss directive 6)
-All multi-round review rounds (latex-academic-reviewer, citation-verifier,
-journal-review) run via **`codex exec`** (`codex:rescue` / `codex-cli`) — not in the
-main thread — to save main-thread tokens. The main thread orchestrates, reads the
-codex verdict, applies corrections (via `paper-update`), and advances the tracker.
+Review-round 編排（透過 `codex exec` (`codex:rescue` / `codex-cli`) 跑 latex-academic-reviewer
++ citation-verifier + journal-review、不在主線燒 token、迭代到收斂、主線程只 orchestrate +
+adjudicate verdict + apply corrections via `paper-update`）的 owner = **`paper-review-cycle`
+Step 1**. 本 pipeline 只 orchestrate gate，讀 codex verdict 後 advance tracker；不重複編排細節。
 
 ---
 
