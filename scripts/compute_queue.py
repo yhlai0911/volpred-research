@@ -63,6 +63,7 @@ QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
 LOCK_FILE = QUEUE_DIR / ".worker.lock"
 LOG_DIR = ROOT / "storage" / "logs" / "compute"
 AGENT_JOB_DIR = ROOT / "storage" / "ops" / "agent_jobs"
+AGENT_BRIEF_DIR = ROOT / "storage" / "ops" / "agent_briefs"
 
 # Agent jobs. A research agent needs 20-60min of wall clock (that is the whole
 # reason it cannot live inside a ~50min dispatch fire), so the default budget has
@@ -356,6 +357,10 @@ def enqueue(args) -> int:
         "claude_followup": followup,
         "followup_dispatched": False,
         "timeout_seconds": args.timeout or 3600,
+        # Where the brief came from vs the frozen copy the runner will actually read.
+        # Keeping both makes "the agent read something else than I wrote" auditable.
+        "brief_source": getattr(args, "brief_source", None),
+        "brief_snapshot": getattr(args, "brief_snapshot", None),
     }
     _write_job_file(job_path, entry)
     print(f"enqueued: {job_id}")
@@ -394,6 +399,18 @@ def enqueue_agent(args) -> int:
 
     job_id = args.id or f"agent-{brief_path.stem}-{uuid.uuid4().hex[:6]}"
 
+    # Freeze the brief HERE, at enqueue. The runner opens its brief when the worker
+    # picks the job up (*/15) — not now — so "enqueue, then fix the brief" is not an
+    # edit, it is a race against the worker, and the author does not find out who won.
+    # 2026-07-14: a corrected verdict schema landed 48s too late, the agent read the
+    # stale brief, and a 30-minute xhigh review produced a verdict the merge gate could
+    # not accept. Snapshotting makes the spec immutable the moment it is queued, and
+    # incidentally rescues briefs written to /tmp from being swept before the job runs.
+    # To change a queued brief now: `amend --brief-file`, which refuses once it is running.
+    AGENT_BRIEF_DIR.mkdir(parents=True, exist_ok=True)
+    frozen_brief = AGENT_BRIEF_DIR / f"{job_id}.md"
+    frozen_brief.write_text(brief_path.read_text(encoding="utf-8"), encoding="utf-8")
+
     # `result_artifact` is the AGENT'S output, never the runner's summary. Resolve
     # it on the same side of the worktree boundary as the agent itself. The runner
     # only verifies that this path exists after a successful exit; it never writes
@@ -406,7 +423,7 @@ def enqueue_agent(args) -> int:
     metadata_path = AGENT_JOB_DIR / f"{job_id}.json"
 
     script_args = [
-        "--brief-file", str(brief_path),
+        "--brief-file", str(frozen_brief),
         "--model", args.model,
         "--effort", args.effort,
     ]
@@ -440,6 +457,8 @@ def enqueue_agent(args) -> int:
         followup_task_type=args.followup_task_type,
         followup_priority=args.followup_priority,
         timeout=outer_timeout,
+        brief_source=str(brief_path),
+        brief_snapshot=str(frozen_brief),
     )
     return enqueue(inner)
 
@@ -742,6 +761,119 @@ def mark_followup_dispatched(args) -> int:
     return 0
 
 
+def _load_queued_job(job_id: str, verb: str) -> tuple[Path, dict[str, Any]] | None:
+    """Fetch a job that has not started yet. Caller must already hold the receipt lock.
+
+    A queued spec is a work order nobody has read; an in-flight one is a promise the
+    worker is already keeping. Only the first is safe to rewrite, so status is the gate
+    — not a timestamp, not "it probably has not started". Refusing loudly is the point:
+    before this, the only way to fix a queued job was to hand-edit its JSON, which
+    CLAUDE.md forbids, so the real-world choice was "edit it anyway" or "let it run
+    wrong". Both happened.
+    """
+    path = QUEUE_DIR / f"{job_id}.json"
+    if not path.exists():
+        print(f"error: not found {job_id}", file=sys.stderr)
+        return None
+    job = _read_job_file(path, context=verb)
+    if job is None:
+        return None
+    status = job.get("status")
+    if status != "queued":
+        print(
+            f"error: cannot {verb} {job_id} — status={status}, not queued. "
+            f"A job the worker already picked up is not yours to rewrite; "
+            f"let it finish and act on the result.",
+            file=sys.stderr,
+        )
+        return None
+    return path, job
+
+
+def amend(args) -> int:
+    """Correct a queued job's spec — the sanctioned alternative to editing its JSON."""
+    fields = {
+        "followup_brief": args.followup_brief,
+        "followup_task_type": args.followup_task_type,
+        "followup_priority": args.followup_priority,
+        "timeout": args.timeout,
+        "brief_file": args.brief_file,
+    }
+    if not any(v is not None for v in fields.values()):
+        print("error: amend needs at least one field to change", file=sys.stderr)
+        return 2
+
+    with _receipt_lock():
+        loaded = _load_queued_job(args.id, "amend")
+        if loaded is None:
+            return 2
+        path, job = loaded
+        changed = []
+
+        if args.brief_file is not None:
+            if job.get("kind") != "agent":
+                print(f"error: --brief-file only applies to agent jobs (kind={job.get('kind')})",
+                      file=sys.stderr)
+                return 2
+            src = Path(args.brief_file)
+            if not src.is_absolute():
+                src = ROOT / src
+            if not src.exists():
+                print(f"error: brief file not found: {src}", file=sys.stderr)
+                return 2
+            snapshot = job.get("brief_snapshot")
+            if not snapshot:
+                print(f"error: {args.id} has no brief snapshot (enqueued before snapshotting); "
+                      f"cancel and re-enqueue instead", file=sys.stderr)
+                return 2
+            # Rewrite the frozen copy in place: `args` already points the runner at it,
+            # so the snapshot path is the one thing that must NOT move.
+            Path(snapshot).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+            job["brief_source"] = str(src)
+            changed.append("brief")
+
+        followup = job.get("claude_followup") or {}
+        for key, arg in (
+            ("brief", args.followup_brief),
+            ("task_type", args.followup_task_type),
+            ("priority", args.followup_priority),
+        ):
+            if arg is not None:
+                followup[key] = arg
+                changed.append(f"followup.{key}")
+        if followup:
+            job["claude_followup"] = followup
+
+        if args.timeout is not None:
+            job["timeout_seconds"] = args.timeout
+            changed.append("timeout")
+
+        job["amended_at"] = utc_now()
+        _write_job_file(path, job)
+
+    print(f"amended: {args.id} [{', '.join(changed)}]")
+    return 0
+
+
+def cancel(args) -> int:
+    """Drop a queued job before the worker sees it."""
+    with _receipt_lock():
+        loaded = _load_queued_job(args.id, "cancel")
+        if loaded is None:
+            return 2
+        path, job = loaded
+        job["status"] = "cancelled"
+        job["completed_at"] = utc_now()
+        job["cancel_reason"] = args.reason or "cancelled by operator"
+        # A cancelled job has no result, so it has nothing to follow up on. Saying so
+        # explicitly keeps it out of `list --pending-followup` instead of relying on the
+        # collector to infer that "cancelled" means "do not triage me".
+        job["followup_dispatched"] = True
+        _write_job_file(path, job)
+    print(f"cancelled: {args.id}")
+    return 0
+
+
 def record_output_paths_cli(args) -> int:
     if not record_output_paths(args.id, args.path):
         return 2
@@ -789,6 +921,23 @@ def main():
     ea.add_argument("--followup-priority", type=int)
     ea.add_argument("--timeout", type=int)
     ea.set_defaults(func=enqueue_agent)
+
+    am = sub.add_parser(
+        "amend",
+        help="Correct a QUEUED job's spec (refuses once running). Use this instead of editing the JSON.",
+    )
+    am.add_argument("--id", required=True)
+    am.add_argument("--brief-file", help="Replace an agent job's frozen brief with this file's contents.")
+    am.add_argument("--followup-brief")
+    am.add_argument("--followup-task-type")
+    am.add_argument("--followup-priority", type=int)
+    am.add_argument("--timeout", type=int)
+    am.set_defaults(func=amend)
+
+    cx = sub.add_parser("cancel", help="Drop a QUEUED job before the worker picks it up.")
+    cx.add_argument("--id", required=True)
+    cx.add_argument("--reason")
+    cx.set_defaults(func=cancel)
 
     l = sub.add_parser("list")
     l.add_argument("--status")
