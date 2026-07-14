@@ -35,6 +35,10 @@ def _fixture() -> list[dict]:
          "title": "legacy row", "completed_at": _iso(200), "description": "frozen"},
         {"id": "no_ts", "status": "failed", "task_type": "experiment",
          "title": "failed row without any timestamp"},
+        {"id": "internal_unresolved", "status": "failed", "task_type": "platform_ops",
+         "title": "repair still needed", "completed_at": _iso(60),
+         "internal_remediable": True, "alert_key": "git_push_backup_hold",
+         "internal_alert_state": {"episode_id": "e1", "attempt_number": 1}},
         {"id": "expired_block", "status": "blocked", "task_type": "event_article",
          "title": "nfp", "priority": 1, "blocked_reason": "awaiting_external_data",
          "blocked_until": _iso(2)},
@@ -75,12 +79,14 @@ def test_apply_compacts_and_archives(tmp_path: Path) -> None:
     assert "description" not in tasks["old_ok"]
     assert "result" not in tasks["old_ok"]
     assert tasks["old_ok"]["status"] == "succeeded"
-    # recent terminal / pending / legacy / no-timestamp rows untouched
+    # recent terminal / pending / legacy / no-timestamp / unresolved internal rows untouched
     assert "tombstone" not in tasks["recent_ok"]
     assert tasks["recent_ok"]["description"] == "keep me"
     assert "tombstone" not in tasks["legacy"]
     assert tasks["legacy"]["description"] == "frozen"
     assert "tombstone" not in tasks["no_ts"]
+    assert "tombstone" not in tasks["internal_unresolved"]
+    assert tasks["internal_unresolved"]["internal_alert_state"]["episode_id"] == "e1"
     # expired blocked flipped to pending
     assert tasks["expired_block"]["status"] == "pending"
     assert "blocked_until" not in tasks["expired_block"]

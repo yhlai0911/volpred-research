@@ -30298,38 +30298,14 @@
   },
   {
     "id": "k1655_vix_nfci_encompassing",
-    "priority": 2,
     "status": "succeeded",
     "task_type": "experiment",
-    "created_at": "2026-07-11",
     "title": "K1655：VIX vs NFCI 配對 DM + encompassing test（「VIX 蓋過 NFCI」目前未經檢定）",
-    "description": "來源：Codex primary-path re-verify 2026-07-11 CRITICAL #3（VERDICT=FAIL）。K1655 只各自比 NFCI-only / VIX-only vs unconditional benchmark，從未直接檢定兩者。但 README（line 147）與線上文章 mile_9c211681 整個段落都寫「VIX dominates/subsumes/absorbs NFCI」並宣稱 confirms K503/K828 — 超出證據。做法：(a) 在完全相同 origins 上對 NFCI 與 VIX 的 pointwise pinball loss 做配對 DM；(b) 加 VIX-only vs VIX+NFCI 的 OOS quantile forecast-encompassing test（NFCI 是否有增量資訊）。文章已先改成「點估計上 VIX 較好，subsumption 尚未檢定」。檢定跑完後回頭把文章改成有依據的結論。",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-11T11:51:54.066236+00:00",
-    "claim_session_id": "2efbd15618e1",
-    "status_history": [
-      {
-        "ts": "2026-07-11T11:51:54.066253+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-11T11:51:54.328682+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-11T12:40:34.988738+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-11T11:51:54.328662+00:00",
+    "priority": 2,
+    "created_at": "2026-07-11",
     "completed_at": "2026-07-11T12:40:34.988722+00:00",
-    "result": "完成 true-PIT 同原點 VIX vs NFCI paired DM 與固定 rolling R=400 CQFE：三個 horizon 均無穩健 VIX dominance，亦無 NFCI beyond-VIX 增量證據；1,999-rep bootstrap、4,970-row artifact 與獨立 post-run review 全 PASS。已更新 K1655 README／knowledge／research_program／error log，並就地修正 mile_9c211681、單篇同步及線上讀回 PASS。"
+    "tombstone": true,
+    "archived_at": "2026-07-14T13:07:24.635238+00:00"
   },
   {
     "id": "K1683_article_general",
@@ -30619,31 +30595,15 @@
   },
   {
     "id": "telegram-489",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 489）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-11T13:03:13.699837+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 489）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n到底要處理幾次？ 每次叫你立刻處理是要從底層去處理，不是表面上弄好就好。\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\nℹ️ [INFO] [ACK] Re: Re: [VolPred 警報][CRITICAL] PHASE-Z 20:47: 1 個檔案已連續 4 班沒人收 — 遺留變成堆積\n\n📌 已收到你的回信\n\n• 欄位: 值\n• Task ID: email-12066-2c58d1\n• 類型: 老闆回信\n• Priority: P3 普通優先\n• 主旨: Re: [VolPred 警報][CRITICAL] PHASE-Z 20:47: 1 個檔案已連續 4 班沒人收 — 遺留變成堆積\n• 收信時間: 2026-07-11 13:00:06 UTC\n\n📌 決策\n\n已推入統一任務池 — storage/next_tasks.json 中 task_type=老闆回信\n\n📌 執行時間\n\n• 下次 Claude hourly-dispatch fire：今天 21:07（台灣時間，約 6 分鐘後）\n• Claude 主線程會於該 tick 自動 claim + 分析 + 執行\n• 若任務跨多 tick → 中間不會 spam；最後一次 tick 收尾發 close email\n\n📌 完成後通知\n\n✅ 全部處理完成時會寄 close email 給你（同 thread 回覆）— 含完成項目 / commit hash / 對應 sub-task id\n\n---\n\n*Auto-sent by gmail_inbox_poll.py on queue insertion (gmail_inbox_poll.py)*\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "claimed_by": "telegram-responder",
-    "claimed_at": "2026-07-11T13:03:38.339741+00:00",
-    "claim_session_id": "36afab55dc15",
-    "status_history": [
-      {
-        "ts": "2026-07-11T13:03:38.339755+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-11T13:06:43.465516+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-11T13:06:43.465493+00:00"
+    "completed_at": "2026-07-11T13:06:43.465493+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-14T13:07:24.635238+00:00"
   },
   {
     "id": "K1572_article_general",
@@ -36962,20 +36922,39 @@
     "description": "Codex (gpt-5.6-sol/ultra) 對凍結 SHA c97d690c 的裁決 = FAIL，但只有一條 blocking，且是宣稱範圍問題不是算術錯。\n\n【blocking】k1709.py:1039-1091 的「Giacomini-White gate」實作的其實是 h_t≡1 的無條件 DM 特例（scalar loss differential + Bartlett HAC + normal z），從未建構 instrument h_t、q×q 共變異、Wald 統計量或 chi-square_q 參考分布。README.md:30-38 / 69-82 的「GW gate / GW z / Giacomini-White on QLIKE」因此超出證據：撐不起 conditional / state-dependent predictive ability 的宣稱，也可能抵銷掉跨 regime 的正負效果。Codex 明確指出數字本身站得住，只是站得住的是 GW(2006) Sec 3.4 真正授權的較弱宣稱 —— bounded-memory forecasting method 下的 equal *unconditional* predictive ability（此時 GW 統計量與 DM 重合）。\n\n修法（優先 a）：\n(a) 把用詞改成它實際做的事：README + code 標籤改為「unconditional DM / GW(2006) Sec 3.4 unconditional special case」，結論範圍收斂為「未發現無條件增量預測能力」。數字不動 → 不必重跑，但 render_readme.py 要重跑（Codex 已驗證 renderer 對凍結 JSON 可 byte-for-bit 重現 README）。\n(b) 真做 conditional GW（建 h_t、vector moment、Wald、chi2_q）→ 要重跑 + 重審。\n\n其餘 9 條舊缺陷（C6 cell-key collision / R1-R6 / README 撤回宣稱 / end-to-end runnability）Codex 全判 FIXED。4 條 non-blocking（bound 單調性假設、Fig2 event-day 位移一天、README:209 的 live-rerun 不變承諾、vendor vintage 未存檔）一併處理或明寫為 limitation。\n\n【重審 SOP — 不要再手抄 schema】凍結後跑：\n  uv run python scripts/experiment_gates.py verdict-template --path experiments/k1709 --out experiments/k1709/review_verdict.json\n再叫 Codex 只填欄位。rev2 就是 brief 手寫 schema 寫成 final_verdict/claim_surface_sha256、只 pin 2 個檔而 gate 要 5 個。\n\n實驗仍在 .claude/worktrees/dispatch-slot-2-c873d04d-k1709（FAIL 不得進 main）；rev2 裁決已 commit 6951526cc 保存。\n",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-16",
     "created_at": "2026-07-14T08:23:20.356430+00:00",
-    "started_at": null,
-    "completed_at": null,
-    "result": "",
-    "status_history": []
+    "started_at": "2026-07-14T13:08:34.481741+00:00",
+    "completed_at": "2026-07-14T13:22:55.467697+00:00",
+    "result": "rev3 relabel done + committed (worktree exp/k1709-btc-etf-flow-vol, frozen f3f9d303). Codex FAIL 的唯一 blocking（無條件 DM 貼成 GW conditional gate）已修：函式改名 gw_unconditional_dm、docstring 明列未做 conditional GW machinery、verdict_basis claim 句子抽成 pure function + --relabel 路徑（斷言每個非字串欄位 byte-identical）、新增 conditional_predictive_ability_not_tested 欄位、headline claim 收斂為 no incremental UNCONDITIONAL predictive content、README 由 renderer 重生。數字零變動（獨立驗證：所有非字串值 identical）。61/62 experiment tests pass；第 62 個是真發現非回歸 — repo 的 nested-DM 稽核器用字面規則，誠實標籤反而觸發它 → 另立 task nested_dm_auditor_cannot_express_fixed_window_gw。Codex 重審已 enqueue（agent-brief_k1709_rev3_review-580bae），certify gate 正確擋著等裁決。",
+    "status_history": [
+      {
+        "ts": "2026-07-14T13:08:34.234455+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-14T13:08:34.481761+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-14T13:22:55.467715+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-21"
+      }
+    ]
   },
   {
     "id": "telegram-749",
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-07-14T08:27:23.339693+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 749）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你他媽的你不是說已經改好了嗎？\n立即給我從底層邏輯架構流程，整個重構\n不是給我修補而已\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] PHASE-Z auto-commit 測試紅燈（273b2b110）\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\nsafety-net 自動 commit 直接進 main，補跑受影響測試後亮紅燈。\n• fire 時間: 16:26\n• commit: 273b2b110\n• 變更程式檔: scripts/daily_checkup.py, scripts/experiment_gates.py, scripts/tests/test_experiment_certification.py, tests/test_daily_checkup_reproducibility.py, tests/test_reproduce_check.py\n• 跑的測試: tests -k \"daily_checkup or test_daily_checkup_reproducibility or test_reproduce_check\"\n• pytest 退出碼: 2\n\n📌 影響\nPHASE-Z 不經正常測試閘門就把 agent 未提交的變更送進 main（error_log dab3baa12：\n一次紅燈在 main 上紅了 5 天沒人發現）。紅燈代表 main 現在有壞掉的 runtime。\n\n🛠️ 建議行動\n1. 本機重跑確認：\nuv run --extra dev python -m pytest tests -q -k \"daily_checkup or test_daily_checkup_reproducibility or test_reproduce_check\"\n2. 修掉紅燈或 revert 該 co\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
@@ -36998,13 +36977,23 @@
         "from": "pending",
         "to": "claimed",
         "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-14T12:25:47.976344+00:00",
+        "from": "claimed",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-14T12:25:48.211487+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
       }
     ],
     "last_released_at": "2026-07-14T10:50:05.543010+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "telegram-responder",
-    "claimed_at": "2026-07-14T12:13:27.009411+00:00",
-    "claim_session_id": "edbc2937374c"
+    "completed_at": "2026-07-14T12:25:48.211474+00:00"
   },
   {
     "id": "email-12100-5615f8",
@@ -37141,10 +37130,28 @@
     "title": "Alert 分層：內部可自癒的 warn 改 auto-task 不寄老闆信（連續失敗才升級）",
     "description": "refactor_plan_write_boundary_quality.md WS#4+#5。範圍：(a) git_push_backup hold、phase_z baseline missing、silent-fallback NEW 三類 alert 改為：只建 P1 task（idempotent by alert_key）+ 不寄 email；同一 alert_key 連續 ≥2 班自動修復失敗才升級寄信（body 用『已自動嘗試 X 次，失敗原因』框架）。(b) audit_silent_fallbacks 偵測器認得 bad.append/findings-collector 類 observable 出口（2026-07-14 兩個誤報 class），加回歸測試。Enforcement owner 不變（alerts.py 路由層 + no-silent-fallback 機械層）；anti-stacking：不建新通知機制，改路由。完成 Check：連續 7 天老闆信箱零內部乒乓。",
     "task_type": "platform_ops",
-    "status": "pending",
+    "status": "in_progress",
     "priority": 1,
     "source": "owner_correction_20260714_evening",
-    "created_at": "2026-07-14T11:16:52.864957+00:00"
+    "created_at": "2026-07-14T11:16:52.864957+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-14T12:41:24.946867+00:00",
+    "claim_session_id": "7d44ac6bd2e4",
+    "status_history": [
+      {
+        "ts": "2026-07-14T12:41:24.946884+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T12:41:25.197157+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-14T12:41:25.197143+00:00"
   },
   {
     "id": "dispatch_writer_isolation_design",
@@ -37198,30 +37205,65 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-07-14T12:12:51.963318+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 758）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n幹 為什麼修不好\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "claimed_by": "telegram-responder",
-    "claimed_at": "2026-07-14T12:13:27.249814+00:00",
-    "claim_session_id": "c97e4aa1adc0",
     "status_history": [
       {
         "ts": "2026-07-14T12:13:27.249827+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-14T12:25:48.439521+00:00",
+        "from": "claimed",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-14T12:25:48.670228+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
       }
-    ]
+    ],
+    "completed_at": "2026-07-14T12:25:48.670212+00:00"
   },
   {
     "id": "telegram-759",
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-14T12:13:37.289427+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 759）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n幹 為什麼修不好\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] CI 自動修復未成功（ci-red-29320130569）\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🛠️ 自動修復需要支援\n原因：remediation_stalled_more_than_two_checks: 3\n原始失敗：failed log 無法取得：TimeoutExpired\n已失敗 cycles：2\nrepair tasks：{'ci-red-29320130569': 'succeeded', 'ci-red-29328352646': 'pending'}\n\n最新 failure run：29328352646\nhttps://github.com/yhlai0911/volpred-research/actions/runs/29328352646\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n幹 為什麼修不好\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] CI 自動修復未成功（ci-red-29320130569）\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🛠️ 自動修復需要支援\n原因：remediation_stalled_more_than_two_checks: 3\n原始失敗：failed log 無法取得：TimeoutExpired\n已失敗 cycles：2\nrepair tasks：{'ci-red-29320130569': 'succeeded', 'ci-red-29328352646': 'pending'}\n\n最新 failure run：29328352646\nhttps://github.com/yhlai0911/volpred-research/actions/runs/29328352646\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-14T12:25:48.903305+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-14T12:25:49.136810+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-14T12:25:49.136794+00:00"
+  },
+  {
+    "id": "nested_dm_auditor_cannot_express_fixed_window_gw",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent_discovered",
+    "created_at": "2026-07-14T13:23:32.692943+00:00",
+    "title": "nested-DM auditor has no third role: the fixed-window bounded-memory GW unconditional special case",
+    "description": "K1709 rev3 撞出來的。scripts/audit_nested_dm_misuse.py 用字面規則判角色：PRIMARY_DM_DECL_RE 只要看到 PRIMARY 與 DM 在 80 字元內就判 primary_raw_dm（違規）。它只認得兩種安全角色：DM 是 diagnostic-only，或 Clark-West 覆蓋全部 primary。但存在合法的第三種：在 paired fixed rolling window（bounded-memory forecasting method）下，DM 形式的統計量正是 GW(2006) Sec 3.4 的無條件特例，巢狀比較下有效 —— 使它合法的是 estimation scheme，不是公式。K1709 rev2 用模糊的『GW gate』措辭時稽核器判它安全；rev3 依 Codex FAIL 誠實改成『primary family 由無條件 GW/DM 裁決』後反而被判違規。這是稽核器在訓練科學對它說謊 —— 修法方向不是把實驗改回含糊。讓 ratchet 能接受第三種角色，但必須要求證據（marker + 檔案內確有 fixed/rolling bounded-memory scheme 的實證），不可變成人人可蓋的免死金牌 —— ratchet 開後門就是 ratchet 死亡的方式。Codex 已在 K1709 rev3 重審 brief 裡被要求對這個設計問題給裁決（compute job agent-brief_k1709_rev3_review-580bae），先收他的意見再動手。注意：另一 slot 正在改 pre-commit Gate 0（branch fix/gate0-trusted-auditor-from-main），別撞同一批檔。現況：experiments/k1709/test_k1709.py::test_repo_nested_dm_auditor_marks_this_file_safe 與 scripts/tests/test_nested_dm_misuse_ratchet.py::test_no_new_nested_raw_dm_sites 都紅著，K1709 在 worktree 不進 main，故未污染 main CI。"
   }
 ]

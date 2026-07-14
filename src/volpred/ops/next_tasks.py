@@ -321,7 +321,8 @@ def compact_terminal_tasks(
     Mutates ``tasks`` in place. Conservative skips: non-dict rows, statuses
     outside ``TERMINAL_COMPACTABLE_STATUSES`` (the 27 frozen legacy rows are
     out-of-vocab and therefore never touched -- 永遠修流程，不修資料), rows
-    already tombstoned, rows younger than ``age_days``, and rows with no
+    already tombstoned, unresolved internal-alert attempts (their state is the
+    escalation receipt), rows younger than ``age_days``, and rows with no
     parseable terminal timestamp. Caller must persist the returned full
     records to the archive BEFORE writing the compacted queue.
     """
@@ -335,6 +336,16 @@ def compact_terminal_tasks(
             continue
         status = str(task.get("status") or "").strip().lower()
         if status not in TERMINAL_COMPACTABLE_STATUSES:
+            continue
+        internal_state = task.get("internal_alert_state")
+        if (
+            task.get("internal_remediable") is True
+            and isinstance(internal_state, dict)
+            and not internal_state.get("resolved_at")
+        ):
+            # A terminal attempt is counted by the next signal.  Compacting its
+            # episode metadata first would silently reset the two-attempt
+            # escalation threshold after a detector outage.
             continue
         ts_raw = _task_terminal_ts(task)
         if not ts_raw:

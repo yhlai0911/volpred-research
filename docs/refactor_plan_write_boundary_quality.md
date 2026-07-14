@@ -24,8 +24,8 @@
 | 1 | 5 個 fallback 站點修復（2 warn + 3 silent-ok）+ push 解封 | 止血 | ✅ ceed60567（strict new=0；ahead=0 已推） |
 | 2 | Gate 契約原子性落地（auditor `--index` + hook 源同 commit） | 止血 | ✅ ceed60567（用設計好的 bootstrap 逃生口） |
 | 3 | **Gate -1：hook 部署/源原子性自檢** — 部署副本 ≠ 源 → 任何 commit 被擋，死鎖 class 消滅 | 邏輯 | ✅ 384e3612f（break-then-verify：弄歪會咬、同步會過） |
-| 4 | **Alert 分層**：`git_push_backup` hold / `phase_z` baseline / silent-fallback NEW 三類改「auto P1 task + 不寄信；連續 2 班自動修復失敗才 email」 | 流程 | 🔜 P1 `alert_routing_internal_remediable`（spec 見任務） |
-| 5 | 偵測器精度：audit_silent_fallbacks 認得 `bad.append` / findings-collector 類 observable 出口（本次 2 個誤報的 class） | 流程 | 🔜 併入 #4 任務（同 owner：no-silent-fallback 機械層） |
+| 4 | **Alert 分層**：`git_push_backup` hold / `phase_z` baseline / silent-fallback NEW 三類改「auto P1 task + 不寄信；連續 2 班自動修復失敗才 email」 | 流程 | ✅ `alert_routing_internal_remediable`：stable-key P1、explicit resolve、兩次 completed repair 後升級 |
+| 5 | 偵測器精度：audit_silent_fallbacks 認得 `bad.append` / findings-collector 類 observable 出口（本次 2 個誤報的 class） | 流程 | ✅ 同任務完成：只接受 local empty-list + exception payload + unconditional returned collector 的保守 AST proof |
 | 6 | **Writer 隔離擴大**：platform_ops/governance dispatch 改 worktree + gate-green 才 merge（比照實驗紀律） | 架構 | 🔜 P2 `dispatch_writer_isolation_design`（先出設計 + 成本評估，動 supervisor 前需審） |
 | 7 | 完成定義機械化：dispatch prompt 的「完成」檢查表加一行機械項 — 收工前 `git status` 乾淨（自己的檔都 commit）+ strict audit new=0 | 流程 | ✅ 已在 dispatch prompt HARD RULE（本次補強 pointer 至本檔） |
 

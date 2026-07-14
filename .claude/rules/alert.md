@@ -67,6 +67,26 @@ Additional invariants:
 - Alert body should describe what the system already did for automatable cases;
   reserve boss-facing decision language for actual policy decisions.
 
+### 內部可自癒 alert 路由（2026-07-14）
+
+以下規則只取代 `git_push_backup` silent-fallback hold、PHASE-Z fire baseline
+missing、PHASE-Z candidate silent-fallback NEW 的「先寄信再處理」交接；不改變
+`push_backlog` 對所有未推原因的 outcome 偵測：
+
+- 三者先以 stable `alert_key` 建 canonical `storage/next_tasks.json` P1，active
+  task 重複觸發不得另建 task，也不得寄 email／Telegram。
+- pending／claimed／in_progress 是修復進行中，不算失敗。只有 task 已 terminal，
+  下一次同 key 仍被 detector 證實，才算一次完成但未解除的修復。
+- 同一 episode 累積兩次後才走既有 `send_alert()` transport；title 在同 episode
+  內固定、explicit resolve 後的新 episode 使用新 dedup identity，body 必須包含
+  「已自動嘗試 X 次」與最後失敗原因。
+- condition clear 必須由 detector 明確呼叫 resolver；不得用經過幾小時推定已恢復。
+- `push_backlog` 只有最新 backup log 明確是 silent-fallback `HELD` 才使用
+  `git_push_backup_hold` key；PHASE-Z candidate 另用 `silent_fallback_new`，避免
+  HEAD clean 誤關 dirty candidate episode。divergence、auth/network/push failure
+  仍照常通知。
+- P1 寫入失敗時不能靜音；那是獨立 router infrastructure failure，立即 fail-loud。
+
 ## Alert 觸發 → 主線程 auto-remediation（2026-04-19 用戶要求）
 
 **硬規則**：Alert 寄出**不只是通知**，主線程**必立即採取對應 action** 解 breach。email 給用戶是 log，不是責任轉移。
