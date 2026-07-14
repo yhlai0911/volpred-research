@@ -1,46 +1,18 @@
 {
-  "reviewed_commit": "c97d690c684d288a90aa306c6756e6d658669045",
-  "reviewer": "codex gpt-5.6-sol / ultra",
-  "reviewed_at": "2026-07-14T15:43:23+08:00",
-  "final_verdict": "FAIL",
-  "review_artifact": "experiments/k1709/codex_review_rev2_c97d690c.txt",
-  "review_transcript_raw": "experiments/k1709/codex_review_rev2_c97d690c.raw.txt",
+  "kid": "k1709",
+  "verdict": "FILL: PASS or FAIL — anything but PASS blocks the merge",
+  "reviewer": "FILL: model / effort",
+  "reviewed_at": "FILL: ISO8601",
+  "reviewed_commit": "FILL: the frozen SHA you read",
+  "review_artifact": "FILL: relpath of the written review",
   "blocking_defects": [
-    "GW mislabel: the claim-bearing \"Giacomini-White\" gate is implemented only as the scalar unconditional Diebold-Mariano special case (test function h_t == 1). k1709.py:1039-1091 builds a scalar loss differential, tests its mean with a Bartlett HAC standard error against a normal z, and never forms an instrument h_t, the vector moment h_t*dL_t, a q x q covariance, a Wald statistic, or a chi-square_q reference distribution. The reader-facing \"GW gate / GW z / Giacomini-White on QLIKE\" terminology (README.md:30-38, README.md:69-82) therefore overstates the test: it cannot support a conditional / state-dependent predictive-ability claim and could miss offsetting gains and losses across regimes. Codex notes the numeric p-values remain defensible for the weaker claim GW (2006) Sec. 3.4 actually licenses -- equal *unconditional* predictive ability under a bounded-memory forecasting method (where the GW statistic coincides with DM) -- so the defect is one of labelling and claim scope, not of arithmetic."
+    "FILL: one entry per defect that makes this a FAIL; [] if PASS"
   ],
-  "adjudication_of_prior_defects": {
-    "C6_cell_key_collision": "FIXED",
-    "end_to_end_runnability_key_drift": "FIXED",
-    "readme_claim_surface_retracted_null_and_16_2pct": "FIXED",
-    "R1_power_over_claim": "FIXED",
-    "R2_first_at_coarse_grid_point_estimate": "FIXED",
-    "R3_beta0_rejection_rate_mislabeled_size": "FIXED",
-    "R4_fixed_window_raw_dm_mislabeled_nested_biased": "FIXED",
-    "R5_bounded_null_language": "FIXED",
-    "R6_unexpected_z_expanding_window_lookahead": "FIXED"
-  },
-  "independent_findings": {
-    "gw_vs_dm": "BLOCKING -- see blocking_defects[0]. Rolling re-estimation (250-obs fixed-length window, k1709.py:949-998) is NOT a defect: GW bounded-memory asymptotics permit it. HAC/Newey-West bandwidth (~n^(1/3), o(n), > h-1) is appropriate for the loss differential actually tested.",
-    "lookahead_and_seeding": "NO BLOCKING DEFECT -- no claim-bearing look-ahead found (predictors lagged via state_lag/flow_lag, flow scaling uses only prior 20 days, OOS training labels close strictly before the forecast origin, shock thresholds are fixed literals, no randomized split). All stochastic procedures seeded (global seed, bootstrap RNG + per-cell seed, per-beta power RNG)."
-  },
-  "non_blocking_observations": [
-    "qlike_gain_upper_bound assumes z(m) is globally increasing; 4 primary streams are mildly non-monotone. Dense checks found exactly one crossing at both pointwise and Bonferroni critical values, so every frozen bound remains valid, but the inversion should verify the full rejection set rather than assume monotonicity.",
-    "Figure 2 treats an already-lagged flow regressor as event day zero, shifting the displayed flow-shock date one day forward (k1709.py:2530-2555). Does not feed inference.",
-    "README.md:209 claims future live-data reruns will leave h=1 statistics/verdict/counts/bounds unchanged; not guaranteeable under new observations or vendor revisions.",
-    "Farside/Yahoo point-in-time vintages are not archived; no internal look-ahead, but vendor revisions limit strict historical reproducibility."
-  ],
-  "reviewer_checks_run": [
-    "pytest experiments/k1709/test_k1709.py -q -> 62 passed",
-    "pytest scripts/tests/test_nested_dm_misuse_ratchet.py -q -> 21 passed",
-    "renderer re-run from /tmp against frozen JSON -> 238 lines, SHA-256 exactly matched the tracked README.md",
-    "main() smoke run in /tmp with synthetic fetches -> exit 0, 10 primary / 54 total cells, 5 PNGs, verdict JSON written",
-    "ten primary loss streams reconstructed independently -> all raw exclusion p-values and simultaneous bounds matched the frozen artifact bit-for-bit"
-  ],
-  "head_after_review": "c97d690c684d288a90aa306c6756e6d658669045",
-  "worktree_clean_during_review": true,
-  "worktree_clean_note": "git status --porcelain was empty at review start and, at review end, showed only the newly written review artifacts (codex_review_rev2_c97d690c.txt, .raw.txt, review_verdict.json). No file under experiments/k1709/ that the review covers was modified: k1709.py / test_k1709.py / render_readme.py / k1709_results.json / README.md are byte-identical to commit c97d690c. Codex ran with -s workspace-write but modified no repository file (it confirms this itself in the report).",
-  "claim_surface_sha256": {
-    "k1709.py": "a98b740bc36098d46ab059a035acf9d7dc33238fdcbe361d3ef53d06f73c7971",
-    "k1709_results.json": "63e99e60a866bb0bc7358f77abc9017ac5ac0df157b1d15393847bc78a00be57"
+  "reviewed_sha256": {
+    "README.md": "3716836db76488defbc0ccd151a98a9d8cad228cf93b19435fe9591ca94c2509",
+    "k1709.py": "32e2896f9b2b9de0f58a0eb23e513c144b23970577c40c87dbf8def182bfe07b",
+    "k1709_results.json": "787baf5136c282f8810c07cbf983dc20560c5b090fad589db3f64ad64413389f",
+    "render_readme.py": "2ad0d450c53906fc5c29a1e33d592792a79bfe73eade35cc14487a934aa5b0dc",
+    "test_k1709.py": "94ed7c3fe352b74027c52bd40d6e1aa1dc921a638edc9d5ce8fbd91df7f996f9"
   }
 }
