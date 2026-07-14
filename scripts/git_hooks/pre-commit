@@ -43,6 +43,26 @@ cd "$ROOT" || exit 0
 
 PY="$(command -v uv >/dev/null 2>&1 && echo "uv run python" || echo python3)"
 
+# --- Gate -1: hook deploy/source atomicity (2026-07-14 19:xx) --------------
+# 今天的死鎖 class：18:47 tick 把新 hook 部署進 .git/hooks（要求 --index）但沒
+# commit 升級後的 auditor 源 → HEAD 舊 auditor 不認 --index → 所有 .py commit
+# 被鎖死，連修復本身都進不來。規則：部署副本與 hook 源必須一致才准 commit；
+# 本 commit 若有 stage hook 源，比對的是 staged 版（允許原子同步落地）。
+HOOK_SRC="scripts/git_hooks/pre-commit"
+DEPLOYED_HOOK="$(git rev-parse --git-dir)/hooks/pre-commit"
+if [ -f "$DEPLOYED_HOOK" ] && [ -f "$HOOK_SRC" ]; then
+  if git diff --cached --name-only | grep -qx "$HOOK_SRC"; then
+    SRC_BLOB="$(git show ":$HOOK_SRC" 2>/dev/null)"
+  else
+    SRC_BLOB="$(cat "$HOOK_SRC")"
+  fi
+  if [ -n "$SRC_BLOB" ] && ! printf '%s\n' "$SRC_BLOB" | diff -q - "$DEPLOYED_HOOK" >/dev/null 2>&1; then
+    echo "[pre-commit] BLOCKED — .git/hooks/pre-commit 與 $HOOK_SRC 不一致（hook 先上源沒跟上 = 今日死鎖 class）。"
+    echo "[pre-commit] 修法：同一個 commit 內同步兩者 — cp $HOOK_SRC 到 .git/hooks/ 或反向，然後 git add $HOOK_SRC。"
+    exit 1
+  fi
+fi
+
 # --- Gate 0: candidate-index test dependency closure (2026-07-14) ---------
 # Read the INDEX, not the working tree.  A foreign/untracked implementation can
 # exist locally while this commit contains only its test; filesystem existence
