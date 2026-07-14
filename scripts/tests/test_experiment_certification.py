@@ -175,3 +175,24 @@ def test_cli_exit_codes(tmp_path: Path) -> None:
     )
     assert ok.returncode == 0, ok.stderr
     assert "PASS" in ok.stdout
+
+
+def test_certify_cli_is_stdlib_only(tmp_path: Path) -> None:
+    """The merge hook uses bare python3, outside the project's uv environment.
+
+    ``-I -S`` removes cwd, PYTHONPATH, user site and site-packages.  A PASS here
+    proves the certify subcommand does not eagerly import the audit stack (some
+    auditors import ``volpred``); only the separate ``run`` subcommand may do so.
+    """
+    exp = _experiment(tmp_path)
+    _certify(exp, "PASS")
+
+    isolated = subprocess.run(
+        [sys.executable, "-I", "-S", str(GATE), "certify", "--path", str(exp)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+
+    assert isolated.returncode == 0, isolated.stderr
+    assert "PASS" in isolated.stdout

@@ -51,11 +51,6 @@ from typing import Any, Callable, Iterable
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-import audit_dm_hac_lag as dm_hac  # noqa: E402
-import audit_fevd_ordering as fevd  # noqa: E402
-import audit_mdd_scale_artifact as mdd  # noqa: E402
-import audit_nested_dm_misuse as nested_dm  # noqa: E402
-
 BASELINE_DIR = REPO_ROOT / "storage" / "ops"
 
 
@@ -115,24 +110,35 @@ def _rel(path: Path) -> str:
 
 
 def _scan_nested_dm(path: Path) -> Iterable[tuple[str, str]]:
+    # Keep auditor imports on the ``run`` path.  ``certify`` is called by
+    # merge_worktree.sh with bare python3 and must remain stdlib-only even when
+    # the volpred package has not been installed in that interpreter.
+    import audit_nested_dm_misuse as nested_dm
+
     finding = nested_dm.scan_file(path, REPO_ROOT)
     if finding is not None and finding.test_role == "primary_raw_dm":
         yield finding.file, finding.test_role
 
 
 def _scan_dm_hac(path: Path) -> Iterable[tuple[str, str]]:
+    import audit_dm_hac_lag as dm_hac
+
     for finding in dm_hac.scan_file(path):
         if finding.verdict in dm_hac.RATCHET_VERDICTS:
             yield f"{finding.file}::{finding.function}", finding.verdict
 
 
 def _scan_mdd(path: Path) -> Iterable[tuple[str, str]]:
+    import audit_mdd_scale_artifact as mdd
+
     for finding in mdd.scan_file(path):
         if finding.verdict in mdd.RATCHET_VERDICTS:
             yield finding.key(), finding.verdict
 
 
 def _scan_fevd(path: Path) -> Iterable[tuple[str, str]]:
+    import audit_fevd_ordering as fevd
+
     site = fevd.classify(path)
     if site is not None and site.classification in ("VIOLATION", "MISLABELED"):
         yield site.path, site.classification

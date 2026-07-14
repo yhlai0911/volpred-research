@@ -17333,5 +17333,15 @@
     "summary": "merge 路徑加『綁定 bytes 的 PASS 裁決』認證 gate（commit 7f6adcbd2）",
     "detail": "K1709 被 Codex 判 FAIL 仍 merge 進 main（CI 連紅 4 次）。但單純『FAIL 就擋』不夠：agent 事後修好了兩個 CRITICAL，那份 FAIL 講的是已不存在的 k1709.py @e42b0885。故裁決必須綁定其審查的快照：certify 比對 claim surface 的 sha256。三入口全擋（無裁決/FAIL/sha 漂移）。測試 11 + 16 cases/43 assertions 全綠。已驗證 gate 正確擋住尚未認證的 k1709；K1709 rev2 重裁決 job 已在其他線 running，未重複派工。",
     "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-14T14:42:39+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29307406826",
+    "outcome": "completed",
+    "actor": "hourly-14",
+    "owner": "codex-vscode",
+    "commit": "562eaf958",
+    "summary": "Closed CI incident 29307406826: verified K1709 withdrawal at 562eaf958 is green, class sweep found no other new nested-DM site, and hardened merge certification to remain stdlib-only under bare python3. Clean verification: 39 pytest passed; merge_worktree 16/16 cases and 43/43 assertions passed."
   }
 ]

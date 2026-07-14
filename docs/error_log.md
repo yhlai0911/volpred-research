@@ -2,6 +2,26 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 14:40 — Merge 認證聲稱可用裸 `python3`，卻在解析子命令前 eager-import 專案套件
+
+**現象**：K1709 的 nested-DM 紅燈已由 `562eaf958` 撤回並在 GitHub Actions 轉綠，新增的
+review-certification merge gate 也宣稱不依賴 `uv`；但在乾淨 detached worktree 執行
+`scripts/tests/test_merge_worktree.sh` 時，16 個 case 有 16 個 assertion 失敗。所有正常 merge 都在
+`python3 scripts/experiment_gates.py certify ...` 先誤擋，traceback 是
+`audit_dm_hac_lag.py -> volpred.ops.diagnostics -> ModuleNotFoundError: volpred`。
+
+**根因**：`experiment_gates.py` 在 module import 時一次載入四個 audit 模組；其中 audit stack 已有
+`volpred` 相依。`certify` 本身只需 stdlib，但 argparse 尚未分流到子命令就先支付了 `run` 路徑的相依，
+所以同一個 `uv` pytest interpreter 會綠、merge hook 真正使用的裸 `python3` 卻失效。
+
+**修正**：四個 auditor 改在各自 `_scan_*()` adapter 內 lazy import，只有 `run` 子命令掃描實驗時才
+載入；`certify` 維持 stdlib-only。新增 `python -I -S ... certify` 回歸測試，刻意移除 cwd、PYTHONPATH、
+user site 與 site-packages。乾淨 worktree 驗證：相關 pytest **39 passed**；merge-worktree **16/16 cases、
+43/43 assertions passed**。
+
+**教訓（class）**：多子命令 CLI 的「輕量／無環境相依」不能由函式內容推定，必須用 production
+真正呼叫的 interpreter 做隔離測試；top-level import 也是每個子命令的 runtime dependency。
+
 ## 2026-07-14 14:20 — Review 對移動中的樹裁決：verdict 沒綁 commit SHA，一落地就過期（hourly-14 / slot-2）
 
 **現象**：K1709-rev 的 agent 在 worktree 內自跑 Codex review，產出 `codex_review_rev1_20260714.txt`
