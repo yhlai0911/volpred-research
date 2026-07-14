@@ -146,6 +146,31 @@ def test_receipt_does_not_survive_its_fire(repo: Path):
     assert "沒留 receipt" in _subject(repo)
 
 
+def test_cli_refuses_mangled_cjk_argv_with_an_actionable_message(repo: Path):
+    """CJK through a shell arg can arrive as lone surrogates.
+
+    2026-07-14: `fire_receipt.py --body "<中文>"` died with
+    `UnicodeEncodeError: surrogates not allowed` inside f.write() — an error that
+    tells the caller nothing about the fix. The CLI must catch it at the argument
+    boundary and name --body-file, the path that works.
+    """
+    import sys
+
+    cli = Path(__file__).resolve().parents[1] / "fire_receipt.py"
+    mangled = "\udc89".join(("本班", "修好了"))  # what a bad-bytes argv looks like after decoding
+
+    res = subprocess.run(
+        [sys.executable, str(cli), "--subject", "ok", "--body", mangled, "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        errors="replace",
+        check=False,
+    )
+
+    assert res.returncode == 2, f"mangled body was accepted:\n{res.stdout}{res.stderr}"
+    assert "--body-file" in res.stderr, f"error does not name the fix:\n{res.stderr}"
+
+
 def test_stale_receipt_is_refused(repo: Path):
     """A receipt older than a fire's lifetime describes a fire that never finished."""
     phase_z.write_fire_receipt(repo, subject="上上班留下的")
