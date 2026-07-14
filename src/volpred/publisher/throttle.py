@@ -116,7 +116,7 @@ def _log_throttle_decision(
     warn) must leave an audit trail so a non-publish is never silent.
     Fail-safe — logging never breaks a publish.
     """
-    from volpred.ops.canonical_write import guard_canonical_write
+    from volpred.canonical_write import guard_canonical_write
 
     path = Path(storage_dir) / "logs" / "dedup_decisions.jsonl"
     guard_canonical_write(path)

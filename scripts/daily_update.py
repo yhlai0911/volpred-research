@@ -17,6 +17,7 @@ from arch import arch_model
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from volpred.canonical_write import guard_canonical_write
 from volpred.config.runtime import (
     get_default_mirror_url,
     get_frontend_path,
@@ -1151,6 +1152,7 @@ def main():
         "gap_alert_level": gap_alert_level,
     }
 
+    guard_canonical_write(pt_file)
     pt_file.write_text(json.dumps(pt, indent=2, ensure_ascii=False))
 
     # --- Check if data is fresh (skip publish if spy_date unchanged since last run) ---
@@ -1169,6 +1171,7 @@ def main():
         else:
             # Remove old daily_update for today
             feed = [p for p in feed if not (p.get("phase") == "daily_update" and today in p.get("title", ""))]
+            guard_canonical_write(feed_path)
             feed_path.write_text(json.dumps(feed, indent=2, ensure_ascii=False))
     else:
         feed = []
@@ -1271,6 +1274,7 @@ def main():
     data_sync_dirs = get_local_data_sync_dirs(active_only=True)
     if data_sync_dirs:
         for data_dir in data_sync_dirs:
+            guard_canonical_write(data_dir)
             data_dir.mkdir(parents=True, exist_ok=True)
             for src, dst in [
                 ("memory/research_log.json", "research_log.json"),
@@ -1281,13 +1285,20 @@ def main():
             ]:
                 source_path = storage / src
                 if source_path.exists():
-                    shutil.copy2(source_path, data_dir / dst)
+                    destination_path = data_dir / dst
+                    guard_canonical_write(destination_path)
+                    shutil.copy2(source_path, destination_path)
             if feed_source.exists():
-                (data_dir / "feed.json").write_text(sorted_feed)
+                data_feed_path = data_dir / "feed.json"
+                guard_canonical_write(data_feed_path)
+                data_feed_path.write_text(sorted_feed)
             report_dir = data_dir / "reports"
+            guard_canonical_write(report_dir)
             report_dir.mkdir(exist_ok=True)
             for report_file in (storage / "reports").glob("*.json"):
-                shutil.copy2(report_file, report_dir / report_file.name)
+                report_destination = report_dir / report_file.name
+                guard_canonical_write(report_destination)
+                shutil.copy2(report_file, report_destination)
         print(f"  Published + synced locally to {len(data_sync_dirs)} configured data mirror(s). Feed: {len(feed)} items")
     else:
         print(f"  Published locally. Feed: {len(feed)} items (no configured local data mirrors)")
@@ -1333,6 +1344,7 @@ def main():
         print("  Mirror API URL not configured")
 
     # --- Sync to Supabase (v2 website) ---
+    failed_path = Path("storage/.failed_supabase_syncs.json")
     try:
         # Contentlayer pattern (2026-04-18): feed.json is canonical; no
         # mile_*.json singles to audit / repair. article_backups is a
@@ -1340,7 +1352,6 @@ def main():
         from supabase_sync import sync_article, sync_risk_forecast, sync_strategy_signal, sync_paper_trade
         # Heartbeat is in collect_us_data.py (runs 30min earlier at 05:30)
         # Retry any failed syncs from publish_milestone
-        failed_path = Path("storage/.failed_supabase_syncs.json")
         if failed_path.exists():
             failed_ids = json.loads(failed_path.read_text())
             if failed_ids:
@@ -1355,6 +1366,7 @@ def main():
                             retried += 1
                 if retried:
                     print(f"  Supabase: retried {retried} failed syncs")
+                guard_canonical_write(failed_path)
                 failed_path.unlink()
         # Sync the daily signal article
         if feed and feed[0]:

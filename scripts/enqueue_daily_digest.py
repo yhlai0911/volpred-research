@@ -29,6 +29,7 @@ NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 FEED = ROOT / "storage" / "reports" / "feed.json"
 TPE = ZoneInfo("Asia/Taipei")
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 DESCRIPTION = (
@@ -152,6 +153,7 @@ def _reconcile_stale_digest_task(task_id: str) -> None:
             changed = True
     if not changed:
         return
+    guard_canonical_write(NEXT_TASKS)
     try:
         tmp = NEXT_TASKS.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=2) + "\n")
@@ -214,6 +216,7 @@ def main() -> int:
 
     tasks.append(task)
     normalize_task_priorities(tasks)
+    guard_canonical_write(NEXT_TASKS)
     tmp = NEXT_TASKS.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=2) + "\n")
     tmp.replace(NEXT_TASKS)

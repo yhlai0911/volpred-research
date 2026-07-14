@@ -13,8 +13,10 @@
 #   Repaired after the fact by e00b83482.
 #
 # The gate now reproduces what CI actually does: for each pushed <local sha>,
-# extract that commit's tree into a temp dir and run THAT COMMIT'S OWN audit
-# scripts against THAT COMMIT'S OWN baseline. Disk state is irrelevant. Only the
+# extract that commit's tree into a temp dir and run the audit gates against
+# THAT COMMIT'S OWN bytes and baseline. Gate 3 is bootstrapped from the commit's
+# immutable parent copy, so a candidate cannot replace its own auditor with an
+# always-green stub. Disk state is irrelevant. Only the
 # ref tips are audited, which is exactly what CI checks out (.github/workflows/
 # silent-fallbacks.yml + source-encoding.yml run on the pushed head).
 #
@@ -189,29 +191,51 @@ for sha in $SHAS; do
   # `pytest --collect-only` cannot stand in here — it needs config/ + storage/ +
   # installed deps, which this source-only extract deliberately does not have.
   TI="$tree/scripts/audit_test_imports.py"
-  if [ -f "$TI" ]; then
-    TI_OUT="$("$PY" "$TI" --root "$tree" 2>&1)"
-    TI_RC=$?
-    if [ "$TI_RC" -eq 1 ]; then
-      printf '%s\n' "$TI_OUT" | grep '^BAD '
-      block "commit $short has tests importing names its own source does not define — CI Test Suite would go red at collection."
-      echo "[pre-push] This is the partial-commit signature: the test landed, the source change did not."
-      echo "[pre-push] Commit the source side too (the gate reads the COMMIT, not your working tree)."
-      exit 1
-    fi
-    if [ "$TI_RC" -ne 0 ]; then
-      printf '%s\n' "$TI_OUT"
-      block "the test-import audit could not run on $short (rc=$TI_RC)."
-      exit 1
-    fi
-    # Coverage canary: same reasoning as Gate 1 — a gate that resolved 0 imports
-    # is indistinguishable from a passing one.
-    TI_N="$(printf '%s\n' "$TI_OUT" | sed -n 's/.*\[audit-test-imports\] \([0-9][0-9]*\) test files checked.*/\1/p' | head -1)"
-    if [ -z "$TI_N" ] || [ "$TI_N" -eq 0 ]; then
-      printf '%s\n' "$TI_OUT"
-      block "the test-import audit checked 0 test files in $short — the gate is not actually gating."
-      exit 1
-    fi
+  if [ ! -f "$TI" ]; then
+    block "commit $short removes scripts/audit_test_imports.py — a candidate cannot remove its own dependency gate."
+    exit 1
+  fi
+  # Bootstrap from the immutable parent tree, never from the candidate being
+  # judged.  Otherwise the same commit could replace this script with `exit 0`
+  # and land a missing implementation.  A root commit has no trusted bootstrap,
+  # so it fails closed; seed/bootstrap pushes must happen before installing the
+  # hook (the regression fixtures model that explicitly).
+  TI_PARENT="$(git rev-parse "${sha}^" 2>/dev/null || true)"
+  TRUSTED_TI="$GATE_TMP/$short.trusted-audit-test-imports.py"
+  if [ -z "$TI_PARENT" ] || ! git show "$TI_PARENT:scripts/audit_test_imports.py" > "$TRUSTED_TI" 2>/dev/null; then
+    block "commit $short has no immutable parent copy of scripts/audit_test_imports.py — test-import gate cannot bootstrap."
+    exit 1
+  fi
+  # The candidate copy must remain syntactically runnable for the next commit,
+  # but it never executes while judging itself.
+  TI_PARSE_OUT="$("$PY" -m py_compile "$TI" 2>&1)"
+  TI_PARSE_RC=$?
+  if [ "$TI_PARSE_RC" -ne 0 ]; then
+    printf '%s\n' "$TI_PARSE_OUT"
+    block "commit $short contains an unrunnable scripts/audit_test_imports.py."
+    exit 1
+  fi
+  TI_OUT="$("$PY" "$TRUSTED_TI" --root "$tree" 2>&1)"
+  TI_RC=$?
+  if [ "$TI_RC" -eq 1 ]; then
+    printf '%s\n' "$TI_OUT" | grep '^BAD '
+    block "commit $short has tests importing names its own source does not define — CI Test Suite would go red at collection."
+    echo "[pre-push] This is the partial-commit signature: the test landed, the source change did not."
+    echo "[pre-push] Commit the source side too (the gate reads the COMMIT, not your working tree)."
+    exit 1
+  fi
+  if [ "$TI_RC" -ne 0 ]; then
+    printf '%s\n' "$TI_OUT"
+    block "the test-import audit could not run on $short (rc=$TI_RC)."
+    exit 1
+  fi
+  # Coverage canary: same reasoning as Gate 1 — a gate that resolved 0 imports
+  # is indistinguishable from a passing one.
+  TI_N="$(printf '%s\n' "$TI_OUT" | sed -n 's/.*\[audit-test-imports\] \([0-9][0-9]*\) test files checked.*/\1/p' | head -1)"
+  if [ -z "$TI_N" ] || [ "$TI_N" -eq 0 ]; then
+    printf '%s\n' "$TI_OUT"
+    block "the test-import audit checked 0 test files in $short — the gate is not actually gating."
+    exit 1
   fi
 done
 

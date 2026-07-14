@@ -35,7 +35,7 @@ NEXT_TASKS_PATH = ROOT / "storage/next_tasks.json"
 
 sys.path.insert(0, str(ROOT / "src"))
 
-from volpred.ops.canonical_write import guard_canonical_write
+from volpred.canonical_write import guard_canonical_write
 from volpred.publication_gate import publication_block_reason
 from volpred.topic_clusters import classify_topic_cluster, cluster_gate_status
 
@@ -320,6 +320,7 @@ def _write_output_atomically(output: dict) -> None:
     os.replace is atomic on the same filesystem, so readers see either the old
     complete file or the new complete file, never a half-written one.
     """
+    guard_canonical_write(OUTPUT_PATH)
     payload = json.dumps(output, ensure_ascii=False, indent=2)
     tmp_path = OUTPUT_PATH.with_name(OUTPUT_PATH.name + ".tmp")
     tmp_path.write_text(payload, encoding="utf-8")

@@ -20,6 +20,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from volpred.canonical_write import guard_canonical_write
+
 
 def _norm_ts(value: str | None) -> str:
     """Normalize a timestamp string for cross-store comparison.
@@ -386,6 +388,7 @@ def reconcile_content_from_singles(
     if not dry_run and updated:
         # Preserve original feed order (feed list carries same dict refs,
         # so mutations are already in place).
+        guard_canonical_write(feed_path)
         feed_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2))
 
     return {

@@ -7,6 +7,7 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
+from volpred.canonical_write import guard_canonical_write
 from volpred.config.runtime import get_default_mirror_url
 from volpred.core.types import ExperimentResult
 from volpred.memory.schemas import ExperimentRecord, KnowledgeItem, ResearchLogEntry
@@ -27,6 +28,8 @@ class MemorySystem:
         self.memory_dir = self.storage_dir / "memory"
         self.results_dir = self.storage_dir / "results"
         for d in [self.memory_dir, self.results_dir]:
+            if not d.exists():
+                guard_canonical_write(d)
             d.mkdir(parents=True, exist_ok=True)
 
     def _sync_to_remote(
@@ -117,6 +120,7 @@ class MemorySystem:
 
         # Save individual result
         result_file = self.results_dir / f"{result.experiment_id}.json"
+        guard_canonical_write(result_file)
         with open(result_file, "w", encoding="utf-8") as f:
             json.dump(record, f, indent=2, default=str, ensure_ascii=False)
 
@@ -212,6 +216,7 @@ class MemorySystem:
                 q["answered_at"] = datetime.now().isoformat()
                 break
         filepath = self.memory_dir / "open_questions.json"
+        guard_canonical_write(filepath)
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(questions, f, indent=2, default=str, ensure_ascii=False)
         self._sync_to_remote("open_questions.json")
@@ -293,6 +298,7 @@ class MemorySystem:
                 }
             )
         fcast_file = self.results_dir / f"{experiment_id}_forecasts.json"
+        guard_canonical_write(fcast_file)
         with open(fcast_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
@@ -315,6 +321,7 @@ class MemorySystem:
             validate_provenance(record)
 
         filepath = self.memory_dir / filename
+        guard_canonical_write(filepath)
         # Derive a friendly subsystem key without the .json suffix
         lock_key = f"memory_{Path(filename).stem}"
         record_id = record.get("experiment_id") or record.get("item_id") or record.get("id")

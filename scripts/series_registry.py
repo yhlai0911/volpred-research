@@ -35,6 +35,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from volpred.canonical_write import guard_canonical_write
+
 REGISTRY = ROOT / "config" / "article_series.json"
 FEED = ROOT / "storage" / "reports" / "feed.json"
 REPORTS = ROOT / "storage" / "reports"
@@ -171,6 +177,7 @@ def apply(series: dict, feed: list) -> tuple[int, list[str]]:
             changed += 1
             log.append(f"  ~ {key}/{aid}: {title[:24]}… -> {new_title[:24]}…")
     if changed:
+        guard_canonical_write(FEED)
         FEED.write_text(json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8")
         for aid, new_title in report_updates.items():
             rp = REPORTS / f"{aid}.json"
@@ -178,6 +185,7 @@ def apply(series: dict, feed: list) -> tuple[int, list[str]]:
                 rj = json.loads(rp.read_text(encoding="utf-8"))
                 if isinstance(rj, dict):
                     rj["title"] = new_title
+                    guard_canonical_write(rp)
                     rp.write_text(json.dumps(rj, ensure_ascii=False, indent=2), encoding="utf-8")
                     log.append(f"    synced reports/{aid}.json")
     return changed, log

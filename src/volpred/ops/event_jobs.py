@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 
 from volpred.config import get_optional_schedule_items, load_runtime_schedules
 
-from .canonical_write import guard_canonical_write
+from volpred.canonical_write import guard_canonical_write
 from .common import project_path
 from .local_control_plane import expire_queued_task, supersede_queued_task
 from .next_tasks import write_tasks_to_handle
@@ -59,7 +59,9 @@ def _storage_root(storage_dir: str = "storage") -> Path:
 
 def _event_ledger_root(storage_dir: str = "storage") -> Path:
     root = _storage_root(storage_dir) / "event_ledger"
-    root.mkdir(parents=True, exist_ok=True)
+    if not root.exists():
+        guard_canonical_write(root)
+        root.mkdir(parents=True, exist_ok=True)
     return root
 
 
@@ -965,6 +967,7 @@ def gc_event_ledger(*, storage_dir: str = "storage", now: datetime | None = None
                 _warn_event_jobs(f"event ledger GC timestamp invalid path={path}", exc)
                 continue
             if gc_after and now > gc_after:
+                guard_canonical_write(path)
                 path.unlink(missing_ok=True)
                 removed.append(path.name)
     return removed

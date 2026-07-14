@@ -32,6 +32,7 @@ TASK_ID = "platform_ops_graphify_codeonly_pilot_20260702"
 FOLLOWUP_ID = "platform_ops_graphify_codeonly_14d_verdict_20260716"
 FOLLOWUP_BLOCKED_UNTIL = "2026-07-16T00:00:00+00:00"
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 
 
@@ -167,11 +168,13 @@ def _parse_benchmark(stdout: str) -> dict[str, Any]:
 
 
 def _write_json(path: Path, payload: Any) -> None:
+    guard_canonical_write(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def _write_text(path: Path, text: str) -> None:
+    guard_canonical_write(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
 
@@ -203,6 +206,7 @@ def _ensure_followup_task() -> dict[str, Any]:
     }
     normalize_task_priority(task)
 
+    guard_canonical_write(NEXT_TASKS)
     NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
     if not NEXT_TASKS.exists():
         NEXT_TASKS.write_text("[]\n", encoding="utf-8")

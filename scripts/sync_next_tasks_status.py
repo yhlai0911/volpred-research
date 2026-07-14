@@ -35,6 +35,7 @@ if str(ROOT / "src") not in sys.path:
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 EXPERIMENTS = ROOT / "experiments"
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import normalize_priority, normalize_task_priorities  # noqa: E402
 
 K_ID_RE = re.compile(r"^K\d+[a-z_]*$")
@@ -331,6 +332,7 @@ def main() -> int:
         # can never interleave with a live dispatcher/agent's read-modify-write
         # (2026-07-05: previously this was an unlocked read_text/write_text —
         # racing an in-flight hourly worker could silently drop its update).
+        guard_canonical_write(NEXT_TASKS)
         with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
             fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
             try:

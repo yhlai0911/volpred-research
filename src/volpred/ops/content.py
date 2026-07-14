@@ -25,7 +25,7 @@ from volpred.publisher.publisher import (
 )
 from volpred.topic_clusters import classify_topic_cluster, cluster_cap
 
-from .canonical_write import guard_canonical_write
+from volpred.canonical_write import guard_canonical_write
 from .common import dump_json, load_json, project_path, write_ops_snapshot
 from .content_quality import DIGEST_TITLE_PREFIX
 from .next_tasks import normalize_task_priority, validate_task_status, write_tasks_to_handle
@@ -1021,6 +1021,7 @@ def _materialize_release_audit_fix_task(
     suffix_source = item_id or str(item.get("title") or "")
     task_id = f"platform_ops_release_audit_fix_{_safe_release_task_suffix(suffix_source)}"
     next_tasks_path = project_path(storage_dir, "next_tasks.json")
+    guard_canonical_write(next_tasks_path)
     next_tasks_path.parent.mkdir(parents=True, exist_ok=True)
     if not next_tasks_path.exists():
         next_tasks_path.write_text("[]\n", encoding="utf-8")

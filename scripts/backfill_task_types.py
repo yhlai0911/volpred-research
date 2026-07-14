@@ -30,6 +30,7 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 # Two-stage classifier:
@@ -96,8 +97,11 @@ def main() -> int:
     g.add_argument("--apply", action="store_true")
     args = ap.parse_args()
 
-    with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+    if args.apply:
+        guard_canonical_write(NEXT_TASKS)
+    mode = "r+" if args.apply else "r"
+    with NEXT_TASKS.open(mode, encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX if args.apply else fcntl.LOCK_SH)
         try:
             tasks = json.load(fh)
             if not isinstance(tasks, list):

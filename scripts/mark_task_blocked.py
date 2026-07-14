@@ -43,6 +43,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
 sys.path.insert(0, str(ROOT / "src"))
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS  # noqa: E402
 from volpred.ops.blocked_reasons import is_valid as _valid_blocked_reason  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
@@ -107,6 +108,7 @@ def _load() -> tuple[dict | list, list]:
 
 
 def _save(payload: dict | list, tasks: list) -> None:
+    guard_canonical_write(NEXT_TASKS)
     normalize_task_priorities(tasks)
     if isinstance(payload, dict) and "tasks" in payload:
         payload["tasks"] = tasks

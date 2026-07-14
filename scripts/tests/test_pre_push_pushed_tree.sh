@@ -66,7 +66,7 @@ WORK="$SB/work"
 REMOTE="$SB/remote.git"
 
 # ---------------------------------------------------------------------------
-# Sandbox repo mirroring the shape the two audits expect:
+# Sandbox repo mirroring the shape the three audits expect:
 #   scripts/ + src/ + tests/          (audit_source_encoding.py DEFAULT_ROOTS)
 #   scripts/ + src/volpred/           (audit_silent_fallbacks.py DEFAULT_TARGETS)
 #   storage/qa/silent_fallback_baseline.json
@@ -82,6 +82,7 @@ git -C "$WORK" config commit.gpgsign false
 mkdir -p "$WORK/scripts" "$WORK/src/volpred" "$WORK/tests" "$WORK/storage/qa"
 cp "$REPO/scripts/audit_silent_fallbacks.py" "$WORK/scripts/"
 cp "$REPO/scripts/audit_source_encoding.py" "$WORK/scripts/"
+cp "$REPO/scripts/audit_test_imports.py" "$WORK/scripts/"
 : > "$WORK/src/volpred/__init__.py"
 printf 'def test_placeholder():\n    assert True\n' > "$WORK/tests/test_placeholder.py"
 
@@ -109,11 +110,18 @@ BASELINE="$WORK/storage/qa/silent_fallback_baseline.json"
 "$PY" "$WORK/scripts/audit_silent_fallbacks.py" --write-baseline "$BASELINE" >/dev/null 2>&1 \
   || { echo "FATAL: could not seed sandbox baseline"; exit 1; }
 
-install -m 0755 "$HOOK" "$WORK/.git/hooks/pre-push"
-
 git -C "$WORK" add -A
 git -C "$WORK" commit -qm "base: clean tree"
 git -C "$WORK" remote add origin "$REMOTE"
+
+# Seed one trusted parent before installing the hook. Gate 3 deliberately fails
+# closed for a root commit because there is no immutable parent auditor.
+git -C "$WORK" push --no-verify -q origin main \
+  || { echo "FATAL: could not seed trusted parent"; exit 1; }
+install -m 0755 "$HOOK" "$WORK/.git/hooks/pre-push"
+printf 'CLEAN_PROBE = True\n' > "$WORK/scripts/clean_probe.py"
+git -C "$WORK" add scripts/clean_probe.py
+git -C "$WORK" commit -qm "clean: exercise installed gate"
 BASE_SHA="$(git -C "$WORK" rev-parse HEAD)"
 
 audit_working_tree_new() {   # legacy gate's decision function
@@ -308,6 +316,53 @@ git -C "$WORK" tag bad-archive "$BAD_SHA"
 OUT="$(git -C "$WORK" push origin refs/tags/bad-archive 2>&1)"; RC=$?
 if [ "$RC" -eq 0 ]; then ok "tag pointing at the bad commit pushes (tags are not gated)"
 else bad "tag push was blocked (rc=$RC): $OUT"; fi
+
+# ---------------------------------------------------------------------------
+# Case 8 — replacing the candidate auditor with an always-green stub cannot
+# judge the same pushed candidate. The immutable parent auditor must still see
+# the missing implementation referenced by the new test.
+# ---------------------------------------------------------------------------
+REMOTE_BEFORE_WEAKEN="$(git -C "$REMOTE" rev-parse refs/heads/main)"
+cat > "$WORK/scripts/audit_test_imports.py" <<'PY'
+#!/usr/bin/env python3
+print("[audit-test-imports] 1 test files checked, 1 dependencies resolved, 0 bad")
+PY
+printf 'from scripts import pushed_missing\n' > "$WORK/tests/test_weakened_gate.py"
+git -C "$WORK" add scripts/audit_test_imports.py tests/test_weakened_gate.py
+git -C "$WORK" commit -qm "bad: weaken test dependency gate"
+OUT="$(git -C "$WORK" push origin main 2>&1)"; RC=$?
+if [ "$RC" -ne 0 ] && contains 'pushed_missing' "$OUT"; then
+  ok "pushed candidate cannot weaken its immutable parent auditor"
+else
+  bad "candidate auditor weakening was not blocked (rc=$RC): $OUT"
+fi
+REMOTE_AFTER_WEAKEN="$(git -C "$REMOTE" rev-parse refs/heads/main)"
+if [ "$REMOTE_AFTER_WEAKEN" = "$REMOTE_BEFORE_WEAKEN" ]; then
+  ok "remote did not advance to the weakened-auditor commit"
+else
+  bad "remote advanced after auditor weakening ($REMOTE_BEFORE_WEAKEN -> $REMOTE_AFTER_WEAKEN)"
+fi
+
+# ---------------------------------------------------------------------------
+# Case 9 — the pushed candidate cannot delete the auditor that judges test/
+# implementation closure. This check is candidate-tree-local and therefore
+# still fails closed even though case 8 left a fake auditor in its parent.
+# ---------------------------------------------------------------------------
+REMOTE_BEFORE_DELETE="$REMOTE_AFTER_WEAKEN"
+git -C "$WORK" rm -q scripts/audit_test_imports.py
+git -C "$WORK" commit -qm "bad: remove test dependency gate"
+OUT="$(git -C "$WORK" push origin main 2>&1)"; RC=$?
+if [ "$RC" -ne 0 ] && contains 'removes scripts/audit_test_imports.py' "$OUT"; then
+  ok "pushed commit cannot delete its own test-dependency auditor"
+else
+  bad "auditor deletion was not blocked (rc=$RC): $OUT"
+fi
+REMOTE_AFTER_DELETE="$(git -C "$REMOTE" rev-parse refs/heads/main)"
+if [ "$REMOTE_AFTER_DELETE" = "$REMOTE_BEFORE_DELETE" ]; then
+  ok "remote did not advance to the auditor-deletion commit"
+else
+  bad "remote advanced after auditor deletion ($REMOTE_BEFORE_DELETE -> $REMOTE_AFTER_DELETE)"
+fi
 
 # ---------------------------------------------------------------------------
 echo ""

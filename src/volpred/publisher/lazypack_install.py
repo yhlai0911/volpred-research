@@ -23,6 +23,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
+from volpred.canonical_write import guard_canonical_write
+
 _LAZYPACK_HEADING_RE = re.compile(r"^#+\s*.*懶人包.*$", re.MULTILINE)
 
 
@@ -131,6 +133,7 @@ def install_lazypack_section(
         )
         errata["update_history"] = hist
         art["errata"] = errata
+        guard_canonical_write(feed_path)
         feed_path.write_text(
             json.dumps(feed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )

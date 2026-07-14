@@ -36,6 +36,8 @@ from collections import Counter
 from pathlib import Path
 from typing import IO, Any
 
+from volpred.canonical_write import guard_canonical_write
+
 from .diagnostics import warn
 
 
@@ -369,6 +371,12 @@ def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
     surrogateescape argv (e.g. a shell-mangled ``--result`` char) are scrubbed
     with an observable warning rather than raising mid-write.
     """
+    # A handle opened by a higher-level read/modify/write caller is still a
+    # mutation primitive. Guard it here so every caller shares the same check.
+    handle_name = getattr(fh, "name", None)
+    if isinstance(handle_name, (str, Path)):
+        guard_canonical_write(handle_name)
+
     _normalize_priorities_tolerant(tasks)
     _audit_task_statuses(tasks)
     payload = json.dumps(tasks, indent=2, ensure_ascii=False)
@@ -393,6 +401,7 @@ def write_tasks_locked(path: str | Path, tasks: list[Any]) -> None:
     opening a second descriptor here would deadlock on the same-process flock.
     """
     p = Path(path)
+    guard_canonical_write(p)
     p.parent.mkdir(parents=True, exist_ok=True)
     if not p.exists():
         p.write_text("[]\n", encoding="utf-8")

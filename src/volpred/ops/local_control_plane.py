@@ -11,6 +11,8 @@ from typing import Any, Iterable
 
 import fcntl
 
+from volpred.canonical_write import guard_canonical_write
+
 from .common import project_path
 
 TASK_SOURCES = {"user", "schedule", "agent"}
@@ -142,17 +144,23 @@ def ensure_control_plane_dirs(storage_dir: str = "storage") -> dict[str, Path]:
     paths = _control_plane_paths(storage_dir)
     for key, path in paths.items():
         if key == "lock":
-            path.parent.mkdir(parents=True, exist_ok=True)
+            if not path.parent.exists():
+                guard_canonical_write(path.parent)
+                path.parent.mkdir(parents=True, exist_ok=True)
             if not path.exists():
+                guard_canonical_write(path)
                 path.touch()
             continue
-        path.mkdir(parents=True, exist_ok=True)
+        if not path.exists():
+            guard_canonical_write(path)
+            path.mkdir(parents=True, exist_ok=True)
     return paths
 
 
 @contextmanager
 def _plane_lock(storage_dir: str = "storage") -> Iterable[None]:
     paths = ensure_control_plane_dirs(storage_dir)
+    guard_canonical_write(paths["lock"])
     with paths["lock"].open("a+", encoding="utf-8") as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         try:
@@ -162,6 +170,7 @@ def _plane_lock(storage_dir: str = "storage") -> Iterable[None]:
 
 
 def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    guard_canonical_write(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_suffix(f"{path.suffix}.tmp")
     tmp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str))

@@ -28,6 +28,7 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 
 STATUS_RANK = {
@@ -144,8 +145,11 @@ def main() -> int:
     ap.add_argument("--json", action="store_true", help="print full JSON summary")
     args = ap.parse_args()
 
-    with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+    if args.apply:
+        guard_canonical_write(NEXT_TASKS)
+    mode = "r+" if args.apply else "r"
+    with NEXT_TASKS.open(mode, encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX if args.apply else fcntl.LOCK_SH)
         try:
             tasks = _load_tasks(fh)
             deduped, dropped = dedupe(tasks)

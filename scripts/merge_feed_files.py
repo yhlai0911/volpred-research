@@ -7,7 +7,14 @@ import json
 import sys
 from pathlib import Path
 
-storage = Path(__file__).resolve().parent.parent / "storage"
+ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from volpred.canonical_write import guard_canonical_write
+
+storage = ROOT / "storage"
 main_feed = storage / "reports" / "feed.json"
 agent_feed = storage / "feed.json"
 
@@ -32,6 +39,7 @@ for item in agent_items:
         added += 1
 
 if added > 0:
+    guard_canonical_write(main_feed)
     if isinstance(main, list):
         with open(main_feed, "w") as f:
             json.dump(main_items, f, ensure_ascii=False, indent=2)

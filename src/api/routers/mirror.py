@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from volpred.canonical_write import guard_canonical_write
 
 from .common import require_research_mirror_token, storage_path
 
@@ -60,6 +61,7 @@ async def put_memory_file(filename: str, request: Request):
     if not isinstance(payload, list):
         raise HTTPException(status_code=400, detail="memory mirror payload must be a JSON array")
 
+    guard_canonical_write(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     data = _json_bytes(payload)
     tmp_path = path.with_name(f".{path.name}.tmp")
@@ -82,6 +84,7 @@ async def append_memory_file(filename: str, request: Request):
     if not isinstance(new_entries, list):
         raise HTTPException(status_code=400, detail="payload must be a JSON array")
 
+    guard_canonical_write(path)
     # Load existing
     existing: list = []
     if path.exists():

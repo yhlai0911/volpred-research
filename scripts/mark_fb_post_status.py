@@ -17,6 +17,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from volpred.canonical_write import guard_canonical_write
 from volpred.ops.shared_lock import shared_state_lock
 
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
@@ -64,6 +65,7 @@ def _load_json(path: Path, default):
 
 
 def _write_json(path: Path, payload) -> None:
+    guard_canonical_write(path)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
@@ -119,6 +121,7 @@ def _persist_or_require_draft(mile_id: str, *, status: str, draft_text: str | No
         return None
     draft_path = canonical_fb_draft_path(mile_id)
     if draft_text is not None:
+        guard_canonical_write(draft_path)
         DRAFTS_DIR.mkdir(parents=True, exist_ok=True)
         body = draft_text if draft_text.endswith("\n") else draft_text + "\n"
         draft_path.write_text(body, encoding="utf-8")

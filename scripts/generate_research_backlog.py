@@ -40,6 +40,7 @@ SCRIPTS_DIR = ROOT / "scripts"
 sys.path.insert(0, str(ROOT / "src"))
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 from kid_reserve import reserve_k_id  # noqa: E402
@@ -95,6 +96,7 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
 
 
 def _save_tasks(payload: dict | list, tasks: list) -> None:
+    guard_canonical_write(NEXT_TASKS)
     normalize_task_priorities(tasks)
     if isinstance(payload, dict) and "tasks" in payload:
         payload["tasks"] = tasks

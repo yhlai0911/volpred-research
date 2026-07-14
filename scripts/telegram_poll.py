@@ -41,6 +41,7 @@ from volpred.ops.telegram import (  # noqa: E402
 )
 from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 INBOX = ROOT / "storage" / "ops" / "telegram_inbox.jsonl"
@@ -85,6 +86,7 @@ def _record_poll_success() -> None:
 
 
 def _archive(update: dict) -> None:
+    guard_canonical_write(INBOX)
     INBOX.parent.mkdir(parents=True, exist_ok=True)
     with open(INBOX, "a", encoding="utf-8") as f:
         f.write(json.dumps(update, ensure_ascii=False) + "\n")
@@ -117,6 +119,7 @@ def _append_task(text: str, msg_id: int, sender: str, reply_context: str = "") -
         ),
     })
     normalize_task_priorities(tasks)
+    guard_canonical_write(NEXT_TASKS)
     tmp = NEXT_TASKS.with_suffix(".tmp")
     tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     tmp.replace(NEXT_TASKS)

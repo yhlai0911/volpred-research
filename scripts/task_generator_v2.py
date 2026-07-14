@@ -47,6 +47,7 @@ DEFAULT_DISPATCH_LANES = {
     "event_article": "main_thread",
 }
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 
 
@@ -844,6 +845,7 @@ def main() -> None:
         original = load_next_tasks()
         combined = original + new_tasks
         normalize_task_priorities(combined)
+        guard_canonical_write(NEXT_TASKS)
         with open(NEXT_TASKS, "w", encoding="utf-8") as f:
             json.dump(combined, f, ensure_ascii=False, indent=2)
         print(f"[task_generator_v2] Wrote {total} new tasks to {NEXT_TASKS}")

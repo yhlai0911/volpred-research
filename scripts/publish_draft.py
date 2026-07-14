@@ -92,6 +92,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from volpred.canonical_write import guard_canonical_write
 
 
 def _refresh_publication_candidates_after_feed_change(reason: str) -> None:
@@ -1329,6 +1334,7 @@ def apply_update(args) -> int:
     # to avoid silent data loss on concurrent publisher appends (Codex review P2).
     from volpred.ops.shared_lock import shared_state_lock
     storage_dir = str(feed_path.parent.parent)
+    guard_canonical_write(feed_path)
     with shared_state_lock("publisher_feed", storage_dir=storage_dir):
         tmp_path = feed_path.with_name(f".{feed_path.name}.tmp")
         tmp_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -1337,6 +1343,7 @@ def apply_update(args) -> int:
 
     # Write parallel single-article file
     single_path = ROOT / "storage" / "reports" / f"{mile_id}.json"
+    guard_canonical_write(single_path)
     single_path.write_text(
         json.dumps(copy.deepcopy(art), ensure_ascii=False, indent=2),
         encoding="utf-8",

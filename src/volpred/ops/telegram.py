@@ -24,6 +24,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from volpred.canonical_write import guard_canonical_write
+
 API_BASE = "https://api.telegram.org"
 MAX_MSG_CHARS = 4096  # Telegram sendMessage hard limit
 
@@ -81,6 +83,7 @@ def load_state(storage_dir: str | Path = "storage") -> dict[str, Any]:
 
 def save_state(state: dict[str, Any], storage_dir: str | Path = "storage") -> None:
     p = state_path(storage_dir)
+    guard_canonical_write(p)
     p.parent.mkdir(parents=True, exist_ok=True)
     tmp = p.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")

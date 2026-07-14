@@ -38,6 +38,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from volpred.canonical_write import guard_canonical_write
 from volpred.ops.shared_lock import shared_state_lock
 
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
@@ -83,6 +84,7 @@ def main() -> int:
         feed = json.loads(FEED_PATH.read_text(encoding="utf-8"))
         changes = consolidate(feed, now_iso=now_iso)
         if not args.dry_run:
+            guard_canonical_write(FEED_PATH)
             FEED_PATH.write_text(
                 json.dumps(feed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
             )

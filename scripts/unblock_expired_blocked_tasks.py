@@ -33,6 +33,7 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 from volpred.ops.next_tasks import (  # noqa: E402
     compact_terminal_tasks,
@@ -97,8 +98,9 @@ def _sweep_unblock(tasks: list, *, apply: bool) -> list[dict]:
 
 
 def _persist_archive(archived: list[dict]) -> Path:
-    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
     dest = ARCHIVE_DIR / f"{datetime.now(timezone.utc).strftime('%Y-%m')}.jsonl"
+    guard_canonical_write(dest)
+    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
     with dest.open("a", encoding="utf-8") as fh:
         for rec in archived:
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
@@ -110,8 +112,13 @@ def main(apply: bool) -> int:
     if not PATH.exists():
         print("[queue-maint] next_tasks.json missing; nothing to do")
         return 0
-    with PATH.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+    if apply:
+        # Guard once this invocation has committed to a mutation. The default
+        # audit mode opens read-only and remains usable under the test gate.
+        guard_canonical_write(PATH)
+    mode = "r+" if apply else "r"
+    with PATH.open(mode, encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX if apply else fcntl.LOCK_SH)
         try:
             tasks = json.loads(fh.read() or "[]")
             if isinstance(tasks, dict):

@@ -41,6 +41,47 @@ set -uo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT" || exit 0
 
+PY="$(command -v uv >/dev/null 2>&1 && echo "uv run python" || echo python3)"
+
+# --- Gate 0: candidate-index test dependency closure (2026-07-14) ---------
+# Read the INDEX, not the working tree.  A foreign/untracked implementation can
+# exist locally while this commit contains only its test; filesystem existence
+# is exactly what made 273b2b110 collect locally and break a clean checkout.
+STAGED_PY_CHANGED=()
+while IFS= read -r f; do
+  [ -n "$f" ] && STAGED_PY_CHANGED+=("$f")
+done < <(git diff --cached --name-only --diff-filter=ACMRD | grep -E '\.py$')
+REF_GATE="scripts/audit_test_imports.py"
+if [ "${#STAGED_PY_CHANGED[@]}" -gt 0 ]; then
+  if ! git cat-file -e ":$REF_GATE" 2>/dev/null; then
+    echo "[pre-commit] BLOCKED — candidate index removes its own test-import gate: $REF_GATE"
+    exit 1
+  fi
+  # Bootstrap with an immutable auditor, never the candidate/worktree copy.
+  # PHASE-Z supplies base_sha's extracted auditor.  Ordinary git commit uses
+  # HEAD's tracked copy.  The candidate copy is still required to exist and
+  # parse, but cannot weaken the gate evaluating this very commit.
+  TRUSTED_REF_GATE="${VOLPRED_TRUSTED_TEST_IMPORT_AUDITOR:-}"
+  TRUSTED_REF_TMP=""
+  if [ -z "$TRUSTED_REF_GATE" ]; then
+    TRUSTED_REF_TMP="$(mktemp "${TMPDIR:-/tmp}/volpred-audit-test-imports.XXXXXX.py")"
+    if ! git show "HEAD:$REF_GATE" > "$TRUSTED_REF_TMP" 2>/dev/null; then
+      rm -f "$TRUSTED_REF_TMP"
+      echo "[pre-commit] BLOCKED — trusted HEAD does not contain $REF_GATE"
+      exit 1
+    fi
+    TRUSTED_REF_GATE="$TRUSTED_REF_TMP"
+  fi
+  REF_OUT="$($PY "$TRUSTED_REF_GATE" --root "$ROOT" --index 2>&1)"
+  REF_RC=$?
+  [ -z "$TRUSTED_REF_TMP" ] || rm -f "$TRUSTED_REF_TMP"
+  if [ "$REF_RC" -ne 0 ]; then
+    echo "[pre-commit] BLOCKED — candidate index has test/script dependency drift:"
+    printf '%s\n' "$REF_OUT" | sed 's/^/[pre-commit]   /'
+    exit 1
+  fi
+fi
+
 # Only pay the cost when Python actually changed.
 STAGED_PY=()
 while IFS= read -r f; do
@@ -58,8 +99,6 @@ for f in "${STAGED_PY[@]}"; do
     break
   fi
 done
-
-PY="$(command -v uv >/dev/null 2>&1 && echo "uv run python" || echo python3)"
 
 # --- Gate 1: source encoding (2026-07-12, zero tolerance) --------------------
 # Cheapest gate first: mojibake makes the file undecodable, so every downstream

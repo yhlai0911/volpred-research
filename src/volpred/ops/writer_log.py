@@ -22,13 +22,31 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from volpred.canonical_write import guard_canonical_write
+
 from .common import project_path
 
 
 def _writer_log_path(storage_dir: str = "storage") -> Path:
-    path = project_path(storage_dir, "ops", "writer_log.jsonl")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    return path
+    return project_path(storage_dir, "ops", "writer_log.jsonl")
+
+
+def _warn_append_failure(
+    exc: Exception,
+    *,
+    subsystem: str,
+    target: str,
+    record_id: str | None,
+) -> None:
+    try:
+        print(
+            "[writer_log] WARN append failed: "
+            f"subsystem={subsystem!r} target={target!r} "
+            f"record_id={record_id!r} error={type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
+    except Exception:
+        return  # silent-ok: warn 輸出自身失敗（stderr 不可用），不可遞迴 warn
 
 
 def append_writer_log(
@@ -40,7 +58,15 @@ def append_writer_log(
     actor: str | None = None,
     storage_dir: str = "storage",
 ) -> None:
-    """Append a single JSONL provenance entry. Never raises."""
+    """Append a provenance entry; canonical-write enforcement remains fail-closed."""
+    try:
+        path = _writer_log_path(storage_dir)
+    except Exception as exc:
+        _warn_append_failure(
+            exc, subsystem=subsystem, target=target, record_id=record_id,
+        )
+        return
+    guard_canonical_write(path)
     try:
         entry = {
             "ts": datetime.now(timezone.utc).isoformat(),
@@ -50,17 +76,11 @@ def append_writer_log(
             "record_id": record_id,
             "result": result,
         }
-        path = _writer_log_path(storage_dir)
+        path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
     except Exception as exc:
         # Writer log is best-effort; must never break the caller.
-        try:
-            print(
-                "[writer_log] WARN append failed: "
-                f"subsystem={subsystem!r} target={target!r} "
-                f"record_id={record_id!r} error={type(exc).__name__}: {exc}",
-                file=sys.stderr,
-            )
-        except Exception:
-            return
+        _warn_append_failure(
+            exc, subsystem=subsystem, target=target, record_id=record_id,
+        )

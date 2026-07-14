@@ -13,6 +13,7 @@ semantics, not in Python. A fake `git` would have happily agreed with the bug.
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -37,6 +38,9 @@ def _init_repo(root: Path) -> None:
     _git(root, "config", "user.email", "test@volpred.local")
     _git(root, "config", "user.name", "phase-z-ownership-test")
     _git(root, "config", "commit.gpgsign", "false")
+    hook = root / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    hook.chmod(0o755)
     (root / "seed.txt").write_text("seed\n", encoding="utf-8")
     _git(root, "add", "-A")
     _git(root, "commit", "-qm", "seed")
@@ -180,6 +184,184 @@ def test_agent_work_is_committed_when_tree_was_clean(repo: Path) -> None:
     assert outcome["committed"] is True
     assert _head_files(repo) == {"experiments/k2/k2.py", "docs/note.md"}
     assert outcome["foreign"] == []
+
+
+def test_candidate_adoption_cas_rejects_concurrent_head_advance(repo: Path) -> None:
+    """A commit arriving during the candidate gate wins; PHASE-Z never overwrites it."""
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "ours.txt", "candidate bytes\n")
+    advanced = False
+
+    def racing_runner(cmd, **kwargs):
+        nonlocal advanced
+        if not advanced and "update-ref" in cmd:
+            advanced = True
+            _git(repo, "commit", "--allow-empty", "--no-verify", "-qm", "concurrent winner")
+        return subprocess.run(cmd, **kwargs)
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        runner=racing_runner,
+        test_runner=_no_tests,
+        alert_fn=lambda **_k: {},
+    )
+
+    assert advanced is True
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "commit_nonzero"
+    assert outcome["rolled_back"] is True
+    assert _git(repo, "log", "-1", "--pretty=%s").stdout.strip() == "concurrent winner"
+    assert (repo / "ours.txt").read_text() == "candidate bytes\n"
+
+
+def test_shared_index_refresh_preserves_same_path_concurrent_stage(repo: Path) -> None:
+    """A same-path git add after adoption is data, not refreshable base state."""
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "ours.txt", "candidate bytes\n")
+    staged = False
+
+    def racing_runner(cmd, **kwargs):
+        nonlocal staged
+        proc = subprocess.run(cmd, **kwargs)
+        if not staged and "update-ref" in cmd and proc.returncode == 0:
+            staged = True
+            blob = subprocess.run(
+                ["git", "-C", str(repo), "hash-object", "-w", "--stdin"],
+                input="concurrent staged bytes\n", capture_output=True, text=True, check=True,
+            ).stdout.strip()
+            _git(repo, "update-index", "--add", "--cacheinfo", "100644", blob, "ours.txt")
+        return proc
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        runner=racing_runner,
+        test_runner=_no_tests,
+        alert_fn=lambda **_k: {},
+    )
+
+    assert outcome["committed"] is True
+    assert staged is True
+    assert outcome["index_refresh"]["preserved"] == ["ours.txt"]
+    assert _git(repo, "show", "HEAD:ours.txt").stdout == "candidate bytes\n"
+    assert _git(repo, "show", ":ours.txt").stdout == "concurrent staged bytes\n"
+
+
+def test_candidate_hook_reads_candidate_tree_and_side_effects_are_isolated(repo: Path) -> None:
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "[ \"$(cat ours.txt)\" = \"candidate bytes\" ] || exit 17\n"
+        "echo isolated > hook-side-effect.txt\n",
+        encoding="utf-8",
+    )
+    hook.chmod(0o755)
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "ours.txt", "candidate bytes\n")
+    changed_live = False
+
+    def racing_runner(cmd, **kwargs):
+        nonlocal changed_live
+        if not changed_live and cmd and cmd[0] == "bash" and "trusted-pre-commit" in cmd[1]:
+            changed_live = True
+            _write(repo, "ours.txt", "concurrent live bytes\n")
+        return subprocess.run(cmd, **kwargs)
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        runner=racing_runner,
+        test_runner=_no_tests,
+        alert_fn=lambda **_k: {},
+    )
+
+    assert outcome["committed"] is True
+    assert changed_live is True
+    assert _git(repo, "show", "HEAD:ours.txt").stdout == "candidate bytes\n"
+    assert (repo / "ours.txt").read_text() == "concurrent live bytes\n"
+    assert not (repo / "hook-side-effect.txt").exists()
+
+
+def test_missing_immutable_hook_fails_closed(repo: Path) -> None:
+    (repo / ".git" / "hooks" / "pre-commit").unlink()
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "ours.txt", "candidate bytes\n")
+
+    outcome = _fire(repo)
+
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "candidate_gate_missing"
+    assert subprocess.run(
+        ["git", "-C", str(repo), "cat-file", "-e", "HEAD:ours.txt"],
+        capture_output=True, text=True, check=False,
+    ).returncode != 0
+
+
+def test_candidate_cannot_modify_its_own_trusted_gate(repo: Path) -> None:
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "scripts/audit_test_imports.py", "raise SystemExit(0)\n")
+
+    outcome = _fire(repo)
+
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "candidate_gate_self_modification"
+    assert outcome["gate_changes"] == ["scripts/audit_test_imports.py"]
+
+
+def test_candidate_gate_blocks_test_without_its_foreign_script(repo: Path) -> None:
+    """Reproduce 273b2b110: test owned by this fire, implementation pre-existing/foreign."""
+    source_root = Path(phase_z.__file__).resolve().parents[2]
+    for rel in ("scripts/git_hooks/pre-commit", "scripts/audit_test_imports.py"):
+        dest = repo / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source_root / rel, dest)
+    _write(repo, "src/volpred/__init__.py", "")
+    _git(repo, "add", "scripts/git_hooks/pre-commit", "scripts/audit_test_imports.py",
+         "src/volpred/__init__.py")
+    _git(repo, "commit", "-qm", "seed canonical dependency gate")
+
+    _write(repo, "scripts/reproduce_check.py", "VALUE = 1\n")  # foreign before fire
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "tests/test_reproduce.py", "from scripts import reproduce_check\n")
+    before_head = _git(repo, "rev-parse", "HEAD").stdout.strip()
+    before_index = _git(repo, "write-tree").stdout.strip()
+
+    outcome = _fire(repo)
+
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "commit_nonzero"
+    assert outcome["rolled_back"] is True
+    assert "reproduce_check" in outcome["commit_tail"]
+    assert _git(repo, "rev-parse", "HEAD").stdout.strip() == before_head
+    assert _git(repo, "write-tree").stdout.strip() == before_index
+    assert (repo / "scripts/reproduce_check.py").exists()
+    assert (repo / "tests/test_reproduce.py").exists()
+
+
+def test_foreign_worktree_hook_cannot_weaken_pinned_base_gate(repo: Path) -> None:
+    source_root = Path(phase_z.__file__).resolve().parents[2]
+    for rel in ("scripts/git_hooks/pre-commit", "scripts/audit_test_imports.py"):
+        dest = repo / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source_root / rel, dest)
+    _write(repo, "src/volpred/__init__.py", "")
+    _git(repo, "add", "scripts/git_hooks/pre-commit", "scripts/audit_test_imports.py",
+         "src/volpred/__init__.py")
+    _git(repo, "commit", "-qm", "seed canonical dependency gate")
+
+    # Foreign before the fire: old implementation executed this live copy and
+    # let the partial candidate through.
+    _write(repo, "scripts/git_hooks/pre-commit", "#!/bin/sh\nexit 0\n")
+    _write(repo, "scripts/reproduce_check.py", "VALUE = 1\n")
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "tests/test_reproduce.py", "from scripts import reproduce_check\n")
+
+    outcome = _fire(repo)
+
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "commit_nonzero"
+    assert "reproduce_check" in outcome["commit_tail"]
 
 
 def test_lazypack_outputs_are_not_broad_machine_churn() -> None:

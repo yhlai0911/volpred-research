@@ -16,6 +16,8 @@ from typing import Any
 import exchange_calendars as ecals
 import pandas as pd
 
+from volpred.canonical_write import guard_canonical_write
+
 _log = logging.getLogger(__name__)
 
 # ── Calendar instances (lazy singletons) ────────────────────────────
@@ -329,6 +331,7 @@ def save_market_status(storage_dir: str | Path = "storage") -> Path:
     }
 
     out_path = storage / "market_status.json"
+    guard_canonical_write(out_path)
     out_path.write_text(json.dumps(status, ensure_ascii=False, indent=2))
     return out_path
 

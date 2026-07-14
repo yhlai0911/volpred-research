@@ -36,6 +36,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "src"))
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.scheduled_writer_commit import (  # noqa: E402
     commit_owned_outputs,
     dirty_paths_before_write,
@@ -121,6 +122,7 @@ def main() -> int:
         resolved = set(synced) | set(not_found)
         current = _load_list(QUEUE_PATH)
         remaining = [mid for mid in current if mid not in resolved]
+        guard_canonical_write(QUEUE_PATH)
         QUEUE_PATH.write_text(json.dumps(remaining), encoding="utf-8")
         commit_owned_outputs(
             ROOT,

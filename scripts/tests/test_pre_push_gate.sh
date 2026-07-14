@@ -62,12 +62,19 @@ printf '' > src/volpred/__init__.py
 printf 'def test_noop():\n    assert True\n' > tests/test_noop.py
 printf 'HOOK_NOOP = True\n' > .claude/hooks/noop.py
 
-install -m 0755 "$HOOK" .git/hooks/pre-push
-
 # Freeze the current findings as the baseline, so only NEW ones can block.
 python3 scripts/audit_silent_fallbacks.py --write-baseline storage/qa/silent_fallback_baseline.json >/dev/null 2>&1
 
 git add -A && git commit --quiet -m "baseline"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+# Seed an immutable parent before installing the hook. Gate 3 intentionally
+# fails closed on root commits because no parent auditor exists yet.
+git push --no-verify --quiet origin "$BRANCH" >/dev/null 2>&1 \
+  || { echo "FATAL: could not seed trusted parent"; exit 1; }
+install -m 0755 "$HOOK" .git/hooks/pre-push
+printf 'CLEAN_PROBE = True\n' > scripts/clean_probe.py
+git add scripts/clean_probe.py && git commit --quiet -m "exercise installed gate"
 
 echo "case 1 — clean commit pushes"
 if git push --quiet origin main >/dev/null 2>&1 || git push --quiet origin master >/dev/null 2>&1; then
@@ -75,7 +82,6 @@ if git push --quiet origin main >/dev/null 2>&1 || git push --quiet origin maste
 else
   bad "clean commit was rejected (gate is over-blocking)"
 fi
-BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 echo "case 2 — commit carries a violation, working tree is CLEAN (the 2026-07-10 bug)"
 cat > scripts/offender.py <<'PY'

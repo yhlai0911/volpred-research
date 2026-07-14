@@ -43,6 +43,7 @@ def main() -> int:
     # Import the canonical excerpt helper so backfill == publish-time behavior.
     repo_root = Path(__file__).resolve().parent.parent
     sys.path.insert(0, str(repo_root / 'src'))
+    from volpred.canonical_write import guard_canonical_write  # noqa: E402
     from volpred.publisher.publisher import _make_excerpt  # noqa: E402
 
     feed_path = Path(args.feed)
@@ -74,6 +75,7 @@ def main() -> int:
     if args.apply:
         # Match publisher's json.dump params exactly (indent=2, ensure_ascii=False,
         # default=str) so the backfill diff is minimal and format-stable.
+        guard_canonical_write(feed_path)
         feed_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2, default=str))
         new_bytes = len(feed_path.read_bytes())
         print(

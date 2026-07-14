@@ -33,7 +33,7 @@ ARC_DEDUP_WINDOW_DAYS = 90
 sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
-from volpred.ops.canonical_write import guard_canonical_write  # noqa: E402
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.event_jobs import (  # noqa: E402
     build_pending_event_task,
@@ -86,6 +86,7 @@ def _load_next_tasks() -> list[dict[str, Any]]:
 
 
 def _append_task(task: dict[str, Any]) -> bool:
+    guard_canonical_write(NEXT_TASKS)
     normalize_task_priority(task)
     NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
     if not NEXT_TASKS.exists():

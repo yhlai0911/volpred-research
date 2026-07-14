@@ -75,6 +75,7 @@ git -C "$WORK" config commit.gpgsign false
 mkdir -p "$WORK/scripts" "$WORK/src/volpred" "$WORK/tests" "$WORK/storage/qa"
 cp "$REPO/scripts/audit_silent_fallbacks.py" "$WORK/scripts/"
 cp "$REPO/scripts/audit_source_encoding.py" "$WORK/scripts/"
+cp "$REPO/scripts/audit_test_imports.py" "$WORK/scripts/"
 : > "$WORK/src/volpred/__init__.py"
 printf 'def test_placeholder():\n    assert True\n' > "$WORK/tests/test_placeholder.py"
 
@@ -119,7 +120,7 @@ BASELINE="$WORK/storage/qa/silent_fallback_baseline.json"
 install -m 0755 "$HOOK" "$WORK/.git/hooks/pre-commit"
 
 git -C "$WORK" add -A
-git -C "$WORK" commit -qm "base: clean tree" >/dev/null 2>&1 \
+git -C "$WORK" commit --no-verify -qm "base: clean tree" >/dev/null 2>&1 \
   || { echo "FATAL: base commit rejected by hook"; exit 1; }
 
 # A new *undiagnosed* fallback — the exact shape the audit flags.
@@ -206,6 +207,70 @@ else
   bad "case 4: mojibake file slipped through (rc=$RC4) — encoding gate scanned nothing"
   echo "$OUT4" | sed 's/^/      /' | head -8
 fi
+
+git -C "$WORK" reset -q
+rm -f "$WORK/scripts/mojibake.py"
+
+# ---------------------------------------------------------------------------
+# Case 5: a test is staged while the implementation it imports exists only in
+# the working tree.  The candidate INDEX is incomplete and must be BLOCKED.
+# ---------------------------------------------------------------------------
+printf 'X = 1\n' > "$WORK/scripts/worktree_only.py"  # deliberately untracked
+printf 'from scripts import worktree_only\n' > "$WORK/tests/test_partial_dependency.py"
+git -C "$WORK" add tests/test_partial_dependency.py
+
+OUT5="$(cd "$WORK" && git commit -m "mine: partial test dependency" 2>&1)"
+RC5=$?
+if [ "$RC5" -ne 0 ] && contains "dependency drift" "$OUT5" && contains "worktree_only" "$OUT5"; then
+  ok "case 5: working-tree-only implementation cannot satisfy candidate-index test"
+else
+  bad "case 5: partial test commit was not blocked (rc=$RC5)"
+  echo "$OUT5" | sed 's/^/      /' | head -10
+fi
+
+git -C "$WORK" reset -q
+rm -f "$WORK/tests/test_partial_dependency.py" "$WORK/scripts/worktree_only.py"
+
+# ---------------------------------------------------------------------------
+# Case 6: the candidate cannot delete the gate that judges it.
+# ---------------------------------------------------------------------------
+git -C "$WORK" rm -q scripts/audit_test_imports.py
+OUT6="$(cd "$WORK" && git commit -m "mine: remove dependency gate" 2>&1)"
+RC6=$?
+if [ "$RC6" -ne 0 ] && contains "removes its own test-import gate" "$OUT6"; then
+  ok "case 6: deleting the candidate-index auditor fails closed"
+else
+  bad "case 6: candidate removed its own auditor (rc=$RC6)"
+  echo "$OUT6" | sed 's/^/      /' | head -10
+fi
+
+git -C "$WORK" reset -q HEAD -- scripts/audit_test_imports.py
+git -C "$WORK" checkout -q -- scripts/audit_test_imports.py
+
+# ---------------------------------------------------------------------------
+# Case 7: replacing the candidate auditor with an always-green stub cannot
+# judge the same candidate.  The immutable HEAD auditor must still catch the
+# missing implementation.
+# ---------------------------------------------------------------------------
+cat > "$WORK/scripts/audit_test_imports.py" <<'PY'
+#!/usr/bin/env python3
+print("[audit-test-imports] 1 test files checked, 1 dependencies resolved, 0 bad")
+PY
+printf 'from scripts import still_missing\n' > "$WORK/tests/test_weakened_gate.py"
+git -C "$WORK" add scripts/audit_test_imports.py tests/test_weakened_gate.py
+
+OUT7="$(cd "$WORK" && git commit -m "mine: weaken dependency gate" 2>&1)"
+RC7=$?
+if [ "$RC7" -ne 0 ] && contains "still_missing" "$OUT7"; then
+  ok "case 7: candidate cannot weaken the trusted HEAD auditor"
+else
+  bad "case 7: weakened candidate auditor bypassed dependency closure (rc=$RC7)"
+  echo "$OUT7" | sed 's/^/      /' | head -10
+fi
+
+git -C "$WORK" reset -q HEAD -- scripts/audit_test_imports.py tests/test_weakened_gate.py
+git -C "$WORK" checkout -q -- scripts/audit_test_imports.py
+rm -f "$WORK/tests/test_weakened_gate.py"
 
 echo
 echo "pre-commit staged-scope: $PASS passed, $FAIL failed"

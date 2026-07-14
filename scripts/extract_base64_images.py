@@ -38,6 +38,7 @@ def main() -> int:
     repo_root = Path(__file__).resolve().parent.parent
     sys.path.insert(0, str(repo_root / 'src'))
     sys.path.insert(0, str(repo_root))
+    from volpred.canonical_write import guard_canonical_write  # noqa: E402
     from volpred.publisher.publisher import _extract_base64_images, _DATA_URI_IMG_RE  # noqa: E402
 
     feed_path = Path(args.feed)
@@ -62,6 +63,9 @@ def main() -> int:
 
     # Apply: rewrite each affected entry's content via the publisher helper
     # (decodes → uploads → swaps in the URL). Network upload happens here.
+    # Fail before creating remote/orphaned assets when a test accidentally aims
+    # the apply path at the checkout's canonical feed.
+    guard_canonical_write(feed_path)
     changed_ids = []
     for entry, _n, _clen in affected:
         article_id = entry.get('id', 'unknown')

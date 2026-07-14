@@ -50,7 +50,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-from volpred.ops.canonical_write import guard_canonical_write
+from volpred.canonical_write import guard_canonical_write
 from volpred.ops.diagnostics import warn as _diag_warn
 from volpred.publisher.arc_dedup import (
     THEME_SATURATION_THRESHOLD,

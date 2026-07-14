@@ -38,6 +38,9 @@ def repo(tmp_path: Path) -> Path:
     _git(r.parent, "init", "-q", str(r))
     _git(r, "config", "user.email", "t@t.t")
     _git(r, "config", "user.name", "t")
+    hook = r / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 0\n")
+    hook.chmod(0o755)
     (r / "seed.txt").write_text("seed\n")
     _git(r, "add", "seed.txt")
     _git(r, "commit", "-qm", "seed")
@@ -81,6 +84,42 @@ def test_blocked_commit_keeps_baseline_and_never_degrades(repo: Path):
     assert second["reason"] == "commit_nonzero", (
         f"retry degraded to {second['reason']!r} — baseline was lost")
     assert not any("沒有 fire 起始基線" in a.get("title", "") for a in alerts)
+
+
+def test_blocked_candidate_preserves_head_index_and_working_bytes(repo: Path):
+    """Alternate-index transaction: a hook veto cannot leave half the fire staged."""
+    (repo / "foreign.txt").write_text("another writer\n")
+    _git(repo, "add", "foreign.txt")
+    before_tree = _git(repo, "write-tree").strip()
+    before_head = _git(repo, "rev-parse", "HEAD").strip()
+    assert phase_z._write_pre_fire_snapshot(repo, {"foreign.txt"}, subprocess.run)
+    (repo / "out.txt").write_text("agent output\n")
+    _install_blocking_hook(repo)
+
+    out = _run(repo, [])
+
+    assert out["reason"] == "commit_nonzero"
+    assert out["rolled_back"] is True
+    assert _git(repo, "rev-parse", "HEAD").strip() == before_head
+    assert _git(repo, "write-tree").strip() == before_tree
+    assert (repo / "out.txt").read_text() == "agent output\n"
+    assert (repo / "foreign.txt").read_text() == "another writer\n"
+
+
+def test_blocking_hook_side_effect_stays_in_disposable_candidate(repo: Path):
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text(
+        "#!/bin/sh\necho touched > hook-side-effect.txt\necho BLOCKED >&2\nexit 1\n"
+    )
+    hook.chmod(0o755)
+    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
+    (repo / "out.txt").write_text("agent output\n")
+
+    out = _run(repo, [])
+
+    assert out["reason"] == "commit_nonzero"
+    assert not (repo / "hook-side-effect.txt").exists()
+    assert (repo / "out.txt").read_text() == "agent output\n"
 
 
 def test_successful_commit_still_consumes_baseline(repo: Path):

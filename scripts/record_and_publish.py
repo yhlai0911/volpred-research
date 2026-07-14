@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+from volpred.canonical_write import guard_canonical_write
 from volpred.config.runtime import get_default_remote_url, get_local_data_sync_dirs
 from volpred.memory.system import MemorySystem
 from volpred.publisher.publisher import Publisher
@@ -78,6 +79,7 @@ def record_and_publish(
             feed[0]["description"] = thinking[:300] + "..." if len(thinking) > 300 else thinking
             if tags:
                 feed[0]["tags"] = tags  # Ensure tags are set
+            guard_canonical_write(feed_path)
             feed_path.write_text(json.dumps(feed, indent=2, ensure_ascii=False, default=str))
             # Also update individual report
             report_id = feed[0].get("id", "")
@@ -88,6 +90,7 @@ def record_and_publish(
                 report["description"] = feed[0]["description"]
                 if tags:
                     report["tags"] = tags
+                guard_canonical_write(report_path)
                 report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str))
     print(f"✓ feed published (via Publisher — correct format)")
 
@@ -97,11 +100,15 @@ def record_and_publish(
     data_sync_dirs = get_local_data_sync_dirs(active_only=True)
     synced_local_dirs = 0
     for data_dir in data_sync_dirs:
+        data_feed_path = data_dir / "feed.json"
+        guard_canonical_write(data_feed_path)
         data_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(feed_path, data_dir / "feed.json")
+        shutil.copy2(feed_path, data_feed_path)
         report_dir = data_dir / "reports"
+        report_feed_path = report_dir / "feed.json"
+        guard_canonical_write(report_feed_path)
         report_dir.mkdir(exist_ok=True)
-        shutil.copy2(feed_path, report_dir / "feed.json")
+        shutil.copy2(feed_path, report_feed_path)
         synced_local_dirs += 1
 
     # Sync individual report file to all locations
@@ -110,8 +117,10 @@ def record_and_publish(
         if src_report.exists():
             for data_dir in data_sync_dirs:
                 report_dir = data_dir / "reports"
+                report_path = report_dir / f"{report_id}.json"
+                guard_canonical_write(report_path)
                 report_dir.mkdir(exist_ok=True)
-                shutil.copy2(src_report, report_dir / f"{report_id}.json")
+                shutil.copy2(src_report, report_path)
 
     if synced_local_dirs:
         print(f"✓ local data mirrors synced ({synced_local_dirs})")

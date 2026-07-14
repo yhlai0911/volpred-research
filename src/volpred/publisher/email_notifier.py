@@ -12,16 +12,12 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
+from volpred.canonical_write import guard_canonical_write
 from volpred.config.runtime import get_default_remote_url
 from zoneinfo import ZoneInfo
 
-# NOTE: `guard_canonical_write` is imported lazily inside the methods that use it
-# (see `_save_log` / `_write_notification_file`). A top-level
-# `from volpred.ops.canonical_write import ...` eagerly runs `volpred.ops.__init__`,
-# which imports `.alerts`, which imports `EmailNotifier` from this module while it
-# is still partially initialized → circular ImportError. Importing at call time
-# keeps `email_notifier` below `volpred.ops` in the dependency order (2026-07-11
-# fix: token_report_daily cron was failing daily on this cycle).
+# The guard owner deliberately lives below the eager volpred.ops package, so a
+# normal module-level import cannot recreate the 2026-07-11 circular import.
 
 
 def _utc_now() -> str:
@@ -341,6 +337,8 @@ class EmailNotifier:
         _prime_project_env()
         self.storage_dir = Path(storage_dir)
         self.notifications_dir = self.storage_dir / "notifications"
+        if not self.notifications_dir.exists():
+            guard_canonical_write(self.notifications_dir)
         self.notifications_dir.mkdir(parents=True, exist_ok=True)
         self.from_email = os.environ.get("EMAIL_FROM", "").strip()
         self.from_name = os.environ.get("EMAIL_FROM_NAME", "VolPred")
@@ -394,15 +392,11 @@ class EmailNotifier:
     # genuinely exercise alerting must pass storage_dir=tmp_path; that path is
     # outside the repo and the guard lets it through.
     def _save_log(self, entries: list[dict[str, Any]]) -> None:
-        from volpred.ops.canonical_write import guard_canonical_write
-
         log_file = self.notifications_dir / "notification_log.json"
         guard_canonical_write(log_file)
         log_file.write_text(json.dumps(entries, indent=2, ensure_ascii=False, default=str))
 
     def _write_notification_file(self, notification: dict[str, Any]) -> None:
-        from volpred.ops.canonical_write import guard_canonical_write
-
         notif_file = self.notifications_dir / f"{notification['id']}.json"
         guard_canonical_write(notif_file)
         notif_file.write_text(json.dumps(notification, indent=2, ensure_ascii=False, default=str))

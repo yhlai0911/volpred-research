@@ -140,6 +140,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
+from volpred.canonical_write import guard_canonical_write
+
 ROOT = Path(__file__).resolve().parents[2]
 STATE_PATH = ROOT / "storage" / "ops" / "dispatch_state.json"
 
@@ -330,9 +332,8 @@ def _state_schema_detail(data: Any) -> str:
     return f"type={type(data).__name__} version={version!r}"
 
 
-# Captured at import, BEFORE any test monkeypatches `STATE_PATH` to a tmp file.
-# The gate below must compare against the real canonical path, never against a
-# redirected one — otherwise every tmp-path write would look like a canonical write.
+# Backward-compatible probe constant; path classification is owned centrally by
+# volpred.canonical_write rather than a dispatch-specific equality check.
 _CANONICAL_STATE_PATH = STATE_PATH
 
 
@@ -347,25 +348,11 @@ def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
     os.replace() is POSIX-atomic on same filesystem; downstream readers
     never observe a partially-written file.
 
-    2026-07-10 writer-level gate: a test that forgets to redirect `STATE_PATH`
-    used to write the LIVE daemon state (`supervisor.main()` did exactly that —
-    see its call-time-lookup NOTE). The repo-root `conftest.py` backstopped it with a
-    per-test fingerprint of canonical files, but `dispatch_state.json` is also
-    where the running daemon stamps a heartbeat every 30s, so that detector
-    failed a random test on every run whose span crossed a beat — and PHASE-Z,
-    which runs the test gate on this very checkout after each fire, emailed the
-    owner a CRITICAL "測試紅燈" for it. A gate at the writer is precise where a
-    fingerprint cannot be: it knows who is writing, not merely that bytes moved.
-    The daemon's own env never sets this flag; pytest's does, and subprocesses
-    inherit it.
+    The shared writer-level gate is precise where the former per-test mtime
+    fingerprint was not: it identifies the attempted writer and permits tmp
+    paths while the live daemon independently updates its own state.
     """
-    if os.environ.get("VOLPRED_NO_CANONICAL_WRITE") == "1" and path == _CANONICAL_STATE_PATH:
-        raise RuntimeError(
-            f"refusing to write canonical dispatch state under test: {path}\n"
-            "Redirect it: monkeypatch `state.STATE_PATH` AND pass the path down "
-            "explicitly (the `path=STATE_PATH` defaults bind at function-definition "
-            "time, so patching the module attribute alone does not reach them)."
-        )
+    guard_canonical_write(path)
     fd, tmp_name = tempfile.mkstemp(
         prefix=f".{path.name}.tmp.",
         dir=str(path.parent),
@@ -441,7 +428,9 @@ def _locked_state(path: Path = STATE_PATH) -> Iterator[tuple[Any, dict[str, Any]
     `_atomic_write_json` (temp file + os.replace) so a crash mid-write never
     leaves a partial/empty canonical file.
     """
-    path.parent.mkdir(parents=True, exist_ok=True)
+    if not path.parent.exists():
+        guard_canonical_write(path.parent)
+        path.parent.mkdir(parents=True, exist_ok=True)
     lock_fh = _acquire_lock(_lock_path(path), shared=False)
     try:
         try:
@@ -478,7 +467,6 @@ def read_state(path: Path = STATE_PATH) -> dict[str, Any]:
     reasoning in one place)."""
     if not path.exists():
         return _empty_state()
-    path.parent.mkdir(parents=True, exist_ok=True)
     lock_fh = _acquire_lock(_lock_path(path), shared=True)
     try:
         try:

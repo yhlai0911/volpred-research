@@ -45,7 +45,7 @@ except ImportError:  # pragma: no cover
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from cron_mark_last_run import merge_last_run  # noqa: E402
-from volpred.ops.canonical_write import guard_canonical_write  # noqa: E402
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 
 # Host crontab expressions are in LOCAL time (macOS cron default). When we
 # evaluate "is this job due?" via croniter, we must use the same local tz

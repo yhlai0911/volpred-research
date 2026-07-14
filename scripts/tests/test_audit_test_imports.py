@@ -12,6 +12,7 @@ audit, the pre-push gate has stopped gating and the incident can recur.
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -39,6 +40,28 @@ def _run(root: Path) -> subprocess.CompletedProcess[str]:
         text=True,
         check=False,
     )
+
+
+def _run_index(root: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(AUDIT), "--root", str(root), "--index"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def _script_tree(root: Path, test: str, scripts: dict[str, str] | None = None) -> Path:
+    (root / "src" / "volpred").mkdir(parents=True)
+    (root / "src" / "volpred" / "__init__.py").write_text("", encoding="utf-8")
+    (root / "scripts").mkdir()
+    for rel, source in (scripts or {}).items():
+        path = root / "scripts" / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(source, encoding="utf-8")
+    (root / "tests").mkdir()
+    (root / "tests" / "test_script_ref.py").write_text(test, encoding="utf-8")
+    return root
 
 
 def test_catches_test_importing_symbol_source_does_not_define(tmp_path: Path) -> None:
@@ -91,6 +114,128 @@ def test_star_reexport_module_is_treated_as_opaque(tmp_path: Path) -> None:
     )
     res = _run(tmp_path)
     assert res.returncode == 0, f"opaque module produced a false BAD:\n{res.stdout}"
+
+
+@pytest.mark.parametrize(
+    "statement",
+    [
+        "from scripts import missing_worker\n",
+        "import scripts.missing_worker\n",
+        "from scripts.missing_worker import run\n",
+    ],
+)
+def test_catches_missing_scripts_imports(tmp_path: Path, statement: str) -> None:
+    _script_tree(tmp_path, statement)
+    res = _run(tmp_path)
+    assert res.returncode == 1, f"missing scripts dependency passed:\n{res.stdout}{res.stderr}"
+    assert "missing_worker" in res.stdout
+
+
+@pytest.mark.parametrize(
+    "statement",
+    [
+        'import importlib\nworker = importlib.import_module("scripts.missing_worker")\n',
+        'import importlib as il\nworker = il.import_module("scripts.missing_worker")\n',
+        'from importlib import import_module as load\nworker = load("scripts.missing_worker")\n',
+        'worker = __import__("scripts.missing_worker")\n',
+    ],
+)
+def test_catches_missing_literal_dynamic_imports(tmp_path: Path, statement: str) -> None:
+    _script_tree(tmp_path, statement)
+    res = _run(tmp_path)
+    assert res.returncode == 1, f"dynamic dependency escaped:\n{res.stdout}{res.stderr}"
+    assert "dynamically imports 'scripts.missing_worker'" in res.stdout
+
+
+def test_marker_text_alone_does_not_make_module_opaque(tmp_path: Path) -> None:
+    _tree(
+        tmp_path,
+        source='NOTE = "globals()[ is documentation, not dynamic binding"\n',
+        test="from volpred.publisher.arc_dedup import missing_name\n",
+    )
+    res = _run(tmp_path)
+    assert res.returncode == 1
+    assert "missing_name" in res.stdout
+
+
+def test_passes_scripts_module_and_namespace_package_imports(tmp_path: Path) -> None:
+    _script_tree(
+        tmp_path,
+        "from scripts import worker\nfrom scripts.supervisor import phase_z\nimport scripts.worker\n",
+        {
+            "worker.py": "def run():\n    return 1\n",
+            "supervisor/__init__.py": "",
+            "supervisor/phase_z.py": "X = 1\n",
+        },
+    )
+    res = _run(tmp_path)
+    assert res.returncode == 0, f"valid scripts imports were rejected:\n{res.stdout}{res.stderr}"
+
+
+def test_catches_missing_dynamic_script_spec_location(tmp_path: Path) -> None:
+    _script_tree(
+        tmp_path,
+        """import importlib.util
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+MODULE_PATH = ROOT / "scripts" / "missing_worker.py"
+SPEC = importlib.util.spec_from_file_location("missing_worker", MODULE_PATH)
+""",
+    )
+    res = _run(tmp_path)
+    assert res.returncode == 1
+    assert "references missing 'scripts/missing_worker.py'" in res.stdout
+
+
+def _init_index_repo(root: Path, *, include_auditor: bool = True) -> None:
+    subprocess.run(["git", "init", "-q", str(root)], check=True)
+    _script_tree(root, "from scripts import worktree_only\n")
+    (root / "scripts" / "worktree_only.py").write_text("X = 1\n", encoding="utf-8")
+    if include_auditor:
+        shutil.copy2(AUDIT, root / AUDIT.relative_to(REPO))
+        subprocess.run(
+            ["git", "-C", str(root), "add", "src", "tests", "scripts/audit_test_imports.py"],
+            check=True,
+        )
+    else:
+        subprocess.run(["git", "-C", str(root), "add", "src", "tests"], check=True)
+
+
+def test_index_mode_ignores_working_tree_only_implementation(tmp_path: Path) -> None:
+    _init_index_repo(tmp_path)
+    res = _run_index(tmp_path)
+    assert res.returncode == 1, f"working-tree-only script satisfied candidate:\n{res.stdout}{res.stderr}"
+    assert "worktree_only" in res.stdout
+
+    subprocess.run(["git", "-C", str(tmp_path), "add", "scripts/worktree_only.py"], check=True)
+    complete = _run_index(tmp_path)
+    assert complete.returncode == 0, f"complete candidate rejected:\n{complete.stdout}{complete.stderr}"
+
+
+def test_index_mode_fails_closed_without_candidate_auditor(tmp_path: Path) -> None:
+    _init_index_repo(tmp_path, include_auditor=False)
+    res = _run_index(tmp_path)
+    assert res.returncode == 2
+    assert "removes its own gate" in res.stderr
+
+
+def test_trusted_index_mode_cannot_be_weakened_by_candidate_auditor(tmp_path: Path) -> None:
+    _init_index_repo(tmp_path)
+    candidate_auditor = tmp_path / "scripts" / "audit_test_imports.py"
+    candidate_auditor.write_text(
+        '#!/usr/bin/env python3\nprint("[audit-test-imports] 1 test files checked, 1 dependencies resolved, 0 bad")\n',
+        encoding="utf-8",
+    )
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "add", "scripts/audit_test_imports.py"],
+        check=True,
+    )
+
+    res = _run_index(tmp_path)
+
+    assert res.returncode == 1, f"candidate weakened its own bootstrap:\n{res.stdout}{res.stderr}"
+    assert "worktree_only" in res.stdout
 
 
 def test_real_repo_tree_is_clean() -> None:

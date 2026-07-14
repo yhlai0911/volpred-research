@@ -41,6 +41,8 @@ from typing import Any, Callable, Sequence
 
 from datetime import datetime, timezone
 
+from volpred.canonical_write import guard_canonical_write
+
 from .common import load_json, project_path
 from .diagnostics import warn
 
@@ -186,6 +188,7 @@ def _load_cache(storage_dir: str) -> dict[str, list[float]]:
 
 def _save_cache(storage_dir: str, cache: dict[str, list[float]]) -> None:
     path = _cache_path(storage_dir)
+    guard_canonical_write(path)
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".json.tmp")

@@ -49,6 +49,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import (  # noqa: E402
     normalize_priority,
     normalize_task_priority,
@@ -80,6 +81,7 @@ def _now() -> str:
 
 @contextmanager
 def _locked_load() -> Iterator[tuple[Any, list[dict[str, Any]]]]:
+    guard_canonical_write(NEXT_TASKS)
     NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
     if not NEXT_TASKS.exists():
         NEXT_TASKS.write_text("[]", encoding="utf-8")

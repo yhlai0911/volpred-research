@@ -5,6 +5,7 @@ import re
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from volpred.canonical_write import guard_canonical_write
 from volpred.config.runtime import get_default_remote_url
 from volpred.topic_clusters import classify_topic_cluster, cluster_gate_status
 
@@ -94,8 +95,6 @@ def _log_dedup_decision(storage_dir: str, action: str, new_title: str | None,
     """
     # Imported here, not at module scope: volpred.ops's __init__ pulls in
     # ops.content, which imports this module (test_no_circular_imports).
-    from volpred.ops.canonical_write import guard_canonical_write
-
     path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
     guard_canonical_write(path)
     try:
@@ -358,8 +357,6 @@ def _log_anti_ai_gate_decision(
     mode: str | None = None,
 ) -> None:
     """Append the anti-AI gate audit record; logging is fail-open."""
-    from volpred.ops.canonical_write import guard_canonical_write
-
     path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
     guard_canonical_write(path)
     try:
@@ -1230,6 +1227,8 @@ class Publisher:
 
     def __init__(self, storage_dir: str = 'storage'):
         self.reports_dir = Path(storage_dir) / 'reports'
+        if not self.reports_dir.exists():
+            guard_canonical_write(self.reports_dir)
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         self._feed_file = self.reports_dir / 'feed.json'
 
@@ -1263,6 +1262,7 @@ class Publisher:
             failed = []
         if pub_id not in failed:
             failed.append(pub_id)
+            guard_canonical_write(failed_path)
             failed_path.write_text(json.dumps(failed))
 
     # Domain-specific compound terms for topic extraction (longest match first)
@@ -2317,6 +2317,7 @@ class Publisher:
                 break
         if target_item is None:
             return False
+        guard_canonical_write(self._feed_file)
         with open(self._feed_file, 'w') as f:
             json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
         self._sync_report_to_remote(pub_id, target_item)
@@ -2334,6 +2335,9 @@ class Publisher:
         return True
 
     def _append_to_feed(self, item: dict) -> str:
+        # Fail before validation/audit side effects (including writer_log in the
+        # finally block) when a test accidentally targets the live feed.
+        guard_canonical_write(self._feed_file)
         # Ensure both timestamp fields exist (frontend uses published_at, legacy uses created_at)
         now = datetime.now(timezone.utc).isoformat()
         if 'created_at' not in item:
@@ -2495,6 +2499,7 @@ class Publisher:
                 feed.append(item)
                 # Sort newest first — use published_at (consistent with frontend display)
                 feed.sort(key=lambda x: x.get('published_at') or x.get('created_at') or '', reverse=True)
+                guard_canonical_write(self._feed_file)
                 tmp_file = self._feed_file.with_name(f".{self._feed_file.name}.tmp")
                 with open(tmp_file, 'w') as f:
                     json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
@@ -2548,6 +2553,7 @@ class Publisher:
                     break
             if not found:
                 return False
+            guard_canonical_write(self._feed_file)
             tmp_file = self._feed_file.with_name(f".{self._feed_file.name}.tmp")
             with open(tmp_file, 'w') as f:
                 json.dump(feed, f, indent=2, default=str, ensure_ascii=False)

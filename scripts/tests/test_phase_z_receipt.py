@@ -36,6 +36,9 @@ def repo(tmp_path: Path) -> Path:
     _git(r.parent, "init", "-q", str(r))
     _git(r, "config", "user.email", "t@t.t")
     _git(r, "config", "user.name", "t")
+    hook = r / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 0\n")
+    hook.chmod(0o755)
     (r / "seed.txt").write_text("seed\n")
     _git(r, "add", "seed.txt")
     _git(r, "commit", "-qm", "seed")

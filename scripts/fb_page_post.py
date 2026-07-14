@@ -22,6 +22,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from volpred.canonical_write import guard_canonical_write
 
 GRAPH_VERSION = "v21.0"
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
@@ -124,6 +129,7 @@ def _mark_success(mile_id: str, post_url: str, comment_link: str) -> None:
             det["fb_post_timestamp"] = ts
             det["fb_post_channel"] = "page_graph_api"
             break
+    guard_canonical_write(FEED_PATH)
     FEED_PATH.write_text(json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8")
 
 

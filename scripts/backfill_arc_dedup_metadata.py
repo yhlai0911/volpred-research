@@ -32,7 +32,7 @@ from volpred.publisher.arc_dedup import (  # noqa: E402
     ARC_SIGNATURE_SCHEMA_VERSION,
     arc_signature_from_feed_item,
 )
-from volpred.ops.canonical_write import guard_canonical_write  # noqa: E402
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.shared_lock import shared_state_lock  # noqa: E402
 
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import fcntl
 import json
+from pathlib import Path
 from typing import Any
 
 from scripts.supabase_sync import (
@@ -12,6 +13,7 @@ from scripts.supabase_sync import (
     _select_rows,
 )
 from volpred.memory.system import MemorySystem
+from volpred.canonical_write import guard_canonical_write
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
 from .next_tasks import normalize_task_priority, validate_task_status, write_tasks_to_handle
@@ -183,11 +185,15 @@ def _ensure_article_question_metadata(article_slug: str, question_id: str) -> No
     article upsert to rebuild question_articles rows. Without this metadata,
     the link gets dropped on the next sync cycle.
     """
+    report_path = Path("storage/reports") / f"{article_slug}.json"
+    feed_path = Path("storage/reports/feed.json")
+    if report_path.exists():
+        guard_canonical_write(report_path)
+    if feed_path.exists():
+        guard_canonical_write(feed_path)
+
     try:
         # Update local report JSON
-        import json
-        from pathlib import Path
-        report_path = Path("storage/reports") / f"{article_slug}.json"
         if report_path.exists():
             report = json.loads(report_path.read_text())
             if not report.get("details"):
@@ -196,7 +202,6 @@ def _ensure_article_question_metadata(article_slug: str, question_id: str) -> No
             report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2))
 
         # Update feed.json
-        feed_path = Path("storage/reports/feed.json")
         if feed_path.exists():
             feed = json.loads(feed_path.read_text())
             for item in feed:
@@ -535,6 +540,7 @@ def ensure_member_qa_task(
         return {"created": False, "reason": "missing_question_id"}
 
     next_tasks_path = project_path(storage_dir, "next_tasks.json")
+    guard_canonical_write(next_tasks_path)
     next_tasks_path.parent.mkdir(parents=True, exist_ok=True)
     if not next_tasks_path.exists():
         next_tasks_path.write_text("[]\n", encoding="utf-8")

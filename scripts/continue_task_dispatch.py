@@ -122,6 +122,7 @@ BLOCKED_DISPATCH_LANES = {"blocked", "blocked_on_user", "hold"}
 import sys as _sys
 from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.blocked_reasons import BLOCKED_REASONS  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
@@ -482,6 +483,7 @@ def _materialize_pool_dry_diagnostic_task(now: datetime | None = None) -> dict:
     }
     normalize_task_priority(task)
 
+    guard_canonical_write(NEXT_TASKS)
     NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
     if not NEXT_TASKS.exists():
         NEXT_TASKS.write_text("[]\n", encoding="utf-8")
@@ -1122,6 +1124,7 @@ def main() -> int:
     print_report(report)
 
     if args.report:
+        guard_canonical_write(REPORT_PATH)
         REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
         REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
         print(f"[dispatch] report written: {REPORT_PATH}")

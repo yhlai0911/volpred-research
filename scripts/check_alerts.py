@@ -36,6 +36,7 @@ if str(SRC_DIR) not in sys.path:
 if str(PROJECT_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402 — needs SRC_DIR on sys.path above
 
 
@@ -74,12 +75,14 @@ def _record_release_pool_fallback_fire(*, start_iso: str, end_iso: str, returnco
     run as a skipped cron.
     """
     log_path = PROJECT_ROOT / "storage" / "logs" / "cron" / "release_pool.log"
+    guard_canonical_write(log_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with log_path.open("a", encoding="utf-8") as handle:
         handle.write(f"=== [release_pool] check_alerts fallback fire at {start_iso} ===\n")
         handle.write(f"=== [release_pool] exit {returncode} at {end_iso} (fallback) ===\n")
 
     state_path = PROJECT_ROOT / "storage" / "ops" / "cron_last_run.json"
+    guard_canonical_write(state_path)
     state_path.parent.mkdir(parents=True, exist_ok=True)
     state = _load_json_dict(state_path, label="cron_last_run")
     state["release_pool"] = end_iso
@@ -219,6 +222,7 @@ def _write_json_atomic(path: Path, payload: dict) -> None:
     """Serialize fully, then replace. A half-written receipt would make the alert
     body lie about what the system did (per control-plane rule: never leave partial
     JSON behind a truncate)."""
+    guard_canonical_write(path)
     blob = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -575,6 +579,7 @@ def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
 
     from volpred.ops.next_tasks import normalize_task_priority, write_tasks_to_handle
 
+    guard_canonical_write(next_tasks_path)
     normalize_task_priority(task)
     next_tasks_path.parent.mkdir(parents=True, exist_ok=True)
     if not next_tasks_path.exists():
@@ -1063,6 +1068,7 @@ def _ci_close_pending_repair_tasks(
     wanted = set(task_ids)
     if not wanted or not next_tasks_path.exists():
         return []
+    guard_canonical_write(next_tasks_path)
     retired: list[str] = []
     changed = False
     with next_tasks_path.open("r+", encoding="utf-8") as fh:

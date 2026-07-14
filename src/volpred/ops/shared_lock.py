@@ -35,7 +35,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterable
 
-from .canonical_write import canonical_writes_disabled, is_canonical_path
+from volpred.canonical_write import canonical_writes_disabled, is_canonical_path
 from .common import project_path
 
 # Shared by every process running with the gate on, so mutual exclusion between

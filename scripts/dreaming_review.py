@@ -50,6 +50,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.common import project_path  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.loop_health import (  # noqa: E402
@@ -1112,6 +1113,7 @@ def apply_auto_dispatch(
     from volpred.ops.next_tasks import write_tasks_to_handle
 
     queue = Path(storage_dir) / "next_tasks.json"
+    guard_canonical_write(queue)
     try:
         queue.parent.mkdir(parents=True, exist_ok=True)
         if not queue.exists():

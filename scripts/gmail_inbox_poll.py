@@ -46,6 +46,7 @@ NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 LOG_PATH = ROOT / "storage" / "logs" / "cron" / "gmail_poll.log"
 TAIPEI = ZoneInfo("Asia/Taipei")
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 
 # Quoted-reply markers (Gmail / Apple Mail / Outlook common forms)
@@ -86,6 +87,7 @@ def _now_local() -> str:
 
 
 def _log(msg: str) -> None:
+    guard_canonical_write(LOG_PATH)
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     line = f"[{_now_local()}] {msg}\n"
     with LOG_PATH.open("a", encoding="utf-8") as fh:
@@ -107,6 +109,7 @@ def _load_state() -> dict[str, Any]:
 
 
 def _save_state(state: dict[str, Any]) -> None:
+    guard_canonical_write(STATE_PATH)
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     # Cap processed_message_ids to last 500 to avoid unbounded growth
     if len(state.get("processed_message_ids", [])) > 500:
@@ -385,6 +388,7 @@ def _append_task(task: dict[str, Any], dry_run: bool) -> str:
         return task["id"]
     import fcntl
 
+    guard_canonical_write(NEXT_TASKS)
     NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
     if not NEXT_TASKS.exists():
         NEXT_TASKS.write_text("[]", encoding="utf-8")
@@ -748,6 +752,7 @@ def _trigger_immediate_dispatch(queued: list[dict[str, Any]]) -> dict[str, Any]:
             }
         task_ids = [q["task_id"] for q in pending]
         dispatch_state.request_fire(f"email_reply:{','.join(task_ids)[:150]}")
+        guard_canonical_write(_TRIGGER_MARKER)
         _TRIGGER_MARKER.parent.mkdir(parents=True, exist_ok=True)
         _TRIGGER_MARKER.write_text(_now_iso(), encoding="utf-8")
         _log(f"  IMMEDIATE DISPATCH requested via supervisor fire-flag for "

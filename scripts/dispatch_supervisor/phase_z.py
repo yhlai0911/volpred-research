@@ -31,16 +31,15 @@ block below and docs/error_log.md 2026-07-10):
   1. `git status --porcelain -z -uall` — empty → clean → no-op.
   2. no fire-start baseline → ownership unknown → commit NOTHING, alert. The work
      stays in the working tree; nobody's history gets rewritten.
-  3. dirty → first untrack any *already-tracked-but-gitignored* flat runtime
-     state file (`git ls-files -ci --exclude-standard` — the ONLY ls-files
-     combination that lists tracked-but-ignored paths; `git check-ignore`
-     reports already-tracked paths as NOT ignored by design). This prevents
-     the 2026-07-01 incident where a re-tracked `storage/.release_settings.json`
-     let a PHASE-Z commit silently revert the boss's cadence directive.
-  4. unstage anything ANOTHER writer had staged (`git reset -- <foreign>`; the
-     working tree is untouched, only their staging is), then
-     `git add -A --pathspec-from-file` with only the paths this fire produced.
-  5. `git commit -m "ops(dispatch-supervisor HH:MM): PHASE-Z safety-net auto-commit (agent left uncommitted)"`.
+  3. Build a candidate from HEAD in a temporary `GIT_INDEX_FILE`; add only this
+     fire's paths and remove leaked tracked runtime state there. The shared index
+     is never mutated, so another session's staged work cannot be stolen or lost.
+  4. Run the tracked canonical pre-commit path against that candidate index.
+     Failure discards the temporary index: HEAD/index/working bytes are unchanged.
+  5. Create the candidate commit object and adopt it with `git update-ref`'s
+     old-HEAD CAS. A concurrent HEAD advance wins; PHASE-Z never overwrites it.
+  6. Test the exact adopted OID in a disposable clone and compare rc=1 failures
+     against its exact parent. Only newly failing node ids emit CRITICAL.
 
 Differences from legacy (deliberate, same behaviour):
   - `subprocess.run(..., timeout=...)` replaces the `perl -e 'alarm N; exec'`
@@ -57,9 +56,12 @@ import fcntl
 import json
 import logging
 import os
+import re
+import shutil
 import subprocess
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 
@@ -80,6 +82,10 @@ _TEST_GATE_TIMEOUT_S = 600
 # in via PHASE-Z with a red test nobody saw for 5 days). experiments/ and paper/
 # are research artifacts, not the runtime the gate protects.
 _GATED_CODE_PREFIXES = ("src/volpred/", "scripts/", "tests/")
+_TRUSTED_GATE_PATHS = {
+    "scripts/audit_test_imports.py",
+    "scripts/git_hooks/pre-commit",
+}
 # pytest exit 5 = "no tests collected" — a keyword `-k` that matched nothing, NOT
 # a failure. Classified as no_tests (observable), never as red.
 _PYTEST_NO_TESTS_COLLECTED = 5
@@ -661,17 +667,163 @@ def _git(
     *args: str,
     timeout_s: int,
     runner=subprocess.run,
+    env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess:
     """Run `git -C <repo> <args>` with a hard timeout. Never raises on non-zero
     exit (check=False); callers inspect returncode. Raises TimeoutExpired /
     OSError, which run_phase_z catches and turns into an observable no-op."""
-    return runner(
-        ["git", "-C", str(repo_root), *args],
-        capture_output=True,
-        text=True,
-        timeout=timeout_s,
-        check=False,
-    )
+    kwargs = {
+        "capture_output": True,
+        "text": True,
+        "timeout": timeout_s,
+        "check": False,
+    }
+    if env is not None:
+        kwargs["env"] = env
+    return runner(["git", "-C", str(repo_root), *args], **kwargs)
+
+
+def _parse_stage_entries(raw: str, *, tree: bool = False) -> dict[str, tuple[str, ...]]:
+    """Parse NUL-delimited ``ls-files --stage`` / ``ls-tree`` output by path."""
+    entries: dict[str, list[str]] = {}
+    for record in (raw or "").split("\0"):
+        if not record or "\t" not in record:
+            continue
+        meta, path = record.split("\t", 1)
+        fields = meta.split()
+        if tree:
+            if len(fields) < 3:
+                continue
+            normalized = f"{fields[0]} {fields[2]} 0"
+        else:
+            if len(fields) < 3:
+                continue
+            normalized = f"{fields[0]} {fields[1]} {fields[2]}"
+        entries.setdefault(path, []).append(normalized)
+    return {path: tuple(sorted(values)) for path, values in entries.items()}
+
+
+def _shared_index_entries(
+    repo_root: Path,
+    paths: list[str],
+    *,
+    runner,
+    env: dict[str, str] | None = None,
+) -> dict[str, tuple[str, ...]] | None:
+    if not paths:
+        return {}
+    try:
+        proc = _git(
+            repo_root, "ls-files", "--stage", "-z", "--", *paths,
+            timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+        )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        LOG.warning("phase_z: ls-files --stage failed (%s) — baseline unavailable, fail closed", exc)
+        return None
+    if proc.returncode != 0:
+        return None
+    parsed = _parse_stage_entries(proc.stdout or "")
+    return {path: parsed.get(path, ()) for path in paths}
+
+
+def _base_tree_entries(
+    repo_root: Path,
+    base_sha: str,
+    paths: list[str],
+    *,
+    runner,
+) -> dict[str, tuple[str, ...]] | None:
+    if not paths:
+        return {}
+    try:
+        proc = _git(
+            repo_root, "ls-tree", "-r", "-z", base_sha, "--", *paths,
+            timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+        )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        LOG.warning("phase_z: ls-tree %s failed (%s) — base entries unavailable, fail closed", base_sha[:8], exc)
+        return None
+    if proc.returncode != 0:
+        return None
+    parsed = _parse_stage_entries(proc.stdout or "", tree=True)
+    return {path: parsed.get(path, ()) for path in paths}
+
+
+def _refresh_shared_index_cas(
+    repo_root: Path,
+    *,
+    base_sha: str,
+    committed_sha: str,
+    candidate_paths: list[str],
+    runner,
+) -> dict:
+    """Refresh only candidate paths whose shared-index entry still equals base.
+
+    ``.git/index.lock`` is the Git-wide exclusion primitive.  We copy the current
+    index into that lock, compare each candidate path to the pinned base tree,
+    update only unchanged entries, then atomically adopt the lock.  A concurrent
+    ``git add`` either lands before the lock and is preserved by the comparison,
+    or observes the lock and cannot race between compare and replace.
+    """
+    try:
+        probe = _git(
+            repo_root, "rev-parse", "--git-path", "index",
+            timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+        )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        return {"ok": False, "reason": "index_path_error", "detail": str(exc)[:300]}
+    if probe.returncode != 0 or not (probe.stdout or "").strip():
+        return {"ok": False, "reason": "index_path_error", "detail": (probe.stderr or "")[-300:]}
+    index_path = Path((probe.stdout or "").strip())
+    if not index_path.is_absolute():
+        index_path = repo_root / index_path
+    lock_path = index_path.with_name(index_path.name + ".lock")
+
+    fd: int | None = None
+    adopted = False
+    owns_lock = False
+    try:
+        fd = os.open(lock_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        owns_lock = True
+        with os.fdopen(fd, "wb") as handle:
+            fd = None
+            with index_path.open("rb") as source:
+                shutil.copyfileobj(source, handle)
+
+        locked_env = os.environ.copy()
+        locked_env["GIT_INDEX_FILE"] = str(lock_path)
+        current = _shared_index_entries(
+            repo_root, candidate_paths, runner=runner, env=locked_env,
+        )
+        base = _base_tree_entries(repo_root, base_sha, candidate_paths, runner=runner)
+        if current is None or base is None:
+            return {"ok": False, "reason": "index_compare_error"}
+        refreshable = [path for path in candidate_paths if current[path] == base[path]]
+        preserved = [path for path in candidate_paths if current[path] != base[path]]
+        if not refreshable:
+            return {"ok": True, "refreshed": [], "preserved": preserved}
+
+        reset = _git(
+            repo_root, "reset", "-q", committed_sha, "--", *refreshable,
+            timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=locked_env,
+        )
+        if reset.returncode != 0:
+            return {"ok": False, "reason": "index_refresh_error", "detail": (reset.stderr or "")[-300:]}
+        os.replace(lock_path, index_path)
+        adopted = True
+        return {"ok": True, "refreshed": refreshable, "preserved": preserved}
+    except FileExistsError:
+        return {"ok": False, "reason": "index_busy"}
+    except OSError as exc:
+        return {"ok": False, "reason": "index_refresh_error", "detail": str(exc)[:300]}
+    finally:
+        if fd is not None:
+            os.close(fd)
+        if owns_lock and not adopted:
+            try:
+                lock_path.unlink(missing_ok=True)
+            except OSError:
+                pass  # silent-ok: the CRITICAL caller reports failed refresh
 
 
 def _default_alert(*, level: str, title: str, body: str) -> dict:
@@ -691,20 +843,25 @@ def _default_alert(*, level: str, title: str, body: str) -> dict:
         return {"sent": False, "error": str(exc)[:200]}
 
 
-def _stem_present_in_tests(tests_dir: Path, stem: str) -> bool:
-    """Does `stem` appear in any tests/*.py filename or body? Decides whether a
-    `-k <stem>` fallback would collect anything (→ run it) or the changed module
-    simply has no coverage (→ record as unmapped, do NOT pretend it passed)."""
-    for path in sorted(tests_dir.glob("*.py")):
+def _test_files_referencing_stem(tests_dir: Path, stem: str) -> list[Path]:
+    """Test files whose filename or source references ``stem``.
+
+    Pytest ``-k`` matches node metadata, not source bodies.  Returning concrete
+    files avoids the old false mapping where an import in a generically named
+    test file made us run ``-k stem`` and collect zero tests.
+    """
+    matches: list[Path] = []
+    for path in sorted(tests_dir.rglob("*.py")):
         if stem in path.name:
-            return True
+            matches.append(path)
+            continue
         try:
             if stem in path.read_text(encoding="utf-8", errors="ignore"):
-                return True
+                matches.append(path)
         except OSError as exc:
             LOG.warning("phase_z: could not scan %s for stem %r (%s)", path, stem, exc)
             continue
-    return False
+    return matches
 
 
 def _resolve_test_targets(repo_root: Path, code_files: list[str]) -> dict:
@@ -712,60 +869,176 @@ def _resolve_test_targets(repo_root: Path, code_files: list[str]) -> dict:
 
     Per changed `<tree>/…/<stem>.py`:
       - precise: `tests/test_<stem>*.py` exists → run those files by path.
-      - keyword fallback: no precise file but `<stem>` appears in the tests tree
-        → `pytest -k <stem>` over `tests/`.
+      - source-reference fallback: no precise filename but `<stem>` appears in
+        test source → run those concrete files (never misuse ``-k`` as grep).
       - unmapped: `<stem>` appears nowhere → recorded, never counted as passed.
 
-    Run-plan invariant: a `-k` expression is only ever paired with the `tests/`
-    directory, never with explicit file paths — `-k` filters whatever positional
-    targets pytest collects, so mixing precise files with `-k` would silently drop
-    the precise files whose node-ids don't contain the keyword. When any keyword
-    fallback is in play we therefore run the whole `tests/` tree filtered by every
-    involved stem (precise stems included, so their tests still run)."""
-    tests_dir = repo_root / "tests"
+    The returned plan always uses concrete files.  This is intentionally wider
+    than a keyword filter, but cannot silently collect zero due to a generic test
+    function name."""
+    test_roots = [p for p in (repo_root / "tests", repo_root / "scripts" / "tests") if p.is_dir()]
     precise_files: set[str] = set()
-    precise_stems: set[str] = set()
-    keyword_stems: set[str] = set()
     unmapped: list[str] = []
     for changed in code_files:
+        changed_path = repo_root / changed
+        if (
+            changed_path.is_file()
+            and (changed.startswith("tests/") or changed.startswith("scripts/tests/"))
+            and changed_path.name.startswith("test_")
+        ):
+            precise_files.add(changed)
+            continue
         stem = Path(changed).stem
         if stem.startswith("__"):
             # __init__.py / dunder modules have no meaningful test-file stem.
             continue
-        matches = sorted(tests_dir.glob(f"test_{stem}*.py"))
+        matches = sorted(
+            match
+            for tests_dir in test_roots
+            for match in tests_dir.rglob(f"test_{stem}*.py")
+        )
         if matches:
-            precise_stems.add(stem)
             precise_files.update(str(m.relative_to(repo_root)) for m in matches)
-        elif _stem_present_in_tests(tests_dir, stem):
-            keyword_stems.add(stem)
         else:
-            unmapped.append(changed)
+            referenced = sorted(
+                match
+                for tests_dir in test_roots
+                for match in _test_files_referencing_stem(tests_dir, stem)
+            )
+            if referenced:
+                precise_files.update(str(m.relative_to(repo_root)) for m in referenced)
+            else:
+                unmapped.append(changed)
 
-    if keyword_stems:
-        targets = ["tests"]
-        k_expr = " or ".join(sorted(precise_stems | keyword_stems))
-    else:
-        targets = sorted(precise_files)
-        k_expr = None
-    return {"targets": targets, "k_expr": k_expr, "unmapped": unmapped}
+    return {"targets": sorted(precise_files), "k_expr": None, "unmapped": unmapped}
+
+
+_PYTEST_FAILURE_RE = re.compile(r"^(?:FAILED|ERROR)\s+([^\s]+)", re.MULTILINE)
+
+
+def _pytest_failure_ids(output: str) -> set[str]:
+    """Stable node ids from pytest's short summary (best effort for fake runners)."""
+    return set(_PYTEST_FAILURE_RE.findall(output or ""))
+
+
+def _junit_failure_ids(path: Path) -> set[str]:
+    """Machine-readable failing testcase identities; malformed/missing XML falls back to stdout."""
+    try:
+        root = ET.parse(path).getroot()
+    except (OSError, ET.ParseError):
+        return set()
+    failures: set[str] = set()
+    for case in root.iter("testcase"):
+        if not any(child.tag.rsplit("}", 1)[-1] in {"failure", "error"} for child in case):
+            continue
+        file_name = case.attrib.get("file", "")
+        class_name = case.attrib.get("classname", "")
+        test_name = case.attrib.get("name", "")
+        failures.add("::".join(part for part in (file_name, class_name, test_name) if part))
+    return failures
+
+
+def _clone_revision(repo_root: Path, destination: Path, revision: str, *, runner) -> dict:
+    """Materialise one revision in a disposable clone; never run in the live checkout."""
+    try:
+        clone = runner(
+            ["git", "clone", "--quiet", "--shared", "--no-checkout", str(repo_root), str(destination)],
+            capture_output=True,
+            text=True,
+            timeout=_SHORT_TIMEOUT_S,
+            check=False,
+        )
+        if clone.returncode != 0:
+            return {"ok": False, "reason": "clone_error", "detail": (clone.stderr or "")[-400:]}
+        checkout = _git(
+            destination, "checkout", "--quiet", "--detach", revision,
+            timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+        )
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "reason": "clone_timeout"}
+    except OSError as exc:
+        return {"ok": False, "reason": "clone_error", "detail": str(exc)[:400]}
+    if checkout.returncode != 0:
+        return {"ok": False, "reason": "checkout_error", "detail": (checkout.stderr or "")[-400:]}
+    return {"ok": True}
+
+
+def _run_clone_pytest(
+    clone_root: Path,
+    *,
+    targets: list[str],
+    k_expr: str | None,
+    test_runner,
+) -> dict:
+    """Run one side of the attribution comparison inside its disposable clone."""
+    existing_targets = [target for target in targets if (clone_root / target).exists()]
+    if not existing_targets:
+        return {"returncode": _PYTEST_NO_TESTS_COLLECTED, "output": "", "ran": []}
+    junit_path = clone_root.parent / f"{clone_root.name}-pytest.xml"
+    argv = [
+        "uv", "run", "--extra", "dev", "python", "-m", "pytest",
+        *existing_targets, "-q", f"--junitxml={junit_path}", "-o", "junit_family=legacy",
+    ]
+    if k_expr:
+        argv += ["-k", k_expr]
+    env = os.environ.copy()
+    env.update({
+        "VOLPRED_NO_EMAIL": "1",
+        "VOLPRED_NO_REMOTE_WRITE": "1",
+        "VOLPRED_NO_REMOTE_READ": "1",
+        "VOLPRED_NO_CANONICAL_WRITE": "1",
+        "VOLPRED_CI_PARITY": "0",
+        "PYTHONPATH": os.pathsep.join([str(clone_root), str(clone_root / "src")]),
+    })
+    try:
+        proc = test_runner(
+            argv,
+            capture_output=True,
+            text=True,
+            timeout=_TEST_GATE_TIMEOUT_S,
+            cwd=str(clone_root),
+            env=env,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return {"returncode": None, "reason": "timeout", "output": "", "ran": existing_targets}
+    except OSError as exc:
+        return {
+            "returncode": None,
+            "reason": "runner_error",
+            "output": str(exc),
+            "ran": existing_targets,
+        }
+    output = ((proc.stdout or "") + (proc.stderr or "")).strip()
+    failure_ids = _junit_failure_ids(junit_path) or _pytest_failure_ids(output)
+    return {
+        "returncode": proc.returncode,
+        "output": output,
+        "failure_ids": sorted(failure_ids),
+        "ran": existing_targets,
+    }
 
 
 def _post_commit_test_gate(
     repo_root: Path,
     *,
+    commit_sha: str,
     hhmm: str,
     runner,
     test_runner,
     alert_fn,
 ) -> dict:
-    """Run the tests a just-landed PHASE-Z commit put at risk (`docs/error_log.md`
-    dab3baa12: safety-net commits bypass the normal test gate). Returns an
-    observability dict; ``passed`` is True (green), False (red — alert sent, NO
-    auto-revert), or None (skipped / no mapping / gate could not run). Never
-    raises — the caller already committed; a gate hiccup must not undo that."""
+    """Test an exact commit in a disposable clone and compare its exact parent.
+
+    The live checkout is deliberately never a pytest cwd: its canonical state is
+    rewritten by 24/7 daemons, so collection/fingerprint noise there cannot be
+    evidence about this commit.  Only a failure newly introduced relative to the
+    parent emits CRITICAL; collection errors and pre-existing failures remain
+    observable but un-attributed.
+    """
     try:
         shown = _git(
-            repo_root, "show", "--name-only", "--pretty=format:", "HEAD",
+            repo_root, "show", "--name-only", "--pretty=format:", commit_sha,
             timeout_s=_SHORT_TIMEOUT_S, runner=runner,
         )
     except (subprocess.TimeoutExpired, OSError) as exc:
@@ -785,60 +1058,100 @@ def _post_commit_test_gate(
         LOG.info("phase_z: test-gate skipped — commit touched no gated .py (changed=%d)", len(changed))
         return {"passed": None, "reason": "skipped_non_code", "changed_code_files": []}
 
-    plan = _resolve_test_targets(repo_root, code_files)
-    targets, k_expr, unmapped = plan["targets"], plan["k_expr"], plan["unmapped"]
-    if not targets:
-        LOG.warning("phase_z: test-gate found NO tests for committed code %s — not treating as pass", code_files)
-        return {
-            "passed": None, "reason": "no_mapped_tests",
-            "changed_code_files": code_files, "unmapped": unmapped,
-        }
-
-    argv = ["uv", "run", "--extra", "dev", "python", "-m", "pytest", *targets, "-q"]
-    if k_expr:
-        argv += ["-k", k_expr]
-    LOG.info("phase_z: test-gate running %s", " ".join(argv))
     try:
-        proc = test_runner(
-            argv, capture_output=True, text=True,
-            timeout=_TEST_GATE_TIMEOUT_S, cwd=str(repo_root), check=False,
+        parent = _git(
+            repo_root, "rev-parse", "--verify", f"{commit_sha}^",
+            timeout_s=_SHORT_TIMEOUT_S, runner=runner,
         )
-    except subprocess.TimeoutExpired:
-        LOG.warning("phase_z: test-gate timed out after %ss — cannot verify commit", _TEST_GATE_TIMEOUT_S)
-        return {"passed": None, "reason": "timeout", "ran": targets,
-                "k_expr": k_expr, "changed_code_files": code_files, "unmapped": unmapped}
-    except OSError as exc:
-        LOG.warning("phase_z: test-gate runner spawn failed (%s) — cannot verify commit", exc)
-        return {"passed": None, "reason": "runner_error", "ran": targets,
-                "k_expr": k_expr, "changed_code_files": code_files, "unmapped": unmapped}
-
-    rc = proc.returncode
-    out = ((proc.stdout or "") + (proc.stderr or "")).strip()
-    base = {"ran": targets, "k_expr": k_expr, "returncode": rc,
-            "changed_code_files": code_files, "unmapped": unmapped}
-    if rc == 0:
-        LOG.info("phase_z: test-gate green — %s", out.splitlines()[-1] if out else "(no output)")
-        return {"passed": True, "reason": "green", **base}
-    if rc == _PYTEST_NO_TESTS_COLLECTED:
-        LOG.warning("phase_z: test-gate collected no tests (pytest exit 5) for %s — not a pass", targets)
-        return {"passed": None, "reason": "no_tests_collected", **base}
-
-    tail = out[-800:]
-    LOG.warning("phase_z: test-gate RED rc=%d for %s", rc, targets)
-    short_sha = ""
-    try:
-        rev = _git(repo_root, "rev-parse", "--short", "HEAD", timeout_s=_SHORT_TIMEOUT_S, runner=runner)
-        if rev.returncode == 0:
-            short_sha = (rev.stdout or "").strip()
     except (subprocess.TimeoutExpired, OSError) as exc:
-        LOG.warning("phase_z: test-gate could not resolve commit sha (%s)", exc)
+        LOG.warning("phase_z: test-gate parent probe failed (%s)", exc)
+        return {"passed": None, "reason": "attribution_error", "ran": []}
+    if parent.returncode != 0:
+        return {"passed": None, "reason": "attribution_error", "ran": []}
+
+    with tempfile.TemporaryDirectory(prefix="volpred-phase-z-test-") as tmp:
+        temp_root = Path(tmp)
+        head_root = temp_root / "head"
+        base_root = temp_root / "parent"
+        cloned = _clone_revision(repo_root, head_root, commit_sha, runner=runner)
+        if not cloned["ok"]:
+            return {"passed": None, **cloned, "ran": []}
+        plan = _resolve_test_targets(head_root, code_files)
+        targets, k_expr, unmapped = plan["targets"], plan["k_expr"], plan["unmapped"]
+        if not targets:
+            LOG.warning("phase_z: test-gate found NO tests for committed code %s — not treating as pass", code_files)
+            return {
+                "passed": None, "reason": "no_mapped_tests",
+                "changed_code_files": code_files, "unmapped": unmapped,
+            }
+        current = _run_clone_pytest(
+            head_root, targets=targets, k_expr=k_expr, test_runner=test_runner,
+        )
+
+        rc = current["returncode"]
+        out = current.get("output", "")
+        base = {
+            "ran": current.get("ran", targets),
+            "k_expr": k_expr,
+            "returncode": rc,
+            "tested_sha": commit_sha,
+            "changed_code_files": code_files,
+            "unmapped": unmapped,
+            "isolated": True,
+        }
+        if rc is None:
+            return {"passed": None, "reason": current["reason"], **base}
+        if rc == 0:
+            LOG.info("phase_z: isolated test-gate green — %s", out.splitlines()[-1] if out else "(no output)")
+            return {"passed": True, "reason": "green", **base}
+        if rc == _PYTEST_NO_TESTS_COLLECTED:
+            return {"passed": None, "reason": "no_tests_collected", **base}
+        if rc == 2:
+            LOG.warning("phase_z: isolated test-gate collection error; not attributing it to HEAD")
+            return {"passed": None, "reason": "collection_error", "failing_tail": out[-800:], **base}
+        if rc != 1:
+            LOG.warning("phase_z: isolated test-gate infrastructure rc=%d; not attributing it to HEAD", rc)
+            return {"passed": None, "reason": "gate_error", "failing_tail": out[-800:], **base}
+
+        cloned_parent = _clone_revision(repo_root, base_root, f"{commit_sha}^", runner=runner)
+        if not cloned_parent["ok"]:
+            return {"passed": None, "reason": "attribution_error", **cloned_parent, **base}
+        previous = _run_clone_pytest(
+            base_root, targets=targets, k_expr=k_expr, test_runner=test_runner,
+        )
+
+    parent_rc = previous["returncode"]
+    parent_ids = set(previous.get("failure_ids", []))
+    current_ids = set(current.get("failure_ids", []))
+    comparison = {
+        "parent_returncode": parent_rc,
+        "failure_ids": sorted(current_ids),
+        "parent_failure_ids": sorted(parent_ids),
+    }
+    if parent_rc == 1 and (not current_ids or not (current_ids - parent_ids)):
+        LOG.warning("phase_z: isolated test-gate failure was already red at HEAD^")
+        return {"passed": False, "reason": "pre_existing_failure", "failing_tail": out[-800:],
+                **comparison, **base}
+    if parent_rc not in (0, 1, _PYTEST_NO_TESTS_COLLECTED):
+        LOG.warning("phase_z: parent comparison rc=%s is not attributable", parent_rc)
+        return {"passed": None, "reason": "attribution_error", "failing_tail": out[-800:],
+                **comparison, **base}
+
+    # HEAD is red and HEAD^ was green/no-tests, or HEAD has at least one new
+    # failing node id.  This is the only non-zero class attributable to HEAD.
+    rc = int(rc)
+    if rc == 0:
+        raise AssertionError("unreachable")
+    tail = out[-800:]
+    LOG.warning("phase_z: test-gate NEW failure rc=%d for %s", rc, targets)
+    short_sha = commit_sha[:12]
 
     # title 不帶 hhmm：時間戳會讓每次 fire 的 dedup key 都不同，24h 去重形同虛設
     # （2026-07-13 老闆被同一 warn 每 64 秒轟炸的根因）。時間放 body。
     title = f"PHASE-Z auto-commit 測試紅燈（{short_sha or 'HEAD'}）"
     body = "\n".join([
         "## 觸發條件",
-        "safety-net 自動 commit 直接進 main，補跑受影響測試後亮紅燈。",
+        "safety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。",
         f"- fire 時間: {hhmm}",
         f"- commit: {short_sha or 'HEAD'}",
         f"- 變更程式檔: {', '.join(code_files)}",
@@ -846,8 +1159,7 @@ def _post_commit_test_gate(
         f"- pytest 退出碼: {rc}",
         "",
         "## 影響",
-        "PHASE-Z 不經正常測試閘門就把 agent 未提交的變更送進 main（error_log dab3baa12：",
-        "一次紅燈在 main 上紅了 5 天沒人發現）。紅燈代表 main 現在有壞掉的 runtime。",
+        "隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。",
         "",
         "## 建議行動",
         "1. 本機重跑確認：",
@@ -861,8 +1173,8 @@ def _post_commit_test_gate(
         "```",
     ])
     alert_result = alert_fn(level="critical", title=title, body=body)
-    return {"passed": False, "reason": "red", "failing_tail": tail,
-            "alert": alert_result, **base}
+    return {"passed": False, "reason": "new_failure", "failing_tail": tail,
+            "alert": alert_result, **comparison, **base}
 
 
 def run_phase_z(
@@ -883,13 +1195,11 @@ def run_phase_z(
     supervisor tick, but it is always logged (no silent fallback per
     .claude/rules/no-silent-fallback.md).
 
-    Post-commit test gate (this module is the enforcement owner — whoever created
-    the untested commit verifies it, no separate watchdog per anti-stacking):
-    after a successful commit, the files it touched under ``src/volpred/`` /
-    ``scripts/`` / ``tests/`` are mapped to a pytest subset and run (bounded by
-    ``_TEST_GATE_TIMEOUT_S``). Red → ``tests.passed=False`` + a critical alert,
-    but NO auto-revert (revert risk > a red main). The ``tests`` dict is absent on
-    the non-committing paths (clean / error) — nothing landed to verify.
+    Post-commit test gate (single enforcement owner): after a successful commit,
+    its exact OID is tested in a disposable clone, never the daemon-written live
+    checkout. Collection errors are classified separately; an rc=1 is compared
+    with the exact parent OID. Only newly failing node ids emit CRITICAL. The
+    ``tests`` dict is absent on non-committing paths — nothing landed to verify.
 
     ``test_runner`` / ``alert_fn`` are injectable (same style as ``runner``) so the
     gate's own tests fake the pytest run instead of recursively spawning pytest.
@@ -1058,135 +1368,279 @@ def run_phase_z(
 
     LOG.info("phase_z: auto-committing %d path(s) from this fire + %d machine-churn path(s)",
              len(owned), len(churn))
+    # Build the commit in an alternate index.  The real index may contain another
+    # session's carefully staged work; mutating it and attempting to reset after a
+    # hook failure is not a transaction.  A temporary GIT_INDEX_FILE gives PHASE-Z
+    # an isolated candidate: every failure discards the file, so HEAD, the real
+    # index, and all working bytes remain byte-for-byte untouched.
     untracked: list[str] = []
+    candidate_paths: list[str] = []
     try:
-        leaked = _git(
-            repo_root, "ls-files", "-ci", "--exclude-standard", "--",
-            *_LEAKED_STATE_PATHSPECS, timeout_s=_SHORT_TIMEOUT_S, runner=runner,
-        )
-        if leaked.returncode != 0:
-            # ls-files probe itself failed (Codex review #3): don't blindly
-            # treat as "no leaked paths". Warn — we can't untrack this fire, but
-            # committing real work still matters more than the rare leaked edge.
-            LOG.warning("phase_z: git ls-files rc=%d: %s — cannot untrack leaked-ignored this fire",
-                        leaked.returncode, (leaked.stderr or "").strip()[:200])
-        else:
-            for path in (leaked.stdout or "").splitlines():
-                path = path.strip()
-                if not path:
-                    continue
-                rm = _git(repo_root, "rm", "--cached", "-q", "--", path,
-                          timeout_s=_SHORT_TIMEOUT_S, runner=runner)
-                if rm.returncode == 0:
-                    untracked.append(path)
-                else:
-                    LOG.warning("phase_z: git rm --cached %s rc=%d: %s",
-                                path, rm.returncode, (rm.stderr or "").strip()[:200])
-            if untracked:
-                LOG.info("phase_z: untracked accidentally-tracked ignored state file(s): %s", untracked)
-    except (subprocess.TimeoutExpired, OSError) as exc:
-        # fall through to add+commit anyway — untracking is best-effort; the
-        # commit of real work must still happen. Logged, not silent.
-        LOG.warning("phase_z: leaked-ignored untrack step failed (%s) — proceeding to add/commit", exc)
+        with tempfile.TemporaryDirectory(prefix="volpred-phase-z-index-") as tx:
+            tx_root = Path(tx)
+            candidate_env = os.environ.copy()
+            candidate_env["GIT_INDEX_FILE"] = str(tx_root / "index")
 
-    # The commit itself stays index-based: the `git rm --cached` above only exists
-    # in the index, and a pathspec commit would bypass it and leave the leaked
-    # state files tracked. So the index must be made to contain exactly this
-    # fire's work — which means first evicting anything ANOTHER writer staged.
-    # `git reset -- <paths>` restores those index entries to HEAD and never
-    # touches the working tree: their content survives, only the staging does not.
-    if foreign:
-        try:
-            reset = _git(repo_root, "reset", "-q", "--", *foreign,
-                         timeout_s=_SHORT_TIMEOUT_S, runner=runner)
-        except (subprocess.TimeoutExpired, OSError) as exc:
-            LOG.warning("phase_z: cannot unstage foreign paths (%s) — declining to commit", exc)
-            return {"committed": False, "reason": "unstage_error", "untracked": untracked}
-        if reset.returncode != 0:
-            # Cannot prove the index is free of another writer's staged work.
-            # Commit anyway and we are back to the bug this whole path exists for.
-            LOG.warning("phase_z: git reset rc=%d: %s — declining to commit (theft risk)",
-                        reset.returncode, (reset.stderr or "").strip()[:200])
-            return {"committed": False, "reason": "unstage_error", "untracked": untracked}
+            base = _git(
+                repo_root, "rev-parse", "--verify", "HEAD",
+                timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+            )
+            if base.returncode != 0:
+                return {"committed": False, "reason": "candidate_index_error", "rolled_back": True}
+            base_sha = (base.stdout or "").strip()
 
-    # A path we just `git rm --cached` is now untracked AND gitignored. The old
-    # bare `git add -A` skipped ignored paths silently; naming one in a pathspec
-    # makes git refuse the whole call ("paths are ignored by one of your
-    # .gitignore files"), which would abort the fire's safety-net. Drop them: the
-    # untracking is already staged and the commit below carries it.
-    to_stage = [p for p in (owned + churn) if p not in set(untracked)]
+            read_tree = _git(
+                repo_root, "read-tree", base_sha, timeout_s=_SHORT_TIMEOUT_S,
+                runner=runner, env=candidate_env,
+            )
+            if read_tree.returncode != 0:
+                LOG.warning("phase_z: cannot initialise candidate index: %s", (read_tree.stderr or "")[-300:])
+                return {"committed": False, "reason": "candidate_index_error", "rolled_back": True}
 
-    pathspec_file = ""
-    if to_stage:
-        # `--pathspec-from-file` (NUL) rather than argv: paths with spaces stay
-        # intact and a fire that touched hundreds of files cannot hit ARG_MAX.
-        try:
-            with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".pathspec",
-                                             delete=False) as fh:
-                fh.write("\0".join(to_stage))
-                pathspec_file = fh.name
-        except OSError as exc:
-            LOG.warning("phase_z: cannot write pathspec file (%s)", exc)
-            return {"committed": False, "reason": "pathspec_error", "untracked": untracked}
+            leaked = _git(
+                repo_root, "ls-files", "-ci", "--exclude-standard", "--",
+                *_LEAKED_STATE_PATHSPECS, timeout_s=_SHORT_TIMEOUT_S,
+                runner=runner, env=candidate_env,
+            )
+            if leaked.returncode != 0:
+                LOG.warning("phase_z: candidate leaked-state probe rc=%d: %s",
+                            leaked.returncode, (leaked.stderr or "")[-300:])
+                return {"committed": False, "reason": "candidate_index_error", "rolled_back": True}
+            for path in filter(None, ((leaked.stdout or "").splitlines())):
+                rm = _git(
+                    repo_root, "rm", "--cached", "-q", "--", path,
+                    timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=candidate_env,
+                )
+                if rm.returncode != 0:
+                    LOG.warning("phase_z: candidate git rm --cached %s rc=%d", path, rm.returncode)
+                    return {"committed": False, "reason": "candidate_index_error", "rolled_back": True}
+                untracked.append(path)
 
-    try:
-        if to_stage:
-            add = _git(repo_root, "add", "-A", f"--pathspec-from-file={pathspec_file}",
-                       "--pathspec-file-nul", timeout_s=_SHORT_TIMEOUT_S, runner=runner)
-            if add.returncode != 0:
-                # Codex review #3: a failed `git add` means the index is in an
-                # unknown/partial state — committing now could snapshot a partial
-                # tree. Abort this fire's safety-net (observable, no commit).
-                LOG.warning("phase_z: git add rc=%d: %s — aborting commit (partial-index risk)",
-                            add.returncode, (add.stderr or "").strip()[:200])
-                return {"committed": False, "reason": "add_error", "untracked": untracked}
-        # Committing the fire's output is this module's job, not a rescue of a
-        # delinquent agent — so the normal path no longer says "safety-net" or
-        # "agent left uncommitted". Those words made a working system read as a
-        # failing one every single shift (owner, Telegram msg 576: 「還是一直出錯啊」).
-        # What IS worth a distinct message: output that arrived with no account of
-        # why (no receipt) — that is the one case a human should look at.
-        if owned and receipt:
-            subject = f"dispatch({hhmm}): {receipt['subject']}"
-        elif owned:
-            subject = f"dispatch({hhmm}): 本班產出未附說明（agent 沒留 receipt）"
-        else:
-            subject = f"ops(dispatch-supervisor {hhmm}): PHASE-Z state churn (no agent output this fire)"
-        body_lines = []
-        if receipt:
-            if receipt["task_id"]:
-                body_lines.append(f"task: {receipt['task_id']}")
-            if receipt["body"]:
-                body_lines.append(receipt["body"])
-            if body_lines:
-                body_lines.append("")
-        body_lines.append(
-            f"Staged what this fire produced: {len(owned)} path(s), plus "
-            f"{len(churn)} daemon-written machine-churn path(s) this module owns.\n"
-            f"Left alone (dirty before the fire, another writer's): {len(foreign)} path(s)."
-        )
-        commit = _git(
-            repo_root, "commit",
-            "-m", subject,
-            "-m", "\n".join(body_lines),
-            timeout_s=_COMMIT_TIMEOUT_S, runner=runner,
-        )
-    except (subprocess.TimeoutExpired, OSError) as exc:
-        LOG.warning("phase_z: git add/commit failed (%s)", exc)
-        return {"committed": False, "reason": "commit_error", "untracked": untracked}
-    finally:
-        if pathspec_file:
+            to_stage = [p for p in (owned + churn) if p not in set(untracked)]
+            pathspec_file = tx_root / "paths.nul"
             try:
-                os.unlink(pathspec_file)
-            except OSError:  # pragma: no cover
-                pass  # silent-ok: best-effort cleanup of our own temp pathspec file
+                pathspec_file.write_bytes(b"\0".join(os.fsencode(path) for path in to_stage))
+            except OSError as exc:
+                LOG.warning("phase_z: cannot write candidate pathspec (%s)", exc)
+                return {"committed": False, "reason": "pathspec_error", "rolled_back": True}
+
+            if to_stage:
+                add = _git(
+                    repo_root, "add", "-A", f"--pathspec-from-file={pathspec_file}",
+                    "--pathspec-file-nul", timeout_s=_SHORT_TIMEOUT_S,
+                    runner=runner, env=candidate_env,
+                )
+                if add.returncode != 0:
+                    LOG.warning("phase_z: candidate git add rc=%d: %s",
+                                add.returncode, (add.stderr or "")[-300:])
+                    return {"committed": False, "reason": "add_error", "untracked": untracked,
+                            "rolled_back": True}
+
+            staged = _git(
+                repo_root, "diff", "--cached", "--name-only", "-z", base_sha,
+                timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=candidate_env,
+            )
+            if staged.returncode != 0:
+                return {"committed": False, "reason": "candidate_index_error", "rolled_back": True}
+            candidate_paths = sorted(filter(None, (staged.stdout or "").split("\0")))
+            allowed_paths = set(to_stage) | set(untracked)
+            unexpected = sorted(set(candidate_paths) - allowed_paths)
+            if unexpected:
+                LOG.error("phase_z: candidate index contains non-owned paths: %s", unexpected)
+                return {"committed": False, "reason": "candidate_scope_error", "rolled_back": True,
+                        "unexpected": unexpected}
+            if not candidate_paths:
+                _consume_pre_fire_snapshot(repo_root, runner)
+                return {"committed": False, "reason": "nothing_to_commit", "untracked": untracked}
+
+            tree_before = _git(
+                repo_root, "write-tree", timeout_s=_SHORT_TIMEOUT_S,
+                runner=runner, env=candidate_env,
+            )
+            if tree_before.returncode != 0:
+                return {"committed": False, "reason": "candidate_index_error", "rolled_back": True}
+
+            gate_changes = sorted(set(candidate_paths) & _TRUSTED_GATE_PATHS)
+            if gate_changes:
+                LOG.error("phase_z: candidate attempted to modify its own trusted gate: %s", gate_changes)
+                return {
+                    "committed": False,
+                    "reason": "candidate_gate_self_modification",
+                    "rolled_back": True,
+                    "gate_changes": gate_changes,
+                }
+
+            # Run an immutable hook (pinned base_sha, or an installed fixture
+            # hook when the base has no canonical gate) against a materialized
+            # candidate worktree.  Neither hook code nor cwd comes from the live
+            # checkout, so hook side effects are confined to this temp tree.
+            hook_probe = _git(
+                repo_root, "rev-parse", "--git-path", "hooks/pre-commit",
+                timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+            )
+            if hook_probe.returncode != 0:
+                return {"committed": False, "reason": "candidate_gate_error", "rolled_back": True}
+            installed_hook = Path((hook_probe.stdout or "").strip())
+            if not installed_hook.is_absolute():
+                installed_hook = repo_root / installed_hook
+            trusted_hook = tx_root / "trusted-pre-commit"
+            trusted_auditor = tx_root / "trusted-audit-test-imports.py"
+            base_hook = _git(
+                repo_root, "show", f"{base_sha}:scripts/git_hooks/pre-commit",
+                timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+            )
+            if base_hook.returncode == 0:
+                base_auditor = _git(
+                    repo_root, "show", f"{base_sha}:scripts/audit_test_imports.py",
+                    timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+                )
+                if base_auditor.returncode != 0:
+                    return {"committed": False, "reason": "candidate_gate_error", "rolled_back": True}
+                trusted_hook.write_text(base_hook.stdout or "", encoding="utf-8")
+                trusted_auditor.write_text(base_auditor.stdout or "", encoding="utf-8")
+            elif installed_hook.is_file() and os.access(installed_hook, os.X_OK):
+                # Hermetic repositories may supply a deliberately tiny fixture
+                # hook. Copy it now so a concurrent rewrite cannot change what
+                # this transaction executes.
+                shutil.copyfile(installed_hook, trusted_hook)
+            else:
+                LOG.error("phase_z: no immutable pre-commit hook available")
+                return {"committed": False, "reason": "candidate_gate_missing", "rolled_back": True}
+            trusted_hook.chmod(0o700)
+
+            candidate_root = tx_root / "candidate"
+            candidate_root.mkdir()
+            checkout = _git(
+                repo_root, "checkout-index", "--all", f"--prefix={candidate_root}{os.sep}",
+                timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=candidate_env,
+            )
+            if checkout.returncode != 0:
+                return {"committed": False, "reason": "candidate_gate_error", "rolled_back": True}
+            git_dir_probe = _git(
+                repo_root, "rev-parse", "--absolute-git-dir",
+                timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+            )
+            if git_dir_probe.returncode != 0:
+                return {"committed": False, "reason": "candidate_gate_error", "rolled_back": True}
+            hook_env = candidate_env.copy()
+            hook_env.update({
+                "GIT_DIR": (git_dir_probe.stdout or "").strip(),
+                "GIT_WORK_TREE": str(candidate_root),
+                "VOLPRED_NO_EMAIL": "1",
+                "VOLPRED_NO_REMOTE_WRITE": "1",
+                "VOLPRED_NO_REMOTE_READ": "1",
+                "VOLPRED_NO_CANONICAL_WRITE": "1",
+            })
+            if trusted_auditor.is_file():
+                hook_env["VOLPRED_TRUSTED_TEST_IMPORT_AUDITOR"] = str(trusted_auditor)
+            hook = runner(
+                ["bash", str(trusted_hook)], cwd=str(candidate_root), env=hook_env,
+                capture_output=True, text=True, timeout=_COMMIT_TIMEOUT_S, check=False,
+            )
+            hook_out = ((hook.stdout or "") + (hook.stderr or "")).strip()
+            if hook.returncode != 0:
+                LOG.warning("phase_z: candidate pre-commit blocked; alternate index discarded: %s",
+                            hook_out[-400:])
+                alert_fn(
+                    level="warn",
+                    title="PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
+                    body=("候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n"
+                          + (hook_out[-1200:] or "(hook returned non-zero without output)")),
+                )
+                return {"committed": False, "reason": "commit_nonzero", "untracked": untracked,
+                        "commit_tail": hook_out[-600:], "rolled_back": True}
+
+            tree_after = _git(
+                repo_root, "write-tree", timeout_s=_SHORT_TIMEOUT_S,
+                runner=runner, env=candidate_env,
+            )
+            if tree_after.returncode != 0 or tree_after.stdout.strip() != tree_before.stdout.strip():
+                LOG.error("phase_z: pre-commit mutated candidate index; discarding transaction")
+                return {"committed": False, "reason": "candidate_gate_mutation", "untracked": untracked,
+                        "rolled_back": True}
+
+            if owned and receipt:
+                subject = f"dispatch({hhmm}): {receipt['subject']}"
+            elif owned:
+                subject = f"dispatch({hhmm}): 本班產出未附說明（agent 沒留 receipt）"
+            else:
+                subject = f"ops(dispatch-supervisor {hhmm}): PHASE-Z state churn (no agent output this fire)"
+            body_lines = []
+            if receipt:
+                if receipt["task_id"]:
+                    body_lines.append(f"task: {receipt['task_id']}")
+                if receipt["body"]:
+                    body_lines.append(receipt["body"])
+                if body_lines:
+                    body_lines.append("")
+            body_lines.append(
+                f"Staged what this fire produced: {len(owned)} path(s), plus "
+                f"{len(churn)} daemon-written machine-churn path(s) this module owns.\n"
+                f"Left alone (dirty before the fire, another writer's): {len(foreign)} path(s)."
+            )
+            commit_object = _git(
+                repo_root, "commit-tree", tree_after.stdout.strip(), "-p", base_sha,
+                "-m", subject, "-m", "\n".join(body_lines),
+                timeout_s=_COMMIT_TIMEOUT_S, runner=runner, env=candidate_env,
+            )
+            if commit_object.returncode != 0:
+                commit = commit_object
+                committed_sha = ""
+            else:
+                committed_sha = (commit_object.stdout or "").strip()
+                adopted = _git(
+                    repo_root, "update-ref", "HEAD", committed_sha, base_sha,
+                    timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+                )
+                if adopted.returncode == 0:
+                    commit = subprocess.CompletedProcess(
+                        args=adopted.args,
+                        returncode=0,
+                        stdout=f"[{committed_sha[:12]}] {subject}",
+                        stderr="",
+                    )
+                else:
+                    # Another writer advanced HEAD after the candidate was built.
+                    # update-ref's old-value CAS rejects adoption; the dangling
+                    # commit object is harmless and the candidate index is deleted.
+                    commit = subprocess.CompletedProcess(
+                        args=adopted.args,
+                        returncode=adopted.returncode,
+                        stdout="",
+                        stderr=("HEAD moved while PHASE-Z candidate was running; CAS adoption rejected.\n"
+                                + (adopted.stderr or "")),
+                    )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        LOG.warning("phase_z: candidate transaction failed (%s); alternate index discarded", exc)
+        return {"committed": False, "reason": "commit_error", "untracked": untracked,
+                "rolled_back": True}
 
     out = ((commit.stdout or "") + (commit.stderr or "")).strip()
     if commit.returncode == 0:
+        refresh = _refresh_shared_index_cas(
+            repo_root,
+            base_sha=base_sha,
+            committed_sha=committed_sha,
+            candidate_paths=candidate_paths,
+            runner=runner,
+        )
+        if not refresh.get("ok"):
+            detail = f"{refresh.get('reason')}: {refresh.get('detail', '')}".strip()
+            alert_fn(
+                level="critical",
+                title="PHASE-Z commit 已落地但共享 index 未完成 refresh",
+                body=("commit 本身完整，working bytes 未遺失；共享 index CAS 未完成。"
+                      "請先確認沒有其他 git writer，再人工 refresh。\n\n" + detail),
+            )
+        elif refresh.get("preserved"):
+            LOG.info(
+                "phase_z: preserved concurrent staged entries for %s",
+                refresh["preserved"],
+            )
         _consume_pre_fire_snapshot(repo_root, runner)  # settled: the fire's work landed
         LOG.info("phase_z: committed — %s", out.splitlines()[-1] if out else "(no output)")
         tests = _post_commit_test_gate(
-            repo_root, hhmm=hhmm, runner=runner,
+            repo_root, commit_sha=committed_sha, hhmm=hhmm, runner=runner,
             test_runner=test_runner or subprocess.run,
             alert_fn=alert_fn or _default_alert,
         )
@@ -1235,7 +1689,7 @@ def run_phase_z(
             )
         return {"committed": True, "reason": "committed", "untracked": untracked,
                 "owned": owned, "foreign": foreign, "churn": churn,
-                "commit_head": out[-500:], "tests": tests}
+                "commit_head": out[-500:], "tests": tests, "index_refresh": refresh}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything
     # dirty was a leaked-ignored file already rm --cached'd, or a race cleaned
     # it) from a genuine commit failure.
@@ -1249,4 +1703,4 @@ def run_phase_z(
     # and zero mention of the silent-fallback gate that actually blocked it).
     LOG.warning("phase_z: git commit rc=%d: %s", commit.returncode, out[:300])
     return {"committed": False, "reason": "commit_nonzero", "untracked": untracked,
-            "commit_tail": out[-600:]}
+            "commit_tail": out[-600:], "rolled_back": True}

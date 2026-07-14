@@ -36,6 +36,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from volpred.canonical_write import guard_canonical_write
 from volpred.ops.diagnostics import warn
 from volpred.ops.next_tasks import normalize_task_priority
 
@@ -107,6 +108,7 @@ def _enqueue(condition: dict[str, Any], storage_dir: str, now: datetime) -> dict
     }
     normalize_task_priority(task)
 
+    guard_canonical_write(path)
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("[]\n", encoding="utf-8")

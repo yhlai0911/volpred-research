@@ -40,6 +40,11 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
+
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
+
 WORK_LOG = ROOT / "storage" / "work_log.json"
 LOCK_PATH = ROOT / "storage" / ".work_log.lock"
 
@@ -86,6 +91,8 @@ def append_entries(
     with an idempotency key (e.g. backfill's commit sha) must filter here, not
     before the call.
     """
+    guard_canonical_write(path)
+    guard_canonical_write(lock_path)
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with open(lock_path, "w") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX)

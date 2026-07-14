@@ -344,6 +344,9 @@ def _git_init_repo(root: Path) -> None:
     g("config", "user.email", "test@volpred.local")
     g("config", "user.name", "phase-z-test")
     g("config", "commit.gpgsign", "false")
+    hook = root / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    hook.chmod(0o755)
     (root / ".gitignore").write_text(
         "storage/.release_settings.json\n"
         "storage/ops/dashboard_latest.json\n"
@@ -374,7 +377,9 @@ def _git_head_count(root: Path) -> int:
 def test_phase_z_clean_tree_no_commit(tmp_path: Path) -> None:
     _git_init_repo(tmp_path)
     before = _git_head_count(tmp_path)
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07")
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", alert_fn=lambda **_kwargs: {},
+    )
     assert out["committed"] is False
     assert out["reason"] == "clean"
     assert _git_head_count(tmp_path) == before  # no empty commit on clean tree
@@ -386,7 +391,10 @@ def test_phase_z_dirty_tree_commits_with_correct_message(tmp_path: Path) -> None
     # Simulate an agent that produced real work but forgot to commit it.
     (tmp_path / "experiments").mkdir()
     (tmp_path / "experiments" / "k9999.py").write_text("print('result')\n", encoding="utf-8")
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set())
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        alert_fn=lambda **_kwargs: {},
+    )
     assert out["committed"] is True
     assert out["reason"] == "committed"
     assert _git_head_count(tmp_path) == before + 1
@@ -421,7 +429,10 @@ def test_phase_z_untracks_leaked_ignored_state_file(tmp_path: Path) -> None:
     (tmp_path / "real_work.md").write_text("real\n", encoding="utf-8")
 
     # baseline = clean tree at fire start → everything dirty now is this fire's.
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set())
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        alert_fn=lambda **_kwargs: {},
+    )
 
     assert out["committed"] is True
     assert "storage/.release_settings.json" in out["untracked"]
@@ -458,7 +469,10 @@ def test_phase_z_untracks_leaked_supervisor_dispatch_state(tmp_path: Path) -> No
     leaked.write_text('{"last_fire_at": "new-heartbeat"}\n', encoding="utf-8")
     (tmp_path / "work.md").write_text("real\n", encoding="utf-8")
 
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set())
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        alert_fn=lambda **_kwargs: {},
+    )
 
     assert out["committed"] is True
     assert "storage/ops/dispatch_state.json" in out["untracked"]
@@ -493,8 +507,10 @@ def test_phase_z_add_failure_aborts_commit(tmp_path: Path) -> None:
             return _FakeCompleted(0)
         return _FakeCompleted(0)
 
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner,
-                              pre_fire_dirty=set())
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner,
+        pre_fire_dirty=set(), alert_fn=lambda **_kwargs: {},
+    )
     assert out["committed"] is False
     assert out["reason"] == "add_error"
     assert commits == []  # never reached commit
@@ -516,8 +532,10 @@ def test_phase_z_lsfiles_failure_discards_candidate(tmp_path: Path) -> None:
             return _FakeCompleted(0)
         return _FakeCompleted(0)
 
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner,
-                              pre_fire_dirty=set())
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner,
+        pre_fire_dirty=set(), alert_fn=lambda **_kwargs: {},
+    )
     assert out["committed"] is False
     assert out["reason"] == "candidate_index_error"
     assert out["rolled_back"] is True
@@ -560,7 +578,9 @@ def test_phase_z_non_git_dir_is_observable_noop(tmp_path: Path) -> None:
     # repo_root that is not a git repo → git status rc!=0 → must be reported as
     # status_error, NOT misreported as "clean" (which would silently skip a
     # real safety-net if the tree were actually dirty).
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07")
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", alert_fn=lambda **_kwargs: {},
+    )
     assert out["committed"] is False
     assert out["reason"] == "status_error"
 
@@ -569,7 +589,10 @@ def test_phase_z_git_timeout_does_not_raise(tmp_path: Path) -> None:
     def boom(*args, **kwargs):
         raise subprocess.TimeoutExpired(cmd="git", timeout=30)
 
-    out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=boom)
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", runner=boom,
+        alert_fn=lambda **_kwargs: {},
+    )
     assert out["committed"] is False
     assert out["reason"] == "status_error"
 

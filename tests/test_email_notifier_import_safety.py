@@ -1,8 +1,8 @@
 """Gate: `volpred.publisher.email_notifier` must import without triggering a
 circular import through `volpred.ops`.
 
-Why this exists (2026-07-11): `email_notifier.py` used to do a *top-level*
-`from volpred.ops.canonical_write import guard_canonical_write`. Importing any
+Why this exists (2026-07-11): `email_notifier.py` used to import an eager
+`volpred.ops` submodule at module scope. Importing any
 `volpred.ops.*` submodule eagerly runs `volpred/ops/__init__.py`, which imports
 `.alerts`, which imports `EmailNotifier` back from this module while it is still
 partially initialized → `ImportError: cannot import name 'EmailNotifier' ...
@@ -11,9 +11,8 @@ partially initialized → `ImportError: cannot import name 'EmailNotifier' ...
 `email_notifier` sits *below* `volpred.ops` in the dependency order (ops depends
 on it, not the other way round). The daily `token_report_daily` cron imports
 `EmailNotifier` first and hit this cycle every run (exit=1) — see the
-`host_cron_fail` critical alert. The fix defers the `guard_canonical_write`
-import into the two methods that use it; this suite pins that ordering so nobody
-reintroduces the top-level edge.
+`host_cron_fail` critical alert. The guard now lives below `volpred.ops`, so this
+suite pins the dependency direction and rejects any new top-level ops edge.
 
 The subprocess is load-bearing: within a running pytest process `volpred.ops`
 is usually already fully imported, so an in-process `import` would pass

@@ -17,6 +17,8 @@ from croniter import croniter
 from volpred.config import load_runtime_schedules
 
 from .boss_facing import boss_facing_alert, plainify_boss_text
+from volpred.canonical_write import guard_canonical_write
+
 from .common import dump_json, load_json, project_path
 from .content_quality import (
     DIGEST_TITLE_PREFIX,
@@ -259,8 +261,10 @@ def _load_alert_dedup(storage_dir: str = "storage") -> dict[str, Any]:
 
 
 def _save_alert_dedup(storage_dir: str, payload: dict[str, Any]) -> None:
+    path = _alert_dedup_path(storage_dir)
+    guard_canonical_write(path)
     payload["updated_at"] = _utc_now().isoformat()
-    dump_json(_alert_dedup_path(storage_dir), payload)
+    dump_json(path, payload)
 
 
 _TELEGRAM_LEVEL_EMOJI = {

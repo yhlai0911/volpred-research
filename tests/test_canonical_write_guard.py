@@ -13,6 +13,7 @@ canonical state. That holds through `subprocess`/`uv run` because env is inherit
 from __future__ import annotations
 
 import ast
+import importlib
 import json
 import os
 import subprocess
@@ -21,7 +22,7 @@ from pathlib import Path
 
 import pytest
 
-from volpred.ops.canonical_write import (
+from volpred.canonical_write import (
     ENV_FLAG,
     CanonicalWriteBlocked,
     canonical_writes_disabled,
@@ -92,6 +93,208 @@ def test_guard_is_noop_when_flag_unset(monkeypatch):
     guard_canonical_write(ROOT / "storage" / "publication_candidates.json")
 
 
+def test_guard_sentinel_pierces_broad_exception_handler():
+    """Best-effort production fallbacks must not turn a blocked write green."""
+
+    def application_fail_open_boundary() -> str:
+        try:
+            guard_canonical_write(ROOT / "storage" / "next_tasks.json")
+        except Exception:  # noqa: BLE001 - models the production fail-open sites
+            return "swallowed"
+        return "unreachable"
+
+    assert issubclass(CanonicalWriteBlocked, BaseException)
+    assert not issubclass(CanonicalWriteBlocked, Exception)
+    with pytest.raises(CanonicalWriteBlocked):
+        application_fail_open_boundary()
+
+
+@pytest.mark.parametrize(
+    ("module_name", "argv", "call_style"),
+    [
+        ("scripts.backfill_null_task_ids", ["backfill_null_task_ids.py", "--dry-run"], "argv"),
+        ("scripts.backfill_task_types", ["backfill_task_types.py", "--dry-run"], "argv"),
+        ("scripts.dedupe_next_tasks", ["dedupe_next_tasks.py"], "argv"),
+        ("scripts.unblock_expired_blocked_tasks", [], "apply_false"),
+    ],
+)
+def test_queue_maintenance_dry_run_does_not_trip_write_guard(
+    module_name, argv, call_style, monkeypatch, tmp_path
+):
+    """Audit modes may read/lock the queue but must guard only before mutation."""
+    import volpred.canonical_write as canonical_write
+
+    fake_root = tmp_path / "checkout"
+    queue = fake_root / "storage" / "next_tasks.json"
+    queue.parent.mkdir(parents=True)
+    queue.write_text("[]\n", encoding="utf-8")
+    before = queue.read_bytes()
+
+    monkeypatch.setattr(canonical_write, "_repo_root", lambda: fake_root)
+    module = importlib.import_module(module_name)
+    if hasattr(module, "NEXT_TASKS"):
+        monkeypatch.setattr(module, "NEXT_TASKS", queue)
+    if hasattr(module, "PATH"):
+        monkeypatch.setattr(module, "PATH", queue)
+    if hasattr(module, "ARCHIVE_DIR"):
+        monkeypatch.setattr(module, "ARCHIVE_DIR", fake_root / "storage" / "next_tasks_archive")
+
+    if call_style == "argv":
+        monkeypatch.setattr(sys, "argv", argv)
+        result = module.main()
+    else:
+        result = module.main(apply=False)
+
+    assert result == 0
+    assert queue.read_bytes() == before
+
+
+def test_unblock_archive_writer_is_guarded(monkeypatch, tmp_path):
+    import volpred.canonical_write as canonical_write
+    from scripts import unblock_expired_blocked_tasks as module
+
+    fake_root = tmp_path / "checkout"
+    archive_dir = fake_root / "storage" / "next_tasks_archive"
+    monkeypatch.setattr(canonical_write, "_repo_root", lambda: fake_root)
+    monkeypatch.setattr(module, "ARCHIVE_DIR", archive_dir)
+
+    with pytest.raises(CanonicalWriteBlocked):
+        module._persist_archive([{"id": "guard_probe"}])
+    assert not archive_dir.exists()
+
+
+def test_base64_apply_blocks_before_remote_upload(monkeypatch, tmp_path):
+    import volpred.canonical_write as canonical_write
+    from scripts import extract_base64_images
+    from volpred.publisher import publisher
+
+    fake_root = tmp_path / "checkout"
+    feed = fake_root / "storage" / "reports" / "feed.json"
+    feed.parent.mkdir(parents=True)
+    feed.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "guard_probe",
+                    "content": "![probe](data:image/png;base64,AAAA)",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(canonical_write, "_repo_root", lambda: fake_root)
+
+    uploaded = False
+
+    def unexpected_upload(*args, **kwargs):
+        nonlocal uploaded
+        uploaded = True
+        return args[0]
+
+    monkeypatch.setattr(publisher, "_extract_base64_images", unexpected_upload)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["extract_base64_images.py", "--apply", "--no-sync", "--feed", str(feed)],
+    )
+
+    with pytest.raises(CanonicalWriteBlocked):
+        extract_base64_images.main()
+    assert not uploaded
+
+
+def test_guard_owner_import_does_not_initialize_ops_package():
+    """The guard is a dependency leaf; importing it must not execute volpred.ops."""
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; import volpred.canonical_write; "
+            "assert 'volpred.ops' not in sys.modules",
+        ],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_common_dump_json_refuses_canonical_path():
+    from volpred.ops.common import dump_json
+
+    with pytest.raises(CanonicalWriteBlocked):
+        dump_json(ROOT / "storage" / "ops" / "guard_probe.json", {})
+
+
+def test_next_tasks_low_level_writer_refuses_canonical_path():
+    from volpred.ops.next_tasks import write_tasks_locked
+
+    with pytest.raises(CanonicalWriteBlocked):
+        write_tasks_locked(ROOT / "storage" / "next_tasks.json", [])
+
+
+def test_memory_index_writer_refuses_canonical_path():
+    from volpred.memory.system import MemorySystem
+
+    # Bypass __init__: this probe targets the append primitive, independent of
+    # which storage subdirectories happen to exist in a clean checkout.
+    memory = object.__new__(MemorySystem)
+    memory.storage_dir = ROOT / "storage"
+    memory.memory_dir = ROOT / "storage" / "memory"
+    memory.results_dir = ROOT / "storage" / "results"
+    with pytest.raises(CanonicalWriteBlocked):
+        memory._append_to_index("experiments.json", {"experiment_id": "guard_probe"})
+
+
+def test_publisher_unpublish_and_rewrite_refuse_canonical_feed(monkeypatch):
+    from volpred.publisher.publisher import Publisher
+
+    publisher = object.__new__(Publisher)
+    publisher.reports_dir = ROOT / "storage" / "reports"
+    publisher._feed_file = publisher.reports_dir / "feed.json"
+    monkeypatch.setattr(publisher, "_load_feed", lambda: [{"id": "guard_probe"}])
+
+    with pytest.raises(CanonicalWriteBlocked):
+        publisher._append_to_feed({"id": "guard_probe"})
+    with pytest.raises(CanonicalWriteBlocked):
+        publisher.unpublish("guard_probe")
+    with pytest.raises(CanonicalWriteBlocked):
+        publisher._rewrite_feed_entry("guard_probe", {"id": "guard_probe"})
+
+
+def test_work_log_append_refuses_canonical_path():
+    from append_work_log import append_entry
+
+    with pytest.raises(CanonicalWriteBlocked):
+        append_entry(
+            {"task_id": "guard_probe"},
+            path=ROOT / "storage" / "work_log.json",
+            lock_path=ROOT / "storage" / ".work_log.lock",
+        )
+
+
+def test_control_plane_atomic_writer_refuses_canonical_path():
+    from volpred.ops.local_control_plane import _atomic_write_json
+
+    with pytest.raises(CanonicalWriteBlocked):
+        _atomic_write_json(ROOT / "storage" / "ops" / "tasks" / "guard_probe.json", {})
+
+
+def test_event_ledger_write_and_delete_refuse_canonical_paths(monkeypatch):
+    from volpred.ops import event_jobs
+
+    ledger = ROOT / "storage" / "ops" / "event_ledger" / "guard_probe.json"
+    with pytest.raises(CanonicalWriteBlocked):
+        event_jobs._write_json(ledger, {})
+
+    # Exercise the GC deletion boundary without creating a real ledger entry.
+    monkeypatch.setattr(event_jobs, "_event_ledger_root", lambda storage_dir="storage": ledger.parent)
+    monkeypatch.setattr(event_jobs, "_read_json", lambda path: {"gc_after": "2000-01-01T00:00:00+00:00"})
+    monkeypatch.setattr(Path, "glob", lambda self, pattern: [ledger])
+    with pytest.raises(CanonicalWriteBlocked):
+        event_jobs.gc_event_ledger()
+
+
 @pytest.mark.parametrize(
     "launcher",
     [
@@ -122,6 +325,14 @@ def test_builder_refuses_to_write_canonical_output_in_subprocess(launcher):
 
     after = canonical.stat().st_mtime_ns if canonical.exists() else None
     assert after == before, f"builder rewrote {canonical}"
+
+
+def test_builder_atomic_primitive_refuses_canonical_output():
+    """The primitive itself is guarded; a caller cannot bypass main()'s check."""
+    import build_publication_candidates
+
+    with pytest.raises(CanonicalWriteBlocked):
+        build_publication_candidates._write_output_atomically({"guard_probe": True})
 
 
 # ---------------------------------------------------------------------------
@@ -166,6 +377,44 @@ def test_notification_writer_refuses_canonical_path():
         notifier._save_log([])
 
     assert not (ROOT / "storage" / "notifications" / "guard_probe.json").exists()
+
+
+def test_notification_constructor_guards_only_missing_directory(monkeypatch, tmp_path):
+    """Construction stays read-only when the directory exists and blocks its creation."""
+    import volpred.canonical_write as canonical_write
+    from volpred.publisher.email_notifier import EmailNotifier
+
+    fake_root = tmp_path / "checkout"
+    storage = fake_root / "storage"
+    storage.mkdir(parents=True)
+    monkeypatch.setattr(canonical_write, "_repo_root", lambda: fake_root)
+
+    with pytest.raises(CanonicalWriteBlocked):
+        EmailNotifier(storage_dir=str(storage))
+    assert not (storage / "notifications").exists()
+
+    (storage / "notifications").mkdir()
+    notifier = EmailNotifier(storage_dir=str(storage))
+    assert notifier.notifications_dir == storage / "notifications"
+
+
+def test_immediate_dispatch_slots_full_is_read_only(monkeypatch, tmp_path):
+    """A capacity check that returns early must not guard the untouched marker."""
+    import volpred.canonical_write as canonical_write
+    from scripts import gmail_inbox_poll
+    from scripts.dispatch_supervisor import scheduler, state
+
+    fake_root = tmp_path / "checkout"
+    marker = fake_root / "storage" / "ops" / ".last_email_immediate_dispatch"
+    monkeypatch.setattr(canonical_write, "_repo_root", lambda: fake_root)
+    monkeypatch.setattr(gmail_inbox_poll, "_TRIGGER_MARKER", marker)
+    monkeypatch.setattr(state, "read_state", lambda: {"current_jobs": [{"job_id": "busy"}]})
+    monkeypatch.setattr(scheduler, "load_max_slots", lambda: 1)
+
+    result = gmail_inbox_poll._trigger_immediate_dispatch([{"task_id": "email-1"}])
+
+    assert result["reason"] == "dispatch_slots_full"
+    assert not marker.exists()
 
 
 def test_notification_writer_allows_tmp_storage(tmp_path):

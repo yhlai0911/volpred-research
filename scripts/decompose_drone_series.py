@@ -19,13 +19,18 @@ from __future__ import annotations
 
 import fcntl
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 RESEARCH_DOC = "storage/pending_series/taiwan_drone_series_ep0_research.md"
 WINDOW_START = "2026-07-13T09:00:00+08:00"  # boss: 下週一起一整週
+
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 
 _COMMON = (
     f"研究地基（已驗證公司名冊/產業鏈地圖/PEST/SWOT）見 {RESEARCH_DOC}。"
@@ -90,6 +95,7 @@ def _load():
 
 def main() -> None:
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    guard_canonical_write(NEXT_TASKS)
     with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
         fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
         try:

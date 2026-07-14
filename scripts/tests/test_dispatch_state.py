@@ -30,6 +30,7 @@ from pathlib import Path
 import pytest
 
 from scripts.dispatch_supervisor import state as st
+from volpred.canonical_write import CanonicalWriteBlocked
 
 
 @pytest.fixture
@@ -63,7 +64,11 @@ def test_writer_gate_refuses_the_canonical_state_under_test(tmp_path: Path) -> N
     LIVE daemon state. `conftest.py` sets VOLPRED_NO_CANONICAL_WRITE=1 for the
     whole session; this asserts the writer honours it.
     """
-    with pytest.raises(RuntimeError, match="refusing to write canonical dispatch state"):
+    # This is a control-flow sentinel, deliberately outside Exception so the
+    # supervisor's best-effort broad catches cannot turn the violation green.
+    assert issubclass(CanonicalWriteBlocked, BaseException)
+    assert not issubclass(CanonicalWriteBlocked, Exception)
+    with pytest.raises(CanonicalWriteBlocked, match="blocks write to canonical state"):
         st._atomic_write_json(st._CANONICAL_STATE_PATH, st._empty_state())
 
 

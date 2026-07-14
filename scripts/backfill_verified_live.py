@@ -20,6 +20,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.publisher.live_verify import (  # noqa: E402
     public_url,
     verify_article_live,
@@ -76,6 +77,7 @@ def main() -> int:
             entry["live_verify_failed"] = True
             failed += 1
 
+    guard_canonical_write(FEED_PATH)
     tmp = FEED_PATH.with_name(f".{FEED_PATH.name}.tmp")
     tmp.write_text(json.dumps(feed, indent=2, ensure_ascii=False))
     json.loads(tmp.read_text())  # sanity
