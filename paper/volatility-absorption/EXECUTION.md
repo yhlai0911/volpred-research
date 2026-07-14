@@ -1,6 +1,6 @@
 # EXECUTION — volatility-absorption（Paper 8：The Volatility Absorption Hypothesis）
 
-`BADGE` · `stage: revision` · `verdict: 2.5/5 有條件 Major Revision` · `journal: JBF → JEF/IRFA（backup）` · `p0: TODO` · `gate: OPEN（P0-1 未跑）`
+`BADGE` · `stage: revision` · `verdict: 2.5/5 有條件 Major Revision` · `journal: JBF → JEF/IRFA（backup）` · `p0: P0-1 ✅ CLOSED（K1686 R2 gate 通過）` · `gate: JBF 線繼續 — absorption survives ambient-fear-shock gate（2026-07-14 裁定）`
 
 > **執行檔用途**：把 Fable 深審（`review_history/fable_deep_review_20260711/README.md`，commit `f913ed68c`）的判定落成可勾選、可交接的行動清單。canonical 稿 = `main_v3.tex`；本檔只驅動執行，不取代深審報告的證據細節。
 
@@ -21,9 +21,9 @@
 
 ## 2. Definition of Done（DoD — 全未達成）
 
-投稿前必須全部勾起；目前 P0 未執行，全部 ⬜。
+投稿前必須全部勾起。
 
-- ⬜ **P0-1 contemporaneous null 重跑完成**，事前判定規則已裁決並如實寫入正文（升級敘事 or 重新框架，二者之一）
+- ✅ **P0-1 contemporaneous null 重跑完成**（K1686 + R2 ambient×sign follow-up；Codex R2 PASS）— 裁決見文末 2026-07-14 正式裁定：absorption 通過 fear-shock gate，JBF 線繼續；「如實寫入正文」由 body 修訂承接（K897 退役 + null inconclusive + threshold artifact + H 規格）
 - ⬜ 5 處內部不一致 C1–C5 全修（含 C1：Intro 一句與自家 artifact `k720`（`vrp_flip_confirmed: true`）反向的 VRP 宣稱）
 - ⬜ Table 3 SAR inference 用 pinned snapshot 重建，p 值有可驗證 binding（消除「t-test via bootstrap」的混亂表注）
 - ⬜ reproduce gate 從 30 checks 擴到 ~40，重跑 `match_rate ≥ 0.95` + `alert_level = green`
@@ -34,9 +34,9 @@
 
 ---
 
-## 3. P0 — Gate（不完成不得標 ready / 不得投稿；預估 1–2 工作天；**全 ⬜ TODO，尚未執行**）
+## 3. P0 — Gate（不完成不得標 ready / 不得投稿；預估 1–2 工作天；**P0-1 ✅ 完成，P0-2/3/4 進行中**）
 
-### ⬜ P0-1 · **【make-or-break】** contemporaneous null 重跑 K897
+### ✅ P0-1 · **【make-or-break】** contemporaneous null 重跑 K897 — 完成（K1686 + R2；裁定見文末 2026-07-14）
 
 - 開**新 K**（`experiments/` 下一個可用編號 ≥ **k1684**；派工時 `ls experiments/` 取最新確認，深審原寫 k1683 已被占用）。
 - 改動極小：`simulate_garch_sar_fixed_thresholds` 中 day-t vol proxy 由 `h[t]` 改用 **`h[t+1]`**（觀測 `r_t` 後的 GARCH forecast，等價於「收盤 VIX 反映當日資訊」），shock 定義隨之同期化。
@@ -98,6 +98,8 @@
 
 ```
 2026-07-11 | Fable deep review | 深審完成，待執行 P0 | f913ed68c
+2026-07-12 | P0-1 K1686 首跑 + Codex FAIL + R2 rerun | 首裁 REFRAME→撤回→R2 ambient×sign 補跑完成 | 085064f0f, 2c764c69d
+2026-07-14 | K1686 R2 正式裁定（主線程） | absorption 通過 fear-shock gate；JBF 線繼續；FRL 重框取消；P0-1 CLOSED；knowledge da9ac9d2 | 本 commit
 ```
 
 ---
@@ -128,3 +130,20 @@
 - **不寫 knowledge.json**（FAIL verdict，per `.claude/rules/experiments.md` — CONDITIONAL PASS 以上才寫）。
 - **派修正實驗**（見 next_tasks `k1686_fix_ambient_sign_spec` P1）：在 empirical 與 same-seed null 兩側補跑**缺失的 ambient(`VIX_{t-1}`) × sign 規格**；pooled-vs-up-only 改用**直接配對 block bootstrap**；B/C/G 在 calibration failure 未解前不得稱 well-specified。該 K 裁決前不得再改本篇 narrative。
 - 依據：`storage/ops/codex_reviews/k1686_verdict.md`（Codex primary path，2026-07-12）。
+
+### ✅ 正式裁定 2026-07-14 — K1686 R2 收斂：**absorption 通過 ambient-fear-shock gate，JBF 線繼續，FRL 重框取消**（本檔 canonical）
+
+`k1686_fix_ambient_sign_spec`（P1）已於 2026-07-12 完成（commit `2c764c69d`），Codex primary-path **R2 review = PASS**（`experiments/k1686/codex_review_r2.md`；R1 兩個 blocker — ambient×sign 規格缺失、pooled-vs-up-only 非直接檢定 — 全數關閉）。依 **rerun 前固定的 R2 follow-up gate**（K1686 README §3：「H ambient-up 的 20-day paired block-bootstrap CI 若為正且不含 0，absorption 在 fear-shock 條件下存活；若含 0，機制 unresolved、論文降級重框」）：
+
+- **H ambient-up decline = +1.0465**，20-day paired circular block bootstrap CI **[0.3286, 1.7625] 排除 0**；block 10/40/63 sensitivity 全同方向；calm/high up-shock n = 47/53。
+- paired pooled−current-up = +0.9353，CI [0.3437, 1.4991]（直接配對檢定，取代舊的無效比較）。
+- same-seed null 方向一致：H_up empirical 1.0465 > null 95% CI 上界 0.9887，MC p = 0.0327（補充證據，非完整結構識別 — null calibration 限制仍在）。
+
+**裁定（依事前規則，無裁量空間）**：absorption 在 fear-shock 條件下**存活** → **JBF 主線繼續**；2026-07-12 第一條（已撤回）的 FRL 重框裁定**正式取消**。但 gate 通過 ≠ 回到舊敘事 — body 修訂必須如實納入：
+
+1. **K897 退役**（timing-dependent 拒絕，不得再引用其 NULL REJECTED）；
+2. **null 比較 inconclusive**（A 是兩個 artifact 抵消、B/C/G 拒絕但 calibration 未解、F 證明校準不變的 null 不存在）— 不得宣稱「null 檢定證明 absorption 真實」；
+3. **58% threshold artifact**（相對門檻下 headline decline 0.8165 → 0.3397）必須揭露；
+4. **識別重心移到 H 規格**（ambient×sign paired block gate）＋ §6.5 限制（α=0 半同期性、GJR 函數形式）。
+
+**P0-1 就此關閉**。knowledge.json 已寫入（item `da9ac9d2`，2026-07-14）。後續：P0-2（C1–C5）→ K1686 body 整合 → P0-3（Table 3 SAR rebuild）→ P0-4（reproduce 擴充）。

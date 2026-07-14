@@ -13,7 +13,7 @@
 - ~~abm-p04~~ ✅ 已收割：gate 173/173 + 主線程收官 P0 全部（1c15d3c11 + ea191161e）
 
 ## 待辦隊列（優先序）
-1. volatility-absorption body 重寫為 FRL 方法論短文（裁定已定，K1686 NULL）— 主線程
+1. ~~volatility-absorption body 重寫為 FRL 方法論短文~~ **裁定更正（2026-07-14）**：K1686 R2（Codex PASS）通過事前固定 ambient-fear-shock gate → **JBF 線繼續、FRL 重框取消**（舊隊列項抄自 7/12 已撤回的首裁，stale）。現行工作 = JBF 線 body 修訂（K897 退役 + null inconclusive + H 規格整合）+ P0-2/3/4 — 主線程，見 `paper/volatility-absorption/EXECUTION.md` 2026-07-14 裁定
 3. forecast-tail-divergence FRL 短文 outline（K1698 H2_REJECTED）— 主線程
 4. Tier 3：garch-x-vix（K1685 GO 已備）→ vix-sufficiency（K1655 DM/HAC class）→ eav-universal-magnitude → btc-gas-negative → crypto-fear-channel（禁 ready 標記直到 Codex 語義複核）
 
