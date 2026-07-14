@@ -66,7 +66,7 @@
           "rv_hourly": 0
         },
         "qlike_noise_note": "r^2 is a chi^2(1) variance proxy: its QLIKE level runs ~7x that of hourly RV, so it is reported as robustness only.",
-        "n_hourly_complete_days": 722,
+        "n_hourly_complete_days": 723,
         "hourly_coverage_start": "2024-07-16",
         "ann_vol_gk_pct": 47.91,
         "corr_gk_vs_hourly": 0.9023
@@ -87,7 +87,7 @@
           "rv_hourly": 0
         },
         "qlike_noise_note": "r^2 is a chi^2(1) variance proxy: its QLIKE level runs ~7x that of hourly RV, so it is reported as robustness only.",
-        "n_hourly_complete_days": 721,
+        "n_hourly_complete_days": 722,
         "hourly_coverage_start": "2024-07-16",
         "ann_vol_gk_pct": 66.09,
         "corr_gk_vs_hourly": 0.8968
@@ -1486,6 +1486,43 @@
       "n_days_below_minus20pct": 429,
       "worst_day_ret_pct": -16.27
     }
+  },
+  "smearing_robustness": {
+    "note": "The alt model has more parameters -> lower training residual variance -> smaller exp(0.5*s2) multiplier -> lower forecasts. QLIKE is asymmetric, so this could manufacture the null. Re-scored with no smearing and with the baseline's smearing forced on both models: the verdict is unchanged, so the null is not an artifact of this transform.",
+    "runs": [
+      {
+        "asset": "BTC",
+        "horizon": 1,
+        "dm_t_primary_own_smearing": 0.048,
+        "dm_t_no_smearing": -0.697,
+        "dm_t_shared_smearing": 0.05,
+        "harvey_pass_any": false
+      },
+      {
+        "asset": "BTC",
+        "horizon": 5,
+        "dm_t_primary_own_smearing": 0.159,
+        "dm_t_no_smearing": 0.444,
+        "dm_t_shared_smearing": 0.166,
+        "harvey_pass_any": false
+      },
+      {
+        "asset": "ETH",
+        "horizon": 1,
+        "dm_t_primary_own_smearing": 0.521,
+        "dm_t_no_smearing": 1.021,
+        "dm_t_shared_smearing": 0.52,
+        "harvey_pass_any": false
+      },
+      {
+        "asset": "ETH",
+        "horizon": 5,
+        "dm_t_primary_own_smearing": -0.162,
+        "dm_t_no_smearing": -0.8,
+        "dm_t_shared_smearing": -0.097,
+        "harvey_pass_any": false
+      }
+    ]
   },
   "flow_transform_robustness": {
     "note": "Warther (1995): only the unexpected component of flow should carry news, and netting can hide offsetting creations/redemptions. We test signed, squared, gross-churn and AR(5)-unexpected flow. None beats HAR.",
