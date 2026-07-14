@@ -28293,7 +28293,7 @@
     "title": "研究 backlog fallback: 時序基礎模型 × HAR 的預測組合誠實檢定（問組合是否進 MCS，不是問誰贏）— 對 SPY/0050.TW/TX，把免費開源 TSFM（TimesFM/TTM 權重）與 Log-HAR 做 equal-weight 與 bias-corrected 組合，用 MCS + DM-HLN 檢定組合是否穩定進 superior set；免費開源模型 + yfinance/TAIFEX（來源：2025-26 TSFM vs 計量 benchmark + corrected forecast combinations 熱潮）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 時序基礎模型 × HAR 的預測組合誠實檢定（問組合是否進 MCS，不是問誰贏）— 對 SPY/0050.TW/TX，把免費開源 TSFM（TimesFM/TTM 權重）與 Log-HAR 做 equal-weight 與 bias-corrected 組合，用 MCS + DM-HLN 檢定組合是否穩定進 superior set；免費開源模型 + yfinance/TAIFEX（來源：2025-26 TSFM vs 計量 benchmark + corrected forecast combinations 熱潮）。差異化：庫內 ML ceiling 9 次確認 → 定位為 forecas | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -28365,11 +28365,29 @@
         "to": "pending",
         "by": "hourly-20",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-14T17:10:09.215376+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:10:09.797470+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-07-14T17:12:52.321478+00:00",
+        "from": "in_progress",
+        "to": "blocked",
+        "by": "hourly-01"
       }
     ],
-    "started_at": "2026-07-14T12:18:32.413374+00:00",
-    "completed_at": "2026-07-08T19:42:11.902789+00:00",
-    "result": "Created diagnostic experiment + HAR/EWMA/MCS harness for SPY, 0050.TW, TAIFEX_TX. Primary TimesFM/TTM evaluation blocked: TimesFM weights not cached after >150s smoke test; TTM dry-run would downgrade project scikit-learn. Results explicitly BLOCKED, no fake TSFM forecasts.",
+    "started_at": "2026-07-14T17:10:09.797457+00:00",
+    "completed_at": "2026-07-14T17:12:52.321465+00:00",
+    "result": "Created diagnostic experiment + HAR/EWMA/MCS harness for SPY, 0050.TW, TAIFEX_TX. Primary TimesFM/TTM evaluation blocked: TimesFM weights not cached after >150s smoke test; TTM dry-run would downgrade project scikit-learn. Results explicitly BLOCKED, no fake TSFM forecasts.\n\n已交 compute queue job k1711_tsfm_har_mcs（MCS 5000-boot × 數百 cell，實測超出 fire 50min cap → 依規則走 async worker）。salvaged pipeline 在 worktree dispatch-slot-1-eeb5a46e-tsfm-har，19/19 自帶測試通過。job 完成後由 PHASE A followup 接手（驗 primary cell → experiment_gates → review_verdict → merge → knowledge）。",
     "last_released_at": "2026-07-14T14:50:03.521138+00:00",
     "last_release_reason": "auto_release_stale_2h"
   },
@@ -33887,7 +33905,7 @@
     "title": "K1702 milestone article: vol-managed factor zoo OOS null and corrected drawdown phase-null lesson",
     "description": "K1702 has completed primary-path Codex review with two independent full-population audits. Write a general-audience milestone article from experiments/k1702 only. The empirical verdict is NULL_OR_MIXED_INDIVIDUAL_FACTOR_OOS: primary positive Sharpe delta 1/6, paired bootstrap BH-FDR 0/6, spanning-alpha t gate BH-FDR 0/6. The corrected drawdown lesson is that MDD/vol is descriptive, not scale invariant; exposure-matched 316-shift phase-null leaves only MOM with a positive production gap, p=0.1582 and Holm p=0.9494, so 0/6 survive. Say no detected timing evidence, never proof timing is absent. Follow feed-publisher, anti-ai-style, publishing dedup, and lazypack requirements; all numbers must be read from K1702 evidence artifacts.",
     "task_type": "daily_article",
-    "priority": 3,
+    "priority": 1,
     "status": "pending",
     "tags": [
       "publish_milestone_article",
@@ -33899,7 +33917,8 @@
     "source": "agent_result_verification_publishable_gate",
     "k_id": "K1702",
     "experiment_path": "experiments/k1702",
-    "dispatch_lane": "agent"
+    "dispatch_lane": "agent",
+    "priority_note": "2026-07-15 01:15 主線程升 P1：draft 池可發=0、16:00 後脫班（owner 直接點名），內容產線斷糧優先於非時效 ops"
   },
   {
     "id": "telegram-623",
@@ -37152,13 +37171,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-14T16:00:59.683274+00:00",
+    "completed_at": "2026-07-14T17:00:51.204616+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T16:00:59.683274+00:00",
-      "last_clean_observed_at": "2026-07-14T16:00:59.683274+00:00"
+      "resolved_at": "2026-07-14T17:00:51.204616+00:00",
+      "last_clean_observed_at": "2026-07-14T17:00:51.204616+00:00"
     }
   },
   {
@@ -37188,13 +37207,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-14T15:24:01.245727+00:00",
+    "completed_at": "2026-07-14T16:50:55.915472+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T15:24:01.245727+00:00",
-      "last_clean_observed_at": "2026-07-14T15:24:01.245727+00:00"
+      "resolved_at": "2026-07-14T16:50:55.915472+00:00",
+      "last_clean_observed_at": "2026-07-14T16:50:55.915472+00:00"
     }
   },
   {
@@ -37291,5 +37310,26 @@
     "created_at": "2026-07-14T16:11:43.712159+00:00",
     "title": "K1709 rev4 D3: standalone 圖表仍標無限定的 'Giacomini-White' / 'GW gate' → 圖標須由同一 claim object 渲染並重建 Fig 3/4",
     "description": "Codex rev3 複審 blocking defect D3（verdict: storage/ops/codex_reviews/k1709_rev3_verdict.{md,json}）。k1709.py:2673-2681,2712-2713,2728 仍輸出 'GW z'、'Giacomini-White on QLIKE'、'Giacomini-White z'、'power of the GW gate' —— 正是 rev2 已判不可接受的無限定 nomenclature。程式只實作 unconditional GW/DM special case（GW 2006 Sec 3.4），而 PNG 會脫離 README 獨立流通，README:38 的 disclaimer 保護不到它；且 Fig 3/4 自 c97d690c 後未重建，現在與 README:224-225 的『unconditional GW/DB』描述互相矛盾。修法：圖表標籤與 caption 由 k1709_rev4_claim_object 建立的同一 canonical claim object 渲染（不得在繪圖碼裡寫死統計名稱），標明 unconditional；重建 Fig 3/4；parity test 涵蓋圖標。依賴：k1709_rev4_claim_object 先完成。實驗留 worktree，不得進 main。"
+  },
+  {
+    "id": "reader_preferences_skill_pointers",
+    "title": "讀者偏好迴圈 skill pointer 收尾（4 個 skill 各加一行）+ 寄通知信",
+    "description": "Phase 1 已上線（scripts/analyze_reader_preferences.py，週一 06:45，輸出 storage/analytics/reader_preferences.json + report.md，commit 296032df5）。收尾：在 publication-candidates / pdca-operations / admin-ops（+references/surfaces.md）/ feed-publisher 各加一行 pointer（選題與圖文表使用查合格結論；樣本不足 bucket 不得當依據）。改 skill 後必寄『Skill 修改通知』email 給 owner（feedback_skill_autonomy），含 diff 摘要。主線程 lane。",
+    "task_type": "governance",
+    "dispatch_lane": "main_thread",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "source": "owner_directive_20260715_reader_prefs",
+    "created_at": "2026-07-14T17:08:27.328740+00:00"
+  },
+  {
+    "id": "k1711_mcs_eval_redispatch_fa2c62",
+    "title": "K1711 TSFM-HAR MCS 評估重派（兩次 timeout 後）",
+    "description": "K1711（TimesFM/TTM vs HAR 的 MCS 評估）研究線卡住：agent job agent-brief_tsfm_har_mcs-54e6f9 於 5280s cap 超時、salvage commit 750631d915a9 搶救部分產出；follow-up compute job k1711-mcs-eval 又於 3600s timeout（stderr=[TIMEOUT]，script 指向已清除的 worktree dispatch-slot-1-671aaa12-tsfm-har）。重派要求：(1) 先 git show 750631d915a9 定位 salvage 產出實際位置；(2) 評估 script 落到主 repo experiments/k1711/；(3) compute job timeout ≥7200s 或拆段跑；(4) 完成後三件套 + Codex 審。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "main_thread",
+    "created_at": "2026-07-14T17:13:16.384826+00:00"
   }
 ]
