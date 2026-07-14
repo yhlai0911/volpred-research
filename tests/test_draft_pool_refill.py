@@ -32,12 +32,30 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "continue_task_dispatch.py"
 SPEC = importlib.util.spec_from_file_location("continue_task_dispatch", MODULE_PATH)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(MODULE)
+
+
+@pytest.fixture(autouse=True)
+def isolated_next_tasks(tmp_path, monkeypatch) -> Path:
+    """Point NEXT_TASKS at a throwaway file for every test in this module.
+
+    `_maybe_refill_draft_pool` calls `_promote_starved_article_tasks`, which
+    writes NEXT_TASKS, whenever releasable stock is 0 — so any test that merely
+    pins `releasable=0` reaches for the repo's real queue. Isolating here rather
+    than per-test means a newly added canonical write can't leak just because
+    the next test author didn't know to patch it.
+    """
+    isolated = tmp_path / "next_tasks.json"
+    isolated.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", isolated)
+    return isolated
 
 
 def _set_stock(monkeypatch, *, releasable: int | None, in_flight: int = 0) -> None:
@@ -257,3 +275,68 @@ def test_maybe_refill_handles_timeout(monkeypatch):
     assert result is not None
     assert result["ok"] is False
     assert "timeout" in result["reason"]
+
+
+# --- starved-article promotion (owner rule 2026-07-15: fill to floor) ------
+
+
+def test_promote_starved_articles_batch_raises_pending_articles_to_p1(isolated_next_tasks):
+    """Drought escalation lifts pending articles that dispatch can't reach."""
+    isolated_next_tasks.write_text(
+        json.dumps(
+            [
+                {"id": "a", "task_type": "daily_article", "status": "pending", "priority": 3},
+                {"id": "b", "task_type": "daily_article", "status": "pending", "priority": 4},
+                {"id": "c", "task_type": "daily_article", "status": "pending", "priority": 1},
+                {"id": "d", "task_type": "daily_article", "status": "in_progress", "priority": 3},
+                {"id": "e", "task_type": "experiment", "status": "pending", "priority": 3},
+            ]
+        ),
+        encoding="utf-8",
+    )
+    assert MODULE._promote_starved_article_tasks(limit=6) == 2
+
+    by_id = {t["id"]: t for t in json.loads(isolated_next_tasks.read_text(encoding="utf-8"))}
+    assert by_id["a"]["priority"] == 1
+    assert by_id["b"]["priority"] == 1
+    assert by_id["c"]["priority"] == 1  # already reachable — untouched
+    assert by_id["d"]["priority"] == 3  # not pending — not starved stock
+    assert by_id["e"]["priority"] == 3  # wrong type
+
+
+def test_promote_starved_articles_respects_limit(isolated_next_tasks):
+    isolated_next_tasks.write_text(
+        json.dumps(
+            [
+                {"id": f"a{i}", "task_type": "daily_article", "status": "pending", "priority": 3}
+                for i in range(5)
+            ]
+        ),
+        encoding="utf-8",
+    )
+    assert MODULE._promote_starved_article_tasks(limit=2) == 2
+
+    tasks = json.loads(isolated_next_tasks.read_text(encoding="utf-8"))
+    assert sum(1 for t in tasks if t["priority"] == 1) == 2
+
+
+def test_maybe_refill_promotes_starved_articles_when_pool_dry(monkeypatch, isolated_next_tasks):
+    """The refill path must reach promotion — and write only to the queue it's given."""
+    _set_stock(monkeypatch, releasable=0, in_flight=MODULE.DRAFT_POOL_FLOOR)
+    isolated_next_tasks.write_text(
+        json.dumps(
+            [{"id": "starved", "task_type": "daily_article", "status": "pending", "priority": 3}]
+        ),
+        encoding="utf-8",
+    )
+
+    def fail_refill(*_args, **_kwargs):
+        raise AssertionError("in-flight stock covers the floor — refill must not add new tasks")
+
+    monkeypatch.setattr(MODULE, "_run_article_refill", fail_refill)
+    # deficit is 0 (in-flight masks it), so refill no-ops — but promotion still runs,
+    # which is the whole point: pending stock that dispatch can't reach isn't stock.
+    assert MODULE._maybe_refill_draft_pool(auto_refill=True) is None
+
+    tasks = json.loads(isolated_next_tasks.read_text(encoding="utf-8"))
+    assert tasks[0]["priority"] == 1
