@@ -168,6 +168,10 @@ class DreamFinding:
     remediation: str = "propose_only"  # propose_only | auto_dispatch
     remediation_ref: str | None = None
     proposal: str | None = None
+    # The task this finding is ABOUT (not the task dreaming creates to fix it).
+    # An auto-dispatched remediation task records it as `follows_up_on`, which is
+    # what lets the next run recognise its own fix instead of re-flagging forever.
+    subject_task_id: str | None = None
     governance_target: str | None = None
     occurrences: int = 1
     first_seen: str | None = None
@@ -395,6 +399,19 @@ def detect_missing_retry_strategy(
 
     ids_and_status = [(str(t.get("id") or ""), str(t.get("status") or "")) for t in tasks]
 
+    # Explicit follow-up edges: task.follows_up_on == <parent id>. This is the
+    # authoritative successor link. Before it existed (pre-2026-07-14) lineage was
+    # guessed from the id string, which only matched a PREFIX — so dreaming's own
+    # remediation task (`dreaming_missing_retry_strategy_<parent>`, parent in the
+    # SUFFIX) was invisible to it. It re-flagged the failure it had already queued
+    # a fix for, every night, until the three-strike counter false-escalated to
+    # critical (fable0711_ftd_e1_scale_gating ×5).
+    followed_up: set[str] = set()
+    for t in tasks:
+        parent = str(t.get("follows_up_on") or "").strip()
+        if parent and not _is_execution_failure(t.get("status")):
+            followed_up.add(parent)
+
     for t in tasks:
         if not _is_execution_failure(t.get("status")):
             continue
@@ -407,8 +424,8 @@ def detect_missing_retry_strategy(
         # superseded/follow-up check: same k_id with a non-failed later sibling.
         kid = str(t.get("k_id") or "").strip()
         tid = str(t.get("id") or "unknown")
-        has_followup = False
-        if kid:
+        has_followup = tid in followed_up
+        if not has_followup and kid:
             for sib_time, sib_status in by_kid.get(kid, []):
                 if sib_status == t.get("status"):
                     continue
@@ -441,6 +458,7 @@ def detect_missing_retry_strategy(
                     f"Failed task {tid} has no retry/follow-up and is not parked. "
                     f"Either retry with a clearer brief or mark it blocked with a controlled reason."
                 ),
+                subject_task_id=tid,
             )
         )
     return out
@@ -1110,7 +1128,7 @@ def apply_auto_dispatch(
                     task_id = _dreaming_task_id(f.signature)
                     if task_id in existing:
                         continue  # dreaming re-derives the same signature nightly — queue once
-                    tasks.append({
+                    task: dict[str, Any] = {
                         "id": task_id,
                         "title": f"[dreaming] {f.signature}",
                         "description": (
@@ -1131,7 +1149,12 @@ def apply_auto_dispatch(
                             "occurrences": f.occurrences,
                             "governance_target": f.governance_target,
                         },
-                    })
+                    }
+                    if f.subject_task_id:
+                        # Explicit successor edge — without it the next run cannot
+                        # see that this failure already has a fix queued.
+                        task["follows_up_on"] = f.subject_task_id
+                    tasks.append(task)
                     existing.add(task_id)
                     f.remediation_ref = f"next_task:{task_id}"
                     actions.append({"signature": f.signature, "action": "queued", "task_id": task_id})

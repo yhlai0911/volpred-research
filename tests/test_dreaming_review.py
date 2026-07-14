@@ -153,6 +153,57 @@ def test_detect_missing_retry_strategy_honours_id_lineage(tmp_path):
     assert "missing_retry_strategy:K777-rev" in sigs
 
 
+def test_detect_missing_retry_strategy_sees_its_own_remediation_task(tmp_path):
+    """2026-07-14: dreaming re-flagged failures it had already queued a fix for.
+
+    auto_dispatch names the remediation task `dreaming_<pattern>_<parent>` — parent
+    in the SUFFIX — but lineage matching only accepted a parent PREFIX. So dreaming
+    could not see its own fix, re-flagged the same failure nightly, and the
+    three-strike counter false-escalated it to critical (fable0711 ×5). The fix is
+    an explicit successor edge (`follows_up_on`), not a smarter string guess.
+    """
+    storage = _storage(tmp_path)
+    _write(
+        storage / "next_tasks.json",
+        [
+            {"id": "fable0711_ftd_e1", "status": "failed", "completed_at": _iso(2)},
+            {
+                "id": "dreaming_missing_retry_strategy_fable0711_ftd_e1",
+                "status": "pending",
+                "source": "dreaming",
+                "follows_up_on": "fable0711_ftd_e1",
+            },
+            # a hand-written retry may declare the edge too — id need not resemble the parent
+            {"id": "K1684", "status": "failed", "completed_at": _iso(2)},
+            {"id": "rerun-of-the-gating-experiment", "status": "pending", "follows_up_on": "K1684"},
+            # an edge from a task that ITSELF failed is not a fix → parent stays flagged
+            {"id": "K555", "status": "failed", "completed_at": _iso(2)},
+            {"id": "K555-retry", "status": "failed", "follows_up_on": "K555", "completed_at": _iso(1)},
+        ],
+    )
+    sigs = {f.signature for f in dr.detect_missing_retry_strategy(str(storage), {}, NOW)}
+    assert "missing_retry_strategy:fable0711_ftd_e1" not in sigs
+    assert "missing_retry_strategy:K1684" not in sigs
+    assert "missing_retry_strategy:K555" in sigs
+    assert "missing_retry_strategy:K555-retry" in sigs
+
+
+def test_auto_dispatch_records_successor_edge(tmp_path):
+    """The remediation task must carry `follows_up_on`, or the loop above returns."""
+    storage = _storage(tmp_path)
+    _write(storage / "next_tasks.json", [])
+    finding = dr.DreamFinding(
+        pattern_type="missing_retry_strategy",
+        signature="missing_retry_strategy:K1684",
+        severity="warn",
+        remediation="auto_dispatch",
+        subject_task_id="K1684",
+    )
+    dr.apply_auto_dispatch([finding], str(storage), NOW)
+    queued = json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
+    assert [t["follows_up_on"] for t in queued] == ["K1684"]
+
+
 def test_detect_semantic_concentration_flags_high_rehash(tmp_path, monkeypatch):
     # High semantic rehash rate → finding (boss email-12139 semantic directive).
     monkeypatch.setattr(

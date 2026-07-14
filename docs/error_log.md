@@ -7335,3 +7335,29 @@ drift kind 因此**結構上不可能發生**，不是被抑制。`series_regist
 出現 `members_published` / `members_draft` / `status` 即 fail，擋 reintroduce。
 治理：`.claude/rules/publishing.md` §系列前綴慣例 鐵律 (4)。
 **驗證**：`series_registry.py --audit` → CLEAN；`check-alerts` → breach_count=0（原本 1）。
+
+## 2026-07-14 09:56 — dreaming missing_retry_strategy 假 critical：detector 看不見自己派的補救任務
+
+**症狀**：Dreaming review 報 `[critical] missing_retry_strategy:fable0711_ftd_e1_scale_gating (×5)`
++ 兩個 warn（research_rp_4855ddb7a9 ×2、K1679）。連續 5 晚重複 → 三振升級成 critical。
+
+**根因（自噬迴圈，非資料問題）**：`detect_missing_retry_strategy` 判定「這個失敗任務有沒有後續補救」
+靠 **id 字串前綴**（`_is_followup_id`: `cand_id.startswith(parent_id)`）。但 `apply_auto_dispatch`
+建出來的補救任務 id 是 `dreaming_missing_retry_strategy_<parent>` —— parent 在**後綴**。
+於是 dreaming **認不得自己昨晚才派出去的補救任務**，每晚重新 flag 同一個失敗，strike 一路累積，
+最後假升級成 critical。系統做了正確的補救，卻因為血緣判定是「猜字串」而看不見。
+
+任何表面修補（手動 retry 一次、把 status 改掉、把 strike 歸零）都只清掉當下那一筆；
+下一個失敗任務進來又會走一次同樣的迴圈。
+
+**修法（底層，改領域模型）**：follow-up 不該從 id 字串推導，應該是**顯式有向邊**。
+- task schema 新增 `follows_up_on: <parent_task_id>`；`DreamFinding` 新增 `subject_task_id`
+- `apply_auto_dispatch` 建補救任務時寫入該邊 → 下一次掃描認得自己的補救
+- detector 先讀 `follows_up_on`（權威），id-lineage 保留為 legacy 相容
+- 邊來自「自己也失敗」的任務不算補救（父任務仍會被 flag）
+- 既有 3 筆補救任務 backfill 該欄位（schema 演進，非修資料）
+
+**Gate**：`tests/test_dreaming_review.py::test_detect_missing_retry_strategy_sees_its_own_remediation_task`
++ `::test_auto_dispatch_records_successor_edge`。
+**驗證**：3 個自噬 signature 全消（含該 critical）；escalations 1 → 0；剩 2 個是**真的**沒補救的
+失敗（K1684 / trending_repost_2026_07_14）—— detector 只報真問題，不是被關掉。45 tests passed。
