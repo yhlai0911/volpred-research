@@ -2,6 +2,8 @@
 
 **用途**：compact / 新 session 後讀此檔無縫接續。總入口 `docs/paper_execution_master.md`；單篇規格 `paper/<name>/EXECUTION.md`。
 
+**⚠️ 隊列項規則（2026-07-14 K1686 stale-裁定事故後立）**：隊列項**不得複製裁定內容**（「裁定已定 = X」這種句子禁止手寫）——裁定的 canonical 只有 `paper/<id>/EXECUTION.md` 裁定段 + `storage/paper_pipeline_status.json` blocker。隊列項只寫「下一步動作 + pointer」；接手 session 開工前**必讀 pointer 指向的 canonical 當前狀態**。違反的代價已發生一次：7/14 隊列抄了 7/12 已撤回的 FRL 首裁，差點把 JBF 可投的 volabs 錯誤降級改寫。機械側防線 = `paper_adjudication_gap` alert（gating task 完成未裁決 → 自動建 task）。
+
 ## 已完成並 commit（勿重做）
 - **vt-crowding-abm P0 全收官（ea191161e，2026-07-14）**：P0-1~P0-5 done、gate 173/173、PDF 零洩漏、VT-only 殘留清除；剩 v6 review（in-flight）+ QF compliance
 - vt-insurance-cost（478d4006e 等）/ vt-trend-following（4360ecfaa）/ leverage-direction（46f1766c3）/ taiwan-vt（6562076b6）/ vt-crowding-abm P0-2+P0-3（5ff463529）/ volabs+ftd 裁定（9b1260cfa、5ff463529）

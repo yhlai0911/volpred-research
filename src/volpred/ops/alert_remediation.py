@@ -60,6 +60,7 @@ ALERT_TASK_TYPE: dict[str, str] = {
     "knowledge_stale": "experiment",
     "paper_stale": "paper_review",
     "paper_website_drift": "paper_review",
+    "paper_adjudication_gap": "paper_review",  # 2026-07-14 K1686 incident: gating task done, ruling missing — main-thread adjudication
     "content_quality": "governance",
     "cluster_cap_drift": "governance",
     "loop_health": "governance",

@@ -2077,6 +2077,144 @@ def _parse_paper_website_drift_state(now: datetime) -> dict[str, Any]:
 # （feed 新鮮度，active-window aware，CRITICAL）+ generator binary 源頭健康，與 job
 # exit code 完全脫鉤，補上這層盲區。
 PUBLISH_FRESHNESS_CRITICAL_HOURS = 5.0  # legacy floor; 實際門檻 = release interval + grace（見下）
+PAPER_ADJUDICATION_GRACE_HOURS = 12.0  # gating task 完成後，主線程裁決的寬限窗
+
+
+def _parse_paper_adjudication_gap_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Gating task 完成但論文裁決未發生 → warn（2026-07-14 K1686 incident）。
+
+    Why: `k1686_fix_ambient_sign_spec` 於 2026-07-12 19:19 succeeded，其結果
+    （Codex R2 PASS、事前固定 gate 通過）會推翻先前已撤回的 FRL-reframe 首裁 ——
+    但沒有任何機制強制主線程裁決，於是它躺了 ~43 小時；期間
+    paper_pipeline_status 仍寫「Blocked on next_tasks k1686_...」，而一份憑記憶
+    手寫的 handoff 複製了那個「已撤回」的首裁。只差一次人工 cross-check，主線程
+    就會把一篇 JBF 可投的論文按 stale 裁定改寫成 FRL 短文（研究誠實級事故）。
+
+    這條 enforce 的契約：paper 的 pipeline `blocker` 引用 next_tasks id 時，該
+    引用是活的依賴。task 到達 terminal（succeeded / failed）那一刻起，主線程必須
+    裁決並改寫 blocker；超過 PAPER_ADJUDICATION_GRACE_HOURS 未改寫 → breach（warn），
+    remediation bridge 會自動建立裁決 task（alert 即 task，不是老闆的待辦）。
+
+    Fail-open：任一來源讀失敗 → info/degraded，不 breach、不 crash。
+    """
+    pipeline_path = _storage_root(storage_dir).joinpath("paper_pipeline_status.json")
+    tasks_path = _storage_root(storage_dir).joinpath("next_tasks.json")
+    try:
+        pipeline = load_json(pipeline_path, None)
+        tasks = load_json(tasks_path, None)
+        if not isinstance(pipeline, dict) or not isinstance(tasks, list):
+            raise ValueError("pipeline or next_tasks missing/malformed")
+    except Exception as exc:  # noqa: BLE001 — fail-open per no-silent-fallback.md
+        warn("alerts", "paper_adjudication_gap read failed", err=str(exc))
+        return {
+            "id": "paper_adjudication_gap",
+            "breached": False,
+            "level": "info",
+            "title": "paper_adjudication_gap degraded (state unreadable)",
+            "body": "",
+            "details": {"degraded": True},
+        }
+
+    terminal = {"succeeded", "failed"}
+    task_index = {
+        str(t.get("id")): t
+        for t in tasks
+        if isinstance(t, dict) and t.get("id") and len(str(t.get("id"))) >= 6
+    }
+
+    def _is_live_dependency(paper: dict[str, Any], blocker: str, tid: str) -> bool:
+        """引用是「活依賴」才算 — provenance 記載（'completed (task X)'）不是 gap。
+
+        契約兩層：(1) 結構化欄位 `blocked_on_tasks: [id, ...]` 是首選（machine-readable，
+        新寫入一律用它）；(2) prose fallback 只認前瞻語境 —— 「blocked on / awaiting /
+        pending / 卡在 / 等待」與 id 同一子句。首版用裸 substring 掃出 2 個 false
+        positive（leverage-direction / taiwan-vt 的 blocker 把 task id 當完成史引用），
+        故收窄至此。
+        """
+        declared = paper.get("blocked_on_tasks")
+        if isinstance(declared, list) and tid in [str(x) for x in declared]:
+            return True
+        pattern = (
+            r"(?i)(?:blocked\s+(?:on|by)|awaiting|waiting\s+(?:for|on)|pending"
+            r"|卡在|等待|待)"
+            r"[^.;。；]{0,160}?"
+            rf"(?<![\w-]){re.escape(tid)}(?![\w-])"
+        )
+        return bool(re.search(pattern, blocker))
+
+    gaps: list[dict[str, Any]] = []
+    for paper in pipeline.get("papers") or []:
+        if not isinstance(paper, dict):
+            continue
+        blocker = str(paper.get("blocker") or "")
+        declared_deps = paper.get("blocked_on_tasks")
+        if not blocker and not declared_deps:
+            continue
+        for tid, task in task_index.items():
+            status = str(task.get("status") or "")
+            if status not in terminal:
+                continue
+            if not _is_live_dependency(paper, blocker, tid):
+                continue
+            completed_raw = task.get("completed_at")
+            age_hours: float | None = None
+            if completed_raw:
+                try:
+                    completed = datetime.fromisoformat(str(completed_raw))
+                    if completed.tzinfo is None:
+                        completed = completed.replace(tzinfo=timezone.utc)
+                    age_hours = (now - completed).total_seconds() / 3600.0
+                except ValueError:
+                    age_hours = None
+            # 無 completed_at 視為夠老（缺時間戳不該讓 gap 隱形）
+            if age_hours is not None and age_hours < PAPER_ADJUDICATION_GRACE_HOURS:
+                continue
+            gaps.append(
+                {
+                    "paper": str(paper.get("paper") or "?"),
+                    "task_id": tid,
+                    "task_status": status,
+                    "completed_at": completed_raw,
+                    "age_hours": round(age_hours, 1) if age_hours is not None else None,
+                }
+            )
+
+    if not gaps:
+        return {
+            "id": "paper_adjudication_gap",
+            "breached": False,
+            "level": "info",
+            "title": "paper adjudication up to date",
+            "body": "",
+            "details": {"gaps": []},
+        }
+
+    lines = [
+        "以下論文的 pipeline blocker 仍引用「已完成」的 gating task —— 該實驗結果等待主線程裁決，"
+        "裁決前 blocker 是 stale 狀態，任何讀它（或抄它進 handoff）的 session 都會拿到過期裁定：",
+        "",
+    ]
+    for g in gaps:
+        lines.append(
+            f"- `{g['paper']}` ← task `{g['task_id']}`（{g['task_status']}，"
+            f"完成於 {g['completed_at'] or '?'}，已 {g['age_hours'] if g['age_hours'] is not None else '?'} 小時）"
+        )
+    lines += [
+        "",
+        "裁決 SOP：讀該 K 的 results JSON + review artifact → 按事前固定判定規則裁決 → "
+        "更新 `paper/<id>/EXECUTION.md` 裁定段 + `storage/paper_pipeline_status.json` blocker → "
+        "同步 handoff。裁定以 experiment JSON 為準，不以敘事偏好或舊 handoff 為準。",
+    ]
+    return {
+        "id": "paper_adjudication_gap",
+        "breached": True,
+        "level": "warn",
+        "title": f"論文裁決缺口：{len(gaps)} 篇 blocked-on 已完成的 gating task",
+        "body": "\n".join(lines),
+        "details": {"gaps": gaps},
+    }
+
+
 PUBLISH_FRESHNESS_GRACE_HOURS = 2.0  # dead-man switch buffer on top of release cadence
 _TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 PUBLISH_ACTIVE_START_HOUR = 9   # 台北時間：此窗內才預期有新內容
@@ -4270,6 +4408,7 @@ def build_alert_condition_report(
         _parse_knowledge_stale_state(storage_dir, current),
         _parse_paper_stale_state(current, paper_root),
         _parse_paper_website_drift_state(current),                # 2026-07-01 loop-eng: 網頁論文卡 status 是否 over-claim vs pipeline 決策
+        _parse_paper_adjudication_gap_state(storage_dir, current), # 2026-07-14 K1686 incident: gating task 完成但裁決未發生（blocker stale → handoff 抄到已撤回裁定）
         _parse_strategy_metrics_freshness_state(storage_dir),     # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_paper_trading_gaps_state(storage_dir),             # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_disk_usage_state(storage_dir),                     # 2026-06-24 migrated from cloud platform-ops-patrol

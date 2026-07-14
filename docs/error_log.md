@@ -2,6 +2,39 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 15:30 — Gating 實驗完成後無人裁決 + handoff 抄到已撤回裁定（差點錯殺一篇 JBF 論文）
+
+**現象**：`k1686_fix_ambient_sign_spec`（volabs 的 make-or-break 修正實驗）7/12 19:19 `succeeded`，
+Codex R2 PASS、事前固定 gate 通過（結論 = absorption 存活、JBF 線繼續）——但結果躺了 ~43 小時無人裁決。
+期間 `paper_pipeline_status.json` blocker 仍寫「Blocked on next_tasks k1686_...」；7/14 12:30 更新的
+`paper_sprint_handoff.md` 隊列項憑記憶手寫「volabs 重寫為 FRL 短文（裁定已定，K1686 NULL）」——抄的是
+7/12 **當天 18:20 已被撤回**的首裁。若接手 session 直接照隊列執行，一篇 JBF 可投的論文會按 stale 裁定
+被降級改寫（研究誠實級事故）。僅因主線程開工前 cross-check 了 EXECUTION.md + K1686 README 才攔下。
+
+**根因（三層）**：
+1. **底層邏輯**：「task 完成」與「論文狀態更新」是兩個斷開的系統——task 標 succeeded 不會產生任何
+   「主線程必須裁決」的義務；pipeline blocker 是自由文字，沒有 machine-readable 的依賴宣告。
+2. **流程**：handoff 隊列項複製裁定內容（而非 pointer 到 canonical），等於為裁定開了第二個會漂移的
+   source of truth；寫的人憑記憶，讀的人信以為真。
+3. **機械 enforcement**：「blocker 引用的 task 已 terminal 但 blocker 未改寫」是機械可偵測的不一致，
+   但沒有任何 checker 看它。
+
+**修正**（enforcement owner = check_alerts，anti-stacking 收編，commit 見本日）：
+1. **`paper_adjudication_gap` alert condition**（`src/volpred/ops/alerts.py`）：pipeline blocker 以
+   前瞻語境（"blocked on / awaiting / pending / 卡在 / 等待"）或結構化欄位 `blocked_on_tasks: [...]`
+   引用的 next_tasks id 到達 terminal（succeeded/failed）超過 12h 未改寫 blocker → warn breach；
+   remediation bridge 自動建 `paper_review` task（alert 即 task）。首版裸 substring 掃出 2 個
+   false positive（leverage-direction / taiwan-vt 把 task id 當 provenance 引用）→ 收窄為前瞻語境 +
+   結構化欄位雙契約。Regression：`tests/test_paper_adjudication_gap_alert.py`（10 cases，含事故原文
+   與兩個 false-positive 原文）；並用 `e947c9e25~1` 的真實歷史狀態驗證只抓 k1686。
+2. **Handoff 隊列項規則**（`paper_sprint_handoff.md` 檔頭）：隊列項禁止複製裁定內容，只寫動作 +
+   pointer；接手 session 必讀 canonical 當前狀態。
+3. **裁定本身**已於同日完成並入檔（EXECUTION.md 2026-07-14 裁定段 + pipeline + knowledge `da9ac9d2`）。
+
+**教訓**：發現流程問題不能只補做被漏掉的那個決策——「補決策」是修資料，「讓漏決策不可能再發生」才是
+修流程。gating 實驗的完成必須機械地產生裁決義務；任何複製 canonical 狀態的文件遲早變 stale，
+只能放 pointer。
+
 ## 2026-07-14 14:40 — Merge 認證聲稱可用裸 `python3`，卻在解析子命令前 eager-import 專案套件
 
 **現象**：K1709 的 nested-DM 紅燈已由 `562eaf958` 撤回並在 GitHub Actions 轉綠，新增的

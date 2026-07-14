@@ -6,6 +6,18 @@ paths:
 
 # Paper Workflow Rules
 
+## Gating 實驗 → 裁決義務（2026-07-14 K1686 stale-裁定事故後立）
+
+論文的 pipeline blocker（`storage/paper_pipeline_status.json`）引用一個 next_tasks id 作為**活依賴**時：
+
+- **寫法**：優先用結構化欄位 `"blocked_on_tasks": ["<task_id>", ...]`；prose 引用必須帶前瞻語境
+  （"Blocked on ... <id>"），完成史引用（"completed (task <id>)"）不算依賴。
+- **義務**：該 task 到 terminal（succeeded/failed）那一刻起，主線程必須依事前判定規則裁決，並改寫
+  EXECUTION.md 裁定段 + pipeline blocker（+清掉 `blocked_on_tasks` 條目）。超過 12h 未裁決 →
+  `paper_adjudication_gap` alert（enforcement owner = check_alerts）自動建 paper_review task。
+- **Handoff**：隊列項禁止複製裁定內容，只寫動作 + pointer 到 canonical（EXECUTION.md / pipeline）。
+- Why + incident：`docs/error_log.md` 2026-07-14 15:30；regression `tests/test_paper_adjudication_gap_alert.py`。
+
 ## 流程核心
 
 - 論文 `.tex` 寫作與方法論決策留在主線程；不丟 background agent 直接改寫
