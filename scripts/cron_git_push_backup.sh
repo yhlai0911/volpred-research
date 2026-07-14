@@ -70,8 +70,16 @@ fi
 # 就 hold push（紅碼永不到 origin、CI 不會紅），建立固定 P1 給當班修；首次與
 # 修復進行中不寄信（per feedback_fix_silent_fallback_immediately）。
 # Fail-open：audit 本身出錯（uv 缺 / baseline 缺）→ 照推，備份優先不被 audit 故障擋。
+#
+# 2026-07-15: --rev HEAD。此 repo 的 checkout 是共享的（多 dispatch slot + 互動
+# session + codex-vscode 同時在同一棵樹上工作），而這個 gate 判的是「即將 push 的
+# 那個 commit」。掃工作區等於把別人**還沒 commit** 的在途編輯算到 HEAD 頭上：
+# 2026-07-14 夜間 4 個乾淨 commit 被擋了一整晚，NEW 三行全部來自另一個 session
+# 未提交的 diff（HEAD 本身 new=0），而 alert 卻寫著「HEAD 帶 3 個」。量錯樹 =
+# 假陽性 hold + 假的 P1 修復任務。
 AUDIT_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 AUDIT_OUT=$("$UV_BIN" run python "$REPO/scripts/audit_silent_fallbacks.py" --strict \
+  --rev HEAD \
   --baseline "$REPO/storage/qa/silent_fallback_baseline.json" 2>&1)
 AUDIT_RC=$?
 AUDIT_FINISHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
