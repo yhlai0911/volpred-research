@@ -1,0 +1,170 @@
+{
+  "schema_version": "volpred.reproduce_report.v1",
+  "generated_at": "2026-07-14T08:09:03.984912+00:00",
+  "experiment_id": "k1683",
+  "engine": {
+    "name": "scripts/reproduce_check.py",
+    "schema": "volpred.reproduce_report.v1"
+  },
+  "repo_head": "962b58278d4e0dfa339c069242e1bb2e7c9bf856",
+  "methodology_references": [
+    {
+      "citation": "Peng (2011), Reproducible Research in Computational Science",
+      "doi": "10.1126/science.1213847",
+      "principle": "computational reproducibility is a minimum standard, not a validity verdict"
+    },
+    {
+      "citation": "Sandve et al. (2013), Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "principle": "record provenance and preserve the exact workflow behind every result"
+    },
+    {
+      "citation": "Stodden et al. (2016), Enhancing Reproducibility for Computational Methods",
+      "doi": "10.1126/science.aah6168",
+      "principle": "disclose code, data, workflow, and computational environment"
+    }
+  ],
+  "discovery": {
+    "inventory_record": {
+      "experiment": "k1683",
+      "path": "experiments/k1683",
+      "priority_sources": [],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "k1683.py",
+      "result_file": "k1683_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    "subject_files": [
+      {
+        "path": "experiments/k1683/data/adjusted_closes.csv",
+        "sha256": "b05d8a4f4adc771cda221614fb82332f3027ae696e2659ed6f8b7a5ba93aeebd",
+        "size": 387636
+      },
+      {
+        "path": "experiments/k1683/data/cftc_tff_treasury.csv",
+        "sha256": "0a39ac553348c82d98b58e6219adffe3c29d5c372a52162dc3c666462c5b12f1",
+        "size": 258383
+      },
+      {
+        "path": "experiments/k1683/data/fred_dgs10.csv",
+        "sha256": "8c20497b438a9bbba86d7687dad36b6c2f6aac8b953c20f52d3fc6e26c73018f",
+        "size": 81654
+      },
+      {
+        "path": "experiments/k1683/k1683.py",
+        "sha256": "50e128ff682904c820f172f1317316589351dedb241e651e9e0593c3f0ee9b42",
+        "size": 33286
+      },
+      {
+        "path": "experiments/k1683/k1683_results.json",
+        "sha256": "b555d9b788d068694309b8663814791471a36e87bcd864622c019ab51dab1da4",
+        "size": 16851
+      },
+      {
+        "path": "experiments/k1683/reproduce_spec.json",
+        "sha256": "ce987a952ed8b50179bae42eb72211d192aadd1ba0405f50637a41fab1af2ce8",
+        "size": 1060
+      },
+      {
+        "path": "src/volpred/stats/model_evaluation.py",
+        "sha256": "29c6f80d1d39f72dfff1984622db599069076c895e174fb564d1e891ae5d59c8",
+        "size": 20107
+      }
+    ],
+    "entrypoint": "experiments/k1683/k1683.py",
+    "canonical_result": "experiments/k1683/k1683_results.json",
+    "spec_sha256": "ce987a952ed8b50179bae42eb72211d192aadd1ba0405f50637a41fab1af2ce8",
+    "subject_sha256": "1d2e7c2e1f7f2890da771040e324a3b8801071dde33c25657d58acee5f57aec0"
+  },
+  "execution": {
+    "command": [
+      "/Users/yhlai0911/volpred-research/.venv/bin/python3",
+      "experiments/k1683/k1683.py"
+    ],
+    "backend": "macos_sandbox_exec",
+    "network": "deny",
+    "exit_code": 0,
+    "timeout_seconds": 240,
+    "duration_seconds": 23.722,
+    "stdout_sha256": "0c74523fc701ccdeb164e2e04ab59ee9f22091f72e3dc2f5499e29f138b254de",
+    "stderr_sha256": "cace1071573ef725e762e8856427937617c8c67e5d0784c45c0e854e56a803a8",
+    "stdout_tail": "{\n  \"status\": \"NULL_NO_ROBUST_INCREMENT\",\n  \"n_primary_pass\": 0,\n  \"target_classes_with_pass\": [],\n  \"claim_scope\": \"incremental predictive association of a lagged public CFTC category proxy; not forced-deleveraging causality or Form PF hedge-fund exposure\"\n}\nwrote /private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-hr4pjlzr/repo/experiments/k1683/k1683_results.json\n",
+    "stderr_tail": "Matplotlib is building the font cache; this may take a moment.\n",
+    "clean_snapshot": true,
+    "sandbox_removed_after_run": true
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [],
+    "archived_scalar_count": 337,
+    "rerun_scalar_count": 337,
+    "numeric_compared": 114,
+    "matched_scalars": 336,
+    "mismatch_count": 1,
+    "mismatches_truncated": false,
+    "mismatches": [
+      {
+        "path": "/run_utc",
+        "kind": "value_mismatch",
+        "archived": "2026-07-11T08:32:06.034084+00:00",
+        "rerun": "2026-07-14T08:09:27.547015+00:00"
+      }
+    ]
+  },
+  "integrity": {
+    "canonical_unchanged": true,
+    "changed_paths": []
+  },
+  "canonical_results": [
+    {
+      "archived_result": "experiments/k1683/k1683_results.json",
+      "archived_sha256": "b555d9b788d068694309b8663814791471a36e87bcd864622c019ab51dab1da4",
+      "rerun_sha256": "bbef7710fd8832691843121f55fb83cc4f27022048412a0d555fac8d255ef761",
+      "bit_identical": false
+    }
+  ],
+  "environment": {
+    "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
+    "platform": "macOS-26.5.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "uv_lock_sha256": "9ba4727375c810be0241c907e77ad7e28c8d2860c3acc8b383230827430bc472",
+    "pythonhashseed": "0",
+    "package_versions": {
+      "numpy": "2.4.3",
+      "pandas": "3.0.1",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6",
+      "arch": "8.0.0",
+      "yfinance": "1.2.0",
+      "scikit-learn": "1.8.0"
+    },
+    "seed_evidence": [
+      "45: SEED = 42",
+      "582: np.random.seed(SEED)",
+      "698: \"seed\": SEED,"
+    ],
+    "declared_randomness": {
+      "status": "declared",
+      "seeds": [
+        {
+          "library": "numpy",
+          "value": 42
+        }
+      ]
+    }
+  },
+  "outcome": {
+    "status": "fail_mismatch",
+    "reason_code": "RESULT_MISMATCH",
+    "severity": "critical",
+    "reproducible": false,
+    "summary": "1 scalar mismatches"
+  }
+}

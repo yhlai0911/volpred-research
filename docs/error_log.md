@@ -7714,3 +7714,26 @@ convention」，flag 本身是揭露項不是絕對值）留待用戶可見時�
 k1262 路徑 — 同 class（pattern 蓋不住 population）。與 K1259「audit 必 re-walk full population」同根。
 
 **處置**：兩處都已 class-sweep 修復（4217af920 / 1c15d3c11）；此後 .tex 驗證 grep 一律 `-i` + 雙編碼 pattern。
+
+## 2026-07-14 16:15 — experiment-level reproduce report 為 0 + 「166」窄 regex 漏兩個 K-family
+
+**現象**：paper 層已有 11 份不同 schema 的 `reproduce_report.json`，但 `experiments/<id>/` 層為 0；
+「有 code 無 results = 166」只對 `^k[0-9]+$` 成立，漏了合法 suffix 目錄 `k994b` 與
+`k1540_friday_triple_witching_closing_auction_concentration`。用 K-family + direct experiment artifacts
+重算後是 **168**。初版 paper regex 又把 `K125` lag、`K827v3_*_results` 等檔名 token 當 K id，會製造
+大量假 missing；feed 若不先過濾 `status=published` 也會混入 draft / unpublished。
+
+**根因**：過去只有「檔案存在」與 paper-specific 手寫 gate，沒有 experiment-level 的 discovery → pinned
+rerun → strict compare → immutable receipt 流程；盤點口徑也沒有同一個 canonical parser。
+
+**根治**：新增 `scripts/reproduce_check.py` + `docs/reproducibility.md`。Paper 聯集 canonical
+`experiments.md` 與 active `main.tex/body.tex`（兩者皆無才讀 README），明確排除 MIDAS `K125` 並解析 alias；feed 先取最新
+60 篇 published。Rerun 強制 predeclared spec/input SHA/seed/tolerance、disposable committed clone、macOS
+write+network sandbox、process-group timeout、baseline 先刪、strict JSON，以及 main canonical 前後 hash。
+168 個 code-without-results 全列入 inventory 為不可驗證；daily_checkup 只呼叫純讀 `build_status()`，不跑實驗。
+
+**首批真實結果**：K1683 / K1699 / K1710 三個 pinned-snapshot 實驗皆 `pass_tolerated`、scientific scalar
+mismatch=0、main canonical unchanged=true。K1683 首跑如實抓到唯一 `/run_utc` mismatch；README 原已定義
+移除該 execution timestamp 後比較，故 spec 明列理由後重跑，紅/綠兩次 receipt 都保留。這再次確認：
+**reproduce pass 只是可重算性，不是方法有效性或主張正確性的背書；metadata 排除必須事前列明理由，不能看完
+差異才任意放寬 tolerance。**

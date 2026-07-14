@@ -547,7 +547,7 @@
         "launchagent_label": "com.volpred.daily-checkup",
         "mechanism": "launchd",
         "host_crontab_managed": false,
-        "description": "每日 09:40 Asia/Taipei 在 reader metrics、daily update、radar 與 09:00 digest 後執行八維 result-level 大體檢；LaunchAgent com.volpred.daily-checkup 是唯一 owner，host crontab 與 run_due_jobs piggy-back 均因 host_crontab_managed=false 排除。findings 寫 storage/ops/checkup，warn/critical 由 --alert 通知。",
+        "description": "每日 09:40 Asia/Taipei 在 reader metrics、daily update、radar 與 09:00 digest 後執行多維 result-level 大體檢（含唯讀復現性 status scan）；LaunchAgent com.volpred.daily-checkup 是唯一 owner，host crontab 與 run_due_jobs piggy-back 均因 host_crontab_managed=false 排除。findings 寫 storage/ops/checkup，warn/critical 由 --alert 通知。",
         "matchers": [
           "daily_checkup.py",
           "cron_daily_checkup.sh",

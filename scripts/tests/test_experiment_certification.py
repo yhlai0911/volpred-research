@@ -155,6 +155,69 @@ def test_pycache_is_not_part_of_the_claim_surface(tmp_path: Path) -> None:
     assert gates.certification_violations(exp) == []
 
 
+# --- the schema the reviewer writes against ----------------------------------
+#
+# Second half of the same K1709 day: Codex reviewed the frozen c97d690c for half
+# an hour and wrote `final_verdict` / `claim_surface_sha256` (two files pinned)
+# because the brief described the schema by hand and the description had drifted
+# from the gate.  That verdict was FAIL, so nothing unsafe merged -- but a PASS
+# in that shape would have certified nothing and burnt the round.  The fix is
+# not a second reader for the old key names: it is that the gate emits the
+# skeleton, so there is nothing left to transcribe.
+
+
+def test_the_generated_template_is_the_verdict_the_gate_accepts(tmp_path: Path) -> None:
+    """Fill in the template, say PASS, and you are through. This is the ratchet:
+
+    if anyone changes the schema on one side only, this test fails.
+    """
+    exp = _experiment(tmp_path)
+    template = gates.verdict_template(exp)
+    template["verdict"] = "PASS"
+    template["blocking_defects"] = []
+    (exp / gates.CERT_FILENAME).write_text(json.dumps(template, indent=2), encoding="utf-8")
+
+    assert gates.certification_violations(exp) == []
+
+
+def test_the_template_pins_the_whole_claim_surface(tmp_path: Path) -> None:
+    exp = _experiment(tmp_path)
+    pinned = gates.verdict_template(exp)["reviewed_sha256"]
+
+    assert set(pinned) == {"k1709.py", "README.md", "k1709_results.json"}
+    assert pinned["k1709.py"] == _sha(exp / "k1709.py")
+
+
+def test_a_verdict_in_the_old_hand_written_shape_names_its_own_drift(tmp_path: Path) -> None:
+    """Blocked either way -- but say WHY, or the next reviewer re-derives it from scratch."""
+    exp = _experiment(tmp_path)
+    (exp / gates.CERT_FILENAME).write_text(
+        json.dumps({
+            "final_verdict": "PASS",
+            "claim_surface_sha256": {"k1709.py": _sha(exp / "k1709.py")},
+        }, indent=2),
+        encoding="utf-8",
+    )
+
+    verdicts = _verdicts(exp)
+    assert any("final_verdict" in v and "schema drift" in v for v in verdicts)
+
+
+def test_verdict_template_cli_writes_a_gate_shaped_file(tmp_path: Path) -> None:
+    exp = _experiment(tmp_path)
+    out = tmp_path / "verdict.json"
+
+    proc = subprocess.run(
+        [sys.executable, str(GATE), "verdict-template", "--path", str(exp), "--out", str(out)],
+        capture_output=True, text=True,
+    )
+
+    assert proc.returncode == 0, proc.stderr
+    written = json.loads(out.read_text(encoding="utf-8"))
+    assert set(written["reviewed_sha256"]) == {"k1709.py", "README.md", "k1709_results.json"}
+    assert written["verdict"].startswith("FILL")
+
+
 # --- the CLI the merge path actually calls -----------------------------------
 
 

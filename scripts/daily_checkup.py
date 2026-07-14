@@ -8,16 +8,17 @@
 靜默落後的資料（daily_update 卡 6/26、collect_us、twse_orderflow 死 12 天）、卡 1 年的
 頁面 cache，全部漏網，最後靠老闆當 QA 發現。本檢查補上 result-level 維度。
 
-九大維度（每個失敗都產生具體 finding，可被 alert 消費）：
+十大維度（每個失敗都產生具體 finding，可被 alert 消費）：
 1. data_freshness   — 所有資料收集 job 是否照排程跑 + 關鍵資料檔是否新鮮（時效性資料優先）
 2. cron_completion  — 所有排程 job 最近一輪是否真的 fire + exit0
 3. content_pipeline — 草稿池 ≥ 門檻、今日有產出、published 文章皆含真圖表+數據表（非純散文）
 4. live_freshness   — 線上 API 回傳的 data_date 是否 ≈ 最新交易日（抓「頁面卡舊資料」）
 5. live_cache       — data-bearing 頁面是否被設成長效靜態快取（抓「網頁卡 cache」）
 6. mission_progress — 研究 backlog / 實驗 / 論文是否在前進（非停滯）
-7. reader_metrics   — 讀者互動 metrics 是否已落地且足夠新鮮
-8. recovery_actions — 對可自動修復的 finding 列出建議 recovery 指令
+7. alert_conditions — ops alert 是否存在未處理的 critical / warn
+8. reader_metrics   — 讀者互動 metrics 是否已落地且足夠新鮮
 9. dedup_calibration — 真實 90d feed 上的 arc/theme 固定 probes 與 threshold margin
+10. reproducibility — 論文/feed 引用實驗的 report coverage、staleness 與 mismatch（唯讀）
 
 用法：
   uv run python scripts/daily_checkup.py            # 印報告
@@ -568,6 +569,35 @@ def check_dedup_calibration() -> list[dict]:
     ]
 
 
+# ── 10. reproducibility ─────────────────────────────────────────────────────
+def check_reproducibility() -> list[dict]:
+    """Project the pure inventory/status scan into alert-compatible findings."""
+    try:
+        from scripts import reproduce_check
+    except ModuleNotFoundError:  # direct ``python scripts/daily_checkup.py``
+        import reproduce_check  # type: ignore[no-redef]
+
+    status = reproduce_check.build_status(ROOT, feed_limit=60)
+    if status.get("schema_version") != reproduce_check.STATUS_SCHEMA:
+        raise ValueError(f"unexpected reproducibility status schema: {status.get('schema_version')}")
+    findings: list[dict] = []
+    for issue in status.get("issues", []):
+        severity = issue.get("severity")
+        if severity not in {"critical", "warn"}:
+            continue
+        sample = ", ".join(issue.get("experiment_ids", []))
+        suffix = f"（例：{sample}）" if sample else ""
+        findings.append(
+            _finding(
+                "reproducibility",
+                severity,
+                f"{issue.get('code')}: {issue.get('message')}{suffix}",
+                recovery=issue.get("recovery"),
+            )
+        )
+    return findings
+
+
 def run_all() -> dict:
     dims = {
         "data_freshness": check_data_freshness,
@@ -579,6 +609,7 @@ def run_all() -> dict:
         "alert_conditions": check_alert_conditions,
         "reader_metrics": check_reader_metrics,
         "dedup_calibration": check_dedup_calibration,
+        "reproducibility": check_reproducibility,
     }
     findings = []
     for name, fn in dims.items():

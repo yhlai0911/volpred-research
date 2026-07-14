@@ -233,8 +233,10 @@ CERT_FILENAME = "review_verdict.json"
 
 CERT_REMEDY = (
     "An experiment may only enter main carrying a review verdict that is bound "
-    "to the bytes it reviewed. Have the reviewer (Codex) read the FROZEN "
-    f"experiment, then write experiments/<kid>/{CERT_FILENAME}:\n"
+    "to the bytes it reviewed. Generate the skeleton — do not transcribe it:\n"
+    "      uv run python scripts/experiment_gates.py verdict-template "
+    f"--path experiments/<kid> --out experiments/<kid>/{CERT_FILENAME}\n"
+    "    Have the reviewer (Codex) read the FROZEN experiment and fill it in:\n"
     '      {"kid": "k1709", "verdict": "PASS", "reviewer": "codex/gpt-5.6-sol",\n'
     '       "reviewed_at": "<ISO8601>", "review_artifact": "<the review file>",\n'
     '       "reviewed_sha256": {"<relpath>": "<sha256>", ...}}\n'
@@ -272,6 +274,34 @@ def claim_surface(exp_dir: Path) -> list[Path]:
     return out
 
 
+LEGACY_VERDICT_KEYS = ("final_verdict", "claim_surface_sha256")
+
+
+def verdict_template(exp_dir: Path) -> dict[str, Any]:
+    """The verdict skeleton `certify` accepts, with the claim surface already pinned.
+
+    The reviewer used to copy this schema out of a hand-written brief, and on
+    2026-07-14 the copy drifted: Codex reviewed k1709 @c97d690c for half an hour
+    and wrote `final_verdict` / `claim_surface_sha256` (two files pinned) where
+    the gate reads `verdict` / `reviewed_sha256` (whole claim surface). The
+    verdict was FAIL so nothing unsafe merged — but a PASS would have certified
+    nothing and burnt the round. A schema that lives in two places drifts; emit
+    it from the module that enforces it and there is only one place.
+    """
+    return {
+        "kid": exp_dir.name,
+        "verdict": "FILL: PASS or FAIL — anything but PASS blocks the merge",
+        "reviewer": "FILL: model / effort",
+        "reviewed_at": "FILL: ISO8601",
+        "reviewed_commit": "FILL: the frozen SHA you read",
+        "review_artifact": "FILL: relpath of the written review",
+        "blocking_defects": ["FILL: one entry per defect that makes this a FAIL; [] if PASS"],
+        "reviewed_sha256": {
+            str(p.relative_to(exp_dir)): _sha256(p) for p in claim_surface(exp_dir)
+        },
+    }
+
+
 def certification_violations(exp_dir: Path) -> list[Violation]:
     """Block unless a PASS verdict exists for EXACTLY these bytes.
 
@@ -303,6 +333,9 @@ def certification_violations(exp_dir: Path) -> list[Violation]:
     verdict = str(cert.get("verdict", "")).strip().upper()
     if verdict != "PASS":
         shown = verdict or "<missing>"
+        drifted = sorted(k for k in LEGACY_VERDICT_KEYS if k in cert)
+        if not verdict and drifted:
+            shown = f"<missing> (found {', '.join(drifted)} — schema drift, not this gate's schema)"
         return [Violation(gate="review-certification", site=site,
                           verdict=f"reviewer verdict is {shown}, not PASS", remedy=CERT_REMEDY)]
 
@@ -365,6 +398,32 @@ def cmd_certify(args: argparse.Namespace) -> int:
         print(f"    - {v.site}  ({v.verdict})", file=sys.stderr)
     print(f"\n  → {CERT_REMEDY}", file=sys.stderr)
     return 1
+
+
+def cmd_verdict_template(args: argparse.Namespace) -> int:
+    target = Path(args.path)
+    if not target.is_absolute():
+        target = REPO_ROOT / target
+    if not target.is_dir():
+        print(f"[cert] error: not an experiment directory: {target}", file=sys.stderr)
+        return 2
+
+    surface = claim_surface(target)
+    if not surface:
+        print(f"[cert] error: {_rel(target)} has no claim surface to review "
+              "(no *.py, README.md, or *_results.json)", file=sys.stderr)
+        return 2
+
+    rendered = json.dumps(verdict_template(target), indent=2, ensure_ascii=False)
+    if args.out:
+        out = Path(args.out)
+        if not out.is_absolute():
+            out = REPO_ROOT / out
+        out.write_text(rendered + "\n", encoding="utf-8")
+        print(f"[cert] wrote verdict template for {len(surface)} claim-surface file(s) → {_rel(out)}")
+    else:
+        print(rendered)
+    return 0
 
 
 def cmd_run(args: argparse.Namespace) -> int:
@@ -433,6 +492,15 @@ def main() -> int:
     cert.add_argument("--path", required=True, help="experiments/<kid> directory")
     cert.add_argument("--json", help="write a machine-readable report here")
     cert.set_defaults(func=cmd_certify)
+    tmpl = sub.add_parser(
+        "verdict-template",
+        help="Print the review_verdict.json skeleton `certify` accepts, with the "
+             "claim surface pinned. Give this to the reviewer instead of describing "
+             "the schema in a brief — a described schema drifts, a generated one cannot.",
+    )
+    tmpl.add_argument("--path", required=True, help="experiments/<kid> directory")
+    tmpl.add_argument("--out", help="write the template here instead of stdout")
+    tmpl.set_defaults(func=cmd_verdict_template)
     args = parser.parse_args()
     return args.func(args)
 

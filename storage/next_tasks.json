@@ -36802,7 +36802,7 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-14T05:37:54.793091+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 741）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n又來！\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
@@ -36819,10 +36819,31 @@
         "to": "pending",
         "by": "telegram-responder",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-14T08:24:01.737943+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-14T08:24:01.976138+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-14T08:25:12.628310+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-16"
       }
     ],
     "last_released_at": "2026-07-14T07:50:05.652714+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "started_at": "2026-07-14T08:24:01.976122+00:00",
+    "completed_at": "2026-07-14T08:25:12.628294+00:00",
+    "result": "已回覆（msg 747）：本班 K1709 裁決收件結果 + verdict schema 根因修復 + 說明 k1683 復現紅字是時間戳誤判非真不一致 + CI 綠燈。"
   },
   {
     "id": "k1709-redo",
@@ -37036,5 +37057,19 @@
     "depends_on": [
       "taifexdata_dropbox_organize"
     ]
+  },
+  {
+    "id": "k1709-rev3-gw-label",
+    "title": "K1709 rev3 — 把 GW 標籤改回它真正做的檢定（Codex FAIL 的唯一 blocking）",
+    "description": "Codex (gpt-5.6-sol/ultra) 對凍結 SHA c97d690c 的裁決 = FAIL，但只有一條 blocking，且是宣稱範圍問題不是算術錯。\n\n【blocking】k1709.py:1039-1091 的「Giacomini-White gate」實作的其實是 h_t≡1 的無條件 DM 特例（scalar loss differential + Bartlett HAC + normal z），從未建構 instrument h_t、q×q 共變異、Wald 統計量或 chi-square_q 參考分布。README.md:30-38 / 69-82 的「GW gate / GW z / Giacomini-White on QLIKE」因此超出證據：撐不起 conditional / state-dependent predictive ability 的宣稱，也可能抵銷掉跨 regime 的正負效果。Codex 明確指出數字本身站得住，只是站得住的是 GW(2006) Sec 3.4 真正授權的較弱宣稱 —— bounded-memory forecasting method 下的 equal *unconditional* predictive ability（此時 GW 統計量與 DM 重合）。\n\n修法（優先 a）：\n(a) 把用詞改成它實際做的事：README + code 標籤改為「unconditional DM / GW(2006) Sec 3.4 unconditional special case」，結論範圍收斂為「未發現無條件增量預測能力」。數字不動 → 不必重跑，但 render_readme.py 要重跑（Codex 已驗證 renderer 對凍結 JSON 可 byte-for-bit 重現 README）。\n(b) 真做 conditional GW（建 h_t、vector moment、Wald、chi2_q）→ 要重跑 + 重審。\n\n其餘 9 條舊缺陷（C6 cell-key collision / R1-R6 / README 撤回宣稱 / end-to-end runnability）Codex 全判 FIXED。4 條 non-blocking（bound 單調性假設、Fig2 event-day 位移一天、README:209 的 live-rerun 不變承諾、vendor vintage 未存檔）一併處理或明寫為 limitation。\n\n【重審 SOP — 不要再手抄 schema】凍結後跑：\n  uv run python scripts/experiment_gates.py verdict-template --path experiments/k1709 --out experiments/k1709/review_verdict.json\n再叫 Codex 只填欄位。rev2 就是 brief 手寫 schema 寫成 final_verdict/claim_surface_sha256、只 pin 2 個檔而 gate 要 5 個。\n\n實驗仍在 .claude/worktrees/dispatch-slot-2-c873d04d-k1709（FAIL 不得進 main）；rev2 裁決已 commit 6951526cc 保存。\n",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "pending",
+    "source": "hourly-16",
+    "created_at": "2026-07-14T08:23:20.356430+00:00",
+    "started_at": null,
+    "completed_at": null,
+    "result": "",
+    "status_history": []
   }
 ]

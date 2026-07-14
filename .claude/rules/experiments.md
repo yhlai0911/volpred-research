@@ -54,18 +54,20 @@ K1709 就是自帶測試全過、ratchet 抓得到卻從沒被執行到，一整
 ## 審查認證：實驗進 main 的唯一門票（2026-07-14）
 
 實驗要合併進 main，`experiments/<kid>/` 必須有一份 **`review_verdict.json`**，且它 pin 住的
-sha256 就是**現在這份 bytes**。merge 路徑會擋（`scripts/merge_worktree.sh` → `experiment_gates.py certify`）：
+sha256 就是**現在這份 bytes**。merge 路徑會擋（`scripts/merge_worktree.sh` → `experiment_gates.py certify`）。
 
-```json
-{
-  "kid": "k1709",
-  "verdict": "PASS",
-  "reviewer": "codex/gpt-5.6-sol",
-  "reviewed_at": "2026-07-14T13:42:00+08:00",
-  "review_artifact": "codex_review_rev1_20260714.txt",
-  "reviewed_sha256": {"k1709.py": "<sha256>", "README.md": "...", "k1709_results.json": "..."}
-}
+**裁決檔一律由 gate 產生，不要用手抄**（2026-07-14 補；schema 曾有三份副本 → 必漂移）：
+
+```bash
+uv run python scripts/experiment_gates.py verdict-template \
+  --path experiments/<kid> --out experiments/<kid>/review_verdict.json
 ```
+
+它會把 claim surface 全部 pin 好，reviewer 只填 `verdict` / `reviewer` / `reviewed_at` /
+`reviewed_commit` / `review_artifact` / `blocking_defects`。**派 Codex 審查的 brief 引用這行命令，
+不要在 brief 裡重述欄位名** —— 2026-07-14 K1709 rev2 就是 brief 手寫 schema 寫成
+`final_verdict` / `claim_surface_sha256`（且只 pin 2 個檔、gate 要 5 個），一輪 30 分鐘 xhigh 審查
+若判 PASS 會認證不到任何東西。那次判 FAIL 才沒出事。
 
 Claim surface = `*.py` + `README.md` + `*_results.json`（README 也算：**overclaim 是透過 README 抵達人類的**）。
 
