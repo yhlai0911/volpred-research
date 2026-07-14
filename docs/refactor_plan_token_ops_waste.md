@@ -149,3 +149,57 @@
 - **C**：每週一 token 週報產出後，比對 §2 各 Check 指標，結果回寫本檔 §4 狀態欄。
 - **A**：達標項固化（規則進對應 owner script/skill/rule 並降級 prose 層）；未達標項
   升級診斷層級（邏輯→流程→架構）重打，不加 patch 層。
+
+---
+
+## 7. WS1e — Tool-boundary context budget（2026-07-14 owner 打回票後補上的「真正的結構修正」）
+
+**Owner 回信（2026-07-14 16:25）**：「不能只有壓縮或是減班，要確實重構優化流程提高運作效率，
+但又不損當前的功能，立即優化。」
+
+**這個批評是對的，且指出了原計畫的診斷缺陷。** 原 §0 把 `cache_create 佔 billable 79%` 讀成
+「bootstrap 太大」，於是 WS1c 去瘦 CLAUDE.md、WS2/WS3 去壓縮與清理、報告面去減班。
+但 bootstrap 是**一次性前綴**，會被 cache_read（0.1x）攤平 —— 瘦它幾乎打不到 cache_create。
+
+### 7.1 重新量測（7 天 transcript，17,570 筆 tool_result；`/tmp` 一次性腳本，數字見下）
+
+| 事實 | 數值 |
+|---|---|
+| cache_create（週 billable） | 33.3M |
+| 全部進入 context 的新內容（tool_result 7.26M + assistant 3.83M + …） | ~11M |
+| **放大倍數** | **~3×** —— 每個進 context 的 token 平均被寫進 cache 三次（長 session 跨 cache TTL 續跑時整段 prefix 重寫） |
+| tool_result 總量 | 7.26M tok / 17,570 筆 |
+| **Read** | **3.68M tok / 2,005 次 / 平均 1,835 → 佔全部 tool_result 的 51%** |
+| ├ 無 limit/offset（整檔讀） | **2.71M tok / 1,015 次 / 平均 2,673（佔 Read 的 73.8%）**，p90 = 8,045 |
+| └ 有 limit/offset | 0.97M tok / 990 次 / 平均 975 |
+| Bash | 3.24M tok / 12,075 次 / 平均 268（**長尾問題，不是均值問題**） |
+| 長尾集中度 | 僅 8.1% 的 tool_result 握有 60% 的 token |
+| 單檔冠軍 | `storage/ops/handoff_latest.md` — **457K tok/週**，被每個 session 整檔讀 |
+
+**真正的成本函數**：`bill ≈ 3 × (每 turn 追加進 context 的 token)`。
+→ 槓桿不在「文件多大」，在**「工具邊界每次倒多少東西進來」**。砍 tool_result 是**放大 3 倍**的節省，不是 1:1。
+
+### 7.2 落地：`scripts/hooks/read_context_budget.py`（PreToolUse: Read）
+
+- **政策**：caller 未給 `limit` 也未給 `offset` **且** 檔案 > 250 行 → 注入 `limit=200`，
+  並在 additionalContext 告知真實行數與取得其餘內容的三條路（offset / Grep / 明確 limit）。
+- **不損功能（owner 硬性條件）**：**明確意圖永遠不被覆寫** —— 有 `limit` 或 `offset` 就完全 no-op。
+  這只是替「沒表達意圖」的呼叫補一個預設上限，與 Read 內建的 2000 行上限是同一個契約。
+  任何 malformed input / 讀不到的路徑 / 二進位 / PDF·ipynb·圖片 → fail-open 回 `{}`。
+- **實測效益**：命中 1,015 筆無界 Read 中的 273 筆，**省 ~1.12M raw tok/週**；
+  以 3× 放大計 ≈ 3.4M billable/週 ≈ 週帳單的 **8%**。
+- **回歸測試**：`scripts/tests/test_read_context_budget.py`（19 cases：觸發 / 明確 limit 不覆寫 /
+  offset 不覆寫 / 邊界 250 行 / 非行導向格式 / 二進位 / 其他工具 / 7 種 malformed 全 fail-open）。
+
+### 7.3 明確否決：Bash 端的通用輸出包裝
+
+`.claude/hooks/run-compact-bash.sh` 已能用 `updatedInput` 改寫指令來壓縮輸出（pytest / git status /
+tail log 三個模式），把它的 `*)` default case 改成「所有 Bash 都套預算」看似順理成章 —— **但會損害功能，故否決**：
+wrapper 用 `bash -lc` 跑在子殼，而 7 天內有 **6,399 次呼叫以 `cd` 開頭、553 次 `export`**；
+包裝後 cwd / env 不會延續到下一次 Bash 呼叫，直接違反 owner 的「不損當前功能」。
+Bash 端要省，必須走「逐 class 判定為無 shell-state 副作用才包裝」，不是無差別包裝 —— 列入 backlog，不在本次硬推。
+
+### 7.4 Check（下期驗收）
+
+下兩期 token 週報應看到：`drilldown.by_tool.Read` 的無 limit/offset 佔比從 73.8% 明顯下降；
+tool_result 總量下降 ≥1M/週。**若沒有下降 = 政策沒生效或被繞過，回來查，不要自我安慰。**
