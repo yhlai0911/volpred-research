@@ -116,6 +116,16 @@ _最後更新：2026-07-11（Fable 深審輪）。本檔是 prg-periodic-garch �
 | 日期 | 動作 | 摘要 | commit |
 |---|---|---|---|
 | 2026-07-11 | Fable deep review | 深審完成，待執行 P0 | f913ed68c |
+| 2026-07-12 | K1699 落地 | P0-2（K-new-A）完成：六市場 close-convention 0/6 Harvey，pinned + deterministic + Codex PASS_WITH_CAVEAT | （見 experiments/k1699/） |
+| 2026-07-14 | v7 重寫開工（Fable 主線程） | 架構定案（見下方 v7 決策記錄）；main_v7_draft.tex 草稿完成（正文 ~1.8k 字 / abstract 243 字 / 編譯 9pp）；K1699 close 面板數字已入稿；K1710（pinned 重跑 open+mixed 面板）與 prg-recon（P0-1 errata map）兩個 Opus agent 已派 | — |
+
+### v7 重寫決策記錄（2026-07-14，Fable 主線程裁定）
+
+1. **Flip 主表 = 論文唯一中心**：六市場 × 三 convention（Mixed / Close / Open），全部綁單一 pinned vintage（2026-07-12）。Close 面板 = K1699；Mixed anchor + Open 面板 = **K1710**（新實驗：在 K1699 同一批 pinned snapshot 上重現 K1544 的 open-known vs fair GJR-X 與舊 canonical mixed 物件）— 這同時解掉 §7「K1544 點估計未 pipeline 重現不可入表」的禁令與 P0-1 的 SPY 漂移（整個 mixed 列直接在 pinned vintage 重生成，舊值以 footnote 揭露）。
+2. **裁掉 VaR/ES、VT 經濟價值、Separate-GARCH ablation、HAR target-mismatch、MCS**：舊值全屬未 pin 漂移類（K880/K880v2 vintage 不可重現）；FRL 單一 sharp point 體裁本來就要砍。P1 若要加回，一律以 pinned 重跑為前提（VT/VaR = 原 P1-2(ii) K-new-B；Separate ablation = 選配新 K）。reproduce surface 因此縮到 K1699 + K1710 兩個 JSON。
+3. **auto_adjust 硬規則張力處置**：K1699/K1710 的 pinned snapshot 上游（K880/K881/K886 loaders）用 `auto_adjust=True`，與 paper-workflow 硬規則字面（False）不符。裁定**不重跑**：規則根本目的（vintage 漂移）已由 pin + bit-identical 驗證根治；且調整價讓 overnight return 排除除息跳空，方法論上優於 raw。處置 = 論文 Data 節明文揭露 + 本記錄 + error_log 記錄；規則母本修訂（「pin 是 enforcement 點，flag 是揭露項」）待用戶可見時提案。
+4. **符號 orientation**：論文全表統一「正 = PRG 優」；K1699 JSON orientation 相反（正 = GJR 優），入稿一律翻轉並在 `% source` comment 明記。
+5. **標題改**：Forecast-Timing Conventions and the Value of Overnight Information in Volatility Forecasting（headline pivot 的自然結果；舊標題的 "Session-Boundary Information Transfers" 屬舊敘事）。
 
 ---
 

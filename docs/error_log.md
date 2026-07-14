@@ -7426,3 +7426,21 @@ drift kind 因此**結構上不可能發生**，不是被抑制。`series_regist
 + `::test_auto_dispatch_records_successor_edge`。
 **驗證**：3 個自噬 signature 全消（含該 critical）；escalations 1 → 0；剩 2 個是**真的**沒補救的
 失敗（K1684 / trending_repost_2026_07_14）—— detector 只報真問題，不是被關掉。45 tests passed。
+
+## 2026-07-14 11:52 — paper snapshot pin 的 auto_adjust 硬規則張力（prg v7 重寫時發現，記錄 + 揭露處置）
+
+**現象**：paper-workflow 硬規則 1 要求投稿 snapshot CSV `auto_adjust=False`（源自 2026-04-19 K903/K904
+vintage-drift sign-flip 教訓），但 prg-periodic-garch 的 pinned 資料血統（K880/K881/K886 loaders →
+K1699/K1710 snapshots）全部用 `auto_adjust=True` 下載後 pin。
+
+**判斷（不重跑）**：規則的根本目的是消滅 vintage 漂移 — 這由 pin 本身 + K1699 的 bit-identical 重跑驗證
+已根治（含 `float_precision="round_trip"` 教訓）。且 session-level 波動率研究用調整價方法論上**更對**：
+raw 價會把除息日可預期跳空灌進 overnight return 當假波動（SPY 每季 ~0.3-0.5%）。硬套字面重跑會毀掉
+已 Codex-reviewed 的 K1699 且引入新的 dividend artifact。
+
+**處置**：(a) 論文 Data 節明文揭露「dividend- and split-adjusted, pinned, vintage 2026-07-14 前後」；
+(b) prg EXECUTION.md v7 決策記錄第 3 條；(c) 規則母本的修訂提案（enforcement 點應是「pin + 揭露 adjustment
+convention」，flag 本身是揭露項不是絕對值）留待用戶可見時確認 — 治理規範不自行改寫。
+
+**教訓**：硬規則寫「手段」（flag 值）而非「目的」（vintage 穩定 + 口徑揭露）時，遇到手段與目的分離的案例
+要回到目的裁定並記錄，不盲從也不靜默繞過。
