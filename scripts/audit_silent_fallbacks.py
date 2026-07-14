@@ -33,7 +33,13 @@ from typing import Any, Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_TARGETS = (ROOT / "scripts", ROOT / "src" / "volpred", ROOT / ".claude" / "hooks")
+
+
+def default_targets(root: Path = ROOT) -> tuple[Path, ...]:
+    return (root / "scripts", root / "src" / "volpred", root / ".claude" / "hooks")
+
+
+DEFAULT_TARGETS = default_targets()
 SKIP_DIRS = {".git", ".venv", "__pycache__", "node_modules", "tests"}
 
 OBSERVABLE_CALL_NAMES = {
@@ -74,10 +80,10 @@ def _relative(path: Path, root: Path = ROOT) -> str:
         return str(path)
 
 
-def iter_python_files(paths: Iterable[Path]) -> list[Path]:
+def iter_python_files(paths: Iterable[Path], root: Path = ROOT) -> list[Path]:
     files: list[Path] = []
     for raw_path in paths:
-        path = raw_path if raw_path.is_absolute() else ROOT / raw_path
+        path = raw_path if raw_path.is_absolute() else root / raw_path
         if path.is_file() and path.suffix == ".py":
             files.append(path)
             continue
@@ -555,7 +561,7 @@ def audit_file(path: Path, *, root: Path = ROOT) -> list[Finding]:
 
 def audit_paths(paths: Iterable[Path], *, root: Path = ROOT) -> list[Finding]:
     findings: list[Finding] = []
-    for path in iter_python_files(paths):
+    for path in iter_python_files(paths, root):
         try:
             findings.extend(audit_file(path, root=root))
         except (OSError, SyntaxError, UnicodeDecodeError) as exc:
@@ -710,7 +716,18 @@ def _baseline_report(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("paths", nargs="*", type=Path, default=list(DEFAULT_TARGETS))
+    parser.add_argument("paths", nargs="*", type=Path)
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=ROOT,
+        help=(
+            "repo root that relative paths, the default targets and the finding paths "
+            "(hence the baseline signatures) are resolved against; default: this script's "
+            "own repo. The pre-commit hook runs a copy extracted from a trusted ref into a "
+            "temp dir, where __file__ says nothing about the tree being audited."
+        ),
+    )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--strict", action="store_true")
     parser.add_argument(
@@ -730,8 +747,9 @@ def main() -> int:
         help="maximum human rows to print; 0 means no limit",
     )
     args = parser.parse_args()
+    root = args.root.resolve()
 
-    findings = audit_paths(args.paths)
+    findings = audit_paths(args.paths or list(default_targets(root)), root=root)
     if args.write_baseline:
         write_baseline(args.write_baseline, findings)
         print(f"[silent-fallback-audit] wrote baseline={args.write_baseline} findings={len(findings)}")

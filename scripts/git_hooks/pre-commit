@@ -43,6 +43,56 @@ cd "$ROOT" || exit 0
 
 PY="$(command -v uv >/dev/null 2>&1 && echo "uv run python" || echo python3)"
 
+# --- Trusted-ref resolution, shared by every gate (2026-07-15) --------------
+# The hook is deployed from main, so every tool it drives must be read from main
+# too. Resolving them from the committing checkout's working tree splits one
+# contract across two refs, and that split is this hook's recurring deadlock:
+# a worktree branched before a gate input existed simply does not carry the file,
+# and Gate 2 fail-closes on EVERY .py commit inside it — agent work stranded
+# uncommitted, exactly as on 2026-07-14. a4ecb962a closed that hole for Gate 0's
+# auditor and left Gates 1-2 open; same root cause, so same fix, everywhere.
+if git rev-parse --verify --quiet refs/heads/main >/dev/null 2>&1; then
+  TRUSTED_REF_SRC="main"
+else
+  TRUSTED_REF_SRC="HEAD"   # bare CI clone with no local main: prior behaviour
+fi
+
+TRUSTED_TMPS=()
+cleanup_trusted_tmps() {
+  [ "${#TRUSTED_TMPS[@]}" -eq 0 ] || rm -f "${TRUSTED_TMPS[@]}"
+}
+trap cleanup_trusted_tmps EXIT
+
+# from_trusted_ref <tracked-path> [--allow-staged]
+# Materialises the trusted copy of <tracked-path> into a temp file and puts its
+# path in $TRUSTED_OUT. Returns 1 when the ref does not carry the path; each
+# caller decides whether that is fatal (Gate 2) or a skip (Gate 1).
+#
+# It answers through a global instead of stdout on purpose: `x="$(f)"` would run
+# the function in a subshell, so the temp path it appends to TRUSTED_TMPS would
+# die with that subshell and the EXIT trap would leak a file per commit, forever.
+#
+# --allow-staged prefers this commit's staged blob when it changes the path.
+# ONLY the baseline gets it: re-generating the baseline is the sanctioned way to
+# accept a finding, so judging that commit against main's older baseline would
+# make an accepted finding permanently unlandable. The auditors never get it — a
+# candidate must not supply the judge that grades it (Gate 0's tamper property).
+TRUSTED_OUT=""
+from_trusted_ref() {
+  local path="$1" allow_staged="${2:-}" ref="$TRUSTED_REF_SRC" tmp
+  TRUSTED_OUT=""
+  if [ "$allow_staged" = "--allow-staged" ] && git diff --cached --name-only | grep -qx "$path"; then
+    ref=""   # empty ref => `git show :path` => the staged blob
+  fi
+  tmp="$(mktemp "${TMPDIR:-/tmp}/volpred-gate.XXXXXX")" || return 1
+  if ! git show "${ref}:${path}" > "$tmp" 2>/dev/null; then
+    rm -f "$tmp"
+    return 1
+  fi
+  TRUSTED_TMPS+=("$tmp")
+  TRUSTED_OUT="$tmp"
+}
+
 # --- Gate -1: hook deploy/source atomicity (2026-07-14 19:xx) --------------
 # 今天的死鎖 class：18:47 tick 把新 hook 部署進 .git/hooks（要求 --index）但沒
 # commit 升級後的 auditor 源 → HEAD 舊 auditor 不認 --index → 所有 .py commit
@@ -99,24 +149,15 @@ if [ "${#STAGED_PY_CHANGED[@]}" -gt 0 ]; then
   # A commit ON main resolves main == HEAD, i.e. unchanged behaviour.  A checkout
   # with no local main (bare CI clone) falls back to HEAD, as before.
   TRUSTED_REF_GATE="${VOLPRED_TRUSTED_TEST_IMPORT_AUDITOR:-}"
-  TRUSTED_REF_TMP=""
   if [ -z "$TRUSTED_REF_GATE" ]; then
-    if git rev-parse --verify --quiet refs/heads/main >/dev/null 2>&1; then
-      TRUSTED_REF_SRC="main"
-    else
-      TRUSTED_REF_SRC="HEAD"
-    fi
-    TRUSTED_REF_TMP="$(mktemp "${TMPDIR:-/tmp}/volpred-audit-test-imports.XXXXXX.py")"
-    if ! git show "$TRUSTED_REF_SRC:$REF_GATE" > "$TRUSTED_REF_TMP" 2>/dev/null; then
-      rm -f "$TRUSTED_REF_TMP"
+    if ! from_trusted_ref "$REF_GATE"; then
       echo "[pre-commit] BLOCKED — trusted ref $TRUSTED_REF_SRC does not contain $REF_GATE"
       exit 1
     fi
-    TRUSTED_REF_GATE="$TRUSTED_REF_TMP"
+    TRUSTED_REF_GATE="$TRUSTED_OUT"
   fi
   REF_OUT="$($PY "$TRUSTED_REF_GATE" --root "$ROOT" --index 2>&1)"
   REF_RC=$?
-  [ -z "$TRUSTED_REF_TMP" ] || rm -f "$TRUSTED_REF_TMP"
   if [ "$REF_RC" -ne 0 ]; then
     echo "[pre-commit] BLOCKED — candidate index has test/script dependency drift:"
     printf '%s\n' "$REF_OUT" | sed 's/^/[pre-commit]   /'
@@ -146,11 +187,14 @@ done
 # Cheapest gate first: mojibake makes the file undecodable, so every downstream
 # audit and pytest collection on it silently stops running.
 ENC="scripts/audit_source_encoding.py"
-if [ -f "$ENC" ]; then
+if from_trusted_ref "$ENC"; then
+  ENC_TOOL="$TRUSTED_OUT"
+  # --root: the tool runs from a temp extraction, so it cannot infer the tree it
+  # is auditing from its own __file__ — the checkout being committed must be named.
   if [ "${#STAGED_PY[@]}" -gt 0 ]; then
-    ENC_OUT="$($PY "$ENC" --roots "${STAGED_PY[@]}" 2>&1)"
+    ENC_OUT="$($PY "$ENC_TOOL" --root "$ROOT" --roots "${STAGED_PY[@]}" 2>&1)"
   else
-    ENC_OUT="$($PY "$ENC" 2>&1)"
+    ENC_OUT="$($PY "$ENC_TOOL" --root "$ROOT" 2>&1)"
   fi
   if [ $? -ne 0 ]; then
     echo "[pre-commit] BLOCKED — corrupted (non-UTF-8) .py source:"
@@ -164,17 +208,21 @@ fi
 # --- Gate 2: silent fallbacks (2026-07-11, baseline) ------------------------
 AUDIT="scripts/audit_silent_fallbacks.py"
 BL="storage/qa/silent_fallback_baseline.json"
-if [ ! -f "$AUDIT" ] || [ ! -f "$BL" ]; then
-  echo "[pre-commit] BLOCKED — silent-fallback gate inputs missing: $AUDIT / $BL"
+AUDIT_TOOL=""
+BL_FILE=""
+from_trusted_ref "$AUDIT" && AUDIT_TOOL="$TRUSTED_OUT"
+from_trusted_ref "$BL" --allow-staged && BL_FILE="$TRUSTED_OUT"
+if [ -z "$AUDIT_TOOL" ] || [ -z "$BL_FILE" ]; then
+  echo "[pre-commit] BLOCKED — $TRUSTED_REF_SRC does not carry the silent-fallback gate inputs: $AUDIT / $BL"
   exit 1
 fi
 
 # bash 3.2 (macOS /bin/bash) errors on "${arr[@]}" when arr is empty under `set -u`,
 # so the full-sweep fallback must not go through the array expansion.
 if [ "${#STAGED_PY[@]}" -gt 0 ]; then
-  OUT="$($PY "$AUDIT" --strict --baseline "$BL" --limit 20 "${STAGED_PY[@]}" 2>&1)"
+  OUT="$($PY "$AUDIT_TOOL" --root "$ROOT" --strict --baseline "$BL_FILE" --limit 20 "${STAGED_PY[@]}" 2>&1)"
 else
-  OUT="$($PY "$AUDIT" --strict --baseline "$BL" --limit 20 2>&1)"
+  OUT="$($PY "$AUDIT_TOOL" --root "$ROOT" --strict --baseline "$BL_FILE" --limit 20 2>&1)"
 fi
 RC=$?
 

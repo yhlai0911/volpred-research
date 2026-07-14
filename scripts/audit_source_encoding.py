@@ -37,10 +37,10 @@ FFFD = "�"  # fffd-ok: the detector's own needle
 FFFD_OK_MARKER = "# fffd-ok:"
 
 
-def iter_py_files(roots: list[str]) -> list[Path]:
+def iter_py_files(roots: list[str], repo_root: Path = ROOT) -> list[Path]:
     files: list[Path] = []
     for root in roots:
-        base = ROOT / root
+        base = repo_root / root
         candidates = [base] if base.is_file() else sorted(base.rglob("*.py"))
         for p in candidates:
             if p.suffix != ".py" or SKIP_PARTS.intersection(p.parts):
@@ -107,14 +107,25 @@ def main() -> int:
             f"(default: {' '.join(DEFAULT_ROOTS)})"
         ),
     )
+    ap.add_argument(
+        "--root",
+        type=Path,
+        default=ROOT,
+        help=(
+            "repo root the --roots are resolved against (default: this script's own repo). "
+            "The pre-commit hook runs a copy of this script extracted from a trusted ref into "
+            "a temp dir, so its __file__ says nothing about which tree is being audited."
+        ),
+    )
     args = ap.parse_args()
+    repo_root = args.root.resolve()
 
-    missing = [r for r in args.roots if not (ROOT / r).exists()]
+    missing = [r for r in args.roots if not (repo_root / r).exists()]
     if missing:
         print(f"[audit-encoding] FAIL: root path(s) not found: {missing}", file=sys.stderr)
         return 2
 
-    files = iter_py_files(args.roots)
+    files = iter_py_files(args.roots, repo_root)
     bad: dict[Path, list[str]] = {}
     for path in files:
         problems = check_file(path)
@@ -123,7 +134,7 @@ def main() -> int:
 
     if bad:
         for path, problems in bad.items():
-            rel = path.relative_to(ROOT)
+            rel = path.relative_to(repo_root)
             for prob in problems:
                 print(f"BAD {rel}: {prob}", file=sys.stderr)
         print(
