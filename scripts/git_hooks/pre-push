@@ -53,6 +53,7 @@ cd "$ROOT" || { degraded "cannot cd to $ROOT"; exit 0; }
 #   audit_source_encoding.py   DEFAULT_ROOTS   = ("src", "tests", "scripts")
 #   audit_silent_fallbacks.py  DEFAULT_TARGETS = scripts/, src/volpred/, .claude/hooks/
 #   audit_silent_fallbacks.py  --baseline      = storage/qa/silent_fallback_baseline.json
+#   audit_test_imports.py      needs           = src/volpred/, tests/, scripts/tests/
 # A full-tree extract is not viable (3.2 GB / 44 s, mostly storage/ + experiments/);
 # this subset is ~7 MB / 0.5 s. If a root ever goes missing from the extract the
 # audits exit 2 and this hook BLOCKS loudly instead of quietly scanning nothing.
@@ -176,6 +177,39 @@ for sha in $SHAS; do
     if [ "$RC" -ne 0 ]; then
       printf '%s\n' "$OUT"
       block "the silent-fallback audit exited $RC with new=0 for $short — gate malfunction, not a clean tree."
+      exit 1
+    fi
+  fi
+
+  # --- Gate 3: test-import audit (2026-07-14) --------------------------------
+  # A test that imports a name the pushed source does not define kills pytest at
+  # COLLECTION: the suite goes red before one test runs. 0fef6fa3b reached main
+  # that way (tests/test_arc_dedup_calibration.py without the arc_dedup symbols
+  # it imports) and CI stayed red until the source commit followed.
+  # `pytest --collect-only` cannot stand in here — it needs config/ + storage/ +
+  # installed deps, which this source-only extract deliberately does not have.
+  TI="$tree/scripts/audit_test_imports.py"
+  if [ -f "$TI" ]; then
+    TI_OUT="$("$PY" "$TI" --root "$tree" 2>&1)"
+    TI_RC=$?
+    if [ "$TI_RC" -eq 1 ]; then
+      printf '%s\n' "$TI_OUT" | grep '^BAD '
+      block "commit $short has tests importing names its own source does not define — CI Test Suite would go red at collection."
+      echo "[pre-push] This is the partial-commit signature: the test landed, the source change did not."
+      echo "[pre-push] Commit the source side too (the gate reads the COMMIT, not your working tree)."
+      exit 1
+    fi
+    if [ "$TI_RC" -ne 0 ]; then
+      printf '%s\n' "$TI_OUT"
+      block "the test-import audit could not run on $short (rc=$TI_RC)."
+      exit 1
+    fi
+    # Coverage canary: same reasoning as Gate 1 — a gate that resolved 0 imports
+    # is indistinguishable from a passing one.
+    TI_N="$(printf '%s\n' "$TI_OUT" | sed -n 's/.*\[audit-test-imports\] \([0-9][0-9]*\) test files checked.*/\1/p' | head -1)"
+    if [ -z "$TI_N" ] || [ "$TI_N" -eq 0 ]; then
+      printf '%s\n' "$TI_OUT"
+      block "the test-import audit checked 0 test files in $short — the gate is not actually gating."
       exit 1
     fi
   fi

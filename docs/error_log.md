@@ -2,6 +2,35 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 11:15 — 測試先上、原始碼沒跟上，main Test Suite 紅了兩班 — **FIXED**（hourly-11）
+
+**現象**：main 的 Test Suite 連續紅燈，訊息是
+`ImportError: cannot import name 'ARC_SIGNATURE_SCHEMA_VERSION' from 'volpred.publisher.arc_dedup'`。
+整套測試在**收集階段**就死了 —— 一個測試都還沒跑。
+
+**根因**：`0fef6fa3b` 把 `tests/test_arc_dedup_calibration.py` 送上 main，但它 import 的三個符號
+（`ARC_SIGNATURE_SCHEMA_VERSION` / `is_arc_near_miss` / `strip_exclusion_scopes`）當時的
+`arc_dedup.py` 一個都還沒有 —— 原始碼那半留在 worktree 裡，隔了兩個 commit（`5440ffab8`）才跟上。
+這是 partial commit 的典型簽名（auto-commit `git add -A` 掃到別人半成品的老問題，
+見 memory `feedback_autocommit_poisons_before_after`）。
+
+**為什麼沒被擋下**：pre-push 有 encoding gate 與 silent-fallback gate，但**沒有任何一關在問
+「這個 commit 自己 import 得起來嗎」**。於是壞掉的 commit 一路上 main，只有 CI 事後喊紅 ——
+偵測點在推送之後，而不是之前。
+
+**修法（收編進既有 owner，不另建一層）**：
+1. `scripts/audit_test_imports.py` —— AST 解析被推送的 tree：每個 test 的 `from volpred.* import X`，
+   都去對應原始碼確認 X 真的有定義（submodule import 與 `import *` re-export 不誤判）。
+2. pre-push 的 gate 迴圈加 **Gate 3** 呼叫它，跟 Gate 1/2 同樣的 fail-loud + coverage canary 形狀。
+   *不用* `pytest --collect-only` 當這一關：收集需要 config/ + storage/ + 已安裝的依賴，而 hook 為了
+   速度只抽 ~7 MB 的原始碼子樹（實測光是缺專案目錄就噴 121 個 collection error）。import 解析
+   只需要原始碼，所以就只檢查 import。
+3. `scripts/tests/test_audit_test_imports.py` 8 cases —— 第一個 case 就是 0fef6fa3b 的形狀，
+   哪天這一關失效，這個測試會先叫。
+
+**驗證**：對 `0fef6fa3b` 的 tree 跑 audit → 精準抓出那 3 個缺的符號；對修好的 HEAD → 256 個 test 檔、
+444 個 volpred import、0 bad。
+
 ## 2026-07-14 10:15 — live_freshness 拿日曆天當交易日曆，同時誤報與漏報 — **FIXED**（hourly-10）
 
 **觸發**：老闆回信「立刻從底層邏輯流程去修復 不要只是表面修補有這麼難嗎？」——
