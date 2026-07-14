@@ -196,24 +196,28 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
     "feature_stages": [
         {
             "id": "state_har_return",
+            "role": "predictor_feature",
             "outputs": ["har_d", "har_w", "har_m", "ret", "abs_ret"],
             "memory": "finite_lag",
             "max_observations": 22,
         },
         {
             "id": "own_flow_z",
+            "role": "predictor_feature",
             "outputs": ["abs_z", "z_neg"],
             "memory": "finite_lag",
             "max_observations": 21,
         },
         {
             "id": "btc_flow_z",
+            "role": "predictor_feature",
             "outputs": ["abs_z_btc"],
             "memory": "finite_lag",
             "max_observations": 21,
         },
         {
             "id": "paired_log_variance_fit",
+            "role": "paired_final_estimator",
             "outputs": ["forecast_base", "forecast_aug"],
             "memory": "fixed_rolling",
             "max_observations": 250,
