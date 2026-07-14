@@ -1,4 +1,4 @@
-"""K1709 — Spot BTC/ETH ETF net flow shocks and next-day realized volatility.
+"""K1709-rev — Spot BTC/ETH ETF net flow shocks and next-day realized volatility.
 
 Research question
 -----------------
@@ -12,6 +12,36 @@ This is NOT the "ETF-ization changed the trading clock / session structure"
 line of work. The treatment here is the *flow* itself (dollar creations minus
 redemptions), not the calendar/microstructure of ETF trading hours.
 
+Inference design (this is what v1 got wrong)
+--------------------------------------------
+`HAR+ctrl` and `HAR+ctrl+flow` are STRICTLY NESTED. Under the nested null the
+augmented method's extra estimated coefficients inject pure forecast noise, so
+an ordinary loss-difference statistic does not have its usual equal-accuracy
+interpretation. v1 pushed an expanding-window QLIKE loss through a raw
+Diebold-Mariano statistic and then bolted on a Clark-West helper that actually
+scores *variance-level squared error* -- three different estimands fused into a
+single NULL gate. See `codex_review_20260714.md` and the K1701 lesson in
+`docs/error_log.md` (2026-07-13 05:47).
+
+  nested-dm: diagnostic-only  -- every raw Diebold-Mariano number in this file is
+  descriptive and is tagged `feeds_gate=False`. None of them reaches a verdict.
+
+What the claim actually rests on:
+  * Giacomini-White (2006) equal-unconditional-predictive-ability test on Patton
+    QLIKE, computed from a PAIRED FIXED ROLLING WINDOW. GW keeps estimation
+    uncertainty in the limiting experiment, which is exactly what makes it legal
+    for nested *methods* where the ordinary loss-difference statistic is not.
+  * A pre-specified one-sided MATERIAL-GAIN EXCLUSION test. Failing to reject
+    equal accuracy is not evidence of equality; only this test can license a
+    bounded null, and only in QLIKE-loss space.
+  * Clark-West is retained but reported strictly as evidence about a SEPARATE
+    MSPE estimand. It is never relabelled as a QLIKE general-loss test.
+
+Power is reported (>=1000 simulated OOS paths, size-calibrated) but it is a
+statement about the DESIGN, not about the effect: power cannot prove that the
+effect is smaller than the minimum detectable effect. v1 made exactly that
+inversion.
+
 Information set / lookahead
 ---------------------------
 Farside publishes day-t flows after the US close (~20:00-21:00 UTC on day t).
@@ -19,12 +49,9 @@ We therefore set the forecast origin at 00:00 UTC ending calendar day t:
     - flow_t          known (published ~21:00 UTC, i.e. before 24:00 UTC)
     - RV_t (UTC day)  known (the UTC day just closed)
     - target RV_{t+1} lies entirely in the future
-Every predictor enters through an explicit `.shift(1)` on a calendar-day frame,
-and `assert_no_lookahead()` re-verifies that the max source date of every design
-row is strictly earlier than that row's target date.
-
-A conservative T+1-publication robustness run (assume flow_t only becomes known
-at the end of day t+1) is reported separately.
+State controls and the flow carry SEPARATE lags (`state_lag`, `flow_lag`): if a
+flow only becomes usable one day later, that does not un-observe yesterday's
+realized volatility.
 
 Run:  uv run python experiments/k1709/k1709.py
 """
@@ -33,20 +60,23 @@ from __future__ import annotations
 
 import io
 import json
+import math
 import os
 import sys
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import requests
-import yfinance as yf
+import exchange_calendars as xcals  # noqa: E402
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+import requests  # noqa: E402
+import yfinance as yf  # noqa: E402
+from scipy import stats  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from volpred.stats.model_evaluation import (  # noqa: E402
@@ -75,14 +105,194 @@ TICKER = {"BTC": "BTC-USD", "ETH": "ETH-USD"}
 
 # HAR-RV lag structure (Corsi 2009), in calendar days (crypto trades 24/7).
 HAR_W, HAR_M = 5, 22
-Z_WINDOW = 20          # rolling window for the flow-shock scaling
-INITIAL_TRAIN = 250    # expanding-window OOS burn-in, in ETF-flow days
+Z_WINDOW = 20            # rolling window for the flow-shock scaling (flow days)
 HORIZONS = (1, 5)
 EPS = 1e-12
+VAR_FLOOR = 1e-12
+STATE_LAG = 1            # RV/return controls are always known one day ahead
+
+# --- Giacomini-White design constants -------------------------------------
+# GW's asymptotics require BOUNDED estimator memory: the forecasting *method*
+# must re-estimate on a fixed-length rolling window, not an expanding one. 250
+# flow days (~1 trading year) is the longest window that still leaves ETH -- the
+# shorter series -- with enough origins for the test's n>=60 requirement.
+GW_TRAIN_WINDOW = 250
+GW_MIN_LOSSES = 60
+
+# Pre-specified BEFORE looking at the exclusion results: the same "minimum
+# meaningful relative QLIKE gain" margin K1701 uses. It is a project standard,
+# not a number tuned until the null passed.
+MATERIAL_GAIN_MARGIN = 0.01
+
+# Power-simulation grid. beta is the true coefficient on |z| in the log-variance
+# equation, so a one-sd flow shock multiplies RV by exp(beta).
+POWER_REPS = 1000
+POWER_BETAS = (0.0, 0.05, 0.10, 0.15, 0.20, 0.30, 0.45, 0.60)
+POWER_GATE_Z = -1.645    # one-sided 5% GW gate, pre-specified
 
 
 # ---------------------------------------------------------------------------
-# 1. Farside flow parsing (the traps live here)
+# 0. Test registry — the single source of the multiple-testing family (C6)
+# ---------------------------------------------------------------------------
+@dataclass
+class TestRecord:
+    """One statistical test. The family is DERIVED from this list, never hand-listed.
+
+    v1 hand-enumerated "EVERY DM test" and silently missed the 8 smearing tests.
+    Every test in this study now registers itself here, and the multiple-testing
+    families are built by filtering this registry.
+
+    `feeds_gate` is the honest bit: only tests whose inference is valid for a
+    nested comparison are allowed to reach the verdict. Raw Diebold-Mariano
+    records are registered with feeds_gate=False so they show up in the audit
+    trail without contaminating the claim.
+
+    `p_one_sided` is stored RAW (unrounded). v1 fed 4-decimal rounded p-values
+    into Holm.
+    """
+
+    family: str
+    cell: str
+    asset: str
+    horizon: int
+    base: str
+    alt: str
+    inference: str
+    estimand: str
+    scheme: str
+    stat: float
+    p_one_sided: float
+    feeds_gate: bool
+    qlike_improve_pct: float | None = None
+    n: int | None = None
+
+
+REGISTRY: list[TestRecord] = []
+
+# Paired QLIKE loss streams, keyed by cell. Kept so a confidence bound can be
+# re-inverted at any alpha AFTER the family size is known (the Bonferroni level
+# depends on how many cells there turned out to be). Never serialized.
+LOSS_CACHE: dict[str, tuple[np.ndarray, np.ndarray, int]] = {}
+
+
+def register(rec: TestRecord) -> TestRecord:
+    REGISTRY.append(rec)
+    return rec
+
+
+def qlike_gain_upper_bound_from_cell(cell: str, alpha: float) -> float | None:
+    la, lb, h = LOSS_CACHE[cell]
+    return qlike_gain_upper_bound(la, lb, h, alpha=alpha)
+
+
+def _assert_unique_cell(
+    family: str,
+    p,
+    alt: str,
+    smearing: str,
+    train_window: int | None,
+    variant: str,
+) -> str:
+    """Build the cell key and refuse to let two cells share one.
+
+    The key joins the registry, the loss cache and the verdict. When it was just
+    `{asset}_h{h}_{alt}`, the same string named the primary BTC h=1 cell AND its
+    rv-proxy, flow-lag, threshold and window variants -- so the dict that carried
+    exclusion statistics into the verdict silently kept whichever cell was written
+    LAST. The primary family was being adjudicated with a robustness cell's
+    numbers. Uniqueness is now a precondition, not a hope.
+    """
+    parts = [family, f"{p.asset}_h{p.horizon}", alt, p.rv_col, f"fl{p.flow_lag}"]
+    if smearing != "own":
+        parts.append(smearing)
+    if train_window != GW_TRAIN_WINDOW:
+        parts.append(f"tw{train_window}")
+    if variant:
+        parts.append(variant)
+    cell = "|".join(parts)
+    if cell in LOSS_CACHE:
+        raise AssertionError(
+            f"duplicate cell key {cell!r}: two comparisons would collide in the "
+            "registry/loss-cache join. Pass a distinguishing `variant=`."
+        )
+    return cell
+
+
+def holm(pvals: list[float]) -> list[float]:
+    """Holm step-down. Takes RAW p-values; rounding happens only at serialization."""
+    m = len(pvals)
+    if m == 0:
+        return []
+    order = np.argsort(pvals)
+    adj = np.empty(m)
+    running = 0.0
+    for rank, idx in enumerate(order):
+        running = max(running, (m - rank) * pvals[idx])
+        adj[idx] = min(running, 1.0)
+    return [float(a) for a in adj]
+
+
+# ---------------------------------------------------------------------------
+# 1. US equity session calendar (C3)
+# ---------------------------------------------------------------------------
+def us_equity_sessions(start: pd.Timestamp, end: pd.Timestamp) -> pd.DatetimeIndex:
+    """NYSE session days over [start, end].
+
+    Farside keeps a row for US market holidays with every fund column showing a
+    dash and `Total` showing 0.0. `sum(skipna=True)` over an all-NaN row is 0.0,
+    so the parser cross-check cannot see it either: the holiday looks exactly
+    like a genuine zero-flow day. Those fake zeros then enter the 20-flow-day
+    rolling sd that scales every shock.
+
+    A "flow day" is by construction a day the ETFs could trade, i.e. an NYSE
+    session. Anything else is MISSING, not zero.
+    """
+    cal = xcals.get_calendar("XNYS")
+    sess = cal.sessions_in_range(
+        pd.Timestamp(start).normalize(), pd.Timestamp(end).normalize()
+    )
+    idx = pd.DatetimeIndex(sess)
+    if idx.tz is not None:
+        idx = idx.tz_convert("UTC").tz_localize(None)
+    return idx.normalize()
+
+
+def filter_to_sessions(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+    """Keep only NYSE session rows; report exactly what was dropped.
+
+    Split out of `fetch_flows` so it can be tested without hitting the network:
+    a data-integrity rule that only runs behind an HTTP call is a rule nobody
+    ever tests.
+    """
+    sessions = us_equity_sessions(df.index.min(), df.index.max())
+    is_session = df.index.isin(sessions)
+    dropped = df.index[~is_session]
+    detail = [
+        {
+            "date": str(d.date()),
+            "weekday": d.day_name(),
+            "farside_total_musd": float(df.loc[d, "flow"]),
+            "all_fund_columns_dash": (
+                bool(df.loc[d, "all_dash"]) if "all_dash" in df.columns else None
+            ),
+        }
+        for d in dropped
+    ]
+    diag = {
+        "n_nonsession_rows_dropped": len(detail),
+        "n_nonsession_rows_with_nonzero_total": int(
+            (df.loc[~is_session, "flow"].abs() > 1e-9).sum()
+        ),
+        "nonsession_rows_dropped": detail,
+    }
+    keep = df[is_session]
+    if "all_dash" in keep.columns:
+        keep = keep.drop(columns=["all_dash"])
+    return keep, diag
+
+
+# ---------------------------------------------------------------------------
+# 2. Farside flow parsing (the traps live here)
 # ---------------------------------------------------------------------------
 def _parse_money(x) -> float:
     """Farside cell -> float ($M).
@@ -142,6 +352,10 @@ def fetch_flows(asset: str) -> tuple[pd.DataFrame, dict]:
     # Parser self-check: Farside's own Total must equal the sum of the fund
     # columns (NaN = fund not trading = contributes nothing). A mismatch means
     # the paren/comma/dash handling above is wrong -- fail loud, do not proceed.
+    #
+    # NOTE this check is BLIND to the market-holiday trap: an all-dash row sums
+    # to 0.0 and Farside's own Total also reads 0.0, so the residual is 0. That
+    # is precisely why the session-calendar filter below is a separate layer.
     recomputed = parsed.sum(axis=1, skipna=True)
     resid = (total - recomputed).abs()
     max_resid = float(resid.max())
@@ -157,14 +371,19 @@ def fetch_flows(asset: str) -> tuple[pd.DataFrame, dict]:
     # the NET series is blind to. Keeping it lets us test whether the null is an
     # artifact of netting (Warther 1995: only flow INNOVATIONS should inform).
     gross = parsed.abs().sum(axis=1, skipna=True)
+    all_dash = parsed.isna().all(axis=1)
 
     df = pd.DataFrame(
-        {"flow": total.values, "gross": gross.values},
+        {"flow": total.values, "gross": gross.values, "all_dash": all_dash.values},
         index=pd.DatetimeIndex(raw["date"].values),
     )
     df = df.sort_index()
     df = df[~df.index.duplicated(keep="last")]
     df = df.dropna(subset=["flow"])
+
+    df, session_diag = filter_to_sessions(df)
+    dropped_detail = session_diag["nonsession_rows_dropped"]
+    n_dropped_nonzero = session_diag["n_nonsession_rows_with_nonzero_total"]
 
     diag = {
         "source_url": FARSIDE[asset],
@@ -172,6 +391,17 @@ def fetch_flows(asset: str) -> tuple[pd.DataFrame, dict]:
         "dropped_total_rows": n_total_rows,
         "dropped_seed_rows": n_seed_rows,
         "dropped_unparseable_dates": n_unparsed,
+        "session_calendar": "XNYS (exchange_calendars)",
+        "n_nonsession_rows_dropped": len(dropped_detail),
+        "n_nonsession_rows_with_nonzero_total": n_dropped_nonzero,
+        "nonsession_rows_dropped": dropped_detail,
+        "session_filter_note": (
+            "Farside emits a row for every US market holiday with all fund "
+            "columns dashed and Total = 0.0. skipna summation makes the parser "
+            "cross-check read 0.0 - 0.0 = 0, so it cannot detect them. These are "
+            "MISSING flow days, not genuine zero-flow days, and they were "
+            "polluting the 20-flow-day rolling sd used to scale every shock."
+        ),
         "n_obs": int(len(df)),
         "date_min": str(df.index.min().date()),
         "date_max": str(df.index.max().date()),
@@ -184,14 +414,14 @@ def fetch_flows(asset: str) -> tuple[pd.DataFrame, dict]:
             "median": round(float(df["flow"].median()), 3),
         },
         "share_negative": round(float((df["flow"] < 0).mean()), 4),
-        "share_exact_zero": round(float((df["flow"] == 0).mean()), 4),
+        "share_exact_zero_on_session_days": round(float((df["flow"] == 0).mean()), 4),
         "n_fund_columns": len(fund_cols),
     }
     return df, diag
 
 
 # ---------------------------------------------------------------------------
-# 2. Realized volatility proxies
+# 3. Realized volatility proxies
 # ---------------------------------------------------------------------------
 def fetch_rv(asset: str) -> tuple[pd.DataFrame, dict]:
     """Calendar-daily (UTC) RV proxies for `asset`.
@@ -268,7 +498,7 @@ def fetch_rv(asset: str) -> tuple[pd.DataFrame, dict]:
     # QLIKE has a -log(actual) term, so a near-zero "actual" blows it up. Track
     # how many observations each proxy floors: r^2 is a chi^2(1) proxy and hits
     # near-zero on quiet days, which is one reason it is a NOISY variance target
-    # and is reported only as robustness, never as the primary.
+    # and is reported only as robustness, never as the headline.
     clipped = {c: int((out[c] < EPS).sum()) for c in ("rv_gk", "rv_park", "rv_r2", "rv_hourly")}
     for c in ("rv_gk", "rv_park", "rv_r2", "rv_hourly"):
         out[c] = out[c].clip(lower=EPS)
@@ -293,15 +523,10 @@ def fetch_rv(asset: str) -> tuple[pd.DataFrame, dict]:
             if out["rv_hourly"].notna().any()
             else None
         ),
-        "ann_vol_gk_pct": round(
-            float(np.sqrt(out["rv_gk"].mean() * 365) * 100), 2
-        ),
+        "ann_vol_gk_pct": round(float(np.sqrt(out["rv_gk"].mean() * 365) * 100), 2),
         "corr_gk_vs_hourly": (
             round(
-                float(
-                    np.log(out[["rv_gk", "rv_hourly"]].dropna()).corr().iloc[0, 1]
-                ),
-                4,
+                float(np.log(out[["rv_gk", "rv_hourly"]].dropna()).corr().iloc[0, 1]), 4
             )
             if out["rv_hourly"].notna().sum() > 30
             else None
@@ -311,14 +536,22 @@ def fetch_rv(asset: str) -> tuple[pd.DataFrame, dict]:
 
 
 # ---------------------------------------------------------------------------
-# 3. Panel construction — the alignment layer
+# 4. Flow features — computed ONCE, reused by every panel
 # ---------------------------------------------------------------------------
 @dataclass
-class Panel:
-    df: pd.DataFrame           # indexed by TARGET date tau
-    rv_col: str
-    horizon: int
-    asset: str
+class FlowFeatures:
+    """Flow-derived regressors, indexed by FLOW DAY (= NYSE session).
+
+    These depend only on the flow series, never on RV, so they are computed once
+    and reused. That matters for the power simulation, which rebuilds the RV side
+    thousands of times: recomputing the rolling AR(5) each rep would dominate the
+    runtime and, worse, tempt a divergent panel-construction path.
+    """
+
+    flow: pd.Series
+    z: pd.Series
+    z_unexp: pd.Series
+    z_gross: pd.Series | None = None
 
 
 def flow_zscore(flow: pd.Series) -> pd.Series:
@@ -326,8 +559,9 @@ def flow_zscore(flow: pd.Series) -> pd.Series:
 
     `.shift(1)` on the rolling sd keeps the scaler strictly backward-looking:
     z_t = flow_t / sd(flow_{t-20..t-1}), so nothing on day t enters its own
-    denominator. The window is indexed by flow days (weekends carry no flow),
-    which is why this is computed BEFORE reindexing onto the calendar.
+    denominator. The window is indexed by flow days (weekends and US market
+    holidays carry no flow), which is why this is computed BEFORE reindexing
+    onto the 24/7 crypto calendar.
     """
     sd_prior = flow.rolling(Z_WINDOW).std().shift(1)
     return flow / sd_prior
@@ -358,35 +592,98 @@ def ar_residual(flow: pd.Series, p: int = 5) -> pd.Series:
     return pd.Series(resid, index=flow.index)
 
 
-def unexpected_flow_z(flow: pd.Series) -> pd.Series:
+def make_flow_features(flow: pd.DataFrame) -> FlowFeatures:
     """Warther (1995): only the UNEXPECTED component of flow should carry news.
 
     Flow is strongly autocorrelated, so raw net flow is largely predictable from
-    its own past. We strip that out with the rolling AR(5) above and z-score the
+    its own past. We strip that out with the rolling AR(5) and z-score the
     residual by its own strictly-prior rolling sd. If our null were merely an
     artifact of feeding the model the *predictable* part of flow, this variable
     would rescue it.
     """
-    r = ar_residual(flow, p=5)
-    return r / r.rolling(Z_WINDOW).std().shift(1)
+    # CAVEAT (Codex, rev1 review). This AR(5) refits on an EXPANDING window of flow
+    # history. The regressor is still strictly backward-looking -- day i's own value
+    # never enters its own fit, so there is no lookahead -- but the FORECASTING
+    # METHOD that uses `z_unexp` therefore does not have bounded estimator memory.
+    # GW's limiting experiment formally wants it to. The 10 primary cells do not use
+    # this column at all; only the `flow_transform/unexpected_z` robustness cell
+    # does, and its GW p-value is reported with that caveat attached rather than
+    # being quietly counted as a bounded-memory test.
+    r = ar_residual(flow["flow"], p=5)
+    return FlowFeatures(
+        flow=flow["flow"],
+        z=flow_zscore(flow["flow"]),
+        z_unexp=r / r.rolling(Z_WINDOW).std().shift(1),
+        z_gross=flow_zscore(flow["gross"]) if "gross" in flow.columns else None,
+    )
+
+
+# ---------------------------------------------------------------------------
+# 5. Panel construction — the alignment layer
+# ---------------------------------------------------------------------------
+@dataclass
+class Panel:
+    df: pd.DataFrame           # indexed by TARGET date tau
+    rv_col: str
+    horizon: int
+    asset: str
+    state_lag: int = STATE_LAG
+    flow_lag: int = 1
+
+
+STATE_COLS = ["har_d", "har_w", "har_m", "ret", "abs_ret"]
+FLOW_COLS = ["flow", "z", "z_unexp", "z_gross", "z_btc"]
+
+
+def assert_calendar_is_complete(idx: pd.DatetimeIndex, label: str) -> None:
+    """Guard the assumption every `.shift()` in this file relies on.
+
+    `.shift(k)` moves by ROW POSITION. It equals "k calendar days back" only if
+    the index is a complete, sorted, duplicate-free daily range. Codex's review
+    showed `assert_no_lookahead` alone could not prove this: it re-checks the
+    same src_date the shift itself produced. This checks the PRECONDITION, before
+    any rolling or shifting happens.
+    """
+    if not idx.is_monotonic_increasing:
+        raise AssertionError(f"[{label}] calendar index is not sorted")
+    if idx.has_duplicates:
+        dupes = idx[idx.duplicated()][:5]
+        raise AssertionError(f"[{label}] duplicate calendar dates: {list(dupes)}")
+    full = pd.date_range(idx.min(), idx.max(), freq="D")
+    if len(full) != len(idx) or not full.equals(pd.DatetimeIndex(idx)):
+        missing = full.difference(idx)[:5]
+        raise AssertionError(
+            f"[{label}] calendar has {len(full) - len(idx)} hole(s); "
+            f"`.shift()` would move by row position, not by one day. "
+            f"First missing: {list(missing)}"
+        )
 
 
 def build_panel(
     rv: pd.DataFrame,
-    flow: pd.DataFrame,
+    ff: FlowFeatures,
     rv_col: str,
     horizon: int,
     asset: str,
-    pub_lag: int = 1,
+    flow_lag: int = 1,
+    state_lag: int = STATE_LAG,
     btc_z: pd.Series | None = None,
 ) -> Panel:
     """Assemble the design matrix, indexed by the *target* date tau.
 
-    `pub_lag=1` (default) encodes the baseline timing assumption: a flow stamped
-    day t is usable from the end of day t, so it predicts day t+1.
-    `pub_lag=2` is the conservative run: the flow is only usable from the end of
-    day t+1, so it predicts day t+2.
+    C4 fix. v1 had a single `pub_lag` that shifted EVERYTHING, so the
+    conservative "flow is only published at the end of day t+1" run also pushed
+    the HAR and return controls back to t-1 -- but RV_{t+1} and ret_{t+1} are
+    obviously known by then. That handicapped the baseline and made the
+    robustness run answer a question nobody asked.
+
+    Now:
+      state_lag : RV/return controls. ALWAYS 1 -- yesterday's realized
+                  volatility is known today, whatever the flow vendor does.
+      flow_lag  : 1 (baseline: flow_t usable from the end of day t)
+                  2 (conservative: flow_t only usable from the end of day t+1)
     """
+    assert_calendar_is_complete(pd.DatetimeIndex(rv.index), f"{asset} rv")
     cal = rv.copy()
 
     # --- HAR features, computed on calendar days, as of the END of each day ---
@@ -396,38 +693,30 @@ def build_panel(
     cal["har_m"] = lr.rolling(HAR_M).mean()
     cal["abs_ret"] = cal["ret"].abs()
 
-    # --- flow shock, scaled by a STRICTLY PRIOR rolling sd -------------------
-    # The rolling window must live in ETF-FLOW-DAY space, not calendar space:
-    # a 20-calendar-day window straddles weekends, which carry no flow at all.
-    z_flowday = flow_zscore(flow["flow"])
-    cal["flow"] = flow["flow"].reindex(cal.index)   # NaN on non-ETF calendar days
-    cal["z"] = z_flowday.reindex(cal.index)
+    # --- flow shocks, reindexed from flow-day space onto the 24/7 calendar ---
+    cal["flow"] = ff.flow.reindex(cal.index)     # NaN on non-flow calendar days
+    cal["z"] = ff.z.reindex(cal.index)
+    cal["z_unexp"] = ff.z_unexp.reindex(cal.index)
+    if ff.z_gross is not None:
+        cal["z_gross"] = ff.z_gross.reindex(cal.index)
     if btc_z is not None:
         cal["z_btc"] = btc_z.reindex(cal.index)
 
-    # --- alternative flow transforms (Warther 1995 robustness) --------------
-    # A null found with ONE transform of the flow is weak: maybe the information
-    # lives in gross churn, or in the unexpected component, not in raw net flow.
-    if "gross" in flow.columns:
-        cal["z_gross"] = flow_zscore(flow["gross"]).reindex(cal.index)
-    cal["z_unexp"] = unexpected_flow_z(flow["flow"]).reindex(cal.index)
+    # --- the two visible lags ------------------------------------------------
+    state = [c for c in STATE_COLS if c in cal.columns]
+    flow_c = [c for c in FLOW_COLS if c in cal.columns]
+    day = pd.Series(cal.index, index=cal.index)
 
-    # --- the single, visible lag -------------------------------------------
-    # Everything on the RHS is shifted by `pub_lag` days. After this line, row
-    # tau contains ONLY information stamped on or before day tau - pub_lag.
-    pred_cols = ["har_d", "har_w", "har_m", "ret", "abs_ret", "flow", "z", "z_unexp"]
-    if "z_gross" in cal.columns:
-        pred_cols.append("z_gross")
-    if btc_z is not None:
-        pred_cols.append("z_btc")
-    X = cal[pred_cols].shift(pub_lag)
-    X["src_date"] = pd.Series(cal.index, index=cal.index).shift(pub_lag)
+    X = cal[state].shift(state_lag)
+    X[flow_c] = cal[flow_c].shift(flow_lag)
+    X["state_src_date"] = day.shift(state_lag)
+    X["flow_src_date"] = day.shift(flow_lag)
 
     # --- target: average RV over the next `horizon` calendar days ------------
     # tau is the FIRST day of the target window; the window is [tau, tau+h-1].
     fwd = cal[rv_col].rolling(horizon).mean().shift(-(horizon - 1))
     X["y"] = fwd
-    X["y_end_date"] = pd.Series(cal.index, index=cal.index).shift(-(horizon - 1))
+    X["y_end_date"] = day.shift(-(horizon - 1))
 
     # Derived flow-shock regressors
     X["abs_z"] = X["z"].abs()
@@ -440,45 +729,61 @@ def build_panel(
     if btc_z is not None:
         X["abs_z_btc"] = X["z_btc"].abs()
 
-    X["dow_src"] = X["src_date"].dt.dayofweek   # 4 = Friday flow day
+    X["dow_src"] = X["flow_src_date"].dt.dayofweek   # 4 = Friday flow day
     panel = X.dropna(subset=["y", "har_m", "z", "y_end_date"])
-    return Panel(df=panel, rv_col=rv_col, horizon=horizon, asset=asset)
+    return Panel(panel, rv_col, horizon, asset, state_lag=state_lag, flow_lag=flow_lag)
 
 
-def assert_no_lookahead(p: Panel, pub_lag: int = 1) -> None:
+def assert_no_lookahead(p: Panel) -> None:
     """Re-derive the timing guarantee from the data itself.
 
-    Two distinct failures are checked, because they fail in opposite directions:
-      (1) gap < pub_lag  -> LOOKAHEAD: the row sees the future.
-      (2) gap > pub_lag  -> MISALIGNMENT: a hole in the calendar means `.shift()`
-          moved by row position rather than by one day, so a "t+1" target is
-          silently a t+2 target. Not a lookahead, but the model is not answering
-          the question we asked. An inequality check (gap >= 1) would MISS this,
-          which is exactly how the 2026-07-13 Yahoo gap slipped through.
+    Checks, per Codex's review:
+      (1) state gap == state_lag exactly. `<` would be lookahead; `>` would mean
+          `.shift()` moved by row position across a calendar hole, silently
+          turning a t+1 target into a t+2 target. An inequality check would miss
+          the second, which is exactly how the 2026-07-13 Yahoo gap slipped past.
+      (2) flow gap == flow_lag exactly, verified SEPARATELY. v1 only had one
+          src_date, so it could not have caught a state/flow lag mixup.
+      (3) the target window closes exactly h-1 days after it opens -- not merely
+          "at or after". A calendar hole inside the rolling target window would
+          stretch a 5-day window across 6 calendar days and the old `>=` check
+          would have waved it through.
     """
     d = p.df
-    gap = (d.index - d["src_date"]).dt.days
-    if (gap != pub_lag).any():
-        bad = d.loc[gap != pub_lag]
+    for src, lag, name in (
+        ("state_src_date", p.state_lag, "state"),
+        ("flow_src_date", p.flow_lag, "flow"),
+    ):
+        gap = (d.index - d[src]).dt.days
+        if (gap != lag).any():
+            bad = d.loc[gap != lag]
+            raise AssertionError(
+                f"[{p.asset} h={p.horizon}] {len(bad)} rows have a {name} "
+                f"source->target gap != {lag} day(s) "
+                f"(min={gap.min()}, max={gap.max()}). First offender: "
+                f"target={bad.index[0].date()} src={bad[src].iloc[0].date()}"
+            )
+    span = (d["y_end_date"] - d.index).dt.days
+    if (span != p.horizon - 1).any():
+        bad = d.loc[span != p.horizon - 1]
         raise AssertionError(
-            f"[{p.asset} h={p.horizon}] {len(bad)} rows have a source->target gap "
-            f"!= {pub_lag} day(s) (min={gap.min()}, max={gap.max()}). "
-            f"First offender: target={bad.index[0].date()} "
-            f"src={bad['src_date'].iloc[0].date()}"
+            f"[{p.asset} h={p.horizon}] {len(bad)} target windows do not span "
+            f"exactly {p.horizon} calendar days (min={span.min()}, max={span.max()})"
         )
-    # The target window must also lie entirely at or after the target date.
-    if (d["y_end_date"] < d.index).any():
-        raise AssertionError(f"[{p.asset}] target window ends before it starts")
 
 
 # ---------------------------------------------------------------------------
-# 4. Estimation
+# 6. Estimation
 # ---------------------------------------------------------------------------
-SPECS = {
-    "HAR":            ["har_d", "har_w", "har_m"],
-    "HAR+ctrl":       ["har_d", "har_w", "har_m", "ret", "abs_ret"],
-    "H1_absflow":     ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"],
-    "H2_asym":        ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z", "z_neg"],
+SPECS: dict[str, list[str]] = {
+    "HAR":        ["har_d", "har_w", "har_m"],
+    "HAR+ctrl":   ["har_d", "har_w", "har_m", "ret", "abs_ret"],
+    "H1_absflow": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"],
+    "H2_asym":    ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z", "z_neg"],
+    "H4_own":     ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"],
+    "H4_plus_btc": [
+        "har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z", "abs_z_btc",
+    ],
 }
 
 
@@ -490,7 +795,6 @@ def _hac_se(X: np.ndarray, y: np.ndarray, beta: np.ndarray, lag: int) -> np.ndar
     """Newey-West standard errors (needed: overlapping targets when h>1)."""
     Xc = np.column_stack([np.ones(len(X)), X])
     u = y - Xc @ beta
-    n, k = Xc.shape
     XtX_inv = np.linalg.pinv(Xc.T @ Xc)
     S = (Xc * u[:, None]).T @ (Xc * u[:, None])
     for L in range(1, lag + 1):
@@ -501,13 +805,22 @@ def _hac_se(X: np.ndarray, y: np.ndarray, beta: np.ndarray, lag: int) -> np.ndar
     return np.sqrt(np.maximum(np.diag(V), 0))
 
 
+def canonical_bandwidth(h: int, n: int) -> int:
+    """The repo's canonical HAC bandwidth (see .claude/rules/experiments.md).
+
+    `h-1` alone degenerates to ZERO at h=1, i.e. no HAC at all, which is the
+    K1655 trap. Every long-run variance in this file uses max(h-1, this).
+    """
+    return max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))
+
+
 def in_sample(p: Panel, spec: str) -> dict:
     cols = SPECS[spec]
     d = p.df.dropna(subset=cols)
     X = d[cols].to_numpy(float)
     y = np.log(d["y"].to_numpy(float))
     beta = _ols(X, y)
-    lag = max(p.horizon - 1, int(np.ceil(p.horizon ** (1 / 3) * len(d) ** (1 / 3))))
+    lag = max(p.horizon - 1, canonical_bandwidth(p.horizon, len(d)))
     se = _hac_se(X, y, beta, lag)
     names = ["const"] + cols
     yhat = np.column_stack([np.ones(len(X)), X]) @ beta
@@ -524,269 +837,847 @@ def in_sample(p: Panel, spec: str) -> dict:
     }
 
 
-def oos(
+# ---------------------------------------------------------------------------
+# 7. Paired fixed-window OOS — the estimator GW requires (C1)
+# ---------------------------------------------------------------------------
+@dataclass
+class PairedOOS:
+    actual: np.ndarray
+    pred_base: np.ndarray
+    pred_aug: np.ndarray
+    origins: pd.DatetimeIndex
+    audit: dict = field(default_factory=dict)
+
+
+def paired_oos(
     p: Panel,
-    spec: str,
-    initial_train: int = INITIAL_TRAIN,
+    base: str,
+    alt: str,
+    train_window: int | None = GW_TRAIN_WINDOW,
     smearing: str = "own",
-) -> tuple[np.ndarray, np.ndarray, pd.DatetimeIndex]:
-    """Expanding-window OOS forecasts of the VARIANCE level.
+) -> PairedOOS:
+    """Both models, one estimation window, identical training dates.
 
-    Training rows must satisfy `y_end_date < forecast_origin` (rule
-    .claude/rules/experiments.md L20): with overlapping h-day targets, the naive
-    "all rows before i" training set would let the model see realized returns
-    from the forecast day itself.
+    `train_window=None` reproduces v1's EXPANDING window. It is retained for one
+    purpose only: to show, in the results file, what the design change did to the
+    statistic. Expanding-window losses never feed a verdict here -- see
+    `giacomini_white` for why the scheme is the whole ballgame.
 
-    The log-model is mapped back to a variance forecast with the lognormal
-    smearing term exp(mu + s^2/2), using the TRAINING residual variance.
+    Why fixed and not expanding (this is the whole point of the C1 fix):
+    Giacomini-White (2006) tests equal predictive ability of FORECASTING METHODS
+    -- estimation error included -- and its asymptotics need the estimator to
+    have bounded memory. An expanding window does not. v1 ran an expanding
+    window and then applied a test whose null assumed otherwise.
 
-    `smearing` controls that term, because it is a live threat to the null: the
-    richer (flow) model has more parameters -> lower training residual variance
-    -> a smaller multiplier -> systematically lower variance forecasts. QLIKE is
-    asymmetric, so in principle this could PENALISE the richer model and
-    manufacture the very null we report.
-      "own"    -- each spec uses its own s^2 (primary)
+    Both specs are fit on the AUGMENTED model's complete-case mask, so they see
+    the exact same rows, the exact same targets, and the exact same embargo. That
+    common sample is part of the nested comparison, not a cosmetic detail.
+
+    Embargo: with overlapping h-day targets, "every row before i" would let the
+    model train on a label window that overlaps the forecast day. A training row
+    is eligible at origin i only once its whole label window has closed:
+    `y_end_date < origin_i`.
+
+    Smearing (log -> variance level). The augmented spec has more parameters ->
+    lower training residual variance -> a smaller exp(s^2/2) multiplier -> lower
+    variance forecasts. QLIKE is asymmetric, so this channel could in principle
+    MANUFACTURE the null we are reporting.
+      "own"    -- each spec uses its own s^2  (primary)
       "none"   -- no smearing at all, forecast = exp(mu)
-      "shared" -- both specs use the BASELINE's s^2, neutralising the effect
-    `smearing_robustness` in the results JSON shows the verdict is identical
-    under all three, so the null is not an artifact of this transform.
+      "shared" -- both specs use the BASELINE's s^2, neutralising the channel
+    The dof correction (N - k) is what makes E[s^2] spec-invariant under the
+    null: with RSS/N a richer spec gets a mechanically smaller s^2 even when its
+    extra regressor is pure noise.
     """
-    cols = SPECS[spec]
+    if not set(SPECS[base]) < set(SPECS[alt]):
+        raise ValueError(
+            f"GW requires strict nesting: {base} must be a proper subset of {alt}"
+        )
+    if smearing not in {"own", "none", "shared"}:
+        raise ValueError(f"unknown smearing mode: {smearing}")
+
+    burn_in = GW_TRAIN_WINDOW if train_window is None else train_window
+    cols = list(dict.fromkeys([*SPECS[alt], "y", "y_end_date"]))
     d = p.df.dropna(subset=cols)
-    X = d[cols].to_numpy(float)
-    y = np.log(d["y"].to_numpy(float))
-    origins = d.index                       # forecast origin = target date tau
-    y_end = d["y_end_date"]
+    if len(d) < burn_in + GW_MIN_LOSSES:
+        return PairedOOS(np.array([]), np.array([]), np.array([]), pd.DatetimeIndex([]))
 
-    preds, acts, dates, s2s = [], [], [], []
-    for i in range(initial_train, len(d)):
-        train = np.where(y_end.to_numpy() < origins[i])[0]
-        train = train[train < i]
-        if len(train) < 60:
-            continue
-        beta = _ols(X[train], y[train])
-        Xtr = np.column_stack([np.ones(len(train)), X[train]])
-        # dof-corrected residual variance. With s2 = RSS/N, a richer spec gets a
-        # mechanically SMALLER s2 (by ~sigma^2/N) even when its extra regressor is
-        # pure noise, which tilts its smearing term and hence its forecasts. The
-        # (N - k - 1) divisor makes E[s2] spec-invariant under the null.
-        dof = max(len(train) - Xtr.shape[1], 1)
-        s2 = float(np.sum((y[train] - Xtr @ beta) ** 2) / dof)
-        mu = float(np.r_[1.0, X[i]] @ beta)
+    Xb = np.column_stack([np.ones(len(d)), d[SPECS[base]].to_numpy(float)])
+    Xa = np.column_stack([np.ones(len(d)), d[SPECS[alt]].to_numpy(float)])
+    yraw = d["y"].to_numpy(float)
+    yfit = np.log(np.clip(yraw, VAR_FLOOR, None))
+    origins = d.index
+    y_end = d["y_end_date"].to_numpy()
+
+    if not pd.Series(y_end).is_monotonic_increasing:
+        raise AssertionError(f"[{p.asset}] y_end_date is not monotonic; searchsorted invalid")
+
+    n_clip = 0
+
+    def fit(x_all, start, end, i, s2_override=None):
+        nonlocal n_clip
+        xtr, ytr = x_all[start:end], yfit[start:end]
+        # Normal equations, not SVD. The power simulation re-runs this loop
+        # ~16k times, and an SVD per origin makes that a half-hour job. There is
+        # exactly ONE estimation path in this file -- the simulation must not be
+        # allowed to quietly use a different estimator than the headline result.
+        # `test_normal_equations_match_lstsq` pins this to the SVD solution.
+        gram = xtr.T @ xtr
+        try:
+            beta = np.linalg.solve(gram, xtr.T @ ytr)
+        except np.linalg.LinAlgError:
+            beta = np.linalg.lstsq(xtr, ytr, rcond=None)[0]
+        resid = ytr - xtr @ beta
+        # dof-corrected: E[s2] is then spec-invariant under the null
+        s2 = float(resid @ resid / max(len(ytr) - x_all.shape[1], 1))
+        mu = float(x_all[i] @ beta)
+        # Trap runaway extrapolation BEFORE exponentiating: a regressor far
+        # outside its training range can otherwise produce an astronomical
+        # variance forecast and let two origins dominate the whole QLIKE mean.
+        # Bounds come from training values only and are applied identically to
+        # both specs, so neither is advantaged. `n_clipped` reports how often it
+        # binds -- if that is 0, this is a pure no-op safety net.
+        lo, hi = float(ytr.min()) - 1.0, float(ytr.max()) + 1.0
+        if not (lo <= mu <= hi):
+            n_clip += 1
+            mu = min(max(mu, lo), hi)
+        use = s2 if s2_override is None else s2_override
         if smearing == "none":
-            f = np.exp(mu)
-        else:                                   # "own" (primary) or "shared"
-            f = np.exp(mu + 0.5 * s2)
-        preds.append(f)                         # lognormal smearing -> variance
-        acts.append(float(d["y"].iloc[i]))
-        dates.append(origins[i])
-        s2s.append(s2)
-    return np.array(acts), np.array(preds), pd.DatetimeIndex(dates)
+            return math.exp(mu), s2
+        return max(math.exp(mu + 0.5 * use), VAR_FLOOR), s2
 
-
-def oos_shared_smearing(
-    p: Panel, base: str, alt: str, initial_train: int = INITIAL_TRAIN
-) -> dict:
-    """Re-score base vs alt forcing BOTH to use the BASELINE's smearing term.
-
-    Neutralises the "richer model gets a smaller multiplier" channel entirely.
-    """
-    cols_b, cols_a = SPECS[base], SPECS[alt]
-    d = p.df.dropna(subset=list(set(cols_b) | set(cols_a)))
-    y = np.log(d["y"].to_numpy(float))
-    origins, y_end = d.index, d["y_end_date"]
-    Xb, Xa = d[cols_b].to_numpy(float), d[cols_a].to_numpy(float)
-
-    act, fb, fa = [], [], []
-    for i in range(initial_train, len(d)):
-        train = np.where(y_end.to_numpy() < origins[i])[0]
-        train = train[train < i]
-        if len(train) < 60:
+    act, fb, fa, dates, sizes, gaps = [], [], [], [], [], []
+    for i in range(burn_in, len(d)):
+        # Forward-label embargo: a training row is usable only once its whole
+        # label window has closed strictly before this origin.
+        end = int(np.searchsorted(y_end, origins[i].to_datetime64(), side="left"))
+        end = min(end, i)
+        start = 0 if train_window is None else end - train_window
+        if start < 0 or end - start < GW_MIN_LOSSES:
             continue
-        bb = _ols(Xb[train], y[train])
-        ba = _ols(Xa[train], y[train])
-        Xtrb = np.column_stack([np.ones(len(train)), Xb[train]])
-        s2 = float(np.mean((y[train] - Xtrb @ bb) ** 2))   # BASELINE's s2, both
-        fb.append(np.exp(float(np.r_[1.0, Xb[i]] @ bb) + 0.5 * s2))
-        fa.append(np.exp(float(np.r_[1.0, Xa[i]] @ ba) + 0.5 * s2))
-        act.append(float(d["y"].iloc[i]))
-    act, fb, fa = np.array(act), np.array(fb), np.array(fa)
-    lb, la = qlike_pointwise(act, fb), qlike_pointwise(act, fa)
-    t, pv = dm_test(la, lb, h=p.horizon)
+        pb, s2b = fit(Xb, start, end, i)
+        # "shared" forces the BASELINE's s^2 onto the augmented spec too
+        pa, _ = fit(Xa, start, end, i, s2_override=s2b if smearing == "shared" else None)
+        act.append(float(yraw[i]))
+        fb.append(pb)
+        fa.append(pa)
+        dates.append(origins[i])
+        sizes.append(end - start)
+        gaps.append((origins[i] - pd.Timestamp(y_end[end - 1])).days)
+
+    audit = {
+        "scheme": "expanding" if train_window is None else "fixed_rolling",
+        "train_window": None if train_window is None else int(train_window),
+        "n_origins": len(act),
+        "fixed_window_held": bool(
+            train_window is not None
+            and sizes
+            and min(sizes) == max(sizes) == train_window
+        ),
+        "same_training_dates_for_both_models": True,
+        "min_origin_minus_last_train_label_end_days": int(min(gaps)) if gaps else None,
+        "embargo_ok": bool(gaps and min(gaps) >= 1),
+        "smearing": smearing,
+        "n_forecasts_clipped_to_training_range": n_clip,
+    }
+    return PairedOOS(
+        np.array(act), np.array(fb), np.array(fa), pd.DatetimeIndex(dates), audit
+    )
+
+
+# ---------------------------------------------------------------------------
+# 8. Inference
+# ---------------------------------------------------------------------------
+def _bartlett_lrv(x: np.ndarray, max_lag: int) -> float:
+    x = np.asarray(x, dtype=np.float64)
+    x = x[np.isfinite(x)]
+    n = len(x)
+    if n < 10:
+        raise ValueError("long-run variance needs >=10 finite observations")
+    c = x - float(np.mean(x))
+    lrv = float(c @ c / n)
+    for lag in range(1, min(max_lag, n - 1) + 1):
+        w = 1.0 - lag / (max_lag + 1.0)
+        lrv += 2.0 * w * float(c[lag:] @ c[:-lag] / n)
+    if not np.isfinite(lrv) or lrv <= 0:
+        raise ValueError(f"non-positive long-run variance: {lrv}")
+    return lrv
+
+
+def giacomini_white(loss_aug: np.ndarray, loss_base: np.ndarray, h: int) -> dict:
+    """GW (2006) equal-unconditional-predictive-ability test under general loss.
+
+    READ THIS BEFORE CONCLUDING WE JUST RENAMED DM.
+    The arithmetic here -- mean loss difference over a Bartlett HAC standard
+    error -- is algebraically the same as a HAC Diebold-Mariano t. On the same
+    loss stream the two statistics COINCIDE, and the results file shows them
+    coinciding. That is not a bug and it is not a relabelling.
+
+    What makes this a legal test under nesting is the ESTIMATION SCHEME, not the
+    formula. GW tests equal predictive ability of forecasting METHODS -- the
+    fitted-parameter noise is part of the object being compared, not a nuisance
+    to be purged. For that limiting experiment to hold, the estimator must have
+    BOUNDED MEMORY, i.e. a fixed-length rolling window. Feed it fixed-window
+    forecasts and the statistic is asymptotically standard normal even when the
+    models are nested. Feed it EXPANDING-window forecasts -- what v1 did -- and
+    the nested null is degenerate, the statistic is biased toward the smaller
+    model, and no reference distribution rescues it.
+
+    So: same number, different scheme, different null, different validity. The
+    expanding-window value is reported alongside as a diagnostic precisely so a
+    reader can see what the scheme change did.
+
+    Moment: E[L_aug - L_base] = 0.  Negative z favours the flow model.
+    """
+    aug = np.asarray(loss_aug, float)
+    base = np.asarray(loss_base, float)
+    if aug.shape != base.shape:
+        raise ValueError("loss arrays must have identical shapes")
+    fin = np.isfinite(aug) & np.isfinite(base)
+    diff = aug[fin] - base[fin]
+    n = len(diff)
+    if n < GW_MIN_LOSSES:
+        raise ValueError(f"GW requires >={GW_MIN_LOSSES} losses; got {n}")
+    bw = max(h - 1, canonical_bandwidth(h, n))
+    lrv = _bartlett_lrv(diff, bw)
+    se = math.sqrt(lrv / n)
+    z = float(np.mean(diff)) / se
     return {
-        "asset": p.asset,
-        "horizon": p.horizon,
-        "n_oos": int(len(act)),
-        "dm_t": round(float(t), 3),
-        "dm_p": round(float(pv), 4),
-        "dm_harvey_pass": bool(abs(t) > 3.0),
-        "qlike_improvement_pct": round(
-            (float(np.mean(lb)) - float(np.mean(la))) / float(np.mean(lb)) * 100, 3
+        "test": "Giacomini-White (2006) equal unconditional predictive ability",
+        "loss": "Patton QLIKE",
+        "estimand": "E[QLIKE_aug - QLIKE_base]",
+        "forecast_scheme": "paired fixed rolling estimation window",
+        "null": "equal expected QLIKE loss for the two forecasting METHODS",
+        "direction": "negative z favours the flow model",
+        "n": int(n),
+        "mean_loss_diff_aug_minus_base": float(np.mean(diff)),
+        "z_stat": float(z),
+        "p_value_two_sided": float(2.0 * stats.norm.sf(abs(z))),
+        "p_value_one_sided_flow_better": float(stats.norm.cdf(z)),
+        "hac_lag_used": int(bw),
+        "standard_error": float(se),
+    }
+
+
+def material_gain_exclusion(
+    loss_aug: np.ndarray,
+    loss_base: np.ndarray,
+    h: int,
+    margin: float = MATERIAL_GAIN_MARGIN,
+) -> dict:
+    """Can a pre-specified relative QLIKE gain be RULED OUT? (C2b)
+
+    This is the only test in the file that can license a bounded null, and it is
+    the one v1 never ran.
+
+    H0: the flow method improves expected QLIKE by at least `margin`,
+        E[L_aug] <= (1 - margin) * E[L_base].
+    Rejecting H0 (positive z, small p) means a gain that large is NOT there.
+
+    Note what this does and does not buy. It reverses the burden of proof, so a
+    rejection is a genuine upper bound on the effect -- but the bound lives in
+    QLIKE-LOSS space ("no >=1% relative QLIKE improvement"), NOT in RV-uplift
+    space. v1's "we can rule out a >=16% RV rise per 1-sd shock" came from
+    reading a power curve backwards, which is not an inference at all. Failing to
+    reject equal accuracy never proves equality; only this does, and only for
+    what it actually measures.
+    """
+    if not 0 < margin < 1:
+        raise ValueError("margin must lie strictly in (0, 1)")
+    aug = np.asarray(loss_aug, float)
+    base = np.asarray(loss_base, float)
+    fin = np.isfinite(aug) & np.isfinite(base)
+    moment = aug[fin] - (1.0 - margin) * base[fin]
+    n = len(moment)
+    if n < GW_MIN_LOSSES:
+        raise ValueError(f"exclusion test requires >={GW_MIN_LOSSES} losses; got {n}")
+    bw = max(h - 1, canonical_bandwidth(h, n))
+    lrv = _bartlett_lrv(moment, bw)
+    se = math.sqrt(lrv / n)
+    z = float(np.mean(moment)) / se
+    return {
+        "test": "one-sided material-gain exclusion (fixed-window GW moment)",
+        "margin_relative_qlike": float(margin),
+        "null": f"flow method improves expected QLIKE by at least {100 * margin:.1f}%",
+        "alternative": f"any QLIKE gain is smaller than {100 * margin:.1f}%",
+        "n": int(n),
+        "mean_margin_moment": float(np.mean(moment)),
+        "z_stat": float(z),
+        "p_value_one_sided": float(stats.norm.sf(z)),
+        "hac_lag_used": int(bw),
+        "scope": (
+            "rules out a material QLIKE gain; does NOT prove exact equality, and "
+            "says nothing about RV-uplift magnitude"
         ),
     }
 
 
-def compare(p: Panel, base: str, alt: str, initial_train: int = INITIAL_TRAIN) -> dict:
-    a0, f0, dt0 = oos(p, base, initial_train)
-    a1, f1, dt1 = oos(p, alt, initial_train)
-    if len(dt0) == 0 or len(dt1) == 0:
-        raise ValueError(f"[{p.asset} h={p.horizon}] empty OOS set for {base}/{alt}")
-    # Compare the two models only on the origins BOTH of them forecast.
-    common = dt0.intersection(dt1).sort_values()
-    m0 = np.asarray(dt0.get_indexer(common), dtype=int)
-    m1 = np.asarray(dt1.get_indexer(common), dtype=int)
-    act, fb, fa = a0[m0], f0[m0], f1[m1]
+def qlike_gain_upper_bound(
+    loss_aug: np.ndarray, loss_base: np.ndarray, h: int, alpha: float = 0.05
+) -> float | None:
+    """One-sided (1-alpha) UPPER CONFIDENCE BOUND on the relative QLIKE gain, in %.
 
-    lb, la = qlike_pointwise(act, fb), qlike_pointwise(act, fa)
-    t, pv = dm_test(la, lb, h=p.horizon)     # negative t => alt (flow) is better
-    cw = clark_west_test(act, fb, fa, h=p.horizon)
+    This inverts `material_gain_exclusion`: it returns the smallest margin whose
+    one-sided test rejects. Gains larger than the bound are excluded by the data;
+    gains smaller than it are not.
 
+    Why this and not the power curve. Both answer "how big an effect could this
+    design have seen?", but only ONE of them is an inference about the effect. A
+    power curve is a property of the design under an assumed truth; a confidence
+    bound is a statement about the truth given the data. v1 reached for the power
+    curve and read it backwards. This is the object it should have reported.
+
+    Returns None when even a 90% gain cannot be excluded, i.e. the design says
+    essentially nothing about the effect size.
+    """
+    z_crit = float(stats.norm.ppf(1 - alpha))
+
+    def z_of(m: float) -> float:
+        return material_gain_exclusion(loss_aug, loss_base, h, margin=m)["z_stat"]
+
+    lo, hi = 1e-4, 0.90
+    if z_of(hi) < z_crit:
+        return None
+    if z_of(lo) >= z_crit:
+        return lo * 100.0
+    for _ in range(50):                       # z(m) is increasing in m
+        mid = 0.5 * (lo + hi)
+        if z_of(mid) >= z_crit:
+            hi = mid
+        else:
+            lo = mid
+    return hi * 100.0
+
+
+def block_bootstrap_ci(
+    loss_aug: np.ndarray, loss_base: np.ndarray, h: int, seed: int, reps: int = 1999
+) -> dict:
+    """Paired circular moving-block CI for the relative QLIKE improvement."""
+    aug = np.asarray(loss_aug, float)
+    base = np.asarray(loss_base, float)
+    fin = np.isfinite(aug) & np.isfinite(base)
+    aug, base = aug[fin], base[fin]
+    n = len(aug)
+    if n < GW_MIN_LOSSES:
+        raise ValueError(f"bootstrap requires >={GW_MIN_LOSSES} losses; got {n}")
+    bl = max(int(h), int(math.ceil(n ** (1 / 3))))
+    nb = int(math.ceil(n / bl))
+    rng = np.random.default_rng(seed)
+    off = np.arange(bl)
+    draws = np.empty(reps)
+    for b in range(reps):
+        starts = rng.integers(0, n, size=nb)
+        idx = ((starts[:, None] + off[None, :]) % n).ravel()[:n]
+        bm = float(np.mean(base[idx]))
+        draws[b] = 100.0 * (bm - float(np.mean(aug[idx]))) / bm
+    pb = float(np.mean(base))
+    return {
+        "method": "paired circular moving-block bootstrap of fixed-window QLIKE losses",
+        "seed": int(seed),
+        "reps": int(reps),
+        "block_length": int(bl),
+        "point_improvement_pct": 100.0 * (pb - float(np.mean(aug))) / pb,
+        "ci95_improvement_pct": [float(x) for x in np.quantile(draws, [0.025, 0.975])],
+        "scope": "uncertainty diagnostic; forecasts are not re-estimated inside the bootstrap",
+    }
+
+
+def raw_dm_diagnostic(loss_aug: np.ndarray, loss_base: np.ndarray, h: int) -> dict:
+    """Ordinary Diebold-Mariano on the QLIKE loss difference. DESCRIPTIVE ONLY.
+
+    Kept because it is what the literature reports and because its gap from the
+    Giacomini-White statistic is itself informative -- but under the nested null
+    it is biased toward the smaller model, so it is tagged `feeds_gate=False`
+    everywhere and never reaches a verdict.
+
+    C5 -- naming. `volpred.stats.model_evaluation.dm_test` is a HAC-DM statistic
+    combined with the Harvey-Liu-Zhu (2016) |t| > 3 heuristic threshold. It does
+    NOT apply the Harvey-Leybourne-Newbold (1997) finite-sample correction
+    factor, so v1 was wrong to call it "HLN modified DM". We report it under its
+    true name. The one-sided p-value is taken from the SAME Student-t(n-1)
+    distribution the helper uses for its two-sided p -- v1 switched to a normal
+    CDF here, so its two p-values disagreed with each other.
+    """
+    t, p_two = dm_test(loss_aug, loss_base, h=h)
+    n = int(np.isfinite(np.asarray(loss_aug) - np.asarray(loss_base)).sum())
+    return {
+        "statistic": "HAC-DM (canonical bandwidth) + Harvey-Liu-Zhu |t|>3 heuristic",
+        "not_hln": (
+            "This is NOT Harvey-Leybourne-Newbold modified DM: no finite-sample "
+            "correction factor is applied. v1 mislabelled it."
+        ),
+        "role": "diagnostic-only; biased toward the smaller model under nesting",
+        "feeds_gate": False,
+        "t_stat": float(t),
+        "p_two_sided_student_t": float(p_two),
+        "p_one_sided_flow_better_student_t": float(stats.t.cdf(t, df=max(n - 1, 1))),
+        "df": n - 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# 9. The cell — one nested comparison, fully inferred
+# ---------------------------------------------------------------------------
+def evaluate_cell(
+    p: Panel,
+    base: str,
+    alt: str,
+    family: str,
+    train_window: int = GW_TRAIN_WINDOW,
+    smearing: str = "own",
+    variant: str = "",
+    register_gate: bool = True,
+) -> dict | None:
+    """Run one nested comparison end to end and register its tests.
+
+    `variant` disambiguates cells that share an (asset, horizon, spec) signature
+    but not a panel -- the four shock-threshold dummies, for instance. The cell
+    key MUST be globally unique: it is the join key between the registry, the
+    loss cache and the verdict, and a silent collision would let a robustness
+    cell's exclusion statistics be wired into the primary family. That is not
+    hypothetical -- it happened, and it is why `_assert_unique_cell` below now
+    fails loudly instead of letting the last writer win.
+    """
+    po = paired_oos(p, base, alt, train_window, smearing)
+    if len(po.actual) < GW_MIN_LOSSES:
+        return None
+
+    lb = qlike_pointwise(po.actual, po.pred_base)
+    la = qlike_pointwise(po.actual, po.pred_aug)
+    h = p.horizon
     qb, qa = float(np.mean(lb)), float(np.mean(la))
-    d = la - lb
-    acf1 = float(pd.Series(d).autocorr(1)) if len(d) > 5 else 0.0
+    improve = (qb - qa) / qb * 100.0
 
-    lag_sens = {}
-    for hh in (1, 5, 10):
-        tt, _ = dm_test(la, lb, h=hh)
-        lag_sens[f"h={hh}"] = round(float(tt), 3)
+    gw = giacomini_white(la, lb, h)
+    excl = material_gain_exclusion(la, lb, h)
+    excl["qlike_gain_upper_bound_95pct"] = qlike_gain_upper_bound(la, lb, h, alpha=0.05)
+    excl["upper_bound_note"] = (
+        "One-sided 95% upper confidence bound on the RELATIVE QLIKE gain, obtained "
+        "by inverting the exclusion test. Gains above it are excluded by the data; "
+        "gains below it are not. None = even a 90% gain cannot be excluded."
+    )
+    boot = block_bootstrap_ci(la, lb, h, seed=SEED + h)
+    dm = raw_dm_diagnostic(la, lb, h)
 
-    # Direction matters. `abs(t) > 3` is NOT the right gate: a flow model that is
-    # significantly WORSE than the baseline also has |t| > 3, and counting it as a
-    # "pass" would report that flow works when the data says the opposite. Every
-    # downstream count is therefore gated on the flow-favouring direction (t < 0).
-    cw_t = float(cw["t_stat"])
+    # v1's design, re-run purely so the results file can show what changed. An
+    # expanding window breaks GW's bounded-memory condition, so a HAC t-test on
+    # these losses is NOT a valid nested test -- whatever it happens to say.
+    exp_po = paired_oos(p, base, alt, train_window=None, smearing=smearing)
+    expanding = None
+    if len(exp_po.actual) >= GW_MIN_LOSSES:
+        exp_lb = qlike_pointwise(exp_po.actual, exp_po.pred_base)
+        exp_la = qlike_pointwise(exp_po.actual, exp_po.pred_aug)
+        exp_dm = raw_dm_diagnostic(exp_la, exp_lb, h)
+        expanding = {
+            "scheme": "expanding window (v1's design)",
+            "valid_for_nested_inference": False,
+            "why_invalid": (
+                "GW's limiting experiment needs bounded estimator memory. An "
+                "expanding window has none, so the nested null is degenerate and "
+                "the statistic is biased toward the smaller model."
+            ),
+            "feeds_gate": False,
+            "n_oos": int(len(exp_po.actual)),
+            "qlike_improvement_pct": float(
+                (np.mean(exp_lb) - np.mean(exp_la)) / np.mean(exp_lb) * 100.0
+            ),
+            "hac_t_stat": exp_dm["t_stat"],
+        }
+
+    # Clark-West: a DIFFERENT estimand. CW adjusts the MSPE of variance-level
+    # forecasts; it is not a QLIKE general-loss test and is not relabelled as one.
+    cw = clark_west_test(po.actual, po.pred_base, po.pred_aug, h=h)
+
+    cell = _assert_unique_cell(family, p, alt, smearing, train_window, variant)
+    LOSS_CACHE[cell] = (la, lb, h)
+    register(
+        TestRecord(
+            family=family, cell=cell, asset=p.asset, horizon=h, base=base, alt=alt,
+            inference="giacomini_white_qlike_fixed_window",
+            estimand="E[QLIKE_aug - QLIKE_base]",
+            scheme="paired fixed rolling window",
+            stat=gw["z_stat"], p_one_sided=gw["p_value_one_sided_flow_better"],
+            feeds_gate=register_gate, qlike_improve_pct=improve, n=gw["n"],
+        )
+    )
+    register(
+        TestRecord(
+            family=family, cell=cell, asset=p.asset, horizon=h, base=base, alt=alt,
+            inference="raw_dm_qlike",
+            estimand="E[QLIKE_aug - QLIKE_base] (same stream as GW; Student-t reference)",
+            scheme="paired fixed rolling window",
+            stat=dm["t_stat"], p_one_sided=dm["p_one_sided_flow_better_student_t"],
+            feeds_gate=False, qlike_improve_pct=improve, n=gw["n"],
+        )
+    )
+    register(
+        TestRecord(
+            family=family, cell=cell, asset=p.asset, horizon=h, base=base, alt=alt,
+            inference="clark_west_mspe",
+            estimand="MSPE of variance-level forecasts (NOT QLIKE)",
+            scheme="paired fixed rolling window",
+            stat=float(cw["t_stat"]),
+            p_one_sided=float(cw.get("p_value_one_sided", np.nan)),
+            feeds_gate=False, qlike_improve_pct=improve, n=gw["n"],
+        )
+    )
+
     return {
         "asset": p.asset,
-        "horizon": p.horizon,
+        "horizon": h,
         "rv_proxy": p.rv_col,
         "base": base,
         "alt": alt,
-        "n_oos": int(len(act)),
-        "oos_start": str(common.min().date()),
-        "oos_end": str(common.max().date()),
-        "qlike_base": round(qb, 6),
-        "qlike_alt": round(qa, 6),
-        "qlike_improvement_pct": round((qb - qa) / qb * 100, 3),
-        "dm_t": round(float(t), 3),
-        "dm_p": round(float(pv), 4),
-        # one-sided p for the hypothesis "flow model is BETTER" (t < 0)
-        "dm_p_one_sided_flow_better": round(float(_norm_cdf(float(t))), 4),
-        "dm_harvey_pass_flow_better": bool(t < -3.0),
-        "dm_harvey_pass_flow_worse": bool(t > 3.0),
-        "dm_direction": "alt better" if t < 0 else "base better",
-        "dm_lag_sensitivity": lag_sens,
-        "loss_diff_acf1": round(acf1, 4),
-        "clark_west_t": round(cw_t, 3),
-        "clark_west_p_one_sided": round(float(cw.get("p_value_one_sided", np.nan)), 4),
-        # CW is the properly-sized test for NESTED comparisons; it is the strongest
-        # single piece of evidence either way, so it gets a first-class flag.
-        "clark_west_supports_flow": bool(cw_t > 1.645),
+        "cell": cell,
+        "family": family,
+        "state_lag": p.state_lag,
+        "flow_lag": p.flow_lag,
+        "smearing": smearing,
+        "n_oos": int(len(po.actual)),
+        "oos_start": str(po.origins.min().date()),
+        "oos_end": str(po.origins.max().date()),
+        "qlike_base": qb,
+        "qlike_alt": qa,
+        "qlike_improvement_pct": improve,
+        "oos_audit": po.audit,
+        "primary_inference_gw_qlike": gw,
+        "material_gain_exclusion": excl,
+        "bootstrap_ci": boot,
+        "raw_dm_diagnostic": dm,
+        "expanding_window_diagnostic_v1_design": expanding,
+        "statistic_coincidence_note": (
+            "raw_dm_diagnostic.t_stat and primary_inference_gw_qlike.z_stat are the "
+            "same statistic up to a small-sample HAC scaling (the GW long-run "
+            "variance divides each lag covariance by n, the canonical DM helper by "
+            "n-lag), and they are computed on the SAME fixed-window loss stream. "
+            "They therefore agree to ~3 decimal places. That is expected, not a "
+            "relabelling: what separates a valid nested test from an invalid one "
+            "here is the ESTIMATION SCHEME and the null, not the arithmetic. The "
+            "raw statistic is nevertheless tagged feeds_gate=false so that the "
+            "verdict is carried by the object whose reference distribution is "
+            "justified. Compare with expanding_window_diagnostic_v1_design to see "
+            "what the scheme change actually did."
+        ),
+        "clark_west_mspe_separate_estimand": {
+            "t_stat": float(cw["t_stat"]),
+            "p_one_sided": float(cw.get("p_value_one_sided", np.nan)),
+            "estimand": "MSPE (variance level), not QLIKE",
+            "feeds_gate": False,
+            "note": (
+                "Clark-West corrects the MSPE of the nested comparison. It is "
+                "evidence about a different loss than the one the verdict uses, "
+                "and is reported as such."
+            ),
+        },
     }
 
 
-def _norm_cdf(x: float) -> float:
-    from scipy import stats as _st
+# ---------------------------------------------------------------------------
+# 10. Power simulation (C2a) — a statement about the DESIGN, not the effect
+# ---------------------------------------------------------------------------
+def fit_calendar_har(rv: pd.DataFrame, rv_col: str) -> dict:
+    """Fit the HAR+ctrl recursion on CALENDAR days. This is the simulation DGP.
 
-    return float(_st.norm.cdf(x))
+    Distinct from `in_sample`, which fits on PANEL rows (flow days only). The
+    simulation has to step the volatility process forward on every calendar day,
+    including the weekends when no flow prints, so it needs a calendar-day law of
+    motion.
+    """
+    lr = np.log(rv[rv_col])
+    frame = pd.DataFrame(
+        {
+            "y": lr,
+            "har_d": lr.shift(1),
+            "har_w": lr.rolling(HAR_W).mean().shift(1),
+            "har_m": lr.rolling(HAR_M).mean().shift(1),
+            "ret": rv["ret"].shift(1),
+            "abs_ret": rv["ret"].abs().shift(1),
+        }
+    ).dropna()
+    cols = ["har_d", "har_w", "har_m", "ret", "abs_ret"]
+    X = frame[cols].to_numpy(float)
+    y = frame["y"].to_numpy(float)
+    beta = _ols(X, y)
+    resid = y - np.column_stack([np.ones(len(X)), X]) @ beta
+    persistence = float(beta[1] + beta[2] + beta[3])
+    if persistence >= 1.0:
+        raise AssertionError(
+            f"calendar HAR is non-stationary (phi_d+phi_w+phi_m = {persistence:.4f}); "
+            "the simulated paths would explode"
+        )
+    return {
+        "beta": beta,
+        "resid": resid,
+        "n": int(len(frame)),
+        "persistence": persistence,
+        "resid_sd": float(np.std(resid)),
+    }
 
 
-def mde_curve(
+def _block_resample(resid: np.ndarray, n_out: int, rng, block: int) -> np.ndarray:
+    """Circular moving-block resample: keeps the innovation autocorrelation."""
+    nb = int(math.ceil(n_out / block))
+    starts = rng.integers(0, len(resid), size=nb)
+    idx = ((starts[:, None] + np.arange(block)[None, :]) % len(resid)).ravel()[:n_out]
+    return resid[idx]
+
+
+def simulate_lrv(
+    lr_seed: np.ndarray,
+    ret_lag: np.ndarray,
+    aret_lag: np.ndarray,
+    shock: np.ndarray,
+    dgp: dict,
+    beta_flow: float,
+    rng,
+    bounds: tuple[float, float],
+) -> tuple[np.ndarray, int]:
+    """One simulated calendar log-RV path carrying a KNOWN flow effect.
+
+    The effect is injected into the LAW OF MOTION, so it propagates into
+    tomorrow's HAR features exactly as a genuine effect would. That matters: the
+    HAR baseline partially absorbs a real effect through its own lags, which
+    makes the effect HARDER to detect. Injecting into the target only -- without
+    propagation -- would overstate power, which is the optimistic direction and
+    therefore the dangerous one.
+    """
+    b = dgp["beta"]
+    n = len(shock)
+    lrv = np.empty(n)
+    lrv[:HAR_M] = lr_seed[:HAR_M]
+    e = _block_resample(dgp["resid"], n, rng, block=max(2, int(math.ceil(n ** (1 / 3)))))
+    lo, hi = bounds
+    n_clip = 0
+    sw = float(lrv[HAR_M - HAR_W : HAR_M].sum())
+    sm = float(lrv[:HAR_M].sum())
+    for d in range(HAR_M, n):
+        v = (
+            b[0]
+            + b[1] * lrv[d - 1]
+            + b[2] * (sw / HAR_W)
+            + b[3] * (sm / HAR_M)
+            + b[4] * ret_lag[d]
+            + b[5] * aret_lag[d]
+            + beta_flow * shock[d]
+            + e[d]
+        )
+        if not (lo <= v <= hi):
+            n_clip += 1
+            v = min(max(v, lo), hi)
+        lrv[d] = v
+        sw += lrv[d] - lrv[d - HAR_W]
+        sm += lrv[d] - lrv[d - HAR_M]
+    return lrv, n_clip
+
+
+def power_simulation(
     rv: pd.DataFrame,
-    flow: pd.DataFrame,
+    ff: FlowFeatures,
     asset: str,
     horizon: int = 1,
-    betas: tuple[float, ...] = (0.02, 0.05, 0.10, 0.15, 0.20, 0.30, 0.40, 0.60, 0.80),
+    reps: int = POWER_REPS,
+    betas: tuple[float, ...] = POWER_BETAS,
 ) -> dict:
-    """Minimum detectable effect, calibrated on the REAL panel.
+    """Simulated power of the pre-specified GW gate, with size calibration.
 
-    A null is only meaningful next to the effect size the design could have seen.
-    The power test in test_k1709.py plants a signal explaining ~70% of a
-    noise-free target -- that proves the plumbing carries a signal, it does NOT
-    establish power against a realistic effect.
+    v1's "MDE" was not a power analysis at all: it injected each beta ONCE into
+    the single realised noise path and took the first crossing. No repeated
+    sampling, no size calibration, no confidence interval -- and the resulting
+    curve was not even monotone in beta, which is a tell that it was reading
+    noise. It then INVERTED the logic and claimed the null "excludes effects
+    >= the MDE". Power cannot do that. Only the exclusion test can, and it is
+    reported separately.
 
-    Here we inject a KNOWN effect into the ACTUAL GK realized variance,
-        log RV_tau  <-  log RV_tau + beta * |z_{tau-1}|
-    (i.e. a one-sd flow shock raises RV by (exp(beta)-1) * 100%), keep the real
-    noise, the real n_oos and the real HAR dynamics, and find the smallest beta
-    that clears BOTH gates (DM t < -3 and Clark-West > 1.645).
-
-    The injection also propagates into the HAR features, exactly as a genuine
-    effect would -- we do not hand the model a cleaner target than reality.
+    What this function establishes: for an effect of size beta, how often would
+    the pre-specified gate fire? Nothing more.
     """
-    z_abs = flow_zscore(flow["flow"]).abs().reindex(rv.index)
-    shock = z_abs.shift(1).fillna(0.0)          # |z| from the PRIOR day, as in H1
+    dgp = fit_calendar_har(rv, "rv_gk")
+    idx = rv.index
+    lr_real = np.log(rv["rv_gk"])
+    lr_seed = lr_real.ffill().bfill().to_numpy()
+    missing = rv["rv_gk"].isna().to_numpy()
+
+    z_cal = ff.z.reindex(idx)
+    shock = z_cal.abs().shift(1).fillna(0.0).to_numpy()     # |z_{d-1}|, as in H1
+    ret_lag = rv["ret"].shift(1).fillna(0.0).to_numpy()
+    aret_lag = rv["ret"].abs().shift(1).fillna(0.0).to_numpy()
+
+    # Keep simulated log-variance inside a generous envelope of what the asset has
+    # actually done. Without it a draw from the tail of the innovation block can
+    # walk a persistent HAR into absurd territory and one path dominates the
+    # rejection rate. `clip_rate` reports how often it binds.
+    obs = lr_real.dropna()
+    bounds = (float(obs.min()) - 3.0, float(obs.max()) + 3.0)
+
     rows = []
     for b in betas:
-        rv_inj = rv.copy()
-        rv_inj["rv_gk"] = rv["rv_gk"] * np.exp(b * shock)
-        p = build_panel(rv_inj, flow, "rv_gk", horizon, asset, pub_lag=1)
-        assert_no_lookahead(p, pub_lag=1)
-        c = compare(p, "HAR+ctrl", "H1_absflow")
+        rng = np.random.default_rng(SEED + int(round(b * 10_000)))
+        zs, clips, fails = [], 0, 0
+        for _ in range(reps):
+            lrv, nc = simulate_lrv(
+                lr_seed, ret_lag, aret_lag, shock, dgp, b, rng, bounds
+            )
+            clips += nc
+            sim = rv[["ret"]].copy()
+            sim["rv_gk"] = np.exp(lrv)
+            sim.loc[missing, "rv_gk"] = np.nan     # preserve the real missingness
+            try:
+                p = build_panel(sim, ff, "rv_gk", horizon, asset)
+                po = paired_oos(p, "HAR+ctrl", "H1_absflow")
+                if len(po.actual) < GW_MIN_LOSSES:
+                    fails += 1
+                    continue
+                gw = giacomini_white(
+                    qlike_pointwise(po.actual, po.pred_aug),
+                    qlike_pointwise(po.actual, po.pred_base),
+                    horizon,
+                )
+                zs.append(gw["z_stat"])
+            except (ValueError, AssertionError):
+                fails += 1
+        z = np.asarray(zs)
+        n_ok = len(z)
+        rej_5 = float(np.mean(z < POWER_GATE_Z)) if n_ok else float("nan")
+        rej_h = float(np.mean(z < -3.0)) if n_ok else float("nan")
         rows.append(
             {
                 "beta": b,
-                "rv_uplift_per_1sd_shock_pct": round((np.exp(b) - 1) * 100, 2),
-                "dm_t": c["dm_t"],
-                "clark_west_t": c["clark_west_t"],
-                "qlike_improvement_pct": c["qlike_improvement_pct"],
-                "detected_dm_harvey": c["dm_harvey_pass_flow_better"],
-                "detected_cw": c["clark_west_supports_flow"],
-                "detected_both": bool(
-                    c["dm_harvey_pass_flow_better"] and c["clark_west_supports_flow"]
+                "rv_uplift_per_1sd_shock_pct": round((math.exp(b) - 1) * 100, 2),
+                "reps_completed": n_ok,
+                "reps_failed": fails,
+                "power_gw_one_sided_5pct": rej_5,
+                "power_gw_se": (
+                    float(math.sqrt(max(rej_5 * (1 - rej_5), 0) / n_ok)) if n_ok else None
                 ),
+                "power_gw_harvey_z_lt_minus3": rej_h,
+                "median_gw_z": float(np.median(z)) if n_ok else None,
+                "clip_rate_per_path": round(clips / max(n_ok, 1) / len(idx), 6),
             }
         )
-    def _first(pred) -> dict | None:
-        hits = [r for r in rows if pred(r)]
-        return hits[0] if hits else None
 
-    dm_hit = _first(lambda r: r["detected_dm_harvey"])
-    cw_hit = _first(lambda r: r["detected_cw"])
+    size = next((r for r in rows if r["beta"] == 0.0), None)
+
+    def _first_at(power: float) -> dict | None:
+        return next((r for r in rows if r["power_gw_one_sided_5pct"] >= power), None)
+
+    def _bracket(power: float) -> dict | None:
+        """The grid point where power is FIRST met, plus the one below it.
+
+        This is a bracket, not a solved threshold: the true crossing lies somewhere
+        between the two. Reporting the upper grid point as if it were the exact
+        80%-power effect would be a (smaller) cousin of v1's habit of turning a
+        coarse curve into a precise-sounding number.
+        """
+        hit = _first_at(power)
+        if hit is None:
+            return None
+        below = [r for r in rows if r["beta"] < hit["beta"]]
+        prev = below[-1] if below else None
+        return {
+            "power_first_met_at_beta": hit["beta"],
+            "power_first_met_at_rv_uplift_pct": hit["rv_uplift_per_1sd_shock_pct"],
+            "achieved_power": hit["power_gw_one_sided_5pct"],
+            "previous_grid_beta": prev["beta"] if prev else None,
+            "previous_grid_power": prev["power_gw_one_sided_5pct"] if prev else None,
+            "note": (
+                "The true crossing lies between the previous grid point and this one; "
+                "the grid is coarse and this is a bracket, not a solved threshold."
+            ),
+        }
+
+    p80, p90 = _first_at(0.80), _first_at(0.90)
     return {
         "asset": asset,
         "horizon": horizon,
-        "panel_n": len(p.df),
-        "curve": rows,
-        # Two separate MDEs, because the two gates have VERY different power.
-        "mde_dm_harvey_beta": dm_hit["beta"] if dm_hit else None,
-        "mde_dm_harvey_uplift_pct": (
-            dm_hit["rv_uplift_per_1sd_shock_pct"] if dm_hit else None
+        "design": (
+            "Semi-parametric DGP: calendar-day HAR+ctrl law of motion fitted on the "
+            "real series, innovations drawn by circular moving-block bootstrap, real "
+            "flow shocks and real returns retained, effect injected into the law of "
+            "motion so it propagates through the HAR lags."
         ),
-        "mde_clark_west_beta": cw_hit["beta"] if cw_hit else None,
-        "mde_clark_west_uplift_pct": (
-            cw_hit["rv_uplift_per_1sd_shock_pct"] if cw_hit else None
+        "reps_per_beta": reps,
+        "seed": SEED,
+        "gate": f"GW z < {POWER_GATE_Z} (one-sided 5%), pre-specified",
+        "dgp_persistence_phi_sum": round(dgp["persistence"], 4),
+        "dgp_resid_sd": round(dgp["resid_sd"], 4),
+        "false_positive_rate_at_beta_0": size["power_gw_one_sided_5pct"] if size else None,
+        "false_positive_note": (
+            "This is the rejection rate of the flow-favouring gate when the true "
+            "effect is ZERO, and it must be read carefully -- it is NOT 'size' in "
+            "the textbook sense. Under GW's method-level null with a fixed window, "
+            "an irrelevant extra regressor makes the augmented METHOD genuinely "
+            "worse: it pays an estimation cost and buys nothing, so "
+            "E[L_aug - L_base] > 0 strictly. The one-sided flow-favouring test is "
+            "therefore CONSERVATIVE at beta = 0 by construction, and a rate well "
+            "below the nominal 5% is the expected, correct behaviour -- not a bug "
+            "and not a calibration failure. What it does establish is the thing we "
+            "need: this gate does not manufacture flow signals out of noise. A rate "
+            "materially ABOVE 5% would have been the alarming result."
+        ),
+        "curve": rows,
+        "power_80pct_bracket": _bracket(0.80),
+        "power_90pct_bracket": _bracket(0.90),
+        "grid_note": (
+            "beta is evaluated on a coarse grid, so the '80% power at +X%' figures "
+            "below are the FIRST GRID POINT at which power is met, not a solved "
+            "threshold. See the bracket objects for the interval that actually "
+            "contains the crossing."
+        ),
+        "beta_at_80pct_power": p80["beta"] if p80 else None,
+        "rv_uplift_at_80pct_power_pct": (
+            p80["rv_uplift_per_1sd_shock_pct"] if p80 else None
+        ),
+        "beta_at_90pct_power": p90["beta"] if p90 else None,
+        "rv_uplift_at_90pct_power_pct": (
+            p90["rv_uplift_per_1sd_shock_pct"] if p90 else None
         ),
         "max_beta_tested": max(betas),
-        "max_uplift_tested_pct": round((np.exp(max(betas)) - 1) * 100, 2),
-        "interpretation": (
-            "The DM/Harvey |t|>3 gate turns out to be near-powerless on this "
-            "target: QLIKE loss differentials are dominated by the huge idiosyncratic "
-            "noise of daily RV, so even a large injected effect barely moves DM t. "
-            "Clark-West -- which explicitly corrects the parameter-noise penalty that "
-            "biases DM toward the smaller model -- DOES have power. The honest power "
-            "statement for this study therefore rests on the CW gate, and the null "
-            "means 'no effect as large as the CW MDE', not 'no effect'."
+        "max_uplift_tested_pct": round((math.exp(max(betas)) - 1) * 100, 2),
+        "scope_warning": (
+            "POWER IS NOT AN EXCLUSION. This says how often the gate fires against "
+            "an effect of a given size. It does NOT say the true effect is smaller "
+            "than the 80%-power point -- that inversion is exactly the error v1 "
+            "made when it claimed to 'rule out >= +16% RV per 1-sd shock'. The only "
+            "upper bound this study can defend is the material-gain exclusion test, "
+            "and it lives in QLIKE-loss space. "
+            "Also note this is PER-CELL power at the nominal 5% gate: the primary "
+            "family additionally applies a Holm correction, which is stricter, so "
+            "the family-wise design has LESS power than the curve below."
         ),
     }
 
 
-def holm(pvals: list[float]) -> list[float]:
-    m = len(pvals)
-    order = np.argsort(pvals)
-    adj = np.empty(m)
-    running = 0.0
-    for rank, idx in enumerate(order):
-        running = max(running, (m - rank) * pvals[idx])
-        adj[idx] = min(running, 1.0)
-    return [round(float(a), 4) for a in adj]
+# ---------------------------------------------------------------------------
+# 11. Main
+# ---------------------------------------------------------------------------
+def _serialize(rec: TestRecord, holm_p: float | None = None) -> dict:
+    d = {
+        "family": rec.family,
+        "cell": rec.cell,
+        "asset": rec.asset,
+        "horizon": rec.horizon,
+        "base": rec.base,
+        "alt": rec.alt,
+        "inference": rec.inference,
+        "estimand": rec.estimand,
+        "scheme": rec.scheme,
+        "stat": round(rec.stat, 4) if np.isfinite(rec.stat) else None,
+        "p_one_sided_raw": rec.p_one_sided,
+        "feeds_gate": rec.feeds_gate,
+        "qlike_improve_pct": (
+            round(rec.qlike_improve_pct, 4) if rec.qlike_improve_pct is not None else None
+        ),
+        "n": rec.n,
+    }
+    if holm_p is not None:
+        d["holm_adjusted_p"] = holm_p
+    return d
 
 
-# ---------------------------------------------------------------------------
-# 5. Main
-# ---------------------------------------------------------------------------
 def main() -> None:
     res: dict = {
         "experiment_id": "k1709",
+        "revision": "rev1 — rebuilt after the 2026-07-14 independent review FAILed v1",
         "title": "Spot BTC/ETH ETF net flow shocks and realized volatility",
         "seed": SEED,
         "orthogonality": (
@@ -796,19 +1687,63 @@ def main() -> None:
         "information_set": (
             "Forecast origin = 00:00 UTC ending calendar day t. Farside publishes "
             "day-t flows ~21:00 UTC on day t, so flow_t and the completed UTC day-t "
-            "RV are both known; target RV_{t+1..t+h} lies entirely ahead."
+            "RV are both known; target RV_{t+1..t+h} lies entirely ahead. State "
+            "controls carry state_lag=1 always; only the flow carries flow_lag."
         ),
+        "inference_design": {
+            "problem": (
+                "HAR+ctrl vs HAR+ctrl+flow is a STRICTLY NESTED comparison of "
+                "forecasting methods. Under the nested null the augmented method's "
+                "extra estimated coefficients add pure forecast noise, so an "
+                "ordinary loss-difference statistic is biased toward the smaller "
+                "model and does not have its usual equal-accuracy reading."
+            ),
+            "claim_bearing_test": (
+                "Giacomini-White (2006) equal unconditional predictive ability on "
+                "Patton QLIKE, from a PAIRED FIXED ROLLING WINDOW (both specs share "
+                "the augmented complete-case mask, the training dates, the embargo "
+                "and the window length)."
+            ),
+            "bounded_null_test": (
+                "One-sided material-gain exclusion at a pre-specified "
+                f"{100 * MATERIAL_GAIN_MARGIN:.0f}% relative-QLIKE margin. This is "
+                "the ONLY test here that can license an upper bound on the effect."
+            ),
+            "diagnostic_only": (
+                "Raw Diebold-Mariano (HAC, canonical bandwidth) and Clark-West are "
+                "reported but tagged feeds_gate=false. Clark-West scores a DIFFERENT "
+                "estimand (variance-level MSPE), so it is never relabelled as a "
+                "QLIKE general-loss test -- that relabelling is what the review "
+                "flagged as CRITICAL in v1."
+            ),
+            "power_is_not_exclusion": (
+                "Simulated power is reported for the design, but power cannot prove "
+                "the effect is smaller than the minimum detectable effect. v1 made "
+                "that inversion and claimed to rule out a >=16% RV uplift. Withdrawn."
+            ),
+        },
+        "v1_defects_fixed": {
+            "C1": "nested comparison no longer inferred with raw DM / mislabelled CW",
+            "C2": "MDE replaced by a real power simulation + a real exclusion test",
+            "C3": "US market holidays no longer counted as genuine zero-flow days",
+            "C4": "state_lag and flow_lag are now separate",
+            "C5": "HLN mislabelling corrected; one-sided p unified to Student-t",
+            "C6": "Holm uses raw p; the family is derived from a single test registry",
+            "C7": "README numbers regenerated from the results JSON",
+        },
     }
 
-    flows, fdiag, rvs, rdiag = {}, {}, {}, {}
+    flows, fdiag, rvs, rdiag, feats = {}, {}, {}, {}, {}
     for a in ("BTC", "ETH"):
         flows[a], fdiag[a] = fetch_flows(a)
         rvs[a], rdiag[a] = fetch_rv(a)
+        feats[a] = make_flow_features(flows[a])
         print(
             f"[{a}] flow n={fdiag[a]['n_obs']} "
             f"{fdiag[a]['date_min']}..{fdiag[a]['date_max']} "
-            f"neg={fdiag[a]['share_negative']:.1%} | "
-            f"rv n={rdiag[a]['n_daily_obs']} hourly={rdiag[a]['n_hourly_complete_days']}"
+            f"neg={fdiag[a]['share_negative']:.1%} "
+            f"(dropped {fdiag[a]['n_nonsession_rows_dropped']} non-session rows) | "
+            f"rv n={rdiag[a]['n_daily_obs']}"
         )
     res["data_diagnostics"] = {"flows": fdiag, "rv": rdiag}
 
@@ -840,34 +1775,155 @@ def main() -> None:
         "and conditional on a HAR-RV baseline."
     )
 
-    # --- BTC flow z-score, reused for the H4 cross-asset spillover test ------
-    # Same rule as above: z is built in BTC-flow-day space, then reindexed.
-    btc_z_cal = flow_zscore(flows["BTC"]["flow"])
+    btc_z_cal = feats["BTC"].z
 
     panels: dict[tuple, Panel] = {}
     for a in ("BTC", "ETH"):
         for h in HORIZONS:
             bz = btc_z_cal if a == "ETH" else None
-            p = build_panel(rvs[a], flows[a], "rv_gk", h, a, pub_lag=1, btc_z=bz)
+            p = build_panel(rvs[a], feats[a], "rv_gk", h, a, flow_lag=1, btc_z=bz)
             assert_no_lookahead(p)
             panels[(a, h)] = p
-            print(f"  panel {a} h={h}: n={len(p.df)} {p.df.index.min().date()}..{p.df.index.max().date()}")
+            print(
+                f"  panel {a} h={h}: n={len(p.df)} "
+                f"{p.df.index.min().date()}..{p.df.index.max().date()}"
+            )
 
-    # --- H1 / H2: in-sample + OOS -------------------------------------------
-    insample, comps = {}, []
+    # --- in-sample (descriptive) ---------------------------------------------
+    insample = {}
     for (a, h), p in panels.items():
-        for spec in SPECS:
+        for spec in ("HAR", "HAR+ctrl", "H1_absflow", "H2_asym"):
             insample[f"{a}_h{h}_{spec}"] = in_sample(p, spec)
-        comps.append(compare(p, "HAR+ctrl", "H1_absflow"))
-        comps.append(compare(p, "HAR+ctrl", "H2_asym"))
     res["in_sample"] = insample
-    res["oos_comparisons"] = comps
+    res["in_sample_note"] = (
+        "Descriptive. The verdict rests on out-of-sample predictive ability, not "
+        "on an in-sample coefficient."
+    )
 
-    # --- H3: Friday flow -> weekend RV --------------------------------------
+    # --- PRIMARY family: H1 / H2 on both assets and horizons ------------------
+    cells = []
+    for (a, h), p in panels.items():
+        for alt in ("H1_absflow", "H2_asym"):
+            c = evaluate_cell(p, "HAR+ctrl", alt, family="primary")
+            if c:
+                cells.append(c)
+
+    # --- PRIMARY family: BTC flow -> ETH RV spillover -------------------------
+    for h in HORIZONS:
+        p = panels[("ETH", h)]
+        pf = Panel(
+            p.df.dropna(subset=["abs_z_btc"]), p.rv_col, h, "ETH",
+            state_lag=p.state_lag, flow_lag=p.flow_lag,
+        )
+        c = evaluate_cell(pf, "H4_own", "H4_plus_btc", family="primary")
+        if c:
+            c["description"] = "BTC flow shock -> ETH RV, controlling ETH's own flow"
+            cells.append(c)
+    # A COPY. `= cells` aliased the same list object, so every robustness cell
+    # appended below silently landed in "primary_cells" too.
+    res["primary_cells"] = list(cells)
+    primary_cell_keys = {c["cell"] for c in cells}
+
+    # --- ROBUSTNESS: RV proxy ------------------------------------------------
+    for a in ("BTC", "ETH"):
+        for col in ("rv_park", "rv_r2", "rv_hourly"):
+            if rvs[a][col].notna().sum() < 300:
+                continue
+            p = build_panel(rvs[a], feats[a], col, 1, a, flow_lag=1)
+            assert_no_lookahead(p)
+            c = evaluate_cell(p, "HAR+ctrl", "H1_absflow", family="rv_proxy")
+            if c:
+                cells.append(c)
+
+    # --- ROBUSTNESS: conservative publication lag (C4 — flow only) ------------
+    for a in ("BTC", "ETH"):
+        for h in HORIZONS:
+            p = build_panel(rvs[a], feats[a], "rv_gk", h, a, flow_lag=2, state_lag=1)
+            assert_no_lookahead(p)
+            c = evaluate_cell(p, "HAR+ctrl", "H1_absflow", family="flow_lag2")
+            if c:
+                c["description"] = (
+                    "flow_lag=2 (flow usable only at the end of t+1) while "
+                    "state_lag stays 1: RV_{t+1} and ret_{t+1} ARE known by then. "
+                    "v1 wrongly lagged the state controls too, handicapping its own "
+                    "baseline."
+                )
+                cells.append(c)
+
+    # --- ROBUSTNESS: smearing (is the null an artifact of the log->level map?) -
+    for a in ("BTC", "ETH"):
+        for h in HORIZONS:
+            for sm in ("none", "shared"):
+                c = evaluate_cell(
+                    panels[(a, h)], "HAR+ctrl", "H1_absflow",
+                    family=f"smearing_{sm}", smearing=sm,
+                )
+                if c:
+                    cells.append(c)
+
+    # --- ROBUSTNESS: flow transforms (Warther 1995) ---------------------------
+    CTRL = SPECS["HAR+ctrl"]
+    TRANSFORMS = {
+        "signed_z": "z_signed",
+        "squared_z": "z_sq",
+        "gross_churn_z": "abs_z_gross",
+        "unexpected_z": "abs_z_unexp",
+    }
+    for a in ("BTC", "ETH"):
+        p = panels[(a, 1)]
+        for label, col in TRANSFORMS.items():
+            if col not in p.df.columns:
+                continue
+            SPECS[f"T_{label}"] = CTRL + [col]
+            pt = Panel(
+                p.df.dropna(subset=[col]), p.rv_col, 1, a,
+                state_lag=p.state_lag, flow_lag=p.flow_lag,
+            )
+            c = evaluate_cell(pt, "HAR+ctrl", f"T_{label}", family="flow_transform")
+            if c:
+                c["transform"] = label
+                c["in_sample_t"] = in_sample(pt, f"T_{label}")["coef"][col]["t"]
+                if label == "unexpected_z":
+                    c["bounded_memory_caveat"] = (
+                        "The AR(5) that builds this regressor refits on an EXPANDING "
+                        "window of flow history. There is no lookahead (day i's own "
+                        "value never enters its own fit), but the forecasting METHOD "
+                        "does not have the bounded estimator memory GW formally "
+                        "assumes. Read this cell's GW p-value as indicative. None of "
+                        "the 10 primary cells uses this column."
+                    )
+                cells.append(c)
+
+    # --- ROBUSTNESS: shock-threshold dummies ---------------------------------
+    for (a, h), p in panels.items():
+        for thr in (1.0, 1.5, 2.0, 2.5):
+            d = p.df.copy()
+            d["abs_z"] = (d["abs_z"] >= thr).astype(float)   # shock DUMMY
+            pt = Panel(d, p.rv_col, h, a, state_lag=p.state_lag, flow_lag=p.flow_lag)
+            c = evaluate_cell(
+                pt, "HAR+ctrl", "H1_absflow", family="threshold",
+                variant=f"thr{thr}",
+            )
+            if c:
+                c["threshold"] = thr
+                c["n_shock_days"] = int((p.df["abs_z"] >= thr).sum())
+                cells.append(c)
+
+    # --- ROBUSTNESS: shorter ETH burn-in --------------------------------------
+    for h in HORIZONS:
+        c = evaluate_cell(
+            panels[("ETH", h)], "HAR+ctrl", "H1_absflow",
+            family="eth_window", train_window=200,
+        )
+        if c:
+            cells.append(c)
+
+    res["all_cells"] = cells
+
+    # --- H3: Friday flow -> weekend RV (IN-SAMPLE, descriptive) ---------------
     h3 = {}
     for a in ("BTC", "ETH"):
-        # target date tau = Saturday, source = Friday flow (pub_lag=1 => dow 4)
-        p = build_panel(rvs[a], flows[a], "rv_gk", 2, a, pub_lag=1)  # Sat+Sun mean
+        p = build_panel(rvs[a], feats[a], "rv_gk", 2, a, flow_lag=1)   # Sat+Sun mean
         assert_no_lookahead(p)
         fri = p.df[p.df["dow_src"] == 4].copy()
         cols = SPECS["H1_absflow"]
@@ -875,345 +1931,250 @@ def main() -> None:
         Xf = fri[cols].to_numpy(float)
         yf_ = np.log(fri["y"].to_numpy(float))
         b = _ols(Xf, yf_)
-        se = _hac_se(Xf, yf_, b, max(1, int(np.ceil(len(fri) ** (1 / 3)))))
+        se = _hac_se(Xf, yf_, b, max(1, canonical_bandwidth(1, len(fri))))
         names = ["const"] + cols
+        i_z = names.index("abs_z")
+        t_z = float(b[i_z] / se[i_z]) if se[i_z] > 0 else 0.0
         h3[a] = {
             "description": "Friday ETF flow -> mean GK RV over Sat+Sun (weekend gap)",
+            "inference": "in-sample HAC t on the abs_z coefficient",
+            "feeds_gate": False,
+            "note": (
+                "In-sample only. The study's claim is about out-of-sample predictive "
+                "content, so this is descriptive and does not enter any verdict."
+            ),
             "n_fridays": int(len(fri)),
             "coef": {
-                nm: {"beta": round(float(bb), 5), "t": round(float(bb / ss) if ss > 0 else 0.0, 3)}
+                nm: {
+                    "beta": round(float(bb), 5),
+                    "t": round(float(bb / ss) if ss > 0 else 0.0, 3),
+                }
                 for nm, bb, ss in zip(names, b, se)
             },
-            "harvey_pass_abs_z": bool(
-                abs(b[names.index("abs_z")] / se[names.index("abs_z")]) > 3.0
+            "abs_z_t": round(t_z, 3),
+            "abs_z_p_two_sided": float(
+                2 * stats.t.sf(abs(t_z), df=max(len(fri) - len(names), 1))
             ),
         }
-    res["h3_weekend"] = h3
+    res["h3_weekend_in_sample"] = h3
 
-    # --- H4: BTC flow -> ETH RV (spillover), controlling ETH's own flow ------
-    SPECS["H4_own"] = ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"]
-    SPECS["H4_plus_btc"] = ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z", "abs_z_btc"]
-    h4 = []
-    for h in HORIZONS:
-        p = panels[("ETH", h)]
-        pf = Panel(p.df.dropna(subset=["abs_z_btc"]), p.rv_col, h, "ETH")
-        h4.append(
-            {
-                "horizon": h,
-                "in_sample": in_sample(pf, "H4_plus_btc"),
-                "oos": compare(pf, "H4_own", "H4_plus_btc"),
-            }
-        )
-    res["h4_btc_to_eth_spillover"] = h4
-
-    # --- Multiple testing across the primary DM family ----------------------
-    fam = [c for c in comps] + [c["oos"] for c in h4]
-    # Holm on the ONE-SIDED p for "flow is better". Using the two-sided p would
-    # let a significantly-WORSE flow model count as a significant result.
-    pv = [c["dm_p_one_sided_flow_better"] for c in fam]
-    adj = holm(pv)
-    res["multiple_testing"] = {
-        "n_primary_dm_tests": len(fam),
-        "n_additional_is_tests_h3": len(h3),
-        "harvey_threshold": 3.0,
-        "gate_note": (
-            "All counts are gated on the FLOW-FAVOURING direction (DM t < -3). "
-            "abs(t) > 3 would also count a flow model that is significantly WORSE."
-        ),
-        "n_harvey_pass_flow_better": int(
-            sum(c["dm_harvey_pass_flow_better"] for c in fam)
-        ),
-        "n_harvey_pass_flow_worse": int(
-            sum(c["dm_harvey_pass_flow_worse"] for c in fam)
-        ),
-        "n_dm_favouring_flow": int(sum(c["dm_t"] < 0 for c in fam)),
-        "n_clark_west_supporting_flow": int(
-            sum(c["clark_west_supports_flow"] for c in fam)
-        ),
-        "holm_adjusted_p_one_sided": {
-            f"{c['asset']}_h{c['horizon']}_{c['alt']}": a for c, a in zip(fam, adj)
-        },
-        "n_holm_significant_at_05": int(sum(a < 0.05 for a in adj)),
-    }
-
-    # --- Threshold sensitivity sweep ----------------------------------------
-    sweep = []
-    for (a, h), p in panels.items():
-        for thr in (1.0, 1.5, 2.0, 2.5):
-            d = p.df.copy()
-            d["abs_z"] = (d["abs_z"] >= thr).astype(float)   # shock DUMMY
-            pt = Panel(d, p.rv_col, h, a)
-            c = compare(pt, "HAR+ctrl", "H1_absflow")
-            sweep.append(
-                {
-                    "asset": a,
-                    "horizon": h,
-                    "threshold": thr,
-                    "n_shock_days": int((p.df["abs_z"] >= thr).sum()),
-                    "qlike_improvement_pct": c["qlike_improvement_pct"],
-                    "dm_t": c["dm_t"],
-                    "harvey_pass": c["dm_harvey_pass_flow_better"],
-                }
-            )
-    res["threshold_sensitivity"] = sweep
-
-    # --- RV-proxy robustness -------------------------------------------------
-    prox = []
-    for a in ("BTC", "ETH"):
-        for col in ("rv_park", "rv_r2", "rv_hourly"):
-            if rvs[a][col].notna().sum() < 300:
-                continue
-            p = build_panel(rvs[a], flows[a], col, 1, a, pub_lag=1)
-            assert_no_lookahead(p)
-            if len(p.df) < INITIAL_TRAIN + 60:
-                continue
-            prox.append(compare(p, "HAR+ctrl", "H1_absflow"))
-    res["rv_proxy_robustness"] = prox
-
-    # --- Conservative T+1 publication-lag robustness ------------------------
-    publag = []
-    for a in ("BTC", "ETH"):
-        for h in HORIZONS:
-            p = build_panel(rvs[a], flows[a], "rv_gk", h, a, pub_lag=2)
-            assert_no_lookahead(p, pub_lag=2)
-            publag.append(compare(p, "HAR+ctrl", "H1_absflow"))
-    res["publication_lag_robustness"] = publag
-
-    # --- Bear-market / drawdown coverage of the OOS window -------------------
-    dd = {}
-    for a in ("BTC", "ETH"):
-        lvl = np.exp(rvs[a]["ret"].fillna(0).cumsum())
-        peak = lvl.cummax()
-        draw = lvl / peak - 1
-        oos_start = pd.Timestamp(comps[0]["oos_start"])
-        w = draw[draw.index >= oos_start]
-        dd[a] = {
-            "oos_start": str(oos_start.date()),
-            "max_drawdown_in_oos_pct": round(float(w.min() * 100), 2),
-            "n_days_below_minus10pct": int((w <= -0.10).sum()),
-            "n_days_below_minus20pct": int((w <= -0.20).sum()),
-            "worst_day_ret_pct": round(float(rvs[a]["ret"][rvs[a].index >= oos_start].min() * 100), 2),
-        }
-    res["oos_bear_coverage"] = dd
-
-    # --- Smearing robustness (is the null an artifact of the log->level map?) -
-    # The richer model has more parameters -> lower training residual variance ->
-    # a smaller exp(0.5*s2) multiplier -> lower variance forecasts. QLIKE is
-    # asymmetric, so this could in principle penalise the flow model and MANUFACTURE
-    # the null. We re-score with (a) no smearing and (b) the baseline's smearing
-    # forced onto both models. If the null were an artifact, it would flip here.
-    smear = []
-    for a in ("BTC", "ETH"):
-        for h in HORIZONS:
-            p = panels[(a, h)]
-            a0, f0, d0 = oos(p, "HAR+ctrl", smearing="none")
-            a1, f1, d1 = oos(p, "H1_absflow", smearing="none")
-            common = d0.intersection(d1).sort_values()
-            i0, i1 = d0.get_indexer(common), d1.get_indexer(common)
-            lb = qlike_pointwise(a0[i0], f0[i0])
-            la = qlike_pointwise(a0[i0], f1[i1])
-            t_none, _ = dm_test(la, lb, h=h)
-            shared = oos_shared_smearing(p, "HAR+ctrl", "H1_absflow")
-            smear.append(
-                {
-                    "asset": a,
-                    "horizon": h,
-                    "dm_t_primary_own_smearing": next(
-                        c["dm_t"] for c in comps
-                        if c["asset"] == a and c["horizon"] == h and c["alt"] == "H1_absflow"
-                    ),
-                    "dm_t_no_smearing": round(float(t_none), 3),
-                    "dm_t_shared_smearing": shared["dm_t"],
-                    "harvey_pass_any": bool(
-                        abs(t_none) > 3.0 or shared["dm_harvey_pass"]
-                    ),
-                }
-            )
-    res["smearing_robustness"] = {
-        "note": (
-            "The alt model has more parameters -> lower training residual variance "
-            "-> smaller exp(0.5*s2) multiplier -> lower forecasts. QLIKE is "
-            "asymmetric, so this could manufacture the null. Re-scored with no "
-            "smearing and with the baseline's smearing forced on both models: the "
-            "verdict is unchanged, so the null is not an artifact of this transform."
-        ),
-        "runs": smear,
-    }
-
-    # --- Flow-transform robustness (Warther 1995) ----------------------------
-    # A null obtained with a single transform of the flow is weak. If ETF flow
-    # carries variance information at all, it should show up in AT LEAST ONE of:
-    # signed flow, squared flow, gross churn, or the unexpected (AR-residual)
-    # component. Testing all four is what makes "no predictive content" a claim
-    # about the DATA rather than about our choice of transform.
-    CTRL = ["har_d", "har_w", "har_m", "ret", "abs_ret"]
-    TRANSFORMS = {
-        "signed_z": "z_signed",
-        "squared_z": "z_sq",
-        "gross_churn_z": "abs_z_gross",
-        "unexpected_z": "abs_z_unexp",
-    }
-    xform = []
-    for a in ("BTC", "ETH"):
-        p = panels[(a, 1)]
-        for label, col in TRANSFORMS.items():
-            if col not in p.df.columns:
-                continue
-            SPECS[f"T_{label}"] = CTRL + [col]
-            pt = Panel(p.df.dropna(subset=[col]), p.rv_col, 1, a)
-            if len(pt.df) < INITIAL_TRAIN + 60:
-                continue
-            c = compare(pt, "HAR+ctrl", f"T_{label}")
-            c["transform"] = label
-            c["in_sample_t"] = in_sample(pt, f"T_{label}")["coef"][col]["t"]
-            xform.append(c)
-    res["flow_transform_robustness"] = {
-        "note": (
-            "Warther (1995): only the unexpected component of flow should carry "
-            "news, and netting can hide offsetting creations/redemptions. We test "
-            "signed, squared, gross-churn and AR(5)-unexpected flow. None beats HAR."
-        ),
-        "runs": xform,
-    }
-
-    # --- ETH OOS-window sensitivity ------------------------------------------
-    # The pre-set INITIAL_TRAIN=250 leaves ETH with only 233 OOS origins, below
-    # the 252-day bar in the experiment preamble. Re-run ETH with a shorter
-    # burn-in so the OOS window clears the bar, and check the verdict is stable.
-    # (This can only ADD noise to a null; it is not a search for significance.)
-    eth_sens = [
-        compare(panels[("ETH", h)], "HAR+ctrl", "H1_absflow", initial_train=200)
-        for h in HORIZONS
+    # --- Multiple testing, derived from the registry (C6) ----------------------
+    gw_all = [
+        r for r in REGISTRY if r.inference == "giacomini_white_qlike_fixed_window"
     ]
-    res["eth_oos_window_sensitivity"] = {
-        "note": (
-            "Primary spec (INITIAL_TRAIN=250) gives ETH only 233 OOS origins, "
-            "short of the 252-day preamble bar. With INITIAL_TRAIN=200 the OOS "
-            "window clears the bar; the verdict is unchanged."
-        ),
-        "runs": eth_sens,
-    }
+    gw_primary = [r for r in gw_all if r.family == "primary"]
+    if not gw_primary:
+        raise AssertionError("primary family is empty — nothing to adjudicate")
 
-    # --- Full-family multiple testing (EVERY DM test run in this study) -------
-    # The primary-family Holm above covers 10 tests. But this study runs many
-    # more DM tests across robustness dimensions, and a discrepant cell in ANY
-    # of them must be judged against the FULL number of shots taken -- otherwise
-    # the robustness suite becomes a free multiple-comparisons lottery.
-    all_dm = (
-        [("primary", c) for c in fam]
-        + [("rv_proxy", c) for c in prox]
-        + [("pub_lag", c) for c in publag]
-        + [("eth_window", c) for c in eth_sens]
-        + [("flow_transform", c) for c in xform]
-        + [
-            ("threshold", {"asset": s["asset"], "horizon": s["horizon"],
-                           "alt": f"thr{s['threshold']}", "dm_t": s["dm_t"],
-                           "dm_p": float(2 * (1 - _norm_cdf(abs(s["dm_t"])))),
-                           "dm_p_one_sided_flow_better": float(_norm_cdf(s["dm_t"])),
-                           "dm_harvey_pass_flow_better": bool(s["dm_t"] < -3.0),
-                           "clark_west_t": None})
-            for s in sweep
-        ]
-    )
-    pv_all = [c.get("dm_p_one_sided_flow_better", c["dm_p"]) for _, c in all_dm]
-    adj_all = holm(pv_all)
-    discrepant = []
-    for (fam_name, c), a in zip(all_dm, adj_all):
-        if c.get("dm_harvey_pass_flow_better", c["dm_t"] < -3.0):   # FAVOURING flow
-            discrepant.append(
-                {
-                    "family": fam_name,
-                    "cell": f"{c['asset']}_h{c['horizon']}_{c.get('rv_proxy', 'rv_gk')}_{c['alt']}",
-                    "dm_t": c["dm_t"],
-                    "dm_p_nominal": c["dm_p"],
-                    "holm_adj_p_full_family": a,
-                    "clark_west_t": c.get("clark_west_t"),
-                    "clark_west_confirms": (
-                        None
-                        if c.get("clark_west_t") is None
-                        else bool(c["clark_west_t"] > 1.645)
-                    ),
-                    "survives_full_family_holm_05": bool(a < 0.05),
-                }
+    holm_primary = holm([r.p_one_sided for r in gw_primary])
+    holm_full = holm([r.p_one_sided for r in gw_all])
+
+    by_cell = {c["cell"]: c for c in cells}
+    if len(by_cell) != len(cells):
+        raise AssertionError("cell keys are not unique; the verdict join is unsafe")
+    # every primary GW record must resolve to a cell that really is primary
+    for rec in gw_primary:
+        if rec.cell not in primary_cell_keys:
+            raise AssertionError(
+                f"primary registry record {rec.cell!r} does not resolve to a primary "
+                "cell -- the registry/loss-cache join has drifted"
             )
-    res["full_family_multiple_testing"] = {
-        "n_dm_tests_total": len(all_dm),
-        "families": [
-            "primary", "rv_proxy", "pub_lag", "eth_window", "flow_transform", "threshold",
+    excl_p = [
+        by_cell[r.cell]["material_gain_exclusion"]["p_value_one_sided"]
+        for r in gw_primary
+    ]
+    excl_z = [by_cell[r.cell]["material_gain_exclusion"]["z_stat"] for r in gw_primary]
+    holm_excl = holm(excl_p)
+
+    # The two families need OPPOSITE multiplicity treatments, because the two
+    # claims have opposite logical structure. This asymmetry is not a convenience;
+    # it is what the claims actually require.
+    #
+    #   "flow helps SOMEWHERE"     -> a UNION of alternatives. Ten shots at finding
+    #                                 an effect, so the family-wise error must be
+    #                                 controlled: Holm on the GW p-values.
+    #
+    #   "flow helps NOWHERE by >=m" -> an INTERSECTION of alternatives, i.e. an
+    #                                 intersection-union test (Berger 1982). We may
+    #                                 assert it only if EVERY cell rejects its own
+    #                                 exclusion null. Under any configuration where
+    #                                 the global claim is false, at least one null is
+    #                                 true, and we wrongly reject it with probability
+    #                                 <= alpha. The conjunction therefore holds at
+    #                                 level alpha with NO adjustment -- and adjusting
+    #                                 anyway would inflate type-II error while buying
+    #                                 no type-I protection at all.
+    #
+    # Holm-adjusted exclusion p-values are still reported as a conservative
+    # sensitivity, so the choice is auditable rather than asserted.
+    primary_rows = []
+    for r, hp, hz, hx, praw in zip(
+        gw_primary, holm_primary, excl_z, holm_excl, excl_p
+    ):
+        row = _serialize(r, holm_p=hp)
+        row["passes_flow_gate"] = bool(
+            r.qlike_improve_pct is not None
+            and r.qlike_improve_pct > 0
+            and r.stat < POWER_GATE_Z
+            and hp < 0.05
+        )
+        row["excludes_material_gain"] = bool(hz > 0 and praw < 0.05)   # IU: unadjusted
+        row["material_gain_exclusion_p_raw"] = praw
+        row["material_gain_exclusion_holm_p"] = hx
+        row["excludes_material_gain_holm_conservative"] = bool(hz > 0 and hx < 0.05)
+        ex = by_cell[r.cell]["material_gain_exclusion"]
+        row["qlike_gain_upper_bound_95pct"] = ex["qlike_gain_upper_bound_95pct"]
+        primary_rows.append(row)
+
+    # Simultaneous (Bonferroni) upper bounds: each cell's one-sided bound computed
+    # at alpha/m so the whole family holds jointly at 95%. Conservative on purpose.
+    m = len(gw_primary)
+    simultaneous = [
+        qlike_gain_upper_bound_from_cell(r.cell, alpha=0.05 / m) for r in gw_primary
+    ]
+    for row, b in zip(primary_rows, simultaneous):
+        row["qlike_gain_upper_bound_simultaneous"] = b
+    finite = [b for b in simultaneous if b is not None]
+    # The family-wide statement is only as strong as its WEAKEST cell: a bound that
+    # holds for 9 cells and fails for the 10th does not hold for the family.
+    family_bound = max(finite) if len(finite) == m else None
+
+    n_pass = int(sum(r["passes_flow_gate"] for r in primary_rows))
+    n_excl = int(sum(r["excludes_material_gain"] for r in primary_rows))
+    n_excl_holm = int(
+        sum(r["excludes_material_gain_holm_conservative"] for r in primary_rows)
+    )
+    all_excl = bool(primary_rows) and all(
+        r["excludes_material_gain"] for r in primary_rows
+    )
+
+    res["multiple_testing"] = {
+        "registry_note": (
+            "The families below are DERIVED from the in-code test registry, not "
+            "hand-listed. v1 hand-listed 'EVERY DM test' and missed 8 of them. Holm "
+            "runs on RAW p-values; rounding happens only at serialization."
+        ),
+        "n_tests_registered_total": len(REGISTRY),
+        "n_gate_eligible_gw_tests": len(gw_all),
+        "n_diagnostic_only_tests": len([r for r in REGISTRY if not r.feeds_gate]),
+        "primary_family": primary_rows,
+        "full_family_holm": [
+            _serialize(r, holm_p=hp) for r, hp in zip(gw_all, holm_full)
         ],
-        "n_harvey_pass_favouring_flow": len(discrepant),
-        "n_surviving_full_family_holm_05": int(
-            sum(d["survives_full_family_holm_05"] for d in discrepant)
-        ),
-        "discrepant_cells": discrepant,
-        "interpretation": (
-            "Any single cell that crosses Harvey must be judged against every "
-            "shot taken in this study, not against its own robustness family."
+        "n_full_family_holm_significant_at_05": int(
+            sum(hp < 0.05 and r.stat < 0 for r, hp in zip(gw_all, holm_full))
         ),
     }
 
-    # --- Minimum detectable effect (what is this null ALLOWED to claim?) ------
-    # Without this, "NULL" is indistinguishable from "underpowered".
-    res["minimum_detectable_effect"] = {
-        a: mde_curve(rvs[a], flows[a], a, horizon=1) for a in ("BTC", "ETH")
+    # --- Power (design sensitivity, NOT an exclusion) -------------------------
+    print(
+        f"\nrunning power simulation ({POWER_REPS} reps x "
+        f"{len(POWER_BETAS)} betas x 2 assets)..."
+    )
+    res["power_simulation"] = {
+        a: power_simulation(rvs[a], feats[a], a, horizon=1) for a in ("BTC", "ETH")
     }
 
-    # --- Verdict -------------------------------------------------------------
-    mt = res["multiple_testing"]
-    n_pass = mt["n_harvey_pass_flow_better"]        # direction-gated, NOT abs(t)
-    n_worse = mt["n_harvey_pass_flow_worse"]
-    n_cw = mt["n_clark_west_supporting_flow"]
-    n_holm = mt["n_holm_significant_at_05"]
-    n_surv = res["full_family_multiple_testing"]["n_surviving_full_family_holm_05"]
-    if n_pass == 0 and n_holm == 0 and n_surv == 0 and n_cw == 0:
-        verdict = "NULL"
-    elif n_pass >= 2:
-        verdict = "PASS"
+    # --- VERDICT --------------------------------------------------------------
+    if n_pass > 0:
+        verdict = "POSITIVE_INCREMENTAL_PREDICTIVE_CONTENT"
+    elif all_excl:
+        verdict = "BOUNDED_NULL_NO_MATERIAL_QLIKE_GAIN"
     else:
-        verdict = "CONDITIONAL"
+        verdict = "INCONCLUSIVE_NO_EXACT_NULL_CLAIM"
     res["verdict"] = verdict
 
-    mde = res["minimum_detectable_effect"]
-    cw_mde = ", ".join(
-        f"{a}: +{v['mde_clark_west_uplift_pct']}%"
-        if v["mde_clark_west_uplift_pct"] is not None
-        else f"{a}: not reached by +{v['max_uplift_tested_pct']}%"
-        for a, v in mde.items()
-    )
-    dm_mde = ", ".join(
-        f"{a}: +{v['mde_dm_harvey_uplift_pct']}%"
-        if v["mde_dm_harvey_uplift_pct"] is not None
-        else f"{a}: not reached even at +{v['max_uplift_tested_pct']}%"
-        for a, v in mde.items()
-    )
-    max_cw_real = max(c["clark_west_t"] for c in fam)
+    margin_pct = 100 * MATERIAL_GAIN_MARGIN
+    if verdict == "BOUNDED_NULL_NO_MATERIAL_QLIKE_GAIN":
+        claim = (
+            f"BOUNDED NULL. No cell shows incremental predictive content, and all "
+            f"{n_excl}/{len(primary_rows)} primary cells REJECT the hypothesis that "
+            f"adding ETF flow improves expected QLIKE by at least {margin_pct:.0f}% "
+            f"(intersection-union test, each cell unadjusted; "
+            f"{n_excl_holm}/{len(primary_rows)} also survive the conservative Holm "
+            f"variant). Defensible claim: 'spot BTC/ETH ETF net flow buys no "
+            f"material ({margin_pct:.0f}%+) QLIKE improvement over a HAR-RV baseline, "
+            f"out of sample.' The bound lives in QLIKE-LOSS space. It is NOT a bound "
+            f"on RV-uplift magnitude and NOT a proof of exact zero."
+        )
+    elif verdict == "INCONCLUSIVE_NO_EXACT_NULL_CLAIM":
+        bound_txt = (
+            f"The inverted one-sided 95% upper confidence bound on the relative "
+            f"QLIKE gain is {family_bound:.1f}% simultaneously across all "
+            f"{len(primary_rows)} cells (Bonferroni): gains LARGER than that are "
+            f"excluded by the data; anything smaller is not."
+            if family_bound is not None
+            else (
+                "The design cannot even exclude a 90% relative QLIKE gain in every "
+                "cell, so NO upper bound can be stated. That is how little this "
+                "sample can say about the effect size."
+            )
+        )
+        claim = (
+            f"INCONCLUSIVE. No cell shows incremental predictive content, but only "
+            f"{n_excl}/{len(primary_rows)} primary cells can rule out the "
+            f"pre-specified {margin_pct:.0f}% QLIKE gain, so the bounded null is NOT "
+            f"established. Failure to reject equal accuracy is not evidence of "
+            f"equality. The honest headline is: 'no robust incremental predictive "
+            f"evidence was found for spot BTC/ETH ETF flow over a HAR-RV baseline' "
+            f"-- a negative finding, not a proven zero. {bound_txt}"
+        )
+    else:
+        claim = (
+            f"POSITIVE. {n_pass}/{len(primary_rows)} primary cells clear the "
+            f"pre-specified flow gate."
+        )
 
-    res["power_caveat"] = (
-        "The DM/Harvey |t|>3 gate is close to useless on this target. QLIKE loss "
-        "differentials are swamped by the idiosyncratic noise of daily RV, so the "
-        "smallest injected effect DM can see is enormous: "
-        f"{dm_mde} (RV uplift per 1-sd flow shock). A null resting on DM alone "
-        "would therefore be nearly vacuous -- it could not have detected even a "
-        "doubling of RV after a one-sd flow shock in ETH. "
-        "Clark-West, which corrects the parameter-noise penalty that biases DM "
-        f"toward the smaller model, DOES have power: it clears its gate at {cw_mde}. "
-        f"On the real data CW never exceeds {max_cw_real:.3f} (gate 1.645). "
-        "The null therefore rests on CW, and its honest scope is 'no incremental "
-        "content as large as the CW minimum detectable effect'."
-    )
-    res["verdict_basis"] = (
-        f"{n_pass}/{len(fam)} primary DM tests pass Harvey t<-3 in the "
-        f"flow-favouring direction ({n_worse} significantly WORSE than baseline). "
-        f"Clark-West -- the properly-sized test for these NESTED models, and the "
-        f"only gate with usable power here -- supports flow in {n_cw}/{len(fam)} "
-        f"(max CW t on real data = {max_cw_real:.3f}, gate = 1.645). "
-        f"{n_holm}/{len(fam)} survive one-sided Holm at 5%; {len(discrepant)} of all "
-        f"{len(all_dm)} DM tests cross Harvey favouring flow, {n_surv} survive "
-        f"full-family Holm. POWER: DM/Harvey MDE = {dm_mde} (effectively unusable); "
-        f"Clark-West MDE = {cw_mde} RV uplift per 1-sd flow shock. "
-        f"Claim scope: 'no incremental content as large as ~+16% RV per 1-sd flow "
-        f"shock', NOT 'no content whatsoever'."
-    )
+    res["verdict_basis"] = {
+        "test": (
+            "Giacomini-White (2006) equal unconditional predictive ability "
+            "(one-sided, flow-favouring), Holm-adjusted across the primary family"
+        ),
+        "loss": "Patton QLIKE on the variance level",
+        "estimation_scheme": (
+            f"paired fixed rolling window of {GW_TRAIN_WINDOW} flow days; both specs "
+            "share the augmented complete-case mask, the training dates and the "
+            "forward-label embargo (y_end_date < forecast origin)"
+        ),
+        "gate": f"qlike_improve > 0 AND GW z < {POWER_GATE_Z} AND Holm p < 0.05",
+        "cells_in_primary_family": len(primary_rows),
+        "cells_passing_flow_gate": n_pass,
+        "cells_excluding_material_gain": n_excl,
+        "cells_excluding_material_gain_holm_conservative": n_excl_holm,
+        "exclusion_multiplicity_rationale": (
+            "The exclusion family is an INTERSECTION-UNION test (Berger 1982): the "
+            "bounded-null claim requires EVERY cell to reject its own exclusion null, "
+            "so the conjunction holds at level alpha with each cell tested "
+            "unadjusted. A Holm adjustment here would buy no type-I protection and "
+            "only inflate type-II error. The GW family is the mirror image -- a union "
+            "of alternatives, ten shots at finding an effect -- so it IS Holm-"
+            "adjusted. Both numbers are reported; "
+            f"{n_excl}/{len(primary_rows)} cells exclude unadjusted, "
+            f"{n_excl_holm}/{len(primary_rows)} under the conservative Holm variant."
+        ),
+        "material_gain_margin_pct": margin_pct,
+        "qlike_gain_upper_bound_95pct_per_cell": {
+            row["cell"]: row["qlike_gain_upper_bound_95pct"] for row in primary_rows
+        },
+        "qlike_gain_upper_bound_family_simultaneous_pct": family_bound,
+        "upper_bound_method": (
+            "Inverted one-sided exclusion test (Bonferroni alpha/m across the "
+            f"{m} primary cells). This -- not the power curve -- is the object that "
+            "can bound an effect. It lives in QLIKE-LOSS space, not RV-uplift space."
+        ),
+        "claim_strength": claim,
+        "withdrawn_v1_claim": (
+            "v1 claimed it could 'rule out an RV uplift of >= +16.2% per 1-sd flow "
+            "shock'. That number came from reading a single-path power curve "
+            "backwards. Power is not an exclusion. The claim is WITHDRAWN and is not "
+            "replaced by an RV-space bound of any size."
+        ),
+        "four_way_alignment": (
+            "test = Giacomini-White | loss = Patton QLIKE | scheme = paired fixed "
+            "rolling window | claim = bounded in QLIKE-loss space only. These four "
+            "match by construction; v1's did not."
+        ),
+    }
 
     make_plots(flows, rvs, panels, res)
 
@@ -1221,13 +2182,35 @@ def main() -> None:
     with open(tmp, "w") as fh:
         json.dump(res, fh, indent=2, default=str)
     with open(tmp) as fh:
-        json.load(fh)
+        json.load(fh)                      # parse before replacing
     os.replace(tmp, OUT / "k1709_results.json")
-    print(f"\nVERDICT: {verdict}  ({res['verdict_basis']})")
+
+    print("\n" + "=" * 78)
+    print("PRIMARY FAMILY (paired fixed-window Giacomini-White on QLIKE):")
+    for r in primary_rows:
+        label = f"{r['asset']} h={r['horizon']} {r['alt']}"
+        ub = r["qlike_gain_upper_bound_95pct"]
+        print(
+            f"  {label:24s} QLIKE {r['qlike_improve_pct']:+7.3f}%  "
+            f"GW z={r['stat']:+6.2f} (Holm p={r['holm_adjusted_p']:.3f})  "
+            f"excl({margin_pct:.0f}%)={'Y' if r['excludes_material_gain'] else 'n'}  "
+            f"ub95={'n/a' if ub is None else f'{ub:.2f}%'}"
+        )
+    for a in ("BTC", "ETH"):
+        pw = res["power_simulation"][a]
+        b80 = pw["rv_uplift_at_80pct_power_pct"]
+        print(
+            f"  power[{a}]: false-positive rate at beta=0 = "
+            f"{pw['false_positive_rate_at_beta_0']:.3f}  |  80% power at RV uplift = "
+            + (f"+{b80}%" if b80 is not None else
+               f"NOT REACHED even at +{pw['max_uplift_tested_pct']}%")
+        )
+    print(f"\nVERDICT: {verdict}")
+    print(claim)
 
 
 # ---------------------------------------------------------------------------
-# 6. Figures
+# 12. Figures
 # ---------------------------------------------------------------------------
 def make_plots(flows, rvs, panels, res) -> None:
     # Fig 1 — flow vs RV time series
@@ -1238,7 +2221,8 @@ def make_plots(flows, rvs, panels, res) -> None:
         ax.set_ylabel(f"{a} ETF net flow ($M)")
         ax2 = ax.twinx()
         v = np.sqrt(rvs[a]["rv_gk"] * 365) * 100
-        ax2.plot(v.index, v.rolling(7).mean(), color="#264653", lw=1.2, label="GK vol (7d MA, ann. %)")
+        ax2.plot(v.index, v.rolling(7).mean(), color="#264653", lw=1.2,
+                 label="GK vol (7d MA, ann. %)")
         ax2.set_ylabel("annualised GK vol (%)")
         ax2.legend(loc="upper right", fontsize=8)
         ax.set_title(f"{a}: spot-ETF net creation/redemption flow vs realized volatility")
@@ -1279,73 +2263,94 @@ def make_plots(flows, rvs, panels, res) -> None:
     fig.savefig(OUT / "fig2_event_window.png", dpi=130)
     plt.close(fig)
 
-    # Fig 3 — OOS QLIKE, HAR vs HAR+flow
-    comps = res["oos_comparisons"]
-    fig, ax = plt.subplots(figsize=(11, 4.6))
-    labs = [f"{c['asset']}\nh={c['horizon']}\n{c['alt']}" for c in comps]
-    x = np.arange(len(comps))
-    ax.bar(x - .2, [c["qlike_base"] for c in comps], .4, label="HAR+ctrl (baseline)", color="#264653")
-    ax.bar(x + .2, [c["qlike_alt"] for c in comps], .4, label="HAR+ctrl+flow", color="#e9c46a")
-    for i, c in enumerate(comps):
+    # Fig 3 — OOS QLIKE + the Giacomini-White statistic, primary cells
+    prim = [c for c in res["primary_cells"]]
+    fig, ax = plt.subplots(figsize=(12, 4.8))
+    labs = [f"{c['asset']}\nh={c['horizon']}\n{c['alt']}" for c in prim]
+    x = np.arange(len(prim))
+    ax.bar(x - .2, [c["qlike_base"] for c in prim], .4,
+           label="baseline (HAR+ctrl)", color="#264653")
+    ax.bar(x + .2, [c["qlike_alt"] for c in prim], .4,
+           label="+ ETF flow", color="#e9c46a")
+    for i, c in enumerate(prim):
         ax.text(i, max(c["qlike_base"], c["qlike_alt"]) * 1.02,
-                f"DM t={c['dm_t']}", ha="center", fontsize=8)
-    ax.set_xticks(x); ax.set_xticklabels(labs, fontsize=8)
+                f"GW z={c['primary_inference_gw_qlike']['z_stat']:.2f}",
+                ha="center", fontsize=8)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labs, fontsize=7.5)
     ax.set_ylabel("out-of-sample QLIKE (lower = better)")
-    ax.set_title("Does ETF flow beat HAR out-of-sample?  (Harvey gate: |t| > 3)")
+    ax.set_title(
+        "Does ETF flow beat HAR out-of-sample?\n"
+        "Giacomini-White on QLIKE, paired fixed rolling window "
+        "(gate: z < −1.645 and Holm p < 0.05)"
+    )
     ax.legend()
     fig.tight_layout()
     fig.savefig(OUT / "fig3_oos_qlike.png", dpi=130)
     plt.close(fig)
 
-    # Fig 5 — minimum detectable effect: what COULD this design have seen?
-    mde = res.get("minimum_detectable_effect")
-    if mde:
-        fig, axes = plt.subplots(1, 2, figsize=(12, 4.6), sharex=True)
-        for ax, a in zip(axes, ("BTC", "ETH")):
-            cur = pd.DataFrame(mde[a]["curve"])
-            x = cur["rv_uplift_per_1sd_shock_pct"]
-            ax.plot(x, cur["clark_west_t"], marker="o", ms=4, color="#2a9d8f",
-                    label="Clark-West t (nested-correct)")
-            ax.plot(x, -cur["dm_t"], marker="s", ms=4, color="#e76f51",
-                    label="−DM t (higher = flow better)")
-            ax.axhline(1.645, color="#2a9d8f", ls="--", lw=.9,
-                       label="CW gate 1.645")
-            ax.axhline(3.0, color="#e76f51", ls="--", lw=.9, label="Harvey gate 3.0")
-            real_cw = max(
-                c["clark_west_t"] for c in res["oos_comparisons"] if c["asset"] == a
-            )
-            ax.axhline(real_cw, color="k", ls=":", lw=1.2,
-                       label=f"ACTUAL data CW = {real_cw:.2f}")
-            ax.set_title(f"{a}: minimum detectable effect")
-            ax.set_xlabel("injected RV uplift per 1-sd flow shock (%)")
-            ax.set_ylabel("test statistic")
-            ax.legend(fontsize=7.5)
-        fig.suptitle(
-            "Power check: DM/Harvey is near-powerless here; Clark-West has power — "
-            "and the real data sits far below its gate",
-            fontsize=10,
+    # Fig 4 — threshold sensitivity heatmap (GW z)
+    sw = [c for c in res["all_cells"] if c["family"] == "threshold"]
+    if sw:
+        df = pd.DataFrame(
+            [
+                {
+                    "asset": c["asset"], "horizon": c["horizon"],
+                    "threshold": c["threshold"],
+                    "gw_z": c["primary_inference_gw_qlike"]["z_stat"],
+                }
+                for c in sw
+            ]
         )
+        piv = df.pivot_table(index=["asset", "horizon"], columns="threshold", values="gw_z")
+        fig, ax = plt.subplots(figsize=(7.5, 3.6))
+        im = ax.imshow(piv.to_numpy(), cmap="RdBu_r", vmin=-3.5, vmax=3.5, aspect="auto")
+        ax.set_xticks(range(len(piv.columns)))
+        ax.set_xticklabels([f"|z|≥{c}" for c in piv.columns])
+        ax.set_yticks(range(len(piv.index)))
+        ax.set_yticklabels([f"{a} h={h}" for a, h in piv.index])
+        for i in range(piv.shape[0]):
+            for j in range(piv.shape[1]):
+                ax.text(j, i, f"{piv.to_numpy()[i, j]:.2f}",
+                        ha="center", va="center", fontsize=9)
+        ax.set_title("Giacomini-White z by shock threshold  (negative = flow helps)")
+        fig.colorbar(im, label="GW z")
         fig.tight_layout()
-        fig.savefig(OUT / "fig5_minimum_detectable_effect.png", dpi=130)
+        fig.savefig(OUT / "fig4_threshold_sensitivity.png", dpi=130)
         plt.close(fig)
 
-    # Fig 4 — threshold sensitivity heatmap (DM t)
-    sw = pd.DataFrame(res["threshold_sensitivity"])
-    piv = sw.pivot_table(index=["asset", "horizon"], columns="threshold", values="dm_t")
-    fig, ax = plt.subplots(figsize=(7.5, 3.6))
-    im = ax.imshow(piv.to_numpy(), cmap="RdBu_r", vmin=-3.5, vmax=3.5, aspect="auto")
-    ax.set_xticks(range(len(piv.columns)))
-    ax.set_xticklabels([f"|z|≥{c}" for c in piv.columns])
-    ax.set_yticks(range(len(piv.index)))
-    ax.set_yticklabels([f"{a} h={h}" for a, h in piv.index])
-    for i in range(piv.shape[0]):
-        for j in range(piv.shape[1]):
-            ax.text(j, i, f"{piv.to_numpy()[i, j]:.2f}", ha="center", va="center", fontsize=9)
-    ax.set_title("DM t-stat by shock threshold  (negative = flow helps; |t|>3 = Harvey)")
-    fig.colorbar(im, label="DM t")
-    fig.tight_layout()
-    fig.savefig(OUT / "fig4_threshold_sensitivity.png", dpi=130)
-    plt.close(fig)
+    # Fig 5 — SIMULATED POWER (replaces v1's single-path "MDE" curve)
+    pw = res.get("power_simulation")
+    if pw:
+        fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharey=True)
+        for ax, a in zip(axes, ("BTC", "ETH")):
+            cur = pd.DataFrame(pw[a]["curve"])
+            x = cur["rv_uplift_per_1sd_shock_pct"]
+            y = cur["power_gw_one_sided_5pct"]
+            se = cur["power_gw_se"].fillna(0)
+            ax.plot(x, y, marker="o", ms=4.5, color="#2a9d8f",
+                    label="power of the GW gate (z < −1.645)")
+            ax.fill_between(x, y - 1.96 * se, y + 1.96 * se, color="#2a9d8f", alpha=.18)
+            ax.axhline(0.80, color="#e76f51", ls="--", lw=1.0, label="80% power")
+            ax.axhline(0.05, color="grey", ls=":", lw=1.0, label="nominal size 5%")
+            size = pw[a]["false_positive_rate_at_beta_0"]
+            b80 = pw[a]["rv_uplift_at_80pct_power_pct"]
+            if b80 is not None:
+                ax.axvline(b80, color="#264653", ls="-.", lw=1.0,
+                           label=f"80% power at +{b80}% RV")
+            ax.set_title(f"{a}: simulated power  (fires on pure noise: {size:.1%})")
+            ax.set_xlabel("TRUE RV uplift per 1-sd flow shock (%)")
+            ax.set_ylim(0, 1.02)
+            ax.legend(fontsize=7.5, loc="lower right")
+        axes[0].set_ylabel("rejection rate")
+        fig.suptitle(
+            f"What this design could have SEEN — {POWER_REPS} simulated OOS paths per point.  "
+            "Power is not an exclusion: it does not bound the true effect.",
+            fontsize=9.5,
+        )
+        fig.tight_layout()
+        fig.savefig(OUT / "fig5_simulated_power.png", dpi=130)
+        plt.close(fig)
 
 
 if __name__ == "__main__":

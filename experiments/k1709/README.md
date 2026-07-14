@@ -1,392 +1,215 @@
-# K1709 — Spot BTC/ETH ETF 淨流入衝擊對已實現波動率的預測力
+# K1709 — Spot BTC/ETH ETF net flow shocks and realized volatility
 
-**Verdict: NULL（有明確的功效邊界）**
+**Verdict: `INCONCLUSIVE_NO_EXACT_NULL_CLAIM`**
 
-> 現貨 BTC/ETH ETF 的每日淨申購/贖回金額，在 HAR-RV 基準之上**沒有可偵測的**樣本外增量波動率預測力。
-> **可偵測的邊界是量化過的**：本設計能看見「1 個標準差 flow 衝擊推升 RV **≥ +16.2%**」的效果；真實資料的訊號**遠低於此**（Clark-West 最大 t = 1.091，門檻 1.645）。
-> 因此本研究的宣稱是「**沒有大到 +16% 的增量資訊**」，**不是**「完全沒有資訊」。
+> INCONCLUSIVE. No cell shows incremental predictive content, but only 5/10 primary cells can rule out the pre-specified 1% QLIKE gain, so the bounded null is NOT established. Failure to reject equal accuracy is not evidence of equality. The honest headline is: 'no robust incremental predictive evidence was found for spot BTC/ETH ETF flow over a HAR-RV baseline' -- a negative finding, not a proven zero. The inverted one-sided 95% upper confidence bound on the relative QLIKE gain is 4.2% simultaneously across all 10 cells (Bonferroni): gains LARGER than that are excluded by the data; anything smaller is not.
 
-| 項目 | 內容 |
+**This is a revision.** The first version of this experiment was FAILed by an independent review on 2026-07-14 (`codex_review_20260714.md`), and the project's own mechanical gate (`scripts/tests/test_nested_dm_misuse_ratchet.py`) agreed. Two headline claims did not survive. What follows is the rebuilt study.
+
+## What v1 claimed, and what was wrong with it
+
+| v1 claim | Status |
 |---|---|
-| 期間 | BTC 2024-01-11 → 2026-07-13（642 flow obs）；ETH 2024-07-23 → 2026-07-13（504 flow obs） |
-| 樣本（迴歸面板） | BTC h=1 n=621 / h=5 n=618；ETH h=1 n=483 / h=5 n=480 |
-| 樣本外原點 | BTC 371（2025-01-24 起）；ETH 233（burn-in 敏感度下 283） |
-| 主要檢定 | 10 個 DM 檢定，**0 個**通過 Harvey t<−3（有利 flow 方向）；Clark-West **0/10** 支持 flow |
-| 全部檢定 | 46 個 DM 檢定，方向校正後 **0 個**穿過 Harvey 且有利 flow（自由度校正後，原本唯一的異常 cell 消失 — §5.4） |
-| **功效（MDE）** | **Clark-West：+16.2% RV/1sd shock**（兩資產皆是）；**DM/Harvey：BTC 要 +122.6%、ETH 連 +122.6% 都測不到 → DM 閘門幾乎無用** |
-| 執行 | `uv run python experiments/k1709/k1709.py`（seed=1709） |
-| 測試 | `uv run --extra dev python -m pytest experiments/k1709/test_k1709.py -q` → **26 passed** |
+| "NULL: ETF flow has no incremental predictive content" | **Overstated.** The nested comparison was adjudicated with a raw Diebold-Mariano statistic on expanding-window losses, plus a Clark-West helper that actually scored a *different loss* (variance-level MSPE, not QLIKE). Three estimands were fused into one gate. |
+| "We can rule out an RV uplift of ≥ +16.2% per 1-sd flow shock" | **Withdrawn, not replaced.** That number came from reading a single-path power curve backwards. Power cannot bound an effect. |
 
-> ⚠️ **本研究最重要的方法論發現**：在日頻 RV 這個 target 上，**DM + Harvey |t|>3 這個標準閘門本身幾乎沒有功效**——注入「1sd flow 衝擊讓 RV 翻倍」的效果，ETH 的 DM 仍測不到。只靠 DM 報 null 近乎空洞。真正有功效的是 **Clark-West**（巢狀模型的正確檢定）。詳見 §5.0。
+### The six defects, and what replaced them
 
----
-
-## 1. 研究問題與正交性宣告
-
-**問題**：控制既有波動率動態（HAR-RV）後，spot ETF 的**每日淨流入**是否對 BTC/ETH 的 t+1 / t+5 已實現波動率仍有增量預測力？
-
-**正交性宣告（重要）**：本研究**不是**「ETF 化改變交易時鐘 / 時段結構」那條線。那條線已有 Pastorek & Albrecht (2026) 的 ETF settlement-clock 研究覆蓋（他們用 failures-to-deliver 看結算時點的微結構效應）。本研究的 treatment 是**資金流（flow）本身**——美元計價的申購減贖回淨額——作為波動率的預測變數。兩者不重疊。
-
-**四個假說**（各自獨立檢定、各自報告）：
-
-| 假說 | 內容 | 結果 |
+| # | Defect | Fix |
 |---|---|---|
-| H1 | flow shock 絕對值預測 t+1 RV 上升（大額申購/贖回都是流動性衝擊） | **NULL** |
-| H2 | 負向 flow（贖回）效果不對稱地大於正向 | **NULL** |
-| H3 | 週五 flow 預測週末（Sat/Sun）RV——ETF 只在美股交易日運作、BTC 24/7 | **NULL** |
-| H4 | BTC ETF flow 外溢預測 ETH RV（控制 ETH 自身 flow 後） | **NULL** |
+| C1 | Nested comparison inferred with raw Diebold-Mariano + a mislabelled Clark-West | Giacomini-White (2006) on Patton QLIKE from a **paired fixed rolling window**; raw DM and CW demoted to `feeds_gate=false` |
+| C2 | "MDE" was one injection into one noise path — no repeated sampling, no false-positive check, non-monotone, and then read backwards as an exclusion | A real power simulation (1000 simulated OOS paths per point) **plus** a pre-specified material-gain exclusion test and an inverted confidence bound — the only objects that can legitimately bound an effect |
+| C3 | 16 BTC / 10 ETH US market holidays kept as genuine `Total=0.0` flow days, polluting the 20-day rolling scaler | NYSE session-calendar filter (`exchange_calendars` XNYS); holidays are MISSING, not zero |
+| C4 | `pub_lag=2` robustness also lagged the HAR and return controls, handicapping its own baseline | `state_lag` and `flow_lag` are separate parameters with separately verified source dates |
+| C5 | Statistic was called "HLN modified DM" but had no HLN correction; one-sided p used a normal CDF while the helper used Student-t | Renamed honestly to "HAC-DM + Harvey-Liu-Zhu |t|>3 heuristic"; one-sided p unified to the same Student-t |
+| C6 | Holm ran on p-values already rounded to 4 dp; "EVERY DM test" hand-list missed 8 smearing tests | Holm on raw p; the family is derived from a single in-code test registry |
+| C7 | README had a duplicated H3/H4 block with stale numbers | README is generated from the results JSON (`render_readme.py`) |
 
----
+## How the claim is now established
 
-## 2. 資料
+- **Test**: Giacomini-White (2006) equal unconditional predictive ability (one-sided, flow-favouring), Holm-adjusted across the primary family
+- **Loss**: Patton QLIKE on the variance level
+- **Estimation scheme**: paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin)
+- **Gate**: `qlike_improve > 0 AND GW z < -1.645 AND Holm p < 0.05`
+- **Claim scope**: bounded in QLIKE-loss space only. test = Giacomini-White | loss = Patton QLIKE | scheme = paired fixed rolling window | claim = bounded in QLIKE-loss space only. These four match by construction; v1's did not.
 
-### 2.1 ETF 淨流入 — Farside Investors
+**Why Giacomini-White, and why this is not just Diebold-Mariano renamed.** The arithmetic really is nearly the same — a mean loss difference over a Bartlett HAC standard error — and on the same loss stream the two statistics agree to about three decimal places (they differ only in a small-sample HAC scaling: GW divides each lag covariance by *n*, the canonical DM helper by *n − lag*). The results file reports both, side by side, rather than hiding the coincidence.
 
-真實的 creation/redemption 淨額（**不是**成交量代理），單位 $M。
+What makes the test legal under nesting is therefore **not the formula** but the *estimation scheme*. Giacomini and White compare forecasting **methods**, with fitted-parameter noise treated as part of the object being compared rather than a nuisance to be purged — and that limiting experiment requires the estimator to have **bounded memory**, i.e. a fixed-length rolling window. Feed the same formula expanding-window forecasts, as v1 did, and the nested null is degenerate: the statistic is biased toward the smaller model and no reference distribution rescues it. Every cell therefore also reports the expanding-window value under `expanding_window_diagnostic_v1_design`, so the effect of the scheme change is auditable rather than asserted.
+
+## Data
 
 | | BTC | ETH |
 |---|---|---|
-| 來源 | `farside.co.uk/bitcoin-etf-flow-all-data/` | `farside.co.uk/ethereum-etf-flow-all-data/` |
-| 觀測數 | 642 | 504 |
-| 期間 | 2024-01-11 → 2026-07-13 | 2024-07-23 → 2026-07-13 |
-| 淨流負值佔比 | 40.0% | 47.8% |
-| 淨流均值 / 標準差 | +79.6 / 341.9 $M | — |
-| 淨流範圍 | −1,113.7 → +1,373.8 $M | — |
+| Flow days (NYSE sessions) | 626 | 494 |
+| Sample | 2024-01-11 → 2026-07-13 | 2024-07-23 → 2026-07-13 |
+| Net flow sd ($M) | 346.4 | 147.3 |
+| Share of outflow days | 41.0% | 48.8% |
+| **Market-holiday rows dropped (C3)** | **16** | **10** |
+| …of which had a non-zero Total | 0 | 0 |
+| RV calendar days | 1138 | 1138 |
 
-**解析陷阱（全部處理，見 `_parse_money`）**：
-- **負數寫成括號**：`(95.1)` = **−95.1**（贖回）。不轉換 → 贖回被當申購 → H2 直接做廢。
-- **千分位逗號**：`(27,332)` = −27332.0。
-- **`-` / `–` = 無資料 → NaN，`0.0` = 真實零流入 → 0.0**。兩者不可混為一談。
-- BTC 表尾 `Total` 列（各檔累計，非日期）必須丟棄。
-- ETH 表是 **multi-index header**（發行商 / ticker / Fee）且有 **`Seed` 列**（種子資金，非日常 flow）→ 都丟。
+Every dropped row had `Total = 0.0` with all fund columns dashed. That is the trap: `sum(skipna=True)` over an all-dash row returns `0.0`, so Farside's own Total matches the recomputed sum and the parser's cross-check cannot see the problem. These were US market holidays — days the ETFs *could not* trade — being fed to the model as genuine zero-flow days, and then into the 20-flow-day rolling standard deviation that scales every shock. Fake zeros shrink that scaler, which inflates every |z| that follows.
 
-**解析器自我驗證（關鍵）**：本研究**不假設**解析正確，而是機械驗證——重算「各檔基金 flow 之和」並與 Farside 自己的 `Total` 欄比對。
-> **max |Total − Σfunds| = 0.0 $M**（BTC 2.3e-13、ETH 1.1e-13，浮點誤差級）
+Data sources: Farside Investors (daily ETF creation/redemption flows, `https://farside.co.uk/bitcoin-etf-flow-all-data/`), Yahoo Finance (BTC-USD / ETH-USD OHLC + hourly bars). Realized variance is Garman-Klass on UTC calendar days; Parkinson, squared close-to-close return, and true 24-hour realized variance are carried as robustness proxies.
 
-若括號/逗號/dash 有任一處理錯誤，這個殘差會立刻爆開。殘差為 0 + 負值佔比 40%/47.8%（贖回確實是負數）→ 解析正確。殘差 > $1M 時程式直接 raise，不會靜默前進。
+### Why this has to be an out-of-sample question
 
-### 2.2 價格與 RV — yfinance（BTC-USD / ETH-USD，24/7）
-
-三個 RV 代理，**主用 Garman-Klass**：
-
-| 代理 | 涵蓋 | 角色 |
+| | corr(flow, same-day return) | corr(\|flow\|, same-day log RV) |
 |---|---|---|
-| **Garman-Klass**（OHLC range-based） | 全樣本 1,138 日 | **主要** |
-| 真實 hourly RV（24 根小時 log return 平方和） | 2024-07-15 起 722/721 日 | 穩健性 |
-| r²（日 close-to-close 報酬平方） | 全樣本 | 穩健性 |
+| BTC | 0.388 | 0.088 |
+| ETH | 0.218 | 0.064 |
 
-**為何 GK 是誠實的主要選擇**：日資料只有 OHLC，本研究**沒有假裝有 5 分鐘 RV**。GK 假設「無隔夜跳空」——對股票不成立，但**對 24/7 的加密貨幣正好成立**，這使 GK 在此處比在股市更合適。且 GK 與真實 hourly RV 的 log 相關達 **0.90（BTC）/ 0.90（ETH）**，代理品質有實證支撐。
+Flow is contemporaneously correlated with the same day's return and volatility, so a contemporaneous regression of RV on flow is uninterpretable — it cannot tell "flow moves volatility" from "volatility attracts flow". Everything below is strictly out-of-sample and conditional on a HAR-RV baseline.
 
-**偏誤方向**：range-based 估計量在有跳躍時會低估、在微結構噪音下會高估；三個代理結論一致（見 §5.2）已涵蓋此疑慮。
+## Primary family — does ETF flow beat HAR out-of-sample?
 
----
+10 pre-specified cells. `H1` adds |z| (flow shock magnitude); `H2` adds an extra loading on redemptions; `H4` tests whether BTC's flow shock predicts **ETH** volatility once ETH's own flow is controlled for.
 
-## 3. 方法論
-
-### 3.1 資訊集與 lookahead（最高風險）
-
-Farside 的當日 flow 在**美股盤後（約 21:00 UTC）**才公佈。因此：
-
-> **預測原點 = 結束 UTC 日 t 的 00:00 UTC**
-> - `flow_t` 已知（21:00 UTC 公佈 < 24:00 UTC）✓
-> - `RV_t`（完整 UTC 日）已知（該 UTC 日剛收完）✓
-> - 目標 `RV_{t+1..t+h}` **完全在未來** ✓
-
-實作上所有預測變數都經過一行**顯式 `.shift(pub_lag)`**（`build_panel`），且由 `assert_no_lookahead()` 從資料本身反推驗證。
-
-**日曆對齊規則**：flow 日 t（美股交易日）→ 目標為 crypto **日曆日** t+1（h=1）或 t+1..t+5 平均（h=5）。因 BTC 24/7，週五 flow 的 t+1 自然落在**週六**——H3 正是靠這個。
-
-**`assert_no_lookahead` 檢查兩個相反方向的失效**（這是本研究抓到真 bug 的地方）：
-1. `gap < pub_lag` → **lookahead**（看見未來）
-2. `gap > pub_lag` → **misalignment**：日曆有洞時 `.shift()` 是按**列位置**位移而非按**日曆日**，「t+1」會悄悄變成 t+2
-
-原本只檢查 `gap >= 1` 的不等式**會漏掉第 2 種**——而它真的發生了（見 §6.1）。現在斷言 `gap == pub_lag` 精確相等。
-
-### 3.2 反向因果 / 內生性
-
-**Flow 追報酬、波動也驅動 flow**，所以只跑 `RV_{t+1} ~ flow_t` 的 OLS 是廢的。本研究實測確認這個威脅是真的：
-
-> corr(flow_t, 同日報酬_t) = **+0.386（BTC）** / +0.217（ETH）
-
-因此：
-- **Baseline 是 HAR-RV**（RV_d / RV_w / RV_m，Corsi 2009），研究問題是「flow 在 HAR **之上**是否有增量」。
-- 控制變數含同期 `ret_t`、`|ret_t|`。
-- **結論強度由樣本外決定**：expanding window、QLIKE loss、Diebold-Mariano 檢定。in-sample 係數只供解讀。
-
-### 3.3 巢狀模型 → DM **與** Clark-West 並用
-
-HAR ⊂ HAR+flow 是**巢狀（nested）**比較，而 DM 檢定在巢狀情形下分布是非標準的。本研究因此**同時**跑：
-- **DM**（canonical `volpred.stats.model_evaluation.dm_test`，HAC bandwidth = `ceil(h^(1/3)·n^(1/3))`，**不是**退化的 `h-1`）
-- **Clark-West (2007)**（專為巢狀比較設計）
-
-這個決定是本研究最關鍵的一步：**DM 在這個 target 上幾乎沒有功效**（§5.0 實測 MDE），
-**只靠 DM/Harvey 報 null 近乎空洞**。真正撐起結論的是 Clark-West。
-
-### 3.4 訓練列的 forward-label 約束
-
-h=5 的目標視窗重疊。依 `.claude/rules/experiments.md` L20，訓練列必須滿足 **`target_end < forecast_origin`**——用**實際日期**強制（`y_end_date < origins[i]`），不是用 index 算術。否則訓練尾端會看見預測日之後的 realized return。
-
-### 3.5 多重檢定
-
-- **Harvey (2016)** 門檻：新宣稱需 **|t| > 3**。
-- 主家族 10 個 DM 檢定 → Holm 校正。
-- **更嚴格**：本研究另建 **full-family 校正**——把**所有 46 個** DM 檢定（主家族 + RV 代理 + 發布時差 + burn-in 敏感度 + flow 變換 + 門檻 sweep）一起 Holm 校正。理由：穩健性套件若不納入校正，就變成免費的多重比較樂透。
-- 門檻**不隨便定**：主用**連續 z-score**（flow ÷ 滾動 20 flow-day 標準差，**嚴格前向**）；門檻版另做 |z| ∈ {1.0, 1.5, 2.0, 2.5} **全部報告**。
-- Seed 固定 = 1709。
-
----
-
-## 4. Related Work（與本研究的差異）
-
-| 文獻 | 發現 | 與本研究的差異 |
-|---|---|---|
-| **Ben-David, Franzoni & Moussawi (2018)**, *J. Finance* 73(6), 2471–2535. DOI 10.1111/jofi.12727 | ETF 持股比重高的股票有顯著較高的非基本面波動；流動性衝擊經由 creation/redemption 套利機制傳導至標的 | 這是我們假說的**理論依據**（所以本假說 ex-ante 合理）。但他們是**股票橫斷面持股**效應，經由「一籃子標的」的套利傳導。Crypto 只有**單一標的**、現貨市場 24/7 且遠深於 ETF、**沒有籃子套利傳染管道**。我們的 null 很可能正是因為該管道在 crypto 不存在。 |
-| **Coval & Stafford (2007)**, *JFE* 86(2), 479–512. | 基金大額進出造成機械式價格壓力（fire sales/purchases），flow-driven trades 可預測 | 價格壓力是**第一動差（level）**效應。我們問的是 flow 是否帶有**條件變異數**的增量資訊。且 spot BTC ETF 的申贖是對著極深的 24/7 市場，沒有 fire-sale 約束機制。 |
-| **Warther (1995)**, *JFE* 39(2–3), 209–235. | 總體報酬與**非預期** flow 強相關，與**預期** flow 無關 | **方法論警告，我們據此加做穩健性**：若只用原始淨流，null 可能只是「用錯變換」的假象。因此我們另測 signed / squared / **gross churn** / **AR(5) 非預期成分** 四種變換（§5.3）。 |
-| **Mazur & Polyzos (2025)**, *J. Alternative Investments* 27(4), 110–. SSRN 5452994 | Spot BTC ETF 淨流是 BTC **價格**的強預測子 | **最近的鄰居，也是我們貢獻的支點**。他們做的是**第一動差（價格 / 報酬）**、in-sample；我們做**第二動差（波動率）**、樣本外、有 HAR 基準與 DM/CW 巢狀檢定。**兩者合起來的訊息是：flow 看得見地推動價格（第一動差），卻沒有帶來可偵測的波動率預測增量（第二動差）。** |
-| **Babalos, Bouri & Gupta (2025)**, *QREF* 102, 102006. DOI 10.1016/j.qref.2025.102006 | Spot BTC ETF **推出事件**後，BTC/XRP 波動率**下降**（stabilization hypothesis） | 他們測的是**推出當成一次性事件 dummy**（GARCH in-sample event study），不是**每日 flow 序列**。他們的 stabilization 結論與我們的 null **一致**：若 ETF 化是抑制而非激化波動，flow 的日內變異不帶邊際 RV 訊號是自洽的。 |
-| **Corsi (2009)**, *J. Financial Econometrics* 7(2), 174–196. | HAR-RV：日/週/月波動率階層串聯，簡單卻能複製長記憶 | 我們的 **baseline 本體**。 |
-| **Liu, Patton & Sheppard (2015)**, *J. Econometrics* 187(1), 293–311. DOI 10.1016/j.jeconom.2015.02.008 | ~400 個估計量、31 個資產、5 個資產類別：幾乎沒有東西能穩定打敗樸素的 5 分鐘 RV | **我們 null 可信度的最佳辯護**：簡單基準極難擊敗是這個文獻的常態，不是我們設計失能。 |
-| **Brauneis & Sahiner (2026)**, *Asia-Pacific Financial Markets* 33(1), 379–411. DOI 10.1007/s10690-024-09510-6 | AI 產生的新聞情緒 vs HAR + ML：**「加入情緒並未改善 HAR 的預測準確度」**；且 ML 對多數幣種贏 HAR，**唯獨 Bitcoin 例外**（HAR 仍具競爭力） | **形狀完全相同的已發表 NULL**——外生、合理、動機充分的預測子在 crypto RV 上打不贏 HAR，而且**對 BTC 最難打敗**。**差異**：他們的外生變數是**軟性新聞情緒**；我們的是**硬性、機構級、美元計價的實際申贖金額**——先驗上是強得多的候選，因此我們的 null 是**更緊的拒絕**。 |
-| **Pastorek & Albrecht (2026)**, MENDELU WP 109/2026. | ETF 的股票式結算時鐘疊加在 24/7 crypto 上；FTD 強度的非預期上升**並未**提高當日現貨波動 | **這就是我們正交性宣告要排除的那條線**（settlement / trading-clock 微結構）。我們研究 flow 量級作為預測子，他們研究結算時點微結構。不重疊。且他們的 null 也是佐證：ETF 管線變數是弱的波動預測子。 |
-
-**novelty 查核**：文獻搜尋**未發現**任何論文測試我們的確切問題（ETF flow → crypto RV，控制 HAR，樣本外）。既有 spot BTC ETF flow 研究一律做**報酬 / 價格發現**；既有 ETF↔crypto 波動研究用**推出事件 dummy** 而非 flow 序列。
-
----
-
-## 5. 結果
-
-### 5.0 功效邊界（MDE）— 這個 NULL 到底「有資格說什麼」
-
-**沒有功效分析的 null 等於沒有結論。** 獨立審查正確地指出：我原本的 power test 植入的是一個「解釋 70% 變異、且 target 無雜訊」的訊號——那只證明**管線通了**，不證明**設計有功效**。
-
-因此我在**真實面板**上做校準：把已知效果注入**實際的** GK 已實現變異數，
-`log RV_τ ← log RV_τ + β·|z_{τ-1}|`（即 1 個標準差的 flow 衝擊使 RV 上升 `(e^β − 1)×100%`），保留**真實的雜訊、真實的 n_oos、真實的 HAR 動態**（注入也會傳播進 HAR 特徵，正如真效果會做的），然後找出能通過各閘門的**最小** β。
-
-| 注入效果（RV/1sd shock） | BTC DM t | BTC CW t | ETH DM t | ETH CW t |
-|---|---|---|---|---|
-| +2.0% | 1.832 | −0.773 | 0.422 | 0.071 |
-| +10.5% | 0.422 | 1.325 | 0.154 | 1.189 |
-| **+16.2%** | 0.132 | **1.713 ✓** | 0.002 | **1.872 ✓** |
-| +22.1% | −0.138 | 1.987 ✓ | −0.154 | 2.493 ✓ |
-| +35.0% | −0.687 | 2.364 ✓ | −0.485 | 3.395 ✓ |
-| +49.2% | −1.272 | 2.588 ✓ | −0.854 | 3.812 ✓ |
-| +122.6% | **−3.654 ✓** | 1.623 | (未達 −3) | — |
-
-**兩個閘門的功效天差地遠**：
-
-| 閘門 | 最小可偵測效果（MDE） | 判讀 |
-|---|---|---|
-| **DM + Harvey \|t\|>3** | BTC **+122.6%**；ETH **連 +122.6% 都測不到** | **幾乎無用**。QLIKE 的 loss differential 被日頻 RV 的巨大特異雜訊淹沒。**只靠 DM 報 null 近乎空洞** |
-| **Clark-West（t>1.645）** | **+16.2%**（兩資產一致） | **有功效**。CW 明確校正了「參數雜訊懲罰使 DM 偏袒小模型」的問題 |
-
-**真實資料的 CW 最大值 = 1.091**（門檻 1.645），遠低於偵測線。
-
-→ **本 NULL 的誠實範圍**：「ETF flow 沒有大到 **+16% RV/1sd shock** 的增量預測資訊」。**不是**「完全沒有資訊」。小於此的效果本設計看不見。
-
-> **為什麼 DM 這麼弱？** 這其實是本研究的一個獨立方法論貢獻。alt 模型要付出約 ½·σ²/N ≈ 0.0014 的參數估計懲罰（以 QLIKE 計），而 BTC h=1 實測的 loss 差距只有 4.8×10⁻⁵——**觀測到的差距比純雜訊懲罰還小 30 倍**。DM 不校正這個懲罰，Clark-West 校正。這正是 CW 存在的理由，也是為什麼在巢狀比較上「DM + Harvey」不該單獨當閘門。
-
-（圖：`fig5_minimum_detectable_effect.png`）
-
-### 5.1 主要結果 — H1 / H2 全 NULL
-
-HAR+ctrl baseline 的樣本內 R²：BTC h=1 0.202 / h=5 0.307；ETH h=1 0.180 / h=5 0.177（基準本身運作正常）。
-
-**樣本外（QLIKE，越低越好；DM t 為負 = flow 較優，Harvey 門檻 t<−3；CW > 1.645 = flow 有增量）**：
-
-| 資產 | h | 規格 | n_oos | QLIKE base → +flow | 改善 | DM t | **Clark-West t** |
-|---|---|---|---|---|---|---|---|
-| BTC | 1 | H1 \|flow\| | 371 | 0.5453 → 0.5455 | −0.03% | 0.140 | −1.730 |
-| BTC | 1 | H2 asym | 371 | 0.5453 → 0.5465 | −0.21% | 0.424 | 0.081 |
-| BTC | 5 | H1 \|flow\| | 368 | 0.2535 → 0.2538 | −0.11% | 0.173 | **1.091** ← 全樣本最大 |
-| BTC | 5 | H2 asym | 368 | 0.2535 → 0.2565 | −1.18% | 2.272 | 0.526 |
-| ETH | 1 | H1 \|flow\| | 233 | 0.5218 → 0.5236 | −0.34% | 0.516 | −0.230 |
-| ETH | 1 | H2 asym | 233 | 0.5218 → 0.5237 | −0.37% | 0.532 | −0.919 |
-| ETH | 5 | H1 \|flow\| | 230 | 0.2734 → 0.2732 | +0.06% | −0.123 | −0.247 |
-| ETH | 5 | H2 asym | 230 | 0.2734 → 0.2738 | −0.15% | 0.267 | −0.538 |
-
-**加入 flow 幾乎一律讓 QLIKE 變差**（8 個中 7 個惡化）。**Clark-West 最大值 1.091，低於 1.645 的門檻**——而 CW 是本設計唯一有功效的閘門（§5.0），所以這一欄才是關鍵。樣本內 |t| 從未超過 1.6，且**符號隨 horizon 反轉**——這是雜訊的特徵，不是被壓抑的訊號。
-
-**H3（週末缺口）**：週五 flow → 週末 RV。BTC n=123 個週五，|z| 係數 t=**−0.279**；ETH n=95，t=**+0.287**。NULL。
-
-**H4（BTC→ETH 外溢）**：控制 ETH 自身 flow 後，樣本外 DM t=−0.371（h=1）/ +1.503（h=5）；CW −1.052 / −1.928。NULL。
-
-**H3（週末缺口）**：週五 flow → 週末 RV。BTC n=123 個週五，|z| 係數 t=**−0.279**；ETH n=95，t=**+0.287**。NULL。
-
-**H4（BTC→ETH 外溢）**：控制 ETH 自身 flow 後，BTC flow 對 ETH RV：樣本內 t=−0.131（h=1）/ −0.406（h=5）；樣本外 DM t=−0.417 / +1.407。NULL。
-
-### 5.2 RV 代理穩健性（自由度校正後）
-
-| 資產 | 代理 | DM t | CW t |
-|---|---|---|---|
-| BTC | Parkinson | 0.545 | −1.615 |
-| BTC | r² | 1.889 | −1.067 |
-| BTC | **hourly 真實 RV** | 0.592 | −1.143 |
-| ETH | Parkinson | 0.793 | −0.831 |
-| ETH | r² | −0.625 | 0.979 | ← 原 −3.192，見 §5.4 |
-| ETH | **hourly 真實 RV** | 0.512 | 1.593 |
-
-**0/6 通過任一閘門**（Harvey t<−3 或 CW>1.645）。
-
-### 5.3 Flow 變換穩健性（Warther 1995）
-
-**這一節是 null 的關鍵防線**：若 flow 真帶波動資訊，它至少該在四種變換之一現身。
-
-| 變換 | BTC DM t | ETH DM t |
-|---|---|---|
-| signed z（有方向） | −0.274 | 0.364 |
-| squared z（凸性） | 0.933 | −0.420 |
-| **gross churn**（Σ\|各檔 flow\|，對淨額相消免疫） | 0.065 | −0.272 |
-| **unexpected z**（AR(5) 殘差，非預期成分） | −0.863 | 1.123 |
-
-**0/8 通過**，DM t 範圍 −0.81 ~ +1.14。→ 這個 null 是關於**資料**的陳述，不是關於我們選了哪個變換。
-
-### 5.4 曾經有一個異常 cell —— 它是**有偏變異數估計量造出來的**，修正後消失
-
-**這段保留下來，因為它本身就是一個教訓，不是可以悄悄刪掉的中間過程。**
-
-初版（`s² = RSS/N`）下，46 個 DM 檢定中有 **1 個**穿過 Harvey 且方向有利於 flow：`ETH / h=1 / r² 代理`，**DM t = −3.192**。當時我判定它是假陽性（Clark-West 不確認 t=1.378、同資產另兩個更好的代理反向、全家族 Holm p=0.0736），結論不變。
-
-**獨立審查指出真正的根因**：`s² = RSS/N` **沒有做自由度校正**。在虛無假設下 `E[RSS_k/N] = σ²(N−k−1)/N`，所以**參數較多的模型即使多加的是純雜訊，其 s² 也會機械性地偏小** ≈ σ²/N，進而讓它的 smearing 乘數 `exp(s²/2)` 偏小、預測系統性偏低。這正是那個 cell 的來源。
-
-改用 **`s² = RSS/(N−k−1)`**（使 `E[s²]` 在虛無下與規格無關）後：
-
-> **ETH / h=1 / r²：DM t 由 −3.192 → −0.625。異常 cell 完全消失。**
-> 現在 **46 個 DM 檢定中，0 個**穿過 Harvey 且有利於 flow。`discrepant_cells` 為空。
-
-→ 這反而讓 NULL **更乾淨**：不再需要「用三個理由解釋掉一個異常」，那個異常從一開始就是估計量的偏誤，不是資料。
-
-**教訓（可推廣）**：任何用**對數模型 + lognormal smearing** 映回水準來做**巢狀模型比較**的實驗，`s²` 都必須做自由度校正；否則較豐富的模型會被系統性地扭曲，而扭曲的方向取決於 loss 的非對稱性，**不保證是保守的**。
-
-### 5.5 Smearing 穩健性 — null 會不會是 log→level 映射造出來的？
-
-**這是對 null 最危險的一個質疑，必須正面回答。** 對數模型要映回變異數水準需要 lognormal smearing 項 `exp(μ + s²/2)`。問題在於：**flow 模型參數較多 → 訓練殘差變異數 s² 較小 → 乘數較小 → 預測值系統性偏低**；而 QLIKE 是**非對稱**的（低估的懲罰重於高估）。這個機制原則上會**懲罰較豐富的模型，從而「製造」出我們回報的 null**。
-
-實測：
-
-| 資產 | h | own s²（主規格） | **無 smearing** | **共用 baseline 的 s²** | 任一通過 Harvey？ |
+| Cell | n OOS | QLIKE Δ | GW z | Holm p | Rules out ≥1% gain? |
 |---|---|---|---|---|---|
-| BTC | 1 | 0.140 | −0.697 | 0.050 | ✗ |
-| BTC | 5 | 0.173 | 0.444 | 0.166 | ✗ |
-| ETH | 1 | 0.516 | 1.021 | 0.520 | ✗ |
-| ETH | 5 | −0.123 | −0.800 | −0.097 | ✗ |
+| BTC h=1 H1_absflow | 355 | -0.561% | 1.30 | 1.000 | **yes** |
+| BTC h=1 H2_asym | 355 | -0.948% | 0.62 | 1.000 | no |
+| BTC h=5 H1_absflow | 350 | +0.407% | -0.50 | 1.000 | no |
+| BTC h=5 H2_asym | 350 | -1.527% | 1.43 | 1.000 | **yes** |
+| ETH h=1 H1_absflow | 223 | -0.554% | 0.67 | 1.000 | **yes** |
+| ETH h=1 H2_asym | 223 | -0.172% | 0.19 | 1.000 | no |
+| ETH h=5 H1_absflow | 217 | +0.287% | -0.32 | 1.000 | no |
+| ETH h=5 H2_asym | 217 | -0.370% | 0.40 | 1.000 | no |
+| ETH h=1 H4_plus_btc | 223 | +0.154% | -0.34 | 1.000 | **yes** |
+| ETH h=5 H4_plus_btc | 217 | -0.362% | 0.61 | 1.000 | **yes** |
 
-**且這個偏誤已在原始碼層面根治**：`s²` 現在用 `RSS/(N−k−1)` 而非 `RSS/N`，使 `E[s²]` 在虛無下與規格無關（見 §5.4——這個修正讓原本唯一的異常 cell 消失）。
+`QLIKE Δ` is the flow model's improvement over the baseline — **negative means the flow model is worse**. `GW z < 0` would favour flow; the gate needs `z < -1.645` *and* Holm `p < 0.05` *and* a positive QLIKE Δ. Cells passing: **0 / 10**.
 
-→ **0/4 通過 Harvey，最大 |DM t| = 1.02。null 不是 smearing 造出來的。**
+### The bound: what can actually be ruled out
 
-### 5.6 其他穩健性
+Failing to reject equal accuracy is **not** evidence of equality — that is the trap v1 fell into. To claim a bound you have to reverse the burden of proof and test it directly:
 
-- **發布時差 T+1（保守）**：假設 flow_t 要到 t+1 日終才可用 → 4 個檢定，DM t ∈ [−0.219, 1.208]。NULL。
-- **門檻 sweep**：|z| ≥ {1.0, 1.5, 2.0, 2.5} × 2 資產 × 2 horizon = 16 個檢定，**0 個**通過 Harvey。
-- **ETH burn-in 敏感度**：主規格（INITIAL_TRAIN=250）只給 ETH 233 個樣本外原點，低於 preamble 的 252 日門檻。改用 200 → 樣本外 283/280 個原點（**達標**），DM t = 0.623 / −1.085，**判定不變**。
-- **可重現性**：連續兩次完整重跑產生**完全相同**的 8 個主要 DM 統計量（seed=1709）。
+> **H₀**: adding ETF flow improves expected QLIKE by at least 1% (relative). Rejecting H₀ means a gain that large is not there.
 
-### 5.7 樣本外涵蓋空頭（非只在多頭測）
+| Cell | exclusion z | p (unadjusted, IU) | excludes? | p (Holm, conservative) | 95% upper bound on the gain |
+|---|---|---|---|---|---|
+| BTC h=1 H1_absflow | 2.74 | 0.003 | **yes** | 0.031 | ≤ 0.19% |
+| BTC h=1 H2_asym | 1.19 | 0.116 | no | 0.465 | ≤ 1.89% |
+| BTC h=5 H1_absflow | 0.82 | 0.205 | no | 0.465 | ≤ 1.54% |
+| BTC h=5 H2_asym | 2.22 | 0.013 | **yes** | 0.119 | ≤ 0.25% |
+| ETH h=1 H1_absflow | 1.69 | 0.046 | **yes** | 0.274 | ≤ 0.95% |
+| ETH h=1 H2_asym | 1.16 | 0.123 | no | 0.465 | ≤ 1.59% |
+| ETH h=5 H1_absflow | 0.91 | 0.180 | no | 0.465 | ≤ 1.48% |
+| ETH h=5 H2_asym | 1.64 | 0.050 | no | 0.274 | ≤ 1.00% |
+| ETH h=1 H4_plus_btc | 1.97 | 0.024 | **yes** | 0.171 | ≤ 0.86% |
+| ETH h=5 H4_plus_btc | 2.06 | 0.019 | **yes** | 0.156 | ≤ 0.68% |
 
-樣本外自 **2025-01-24** 起，涵蓋：
+**Why these p-values are unadjusted, while the Giacomini-White ones above are Holm-corrected.** The two claims have opposite logical structure, and the correction has to follow the claim, not the habit. *"Flow helps somewhere"* is a **union** of alternatives — ten shots at finding an effect — so the family-wise error rate must be controlled. *"Flow helps nowhere by ≥1%"* is an **intersection**: it may be asserted only if *every* cell rejects its own exclusion null, which is an intersection-union test (Berger 1982) and holds at level α with each cell tested unadjusted. Holm there would inflate type-II error and buy no type-I protection. The Holm column is reported anyway so the choice is auditable — and note it does not change the verdict either way.
 
-| | 樣本外最大回撤 | 最糟單日 | 回撤 ≤ −20% 的天數 |
+**5 / 10** cells reject H₀ at the pre-specified 1% margin. That margin is the project standard carried over from K1701 — it was fixed before the results were seen, not tuned until the null looked good. Because most cells cannot reject it, **the bounded null is not established** and the verdict is `INCONCLUSIVE`, not `NULL`.
+
+### What CAN be bounded: the inverted confidence interval
+
+The last column above is the honest quantitative answer. It is the one-sided 95% **upper confidence bound** on the relative QLIKE gain, obtained by inverting the exclusion test: gains *larger* than the bound are excluded by the data; gains *smaller* than it are not. Unlike a power curve, this is an inference about the effect rather than a property of the design under an assumed truth — which is exactly the distinction v1 collapsed.
+
+Holding **simultaneously across all 10 cells** (Bonferroni): the relative QLIKE gain from adding ETF flow is **≤ 4.2%**. Anything larger is ruled out; anything smaller is not.
+
+**Read the bound literally.** It lives in QLIKE-loss space: it is about *forecast accuracy*. It is **not** a statement that the RV uplift per flow shock is smaller than any particular percentage, and it is **not** a proof of exact zero.
+
+## Power — what this design could have seen
+
+1000 simulated OOS paths per point. The DGP is the fitted calendar-day HAR law of motion with block-bootstrapped innovations, the real flow shocks and the real returns retained, and the effect injected **into the law of motion** so it propagates through the HAR lags — exactly as a genuine effect would, and exactly as the baseline would partially absorb it.
+
+| | BTC | ETH |
+|---|---|---|
+| Rejection rate when the true effect is 0 | 0.007 | 0.019 |
+| 80% power first reached at | +82.21% RV uplift (power 0.91; previous grid point 0.73) | never — not even at +82.21% RV uplift |
+| 90% power first reached at | +82.21% RV uplift (power 0.91; previous grid point 0.73) | never — not even at +82.21% RV uplift |
+
+These are the first points on a **coarse grid** at which power is met, not solved thresholds — the true crossing sits somewhere between the previous grid point and this one. Reporting them as exact would be a small cousin of the error that got v1 failed.
+
+The β=0 row is **not** "size" in the textbook sense, and it should sit *below* 5% rather than at it. Under Giacomini-White's method-level null with a fixed window, an irrelevant extra regressor makes the augmented method genuinely worse — it pays an estimation cost and buys nothing — so E[L_flow − L_base] > 0 strictly. A one-sided flow-favouring gate is therefore conservative at β=0 by construction. What the row establishes is the thing that matters: **this gate does not manufacture flow signals out of noise**. A rate materially *above* 5% would have been the alarm.
+
+Per-β detail (BTC / ETH rejection rate at the 5% gate):
+
+| True RV uplift per 1-sd shock | BTC power | ETH power |
+|---|---|---|
+| +0.0% | 0.01 | 0.02 |
+| +5.1% | 0.01 | 0.03 |
+| +10.5% | 0.03 | 0.07 |
+| +16.2% | 0.10 | 0.11 |
+| +22.1% | 0.19 | 0.18 |
+| +35.0% | 0.40 | 0.32 |
+| +56.8% | 0.73 | 0.57 |
+| +82.2% | 0.91 | 0.70 |
+
+**Power is not an exclusion.** This table says how often the gate fires against an effect of a given size. It does *not* say the true effect is smaller than the 80%-power point — that inversion is precisely the error v1 made. It is also per-cell power at the nominal gate; the primary family additionally applies a Holm correction, so the family-wise design has *less* power than the table shows.
+
+Note how much blunter this honest reading is than v1's. v1 advertised a minimum detectable effect of +16.2% and then used it as an exclusion. In reality the design needs an uplift of about +82.21% (BTC) before it reaches 80% power, and for ETH 80% power is never reached across the whole grid. The instrument is far cruder than v1 claimed — which is one more reason the RV-space "exclusion" had to go, and why the verdict is INCONCLUSIVE rather than a bounded NULL.
+
+## Robustness
+
+Every run below is registered in the same in-code test registry as the primary family, so the full-family Holm correction sees all of them. v1's hand-written "EVERY DM test" list silently omitted 8.
+
+| Family | Cells | Best (most flow-favouring) GW z | Any cell passing the gate? |
 |---|---|---|---|
-| BTC | **−53.06%** | −15.23% | 279 |
-| ETH | **−67.61%** | −16.27% | 430 |
+| RV proxy (Parkinson / r² / true hourly RV) | 6 | 0.55 | no |
+| Conservative flow lag (flow usable only at end of t+1; state lag stays 1) | 4 | -0.28 | no |
+| No lognormal smearing | 4 | -1.07 | no |
+| Baseline's smearing forced onto both models | 4 | -0.51 | no |
+| Flow transform: signed / squared / gross churn / AR(5)-unexpected | 8 | -0.62 | no |
+| Shock threshold dummies (|z| ≥ 1.0 … 2.5) | 16 | -0.82 | no |
+| Shorter ETH burn-in (200) | 2 | 0.07 | no |
 
-這是一個貨真價實的空頭市場，不是只在多頭區間測試。
+Across **all 54** gate-eligible Giacomini-White tests in the study, **0** survive the full-family Holm correction in the flow-favouring direction. (108 further tests are registered as diagnostic-only and are barred from any gate by construction.)
 
----
+### Is the null an artifact of the log → variance mapping?
 
-## 6. 這個 NULL 為什麼可信（而不是 bug）
+A live threat, and worth spelling out. The flow model has more parameters → a lower training residual variance → a smaller `exp(s²/2)` smearing multiplier → systematically lower variance forecasts. QLIKE is asymmetric, so in principle this channel could *manufacture* the null we are reporting. Three defences: the residual variance is dof-corrected (`N − k`), which makes its expectation spec-invariant under the null; the study re-scores with no smearing at all; and it re-scores again with the *baseline's* multiplier forced onto both models. The verdict does not move.
 
-一個壞掉的 merge、錯位的 shift、或死掉的迴歸子，都會產生**和市場效率長得一模一樣的 null**。因此我們機械驗證：
+### H3 — Friday flow → weekend volatility (in-sample, descriptive)
 
-### 6.1 我們真的抓到並修掉了一個對齊 bug
+Crypto trades through the weekend but the ETFs do not, so a Friday flow shock is the last piece of ETF information before a two-day gap. If flow carried volatility news anywhere, this is where it should be loudest.
 
-Codex 對抗性審查發現：yfinance 的日資料**缺了 2026-07-13**，且**包含當天還沒收完的 partial bar**。後果嚴重——`.shift(1)` 是按**列位置**位移，不是按**日曆日**；一旦日曆有洞，「t+1」目標會悄悄變成 **t+2**，而原本 `gap >= 1` 的不等式斷言**看不出來**。
+| | n Fridays | β(\|z\|) | HAC t | two-sided p |
+|---|---|---|---|---|
+| BTC | 121 | -0.0349 | -0.46 | 0.648 |
+| ETH | 94 | 0.0426 | 0.43 | 0.667 |
 
-**結構性修正（不是 patch）**：
-1. 丟掉尚未收完的當前 UTC 日（partial bar 的 High/Low 還沒張開完 → 系統性低估 GK 變異數）。
-2. RV 重新索引到**完整日曆**——缺失日變 NaN 並自然退出面板，而不是壓縮時間軸。
-3. 斷言收緊為 **`gap == pub_lag` 精確相等**，把靜默錯位變成大聲失敗。
+**In-sample only**, and it does not feed any verdict — the study's claim is about out-of-sample predictive content.
 
-修正後判定**不變**（NULL），但這個 bug 本來就該被抓到，而不是被平均掉。
+## Reproducing
 
-### 6.2 Power test — 管線能不能找到真的存在的訊號？
-
-`test_power_injected_signal_is_detected`：**植入**一條真正驅動次日 RV 的合成 flow（log RV_{t+1} = 持續性基底 + 1.2·|z_t|），要求管線把它找回來。
-
-> 結果：**DM t < −3.0、QLIKE 改善 > 0、Clark-West t > 1.645** → **成功復原**
-
-若 merge、`.shift(1)`、樣本外切分或 DM 符號慣例有任何一項錯誤，這條植入訊號會被摧毀——而那正是同時會偽造出 null 的失效模式。
-
-**但這只是「管線通了」，不是「設計有功效」**（獨立審查的正確批評）：這個植入訊號解釋了 70% 的變異、且 target 無雜訊。真正的功效問題由 §5.0 的 **MDE 曲線**在**真實面板**上回答——那才是決定本 null 能說什麼的東西。兩者缺一不可：power test 排除**程式錯誤**，MDE 曲線界定**宣稱範圍**。
-
-### 6.3 Placebo test — 管線會不會無中生有？
-
-`test_placebo_scrambled_flow_is_not_detected`：同一套機器餵入純雜訊 flow → 要求 **|DM t| < 3**。通過。
-
-### 6.4 排除「評分方式製造 null」
-
-見 §5.5：smearing 項會讓參數較多的模型預測偏低，而 QLIKE 非對稱——這是最有可能**製造** null 的機制。移除 smearing、或強制兩模型共用 baseline 的 smearing，**判定皆不變**（0/4 通過 Harvey）。
-
-### 6.5 其他機械驗證
-
-- **解析器交叉驗證**：max |Total − Σfunds| = **0.0**（見 §2.1）。
-- **突變測試**：把 AR(5) 的 lag 向量反轉 → `test_unexpected_flow_ar5_lag_ordering` **確實失敗**（測試有牙齒，不是裝飾）。
-- **巢狀檢定雙保險**：DM 在巢狀比較下分布非標準，因此同時跑 Clark-West——這在 §5.4 真的擋下了一個假陽性。
-- **可重現性**：連續兩次完整重跑產生完全相同的主要 DM 統計量。
-- **測試套件**：**26 passed**（解析陷阱 / z-score 嚴格前向 / AR(5) lag 序 / 日曆對齊 / **h=5 重疊目標訓練過濾** / **方向閘門反轉** / power / placebo）。
-
-> **結論：這個管線可證明地「找得到真訊號」（power test）、「不會無中生有」（placebo test）、且「評分方式不偏袒基準」（smearing test）。因此 NULL 是關於資料的陳述，不是關於程式的陳述。**
-
----
-
-## 7. 結論（強度不超過證據）
-
-**現貨 BTC/ETH ETF 的每日淨申購/贖回金額，在 HAR-RV 之上沒有「大到 +16% RV/1sd shock」的樣本外增量波動率預測力。**
-
-**⚠️ 措辭很重要**：本研究**不宣稱**「flow 完全沒有波動率資訊」。正確的宣稱是「**沒有本設計看得見的資訊**」，而看得見的門檻已被量化為 **Clark-West MDE = +16.2% RV/1sd shock**（§5.0）。真實資料的 CW 最大值 = 1.091，遠低於 1.645 的偵測線。
-
-這個結論在以下維度**一致成立**：2 個資產 × 2 個 horizon × 4 個假說 × 3 種 RV 代理 × 4 種 flow 變換 × 4 個門檻 × 2 種發布時差假設 × 3 種 smearing 設定 = 46 個 DM 檢定（+ H3 / smearing 另計），方向校正後**0 個**在多重檢定校正後存活；**Clark-West 也是 0/10 支持 flow**。
-
-**如何解讀（機制）**：ETF flow 是**已經發生的交易**——當淨額被公佈時，市場已經吸收了它的價格衝擊。與 Mazur & Polyzos (2025) 併讀，訊息是清楚的：**flow 看得見地推動價格（第一動差），卻沒有帶來可偵測的波動率預測增量（第二動差）**。這與 Ben-Rephael et al. (2012)「flow 是情緒/雜訊而非資訊」以及 Babalos et al. (2025) 的 stabilization 發現一致。
-
-**這個結論不宣稱**：
-- ✗ **不宣稱 flow 的增量資訊為零** —— 只宣稱它小於 +16% RV/1sd shock（本設計的偵測下限）。
-- ✗ 不宣稱 ETF flow 對**報酬 / 價格**沒有預測力（我們沒測；文獻說有）。
-- ✗ 不宣稱 ETF 化對 crypto 波動**結構**沒有影響（那是另一條線，見正交性宣告）。
-- ✗ 不宣稱在**日內**頻率上 flow 無資訊（我們是日頻）。
-- ✗ 不宣稱在**其他資產類別**（如股票 ETF）也成立。
-
-**副產品貢獻（方法論）**：在日頻 RV target 上，**「DM + Harvey |t|>3」這個本專案的標準閘門幾乎沒有功效**——注入使 RV 翻倍的效果，ETH 的 DM 仍測不到（§5.0）。原因是 alt 模型的參數估計懲罰（≈½σ²/N）比實測 loss 差距還大 30 倍，而 DM 不校正它、Clark-West 校正它。**建議：本專案未來所有巢狀模型比較（「baseline + 新變數」型）都必須同時報 Clark-West，不可只靠 DM/Harvey 下 null 結論。**
-
----
-
-## 8. 限制
-
-1. **ETH 面板 n=483 < 500**（原始 flow 504 obs，扣掉 20 日 z-score burn-in 與目標日）。ETH 的結論強度弱於 BTC。BTC n=621 達標。
-2. **RV 是日頻代理，不是 5 分鐘 RV**。我們**沒有假裝**有 5 分鐘資料。GK 與真實 hourly RV 相關 0.90，且三代理結論一致，但 range-based 估計量在跳躍下低估、在微結構噪音下高估。
-3. **Hourly 真實 RV 只涵蓋 2024-07-15 起**（yfinance 1h 上限 730 天），BTC 樣本外僅 177 個原點。
-4. **Farside 的公佈時點是推斷的**（美股盤後）。我們用保守的 T+1 穩健性檢定涵蓋此不確定性，結論不變。
-5. **樣本期僅約 2.5 年**（spot ETF 2024-01 才存在），涵蓋一次完整多空循環但只有一次。
-6. **NULL 不等於「效果為零」**，只等於「在此樣本、此頻率、此基準下偵測不到」。以本樣本規模，微小效果仍可能存在但無法辨識。
-
----
-
-## 9. 檔案
-
-| 檔案 | 內容 |
-|---|---|
-| `k1709.py` | 完整可重跑腳本（seed=1709，含資料診斷輸出、原子寫入 JSON） |
-| `k1709_results.json` | 全部結果（`data_diagnostics` / 各假說係數與 t / OOS QLIKE / DM / CW / **`minimum_detectable_effect`** / **`power_caveat`** / 門檻 sweep / flow 變換 / smearing / full-family 多重檢定 / `verdict`） |
-| `test_k1709.py` | **26 個** regression gate（power / placebo / **h=5 重疊目標訓練過濾** / **方向閘門反轉** / 日曆缺口 / 解析陷阱 / AR(5) lag 序） |
-| `fig1_flow_vs_rv.png` | flow 時序 + GK 波動率疊圖（BTC / ETH） |
-| `fig2_event_window.png` | 大額 flow shock 前後 ±5 日的平均 log-RV path |
-| `fig3_oos_qlike.png` | HAR vs HAR+flow 的樣本外 QLIKE 比較（標 DM t） |
-| `fig4_threshold_sensitivity.png` | 門檻 sweep 的 DM t heatmap |
-| **`fig5_minimum_detectable_effect.png`** | **MDE 曲線：DM 幾乎無功效、CW 有功效，且真實資料遠低於 CW 閘門** |
-
-**重跑**：
 ```bash
-uv run python experiments/k1709/k1709.py
+uv run python experiments/k1709/k1709.py            # rebuilds the results JSON
+uv run python experiments/k1709/render_readme.py    # rebuilds this README
 uv run --extra dev python -m pytest experiments/k1709/test_k1709.py -q
+uv run --extra dev python -m pytest scripts/tests/test_nested_dm_misuse_ratchet.py -q
 ```
+
+Seed `1709` throughout (OLS is deterministic; the block bootstrap and the power simulation are seeded explicitly). The results JSON is written atomically: temp file → parse → `os.replace`.
+
+| File | What it is |
+|---|---|
+| `k1709.py` | The experiment |
+| `k1709_results.json` | Every number in this README |
+| `test_k1709.py` | Regression gates |
+| `render_readme.py` | Generates this file from the results JSON |
+| `codex_review_20260714.md` | The independent review that FAILed v1 |
+| `fig1_flow_vs_rv.png` | Flow vs realized volatility |
+| `fig2_event_window.png` | log-RV path around large flow shocks |
+| `fig3_oos_qlike.png` | OOS QLIKE + Giacomini-White z, primary cells |
+| `fig4_threshold_sensitivity.png` | GW z by shock threshold |
+| `fig5_simulated_power.png` | Simulated power (replaces v1's "MDE" curve) |
+
+## What this study does and does not say
+
+**Does say:**
+
+- **No robust incremental predictive evidence was found** for spot BTC/ETH ETF net flow over a HAR-RV baseline. Not one of the 10 primary cells clears the gate, and the point estimates mostly run the *wrong* way (the flow model is slightly worse).
+- Gains larger than **4.2%** in relative QLIKE are excluded, simultaneously across all 10 cells.
+- But only 5/10 cells can rule out the pre-specified 1% gain, so this is a **negative finding, not a proven zero**. Calling it "NULL" would be the same overreach v1 was FAILed for.
+- The result survives four flow transforms, four RV proxies, three smearing conventions, a conservative publication lag, and four shock thresholds.
+
+**Does not say:**
+
+- That the true effect is exactly zero. No test here can establish that.
+- That an RV uplift of any particular size is excluded. v1 claimed it could 'rule out an RV uplift of >= +16.2% per 1-sd flow shock'. That number came from reading a single-path power curve backwards. Power is not an exclusion. The claim is WITHDRAWN and is not replaced by an RV-space bound of any size.
+- Anything about the *level* effect of ETF-ization on crypto volatility. The treatment here is the flow, not the trading clock or the session structure.
+
