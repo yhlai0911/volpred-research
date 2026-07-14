@@ -6,6 +6,7 @@
     "governance": ".claude/rules/publishing.md §系列/專題標題前綴慣例 points here as SoT",
     "audit": "scripts/series_registry.py --audit (drift detector); --apply (idempotent branding)",
     "how_to_add_series": "Add a key under `series` (see schema below). If title_prefix branding, set prefix + members. Update members whenever a new article joins. Then run `scripts/series_registry.py --apply`.",
+    "release_pacing_rule": "Optional per-series `release_pacing`: {min_hours_between_episodes: float, ordered: bool, disabled: bool}. Enforced at release-pool selection (src/volpred/ops/content.py _series_pacing_hold — single owner; tests/test_release_series_pacing.py). DEFAULT for episodic series (no_episode_numbers=false): ordered daily pacing (24h) even without an explicit field. For `ordered`, the members ARRAY ORDER is the canonical episode order — keep it EP0..EP-Final. Root cause 2026-07-14: the cluster-gate exemption (2bd97c1f7) fixed the series deadlock but removed the only brake — the 6-episode 無人載具 series drained in ~20h at pool cadence, EP4 before EP3. Manual explicit release (pub_id) bypasses pacing.",
     "hard_rules": [
       "Branding mechanisms: 'title_prefix' (prefix 系列名｜ on the title, full-width ｜) OR 'frontend_masthead' (a dedicated frontend component renders the series identity; title carries NO prefix).",
       "Separator is ALWAYS full-width ｜ (U+FF5C), never half-width | (reserved for 絕對值 |t| and tables).",
@@ -96,6 +97,10 @@
       "prefix": "🛩️ 無人載具｜",
       "no_episode_numbers": false,
       "episode_scheme": "EP0 總覽 → EP1 上游 → EP2 中游 → EP3 下游 → EP4 核心個股六面向 → EP-Final 投資組合收尾",
+      "release_pacing": {
+        "min_hours_between_episodes": 24,
+        "ordered": true
+      },
       "definition": "台灣無人載具（廣義：無人機 + 無人艇/USV）產業投資專題。主軸探問：美中/俄烏催化的『非紅供應鏈』訂單移轉，台灣接得穩嗎（產能、驗證、關鍵零組件自主度、訂單能見度、預算落地風險）。boss 2026-07-09 定調 scope 含無人艇。與其他系列不同：本系列有集數 EP。",
       "membership_criteria": "台灣無人載具產業鏈的產業/個股/政策分析；內部任務線代號 drone_series_*。",
       "members": [

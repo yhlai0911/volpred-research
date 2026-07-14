@@ -947,27 +947,43 @@ def _arc_item_audience(item: dict) -> str:
 _SERIES_REGISTRY_PATH = (
     Path(__file__).resolve().parents[3] / "config" / "article_series.json"
 )
-_SERIES_PREFIX_CACHE: list[str] | None = None
+_SERIES_SPEC_CACHE: list[tuple[str, str, dict]] | None = None  # (prefix, registry_key, spec)
 
 
-def _series_prefixes() -> list[str]:
-    """Registered title_prefix series (config/article_series.json is the SoT)."""
-    global _SERIES_PREFIX_CACHE
-    if _SERIES_PREFIX_CACHE is None:
-        prefixes: list[str] = []
+def _series_specs() -> list[tuple[str, str, dict]]:
+    """Registered title_prefix series specs (config/article_series.json is the SoT)."""
+    global _SERIES_SPEC_CACHE
+    if _SERIES_SPEC_CACHE is None:
+        specs: list[tuple[str, str, dict]] = []
         try:
             raw = json.loads(_SERIES_REGISTRY_PATH.read_text(encoding="utf-8"))
-            for spec in (raw.get("series") or {}).values():
+            for key, spec in (raw.get("series") or {}).items():
                 prefix = str(spec.get("prefix") or "").strip()
                 if prefix and spec.get("branding") == "title_prefix":
-                    prefixes.append(prefix)
+                    specs.append((prefix, str(key), spec))
         except Exception as exc:
             LOG.warning(
                 "arc_dedup series registry unreadable path=%s (%s: %s) — series exemption off",
                 _SERIES_REGISTRY_PATH, type(exc).__name__, exc,
             )
-        _SERIES_PREFIX_CACHE = prefixes
-    return _SERIES_PREFIX_CACHE
+        _SERIES_SPEC_CACHE = specs
+    return _SERIES_SPEC_CACHE
+
+
+def _series_prefixes() -> list[str]:
+    return [prefix for prefix, _key, _spec in _series_specs()]
+
+
+def series_spec_for_title(title: str) -> tuple[str, dict] | None:
+    """(registry_key, spec) of the registered series this title belongs to, else None."""
+    t = (title or "").strip()
+    for prefix, key, spec in _series_specs():
+        if t.startswith(prefix):
+            return key, spec
+        name_part = prefix.split(" ", 1)[-1]
+        if name_part and t.startswith(name_part):
+            return key, spec
+    return None
 
 
 def _series_of(title: str) -> str | None:

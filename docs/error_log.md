@@ -7444,3 +7444,30 @@ convention」，flag 本身是揭露項不是絕對值）留待用戶可見時�
 
 **教訓**：硬規則寫「手段」（flag 值）而非「目的」（vintage 穩定 + 口徑揭露）時，遇到手段與目的分離的案例
 要回到目的裁定並記錄，不盲從也不靜默繞過。
+
+## 2026-07-14 12:05 — 無人載具連載一天發完 + 集數亂序（release 層缺「系列節奏」領域概念；已根治）
+
+**現象（老闆抓到）**：規劃為約一週弧線的 6 集連載，5 集在 ~20 小時內以 pool cadence（~4h/篇）全數
+出刊（EP0 10:00 → EP3 隔日 06:02 台灣時間），且 **EP4 比 EP3 先發**；EP-Final 尚在池中。
+
+**根因鏈（兩段）**：
+1. 7/13 的 cluster-gate 豁免（2bd97c1f7，回應老闆 msg 662-664 的系列死鎖）修好了「一集發出去就把
+   全系列鎖死」，但**它同時移除了系列唯一的煞車** — release 層從頭到尾沒有「系列節奏」這個領域概念，
+   豁免後的集數就以 release pool 自己的 cadence 被抽乾。修 deadlock 的人沒有問「那放行之後由什麼
+   控制節奏？」— 過修正（overcorrection）的典型：拆掉錯的鎖，沒裝對的節拍器。
+2. 選候選排序（audience → scheduled → under-cap → FIFO）**不認得集數順序**；EP3 當時因 evidence
+   修正被暫緩，EP4 就先出了。
+
+**根治（單一 enforcement owner = release-pool selection）**：
+- `config/article_series.json` 新增 per-series `release_pacing`（taiwan_uav = 24h + ordered），
+  **有集數的系列預設 ordered daily pacing**（不必逐一補欄位）；members 陣列順序 = canonical 集數順序
+- `content._series_pacing_hold`：min_gap（距同系列上一篇 <N 小時就 hold）+ out_of_order（前面
+  還有 pending 集數就 hold）+ 同輪防重；hold 寫 dedup_decisions.jsonl audit + result
+  `series_pacing_held`；被 hold 的集數進不了 release loop → drought breaker 也拿不到；
+  顯式 pub_id（人工單篇）bypass
+- Regression: `tests/test_release_series_pacing.py`（7 tests，含事故重現 + bypass）；
+  arc_dedup/series/release 全家 121 passed
+- **線上驗證**：EP-Final 現被 hold，next_eligible 2026-07-15 06:02（台灣）= EP3 +24h，自然恢復節奏
+
+**已發出的 5 集不回收**：retract 已上線文章對讀者/SEO 傷害大於亂序本身；EP4/EP3 順序錯置為既成事實，
+記於此。**教訓**：拆除一個 gate 時必問「它原本還兼任什麼功能？」— 煞車常常長在錯的零件上。

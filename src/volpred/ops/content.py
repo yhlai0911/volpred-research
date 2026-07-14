@@ -675,6 +675,107 @@ def _article_series(item: dict) -> str | None:
     return _series_of(str(item.get("title") or ""))
 
 
+def _series_release_pacing(spec: dict) -> dict | None:
+    """Release-pacing policy for a registered series; None = unpaced.
+
+    An explicit `release_pacing` object in the registry wins. Episodic series
+    (`no_episode_numbers` is false) default to ordered, one-episode-per-24h pacing:
+    a serialized 專題 is a multi-day arc by design, not a backlog to drain at pool
+    cadence. 2026-07-14 incident: the moment the cluster-gate exemption (2bd97c1f7)
+    removed the deadlock, it also removed the only brake — the 6-episode 無人載具
+    series burned through in ~20 hours, EP4 before EP3.
+    """
+    raw = spec.get("release_pacing")
+    if isinstance(raw, dict):
+        if raw.get("disabled") is True:
+            return None
+        return {
+            "min_hours_between_episodes": float(
+                raw.get("min_hours_between_episodes", 24.0)
+            ),
+            "ordered": bool(
+                raw.get("ordered", spec.get("no_episode_numbers") is False)
+            ),
+        }
+    if spec.get("no_episode_numbers") is False:
+        return {"min_hours_between_episodes": 24.0, "ordered": True}
+    return None
+
+
+def _item_paced_series(item: dict) -> str | None:
+    """Registry key of the item's series when that series has release pacing, else None."""
+    try:
+        from volpred.publisher.arc_dedup import series_spec_for_title
+    except Exception as exc:  # noqa: BLE001
+        _warn_release_pool("series registry unavailable — series pacing off", exc)
+        return None
+    resolved = series_spec_for_title(str(item.get("title") or ""))
+    if not resolved:
+        return None
+    series_key, spec = resolved
+    return series_key if _series_release_pacing(spec) else None
+
+
+def _series_pacing_hold(item: dict, feed: list[dict], now: datetime) -> dict | None:
+    """Hold record if a registered series' pacing blocks this episode now, else None.
+
+    Two independent holds, both derived from the registry members list (whose array
+    order is the canonical episode order for episodic series):
+    - min_gap: another episode of the same series published less than
+      `min_hours_between_episodes` ago.
+    - out_of_order: an earlier episode is still pending (draft/scheduled) in the feed.
+      Members absent from the feed or deliberately retired (`unpublished`) do not block.
+    """
+    try:
+        from volpred.publisher.arc_dedup import series_spec_for_title
+    except Exception as exc:  # noqa: BLE001
+        _warn_release_pool("series registry unavailable — series pacing off", exc)
+        return None
+    resolved = series_spec_for_title(str(item.get("title") or ""))
+    if not resolved:
+        return None
+    series_key, spec = resolved
+    pacing = _series_release_pacing(spec)
+    if not pacing:
+        return None
+    members = [str(m) for m in (spec.get("members") or [])]
+    by_id = {str(a.get("id") or ""): a for a in feed}
+    base = {
+        "id": item.get("id"),
+        "title": item.get("title"),
+        "series": series_key,
+        "pacing": pacing,
+    }
+
+    latest: datetime | None = None
+    for mid in members:
+        member = by_id.get(mid)
+        if not member or member.get("status") != "published":
+            continue
+        ts = _parse_datetime(member.get("published_at"))
+        if ts is not None and (latest is None or ts > latest):
+            latest = ts
+    if latest is not None:
+        gap = timedelta(hours=pacing["min_hours_between_episodes"])
+        next_eligible = latest + gap
+        if now < next_eligible:
+            return {**base, "reason": "min_gap", "next_eligible_at": next_eligible.isoformat()}
+
+    if pacing["ordered"] and members:
+        item_id = str(item.get("id") or "")
+        for mid in members:
+            member = by_id.get(mid)
+            if member is None:
+                continue  # not in feed yet — an unwritten episode must not deadlock the rest
+            status = str(member.get("status") or "")
+            if status in {"published", "unpublished"}:
+                continue
+            if mid != item_id:
+                return {**base, "reason": "out_of_order", "next_in_series": mid}
+            break
+    return None
+
+
 def _article_narrative_cluster(item: dict, k_cluster: dict[str, str]) -> str | None:
     title = str(item.get("title") or "")
     tags = item.get("tags") if isinstance(item.get("tags"), list) else []
@@ -1363,6 +1464,32 @@ def release_pool_articles(
             filtered_candidates.append(item)
         candidates = filtered_candidates
 
+    # Series release pacing (2026-07-14): the cluster-gate exemption above keeps a
+    # registered series from deadlocking the pool, but without pacing it drains at
+    # pool cadence (無人載具 6 episodes in ~20h, EP4 before EP3, boss escalation).
+    # Pacing is a hard hold at selection: held episodes never reach the release
+    # loop, so the drought breaker cannot force them out either. An explicit
+    # pub_id (manual single-article release) is an operator override and bypasses.
+    series_pacing_held: list[dict] = []
+    if not pub_id:
+        unheld_candidates: list[dict] = []
+        for item in candidates:
+            hold = _series_pacing_hold(item, feed, now)
+            if hold is not None:
+                series_pacing_held.append(hold)
+                _log_release_dedup_decision(
+                    storage_dir,
+                    target_id=item.get("id"),
+                    decision="hold",
+                    reason=(
+                        f"series_pacing:{hold['series']}:{hold['reason']}:"
+                        f"{hold.get('next_eligible_at') or hold.get('next_in_series') or ''}"
+                    ),
+                )
+                continue
+            unheld_candidates.append(item)
+        candidates = unheld_candidates
+
     target_limit = max(int(limit), 1)
     released: list[dict] = []
     audit_skipped: list[dict] = []
@@ -1397,9 +1524,32 @@ def release_pool_articles(
     # candidates. If the oldest due drafts are correctly skipped by audit or
     # dedup gates, keep scanning the sorted pool until `target_limit` articles
     # are actually released or the pool is exhausted.
+    _paced_series_released_this_run: set[str] = set()
     for item in candidates:
         if len(released) >= target_limit:
             break
+
+        # Same-run guard for paced series: min_gap only sees *persisted*
+        # published_at timestamps, so with limit > 1 an unordered paced series
+        # could still ship two episodes in one run. One paced episode per run.
+        if not pub_id:
+            _series_key = _item_paced_series(item)
+            if _series_key and _series_key in _paced_series_released_this_run:
+                series_pacing_held.append(
+                    {
+                        "id": item.get("id"),
+                        "title": item.get("title"),
+                        "series": _series_key,
+                        "reason": "same_run",
+                    }
+                )
+                _log_release_dedup_decision(
+                    storage_dir,
+                    target_id=item.get("id"),
+                    decision="hold",
+                    reason=f"series_pacing:{_series_key}:same_run",
+                )
+                continue
 
         _relocate_release_internal_tags(item, now=now)
 
@@ -1750,6 +1900,9 @@ def release_pool_articles(
 
         item["status"] = "published"
         item["published_at"] = released_at
+        _released_paced = _item_paced_series(item)
+        if _released_paced:
+            _paced_series_released_this_run.add(_released_paced)
         # Contentlayer pattern (2026-04-18): feed.json is canonical; no
         # mile_*.json singles to read back / rewrite. feed entry already
         # holds the full content since reconcile_content_from_singles().
@@ -1905,6 +2058,7 @@ def release_pool_articles(
         "drought_override": drought_override,
         "narrative_cluster_pressure": narrative_pressure,
         "narrative_cluster_filtered": narrative_cluster_filtered,
+        "series_pacing_held": series_pacing_held,
         "due_only": due_only,
         "include_drafts": effective_include_drafts,
         "preferred_audiences": list(preferred_audiences or []),
