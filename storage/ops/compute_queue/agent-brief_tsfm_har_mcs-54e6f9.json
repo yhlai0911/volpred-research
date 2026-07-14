@@ -1,0 +1,43 @@
+{
+  "id": "agent-brief_tsfm_har_mcs-54e6f9",
+  "title": "K1711 TSFM×HAR 預測組合 MCS 誠實檢定 (SPY/0050.TW/TX)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_tsfm_har_mcs.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    ".claude/worktrees/dispatch-slot-1-671aaa12-tsfm-har",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-671aaa12-tsfm-har/experiments/k1711/k1711_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_tsfm_har_mcs-54e6f9.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-14T09:13:19Z",
+  "started_at": "2026-07-14T09:15:03Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_tsfm_har_mcs-54e6f9.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_tsfm_har_mcs-54e6f9.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-671aaa12-tsfm-har/experiments/k1711/k1711_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_tsfm_har_mcs-54e6f9.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-671aaa12-tsfm-har",
+  "claude_followup": {
+    "brief": "收件：(1) 驗 k1711_results.json 數字與 README 一致（MCS superior set / DM-HLN t / seed / 樣本期間）(2) 檢查 TSFM 無 lookahead（context window 邊界）(3) Codex review 代碼 (4) 通過才寫 knowledge.json (5) bash scripts/merge_worktree.sh 合併 worktree",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}

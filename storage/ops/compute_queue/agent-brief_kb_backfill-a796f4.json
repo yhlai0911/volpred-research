@@ -1,0 +1,43 @@
+{
+  "id": "agent-brief_kb_backfill-a796f4",
+  "title": "KB 補登：136 個已完成實驗從未進 knowledge.json（產提案檔，不寫 canonical）",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/tmp/brief_kb_backfill.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "high",
+    "--cwd",
+    ".",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/storage/ops/kb_backfill/proposed_entries.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_kb_backfill-a796f4.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-14T09:17:30Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_kb_backfill-a796f4.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_kb_backfill-a796f4.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/storage/ops/kb_backfill/proposed_entries.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_kb_backfill-a796f4.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research",
+  "claude_followup": {
+    "brief": "主線程收件：(1) 抽驗 5 筆 content 數字 vs artifact 完全一致 (2) 檢查 evidence 路徑真實存在 (3) needs_human 筆數與理由合理 (4) 通過才由主線程寫入 knowledge.json（agent 禁寫，K1259）(5) scripts/build_knowledge_index.py update (6) 重跑 daily_checkup 確認 KNOWLEDGE_UNRECORDED 下降",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}

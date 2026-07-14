@@ -1,15 +1,9 @@
 {
-  "generated_at": "2026-07-14T16:09:22.764663",
-  "overall": "critical",
-  "critical_count": 1,
-  "warn_count": 6,
+  "generated_at": "2026-07-14T17:16:01.249664",
+  "overall": "warn",
+  "critical_count": 0,
+  "warn_count": 7,
   "findings": [
-    {
-      "dimension": "cron_completion",
-      "severity": "warn",
-      "message": "git_push_backup: 最近一輪 exit=120（非 0）",
-      "recovery": "tail storage/logs/cron/git_push_backup.log"
-    },
     {
       "dimension": "content_pipeline",
       "severity": "warn",
@@ -30,14 +24,14 @@
     },
     {
       "dimension": "reproducibility",
-      "severity": "critical",
-      "message": "RESULT_MISMATCH: 1 reproduction report(s) disagree with canonical results（例：k1683）",
+      "severity": "warn",
+      "message": "REPORT_STALE: 3 priority report(s) no longer match their audited subject hashes（例：k1683, k1699, K1710）",
       "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
     },
     {
       "dimension": "reproducibility",
       "severity": "warn",
-      "message": "PRIORITY_UNVERIFIED: 195 referenced experiment(s) have no reproduction report（例：k1001, k1003, k1023, k1025, k1025b）",
+      "message": "PRIORITY_UNVERIFIED: 228 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1023, k1025, k1025b）",
       "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
     },
     {
@@ -50,6 +44,12 @@
       "dimension": "reproducibility",
       "severity": "warn",
       "message": "CODE_WITHOUT_RESULTS: 168 K-family directories have code but no archived *_results.json（例：k1212, k1267, k1380, k144, k150）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "KNOWLEDGE_UNRECORDED: 136 finished experiment(s) never reached knowledge.json — invisible to dedup/topic selection, so the pipeline can re-run them（例：K1330, K1331, K1342, K1343_bdc_pressure_private_credit_vol_signal, K1344_private_credit_software_spillover）",
       "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
     }
   ]

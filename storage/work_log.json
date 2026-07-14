@@ -17416,5 +17416,35 @@
     "owner": "hourly-16",
     "commit": "7bcfb12ca",
     "summary": "Owner 打回票『不能只有壓縮或減班，要確實重構優化流程但不損功能』。重測 7d transcript（17,570 筆 tool_result）推翻原診斷：cache_create 79% 不是 bootstrap 過大（一次性前綴、被 cache_read 攤平），而是每 turn 追加進 context 的 token 被 cache 重寫約 3 次。Read 佔 tool_result 51%，其中 73.8% 是無 limit/offset 整檔讀（avg 2,673 tok, p90 8,045）；handoff_latest.md 單檔每週 457K tok。落地 PreToolUse(Read) context budget（scripts/hooks/read_context_budget.py）：無 limit/offset 且 >250 行 → 注入 limit=200 + 告知真實行數與取得其餘內容的方法；明確 limit/offset 永不覆寫（不損功能）；異常 fail-open。省 ~1.12M raw tok/wk ≈ 週帳單 8%。19 回歸測試通過 + main 實跑驗證。明確否決 Bash 通用輸出包裝：bash -lc 子殼會讓 6,399 次 cd / 553 次 export 的 cwd/env 不再延續 = 損害功能。"
+  },
+  {
+    "actor": "hourly-17",
+    "commit": null,
+    "outcome": "succeeded",
+    "owner": "hourly-17",
+    "summary": "KB 覆蓋缺口治本：發現 136/1252 已完成實驗從未進 knowledge.json（對 dedup 隱形，系統因此誤判『全飽和』還去生新題）。收編進既有 owner reproduce_check.py 新增 KNOWLEDGE_UNRECORDED 維度（經 daily_checkup 曝光，不新開 gate）；修掉第一版欄位白名單造成的 139 筆誤報（KB 兩種 schema 並存）。136 筆補登 enqueue 給 async agent 產提案檔（agent 禁寫 KB）。",
+    "task_id": "experiment_scaffold_k1537",
+    "task_type": "platform_ops",
+    "timestamp": "2026-07-14T09:18:56.676416+00:00"
+  },
+  {
+    "actor": "hourly-17",
+    "commit": null,
+    "outcome": "succeeded",
+    "owner": "hourly-17",
+    "summary": "研究誠實：research_program.md:1284 把 experiments/k1536/ 誤標為 K1537 並編造『K1536 已被預留』理由，:1271 沿用同一錯誤前提。已更正兩處；K1537 從未被使用。衍生的 stale task experiment_scaffold_k1537（502h）關閉為作廢而非照做（照做會生幽靈實驗）。",
+    "task_id": "experiment_scaffold_k1537",
+    "task_type": "platform_ops",
+    "timestamp": "2026-07-14T09:18:56.676416+00:00"
+  },
+  {
+    "actor": "hourly-17",
+    "commit": null,
+    "outcome": "dispatched",
+    "owner": "hourly-17",
+    "summary": "K1711 TSFM×HAR 預測組合 MCS 誠實檢定 enqueue 至 compute queue（job agent-brief_tsfm_har_mcs-54e6f9，xhigh）。清 156h starvation。定位在 forecast-eval 方法學（問組合是否進 MCS superior set），避開庫內已 9 次 NULL 的 ML horse-race 弧。",
+    "task_id": "research_har_mcs_spy_0050_tw_tx_tsfm_timesfm_ttm_log_har",
+    "task_type": "experiment",
+    "timestamp": "2026-07-14T09:18:56.676416+00:00"
   }
 ]

@@ -52,6 +52,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REPORT_NAME = "reproduce_report.json"
 SPEC_NAME = "reproduce_spec.json"
 DEFAULT_INVENTORY = Path("storage/ops/reproducibility/latest.json")
+KNOWLEDGE_PATH = Path("storage/memory/knowledge.json")
 REPORT_SCHEMA = "volpred.reproduce_report.v1"
 SPEC_SCHEMA = "volpred.reproduce_spec.v1"
 INVENTORY_SCHEMA = "volpred.reproduce_inventory.v1"
@@ -264,6 +265,33 @@ def _code_surface_files(exp_dir: Path) -> list[Path]:
 
 def _result_files(exp_dir: Path) -> list[Path]:
     return sorted(path for path in exp_dir.glob("*results.json") if path.name != REPORT_NAME)
+
+
+def _k_id(name: str) -> str | None:
+    """Leading K-number of an experiment dir (``k1538_bond_fund…`` → ``k1538``)."""
+    match = re.match(r"^([Kk]\d+)", name)
+    return match.group(1).casefold() if match else None
+
+
+def knowledge_recorded_ids(root: Path = ROOT) -> set[str] | None:
+    """K-ids that appear anywhere in the knowledge base. ``None`` = KB unreadable."""
+    path = root / KNOWLEDGE_PATH
+    try:
+        entries = _read_json_strict(path)
+    except (OSError, ValueError) as exc:
+        warn("reproduce_check", "knowledge base unreadable", path=str(path), err=str(exc))
+        return None
+    if not isinstance(entries, list):
+        warn("reproduce_check", "knowledge base is not a list", path=str(path))
+        return None
+    # Two entry shapes coexist: modern (item_id/content/evidence) and legacy
+    # (title/experiment_id). Scan every value rather than a field whitelist —
+    # a whitelist silently skipped every legacy entry.
+    recorded: set[str] = set()
+    for entry in entries:
+        blob = json.dumps(entry, ensure_ascii=False) if isinstance(entry, dict) else str(entry)
+        recorded.update(match.casefold() for match in re.findall(r"[Kk]\d{3,}", blob))
+    return recorded
 
 
 def _safe_relative_path(value: Any, *, field: str) -> Path:
@@ -591,6 +619,14 @@ def build_inventory(root: Path = ROOT, feed_limit: int = 60) -> dict[str, Any]:
     ]
     status_counts = Counter(record.report_status for record in records if record.report_status)
 
+    # A finished experiment that never reached knowledge.json is invisible to topic
+    # dedup and article selection — the pipeline will happily re-run it.
+    recorded_kids = knowledge_recorded_ids(root)
+    results_without_knowledge = [] if recorded_kids is None else [
+        record for record in records
+        if record.results_count > 0 and (_k_id(record.experiment) or "") not in recorded_kids
+    ]
+
     counts = {
         "experiment_dirs": len(records),
         "with_code": sum(record.code_count > 0 for record in records),
@@ -626,6 +662,8 @@ def build_inventory(root: Path = ROOT, feed_limit: int = 60) -> dict[str, Any]:
         ),
         "broken_reports": len(broken_reports),
         "stale_reports": sum(record.report_stale is True for record in records),
+        "knowledge_base_readable": recorded_kids is not None,
+        "results_without_knowledge": len(results_without_knowledge),
     }
 
     candidates = [record for record in priority_records if record.classification == "runnable"]
@@ -654,6 +692,7 @@ def build_inventory(root: Path = ROOT, feed_limit: int = 60) -> dict[str, Any]:
         "missing_priority_experiment_dirs": missing_refs,
         "priority_experiments": [asdict(record) for record in priority_records],
         "code_without_results": [asdict(record) for record in code_without_results],
+        "results_without_knowledge": [asdict(record) for record in results_without_knowledge],
         "broken_reports": [asdict(record) for record in broken_reports],
         "sample_candidates": [asdict(record) for record in candidates],
     }
@@ -711,6 +750,17 @@ def build_status(root: Path = ROOT, feed_limit: int = 60) -> dict[str, Any]:
         add("PRIORITY_REFERENCE_UNRESOLVED", "warn", missing, f"{len(missing)} paper/feed reference(s) do not resolve to an experiment directory")
     if code_without:
         add("CODE_WITHOUT_RESULTS", "warn", code_without, f"{len(code_without)} K-family directories have code but no archived *_results.json")
+    unrecorded = inventory["results_without_knowledge"]
+    if unrecorded:
+        add(
+            "KNOWLEDGE_UNRECORDED",
+            "warn",
+            unrecorded,
+            f"{len(unrecorded)} finished experiment(s) never reached knowledge.json — "
+            "invisible to dedup/topic selection, so the pipeline can re-run them",
+        )
+    if not counts["knowledge_base_readable"]:
+        add("KNOWLEDGE_BASE_UNREADABLE", "critical", [], "knowledge.json could not be parsed — coverage unknown")
 
     overall = "critical" if any(item["severity"] == "critical" for item in issues) else ("warn" if issues else "ok")
     return {
