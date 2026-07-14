@@ -376,31 +376,45 @@ def main() -> None:
         f"| {num(pw['ETH']['false_positive_rate_at_beta_0'], 3)} |"
     )
     for lbl, key in (
-        ("80% power first reached at", "power_80pct_bracket"),
-        ("90% power first reached at", "power_90pct_bracket"),
+        ("80% power crossing lies in", "power_80pct_bracket"),
+        ("90% power crossing lies in", "power_90pct_bracket"),
     ):
         row = [lbl]
         for a in ("BTC", "ETH"):
-            br = pw[a].get(key)
-            if br is None:
+            br = pw[a][key]
+            if not br["reached_on_grid"]:
                 row.append(
-                    f"never — not even at +{pw[a]['max_uplift_tested_pct']}% RV uplift"
+                    f"never reached — not even at +{pw[a]['max_uplift_tested_pct']}% "
+                    "RV uplift"
                 )
+            elif br["lower_rv_uplift_pct"] is None:
+                row.append(f"at or below +{br['upper_rv_uplift_pct']}% RV uplift")
             else:
-                lo = br["previous_grid_power"]
                 row.append(
-                    f"+{br['power_first_met_at_rv_uplift_pct']}% RV uplift "
-                    f"(power {br['achieved_power']:.2f}; previous grid point "
-                    f"{lo:.2f})" if lo is not None
-                    else f"+{br['power_first_met_at_rv_uplift_pct']}% RV uplift"
+                    f"+{br['lower_rv_uplift_pct']}% … +{br['upper_rv_uplift_pct']}% "
+                    f"RV uplift (power {br['lower_grid_power']:.2f} → "
+                    f"{br['upper_grid_power']:.2f})"
                 )
         A(f"| {row[0]} | {row[1]} | {row[2]} |")
     A("")
     A(
-        "These are the first points on a **coarse grid** at which power is met, not "
-        "solved thresholds — the true crossing sits somewhere between the previous "
-        "grid point and this one. Reporting them as exact would be a small cousin of "
-        "the error that got v1 failed."
+        "Those are **intervals, not thresholds**. β runs on a coarse 8-point grid, so "
+        "the effect size at which power crosses a target can only be bracketed — it "
+        "sits somewhere strictly inside the interval. The results JSON deliberately "
+        "publishes **no point estimate** of an 80%- or 90%-power effect: turning a "
+        "coarse curve into a precise-sounding number is exactly the move that got v1 "
+        "failed, and a smaller version of it is still that move."
+    )
+    A("")
+    A(
+        "**Read the scope before quoting any of this.** The simulation covers *one "
+        "cell* of the design: **h = 1 only** (the primary family also contains h = 5), "
+        "a **single injected |flow| shock** (the H2 asymmetry and the cross-asset H4 "
+        "alternative are never simulated, so this says nothing about power against "
+        "*them*), and the **nominal single-cell gate** — not the ten-cell Holm-"
+        "corrected family that actually produces the verdict, which is strictly less "
+        "powerful. This is not \"the power of the study\", and it must not be quoted "
+        "as such."
     )
     A("")
     A(
@@ -434,20 +448,31 @@ def main() -> None:
         "*less* power than the table shows."
     )
     A("")
-    b80 = pw["BTC"]["rv_uplift_at_80pct_power_pct"]
+    btc80 = pw["BTC"]["power_80pct_bracket"]
+    eth80 = pw["ETH"]["power_80pct_bracket"]
+    if btc80["reached_on_grid"]:
+        btc_txt = (
+            f"somewhere between +{btc80['lower_rv_uplift_pct']}% and "
+            f"+{btc80['upper_rv_uplift_pct']}% (BTC)"
+        )
+    else:
+        btc_txt = f"more than +{pw['BTC']['max_uplift_tested_pct']}% (BTC)"
+    eth_txt = (
+        "80% power is never reached anywhere on the grid"
+        if not eth80["reached_on_grid"]
+        else (
+            f"the interval is +{eth80['lower_rv_uplift_pct']}% … "
+            f"+{eth80['upper_rv_uplift_pct']}%"
+        )
+    )
     A(
         "Note how much blunter this honest reading is than v1's. v1 advertised a "
         "minimum detectable effect of +16.2% and then used it as an exclusion. In "
-        "reality the design needs an uplift of "
-        + (f"about +{b80}% (BTC)" if b80 is not None
-           else f"more than +{pw['BTC']['max_uplift_tested_pct']}% (BTC)")
-        + " before it reaches 80% power, and for ETH "
-        + ("80% power is never reached across the whole grid"
-           if pw["ETH"]["rv_uplift_at_80pct_power_pct"] is None
-           else f"the figure is +{pw['ETH']['rv_uplift_at_80pct_power_pct']}%")
-        + ". The instrument is far cruder than v1 claimed — which is one more reason "
-        "the RV-space \"exclusion\" had to go, and why the verdict is INCONCLUSIVE "
-        "rather than a bounded NULL."
+        f"reality even this single-cell, single-alternative gate needs an uplift of "
+        f"{btc_txt} before it reaches 80% power, and for ETH {eth_txt}. The instrument "
+        "is far cruder than v1 claimed — which is one more reason the RV-space "
+        "\"exclusion\" had to go, and why the verdict is INCONCLUSIVE rather than a "
+        "bounded NULL."
     )
     A("")
 
@@ -494,6 +519,52 @@ def main() -> None:
         "diagnostic-only and are barred from any gate by construction.)"
     )
     A("")
+    bm = mt["bounded_memory_sensitivity"]
+    n_unb = len(bm["unbounded_memory_cells"])
+    cells_txt = "`" + "`, `".join(bm["unbounded_memory_cells"]) + "`"
+    A(
+        f"### {'One' if n_unb == 1 else n_unb} of those tests "
+        f"{'is' if n_unb == 1 else 'are'} not "
+        f"{'a ' if n_unb == 1 else ''}bounded-memory "
+        f"{'test' if n_unb == 1 else 'tests'} — and "
+        f"{'it is' if n_unb == 1 else 'they are'} labelled"
+    )
+    A("")
+    A(
+        "Giacomini-White's limiting experiment assumes the **forecasting method** has "
+        "bounded estimator memory. Every cell here fits its regression on a fixed "
+        "250-day rolling window, so the final fit always satisfies that. But the "
+        "condition is on the *whole method*, not on the last regression: "
+        f"{cells_txt} "
+        f"{'builds its regressor' if n_unb == 1 else 'build their regressor'} from "
+        "an **AR(5) refitted on an expanding window** of flow history. There is no "
+        "lookahead in it — day *i*'s own value never enters its own fit — but it is "
+        "not a bounded-memory forecasting method, and a blanket sentence claiming all "
+        f"{bm['n_gw_tests_all']} registered tests are one would be false."
+    )
+    A("")
+    it, they, them = (
+        ("It", "it", "it") if n_unb == 1 else ("They", "they", "them")
+    )
+    A(
+        f"{it} **{'is' if n_unb == 1 else 'are'} not dropped**. Removing a test once "
+        f"its result is known is selection, not rigour. {it} "
+        f"{'stays' if n_unb == 1 else 'stay'} in the family, "
+        f"{they} {'is' if n_unb == 1 else 'are'} corrected for, "
+        f"{they} {'carries' if n_unb == 1 else 'carry'} `bounded_memory=false` in the "
+        f"registry, and the family-wise count is re-run without {them} so a reader can "
+        f"see whether anything hangs on {them}: "
+        f"**{bm['n_full_family_holm_significant_at_05']}** Holm-surviving cells across "
+        f"all {bm['n_gw_tests_all']} tests, "
+        f"**{bm['n_full_family_holm_significant_at_05_bounded_memory_only']}** across "
+        f"the {bm['n_gw_tests_bounded_memory']} bounded-memory tests. The verdict "
+        + (f"**does** depend on {them} — see the JSON."
+           if bm["conclusion_depends_on_the_unbounded_cell"]
+           else f"does **not** depend on {them}.")
+        + (" All 10 primary cells are bounded-memory."
+           if bm["primary_family_is_entirely_bounded_memory"] else "")
+    )
+    A("")
 
     # ---- smearing note -----------------------------------------------------
     A("### Is the null an artifact of the log → variance mapping?")
@@ -535,6 +606,40 @@ def main() -> None:
     A("")
 
     # ---- files -------------------------------------------------------------
+    # ---- rev1 re-review residuals ------------------------------------------
+    resid = r.get("rev1_review_residuals_fixed")
+    if resid:
+        A("## What a second, independent re-review still found — and what changed")
+        A("")
+        A(
+            "The rebuilt study was re-reviewed against a *frozen* commit. Six residuals "
+            "survived the first rebuild. **Not one of them moved an estimate**; every "
+            "one of them moved what a reader would have been entitled to conclude from "
+            "the estimates, which is the more dangerous kind of defect and the kind "
+            "this experiment already got caught by once. (The *h*=5 statistics do "
+            "differ in the third decimal from the pre-fix run — because Yahoo "
+            "back-filled a calendar day between the two runs, adding one out-of-sample "
+            "observation. That is the data moving, not the fixes. See *Reproducing*.)"
+        )
+        A("")
+        A("| # | Residual | What changed |")
+        A("|---|---|---|")
+        labels = {
+            "R1_power_overclaim": "Power curve read as the study's power",
+            "R2_spurious_precision": "80%/90%-power effect quoted as a point",
+            "R3_beta0_is_not_size": "β=0 row described as a size calibration",
+            "R4_fixed_window_dm_mislabelled":
+                "Fixed-window raw DM tagged \"biased toward the smaller model\"",
+            "R5_verdict_basis_alignment":
+                "`verdict_basis` named only the detection test",
+            "R6_bounded_memory":
+                "One robustness cell is not a bounded-memory method",
+        }
+        for i, (key, label) in enumerate(labels.items(), start=1):
+            if key in resid:
+                A(f"| R{i} | {label} | {resid[key]} |")
+        A("")
+
     A("## Reproducing")
     A("")
     A("```bash")
@@ -547,6 +652,20 @@ def main() -> None:
     A(f"Seed `{r['seed']}` throughout (OLS is deterministic; the block bootstrap and "
       "the power simulation are seeded explicitly). The results JSON is written "
       "atomically: temp file → parse → `os.replace`.")
+    A("")
+    A(
+        "**The seed does not make this bit-reproducible, and pretending otherwise "
+        "would be its own small overclaim.** The RV series is fetched live from "
+        "Yahoo at run time, so the sample end date advances every day and Yahoo "
+        "occasionally back-fills a day it had previously dropped. Re-running this "
+        "script tomorrow will therefore move the third decimal of the *h*=5 "
+        "statistics (one extra out-of-sample observation), while the *h*=1 "
+        "statistics, the verdict, the gate counts and the family-wide bound stay "
+        "put. The vintage behind every number in this README is "
+        f"**{r['data_diagnostics']['rv']['BTC']['date_max']}** (last fully-closed "
+        "UTC day); it is recorded in `data_diagnostics.rv.*.date_max` so the "
+        "numbers can always be traced to the data that produced them."
+    )
     A("")
     A("| File | What it is |")
     A("|---|---|")

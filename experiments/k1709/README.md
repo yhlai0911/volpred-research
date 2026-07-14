@@ -27,9 +27,9 @@
 
 ## How the claim is now established
 
-- **Test**: Giacomini-White (2006) equal unconditional predictive ability (one-sided, flow-favouring), Holm-adjusted across the primary family
+- **Test**: TWO pre-specified objects, with OPPOSITE multiplicity treatments, and the verdict is a function of both. (1) DETECTION -- Giacomini-White (2006) equal unconditional predictive ability, one-sided and flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union of alternatives: ten shots at finding an effect). (2) EXCLUSION -- the pre-specified one-sided material-gain test, run as an INTERSECTION-UNION test with each cell UNADJUSTED (Berger 1982): the bounded null may be asserted only if EVERY cell rejects its own exclusion null, which needs no correction. Holm-adjusted exclusion p-values are also reported as a conservative sensitivity, but they are NOT the test. The verdict is INCONCLUSIVE precisely because (1) finds nothing and (2) does not hold in every cell.
 - **Loss**: Patton QLIKE on the variance level
-- **Estimation scheme**: paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin)
+- **Estimation scheme**: paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin). Every one of the 10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which is the condition GW's limiting experiment needs. The one registered cell that is not (`flow_transform/unexpected_z`, whose regressor comes from an expanding-window AR(5)) sits in the robustness family, is flagged `bounded_memory=false`, and is shown in `multiple_testing.bounded_memory_sensitivity` not to move the family-wise conclusion.
 - **Gate**: `qlike_improve > 0 AND GW z < -1.645 AND Holm p < 0.05`
 - **Claim scope**: bounded in QLIKE-loss space only. test = Giacomini-White | loss = Patton QLIKE | scheme = paired fixed rolling window | claim = bounded in QLIKE-loss space only. These four match by construction; v1's did not.
 
@@ -47,7 +47,7 @@ What makes the test legal under nesting is therefore **not the formula** but the
 | Share of outflow days | 41.0% | 48.8% |
 | **Market-holiday rows dropped (C3)** | **16** | **10** |
 | …of which had a non-zero Total | 0 | 0 |
-| RV calendar days | 1138 | 1138 |
+| RV calendar days | 1139 | 1139 |
 
 Every dropped row had `Total = 0.0` with all fund columns dashed. That is the trap: `sum(skipna=True)` over an all-dash row returns `0.0`, so Farside's own Total matches the recomputed sum and the parser's cross-check cannot see the problem. These were US market holidays — days the ETFs *could not* trade — being fed to the model as genuine zero-flow days, and then into the 20-flow-day rolling standard deviation that scales every shock. Fake zeros shrink that scaler, which inflates every |z| that follows.
 
@@ -57,8 +57,8 @@ Data sources: Farside Investors (daily ETF creation/redemption flows, `https://f
 
 | | corr(flow, same-day return) | corr(\|flow\|, same-day log RV) |
 |---|---|---|
-| BTC | 0.388 | 0.088 |
-| ETH | 0.218 | 0.064 |
+| BTC | 0.389 | 0.088 |
+| ETH | 0.219 | 0.064 |
 
 Flow is contemporaneously correlated with the same day's return and volatility, so a contemporaneous regression of RV on flow is uninterpretable — it cannot tell "flow moves volatility" from "volatility attracts flow". Everything below is strictly out-of-sample and conditional on a HAR-RV baseline.
 
@@ -70,14 +70,14 @@ Flow is contemporaneously correlated with the same day's return and volatility, 
 |---|---|---|---|---|---|
 | BTC h=1 H1_absflow | 355 | -0.561% | 1.30 | 1.000 | **yes** |
 | BTC h=1 H2_asym | 355 | -0.948% | 0.62 | 1.000 | no |
-| BTC h=5 H1_absflow | 350 | +0.407% | -0.50 | 1.000 | no |
-| BTC h=5 H2_asym | 350 | -1.527% | 1.43 | 1.000 | **yes** |
+| BTC h=5 H1_absflow | 351 | +0.404% | -0.50 | 1.000 | no |
+| BTC h=5 H2_asym | 351 | -1.526% | 1.44 | 1.000 | **yes** |
 | ETH h=1 H1_absflow | 223 | -0.554% | 0.67 | 1.000 | **yes** |
 | ETH h=1 H2_asym | 223 | -0.172% | 0.19 | 1.000 | no |
-| ETH h=5 H1_absflow | 217 | +0.287% | -0.32 | 1.000 | no |
-| ETH h=5 H2_asym | 217 | -0.370% | 0.40 | 1.000 | no |
+| ETH h=5 H1_absflow | 218 | +0.297% | -0.33 | 1.000 | no |
+| ETH h=5 H2_asym | 218 | -0.363% | 0.39 | 1.000 | no |
 | ETH h=1 H4_plus_btc | 223 | +0.154% | -0.34 | 1.000 | **yes** |
-| ETH h=5 H4_plus_btc | 217 | -0.362% | 0.61 | 1.000 | **yes** |
+| ETH h=5 H4_plus_btc | 218 | -0.389% | 0.66 | 1.000 | **yes** |
 
 `QLIKE Δ` is the flow model's improvement over the baseline — **negative means the flow model is worse**. `GW z < 0` would favour flow; the gate needs `z < -1.645` *and* Holm `p < 0.05` *and* a positive QLIKE Δ. Cells passing: **0 / 10**.
 
@@ -91,14 +91,14 @@ Failing to reject equal accuracy is **not** evidence of equality — that is the
 |---|---|---|---|---|---|
 | BTC h=1 H1_absflow | 2.74 | 0.003 | **yes** | 0.031 | ≤ 0.19% |
 | BTC h=1 H2_asym | 1.19 | 0.116 | no | 0.465 | ≤ 1.89% |
-| BTC h=5 H1_absflow | 0.82 | 0.205 | no | 0.465 | ≤ 1.54% |
-| BTC h=5 H2_asym | 2.22 | 0.013 | **yes** | 0.119 | ≤ 0.25% |
+| BTC h=5 H1_absflow | 0.83 | 0.203 | no | 0.465 | ≤ 1.54% |
+| BTC h=5 H2_asym | 2.22 | 0.013 | **yes** | 0.118 | ≤ 0.25% |
 | ETH h=1 H1_absflow | 1.69 | 0.046 | **yes** | 0.274 | ≤ 0.95% |
 | ETH h=1 H2_asym | 1.16 | 0.123 | no | 0.465 | ≤ 1.59% |
-| ETH h=5 H1_absflow | 0.91 | 0.180 | no | 0.465 | ≤ 1.48% |
+| ETH h=5 H1_absflow | 0.90 | 0.183 | no | 0.465 | ≤ 1.49% |
 | ETH h=5 H2_asym | 1.64 | 0.050 | no | 0.274 | ≤ 1.00% |
 | ETH h=1 H4_plus_btc | 1.97 | 0.024 | **yes** | 0.171 | ≤ 0.86% |
-| ETH h=5 H4_plus_btc | 2.06 | 0.019 | **yes** | 0.156 | ≤ 0.68% |
+| ETH h=5 H4_plus_btc | 2.12 | 0.017 | **yes** | 0.136 | ≤ 0.64% |
 
 **Why these p-values are unadjusted, while the Giacomini-White ones above are Holm-corrected.** The two claims have opposite logical structure, and the correction has to follow the claim, not the habit. *"Flow helps somewhere"* is a **union** of alternatives — ten shots at finding an effect — so the family-wise error rate must be controlled. *"Flow helps nowhere by ≥1%"* is an **intersection**: it may be asserted only if *every* cell rejects its own exclusion null, which is an intersection-union test (Berger 1982) and holds at level α with each cell tested unadjusted. Holm there would inflate type-II error and buy no type-I protection. The Holm column is reported anyway so the choice is auditable — and note it does not change the verdict either way.
 
@@ -118,11 +118,13 @@ Holding **simultaneously across all 10 cells** (Bonferroni): the relative QLIKE 
 
 | | BTC | ETH |
 |---|---|---|
-| Rejection rate when the true effect is 0 | 0.007 | 0.019 |
-| 80% power first reached at | +82.21% RV uplift (power 0.91; previous grid point 0.73) | never — not even at +82.21% RV uplift |
-| 90% power first reached at | +82.21% RV uplift (power 0.91; previous grid point 0.73) | never — not even at +82.21% RV uplift |
+| Rejection rate when the true effect is 0 | 0.004 | 0.018 |
+| 80% power crossing lies in | +56.83% … +82.21% RV uplift (power 0.71 → 0.91) | never reached — not even at +82.21% RV uplift |
+| 90% power crossing lies in | +56.83% … +82.21% RV uplift (power 0.71 → 0.91) | never reached — not even at +82.21% RV uplift |
 
-These are the first points on a **coarse grid** at which power is met, not solved thresholds — the true crossing sits somewhere between the previous grid point and this one. Reporting them as exact would be a small cousin of the error that got v1 failed.
+Those are **intervals, not thresholds**. β runs on a coarse 8-point grid, so the effect size at which power crosses a target can only be bracketed — it sits somewhere strictly inside the interval. The results JSON deliberately publishes **no point estimate** of an 80%- or 90%-power effect: turning a coarse curve into a precise-sounding number is exactly the move that got v1 failed, and a smaller version of it is still that move.
+
+**Read the scope before quoting any of this.** The simulation covers *one cell* of the design: **h = 1 only** (the primary family also contains h = 5), a **single injected |flow| shock** (the H2 asymmetry and the cross-asset H4 alternative are never simulated, so this says nothing about power against *them*), and the **nominal single-cell gate** — not the ten-cell Holm-corrected family that actually produces the verdict, which is strictly less powerful. This is not "the power of the study", and it must not be quoted as such.
 
 The β=0 row is **not** "size" in the textbook sense, and it should sit *below* 5% rather than at it. Under Giacomini-White's method-level null with a fixed window, an irrelevant extra regressor makes the augmented method genuinely worse — it pays an estimation cost and buys nothing — so E[L_flow − L_base] > 0 strictly. A one-sided flow-favouring gate is therefore conservative at β=0 by construction. What the row establishes is the thing that matters: **this gate does not manufacture flow signals out of noise**. A rate materially *above* 5% would have been the alarm.
 
@@ -130,18 +132,18 @@ Per-β detail (BTC / ETH rejection rate at the 5% gate):
 
 | True RV uplift per 1-sd shock | BTC power | ETH power |
 |---|---|---|
-| +0.0% | 0.01 | 0.02 |
-| +5.1% | 0.01 | 0.03 |
-| +10.5% | 0.03 | 0.07 |
-| +16.2% | 0.10 | 0.11 |
-| +22.1% | 0.19 | 0.18 |
-| +35.0% | 0.40 | 0.32 |
-| +56.8% | 0.73 | 0.57 |
-| +82.2% | 0.91 | 0.70 |
+| +0.0% | 0.00 | 0.02 |
+| +5.1% | 0.01 | 0.02 |
+| +10.5% | 0.04 | 0.07 |
+| +16.2% | 0.09 | 0.13 |
+| +22.1% | 0.19 | 0.22 |
+| +35.0% | 0.42 | 0.30 |
+| +56.8% | 0.71 | 0.57 |
+| +82.2% | 0.91 | 0.72 |
 
 **Power is not an exclusion.** This table says how often the gate fires against an effect of a given size. It does *not* say the true effect is smaller than the 80%-power point — that inversion is precisely the error v1 made. It is also per-cell power at the nominal gate; the primary family additionally applies a Holm correction, so the family-wise design has *less* power than the table shows.
 
-Note how much blunter this honest reading is than v1's. v1 advertised a minimum detectable effect of +16.2% and then used it as an exclusion. In reality the design needs an uplift of about +82.21% (BTC) before it reaches 80% power, and for ETH 80% power is never reached across the whole grid. The instrument is far cruder than v1 claimed — which is one more reason the RV-space "exclusion" had to go, and why the verdict is INCONCLUSIVE rather than a bounded NULL.
+Note how much blunter this honest reading is than v1's. v1 advertised a minimum detectable effect of +16.2% and then used it as an exclusion. In reality even this single-cell, single-alternative gate needs an uplift of somewhere between +56.83% and +82.21% (BTC) before it reaches 80% power, and for ETH 80% power is never reached anywhere on the grid. The instrument is far cruder than v1 claimed — which is one more reason the RV-space "exclusion" had to go, and why the verdict is INCONCLUSIVE rather than a bounded NULL.
 
 ## Robustness
 
@@ -149,15 +151,21 @@ Every run below is registered in the same in-code test registry as the primary f
 
 | Family | Cells | Best (most flow-favouring) GW z | Any cell passing the gate? |
 |---|---|---|---|
-| RV proxy (Parkinson / r² / true hourly RV) | 6 | 0.55 | no |
-| Conservative flow lag (flow usable only at end of t+1; state lag stays 1) | 4 | -0.28 | no |
+| RV proxy (Parkinson / r² / true hourly RV) | 6 | 0.37 | no |
+| Conservative flow lag (flow usable only at end of t+1; state lag stays 1) | 4 | -0.31 | no |
 | No lognormal smearing | 4 | -1.07 | no |
-| Baseline's smearing forced onto both models | 4 | -0.51 | no |
+| Baseline's smearing forced onto both models | 4 | -0.50 | no |
 | Flow transform: signed / squared / gross churn / AR(5)-unexpected | 8 | -0.62 | no |
 | Shock threshold dummies (|z| ≥ 1.0 … 2.5) | 16 | -0.82 | no |
-| Shorter ETH burn-in (200) | 2 | 0.07 | no |
+| Shorter ETH burn-in (200) | 2 | 0.03 | no |
 
 Across **all 54** gate-eligible Giacomini-White tests in the study, **0** survive the full-family Holm correction in the flow-favouring direction. (108 further tests are registered as diagnostic-only and are barred from any gate by construction.)
+
+### 2 of those tests are not bounded-memory tests — and they are labelled
+
+Giacomini-White's limiting experiment assumes the **forecasting method** has bounded estimator memory. Every cell here fits its regression on a fixed 250-day rolling window, so the final fit always satisfies that. But the condition is on the *whole method*, not on the last regression: `flow_transform|BTC_h1|T_unexpected_z|rv_gk|fl1`, `flow_transform|ETH_h1|T_unexpected_z|rv_gk|fl1` build their regressor from an **AR(5) refitted on an expanding window** of flow history. There is no lookahead in it — day *i*'s own value never enters its own fit — but it is not a bounded-memory forecasting method, and a blanket sentence claiming all 54 registered tests are one would be false.
+
+They **are not dropped**. Removing a test once its result is known is selection, not rigour. They stay in the family, they are corrected for, they carry `bounded_memory=false` in the registry, and the family-wise count is re-run without them so a reader can see whether anything hangs on them: **0** Holm-surviving cells across all 54 tests, **0** across the 52 bounded-memory tests. The verdict does **not** depend on them. All 10 primary cells are bounded-memory.
 
 ### Is the null an artifact of the log → variance mapping?
 
@@ -174,6 +182,19 @@ Crypto trades through the weekend but the ETFs do not, so a Friday flow shock is
 
 **In-sample only**, and it does not feed any verdict — the study's claim is about out-of-sample predictive content.
 
+## What a second, independent re-review still found — and what changed
+
+The rebuilt study was re-reviewed against a *frozen* commit. Six residuals survived the first rebuild. **Not one of them moved an estimate**; every one of them moved what a reader would have been entitled to conclude from the estimates, which is the more dangerous kind of defect and the kind this experiment already got caught by once. (The *h*=5 statistics do differ in the third decimal from the pre-fix run — because Yahoo back-filled a calendar day between the two runs, adding one out-of-sample observation. That is the data moving, not the fixes. See *Reproducing*.)
+
+| # | Residual | What changed |
+|---|---|---|
+| R1 | Power curve read as the study's power | The power curve is now explicitly scoped: single cell, h = 1, one injected alternative, nominal gate. It was being read as the study's power. See power_simulation.scope. |
+| R2 | 80%/90%-power effect quoted as a point | The 80%/90%-power effect sizes are now BRACKETS only. The point fields (`rv_uplift_at_80pct_power_pct` and friends) are DELETED, not merely annotated -- a coarse grid cannot produce a point estimate, and leaving one in the JSON invites exactly the quotation it warns against. |
+| R3 | β=0 row described as a size calibration | The beta = 0 row is a false-positive diagnostic, not a size calibration. The 'size-calibrated' wording is gone from the module docstring and the figure legend. |
+| R4 | Fixed-window raw DM tagged "biased toward the smaller model" | The fixed-window raw Diebold-Mariano statistic was tagged 'biased toward the smaller model', which contradicts the very reason the scheme was changed. The role text is now scheme-specific: the expanding one is invalid, the fixed one is valid-but-not-the-gate. |
+| R5 | `verdict_basis` named only the detection test | verdict_basis.test named only the Holm-adjusted detection family, although the verdict is co-determined by the unadjusted intersection-union exclusion test. Both are now named, with their opposite multiplicity treatments. |
+| R6 | One robustness cell is not a bounded-memory method | One robustness cell (`flow_transform/unexpected_z`) uses an expanding-window AR(5) to build its regressor, so its forecasting method is not bounded-memory. It is now flagged in the registry and the full-family correction is re-run without it as a published sensitivity, instead of the write-up claiming blanket bounded memory. |
+
 ## Reproducing
 
 ```bash
@@ -184,6 +205,8 @@ uv run --extra dev python -m pytest scripts/tests/test_nested_dm_misuse_ratchet.
 ```
 
 Seed `1709` throughout (OLS is deterministic; the block bootstrap and the power simulation are seeded explicitly). The results JSON is written atomically: temp file → parse → `os.replace`.
+
+**The seed does not make this bit-reproducible, and pretending otherwise would be its own small overclaim.** The RV series is fetched live from Yahoo at run time, so the sample end date advances every day and Yahoo occasionally back-fills a day it had previously dropped. Re-running this script tomorrow will therefore move the third decimal of the *h*=5 statistics (one extra out-of-sample observation), while the *h*=1 statistics, the verdict, the gate counts and the family-wide bound stay put. The vintage behind every number in this README is **2026-07-13** (last fully-closed UTC day); it is recorded in `data_diagnostics.rv.*.date_max` so the numbers can always be traced to the data that produced them.
 
 | File | What it is |
 |---|---|

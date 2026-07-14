@@ -19,11 +19,30 @@ said were missing:
   * that power is never reported as an exclusion
     (`test_power_is_not_reported_as_an_exclusion`)
 
+and, after the 2026-07-14 re-review of the frozen rebuild, the residuals it found:
+
+  * that the power curve admits its own scope -- one cell, h=1, one alternative,
+    nominal gate -- and is never quoted as the study's power
+    (`test_power_scope_admits_it_is_not_the_studys_power`)
+  * that the 80%/90%-power effect is BRACKETED, never a point estimate
+    (`test_power_bracket_reports_an_interval_not_a_solved_threshold`)
+  * that beta=0 is a false-positive check, not a size calibration
+    (`test_beta0_row_is_a_false_positive_check_not_a_size_calibration`)
+  * that the FIXED-window raw statistic is not smeared with the expanding
+    window's pathology (`test_fixed_window_raw_dm_is_not_labelled_biased`)
+  * that the one cell without bounded estimator memory is labelled, not pooled
+    (`test_unbounded_memory_cell_is_flagged_not_silently_pooled`)
+
+  nested-dm: diagnostic-only  -- this suite calls `raw_dm_diagnostic` only to pin
+  down its LABELS and to assert it can never reach a verdict. No raw
+  Diebold-Mariano statistic is used as inference anywhere in it.
+
 Run:  uv run --extra dev python -m pytest experiments/k1709/test_k1709.py -q
 """
 
 from __future__ import annotations
 
+import ast
 import sys
 from pathlib import Path
 
@@ -60,6 +79,7 @@ from k1709 import (  # noqa: E402
     qlike_gain_upper_bound,
     paired_oos,
     power_simulation,
+    raw_dm_diagnostic,
     us_equity_sessions,
 )
 
@@ -817,7 +837,7 @@ def test_every_results_key_the_renderer_reads_is_produced(panel):
     for key in (
         "false_positive_rate_at_beta_0", "false_positive_note", "curve",
         "power_80pct_bracket", "power_90pct_bracket", "max_uplift_tested_pct",
-        "scope_warning", "reps_per_beta",
+        "scope_warning", "reps_per_beta", "scope",
     ):
         assert key in pw, key
     for key in ("rv_uplift_per_1sd_shock_pct", "power_gw_one_sided_5pct", "power_gw_se"):
@@ -825,15 +845,134 @@ def test_every_results_key_the_renderer_reads_is_produced(panel):
 
 
 def test_power_bracket_reports_an_interval_not_a_solved_threshold():
-    """`_first_at` returns a GRID point. Presenting it as the exact 80%-power effect
-    would be a small cousin of v1's turning a coarse curve into a precise number."""
+    """The grid is coarse, so the 80%-power effect can only be BRACKETED.
+
+    The rev1 re-review's R2: the previous revision published both a bracket and a
+    point (`rv_uplift_at_80pct_power_pct`), and the README then quoted the point.
+    A number that exists in the JSON will be quoted, so the point fields are gone,
+    and this test is the ratchet that keeps them gone.
+    """
     rv, flow = _make_world(n_days=800, flow_beta=0.0)
     pw = power_simulation(
         rv, make_flow_features(flow), "SYN", horizon=1, reps=40,
         betas=(0.0, 0.30, 0.90),
     )
-    assert "coarse" in pw["grid_note"]
+    assert "COARSE" in pw["grid_note"] or "coarse" in pw["grid_note"]
+
+    for banned in (
+        "beta_at_80pct_power", "rv_uplift_at_80pct_power_pct",
+        "beta_at_90pct_power", "rv_uplift_at_90pct_power_pct",
+    ):
+        assert banned not in pw, (
+            f"{banned!r} is a POINT estimate of a crossing that only a bracket can "
+            "locate. It was removed after the rev1 re-review; it must not come back."
+        )
+
     br = pw["power_80pct_bracket"]
-    if br is not None:
-        assert "bracket, not a solved threshold" in br["note"]
-        assert br["achieved_power"] >= 0.80
+    assert br is not None                       # always an object, never None
+    assert "reached_on_grid" in br
+    if br["reached_on_grid"]:
+        assert br["upper_grid_power"] >= 0.80
+        assert "bracket" in br["note"]
+        if br["lower_rv_uplift_pct"] is not None:
+            assert br["lower_grid_power"] < 0.80          # the target IS bracketed
+            assert br["lower_rv_uplift_pct"] < br["upper_rv_uplift_pct"]
+    else:
+        assert br["upper_rv_uplift_pct"] is None
+        assert "not reached" in br["note"]
+
+
+def test_power_scope_admits_it_is_not_the_studys_power():
+    """R1: the curve is ONE cell, at h=1, against ONE alternative, at the nominal
+    gate. The verdict runs a 10-cell Holm family, which is strictly weaker. The
+    previous revision reported the curve without saying so, which invites a reader
+    to treat it as the design's family-wise power."""
+    rv, flow = _make_world(n_days=700)
+    pw = power_simulation(
+        rv, make_flow_features(flow), "SYN", horizon=1, reps=20, betas=(0.0, 0.5)
+    )
+    sc = pw["scope"]
+    assert sc["horizon_simulated"] == 1
+    assert 5 in sc["primary_family_horizons"]
+    assert 5 in sc["horizons_not_simulated"]
+    assert sc["alternatives_not_simulated"]                    # H2/H4 are not covered
+    assert "Holm" in sc["multiplicity_in_the_actual_verdict"]
+    assert "none" in sc["multiplicity_in_the_simulated_gate"]
+    assert "NOT the ten-cell" in pw["gate"] or "not the ten-cell" in pw["gate"].lower()
+
+
+def test_beta0_row_is_a_false_positive_check_not_a_size_calibration():
+    """R3: 'size-calibrated' is the wrong word and it was in the module docstring.
+
+    Under GW's method-level null with a fixed window, an irrelevant regressor makes
+    the augmented METHOD genuinely worse, so the one-sided flow-favouring test is
+    conservative at beta=0 BY CONSTRUCTION. A rate below 5% is correct behaviour,
+    not a calibrated size — so the file must not advertise size calibration.
+    """
+    src = (Path(__file__).parent / "k1709.py").read_text(encoding="utf-8")
+    doc = ast.get_docstring(ast.parse(src)) or ""
+    assert "size-calibrated" not in doc.lower()
+    assert "FALSE-POSITIVE DIAGNOSTIC" in doc
+
+    rv, flow = _make_world(n_days=700)
+    pw = power_simulation(
+        rv, make_flow_features(flow), "SYN", horizon=1, reps=20, betas=(0.0, 0.5)
+    )
+    assert "NOT 'size' in" in pw["false_positive_note"]
+
+
+def test_fixed_window_raw_dm_is_not_labelled_biased():
+    """R4: the two raw-DM records are diagnostic for DIFFERENT reasons.
+
+    The expanding-window statistic is diagnostic because it is INVALID. The
+    fixed-window one is diagnostic because the verdict was pre-registered on the GW
+    object — it runs on the same GW-legal loss stream and agrees with the gate
+    statistic to ~3 decimals. Tagging the fixed-window statistic 'biased toward the
+    smaller model' imports the expanding-window pathology into the very design that
+    was changed to avoid it, and directly contradicts the file's own coincidence
+    note.
+    """
+    rng = np.random.default_rng(7)
+    la = np.abs(rng.normal(1.0, 0.2, 300))
+    lb = np.abs(rng.normal(1.0, 0.2, 300))
+
+    fixed = raw_dm_diagnostic(la, lb, h=1, scheme="fixed")
+    expanding = raw_dm_diagnostic(la, lb, h=1, scheme="expanding")
+
+    assert fixed["t_stat"] == pytest.approx(expanding["t_stat"])   # same arithmetic
+    assert fixed["feeds_gate"] is False and expanding["feeds_gate"] is False
+
+    # the discriminating substring: the fixed-window role may only ever say it is
+    # NOT biased; only the expanding one may assert the bias.
+    assert "is NOT biased toward the smaller model" in fixed["role"]
+    assert "is biased toward the smaller model" not in fixed["role"]
+    assert fixed["valid_for_this_nested_comparison"] is True
+    assert "not by invalidity" in fixed["role"].lower()
+
+    assert "is biased toward the smaller model" in expanding["role"]
+    assert expanding["valid_for_this_nested_comparison"] is False
+
+    with pytest.raises(ValueError):
+        raw_dm_diagnostic(la, lb, h=1, scheme="whatever")
+
+
+def test_unbounded_memory_cell_is_flagged_not_silently_pooled(panel):
+    """R6: the AR(5)-unexpected regressor is built on an EXPANDING window, so that
+    cell's forecasting METHOD is not bounded-memory — which is a condition GW puts
+    on the whole method, not on the final regression. It must be labelled, not
+    quietly counted among the bounded-memory tests (and not dropped either: removing
+    a test once its result is known is selection)."""
+    ok = evaluate_cell(panel, "HAR+ctrl", "H1_absflow", family="primary")
+    bad = evaluate_cell(
+        panel, "HAR+ctrl", "H1_absflow", family="flow_transform",
+        variant="unexp", bounded_memory=False,
+    )
+    assert ok["bounded_memory"] is True
+    assert bad["bounded_memory"] is False
+
+    gw = [r for r in REGISTRY if r.inference == "giacomini_white_qlike_fixed_window"]
+    assert {r.bounded_memory for r in gw} == {True, False}
+    # every test of the offending cell inherits the flag, not just the GW one
+    assert all(
+        not r.bounded_memory for r in REGISTRY if r.cell == bad["cell"]
+    )

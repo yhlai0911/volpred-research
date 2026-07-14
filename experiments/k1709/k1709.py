@@ -14,33 +14,55 @@ redemptions), not the calendar/microstructure of ETF trading hours.
 
 Inference design (this is what v1 got wrong)
 --------------------------------------------
-`HAR+ctrl` and `HAR+ctrl+flow` are STRICTLY NESTED. Under the nested null the
-augmented method's extra estimated coefficients inject pure forecast noise, so
-an ordinary loss-difference statistic does not have its usual equal-accuracy
-interpretation. v1 pushed an expanding-window QLIKE loss through a raw
-Diebold-Mariano statistic and then bolted on a Clark-West helper that actually
-scores *variance-level squared error* -- three different estimands fused into a
-single NULL gate. See `codex_review_20260714.md` and the K1701 lesson in
-`docs/error_log.md` (2026-07-13 05:47).
+`HAR+ctrl` and `HAR+ctrl+flow` are STRICTLY NESTED. What breaks an ordinary
+loss-difference statistic here is not nesting by itself: it is nesting COMBINED
+WITH AN ESTIMATION SCHEME THAT DRIVES ESTIMATION ERROR TO ZERO. Under an
+expanding (recursive) window the two methods' forecasts converge under the null,
+the loss differential degenerates, and the statistic tilts toward the smaller
+model. Under a FIXED ROLLING window the estimation error never vanishes, the
+loss differential keeps a non-degenerate variance, and the comparison is legal
+again -- that is precisely Giacomini-White's (2006) construction. v1 pushed an
+expanding-window QLIKE loss through a raw Diebold-Mariano statistic and then
+bolted on a Clark-West helper that actually scores *variance-level squared
+error* -- three different estimands fused into a single NULL gate. See
+`codex_review_20260714.md` and the K1701 lesson in `docs/error_log.md`
+(2026-07-13 05:47).
 
   nested-dm: diagnostic-only  -- every raw Diebold-Mariano number in this file is
   descriptive and is tagged `feeds_gate=False`. None of them reaches a verdict.
+  Two DIFFERENT reasons sit behind that one tag, and they must not be conflated:
+  the EXPANDING-window statistic is diagnostic because it is INVALID (degenerate
+  null); the FIXED-window statistic is diagnostic because the verdict is carried
+  by the pre-registered Giacomini-White object, NOT because it is invalid -- it
+  runs on the same GW-legal loss stream and agrees with the gate statistic to ~3
+  decimals.
 
 What the claim actually rests on:
   * Giacomini-White (2006) equal-unconditional-predictive-ability test on Patton
     QLIKE, computed from a PAIRED FIXED ROLLING WINDOW. GW keeps estimation
     uncertainty in the limiting experiment, which is exactly what makes it legal
-    for nested *methods* where the ordinary loss-difference statistic is not.
+    for nested *methods* where a vanishing-estimation-error scheme is not.
+    Bounded estimator memory is a condition on the whole FORECASTING METHOD, not
+    just on the final regression: the one robustness cell whose regressor is
+    itself built from an expanding-window AR(5) (`flow_transform/unexpected_z`)
+    therefore does NOT satisfy it, is flagged as such in the registry
+    (`bounded_memory=false`), and is reported with a sensitivity that re-runs the
+    full-family correction without it. None of the 10 primary cells uses it.
   * A pre-specified one-sided MATERIAL-GAIN EXCLUSION test. Failing to reject
     equal accuracy is not evidence of equality; only this test can license a
     bounded null, and only in QLIKE-loss space.
   * Clark-West is retained but reported strictly as evidence about a SEPARATE
     MSPE estimand. It is never relabelled as a QLIKE general-loss test.
 
-Power is reported (>=1000 simulated OOS paths, size-calibrated) but it is a
-statement about the DESIGN, not about the effect: power cannot prove that the
-effect is smaller than the minimum detectable effect. v1 made exactly that
-inversion.
+Power is reported (>=1000 simulated OOS paths, with a false-positive check at
+beta = 0) but it is a statement about the DESIGN, not about the effect: power
+cannot prove that the effect is smaller than the minimum detectable effect. v1
+made exactly that inversion. Its SCOPE is deliberately narrow and must be quoted
+as such: h = 1 only (the primary family also contains h = 5), a single injected
+|flow| shock (the H2 asymmetry and the cross-asset H4 alternatives are NOT
+simulated), and a SINGLE-CELL nominal gate. It is NOT the power of the ten-cell
+Holm-corrected family, which is strictly lower. The beta = 0 row is a
+FALSE-POSITIVE DIAGNOSTIC, not a size calibration -- see `false_positive_note`.
 
 Information set / lookahead
 ---------------------------
@@ -149,6 +171,15 @@ class TestRecord:
 
     `p_one_sided` is stored RAW (unrounded). v1 fed 4-decimal rounded p-values
     into Holm.
+
+    `bounded_memory` records whether the FORECASTING METHOD behind this test has
+    the bounded estimator memory Giacomini-White assumes. It is a property of the
+    whole method, not of the final regression: a cell whose regressor is itself
+    built by an expanding-window fit does not have it, even though every column
+    is strictly backward-looking. Flagging it here is what lets the write-up stop
+    claiming, in one blanket sentence, that every registered test is a
+    bounded-memory test -- and lets the family-wise correction be re-run without
+    the offender as a published sensitivity rather than a quiet exclusion.
     """
 
     family: str
@@ -165,6 +196,7 @@ class TestRecord:
     feeds_gate: bool
     qlike_improve_pct: float | None = None
     n: int | None = None
+    bounded_memory: bool = True
 
 
 REGISTRY: list[TestRecord] = []
@@ -1182,13 +1214,36 @@ def block_bootstrap_ci(
     }
 
 
-def raw_dm_diagnostic(loss_aug: np.ndarray, loss_base: np.ndarray, h: int) -> dict:
+def raw_dm_diagnostic(
+    loss_aug: np.ndarray, loss_base: np.ndarray, h: int, scheme: str = "fixed"
+) -> dict:
     """Ordinary Diebold-Mariano on the QLIKE loss difference. DESCRIPTIVE ONLY.
 
-    Kept because it is what the literature reports and because its gap from the
-    Giacomini-White statistic is itself informative -- but under the nested null
-    it is biased toward the smaller model, so it is tagged `feeds_gate=False`
-    everywhere and never reaches a verdict.
+    `scheme` decides WHY it is descriptive, and the two reasons are not the same
+    reason. Writing one label for both is how a file ends up contradicting
+    itself.
+
+      scheme="expanding"  The statistic is INVALID for this comparison. An
+                          expanding window drives estimation error to zero, the
+                          nested null degenerates, and the statistic is biased
+                          toward the smaller model. It is kept only to show what
+                          v1's design produced.
+
+      scheme="fixed"      The statistic is VALID and is simply not the object the
+                          verdict was pre-registered on. It runs on the very loss
+                          stream the Giacomini-White gate runs on -- a fixed
+                          rolling window, so estimation error survives in the
+                          limit and there is NO bias toward the smaller model
+                          here. It differs from the gate statistic only in the
+                          HAC small-sample scaling and in taking a Student-t
+                          rather than a normal reference, which is why the two
+                          agree to ~3 decimals. Calling this one "biased toward
+                          the smaller model" would be importing the expanding-
+                          window pathology into a design that was changed
+                          specifically to avoid it.
+
+    Either way `feeds_gate=False`: exactly one object reaches the verdict, and it
+    is the one whose reference distribution was justified in advance.
 
     C5 -- naming. `volpred.stats.model_evaluation.dm_test` is a HAC-DM statistic
     combined with the Harvey-Liu-Zhu (2016) |t| > 3 heuristic threshold. It does
@@ -1198,15 +1253,36 @@ def raw_dm_diagnostic(loss_aug: np.ndarray, loss_base: np.ndarray, h: int) -> di
     distribution the helper uses for its two-sided p -- v1 switched to a normal
     CDF here, so its two p-values disagreed with each other.
     """
+    if scheme not in ("fixed", "expanding"):
+        raise ValueError(f"scheme must be 'fixed' or 'expanding'; got {scheme!r}")
     t, p_two = dm_test(loss_aug, loss_base, h=h)
     n = int(np.isfinite(np.asarray(loss_aug) - np.asarray(loss_base)).sum())
+    role = {
+        "fixed": (
+            "diagnostic-only BY DESIGN, not by invalidity: same estimand and same "
+            "fixed-rolling-window loss stream as the Giacomini-White gate, "
+            "differing only in the HAC small-sample scaling and a Student-t "
+            "reference. A fixed window keeps estimation error in the limiting "
+            "experiment, so this statistic is NOT biased toward the smaller model. "
+            "It does not feed the gate because the verdict was pre-registered on "
+            "the object with the justified reference distribution."
+        ),
+        "expanding": (
+            "diagnostic-only BECAUSE INVALID: an expanding window drives estimation "
+            "error to zero, the nested null is degenerate, and the statistic is "
+            "biased toward the smaller model. Reported only to show what v1's "
+            "design produced."
+        ),
+    }[scheme]
     return {
         "statistic": "HAC-DM (canonical bandwidth) + Harvey-Liu-Zhu |t|>3 heuristic",
+        "estimation_scheme": scheme,
         "not_hln": (
             "This is NOT Harvey-Leybourne-Newbold modified DM: no finite-sample "
             "correction factor is applied. v1 mislabelled it."
         ),
-        "role": "diagnostic-only; biased toward the smaller model under nesting",
+        "role": role,
+        "valid_for_this_nested_comparison": scheme == "fixed",
         "feeds_gate": False,
         "t_stat": float(t),
         "p_two_sided_student_t": float(p_two),
@@ -1227,6 +1303,7 @@ def evaluate_cell(
     smearing: str = "own",
     variant: str = "",
     register_gate: bool = True,
+    bounded_memory: bool = True,
 ) -> dict | None:
     """Run one nested comparison end to end and register its tests.
 
@@ -1237,6 +1314,12 @@ def evaluate_cell(
     cell's exclusion statistics be wired into the primary family. That is not
     hypothetical -- it happened, and it is why `_assert_unique_cell` below now
     fails loudly instead of letting the last writer win.
+
+    `bounded_memory=False` marks a cell whose forecasting METHOD does not satisfy
+    GW's bounded-estimator-memory condition (see `TestRecord`). Such a cell is
+    still registered and still corrected for -- dropping a test after seeing its
+    result would be selection -- but it is labelled, and the family-wise number is
+    reported with and without it.
     """
     po = paired_oos(p, base, alt, train_window, smearing)
     if len(po.actual) < GW_MIN_LOSSES:
@@ -1257,7 +1340,7 @@ def evaluate_cell(
         "gains below it are not. None = even a 90% gain cannot be excluded."
     )
     boot = block_bootstrap_ci(la, lb, h, seed=SEED + h)
-    dm = raw_dm_diagnostic(la, lb, h)
+    dm = raw_dm_diagnostic(la, lb, h, scheme="fixed")
 
     # v1's design, re-run purely so the results file can show what changed. An
     # expanding window breaks GW's bounded-memory condition, so a HAC t-test on
@@ -1267,7 +1350,7 @@ def evaluate_cell(
     if len(exp_po.actual) >= GW_MIN_LOSSES:
         exp_lb = qlike_pointwise(exp_po.actual, exp_po.pred_base)
         exp_la = qlike_pointwise(exp_po.actual, exp_po.pred_aug)
-        exp_dm = raw_dm_diagnostic(exp_la, exp_lb, h)
+        exp_dm = raw_dm_diagnostic(exp_la, exp_lb, h, scheme="expanding")
         expanding = {
             "scheme": "expanding window (v1's design)",
             "valid_for_nested_inference": False,
@@ -1298,6 +1381,7 @@ def evaluate_cell(
             scheme="paired fixed rolling window",
             stat=gw["z_stat"], p_one_sided=gw["p_value_one_sided_flow_better"],
             feeds_gate=register_gate, qlike_improve_pct=improve, n=gw["n"],
+            bounded_memory=bounded_memory,
         )
     )
     register(
@@ -1308,6 +1392,7 @@ def evaluate_cell(
             scheme="paired fixed rolling window",
             stat=dm["t_stat"], p_one_sided=dm["p_one_sided_flow_better_student_t"],
             feeds_gate=False, qlike_improve_pct=improve, n=gw["n"],
+            bounded_memory=bounded_memory,
         )
     )
     register(
@@ -1319,6 +1404,7 @@ def evaluate_cell(
             stat=float(cw["t_stat"]),
             p_one_sided=float(cw.get("p_value_one_sided", np.nan)),
             feeds_gate=False, qlike_improve_pct=improve, n=gw["n"],
+            bounded_memory=bounded_memory,
         )
     )
 
@@ -1333,6 +1419,7 @@ def evaluate_cell(
         "state_lag": p.state_lag,
         "flow_lag": p.flow_lag,
         "smearing": smearing,
+        "bounded_memory": bounded_memory,
         "n_oos": int(len(po.actual)),
         "oos_start": str(po.origins.min().date()),
         "oos_end": str(po.origins.max().date()),
@@ -1478,18 +1565,34 @@ def power_simulation(
     reps: int = POWER_REPS,
     betas: tuple[float, ...] = POWER_BETAS,
 ) -> dict:
-    """Simulated power of the pre-specified GW gate, with size calibration.
+    """Simulated power of ONE cell's GW gate, plus a false-positive check at beta=0.
 
     v1's "MDE" was not a power analysis at all: it injected each beta ONCE into
     the single realised noise path and took the first crossing. No repeated
-    sampling, no size calibration, no confidence interval -- and the resulting
+    sampling, no false-positive check, no confidence interval -- and the resulting
     curve was not even monotone in beta, which is a tell that it was reading
     noise. It then INVERTED the logic and claimed the null "excludes effects
     >= the MDE". Power cannot do that. Only the exclusion test can, and it is
     reported separately.
 
+    SCOPE -- what this is NOT (quote it with these limits or not at all):
+      * It is the power of a SINGLE CELL against the NOMINAL one-sided 5% gate
+        (z < -1.645). The verdict runs a ten-cell Holm-corrected family, whose
+        power is strictly LOWER. This is not "the power of the study".
+      * `horizon` defaults to 1. The primary family also contains h = 5 cells,
+        which are not simulated here.
+      * The injected effect is a single |flow| shock entering the HAR law of
+        motion -- the H1-style alternative. The H2 asymmetry and the cross-asset
+        H4 alternative are NOT simulated, so this curve says nothing about the
+        design's power against THEM.
+      * The beta = 0 row is a FALSE-POSITIVE DIAGNOSTIC, not a size calibration:
+        under GW's method-level null with a fixed window, an irrelevant regressor
+        makes the augmented method genuinely worse, so the flow-favouring
+        one-sided test is CONSERVATIVE at beta = 0 by construction. A rate below
+        5% there is the correct behaviour, not evidence of a calibrated size.
+
     What this function establishes: for an effect of size beta, how often would
-    the pre-specified gate fire? Nothing more.
+    that one gate fire? Nothing more.
     """
     dgp = fit_calendar_har(rv, "rv_gk")
     idx = rv.index
@@ -1560,32 +1663,49 @@ def power_simulation(
     def _first_at(power: float) -> dict | None:
         return next((r for r in rows if r["power_gw_one_sided_5pct"] >= power), None)
 
-    def _bracket(power: float) -> dict | None:
-        """The grid point where power is FIRST met, plus the one below it.
+    def _bracket(power: float) -> dict:
+        """The INTERVAL that contains the power crossing. Never a point.
 
-        This is a bracket, not a solved threshold: the true crossing lies somewhere
-        between the two. Reporting the upper grid point as if it were the exact
-        80%-power effect would be a (smaller) cousin of v1's habit of turning a
-        coarse curve into a precise-sounding number.
+        The grid is coarse (8 betas), so the effect size at which power first
+        reaches a target is only ever bracketed: it lies strictly between the last
+        grid point BELOW the target and the first grid point AT OR ABOVE it. v1's
+        signature error was turning a coarse curve into a precise-sounding number;
+        reporting the upper grid point as "the 80%-power effect" would be a smaller
+        version of the same move, so no point estimate is emitted at all -- only
+        `lower_rv_uplift_pct` / `upper_rv_uplift_pct`, and `upper` is None when the
+        grid never reaches the target (the crossing is then beyond the grid, or
+        does not exist).
         """
         hit = _first_at(power)
-        if hit is None:
-            return None
-        below = [r for r in rows if r["beta"] < hit["beta"]]
+        below = [r for r in rows if hit is None or r["beta"] < hit["beta"]]
         prev = below[-1] if below else None
+        reached = hit is not None
         return {
-            "power_first_met_at_beta": hit["beta"],
-            "power_first_met_at_rv_uplift_pct": hit["rv_uplift_per_1sd_shock_pct"],
-            "achieved_power": hit["power_gw_one_sided_5pct"],
-            "previous_grid_beta": prev["beta"] if prev else None,
-            "previous_grid_power": prev["power_gw_one_sided_5pct"] if prev else None,
+            "target_power": power,
+            "reached_on_grid": reached,
+            "lower_rv_uplift_pct": prev["rv_uplift_per_1sd_shock_pct"] if prev else None,
+            "lower_grid_power": prev["power_gw_one_sided_5pct"] if prev else None,
+            "upper_rv_uplift_pct": hit["rv_uplift_per_1sd_shock_pct"] if reached else None,
+            "upper_grid_power": hit["power_gw_one_sided_5pct"] if reached else None,
+            "lower_beta": prev["beta"] if prev else None,
+            "upper_beta": hit["beta"] if reached else None,
             "note": (
-                "The true crossing lies between the previous grid point and this one; "
-                "the grid is coarse and this is a bracket, not a solved threshold."
+                (
+                    "The crossing lies strictly INSIDE this interval. It is a bracket, "
+                    "not a solved threshold, and must never be quoted as a single "
+                    "number."
+                )
+                if reached
+                else (
+                    f"Power never reaches {power:.0%} anywhere on the grid (the "
+                    f"largest effect simulated is +"
+                    f"{rows[-1]['rv_uplift_per_1sd_shock_pct']}% RV uplift, where power "
+                    f"is only {rows[-1]['power_gw_one_sided_5pct']:.2f}). No bracket "
+                    "exists; the honest statement is 'not reached', not a number."
+                )
             ),
         }
 
-    p80, p90 = _first_at(0.80), _first_at(0.90)
     return {
         "asset": asset,
         "horizon": horizon,
@@ -1597,7 +1717,36 @@ def power_simulation(
         ),
         "reps_per_beta": reps,
         "seed": SEED,
-        "gate": f"GW z < {POWER_GATE_Z} (one-sided 5%), pre-specified",
+        "gate": (
+            f"SINGLE-CELL nominal GW gate: z < {POWER_GATE_Z} (one-sided 5%), "
+            "pre-specified. This is NOT the ten-cell Holm-corrected gate that "
+            "produces the verdict."
+        ),
+        "scope": {
+            "what_this_is": (
+                "The power of ONE pre-specified cell's gate against a single "
+                "injected alternative, at one horizon."
+            ),
+            "what_this_is_not": (
+                "The power of the study. The verdict is adjudicated on a ten-cell "
+                "family with a Holm correction, which is strictly less powerful than "
+                "the nominal single-cell gate simulated here. No number in this "
+                "object may be quoted as the design's family-wise power."
+            ),
+            "horizon_simulated": horizon,
+            "primary_family_horizons": list(HORIZONS),
+            "horizons_not_simulated": [h for h in HORIZONS if h != horizon],
+            "alternative_simulated": (
+                "a single |flow| z-shock injected into the HAR law of motion "
+                "(the H1-style alternative)"
+            ),
+            "alternatives_not_simulated": [
+                "H2_asym (signed / asymmetric flow response)",
+                "H4_plus_btc (cross-asset BTC flow spillover into ETH)",
+            ],
+            "multiplicity_in_the_simulated_gate": "none (nominal 5%, single cell)",
+            "multiplicity_in_the_actual_verdict": "Holm across the 10-cell family",
+        },
         "dgp_persistence_phi_sum": round(dgp["persistence"], 4),
         "dgp_resid_sd": round(dgp["resid_sd"], 4),
         "false_positive_rate_at_beta_0": size["power_gw_one_sided_5pct"] if size else None,
@@ -1618,18 +1767,14 @@ def power_simulation(
         "power_80pct_bracket": _bracket(0.80),
         "power_90pct_bracket": _bracket(0.90),
         "grid_note": (
-            "beta is evaluated on a coarse grid, so the '80% power at +X%' figures "
-            "below are the FIRST GRID POINT at which power is met, not a solved "
-            "threshold. See the bracket objects for the interval that actually "
-            "contains the crossing."
-        ),
-        "beta_at_80pct_power": p80["beta"] if p80 else None,
-        "rv_uplift_at_80pct_power_pct": (
-            p80["rv_uplift_per_1sd_shock_pct"] if p80 else None
-        ),
-        "beta_at_90pct_power": p90["beta"] if p90 else None,
-        "rv_uplift_at_90pct_power_pct": (
-            p90["rv_uplift_per_1sd_shock_pct"] if p90 else None
+            "beta is evaluated on a COARSE grid of 8 points, so the effect size at "
+            "which power first reaches a target is BRACKETED, never solved. The "
+            "brackets above are the only admissible reading: a crossing lies "
+            "somewhere inside [lower_rv_uplift_pct, upper_rv_uplift_pct]. This "
+            "object deliberately emits NO point estimate of an 80%- or 90%-power "
+            "effect size -- an earlier revision printed the upper grid point as if "
+            "it were the threshold, which is the same 'coarse curve, precise number' "
+            "move that got v1 failed, only smaller."
         ),
         "max_beta_tested": max(betas),
         "max_uplift_tested_pct": round((math.exp(max(betas)) - 1) * 100, 2),
@@ -1640,9 +1785,12 @@ def power_simulation(
             "made when it claimed to 'rule out >= +16% RV per 1-sd shock'. The only "
             "upper bound this study can defend is the material-gain exclusion test, "
             "and it lives in QLIKE-loss space. "
-            "Also note this is PER-CELL power at the nominal 5% gate: the primary "
-            "family additionally applies a Holm correction, which is stricter, so "
-            "the family-wise design has LESS power than the curve below."
+            "Also note the SCOPE (see `scope`): this is PER-CELL power at the nominal "
+            "5% gate, at h = 1, against ONE injected alternative. The verdict's family "
+            "additionally applies a Holm correction, spans h = 5 as well, and includes "
+            "alternatives that are not simulated here -- so the family-wise design has "
+            "LESS power than the curve below, and the curve says nothing at all about "
+            "power against H2_asym or H4_plus_btc."
         ),
     }
 
@@ -1664,6 +1812,7 @@ def _serialize(rec: TestRecord, holm_p: float | None = None) -> dict:
         "stat": round(rec.stat, 4) if np.isfinite(rec.stat) else None,
         "p_one_sided_raw": rec.p_one_sided,
         "feeds_gate": rec.feeds_gate,
+        "bounded_memory": rec.bounded_memory,
         "qlike_improve_pct": (
             round(rec.qlike_improve_pct, 4) if rec.qlike_improve_pct is not None else None
         ),
@@ -1693,10 +1842,17 @@ def main() -> None:
         "inference_design": {
             "problem": (
                 "HAR+ctrl vs HAR+ctrl+flow is a STRICTLY NESTED comparison of "
-                "forecasting methods. Under the nested null the augmented method's "
-                "extra estimated coefficients add pure forecast noise, so an "
-                "ordinary loss-difference statistic is biased toward the smaller "
-                "model and does not have its usual equal-accuracy reading."
+                "forecasting methods. What breaks an ordinary loss-difference "
+                "statistic is nesting COMBINED WITH an estimation scheme whose "
+                "estimation error vanishes: under an expanding (recursive) window the "
+                "two methods' forecasts converge under the null, the loss "
+                "differential degenerates and the statistic tilts toward the smaller "
+                "model. That is v1's design. Under a FIXED ROLLING window the "
+                "estimation error survives in the limit, the loss differential keeps "
+                "a non-degenerate variance, and the comparison is legal again -- "
+                "which is exactly why the scheme was changed, and why it would be "
+                "wrong to keep calling the fixed-window statistic 'biased toward the "
+                "smaller model'."
             ),
             "claim_bearing_test": (
                 "Giacomini-White (2006) equal unconditional predictive ability on "
@@ -1711,15 +1867,24 @@ def main() -> None:
             ),
             "diagnostic_only": (
                 "Raw Diebold-Mariano (HAC, canonical bandwidth) and Clark-West are "
-                "reported but tagged feeds_gate=false. Clark-West scores a DIFFERENT "
-                "estimand (variance-level MSPE), so it is never relabelled as a "
-                "QLIKE general-loss test -- that relabelling is what the review "
-                "flagged as CRITICAL in v1."
+                "reported but tagged feeds_gate=false -- for two DIFFERENT reasons, "
+                "which the results file keeps apart. The EXPANDING-window statistic "
+                "is diagnostic because it is invalid (degenerate null). The "
+                "FIXED-window statistic is diagnostic because the verdict was "
+                "pre-registered on the Giacomini-White object, NOT because it is "
+                "invalid: it runs on the same legal loss stream and matches the gate "
+                "statistic to ~3 decimals. Clark-West scores a DIFFERENT estimand "
+                "(variance-level MSPE), so it is never relabelled as a QLIKE "
+                "general-loss test -- that relabelling is what the review flagged as "
+                "CRITICAL in v1."
             ),
             "power_is_not_exclusion": (
-                "Simulated power is reported for the design, but power cannot prove "
-                "the effect is smaller than the minimum detectable effect. v1 made "
-                "that inversion and claimed to rule out a >=16% RV uplift. Withdrawn."
+                "Simulated power is reported for ONE cell of the design at h = 1 "
+                "against ONE injected alternative, but power cannot prove the effect "
+                "is smaller than the minimum detectable effect. v1 made that "
+                "inversion and claimed to rule out a >=16% RV uplift. Withdrawn. The "
+                "curve is also NOT the family's power: the verdict applies a Holm "
+                "correction over 10 cells, which is strictly less powerful."
             ),
         },
         "v1_defects_fixed": {
@@ -1730,6 +1895,56 @@ def main() -> None:
             "C5": "HLN mislabelling corrected; one-sided p unified to Student-t",
             "C6": "Holm uses raw p; the family is derived from a single test registry",
             "C7": "README numbers regenerated from the results JSON",
+        },
+        "rev1_review_residuals_fixed": {
+            "note": (
+                "Six methodology/wording residuals found by an independent re-review "
+                "of the frozen commit 34c291a4. NOT ONE OF THEM CHANGED AN ESTIMATE -- "
+                "they are all about what a reader is entitled to conclude from the "
+                "estimates, which is the failure mode that got v1 FAILed. Be precise "
+                "about the one thing that did move between the two runs: it was the "
+                "DATA, not the fixes. Yahoo back-filled a calendar day it had "
+                "previously dropped (2026-07-12 -> 2026-07-13), which adds one "
+                "out-of-sample observation to the h=5 cells and shifts their GW z in "
+                "the third decimal. The h=1 statistics, the verdict, every gate count "
+                "and the family-wide bound are bit-identical across the two runs."
+            ),
+            "R1_power_overclaim": (
+                "The power curve is now explicitly scoped: single cell, h = 1, one "
+                "injected alternative, nominal gate. It was being read as the study's "
+                "power. See power_simulation.scope."
+            ),
+            "R2_spurious_precision": (
+                "The 80%/90%-power effect sizes are now BRACKETS only. The point "
+                "fields (`rv_uplift_at_80pct_power_pct` and friends) are DELETED, not "
+                "merely annotated -- a coarse grid cannot produce a point estimate, "
+                "and leaving one in the JSON invites exactly the quotation it warns "
+                "against."
+            ),
+            "R3_beta0_is_not_size": (
+                "The beta = 0 row is a false-positive diagnostic, not a size "
+                "calibration. The 'size-calibrated' wording is gone from the module "
+                "docstring and the figure legend."
+            ),
+            "R4_fixed_window_dm_mislabelled": (
+                "The fixed-window raw Diebold-Mariano statistic was tagged 'biased "
+                "toward the smaller model', which contradicts the very reason the "
+                "scheme was changed. The role text is now scheme-specific: the "
+                "expanding one is invalid, the fixed one is valid-but-not-the-gate."
+            ),
+            "R5_verdict_basis_alignment": (
+                "verdict_basis.test named only the Holm-adjusted detection family, "
+                "although the verdict is co-determined by the unadjusted "
+                "intersection-union exclusion test. Both are now named, with their "
+                "opposite multiplicity treatments."
+            ),
+            "R6_bounded_memory": (
+                "One robustness cell (`flow_transform/unexpected_z`) uses an "
+                "expanding-window AR(5) to build its regressor, so its forecasting "
+                "method is not bounded-memory. It is now flagged in the registry and "
+                "the full-family correction is re-run without it as a published "
+                "sensitivity, instead of the write-up claiming blanket bounded memory."
+            ),
         },
     }
 
@@ -1879,7 +2094,16 @@ def main() -> None:
                 p.df.dropna(subset=[col]), p.rv_col, 1, a,
                 state_lag=p.state_lag, flow_lag=p.flow_lag,
             )
-            c = evaluate_cell(pt, "HAR+ctrl", f"T_{label}", family="flow_transform")
+            # The AR(5)-unexpected transform is the one cell in the whole study
+            # whose forecasting METHOD lacks bounded estimator memory: the AR(5)
+            # that builds the regressor refits on an expanding window of flow
+            # history. It is registered and corrected for like any other cell --
+            # dropping it after seeing its result would be selection -- but it is
+            # flagged, and the family-wise count is reported without it as well.
+            c = evaluate_cell(
+                pt, "HAR+ctrl", f"T_{label}", family="flow_transform",
+                bounded_memory=(label != "unexpected_z"),
+            )
             if c:
                 c["transform"] = label
                 c["in_sample_t"] = in_sample(pt, f"T_{label}")["coef"][col]["t"]
@@ -1890,7 +2114,9 @@ def main() -> None:
                         "value never enters its own fit), but the forecasting METHOD "
                         "does not have the bounded estimator memory GW formally "
                         "assumes. Read this cell's GW p-value as indicative. None of "
-                        "the 10 primary cells uses this column."
+                        "the 10 primary cells uses this column, and "
+                        "`multiple_testing.bounded_memory_sensitivity` re-runs the "
+                        "full-family correction without this cell."
                     )
                 cells.append(c)
 
@@ -2048,6 +2274,17 @@ def main() -> None:
         r["excludes_material_gain"] for r in primary_rows
     )
 
+    # Bounded-memory sensitivity. One registered GW cell -- the AR(5)-unexpected
+    # flow transform -- builds its regressor with an expanding-window fit, so its
+    # forecasting method does not satisfy GW's bounded-memory condition. It is NOT
+    # dropped (removing a test once its result is known is selection); it is
+    # flagged, and the family-wise conclusion is re-derived without it so a reader
+    # can see whether anything hangs on it.
+    gw_bm = [r for r in gw_all if r.bounded_memory]
+    holm_bm = holm([r.p_one_sided for r in gw_bm])
+    n_sig_all = int(sum(hp < 0.05 and r.stat < 0 for r, hp in zip(gw_all, holm_full)))
+    n_sig_bm = int(sum(hp < 0.05 and r.stat < 0 for r, hp in zip(gw_bm, holm_bm)))
+
     res["multiple_testing"] = {
         "registry_note": (
             "The families below are DERIVED from the in-code test registry, not "
@@ -2061,9 +2298,37 @@ def main() -> None:
         "full_family_holm": [
             _serialize(r, holm_p=hp) for r, hp in zip(gw_all, holm_full)
         ],
-        "n_full_family_holm_significant_at_05": int(
-            sum(hp < 0.05 and r.stat < 0 for r, hp in zip(gw_all, holm_full))
-        ),
+        "n_full_family_holm_significant_at_05": n_sig_all,
+        "bounded_memory_sensitivity": {
+            "issue": (
+                "GW's limiting experiment assumes the forecasting METHOD has bounded "
+                "estimator memory. Every cell here uses a fixed 250-day rolling "
+                "regression window, so the final fit always satisfies it -- but the "
+                "condition is on the whole method. The `flow_transform/unexpected_z` "
+                "cell builds its regressor from an AR(5) refitted on an EXPANDING "
+                "window of flow history, so that cell alone does not. There is no "
+                "lookahead in it; it simply is not a bounded-memory forecasting "
+                "method, and the write-up must not claim in one blanket sentence "
+                "that every registered test is one."
+            ),
+            "n_gw_tests_all": len(gw_all),
+            "n_gw_tests_bounded_memory": len(gw_bm),
+            "unbounded_memory_cells": sorted(
+                {r.cell for r in gw_all if not r.bounded_memory}
+            ),
+            "n_full_family_holm_significant_at_05": n_sig_all,
+            "n_full_family_holm_significant_at_05_bounded_memory_only": n_sig_bm,
+            "conclusion_depends_on_the_unbounded_cell": bool(n_sig_all != n_sig_bm),
+            "note": (
+                "The cell is kept in the family and corrected for. Dropping a test "
+                "after its result is known would be selection, not rigour. The "
+                "sensitivity above is what licenses the claim that nothing in the "
+                "verdict rests on it -- not the assertion that it does not matter."
+            ),
+            "primary_family_is_entirely_bounded_memory": bool(
+                all(r.bounded_memory for r in gw_primary)
+            ),
+        },
     }
 
     # --- Power (design sensitivity, NOT an exclusion) -------------------------
@@ -2127,14 +2392,39 @@ def main() -> None:
 
     res["verdict_basis"] = {
         "test": (
-            "Giacomini-White (2006) equal unconditional predictive ability "
-            "(one-sided, flow-favouring), Holm-adjusted across the primary family"
+            "TWO pre-specified objects, with OPPOSITE multiplicity treatments, and "
+            "the verdict is a function of both. (1) DETECTION -- Giacomini-White "
+            "(2006) equal unconditional predictive ability, one-sided and "
+            "flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union of "
+            "alternatives: ten shots at finding an effect). (2) EXCLUSION -- the "
+            "pre-specified one-sided material-gain test, run as an INTERSECTION-UNION "
+            "test with each cell UNADJUSTED (Berger 1982): the bounded null may be "
+            "asserted only if EVERY cell rejects its own exclusion null, which needs "
+            "no correction. Holm-adjusted exclusion p-values are also reported as a "
+            "conservative sensitivity, but they are NOT the test. The verdict is "
+            "INCONCLUSIVE precisely because (1) finds nothing and (2) does not hold "
+            "in every cell."
+        ),
+        "test_detection": (
+            "Giacomini-White (2006) EUPA, one-sided flow-favouring, Holm-adjusted "
+            "across the 10-cell primary family"
+        ),
+        "test_exclusion": (
+            "pre-specified one-sided material-gain exclusion, intersection-union "
+            "across the 10-cell primary family, each cell UNADJUSTED"
         ),
         "loss": "Patton QLIKE on the variance level",
         "estimation_scheme": (
             f"paired fixed rolling window of {GW_TRAIN_WINDOW} flow days; both specs "
             "share the augmented complete-case mask, the training dates and the "
-            "forward-label embargo (y_end_date < forecast origin)"
+            "forward-label embargo (y_end_date < forecast origin). Every one of the "
+            "10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which "
+            "is the condition GW's limiting experiment needs. The one registered cell "
+            "that is not (`flow_transform/unexpected_z`, whose regressor comes from an "
+            "expanding-window AR(5)) sits in the robustness family, is flagged "
+            "`bounded_memory=false`, and is shown in "
+            "`multiple_testing.bounded_memory_sensitivity` not to move the family-wise "
+            "conclusion."
         ),
         "gate": f"qlike_improve > 0 AND GW z < {POWER_GATE_Z} AND Holm p < 0.05",
         "cells_in_primary_family": len(primary_rows),
@@ -2198,12 +2488,18 @@ def main() -> None:
         )
     for a in ("BTC", "ETH"):
         pw = res["power_simulation"][a]
-        b80 = pw["rv_uplift_at_80pct_power_pct"]
+        br = pw["power_80pct_bracket"]
+        if br["reached_on_grid"]:
+            band = (
+                f"between +{br['lower_rv_uplift_pct']}% and "
+                f"+{br['upper_rv_uplift_pct']}% RV uplift"
+            )
+        else:
+            band = f"NOT REACHED even at +{pw['max_uplift_tested_pct']}%"
         print(
-            f"  power[{a}]: false-positive rate at beta=0 = "
-            f"{pw['false_positive_rate_at_beta_0']:.3f}  |  80% power at RV uplift = "
-            + (f"+{b80}%" if b80 is not None else
-               f"NOT REACHED even at +{pw['max_uplift_tested_pct']}%")
+            f"  power[{a}] (h={pw['horizon']}, single cell, nominal gate): "
+            f"fires on pure noise {pw['false_positive_rate_at_beta_0']:.3f}  |  "
+            f"80% power {band}"
         )
     print(f"\nVERDICT: {verdict}")
     print(claim)
@@ -2332,20 +2628,32 @@ def make_plots(flows, rvs, panels, res) -> None:
                     label="power of the GW gate (z < −1.645)")
             ax.fill_between(x, y - 1.96 * se, y + 1.96 * se, color="#2a9d8f", alpha=.18)
             ax.axhline(0.80, color="#e76f51", ls="--", lw=1.0, label="80% power")
-            ax.axhline(0.05, color="grey", ls=":", lw=1.0, label="nominal size 5%")
-            size = pw[a]["false_positive_rate_at_beta_0"]
-            b80 = pw[a]["rv_uplift_at_80pct_power_pct"]
-            if b80 is not None:
-                ax.axvline(b80, color="#264653", ls="-.", lw=1.0,
-                           label=f"80% power at +{b80}% RV")
-            ax.set_title(f"{a}: simulated power  (fires on pure noise: {size:.1%})")
+            ax.axhline(0.05, color="grey", ls=":", lw=1.0,
+                       label="nominal 5% gate level")
+            fp = pw[a]["false_positive_rate_at_beta_0"]
+            # The 80%-power effect is BRACKETED by the grid, never solved. Draw the
+            # interval, not a line: a vline here would redraw the exact "coarse
+            # curve, precise number" claim the write-up withdraws.
+            br = pw[a]["power_80pct_bracket"]
+            if br["reached_on_grid"] and br["lower_rv_uplift_pct"] is not None:
+                ax.axvspan(
+                    br["lower_rv_uplift_pct"], br["upper_rv_uplift_pct"],
+                    color="#264653", alpha=.12,
+                    label=(
+                        f"80% power somewhere in "
+                        f"+{br['lower_rv_uplift_pct']}…+{br['upper_rv_uplift_pct']}% "
+                        "(bracket, not a threshold)"
+                    ),
+                )
+            ax.set_title(f"{a}: simulated power  (fires on pure noise: {fp:.1%})")
             ax.set_xlabel("TRUE RV uplift per 1-sd flow shock (%)")
             ax.set_ylim(0, 1.02)
             ax.legend(fontsize=7.5, loc="lower right")
         axes[0].set_ylabel("rejection rate")
         fig.suptitle(
-            f"What this design could have SEEN — {POWER_REPS} simulated OOS paths per point.  "
-            "Power is not an exclusion: it does not bound the true effect.",
+            f"What ONE CELL of this design could have SEEN — {POWER_REPS} simulated OOS "
+            "paths per point, h=1, nominal single-cell gate (the 10-cell Holm family is "
+            "weaker).\nPower is not an exclusion: it does not bound the true effect.",
             fontsize=9.5,
         )
         fig.tight_layout()
