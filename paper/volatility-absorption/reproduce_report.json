@@ -1,99 +1,514 @@
 {
   "paper": "volatility-absorption",
-  "paper_version": "v3-active-scope",
-  "generated_at": "2026-06-11T02:27:03+00:00",
+  "paper_version": "v3-active-scope-post-k1686",
+  "generated_at": "2026-07-14T06:41:55+00:00",
   "alert_level": "green",
   "gate_status": "pass",
   "match_rate": 1.0,
   "verification_rate": "100.0%",
-  "total_checks": 30,
-  "matches": 30,
+  "total_checks": 95,
+  "matches": 95,
   "mismatches": 0,
   "critical_flags": [
     "Active gate restricted to reproducible evidence retained in main_v3.tex",
+    "K897 lagged-proxy simulation retired (K1686 R2, 2026-07-14 adjudication); its interval is no longer printed or bound",
     "Legacy shock-type / VRP / hedging tables intentionally excluded pending pinned-snapshot rebuild"
   ],
   "checks": [
     {
-      "metric": "T3 calm SAR",
-      "paper_value": 3.16,
-      "actual_value": 3.16,
-      "tol_pct": 1.0,
+      "metric": "T2 calm days",
+      "paper_value": 1755.0,
+      "actual_value": 1755.0,
+      "tol_pct": 0.0,
       "rel_diff_pct": 0.0,
       "status": "match",
-      "source_path": "k716.calm (<15).ratio"
+      "source_path": "table3_sar_inference.table3.calm.n_shock+n_normal"
+    },
+    {
+      "metric": "T2 normal days",
+      "paper_value": 1571.0,
+      "actual_value": 1571.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "table3_sar_inference.table3.normal"
+    },
+    {
+      "metric": "T2 elevated days",
+      "paper_value": 885.0,
+      "actual_value": 885.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "table3_sar_inference.table3.elevated"
+    },
+    {
+      "metric": "T2 high days",
+      "paper_value": 432.0,
+      "actual_value": 432.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "table3_sar_inference.table3.high"
+    },
+    {
+      "metric": "T2 crisis days",
+      "paper_value": 449.0,
+      "actual_value": 449.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "table3_sar_inference.table3.crisis"
+    },
+    {
+      "metric": "T2 total shock days",
+      "paper_value": 768.0,
+      "actual_value": 768.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "table3_sar_inference.data.n_shock_days"
+    },
+    {
+      "metric": "T2 total days",
+      "paper_value": 5092.0,
+      "actual_value": 5092.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "table3_sar_inference.data.n_days"
+    },
+    {
+      "metric": "T3 calm SAR",
+      "paper_value": 3.15,
+      "actual_value": 3.149047813489424,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.030228143192879822,
+      "status": "match",
+      "source_path": "table3_sar_inference.table3.calm.sar"
     },
     {
       "metric": "T3 normal SAR",
       "paper_value": 2.77,
-      "actual_value": 2.77,
+      "actual_value": 2.77233331130068,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.0,
+      "rel_diff_pct": 0.08423506500649967,
       "status": "match",
-      "source_path": "k716.normal (15-20).ratio"
+      "source_path": "table3_sar_inference.table3.normal.sar"
     },
     {
       "metric": "T3 elevated SAR",
-      "paper_value": 2.37,
-      "actual_value": 2.37,
+      "paper_value": 2.38,
+      "actual_value": 2.377004039240465,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.0,
+      "rel_diff_pct": 0.12588070418213862,
       "status": "match",
-      "source_path": "k716.elevated (20-25).ratio"
+      "source_path": "table3_sar_inference.table3.elevated.sar"
     },
     {
       "metric": "T3 high SAR",
-      "paper_value": 2.32,
-      "actual_value": 2.32,
+      "paper_value": 2.33,
+      "actual_value": 2.3325399513781417,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.0,
+      "rel_diff_pct": 0.10901078876144503,
       "status": "match",
-      "source_path": "k716.high (25-30).ratio"
+      "source_path": "table3_sar_inference.table3.high.sar"
     },
     {
       "metric": "T3 crisis SAR",
-      "paper_value": 2.43,
-      "actual_value": 2.43,
+      "paper_value": 2.45,
+      "actual_value": 2.4513717376779436,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.0,
+      "rel_diff_pct": 0.05598929297728194,
       "status": "match",
-      "source_path": "k716.crisis (>30).ratio"
+      "source_path": "table3_sar_inference.table3.crisis.sar"
     },
     {
-      "metric": "K897 empirical decline",
-      "paper_value": 0.816,
-      "actual_value": 0.8162,
-      "tol_pct": 1.0,
-      "rel_diff_pct": 0.024509803921579535,
-      "status": "match",
-      "source_path": "k897.sar_decline_comparison.empirical_decline"
-    },
-    {
-      "metric": "K897 sim CI low",
-      "paper_value": -0.281,
-      "actual_value": -0.2811,
-      "tol_pct": 1.0,
-      "rel_diff_pct": 0.03558718861209572,
-      "status": "match",
-      "source_path": "k897.sar_decline_comparison.sim_ci_95[0]"
-    },
-    {
-      "metric": "K897 sim CI high",
-      "paper_value": 0.558,
-      "actual_value": 0.5575,
-      "tol_pct": 1.0,
-      "rel_diff_pct": 0.08960573476703511,
-      "status": "match",
-      "source_path": "k897.sar_decline_comparison.sim_ci_95[1]"
-    },
-    {
-      "metric": "K897 regimes outside CI",
-      "paper_value": 5.0,
-      "actual_value": 5.0,
+      "metric": "T3 calm shock days",
+      "paper_value": 34.0,
+      "actual_value": 34.0,
       "tol_pct": 0.0,
       "rel_diff_pct": 0.0,
       "status": "match",
-      "source_path": "k897.regimes_outside_ci"
+      "source_path": "table3_sar_inference.table3.calm.n_shock"
+    },
+    {
+      "metric": "T3 high shock days",
+      "paper_value": 133.0,
+      "actual_value": 133.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "table3_sar_inference.table3.high.n_shock"
+    },
+    {
+      "metric": "T3 calm mean shock |r|",
+      "paper_value": 1.23,
+      "actual_value": 1.232254272992883,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.18327422706365398,
+      "status": "match",
+      "source_path": "table3_sar_inference.table3.calm.mean_abs_ret_shock"
+    },
+    {
+      "metric": "T3 crisis mean shock |r|",
+      "paper_value": 3.0,
+      "actual_value": 3.003987522507915,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.13291741693050402,
+      "status": "match",
+      "source_path": "table3_sar_inference.table3.crisis.mean_abs_ret_shock"
+    },
+    {
+      "metric": "T3 high dSAR CI lo (|.|)",
+      "paper_value": 1.33,
+      "actual_value": 1.3337109730340382,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.27902052887504597,
+      "status": "match",
+      "source_path": "table3_sar_inference.decline_inference_primary.high.ci95[1]"
+    },
+    {
+      "metric": "T3 high dSAR CI hi (|.|)",
+      "paper_value": 0.29,
+      "actual_value": 0.2856879382487004,
+      "tol_pct": 3.0,
+      "rel_diff_pct": 1.486917845275709,
+      "status": "match",
+      "source_path": "table3_sar_inference.decline_inference_primary.high.ci95[0]"
+    },
+    {
+      "metric": "T3 high dSAR p",
+      "paper_value": 0.003,
+      "actual_value": 0.0029997000299970002,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.009999000099994784,
+      "status": "match",
+      "source_path": "table3_sar_inference.decline_inference_primary.high.p_two_sided"
+    },
+    {
+      "metric": "T3 normal dSAR p",
+      "paper_value": 0.103,
+      "actual_value": 0.102989701029897,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.009999000099990153,
+      "status": "match",
+      "source_path": "table3_sar_inference.decline_inference_primary.normal.p_two_sided"
+    },
+    {
+      "metric": "T3 crisis dSAR p",
+      "paper_value": 0.012,
+      "actual_value": 0.011998800119988001,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.009999000099994784,
+      "status": "match",
+      "source_path": "table3_sar_inference.decline_inference_primary.crisis.p_two_sided"
+    },
+    {
+      "metric": "T3 elevated dSAR CI lo (|.|)",
+      "paper_value": 1.27,
+      "actual_value": 1.268867003310821,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.08921233773063779,
+      "status": "match",
+      "source_path": "table3_sar_inference.decline_inference_primary.elevated.ci95[1]"
+    },
+    {
+      "metric": "T3 elevated dSAR CI hi (|.|)",
+      "paper_value": 0.32,
+      "actual_value": 0.32067469215706645,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.2108412990832649,
+      "status": "match",
+      "source_path": "table3_sar_inference.decline_inference_primary.elevated.ci95[0]"
+    },
+    {
+      "metric": "Headline decline 0.82",
+      "paper_value": 0.82,
+      "actual_value": 0.8165078621112825,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.42587047423384083,
+      "status": "match",
+      "source_path": "table3_sar_inference (calm.sar - high.sar)"
+    },
+    {
+      "metric": "K1686 lagged-arm mean",
+      "paper_value": 0.17,
+      "actual_value": 0.1734,
+      "tol_pct": 3.0,
+      "rel_diff_pct": 1.9999999999999918,
+      "status": "match",
+      "source_path": "k1686.k897_replication_check.ours.sim_mean"
+    },
+    {
+      "metric": "K1686 lagged-arm CI lo",
+      "paper_value": -0.28,
+      "actual_value": -0.2811,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.39285714285713924,
+      "status": "match",
+      "source_path": "k1686.k897_replication_check.ours.sim_ci_95[0]"
+    },
+    {
+      "metric": "K1686 lagged-arm CI hi",
+      "paper_value": 0.56,
+      "actual_value": 0.5575,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.4464285714285817,
+      "status": "match",
+      "source_path": "k1686.k897_replication_check.ours.sim_ci_95[1]"
+    },
+    {
+      "metric": "K1686 A null mean",
+      "paper_value": 0.62,
+      "actual_value": 0.619,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.16129032258064532,
+      "status": "match",
+      "source_path": "k1686.sar_decline_comparison[contemporaneous|A].sim_mean"
+    },
+    {
+      "metric": "K1686 A CI lo",
+      "paper_value": 0.08,
+      "actual_value": 0.0824,
+      "tol_pct": 3.0,
+      "rel_diff_pct": 2.999999999999999,
+      "status": "match",
+      "source_path": "k1686...A.sim_ci_95[0]"
+    },
+    {
+      "metric": "K1686 A CI hi",
+      "paper_value": 1.06,
+      "actual_value": 1.0596,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.037735849056599616,
+      "status": "match",
+      "source_path": "k1686...A.sim_ci_95[1]"
+    },
+    {
+      "metric": "K1686 A MC p",
+      "paper_value": 0.41,
+      "actual_value": 0.409759,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.05878048780487591,
+      "status": "match",
+      "source_path": "k1686...A.p_value_monte_carlo"
+    },
+    {
+      "metric": "K1686 A empirical",
+      "paper_value": 0.82,
+      "actual_value": 0.8165,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.42682926829267653,
+      "status": "match",
+      "source_path": "k1686...A.empirical"
+    },
+    {
+      "metric": "K1686 null crisis shock rate",
+      "paper_value": 0.82,
+      "actual_value": 0.8226,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.31707317073171304,
+      "status": "match",
+      "source_path": "k1686.mechanism_diagnostic...sim_contemporaneous_A[4]"
+    },
+    {
+      "metric": "K1686 emp crisis shock rate",
+      "paper_value": 0.54,
+      "actual_value": 0.5434,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.6296296296296219,
+      "status": "match",
+      "source_path": "k1686.mechanism_diagnostic...empirical[4]"
+    },
+    {
+      "metric": "K1686 null calm occupancy",
+      "paper_value": 0.77,
+      "actual_value": 0.7664,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.4675324675324737,
+      "status": "match",
+      "source_path": "k1686.calibration_diagnostics.regime_occupancy_sim_A[0]"
+    },
+    {
+      "metric": "K1686 emp calm occupancy",
+      "paper_value": 0.35,
+      "actual_value": 0.3447,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 1.5142857142857062,
+      "status": "match",
+      "source_path": "k1686.calibration_diagnostics.regime_occupancy_empirical[0]"
+    },
+    {
+      "metric": "K1686 C empirical decline",
+      "paper_value": 0.34,
+      "actual_value": 0.3397,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.08823529411765367,
+      "status": "match",
+      "source_path": "k1686...C.empirical"
+    },
+    {
+      "metric": "K1686 threshold share 58%",
+      "paper_value": 0.58,
+      "actual_value": 0.583955909369259,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.6820533395274221,
+      "status": "match",
+      "source_path": "k1686 derived: 1 - C.empirical/A.empirical"
+    },
+    {
+      "metric": "K1686 D-up current decline",
+      "paper_value": -0.12,
+      "actual_value": -0.1192,
+      "tol_pct": 5.0,
+      "rel_diff_pct": 0.6666666666666626,
+      "status": "match",
+      "source_path": "k1686.null_free_evidence.up_only_current_regime_decline"
+    },
+    {
+      "metric": "K1686 H ambient-up decline",
+      "paper_value": 1.05,
+      "actual_value": 1.0465,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.3333333333333389,
+      "status": "match",
+      "source_path": "k1686.codex_followup_gate.empirical_ambient_up.point_estimate"
+    },
+    {
+      "metric": "K1686 H CI lo",
+      "paper_value": 0.33,
+      "actual_value": 0.3286,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.4242424242424279,
+      "status": "match",
+      "source_path": "k1686.codex_followup_gate.empirical_ambient_up.ci95[0]"
+    },
+    {
+      "metric": "K1686 H CI hi",
+      "paper_value": 1.76,
+      "actual_value": 1.7625,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.1420454545454515,
+      "status": "match",
+      "source_path": "k1686.codex_followup_gate.empirical_ambient_up.ci95[1]"
+    },
+    {
+      "metric": "K1686 H calm SAR",
+      "paper_value": 3.89,
+      "actual_value": 3.8863,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0951156812339398,
+      "status": "match",
+      "source_path": "k1686.regime_sar[H_up].calm.empirical"
+    },
+    {
+      "metric": "K1686 H high SAR",
+      "paper_value": 2.84,
+      "actual_value": 2.8398,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.007042253521125986,
+      "status": "match",
+      "source_path": "k1686.regime_sar[H_up].high.empirical"
+    },
+    {
+      "metric": "K1686 H n calm up",
+      "paper_value": 47.0,
+      "actual_value": 47.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k1686.null_free_evidence.n_calm_up_shocks_ambient_regime"
+    },
+    {
+      "metric": "K1686 H n high up",
+      "paper_value": 53.0,
+      "actual_value": 53.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k1686.null_free_evidence.n_high_up_shocks_ambient_regime"
+    },
+    {
+      "metric": "K1686 paired pooled-up",
+      "paper_value": 0.94,
+      "actual_value": 0.9353,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.49999999999999223,
+      "status": "match",
+      "source_path": "k1686.codex_followup_gate.paired_pooled_minus_up_current.point_estimate"
+    },
+    {
+      "metric": "K1686 paired CI lo",
+      "paper_value": 0.34,
+      "actual_value": 0.3437,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 1.0882352941176414,
+      "status": "match",
+      "source_path": "k1686.codex_followup_gate.paired_pooled_minus_up_current.ci95[0]"
+    },
+    {
+      "metric": "K1686 paired CI hi",
+      "paper_value": 1.5,
+      "actual_value": 1.4991,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.05999999999999339,
+      "status": "match",
+      "source_path": "k1686.codex_followup_gate.paired_pooled_minus_up_current.ci95[1]"
+    },
+    {
+      "metric": "K1686 same-seed null CI lo",
+      "paper_value": -0.66,
+      "actual_value": -0.6554,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.6969696969697043,
+      "status": "match",
+      "source_path": "k1686.codex_followup_gate.same_seed_null_comparison.sim_ci_95[0]"
+    },
+    {
+      "metric": "K1686 same-seed null CI hi",
+      "paper_value": 0.99,
+      "actual_value": 0.9887,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.13131313131312805,
+      "status": "match",
+      "source_path": "k1686.codex_followup_gate.same_seed_null_comparison.sim_ci_95[1]"
+    },
+    {
+      "metric": "K1686 same-seed MC p",
+      "paper_value": 0.033,
+      "actual_value": 0.032673,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.9909090909090935,
+      "status": "match",
+      "source_path": "k1686.codex_followup_gate.same_seed_null_comparison.p_value_monte_carlo"
+    },
+    {
+      "metric": "K1686 P* down-shock bound",
+      "paper_value": 28.8,
+      "actual_value": 28.84,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.13888888888888593,
+      "status": "match",
+      "source_path": "k1686.down_shock_impossibility.min_level_for_a_2pt_one_day_fall"
+    },
+    {
+      "metric": "K1686 F shock rate",
+      "paper_value": 0.06,
+      "actual_value": 0.0595,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.8333333333333341,
+      "status": "match",
+      "source_path": "k1686.calibration_diagnostics.shock_rate_sim_F"
+    },
+    {
+      "metric": "K1686 emp shock rate",
+      "paper_value": 0.151,
+      "actual_value": 0.1508,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.1324503311258316,
+      "status": "match",
+      "source_path": "k1686.calibration_diagnostics.shock_rate_empirical"
     },
     {
       "metric": "T4 SPY beta",
@@ -157,6 +572,132 @@
       "rel_diff_pct": 0.15455719079410943,
       "status": "match",
       "source_path": "k1418.results[0050.TW].beta"
+    },
+    {
+      "metric": "T4 0050 t",
+      "paper_value": 0.28,
+      "actual_value": 0.2829017091408103,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 1.0363246931465293,
+      "status": "match",
+      "source_path": "k1418.results[0050.TW].beta_t"
+    },
+    {
+      "metric": "AppB SPY alpha",
+      "paper_value": 0.0822,
+      "actual_value": 0.08216797400343638,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.03896106637909292,
+      "status": "match",
+      "source_path": "k1418.results[SPY].alpha"
+    },
+    {
+      "metric": "AppB GLD alpha",
+      "paper_value": 0.0548,
+      "actual_value": 0.05479698582694164,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.005500315799930437,
+      "status": "match",
+      "source_path": "k1418.results[GLD].alpha"
+    },
+    {
+      "metric": "AppB TLT alpha",
+      "paper_value": 0.0531,
+      "actual_value": 0.05307857528850017,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.04034785593188386,
+      "status": "match",
+      "source_path": "k1418.results[TLT].alpha"
+    },
+    {
+      "metric": "AppB 0050 alpha",
+      "paper_value": 0.0473,
+      "actual_value": 0.04731651199390317,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.03490907801937618,
+      "status": "match",
+      "source_path": "k1418.results[0050.TW].alpha"
+    },
+    {
+      "metric": "AppB SPY adjR2",
+      "paper_value": 0.0076,
+      "actual_value": 0.007600550293412778,
+      "tol_pct": 3.0,
+      "rel_diff_pct": 0.007240702799707691,
+      "status": "match",
+      "source_path": "k1418.results[SPY].r2_adj"
+    },
+    {
+      "metric": "AppB GLD adjR2",
+      "paper_value": 0.0142,
+      "actual_value": 0.014246510100591747,
+      "tol_pct": 3.0,
+      "rel_diff_pct": 0.3275359196601855,
+      "status": "match",
+      "source_path": "k1418.results[GLD].r2_adj"
+    },
+    {
+      "metric": "AppB TLT adjR2",
+      "paper_value": 0.029,
+      "actual_value": 0.0289679209111513,
+      "tol_pct": 3.0,
+      "rel_diff_pct": 0.11061754775413812,
+      "status": "match",
+      "source_path": "k1418.results[TLT].r2_adj"
+    },
+    {
+      "metric": "AppB 0050 adjR2",
+      "paper_value": -0.0013,
+      "actual_value": -0.001262534418672523,
+      "tol_pct": 5.0,
+      "rel_diff_pct": 2.8819677944213096,
+      "status": "match",
+      "source_path": "k1418.results[0050.TW].r2_adj"
+    },
+    {
+      "metric": "T5 NFP ratio vs all",
+      "paper_value": 1.14,
+      "actual_value": 1.14480815532081,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.4217680105973805,
+      "status": "match",
+      "source_path": "k741.part_a_historical.ratio_vs_all"
+    },
+    {
+      "metric": "T5 NFP p vs all",
+      "paper_value": 0.081,
+      "actual_value": 0.08138068805166426,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.46998524896822247,
+      "status": "match",
+      "source_path": "k741.part_a_historical.p_vs_all"
+    },
+    {
+      "metric": "T5 NFP ratio vs Friday",
+      "paper_value": 1.16,
+      "actual_value": 1.1647696373172436,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.41117563079686803,
+      "status": "match",
+      "source_path": "k741.part_a_historical.ratio_vs_friday"
+    },
+    {
+      "metric": "T5 NFP p vs Friday",
+      "paper_value": 0.061,
+      "actual_value": 0.06051119813911774,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.801314526036489,
+      "status": "match",
+      "source_path": "k741.part_a_historical.p_vs_friday"
+    },
+    {
+      "metric": "T5 NFP total days 4104",
+      "paper_value": 4104.0,
+      "actual_value": 4104.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741.part_a_historical n_nfp+n_non_nfp"
     },
     {
       "metric": "T5 Low NFP n",
@@ -283,10 +824,55 @@
       "rel_diff_pct": 0.0,
       "status": "match",
       "source_path": "k903.task2_controlled_regression.t_stat_VIX"
+    },
+    {
+      "metric": "T3 elevated dSAR p < 0.001",
+      "paper_value": true,
+      "actual_value": true,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "table3_sar_inference.decline_inference_primary.elevated.p_two_sided"
+    },
+    {
+      "metric": "K1686 B/C/G all reject p<=0.007",
+      "paper_value": true,
+      "actual_value": true,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k1686 B/C/G p_value_monte_carlo"
+    },
+    {
+      "metric": "K1686 H CI excludes zero",
+      "paper_value": true,
+      "actual_value": true,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k1686.codex_followup_gate.empirical_ambient_up.ci95"
+    },
+    {
+      "metric": "K1686 A in null CI (not rejected)",
+      "paper_value": true,
+      "actual_value": true,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k1686...A.in_95_ci"
+    },
+    {
+      "metric": "T3 block sensitivity same conclusion",
+      "paper_value": true,
+      "actual_value": true,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "table3_sar_inference.decline_inference_by_block"
     }
   ],
   "notes": [
-    "Coverage: T3 SAR, K897 null simulation, T4 pinned cross-asset, T5 NFP, baseline NSI, T9 thresholds, T10 subperiods, RV-normalized and controlled regressions.",
+    "Coverage: T2 regime distribution (pinned), T3 SAR + paired block-bootstrap inference (P0-3 rebuild), K1686 contemporaneous-null section, T4 pinned cross-asset (incl. 0050.TW C3 fix), Appendix B alpha/adjR2 (C4), T5 NFP overall + regime (C5), baseline NSI, T9 thresholds, T10 subperiods, RV-normalized and controlled regressions.",
     "This gate no longer validates legacy deferred sections that lack stable JSON bindings under the current pinned snapshot."
   ]
 }

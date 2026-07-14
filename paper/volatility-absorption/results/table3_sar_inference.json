@@ -1,0 +1,303 @@
+{
+  "experiment": "table3_sar_inference_rebuild",
+  "paper": "volatility-absorption",
+  "purpose": "P0-3: replace unverifiable K716 Table 3 p-values with pinned-snapshot paired block-bootstrap inference",
+  "data": {
+    "pinned_csv": "paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv",
+    "sample_start": "2006-01-05",
+    "sample_end": "2026-04-02",
+    "n_days": 5092,
+    "n_shock_days": 768,
+    "shock_rule": "|dVIX_t| > 2.0",
+    "return": "log(spy_adj_close_t / spy_adj_close_{t-1}) * 100",
+    "vix": "vix_close"
+  },
+  "inference": {
+    "design": "paired circular moving-block bootstrap on complete day-rows (|r_t|, V_t, dVIX_t)",
+    "B": 10000,
+    "primary_block": 20,
+    "block_sensitivity": [
+      10,
+      20,
+      40,
+      63
+    ],
+    "seed": 20260714,
+    "validity_rule": "regime cell needs > 5 shock and > 5 normal days; replication needs calm and target regime both valid",
+    "p_value": "two-sided percentile with (b+1)/(n+1) plug-in floor"
+  },
+  "table3": {
+    "calm": {
+      "n_shock": 34,
+      "n_normal": 1721,
+      "mean_abs_ret_shock": 1.232254272992883,
+      "mean_abs_ret_normal": 0.3913101184790954,
+      "sar": 3.149047813489424,
+      "delta_sar_vs_calm": null
+    },
+    "normal": {
+      "n_shock": 168,
+      "n_normal": 1403,
+      "mean_abs_ret_shock": 1.4408800233454875,
+      "mean_abs_ret_normal": 0.5197354940952168,
+      "sar": 2.77233331130068,
+      "delta_sar_vs_calm": -0.37671450218874414
+    },
+    "elevated": {
+      "n_shock": 189,
+      "n_normal": 696,
+      "mean_abs_ret_shock": 1.6463690460570743,
+      "mean_abs_ret_normal": 0.6926235794631406,
+      "sar": 2.377004039240465,
+      "delta_sar_vs_calm": -0.7720437742489592
+    },
+    "high": {
+      "n_shock": 133,
+      "n_normal": 299,
+      "mean_abs_ret_shock": 1.9388310396828747,
+      "mean_abs_ret_normal": 0.831210217230084,
+      "sar": 2.3325399513781417,
+      "delta_sar_vs_calm": -0.8165078621112825
+    },
+    "crisis": {
+      "n_shock": 244,
+      "n_normal": 205,
+      "mean_abs_ret_shock": 3.003987522507915,
+      "mean_abs_ret_normal": 1.2254312458352137,
+      "sar": 2.4513717376779436,
+      "delta_sar_vs_calm": -0.6976760758114806
+    }
+  },
+  "decline_inference_primary": {
+    "normal": {
+      "point_estimate": 0.37671450218874414,
+      "bootstrap_mean": 0.38056599092405036,
+      "ci95": [
+        -0.07353088355244149,
+        0.8733097603784101
+      ],
+      "ci_excludes_zero": false,
+      "p_two_sided": 0.102989701029897,
+      "n_valid": 10000
+    },
+    "elevated": {
+      "point_estimate": 0.7720437742489592,
+      "bootstrap_mean": 0.7738744759660648,
+      "ci95": [
+        0.32067469215706645,
+        1.268867003310821
+      ],
+      "ci_excludes_zero": true,
+      "p_two_sided": 0.0005999400059994001,
+      "n_valid": 10000
+    },
+    "high": {
+      "point_estimate": 0.8165078621112825,
+      "bootstrap_mean": 0.8079705196394028,
+      "ci95": [
+        0.2856879382487004,
+        1.3337109730340382
+      ],
+      "ci_excludes_zero": true,
+      "p_two_sided": 0.0029997000299970002,
+      "n_valid": 10000
+    },
+    "crisis": {
+      "point_estimate": 0.6976760758114806,
+      "bootstrap_mean": 0.6991101037078814,
+      "ci95": [
+        0.14939788358649395,
+        1.2580878319622786
+      ],
+      "ci_excludes_zero": true,
+      "p_two_sided": 0.011998800119988001,
+      "n_valid": 10000
+    }
+  },
+  "decline_inference_by_block": {
+    "10": {
+      "normal": {
+        "point_estimate": 0.37671450218874414,
+        "bootstrap_mean": 0.37693485328445825,
+        "ci95": [
+          -0.06323127327086352,
+          0.8512780307714716
+        ],
+        "ci_excludes_zero": false,
+        "p_two_sided": 0.10018998100189981,
+        "n_valid": 10000
+      },
+      "elevated": {
+        "point_estimate": 0.7720437742489592,
+        "bootstrap_mean": 0.7726375013809266,
+        "ci95": [
+          0.32589824103144654,
+          1.2583953533019683
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.00039996000399960006,
+        "n_valid": 10000
+      },
+      "high": {
+        "point_estimate": 0.8165078621112825,
+        "bootstrap_mean": 0.8119386409502236,
+        "ci95": [
+          0.3226666705370678,
+          1.3249844406036047
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.0007999200079992001,
+        "n_valid": 10000
+      },
+      "crisis": {
+        "point_estimate": 0.6976760758114806,
+        "bootstrap_mean": 0.6941809684202881,
+        "ci95": [
+          0.1432127723406621,
+          1.2548094009051702
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.015998400159984,
+        "n_valid": 10000
+      }
+    },
+    "20": {
+      "normal": {
+        "point_estimate": 0.37671450218874414,
+        "bootstrap_mean": 0.38056599092405036,
+        "ci95": [
+          -0.07353088355244149,
+          0.8733097603784101
+        ],
+        "ci_excludes_zero": false,
+        "p_two_sided": 0.102989701029897,
+        "n_valid": 10000
+      },
+      "elevated": {
+        "point_estimate": 0.7720437742489592,
+        "bootstrap_mean": 0.7738744759660648,
+        "ci95": [
+          0.32067469215706645,
+          1.268867003310821
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.0005999400059994001,
+        "n_valid": 10000
+      },
+      "high": {
+        "point_estimate": 0.8165078621112825,
+        "bootstrap_mean": 0.8079705196394028,
+        "ci95": [
+          0.2856879382487004,
+          1.3337109730340382
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.0029997000299970002,
+        "n_valid": 10000
+      },
+      "crisis": {
+        "point_estimate": 0.6976760758114806,
+        "bootstrap_mean": 0.6991101037078814,
+        "ci95": [
+          0.14939788358649395,
+          1.2580878319622786
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.011998800119988001,
+        "n_valid": 10000
+      }
+    },
+    "40": {
+      "normal": {
+        "point_estimate": 0.37671450218874414,
+        "bootstrap_mean": 0.38600863640093064,
+        "ci95": [
+          -0.06498897491946472,
+          0.8785187435784043
+        ],
+        "ci_excludes_zero": false,
+        "p_two_sided": 0.09779022097790221,
+        "n_valid": 10000
+      },
+      "elevated": {
+        "point_estimate": 0.7720437742489592,
+        "bootstrap_mean": 0.7775061868163095,
+        "ci95": [
+          0.3079713535794981,
+          1.280130360640704
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.0011998800119988001,
+        "n_valid": 10000
+      },
+      "high": {
+        "point_estimate": 0.8165078621112825,
+        "bootstrap_mean": 0.8103209868522923,
+        "ci95": [
+          0.2623796104113398,
+          1.372041025329807
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.0033996600339966003,
+        "n_valid": 10000
+      },
+      "crisis": {
+        "point_estimate": 0.6976760758114806,
+        "bootstrap_mean": 0.7114172754265947,
+        "ci95": [
+          0.16593787699213666,
+          1.2697576498608185
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.010798920107989201,
+        "n_valid": 10000
+      }
+    },
+    "63": {
+      "normal": {
+        "point_estimate": 0.37671450218874414,
+        "bootstrap_mean": 0.37897178945996157,
+        "ci95": [
+          -0.07487156963151234,
+          0.8570421552791512
+        ],
+        "ci_excludes_zero": false,
+        "p_two_sided": 0.10618938106189381,
+        "n_valid": 10000
+      },
+      "elevated": {
+        "point_estimate": 0.7720437742489592,
+        "bootstrap_mean": 0.7736895960073931,
+        "ci95": [
+          0.2970002927271271,
+          1.2786572884742609
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.0005999400059994001,
+        "n_valid": 10000
+      },
+      "high": {
+        "point_estimate": 0.8165078621112825,
+        "bootstrap_mean": 0.7984002496391709,
+        "ci95": [
+          0.25295968674560004,
+          1.334703406832123
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.0059994000599940004,
+        "n_valid": 10000
+      },
+      "crisis": {
+        "point_estimate": 0.6976760758114806,
+        "bootstrap_mean": 0.7039723014026255,
+        "ci95": [
+          0.14715822559895597,
+          1.2439941498979383
+        ],
+        "ci_excludes_zero": true,
+        "p_two_sided": 0.015598440155984402,
+        "n_valid": 10000
+      }
+    }
+  }
+}

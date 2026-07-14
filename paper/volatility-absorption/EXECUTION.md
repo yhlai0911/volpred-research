@@ -1,6 +1,6 @@
 # EXECUTION — volatility-absorption（Paper 8：The Volatility Absorption Hypothesis）
 
-`BADGE` · `stage: revision` · `verdict: 2.5/5 有條件 Major Revision` · `journal: JBF → JEF/IRFA（backup）` · `p0: P0-1 ✅ CLOSED（K1686 R2 gate 通過）` · `gate: JBF 線繼續 — absorption survives ambient-fear-shock gate（2026-07-14 裁定）`
+`BADGE` · `stage: revision` · `verdict: 2.5/5 有條件 Major Revision` · `journal: JBF → JEF/IRFA（backup）` · `p0: ✅ 全部完成（P0-1 gate 通過 + P0-2/3/4 落地 2026-07-14）` · `reproduce_gate: GREEN 95/95` · `next: P1（引用修理 / prior-art / K897 衛生餘項 / NW lag 交代）→ 多輪 review`
 
 > **執行檔用途**：把 Fable 深審（`review_history/fable_deep_review_20260711/README.md`，commit `f913ed68c`）的判定落成可勾選、可交接的行動清單。canonical 稿 = `main_v3.tex`；本檔只驅動執行，不取代深審報告的證據細節。
 
@@ -24,9 +24,10 @@
 投稿前必須全部勾起。
 
 - ✅ **P0-1 contemporaneous null 重跑完成**（K1686 + R2 ambient×sign follow-up；Codex R2 PASS）— 裁決見文末 2026-07-14 正式裁定：absorption 通過 fear-shock gate，JBF 線繼續；「如實寫入正文」由 body 修訂承接（K897 退役 + null inconclusive + threshold artifact + H 規格）
-- ⬜ 5 處內部不一致 C1–C5 全修（含 C1：Intro 一句與自家 artifact `k720`（`vrp_flip_confirmed: true`）反向的 VRP 宣稱）
-- ⬜ Table 3 SAR inference 用 pinned snapshot 重建，p 值有可驗證 binding（消除「t-test via bootstrap」的混亂表注）
-- ⬜ reproduce gate 從 30 checks 擴到 ~40，重跑 `match_rate ≥ 0.95` + `alert_level = green`
+- ✅ 5 處內部不一致 C1–C5 全修（2026-07-14；C1 class-swept 兩處 VRP 反向宣稱全撤）
+- ✅ Table 3 SAR inference 用 pinned snapshot 重建，p 值有可驗證 binding（2026-07-14；`results/table3_sar_inference.json`）
+- ✅ reproduce gate 從 30 checks 擴到 95，`match_rate = 100%` + `alert_level = green`（2026-07-14）
+- ✅ **K1686 body 整合**（2026-07-14）：新 §null_reexam（K897 退役 + null inconclusive + 58% threshold artifact + H ambient×sign gate + α=0/P* 結構限制）；abstract/intro/conclusion/limitations 同步改寫；Table 2/3 全面 pinned
 - ⬜ 引用修理：4 條孤兒（chernov2018 / baur2010 / patton2011 / romer2004）+ zakoian1994 期刊出處 + chernov 年份，`citation-verifier` 全掃通過
 - ⬜ Prior-art 防線：Intro/Lit review 補 Low (2004) / Hibbert et al. (2008) / Fleming-Ostdiek-Whaley (1995) 並正面區分
 - ⬜ 多輪 `paper-review-cycle`（latex-academic-reviewer + citation-verifier）收斂
@@ -45,7 +46,7 @@
 - 產出：新 K 三件套（`README.md` / `<id>.py` / `<id>_results.json`）+ 固定 seed + Codex 語義級複核 → `main_v3.tex` §Robustness 更新。
 - Brief：`review_history/fable_deep_review_20260711/README.md` §5（P0-1）+ §3-B（timing 缺口證據，`k897_sar_null_simulation.py:269-316`）。
 
-### ⬜ P0-2 · 修 5 處內部不一致（C1–C5）
+### ✅ P0-2 · 修 5 處內部不一致（C1–C5）— 完成 2026-07-14（C1 掃出兩處：Intro + Lit §2.2 一併修；C5 以 k741 JSON 為準 = 1.14×/1.16×，EXECUTION 原寫 1.17 與 JSON 不符已依 JSON）
 
 - **C1**（Intro line 76）：刪或改寫「We find that the VRP narrows... no VRP sign flip」——此句與 §5.5（VRP 已降級 deferred）及 `k720_results.json`（`vrp_flip_confirmed: true`）**正好相反**。referee/replicator 一抓即喪失全篇可信度。
 - **C3**（Table 4 line 351）：0050.TW 行改用 `k1418_results.json` pinned 值（β=9.21e-5, t=+0.283），統一 Intro/Appendix B 的三處兩值。
@@ -53,13 +54,13 @@
 - **C2**（Table 2 note line 284）：改寫 stale cross-ref（「N=893」→ 現行 769/768）。
 - **C5**（§5.3 line 368）：「1.17 times」改成「1.14× vs all non-NFP（1.17× vs Fridays）」；修 footnote「4,081 trading days」→ 與 `k741` JSON 一致值（195+3909=4,104）。
 
-### ⬜ P0-3 · Table 3 SAR inference rebuild
+### ✅ P0-3 · Table 3 SAR inference rebuild — 完成 2026-07-14（`scripts/rebuild_table3_sar_inference.py` → `results/table3_sar_inference.json`；paired circular moving-block bootstrap B=10k seed 固定，block 10/20/40/63；SAR 五值與 K1686 empirical arm 逐位一致；誠實發現：calm→normal p=0.103 不顯著，headline calm→high p=0.003；Table 2/3 全面移到 pinned 口徑，表注重寫消滅「t-test via bootstrap」矛盾）
 
 - pinned CSV 上重算五 regime SAR + seeded bootstrap（明確統計量：`SAR_calm − SAR_j` 的 percentile CI），產出 JSON、綁進 `reproduce.py`、更新表注（消掉「two-sample t-test … via bootstrap」的自相矛盾描述；K716 原始腳本永久缺失，K1249 確認 rebuild blocked，故用 pinned snapshot 重寫）。
 
-### ⬜ P0-4 · reproduce.py 補 checks（30 → ~40）
+### ✅ P0-4 · reproduce.py 補 checks（30 → 95）— 完成 2026-07-14
 
-- 新增 binding：Table 4 0050.TW t、Appendix B α/R²（讀 k1418 CSV）、NFP overall ratio/p、Table 3 新 p 值。重跑 `reproduce_report.json` 綠。
+- K897 bindings 退役；新增：Table 2 pinned 分佈、Table 3 rebuild（SAR/counts/CI/p/block sensitivity）、K1686 §null_reexam 全部印出數字（28 checks）、Table 4 0050.TW t、Appendix B α/adj-R²、NFP overall ratios。**95/95 = 100% GREEN**。
 
 ---
 
@@ -99,7 +100,8 @@
 ```
 2026-07-11 | Fable deep review | 深審完成，待執行 P0 | f913ed68c
 2026-07-12 | P0-1 K1686 首跑 + Codex FAIL + R2 rerun | 首裁 REFRAME→撤回→R2 ambient×sign 補跑完成 | 085064f0f, 2c764c69d
-2026-07-14 | K1686 R2 正式裁定（主線程） | absorption 通過 fear-shock gate；JBF 線繼續；FRL 重框取消；P0-1 CLOSED；knowledge da9ac9d2 | 本 commit
+2026-07-14 | K1686 R2 正式裁定（主線程） | absorption 通過 fear-shock gate；JBF 線繼續；FRL 重框取消；P0-1 CLOSED；knowledge da9ac9d2 | e947c9e25
+2026-07-14 | P0-2/3/4 + K1686 body 整合（主線程） | C1–C5 修（C1×2 處、C5 依 k741 JSON=1.14/1.16）；Table 2/3 pinned + block-bootstrap 推論；新 §null_reexam；gate 95/95 GREEN；41pp 編譯乾淨 | 本 commit
 ```
 
 ---

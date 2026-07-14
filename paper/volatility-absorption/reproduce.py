@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
-"""Paper 8 (volatility-absorption) reproducibility gate for active v3 scope."""
+"""Paper 8 (volatility-absorption) reproducibility gate for active v3 scope.
+
+2026-07-14 P0-4 rewrite (after K1686 R2 adjudication):
+  - K897 bindings retired together with the lagged-proxy simulation (the paper no
+    longer prints its interval; Section null_reexam explains the retirement).
+  - Table 2 / Table 3 now bind to results/table3_sar_inference.json (P0-3 rebuild:
+    pinned snapshot + paired circular moving-block bootstrap, Codex-R2-approved design).
+  - New bindings: K1686 contemporaneous-null section, NFP overall ratios (k741),
+    Table 4 0050.TW pinned row (C3), Appendix B alpha / adj-R2 (C4, k1418).
+No live data fetch. Every check compares a printed manuscript number to its JSON source.
+"""
 from __future__ import annotations
 
 import json
@@ -31,24 +41,83 @@ def approx(actual: float, paper: float, tol_pct: float) -> bool:
 
 
 def main() -> int:
-    k716 = load_json(PAPER_DIR / "experiments" / "k716_results.json")
     k741 = load_json(PAPER_DIR / "experiments" / "k741_nfp_event_study_results.json")
-    k897 = load_json(PAPER_DIR / "experiments" / "k897_sar_null_simulation_results.json")
     k903 = load_json(PROJECT / "experiments" / "k903" / "k903_paper8_robustness_results.json")
     k1418 = load_json(PROJECT / "experiments" / "k1418" / "k1418_results.json")
+    k1686 = load_json(PROJECT / "experiments" / "k1686" / "k1686_contemporaneous_null_results.json")
+    t3 = load_json(PAPER_DIR / "results" / "table3_sar_inference.json")
 
     cross_asset = {row["asset"]: row for row in k1418["results"]}
+    t3t = t3["table3"]
+    t3p = t3["decline_inference_primary"]
+    sdc = k1686["sar_decline_comparison"]
+    gate = k1686["codex_followup_gate"]
+    nfe = k1686["null_free_evidence"]
+    mech = k1686["mechanism_diagnostic_within_regime_shock_rate"]
+    calib = k1686["calibration_diagnostics"]
+    nfp = k741["part_a_historical"]
 
     claims = [
-        ("T3 calm SAR", 3.16, k716["calm (<15)"]["ratio"], 1.0, "k716.calm (<15).ratio"),
-        ("T3 normal SAR", 2.77, k716["normal (15-20)"]["ratio"], 1.0, "k716.normal (15-20).ratio"),
-        ("T3 elevated SAR", 2.37, k716["elevated (20-25)"]["ratio"], 1.0, "k716.elevated (20-25).ratio"),
-        ("T3 high SAR", 2.32, k716["high (25-30)"]["ratio"], 1.0, "k716.high (25-30).ratio"),
-        ("T3 crisis SAR", 2.43, k716["crisis (>30)"]["ratio"], 1.0, "k716.crisis (>30).ratio"),
-        ("K897 empirical decline", 0.816, k897["sar_decline_comparison"]["empirical_decline"], 1.0, "k897.sar_decline_comparison.empirical_decline"),
-        ("K897 sim CI low", -0.281, k897["sar_decline_comparison"]["sim_ci_95"][0], 1.0, "k897.sar_decline_comparison.sim_ci_95[0]"),
-        ("K897 sim CI high", 0.558, k897["sar_decline_comparison"]["sim_ci_95"][1], 1.0, "k897.sar_decline_comparison.sim_ci_95[1]"),
-        ("K897 regimes outside CI", 5.0, float(k897["regimes_outside_ci"].split("/")[0]), 0.0, "k897.regimes_outside_ci"),
+        # ---- Table 2: regime distribution (pinned; days = n_shock + n_normal) ----
+        ("T2 calm days", 1755.0, float(t3t["calm"]["n_shock"] + t3t["calm"]["n_normal"]), 0.0, "table3_sar_inference.table3.calm.n_shock+n_normal"),
+        ("T2 normal days", 1571.0, float(t3t["normal"]["n_shock"] + t3t["normal"]["n_normal"]), 0.0, "table3_sar_inference.table3.normal"),
+        ("T2 elevated days", 885.0, float(t3t["elevated"]["n_shock"] + t3t["elevated"]["n_normal"]), 0.0, "table3_sar_inference.table3.elevated"),
+        ("T2 high days", 432.0, float(t3t["high"]["n_shock"] + t3t["high"]["n_normal"]), 0.0, "table3_sar_inference.table3.high"),
+        ("T2 crisis days", 449.0, float(t3t["crisis"]["n_shock"] + t3t["crisis"]["n_normal"]), 0.0, "table3_sar_inference.table3.crisis"),
+        ("T2 total shock days", 768.0, float(t3["data"]["n_shock_days"]), 0.0, "table3_sar_inference.data.n_shock_days"),
+        ("T2 total days", 5092.0, float(t3["data"]["n_days"]), 0.0, "table3_sar_inference.data.n_days"),
+        # ---- Table 3: SAR by regime (P0-3 rebuild, pinned snapshot) ----
+        ("T3 calm SAR", 3.15, t3t["calm"]["sar"], 1.0, "table3_sar_inference.table3.calm.sar"),
+        ("T3 normal SAR", 2.77, t3t["normal"]["sar"], 1.0, "table3_sar_inference.table3.normal.sar"),
+        ("T3 elevated SAR", 2.38, t3t["elevated"]["sar"], 1.0, "table3_sar_inference.table3.elevated.sar"),
+        ("T3 high SAR", 2.33, t3t["high"]["sar"], 1.0, "table3_sar_inference.table3.high.sar"),
+        ("T3 crisis SAR", 2.45, t3t["crisis"]["sar"], 1.0, "table3_sar_inference.table3.crisis.sar"),
+        ("T3 calm shock days", 34.0, float(t3t["calm"]["n_shock"]), 0.0, "table3_sar_inference.table3.calm.n_shock"),
+        ("T3 high shock days", 133.0, float(t3t["high"]["n_shock"]), 0.0, "table3_sar_inference.table3.high.n_shock"),
+        ("T3 calm mean shock |r|", 1.23, t3t["calm"]["mean_abs_ret_shock"], 1.0, "table3_sar_inference.table3.calm.mean_abs_ret_shock"),
+        ("T3 crisis mean shock |r|", 3.00, t3t["crisis"]["mean_abs_ret_shock"], 1.0, "table3_sar_inference.table3.crisis.mean_abs_ret_shock"),
+        # delta CI printed as [SAR_j - SAR_calm]; JSON stores calm - SAR_j (sign flipped)
+        ("T3 high dSAR CI lo (|.|)", 1.33, t3p["high"]["ci95"][1], 2.0, "table3_sar_inference.decline_inference_primary.high.ci95[1]"),
+        ("T3 high dSAR CI hi (|.|)", 0.29, t3p["high"]["ci95"][0], 3.0, "table3_sar_inference.decline_inference_primary.high.ci95[0]"),
+        ("T3 high dSAR p", 0.003, t3p["high"]["p_two_sided"], 2.0, "table3_sar_inference.decline_inference_primary.high.p_two_sided"),
+        ("T3 normal dSAR p", 0.103, t3p["normal"]["p_two_sided"], 2.0, "table3_sar_inference.decline_inference_primary.normal.p_two_sided"),
+        ("T3 crisis dSAR p", 0.012, t3p["crisis"]["p_two_sided"], 2.0, "table3_sar_inference.decline_inference_primary.crisis.p_two_sided"),
+        ("T3 elevated dSAR CI lo (|.|)", 1.27, t3p["elevated"]["ci95"][1], 2.0, "table3_sar_inference.decline_inference_primary.elevated.ci95[1]"),
+        ("T3 elevated dSAR CI hi (|.|)", 0.32, t3p["elevated"]["ci95"][0], 2.0, "table3_sar_inference.decline_inference_primary.elevated.ci95[0]"),
+        ("Headline decline 0.82", 0.82, t3t["calm"]["sar"] - t3t["high"]["sar"], 1.0, "table3_sar_inference (calm.sar - high.sar)"),
+        # ---- Section null_reexam: K1686 contemporaneous re-examination ----
+        ("K1686 lagged-arm mean", 0.17, k1686["k897_replication_check"]["ours"]["sim_mean"], 3.0, "k1686.k897_replication_check.ours.sim_mean"),
+        ("K1686 lagged-arm CI lo", -0.28, k1686["k897_replication_check"]["ours"]["sim_ci_95"][0], 2.0, "k1686.k897_replication_check.ours.sim_ci_95[0]"),
+        ("K1686 lagged-arm CI hi", 0.56, k1686["k897_replication_check"]["ours"]["sim_ci_95"][1], 2.0, "k1686.k897_replication_check.ours.sim_ci_95[1]"),
+        ("K1686 A null mean", 0.62, sdc["contemporaneous|A"]["sim_mean"], 1.0, "k1686.sar_decline_comparison[contemporaneous|A].sim_mean"),
+        ("K1686 A CI lo", 0.08, sdc["contemporaneous|A"]["sim_ci_95"][0], 3.0, "k1686...A.sim_ci_95[0]"),
+        ("K1686 A CI hi", 1.06, sdc["contemporaneous|A"]["sim_ci_95"][1], 1.0, "k1686...A.sim_ci_95[1]"),
+        ("K1686 A MC p", 0.41, sdc["contemporaneous|A"]["p_value_monte_carlo"], 1.0, "k1686...A.p_value_monte_carlo"),
+        ("K1686 A empirical", 0.82, sdc["contemporaneous|A"]["empirical"], 1.0, "k1686...A.empirical"),
+        ("K1686 null crisis shock rate", 0.82, mech["sim_contemporaneous_A"][4], 1.0, "k1686.mechanism_diagnostic...sim_contemporaneous_A[4]"),
+        ("K1686 emp crisis shock rate", 0.54, mech["empirical"][4], 1.0, "k1686.mechanism_diagnostic...empirical[4]"),
+        ("K1686 null calm occupancy", 0.77, calib["regime_occupancy_sim_A_contemporaneous"][0], 1.0, "k1686.calibration_diagnostics.regime_occupancy_sim_A[0]"),
+        ("K1686 emp calm occupancy", 0.35, calib["regime_occupancy_empirical"][0], 2.0, "k1686.calibration_diagnostics.regime_occupancy_empirical[0]"),
+        ("K1686 C empirical decline", 0.34, sdc["contemporaneous|C"]["empirical"], 1.0, "k1686...C.empirical"),
+        ("K1686 threshold share 58%", 0.58, 1.0 - sdc["contemporaneous|C"]["empirical"] / sdc["contemporaneous|A"]["empirical"], 2.0, "k1686 derived: 1 - C.empirical/A.empirical"),
+        ("K1686 D-up current decline", -0.12, nfe["up_only_current_regime_decline"], 5.0, "k1686.null_free_evidence.up_only_current_regime_decline"),
+        ("K1686 H ambient-up decline", 1.05, gate["empirical_ambient_up"]["point_estimate"], 1.0, "k1686.codex_followup_gate.empirical_ambient_up.point_estimate"),
+        ("K1686 H CI lo", 0.33, gate["empirical_ambient_up"]["ci95"][0], 1.0, "k1686.codex_followup_gate.empirical_ambient_up.ci95[0]"),
+        ("K1686 H CI hi", 1.76, gate["empirical_ambient_up"]["ci95"][1], 1.0, "k1686.codex_followup_gate.empirical_ambient_up.ci95[1]"),
+        ("K1686 H calm SAR", 3.89, k1686["regime_sar"]["contemporaneous|H_up"]["calm (<15)"]["empirical"], 1.0, "k1686.regime_sar[H_up].calm.empirical"),
+        ("K1686 H high SAR", 2.84, k1686["regime_sar"]["contemporaneous|H_up"]["high (25-30)"]["empirical"], 1.0, "k1686.regime_sar[H_up].high.empirical"),
+        ("K1686 H n calm up", 47.0, float(nfe["n_calm_up_shocks_ambient_regime"]), 0.0, "k1686.null_free_evidence.n_calm_up_shocks_ambient_regime"),
+        ("K1686 H n high up", 53.0, float(nfe["n_high_up_shocks_ambient_regime"]), 0.0, "k1686.null_free_evidence.n_high_up_shocks_ambient_regime"),
+        ("K1686 paired pooled-up", 0.94, gate["paired_pooled_minus_up_current"]["point_estimate"], 1.0, "k1686.codex_followup_gate.paired_pooled_minus_up_current.point_estimate"),
+        ("K1686 paired CI lo", 0.34, gate["paired_pooled_minus_up_current"]["ci95"][0], 2.0, "k1686.codex_followup_gate.paired_pooled_minus_up_current.ci95[0]"),
+        ("K1686 paired CI hi", 1.50, gate["paired_pooled_minus_up_current"]["ci95"][1], 1.0, "k1686.codex_followup_gate.paired_pooled_minus_up_current.ci95[1]"),
+        ("K1686 same-seed null CI lo", -0.66, gate["same_seed_null_comparison"]["sim_ci_95"][0], 1.0, "k1686.codex_followup_gate.same_seed_null_comparison.sim_ci_95[0]"),
+        ("K1686 same-seed null CI hi", 0.99, gate["same_seed_null_comparison"]["sim_ci_95"][1], 1.0, "k1686.codex_followup_gate.same_seed_null_comparison.sim_ci_95[1]"),
+        ("K1686 same-seed MC p", 0.033, gate["same_seed_null_comparison"]["p_value_monte_carlo"], 2.0, "k1686.codex_followup_gate.same_seed_null_comparison.p_value_monte_carlo"),
+        ("K1686 P* down-shock bound", 28.8, k1686["down_shock_impossibility"]["min_level_for_a_2pt_one_day_fall"], 1.0, "k1686.down_shock_impossibility.min_level_for_a_2pt_one_day_fall"),
+        ("K1686 F shock rate", 0.060, calib["shock_rate_sim_F"], 2.0, "k1686.calibration_diagnostics.shock_rate_sim_F"),
+        ("K1686 emp shock rate", 0.151, calib["shock_rate_empirical"], 1.0, "k1686.calibration_diagnostics.shock_rate_empirical"),
+        # ---- Table 4 / cross-asset (pinned, C3) ----
         ("T4 SPY beta", -0.000273, cross_asset["SPY"]["beta"], 1.0, "k1418.results[SPY].beta"),
         ("T4 SPY t", -1.85, cross_asset["SPY"]["beta_t"], 2.0, "k1418.results[SPY].beta_t"),
         ("T4 GLD beta", -0.000434, cross_asset["GLD"]["beta"], 1.0, "k1418.results[GLD].beta"),
@@ -56,10 +125,27 @@ def main() -> int:
         ("T4 TLT beta", -0.000437, cross_asset["TLT"]["beta"], 1.0, "k1418.results[TLT].beta"),
         ("T4 TLT t", -3.31, cross_asset["TLT"]["beta_t"], 2.0, "k1418.results[TLT].beta_t"),
         ("T4 0050 beta", 0.000092, cross_asset["0050.TW"]["beta"], 2.0, "k1418.results[0050.TW].beta"),
+        ("T4 0050 t", 0.28, cross_asset["0050.TW"]["beta_t"], 2.0, "k1418.results[0050.TW].beta_t"),
+        # ---- Appendix B alpha / adj-R2 (C4) ----
+        ("AppB SPY alpha", 0.0822, cross_asset["SPY"]["alpha"], 1.0, "k1418.results[SPY].alpha"),
+        ("AppB GLD alpha", 0.0548, cross_asset["GLD"]["alpha"], 1.0, "k1418.results[GLD].alpha"),
+        ("AppB TLT alpha", 0.0531, cross_asset["TLT"]["alpha"], 1.0, "k1418.results[TLT].alpha"),
+        ("AppB 0050 alpha", 0.0473, cross_asset["0050.TW"]["alpha"], 1.0, "k1418.results[0050.TW].alpha"),
+        ("AppB SPY adjR2", 0.0076, cross_asset["SPY"]["r2_adj"], 3.0, "k1418.results[SPY].r2_adj"),
+        ("AppB GLD adjR2", 0.0142, cross_asset["GLD"]["r2_adj"], 3.0, "k1418.results[GLD].r2_adj"),
+        ("AppB TLT adjR2", 0.0290, cross_asset["TLT"]["r2_adj"], 3.0, "k1418.results[TLT].r2_adj"),
+        ("AppB 0050 adjR2", -0.0013, cross_asset["0050.TW"]["r2_adj"], 5.0, "k1418.results[0050.TW].r2_adj"),
+        # ---- Table 5 / NFP (C5) ----
+        ("T5 NFP ratio vs all", 1.14, nfp["ratio_vs_all"], 1.0, "k741.part_a_historical.ratio_vs_all"),
+        ("T5 NFP p vs all", 0.081, nfp["p_vs_all"], 1.0, "k741.part_a_historical.p_vs_all"),
+        ("T5 NFP ratio vs Friday", 1.16, nfp["ratio_vs_friday"], 1.0, "k741.part_a_historical.ratio_vs_friday"),
+        ("T5 NFP p vs Friday", 0.061, nfp["p_vs_friday"], 1.0, "k741.part_a_historical.p_vs_friday"),
+        ("T5 NFP total days 4104", 4104.0, float(nfp["n_nfp"] + nfp["n_non_nfp"]), 0.0, "k741.part_a_historical n_nfp+n_non_nfp"),
         ("T5 Low NFP n", 62.0, float(k741["part_b_vix_regimes"]["Low (VIX<15)"]["n"]), 0.0, "k741.part_b_vix_regimes.Low.n"),
         ("T5 Low NFP mean abs", 0.498, k741["part_b_vix_regimes"]["Low (VIX<15)"]["mean_abs_return_pct"], 1.0, "k741.part_b_vix_regimes.Low.mean_abs_return_pct"),
         ("T5 Medium NFP mean abs", 0.757, k741["part_b_vix_regimes"]["Medium (15-20)"]["mean_abs_return_pct"], 1.0, "k741.part_b_vix_regimes.Medium.mean_abs_return_pct"),
         ("T5 High NFP mean abs", 1.488, k741["part_b_vix_regimes"]["High (VIX>=25)"]["mean_abs_return_pct"], 1.0, "k741.part_b_vix_regimes.High.mean_abs_return_pct"),
+        # ---- NSI baseline / thresholds / subperiods / RV / controlled (k903, unchanged) ----
         ("Baseline beta", -0.000267, k903["baseline_regression"]["beta_hat"], 1.0, "k903.baseline_regression.beta_hat"),
         ("Baseline t", -1.77, k903["baseline_regression"]["t_stat_NW"], 2.0, "k903.baseline_regression.t_stat_NW"),
         ("T9 tau=2 N", 768.0, float(k903["task2_table9_alternative_thresholds"]["2.0"]["N_shock"]), 0.0, "k903.task2_table9_alternative_thresholds.2.0.N_shock"),
@@ -86,22 +172,51 @@ def main() -> int:
             }
         )
 
+    # Threshold-style claims (printed as inequalities, checked as booleans)
+    bool_claims = [
+        ("T3 elevated dSAR p < 0.001", t3p["elevated"]["p_two_sided"] < 0.001, "table3_sar_inference.decline_inference_primary.elevated.p_two_sided"),
+        ("K1686 B/C/G all reject p<=0.007", max(sdc["contemporaneous|B"]["p_value_monte_carlo"], sdc["contemporaneous|C"]["p_value_monte_carlo"], sdc["contemporaneous|G"]["p_value_monte_carlo"]) <= 0.007, "k1686 B/C/G p_value_monte_carlo"),
+        ("K1686 H CI excludes zero", gate["empirical_ambient_up"]["ci95"][0] > 0, "k1686.codex_followup_gate.empirical_ambient_up.ci95"),
+        ("K1686 A in null CI (not rejected)", bool(sdc["contemporaneous|A"]["in_95_ci"]), "k1686...A.in_95_ci"),
+        ("T3 block sensitivity same conclusion", all(
+            (t3["decline_inference_by_block"][b]["normal"]["ci95"][0] < 0 < t3["decline_inference_by_block"][b]["normal"]["ci95"][1])
+            and all(t3["decline_inference_by_block"][b][r]["ci95"][0] > 0 for r in ("elevated", "high", "crisis"))
+            for b in ("10", "20", "40", "63")
+        ), "table3_sar_inference.decline_inference_by_block"),
+    ]
+    for metric, ok, source_path in bool_claims:
+        checks.append(
+            {
+                "metric": metric,
+                "paper_value": True,
+                "actual_value": bool(ok),
+                "tol_pct": 0.0,
+                "rel_diff_pct": 0.0 if ok else 100.0,
+                "status": "match" if ok else "mismatch",
+                "source_path": source_path,
+            }
+        )
+
     total = len(checks)
     matched = sum(1 for c in checks if c["status"] == "match")
     match_rate = matched / total * 100 if total else 0.0
     alert_level = "green" if match_rate >= 95 else ("amber" if match_rate >= 80 else "red")
     gate_status = "pass" if match_rate >= 95 else "fail"
 
-    print(f"{'Metric':<34} {'Paper':>12} {'Actual':>12} {'diff %':>8} {'status':>10}")
-    print("-" * 84)
+    print(f"{'Metric':<38} {'Paper':>12} {'Actual':>12} {'diff %':>8} {'status':>10}")
+    print("-" * 88)
     for c in checks:
-        print(f"{c['metric'][:32]:<34} {c['paper_value']:>12.6f} {c['actual_value']:>12.6f} {c['rel_diff_pct']:>7.2f}% {c['status']:>10}")
-    print("-" * 84)
+        pv = c["paper_value"]
+        av = c["actual_value"]
+        pv_s = f"{pv:>12.6f}" if isinstance(pv, float) else f"{str(pv):>12}"
+        av_s = f"{av:>12.6f}" if isinstance(av, float) else f"{str(av):>12}"
+        print(f"{c['metric'][:36]:<38} {pv_s} {av_s} {c['rel_diff_pct']:>7.2f}% {c['status']:>10}")
+    print("-" * 88)
     print(f"Matched: {matched}/{total}  rate: {match_rate:.1f}%  alert: {alert_level}  gate: {gate_status}")
 
     report = {
         "paper": "volatility-absorption",
-        "paper_version": "v3-active-scope",
+        "paper_version": "v3-active-scope-post-k1686",
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "alert_level": alert_level,
         "gate_status": gate_status,
@@ -112,11 +227,12 @@ def main() -> int:
         "mismatches": total - matched,
         "critical_flags": [
             "Active gate restricted to reproducible evidence retained in main_v3.tex",
+            "K897 lagged-proxy simulation retired (K1686 R2, 2026-07-14 adjudication); its interval is no longer printed or bound",
             "Legacy shock-type / VRP / hedging tables intentionally excluded pending pinned-snapshot rebuild",
         ],
         "checks": checks,
         "notes": [
-            "Coverage: T3 SAR, K897 null simulation, T4 pinned cross-asset, T5 NFP, baseline NSI, T9 thresholds, T10 subperiods, RV-normalized and controlled regressions.",
+            "Coverage: T2 regime distribution (pinned), T3 SAR + paired block-bootstrap inference (P0-3 rebuild), K1686 contemporaneous-null section, T4 pinned cross-asset (incl. 0050.TW C3 fix), Appendix B alpha/adjR2 (C4), T5 NFP overall + regime (C5), baseline NSI, T9 thresholds, T10 subperiods, RV-normalized and controlled regressions.",
             "This gate no longer validates legacy deferred sections that lack stable JSON bindings under the current pinned snapshot.",
         ],
     }

@@ -1,7 +1,7 @@
 # Paper 8: The Volatility Absorption Hypothesis
 
-**Target Journal**: TBD
-**Status**: MAJOR REVISION — active manuscript narrowed to the reproducible evidence set (SAR / pinned cross-asset / NFP / K903 / K897). Legacy shock-type, VRP, and hedging tables are now treated as deferred extensions until rebuilt from pinned-snapshot JSON bindings.
+**Target Journal**: Journal of Banking & Finance (primary) → JEF/IRFA (backup)
+**Status**: MAJOR REVISION in progress — P0 gate closed 2026-07-14. K1686 (Codex R2 PASS) retired K897 and re-founded the identification: pooled GARCH-null comparisons are inconclusive, ~58\% of the pooled headline decline is fixed-threshold selection, and the claim now rests on the ambient×sign decomposition (fear-shock calm-to-high SAR decline $+1.05$, paired 20-day block bootstrap CI $[0.33, 1.76]$). Body integrated in `main_v3.tex` §"Contemporaneous Null Re-Examination"; Table 2/3 moved fully to the pinned snapshot with rebuilt block-bootstrap inference (`results/table3_sar_inference.json`); reproduce gate 95/95 GREEN. Legacy shock-type, VRP, and hedging tables remain deferred extensions.
 - ~~**CRITICAL**: controlled regression $t = -3.14 \to -1.17$ crosses Harvey boundary~~ → **ADDRESSED** in main_v3.tex: K903 values applied ($\beta=-0.000216$, $t=-1.26$) with Harvey-boundary footnote
 - ~~**HIGH**: T10 2020-2026 $\beta$ sign flip~~ → **ADDRESSED** in main_v3.tex: table updated to K903 snapshot (2020-2026 $\beta=+0.000141$, $t=+0.47$); "all periods" claim removed; crisis-era caveat added
 - **MEDIUM**: 10+ T9/T10 magnitude drifts within acceptable yfinance drift range
@@ -18,7 +18,7 @@
 **Acknowledged limitation**: K716 absorption regression cannot be exactly reproduced from current yfinance data. The qualitative paralysis claim (absorption mechanism exists) and SAR Table 3 quantitative results remain valid; the specific Table 9-10 K716 cell numbers are pinned to paper-drafting-time data which we cannot retroactively recover. Future readers should treat K716 numerical cells as **frozen paper-time values** (cited verbatim from paper PDF), not currently reproducible against live yfinance — equivalent to citing a discontinued data vendor.
 
 **Mitigation**: see `errata_pending.md` §Path B/C for full disclosure; SAR Table 3 (≤0.82% drift) carried forward with current snapshot, K716 Table 9-10 cells kept as paper-time values with footnote.
-**Pages**: 38 | **Citations**: 37
+**Pages**: 41 | **Citations**: 37
 
 ## Data Sources
 - SPY: yfinance
@@ -57,6 +57,7 @@ uv run python paper/volatility-absorption/reproduce.py
 | K721 | VRP by regime | VRP narrowing at high VIX |
 | K722 | Hedging cost-benefit | Cost-benefit by VIX regime |
 | K741 | NFP event study (revision) | Revised; addresses S4 |
-| K897 | SAR null simulation | Absorption is real, not GARCH artifact |
+| K897 | SAR null simulation | RETIRED (K1686): rejection was timing-dependent |
 | K903 | Robustness | Alternative shock thresholds |
 | K904 | Shock + NFP fix | Combined S2+S4 fix |
+| K1686 | Contemporaneous null + ambient×sign | Null panel inconclusive; absorption survives ambient fear-shock gate (+1.05, CI [0.33,1.76]; Codex R2 PASS) |
