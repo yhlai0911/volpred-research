@@ -29,7 +29,7 @@
 
 - **Test**: TWO pre-specified objects, with OPPOSITE multiplicity treatments, and the verdict is a function of both. (1) DETECTION -- Giacomini-White (2006) Sec 3.4 UNCONDITIONAL special case (instrument h_t = 1, which coincides with a HAC Diebold-Mariano t; NOT the conditional GW test -- no instrument vector, no Wald statistic, no chi-square_q), one-sided and flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union of alternatives: ten shots at finding an effect). (2) EXCLUSION -- the pre-specified one-sided material-gain test, run as an INTERSECTION-UNION test with each cell UNADJUSTED (Berger 1982): the bounded null may be asserted only if EVERY cell rejects its own exclusion null, which needs no correction. Holm-adjusted exclusion p-values are also reported as a conservative sensitivity, but they are NOT the test. The verdict is determined by those two objects. The verdict is INCONCLUSIVE because the detection family finds no Holm-adjusted evidence and the exclusion conjunction does not hold in every cell.
 - **Loss**: Patton QLIKE on the variance level
-- **Estimation scheme**: paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin). Every one of the 10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which is the condition GW's limiting experiment needs. The two registered asset-specific `flow_transform/unexpected_z` rows whose regressor comes from an expanding-window AR(5) sit outside the primary family, are flagged `bounded_memory=false` and `feeds_gate=false`, and remain visible only as invalid-for-nested-inference diagnostics.
+- **Estimation scheme**: paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin). Every one of the 10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which is the condition GW's limiting experiment needs. Every non-primary robustness row is `feeds_gate=false` and cannot broaden that claim. The two asset-specific `flow_transform/unexpected_z` rows are additionally `bounded_memory=false` because their regressor comes from an expanding-window AR(5); they are invalid-for-nested-inference diagnostics.
 - **Gate**: `qlike_improve > 0 AND unconditional GW/DM z < -1.645 AND Holm p < 0.05`
 - **Claim scope**: bounded in QLIKE-loss space only. test = GW(2006) Sec 3.4 unconditional special case (= HAC DM) | loss = Patton QLIKE | scheme = paired fixed rolling window | claim = no robust evidence of UNCONDITIONAL incremental predictive ability, with any bound stated in QLIKE-loss space only. These four match by construction; v1's did not, and rev2's claim was broader than its test.
 
@@ -165,13 +165,13 @@ Every run below is registered in the same in-code test registry as the primary f
 | Shock threshold dummies (|z| ≥ 1.0 … 2.5) | 16 | -0.82 | no |
 | Shorter ETH burn-in (200) | 2 | 0.03 | no |
 
-Across **all 52** gate-eligible unconditional GW/DM tests in the study, **0** survive the full-family Holm correction in the flow-favouring direction. (110 further tests are registered as diagnostic-only and are barred from any gate by construction.)
+Across **all 10** gate-eligible unconditional GW/DM tests in the study, **0** survive the full-family Holm correction in the flow-favouring direction. (152 further tests are registered as diagnostic-only and are barred from any gate by construction.)
 
 ### 2 registered diagnostic rows fail the bounded-memory gate
 
 GW's limiting experiment assumes the **forecasting method** has bounded estimator memory. Every cell here fits its regression on a fixed 250-day rolling window, so the final fit always satisfies that. But the condition is on the *whole method*, not on the last regression: `flow_transform|BTC_h1|T_unexpected_z|rv_gk|fl1`, `flow_transform|ETH_h1|T_unexpected_z|rv_gk|fl1` build their regressor from an **AR(5) refitted on an expanding window** of flow history. There is no lookahead in it — day *i*'s own value never enters its own fit — but it is not a bounded-memory forecasting method, and a blanket sentence claiming all 54 registered tests are one would be false.
 
-They remain visible in the frozen historical sensitivity inventory, but they carry both `bounded_memory=false` and `feeds_gate=false`. That eligibility is fixed from method provenance before any p-value is read; the rows cannot enter a GW family or verdict. The archived 54-row sensitivity and the 52-row eligible family both happen to have **0** Holm-surviving cells, but only the latter is inferentially licensed. All 10 primary cells are bounded-memory.
+They remain visible in the frozen historical sensitivity inventory, but they carry both `bounded_memory=false` and `feeds_gate=false`. That eligibility is fixed from method provenance before any p-value is read; the rows cannot enter a GW family or verdict. The archived 54-row sensitivity and the 10-row eligible family both happen to have **0** Holm-surviving cells, but only the latter is inferentially licensed. All 10 primary cells are bounded-memory.
 
 ### Is the null an artifact of the log → variance mapping?
 
@@ -237,9 +237,9 @@ The committed result endpoint is **2026-07-13** (last fully closed UTC day in th
 **Does say:**
 
 - **No robust incremental UNCONDITIONAL predictive evidence was found** for spot BTC/ETH ETF net flow over a HAR-RV baseline. Not one of the 10 primary cells clears the pre-specified Holm-adjusted detection gate; the point estimates mostly run the wrong way.
-- Gains larger than **4.2%** in relative QLIKE are excluded simultaneously across all 10 cells.
-- Only 5/10 cells can rule out the pre-specified 1% gain, so this is a **negative finding, not a proven zero**. Calling it a null result would overstate the evidence.
-- The same lack of a gate-clearing UNCONDITIONAL signal appears across four flow transforms, four RV proxies, three smearing conventions, a conservative publication lag and four shock thresholds.
+- For the UNCONDITIONAL average-loss estimand, gains larger than **4.2%** in relative QLIKE are excluded simultaneously across all 10 cells.
+- For the UNCONDITIONAL average-loss estimand, only 5/10 cells can rule out the pre-specified 1% gain, so this is a **negative finding, not a proven zero**. Calling it a null result would overstate the evidence.
+- The flow-transform, RV-proxy, smearing, publication-lag and threshold panels are reported as diagnostics only; none broadens the 10-cell primary UNCONDITIONAL average-loss claim.
 
 **Does not say:**
 

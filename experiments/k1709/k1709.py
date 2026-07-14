@@ -168,8 +168,28 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         "statistic_function": "gw_unconditional_dm",
         "gate_registry_inference": "giacomini_white_qlike_fixed_window",
         "train_window_constant": "GW_TRAIN_WINDOW",
+        "model_spec_registry": "SPECS",
+        "base_model_parameter": "base",
+        "augmented_model_parameter": "alt",
+        "paired_result_variable": "po",
+        "gate_function": "evaluate_cell",
+        "registry_record_constructor": "TestRecord",
+        "gate_eligibility_variable": "gate_eligible",
+        "whole_method_eligibility_variable": "whole_method_fixed_memory",
+        "bounded_memory_parameter": "bounded_memory",
+        "paired_audit_attribute": "audit",
+        "paired_eligibility_key": "gw_fixed_memory_eligible",
+        "base_design_variable": "Xb",
+        "augmented_design_variable": "Xa",
+        "fit_function": "fit",
         "runtime_evidence_file": "k1709_results.json",
         "runtime_evidence_key": "nested_dm_fixed_memory_evidence_v1",
+        "runtime_cell_inventory": "primary_cells",
+        "runtime_gate_inventory": "multiple_testing.primary_family",
+        "runtime_registry_inventory": "multiple_testing.full_family_holm",
+        "runtime_claim_record": "verdict_basis",
+        "runtime_statistic_record": "primary_inference_gw_qlike",
+        "runtime_multiple_testing_record": "multiple_testing",
         "claim_surface_files": [
             "README.md",
             "k1709.py",
@@ -192,6 +212,21 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
         "reference_distribution": "standard_normal",
         "estimand": "unconditional average QLIKE loss differential",
+    },
+    "decision_contract": {
+        "gate_direction": "lower",
+        "raw_p_field": "p_value_one_sided_flow_better",
+        "multiplicity": "Holm",
+        "family_alpha": 0.05,
+        "critical_value": -1.645,
+        "gate_flag_field": "passes_flow_gate",
+        "holm_adjusted_p_field": "holm_adjusted_p",
+        "registry_stat_field": "stat",
+        "registry_stat_decimals": 4,
+        "registry_raw_p_field": "p_one_sided_raw",
+        "gate_count_field": "n_gate_eligible_gw_tests",
+        "claim_family_count_field": "cells_in_primary_family",
+        "claim_pass_count_field": "cells_passing_flow_gate",
     },
     "feature_stages": [
         {
@@ -227,16 +262,12 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
     "primary_cells": [
         {
             "id": "primary|BTC_h1|H1_absflow|rv_gk|fl1",
+            "id_components": ["primary", "BTC_h1", "H1_absflow", "rv_gk", "fl1"],
             "family": "primary",
-            "asset": "BTC",
             "base": "HAR+ctrl",
             "augmented": "H1_absflow",
             "strictly_nested": True,
             "horizon": 1,
-            "rv_proxy": "rv_gk",
-            "state_lag": 1,
-            "flow_lag": 1,
-            "smearing": "own",
             "feeds_gate": True,
             "base_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret"],
             "augmented_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"],
@@ -244,16 +275,12 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         },
         {
             "id": "primary|BTC_h1|H2_asym|rv_gk|fl1",
+            "id_components": ["primary", "BTC_h1", "H2_asym", "rv_gk", "fl1"],
             "family": "primary",
-            "asset": "BTC",
             "base": "HAR+ctrl",
             "augmented": "H2_asym",
             "strictly_nested": True,
             "horizon": 1,
-            "rv_proxy": "rv_gk",
-            "state_lag": 1,
-            "flow_lag": 1,
-            "smearing": "own",
             "feeds_gate": True,
             "base_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret"],
             "augmented_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z", "z_neg"],
@@ -261,16 +288,12 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         },
         {
             "id": "primary|BTC_h5|H1_absflow|rv_gk|fl1",
+            "id_components": ["primary", "BTC_h5", "H1_absflow", "rv_gk", "fl1"],
             "family": "primary",
-            "asset": "BTC",
             "base": "HAR+ctrl",
             "augmented": "H1_absflow",
             "strictly_nested": True,
             "horizon": 5,
-            "rv_proxy": "rv_gk",
-            "state_lag": 1,
-            "flow_lag": 1,
-            "smearing": "own",
             "feeds_gate": True,
             "base_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret"],
             "augmented_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"],
@@ -278,16 +301,12 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         },
         {
             "id": "primary|BTC_h5|H2_asym|rv_gk|fl1",
+            "id_components": ["primary", "BTC_h5", "H2_asym", "rv_gk", "fl1"],
             "family": "primary",
-            "asset": "BTC",
             "base": "HAR+ctrl",
             "augmented": "H2_asym",
             "strictly_nested": True,
             "horizon": 5,
-            "rv_proxy": "rv_gk",
-            "state_lag": 1,
-            "flow_lag": 1,
-            "smearing": "own",
             "feeds_gate": True,
             "base_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret"],
             "augmented_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z", "z_neg"],
@@ -295,16 +314,12 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         },
         {
             "id": "primary|ETH_h1|H1_absflow|rv_gk|fl1",
+            "id_components": ["primary", "ETH_h1", "H1_absflow", "rv_gk", "fl1"],
             "family": "primary",
-            "asset": "ETH",
             "base": "HAR+ctrl",
             "augmented": "H1_absflow",
             "strictly_nested": True,
             "horizon": 1,
-            "rv_proxy": "rv_gk",
-            "state_lag": 1,
-            "flow_lag": 1,
-            "smearing": "own",
             "feeds_gate": True,
             "base_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret"],
             "augmented_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"],
@@ -312,16 +327,12 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         },
         {
             "id": "primary|ETH_h1|H2_asym|rv_gk|fl1",
+            "id_components": ["primary", "ETH_h1", "H2_asym", "rv_gk", "fl1"],
             "family": "primary",
-            "asset": "ETH",
             "base": "HAR+ctrl",
             "augmented": "H2_asym",
             "strictly_nested": True,
             "horizon": 1,
-            "rv_proxy": "rv_gk",
-            "state_lag": 1,
-            "flow_lag": 1,
-            "smearing": "own",
             "feeds_gate": True,
             "base_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret"],
             "augmented_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z", "z_neg"],
@@ -329,16 +340,12 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         },
         {
             "id": "primary|ETH_h1|H4_plus_btc|rv_gk|fl1",
+            "id_components": ["primary", "ETH_h1", "H4_plus_btc", "rv_gk", "fl1"],
             "family": "primary",
-            "asset": "ETH",
             "base": "H4_own",
             "augmented": "H4_plus_btc",
             "strictly_nested": True,
             "horizon": 1,
-            "rv_proxy": "rv_gk",
-            "state_lag": 1,
-            "flow_lag": 1,
-            "smearing": "own",
             "feeds_gate": True,
             "base_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"],
             "augmented_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z", "abs_z_btc"],
@@ -346,16 +353,12 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         },
         {
             "id": "primary|ETH_h5|H1_absflow|rv_gk|fl1",
+            "id_components": ["primary", "ETH_h5", "H1_absflow", "rv_gk", "fl1"],
             "family": "primary",
-            "asset": "ETH",
             "base": "HAR+ctrl",
             "augmented": "H1_absflow",
             "strictly_nested": True,
             "horizon": 5,
-            "rv_proxy": "rv_gk",
-            "state_lag": 1,
-            "flow_lag": 1,
-            "smearing": "own",
             "feeds_gate": True,
             "base_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret"],
             "augmented_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"],
@@ -363,16 +366,12 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         },
         {
             "id": "primary|ETH_h5|H2_asym|rv_gk|fl1",
+            "id_components": ["primary", "ETH_h5", "H2_asym", "rv_gk", "fl1"],
             "family": "primary",
-            "asset": "ETH",
             "base": "HAR+ctrl",
             "augmented": "H2_asym",
             "strictly_nested": True,
             "horizon": 5,
-            "rv_proxy": "rv_gk",
-            "state_lag": 1,
-            "flow_lag": 1,
-            "smearing": "own",
             "feeds_gate": True,
             "base_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret"],
             "augmented_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z", "z_neg"],
@@ -380,16 +379,12 @@ NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {
         },
         {
             "id": "primary|ETH_h5|H4_plus_btc|rv_gk|fl1",
+            "id_components": ["primary", "ETH_h5", "H4_plus_btc", "rv_gk", "fl1"],
             "family": "primary",
-            "asset": "ETH",
             "base": "H4_own",
             "augmented": "H4_plus_btc",
             "strictly_nested": True,
             "horizon": 5,
-            "rv_proxy": "rv_gk",
-            "state_lag": 1,
-            "flow_lag": 1,
-            "smearing": "own",
             "feeds_gate": True,
             "base_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z"],
             "augmented_predictors": ["har_d", "har_w", "har_m", "ret", "abs_ret", "abs_z", "abs_z_btc"],
@@ -1388,6 +1383,9 @@ def gw_unconditional_dm(loss_aug: np.ndarray, loss_base: np.ndarray, h: int) -> 
         "p_value_two_sided": float(2.0 * stats.norm.sf(abs(z))),
         "p_value_one_sided_flow_better": float(stats.norm.cdf(z)),
         "hac_lag_used": int(bw),
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal",
         "standard_error": float(se),
     }
 
@@ -1750,7 +1748,9 @@ def evaluate_cell(
     whole_method_fixed_memory = bool(
         bounded_memory and po.audit.get("gw_fixed_memory_eligible") is True
     )
-    gate_eligible = bool(register_gate and whole_method_fixed_memory)
+    gate_eligible = bool(
+        register_gate and family == "primary" and whole_method_fixed_memory
+    )
     if family == "primary" and register_gate and not gate_eligible:
         raise AssertionError(
             f"primary cell {cell} requested a gate without fixed-memory provenance"
@@ -2247,8 +2247,9 @@ def build_verdict_basis(
             f"test."
         )
         does_say_1 = (
-            "Spot BTC/ETH ETF net flow buys no material improvement in out-of-sample "
-            "volatility forecast accuracy over a HAR-RV baseline: a "
+            "On the UNCONDITIONAL average-loss estimand, spot BTC/ETH ETF net flow "
+            "buys no material improvement in out-of-sample volatility forecast "
+            "accuracy over a HAR-RV baseline: a "
             f">={margin_pct:.0f}% relative QLIKE gain is ruled out in all {n_cells} "
             "primary cells. This is a QLIKE-loss bound, not proof of exact zero."
         )
@@ -2289,15 +2290,17 @@ def build_verdict_basis(
             "detection gate; the point estimates mostly run the wrong way."
         )
         does_say_2 = (
-            f"Gains larger than **{family_bound:.1f}%** in relative QLIKE are "
-            f"excluded simultaneously across all {n_cells} cells."
+            "For the UNCONDITIONAL average-loss estimand, gains larger than "
+            f"**{family_bound:.1f}%** in relative QLIKE are excluded "
+            f"simultaneously across all {n_cells} cells."
             if family_bound is not None
             else ""
         )
         does_say_3 = (
-            f"Only {n_excl}/{n_cells} cells can rule out the pre-specified "
-            f"{margin_pct:.0f}% gain, so this is a **negative finding, not a proven "
-            "zero**. Calling it a null result would overstate the evidence."
+            "For the UNCONDITIONAL average-loss estimand, only "
+            f"{n_excl}/{n_cells} cells can rule out the pre-specified "
+            f"{margin_pct:.0f}% gain, so this is a **negative finding, not a "
+            "proven zero**. Calling it a null result would overstate the evidence."
         )
     else:
         claim = (
@@ -2353,11 +2356,11 @@ def build_verdict_basis(
             "forward-label embargo (y_end_date < forecast origin). Every one of the "
             f"{n_cells} primary cells is therefore a BOUNDED-MEMORY forecasting "
             "method, which "
-            "is the condition GW's limiting experiment needs. The two registered "
-            "asset-specific `flow_transform/unexpected_z` rows whose regressor comes "
-            "from an expanding-window AR(5) sit outside the primary family, are "
-            "flagged `bounded_memory=false` and `feeds_gate=false`, and remain visible "
-            "only as invalid-for-nested-inference diagnostics."
+            "is the condition GW's limiting experiment needs. Every non-primary "
+            "robustness row is `feeds_gate=false` and cannot broaden that claim. The "
+            "two asset-specific `flow_transform/unexpected_z` rows are additionally "
+            "`bounded_memory=false` because their regressor comes from an "
+            "expanding-window AR(5); they are invalid-for-nested-inference diagnostics."
         ),
         "gate": (
             f"qlike_improve > 0 AND unconditional GW/DM z < {POWER_GATE_Z} "
@@ -2392,9 +2395,9 @@ def build_verdict_basis(
         "does_say_2_family_bound": does_say_2,
         "does_say_3_inconclusive_scope": does_say_3,
         "does_say_4_robustness": (
-            "The same lack of a gate-clearing UNCONDITIONAL signal appears across "
-            "four flow transforms, four RV proxies, three smearing conventions, a "
-            "conservative publication lag and four shock thresholds."
+            "The flow-transform, RV-proxy, smearing, publication-lag and threshold "
+            "panels are reported as diagnostics only; none broadens the 10-cell "
+            "primary UNCONDITIONAL average-loss claim."
         ),
         "does_not_say_1_exact_zero": (
             "That the true effect is exactly zero. No test here establishes that."
@@ -2572,7 +2575,8 @@ def build_fixed_memory_runtime_evidence(res: dict) -> dict:
         raise AssertionError("runtime primary-cell inventory differs from the manifest")
     evidence_cells = []
     for cell_id in expected_ids:
-        audit = cells[cell_id]["oos_audit"]
+        runtime_cell = cells[cell_id]
+        audit = runtime_cell["oos_audit"]
         evidence_cells.append(
             {
                 "id": cell_id,
@@ -2587,13 +2591,16 @@ def build_fixed_memory_runtime_evidence(res: dict) -> dict:
                 ],
                 "origin_schedule_sha256": audit["origin_schedule_sha256"],
                 "eligibility": "whole_method_fixed_memory_verified",
+                "base_predictors": list(SPECS[runtime_cell["base"]]),
+                "augmented_predictors": list(SPECS[runtime_cell["alt"]]),
             }
         )
+    manifest_sha256 = _canonical_object_sha256(
+        NESTED_DM_FIXED_MEMORY_MANIFEST_V1
+    )
     return {
         "schema": "nested_dm_fixed_memory_runtime.v1",
-        "manifest_sha256": _canonical_object_sha256(
-            NESTED_DM_FIXED_MEMORY_MANIFEST_V1
-        ),
+        "manifest_sha256": manifest_sha256,
         "cell_inventory": "primary_cells",
         "gate_inventory": "multiple_testing.primary_family",
         "registry_inventory": "multiple_testing.full_family_holm",
@@ -2605,7 +2612,7 @@ def build_fixed_memory_runtime_evidence(res: dict) -> dict:
 
 
 def _repair_frozen_gate_metadata(res: dict) -> set[tuple]:
-    """Correct two known gate-eligibility flags without touching estimates."""
+    """Constrain gate metadata to the pre-registered primary family only."""
     before = _non_string_leaf_surface(res)
     invalid_cells = set(
         res["multiple_testing"]["bounded_memory_sensitivity"][
@@ -2613,37 +2620,54 @@ def _repair_frozen_gate_metadata(res: dict) -> set[tuple]:
         ]
     )
     rows = res["multiple_testing"]["full_family_holm"]
-    for row in rows:
+    newly_diagnostic = 0
+    for index, row in enumerate(rows):
+        if row["family"] == "primary":
+            if row.get("bounded_memory") is not True:
+                raise AssertionError(f"{row['cell']}: primary record is not bounded")
+            row["claim_role"] = "primary_unconditional_detection_gate"
+            continue
+        if before.get(
+            ("multiple_testing", "full_family_holm", index, "feeds_gate")
+        ) == ("bool", "true"):
+            newly_diagnostic += 1
+        row["feeds_gate"] = False
         if row["cell"] in invalid_cells:
             if row.get("bounded_memory") is not False:
                 raise AssertionError(f"{row['cell']}: expected unbounded-memory record")
-            row["feeds_gate"] = False
             row["claim_role"] = "invalid_for_nested_inference_diagnostic_only"
-        elif row["family"] == "primary":
-            row["claim_role"] = "primary_unconditional_detection_gate"
         else:
-            row["claim_role"] = "robustness_unconditional_sensitivity"
+            row["claim_role"] = "non_primary_diagnostic_only"
     for row in res["multiple_testing"]["primary_family"]:
         row["claim_role"] = "primary_unconditional_detection_gate"
+    for cell in res["primary_cells"]:
+        statistic = cell["primary_inference_gw_qlike"]
+        statistic.update(
+            {
+                "hac_kernel": "Bartlett",
+                "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+                "reference_distribution": "standard_normal",
+            }
+        )
     res["multiple_testing"]["n_gate_eligible_gw_tests"] = sum(
         bool(row["feeds_gate"]) for row in rows
     )
-    res["multiple_testing"]["n_diagnostic_only_tests"] += sum(
-        1 for row in rows if row["cell"] in invalid_cells and before.get(
-            ("multiple_testing", "full_family_holm", rows.index(row), "feeds_gate")
-        ) == ("bool", "true")
-    )
+    res["multiple_testing"]["n_diagnostic_only_tests"] += newly_diagnostic
+    res["multiple_testing"]["bounded_memory_sensitivity"][
+        "n_gw_tests_bounded_memory"
+    ] = sum(row["feeds_gate"] is True for row in rows)
     res["multiple_testing"]["registry_note"] = (
         "The primary family and gate-eligible count are registry-derived. The "
-        "frozen full_family_holm array remains as the historical 54-row sensitivity "
-        "inventory; its two expanding-preprocessing rows are now explicitly "
-        "feeds_gate=false and diagnostic-only. No primary cell uses them."
+        "frozen full_family_holm array remains as a historical 54-row sensitivity "
+        "inventory. Only the 10 pre-registered primary rows are gate-eligible; every "
+        "non-primary row is feeds_gate=false. The two expanding-preprocessing rows "
+        "are additionally marked invalid for nested inference."
     )
     res["multiple_testing"]["bounded_memory_sensitivity"]["note"] = (
         "Eligibility is decided from whole-method provenance before p-values are "
-        "inspected. The two expanding-preprocessing rows remain visible in the "
-        "historical full-family sensitivity array, but feeds_gate=false prevents "
-        "either from entering a GW family or verdict."
+        "inspected. All robustness rows remain visible in the historical "
+        "sensitivity array, but feeds_gate=false keeps them outside the claim sink. "
+        "The two expanding-preprocessing rows are also invalid for nested inference."
     )
     res["rev1_review_residuals_fixed"]["R6_bounded_memory"] = (
         "Two asset-specific `flow_transform/unexpected_z` rows use an "
@@ -2668,10 +2692,9 @@ def relabel_frozen_results() -> None:
     """Migrate frozen labels/provenance without recomputing an estimate.
 
     String claims and schedule digests may be added. The only permitted typed-leaf
-    correction is the audited four-path gate-metadata repair: two invalid
-    expanding-preprocessing rows flip ``feeds_gate`` true -> false and the two
-    corresponding registry counts change. Every other number, bool and null is
-    asserted type/value-identical before replacing the frozen file.
+    correction is the audited gate-scope repair: all 44 non-primary rows are
+    ``feeds_gate=false`` and three registry counts are reconciled. Every estimate,
+    test statistic, p-value, bound, and all other typed leaves remain identical.
     """
     path = OUT / "k1709_results.json"
     with open(path) as fh:
@@ -2680,10 +2703,15 @@ def relabel_frozen_results() -> None:
     allowed_repairs = {
         ("multiple_testing", "n_gate_eligible_gw_tests"),
         ("multiple_testing", "n_diagnostic_only_tests"),
+        (
+            "multiple_testing",
+            "bounded_memory_sensitivity",
+            "n_gw_tests_bounded_memory",
+        ),
         *{
             ("multiple_testing", "full_family_holm", index, "feeds_gate")
             for index, row in enumerate(res["multiple_testing"]["full_family_holm"])
-            if row.get("claim_role") == "invalid_for_nested_inference_diagnostic_only"
+            if row.get("family") != "primary"
         },
     }
     if repaired_paths - allowed_repairs:
@@ -2723,8 +2751,8 @@ def relabel_frozen_results() -> None:
     if added:
         print(f"added: {', '.join(added)}")
     print(
-        "all estimates unchanged; only the allowlisted two gate flags and two "
-        "registry counts may differ from the pre-migration freeze"
+        "all estimates unchanged; only allowlisted non-primary gate flags and "
+        "their three registry counts may differ from the pre-migration freeze"
     )
 
 
@@ -3211,8 +3239,8 @@ def main() -> None:
                 "estimator memory. Every cell here uses a fixed 250-day rolling "
                 "regression window, so the final fit always satisfies it -- but the "
                 "condition is on the whole method. The `flow_transform/unexpected_z` "
-                "cell builds its regressor from an AR(5) refitted on an EXPANDING "
-                "window of flow history, so that cell alone does not. There is no "
+                "rows build their regressor from an AR(5) refitted on an EXPANDING "
+                "window of flow history, so those rows do not. There is no "
                 "lookahead in it; it simply is not a bounded-memory forecasting "
                 "method, and the write-up must not claim in one blanket sentence "
                 "that every registered test is one."

@@ -881,7 +881,10 @@
         "p_value_two_sided": 0.19400730363938712,
         "p_value_one_sided_flow_better": 0.9029963481803065,
         "hac_lag_used": 8,
-        "standard_error": 0.0023068428752883257
+        "standard_error": 0.0023068428752883257,
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal"
       },
       "material_gain_exclusion": {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
@@ -985,7 +988,10 @@
         "p_value_two_sided": 0.5356788923269773,
         "p_value_one_sided_flow_better": 0.7321605538365114,
         "hac_lag_used": 8,
-        "standard_error": 0.008164509037190395
+        "standard_error": 0.008164509037190395,
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal"
       },
       "material_gain_exclusion": {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
@@ -1089,7 +1095,10 @@
         "p_value_two_sided": 0.6158256099070711,
         "p_value_one_sided_flow_better": 0.30791280495353557,
         "hac_lag_used": 13,
-        "standard_error": 0.002024290408586088
+        "standard_error": 0.002024290408586088,
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal"
       },
       "material_gain_exclusion": {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
@@ -1193,7 +1202,10 @@
         "p_value_two_sided": 0.15077649142610455,
         "p_value_one_sided_flow_better": 0.9246117542869478,
         "hac_lag_used": 13,
-        "standard_error": 0.002668907756183232
+        "standard_error": 0.002668907756183232,
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal"
       },
       "material_gain_exclusion": {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
@@ -1297,7 +1309,10 @@
         "p_value_two_sided": 0.5016903343957584,
         "p_value_one_sided_flow_better": 0.7491548328021208,
         "hac_lag_used": 7,
-        "standard_error": 0.0044342700062209375
+        "standard_error": 0.0044342700062209375,
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal"
       },
       "material_gain_exclusion": {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
@@ -1401,7 +1416,10 @@
         "p_value_two_sided": 0.8516924010036103,
         "p_value_one_sided_flow_better": 0.5741537994981949,
         "hac_lag_used": 7,
-        "standard_error": 0.004934091176870652
+        "standard_error": 0.004934091176870652,
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal"
       },
       "material_gain_exclusion": {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
@@ -1505,7 +1523,10 @@
         "p_value_two_sided": 0.743030142877023,
         "p_value_one_sided_flow_better": 0.3715150714385115,
         "hac_lag_used": 11,
-        "standard_error": 0.002584247088286077
+        "standard_error": 0.002584247088286077,
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal"
       },
       "material_gain_exclusion": {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
@@ -1609,7 +1630,10 @@
         "p_value_two_sided": 0.6957545724045187,
         "p_value_one_sided_flow_better": 0.6521227137977407,
         "hac_lag_used": 11,
-        "standard_error": 0.0026469936488873747
+        "standard_error": 0.0026469936488873747,
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal"
       },
       "material_gain_exclusion": {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
@@ -1713,7 +1737,10 @@
         "p_value_two_sided": 0.7318553851244756,
         "p_value_one_sided_flow_better": 0.3659276925622378,
         "hac_lag_used": 7,
-        "standard_error": 0.0024319991959876525
+        "standard_error": 0.0024319991959876525,
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal"
       },
       "material_gain_exclusion": {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
@@ -1818,7 +1845,10 @@
         "p_value_two_sided": 0.5110406545503356,
         "p_value_one_sided_flow_better": 0.7444796727248322,
         "hac_lag_used": 11,
-        "standard_error": 0.001683882909221902
+        "standard_error": 0.001683882909221902,
+        "hac_kernel": "Bartlett",
+        "hac_bandwidth_rule": "max(h-1, canonical_bandwidth(h,n))",
+        "reference_distribution": "standard_normal"
       },
       "material_gain_exclusion": {
         "test": "one-sided material-gain exclusion (fixed-window GW moment)",
@@ -7417,10 +7447,10 @@
     }
   },
   "multiple_testing": {
-    "registry_note": "The primary family and gate-eligible count are registry-derived. The frozen full_family_holm array remains as the historical 54-row sensitivity inventory; its two expanding-preprocessing rows are now explicitly feeds_gate=false and diagnostic-only. No primary cell uses them.",
+    "registry_note": "The primary family and gate-eligible count are registry-derived. The frozen full_family_holm array remains as a historical 54-row sensitivity inventory. Only the 10 pre-registered primary rows are gate-eligible; every non-primary row is feeds_gate=false. The two expanding-preprocessing rows are additionally marked invalid for nested inference.",
     "n_tests_registered_total": 162,
-    "n_gate_eligible_gw_tests": 52,
-    "n_diagnostic_only_tests": 110,
+    "n_gate_eligible_gw_tests": 10,
+    "n_diagnostic_only_tests": 152,
     "primary_family": [
       {
         "family": "primary",
@@ -7886,12 +7916,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.6174,
         "p_one_sided_raw": 0.9471082859177316,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.6761,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "rv_proxy",
@@ -7905,12 +7935,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 5.3886,
         "p_one_sided_raw": 0.9999999644910277,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.4803,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "rv_proxy",
@@ -7924,12 +7954,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.3697,
         "p_one_sided_raw": 0.6441959935100096,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.3966,
         "n": 170,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "rv_proxy",
@@ -7943,12 +7973,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.2155,
         "p_one_sided_raw": 0.8879202397288808,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.8275,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "rv_proxy",
@@ -7962,12 +7992,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.0651,
         "p_one_sided_raw": 0.8565879054235583,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.1219,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "rv_proxy",
@@ -7981,12 +8011,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.5489,
         "p_one_sided_raw": 0.7084572697749392,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.922,
         "n": 143,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_lag2",
@@ -8000,12 +8030,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.2501,
         "p_one_sided_raw": 0.8943660575159368,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.3832,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_lag2",
@@ -8019,12 +8049,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.3092,
         "p_one_sided_raw": 0.37860088310489404,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.158,
         "n": 350,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_lag2",
@@ -8038,12 +8068,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.0125,
         "p_one_sided_raw": 0.4950067149499774,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.0051,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_lag2",
@@ -8057,12 +8087,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.5025,
         "p_one_sided_raw": 0.6923406095033089,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.4448,
         "n": 217,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "smearing_none",
@@ -8076,12 +8106,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.4507,
         "p_one_sided_raw": 0.9265655099439969,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.8159,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "smearing_shared",
@@ -8095,12 +8125,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.2291,
         "p_one_sided_raw": 0.8904796728787056,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.557,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "smearing_none",
@@ -8114,12 +8144,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.281,
         "p_one_sided_raw": 0.3893576953248068,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.2462,
         "n": 351,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "smearing_shared",
@@ -8133,12 +8163,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.5043,
         "p_one_sided_raw": 0.3070081919641543,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.4049,
         "n": 351,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "smearing_none",
@@ -8152,12 +8182,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.564,
         "p_one_sided_raw": 0.9410909051575658,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -1.6381,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "smearing_shared",
@@ -8171,12 +8201,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.6857,
         "p_one_sided_raw": 0.7535554051998217,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.565,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "smearing_none",
@@ -8190,12 +8220,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -1.0732,
         "p_one_sided_raw": 0.14159279598482594,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 1.2793,
         "n": 218,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "smearing_shared",
@@ -8209,12 +8239,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.2869,
         "p_one_sided_raw": 0.3870886107657586,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.2742,
         "n": 218,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_transform",
@@ -8228,12 +8258,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.616,
         "p_one_sided_raw": 0.26895089531626376,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.4733,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_transform",
@@ -8247,12 +8277,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.3798,
         "p_one_sided_raw": 0.9161720544320033,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.2664,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_transform",
@@ -8266,12 +8296,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.521,
         "p_one_sided_raw": 0.9358735564924163,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.5059,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_transform",
@@ -8304,12 +8334,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.1413,
         "p_one_sided_raw": 0.4438232524433199,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.112,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_transform",
@@ -8323,12 +8353,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.5351,
         "p_one_sided_raw": 0.2963039807595721,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.2165,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_transform",
@@ -8342,12 +8372,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.2679,
         "p_one_sided_raw": 0.6055965166072127,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.1882,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "flow_transform",
@@ -8380,12 +8410,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.6943,
         "p_one_sided_raw": 0.9548942320871812,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.7242,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8399,12 +8429,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.0426,
         "p_one_sided_raw": 0.8514301439369869,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.5737,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8418,12 +8448,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.2863,
         "p_one_sided_raw": 0.9008313833944742,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.6624,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8437,12 +8467,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.1349,
         "p_one_sided_raw": 0.5536403954617524,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.042,
         "n": 355,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8456,12 +8486,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.4962,
         "p_one_sided_raw": 0.6901316144378505,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.3361,
         "n": 351,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8475,12 +8505,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.5679,
         "p_one_sided_raw": 0.2850397693868315,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.3527,
         "n": 351,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8494,12 +8524,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.5829,
         "p_one_sided_raw": 0.27997208417784947,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.8633,
         "n": 351,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8513,12 +8543,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.2569,
         "p_one_sided_raw": 0.3986187232073122,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.2038,
         "n": 351,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8532,12 +8562,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.9153,
         "p_one_sided_raw": 0.8199874039458734,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.2709,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8551,12 +8581,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.5203,
         "p_one_sided_raw": 0.30141433183750965,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.7117,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8570,12 +8600,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.2949,
         "p_one_sided_raw": 0.6159558869784897,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.1154,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8589,12 +8619,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.8223,
         "p_one_sided_raw": 0.20546238355036295,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.3846,
         "n": 223,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8608,12 +8638,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.2522,
         "p_one_sided_raw": 0.4004254538875814,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.4212,
         "n": 218,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8627,12 +8657,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 1.4428,
         "p_one_sided_raw": 0.9254598267075086,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.8504,
         "n": 218,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8646,12 +8676,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.1949,
         "p_one_sided_raw": 0.42273791446047293,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": 0.1299,
         "n": 218,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8665,12 +8695,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.9171,
         "p_one_sided_raw": 0.8204582745126452,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.2974,
         "n": 218,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "eth_window",
@@ -8684,12 +8714,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.8035,
         "p_one_sided_raw": 0.7891618178053585,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.6127,
         "n": 273,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       },
       {
         "family": "eth_window",
@@ -8703,19 +8733,19 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.0263,
         "p_one_sided_raw": 0.5104931778580449,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": true,
         "qlike_improve_pct": -0.0277,
         "n": 269,
         "holm_adjusted_p": 1.0,
-        "claim_role": "robustness_unconditional_sensitivity"
+        "claim_role": "non_primary_diagnostic_only"
       }
     ],
     "n_full_family_holm_significant_at_05": 0,
     "bounded_memory_sensitivity": {
       "issue": "GW's limiting experiment assumes the forecasting METHOD has bounded estimator memory. Every cell here uses a fixed 250-day rolling regression window, so the final fit always satisfies it -- but the condition is on the whole method. The `flow_transform/unexpected_z` cell builds its regressor from an AR(5) refitted on an EXPANDING window of flow history, so that cell alone does not. There is no lookahead in it; it simply is not a bounded-memory forecasting method, and the write-up must not claim in one blanket sentence that every registered test is one.",
       "n_gw_tests_all": 54,
-      "n_gw_tests_bounded_memory": 52,
+      "n_gw_tests_bounded_memory": 10,
       "unbounded_memory_cells": [
         "flow_transform|BTC_h1|T_unexpected_z|rv_gk|fl1",
         "flow_transform|ETH_h1|T_unexpected_z|rv_gk|fl1"
@@ -8723,7 +8753,7 @@
       "n_full_family_holm_significant_at_05": 0,
       "n_full_family_holm_significant_at_05_bounded_memory_only": 0,
       "conclusion_depends_on_the_unbounded_cell": false,
-      "note": "Eligibility is decided from whole-method provenance before p-values are inspected. The two expanding-preprocessing rows remain visible in the historical full-family sensitivity array, but feeds_gate=false prevents either from entering a GW family or verdict.",
+      "note": "Eligibility is decided from whole-method provenance before p-values are inspected. All robustness rows remain visible in the historical sensitivity array, but feeds_gate=false keeps them outside the claim sink. The two expanding-preprocessing rows are also invalid for nested inference.",
       "primary_family_is_entirely_bounded_memory": true
     }
   },
@@ -9030,7 +9060,7 @@
     "test_exclusion": "pre-specified one-sided material-gain exclusion, intersection-union across the 10-cell primary family, each cell UNADJUSTED",
     "conditional_predictive_ability_not_tested": "The conditional GW test (h_t a non-trivial instrument, q x q moment covariance, Wald chi-square_q) is NOT run anywhere in this study. Every claim below is therefore UNCONDITIONAL: it is about the AVERAGE loss differential over the OOS sample. A flow effect that helps in one regime and hurts in another, netting to zero on average, would be invisible to this design and is NOT excluded by it.",
     "loss": "Patton QLIKE on the variance level",
-    "estimation_scheme": "paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin). Every one of the 10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which is the condition GW's limiting experiment needs. The two registered asset-specific `flow_transform/unexpected_z` rows whose regressor comes from an expanding-window AR(5) sit outside the primary family, are flagged `bounded_memory=false` and `feeds_gate=false`, and remain visible only as invalid-for-nested-inference diagnostics.",
+    "estimation_scheme": "paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin). Every one of the 10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which is the condition GW's limiting experiment needs. Every non-primary robustness row is `feeds_gate=false` and cannot broaden that claim. The two asset-specific `flow_transform/unexpected_z` rows are additionally `bounded_memory=false` because their regressor comes from an expanding-window AR(5); they are invalid-for-nested-inference diagnostics.",
     "gate": "qlike_improve > 0 AND unconditional GW/DM z < -1.645 AND Holm p < 0.05",
     "cells_in_primary_family": 10,
     "cells_passing_flow_gate": 0,
@@ -9054,9 +9084,9 @@
     "upper_bound_method": "Inverted one-sided exclusion test (Bonferroni alpha/m across the 10 primary cells). This -- not the power curve -- is the object that can bound an effect. It lives in QLIKE-LOSS space, not RV-uplift space.",
     "claim_strength": "INCONCLUSIVE. No primary cell clears the pre-specified Holm-adjusted UNCONDITIONAL detection gate, but only 5/10 primary cells can rule out the pre-specified 1% QLIKE gain, so the bounded null is NOT established. Failure to reject equal accuracy is not evidence of equality. The honest headline is: 'no robust incremental UNCONDITIONAL predictive evidence was found for spot BTC/ETH ETF flow over a HAR-RV baseline' -- a negative finding, not a proven zero. The inverted one-sided 95% upper confidence bound on the relative QLIKE gain is 4.2% simultaneously across all 10 cells (Bonferroni): gains LARGER than that are excluded by the data; anything smaller is not.",
     "does_say_1_primary_evidence": "**No robust incremental UNCONDITIONAL predictive evidence was found** for spot BTC/ETH ETF net flow over a HAR-RV baseline. Not one of the 10 primary cells clears the pre-specified Holm-adjusted detection gate; the point estimates mostly run the wrong way.",
-    "does_say_2_family_bound": "Gains larger than **4.2%** in relative QLIKE are excluded simultaneously across all 10 cells.",
-    "does_say_3_inconclusive_scope": "Only 5/10 cells can rule out the pre-specified 1% gain, so this is a **negative finding, not a proven zero**. Calling it a null result would overstate the evidence.",
-    "does_say_4_robustness": "The same lack of a gate-clearing UNCONDITIONAL signal appears across four flow transforms, four RV proxies, three smearing conventions, a conservative publication lag and four shock thresholds.",
+    "does_say_2_family_bound": "For the UNCONDITIONAL average-loss estimand, gains larger than **4.2%** in relative QLIKE are excluded simultaneously across all 10 cells.",
+    "does_say_3_inconclusive_scope": "For the UNCONDITIONAL average-loss estimand, only 5/10 cells can rule out the pre-specified 1% gain, so this is a **negative finding, not a proven zero**. Calling it a null result would overstate the evidence.",
+    "does_say_4_robustness": "The flow-transform, RV-proxy, smearing, publication-lag and threshold panels are reported as diagnostics only; none broadens the 10-cell primary UNCONDITIONAL average-loss claim.",
     "does_not_say_1_exact_zero": "That the true effect is exactly zero. No test here establishes that.",
     "does_not_say_2_rv_uplift": "That an RV uplift of any particular size is excluded. The only reported bound is in relative QLIKE-loss space.",
     "does_not_say_3_conditional_effect": "That flow lacks conditional or state-dependent predictive ability. The conditional GW test is not run; regime-specific effects that help in one state and hurt in another, netting to zero on average, are invisible to this design and are NOT excluded.",
@@ -9074,7 +9104,7 @@
   },
   "nested_dm_fixed_memory_evidence_v1": {
     "schema": "nested_dm_fixed_memory_runtime.v1",
-    "manifest_sha256": "fd1a2bf652502bd8465ae2ca9ddb12a46ac2c913b591cf77b61cb81691faec35",
+    "manifest_sha256": "e1ac343b175e6fa3e98c1d28ce09285052c524cbd8b927a6b8b76e86ed7a0340",
     "cell_inventory": "primary_cells",
     "gate_inventory": "multiple_testing.primary_family",
     "registry_inventory": "multiple_testing.full_family_holm",
@@ -9088,7 +9118,22 @@
         "base_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
         "aug_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
         "origin_schedule_sha256": "4f54fd792f6bc0485dac9fad378f56d96277593ccec91955499dc9c6e5bcf1b4",
-        "eligibility": "whole_method_fixed_memory_verified"
+        "eligibility": "whole_method_fixed_memory_verified",
+        "base_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret"
+        ],
+        "augmented_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z"
+        ]
       },
       {
         "id": "primary|BTC_h1|H2_asym|rv_gk|fl1",
@@ -9096,7 +9141,23 @@
         "base_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
         "aug_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
         "origin_schedule_sha256": "4f54fd792f6bc0485dac9fad378f56d96277593ccec91955499dc9c6e5bcf1b4",
-        "eligibility": "whole_method_fixed_memory_verified"
+        "eligibility": "whole_method_fixed_memory_verified",
+        "base_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret"
+        ],
+        "augmented_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z",
+          "z_neg"
+        ]
       },
       {
         "id": "primary|BTC_h5|H1_absflow|rv_gk|fl1",
@@ -9104,7 +9165,22 @@
         "base_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
         "aug_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
         "origin_schedule_sha256": "f1346545e33c698cabeef053009b225e1ea399c3192791acccf071e443e1b811",
-        "eligibility": "whole_method_fixed_memory_verified"
+        "eligibility": "whole_method_fixed_memory_verified",
+        "base_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret"
+        ],
+        "augmented_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z"
+        ]
       },
       {
         "id": "primary|BTC_h5|H2_asym|rv_gk|fl1",
@@ -9112,7 +9188,23 @@
         "base_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
         "aug_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
         "origin_schedule_sha256": "f1346545e33c698cabeef053009b225e1ea399c3192791acccf071e443e1b811",
-        "eligibility": "whole_method_fixed_memory_verified"
+        "eligibility": "whole_method_fixed_memory_verified",
+        "base_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret"
+        ],
+        "augmented_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z",
+          "z_neg"
+        ]
       },
       {
         "id": "primary|ETH_h1|H1_absflow|rv_gk|fl1",
@@ -9120,7 +9212,22 @@
         "base_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
         "aug_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
         "origin_schedule_sha256": "43a37ac8cb3bc863421cc1a72afc88b81c96806be42d5b30e2b274ad995dde93",
-        "eligibility": "whole_method_fixed_memory_verified"
+        "eligibility": "whole_method_fixed_memory_verified",
+        "base_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret"
+        ],
+        "augmented_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z"
+        ]
       },
       {
         "id": "primary|ETH_h1|H2_asym|rv_gk|fl1",
@@ -9128,7 +9235,23 @@
         "base_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
         "aug_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
         "origin_schedule_sha256": "43a37ac8cb3bc863421cc1a72afc88b81c96806be42d5b30e2b274ad995dde93",
-        "eligibility": "whole_method_fixed_memory_verified"
+        "eligibility": "whole_method_fixed_memory_verified",
+        "base_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret"
+        ],
+        "augmented_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z",
+          "z_neg"
+        ]
       },
       {
         "id": "primary|ETH_h1|H4_plus_btc|rv_gk|fl1",
@@ -9136,7 +9259,24 @@
         "base_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
         "aug_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
         "origin_schedule_sha256": "43a37ac8cb3bc863421cc1a72afc88b81c96806be42d5b30e2b274ad995dde93",
-        "eligibility": "whole_method_fixed_memory_verified"
+        "eligibility": "whole_method_fixed_memory_verified",
+        "base_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z"
+        ],
+        "augmented_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z",
+          "abs_z_btc"
+        ]
       },
       {
         "id": "primary|ETH_h5|H1_absflow|rv_gk|fl1",
@@ -9144,7 +9284,22 @@
         "base_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
         "aug_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
         "origin_schedule_sha256": "902a58eede42d942323b29a30d47fd95ddffcc88186d9d60b79204b7fff44025",
-        "eligibility": "whole_method_fixed_memory_verified"
+        "eligibility": "whole_method_fixed_memory_verified",
+        "base_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret"
+        ],
+        "augmented_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z"
+        ]
       },
       {
         "id": "primary|ETH_h5|H2_asym|rv_gk|fl1",
@@ -9152,7 +9307,23 @@
         "base_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
         "aug_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
         "origin_schedule_sha256": "902a58eede42d942323b29a30d47fd95ddffcc88186d9d60b79204b7fff44025",
-        "eligibility": "whole_method_fixed_memory_verified"
+        "eligibility": "whole_method_fixed_memory_verified",
+        "base_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret"
+        ],
+        "augmented_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z",
+          "z_neg"
+        ]
       },
       {
         "id": "primary|ETH_h5|H4_plus_btc|rv_gk|fl1",
@@ -9160,7 +9331,24 @@
         "base_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
         "aug_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
         "origin_schedule_sha256": "902a58eede42d942323b29a30d47fd95ddffcc88186d9d60b79204b7fff44025",
-        "eligibility": "whole_method_fixed_memory_verified"
+        "eligibility": "whole_method_fixed_memory_verified",
+        "base_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z"
+        ],
+        "augmented_predictors": [
+          "har_d",
+          "har_w",
+          "har_m",
+          "ret",
+          "abs_ret",
+          "abs_z",
+          "abs_z_btc"
+        ]
       }
     ]
   }

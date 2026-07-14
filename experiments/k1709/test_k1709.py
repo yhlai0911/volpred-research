@@ -516,19 +516,20 @@ def test_repo_nested_dm_auditor_marks_this_file_safe():
     """The project's own mechanical gate, mirrored here so it fails loudly and
     locally. `scripts/tests/test_nested_dm_misuse_ratchet.py` FAILED on v1.
     """
-    from audit_nested_dm_misuse import scan_file
+    from audit_nested_dm_misuse import FIXED_MEMORY_ROLE, scan_file
 
     root = Path(__file__).resolve().parents[2]
     finding = scan_file(Path(__file__).resolve().parent / "k1709.py", root)
     assert finding is not None
-    assert finding.test_role == "diagnostic_with_cw_primary"
+    assert finding.test_role == FIXED_MEMORY_ROLE
     assert finding.safe_role_evidence
+    assert finding.role_validation_errors == []
 
 
 def test_raw_dm_never_feeds_a_gate(panel):
     evaluate_cell(panel, "HAR+ctrl", "H1_absflow", family="unit")
     by_inf = {r.inference: r for r in REGISTRY}
-    assert by_inf["giacomini_white_qlike_fixed_window"].feeds_gate is True
+    assert by_inf["giacomini_white_qlike_fixed_window"].feeds_gate is False
     assert by_inf["raw_dm_qlike"].feeds_gate is False
     assert by_inf["clark_west_mspe"].feeds_gate is False
 
@@ -838,7 +839,7 @@ def test_registry_captures_every_test_including_the_smearing_runs(panel):
     gw = [r for r in REGISTRY if r.inference == "giacomini_white_qlike_fixed_window"]
     assert len(gw) == 3
     assert {r.family for r in gw} == {"primary", "smearing_none", "smearing_shared"}
-    assert all(r.feeds_gate for r in gw)
+    assert [r.feeds_gate for r in gw] == [True, False, False]
 
 
 # ---------------------------------------------------------------------------
@@ -1092,7 +1093,7 @@ def _frozen_results() -> dict:
 
 
 def test_frozen_non_string_surface_has_not_moved():
-    """Freeze every typed leaf after the four-path gate-metadata correction."""
+    """Freeze every typed leaf after the audited gate-scope correction."""
     surface = _non_string_leaf_surface(_frozen_results())
     rows = [
         [list(path), kind, encoded]
@@ -1101,15 +1102,26 @@ def test_frozen_non_string_surface_has_not_moved():
     payload = json.dumps(rows, ensure_ascii=False, separators=(",", ":")).encode()
     assert len(rows) == 4383
     assert hashlib.sha256(payload).hexdigest() == (
-        "03e6e18208fe2cc42611f6243ea3428cc2a96fe3cd65ca79bda98d3fbeb4c405"
+        "476f2fcfc72f06cc6aca4be2210f30972979356a5fcb88ae22e4cb5aecebc61d"
     )
 
 
 def test_frozen_gate_metadata_correction_is_exactly_scoped():
     r = _frozen_results()
+    rows = r["multiple_testing"]["full_family_holm"]
+    primary = [row for row in rows if row["family"] == "primary"]
+    diagnostic = [row for row in rows if row["family"] != "primary"]
+    assert len(primary) == 10
+    assert all(row["feeds_gate"] is True for row in primary)
+    assert all(
+        row["claim_role"] == "primary_unconditional_detection_gate"
+        for row in primary
+    )
+    assert len(diagnostic) == 44
+    assert all(row["feeds_gate"] is False for row in diagnostic)
     invalid = [
         row
-        for row in r["multiple_testing"]["full_family_holm"]
+        for row in rows
         if row["bounded_memory"] is False
     ]
     assert len(invalid) == 2
@@ -1118,8 +1130,19 @@ def test_frozen_gate_metadata_correction_is_exactly_scoped():
         row["claim_role"] == "invalid_for_nested_inference_diagnostic_only"
         for row in invalid
     )
-    assert r["multiple_testing"]["n_gate_eligible_gw_tests"] == 52
-    assert r["multiple_testing"]["n_diagnostic_only_tests"] == 110
+    assert all(
+        row["claim_role"] == "non_primary_diagnostic_only"
+        for row in diagnostic
+        if row["bounded_memory"] is True
+    )
+    assert r["multiple_testing"]["n_gate_eligible_gw_tests"] == 10
+    assert r["multiple_testing"]["n_diagnostic_only_tests"] == 152
+    assert (
+        r["multiple_testing"]["bounded_memory_sensitivity"][
+            "n_gw_tests_bounded_memory"
+        ]
+        == 10
+    )
 
 
 def test_frozen_verdict_words_are_exactly_rederived_from_frozen_counts():
