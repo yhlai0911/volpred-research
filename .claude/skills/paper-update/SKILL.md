@@ -6,7 +6,7 @@ description: >
   負責，stage 由 paper-stage-classifier 負責。Trigger phrases: 'paper-update',
   '更新論文', '同步論文平台'. Do not use for review orchestration（use
   paper-review-cycle）或 stage 判定（use paper-stage-classifier）。
-model: sonnet
+model: opus
 effort: medium
 user-invocable: true
 ---

@@ -7,7 +7,7 @@ description: >
   'review cycle', '跑論文審查', 'review_history', 'paper review round'. Do not
   use for stage 判定（use paper-stage-classifier）或主線程修稿與同步（use
   paper-update）。
-model: sonnet
+model: opus
 effort: medium
 user-invocable: true
 ---
