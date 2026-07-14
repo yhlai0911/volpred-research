@@ -89,18 +89,22 @@ PYCERT
 setup_test_env() {
     local test_name="$1"
     local test_dir="$TMP_BASE/$test_name"
-    mkdir -p "$test_dir/scripts"
+    mkdir -p "$test_dir/scripts" "$test_dir/storage/ops"
     cp "$MERGE_SCRIPT" "$test_dir/scripts/merge_worktree.sh"
     chmod +x "$test_dir/scripts/merge_worktree.sh"
-    # merge 路徑會呼叫 certify gate；gate 不存在時 merge_worktree.sh 會 fail-closed。
-    # 這四個 auditor 是 experiment_gates.py 的 import 相依（全 stdlib）。
+    # merge 路徑會呼叫 trusted certify gate；gate 或其 stdlib dependency
+    # 不存在時 merge_worktree.sh 會 fail-closed。certify 目前 arm MDD owner；
+    # 其餘 auditor 保留給 run-path fixture。
     local real_scripts
     real_scripts="$(cd "$(dirname "$MERGE_SCRIPT")" && pwd)"
     cp "$real_scripts/experiment_gates.py" "$test_dir/scripts/"
+    cp "$real_scripts/experiment_claim_surface.py" "$test_dir/scripts/"
     cp "$real_scripts/audit_nested_dm_misuse.py" "$test_dir/scripts/"
     cp "$real_scripts/audit_dm_hac_lag.py" "$test_dir/scripts/"
     cp "$real_scripts/audit_mdd_scale_artifact.py" "$test_dir/scripts/"
     cp "$real_scripts/audit_fevd_ordering.py" "$test_dir/scripts/"
+    cp "$PROJECT_ROOT/storage/ops/mdd_scale_artifact_baseline.json" \
+        "$test_dir/storage/ops/"
 
     cd "$test_dir"
 

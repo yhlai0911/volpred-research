@@ -214,6 +214,28 @@ def test_every_gate_has_a_baseline_and_a_named_owner() -> None:
         )
 
 
+def test_certify_arms_the_stdlib_mdd_owner() -> None:
+    assert [gate.name for gate in eg.CERTIFY_GATES] == ["mdd-scale-artifact"]
+
+
+def test_retired_sites_are_not_frozen_again(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(eg, "BASELINE_DIR", tmp_path)
+    (tmp_path / "fixture.json").write_text(
+        json.dumps(
+            {
+                "sites": ["experiments/legacy/legacy.py::raw_claim"],
+                "retired": ["experiments/fixed/fixed.py::raw_claim"],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    frozen = eg._baseline_sites("fixture.json")
+
+    assert "experiments/legacy/legacy.py::raw_claim" in frozen
+    assert "experiments/fixed/fixed.py::raw_claim" not in frozen
+
+
 def test_the_runner_actually_calls_the_gate() -> None:
     """The gate must stay wired into the compute-queue completion path.
 

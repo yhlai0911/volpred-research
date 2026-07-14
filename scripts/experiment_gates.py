@@ -74,7 +74,8 @@ def _baseline_sites(name: str) -> set[str]:
     string that names a Python site.  Over-collecting is safe in the one
     direction that matters: it can only make the gate *more* lenient toward
     paths that are already recorded, and a brand-new experiment's path appears
-    in no baseline at all.
+    in no baseline at all.  The one explicit exclusion is ``retired``: those
+    sites have surrendered their legacy exemption and may never return.
     """
     path = BASELINE_DIR / name
     if not path.exists():
@@ -89,7 +90,13 @@ def _baseline_sites(name: str) -> set[str]:
             if head.endswith(".py"):
                 sites.add(node)
         elif isinstance(node, dict):
-            for value in node.values():
+            for key, value in node.items():
+                # A retired site is deliberately no longer frozen. Including
+                # it here would let a previously-fixed defect re-enter through
+                # the per-experiment gate even while the repo-wide ratchet
+                # correctly rejects it.
+                if key == "retired":
+                    continue
                 walk(value)
         elif isinstance(node, list):
             for value in node:
@@ -151,7 +158,7 @@ def _scan_dm_hac(path: Path) -> Iterable[tuple[str, str]]:
 def _scan_mdd(path: Path) -> Iterable[tuple[str, str]]:
     import audit_mdd_scale_artifact as mdd
 
-    for finding in mdd.scan_file(path):
+    for finding in mdd.scan_file(path, _candidate_root(path)):
         if finding.verdict in mdd.RATCHET_VERDICTS:
             yield finding.key(), finding.verdict
 
@@ -170,6 +177,7 @@ class Gate:
     scan: Callable[[Path], Iterable[tuple[str, str]]]
     baseline: str
     remedy: str
+    certify: bool = False
 
 
 GATES: tuple[Gate, ...] = (
@@ -205,10 +213,16 @@ GATES: tuple[Gate, ...] = (
         scan=_scan_mdd,
         baseline="mdd_scale_artifact_baseline.json",
         remedy=(
-            "Comparing max-drawdown across series at different scales is an "
-            "artifact, not a result. Normalise before comparing. "
+            "A naked max-drawdown comparison across differently exposed return "
+            "series is a scale artifact, not evidence of protection. Use "
+            "volpred.stats.drawdown.compare_max_drawdown (or an equivalent "
+            "scale/exposure companion) and keep raw MDD out of the claim sink "
+            "when exposure_mismatch is true. A positive exposure-matched gap "
+            "still needs its own phase/randomization null before it supports a "
+            "timing claim. "
             "Owner: scripts/tests/test_mdd_scale_artifact_ratchet.py"
         ),
+        certify=True,
     ),
     Gate(
         name="fevd-ordering",
@@ -225,6 +239,12 @@ GATES: tuple[Gate, ...] = (
     ),
 )
 
+# ``merge_worktree.sh`` calls ``certify`` with bare system Python so merge
+# admission cannot depend on uv/site-packages. The MDD owner is deliberately
+# stdlib-only and is therefore safe to arm there. Other methodology gates stay
+# on ``run`` until their import chains meet the same contract.
+CERTIFY_GATES: tuple[Gate, ...] = tuple(gate for gate in GATES if gate.certify)
+
 
 def python_files(target: Path) -> list[Path]:
     if target.is_file():
@@ -236,11 +256,11 @@ def python_files(target: Path) -> list[Path]:
     ]
 
 
-def run_gates(target: Path) -> list[Violation]:
-    """Run every experiment-integrity gate over `target`, newest debt only."""
+def run_gates(target: Path, gates: Iterable[Gate] = GATES) -> list[Violation]:
+    """Run selected integrity gates (all by default), newest debt only."""
     files = python_files(target)
     violations: list[Violation] = []
-    for gate in GATES:
+    for gate in gates:
         frozen = _baseline_sites(gate.baseline)
         for path in files:
             for site, verdict in gate.scan(path):
@@ -327,7 +347,7 @@ def verdict_template(exp_dir: Path) -> dict[str, Any]:
     }
 
 
-def certification_violations(exp_dir: Path) -> list[Violation]:
+def _review_certification_violations(exp_dir: Path) -> list[Violation]:
     """Block unless a PASS verdict exists for EXACTLY these bytes.
 
     Three ways in, all of them closed:
@@ -395,6 +415,22 @@ def certification_violations(exp_dir: Path) -> list[Violation]:
     return violations
 
 
+def certification_violations(exp_dir: Path) -> list[Violation]:
+    """Merge admission = methodology hard gates plus byte-bound review.
+
+    K1695 exposed the remaining path split: compute-queue completion ran the
+    methodology ``run`` command, while worktree merge called only ``certify``.
+    A perfectly shaped PASS receipt could therefore admit a new naked raw-MDD
+    comparison. Run the stdlib-compatible merge gates from the trusted main
+    checkout before accepting the review receipt. Auditor import/scan failures
+    are intentionally not swallowed: a gate that cannot run must block merge.
+    """
+    return [
+        *run_gates(exp_dir, CERTIFY_GATES),
+        *_review_certification_violations(exp_dir),
+    ]
+
+
 def cmd_certify(args: argparse.Namespace) -> int:
     target = Path(args.path)
     if not target.is_absolute():
@@ -415,13 +451,21 @@ def cmd_certify(args: argparse.Namespace) -> int:
         }, indent=2), encoding="utf-8")
 
     if not violations:
-        print(f"[cert] PASS — {_rel(target)} carries a PASS verdict bound to its current bytes.")
+        print(
+            f"[cert] PASS — {_rel(target)} carries a PASS verdict bound to its "
+            f"current bytes and cleared {len(CERTIFY_GATES)} merge-time "
+            "integrity gate(s)."
+        )
         return 0
 
     print(f"[cert] BLOCKED — {_rel(target)} is not certified for main:\n", file=sys.stderr)
     for v in violations:
-        print(f"    - {v.site}  ({v.verdict})", file=sys.stderr)
-    print(f"\n  → {CERT_REMEDY}", file=sys.stderr)
+        print(f"    - [{v.gate}] {v.site}  ({v.verdict})", file=sys.stderr)
+    remedies: dict[str, str] = {}
+    for violation in violations:
+        remedies.setdefault(violation.gate, violation.remedy)
+    for gate_name, remedy in remedies.items():
+        print(f"\n  → [{gate_name}] {remedy}", file=sys.stderr)
     return 1
 
 

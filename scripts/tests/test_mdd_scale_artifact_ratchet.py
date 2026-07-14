@@ -56,6 +56,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 from audit_mdd_scale_artifact import (  # noqa: E402
     RATCHET_VERDICTS,
     classify_scope,
+    scan_file,
     scan_population,
 )
 from volpred.stats.drawdown import (  # noqa: E402
@@ -67,6 +68,13 @@ from volpred.stats.drawdown import (  # noqa: E402
 )
 
 BASELINE_PATH = REPO_ROOT / "storage" / "ops" / "mdd_scale_artifact_baseline.json"
+
+CANDIDATE_ROOT_RAW_FIXTURE = """
+def compare(strategy_returns, buy_hold_returns):
+    mdd = max_drawdown(strategy_returns)
+    bh_mdd = max_drawdown(buy_hold_returns)
+    return {"delta_mdd": mdd - bh_mdd}
+"""
 
 
 @pytest.fixture(scope="module")
@@ -223,6 +231,19 @@ def tag_article(article):
 '''
     verdict, _ = classify_scope(src, module_delegates=False)
     assert verdict == "", "a tag list is not a drawdown computation"
+
+
+def test_scan_file_keys_sites_to_the_candidate_root(tmp_path: Path) -> None:
+    path = tmp_path / "experiments" / "k9995" / "k9995.py"
+    path.parent.mkdir(parents=True)
+    path.write_text(CANDIDATE_ROOT_RAW_FIXTURE, encoding="utf-8")
+
+    findings = scan_file(path, tmp_path)
+
+    assert [finding.key() for finding in findings] == [
+        "experiments/k9995/k9995.py::compare"
+    ]
+    assert findings[0].verdict in RATCHET_VERDICTS
 
 
 # ---------------------------------------------------------------------------

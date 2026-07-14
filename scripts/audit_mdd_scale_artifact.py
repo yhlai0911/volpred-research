@@ -235,8 +235,28 @@ def classify_scope(scope_src: str, module_delegates: bool) -> tuple[str, list[st
     return SINGLE_SERIES, reasons
 
 
-def scan_file(path: Path) -> list[Finding]:
-    rel = str(path.relative_to(REPO_ROOT))
+def _logical_site(path: Path, root: Path) -> str:
+    """Return the candidate-root-relative site used by the frozen baseline.
+
+    The merge gate lives in the trusted main checkout while the experiment it
+    certifies lives in another git worktree.  Binding sites to this module's
+    ``REPO_ROOT`` would either raise ``ValueError`` or prefix every key with the
+    worktree path, making all frozen legacy sites look new.
+    """
+    # ``resolve()`` is forbidden here: it follows candidate-controlled
+    # symlinks. A new ``experiments/k9999/k9999.py`` symlinked to frozen
+    # ``experiments/k1695/k1695.py`` must keep the k9999 key, not inherit the
+    # legacy exemption of its target.
+    lexical_path = path.absolute()
+    lexical_root = root.absolute()
+    try:
+        return lexical_path.relative_to(lexical_root).as_posix()
+    except ValueError:
+        return lexical_path.as_posix()
+
+
+def scan_file(path: Path, root: Path = REPO_ROOT) -> list[Finding]:
+    rel = _logical_site(path, root)
     try:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
@@ -289,7 +309,7 @@ def scan_population(root: Path = REPO_ROOT) -> list[Finding]:
         for path in sorted(base.rglob("*.py")):
             if "__pycache__" in path.parts or ".claude/worktrees" in str(path):
                 continue
-            findings.extend(scan_file(path))
+            findings.extend(scan_file(path, root))
     return findings
 
 

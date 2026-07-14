@@ -85,6 +85,84 @@ def _verdicts(exp: Path) -> list[str]:
     return [v.verdict for v in gates.certification_violations(exp)]
 
 
+K1695_RAW_FIXTURE = """
+def compute_metrics(vt_returns, buy_hold_returns):
+    vt_wealth = (1.0 + vt_returns).cumprod()
+    vt_mdd = (vt_wealth / vt_wealth.cummax() - 1.0).min()
+    bh_wealth = (1.0 + buy_hold_returns).cumprod()
+    bh_mdd = (bh_wealth / bh_wealth.cummax() - 1.0).min()
+
+    # Frozen K1695 reader-facing claim: raw +12.6138795804pp, 13/13 markets.
+    reported_average_delta_mdd_pp = 12.6138795804
+    reported_positive_markets = 13
+    reported_total_markets = 13
+    vt_to_bh_vol_ratio = 0.65
+    return {
+        "vt_mdd": vt_mdd,
+        "bh_mdd": bh_mdd,
+        "delta_mdd": vt_mdd - bh_mdd,
+        "average_delta_mdd_pp": reported_average_delta_mdd_pp,
+        "positive_markets": reported_positive_markets,
+        "total_markets": reported_total_markets,
+        "vt_to_bh_vol_ratio": vt_to_bh_vol_ratio,
+    }
+"""
+
+K1695_CANONICAL_FIXTURE = """
+from volpred.stats.drawdown import compare_max_drawdown
+
+
+def compute_metrics(vt_returns, buy_hold_returns):
+    comparison = compare_max_drawdown(vt_returns, buy_hold_returns)
+    return {
+        "vt_mdd": comparison.strategy_mdd,
+        "bh_mdd": comparison.benchmark_mdd,
+        "exposure_mismatch": comparison.exposure_mismatch,
+        "exposure_matched_gap": comparison.exposure_matched_gap,
+    }
+"""
+
+
+def _init_candidate_repo(root: Path) -> None:
+    subprocess.run(
+        ["git", "init", "-q"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def _isolated_certify(exp: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [sys.executable, "-I", "-S", str(GATE), "certify", "--path", str(exp)],
+        cwd=exp.parents[1],
+        capture_output=True,
+        text=True,
+    )
+
+
+def _plant_candidate_self_waiver(root: Path) -> None:
+    """A candidate checkout cannot replace trusted merge policy with a stub."""
+    scripts = root / "scripts"
+    ops = root / "storage" / "ops"
+    scripts.mkdir(parents=True, exist_ok=True)
+    ops.mkdir(parents=True, exist_ok=True)
+    (scripts / "experiment_gates.py").write_text(
+        "raise SystemExit(0)\n", encoding="utf-8"
+    )
+    (ops / "mdd_scale_artifact_baseline.json").write_text(
+        json.dumps(
+            {
+                "count": 1,
+                "sites": ["experiments/k9995/k9995.py::compute_metrics"],
+                "retired": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 # --- the three ways in, all of them closed -----------------------------------
 
 
@@ -104,6 +182,92 @@ def test_fail_verdict_blocks_merge(tmp_path: Path) -> None:
 def test_uncertified_experiment_blocks_merge(tmp_path: Path) -> None:
     exp = _experiment(tmp_path)
     assert any("no review_verdict.json" in v for v in _verdicts(exp))
+
+
+def test_valid_pass_receipt_cannot_certify_k1695_raw_mdd_shape(
+    tmp_path: Path,
+) -> None:
+    """A PASS review hash is necessary, but cannot waive a methodology gate.
+
+    This freezes the exact class K1695 exposed: +12.6138795804pp and 13/13 raw
+    improvements came from strategies running at roughly 0.65x benchmark vol.
+    Moving that shape to an unbaselined K must be blocked on the merge command,
+    even though every claim-surface byte has a syntactically valid PASS receipt.
+    """
+    _init_candidate_repo(tmp_path)
+    exp = _experiment(tmp_path, kid="k9995")
+    (exp / "k9995.py").write_text(K1695_RAW_FIXTURE, encoding="utf-8")
+    _certify(exp, "PASS")
+    _plant_candidate_self_waiver(tmp_path)
+
+    proc = _isolated_certify(exp)
+
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "[mdd-scale-artifact]" in proc.stderr
+    assert "RAW_COMPARISON" in proc.stderr
+    assert "experiments/k9995/k9995.py::compute_metrics" in proc.stderr
+    assert "compare_max_drawdown" in proc.stderr
+
+
+def test_canonical_mdd_companion_can_be_certified_with_system_python(
+    tmp_path: Path,
+) -> None:
+    _init_candidate_repo(tmp_path)
+    exp = _experiment(tmp_path, kid="k9996")
+    (exp / "k9996.py").write_text(K1695_CANONICAL_FIXTURE, encoding="utf-8")
+    _certify(exp, "PASS")
+
+    proc = _isolated_certify(exp)
+
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "cleared 1 merge-time integrity gate" in proc.stdout
+
+
+def test_trusted_main_certify_matches_worktree_site_to_legacy_baseline(
+    tmp_path: Path,
+) -> None:
+    """Candidate-root normalization must not relitigate frozen K1695 debt."""
+    _init_candidate_repo(tmp_path)
+    exp = _experiment(tmp_path, kid="k1695")
+    (exp / "k1695.py").write_text(K1695_RAW_FIXTURE, encoding="utf-8")
+    _certify(exp, "PASS")
+
+    proc = _isolated_certify(exp)
+
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
+def test_new_k_symlink_cannot_borrow_k1695_legacy_exemption(tmp_path: Path) -> None:
+    _init_candidate_repo(tmp_path)
+    legacy = _experiment(tmp_path, kid="k1695")
+    (legacy / "k1695.py").write_text(K1695_RAW_FIXTURE, encoding="utf-8")
+
+    candidate = _experiment(tmp_path, kid="k9998")
+    source = candidate / "k9998.py"
+    source.unlink()
+    source.symlink_to(Path("../k1695/k1695.py"))
+    _certify(candidate, "PASS")
+
+    proc = _isolated_certify(candidate)
+
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "experiments/k9998/k9998.py::compute_metrics" in proc.stderr
+    assert "experiments/k1695/k1695.py::compute_metrics" not in proc.stderr
+
+
+def test_unparseable_drawdown_source_fails_closed_as_unknown(tmp_path: Path) -> None:
+    _init_candidate_repo(tmp_path)
+    exp = _experiment(tmp_path, kid="k9997")
+    (exp / "k9997.py").write_text(
+        "def broken(:\n    max_drawdown =\n", encoding="utf-8"
+    )
+    _certify(exp, "PASS")
+
+    proc = _isolated_certify(exp)
+
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "[mdd-scale-artifact]" in proc.stderr
+    assert "UNKNOWN" in proc.stderr
 
 
 @pytest.mark.parametrize(
@@ -266,8 +430,8 @@ def test_certify_cli_is_stdlib_only(tmp_path: Path) -> None:
     """The merge hook uses bare python3, outside the project's uv environment.
 
     ``-I -S`` removes cwd, PYTHONPATH, user site and site-packages.  A PASS here
-    proves the certify subcommand does not eagerly import the audit stack (some
-    auditors import ``volpred``); only the separate ``run`` subcommand may do so.
+    proves certify imports only its armed stdlib-compatible owners (currently
+    MDD), not project-dependent auditors; the full stack remains on ``run``.
     """
     exp = _experiment(tmp_path)
     _certify(exp, "PASS")

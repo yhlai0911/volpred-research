@@ -42,4 +42,6 @@ K1695 的招牌結論「vt-trend 在 13 個國際市場提供 drawdown protectio
 
 - 沒跑 phase-randomized / circular-shift null（超出本班 scope）→ 所以只能說「同曝險下平均約等於零、
   7/13 接近擲硬幣」，**不宣稱顯著為負**。
-- 沒碰 `experiments/k1695/` 任何檔（review_verdict sha pin 完好，certify gate 仍過）。
+- 沒碰 `experiments/k1695/` 任何檔。**2026-07-15 gate investigation 訂正**：原括號所寫
+  「review_verdict sha pin 完好，certify gate 仍過」不實；當前 main 的 K1695 並無
+  `review_verdict.json`，bare `certify` 會因未認證而擋下。此訂正不改變上述數值驗證。
