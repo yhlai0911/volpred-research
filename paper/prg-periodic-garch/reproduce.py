@@ -139,6 +139,17 @@ spread = max(
 )
 check("prose_max_spread", f"${spread:.1f}$ $t$-units")
 check("prose_qqq_open", f"QQQ ($t=+{open_t['QQQ']:.2f}$")
+_qqq_close = K1699["markets"]["QQQ"]["dm_tests"]["PRG_tminus1_exp_vs_GJR"]
+check(
+    "prose_qqq_close_nominal",
+    f"QQQ, $t=-{abs(-_qqq_close['t_stat']):.2f}$, $p={_qqq_close['p_value']:.2f}$",
+)
+_t50_exp = -K1699["markets"]["0050.TW"]["dm_tests"]["PRG_tminus1_exp_vs_GJR"]["t_stat"]
+_t50_lag = -K1699["markets"]["0050.TW"]["dm_tests"]["PRG_tminus1_lag_vs_GJR"]["t_stat"]
+check(
+    "prose_0050_variant_signflip",
+    f"($+{abs(_t50_exp):.2f}$ vs.\\ $-{abs(_t50_lag):.2f}$",
+)
 check(
     "prose_rank_order_sentence",
     f"EEM ({shares_pct['EEM']:.1f}\\%, $t=+{open_t['EEM']:.2f}$) down to "

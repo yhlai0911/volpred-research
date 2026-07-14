@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-07-14T04:46:19.414378+00:00",
+  "generated_at": "2026-07-14T04:50:05.101528+00:00",
   "tex": "main.tex",
   "sources": [
     "experiments/k1699/k1699_results.json",
     "experiments/K1710/K1710_results.json"
   ],
-  "n_checks": 26,
-  "n_matched": 26,
-  "n_tex_bindings": 19,
+  "n_checks": 28,
+  "n_matched": 28,
+  "n_tex_bindings": 21,
   "n_json_invariants": 7,
   "match_rate": 100.0,
   "overall_match_rate_pct": 100.0,
@@ -119,6 +119,18 @@
       "check": "prose_qqq_open",
       "kind": "tex_binding",
       "expected": "QQQ ($t=+1.56$",
+      "match": true
+    },
+    {
+      "check": "prose_qqq_close_nominal",
+      "kind": "tex_binding",
+      "expected": "QQQ, $t=-2.28$, $p=0.02$",
+      "match": true
+    },
+    {
+      "check": "prose_0050_variant_signflip",
+      "kind": "tex_binding",
+      "expected": "($+0.32$ vs.\\ $-0.28$",
       "match": true
     },
     {

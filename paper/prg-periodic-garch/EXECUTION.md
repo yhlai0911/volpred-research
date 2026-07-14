@@ -91,7 +91,7 @@ _最後更新：2026-07-11（Fable 深審輪）。本檔是 prg-periodic-garch �
 - [x] ✅ 雙時點框架 body rewrite 完成（headline = timing-convention flip；辯護語氣全刪；v7 = 全新稿）
 - [x] ✅ 正文 ~1.9k ≤ 2,500 字、abstract 249 ≤ 250 字（Highlights 檔待 v7 review 後補）
 - [x] ✅ K1544 編號碰撞已治理（2026-07-12；term-spread → K1696，本論文 K1544 全指 `k1544_prg_fair_info_gjr`）
-- [ ] ⬜ v7 review cycle 收斂（latex + citation + Codex independent，無 BLOCKING）— **下一步**
+- [x] ✅ v7 review cycle 完成（2026-07-14）：MINOR_FIXES / 0 BLOCKING / 6 MAJOR（4 框架 + Codex 抓的 2 事實錯誤）+ 6 MINOR — **全部已修**（e2ffd8d90 + M5/M6 commit）；15 citations 全 PASS；Codex raw transcript 存證 `review_history/v7_review_20260714/codex_raw_transcript.txt`；修正後 gate 28/28 GREEN。殘餘：Codex verdict token 因 CLI hang 未印出（findings 歸納有 transcript 佐證，README 已誠實揭露）— 若投稿前要 belt-and-suspenders，可再跑一輪乾淨 Codex 短審
 - [ ] ⬜ FRL 合規：author = Yi-Hao Lai only、無 volpred / AI / LLM 字樣、$200 fee、data availability Option C、Highlights 檔
 - [x] ✅ Open-time 邊際市場誠實表述 — **pinned vintage 上事實更新**：5/6 過 3.0，唯一 NS = QQQ（+1.56，ON share 最低 38.5%）；vintage 脆弱性（pilot SPY 2.1/QQQ 3.0 vs pinned 3.56/1.56，方向不翻）已在 Robustness 段揭露
 
