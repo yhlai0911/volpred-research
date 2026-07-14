@@ -17,6 +17,12 @@ on:
       - main
   workflow_dispatch:
 
+# Cancel a still-running gate when a newer commit lands on the same ref — the
+# newer tip is what matters. Keyed on ref so PRs/branches stay independent.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   audit:
     runs-on: ubuntu-latest

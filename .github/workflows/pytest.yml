@@ -44,7 +44,24 @@ on:
   push:
     branches:
       - main
+    # Pure-documentation commits (paper .tex/.pdf/.bib, Markdown) cannot change
+    # any test outcome — the suite reads none of them. ~half of main's ~130
+    # pushes/day are exactly these (daily paper/ops refreshes). paths-ignore is
+    # fail-safe: a run is skipped ONLY when EVERY changed file matches, so any
+    # commit that also touches a .py / config / conftest still runs the full suite.
+    paths-ignore:
+      - 'paper/**'
+      - '**/*.md'
   workflow_dispatch:
+
+# Rapid successive pushes to main (many land <120s apart, well under the 9-min
+# suite runtime) otherwise pile full runs onto already-superseded commits. On a
+# linear main the tip's tree contains every prior change, so cancelling an
+# in-progress run when a newer commit lands loses no coverage — the newer HEAD is
+# tested instead. Keyed on ref so PRs/branches stay independent.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
