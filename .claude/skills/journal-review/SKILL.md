@@ -89,8 +89,10 @@ referee polices (and our `experiments.md` enforces):
   value (IJF/JoF), implementable practitioner payoff net of costs (JPM/FAJ).
 
 ### 6. COMPLIANCE gate (hard — cross-ref paper-workflow / publishing rules)
-Before packaging, enforce the submission-compliance invariants (also in
-`templates/submission-checklist.md`):
+**This section + `scripts/check_paper_compliance.py` are the single OWNER of submission-
+compliance prose** — `paper-submission-pipeline` compliance gate and `finance-paper-quality`
+§10 point here; do not re-duplicate the rules there. Before packaging, enforce the
+submission-compliance invariants (also in `templates/submission-checklist.md`):
 - **Authorship = Yi-Hao Lai (賴奕豪) ONLY.** No co-authors, no AI/agent listed
   as author (Elsevier/JFE/RFS forbid AI authorship anyway).
 - **No "volpred" / "VolPred" / "AI" / "LLM" / "Claude" / "Codex" / agent / model

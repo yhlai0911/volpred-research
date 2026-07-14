@@ -77,11 +77,11 @@ posted to arXiv.** 最終版先丟 arXiv 佔位，找機會再丟目標期刊。
 | `-> journal_submitted` | owner approval + target-journal portal submission (owner-timed: 找機會再丟) |
 
 ### Compliance gate (the `-> multi_round_review` bar)
-- Author is solely **"Yi-Hao Lai"**.
-- **ZERO** mentions of volpred / Claude / ChatGPT / GPT / LLM / "large language model" /
-  AI-as-method / "this platform".
-- No AI-style phrasing or symbols (em-dash tics, "delve", "it's worth noting", etc.).
-- Cross-reference the paper-submission-compliance audit before clearing.
+Compliance prose 的唯一 owner = **`journal-review` Step 6**（authorship = Yi-Hao Lai only;
+ZERO volpred / Claude / ChatGPT / GPT / LLM / "large language model" / AI-as-method / "this
+platform" mentions; AI-use declaration 為期刊要求時的獨立 titled 章節，非 footnote、非默默省略;
+no AI-style phrasing/symbols）+ 機械 gate **`scripts/check_paper_compliance.py`**. 清此 gate
+前必跑該 compliance audit；本 skill 不重複清單。
 
 ### Run reviews via codex to save tokens (boss directive 6)
 All multi-round review rounds (latex-academic-reviewer, citation-verifier,

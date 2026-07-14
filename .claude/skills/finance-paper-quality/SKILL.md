@@ -167,10 +167,8 @@ Each contribution must pass the "so what" test: Would a busy portfolio manager o
 
 ### 10. Author Presentation
 
-- Human authors only (no AI systems as co-authors)
-- Acknowledge AI assistance in footnote if used
-- Affiliation must be real academic institution
-- Corresponding author email from institutional domain
+- Human authors only — no AI systems as co-authors; affiliation must be a real academic institution; corresponding author email from an institutional domain.
+- **Submission compliance（authorship = Yi-Hao Lai 賴奕豪 only；投稿稿件 ZERO AI / LLM / Claude / GPT 提及）唯一 owner = `journal-review` Step 6 + `scripts/check_paper_compliance.py`。** 投稿稿件本體**不得**提及 AI 協助（無 footnote、無致謝行）；期刊**要求**時的 generative-AI-use declaration 是投稿流程中的**獨立 titled 章節**（依 journal-review Step 6 處理），非在論文內默默加 footnote。
 
 ## Paper Location
 
