@@ -116,7 +116,7 @@ def _scan_nested_dm(path: Path) -> Iterable[tuple[str, str]]:
     import audit_nested_dm_misuse as nested_dm
 
     finding = nested_dm.scan_file(path, REPO_ROOT)
-    if finding is not None and finding.test_role == "primary_raw_dm":
+    if finding is not None and finding.test_role not in nested_dm.SAFE_ROLES:
         yield finding.file, finding.test_role
 
 
@@ -163,6 +163,9 @@ GATES: tuple[Gate, ...] = (
             "recursive-bootstrap design for QLIKE/pinball, and wire THAT into "
             "the verdict. If the DM is descriptive only, say so with "
             "`nested-dm: diagnostic-only` and keep it out of the claim sink. "
+            "A primary unconditional GW/DM statistic under nesting is accepted "
+            "only with the versioned fixed-memory cell manifest, matching runtime "
+            "provenance, locally narrow claims, and a trusted external PASS receipt. "
             "Owner: scripts/tests/test_nested_dm_misuse_ratchet.py"
         ),
     ),

@@ -30345,62 +30345,15 @@
   },
   {
     "id": "email-12062-5be768",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z 20:15: 1 個檔案已連續 3 班沒人收 — 遺留變成堆積",
-    "description": "Gmail UID: 12062\nMessage-ID: <24A0B8DC-22B9-4306-B891-DF37A310AA58@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sat, 11 Jul 2026 20:21:45 +0800\nSubject: Re: [VolPred Alert][CRITICAL] PHASE-Z 20:15: 1 個檔案已連續 3 班沒人收 — 遺留變成堆積\n\n--- 用戶回信內容 ---\n這是卡什麼？ 立刻處理\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月11日 20:15 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> PHASE-Z 20:15: 1 個檔案已連續 3 班沒人收 — 遺留變成堆積\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> 發生什麼\r\n> \r\n> 這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 3 班都還在工作區。單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— 它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。\r\n> 現在該做什麼\r\n> \r\n> 人工判斷後二選一：確認內容正確就 git add <檔案> && git commit；是廢棄的半成品就 git checkout HEAD -- <檔案> 丟掉。（PHASE-Z 不自動收養 —— 自動收養正是先前三次事故的成因。）\r\n> 卡住的檔案（連續班數）\r\n> \r\n> storage/lazypack_jobs/mile_531e4c87/panels/mile_531e4c87_article.md — 3 班\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-11T12:30:05.503144+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z 20:15: 1 個檔案已連續 3 班沒人收 — 遺留變成堆積",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12062,
-    "email_message_id": "<24A0B8DC-22B9-4306-B891-DF37A310AA58@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] PHASE-Z 20:15: 1 個檔案已連續 3 班沒人收 — 遺留變成堆積",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-11T12:31:04.193974+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-11T12:31:04.464885+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-11T14:50:03.677669+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "interactive-claude",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-11T15:08:02.728808+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-23"
-      },
-      {
-        "ts": "2026-07-11T15:11:34.262387+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "hourly-23"
-      }
-    ],
-    "started_at": "2026-07-11T12:31:04.464868+00:00",
-    "last_released_at": "2026-07-11T14:50:03.677661+00:00",
-    "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "hourly-23",
-    "claimed_at": "2026-07-11T15:08:02.728786+00:00",
-    "claim_session_id": "e8efb7e46055",
+    "created_at": "2026-07-11T12:30:05.503144+00:00",
     "completed_at": "2026-07-11T15:11:34.262371+00:00",
-    "result": "已回信老闆。根因=lazypack 產圖暫存檔 storage/lazypack_jobs/*/panels/*_article.md 不屬任何一班 fire 產出，PHASE-Z 拒絕自動收養（設計正確），但也無人會收→每班重複告警。修法=commit f2380a9b7 加 .gitignore 規則 untrack 該衍生檔（21:06，早於本信）。驗證：全 6 個同類檔已 untrack+ignore（class-level）、工作區 0 orphan、21:06 後無再 fire。--article-id 重生路徑已 grep 實證。"
+    "tombstone": true,
+    "archived_at": "2026-07-14T16:00:36.053294+00:00"
   },
   {
     "id": "lazypack_render_layout_verify_gate",
@@ -30480,47 +30433,15 @@
   },
   {
     "id": "email-12066-2c58d1",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z 20:47: 1 個檔案已連續 4 班沒人收 — 遺留變成堆積",
-    "description": "Gmail UID: 12066\nMessage-ID: <85F60715-07FF-4303-9429-636B6FB79373@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sat, 11 Jul 2026 20:52:50 +0800\nSubject: Re: [VolPred Alert][CRITICAL] PHASE-Z 20:47: 1 個檔案已連續 4 班沒人收 — 遺留變成堆積\n\n--- 用戶回信內容 ---\n所以解決了嗎\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月11日 20:47 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> PHASE-Z 20:47: 1 個檔案已連續 4 班沒人收 — 遺留變成堆積\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> 發生什麼\r\n> \r\n> 這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 4 班都還在工作區。單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— 它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。\r\n> \r\n> 現在該做什麼\r\n> \r\n> 人工判斷後二選一：確認內容正確就 git add <檔案> && git commit；是廢棄的半成品就 git checkout HEAD -- <檔案> 丟掉。（PHASE-Z 不自動收養 —— 自動收養正是先前三次事故的成因。）\r\n> \r\n> 卡住的檔案（連續班數）\r\n> \r\n> storage/lazypack_jobs/mile_531e4c87/panels/mile_531e4c87_article.md — 4 班\n",
-    "task_type": "email_reply",
-    "priority": 3,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-11T13:00:06.764689+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z 20:47: 1 個檔案已連續 4 班沒人收 — 遺留變成堆積",
+    "priority": 3,
     "source": "gmail_inbox_poll",
-    "email_uid": 12066,
-    "email_message_id": "<85F60715-07FF-4303-9429-636B6FB79373@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] PHASE-Z 20:47: 1 個檔案已連續 4 班沒人收 — 遺留變成堆積",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-07-11T13:10:15.212052+00:00",
-    "claim_session_id": "3e52538a42ea",
-    "status_history": [
-      {
-        "ts": "2026-07-11T13:10:15.212067+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-11T13:10:15.483609+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-11T15:11:34.573394+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "interactive-claude"
-      }
-    ],
-    "started_at": "2026-07-11T13:10:15.483593+00:00",
+    "created_at": "2026-07-11T13:00:06.764689+00:00",
     "completed_at": "2026-07-11T15:11:34.573380+00:00",
-    "result": "與 email-12062 同根因（同一檔案的 4 班版本告警）。已於同封 close email 一併結案說明。修法 commit f2380a9b7。"
+    "tombstone": true,
+    "archived_at": "2026-07-14T16:00:36.053294+00:00"
   },
   {
     "id": "telegram-489",
@@ -31269,44 +31190,15 @@
   },
   {
     "id": "fable0711_k865_fevd_retro_correction",
-    "title": "governance: k865 同 FEVD bug 下游回溯更正（knowledge/feed 追查）",
-    "description": "深審 class sweep 發現 k865 與 k1025 系列同一 FEVD shape bug（buggy: k1025/k1025_v2/k1025b/k865；正確: k834/k628b/k304）。依研究誠實原則第 6 條（推翻舊結論必回溯更正）：grep knowledge.json 與 feed/reports 中引用 k865 spillover 數字的 entries → 逐筆更正或標記 superseded → 同步平台 → 寫 docs/error_log.md。Brief=paper/crypto-fear-channel/review_history/fable_deep_review_20260711/README.md §P0-3。",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "governance",
-    "dispatch_lane": "agent",
+    "title": "governance: k865 同 FEVD bug 下游回溯更正（knowledge/feed 追查）",
+    "priority": 1,
     "source": "fable_deep_review_20260711",
-    "tags": [
-      "fable-deep-review",
-      "research-honesty-retro"
-    ],
     "created_at": "2026-07-11T14:55:56.010876+00:00",
-    "claimed_by": "hourly-23",
-    "claimed_at": "2026-07-11T15:14:33.778793+00:00",
-    "claim_session_id": "d446923ad115",
-    "status_history": [
-      {
-        "ts": "2026-07-11T15:14:33.778807+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-23"
-      },
-      {
-        "ts": "2026-07-11T15:14:34.084006+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-23"
-      },
-      {
-        "ts": "2026-07-11T15:34:46.843628+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-23"
-      }
-    ],
-    "started_at": "2026-07-11T15:14:34.083991+00:00",
     "completed_at": "2026-07-11T15:34:46.843614+00:00",
-    "result": "k865 FEVD axis bug (fevd.decomp[-1] on (n,horizon,n) array) 修復+重跑+下游回溯更正。三個 headline 結論全撤回：TSI 非恆定90%（隨 regime 26.7-61.2）、SPY 無角色翻轉（五期全淨傳染源）、BTC 從非樞紐（全期淨接收者）。倖存的唯一宣稱是 null（關稅期連動上升 NS p=0.382）。更正：knowledge K865（舊文留 superseded_content）、feed mile_8cc3dfe9 撤回、live digest mile_1597b341 第四層改寫+移除推翻連結+Supabase synced。機械 gate scripts/tests/test_fevd_shape.py（13 passed，含 buggy-slice 負向對照+AST 全庫掃描）。error_log 已記。commit c1831a0f6。遺留：Cholesky ordering 使『SPY 是 hub』本身尚非 ordering-robust，需 GFEVD(KPPS) 重跑（已列後續 K）。"
+    "tombstone": true,
+    "archived_at": "2026-07-14T16:00:36.053294+00:00"
   },
   {
     "id": "k865_gfevd_ordering_robust",
@@ -36571,7 +36463,7 @@
     "task_type": "experiment",
     "priority": 1,
     "source": "agent-discovered",
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-14T05:42:35.257885+00:00",
     "title": "K1709 重做 — ETF flow → RV 增量預測（CW/general-loss primary，撤回版）",
     "description": "原 K1709 被 Codex (gpt-5.6-sol ultra) 判 FAIL 並已撤出 canonical experiments/（見 experiments/_rejected/k1709/）。重做硬性要求：(1) 巢狀比較不得用 raw DM 承載 verdict — MSPE 用 Clark-West，QLIKE/pinball 用適當 general-loss/encompassing/recursive-bootstrap，禁止把 MSPE-CW 貼標成 QLIKE inference；(2) 宣稱強度不得超過證據（可寫『未發現穩健增量證據』，不得寫『NULL 成立』或『可排除 ≥16% 效果』）；(3) provenance 測試要能證明每個 predictor 的真實來源日期（現行 assert 可被同列複製繞過）。開工前必跑 scripts/tests/test_nested_dm_misuse_ratchet.py。",
@@ -36594,11 +36486,26 @@
         "to": "pending",
         "by": "hourly-14",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-14T16:00:14.889546+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T16:00:15.115963+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-14T06:15:12.719828+00:00",
+    "started_at": "2026-07-14T16:00:15.115949+00:00",
     "last_released_at": "2026-07-14T08:50:02.485381+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-14T16:00:14.889532+00:00",
+    "claim_session_id": "58568d69eba3"
   },
   {
     "id": "gate-fail-verdict-blocks-merge",
@@ -36742,10 +36649,14 @@
     "description": ".claude/worktrees/dispatch-slot-2-c873d04d-k1709（branch exp/k1709-btc-etf-flow-vol）有 3 個未合併 commits（c97d690c6 等：推論設計重建、撤回 NULL 改判 INCONCLUSIVE）。主線程走 bash scripts/merge_worktree.sh + worktree-merge-verification skill + agent-result-verification 收割；合併後移除 worktree（回收 4.7GB）。來源：docs/refactor_plan_token_ops_waste.md WS2c（WS3b 清理時發現未收割）。 ⚠️ 2026-07-14 16:19 依賴更新：k1709_rev2_codex_verdict（15:45 完成）指出尚有 GW 措辭修正待做（見 storage/logs/compute/k1709_rev2_codex_verdict.stdout 結論）；合併必須排在該修正 commit 之後，merge 前 re-check worktree HEAD 已含修正。",
     "task_type": "experiment",
     "dispatch_lane": "main_thread",
-    "status": "pending_main_thread",
+    "status": "blocked",
     "priority": 2,
     "source": "refactor_plan_token_ops_waste",
-    "created_at": "2026-07-14T07:28:32.517134+00:00"
+    "created_at": "2026-07-14T07:28:32.517134+00:00",
+    "blocked_until": "2026-07-28T16:12:04+00:00",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_at": "2026-07-14T16:12:04+00:00",
+    "blocked_note": "Codex rev3 verdict=FAIL (2026-07-14T15:25Z, reviewed_commit f3f9d3034b): 4 blocking defects (D1 README summary 無 UNCONDITIONAL 限定 / D2 renderer 為第二 claim 作者且在 --relabel invariant 外 / D3 圖表無限定 GW nomenclature / D4 main() NameError)。K1709 不得進 main，直到 k1709_rev4_nameerror + k1709_rev4_claim_object + k1709_rev4_figure_labels 三條全 succeeded 且 Codex rev4 複審 PASS。verdict: storage/ops/codex_reviews/k1709_rev3_verdict.json"
   },
   {
     "id": "ws4c_error_log_compaction",
@@ -37208,11 +37119,29 @@
     "id": "nested_dm_auditor_cannot_express_fixed_window_gw",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent_discovered",
     "created_at": "2026-07-14T13:23:32.692943+00:00",
     "title": "nested-DM auditor has no third role: the fixed-window bounded-memory GW unconditional special case",
-    "description": "K1709 rev3 撞出來的。scripts/audit_nested_dm_misuse.py 用字面規則判角色：PRIMARY_DM_DECL_RE 只要看到 PRIMARY 與 DM 在 80 字元內就判 primary_raw_dm（違規）。它只認得兩種安全角色：DM 是 diagnostic-only，或 Clark-West 覆蓋全部 primary。但存在合法的第三種：在 paired fixed rolling window（bounded-memory forecasting method）下，DM 形式的統計量正是 GW(2006) Sec 3.4 的無條件特例，巢狀比較下有效 —— 使它合法的是 estimation scheme，不是公式。K1709 rev2 用模糊的『GW gate』措辭時稽核器判它安全；rev3 依 Codex FAIL 誠實改成『primary family 由無條件 GW/DM 裁決』後反而被判違規。這是稽核器在訓練科學對它說謊 —— 修法方向不是把實驗改回含糊。讓 ratchet 能接受第三種角色，但必須要求證據（marker + 檔案內確有 fixed/rolling bounded-memory scheme 的實證），不可變成人人可蓋的免死金牌 —— ratchet 開後門就是 ratchet 死亡的方式。Codex 已在 K1709 rev3 重審 brief 裡被要求對這個設計問題給裁決（compute job agent-brief_k1709_rev3_review-580bae），先收他的意見再動手。注意：另一 slot 正在改 pre-commit Gate 0（branch fix/gate0-trusted-auditor-from-main），別撞同一批檔。現況：experiments/k1709/test_k1709.py::test_repo_nested_dm_auditor_marks_this_file_safe 與 scripts/tests/test_nested_dm_misuse_ratchet.py::test_no_new_nested_raw_dm_sites 都紅著，K1709 在 worktree 不進 main，故未污染 main CI。"
+    "description": "K1709 rev3 撞出來的。scripts/audit_nested_dm_misuse.py 用字面規則判角色：PRIMARY_DM_DECL_RE 只要看到 PRIMARY 與 DM 在 80 字元內就判 primary_raw_dm（違規）。它只認得兩種安全角色：DM 是 diagnostic-only，或 Clark-West 覆蓋全部 primary。但存在合法的第三種：在 paired fixed rolling window（bounded-memory forecasting method）下，DM 形式的統計量正是 GW(2006) Sec 3.4 的無條件特例，巢狀比較下有效 —— 使它合法的是 estimation scheme，不是公式。K1709 rev2 用模糊的『GW gate』措辭時稽核器判它安全；rev3 依 Codex FAIL 誠實改成『primary family 由無條件 GW/DM 裁決』後反而被判違規。這是稽核器在訓練科學對它說謊 —— 修法方向不是把實驗改回含糊。讓 ratchet 能接受第三種角色，但必須要求證據（marker + 檔案內確有 fixed/rolling bounded-memory scheme 的實證），不可變成人人可蓋的免死金牌 —— ratchet 開後門就是 ratchet 死亡的方式。Codex 已在 K1709 rev3 重審 brief 裡被要求對這個設計問題給裁決（compute job agent-brief_k1709_rev3_review-580bae），先收他的意見再動手。注意：另一 slot 正在改 pre-commit Gate 0（branch fix/gate0-trusted-auditor-from-main），別撞同一批檔。現況：experiments/k1709/test_k1709.py::test_repo_nested_dm_auditor_marks_this_file_safe 與 scripts/tests/test_nested_dm_misuse_ratchet.py::test_no_new_nested_raw_dm_sites 都紅著，K1709 在 worktree 不進 main，故未污染 main CI。\n\n== Codex rev3 裁決（2026-07-14T15:25Z，已收）==\nauditor 的 two-role model 判定為【錯的】。GW(2006) Sec 3.4 明確定義 fixed-memory forecasting methods 的無條件檢定：HAC 標準化平均 loss differential + 標準常態參考分布，統計量與 DM 一致；只有 conditional test 才需要 instrument vector / Wald / chi-square。→ 不可為了取悅 lexical scanner 把科學文字改回模糊的『GW gate』；正解是加第三種角色（如 primary_unconditional_dm_fixed_memory）。但第三角色必須靠證據取得，不可自填 marker。Ratchet 接受第三角色前的 7 項門檻（逐字見 storage/ops/codex_reviews/k1709_rev3_verdict.json 的 ratchet_ruling_q4.required_evidence_before_ratchet_accepts_third_role）：(1) pair/cell-level 版本化 machine-readable manifest（非 file-level escape hatch）；(2) 每個 claim-bearing cell 的 runtime provenance 證明整條 forecasting method 為 bounded-memory（base/aug 同 fixed window、同 complete-case mask、同 training dates、同 embargo；上游 feature estimator 亦不得 expanding）；(3) statistic provenance（paired unadjusted loss differential、HAC estimator/bandwidth、有限正 LRV、normal reference、明確的 unconditional average-loss estimand）；(4) gate wiring 證明只有通過證據的 record 可 feeds_gate=true（bounded_memory=True 或註解不可自我認證）；(5) reader-facing claim 必須就地寫明 unconditional 並揭露 regime-offsetting 效果未被排除；(6) repo 外部的 adjudication receipt，綁 file SHA + cell-manifest hash + reviewer，bytes 一漂移即失效；(7) adversarial fixtures 必須繼續 FAIL（偽 marker、mixed fixed/expanding cells、fixed final regression 但 expanding preprocessing、conditional wording、file-level marker 洗白其他 cells）。",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-14T16:17:14.041788+00:00",
+    "claim_session_id": "57e6d035c4dc",
+    "status_history": [
+      {
+        "ts": "2026-07-14T16:17:14.041807+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T16:17:14.319396+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-14T16:17:14.319380+00:00"
   },
   {
     "id": "alert_internal_git_push_backup_hold_3f4834ce7a_clean_watermark",
@@ -37223,13 +37152,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-14T15:00:50.937108+00:00",
+    "completed_at": "2026-07-14T16:00:59.683274+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T15:00:50.937108+00:00",
-      "last_clean_observed_at": "2026-07-14T15:00:50.937108+00:00"
+      "resolved_at": "2026-07-14T16:00:59.683274+00:00",
+      "last_clean_observed_at": "2026-07-14T16:00:59.683274+00:00"
     }
   },
   {
@@ -37241,13 +37170,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-14T15:23:38.566241+00:00",
+    "completed_at": "2026-07-14T16:50:29.523819+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T15:23:38.566241+00:00",
-      "last_clean_observed_at": "2026-07-14T15:23:38.566241+00:00"
+      "resolved_at": "2026-07-14T16:50:29.523819+00:00",
+      "last_clean_observed_at": "2026-07-14T16:50:29.523819+00:00"
     }
   },
   {
@@ -37259,13 +37188,108 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-14T14:23:43.126507+00:00",
+    "completed_at": "2026-07-14T15:24:01.245727+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T14:23:43.126507+00:00",
-      "last_clean_observed_at": "2026-07-14T14:23:43.126507+00:00"
+      "resolved_at": "2026-07-14T15:24:01.245727+00:00",
+      "last_clean_observed_at": "2026-07-14T15:24:01.245727+00:00"
     }
+  },
+  {
+    "id": "frontend_deploy_3_pending_commits",
+    "title": "部署 frontend 3 個未推 commits（颱風休市橫幅 / feed day-bucket / digest emoji）",
+    "description": "frontend-v2-fix 巢狀 repo local main 領先 origin/main 3 commits（1ce0342 颱風休市 5 分快取、f2ea3d4 feed day-bucket diversify、8569a55 digest emoji）。線上站缺這 3 個修正。流程：cd frontend-v2-fix → npm run build 通過 → 測主要 tab（feedback_test_before_deploy）→ push origin main → 走 scripts/deploy-zeabur-safe.sh（目標 volpred-v3，見 config/project_targets.json）→ 線上驗證三個修正各自可見。",
+    "task_type": "platform_ops",
+    "status": "succeeded",
+    "priority": 2,
+    "source": "admin_verification_20260714",
+    "created_at": "2026-07-14T15:28:12.774336+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-14T15:45:57.052998+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "analytics-500-fix"
+      },
+      {
+        "ts": "2026-07-14T15:52:42.717061+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "analytics-500-fix"
+      }
+    ],
+    "completed_at": "2026-07-14T15:52:42.717048+00:00",
+    "result": "Pushed 3 pending commits (typhoon banner/digest/diversify) + admin-analytics 500 fix to origin/main; deployed volpred-v3; live analytics+health APIs verified 200."
+  },
+  {
+    "id": "ci-red-29343425525",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "claimed",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29343425525",
+    "ci_run_key": "29343425525:1",
+    "created_at": "2026-07-14T16:00:05.539127+00:00",
+    "title": "CI 紅燈修復（run 29343425525, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29343425525\nattempt: 1\nhead_sha: 0c0036be0\n偵測摘要（仍須讀完整 failed log）：2026-07-14T15:10:17.4840673Z E AssertionError: stale worktree blocked by Gate 0:\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29343425525 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-07-14T16:00:41.762523+00:00",
+    "claim_session_id": "f8408b8607a7",
+    "status_history": [
+      {
+        "ts": "2026-07-14T16:00:41.762538+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-00"
+      }
+    ]
+  },
+  {
+    "id": "alert_release_pool_gap_20260714",
+    "title": "[alert] Release pool starved > 8.0h (cron healthy)",
+    "description": "由 alert `release_pool_gap` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n## 觸發條件\n釋出機器 cron 正常 fire（machinery_gap=0.0h），但已超過 8.0h 沒有任何文章成功釋出。\n- last_released_at: 2026-07-14T08:00:56.867821+00:00\n- release_gap_hours: 8.0\n- machinery_last_at: 2026-07-14T16:00:56+00:00\n\n## release preview\n- draft: 2\n- scheduled: 0\n- eligible_before_dedup: 2\n- dedup_flagged: 1\n- eligible_after_dedup: 1\n\n## 影響\n通常是 due 草稿全落在已飽和主題、dedup 正確 skip 但釋出算法未 fall-through 到 fresh-theme 草稿；\n讀者端看不到新內容（Mission 第 1/5 條），但這不是 cron 停擺，是內容釋出層問題。\n\n## 建議行動\n1. 若 eligible_after_dedup=0：不要強行釋出已被 dedup TTL 排除的草稿，先補 fresh-theme draft 或等 TTL 到期。\n2. 若還有 eligible_after_dedup>0：定向釋出一篇 fresh-theme 草稿（避開 model_complexity / vt_strategy / spy / vix / garch）：\n   jq '[.[]|select(.status==\"draft\")]|.[].title' storage/reports/feed.json 挑非飽和主題\n   VOLPRED_ACTOR=claude uv run volpred ops release-pool --pub-id <id> --include-drafts\n3. 若 draft 池主題全飽和：派 daily_article 補 fresh-theme 草稿（publication-candidates skill）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-14T16:01:10.804145+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "release_pool_gap"
+    ]
+  },
+  {
+    "id": "k1709_rev4_nameerror",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent_discovered",
+    "created_at": "2026-07-14T16:11:43.712159+00:00",
+    "title": "K1709 rev4 D4: main() 引用已出 scope 的 margin_pct / claim → 預設執行路徑 NameError",
+    "description": "Codex rev3 複審 blocking defect D4（verdict: storage/ops/codex_reviews/k1709_rev3_verdict.{md,json}，reviewed_commit f3f9d3034b）。rev3 把 claim 組裝抽成 build_verdict_basis() 後，k1709.py:2586 與 :2605 仍引用已不在 scope 的 margin_pct / claim → 預設 run 在寫出 results JSON 之後就丟 NameError。Frozen estimates 未受影響（Codex 遞迴比對 4383 個 leaf，0 差異），但這代表 rev3 根本不是一個能跑到底的 relabel-only refactor，等於整份 rev3 沒被端到端執行過。修法：把 2586/2605 改成從 verdict basis 物件取值；補一個 smoke test 讓 default path 真的跑到結束（不是只 import）。實驗留在 worktree .claude/worktrees/dispatch-slot-2-c873d04d-k1709，FAIL 期間不得進 main。三個 rev4 修復單建議順序：本條 → k1709_rev4_claim_object → k1709_rev4_figure_labels。"
+  },
+  {
+    "id": "k1709_rev4_claim_object",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent_discovered",
+    "created_at": "2026-07-14T16:11:43.712159+00:00",
+    "title": "K1709 rev4 D1+D2: renderer 是第二個 claim 作者且在 --relabel invariant 之外 → 收斂成單一 canonical claim object",
+    "description": "Codex rev3 複審 blocking defects D1 與 D2（verdict: storage/ops/codex_reviews/k1709_rev3_verdict.{md,json}）。D1：README:232 最終『Does say』摘要仍寫『No robust incremental predictive evidence was found』，沒有 UNCONDITIONAL 限定詞；程式（k1709.py:1039-1052）只授權 OOS 平均 QLIKE loss differential，跨 regime 正負互抵的條件式效果從未檢定。README:38 的遠端 blanket disclaimer 保護不了一句會被獨立引用的結論。D2：rev3 宣稱所有 claim 句子只由 build_verdict_basis() 產生，但 render_readme.py:701-743 仍然自己寫死散文，且完全在 --relabel invariant 掃描範圍之外；test_k1709.py:804-844 只驗 renderer 需要的 key，沒驗 claim parity → 同一類 overclaim 可以在 invariant 全綠的情況下復發。Codex 明確指出：只把 line 710 補一個字不算修好（那是 5(c) 的設計缺陷）。修法：summary / limitations / 圖表標籤全部由同一個 canonical claim object 渲染；新增 frozen-render parity regression test（renderer 產出的每個 claim 句子必須可回溯到 claim object 的欄位，否則 fail）；『Does not say』新增一條 bullet：conditional / state-dependent predictive ability 未檢定，跨 regime 互抵的效果不被排除。依賴：先做 k1709_rev4_nameerror。實驗留 worktree，不得進 main。"
+  },
+  {
+    "id": "k1709_rev4_figure_labels",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent_discovered",
+    "created_at": "2026-07-14T16:11:43.712159+00:00",
+    "title": "K1709 rev4 D3: standalone 圖表仍標無限定的 'Giacomini-White' / 'GW gate' → 圖標須由同一 claim object 渲染並重建 Fig 3/4",
+    "description": "Codex rev3 複審 blocking defect D3（verdict: storage/ops/codex_reviews/k1709_rev3_verdict.{md,json}）。k1709.py:2673-2681,2712-2713,2728 仍輸出 'GW z'、'Giacomini-White on QLIKE'、'Giacomini-White z'、'power of the GW gate' —— 正是 rev2 已判不可接受的無限定 nomenclature。程式只實作 unconditional GW/DM special case（GW 2006 Sec 3.4），而 PNG 會脫離 README 獨立流通，README:38 的 disclaimer 保護不到它；且 Fig 3/4 自 c97d690c 後未重建，現在與 README:224-225 的『unconditional GW/DB』描述互相矛盾。修法：圖表標籤與 caption 由 k1709_rev4_claim_object 建立的同一 canonical claim object 渲染（不得在繪圖碼裡寫死統計名稱），標明 unconditional；重建 Fig 3/4；parity test 涵蓋圖標。依賴：k1709_rev4_claim_object 先完成。實驗留 worktree，不得進 main。"
   }
 ]

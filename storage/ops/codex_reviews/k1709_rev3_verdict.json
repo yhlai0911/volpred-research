@@ -1,0 +1,67 @@
+{
+  "experiment": "k1709",
+  "revision": "rev3",
+  "reviewer": "codex (compute-queue job k1709-rev3-codex-review)",
+  "reviewed_commit": "f3f9d3034b1a5cc4c42cacae1528178e798d08d1",
+  "completed_at": "2026-07-14T15:25:31Z",
+  "transcribed_by": "hourly-00 main thread (2026-07-15T00:07 Asia/Taipei)",
+  "source_report": "storage/ops/codex_reviews/k1709_rev3_verdict.md",
+  "verdict": "FAIL",
+  "merge_allowed": false,
+  "numbers_moved": false,
+  "numbers_check": "recursive leaf compare c97d690c vs frozen rev3 JSON: 4383 non-string leaves (2248 floats / 1361 ints / 768 bools / 6 nulls), 0 differences in path, type or value. Only new executable numeric literal is k1709.py:2016 indent=2 (JSON formatting).",
+  "blocking_defects": [
+    {
+      "id": "D1",
+      "loc": "render_readme.py:710-714 / README.md:232",
+      "summary": "Final 'Does say' summary still claims 'No robust incremental predictive evidence was found' without the UNCONDITIONAL qualifier. k1709.py:1039-1052 only authorises an OOS average QLIKE loss differential; regime-offsetting conditional effects were never tested. The remote blanket disclaimer at README:38 does not protect an independently-quotable summary line.",
+      "fix_task": "k1709_rev4_claim_object"
+    },
+    {
+      "id": "D2",
+      "loc": "k1709.py:1843-1845,1987-2020 / render_readme.py:701-743 / test_k1709.py:804-844",
+      "summary": "rev3 claims every claim sentence comes from build_verdict_basis(), but the renderer remains a second claim author and sits entirely outside the --relabel invariant. Tests only check the keys the renderer needs, not claim parity — so the same class of overclaim can recur with every invariant green.",
+      "fix_task": "k1709_rev4_claim_object"
+    },
+    {
+      "id": "D3",
+      "loc": "k1709.py:2673-2681,2712-2713,2728",
+      "summary": "Standalone figures still emit 'GW z', 'Giacomini-White on QLIKE', 'Giacomini-White z', 'power of the GW gate' — the unqualified nomenclature rev2 already ruled unacceptable. Code implements only the unconditional GW/DM special case; PNGs circulate independently of README:38. Fig 3/4 not rebuilt since c97d690c and now contradict README:224-225.",
+      "fix_task": "k1709_rev4_figure_labels"
+    },
+    {
+      "id": "D4",
+      "loc": "k1709.py:2586,2605",
+      "summary": "After build_verdict_basis() was extracted, main() still references margin_pct and claim, which are no longer in scope. The default run path raises NameError right after writing the JSON (line 2586); line 2605 is likewise undefined and unreachable. Frozen estimates unaffected, but rev3 is not a runnable relabel-only refactor.",
+      "fix_task": "k1709_rev4_nameerror"
+    }
+  ],
+  "non_blocking_carried_over": [
+    "Bound monotonicity: binary search assumes z(m) increasing in m without verifying the full rejection set (k1709.py:1174-1185). Frozen bounds independently confirmed in rev2.",
+    "Fig 2 event-day shift: uses already-lagged z but labels 0 = flow date; day zero is one day after the raw flow date (k1709.py:2635-2655). Does not feed inference.",
+    "Live-rerun invariance promise (render_readme.py:669-679 / README:213) still guarantees statistics 'stay put'; contradicts the later-sample caveat added at k1709.py:1847-1850.",
+    "Vendor vintage not archived: acknowledged at k1709.py:1847-1853 but README:213 still overclaims that an RV date_max makes every number traceable; a date bound is not a Farside point-in-time snapshot."
+  ],
+  "ratchet_ruling_q4": {
+    "auditor_two_role_model": "wrong",
+    "basis": "GW (2006) Sec. 3.4 defines the unconditional test for fixed-memory forecasting methods: HAC-standardised mean loss differential, standard-normal reference, statistic coincides with DM. Only the conditional test needs an instrument vector / Wald / chi-square.",
+    "prescription": "Do not soften the science back to a vague 'GW gate' to please a lexical scanner. Add a third role (e.g. primary_unconditional_dm_fixed_memory) gated on evidence, not a self-declared marker.",
+    "required_evidence_before_ratchet_accepts_third_role": [
+      "Pair/cell-level versioned machine-readable manifest (not a file-level escape hatch) listing nested relation, loss, horizon, claim scope and gate sink.",
+      "Runtime provenance per claim-bearing cell proving the whole forecasting method is bounded-memory: base/aug share the same fixed window, complete-case mask, training dates, embargo; no upstream feature estimator may be expanding.",
+      "Statistic provenance: paired unadjusted loss differential, HAC estimator/bandwidth, finite positive LRV, normal reference, explicit unconditional average-loss estimand.",
+      "Gate wiring proof that only evidence-backed records may set feeds_gate=true; bounded_memory=True or a comment cannot self-certify.",
+      "Reader-facing claims must state 'unconditional' in place and disclose that regime-offsetting conditional effects are not excluded.",
+      "Out-of-repo adjudication receipt binding file SHAs, cell-manifest hash and reviewer; any byte drift invalidates it.",
+      "Adversarial fixtures must keep FAILing: fake markers, mixed fixed/expanding cells, fixed final regression with expanding preprocessing, conditional wording, file-level marker whitewashing other cells."
+    ],
+    "routed_to_task": "nested_dm_auditor_cannot_express_fixed_window_gw"
+  },
+  "sha256": {
+    "experiments/k1709/k1709.py": "32e2896f9b2b9de0f58a0eb23e513c144b23970577c40c87dbf8def182bfe07b",
+    "experiments/k1709/render_readme.py": "2ad0d450c53906fc5c29a1e33d592792a79bfe73eade35cc14487a934aa5b0dc",
+    "experiments/k1709/README.md": "3716836db76488defbc0ccd151a98a9d8cad228cf93b19435fe9591ca94c2509",
+    "experiments/k1709/k1709_results.json": "787baf5136c282f8810c07cbf983dc20560c5b090fad589db3f64ad64413389f",
+    "experiments/k1709/test_k1709.py": "94ed7c3fe352b74027c52bd40d6e1aa1dc921a638edc9d5ce8fbd91df7f996f9"
+  }
+}

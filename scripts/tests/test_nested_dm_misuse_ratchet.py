@@ -13,8 +13,11 @@ Run:
 from __future__ import annotations
 
 import ast
+import copy
+import hashlib
 import json
 import sys
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -23,6 +26,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
+import audit_nested_dm_misuse as nested_dm  # noqa: E402
 from audit_nested_dm_misuse import scan_file, scan_population  # noqa: E402
 
 
@@ -368,3 +372,304 @@ def test_parse_failure_is_reported_not_silently_dropped(tmp_path: Path) -> None:
     result = scan_population(tmp_path)
     assert result.scan_errors
     assert "SyntaxError" in result.scan_errors[0]
+
+
+# ---------------------------------------------------------------------------
+# Third role: unconditional GW/DM with a bounded-memory forecasting method
+# ---------------------------------------------------------------------------
+def _fixed_memory_manifest() -> dict:
+    return {
+        "schema": nested_dm.FIXED_MEMORY_MANIFEST_SCHEMA,
+        "role": nested_dm.FIXED_MEMORY_ROLE,
+        "claim_scope": "unconditional_average_loss_only",
+        "conditional_predictive_ability_tested": False,
+        "regime_offsetting_effects_excluded": False,
+        "implementation": {
+            "paired_forecast_function": "paired_oos",
+            "statistic_function": "gw_unconditional_dm",
+            "gate_registry_inference": "gw_fixed",
+            "train_window_constant": "TRAIN_WINDOW",
+            "runtime_evidence_file": "fixture_results.json",
+            "runtime_evidence_key": "nested_dm_fixed_memory_evidence_v1",
+            "claim_surface_files": ["fixture.py", "fixture_results.json"],
+        },
+        "method_contract": {
+            "estimation_scheme": "fixed_rolling",
+            "train_window": 50,
+            "window_data_dependent": False,
+            "shared_complete_case_mask": True,
+            "shared_training_dates": True,
+            "forward_label_embargo": True,
+            "loss": "generic proper loss",
+            "runtime_estimand": "E[loss_aug - loss_base]",
+            "loss_differential": "loss_aug_minus_loss_base",
+            "hac_kernel": "Bartlett",
+            "hac_bandwidth_rule": "max(h-1, fixed rule)",
+            "reference_distribution": "standard_normal",
+            "estimand": "unconditional average proper-loss differential",
+        },
+        "feature_stages": [
+            {
+                "id": "state",
+                "outputs": ["x"],
+                "memory": "finite_lag",
+                "max_observations": 2,
+            },
+            {
+                "id": "signal",
+                "outputs": ["s"],
+                "memory": "finite_lag",
+                "max_observations": 5,
+            },
+            {
+                "id": "paired_log_variance_fit",
+                "outputs": ["forecast_base", "forecast_aug"],
+                "memory": "fixed_rolling",
+                "max_observations": 50,
+            },
+        ],
+        "expected_primary_cell_count": 1,
+        "primary_cells": [
+            {
+                "id": "primary|BTC_h1|AUG|rv|fl1",
+                "family": "primary",
+                "asset": "BTC",
+                "base": "BASE",
+                "augmented": "AUG",
+                "strictly_nested": True,
+                "horizon": 1,
+                "rv_proxy": "rv",
+                "state_lag": 1,
+                "flow_lag": 1,
+                "smearing": "own",
+                "feeds_gate": True,
+                "base_predictors": ["x"],
+                "augmented_predictors": ["x", "s"],
+                "used_stage_ids": [
+                    "state",
+                    "signal",
+                    "paired_log_variance_fit",
+                ],
+            }
+        ],
+    }
+
+
+def _fixed_memory_runtime(manifest: dict) -> dict:
+    cell_id = manifest["primary_cells"][0]["id"]
+    digest = "a" * 64
+    audit = {
+        "scheme": "fixed_rolling",
+        "train_window": 50,
+        "n_origins": 80,
+        "fixed_window_held": True,
+        "same_training_dates_for_both_models": True,
+        "min_origin_minus_last_train_label_end_days": 1,
+        "embargo_ok": True,
+        "common_complete_case_mask_sha256": digest,
+        "base_training_schedule_sha256": digest,
+        "aug_training_schedule_sha256": digest,
+        "origin_schedule_sha256": digest,
+    }
+    statistic = {
+        "test": "equal unconditional predictive ability",
+        "loss": "generic proper loss",
+        "estimand": "E[loss_aug - loss_base]",
+        "forecast_scheme": "paired fixed rolling estimation window",
+        "n": 80,
+        "mean_loss_diff_aug_minus_base": 0.01,
+        "standard_error": 0.02,
+        "hac_lag_used": 2,
+    }
+    cell = {
+        "cell": cell_id,
+        "family": "primary",
+        "asset": "BTC",
+        "horizon": 1,
+        "rv_proxy": "rv",
+        "base": "BASE",
+        "alt": "AUG",
+        "state_lag": 1,
+        "flow_lag": 1,
+        "smearing": "own",
+        "bounded_memory": True,
+        "n_oos": 80,
+        "oos_audit": audit,
+        "primary_inference": statistic,
+    }
+    gate = {
+        "cell": cell_id,
+        "family": "primary",
+        "asset": "BTC",
+        "horizon": 1,
+        "base": "BASE",
+        "alt": "AUG",
+        "inference": "gw_fixed",
+        "estimand": "E[loss_aug - loss_base]",
+        "feeds_gate": True,
+        "bounded_memory": True,
+        "claim_role": "primary_unconditional_detection_gate",
+        "n": 80,
+    }
+    envelope_cell = {
+        "id": cell_id,
+        "common_complete_case_mask_sha256": digest,
+        "base_training_schedule_sha256": digest,
+        "aug_training_schedule_sha256": digest,
+        "origin_schedule_sha256": digest,
+        "eligibility": "whole_method_fixed_memory_verified",
+    }
+    return {
+        "primary_cells": [cell],
+        "multiple_testing": {
+            "primary_family": [copy.deepcopy(gate)],
+            "full_family_holm": [copy.deepcopy(gate)],
+            "n_gate_eligible_gw_tests": 1,
+        },
+        "verdict_basis": {
+            "claim_strength": "No unconditional predictive evidence was found.",
+            "does_say_1": "No unconditional predictive evidence was found.",
+            "does_not_say_1": (
+                "Conditional ability was not tested; regime-offsetting effects "
+                "are not excluded."
+            ),
+        },
+        "nested_dm_fixed_memory_evidence_v1": {
+            "schema": nested_dm.FIXED_MEMORY_RUNTIME_SCHEMA,
+            "manifest_sha256": nested_dm._canonical_sha256(manifest),
+            "cell_inventory": "primary_cells",
+            "gate_inventory": "multiple_testing.primary_family",
+            "registry_inventory": "multiple_testing.full_family_holm",
+            "statistic_record": "primary_inference",
+            "claim_record": "verdict_basis",
+            "claim_scope": "unconditional_average_loss_only",
+            "cells": [envelope_cell],
+        },
+    }
+
+
+def test_fixed_memory_manifest_is_cell_level_and_fail_closed() -> None:
+    manifest = _fixed_memory_manifest()
+    assert nested_dm._fixed_memory_manifest_errors(manifest) == []
+
+    expanding = copy.deepcopy(manifest)
+    expanding["feature_stages"][1]["memory"] = "expanding"
+    assert any(
+        "not bounded" in error
+        for error in nested_dm._fixed_memory_manifest_errors(expanding)
+    )
+
+    boolean_window = copy.deepcopy(manifest)
+    boolean_window["method_contract"]["train_window"] = True
+    assert nested_dm._fixed_memory_manifest_errors(boolean_window)
+
+    missing_lineage = copy.deepcopy(manifest)
+    missing_lineage["primary_cells"][0]["used_stage_ids"].remove("signal")
+    assert any(
+        "without a used stage" in error
+        for error in nested_dm._fixed_memory_manifest_errors(missing_lineage)
+    )
+
+
+def test_complete_fixed_memory_runtime_envelope_is_valid(tmp_path: Path) -> None:
+    manifest = _fixed_memory_manifest()
+    path = tmp_path / "fixture.py"
+    path.write_text("# fixture", encoding="utf-8")
+    (tmp_path / "fixture_results.json").write_text(
+        json.dumps(_fixed_memory_runtime(manifest)), encoding="utf-8"
+    )
+    assert nested_dm._fixed_memory_runtime_errors(path, manifest) == []
+
+
+@pytest.mark.parametrize(
+    ("mutation", "needle"),
+    [
+        ("different_schedule", "base/aug training schedules differ"),
+        ("unbounded_gate", "an unbounded record reaches a gate"),
+        ("bool_standard_error", "standard_error is not finite-positive"),
+        ("conditional_claim", "conditional/regime caveat"),
+        ("extra_primary", "registry primary-cell set"),
+    ],
+)
+def test_fixed_memory_runtime_evidence_is_adversarial(
+    tmp_path: Path, mutation: str, needle: str
+) -> None:
+    manifest = _fixed_memory_manifest()
+    runtime = _fixed_memory_runtime(manifest)
+    if mutation == "different_schedule":
+        runtime["nested_dm_fixed_memory_evidence_v1"]["cells"][0][
+            "aug_training_schedule_sha256"
+        ] = "b" * 64
+    elif mutation == "unbounded_gate":
+        runtime["multiple_testing"]["full_family_holm"][0]["bounded_memory"] = False
+    elif mutation == "bool_standard_error":
+        runtime["primary_cells"][0]["primary_inference"]["standard_error"] = True
+    elif mutation == "conditional_claim":
+        runtime["verdict_basis"]["does_not_say_1"] = "No further limitation."
+    elif mutation == "extra_primary":
+        extra = copy.deepcopy(runtime["multiple_testing"]["full_family_holm"][0])
+        extra["cell"] = "primary|BTC_h1|OTHER|rv|fl1"
+        runtime["multiple_testing"]["full_family_holm"].append(extra)
+        runtime["multiple_testing"]["n_gate_eligible_gw_tests"] = 2
+    path = tmp_path / "fixture.py"
+    path.write_text("# fixture", encoding="utf-8")
+    (tmp_path / "fixture_results.json").write_text(
+        json.dumps(runtime), encoding="utf-8"
+    )
+    errors = nested_dm._fixed_memory_runtime_errors(path, manifest)
+    assert any(needle in error for error in errors), errors
+
+
+@pytest.mark.parametrize(
+    "declaration",
+    [
+        "NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {'schema': 'fake'}",
+        "NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = dict(schema='fake')",
+        (
+            "NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {'schema': 'fake'}\n"
+            "NESTED_DM_FIXED_MEMORY_MANIFEST_V1 = {'schema': 'second'}"
+        ),
+    ],
+)
+def test_invalid_third_role_cannot_fall_through_a_safe_marker(
+    tmp_path: Path, declaration: str
+) -> None:
+    path = _write_fixture(
+        tmp_path,
+        '"""Nested model; ordinary DM is descriptive only; nested-dm: cw-primary.\n'
+        'PRIMARY family uses GW/DM for the verdict."""\n'
+        f"{declaration}\n"
+        "base_cols = ['x']\n"
+        "aug_cols = base_cols + ['s']\n"
+        "def classify(loss_base, loss_aug):\n"
+        "    dm_t, _ = dm_test(loss_aug, loss_base, h=1)\n"
+        "    return 'PASS' if dm_t < -3 else 'NULL'\n",
+    )
+    finding = scan_file(path, tmp_path, trust_root=tmp_path)
+    assert finding is not None
+    assert finding.test_role == "invalid_fixed_memory_evidence"
+    assert finding.role_validation_errors
+
+
+def test_candidate_local_receipt_cannot_self_waive(tmp_path: Path) -> None:
+    manifest = _fixed_memory_manifest()
+    candidate = tmp_path / "candidate"
+    trusted = tmp_path / "trusted"
+    source = candidate / "experiments" / "fixture" / "fixture.py"
+    source.parent.mkdir(parents=True)
+    trusted.mkdir()
+    source.write_text("# candidate", encoding="utf-8")
+    (source.parent / "fixture_results.json").write_text("{}", encoding="utf-8")
+    local_registry = candidate / nested_dm.FIXED_MEMORY_ADJUDICATIONS
+    local_registry.parent.mkdir(parents=True)
+    local_registry.write_text(
+        json.dumps(
+            {
+                "schema": "nested_dm_fixed_memory_adjudications.v1",
+                "entries": [{"site": "experiments/fixture/fixture.py"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    errors, _ = nested_dm._fixed_memory_receipt_errors(source, trusted, manifest)
+    assert any("registry unavailable" in error for error in errors)
