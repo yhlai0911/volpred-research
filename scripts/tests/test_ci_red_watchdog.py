@@ -235,13 +235,62 @@ def test_verified_watcher_push_head_is_not_automatically_called_repair_commit(tm
     run, sent, _dispatches = _harness(tmp_path, probe=_ahead(1))
     run(RED1)
 
-    summary = run(GREEN)
+    run(GREEN)
 
-    assert sent == []
-    assert summary["reason"] == "green_without_repair_evidence"
-    incident = _state(tmp_path)["active_incident"]
+    # The green closes the incident (it carries the failing commit in its
+    # history), but no specific commit may be named as the repair: a shared-main
+    # HEAD can contain unrelated work.
+    incident = _state(tmp_path)["last_closed_incident"]
     assert incident["last_verified_push_head"] == "localsha123"
     assert "repair_commit" not in incident
+    assert incident["repair_commit_source"] == "green_descendant"
+    assert "localsha123" not in sent[0]["body"]
+
+
+def test_green_descendant_closes_incident_when_repair_task_never_reports(tmp_path):
+    """A fix landing outside the repair task must still close the incident.
+
+    boss msg 749/758 (2026-07-14): the PHASE-Z refactor fixed main, the repair
+    task stayed pending, and the incident could only close through a repair-task
+    receipt — so it escalated against an already-green main once an hour.
+    """
+    run, sent, _dispatches = _harness(tmp_path)
+    run(RED1)
+    run(RED2)
+    assert _tasks(tmp_path)[0]["status"] == "pending"
+
+    summary = run(GREEN, now_iso="2026-07-13T11:00:00+00:00")
+
+    assert summary["reason"] == "recovery_notified"
+    state = _state(tmp_path)
+    assert "active_incident" not in state
+    assert state["last_closed_incident"]["phase"] == "recovered"
+    # Recovery, not another CRITICAL escalation at an already-green main.
+    assert [msg["level"] for msg in sent] == ["info"]
+    # The repair task never ran — closing it as "succeeded" would be a lie.
+    assert _tasks(tmp_path)[0]["status"] == "closed_no_action"
+
+
+def test_green_that_does_not_descend_from_every_failure_stays_open(tmp_path):
+    """Fail closed: an unprovable ancestry is not evidence of recovery."""
+    run, sent, _dispatches = _harness(tmp_path)
+    run(RED1)
+
+    summary = check_alerts._handle_ci_run(
+        GREEN,
+        now_iso=NOW,
+        next_tasks_path=tmp_path / "next_tasks.json",
+        state_path=tmp_path / "ci_watch_state.json",
+        sender=lambda level, title, body, **kwargs: {"sent": True},
+        ahead_probe=_ahead(),
+        pusher=lambda: {"pushed": True, "outcome": "pushed"},
+        failure_summarizer=lambda _run: CAUSE,
+        dispatcher=lambda _task_id: {"requested": True},
+        commit_covered_probe=lambda _a, _b: False,
+    )
+
+    assert summary["reason"] == "green_without_repair_evidence"
+    assert _state(tmp_path)["active_incident"]["phase"] == "verifying"
 
 
 def test_same_sha_green_without_repair_evidence_is_not_misreported(tmp_path):
@@ -305,9 +354,38 @@ def test_confirmed_task_root_cause_is_used_in_recovery_notice(tmp_path):
 
 
 def test_late_task_commit_promotes_stored_green_even_after_neutral_run(tmp_path):
-    run, sent, _dispatches = _harness(tmp_path)
+    """A green whose ancestry cannot be proven still promotes on a late receipt.
+
+    Ancestry is unprovable here (shallow clone / ungraftable head), so the green
+    cannot self-verify as a descendant and has to wait for the repair task.
+    """
+    sent = []
+
+    def sender(level, title, body, **kwargs):
+        sent.append({"level": level, "title": title, "body": body})
+        return {"sent": True, "notification_id": f"n-{len(sent)}"}
+
+    # Only the repair commit's coverage of the green head is provable.
+    def probe(commit, head):
+        return commit == "abc1234" and head == GREEN["headSha"]
+
+    def run(run_payload):
+        return check_alerts._handle_ci_run(
+            run_payload,
+            now_iso=NOW,
+            next_tasks_path=tmp_path / "next_tasks.json",
+            state_path=tmp_path / "ci_watch_state.json",
+            sender=sender,
+            ahead_probe=_ahead(),
+            pusher=lambda: {"pushed": True, "rc": 0, "outcome": "pushed"},
+            failure_summarizer=lambda _run: CAUSE,
+            dispatcher=lambda task_id: {"requested": True, "task_id": task_id},
+            commit_covered_probe=probe,
+        )
+
     run(RED1)
     run(GREEN)
+    assert sent == []
     tasks = _tasks(tmp_path)
     tasks[0]["status"] = "succeeded"
     tasks[0]["result"] = "root_cause=flake; repair_commit=abc1234"

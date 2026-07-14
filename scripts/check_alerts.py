@@ -1285,6 +1285,25 @@ def _ci_mark_recovery_candidate(incident: dict, green: dict) -> None:
         notice["status"] = "pending"
 
 
+def _ci_green_supersedes_failures(
+    green_head: str,
+    failed_heads: set[str],
+    *,
+    commit_covered_probe,
+) -> bool:
+    """True when a green head carries every failing commit in its history.
+
+    Fails closed: an unknown/ungraftable failed head makes the ancestry probe
+    return False, so a green run cannot close an incident it does not provably
+    supersede.
+    """
+    if not green_head or not failed_heads or green_head in failed_heads:
+        return False
+    return all(
+        commit_covered_probe(failed_head, green_head) for failed_head in failed_heads
+    )
+
+
 def _ci_repair_verification_error(
     incident: dict,
     *,
@@ -1297,6 +1316,13 @@ def _ci_repair_verification_error(
     A rerun can turn green on the exact code that already failed. More subtly, a
     proposed repair commit can itself have been covered by a later failed run in
     the same incident. Both are flaky/re-failure evidence, not a verified fix.
+
+    A repair-task receipt is not the only admissible proof. When every failing
+    commit is an ancestor of a green head, main passes CI with all of the failing
+    code in its history — the failure is gone no matter which path fixed it. That
+    edge has to exist: a fix landing outside the repair task (a refactor, a
+    revert, a human commit) would otherwise leave the incident escalating forever
+    against an already-green main.
     """
     failed_heads = {
         str(head)
@@ -1307,6 +1333,12 @@ def _ci_repair_verification_error(
         head = str((incident.get(record_name) or {}).get("head_sha") or "")
         if head:
             failed_heads.add(head)
+    if _ci_green_supersedes_failures(
+        green_head,
+        failed_heads,
+        commit_covered_probe=commit_covered_probe,
+    ):
+        return None
     if not repair_commit:
         return "green_without_repair_commit_evidence"
     if not green_head:
@@ -1568,6 +1600,8 @@ def _reduce_ci_run(
                 ),
             }.get(verification_error, verification_error)
         else:
+            if not repair_commit:
+                incident["repair_commit_source"] = "green_descendant"
             _ci_mark_recovery_candidate(incident, run)
             summary["reason"] = "recovery_pending_notification"
         _ci_mark_processed(state, run)
@@ -1617,7 +1651,7 @@ def _ci_refresh_recovery_evidence(state: dict, *, task_status_probe, commit_cove
     )
     if not verification_error:
         incident["repair_commit"] = repair_commit
-        incident["repair_commit_source"] = "task_result"
+        incident["repair_commit_source"] = "task_result" if repair_commit else "green_descendant"
         _ci_mark_recovery_candidate(incident, _ci_record_as_run(green))
     else:
         incident["verification_blocked"] = {
@@ -1720,12 +1754,20 @@ def _notify_ci_incident(
     if kind == "recovery":
         green_head = str(candidate.get("head_sha") or "")
         repair_commit = str(incident.get("repair_commit") or "")
-        if not repair_commit:
+        if repair_commit:
+            commit_line = (
+                f"修復 commit：{repair_commit[:12]}；綠燈驗證 head：{green_head[:12]}。"
+            )
+        elif incident.get("repair_commit_source") == "green_descendant":
+            # Nobody claimed the fix, so no commit may be named as the repair.
+            # The green head carrying every failing commit is the evidence.
+            commit_line = (
+                f"無單一修復 commit（修復由 repair task 以外的路徑落地）；"
+                f"綠燈驗證 head：{green_head[:12]}，該 head 已涵蓋全部失敗 commit。"
+            )
+        else:
             summary["reason"] = "recovery_missing_repair_commit"
             return summary
-        commit_line = (
-            f"修復 commit：{repair_commit[:12]}；綠燈驗證 head：{green_head[:12]}。"
-        )
         level = "info"
         title = f"CI 已修復並驗證（{incident_id}）"
         body = (
