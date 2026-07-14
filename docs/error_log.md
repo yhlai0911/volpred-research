@@ -7596,3 +7596,15 @@ convention」，flag 本身是揭露項不是絕對值）留待用戶可見時�
 
 **已發出的 5 集不回收**：retract 已上線文章對讀者/SEO 傷害大於亂序本身；EP4/EP3 順序錯置為既成事實，
 記於此。**教訓**：拆除一個 gate 時必問「它原本還兼任什麼功能？」— 煞車常常長在錯的零件上。
+
+## 2026-07-14 13:40 — 驗證 grep 的符號編碼盲區（abm v6 review B1 根因；class 教訓）
+
+**現象**：P0-2 宣告「家族級主張 grep=0」，但 grep pattern 用 unicode `≤`，LaTeX 稿裡寫的是 `$\le$` —
+4 處主張式 family ordering 殘留假性通過，直到 v6 跨模型 review（Codex + code-verification 雙軌）才抓到。
+
+**教訓（cross-cutting）**：**驗證 grep 必須匹配文件的「符號編碼」，不是「概念」**。LaTeX 稿驗證要同時掃
+`≤` 與 `\le`、`%` 與 `\%`、`×` 與 `\times` 等雙編碼；宣告「grep=0 通過」前先反問「這個概念在此文件格式
+裡還有哪些寫法」。同日第二例：P0-4 洩漏 gate 只掃 `k1471|source:`（小寫），漏掉 `Source:` 大寫與
+k1262 路徑 — 同 class（pattern 蓋不住 population）。與 K1259「audit 必 re-walk full population」同根。
+
+**處置**：兩處都已 class-sweep 修復（4217af920 / 1c15d3c11）；此後 .tex 驗證 grep 一律 `-i` + 雙編碼 pattern。
