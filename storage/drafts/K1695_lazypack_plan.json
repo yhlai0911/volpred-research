@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "title": "波動率目標策略：抗跌是真的嗎",
+  "subtitle": "K1695 重做版懶人包",
+  "evidence": {
+    "k1695": {
+      "path": "storage/drafts/k1695_article_evidence.json",
+      "sha256": "e311c0d86ea184462f2797f22e45f04e791f8d88fc6485689c7af8251c1d589b",
+      "label": "K1695 共同樣本與同風險口徑重算"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "策略在做什麼，以及一個容易被跳過的問題",
+      "alt": "波動率目標策略的規則，與回撤比較的前提",
+      "sources": [
+        "k1695"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "規則",
+          "body": [
+            "月底看一次恐慌指數 VIX，指數越高，下個月股票部位放越少，其餘擺短債。整個月不動，下月初再調。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "要先問的問題",
+          "body": [
+            "回撤變淺，可能是因為會挑時機，也可能只是因為部位放得少。兩者長得一樣，必須拆開來看。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "回測市場數",
+          "value": {
+            "source": "k1695",
+            "path": "common_sample.n_markets",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "共同樣本交易日",
+          "value": {
+            "source": "k1695",
+            "path": "common_sample.n_obs",
+            "format": {
+              "kind": "integer",
+              "suffix": " 日"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "重做版把口徑修回誠實",
+      "alt": "重做版的方法與資料口徑",
+      "sources": [
+        "k1695"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "修了什麼",
+          "body": [
+            "資料釘死成快照不再連網重抓；訊號用上月底 VIX、落後一期；現金部位改買短債並計入實際報酬；每次調倉按實際換手扣交易成本；重抽樣時各市場同步抽同一組日期，保留一起崩盤的相依性。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "關鍵檢查",
+          "body": [
+            "策略的實際波動遠低於買進持有，代表兩者曝險不同，帳面回撤不能直接對比。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "策略平均壓低的波動",
+          "value": {
+            "source": "k1695",
+            "path": "exposure_matched.mean_vol_cut_pct",
+            "format": {
+              "kind": "number",
+              "digits": 0,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "曝險不匹配的市場",
+          "value": {
+            "source": "k1695",
+            "path": "exposure_matched.n_markets_vol_mismatch_flagged",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個（全部）"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "把「少冒險」扣掉，抗跌效果就不見了",
+      "alt": "原始回撤改善與同風險口徑下的回撤改善對照",
+      "sources": [
+        "k1695"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "帳面平均回撤改善",
+          "value": {
+            "source": "k1695",
+            "path": "exposure_matched.avg_raw_mdd_gap_pp",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " 個百分點"
+            }
+          },
+          "note": "看起來很漂亮"
+        },
+        {
+          "kind": "metric",
+          "label": "同風險口徑平均回撤改善",
+          "value": {
+            "source": "k1695",
+            "path": "exposure_matched.avg_exposure_matched_gap_pp",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " 個百分點"
+            }
+          },
+          "note": "把買進持有縮到同樣風險後再比"
+        },
+        {
+          "kind": "metric",
+          "label": "同風險口徑下仍為正的市場",
+          "value": {
+            "source": "k1695",
+            "path": "exposure_matched.n_markets_matched_gap_positive",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個市場"
+            }
+          },
+          "note": "接近擲硬幣"
+        },
+        {
+          "kind": "text",
+          "heading": "讀法",
+          "body": [
+            "帳面上的抗跌，主要成分是槓桿，不是擇時。任何人把持股等比例縮小都能複製同樣的改善。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "代價是真的，解釋是假的",
+      "alt": "策略付出的報酬代價與站不住的機制解釋",
+      "sources": [
+        "k1695"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "風險報酬比變好的市場",
+          "value": {
+            "source": "k1695",
+            "path": "published_k1695.n_sharpe_improved_common",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個市場"
+            }
+          },
+          "note": "一個都沒有"
+        },
+        {
+          "kind": "metric",
+          "label": "每年的報酬代價",
+          "value": {
+            "source": "k1695",
+            "path": "published_k1695.avg_annual_return_cost_pp_common",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 個百分點／年"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "VIX 敏感度與保護幅度的關聯（共同期間）",
+          "value": {
+            "source": "k1695",
+            "path": "published_k1695.vix_r_common",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "換樣本就翻面，統計上不成立"
+        },
+        {
+          "kind": "text",
+          "heading": "帶走這句",
+          "body": [
+            "下次看到策略宣稱大幅降低回撤，先問它平均放了幾成部位。真正該比的，是把對照組也縮到同樣風險水位之後，它還剩多少優勢。"
+          ]
+        }
+      ]
+    }
+  ]
+}

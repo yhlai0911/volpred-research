@@ -1,0 +1,103 @@
+{
+  "common_sample": {
+    "end": "2026-03-31",
+    "n_markets": 13,
+    "n_obs": 3557,
+    "start": "2012-02-07"
+  },
+  "exposure_matched": {
+    "avg_exposure_matched_gap_pp": -0.8654178693536733,
+    "avg_raw_mdd_gap_pp": 12.613879580351185,
+    "max_vol_cut_pct": 38.64001768355523,
+    "mean_vol_cut_pct": 34.92702057286072,
+    "min_vol_cut_pct": 31.823649054585566,
+    "n_markets_matched_gap_negative": 6,
+    "n_markets_matched_gap_positive": 7,
+    "n_markets_vol_mismatch_flagged": 13,
+    "per_market": {
+      "EEM": {
+        "exposure_matched_gap_pp": -3.966478286833186,
+        "raw_mdd_gap_pp": 7.764417398576706,
+        "vol_cut_pct": 33.49804032052182
+      },
+      "EFA": {
+        "exposure_matched_gap_pp": 1.2913213807450696,
+        "raw_mdd_gap_pp": 12.866200876425715,
+        "vol_cut_pct": 36.66652939490049
+      },
+      "EWA": {
+        "exposure_matched_gap_pp": -3.86820077243637,
+        "raw_mdd_gap_pp": 11.535314578235933,
+        "vol_cut_pct": 38.41562326261554
+      },
+      "EWC": {
+        "exposure_matched_gap_pp": -5.388798341263534,
+        "raw_mdd_gap_pp": 9.014926669863875,
+        "vol_cut_pct": 38.64001768355523
+      },
+      "EWG": {
+        "exposure_matched_gap_pp": -1.4403684996137867,
+        "raw_mdd_gap_pp": 13.256708562425779,
+        "vol_cut_pct": 36.50987503512453
+      },
+      "EWJ": {
+        "exposure_matched_gap_pp": 0.3338506658401408,
+        "raw_mdd_gap_pp": 9.771119107006143,
+        "vol_cut_pct": 31.823649054585566
+      },
+      "EWT": {
+        "exposure_matched_gap_pp": 1.3285058416446782,
+        "raw_mdd_gap_pp": 12.042506730660952,
+        "vol_cut_pct": 31.86037076070667
+      },
+      "EWU": {
+        "exposure_matched_gap_pp": 0.9860408894134975,
+        "raw_mdd_gap_pp": 15.26702753650191,
+        "vol_cut_pct": 37.49205467886312
+      },
+      "EWZ": {
+        "exposure_matched_gap_pp": -8.141393444732014,
+        "raw_mdd_gap_pp": 8.372433605681495,
+        "vol_cut_pct": 33.64435722793849
+      },
+      "FXI": {
+        "exposure_matched_gap_pp": -1.5853321689502486,
+        "raw_mdd_gap_pp": 13.433766709220507,
+        "vol_cut_pct": 32.26347970531515
+      },
+      "INDA": {
+        "exposure_matched_gap_pp": 5.027132244091648,
+        "raw_mdd_gap_pp": 18.979929494359737,
+        "vol_cut_pct": 34.2479908114981
+      },
+      "MCHI": {
+        "exposure_matched_gap_pp": 3.328637137521495,
+        "raw_mdd_gap_pp": 18.504977619000627,
+        "vol_cut_pct": 32.332541066228
+      },
+      "VGK": {
+        "exposure_matched_gap_pp": 0.8446510529748541,
+        "raw_mdd_gap_pp": 13.171105656605986,
+        "vol_cut_pct": 36.65673844533678
+      }
+    },
+    "shrinkage_pct": 106.86083820477997
+  },
+  "note": "Derived from pinned K1695 artifacts only. Common sample 2012-02-07..2026-03-31, N=3557.",
+  "paired_returns_sha256": "8cbc18a7986e727f67b23be14fadfabcfae521d6ee9bda1381ce8e2d40d53295",
+  "published_k1695": {
+    "avg_annual_return_cost_pp_common": -2.1753591132467673,
+    "avg_delta_mdd_pp_common": 12.613879580350584,
+    "avg_delta_mdd_pp_inception": 27.503383107715724,
+    "avg_delta_sharpe_common": -0.09092503916217498,
+    "bootstrap_ci_lower_pp": 4.220717849686448,
+    "bootstrap_ci_upper_pp": 19.301780054907805,
+    "n_sharpe_improved_common": 0,
+    "n_sharpe_improved_inception": 1,
+    "vix_p_common": 0.3113008649155788,
+    "vix_p_inception": 0.0006511371642021946,
+    "vix_r_common": 0.3047698580510254,
+    "vix_r_inception": -0.8169969982810632
+  },
+  "source_experiment": "K1695"
+}
