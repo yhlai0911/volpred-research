@@ -2,6 +2,23 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 15:55 — 論文驗證副產物連續多班無主（PHASE-Z streak alert 根因修正）
+
+**現象**：`paper/vt-crowding-abm/{experiments/k827v3_*_results.json, main.pdf}` 未提交連續 3 班，
+PHASE-Z critical alert。老闆定調「一直出現這種問題不應該是正常流程，要優化」。
+
+**根因（結構性，非單次疏忽）**：論文 session 跑 `reproduce.py` 驗證會就地重寫 results.json 的
+volatile 欄位（timestamp/runtime；本次實驗數字 0 變動、173/173 checks matched）並 xelatex
+重編譯 main.pdf；session 用 explicit-path commit（正確紀律，防 `git add -A` 捲檔）收自己的
+.tex 修正時，**這些驗證副產物必然被漏掉** — 每次 reproduce 都會復發，不是人為失誤。
+
+**解決**：(1) 兩檔驗證後收編（af84175ce；PDF 本來已 stale 於 HEAD tex，paper_sync 面臨漂移）。
+(2) 機械 gate 收編進既有 owner `scripts/reap_orphan_deliverables.py`（anti-stacking，check_alerts
+每小時自動跑）：新增 paper build artifacts 辨識 — results.json 僅 volatile diff 才自動 commit、
+PDF 需同 dir 無未提交 .tex/.bib 源；真內容變動一律 held 待作者（研究誠實）。hermetic 測試 ×3
+（`scripts/tests/test_reap_paper_artifacts.py`，臨時 git repo 不碰真庫）。
+(3) 附帶修正：孤兒 script 移 `_legacy/` 造成 MDD ratchet baseline 路徑 stale → baseline 同步改路徑。
+
 ## 2026-07-14 15:30 — Gating 實驗完成後無人裁決 + handoff 抄到已撤回裁定（差點錯殺一篇 JBF 論文）
 
 **現象**：`k1686_fix_ambient_sign_spec`（volabs 的 make-or-break 修正實驗）7/12 19:19 `succeeded`，

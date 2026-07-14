@@ -456,6 +456,117 @@ def _inflight_stems(tasks: list[dict]) -> set[str]:
     )
 
 
+# ---------------------------------------------------------------------------
+# Paper build artifacts（2026-07-14，PHASE-Z streak alert 根因修正）。
+# 論文 session 跑 reproduce.py 驗證會就地重寫 experiments/*_results.json 的
+# volatile 欄位（timestamp/runtime）並 xelatex 重編譯 main.pdf；session 用
+# explicit-path commit（正確紀律）收自己的 .tex 修正時，這些驗證副產物必然被
+# 漏掉 → 連續多班無主 → PHASE-Z streak alert。此 recognizer 讓 reaper（孤兒
+# 成品的唯一 owner）認得這一類並在安全條件下自動收編：
+#   *_results.json — 與 HEAD 的差異僅限 volatile keys（實驗數字零變動）才收
+#   *.pdf         — 同 paper dir 無任何未提交的 .tex/.bib/圖源（= HEAD 源的
+#                    rebuild）才收
+# 任一條件不成立 → held 回報，絕不收（真的內容變動必須由作者驗證後 commit）。
+# ---------------------------------------------------------------------------
+
+PAPER_DIR = ROOT / "paper"
+_VOLATILE_RESULT_KEYS = {"timestamp", "runtime_seconds", "generated_at",
+                         "audit_date", "run_at", "elapsed_seconds"}
+_PAPER_SOURCE_SUFFIXES = {".tex", ".bib", ".sty", ".cls", ".png", ".pdf_tex", ".eps"}
+DEFAULT_MAX_PAPER_COMMITS = 2
+
+
+def _strip_volatile(obj):
+    if isinstance(obj, dict):
+        return {k: _strip_volatile(v) for k, v in obj.items()
+                if k not in _VOLATILE_RESULT_KEYS}
+    if isinstance(obj, list):
+        return [_strip_volatile(v) for v in obj]
+    return obj
+
+
+def _results_volatile_only(rel: str) -> tuple[bool, str]:
+    """True iff the dirty results.json differs from HEAD only in volatile keys."""
+    head = _git("show", f"HEAD:{rel}")
+    if head.returncode != 0:
+        return False, "not_in_head"
+    try:
+        head_obj = json.loads(head.stdout)
+        work_obj = json.loads((ROOT / rel).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return False, f"unparseable: {exc}"
+    if _strip_volatile(head_obj) == _strip_volatile(work_obj):
+        return True, "volatile_only"
+    return False, "content_changed"
+
+
+def scan_paper_build_artifacts(*, now_ts: float | None = None) -> dict:
+    """Classify dirty tracked files under paper/ into collectable / held."""
+    now_ts = now_ts if now_ts is not None else time.time()
+    status = _git("status", "--porcelain", "--", "paper/")
+    collectable: list[dict] = []
+    held: list[dict] = []
+    if status.returncode != 0:
+        warn("reap_orphan", "paper artifact scan: git status failed",
+             err=status.stderr[:120])
+        return {"collectable": [], "held": []}
+    dirty = [ln[3:].strip() for ln in status.stdout.splitlines()
+             if ln[:2].strip() == "M"]  # tracked modifications only；untracked 另有 owner
+    dirty_set = set(dirty)
+    for rel in dirty:
+        p = ROOT / rel
+        try:
+            if now_ts - p.stat().st_mtime < GRACE_SECONDS:
+                continue  # 可能有 session 正在寫 — 給滿 grace 再說
+        except OSError:
+            continue  # silent-ok: status→stat 之間檔案消失 = 無物可收，race-safe
+        parts = Path(rel).parts
+        if len(parts) < 2 or parts[0] != "paper":
+            continue
+        paper_dir = f"paper/{parts[1]}"
+        if rel.endswith("_results.json"):
+            ok, why = _results_volatile_only(rel)
+            (collectable if ok else held).append(
+                {"path": rel, "kind": "results_json", "reason": why})
+        elif rel.endswith(".pdf"):
+            dirty_sources = [d for d in dirty_set
+                             if d.startswith(paper_dir + "/") and d != rel
+                             and Path(d).suffix in _PAPER_SOURCE_SUFFIXES]
+            if dirty_sources:
+                held.append({"path": rel, "kind": "pdf",
+                             "reason": f"sources_dirty:{dirty_sources[:3]}"})
+            else:
+                collectable.append({"path": rel, "kind": "pdf",
+                                    "reason": "rebuild_of_head_sources"})
+    return {"collectable": collectable, "held": held}
+
+
+def collect_paper_artifacts(entries: list[dict]) -> list[dict]:
+    """Commit collectable paper build artifacts through git（ASCII message）."""
+    out: list[dict] = []
+    if not entries:
+        return out
+    paths = [e["path"] for e in entries]
+    add = _git("add", "--", *paths)
+    if add.returncode != 0:
+        warn("reap_orphan", "paper artifact add failed", err=add.stderr[:150])
+        return [{"paths": paths, "committed": False, "err": add.stderr[:150]}]
+    msg = ("chore(paper-reap): collect verification byproducts "
+           f"({', '.join(sorted({Path(p).parts[1] for p in paths}))})\n\n"
+           "Auto-collected by reap_orphan_deliverables: results diffs are "
+           "volatile-only (timestamp/runtime) and PDFs rebuild HEAD sources. "
+           "Root-cause: reproduce.py verification dirties tracked artifacts "
+           "that explicit-path session commits necessarily miss.\n\n"
+           "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>")
+    commit = _git("commit", "-m", msg, "--", *paths)
+    ok = commit.returncode == 0
+    if not ok:
+        warn("reap_orphan", "paper artifact commit failed", err=commit.stderr[:150])
+    out.append({"paths": paths, "committed": ok,
+                "detail": (commit.stdout or commit.stderr)[:150]})
+    return out
+
+
 def scan(*, now_ts: float | None = None) -> dict:
     """Classify every post-cutover draft. Pure read — writes nothing, deletes nothing."""
     now_ts = now_ts if now_ts is not None else time.time()
@@ -582,9 +693,13 @@ def main() -> int:
 
     result = scan()
     job_scan = scan_job_deliverables()
+    paper_scan = scan_paper_build_artifacts()
     job_deliveries: list[dict] = []
+    paper_collections: list[dict] = []
     adopted: list[dict] = []
     if args.apply:
+        paper_collections = collect_paper_artifacts(
+            paper_scan["collectable"][:DEFAULT_MAX_PAPER_COMMITS])
         for candidate in job_scan["candidates"][: args.max_jobs]:
             job_deliveries.append(deliver_job_outputs(candidate))
         for entry in result["adoptable"][: args.max]:
@@ -600,6 +715,9 @@ def main() -> int:
     result["job_deliverable_candidates"] = job_scan["candidates"]
     result["job_deliverable_held"] = job_scan["held"]
     result["job_deliveries"] = job_deliveries
+    result["paper_artifact_collectable"] = paper_scan["collectable"]
+    result["paper_artifact_held"] = paper_scan["held"]
+    result["paper_collections"] = paper_collections
 
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n",
