@@ -17374,5 +17374,15 @@
     "owner": "hourly-16",
     "commit": "6cde3be09",
     "summary": "PHASE A 收件 k1709_rev2_codex_verdict：Codex(gpt-5.6-sol/ultra) 對凍結 SHA c97d690c 判 FAIL —— 唯一 blocking 是「GW gate」其實只實作 h_t≡1 的無條件 DM 特例（無 instrument / 無 Wald / 無 chi2_q），README 的 conditional predictive-ability 用詞超出證據；9 條舊缺陷全 FIXED，10 條 loss stream 經 Codex 獨立重建 bit-for-bit 相符（算術沒錯，是宣稱範圍錯）。Provenance 驗過 head_after_review==c97d690c + worktree_clean_during_review==true。依 gate-fail-verdict-blocks-merge，實驗續留 worktree（rev2 裁決 commit 6951526cc 保存），建 k1709-rev3-gw-label(P1)。\n\n根因修復（本班主要產出）：verdict schema 過去有 3 份手抄副本（experiment_gates.py 原始碼 / 每輪 review brief / .claude/rules/experiments.md）→ rev2 的 brief 抄成 final_verdict + claim_surface_sha256、只 pin 2 個檔，而 gate 讀 verdict + reviewed_sha256、要求 pin 全部 5 個 claim-surface 檔。這輪判 FAIL 才沒出事；若判 PASS，30 分鐘 xhigh 審查會認證不到任何東西。改為 gate 自己吐骨架：`experiment_gates.py verdict-template --path <exp> --out <verdict>`，brief 只引用命令不再重述欄位；certify 遇到舊 key 會直接點名 schema drift（不再只回 <missing>）。ratchet：填好的 template 必須能認證通過，schema 單邊改動即 red。22 tests pass。\n\n未做：k1683 的 reproduce RESULT_MISMATCH（唯一差異是 /run_utc 時間戳，實為揮發性欄位誤判）—— scripts/reproduce_check.py 正被 codex-vscode 的 repro-audit-001 在寫（mtime 1 分鐘內），依 liveness 規則不平行編輯，留給該任務收尾。"
+  },
+  {
+    "timestamp": "2026-07-14T16:42:12+08:00",
+    "task_type": "experiment",
+    "task_id": "repro-audit-001",
+    "outcome": "completed",
+    "actor": "codex-vscode",
+    "owner": "codex-vscode",
+    "commit": null,
+    "summary": "Built isolated reproducibility audits; three pinned reruns matched, and 168 code-only K folders were classified."
   }
 ]

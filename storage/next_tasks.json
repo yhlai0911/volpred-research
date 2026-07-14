@@ -36624,15 +36624,12 @@
     "description": "系統至今 0 份 reproduce_report — 檔案齊全不等於已驗證可復現。範圍：(1) 論文引用的 K + 近 60 篇 feed 文章 details.experiment_refs 的 K，優先重跑；(2) 比對重跑輸出與既存 *_results.json 的關鍵數字（容許數值誤差需說明 seed/環境），寫 experiments/<id>/reproduce_report.json；(3) 對 166 個「有 code 無 results」的 K 補跑或標記為不可復現；(4) 把復現檢查機械化成 script（scripts/reproduce_check.py）並掛進 daily_checkup 維度。研究誠實原則：不一致就如實記錄並回溯更正文章/論文。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-14T10:35:00+08:00",
     "source": "telegram-733 (老闆質詢復現性)",
     "dispatch_lane": null,
     "source_line": null,
     "tags": null,
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-14T07:44:45.751357+00:00",
-    "claim_session_id": "ca6e83f3a218",
     "status_history": [
       {
         "ts": "2026-07-14T07:44:45.751372+00:00",
@@ -36645,9 +36642,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T08:42:02.120202+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-14T07:44:45.989283+00:00"
+    "started_at": "2026-07-14T07:44:45.989283+00:00",
+    "completed_at": "2026-07-14T08:42:02.120188+00:00",
+    "result": "Built a committed isolated audit engine plus daily read-only coverage; inventory classifies 168 code-only K folders and 237 priority references. Pinned reruns K1683/K1699/K1710 matched all 1,358 scalars with zero mismatches, canonical files unchanged, and immutable receipts; 12 targeted tests pass."
   },
   {
     "id": "ci-red-29299985391",

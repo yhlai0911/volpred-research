@@ -1,9 +1,9 @@
 {
   "schema_version": "volpred.reproduce_inventory.v1",
-  "generated_at": "2026-07-14T08:14:30.209859+00:00",
-  "repo_head": "962b58278d4e0dfa339c069242e1bb2e7c9bf856",
+  "generated_at": "2026-07-14T08:39:06.576908+00:00",
+  "repo_head": "f003356d909b1842a88f04755daf3baea09ad4f2",
   "scope": {
-    "paper_sources": "paper/*/experiments.md; active source/README fallback only when manifest is absent",
+    "paper_sources": "paper/*/experiments.md plus canonical submission compile closures; README fallback only when both are absent",
     "recent_feed_articles": "latest 60 records with status=published",
     "experiment_root": "experiments/"
   },
@@ -44,6 +44,10 @@
       "K1114",
       "K1116",
       "K1116b",
+      "K1116c",
+      "K1116e",
+      "K1116f",
+      "K1116g",
       "K1117",
       "K1118",
       "K1121",
@@ -67,6 +71,13 @@
       "K1148",
       "K1149",
       "K1150",
+      "K1163",
+      "K1165",
+      "K1166",
+      "K1168",
+      "K1171",
+      "K1172",
+      "K1173",
       "K1175",
       "K1176",
       "K1178",
@@ -78,15 +89,40 @@
       "K1188",
       "K1192",
       "K1193",
+      "K1201",
+      "K1203",
+      "K1204",
+      "K1207",
       "K1209",
+      "K1211",
+      "K1213",
+      "K1215",
+      "K1216",
+      "K1216b",
+      "K1216c",
+      "K1222",
+      "K1222b",
       "K1256",
+      "K1261",
+      "K1262",
+      "K1262b",
       "K1302",
       "K1302b",
       "K1370",
       "K1370c",
+      "K1376",
+      "K1393",
+      "K1417",
       "K1418",
+      "K1457",
+      "K1470",
+      "K1471",
       "K1544",
+      "K1591",
+      "K1592",
       "K1686",
+      "K1695",
+      "K1697",
       "K1699",
       "K1710",
       "K273",
@@ -111,7 +147,6 @@
       "K568",
       "K633",
       "K636",
-      "K639",
       "K687",
       "K688",
       "K697",
@@ -250,6 +285,10 @@
       "K1114",
       "K1116",
       "K1116b",
+      "K1116c",
+      "K1116e",
+      "K1116f",
+      "K1116g",
       "K1117",
       "K1118",
       "K1121",
@@ -273,6 +312,13 @@
       "K1148",
       "K1149",
       "K1150",
+      "K1163",
+      "K1165",
+      "K1166",
+      "K1168",
+      "K1171",
+      "K1172",
+      "K1173",
       "K1175",
       "K1176",
       "K1178",
@@ -284,19 +330,42 @@
       "K1188",
       "K1192",
       "K1193",
+      "K1201",
+      "K1203",
+      "K1204",
+      "K1207",
       "K1209",
+      "K1211",
+      "K1213",
+      "K1215",
+      "K1216",
+      "K1216b",
+      "K1216c",
+      "K1222",
+      "K1222b",
       "K1256",
+      "K1261",
+      "K1262",
+      "K1262b",
       "K1302",
       "K1302b",
       "K1370",
       "K1370c",
+      "K1376",
+      "K1393",
+      "K1417",
       "K1418",
       "K1452",
+      "K1457",
+      "K1470",
+      "K1471",
       "K1544",
       "K1568",
       "K1570",
       "K1574",
       "K1590",
+      "K1591",
+      "K1592",
       "K1605",
       "K1606",
       "K1611",
@@ -317,6 +386,8 @@
       "K1679-rev2",
       "K1683",
       "K1686",
+      "K1695",
+      "K1697",
       "K1699",
       "K1700",
       "K1703",
@@ -344,7 +415,6 @@
       "K568",
       "K633",
       "K636",
-      "K639",
       "K687",
       "K688",
       "K697",
@@ -455,6 +525,10 @@
     "K1114": "k1114",
     "K1116": "k1116",
     "K1116b": "k1116b",
+    "K1116c": "k1116c",
+    "K1116e": "k1116e",
+    "K1116f": "k1116f",
+    "K1116g": "k1116g",
     "K1117": "k1117",
     "K1118": "k1118",
     "K1121": "k1121",
@@ -478,6 +552,13 @@
     "K1148": "k1148",
     "K1149": "k1149",
     "K1150": "k1150",
+    "K1163": "k1163",
+    "K1165": "k1165",
+    "K1166": "k1166",
+    "K1168": "k1168",
+    "K1171": "k1171",
+    "K1172": "k1172",
+    "K1173": "k1173",
     "K1175": "k1175",
     "K1176": "k1176",
     "K1178": "k1178",
@@ -489,19 +570,42 @@
     "K1188": "k1188",
     "K1192": "k1192",
     "K1193": "k1193",
+    "K1201": "k1201",
+    "K1203": "k1203",
+    "K1204": "k1204",
+    "K1207": "k1207",
     "K1209": "k1209",
+    "K1211": "k1211",
+    "K1213": "k1213",
+    "K1215": "k1215",
+    "K1216": "k1216",
+    "K1216b": "k1216b",
+    "K1216c": "k1216c",
+    "K1222": "k1222",
+    "K1222b": "k1222b",
     "K1256": "k1256",
+    "K1261": "k1261",
+    "K1262": "k1262",
+    "K1262b": "k1262b",
     "K1302": "k1302",
     "K1302b": "k1302b",
     "K1370": "k1370",
     "K1370c": "k1370c",
+    "K1376": "k1376",
+    "K1393": "k1393",
+    "K1417": "k1417",
     "K1418": "k1418",
     "K1452": "k1452",
+    "K1457": "k1457",
+    "K1470": "k1470_eav_multistart_main_spec",
+    "K1471": "k1471_vt_crowding_redesign",
     "K1544": "k1544_prg_fair_info_gjr",
     "K1568": "k1568",
     "K1570": "k1570",
     "K1574": "K1574",
     "K1590": "k1590",
+    "K1591": "k1591",
+    "K1592": "k1592",
     "K1605": "k1605",
     "K1606": "k1606",
     "K1611": "K1611",
@@ -522,6 +626,8 @@
     "K1679-rev2": "K1679-rev2",
     "K1683": "k1683",
     "K1686": "k1686",
+    "K1695": "k1695",
+    "K1697": "k1697",
     "K1699": "k1699",
     "K1700": "k1700",
     "K1703": "k1703",
@@ -547,7 +653,6 @@
     "K568": "k568",
     "K633": "k633",
     "K636": "k636",
-    "K639": "k639",
     "K687": "k687",
     "K688": "k688",
     "K697": "k697",
@@ -645,14 +750,14 @@
     "unverified_missing_spec": 1174,
     "code_without_results": 168,
     "results_without_code": 13,
-    "priority_refs": 202,
-    "priority_existing": 198,
+    "priority_refs": 237,
+    "priority_existing": 233,
     "priority_missing_dirs": 4,
     "priority_runnable": 3,
     "priority_with_reproduce_report": 3,
     "priority_reproduced_match": 3,
     "priority_stale_reports": 0,
-    "priority_unverified": 195,
+    "priority_unverified": 230,
     "priority_code_without_results": 2,
     "broken_reports": 0,
     "stale_reports": 0
@@ -970,6 +1075,74 @@
       "spec_file": null,
       "entrypoint": "k1116b.py",
       "result_file": "k1116b_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1116c",
+      "path": "experiments/k1116c",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 4,
+      "results_count": 2,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1116c.py",
+      "result_file": "k1116c_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1116e",
+      "path": "experiments/k1116e",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1116e.py",
+      "result_file": "k1116e_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1116f",
+      "path": "experiments/k1116f",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1116f.py",
+      "result_file": "k1116f_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1116g",
+      "path": "experiments/k1116g",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1116g.py",
+      "result_file": "k1116g_results.json",
       "classification": "unverified_missing_spec",
       "blocker": "missing reproduce_spec.json"
     },
@@ -1365,6 +1538,125 @@
       "blocker": "missing reproduce_spec.json"
     },
     {
+      "experiment": "k1163",
+      "path": "experiments/k1163",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 2,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1163.py",
+      "result_file": "k1163_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1165",
+      "path": "experiments/k1165",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 3,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1165.py",
+      "result_file": "k1165_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1166",
+      "path": "experiments/k1166",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1166.py",
+      "result_file": "k1166_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1168",
+      "path": "experiments/k1168",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 3,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1168.py",
+      "result_file": "k1168_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1171",
+      "path": "experiments/k1171",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 3,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1171.py",
+      "result_file": "k1171_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1172",
+      "path": "experiments/k1172",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 3,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1172.py",
+      "result_file": "k1172_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1173",
+      "path": "experiments/k1173",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 2,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1173.py",
+      "result_file": "k1173_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
       "experiment": "k1175",
       "path": "experiments/k1175",
       "priority_sources": [
@@ -1552,8 +1844,212 @@
       "blocker": "missing reproduce_spec.json"
     },
     {
+      "experiment": "k1201",
+      "path": "experiments/k1201",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1201.py",
+      "result_file": "k1201_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1203",
+      "path": "experiments/k1203",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1203.py",
+      "result_file": "k1203_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1204",
+      "path": "experiments/k1204",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 2,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1204.py",
+      "result_file": "k1204_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1207",
+      "path": "experiments/k1207",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 3,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1207.py",
+      "result_file": "k1207_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
       "experiment": "k1209",
       "path": "experiments/k1209",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 0,
+      "results_count": 0,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": null,
+      "result_file": null,
+      "classification": "metadata_only",
+      "blocker": "no Python source and no archived results"
+    },
+    {
+      "experiment": "k1211",
+      "path": "experiments/k1211",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 0,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": null,
+      "result_file": "k1211_results.json",
+      "classification": "not_reproducible_missing_code",
+      "blocker": "archived results exist but no Python source is present"
+    },
+    {
+      "experiment": "k1213",
+      "path": "experiments/k1213",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1213.py",
+      "result_file": "k1213_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1215",
+      "path": "experiments/k1215",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 0,
+      "results_count": 0,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": null,
+      "result_file": null,
+      "classification": "metadata_only",
+      "blocker": "no Python source and no archived results"
+    },
+    {
+      "experiment": "k1216",
+      "path": "experiments/k1216",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1216.py",
+      "result_file": "k1216_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1216b",
+      "path": "experiments/k1216b",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1216b.py",
+      "result_file": "k1216b_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1216c",
+      "path": "experiments/k1216c",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1216c.py",
+      "result_file": "k1216c_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1222",
+      "path": "experiments/k1222",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 0,
+      "results_count": 0,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": null,
+      "result_file": null,
+      "classification": "metadata_only",
+      "blocker": "no Python source and no archived results"
+    },
+    {
+      "experiment": "k1222b",
+      "path": "experiments/k1222b",
       "priority_sources": [
         "paper"
       ],
@@ -1582,6 +2078,57 @@
       "spec_file": null,
       "entrypoint": "k1256.py",
       "result_file": "k1256_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1261",
+      "path": "experiments/k1261",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 2,
+      "results_count": 2,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": null,
+      "result_file": "k1261_results.json",
+      "classification": "manual_mapping_required",
+      "blocker": "ambiguous entrypoint (2 candidates)"
+    },
+    {
+      "experiment": "k1262",
+      "path": "experiments/k1262",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1262.py",
+      "result_file": "k1262_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1262b",
+      "path": "experiments/k1262b",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1262b.py",
+      "result_file": "k1262b_results.json",
       "classification": "unverified_missing_spec",
       "blocker": "missing reproduce_spec.json"
     },
@@ -1654,6 +2201,57 @@
       "blocker": "missing reproduce_spec.json"
     },
     {
+      "experiment": "k1376",
+      "path": "experiments/k1376",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1376.py",
+      "result_file": "k1376_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1393",
+      "path": "experiments/k1393",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1393.py",
+      "result_file": "k1393_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1417",
+      "path": "experiments/k1417",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1417.py",
+      "result_file": "k1417_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
       "experiment": "k1418",
       "path": "experiments/k1418",
       "priority_sources": [
@@ -1686,6 +2284,57 @@
       "result_file": "k1452_results.json",
       "classification": "unverified_missing_spec",
       "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1457",
+      "path": "experiments/k1457",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1457.py",
+      "result_file": "k1457_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1470_eav_multistart_main_spec",
+      "path": "experiments/k1470_eav_multistart_main_spec",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1470.py",
+      "result_file": "k1470_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1471_vt_crowding_redesign",
+      "path": "experiments/k1471_vt_crowding_redesign",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 3,
+      "results_count": 2,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1471_vt_crowding_redesign.py",
+      "result_file": null,
+      "classification": "manual_mapping_required",
+      "blocker": "ambiguous result artifact (2 candidates)"
     },
     {
       "experiment": "k1544_prg_fair_info_gjr",
@@ -1771,6 +2420,40 @@
       "result_file": "k1590_diagnostic_results.json",
       "classification": "manual_mapping_required",
       "blocker": "ambiguous entrypoint (3 candidates)"
+    },
+    {
+      "experiment": "k1591",
+      "path": "experiments/k1591",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1591.py",
+      "result_file": "k1591_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1592",
+      "path": "experiments/k1592",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1592.py",
+      "result_file": "k1592_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
     },
     {
       "experiment": "k1605",
@@ -2109,6 +2792,40 @@
       "spec_file": null,
       "entrypoint": "k1686_contemporaneous_null.py",
       "result_file": "k1686_contemporaneous_null_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1695",
+      "path": "experiments/k1695",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 2,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1695.py",
+      "result_file": "k1695_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1697",
+      "path": "experiments/k1697",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1697_rolling_gamma_rerun.py",
+      "result_file": "k1697_results.json",
       "classification": "unverified_missing_spec",
       "blocker": "missing reproduce_spec.json"
     },
@@ -2534,23 +3251,6 @@
       "spec_file": null,
       "entrypoint": "k636_taiwan_amplification.py",
       "result_file": "k636_results.json",
-      "classification": "unverified_missing_spec",
-      "blocker": "missing reproduce_spec.json"
-    },
-    {
-      "experiment": "k639",
-      "path": "experiments/k639",
-      "priority_sources": [
-        "paper"
-      ],
-      "code_count": 1,
-      "results_count": 1,
-      "reproduce_report": false,
-      "report_status": null,
-      "report_stale": null,
-      "spec_file": null,
-      "entrypoint": "k639_crypto_equity_vol.py",
-      "result_file": "k639_results.json",
       "classification": "unverified_missing_spec",
       "blocker": "missing reproduce_spec.json"
     },
