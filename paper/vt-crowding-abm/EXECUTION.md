@@ -1,6 +1,6 @@
 # EXECUTION — vt-crowding-abm
 
-> **BADGE** · verdict `2/5`（底層 K1471 證據層 `4/5`）· stage `revision`（**finishing**；journal_target 未定）· journal `QF → JEBO`（FRL 快軌備選）· **p0 = DONE（2026-07-14）** · tier `1` · dod `6/9`
+> **BADGE** · verdict `2/5`（底層 K1471 證據層 `4/5`）· stage `revision`（**finishing**；journal_target 未定）· journal `QF → JEBO`（FRL 快軌備選）· **p0 = DONE · v6_review = PASSED（2026-07-14）** · tier `1` · dod `7/9`
 > 依據：`review_history/fable_deep_review_20260711/README.md`（Fable 深審 2/5）· `docs/paper_portfolio_review_20260711.md`（第一梯隊）· `storage/paper_pipeline_status.json`（stage=revision / blocker=finishing / journal_target=decide）
 > 最後更新：2026-07-14（P0-1~P0-5 全數完成；下一 gate = v6 跨模型獨立 review）
 
@@ -47,7 +47,7 @@
 - [x] **P0-4** 完成（2026-07-14）：reproduce.py K1471 三表 binding（gate 173/173 green）+ 主線程 provenance class sweep（7 處印出型內部路徑全清，PDF 零洩漏）
 - [x] **P0-5** 完成（2026-07-14 主線程）：§2 補 redesign-layer 描述（27×7×500 grid + coherent-block RR + deterministic disjoint seeds——**深審原要求的「CRN pairing 說明」經查證 K1471 README 不成立**（RR 用不重疊 offset），已改寫誠實版本）；Phase-1 14,000/10,500 口徑統一（VT slice 標明重用）；Bonferroni(35) 句補上；heterogeneous agents→agents of heterogeneous types ×3；Kyle 1315–1335；bib 字母排序；README metadata 更新。94,500 因式分解 / 52% 歸因 / φ=100% accounting 三項確認已由先前 pass 解決
 - [x] `reproduce.py` exit 0 且 `reproduce_report.json` match_rate ≥ 95% / **alert green**（含 K1471 三張 headline 表）✅ 173/173 = 100% green（2026-07-14）
-- [ ] **v6 跨模型獨立 review** 通過 0 blocking（paper-review-cycle + Codex adversarial；**同模型自審不算**）
+- [x] **v6 跨模型獨立 review** ✅ 0 blocking 達成（2026-07-14）：初審 BLOCKING(3B+1M+3m) → 全修（4217af920 + a74895380）→ 覆核 6/6 FIXED（B2 經 Codex 終驗 CONFIRM_FIXED；REVERIFY.md + 兩份 transcript 存證）
 - [ ] QF `journal-review` compliance gate 通過（author = Yi-Hao Lai only；無 volpred / AI / LLM 字樣）
 - [ ] `uv run volpred ops paper-update --paper-id vt-crowding-abm` 同步 + 線上驗證
 
