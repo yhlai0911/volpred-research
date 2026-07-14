@@ -1,15 +1,19 @@
 {
   "artifacts": {
+    "circular_shift_null_gaps": "circular_shift_null_gaps.csv",
     "common_rows": "common_sample_rows.csv",
+    "exposure_figure_png": "figure_exposure_matched.png",
     "figure_data": "figure2_data.csv",
     "figure_png": "figure_cross_asset.png",
     "paired_returns": "data/paired_common_returns.csv.gz",
     "sha256": {
-      "common_sample_rows.csv": "484741cb384bb67df55c55ec54c39ab6555d09467d55c0185c22c066b7caf436",
+      "circular_shift_null_gaps.csv": "75f0509fdc1951b33186f8ea39bb54cf0bd9137b3ab9aa4fed92e3deeb1920e3",
+      "common_sample_rows.csv": "a8026589f7bcbbe51924f5f88ef7656b0d9ff3a202babbd717070029d1432733",
       "data/paired_common_returns.csv.gz": "8cbc18a7986e727f67b23be14fadfabcfae521d6ee9bda1381ce8e2d40d53295",
       "figure2_data.csv": "98faa282f3b36667e6c85bc93484046947e59b0b9f4c03efa681e1253b913f34",
       "figure_cross_asset.png": "08b410aad36ca066be11febce71e464daf212771dda4206b2d3ef692ce076df5",
-      "table5_rows.csv": "1e784b872eab2fa3807658ff9fde4a77e1abb5348b3e4dd17d48c09b93ea2cf7"
+      "figure_exposure_matched.png": "fd0ce972ed5dd8b427489b3fa641e68df81507b9614b28dd367f54caa0efe492",
+      "table5_rows.csv": "52187ecda30510a5947182a366f2b81ade288da91239991d0a7419f3c7427964"
     },
     "table5_rows": "table5_rows.csv"
   },
@@ -276,12 +280,47 @@
     "total_return_formula": "(Close_t + Dividends_t + CapitalGains_t) / Close_(t-1) - 1"
   },
   "decision": {
-    "kill_triggered": false,
-    "narrative_implication": "international drawdown-protection result survives the pre-registered gate",
-    "pre_registered_kill_rule": "TRUE if either observed sample has fewer than 13/13 positive MDD improvements or the primary joint-bootstrap CI for common-sample average delta MDD includes zero"
+    "claim_status": "retracted",
+    "exposure_matched_ci_excludes_zero": false,
+    "kill_rule": "The drawdown-protection claim survives ONLY IF (a) the exposure-matched joint-bootstrap CI excludes zero, AND (b) BOTH samples reject the circular-shift no-timing null at 10% with at least one market surviving Holm. Otherwise the claim is killed.",
+    "kill_triggered": true,
+    "narrative_implication": "The international drawdown-protection contribution must be withdrawn. The headline raw MDD gaps (+27.50 pp inception-aware, +12.61 pp common, 13/13 positive) measure de-levering, not volatility timing: a constant-weight strategy that never looks at VIX reproduces most of them and earns a ~zero exposure-matched gap.",
+    "per_sample": {
+      "common_period": {
+        "exposure_matched_average_delta_mdd_pp": -0.8654178693546898,
+        "holm_survivors": 0,
+        "n_exposure_matched_positive": 7,
+        "null_mean_pp": -0.6788296207236574,
+        "null_p_one_sided": 0.5588235294117647,
+        "raw_average_delta_mdd_pp": 12.613879580350584,
+        "rejects_no_timing_null": false
+      },
+      "inception_aware": {
+        "exposure_matched_average_delta_mdd_pp": 4.955627276524926,
+        "holm_survivors": 0,
+        "n_exposure_matched_positive": 12,
+        "null_mean_pp": 0.5940820145124273,
+        "null_p_one_sided": 0.21212121212121213,
+        "raw_average_delta_mdd_pp": 27.503383107715724,
+        "rejects_no_timing_null": false
+      }
+    },
+    "superseded_pre_registration": {
+      "kill_triggered": false,
+      "pre_registered_kill_rule": "TRUE if either observed sample has fewer than 13/13 positive MDD improvements or the primary joint-bootstrap CI for common-sample average delta MDD includes zero",
+      "status": "mis-specified; not evidence for or against the claim",
+      "why_superseded": "The pre-registered rule gates on the RAW delta MDD, which is not scale-invariant. 12/VIX runs at 0.61-0.68x buy-and-hold volatility on the common panel (13/13 markets flagged), so both of its conditions are satisfied by de-levering alone -- the constant-weight no-timing strategy passes the same gate 13/13. The gate could not have failed and therefore never tested the claim. Reported here for auditability, not as evidence."
+    },
+    "what_the_evidence_does_and_does_not_say": [
+      "SUPPORTED: the raw 13/13 result is reproduced exactly, and it is an exposure artifact. VT holds 0.65x buy-and-hold realized volatility on the common panel (range 0.61-0.68x, mismatch flagged in 13/13 markets). A constant-weight strategy with the same average exposure and no VIX input earns +10.68 pp (common) / +16.20 pp (inception-aware) of raw MDD 'improvement' and an exposure-matched gap of +0.01 pp / -0.06 pp.",
+      "SUPPORTED: on the common panel the exposure-matched gap is indistinguishable from the no-timing null (observed -0.87 pp vs null mean -0.68 pp, p = 0.559).",
+      "SUPPORTED, AND IT CUTS THE OTHER WAY: 12/VIX really does reduce risk, and the RAW statistic does reject the phase null on the long sample (raw +27.50 pp vs raw-null mean +15.22 pp, p = 0.039). That rejection is not noise and it is not dismissed here. Its cause is measured: among all 231 phases of its own weight path, the observed phase realizes the LOWEST volatility (rank 1/231; vol ratio 0.560 vs phase-null mean 0.698). VIX forecasts volatility, so 12/VIX de-levers into genuinely turbulent months -- a real property of the signal. But it is a property about REDUCING RISK, and the raw MDD gap rewards exactly that. Reducing risk is not the same as drawing down less than a benchmark carrying the same risk, and the withdrawn contribution claimed the latter. Strip the risk reduction out and nothing survives.",
+      "NOT SUPPORTED: that volatility timing HURTS. The common-sample point estimate is negative but sits in the middle of its own null; that is a failure to detect an effect, not evidence of a negative one.",
+      "NOT SUPPORTED, AND NOT REFUTED: a modest positive effect on the long sample. The inception-aware exposure-matched gap is +4.96 pp and positive in 12/13 markets, but it does not reject its own null (p = 0.212) and 0/13 markets survive Holm. That sample's extra years are the 2008 crisis window; one crisis is not a test."
+    ]
   },
   "experiment_id": "K1695",
-  "generated_at_utc": "2026-07-12T06:42:23.157778+00:00",
+  "generated_at_utc": "2026-07-14T22:13:02.348957+00:00",
   "inference": {
     "block_length_sensitivity": {
       "126": {
@@ -291,6 +330,13 @@
           "median": 12.106652151703742,
           "probability_le_zero": 0.001,
           "upper": 20.236444653505277
+        },
+        "average_exposure_matched_delta_mdd_pp": {
+          "lower": -6.859438906203832,
+          "mean": -1.502227047198462,
+          "median": -1.5835616756216844,
+          "probability_le_zero": 0.678,
+          "upper": 4.10120184734528
         },
         "ci_level": 0.9,
         "mean_block_days": 126,
@@ -363,9 +409,78 @@
             "upper_pp": 22.498090225352243
           }
         },
+        "per_market_exposure_matched_delta_mdd_ci": {
+          "EEM": {
+            "lower_pp": -10.984882802266993,
+            "median_pp": -3.4462252086881753,
+            "upper_pp": 3.6361615074196476
+          },
+          "EFA": {
+            "lower_pp": -8.387656772685762,
+            "median_pp": -1.2955208181193278,
+            "upper_pp": 6.503170837664132
+          },
+          "EWA": {
+            "lower_pp": -15.084559046794345,
+            "median_pp": -3.6962405157347833,
+            "upper_pp": 7.950320779275391
+          },
+          "EWC": {
+            "lower_pp": -8.844153868627116,
+            "median_pp": -0.8728351618637886,
+            "upper_pp": 9.589747632034047
+          },
+          "EWG": {
+            "lower_pp": -9.710950767169933,
+            "median_pp": -1.759046270541903,
+            "upper_pp": 6.930668223589828
+          },
+          "EWJ": {
+            "lower_pp": -5.144032235332615,
+            "median_pp": -0.36069248643751384,
+            "upper_pp": 5.471646695142901
+          },
+          "EWT": {
+            "lower_pp": -7.675999874039925,
+            "median_pp": -0.9680158553581564,
+            "upper_pp": 5.287490915837096
+          },
+          "EWU": {
+            "lower_pp": -9.255471881411113,
+            "median_pp": -0.029058563437711626,
+            "upper_pp": 9.591679688202309
+          },
+          "EWZ": {
+            "lower_pp": -12.190396169260874,
+            "median_pp": -3.1573756580510537,
+            "upper_pp": 8.202799999165016
+          },
+          "FXI": {
+            "lower_pp": -8.78522475734407,
+            "median_pp": -1.8525799643325458,
+            "upper_pp": 5.443106529405094
+          },
+          "INDA": {
+            "lower_pp": -9.39753963278762,
+            "median_pp": -1.438586429293337,
+            "upper_pp": 8.736215221838894
+          },
+          "MCHI": {
+            "lower_pp": -9.706399740517513,
+            "median_pp": -2.539312101963298,
+            "upper_pp": 4.565201513679562
+          },
+          "VGK": {
+            "lower_pp": -8.8345440063439,
+            "median_pp": -1.0369383230930507,
+            "upper_pp": 7.4932003096001285
+          }
+        },
+        "probability_all_13_exposure_matched_positive": 0.016,
         "probability_all_13_positive": 0.855,
         "reps": 3000,
-        "seed": 20042
+        "seed": 20042,
+        "statistic_note": "average_delta_mdd_pp is the RAW statistic (VT minus BH) and is not scale-invariant; average_exposure_matched_delta_mdd_pp rescales BH to VT's own realized volatility inside every replication and is the reportable one."
       },
       "504": {
         "average_delta_mdd_pp": {
@@ -374,6 +489,13 @@
           "median": 11.742020424832187,
           "probability_le_zero": 0.0,
           "upper": 18.68708493565355
+        },
+        "average_exposure_matched_delta_mdd_pp": {
+          "lower": -6.0853888403335565,
+          "mean": -1.623167957262646,
+          "median": -1.6615091132339668,
+          "probability_le_zero": 0.737,
+          "upper": 3.024298226658106
         },
         "ci_level": 0.9,
         "mean_block_days": 504,
@@ -446,9 +568,78 @@
             "upper_pp": 19.445136359986844
           }
         },
+        "per_market_exposure_matched_delta_mdd_ci": {
+          "EEM": {
+            "lower_pp": -11.018862336706576,
+            "median_pp": -3.960299433727571,
+            "upper_pp": 2.2864202746784352
+          },
+          "EFA": {
+            "lower_pp": -7.641780819881084,
+            "median_pp": -1.103793522673291,
+            "upper_pp": 4.25237115395137
+          },
+          "EWA": {
+            "lower_pp": -14.44053502015277,
+            "median_pp": -3.975511295452999,
+            "upper_pp": 8.350120788858874
+          },
+          "EWC": {
+            "lower_pp": -8.16033504167068,
+            "median_pp": -1.9316127641276104,
+            "upper_pp": 8.928054366027489
+          },
+          "EWG": {
+            "lower_pp": -9.479811026657153,
+            "median_pp": -1.796032760785965,
+            "upper_pp": 5.389138407787951
+          },
+          "EWJ": {
+            "lower_pp": -4.13394536277575,
+            "median_pp": 0.04234847893784255,
+            "upper_pp": 4.151666774416505
+          },
+          "EWT": {
+            "lower_pp": -6.443663575073595,
+            "median_pp": 0.04499011665393127,
+            "upper_pp": 4.633118129933256
+          },
+          "EWU": {
+            "lower_pp": -8.962280999656269,
+            "median_pp": 0.2239457709851178,
+            "upper_pp": 8.051167339027378
+          },
+          "EWZ": {
+            "lower_pp": -12.492828763791826,
+            "median_pp": -4.40763832631696,
+            "upper_pp": 7.830496666519216
+          },
+          "FXI": {
+            "lower_pp": -8.123793864102755,
+            "median_pp": -1.3816490007684312,
+            "upper_pp": 5.223462246356932
+          },
+          "INDA": {
+            "lower_pp": -8.379165327250742,
+            "median_pp": -1.5875555451414058,
+            "upper_pp": 7.036888969658341
+          },
+          "MCHI": {
+            "lower_pp": -7.99233819788232,
+            "median_pp": -0.9943380230294563,
+            "upper_pp": 5.354966833248014
+          },
+          "VGK": {
+            "lower_pp": -8.342014554010943,
+            "median_pp": -1.050878768983321,
+            "upper_pp": 5.044522418989141
+          }
+        },
+        "probability_all_13_exposure_matched_positive": 0.005333333333333333,
         "probability_all_13_positive": 0.857,
         "reps": 3000,
-        "seed": 30042
+        "seed": 30042,
+        "statistic_note": "average_delta_mdd_pp is the RAW statistic (VT minus BH) and is not scale-invariant; average_exposure_matched_delta_mdd_pp rescales BH to VT's own realized volatility inside every replication and is the reportable one."
       },
       "63": {
         "average_delta_mdd_pp": {
@@ -457,6 +648,13 @@
           "median": 12.411910692672471,
           "probability_le_zero": 0.001,
           "upper": 20.70618972806512
+        },
+        "average_exposure_matched_delta_mdd_pp": {
+          "lower": -6.789759642184232,
+          "mean": -1.239677525475977,
+          "median": -1.4091378804362937,
+          "probability_le_zero": 0.6493333333333333,
+          "upper": 4.589172813695159
         },
         "ci_level": 0.9,
         "mean_block_days": 63,
@@ -529,12 +727,804 @@
             "upper_pp": 23.312887843518748
           }
         },
+        "per_market_exposure_matched_delta_mdd_ci": {
+          "EEM": {
+            "lower_pp": -10.370251137665617,
+            "median_pp": -2.9808025770848126,
+            "upper_pp": 4.470760046518866
+          },
+          "EFA": {
+            "lower_pp": -7.730192599202503,
+            "median_pp": -0.7512869731811644,
+            "upper_pp": 6.938937024530311
+          },
+          "EWA": {
+            "lower_pp": -13.959170535982551,
+            "median_pp": -3.553955643703027,
+            "upper_pp": 7.3985044264798265
+          },
+          "EWC": {
+            "lower_pp": -8.594290484334802,
+            "median_pp": -0.4894109565457605,
+            "upper_pp": 9.833013579327044
+          },
+          "EWG": {
+            "lower_pp": -9.60302274879535,
+            "median_pp": -1.2524869488301282,
+            "upper_pp": 7.691757703866027
+          },
+          "EWJ": {
+            "lower_pp": -5.5821379154418524,
+            "median_pp": -0.21632957809266662,
+            "upper_pp": 5.907266576788841
+          },
+          "EWT": {
+            "lower_pp": -7.784371620962914,
+            "median_pp": -1.2407036384260661,
+            "upper_pp": 5.199611379594701
+          },
+          "EWU": {
+            "lower_pp": -8.619984151609524,
+            "median_pp": 0.26458116887176364,
+            "upper_pp": 9.976142394176355
+          },
+          "EWZ": {
+            "lower_pp": -11.833113664551718,
+            "median_pp": -2.587223398053473,
+            "upper_pp": 7.242358694088423
+          },
+          "FXI": {
+            "lower_pp": -8.628774404551384,
+            "median_pp": -1.6225677532804794,
+            "upper_pp": 5.850531989721328
+          },
+          "INDA": {
+            "lower_pp": -9.63628797501112,
+            "median_pp": -1.354419381502442,
+            "upper_pp": 8.746019969678812
+          },
+          "MCHI": {
+            "lower_pp": -10.082760152991424,
+            "median_pp": -2.5673095888707254,
+            "upper_pp": 4.932059244546268
+          },
+          "VGK": {
+            "lower_pp": -7.996202098458467,
+            "median_pp": -0.4553512603043208,
+            "upper_pp": 8.131665042695001
+          }
+        },
+        "probability_all_13_exposure_matched_positive": 0.021333333333333333,
         "probability_all_13_positive": 0.8716666666666667,
         "reps": 3000,
-        "seed": 10042
+        "seed": 10042,
+        "statistic_note": "average_delta_mdd_pp is the RAW statistic (VT minus BH) and is not scale-invariant; average_exposure_matched_delta_mdd_pp rescales BH to VT's own realized volatility inside every replication and is the reportable one."
+      }
+    },
+    "circular_shift_null": {
+      "common_period": {
+        "deterministic": true,
+        "exposure_of_the_null": {
+          "interpretation": "The observed phase realizes LOWER volatility than a randomly re-phased copy of the same weight path. That is real: VIX forecasts volatility, so 12/VIX de-levers into genuinely turbulent months. It is also exactly what the RAW MDD gap rewards, which is why the raw statistic can reject this null while the exposure-matched one cannot. Lowering realized risk is not the same as drawing down less than a benchmark carrying the same risk -- and the paper's contribution claimed the latter.",
+          "null_max_vol_ratio": 0.8024150235738158,
+          "null_mean_vol_ratio": 0.7421474772214951,
+          "null_min_vol_ratio": 0.6395333460212755,
+          "observed_percentile": 0.011764705882352941,
+          "observed_rank_among_phases": 2,
+          "observed_vol_ratio": 0.6507297942713934
+        },
+        "holm": {
+          "alpha": 0.1,
+          "family_size": 13,
+          "n_survivors": 0,
+          "per_market": {
+            "EEM": {
+              "holm_threshold": 0.025,
+              "p_one_sided": 0.7235294117647059,
+              "reject": false
+            },
+            "EFA": {
+              "holm_threshold": 0.007692307692307693,
+              "p_one_sided": 0.2,
+              "reject": false
+            },
+            "EWA": {
+              "holm_threshold": 0.03333333333333333,
+              "p_one_sided": 0.8117647058823529,
+              "reject": false
+            },
+            "EWC": {
+              "holm_threshold": 0.05,
+              "p_one_sided": 0.8235294117647058,
+              "reject": false
+            },
+            "EWG": {
+              "holm_threshold": 0.02,
+              "p_one_sided": 0.5823529411764706,
+              "reject": false
+            },
+            "EWJ": {
+              "holm_threshold": 0.011111111111111112,
+              "p_one_sided": 0.29411764705882354,
+              "reject": false
+            },
+            "EWT": {
+              "holm_threshold": 0.0125,
+              "p_one_sided": 0.3411764705882353,
+              "reject": false
+            },
+            "EWU": {
+              "holm_threshold": 0.014285714285714287,
+              "p_one_sided": 0.4823529411764706,
+              "reject": false
+            },
+            "EWZ": {
+              "holm_threshold": 0.1,
+              "p_one_sided": 0.9470588235294117,
+              "reject": false
+            },
+            "FXI": {
+              "holm_threshold": 0.016666666666666666,
+              "p_one_sided": 0.5176470588235295,
+              "reject": false
+            },
+            "INDA": {
+              "holm_threshold": 0.01,
+              "p_one_sided": 0.22941176470588234,
+              "reject": false
+            },
+            "MCHI": {
+              "holm_threshold": 0.008333333333333333,
+              "p_one_sided": 0.20588235294117646,
+              "reject": false
+            },
+            "VGK": {
+              "holm_threshold": 0.009090909090909092,
+              "p_one_sided": 0.22941176470588234,
+              "reject": false
+            }
+          },
+          "survivors": []
+        },
+        "joint_exposure_matched": {
+          "n_null_ge_observed": 95,
+          "null_mean_pp": -0.6788296207236574,
+          "null_p50_pp": -0.7145698315462214,
+          "null_p95_pp": 2.454822824343401,
+          "observed_pp": -0.865417869354714,
+          "p_one_sided": 0.5588235294117647,
+          "p_one_sided_monte_carlo_convention": 0.5555555555555556
+        },
+        "joint_raw_delta_mdd": {
+          "n_null_ge_observed": 18,
+          "null_mean_pp": 9.073985480846623,
+          "null_p50_pp": 9.107140374727049,
+          "null_p95_pp": 13.779391173770655,
+          "observed_pp": 12.613879580350584,
+          "p_one_sided": 0.10588235294117647,
+          "p_one_sided_monte_carlo_convention": 0.10526315789473684
+        },
+        "month_span": "2012-02..2026-03",
+        "months_per_market": {
+          "EEM": 170,
+          "EFA": 170,
+          "EWA": 170,
+          "EWC": 170,
+          "EWG": 170,
+          "EWJ": 170,
+          "EWT": 170,
+          "EWU": 170,
+          "EWZ": 170,
+          "FXI": 170,
+          "INDA": 170,
+          "MCHI": 170,
+          "VGK": 170
+        },
+        "n_shifts": 170,
+        "per_market": {
+          "EEM": {
+            "n_null_ge_observed": 123,
+            "null_mean_pp": -2.386080092623184,
+            "null_p50_pp": -2.3421672210321267,
+            "null_p95_pp": 1.0131962448093499,
+            "observed_pp": -3.9664782868336412,
+            "p_one_sided": 0.7235294117647059,
+            "p_one_sided_monte_carlo_convention": 0.7192982456140351,
+            "raw_null_mean_pp": 6.458122932735964,
+            "raw_observed_pp": 7.76441739857675
+          },
+          "EFA": {
+            "n_null_ge_observed": 34,
+            "null_mean_pp": -0.9504625685390216,
+            "null_p50_pp": -0.6168558980019445,
+            "null_p95_pp": 3.598467719622547,
+            "observed_pp": 1.2913213807444923,
+            "p_one_sided": 0.2,
+            "p_one_sided_monte_carlo_convention": 0.19883040935672514,
+            "raw_null_mean_pp": 7.111466758117661,
+            "raw_observed_pp": 12.866200876425705
+          },
+          "EWA": {
+            "n_null_ge_observed": 138,
+            "null_mean_pp": 0.02878807193910605,
+            "null_p50_pp": 0.3817033079125509,
+            "null_p95_pp": 6.134417135739112,
+            "observed_pp": -3.868200772437569,
+            "p_one_sided": 0.8117647058823529,
+            "p_one_sided_monte_carlo_convention": 0.8070175438596491,
+            "raw_null_mean_pp": 10.247918255710644,
+            "raw_observed_pp": 11.535314578234711
+          },
+          "EWC": {
+            "n_null_ge_observed": 140,
+            "null_mean_pp": -2.137831358311252,
+            "null_p50_pp": -2.2844344380286707,
+            "null_p95_pp": 4.108075153353069,
+            "observed_pp": -5.388798341264112,
+            "p_one_sided": 0.8235294117647058,
+            "p_one_sided_monte_carlo_convention": 0.8187134502923976,
+            "raw_null_mean_pp": 7.346607905133523,
+            "raw_observed_pp": 9.014926669863321
+          },
+          "EWG": {
+            "n_null_ge_observed": 99,
+            "null_mean_pp": -0.8330463086822572,
+            "null_p50_pp": -1.0331828973141,
+            "null_p95_pp": 4.629727992426182,
+            "observed_pp": -1.440368499615774,
+            "p_one_sided": 0.5823529411764706,
+            "p_one_sided_monte_carlo_convention": 0.5789473684210527,
+            "raw_null_mean_pp": 9.2616151895374,
+            "raw_observed_pp": 13.256708562424402
+          },
+          "EWJ": {
+            "n_null_ge_observed": 50,
+            "null_mean_pp": -1.4980498893248069,
+            "null_p50_pp": -1.8638230620560137,
+            "null_p95_pp": 3.5395033902967996,
+            "observed_pp": 0.33385066583944134,
+            "p_one_sided": 0.29411764705882354,
+            "p_one_sided_monte_carlo_convention": 0.29239766081871343,
+            "raw_null_mean_pp": 5.970028788987359,
+            "raw_observed_pp": 9.771119107005855
+          },
+          "EWT": {
+            "n_null_ge_observed": 58,
+            "null_mean_pp": -0.7658849375429411,
+            "null_p50_pp": -0.6762315096022098,
+            "null_p95_pp": 4.725336826986921,
+            "observed_pp": 1.3285058416443674,
+            "p_one_sided": 0.3411764705882353,
+            "p_one_sided_monte_carlo_convention": 0.3391812865497076,
+            "raw_null_mean_pp": 7.685831731522205,
+            "raw_observed_pp": 12.042506730660973
+          },
+          "EWU": {
+            "n_null_ge_observed": 82,
+            "null_mean_pp": 0.5751861050140901,
+            "null_p50_pp": 0.7329045151924563,
+            "null_p95_pp": 7.320191915224758,
+            "observed_pp": 0.9860408894128203,
+            "p_one_sided": 0.4823529411764706,
+            "p_one_sided_monte_carlo_convention": 0.47953216374269003,
+            "raw_null_mean_pp": 10.221531283313228,
+            "raw_observed_pp": 15.267027536502098
+          },
+          "EWZ": {
+            "n_null_ge_observed": 161,
+            "null_mean_pp": 0.7960426277150987,
+            "null_p50_pp": 1.9038704533425377,
+            "null_p95_pp": 9.450497473635583,
+            "observed_pp": -8.14139344473286,
+            "p_one_sided": 0.9470588235294117,
+            "p_one_sided_monte_carlo_convention": 0.9415204678362573,
+            "raw_null_mean_pp": 13.063982889260005,
+            "raw_observed_pp": 8.372433605681307
+          },
+          "FXI": {
+            "n_null_ge_observed": 88,
+            "null_mean_pp": -0.8297216356306345,
+            "null_p50_pp": -1.4908108653321872,
+            "null_p95_pp": 5.789736044270873,
+            "observed_pp": -1.5853321689518363,
+            "p_one_sided": 0.5176470588235295,
+            "p_one_sided_monte_carlo_convention": 0.5146198830409356,
+            "raw_null_mean_pp": 10.764380398644386,
+            "raw_observed_pp": 13.433766709219153
+          },
+          "INDA": {
+            "n_null_ge_observed": 39,
+            "null_mean_pp": 0.8218651108050594,
+            "null_p50_pp": 0.8867221242937873,
+            "null_p95_pp": 7.4814981142682475,
+            "observed_pp": 5.027132244091115,
+            "p_one_sided": 0.22941176470588234,
+            "p_one_sided_monte_carlo_convention": 0.22807017543859648,
+            "raw_null_mean_pp": 11.274896952506076,
+            "raw_observed_pp": 18.979929494359727
+          },
+          "MCHI": {
+            "n_null_ge_observed": 35,
+            "null_mean_pp": -0.41603293955379844,
+            "null_p50_pp": -1.1832084354462036,
+            "null_p95_pp": 7.596119214197101,
+            "observed_pp": 3.3286371375189083,
+            "p_one_sided": 0.20588235294117646,
+            "p_one_sided_monte_carlo_convention": 0.2046783625730994,
+            "raw_null_mean_pp": 11.2474623004568,
+            "raw_observed_pp": 18.50497761899843
+          },
+          "VGK": {
+            "n_null_ge_observed": 39,
+            "null_mean_pp": -1.2295572546730051,
+            "null_p50_pp": -0.9741405854357399,
+            "null_p95_pp": 3.8984404649097573,
+            "observed_pp": 0.8446510529733664,
+            "p_one_sided": 0.22941176470588234,
+            "p_one_sided_monte_carlo_convention": 0.22807017543859648,
+            "raw_null_mean_pp": 7.307965865080854,
+            "raw_observed_pp": 13.171105656605175
+          }
+        },
+        "randomization_note": "Exhaustive over the shift group; no sampling, so no seed is required. Shift 0 is the observed path and is included in the reference set.",
+        "sample": "common_period",
+        "seed": null,
+        "shift_group_note": "Each market circularly rolls the months IT actually traded, by a SHARED shift index. Every null draw is therefore an exact permutation of the weights that market really held, while the calendar displacement stays common across markets. Markets with shorter histories wrap sooner (s mod own_months), so their draws repeat with that period.",
+        "shift_unit": "calendar month",
+        "stationarity_caveat": "Circular-shift randomization assumes the weight process is approximately circularly stationary. 12/VIX is persistent but not exactly stationary, so this is a strong diagnostic rather than an exact size-alpha test.",
+        "statistic": "exposure-matched delta MDD = MDD(VT) - MDD(lambda * BH), lambda = vol(VT)/vol(BH)",
+        "test": "exact circular-shift randomization over all calendar-month phases of the 12/VIX weight path"
+      },
+      "inception_aware": {
+        "deterministic": true,
+        "exposure_of_the_null": {
+          "interpretation": "The observed phase realizes LOWER volatility than a randomly re-phased copy of the same weight path. That is real: VIX forecasts volatility, so 12/VIX de-levers into genuinely turbulent months. It is also exactly what the RAW MDD gap rewards, which is why the raw statistic can reject this null while the exposure-matched one cannot. Lowering realized risk is not the same as drawing down less than a benchmark carrying the same risk -- and the paper's contribution claimed the latter.",
+          "null_max_vol_ratio": 0.7679390040894669,
+          "null_mean_vol_ratio": 0.698170288022006,
+          "null_min_vol_ratio": 0.559541922252008,
+          "observed_percentile": 0.004329004329004329,
+          "observed_rank_among_phases": 1,
+          "observed_vol_ratio": 0.559541922252008
+        },
+        "holm": {
+          "alpha": 0.1,
+          "family_size": 13,
+          "n_survivors": 0,
+          "per_market": {
+            "EEM": {
+              "holm_threshold": 0.01,
+              "p_one_sided": 0.1774891774891775,
+              "reject": false
+            },
+            "EFA": {
+              "holm_threshold": 0.0125,
+              "p_one_sided": 0.18614718614718614,
+              "reject": false
+            },
+            "EWA": {
+              "holm_threshold": 0.016666666666666666,
+              "p_one_sided": 0.22077922077922077,
+              "reject": false
+            },
+            "EWC": {
+              "holm_threshold": 0.025,
+              "p_one_sided": 0.341991341991342,
+              "reject": false
+            },
+            "EWG": {
+              "holm_threshold": 0.02,
+              "p_one_sided": 0.29004329004329005,
+              "reject": false
+            },
+            "EWJ": {
+              "holm_threshold": 0.007692307692307693,
+              "p_one_sided": 0.09523809523809523,
+              "reject": false
+            },
+            "EWT": {
+              "holm_threshold": 0.009090909090909092,
+              "p_one_sided": 0.1645021645021645,
+              "reject": false
+            },
+            "EWU": {
+              "holm_threshold": 0.008333333333333333,
+              "p_one_sided": 0.16017316017316016,
+              "reject": false
+            },
+            "EWZ": {
+              "holm_threshold": 0.1,
+              "p_one_sided": 0.9696969696969697,
+              "reject": false
+            },
+            "FXI": {
+              "holm_threshold": 0.05,
+              "p_one_sided": 0.36363636363636365,
+              "reject": false
+            },
+            "INDA": {
+              "holm_threshold": 0.014285714285714287,
+              "p_one_sided": 0.19913419913419914,
+              "reject": false
+            },
+            "MCHI": {
+              "holm_threshold": 0.03333333333333333,
+              "p_one_sided": 0.3593073593073593,
+              "reject": false
+            },
+            "VGK": {
+              "holm_threshold": 0.011111111111111112,
+              "p_one_sided": 0.18181818181818182,
+              "reject": false
+            }
+          },
+          "survivors": []
+        },
+        "joint_exposure_matched": {
+          "n_null_ge_observed": 49,
+          "null_mean_pp": 0.5940820145124273,
+          "null_p50_pp": 0.24629979030446666,
+          "null_p95_pp": 7.967594375368366,
+          "observed_pp": 4.955627276524897,
+          "p_one_sided": 0.21212121212121213,
+          "p_one_sided_monte_carlo_convention": 0.21120689655172414
+        },
+        "joint_raw_delta_mdd": {
+          "n_null_ge_observed": 9,
+          "null_mean_pp": 15.220766091565553,
+          "null_p50_pp": 14.160578467483093,
+          "null_p95_pp": 25.72559772760973,
+          "observed_pp": 27.503383107715724,
+          "p_one_sided": 0.03896103896103896,
+          "p_one_sided_monte_carlo_convention": 0.03879310344827586
+        },
+        "month_span": "2007-01..2026-03",
+        "months_per_market": {
+          "EEM": 231,
+          "EFA": 231,
+          "EWA": 231,
+          "EWC": 231,
+          "EWG": 231,
+          "EWJ": 231,
+          "EWT": 231,
+          "EWU": 231,
+          "EWZ": 231,
+          "FXI": 231,
+          "INDA": 170,
+          "MCHI": 180,
+          "VGK": 231
+        },
+        "n_shifts": 231,
+        "per_market": {
+          "EEM": {
+            "n_null_ge_observed": 41,
+            "null_mean_pp": 0.8025334595473194,
+            "null_p50_pp": -0.21418069128258388,
+            "null_p95_pp": 11.690567469237699,
+            "observed_pp": 8.105503154021921,
+            "p_one_sided": 0.1774891774891775,
+            "p_one_sided_monte_carlo_convention": 0.17672413793103448,
+            "raw_null_mean_pp": 17.052853100323027,
+            "raw_observed_pp": 34.32100674819294
+          },
+          "EFA": {
+            "n_null_ge_observed": 43,
+            "null_mean_pp": 1.7150925025121664,
+            "null_p50_pp": 0.6449291407576552,
+            "null_p95_pp": 12.53833872041814,
+            "observed_pp": 8.502622831767903,
+            "p_one_sided": 0.18614718614718614,
+            "p_one_sided_monte_carlo_convention": 0.1853448275862069,
+            "raw_null_mean_pp": 16.49099773311518,
+            "raw_observed_pp": 32.75773121981456
+          },
+          "EWA": {
+            "n_null_ge_observed": 51,
+            "null_mean_pp": 1.5869788878431001,
+            "null_p50_pp": 0.7483420381925399,
+            "null_p95_pp": 13.05346396496464,
+            "observed_pp": 7.487264508940261,
+            "p_one_sided": 0.22077922077922077,
+            "p_one_sided_monte_carlo_convention": 0.21982758620689655,
+            "raw_null_mean_pp": 16.863083302311694,
+            "raw_observed_pp": 32.97722483525074
+          },
+          "EWC": {
+            "n_null_ge_observed": 79,
+            "null_mean_pp": -0.056577808475777015,
+            "null_p50_pp": 0.2204449793652863,
+            "null_p95_pp": 8.803092523193007,
+            "observed_pp": 2.951711568715365,
+            "p_one_sided": 0.341991341991342,
+            "p_one_sided_monte_carlo_convention": 0.34051724137931033,
+            "raw_null_mean_pp": 14.682408744959636,
+            "raw_observed_pp": 27.12872383446149
+          },
+          "EWG": {
+            "n_null_ge_observed": 67,
+            "null_mean_pp": 1.0224166182642371,
+            "null_p50_pp": 0.31890402571906895,
+            "null_p95_pp": 11.55607559558427,
+            "observed_pp": 5.473964623084382,
+            "p_one_sided": 0.29004329004329005,
+            "p_one_sided_monte_carlo_convention": 0.28879310344827586,
+            "raw_null_mean_pp": 15.94615769042682,
+            "raw_observed_pp": 29.588736063990982
+          },
+          "EWJ": {
+            "n_null_ge_observed": 22,
+            "null_mean_pp": 2.0185052758731596,
+            "null_p50_pp": 1.2092594466210138,
+            "null_p95_pp": 11.947768166430977,
+            "observed_pp": 9.61945107855966,
+            "p_one_sided": 0.09523809523809523,
+            "p_one_sided_monte_carlo_convention": 0.09482758620689655,
+            "raw_null_mean_pp": 15.82447454896935,
+            "raw_observed_pp": 29.52403620313724
+          },
+          "EWT": {
+            "n_null_ge_observed": 38,
+            "null_mean_pp": 1.5086298556696707,
+            "null_p50_pp": 0.42854247882386787,
+            "null_p95_pp": 12.803836836153115,
+            "observed_pp": 9.494458577828368,
+            "p_one_sided": 0.1645021645021645,
+            "p_one_sided_monte_carlo_convention": 0.16379310344827586,
+            "raw_null_mean_pp": 16.203836413819406,
+            "raw_observed_pp": 31.224531352885965
+          },
+          "EWU": {
+            "n_null_ge_observed": 37,
+            "null_mean_pp": 1.4629657420073645,
+            "null_p50_pp": 0.48025267926565807,
+            "null_p95_pp": 11.957270832053059,
+            "observed_pp": 8.656337534015002,
+            "p_one_sided": 0.16017316017316016,
+            "p_one_sided_monte_carlo_convention": 0.15948275862068967,
+            "raw_null_mean_pp": 16.575158161937267,
+            "raw_observed_pp": 33.53991917185131
+          },
+          "EWZ": {
+            "n_null_ge_observed": 224,
+            "null_mean_pp": -4.110351556917096,
+            "null_p50_pp": -4.350688826810368,
+            "null_p95_pp": 5.425235789196952,
+            "observed_pp": -14.669122244084832,
+            "p_one_sided": 0.9696969696969697,
+            "p_one_sided_monte_carlo_convention": 0.9655172413793104,
+            "raw_null_mean_pp": 13.60167588823558,
+            "raw_observed_pp": 9.894130120518385
+          },
+          "FXI": {
+            "n_null_ge_observed": 84,
+            "null_mean_pp": -0.4334603955739659,
+            "null_p50_pp": -0.21478960216034793,
+            "null_p95_pp": 5.9453706307387275,
+            "observed_pp": 1.7359866269438307,
+            "p_one_sided": 0.36363636363636365,
+            "p_one_sided_monte_carlo_convention": 0.3620689655172414,
+            "raw_null_mean_pp": 15.218061154704191,
+            "raw_observed_pp": 25.326658308730863
+          },
+          "INDA": {
+            "n_null_ge_observed": 46,
+            "null_mean_pp": 0.24959147174913351,
+            "null_p50_pp": 0.37897510235339604,
+            "null_p95_pp": 7.481476717034674,
+            "observed_pp": 5.027132244091115,
+            "p_one_sided": 0.19913419913419914,
+            "p_one_sided_monte_carlo_convention": 0.19827586206896552,
+            "raw_null_mean_pp": 10.44343407253699,
+            "raw_observed_pp": 18.979929494359727
+          },
+          "MCHI": {
+            "n_null_ge_observed": 83,
+            "null_mean_pp": -0.011256801159023494,
+            "null_p50_pp": -0.10272963222286435,
+            "null_p95_pp": 9.15619173299973,
+            "observed_pp": 2.3733442192673038,
+            "p_one_sided": 0.3593073593073593,
+            "p_one_sided_monte_carlo_convention": 0.3577586206896552,
+            "raw_null_mean_pp": 12.225903652413729,
+            "raw_observed_pp": 18.504977618998332
+          },
+          "VGK": {
+            "n_null_ge_observed": 42,
+            "null_mean_pp": 1.967998937321265,
+            "null_p50_pp": 0.7065032575249375,
+            "null_p95_pp": 13.413239085854705,
+            "observed_pp": 9.664499871673382,
+            "p_one_sided": 0.18181818181818182,
+            "p_one_sided_monte_carlo_convention": 0.1810344827586207,
+            "raw_null_mean_pp": 16.74191472659931,
+            "raw_observed_pp": 33.77637542811181
+          }
+        },
+        "randomization_note": "Exhaustive over the shift group; no sampling, so no seed is required. Shift 0 is the observed path and is included in the reference set.",
+        "sample": "inception_aware",
+        "seed": null,
+        "shift_group_note": "Each market circularly rolls the months IT actually traded, by a SHARED shift index. Every null draw is therefore an exact permutation of the weights that market really held, while the calendar displacement stays common across markets. Markets with shorter histories wrap sooner (s mod own_months), so their draws repeat with that period.",
+        "shift_unit": "calendar month",
+        "stationarity_caveat": "Circular-shift randomization assumes the weight process is approximately circularly stationary. 12/VIX is persistent but not exactly stationary, so this is a strong diagnostic rather than an exact size-alpha test.",
+        "statistic": "exposure-matched delta MDD = MDD(VT) - MDD(lambda * BH), lambda = vol(VT)/vol(BH)",
+        "test": "exact circular-shift randomization over all calendar-month phases of the 12/VIX weight path"
       }
     },
     "excluded_legacy_test": "No iid one-sample t-test across 13 markets; markets share crisis dates and VIX signal.",
+    "inference_order": "1. exposure-matched gap vs its own circular-shift null (binding); 2. exposure-matched joint-bootstrap CI (sampling uncertainty); 3. raw delta MDD (audit trail only).",
+    "no_timing_reference": {
+      "common_period": {
+        "average_exposure_matched_delta_mdd_pp": 0.00546078285480478,
+        "average_raw_delta_mdd_pp": 10.683837859913446,
+        "description": "Constant equity weight equal to each market's own average 12/VIX target, same SHY cash sleeve, same monthly rebalance, same 10 bp cost. Knows nothing about VIX.",
+        "n_raw_improved": 13,
+        "per_market": {
+          "EEM": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": -1.5891537102807773,
+            "raw_delta_mdd_pp": 8.079157749765054,
+            "vol_ratio": 0.7208179104770199
+          },
+          "EFA": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": 0.6965756344027962,
+            "raw_delta_mdd_pp": 9.48208715604003,
+            "vol_ratio": 0.7200210105458823
+          },
+          "EWA": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": 0.6884009312048356,
+            "raw_delta_mdd_pp": 11.859301023016078,
+            "vol_ratio": 0.7152266456364855
+          },
+          "EWC": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": 0.7261489055372383,
+            "raw_delta_mdd_pp": 11.11375553074282,
+            "vol_ratio": 0.7149394311559994
+          },
+          "EWG": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": 1.2850519700993268,
+            "raw_delta_mdd_pp": 12.33302808365111,
+            "vol_ratio": 0.719720887000714
+          },
+          "EWJ": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": -1.391464545514054,
+            "raw_delta_mdd_pp": 6.762727384487965,
+            "vol_ratio": 0.7231446501059114
+          },
+          "EWT": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": -1.0178365311359405,
+            "raw_delta_mdd_pp": 8.218630364550739,
+            "vol_ratio": 0.7228807372678883
+          },
+          "EWU": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": 1.5098319023739482,
+            "raw_delta_mdd_pp": 12.05928298871778,
+            "vol_ratio": 0.7174542688665645
+          },
+          "EWZ": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": -0.2905281065665899,
+            "raw_delta_mdd_pp": 13.260208989316247,
+            "vol_ratio": 0.7151984265416089
+          },
+          "FXI": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": -1.4202413852783313,
+            "raw_delta_mdd_pp": 11.296291891547838,
+            "vol_ratio": 0.7217675884099941
+          },
+          "INDA": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": 1.6017752572435984,
+            "raw_delta_mdd_pp": 13.032281709749228,
+            "vol_ratio": 0.7163868346939939
+          },
+          "MCHI": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": -1.4221740916769088,
+            "raw_delta_mdd_pp": 11.381092898269218,
+            "vol_ratio": 0.7216871104472659
+          },
+          "VGK": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": 0.6946039467033205,
+            "raw_delta_mdd_pp": 10.01204640902069,
+            "vol_ratio": 0.7195742346412766
+          }
+        }
+      },
+      "inception_aware": {
+        "average_exposure_matched_delta_mdd_pp": -0.061888490513432974,
+        "average_raw_delta_mdd_pp": 16.202619793351126,
+        "description": "Constant equity weight equal to each market's own average 12/VIX target, same SHY cash sleeve, same monthly rebalance, same 10 bp cost. Knows nothing about VIX.",
+        "n_raw_improved": 13,
+        "per_market": {
+          "EEM": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": -0.8887161974906577,
+            "raw_delta_mdd_pp": 17.160507743152074,
+            "vol_ratio": 0.6535412519310906
+          },
+          "EFA": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": -0.13160886227556734,
+            "raw_delta_mdd_pp": 16.299370760014263,
+            "vol_ratio": 0.6586751471845094
+          },
+          "EWA": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": 0.08373871915686726,
+            "raw_delta_mdd_pp": 17.12360158582824,
+            "vol_ratio": 0.6571053103269252
+          },
+          "EWC": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": -0.5527198001760492,
+            "raw_delta_mdd_pp": 15.865031665280737,
+            "vol_ratio": 0.6581667700079832
+          },
+          "EWG": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": -0.14114266122936536,
+            "raw_delta_mdd_pp": 16.514269096872557,
+            "vol_ratio": 0.6593766674130775
+          },
+          "EWJ": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": 1.0132397113888691,
+            "raw_delta_mdd_pp": 16.340885881039235,
+            "vol_ratio": 0.6630077735766943
+          },
+          "EWT": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": 0.4750883168268327,
+            "raw_delta_mdd_pp": 16.81081148342889,
+            "vol_ratio": 0.6628297058613288
+          },
+          "EWU": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": -0.5310167373528074,
+            "raw_delta_mdd_pp": 16.297490713619467,
+            "vol_ratio": 0.657984118071871
+          },
+          "EWZ": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": -0.5573265384745119,
+            "raw_delta_mdd_pp": 19.103092524174592,
+            "vol_ratio": 0.6556721648097618
+          },
+          "FXI": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": 0.3059167028591325,
+            "raw_delta_mdd_pp": 17.772236373483107,
+            "vol_ratio": 0.6599604141434173
+          },
+          "INDA": {
+            "constant_equity_weight": 0.7259674375539619,
+            "exposure_matched_delta_mdd_pp": 1.6017752572435984,
+            "raw_delta_mdd_pp": 13.032281709749228,
+            "vol_ratio": 0.7163868346939939
+          },
+          "MCHI": {
+            "constant_equity_weight": 0.7158584137964539,
+            "exposure_matched_delta_mdd_pp": -1.486399590725973,
+            "raw_delta_mdd_pp": 11.853549076987502,
+            "vol_ratio": 0.7113584178840701
+          },
+          "VGK": {
+            "constant_equity_weight": 0.675027274441499,
+            "exposure_matched_delta_mdd_pp": 0.004621303575003122,
+            "raw_delta_mdd_pp": 16.46092869993475,
+            "vol_ratio": 0.6604523371093446
+          }
+        }
+      }
+    },
     "per_market_wording": "Per-market positive delta MDD is descriptive, not individual significance.",
     "primary": {
       "average_delta_mdd_pp": {
@@ -543,6 +1533,13 @@
         "median": 11.824630199235173,
         "probability_le_zero": 0.0006,
         "upper": 19.301780054907805
+      },
+      "average_exposure_matched_delta_mdd_pp": {
+        "lower": -7.019416564157701,
+        "mean": -1.6991570515113736,
+        "median": -1.7395890337357391,
+        "probability_le_zero": 0.7075,
+        "upper": 3.588093306108739
       },
       "ci_level": 0.9,
       "mean_block_days": 252,
@@ -615,16 +1612,90 @@
           "upper_pp": 20.99584968352972
         }
       },
+      "per_market_exposure_matched_delta_mdd_ci": {
+        "EEM": {
+          "lower_pp": -11.135400110308083,
+          "median_pp": -3.687739651018279,
+          "upper_pp": 3.2504492998211822
+        },
+        "EFA": {
+          "lower_pp": -8.530372279832608,
+          "median_pp": -1.3060700659753455,
+          "upper_pp": 5.290388842421644
+        },
+        "EWA": {
+          "lower_pp": -15.12806827870715,
+          "median_pp": -3.8858359530405284,
+          "upper_pp": 7.976742567512694
+        },
+        "EWC": {
+          "lower_pp": -8.571664862810296,
+          "median_pp": -1.4111803482594443,
+          "upper_pp": 9.010875833940656
+        },
+        "EWG": {
+          "lower_pp": -10.243511105685085,
+          "median_pp": -1.8656003008085842,
+          "upper_pp": 6.052635417049422
+        },
+        "EWJ": {
+          "lower_pp": -4.800139613690219,
+          "median_pp": -0.1302053239526202,
+          "upper_pp": 4.760561587879955
+        },
+        "EWT": {
+          "lower_pp": -7.414297048744289,
+          "median_pp": -0.6287098414517245,
+          "upper_pp": 5.140698386132313
+        },
+        "EWU": {
+          "lower_pp": -9.456518626658168,
+          "median_pp": -0.32881473587630383,
+          "upper_pp": 8.850611698901272
+        },
+        "EWZ": {
+          "lower_pp": -12.521555831900944,
+          "median_pp": -3.9215850375220573,
+          "upper_pp": 8.09230012900793
+        },
+        "FXI": {
+          "lower_pp": -8.904760443737212,
+          "median_pp": -1.8099629889401225,
+          "upper_pp": 5.555102282330741
+        },
+        "INDA": {
+          "lower_pp": -8.976823596077399,
+          "median_pp": -1.3873341576988663,
+          "upper_pp": 7.628915049083064
+        },
+        "MCHI": {
+          "lower_pp": -9.401662221944562,
+          "median_pp": -2.078637842998038,
+          "upper_pp": 5.155106783884869
+        },
+        "VGK": {
+          "lower_pp": -9.00232997763245,
+          "median_pp": -1.2443488729284302,
+          "upper_pp": 6.304188830083622
+        }
+      },
+      "probability_all_13_exposure_matched_positive": 0.0095,
       "probability_all_13_positive": 0.8429,
       "reps": 10000,
-      "seed": 42
-    }
+      "seed": 42,
+      "statistic_note": "average_delta_mdd_pp is the RAW statistic (VT minus BH) and is not scale-invariant; average_exposure_matched_delta_mdd_pp rescales BH to VT's own realized volatility inside every replication and is the reportable one."
+    },
+    "primary_statistic": "exposure_matched_delta_mdd_pp",
+    "raw_statistic_status": "Retained for auditability against the published numbers. NOT reportable alone: realized-vol ratio is outside the 20% band in 13/13 markets, so the raw gap is a scale artifact of holding less equity."
   },
   "limitations": [
     "MDD is path-dependent; the stationary-bootstrap CI remains sensitive to block length.",
     "The analysis is descriptive and does not identify a causal insurance-pricing mechanism.",
     "One common US VIX signal may proxy global crises rather than locally priced volatility.",
-    "Results are frozen to the 2026-03-31 manuscript sample and do not use later observations."
+    "Results are frozen to the 2026-03-31 manuscript sample and do not use later observations.",
+    "The circular-shift null assumes the 12/VIX weight path is approximately circularly stationary. It is persistent but not exactly stationary, so the null is a strong diagnostic, not an exact size-alpha test.",
+    "Exposure matching equalizes UNCONDITIONAL realized volatility, not the volatility path. That is why the gap is read against its own null and not against zero.",
+    "Failing to reject does not prove the absence of timing skill; with 13 dependent markets and one shared signal, the effective sample for the joint test is small and its power against a modest true effect is limited."
   ],
   "methodology_type": "empirical descriptive study with dependence-robust bootstrap inference",
   "motivation": "Replace K1178's mixed-vintage Table 5 pipeline with one pinned, auditable run covering every row, summary statistic, figure point, and abstract number.",
@@ -695,6 +1766,24 @@
           },
           "delta_mdd_pp": 12.866200876425705,
           "delta_sharpe": -0.1113487998703066,
+          "exposure": {
+            "bh_mdd_per_vol": -2.0409881713040625,
+            "bh_realized_vol": 0.1675208605841629,
+            "exposure_matched_delta_mdd_pp": 1.2913213807444257,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.22615929994214068,
+            "matched_lambda": 0.6333347060509965,
+            "raw_delta_mdd_pp": 12.866200876425705,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6333347060509965,
+            "vt_mdd_per_vol": -2.009920529099774,
+            "vt_realized_vol": 0.10609677499548079,
+            "warnings": [
+              "realized volatilities differ by 37% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 1.2913213807444257,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "EAFE (Developed ex-US)",
@@ -736,6 +1825,24 @@
           },
           "delta_mdd_pp": 9.771119107005855,
           "delta_sharpe": -0.07175352584562772,
+          "exposure": {
+            "bh_mdd_per_vol": -1.897484439302351,
+            "bh_realized_vol": 0.17460460384227158,
+            "exposure_matched_delta_mdd_pp": 0.33385066583951906,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.23693683440959845,
+            "matched_lambda": 0.6817635094541454,
+            "raw_delta_mdd_pp": 9.771119107005855,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6817635094541454,
+            "vt_mdd_per_vol": -1.962367245804984,
+            "vt_realized_vol": 0.11903904748235784,
+            "warnings": [
+              "realized volatilities differ by 32% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 0.33385066583951906,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "Japan",
@@ -777,6 +1884,24 @@
           },
           "delta_mdd_pp": 13.256708562424402,
           "delta_sharpe": -0.11855865153495879,
+          "exposure": {
+            "bh_mdd_per_vol": -2.2714203243500313,
+            "bh_realized_vol": 0.20596727510651675,
+            "exposure_matched_delta_mdd_pp": -1.4403684996157629,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.32086748420753475,
+            "matched_lambda": 0.6349012496487559,
+            "raw_delta_mdd_pp": 13.256708562424402,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6349012496487559,
+            "vt_mdd_per_vol": -2.563845222973044,
+            "vt_realized_vol": 0.1307688803518766,
+            "warnings": [
+              "realized volatilities differ by 37% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": -1.4403684996157629,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "Germany",
@@ -818,6 +1943,24 @@
           },
           "delta_mdd_pp": 15.267027536502098,
           "delta_sharpe": -0.10591139734474062,
+          "exposure": {
+            "bh_mdd_per_vol": -2.3955738024496855,
+            "bh_realized_vol": 0.1808975658417785,
+            "exposure_matched_delta_mdd_pp": 0.9860408894129757,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.29054360318659045,
+            "matched_lambda": 0.62507945321137,
+            "raw_delta_mdd_pp": 15.267027536502098,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.62507945321137,
+            "vt_mdd_per_vol": -2.4822668288067886,
+            "vt_realized_vol": 0.1130753515436467,
+            "warnings": [
+              "realized volatilities differ by 37% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 0.9860408894129757,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "United Kingdom",
@@ -859,6 +2002,24 @@
           },
           "delta_mdd_pp": 11.535314578234711,
           "delta_sharpe": -0.16769486740981251,
+          "exposure": {
+            "bh_mdd_per_vol": -2.08269818131875,
+            "bh_realized_vol": 0.21865631345310071,
+            "exposure_matched_delta_mdd_pp": -3.8682007724375245,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.301359952855913,
+            "matched_lambda": 0.6158437673738458,
+            "raw_delta_mdd_pp": 11.535314578234711,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6158437673738458,
+            "vt_mdd_per_vol": -2.5252241809853,
+            "vt_realized_vol": 0.13465812783703407,
+            "warnings": [
+              "realized volatilities differ by 38% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": -3.8682007724375245,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "Australia",
@@ -900,6 +2061,24 @@
           },
           "delta_mdd_pp": 9.014926669863321,
           "delta_sharpe": -0.130081183714937,
+          "exposure": {
+            "bh_mdd_per_vol": -2.348831795188617,
+            "bh_realized_vol": 0.1816118653386772,
+            "exposure_matched_delta_mdd_pp": -5.388798341264122,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.28253847357972406,
+            "matched_lambda": 0.613599823164449,
+            "raw_delta_mdd_pp": 9.014926669863321,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.613599823164449,
+            "vt_mdd_per_vol": -3.018983205422812,
+            "vt_realized_vol": 0.11143700845637806,
+            "warnings": [
+              "realized volatilities differ by 39% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": -5.388798341264122,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "Canada",
@@ -941,6 +2120,24 @@
           },
           "delta_mdd_pp": 13.171105656605175,
           "delta_sharpe": -0.11065718615653392,
+          "exposure": {
+            "bh_mdd_per_vol": -2.022214937360272,
+            "bh_realized_vol": 0.18420772506410632,
+            "exposure_matched_delta_mdd_pp": 0.8446510529733553,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.24924306716547173,
+            "matched_lambda": 0.6334326155466335,
+            "raw_delta_mdd_pp": 13.171105656605175,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6334326155466335,
+            "vt_mdd_per_vol": -2.063678367214066,
+            "vt_realized_vol": 0.11668318109125203,
+            "warnings": [
+              "realized volatilities differ by 37% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 0.8446510529733553,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "Europe",
@@ -982,6 +2179,24 @@
           },
           "delta_mdd_pp": 7.76441739857675,
           "delta_sharpe": -0.08635079315426744,
+          "exposure": {
+            "bh_mdd_per_vol": -1.9853037886374953,
+            "bh_realized_vol": 0.20046698683609487,
+            "exposure_matched_delta_mdd_pp": -3.9664782868336412,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.28067891160833813,
+            "matched_lambda": 0.6650195967947831,
+            "raw_delta_mdd_pp": 7.76441739857675,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6650195967947831,
+            "vt_mdd_per_vol": -2.402917575619703,
+            "vt_realized_vol": 0.1333144747564049,
+            "warnings": [
+              "realized volatilities differ by 33% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": -3.9664782868336412,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "Emerging Markets",
@@ -1023,6 +2238,24 @@
           },
           "delta_mdd_pp": 13.433766709219153,
           "delta_sharpe": -0.020968011272935266,
+          "exposure": {
+            "bh_mdd_per_vol": -2.2767161308162724,
+            "bh_realized_vol": 0.2670299906161613,
+            "exposure_matched_delta_mdd_pp": -1.585332168951803,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.45776049826582266,
+            "matched_lambda": 0.6773652029468493,
+            "raw_delta_mdd_pp": 13.433766709219153,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6773652029468493,
+            "vt_mdd_per_vol": -2.6184328651971716,
+            "vt_realized_vol": 0.18087682378661135,
+            "warnings": [
+              "realized volatilities differ by 32% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": -1.585332168951803,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "China Large-Cap",
@@ -1064,6 +2297,24 @@
           },
           "delta_mdd_pp": 8.372433605681307,
           "delta_sharpe": -0.055430445656767066,
+          "exposure": {
+            "bh_mdd_per_vol": -2.172456950962369,
+            "bh_realized_vol": 0.3321600451067424,
+            "exposure_matched_delta_mdd_pp": -8.141393444732802,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.5564651283199754,
+            "matched_lambda": 0.6635564277206157,
+            "raw_delta_mdd_pp": 8.372433605681307,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6635564277206157,
+            "vt_mdd_per_vol": -2.894097087570705,
+            "vt_realized_vol": 0.2204069329625486,
+            "warnings": [
+              "realized volatilities differ by 34% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": -8.141393444732802,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "Brazil",
@@ -1105,6 +2356,24 @@
           },
           "delta_mdd_pp": 18.979929494359727,
           "delta_sharpe": -0.07584929712950539,
+          "exposure": {
+            "bh_mdd_per_vol": -2.056754472076342,
+            "bh_realized_vol": 0.2191666679118589,
+            "exposure_matched_delta_mdd_pp": 5.027132244091215,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.3112440518551013,
+            "matched_lambda": 0.6575200918850199,
+            "raw_delta_mdd_pp": 18.979929494359727,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6575200918850199,
+            "vt_mdd_per_vol": -1.8109714123069118,
+            "vt_realized_vol": 0.14410648762353911,
+            "warnings": [
+              "realized volatilities differ by 34% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 5.027132244091215,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "India",
@@ -1146,6 +2415,24 @@
           },
           "delta_mdd_pp": 12.042506730660973,
           "delta_sharpe": -0.09830498802314808,
+          "exposure": {
+            "bh_mdd_per_vol": -1.9065111494324252,
+            "bh_realized_vol": 0.20394064141219367,
+            "exposure_matched_delta_mdd_pp": 1.3285058416442896,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.28167509778458055,
+            "matched_lambda": 0.6813962923929342,
+            "raw_delta_mdd_pp": 12.042506730660973,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6813962923929342,
+            "vt_mdd_per_vol": -1.9313582853173648,
+            "vt_realized_vol": 0.13896439692650567,
+            "warnings": [
+              "realized volatilities differ by 32% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 1.3285058416442896,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "Taiwan",
@@ -1187,6 +2474,24 @@
           },
           "delta_mdd_pp": 18.50497761899843,
           "delta_sharpe": -0.029116361994734358,
+          "exposure": {
+            "bh_mdd_per_vol": -2.4010477446356546,
+            "bh_realized_vol": 0.26165168572589503,
+            "exposure_matched_delta_mdd_pp": 3.3286371375189083,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.4764747850774822,
+            "matched_lambda": 0.6766745893377207,
+            "raw_delta_mdd_pp": 18.50497761899843,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6766745893377207,
+            "vt_mdd_per_vol": -2.5031391509014784,
+            "vt_realized_vol": 0.17705304698809238,
+            "warnings": [
+              "realized volatilities differ by 32% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 3.3286371375189083,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "China Broad",
@@ -1215,11 +2520,20 @@
         "average_annual_return_cost_pp": -2.1753591132467673,
         "average_delta_mdd_pp": 12.613879580350584,
         "average_delta_sharpe": -0.09092503916217498,
+        "average_exposure_matched_delta_mdd_pp": -0.8654178693546898,
+        "average_vol_ratio": 0.6507297942713938,
         "dm_average_delta_mdd_pp": 12.126057569580182,
+        "dm_average_exposure_matched_delta_mdd_pp": -1.0345005177638764,
         "em_average_delta_mdd_pp": 13.183005259582723,
+        "em_average_exposure_matched_delta_mdd_pp": -0.6681547795439723,
+        "max_vol_ratio": 0.6817635094541454,
+        "min_vol_ratio": 0.613599823164449,
+        "n_exposure_matched_improved": 7,
+        "n_exposure_mismatch": 13,
         "n_markets": 13,
         "n_mdd_improved": 13,
         "n_sharpe_improved": 0,
+        "raw_delta_mdd_reportable_alone": false,
         "vix_sensitivity_vs_delta_mdd": {
           "interpretation": "descriptive cross-sectional association; not causal",
           "pearson_p": 0.3113008649155788,
@@ -1251,6 +2565,24 @@
           },
           "delta_mdd_pp": 32.75773121981456,
           "delta_sharpe": -0.03232594023408794,
+          "exposure": {
+            "bh_mdd_per_vol": -2.8127094093737686,
+            "bh_realized_vol": 0.21703345984483488,
+            "exposure_matched_delta_mdd_pp": 8.502622831767914,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.3679009707740446,
+            "matched_lambda": 0.5220220351343117,
+            "raw_delta_mdd_pp": 32.75773121981456,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.5220220351343117,
+            "vt_mdd_per_vol": -2.4967706031761496,
+            "vt_realized_vol": 0.11329624840044161,
+            "warnings": [
+              "realized volatilities differ by 48% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 8.502622831767914,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "EAFE (Developed ex-US)",
@@ -1292,6 +2624,24 @@
           },
           "delta_mdd_pp": 29.52403620313724,
           "delta_sharpe": 0.009357745180820609,
+          "exposure": {
+            "bh_mdd_per_vol": -2.6105389537543506,
+            "bh_realized_vol": 0.20511487017084842,
+            "exposure_matched_delta_mdd_pp": 9.619451078559804,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.33641450732949174,
+            "matched_lambda": 0.573123113996143,
+            "raw_delta_mdd_pp": 29.52403620313724,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.573123113996143,
+            "vt_mdd_per_vol": -2.0434503311475076,
+            "vt_realized_vol": 0.11755607311923123,
+            "warnings": [
+              "realized volatilities differ by 43% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 9.619451078559804,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "Japan",
@@ -1333,6 +2683,24 @@
           },
           "delta_mdd_pp": 29.588736063990982,
           "delta_sharpe": -0.03425507534661448,
+          "exposure": {
+            "bh_mdd_per_vol": -2.468461634235597,
+            "bh_realized_vol": 0.25568901743901407,
+            "exposure_matched_delta_mdd_pp": 5.47396462308437,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.39001081543453653,
+            "matched_lambda": 0.5322070025773231,
+            "raw_delta_mdd_pp": 29.588736063990982,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.5322070025773231,
+            "vt_mdd_per_vol": -2.4637892171343005,
+            "vt_realized_vol": 0.13607948556315858,
+            "warnings": [
+              "realized volatilities differ by 47% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 5.47396462308437,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "Germany",
@@ -1374,6 +2742,24 @@
           },
           "delta_mdd_pp": 33.53991917185131,
           "delta_sharpe": -0.05000324962392397,
+          "exposure": {
+            "bh_mdd_per_vol": -2.7796219949600154,
+            "bh_realized_vol": 0.23023777689326783,
+            "exposure_matched_delta_mdd_pp": 8.656337534014868,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.3911381723448597,
+            "matched_lambda": 0.5226778943059159,
+            "raw_delta_mdd_pp": 33.53991917185131,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.5226778943059159,
+            "vt_mdd_per_vol": -2.5309481459645258,
+            "vt_realized_vol": 0.1203401964162485,
+            "warnings": [
+              "realized volatilities differ by 48% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 8.656337534014868,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "United Kingdom",
@@ -1415,6 +2801,24 @@
           },
           "delta_mdd_pp": 32.97722483525074,
           "delta_sharpe": -0.09822098405978377,
+          "exposure": {
+            "bh_mdd_per_vol": -2.3998388573139513,
+            "bh_realized_vol": 0.279107993810255,
+            "exposure_matched_delta_mdd_pp": 7.48726450894025,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.41491460566968674,
+            "matched_lambda": 0.5198462374057125,
+            "raw_delta_mdd_pp": 32.97722483525074,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.5198462374057125,
+            "vt_mdd_per_vol": -2.3436099408521067,
+            "vt_realized_vol": 0.14509324041211794,
+            "warnings": [
+              "realized volatilities differ by 48% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 7.48726450894025,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "Australia",
@@ -1456,6 +2860,24 @@
           },
           "delta_mdd_pp": 27.12872383446149,
           "delta_sharpe": -0.026067593931945743,
+          "exposure": {
+            "bh_mdd_per_vol": -2.7080058948818526,
+            "bh_realized_vol": 0.22441372689976818,
+            "exposure_matched_delta_mdd_pp": 2.951711568715365,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.36594357267951716,
+            "matched_lambda": 0.5208199521567418,
+            "raw_delta_mdd_pp": 27.12872383446149,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.5208199521567418,
+            "vt_mdd_per_vol": -2.8784130193103805,
+            "vt_realized_vol": 0.11687914650725338,
+            "warnings": [
+              "realized volatilities differ by 48% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 2.951711568715365,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "Canada",
@@ -1497,6 +2919,24 @@
           },
           "delta_mdd_pp": 33.77637542811181,
           "delta_sharpe": -0.03973744428273154,
+          "exposure": {
+            "bh_mdd_per_vol": -2.702667161128221,
+            "bh_realized_vol": 0.23553116641481756,
+            "exposure_matched_delta_mdd_pp": 9.664499871673426,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.3954435933271696,
+            "matched_lambda": 0.5299158502283069,
+            "raw_delta_mdd_pp": 33.77637542811181,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.5299158502283069,
+            "vt_mdd_per_vol": -2.393995103551413,
+            "vt_realized_vol": 0.1248116983059729,
+            "warnings": [
+              "realized volatilities differ by 47% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 9.664499871673426,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "Europe",
@@ -1538,6 +2978,24 @@
           },
           "delta_mdd_pp": 34.32100674819294,
           "delta_sharpe": -0.05894804220498315,
+          "exposure": {
+            "bh_mdd_per_vol": -2.375999559190534,
+            "bh_realized_vol": 0.2796667928583657,
+            "exposure_matched_delta_mdd_pp": 8.105503154022065,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.4023331406099986,
+            "matched_lambda": 0.5238820394484048,
+            "raw_delta_mdd_pp": 34.32100674819294,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.5238820394484048,
+            "vt_mdd_per_vol": -2.1928388829957144,
+            "vt_realized_vol": 0.1465124098086352,
+            "warnings": [
+              "realized volatilities differ by 48% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 8.105503154022065,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "Emerging Markets",
@@ -1579,6 +3037,24 @@
           },
           "delta_mdd_pp": 25.326658308730863,
           "delta_sharpe": -0.04810028217773621,
+          "exposure": {
+            "bh_mdd_per_vol": -2.1440482344036775,
+            "bh_realized_vol": 0.33902241161324265,
+            "exposure_matched_delta_mdd_pp": 1.7359866269438529,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.49097368622477955,
+            "matched_lambda": 0.56502591189537,
+            "raw_delta_mdd_pp": 25.326658308730863,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.56502591189537,
+            "vt_mdd_per_vol": -2.4724504275027623,
+            "vt_realized_vol": 0.19155644727473992,
+            "warnings": [
+              "realized volatilities differ by 43% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 1.7359866269438529,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "China Large-Cap",
@@ -1620,6 +3096,24 @@
           },
           "delta_mdd_pp": 9.894130120518385,
           "delta_sharpe": -0.060623193343036924,
+          "exposure": {
+            "bh_mdd_per_vol": -2.0608767509917665,
+            "bh_realized_vol": 0.37492672970895424,
+            "exposure_matched_delta_mdd_pp": -14.669122244084754,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.5270452569365264,
+            "matched_lambda": 0.5791401354224107,
+            "raw_delta_mdd_pp": 9.894130120518385,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.5791401354224107,
+            "vt_mdd_per_vol": -3.1028443884746504,
+            "vt_realized_vol": 0.21713511701712535,
+            "warnings": [
+              "realized volatilities differ by 42% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": -14.669122244084754,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "Brazil",
@@ -1661,6 +3155,24 @@
           },
           "delta_mdd_pp": 18.979929494359727,
           "delta_sharpe": -0.07584929712950539,
+          "exposure": {
+            "bh_mdd_per_vol": -2.056754472076342,
+            "bh_realized_vol": 0.2191666679118589,
+            "exposure_matched_delta_mdd_pp": 5.027132244091215,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.3112440518551013,
+            "matched_lambda": 0.6575200918850199,
+            "raw_delta_mdd_pp": 18.979929494359727,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6575200918850199,
+            "vt_mdd_per_vol": -1.8109714123069118,
+            "vt_realized_vol": 0.14410648762353911,
+            "warnings": [
+              "realized volatilities differ by 34% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 5.027132244091215,
           "n_obs": 3557,
           "n_rebalances_with_cost": 160,
           "name": "India",
@@ -1702,6 +3214,24 @@
           },
           "delta_mdd_pp": 31.224531352885965,
           "delta_sharpe": -0.03596239152446279,
+          "exposure": {
+            "bh_mdd_per_vol": -2.4902384342427877,
+            "bh_realized_vol": 0.2526733774950453,
+            "exposure_matched_delta_mdd_pp": 9.494458577828357,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.4119162281975224,
+            "matched_lambda": 0.5688459752122527,
+            "raw_delta_mdd_pp": 31.224531352885965,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.5688459752122527,
+            "vt_mdd_per_vol": -2.2052926749275845,
+            "vt_realized_vol": 0.1437322338313427,
+            "warnings": [
+              "realized volatilities differ by 43% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 9.494458577828357,
           "n_obs": 4840,
           "n_rebalances_with_cost": 220,
           "name": "Taiwan",
@@ -1743,6 +3273,24 @@
           },
           "delta_mdd_pp": 18.504977618998332,
           "delta_sharpe": -0.02096343508778642,
+          "exposure": {
+            "bh_mdd_per_vol": -2.360055238993422,
+            "bh_realized_vol": 0.2661963921489503,
+            "exposure_matched_delta_mdd_pp": 2.3733442192673038,
+            "exposure_mismatch": true,
+            "matched_benchmark_mdd": -0.46692185589496726,
+            "matched_lambda": 0.6590187496081976,
+            "raw_delta_mdd_pp": 18.504977618998332,
+            "raw_mdd_improvement_is_reportable_alone": false,
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+            "vol_ratio": 0.6590187496081976,
+            "vt_mdd_per_vol": -2.5263205933949044,
+            "vt_realized_vol": 0.17542841350421465,
+            "warnings": [
+              "realized volatilities differ by 34% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+            ]
+          },
+          "exposure_matched_delta_mdd_pp": 2.3733442192673038,
           "n_obs": 3770,
           "n_rebalances_with_cost": 170,
           "name": "China Broad",
@@ -1771,11 +3319,20 @@
         "average_annual_return_cost_pp": -1.1741052870941044,
         "average_delta_mdd_pp": 27.503383107715724,
         "average_delta_sharpe": -0.04397686028967521,
+        "average_exposure_matched_delta_mdd_pp": 4.955627276524926,
+        "average_vol_ratio": 0.5595419222520085,
         "dm_average_delta_mdd_pp": 31.32753525094544,
+        "dm_average_exposure_matched_delta_mdd_pp": 7.479407430965144,
         "em_average_delta_mdd_pp": 23.041872273947703,
+        "em_average_exposure_matched_delta_mdd_pp": 2.0112170963446734,
+        "max_vol_ratio": 0.6590187496081976,
+        "min_vol_ratio": 0.5198462374057125,
+        "n_exposure_matched_improved": 12,
+        "n_exposure_mismatch": 13,
         "n_markets": 13,
         "n_mdd_improved": 13,
         "n_sharpe_improved": 1,
+        "raw_delta_mdd_reportable_alone": false,
         "vix_sensitivity_vs_delta_mdd": {
           "interpretation": "descriptive cross-sectional association; not causal",
           "pearson_p": 0.0006511371642021946,
@@ -1788,18 +3345,26 @@
   },
   "source_bindings": {
     "abstract_annual_return_cost": "$.samples.inception_aware.summary.average_annual_return_cost_pp",
-    "abstract_average_delta_mdd": "$.samples.inception_aware.summary.average_delta_mdd_pp",
+    "abstract_average_delta_mdd": "$.samples.inception_aware.summary.average_exposure_matched_delta_mdd_pp",
+    "abstract_average_delta_mdd_RAW_DO_NOT_QUOTE_ALONE": "$.samples.inception_aware.summary.average_delta_mdd_pp",
     "abstract_average_delta_sharpe": "$.samples.inception_aware.summary.average_delta_sharpe",
+    "circular_shift_null_p": "$.inference.circular_shift_null.common_period.joint_exposure_matched.p_one_sided",
     "common_sample_rows": {
       "artifact": "common_sample_rows.csv",
       "json_path": "$.samples.common_period.rows[*]"
+    },
+    "exposure_figure": {
+      "data_artifact": "circular_shift_null_gaps.csv",
+      "image_artifact": "figure_exposure_matched.png",
+      "json_path": "$.inference.circular_shift_null.common_period"
     },
     "figure2": {
       "data_artifact": "figure2_data.csv",
       "image_artifact": "figure_cross_asset.png",
       "json_path": "$.samples.inception_aware.rows[*]"
     },
-    "joint_bootstrap_ci": "$.inference.primary.average_delta_mdd_pp",
+    "joint_bootstrap_ci": "$.inference.primary.average_exposure_matched_delta_mdd_pp",
+    "joint_bootstrap_ci_raw": "$.inference.primary.average_delta_mdd_pp",
     "joint_bootstrap_kill_flag": "$.decision.kill_triggered",
     "table5_rows": {
       "artifact": "table5_rows.csv",

@@ -1,1 +1,6 @@
-K1695 complete: n_mdd=13/13, avg_delta_mdd=27.50 pp, joint 90% CI=[4.22, 19.30], kill=False
+K1695 complete (exposure-corrected)
+  RAW (not reportable alone): inception avg ΔMDD=27.50 pp (13/13 positive); common avg=12.61 pp (13/13); joint 90% CI=[4.22, 19.30]
+  EXPOSURE: vol ratio 0.61-0.68x BH; mismatch in 13/13 markets
+  EXPOSURE-MATCHED: inception avg=4.96 pp (12/13 positive); common avg=-0.87 pp (7/13); joint 90% CI=[-7.02, 3.59]
+  CIRCULAR-SHIFT NULL (n=170 phases): observed=-0.87 pp, null mean=-0.68 pp, p=0.559; Holm survivors=0/13
+  DECISION: kill=True claim=retracted

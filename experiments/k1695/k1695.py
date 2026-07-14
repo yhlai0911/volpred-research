@@ -15,6 +15,41 @@ This experiment replaces K1178's live/auto-adjusted/daily-signal pipeline with:
 The script writes only inside ``experiments/k1695``.  A live refresh is never
 implicit: first-time data acquisition requires ``--refresh-data`` and an
 existing snapshot requires ``--force-refresh-data`` to be replaced.
+
+2026-07-15 EXPOSURE CORRECTION
+------------------------------
+The first run of this experiment reported the raw MDD difference (VT minus BH) as
+evidence of international drawdown protection: +12.61 pp on the common sample,
++27.50 pp inception-aware, positive in 13/13 markets, and a pre-registered kill gate
+that the result "survived".  Every one of those numbers is arithmetically correct and
+none of them supports the claim that was built on top of them.
+
+12/VIX holds an average of ~73% equity.  Its realized volatility is 0.52-0.68x
+buy-and-hold in all 13 markets of both samples -- far outside the 20% band inside which a
+raw max drawdown is comparable at all (``.claude/rules/experiments.md``).  Raw MDD is not
+scale-invariant: anyone who simply holds less equity draws down less.  That is taking
+less risk, not timing risk.
+
+This version therefore:
+
+* routes every drawdown comparison through the canonical
+  ``volpred.stats.drawdown.compare_max_drawdown``, which emits the realized-vol ratio,
+  the exposure-mismatch flag, and the exposure-matched gap
+  MDD(VT) - MDD(lambda * BH) with lambda chosen so the benchmark carries VT's own
+  realized volatility;
+* keeps every raw number (they are real computations, and the correction has to be
+  auditable against what was published) but never lets one stand alone as a claim;
+* tests the exposure-matched gap against an EXACT circular-shift randomization null --
+  all calendar-month phases of the same 12/VIX weight path, which preserves the weight
+  values and their autocorrelation exactly and destroys only their alignment with
+  returns.  A positive exposure-matched gap is necessary but NOT sufficient: matching
+  unconditional volatility does not match the volatility PATH, so the gap must be read
+  against its own null, not against zero;
+* recomputes the joint stationary-bootstrap CI and the kill gate on the exposure-matched
+  statistic, and reports the original raw-statistic gate beside it as the mis-specified
+  pre-registration it was; and
+* adds a no-timing reference strategy (constant equity weight equal to VT's own average),
+  which reproduces most of the raw MDD "improvement" while knowing nothing about VIX.
 """
 
 from __future__ import annotations
@@ -41,6 +76,18 @@ import pandas as pd
 import yfinance as yf
 from scipy import stats
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "src"))
+
+# The repo owns exactly one honest drawdown comparison.  Re-implementing it here is how
+# the original claim got made in the first place.
+from volpred.stats.drawdown import (  # noqa: E402
+    annualized_volatility as vp_annualized_volatility,
+    compare_max_drawdown,
+    max_drawdown as vp_max_drawdown,
+)
+
 
 EXPERIMENT_ID = "K1695"
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -53,6 +100,8 @@ COMMON_PATH = SCRIPT_DIR / "common_sample_rows.csv"
 FIGURE_DATA_PATH = SCRIPT_DIR / "figure2_data.csv"
 FIGURE_PATH = SCRIPT_DIR / "figure_cross_asset.png"
 RETURNS_PATH = DATA_DIR / "paired_common_returns.csv.gz"
+EXPOSURE_FIGURE_PATH = SCRIPT_DIR / "figure_exposure_matched.png"
+NULL_GAPS_PATH = SCRIPT_DIR / "circular_shift_null_gaps.csv"
 
 DATA_START = "2004-01-01"
 # yfinance end is exclusive.  The manuscript sample ends on 2026-03-31.
@@ -72,6 +121,13 @@ SENSITIVITY_REPS = 3_000
 CI_LEVEL = 0.90
 NON_DISTRIBUTION_CROSSCHECK_TOL = 1e-4  # 1 bp on ordinary price-only dates
 DISTRIBUTION_CROSSCHECK_TOL = 3e-3  # 30 bp; Yahoo action amounts are rounded
+
+# Exposure correction (2026-07-15).
+TRADING_DAYS = 252
+#: alpha for the Holm-corrected family of 13 per-market circular-shift tests
+NULL_ALPHA = 0.10
+#: the fast scenario simulator must reproduce the canonical scalar simulator exactly
+SIMULATOR_EQUIVALENCE_TOL = 1e-12
 
 MARKETS: dict[str, dict[str, str]] = {
     "EFA": {"name": "EAFE (Developed ex-US)", "region": "DM"},
@@ -617,6 +673,58 @@ def stationary_bootstrap_indices(
     return indices
 
 
+def annualized_vol_by_column(returns: np.ndarray) -> np.ndarray:
+    """Column-wise annualized volatility, matching ``vp_annualized_volatility``."""
+    if returns.ndim != 2:
+        raise ValueError("returns must be a 2-D date x market matrix")
+    return np.std(returns, axis=0, ddof=1) * math.sqrt(TRADING_DAYS)
+
+
+def exposure_matched_mdd_by_column(
+    strategy: np.ndarray, benchmark: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Vectorized twin of ``volpred.stats.drawdown.compare_max_drawdown``.
+
+    Returns ``(lambda, MDD(lambda * benchmark))`` per column, where lambda makes the
+    benchmark carry the strategy's own realized volatility.  Equivalence with the
+    canonical scalar helper is asserted at run time -- see
+    :func:`assert_vectorized_matches_canonical`.  It exists only because the null and the
+    bootstrap need this statistic tens of thousands of times.
+    """
+    strategy_vol = annualized_vol_by_column(strategy)
+    benchmark_vol = annualized_vol_by_column(benchmark)
+    lam = np.where(benchmark_vol > 0.0, strategy_vol / benchmark_vol, np.nan)
+    scaled = lam * benchmark
+    if np.nanmin(scaled) <= -1.0:
+        raise ValueError("exposure-matched benchmark implies wealth <= 0; MDD undefined")
+    return lam, max_drawdown_by_column(scaled)
+
+
+def assert_vectorized_matches_canonical(
+    strategy: np.ndarray, benchmark: np.ndarray, *, tickers: list[str]
+) -> None:
+    """Fail closed unless the fast path reproduces the canonical helper exactly.
+
+    The whole correction rests on the exposure-matched gap.  A fast re-implementation of
+    it that silently disagreed with ``volpred.stats.drawdown`` would just be the original
+    bug wearing a new hat.
+    """
+    lam_vec, matched_vec = exposure_matched_mdd_by_column(strategy, benchmark)
+    mdd_vec = max_drawdown_by_column(strategy)
+    for column, ticker in enumerate(tickers):
+        canonical = compare_max_drawdown(strategy[:, column], benchmark[:, column])
+        checks = {
+            "matched_lambda": (lam_vec[column], canonical.matched_lambda),
+            "matched_benchmark_mdd": (matched_vec[column], canonical.matched_benchmark_mdd),
+            "strategy_mdd": (mdd_vec[column], canonical.strategy_mdd),
+        }
+        for name, (fast, slow) in checks.items():
+            if not math.isclose(float(fast), float(slow), rel_tol=0.0, abs_tol=SIMULATOR_EQUIVALENCE_TOL):
+                raise AssertionError(
+                    f"{ticker}: vectorized {name}={fast!r} != canonical {slow!r}"
+                )
+
+
 def joint_mdd_bootstrap(
     paired_returns: pd.DataFrame,
     market_order: Iterable[str],
@@ -626,6 +734,13 @@ def joint_mdd_bootstrap(
     seed: int,
     ci_level: float = CI_LEVEL,
 ) -> dict[str, Any]:
+    """Joint stationary bootstrap of BOTH the raw and the exposure-matched delta MDD.
+
+    Both statistics are computed inside the SAME resample, from the same shared date
+    index, so the raw CI and the exposure-matched CI are directly comparable and the
+    difference between them is entirely the statistic, not the resampling.  Lambda is
+    re-estimated inside each replication: it is part of the statistic, not a constant.
+    """
     markets = list(market_order)
     bh_columns = [f"{ticker}_bh" for ticker in markets]
     vt_columns = [f"{ticker}_vt" for ticker in markets]
@@ -640,27 +755,54 @@ def joint_mdd_bootstrap(
 
     rng = np.random.default_rng(seed)
     avg_delta = np.empty(reps, dtype=float)
+    avg_matched = np.empty(reps, dtype=float)
     all_positive = np.empty(reps, dtype=bool)
+    all_matched_positive = np.empty(reps, dtype=bool)
     market_delta = np.empty((reps, len(markets)), dtype=float)
+    market_matched = np.empty((reps, len(markets)), dtype=float)
     for replication in range(reps):
         indices = stationary_bootstrap_indices(len(panel), mean_block, rng)
         # One shared index simultaneously resamples all 26 paired columns.
-        bh_mdd = max_drawdown_by_column(bh[indices])
-        vt_mdd = max_drawdown_by_column(vt[indices])
+        bh_b = bh[indices]
+        vt_b = vt[indices]
+        bh_mdd = max_drawdown_by_column(bh_b)
+        vt_mdd = max_drawdown_by_column(vt_b)
+        _, matched_mdd = exposure_matched_mdd_by_column(vt_b, bh_b)
         delta_pp = (vt_mdd - bh_mdd) * 100.0
+        matched_pp = (vt_mdd - matched_mdd) * 100.0
         market_delta[replication] = delta_pp
+        market_matched[replication] = matched_pp
         avg_delta[replication] = float(delta_pp.mean())
+        avg_matched[replication] = float(matched_pp.mean())
         all_positive[replication] = bool(np.all(delta_pp > 0.0))
+        all_matched_positive[replication] = bool(np.all(matched_pp > 0.0))
 
     alpha = (1.0 - ci_level) / 2.0
-    lower, upper = np.quantile(avg_delta, [alpha, 1.0 - alpha])
+
+    def _interval(draws: np.ndarray) -> dict[str, Any]:
+        lower, upper = np.quantile(draws, [alpha, 1.0 - alpha])
+        return {
+            "lower": lower,
+            "median": float(np.median(draws)),
+            "upper": upper,
+            "mean": float(draws.mean()),
+            "probability_le_zero": float(np.mean(draws <= 0.0)),
+        }
+
     per_market_ci: dict[str, Any] = {}
+    per_market_matched_ci: dict[str, Any] = {}
     for column_index, ticker in enumerate(markets):
         lo, hi = np.quantile(market_delta[:, column_index], [alpha, 1.0 - alpha])
         per_market_ci[ticker] = {
             "lower_pp": lo,
             "median_pp": float(np.median(market_delta[:, column_index])),
             "upper_pp": hi,
+        }
+        mlo, mhi = np.quantile(market_matched[:, column_index], [alpha, 1.0 - alpha])
+        per_market_matched_ci[ticker] = {
+            "lower_pp": mlo,
+            "median_pp": float(np.median(market_matched[:, column_index])),
+            "upper_pp": mhi,
         }
     return {
         "n_obs": len(panel),
@@ -669,15 +811,351 @@ def joint_mdd_bootstrap(
         "method": "joint circular stationary bootstrap; shared date indices across 13 paired BH/VT vectors",
         "mean_block_days": mean_block,
         "ci_level": ci_level,
-        "average_delta_mdd_pp": {
-            "lower": lower,
-            "median": float(np.median(avg_delta)),
-            "upper": upper,
-            "mean": float(avg_delta.mean()),
-            "probability_le_zero": float(np.mean(avg_delta <= 0.0)),
-        },
+        "statistic_note": (
+            "average_delta_mdd_pp is the RAW statistic (VT minus BH) and is not "
+            "scale-invariant; average_exposure_matched_delta_mdd_pp rescales BH to VT's own "
+            "realized volatility inside every replication and is the reportable one."
+        ),
+        "average_delta_mdd_pp": _interval(avg_delta),
+        "average_exposure_matched_delta_mdd_pp": _interval(avg_matched),
         "probability_all_13_positive": float(all_positive.mean()),
+        "probability_all_13_exposure_matched_positive": float(all_matched_positive.mean()),
         "per_market_delta_mdd_ci": per_market_ci,
+        "per_market_exposure_matched_delta_mdd_ci": per_market_matched_ci,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Exposure correction: circular-shift randomization null
+# ---------------------------------------------------------------------------
+def monthly_signal_over_span(vix_level: pd.Series, periods: pd.PeriodIndex) -> pd.Series:
+    """The lagged 12/VIX monthly weight, restricted to the calendar months of a sample.
+
+    Same construction as :func:`build_monthly_lagged_weights` (month m gets the signal
+    formed at the end of month m-1); this variant just exposes the monthly vector so it
+    can be circularly rotated.  Rotating in calendar-month space keeps the phase shift
+    identical across all 13 markets even when their samples start on different dates.
+    """
+    vix = vix_level.dropna().sort_index()
+    monthly_vix = vix.groupby(vix.index.to_period("M")).last()
+    full_periods = pd.period_range(monthly_vix.index.min(), monthly_vix.index.max() + 1, freq="M")
+    unlagged = (VT_NUMERATOR / monthly_vix).clip(lower=0.0, upper=MAX_EQUITY_WEIGHT).reindex(
+        full_periods
+    )
+    lagged = unlagged.shift(1)
+    signal = lagged.reindex(periods)
+    if signal.isna().any():
+        missing = signal.index[signal.isna()].tolist()
+        raise ValueError(f"monthly signal has no value for {missing[:3]}")
+    return signal.astype(float)
+
+
+def month_start_mask(dates: pd.DatetimeIndex) -> np.ndarray:
+    """True on the first observed trading date of each calendar month (rebalance days)."""
+    periods = pd.DatetimeIndex(dates).to_period("M")
+    mask = np.empty(len(periods), dtype=bool)
+    mask[0] = True
+    mask[1:] = periods[1:] != periods[:-1]
+    return mask
+
+
+def simulate_monthly_hold_scenarios(
+    equity: np.ndarray,
+    cash: np.ndarray,
+    targets: np.ndarray,
+    rebalance: np.ndarray,
+    *,
+    cost_rate: float = TRANSACTION_COST,
+) -> np.ndarray:
+    """Vectorized twin of :func:`simulate_monthly_hold`, run over R weight scenarios at once.
+
+    ``targets`` is (T, R): one column per circular shift.  Equivalence with the scalar
+    simulator is asserted against the observed weight path before any null is trusted.
+    """
+    n_obs, n_scen = targets.shape
+    if equity.shape != (n_obs,) or cash.shape != (n_obs,) or rebalance.shape != (n_obs,):
+        raise ValueError("scenario simulator received misaligned inputs")
+
+    equity_value = targets[0] * 1.0
+    cash_value = 1.0 - targets[0]
+    nav = np.ones(n_scen, dtype=float)
+    out = np.empty((n_obs, n_scen), dtype=float)
+    for t in range(n_obs):
+        nav_before = nav.copy()
+        if t > 0:
+            if rebalance[t]:
+                pretrade = equity_value / nav
+                turnover = np.abs(targets[t] - pretrade)
+                nav_after_cost = nav - cost_rate * turnover * nav
+                equity_value = targets[t] * nav_after_cost
+                cash_value = (1.0 - targets[t]) * nav_after_cost
+        equity_value = equity_value * (1.0 + equity[t])
+        cash_value = cash_value * (1.0 + cash[t])
+        nav = equity_value + cash_value
+        out[t] = nav / nav_before - 1.0
+    return out
+
+
+@dataclass
+class MarketPath:
+    """Everything the null needs to re-simulate one market on its own observed dates."""
+
+    ticker: str
+    dates: pd.DatetimeIndex
+    equity: np.ndarray
+    cash: np.ndarray
+    observed_targets: np.ndarray
+    rebalance: np.ndarray
+    bh_returns: np.ndarray
+    vt_returns: np.ndarray
+
+
+def _shifted_target_matrix(
+    signal: pd.Series, dates: pd.DatetimeIndex, n_shifts: int
+) -> np.ndarray:
+    """(T, n_shifts) daily targets: column s rolls THIS MARKET'S OWN month vector by s months.
+
+    Rolling each market's own months -- rather than a shared union-span vector -- is what
+    makes the null an exact permutation of the weights that market actually experienced.
+    Rolling a union vector would have fed INDA and MCHI (which start in 2012 and 2011)
+    weights from calendar months they were never trading in, including the 2008 crisis
+    lows; that inflates their weight dispersion and therefore inflates the null.
+
+    The shift index s is still SHARED across markets, so the calendar displacement is
+    common and the cross-market dependence survives.  Markets with shorter histories wrap
+    sooner (s mod len), which just means their null draws repeat with period len.
+    """
+    values = signal.to_numpy(dtype=float)
+    n_months = len(values)
+    periods = signal.index
+    lookup = {period: index for index, period in enumerate(periods)}
+    row_of_date = np.array([lookup[period] for period in pd.DatetimeIndex(dates).to_period("M")])
+    rolled = np.empty((n_shifts, n_months), dtype=float)
+    for shift in range(n_shifts):
+        rolled[shift] = np.roll(values, shift % n_months)
+    return rolled[:, row_of_date].T  # (T, n_shifts)
+
+
+def circular_shift_null(
+    paths: list[MarketPath],
+    vix_level: pd.Series,
+    *,
+    sample_name: str,
+) -> tuple[dict[str, Any], np.ndarray]:
+    """Exact randomization test of the exposure-matched gap over all calendar-month phases.
+
+    Under the null "the 12/VIX weight path knows nothing about WHEN returns are bad",
+    every phase of that path is equally likely.  A circular shift preserves the weight
+    values exactly (it is a permutation of time) and preserves their autocorrelation; it
+    destroys only the alignment with returns.  Shift 0 is the observed path and is part of
+    the reference set, so p = #{gap_s >= gap_observed} / (n_shifts + 1) can never be zero.
+
+    The same shift is applied to every market simultaneously, so the null preserves the
+    cross-market dependence that makes 13/13 counts look more impressive than they are.
+
+    Stated assumption: this requires the weight process to be approximately circularly
+    stationary.  12/VIX is persistent but not exactly stationary, so this is a strong
+    diagnostic, not an exact size-alpha test.
+    """
+    span = pd.period_range(
+        min(path.dates.min() for path in paths).to_period("M"),
+        max(path.dates.max() for path in paths).to_period("M"),
+        freq="M",
+    )
+    n_shifts = len(span)
+
+    raw_by_market = np.empty((n_shifts, len(paths)), dtype=float)
+    matched_by_market = np.empty((n_shifts, len(paths)), dtype=float)
+    vol_ratio_by_market = np.empty((n_shifts, len(paths)), dtype=float)
+    own_months: dict[str, int] = {}
+    for column, path in enumerate(paths):
+        # Each market rolls the months IT actually traded -- see _shifted_target_matrix.
+        market_months = pd.PeriodIndex(path.dates.to_period("M").unique(), freq="M")
+        signal = monthly_signal_over_span(vix_level, market_months)
+        own_months[path.ticker] = len(market_months)
+        targets = _shifted_target_matrix(signal, path.dates, n_shifts)
+        if not np.allclose(
+            targets[:, 0], path.observed_targets, rtol=0.0, atol=SIMULATOR_EQUIVALENCE_TOL
+        ):
+            raise AssertionError(
+                f"{path.ticker}: shift-0 targets do not reproduce the observed weight path"
+            )
+        observed_weights = np.sort(signal.to_numpy(dtype=float))
+        for shift in (1, n_shifts // 2):
+            rolled_weights = np.sort(np.unique(targets[:, shift % n_shifts]))
+            if not np.isin(rolled_weights, observed_weights).all():
+                raise AssertionError(
+                    f"{path.ticker}: shift {shift} introduced weights this market never held"
+                )
+        vt = simulate_monthly_hold_scenarios(path.equity, path.cash, targets, path.rebalance)
+        if not np.allclose(
+            vt[:, 0], path.vt_returns, rtol=0.0, atol=SIMULATOR_EQUIVALENCE_TOL
+        ):
+            raise AssertionError(
+                f"{path.ticker}: scenario simulator does not reproduce the canonical VT path"
+            )
+        benchmark = np.repeat(path.bh_returns[:, None], n_shifts, axis=1)
+        vt_mdd = max_drawdown_by_column(vt)
+        bh_mdd = max_drawdown_by_column(benchmark)
+        lam, matched_mdd = exposure_matched_mdd_by_column(vt, benchmark)
+        raw_by_market[:, column] = (vt_mdd - bh_mdd) * 100.0
+        matched_by_market[:, column] = (vt_mdd - matched_mdd) * 100.0
+        vol_ratio_by_market[:, column] = lam
+
+    joint_matched = matched_by_market.mean(axis=1)
+    joint_raw = raw_by_market.mean(axis=1)
+    joint_vol_ratio = vol_ratio_by_market.mean(axis=1)
+
+    def _one_sided(draws: np.ndarray, observed: float) -> dict[str, Any]:
+        # The shift group is enumerated exhaustively and contains the identity (shift 0),
+        # so the exact randomization p-value is #{T_s >= T_obs} / |G|.  The Monte-Carlo
+        # convention (B + 1 in the denominator) belongs to SAMPLED reference sets; using it
+        # here would shave ~0.6% off p in the anti-conservative direction.  Reported too,
+        # only so this run can be compared with K1265b, which used that convention.
+        n_ge = int((draws >= observed).sum())
+        return {
+            "observed_pp": float(observed),
+            "null_mean_pp": float(draws.mean()),
+            "null_p50_pp": float(np.percentile(draws, 50)),
+            "null_p95_pp": float(np.percentile(draws, 95)),
+            "n_null_ge_observed": n_ge,
+            "p_one_sided": float(n_ge / len(draws)),
+            "p_one_sided_monte_carlo_convention": float(n_ge / (len(draws) + 1)),
+        }
+
+    per_market: dict[str, Any] = {}
+    p_values: dict[str, float] = {}
+    for column, path in enumerate(paths):
+        draws = matched_by_market[:, column]
+        detail = _one_sided(draws, float(draws[0]))
+        detail["raw_observed_pp"] = float(raw_by_market[0, column])
+        detail["raw_null_mean_pp"] = float(raw_by_market[:, column].mean())
+        per_market[path.ticker] = detail
+        p_values[path.ticker] = detail["p_one_sided"]
+
+    holm_result = holm_correction(p_values, alpha=NULL_ALPHA)
+    survivors = [ticker for ticker, item in holm_result.items() if item["reject"]]
+
+    # WHY THE RAW STATISTIC CAN REJECT THIS NULL WHILE THE MATCHED ONE CANNOT.
+    # Measured, not asserted: where does the OBSERVED phase's realized volatility sit among
+    # all phases?  12/VIX conditions on lagged VIX, and VIX does forecast volatility -- so
+    # the observed phase de-levers into genuinely turbulent months and ends up with a lower
+    # realized vol than a randomly-phased version of the same weight path.  The raw MDD gap
+    # rewards exactly that.  It is a real property of the signal, and it is a property about
+    # RISK REDUCTION, not about drawing down less than a benchmark carrying the same risk.
+    observed_vol_ratio = float(joint_vol_ratio[0])
+    n_le = int((joint_vol_ratio <= observed_vol_ratio).sum())
+    exposure_of_the_null = {
+        "observed_vol_ratio": observed_vol_ratio,
+        "null_mean_vol_ratio": float(joint_vol_ratio.mean()),
+        "null_min_vol_ratio": float(joint_vol_ratio.min()),
+        "null_max_vol_ratio": float(joint_vol_ratio.max()),
+        "observed_rank_among_phases": n_le,
+        "observed_percentile": float(n_le / len(joint_vol_ratio)),
+        "interpretation": (
+            "The observed phase realizes LOWER volatility than a randomly re-phased copy of the "
+            "same weight path. That is real: VIX forecasts volatility, so 12/VIX de-levers into "
+            "genuinely turbulent months. It is also exactly what the RAW MDD gap rewards, which is "
+            "why the raw statistic can reject this null while the exposure-matched one cannot. "
+            "Lowering realized risk is not the same as drawing down less than a benchmark carrying "
+            "the same risk -- and the paper's contribution claimed the latter."
+        ),
+    }
+
+    result = {
+        "sample": sample_name,
+        "test": "exact circular-shift randomization over all calendar-month phases of the 12/VIX weight path",
+        "statistic": "exposure-matched delta MDD = MDD(VT) - MDD(lambda * BH), lambda = vol(VT)/vol(BH)",
+        "n_shifts": n_shifts,
+        "shift_unit": "calendar month",
+        "month_span": f"{span.min()}..{span.max()}",
+        "months_per_market": own_months,
+        "shift_group_note": (
+            "Each market circularly rolls the months IT actually traded, by a SHARED shift index. "
+            "Every null draw is therefore an exact permutation of the weights that market really "
+            "held, while the calendar displacement stays common across markets. Markets with "
+            "shorter histories wrap sooner (s mod own_months), so their draws repeat with that "
+            "period."
+        ),
+        "seed": None,
+        "deterministic": True,
+        "randomization_note": (
+            "Exhaustive over the shift group; no sampling, so no seed is required. "
+            "Shift 0 is the observed path and is included in the reference set."
+        ),
+        "exposure_of_the_null": exposure_of_the_null,
+        "joint_exposure_matched": _one_sided(joint_matched, float(joint_matched[0])),
+        "joint_raw_delta_mdd": _one_sided(joint_raw, float(joint_raw[0])),
+        "per_market": per_market,
+        "holm": {
+            "alpha": NULL_ALPHA,
+            "family_size": len(p_values),
+            "per_market": holm_result,
+            "n_survivors": len(survivors),
+            "survivors": survivors,
+        },
+        "stationarity_caveat": (
+            "Circular-shift randomization assumes the weight process is approximately "
+            "circularly stationary. 12/VIX is persistent but not exactly stationary, so this "
+            "is a strong diagnostic rather than an exact size-alpha test."
+        ),
+    }
+    return result, matched_by_market
+
+
+def holm_correction(p_values: dict[str, float], *, alpha: float) -> dict[str, dict[str, Any]]:
+    """Holm step-down over a family of one-sided p-values."""
+    ordered = sorted(p_values.items(), key=lambda item: item[1])
+    family = len(ordered)
+    out: dict[str, dict[str, Any]] = {}
+    still_rejecting = True
+    for rank, (key, p_value) in enumerate(ordered):
+        threshold = alpha / (family - rank)
+        if p_value > threshold:
+            still_rejecting = False
+        out[key] = {
+            "p_one_sided": p_value,
+            "holm_threshold": threshold,
+            "reject": bool(still_rejecting),
+        }
+    return out
+
+
+def constant_weight_reference(paths: list[MarketPath]) -> dict[str, Any]:
+    """A strategy that de-levers to VT's own average weight and never looks at VIX.
+
+    It is the null hypothesis made concrete.  If it reproduces most of VT's raw MDD
+    "improvement" while scoring a ~zero exposure-matched gap, then the raw improvement was
+    never about volatility timing.
+    """
+    rows: dict[str, Any] = {}
+    raw_gaps: list[float] = []
+    matched_gaps: list[float] = []
+    for path in paths:
+        constant = float(path.observed_targets.mean())
+        targets = np.full((len(path.dates), 1), constant, dtype=float)
+        constant_returns = simulate_monthly_hold_scenarios(
+            path.equity, path.cash, targets, path.rebalance
+        )[:, 0]
+        comparison = compare_max_drawdown(constant_returns, path.bh_returns)
+        rows[path.ticker] = {
+            "constant_equity_weight": constant,
+            "raw_delta_mdd_pp": comparison.raw_mdd_improvement * 100.0,
+            "exposure_matched_delta_mdd_pp": comparison.exposure_matched_gap * 100.0,
+            "vol_ratio": comparison.vol_ratio,
+        }
+        raw_gaps.append(comparison.raw_mdd_improvement * 100.0)
+        matched_gaps.append(comparison.exposure_matched_gap * 100.0)
+    return {
+        "description": (
+            "Constant equity weight equal to each market's own average 12/VIX target, "
+            "same SHY cash sleeve, same monthly rebalance, same 10 bp cost. Knows nothing "
+            "about VIX."
+        ),
+        "average_raw_delta_mdd_pp": float(np.mean(raw_gaps)),
+        "average_exposure_matched_delta_mdd_pp": float(np.mean(matched_gaps)),
+        "n_raw_improved": int(np.sum(np.array(raw_gaps) > 0.0)),
+        "per_market": rows,
     }
 
 
@@ -707,7 +1185,7 @@ def _run_one_market(
     vix_level: pd.Series,
     irx_level: pd.Series,
     required_dates: pd.DatetimeIndex | None = None,
-) -> tuple[dict[str, Any], pd.DataFrame]:
+) -> tuple[dict[str, Any], pd.DataFrame, MarketPath]:
     candidate_dates = market_return.index.intersection(shy_return.index)
     candidate_dates = candidate_dates[candidate_dates >= start]
     if required_dates is not None:
@@ -746,6 +1224,13 @@ def _run_one_market(
     sens_frame = pd.concat([comparison["bh"], vix_change.rename("vix_change")], axis=1).dropna()
     vix_r, vix_p = stats.pearsonr(sens_frame["bh"], sens_frame["vix_change"])
 
+    # The single honest drawdown comparison in this file.  Everything the paper says about
+    # drawdown protection has to survive this object, not the raw difference above it.
+    drawdown = compare_max_drawdown(
+        comparison["vt_return"].to_numpy(dtype=float),
+        comparison["bh"].to_numpy(dtype=float),
+    )
+
     result = {
         "ticker": ticker,
         "name": MARKETS[ticker]["name"],
@@ -756,7 +1241,24 @@ def _run_one_market(
         "bh": bh_metrics,
         "vt": vt_metrics,
         "delta_sharpe": vt_metrics["sharpe"] - bh_metrics["sharpe"],
+        # RAW. Real arithmetic, but not scale-invariant: see .exposure below before quoting it.
         "delta_mdd_pp": (vt_metrics["max_drawdown"] - bh_metrics["max_drawdown"]) * 100.0,
+        "exposure": {
+            "vt_realized_vol": drawdown.strategy_vol,
+            "bh_realized_vol": drawdown.benchmark_vol,
+            "vol_ratio": drawdown.vol_ratio,
+            "exposure_mismatch": drawdown.exposure_mismatch,
+            "raw_mdd_improvement_is_reportable_alone": drawdown.raw_mdd_improvement_is_reportable_alone,
+            "matched_lambda": drawdown.matched_lambda,
+            "matched_benchmark_mdd": drawdown.matched_benchmark_mdd,
+            "raw_delta_mdd_pp": drawdown.raw_mdd_improvement * 100.0,
+            "exposure_matched_delta_mdd_pp": drawdown.exposure_matched_gap * 100.0,
+            "vt_mdd_per_vol": drawdown.strategy_mdd_per_vol,
+            "bh_mdd_per_vol": drawdown.benchmark_mdd_per_vol,
+            "warnings": list(drawdown.warnings),
+            "source": "volpred.stats.drawdown.compare_max_drawdown",
+        },
+        "exposure_matched_delta_mdd_pp": drawdown.exposure_matched_gap * 100.0,
         "annual_return_cost_pp": (vt_metrics["cagr"] - bh_metrics["cagr"]) * 100.0,
         "vix_sensitivity_pearson_r": float(vix_r),
         "vix_sensitivity_p": float(vix_p),
@@ -765,14 +1267,30 @@ def _run_one_market(
         "total_transaction_cost_pct": float(comparison["transaction_cost"].sum() * 100.0),
         "n_rebalances_with_cost": int((comparison["transaction_cost"] > 0).sum()),
     }
+    cash_on_path = aligned["shy"].reindex(comparison.index)
+    if cash_on_path.isna().any():
+        raise ValueError(f"{ticker}: cash sleeve has gaps on the evaluated path")
+    path = MarketPath(
+        ticker=ticker,
+        dates=comparison.index,
+        equity=comparison["bh"].to_numpy(dtype=float),
+        cash=cash_on_path.to_numpy(dtype=float),
+        observed_targets=comparison["target_weight"].to_numpy(dtype=float),
+        rebalance=month_start_mask(comparison.index),
+        bh_returns=comparison["bh"].to_numpy(dtype=float),
+        vt_returns=comparison["vt_return"].to_numpy(dtype=float),
+    )
     comparison = comparison.rename(
         columns={"bh": f"{ticker}_bh", "vt_return": f"{ticker}_vt"}
     )
-    return result, comparison
+    return result, comparison, path
 
 
 def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     delta_mdd = np.array([row["delta_mdd_pp"] for row in rows], dtype=float)
+    matched_mdd = np.array([row["exposure_matched_delta_mdd_pp"] for row in rows], dtype=float)
+    vol_ratio = np.array([row["exposure"]["vol_ratio"] for row in rows], dtype=float)
+    mismatch = np.array([row["exposure"]["exposure_mismatch"] for row in rows], dtype=bool)
     delta_sharpe = np.array([row["delta_sharpe"] for row in rows], dtype=float)
     annual_cost = np.array([row["annual_return_cost_pp"] for row in rows], dtype=float)
     vix_sensitivity = np.array([row["vix_sensitivity_pearson_r"] for row in rows], dtype=float)
@@ -780,15 +1298,26 @@ def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     spearman = stats.spearmanr(vix_sensitivity, delta_mdd)
     dm = [row["delta_mdd_pp"] for row in rows if row["region"] == "DM"]
     em = [row["delta_mdd_pp"] for row in rows if row["region"] == "EM"]
+    dm_matched = [row["exposure_matched_delta_mdd_pp"] for row in rows if row["region"] == "DM"]
+    em_matched = [row["exposure_matched_delta_mdd_pp"] for row in rows if row["region"] == "EM"]
     return {
         "n_markets": len(rows),
         "n_mdd_improved": int(np.sum(delta_mdd > 0)),
+        "n_exposure_matched_improved": int(np.sum(matched_mdd > 0)),
+        "n_exposure_mismatch": int(mismatch.sum()),
         "n_sharpe_improved": int(np.sum(delta_sharpe > 0)),
         "average_delta_mdd_pp": float(delta_mdd.mean()),
+        "average_exposure_matched_delta_mdd_pp": float(matched_mdd.mean()),
+        "average_vol_ratio": float(vol_ratio.mean()),
+        "min_vol_ratio": float(vol_ratio.min()),
+        "max_vol_ratio": float(vol_ratio.max()),
         "average_delta_sharpe": float(delta_sharpe.mean()),
         "average_annual_return_cost_pp": float(annual_cost.mean()),
         "dm_average_delta_mdd_pp": float(np.mean(dm)),
         "em_average_delta_mdd_pp": float(np.mean(em)),
+        "dm_average_exposure_matched_delta_mdd_pp": float(np.mean(dm_matched)),
+        "em_average_exposure_matched_delta_mdd_pp": float(np.mean(em_matched)),
+        "raw_delta_mdd_reportable_alone": bool(not mismatch.any()),
         "vix_sensitivity_vs_delta_mdd": {
             "pearson_r": float(pearson.statistic),
             "pearson_p": float(pearson.pvalue),
@@ -818,6 +1347,11 @@ def _rows_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
                 "vt_cagr_pct": row["vt"]["cagr"] * 100.0,
                 "delta_sharpe": row["delta_sharpe"],
                 "delta_mdd_pp": row["delta_mdd_pp"],
+                "vol_ratio_vt_over_bh": row["exposure"]["vol_ratio"],
+                "exposure_mismatch": row["exposure"]["exposure_mismatch"],
+                "matched_lambda": row["exposure"]["matched_lambda"],
+                "matched_bh_mdd_pct": row["exposure"]["matched_benchmark_mdd"] * 100.0,
+                "exposure_matched_delta_mdd_pp": row["exposure_matched_delta_mdd_pp"],
                 "annual_return_cost_pp": row["annual_return_cost_pp"],
                 "vix_sensitivity": row["vix_sensitivity_pearson_r"],
                 "annualized_turnover": row["annualized_turnover"],
@@ -871,6 +1405,86 @@ def _render_figure(frame: pd.DataFrame) -> None:
         tmp.unlink(missing_ok=True)
 
 
+def _render_exposure_figure(
+    rows: list[dict[str, Any]],
+    null_result: dict[str, Any],
+    null_draws: np.ndarray,
+    no_timing: dict[str, Any],
+) -> None:
+    """The correction in one picture: the raw bars vanish once exposure is matched."""
+    tickers = [row["ticker"] for row in rows]
+    raw = np.array([row["delta_mdd_pp"] for row in rows], dtype=float)
+    matched = np.array([row["exposure_matched_delta_mdd_pp"] for row in rows], dtype=float)
+    constant_raw = np.array(
+        [no_timing["per_market"][ticker]["raw_delta_mdd_pp"] for ticker in tickers], dtype=float
+    )
+    order = np.argsort(-raw)
+
+    fig, (left, right) = plt.subplots(1, 2, figsize=(14.0, 6.4), dpi=150)
+
+    positions = np.arange(len(tickers))
+    width = 0.28
+    left.bar(
+        positions - width,
+        raw[order],
+        width,
+        color="#94a3b8",
+        label="raw ΔMDD (VT − BH)",
+    )
+    left.bar(
+        positions,
+        constant_raw[order],
+        width,
+        color="#f59e0b",
+        label="raw ΔMDD of a constant-weight strategy (no VIX)",
+    )
+    left.bar(
+        positions + width,
+        matched[order],
+        width,
+        color="#2563eb",
+        label="exposure-matched ΔMDD (same realized vol)",
+    )
+    left.axhline(0.0, color="black", linewidth=0.9)
+    left.set_xticks(positions)
+    left.set_xticklabels([tickers[index] for index in order], rotation=45, ha="right")
+    left.set_ylabel("ΔMDD (percentage points; positive = shallower than benchmark)")
+    left.set_title(
+        "A strategy that never looks at VIX buys most of the raw 'protection'",
+        fontsize=11,
+    )
+    left.legend(fontsize=8, loc="upper right")
+    left.grid(axis="y", alpha=0.25)
+
+    joint = null_draws.mean(axis=1)
+    observed = float(joint[0])
+    p_value = null_result["joint_exposure_matched"]["p_one_sided"]
+    right.hist(joint, bins=40, color="#cbd5e1", edgecolor="#94a3b8")
+    right.axvline(
+        observed,
+        color="#dc2626",
+        linewidth=2.0,
+        label=f"observed = {observed:+.2f} pp (p = {p_value:.3f})",
+    )
+    right.axvline(0.0, color="black", linewidth=0.9, linestyle=":")
+    right.set_xlabel("average exposure-matched ΔMDD across 13 markets (pp)")
+    right.set_ylabel(f"count over all {null_result['n_shifts']} calendar-month phases")
+    right.set_title(
+        "Observed 12/VIX timing vs every other phase of the same weight path",
+        fontsize=11,
+    )
+    right.legend(fontsize=9)
+    right.grid(axis="y", alpha=0.25)
+
+    fig.suptitle(
+        "K1695 correction: the 13-market drawdown result is an exposure artifact",
+        fontsize=13,
+    )
+    fig.tight_layout()
+    fig.savefig(EXPOSURE_FIGURE_PATH, bbox_inches="tight")
+    plt.close(fig)
+
+
 def _source_bindings() -> dict[str, Any]:
     return {
         "table5_rows": {
@@ -886,10 +1500,24 @@ def _source_bindings() -> dict[str, Any]:
             "image_artifact": FIGURE_PATH.name,
             "json_path": "$.samples.inception_aware.rows[*]",
         },
-        "abstract_average_delta_mdd": "$.samples.inception_aware.summary.average_delta_mdd_pp",
+        "exposure_figure": {
+            "data_artifact": NULL_GAPS_PATH.name,
+            "image_artifact": EXPOSURE_FIGURE_PATH.name,
+            "json_path": "$.inference.circular_shift_null.common_period",
+        },
+        "abstract_average_delta_mdd_RAW_DO_NOT_QUOTE_ALONE": (
+            "$.samples.inception_aware.summary.average_delta_mdd_pp"
+        ),
+        "abstract_average_delta_mdd": (
+            "$.samples.inception_aware.summary.average_exposure_matched_delta_mdd_pp"
+        ),
         "abstract_average_delta_sharpe": "$.samples.inception_aware.summary.average_delta_sharpe",
         "abstract_annual_return_cost": "$.samples.inception_aware.summary.average_annual_return_cost_pp",
-        "joint_bootstrap_ci": "$.inference.primary.average_delta_mdd_pp",
+        "joint_bootstrap_ci": "$.inference.primary.average_exposure_matched_delta_mdd_pp",
+        "joint_bootstrap_ci_raw": "$.inference.primary.average_delta_mdd_pp",
+        "circular_shift_null_p": (
+            "$.inference.circular_shift_null.common_period.joint_exposure_matched.p_one_sided"
+        ),
         "joint_bootstrap_kill_flag": "$.decision.kill_triggered",
     }
 
@@ -907,8 +1535,9 @@ def run_experiment(
     shy_return = total_returns["SHY"]
 
     inception_rows: list[dict[str, Any]] = []
+    inception_paths: list[MarketPath] = []
     for ticker in MARKETS:
-        row, _ = _run_one_market(
+        row, _, path = _run_one_market(
             ticker,
             start=pd.Timestamp(INCEPTION_SAMPLE_START),
             market_return=total_returns[ticker],
@@ -917,6 +1546,7 @@ def run_experiment(
             irx_level=irx_level,
         )
         inception_rows.append(row)
+        inception_paths.append(path)
     if any(pd.Timestamp(row["sample_end"]) != EXPECTED_LAST_DATE for row in inception_rows):
         raise ValueError("one or more inception-aware market samples do not reach paper cutoff")
 
@@ -932,9 +1562,10 @@ def run_experiment(
     common_start = common_dates.min()
 
     common_rows: list[dict[str, Any]] = []
+    common_paths: list[MarketPath] = []
     paired_parts: list[pd.DataFrame] = []
     for ticker in MARKETS:
-        row, comparison = _run_one_market(
+        row, comparison, path = _run_one_market(
             ticker,
             start=common_start,
             market_return=total_returns[ticker],
@@ -944,6 +1575,7 @@ def run_experiment(
             required_dates=common_dates,
         )
         common_rows.append(row)
+        common_paths.append(path)
         paired_parts.append(comparison[[f"{ticker}_bh", f"{ticker}_vt"]])
     paired = pd.concat(paired_parts, axis=1, join="inner").dropna()
     if paired.index.min() != common_start:
@@ -958,6 +1590,14 @@ def run_experiment(
         raise ValueError("one or more common-sample market rows do not reach paper cutoff")
     paired_export = paired.reset_index().rename(columns={paired.index.name or "index": "date"})
     atomic_write_gzip_csv(paired_export, RETURNS_PATH)
+
+    # Fail closed before any null is trusted: the vectorized statistic must equal the
+    # canonical one on the observed data, market by market.
+    assert_vectorized_matches_canonical(
+        paired[[f"{ticker}_vt" for ticker in MARKETS]].to_numpy(dtype=float),
+        paired[[f"{ticker}_bh" for ticker in MARKETS]].to_numpy(dtype=float),
+        tickers=list(MARKETS),
+    )
 
     primary = joint_mdd_bootstrap(
         paired,
@@ -976,25 +1616,155 @@ def run_experiment(
             seed=SEED + 10_000 * offset,
         )
 
+    common_null, common_null_draws = circular_shift_null(
+        common_paths, vix_level, sample_name="common_period"
+    )
+    inception_null, _ = circular_shift_null(
+        inception_paths, vix_level, sample_name="inception_aware"
+    )
+    no_timing_reference = {
+        "common_period": constant_weight_reference(common_paths),
+        "inception_aware": constant_weight_reference(inception_paths),
+    }
+    null_frame = pd.DataFrame(
+        common_null_draws, columns=[f"{ticker}_matched_gap_pp" for ticker in MARKETS]
+    )
+    null_frame.insert(0, "shift_months", np.arange(len(null_frame)))
+    null_frame["joint_average_matched_gap_pp"] = common_null_draws.mean(axis=1)
+    atomic_write_csv(null_frame, NULL_GAPS_PATH)
+
     inception_summary = _summary(inception_rows)
     common_summary = _summary(common_rows)
-    ci = primary["average_delta_mdd_pp"]
-    kill_triggered = bool(
+
+    raw_ci = primary["average_delta_mdd_pp"]
+    matched_ci = primary["average_exposure_matched_delta_mdd_pp"]
+
+    # The rule that was actually pre-registered.  It is reported because it was
+    # pre-registered, not because it is valid: it gates on a statistic that is not
+    # scale-invariant, so a strategy holding 73% equity passes it by construction.
+    raw_kill_triggered = bool(
         inception_summary["n_mdd_improved"] < len(MARKETS)
         or common_summary["n_mdd_improved"] < len(MARKETS)
-        or ci["lower"] <= 0.0 <= ci["upper"]
+        or raw_ci["lower"] <= 0.0 <= raw_ci["upper"]
     )
+    # The rule that governs the claim.  A positive exposure-matched gap is necessary but NOT
+    # sufficient, so the null test -- not the sign, and not the CI -- is the binding condition.
+    # Both samples are gated: the abstract quotes the inception-aware average, the
+    # pre-registered inference used the common panel.  A claim made from both must hold in both.
+    per_sample_verdict: dict[str, Any] = {}
+    for name, null_result, summary in (
+        ("common_period", common_null, common_summary),
+        ("inception_aware", inception_null, inception_summary),
+    ):
+        joint = null_result["joint_exposure_matched"]
+        rejects = bool(
+            joint["p_one_sided"] <= NULL_ALPHA and null_result["holm"]["n_survivors"] > 0
+        )
+        per_sample_verdict[name] = {
+            "raw_average_delta_mdd_pp": summary["average_delta_mdd_pp"],
+            "exposure_matched_average_delta_mdd_pp": summary[
+                "average_exposure_matched_delta_mdd_pp"
+            ],
+            "n_exposure_matched_positive": summary["n_exposure_matched_improved"],
+            "null_p_one_sided": joint["p_one_sided"],
+            "null_mean_pp": joint["null_mean_pp"],
+            "holm_survivors": null_result["holm"]["n_survivors"],
+            "rejects_no_timing_null": rejects,
+        }
+    ci_excludes_zero = bool(not (matched_ci["lower"] <= 0.0 <= matched_ci["upper"]))
+    claim_supported = bool(
+        ci_excludes_zero and all(item["rejects_no_timing_null"] for item in per_sample_verdict.values())
+    )
+    matched_kill_triggered = not claim_supported
+
+    # Every number in the prose below is interpolated from the run, never typed in.  A
+    # correction whose narrative can drift away from its own results is not a correction.
+    common_verdict = per_sample_verdict["common_period"]
+    inception_verdict = per_sample_verdict["inception_aware"]
+    common_no_timing = no_timing_reference["common_period"]
+    inception_no_timing = no_timing_reference["inception_aware"]
+
     decision = {
-        "kill_triggered": kill_triggered,
-        "pre_registered_kill_rule": (
-            "TRUE if either observed sample has fewer than 13/13 positive MDD improvements "
-            "or the primary joint-bootstrap CI for common-sample average delta MDD includes zero"
+        "kill_triggered": matched_kill_triggered,
+        "kill_rule": (
+            "The drawdown-protection claim survives ONLY IF (a) the exposure-matched joint-bootstrap "
+            f"CI excludes zero, AND (b) BOTH samples reject the circular-shift no-timing null at "
+            f"{NULL_ALPHA:.0%} with at least one market surviving Holm. Otherwise the claim is killed."
         ),
+        "claim_status": "retracted" if matched_kill_triggered else "supported",
+        "exposure_matched_ci_excludes_zero": ci_excludes_zero,
+        "per_sample": per_sample_verdict,
         "narrative_implication": (
-            "downgrade international contribution to conditional"
-            if kill_triggered
-            else "international drawdown-protection result survives the pre-registered gate"
+            "The international drawdown-protection contribution must be withdrawn. The headline raw "
+            f"MDD gaps ({inception_verdict['raw_average_delta_mdd_pp']:+.2f} pp inception-aware, "
+            f"{common_verdict['raw_average_delta_mdd_pp']:+.2f} pp common, 13/13 positive) measure "
+            "de-levering, not volatility timing: a constant-weight strategy that never looks at VIX "
+            "reproduces most of them and earns a ~zero exposure-matched gap."
+            if matched_kill_triggered
+            else "The drawdown-protection result survives an exposure-matched test against its own "
+            "circular-shift null in both samples."
         ),
+        "what_the_evidence_does_and_does_not_say": [
+            "SUPPORTED: the raw 13/13 result is reproduced exactly, and it is an exposure artifact. "
+            f"VT holds {common_summary['average_vol_ratio']:.2f}x buy-and-hold realized volatility on "
+            f"the common panel (range {common_summary['min_vol_ratio']:.2f}-"
+            f"{common_summary['max_vol_ratio']:.2f}x, mismatch flagged in "
+            f"{common_summary['n_exposure_mismatch']}/13 markets). A constant-weight strategy with the "
+            "same average exposure and no VIX input earns "
+            f"{common_no_timing['average_raw_delta_mdd_pp']:+.2f} pp (common) / "
+            f"{inception_no_timing['average_raw_delta_mdd_pp']:+.2f} pp (inception-aware) of raw MDD "
+            "'improvement' and an exposure-matched gap of "
+            f"{common_no_timing['average_exposure_matched_delta_mdd_pp']:+.2f} pp / "
+            f"{inception_no_timing['average_exposure_matched_delta_mdd_pp']:+.2f} pp.",
+            "SUPPORTED: on the common panel the exposure-matched gap is indistinguishable from the "
+            f"no-timing null (observed {common_verdict['exposure_matched_average_delta_mdd_pp']:+.2f} pp "
+            f"vs null mean {common_verdict['null_mean_pp']:+.2f} pp, p = "
+            f"{common_verdict['null_p_one_sided']:.3f}).",
+            "SUPPORTED, AND IT CUTS THE OTHER WAY: 12/VIX really does reduce risk, and the RAW "
+            "statistic does reject the phase null on the long sample "
+            f"(raw {inception_null['joint_raw_delta_mdd']['observed_pp']:+.2f} pp vs raw-null mean "
+            f"{inception_null['joint_raw_delta_mdd']['null_mean_pp']:+.2f} pp, p = "
+            f"{inception_null['joint_raw_delta_mdd']['p_one_sided']:.3f}). That rejection is not "
+            "noise and it is not dismissed here. Its cause is measured: among all "
+            f"{inception_null['n_shifts']} phases of its own weight path, the observed phase realizes "
+            f"the LOWEST volatility (rank "
+            f"{inception_null['exposure_of_the_null']['observed_rank_among_phases']}/"
+            f"{inception_null['n_shifts']}; vol ratio "
+            f"{inception_null['exposure_of_the_null']['observed_vol_ratio']:.3f} vs phase-null mean "
+            f"{inception_null['exposure_of_the_null']['null_mean_vol_ratio']:.3f}). VIX forecasts "
+            "volatility, so 12/VIX de-levers into genuinely turbulent months -- a real property of "
+            "the signal. But it is a property about REDUCING RISK, and the raw MDD gap rewards "
+            "exactly that. Reducing risk is not the same as drawing down less than a benchmark "
+            "carrying the same risk, and the withdrawn contribution claimed the latter. Strip the "
+            "risk reduction out and nothing survives.",
+            "NOT SUPPORTED: that volatility timing HURTS. The common-sample point estimate is negative "
+            "but sits in the middle of its own null; that is a failure to detect an effect, not "
+            "evidence of a negative one.",
+            "NOT SUPPORTED, AND NOT REFUTED: a modest positive effect on the long sample. The "
+            "inception-aware exposure-matched gap is "
+            f"{inception_verdict['exposure_matched_average_delta_mdd_pp']:+.2f} pp and positive in "
+            f"{inception_verdict['n_exposure_matched_positive']}/13 markets, but it does not reject its "
+            f"own null (p = {inception_verdict['null_p_one_sided']:.3f}) and "
+            f"{inception_verdict['holm_survivors']}/13 markets survive Holm. That sample's extra years "
+            "are the 2008 crisis window; one crisis is not a test.",
+        ],
+        "superseded_pre_registration": {
+            "kill_triggered": raw_kill_triggered,
+            "pre_registered_kill_rule": (
+                "TRUE if either observed sample has fewer than 13/13 positive MDD improvements "
+                "or the primary joint-bootstrap CI for common-sample average delta MDD includes zero"
+            ),
+            "why_superseded": (
+                "The pre-registered rule gates on the RAW delta MDD, which is not scale-invariant. "
+                f"12/VIX runs at {common_summary['min_vol_ratio']:.2f}-"
+                f"{common_summary['max_vol_ratio']:.2f}x buy-and-hold volatility on the common panel "
+                "(13/13 markets flagged), so both of its conditions are satisfied by de-levering "
+                "alone -- the constant-weight no-timing strategy passes the same gate 13/13. The gate "
+                "could not have failed and therefore never tested the claim. Reported here for "
+                "auditability, not as evidence."
+            ),
+            "status": "mis-specified; not evidence for or against the claim",
+        },
     }
 
     table_frame = _rows_frame(inception_rows)
@@ -1014,6 +1784,9 @@ def run_experiment(
     ].copy()
     atomic_write_csv(figure_frame, FIGURE_DATA_PATH)
     _render_figure(figure_frame)
+    _render_exposure_figure(
+        common_rows, common_null, common_null_draws, no_timing_reference["common_period"]
+    )
 
     results = {
         "experiment_id": EXPERIMENT_ID,
@@ -1076,10 +1849,26 @@ def run_experiment(
         "inference": {
             "primary": primary,
             "block_length_sensitivity": sensitivity,
+            "circular_shift_null": {
+                "common_period": common_null,
+                "inception_aware": inception_null,
+            },
+            "no_timing_reference": no_timing_reference,
+            "primary_statistic": "exposure_matched_delta_mdd_pp",
             "excluded_legacy_test": (
                 "No iid one-sample t-test across 13 markets; markets share crisis dates and VIX signal."
             ),
             "per_market_wording": "Per-market positive delta MDD is descriptive, not individual significance.",
+            "raw_statistic_status": (
+                "Retained for auditability against the published numbers. NOT reportable alone: "
+                "realized-vol ratio is outside the 20% band in 13/13 markets, so the raw gap is a "
+                "scale artifact of holding less equity."
+            ),
+            "inference_order": (
+                "1. exposure-matched gap vs its own circular-shift null (binding); "
+                "2. exposure-matched joint-bootstrap CI (sampling uncertainty); "
+                "3. raw delta MDD (audit trail only)."
+            ),
         },
         "decision": decision,
         "source_bindings": _source_bindings(),
@@ -1088,12 +1877,16 @@ def run_experiment(
             "common_rows": COMMON_PATH.name,
             "figure_data": FIGURE_DATA_PATH.name,
             "figure_png": FIGURE_PATH.name,
+            "exposure_figure_png": EXPOSURE_FIGURE_PATH.name,
+            "circular_shift_null_gaps": NULL_GAPS_PATH.name,
             "paired_returns": str(RETURNS_PATH.relative_to(SCRIPT_DIR)),
             "sha256": {
                 TABLE5_PATH.name: sha256_file(TABLE5_PATH),
                 COMMON_PATH.name: sha256_file(COMMON_PATH),
                 FIGURE_DATA_PATH.name: sha256_file(FIGURE_DATA_PATH),
                 FIGURE_PATH.name: sha256_file(FIGURE_PATH),
+                EXPOSURE_FIGURE_PATH.name: sha256_file(EXPOSURE_FIGURE_PATH),
+                NULL_GAPS_PATH.name: sha256_file(NULL_GAPS_PATH),
                 str(RETURNS_PATH.relative_to(SCRIPT_DIR)): sha256_file(RETURNS_PATH),
             },
         },
@@ -1108,6 +1901,14 @@ def run_experiment(
             "The analysis is descriptive and does not identify a causal insurance-pricing mechanism.",
             "One common US VIX signal may proxy global crises rather than locally priced volatility.",
             "Results are frozen to the 2026-03-31 manuscript sample and do not use later observations.",
+            "The circular-shift null assumes the 12/VIX weight path is approximately circularly "
+            "stationary. It is persistent but not exactly stationary, so the null is a strong "
+            "diagnostic, not an exact size-alpha test.",
+            "Exposure matching equalizes UNCONDITIONAL realized volatility, not the volatility path. "
+            "That is why the gap is read against its own null and not against zero.",
+            "Failing to reject does not prove the absence of timing skill; with 13 dependent markets "
+            "and one shared signal, the effective sample for the joint test is small and its power "
+            "against a modest true effect is limited.",
         ],
     }
     atomic_write_json(RESULTS_PATH, results)
@@ -1144,12 +1945,29 @@ def main(argv: list[str] | None = None) -> int:
         sensitivity_reps=args.sensitivity_reps,
     )
     summary = results["samples"]["inception_aware"]["summary"]
-    ci = results["inference"]["primary"]["average_delta_mdd_pp"]
+    common = results["samples"]["common_period"]["summary"]
+    matched_ci = results["inference"]["primary"]["average_exposure_matched_delta_mdd_pp"]
+    raw_ci = results["inference"]["primary"]["average_delta_mdd_pp"]
+    null = results["inference"]["circular_shift_null"]["common_period"]
     print(
-        f"{EXPERIMENT_ID} complete: n_mdd={summary['n_mdd_improved']}/13, "
-        f"avg_delta_mdd={summary['average_delta_mdd_pp']:.2f} pp, "
-        f"joint {CI_LEVEL:.0%} CI=[{ci['lower']:.2f}, {ci['upper']:.2f}], "
-        f"kill={results['decision']['kill_triggered']}"
+        f"{EXPERIMENT_ID} complete (exposure-corrected)\n"
+        f"  RAW (not reportable alone): inception avg ΔMDD={summary['average_delta_mdd_pp']:.2f} pp "
+        f"({summary['n_mdd_improved']}/13 positive); common avg={common['average_delta_mdd_pp']:.2f} pp "
+        f"({common['n_mdd_improved']}/13); joint {CI_LEVEL:.0%} CI=[{raw_ci['lower']:.2f}, {raw_ci['upper']:.2f}]\n"
+        f"  EXPOSURE: vol ratio {common['min_vol_ratio']:.2f}-{common['max_vol_ratio']:.2f}x BH; "
+        f"mismatch in {common['n_exposure_mismatch']}/13 markets\n"
+        f"  EXPOSURE-MATCHED: inception avg={summary['average_exposure_matched_delta_mdd_pp']:.2f} pp "
+        f"({summary['n_exposure_matched_improved']}/13 positive); "
+        f"common avg={common['average_exposure_matched_delta_mdd_pp']:.2f} pp "
+        f"({common['n_exposure_matched_improved']}/13); "
+        f"joint {CI_LEVEL:.0%} CI=[{matched_ci['lower']:.2f}, {matched_ci['upper']:.2f}]\n"
+        f"  CIRCULAR-SHIFT NULL (n={null['n_shifts']} phases): observed="
+        f"{null['joint_exposure_matched']['observed_pp']:+.2f} pp, "
+        f"null mean={null['joint_exposure_matched']['null_mean_pp']:+.2f} pp, "
+        f"p={null['joint_exposure_matched']['p_one_sided']:.3f}; "
+        f"Holm survivors={null['holm']['n_survivors']}/13\n"
+        f"  DECISION: kill={results['decision']['kill_triggered']} "
+        f"claim={results['decision']['claim_status']}"
     )
     return 0
 
