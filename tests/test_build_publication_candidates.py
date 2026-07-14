@@ -132,6 +132,40 @@ def test_release_layer_coverage_filters_stale_publication_gaps(
     assert "K3003" in missing_general_ids
 
 
+def test_preference_bonus_reads_qualified_conclusions(tmp_path: Path, monkeypatch) -> None:
+    """Reader-preference bonus must be additive, capped, and zero when the
+    signals file is absent — proving the wiring is live, not silently empty."""
+    mod = _load_module()
+    analytics = tmp_path / "storage" / "analytics"
+    analytics.mkdir(parents=True, exist_ok=True)
+    (analytics / "reader_preferences.json").write_text(
+        json.dumps({
+            "qualified_conclusions": [
+                {"dimension": "tag", "higher_bucket": "波動率", "lower_bucket": "GLD"},
+                {"dimension": "research_vs_narrative", "higher_bucket": "research", "lower_bucket": "narrative"},
+                {"dimension": "chart_bucket", "higher_bucket": "3+", "lower_bucket": "0"},
+            ],
+        }, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(mod, "ROOT", tmp_path)
+
+    high_tags, research_higher = mod._load_preference_signals()
+    assert high_tags == {"波動率"}          # only tag-dimension higher buckets
+    assert research_higher is True
+
+    # Matching candidate: tag hit + research-type hit, capped at 2.
+    bonus, reasons = mod._preference_bonus(["波動率", "misc"], True, high_tags, research_higher)
+    assert bonus == 2 and len(reasons) == 2
+
+    # Non-matching candidate gets nothing (no penalty either).
+    assert mod._preference_bonus(["misc"], False, high_tags, research_higher) == (0, [])
+
+    # Absent file -> zero signal -> "樣本不足/無檔 → 零影響".
+    monkeypatch.setattr(mod, "ROOT", tmp_path / "does_not_exist")
+    assert mod._load_preference_signals() == (set(), False)
+
+
 def test_output_write_is_atomic(tmp_path: Path, monkeypatch) -> None:
     """A SIGKILL mid-write must never leave truncated JSON in tracked state.
 

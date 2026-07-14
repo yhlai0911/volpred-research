@@ -86,6 +86,18 @@
         ]
       },
       {
+        "id": "reader_preferences",
+        "label": "讀者偏好週度分析",
+        "cron": "45 6 * * 1",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_reader_preferences.sh",
+        "log_path": "storage/logs/cron/reader_preferences.log",
+        "description": "每週一 06:45 分析讀者偏好（議題/系列/標題型態/文字風格/圖表/表格/研究vs敘事 × 互動），輸出 storage/analytics/reader_preferences.{json,md}，供選題與圖文表使用參考，並由 build_publication_candidates.py 當加分項。合格門檻：bucket 需 ≥10 篇且 ≥30 impressions；對比用 median（重尾）；標『傾向訊號非因果』，樣本不足只列清單不進結論。由 piggy-back run_due_jobs 執行（週一 07:00 hourly tick 評估 due）。2026-07-15 owner directive Phase 1。",
+        "matchers": [
+          "cron_reader_preferences.sh",
+          "analyze_reader_preferences.py"
+        ]
+      },
+      {
         "id": "daily_update",
         "label": "daily_update 每日更新與同步",
         "cron": "3 8 * * 1-6",

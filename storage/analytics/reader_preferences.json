@@ -1,0 +1,1446 @@
+{
+  "generated_at": "2026-07-14T17:04:18.152028+00:00",
+  "window_days": 365,
+  "since_date": "2025-07-14",
+  "gate": {
+    "min_articles": 10,
+    "min_impressions": 30
+  },
+  "totals": {
+    "articles_with_activity": 681,
+    "total_impressions": 1518,
+    "member_impression_share_overall": 0.4157
+  },
+  "data_source_errors": {
+    "article_impressions": null,
+    "article_reactions": null
+  },
+  "feature_source_counts": {
+    "report": 39,
+    "feed": 642,
+    "missing": 0
+  },
+  "methodology_notes": {
+    "signal_is_directional_not_causal": true,
+    "caveat": "傾向訊號，非因果（觀察性關聯，樣本小；勿當作 A/B 因果證據）",
+    "comparison_statistic": "median (heavy-tailed engagement; mean excluded)",
+    "read_time_is_proxy": true,
+    "read_time_bounce_filter_sec": 5,
+    "read_time_outlier_cap_sec": 1200,
+    "engaged_threshold_sec": 30,
+    "member_definition": "impression with non-null user_id = member; null = anonymous",
+    "sample_gate": "bucket needs >=10 articles AND >=30 impressions to qualify"
+  },
+  "dimensions": {
+    "audience": {
+      "title": "受眾（audience）",
+      "kind": "single",
+      "buckets": {
+        "member_qa": {
+          "n_articles": 11,
+          "total_impressions": 70,
+          "median_views_per_article": 5,
+          "median_read_time_sec": 51,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.8,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "daily": {
+          "n_articles": 29,
+          "total_impressions": 41,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 45.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.3659,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "research": {
+          "n_articles": 368,
+          "total_impressions": 744,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 42.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4503,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "general": {
+          "n_articles": 268,
+          "total_impressions": 644,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 50.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3494,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "event": {
+          "n_articles": 5,
+          "total_impressions": 19,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 39.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.0,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        }
+      }
+    },
+    "series": {
+      "title": "系列",
+      "kind": "single",
+      "buckets": {
+        "會員提問": {
+          "n_articles": 5,
+          "total_impressions": 22,
+          "median_views_per_article": 3,
+          "median_read_time_sec": 51,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.7727,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "無系列": {
+          "n_articles": 643,
+          "total_impressions": 1431,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 44.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4172,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "每日策略": {
+          "n_articles": 18,
+          "total_impressions": 28,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 49,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3214,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "事件溫度計": {
+          "n_articles": 3,
+          "total_impressions": 14,
+          "median_views_per_article": 4,
+          "median_read_time_sec": 150.75,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.1429,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "迷思實驗室": {
+          "n_articles": 7,
+          "total_impressions": 9,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 180.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.0,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "無人載具": {
+          "n_articles": 5,
+          "total_impressions": 14,
+          "median_views_per_article": 3,
+          "median_read_time_sec": null,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4286,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        }
+      }
+    },
+    "title_is_question": {
+      "title": "問句標題 vs 直述",
+      "kind": "single",
+      "buckets": {
+        "yes": {
+          "n_articles": 248,
+          "total_impressions": 533,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 44.5,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4334,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "no": {
+          "n_articles": 433,
+          "total_impressions": 985,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 44.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4061,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "title_has_number": {
+      "title": "標題含數字 vs 無",
+      "kind": "single",
+      "buckets": {
+        "yes": {
+          "n_articles": 421,
+          "total_impressions": 957,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 39.75,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4295,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "no": {
+          "n_articles": 260,
+          "total_impressions": 561,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 51.5,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3922,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "title_has_exclamation": {
+      "title": "標題含驚嘆 vs 無",
+      "kind": "single",
+      "buckets": {
+        "no": {
+          "n_articles": 673,
+          "total_impressions": 1499,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 44.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4149,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "yes": {
+          "n_articles": 8,
+          "total_impressions": 19,
+          "median_views_per_article": 2.5,
+          "median_read_time_sec": 60.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4737,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        }
+      }
+    },
+    "title_len_bucket": {
+      "title": "標題長度",
+      "kind": "single",
+      "buckets": {
+        "中": {
+          "n_articles": 385,
+          "total_impressions": 793,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 45.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4237,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "長": {
+          "n_articles": 276,
+          "total_impressions": 696,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 42.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4138,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "短": {
+          "n_articles": 20,
+          "total_impressions": 29,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 39.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.2414,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        }
+      }
+    },
+    "content_len_bucket": {
+      "title": "內文長度",
+      "kind": "single",
+      "buckets": {
+        "中": {
+          "n_articles": 356,
+          "total_impressions": 838,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 44,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3962,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "短": {
+          "n_articles": 75,
+          "total_impressions": 102,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 35,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4412,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "長": {
+          "n_articles": 250,
+          "total_impressions": 578,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 54.5,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4394,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "chart_bucket": {
+      "title": "圖表數",
+      "kind": "single",
+      "buckets": {
+        "0": {
+          "n_articles": 151,
+          "total_impressions": 287,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 50,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.3902,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "3+": {
+          "n_articles": 110,
+          "total_impressions": 252,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 55,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3571,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "1-2": {
+          "n_articles": 420,
+          "total_impressions": 979,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 41.75,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4382,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "table_bucket": {
+      "title": "表格數",
+      "kind": "single",
+      "buckets": {
+        "2+": {
+          "n_articles": 328,
+          "total_impressions": 748,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 54,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4385,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "1": {
+          "n_articles": 216,
+          "total_impressions": 457,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 41.5,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4267,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "0": {
+          "n_articles": 137,
+          "total_impressions": 313,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 41.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.345,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "has_lazypack": {
+      "title": "有無懶人包",
+      "kind": "single",
+      "buckets": {
+        "no": {
+          "n_articles": 638,
+          "total_impressions": 1436,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 43.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4304,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "yes": {
+          "n_articles": 43,
+          "total_impressions": 82,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 56.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.1585,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "research_vs_narrative": {
+      "title": "研究文（K-id）vs 敘事文",
+      "kind": "single",
+      "buckets": {
+        "narrative": {
+          "n_articles": 337,
+          "total_impressions": 775,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 43.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4748,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "research": {
+          "n_articles": 344,
+          "total_impressions": 743,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 50.5,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.354,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "tag": {
+      "title": "主題標籤（tag，多值）",
+      "kind": "multi",
+      "buckets": {
+        "會員提問": {
+          "n_articles": 10,
+          "total_impressions": 67,
+          "median_views_per_article": 5.0,
+          "median_read_time_sec": 51.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.791,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "50/50": {
+          "n_articles": 11,
+          "total_impressions": 16,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 28.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.625,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "SPY": {
+          "n_articles": 194,
+          "total_impressions": 424,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 50.75,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4292,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "GLD": {
+          "n_articles": 82,
+          "total_impressions": 172,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 45.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.407,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "TLT": {
+          "n_articles": 15,
+          "total_impressions": 26,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 61,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4231,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "VT策略": {
+          "n_articles": 50,
+          "total_impressions": 89,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 37.75,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4607,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "每日建議": {
+          "n_articles": 29,
+          "total_impressions": 41,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 45.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.3659,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "持倉建議": {
+          "n_articles": 11,
+          "total_impressions": 13,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 26,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4615,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "12/VIX": {
+          "n_articles": 29,
+          "total_impressions": 40,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 26,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.575,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "0050.TW": {
+          "n_articles": 57,
+          "total_impressions": 139,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 29,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4101,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "研究": {
+          "n_articles": 399,
+          "total_impressions": 814,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 42.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.473,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "行為金融": {
+          "n_articles": 10,
+          "total_impressions": 15,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 81.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4667,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "風險管理": {
+          "n_articles": 125,
+          "total_impressions": 253,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 45.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.3913,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "QLIKE": {
+          "n_articles": 25,
+          "total_impressions": 50,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 61.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.46,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "GARCH": {
+          "n_articles": 61,
+          "total_impressions": 124,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 54.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4677,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "模型比較": {
+          "n_articles": 20,
+          "total_impressions": 39,
+          "median_views_per_article": 1.5,
+          "median_read_time_sec": 41.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4103,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "QQQ": {
+          "n_articles": 20,
+          "total_impressions": 39,
+          "median_views_per_article": 1.5,
+          "median_read_time_sec": 52,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3333,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "波動率預測": {
+          "n_articles": 101,
+          "total_impressions": 184,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 50,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4022,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "一般讀者": {
+          "n_articles": 239,
+          "total_impressions": 578,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 50.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.308,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "VIX": {
+          "n_articles": 195,
+          "total_impressions": 518,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 48.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.3764,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "投資策略": {
+          "n_articles": 66,
+          "total_impressions": 183,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 44,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4098,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "波動率": {
+          "n_articles": 135,
+          "total_impressions": 362,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 42.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.2514,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "定期定額": {
+          "n_articles": 10,
+          "total_impressions": 26,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 40.25,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.5,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "台股": {
+          "n_articles": 71,
+          "total_impressions": 151,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 34,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4172,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "投資組合": {
+          "n_articles": 20,
+          "total_impressions": 52,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 65,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.2885,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "黃金": {
+          "n_articles": 23,
+          "total_impressions": 48,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 52,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.3333,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "VT": {
+          "n_articles": 13,
+          "total_impressions": 25,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 22.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.44,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "方法論": {
+          "n_articles": 28,
+          "total_impressions": 50,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 45.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.36,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "ETF": {
+          "n_articles": 15,
+          "total_impressions": 45,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 86.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.1556,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "FOMC": {
+          "n_articles": 15,
+          "total_impressions": 70,
+          "median_views_per_article": 3,
+          "median_read_time_sec": 41,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.2286,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "事件研究": {
+          "n_articles": 24,
+          "total_impressions": 69,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 58,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.2174,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "HAR": {
+          "n_articles": 13,
+          "total_impressions": 19,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 212.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.3158,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "BTC": {
+          "n_articles": 13,
+          "total_impressions": 37,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 25,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4865,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "資產配置": {
+          "n_articles": 33,
+          "total_impressions": 66,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 65,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.2879,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "避險": {
+          "n_articles": 13,
+          "total_impressions": 16,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 84.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.3125,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "VaR": {
+          "n_articles": 52,
+          "total_impressions": 108,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 43.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.537,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "NFP": {
+          "n_articles": 12,
+          "total_impressions": 40,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 41.5,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.35,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "美股": {
+          "n_articles": 33,
+          "total_impressions": 98,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 55,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.3878,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "跨資產": {
+          "n_articles": 18,
+          "total_impressions": 29,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 50,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3103,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "0050": {
+          "n_articles": 24,
+          "total_impressions": 59,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 35,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3898,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "GJR-GARCH": {
+          "n_articles": 31,
+          "total_impressions": 57,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 33,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4386,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "比特幣": {
+          "n_articles": 10,
+          "total_impressions": 30,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 62.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.5,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "台積電": {
+          "n_articles": 17,
+          "total_impressions": 53,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 28.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.1698,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "AI": {
+          "n_articles": 10,
+          "total_impressions": 39,
+          "median_views_per_article": 3.0,
+          "median_read_time_sec": 30.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.2821,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "研究誠實": {
+          "n_articles": 27,
+          "total_impressions": 71,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 36.0,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.3944,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "台灣": {
+          "n_articles": 10,
+          "total_impressions": 44,
+          "median_views_per_article": 4.0,
+          "median_read_time_sec": 29,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.5682,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "TSMC": {
+          "n_articles": 11,
+          "total_impressions": 31,
+          "median_views_per_article": 2,
+          "median_read_time_sec": 31.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4194,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "HAR-RV": {
+          "n_articles": 16,
+          "total_impressions": 34,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 49.5,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.5,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "跨市場": {
+          "n_articles": 29,
+          "total_impressions": 58,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 81,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.4828,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "策略配置": {
+          "n_articles": 18,
+          "total_impressions": 28,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 49,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3214,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "TAIFEX": {
+          "n_articles": 11,
+          "total_impressions": 29,
+          "median_views_per_article": 1,
+          "median_read_time_sec": 34.5,
+          "median_reactions_per_article": 0,
+          "member_impression_share": 0.5862,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "台指期": {
+          "n_articles": 14,
+          "total_impressions": 31,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 88.75,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4194,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "trending": {
+          "n_articles": 18,
+          "total_impressions": 60,
+          "median_views_per_article": 2.5,
+          "median_read_time_sec": 125.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.1,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "MF-GJR": {
+          "n_articles": 10,
+          "total_impressions": 33,
+          "median_views_per_article": 3.0,
+          "median_read_time_sec": 53,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.4848,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "EAV": {
+          "n_articles": 10,
+          "total_impressions": 14,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 85,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.7857,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "A4f": {
+          "n_articles": 16,
+          "total_impressions": 28,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 88.0,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.7857,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "Paper2": {
+          "n_articles": 10,
+          "total_impressions": 12,
+          "median_views_per_article": 1.0,
+          "median_read_time_sec": 43,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 1.0,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        },
+        "財報": {
+          "n_articles": 12,
+          "total_impressions": 31,
+          "median_views_per_article": 1.5,
+          "median_read_time_sec": 64,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3548,
+          "read_time_is_proxy": true,
+          "sample_ok": true,
+          "insufficient_sample": false
+        },
+        "精選導讀": {
+          "n_articles": 10,
+          "total_impressions": 20,
+          "median_views_per_article": 2.0,
+          "median_read_time_sec": 145.25,
+          "median_reactions_per_article": 0.0,
+          "member_impression_share": 0.3,
+          "read_time_is_proxy": true,
+          "sample_ok": false,
+          "insufficient_sample": true
+        }
+      },
+      "tags_below_article_threshold": 1231
+    }
+  },
+  "qualified_conclusions": [
+    {
+      "dimension": "audience",
+      "dimension_title": "受眾（audience）",
+      "metric": "median_views_per_article",
+      "higher_bucket": "member_qa",
+      "higher_value": 5,
+      "higher_sample": {
+        "n_articles": 11,
+        "total_impressions": 70
+      },
+      "lower_bucket": "daily",
+      "lower_value": 1,
+      "lower_sample": {
+        "n_articles": 29,
+        "total_impressions": 41
+      },
+      "delta": 4,
+      "qualifying_buckets": 4,
+      "caveat": "傾向訊號，非因果（觀察性關聯，樣本小；勿當作 A/B 因果證據）"
+    },
+    {
+      "dimension": "title_is_question",
+      "dimension_title": "問句標題 vs 直述",
+      "metric": "median_views_per_article",
+      "higher_bucket": "yes",
+      "higher_value": 2.0,
+      "higher_sample": {
+        "n_articles": 248,
+        "total_impressions": 533
+      },
+      "lower_bucket": "no",
+      "lower_value": 1,
+      "lower_sample": {
+        "n_articles": 433,
+        "total_impressions": 985
+      },
+      "delta": 1.0,
+      "qualifying_buckets": 2,
+      "caveat": "傾向訊號，非因果（觀察性關聯，樣本小；勿當作 A/B 因果證據）"
+    },
+    {
+      "dimension": "title_len_bucket",
+      "dimension_title": "標題長度",
+      "metric": "median_views_per_article",
+      "higher_bucket": "長",
+      "higher_value": 2.0,
+      "higher_sample": {
+        "n_articles": 276,
+        "total_impressions": 696
+      },
+      "lower_bucket": "中",
+      "lower_value": 1,
+      "lower_sample": {
+        "n_articles": 385,
+        "total_impressions": 793
+      },
+      "delta": 1.0,
+      "qualifying_buckets": 2,
+      "caveat": "傾向訊號，非因果（觀察性關聯，樣本小；勿當作 A/B 因果證據）"
+    },
+    {
+      "dimension": "content_len_bucket",
+      "dimension_title": "內文長度",
+      "metric": "median_views_per_article",
+      "higher_bucket": "中",
+      "higher_value": 2.0,
+      "higher_sample": {
+        "n_articles": 356,
+        "total_impressions": 838
+      },
+      "lower_bucket": "短",
+      "lower_value": 1,
+      "lower_sample": {
+        "n_articles": 75,
+        "total_impressions": 102
+      },
+      "delta": 1.0,
+      "qualifying_buckets": 3,
+      "caveat": "傾向訊號，非因果（觀察性關聯，樣本小；勿當作 A/B 因果證據）"
+    },
+    {
+      "dimension": "chart_bucket",
+      "dimension_title": "圖表數",
+      "metric": "median_views_per_article",
+      "higher_bucket": "3+",
+      "higher_value": 2.0,
+      "higher_sample": {
+        "n_articles": 110,
+        "total_impressions": 252
+      },
+      "lower_bucket": "0",
+      "lower_value": 1,
+      "lower_sample": {
+        "n_articles": 151,
+        "total_impressions": 287
+      },
+      "delta": 1.0,
+      "qualifying_buckets": 3,
+      "caveat": "傾向訊號，非因果（觀察性關聯，樣本小；勿當作 A/B 因果證據）"
+    },
+    {
+      "dimension": "table_bucket",
+      "dimension_title": "表格數",
+      "metric": "median_views_per_article",
+      "higher_bucket": "2+",
+      "higher_value": 2.0,
+      "higher_sample": {
+        "n_articles": 328,
+        "total_impressions": 748
+      },
+      "lower_bucket": "0",
+      "lower_value": 1,
+      "lower_sample": {
+        "n_articles": 137,
+        "total_impressions": 313
+      },
+      "delta": 1.0,
+      "qualifying_buckets": 3,
+      "caveat": "傾向訊號，非因果（觀察性關聯，樣本小；勿當作 A/B 因果證據）"
+    },
+    {
+      "dimension": "research_vs_narrative",
+      "dimension_title": "研究文（K-id）vs 敘事文",
+      "metric": "median_views_per_article",
+      "higher_bucket": "narrative",
+      "higher_value": 2,
+      "higher_sample": {
+        "n_articles": 337,
+        "total_impressions": 775
+      },
+      "lower_bucket": "research",
+      "lower_value": 1.0,
+      "lower_sample": {
+        "n_articles": 344,
+        "total_impressions": 743
+      },
+      "delta": 1.0,
+      "qualifying_buckets": 2,
+      "caveat": "傾向訊號，非因果（觀察性關聯，樣本小；勿當作 A/B 因果證據）"
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "metric": "median_views_per_article",
+      "higher_bucket": "會員提問",
+      "higher_value": 5.0,
+      "higher_sample": {
+        "n_articles": 10,
+        "total_impressions": 67
+      },
+      "lower_bucket": "GLD",
+      "lower_value": 1.0,
+      "lower_sample": {
+        "n_articles": 82,
+        "total_impressions": 172
+      },
+      "delta": 4.0,
+      "qualifying_buckets": 44,
+      "caveat": "傾向訊號，非因果（觀察性關聯，樣本小；勿當作 A/B 因果證據）"
+    }
+  ],
+  "insufficient_samples": [
+    {
+      "dimension": "audience",
+      "dimension_title": "受眾（audience）",
+      "bucket": "event",
+      "n_articles": 5,
+      "total_impressions": 19
+    },
+    {
+      "dimension": "series",
+      "dimension_title": "系列",
+      "bucket": "會員提問",
+      "n_articles": 5,
+      "total_impressions": 22
+    },
+    {
+      "dimension": "series",
+      "dimension_title": "系列",
+      "bucket": "每日策略",
+      "n_articles": 18,
+      "total_impressions": 28
+    },
+    {
+      "dimension": "series",
+      "dimension_title": "系列",
+      "bucket": "事件溫度計",
+      "n_articles": 3,
+      "total_impressions": 14
+    },
+    {
+      "dimension": "series",
+      "dimension_title": "系列",
+      "bucket": "迷思實驗室",
+      "n_articles": 7,
+      "total_impressions": 9
+    },
+    {
+      "dimension": "series",
+      "dimension_title": "系列",
+      "bucket": "無人載具",
+      "n_articles": 5,
+      "total_impressions": 14
+    },
+    {
+      "dimension": "title_has_exclamation",
+      "dimension_title": "標題含驚嘆 vs 無",
+      "bucket": "yes",
+      "n_articles": 8,
+      "total_impressions": 19
+    },
+    {
+      "dimension": "title_len_bucket",
+      "dimension_title": "標題長度",
+      "bucket": "短",
+      "n_articles": 20,
+      "total_impressions": 29
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "50/50",
+      "n_articles": 11,
+      "total_impressions": 16
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "TLT",
+      "n_articles": 15,
+      "total_impressions": 26
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "持倉建議",
+      "n_articles": 11,
+      "total_impressions": 13
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "行為金融",
+      "n_articles": 10,
+      "total_impressions": 15
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "定期定額",
+      "n_articles": 10,
+      "total_impressions": 26
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "VT",
+      "n_articles": 13,
+      "total_impressions": 25
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "HAR",
+      "n_articles": 13,
+      "total_impressions": 19
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "避險",
+      "n_articles": 13,
+      "total_impressions": 16
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "跨資產",
+      "n_articles": 18,
+      "total_impressions": 29
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "策略配置",
+      "n_articles": 18,
+      "total_impressions": 28
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "TAIFEX",
+      "n_articles": 11,
+      "total_impressions": 29
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "EAV",
+      "n_articles": 10,
+      "total_impressions": 14
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "A4f",
+      "n_articles": 16,
+      "total_impressions": 28
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "Paper2",
+      "n_articles": 10,
+      "total_impressions": 12
+    },
+    {
+      "dimension": "tag",
+      "dimension_title": "主題標籤（tag，多值）",
+      "bucket": "精選導讀",
+      "n_articles": 10,
+      "total_impressions": 20
+    }
+  ]
+}

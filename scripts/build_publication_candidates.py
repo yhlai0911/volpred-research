@@ -66,6 +66,64 @@ def _load_reader_signal_map() -> dict[str, dict]:
     return {row.get("slug"): row for row in rows if isinstance(row, dict) and row.get("slug")}
 
 
+# Reader-preference bonus is intentionally small: a tie-breaker nudge, never a
+# gate and never large enough to dominate the content-keyword score (max 10).
+PREFERENCE_BONUS_CAP = 2
+
+
+def _load_preference_signals() -> tuple[set[str], bool]:
+    """(high_engagement_tags, research_type_is_higher) from reader_preferences.json.
+
+    Source: scripts/analyze_reader_preferences.py output. Only *qualified*
+    conclusions (buckets that passed the >=10 articles AND >=30 impressions
+    sample gate) are ever present in that file, so an insufficient-sample bucket
+    contributes NOTHING here by construction — "樣本不足 → 零影響" is enforced
+    upstream, not re-checked. File missing/corrupt/empty -> ({}, False) -> zero
+    bonus, i.e. identical candidate output to before this feedback loop existed.
+
+    Path is derived from the module-level ROOT at call time (not a frozen
+    constant) so tests that monkeypatch ROOT get a clean, file-free environment
+    without also having to know this path.
+    """
+    prefs_path = ROOT / "storage/analytics/reader_preferences.json"
+    if not prefs_path.exists():
+        return set(), False
+    try:
+        data = json.loads(prefs_path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"WARN: reader_preferences.json unreadable, skipping preference bonus: {exc}", file=sys.stderr)
+        return set(), False
+    high_tags: set[str] = set()
+    research_higher = False
+    for c in data.get("qualified_conclusions") or []:
+        if not isinstance(c, dict):
+            continue
+        if c.get("dimension") == "tag" and c.get("higher_bucket"):
+            high_tags.add(str(c["higher_bucket"]))
+        if c.get("dimension") == "research_vs_narrative" and c.get("higher_bucket") == "research":
+            research_higher = True
+    return high_tags, research_higher
+
+
+def _preference_bonus(
+    tags: list, is_research_candidate: bool, high_tags: set[str], research_higher: bool
+) -> tuple[int, list[str]]:
+    """Additive, capped tie-breaker bonus. Only matches dimensions knowable at
+    SELECTION time (the candidate's tags + that it is a research K); style/format
+    dimensions like chart/table count are writing-time decisions, not properties
+    of the K, so they never enter the candidate score."""
+    bonus = 0
+    reasons: list[str] = []
+    for t in tags or []:
+        if str(t) in high_tags:
+            bonus += 1
+            reasons.append(f"reader-pref: tag『{t}』higher reader engagement")
+    if research_higher and is_research_candidate:
+        bonus += 1
+        reasons.append("reader-pref: research-type higher reader engagement")
+    return min(bonus, PREFERENCE_BONUS_CAP), reasons
+
+
 def extract_k_id(experiment_id: str) -> str | None:
     """Normalize K1145, k1145, K1145b → K1145."""
     if not experiment_id:
@@ -344,6 +402,7 @@ def main():
     release_layer_covered_families = _feed_experiment_ref_families(feed) | set(task_coverage_by_family)
     overturned_map = _extract_overturned_map(knowledge)
     reader_signal_map = _load_reader_signal_map()
+    pref_high_tags, pref_research_higher = _load_preference_signals()
 
     # Deduplicate knowledge by experiment_id (keep latest)
     by_k: dict[str, dict] = {}
@@ -406,6 +465,20 @@ def main():
         if cluster and cluster_gate["count"] > cluster_gate["cap"]:
             adjusted_score = max(0, int(score * 0.5))
             reasons = reasons + [f"cluster cooldown penalty ({cluster} 30d={cluster_gate['count']}>{cluster_gate['cap']})"]
+        # Reader-preference bonus (additive tie-breaker, NOT a gate). Sourced from
+        # qualified conclusions in reader_preferences.json; insufficient-sample
+        # buckets never reach here, so small/absent reader data => zero bonus =>
+        # unchanged ranking. Capped at PREFERENCE_BONUS_CAP.
+        is_research_candidate = bool(
+            (entry.get("experiment_id"))
+            or any(re.match(r"[Kk]\d", str(t)) for t in (entry.get("tags") or []))
+        )
+        preference_bonus, preference_bonus_reasons = _preference_bonus(
+            entry.get("tags") or [], is_research_candidate, pref_high_tags, pref_research_higher
+        )
+        if preference_bonus:
+            adjusted_score += preference_bonus
+            reasons = reasons + preference_bonus_reasons
         # Soft reader-engagement signal (metadata only — see
         # _load_reader_signal_map docstring; never affects score/adjusted_score
         # or the sort key). Matched via covering-article slug against
@@ -457,6 +530,8 @@ def main():
             "tags": entry.get("tags", []),
             "overturned_by": overturned_map.get(k_id, []),
             "reader_signal": reader_signal,
+            "preference_bonus": preference_bonus,
+            "preference_bonus_reasons": preference_bonus_reasons,
             "release_layer_covered": _k_id_family(k_id) in release_layer_covered_families,
         })
 
@@ -584,6 +659,7 @@ def main():
         }
 
     candidates_with_reader_signal = sum(1 for c in candidates if c.get("reader_signal"))
+    candidates_with_preference_bonus = sum(1 for c in candidates if c.get("preference_bonus"))
     release_layer_covered_count = sum(1 for c in candidates if c.get("release_layer_covered"))
 
     output = {
@@ -607,6 +683,15 @@ def main():
                 "measured reader activity. Absent (null) reader_signal_map or no "
                 "matching activity -> reader_signal stays null, never fabricated."
             ),
+            "preference_bonus": (
+                "Additive tie-breaker (0..2) folded into score, sourced from "
+                "qualified conclusions in storage/analytics/reader_preferences.json "
+                "(scripts/analyze_reader_preferences.py). Matches only "
+                "selection-time signals (candidate tags in a high-engagement tag "
+                "bucket; research-type when research reads higher). Insufficient-"
+                "sample buckets are excluded upstream, so small/absent reader data "
+                "=> 0 bonus => identical ranking. Never a gate; never a penalty."
+            ),
             "release_layer_covered": (
                 "True when storage/reports/feed.json carries structured "
                 "details.experiment_refs for the K-family, or storage/next_tasks.json "
@@ -625,6 +710,7 @@ def main():
             "missing_general_audience": len(missing_general),
             "missing_research_audience": len(missing_research),
             "candidates_with_reader_signal": candidates_with_reader_signal,
+            "candidates_with_preference_bonus": candidates_with_preference_bonus,
             "release_layer_covered": release_layer_covered_count,
         },
         "overturned_kids": sorted(overturned_map.keys()),
