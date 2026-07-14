@@ -33,7 +33,7 @@
 % --- Abstract ---
 \begin{abstract}
 \noindent
-Volatility targeting (VT), trend-following (TF), and short-horizon mean-reversion (MR) share a procyclical structure: each strategy's position update is a non-trivial function of recent prices or volatility, so widespread adoption can in principle generate self-reinforcing trading flows. Whether the resulting strategy-performance degradation reflects a discrete crowding tipping point, and whether it is VT-specific or attributable to crowded flow in general, remains unsettled. We build an agent-based model with 1{,}000 heterogeneous agents, a Kyle (1985) market maker, endogenous VIX dynamics, and 200 fixed noise traders, and re-examine the threshold structure under matched microstructure with an exogenous sup-Wald detector and turnover-matched random-direction controls. Across 94{,}500 Monte Carlo simulations in the exogenous-detector redesign layer (27 cell--adoption combinations---seven adoption levels in the baseline cell and five in each of four perturbed cells---$\times$ 7 treatments/controls $\times$ 500 MC), three findings emerge. First, VT Sharpe declines \emph{monotonically} with adoption rather than crossing a discrete threshold: in the canonical cell ($\lambda = 0.005$, $\gamma = 200$), Sharpe falls from $0.510$ at 10\% adoption to $-0.271$ at 100\%, with adjacent path-bootstrap 95\% confidence intervals separating from 40\% onward; the sup-Wald test rejects flatness in all five cells ($p = 0.001$ in every cell) but identifies no internal break, and the maximum marginal degradation concentrates in $(70\%, 100\%]$. Second, a turnover-matched random-direction control (RR\_VT) replicating VT's trading footprint without its vol-feedback direction exhibits no degradation in any cell; at VT's footprint scale, the erosion is therefore identified to the \emph{systematic direction} of vol-feedback trading rather than to crowded flow, providing a cleaner mechanism counterfactual than a no-strategy baseline (at trend-following footprint scales two orders of magnitude larger, direction-randomized controls do erode, so the identification is footprint-scale-dependent). Third, the canonical ``70\% threshold'' reported under a Sharpe-only detector survives only as a descriptive relative-drop level-crossing (drop $>70\%$) in 3 of 5 cells; under the exogenous, treatment-aware detector the interpretation is monotone erosion without a tipping point. The applicability gate excludes the TF treatment in four of five cells and MR in all five (structurally loss-making regimes), so cross-strategy family claims are withdrawn and the paper's mechanism evidence is confined to VT; our results sharpen the policy-relevant question from ``where is the tipping point'' to ``how steep is the monotone erosion and what identifies its mechanism.''
+Volatility targeting (VT), trend-following (TF), and short-horizon mean-reversion (MR) share a procyclical structure: each strategy's position update is a non-trivial function of recent prices or volatility, so widespread adoption can in principle generate self-reinforcing trading flows. Whether the resulting strategy-performance degradation reflects a discrete crowding tipping point, and whether it is VT-specific or attributable to crowded flow in general, remains unsettled. We build an agent-based model with 1{,}000 agents of heterogeneous types, a Kyle (1985) market maker, endogenous VIX dynamics, and 200 fixed noise traders, and re-examine the threshold structure under matched microstructure with an exogenous sup-Wald detector and turnover-matched random-direction controls. Across 94{,}500 Monte Carlo simulations in the exogenous-detector redesign layer (27 cell--adoption combinations---seven adoption levels in the baseline cell and five in each of four perturbed cells---$\times$ 7 treatments/controls $\times$ 500 MC), three findings emerge. First, VT Sharpe declines \emph{monotonically} with adoption rather than crossing a discrete threshold: in the canonical cell ($\lambda = 0.005$, $\gamma = 200$), Sharpe falls from $0.510$ at 10\% adoption to $-0.271$ at 100\%, with adjacent path-bootstrap 95\% confidence intervals separating from 40\% onward; the sup-Wald test rejects flatness in all five cells ($p = 0.001$ in every cell) but identifies no internal break, and the maximum marginal degradation concentrates in $(70\%, 100\%]$. Second, a turnover-matched random-direction control (RR\_VT) replicating VT's trading footprint without its vol-feedback direction exhibits no degradation in any cell; at VT's footprint scale, the erosion is therefore identified to the \emph{systematic direction} of vol-feedback trading rather than to crowded flow, providing a cleaner mechanism counterfactual than a no-strategy baseline (at trend-following footprint scales two orders of magnitude larger, direction-randomized controls do erode, so the identification is footprint-scale-dependent). Third, the canonical ``70\% threshold'' reported under a Sharpe-only detector survives only as a descriptive relative-drop level-crossing (drop $>70\%$) in 3 of 5 cells; under the exogenous, treatment-aware detector the interpretation is monotone erosion without a tipping point. The applicability gate excludes the TF treatment in four of five cells and MR in all five (structurally loss-making regimes), so cross-strategy family claims are withdrawn and the paper's mechanism evidence is confined to VT; our results sharpen the policy-relevant question from ``where is the tipping point'' to ``how steep is the monotone erosion and what identifies its mechanism.''
 
 \medskip
 \noindent
@@ -64,7 +64,7 @@ We address this gap with an agent-based simulation in which the same Kyle-micros
 \label{sec:model}
 %=================================================================
 
-We construct an agent-based model with $N = 1{,}000$ heterogeneous agents operating in a single risky asset over $T = 2{,}520$ trading days (approximately 10~years).
+We construct an agent-based model with $N = 1{,}000$ agents of heterogeneous types operating in a single risky asset over $T = 2{,}520$ trading days (approximately 10~years).
 
 \subsection{Agent Types and Strategy Treatments}
 \label{sec:agents}
@@ -123,7 +123,7 @@ The model is designed to embed a positive feedback loop: when VT agents sell (be
 
 \subsection{Simulation Design}
 
-We organize the simulation evidence base into three layered phases. \textbf{Phase~1} (cross-treatment baseline at cell1 microstructure $\lambda = 0.005$, $\gamma = 200$) runs $M = 500$ independent Monte Carlo simulations across all four treatments (VT/TF/MR/NoiseControl) at the 7 adoption levels enumerated above, yielding 14{,}000 simulations; the 3{,}500-sim VT slice supplies the standalone VT analysis (Tables~\ref{tab:main}--\ref{tab:market}). Bootstrap 95\% confidence intervals (2{,}000 replications) are reported for all key VT metrics. \textbf{Phase~2} (strategy-spec robustness) extends the comparison to TF and MR under a 12-cell scaling-by-window grid ($s \in \{1, 3, 5, 10\}$, $W \in \{10, 22, 60\}$) at 7 adoption levels with $M = 100$ MC per cell, totaling 16{,}800 simulations (Table~\ref{tab:scaling_window_matrix}). \textbf{Phase~2b} (microstructure OAT) crosses the four treatments under five $(\lambda, \gamma)$ cells (cell1 baseline plus $\lambda$/$\gamma$ each at $\pm 50\%$ of baseline; $\kappa$ is held fixed because this run, designed after Phase~1's then-current cross-treatment comparison, prioritizes the impact-and-feedback parameters most relevant to the Kyle mechanism) at four adoption levels ($\phi \in \{10\%, 30\%, 70\%, 100\%\}$) with $M = 200$ MC per (treatment, $\phi$) combination, totaling 16{,}000 simulations distributed across the 5 OAT cells (Table~\ref{tab:oat_robustness}). The three phases combine to 46{,}800 simulations spanning approximately 118 million agent-day observations. For each simulation we compute: annualized market volatility, strategy-treatment Sharpe ratio (annualized mean excess return over risk-free rate divided by annualized standard deviation of daily returns), maximum drawdown, excess kurtosis, skewness, flash-crash frequency (daily returns exceeding $3\sigma$), and VIX dynamics.
+We organize the simulation evidence base into three layered phases. \textbf{Phase~1} (cross-treatment baseline at cell1 microstructure $\lambda = 0.005$, $\gamma = 200$) runs $M = 500$ independent Monte Carlo simulations across all four treatments (VT/TF/MR/NoiseControl) at the 7 adoption levels enumerated above---14{,}000 simulations in total, of which the 3{,}500-simulation VT slice reuses the earlier VT baseline run under identical settings (the other 10{,}500 are new) and supplies the standalone VT analysis (Tables~\ref{tab:main}--\ref{tab:market}). Bootstrap 95\% confidence intervals (2{,}000 replications) are reported for all key VT metrics. \textbf{Phase~2} (strategy-spec robustness) extends the comparison to TF and MR under a 12-cell scaling-by-window grid ($s \in \{1, 3, 5, 10\}$, $W \in \{10, 22, 60\}$) at 7 adoption levels with $M = 100$ MC per cell, totaling 16{,}800 simulations (Table~\ref{tab:scaling_window_matrix}). \textbf{Phase~2b} (microstructure OAT) crosses the four treatments under five $(\lambda, \gamma)$ cells (cell1 baseline plus $\lambda$/$\gamma$ each at $\pm 50\%$ of baseline; $\kappa$ is held fixed because this run, designed after Phase~1's then-current cross-treatment comparison, prioritizes the impact-and-feedback parameters most relevant to the Kyle mechanism) at four adoption levels ($\phi \in \{10\%, 30\%, 70\%, 100\%\}$) with $M = 200$ MC per (treatment, $\phi$) combination, totaling 16{,}000 simulations distributed across the 5 OAT cells (Table~\ref{tab:oat_robustness}). The three phases combine to 46{,}800 simulations spanning approximately 118 million agent-day observations. Finally, the \textbf{exogenous-detector redesign layer}---the evidence layer behind every headline claim in Section~3---resimulates all seven treatments and controls (VT, TF, MR, RR\_VT, RR\_TF, RR\_MR, NoiseControl) at $M = 500$ MC per (cell, adoption) point on a denser adoption grid: $\phi \in \{10, 30, 40, 50, 60, 70, 100\}\%$ in the canonical cell and $\phi \in \{10, 30, 50, 70, 100\}\%$ in each of the four perturbed cells, i.e.\ 27 cell--adoption combinations and $27 \times 7 \times 500 = 94{,}500$ simulations. The random-direction controls are \emph{coherent-block}: on each day a single random draw applies one common sign to the block's entire matched $|\Delta w|$ weight vector, so the control reproduces the treatment's aggregate, coordinated footprint---per-agent independent randomization would diversify away in aggregation and understate the footprint being matched. All simulation seeds are deterministic (a fixed base formula plus treatment-specific offsets that keep treatment and control seed streams disjoint), so every run is exactly reproducible. For each simulation we compute: annualized market volatility, strategy-treatment Sharpe ratio (annualized mean excess return over risk-free rate divided by annualized standard deviation of daily returns), maximum drawdown, excess kurtosis, skewness, flash-crash frequency (daily returns exceeding $3\sigma$), and VIX dynamics.
 
 %=================================================================
 \section{Results}
@@ -133,7 +133,7 @@ We organize the simulation evidence base into three layered phases. \textbf{Phas
 \subsection{Strategy Performance Degradation: Monotone, Not Tipping}
 \label{sec:degradation_monotone}
 
-Table~\ref{tab:main} presents the core VT degradation results under fixed background liquidity ($N_{\text{noise}} = 200$). The pattern is best characterized as \emph{monotone, strategy-specific erosion}---a continuous decline in Sharpe with adoption rather than a discrete threshold crossing. Adjacent path-bootstrap 95\% confidence intervals separate from $\phi = 40\%$ onward (Table~\ref{tab:vt_monotone_curve}), the exogenous sup-Wald flatness test rejects $\phi$-invariant Sharpe in all five microstructure cells ($p = 0.001$ in every cell; full per-cell statistics in the replication package), and the maximum marginal degradation localizes to the $(70\%, 100\%]$ interval.\footnote{An earlier version of this paper, calibrated against a Sharpe-only detector that itself used adoption-level performance to define both the threshold and the falsification criterion, reported a discrete ``70\% tipping point.'' The exogenous-detector resimulation ($M = 500$, documented in the replication package) establishes that the sup-Wald rejection of flatness is consistent with smooth monotone decline and does not localize an internal break: the permutation null tests $\phi$-invariance, not the absence of a break, so the resulting $p = 0.001$ in every cell identifies non-flatness but not a discrete threshold. The headline ``70\%'' figure survives only as a descriptive level-crossing (relative Sharpe drop $>70\%$) in 3 of 5 microstructure cells and is not the output of a structural break detector. The exogenous-detector narrative supersedes the earlier tipping-point framing throughout this paper.}
+Table~\ref{tab:main} presents the core VT degradation results under fixed background liquidity ($N_{\text{noise}} = 200$). The pattern is best characterized as \emph{monotone, strategy-specific erosion}---a continuous decline in Sharpe with adoption rather than a discrete threshold crossing. Adjacent path-bootstrap 95\% confidence intervals separate from $\phi = 40\%$ onward (Table~\ref{tab:vt_monotone_curve}), the exogenous sup-Wald flatness test rejects $\phi$-invariant Sharpe in all five microstructure cells ($p = 0.001$ in every cell; full per-cell statistics in the replication package), and the maximum marginal degradation localizes to the $(70\%, 100\%]$ interval. The cell-level rejections survive multiple-testing discipline: across the redesign layer's 35 (cell, treatment) detector runs, a Bonferroni correction leaves $p = 0.001$ significant ($35 \times 0.001 = 0.035 < 0.05$), while marginal readings at $p = 0.003$ would not survive and are not relied upon.\footnote{An earlier version of this paper, calibrated against a Sharpe-only detector that itself used adoption-level performance to define both the threshold and the falsification criterion, reported a discrete ``70\% tipping point.'' The exogenous-detector resimulation ($M = 500$, documented in the replication package) establishes that the sup-Wald rejection of flatness is consistent with smooth monotone decline and does not localize an internal break: the permutation null tests $\phi$-invariance, not the absence of a break, so the resulting $p = 0.001$ in every cell identifies non-flatness but not a discrete threshold. The headline ``70\%'' figure survives only as a descriptive level-crossing (relative Sharpe drop $>70\%$) in 3 of 5 microstructure cells and is not the output of a structural break detector. The exogenous-detector narrative supersedes the earlier tipping-point framing throughout this paper.}
 
 In the canonical cell ($\lambda = 0.005$, $\gamma = 200$, $M = 500$ Monte Carlo paths), VT Sharpe falls from $0.510$ at 10\% adoption to $-0.271$ at 100\% (a $-0.78$ absolute change spanning the adoption axis), passing through $0.481$ at 30\%, $0.405$ at 40\%, $0.338$ at 50\%, $0.203$ at 60\%, and $0.091$ at 70\%. The 30--50\% decline that the earlier Sharpe-only narrative attributed to a ``safe-zone-to-tipping'' transition is, under the exogenous detector with denser adoption grid, the middle portion of an already-significant monotone slope; the 70--100\% interval contains the steepest single-step drop ($0.091 \to -0.271$) but the path-bootstrap CIs of all adjacent levels from 40\% onward are non-overlapping, so the steepness pattern is one of accelerating monotone erosion rather than knife-edge transition. Table~\ref{tab:vt_monotone_curve} reports the full canonical-cell curve.
 
@@ -333,7 +333,7 @@ Two findings follow. \emph{First, the gate excludes TF in four of five cells and
 
 \begin{table}[H]
 \centering
-\caption{Critical adoption thresholds across treatments under three detector specifications. Source: 10{,}500-simulation Phase~1 run for VT, TF, MR, NoiseControl baselines; cross-detector recompute in the replication package.}
+\caption{Critical adoption thresholds across treatments under three detector specifications. Source: Phase~1 cross-treatment run (10{,}500 new TF/MR/NoiseControl simulations plus the 3{,}500-simulation reused VT baseline slice; 14{,}000 in total); cross-detector recompute in the replication package.}
 % source: experiments/k1262/k1262_softer_detector_table.md
 \label{tab:cross_strategy_threshold}
 \begin{threeparttable}
@@ -464,20 +464,18 @@ These limitations suggest that our quantitative ranges (roughly 20--100\% across
 \subsection{Reviewer-Anticipated Objection: Knife-Edge Critique Addressed}
 \label{sec:knife_edge_rebuttal}
 
-A reviewer might reasonably argue that the VT erosion and the cross-strategy ordering TF/MR $\le$ VT are artifacts of specific parameter tuning---a ``knife-edge'' result that vanishes under perturbation. The concern has less purchase against the monotone framing than it had against the earlier tipping-point framing---a discrete threshold is a knife-edge object by construction, whereas a monotone slope is not---but the ordering claim still has to survive perturbation. Three considerations rebut the concern, in order of binding strength.
+A reviewer might reasonably argue that the VT erosion is an artifact of specific parameter tuning---a ``knife-edge'' result that vanishes under perturbation. The concern has less purchase against the monotone framing than it had against the earlier tipping-point framing---a discrete threshold is a knife-edge object by construction, whereas a monotone slope is not---but the finding still has to survive perturbation. Two considerations rebut the concern, in order of binding strength.
 
-First, the qualitative ordering TF/MR $\le$ VT is robust to strategy-spec perturbation across 12 (scaling, window) combinations (Table~\ref{tab:scaling_window_matrix}): TF threshold strictly less than VT threshold in 12/12 cells under the softer detector; MR threshold less than or equal to VT in 12/12 cells. The TF threshold ranges from 20\% under aggressive scaling ($s = 10$, $W \in \{22, 60\}$) to 70\% under mild scaling ($s = 1$, all windows), but at no point does the TF threshold exceed the VT threshold under matched microstructure. The MR threshold sits between 50\% and 70\%, also never above VT. A knife-edge result would require this ordering to flip under at least one (scaling, window) combination; it does not.
+First, the \emph{VT} monotone-erosion pattern is robust to microstructure perturbation across 5 ($\lambda$, $\gamma$) cells (Table~\ref{tab:oat_robustness}). The legacy TF/MR ordering rows in that table are retained for continuity but carry the same caveat as \S\ref{sec:cross_strategy}: they are computed in regimes that fail the matched-input gate (structurally loss-making treatments), so we do not count them as robustness evidence for a family-level claim. The $\pm 50\%$ perturbation range corresponds to the calibration uncertainty around our baseline cell rather than the full empirical span of $\lambda$ and $\gamma$ in the literature, which can vary by an order of magnitude across asset classes and time periods (Kyle-style $\lambda$ measures and inter-decadal VIX-realized-vol regression slopes both exhibit such variation in the empirical microstructure literature); a wider sweep is left to future work. The VT \emph{magnitude} does shift---from 70\% in 4/5 OAT cells to 100\% in cell2 ($\lambda$\,low)---but the shift is monotonic in $\lambda$ and consistent with the Kyle-impact mechanism encoded directly in Eq.~(\ref{eq:price}): lower price impact means correlated VT selling has a smaller per-trade price effect, and the feedback loop therefore saturates at a higher adoption level. The shift is a \emph{directional} magnitude response to a parameter that the model treats as exogenous, not a knife-edge.
 
-Second, the \emph{VT} monotone-erosion pattern is robust to microstructure perturbation across 5 ($\lambda$, $\gamma$) cells (Table~\ref{tab:oat_robustness}). The legacy TF/MR ordering rows in that table are retained for continuity but carry the same caveat as \S\ref{sec:cross_strategy}: they are computed in regimes that fail the matched-input gate (structurally loss-making treatments), so we do not count them as robustness evidence for a family-level claim. The $\pm 50\%$ perturbation range corresponds to the calibration uncertainty around our baseline cell rather than the full empirical span of $\lambda$ and $\gamma$ in the literature, which can vary by an order of magnitude across asset classes and time periods (Kyle-style $\lambda$ measures and inter-decadal VIX-realized-vol regression slopes both exhibit such variation in the empirical microstructure literature); a wider sweep is left to future work. The VT \emph{magnitude} does shift---from 70\% in 4/5 OAT cells to 100\% in cell2 ($\lambda$\,low)---but the shift is monotonic in $\lambda$ and consistent with the Kyle-impact mechanism encoded directly in Eq.~(\ref{eq:price}): lower price impact means correlated VT selling has a smaller per-trade price effect, and the feedback loop therefore saturates at a higher adoption level. The shift is a \emph{directional} magnitude response to a parameter that the model treats as exogenous, not a knife-edge.
-
-Third, the NoiseControl falsifiability anchor never produces a degradation threshold (5/5 OAT cells, 12/12 strategy-spec cells, all 7 adoption levels). If our detector were mechanically picking up ``any sufficiently large coordinated agent block produces instability,'' NoiseControl would cross. It does not. The monotone-erosion structure is therefore tied to the positive-feedback property that VT, TF, and MR share by construction---and that NoiseControl lacks. We conclude that the family-level erosion finding is mechanism-driven, not parameter-tuned: the standalone VT canonical magnitude is itself the cell1-baseline output of a 5-cell OAT robustness suite; the cross-strategy ordering is a 17-cell robustness check; and the falsifiability anchor passes in 100\% of tested configurations.
+Second, the NoiseControl falsifiability anchor never produces a degradation threshold (5/5 OAT cells, 12/12 strategy-spec cells, all 7 adoption levels). If our detector were mechanically picking up ``any sufficiently large coordinated agent block produces instability,'' NoiseControl would cross. It does not. The VT erosion structure is therefore tied to the positive-feedback property that VT encodes---and that NoiseControl lacks. We conclude that the VT erosion finding is mechanism-driven, not parameter-tuned: the canonical magnitude is itself the cell1-baseline output of a 5-cell OAT robustness suite, and the falsifiability anchor passes in 100\% of tested configurations. The legacy 12-cell TF/MR-vs-VT ordering matrix (Table~\ref{tab:scaling_window_matrix}) is retained for continuity only: computed under the superseded Sharpe-only detector in regimes that fail the matched-input gate, it is not counted as evidence for any family-level claim (\S\ref{sec:cross_strategy}).
 
 %=================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=================================================================
 
-This paper presents preliminary agent-based evidence that \emph{positive-feedback strategies as a class}---volatility targeting (VT), trend-following (TF), and short-horizon mean-reversion (MR)---exhibit strategy-specific \emph{monotone erosion} under crowding, with VT as the empirically dominant and cleanest identified case. Using a Kyle (1985) market microstructure with 1{,}000 heterogeneous agents, 200 fixed noise traders, and 46{,}800 Monte Carlo simulations across the three paper phases (plus the 94{,}500-simulation exogenous-detector redesign layer that rewrites the detector narrative), we establish three claims. First, the robust object is not a discrete tipping point but a monotone decline in VT performance with adoption: in the canonical redesign cell, Sharpe falls from 0.510 at 10\% adoption to $-0.271$ at 100\%, adjacent path-bootstrap confidence intervals separate from 40\% onward, and the exogenous sup-Wald detector rejects flatness without locating an internal break. Second, cross-strategy comparison (\S\ref{sec:cross_strategy}) and $\lambda$/$\gamma$ OAT robustness jointly establish that this degradation pattern is a feature of the positive-feedback class, not a VT-specific artifact, while the matched-control evidence shows that VT's erosion is tied to the systematic direction of vol-feedback trading rather than to crowded turnover alone. Third, a design validation (\S\ref{sec:validation}) confirms that a substantial share of the na\"ive earlier degradation estimate came from liquidity evaporation rather than crowding per se, reinforcing the value of the more conservative fixed-liquidity design.
+This paper presents agent-based evidence that volatility targeting (VT) exhibits \emph{monotone erosion} under crowding, identified to the systematic direction of vol-feedback trading at VT's footprint scale. Using a Kyle (1985) market microstructure with 1{,}000 agents of heterogeneous types, 200 fixed noise traders, and 46{,}800 Monte Carlo simulations across the three paper phases (plus the 94{,}500-simulation exogenous-detector redesign layer that rewrites the detector narrative), we establish three claims. First, the robust object is not a discrete tipping point but a monotone decline in VT performance with adoption: in the canonical redesign cell, Sharpe falls from 0.510 at 10\% adoption to $-0.271$ at 100\%, adjacent path-bootstrap confidence intervals separate from 40\% onward, and the exogenous sup-Wald detector rejects flatness without locating an internal break. Second, the matched-control evidence shows that VT's erosion is tied to the systematic direction of vol-feedback trading rather than to crowded turnover alone at VT's footprint scale; the cross-strategy extension (\S\ref{sec:cross_strategy}) instead yields an applicability finding---the TF and MR treatments are structurally loss-making at $s=10$ in four and five of five cells respectively---so family-level ordering claims are withdrawn rather than supported. Third, a design validation (\S\ref{sec:validation}) confirms that a substantial share of the na\"ive earlier degradation estimate came from liquidity evaporation rather than crowding per se, reinforcing the value of the more conservative fixed-liquidity design.
 
 Current VT adoption may still be far from the most severe region of the simulated erosion curve, but the policy and practitioner lesson is to monitor how quickly degradation steepens as combined positive-feedback adoption rises, not to fixate on a single hard trigger. Monitoring the \emph{aggregate} adoption of VT, TF, MR, and adjacent classes such as risk-parity and target-volatility overlays is therefore warranted, since family-level crowding may matter before any one class dominates in isolation. Future work should: (i)~extend the simulation model with endogenous $\lambda$ to capture liquidity-evaporation feedback during stress; (ii)~test arbitrary mixtures of feedback signals on the conjecture that the family-level erosion structure persists across continuous strategy-mix specifications; (iii)~calibrate TF and MR scaling parameters against real-world manager taxonomies; and (iv)~complement the simulation with empirical calibration as volatility-targeting and trend-following AUM data improve in granularity.
 
@@ -493,6 +491,12 @@ All methodological choices and the final manuscript content are the author's res
 \bibliographystyle{plainnat}
 
 \begin{thebibliography}{20}
+
+\bibitem[Asness et~al.(2013)]{asness2013}
+Asness, C.~S., Moskowitz, T.~J., and Pedersen, L.~H. (2013).
+\newblock Value and momentum everywhere.
+\newblock \emph{Journal of Finance}, 68(3), 929--985.
+\newblock \url{https://doi.org/10.1111/jofi.12021}
 
 \bibitem[Baltas(2019)]{baltas2019}
 Baltas, N. (2019).
@@ -523,6 +527,23 @@ Cederburg, S., O'Doherty, M.~S., Wang, F., and Yan, X.~S. (2020).
 \newblock \emph{Journal of Financial Economics}, 138(1), 95--117.
 \newblock \url{https://doi.org/10.1016/j.jfineco.2020.04.015}
 
+\bibitem[Cole(2017)]{cole2017}
+Cole, C. (2017).
+\newblock Volatility and the alchemy of risk.
+\newblock Artemis Capital Management, Research Report.
+\newblock \url{https://www.artemiscm.com/research-market-views}
+
+\bibitem[Cont and Bouchaud(2000)]{cont2000}
+Cont, R. and Bouchaud, J.-P. (2000).
+\newblock Herd behavior and aggregate fluctuations in financial markets.
+\newblock \emph{Macroeconomic Dynamics}, 4(2), 170--196.
+\newblock \url{https://doi.org/10.1017/S1365100500015029}
+
+\bibitem[Danielsson et~al.(2012)]{danielsson2012}
+Danielsson, J., Shin, H.~S., and Zigrand, J.-P. (2012).
+\newblock Procyclical leverage and endogenous risk.
+\newblock Working Paper, London School of Economics.
+
 \bibitem[{European Central Bank}(2020)]{ecb2020}
 {European Central Bank}. (2020).
 \newblock Volatility-targeting strategies and the market sell-off.
@@ -532,6 +553,12 @@ Cederburg, S., O'Doherty, M.~S., Wang, F., and Yan, X.~S. (2020).
 Gennotte, G. and Leland, H.~E. (1990).
 \newblock Market liquidity, hedging, and crashes.
 \newblock \emph{American Economic Review}, 80(5), 999--1021.
+
+\bibitem[Greenwood and Thesmar(2011)]{greenwood2011}
+Greenwood, R. and Thesmar, D. (2011).
+\newblock Stock price fragility.
+\newblock \emph{Journal of Financial Economics}, 102(3), 471--490.
+\newblock \url{https://doi.org/10.1016/j.jfineco.2011.06.003}
 
 \bibitem[Harvey et~al.(2016)]{harvey2016}
 Harvey, C.~R., Liu, Y., and Zhu, H. (2016).
@@ -548,52 +575,12 @@ Harvey, C.~R., Hoyle, E., Korgaonkar, R., Rattray, S., Sargaison, M., and Van~He
 \bibitem[Kyle(1985)]{kyle1985}
 Kyle, A.~S. (1985).
 \newblock Continuous auctions and insider trading.
-\newblock \emph{Econometrica}, 53(6), 1315--1336.
-
-\bibitem[Moreira and Muir(2017)]{moreira2017}
-Moreira, A. and Muir, T. (2017).
-\newblock Volatility-managed portfolios.
-\newblock \emph{Journal of Finance}, 72(4), 1611--1644.
-\newblock \url{https://doi.org/10.1111/jofi.12513}
-
-\bibitem[Perchet et~al.(2015)]{perchet2015}
-Perchet, R., de~Carvalho, R.~L., Heckel, T., and Moulin, P. (2015).
-\newblock Predicting the success of volatility targeting strategies: Application to equities and other asset classes.
-\newblock \emph{Journal of Alternative Investments}, 18(3), 21--38.
-
-\bibitem[Cole(2017)]{cole2017}
-Cole, C. (2017).
-\newblock Volatility and the alchemy of risk.
-\newblock Artemis Capital Management, Research Report.
-\newblock \url{https://www.artemiscm.com/research-market-views}
-
-\bibitem[Danielsson et~al.(2012)]{danielsson2012}
-Danielsson, J., Shin, H.~S., and Zigrand, J.-P. (2012).
-\newblock Procyclical leverage and endogenous risk.
-\newblock Working Paper, London School of Economics.
+\newblock \emph{Econometrica}, 53(6), 1315--1335.
 
 \bibitem[LeBaron(2006)]{lebaron2006}
 LeBaron, B. (2006).
 \newblock Agent-based computational finance.
 \newblock In L.~Tesfatsion and K.~L.~Judd (Eds.), \emph{Handbook of Computational Economics}, Vol.~2, pp.~1187--1233. Elsevier.
-
-\bibitem[Liu et~al.(2019)]{liu2019}
-Liu, F., Tang, X., and Zhou, G. (2019).
-\newblock Volatility-managed portfolio: Does it really work?
-\newblock \emph{Journal of Portfolio Management}, 46(1), 38--51.
-\newblock \url{https://doi.org/10.3905/jpm.2019.1.107}
-
-\bibitem[Moskowitz et~al.(2012)]{moskowitz2012}
-Moskowitz, T.~J., Ooi, Y.~H., and Pedersen, L.~H. (2012).
-\newblock Time series momentum.
-\newblock \emph{Journal of Financial Economics}, 104(2), 228--250.
-\newblock \url{https://doi.org/10.1016/j.jfineco.2011.11.003}
-
-\bibitem[Asness et~al.(2013)]{asness2013}
-Asness, C.~S., Moskowitz, T.~J., and Pedersen, L.~H. (2013).
-\newblock Value and momentum everywhere.
-\newblock \emph{Journal of Finance}, 68(3), 929--985.
-\newblock \url{https://doi.org/10.1111/jofi.12021}
 
 \bibitem[Lehmann(1990)]{lehmann1990}
 Lehmann, B.~N. (1990).
@@ -601,23 +588,34 @@ Lehmann, B.~N. (1990).
 \newblock \emph{Quarterly Journal of Economics}, 105(1), 1--28.
 \newblock \url{https://doi.org/10.2307/2937816}
 
+\bibitem[Liu et~al.(2019)]{liu2019}
+Liu, F., Tang, X., and Zhou, G. (2019).
+\newblock Volatility-managed portfolio: Does it really work?
+\newblock \emph{Journal of Portfolio Management}, 46(1), 38--51.
+\newblock \url{https://doi.org/10.3905/jpm.2019.1.107}
+
 \bibitem[Lo and MacKinlay(1990)]{lo1990}
 Lo, A.~W. and MacKinlay, A.~C. (1990).
 \newblock When are contrarian profits due to stock market overreaction?
 \newblock \emph{Review of Financial Studies}, 3(2), 175--205.
 \newblock \url{https://doi.org/10.1093/rfs/3.2.175}
 
-\bibitem[Cont and Bouchaud(2000)]{cont2000}
-Cont, R. and Bouchaud, J.-P. (2000).
-\newblock Herd behavior and aggregate fluctuations in financial markets.
-\newblock \emph{Macroeconomic Dynamics}, 4(2), 170--196.
-\newblock \url{https://doi.org/10.1017/S1365100500015029}
+\bibitem[Moreira and Muir(2017)]{moreira2017}
+Moreira, A. and Muir, T. (2017).
+\newblock Volatility-managed portfolios.
+\newblock \emph{Journal of Finance}, 72(4), 1611--1644.
+\newblock \url{https://doi.org/10.1111/jofi.12513}
 
-\bibitem[Greenwood and Thesmar(2011)]{greenwood2011}
-Greenwood, R. and Thesmar, D. (2011).
-\newblock Stock price fragility.
-\newblock \emph{Journal of Financial Economics}, 102(3), 471--490.
-\newblock \url{https://doi.org/10.1016/j.jfineco.2011.06.003}
+\bibitem[Moskowitz et~al.(2012)]{moskowitz2012}
+Moskowitz, T.~J., Ooi, Y.~H., and Pedersen, L.~H. (2012).
+\newblock Time series momentum.
+\newblock \emph{Journal of Financial Economics}, 104(2), 228--250.
+\newblock \url{https://doi.org/10.1016/j.jfineco.2011.11.003}
+
+\bibitem[Perchet et~al.(2015)]{perchet2015}
+Perchet, R., de~Carvalho, R.~L., Heckel, T., and Moulin, P. (2015).
+\newblock Predicting the success of volatility targeting strategies: Application to equities and other asset classes.
+\newblock \emph{Journal of Alternative Investments}, 18(3), 21--38.
 
 \end{thebibliography}
 

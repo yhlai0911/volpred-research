@@ -1,8 +1,8 @@
 # Paper 5: Monotone Strategy-Specific Erosion under VT Crowding — Matched-Control Identification via ABM
 
-**Target Journal**: Finance Research Letters (FRL)
-**Status**: 🔶 **narrative_rewrite_complete_pending_review（2026-06-11 15:xx 台灣時間，Codex phase-2 收尾）** — 已完成 Discussion / Conclusion monotone-not-tipping framing、abstract 補註 K1471 redesign layer `total_sims=94,500`、README 狀態更新，並保持 source binding 指向 `experiments/k1471_vt_crowding_redesign/k1471_full_results.json`。待主線程 / paper-review-cycle 做最終審查與提交前 polish。Codex review verdict: CONDITIONAL_PASS (presentation/interpretation caveats only, 無 calc bug)。Evidence: `experiments/k1471_vt_crowding_redesign/full_results_interpretation.md`。｜前狀態歷史：v5 雙審稿人 5 blocking → K1471 redesign + M=500 resimulation 完成；R3 SEVERE=0（v3 audit, 已被新 narrative 覆蓋）；v2 revise 2026-04-19。
-**Pages**: 15 | **Citations**: 16 (13 original + 3 new: barroso2021, cederburg2020, liu2019)
+**Target Journal**: Quantitative Finance (QF; primary) → JEBO (secondary); FRL only as fast-track fallback with heavy cuts
+**Status**: 🔶 **VT-only revision in progress（2026-07-14）** — P0-1~P0-4 完成：敘事單一化、scope 收斂 VT-only（family ordering 全面撤回，含 conclusion / knife-edge 節殘留清除）、K1471 TF/MR 誠實補報（tab:tfmr_gate + RR_TF erosion）、reproduce gate 173/173 GREEN + PDF 零內部路徑洩漏、P0-5 機械批次（redesign-layer §2 描述、sims 口徑、Bonferroni 句、Kyle 頁碼、bib 排序、本 README）。剩：v6 跨模型獨立 review（同模型自審不算）→ QF compliance gate。v4 GREEN PASS 已作廢（同模型自審假陽性第三例）。
+**Pages**: 34 | **Citations**: 22 bibitems
 
 ## Data Sources
 - Agent-based simulation (no external data needed)

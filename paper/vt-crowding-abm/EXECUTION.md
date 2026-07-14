@@ -41,11 +41,11 @@
 
 ## 完成定義（DoD）— 全部未達成
 
-- [ ] **P0-1** 落地：敘事單一化——split-brain 7 處全部消除，abstract/§3 敘事單一（B1）
-- [ ] **P0-2** 落地：scope 收斂 VT-only，title/abstract/conclusion 對齊，L317 循環校準句刪除，family-level 撤/降級（B2）
-- [ ] **P0-3** 落地：K1471 TF/MR 誠實補報（gate 失效全表 + RR_TF 5/5 惡化 + footprint-scale caveat + 修 L243）（B3 + B4，研究誠實層級）
+- [x] **P0-1** 完成（d37775ac9 + 2026-07-14 主線程驗證）：全稿 tipping/structural-break/safe-zone 殘留僅剩合法否定式/歷史指涉用法
+- [x] **P0-2** 完成（5ff463529 + 2026-07-14 主線程殘留清除）：VT-only 對齊——**conclusion 開頭「positive-feedback strategies as a class」與 §knife_edge 為已撤回 ordering 辯護的兩處漏網已改寫**；`grep 'TF/MR ≤ VT|as a class'` = 0
+- [x] **P0-3** 完成（5ff463529，2026-07-14 驗證）：tab:tfmr_gate 在稿 + RR_TF erosion 補報 + 'per se' 殘留 3 處皆為 liquidity-attribution 合法用法
 - [x] **P0-4** 完成（2026-07-14）：reproduce.py K1471 三表 binding（gate 173/173 green）+ 主線程 provenance class sweep（7 處印出型內部路徑全清，PDF 零洩漏）
-- [ ] **P0-5** 落地：機械修正批次（因式分解、macro/口徑/accounting、多重檢定、Kyle 頁碼、bib 排序、README metadata）
+- [x] **P0-5** 完成（2026-07-14 主線程）：§2 補 redesign-layer 描述（27×7×500 grid + coherent-block RR + deterministic disjoint seeds——**深審原要求的「CRN pairing 說明」經查證 K1471 README 不成立**（RR 用不重疊 offset），已改寫誠實版本）；Phase-1 14,000/10,500 口徑統一（VT slice 標明重用）；Bonferroni(35) 句補上；heterogeneous agents→agents of heterogeneous types ×3；Kyle 1315–1335；bib 字母排序；README metadata 更新。94,500 因式分解 / 52% 歸因 / φ=100% accounting 三項確認已由先前 pass 解決
 - [x] `reproduce.py` exit 0 且 `reproduce_report.json` match_rate ≥ 95% / **alert green**（含 K1471 三張 headline 表）✅ 173/173 = 100% green（2026-07-14）
 - [ ] **v6 跨模型獨立 review** 通過 0 blocking（paper-review-cycle + Codex adversarial；**同模型自審不算**）
 - [ ] QF `journal-review` compliance gate 通過（author = Yi-Hao Lai only；無 volpred / AI / LLM 字樣）
@@ -162,4 +162,5 @@ L243 現宣稱 gate 只排除「RR_MR in cell3 + cell2-TF@φ=30%」，且承諾�
 
 ### 進度更新 2026-07-14
 - 2026-07-14 | **P0-4 reproduce.py K1471 擴充落地（論文工程 agent）**：三張 K1471 表全欄 binding 進 `reproduce.py`（tab:vt_monotone_curve / tab:matched_control_vt / tab:tfmr_gate）+ abstract 因式分解（94,500=27×7×500）+ RR_TF footprint-scale erosion narrative（TF excluded 4/5、MR 5/5、RR_TF p=0.001 5/5、level-crossing 40–70%、footprint 1.5 vs 0.004–0.008、two orders）。新增 125 條 assertion，binding 全走 K1471 canonical JSON path（caption 舊 path `treatment_results.VT_baseline.cell1` 不存在，已改用 `cells.<cell>.treatments.<treat>.per_adoption`）。gate: **173/173 = 100% green, exit 0**（`--skip-live` 與 live K827v3 rerun 皆同）。report metadata 對齊 VT-only 標題 + QF target + tables_verified 7。
+- 2026-07-14 | **P0 全數收官（主線程）**：(1) provenance class sweep——agent 點名 2 處外掃出全類共 7 處印出型內部路徑（含 k1262/k1262b caption），全改「replication package」+ 路徑降 comment，PDF 零洩漏；(2) P0-2 殘留清除——conclusion「as a class」宣稱與 §knife_edge 為已撤回 ordering 辯護兩處改寫為 VT-only；(3) P0-5 機械批次全項落地（§2 redesign-layer 描述、CRN 說法查證後改寫、sims 口徑、Bonferroni(35) 句、Kyle 頁碼、bib 排序、README）。最終驗證：compile 35pp 乾淨、reproduce 173/173 green、PDF 0 內部路徑、家族級主張 grep=0。**P0-1~P0-5 全 ✅；下一 gate = v6 跨模型獨立 review**。
 - **⚠️ 待主線程裁定（main.tex 專屬，agent 不改 .tex）**：P0-4 的 B5+B6 provenance 修復未完成 —— L142 caption 仍寫 JSON 不存在的 `treatment_results.VT_baseline.cell1`，且 **L142 + L214 兩張 table caption 仍用 `\% source:`**（會印字面 `%` + repo 路徑到投稿 PDF；2026-07-13 只修了 abstract）。P0-4 pdftotext 洩漏 gate 因此尚未達成。
