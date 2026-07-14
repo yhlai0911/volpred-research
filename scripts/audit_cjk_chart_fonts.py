@@ -129,29 +129,47 @@ def _establishes_cjk_font(source: str) -> bool:
     return False
 
 
+def check_file(path: Path) -> dict | None:
+    """Verdict for one script: a violation dict, or None if clean/irrelevant.
+
+    Split out of `scan()` so the publish path can ask the same question about a
+    single experiment's figure script. The CI ratchet only fires on push — which
+    is *after* the article is live, so it caught k1703's tofu charts only once
+    readers could already see them (2026-07-14). The publish gate needs a per-file
+    verdict, and it has to be this same verdict, not a second opinion.
+    """
+    try:
+        source = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as e:
+        print(f"[WARN] 讀檔失敗 path={path} err={e}", file=sys.stderr)
+        return None
+    if not any(m in source for m in MPL_MARKERS):
+        return None
+    try:
+        tree = ast.parse(source)
+    except SyntaxError as e:
+        print(f"[WARN] AST parse 失敗 path={path} err={e}", file=sys.stderr)
+        return None
+    if not _draws_cjk_text(tree):
+        return None
+    if _establishes_cjk_font(source):
+        return None
+    try:
+        rel = str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        rel = str(path)
+    return {
+        "path": rel,
+        "reason": "matplotlib + CJK 字串，但未建立 CJK 字型鏈（會渲染成豆腐字）",
+    }
+
+
 def scan() -> list[dict]:
     violations: list[dict] = []
     for path in _iter_python_files():
-        try:
-            source = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError) as e:
-            print(f"[WARN] 讀檔失敗 path={path} err={e}", file=sys.stderr)
-            continue
-        if not any(m in source for m in MPL_MARKERS):
-            continue
-        try:
-            tree = ast.parse(source)
-        except SyntaxError as e:
-            print(f"[WARN] AST parse 失敗 path={path} err={e}", file=sys.stderr)
-            continue
-        if not _draws_cjk_text(tree):
-            continue
-        if _establishes_cjk_font(source):
-            continue
-        violations.append({
-            "path": str(path.relative_to(REPO_ROOT)),
-            "reason": "matplotlib + CJK 字串，但未建立 CJK 字型鏈（會渲染成豆腐字）",
-        })
+        verdict = check_file(path)
+        if verdict is not None:
+            violations.append(verdict)
     return violations
 
 

@@ -110,7 +110,11 @@ def test_lockout_collapses_the_candidate_menu(monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setattr(ctd, "_maybe_refill", lambda *_a, **_kw: {})
     monkeypatch.setattr(ctd, "_maybe_refill_draft_pool", lambda **_kw: {})
 
-    report = ctd.build_report(auto_refill=False)
+    # Pin the clock to the same instant the fixtures are dated against. On the wall
+    # clock `fresh_p2` keeps ageing, and once it drifts past its own 24h threshold it
+    # joins the starved set — the assertion below then fails for a reason that has
+    # nothing to do with the lockout it is pinning.
+    report = ctd.build_report(auto_refill=False, now=NOW)
 
     assert report["starvation"]["locked"] is True
     assert [c["id"] for c in report["dispatch_candidates"]] == ["starving_p1"]

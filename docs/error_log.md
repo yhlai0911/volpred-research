@@ -2,6 +2,47 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-14 09:07 — 豆腐字圖表第三次上線 + CI 時間炸彈測試 — **3-STRIKE TRIGGER，FIXED**（hourly-09）
+
+**觸發**：main 的 Test Suite 紅燈（run 29294703782，head_sha 112811a3c），兩個 failure。
+
+### Failure A — CJK 豆腐字圖表**已經發到讀者面前**（3-strike class）
+
+`test_no_new_cjk_font_violations` 抓到 `experiments/k1703/k1703.py` 畫中文卻沒設 CJK 字型。
+但這不只是「新腳本違規」—— 去抓線上圖 `article-images/k1703/fig1_rv_by_week_type.png` 一看，
+**整張圖的中文全是空方框**，而文章早就上線了。
+
+**同類事故第三次**：2026-06-11 k202（`mile_872abdc3`）、2026-07-13 CPI T-2（`mile_9560b9cc`）、
+今天 k1703。7/13 的修法是加 CI ratchet（`scripts/tests/test_cjk_chart_font_ratchet.py`），
+**它今天確實紅燈了 —— 但它是 CI 測試，跑在 push 之後，而 publish 發生在 push 之前**。
+於是 ratchet 在背景正確地紅著，讀者同時在看三張豆腐字圖。**判準是對的，站錯邊界**。
+
+**三層修正**：
+1. **底層邏輯** — 豆腐字是 reader-facing 缺陷，判定必須發生在**內容送到讀者之前**，不是進 repo 之後。
+2. **流程** — 判準搬到 publish gate：`prepublish_audit.audit_chart_cjk_fonts()` 從文章 embed 的
+   `/article-images/<kid>/` URL 反解出 `experiments/<kid>/*.py`，用**同一個** AST 判準檢查。
+   收編進既有 image gate（`publisher.py` 內，緊鄰 `audit_image_urls`）—— 依 anti-stacking，
+   不另立新 watchdog。確定性判定 → `audit_strict` 下 hard block；解不到實驗目錄則 fail-open
+   （per `.claude/rules/dedup-gate-audit.md`，不製造內容黑洞）。
+3. **程式架構** — `audit_cjk_chart_fonts.py` 抽出 `check_file(path)` 單檔判準，CI ratchet 與
+   publish gate 共用同一個 verdict，杜絕兩份定義漂移（正是 7/14 06:20 dedup gate 那條的同型錯誤）。
+
+**線上補救**：k1703.py 補 `apply_cjk_style()` → 重跑產圖 → `upsert_article_image.py` 就地覆蓋
+Supabase 同 key 三張圖 → 重抓 public URL 目視確認中文正常。重跑的 results.json 樣本期間 / 交易日數
+/ 週數完全一致（8,418 日 / 1,744 週），只有第 5 位小數的 yfinance 回溯調整浮點差，結論不受影響。
+
+**Regression gate**：`tests/test_prepublish_cjk_font_gate.py`（4 cases，k1703 字面情境）。
+
+### Failure B — starvation 測試是時間炸彈（非 code 變更觸發）
+
+`test_lockout_collapses_the_candidate_menu` 失敗，但**沒有人改過 dispatcher**。根因：
+`build_report()` 只認牆鐘時間，測試 fixture 卻把 `fresh_p2`（P2，24h 門檻）錨在 `NOW=2026-07-13`
+的 0.5h 前。真實時間走到 7/14，這個「新鮮」任務自己老化到 24.6h → 被判餓死 → 候選清單多一筆。
+**測試會在某個日曆邊界自己壞掉，與程式碼無關**。
+
+**修法**：`build_report(now=...)` 讓時鐘可注入，測試 pin 到 fixture 的同一瞬間。
+（`test_dispatch_type_rotation.py` 的 fixture 沒有 `created_at` → 永不判餓死 → 不受影響，已查。）
+
 ## 2026-07-14 06:20 — dedup gate 說 `clean`，其實是「我沒看」— **STRIKE 2，FIXED**（hourly-06）
 
 **現象**：本班 P1 時效任務 `trending_repost_2026_07_14_ai資本`（「AI變現挑戰：從期權波動率解析

@@ -568,3 +568,65 @@ def audit_image_urls(content: str) -> dict:
                 break
         broken.append({"url": u, "reason": reason})
     return {"broken": broken, "total": len(urls)}
+
+
+# Experiment-scoped image keys look like `.../article-images/k1703/fig1_...png`.
+_EXPERIMENT_IMG_KEY_RE = _img_re.compile(
+    r"/article-images/(?P<kid>k\d+[a-z0-9_\-]*)/", _img_re.IGNORECASE
+)
+
+
+def audit_chart_cjk_fonts(content: str, root: Path | None = None) -> dict:
+    """Block articles whose charts were drawn without a CJK font (tofu boxes).
+
+    matplotlib's default font has no CJK glyphs, so a Chinese axis label renders as
+    empty boxes. Nothing raises, nothing logs — only a human looking at the PNG can
+    tell. It has now shipped to readers three times (2026-06-11 k202, 2026-07-13 CPI
+    T-2, 2026-07-14 k1703).
+
+    A CI ratchet for this already exists, and it *did* fire on k1703 — but CI runs on
+    push, which is after publish, so it turned red while the tofu charts were already
+    live on the site. Same verdict, wrong side of the publish boundary. This is that
+    verdict moved to the point where it can still prevent the damage.
+
+    Deterministic (AST over the generator script), so a hit is a hard block rather
+    than a warning; unresolvable inputs fail open per `.claude/rules/dedup-gate-audit.md`.
+    """
+    repo_root = root or _REPO_ROOT
+    text = content or ""
+    urls: list[str] = []
+    for m in _IMG_MD_RE.finditer(text):
+        urls.append(m.group("url"))
+    for m in _IMG_HTML_RE.finditer(text):
+        urls.append(m.group("url"))
+
+    k_ids: list[str] = []
+    for u in urls:
+        m = _EXPERIMENT_IMG_KEY_RE.search(u)
+        if m:
+            kid = m.group("kid").lower()
+            if kid not in k_ids:
+                k_ids.append(kid)
+    if not k_ids:
+        return {"violations": [], "checked": []}
+
+    try:
+        from scripts import audit_cjk_chart_fonts as cjk_audit
+    except Exception as exc:  # noqa: BLE001
+        print(f"  [prepublish_audit] CJK font gate unavailable (fail-open): {exc}")
+        return {"violations": [], "checked": [], "degraded": str(exc)}
+
+    violations: list[dict] = []
+    checked: list[str] = []
+    for kid in k_ids:
+        exp_dir = repo_root / "experiments" / kid
+        if not exp_dir.is_dir():
+            # Image key that does not map to an experiment dir (renamed / external
+            # asset). Nothing to inspect — fail open rather than block on a guess.
+            continue
+        for script in sorted(exp_dir.glob("*.py")):
+            checked.append(str(script.relative_to(repo_root)))
+            verdict = cjk_audit.check_file(script)
+            if verdict is not None:
+                violations.append({**verdict, "k_id": kid})
+    return {"violations": violations, "checked": checked}

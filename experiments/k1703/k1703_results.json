@@ -23,58 +23,58 @@
   "summary_by_week_type": {
     "opex": {
       "n_weeks": 393,
-      "mean_rv_annual_pct": 14.367836035747874,
-      "median_rv_annual_pct": 11.747840465014733,
-      "ci95_low": 13.28188448606134,
-      "ci95_high": 15.620077876743084,
-      "mean_abs_ret_pct": 0.7492819996983149,
-      "mean_hl_range_pct": 3.2822940705185553
+      "mean_rv_annual_pct": 14.367854629230466,
+      "median_rv_annual_pct": 11.748117697688537,
+      "ci95_low": 13.281944249893979,
+      "ci95_high": 15.62008998384741,
+      "mean_abs_ret_pct": 0.7492824082217423,
+      "mean_hl_range_pct": 3.2822942855527604
     },
     "post_opex": {
       "n_weeks": 393,
-      "mean_rv_annual_pct": 14.56932842365748,
-      "median_rv_annual_pct": 11.921672767357213,
-      "ci95_low": 13.586961244617438,
-      "ci95_high": 15.64072519574322,
-      "mean_abs_ret_pct": 0.7594641765936285,
-      "mean_hl_range_pct": 3.140264085190575
+      "mean_rv_annual_pct": 14.569323944574275,
+      "median_rv_annual_pct": 11.921394675219956,
+      "ci95_low": 13.586926439229236,
+      "ci95_high": 15.640723538214038,
+      "mean_abs_ret_pct": 0.7594634779752066,
+      "mean_hl_range_pct": 3.14026677398244
     },
     "normal": {
       "n_weeks": 958,
-      "mean_rv_annual_pct": 15.302706670397873,
-      "median_rv_annual_pct": 12.239919399282229,
-      "ci95_low": 14.584682442266672,
-      "ci95_high": 16.072110761089096,
-      "mean_abs_ret_pct": 0.8000786463900217,
-      "mean_hl_range_pct": 3.329449167663114
+      "mean_rv_annual_pct": 15.302692242134588,
+      "median_rv_annual_pct": 12.23989389268144,
+      "ci95_low": 14.584654322322626,
+      "ci95_high": 16.072094307549705,
+      "mean_abs_ret_pct": 0.800078267153825,
+      "mean_hl_range_pct": 3.329449106266016
     }
   },
   "tests": {
     "opex_vs_normal": {
-      "diff": -0.9348706346499984,
-      "ci_low": -2.282843781723793,
-      "ci_high": 0.490702665130382,
+      "diff": -0.934837612904122,
+      "ci_low": -2.2828370126833697,
+      "ci_high": 0.4907145735747066,
       "p_value": 0.1826
     },
     "post_opex_vs_normal": {
-      "diff": -0.7333782467403935,
-      "ci_low": -2.0015259665824274,
-      "ci_high": 0.5623279416960887,
+      "diff": -0.7333682975603129,
+      "ci_low": -2.0015577478554194,
+      "ci_high": 0.5623353926742017,
       "p_value": 0.266
     },
     "post_opex_vs_opex": {
-      "diff": 0.2014923879096049,
-      "ci_low": -1.428421520392484,
-      "ci_high": 1.7537116335730734,
+      "diff": 0.20146931534380919,
+      "ci_low": -1.4284489062868817,
+      "ci_high": 1.7536653765933614,
       "p_value": 0.8022
     },
     "opexday_vs_other_friday_abs_ret": {
-      "diff": -0.11600860462339968,
-      "ci_low": -0.19715163255166543,
-      "ci_high": -0.031699921005730824,
+      "diff": -0.11600911586088258,
+      "ci_low": -0.197149671315695,
+      "ci_high": -0.03170094987978333,
       "p_value": 0.009,
-      "mean_opex_friday_pct": 0.6831469119761746,
-      "mean_other_friday_pct": 0.7991555165995743,
+      "mean_opex_friday_pct": 0.6831458462264264,
+      "mean_other_friday_pct": 0.799154962087309,
       "n_opex_fridays": 393,
       "n_other_fridays": 1292
     }
@@ -82,31 +82,31 @@
   "by_decade": {
     "1993-1999": {
       "n_opex_weeks": 83,
-      "opex_mean": 11.889438729449262,
-      "normal_mean": 13.817462513780038,
-      "post_opex_mean": 13.644120404284921,
-      "opex_minus_normal": -1.928023784330776
+      "opex_mean": 11.889464330190755,
+      "normal_mean": 13.81744956370845,
+      "post_opex_mean": 13.644088633189016,
+      "opex_minus_normal": -1.9279852335176955
     },
     "2000-2009": {
       "n_opex_weeks": 117,
-      "opex_mean": 18.567349465312805,
-      "normal_mean": 18.36400640773363,
-      "post_opex_mean": 17.353106909970094,
-      "opex_minus_normal": 0.20334305757917548
+      "opex_mean": 18.56738986449179,
+      "normal_mean": 18.363985301632255,
+      "post_opex_mean": 17.353117326442575,
+      "opex_minus_normal": 0.2034045628595358
     },
     "2010-2019": {
       "n_opex_weeks": 118,
-      "opex_mean": 11.58438100454019,
-      "normal_mean": 12.638069337747872,
-      "post_opex_mean": 11.879812082547597,
-      "opex_minus_normal": -1.053688333207683
+      "opex_mean": 11.584378318815071,
+      "normal_mean": 12.638054986825917,
+      "post_opex_mean": 11.87980247710337,
+      "opex_minus_normal": -1.053676668010846
     },
     "2020-2026": {
       "n_opex_weeks": 75,
-      "opex_mean": 14.938657353697142,
-      "normal_mean": 16.213842791782163,
-      "post_opex_mean": 15.482036569794978,
-      "opex_minus_normal": -1.2751854380850212
+      "opex_mean": 14.938667654880295,
+      "normal_mean": 16.213836817058517,
+      "post_opex_mean": 15.482047122280306,
+      "opex_minus_normal": -1.2751691621782228
     }
   }
 }

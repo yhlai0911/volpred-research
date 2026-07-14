@@ -1866,6 +1866,36 @@ class Publisher:
             content_audit_flagged = True
             print(f"  ⚠️ prepublish_audit image-URL findings (audit_strict=False bypass):\n  - {img_lines}")
 
+        # CJK chart-font gate. An image URL under /article-images/<kid>/ traces back
+        # to experiments/<kid>/*.py; if that script draws Chinese without setting a
+        # CJK font, every label in the PNG is a tofu box. The CI ratchet catches this
+        # too, but only on push — i.e. after the article is already live (k1703,
+        # 2026-07-14). Deterministic verdict → hard gate under audit_strict, same
+        # shape as the image-URL gate above.
+        try:
+            from volpred.publisher.prepublish_audit import audit_chart_cjk_fonts
+            cjk_audit = audit_chart_cjk_fonts(description or '')
+        except Exception as _cjk_exc:
+            print(f"  [prepublish_audit] CJK font gate exception (degrading): {_cjk_exc}")
+            cjk_audit = {"violations": []}
+            content_audit_flagged = True
+        if cjk_audit.get("violations"):
+            cjk_lines = '\n  - '.join(
+                f"{v['path']} ({v['reason']})" for v in cjk_audit["violations"]
+            )
+            cjk_msg = (
+                "pre-publish CJK chart-font violations: the figures embedded in this "
+                "article come from scripts that draw Chinese without a CJK font, so "
+                "they render as tofu boxes for readers:\n  - "
+                f"{cjk_lines}\n"
+                "修法：在 savefig 前呼叫 scripts/plot_style.py 的 apply_cjk_style()，"
+                "重跑腳本產圖，再用 scripts/upsert_article_image.py 覆蓋線上同名圖檔。"
+            )
+            if audit_strict:
+                raise ValueError(cjk_msg)
+            content_audit_flagged = True
+            print(f"  ⚠️ prepublish_audit CJK font findings (audit_strict=False bypass):\n  - {cjk_lines}")
+
         # Chart-path provenance check — warn-only, never blocks (fail-open).
         # Stale/machine-absolute chart refs survive publish as provenance and
         # break future re-publish once the repo path changes (2026-07-02

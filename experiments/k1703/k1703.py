@@ -13,6 +13,8 @@ import json
 from datetime import date
 from pathlib import Path
 
+import sys
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -20,6 +22,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yfinance as yf
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from plot_style import apply_cjk_style
+
+apply_cjk_style()
 
 SEED = 42
 N_BOOT = 10000

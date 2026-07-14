@@ -856,7 +856,16 @@ def _maybe_retire_covered_article_tasks(*, auto_refill: bool) -> dict | None:
         return None
 
 
-def build_report(*, auto_refill: bool = True) -> dict:
+def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> dict:
+    """Build the dispatch report.
+
+    `now` exists so starvation verdicts can be pinned to a fixed instant. Without
+    it the only clock is the wall clock, and any test that dates its fixtures
+    relative to a literal `datetime(...)` ages a little more every real hour: a
+    "fresh" P2 written on 2026-07-13 crossed its own 24h starvation line the next
+    day and joined the starved set, so the lockout assertion started failing on a
+    calendar boundary rather than on a code change (CI red, 2026-07-14).
+    """
     slots = count_active_slots()
     # Retire covered article tasks BEFORE categorizing so duplicates never reach
     # the agentable candidate list this run.
@@ -889,12 +898,12 @@ def build_report(*, auto_refill: bool = True) -> dict:
     # menu to rotate to. Advisory prose ("please take the oldest P1") is what we
     # had before, and it let a P1 sit for 17h; changing what is *offered* is the
     # mechanical version of the same instruction.
-    starved = find_starved(cats["agentable"])
+    starved = find_starved(cats["agentable"], now=now)
     starved_ids = {s["task"].get("id") for s in starved}
     # Main-thread tasks starve too (a boss-assigned P1 sat 27h — see `_coerce_priority`),
     # but the fix there cannot be a lockout: nothing in the agent lane can claim them.
     # Surface them so the fire has to look at them, and let the alert bridge nag.
-    starved_main_thread = find_starved(cats["main_thread"])
+    starved_main_thread = find_starved(cats["main_thread"], now=now)
     if starved:
         candidates_to_dispatch = [s["task"] for s in starved][:free_slots]
     else:
