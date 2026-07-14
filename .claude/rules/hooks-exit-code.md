@@ -7,7 +7,7 @@ paths:
 
 # Hooks / Wrapper Exit-Code Rule
 
-**THREE-STRIKE TRIGGER**：2026-06-23 同一 session 3 次發現 hook / wrapper 把 shell pipeline exit code 當作 tool outcome（pytest false-green），詳見 `docs/error_log.md` line 23-41。
+**THREE-STRIKE TRIGGER**：2026-06-23 同一 session 3 次發現 hook / wrapper 把 shell pipeline exit code 當作 tool outcome（pytest false-green），詳見 `docs/error_log_archive/2026-Q2.md` 2026-06-23 entries（索引見 error_log.md §D）。
 
 ## 規則本體
 
@@ -71,4 +71,4 @@ Hook 騙過 review = 紀律失效。`run-compact-bash.sh` 把 SyntaxError 當 PA
 - 用 `set -o pipefail` + `PIPESTATUS` 或解析 tool 自己的 summary
 - LaunchAgent wrapper 永遠先 emit banner，最後 trap EXIT 記 rc
 
-歷史 incident: `docs/error_log.md` line 23-41（hook exit-code masking），line 539-559（gmail-poll 雙 log 診斷）。
+歷史 incident: `docs/error_log_archive/2026-Q2.md` — 2026-06-23 hook exit-code masking、2026-06-22 gmail-poll 雙 log 診斷（索引見 error_log.md §D）。

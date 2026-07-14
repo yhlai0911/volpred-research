@@ -77,7 +77,7 @@ except Exception as e:
 
 When an error-log bucket review task is opened:
 
-1. Read the recent 20 top-level entries from `docs/error_log.md`.
+1. Read `docs/error_log.md` §D（class index）+ recent entries in `docs/error_log_archive/2026-Q3.md`.
 2. If the cluster contains fallback, guard-held, alert-severity, or hidden
    diagnostic failures, run:
    ```bash
@@ -116,4 +116,4 @@ Silent fallback 在開發階段看似「ops 友善」，運營階段是**最大�
 - Code review / Codex review 加 checklist 一條「bare except 是否有 log」
 - 新建 ops script 預設 `from volpred.ops.diagnostics import warn`（待 module 建好後加入 cookiecutter template）
 
-歷史 incident: `docs/error_log.md` 2026-06-22 ~ 2026-06-23 silent fallback batch fix entries（line 59-598 多筆）；governance_error_log_review_200 sweep report (2026-06-23)。
+歷史 incident: `docs/error_log_archive/2026-Q2.md` 2026-06-22 ~ 2026-06-23 silent fallback batch fix entries（多筆；索引見 error_log.md §D）；governance_error_log_review_200 sweep report (2026-06-23)。

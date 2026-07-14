@@ -8,7 +8,7 @@ paths:
 
 # Dedup Gate Audit Rule
 
-**Pattern 觸發**：2026-06-23 dedup-gate 8-day 內容黑洞 incident（`docs/error_log.md` line 43-49） — fail-closed default + 無 audit trail，content pipeline 變 invisible black hole。
+**Pattern 觸發**：2026-06-23 dedup-gate 8-day 內容黑洞 incident（`docs/error_log_archive/2026-Q2.md` 2026-06-23 entry；索引見 error_log.md §E） — fail-closed default + 無 audit trail，content pipeline 變 invisible black hole。
 
 ## 規則本體
 
@@ -78,4 +78,4 @@ except Exception as e:
 - 既有 gate 若不符合此規則 → 補 audit trail（不必一次性改完，逐步補）
 - Code review checklist 加一條「gate 決策是否 logged」
 
-歷史 incident: `docs/error_log.md` line 43-49（arc-dedup default-block）；governance_error_log_review_200 sweep Pattern E（2026-06-23）。
+歷史 incident: `docs/error_log_archive/2026-Q2.md` 2026-06-23（arc-dedup default-block；索引 §E）；governance_error_log_review_200 sweep Pattern E（2026-06-23）。

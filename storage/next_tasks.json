@@ -37010,13 +37010,10 @@
     "title": "error_log.md 壓縮：7,666 行 → 活教訓索引（≤800 行）+ 季度歸檔",
     "description": "docs/error_log.md 已 7,666 行 / 430 條 / 35 個 3-STRIKE，「實驗前必讀」已不可執行。做法：(1) 每類 root cause 收斂成一條活教訓（規則 + 防錯 + 指向機械 gate），主檔 ≤800 行；(2) 歷史全文按季移 docs/error_log_archive/；(3) 更新引用面（CLAUDE.md、experiments rule、preamble）指向索引。詳見 docs/refactor_plan_token_ops_waste.md WS4c。注意：改治理檔前 commit snapshot；不刪教訓內容只搬家 + 收斂。",
     "task_type": "governance",
-    "status": "in_progress",
+    "status": "succeeded",
     "priority": 2,
     "source": "refactor_plan_token_ops_waste",
     "created_at": "2026-07-14T07:28:32.517134+00:00",
-    "claimed_by": "interactive-main-20260714",
-    "claimed_at": "2026-07-14T08:20:50.297964+00:00",
-    "claim_session_id": "df994fecd9fe",
     "status_history": [
       {
         "ts": "2026-07-14T08:20:50.297977+00:00",
@@ -37029,19 +37026,45 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "interactive-main-20260714"
+      },
+      {
+        "ts": "2026-07-14T08:46:53.311333+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-main-20260714"
       }
     ],
-    "started_at": "2026-07-14T08:20:50.811457+00:00"
+    "started_at": "2026-07-14T08:20:50.811457+00:00",
+    "completed_at": "2026-07-14T08:46:53.311318+00:00",
+    "result": "7,739行/433條 → 271行 class index（16 classes A-P + 3-STRIKE 分布）+ 季度歸檔 Q1/Q2/Q3。主線程機械驗證：header multiset 433=433 全同、抽驗 entry 逐字相同、回滾 tag error_log_pre_compaction 存在。4 處 rules 檔 stale 行號引用已由主線程改指 archive+索引。"
   },
   {
     "id": "ws5_governance_layer_consolidation",
     "title": "治理疊層收斂：6 個多層 concern 各指定唯一 enforcement owner",
     "description": "3-strike/dedup/worktree-merge/silent-fallback/時間戳/發文查重 6 個 concern 各被 4-6 層文件重複規範。每個 concern 指定唯一 enforcement owner（機械 gate 優先），其餘層降一行 pointer（anti-stacking 升級路徑）。8 個 paper skill 整併評估併入月度 skill audit。詳見 docs/refactor_plan_token_ops_waste.md WS5。約束：snapshot commit 先行；改既有 skill 需寄 email 通知（feedback_skill_autonomy）；刪治理規範需用戶同意 — 本任務只做降級成 pointer 與 owner 指定，不刪規範本體。",
     "task_type": "governance",
-    "status": "pending",
+    "status": "in_progress",
     "priority": 2,
     "source": "refactor_plan_token_ops_waste",
-    "created_at": "2026-07-14T07:28:32.517134+00:00"
+    "created_at": "2026-07-14T07:28:32.517134+00:00",
+    "claimed_by": "interactive-main-20260714",
+    "claimed_at": "2026-07-14T08:46:53.557265+00:00",
+    "claim_session_id": "c2f3a85b87e2",
+    "status_history": [
+      {
+        "ts": "2026-07-14T08:46:53.557282+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-main-20260714"
+      },
+      {
+        "ts": "2026-07-14T08:46:53.847037+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-main-20260714"
+      }
+    ],
+    "started_at": "2026-07-14T08:46:53.847022+00:00"
   },
   {
     "id": "taifexdata_dropbox_organize",
