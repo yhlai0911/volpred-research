@@ -28,7 +28,7 @@ copying that mapping into prose. Codex eligibility is enforced by
 | **paper_review** | ✅ | ✅ | serialize per paper | `paper-review-cycle` | Codex 可做完整 read-only review / report；任何 `.tex` new section、methodology rewrite 或結構性寫入改列 `paper_body` 由主線程處理 |
 | **paper_body** | ✅ only | ❌ | serialize per paper | `paper-update` | **禁止 background agent 寫 .tex** (CLAUDE.md hard rule); main thread only |
 | **paper_decision** | ✅ only | ❌ | one at a time | `paper-stage-classifier` | 需 ≥3 互補實驗 + user confirm 才進 `decision_made_awaiting_body_rewrite` |
-| **daily_article** | ✅ | ✅ | up to 2 | `feed-publisher` + `anti-ai-style` | reader-facing 3-canonical 必讀；publication-candidates 選題；3-layer dedup |
+| **daily_article** | ✅ | ✅ | up to 2 | `feed-publisher` + `anti-ai-style` | reader-facing 3-canonical 必讀；publication-candidates 選題；3-layer dedup（規則本體見 `.claude/rules/publishing.md` §選題三層查重）|
 | **daily_digest** | ✅ | ✅ | 1/day | `feed-publisher` + `anti-ai-style` | 每日精選導讀＝**專題策展**（選一 theme + 撈 archive 同主題 3-6 篇舊文 + 時事 hook + 串敘事弧，**非逐篇 recap 當天文章**）；立即 published；`details.content_type='daily_digest'`；curated slug 寫 `details.digest_articles`；title 用專題式標題且**不可**以 `每日精選導讀｜` 起頭（前端已顯示此區塊標頭）；tags 含 `精選導讀`；勿混 EMAIL 用 `send-daily-digest` |
 | **event_article** | ✅ only | ❌ | one at a time | `feed-publisher` + event templates | 即時性需要主線程判斷；直接 `published` 不入 draft pool；**FB 雙發佈強制**（2026-05-25 起；共用 trending-repost FB SOP，不算 trending daily cap） |
 | **member_qa** | ✅ only | ❌ | one at a time | `member-questions` | 4 維度評分 → question-rerank → research → publish；每 6h cron |

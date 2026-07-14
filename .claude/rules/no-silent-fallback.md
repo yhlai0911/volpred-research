@@ -7,7 +7,7 @@ paths:
 
 # No-Silent-Fallback Rule
 
-**THREE-STRIKE TRIGGER**：2026-06-23 governance sweep 發現 127 個 silent fallback instances 跨 68 個 file（audit: `scripts/audit_silent_fallbacks.py --json`），相關 incident 散見 `docs/error_log.md` 2026-06-22/23 entries 35+ 條。屬於「同類 root cause 重複出現」結構性缺陷。
+**THREE-STRIKE TRIGGER**：2026-06-23 governance sweep 發現 127 個 silent fallback instances 跨 68 個 file（audit: `scripts/audit_silent_fallbacks.py --json`），相關 incident 見 `docs/error_log.md` §D（全文在 archive Q2）。屬於「同類 root cause 重複出現」結構性缺陷。3-strike 教條本體在 CLAUDE.md，本檔只是該 class 的規則 owner。
 
 ## 規則本體
 
