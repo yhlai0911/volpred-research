@@ -1,8 +1,8 @@
 # EXECUTION — vt-crowding-abm
 
-> **BADGE** · verdict `2/5`（底層 K1471 證據層 `4/5`）· stage `revision`（**finishing**；journal_target 未定）· journal `QF → JEBO`（FRL 快軌備選）· **p0 = TODO** · tier `1` · dod `0/9`
+> **BADGE** · verdict `2/5`（底層 K1471 證據層 `4/5`）· stage `revision`（**finishing**；journal_target 未定）· journal `QF → JEBO`（FRL 快軌備選）· **p0 = DONE（2026-07-14）** · tier `1` · dod `6/9`
 > 依據：`review_history/fable_deep_review_20260711/README.md`（Fable 深審 2/5）· `docs/paper_portfolio_review_20260711.md`（第一梯隊）· `storage/paper_pipeline_status.json`（stage=revision / blocker=finishing / journal_target=decide）
-> 最後更新：2026-07-11（Fable deep review 完成，P0 尚未執行）
+> 最後更新：2026-07-14（P0-1~P0-5 全數完成；下一 gate = v6 跨模型獨立 review）
 
 ---
 
@@ -39,7 +39,7 @@
 
 ---
 
-## 完成定義（DoD）— 全部未達成
+## 完成定義（DoD）— 6/9（剩 v6 review / QF compliance / 最終同步）
 
 - [x] **P0-1** 完成（d37775ac9 + 2026-07-14 主線程驗證）：全稿 tipping/structural-break/safe-zone 殘留僅剩合法否定式/歷史指涉用法
 - [x] **P0-2** 完成（5ff463529 + 2026-07-14 主線程殘留清除）：VT-only 對齊——**conclusion 開頭「positive-feedback strategies as a class」與 §knife_edge 為已撤回 ordering 辯護的兩處漏網已改寫**；`grep 'TF/MR ≤ VT|as a class'` = 0
@@ -53,9 +53,9 @@
 
 ---
 
-## P0 — 投稿前必做（純寫作，無需重跑任何模擬；估 2–3 個主線程工作段；全部 ⬜ TODO）
+## P0 — 投稿前必做（✅ 2026-07-14 全數完成；下方各節保留原規格與驗證 gate 記錄）
 
-### ⬜ P0-1 — 敘事單一化 pass（B1；純手稿，估 1 天主線程）
+### ✅ P0-1 — 敘事單一化 pass（d37775ac9；2026-07-14 主線程 gate 驗證通過）
 
 現稿新舊敘事同稿互撞至少 5 處，任何 referee 讀到 §3.4「genuine structural break」對上 abstract「identifies no internal break」就結束了。一次消除（行號以 2026-07-01 版 `main.tex` 為準）：
 
@@ -67,7 +67,7 @@
 
 **驗證 gate**：全稿 `grep -iE 'tipping|structural break|safe zone'` 無殘留（appendix continuity 註記除外）；abstract 與 §3 敘事單一化。
 
-### ⬜ P0-2 — scope 收斂 VT-only（B2；純手稿，估 0.5–1 天）
+### ✅ P0-2 — scope 收斂 VT-only（5ff463529 + 2026-07-14 conclusion/knife-edge 殘留清除）
 
 - ⬜ **Tables 3/4 + knife-edge §（17/17 robustness）移 appendix**，標「superseded Sharpe-only detector（K1261/K1262/K1262b）的歷史結果，僅作 continuity 參考」，或整段刪除——同一份稿不能一邊宣告該 detector 循環作廢、一邊拿它輸出當第二貢獻
 - ⬜ **刪 L317** 循環校準句（v5 codex blocking #1 指名：「reproduces exactly the 70% threshold... the primary anchor」）
@@ -76,7 +76,7 @@
 
 **驗證 gate**：conclusion 無任何以 superseded detector 為證據的 family-level ordering 主張；title/abstract/conclusion 三處 scope 一致。
 
-### ⬜ P0-3 — 誠實補報 K1471 TF/MR（B3 + B4；研究誠實層級，估 0.5 天）
+### ✅ P0-3 — 誠實補報 K1471 TF/MR（5ff463529；2026-07-14 驗證）
 
 L243 現宣稱 gate 只排除「RR_MR in cell3 + cell2-TF@φ=30%」，且承諾「TF/MR matched-control evidence reported in §3.5」——§3.5 內 RR_TF/RR_MR 數字**一個都沒有**。實況（`k1471_full_threshold_table.md`，已對 JSON 驗證）：
 
@@ -97,7 +97,7 @@ L243 現宣稱 gate 只排除「RR_MR in cell3 + cell2-TF@φ=30%」，且承諾�
 - ✅ **`\% source:` 洩漏修復 + class sweep（主線程 2026-07-14）**：不只 agent 點名的 L142/L214 — 全檔掃出**同類共 7 處**印出型內部路徑（k1471 caption×2、§3.5 gate 實作路徑、§4.1 footnote、fig caption 的 scripts/ 路徑、k1262/k1262b caption×3），全部改為「replication package」+ 路徑降 LaTeX comment。原 P0-4 gate 只掃 `k1471|source:` 小寫，會漏 k1262 的 `Source:` — class sweep 補上。
 - **驗證 gate 全達成**：`reproduce.py` **173/173 = 100% green, exit 0**；`pdftotext main.pdf | grep -iE 'source:|experiments/k|scripts/|_results\.json|\.py|\.md'` 僅剩 3 筆 caption 正常學術用語「Source: <run 描述>」，**零內部路徑洩漏**；重編譯乾淨。
 
-### ⬜ P0-5 — 機械修正批次（B7 + audit 2026-06-10 Major 群；估 0.5 天）
+### ✅ P0-5 — 機械修正批次（2026-07-14 主線程全項落地；見 DoD P0-5 條）
 
 - ⬜ **abstract 因式分解** 改 7 treatments × **27** 個 cell×adoption 組合 × 500 = 94,500（現「5 cells × 7 levels × 7 treatments × 500 = 122,500」≠ 94,500）
 - ⬜ **§2.1 補 K1471 adoption grid 描述**（{10,30,40,50,60,70,100}%，cell1 七點、cells2–5 各五點；現 L103 誤寫 {0,10,20,30,50,70,100}%）+ **coherent-block RR 描述**（整個 block 同天同 sign 同 |Δw|，單次 rng draw 施加全體權重向量——非 per-agent 獨立，否則審稿人會用「聚合流量不協同」打掉識別）+ common-random-numbers seed pairing 說明
