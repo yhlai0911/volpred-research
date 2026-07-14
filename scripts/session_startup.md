@@ -83,6 +83,10 @@ scripts/install_scheduler_cron.sh
 
 **2026-04-18 回復 4/11 版本 — supervisor 3-terminal workflow 已廢棄。**
 
+**定位儀器（2026-07-14 WS1b）**：session 開頭的運營狀態定位一律
+`uv run python scripts/ops_snapshot.py`（backbone / queue / pool / alerts / git 一份 JSON，0.4s），
+不要用零散 ls / git status / jq 翻抽屜重建狀態。
+
 ### 2.0 Session 啟動前：replay pending_sessions.json（2026-04-25, 2026-04-27 新增 helper script）
 
 新 session 開啟時**第一步**跑：

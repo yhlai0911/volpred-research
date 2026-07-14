@@ -15,7 +15,6 @@ from zoneinfo import ZoneInfo
 from croniter import croniter
 
 from volpred.config import load_runtime_schedules
-from volpred.publisher.email_notifier import EmailNotifier
 
 from .boss_facing import boss_facing_alert, plainify_boss_text
 from .common import dump_json, load_json, project_path
@@ -383,6 +382,11 @@ def _dispatch_alert_email(
     recipient: str,
     storage_dir: str,
 ) -> dict[str, Any]:
+    # Lazy import：email_notifier 反向 import volpred.ops（canonical_write），
+    # top-level import 形成 alerts ↔ email_notifier 環，token_report 路徑每日撞
+    # ImportError（refactor_plan_token_ops_waste WS4d）。函式內 import 解環。
+    from volpred.publisher.email_notifier import EmailNotifier
+
     notifier = EmailNotifier(storage_dir=storage_dir)
     display_title, display_body = boss_facing_alert(title, body, level)
     subject = f"[VolPred Alert][{level.upper()}] {display_title}"

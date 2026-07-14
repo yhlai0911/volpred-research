@@ -62,4 +62,28 @@ for dir in "${LOG_DIRS[@]}"; do
     fi
   done
 done
+# --- Retention（2026-07-14 refactor_plan_token_ops_waste WS3a）---
+# 累積性目錄的裁切收編進本 job（anti-stacking：log_rotate 是唯一 retention owner）。
+# rollback_points：session 級重構安全網，超過 14 天的 session 早已結束，無復原價值
+#（2026-07-14 盤點：81 目錄 1.7GB 全部停在 5/18，從未有清理機制）。
+# logs/hooks：hook debug tail，7 天後無診斷價值（盤點：4,549 檔自 4/25 累積未輪替）。
+RB_DIR="/Users/yhlai0911/volpred-research/storage/ops/rollback_points"
+HOOKS_LOG_DIR="/Users/yhlai0911/volpred-research/storage/logs/hooks"
+
+if [ -d "$RB_DIR" ]; then
+  rb_n=$(find "$RB_DIR" -mindepth 1 -maxdepth 1 -type d -mtime +14 | wc -l | tr -d ' ')
+  if [ "$rb_n" -gt 0 ]; then
+    find "$RB_DIR" -mindepth 1 -maxdepth 1 -type d -mtime +14 -exec rm -rf {} +
+    echo "retention: rollback_points pruned $rb_n dirs (>14d)"
+  fi
+fi
+
+if [ -d "$HOOKS_LOG_DIR" ]; then
+  hk_n=$(find "$HOOKS_LOG_DIR" -type f -mtime +7 | wc -l | tr -d ' ')
+  if [ "$hk_n" -gt 0 ]; then
+    find "$HOOKS_LOG_DIR" -type f -mtime +7 -delete
+    echo "retention: hooks logs pruned $hk_n files (>7d)"
+  fi
+fi
+
 echo "=== [log_rotate] exit 0 ($rotated files rotated) at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="

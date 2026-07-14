@@ -5,11 +5,11 @@
 只有最後一則真人訊息是 `<<autonomous-loop-dynamic>>` sentinel 的 autonomous fire 才走本流程。互動 turn 禁用 `ScheduleWakeup`，由文字回覆收尾；24/7 persistence 由 `com.volpred.dispatch-supervisor` 與 host cron 負責。
 
 ## Step 1 — Run ops cycle
-- Check `storage/ops/dashboard_latest.json` breaches
-- Diff `storage/ops/handoff_latest.md` since last fire
-- Verify canonical dispatcher state (`storage/ops/dispatch_state.json`: heartbeat, current jobs, latest completion)
-- Triage critical email backlog (`scripts/task_pool_claim.py list --status pending` filter email_reply)
-- Commit any orphan deliverables (`git status` for uncommitted refactor pieces)
+- **定位一次到位**：`uv run python scripts/ops_snapshot.py`（backbone / queue / pool / alerts / git 一份 JSON；2026-07-14 WS1b 起取代零散 ls / git status / jq 巡檢）
+- Diff `storage/ops/handoff_latest.md` since last fire（敘事脈絡）
+- Check `storage/ops/dashboard_latest.json` breaches（snapshot 未涵蓋的 dashboard 維度）
+- Triage critical email backlog（snapshot.queue 有 email_reply 時才展開）
+- Commit any orphan deliverables（snapshot.git.dirty_files > 0 時才跑 git status 細查）
 - Dispatch 1 task from next_tasks if pool > 0 and slot < 4
 
 ## Step 2 — Summarize to markdown

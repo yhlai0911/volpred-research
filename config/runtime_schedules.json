@@ -2,7 +2,7 @@
   "metadata": {
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
-    "updated_at": "2026-06-30",
+    "updated_at": "2026-07-14",
     "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection."
   },
   "system_crontab": {
@@ -72,6 +72,18 @@
         ],
         "piggy_back_skip": true,
         "piggy_back_skip_reason": "host crontab fires reliably; 2026-05-29 incident confirmed double-fire (host + piggy-back). See docs/error_log.md."
+      },
+      {
+        "id": "fred_backfill_guard",
+        "label": "FRED daily-rate 新鮮度 guard（自癒 backfill）",
+        "cron": "10 8 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_fred_backfill_guard.sh",
+        "log_path": "storage/logs/cron/fred_backfill_guard.log",
+        "description": "每日 08:10 檢查 guarded FRED series 新鮮度（>4 天 stale 自動 backfill）。2026-05-29 建立時為 */30 應急補 4/16 缺口；缺口癒合後空轉 2,220 班（每班 noop），2026-07-14 refactor_plan_token_ops_waste WS3c 降為每日並補進本 spec（原為 spec drift：在 crontab 但不在此檔）。",
+        "matchers": [
+          "cron_fred_backfill_guard.sh",
+          "fred_backfill_guard.py"
+        ]
       },
       {
         "id": "daily_update",

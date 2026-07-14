@@ -5,7 +5,7 @@ Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-con
 **Routing canonical**：`.claude/rules/task-routing.md`（capability / concurrency / workflow exceptions）+ `scripts/model_router.py`（model / effort / topology）。派工前依 `task_type` 查兩個 owner，不在本 prompt 維護固定型別數。
 
 **統一任務池 + claim 流程（HARD RULE，2026-05-25 用戶要求）**：
-1. **第一動作必讀 `storage/ops/handoff_latest.md`**（由 com.volpred.handoff-regen LaunchAgent 每小時 :50 自動生成）— 取得任務池快照 / claim 狀態 / email_reply 待處理 / dashboard 訊號。
+1. **第一動作 = 一次定位，禁止翻抽屜**：`uv run python scripts/ops_snapshot.py`（0.4s 回傳 backbone/queue/pool/alerts/git 全狀態 JSON）+ 讀 `storage/ops/handoff_latest.md`（敘事脈絡）。**之後不得再用零散 ls / git status / jq 重複定位**（2026-07-14 WS1b：repo-navigation bash 一週 1,945 則 / 10.1M tokens 的根治）。
 2. **派工前先 claim**：`uv run python scripts/task_pool_claim.py claim --id <id> --owner hourly-$(date +%H)` — 拒絕 `wrong_status` / `already_claimed` 時換另一 task，禁強推。
 3. 開工標 in_progress：`uv run python scripts/task_pool_claim.py start --id <id>`
 4. 完工標 succeeded/failed：`uv run python scripts/task_pool_claim.py complete --id <id> --status succeeded --result "<摘要>"`
