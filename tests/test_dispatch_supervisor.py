@@ -500,9 +500,9 @@ def test_phase_z_add_failure_aborts_commit(tmp_path: Path) -> None:
     assert commits == []  # never reached commit
 
 
-def test_phase_z_lsfiles_failure_warns_but_still_commits(tmp_path: Path) -> None:
-    # Codex review #3: ls-files probe rc!=0 must not silently claim "no leaked
-    # paths and everything fine" — it warns but the real-work commit proceeds.
+def test_phase_z_lsfiles_failure_discards_candidate(tmp_path: Path) -> None:
+    # The alternate-index transaction is fail-closed: if it cannot inventory
+    # leaked tracked state, it cannot prove the candidate tree is complete.
     calls: list[str] = []
 
     def fake_runner(argv, **kwargs):
@@ -514,15 +514,14 @@ def test_phase_z_lsfiles_failure_warns_but_still_commits(tmp_path: Path) -> None
             return _FakeCompleted(128, stderr="fatal: bad revision")
         if sub == "add":
             return _FakeCompleted(0)
-        if sub == "commit":
-            return _FakeCompleted(0, stdout="[main abc] PHASE-Z\n")
         return _FakeCompleted(0)
 
     out = phase_z.run_phase_z(repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner,
                               pre_fire_dirty=set())
-    assert out["committed"] is True
-    assert out["untracked"] == []  # could not untrack (ls-files failed)
-    assert "commit" in calls  # but real work was still committed
+    assert out["committed"] is False
+    assert out["reason"] == "candidate_index_error"
+    assert out["rolled_back"] is True
+    assert "commit-tree" not in calls
 
 
 def test_scheduler_phase_z_runs_even_if_worker_raises(tmp_path: Path, monkeypatch) -> None:

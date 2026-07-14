@@ -30360,47 +30360,15 @@
   },
   {
     "id": "K1683_article_general",
-    "title": "K1683：公開 Treasury crowding 指標為何沒有穩定預警風險",
-    "description": "依 agent-result-verification publishable-finding gate 建立。Evidence 只用 experiments/k1683/k1683_results.json、README.md 與兩份 Codex review：CFTC TFF 四年期 gross-participation proxy（4,192 contract-report rows；899 lagged origins）在 4 個主要 expanding-OOS 格子 0/4 通過。TLT/IEF RV5 QLIKE 改善 +1.4026038748396232%/+0.4978547418674615%，但 HLN t=-1.270115489450718/-0.5779944527214179、BH q 均 0.5634724474919137，late-half 轉負；DGS10 jump 與 SPY-TLT correlation loss 惡化。一般讀者 takeaway：規模很大的 hedge-fund Treasury exposure 不等於公開持倉 level 能當每週風險警報。必須明說 CFTC proxy 不是 Form PF exposure，也不可宣稱 forced deleveraging 不存在。寫前跑 3-layer dedup + check_arc_dedup --k-id K1683 --audience general，並遵守 feed-publisher / anti-ai-style / publishing rules。",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "audience": "general",
-    "k_id": "K1683",
+    "title": "K1683：公開 Treasury crowding 指標為何沒有穩定預警風險",
+    "priority": 3,
     "source": "auto_discovered",
     "created_at": "2026-07-11T08:42:03.477465+00:00",
-    "publishable_gate": {
-      "confidence": 0.9,
-      "decisive_verdict": "NULL_NO_ROBUST_INCREMENT",
-      "reader_takeaway": true,
-      "knowledge_item_id": "01bd87e9"
-    },
-    "claimed_by": "hourly-17",
-    "claimed_at": "2026-07-11T09:08:19.619551+00:00",
-    "claim_session_id": "026bf9d79d38",
-    "status_history": [
-      {
-        "ts": "2026-07-11T09:08:19.619573+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-17"
-      },
-      {
-        "ts": "2026-07-11T09:08:19.892146+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-17"
-      },
-      {
-        "ts": "2026-07-11T09:19:34.479850+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-17"
-      }
-    ],
-    "started_at": "2026-07-11T09:08:19.892127+00:00",
     "completed_at": "2026-07-11T09:19:34.479830+00:00",
-    "result": "mile_531e4c87 草稿已建檔（general, 3719 字, 2 圖上傳 CDN, anti_ai_gate PASS）；懶人包 async render 已 enqueue (lazypack-mile_531e4c87)；順修 prepublish_audit criteria-string 門檻 false positive + regression test"
+    "tombstone": true,
+    "archived_at": "2026-07-14T10:03:04.858247+00:00"
   },
   {
     "id": "telegram-472",
@@ -30416,31 +30384,15 @@
   },
   {
     "id": "telegram-475",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 475）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-11T10:00:54.003159+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 475）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻處理\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] git-push-backup: push held — 1 new silent fallback(s)\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n本地領先 2 commit 但 HEAD 帶 1 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push 保護 CI（紅碼不上 origin、CI 不會紅）。主線程收到此信會當班立即修（每處加 'from volpred.ops.diagnostics import warn' 再 fallback，或標 '# silent-ok: 理由'）並重跑本 wrapper 解封 — 不留待下一班。新發現：\nNEW src/volpred/publisher/prepublish_audit.py:228 except ValueError: pass\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "claimed_by": "telegram-responder",
-    "claimed_at": "2026-07-11T10:01:11.777689+00:00",
-    "claim_session_id": "ccb13e886fd6",
-    "status_history": [
-      {
-        "ts": "2026-07-11T10:01:11.777709+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-11T10:03:31.806672+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-11T10:03:31.806656+00:00"
+    "completed_at": "2026-07-11T10:03:31.806656+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-14T10:07:18.883046+00:00"
   },
   {
     "id": "k1655_dm_sweep_rerun_paper_bound",
@@ -34690,14 +34642,37 @@
     "title": "paper_body P0-2: scope 收斂 VT-only（B2）",
     "description": "Tables 3/4 + knife-edge § 移 appendix 並標「superseded Sharpe-only detector 的歷史結果，僅作 continuity 參考」或整段刪；title/abstract/conclusion 對齊 VT-only；刪 L317 循環校準句。 主線程執行（平台規則：論文 .tex 不派 background agent）。Brief=paper/vt-crowding-abm/review_history/fable_deep_review_20260711/README.md §5。父任務 fable0711_abm_honesty_pass 的第 N 段；完成後 xelatex 編譯 + uv run volpred ops paper-update --paper-id vt-crowding-abm。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_body",
     "topology": "inline",
     "source": "decompose:fable0711_abm_honesty_pass",
     "parent_task_id": "fable0711_abm_honesty_pass",
     "series_order": 1,
     "paper_id": "vt-crowding-abm",
-    "created_at": "2026-07-13T07:10:29+00:00"
+    "created_at": "2026-07-13T07:10:29+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-14T10:08:51.383991+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-14T10:08:51.683294+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-14T10:22:17.956407+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-18"
+      }
+    ],
+    "started_at": "2026-07-14T10:08:51.683276+00:00",
+    "completed_at": "2026-07-14T10:22:17.956391+00:00",
+    "result": "P0-2 收官：superseded Sharpe-only detector 三表(cross_strategy_threshold/scaling_window_matrix/oat_robustness)整批移入新增 appendix A 並標 superseded+no-claim-rests-on-them；正文表數 8→5。§sec:oat robustness 論證從 legacy 表改接 redesign layer (tab:matched_control_vt): VT 5/5 degrade、RR_VT 0/5、λ 單調驅動(-0.421/-0.781/-0.899)、γ 不動。knife-edge § 留正文但重新接地(對 brief 的刻意偏離，已記 EXECUTION.md)。驗證: xelatex 34pp/0 error/0 undefined、reproduce 173/173 green、PDF 洩漏 0、family-ordering grep 0。已 merge main (93631c8c6) + paper-update 同步線上(34pp)。"
   },
   {
     "id": "abm_p0_3_k1471_honesty",
@@ -37129,9 +37104,27 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "owner-telegram-749",
-    "status": "pending",
+    "status": "in_progress",
     "title": "3-STRIKE 重構：PHASE-Z 測試閘門 + canonical-write 偵測（底層/流程/架構三層）",
-    "description": "老闆 2026-07-14 Telegram 指令：不准再修補，從底層邏輯/架構/流程整個重構。\n\n【三次同類 strike】\n1. 2026-07-10 conftest fingerprint 因 dispatch_state.json 被 daemon 每 30s 寫入 → 隨機測試紅燈 → PHASE-Z 誤發 CRITICAL。當時的修法：把該檔名從 _CANONICAL_FILES 刪掉（見 tests/conftest.py:42-51 自述）。\n2. 2026-07-14 同一 race 換 storage/next_tasks.json 復發（dispatch_supervisor/phase_z.py 自己就會寫它）→ 測試 teardown 紅燈。\n3. 2026-07-14 孤兒測試 collection error（exit 2）被 PHASE-Z 歸咎於無關 commit 273b2b110 → 誤發 CRITICAL 給老闆。\n\n【三層診斷】\n底層領域模型錯：用『檔案 mtime/size 有沒有變』推論『測試有沒有寫 canonical』。在有 24/7 daemon 寫同一批檔的 live checkout 裡此推論不成立。conftest 註解自己寫出正解——在 writer 端擋（VOLPRED_NO_CANONICAL_WRITE），因為它知道 WHO wrote，fingerprint 只知道 bytes moved——但只套用到一個 writer 就停手。\n流程錯：PHASE-Z 在 live working checkout 跑 pytest，且把任何 non-zero exit 一律歸因於剛才那個 commit。collection error、daemon race、既有紅燈都會被貼上『你的 commit 弄壞 main』→ 狼來了，誤報稀釋真警報。\n架構錯：測試沒有隔離執行環境。反諷的是 scripts/reproduce_check.py 自己就有 disposable clone 的正確設計（run 在 clean clone 執行），PHASE-Z 卻沒有。\n\n【要求】\na) 廢除 tests/conftest.py 的 _forbid_canonical_state_mutation mtime fingerprint；改成所有 canonical writer 一律走 guard_canonical_write / VOLPRED_NO_CANONICAL_WRITE（writer-side，知道是誰寫的）。清點所有 canonical writer 並全數收編，不可只補一個。\nb) PHASE-Z 測試閘門改在 disposable clone / worktree 跑（沿用 reproduce_check 的隔離設計），與 live daemon 完全隔離。\nc) 閘門必須區分三種 non-zero exit：collection error（環境/孤兒，不是本次 commit）、既有紅燈（跑 commit^ 對照，pre-existing）、本次 commit 造成的新紅燈。只有第三種才發 CRITICAL 並歸因該 commit。\nd) 加機械 gate：tracked test 引用的 script 必須存在且 tracked（今天兩個紅燈都是這個 class：刪 script 不刪 test、commit test 不 commit script）。\ne) PHASE-Z auto-commit 若因 pre-commit gate 只 commit 了一半的檔（本次：test 進了 main、script 被 silent-fallback gate 擋下 → main 直接壞掉），必須 fail loud 並回滾，不可留半套。\nf) 落地後廢棄原 patch 路徑（不留兩套）；regression test 覆蓋上述三次 strike 條件；commit 開頭 refactor(3-strike):。\n\n已完成的止血（非根因，勿重做）：d8e3392b6 刪孤兒測試、02912ce58 補 commit reproduce_check.py + 4 個 silent fallback 標註。collection 已從 1 error 恢復為 2144 tests。"
+    "description": "老闆 2026-07-14 Telegram 指令：不准再修補，從底層邏輯/架構/流程整個重構。\n\n【三次同類 strike】\n1. 2026-07-10 conftest fingerprint 因 dispatch_state.json 被 daemon 每 30s 寫入 → 隨機測試紅燈 → PHASE-Z 誤發 CRITICAL。當時的修法：把該檔名從 _CANONICAL_FILES 刪掉（見 tests/conftest.py:42-51 自述）。\n2. 2026-07-14 同一 race 換 storage/next_tasks.json 復發（dispatch_supervisor/phase_z.py 自己就會寫它）→ 測試 teardown 紅燈。\n3. 2026-07-14 孤兒測試 collection error（exit 2）被 PHASE-Z 歸咎於無關 commit 273b2b110 → 誤發 CRITICAL 給老闆。\n\n【三層診斷】\n底層領域模型錯：用『檔案 mtime/size 有沒有變』推論『測試有沒有寫 canonical』。在有 24/7 daemon 寫同一批檔的 live checkout 裡此推論不成立。conftest 註解自己寫出正解——在 writer 端擋（VOLPRED_NO_CANONICAL_WRITE），因為它知道 WHO wrote，fingerprint 只知道 bytes moved——但只套用到一個 writer 就停手。\n流程錯：PHASE-Z 在 live working checkout 跑 pytest，且把任何 non-zero exit 一律歸因於剛才那個 commit。collection error、daemon race、既有紅燈都會被貼上『你的 commit 弄壞 main』→ 狼來了，誤報稀釋真警報。\n架構錯：測試沒有隔離執行環境。反諷的是 scripts/reproduce_check.py 自己就有 disposable clone 的正確設計（run 在 clean clone 執行），PHASE-Z 卻沒有。\n\n【要求】\na) 廢除 tests/conftest.py 的 _forbid_canonical_state_mutation mtime fingerprint；改成所有 canonical writer 一律走 guard_canonical_write / VOLPRED_NO_CANONICAL_WRITE（writer-side，知道是誰寫的）。清點所有 canonical writer 並全數收編，不可只補一個。\nb) PHASE-Z 測試閘門改在 disposable clone / worktree 跑（沿用 reproduce_check 的隔離設計），與 live daemon 完全隔離。\nc) 閘門必須區分三種 non-zero exit：collection error（環境/孤兒，不是本次 commit）、既有紅燈（跑 commit^ 對照，pre-existing）、本次 commit 造成的新紅燈。只有第三種才發 CRITICAL 並歸因該 commit。\nd) 加機械 gate：tracked test 引用的 script 必須存在且 tracked（今天兩個紅燈都是這個 class：刪 script 不刪 test、commit test 不 commit script）。\ne) PHASE-Z auto-commit 若因 pre-commit gate 只 commit 了一半的檔（本次：test 進了 main、script 被 silent-fallback gate 擋下 → main 直接壞掉），必須 fail loud 並回滾，不可留半套。\nf) 落地後廢棄原 patch 路徑（不留兩套）；regression test 覆蓋上述三次 strike 條件；commit 開頭 refactor(3-strike):。\n\n已完成的止血（非根因，勿重做）：d8e3392b6 刪孤兒測試、02912ce58 補 commit reproduce_check.py + 4 個 silent fallback 標註。collection 已從 1 error 恢復為 2144 tests。",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-14T09:43:57.503790+00:00",
+    "claim_session_id": "6756f39200c8",
+    "status_history": [
+      {
+        "ts": "2026-07-14T09:43:57.503806+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T09:44:00.925530+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-14T09:44:00.925515+00:00"
   },
   {
     "id": "paper_stage_tracker_unification_analysis",
@@ -37142,5 +37135,42 @@
     "priority": 3,
     "source": "ws5_governance_layer_consolidation",
     "created_at": "2026-07-14T09:04:42.802403+00:00"
+  },
+  {
+    "id": "ci-red-29320130569",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29320130569",
+    "ci_run_key": "29320130569:1",
+    "created_at": "2026-07-14T10:00:13.095806+00:00",
+    "title": "CI 紅燈修復（run 29320130569, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29320130569\nattempt: 1\nhead_sha: b106ab5ef\n偵測摘要（仍須讀完整 failed log）：failed log 無法取得：TimeoutExpired\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29320130569 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-14T10:03:16.634777+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-14T10:03:16.866524+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-14T10:46:51.106794+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-18"
+      }
+    ],
+    "started_at": "2026-07-14T10:03:16.866509+00:00",
+    "completed_at": "2026-07-14T10:46:51.106779+00:00",
+    "result": "CI run 29320130569 的 8 個失敗全修，5 個獨立根因（reproduce_check 環境戳記寫太晚=產品碼 bug / reap 測試非 hermetic git / fred guard 排程 spec 雙份矛盾 / work_log gate 誤判測試 fixture / circular-import 自我測試已無法自證）。全套 2793 passed 0 failed；push 後 CI 4/4 workflow green @ca1b852b7。"
   }
 ]

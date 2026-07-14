@@ -57,6 +57,7 @@ git remote add origin "$REMOTE"
 mkdir -p scripts src/volpred tests .claude/hooks storage/qa
 cp "$REPO_ROOT/scripts/audit_silent_fallbacks.py" scripts/
 cp "$REPO_ROOT/scripts/audit_source_encoding.py" scripts/
+cp "$REPO_ROOT/scripts/audit_test_imports.py" scripts/
 printf '' > src/volpred/__init__.py
 printf 'def test_noop():\n    assert True\n' > tests/test_noop.py
 printf 'HOOK_NOOP = True\n' > .claude/hooks/noop.py
