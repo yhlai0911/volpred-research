@@ -1,62 +1,25 @@
-# Paper 6: Periodic Realized GARCH — Session-Boundary Information Transfers
+# Paper 6: Forecast-Timing Conventions and the Value of Overnight Information in Volatility Forecasting
 
 **Target Journal**: Finance Research Letters (FRL)
+**Status**: v7 major rewrite (2026-07-14) — headline pivot to the **timing-convention flip**; body rewritten, reproduce gate 100% GREEN (26/26). Pending: v7 review cycle (latex-academic-reviewer + citation-verifier + Codex) before any ready/submit flag.
+**Manuscript**: `main.tex` (9 pp double-spaced; body ≈1.9k words ≤2,500; abstract 249 ≤250). Pre-rewrite version frozen as `main_pre_v7.tex`.
 
-> **Status override (2026-06-24)**: The older submission-ready status below is
-> superseded by K1544 (`experiments/k1544_prg_fair_info_gjr/`). A true
-> current-overnight GJR-X benchmark beats canonical PRG Extended under the old
-> `h_overnight + h_intraday` timing convention, while PRG only regains the
-> advantage under an explicit full-day-at-open `x_overnight + h_intraday`
-> convention. Do not submit or add body-level reinforcement until the
-> forecast-timing narrative is decided.
+## One-sentence claim (v7)
+The same session-level volatility model (PRG), on the same pinned data, delivers DM statistics against its benchmark from −2.3 to +10.1 depending only on the forecast-timing convention; evaluated coherently, overnight information has real value at the open horizon (5/6 markets Harvey-significant vs an information-matched GJR-X) and none at the day-ahead close horizon (0/6 vs GJR).
 
-**Status**: ✅ **Submission-ready (all clear)** (2026-04-19 final pass: Codex P10 audit 2 blockers RESOLVED (PRS continuity §6 + 11pt/≤15pp) + v2 revise 2 MAJOR Fix B + 6 MED + 10 MINOR + 17/17 DOIs + citation_check.md synced + main.pdf 13pp A4 11pt + **reproduce gate 100% GREEN 15/15** after DM_t tolerance calibration reflecting yfinance retroactive drift (0.10 → 0.15/0.20, all Harvey |t|>3 qualitative claims intact)).
-**Pages**: 13 | **Citations**: 19
+## Canonical evidence (v7) — single pinned vintage 2026-07-12
+| Experiment | Panel | Result |
+|---|---|---|
+| `experiments/k1699/` | Close convention (six markets) | 0/6 Harvey vs GJR (both plug-in variants); Codex PASS_WITH_CAVEAT; bit-identical reruns |
+| `experiments/K1710/` | Mixed anchor + Open panel + ON shares (same snapshots, SHA-asserted) | Mixed 6/6 Harvey (+4.3..+6.4); Open 5/6 Harvey vs fair GJR-X (QQQ +1.56 NS); Codex PASS; bit-identical |
 
-## Data Sources
-- TAIFEX TX tick: ~/Dropbox/TAIFEXDATA/ (volume-based contract selection)
-- SPY, QQQ, GLD, EEM, 0050.TW: yfinance
-- OOS periods vary by market (2018-2026)
+All prices dividend/split-adjusted (disclosed in Data section); snapshots pinned under `experiments/k1699/data/` and `experiments/K1710/data/` with `float_precision="round_trip"` reads.
 
 ## Reproduction
 ```bash
-uv run python paper/prg-periodic-garch/reproduce.py [--quick]
+uv run python paper/prg-periodic-garch/reproduce.py          # JSON→tex binding gate (no live fetch)
+uv run python paper/prg-periodic-garch/scripts/gen_flip_table.py  # regenerates Table 2 rows + prose numbers
 ```
 
-## Key Experiments
-| File | Market | Result |
-|------|--------|--------|
-| k880_prg_spy_validation.py | SPY | DM t=6.00 PASS |
-| k881_prg_multi_asset.py | QQQ/GLD/EEM | All Harvey PASS |
-| k886_prg_0050tw.py | 0050.TW | DM t=5.27 PASS |
-| k874d_fair_comparison.py | TAIFEX | DM t=5.10 PASS |
-
-## Important Note
-Using realized overnight return for intraday prediction is NOT lookahead.
-Sessions complete sequentially: overnight ends → intraday starts.
-
-## Self-Contained Index (2026-04-17)
-
-| File | Status |
-|------|--------|
-| `data_sources.md` | ✅ Data sources and storage paths |
-| `scripts/README.md` | ✅ Reproduction guide for all experiments |
-| `results/README.md` | ✅ Table/figure → JSON source mapping |
-| `figures/` | ✅ Soft-links: k880_charts + k881_charts PNGs |
-| `experiments.md` | ✅ Full K-number index (K874c–K886) |
-
-## Supporting Experiments (K Index)
-
-| K | Market | Key Result |
-|---|--------|-----------|
-| K874c | TAIFEX | Baseline PRG estimation |
-| K874d | TAIFEX | DM t=5.10 PASS (fair comparison) |
-| K874e | TAIFEX | Full 5-model horse race |
-| K880 | SPY | DM t=6.00 PASS |
-| K880b | SPY | ES evaluation |
-| K880v2 | SPY | Denominator-fix confirmation |
-| K881 | QQQ/GLD/EEM | All Harvey PASS |
-| K881b | QQQ/GLD/EEM | ES evaluation |
-| K883 | TAIFEX tick | High-frequency PRG |
-| K884 | SPY | HAR day/night decomposition |
-| K886 | 0050.TW | DM t=5.27 PASS |
+## Historical note (pre-v7 lineage)
+The v6-era manuscript ("Session-Boundary Information Transfers") reported mixed-timing headline DM values (SPY 6.00 etc.) built on unpinned, vintage-drifting yfinance pulls via K874c/d/e, K880/K880b/K880v2, K881/K881b, K883/K884, K886, plus VaR/ES and VT-economic tables. K1544 (2026-06-24) showed a fair current-overnight GJR-X beats the mixed-timing PRG object in all six markets, triggering the narrative pivot; the 2026-07-11 Fable deep review specified the dual-convention rewrite. Those legacy tables were removed in v7 (re-addable only from pinned reruns — see EXECUTION.md P1). Full errata archaeology: `review_history/fable_deep_review_20260711/P0-1_errata_map.md`.

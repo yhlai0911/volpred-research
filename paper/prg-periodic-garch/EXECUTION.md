@@ -1,6 +1,6 @@
 # EXECUTION — prg-periodic-garch
 
-> **BADGE** · `verdict=2/5` · `journal=FRL` · `stage=revision` · `p0=TODO` · `reproduce_gate=RED` · `blocker=K1544 timing-convention 敘事未收斂 + SPY canonical 數字漂移`
+> **BADGE** · `verdict=v7-rewrite-done` · `journal=FRL` · `stage=revision` · `p0=DONE` · `p1_rewrite=DONE` · `reproduce_gate=GREEN(26/26)` · `blocker=v7 review cycle（latex+citation+Codex）未跑`
 
 _最後更新：2026-07-11（Fable 深審輪）。本檔是 prg-periodic-garch 的可執行收斂計畫；單篇深審全文見 `review_history/fable_deep_review_20260711/README.md`。_
 
@@ -41,20 +41,18 @@ _最後更新：2026-07-11（Fable 深審輪）。本檔是 prg-periodic-garch �
 
 ## 3. P0 — 必做（阻擋投稿，尚未執行）
 
-> 全部 ⬜ TODO。P0 未動任何一項前，不得跑 review / 標 ready / submit。
+> ✅ P0 全數完成（2026-07-14）。P0-1 的解法比原規格更徹底：不是修補 K880，而是整個 mixed 面板在 pinned vintage 重生成（K1710），舊 K880 鏈全數退役。
 
-- [ ] **⬜ P0-1｜K880 snapshot pin + SPY 數字 errata + reproduce gate 重建**（接續起點）
-  - pin yfinance snapshot CSV（`auto_adjust=False`，paper-workflow 硬規則 1）
-  - 以 6/13 重跑版為 canonical 重生成全部 SPY 表格（Table 1 / 3 / 4 + appendix）
-  - `reproduce.py` 改讀 snapshot + 更新 target 值；重跑 gate 至 **green**
-  - paper 側補 K880 重跑 errata 記錄（README 有記，但論文側無 errata、無 alert）
-  - _為何最先做_：不做則後續一切 review 都建在漂移的地基上。
+- [x] **✅ P0-1｜SPY 數字 errata + reproduce gate 重建**（2026-07-14，路徑升級）
+  - errata 考古完成：`review_history/fable_deep_review_20260711/P0-1_errata_map.md`（三 vintage 對照 + NOT FOUND 清單）
+  - mixed 面板改由 K1710 在 K1699 pinned snapshot 上重生成（SPY +5.83，6/6 Harvey）— 舊 6.00 僅存於 main.tex data 節 footnote 作歷史揭露
+  - `reproduce.py` 全面重寫：JSON→tex 雙向 binding、26 checks 全部從兩個 canonical JSON 動態推導、無 live fetch；**GREEN 100%**；舊 live-yfinance gate 已刪（git history 保留）
+  - （原規格「pin K880 + 修表格」由上述升級路徑取代；snapshot 的 auto_adjust 張力處置見 v7 決策記錄第 3 條）
 
-- [ ] **⬜ P0-2｜派 K-new-A（六市場 Close-convention 補跑）**（compute queue）
-  - PRG_tminus1（ĥ_ov + ĥ_in(ĥ_ov)）vs GJR / HAR，全部在 F^c_{d−1} 同資訊集
-  - 複用 `experiments/k1544_prg_fair_info_gjr/` 六市場 infra（改造成本低）
-  - 驗證「strict t−1 下 PRG 無優勢」是否六市場一般成立（目前僅 SPY 證據）；若高 overnight-share 市場（TAIFEX/GLD）close-time 下仍勝，是額外正面發現
-  - _性質_：敘事收斂的最後一塊實驗證據。
+- [x] **✅ P0-2｜K-new-A = K1699（六市場 Close-convention）**（2026-07-12 落地）
+  - 0/6 Harvey vs GJR（exp/lag 雙變體一致）；高 overnight-share 市場無例外（「額外正面發現」情境不成立）
+  - pinned + deterministic + bit-identical + Codex PASS_WITH_CAVEAT
+  - **加碼 K1710**（2026-07-14）：open 面板（PRG open-known vs fair GJR-X，5/6 Harvey，QQQ +1.56 NS）+ mixed anchor 在同一批 snapshot 重生成 — 三面板單一 vintage，flip 主表成立
 
 - [x] **✅ P0-3｜K1544 K 編號碰撞治理（2026-07-12）**
   - term-spread vol NULL 已由 `experiments/K1544/` 重編為 `experiments/K1696/`
@@ -65,14 +63,14 @@ _最後更新：2026-07-11（Fable 深審輪）。本檔是 prg-periodic-garch �
 
 ## 4. P1 — 收斂主體（P0 落地後）
 
-- [ ] **P1-1｜雙 convention body rewrite（主線程執行，non-patch major rewrite）**
-  - **前置 gate（narrative state machine）**：≥3 互補實驗已備（K880v2、K880-rerun PRG_tminus1、K1544、K-new-A）→ **用戶 confirm 雙 convention 重寫後** 才設 `status=decision_made_awaiting_body_rewrite` 並開始改 body
-  - 範圍：abstract 全重寫（≤250 字）；§2.2 改雙 convention 定義（刪「natural and admissible」辯護段）；Table 1 重做為雙 convention 面板；§4.2 改 convention 對照主節；§4.5 以 K1544 fair GJR-X 取代 K1260 lagged 版（K1260 降 appendix）；§4.3/4.4 用重跑後數字重生成並縮編；Discussion/Conclusion 重寫定位
+- [x] **✅ P1-1｜雙 convention body rewrite（2026-07-14，Fable 主線程完成）**
+  - 前置 gate 滿足：≥3 互補實驗（K1544 + K1699 + K1710）+ 用戶 confirm（07-14 接續指令明示「開始 prg 雙時點重寫」）
+  - 實際範圍比原規格更徹底：v7 = 全新稿（標題改為 Forecast-Timing Conventions...；三 convention 正式定義節；flip 主表為唯一中心；「natural and admissible」辯護、VaR/ES 表、VT 表、Separate ablation、HAR、MCS、舊 appendix 全部移除）；舊稿凍結為 `main_pre_v7.tex`
+  - 新發現入稿：open 面板 t 與 ON share 六市場完全同序（EEM 70.7%/+10.14 → QQQ 38.5%/+1.56）
 - [ ] **P1-2｜K-new-B（可與 rewrite 並行）**
   - (i) intraday-only target 版本（ĥ_d1 vs 含 current-ON regressor 的 benchmark intraday 方程），排除「r²_d0 加雙邊」機械性 QLIKE 壓縮疑慮
   - (ii) VT 經濟價值在 open-known convention 下重跑 + Sharpe difference bootstrap CI（一併關 MINOR #10）
-- [ ] **P1-3｜FRL 減肥：正文砍到 ≤2,500 字（現 3,839，須砍 ~35%）**
-  - VaR/ES 全表、appendix、參數表移 online appendix；主文只留 timing flip + 六市場雙 convention 主表 + ablation
+- [x] **✅ P1-3｜FRL 減肥（v7 重寫時一併達成）**：正文 ~1.9k 字 ≤2,500；abstract 249 ≤250；9pp
 
 ---
 
@@ -88,14 +86,14 @@ _最後更新：2026-07-11（Fable 深審輪）。本檔是 prg-periodic-garch �
 
 > 以下每一條達成才可標 ready / 進投稿 gate。**現狀全部 ⬜**。
 
-- [ ] ⬜ reproduce gate = **green**（match_rate ≥ 95%、alert_level=green；SPY 表格已 rebind 到 6/13 重跑 canonical）
-- [ ] ⬜ K-new-A（六市場 Close-convention）已落地並 Codex reviewed
-- [ ] ⬜ 雙時點框架 body rewrite 完成（headline = timing-convention flip；已刪「natural and admissible」辯護）
-- [ ] ⬜ 正文 ≤ 2,500 字、abstract ≤ 250 字、Highlights 檔齊
+- [x] ✅ reproduce gate = **green**（26/26 = 100%；v7 gate = JSON→tex binding、無 live fetch、全部 expected 值動態推導）
+- [x] ✅ K-new-A（K1699）落地 + Codex reviewed；加碼 K1710（open+mixed 同 vintage）+ Codex PASS
+- [x] ✅ 雙時點框架 body rewrite 完成（headline = timing-convention flip；辯護語氣全刪；v7 = 全新稿）
+- [x] ✅ 正文 ~1.9k ≤ 2,500 字、abstract 249 ≤ 250 字（Highlights 檔待 v7 review 後補）
 - [x] ✅ K1544 編號碰撞已治理（2026-07-12；term-spread → K1696，本論文 K1544 全指 `k1544_prg_fair_info_gjr`）
-- [ ] ⬜ v7 review cycle 收斂（latex + citation + Codex independent，無 BLOCKING）
-- [ ] ⬜ FRL 合規：author = Yi-Hao Lai only、無 volpred / AI / LLM 字樣、$200 fee、data availability Option C
-- [ ] ⬜ 開 Open-time 新 headline 下 SPY(2.12) / QQQ(2.97) 不過 3.0 門檻已誠實表述（4/6 過、2/6 marginal），不迴避
+- [ ] ⬜ v7 review cycle 收斂（latex + citation + Codex independent，無 BLOCKING）— **下一步**
+- [ ] ⬜ FRL 合規：author = Yi-Hao Lai only、無 volpred / AI / LLM 字樣、$200 fee、data availability Option C、Highlights 檔
+- [x] ✅ Open-time 邊際市場誠實表述 — **pinned vintage 上事實更新**：5/6 過 3.0，唯一 NS = QQQ（+1.56，ON share 最低 38.5%）；vintage 脆弱性（pilot SPY 2.1/QQQ 3.0 vs pinned 3.56/1.56，方向不翻）已在 Robustness 段揭露
 
 ---
 
@@ -117,7 +115,8 @@ _最後更新：2026-07-11（Fable 深審輪）。本檔是 prg-periodic-garch �
 |---|---|---|---|
 | 2026-07-11 | Fable deep review | 深審完成，待執行 P0 | f913ed68c |
 | 2026-07-12 | K1699 落地 | P0-2（K-new-A）完成：六市場 close-convention 0/6 Harvey，pinned + deterministic + Codex PASS_WITH_CAVEAT | （見 experiments/k1699/） |
-| 2026-07-14 | v7 重寫開工（Fable 主線程） | 架構定案（見下方 v7 決策記錄）；main_v7_draft.tex 草稿完成（正文 ~1.8k 字 / abstract 243 字 / 編譯 9pp）；K1699 close 面板數字已入稿；K1710（pinned 重跑 open+mixed 面板）與 prg-recon（P0-1 errata map）兩個 Opus agent 已派 | — |
+| 2026-07-14 | v7 重寫開工（Fable 主線程） | 架構定案（見下方 v7 決策記錄）；main_v7_draft.tex 草稿完成（正文 ~1.8k 字 / abstract 243 字 / 編譯 9pp）；K1699 close 面板數字已入稿；K1710（pinned 重跑 open+mixed 面板）與 prg-recon（P0-1 errata map）兩個 Opus agent 已派 | 13dd4dcac |
+| 2026-07-14 | **v7 重寫完成** | K1710 merge（bit-identical、Codex PASS、與 K1699 一致性 0.00e+00）；flip 主表 + 全部 prose 數字入稿（`scripts/gen_flip_table.py` 生成）；main.tex 晉升（舊稿凍結 `main_pre_v7.tex`）；reproduce.py 全面重寫 → **GREEN 26/26**；README / experiments.md / data_sources.md 改 v7 口徑；open 面板 pinned 事實 = 5/6 Harvey（QQQ NS）+ t 與 ON share 完全同序 | （本 commit） |
 
 ### v7 重寫決策記錄（2026-07-14，Fable 主線程裁定）
 
