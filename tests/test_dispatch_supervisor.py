@@ -1174,6 +1174,12 @@ def test_force_kill_pgid_tolerates_process_lookup_races(monkeypatch) -> None:
         raise ProcessLookupError
 
     monkeypatch.setattr(procutil.os, "killpg", missing_pgid)
+    # The liveness probe must be pinned to the same fiction as killpg: a group
+    # that raises ProcessLookupError is gone, so `ps -g` finds nothing. Without
+    # this the probe queries the REAL pgid 456 — empty on a dev mac, a live
+    # process group on a CI runner, where the kill then escalated to SIGKILL and
+    # failed the assert below (run 29372109046).
+    monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [])
     monkeypatch.setattr(procutil.time, "sleep", lambda seconds: None)
 
     health._force_kill_pgid(456)
