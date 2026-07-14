@@ -36,6 +36,21 @@ paths:
   - **Audit methodology hard rule**（2026-04-29 K1259 v2 教訓）：任何 ledger / dataset / output JSON 的 quality audit **必須 re-walk full population**，不可只 sample suspect subset。子集 audit 把 false negative 限在子集外的盲區（K1259 v1 只 audit `t`/`stat`-keyed rows，漏看 `t_stat` priority-5 keyed 的 12 residuals）。Audit doc 須明記：(a) 掃描範圍（全 population 或 subset criteria）、(b) blind-spot 分析（子集外有什麼可能漏掉）、(c) verification 方法（jq / hash / row-count invariant 等可驗證的 evidence）。
   - **K1259 process gate**（2026-05-17 T3）：`src/volpred/memory/system.py:_append_to_index` 現強制 enforce knowledge.json provenance — `verdict == "PASS"` 必須帶 `experiment_id`/`experiment_ids`/`k_id`/`experiment_path`(任一非空) **且** 帶 reviewer 欄位（`reviewer`/`reviewer_source`/`codex_review`/...任一非空）；`verdict == "CONDITIONAL_PASS"` 只需 provenance，不需 reviewer。NULL/FAIL/MIXED/無 verdict 不 gated。Validator: `src/volpred/memory/provenance.py`. CI invariant: `scripts/validate_knowledge_provenance.py`（baseline 284；超過代表有人用 jq/Edit 繞過 Python writer）。測試: `tests/test_knowledge_provenance.py`（19 tests）。手動 jq/Edit 不會被 Python validator 攔截 — 走 CI script 才會發現。
 
+## 實驗完整性 gate（收工前自檢）
+
+```bash
+uv run python scripts/experiment_gates.py run --path experiments/<kid>
+```
+
+跑下面所有 methodology 硬規則裡**已經機械化**的那幾條（nested-DM 推論、DM 的 HAC 落後期、
+Cholesky-FEVD 排序假象、MDD scale artifact），scope 只看你這個 K，已凍結的 legacy debt 不會算到你頭上。
+
+**這是自檢，不是你的責任上限** — enforcement owner 是 compute_queue 的 agent runner：它在標 completed
+之前會對 `--result-artifact` 所在的 experiments/ 目錄跑同一支，不過就標 failed 走 triage。你自己的
+`test_kXXXX.py` 全綠只證明「它照你想的跑」，證明不了「沒違反 repo 早就用代價換來的規矩」——
+K1709 就是自帶測試全過、ratchet 抓得到卻從沒被執行到，一整份 xhigh 實驗白做
+（`docs/error_log.md` 2026-07-14）。
+
 ## Methodology 硬規則
 
 ### 套件限制 ≠ 模型無效

@@ -202,6 +202,105 @@ def _declared_result_artifact(job: dict[str, Any]) -> Path | None:
     return path if path.is_absolute() else ROOT / path
 
 
+def _experiment_scope(job: dict[str, Any], artifact_path: Path | None) -> Path | None:
+    """The `experiments/<kid>` directory this job produced, if any.
+
+    Prefer the declared artifact: for agent jobs it is already resolved on the
+    worktree side of the boundary, so its `experiments/<kid>` ancestor is the
+    exact tree the agent wrote.  Fall back to whatever the worktree's git status
+    calls dirty, which covers an agent that produced an experiment but declared
+    no artifact.
+    """
+    if artifact_path is not None:
+        parts = artifact_path.parts
+        if "experiments" in parts:
+            idx = parts.index("experiments")
+            if idx + 1 < len(parts):
+                return Path(*parts[: idx + 2])
+
+    workdir = _agent_workdir(job)
+    if not workdir:
+        return None
+    try:
+        out = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=workdir,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True,
+        ).stdout
+    except Exception as e:  # noqa: BLE001
+        print(f"[gate] WARNING: git status failed in {workdir}: {e}", file=sys.stderr)
+        return None
+
+    for line in out.splitlines():
+        rel = line[3:].strip().strip('"')
+        parts = Path(rel).parts
+        if len(parts) >= 2 and parts[0] == "experiments":
+            return Path(workdir) / parts[0] / parts[1]
+    return None
+
+
+def _experiment_gate_failure(
+    job: dict[str, Any], artifact_path: Path | None
+) -> dict[str, Any] | None:
+    """Run the repo's experiment-integrity gates over what this job produced.
+
+    This is the choke point the gates never had. A dispatched agent runs in a
+    worktree, runs its own `test_kXXXX.py`, and never runs `scripts/tests/` --
+    so the ratchets that would have caught K1701 and K1709 sat unrun while an
+    xhigh experiment was wasted (docs/error_log.md 2026-07-14). Every worktree
+    experiment comes back through here, so here is where the repo gets to
+    check its own rules before calling the work accepted.
+
+    Returns a report dict on violation (caller fails the job), else None.
+    """
+    scope = _experiment_scope(job, artifact_path)
+    if scope is None:
+        # Not an experiment job (paper review, ops, lazypack...). Recorded, not
+        # silent: a job that SHOULD have been gated and was not must be findable.
+        job["experiment_gate"] = {"status": "out_of_scope"}
+        return None
+
+    workdir = Path(_agent_workdir(job) or ROOT)
+    gate_script = workdir / "scripts" / "experiment_gates.py"
+    if not gate_script.exists():
+        # A worktree branched before the gates existed genuinely has no gate to
+        # run. Say so loudly rather than passing the job off as gated.
+        print(
+            f"[gate] WARNING: no experiment_gates.py in {workdir} — job {job['id']} "
+            "was NOT gated (worktree base predates the gates; rebase it).",
+            file=sys.stderr,
+        )
+        job["experiment_gate"] = {"status": "unavailable", "workdir": str(workdir)}
+        return None
+
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(gate_script), "run", "--path", str(scope)],
+            cwd=str(workdir),
+            capture_output=True,
+            text=True,
+            timeout=600,
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"[gate] WARNING: gate run crashed for {job['id']}: {e}", file=sys.stderr)
+        job["experiment_gate"] = {"status": "error", "error": str(e)}
+        return None
+
+    if proc.returncode == 0:
+        job["experiment_gate"] = {"status": "passed", "scope": str(scope)}
+        return None
+
+    return {
+        "status": "failed",
+        "scope": str(scope),
+        "exit_code": proc.returncode,
+        "report": (proc.stderr or proc.stdout).strip(),
+    }
+
+
 def slug(s: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
     return s[:60] or uuid.uuid4().hex[:8]
@@ -548,7 +647,21 @@ def run_next(args) -> int:
                     with stderr_p.open("a") as se:
                         se.write(f"\n[RESULT_ARTIFACT_MISSING] {artifact_path}\n")
                 else:
-                    job["status"] = "completed"
+                    gate = _experiment_gate_failure(job, artifact_path)
+                    if gate is not None:
+                        # The artifact exists and the process was happy. That only
+                        # means the experiment ran the way its author meant it to.
+                        # It broke a rule the repo already paid to learn, so it is
+                        # not a completed job -- it routes to triage_failed.
+                        job["process_exit_code"] = proc.returncode
+                        job["exit_code"] = 4
+                        job["status"] = "failed"
+                        job["failure_reason"] = "experiment_gate_failed"
+                        job["experiment_gate"] = gate
+                        with stderr_p.open("a") as se:
+                            se.write(f"\n[EXPERIMENT_GATE_FAILED]\n{gate['report']}\n")
+                    else:
+                        job["status"] = "completed"
         except subprocess.TimeoutExpired:
             job["status"] = "failed"
             job["exit_code"] = -1

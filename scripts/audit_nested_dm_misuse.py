@@ -422,6 +422,16 @@ def main() -> int:
         for error in result.scan_errors:
             print(f"SCAN_ERROR {error}")
         return 2
+
+    # This is a reporter, and its exit code says so: a clean exit here means the
+    # scan ran, NOT that the population is clean. Enforcement deliberately lives
+    # elsewhere, and saying where is the difference between a report and a gate
+    # somebody mistook for one.
+    print(
+        "\n[note] exit 0 = scan completed; it is NOT a pass. Enforcement owners:\n"
+        "  repo-wide  scripts/tests/test_nested_dm_misuse_ratchet.py\n"
+        "  per-path   scripts/experiment_gates.py run --path experiments/<kid>"
+    )
     return 0
 
 

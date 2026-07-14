@@ -17295,5 +17295,13 @@
     "task_id": "research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
     "summary": "K1709（ETF flow → BTC/ETH RV）收件：Codex 審查 FAIL，未過 knowledge gate。2 CRITICAL：巢狀比較用 raw DM + 混口徑 CW 承載 verdict（重犯 K1701 教訓，repo 自己的 nested-DM ratchet test 也 FAIL）；MDE 非功效分析、不能支撐『可排除 ≥16% RV 效果』。3 MAJOR：美股休市日 Total=0.0 當真實 flow day（BTC 16/ETH 10 天，DM 0.140→1.542）、pub_lag=2 誤 lag HAR controls、非真 HLN modified DM。未寫 knowledge.json、未發文。修訂版 enqueue agent-brief_k1709_rev-b4a0a9。結構性發現：ratchet 偵測正確但在 worktree 內從沒被執行到（agent 只跑自帶測試、branch 未 merge 故 CI 也沒看過）→ 與 platform_ops_canonical_write_guard_blind_in_worktrees 同 class 第 2 例，建 P1 governance_experiment_gates_blind_in_worktrees。",
     "status": "failed"
+  },
+  {
+    "timestamp": "2026-07-14T13:21+08:00",
+    "actor": "hourly-13",
+    "task_type": "platform_ops",
+    "task_id": "governance_experiment_gates_blind_in_worktrees",
+    "summary": "實驗完整性 gate 推進 agent 構得到的地方（commit 1f6097af4）。K1709 白做一整份 xhigh 實驗，不是因為偵測器不對 —— nested-DM ratchet 抓得到且錯誤訊息與 Codex CRITICAL 逐字重合 —— 而是它從沒被執行到：worktree agent 只跑自帶 test_kXXXX.py，不跑 scripts/tests/，branch 未 merge 故 CI 也沒看過。(1) scripts/experiment_gates.py 單一入口 run --path experiments/<kid>，detector/verdict set/baseline 全部 import 自原 auditor module（nested-DM、DM HAC lag、FEVD ordering、MDD scale），不重造第二套判定；已凍結 legacy debt 放行，agent 不為別人的債被擋。(2) 接進 compute_queue.run_next 標 completed 前的 choke point（每個 worktree 實驗必經）：不過 → failed + experiment_gate_failed → 走既有 triage_failed。選 runner-enforced 而非 brief 自律，因為 agent 自律正是這次失效的東西。(3) audit_nested_dm_misuse exit 0 不再假裝是 pass，明說 enforcement owner。(4) test_experiment_gates.py：k1709 v1 fixture 驗 FAIL、gate 在非 canonical checkout 仍咬、AST 斷言 runner 仍接線（break-then-verify：拆線後斷言轉 False）。驗證 k1709 FAIL(primary_raw_dm)、k1698/k1680/k1681 PASS、6+68 tests 綠。姊妹 P2 canonical_write_guard_blind_in_worktrees 實測已不復現（根因 conftest.py 曾被 gitignore，worktree checkout 拿不到；今日 un-ignore 後 68 tests 全過）→ 同 class 兩例一次收斂，一併結案。未用 merge_worktree.sh（它會對共享 checkout 下 git stash push，會捲進 slot-2 在途的 k1709），改 path-scoped 抽取只搬本班 5 個檔。",
+    "status": "succeeded"
   }
 ]
