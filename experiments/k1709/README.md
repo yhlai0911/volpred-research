@@ -2,7 +2,7 @@
 
 **Verdict: `INCONCLUSIVE_NO_EXACT_NULL_CLAIM`**
 
-> INCONCLUSIVE. No cell shows incremental UNCONDITIONAL predictive content, but only 5/10 primary cells can rule out the pre-specified 1% QLIKE gain, so the bounded null is NOT established. Failure to reject equal accuracy is not evidence of equality. The honest headline is: 'no robust incremental UNCONDITIONAL predictive evidence was found for spot BTC/ETH ETF flow over a HAR-RV baseline' -- a negative finding, not a proven zero. The inverted one-sided 95% upper confidence bound on the relative QLIKE gain is 4.2% simultaneously across all 10 cells (Bonferroni): gains LARGER than that are excluded by the data; anything smaller is not.
+> INCONCLUSIVE. No primary cell clears the pre-specified Holm-adjusted UNCONDITIONAL detection gate, but only 5/10 primary cells can rule out the pre-specified 1% QLIKE gain, so the bounded null is NOT established. Failure to reject equal accuracy is not evidence of equality. The honest headline is: 'no robust incremental UNCONDITIONAL predictive evidence was found for spot BTC/ETH ETF flow over a HAR-RV baseline' -- a negative finding, not a proven zero. The inverted one-sided 95% upper confidence bound on the relative QLIKE gain is 4.2% simultaneously across all 10 cells (Bonferroni): gains LARGER than that are excluded by the data; anything smaller is not.
 
 **This is a revision.** The first version of this experiment was FAILed by an independent review on 2026-07-14 (`codex_review_20260714.md`), and the project's own mechanical gate (`scripts/tests/test_nested_dm_misuse_ratchet.py`) agreed. Two headline claims did not survive. What follows is the rebuilt study.
 
@@ -27,11 +27,11 @@
 
 ## How the claim is now established
 
-- **Test**: TWO pre-specified objects, with OPPOSITE multiplicity treatments, and the verdict is a function of both. (1) DETECTION -- Giacomini-White (2006) Sec 3.4 UNCONDITIONAL special case (instrument h_t = 1, which coincides with a HAC Diebold-Mariano t; NOT the conditional GW test -- no instrument vector, no Wald statistic, no chi-square_q), one-sided and flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union of alternatives: ten shots at finding an effect). (2) EXCLUSION -- the pre-specified one-sided material-gain test, run as an INTERSECTION-UNION test with each cell UNADJUSTED (Berger 1982): the bounded null may be asserted only if EVERY cell rejects its own exclusion null, which needs no correction. Holm-adjusted exclusion p-values are also reported as a conservative sensitivity, but they are NOT the test. The verdict is INCONCLUSIVE precisely because (1) finds nothing and (2) does not hold in every cell.
+- **Test**: TWO pre-specified objects, with OPPOSITE multiplicity treatments, and the verdict is a function of both. (1) DETECTION -- Giacomini-White (2006) Sec 3.4 UNCONDITIONAL special case (instrument h_t = 1, which coincides with a HAC Diebold-Mariano t; NOT the conditional GW test -- no instrument vector, no Wald statistic, no chi-square_q), one-sided and flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union of alternatives: ten shots at finding an effect). (2) EXCLUSION -- the pre-specified one-sided material-gain test, run as an INTERSECTION-UNION test with each cell UNADJUSTED (Berger 1982): the bounded null may be asserted only if EVERY cell rejects its own exclusion null, which needs no correction. Holm-adjusted exclusion p-values are also reported as a conservative sensitivity, but they are NOT the test. The verdict is determined by those two objects. The verdict is INCONCLUSIVE because the detection family finds no Holm-adjusted evidence and the exclusion conjunction does not hold in every cell.
 - **Loss**: Patton QLIKE on the variance level
-- **Estimation scheme**: paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin). Every one of the 10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which is the condition GW's limiting experiment needs. The one registered cell that is not (`flow_transform/unexpected_z`, whose regressor comes from an expanding-window AR(5)) sits in the robustness family, is flagged `bounded_memory=false`, and is shown in `multiple_testing.bounded_memory_sensitivity` not to move the family-wise conclusion.
+- **Estimation scheme**: paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin). Every one of the 10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which is the condition GW's limiting experiment needs. The two registered asset-specific `flow_transform/unexpected_z` rows whose regressor comes from an expanding-window AR(5) sit outside the primary family, are flagged `bounded_memory=false` and `feeds_gate=false`, and remain visible only as invalid-for-nested-inference diagnostics.
 - **Gate**: `qlike_improve > 0 AND unconditional GW/DM z < -1.645 AND Holm p < 0.05`
-- **Claim scope**: bounded in QLIKE-loss space only. test = GW(2006) Sec 3.4 unconditional special case (= HAC DM) | loss = Patton QLIKE | scheme = paired fixed rolling window | claim = no UNCONDITIONAL incremental predictive ability, bounded in QLIKE-loss space only. These four match by construction; v1's did not, and rev2's claim was broader than its test.
+- **Claim scope**: bounded in QLIKE-loss space only. test = GW(2006) Sec 3.4 unconditional special case (= HAC DM) | loss = Patton QLIKE | scheme = paired fixed rolling window | claim = no robust evidence of UNCONDITIONAL incremental predictive ability, with any bound stated in QLIKE-loss space only. These four match by construction; v1's did not, and rev2's claim was broader than its test.
 
 > ### What this study did NOT test
 >
@@ -116,6 +116,8 @@ Holding **simultaneously across all 10 cells** (Bonferroni): the relative QLIKE 
 
 **Read the bound literally.** It lives in QLIKE-loss space: it is about *forecast accuracy*. It is **not** a statement that the RV uplift per flow shock is smaller than any particular percentage, and it is **not** a proof of exact zero.
 
+**Frozen-bound limitation.** The frozen QLIKE upper bounds were produced by a binary inversion that assumed the rejection set was an upper tail. The primary streams were later found mildly non-monotone; a dense independent audit found one crossing per stream, so the published crossings did not move, but the frozen JSON does not archive the loss paths needed to reproduce that audit. Future runs verify the full rejection topology before reporting a bound.
+
 ## Power — what this design could have seen
 
 1000 simulated OOS paths per point. The DGP is the fitted calendar-day HAR law of motion with block-bootstrapped innovations, the real flow shocks and the real returns retained, and the effect injected **into the law of motion** so it propagates through the HAR lags — exactly as a genuine effect would, and exactly as the baseline would partially absorb it.
@@ -163,13 +165,13 @@ Every run below is registered in the same in-code test registry as the primary f
 | Shock threshold dummies (|z| ≥ 1.0 … 2.5) | 16 | -0.82 | no |
 | Shorter ETH burn-in (200) | 2 | 0.03 | no |
 
-Across **all 54** gate-eligible unconditional GW/DM tests in the study, **0** survive the full-family Holm correction in the flow-favouring direction. (108 further tests are registered as diagnostic-only and are barred from any gate by construction.)
+Across **all 52** gate-eligible unconditional GW/DM tests in the study, **0** survive the full-family Holm correction in the flow-favouring direction. (110 further tests are registered as diagnostic-only and are barred from any gate by construction.)
 
-### 2 of those tests are not bounded-memory tests — and they are labelled
+### 2 registered diagnostic rows fail the bounded-memory gate
 
 GW's limiting experiment assumes the **forecasting method** has bounded estimator memory. Every cell here fits its regression on a fixed 250-day rolling window, so the final fit always satisfies that. But the condition is on the *whole method*, not on the last regression: `flow_transform|BTC_h1|T_unexpected_z|rv_gk|fl1`, `flow_transform|ETH_h1|T_unexpected_z|rv_gk|fl1` build their regressor from an **AR(5) refitted on an expanding window** of flow history. There is no lookahead in it — day *i*'s own value never enters its own fit — but it is not a bounded-memory forecasting method, and a blanket sentence claiming all 54 registered tests are one would be false.
 
-They **are not dropped**. Removing a test once its result is known is selection, not rigour. They stay in the family, they are corrected for, they carry `bounded_memory=false` in the registry, and the family-wise count is re-run without them so a reader can see whether anything hangs on them: **0** Holm-surviving cells across all 54 tests, **0** across the 52 bounded-memory tests. The verdict does **not** depend on them. All 10 primary cells are bounded-memory.
+They remain visible in the frozen historical sensitivity inventory, but they carry both `bounded_memory=false` and `feeds_gate=false`. That eligibility is fixed from method provenance before any p-value is read; the rows cannot enter a GW family or verdict. The archived 54-row sensitivity and the 52-row eligible family both happen to have **0** Holm-surviving cells, but only the latter is inferentially licensed. All 10 primary cells are bounded-memory.
 
 ### Is the null an artifact of the log → variance mapping?
 
@@ -197,20 +199,23 @@ The rebuilt study was re-reviewed against a *frozen* commit. Six residuals survi
 | R3 | β=0 row described as a size calibration | The beta = 0 row is a false-positive diagnostic, not a size calibration. The 'size-calibrated' wording is gone from the module docstring and the figure legend. |
 | R4 | Fixed-window raw DM tagged "biased toward the smaller model" | The fixed-window raw Diebold-Mariano statistic was tagged 'biased toward the smaller model', which contradicts the very reason the scheme was changed. The role text is now scheme-specific: the expanding one is invalid, the fixed one is valid-but-not-the-gate. |
 | R5 | `verdict_basis` named only the detection test | verdict_basis.test named only the Holm-adjusted detection family, although the verdict is co-determined by the unadjusted intersection-union exclusion test. Both are now named, with their opposite multiplicity treatments. |
-| R6 | One robustness cell is not a bounded-memory method | One robustness cell (`flow_transform/unexpected_z`) uses an expanding-window AR(5) to build its regressor, so its forecasting method is not bounded-memory. It is now flagged in the registry and the full-family correction is re-run without it as a published sensitivity, instead of the write-up claiming blanket bounded memory. |
+| R6 | Two robustness rows are not bounded-memory methods | Two asset-specific `flow_transform/unexpected_z` rows use an expanding-window AR(5) to build their regressor, so their forecasting methods are not bounded-memory. They remain visible but are flagged `bounded_memory=false`, `feeds_gate=false` and diagnostic-only before their p-values are read. |
 
 ## Reproducing
 
 ```bash
-uv run python experiments/k1709/k1709.py            # rebuilds the results JSON
-uv run python experiments/k1709/render_readme.py    # rebuilds this README
+uv run python experiments/k1709/k1709.py --relabel  # frozen-safe wording only
+uv run python experiments/k1709/k1709.py --render-frozen-figures
+uv run python experiments/k1709/render_readme.py    # JSON-only README render
 uv run --extra dev python -m pytest experiments/k1709/test_k1709.py -q
 uv run --extra dev python -m pytest scripts/tests/test_nested_dm_misuse_ratchet.py -q
 ```
 
 Seed `1709` throughout (OLS is deterministic; the block bootstrap and the power simulation are seeded explicitly). The results JSON is written atomically: temp file → parse → `os.replace`.
 
-**The seed does not make this bit-reproducible, and pretending otherwise would be its own small overclaim.** The RV series is fetched live from Yahoo at run time, so the sample end date advances every day and Yahoo occasionally back-fills a day it had previously dropped. Re-running this script tomorrow will therefore move the third decimal of the *h*=5 statistics (one extra out-of-sample observation), while the *h*=1 statistics, the verdict, the gate counts and the family-wide bound stay put. The vintage behind every number in this README is **2026-07-13** (last fully-closed UTC day); it is recorded in `data_diagnostics.rv.*.date_max` so the numbers can always be traced to the data that produced them.
+**Point-in-time limitation.** Neither the Farside flow response nor the Yahoo price response was archived point-in-time. The source URLs and sample endpoint identify what was queried, but cannot reconstruct the exact vendor bytes. Any live rerun may therefore change any statistic, gate count, bound or verdict; only --relabel and JSON-only rendering preserve this frozen numerical artefact.
+
+The committed result endpoint is **2026-07-13** (last fully closed UTC day in that run). This records the sample endpoint, not the unarchived vendor response bytes. Running `k1709.py` without a frozen-only flag is a new live-data estimate, not a reproduction of this artefact.
 
 | File | What it is |
 |---|---|
@@ -220,23 +225,26 @@ Seed `1709` throughout (OLS is deterministic; the block bootstrap and the power 
 | `render_readme.py` | Generates this file from the results JSON |
 | `codex_review_20260714.md` | The independent review that FAILed v1 |
 | `fig1_flow_vs_rv.png` | Flow vs realized volatility |
-| `fig2_event_window.png` | log-RV path around large flow shocks |
+| `fig2_event_window.png` | Frozen descriptive event plot; see label limitation below |
 | `fig3_oos_qlike.png` | OOS QLIKE + unconditional GW/DM z, primary cells |
 | `fig4_threshold_sensitivity.png` | Unconditional GW/DM z by shock threshold |
 | `fig5_simulated_power.png` | Simulated power (replaces v1's "MDE" curve) |
+
+**Figure 2 limitation.** The frozen fig2 is descriptive and has a one-day label shift: its x=0 is the first RV target day after the lagged flow observation, so the actual flow day is x=-1. It feeds no estimate, test or verdict. Future renders centre x=0 on the recorded flow source date explicitly.
 
 ## What this study does and does not say
 
 **Does say:**
 
-- **No robust incremental predictive evidence was found** for spot BTC/ETH ETF net flow over a HAR-RV baseline. Not one of the 10 primary cells clears the gate, and the point estimates mostly run the *wrong* way (the flow model is slightly worse).
-- Gains larger than **4.2%** in relative QLIKE are excluded, simultaneously across all 10 cells.
-- But only 5/10 cells can rule out the pre-specified 1% gain, so this is a **negative finding, not a proven zero**. Calling it "NULL" would be the same overreach v1 was FAILed for.
-- The result survives four flow transforms, four RV proxies, three smearing conventions, a conservative publication lag, and four shock thresholds.
+- **No robust incremental UNCONDITIONAL predictive evidence was found** for spot BTC/ETH ETF net flow over a HAR-RV baseline. Not one of the 10 primary cells clears the pre-specified Holm-adjusted detection gate; the point estimates mostly run the wrong way.
+- Gains larger than **4.2%** in relative QLIKE are excluded simultaneously across all 10 cells.
+- Only 5/10 cells can rule out the pre-specified 1% gain, so this is a **negative finding, not a proven zero**. Calling it a null result would overstate the evidence.
+- The same lack of a gate-clearing UNCONDITIONAL signal appears across four flow transforms, four RV proxies, three smearing conventions, a conservative publication lag and four shock thresholds.
 
 **Does not say:**
 
-- That the true effect is exactly zero. No test here can establish that.
-- That an RV uplift of any particular size is excluded. v1 claimed it could 'rule out an RV uplift of >= +16.2% per 1-sd flow shock'. That number came from reading a single-path power curve backwards. Power is not an exclusion. The claim is WITHDRAWN and is not replaced by an RV-space bound of any size.
-- Anything about the *level* effect of ETF-ization on crypto volatility. The treatment here is the flow, not the trading clock or the session structure.
+- That the true effect is exactly zero. No test here establishes that.
+- That an RV uplift of any particular size is excluded. The only reported bound is in relative QLIKE-loss space.
+- That flow lacks conditional or state-dependent predictive ability. The conditional GW test is not run; regime-specific effects that help in one state and hurt in another, netting to zero on average, are invisible to this design and are NOT excluded.
+- Anything about the level effect of ETF-ization on crypto volatility. The treatment here is flow, not the trading clock or session structure.
 

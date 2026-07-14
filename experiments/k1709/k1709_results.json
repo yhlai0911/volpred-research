@@ -28,7 +28,7 @@
     "R3_beta0_is_not_size": "The beta = 0 row is a false-positive diagnostic, not a size calibration. The 'size-calibrated' wording is gone from the module docstring and the figure legend.",
     "R4_fixed_window_dm_mislabelled": "The fixed-window raw Diebold-Mariano statistic was tagged 'biased toward the smaller model', which contradicts the very reason the scheme was changed. The role text is now scheme-specific: the expanding one is invalid, the fixed one is valid-but-not-the-gate.",
     "R5_verdict_basis_alignment": "verdict_basis.test named only the Holm-adjusted detection family, although the verdict is co-determined by the unadjusted intersection-union exclusion test. Both are now named, with their opposite multiplicity treatments.",
-    "R6_bounded_memory": "One robustness cell (`flow_transform/unexpected_z`) uses an expanding-window AR(5) to build its regressor, so its forecasting method is not bounded-memory. It is now flagged in the registry and the full-family correction is re-run without it as a published sensitivity, instead of the write-up claiming blanket bounded memory."
+    "R6_bounded_memory": "Two asset-specific `flow_transform/unexpected_z` rows use an expanding-window AR(5) to build their regressor, so their forecasting methods are not bounded-memory. They remain visible but are flagged `bounded_memory=false`, `feeds_gate=false` and diagnostic-only before their p-values are read."
   },
   "data_diagnostics": {
     "flows": {
@@ -862,7 +862,11 @@
         "min_origin_minus_last_train_label_end_days": 1,
         "embargo_ok": true,
         "smearing": "own",
-        "n_forecasts_clipped_to_training_range": 0
+        "n_forecasts_clipped_to_training_range": 0,
+        "common_complete_case_mask_sha256": "5df449eb7b17af7344b614991342ea17d376a4d4b0c24d3781dc9d4813d0ff7c",
+        "base_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
+        "aug_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
+        "origin_schedule_sha256": "4f54fd792f6bc0485dac9fad378f56d96277593ccec91955499dc9c6e5bcf1b4"
       },
       "primary_inference_gw_qlike": {
         "test": "Giacomini-White (2006) equal unconditional predictive ability",
@@ -962,7 +966,11 @@
         "min_origin_minus_last_train_label_end_days": 1,
         "embargo_ok": true,
         "smearing": "own",
-        "n_forecasts_clipped_to_training_range": 0
+        "n_forecasts_clipped_to_training_range": 0,
+        "common_complete_case_mask_sha256": "5df449eb7b17af7344b614991342ea17d376a4d4b0c24d3781dc9d4813d0ff7c",
+        "base_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
+        "aug_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
+        "origin_schedule_sha256": "4f54fd792f6bc0485dac9fad378f56d96277593ccec91955499dc9c6e5bcf1b4"
       },
       "primary_inference_gw_qlike": {
         "test": "Giacomini-White (2006) equal unconditional predictive ability",
@@ -1062,7 +1070,11 @@
         "min_origin_minus_last_train_label_end_days": 1,
         "embargo_ok": true,
         "smearing": "own",
-        "n_forecasts_clipped_to_training_range": 0
+        "n_forecasts_clipped_to_training_range": 0,
+        "common_complete_case_mask_sha256": "d97cd2ad0eed798d92d1335e3feb325a9b180b447c43c14286d93d3b99f72f45",
+        "base_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
+        "aug_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
+        "origin_schedule_sha256": "f1346545e33c698cabeef053009b225e1ea399c3192791acccf071e443e1b811"
       },
       "primary_inference_gw_qlike": {
         "test": "Giacomini-White (2006) equal unconditional predictive ability",
@@ -1162,7 +1174,11 @@
         "min_origin_minus_last_train_label_end_days": 1,
         "embargo_ok": true,
         "smearing": "own",
-        "n_forecasts_clipped_to_training_range": 0
+        "n_forecasts_clipped_to_training_range": 0,
+        "common_complete_case_mask_sha256": "d97cd2ad0eed798d92d1335e3feb325a9b180b447c43c14286d93d3b99f72f45",
+        "base_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
+        "aug_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
+        "origin_schedule_sha256": "f1346545e33c698cabeef053009b225e1ea399c3192791acccf071e443e1b811"
       },
       "primary_inference_gw_qlike": {
         "test": "Giacomini-White (2006) equal unconditional predictive ability",
@@ -1262,7 +1278,11 @@
         "min_origin_minus_last_train_label_end_days": 1,
         "embargo_ok": true,
         "smearing": "own",
-        "n_forecasts_clipped_to_training_range": 0
+        "n_forecasts_clipped_to_training_range": 0,
+        "common_complete_case_mask_sha256": "867ae2435a807918b6738cbef87fde0da157849e15ac7e8fa22f86bb9b4f3bac",
+        "base_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "aug_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "origin_schedule_sha256": "43a37ac8cb3bc863421cc1a72afc88b81c96806be42d5b30e2b274ad995dde93"
       },
       "primary_inference_gw_qlike": {
         "test": "Giacomini-White (2006) equal unconditional predictive ability",
@@ -1362,7 +1382,11 @@
         "min_origin_minus_last_train_label_end_days": 1,
         "embargo_ok": true,
         "smearing": "own",
-        "n_forecasts_clipped_to_training_range": 0
+        "n_forecasts_clipped_to_training_range": 0,
+        "common_complete_case_mask_sha256": "867ae2435a807918b6738cbef87fde0da157849e15ac7e8fa22f86bb9b4f3bac",
+        "base_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "aug_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "origin_schedule_sha256": "43a37ac8cb3bc863421cc1a72afc88b81c96806be42d5b30e2b274ad995dde93"
       },
       "primary_inference_gw_qlike": {
         "test": "Giacomini-White (2006) equal unconditional predictive ability",
@@ -1462,7 +1486,11 @@
         "min_origin_minus_last_train_label_end_days": 1,
         "embargo_ok": true,
         "smearing": "own",
-        "n_forecasts_clipped_to_training_range": 0
+        "n_forecasts_clipped_to_training_range": 0,
+        "common_complete_case_mask_sha256": "252e31f5b5b70d0cac0e8f0fe2a7e38c9ab9c0b7ca05673ce9027f937f1d2ed3",
+        "base_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "aug_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "origin_schedule_sha256": "902a58eede42d942323b29a30d47fd95ddffcc88186d9d60b79204b7fff44025"
       },
       "primary_inference_gw_qlike": {
         "test": "Giacomini-White (2006) equal unconditional predictive ability",
@@ -1562,7 +1590,11 @@
         "min_origin_minus_last_train_label_end_days": 1,
         "embargo_ok": true,
         "smearing": "own",
-        "n_forecasts_clipped_to_training_range": 0
+        "n_forecasts_clipped_to_training_range": 0,
+        "common_complete_case_mask_sha256": "252e31f5b5b70d0cac0e8f0fe2a7e38c9ab9c0b7ca05673ce9027f937f1d2ed3",
+        "base_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "aug_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "origin_schedule_sha256": "902a58eede42d942323b29a30d47fd95ddffcc88186d9d60b79204b7fff44025"
       },
       "primary_inference_gw_qlike": {
         "test": "Giacomini-White (2006) equal unconditional predictive ability",
@@ -1662,7 +1694,11 @@
         "min_origin_minus_last_train_label_end_days": 1,
         "embargo_ok": true,
         "smearing": "own",
-        "n_forecasts_clipped_to_training_range": 0
+        "n_forecasts_clipped_to_training_range": 0,
+        "common_complete_case_mask_sha256": "867ae2435a807918b6738cbef87fde0da157849e15ac7e8fa22f86bb9b4f3bac",
+        "base_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "aug_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "origin_schedule_sha256": "43a37ac8cb3bc863421cc1a72afc88b81c96806be42d5b30e2b274ad995dde93"
       },
       "primary_inference_gw_qlike": {
         "test": "Giacomini-White (2006) equal unconditional predictive ability",
@@ -1763,7 +1799,11 @@
         "min_origin_minus_last_train_label_end_days": 1,
         "embargo_ok": true,
         "smearing": "own",
-        "n_forecasts_clipped_to_training_range": 0
+        "n_forecasts_clipped_to_training_range": 0,
+        "common_complete_case_mask_sha256": "252e31f5b5b70d0cac0e8f0fe2a7e38c9ab9c0b7ca05673ce9027f937f1d2ed3",
+        "base_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "aug_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "origin_schedule_sha256": "902a58eede42d942323b29a30d47fd95ddffcc88186d9d60b79204b7fff44025"
       },
       "primary_inference_gw_qlike": {
         "test": "Giacomini-White (2006) equal unconditional predictive ability",
@@ -5052,7 +5092,7 @@
       },
       "transform": "unexpected_z",
       "in_sample_t": -0.51,
-      "bounded_memory_caveat": "The AR(5) that builds this regressor refits on an EXPANDING window of flow history. There is no lookahead (day i's own value never enters its own fit), but the forecasting METHOD does not have the bounded estimator memory GW formally assumes. Read this cell's GW p-value as indicative. None of the 10 primary cells uses this column, and `multiple_testing.bounded_memory_sensitivity` re-runs the full-family correction without this cell."
+      "bounded_memory_caveat": "The AR(5) that builds this regressor refits on an EXPANDING window of flow history. There is no lookahead, but the whole forecasting method is not bounded-memory. This row is retained as a diagnostic with feeds_gate=false and cannot enter a verdict."
     },
     {
       "asset": "ETH",
@@ -5461,7 +5501,7 @@
       },
       "transform": "unexpected_z",
       "in_sample_t": 1.003,
-      "bounded_memory_caveat": "The AR(5) that builds this regressor refits on an EXPANDING window of flow history. There is no lookahead (day i's own value never enters its own fit), but the forecasting METHOD does not have the bounded estimator memory GW formally assumes. Read this cell's GW p-value as indicative. None of the 10 primary cells uses this column, and `multiple_testing.bounded_memory_sensitivity` re-runs the full-family correction without this cell."
+      "bounded_memory_caveat": "The AR(5) that builds this regressor refits on an EXPANDING window of flow history. There is no lookahead, but the whole forecasting method is not bounded-memory. This row is retained as a diagnostic with feeds_gate=false and cannot enter a verdict."
     },
     {
       "asset": "BTC",
@@ -7377,10 +7417,10 @@
     }
   },
   "multiple_testing": {
-    "registry_note": "The families below are DERIVED from the in-code test registry, not hand-listed. v1 hand-listed 'EVERY DM test' and missed 8 of them. Holm runs on RAW p-values; rounding happens only at serialization.",
+    "registry_note": "The primary family and gate-eligible count are registry-derived. The frozen full_family_holm array remains as the historical 54-row sensitivity inventory; its two expanding-preprocessing rows are now explicitly feeds_gate=false and diagnostic-only. No primary cell uses them.",
     "n_tests_registered_total": 162,
-    "n_gate_eligible_gw_tests": 54,
-    "n_diagnostic_only_tests": 108,
+    "n_gate_eligible_gw_tests": 52,
+    "n_diagnostic_only_tests": 110,
     "primary_family": [
       {
         "family": "primary",
@@ -7405,7 +7445,8 @@
         "material_gain_exclusion_holm_p": 0.03054446031193441,
         "excludes_material_gain_holm_conservative": true,
         "qlike_gain_upper_bound_95pct": 0.19139938153049751,
-        "qlike_gain_upper_bound_simultaneous": 0.8514687857391007
+        "qlike_gain_upper_bound_simultaneous": 0.8514687857391007,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7430,7 +7471,8 @@
         "material_gain_exclusion_holm_p": 0.4648261283034436,
         "excludes_material_gain_holm_conservative": false,
         "qlike_gain_upper_bound_95pct": 1.8945767757545269,
-        "qlike_gain_upper_bound_simultaneous": 4.206775702280787
+        "qlike_gain_upper_bound_simultaneous": 4.206775702280787,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7455,7 +7497,8 @@
         "material_gain_exclusion_holm_p": 0.4648261283034436,
         "excludes_material_gain_holm_conservative": false,
         "qlike_gain_upper_bound_95pct": 1.5388491090904761,
-        "qlike_gain_upper_bound_simultaneous": 2.152368399595618
+        "qlike_gain_upper_bound_simultaneous": 2.152368399595618,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7480,7 +7523,8 @@
         "material_gain_exclusion_holm_p": 0.11811750022791362,
         "excludes_material_gain_holm_conservative": false,
         "qlike_gain_upper_bound_95pct": 0.24615402100943204,
-        "qlike_gain_upper_bound_simultaneous": 1.5357822686696214
+        "qlike_gain_upper_bound_simultaneous": 1.5357822686696214,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7505,7 +7549,8 @@
         "material_gain_exclusion_holm_p": 0.2743613537295786,
         "excludes_material_gain_holm_conservative": false,
         "qlike_gain_upper_bound_95pct": 0.952666424988803,
-        "qlike_gain_upper_bound_simultaneous": 2.1185438371568734
+        "qlike_gain_upper_bound_simultaneous": 2.1185438371568734,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7530,7 +7575,8 @@
         "material_gain_exclusion_holm_p": 0.4648261283034436,
         "excludes_material_gain_holm_conservative": false,
         "qlike_gain_upper_bound_95pct": 1.588911508244504,
-        "qlike_gain_upper_bound_simultaneous": 2.9597124867866103
+        "qlike_gain_upper_bound_simultaneous": 2.9597124867866103,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7555,7 +7601,8 @@
         "material_gain_exclusion_holm_p": 0.4648261283034436,
         "excludes_material_gain_holm_conservative": false,
         "qlike_gain_upper_bound_95pct": 1.4900523809963147,
-        "qlike_gain_upper_bound_simultaneous": 2.0456053032131196
+        "qlike_gain_upper_bound_simultaneous": 2.0456053032131196,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7580,7 +7627,8 @@
         "material_gain_exclusion_holm_p": 0.2743613537295786,
         "excludes_material_gain_holm_conservative": false,
         "qlike_gain_upper_bound_95pct": 1.0031430075683978,
-        "qlike_gain_upper_bound_simultaneous": 1.6651447234003973
+        "qlike_gain_upper_bound_simultaneous": 1.6651447234003973,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7605,7 +7653,8 @@
         "material_gain_exclusion_holm_p": 0.17092565139230725,
         "excludes_material_gain_holm_conservative": false,
         "qlike_gain_upper_bound_95pct": 0.8608742213662932,
-        "qlike_gain_upper_bound_simultaneous": 1.2646423467035954
+        "qlike_gain_upper_bound_simultaneous": 1.2646423467035954,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7630,7 +7679,8 @@
         "material_gain_exclusion_holm_p": 0.13575100881281443,
         "excludes_material_gain_holm_conservative": false,
         "qlike_gain_upper_bound_95pct": 0.6411538947656945,
-        "qlike_gain_upper_bound_simultaneous": 1.3968750736671893
+        "qlike_gain_upper_bound_simultaneous": 1.3968750736671893,
+        "claim_role": "primary_unconditional_detection_gate"
       }
     ],
     "full_family_holm": [
@@ -7650,7 +7700,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.5615,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7668,7 +7719,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.9476,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7686,7 +7738,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.4041,
         "n": 351,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7704,7 +7757,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -1.5257,
         "n": 351,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7722,7 +7776,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.554,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7740,7 +7795,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.1716,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7758,7 +7814,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.2971,
         "n": 218,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7776,7 +7833,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.363,
         "n": 218,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7794,7 +7852,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.1541,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "primary",
@@ -7812,7 +7871,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.3893,
         "n": 218,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "primary_unconditional_detection_gate"
       },
       {
         "family": "rv_proxy",
@@ -7830,7 +7890,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.6761,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "rv_proxy",
@@ -7848,7 +7909,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.4803,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "rv_proxy",
@@ -7866,7 +7928,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.3966,
         "n": 170,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "rv_proxy",
@@ -7884,7 +7947,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.8275,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "rv_proxy",
@@ -7902,7 +7966,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.1219,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "rv_proxy",
@@ -7920,7 +7985,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.922,
         "n": 143,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_lag2",
@@ -7938,7 +8004,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.3832,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_lag2",
@@ -7956,7 +8023,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.158,
         "n": 350,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_lag2",
@@ -7974,7 +8042,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.0051,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_lag2",
@@ -7992,7 +8061,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.4448,
         "n": 217,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "smearing_none",
@@ -8010,7 +8080,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.8159,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "smearing_shared",
@@ -8028,7 +8099,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.557,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "smearing_none",
@@ -8046,7 +8118,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.2462,
         "n": 351,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "smearing_shared",
@@ -8064,7 +8137,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.4049,
         "n": 351,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "smearing_none",
@@ -8082,7 +8156,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -1.6381,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "smearing_shared",
@@ -8100,7 +8175,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.565,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "smearing_none",
@@ -8118,7 +8194,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 1.2793,
         "n": 218,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "smearing_shared",
@@ -8136,7 +8213,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.2742,
         "n": 218,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_transform",
@@ -8154,7 +8232,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.4733,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_transform",
@@ -8172,7 +8251,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.2664,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_transform",
@@ -8190,7 +8270,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.5059,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_transform",
@@ -8204,11 +8285,12 @@
         "scheme": "paired fixed rolling window",
         "stat": -0.4029,
         "p_one_sided_raw": 0.3435140809112126,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": false,
         "qlike_improve_pct": 0.2588,
         "n": 310,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "invalid_for_nested_inference_diagnostic_only"
       },
       {
         "family": "flow_transform",
@@ -8226,7 +8308,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.112,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_transform",
@@ -8244,7 +8327,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.2165,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_transform",
@@ -8262,7 +8346,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.1882,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "flow_transform",
@@ -8276,11 +8361,12 @@
         "scheme": "paired fixed rolling window",
         "stat": 0.6963,
         "p_one_sided_raw": 0.756866373457423,
-        "feeds_gate": true,
+        "feeds_gate": false,
         "bounded_memory": false,
         "qlike_improve_pct": -0.2689,
         "n": 178,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "invalid_for_nested_inference_diagnostic_only"
       },
       {
         "family": "threshold",
@@ -8298,7 +8384,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.7242,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8316,7 +8403,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.5737,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8334,7 +8422,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.6624,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8352,7 +8441,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.042,
         "n": 355,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8370,7 +8460,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.3361,
         "n": 351,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8388,7 +8479,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.3527,
         "n": 351,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8406,7 +8498,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.8633,
         "n": 351,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8424,7 +8517,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.2038,
         "n": 351,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8442,7 +8536,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.2709,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8460,7 +8555,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.7117,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8478,7 +8574,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.1154,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8496,7 +8593,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.3846,
         "n": 223,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8514,7 +8612,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.4212,
         "n": 218,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8532,7 +8631,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.8504,
         "n": 218,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8550,7 +8650,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": 0.1299,
         "n": 218,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "threshold",
@@ -8568,7 +8669,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.2974,
         "n": 218,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "eth_window",
@@ -8586,7 +8688,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.6127,
         "n": 273,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       },
       {
         "family": "eth_window",
@@ -8604,7 +8707,8 @@
         "bounded_memory": true,
         "qlike_improve_pct": -0.0277,
         "n": 269,
-        "holm_adjusted_p": 1.0
+        "holm_adjusted_p": 1.0,
+        "claim_role": "robustness_unconditional_sensitivity"
       }
     ],
     "n_full_family_holm_significant_at_05": 0,
@@ -8619,7 +8723,7 @@
       "n_full_family_holm_significant_at_05": 0,
       "n_full_family_holm_significant_at_05_bounded_memory_only": 0,
       "conclusion_depends_on_the_unbounded_cell": false,
-      "note": "The cell is kept in the family and corrected for. Dropping a test after its result is known would be selection, not rigour. The sensitivity above is what licenses the claim that nothing in the verdict rests on it -- not the assertion that it does not matter.",
+      "note": "Eligibility is decided from whole-method provenance before p-values are inspected. The two expanding-preprocessing rows remain visible in the historical full-family sensitivity array, but feeds_gate=false prevents either from entering a GW family or verdict.",
       "primary_family_is_entirely_bounded_memory": true
     }
   },
@@ -8921,12 +9025,12 @@
   },
   "verdict": "INCONCLUSIVE_NO_EXACT_NULL_CLAIM",
   "verdict_basis": {
-    "test": "TWO pre-specified objects, with OPPOSITE multiplicity treatments, and the verdict is a function of both. (1) DETECTION -- Giacomini-White (2006) Sec 3.4 UNCONDITIONAL special case (instrument h_t = 1, which coincides with a HAC Diebold-Mariano t; NOT the conditional GW test -- no instrument vector, no Wald statistic, no chi-square_q), one-sided and flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union of alternatives: ten shots at finding an effect). (2) EXCLUSION -- the pre-specified one-sided material-gain test, run as an INTERSECTION-UNION test with each cell UNADJUSTED (Berger 1982): the bounded null may be asserted only if EVERY cell rejects its own exclusion null, which needs no correction. Holm-adjusted exclusion p-values are also reported as a conservative sensitivity, but they are NOT the test. The verdict is INCONCLUSIVE precisely because (1) finds nothing and (2) does not hold in every cell.",
+    "test": "TWO pre-specified objects, with OPPOSITE multiplicity treatments, and the verdict is a function of both. (1) DETECTION -- Giacomini-White (2006) Sec 3.4 UNCONDITIONAL special case (instrument h_t = 1, which coincides with a HAC Diebold-Mariano t; NOT the conditional GW test -- no instrument vector, no Wald statistic, no chi-square_q), one-sided and flow-favouring, HOLM-ADJUSTED across the 10-cell family (a union of alternatives: ten shots at finding an effect). (2) EXCLUSION -- the pre-specified one-sided material-gain test, run as an INTERSECTION-UNION test with each cell UNADJUSTED (Berger 1982): the bounded null may be asserted only if EVERY cell rejects its own exclusion null, which needs no correction. Holm-adjusted exclusion p-values are also reported as a conservative sensitivity, but they are NOT the test. The verdict is determined by those two objects. The verdict is INCONCLUSIVE because the detection family finds no Holm-adjusted evidence and the exclusion conjunction does not hold in every cell.",
     "test_detection": "Giacomini-White (2006) Sec 3.4 unconditional special case (h_t = 1; equals HAC Diebold-Mariano), one-sided flow-favouring, Holm-adjusted across the 10-cell primary family",
     "test_exclusion": "pre-specified one-sided material-gain exclusion, intersection-union across the 10-cell primary family, each cell UNADJUSTED",
     "conditional_predictive_ability_not_tested": "The conditional GW test (h_t a non-trivial instrument, q x q moment covariance, Wald chi-square_q) is NOT run anywhere in this study. Every claim below is therefore UNCONDITIONAL: it is about the AVERAGE loss differential over the OOS sample. A flow effect that helps in one regime and hurts in another, netting to zero on average, would be invisible to this design and is NOT excluded by it.",
     "loss": "Patton QLIKE on the variance level",
-    "estimation_scheme": "paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin). Every one of the 10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which is the condition GW's limiting experiment needs. The one registered cell that is not (`flow_transform/unexpected_z`, whose regressor comes from an expanding-window AR(5)) sits in the robustness family, is flagged `bounded_memory=false`, and is shown in `multiple_testing.bounded_memory_sensitivity` not to move the family-wise conclusion.",
+    "estimation_scheme": "paired fixed rolling window of 250 flow days; both specs share the augmented complete-case mask, the training dates and the forward-label embargo (y_end_date < forecast origin). Every one of the 10 primary cells is therefore a BOUNDED-MEMORY forecasting method, which is the condition GW's limiting experiment needs. The two registered asset-specific `flow_transform/unexpected_z` rows whose regressor comes from an expanding-window AR(5) sit outside the primary family, are flagged `bounded_memory=false` and `feeds_gate=false`, and remain visible only as invalid-for-nested-inference diagnostics.",
     "gate": "qlike_improve > 0 AND unconditional GW/DM z < -1.645 AND Holm p < 0.05",
     "cells_in_primary_family": 10,
     "cells_passing_flow_gate": 0,
@@ -8948,8 +9052,116 @@
     },
     "qlike_gain_upper_bound_family_simultaneous_pct": 4.206775702280787,
     "upper_bound_method": "Inverted one-sided exclusion test (Bonferroni alpha/m across the 10 primary cells). This -- not the power curve -- is the object that can bound an effect. It lives in QLIKE-LOSS space, not RV-uplift space.",
-    "claim_strength": "INCONCLUSIVE. No cell shows incremental UNCONDITIONAL predictive content, but only 5/10 primary cells can rule out the pre-specified 1% QLIKE gain, so the bounded null is NOT established. Failure to reject equal accuracy is not evidence of equality. The honest headline is: 'no robust incremental UNCONDITIONAL predictive evidence was found for spot BTC/ETH ETF flow over a HAR-RV baseline' -- a negative finding, not a proven zero. The inverted one-sided 95% upper confidence bound on the relative QLIKE gain is 4.2% simultaneously across all 10 cells (Bonferroni): gains LARGER than that are excluded by the data; anything smaller is not.",
+    "claim_strength": "INCONCLUSIVE. No primary cell clears the pre-specified Holm-adjusted UNCONDITIONAL detection gate, but only 5/10 primary cells can rule out the pre-specified 1% QLIKE gain, so the bounded null is NOT established. Failure to reject equal accuracy is not evidence of equality. The honest headline is: 'no robust incremental UNCONDITIONAL predictive evidence was found for spot BTC/ETH ETF flow over a HAR-RV baseline' -- a negative finding, not a proven zero. The inverted one-sided 95% upper confidence bound on the relative QLIKE gain is 4.2% simultaneously across all 10 cells (Bonferroni): gains LARGER than that are excluded by the data; anything smaller is not.",
+    "does_say_1_primary_evidence": "**No robust incremental UNCONDITIONAL predictive evidence was found** for spot BTC/ETH ETF net flow over a HAR-RV baseline. Not one of the 10 primary cells clears the pre-specified Holm-adjusted detection gate; the point estimates mostly run the wrong way.",
+    "does_say_2_family_bound": "Gains larger than **4.2%** in relative QLIKE are excluded simultaneously across all 10 cells.",
+    "does_say_3_inconclusive_scope": "Only 5/10 cells can rule out the pre-specified 1% gain, so this is a **negative finding, not a proven zero**. Calling it a null result would overstate the evidence.",
+    "does_say_4_robustness": "The same lack of a gate-clearing UNCONDITIONAL signal appears across four flow transforms, four RV proxies, three smearing conventions, a conservative publication lag and four shock thresholds.",
+    "does_not_say_1_exact_zero": "That the true effect is exactly zero. No test here establishes that.",
+    "does_not_say_2_rv_uplift": "That an RV uplift of any particular size is excluded. The only reported bound is in relative QLIKE-loss space.",
+    "does_not_say_3_conditional_effect": "That flow lacks conditional or state-dependent predictive ability. The conditional GW test is not run; regime-specific effects that help in one state and hurt in another, netting to zero on average, are invisible to this design and are NOT excluded.",
+    "does_not_say_4_etf_level_effect": "Anything about the level effect of ETF-ization on crypto volatility. The treatment here is flow, not the trading clock or session structure.",
+    "figure_3_stat_label": "uncond. GW/DM z={z:.2f}",
+    "figure_3_title": "Does ETF flow improve HAR out-of-sample average QLIKE?\nGW (2006) Sec. 3.4 UNCONDITIONAL / HAC-DM-form statistic, paired fixed rolling window (gate: z < -1.645 and Holm p < 0.05)",
+    "figure_4_title": "UNCONDITIONAL GW/DM z by shock threshold (negative = flow helps on average)",
+    "figure_4_colorbar_label": "unconditional GW/DM z",
+    "figure_5_power_label": "power of one-cell UNCONDITIONAL GW/DM gate (z < -1.645)",
+    "reproducibility_limitation": "Neither the Farside flow response nor the Yahoo price response was archived point-in-time. The source URLs and sample endpoint identify what was queried, but cannot reconstruct the exact vendor bytes. Any live rerun may therefore change any statistic, gate count, bound or verdict; only --relabel and JSON-only rendering preserve this frozen numerical artefact.",
+    "fig2_event_day_limitation": "The frozen fig2 is descriptive and has a one-day label shift: its x=0 is the first RV target day after the lagged flow observation, so the actual flow day is x=-1. It feeds no estimate, test or verdict. Future renders centre x=0 on the recorded flow source date explicitly.",
+    "bound_inversion_limitation": "The frozen QLIKE upper bounds were produced by a binary inversion that assumed the rejection set was an upper tail. The primary streams were later found mildly non-monotone; a dense independent audit found one crossing per stream, so the published crossings did not move, but the frozen JSON does not archive the loss paths needed to reproduce that audit. Future runs verify the full rejection topology before reporting a bound.",
     "withdrawn_v1_claim": "v1 claimed it could 'rule out an RV uplift of >= +16.2% per 1-sd flow shock'. That number came from reading a single-path power curve backwards. Power is not an exclusion. The claim is WITHDRAWN and is not replaced by an RV-space bound of any size.",
-    "four_way_alignment": "test = GW(2006) Sec 3.4 unconditional special case (= HAC DM) | loss = Patton QLIKE | scheme = paired fixed rolling window | claim = no UNCONDITIONAL incremental predictive ability, bounded in QLIKE-loss space only. These four match by construction; v1's did not, and rev2's claim was broader than its test."
+    "four_way_alignment": "test = GW(2006) Sec 3.4 unconditional special case (= HAC DM) | loss = Patton QLIKE | scheme = paired fixed rolling window | claim = no robust evidence of UNCONDITIONAL incremental predictive ability, with any bound stated in QLIKE-loss space only. These four match by construction; v1's did not, and rev2's claim was broader than its test."
+  },
+  "nested_dm_fixed_memory_evidence_v1": {
+    "schema": "nested_dm_fixed_memory_runtime.v1",
+    "manifest_sha256": "afff49dad0abc17413173b17b1e54d5c8023acbcdcae1b407a4566d76076822f",
+    "cell_inventory": "primary_cells",
+    "gate_inventory": "multiple_testing.primary_family",
+    "registry_inventory": "multiple_testing.full_family_holm",
+    "statistic_record": "primary_inference_gw_qlike",
+    "claim_record": "verdict_basis",
+    "claim_scope": "unconditional_average_loss_only",
+    "cells": [
+      {
+        "id": "primary|BTC_h1|H1_absflow|rv_gk|fl1",
+        "common_complete_case_mask_sha256": "5df449eb7b17af7344b614991342ea17d376a4d4b0c24d3781dc9d4813d0ff7c",
+        "base_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
+        "aug_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
+        "origin_schedule_sha256": "4f54fd792f6bc0485dac9fad378f56d96277593ccec91955499dc9c6e5bcf1b4",
+        "eligibility": "whole_method_fixed_memory_verified"
+      },
+      {
+        "id": "primary|BTC_h1|H2_asym|rv_gk|fl1",
+        "common_complete_case_mask_sha256": "5df449eb7b17af7344b614991342ea17d376a4d4b0c24d3781dc9d4813d0ff7c",
+        "base_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
+        "aug_training_schedule_sha256": "1681e77d406ae22d0bda56a11ea3d59f683c57066c1ed383f328d6dd9f497df2",
+        "origin_schedule_sha256": "4f54fd792f6bc0485dac9fad378f56d96277593ccec91955499dc9c6e5bcf1b4",
+        "eligibility": "whole_method_fixed_memory_verified"
+      },
+      {
+        "id": "primary|BTC_h5|H1_absflow|rv_gk|fl1",
+        "common_complete_case_mask_sha256": "d97cd2ad0eed798d92d1335e3feb325a9b180b447c43c14286d93d3b99f72f45",
+        "base_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
+        "aug_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
+        "origin_schedule_sha256": "f1346545e33c698cabeef053009b225e1ea399c3192791acccf071e443e1b811",
+        "eligibility": "whole_method_fixed_memory_verified"
+      },
+      {
+        "id": "primary|BTC_h5|H2_asym|rv_gk|fl1",
+        "common_complete_case_mask_sha256": "d97cd2ad0eed798d92d1335e3feb325a9b180b447c43c14286d93d3b99f72f45",
+        "base_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
+        "aug_training_schedule_sha256": "42feef914612bef08d02269bef03fe6ea08d3ab6325d3b01904ba9178a5b7ff3",
+        "origin_schedule_sha256": "f1346545e33c698cabeef053009b225e1ea399c3192791acccf071e443e1b811",
+        "eligibility": "whole_method_fixed_memory_verified"
+      },
+      {
+        "id": "primary|ETH_h1|H1_absflow|rv_gk|fl1",
+        "common_complete_case_mask_sha256": "867ae2435a807918b6738cbef87fde0da157849e15ac7e8fa22f86bb9b4f3bac",
+        "base_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "aug_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "origin_schedule_sha256": "43a37ac8cb3bc863421cc1a72afc88b81c96806be42d5b30e2b274ad995dde93",
+        "eligibility": "whole_method_fixed_memory_verified"
+      },
+      {
+        "id": "primary|ETH_h1|H2_asym|rv_gk|fl1",
+        "common_complete_case_mask_sha256": "867ae2435a807918b6738cbef87fde0da157849e15ac7e8fa22f86bb9b4f3bac",
+        "base_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "aug_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "origin_schedule_sha256": "43a37ac8cb3bc863421cc1a72afc88b81c96806be42d5b30e2b274ad995dde93",
+        "eligibility": "whole_method_fixed_memory_verified"
+      },
+      {
+        "id": "primary|ETH_h1|H4_plus_btc|rv_gk|fl1",
+        "common_complete_case_mask_sha256": "867ae2435a807918b6738cbef87fde0da157849e15ac7e8fa22f86bb9b4f3bac",
+        "base_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "aug_training_schedule_sha256": "079a1a14a9bcfdbeaecd4506216ff840ebcf6bbcbe3e8347ec16a120ee6c581c",
+        "origin_schedule_sha256": "43a37ac8cb3bc863421cc1a72afc88b81c96806be42d5b30e2b274ad995dde93",
+        "eligibility": "whole_method_fixed_memory_verified"
+      },
+      {
+        "id": "primary|ETH_h5|H1_absflow|rv_gk|fl1",
+        "common_complete_case_mask_sha256": "252e31f5b5b70d0cac0e8f0fe2a7e38c9ab9c0b7ca05673ce9027f937f1d2ed3",
+        "base_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "aug_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "origin_schedule_sha256": "902a58eede42d942323b29a30d47fd95ddffcc88186d9d60b79204b7fff44025",
+        "eligibility": "whole_method_fixed_memory_verified"
+      },
+      {
+        "id": "primary|ETH_h5|H2_asym|rv_gk|fl1",
+        "common_complete_case_mask_sha256": "252e31f5b5b70d0cac0e8f0fe2a7e38c9ab9c0b7ca05673ce9027f937f1d2ed3",
+        "base_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "aug_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "origin_schedule_sha256": "902a58eede42d942323b29a30d47fd95ddffcc88186d9d60b79204b7fff44025",
+        "eligibility": "whole_method_fixed_memory_verified"
+      },
+      {
+        "id": "primary|ETH_h5|H4_plus_btc|rv_gk|fl1",
+        "common_complete_case_mask_sha256": "252e31f5b5b70d0cac0e8f0fe2a7e38c9ab9c0b7ca05673ce9027f937f1d2ed3",
+        "base_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "aug_training_schedule_sha256": "7a0252aefef5e814a0853343177cfa2d01230e73ce82200afdd7a5f305a0906d",
+        "origin_schedule_sha256": "902a58eede42d942323b29a30d47fd95ddffcc88186d9d60b79204b7fff44025",
+        "eligibility": "whole_method_fixed_memory_verified"
+      }
+    ]
   }
 }

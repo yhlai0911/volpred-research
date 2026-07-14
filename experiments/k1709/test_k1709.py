@@ -43,6 +43,10 @@ Run:  uv run --extra dev python -m pytest experiments/k1709/test_k1709.py -q
 from __future__ import annotations
 
 import ast
+import builtins
+import hashlib
+import json
+import symtable
 import sys
 from pathlib import Path
 
@@ -63,12 +67,16 @@ from k1709 import (  # noqa: E402
     REGISTRY,
     SPECS,
     Panel,
+    _date_index_sha256,
+    _non_string_leaf_surface,
     _ols,
     _parse_money,
+    _string_sequence_sha256,
     ar_residual,
     assert_calendar_is_complete,
     assert_no_lookahead,
     build_panel,
+    build_verdict_basis,
     evaluate_cell,
     filter_to_sessions,
     flow_zscore,
@@ -82,6 +90,7 @@ from k1709 import (  # noqa: E402
     raw_dm_diagnostic,
     us_equity_sessions,
 )
+from render_readme import build_readme  # noqa: E402
 
 SEED = 1709
 
@@ -441,6 +450,35 @@ def test_baseline_lags_are_one_and_one(panel):
     assert (panel.df.index - panel.df["flow_src_date"]).dt.days.eq(1).all()
 
 
+def test_every_primary_predictor_matches_its_real_source_date(world):
+    """Pin values to raw dated inputs, not to self-authored provenance columns."""
+    rv, flow = world
+    ff = make_flow_features(flow)
+    p = build_panel(rv, ff, "rv_gk", 1, "SYN", btc_z=ff.z * 1.7)
+    log_rv = np.log(rv["rv_gk"])
+    for tau in p.df.index[80:180:17]:
+        state_date = tau - pd.Timedelta(days=1)
+        flow_date = tau - pd.Timedelta(days=1)
+        row = p.df.loc[tau]
+        assert row["state_src_date"] == state_date
+        assert row["flow_src_date"] == flow_date
+        assert row["har_d"] == pytest.approx(log_rv.loc[state_date])
+        assert row["har_w"] == pytest.approx(
+            log_rv.loc[state_date - pd.Timedelta(days=4) : state_date].mean()
+        )
+        assert row["har_m"] == pytest.approx(
+            log_rv.loc[state_date - pd.Timedelta(days=21) : state_date].mean()
+        )
+        assert row["ret"] == pytest.approx(rv.loc[state_date, "ret"])
+        assert row["abs_ret"] == pytest.approx(abs(rv.loc[state_date, "ret"]))
+        assert row["z"] == pytest.approx(ff.z.loc[flow_date])
+        assert row["abs_z"] == pytest.approx(abs(ff.z.loc[flow_date]))
+        assert row["z_neg"] == pytest.approx(
+            abs(ff.z.loc[flow_date]) * (ff.z.loc[flow_date] < 0)
+        )
+        assert row["abs_z_btc"] == pytest.approx(abs(1.7 * ff.z.loc[flow_date]))
+
+
 def test_assert_no_lookahead_catches_a_lag_mixup(world):
     rv, flow = world
     p = build_panel(rv, make_flow_features(flow), "rv_gk", 1, "SYN")
@@ -520,6 +558,21 @@ def test_gw_uses_a_fixed_window_with_shared_training_dates(panel):
     assert po.audit["fixed_window_held"] is True
     assert po.audit["train_window"] == GW_TRAIN_WINDOW
     assert po.audit["same_training_dates_for_both_models"] is True
+    assert po.audit["base_training_schedule_sha256"] == (
+        po.audit["aug_training_schedule_sha256"]
+    )
+    assert po.audit["gw_fixed_memory_eligible"] is True
+
+    d = panel.df.dropna(subset=[*SPECS["H1_absflow"], "y", "y_end_date"])
+    y_end = d["y_end_date"].to_numpy()
+    schedules = []
+    for origin in po.origins:
+        end = int(np.searchsorted(y_end, origin.to_datetime64(), side="left"))
+        start = end - GW_TRAIN_WINDOW
+        schedules.append(_date_index_sha256(d.index[start:end]))
+    assert po.audit["base_training_schedule_sha256"] == (
+        _string_sequence_sha256(schedules)
+    )
 
 
 def test_expanding_window_is_reported_but_flagged_invalid(panel):
@@ -601,6 +654,47 @@ def test_inverted_upper_bound_returns_none_when_nothing_can_be_excluded():
     rng = np.random.default_rng(23)
     loss_base = np.abs(rng.normal(1.0, 0.2, 300))
     assert qlike_gain_upper_bound(loss_base * 0.05, loss_base, h=1, alpha=0.05) is None
+
+
+def test_bound_inversion_audits_a_nonmonotone_rejection_topology():
+    """The HAC denominator varies with the margin, so z(m) can turn around.
+
+    This deterministic stream has one crossing followed by a local maximum: z(m)
+    falls near the top of the searched range. The inversion must enumerate the
+    full topology and return the last non-rejected boundary, not merely rely on a
+    comment claiming global monotonicity.
+    """
+    rng = np.random.default_rng(70)
+    n = 250
+    loss_base = np.exp(rng.normal(0, 0.8, n))
+    eps = np.empty(n)
+    eps[0] = rng.normal()
+    for i in range(1, n):
+        eps[i] = 0.8 * eps[i - 1] + rng.normal(scale=0.6)
+    diff = (
+        rng.uniform(-1.5, 1.5) * loss_base
+        + rng.uniform(0.1, 2.0) * eps
+        + rng.uniform(-1.0, 1.0)
+    )
+    loss_aug = loss_base + diff
+
+    grid = np.linspace(1e-4, 0.90, 1001)
+    z = np.array(
+        [
+            material_gain_exclusion(loss_aug, loss_base, h=1, margin=m)["z_stat"]
+            for m in grid
+        ]
+    )
+    assert np.any(np.diff(z) > 0) and np.any(np.diff(z) < 0)  # genuinely non-monotone
+
+    crit = 1.6448536269514722
+    non_rejected = grid[z < crit]
+    assert len(non_rejected) and z[-1] >= crit
+    dense_boundary_pct = float(non_rejected.max() * 100)
+    bound = qlike_gain_upper_bound(loss_aug, loss_base, h=1, alpha=0.05)
+    assert bound is not None
+    assert dense_boundary_pct <= bound <= dense_boundary_pct + 0.10
+    assert np.all(z[grid > bound / 100.0] >= crit)
 
 
 def test_power_rises_with_the_effect_and_does_not_fire_on_noise():
@@ -976,3 +1070,148 @@ def test_unbounded_memory_cell_is_flagged_not_silently_pooled(panel):
     assert all(
         not r.bounded_memory for r in REGISTRY if r.cell == bad["cell"]
     )
+    assert all(not r.feeds_gate for r in REGISTRY if r.cell == bad["cell"])
+
+
+def test_primary_gate_fails_closed_when_upstream_memory_is_unbounded(panel):
+    with pytest.raises(AssertionError, match="without fixed-memory provenance"):
+        evaluate_cell(
+            panel,
+            "HAR+ctrl",
+            "H1_absflow",
+            family="primary",
+            bounded_memory=False,
+        )
+
+
+# ---------------------------------------------------------------------------
+# 10. rev4 frozen-claim-surface ratchets
+# ---------------------------------------------------------------------------
+def _frozen_results() -> dict:
+    return json.loads((Path(__file__).parent / "k1709_results.json").read_text())
+
+
+def test_frozen_non_string_surface_has_not_moved():
+    """Freeze every typed leaf after the four-path gate-metadata correction."""
+    surface = _non_string_leaf_surface(_frozen_results())
+    rows = [
+        [list(path), kind, encoded]
+        for path, (kind, encoded) in sorted(surface.items(), key=lambda item: repr(item[0]))
+    ]
+    payload = json.dumps(rows, ensure_ascii=False, separators=(",", ":")).encode()
+    assert len(rows) == 4383
+    assert hashlib.sha256(payload).hexdigest() == (
+        "03e6e18208fe2cc42611f6243ea3428cc2a96fe3cd65ca79bda98d3fbeb4c405"
+    )
+
+
+def test_frozen_gate_metadata_correction_is_exactly_scoped():
+    r = _frozen_results()
+    invalid = [
+        row
+        for row in r["multiple_testing"]["full_family_holm"]
+        if row["bounded_memory"] is False
+    ]
+    assert len(invalid) == 2
+    assert all(row["feeds_gate"] is False for row in invalid)
+    assert all(
+        row["claim_role"] == "invalid_for_nested_inference_diagnostic_only"
+        for row in invalid
+    )
+    assert r["multiple_testing"]["n_gate_eligible_gw_tests"] == 52
+    assert r["multiple_testing"]["n_diagnostic_only_tests"] == 110
+
+
+def test_frozen_verdict_words_are_exactly_rederived_from_frozen_counts():
+    r = _frozen_results()
+    old = r["verdict_basis"]
+    rebuilt = build_verdict_basis(
+        r["verdict"],
+        n_cells=old["cells_in_primary_family"],
+        n_pass=old["cells_passing_flow_gate"],
+        n_excl=old["cells_excluding_material_gain"],
+        n_excl_holm=old["cells_excluding_material_gain_holm_conservative"],
+        margin_pct=old["material_gain_margin_pct"],
+        family_bound=old["qlike_gain_upper_bound_family_simultaneous_pct"],
+        per_cell_upper_bounds=old["qlike_gain_upper_bound_95pct_per_cell"],
+    )
+    assert rebuilt == old
+
+
+def test_readme_is_an_exact_pure_render_of_the_frozen_json():
+    r = _frozen_results()
+    expected = build_readme(r)
+    assert expected == (Path(__file__).parent / "README.md").read_text()
+
+
+def test_final_claim_bullets_have_one_author_and_include_conditional_caveat():
+    r = _frozen_results()
+    vb = r["verdict_basis"]
+    text = build_readme(r)
+    summary = text.split("## What this study does and does not say", 1)[1]
+    does_say, does_not = summary.split("**Does not say:**", 1)
+
+    actual_say = [line for line in does_say.splitlines() if line.startswith("- ")]
+    actual_not = [line for line in does_not.splitlines() if line.startswith("- ")]
+    expected_say = [
+        f"- {vb[key]}"
+        for key in sorted(k for k in vb if k.startswith("does_say_"))
+        if vb[key]
+    ]
+    expected_not = [
+        f"- {vb[key]}"
+        for key in sorted(k for k in vb if k.startswith("does_not_say_"))
+        if vb[key]
+    ]
+    assert actual_say == expected_say
+    assert actual_not == expected_not
+
+    conditional = vb["does_not_say_3_conditional_effect"].lower()
+    assert "conditional" in conditional
+    assert "regime" in conditional
+    assert "not excluded" in conditional
+
+    renderer = (Path(__file__).parent / "render_readme.py").read_text()
+    assert "No robust incremental predictive evidence was found" not in renderer
+    assert "That the true effect is exactly zero" not in renderer
+
+
+def test_every_inferential_figure_label_is_explicitly_unconditional():
+    vb = _frozen_results()["verdict_basis"]
+    labels = {
+        key: value for key, value in vb.items() if key.startswith("figure_")
+    }
+    assert labels
+    for key, value in labels.items():
+        if "GW" in value or "Giacomini-White" in value:
+            assert "uncond" in value.lower() or "sec. 3.4" in value.lower(), key
+
+    src = (Path(__file__).parent / "k1709.py").read_text()
+    for stale in (
+        'f"GW z=',
+        "Giacomini-White on QLIKE",
+        "Giacomini-White z by shock threshold",
+        "power of the GW gate",
+    ):
+        assert stale not in src
+
+
+def test_main_has_no_unresolved_global_references():
+    """Compile succeeds with unresolved globals; stdlib symtable catches them."""
+    source = (Path(__file__).parent / "k1709.py").read_text()
+    table = symtable.symtable(source, "k1709.py", "exec")
+    module_defined = {
+        symbol.get_name()
+        for symbol in table.get_symbols()
+        if symbol.is_assigned() or symbol.is_imported() or symbol.is_namespace()
+    }
+    main_scope = next(child for child in table.get_children() if child.get_name() == "main")
+    unresolved = {
+        symbol.get_name()
+        for symbol in main_scope.get_symbols()
+        if symbol.is_referenced()
+        and symbol.is_global()
+        and symbol.get_name() not in module_defined
+        and not hasattr(builtins, symbol.get_name())
+    }
+    assert unresolved == set()

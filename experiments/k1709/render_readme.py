@@ -32,8 +32,8 @@ def sci(p: float | None) -> str:
     return f"{p:.3f}" if p >= 1e-3 else f"{p:.1e}"
 
 
-def main() -> None:
-    r = json.loads(RESULTS.read_text())
+def build_readme(r: dict) -> str:
+    """Pure renderer: results mapping in, complete README text out."""
     prim = r["primary_cells"]
     fam = r["multiple_testing"]["primary_family"]
     vb = r["verdict_basis"]
@@ -366,6 +366,8 @@ def main() -> None:
         "of exact zero."
     )
     A("")
+    A(f"**Frozen-bound limitation.** {vb['bound_inversion_limitation']}")
+    A("")
 
     # ---- power -------------------------------------------------------------
     A("## Power — what this design could have seen")
@@ -535,11 +537,8 @@ def main() -> None:
     n_unb = len(bm["unbounded_memory_cells"])
     cells_txt = "`" + "`, `".join(bm["unbounded_memory_cells"]) + "`"
     A(
-        f"### {'One' if n_unb == 1 else n_unb} of those tests "
-        f"{'is' if n_unb == 1 else 'are'} not "
-        f"{'a ' if n_unb == 1 else ''}bounded-memory "
-        f"{'test' if n_unb == 1 else 'tests'} — and "
-        f"{'it is' if n_unb == 1 else 'they are'} labelled"
+        f"### {'One' if n_unb == 1 else n_unb} registered diagnostic "
+        f"{'row fails' if n_unb == 1 else 'rows fail'} the bounded-memory gate"
     )
     A("")
     A(
@@ -555,26 +554,21 @@ def main() -> None:
         f"{bm['n_gw_tests_all']} registered tests are one would be false."
     )
     A("")
-    it, they, them = (
-        ("It", "it", "it") if n_unb == 1 else ("They", "they", "them")
-    )
+    it, they = (("It", "it") if n_unb == 1 else ("They", "they"))
     A(
-        f"{it} **{'is' if n_unb == 1 else 'are'} not dropped**. Removing a test once "
-        f"its result is known is selection, not rigour. {it} "
-        f"{'stays' if n_unb == 1 else 'stay'} in the family, "
-        f"{they} {'is' if n_unb == 1 else 'are'} corrected for, "
-        f"{they} {'carries' if n_unb == 1 else 'carry'} `bounded_memory=false` in the "
-        f"registry, and the family-wise count is re-run without {them} so a reader can "
-        f"see whether anything hangs on {them}: "
-        f"**{bm['n_full_family_holm_significant_at_05']}** Holm-surviving cells across "
-        f"all {bm['n_gw_tests_all']} tests, "
-        f"**{bm['n_full_family_holm_significant_at_05_bounded_memory_only']}** across "
-        f"the {bm['n_gw_tests_bounded_memory']} bounded-memory tests. The verdict "
-        + (f"**does** depend on {them} — see the JSON."
-           if bm["conclusion_depends_on_the_unbounded_cell"]
-           else f"does **not** depend on {them}.")
-        + (" All 10 primary cells are bounded-memory."
-           if bm["primary_family_is_entirely_bounded_memory"] else "")
+        f"{it} remain{'s' if n_unb == 1 else ''} visible in the frozen historical "
+        f"sensitivity inventory, but {they} {'carries' if n_unb == 1 else 'carry'} "
+        "both `bounded_memory=false` and `feeds_gate=false`. That eligibility is "
+        "fixed from method provenance before any p-value is read; the rows cannot "
+        "enter a GW family or verdict. The archived 54-row sensitivity and the "
+        f"{bm['n_gw_tests_bounded_memory']}-row eligible family both happen to have "
+        f"**{bm['n_full_family_holm_significant_at_05_bounded_memory_only']}** "
+        f"Holm-surviving cells, but only the latter is inferentially licensed."
+        + (
+            " All 10 primary cells are bounded-memory."
+            if bm["primary_family_is_entirely_bounded_memory"]
+            else ""
+        )
     )
     A("")
 
@@ -645,7 +639,7 @@ def main() -> None:
             "R5_verdict_basis_alignment":
                 "`verdict_basis` named only the detection test",
             "R6_bounded_memory":
-                "One robustness cell is not a bounded-memory method",
+                "Two robustness rows are not bounded-memory methods",
         }
         for i, (key, label) in enumerate(labels.items(), start=1):
             if key in resid:
@@ -655,8 +649,9 @@ def main() -> None:
     A("## Reproducing")
     A("")
     A("```bash")
-    A("uv run python experiments/k1709/k1709.py            # rebuilds the results JSON")
-    A("uv run python experiments/k1709/render_readme.py    # rebuilds this README")
+    A("uv run python experiments/k1709/k1709.py --relabel  # frozen-safe wording only")
+    A("uv run python experiments/k1709/k1709.py --render-frozen-figures")
+    A("uv run python experiments/k1709/render_readme.py    # JSON-only README render")
     A("uv run --extra dev python -m pytest experiments/k1709/test_k1709.py -q")
     A("uv run --extra dev python -m pytest scripts/tests/test_nested_dm_misuse_ratchet.py -q")
     A("```")
@@ -665,18 +660,14 @@ def main() -> None:
       "the power simulation are seeded explicitly). The results JSON is written "
       "atomically: temp file → parse → `os.replace`.")
     A("")
+    A(f"**Point-in-time limitation.** {vb['reproducibility_limitation']}")
+    A("")
     A(
-        "**The seed does not make this bit-reproducible, and pretending otherwise "
-        "would be its own small overclaim.** The RV series is fetched live from "
-        "Yahoo at run time, so the sample end date advances every day and Yahoo "
-        "occasionally back-fills a day it had previously dropped. Re-running this "
-        "script tomorrow will therefore move the third decimal of the *h*=5 "
-        "statistics (one extra out-of-sample observation), while the *h*=1 "
-        "statistics, the verdict, the gate counts and the family-wide bound stay "
-        "put. The vintage behind every number in this README is "
-        f"**{r['data_diagnostics']['rv']['BTC']['date_max']}** (last fully-closed "
-        "UTC day); it is recorded in `data_diagnostics.rv.*.date_max` so the "
-        "numbers can always be traced to the data that produced them."
+        "The committed result endpoint is "
+        f"**{r['data_diagnostics']['rv']['BTC']['date_max']}** (last fully closed "
+        "UTC day in that run). This records the sample endpoint, not the unarchived "
+        "vendor response bytes. Running `k1709.py` without a frozen-only flag is a "
+        "new live-data estimate, not a reproduction of this artefact."
     )
     A("")
     A("| File | What it is |")
@@ -687,10 +678,12 @@ def main() -> None:
     A("| `render_readme.py` | Generates this file from the results JSON |")
     A("| `codex_review_20260714.md` | The independent review that FAILed v1 |")
     A("| `fig1_flow_vs_rv.png` | Flow vs realized volatility |")
-    A("| `fig2_event_window.png` | log-RV path around large flow shocks |")
+    A("| `fig2_event_window.png` | Frozen descriptive event plot; see label limitation below |")
     A("| `fig3_oos_qlike.png` | OOS QLIKE + unconditional GW/DM z, primary cells |")
     A("| `fig4_threshold_sensitivity.png` | Unconditional GW/DM z by shock threshold |")
     A("| `fig5_simulated_power.png` | Simulated power (replaces v1's \"MDE\" curve) |")
+    A("")
+    A(f"**Figure 2 limitation.** {vb['fig2_event_day_limitation']}")
     A("")
 
     # ---- honest summary ----------------------------------------------------
@@ -698,56 +691,30 @@ def main() -> None:
     A("")
     A("**Does say:**")
     A("")
-    if r["verdict"] == "BOUNDED_NULL_NO_MATERIAL_QLIKE_GAIN":
-        A(
-            "- Spot BTC/ETH ETF net flow buys no material improvement in "
-            "out-of-sample volatility forecast accuracy over a HAR-RV baseline: a "
-            f"≥{vb['material_gain_margin_pct']:.0f}% relative QLIKE gain is ruled out "
-            f"in all {vb['cells_in_primary_family']} primary cells."
-        )
-    else:
-        A(
-            "- **No robust incremental predictive evidence was found** for spot "
-            "BTC/ETH ETF net flow over a HAR-RV baseline. Not one of the "
-            f"{vb['cells_in_primary_family']} primary cells clears the gate, and the "
-            "point estimates mostly run the *wrong* way (the flow model is slightly "
-            "worse)."
-        )
-        if fb is not None:
-            A(
-                f"- Gains larger than **{fb:.1f}%** in relative QLIKE are excluded, "
-                f"simultaneously across all {vb['cells_in_primary_family']} cells."
-            )
-        A(
-            f"- But only {vb['cells_excluding_material_gain']}/"
-            f"{vb['cells_in_primary_family']} cells can rule out the pre-specified "
-            f"{vb['material_gain_margin_pct']:.0f}% gain, so this is a **negative "
-            "finding, not a proven zero**. Calling it \"NULL\" would be the same "
-            "overreach v1 was FAILed for."
-        )
-    A(
-        "- The result survives four flow transforms, four RV proxies, three smearing "
-        "conventions, a conservative publication lag, and four shock thresholds."
-    )
+    for key in sorted(k for k in vb if k.startswith("does_say_")):
+        if vb[key]:
+            A(f"- {vb[key]}")
     A("")
     A("**Does not say:**")
     A("")
-    A("- That the true effect is exactly zero. No test here can establish that.")
-    A(
-        "- That an RV uplift of any particular size is excluded. "
-        f"{vb['withdrawn_v1_claim']}"
-    )
-    A(
-        "- Anything about the *level* effect of ETF-ization on crypto volatility. The "
-        "treatment here is the flow, not the trading clock or the session structure."
-    )
+    for key in sorted(k for k in vb if k.startswith("does_not_say_")):
+        if vb[key]:
+            A(f"- {vb[key]}")
     A("")
 
-    text = "\n".join(L) + "\n"
+    return "\n".join(L) + "\n"
+
+
+def main() -> None:
+    r = json.loads(RESULTS.read_text())
+    text = build_readme(r)
     tmp = OUT / "README.md.tmp"
     tmp.write_text(text, encoding="utf-8")
     os.replace(tmp, OUT / "README.md")
-    print(f"README.md rewritten from {RESULTS.name}: {len(L)} lines, verdict={r['verdict']}")
+    print(
+        f"README.md rewritten from {RESULTS.name}: "
+        f"{len(text.splitlines())} lines, verdict={r['verdict']}"
+    )
 
 
 if __name__ == "__main__":
