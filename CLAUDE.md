@@ -36,25 +36,15 @@
 
 除此之外：**遇任何問題自行由底層邏輯與流程去修整優化**，不用每一步都請示。規則不清楚就依「研究誠實原則」+「永遠修流程，不修資料」+「先改 skill/rules」推導；依然不清楚就先做再記教訓到 `docs/error_log.md`。
 
-**回應用戶後不可停在「等下一句」（2026-05-21 用戶硬性糾正）**：處理完用戶的問題 / 指令後，**必須自己流回日常 ops loop**（dashboard 巡檢 → triage critical/warn → 從 next_tasks 派工 → 收背景 agent → 繼續），不把「回答完用戶」當成回合結束。互動 session 與運營經理 session 是同一個角色 — 用戶插話只是 user-assigned 優先任務插隊，做完就接回自主主線，不是切換成「reactive 待命模式」。停下來的唯一正當理由是 ops loop 自然到達暫停點（無 critical、池有工已派、背景 agent 已收），不是「用戶沒再說話」。
+**回應用戶後不可停在「等下一句」（2026-05-21 用戶硬性糾正）**：回完用戶必流回 ops loop（巡檢 → triage → 派工 → 收 agent）；用戶插話只是優先任務插隊，不是切換 reactive 待命。唯一正當暫停點 = ops loop 自然收斂（無 critical、池有工已派、agent 已收）。見 memory `feedback_resume_ops_loop_after_user`。
 
-**任務不得做一半待機（2026-06-23 用戶硬性糾正，凌駕排程便利）**：一個 user-assigned 任務（或自己拆出的子項）只要還有「已識別且本回合做得完」的步驟，就**繼續做到底**，**不可**中途排 `ScheduleWakeup` / 待機 / 把剩餘步驟標「下個 tick 再收」—— 那是被禁止的「先記下來等下次再修」反模式。「完成」的定義含：程式改完 + **build/test 通過 + 部署上線 + 線上驗證 + 回報確認**；改完 code 還沒 deploy/verify 不算完成。唯一例外：當次任務真正完成並驗證後、不可回復風險須問用戶、或外部 blocker（額度/權限）擋住。詳見 memory `feedback_finish_task_before_standby`。
+**任務不得做一半待機（2026-06-23 用戶硬性糾正，凌駕排程便利）**：本回合做得完的步驟就做到底，不可中途排 wakeup / 標「下個 tick 再收」。「完成」= code 改完 + build/test 通過 + 部署上線 + 線上驗證 + 回報。例外僅：真完成並驗證、不可回復風險須問用戶、外部 blocker。見 memory `feedback_finish_task_before_standby`。
 
 **最高指引 — 平台運營經理自主迴圈**（2026-05-28 用戶補強，**凌駕一切**）：
 
-**ScheduleWakeup 只准在 autonomous fire 的 turn 使用，互動 turn（用戶在等回覆時）全面禁用**（2026-07-02 五犯後根治；`scripts/hooks/deny_wakeup_interactive.py` 機械 enforce）。24/7 與 no-idle 由 OS backbone（`com.volpred.dispatch-supervisor`、compute-worker、check-alerts 等 LaunchAgent/cron）負責，session 關掉仍照跑；autonomous fire 才能在完成 email protocol 後排下一次 wakeup。互動 turn 的唯一收尾動作 = 文字回覆。
-
-**Turn 最終輸出必須是給用戶的文字（與上一條同位階；enforcement owner = Stop hook）**：互動 turn 收尾 = 文字回報（結果 + 時間戳）；寫在 tool calls 之間的文字用戶看不到；email 不能替代 session 內回覆。2026-07-02 三犯後由 `scripts/hooks/enforce_final_text.py`（Stop hook）機械 enforce — 被擋下時直接補文字回報（why 與 incident 史見 error_log 2026-07-02 14:25、memory `feedback_final_text_after_schedulewakeup`）。
-
-**Session start 自動啟動**（2026-05-29 用戶補強）：
-新 interactive session 一開始（識別方式：第一個 user message 不是「停」、「結束」、「stop」等明確終止指令，且 `git log --since='30 min ago'` 或 `storage/ops/last_autonomous_fire.json` 顯示 autonomous loop 已斷 ≥10 min），確認 OS backbone 活著即可（主派工 = `com.volpred.dispatch-supervisor` 常駐 daemon，2026-07-04 cutover 取代舊 hourly-dispatch LaunchAgent；查法 `launchctl list | grep dispatch-supervisor` + `jq '.last_heartbeat_at' storage/ops/dispatch_state.json`；in-flight 檢查 = `jq '.current_job'` 非 null）；**不在互動回應中排 ScheduleWakeup**（2026-07-02 五犯根治後，session 內 wakeup 僅限 autonomous fire turn）。
-
-判斷流程（接收第一個 user message 時內建）：
-1. 用戶 message 含「停 loop / 結束 / stop autonomous / 暫停 autonomous」→ 不啟動
-2. 用戶 message 含「啟動 loop / 開始 / start autonomous / 接續」→ 立即啟動
-3. 其他情況（含一般 task request）→ 預設啟動（背景跑不打擾用戶）
-
-啟動方式 = 驗證 backbone 活著（`launchctl list | grep dispatch-supervisor` + `storage/ops/dispatch_state.json` heartbeat / latest completion）；backbone 斷了才修 backbone，不用 session 內 wakeup 替代。
+- **ScheduleWakeup 僅限 autonomous fire turn；互動 turn 全面禁用**（enforcement owner = `scripts/hooks/deny_wakeup_interactive.py`）。24/7 與 no-idle 由 OS backbone（dispatch-supervisor、compute-worker、check-alerts）負責，session 關掉照跑。
+- **Turn 最終輸出必須是給用戶的文字**（結果 + 時間戳；enforcement owner = `scripts/hooks/enforce_final_text.py` Stop hook）。tool calls 之間的文字用戶看不到；email 不能替代 session 內回覆。
+- **Session start**：除非用戶明說「停 / stop autonomous」，預設驗證 backbone 活著即可（`uv run python scripts/ops_snapshot.py` 一次回傳 heartbeat / current_job / queue / alerts）；backbone 斷了修 backbone，不用 session 內 wakeup 替代。
 
 **Autonomous fire 4-step protocol**：僅 `<<autonomous-loop-dynamic>>` turn 適用；完整步驟與 canonical supervisor health readout 見 `storage/ops/autonomous_loop_protocol.md`，本 bootstrap 不再複製程序細節。
 
@@ -91,20 +81,7 @@
 
 ### Rule path-trigger 時序原則（2026-04-20 補）
 
-**Path-scoped rule 只在 Claude 以內建 Read/open 讀取 `paths:` frontmatter 命中的檔案時 auto-load**。Bash 內的 `rg` / `grep` / `jq` / `cat`，以及只在 command 文字出現檔名，**都不算觸發**（Claude Code 2.1.206 fresh-session A/B，2026-07-14）。若 workflow 的 token-safe 查詢本來就走 Bash，不能靠多補 paths 解決；需要在 selection 前出現的規則，必須由 CLAUDE.md 一行 pointer、dispatch prompt 或顯式讀取 rule/skill 保證載入。
-
-**寫新規則或改現有規則 paths 時，強制問三個問題**：
-1. 這規則**應該在什麼 workflow 階段** auto-load？（planning / selection / execution / verification）
-2. 在該階段會用內建 Read/open 哪些 path？若只會 Bash `rg`/`jq`，答案是「沒有」。
-3. 有 pre-action Read → 補對應 paths；沒有 → 在 bootstrap / dispatch prompt 放一行 pointer 或明確要求先讀 rule/skill，禁止假設 Bash 查詢會觸發。
-
-**典型 path class 對應 workflow 階段**：
-- Planning/selection → `storage/publication_candidates.json` / `storage/next_draft_candidate_*.md` / `.claude/skills/*/SKILL.md` / `research_program.md` / `docs/error_log.md`
-- Data query → `experiments/*/*_results.json` / `storage/memory/knowledge.json` / `storage/reports/feed.json`
-- Execution → 對應寫入目標（`feed.json`, `paper/*.tex`, `config/*.json`）
-- Verification → test 檔、reproduce_report.json、sync log
-
-**歷史 incident**（2026-04-20；2026-07-14 修正根因模型）：`.claude/rules/publish-checklist.md` 在派 agent 前沒有 surface，session 6 次 dispatch 有 5 次漏做 3-layer dedup。早期只補 selection paths，仍無法涵蓋 Bash query；現在由本 bootstrap 的 publishing pointer + dispatch/skill 顯式載入負責 pre-action，paths 只作內建 Read 的補強。
+**Path-scoped rule 只在內建 Read/open 命中 `paths:` 時 auto-load**；Bash 的 `rg`/`grep`/`jq`/`cat` 與 command 文字出現檔名**都不觸發**（2026-07-14 fresh-session A/B 驗證）。需要在 selection 前出現的規則，必須由 CLAUDE.md 一行 pointer、dispatch prompt 或顯式讀取 rule/skill 保證載入 — 禁止假設 Bash 查詢會觸發。改 rules paths 前先填 stage×paths 矩陣（memory `feedback_path_narrowing_audit`；歷史 incident：publish-checklist 6 次 dispatch 漏 5 次 dedup）。
 
 ## 研究誠實原則（最高優先，不可違反）
 
@@ -122,13 +99,7 @@
 ## 專案地圖
 
 - 本機多 agent 研究系統：Claude 偏主研究與整合，Codex 與 Antigravity (agy) 偏審查、第二意見、針對性修正與分擔工作。
-- **AI CLI 可用性**（2026-05-20 更新）：
-  - **Codex CLI** `codex-cli 0.144.1` ✅（2026-07-10 升級）— ChatGPT auth（`Logged in using ChatGPT`），預設 `gpt-5.6-sol` ultra reasoning（`~/.codex/config.toml` 控制；升級日 smoke 驗證通過）；headless 入口 `codex exec`；`-s workspace-write`。中文 prompt 必 heredoc + stdin。reinstall 要 `npm install -g @openai/codex@latest --include=optional`（缺 darwin-arm64 binary 會 crash）。⚠️ config 的 model 與已裝 CLI 版本必須同步 smoke 驗證 — 2026-07-10 曾因 config 指到舊 CLI 不支援的 model，全平台 codex 流程回 400 靜默失敗（見 error_log 當日 entry + experiments.md 診斷 SOP）。
-  - **Antigravity CLI** `agy` ✅（版本以 `agy --version` 當次輸出為準，不在治理文件硬編）— Google OAuth，預設 `gemini-3.5-flash`（`ANTIGRAVITY_MODEL` env 換模型）；headless 入口 `agy -p "<prompt>"`（真 stdout pipe，2026-05-20 實測單行/多行中文 prompt 皆通過）；agentic 工作加 `--dangerously-skip-permissions`。**第三個 agentic CLI，與 Codex 並列分擔審查 / 第二意見 / 針對性修正**。`-p` 吃參數不吃 stdin — 中文多行 prompt 用 heredoc 存變數再 `agy -p "$VAR"`。
-  - **Gemini 輕量 Q&A（fallback）** → `scripts/gemini_ask.py` ✅ — 直打 Gemini API（`GOOGLE_CLOUD_API_KEY`），預設 `gemini-3.1-pro-preview`，真 stdout pipe；獨立於 gemini-cli（6/18 停服不影響）。**定位是 `agy` 的 fallback**：只在 agy 不可用、或需純 pipe 一次性呼叫時用。⚠️ **每次成功呼叫會打 PAID API → 自動 email 通知 admin + 記 `storage/logs/gemini_ask_usage.jsonl`**（用戶 2026-05-20 硬性要求）。用法 `uv run python scripts/gemini_ask.py "prompt"` / stdin `... | gemini_ask.py -` / `--model` override。
-  - **分工**：agentic 多步工作（code review、針對性修正、獨立子任務）→ Codex CLI 或 `agy`；一次性問答 / fact-check → 優先 `agy -p`，`gemini_ask.py` 僅 fallback。
-  - **已放棄**：`gemini-cli`（2026-06-18 Google 停服，由 `agy` 繼承）。
-  - 完整對照：[codex-cli SKILL](file:///Users/yhlai0911/.claude/skills/codex-cli/SKILL.md) + memory `reference_dual_cli_availability` + `reference_antigravity_cli`。
+- **AI CLI 可用性**：**Codex** `codex exec`（ChatGPT auth；中文 prompt 必 heredoc + stdin）✅；**agy** `agy -p "<prompt>"`（Google OAuth；agentic 加 `--dangerously-skip-permissions`）✅；**gemini_ask.py**（PAID API，僅作 agy fallback，每次呼叫自動 email + 記 usage log）⚠️。分工：agentic 多步 → Codex 或 agy；一次性問答 → agy 優先。已放棄 gemini-cli。細節/陷阱/診斷 SOP：codex-cli SKILL + memory `reference_dual_cli_availability`、`reference_antigravity_cli`。
 - active frontend / Zeabur target 由 `config/project_targets.json` 決定；**先改 config，再改程式或文件。**
 - 目前線上站點：`https://volpred.zeabur.app`
 - 研究記憶雙寫：Supabase + Mirror API
@@ -151,12 +122,7 @@
 
 - `storage/` 是本地唯一源頭 — 不手改歷史 JSON 修結果；paper_trading 不手補，讓 forward tracking / recalc 自然修正
 - Frontend target / Zeabur service / paper public dir / Mirror 預設 URL → `config/project_targets.json`；排程 → `config/runtime_schedules.json`（不反推 cron）
-- v12 task/schedule sources（雙軌實際分工，2026-05-04 audit 後明確）：
-  - **`storage/next_tasks.json`** = de-facto **pending queue**（priority sorted；37+ pending P1-P4），dispatcher 從這挑下個任務派工 — 由 `scripts/continue_task_dispatch.py` 讀
-  - **`storage/ops/`**（TaskRecord / AgentSession / ExecutionReceipt）= **execution receipts / audit trail**；即時數量由該目錄 / ops CLI 查詢，不在 bootstrap 硬編，dispatch 完成後寫入
-  - 完成的 task 同步：`scripts/sync_next_tasks_status.py` 反查 experiments/<id>/results.json + knowledge.json，把 next_tasks 已實際完成的 K 標 succeeded（避免 stale pending 被 dispatcher 誤再派）
-  - `config/runtime_schedules.json` + `event_jobs` + `storage/ops/event_ledger/` = canonical schedule spec
-  - **歷史背景**：原 v12 設計把 `next_tasks.json` 標 legacy，但 `storage/ops/tasks/` 從未被任何 caller 用作 pending queue（全是 receipts），導致 next_tasks 是唯一有 pending 的池。2026-05-04 audit 確認此實際分工 + `continue_task_dispatch.py` 落地 + 規則改成符合現實。原 「不可覆蓋 storage/ops/」改為「dispatch 完成後寫入 storage/ops/ 作 receipt」
+- task/schedule sources：`storage/next_tasks.json` = pending queue（dispatcher 讀；終態 >3 天自動壓 tombstone + 歸檔 `storage/next_tasks_archive/`）；`storage/ops/` = execution receipts / audit trail；`config/runtime_schedules.json` + event_jobs + event_ledger = canonical schedule spec。完成同步 `scripts/sync_next_tasks_status.py`。完整分工與歷史：`.claude/rules/control-plane.md`。
 
 ### 永遠修流程，不修資料
 
@@ -173,24 +139,13 @@
 
 **禁止 reaction**：再 patch 一次、加一個 flag、塞一層 retry / try-except、寫一個 workaround / fallback、再 grep + sed 一次、「先記下來等下次再修」、「strike 1 不修等 strike 3」。**任何 surface-level patch 或拖延都不准。**
 
-**強制 reaction**：從**底層邏輯、流程、程式架構徹底翻掉重新優化**。判斷三層：
+**強制 reaction**：從**底層邏輯（domain model / 狀態機 / 責任分配對不對）、流程（hand-off / failure mode / observability / recovery 有沒有系統性遺漏）、程式架構（該不該換實作技術 / 隔離邊界）**三層徹底翻掉重新優化。
 
-1. **底層邏輯**：問題的 root domain model 是否正確？資料模型、狀態機、責任分配、邊界條件是否一開始就錯？（例：cron + LaunchAgent 同 Label re-launch policy 假設前提錯誤；hourly fire 應該 stateless 還是 stateful？）
-2. **流程**：workflow 是否設計有缺陷？hand-off、failure mode、observability、recovery 是否系統性遺漏？（例：hang detection、heartbeat、dead-man switch、orphan cleanup 應該獨立流程，不是塞進 dispatch script）
-3. **程式架構**：是否該換實作技術 / 架構模式 / 隔離邊界？（例：headless CLI subprocess 不如 worker daemon + queue；shell script orchestration 不如 Python supervisor with health checks）
-
-**執行流程**：
-- (a) `docs/error_log.md` 標記 `**3-STRIKE TRIGGER**` 並列出三次 incident 的 commit/timestamp
-- (b) 寫 `docs/refactor_plan_<topic>.md` — 三層診斷 + 重構方案 + 廢棄面 + 驗證 gate
-- (c) 重構落地後**廢棄原 patch 路徑**（move to `_legacy/` 或刪除），不留兩套並行
-- (d) Regression test 必須覆蓋三次 incident 的觸發條件 — 任一條件能重現舊 bug 即 fail
-- (e) 重構完成 commit 訊息開頭 `refactor(3-strike): <topic>` 便於日後 grep
+**執行流程**：(a) error_log 標 `**3-STRIKE TRIGGER**` + 三次 incident 的 commit/timestamp → (b) 寫 `docs/refactor_plan_<topic>.md`（三層診斷 + 方案 + 廢棄面 + 驗證 gate）→ (c) 落地後廢棄原 patch 路徑（`_legacy/` 或刪），不留兩套 → (d) regression test 覆蓋三次觸發條件 → (e) commit 開頭 `refactor(3-strike): <topic>`。
 
 ### Anti-stacking（不疊床架屋，2026-07-02 owner 指令）
 
-事故後的修正**不可**每次疊一層新機制。一個 concern 只有**一個 enforcement owner**；新增 gate/watchdog/hook 必須收編進既有機制（pre-push 加 check、check_alerts 加 entry、dreaming 加 detector、prepublish 加 audit fn），同 commit 把被取代的提醒層降級成一行 pointer。升級路徑：prose 提醒（strike 1）→ 機械 gate（strike 2+），機械化後 prose 縮 pointer。完整 layer map：`.claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md` §Enforcement Layer Map。
-
-**為什麼**：patch 三次仍復發 = 模型/流程/架構有結構性缺陷，繼續 patch 是負債累積；研究誠實 + 平台穩定的長期成本遠高於一次重構成本。歷史例：cron_hourly_dispatch 2026-05-13 兩次 hang + 2026-05-14 同 root（這次只到 strike 2，但下一次 hang 即觸發重構：worker daemon + queue + health check 取代 shell + LaunchAgent + perl alarm）。
+一個 concern 只有**一個 enforcement owner**；新增 gate/watchdog/hook 必須收編進既有機制，同 commit 把被取代的提醒層降級成一行 pointer。升級路徑：prose 提醒（strike 1）→ 機械 gate（strike 2+），機械化後 prose 縮 pointer。Layer map：`.claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md` §Enforcement Layer Map。
 
 ### CLI / Workflow 優先順序
 
@@ -209,6 +164,7 @@
 
 ## Token / Context 紀律
 
+- **Session 開頭運營定位一律 `uv run python scripts/ops_snapshot.py`**（backbone / queue / pool / alerts / git 一份 JSON，0.4s）— 不用零散 ls / git status / jq 翻抽屜重建狀態（2026-07-14 WS1b：repo-navigation bash 曾佔一週 10.1M tokens）。
 - **禁止整檔讀取** `storage/reports/feed.json`；用 `grep`、`jq`、單篇 `storage/reports/<id>.json`。〔L1 機械 deny：`cat/less/more feed.json·knowledge.json` 已由 `.claude/hooks/pretooluse-bash-optimizer.sh` 攔截〕
 - `storage/memory/knowledge.json` 同理，禁止整檔讀取。
 - 重複性流程靠 skill，不要每次把長 SOP 貼進主對話。
@@ -293,7 +249,7 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 
 **核心 dispatch 規則（inline 保留）**：
 - 任務優先序：`user-assigned ≈ 時效性(event-driven) > scheduled > agent-discovered`；slot running < 4 可繼續 discovery（不必等 queue 清空）
-- **時效性 / 即時性的研究與發文一律 P1**（老闆 2026-07-12 Telegram msg 588）：event_article / trending_repost / 事件驅動實驗（財報、CPI/FOMC/NFP、突發市場事件、當下熱門主題）**與 user-assigned 同級**，插隊在所有 scheduled 研究與 ops 之前 — 時效過了價值歸零，非時效任務晚一天沒差。已機械化：`event_jobs.build_pending_event_task` + `refill_reader_facing_pool._build_trending_task` 都以 `priority=1` 建任務；**手動建時效任務時也必須寫 `priority: 1`**。
+- **時效性 / 即時性的研究與發文一律 P1**（老闆 2026-07-12）：event_article / trending_repost / 事件驅動實驗與 user-assigned 同級，插隊所有 scheduled — 時效過了價值歸零。已機械化（event_jobs + trending refill 以 priority=1 建任務）；**手動建時效任務也必寫 `priority: 1`**。
 - 同一 K 編號禁止雙 agent — 派前 `ls experiments/` + `ls .claude/worktrees/` 檢查
 - **Cron skip 用 stub**（slot 滿 / agent 仍跑 → 回覆 ≤15 字）
 - 每次 idle / discovery pass 必須產生可驗證輸出，不可空轉
@@ -315,33 +271,14 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 - **交易策略研究**：設計階段（backtest/檢定）=`experiment`；上架階段（registry/metrics）=`strategy_lifecycle`
 - **一般文章**（`daily_article`）：**所有非事件驅動**文章都算，包含 research/general/methodology/market-analysis/回顧，不只「補池」
 
-### Subagent vs Agent Team
+### Subagent / Agent Team 使用準則
 
-`subagent` = 1 個 bounded task。用在單一實驗審查、單篇草稿、單一路徑資料診斷、單次 code review、與主線無關的大搜尋。
-
-`agent team` = 1 個 parent task 拆成多個 bounded subtasks，由 lead 協調；teammates 共享任務脈絡，可互相溝通、分析、挑戰假說、整理分歧與形成共識，但本專案的 canonical 寫入、研究結論採信與最終裁決仍由主線程負責。
-
-本專案判斷規則：
-- 單一 `grep` / `jq` / 小 edit / 一次驗證：主線程自己做。
-- 預設先選 `單一主 session` 或 `forked subagent`；`agent team` 是特例，不是預設。
-- 單一研究任務、單篇文章、單一 bug / code path：用 `subagent`。
-- 跨多模組事故、paper synthesis、策略上架評審、需要分工、交叉審查或多方討論收斂：用 `agent team`。
-- 若多個 agent 會同時碰同一檔，先不要開 team；先由主線程拆順序或指定唯一 owner。
-- Codex 類 subagent 預設 serialize；若任務完全獨立且寫入範圍不重疊，可放寬到同一 session 最多 3 個。不要設成不限制。
-- Agent team 為 experimental；啟用前先確認版本、成本與 runtime 限制。
-
-## Subagent / Agent Team / Skill 使用準則
-
-- 常見重複流程優先做成 skill，不要讓主 guide 膨脹。
-- 任務若只需要探索或驗證，優先用 read-only subagent。
-- 任務若與目前對話主線無關，優先用 fresh-context subagent。
-- 任務若天然可分工且子任務互不共享寫入目標，才用 agent team。
-- 需要 agents 彼此討論、交叉分析或形成共識時，可用 agent team。
-- Agent prompt 必須包含必要路徑、K 編號、error log 規則、成功標準與要讀的 skill。
-- Agent 結果不可直接視為 canonical；涉及 `knowledge.json`、`feed.json`、paper body、shared ops 狀態，一律主線程驗證後再寫入。
-- 標準模板：
-  - brief：`.claude/skills/autonomous-research/references/agent-brief-template.md`
-  - result：`.claude/skills/autonomous-research/references/agent-result-template.md`
+完整 playbook（delegation threshold、brief 6 要素、模型/effort 路由）= `.claude/rules/agent-delegation.md`（唯一 owner）。Bootstrap 只留不變式：
+- 單一 grep / jq / 小 edit / 驗證：主線程自己做；大搜尋 / 大 logs / 無關 side task：fork 乾淨 subagent。
+- `agent team` 是特例非預設 — 只在子任務需互相討論、交叉審查、共識收斂時用；多 agent 同檔寫入先拆順序或指定唯一 owner。
+- Codex subagent 預設 serialize，完全獨立時同 session 最多 3 個。
+- Agent 結果不可直接視 canonical；涉及 `knowledge.json`、`feed.json`、paper body、shared ops 狀態，一律主線程驗證後寫入。
+- brief / result 模板：`.claude/skills/autonomous-research/references/agent-{brief,result}-template.md`。
 
 ## 活文件原則
 
