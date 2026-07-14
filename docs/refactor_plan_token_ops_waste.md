@@ -127,8 +127,9 @@
 | 10 | WS1a pregate attribution 修復 | 流程 | 🔜 enqueued P2（`topology-audit-20260710-pregate-enforce-flip` 已重規格：修蓋章→重評→gate 達標才翻 enforce） |
 | 11 | WS4c error_log 壓縮 | 流程 | 🔜 enqueued P2（`ws4c_error_log_compaction`） |
 | 12 | WS5 治理疊層收斂 | 流程 | 🔜 enqueued P2（`ws5_governance_layer_consolidation`；月度 skill audit 併入） |
-| 13 | WS1d 模型分層 | 決策 | ✉️ decision email 2026-07-14 已寄，等 owner 裁決 |
-| 14 | K1709 worktree 正規合併（WS3b 發現） | - | 🔜 enqueued P2 main-thread（`k1709_worktree_merge_verification`） |
+| 13 | WS1d 模型分層 | 決策 | ✅ **owner 2026-07-14 裁決：維持全 Opus**（不改 model_router；成本優化改由 WS1a/1b/1c 的結構面承擔） |
+| 14 | K1709 worktree 正規合併（WS3b 發現） | - | 🔜 enqueued P2 main-thread；⚠️ 依賴 k1709_rev2 GW 措辭修正先行（15:45 Codex 裁決） |
+| 15 | paid data 裁決（WS2c 併入決策信） | 決策 | ✅ **owner 2026-07-14 裁決：不採購**。K1268b/K1310 closed；intraday 線改用自有 TAIFEX tick（新任務 `taifexdata_dropbox_organize` P2 + `research_taifex_intraday_rv_line` P3） |
 
 **執行日 meta-發現（2026-07-14）**：計畫的 5 個「待建機制」中有 3 個其實已存在但未啟用/未被知悉
 （pregate 只差 config flip、dreaming apply_auto 7/12 已 ON、status 詞彙 gate 已有 CI baseline）。

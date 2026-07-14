@@ -845,6 +845,14 @@ boss 點名「M3 不該只盯現有論文，實驗那麼多難道沒長出新論
 
 **Next**: `task_729e70de0f66` Sub4 body_v3.tex 更新 — 主線程 L188 限做，分段 edit。
 
+## 2026-07-14 Owner 裁決：intraday 研究線改用自有 TAIFEX tick（不採購 paid US intraday）
+
+- K1268b（GDELT×SPY 5-min）、K1310（VIX futures roll yield）正式關線（closed_no_action）。
+- 替代方向：dropbox/taifexdata 的台灣期貨/選擇權 tick 資料（位置/格式見 user memory
+  `reference_taifex_data`；owner 註明「很亂」→ 前置任務 `taifexdata_dropbox_organize` 先整理成
+  canonical layout）。候選題組（`research_taifex_intraday_rv_line`）：TX 5-min RV intraday-HAR
+  增益、夜盤/日盤 RV 分解資訊含量、選擇權 tick IV surface 微結構訊號。
+
 ## Paper 4 Citation Audit (2026-04-19, task_ced5ad598ae3)
 
 - Total: 38 inline cites / 40 bibitems

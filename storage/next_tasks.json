@@ -992,7 +992,7 @@
     "title": "K1268b: GDELT 5-min vs SPY 5-min RV — re-run with backtest-grade intraday data",
     "priority": 3,
     "description": "K1268 FAIL_NO_DATA blocker: yfinance 1m/5m limited to last 30/60 days. Re-run with: (a) Polygon Stocks API (paid, ~/mo), (b) Databento, (c) self-hosted SPY 1-min rolling archive (start collecting now to cover future event days), or (d) IBKR TWS API historical. GDELT 5-min raw parquet (experiments/k1268/gdelt_5min_bars.parquet 864 bars × 3 event days) already cached — re-use directly. Test cross-correlation event-density / sentiment vs SPY 5-min RV with Bonferroni multiple-testing correction (3 signals × 4 lags = 12 tests/day).",
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "experiment",
     "source": "K1268_followup",
     "tags": [
@@ -1003,12 +1003,17 @@
       "follow-up"
     ],
     "prerequisites": "paid_intraday_data_source_decision",
-    "blocked_reason": "paid_data_source_decision_pending",
     "last_note": "[2026-05-11] Queued as K1268 FAIL_NO_DATA follow-up. GDELT raw cached. Need user/admin policy on paid data source.",
     "created_at": "2026-05-10T17:55:51Z",
-    "blocked_at": "2026-05-27T00:10:26+00:00",
-    "blocked_note": "2026-07-14 決策 email 已向 owner 提出 paid data 採購裁決；8/14 自動 re-check",
-    "blocked_until": "2026-08-14"
+    "status_history": [
+      {
+        "at": "2026-07-14T08:19:42.370583+00:00",
+        "from": "blocked",
+        "to": "closed_no_action",
+        "reason": "owner 2026-07-14 裁決：不採購 paid US intraday；intraday 研究線改用自有 TAIFEX tick（dropbox/taifexdata）"
+      }
+    ],
+    "completed_at": "2026-07-14T08:19:42.370583+00:00"
   },
   {
     "id": "K1302",
@@ -1111,7 +1116,7 @@
     "title": "K1310: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance 無）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 221). Original: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance 無）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1310.py with signal.shift(1) + seed=42, (c) K1310_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "blocked",
+    "status": "closed_no_action",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -1119,17 +1124,21 @@
       "autonomous-research"
     ],
     "created_at": "2026-05-12T02:47:48Z",
-    "blocked_reason": "paid_data_source_decision_pending",
-    "blocked_note": "2026-07-14 決策 email 已向 owner 提出 paid data 採購裁決；8/14 自動 re-check",
     "started_at": "2026-05-27T01:56:32.322236+00:00",
-    "completed_at": "2026-05-27T01:56:32.392058+00:00",
+    "completed_at": "2026-07-14T08:19:42.370583+00:00",
     "result": "Marked blocked because the task requires historical VIX futures data not available from current free sources (the brief itself says yfinance is insufficient), and no experiments/k1310 workspace exists yet. Queue state now matches the real blocker: paid/approved data-source decision pending before any reproducible experiment can begin.",
-    "blocked_at": "2026-05-27T01:56:32+00:00",
     "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
     "stale_claim_previous_claimed_by": "codex-cli",
     "stale_claim_previous_claimed_at": "2026-05-27T01:56:22.983420+00:00",
     "stale_claim_previous_claim_session_id": "8784b078d9e9",
-    "blocked_until": "2026-08-14"
+    "status_history": [
+      {
+        "at": "2026-07-14T08:19:42.370583+00:00",
+        "from": "blocked",
+        "to": "closed_no_action",
+        "reason": "owner 2026-07-14 裁決：不採購 paid US intraday；intraday 研究線改用自有 TAIFEX tick（dropbox/taifexdata）"
+      }
+    ]
   },
   {
     "id": "K1311",
@@ -29436,14 +29445,14 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "topology-fit-audit-20260710",
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-10T05:04:18.281904+00:00",
     "title": "pregate shadow→enforce 切換（觀察期滿後）",
     "description": "WS1a（docs/refactor_plan_token_ops_waste.md）：(1) 修 dispatch 產出 attribution 蓋章使 crosscheck_pregate_outcomes.py coverage ≥80%；(2) 重跑 crosscheck --invoker supervisor；(3) gate：strict_mismatch_rate ≤10% 才把 config/runtime_schedules.json 的 volpred-hourly-dispatch pregate.mode 翻 enforce（config 熱重載，免重啟 daemon）。絕不裸翻 — 2026-07-14 crosscheck: coverage 10.3%, strict_mismatch 6/12。",
-    "claimed_by": "main-session",
-    "claimed_at": "2026-07-10T05:39:34.773765+00:00",
-    "claim_session_id": "fdb60732",
+    "claimed_by": "interactive-main-20260714",
+    "claimed_at": "2026-07-14T08:20:50.019890+00:00",
+    "claim_session_id": "7293756cef82",
     "status_history": [
       {
         "ts": "2026-07-10T05:39:34.774086+00:00",
@@ -29462,10 +29471,23 @@
         "from": "blocked",
         "to": "pending",
         "reason": "shadow 觀察期滿（243 rows）；crosscheck 判 attribution coverage 10% 不足，先修蓋章再評 flip（docs/refactor_plan_token_ops_waste.md WS2c）"
+      },
+      {
+        "ts": "2026-07-14T08:20:50.019905+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-main-20260714"
+      },
+      {
+        "ts": "2026-07-14T08:20:50.555826+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-main-20260714"
       }
     ],
     "completed_at": "2026-07-10T05:39:35.063435+00:00",
-    "result": "觀察期 criteria 執行完畢，判定：不切換。交叉核對 122 筆 shadow entries：56 筆 would_skip=true 中，寬鬆歸因 27 筆(48%)該小時有實質產出、嚴格歸因(actor=hourly)僅 3 筆(5%) — 但 work_log actor 蓋章不可靠(最近60筆實質工作57筆空actor)，真實誤判率介於 5-48% 無法判定。儀器先行：見後續任務 topology-audit-20260710-pregate-observability。shadow 模式維持(零行為變更零風險)，enforce 決策待儀器修好後用可歸因資料重評。"
+    "result": "觀察期 criteria 執行完畢，判定：不切換。交叉核對 122 筆 shadow entries：56 筆 would_skip=true 中，寬鬆歸因 27 筆(48%)該小時有實質產出、嚴格歸因(actor=hourly)僅 3 筆(5%) — 但 work_log actor 蓋章不可靠(最近60筆實質工作57筆空actor)，真實誤判率介於 5-48% 無法判定。儀器先行：見後續任務 topology-audit-20260710-pregate-observability。shadow 模式維持(零行為變更零風險)，enforce 決策待儀器修好後用可歸因資料重評。",
+    "started_at": "2026-07-14T08:20:50.555812+00:00"
   },
   {
     "id": "telegram-340",
@@ -30242,39 +30264,15 @@
   },
   {
     "id": "ops-lazypack-codex-hang-20260711",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "根治 lazypack codex render hang → supervisor hang_killed（2026-07-11 14:07 fire）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-11T07:05:50.606313+00:00",
-    "title": "根治 lazypack codex render hang → supervisor hang_killed（2026-07-11 14:07 fire）",
-    "description": "老闆 Telegram msg 465 指派：從底層修 supervisor hang_killed。\n\n已完成的 root-cause 診斷（telegram-responder，2026-07-11 15:0x）：\n1. scripts/lazypack_async_render.py 用單次 `codex exec` 一口氣生 3 張 panel，硬 timeout 900s。\n   今天兩個 compute job（lazypack-mile_b5e264a5 06:00、lazypack-mile_de666838 06:30）都在 900s\n   撞牆 → exit=2 failed（stderr: \"ERROR: codex exec timed out after 900s\"）。\n2. 14:07 的 hourly agent 接手在 session 內**直接**跑 codex exec 補渲染（14:27 commit ce9e85e71\n   「[codex] Render K1611 lazypack panels」），之後第二輪 codex exec 卡住 >30 min（14:27→14:57\n   零 hook log、零 stdout、零 commit）→ agent 阻塞在無 timeout 的 Bash → 撞 supervisor 3000s\n   hard cap → SIGKILL → hang_killed 告警。\n3. codex CLI 本身健康（0.144.1，smoke 7s PASS）。問題是「一次 agentic call 生 3 張圖」這個\n   工作量太重 + 無分段 + 無逐張 checkpoint。\n\n要做的修（三層，照 CLAUDE.md 3-strike 精神從底層改，不要再加 flag/retry）：\nA. 底層邏輯：lazypack 渲染改成**逐張 panel 一次 codex exec**（3 次小 call，各自 timeout ~300s、\n   各自可 resume/skip 已完成的 panel），或直接讓 codex 只寫一次 render_lazypack.py 然後由\n   本地 matplotlib 執行（不要每張圖都走 agentic loop）。\nB. 流程：禁止 hourly agent 在 session 內裸跑 codex exec — 一律走 compute_queue（async）。\n   在 dispatch prompt / hooks 加機械 gate：Bash 呼叫 `codex exec` 時若無 timeout wrapper 則擋下。\nC. 觀測：supervisor hang 告警目前顯示 pid=-1 / pgid=-1 / log tail (empty)，等於瞎的；\n   要把 current_job 的真實 pid/pgid + 最後一次工具活動時間 + 最近 commit 帶進 alert。\n   另 procutil killpg 對 pgid 回 EPERM（\"killpg SIGKILL denied ... Operation not permitted\"）\n   → SIGKILL 實際沒送出去，要查 macOS killpg 語意並修（不然真 hang 時殺不掉會留孤兒）。\nD. 補跑：兩個 failed lazypack job（b5e264a5 / de666838）修好後重新入列。",
-    "claimed_by": "hourly-15",
-    "claimed_at": "2026-07-11T07:09:46.713273+00:00",
-    "claim_session_id": "20eb1f70f7af",
-    "status_history": [
-      {
-        "ts": "2026-07-11T07:09:46.713292+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-15"
-      },
-      {
-        "ts": "2026-07-11T07:09:47.009085+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-15"
-      },
-      {
-        "ts": "2026-07-11T07:27:09.553312+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-15"
-      }
-    ],
-    "started_at": "2026-07-11T07:09:47.009067+00:00",
     "completed_at": "2026-07-11T07:27:09.553298+00:00",
-    "result": "三層根治：渲染拆 LLM/執行(+resume)、codex_exec_bounded + hook gate、killpg 濾 zombie 不再謊報擊殺。176 tests + 活體 smoke。commit 49e170e15"
+    "tombstone": true,
+    "archived_at": "2026-07-14T08:08:08.319022+00:00"
   },
   {
     "id": "telegram-467",
@@ -36623,12 +36621,30 @@
     "description": "系統至今 0 份 reproduce_report — 檔案齊全不等於已驗證可復現。範圍：(1) 論文引用的 K + 近 60 篇 feed 文章 details.experiment_refs 的 K，優先重跑；(2) 比對重跑輸出與既存 *_results.json 的關鍵數字（容許數值誤差需說明 seed/環境），寫 experiments/<id>/reproduce_report.json；(3) 對 166 個「有 code 無 results」的 K 補跑或標記為不可復現；(4) 把復現檢查機械化成 script（scripts/reproduce_check.py）並掛進 daily_checkup 維度。研究誠實原則：不一致就如實記錄並回溯更正文章/論文。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-14T10:35:00+08:00",
     "source": "telegram-733 (老闆質詢復現性)",
     "dispatch_lane": null,
     "source_line": null,
-    "tags": null
+    "tags": null,
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-14T07:44:45.751357+00:00",
+    "claim_session_id": "ca6e83f3a218",
+    "status_history": [
+      {
+        "ts": "2026-07-14T07:44:45.751372+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-14T07:44:45.989300+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-14T07:44:45.989283+00:00"
   },
   {
     "id": "ci-red-29299985391",
@@ -36786,21 +36802,27 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "claimed",
+    "status": "pending",
     "created_at": "2026-07-14T05:37:54.793091+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 741）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n又來！\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "claimed_by": "telegram-responder",
-    "claimed_at": "2026-07-14T05:40:02.379131+00:00",
-    "claim_session_id": "585fc0f7082d",
     "status_history": [
       {
         "ts": "2026-07-14T05:40:02.379148+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-14T07:50:05.652722+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "telegram-responder",
+        "note": "auto_release_stale_2h"
       }
-    ]
+    ],
+    "last_released_at": "2026-07-14T07:50:05.652714+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "k1709-redo",
@@ -36905,10 +36927,33 @@
     "title": "K1709: 收 Codex 對凍結 SHA c97d690c 的裁決 + 修 verdict schema + 過 certify gate",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-15",
     "created_at": "2026-07-14T07:18:18.339412+00:00",
-    "description": "compute job `k1709_rev2_codex_verdict`（15:15 起跑，worktree .claude/worktrees/dispatch-slot-2-c873d04d-k1709）產出 Codex 對凍結 SHA c97d690c684d288a90aa306c6756e6d658669045 的獨立裁決。\n\n⚠️ 已知缺陷：worker 在 15:15:02 撿走 job，我在 15:15:50 才修好 brief → agent 讀到的是**舊版 brief**，它會把 verdict 檔寫成 `final_verdict` / `claim_surface_sha256`（只 pin 2 個檔），而 merge gate（scripts/experiment_gates.py::certification_violations）讀的是 `verdict` / `reviewed_sha256`（必須涵蓋 claim surface 全部檔：所有 *.py + README.md + *_results.json）。→ 照舊 brief 產出的 verdict 檔會被 gate 判 uncertified。\n\n收件步驟（主線程做，不要派 agent 改實驗）：\n1. 讀 review_verdict.json + codex_review_rev2_c97d690c.txt，取 Codex 的真實裁決（PASS/FAIL）。\n2. 驗證審查期間工作區沒被動手腳：worktree HEAD 仍是 c97d690c…、git status 除 review/verdict 檔外為空、review 檔第一行 REVIEWED_COMMIT 相符。任一不符 → 裁決無效，重審（這正是前兩次作廢的根因）。\n3. 裁決是 PASS → 主線程把 verdict 檔改寫成 gate schema：`verdict`:'PASS' + `reviewed_sha256` 涵蓋全部 claim-surface 檔的 sha256（從凍結 bytes 機械重算；因為檔案自 codex 審查後未變動，這些 hash 就是 codex 實際讀到的 bytes — 合法，非造假）。保留 reviewed_commit / reviewer / review_artifact 等欄位。\n4. 跑機械 gate（**必跑，不可省**）：`python3 scripts/experiment_gates.py certify --path experiments/k1709` 與 `... run --path experiments/k1709`，兩者 exit 0。gate 平常掛在 merge_worktree.sh，但本 K 走 path-scoped 抽取（merge_worktree.sh 多 slot 下會 stash 掉其他 slot 在途工作），故必須手動呼叫。\n5. certify 過 → 主線程寫 knowledge.json（K1709 verdict=INCONCLUSIVE_NO_EXACT_NULL_CLAIM，誠實記 null/inconclusive，0/10 過閘、5/10 排除 1% margin，不得美化）→ path-scoped 抽取 experiments/k1709/ 進 main → 標 k1709-redo succeeded。\n6. 裁決是 FAIL 或 certify 不過 → 逐條列缺陷建修正 task，實驗續留 worktree，不得進 main （per gate-fail-verdict-blocks-merge）。"
+    "description": "compute job `k1709_rev2_codex_verdict`（15:15 起跑，worktree .claude/worktrees/dispatch-slot-2-c873d04d-k1709）產出 Codex 對凍結 SHA c97d690c684d288a90aa306c6756e6d658669045 的獨立裁決。\n\n⚠️ 已知缺陷：worker 在 15:15:02 撿走 job，我在 15:15:50 才修好 brief → agent 讀到的是**舊版 brief**，它會把 verdict 檔寫成 `final_verdict` / `claim_surface_sha256`（只 pin 2 個檔），而 merge gate（scripts/experiment_gates.py::certification_violations）讀的是 `verdict` / `reviewed_sha256`（必須涵蓋 claim surface 全部檔：所有 *.py + README.md + *_results.json）。→ 照舊 brief 產出的 verdict 檔會被 gate 判 uncertified。\n\n收件步驟（主線程做，不要派 agent 改實驗）：\n1. 讀 review_verdict.json + codex_review_rev2_c97d690c.txt，取 Codex 的真實裁決（PASS/FAIL）。\n2. 驗證審查期間工作區沒被動手腳：worktree HEAD 仍是 c97d690c…、git status 除 review/verdict 檔外為空、review 檔第一行 REVIEWED_COMMIT 相符。任一不符 → 裁決無效，重審（這正是前兩次作廢的根因）。\n3. 裁決是 PASS → 主線程把 verdict 檔改寫成 gate schema：`verdict`:'PASS' + `reviewed_sha256` 涵蓋全部 claim-surface 檔的 sha256（從凍結 bytes 機械重算；因為檔案自 codex 審查後未變動，這些 hash 就是 codex 實際讀到的 bytes — 合法，非造假）。保留 reviewed_commit / reviewer / review_artifact 等欄位。\n4. 跑機械 gate（**必跑，不可省**）：`python3 scripts/experiment_gates.py certify --path experiments/k1709` 與 `... run --path experiments/k1709`，兩者 exit 0。gate 平常掛在 merge_worktree.sh，但本 K 走 path-scoped 抽取（merge_worktree.sh 多 slot 下會 stash 掉其他 slot 在途工作），故必須手動呼叫。\n5. certify 過 → 主線程寫 knowledge.json（K1709 verdict=INCONCLUSIVE_NO_EXACT_NULL_CLAIM，誠實記 null/inconclusive，0/10 過閘、5/10 排除 1% margin，不得美化）→ path-scoped 抽取 experiments/k1709/ 進 main → 標 k1709-redo succeeded。\n6. 裁決是 FAIL 或 certify 不過 → 逐條列缺陷建修正 task，實驗續留 worktree，不得進 main （per gate-fail-verdict-blocks-merge）。",
+    "status_history": [
+      {
+        "ts": "2026-07-14T08:11:35.112856+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-14T08:11:35.343272+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-14T08:22:25.803338+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-16"
+      }
+    ],
+    "started_at": "2026-07-14T08:11:35.343258+00:00",
+    "completed_at": "2026-07-14T08:22:25.803323+00:00",
+    "result": "收件完成。裁決=FAIL（唯一 blocking：GW 標籤 vs 實作的無條件 DM；9 條舊缺陷全 FIXED；Codex 獨立重建 10 條 loss stream，數字 bit-for-bit 相符）。Provenance 驗過：head_after_review==c97d690c、worktree_clean_during_review==true。依 gate-fail-verdict-blocks-merge，實驗續留 worktree 不進 main。已建 k1709-rev3-gw-label（P1）。附帶根因修復：verdict schema 過去存在 3 份手抄副本（gate 原始碼 / brief / experiments rule）→ 已改由 gate 產生（experiment_gates.py verdict-template，commit 6cde3be09，22 tests pass）。"
   },
   {
     "id": "platform_ops_compute_queue_spec_amend_race",
@@ -36923,7 +36968,7 @@
   {
     "id": "k1709_worktree_merge_verification",
     "title": "K1709 worktree 正規合併 + 驗證（3 個未合併修訂 commits）",
-    "description": ".claude/worktrees/dispatch-slot-2-c873d04d-k1709（branch exp/k1709-btc-etf-flow-vol）有 3 個未合併 commits（c97d690c6 等：推論設計重建、撤回 NULL 改判 INCONCLUSIVE）。主線程走 bash scripts/merge_worktree.sh + worktree-merge-verification skill + agent-result-verification 收割；合併後移除 worktree（回收 4.7GB）。來源：docs/refactor_plan_token_ops_waste.md WS2c（WS3b 清理時發現未收割）。",
+    "description": ".claude/worktrees/dispatch-slot-2-c873d04d-k1709（branch exp/k1709-btc-etf-flow-vol）有 3 個未合併 commits（c97d690c6 等：推論設計重建、撤回 NULL 改判 INCONCLUSIVE）。主線程走 bash scripts/merge_worktree.sh + worktree-merge-verification skill + agent-result-verification 收割；合併後移除 worktree（回收 4.7GB）。來源：docs/refactor_plan_token_ops_waste.md WS2c（WS3b 清理時發現未收割）。 ⚠️ 2026-07-14 16:19 依賴更新：k1709_rev2_codex_verdict（15:45 完成）指出尚有 GW 措辭修正待做（見 storage/logs/compute/k1709_rev2_codex_verdict.stdout 結論）；合併必須排在該修正 commit 之後，merge 前 re-check worktree HEAD 已含修正。",
     "task_type": "experiment",
     "dispatch_lane": "main_thread",
     "status": "pending_main_thread",
@@ -36936,10 +36981,28 @@
     "title": "error_log.md 壓縮：7,666 行 → 活教訓索引（≤800 行）+ 季度歸檔",
     "description": "docs/error_log.md 已 7,666 行 / 430 條 / 35 個 3-STRIKE，「實驗前必讀」已不可執行。做法：(1) 每類 root cause 收斂成一條活教訓（規則 + 防錯 + 指向機械 gate），主檔 ≤800 行；(2) 歷史全文按季移 docs/error_log_archive/；(3) 更新引用面（CLAUDE.md、experiments rule、preamble）指向索引。詳見 docs/refactor_plan_token_ops_waste.md WS4c。注意：改治理檔前 commit snapshot；不刪教訓內容只搬家 + 收斂。",
     "task_type": "governance",
-    "status": "pending",
+    "status": "in_progress",
     "priority": 2,
     "source": "refactor_plan_token_ops_waste",
-    "created_at": "2026-07-14T07:28:32.517134+00:00"
+    "created_at": "2026-07-14T07:28:32.517134+00:00",
+    "claimed_by": "interactive-main-20260714",
+    "claimed_at": "2026-07-14T08:20:50.297964+00:00",
+    "claim_session_id": "df994fecd9fe",
+    "status_history": [
+      {
+        "ts": "2026-07-14T08:20:50.297977+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-main-20260714"
+      },
+      {
+        "ts": "2026-07-14T08:20:50.811472+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-main-20260714"
+      }
+    ],
+    "started_at": "2026-07-14T08:20:50.811457+00:00"
   },
   {
     "id": "ws5_governance_layer_consolidation",
@@ -36950,5 +37013,28 @@
     "priority": 2,
     "source": "refactor_plan_token_ops_waste",
     "created_at": "2026-07-14T07:28:32.517134+00:00"
+  },
+  {
+    "id": "taifexdata_dropbox_organize",
+    "title": "整理 dropbox/taifexdata：TAIFEX 期貨/選擇權 tick → canonical layout",
+    "description": "Owner 2026-07-14 裁決：不買 paid US intraday，intraday 研究改用自有 TAIFEX tick 資料（位置/格式/夜盤時間見 user memory reference_taifex_data；現況『很亂』）。任務：盤點 dropbox/taifexdata 檔案結構 → 定 canonical layout（建議 data/intraday/taifex_tick/<contract>/<yyyymm>.parquet 或沿用既有 collect_taifex_tick.py 慣例）→ 寫轉換/驗證 script（校驗筆數/時間範圍/夜盤標記）→ 產 README 記 schema 與缺口清單。禁止改動 Dropbox 原始檔（唯讀源）。完成後 K1268b/K1310 類 intraday 題目可在 TW 市場重開。",
+    "task_type": "platform_ops",
+    "status": "pending",
+    "priority": 2,
+    "source": "owner_decision_20260714",
+    "created_at": "2026-07-14T08:19:42.370583+00:00"
+  },
+  {
+    "id": "research_taifex_intraday_rv_line",
+    "title": "研究線重開：TAIFEX tick 5-min RV intraday 波動率題組（取代 paid US intraday 線）",
+    "description": "依 owner 2026-07-14 裁決以自有 TAIFEX tick 取代 paid US intraday。在 taifexdata_dropbox_organize 完成後，設計 2-3 個 K：例 (a) TX 5-min RV 的 HAR-intraday vs daily HAR 增益（對照 K1095 系列）；(b) 夜盤/日盤 RV 分解對 隔日波動率預測的資訊含量；(c) 選擇權 tick 的 IV surface 微結構訊號。走 autonomous-research skill + 實驗三件套；depends_on: taifexdata_dropbox_organize。",
+    "task_type": "experiment",
+    "status": "pending",
+    "priority": 3,
+    "source": "owner_decision_20260714",
+    "created_at": "2026-07-14T08:19:42.370583+00:00",
+    "depends_on": [
+      "taifexdata_dropbox_organize"
+    ]
   }
 ]
