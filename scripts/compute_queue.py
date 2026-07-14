@@ -57,6 +57,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 
 QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
@@ -407,8 +408,11 @@ def enqueue_agent(args) -> int:
     # not accept. Snapshotting makes the spec immutable the moment it is queued, and
     # incidentally rescues briefs written to /tmp from being swept before the job runs.
     # To change a queued brief now: `amend --brief-file`, which refuses once it is running.
-    AGENT_BRIEF_DIR.mkdir(parents=True, exist_ok=True)
     frozen_brief = AGENT_BRIEF_DIR / f"{job_id}.md"
+    # 2026-07-15 CI tree-clean leak: a test that patches ROOT but not AGENT_BRIEF_DIR
+    # sent this write into the real repo. Guard at the writer so the leak fails loudly.
+    guard_canonical_write(frozen_brief)
+    AGENT_BRIEF_DIR.mkdir(parents=True, exist_ok=True)
     frozen_brief.write_text(brief_path.read_text(encoding="utf-8"), encoding="utf-8")
 
     # `result_artifact` is the AGENT'S output, never the runner's summary. Resolve
@@ -828,6 +832,7 @@ def amend(args) -> int:
                 return 2
             # Rewrite the frozen copy in place: `args` already points the runner at it,
             # so the snapshot path is the one thing that must NOT move.
+            guard_canonical_write(snapshot)
             Path(snapshot).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
             job["brief_source"] = str(src)
             changed.append("brief")

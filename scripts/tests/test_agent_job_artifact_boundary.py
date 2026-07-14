@@ -165,6 +165,9 @@ def _patch_queue_paths(monkeypatch, root: Path) -> None:
     monkeypatch.setattr(compute_queue, "LOCK_FILE", root / "storage/ops/compute_queue/.worker.lock")
     monkeypatch.setattr(compute_queue, "LOG_DIR", root / "storage/logs/compute")
     monkeypatch.setattr(compute_queue, "AGENT_JOB_DIR", root / "storage/ops/agent_jobs")
+    # AGENT_BRIEF_DIR is computed from ROOT at import time — patching ROOT alone
+    # leaves the frozen-brief write pointed at the real repo (2026-07-15 CI leak).
+    monkeypatch.setattr(compute_queue, "AGENT_BRIEF_DIR", root / "storage/ops/agent_briefs")
 
 
 def test_enqueue_agent_resolves_result_from_worktree_and_separates_metadata(
