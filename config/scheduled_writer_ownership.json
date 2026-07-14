@@ -397,7 +397,7 @@
       "tracked_outputs": ["dynamic exact output_paths", "storage/ops/compute_queue/**"],
       "reason": "Each job records literal output_paths; check_alerts invokes the single reaper owner, which collision-checks and commits with --only."
     },
-    "volpred-fred-backfill-guard": {
+    "fred_backfill_guard": {
       "entrypoint": "scripts/fred_backfill_guard.py",
       "commit_owner": "scripts/collect_us_data.py",
       "policy": "self_commit",

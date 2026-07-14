@@ -160,8 +160,25 @@ def _scan(path: Path) -> list[tuple[int, str]]:
 def _population() -> list[Path]:
     files: list[Path] = []
     for root in SCAN_ROOTS:
-        files.extend(sorted((REPO_ROOT / root).rglob("*.py")))
+        files.extend(
+            path
+            for path in sorted((REPO_ROOT / root).rglob("*.py"))
+            if not _is_test_file(path)
+        )
     return files
+
+
+def _is_test_file(path: Path) -> bool:
+    """Test fixtures write their own throwaway work_log.json under tmp_path.
+
+    The gate reasons about names, not resolved paths, so `_write(tmp / "work_log.json")`
+    in a test reads to it exactly like an unlocked append to the canonical log. Those
+    bytes are not the canonical log and the lock buys them nothing. A test that DOES
+    reach the real storage/ tree is a different concern with its own owner —
+    tests/test_canonical_write_guard.py plus VOLPRED_NO_CANONICAL_WRITE in CI — so
+    exempting fixtures here stacks no second watchdog on top of it.
+    """
+    return "tests" in path.parts or path.name.startswith("test_")
 
 
 @pytest.fixture(scope="module")

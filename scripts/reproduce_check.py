@@ -1090,6 +1090,19 @@ def audit_experiment(
         "repo_head": _git_head(root),
         "methodology_references": METHODOLOGY_REFERENCES,
         "discovery": {"inventory_record": asdict(record), "subject_files": []},
+        # Stamped up-front, not after the run: _report_is_stale() reads these five
+        # fields to decide whether a report still describes the current tree, and
+        # every early return below (SPEC_MISSING, SANDBOX_UNAVAILABLE, ...) writes a
+        # report too. Filling them only on the success path made those reports
+        # permanently stale — on Linux, where no sandbox exists, every report was.
+        "environment": {
+            "python": sys.version,
+            "platform": platform.platform(),
+            "machine": platform.machine(),
+            "uv_lock_sha256": _sha256(root / "uv.lock") if (root / "uv.lock").exists() else None,
+            "pythonhashseed": "0",
+            "package_versions": _package_versions(),
+        },
         "execution": None,
         "comparison": None,
         "integrity": None,
@@ -1362,16 +1375,10 @@ def audit_experiment(
                 "rerun_sha256": rerun_sha,
                 "bit_identical": hashlib.sha256(baseline_bytes).hexdigest() == rerun_sha,
             }]
-            report["environment"] = {
-                "python": sys.version,
-                "platform": platform.platform(),
-                "machine": platform.machine(),
-                "uv_lock_sha256": _sha256(root / "uv.lock") if (root / "uv.lock").exists() else None,
-                "pythonhashseed": "0",
-                "package_versions": _package_versions(),
+            report["environment"].update({
                 "seed_evidence": seed_evidence,
                 "declared_randomness": randomness,
-            }
+            })
             if comparison["mismatch_count"]:
                 _set_outcome(report, status="fail_mismatch", reason_code="RESULT_MISMATCH", severity="critical", reproducible=False, summary=f"{comparison['mismatch_count']} scalar mismatches")
             elif spec.get("network", "deny") != "deny":
