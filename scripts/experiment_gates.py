@@ -41,6 +41,7 @@ on purpose, so it can never block an agent for debt it did not create.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from dataclasses import dataclass
@@ -222,6 +223,144 @@ def run_gates(target: Path) -> list[Violation]:
     return violations
 
 
+CERT_FILENAME = "review_verdict.json"
+
+CERT_REMEDY = (
+    "An experiment may only enter main carrying a review verdict that is bound "
+    "to the bytes it reviewed. Have the reviewer (Codex) read the FROZEN "
+    f"experiment, then write experiments/<kid>/{CERT_FILENAME}:\n"
+    '      {"kid": "k1709", "verdict": "PASS", "reviewer": "codex/gpt-5.6-sol",\n'
+    '       "reviewed_at": "<ISO8601>", "review_artifact": "<the review file>",\n'
+    '       "reviewed_sha256": {"<relpath>": "<sha256>", ...}}\n'
+    "    Every file in the claim surface (*.py, README.md, *_results.json) must "
+    "be listed with its sha256 AT REVIEW TIME. If you then edit or re-run the "
+    "experiment, the hashes stop matching and this gate blocks again — that is "
+    "the point. Re-review the new bytes; do not hand-edit the verdict.\n"
+    "    Owner: scripts/tests/test_experiment_certification.py"
+)
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def claim_surface(exp_dir: Path) -> list[Path]:
+    """The files a reader would believe. Code, the write-up, and the numbers.
+
+    A verdict that only pins the .py is not worth much: README and the results
+    JSON are where an overclaim actually reaches a human (K1709 v1 shipped a
+    README asserting a bound the code never established).
+    """
+    out: list[Path] = []
+    for path in sorted(exp_dir.rglob("*")):
+        if not path.is_file() or "__pycache__" in path.parts:
+            continue
+        if path.name == CERT_FILENAME:
+            continue
+        if path.suffix == ".py" or path.name == "README.md" or path.name.endswith("_results.json"):
+            out.append(path)
+    return out
+
+
+def certification_violations(exp_dir: Path) -> list[Violation]:
+    """Block unless a PASS verdict exists for EXACTLY these bytes.
+
+    Three ways in, all of them closed:
+      - no verdict            -> uncertified
+      - FAIL verdict          -> the reviewer said no (K1709: merged anyway, CI red 4x)
+      - PASS but hashes drift -> reviewed one snapshot, shipped another. This is
+        the subtle one: on 2026-07-14 Codex FAILed k1709.py @e42b0885, the agent
+        fixed the two CRITICALs, and the stale FAIL was left dangling over code
+        that no longer existed. A verdict not bound to a snapshot certifies nothing.
+    """
+    site = _rel(exp_dir)
+    cert_path = exp_dir / CERT_FILENAME
+
+    if not cert_path.exists():
+        return [Violation(gate="review-certification", site=site,
+                          verdict="uncertified: no review_verdict.json", remedy=CERT_REMEDY)]
+
+    try:
+        cert = json.loads(cert_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return [Violation(gate="review-certification", site=_rel(cert_path),
+                          verdict=f"malformed verdict file: {exc}", remedy=CERT_REMEDY)]
+
+    if not isinstance(cert, dict):
+        return [Violation(gate="review-certification", site=_rel(cert_path),
+                          verdict="malformed verdict file: not a JSON object", remedy=CERT_REMEDY)]
+
+    verdict = str(cert.get("verdict", "")).strip().upper()
+    if verdict != "PASS":
+        shown = verdict or "<missing>"
+        return [Violation(gate="review-certification", site=site,
+                          verdict=f"reviewer verdict is {shown}, not PASS", remedy=CERT_REMEDY)]
+
+    recorded = cert.get("reviewed_sha256")
+    if not isinstance(recorded, dict) or not recorded:
+        return [Violation(gate="review-certification", site=_rel(cert_path),
+                          verdict="PASS verdict pins no reviewed_sha256 — certifies nothing",
+                          remedy=CERT_REMEDY)]
+
+    violations: list[Violation] = []
+    current = {str(p.relative_to(exp_dir)): p for p in claim_surface(exp_dir)}
+
+    for rel_name in sorted(set(recorded) - set(current)):
+        violations.append(Violation(
+            gate="review-certification", site=f"{site}/{rel_name}",
+            verdict="reviewed file is gone from the experiment", remedy=CERT_REMEDY))
+
+    for rel_name, path in sorted(current.items()):
+        want = recorded.get(rel_name)
+        if want is None:
+            violations.append(Violation(
+                gate="review-certification", site=f"{site}/{rel_name}",
+                verdict="in the claim surface but never reviewed", remedy=CERT_REMEDY))
+            continue
+        got = _sha256(path)
+        if str(want).lower() != got:
+            violations.append(Violation(
+                gate="review-certification", site=f"{site}/{rel_name}",
+                verdict=f"changed after review (reviewed {str(want)[:12]}…, now {got[:12]}…)",
+                remedy=CERT_REMEDY))
+
+    return violations
+
+
+def cmd_certify(args: argparse.Namespace) -> int:
+    target = Path(args.path)
+    if not target.is_absolute():
+        target = REPO_ROOT / target
+    if not target.is_dir():
+        print(f"[cert] error: not an experiment directory: {target}", file=sys.stderr)
+        return 2
+
+    violations = certification_violations(target)
+
+    if args.json:
+        Path(args.json).write_text(json.dumps({
+            "path": _rel(target),
+            "violations": [
+                {"gate": v.gate, "site": v.site, "verdict": v.verdict} for v in violations
+            ],
+            "passed": not violations,
+        }, indent=2), encoding="utf-8")
+
+    if not violations:
+        print(f"[cert] PASS — {_rel(target)} carries a PASS verdict bound to its current bytes.")
+        return 0
+
+    print(f"[cert] BLOCKED — {_rel(target)} is not certified for main:\n", file=sys.stderr)
+    for v in violations:
+        print(f"    - {v.site}  ({v.verdict})", file=sys.stderr)
+    print(f"\n  → {CERT_REMEDY}", file=sys.stderr)
+    return 1
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     target = Path(args.path)
     if not target.is_absolute():
@@ -280,6 +419,14 @@ def main() -> int:
     run.add_argument("--path", required=True, help="experiments/<kid> directory or a .py file")
     run.add_argument("--json", help="write a machine-readable report here")
     run.set_defaults(func=cmd_run)
+    cert = sub.add_parser(
+        "certify",
+        help="Merge-time gate: refuse an experiment that has no PASS verdict "
+             "bound to its current bytes.",
+    )
+    cert.add_argument("--path", required=True, help="experiments/<kid> directory")
+    cert.add_argument("--json", help="write a machine-readable report here")
+    cert.set_defaults(func=cmd_certify)
     args = parser.parse_args()
     return args.func(args)
 

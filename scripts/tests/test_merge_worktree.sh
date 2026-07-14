@@ -41,6 +41,46 @@ FAIL=0
 pass() { echo "  [PASS] $1"; PASS=$((PASS + 1)); }
 fail() { echo "  [FAIL] $1"; FAIL=$((FAIL + 1)); }
 
+# 2026-07-14: 合併現在要求「一份 PASS 裁決，且它審的就是現在這份 bytes」
+# (scripts/experiment_gates.py certify)。這裡模擬一個守規矩的 agent：實驗凍結後
+# 由審查者寫下 review_verdict.json。沒有它，實驗就進不了 main —— 那正是 K1709
+# 的教訓，也是下面 case 14/15 專門守住的行為。
+certify_all_experiments() {
+    # 無參數（或該 case 沒有 $wt 變數）→ 掃所有 agent worktree
+    local wt="${1:-}"
+    if [[ -z "$wt" ]]; then
+        local w
+        for w in .claude/worktrees/*/; do
+            [[ -d "$w" ]] && certify_all_experiments "${w%/}"
+        done
+        return 0
+    fi
+    [[ -d "$wt/experiments" ]] || return 0
+    local exp_dir
+    for exp_dir in "$wt/experiments"/*/; do
+        [[ -d "$exp_dir" ]] || continue
+        python3 - "$exp_dir" <<'PYCERT'
+import hashlib, json, sys
+from pathlib import Path
+exp = Path(sys.argv[1])
+surface = [
+    p for p in sorted(exp.rglob("*"))
+    if p.is_file() and "__pycache__" not in p.parts and p.name != "review_verdict.json"
+    and (p.suffix == ".py" or p.name == "README.md" or p.name.endswith("_results.json"))
+]
+(exp / "review_verdict.json").write_text(json.dumps({
+    "kid": exp.name,
+    "verdict": "PASS",
+    "reviewer": "test-fixture",
+    "reviewed_at": "2026-07-14T00:00:00+08:00",
+    "reviewed_sha256": {
+        str(p.relative_to(exp)): hashlib.sha256(p.read_bytes()).hexdigest() for p in surface
+    },
+}, indent=2), encoding="utf-8")
+PYCERT
+    done
+}
+
 # ============================================================
 # Helper: 建立一個臨時 git repo 作為主目錄 + 一個 worktree
 # 關鍵：把 merge_worktree.sh copy 到 test_dir/scripts/ 裡，
@@ -52,6 +92,15 @@ setup_test_env() {
     mkdir -p "$test_dir/scripts"
     cp "$MERGE_SCRIPT" "$test_dir/scripts/merge_worktree.sh"
     chmod +x "$test_dir/scripts/merge_worktree.sh"
+    # merge 路徑會呼叫 certify gate；gate 不存在時 merge_worktree.sh 會 fail-closed。
+    # 這四個 auditor 是 experiment_gates.py 的 import 相依（全 stdlib）。
+    local real_scripts
+    real_scripts="$(cd "$(dirname "$MERGE_SCRIPT")" && pwd)"
+    cp "$real_scripts/experiment_gates.py" "$test_dir/scripts/"
+    cp "$real_scripts/audit_nested_dm_misuse.py" "$test_dir/scripts/"
+    cp "$real_scripts/audit_dm_hac_lag.py" "$test_dir/scripts/"
+    cp "$real_scripts/audit_mdd_scale_artifact.py" "$test_dir/scripts/"
+    cp "$real_scripts/audit_fevd_ordering.py" "$test_dir/scripts/"
 
     cd "$test_dir"
 
@@ -115,6 +164,7 @@ test_case_a() {
 
     # Run merge script
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
     # 驗證：
@@ -173,6 +223,7 @@ test_case_b() {
 
     # Run merge script
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
     # 驗證：
@@ -209,6 +260,7 @@ test_case_c() {
     echo "{}" > "$wt/experiments/ktest3/ktest3_results.json"
 
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
     if [[ -f "$test_dir/experiments/ktest3/ktest3.py" ]] && \
@@ -235,6 +287,7 @@ test_case_d() {
 
     # Dry-run
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir" --dry-run)
 
     # 驗證：不應出現 `+worktree-agent-*` (被 `+` 污染的名稱)
@@ -297,6 +350,7 @@ EOF
 
     # Run merge script
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
     # 5-1: k1262sim.py 必到 main HEAD
@@ -374,6 +428,7 @@ PYEOF
 
     # Run merge script (the patched one)
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
     # 6-1: K1262-v4 必須印 [CRITICAL] detection 訊息
@@ -423,6 +478,7 @@ test_case_7_locked_worktree_hint() {
 
     # Run merge script
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
     # 7-1: merge 應該 OK（commits 進 main），但 remove 應失敗
@@ -492,6 +548,7 @@ test_case_8_cwd_inside_worktree() {
 
     # 關鍵：從 worktree **內部** 執行 merge script（K1618 精確觸發條件）
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_from_inside_worktree "$test_dir" "$wt" agent-testcase8)
 
     # 8-1: k1618sim.py 必進 main HEAD（不可 silent drop）
@@ -557,6 +614,7 @@ test_case_9_ours_dropped_auto_restore() {
     git add -A && git commit -qm "main modifies km9.py"
 
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
     # 9-1: main HEAD 的 km9.py 必是 agent 版本（auto-restore 生效）
@@ -601,6 +659,7 @@ test_case_10_cross_repo_cwd_anchor() {
 
     # 從 repo B 的 cwd，絕對路徑呼叫 test_dir 的 script
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_from_cwd "$repo_b" "$test_dir" agent-testcase10)
 
     # 10-1: kx10 必 merge 進 test_dir（腳本 repo），不是 repo B
@@ -646,6 +705,7 @@ test_case_11_stale_base_no_false_abort() {
     git add -A && git commit -qm "main: cron 更新 feed.json"
 
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
     # 11-1: 不可 ABORT
@@ -702,6 +762,7 @@ test_case_13_unregistered_standalone_repo_dir() {
     ) >/dev/null 2>&1
 
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
     # 13-1: 必須被偵測到並 fail loud（舊版是完全靜默）
@@ -757,6 +818,7 @@ test_case_12_real_violation_aborts_and_stash_restores() {
     git add dirty_*.txt
 
     local output
+    certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
     # 12-1: guard 該響
@@ -794,6 +856,115 @@ test_case_12_real_violation_aborts_and_stash_restores() {
 echo "### merge_worktree.sh 測試 (K1143-v2 + K1262-v4 + K1618 + 2026-07-10 guard) ###"
 echo ""
 
+
+# ============================================================================
+# Case 14/15/16 (2026-07-14): 審查認證 gate — K1709 的三個入口全部關上
+# K1709 被 Codex 判 FAIL 卻仍 merge 進 main → nested-DM ratchet 讓連續三班
+# dispatch 的 push 全紅。merge 路徑從來沒讀過裁決。
+# ============================================================================
+test_case_14_uncertified_experiment_blocked() {
+    echo "=== Case 14: 實驗沒有審查裁決 → 拒絕合併 ==="
+    local test_dir
+    test_dir=$(setup_test_env "case14")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase14"
+
+    mkdir -p "$wt/experiments/k14un"
+    echo "print('never reviewed')" > "$wt/experiments/k14un/k14un.py"
+    echo "# K14" > "$wt/experiments/k14un/README.md"
+
+    # 注意：故意不呼叫 certify_all_experiments
+    local output
+    output=$(run_merge_in_test_dir "$test_dir") || true
+
+    if ! git -C "$test_dir" cat-file -e "main:experiments/k14un/k14un.py" 2>/dev/null; then
+        pass "14-1: 未認證的實驗沒有進 main"
+    else
+        fail "14-1: 未認證的實驗竟然合併了（K1709 重現）"
+    fi
+
+    if echo "$output" | grep -q "未通過審查認證"; then
+        pass "14-2: 明確說出為什麼擋"
+    else
+        fail "14-2: 沒說明擋的原因"
+    fi
+
+    if [[ -f "$test_dir/$wt/experiments/k14un/k14un.py" ]]; then
+        pass "14-3: worktree 保留，工作沒被丟掉"
+    else
+        fail "14-3: 擋下來卻把 agent 的工作弄丟了"
+    fi
+}
+
+test_case_15_fail_verdict_blocked() {
+    echo "=== Case 15 (K1709 verbatim): 裁決是 FAIL → 拒絕合併 ==="
+    local test_dir
+    test_dir=$(setup_test_env "case15")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase15"
+
+    mkdir -p "$wt/experiments/k15fail"
+    echo "print('reviewer said no')" > "$wt/experiments/k15fail/k15fail.py"
+    certify_all_experiments "$wt"
+    # 審查者判 FAIL
+    python3 - "$test_dir/$wt/experiments/k15fail/review_verdict.json" <<'PYF'
+import json, sys
+from pathlib import Path
+p = Path(sys.argv[1]); c = json.loads(p.read_text()); c["verdict"] = "FAIL"
+p.write_text(json.dumps(c, indent=2))
+PYF
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir") || true
+
+    if ! git -C "$test_dir" cat-file -e "main:experiments/k15fail/k15fail.py" 2>/dev/null; then
+        pass "15-1: FAIL 的實驗沒有進 main"
+    else
+        fail "15-1: FAIL 的實驗被合併了 — 這正是 K1709 讓 CI 連紅 4 次的原因"
+    fi
+
+    if echo "$output" | grep -q "未通過審查認證"; then
+        pass "15-2: merge 路徑真的讀了裁決"
+    else
+        fail "15-2: merge 路徑沒讀裁決"
+    fi
+}
+
+test_case_16_stale_pass_verdict_blocked() {
+    echo "=== Case 16: PASS 之後又改了 code → 裁決過期，一樣擋 ==="
+    local test_dir
+    test_dir=$(setup_test_env "case16")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase16"
+
+    mkdir -p "$wt/experiments/k16stale"
+    echo "print('v1 — the bytes the reviewer saw')" > "$wt/experiments/k16stale/k16stale.py"
+    certify_all_experiments "$wt"   # PASS，pin 住 v1 的 sha256
+
+    # 審查之後 agent 又改了 code（2026-07-14 K1709 rev1 真實發生的事）
+    echo "print('v2 — fixed after the review, never re-reviewed')" \
+        > "$wt/experiments/k16stale/k16stale.py"
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir") || true
+
+    if ! git -C "$test_dir" cat-file -e "main:experiments/k16stale/k16stale.py" 2>/dev/null; then
+        pass "16-1: 審完又改過的 code 沒有靠舊 PASS 混進 main"
+    else
+        fail "16-1: 陳舊的 PASS 裁決放行了沒人審過的 bytes"
+    fi
+
+    if echo "$output" | grep -q "未通過審查認證"; then
+        pass "16-2: 認證與 bytes 綁定，不只與檔名綁定"
+    else
+        fail "16-2: gate 沒抓到 sha 漂移"
+    fi
+}
+
+
 test_case_a
 echo ""
 test_case_b
@@ -821,11 +992,18 @@ echo ""
 test_case_13_unregistered_standalone_repo_dir
 echo ""
 
+test_case_14_uncertified_experiment_blocked
+echo ""
+test_case_15_fail_verdict_blocked
+echo ""
+test_case_16_stale_pass_verdict_blocked
+echo ""
+
 echo "================================"
 echo "Assertions PASS: $PASS"
 echo "Assertions FAIL: $FAIL"
-# Test case-level summary（13 cases = A/B/C/D + 5/6/7 + 8/9/10 + 11/12 + 13）
-TOTAL_CASES=13
+# Test case-level summary（16 cases = A/B/C/D + 5/6/7 + 8/9/10 + 11/12 + 13 + 14/15/16 認證 gate）
+TOTAL_CASES=16
 if [[ $FAIL -eq 0 ]]; then
     echo "Test cases: PASS $TOTAL_CASES/$TOTAL_CASES"
 else

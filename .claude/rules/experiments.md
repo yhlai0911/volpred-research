@@ -51,6 +51,34 @@ Cholesky-FEVD 排序假象、MDD scale artifact），scope 只看你這個 K，�
 K1709 就是自帶測試全過、ratchet 抓得到卻從沒被執行到，一整份 xhigh 實驗白做
 （`docs/error_log.md` 2026-07-14）。
 
+## 審查認證：實驗進 main 的唯一門票（2026-07-14）
+
+實驗要合併進 main，`experiments/<kid>/` 必須有一份 **`review_verdict.json`**，且它 pin 住的
+sha256 就是**現在這份 bytes**。merge 路徑會擋（`scripts/merge_worktree.sh` → `experiment_gates.py certify`）：
+
+```json
+{
+  "kid": "k1709",
+  "verdict": "PASS",
+  "reviewer": "codex/gpt-5.6-sol",
+  "reviewed_at": "2026-07-14T13:42:00+08:00",
+  "review_artifact": "codex_review_rev1_20260714.txt",
+  "reviewed_sha256": {"k1709.py": "<sha256>", "README.md": "...", "k1709_results.json": "..."}
+}
+```
+
+Claim surface = `*.py` + `README.md` + `*_results.json`（README 也算：**overclaim 是透過 README 抵達人類的**）。
+
+三個入口全部關上：**沒裁決**擋、**FAIL**擋、**PASS 但審完又改了 code**（sha 漂移）也擋。
+
+第三條是最容易被忽略的一條，也是這條規則存在的理由。2026-07-14 Codex 判 K1709 `k1709.py`
+@`e42b0885` FAIL，agent 隨後把兩個 CRITICAL 都修掉了 —— 於是 repo 裡留著一份「對著已不存在的
+檔案說 FAIL」的裁決。照著它擋，會擋掉已經修好的版本，並教會 agent「把 review 檔刪掉就過了」；
+忽略它，就是 K1709 的原罪重演（有人說「我修好了」就放行）。**裁決只值它當下審的那個快照。**
+
+推論：**agent 自己叫 Codex 來審是安全的** —— 審完再動 code，sha 就對不上，gate 自動再擋一次。
+所以流程是「凍結 → 審 → 寫裁決 → 不要再動」；真要改，就重審，**不要手改裁決檔**。
+
 ## Methodology 硬規則
 
 ### 套件限制 ≠ 模型無效

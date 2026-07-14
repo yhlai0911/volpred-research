@@ -361,6 +361,54 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
     echo "  [INFO] 發現新 commits："
     echo "$new_commits" | sed 's/^/      /'
 
+    # --- Review-certification gate (2026-07-14) ---------------------------------
+    # K1709 was FAILed by Codex and merged anyway — nothing here ever read the
+    # verdict — and the nested-DM ratchet then reddened every push for three
+    # dispatch hours. The merge path is where an uncertified experiment becomes
+    # everyone's problem, so this is where the verdict has to be read.
+    #
+    # Three-dot: `main...branch` is "what the agent changed" (merge-base vs branch
+    # tip). Two-dot would drag in main's own churn and block on experiments this
+    # branch never touched — the L390 lesson, same trap.
+    local gate_script="$MAIN_DIR/scripts/experiment_gates.py"
+    local touched_experiments
+    touched_experiments=$(git -C "$MAIN_DIR" diff --name-only "$main_branch...$branch" -- experiments/ 2>/dev/null \
+        | awk -F/ 'NF>=2 && $1=="experiments" {print $2}' | sort -u || true)
+
+    if [[ -n "$touched_experiments" ]]; then
+        local uncertified=""
+        while IFS= read -r kid; do
+            [[ -n "$kid" ]] || continue
+            local exp_dir="$wt_path/experiments/$kid"
+            # Deleted in the branch → nothing to certify.
+            [[ -d "$exp_dir" ]] || continue
+            echo "  [CERT] 檢查 $kid 的審查裁決..."
+            # python3 (stdlib-only), not `uv run`: this gate blocks merges, so it must
+            # not inherit uv's project-resolution failure modes (no pyproject in a
+            # scratch repo, uv absent from a cron PATH). A gate that cannot run is a
+            # gate that abstains.
+            if [[ ! -f "$gate_script" ]]; then
+                echo "  [🛑 ABORT] 找不到 $gate_script — 不在沒有 gate 的情況下盲目合併實驗"
+                return 1
+            fi
+            if ! python3 "$gate_script" certify --path "$exp_dir"; then
+                uncertified="$uncertified $kid"
+            fi
+        done <<< "$touched_experiments"
+
+        if [[ -n "$uncertified" ]]; then
+            echo "  [🛑 ABORT] 未通過審查認證的實驗，拒絕合併：$uncertified"
+            echo "  [WHY] K1709 就是被 Codex 判 FAIL 卻仍 merge 進 main，害 CI 連紅 4 次。"
+            echo "        merge 的前提是「有一份 PASS 裁決，且它審的就是現在這份 bytes」。"
+            echo "  [HINT] 路徑："
+            echo "         1. 讓 Codex 審**凍結後**的實驗，寫 experiments/<kid>/review_verdict.json"
+            echo "         2. 裁決要 pin 住 claim surface（*.py / README.md / *_results.json）的 sha256"
+            echo "         3. 若審完又改了 code → 重審，不要手改裁決檔"
+            echo "         4. 再跑 bash scripts/merge_worktree.sh $wt_name"
+            return 1
+        fi
+    fi
+
     # Merge 到 main
     local commit_count
     commit_count=$(echo "$new_commits" | wc -l | tr -d ' ')

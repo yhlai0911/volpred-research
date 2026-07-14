@@ -24,6 +24,10 @@ paths:
 
 ## 合併流程
 
+0. **實驗要進 main，先有審查認證**（2026-07-14）：branch 只要動到 `experiments/`，merge 前會對每個
+   `experiments/<kid>/` 跑 `experiment_gates.py certify` —— 需要一份 `review_verdict.json`，verdict=PASS
+   且 pin 住的 sha256 等於現行 bytes。沒裁決 / FAIL / 審完又改 code（sha 漂移）→ **拒絕合併，保留 worktree**。
+   契約與 why 見 `.claude/rules/experiments.md` §審查認證。K1709 就是被判 FAIL 仍 merge 進 main，害 CI 連紅 4 次。
 1. Worktree agent 完成後**必須 commit** 它產出的檔案到 worktree branch。
 2. 主線程用 `bash scripts/merge_worktree.sh <worktree-name>` 合併。
 3. **絕對禁止** `git worktree remove --force` — 以免未 merge 的 commits 消失（2026-04-18 K1032 教訓有記）。

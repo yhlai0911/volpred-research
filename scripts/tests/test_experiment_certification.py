@@ -1,0 +1,177 @@
+#!/usr/bin/env python
+"""Merge-time gate: an experiment enters main only with a PASS verdict bound to its bytes.
+
+The incident this ratchet freezes (2026-07-14, docs/error_log.md)
+----------------------------------------------------------------
+K1709 was reviewed by Codex and FAILed on two CRITICALs.  It was merged into
+main anyway -- nothing on the merge path ever read the verdict -- and the
+nested-DM ratchet then reddened every push for three consecutive dispatch
+hours until the experiment was withdrawn by hand.
+
+The naive fix ("FAIL blocks merge") is not enough, and the reason is the
+second half of the same day: the agent *fixed* both CRITICALs afterwards.  The
+recorded verdict still said FAIL, but it said FAIL about ``k1709.py``
+@e42b0885 -- a file that no longer existed.  Codex's own review even pinned the
+hash it judged and warned the file had changed underneath it.  So the repo held
+a verdict that certified nothing, and both readings of it were wrong:
+
+  - honour the stale FAIL  -> block a snapshot that was already repaired, and
+    teach agents that the way through is to delete the review file;
+  - ignore the stale FAIL  -> exactly K1709's original sin, merging uncertified
+    work because someone asserted "I fixed it".
+
+A verdict is only worth its snapshot.  So certification pins sha256 over the
+whole claim surface -- code, README, results -- and drift is a block:
+"reviewed one thing, shipped another" is not a certification.  That also makes
+it safe for the agent to invoke the reviewer itself: edit after the PASS and
+the hashes stop matching.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+GATE = REPO_ROOT / "scripts" / "experiment_gates.py"
+
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+import experiment_gates as gates  # noqa: E402
+
+
+def _sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _experiment(tmp_path: Path, kid: str = "k1709") -> Path:
+    """A minimal but complete experiment: code, write-up, numbers."""
+    exp = tmp_path / "experiments" / kid
+    exp.mkdir(parents=True)
+    (exp / f"{kid}.py").write_text("print('flow -> rv')\n", encoding="utf-8")
+    (exp / "README.md").write_text("# K1709\n\n**Verdict: INCONCLUSIVE**\n", encoding="utf-8")
+    (exp / f"{kid}_results.json").write_text(
+        json.dumps({"verdict": "INCONCLUSIVE_NO_EXACT_NULL_CLAIM"}), encoding="utf-8"
+    )
+    return exp
+
+
+def _certify(exp: Path, verdict: str = "PASS", *, files: list[Path] | None = None) -> Path:
+    surface = files if files is not None else gates.claim_surface(exp)
+    cert = exp / gates.CERT_FILENAME
+    cert.write_text(
+        json.dumps(
+            {
+                "kid": exp.name,
+                "verdict": verdict,
+                "reviewer": "codex/gpt-5.6-sol",
+                "reviewed_at": "2026-07-14T13:42:00+08:00",
+                "review_artifact": "codex_review_rev1_20260714.txt",
+                "reviewed_sha256": {str(p.relative_to(exp)): _sha(p) for p in surface},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    return cert
+
+
+def _verdicts(exp: Path) -> list[str]:
+    return [v.verdict for v in gates.certification_violations(exp)]
+
+
+# --- the three ways in, all of them closed -----------------------------------
+
+
+def test_pass_verdict_bound_to_current_bytes_is_the_only_way_through(tmp_path: Path) -> None:
+    exp = _experiment(tmp_path)
+    _certify(exp, "PASS")
+    assert gates.certification_violations(exp) == []
+
+
+def test_fail_verdict_blocks_merge(tmp_path: Path) -> None:
+    """K1709's original sin: Codex said FAIL, it was merged, CI went red 4x."""
+    exp = _experiment(tmp_path)
+    _certify(exp, "FAIL")
+    assert any("not PASS" in v for v in _verdicts(exp))
+
+
+def test_uncertified_experiment_blocks_merge(tmp_path: Path) -> None:
+    exp = _experiment(tmp_path)
+    assert any("no review_verdict.json" in v for v in _verdicts(exp))
+
+
+@pytest.mark.parametrize("target", ["k1709.py", "README.md", "k1709_results.json"])
+def test_pass_verdict_goes_stale_when_the_reviewed_bytes_change(
+    tmp_path: Path, target: str
+) -> None:
+    """The dangling-verdict case. Fix the code after the review and you are
+    uncertified again -- for the code, and equally for the write-up and the
+    numbers, because an overclaim reaches a human through the README."""
+    exp = _experiment(tmp_path)
+    _certify(exp, "PASS")
+    assert gates.certification_violations(exp) == []
+
+    (exp / target).write_text("# repaired after the reviewer looked\n", encoding="utf-8")
+
+    stale = _verdicts(exp)
+    assert any("changed after review" in v for v in stale), stale
+
+
+# --- the ways around it, also closed -----------------------------------------
+
+
+def test_new_claim_bearing_file_slipped_in_after_review_blocks(tmp_path: Path) -> None:
+    """Ship a second script the reviewer never saw and the surface no longer matches."""
+    exp = _experiment(tmp_path)
+    _certify(exp, "PASS")
+    (exp / "k1709_extra_analysis.py").write_text("print('unreviewed claim')\n", encoding="utf-8")
+    assert any("never reviewed" in v for v in _verdicts(exp))
+
+
+def test_pass_verdict_pinning_nothing_certifies_nothing(tmp_path: Path) -> None:
+    exp = _experiment(tmp_path)
+    _certify(exp, "PASS", files=[])
+    assert any("certifies nothing" in v for v in _verdicts(exp))
+
+
+def test_malformed_verdict_fails_closed(tmp_path: Path) -> None:
+    exp = _experiment(tmp_path)
+    (exp / gates.CERT_FILENAME).write_text("{not json", encoding="utf-8")
+    assert any("malformed" in v for v in _verdicts(exp))
+
+
+def test_pycache_is_not_part_of_the_claim_surface(tmp_path: Path) -> None:
+    """Byte-code churn must not invalidate a real verdict."""
+    exp = _experiment(tmp_path)
+    _certify(exp, "PASS")
+    cache = exp / "__pycache__"
+    cache.mkdir()
+    (cache / "k1709.cpython-313.pyc").write_bytes(b"\x00garbage")
+    assert gates.certification_violations(exp) == []
+
+
+# --- the CLI the merge path actually calls -----------------------------------
+
+
+def test_cli_exit_codes(tmp_path: Path) -> None:
+    exp = _experiment(tmp_path)
+
+    blocked = subprocess.run(
+        [sys.executable, str(GATE), "certify", "--path", str(exp)],
+        capture_output=True, text=True,
+    )
+    assert blocked.returncode == 1
+    assert "BLOCKED" in blocked.stderr
+
+    _certify(exp, "PASS")
+    ok = subprocess.run(
+        [sys.executable, str(GATE), "certify", "--path", str(exp)],
+        capture_output=True, text=True,
+    )
+    assert ok.returncode == 0, ok.stderr
+    assert "PASS" in ok.stdout
