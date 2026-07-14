@@ -85,6 +85,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /Users/yhlai0911/volpred-research/scripts/hooks/read_context_budget.py",
+            "timeout": 10
+          }
+        ]
       }
     ]
   }
