@@ -21,7 +21,7 @@ paths:
   - 多 horizon forward-label 實驗不可共用同一個 DM/HAC/HLN horizon；每個 target 的 inference horizon 必須等於該 target 的 H。
 - 所有隨機程序都要固定 seed。
 - 策略與風險管理比較遵守 `research_program.md` 的公平比較、VaR+ES、Harvey / Patton 規則。
-- Worktree agent 只應產出 `experiments/kXXX/` 內檔案；共享 JSON、Supabase、Mirror sync 由主線程負責。
+- Worktree agent 的產出/共享狀態禁忌與合併流程 → 唯一 owner `.claude/rules/worktree.md`（規則本體）+ error_log §C；本檔不重述。
 - 完成實驗後先做 Codex code review，再寫 knowledge / experience / article。
   - **Codex CLI 故障 diagnostic 順序**（2026-04-28 教訓寫入；2026-04-26/27 兩 entries 因順序錯誤花 4 天才修）。Codex error 時**先**這 5 步，不直接懷疑 plugin 版本：
     1. `codex --version` — 看 CLI binary 真正版本（**不**是 `~/.claude/plugins/cache/openai-codex/codex/<x>/` 目錄名，後者是 marketplace plugin 版號）

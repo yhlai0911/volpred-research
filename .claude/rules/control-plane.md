@@ -110,10 +110,9 @@ Treat these as standing rules:
   worktree for historical commit checks. If the main worktree is detached for
   any reason, reattach with `git checkout main` before committing, and verify
   `HEAD == refs/heads/main` before push/commit closeout.
-- **Worktree merge/remove paths fail closed.** Ambiguous "0 commits", git-log
-  errors, dropped modified files, or branch/self-compare anomalies must preserve
-  the worktree/branch and surface a fatal error. Never remove a worktree after a
-  fallback comparison.
+- **Worktree merge/remove paths fail closed** — 規則本體與五層防禦見唯一 owner
+  `.claude/rules/worktree.md` §合併流程 + `scripts/merge_worktree.sh` +
+  error_log §C；此處不重述（anti-stacking）。
 
 ## Task pool 三軌：agentable / main_thread / blocked（2026-05-04 修流程）
 
