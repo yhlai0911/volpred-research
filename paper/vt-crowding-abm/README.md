@@ -2,7 +2,7 @@
 
 **Target Journal**: Quantitative Finance (QF; primary) → JEBO (secondary); FRL only as fast-track fallback with heavy cuts
 **Status**: 🔶 **VT-only revision in progress（2026-07-14）** — P0-1~P0-4 完成：敘事單一化、scope 收斂 VT-only（family ordering 全面撤回，含 conclusion / knife-edge 節殘留清除）、K1471 TF/MR 誠實補報（tab:tfmr_gate + RR_TF erosion）、reproduce gate 173/173 GREEN + PDF 零內部路徑洩漏、P0-5 機械批次（redesign-layer §2 描述、sims 口徑、Bonferroni 句、Kyle 頁碼、bib 排序、本 README）。剩：v6 跨模型獨立 review（同模型自審不算）→ QF compliance gate。v4 GREEN PASS 已作廢（同模型自審假陽性第三例）。
-**Pages**: 34 | **Citations**: 22 bibitems
+**Pages**: 35 | **Citations**: 22 bibitems
 
 ## Data Sources
 - Agent-based simulation (no external data needed)
