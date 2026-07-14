@@ -8,7 +8,7 @@ recorded workflow, not that the research claim is valid.
 ## Commands
 
 ```bash
-# Fast, read-only inventory (paper manifests/current TeX + latest 60 published feed items)
+# Fast, read-only inventory (paper manifests/submission compile closures + latest 60 published feed items)
 uv run python scripts/reproduce_check.py inventory --no-write
 
 # Persist the derived inventory to storage/ops/reproducibility/latest.json

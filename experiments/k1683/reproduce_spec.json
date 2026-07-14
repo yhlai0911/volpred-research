@@ -1,0 +1,47 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "k1683.py",
+    "args": []
+  },
+  "canonical_result": "k1683_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1683/data/adjusted_closes.csv",
+      "sha256": "b05d8a4f4adc771cda221614fb82332f3027ae696e2659ed6f8b7a5ba93aeebd"
+    },
+    {
+      "path": "experiments/k1683/data/cftc_tff_treasury.csv",
+      "sha256": "0a39ac553348c82d98b58e6219adffe3c29d5c372a52162dc3c666462c5b12f1"
+    },
+    {
+      "path": "experiments/k1683/data/fred_dgs10.csv",
+      "sha256": "8c20497b438a9bbba86d7687dad36b6c2f6aac8b953c20f52d3fc6e26c73018f"
+    },
+    {
+      "path": "src/volpred/stats/model_evaluation.py",
+      "sha256": "29c6f80d1d39f72dfff1984622db599069076c895e174fb564d1e891ae5d59c8"
+    }
+  ],
+  "timeout_seconds": 240,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/run_utc"
+    ],
+    "ignore_reasons": {
+      "/run_utc": "Execution timestamp metadata; README already defines canonical equality after removing run_utc, and no scientific calculation consumes it."
+    }
+  }
+}

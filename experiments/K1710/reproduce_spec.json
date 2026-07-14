@@ -1,0 +1,93 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "K1710.py",
+    "args": []
+  },
+  "canonical_result": "K1710_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1699/data/0050_TW_snapshot.csv",
+      "sha256": "91ec88b94cc7692c5f3feaded96c28218f9b8408cd52105367bd296a388e8b0f"
+    },
+    {
+      "path": "experiments/k1699/data/EEM_snapshot.csv",
+      "sha256": "924a7447754546c05852aee899951995f567cae5b23e37e2eccf7c8bef87d7c3"
+    },
+    {
+      "path": "experiments/k1699/data/GLD_snapshot.csv",
+      "sha256": "0741addcf29a2769bd550ea80558a1f6579f6a0441d49039b5437e48b9395f35"
+    },
+    {
+      "path": "experiments/k1699/data/QQQ_snapshot.csv",
+      "sha256": "b42eb032309215841faa55a7476366df9541b991dcb8b046ac4135c31fb4835d"
+    },
+    {
+      "path": "experiments/k1699/data/SPY_snapshot.csv",
+      "sha256": "501af099f9e8205d4629b607ee2e30a147e7beef6ed5ce1282abc00ad2ae183b"
+    },
+    {
+      "path": "experiments/k1699/data/TAIFEX_daily_snapshot.csv",
+      "sha256": "b573f0e2736532c7671bab7120c1872ef23b5682e50013c607a635790cf42588"
+    },
+    {
+      "path": "experiments/k1699/data/TAIFEX_sessions_snapshot.csv",
+      "sha256": "59c21377aea941e9c18094a47d07a1d2caa3d0b73a66c7f97e8bd6b44f950acf"
+    },
+    {
+      "path": "paper/prg-periodic-garch/experiments/k880_results.json",
+      "sha256": "3c59d18ce52ba296e00975f7c13cab0e6d8edbf2b918e53ff29bd7780926784b"
+    },
+    {
+      "path": "paper/prg-periodic-garch/experiments/k880_prg_spy_validation.py",
+      "sha256": "26fb1424b3cab2fef16e7ff234b1aed232359f84d313d17ece6934b7c5365265"
+    },
+    {
+      "path": "paper/prg-periodic-garch/experiments/k881_prg_multi_asset.py",
+      "sha256": "698173175a24fa865bd12990ba37f498b242b70aa4331f5c4daa4c01a2a5bff2"
+    },
+    {
+      "path": "paper/prg-periodic-garch/experiments/k886_prg_0050tw.py",
+      "sha256": "9a16dab8a6f5b453637f2dfe6040c4d71039ad0de4f866ed7fb98d7a2a200f9c"
+    },
+    {
+      "path": "paper/prg-periodic-garch/experiments/k883_taifex_tick_prg.py",
+      "sha256": "0c787fabfc8732ba3656932fba3271e887da70c2053e5de680e0d7e61821e331"
+    },
+    {
+      "path": "experiments/k1544_prg_fair_info_gjr/k1544_prg_fair_info_gjr.py",
+      "sha256": "41f11ac7833ef232d5f097782315b2548c457f6cfdefd2305bc271103bcba516"
+    },
+    {
+      "path": "src/volpred/stats/model_evaluation.py",
+      "sha256": "29c6f80d1d39f72dfff1984622db599069076c895e174fb564d1e891ae5d59c8"
+    }
+  ],
+  "timeout_seconds": 300,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1710
+      },
+      {
+        "library": "numpy.RandomState",
+        "value": 1544
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp metadata generated after all scientific results are computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; it is not an input to any estimate or verdict."
+    }
+  }
+}

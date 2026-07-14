@@ -7727,7 +7727,7 @@ k1262 路徑 — 同 class（pattern 蓋不住 population）。與 K1259「audit
 rerun → strict compare → immutable receipt 流程；盤點口徑也沒有同一個 canonical parser。
 
 **根治**：新增 `scripts/reproduce_check.py` + `docs/reproducibility.md`。Paper 聯集 canonical
-`experiments.md` 與 active `main.tex/body.tex`（兩者皆無才讀 README），明確排除 MIDAS `K125` 並解析 alias；feed 先取最新
+`experiments.md` 與 submission entry 的完整 `\\input/\\include` compile closure（兩者皆無才讀 README），明確排除 MIDAS `K125` 並解析 alias；feed 先取最新
 60 篇 published。Rerun 強制 predeclared spec/input SHA/seed/tolerance、disposable committed clone、macOS
 write+network sandbox、process-group timeout、baseline 先刪、strict JSON，以及 main canonical 前後 hash。
 168 個 code-without-results 全列入 inventory 為不可驗證；daily_checkup 只呼叫純讀 `build_status()`，不跑實驗。
