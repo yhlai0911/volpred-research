@@ -567,6 +567,115 @@ def collect_paper_artifacts(entries: list[dict]) -> list[dict]:
     return out
 
 
+# ---------------------------------------------------------------------------
+# Draft-family artifacts（2026-07-15，fix_reap_orphan_deliverables_gap）
+#
+# `scan()` below answers a PRODUCT question: is this draft in the feed? A draft
+# that is already published answers "yes" and is skipped — correctly, as far as
+# publishing goes. But the file itself, its lazypack plan and its figures are
+# still sitting untracked in the working tree, because `publish_draft.py` writes
+# feed.json and never touches git. Nobody else claims them either: PHASE-Z only
+# commits what its own fire produced, so a draft written by a fire that crashed
+# (or by a producer outside the fire lane) belongs to no one. Every fire then
+# re-reports the same untracked files as orphans — the alert the owner has been
+# getting for days, on work that was in fact finished.
+#
+# So this is the second, missing recognizer: not "is it delivered to readers?"
+# but "is it delivered to git?". Same shape as the paper recognizer above, one
+# deliberate difference — here UNTRACKED files are the point. A new draft, a new
+# lazypack plan and new PNGs enter the world untracked; that is exactly what
+# being orphaned looks like in this directory, so the reaper owns them.
+#
+# Never deletes, never checks out, never commits a deletion — an orphan it can't
+# classify is held and reported, per the invariants at the top of this file.
+# ---------------------------------------------------------------------------
+
+DRAFT_ARTIFACT_SUFFIXES = {".md", ".json", ".png", ".jpg", ".jpeg", ".svg"}
+
+# One article's family is ~10 files (draft + plan + 4-8 figures). This bounds a
+# runaway sweep without splitting a single article's output across two commits.
+DEFAULT_MAX_DRAFT_FILES = 40
+
+
+def scan_draft_artifacts(*, now_ts: float | None = None) -> dict:
+    """Classify dirty/untracked files under storage/drafts/ into collectable / held."""
+    now_ts = now_ts if now_ts is not None else time.time()
+    tasks = _load_json(TASKS_PATH, [])
+    tasks = tasks if isinstance(tasks, list) else tasks.get("tasks", []) if isinstance(tasks, dict) else []
+    inflight = _inflight_stems(tasks)
+
+    # quotePath=false: figure filenames may carry non-ASCII; git would otherwise
+    # hand back an escaped name that no longer resolves as a real path.
+    status = _git("-c", "core.quotePath=false", "status", "--porcelain=v1",
+                  "--untracked-files=all", "--", "storage/drafts/")
+    if status.returncode != 0:
+        warn("reap_orphan", "draft artifact scan: git status failed",
+             err=status.stderr[:120])
+        return {"collectable": [], "held": [], "skipped": {}}
+
+    collectable: list[dict] = []
+    held: list[dict] = []
+    skipped = {"grace": 0, "inflight": 0}
+
+    for line in status.stdout.splitlines():
+        code, rel = line[:2], line[3:].strip()
+        if not rel:
+            continue
+        if "D" in code:
+            # A disappearing file is not a deliverable. Committing the deletion
+            # would be this script's first destructive act; report it instead.
+            held.append({"path": rel, "kind": "deletion", "reason": "deletion_not_owned"})
+            continue
+        if Path(rel).suffix.lower() not in DRAFT_ARTIFACT_SUFFIXES:
+            held.append({"path": rel, "kind": "unknown",
+                         "reason": f"unrecognised_suffix:{Path(rel).suffix or 'none'}"})
+            continue
+        try:
+            if now_ts - (ROOT / rel).stat().st_mtime < GRACE_SECONDS:
+                skipped["grace"] += 1
+                continue  # someone may still be writing it
+        except OSError:
+            continue  # silent-ok: status→stat race, file already gone
+
+        stem = Path(rel).stem
+        if stem in inflight or stem.replace("_draft", "") in inflight:
+            skipped["inflight"] += 1
+            continue
+
+        collectable.append({"path": rel, "kind": Path(rel).suffix.lstrip("."),
+                            "reason": "untracked" if code == "??" else "modified"})
+
+    return {"collectable": collectable, "held": held, "skipped": skipped}
+
+
+def collect_draft_artifacts(entries: list[dict]) -> list[dict]:
+    """Commit collectable draft-family artifacts through git（ASCII message）."""
+    out: list[dict] = []
+    if not entries:
+        return out
+    paths = [e["path"] for e in entries]
+    add = _git("add", "--", *paths)
+    if add.returncode != 0:
+        warn("reap_orphan", "draft artifact add failed", err=add.stderr[:150])
+        return [{"paths": paths, "committed": False, "err": add.stderr[:150]}]
+    msg = ("chore(draft-reap): collect orphaned draft artifacts "
+           f"({len(paths)} files)\n\n"
+           "Auto-collected by reap_orphan_deliverables: drafts, lazypack plans "
+           "and figures left untracked in storage/drafts/. Root-cause: "
+           "publish_draft.py registers a draft in feed.json but never commits "
+           "the files, and PHASE-Z only commits what its own fire produced — so "
+           "output from a crashed or out-of-lane producer was owned by no one "
+           "and re-alerted every fire.\n\n"
+           "Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>")
+    commit = _git("commit", "-m", msg, "--", *paths)
+    ok = commit.returncode == 0
+    if not ok:
+        warn("reap_orphan", "draft artifact commit failed", err=commit.stderr[:150])
+    out.append({"paths": paths, "committed": ok,
+                "detail": (commit.stdout or commit.stderr)[:150]})
+    return out
+
+
 def scan(*, now_ts: float | None = None) -> dict:
     """Classify every post-cutover draft. Pure read — writes nothing, deletes nothing."""
     now_ts = now_ts if now_ts is not None else time.time()
@@ -674,6 +783,8 @@ def main() -> int:
                     help=f"單次最多收編幾份（預設 {DEFAULT_MAX_ADOPT}）")
     ap.add_argument("--max-jobs", type=int, default=DEFAULT_MAX_JOB_COMMITS,
                     help=f"單次最多提交幾個 queue job 的產物（預設 {DEFAULT_MAX_JOB_COMMITS}）")
+    ap.add_argument("--max-draft-files", type=int, default=DEFAULT_MAX_DRAFT_FILES,
+                    help=f"單次最多提交幾個草稿成品檔（預設 {DEFAULT_MAX_DRAFT_FILES}）")
     ap.add_argument("--init-baseline", action="store_true",
                     help="一次性 cutover：把現存草稿全數凍結為 baseline（豁免）")
     ap.add_argument("--json", action="store_true", help="只輸出 JSON")
@@ -694,10 +805,17 @@ def main() -> int:
     result = scan()
     job_scan = scan_job_deliverables()
     paper_scan = scan_paper_build_artifacts()
+    draft_scan = scan_draft_artifacts()
     job_deliveries: list[dict] = []
     paper_collections: list[dict] = []
+    draft_collections: list[dict] = []
     adopted: list[dict] = []
     if args.apply:
+        # Before adopt(): commit the stable on-disk state. publish_draft.py may
+        # rewrite frontmatter, and that delta is collected on a later run once it
+        # ages past the grace window — never mid-write.
+        draft_collections = collect_draft_artifacts(
+            draft_scan["collectable"][: args.max_draft_files])
         paper_collections = collect_paper_artifacts(
             paper_scan["collectable"][:DEFAULT_MAX_PAPER_COMMITS])
         for candidate in job_scan["candidates"][: args.max_jobs]:
@@ -718,6 +836,10 @@ def main() -> int:
     result["paper_artifact_collectable"] = paper_scan["collectable"]
     result["paper_artifact_held"] = paper_scan["held"]
     result["paper_collections"] = paper_collections
+    result["draft_artifact_collectable"] = draft_scan["collectable"]
+    result["draft_artifact_held"] = draft_scan["held"]
+    result["draft_artifact_skipped"] = draft_scan["skipped"]
+    result["draft_collections"] = draft_collections
 
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n",
@@ -732,6 +854,10 @@ def main() -> int:
     delivered_jobs = [item for item in job_deliveries if item.get("delivered")]
     print(f"[reap] queue 產物：候選 {len(job_scan['candidates'])}、"
           f"已交付 {len(delivered_jobs)}、保留 {len(job_scan['held'])}")
+    committed_drafts = sum(len(c["paths"]) for c in draft_collections if c.get("committed"))
+    print(f"[reap] 草稿成品（git 歸屬）：可收 {len(draft_scan['collectable'])}、"
+          f"已提交 {committed_drafts}、保留 {len(draft_scan['held'])}、"
+          f"略過 {draft_scan['skipped']}")
     print(f"[reap] 略過：{result['skipped']}")
     for h in result["held"][:10]:
         print(f"  - 保留 {h['path']} — {h['detail']}")
