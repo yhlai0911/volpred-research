@@ -1,0 +1,28 @@
+{
+  "id": "k1711-mcs-eval",
+  "title": "K1711 evaluation: MCS + DM over cached TSFM/HAR forecasts (SPY/0050.TW/TX)",
+  "script_path": ".claude/worktrees/dispatch-slot-1-671aaa12-tsfm-har/experiments/k1711/k1711.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-14T12:18:22Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1711-mcs-eval.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1711-mcs-eval.stderr",
+  "result_artifact": ".claude/worktrees/dispatch-slot-1-671aaa12-tsfm-har/experiments/k1711/k1711_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1711 收件（salvage 後的評估產出）。前情：agent job agent-brief_tsfm_har_mcs-54e6f9 在 5280s cap 超時被砍，資料 panel 與 TSFM 預測（TimesFM/TTM x SPY/0050.TW/TX）都已產出並 commit 進 worktree branch（67fa83366），只差評估；本 job 只跑 k1711.py 的評估段（讀快取、seed=20260714）。收件要做：(1) 驗 k1711_results.json 的 MCS superior set / DM-HLN t / seed / 樣本期間 與代碼一致，且 DM 的 HAC bandwidth 不是 h-1 退化（h=1 時 lag=0 等於沒做 HAC）(2) 檢查 TSFM 無 lookahead（context window 邊界；test_k1711.py 有 guard，19/19 通過）(3) 寫 README.md（三件套缺這件）+ 跑 k1711_charts.py 產圖 (4) 跑 experiment_gates.py run --path 自檢 (5) 派 Codex 審代碼，用 experiment_gates.py verdict-template 產 review_verdict.json（不要手抄 schema）(6) verdict=PASS 才寫 knowledge.json (7) merge worktree（.claude/worktrees/dispatch-slot-1-671aaa12-tsfm-har；certify gate 會擋沒裁決的）。注意：這是 retrospective pseudo-OOS（TSFM 權重是 2025 artefact、窗口從 2016 起），結論不可寫成 real-time OOS；NULL 是可發表結果。",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}
