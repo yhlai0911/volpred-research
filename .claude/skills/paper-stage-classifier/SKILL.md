@@ -68,51 +68,9 @@ Do **not** use this skill for：
            → 回到 [ready v_(n+1)]，下一輪
 ```
 
-### Review report 歸檔規則（**必須**）
+### Review report 歸檔規則
 
-**結構**：
-```
-paper/<paper-id>/
-├── main_v<n>.tex                     # 當前最新版
-├── body_v<n>.tex
-├── review_history/                    # 所有歷史 review 都在這
-│   ├── v1/
-│   │   ├── citation_check_report.md
-│   │   ├── academic_review_report.md
-│   │   ├── README.md                  # 該輪摘要 + 行動清單 + 修正後 vs 修正前對照
-│   │   └── (其他 reviewer agent 產出)
-│   ├── v2/
-│   │   ├── citation_check_report.md
-│   │   ├── academic_review_report.md
-│   │   └── README.md
-│   └── ...
-└── (其他工作檔案)
-```
-
-**規則**：
-1. **每跑一輪 review，必須建新版本目錄** `review_history/v<n>/`
-2. **舊 reports 不可覆蓋**——同 filename 在新版本目錄
-3. 每個 v<n>/ 內必加 README.md 紀錄：
-   - 該輪 review 觸發時間、原因、reviewer
-   - 主要 issues 摘要（HIGH/MED/MINOR 數量）
-   - 主線程後續動作（修了哪些、未修的理由、deferred 到 v<n+1> 的）
-   - v(n) → v(n+1) 的關鍵 diff 摘要
-4. **agent prompt 寫死**：寫 review 時必須指明輸出到 `paper/<id>/review_history/v<n>/`
-5. Git track：`review_history/` 不放 `.gitignore`，全部 commit 進 repo
-
-**Format：Markdown 為主**（不是 LaTeX）：
-- Review 是頻繁迭代的 working document，MD 寫快讀快
-- 主要產出是 action items（HIGH/MED/MINOR list），表格 + 清單 MD 更適合
-- Git diff 比較 v(n) → v(n+1) review 演進，MD 一目了然
-- 引用論文 sec/eq 用文字 "§4.3, eq.(7)" 即可，不需 `\ref{}`
-- 公式用 inline `$...$` 即可（KaTeX/GitHub 原生支援）
-- **罕見場景才用 .tex 補充**：reviewer 提出新數學推導且要嵌入論文 → `appendix_v<n>.tex`
-
-**為什麼**：
-- 6 個月後 reviewer 詢問「為何這篇 paper 改了 5 次？」→ 翻 review_history 即知
-- 提交 journal 時可附 prior review log 證明 rigor
-- catch deferred fixes（v1 deferred 的問題 v2 必查）
-- 學術誠實：審查痕跡完整，無 cherry-pick
+歸檔規則的**唯一 owner = `paper-review-cycle`**（見其 §「Review Report Archive 規則（MUST）」+「為什麼 review report 必須 archive」+「Agent prompt 必含的歸檔指令」）：`review_history/v<n>/` 目錄結構、每跑一輪建新版本目錄、舊 reports 不可覆蓋、每輪 README 內容（觸發時間/原因/reviewer、HIGH/MED/MINOR 摘要、主線程動作、v(n)→v(n+1) diff）、agent prompt 寫死 output path、Markdown-not-LaTeX、inline `$...$`、`"§4.3, eq.(7)"` 文字引用、`appendix_v<n>.tex` 罕見場景、git-track 不進 `.gitignore`、以及為什麼要 archive 的 rationale。本 skill 不重複；跑審查時依 paper-review-cycle 歸檔。
 
 ### 啟動頻率
 
