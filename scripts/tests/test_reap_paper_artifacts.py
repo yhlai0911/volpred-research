@@ -30,6 +30,13 @@ def _git(cwd: Path, *args: str) -> None:
 @pytest.fixture()
 def fake_repo(tmp_path: Path, monkeypatch) -> Path:
     _git(tmp_path, "init", "-q")
+    # Identity belongs to the throwaway repo, not to _git()'s env: the code under
+    # test shells out to `git commit` with the ambient environment, which on a CI
+    # runner carries no user.name/user.email. Without this the production commit
+    # dies with "Author identity unknown" and the test only passes on a laptop
+    # that happens to have a global gitconfig.
+    _git(tmp_path, "config", "user.email", "reaper-test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Reaper Test")
     d = tmp_path / "paper" / "demo"
     (d / "experiments").mkdir(parents=True)
     (d / "main.tex").write_text("\\documentclass{article}")

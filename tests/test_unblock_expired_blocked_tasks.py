@@ -44,7 +44,9 @@ def test_invalid_blocked_until_warns_and_stays_blocked(tmp_path, monkeypatch, ca
     assert "[unblock] WARN blocked_until parse failed" in captured.err
     assert "task_id=blocked_bad_until" in captured.err
     assert "raw=!!!" in captured.err
-    assert "[unblock] applied: 0 tasks" in captured.out
+    # 2026-07-14: b61789d26 folded tombstone compaction into this script, so the
+    # summary line now reports both sweeps under a `[queue-maint]` tag.
+    assert "[queue-maint] applied: 0 unblocked" in captured.out
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "blocked"
     assert saved[0]["blocked_reason"] == "awaiting_event_window"
@@ -78,7 +80,7 @@ def test_apply_unblocks_expired_iso_timestamp(tmp_path, monkeypatch, capsys) -> 
     assert rc == 0
     captured = capsys.readouterr()
     assert captured.err == ""
-    assert "[unblock] applied: 1 tasks" in captured.out
+    assert "[queue-maint] applied: 1 unblocked" in captured.out
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "pending"
     assert "blocked_reason" not in saved[0]

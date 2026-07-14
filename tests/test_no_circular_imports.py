@@ -143,21 +143,30 @@ def test_no_import_time_cycles_in_volpred() -> None:
 
 
 def test_gate_catches_the_cycle_it_was_built_for(tmp_path: Path) -> None:
-    """Re-introduce the 2026-07-11 cycle in a throwaway copy of the tree.
+    """Rebuild the 2026-07-11 cycle's SHAPE in a throwaway copy of the tree.
 
-    A gate that passes on both the broken and the fixed tree is not a gate. This
-    restores the exact line that was removed (`email_notifier` importing
-    `volpred.ops.canonical_write` at module level) and asserts the detector bites.
+    A gate that passes on both the broken and the fixed tree is not a gate. The
+    shape is what has to be caught: a module reaching INTO a sibling package
+    (running that package's `__init__`) while the `__init__` reaches back out to
+    it. Both edges are staged here rather than the one historical line, because
+    the counter-edge (`volpred.ops` eagerly re-exporting email_notifier) has since
+    been removed too — restoring one half of a cycle whose other half is gone
+    proves nothing, and the day that stopped being true this test started passing
+    on a broken detector as readily as on a working one.
     """
     shutil.copytree(SRC / PKG, tmp_path / PKG)
-    victim = tmp_path / PKG / "publisher" / "email_notifier.py"
-    victim.write_text(
-        "from volpred.ops.canonical_write import guard_canonical_write\n"
-        + victim.read_text(encoding="utf-8"),
+    (tmp_path / PKG / "ops" / "_cycle_probe.py").write_text("PROBE = 1\n", encoding="utf-8")
+    (tmp_path / PKG / "publisher" / "_cycle_probe.py").write_text(
+        "from volpred.ops._cycle_probe import PROBE\n", encoding="utf-8"
+    )
+    ops_init = tmp_path / PKG / "ops" / "__init__.py"
+    ops_init.write_text(
+        ops_init.read_text(encoding="utf-8")
+        + "\nfrom volpred.publisher._cycle_probe import PROBE  # noqa: E402,F401\n",
         encoding="utf-8",
     )
 
     cycles = _find_cycles(_build_graph(tmp_path))
     assert any(
-        "volpred.publisher.email_notifier" in c and "volpred.ops" in c for c in cycles
+        "volpred.publisher._cycle_probe" in c and "volpred.ops" in c for c in cycles
     ), f"detector missed the regression it exists to catch; found: {cycles[:5]}"
