@@ -155,7 +155,7 @@ To formalize the relationship using the supplementary NSI measure, we estimate t
 \text{NSI}_t = \alpha + \beta \cdot V_t + \varepsilon_t, \quad t \in \{t : |\Delta V_t| > \tau\}
 \label{eq:absorption_reg}
 \end{equation}
-A negative $\beta$ (the ``absorption coefficient'') confirms that the marginal impact of fear shocks diminishes with the ambient fear level. We report Newey-West standard errors with 10 lags to account for heteroskedasticity and autocorrelation.
+A negative $\beta$ (the ``absorption coefficient'') confirms that the marginal impact of fear shocks diminishes with the ambient fear level. We report Newey-West standard errors with 10 lags to account for heteroskedasticity and autocorrelation. One caveat on the lag choice: the regression sample consists of shock days only, so consecutive \textit{observations} are not consecutive \textit{calendar} days---except in crisis episodes, where shocks cluster and adjacent observations genuinely are adjacent days. Ten lags in observation time therefore span a variable and regime-dependent calendar window; we choose 10 as a conservative bracket for the shock-clustering episodes that dominate the autocorrelation, and note that the primary SAR inference (Table~\ref{tab:absorption_core}) does not depend on this choice, as it uses a moving-block bootstrap on the full daily series instead.
 
 \subsection{Shock Type Classification}
 
@@ -363,7 +363,7 @@ TLT     & $-0.000437$ & $-3.31$ & $0.001$ & Yes \\
 
 The exception of 0050.TW is instructive. The Taiwan equity market is influenced by VIX primarily through a US lead-lag channel: when US equities fall and VIX rises, Taiwanese equities tend to open lower the following day \citep{lin2020}. However, the incremental information content of a VIX shock for the Taiwan market does not diminish with VIX level---because VIX is not the \textit{local} fear gauge for Taiwan. The Taiwan Volatility Index (VIXTWN) would be the appropriate normalization variable for testing absorption in the Taiwanese context, an avenue we leave for future research.
 
-Interestingly, GLD and TLT exhibit \textit{stronger} absorption than SPY ($-0.00043$ and $-0.00044$ versus $-0.00028$). This may reflect the fact that gold and bonds are safe-haven assets whose sensitivity to VIX shocks is most pronounced in calm markets (when the flight-to-quality trade is ``fresh'') and weakens as sustained high fear dilutes the marginal flight-to-quality impulse.
+Interestingly, GLD and TLT exhibit \textit{stronger} absorption than SPY ($-0.00043$ and $-0.00044$ versus $-0.00028$). This may reflect the fact that gold and bonds are safe-haven assets \citep{baur2010} whose sensitivity to VIX shocks is most pronounced in calm markets (when the flight-to-quality trade is ``fresh'') and weakens as sustained high fear dilutes the marginal flight-to-quality impulse.
 
 \subsection{Event-Level Evidence: Nonfarm Payrolls}
 \label{sec:nfp}
@@ -515,7 +515,7 @@ Our baseline NSI normalizes absolute returns by the VIX level. An alternative no
 \text{NSI}_t^{\text{RV}} = \frac{|r_t|}{\sqrt{RV_t^{(20)}}}
 \label{eq:nsi_rv}
 \end{equation}
-where $RV_t^{(20)} = \sum_{i=1}^{20} r_{t-i}^2$. We re-estimate the absorption regression using $\text{NSI}^{\text{RV}}$ as the dependent variable and the 20-day realized volatility as the independent variable. The slope remains strongly negative ($\hat{\beta}^{\text{RV}} = -0.01249$, $t = -8.2$, $N = 767$) under the 2026-04-19 pinned snapshot,\footnote{Under the paper's original data snapshot, the RV-normalized estimate was $-0.0031$ ($t = -2.76$). The pinned-snapshot estimate is substantially larger in magnitude and more significant, reflecting that the RV normalization is robust to---and in fact strengthened by---the yfinance data revision.} indicating that the negative slope is not specific to the VIX normalizer. We caution, however, that this design shares the structural feature of the NSI regression---the normalizer ($\sqrt{RV}$) is itself correlated with the regressor (RV)---so a mechanical component analogous to the VIX-denominator issue (Section~\ref{sec:method}) cannot be excluded without a placebo simulation quantifying the mechanical slope under the null. We therefore read the RV-normalized regression as a consistency check across normalizers, not as independent identification; the SAR evidence remains the cleaner basis for the absorption claim. % audit fix 2026-06-10: downgraded from "strongest and most robust quantitative evidence" pending a similar placebo calibration
+where $RV_t^{(20)} = \sum_{i=1}^{20} r_{t-i}^2$. We re-estimate the absorption regression using $\text{NSI}^{\text{RV}}$ as the dependent variable and the 20-day realized volatility as the independent variable. The slope remains strongly negative ($\hat{\beta}^{\text{RV}} = -0.01249$, $t = -8.2$, $N = 767$) under the 2026-04-19 pinned snapshot,\footnote{Under the paper's original data snapshot, the RV-normalized estimate was $-0.0031$ ($t = -2.76$). The pinned-snapshot estimate is substantially larger in magnitude and more significant, reflecting that the RV normalization is robust to---and in fact strengthened by---the yfinance data revision.} indicating that the negative slope is not specific to the VIX normalizer. Both normalizers are, of course, imperfect proxies for the latent conditional volatility, and proxy quality itself affects inference in volatility comparisons \citep{patton2011}. We caution, further, that this design shares the structural feature of the NSI regression---the normalizer ($\sqrt{RV}$) is itself correlated with the regressor (RV)---so a mechanical component analogous to the VIX-denominator issue (Section~\ref{sec:method}) cannot be excluded without a placebo simulation quantifying the mechanical slope under the null. We therefore read the RV-normalized regression as a consistency check across normalizers, not as independent identification; the SAR evidence remains the cleaner basis for the absorption claim. % audit fix 2026-06-10: downgraded from "strongest and most robust quantitative evidence" pending a similar placebo calibration
 
 \subsection{Controlling for Return Autocorrelation}
 
@@ -624,9 +624,6 @@ Bollerslev, T., Tauchen, G., \& Zhou, H. (2009). Expected stock returns and vari
 \bibitem[Carr and Wu(2009)]{carr2009}
 Carr, P., \& Wu, L. (2009). Variance risk premiums. \textit{Review of Financial Studies}, 22(3), 1311--1341.
 
-\bibitem[Chernov et al.(2018)]{chernov2018}
-Chernov, M., Lochstoer, L.~A., \& Lundeby, S.~R. (2022). Conditional dynamics and the multi-horizon risk-return trade-off. \textit{Review of Financial Studies}, 35(3), 1310--1347.
-
 \bibitem[Christie(1982)]{christie1982}
 Christie, A.~A. (1982). The stochastic behavior of common stock variances: Value, leverage and interest rate effects. \textit{Journal of Financial Economics}, 10(4), 407--432.
 
@@ -684,9 +681,6 @@ Nelson, D.~B. (1991). Conditional heteroskedasticity in asset returns: A new app
 \bibitem[Patton(2011)]{patton2011}
 Patton, A.~J. (2011). Volatility forecast comparison using imperfect volatility proxies. \textit{Journal of Econometrics}, 160(1), 246--256.
 
-\bibitem[Romer and Romer(2004)]{romer2004}
-Romer, C.~D., \& Romer, D.~H. (2004). A new measure of monetary shocks: Derivation and implications. \textit{American Economic Review}, 94(4), 1055--1084.
-
 \bibitem[Todorov(2010)]{todorov2010}
 Todorov, V. (2010). Variance risk-premium dynamics: The role of jumps. \textit{Review of Financial Studies}, 23(1), 345--383.
 
@@ -697,7 +691,7 @@ Vlastakis, N., \& Markellos, R.~N. (2012). Information demand and stock market v
 Whaley, R.~E. (2000). The investor fear gauge. \textit{Journal of Portfolio Management}, 26(3), 12--17.
 
 \bibitem[Zakoian(1994)]{zakoian1994}
-Zakoian, J.-M. (1994). Threshold heteroskedastic models. \textit{Journal of Time Series Analysis}, 15(3), 253--266.
+Zakoian, J.-M. (1994). Threshold heteroskedastic models. \textit{Journal of Economic Dynamics and Control}, 18(5), 931--955.
 
 \end{thebibliography}
 

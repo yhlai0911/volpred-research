@@ -66,10 +66,10 @@
 
 ## 4. P1 — 投稿前完成（預估 2–3 工作天）
 
-- ⬜ **P1-1** 引用修理：刪或補引 4 條孤兒、修 zakoian1994 出處（正確 = *Journal of Economic Dynamics and Control*, 18(5), 931–955）、修 chernov 年份（bibitem 2018 vs 內文 2022）；`citation-verifier` 全掃。
-- ⬜ **P1-2** Prior-art 段落：補 Low (2004) / Hibbert et al. (2008) / FOW (1995)，主張「SAR within-regime 設計 + null 模擬」是相對這批同期 VIX–return 非線性文獻的增量。
-- ⬜ **P1-3** K897 衛生：修 z-score bug（誤用 Cohen's d × 100）、揭露或修復 percentile 變體 silent fail（全 regime `n_valid_sims=0`）、實證端改讀 pinned CSV、統一 decline 0.816 vs 0.84 為 pinned 口徑。
-- ⬜ **P1-4** NW(10) lag 一句話交代（shock-day 序列的日曆非連續性 vs 觀測序自相關）+ shock-day acf 診斷附錄。
+- ✅ **P1-1** 引用修理（2026-07-14）：baur2010/patton2011 補引於自然落點（safe haven §5.2 / proxy quality §Alt-Norm）；chernov2018/romer2004 無自然落點刪除；zakoian1994 修為 *JEDC*, 18(5), 931–955。`citation-verifier` 全掃留給 review cycle。
+- ⬜ **P1-2** Prior-art 段落：補 Low (2004) / Hibbert et al. (2008) / FOW (1995)，主張「SAR within-regime 設計 + ambient×sign 分解」是相對這批同期 VIX–return 非線性文獻的增量。（需文獻查證，留 review cycle 前做）
+- ✅ **P1-3** K897 衛生（由 K1686 落地）：z-score bug 已修（標準化距離 + MC p）、percentile silent fail 已重實作揭露、實證端已 pinned CSV、decline 口徑已統一 0.8165（body 2026-07-14 同步）。
+- ✅ **P1-4** NW(10) lag 交代（2026-07-14）：§3.4 補段——shock-day 觀測序 vs 日曆非連續性、crisis 群聚主導自相關、SAR 主推論不依賴此選擇（block bootstrap 在全日序列上）。acf 診斷附錄降級 P2（無新 unbound 數字原則）。
 
 ## 5. P2 — R&R 彈藥 / 選擇性
 
@@ -101,7 +101,8 @@
 2026-07-11 | Fable deep review | 深審完成，待執行 P0 | f913ed68c
 2026-07-12 | P0-1 K1686 首跑 + Codex FAIL + R2 rerun | 首裁 REFRAME→撤回→R2 ambient×sign 補跑完成 | 085064f0f, 2c764c69d
 2026-07-14 | K1686 R2 正式裁定（主線程） | absorption 通過 fear-shock gate；JBF 線繼續；FRL 重框取消；P0-1 CLOSED；knowledge da9ac9d2 | e947c9e25
-2026-07-14 | P0-2/3/4 + K1686 body 整合（主線程） | C1–C5 修（C1×2 處、C5 依 k741 JSON=1.14/1.16）；Table 2/3 pinned + block-bootstrap 推論；新 §null_reexam；gate 95/95 GREEN；41pp 編譯乾淨 | 本 commit
+2026-07-14 | P0-2/3/4 + K1686 body 整合（主線程） | C1–C5 修（C1×2 處、C5 依 k741 JSON=1.14/1.16）；Table 2/3 pinned + block-bootstrap 推論；新 §null_reexam；gate 95/95 GREEN | ba2b79fc2
+2026-07-14 | P1-1/P1-3/P1-4 收尾（主線程） | 孤兒引用清零（補引×2 刪×2）+ zakoian JEDC 修正；NW lag 交代；42pp/35 引用；gate 覆跑 GREEN；paper-update 已同步 | 本 commit
 ```
 
 ---

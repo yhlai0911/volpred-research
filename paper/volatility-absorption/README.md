@@ -18,7 +18,7 @@
 **Acknowledged limitation**: K716 absorption regression cannot be exactly reproduced from current yfinance data. The qualitative paralysis claim (absorption mechanism exists) and SAR Table 3 quantitative results remain valid; the specific Table 9-10 K716 cell numbers are pinned to paper-drafting-time data which we cannot retroactively recover. Future readers should treat K716 numerical cells as **frozen paper-time values** (cited verbatim from paper PDF), not currently reproducible against live yfinance — equivalent to citing a discontinued data vendor.
 
 **Mitigation**: see `errata_pending.md` §Path B/C for full disclosure; SAR Table 3 (≤0.82% drift) carried forward with current snapshot, K716 Table 9-10 cells kept as paper-time values with footnote.
-**Pages**: 41 | **Citations**: 37
+**Pages**: 42 | **Citations**: 35
 
 ## Data Sources
 - SPY: yfinance
