@@ -1,18 +1,21 @@
 {
   "kid": "k1709",
-  "verdict": "FILL: PASS or FAIL — anything but PASS blocks the merge",
-  "reviewer": "FILL: model / effort",
-  "reviewed_at": "FILL: ISO8601",
-  "reviewed_commit": "FILL: the frozen SHA you read",
-  "review_artifact": "FILL: relpath of the written review",
-  "blocking_defects": [
-    "FILL: one entry per defect that makes this a FAIL; [] if PASS"
-  ],
+  "verdict": "PASS",
+  "reviewer": "codex-k1709-rev6-independent",
+  "reviewed_at": "2026-07-14T19:06:43Z",
+  "reviewed_commit": "dba627028aec9924d4ee0e167a9d7b99b6c8de77",
+  "review_artifact": "storage/ops/codex_reviews/k1709_rev6_fixed_memory_receipt.json",
+  "blocking_defects": [],
   "reviewed_sha256": {
-    "README.md": "3716836db76488defbc0ccd151a98a9d8cad228cf93b19435fe9591ca94c2509",
-    "k1709.py": "32e2896f9b2b9de0f58a0eb23e513c144b23970577c40c87dbf8def182bfe07b",
-    "k1709_results.json": "787baf5136c282f8810c07cbf983dc20560c5b090fad589db3f64ad64413389f",
-    "render_readme.py": "2ad0d450c53906fc5c29a1e33d592792a79bfe73eade35cc14487a934aa5b0dc",
-    "test_k1709.py": "94ed7c3fe352b74027c52bd40d6e1aa1dc921a638edc9d5ce8fbd91df7f996f9"
+    "README.md": "c0981cd0f0ab88a458238edc90fc78ae12523a0dc691aa47d23e8e808d08c67a",
+    "fig1_flow_vs_rv.png": "86d29f0d717cba58d4afe36c618074010f3380c83767d9e2931decee238c74dd",
+    "fig2_event_window.png": "4c8727bd9fb2299acfefe4c543c865ad3bfe296d983957bed41f9d44b9a1c415",
+    "fig3_oos_qlike.png": "19caee986a3f3dc223a67562693f590d9d659842e59e2cb3ad943e405029717b",
+    "fig4_threshold_sensitivity.png": "d4ea4d1b0543bf2c8d9f7ce9ab28f708e163a3f1c982f36448a21d2559a22792",
+    "fig5_simulated_power.png": "ba29a81a07f7d586662010c14555cfc15cad78cd1398bf119b3607c4707f2daa",
+    "k1709.py": "d7b1a6a3b7fe5f38864ed1f1ccc2982d16c54fbb85cb4ccac9d9c465435aef94",
+    "k1709_results.json": "c91e6f5132b102eae91ea541bb511ea05596886ab679b58ffead468d36ba33f2",
+    "render_readme.py": "8e5e221ffeb824be6320733e19339623d8a7a5fd5aa70c5bcb714b7de69ac760",
+    "test_k1709.py": "afb1209c39a607598cf7ed77f8e8210bcbb78e8936a6e1eb9d0cbcd624f0443b"
   }
 }
