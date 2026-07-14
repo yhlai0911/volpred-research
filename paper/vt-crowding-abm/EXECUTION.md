@@ -44,7 +44,7 @@
 - [ ] **P0-1** 落地：敘事單一化——split-brain 7 處全部消除，abstract/§3 敘事單一（B1）
 - [ ] **P0-2** 落地：scope 收斂 VT-only，title/abstract/conclusion 對齊，L317 循環校準句刪除，family-level 撤/降級（B2）
 - [ ] **P0-3** 落地：K1471 TF/MR 誠實補報（gate 失效全表 + RR_TF 5/5 惡化 + footprint-scale caveat + 修 L243）（B3 + B4，研究誠實層級）
-- [~] **P0-4** 部分落地：✅ reproduce.py 擴充 K1471 三表 binding（gate 173/173 green）；⚠️ caption 路徑修正 + `\%`→`%` provenance 修復仍待主線程（main.tex L142/L214，B5 + B6）
+- [x] **P0-4** 完成（2026-07-14）：reproduce.py K1471 三表 binding（gate 173/173 green）+ 主線程 provenance class sweep（7 處印出型內部路徑全清，PDF 零洩漏）
 - [ ] **P0-5** 落地：機械修正批次（因式分解、macro/口徑/accounting、多重檢定、Kyle 頁碼、bib 排序、README metadata）
 - [x] `reproduce.py` exit 0 且 `reproduce_report.json` match_rate ≥ 95% / **alert green**（含 K1471 三張 headline 表）✅ 173/173 = 100% green（2026-07-14）
 - [ ] **v6 跨模型獨立 review** 通過 0 blocking（paper-review-cycle + Codex adversarial；**同模型自審不算**）
@@ -88,15 +88,14 @@ L243 現宣稱 gate 只排除「RR_MR in cell3 + cell2-TF@φ=30%」，且承諾�
 
 **驗證 gate**：正文含 TF/MR gate 失效全表 + RR_TF 惡化證據；全稿無「per se」無條件識別主張殘留。
 
-### ⬜ P0-4 — reproduce gate + provenance 修復（B5 + B6；估 0.5 天）
+### ✅ P0-4 — reproduce gate + provenance 修復（B5 + B6；2026-07-14 全數完成）
 
 `reproduce.py`（4/28）只綁 k827v3/k1261/k1262，**零 K1471 覆蓋**——abstract、Table `tab:vt_monotone_curve`、Table `tab:matched_control_vt` 全在 gate 之外，違反平台硬規則。
 
 - ✅ **reproduce.py 擴充 K1471 section**（2026-07-14）：三張 K1471 表逐欄 binding —— `tab:vt_monotone_curve`（VT 曲線 7 點 mean+CI+Δ）、`tab:matched_control_vt`（VT vs RR_VT 5 cells 全欄 + narrative）、`tab:tfmr_gate`（gate 5 cells×8 欄）+ abstract 因式分解（94,500=27×7×500）+ RR_TF footprint-scale erosion narrative。**gate: 173/173 = 100% green, exit 0**（`--skip-live` 與 live 皆同）。canonical path = `cells.<cell>.treatments.<treat>.per_adoption` / `cells.<cell>.detector.<treat>`。
-- ⚠️ **修 caption binding 路徑（待主線程 — main.tex 專屬）**：`main.tex` L142 caption 仍寫 JSON 不存在的 `treatment_results.VT_baseline.cell1`；正解 = `cells.cell1_baseline.treatments.VT_baseline.per_adoption`（reproduce.py 已用正解綁定；tex caption 仍待改）。
-- ⚠️ **`\% source:` 洩漏（待主線程 — main.tex 專屬）**：2026-07-13 只修了 abstract；**L142 與 L214 的 table caption 仍用 `\% source:`**，會在投稿 PDF 印出字面 `% source: experiments/k1471_...` repo 路徑（L142 同時含上面的錯誤 path）。改行首 `%` LaTeX comment 即可。
-
-**驗證 gate**：`reproduce.py` exit 0 + match_rate ≥ 95% **green**（含 K1471 三表）✅ **173/173 = 100% green**；`pdftotext main.pdf - | grep -E 'source:|experiments/k1471'` 無 repo 路徑洩漏 ⚠️ **未達（L142/L214 `\%` 洩漏未修，待主線程）**。
+- ✅ **caption binding 路徑修正（主線程 2026-07-14）**：L142 caption 的錯誤路徑 `treatment_results.VT_baseline.cell1` 已改為正解 `cells.cell1_baseline.treatments.VT_baseline.per_adoption`（降為 LaTeX comment）。
+- ✅ **`\% source:` 洩漏修復 + class sweep（主線程 2026-07-14）**：不只 agent 點名的 L142/L214 — 全檔掃出**同類共 7 處**印出型內部路徑（k1471 caption×2、§3.5 gate 實作路徑、§4.1 footnote、fig caption 的 scripts/ 路徑、k1262/k1262b caption×3），全部改為「replication package」+ 路徑降 LaTeX comment。原 P0-4 gate 只掃 `k1471|source:` 小寫，會漏 k1262 的 `Source:` — class sweep 補上。
+- **驗證 gate 全達成**：`reproduce.py` **173/173 = 100% green, exit 0**；`pdftotext main.pdf | grep -iE 'source:|experiments/k|scripts/|_results\.json|\.py|\.md'` 僅剩 3 筆 caption 正常學術用語「Source: <run 描述>」，**零內部路徑洩漏**；重編譯乾淨。
 
 ### ⬜ P0-5 — 機械修正批次（B7 + audit 2026-06-10 Major 群；估 0.5 天）
 
