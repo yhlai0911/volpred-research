@@ -78,16 +78,38 @@ if [ "${#STAGED_PY_CHANGED[@]}" -gt 0 ]; then
     exit 1
   fi
   # Bootstrap with an immutable auditor, never the candidate/worktree copy.
-  # PHASE-Z supplies base_sha's extracted auditor.  Ordinary git commit uses
-  # HEAD's tracked copy.  The candidate copy is still required to exist and
-  # parse, but cannot weaken the gate evaluating this very commit.
+  # PHASE-Z supplies base_sha's extracted auditor.  Otherwise take main's tracked
+  # copy — NOT the current branch's HEAD.  Two reasons, both load-bearing:
+  #
+  #   1. Version skew (2026-07-14 20:xx, this hook's own deadlock class, one layer
+  #      down).  The deployed hook comes from main and calls the auditor with
+  #      --index.  A dispatch worktree branched hours earlier carries a base whose
+  #      auditor predates that flag, so `git show HEAD:` handed the hook an auditor
+  #      that argparse-rejects its own invocation — and EVERY .py commit inside
+  #      EVERY stale worktree was blocked, agent work stranded uncommitted in the
+  #      tree.  Gate -1 does not catch this: in a linked worktree $(git rev-parse
+  #      --git-dir)/hooks/pre-commit does not exist, so Gate -1 no-ops there.  The
+  #      hook and the auditor it drives are one contract; they must come from one
+  #      ref, and that ref is where the hook was deployed from.
+  #
+  #   2. Tamper.  On a feature branch, HEAD is candidate-controlled: commit 1 lands
+  #      a weakened auditor, commit 2 is then judged by it.  main cannot be written
+  #      by the commit in flight, so pinning there closes that door.
+  #
+  # A commit ON main resolves main == HEAD, i.e. unchanged behaviour.  A checkout
+  # with no local main (bare CI clone) falls back to HEAD, as before.
   TRUSTED_REF_GATE="${VOLPRED_TRUSTED_TEST_IMPORT_AUDITOR:-}"
   TRUSTED_REF_TMP=""
   if [ -z "$TRUSTED_REF_GATE" ]; then
+    if git rev-parse --verify --quiet refs/heads/main >/dev/null 2>&1; then
+      TRUSTED_REF_SRC="main"
+    else
+      TRUSTED_REF_SRC="HEAD"
+    fi
     TRUSTED_REF_TMP="$(mktemp "${TMPDIR:-/tmp}/volpred-audit-test-imports.XXXXXX.py")"
-    if ! git show "HEAD:$REF_GATE" > "$TRUSTED_REF_TMP" 2>/dev/null; then
+    if ! git show "$TRUSTED_REF_SRC:$REF_GATE" > "$TRUSTED_REF_TMP" 2>/dev/null; then
       rm -f "$TRUSTED_REF_TMP"
-      echo "[pre-commit] BLOCKED — trusted HEAD does not contain $REF_GATE"
+      echo "[pre-commit] BLOCKED — trusted ref $TRUSTED_REF_SRC does not contain $REF_GATE"
       exit 1
     fi
     TRUSTED_REF_GATE="$TRUSTED_REF_TMP"
