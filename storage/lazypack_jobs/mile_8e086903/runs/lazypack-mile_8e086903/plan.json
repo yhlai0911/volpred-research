@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "title": "市場很粗糙，複雜模型仍輸給 HAR",
+  "subtitle": "把路徑特徵與樣本外預測成績分開看",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1386/k1386_results.json",
+      "sha256": "9502ad91c989fe15c3b2d2d9098614b93c72100abf83e6a425a3b5674aa2da1b",
+      "label": "K1386 independently reviewed corrected results"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_scoreboard",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "同一批隔日預測，HAR 損失最低",
+      "alt": "三種模型的樣本外 QLIKE 成績",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "HAR QLIKE",
+          "value": {
+            "source": "result",
+            "path": "qlike_oos.HAR",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "單市場近似",
+          "value": {
+            "source": "result",
+            "path": "qlike_oos.fGN_univariate",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "跨市場近似",
+          "value": {
+            "source": "result",
+            "path": "qlike_oos.fGN_multivariate",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "可評分預測",
+          "value": {
+            "source": "result",
+            "path": "data.n_eval",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_rough_not_better",
+      "info": "results",
+      "style": "professional",
+      "title": "路徑粗糙，不等於模型更準",
+      "alt": "三個資產的粗糙度與模型比較強度",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "SPY 粗糙度",
+          "value": {
+            "source": "result",
+            "path": "hurst_estimates.SPY",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "QQQ 粗糙度",
+          "value": {
+            "source": "result",
+            "path": "hurst_estimates.QQQ",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "單市場比較強度",
+          "value": {
+            "source": "result",
+            "path": "dm_test.fGN_uni_vs_HAR.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "正號代表近似模型更差"
+        },
+        {
+          "kind": "metric",
+          "label": "跨市場比較強度",
+          "value": {
+            "source": "result",
+            "path": "dm_test.fGN_multi_vs_HAR.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "同樣跨過嚴格門檻"
+        }
+      ]
+    },
+    {
+      "name": "3_reading_rule",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "特徵很漂亮，也要過未來資料驗收",
+      "alt": "閱讀模型比較結果的三個原則",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "分開兩個問題",
+          "body": [
+            "粗糙度描述路徑形狀，QLIKE 才回答隔日預測是否更準。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "守住時間順序",
+          "body": [
+            "預測只讀起點以前資料，成績對照下一交易日。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "不要過度外推",
+          "body": [
+            "本次只測 SPY、日高低價代理與兩個線性近似。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "固定隨機種子",
+          "value": {
+            "source": "result",
+            "path": "seed",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
