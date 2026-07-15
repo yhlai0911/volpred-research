@@ -18483,5 +18483,25 @@
     "owner": "codex-failover-slot-1-a9c7dc5ce95e4ed5896a6d516af9aa5b",
     "commit": null,
     "summary": "Codex-bespoke lazypack is now primary; deterministic fallback is logged; 93 tests and mile_7b02f9e2 E2E passed."
+  },
+  {
+    "timestamp": "2026-07-16T03:39:03+08:00",
+    "task_type": "experiment",
+    "task_id": "k1396_scope_repair_daily_r2",
+    "outcome": "pending_main_thread",
+    "actor": "codex-desktop",
+    "owner": "codex-desktop",
+    "commit": "5b1bd266e",
+    "summary": "完成 K1396 scope repair：凍結歷史結果不改，新增 hash-pinned scope audit、修正版圖表與獨立審查；正式撤回 canonical HAR-RV、exact-K988、parity、non-inferiority、nested raw-DM 與「只差 1%」公開敘事，改以 K1379 daily-r² 校正結果取代。兩篇既有文章已用正式 publisher 原地更正、feed-sync 上線，live HTML 讀回新標題與 5/2 張圖片，圖片端點全為 HTTP 200。Codex primary lazypack 在三輪修復後仍缺 3/3 panels，依 skill 明確改用 deterministic fallback；plan 與三張 PNG 的 SHA-256 已保存於 commit 5b1bd266e。Knowledge K1396 更正受 K1259 gate 限制，已交 Claude 主線程以 canonical writer 完成。"
+  },
+  {
+    "timestamp": "2026-07-16T03:39:06+08:00",
+    "task_type": "experiment",
+    "task_id": "k1396_scope_repair_daily_r2",
+    "outcome": "handoff_main_thread",
+    "actor": "codex-desktop",
+    "owner": "codex-desktop",
+    "commit": null,
+    "summary": "K1396 scope correction completed through the formal publication path. The Codex bespoke lazypack renderer failed after three bounded repair rounds, so the documented deterministic renderer fallback was used and strict validation passed for all three panels. Both corrected articles were synced and verified live by HTTP and Chrome; knowledge supersession remains Claude-main-thread-only."
   }
 ]
