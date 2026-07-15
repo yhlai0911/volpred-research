@@ -31443,7 +31443,7 @@
     "title": "K1692: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 473). Original: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1692.py with signal.shift(1) + seed=42, (c) K1692_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -31452,14 +31452,37 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-12T00:00:00Z"
+    "created_at": "2026-07-12T00:00:00Z",
+    "status_history": [
+      {
+        "ts": "2026-07-15T01:20:16.844847+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-15T01:20:17.078003+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-15T01:22:05.152769+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-09"
+      }
+    ],
+    "started_at": "2026-07-15T01:20:17.077987+00:00",
+    "completed_at": "2026-07-15T01:22:05.152754+00:00",
+    "result": "dispatched to compute queue: agent-brief_K1692-3458bb (opus/xhigh, worktree dispatch-slot-1-f53bca44-k1692, result-artifact experiments/K1692/K1692_results.json)；實驗 async 執行，結果由 PHASE A followup(experiment,P3) 收+驗+合併"
   },
   {
     "id": "K1694",
     "title": "K1694: FCM 清算集中度是否在高波動期排擠小型交易者並放大商品流動性風險** — 用 CFTC 月度 FCM customer-segregated assets 算 HHI，按實際發布日 lag，接 DCOT non-reportable sh",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1548). Original: FCM 清算集中度是否在高波動期排擠小型交易者並放大商品流動性風險** — 用 CFTC 月度 FCM customer-segregated assets 算 HHI，按實際發布日 lag，接 DCOT non-reportable share 與 CL/GC/ZC/ZS volume、range RV；估 commodity×month panel、`FCM-HHI × high-vol` interaction 與雙向 clustered SE，預註冊「異質、非 universal」假說。與期貨持倉/庫存題正交：訊號是 clearing-intermediary concentration（來源：[Journal of Futures Markets 2026](https://onlinelibrary.wiley.com/doi/10.1002/fut.70116)；[CFTC FCM data](https://www.cftc.gov/MarketReports/financialfcmdata/index.htm)）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1694.py with signal.shift(1) + seed=42, (c) K1694_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -31468,7 +31491,30 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-12T00:00:01Z"
+    "created_at": "2026-07-12T00:00:01Z",
+    "status_history": [
+      {
+        "ts": "2026-07-15T01:20:17.312021+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-15T01:20:17.549134+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-15T01:22:05.389242+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-09"
+      }
+    ],
+    "started_at": "2026-07-15T01:20:17.549120+00:00",
+    "completed_at": "2026-07-15T01:22:05.389225+00:00",
+    "result": "dispatched to compute queue: agent-brief_K1694-10e82d (opus/xhigh, worktree dispatch-slot-1-f53bca44-k1694, result-artifact experiments/K1694/K1694_results.json)；實驗 async 執行，結果由 PHASE A followup(experiment,P3) 收+驗+合併"
   },
   {
     "id": "daily_digest_20260712",
@@ -37126,13 +37172,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T00:13:02.646601+00:00",
+    "completed_at": "2026-07-15T01:23:37.404049+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T00:13:02.646601+00:00",
-      "last_clean_observed_at": "2026-07-15T00:13:02.646601+00:00"
+      "resolved_at": "2026-07-15T01:23:37.404049+00:00",
+      "last_clean_observed_at": "2026-07-15T01:23:37.404049+00:00"
     }
   },
   {
@@ -37735,7 +37781,7 @@
     "title": "回溯更正：3 篇已發佈文章的『US VIX 全球抗跌信號』結論是 exposure artifact",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "agent_discovered",
     "created_at": "2026-07-14T21:18:46.499586+00:00",
     "created_by": "hourly-05",
@@ -37743,9 +37789,6 @@
     "blocked_reason": null,
     "unblocked_at": "2026-07-14T23:27:02.380928+00:00",
     "unblocked_by": "hourly-07 (K1695 certified: rerun 06:13 + triple-verified)",
-    "claimed_by": "hourly-09",
-    "claimed_at": "2026-07-15T01:12:13.651738+00:00",
-    "claim_session_id": "8294ef66e7b2",
     "status_history": [
       {
         "ts": "2026-07-15T01:12:13.651753+00:00",
@@ -37758,9 +37801,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-15T01:17:52.525908+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-09"
       }
     ],
-    "started_at": "2026-07-15T01:12:13.885662+00:00"
+    "started_at": "2026-07-15T01:12:13.885662+00:00",
+    "completed_at": "2026-07-15T01:17:52.525891+00:00",
+    "result": "3篇published(mile_0d595dfb/2d4edb65/ee473d5a)前置編者更正聲明+2篇archived(f2e26f43/9eaadbd1)加註；用認證後同曝險數字(平均ΔMDD-0.87pp/7-of-13,null p=0.559,固定減碼複製85%)明寫舊'US VIX全球抗跌'結論被推翻,原數字保留未刪;守強度邊界不寫擇時有害;anti_ai_gate PASS;feed.json+reports同步+supabase_sync full(reconcile no_drift)+error_log Class G closure"
   },
   {
     "id": "dreaming_missing_retry_strategy_k267_article_general_v2",
