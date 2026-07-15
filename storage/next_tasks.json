@@ -35521,7 +35521,7 @@
     "title": "K1706: 美國最小跳動單位試驗的 pre-spread 波動異質性** — 用官方隨機分組與市場品質表，按事前 spread `<10¢`／`>15¢` 固定分層，估 1¢→5¢ 對 small-cap RV、區間與流動性的 DiD／事件研究，配 r",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1608). Original: 美國最小跳動單位試驗的 pre-spread 波動異質性** — 用官方隨機分組與市場品質表，按事前 spread `<10¢`／`>15¢` 固定分層，估 1¢→5¢ 對 small-cap RV、區間與流動性的 DiD／事件研究，配 randomization inference、placebo 與 Holm 檢定；不得事後改分箱。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1706.py with signal.shift(1) + seed=42, (c) K1706_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35530,7 +35530,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-13T23:52:32Z"
+    "created_at": "2026-07-13T23:52:32Z",
+    "claimed_by": "codex-desktop-k1706",
+    "claimed_at": "2026-07-15T22:55:01.102684+00:00",
+    "claim_session_id": "ca60bd71745b",
+    "status_history": [
+      {
+        "ts": "2026-07-15T22:55:01.102700+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1706"
+      },
+      {
+        "ts": "2026-07-15T22:55:01.434951+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1706"
+      }
+    ],
+    "started_at": "2026-07-15T22:55:01.434937+00:00"
   },
   {
     "id": "K1707",
@@ -36815,13 +36833,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T22:01:35.314357+00:00",
+    "completed_at": "2026-07-15T23:01:10.562596+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T22:01:35.314357+00:00",
-      "last_clean_observed_at": "2026-07-15T22:01:35.314357+00:00"
+      "resolved_at": "2026-07-15T23:01:10.562596+00:00",
+      "last_clean_observed_at": "2026-07-15T23:01:10.562596+00:00"
     }
   },
   {
@@ -38292,7 +38310,7 @@
     "title": "K1716: 0DTE 時代的日內 vs 隔夜波動結構轉變 — SPY 日 OHLC 拆 intraday range vol vs c2c vol，斷點檢定 2022-Q2 前後 + expiration-day 效應（來源：Cboe research",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 548). Original: 0DTE 時代的日內 vs 隔夜波動結構轉變 — SPY 日 OHLC 拆 intraday range vol vs c2c vol，斷點檢定 2022-Q2 前後 + expiration-day 效應（來源：Cboe research + SSRN/J.Derivatives 2025；0DTE 佔 SPX 量 59%）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1716.py with signal.shift(1) + seed=42, (c) K1716_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38301,7 +38319,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-15T00:00:02Z"
+    "created_at": "2026-07-15T00:00:02Z",
+    "claimed_by": "codex-failover-slot-2-18d5ef2794c14a9b81624320f3bf4467",
+    "claimed_at": "2026-07-15T23:08:24.547042+00:00",
+    "claim_session_id": "245dae83a240",
+    "status_history": [
+      {
+        "ts": "2026-07-15T23:08:24.547057+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-18d5ef2794c14a9b81624320f3bf4467"
+      },
+      {
+        "ts": "2026-07-15T23:08:24.821627+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-18d5ef2794c14a9b81624320f3bf4467"
+      }
+    ],
+    "started_at": "2026-07-15T23:08:24.821611+00:00"
   },
   {
     "id": "daily_digest_20260715",
@@ -41231,5 +41267,42 @@
       ],
       "screened_at": "2026-07-15T22:00:30+00:00"
     }
+  },
+  {
+    "id": "ci-red-29453904758",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29421677446",
+    "ci_run_key": "29453904758:1",
+    "created_at": "2026-07-15T23:00:07.554131+00:00",
+    "title": "CI 紅燈修復（run 29453904758, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29453904758\nattempt: 1\nhead_sha: f1e20db65\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29453904758 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T23:01:18.862780+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-d107659af2ff45c08b6cb4cf470bc63a"
+      },
+      {
+        "ts": "2026-07-15T23:01:19.107351+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-d107659af2ff45c08b6cb4cf470bc63a"
+      },
+      {
+        "ts": "2026-07-15T23:26:03.445263+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-d107659af2ff45c08b6cb4cf470bc63a"
+      }
+    ],
+    "started_at": "2026-07-15T23:01:19.107338+00:00",
+    "completed_at": "2026-07-15T23:26:03.445247+00:00",
+    "result": "root_cause=refill cluster planner read live storage despite redirected fixtures; subsequent reviewed K1705 merge also lacked knowledge promotion and kept the ratchet red; repair_commit=5c40b59ce\nverification=targeted 2 passed; K1259 provenance 0/2658; clean-clone full suite 3178 passed, 7 skipped"
   }
 ]
