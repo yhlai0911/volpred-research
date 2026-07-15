@@ -54,8 +54,9 @@ A Diebold-Mariano test is invalid when the two forecasts are nested and the larg
 model's extra parameters are unidentified under the null — the statistic is not
 asymptotically normal. In this pool that applies to AR1 (inside HAR), HAR-A (nests
 HAR) and COMB-GR (estimated weights that collapse onto HAR if the TSFMs are
-useless). For those, MSE inference uses the canonical Clark-West test and the DM
-number is reported as *diagnostic only*. K1701 is the standing lesson: a nested
+useless). For those, MSE inference uses the canonical Clark-West test and raw
+DM/HLN is never allowed to feed a verdict (``nested-dm: diagnostic-only``).
+K1701 is the standing lesson: a nested
 QLIKE comparison carried on expanding raw DM, and the NULL it "found" downgraded
 to inconclusive once the nesting was handled.
 
@@ -125,6 +126,7 @@ SEED = 20260714
 N_BOOT = 5000
 ALPHA_GRID = (0.01, 0.05, 0.10, 0.25, 0.50)
 HARVEY_T = 3.0
+NESTED_QLIKE_STATUS = "INCONCLUSIVE_NO_VALID_GENERAL_LOSS_NESTED_TEST"
 
 
 # ══ helpers ═══════════════════════════════════════════════════════════════════
@@ -349,24 +351,32 @@ def build_forecasts(panel: pd.DataFrame, h: int,
 # ══ MCS ═══════════════════════════════════════════════════════════════════════
 
 def mcs_report(losses: dict[str, np.ndarray], block_size: float | None = None) -> dict:
-    """Superior set at each alpha, plus the exact elimination p-values.
+    """Superior set at each alpha, plus the alpha=.01 elimination trace.
 
     Run once per alpha rather than reading survivor p-values off a single run: the
     canonical implementation stops at the first non-rejection and hands every survivor
     max(p, alpha), so a survivor's reported "p-value" is a censored lower bound, not an
-    MCS p-value.  Quoting it as one would overstate what was measured.  The elimination
-    p-values *are* exact, and come from the alpha = 0.01 run (the one that eliminates
-    furthest); the path is identical across alphas because the seed and the bootstrap
-    draws are.
+    MCS p-value. Quoting it as one would overstate what was measured. The recorded trace
+    comes from alpha=.01 and is not the deepest path: a larger alpha can reject farther.
+    It is retained only as an auditable trace for that particular stopping threshold.
     """
-    out = {"superior_set_by_alpha": {}, "elimination_pvalues": {}}
+    out = {
+        "superior_set_by_alpha": {},
+        "elimination_trace": {
+            "alpha": min(ALPHA_GRID),
+            "interpretation": "alpha=.01 stopping trace; not a complete/deepest path",
+            "pvalues": {}, "order": [],
+        },
+    }
     for alpha in ALPHA_GRID:
         res = model_confidence_set(losses, alpha=alpha, n_boot=N_BOOT,
                                    seed=SEED, block_size=block_size)
         out["superior_set_by_alpha"][f"{alpha:g}"] = res["mcs_models"]
         if alpha == min(ALPHA_GRID):
-            out["elimination_pvalues"] = {m: float(p) for m, p in res["eliminated"]}
-            out["elimination_order"] = [m for m, _ in res["eliminated"]]
+            out["elimination_trace"]["pvalues"] = {
+                m: float(p) for m, p in res["eliminated"]
+            }
+            out["elimination_trace"]["order"] = [m for m, _ in res["eliminated"]]
     return out
 
 
@@ -442,6 +452,7 @@ def evaluate(asset: str, h: int, proxy: str, window: str, panel: pd.DataFrame,
         # ── pairwise vs HAR ──────────────────────────────────────────────────
         cell: dict[str, dict] = {}
         raw_p = {}
+        raw_cw_p = {}
         for m in FULL_POOL:
             if m == "HAR":
                 continue
@@ -454,26 +465,55 @@ def evaluate(asset: str, h: int, proxy: str, window: str, panel: pd.DataFrame,
                 "mean_loss_diff": float(np.mean(d)),
                 "beats_har": bool(np.mean(d) < 0),
                 "loss_diff_acf1": float(pd.Series(d).autocorr(lag=1)),
-                "t_hln": t_hln, "p_hln": p_hln,
                 "contains_har": m in CONTAINS_HAR,
                 "nested_with_har": nested,
-                "dm_inference": "diagnostic_only" if nested else "valid",
             }
             if nested:
+                # HLN only rescales DM; it does not repair the non-standard nested
+                # null. Keep the number visible for diagnosis but structurally outside
+                # every verdict path.
+                rec["dm_inference"] = "diagnostic_only"
+                rec["diagnostic_dm_hln"] = {
+                    "t_stat": t_hln,
+                    "p_two_sided": p_hln,
+                    "hac_lag": canonical_dm_lag(len(d), h),
+                    "feeds_verdict": False,
+                }
                 small, large = NESTED_WITH_HAR[m]
                 if loss_name == "mse":
                     cw = clark_west_test(actual, F[small][t_eval], F[large][t_eval], h=h)
                     rec["clark_west"] = {
                         "small": small, "large": large,
+                        "candidate_model": m,
+                        "candidate_role": "larger" if m == large else "smaller",
+                        "alternative_direction": f"{large} has lower expected MSPE than {small}",
                         "t_stat": float(cw["t_stat"]),
                         "p_one_sided": float(cw["p_value_one_sided"]),
                         "hac_lag": int(cw.get("hac_lag", 0)),
+                    }
+                    raw_cw_p[m] = float(cw["p_value_one_sided"])
+                    rec["nested_loss_inference"] = {
+                        "status": "VALID_CLARK_WEST_MSE_SECONDARY",
+                        "method": "Clark-West (2007) MSPE adjustment",
+                        "target": f"larger model {large} versus smaller model {small}",
+                        "feeds_secondary_verdict": True,
+                        "feeds_primary_mcs_verdict": False,
                     }
                 else:
                     # Clark-West is an MSPE adjustment; there is no canonical QLIKE
                     # analogue, so no valid nested test is claimed here.
                     rec["clark_west"] = None
+                    rec["nested_loss_inference"] = {
+                        "status": NESTED_QLIKE_STATUS,
+                        "method": None,
+                        "feeds_secondary_verdict": False,
+                        "feeds_primary_mcs_verdict": False,
+                    }
             else:
+                rec["t_hln"] = t_hln
+                rec["p_hln"] = p_hln
+                rec["dm_inference"] = "valid_nonnested_secondary"
+                rec["feeds_primary_mcs_verdict"] = False
                 raw_p[m] = p_hln
             cell[m] = rec
 
@@ -483,6 +523,17 @@ def evaluate(asset: str, h: int, proxy: str, window: str, panel: pd.DataFrame,
             cell[m]["harvey_significant"] = bool(
                 abs(cell[m]["t_hln"]) > HARVEY_T and p_adj < 0.05
             )
+        # Clark-West is valid only for nested MSE comparisons. It gets its own
+        # within-cell Holm family and remains secondary to the pre-specified MCS.
+        for m, p_adj in holm(raw_cw_p).items():
+            cw = cell[m]["clark_west"]
+            cw["p_one_sided_holm"] = float(p_adj)
+            cw["reject_after_holm"] = bool(p_adj < 0.05)
+            cell[m]["nested_loss_inference"]["verdict"] = (
+                "REJECT_IN_FAVOR_OF_LARGER_MODEL"
+                if p_adj < 0.05
+                else "FAIL_TO_REJECT_NOT_A_NULL_FINDING"
+            )
         out["vs_har"][loss_name] = cell
 
     out["_series"] = {
@@ -490,6 +541,162 @@ def evaluate(asset: str, h: int, proxy: str, window: str, panel: pd.DataFrame,
         "qlike": {m: losses["qlike"][m].tolist() for m in FULL_POOL},
     }
     return out
+
+
+def finalize_results(results: dict) -> dict:
+    """Attach claim wiring and upgrade a completed artifact without recomputation.
+
+    The expensive compute already produced the forecasts, losses and MCS draws. This
+    idempotent pass changes no empirical number: it isolates nested raw DM/HLN as a
+    diagnostic, supplies Clark-West/Holm MSE verdicts, makes nested QLIKE explicitly
+    inconclusive, and derives the headline exclusively from MCS membership.
+    """
+    def normalize_mcs_trace(report: dict) -> None:
+        """Rename the legacy generic fields without pretending alpha=.01 is deepest."""
+        if "elimination_trace" not in report:
+            report["elimination_trace"] = {
+                "alpha": min(ALPHA_GRID),
+                "interpretation": "alpha=.01 stopping trace; not a complete/deepest path",
+                "pvalues": report.pop("elimination_pvalues", {}),
+                "order": report.pop("elimination_order", []),
+            }
+        else:
+            report.pop("elimination_pvalues", None)
+            report.pop("elimination_order", None)
+
+    for c in results["cells"]:
+        for loss_name in c["mcs"]:
+            normalize_mcs_trace(c["mcs"][loss_name])
+            normalize_mcs_trace(c["mcs_base_pool"][loss_name])
+        for loss_name, records in c["vs_har"].items():
+            cw_p: dict[str, float] = {}
+            for m, rec in records.items():
+                if not rec.get("nested_with_har"):
+                    rec.setdefault("dm_inference", "valid_nonnested_secondary")
+                    rec.setdefault("feeds_primary_mcs_verdict", False)
+                    continue
+
+                # Upgrade the pre-repair JSON in-place. Raw DM fields never remain
+                # adjacent to p-value/verdict sinks for a nested comparison.
+                if "diagnostic_dm_hln" not in rec:
+                    rec["diagnostic_dm_hln"] = {
+                        "t_stat": rec.pop("t_hln"),
+                        "p_two_sided": rec.pop("p_hln"),
+                        "hac_lag": int(c["dm_hac_lag"]),
+                        "feeds_verdict": False,
+                    }
+                rec.pop("p_hln_holm", None)
+                rec.pop("harvey_significant", None)
+                rec["dm_inference"] = "diagnostic_only"
+                rec["diagnostic_dm_hln"]["feeds_verdict"] = False
+
+                if loss_name == "qlike":
+                    rec["clark_west"] = None
+                    rec["nested_loss_inference"] = {
+                        "status": NESTED_QLIKE_STATUS,
+                        "method": None,
+                        "feeds_secondary_verdict": False,
+                        "feeds_primary_mcs_verdict": False,
+                    }
+                else:
+                    cw = rec["clark_west"]
+                    if cw is None:
+                        raise ValueError(f"missing Clark-West result for nested MSE pair {m}")
+                    small, large = cw["small"], cw["large"]
+                    cw["candidate_model"] = m
+                    cw["candidate_role"] = "larger" if m == large else "smaller"
+                    cw["alternative_direction"] = (
+                        f"{large} has lower expected MSPE than {small}"
+                    )
+                    cw_p[m] = float(cw["p_one_sided"])
+                    rec["nested_loss_inference"] = {
+                        "status": "VALID_CLARK_WEST_MSE_SECONDARY",
+                        "method": "Clark-West (2007) MSPE adjustment",
+                        "target": f"larger model {large} versus smaller model {small}",
+                        "feeds_secondary_verdict": True,
+                        "feeds_primary_mcs_verdict": False,
+                    }
+
+            for m, p_adj in holm(cw_p).items():
+                cw = records[m]["clark_west"]
+                cw["p_one_sided_holm"] = float(p_adj)
+                cw["reject_after_holm"] = bool(p_adj < 0.05)
+                records[m]["nested_loss_inference"]["verdict"] = (
+                    "REJECT_IN_FAVOR_OF_LARGER_MODEL"
+                    if p_adj < 0.05
+                    else "FAIL_TO_REJECT_NOT_A_NULL_FINDING"
+                )
+
+    spec = results["primary_specification"]
+    primary_cells = [
+        c for c in results["cells"]
+        if c["window"] == spec["window"]
+        and c["proxy"] == spec["proxy"]
+        and c["horizon"] == spec["horizon"]
+    ]
+    loss, alpha = spec["loss"], f"{spec['alpha']:g}"
+    per_asset = []
+    for c in primary_cells:
+        full = c["mcs"][loss]["superior_set_by_alpha"][alpha]
+        base = c["mcs_base_pool"][loss]["superior_set_by_alpha"][alpha]
+        full_base = [m for m in full if m in BASE_POOL]
+        per_asset.append({
+            "asset": c["asset"],
+            "n_scored": c["n_scored"],
+            "full_pool_superior_set": full,
+            "tsfm_bearing_survivors": [m for m in full if m in TSFM_POOL],
+            "base_pool_superior_set_standalone": base,
+            "base_models_surviving_in_full_pool": full_base,
+            "base_set_changed_after_augmentation": set(base) != set(full_base),
+        })
+
+    for p in results["pooled"]:
+        if p.get("status") == "ok":
+            normalize_mcs_trace(p["full_pool"])
+            normalize_mcs_trace(p["base_pool"])
+
+    pooled = next(
+        p for p in results["pooled"]
+        if p.get("status") == "ok"
+        and p["window"] == spec["window"]
+        and p["proxy"] == spec["proxy"]
+        and p["horizon"] == spec["horizon"]
+    )
+    pooled_full = pooled["full_pool"]["superior_set_by_alpha"][alpha]
+    pooled_base = pooled["base_pool"]["superior_set_by_alpha"][alpha]
+    pooled_base_in_full = [m for m in pooled_full if m in BASE_POOL]
+    results["adjudication"] = {
+        "primary_objective": (
+            "MCS membership of TSFM-bearing models and the projected base-model "
+            "superior set after pool augmentation"
+        ),
+        "primary_scope": spec,
+        "verdict": "TSFM_BEARING_MODELS_SURVIVE_MCS_NO_WINNER_OR_INCREMENTAL_CLAIM",
+        "per_asset": per_asset,
+        "pooled": {
+            "n_dates": pooled["n_dates"],
+            "full_pool_superior_set": pooled_full,
+            "tsfm_bearing_survivors": [m for m in pooled_full if m in TSFM_POOL],
+            "base_pool_superior_set_standalone": pooled_base,
+            "base_models_surviving_in_full_pool": pooled_base_in_full,
+            "base_set_changed_after_augmentation": set(pooled_base) != set(pooled_base_in_full),
+        },
+        "nested_qlike_pairwise_verdict": NESTED_QLIKE_STATUS,
+        "interpretation_limits": [
+            "MCS membership is non-rejection, not proof that a survivor wins.",
+            "The MCS contains estimated and nested forecasts; its standard bootstrap does "
+            "not separately repair nested pairwise QLIKE inference.",
+            "The 2016+ window is retrospective pseudo-OOS because TSFM weights post-date it.",
+            "Clark-West results apply to MSE only and are secondary to the MCS objective.",
+        ],
+    }
+    results["config"]["nested_inference_contract"] = {
+        "raw_dm_hln": "diagnostic_only; never feeds any verdict",
+        "mse": "Clark-West (2007), Holm-adjusted within cell, secondary",
+        "qlike": NESTED_QLIKE_STATUS,
+        "primary": "Hansen-Lunde-Nason MCS membership",
+    }
+    return results
 
 
 def sensitivity(cells: list[dict], panels: dict, fcst: dict) -> dict:
@@ -631,6 +838,7 @@ def main() -> None:
                 results["cells"].extend(per_asset)
 
     results["sensitivity"] = sensitivity(results["cells"], panels, fcst)
+    finalize_results(results)
 
     series = {f"{c['asset']}|h{c['horizon']}|{c['proxy']}|{c['window']}": c.pop("_series")
               for c in results["cells"]}

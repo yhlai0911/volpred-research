@@ -18,52 +18,45 @@ import pandas as pd  # noqa: E402
 HERE = Path(__file__).resolve().parent
 FIGS = HERE / "figures"
 
-MODEL_ORDER = ["RW", "TimesFM", "TTM", "TimesFM-MZ", "TTM-MZ",
-               "HAR", "COMB-EW", "COMB-MZ", "COMB-GR"]
+MODEL_ORDER = ["RW", "AR1", "HAR", "HAR-A", "TimesFM", "TTM",
+               "TimesFM-MZ", "TTM-MZ", "COMB-EW", "COMB-MZ", "COMB-GR"]
 TSFM_BEARING = {"TimesFM", "TTM", "TimesFM-MZ", "TTM-MZ",
                 "COMB-EW", "COMB-MZ", "COMB-GR"}
 
 
-def _cells(results: dict, proxy: str) -> list[dict]:
-    return [c for c in results["cells"] if c["proxy"] == proxy]
+def _cells(results: dict, proxy: str, window: str = "pseudo_oos",
+           horizon: int | None = None) -> list[dict]:
+    cells = [c for c in results["cells"]
+             if c["proxy"] == proxy and c["window"] == window]
+    if horizon is not None:
+        cells = [c for c in cells if c["horizon"] == horizon]
+    return cells
 
 
-def fig_mcs_pvalues(results: dict) -> None:
-    """MCS p-value per model per (asset, horizon), primary proxy, both losses."""
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5.2), constrained_layout=True)
-
-    for ax, loss in zip(axes, ("qlike", "mse")):
-        cells = _cells(results, "rv")
-        cols = [f"{c['asset']}\nh={c['horizon']}" for c in cells]
-        M = np.full((len(MODEL_ORDER), len(cells)), np.nan)
-        for j, c in enumerate(cells):
-            pv = c["mcs"][loss]["alpha_0.1"]["p_values"]
-            for i, m in enumerate(MODEL_ORDER):
-                M[i, j] = pv.get(m, np.nan)
-
-        im = ax.imshow(M, cmap="RdYlGn", vmin=0, vmax=1, aspect="auto")
-        ax.set_xticks(range(len(cols)), cols, fontsize=8)
-        ax.set_yticks(range(len(MODEL_ORDER)), MODEL_ORDER, fontsize=9)
-
-        for i in range(M.shape[0]):
-            for j in range(M.shape[1]):
-                inset = M[i, j] >= 0.10
-                ax.text(j, i, f"{M[i, j]:.2f}", ha="center", va="center", fontsize=8,
-                        fontweight="bold" if inset else "normal",
-                        color="black" if inset else "dimgray")
-        # box the models that survive into the superior set
-        for j, c in enumerate(cells):
-            for m in c["mcs"][loss]["alpha_0.1"]["superior_set"]:
-                i = MODEL_ORDER.index(m)
-                ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, fill=False,
+def fig_mcs_membership(results: dict) -> None:
+    """Primary-cell mean loss and MCS membership; never invent survivor p-values."""
+    cells = _cells(results, "rv", horizon=1)
+    fig, axes = plt.subplots(1, len(cells), figsize=(13.5, 6.2), constrained_layout=True)
+    for ax, c in zip(np.atleast_1d(axes), cells):
+        mean = c["mean_loss"]["qlike"]
+        winner = min(mean.values())
+        excess = np.array([[100 * (mean[m] / winner - 1)] for m in MODEL_ORDER])
+        im = ax.imshow(excess, cmap="YlOrRd", vmin=0, vmax=max(25, float(excess.max())),
+                       aspect="auto")
+        survivors = set(c["mcs"]["qlike"]["superior_set_by_alpha"]["0.1"])
+        ax.set_xticks([0], [f"{c['asset']}\nn={c['n_scored']}"])
+        ax.set_yticks(range(len(MODEL_ORDER)), MODEL_ORDER, fontsize=8)
+        for i, m in enumerate(MODEL_ORDER):
+            ax.text(0, i, f"{excess[i, 0]:.1f}%", ha="center", va="center", fontsize=8,
+                    fontweight="bold" if m in survivors else "normal")
+            if m in survivors:
+                ax.add_patch(plt.Rectangle((-.5, i - .5), 1, 1, fill=False,
                                            edgecolor="black", lw=2.0))
-        ax.set_title(f"MCS p-values — {loss.upper()}\n(boxed = in superior set, alpha=0.10)",
-                     fontsize=10)
-        fig.colorbar(im, ax=ax, fraction=0.035)
-
-    fig.suptitle("K1711 — does any TSFM-bearing model survive into the MCS?",
+        ax.set_title("boxed = MCS survivor", fontsize=9)
+        fig.colorbar(im, ax=ax, fraction=0.05, label="QLIKE excess vs cell winner (%)")
+    fig.suptitle("K1711 primary MCS: TSFM-bearing models survive, but membership is not a win",
                  fontsize=12, fontweight="bold")
-    fig.savefig(FIGS / "fig1_mcs_pvalues.png", dpi=150)
+    fig.savefig(FIGS / "fig1_primary_mcs_membership.png", dpi=150)
     plt.close(fig)
 
 
@@ -73,12 +66,12 @@ def fig_cumulative_loss_diff(results: dict, series: dict) -> None:
     A real edge accumulates steadily; an artefact is one cliff on one day. The
     picture is the only honest way to tell those apart before trusting a t-stat.
     """
-    assets = [c["asset"] for c in _cells(results, "rv") if c["horizon"] == 1]
+    assets = [c["asset"] for c in _cells(results, "rv", horizon=1)]
     fig, axes = plt.subplots(1, len(assets), figsize=(15, 4.4), constrained_layout=True)
 
     show = ["TimesFM-MZ", "TTM-MZ", "COMB-EW", "COMB-MZ", "COMB-GR"]
     for ax, asset in zip(np.atleast_1d(axes), assets):
-        s = series[f"{asset}|h1|rv"]
+        s = series[f"{asset}|h1|rv|pseudo_oos"]
         dates = pd.to_datetime(s["dates"])
         har = np.asarray(s["qlike"]["HAR"])
         for m in show:
@@ -106,13 +99,13 @@ def fig_proxy_robustness(results: dict) -> None:
     """
     fig, ax = plt.subplots(figsize=(11, 5), constrained_layout=True)
 
-    cells_rv = _cells(results, "rv")
+    cells_rv = _cells(results, "rv", horizon=1)
     cols, grid = [], []
     for c in cells_rv:
-        c_r2 = next(x for x in _cells(results, "r2")
+        c_r2 = next(x for x in _cells(results, "r2", horizon=1)
                     if x["asset"] == c["asset"] and x["horizon"] == c["horizon"])
-        in_rv = set(c["mcs"]["qlike"]["alpha_0.1"]["superior_set"])
-        in_r2 = set(c_r2["mcs"]["qlike"]["alpha_0.1"]["superior_set"])
+        in_rv = set(c["mcs"]["qlike"]["superior_set_by_alpha"]["0.1"])
+        in_r2 = set(c_r2["mcs"]["qlike"]["superior_set_by_alpha"]["0.1"])
         cols.append(f"{c['asset']}\nh={c['horizon']}")
         grid.append([(2 if m in in_rv else 0) + (1 if m in in_r2 else 0)
                      for m in MODEL_ORDER])
@@ -142,7 +135,7 @@ def fig_proxy_robustness(results: dict) -> None:
 
 def fig_calibration(results: dict) -> None:
     """What the Mincer-Zarnowitz step is actually worth, in mean-loss terms."""
-    cells = [c for c in _cells(results, "rv") if c["horizon"] == 1]
+    cells = _cells(results, "rv", horizon=1)
     fig, ax = plt.subplots(figsize=(9.5, 4.8), constrained_layout=True)
 
     pairs = [("TimesFM", "TimesFM-MZ"), ("TTM", "TTM-MZ")]
@@ -179,7 +172,7 @@ def main() -> None:
     results = json.loads((HERE / "k1711_results.json").read_text())
     series = json.loads((HERE / "k1711_series.json").read_text())
 
-    fig_mcs_pvalues(results)
+    fig_mcs_membership(results)
     fig_cumulative_loss_diff(results, series)
     fig_proxy_robustness(results)
     fig_calibration(results)

@@ -9,6 +9,7 @@ the future still produces a beautiful, plausible, entirely wrong results table.
 
 from __future__ import annotations
 
+import copy
 import sys
 from pathlib import Path
 
@@ -249,6 +250,12 @@ def test_models_that_nest_har_are_routed_away_from_dm():
     assert {"COMB-EW", "COMB-MZ"} <= k1711.CONTAINS_HAR
 
 
+def test_nested_dm_policy_is_machine_readable_and_claim_narrow():
+    """The repo gate must see the explicit contract; prose typography is not enough."""
+    assert "nested-dm: diagnostic-only" in k1711.__doc__
+    assert k1711.NESTED_QLIKE_STATUS.startswith("INCONCLUSIVE_")
+
+
 # ── evaluate(): the end-to-end path that actually crashed ─────────────────────
 
 def _synthetic_cell(n=1700):
@@ -289,11 +296,22 @@ def test_evaluate_runs_end_to_end_and_scores_every_model_on_the_same_days(monkey
     assert set(out["mean_loss"]["qlike"]) == set(k1711.FULL_POOL)
     assert set(out["mcs"]["qlike"]["superior_set_by_alpha"]["0.1"]) <= set(k1711.FULL_POOL)
     assert set(out["mcs_base_pool"]["qlike"]["superior_set_by_alpha"]["0.1"]) <= set(k1711.BASE_POOL)
-    # nested models must carry a Clark-West result on MSE and no Holm-corrected DM verdict
+    # Nested raw DM is diagnostic only. MSE uses CW; QLIKE has no fake CW analogue.
     assert out["vs_har"]["mse"]["COMB-GR"]["dm_inference"] == "diagnostic_only"
     assert out["vs_har"]["mse"]["COMB-GR"]["clark_west"] is not None
     assert "p_hln_holm" not in out["vs_har"]["mse"]["COMB-GR"]
-    assert out["vs_har"]["qlike"]["TimesFM-MZ"]["dm_inference"] == "valid"
+    assert "t_hln" not in out["vs_har"]["mse"]["COMB-GR"]
+    assert not out["vs_har"]["mse"]["COMB-GR"]["diagnostic_dm_hln"]["feeds_verdict"]
+    assert out["vs_har"]["mse"]["COMB-GR"]["nested_loss_inference"][
+        "feeds_secondary_verdict"
+    ]
+    assert out["vs_har"]["qlike"]["COMB-GR"]["nested_loss_inference"]["status"] == (
+        k1711.NESTED_QLIKE_STATUS
+    )
+    assert out["vs_har"]["qlike"]["COMB-GR"]["clark_west"] is None
+    assert out["vs_har"]["qlike"]["TimesFM-MZ"]["dm_inference"] == (
+        "valid_nonnested_secondary"
+    )
     assert "p_hln_holm" in out["vs_har"]["qlike"]["TimesFM-MZ"]
 
 
@@ -308,3 +326,101 @@ def test_evaluate_refuses_to_silently_drop_a_model_with_gaps(monkeypatch):
 
     with pytest.raises(RuntimeError, match="missing/non-positive forecasts"):
         k1711.evaluate("SYN", 1, "rv", "pseudo_oos", panel, F)
+
+
+def _legacy_results_fixture():
+    """Small pre-repair result shape; no live/untracked artifact dependency."""
+    qlike_records = {
+        "AR1": {
+            "nested_with_har": True,
+            "t_hln": 4.0,
+            "p_hln": 0.001,
+            "clark_west": None,
+        },
+        "HAR-A": {
+            "nested_with_har": True,
+            "t_hln": -4.0,
+            "p_hln": 0.001,
+            "p_hln_holm": 0.003,
+            "harvey_significant": True,
+            "clark_west": None,
+        },
+        "TimesFM": {"nested_with_har": False, "t_hln": 1.0, "p_hln": 0.3},
+    }
+    mse_records = copy.deepcopy(qlike_records)
+    mse_records["AR1"]["clark_west"] = {
+        "small": "AR1", "large": "HAR", "t_stat": 2.2,
+        "p_one_sided": 0.01, "hac_lag": 10,
+    }
+    mse_records["HAR-A"]["clark_west"] = {
+        "small": "HAR", "large": "HAR-A", "t_stat": 2.0,
+        "p_one_sided": 0.02, "hac_lag": 10,
+    }
+    cells = []
+    for asset in k1711.ASSETS:
+        cells.append({
+            "asset": asset, "window": "pseudo_oos", "proxy": "rv", "horizon": 1,
+            "n_scored": 1000, "dm_hac_lag": 10,
+            "mcs": {"qlike": {"superior_set_by_alpha": {
+                "0.1": ["HAR-A", "TimesFM-MZ"]
+            }, "elimination_pvalues": {"RW": 0.001}, "elimination_order": ["RW"]}},
+            "mcs_base_pool": {"qlike": {"superior_set_by_alpha": {
+                "0.1": ["HAR-A"]
+            }, "elimination_pvalues": {}, "elimination_order": []}},
+            "vs_har": {"qlike": copy.deepcopy(qlike_records),
+                       "mse": copy.deepcopy(mse_records)},
+        })
+    return {
+        "primary_specification": {
+            "window": "pseudo_oos", "proxy": "rv", "loss": "qlike",
+            "horizon": 1, "alpha": 0.1,
+        },
+        "config": {}, "cells": cells,
+        "pooled": [{
+            "status": "ok", "window": "pseudo_oos", "proxy": "rv", "horizon": 1,
+            "n_dates": 900,
+            "full_pool": {"superior_set_by_alpha": {"0.1": ["HAR-A", "COMB-MZ"]},
+                          "elimination_pvalues": {}, "elimination_order": []},
+            "base_pool": {"superior_set_by_alpha": {"0.1": ["HAR-A"]},
+                          "elimination_pvalues": {}, "elimination_order": []},
+        }],
+    }
+
+
+def test_finalize_existing_results_removes_nested_dm_from_verdict_path():
+    """Regression for the completed artifact: upgrading must not require a forecast rerun."""
+    raw = _legacy_results_fixture()
+    finished = k1711.finalize_results(raw)
+
+    for cell in finished["cells"]:
+        for loss_records in cell["vs_har"].values():
+            for rec in loss_records.values():
+                if not rec["nested_with_har"]:
+                    continue
+                assert "t_hln" not in rec and "p_hln" not in rec
+                assert "p_hln_holm" not in rec and "harvey_significant" not in rec
+                assert rec["diagnostic_dm_hln"]["feeds_verdict"] is False
+
+    assert finished["adjudication"]["nested_qlike_pairwise_verdict"] == (
+        k1711.NESTED_QLIKE_STATUS
+    )
+    ar1_cw = finished["cells"][0]["vs_har"]["mse"]["AR1"]["clark_west"]
+    assert ar1_cw["candidate_role"] == "smaller"
+    assert ar1_cw["alternative_direction"] == "HAR has lower expected MSPE than AR1"
+    report = finished["cells"][0]["mcs"]["qlike"]
+    assert "elimination_pvalues" not in report and "elimination_order" not in report
+    assert report["elimination_trace"]["alpha"] == 0.01
+    assert "not a complete/deepest path" in report["elimination_trace"]["interpretation"]
+
+
+def test_primary_adjudication_comes_from_mcs_not_nested_dm_numbers():
+    raw = _legacy_results_fixture()
+    a = k1711.finalize_results(copy.deepcopy(raw))["adjudication"]
+    for cell in raw["cells"]:
+        for records in cell["vs_har"].values():
+            for rec in records.values():
+                if rec.get("nested_with_har"):
+                    rec["t_hln"] = 1e12
+                    rec["p_hln"] = 0.0
+    b = k1711.finalize_results(raw)["adjudication"]
+    assert a == b
