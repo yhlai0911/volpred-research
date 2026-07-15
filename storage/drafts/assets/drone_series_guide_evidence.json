@@ -1,0 +1,14 @@
+{
+  "note": "系列導讀彙整 evidence — 所有數字二次引用自六集已發佈文章的 evidence 檔；來源欄標明各集 mile id 與原始檔。",
+  "checked_at": "2026-07-13",
+  "series": "無人載具",
+  "evidence_ladder": [
+    {"ep": "EP0", "question": "題材整體值不值", "blocker": "一年跑輸大盤 34.7 個百分點", "source": "mile_a8d79d6a / drone_ep0_market_snapshot.json", "numbers": {"all29_return_pct": 69.1, "twii_return_pct": 103.8}},
+    {"ep": "EP1", "question": "上游晶片誰在賺", "blocker": "87% 營收集中三家，市場沒買它們", "source": "mile_7bd0f673 / drone_ep1_upstream_evidence.json", "numbers": {"revenue_concentration_pct": 87}},
+    {"ep": "EP2", "question": "中游拆得出營收嗎", "blocker": "0/8 拆得出無人機營收", "source": "mile_cdc7f6e8 / drone_ep2_midstream_evidence.json", "numbers": {"disclose_revenue": 0, "checked": 8}},
+    {"ep": "EP3", "question": "下游真的交貨了嗎", "blocker": "10 家只有 2 家量產或交船", "source": "mile_abd517ba / drone_ep3_downstream_evidence.json", "numbers": {"shipping": 2, "checked": 10}},
+    {"ep": "EP4", "question": "龍頭個股撐得住嗎", "blocker": "六面向撐得住的只有 2/6 檔", "source": "mile_aa4713db / drone_ep4_six_dim_evidence.json", "numbers": {"pass": 2, "checked": 6}},
+    {"ep": "Final", "question": "買一籃子划算嗎", "blocker": "追平大盤，代價 2 倍波動 3 倍回撤", "source": "mile_b6a46796 / drone_ep_final_portfolio_evidence.json", "numbers": {"core6_return_pct": 104.0, "twii_return_pct": 103.8, "core6_vol_pct": 45.3, "twii_vol_pct": 23.5, "core6_mdd_pct": 35.6, "twii_mdd_pct": 10.4}}
+  ],
+  "headline_zeros": {"revenue_breakdown": "0/18", "verifiable_orders": "0/18", "source": "EP2+EP3 逐家查核 18 家"}
+}
