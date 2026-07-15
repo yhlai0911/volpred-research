@@ -691,3 +691,96 @@ def test_every_shipped_alert_id_is_covered_by_some_disposition() -> None:
 
     unknown_task_types = set(ar.ALERT_TASK_TYPE) - shipped
     assert not unknown_task_types, f"ALERT_TASK_TYPE names alerts that no longer ship: {unknown_task_types}"
+
+
+def test_disjoint_fingerprint_is_a_new_incident_not_a_failed_repair(pool, monkeypatch) -> None:
+    """2026-07-15: three different files each tripped `silent_fallback_new` once.
+
+    Each repair succeeded, but the coarse alert_key conflated the distinct
+    findings into「同一修復連續失敗」and false-escalated to the owner. A disjoint
+    fingerprint must open a fresh episode (counter reset), never escalate.
+    """
+    from volpred.ops import alerts
+
+    deliveries: list[dict] = []
+
+    def fake_send(level, title, body, **kwargs):
+        deliveries.append({"title": title})
+        return {"sent": True, "skipped": False, "notification_id": "n", "title": title}
+
+    monkeypatch.setattr(alerts, "send_alert", fake_send)
+
+    alerts.route_internal_remediable_alert(
+        alert_key="silent_fallback_new",
+        level="warn",
+        title="blocked A",
+        body="fileA",
+        storage_dir=str(pool),
+        now=NOW,
+        fingerprint=["scripts/a.py:10"],
+    )
+    _finish_only_task(pool, status="succeeded", at=NOW + timedelta(minutes=20), result="marked a.py")
+
+    # A *different* file trips the gate — not a failed repair of a.py.
+    second = alerts.route_internal_remediable_alert(
+        alert_key="silent_fallback_new",
+        level="warn",
+        title="blocked B",
+        body="fileB",
+        storage_dir=str(pool),
+        now=NOW + timedelta(hours=2),
+        fingerprint=["scripts/b.py:20"],
+    )
+    assert second["remediation"]["reason"] == "distinct_incident_new_episode"
+    assert second["remediation"]["consecutive_remediation_failures"] == 0
+    _finish_only_task(pool, status="succeeded", at=NOW + timedelta(hours=2, minutes=20), result="marked b.py")
+
+    # A third distinct file — still must not escalate.
+    third = alerts.route_internal_remediable_alert(
+        alert_key="silent_fallback_new",
+        level="warn",
+        title="blocked C",
+        body="fileC",
+        storage_dir=str(pool),
+        now=NOW + timedelta(hours=4),
+        fingerprint=["scripts/c.py:30"],
+    )
+    assert third["remediation"]["consecutive_remediation_failures"] == 0
+    assert deliveries == [], "distinct one-off findings must never page the owner"
+    # The superseded episodes are retired, not left dangling unresolved.
+    resolved = [t for t in _tasks(pool) if t.get("internal_alert_state", {}).get("resolved_at")]
+    assert len(resolved) == 2
+
+
+def test_same_fingerprint_surviving_repair_still_escalates(pool, monkeypatch) -> None:
+    """Regression guard: a genuinely persistent finding (same file:line after a
+    claimed repair) must still count as a failure and escalate at two."""
+    from volpred.ops import alerts
+
+    deliveries: list[dict] = []
+
+    def fake_send(level, title, body, **kwargs):
+        deliveries.append({"title": title, "body": body})
+        return {"sent": True, "skipped": False, "notification_id": "n", "title": title}
+
+    monkeypatch.setattr(alerts, "send_alert", fake_send)
+    fp = ["scripts/stubborn.py:42"]
+
+    alerts.route_internal_remediable_alert(
+        alert_key="silent_fallback_new", level="warn", title="t1", body="b1",
+        storage_dir=str(pool), now=NOW, fingerprint=fp,
+    )
+    _finish_only_task(pool, status="succeeded", at=NOW + timedelta(minutes=20), result="claimed fixed")
+    second = alerts.route_internal_remediable_alert(
+        alert_key="silent_fallback_new", level="warn", title="t2", body="b2",
+        storage_dir=str(pool), now=NOW + timedelta(hours=8), fingerprint=fp,
+    )
+    assert second["remediation"]["consecutive_remediation_failures"] == 1
+    _finish_only_task(pool, status="succeeded", at=NOW + timedelta(hours=8, minutes=20), result="claimed fixed again")
+    third = alerts.route_internal_remediable_alert(
+        alert_key="silent_fallback_new", level="warn", title="t3", body="b3",
+        storage_dir=str(pool), now=NOW + timedelta(hours=16), fingerprint=fp,
+    )
+    assert third["escalated"] is True
+    assert len(deliveries) == 1
+    assert "已自動嘗試 2 次" in deliveries[0]["body"]

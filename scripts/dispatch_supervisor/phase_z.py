@@ -870,6 +870,7 @@ def _default_internal_alert(
     title: str,
     body: str,
     observed_at=None,
+    fingerprint=None,
 ) -> dict:
     """Route a mechanically repairable PHASE-Z signal to P1 work first."""
 
@@ -882,6 +883,7 @@ def _default_internal_alert(
             title=title,
             body=body,
             now=_coerce_observed_at(observed_at),
+            fingerprint=fingerprint,
         )
     except Exception as exc:  # noqa: BLE001 — routing failure is observable, tick remains alive
         LOG.warning("phase_z: internal alert routing failed (%s)", exc)
@@ -920,6 +922,21 @@ def _is_silent_fallback_clean_gate_output(output: str) -> bool:
 
     normalized = " ".join(str(output or "").lower().split())
     return "silent-fallback-audit passed new=0 scope=" in normalized
+
+
+_SILENT_FALLBACK_NEW_RE = re.compile(r"\bNEW\s+(\S+:\d+)\b")
+
+
+def _silent_fallback_fingerprints(output: str) -> list[str]:
+    """`file:line` identity of each NEW silent fallback the gate flagged.
+
+    audit_silent_fallbacks.py prints ``NEW <path>:<line> except ...`` per finding.
+    A disjoint fingerprint set means a *different* file tripped the coarse
+    ``silent_fallback_new`` key — a distinct incident, not a failed repair — so
+    the escalation counter must not conflate them (2026-07-15 false escalation).
+    """
+
+    return sorted({m.group(1) for m in _SILENT_FALLBACK_NEW_RE.finditer(str(output or ""))})
 
 
 def _test_files_referencing_stem(tests_dir: Path, stem: str) -> list[Path]:
@@ -1676,6 +1693,7 @@ def run_phase_z(
                     internal_alert_fn(
                         alert_key="silent_fallback_new",
                         observed_at=hook_observed_at,
+                        fingerprint=_silent_fallback_fingerprints(hook_out),
                         **alert_payload,
                     )
                 else:

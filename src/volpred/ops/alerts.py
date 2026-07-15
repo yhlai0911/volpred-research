@@ -597,6 +597,7 @@ def route_internal_remediable_alert(
     storage_dir: str = "storage",
     now: datetime | None = None,
     suppress_owner_transport: bool = False,
+    fingerprint: list[str] | None = None,
 ) -> dict[str, Any]:
     """Queue an internal repair and notify only after two failed attempts.
 
@@ -605,6 +606,11 @@ def route_internal_remediable_alert(
     contain changing counts.  Suppressed results intentionally look like an
     alert skip to existing report/log consumers, but no email or Telegram call
     is made on that path.
+
+    `fingerprint` identifies *which* concrete finding tripped the gate (e.g. the
+    ``file:line`` entries flagged NEW).  Under a coarse alert_key, a disjoint
+    fingerprint marks a genuinely different incident so the escalation counter is
+    not conflated across unrelated one-off findings.
     """
 
     normalized_key = str(alert_key or "").strip().lower()
@@ -623,6 +629,10 @@ def route_internal_remediable_alert(
         "title": str(title),
         "body": str(body),
     }
+    if fingerprint:
+        condition["fingerprint"] = [
+            text for item in fingerprint if (text := str(item or "").strip())
+        ]
     remediation = remediate_internal_alert(
         condition,
         alert_key=normalized_key,

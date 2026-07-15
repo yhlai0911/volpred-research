@@ -233,6 +233,27 @@ def _new_episode_id(rows: list[dict[str, Any]], now: datetime) -> str:
     return f"{base}_{serial}"
 
 
+def _normalize_fingerprint(value: Any) -> set[str]:
+    """Normalise a condition/state fingerprint into a comparable string set.
+
+    A fingerprint identifies *which* concrete finding tripped the gate (e.g. the
+    ``file:line`` entries a silent-fallback audit flagged as NEW), so distinct
+    findings under one coarse alert_key can be told apart.  Missing/empty ⇒ empty
+    set ⇒ callers fall back to the fingerprint-agnostic behaviour.
+    """
+
+    if not value:
+        return set()
+    if isinstance(value, str):
+        items: list[Any] = [value]
+    else:
+        try:
+            items = list(value)
+        except TypeError:
+            return set()
+    return {text for item in items if (text := str(item or "").strip())}
+
+
 def _build_internal_attempt(
     condition: dict[str, Any],
     *,
@@ -244,6 +265,7 @@ def _build_internal_attempt(
     attempt_history: list[dict[str, Any]],
     now: datetime,
     last_failure_reason: str | None = None,
+    fingerprint: set[str] | None = None,
 ) -> dict[str, Any]:
     task = {
         "id": f"{task_id_for_alert_key(alert_key)}_{episode_id}_a{attempt_number}",
@@ -268,6 +290,8 @@ def _build_internal_attempt(
             "escalation_due": consecutive_failures >= 2,
         },
     }
+    if fingerprint:
+        task["internal_alert_state"]["fingerprint"] = sorted(fingerprint)
     if last_failure_reason:
         task["internal_alert_state"]["last_failure_reason"] = last_failure_reason
     normalize_task_priority(task)
@@ -341,6 +365,7 @@ def _route_internal_task(
     unresolved = [
         task for task in rows if not _internal_state(task).get("resolved_at")
     ]
+    incoming_fp = _normalize_fingerprint(condition.get("fingerprint"))
     if not unresolved and rows:
         resolved_stamps = [
             stamp
@@ -424,6 +449,66 @@ def _route_internal_task(
                 ),
                 "escalate": False,
             }
+        # Distinct-incident guard (2026-07-15): a coarse alert_key such as
+        # `silent_fallback_new` fires for ANY new silent fallback anywhere.  When
+        # the fingerprint of the current finding is disjoint from the prior
+        # episode's, the prior repair did NOT fail — its finding is gone (the gate
+        # no longer reports it) and a *different* file tripped the gate.  Counting
+        # it as a consecutive failure of the same repair falsely escalated three
+        # separate one-off fallbacks (k1379.py / taifex_tick_inventory.py /
+        # build_publication_candidates.py) as「同一修復連續失敗」.  Retire the
+        # superseded episode and open a fresh one (counter reset) instead.
+        previous_fp = _normalize_fingerprint(state.get("fingerprint"))
+        if incoming_fp and previous_fp and incoming_fp.isdisjoint(previous_fp):
+            for stale in unresolved:
+                stale_state = _internal_state(stale)
+                stale_state["resolved_at"] = now.isoformat()
+                stale_state["final_consecutive_remediation_failures"] = int(
+                    stale_state.get("consecutive_remediation_failures") or 0
+                )
+                stale_state["consecutive_remediation_failures"] = 0
+                stale_state.pop("last_failure_reason", None)
+                stale_state["superseded_by_distinct_incident_at"] = now.isoformat()
+                stale_status = str(stale.get("status") or "").strip().lower()
+                if stale_status in {"", "pending", "pending_main_thread"}:
+                    stale["status"] = "succeeded"
+                    stale["completed_at"] = now.isoformat()
+                    stale["result"] = (
+                        "superseded by distinct silent-fallback incident "
+                        "(different file:line); prior finding absent from current gate output"
+                    )
+                    _append_router_status_history(
+                        stale,
+                        old_status=stale_status,
+                        new_status="succeeded",
+                        now=now,
+                        note="superseded_distinct_fingerprint",
+                    )
+            episode_id = _new_episode_id(rows, now)
+            task = _build_internal_attempt(
+                condition,
+                alert_key=alert_key,
+                episode_id=episode_id,
+                episode_started_at=now.isoformat(),
+                attempt_number=1,
+                consecutive_failures=0,
+                attempt_history=[],
+                now=now,
+                fingerprint=incoming_fp,
+            )
+            tasks.append(task)
+            return {
+                "created": True,
+                "reason": "distinct_incident_new_episode",
+                "task_id": task["id"],
+                "task_type": "platform_ops",
+                "dispatch_lane": "agent",
+                "priority": 1,
+                "episode_id": episode_id,
+                "attempt_number": 1,
+                "consecutive_remediation_failures": 0,
+                "escalate": False,
+            }
         failure_reason = _terminal_failure_reason(previous, status)
         consecutive = int(state.get("consecutive_remediation_failures") or 0)
         history = state.get("attempt_history")
@@ -456,6 +541,7 @@ def _route_internal_task(
             attempt_history=history,
             now=now,
             last_failure_reason=failure_reason,
+            fingerprint=(previous_fp | incoming_fp) or None,
         )
         tasks.append(task)
         return {
@@ -483,6 +569,7 @@ def _route_internal_task(
         consecutive_failures=0,
         attempt_history=[],
         now=now,
+        fingerprint=incoming_fp,
     )
     tasks.append(task)
     return {

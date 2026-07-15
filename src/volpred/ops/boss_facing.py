@@ -123,6 +123,65 @@ def plainify_boss_text(text: object) -> str:
     return "\n".join(lines)
 
 
+def _body_lead_sentence(body: str) -> str:
+    """The alert's own concrete reason, for use as the plain-language lead.
+
+    2026-07-15: the owner replied 「你要通報給我知道的話，你就得告訴我確切的原因，
+    你不要給我一個模擬兩可要我猜的原因」 to a PHASE-Z alert whose 白話結論 was the
+    generic "系統偵測到需要處理的營運風險" while the real cause sat below under
+    ## 發生什麼. Every internal alert body already states the specific cause in its
+    first substantive section; surface it as the lead instead of boilerplate.
+
+    Prefers the first non-empty line under a ``## 發生什麼`` header, else the first
+    substantive line (skipping headers / rules / parenthetical meta). Returns ""
+    when nothing usable is found so the caller keeps its generic fallback.
+    """
+
+    lines = [ln.strip() for ln in str(body or "").splitlines()]
+
+    def _is_meta(line: str) -> bool:
+        return (
+            not line
+            or line.startswith("#")
+            or line.startswith("---")
+            or (line.startswith("（") and line.endswith("）"))
+            or (line.startswith("(") and line.endswith(")"))
+        )
+
+    section_lines: list[str] = []
+    in_section = False
+    for line in lines:
+        if line.startswith("## 發生什麼"):
+            in_section = True
+            continue
+        if in_section:
+            if line.startswith("#"):
+                break
+            if not _is_meta(line):
+                section_lines.append(line)
+    candidate = ""
+    if section_lines:
+        candidate = " ".join(section_lines)
+    else:
+        for line in lines:
+            if not _is_meta(line):
+                candidate = line
+                break
+    candidate = candidate.replace("**", "").strip()
+    if not candidate:
+        return ""
+    # First sentence only — keep the lead tight; full detail stays in the body.
+    for sep in ("。", "！", "!"):
+        idx = candidate.find(sep)
+        if idx != -1:
+            candidate = candidate[: idx + 1]
+            break
+    candidate = candidate.strip()
+    if len(candidate) > 140:
+        candidate = candidate[:139].rstrip() + "…"
+    return candidate
+
+
 def _infer_plain_summary(title: str, body: str) -> str:
     combined = f"{title}\n{body}"
     if any(token in combined for token in ("發文脫班", "發文間隔過久", "文章釋出排程")):
@@ -139,6 +198,11 @@ def _infer_plain_summary(title: str, body: str) -> str:
         return "網站呈現或同步狀態可能和本地真實資料不一致，需要先保住對外可信度。"
     if "定時任務" in combined:
         return "背景自動化有任務失敗，可能讓資料、發文或同步流程停住。"
+    # No curated pattern: surface the alert's own concrete reason rather than the
+    # vague boilerplate the owner explicitly rejected (2026-07-15).
+    lead = _body_lead_sentence(body)
+    if lead:
+        return lead
     return "系統偵測到需要處理的營運風險。"
 
 

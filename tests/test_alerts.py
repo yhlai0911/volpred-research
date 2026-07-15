@@ -558,10 +558,16 @@ def test_boss_facing_alert_info_level_skips_crisis_prefix():
         ]
     )
 
-    # warn（預設）→ 仍套危機 prefix（既有行為）
+    # warn（預設）→ 仍套危機 prefix（## 白話結論 / ## 影響 / ## 行動 三段結構）。
+    # 白話結論改用 body 自身的具體原因當 lead（2026-07-15：老闆要確切原因、不要
+    # 「系統偵測到需要處理的營運風險」這種模稜兩可要他猜的樣板）。
     _, warn_body = boss_facing_alert(title, body, "warn")
     assert "## 白話結論" in warn_body
-    assert "系統偵測到需要處理的營運風險" in warn_body
+    assert "## 影響" in warn_body
+    assert "## 行動" in warn_body
+    crisis_lead = warn_body.split("## 影響")[0]
+    assert "系統偵測到需要處理的營運風險" not in crisis_lead
+    assert "連 4 次卡關的 FB 發文 bug 已根治" in crisis_lead
 
     # info → 不套危機 prefix，但白話化仍生效、原始內容完整保留
     plain_title, info_body = boss_facing_alert(title, body, "info")
@@ -570,6 +576,31 @@ def test_boss_facing_alert_info_level_skips_crisis_prefix():
     assert "依下方行動清單處理" not in info_body
     assert "一句話" in info_body
     assert "已根治" in info_body
+
+
+def test_boss_facing_lead_surfaces_concrete_reason_not_boilerplate():
+    """2026-07-15: an alert with no curated pattern must still lead with its own
+    concrete reason (## 發生什麼), never the generic「系統偵測到需要處理的營運風險」
+    that the owner rejected as「模稜兩可要我猜的原因」."""
+    title = "PHASE-Z 產出已 commit，但 agent 沒交代原因"
+    body = "\n".join(
+        [
+            "（fire 時間: 19:29；12 個檔案）",
+            "",
+            "## 發生什麼",
+            "這班 fire 產出了 12 個檔案，PHASE-Z 已照常 commit（**工作沒有遺失**）。",
+            "但 agent 沒有在收尾時留下 commit 說明（fire receipt）。",
+            "",
+            "## 現在該做什麼",
+            "通常不用處理。",
+        ]
+    )
+    _, warn_body = boss_facing_alert(title, body, "warn")
+    lead = warn_body.split("## 影響")[0]
+    assert "系統偵測到需要處理的營運風險" not in lead
+    assert "這班 fire 產出了 12 個檔案" in lead
+    # Only the first sentence is promoted; the ** markdown is stripped from the lead.
+    assert "**" not in lead
 
 
 def test_plainify_boss_text_replaces_known_terms_without_touching_paths():

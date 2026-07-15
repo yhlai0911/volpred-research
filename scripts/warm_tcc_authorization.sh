@@ -1,28 +1,29 @@
 #!/bin/bash
-# warm_tcc_authorization.sh — SessionStart hook (fix (b) of docs/error_log.md 2026-07-02 10:55).
+# warm_tcc_authorization.sh — SessionStart hook.
 #
-# ROOT CAUSE it mitigates:
-#   claude CLI auto-updates every 1-2 days (versions/ shows 6/30, 7/1, 7/2 ...).
-#   macOS TCC Desktop-folder grants are bound to the binary path+hash, so each
-#   NEW claude version starts UNAUTHORIZED for ~/Desktop. Every launchd-context
-#   job (cwd was ~/Desktop/volpred-research, a TCC-protected path — repo moved to ~/volpred-research on 2026-07-02, so this hook is now a defense layer for any stragglers still using the Desktop symlink) then hangs on a
-#   TCC prompt it can never answer (no UI in launchd) → the suspended authreqs
-#   drag down tccd → cascade timeout/EINTR across ALL schedules until an
-#   interactive session (authorized parent context) re-triggers the grant.
-#   On 2026-07-02 that accidental recovery took until 10:48 (outage 05:00-10:48).
+# HISTORY (2026-07-02): the repo used to live in ~/Desktop/volpred-research, a
+# macOS TCC-protected path. Because TCC Desktop grants are bound to the claude
+# binary's path+hash, every ~1-2-day CLI auto-update started UNAUTHORIZED for
+# ~/Desktop, so launchd-context jobs (cwd on Desktop) hung on a TCC prompt no
+# one could answer → cascade EINTR/timeout across all schedules (outage
+# 05:00-10:48 on 2026-07-02). This hook warmed the Desktop grant early at each
+# interactive SessionStart to compress that window, and emitted an INFO alert.
 #
-# WHAT THIS DOES (runs at every interactive SessionStart, authorized context):
+# STATUS (2026-07-02 → present): the DEFINITIVE fix shipped — the repo was moved
+# OUT of Desktop to ~/volpred-research (all 20 launchd plists now have
+# WorkingDirectory=~/volpred-research; the ~/Desktop/volpred-research symlink is
+# gone). TCC no longer applies to the repo, so the Desktop-outage this hook
+# guarded against CANNOT recur. The old "已暖授權 Desktop TCC / 排程可能全滅"
+# alert was therefore stale + self-contradicting (it stat'd ~/volpred-research,
+# not Desktop) and only spread false alarm on every CLI update — retired
+# 2026-07-15 (boss email email-12126, "為什麼跟 desktop 還有關係").
+#
+# WHAT THIS DOES NOW (runs at every interactive SessionStart, authorized context):
 #   1. Detect whether the claude symlink target changed since last recorded.
-#   2. On change: touch the Desktop repo NOW so the new binary's TCC Desktop
-#      grant is (re-)triggered at session start instead of hours later, and
-#      record the change so auth-preflight can diagnose a TCC-shaped launchd
-#      failure accurately (fix (c)).
-#   3. Emit an INFO alert so the operator knows an update happened (and that the
-#      launchd schedules were likely down between the overnight update and now).
-#
-# Cannot fix headlessly: TCC re-authorization fundamentally needs a UI/authorized
-# context — this compresses the outage window, it does not eliminate the gap.
-# The definitive fix (move repo out of ~/Desktop, or pin the CLI) is a boss call.
+#   2. On change: record it to claude_version_state.json so auth-preflight can
+#      still diagnose a TCC-shaped launchd failure accurately (fix (c)), and
+#      append a line to warm_tcc.log. NO email alert (repo is off Desktop → no
+#      outage to warn about; a version bump is not actionable).
 #
 # Contract: always exit 0, fast, side-effect-safe. Never block a session start.
 
@@ -49,9 +50,9 @@ if [ "$CUR" = "$PREV" ]; then
   exit 0
 fi
 
-# --- version changed (or first run) → warm the Desktop TCC grant early ---
-# Best-effort Desktop access under this authorized session context. The active
-# claude session already reads Desktop; this makes the grant deterministic+early.
+# --- version changed (or first run) → record it (repo is off Desktop; no TCC
+# warming needed anymore). Lightweight stat kept only as a cheap repo liveness
+# touch; it hits ~/volpred-research, NOT a TCC-protected path.
 ( cd "$REPO" 2>/dev/null && /usr/bin/stat "$REPO/CLAUDE.md" >/dev/null 2>&1 )
 
 # Record new state (perl writes valid JSON; avoids jq dependency in hook path).
@@ -68,29 +69,11 @@ fi
   close($fh);
 ' "$CUR" "$PREV" "$NOW" "$STATE"
 
-echo "[$(date '+%F %T')] claude version changed: ${PREV##*/} -> ${CUR##*/} — warmed TCC Desktop access at session start" >> "$LOG"
+echo "[$(date '+%F %T')] claude version changed: ${PREV##*/} -> ${CUR##*/} — recorded (repo off Desktop; no TCC action, no alert)" >> "$LOG"
 
-# INFO alert (best-effort, timeout-guarded, never blocks). Only fires on a real
-# version change, so it is low-frequency (~once per 1-2 days).
-# WARM_TCC_NO_ALERT=1 suppresses the email (tests / silent automated contexts).
-if [ -n "$PREV" ] && [ "${WARM_TCC_NO_ALERT:-0}" != "1" ]; then
-  BODY="# claude CLI 版本變更偵測
-
-**${PREV##*/} → ${CUR##*/}**（symlink 目標已切換）。
-
-## 為什麼重要
-macOS TCC 的 Desktop 授權綁定 binary 路徑+雜湊，新版 claude 對 \`~/Desktop\` **預設無授權**。在此互動 session 開始前的空窗期，所有 cwd 在 Desktop 的 launchd 排程（hourly-dispatch / gmail-poll 等）很可能因 TCC 懸置而逾時或 EINTR 全滅。
-
-## 已自動處理
-本 SessionStart hook 已在授權 context 下觸碰 Desktop，將新版 binary 的 TCC 授權**在 session 開始當下重新觸發**（把空窗從『數小時』壓到『本 session 開始』）。
-
-## 根治仍待決策
-每 1-2 天一次的 CLI 自動更新會週期性重演此空窗。根治選項（搬 repo 出 Desktop / 停用 CLI 自動更新）見 docs/error_log.md 2026-07-02 條目。"
-  ( /usr/bin/perl -e 'alarm shift; exec @ARGV' 30 \
-      /Users/yhlai0911/.local/bin/uv run volpred ops send-alert \
-      --level info \
-      --title "claude CLI 更新偵測 ${PREV##*/}→${CUR##*/} — 已暖授權 Desktop TCC $(date '+%H:%M')" \
-      --body "$BODY" >/dev/null 2>&1 ) &
-fi
+# NO email alert. The repo left ~/Desktop on 2026-07-02, so a CLI version bump no
+# longer risks the Desktop-TCC launchd outage this hook once warned about. The
+# version-change record above (state file + log) is all downstream diagnostics
+# (auth-preflight fix (c)) needs. Retired the misleading INFO email 2026-07-15.
 
 exit 0

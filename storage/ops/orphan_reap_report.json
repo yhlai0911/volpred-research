@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T11:00:52.252863+00:00",
+  "generated_at": "2026-07-15T12:01:09.747461+00:00",
   "adoptable": [],
   "held": [
     {
@@ -10,8 +10,8 @@
   ],
   "skipped": {
     "baseline": 519,
-    "registered": 9,
-    "grace": 2,
+    "registered": 10,
+    "grace": 1,
     "inflight": 0
   },
   "orphan_count": 1,
@@ -60,11 +60,31 @@
   "paper_artifact_collectable": [],
   "paper_artifact_held": [],
   "paper_collections": [],
-  "draft_artifact_collectable": [],
-  "draft_artifact_held": [],
+  "draft_artifact_collectable": [
+    {
+      "path": "storage/drafts/drone_ep_final_general_draft.md",
+      "kind": "md",
+      "reason": "modified"
+    }
+  ],
+  "draft_artifact_held": [
+    {
+      "path": "storage/drafts/assets/drone_series_guide_lazypack_codex/render_lazypack.py",
+      "kind": "unknown",
+      "reason": "unrecognised_suffix:.py"
+    }
+  ],
   "draft_artifact_skipped": {
-    "grace": 6,
+    "grace": 5,
     "inflight": 0
   },
-  "draft_collections": []
+  "draft_collections": [
+    {
+      "paths": [
+        "storage/drafts/drone_ep_final_general_draft.md"
+      ],
+      "committed": true,
+      "detail": "[main b69b893a2] chore(draft-reap): collect orphaned draft artifacts (1 files)\n 1 file changed, 24 insertions(+), 3 deletions(-)\n"
+    }
+  ]
 }
