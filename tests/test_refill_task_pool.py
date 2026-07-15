@@ -435,6 +435,29 @@ def test_research_reader_friendly_still_allows_general_companion(tmp_path, monke
     monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
     monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
 
+    # Cluster planning is part of refill and must use the same redirected
+    # storage tree as NEXT_TASKS.  Before the 2026-07-16 fix this silently read
+    # the live feed, so an unrelated saturated VIX cluster suppressed K1120 in
+    # an otherwise isolated fixture.
+    import volpred.ops.content as content
+
+    planner_storage_dirs = []
+
+    def _empty_cluster_state(*, storage_dir):
+        planner_storage_dirs.append(Path(storage_dir))
+        return {
+            "blocked_clusters": [],
+            "pipeline_counts": {},
+            "threshold": 2,
+        }
+
+    def _empty_cluster_classifier(*, storage_dir):
+        planner_storage_dirs.append(Path(storage_dir))
+        return lambda *_args, **_kwargs: None
+
+    monkeypatch.setattr(content, "release_cluster_planner_state", _empty_cluster_state)
+    monkeypatch.setattr(content, "make_narrative_cluster_classifier", _empty_cluster_classifier)
+
     result = MODULE.refill(target=5, dry_run=False)
     assert result["ok"] is True
     added_ids = json.loads(next_tasks.read_text(encoding="utf-8"))
@@ -448,6 +471,7 @@ def test_research_reader_friendly_still_allows_general_companion(tmp_path, monke
     assert "K9999_article_general" in ids, (
         f"K9999 with jargon title should still queue; got {ids}"
     )
+    assert planner_storage_dirs == [next_tasks.parent, next_tasks.parent]
 
 
 def test_research_cover_helper_acceptance():

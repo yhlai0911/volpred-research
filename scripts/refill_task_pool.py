@@ -1292,7 +1292,7 @@ class _ClusterBudget:
     pool with articles that can't ship.
     """
 
-    def __init__(self, tasks: list):
+    def __init__(self, tasks: list, *, storage_dir: str = "storage"):
         self.enabled = True
         self.blocked: set[str] = set()
         self.counts: dict[str, int] = {}
@@ -1304,8 +1304,14 @@ class _ClusterBudget:
                 release_cluster_planner_state,
             )
 
-            state = release_cluster_planner_state()
-            self._classify = make_narrative_cluster_classifier()
+            # The planner, classifier, candidate snapshot, and task pool must
+            # describe the same storage tree.  Tests and recovery tools
+            # intentionally redirect NEXT_TASKS/CANDIDATES to a temporary
+            # storage directory; falling back to the live default here leaked
+            # production draft pressure into those isolated runs (K1120 CI
+            # incident, 2026-07-16).
+            state = release_cluster_planner_state(storage_dir=storage_dir)
+            self._classify = make_narrative_cluster_classifier(storage_dir=storage_dir)
             self.blocked = set(state.get("blocked_clusters") or [])
             self.counts = dict(state.get("pipeline_counts") or {})
             self.cap = max(1, int(state.get("threshold") or 2))
@@ -1503,7 +1509,7 @@ def refill(
     deferred_dominant: list[dict] = []
     # 2026-07-13 layer-2 rootfix: plan against the release-side cluster gate so the
     # pool can't fill with drafts that gate will never let out (see _ClusterBudget).
-    budget = _ClusterBudget(tasks)
+    budget = _ClusterBudget(tasks, storage_dir=str(NEXT_TASKS.parent))
     deferred_cluster_blocked: list[dict] = []
     for cand in pool:
         if len(new_entries) >= target:

@@ -41855,5 +41855,28 @@
    "reviewed_commit": "63520b4dae8b62d55650904ed51fab1739386f65",
    "review_artifact": "experiments/k1711/codex_review_20260716.md"
   }
+ },
+ {
+  "item_id": "k1718_reviewed_20260716",
+  "category": "cross_market_vix_incremental_forecast",
+  "content": "K1718 [NULL, reviewed]: In the 2015-2026 Japan sample with annual expanding OOS forecasts from 2020 onward, lagged US VIX passed none of six pre-registered Nikkei 225 / TOPIX ETF model-family cells. Each cell required both lower Patton QLIKE and a Holm-adjusted one-sided Clark-West p-value below 0.05. The evidence therefore does not support a robust incremental Japan volatility overlay. The reviewed run repaired the audited 1306.T vendor scale discontinuities before computing returns. This bounded NULL does not prove zero conditional or regime-specific value; daily squared returns are noisy, the HAR-style feature is not HAR-RV, and the exploratory VT ledger uses a different target/holding convention.",
+  "evidence": [
+   "experiments/k1718/k1718_results.json",
+   "experiments/k1718/README.md",
+   "experiments/k1718/review_verdict.json",
+   "experiments/k1718/review_certification_20260716.md"
+  ],
+  "confidence": 0.95,
+  "created_at": "2026-07-15T22:10:38.523456+00:00",
+  "created_at_source": "system_clock_utc",
+  "k_id": "K1718",
+  "experiment_id": "k1718",
+  "experiment_path": "experiments/k1718",
+  "verdict": "NULL",
+  "reviewer": "Codex failover / GPT-5",
+  "provenance": {
+   "reviewed_commit": "0f5feec09d5237e3f442a23e7f31558c33631ddc",
+   "review_artifact": "experiments/k1718/review_certification_20260716.md"
+  }
  }
 ]
