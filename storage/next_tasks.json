@@ -35448,7 +35448,7 @@
     "title": "K1704: 偏誤波動代理的可靠度加權評估目標** — 以本機台指期逐筆資料同步產生 1/5/10 分鐘 RV、區間與日報酬代理；每個預測起點只用過去樣本估偏誤與權重，再以相同 HAR/GJR ledger 比較 ranking、DM-HLN 與 MCS",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1600). Original: 偏誤波動代理的可靠度加權評估目標** — 以本機台指期逐筆資料同步產生 1/5/10 分鐘 RV、區間與日報酬代理；每個預測起點只用過去樣本估偏誤與權重，再以相同 HAR/GJR ledger 比較 ranking、DM-HLN 與 MCS，檢定模型優劣是否依賴單一不可靠目標。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1704.py with signal.shift(1) + seed=42, (c) K1704_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35457,7 +35457,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-13T23:52:31Z"
+    "created_at": "2026-07-13T23:52:31Z",
+    "claimed_by": "codex-failover-slot-1-f217aefbb074420ab8b5bd09e3773c6d",
+    "claimed_at": "2026-07-15T22:02:08.516374+00:00",
+    "claim_session_id": "6b1b2cb38d8a",
+    "status_history": [
+      {
+        "ts": "2026-07-15T22:02:08.516389+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-f217aefbb074420ab8b5bd09e3773c6d"
+      },
+      {
+        "ts": "2026-07-15T22:02:08.800956+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-f217aefbb074420ab8b5bd09e3773c6d"
+      }
+    ],
+    "started_at": "2026-07-15T22:02:08.800937+00:00"
   },
   {
     "id": "K1705",
@@ -36774,13 +36792,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T21:01:08.241499+00:00",
+    "completed_at": "2026-07-15T22:01:35.314357+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T21:01:08.241499+00:00",
-      "last_clean_observed_at": "2026-07-15T21:01:08.241499+00:00"
+      "resolved_at": "2026-07-15T22:01:35.314357+00:00",
+      "last_clean_observed_at": "2026-07-15T22:01:35.314357+00:00"
     }
   },
   {
@@ -38862,7 +38880,7 @@
     "title": "Audience correction: rewrite a true general companion for 「股債金油齊跌、資金在輪動」這個說法，數據站哪邊？——拆開大跌底下的板塊離散度",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_c07025d2. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1427']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38877,7 +38895,30 @@
       "content-quality"
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1427"
+    "k_id": "K1427",
+    "status_history": [
+      {
+        "ts": "2026-07-15T21:42:07.942095+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1427-audience"
+      },
+      {
+        "ts": "2026-07-15T21:42:08.198468+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1427-audience"
+      },
+      {
+        "ts": "2026-07-15T21:57:36.480210+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-k1427-audience"
+      }
+    ],
+    "started_at": "2026-07-15T21:42:08.198456+00:00",
+    "completed_at": "2026-07-15T21:57:36.480192+00:00",
+    "result": "Created draft general companion mile_9d7a5d1a with exact K1427 provenance, plain-language clustered-episode caveat and source limitations. Installed and visually verified 3 data-bound lazypack panels; local/Supabase content matched, all URLs 200, audience and anti-AI gates passed."
   },
   {
     "id": "K1157_article_general_audience_rewrite_858690fd",
@@ -40914,5 +40955,143 @@
     "started_at": "2026-07-15T21:31:04.646156+00:00",
     "completed_at": "2026-07-15T21:39:52.222499+00:00",
     "result": "逐 fire 稽核：六個 window 中五次為 host-cron Keychain 失敗、一次為 encoding gate 正確阻擋。已解耦 host_crontab_managed=false 與 piggy_back_enabled=true、移除 live host leg、加 Three-Strike plan 與回歸測試；21 tests PASS。"
+  },
+  {
+    "id": "ci-red-29450374699",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29421677446",
+    "ci_run_key": "29450374699:1",
+    "created_at": "2026-07-15T22:00:06.114050+00:00",
+    "title": "CI 紅燈修復（run 29450374699, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29450374699\nattempt: 1\nhead_sha: d4e004f03\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29450374699 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。"
+  },
+  {
+    "id": "trending_repost_2026_07_16_ai資本支出",
+    "title": "[trending_repost] AI巨頭資本支出若不如預期，科技股波動率偏斜如何定價？",
+    "description": "探討科技巨頭在AI基建的高額投入與營收實現落差所帶來的尾部風險。可量化：分析科技股近季財報公佈前後，價外賣權隱含波動率溢價與CapEx修正幅度的敏感度。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-15T22:00:17+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "unjudged_thin_signature",
+      "blocked": false,
+      "reason": "arc gate had no anchor (no distinctive entity, no experiment ref) — it did not look; theme saturation 2 < 5 is the only signal that ran. Caller must do the 3-layer dedup check.",
+      "saturation": 2,
+      "theme_terms": [
+        "財報",
+        "尾部",
+        "科技",
+        "技股",
+        "修正",
+        "股波"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_e1ff7ef9",
+          "title": "監管警告 AI 估值太貴，那選擇權市場自己怕不怕？一個反直覺的答案"
+        },
+        {
+          "id": "mile_e4155e7c",
+          "title": "K1381：台灣科技股波動率格蘭傑領先 0050——統計顯著，OOS 預測增益趨近於零"
+        }
+      ],
+      "screened_at": "2026-07-15T22:00:17+00:00"
+    }
+  },
+  {
+    "id": "trending_repost_2026_07_16_台積電法說",
+    "title": "[trending_repost] 台積電法說今日登場，期權隱含波動率如何透露定價分歧？",
+    "description": "從今日 Q2 法說會的 Capex 指引與 N2 量產進度切入，分析期權市場隱含波動率 (IV) 與歷史波動率 (HV) 的偏離度。可量化：利用法說會前後的 IV Skew (偏斜度) 變化，驗證市場對下行風險與上行溢價的期權定價效率。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-15T22:00:24+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "warn_arc_near_miss",
+      "blocked": false,
+      "reason": "fuzzy descriptive arc near-miss of mile_31b2b0bb; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
+      "saturation": 2,
+      "theme_terms": [
+        "驗證",
+        "台積",
+        "積電",
+        "後的",
+        "capex",
+        "權市"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_31b2b0bb",
+          "title": "AI 五層產業鏈，我們不講故事，看波動率怎麼說"
+        }
+      ],
+      "screened_at": "2026-07-15T22:00:26+00:00"
+    }
+  },
+  {
+    "id": "trending_repost_2026_07_16_ai_集中度",
+    "title": "[trending_repost] 科技股集中度創高，如何利用波動率偏斜避險？",
+    "description": "從 2026 年 AI 溢價引導的窄幅市場上漲切入，探討極端權重集中下的尾部風險。可量化：分析科技巨頭的隱含波動率偏斜（skew）與權重集中度之相關性，並評估賣權價差避險策略的成本效益。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-15T22:00:30+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "unjudged_thin_signature",
+      "blocked": false,
+      "reason": "arc gate had no anchor (no distinctive entity, no experiment ref) — it did not look; theme saturation 4 < 5 is the only signal that ran. Caller must do the 3-layer dedup check.",
+      "saturation": 4,
+      "theme_terms": [
+        "尾部",
+        "科技",
+        "技股",
+        "相關",
+        "成本",
+        "避險"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_e1ff7ef9",
+          "title": "監管警告 AI 估值太貴，那選擇權市場自己怕不怕？一個反直覺的答案"
+        },
+        {
+          "id": "mile_057f178b",
+          "title": "為什麼 NVDA 每天都讓人心跳加速？不是業績，是它定價不了的事"
+        },
+        {
+          "id": "mile_a1507cf2",
+          "title": "K951：Copula-GARCH 在高相關 ETF 配對避險上全面落敗 Rolling OLS — 尾部結構缺失是根本原因"
+        },
+        {
+          "id": "mile_31b2b0bb",
+          "title": "AI 五層產業鏈，我們不講故事，看波動率怎麼說"
+        }
+      ],
+      "screened_at": "2026-07-15T22:00:30+00:00"
+    }
   }
 ]
