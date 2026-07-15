@@ -1,6 +1,7 @@
 ---
 audience: general
 type: trending_repost
+title: 海外擴廠拖累毛利？台積電法說會前夕，市場到底在怕什麼
 tags: 台積電, 法說會, 隱含波動率, 事件研究, 台股波動
 description: 台積電 7/16 法說會前夕，用 30 場歷史法說會的事件研究拆解：法說波動是「反應日單日跳、一週回歸」，現在偏高的台灣 VIX 主角其實是 AI 估值疑慮的大盤情緒，不是法說專屬定價。
 ---
@@ -69,3 +70,13 @@ description: 台積電 7/16 法說會前夕，用 30 場歷史法說會的事件
 ---
 
 *數據來源：2330.TW 日線（Yahoo Finance，2019/01–2026/04，30 場法說會）、VIXTWN 日資料（2025/12 起）。事件研究採單樣本與配對 t 檢定 + 5000 次拔靴（bootstrap）信賴區間。本文為研究性質分析，非投資建議，市場有風險。*
+
+## 懶人包圖組
+
+![台積電法說會波動集中在反應日一天的核心發現](storage/article_assets/tsmc_earnings_iv_20260708/lazypack/01_finding.png)
+
+![事件研究的資料口徑與統計檢定方法](storage/article_assets/tsmc_earnings_iv_20260708/lazypack/02_method.png)
+
+![法說會前中後與平常日的單日波動數字對照](storage/article_assets/tsmc_earnings_iv_20260708/lazypack/03_results.png)
+
+![台灣恐慌指數偏高主要反映大盤情緒而非法說會事件](storage/article_assets/tsmc_earnings_iv_20260708/lazypack/04_takeaway.png)

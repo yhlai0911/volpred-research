@@ -36987,13 +36987,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T05:04:07.518479+00:00",
+    "completed_at": "2026-07-15T05:21:44.942416+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T05:04:07.518479+00:00",
-      "last_clean_observed_at": "2026-07-15T05:04:07.518479+00:00"
+      "resolved_at": "2026-07-15T05:21:44.942416+00:00",
+      "last_clean_observed_at": "2026-07-15T05:21:44.942416+00:00"
     }
   },
   {
@@ -37005,13 +37005,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-15T04:13:41.814859+00:00",
+    "completed_at": "2026-07-15T05:04:13.855599+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T04:13:41.814859+00:00",
-      "last_clean_observed_at": "2026-07-15T04:13:41.814859+00:00"
+      "resolved_at": "2026-07-15T05:04:13.855599+00:00",
+      "last_clean_observed_at": "2026-07-15T05:04:13.855599+00:00"
     }
   },
   {
@@ -37560,7 +37560,7 @@
     "title": "Feed 有 45 篇 audience=general 但實為研究向（歷史錯標）— 重新分類 + 補真正的 general 覆蓋",
     "description": "`uv run python scripts/validate_feed_audience.py` 回報 45 個 violations：feed entry 宣告 audience='general'，但 title+content+tags 命中 ≥2 個學術關鍵詞，publisher 的 _infer_audience 會判定它們其實是 research。\n\n為什麼要修（不只是 CI 紅字）：\n1. 讀者拿到「一般讀者向」的標籤，點進去讀到滿篇 QLIKE / GARCH / bootstrap → 直接跳出。這是 Mission #1（把文章寫好）與 #5（曝光流量）的直接損失。\n2. 這 45 篇佔著 general 覆蓋的位置，但實際沒覆蓋到 → publication_candidates 的 uncovered 判定失真。\n\n根因線索（2026-07-15 hourly-03 於 K1583 發佈時發現）：publish_draft.py 的 AUDIENCE GATE 是 2026-05-29 才加的（fail fast，擋住 silent upcast）。這 45 篇很可能是 gate 上線前發佈的存量。池子裡 K672 已 retry-v4、K492/K709 retry-v2 — 同一個坑在反覆咬人，值得一併查是不是同源。\n\n建議做法：\n- 先跑 validate_feed_audience 取完整 45 個 id 清單，按「改標 research」vs「改寫成真 general」分流\n- 純研究內容 → 直接改標 research（backfill patch），並讓 publication_candidates 重新把該 K 列為 missing_general\n- 標題/主題本來就適合一般讀者、只是術語沒清乾淨 → 排進 daily_article 改寫\n- 完成後 validate_feed_audience 應 exit 0；把它接進 CI 防復發\n\n參考：本次 K1583 (mile_7b02f9e2) 的改寫手法可直接複用 — 語言層改寫、數字與限制段一字不動、sanitize_applied=0 才算真的乾淨。",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "platform_ops",
     "source": "agent_discovered",
     "tags": [
@@ -37571,7 +37571,25 @@
       "ci"
     ],
     "created_at": "2026-07-14T19:31:12.099039+00:00",
-    "discovered_by": "hourly-03"
+    "discovered_by": "hourly-03",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-15T05:12:35.836237+00:00",
+    "claim_session_id": "64cf5723f54d",
+    "status_history": [
+      {
+        "ts": "2026-07-15T05:12:35.836250+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-15T05:12:41.596971+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-15T05:12:41.596950+00:00"
   },
   {
     "id": "ops_claim_owner_collides_across_slots",
@@ -37819,7 +37837,7 @@
     "description": "聚焦Q2財報季半導體龍頭的業績指引，探討高估值背景下隱含波動率（IV）在財報公布前的攀升與公布後的快速崩塌（IV Crush）。可量化：歷史財報公布前後隱含波動率 vs 實際波動率（RV）的溢價分布，設計跨式或寬跨式選擇權賣方策略。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-14T22:00:21+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -37851,7 +37869,30 @@
         }
       ],
       "screened_at": "2026-07-14T22:00:23+00:00"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-15T05:09:29.331641+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-15T05:09:36.694710+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-15T05:20:06.315882+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-13"
+      }
+    ],
+    "started_at": "2026-07-15T05:09:36.694693+00:00",
+    "completed_at": "2026-07-15T05:20:06.315867+00:00",
+    "result": "驗證 7/8 卡池的 tsmc_earnings_iv 稿（30場法說會事件研究，數字全對 event_study_results.json）→ 建 4-panel deterministic 懶人包（lazypack_render，0 LLM，layout guard pass）→ anti_ai_gate PASS → 同步發佈 published mile_5a20a332（general，6張圖上架）。FB 文案已寫+過 gate，排 followup fb_post_tsmc_earnings_iv_20260715（需互動 Chrome）。"
   },
   {
     "id": "trending_repost_2026_07_15_ai基建",
@@ -38434,5 +38475,16 @@
       }
     ],
     "started_at": "2026-07-15T05:01:39.525834+00:00"
+  },
+  {
+    "id": "fb_post_tsmc_earnings_iv_20260715",
+    "title": "FB 雙發佈：台積電法說會前夕波動輪廓（mile_5a20a332）",
+    "task_type": "event_article",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-15T05:15:00+00:00",
+    "description": "feed 文章 mile_5a20a332（台積電法說會前夕：波動輪廓）已 published（general，含 4 張懶人包 + chart1/chart2）。做 FB 雙發佈到 Ivan Lai 個人 FB。\n\nFB 文案已寫好且過 anti_ai_gate exit 0：storage/event_articles/tsmc_earnings_iv_20260708/fb_draft.md\n主貼文附圖：storage/article_assets/tsmc_earnings_iv_20260708/chart1_event_profile.png + 懶人包 03_results.png（storage/article_assets/tsmc_earnings_iv_20260708/lazypack/）。\nSOP: .claude/skills/fb-publishing/SKILL.md — 主貼文不放連結、VolPred 連結放第一則留言；發前查重（老闆可能已手動發過）。需互動 Chrome session。\n\n背景：本文原是 7/8 卡在 draft pool 的 trending_repost 稿，hourly-13 於 7/15 法說會前夕（法說會 7/16）驗數字後同步發佈上架。event_article 的 FB 發佈強制但不算入 trending daily cap。\nparent_task_id: trending_repost_2026_07_15_晶片雙雄",
+    "task_family": "content",
+    "preferred_agent": "claude"
   }
 ]
