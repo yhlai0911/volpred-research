@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "title": "模型承諾的機率，要用實際破線率驗收",
+  "subtitle": "同一批資料，兩種尾端畫法交出完全不同的兌現率",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1010/k1010_results.json",
+      "sha256": "0459abe29d00060bbd6b81f57e02d48092c09edae08b8c1a9f6ccfb1ffc54bd8",
+      "label": "K1010 certified probabilistic forecast results"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_probability_promise",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "百日一次的承諾，誰最接近？",
+      "alt": "四種風險方法在百分之一警戒線的實際破線率",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "模型承諾",
+          "value": {
+            "source": "result",
+            "path": "/var_es_backtest/A4f_t_alpha0.01/expected_rate",
+            "format": {
+              "kind": "number",
+              "digits": 0,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "厚尾版本實際破線",
+          "value": {
+            "source": "result",
+            "path": "/var_es_backtest/A4f_t_alpha0.01/violation_rate",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          },
+          "note": "實際頻率接近原承諾"
+        },
+        {
+          "kind": "metric",
+          "label": "滾動校正版實際破線",
+          "value": {
+            "source": "result",
+            "path": "/var_es_backtest/A4f_QR_med_alpha0.01/violation_rate",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          },
+          "note": "實際頻率遠高於原承諾"
+        },
+        {
+          "kind": "metric",
+          "label": "共同評估樣本",
+          "value": {
+            "source": "result",
+            "path": "n_eval",
+            "format": {
+              "kind": "integer",
+              "suffix": " 日"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_calibration_ranking",
+      "info": "results",
+      "style": "professional",
+      "title": "厚尾假設比滾動校正更守信用",
+      "alt": "最佳與最差方法的九個機率刻度平均偏差",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "厚尾版平均偏差",
+          "value": {
+            "source": "result",
+            "path": "calibration_deviation_mad.A4f_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "scale": 100,
+              "suffix": "%"
+            }
+          },
+          "note": "六種做法中最低"
+        },
+        {
+          "kind": "metric",
+          "label": "滾動校正版平均偏差",
+          "value": {
+            "source": "result",
+            "path": "calibration_deviation_mad.A4f_QR",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "scale": 100,
+              "suffix": "%"
+            }
+          },
+          "note": "六種做法中最高"
+        },
+        {
+          "kind": "metric",
+          "label": "完整往前預測",
+          "value": {
+            "source": "result",
+            "path": "n_oos",
+            "format": {
+              "kind": "integer",
+              "suffix": " 日"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "滾動學習視窗",
+          "value": {
+            "source": "result",
+            "path": "config.qr_window",
+            "format": {
+              "kind": "integer",
+              "suffix": " 日"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_honest_boundary",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "三個讀法，避免把漂亮分數當安全",
+      "alt": "驗收風險警報的讀法與研究限制",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "先看兌現率",
+          "body": [
+            "模型承諾百日一次，就用長期實際破線次數驗收。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "再查時間順序",
+          "body": [
+            "每次預測只讀前一日以前的資料，不能偷看當天結果。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "保留研究邊界",
+          "body": [
+            "目前只測一個美股資產，視窗敏感度與跨資產效果仍待驗證。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "厚尾程度中位數",
+          "value": {
+            "source": "result",
+            "path": "student_t_df_median",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          },
+          "note": "尚未測試隨時間調整"
+        }
+      ]
+    }
+  ]
+}
