@@ -41878,5 +41878,28 @@
    "reviewed_commit": "0f5feec09d5237e3f442a23e7f31558c33631ddc",
    "review_artifact": "experiments/k1718/review_certification_20260716.md"
   }
+ },
+ {
+  "item_id": "k1705_reviewed_20260716",
+  "category": "copula_dependence_score_correction",
+  "content": "K1705 [CORRECTION, independently reviewed]: The archived K1100c Joe-superiority claim is not supported. K1100c defined the loss differential as Joe minus DCC, so its positive stored differentials mean Joe had the higher (worse) loss; its archived Joe density also fails the required theta=1 independence limit. In K1705, a common one-sided EWMA/Student-t PIT reconstruction scored 3,056 OOS days per SPY-TLT and SPY-GLD cell from 2014-05-30 through 2026-07-10. Every marginal calibration gate failed, and a conservative one-day delay reversed both score directions without Harvey |t|>3 significance. The defensible conclusion is limited to retracting the parent Joe-superiority interpretation; K1705 does not establish DCC superiority or dependence-family attribution.",
+  "evidence": [
+   "experiments/k1705/k1705_results.json",
+   "experiments/k1705/README.md",
+   "experiments/k1705/review_verdict.json",
+   "experiments/k1705/codex_review.md"
+  ],
+  "confidence": 0.99,
+  "created_at": "2026-07-15T23:03:03.957990+00:00",
+  "created_at_source": "system_clock_utc",
+  "k_id": "K1705",
+  "experiment_id": "k1705",
+  "experiment_path": "experiments/k1705",
+  "verdict": "CORRECTION",
+  "reviewer": "Codex CLI gpt-5.6-sol ultra",
+  "provenance": {
+   "reviewed_commit": "65c3e3199",
+   "review_artifact": "experiments/k1705/codex_review.md"
+  }
  }
 ]
