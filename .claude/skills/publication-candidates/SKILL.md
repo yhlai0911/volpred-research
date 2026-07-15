@@ -170,7 +170,8 @@ jq '.[] | {lesson_id, domain, summary: .summary[0:200]}' storage/memory/experime
 2. **無近期 FAIL 教訓**：knowledge.json / experiences.json 沒標該方向已 paradigm 推翻
 3. **主題多樣化**：對比 work_log 最近 10 個新 K + feed 最近 10 篇文章，檢查是否落在 dominant cluster（避重踩）
 4. **Novelty 20% quota**（`.claude/rules/publish-checklist.md`）：每 10 個新研究至少 2 個在 under-explored 主題（RL vol / HF microstructure / intraday seasonality / term-structure ML / climate vol / REIT / crypto-stablecoin / Bayesian averaging / MCS-SPA / retail flow）
-5. **文獻支持**：WebSearch 回傳 ≥3 篇學術支持或 flag 為 negative result 誠實研究
+5. **市場多樣性檢查（2026-07-15 用戶指示）**：對比 feed 最近 10 篇 reader-facing 文章的市場分佈；美股主題連續 5 篇 → 下一篇**強制**從台股產業 / 日股 / 印度 / 東南亞（research_program.md 面向 TW + 面向 ASIA backlog）取題。每週 reader-facing 產出非美股佔比目標 ≥1/3。資料可用性見面向 ASIA 段（yfinance 已驗證清單）
+6. **文獻支持**：WebSearch 回傳 ≥3 篇學術支持或 flag 為 negative result 誠實研究
 
 ### Step 5 — 派工
 

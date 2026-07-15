@@ -381,6 +381,28 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 
 > **Codex / Gemini / 用戶歷史建議**已移至 [`docs/research_program_archive_2026Q2.md`](docs/research_program_archive_2026Q2.md#archive-codexgemini-用戶-歷史建議2026-03-26--2026-04-14)。新建議請直接 append 此處或該歷史檔。
 
+### 面向 ASIA: 亞太多市場擴展專線（2026-07-15 用戶指示成立）
+
+**成立動機（用戶 2026-07-15 原話意旨）**：平台主題過度集中美股，「總是美股」無法吸引不同性質的投資 TA。研究主題與對象擴及**台股與其產業、日股與其產業、東南亞、印度**。同時服務 mission 1（內容多樣性→不同 TA 回訪）、mission 2（跨市場研究疆域）、mission 5（各市場搜尋流量入口）。**選題與 refill 端此後有市場多樣性要求**（見「發佈規範」與 publication-candidates skill）。
+
+**資料可用性（2026-07-15 yfinance smoke test，38/40 ticker 有 2 年日線；散檔見 scratchpad，結論如下）**：
+- 台股產業代表：2330/2317/2454（電子）、2881/2891（金融）、2603/2609（航運）、1301（塑化）、3008（光學）、0055.TW（金融 ETF）✅
+- 日股：^N225、1306.T（TOPIX ETF）、7203.T/6758.T/8306.T/9984.T/6501.T/4502.T（汽車/電子/銀行/通信/機械/製藥代表）✅；**^NKVI（日經VI）yfinance 不可得** — 日股 IV 研究需另尋源或用美 VIX spillover 替代
+- 印度：^NSEI（NIFTY 50）、^BSESN（SENSEX）、**^INDIAVIX ✅** — 8.63/VIX 台股方法論可整套複製；ADR INFY/HDB/IBN 與 INDA/EPI 提供美時段曝險
+- 東南亞：^STI（新加坡）、^JKSE（印尼）、^KLSE（馬來西亞）、^SET.BK（泰國）✅；^PSEI（菲律賓）不可得 → EPHE proxy；越南無指數 → VNM ETF proxy
+- 時區優勢：亞洲市場收盤在美股開盤前 → 隔夜 spillover 的 timing 合法性天然成立（同 T5b / K1664 慣例）；smoke test 只驗 2y，**每個 K 開工先做資料期間診斷**（^N225 可回溯數十年、^NSEI 2007 起含 2008 空頭，OOS 含空頭要求可滿足）
+
+**K backlog（依序派工；每 K 完成即評估轉對應市場 TA 的一般讀者文章）**：
+- [ ] ★ **ASIA-1 印度 VT + India VIX**：^NSEI + ^INDIAVIX 複製 R12 設計（India VIX vs 美 VIX 資訊含量：Granger + GARCH-X/HAR-X OOS QLIKE + Harvey）；若 India VIX 勝出，續作 c/VIX ratio VT 策略（對照台股 8.63/VIX）
+- [ ] ★ **ASIA-2 日股 VT 基礎**：^N225/1306.T baseline sweep（GARCH/GJR/HAR）+ 美 VIX exogenous 增量 — 台股 R12 結論（VIX 優於本地 proxy）的日本複製；^NKVI 不可得改用 VIX spillover 角度
+- [ ] **ASIA-3 台股產業波動溢出**：電子/金融/航運/塑化產業代表股 DY spillover index + Granger 網絡 — 產業輪動 TA 的內容線；對照 T5a gamma 結構
+- [ ] **ASIA-4 日股產業 EAV**：日本盤後決算公告制度 → 複製 K1060 T+1 發現（產業代表股 [-5,+5] 異常波動）；若 T+1 效應成立 = 跨市場制度性結論（Paper 候選）
+- [ ] **ASIA-5 亞太時區階梯 spillover**：美(SPY/VIX) → 日(^N225) → 台(^TWII) → 東南亞(^STI/^JKSE/^KLSE/^SET.BK) 的隔夜傳遞鏈；T5b（SPY→台）的多市場擴展
+- [ ] **ASIA-6 亞洲共同波動因子**：^TWII/^N225/^NSEI/^STI/^JKSE/^KLSE/^SET.BK panel 的 common vol factor（PCA/DFM）vs idiosyncratic 佔比 — 分散化敘事的實證基礎；注意 K1355 pooled inference 規則（跨資產不可 iid stack）
+- [ ] **ASIA-7 印度 ADR vs 本地雙重上市資訊流**：INFY/HDB/IBN（美）與 .NS 本地股的 vol 資訊先後（需先 smoke .NS ticker 可用性）
+
+**與既有結論的接點**：台股專線（面向 TW）8.63/VIX、R12（VIX>VXEEM）、K1060（T+1 EAV）、T5b（SPY→台 spillover）都是可直接跨市場複製的模板 — ASIA 線優先做「已驗證設計的新市場複製」而非全新設計，降低方法論風險、加速內容產出。
+
 ## 前沿文獻方向（2025-2026）
 
 ### 即刻可行動（不需新數據）
@@ -732,6 +754,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - 所有議題標注發起者（Gemini/Codex/Claude/用戶）
 - 具體發現存 `research_findings.md`（加入 embedding）
 - Claude 應定期讀取平台摘要（尤其 analytics / questions summary），把讀者回饋與高分會員問題納入研究來源
+- **市場多樣性要求（2026-07-15 用戶指示）**：選題與 refill 不可讓美股主題壟斷 — 每週 reader-facing 產出中**非美股市場（台/日/印度/東南亞）佔比目標 ≥1/3**；連續 5 篇皆美股主題時，下一篇強制從面向 TW / 面向 ASIA backlog 取題。事件驅動文章不受此限（時效優先），但亞洲市場事件（台/日央行、日銀 YCC、印度大選/預算、亞洲財報季）與美股事件同等對待為 P1 時效題材
 
 
 ---

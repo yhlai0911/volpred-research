@@ -42,6 +42,11 @@ agent 分別掃財金/經濟/計量/跨領域 + baseline dedup + synthesis），
 (3) data_feasibility（免費資料 yfinance/FRED/TAIFEX/TWSE/NOAA/官網/arXiv 能不能跑）。
 dedup against 既有 arcs（同邏輯換外殼算重複）。不捏造論文。
 
+**市場多樣性軸（2026-07-15 用戶指示）**：每 batch 至少 2 條非美股市場方向 — 台股產業 /
+日股與其產業 / 印度（^NSEI + ^INDIAVIX 可用）/ 東南亞（^STI/^JKSE/^KLSE/^SET.BK）。
+掃期刊時同步留意 JIMF / EMR / Pacific-Basin Finance Journal 等亞太/新興市場線。
+可用 ticker 清單與 proxy 對照見 `research_program.md` 面向 ASIA。
+
 ## 排程（auto-exec — 沒排程就不會執行）
 
 - `config/runtime_schedules.json::journal_topic_scan`（週一/四 cadence）→ piggy-back/session
