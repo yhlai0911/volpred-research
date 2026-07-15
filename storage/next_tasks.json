@@ -36477,10 +36477,33 @@
     "title": "Paper stage tracker 雙 SoT 統一分析（5-stage vs 11-stage）",
     "description": "WS5-5b S1 發現：paper-stage-classifier 的 5-stage 與 paper-submission-pipeline 的 11-stage 是兩套並行生命週期 tracker（dual source of truth），statuses 會漂移。本任務：分析-only — 盤點兩套的實際讀寫者（Supabase schema、前端、storage/paper_pipeline_status.json、各 skill），提出統一方案（保哪套、migration 步驟、影響面），落檔 docs/governance/。實施需 owner 裁決後另開任務。參考 docs/governance/2026-07/paper_skills_merge_eval.md §S1。",
     "task_type": "governance",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "source": "ws5_governance_layer_consolidation",
-    "created_at": "2026-07-14T09:04:42.802403+00:00"
+    "created_at": "2026-07-14T09:04:42.802403+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-15T19:49:06.448376+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T19:49:06.690274+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T20:03:17.727025+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop"
+      }
+    ],
+    "started_at": "2026-07-15T19:49:06.690259+00:00",
+    "completed_at": "2026-07-15T20:03:17.727010+00:00",
+    "result": "Analysis-only audit complete: 5-stage classifier is an unimplemented legacy spec, while the 11-stage tracker is the actual decision SoT and Supabase status is a display projection. Proposed single config owner, inode-safe sidecar-locked transition writer, explicit remote-sync receipts/outbox, phased migration, rollback and acceptance gates; implementation remains owner-gated. Commit b1ed9bf8b."
   },
   {
     "id": "ci-red-29320130569",
@@ -36751,13 +36774,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T19:00:51.922863+00:00",
+    "completed_at": "2026-07-15T20:01:08.885850+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T19:00:51.922863+00:00",
-      "last_clean_observed_at": "2026-07-15T19:00:51.922863+00:00"
+      "resolved_at": "2026-07-15T20:01:08.885850+00:00",
+      "last_clean_observed_at": "2026-07-15T20:01:08.885850+00:00"
     }
   },
   {
@@ -36769,13 +36792,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T18:23:21.315904+00:00",
+    "completed_at": "2026-07-15T19:11:20.515492+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T18:23:21.315904+00:00",
-      "last_clean_observed_at": "2026-07-15T18:23:21.315904+00:00"
+      "resolved_at": "2026-07-15T19:11:20.515492+00:00",
+      "last_clean_observed_at": "2026-07-15T19:11:20.515492+00:00"
     }
   },
   {
@@ -37171,9 +37194,27 @@
     "id": "dm_hac_fix_k1525_k1526_pair",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-15T01:28:07+08:00",
-    "description": "K1655 bug class 必修 #4/#5（必須同輪修，否則兩份 README 數字分岔）：k1525.py:265 與 k1526.py:265（逐字複製）雙重退化 — 空迴圈 + Newey-West 權重 `1-k/h` 在 h=1,k=1 時歸零。k1525 README 的 headline null（t=-0.85, p=0.397）就建在這上面。注意：null 不代表安全 —— k621 前例是負自協方差讓 |t| 由 2.26 升到 3.64、p 由 0.0237 掉到 0.0003，補 HAC 後 null 可能翻成顯著。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md"
+    "description": "K1655 bug class 必修 #4/#5（必須同輪修，否則兩份 README 數字分岔）：k1525.py:265 與 k1526.py:265（逐字複製）雙重退化 — 空迴圈 + Newey-West 權重 `1-k/h` 在 h=1,k=1 時歸零。k1525 README 的 headline null（t=-0.85, p=0.397）就建在這上面。注意：null 不代表安全 —— k621 前例是負自協方差讓 |t| 由 2.26 升到 3.64、p 由 0.0237 掉到 0.0003，補 HAC 後 null 可能翻成顯著。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md",
+    "claimed_by": "codex-failover-slot-2-6248c6031dd8485aa71ab6a0f6f51f7a",
+    "claimed_at": "2026-07-15T20:08:34.791536+00:00",
+    "claim_session_id": "253f4e1d412e",
+    "status_history": [
+      {
+        "ts": "2026-07-15T20:08:34.791551+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-6248c6031dd8485aa71ab6a0f6f51f7a"
+      },
+      {
+        "ts": "2026-07-15T20:08:35.023307+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-6248c6031dd8485aa71ab6a0f6f51f7a"
+      }
+    ],
+    "started_at": "2026-07-15T20:08:35.023294+00:00"
   },
   {
     "id": "dm_hac_auditor_false_negative_regex",
@@ -38800,7 +38841,7 @@
     "title": "Audience correction: rewrite a true general companion for 預測波動率有多準？用天氣預報的標準驗證——簡單方法竟然最精確",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_94a0a999. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1010']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38815,7 +38856,25 @@
       "content-quality"
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1010"
+    "k_id": "K1010",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-07-15T20:06:39.377911+00:00",
+    "claim_session_id": "7e4130630aba",
+    "status_history": [
+      {
+        "ts": "2026-07-15T20:06:39.377926+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T20:06:39.653853+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop"
+      }
+    ],
+    "started_at": "2026-07-15T20:06:39.653835+00:00"
   },
   {
     "id": "K942_article_general_audience_rewrite_2cfa32a4",
@@ -39245,12 +39304,9 @@
     "description": "面向 ASIA 第二棒。^N225 + 1306.T（TOPIX ETF）baseline sweep（GARCH/GJR/HAR）+ 美 VIX exogenous 增量檢定 — 台股 R12 結論（美 VIX 優於本地 vol proxy）的日本複製。^NKVI（日經VI）yfinance 不可得（2026-07-15 smoke test x3 empty），本 K 用美 VIX spillover 角度，不做日本本地 IV。時區注意：日股收盤先於美股開盤，overnight VIX 訊號用前一美股交易日收盤（timing 合法）。資料期間：^N225 可回溯數十年，開工先診斷並依 COMMON_START 慣例。硬規則：開工先讀 docs/error_log.md + 搜 knowledge.json 相似 K + 至少 3 篇文獻；先做資料期間診斷（smoke test 只驗 2y，實驗要拉最長可得樣本，OOS 必含至少一次空頭）；跨市場假日 alignment 依 methodology.md；signal.shift(1) 明確 lag；DM 用 canonical volpred.stats.model_evaluation.dm_test（HAC bandwidth 規則）；收工跑 experiment_gates.py。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user_directive_20260715_market_diversification",
     "created_at": "2026-07-15T07:59:24.440660+00:00",
-    "claimed_by": "codex-failover",
-    "claimed_at": "2026-07-15T17:09:11.082602+00:00",
-    "claim_session_id": "b8db46d35820",
     "status_history": [
       {
         "ts": "2026-07-15T17:09:11.082616+00:00",
@@ -39263,9 +39319,38 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T19:50:06.266234+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-15T20:01:37.581127+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-3c9f512dc6414e2b84f77ff214fadf88"
+      },
+      {
+        "ts": "2026-07-15T20:01:37.859849+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-3c9f512dc6414e2b84f77ff214fadf88"
+      },
+      {
+        "ts": "2026-07-15T20:08:44.557947+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-3c9f512dc6414e2b84f77ff214fadf88"
       }
     ],
-    "started_at": "2026-07-15T17:09:17.832064+00:00"
+    "started_at": "2026-07-15T20:01:37.859834+00:00",
+    "last_released_at": "2026-07-15T19:50:06.266227+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-15T20:08:44.557932+00:00",
+    "result": "K1718 completed and merged: repaired audited 1306.T vendor scale discontinuities, reran 2015-2026 Japan OOS baselines, and found lagged US VIX passes 0/6 Holm-adjusted cells (NULL). Codex review/certification PASS; pytest 3/3 and experiment integrity gates PASS; merge_commit=21c155fb9."
   },
   {
     "id": "asia3_tw_sector_spillover",
@@ -39479,13 +39564,10 @@
     "id": "k1396_scope_repair_daily_r2",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending_main_thread",
     "created_at": "2026-07-15T08:34:29.171934+00:00",
     "source": "dm_hac_fix_k1379_paper9_exposure_audit",
     "description": "Audit K1396 independent protocol and public claims. Relabel daily-r-squared and steady-state A4f approximations accurately, withdraw canonical HAR-RV/non-inferiority wording unless supported, then update K1396 knowledge and feeds mile_7825c8a2 and mile_7fbc61c8.",
-    "claimed_by": "codex-desktop",
-    "claimed_at": "2026-07-15T18:49:02.729042+00:00",
-    "claim_session_id": "c4208ae1324b",
     "status_history": [
       {
         "ts": "2026-07-15T18:49:02.729057+00:00",
@@ -39498,9 +39580,25 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T19:39:03.602070+00:00",
+        "from": "in_progress",
+        "to": "pending_main_thread",
+        "by": "codex-desktop",
+        "note": "Codex-completable scope finished. Experiment repair merged in 23848eea8; public articles mile_7825c8a2 and mile_7fbc61c8 formally corrected, synced, and live-HTML verified; reproducible fallback assets committed in 5b1bd266e. Claude main thread only: use K1259-gated canonical knowledge writer to supersede k1396_har_rv_vs_a4f_paper9_c4; verdict SUPERSEDED, superseded_by K1379, withdraw canonical HAR-RV/exact-K988/parity/non-inferiority/nested raw-DM/small-gap claims. Browser instance unavailable, so visual Chrome readback remains a noted non-blocking verification gap; HTTP live content and all images passed."
+      },
+      {
+        "ts": "2026-07-15T19:39:56.129473+00:00",
+        "from": "pending_main_thread",
+        "to": "pending_main_thread",
+        "by": "handoff",
+        "note": "Codex-completable scope finished. Experiment repair merged in 23848eea8; public articles mile_7825c8a2 and mile_7fbc61c8 formally corrected, synced, and committed in 5b1bd266e; reproducible fallback assets included. HTTP and Chrome live readback both passed on 2026-07-16: correction banners visible, 5/2 article images loaded, no horizontal overflow. Claude main thread only: use K1259-gated canonical knowledge writer to supersede k1396_har_rv_vs_a4f_paper9_c4; verdict SUPERSEDED, superseded_by K1379, withdraw canonical HAR-RV/exact-K988/parity/non-inferiority/nested raw-DM/small-gap claims."
       }
     ],
-    "started_at": "2026-07-15T18:49:02.961112+00:00"
+    "started_at": "2026-07-15T18:49:02.961112+00:00",
+    "handoff_note": "Codex-completable scope finished. Experiment repair merged in 23848eea8; public articles mile_7825c8a2 and mile_7fbc61c8 formally corrected, synced, and committed in 5b1bd266e; reproducible fallback assets included. HTTP and Chrome live readback both passed on 2026-07-16: correction banners visible, 5/2 article images loaded, no horizontal overflow. Claude main thread only: use K1259-gated canonical knowledge writer to supersede k1396_har_rv_vs_a4f_paper9_c4; verdict SUPERSEDED, superseded_by K1379, withdraw canonical HAR-RV/exact-K988/parity/non-inferiority/nested raw-DM/small-gap claims.",
+    "handoff_at": "2026-07-15T19:39:56.129456+00:00"
   },
   {
     "id": "ci-red-29399240558",
@@ -39609,7 +39707,7 @@
     "title": "Audience correction: rewrite a true general companion for 波動率預測不是把指標愈疊愈多就會愈準",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_8a9ae3c8. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1379']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -39624,7 +39722,30 @@
       "content-quality"
     ],
     "created_at": "2026-07-15T10:06:41.746915+00:00",
-    "k_id": "K1379"
+    "k_id": "K1379",
+    "status_history": [
+      {
+        "ts": "2026-07-15T19:40:32.013056+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1379-audience"
+      },
+      {
+        "ts": "2026-07-15T19:40:32.254247+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1379-audience"
+      },
+      {
+        "ts": "2026-07-15T19:59:53.034574+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-k1379-audience"
+      }
+    ],
+    "started_at": "2026-07-15T19:40:32.254231+00:00",
+    "completed_at": "2026-07-15T19:59:53.034554+00:00",
+    "result": "Created true general companion mile_6e81bb0a as draft while preserving mile_8a9ae3c8 as research/published. Anti-AI PASS, publisher inference PASS, sanitize_applied=0, provenance/image/font/audience gates PASS; audience_correction_gap=false. Strict 3-panel lazypack plan validated and queued as lazypack-mile_6e81bb0a. Commit 43cdeb9a2."
   },
   {
     "id": "telegram-820",
@@ -40078,10 +40199,33 @@
     "task_type": "platform_ops",
     "priority": 3,
     "source": "telegram_responder_audit",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T12:10:24.273595+00:00",
     "title": "退役 cron_hourly_dispatch.sh TCC/Desktop 過時警報文案",
-    "description": "排查來源：老闆 Telegram msg 836「徹底排查是否還有這種路徑問題」（承接 warm_tcc_authorization.sh 過時 Desktop 文案議題）。\n\n排查結論（telegram_responder 2026-07-15 20:06 完成）：\n路徑層全乾淨 — 20 個 launchd plist WorkingDirectory 全指向 ~/volpred-research；~/Desktop/volpred-research 目錄與 symlink 已不存在；src/volpred/publisher/prepublish_audit.py 的 Desktop 引用是防禦性 stale-path 偵測（保留）；cron_*.sh header 提到 Desktop 只是歷史註解與 log 目錄說明，不影響行為。\n\n唯一同類殘留（需修）：scripts/cron_hourly_dispatch.sh 的 TCC-shaped failure alert 分支（約 line 291, 303-325, 379-381）。repo 已於 2026-07-02 搬離 ~/Desktop、TCC 對 repo 不再適用，但此分支的標題、內文根因與處置步驟仍寫死「新版 binary 尚未取得 Desktop TCC 授權 / 請在 Desktop 下開互動 session 修復」的過時敘事。若因系統負載等其他原因出現 EINTR / operation not permitted / getcwd 特徵而誤觸發，會發一封 CRITICAL 假警報並給出誤導處置。\n\n建議：比照 warm_tcc_authorization.sh 已退役 email alert 的做法，退役或改寫此分支 —— 移除 Desktop-TCC 專屬敘事與「在 Desktop 下開 session」步驟，改為中性描述（EINTR/資源競爭類暫時失敗），或降級不發 CRITICAL。修前先讀 docs/error_log.md 2026-07-02 條目確認語意。"
+    "description": "排查來源：老闆 Telegram msg 836「徹底排查是否還有這種路徑問題」（承接 warm_tcc_authorization.sh 過時 Desktop 文案議題）。\n\n排查結論（telegram_responder 2026-07-15 20:06 完成）：\n路徑層全乾淨 — 20 個 launchd plist WorkingDirectory 全指向 ~/volpred-research；~/Desktop/volpred-research 目錄與 symlink 已不存在；src/volpred/publisher/prepublish_audit.py 的 Desktop 引用是防禦性 stale-path 偵測（保留）；cron_*.sh header 提到 Desktop 只是歷史註解與 log 目錄說明，不影響行為。\n\n唯一同類殘留（需修）：scripts/cron_hourly_dispatch.sh 的 TCC-shaped failure alert 分支（約 line 291, 303-325, 379-381）。repo 已於 2026-07-02 搬離 ~/Desktop、TCC 對 repo 不再適用，但此分支的標題、內文根因與處置步驟仍寫死「新版 binary 尚未取得 Desktop TCC 授權 / 請在 Desktop 下開互動 session 修復」的過時敘事。若因系統負載等其他原因出現 EINTR / operation not permitted / getcwd 特徵而誤觸發，會發一封 CRITICAL 假警報並給出誤導處置。\n\n建議：比照 warm_tcc_authorization.sh 已退役 email alert 的做法，退役或改寫此分支 —— 移除 Desktop-TCC 專屬敘事與「在 Desktop 下開 session」步驟，改為中性描述（EINTR/資源競爭類暫時失敗），或降級不發 CRITICAL。修前先讀 docs/error_log.md 2026-07-02 條目確認語意。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T19:39:43.255632+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T19:39:43.494271+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T19:47:16.225411+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop"
+      }
+    ],
+    "started_at": "2026-07-15T19:39:43.494258+00:00",
+    "completed_at": "2026-07-15T19:47:16.225395+00:00",
+    "result": "Retired stale Desktop-TCC diagnosis from rollback hourly wrapper. EPERM/getcwd/EINTR now produce neutral WARN with Codex failover and bounded runtime/filesystem diagnostics; removed symlink-age heuristic and stale remediation. Added regression/governance record; bash -n PASS, 172 targeted tests PASS, independent review PASS. Commit c45d82c0d."
   },
   {
     "id": "telegram-838",
@@ -40514,5 +40658,37 @@
     "started_at": "2026-07-15T19:01:17.418915+00:00",
     "completed_at": "2026-07-15T19:08:46.642085+00:00",
     "result": "root_cause=K1709 finished artifacts landed without a knowledge registry entry, while run 29438793681 tested a pre-fixed-memory-adjudication head; class sweep also found newly merged K1711 missing from knowledge; repair_commit=a06d64daf; verification=knowledge inventory zero, K1259 provenance 0 violations, nested-DM ratchet passes on current main; no push per supervisor policy"
+  },
+  {
+    "id": "ci-red-29442836650",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29421677446",
+    "ci_run_key": "29442836650:1",
+    "created_at": "2026-07-15T20:00:07.985734+00:00",
+    "title": "CI 紅燈修復（run 29442836650, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29442836650\nattempt: 1\nhead_sha: 22422d2ee\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29442836650 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "claimed_by": "codex-desktop-ci-29442836650",
+    "claimed_at": "2026-07-15T20:00:59.309201+00:00",
+    "claim_session_id": "c70f56492f09",
+    "status_history": [
+      {
+        "ts": "2026-07-15T20:00:59.309218+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-ci-29442836650"
+      },
+      {
+        "ts": "2026-07-15T20:00:59.534327+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-ci-29442836650"
+      }
+    ],
+    "started_at": "2026-07-15T20:00:59.534312+00:00"
   }
 ]
