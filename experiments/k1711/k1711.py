@@ -22,14 +22,14 @@ What this experiment is NOT — read before quoting any number
 are 2025 artefacts; the main window starts in 2016. Their context windows end at
 the forecast origin (verified by test), so no *input* peeks — but the *weights*
 were fit by someone else, later, on a corpus we do not fully control. That makes
-the 2016+ window a **retrospective pseudo-OOS**, in exactly the sense K1655 had
+the 2016-07+ window a **retrospective pseudo-OOS**, in exactly the sense K1655 had
 to retract a real-time claim for back-stamped NFCI vintages.
 
-So the design carries a second, vintage-respecting window:
+So the design also carries a cleaner, later robustness window:
 
-    pseudo_oos     2016-01-01 →   retrospective; TSFM weights post-date the data
-    vintage_clean  2024-01-01 →   starts after every documented pretraining cutoff
-                                  (TimesFM: Wikipedia Nov-2023, Google Trends EoY-2022)
+    pseudo_oos     2016-07-01 →   retrospective; TSFM weights post-date the data
+    vintage_clean  2024-01-01 →   after TimesFM's documented Nov-2023 cutoff, but TTM's
+                                  data cutoff is unstated; NOT fully model-vintage-clean
 
 Direct target leakage is separately implausible: TTM's corpus is fully enumerated
 on its model card and contains no equity or index volatility (only Bitcoin);
@@ -66,6 +66,7 @@ null and DM applies — but they do contain HAR, so any win is partly HAR's own.
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -85,6 +86,7 @@ from volpred.stats.model_evaluation import (  # noqa: E402
 )
 
 DATA = HERE / "data"
+PANEL_META = DATA / "panel_meta.json"
 
 ASSETS = ("SPY", "0050.TW", "TX")
 HORIZONS = (1, 5)
@@ -100,10 +102,17 @@ WINDOWS = {
     "pseudo_oos": pd.Timestamp("2016-07-01"),
     "vintage_clean": pd.Timestamp("2024-01-01"),
 }
+WINDOW_SEMANTICS = {
+    "pseudo_oos": "retrospective — TSFM weights post-date the data; NOT real-time OOS",
+    "vintage_clean": (
+        "later/cleaner robustness window after TimesFM's documented cutoff; TTM's "
+        "training-data cutoff is unstated, so this is NOT fully model-vintage-clean"
+    ),
+}
 PRIMARY = {"window": "pseudo_oos", "proxy": "rv", "loss": "qlike",
            "horizon": 1, "alpha": 0.10}
 
-FIT_START = WINDOWS["pseudo_oos"]     # PIT quantities are estimated on pre-2016 data only
+FIT_START = WINDOWS["pseudo_oos"]     # PIT quantities use data before the primary window
 MIN_TRAIN_HAR = 500
 MIN_TRAIN_MZ = 400
 R2_FLOOR_PCT = 1.0                    # r2 has exact zeros and QLIKE diverges there
@@ -389,7 +398,8 @@ def evaluate(asset: str, h: int, proxy: str, window: str, panel: pd.DataFrame,
     px = panel[proxy].to_numpy(dtype=np.float64)
 
     # The r2 proxy has exact zeros; QLIKE diverges at zero, so it needs a floor.  The
-    # floor is read off pre-2016 positives only — a percentile taken over the whole
+    # floor is read off positives before the 2016-07 primary window only — a percentile
+    # taken over the whole
     # sample would be a (small) lookahead.  Flooring makes r2 no longer *exactly*
     # conditionally unbiased, so Patton's proxy-robustness applies only approximately;
     # k1711 reports floor sensitivity rather than pretending the issue away.
@@ -686,10 +696,15 @@ def finalize_results(results: dict) -> dict:
             "MCS membership is non-rejection, not proof that a survivor wins.",
             "The MCS contains estimated and nested forecasts; its standard bootstrap does "
             "not separately repair nested pairwise QLIKE inference.",
-            "The 2016+ window is retrospective pseudo-OOS because TSFM weights post-date it.",
+            "The 2016-07+ window is retrospective pseudo-OOS because TSFM weights post-date it.",
             "Clark-West results apply to MSE only and are secondary to the MCS objective.",
         ],
     }
+    # Provenance/wording fields are generated from code-owned sources so completed
+    # result artifacts can be repaired without touching forecasts, losses or MCS draws.
+    results["config"]["windows"] = {k: str(v.date()) for k, v in WINDOWS.items()}
+    results["config"]["window_semantics"] = dict(WINDOW_SEMANTICS)
+    results["panels"] = json.loads(PANEL_META.read_text())
     results["config"]["nested_inference_contract"] = {
         "raw_dm_hln": "diagnostic_only; never feeds any verdict",
         "mse": "Clark-West (2007), Holm-adjusted within cell, secondary",
@@ -791,10 +806,7 @@ def main() -> None:
         "primary_specification": PRIMARY,
         "config": {
             "windows": {k: str(v.date()) for k, v in WINDOWS.items()},
-            "window_semantics": {
-                "pseudo_oos": "retrospective — TSFM weights post-date the data; NOT real-time OOS",
-                "vintage_clean": "starts after every documented TSFM pretraining cutoff",
-            },
+            "window_semantics": dict(WINDOW_SEMANTICS),
             "horizons": list(HORIZONS),
             "proxies": list(PROXIES),
             "base_pool": BASE_POOL,
@@ -813,7 +825,7 @@ def main() -> None:
             "nested_impl": "volpred.stats.model_evaluation.clark_west_test (MSE only)",
             "harvey_threshold": HARVEY_T,
         },
-        "panels": json.loads((DATA / "panel_meta.json").read_text()),
+        "panels": json.loads(PANEL_META.read_text()),
         "tsfm_meta": {m: json.loads((DATA / f"tsfm_{m}_meta.json").read_text())
                       for m in TSFMS},
         "cells": [], "pooled": [],
@@ -847,5 +859,23 @@ def main() -> None:
     print("\nwrote k1711_results.json")
 
 
+def finalize_existing_artifact(path: Path = HERE / "k1711_results.json") -> dict:
+    """Refresh provenance/verdict metadata without recomputing forecasts or MCS."""
+    results = json.loads(path.read_text())
+    finalize_results(results)
+    _atomic_json(path, results)
+    return results
+
+
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--finalize-existing", action="store_true",
+        help="refresh existing results metadata/verdict wiring without recomputation",
+    )
+    args = parser.parse_args()
+    if args.finalize_existing:
+        finalize_existing_artifact()
+        print("refreshed k1711_results.json without recomputing forecasts or MCS")
+    else:
+        main()

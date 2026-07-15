@@ -93,9 +93,10 @@ def fig_cumulative_loss_diff(results: dict, series: dict) -> None:
 def fig_proxy_robustness(results: dict) -> None:
     """Does the superior set survive swapping the evaluation proxy (RV -> r^2)?
 
-    Patton (2011) says QLIKE *rankings* are invariant to any conditionally unbiased
-    proxy. It says nothing about whether a finite-sample MCS keeps the same members
-    once the proxy gets much noisier. That gap is what this panel shows.
+    Patton (2011) establishes QLIKE ranking robustness for conditionally unbiased
+    proxies. Squared open-to-close return meets that condition only under idealized
+    assumptions such as zero conditional intraday mean; K1711 also floors exact zeros.
+    This panel is therefore approximate proxy sensitivity, not an exact theorem check.
     """
     fig, ax = plt.subplots(figsize=(11, 5), constrained_layout=True)
 

@@ -6,7 +6,7 @@
       "start": "1999-01-04",
       "end": "2026-07-13",
       "rv_source": "Garman-Klass open-to-close variance from daily OHLC (yfinance)",
-      "r2_source": "log(close/open)^2 \u2014 noisy but unbiased for the same target",
+      "r2_source": "log(close/open)^2 \u2014 noisy proxy; conditionally unbiased only under idealized assumptions including zero conditional intraday mean; K1711 floors exact zeros from pre-window data, so this is approximate robustness",
       "rv_median": 4.2070034771042235e-05,
       "r2_median": 2.0425758924752572e-05,
       "n_zero_r2": 45,
@@ -21,18 +21,18 @@
       "start": "2009-01-05",
       "end": "2026-07-13",
       "rv_source": "Garman-Klass open-to-close variance from daily OHLC (yfinance)",
-      "r2_source": "log(close/open)^2 \u2014 noisy but unbiased for the same target",
+      "r2_source": "log(close/open)^2 \u2014 noisy proxy; conditionally unbiased only under idealized assumptions including zero conditional intraday mean; K1711 floors exact zeros from pre-window data, so this is approximate robustness",
       "rv_median": 3.0119101305163264e-05,
       "r2_median": 1.8123217428549763e-05,
       "n_zero_r2": 190,
       "file": "data/panel_0050_TW.csv",
       "diagnostics": {
         "split_artefact": {
-          "canonical_repair": "clean_tw50_data() applied to close series",
           "raw_worst_daily_return": -0.7506388480576205,
           "repaired_worst_daily_return": -0.11922342484921145,
           "targets_are_scale_invariant": true,
-          "why": "GK and log(C/O)^2 use only within-day ratios; a cross-day rescaling cancels out of both."
+          "why": "GK and log(C/O)^2 use only within-day ratios; a cross-day rescaling cancels out of both.",
+          "diagnostic_only_close_repair": "clean_tw50_data() applied to close only as a diagnostic/proof; target GK and log(C/O)^2 remain raw within-day ratios because split rescaling cancels"
         },
         "n_dropped_bad_ohlc": 21
       }
@@ -43,7 +43,7 @@
       "start": "2012-01-02",
       "end": "2026-07-13",
       "rv_source": "TAIFEX 5-min RV, day session, volume-selected active contract",
-      "r2_source": "log(close/open)^2 \u2014 noisy but unbiased for the same target",
+      "r2_source": "log(close/open)^2 \u2014 noisy proxy; conditionally unbiased only under idealized assumptions including zero conditional intraday mean; K1711 floors exact zeros from pre-window data, so this is approximate robustness",
       "rv_median": 3.216664348975656e-05,
       "r2_median": 1.6903501761807878e-05,
       "n_zero_r2": 19,
@@ -75,7 +75,7 @@
     "taifex_5min_rv_csv": {
       "path": "/Users/yhlai0911/volpred-research/data/intraday/taifex_5min_rv.csv",
       "sha256": "bc73dd7865d82ff3ef2c528881a44771fbc7a91c4139b8f284679062fd56efd9",
-      "note": "gitignored local artefact; derived panels below are committed"
+      "note": "collector may append later rows; SHA-256 records the experiment-time raw snapshot, while the committed derived panel freezes the rows used by K1711"
     },
     "yfinance_download_window": [
       "1999-01-01",

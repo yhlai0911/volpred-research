@@ -12,7 +12,8 @@ while the analysis runs in the project environment.
 
 Models
     TimesFM   google/timesfm-2.5-200m-pytorch  (decoder-only, patched)
-    TTM       ibm-granite/granite-timeseries-ttm-r2, revision 512-192-r2 (0.9M params)
+    TTM       ibm-granite/granite-timeseries-ttm-r2, official selector
+              512-96-ft-r2.1 (0.86M params, freq='d')
 
 Both are fed the *log* variance series.  Log is the right space: it makes the
 series roughly homoskedastic and symmetric, which is what these models saw in
@@ -134,7 +135,8 @@ def run_ttm(contexts: list[np.ndarray]) -> np.ndarray:
     # hourly resolutions — daily/weekly arrived in r2.1** (model card §Recommended Use).
     # And "-ft-" does NOT mean fine-tuned-on-target; it means *frequency prefix tuning*
     # (an extra embedding carrying the series' sampling frequency), so an -ft- branch is
-    # still zero-shot.  Feeding daily RV to 512-192-r2 would have handicapped TTM — and
+    # still zero-shot. Feeding daily RV to the obsolete 512-192-r2 branch would have
+    # handicapped TTM — and
     # since a handicapped TSFM biases this experiment toward its own expected NULL, that
     # is exactly the kind of bug that would never have announced itself.
     model = get_model(
@@ -172,9 +174,9 @@ CHECKPOINTS = {
     "timesfm": {
         "repo": "google/timesfm-2.5-200m-pytorch",
         "params": "200M",
-        # Straight off the model card. These cutoffs are what make the post-2024
-        # sub-sample in k1711.py a vintage-respecting evaluation rather than a
-        # backcast — see the pseudo-OOS discussion there.
+        # Straight off the TimesFM model card. The post-2024 window is after these
+        # documented cutoffs, but it is only a cleaner robustness window because TTM's
+        # training-data cutoff is unstated; see the pseudo-OOS discussion in k1711.py.
         "pretraining_corpus": ["GiftEvalPretrain",
                                "Wikimedia Pageviews (cutoff Nov 2023)",
                                "Google Trends top queries (cutoff EoY 2022)",

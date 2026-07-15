@@ -10,6 +10,7 @@ the future still produces a beautiful, plausible, entirely wrong results table.
 from __future__ import annotations
 
 import copy
+import json
 import sys
 from pathlib import Path
 
@@ -21,6 +22,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import k1711  # noqa: E402
+import k1711_charts  # noqa: E402
+import k1711_data  # noqa: E402
 import k1711_tsfm  # noqa: E402
 
 
@@ -254,6 +257,69 @@ def test_nested_dm_policy_is_machine_readable_and_claim_narrow():
     """The repo gate must see the explicit contract; prose typography is not enough."""
     assert "nested-dm: diagnostic-only" in k1711.__doc__
     assert k1711.NESTED_QLIKE_STATUS.startswith("INCONCLUSIVE_")
+
+
+def test_window_and_checkpoint_provenance_wording_is_exact():
+    assert k1711.WINDOWS["pseudo_oos"] == pd.Timestamp("2016-07-01")
+    assert "2016-07-01" in k1711.__doc__
+    assert "2016-01-01" not in k1711.__doc__
+    later = k1711.WINDOW_SEMANTICS["vintage_clean"]
+    assert "TTM's training-data cutoff is unstated" in later
+    assert "NOT fully model-vintage-clean" in later
+
+    ttm = k1711_tsfm.CHECKPOINTS["ttm"]
+    assert ttm["revision"].startswith("512-96-ft-r2.1")
+    assert "512-96-ft-r2.1" in k1711_tsfm.__doc__
+    assert "revision 512-192-r2" not in k1711_tsfm.__doc__
+
+
+def test_r2_proxy_claim_has_conditions_and_floor_disclosure():
+    claim = k1711_data.R2_SOURCE_DESCRIPTION.lower()
+    assert "zero conditional intraday mean" in claim
+    assert "idealized assumptions" in claim
+    assert "floors exact zeros" in claim
+    assert "approximate robustness" in claim
+    assert "approximate proxy sensitivity" in k1711_charts.fig_proxy_robustness.__doc__
+
+
+def test_metadata_refresh_and_results_finalizer_share_canonical_wording(
+    tmp_path, monkeypatch,
+):
+    path = tmp_path / "panel_meta.json"
+    original = {
+        "assets": {a: {"r2_source": "legacy", "n_days": i + 1,
+                       "diagnostics": ({"split_artefact": {
+                           "canonical_repair": "legacy ambiguous wording"
+                       }} if a == "0050.TW" else {})}
+                   for i, a in enumerate(k1711.ASSETS)},
+        "source_provenance": {
+            "keep": True,
+            "taifex_5min_rv_csv": {"sha256": "frozen", "note": "legacy"},
+        },
+    }
+    path.write_text(json.dumps(original))
+    refreshed = k1711_data.refresh_panel_metadata(path)
+    assert refreshed["source_provenance"]["keep"] is True
+    assert refreshed["source_provenance"]["taifex_5min_rv_csv"]["sha256"] == "frozen"
+    assert refreshed["source_provenance"]["taifex_5min_rv_csv"]["note"] == (
+        k1711_data.TAIFEX_PROVENANCE_NOTE
+    )
+    assert all(row["r2_source"] == k1711_data.R2_SOURCE_DESCRIPTION
+               for row in refreshed["assets"].values())
+    split = refreshed["assets"]["0050.TW"]["diagnostics"]["split_artefact"]
+    assert "canonical_repair" not in split
+    assert split["diagnostic_only_close_repair"] == k1711_data.TW50_DIAGNOSTIC_DESCRIPTION
+
+    monkeypatch.setattr(k1711, "PANEL_META", path)
+    result = k1711.finalize_results(_legacy_results_fixture())
+    assert result["panels"] == refreshed
+    assert result["config"]["window_semantics"] == k1711.WINDOW_SEMANTICS
+
+    result_path = tmp_path / "results.json"
+    result_path.write_text(json.dumps(_legacy_results_fixture()))
+    finalized = k1711.finalize_existing_artifact(result_path)
+    assert json.loads(result_path.read_text()) == finalized
+    assert finalized["panels"] == refreshed
 
 
 # ── evaluate(): the end-to-end path that actually crashed ─────────────────────

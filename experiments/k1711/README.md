@@ -37,9 +37,13 @@ standalone base set 是 `{HAR-A}`，full-pool 投影則是 `{HAR, HAR-A}`。因�
 | 0050.TW | 2009-01-05–2026-07-13 | 2016-07-01–2026-07-09 | 2,426 | yfinance 日 OHLC 的 Garman–Klass variance |
 | TX | 2012-01-02–2026-07-13 | 2016-07-01–2026-07-09 | 2,438 | 本機 TAIFEX 5-min、按成交量選 active contract 的日 RV |
 
-第二個評估 proxy 是 `log(close/open)^2`。0050.TW close series 經 canonical
-`clean_tw50_data()` 修復 split artefact；GK 與 open-to-close squared return 都是日內比率，
-跨日等比例重標不改變 target。完整來源、hash、樣本診斷在 `data/panel_meta.json`。
+第二個評估 proxy 是 `log(close/open)^2`。0050.TW 的 target 直接使用 raw within-day OHLC
+ratios；`clean_tw50_data()` 只套在 close series 作 split diagnostic/proof，刻意不逐欄重寫 target
+OHLC，因為逐欄修復會破壞 H/L 的跨欄關係。GK 與 open-to-close squared return 都是日內比率，
+跨日等比例 split rescaling 會抵消。Squared open-to-close return 只有在 zero conditional intraday
+mean 等理想化假設下才是 conditionally unbiased proxy；本實驗又對 exact zero 使用 pre-window
+floor，所以 `r2` 僅是 approximate robustness。完整來源、hash、樣本診斷在
+`data/panel_meta.json`。
 
 TSFM 預測由以下公開 checkpoint 產生，context=512、forecast horizon=32：
 
@@ -50,15 +54,20 @@ TSFM 預測由以下公開 checkpoint 產生，context=512、forecast horizon=32
 `data/tsfm_timesfm_meta.json`、`data/tsfm_ttm_meta.json`。每個 forecast CSV 同時記錄
 `target_date` 與 `origin_date`，測試強制 context 結束於 origin，不可包含 target。
 
+TAIFEX collector 會隨日後資料 append；`panel_meta.json` 的 raw SHA-256 記錄 experiment-time
+snapshot，commit 內的 derived `panel_TX.csv` 才是本實驗實際評估列的凍結證據。後續 raw common
+rows 對帳不代表應以新尾端覆寫已完成實驗。
+
 ## Retrospective pseudo-OOS 限定
 
-2016+ 主窗口不是 real-time OOS：兩個 checkpoint 都是後來才發布的 artefact，且 TimesFM 的
+2016-07+ 主窗口不是 real-time OOS：兩個 checkpoint 都是後來才發布的 artefact，且 TimesFM 的
 公開 pretraining corpus cutoff 晚於部分評估期。輸入 context 沒有 forward peek，但 model weights
 是否接觸過等價歷史模式無法完全稽核。因此主窗口只能稱 **retrospective pseudo-OOS**。
 
-`vintage_clean` robustness 從 2024-01-01 開始，位於 TimesFM 已公開 corpus cutoff 之後；TTM
-model card 列舉的金融序列只有 Bitcoin，未列 equity/index volatility。這些聲明降低直接 target
-contamination 疑慮，但不能把本實驗升格成 true real-time forecast evaluation。
+`vintage_clean` 是沿用的 window key，實際語義只是 2024-01-01 起的 later/cleaner robustness：
+它位於 TimesFM 已公開 corpus cutoff 之後，但 TTM 的 training-data cutoff 未 stated。TTM model
+card 列舉的金融序列只有 Bitcoin，未列 equity/index volatility；這降低直接 target contamination
+疑慮，卻不能把這個窗口稱為 fully model-vintage-clean 或 true real-time forecast evaluation。
 
 ## 方法
 
@@ -132,7 +141,8 @@ Pooled mean QLIKE 的 minimum 是 HAR-A（0.2955）；COMB-MZ 為 0.3003。Poole
 - MCS block length 使用 auto、half-auto、double-auto 時，三個 primary superior sets 完全不變。
 - Results 中的 elimination trace 只記 α=.01 的 stopping path；較大的 α 才可能淘汰更深，
   因此這個 trace 不標成 complete/deepest path，也不把 survivor lower bound 當 exact p-value。
-- `r2` floor 使用 pre-2016 正值的 0.5%、1%、5% percentile 時，各資產 MCS set 不變。
+- `r2` floor 使用 2016-07 primary window 前正值的 0.5%、1%、5% percentile 時，各資產 MCS
+  set 不變。
 - 換成 noisy `r2` proxy 後，HAR、HAR-A、TimesFM-MZ、COMB-MZ、COMB-GR 仍在三資產 h=1
   MCS；TTM-MZ 在 TX 不存活，COMB-EW membership 依資產/proxy 改變。
 - 24 cells × 11 models 的 264 條 QLIKE series mean 與 results JSON 逐項相等；由 series 重算的
@@ -154,6 +164,10 @@ Pooled mean QLIKE 的 minimum 是 HAR-A（0.2955）；COMB-MZ 為 0.3003。Poole
 compute 產生，seed 固定為 20260714。不要為了文件或 nested verdict wiring 重跑 TSFM。
 
 ```bash
+# Wording/provenance-only refresh（不重算 panel、forecast、loss 或 MCS）
+uv run python experiments/k1711/k1711_data.py --refresh-metadata-only
+uv run python experiments/k1711/k1711.py --finalize-existing
+
 # 完整 evaluation（讀 cached TSFM forecasts；仍會重估 HAR/combination 與重跑 MCS）
 uv run python experiments/k1711/k1711.py
 

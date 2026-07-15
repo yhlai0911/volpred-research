@@ -12,21 +12,24 @@ model/target matching only has bite if the target is fixed before the models are
              break in the middle of the evaluation window.
 
     SPY      Garman-Klass open-to-close variance from daily OHLC (yfinance).
-    0050.TW  the same, after clean_tw50_data() repairs the 2014 split artefact.
+    0050.TW  the same from raw within-day OHLC ratios. clean_tw50_data() is applied
+             to close only as a diagnostic; it does not rewrite the target OHLC.
 
 Why a proxy for the two equities: yfinance serves at most 60 days of 5-min bars,
 so a *long* true-RV history for SPY / 0050.TW does not exist in this repo.  The
 accumulated 5-min files (data/intraday/, ~110 days from 2026-01) are used here
 only to validate the GK proxy against true RV on the overlap — never to fit.
 
-Each asset also gets a second variance proxy, r2_oc = log(C/O)^2.  It is far
-noisier than RV/GK but conditionally unbiased for the same open-to-close
-integrated variance.  Patton (2011) says QLIKE model *rankings* survive that
-swap; K1711 uses it to check whether the MCS superior set survives it too.
+Each asset also gets a second variance proxy, r2_oc = log(C/O)^2. It is far
+noisier than RV/GK and is conditionally unbiased for integrated variance only
+under idealized assumptions including zero conditional intraday mean. K1711 also
+floors exact zeros using a pre-window percentile, so Patton-style proxy robustness
+is only approximate here. It is a noisy sensitivity check, not a second truth.
 """
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -79,6 +82,19 @@ DOWNLOAD_START = "1999-01-01"
 DOWNLOAD_END = "2026-07-14"
 
 ASSETS = ("SPY", "0050.TW", "TX")
+R2_SOURCE_DESCRIPTION = (
+    "log(close/open)^2 — noisy proxy; conditionally unbiased only under idealized "
+    "assumptions including zero conditional intraday mean; K1711 floors exact zeros "
+    "from pre-window data, so this is approximate robustness"
+)
+TW50_DIAGNOSTIC_DESCRIPTION = (
+    "clean_tw50_data() applied to close only as a diagnostic/proof; target GK and "
+    "log(C/O)^2 remain raw within-day ratios because split rescaling cancels"
+)
+TAIFEX_PROVENANCE_NOTE = (
+    "collector may append later rows; SHA-256 records the experiment-time raw snapshot, "
+    "while the committed derived panel freezes the rows used by K1711"
+)
 
 
 def _atomic_write(path: Path, writer) -> None:
@@ -86,6 +102,28 @@ def _atomic_write(path: Path, writer) -> None:
     tmp = path.with_suffix(path.suffix + ".tmp")
     writer(tmp)
     os.replace(tmp, path)
+
+
+def refresh_panel_metadata(path: Path = DATA / "panel_meta.json") -> dict:
+    """Refresh wording-only proxy provenance without rebuilding any panel.
+
+    This is the canonical lightweight path for propagating a metadata correction into
+    the committed derived artifact. It preserves every measured value and diagnostic.
+    """
+    meta = json.loads(path.read_text())
+    for asset in ASSETS:
+        if asset not in meta.get("assets", {}):
+            raise ValueError(f"panel metadata missing asset: {asset}")
+        meta["assets"][asset]["r2_source"] = R2_SOURCE_DESCRIPTION
+    tw_split = meta["assets"]["0050.TW"].get("diagnostics", {}).get("split_artefact")
+    if tw_split is not None:
+        tw_split.pop("canonical_repair", None)
+        tw_split["diagnostic_only_close_repair"] = TW50_DIAGNOSTIC_DESCRIPTION
+    taifex = meta.get("source_provenance", {}).get("taifex_5min_rv_csv")
+    if taifex is not None:
+        taifex["note"] = TAIFEX_PROVENANCE_NOTE
+    _atomic_write(path, lambda p: p.write_text(json.dumps(meta, indent=2)))
+    return meta
 
 
 # ── yfinance-backed equities ──────────────────────────────────────────────────
@@ -135,7 +173,7 @@ def _equity_panel(ticker: str) -> tuple[pd.DataFrame, dict]:
         _, clean_ret = clean_tw50_data(df["close"])
         raw_ret = df["close"].pct_change()
         diag["split_artefact"] = {
-            "canonical_repair": "clean_tw50_data() applied to close series",
+            "diagnostic_only_close_repair": TW50_DIAGNOSTIC_DESCRIPTION,
             "raw_worst_daily_return": float(raw_ret.min()),
             "repaired_worst_daily_return": float(clean_ret.min()),
             "targets_are_scale_invariant": True,
@@ -236,7 +274,7 @@ def build() -> dict:
             "taifex_5min_rv_csv": {
                 "path": str(TAIFEX_RV),
                 "sha256": _sha256(TAIFEX_RV),
-                "note": "gitignored local artefact; derived panels below are committed",
+                "note": TAIFEX_PROVENANCE_NOTE,
             },
             "yfinance_download_window": [DOWNLOAD_START, DOWNLOAD_END],
         },
@@ -261,7 +299,7 @@ def build() -> dict:
                 if name == "TX"
                 else "Garman-Klass open-to-close variance from daily OHLC (yfinance)"
             ),
-            "r2_source": "log(close/open)^2 — noisy but unbiased for the same target",
+            "r2_source": R2_SOURCE_DESCRIPTION,
             "rv_median": float(panel["rv"].median()),
             "r2_median": float(panel["r2"].median()),
             "n_zero_r2": int((panel["r2"] == 0).sum()),
@@ -274,5 +312,11 @@ def build() -> dict:
 
 
 if __name__ == "__main__":
-    m = build()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--refresh-metadata-only", action="store_true",
+        help="refresh panel_meta wording without downloading or rebuilding panels",
+    )
+    args = parser.parse_args()
+    m = refresh_panel_metadata() if args.refresh_metadata_only else build()
     print(json.dumps(m, indent=2))
