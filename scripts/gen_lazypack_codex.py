@@ -245,8 +245,13 @@ def _build_prompt(
     sources: list[Path],
     out_dir: Path,
     font: str | None = None,
+    evidence_labels: dict[str, str] | None = None,
 ) -> str:
     src_lines = "\n".join(f"  - {p}" for p in sources)
+    label_lines = "\n".join(
+        f"  - {alias}: {label}"
+        for alias, label in (evidence_labels or {}).items()
+    ) or "  - （plan 未提供 label；不得自行猜測內部實驗編號）"
     panel_lines = []
     for i, panel in enumerate(panels, 1):
         name = panel.get("name") or f"{i}_panel"
@@ -281,6 +286,8 @@ def _build_prompt(
 ## 你的工作（只有兩步，做完就結束）
 1. 讀以下 evidence package（**數字一律以 results.json 為準，逐字對齊，禁臆造**）:
 {src_lines}
+   strict plan 已指定下列讀者向來源名稱；圖卡底部必須逐字使用，不得改寫或另猜來源：
+{label_lines}
 2. 寫出檔案 {script_path} — 一支獨立可執行的 Python 程式（matplotlib 或 PIL），
    執行後為下列每個 panel 各輸出一張獨立 PNG 到 {out_dir}，檔名用每個 panel 指定的 `<name>.png`。
 {ref_hint}
@@ -307,7 +314,7 @@ def _build_prompt(
 - **語言**: 全部繁體中文（zh-Hant）。
 {font_rule}
 - **專業、資料導向、非卡通**: 乾淨圖表 + 圖示 + 大數字 + 分區；**禁卡通人物 / 可愛插畫 / 手繪塗鴉**。
-- **每張底部標資料來源**: 例「資料來源：experiment K####」（K 編號從 evidence 檔名/內容判斷）。
+- **每張底部標資料來源**: 使用 strict plan `evidence.*.label` 的讀者向名稱；有 label 時逐字採用。**禁止**從檔名或內容猜 K 編號，也不得顯示 `experiment`、`K####` 或其他內部代碼。
 - **不要把 panel 的 info / 資訊型態（concept/method/results）當文字標籤畫在圖上** — 那是內部分類，讀者不需要看到。
 - **尺寸**: 橫式約 1600x1000 px、150 dpi、白底，邊距充足，字夠大（一眼看懂）。
 - **不要**輸出 base64 或 data-URI；輸出實體 .png 檔到 {out_dir}。
@@ -460,7 +467,8 @@ def _missing_panels(out_dir: Path, panels: list[dict]) -> list[Path]:
 
 
 def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path,
-              *, budget_s: float, model: str | None) -> int:
+              *, budget_s: float, model: str | None,
+              evidence_labels: dict[str, str] | None = None) -> int:
     """codex writes the script → we run it → bounded repair rounds. All phases
     share one deadline, so no single step can wedge the caller."""
     deadline = time.monotonic() + budget_s
@@ -485,7 +493,14 @@ def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path
               f"(reused — no codex call)")
         return 0
 
-    prompt: str | None = _build_prompt(title, panels, sources, out_dir, font=font)
+    prompt: str | None = _build_prompt(
+        title,
+        panels,
+        sources,
+        out_dir,
+        font=font,
+        evidence_labels=evidence_labels,
+    )
     if script.exists():
         print(f"[gen_lazypack_codex] {script.name} already exists — running it "
               f"before calling codex", file=sys.stderr)
@@ -560,9 +575,19 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true", help="print the codex prompt and exit (no codex call)")
     a = ap.parse_args()
 
-    panels = json.loads(Path(a.plan).read_text(encoding="utf-8"))
-    if isinstance(panels, dict) and isinstance(panels.get("panels"), list):
-        panels = panels["panels"]
+    plan_document = json.loads(Path(a.plan).read_text(encoding="utf-8"))
+    evidence_labels: dict[str, str] = {}
+    if isinstance(plan_document, dict):
+        evidence = plan_document.get("evidence")
+        if isinstance(evidence, dict):
+            evidence_labels = {
+                str(alias): str(spec["label"])
+                for alias, spec in evidence.items()
+                if isinstance(spec, dict) and spec.get("label")
+            }
+    panels = plan_document
+    if isinstance(plan_document, dict) and isinstance(plan_document.get("panels"), list):
+        panels = plan_document["panels"]
     if not isinstance(panels, list) or not panels:
         print("ERROR: --plan must be a non-empty JSON list (or {panels:[...]})", file=sys.stderr)
         return 1
@@ -580,11 +605,19 @@ def main() -> int:
         title = f"{a.experiment[0]} 懶人包"
 
     if a.dry_run:
-        print(_build_prompt(title, panels, sources, out_dir, font=_resolve_cjk_font()))
+        print(_build_prompt(
+            title,
+            panels,
+            sources,
+            out_dir,
+            font=_resolve_cjk_font(),
+            evidence_labels=evidence_labels,
+        ))
         return 0
 
     return _generate(title, panels, sources, out_dir,
-                     budget_s=a.budget_s, model=a.model)
+                     budget_s=a.budget_s, model=a.model,
+                     evidence_labels=evidence_labels)
 
 
 if __name__ == "__main__":
