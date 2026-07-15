@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "experiment_id": "K1396",
+  "audit_date": "2026-07-16",
+  "status": "SUPERSEDED_HISTORICAL_DIAGNOSTIC_ONLY",
+  "public_claim_verdict": "FAIL_PUBLIC_CLAIM",
+  "historical_artifact": {
+    "path": "experiments/k1396/k1396_results.json",
+    "sha256": "c2816e6e0d2a2f7b18d3b78421e342ff9606c8c39fd5fab9064574042c7c1a10",
+    "preserved_byte_for_byte": true,
+    "stored_n_oos": 1866,
+    "stored_values_are_fabricated": false,
+    "independent_reproduction_status": "UNAVAILABLE_UNPINNED_INPUT_VINTAGE"
+  },
+  "model_label_corrections": {
+    "HAR": "HAR-style daily-r-squared NNLS",
+    "HAR_VIX": "HAR-style daily-r-squared-VIX NNLS",
+    "A4f": "blockwise-fitted steady-state-g A4f approximation"
+  },
+  "protocol_scope": {
+    "evaluation_target": "daily squared close-to-close log return (r_t^2)",
+    "canonical_intraday_realized_variance": false,
+    "a4f_forecast": "tau_t multiplied by unconditional steady-state g at every OOS date; the short-run state is not recursively carried forward",
+    "matches_k988_exactly": false,
+    "legacy_dm": "custom Bartlett/Newey-West-style raw-loss DM diagnostic with lag cap 12; not the canonical repository helper and not an HLN correction",
+    "nested_comparison": "HAR_VIX_vs_HAR is nested; its raw QLIKE DM value is diagnostic only"
+  },
+  "withdrawn_claims": [
+    "canonical HAR-RV benchmark",
+    "exact K988 protocol match",
+    "A4f non-inferiority or equivalence",
+    "three-model parity or statistically indistinguishable performance",
+    "incremental VIX conclusion from HAR_VIX_vs_HAR raw QLIKE DM",
+    "cross-proxy consistency"
+  ],
+  "historical_values": {
+    "mean_qlike": {
+      "HAR": 1.5611519742545494,
+      "HAR_VIX": 1.522854467466379,
+      "A4f": 1.5389513340376022
+    },
+    "dm_tests": {
+      "HAR_vs_A4f": {
+        "t_stat": 0.8659742598565282,
+        "p_value": 0.38661566311812917,
+        "harvey_significant": false,
+        "interpretation": "positive t = A4f has lower QLIKE (A4f better)"
+      },
+      "HAR_VIX_vs_A4f": {
+        "t_stat": -0.8768318276230287,
+        "p_value": 0.3806909169128035,
+        "harvey_significant": false,
+        "interpretation": "positive t = A4f has lower QLIKE (A4f better)"
+      },
+      "HAR_VIX_vs_HAR": {
+        "t_stat": -2.6040441104105785,
+        "p_value": 0.009286223952342777,
+        "harvey_significant": false,
+        "interpretation": "positive t = HAR has lower QLIKE (HAR better)"
+      }
+    },
+    "interpretation": "withdrawn 2026-05 approximation; audit trail only"
+  },
+  "superseded_by": {
+    "experiment_id": "K1379",
+    "results_path": "experiments/k1379/k1379_results.json",
+    "results_sha256": "bc430da7b03ba23a0090b246641a0a5899b712281c80dc8551befe1b844b8517",
+    "scope": "corrected daily-r-squared protocol; still not canonical intraday HAR-RV",
+    "a4f_vs_daily_r2_har": {
+      "dm_t": -7.698554350280959,
+      "dm_p": 2.220446049250313e-14,
+      "qlike_advantage_pct": 8.176565354166426,
+      "harvey_screen_pass": true,
+      "winner": "A4f"
+    }
+  },
+  "current_input_file_diagnostic": {
+    "path": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "sha256_at_scope_repair": "b30ba6b9bc90d12482fe90431bc4798cd489810af0fdbd5b6a5c97bbbe778007",
+    "rows_at_scope_repair": 6682,
+    "oos_rows_at_scope_repair_before_cleaning": 1903,
+    "duplicate_index_rows": 20,
+    "duplicate_index_excess_rows": 10,
+    "interpretation": "Repair-time diagnostic only. K1396 did not store its run-time input hash or endpoint, so this file cannot establish the original vintage."
+  },
+  "references": [
+    {
+      "citation": "Corsi (2009)",
+      "doi": "10.1093/jjfinec/nbp001",
+      "relevance": "HAR-RV is defined on realized-volatility measures"
+    },
+    {
+      "citation": "Patton (2011)",
+      "doi": "10.1016/j.jeconom.2010.03.034",
+      "relevance": "QLIKE robustness does not relabel daily r-squared as intraday RV"
+    },
+    {
+      "citation": "Diebold and Mariano (1995)",
+      "doi": "10.1080/07350015.1995.10524599",
+      "relevance": "tests equal predictive accuracy, not equivalence"
+    },
+    {
+      "citation": "Schuirmann (1987)",
+      "doi": "10.1007/BF01068419",
+      "relevance": "non-inferiority/equivalence needs an explicit margin and reversed null"
+    }
+  ]
+}

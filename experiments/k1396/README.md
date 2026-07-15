@@ -1,56 +1,137 @@
-# K1396: HAR-RV vs A4f — Paper 9 C4 Benchmark
+# K1396 — superseded historical daily-r² diagnostic
 
-**Status**: ✅ COMPLETE — 2026-05-22 (compute_queue; 40s runtime)
-**Paper**: Paper 9 (garch-x-vix)
-**Resolves**: C4 (HAR-RV benchmark missing from main horse race)
+**Status:** `SUPERSEDED_HISTORICAL_DIAGNOSTIC_ONLY`  
+**Public claim verdict:** `FAIL_PUBLIC_CLAIM`  
+**Correction date:** 2026-07-16  
+**Superseded by:** K1379 for the corrected Paper 9 daily-r² protocol
 
-## Motivation
+## Executive correction
 
-The v3 review of Paper 9 (garch-x-vix) flagged the absence of HAR-RV as a HIGH-priority issue (C4): a volatility forecasting horse race without HAR-RV (Corsi 2009) is incomplete, and referees at JFEC/JEF/Journal of Forecasting will flag this. This experiment adds HAR-RV and HAR-RV-VIX benchmarks to the comparison.
+K1396 does not supply the canonical HAR-RV benchmark that its original title
+claimed. It used close-to-close daily squared returns (`r_t²`) as both the
+evaluation target and the input to daily, weekly, and monthly HAR-style
+features. Corsi's HAR-RV model is defined on realized-volatility measures,
+normally constructed from intraday observations. Daily `r_t²` is a noisy
+volatility proxy; it does not become intraday realized variance merely because
+the loss is proxy-robust QLIKE.
 
-## Models
+The K1396 A4f path is also an approximation. Parameters were refit in 63-day
+blocks, but every OOS forecast used `tau_t × omega/(1-alpha-gamma/2-beta)`.
+The short-run `g_t` state was reset to its unconditional steady state on every
+forecast date instead of being recursively carried forward. The protocol
+therefore did not match K988 exactly.
 
-| Model | Description | Type |
-|-------|-------------|------|
-| HAR | daily/weekly/monthly RV OLS (Corsi 2009) | OLS |
-| HAR-VIX | HAR + VIX²/252 predictor | OLS |
-| A4f | VIX², free ω, GJR-GARCH-X (champion) | GARCH |
+The historical failure to reject equal predictive accuracy did not establish
+equivalence or non-inferiority. K1396 specified no margin, reversed null,
+confidence-interval inversion, or TOST procedure. In addition,
+HAR-style daily-r²-VIX nests HAR-style daily-r², so their raw QLIKE DM statistic
+is retained only as a historical diagnostic and cannot support an incremental
+VIX conclusion.
 
-## Protocol (matches K988/compute_mcs_dm.py exactly)
+## What actually ran
 
-- **Data**: `paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv`
-- **IS window**: 2000 days rolling
-- **OOS start**: 2019-01-01
-- **Refit every**: 63 days
-- **Loss**: QLIKE (Patton 2011)
-- **DM threshold**: Harvey et al. (2016) |t| > 3.0
-- **Seed**: 42
+| Stored label | Accurate label | Historical implementation |
+|---|---|---|
+| `HAR` | HAR-style daily-r² NNLS | lagged daily `r²`, 5-day mean, 22-day mean |
+| `HAR_VIX` | HAR-style daily-r²-VIX NNLS | preceding features plus lagged `VIX²/252` |
+| `A4f` | blockwise-fitted steady-state-g A4f approximation | `tau_t × E[g]` on every OOS date |
 
-## Results (K1396_results.json)
+- Input path recorded by the run:
+  `paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv`.
+- Data start: 2005-01-01.
+- OOS start: 2019-01-01.
+- Stored OOS observations: 1,866.
+- Rolling estimation window: 2,000 observations; refit every 63 OOS days.
+- Seed: 42.
+- Target and loss: daily `r²` with actual-first Patton QLIKE.
+- Timing: HAR-style regressors and VIX are lagged; the lookahead audit passes.
+- Inference: a local Bartlett/Newey-West-style raw-loss DM diagnostic with a
+  lag cap of 12 and an `|t| > 3` reporting screen. It is not the canonical
+  repository helper and contains no Harvey-Leybourne-Newbold correction.
 
-**Protocol**: Patton QLIKE, OOS 2019–2026, n_OOS=1866, W=2000, refit q63, seed=42
+The run did not store an input SHA, the data endpoint, or a duplicate-date
+audit. The file currently found at that path has since changed and contains
+duplicate dates. Consequently the 1,866-observation result is not independently
+reproducible from the committed input. The numbers are preserved as an audit
+trail; this provenance gap is not evidence that they were fabricated.
 
-| Model | Mean QLIKE | DM vs A4f | p-value | Harvey-sig |
-|-------|-----------|-----------|---------|------------|
-| HAR-RV | 1.5612 | t=+0.87 | 0.387 | No |
-| HAR-RV-VIX | 1.5229 | t=−0.88 | 0.381 | No |
-| A4f | 1.5390 | — | — | — |
+## Frozen historical values
 
-**Verdict (C4)**: ACKNOWLEDGED (non-inferiority confirmed; superiority not established)
-- A4f is 1.4% numerically better than HAR-RV but NOT Harvey-sig (t=+0.87, p=0.39)
-- HAR-RV-VIX has lowest QLIKE but NOT Harvey-sig vs A4f (t=−0.88, p=0.38)
-- HAR-RV-VIX vs HAR-RV: t=−2.60, p=0.009 (conventional sig, not Harvey sig)
-- Honest limitation paragraph added to Paper 9 Section 7.4 (HAR-RV Benchmark Comparison)
-- Result consistent with r² proxy comparison (t=+0.29, p=0.77)
+The original [k1396_results.json](k1396_results.json) is preserved byte for
+byte with SHA-256
+`c2816e6e0d2a2f7b18d3b78421e342ff9606c8c39fd5fab9064574042c7c1a10`.
 
-## References
+| Historical approximation | Mean QLIKE | Raw HAC-DM reading |
+|---|---:|---:|
+| HAR-style daily-r² | 1.561152 | vs A4f approximation: `t=+0.86597` |
+| HAR-style daily-r²-VIX | 1.522854 | vs A4f approximation: `t=-0.87683` |
+| steady-state-g A4f approximation | 1.538951 | — |
+| daily-r²-VIX vs daily-r² | — | nested diagnostic: `t=-2.60404` |
 
-- Corsi (2009). A Simple Approximate Long-Memory Model of Realized Volatility. J Financial Econometrics 7(2):174-196.
-- Diebold & Mariano (1995). JBES 13(3):253-263.
-- Harvey, Leybourne & Newbold (2016). t > 3.0.
-- Patton (2011). J Econometrics 160:246-256.
+These values may only be cited as a withdrawn 2026-05 historical
+approximation. They do not support canonical HAR-RV, A4f parity,
+non-inferiority, three-model equivalence, or cross-proxy consistency.
+
+## Corrected evidence from K1379
+
+K1379 repaired the daily-r² comparison with a hash-pinned unique-date snapshot,
+actual-first QLIKE, consistent A4f fit/OOS recursion, and the canonical
+Bartlett-HAC DM helper. On 1,852 shared valid OOS dates from 2019-01-02 through
+2026-05-18:
+
+| Corrected comparison | Result |
+|---|---:|
+| A4f mean QLIKE | 1.399812 |
+| HAR-style daily-r² mean QLIKE | 1.524461 |
+| A4f QLIKE advantage | 8.177% |
+| A4f vs HAR-style daily-r² DM | `t=-7.69855`, `p=2.22e-14` |
+
+The negative K1379 statistic favors the first-named model, A4f. The result
+survives the reported HAC lag grid. It overturns K1396's public “only a small
+gap” story. K1379 still uses daily `r²`, so Paper 9's canonical intraday HAR-RV
+benchmark remains unfulfilled rather than silently relabeled.
+
+## Reproduction and artifacts
+
+```bash
+uv run python experiments/k1396/scope_repair.py
+```
+
+The command:
+
+1. verifies the frozen K1396 result hash;
+2. reads the certified K1379 result;
+3. writes `k1396_scope_audit.json` atomically;
+4. regenerates the correctly labelled legacy chart; and
+5. renders a K1396-to-K1379 supersession chart.
+
+`k1396.py` is retained to explain the legacy implementation. A rerun writes
+`k1396_legacy_rerun_results.json`; it can no longer overwrite the frozen audit
+artifact. No rerun may be promoted to a current result without a unique,
+hash-pinned input, canonical recursion, canonical inference, lag sensitivity,
+and a new byte-bound independent review.
 
 ## Files
 
-- `k1396.py`: Main experiment script
-- `k1396_results.json`: Results (generated by compute queue)
+- `k1396.py`: legacy implementation with corrected scope labels.
+- `k1396_results.json`: immutable historical result.
+- `scope_repair.py`: deterministic scope-audit and figure generator.
+- `k1396_scope_audit.json`: machine-readable correction contract.
+- `k1396_general_article_chart.png`: relabelled historical diagnostic.
+- `k1396_scope_correction_chart.png`: K1396/K1379 supersession comparison.
+
+## References
+
+- Corsi, F. (2009), “A Simple Approximate Long-Memory Model of Realized
+  Volatility,” *Journal of Financial Econometrics* 7(2), 174–196.
+  DOI: `10.1093/jjfinec/nbp001`.
+- Patton, A. J. (2011), “Volatility Forecast Comparison Using Imperfect
+  Volatility Proxies,” *Journal of Econometrics* 160(1), 246–256.
+  DOI: `10.1016/j.jeconom.2010.03.034`.
+- Diebold, F. X. and Mariano, R. S. (1995), “Comparing Predictive Accuracy,”
+  *Journal of Business & Economic Statistics* 13(3), 253–263.
+  DOI: `10.1080/07350015.1995.10524599`.
+- Schuirmann, D. J. (1987), “A Comparison of the Two One-Sided Tests Procedure
+  and the Power Approach for Assessing the Equivalence of Average
+  Bioavailability,” *Journal of Pharmacokinetics and Biopharmaceutics* 15(6),
+  657–680. DOI: `10.1007/BF01068419`.
