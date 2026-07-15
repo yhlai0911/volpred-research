@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "title": "稀土管制後，先拿礦業 ETF 跟大盤比",
+  "subtitle": "八場公告沒有留下穩定的產業波動模式",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1575/k1575_results.json",
+      "sha256": "935fa05121a055cc02320408ab499825accdc82b066ef92d051181f4c5aeb0b0",
+      "label": "K1575 independently reviewed event-study results"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_scoreboard",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "八場公告攤開，主要波動檢查全數未過關",
+      "alt": "八場關鍵礦物出口限制公告與十三檔 ETF 的主要波動檢查結果",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "公開公告",
+          "value": {
+            "source": "result",
+            "path": "data.n_events",
+            "format": {
+              "kind": "integer",
+              "suffix": " 場"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "ETF 與大盤對照",
+          "value": {
+            "source": "result",
+            "path": "data.n_tickers_used",
+            "format": {
+              "kind": "integer",
+              "suffix": " 檔"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "主要波動檢查",
+          "value": {
+            "source": "result",
+            "path": "confirmatory_rv_aggregate.n",
+            "format": {
+              "kind": "integer",
+              "suffix": " 組"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "嚴格門檻後過關",
+          "value": {
+            "source": "result",
+            "path": "confirmatory_rv_aggregate.n_sig_bonferroni",
+            "format": {
+              "kind": "integer",
+              "suffix": " 組"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "平均比值",
+          "value": {
+            "source": "result",
+            "path": "confirmatory_rv_aggregate.mean_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "中位數比值",
+          "value": {
+            "source": "result",
+            "path": "confirmatory_rv_aggregate.median_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "少數高值把平均拉高"
+        }
+      ]
+    },
+    {
+      "name": "2_two_jumps",
+      "info": "results",
+      "style": "professional",
+      "title": "唯二異常跳動，都出現在同一事件週",
+      "alt": "二零二五年四月四日稀土事件後 LIT 與 REMX 的五日最大跳動比值",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "五日最大跳動檢查",
+          "value": {
+            "source": "result",
+            "path": "jump_bootstrap_summary.n_event_ticker_metric_tests",
+            "format": {
+              "kind": "integer",
+              "suffix": " 組"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "嚴格門檻後過關",
+          "value": {
+            "source": "result",
+            "path": "jump_bootstrap_summary.n_sig_bonferroni",
+            "format": {
+              "kind": "integer",
+              "suffix": " 組"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "LIT 最大跳動比值",
+          "value": {
+            "source": "result",
+            "path": "/significant_tests_after_bonferroni/0/ratio",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 倍"
+            }
+          },
+          "note": "量的是絕對報酬，不是跌幅"
+        },
+        {
+          "kind": "metric",
+          "label": "REMX 最大跳動比值",
+          "value": {
+            "source": "result",
+            "path": "/significant_tests_after_bonferroni/1/ratio",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 倍"
+            }
+          },
+          "note": "同樣不是崩跌方向訊號"
+        },
+        {
+          "kind": "text",
+          "heading": "讀法",
+          "body": [
+            "五天挑最大值，本來就容易高於單日平均，因此這些檢查只用隨機日期重抽判斷。",
+            "過關觀測都落在同一事件週，不能當成每場公告都會重複的規律。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_benchmark",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "礦業有震，大盤震得更大",
+      "alt": "二零二五年四月事件週直接礦業 ETF 與大盤對照的波動及跳動比值差異",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "直接礦業五日平均比值",
+          "value": {
+            "source": "result",
+            "path": "/spillover_event_contrasts/14/direct_mean_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "大盤五日平均比值",
+          "value": {
+            "source": "result",
+            "path": "/spillover_event_contrasts/14/benchmark_mean_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "直接礦業減大盤",
+          "value": {
+            "source": "result",
+            "path": "/spillover_event_contrasts/14/direct_minus_benchmark",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "負值代表礦業沒有比大盤更劇烈"
+        },
+        {
+          "kind": "metric",
+          "label": "最大跳動差值",
+          "value": {
+            "source": "result",
+            "path": "/spillover_event_contrasts/12/direct_minus_benchmark",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "直接礦業同樣低於大盤"
+        },
+        {
+          "kind": "text",
+          "heading": "使用邊界",
+          "body": [
+            "日資料沒有找到可與大盤區分的穩定產業訊號。",
+            "八場事件樣本小、清單非完整資料庫，ETF 也不是礦物現貨。",
+            "這是事件診斷，不是交易回測。"
+          ]
+        }
+      ]
+    }
+  ]
+}

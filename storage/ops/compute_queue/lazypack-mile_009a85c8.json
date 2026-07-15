@@ -1,0 +1,51 @@
+{
+  "id": "lazypack-mile_009a85c8",
+  "title": "lazypack render mile_009a85c8",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_009a85c8",
+    "--article-id",
+    "mile_009a85c8",
+    "--plan",
+    "storage/lazypack_jobs/mile_009a85c8/runs/lazypack-mile_009a85c8/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_009a85c8/runs/lazypack-mile_009a85c8/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "稀土管制後，先拿礦業 ETF 跟大盤比",
+    "--experiment",
+    "K1575"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-15T22:22:44Z",
+  "started_at": "2026-07-15T22:22:55Z",
+  "completed_at": "2026-07-15T22:27:34Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_009a85c8.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_009a85c8.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_009a85c8/runs/lazypack-mile_009a85c8/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_009a85c8/runs/lazypack-mile_009a85c8/plan.json",
+    "storage/lazypack_jobs/mile_009a85c8/runs/lazypack-mile_009a85c8/panels/1_scoreboard.png",
+    "storage/lazypack_jobs/mile_009a85c8/runs/lazypack-mile_009a85c8/panels/2_two_jumps.png",
+    "storage/lazypack_jobs/mile_009a85c8/runs/lazypack-mile_009a85c8/panels/3_benchmark.png",
+    "storage/lazypack_jobs/mile_009a85c8/runs/lazypack-mile_009a85c8/panels/render_lazypack.py"
+  ],
+  "output_paths_updated_at": "2026-07-15T22:27:31Z",
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}
