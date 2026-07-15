@@ -275,18 +275,27 @@ def test_canonical_dm_does_not_degenerate_at_h1() -> None:
     )
 
 
-def test_manual_variance_idiom_is_no_hac(findings, baseline) -> None:
-    """k1379 hand-computes gamma0 = np.mean(d**2) - d_bar**2 with no HAC loop.
-
-    PLAIN_VARIANCE_RE only saw np.var / np.std, so this idiom -- treating the
-    plain sample variance as the DM long-run variance (zero HAC correction) --
-    fell through to ``unknown``. Freeze the classification so the extended
-    detection cannot silently regress back into the blind spot.
-    """
-    verdicts = {_site_key(f): f.verdict for f in findings}
+def test_k1379_manual_dm_repair_is_retired(
+    affected_sites, baseline, retired
+) -> None:
+    """K1379 now delegates to canonical HAC-DM and cannot re-enter debt."""
     site = "experiments/k1379/k1379.py::dm_test"
-    assert verdicts[site] == NO_HAC
-    assert site in baseline
+    assert site not in affected_sites
+    assert site not in baseline
+    assert site in retired
+
+    source = (REPO_ROOT / "experiments" / "k1379" / "k1379.py").read_text(
+        encoding="utf-8"
+    )
+    assert "canonical_dm_test(loss1, loss2, h=HORIZON)" in source
+    assert "qlike_pointwise(r2_oos, fcst_a4f)" in source
+    assert "ret[abs_idx-1] / np.sqrt(max(tau_t, 1e-16))" in source
+    assert "a4f_state['tau_prev']" not in source
+    assert "res.success" in source
+    assert "res.fun < infeasible_objective" in source
+    assert "HAR-style OLS failed full-rank finite check" in source
+    assert "All GJR optimization starts failed" in source
+    assert "All A4f optimization starts failed" in source
 
 
 def test_manual_variance_regex_regression() -> None:

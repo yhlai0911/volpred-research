@@ -4269,5 +4269,23 @@
       "joint-bootstrap",
       "paper-gating"
     ]
+  },
+  {
+    "entry_id": "a857b186",
+    "timestamp": "2026-07-15T17:03:54.897018",
+    "phase": "methodology_correction",
+    "action": "Reran K1379 with corrected QLIKE orientation, Bartlett-HAC DM inference, strict A4f timing, fail-closed estimators, and a hash-pinned clean input; corrected Paper 9 and its direct public article.",
+    "observation": "On 1,852 shared OOS losses, A4f QLIKE is 1.399812 versus GJR 1.479503 and HAR-style daily-r-squared 1.524461; canonical lag-13 DM t values are -4.370 and -7.699. Three of six pairwise screens flip, while the unstable VIX-HAR diagnostic remains below the absolute t>3 screen.",
+    "decision": "Withdraw the old all-null, equivalence/non-inferiority, and canonical HAR-RV claims; retain Paper 9 claim C4 only as partial evidence from a daily-r-squared diagnostic pending canonical intraday HAR-RV validation.",
+    "experiment_ids": [
+      "K1379"
+    ],
+    "tags": [
+      "K1379",
+      "k1379-correction-20260715",
+      "QLIKE",
+      "HAC-DM",
+      "Paper9"
+    ]
   }
 ]

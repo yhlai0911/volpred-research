@@ -5,8 +5,13 @@ import subprocess
 
 from PyPDF2 import PdfWriter
 
+from volpred.ops.papers import PAPER_FRONTEND_SLUGS
 from volpred.ops.papers import _count_tex_metrics
 from volpred.ops.papers import _select_current_main_artifact
+
+
+def test_garch_x_vix_has_configured_frontend_slug():
+    assert PAPER_FRONTEND_SLUGS["garch-x-vix"] == "garch-x-vix.pdf"
 
 
 def _write_blank_pdf(path, pages):

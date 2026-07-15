@@ -34,6 +34,7 @@ PAPER_SELECT = (
 )
 
 PAPER_FRONTEND_SLUGS = {
+    "garch-x-vix": "garch-x-vix.pdf",
     "leverage-direction": "leverage-direction-matters.pdf",
     "taiwan-vt": "taiwan-vt-tz-arbitrage.pdf",
     "vt-trend-following": "vt-trend-following.pdf",

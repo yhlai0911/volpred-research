@@ -41567,5 +41567,41 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-07-15T11:14:06.044294"
+  },
+  {
+    "id": "k1379_dm_hac_correction_20260715",
+    "item_id": "k1379_dm_hac_correction_20260715",
+    "type": "methodology_correction",
+    "category": "paper_evidence",
+    "title": "K1379 QLIKE/HAC methodology correction",
+    "content": "K1379 methodology correction: the hash-pinned, unique-date SPY/VIX rerun uses the fixed 2019-01-02 to 2026-05-18 OOS window with n=1,852 shared valid losses. Mean QLIKE is 1.399812 for A4f, 1.479503 for GJR, and 1.524461 for the HAR-style daily-r-squared diagnostic. At the canonical Bartlett-HAC lag 13, A4f minus GJR has t=-4.370 (p=0.00001309) and A4f minus HAR has t=-7.699 (p=2.22e-14); HAR minus GJR has t=+3.110, which favors GJR under the documented first-minus-second sign. The VIX-augmented HAR diagnostic has three nonpositive raw forecasts; its bounded primary comparison is t=-1.050 and the positive-only comparison is t=-2.256 (p=0.0242), both below the absolute t>3 screen. Three of six pairwise screens change relative to the invalid run. This joint QLIKE-orientation, HAC, A4f-timing, optimizer-fail-closed, and clean-input correction withdraws the former equivalence/non-inferiority and canonical HAR-RV claims.",
+    "confidence": 0.9,
+    "tags": [
+      "K1379",
+      "methodology-correction",
+      "QLIKE",
+      "HAC-DM",
+      "Paper9"
+    ],
+    "experiment_id": "K1379",
+    "experiment_ids": [
+      "K1379"
+    ],
+    "experiment_path": "experiments/k1379",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI / gpt-5.6-sol / effort=ultra",
+    "reviewer_source": "experiments/k1379/review_certification_20260715.md",
+    "supersedes": [
+      "88127805"
+    ],
+    "evidence": [
+      "experiments/k1379/k1379.py",
+      "experiments/k1379/k1379_results.json",
+      "experiments/k1379/README.md",
+      "experiments/k1379/review_certification_20260715.md"
+    ],
+    "created_at": "2026-07-15T17:03:54.708053+08:00",
+    "timestamp": "2026-07-15T17:03:54.708053+08:00",
+    "updated_at": "2026-07-15T17:03:54.708053+08:00"
   }
 ]

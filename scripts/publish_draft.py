@@ -64,6 +64,8 @@ Update-mode flags:
                                  (rare — for curated SEO meta differing from body)
   --cluster-waiver "<text>"      optional update details.cluster_waiver
   --dup-waiver "<text>"          optional update details.dup_waiver
+  --update-details-json '<json>' optional shallow merge into article details;
+                                 accepts inline JSON or a JSON file path
   --sync-supabase                optional (auto-run feed-sync after patch)
 
 Description sync (2026-05-08, K703 fix):
@@ -1066,6 +1068,35 @@ def find_article_in_feed(feed: list, mile_id: str) -> int | None:
     return None
 
 
+def _parse_update_details(raw: str | None) -> dict[str, object]:
+    """Parse an explicit details patch while protecting experiment provenance."""
+    if not raw:
+        return {}
+    payload = raw.strip()
+    if not payload.startswith("{"):
+        candidate = Path(payload)
+        if not candidate.is_absolute():
+            candidate = ROOT / candidate
+        if not candidate.exists():
+            raise ValueError(
+                "--update-details-json must be an inline JSON object or an "
+                f"existing JSON file: {candidate}"
+            )
+        payload = candidate.read_text(encoding="utf-8")
+    try:
+        parsed = json.loads(payload)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid --update-details-json: {exc}") from exc
+    if not isinstance(parsed, dict):
+        raise ValueError("--update-details-json must decode to a JSON object")
+    if "experiment_refs" in parsed:
+        raise ValueError(
+            "--update-details-json cannot set experiment_refs; use draft "
+            "frontmatter so provenance is merged rather than replaced"
+        )
+    return parsed
+
+
 def apply_update(args) -> int:
     """In-place rewrite path (--update <mile_id>).
 
@@ -1114,6 +1145,13 @@ def apply_update(args) -> int:
         old_refs = []
     old_cluster_waiver = old_details.get("cluster_waiver")
     old_dup_waiver = old_details.get("dup_waiver")
+    try:
+        details_patch = _parse_update_details(
+            getattr(args, "update_details_json", None)
+        )
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
 
     # Parse draft (frontmatter optional in update mode — fields inherited)
     info = parse_draft(draft_path, require_frontmatter=False)
@@ -1228,12 +1266,16 @@ def apply_update(args) -> int:
             description_source = "preserved (no extractable paragraph)"
 
     new_details = copy.deepcopy(old_details)
+    new_details.update(details_patch)
     cluster_waiver_arg = getattr(args, "cluster_waiver", None)
     dup_waiver_arg = getattr(args, "dup_waiver", None)
     if cluster_waiver_arg is not None:
         new_details["cluster_waiver"] = cluster_waiver_arg.strip()
     if dup_waiver_arg is not None:
         new_details["dup_waiver"] = dup_waiver_arg.strip()
+    details_metadata_changed = any(
+        old_details.get(key) != value for key, value in details_patch.items()
+    )
     details_waiver_changed = (
         new_details.get("cluster_waiver") != old_cluster_waiver
         or new_details.get("dup_waiver") != old_dup_waiver
@@ -1267,6 +1309,8 @@ def apply_update(args) -> int:
         "description_changed": new_description != old_description,
         "description_source": description_source,
         "details_waiver_changed": details_waiver_changed,
+        "details_metadata_changed": details_metadata_changed,
+        "details_metadata_fields": sorted(details_patch),
         "image_paths_normalized": len(image_uploads),
         "image_url_changed": new_image_url != art.get("image_url", ""),
         "content_audit_flag_cleared": content_audit_flag_cleared,
@@ -1296,6 +1340,11 @@ def apply_update(args) -> int:
         print("[publish_draft] details.cluster_waiver updated")
     if dup_waiver_arg is not None:
         print("[publish_draft] details.dup_waiver updated")
+    if details_patch:
+        print(
+            "[publish_draft] details metadata merged: "
+            + ", ".join(sorted(details_patch))
+        )
     if image_uploads:
         print(f"[publish_draft] image auto-uploads: {len(image_uploads)} local refs → HTTPS")
         for p in image_uploads:
@@ -1324,7 +1373,11 @@ def apply_update(args) -> int:
         art.pop("content_audit_flagged", None)
     # Persist merged experiment_refs and explicit waiver updates through the
     # same update entrypoint used for content rewrites.
-    details_changed = details_waiver_changed or merged_refs != list(old_refs)
+    details_changed = (
+        details_waiver_changed
+        or details_metadata_changed
+        or merged_refs != list(old_refs)
+    )
     if merged_refs != list(old_refs):
         new_details["experiment_refs"] = merged_refs
     if details_changed:
@@ -1463,6 +1516,13 @@ def main() -> int:
                               help="preserve existing description verbatim (rare — "
                                    "use only when description is curated SEO meta "
                                    "that intentionally differs from body content)")
+    update_group.add_argument(
+        "--update-details-json",
+        default=None,
+        metavar="JSON_OR_PATH",
+        help="optional JSON object (inline or file) shallow-merged into "
+             "article details; experiment_refs must use frontmatter",
+    )
     update_group.add_argument("--sync-supabase", action="store_true",
                               help="auto-run `volpred ops feed-sync --apply` after "
                               "patch (default is decoupled — run manually)")

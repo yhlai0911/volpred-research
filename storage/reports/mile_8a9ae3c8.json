@@ -1,0 +1,116 @@
+{
+  "id": "mile_8a9ae3c8",
+  "title": "波動率預測不是把指標愈疊愈多就會愈準",
+  "description": "方法更正：修正 QLIKE 方向、改用考慮連續誤差的 HAC 比較檢定，並以日期唯一的固定快照重跑後，A4f 對 GJR 與 daily-r² HAR-style 基準均通過嚴格門檻；舊文『模型全部分不出勝負』及 non-inferiority 解讀撤回。",
+  "content": "# 波動率預測不是把指標愈疊愈多就會愈準\n\n> **方法更正（2026-07-15）**：這篇文章先前使用了方向顛倒的預測損失公式、不完整的模型比較檢定、估計與往前預測不一致的 A4f 尺度遞迴，以及含重複日期的可變動資料檔。改用「實際值除以預測值」的 QLIKE、會處理相鄰誤差關聯的 HAC-DM 比較、對齊 A4f 遞迴，並換成日期唯一、雜湊固定的資料快照後，結論改變：**A4f 對 GJR 與穩定的 daily-r² HAR-style 基準都通過嚴格門檻。**舊文「所有模型都分不出勝負」與任何「彼此不劣／表現相當」的解讀，現正式撤回。\n\n做投資研究的人很容易有一個衝動：再加一個指標、再多一層結構、再換一個比較新的做法，預測應該就會更準。\n\n這個提醒本身仍然成立，但我們先前用來支持它的數字與統計結論並不成立。研究更正最重要的，不是把原故事修得更順，而是把哪些話還能說、哪些話必須收回，清楚畫出界線。\n\n重跑使用 2019-01-02 到 2026-05-18 的共同有效樣本，共 **1,852 個交易日**。四種方法都只能使用前一日以前可見的資訊，並在同一批日期上接受比較。\n\n## 更正後，穩定的三個模型怎麼排\n\nQLIKE 可以想成「預測波動與實際波動不合時要付的罰分」，數字越低越好。公式現在採正確方向：\n\n`實際波動 / 預測波動 − log(實際波動 / 預測波動) − 1`\n\n更正後的平均罰分如下：\n\n| 模型 | 平均 QLIKE | 白話解讀 |\n|---|---:|---|\n| A4f | **1.400** | 三個穩定規格中最低 |\n| GJR | 1.480 | A4f 低約 5.4% |\n| daily-r² HAR-style | 1.524 | A4f 低約 8.2% |\n\n表面排名不是全部，因此我們也比較每天的誤差差距是否只是短期巧合。這次使用 HAC-DM，也就是會把相鄰交易日的誤差關聯納入的模型比較方法。負數代表表格中先寫的 A4f 誤差較低。\n\n- A4f 對 GJR：比較強度 **-4.370**，跨過事先設定的嚴格門檻。\n- A4f 對 daily-r² HAR-style：比較強度 **-7.699**，同樣跨過嚴格門檻。\n\n換句話說，舊文寫的「新版看起來比較好，但三組對比全部沒跨線」是錯的。至少在這個固定期間、這個每日平方報酬代理與這套重跑規則下，A4f 對兩個穩定比較對手的優勢，不只是平均分數好看。\n\n這裡也要避免另一種過度修正：**不能把這次翻轉說成只是「換成 HAC 就顯著了」。**重跑同時修了四件事：QLIKE 的分子分母方向、比較檢定對連續誤差的處理、A4f 在估計與往前預測時不一致的尺度遞迴，以及輸入資料的重複日期。舊結果與新結果的差異，是這四項聯合修正的結果，無法只算在其中一項頭上。\n\n## 為什麼「再加 VIX」仍不能當成可靠結論\n\n第四個模型在 daily-r² HAR-style 架構上再加入 VIX。它出現一個比排名更根本的問題：在 **2019-01-14、2019-01-16、2019-01-18** 三天，模型給出非正的波動預測。\n\n波動不應該是負數。程式為了讓損失函數能運算，只能把這三筆壓到極小的正數下限，結果讓完整樣本的平均 QLIKE 被少數極端罰分淹沒。那個龐大平均值不是可以拿來宣稱經濟幅度的數字。\n\n如果只做診斷、把三個非正預測日排除，這個 VIX 版本的平均 QLIKE 是 **1.537**；A4f 對它的比較強度為 **-2.256**，仍沒有跨過我們採用的嚴格門檻。這項診斷不能證明兩者相當，只能說：這個 VIX 比較對手本身不夠穩定，無法提供乾淨的勝負判決。\n\n所以「多加 VIX 沒有帶來可靠優勢」仍是合理提醒；但理由不是舊文所說的「四個模型統計上都一樣」，而是 VIX 版本出現了不合理預測，且在排除那些日期的診斷中仍未通過嚴格門檻。\n\n## 這不是經典 HAR-RV 的對決\n\n名稱也要一起更正。這裡的 HAR-style 模型使用的是**每日報酬平方**，再取前一日、前五日與前二十二日的資訊做回歸。它沒有使用盤中高頻資料建出的 realized variance，因此不是經典 Corsi HAR-RV。\n\n這個差別不是文字遊戲。日報酬平方是很吵的波動代理；真正的盤中 realized variance 含有更多一天內的價格變化資訊。因此，K1379 只能回答「A4f 與 daily-r² HAR-style 基準相比如何」，不能回答「A4f 是否勝過或不劣於 canonical HAR-RV」。後一個問題仍未被這次重跑關閉。\n\n## 投資人真正可以帶走什麼\n\n第一，模型名字新不新、指標多不多，仍然不能代替往前驗證。這次 VIX 版本多放了一項資訊，卻連三個日期的正波動預測都守不住。\n\n第二，「沒有證明差異」與「證明兩者相當」完全不同。舊文把所有比較未過門檻，延伸成模型之間大致相當；這種 non-inferiority 解讀沒有專門的等效性設計支持，現在一併撤回。\n\n第三，研究流程本身也需要被驗證。損失公式看似只是一個分子分母的位置，重複日期看似只是資料整理問題，但兩者都可能改變模型排序與統計判決。真正可信的更新，不是換一個漂亮敘事，而是保留固定期間、公開輸入雜湊、逐日重算損失，再把不穩定的比較對手標出來。\n\n一句話總結：**「指標愈多不一定愈準」仍值得記住；但 K1379 更正後的精確結論是，A4f 在這套 daily-r² 代理協議下勝過兩個穩定基準，而 VIX 版本不穩定，不能拿來宣稱四個模型彼此無差或相互不劣。**\n\n## 懶人包圖組\n\n![更正後的三個穩定模型 QLIKE 與 A4f 主要比較結果](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1379/k1379_general_article_chart.png)\n\n*圖一：左側是更正後的平均 QLIKE；右側是採 HAC 的主要模型比較。VIX 版本因三筆非正預測而使用數值下限，完整樣本平均值不可作經濟幅度解讀。*\n\n![不同 HAC 落後期設定下的模型比較敏感度](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1379/k1379_hac_lag_sensitivity.png)\n\n*圖二：A4f 對 GJR 與 daily-r² HAR-style 的結論在圖示的落後期範圍內都跨過嚴格門檻；daily-r² HAR-style 對 GJR 的判決較接近門檻，應視為敏感結果。*\n\n---\n\n*本文更正實驗 K1379 的公開解讀。資料來源：2026-07-11 固定的 yfinance SPY／VIX 日期唯一快照；分析資料期間 2000-01-04 至 2026-05-18，樣本外共同有效期間 2019-01-02 至 2026-05-18，共 1,852 筆。重現腳本：`experiments/k1379/k1379.py`；完整結果：`experiments/k1379/k1379_results.json`。*\n",
+  "category": "milestone",
+  "audience": "general",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1379"
+    ],
+    "charts": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1379/k1379_general_article_chart.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1379/k1379_hac_lag_sensitivity.png"
+    ],
+    "data_source": "experiments/k1685/data/k1685_spy_vix_snapshot.csv",
+    "period": "2019-01-02 to 2026-05-18 (1,852 shared valid dates; OOS policy starts 2019-01-01)",
+    "n_obs": 1852,
+    "verdict": "CORRECTED_PARTIAL_EVIDENCE",
+    "cluster_waiver": "pending daily_article task K1379; angle focuses on model-complexity skepticism rather than routine VIX commentary",
+    "topic_cluster": "vix",
+    "topic_cluster_30d": {
+      "count": 130,
+      "cap": 15,
+      "ratio": 0.5098,
+      "exempt": false
+    },
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "FOMC",
+        "US_EQUITY"
+      ],
+      "conclusion_class": "null_no_info",
+      "mechanisms": [
+        "macro_policy"
+      ],
+      "time_horizon": "monthly"
+    },
+    "arc_signature_backfill": {
+      "reason": "release_layer_arc_upgrade_a1",
+      "script": "scripts/backfill_arc_dedup_metadata.py",
+      "applied_at": "2026-06-18T02:13:29.530955+00:00"
+    },
+    "methodology_correction": "Actual-first QLIKE; canonical Bartlett-HAC DM; fit/OOS A4f tau_t alignment; hash-pinned unique-date input."
+  },
+  "tags": [
+    "一般讀者",
+    "波動率預測",
+    "VIX",
+    "模型比較",
+    "負面結果",
+    "投資研究"
+  ],
+  "related_articles": [],
+  "created_at": "2026-05-28T11:56:35.565312+00:00",
+  "published_at": "2026-06-02T04:07:05.528942+00:00",
+  "status": "published",
+  "proposer": "Codex",
+  "verified_live_at": "2026-06-02T04:07:58.245857+00:00",
+  "errata": {
+    "update_at": "2026-07-15T08:41:02.725644+00:00",
+    "update_action": "k1379_source_reference_cleanup",
+    "update_summary": "Remove the upstream snapshot experiment ID from prose so publication coverage remains scoped to K1379; provenance path remains in structured metadata.",
+    "update_history": [
+      {
+        "at": "2026-07-15T08:23:20.513723+00:00",
+        "action": "k1379_methodology_correction",
+        "summary": "Correct reversed QLIKE, omitted HAC-DM, inconsistent A4f recursion, clean-input provenance, and withdraw the former all-null/non-inferiority interpretation.",
+        "old_content_chars": 1318,
+        "new_content_chars": 3071,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "frontmatter override",
+        "details_waiver_changed": false,
+        "details_metadata_changed": true,
+        "details_metadata_fields": [
+          "charts",
+          "data_source",
+          "methodology_correction",
+          "n_obs",
+          "period",
+          "verdict"
+        ],
+        "image_paths_normalized": 2,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      },
+      {
+        "at": "2026-07-15T08:41:02.725644+00:00",
+        "action": "k1379_source_reference_cleanup",
+        "summary": "Remove the upstream snapshot experiment ID from prose so publication coverage remains scoped to K1379; provenance path remains in structured metadata.",
+        "old_content_chars": 3071,
+        "new_content_chars": 3063,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "frontmatter override",
+        "details_waiver_changed": false,
+        "details_metadata_changed": false,
+        "details_metadata_fields": [
+          "charts",
+          "data_source",
+          "methodology_correction",
+          "n_obs",
+          "period",
+          "verdict"
+        ],
+        "image_paths_normalized": 2,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-07-15T08:41:02.725644+00:00"
+}

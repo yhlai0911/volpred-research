@@ -1,64 +1,534 @@
 {
   "experiment_id": "k1379",
-  "title": "Paper 9 HAR-RV / HAR-RV-VIX Benchmarks vs A4f",
+  "title": "Paper 9 HAR-style daily-r-squared Benchmarks vs A4f",
   "metadata": {
-    "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "data_source": "experiments/k1685/data/k1685_spy_vix_snapshot.csv",
+    "data_source_provenance": "Independent yfinance 1.2.0 SPY/^VIX fetch pinned by K1685 on 2026-07-11; unique dates and cross-checked there against the Paper 9 CSV.",
+    "input_columns": {
+      "price": "spy_close (unadjusted close, retained to match the original K1379 specification)",
+      "volatility_index": "vix_close"
+    },
+    "snapshot_sha256": "eee7f9c62ce3ed3ee68d2bffeb3c9386fb8a6343e1a053379cfc89058518e3fb",
+    "snapshot_expected_sha256": "eee7f9c62ce3ed3ee68d2bffeb3c9386fb8a6343e1a053379cfc89058518e3fb",
+    "snapshot_start": "2000-01-03",
+    "snapshot_end": "2026-07-10",
+    "analysis_slice_sha256": "c74fb12f046513fd705f9dc0c301a8fd726454f6509ca4e754e0689204a60e65",
+    "data_start": "2000-01-04",
+    "data_end": "2026-05-18",
     "oos_start": "2019-01-01",
+    "oos_end": "2026-05-18",
+    "first_valid_oos_date": "2019-01-02",
+    "last_valid_oos_date": "2026-05-18",
     "window": 2000,
     "refit_every": 63,
+    "forecast_horizon_days": 1,
+    "n_data": 6632,
+    "n_oos": 1854,
     "n_valid_oos": 1852,
+    "n_zero_return_excluded": 2,
+    "zero_return_policy": "Exclude r_squared <= 1e-16 from the shared QLIKE/DM mask for all models.",
+    "variance_forecast_floor": 1e-16,
+    "forecast_diagnostics": {
+      "HAR_RV": {
+        "raw_nonpositive_count": 0,
+        "raw_nonpositive_dates": []
+      },
+      "HAR_RV_VIX": {
+        "raw_nonpositive_count": 3,
+        "raw_nonpositive_dates": [
+          "2019-01-14",
+          "2019-01-16",
+          "2019-01-18"
+        ]
+      }
+    },
+    "seed": 42,
     "harvey_threshold": 3.0,
     "qlike_proxy": "r_squared (daily squared log return)",
-    "elapsed_seconds": 92.0,
-    "timestamp": "2026-05-19T10:01:43.264403+00:00",
-    "note": "HAR-RV fit via rolling OLS; A4f and GJR via MLE. Fair comparison: same QLIKE proxy."
+    "qlike_formula": "actual/predicted - log(actual/predicted) - 1",
+    "har_benchmark_scope": "HAR-style regression on lagged daily squared returns; not a canonical intraday realized-variance HAR-RV benchmark",
+    "model_display_names": {
+      "HAR_RV": "HAR-style daily-r-squared",
+      "HAR_RV_VIX": "HAR-style daily-r-squared-VIX"
+    },
+    "a4f_normalization": "Engle-style contemporaneous scale: u_{t-1}=r_{t-1}/sqrt(tau_t), with tau_t predetermined by VIX_{t-1}; identical in fit and OOS recursion.",
+    "dm_method": "canonical volpred.stats.model_evaluation.dm_test with Bartlett Newey-West HAC",
+    "dm_hac_bandwidth_rule": "max(1, min(ceil(h^(1/3) * n^(1/3)), n//4))",
+    "dm_small_sample_correction": "none",
+    "dm_sign_convention": "loss(model1)-loss(model2); negative t favors model1",
+    "elapsed_seconds": 92.8,
+    "timestamp": "2026-07-15T08:47:59.079071+00:00",
+    "note": "HAR-style daily-r-squared models use rolling OLS; A4f and GJR use MLE. All models are evaluated on the same daily r-squared QLIKE proxy."
   },
   "qlike_means": {
-    "GJR": 624.3266721124259,
-    "A4f": 688.4875400369174,
-    "HAR_RV": 718.4775617814432,
-    "HAR_RV_VIX": 737.5772977540925
+    "GJR": 1.4795030214805047,
+    "A4f": 1.3998120447667672,
+    "HAR_RV": 1.5244605586426763,
+    "HAR_RV_VIX": 1177742588.3388355
   },
   "dm_tests": {
     "A4f vs GJR": {
-      "dm_t": -1.1911404177557512,
-      "dm_p": 0.23375118115546245,
-      "harvey_pass": false,
-      "direction": "model2_wins"
+      "model1": "A4f",
+      "model2": "GJR",
+      "loss_differential": "model1_minus_model2",
+      "mean_loss_differential": -0.07969097671373734,
+      "model1_qlike_advantage_pct": 5.386334164697585,
+      "loss_differential_acf": {
+        "lag_1": -0.022755635833611114,
+        "lag_2": 0.0005566006866588849,
+        "lag_3": -0.020249923717247275,
+        "lag_4": 0.05413621383164864,
+        "lag_5": -0.010089179759904754
+      },
+      "loss_differential_acf_1": -0.022755635833611114,
+      "hac_max_lag": 13,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": -4.231945178772862,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": -4.28096007572618,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": -4.285175485722557,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": -4.316568776849115,
+          "hac_applied": true
+        },
+        "lag_13": {
+          "dm_t": -4.370344202941814,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": -4.503692378801965,
+          "hac_applied": true
+        }
+      },
+      "inference_status": "ok",
+      "dm_t": -4.370344202941814,
+      "dm_p": 1.309302972885007e-05,
+      "hln_diagnostic": {
+        "factor": 0.9997299851442609,
+        "dm_t": -4.369164145082326,
+        "dm_p": 1.3163243903463738e-05,
+        "primary": false,
+        "note": "Correct HLN factor shown diagnostically; canonical unscaled HAC-DM is primary."
+      },
+      "harvey_pass": true,
+      "direction": "model1_lower_loss",
+      "harvey_winner": "A4f",
+      "forecast_stability": "all_raw_forecasts_positive"
     },
     "A4f vs HAR-RV": {
-      "dm_t": 0.28938230745479476,
-      "dm_p": 0.7723212409721572,
-      "harvey_pass": false,
-      "direction": "model1_wins"
+      "model1": "A4f",
+      "model2": "HAR-style daily-r²",
+      "loss_differential": "model1_minus_model2",
+      "mean_loss_differential": -0.12464851387590882,
+      "model1_qlike_advantage_pct": 8.176565354166426,
+      "loss_differential_acf": {
+        "lag_1": -0.06406092393890074,
+        "lag_2": 0.03645644537603367,
+        "lag_3": -0.007656273541807226,
+        "lag_4": 0.04963965561721869,
+        "lag_5": 0.026550704570071196
+      },
+      "loss_differential_acf_1": -0.06406092393890074,
+      "hac_max_lag": 13,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": -7.948529899553868,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": -8.216200940826358,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": -8.04481738227363,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": -7.81813286892206,
+          "hac_applied": true
+        },
+        "lag_13": {
+          "dm_t": -7.698554350280959,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": -7.648455180405037,
+          "hac_applied": true
+        }
+      },
+      "inference_status": "ok",
+      "dm_t": -7.698554350280959,
+      "dm_p": 2.220446049250313e-14,
+      "hln_diagnostic": {
+        "factor": 0.9997299851442609,
+        "dm_t": -7.696475626238668,
+        "dm_p": 2.259671618740021e-14,
+        "primary": false,
+        "note": "Correct HLN factor shown diagnostically; canonical unscaled HAC-DM is primary."
+      },
+      "harvey_pass": true,
+      "direction": "model1_lower_loss",
+      "harvey_winner": "A4f",
+      "forecast_stability": "all_raw_forecasts_positive"
     },
-    "A4f vs HAR-VX": {
-      "dm_t": 0.647990787962718,
-      "dm_p": 0.5170712754124622,
+    "A4f vs HAR-RV-VIX": {
+      "model1": "A4f",
+      "model2": "HAR-style daily-r²-VIX",
+      "loss_differential": "model1_minus_model2",
+      "mean_loss_differential": -1177742586.9390235,
+      "model1_qlike_advantage_pct": 99.99999988114449,
+      "loss_differential_acf": {
+        "lag_1": -0.0008038243251849729,
+        "lag_2": 0.037975901303578134,
+        "lag_3": -0.0008046919577619425,
+        "lag_4": 0.20395269874698094,
+        "lag_5": -0.0008055595534546194
+      },
+      "loss_differential_acf_1": -0.0008038243251849729,
+      "hac_max_lag": 13,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": -1.2197866038427303,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": -1.2202774118420963,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": -1.1207523536982733,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": -1.0630180144788546,
+          "hac_applied": true
+        },
+        "lag_13": {
+          "dm_t": -1.049979079776011,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": -1.0347377473714674,
+          "hac_applied": true
+        }
+      },
+      "inference_status": "ok",
+      "dm_t": -1.049979079776011,
+      "dm_p": 0.2938647958836307,
+      "hln_diagnostic": {
+        "factor": 0.9997299851442609,
+        "dm_t": -1.0496955698262562,
+        "dm_p": 0.2939951308721565,
+        "primary": false,
+        "note": "Correct HLN factor shown diagnostically; canonical unscaled HAC-DM is primary."
+      },
       "harvey_pass": false,
-      "direction": "model1_wins"
+      "direction": "model1_lower_loss",
+      "harvey_winner": null,
+      "forecast_stability": "bounded_nonpositive_raw_forecasts_present"
     },
     "HAR-RV vs GJR": {
-      "dm_t": -1.0732345892758746,
-      "dm_p": 0.28330576873297386,
-      "harvey_pass": false,
-      "direction": "model2_wins"
+      "model1": "HAR-style daily-r²",
+      "model2": "GJR",
+      "loss_differential": "model1_minus_model2",
+      "mean_loss_differential": 0.04495753716217149,
+      "model1_qlike_advantage_pct": -3.038691811334293,
+      "loss_differential_acf": {
+        "lag_1": -0.02203152610012691,
+        "lag_2": -0.0031974387521709457,
+        "lag_3": -0.018407392506932095,
+        "lag_4": 4.381491006914473e-05,
+        "lag_5": -0.020044456987052622
+      },
+      "loss_differential_acf_1": -0.02203152610012691,
+      "hac_max_lag": 13,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": 2.9413333459144733,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": 2.97429788257743,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": 3.043669011403027,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": 3.072528183972199,
+          "hac_applied": true
+        },
+        "lag_13": {
+          "dm_t": 3.110420660125102,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": 3.2069176373743873,
+          "hac_applied": true
+        }
+      },
+      "inference_status": "ok",
+      "dm_t": 3.110420660125102,
+      "dm_p": 0.0018966978707748439,
+      "hln_diagnostic": {
+        "factor": 0.9997299851442609,
+        "dm_t": 3.1095808003392706,
+        "dm_p": 0.001902070093946995,
+        "primary": false,
+        "note": "Correct HLN factor shown diagnostically; canonical unscaled HAC-DM is primary."
+      },
+      "harvey_pass": true,
+      "direction": "model2_lower_loss",
+      "harvey_winner": "GJR",
+      "forecast_stability": "all_raw_forecasts_positive"
     },
-    "HAR-VX vs GJR": {
-      "dm_t": -1.1177784293372566,
-      "dm_p": 0.2638066902618643,
+    "HAR-RV-VIX vs GJR": {
+      "model1": "HAR-style daily-r²-VIX",
+      "model2": "GJR",
+      "loss_differential": "model1_minus_model2",
+      "mean_loss_differential": 1177742586.8593328,
+      "model1_qlike_advantage_pct": -79603932520.58334,
+      "loss_differential_acf": {
+        "lag_1": -0.0008038243250430799,
+        "lag_2": 0.037975901303562376,
+        "lag_3": -0.0008046919576626066,
+        "lag_4": 0.2039526987468904,
+        "lag_5": -0.0008055595535744328
+      },
+      "loss_differential_acf_1": -0.0008038243250430799,
+      "hac_max_lag": 13,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": 1.2197866037601022,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": 1.2202774117593485,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": 1.1207523536222523,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": 1.0630180144069186,
+          "hac_applied": true
+        },
+        "lag_13": {
+          "dm_t": 1.0499790797049722,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": 1.0347377473014605,
+          "hac_applied": true
+        }
+      },
+      "inference_status": "ok",
+      "dm_t": 1.0499790797049722,
+      "dm_p": 0.29386479591628367,
+      "hln_diagnostic": {
+        "factor": 0.9997299851442609,
+        "dm_t": 1.0496955697552366,
+        "dm_p": 0.2939951309048104,
+        "primary": false,
+        "note": "Correct HLN factor shown diagnostically; canonical unscaled HAC-DM is primary."
+      },
       "harvey_pass": false,
-      "direction": "model2_wins"
+      "direction": "model2_lower_loss",
+      "harvey_winner": null,
+      "forecast_stability": "bounded_nonpositive_raw_forecasts_present"
     },
-    "HAR-VX vs HAR-RV": {
-      "dm_t": -0.20728915864877875,
-      "dm_p": 0.8358068417816478,
+    "HAR-RV-VIX vs HAR-RV": {
+      "model1": "HAR-style daily-r²-VIX",
+      "model2": "HAR-style daily-r²",
+      "loss_differential": "model1_minus_model2",
+      "mean_loss_differential": 1177742586.8143747,
+      "model1_qlike_advantage_pct": -77256350132.33755,
+      "loss_differential_acf": {
+        "lag_1": -0.0008038243248984691,
+        "lag_2": 0.03797590130348204,
+        "lag_3": -0.0008046919577527582,
+        "lag_4": 0.2039526987469713,
+        "lag_5": -0.0008055595536520013
+      },
+      "loss_differential_acf_1": -0.0008038243248984691,
+      "hac_max_lag": 13,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": 1.2197866037133813,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": 1.2202774117125201,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": 1.1207523535792905,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": 1.0630180143664445,
+          "hac_applied": true
+        },
+        "lag_13": {
+          "dm_t": 1.04997907966523,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": 1.034737747262587,
+          "hac_applied": true
+        }
+      },
+      "inference_status": "ok",
+      "dm_t": 1.04997907966523,
+      "dm_p": 0.29386479593455106,
+      "hln_diagnostic": {
+        "factor": 0.9997299851442609,
+        "dm_t": 1.049695569715505,
+        "dm_p": 0.2939951309230785,
+        "primary": false,
+        "note": "Correct HLN factor shown diagnostically; canonical unscaled HAC-DM is primary."
+      },
       "harvey_pass": false,
-      "direction": "model2_wins"
+      "direction": "model2_lower_loss",
+      "harvey_winner": null,
+      "forecast_stability": "bounded_nonpositive_raw_forecasts_present"
     }
   },
+  "positive_raw_forecast_robustness": {
+    "status": "diagnostic_only_sample_selection",
+    "n_valid": 1849,
+    "qlike_means": {
+      "GJR": 1.4802752185764805,
+      "A4f": 1.400660566978005,
+      "HAR_RV": 1.5255171756669401,
+      "HAR_RV_VIX": 1.537462982803517
+    },
+    "dm_tests": {
+      "A4f vs GJR": {
+        "dm_t": -4.359675538355162,
+        "dm_p": 1.3742221086632256e-05,
+        "harvey_pass": true
+      },
+      "A4f vs HAR-RV": {
+        "dm_t": -7.696510541959115,
+        "dm_p": 2.2648549702353193e-14,
+        "harvey_pass": true
+      },
+      "A4f vs HAR-RV-VIX": {
+        "dm_t": -2.255599618497021,
+        "dm_p": 0.024212238829312893,
+        "harvey_pass": false
+      },
+      "HAR-RV vs GJR": {
+        "dm_t": 3.1225250231847563,
+        "dm_p": 0.0018208500117491422,
+        "harvey_pass": true
+      },
+      "HAR-RV-VIX vs GJR": {
+        "dm_t": 0.888483270701981,
+        "dm_p": 0.374396479305928,
+        "harvey_pass": false
+      },
+      "HAR-RV-VIX vs HAR-RV": {
+        "dm_t": 0.19339549926792124,
+        "dm_p": 0.8466704929327948,
+        "harvey_pass": false
+      }
+    },
+    "interpretation": "Excludes dates with nonpositive raw HAR-style OLS variance forecasts; not the primary common-date evaluation."
+  },
+  "methodology_repair": {
+    "supersedes_pre_repair_artifact": true,
+    "pre_repair_issues": [
+      "QLIKE ratio was inverted as predicted/actual",
+      "DM long-run variance omitted all autocovariances",
+      "ad-hoc h=1 HLN factor was incorrect",
+      "A4f fit used tau_t normalization while its OOS recursion used tau_{t-1}",
+      "mutable Paper 9 CSV contained duplicate dates"
+    ],
+    "pre_repair_harvey_significant_comparisons": [],
+    "current_harvey_significant_comparisons": [
+      "A4f vs GJR",
+      "A4f vs HAR-RV",
+      "HAR-RV vs GJR"
+    ],
+    "harvey_significance_flips": [
+      {
+        "comparison": "A4f vs GJR",
+        "from": "not_significant",
+        "to": "significant"
+      },
+      {
+        "comparison": "A4f vs HAR-RV",
+        "from": "not_significant",
+        "to": "significant"
+      },
+      {
+        "comparison": "HAR-RV vs GJR",
+        "from": "not_significant",
+        "to": "significant"
+      }
+    ],
+    "comparison_caveat": "The rerun jointly corrects the loss orientation, HAC inference, A4f fit/OOS normalization alignment, and duplicated-date input, so old/new t-stat differences are not attributable to HAC alone."
+  },
   "paper9_c4_assessment": {
-    "a4f_vs_har_rv_harvey_pass": false,
-    "verdict": "C4 LIMITATION \u2014 A4f does NOT significantly beat HAR-RV (honest result, add as limitation)"
-  }
+    "scope": "partial_evidence_only",
+    "benchmark_limitation": "K1379 uses daily squared returns rather than intraday realized variance, so it does not fully close the canonical HAR-RV benchmark request.",
+    "a4f_vs_har_rv_harvey_pass": true,
+    "verdict": "C4 PARTIAL — A4f has significantly lower QLIKE than the daily-r-squared HAR-style comparator"
+  },
+  "references": [
+    {
+      "authors": "Diebold, F.X.; Mariano, R.S.",
+      "year": 1995,
+      "title": "Comparing Predictive Accuracy",
+      "journal": "Journal of Business & Economic Statistics 13(3), 253–263",
+      "doi": "10.1080/07350015.1995.10524599"
+    },
+    {
+      "authors": "Harvey, D.; Leybourne, S.; Newbold, P.",
+      "year": 1997,
+      "title": "Testing the equality of prediction mean squared errors",
+      "journal": "International Journal of Forecasting 13(2), 281–291",
+      "doi": "10.1016/S0169-2070(96)00719-4"
+    },
+    {
+      "authors": "Newey, W.K.; West, K.D.",
+      "year": 1987,
+      "title": "A Simple, Positive Semi-definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix",
+      "journal": "Econometrica 55(3), 703–708",
+      "doi": "10.2307/1913610"
+    },
+    {
+      "authors": "Patton, A.J.",
+      "year": 2011,
+      "title": "Volatility forecast comparison using imperfect volatility proxies",
+      "journal": "Journal of Econometrics 160(1), 246–256",
+      "doi": "10.1016/j.jeconom.2010.03.034"
+    },
+    {
+      "authors": "Corsi, F.",
+      "year": 2009,
+      "title": "A Simple Approximate Long-Memory Model of Realized Volatility",
+      "journal": "Journal of Financial Econometrics 7(2), 174–196",
+      "doi": "10.1093/jjfinec/nbp001"
+    },
+    {
+      "authors": "Harvey, C.R.; Liu, Y.; Zhu, H.",
+      "year": 2016,
+      "title": "… and the Cross-Section of Expected Returns",
+      "journal": "Review of Financial Studies 29(1), 5–68",
+      "doi": "10.1093/rfs/hhv059"
+    }
+  ]
 }

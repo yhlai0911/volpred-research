@@ -398,3 +398,75 @@ def test_update_mode_can_refresh_waiver_metadata(tmp_path, monkeypatch):
     assert details["cluster_waiver"] == "new cluster reason"
     assert details["dup_waiver"] == "new dup reason"
     assert feed[0]["errata"]["update_history"][-1]["details_waiver_changed"] is True
+
+
+def test_update_mode_can_merge_explicit_details_metadata(tmp_path, monkeypatch):
+    """Correction rewrites update metadata through the canonical writer."""
+    feed_dir = tmp_path / "storage" / "reports"
+    feed_dir.mkdir(parents=True)
+    feed_path = feed_dir / "feed.json"
+    mile_id = "mile_details_patch"
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": mile_id,
+                    "title": "Article with stale source metadata",
+                    "audience": "research",
+                    "phase": "robustness",
+                    "tags": [],
+                    "status": "published",
+                    "content": "Old.",
+                    "details": {
+                        "experiment_refs": ["K1379"],
+                        "data_source": "old.csv",
+                        "n_obs": 99,
+                    },
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    draft = tmp_path / "draft.md"
+    draft.write_text(
+        "Updated body.\n\n"
+        "![chart](https://example.com/a.png)\n"
+        "![chart](https://example.com/b.png)\n",
+        encoding="utf-8",
+    )
+
+    import publish_draft
+
+    monkeypatch.setattr(publish_draft, "ROOT", tmp_path)
+    args = SimpleNamespace(
+        draft_path=str(draft),
+        update=mile_id,
+        update_action="methodology_correction",
+        update_summary="Refresh stale source metadata.",
+        update_title=None,
+        audience=None,
+        no_sanitize=False,
+        no_image_gate=False,
+        dry_run=False,
+        sync_supabase=False,
+        update_details_json=json.dumps(
+            {
+                "data_source": "clean.csv",
+                "n_obs": 1852,
+                "charts": ["https://example.com/a.png"],
+            }
+        ),
+    )
+    rc = apply_update(args)
+    assert rc == 0
+
+    article = json.loads(feed_path.read_text(encoding="utf-8"))[0]
+    assert article["details"]["experiment_refs"] == ["K1379"]
+    assert article["details"]["data_source"] == "clean.csv"
+    assert article["details"]["n_obs"] == 1852
+    assert article["details"]["charts"] == ["https://example.com/a.png"]
+    audit = article["errata"]["update_history"][-1]
+    assert audit["details_metadata_changed"] is True
+    assert audit["details_metadata_fields"] == ["charts", "data_source", "n_obs"]
