@@ -38916,7 +38916,7 @@
     "title": "Audience correction: rewrite a true general companion for 買的時候時點沒那麼重要，賣的時候順序可能決定你幾歲把錢花光",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_c2020d8c. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1410']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38931,7 +38931,25 @@
       "content-quality"
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1410"
+    "k_id": "K1410",
+    "claimed_by": "codex-desktop-k1410-audience",
+    "claimed_at": "2026-07-15T21:13:46.324963+00:00",
+    "claim_session_id": "34ee82a6a149",
+    "status_history": [
+      {
+        "ts": "2026-07-15T21:13:46.324982+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1410-audience"
+      },
+      {
+        "ts": "2026-07-15T21:13:46.559933+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1410-audience"
+      }
+    ],
+    "started_at": "2026-07-15T21:13:46.559919+00:00"
   },
   {
     "id": "K1010_article_general_audience_rewrite_94a0a999",
@@ -40570,7 +40588,7 @@
     "title": "Audience correction: rewrite a true general companion for 市場真的很「粗糙」，但更複雜的模型還是沒贏",
     "description": "parent_task_id=ci-red-29421677446; source_article=mile_f3ade114. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1386']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -40586,9 +40604,6 @@
     ],
     "created_at": "2026-07-15T16:16:33.771681+00:00",
     "k_id": "K1386",
-    "claimed_by": "codex-desktop-k1386-audience",
-    "claimed_at": "2026-07-15T21:08:05.704139+00:00",
-    "claim_session_id": "d8a609eff4d4",
     "status_history": [
       {
         "ts": "2026-07-15T21:08:05.704153+00:00",
@@ -40601,9 +40616,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-k1386-audience"
+      },
+      {
+        "ts": "2026-07-15T21:29:34.526434+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-k1386-audience"
       }
     ],
-    "started_at": "2026-07-15T21:08:05.962930+00:00"
+    "started_at": "2026-07-15T21:08:05.962930+00:00",
+    "completed_at": "2026-07-15T21:29:34.526418+00:00",
+    "result": "Created draft/general companion mile_8e086903 with exact ref K1386, sanitize_applied=0, two evidence charts, corrected 1097-row results and all methodology caveats. 109 tests PASS; Supabase/three lazypack URLs verified; r2 removed QLIKE alt regression and audience validator PASS (0 mismatches)."
   },
   {
     "id": "ci-red-29430567843",
@@ -40852,5 +40875,21 @@
     "started_at": "2026-07-15T21:00:56.209066+00:00",
     "completed_at": "2026-07-15T21:05:55.310244+00:00",
     "result": "root_cause=cron_hourly_dispatch.sh changed in c45d82c0d without regenerating config/cron_wrapper_manifest.json or the launchd copy; repair_commit=3e36eac3f; validation=117 targeted tests passed and canonical/manifest/runtime SHA-256 all match; note=K1396 ratchet failure was already repaired by later HEAD; push=deferred to git_push_backup per supervisor policy"
+  },
+  {
+    "id": "dreaming_persistent_alert_52425890cc2f99a1",
+    "title": "[dreaming] persistent_alert:52425890cc2f99a1",
+    "description": "Alert `git-push-backup: push 失敗` fired 6× over 17.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 3 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：alert_key=52425890cc2f99a1 title='git-push-backup: push 失敗' send_count=6 span=17.1d (first 2026-06-28T10:28:38.987914+00:00 → last 2026-07-15T14:00:04.899579+00:00) — no fire in 7.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-15T21:25:00.515638+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:52425890cc2f99a1",
+      "pattern_type": "persistent_alert",
+      "occurrences": 3,
+      "governance_target": "docs/error_log.md"
+    }
   }
 ]
