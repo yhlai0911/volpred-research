@@ -38708,7 +38708,7 @@
     "title": "Audience correction: rewrite a true general companion for 政策標題嚇人，數據沒這麼怕：八次稀土管制公告之後，礦業 ETF 都怎麼走？",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_9839822d. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1575']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38723,7 +38723,25 @@
       "content-quality"
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1575"
+    "k_id": "K1575",
+    "claimed_by": "codex-desktop-k1575-audience",
+    "claimed_at": "2026-07-15T22:17:30.364186+00:00",
+    "claim_session_id": "11a39dad970c",
+    "status_history": [
+      {
+        "ts": "2026-07-15T22:17:30.364199+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1575-audience"
+      },
+      {
+        "ts": "2026-07-15T22:17:30.596701+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1575-audience"
+      }
+    ],
+    "started_at": "2026-07-15T22:17:30.596686+00:00"
   },
   {
     "id": "K824_article_general_audience_rewrite_328ced24",
@@ -38975,7 +38993,7 @@
     "title": "Audience correction: rewrite a true general companion for 買的時候時點沒那麼重要，賣的時候順序可能決定你幾歲把錢花光",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_c2020d8c. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1410']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38991,9 +39009,6 @@
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
     "k_id": "K1410",
-    "claimed_by": "codex-desktop-k1410-audience",
-    "claimed_at": "2026-07-15T21:13:46.324963+00:00",
-    "claim_session_id": "34ee82a6a149",
     "status_history": [
       {
         "ts": "2026-07-15T21:13:46.324982+00:00",
@@ -39006,9 +39021,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-k1410-audience"
+      },
+      {
+        "ts": "2026-07-15T22:18:36.566580+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-k1410-audience"
       }
     ],
-    "started_at": "2026-07-15T21:13:46.559919+00:00"
+    "started_at": "2026-07-15T21:13:46.559919+00:00",
+    "completed_at": "2026-07-15T22:18:36.566568+00:00",
+    "result": "完成 K1410 報酬來源與尾月完整性更正；重跑數值與三張研究圖不變。新增一般讀者 draft mile_3c0ea15f、兩張讀者圖與 Codex-bespoke r3 懶人包，圖卡無內部 K 編號；audience/anti-AI/layout/feed sync 均通過。Commits: 501f68d94, 7df25236b, c20115c5a."
   },
   {
     "id": "K1010_article_general_audience_rewrite_94a0a999",
