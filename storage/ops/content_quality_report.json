@@ -1,13 +1,14 @@
 {
-  "generated_at": "2026-07-15T02:09:39.703713+00:00",
+  "generated_at": "2026-07-15T02:35:23.774307+00:00",
   "publish_rhythm": {
     "status": "burst",
     "in_active_window": true,
     "tpe_hour": 10,
     "recent_count": 10,
-    "newest_published_at": "2026-07-15T01:01:03.412003+00:00",
-    "age_since_newest_min": 68.6,
+    "newest_published_at": "2026-07-15T02:33:44.570461+00:00",
+    "age_since_newest_min": 1.65,
     "gaps_min_newest_first": [
+      92.69,
       57.71,
       0.16,
       213.19,
@@ -15,8 +16,7 @@
       719.91,
       276.84,
       200.84,
-      0.14,
-      39.49
+      0.14
     ],
     "burst_pairs": [
       {
@@ -31,8 +31,14 @@
   "daily_digest_uniqueness": {
     "status": "ok",
     "date_tpe": "2026-07-15",
-    "published_count": 0,
-    "items": []
+    "published_count": 1,
+    "items": [
+      {
+        "id": "mile_ee178213",
+        "title": "紐約踩煞車、PJM 開備援：AI 電力股還能當防禦資產嗎？",
+        "published_at": "2026-07-15T02:33:44.570461+00:00"
+      }
+    ]
   },
   "title_format": {
     "status": "ok",
@@ -43,19 +49,20 @@
   "arc_diversity": {
     "status": "ok",
     "sample": 20,
-    "distinct_axes": 13,
+    "distinct_axes": 14,
     "top_axis": "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive",
     "top_share": 0.3,
     "threshold": 0.5,
     "distribution": {
       "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive": 6,
-      "TW_EQUITY|US_EQUITY::null_no_info": 2,
       "TW_EQUITY::descriptive": 2,
+      "GOLD|NASDAQ|SEMIS|STAPLES|USD|US_EQUITY|UTILITIES|VIX::systemic_crowding": 1,
       "CREDIT_SPREAD|HIGH_YIELD|LONG_BOND|US_BOND|VIX::null_no_info": 1,
       "GOLD|LONG_BOND|NASDAQ|US_EQUITY|US_SMALLCAP::null_no_info": 1,
       "SILVER|US_EQUITY|VIX::descriptive": 1,
       "SILVER|US_BOND::descriptive": 1,
       "BITCOIN|GOLD|LONG_BOND|NASDAQ|OIL|SEMIS|SILVER|TW_EQUITY|USD|US_BOND|US_EQUITY|UTILITIES|VIX::null_no_info": 1,
+      "TW_EQUITY|US_EQUITY::null_no_info": 1,
       "TW_EQUITY::null_no_info": 1,
       "SEMIS|TW_EQUITY::null_no_info": 1,
       "CREDIT_SPREAD|FOMC|GOLD|HIGH_YIELD|LONG_BOND|MID_BOND|NASDAQ|SILVER|TSMC|USD|US_EQUITY|VIX|VVIX::null_no_info": 1,
