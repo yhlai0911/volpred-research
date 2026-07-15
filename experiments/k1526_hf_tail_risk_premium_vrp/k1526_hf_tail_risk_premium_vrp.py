@@ -20,7 +20,7 @@ Design summary
 - HAC (Newey-West, lag=4) standard errors for in-sample OLS.
 - OOS Campbell-Thompson R^2 with rolling 60-month window, baseline = historical
   mean of next-month excess return.
-- DM test against baseline.
+- Clark-West (2007) MSPE-adjusted HAC test against the nested historical-mean baseline.
 - Bootstrap 1000x (seed=42) for t-stat / R^2_OOS confidence intervals.
 
 Honesty caveats baked in
@@ -30,14 +30,16 @@ Honesty caveats baked in
   "concept validation" only, not as statistical evidence.
 - Daily-channel TRP gets the full 2010+ SPY history.
 - All p-values reported as-is; no cherry picking, no multiplicity correction
-  claimed beyond what HAC + DM provide.
+  claimed beyond what the stated HAC and Clark-West procedures provide.
 
 Author: K1526 experiment agent
 Seed: 42 (fixed for bootstrap, all stochastic procedures)
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import warnings
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -51,6 +53,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+
+from volpred.stats.model_evaluation import clark_west_test
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -224,15 +228,15 @@ def ols_hac(y: pd.Series, X: pd.DataFrame, name: str, lag: int = 4) -> OLSResult
     )
 
 
-def rolling_oos_r2(y: pd.Series, X: pd.DataFrame, window: int = 60) -> Tuple[float, pd.Series, pd.Series]:
+def rolling_oos_r2(y: pd.Series, X: pd.DataFrame, window: int = 60) -> Tuple[float, pd.DataFrame]:
     """Campbell-Thompson out-of-sample R^2 vs historical mean baseline.
 
-    Returns (r2_oos, e_model, e_baseline) where e_* are squared-error series.
+    Returns R2_OOS and a frozen pointwise forecast/loss ledger.
     """
     df = pd.concat([y.rename("y"), X], axis=1).dropna()
     n = len(df)
     if n <= window + 10:
-        return float("nan"), pd.Series(dtype=float), pd.Series(dtype=float)
+        return float("nan"), pd.DataFrame()
     yhat_model = np.full(n, np.nan)
     yhat_base = np.full(n, np.nan)
     y_arr = df["y"].values
@@ -255,39 +259,26 @@ def rolling_oos_r2(y: pd.Series, X: pd.DataFrame, window: int = 60) -> Tuple[flo
     sse_b = np.sum(e_base)
     r2_oos = 1.0 - sse_m / sse_b
     idx = df.index[valid]
-    return (
-        float(r2_oos),
-        pd.Series(e_model, index=idx, name="e_model"),
-        pd.Series(e_base, index=idx, name="e_base"),
+    ledger = pd.DataFrame(
+        {
+            "actual": y_arr[valid],
+            "forecast_model": yhat_model[valid],
+            "forecast_baseline": yhat_base[valid],
+            "loss_model": e_model,
+            "loss_baseline": e_base,
+        },
+        index=idx,
     )
+    ledger.index.name = "month"
+    return float(r2_oos), ledger
 
 
-def dm_test(e1: pd.Series, e2: pd.Series, h: int = 1) -> Dict[str, float]:
-    """Diebold-Mariano test (Harvey 1997 small-sample correction).
-
-    e1 = baseline errors, e2 = model errors. Negative t => model better.
-    Returns dict with t-stat, p-value (two-sided), n.
-    """
-    d = (e1 - e2).dropna().values
-    n = len(d)
-    if n < 10:
-        return {"dm_t": float("nan"), "dm_p": float("nan"), "n": n}
-    mean_d = d.mean()
-    # Newey-West variance with lag h-1
-    gamma0 = np.var(d, ddof=0)
-    variance = gamma0
-    for k in range(1, max(1, h)):
-        gamma_k = np.mean((d[:-k] - mean_d) * (d[k:] - mean_d))
-        variance += 2.0 * (1.0 - k / h) * gamma_k
-    se = np.sqrt(variance / n)
-    dm = mean_d / se if se > 0 else float("nan")
-    # Harvey correction
-    corr = np.sqrt((n + 1 - 2 * h + h * (h - 1) / n) / n)
-    dm_hln = dm * corr
-    from scipy import stats
-    p = 2 * (1 - stats.t.cdf(abs(dm_hln), df=n - 1))
-    # Sign: model better = e_model < e_base => mean_d > 0 => dm > 0
-    return {"dm_t": float(dm_hln), "dm_p": float(p), "n": int(n)}
+def _atomic_write_text(path: Path, text: str) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(text, encoding="utf-8")
+    if path.suffix == ".json":
+        json.loads(temporary.read_text(encoding="utf-8"))
+    os.replace(temporary, path)
 
 
 def bootstrap_t_and_oos(y: pd.Series, X: pd.DataFrame, n_boot: int = 1000, window: int = 60, seed: int = SEED) -> Dict[str, Dict[str, float]]:
@@ -321,7 +312,7 @@ def bootstrap_t_and_oos(y: pd.Series, X: pd.DataFrame, n_boot: int = 1000, windo
 
         # OOS r2 on bootstrap
         try:
-            r2b, _, _ = rolling_oos_r2(boot["y"], boot[cols], window=window)
+            r2b, _ = rolling_oos_r2(boot["y"], boot[cols], window=window)
             r2_oos_samples.append(r2b)
         except Exception:
             r2_oos_samples.append(float("nan"))
@@ -431,8 +422,15 @@ def run() -> dict:
     vrp_pred = asdict(ols_hac(rv_next.loc[keep2], Xfull.loc[keep2, ["ES_d", "vix_end"]], "VRP_side_RVnext_on_ES_VIX"))
 
     # OOS R^2 — focal spec is M3 (ES + VIX)
-    r2_oos, e_m, e_b = rolling_oos_r2(y, Xfull[["ES_d", "vix_end"]], window=60)
-    dm = dm_test(e_b, e_m, h=1)
+    r2_oos, oos_ledger = rolling_oos_r2(y, Xfull[["ES_d", "vix_end"]], window=60)
+    cw = clark_west_test(
+        oos_ledger["actual"].to_numpy(),
+        oos_ledger["forecast_baseline"].to_numpy(),
+        oos_ledger["forecast_model"].to_numpy(),
+        h=1,
+    )
+    raw_loss_diff = oos_ledger["loss_model"] - oos_ledger["loss_baseline"]
+    loss_diff_acf1 = float(raw_loss_diff.autocorr(lag=1))
 
     # Bootstrap CI on focal spec
     boot = bootstrap_t_and_oos(y, Xfull[["ES_d", "vix_end"]], n_boot=1000, window=60, seed=SEED)
@@ -442,7 +440,11 @@ def run() -> dict:
 
     # Figures
     fig_trp_overlay(monthly, FIG_DIR / "fig1_trp_overlay.png")
-    fig_rolling_oos(e_m, e_b, FIG_DIR / "fig2_rolling_oos_cumdiff.png")
+    fig_rolling_oos(
+        oos_ledger["loss_model"],
+        oos_ledger["loss_baseline"],
+        FIG_DIR / "fig2_rolling_oos_cumdiff.png",
+    )
     fig_trp_5m(trp5, FIG_DIR / "fig3_trp_5min_concept.png")
 
     # Summary verdict logic
@@ -453,11 +455,21 @@ def run() -> dict:
     if abs(focal_es_t) >= 1.96:
         verdict = "CONDITIONAL_PASS"
         reasons.append(f"|t(ES_d)|={abs(focal_es_t):.2f} >= 1.96 with HAC SE")
-    if r2_oos > 0 and dm["dm_p"] < 0.10:
+    if r2_oos > 0 and cw["p_value_one_sided"] < 0.10:
         verdict = "CONDITIONAL_PASS"
-        reasons.append(f"R2_OOS={r2_oos:.4f} > 0 and DM p={dm['dm_p']:.3f} < 0.10")
+        reasons.append(
+            f"R2_OOS={r2_oos:.4f} > 0 and Clark-West one-sided "
+            f"p={cw['p_value_one_sided']:.3f} < 0.10"
+        )
     if verdict == "NULL":
-        reasons.append(f"Focal t(ES_d)={focal_es_t:.2f}, R2_OOS={r2_oos:.4f}, DM p={dm['dm_p']:.3f}")
+        reasons.append(
+            f"Focal t(ES_d)={focal_es_t:.2f}, R2_OOS={r2_oos:.4f}, "
+            f"Clark-West one-sided p={cw['p_value_one_sided']:.3f}"
+        )
+
+    ledger_path = EXP_DIR / "k1526_oos_loss_ledger.csv"
+    _atomic_write_text(ledger_path, oos_ledger.to_csv(float_format="%.17g"))
+    ledger_sha256 = hashlib.sha256(ledger_path.read_bytes()).hexdigest()
 
     out = {
         "experiment_id": "k1526_hf_tail_risk_premium_vrp",
@@ -475,7 +487,10 @@ def run() -> dict:
             "spec": "M3_ES_VIX",
             "window": 60,
             "r2_oos": r2_oos,
-            "dm_test_vs_baseline": dm,
+            "nested_test_vs_baseline": cw,
+            "raw_loss_diff_acf1": loss_diff_acf1,
+            "loss_ledger": ledger_path.name,
+            "loss_ledger_sha256": ledger_sha256,
         },
         "bootstrap": boot,
         "trp_5min_concept": (
@@ -503,7 +518,7 @@ def run() -> dict:
 
     # Write results JSON
     res_path = EXP_DIR / "k1526_hf_tail_risk_premium_vrp_results.json"
-    res_path.write_text(json.dumps(out, indent=2, default=str))
+    _atomic_write_text(res_path, json.dumps(out, indent=2, default=str))
     print(f"Wrote {res_path}")
     print(f"Verdict: {verdict}")
     for r in reasons:
