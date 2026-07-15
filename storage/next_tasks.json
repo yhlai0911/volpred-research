@@ -37566,7 +37566,7 @@
     "title": "K1598: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1598 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'cross-market/universal']) but no general article in feed.json.  Verdict preview: K1598 [CONDITIONAL_PASS/COVERAGE_COMPETITIVE_NO_PANEL_EDGE]：測試 Liu, Dobriban & Orabona (2026, arXiv:2602.03168) universal-portfolio 風格的線上 conformal 校準（UP_AggACI_lite，Cover-style 對 ACI 專家做指數混合）能否改善波動率縮放報酬區間，優於 rolling conformal 與 ACI baseline。資料：experiments/k1552 frozen prices.par",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1598",
@@ -37576,9 +37576,6 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-14T19:07:58+00:00",
-    "claimed_by": "codex-desktop-k1598-article",
-    "claimed_at": "2026-07-15T22:37:26.820288+00:00",
-    "claim_session_id": "40941b83b83f",
     "status_history": [
       {
         "ts": "2026-07-15T22:37:26.820302+00:00",
@@ -37591,16 +37588,24 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-k1598-article"
+      },
+      {
+        "ts": "2026-07-15T22:52:27.451528+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-k1598-article"
       }
     ],
-    "started_at": "2026-07-15T22:37:27.380404+00:00"
+    "started_at": "2026-07-15T22:37:27.380404+00:00",
+    "completed_at": "2026-07-15T22:52:27.451515+00:00",
+    "result": "Created general draft mile_382127b9 for K1598 with structured ref, sanitize_applied=0, four verified HTTP-200 images, and three data-bound Codex bespoke panels. Audience/anti-AI/provenance gates passed, local and Supabase content SHA-256 match exactly, and 120 focused tests passed; conclusion remains coverage improvement versus Rolling252 with no panel-level edge."
   },
   {
     "id": "K1678_article_general",
     "title": "K1678: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1678 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1678：以 SEC Litigation Release 26532（2026-04-20 立案，*SEC v. Harsh V. Patel*，解析 439 筆表格列/412 個股票代碼/1079 個唯一 ticker-date 配對）作操縱交易弱標籤，配合 Wikimedia Analytics 公開 topic pageviews（Pump_and_dump/WallStreetBets/Short_squeeze 等）過去 126 日 z-score 作公眾關注度 shock，檢驗是否放大操縱標籤後 t+1/t+5 崩盤風險。yfinance",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1678",
@@ -37609,7 +37614,25 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-14T19:08:03+00:00"
+    "created_at": "2026-07-14T19:08:03+00:00",
+    "claimed_by": "codex-desktop-k1678-article",
+    "claimed_at": "2026-07-15T22:52:38.107956+00:00",
+    "claim_session_id": "5fe69eded007",
+    "status_history": [
+      {
+        "ts": "2026-07-15T22:52:38.107971+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1678-article"
+      },
+      {
+        "ts": "2026-07-15T22:52:38.341568+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1678-article"
+      }
+    ],
+    "started_at": "2026-07-15T22:52:38.341549+00:00"
   },
   {
     "id": "K1348_article_general",
