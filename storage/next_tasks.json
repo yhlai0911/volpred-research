@@ -35669,14 +35669,37 @@
     "description": "2026-07-14 10:12 hourly-10 合併 slot-1 worktree 時，merge_worktree.sh 為求乾淨合併，把共享 main checkout 裡另一個 slot（codex-vscode，arc-gate 任務）**未提交**的 20 個檔 git stash 起來，pop 回來時還在 storage/ops/checkup/20260714.json 撞出 UU 衝突。這次人工驗證後零遺失，但這是結構性地雷：dispatch-supervisor 是多 slot 併發，共享 main checkout 在任何時刻都可能是髒的（其他 slot / 互動 session 在途）。證據：git stash list 裡 stash@{1} 就是上一次 slot-1 合併留下的同類 temp stash — 已經發生過至少兩次，且 stash 從沒被清掉（堆積 = 下一顆地雷）。\n\n根因層次：merge_worktree.sh 的 domain model 假設『main checkout 是我獨佔的』，這在單 agent 時代成立，multi-slot supervisor cutover 後不再成立（cutover orphan class，見 .claude/rules/control-plane.md）。\n\n要修的不是 stash 步驟本身，是『合併能不能在不觸碰共享工作區的前提下完成』：候選方向 = 用 temp worktree 做 merge（不動 main checkout）→ 只在 fast-forward / 無交集時才更新 main；或偵測到共享 checkout 髒且與待合併檔有交集時 fail-closed 並要求主線程處理。禁止的解法：再加一層 stash retry / 加旗標繞過。\n\nGate：scripts/tests/test_merge_worktree.sh 補 case — 共享 checkout 對同一檔有未提交改動時，合併不得靜默 stash 別人的工作。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "multi_slot",
       "agent_discovered"
     ],
     "created_at": "2026-07-14T02:16:20.049108+00:00",
-    "source": "agent_discovered"
+    "source": "agent_discovered",
+    "status_history": [
+      {
+        "ts": "2026-07-15T17:15:20.846671+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T17:15:21.097294+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T17:27:19.683890+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop"
+      }
+    ],
+    "started_at": "2026-07-15T17:15:21.097277+00:00",
+    "completed_at": "2026-07-15T17:27:19.683875+00:00",
+    "result": "移除 merge_worktree 的整樹 stash/pop；foreign staged index 與同路徑 WIP 皆 fail-closed，不相交 WIP 原地保留。19 cases / 56 assertions 全綠，full-population sweep 無其他正式 git-stash writer；commit 7d30d8f84。"
   },
   {
     "id": "telegram-733",
@@ -36705,13 +36728,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T16:01:01.739592+00:00",
+    "completed_at": "2026-07-15T17:00:50.942214+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T16:01:01.739592+00:00",
-      "last_clean_observed_at": "2026-07-15T16:01:01.739592+00:00"
+      "resolved_at": "2026-07-15T17:00:50.942214+00:00",
+      "last_clean_observed_at": "2026-07-15T17:00:50.942214+00:00"
     }
   },
   {
@@ -36723,13 +36746,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T16:19:40.596636+00:00",
+    "completed_at": "2026-07-15T17:48:07.572998+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T16:19:40.596636+00:00",
-      "last_clean_observed_at": "2026-07-15T16:19:40.596636+00:00"
+      "resolved_at": "2026-07-15T17:48:07.572998+00:00",
+      "last_clean_observed_at": "2026-07-15T17:48:07.572998+00:00"
     }
   },
   {
@@ -36888,31 +36911,100 @@
     "id": "k1709_rev4_nameerror",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent_discovered",
     "created_at": "2026-07-14T16:11:43.712159+00:00",
     "title": "K1709 rev4 D4: main() 引用已出 scope 的 margin_pct / claim → 預設執行路徑 NameError",
-    "description": "Codex rev3 複審 blocking defect D4（verdict: storage/ops/codex_reviews/k1709_rev3_verdict.{md,json}，reviewed_commit f3f9d3034b）。rev3 把 claim 組裝抽成 build_verdict_basis() 後，k1709.py:2586 與 :2605 仍引用已不在 scope 的 margin_pct / claim → 預設 run 在寫出 results JSON 之後就丟 NameError。Frozen estimates 未受影響（Codex 遞迴比對 4383 個 leaf，0 差異），但這代表 rev3 根本不是一個能跑到底的 relabel-only refactor，等於整份 rev3 沒被端到端執行過。修法：把 2586/2605 改成從 verdict basis 物件取值；補一個 smoke test 讓 default path 真的跑到結束（不是只 import）。實驗留在 worktree .claude/worktrees/dispatch-slot-2-c873d04d-k1709，FAIL 期間不得進 main。三個 rev4 修復單建議順序：本條 → k1709_rev4_claim_object → k1709_rev4_figure_labels。"
+    "description": "Codex rev3 複審 blocking defect D4（verdict: storage/ops/codex_reviews/k1709_rev3_verdict.{md,json}，reviewed_commit f3f9d3034b）。rev3 把 claim 組裝抽成 build_verdict_basis() 後，k1709.py:2586 與 :2605 仍引用已不在 scope 的 margin_pct / claim → 預設 run 在寫出 results JSON 之後就丟 NameError。Frozen estimates 未受影響（Codex 遞迴比對 4383 個 leaf，0 差異），但這代表 rev3 根本不是一個能跑到底的 relabel-only refactor，等於整份 rev3 沒被端到端執行過。修法：把 2586/2605 改成從 verdict basis 物件取值；補一個 smoke test 讓 default path 真的跑到結束（不是只 import）。實驗留在 worktree .claude/worktrees/dispatch-slot-2-c873d04d-k1709，FAIL 期間不得進 main。三個 rev4 修復單建議順序：本條 → k1709_rev4_claim_object → k1709_rev4_figure_labels。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T17:05:12.646183+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T17:05:15.789080+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T17:12:58.214193+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-15T17:05:15.789065+00:00",
+    "completed_at": "2026-07-15T17:12:58.214177+00:00",
+    "result": "Merged certified K1709 rev6 through merge_worktree.sh. main() unresolved-global regression is clean; 74 K1709 tests pass and experiment_gates certification PASS."
   },
   {
     "id": "k1709_rev4_claim_object",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent_discovered",
     "created_at": "2026-07-14T16:11:43.712159+00:00",
     "title": "K1709 rev4 D1+D2: renderer 是第二個 claim 作者且在 --relabel invariant 之外 → 收斂成單一 canonical claim object",
-    "description": "Codex rev3 複審 blocking defects D1 與 D2（verdict: storage/ops/codex_reviews/k1709_rev3_verdict.{md,json}）。D1：README:232 最終『Does say』摘要仍寫『No robust incremental predictive evidence was found』，沒有 UNCONDITIONAL 限定詞；程式（k1709.py:1039-1052）只授權 OOS 平均 QLIKE loss differential，跨 regime 正負互抵的條件式效果從未檢定。README:38 的遠端 blanket disclaimer 保護不了一句會被獨立引用的結論。D2：rev3 宣稱所有 claim 句子只由 build_verdict_basis() 產生，但 render_readme.py:701-743 仍然自己寫死散文，且完全在 --relabel invariant 掃描範圍之外；test_k1709.py:804-844 只驗 renderer 需要的 key，沒驗 claim parity → 同一類 overclaim 可以在 invariant 全綠的情況下復發。Codex 明確指出：只把 line 710 補一個字不算修好（那是 5(c) 的設計缺陷）。修法：summary / limitations / 圖表標籤全部由同一個 canonical claim object 渲染；新增 frozen-render parity regression test（renderer 產出的每個 claim 句子必須可回溯到 claim object 的欄位，否則 fail）；『Does not say』新增一條 bullet：conditional / state-dependent predictive ability 未檢定，跨 regime 互抵的效果不被排除。依賴：先做 k1709_rev4_nameerror。實驗留 worktree，不得進 main。"
+    "description": "Codex rev3 複審 blocking defects D1 與 D2（verdict: storage/ops/codex_reviews/k1709_rev3_verdict.{md,json}）。D1：README:232 最終『Does say』摘要仍寫『No robust incremental predictive evidence was found』，沒有 UNCONDITIONAL 限定詞；程式（k1709.py:1039-1052）只授權 OOS 平均 QLIKE loss differential，跨 regime 正負互抵的條件式效果從未檢定。README:38 的遠端 blanket disclaimer 保護不了一句會被獨立引用的結論。D2：rev3 宣稱所有 claim 句子只由 build_verdict_basis() 產生，但 render_readme.py:701-743 仍然自己寫死散文，且完全在 --relabel invariant 掃描範圍之外；test_k1709.py:804-844 只驗 renderer 需要的 key，沒驗 claim parity → 同一類 overclaim 可以在 invariant 全綠的情況下復發。Codex 明確指出：只把 line 710 補一個字不算修好（那是 5(c) 的設計缺陷）。修法：summary / limitations / 圖表標籤全部由同一個 canonical claim object 渲染；新增 frozen-render parity regression test（renderer 產出的每個 claim 句子必須可回溯到 claim object 的欄位，否則 fail）；『Does not say』新增一條 bullet：conditional / state-dependent predictive ability 未檢定，跨 regime 互抵的效果不被排除。依賴：先做 k1709_rev4_nameerror。實驗留 worktree，不得進 main。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T17:13:03.213055+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T17:13:06.602227+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T17:13:25.006011+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-15T17:13:06.602210+00:00",
+    "completed_at": "2026-07-15T17:13:25.005998+00:00",
+    "result": "K1709 rev6 canonical claim object is merged. Frozen verdict regeneration, README pure-render parity, final claim bullets, and single-author claim-scope tests all pass (4 targeted; 74 full suite)."
   },
   {
     "id": "k1709_rev4_figure_labels",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent_discovered",
     "created_at": "2026-07-14T16:11:43.712159+00:00",
     "title": "K1709 rev4 D3: standalone 圖表仍標無限定的 'Giacomini-White' / 'GW gate' → 圖標須由同一 claim object 渲染並重建 Fig 3/4",
-    "description": "Codex rev3 複審 blocking defect D3（verdict: storage/ops/codex_reviews/k1709_rev3_verdict.{md,json}）。k1709.py:2673-2681,2712-2713,2728 仍輸出 'GW z'、'Giacomini-White on QLIKE'、'Giacomini-White z'、'power of the GW gate' —— 正是 rev2 已判不可接受的無限定 nomenclature。程式只實作 unconditional GW/DM special case（GW 2006 Sec 3.4），而 PNG 會脫離 README 獨立流通，README:38 的 disclaimer 保護不到它；且 Fig 3/4 自 c97d690c 後未重建，現在與 README:224-225 的『unconditional GW/DB』描述互相矛盾。修法：圖表標籤與 caption 由 k1709_rev4_claim_object 建立的同一 canonical claim object 渲染（不得在繪圖碼裡寫死統計名稱），標明 unconditional；重建 Fig 3/4；parity test 涵蓋圖標。依賴：k1709_rev4_claim_object 先完成。實驗留 worktree，不得進 main。"
+    "description": "Codex rev3 複審 blocking defect D3（verdict: storage/ops/codex_reviews/k1709_rev3_verdict.{md,json}）。k1709.py:2673-2681,2712-2713,2728 仍輸出 'GW z'、'Giacomini-White on QLIKE'、'Giacomini-White z'、'power of the GW gate' —— 正是 rev2 已判不可接受的無限定 nomenclature。程式只實作 unconditional GW/DM special case（GW 2006 Sec 3.4），而 PNG 會脫離 README 獨立流通，README:38 的 disclaimer 保護不到它；且 Fig 3/4 自 c97d690c 後未重建，現在與 README:224-225 的『unconditional GW/DB』描述互相矛盾。修法：圖表標籤與 caption 由 k1709_rev4_claim_object 建立的同一 canonical claim object 渲染（不得在繪圖碼裡寫死統計名稱），標明 unconditional；重建 Fig 3/4；parity test 涵蓋圖標。依賴：k1709_rev4_claim_object 先完成。實驗留 worktree，不得進 main。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T17:13:38.116063+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T17:13:42.493197+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T17:14:04.173538+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-15T17:13:42.493183+00:00",
+    "completed_at": "2026-07-15T17:14:04.173523+00:00",
+    "result": "Merged rebuilt Fig 3/4 with labels sourced from the canonical claim object. Unconditional-label and review-receipt coverage tests pass; PNG SHA-256 values match the PASS verdict receipt."
   },
   {
     "id": "reader_preferences_skill_pointers",
@@ -37429,7 +37521,7 @@
     "title": "claim owner `hourly-$(date +%H)` 在多 slot 並發下會撞名 — 一個 slot 可能誤清另一個 slot 的在途任務",
     "description": "2026-07-15 03:31 hourly-03 (slot-2) 在跑「完整完成 gate」的『無 in_progress 殘留』檢查時，查到一筆 claimed_by='hourly-03' 的 in_progress 任務 (ci-red-29343425525)。但那筆其實是 **slot-1** 在同一小時 claim 的（fire_reason=requested:ci_red），不是 slot-2 的殘留。\n\n根因：dispatch prompt 規定 claim owner = `hourly-$(date +%H)`，**只帶小時、不帶 slot_id**。supervisor 現在是多 slot 並發（cohort 內同時跑 slot-1 / slot-2），同一小時的兩個 slot 會拿到**完全相同的 owner 字串** → 從 owner 欄位無法區分是誰 claim 的。\n\n危害（尚未發生，但這次差一步）：\n- fire 收尾時的『清掉我自己的 in_progress 殘留』動作，會把**另一個 slot 正在跑的任務**誤判成自己的殘留而 release/complete\n- stale-claim 回收器若按 owner 比對，同樣會誤傷\n- work_log 的 actor 歸因也會混淆兩個 slot 的產出\n\n修法建議（改流程不改資料）：\n- owner 改成帶 slot 的唯一字串，例如 `hourly-<HH>-<slot_id>` 或直接用 supervisor 的 job_id\n- enforcement owner 應是 supervisor（它知道 slot_id），不是 prompt 裡的 shell 字串 — 讓 prompt 從環境變數讀 supervisor 注入的 owner，而非自己 `date +%H` 拼\n- 同步更新 cron_hourly_dispatch_prompt.md 的 claim 範例\n- 加 regression test：兩個 slot 同小時 claim 不同 task，斷言 owner 不相同\n\n發現者：hourly-03 (slot-2, job 5ddfeb00)，於 K1583 發佈收尾時。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "agent_discovered",
     "tags": [
@@ -37440,7 +37532,30 @@
       "multi-slot"
     ],
     "created_at": "2026-07-14T19:32:15.966944+00:00",
-    "discovered_by": "hourly-03"
+    "discovered_by": "hourly-03",
+    "status_history": [
+      {
+        "ts": "2026-07-15T17:27:41.800690+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T17:27:42.095228+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T17:35:48.242260+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop"
+      }
+    ],
+    "started_at": "2026-07-15T17:27:42.095207+00:00",
+    "completed_at": "2026-07-15T17:35:48.242201+00:00",
+    "result": "Supervisor now injects a unique retry-stable task owner from slot_id + job_id for both Claude and Codex failover; prompts use only that token. Attribution remains backward-compatible; 144 targeted regression tests passed. Commit 1dcbb35b0."
   },
   {
     "id": "feed_correction_k1695_exposure_artifact",
@@ -39083,9 +39198,27 @@
     "description": "面向 ASIA 第二棒。^N225 + 1306.T（TOPIX ETF）baseline sweep（GARCH/GJR/HAR）+ 美 VIX exogenous 增量檢定 — 台股 R12 結論（美 VIX 優於本地 vol proxy）的日本複製。^NKVI（日經VI）yfinance 不可得（2026-07-15 smoke test x3 empty），本 K 用美 VIX spillover 角度，不做日本本地 IV。時區注意：日股收盤先於美股開盤，overnight VIX 訊號用前一美股交易日收盤（timing 合法）。資料期間：^N225 可回溯數十年，開工先診斷並依 COMMON_START 慣例。硬規則：開工先讀 docs/error_log.md + 搜 knowledge.json 相似 K + 至少 3 篇文獻；先做資料期間診斷（smoke test 只驗 2y，實驗要拉最長可得樣本，OOS 必含至少一次空頭）；跨市場假日 alignment 依 methodology.md；signal.shift(1) 明確 lag；DM 用 canonical volpred.stats.model_evaluation.dm_test（HAC bandwidth 規則）；收工跑 experiment_gates.py。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user_directive_20260715_market_diversification",
-    "created_at": "2026-07-15T07:59:24.440660+00:00"
+    "created_at": "2026-07-15T07:59:24.440660+00:00",
+    "claimed_by": "codex-failover",
+    "claimed_at": "2026-07-15T17:09:11.082602+00:00",
+    "claim_session_id": "b8db46d35820",
+    "status_history": [
+      {
+        "ts": "2026-07-15T17:09:11.082616+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T17:09:17.832078+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-15T17:09:17.832064+00:00"
   },
   {
     "id": "asia3_tw_sector_spillover",
@@ -39460,9 +39593,47 @@
     "description": "2026-07-15 v3 報頭修復時發現：market_daily 7/14 與 7/15 列的 spy_close/gld_close 與 7/13 完全同值（749.17/367.13）— yfinance 7/14 起 SPY/GLD 回 NaN（同 44afe99ea stale-yfinance regression 線），寫入端把前值 carry-forward 進表且無 stale flag，造成前端 ticker change 顯示 0.00%。任務：(1) 驗 yfinance 是否已恢復供 7/14+ 真值；恢復則讓既有資料流程（daily_update/collect_us）重跑回填 market_daily 7/14-15 正確 close（不手改 DB，修流程重寫）；(2) 檢查寫入端 carry-forward 行為：無新值時應寫 NULL 或帶 stale flag，不可無標記複製前值（誠實原則 — 假裝有收盤值）；若要改行為先查 44afe99ea 的 monotone gate 設計避免疊床架屋；(3) 完成後 curl https://volpred.zeabur.app/api/strategy-overview 驗 spy_change_pct 非 0（若市場真有變動）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "main_thread_20260715_v3_masthead_fix",
-    "created_at": "2026-07-15T10:16:06.095808+00:00"
+    "created_at": "2026-07-15T10:16:06.095808+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-15T17:03:15.246958+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T17:03:18.397038+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T17:05:09.106478+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-15T17:43:49.257393+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T17:43:49.534884+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop"
+      }
+    ],
+    "started_at": "2026-07-15T17:43:49.534867+00:00",
+    "last_released_at": "2026-07-15T17:05:09.106462+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-07-15T17:43:49.257380+00:00",
+    "claim_session_id": "e9058ef9654a"
   },
   {
     "id": "telegram-822",
@@ -39828,12 +39999,35 @@
     "task_type": "platform_ops",
     "task_family": "ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "telegram-838",
     "preferred_agent": "claude",
     "parent_task_id": "telegram-838",
     "created_at": "2026-07-15T13:00:00+00:00",
-    "description": "根因：event_ledger receipt 2e795b4a...json 顯示 dedupe_key=cpi-us-2026-07-14-t0:one_shot disposition=reaction_already_covered，covered_by=mile_5dd7c135（match=fuzzy）。但 mile_5dd7c135 實為 2026-07-14『油價跳漲、金價連摔／避風港出勤表』文，與 CPI 完全無關 → CPI 07/14 T+0 實際數字反應文因誤判被跳過，從未發佈。\n修流程（不修資料）：event materializer 的 T+0 反應文覆蓋判定不得只靠寬鬆標題相似度；必須要求結構化匹配（event_type + event_date/slot 命中，或標題明確含該事件關鍵詞如 CPI/通膨/物價）才算 reaction_already_covered。加回歸測試（無關財經文不得 fuzzy-cover 一個 econ event T+0），並確保發 event 文時有回寫 event_key/type/date/slot 讓 dedup 有結構欄位可比。相關檔：src/volpred/ops/event_jobs.py、scripts/populate_upcoming_events.py、event_ledger receipts。"
+    "description": "根因：event_ledger receipt 2e795b4a...json 顯示 dedupe_key=cpi-us-2026-07-14-t0:one_shot disposition=reaction_already_covered，covered_by=mile_5dd7c135（match=fuzzy）。但 mile_5dd7c135 實為 2026-07-14『油價跳漲、金價連摔／避風港出勤表』文，與 CPI 完全無關 → CPI 07/14 T+0 實際數字反應文因誤判被跳過，從未發佈。\n修流程（不修資料）：event materializer 的 T+0 反應文覆蓋判定不得只靠寬鬆標題相似度；必須要求結構化匹配（event_type + event_date/slot 命中，或標題明確含該事件關鍵詞如 CPI/通膨/物價）才算 reaction_already_covered。加回歸測試（無關財經文不得 fuzzy-cover 一個 econ event T+0），並確保發 event 文時有回寫 event_key/type/date/slot 讓 dedup 有結構欄位可比。相關檔：src/volpred/ops/event_jobs.py、scripts/populate_upcoming_events.py、event_ledger receipts。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T17:37:04.187483+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T17:37:04.456719+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T17:43:31.734136+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop"
+      }
+    ],
+    "started_at": "2026-07-15T17:37:04.456701+00:00",
+    "completed_at": "2026-07-15T17:43:31.734122+00:00",
+    "result": "Event reaction coverage now trusts exact event metadata or an explicit title keyword, never generic tags; the real mile_5dd7c135 incident replays as not covered. Live event publishing now requires event_key/type/date/slot; 44 focused tests passed. Commit eed22a6fb."
   },
   {
     "id": "event_article_cpi_us_2026-07-14_tplus0_backfill",
@@ -40030,5 +40224,42 @@
     ],
     "created_at": "2026-07-15T16:16:33.771681+00:00",
     "k_id": "K1386"
+  },
+  {
+    "id": "ci-red-29430567843",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29421677446",
+    "ci_run_key": "29430567843:1",
+    "created_at": "2026-07-15T17:00:05.003862+00:00",
+    "title": "CI 紅燈修復（run 29430567843, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29430567843\nattempt: 1\nhead_sha: 49f4c5dcf\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29430567843 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T17:01:12.317042+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-15T17:01:12.540795+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-15T17:31:51.503943+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-15T17:01:12.540781+00:00",
+    "completed_at": "2026-07-15T17:31:51.503929+00:00",
+    "result": "root_cause=CI run 29430567843 predated the audience repair; the repair-after run then exposed K1386 pandas default C float parsing with 1-2 ULP cross-architecture drift; repair_commit=06e7152ee; prior_audience_commits=c53cd4470,48bdf37b8; verification=ARM+x86 hash 9bce8a54, 8 targeted tests PASS, experiment gate PASS, independent review PASS; push=deferred per repository policy"
   }
 ]
