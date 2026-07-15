@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
-"""Async lazypack (懶人包圖組) pipeline — enqueue + deterministic render/install.
+"""Async lazypack (懶人包圖組) pipeline — enqueue + bespoke render/install.
 
 Root cause (docs/error_log.md 2026-07-02 15:15 #4): the writing agent's 50-min
-hard cap was shared between article body writing and the old agentic lazypack
-render, squeezing body depth. The 2026-07-13 3-STRIKE refactor keeps this async
-install lane but makes rendering deterministic and sub-second for typical sets.
-off the writing fire onto the EXISTING compute_queue async lane
-(storage/ops/compute_queue/ + */15 compute-worker; 0 Claude tokens — same split
-as reference_compute_queue_token_split):
+hard cap was shared between article body writing and the old synchronous
+lazypack render, squeezing body depth. The async lane moves that work onto the
+EXISTING compute_queue lane (storage/ops/compute_queue/ + */15 compute-worker):
 
     writing agent : body done → publish draft (lazypack NOT required at draft
                     stage) → `lazypack_async_render.py enqueue --article-id
                     mile_x --experiment Kxxxx --plan plan.json`
-    compute worker: `run` → lazypack_render.py (strict plan + JSON evidence,
-                    no LLM/code generation) → upload PNGs → append
+    compute worker: `run` → gen_lazypack_codex.py (Codex writes a bespoke,
+                    data-bound renderer; local process executes it) → upload PNGs → append
                     `## 懶人包圖組` to the article → single-article re-sync
     release gate  : release_pool refuses to flip a general draft/scheduled
                     article to published until the section exists
@@ -35,8 +32,11 @@ Usage:
     --plan storage/lazypack_jobs/mile_31b2b0bb/plan.json \
     --out-dir storage/lazypack_jobs/mile_31b2b0bb/panels
 
-plan.json uses the strict, versioned schema owned by scripts/lazypack_render.py.
-Each numeric value is a JSON-field binding; one PNG is emitted per panel.
+The deterministic scripts/lazypack_render.py remains the explicit fallback when
+Codex is unavailable or exhausts its bounded repairs. Every fallback attempt is
+written to work_log; it is never silent. plan.json still uses the strict,
+versioned schema owned by scripts/lazypack_render.py, so evidence hashes and
+numeric bindings are validated before either renderer runs.
 """
 from __future__ import annotations
 
@@ -49,6 +49,7 @@ import subprocess
 import sys
 import tempfile
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,7 +58,8 @@ for _p in (str(ROOT), str(ROOT / "src"), str(ROOT / "scripts")):
         sys.path.insert(0, _p)
 
 JOB_ID_PREFIX = "lazypack-"
-DEFAULT_TIMEOUT_S = 300  # deterministic render is seconds; keep upload/sync headroom
+BESPOKE_SCRIPT_NAME = "render_lazypack.py"
+DEFAULT_TIMEOUT_S = 1800  # bespoke generation budget (1500s) + upload/sync headroom
 
 
 def _resolve(path_like: str | Path) -> Path:
@@ -235,7 +237,10 @@ def _record_job_outputs(
     job_id = job_id or os.environ.get("VOLPRED_COMPUTE_JOB_ID")
     if not job_id:
         return
-    candidates = [out_dir / f"{stem}.png" for stem, _ in specs]
+    candidates = [
+        out_dir / BESPOKE_SCRIPT_NAME,
+        *(out_dir / f"{stem}.png" for stem, _ in specs),
+    ]
     actual = [
         path for path in candidates
         if path.is_file() and before.get(path) != _file_fingerprint(path)
@@ -262,8 +267,11 @@ def _snapshot_outputs(
     out_dir: Path, specs: list[tuple[str, str]],
 ) -> dict[Path, tuple[int, str]]:
     snapshot: dict[Path, tuple[int, str]] = {}
-    for stem, _ in specs:
-        path = out_dir / f"{stem}.png"
+    candidates = [
+        out_dir / BESPOKE_SCRIPT_NAME,
+        *(out_dir / f"{stem}.png" for stem, _ in specs),
+    ]
+    for path in candidates:
         fingerprint = _file_fingerprint(path)
         if fingerprint is not None:
             snapshot[path] = fingerprint
@@ -299,6 +307,112 @@ def _validate_render_receipt(
         raise RuntimeError("renderer receipt output set/hash mismatch")
 
 
+def _write_render_receipt(
+    receipt_path: Path,
+    *,
+    renderer: str,
+    run_token: str,
+    plan_path: Path,
+    out_dir: Path,
+    specs: list[tuple[str, str]],
+) -> None:
+    """Hash the exact plan and panel set accepted by the async installer."""
+    receipt = {
+        "schema_version": 1,
+        "renderer": renderer,
+        "run_token": run_token,
+        "plan_sha256": hashlib.sha256(plan_path.read_bytes()).hexdigest(),
+        "panels": [
+            {
+                "name": f"{stem}.png",
+                "sha256": hashlib.sha256(
+                    (out_dir / f"{stem}.png").read_bytes()
+                ).hexdigest(),
+            }
+            for stem, _ in specs
+        ],
+    }
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+
+
+def _clear_expected_panels(out_dir: Path, specs: list[tuple[str, str]]) -> None:
+    """Require this run to own every accepted PNG, never reuse stale output."""
+    for stem, _ in specs:
+        (out_dir / f"{stem}.png").unlink(missing_ok=True)
+
+
+def _record_fallback(
+    *,
+    storage_dir: Path,
+    article_id: str,
+    job_id: str | None,
+    primary_rc: int,
+    fallback_rc: int,
+) -> None:
+    """Persist the policy-significant renderer downgrade under the work-log lock."""
+    from append_work_log import append_entries
+
+    actor = os.environ.get("VOLPRED_TASK_CLAIM_OWNER") or "lazypack-async-worker"
+    event_id = f"lazypack_fallback:{job_id or article_id}"
+    entry = {
+        "timestamp": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
+        "task_type": "platform_ops",
+        "task_id": f"lazypack_fallback_{article_id}",
+        "outcome": "fallback_succeeded" if fallback_rc == 0 else "fallback_failed",
+        "actor": actor,
+        "owner": actor,
+        "commit": None,
+        "summary": (
+            "Codex bespoke lazypack failed "
+            f"(rc={primary_rc}); deterministic renderer fallback "
+            f"{'succeeded' if fallback_rc == 0 else f'failed (rc={fallback_rc})'}."
+        ),
+        "fallback_event_id": event_id,
+        "article_id": article_id,
+        "job_id": job_id,
+        "primary_renderer": "scripts/gen_lazypack_codex.py",
+        "fallback_renderer": "scripts/lazypack_render.py",
+    }
+
+    def _dedupe(existing: list[dict], candidates: list[dict]) -> list[dict]:
+        seen = {row.get("fallback_event_id") for row in existing}
+        return [row for row in candidates if row.get("fallback_event_id") not in seen]
+
+    append_entries(
+        [entry],
+        path=storage_dir / "work_log.json",
+        lock_path=storage_dir / ".work_log.lock",
+        dedupe=_dedupe,
+    )
+
+
+def _codex_command(
+    a: argparse.Namespace,
+    *,
+    document: dict,
+    plan_path: Path,
+    out_dir: Path,
+) -> list[str]:
+    cmd = [
+        sys.executable,
+        str(ROOT / "scripts" / "gen_lazypack_codex.py"),
+        "--article-id", a.article_id,
+        "--title", a.title or str(document.get("title") or f"{a.article_id} 懶人包"),
+        "--plan", str(plan_path),
+        "--out-dir", str(out_dir),
+        # The strict plan itself tells Codex which evidence binding belongs to
+        # each panel; evidence files provide the hash-verified source values.
+        "--source", str(plan_path),
+    ]
+    for spec in document["evidence"].values():
+        cmd += ["--source", str(_resolve(spec["path"]))]
+    for source in a.source:
+        cmd += ["--source", str(_resolve(source))]
+    for experiment in a.experiment:
+        cmd += ["--experiment", experiment]
+    return cmd
+
+
 def cmd_run(a: argparse.Namespace) -> int:
     storage_dir = _resolve(a.storage_dir)
     plan_path = _resolve(a.plan)
@@ -313,22 +427,54 @@ def cmd_run(a: argparse.Namespace) -> int:
     receipt_dir.mkdir(parents=True, exist_ok=True)
     receipt_path = receipt_dir / f"{run_token}.json"
 
-    # 1) Render.  Deterministic rendering is cheap, so retries always recompute
-    # from the hash-pinned plan instead of trusting stale PNGs by file size.
+    # 1) Render. Both primary and fallback recompute every expected panel from
+    # the hash-pinned plan instead of trusting stale PNGs by file size.
     if a.render_cmd:
+        renderer_used = "test-hook"
         print(f"[lazypack_async] TEST HOOK ACTIVE: --render-cmd {a.render_cmd!r} "
-              f"(bypasses lazypack_render.py; smoke/tests only)")
+              f"(bypasses the primary/fallback renderer chain; smoke/tests only)")
         cmd = shlex.split(a.render_cmd) + [str(plan_path), str(out_dir)]
     else:
-        cmd = [
-            sys.executable, str(ROOT / "scripts" / "lazypack_render.py"),
-            "--plan", str(plan_path), "--out-dir", str(out_dir),
-            "--receipt", str(receipt_path), "--run-token", run_token,
-        ]
+        renderer_used = "codex-bespoke"
+        cmd = _codex_command(
+            a, document=document, plan_path=plan_path, out_dir=out_dir
+        )
 
     before = _snapshot_outputs(out_dir, specs)
+    _clear_expected_panels(out_dir, specs)
     try:
         proc = subprocess.run(cmd, cwd=str(ROOT))
+        if not a.render_cmd and proc.returncode != 0:
+            primary_rc = proc.returncode
+            renderer_used = "deterministic-fallback"
+            _clear_expected_panels(out_dir, specs)
+            fallback_cmd = [
+                sys.executable, str(ROOT / "scripts" / "lazypack_render.py"),
+                "--plan", str(plan_path), "--out-dir", str(out_dir),
+                "--receipt", str(receipt_path), "--run-token", run_token,
+            ]
+            print(
+                f"[lazypack_async] Codex bespoke renderer failed rc={primary_rc}; "
+                "using deterministic fallback",
+                file=sys.stderr,
+            )
+            proc = subprocess.run(fallback_cmd, cwd=str(ROOT))
+            _record_fallback(
+                storage_dir=storage_dir,
+                article_id=a.article_id,
+                job_id=job_id,
+                primary_rc=primary_rc,
+                fallback_rc=proc.returncode,
+            )
+        elif not a.render_cmd:
+            _write_render_receipt(
+                receipt_path,
+                renderer="scripts/gen_lazypack_codex.py",
+                run_token=run_token,
+                plan_path=plan_path,
+                out_dir=out_dir,
+                specs=specs,
+            )
     finally:
         # A test hook or interrupted renderer may have written a partial staging
         # result; record only final files that actually reached the owned path.
@@ -401,8 +547,13 @@ def cmd_run(a: argparse.Namespace) -> int:
         urls,
         storage_dir=storage_dir,
         update_action="lazypack_async_render",
+        update_summary=(
+            f"Installed {renderer_used} data-bound lazypack section "
+            f"({len(urls)} panels)."
+        ),
         sync=not a.no_sync,
     )
+    result["renderer"] = renderer_used
     print(json.dumps(result, ensure_ascii=False))
 
     if result["status"] == "published" and not a.no_sync and result["synced"] is False:
@@ -453,7 +604,7 @@ def main() -> int:
     r.add_argument("--job-id", default=None,
                    help="compute_queue receipt id for producer output write-back")
     r.add_argument("--render-cmd", default=None,
-                   help="TEST HOOK: replace the deterministic render step; invoked as "
+                   help="TEST HOOK: replace the primary/fallback render chain; invoked as "
                         "`<cmd> <plan> <out_dir>`")
     r.add_argument("--upload-cmd", default=None,
                    help="TEST HOOK: replace Supabase upload; invoked as "

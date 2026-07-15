@@ -39760,12 +39760,9 @@
     "description": "boss 2026-07-15 晚間指令：懶人包圖走 codex 生成，deterministic renderer 模板『render 得很醜』降為 fallback。skill 政策已改（.claude/skills/lazypack-infographic/SKILL.md 視覺分層段）。本 task 改管線：(1) `scripts/lazypack_async_render.py` 改為先走 `scripts/gen_lazypack_codex.py`（codex 寫 data-bound 腳本→ 本地執行 → PNG 驗證 → bounded repair），codex 失敗才 fallback deterministic `lazypack_render.py` 並在 work_log 註記 fallback（不得 silent — 依 no-silent-fallback rule）；(2) 保留 hash-receipt / evidence 驗證等研究誠實 gate（codex 腳本的數字也必須 data-bound 自 evidence JSON）；(3) 更新對應 tests；(4) 用一篇 pending queue 文章端到端驗證（enqueue → compute worker → PNG 品質 + upload + append）。注意 gen_lazypack_codex.py 頭部 docstring 的 LEGACY 標示要同步改掉（它現在是 primary）。參考 incident：2026-07-15 trending_ai_power_vol 懶人包（deterministic 模板）被 boss 嫌醜，已用 codex 重生。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "boss_directive_20260715_lazypack_codex",
     "created_at": "2026-07-15T11:14:45.382258+00:00",
-    "claimed_by": "codex-failover-slot-1-a9c7dc5ce95e4ed5896a6d516af9aa5b",
-    "claimed_at": "2026-07-15T18:01:43.246219+00:00",
-    "claim_session_id": "a3a01096a4e3",
     "status_history": [
       {
         "ts": "2026-07-15T18:01:43.246234+00:00",
@@ -39778,9 +39775,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-1-a9c7dc5ce95e4ed5896a6d516af9aa5b"
+      },
+      {
+        "ts": "2026-07-15T18:22:25.129842+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-a9c7dc5ce95e4ed5896a6d516af9aa5b"
       }
     ],
-    "started_at": "2026-07-15T18:01:43.467859+00:00"
+    "started_at": "2026-07-15T18:01:43.467859+00:00",
+    "completed_at": "2026-07-15T18:22:25.129828+00:00",
+    "result": "Codex bespoke renderer is now async PRIMARY; strict plan/evidence and hash receipt gates retained; deterministic fallback writes work_log. 93 tests passed. E2E lazypack-mile_7b02f9e2-r2 completed exit=0, 4 PNGs uploaded/appended/synced and visually verified."
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a3",

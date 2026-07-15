@@ -288,6 +288,7 @@ def test_run_pipeline_end_to_end_with_stub_render_and_upload(
     feed = json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
     assert has_lazypack_section(feed[0]["content"])
     assert "![結果圖](" in feed[0]["content"]  # plan alt override honored
+    assert feed[0]["errata"]["update_summary"].startswith("Installed test-hook")
 
 
 def test_run_fails_when_render_produces_no_pngs(storage, tmp_path):
@@ -322,7 +323,7 @@ def test_run_does_not_accept_rc0_hook_that_reuses_stale_pngs(storage, tmp_path):
     assert lar.cmd_run(ns) == 3
 
 
-def test_run_default_is_deterministic_renderer_and_replaces_stale_pngs(
+def test_run_default_is_codex_bespoke_renderer_and_replaces_stale_pngs(
     storage, tmp_path, monkeypatch
 ):
     from volpred.publisher import lazypack_install
@@ -335,33 +336,16 @@ def test_run_default_is_deterministic_renderer_and_replaces_stale_pngs(
 
     def fake_run(cmd, cwd):
         captured.append(cmd)
-        assert Path(cmd[1]).name == "lazypack_render.py"
-        assert "gen_lazypack_codex.py" not in " ".join(cmd)
+        assert Path(cmd[1]).name == "gen_lazypack_codex.py"
+        assert "lazypack_render.py" not in " ".join(cmd)
+        assert str(tmp_path / "plan.json") in [
+            cmd[i + 1] for i, value in enumerate(cmd[:-1]) if value == "--source"
+        ]
         plan = json.loads(Path(cmd[cmd.index("--plan") + 1]).read_text(encoding="utf-8"))
         target = Path(cmd[cmd.index("--out-dir") + 1])
         target.mkdir(parents=True, exist_ok=True)
         for panel in plan["panels"]:
             (target / f"{panel['name']}.png").write_bytes(b"N" * 2048)
-        receipt = Path(cmd[cmd.index("--receipt") + 1])
-        token = cmd[cmd.index("--run-token") + 1]
-        receipt.parent.mkdir(parents=True, exist_ok=True)
-        receipt.write_text(json.dumps({
-            "schema_version": 1,
-            "renderer": "scripts/lazypack_render.py",
-            "run_token": token,
-            "plan_sha256": hashlib.sha256(
-                Path(cmd[cmd.index("--plan") + 1]).read_bytes()
-            ).hexdigest(),
-            "panels": [
-                {
-                    "name": f"{panel['name']}.png",
-                    "sha256": hashlib.sha256(
-                        (target / f"{panel['name']}.png").read_bytes()
-                    ).hexdigest(),
-                }
-                for panel in plan["panels"]
-            ],
-        }), encoding="utf-8")
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(lar.subprocess, "run", fake_run)
@@ -388,6 +372,85 @@ def test_run_default_is_deterministic_renderer_and_replaces_stale_pngs(
     assert lar.cmd_run(ns) == 0
     assert len(captured) == 1  # stale file-size heuristic no longer bypasses render
     assert stale.read_bytes() == b"N" * 2048
+
+
+def test_run_codex_failure_uses_logged_deterministic_fallback(
+    storage, tmp_path, monkeypatch
+):
+    from volpred.publisher import lazypack_install
+
+    _patch_queue(monkeypatch, tmp_path)
+    out_dir = storage / "lazypack_jobs" / "mile_lz1" / "panels"
+    captured = []
+
+    def fake_run(cmd, cwd):
+        captured.append(cmd)
+        renderer = Path(cmd[1]).name
+        if renderer == "gen_lazypack_codex.py":
+            # A partial primary output must not leak into the fallback receipt.
+            out_dir.mkdir(parents=True, exist_ok=True)
+            (out_dir / "1_framework.png").write_bytes(b"P" * 2048)
+            return SimpleNamespace(returncode=17)
+        assert renderer == "lazypack_render.py"
+        plan_path = Path(cmd[cmd.index("--plan") + 1])
+        plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        target = Path(cmd[cmd.index("--out-dir") + 1])
+        for panel in plan["panels"]:
+            (target / f"{panel['name']}.png").write_bytes(b"F" * 2048)
+        receipt = Path(cmd[cmd.index("--receipt") + 1])
+        token = cmd[cmd.index("--run-token") + 1]
+        receipt.write_text(json.dumps({
+            "schema_version": 1,
+            "renderer": "scripts/lazypack_render.py",
+            "run_token": token,
+            "plan_sha256": hashlib.sha256(plan_path.read_bytes()).hexdigest(),
+            "panels": [
+                {
+                    "name": f"{panel['name']}.png",
+                    "sha256": hashlib.sha256(
+                        (target / f"{panel['name']}.png").read_bytes()
+                    ).hexdigest(),
+                }
+                for panel in plan["panels"]
+            ],
+        }), encoding="utf-8")
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(lar.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        lazypack_install, "upload_panels",
+        lambda article_id, panel_dir, specs, uploader=None: [
+            (f"https://x.test/{stem}.png", alt) for stem, alt in specs
+        ],
+    )
+    monkeypatch.setattr(
+        lazypack_install, "install_lazypack_section",
+        lambda *args, **kwargs: {"status": "draft", "synced": False, "panels": 2},
+    )
+    ns = argparse.Namespace(
+        job_id="lazypack-mile_lz1",
+        article_id="mile_lz1",
+        experiment=[], source=[], title=None,
+        storage_dir=str(storage),
+        plan=str(tmp_path / "plan.json"),
+        out_dir=str(out_dir),
+        render_cmd=None,
+        upload_cmd=None,
+        no_sync=True,
+    )
+
+    assert lar.cmd_run(ns) == 0
+    assert [Path(cmd[1]).name for cmd in captured] == [
+        "gen_lazypack_codex.py", "lazypack_render.py",
+    ]
+    assert (out_dir / "1_framework.png").read_bytes() == b"F" * 2048
+    work_log = json.loads((storage / "work_log.json").read_text(encoding="utf-8"))
+    assert len(work_log) == 1
+    event = work_log[0]
+    assert event["outcome"] == "fallback_succeeded"
+    assert event["fallback_event_id"] == "lazypack_fallback:lazypack-mile_lz1"
+    assert event["primary_renderer"] == "scripts/gen_lazypack_codex.py"
+    assert event["fallback_renderer"] == "scripts/lazypack_render.py"
 
 
 def test_failed_render_writes_back_partial_panel_ownership(
@@ -427,6 +490,27 @@ def test_failed_render_writes_back_partial_panel_ownership(
     assert job["output_paths_updated_at"]
     assert str(out_dir / "1_framework.png") in job["output_paths"]
     assert (out_dir / "1_framework.png").exists()
+
+
+def test_primary_bespoke_script_is_added_to_job_output_ownership(
+    storage, tmp_path, monkeypatch
+):
+    qdir = _patch_queue(monkeypatch, tmp_path)
+    assert lar.cmd_enqueue(_enqueue_ns(tmp_path)) == 0
+    job_path = qdir / "lazypack-mile_lz1.json"
+    run_dir = storage / "lazypack_jobs" / "mile_lz1" / "runs" / "lazypack-mile_lz1"
+    out_dir = run_dir / "panels"
+    before = lar._snapshot_outputs(out_dir, [("1_framework", "圖")])
+    script = out_dir / lar.BESPOKE_SCRIPT_NAME
+    out_dir.mkdir(parents=True, exist_ok=True)
+    script.write_text("# reproducible data-bound renderer\n", encoding="utf-8")
+
+    lar._record_job_outputs(
+        "lazypack-mile_lz1", out_dir, [("1_framework", "圖")], before
+    )
+
+    job = json.loads(job_path.read_text(encoding="utf-8"))
+    assert str(script) in job["output_paths"]
 
 
 def test_failed_render_does_not_claim_unchanged_stale_panels(

@@ -1,0 +1,52 @@
+{
+  "id": "lazypack-mile_7b02f9e2-r2",
+  "title": "lazypack render mile_7b02f9e2",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_7b02f9e2-r2",
+    "--article-id",
+    "mile_7b02f9e2",
+    "--plan",
+    "storage/lazypack_jobs/mile_7b02f9e2/runs/lazypack-mile_7b02f9e2-r2/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_7b02f9e2/runs/lazypack-mile_7b02f9e2-r2/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "冠軍換了十六次，統計上一個都沒贏",
+    "--experiment",
+    "K1583"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-15T18:07:41Z",
+  "started_at": "2026-07-15T18:07:45Z",
+  "completed_at": "2026-07-15T18:18:26Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_7b02f9e2-r2.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_7b02f9e2-r2.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_7b02f9e2/runs/lazypack-mile_7b02f9e2-r2/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_7b02f9e2/runs/lazypack-mile_7b02f9e2-r2/plan.json",
+    "storage/lazypack_jobs/mile_7b02f9e2/runs/lazypack-mile_7b02f9e2-r2/panels/1_concept.png",
+    "storage/lazypack_jobs/mile_7b02f9e2/runs/lazypack-mile_7b02f9e2-r2/panels/2_method.png",
+    "storage/lazypack_jobs/mile_7b02f9e2/runs/lazypack-mile_7b02f9e2-r2/panels/3_results.png",
+    "storage/lazypack_jobs/mile_7b02f9e2/runs/lazypack-mile_7b02f9e2-r2/panels/4_takeaway.png",
+    "storage/lazypack_jobs/mile_7b02f9e2/runs/lazypack-mile_7b02f9e2-r2/panels/render_lazypack.py"
+  ],
+  "output_paths_updated_at": "2026-07-15T18:19:48Z",
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}

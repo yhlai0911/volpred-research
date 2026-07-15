@@ -1,0 +1,361 @@
+{
+  "schema_version": 1,
+  "title": "懶人包｜排行榜第一名，是實力還是噪音",
+  "subtitle": "SPY 波動率模型的信賴集合檢定：一群模型分不出高下的七年",
+  "evidence": {
+    "k1583": {
+      "path": "experiments/k1583/k1583_results.json",
+      "sha256": "88389710b79801d958676f0d99d2f46f5f7c823b306e56900afd8bf192f000ef",
+      "label": "模型信賴集合檢定完整結果 JSON（第 1583 號實驗）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "冠軍一直在換手，這代表什麼",
+      "alt": "概念說明：一群波動率模型的排行榜冠軍反覆換手，換手次數與樣本規模",
+      "sources": [
+        "k1583"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "排行榜的直覺",
+          "body": [
+            "同一批波動率模型，每隔一段時間重排一次名次，冠軍就換一次人。",
+            "看起來像激烈競爭，但名次換得越勤，越可能只是運氣在輪流。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "參賽模型",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_unconditional.M",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "同一條技術路線上的參數變體，另有一個因無有效預測而出局"
+        },
+        {
+          "kind": "metric",
+          "label": "對答案的交易日",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_unconditional.T",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "七年裡冠軍換手",
+          "value": {
+            "source": "k1583",
+            "path": "sequential_drift.n_change_points",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          },
+          "note": "滾動視窗下的當期第一名易主次數"
+        },
+        {
+          "kind": "metric",
+          "label": "測試期起點",
+          "value": {
+            "source": "k1583",
+            "path": "loss_inventory.0.date_start",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "測試期終點",
+          "value": {
+            "source": "k1583",
+            "path": "loss_inventory.0.date_end",
+            "format": {
+              "kind": "date"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "信賴集合檢定在問什麼",
+      "alt": "方法說明：模型信賴集合檢定的邏輯、重抽樣模擬次數、顯著水準與滾動視窗設定",
+      "sources": [
+        "k1583"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "它問的是一句話",
+          "body": [
+            "這批模型之間的預測誤差差距，超得過抽樣隨機性能製造的幅度嗎？",
+            "答案若否，整批留著；答案若是，把最差的踢掉，再問一次。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "留在集合裡的意思",
+          "body": [
+            "留下來只代表「沒有證據說它比別人差」，不代表它比較好。",
+            "評分用的是預測誤差指標：模型押的波動率與當天實際發生的波動差越遠，扣分越多。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "重抽樣模擬",
+          "value": {
+            "source": "k1583",
+            "path": "metadata.n_bootstrap",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          },
+          "note": "定態重抽樣，亂數種子固定，可完整複現"
+        },
+        {
+          "kind": "metric",
+          "label": "淘汰門檻",
+          "value": {
+            "source": "k1583",
+            "path": "metadata.alpha",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "終止統計量低於此值才踢得掉模型"
+        },
+        {
+          "kind": "metric",
+          "label": "滾動視窗長度",
+          "value": {
+            "source": "k1583",
+            "path": "metadata.rolling_window_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個交易日"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "每次往前推",
+          "value": {
+            "source": "k1583",
+            "path": "metadata.rolling_stride_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個交易日"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "成績單：淘汰名單是空的",
+      "alt": "主要結果：全期與三種波動狀態下的存活模型數與檢定終止統計量，全部無人被淘汰",
+      "sources": [
+        "k1583"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "全期存活模型",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_unconditional.M",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "一個都沒被剔除，淘汰名單是空的"
+        },
+        {
+          "kind": "metric",
+          "label": "全期終止統計量",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_unconditional.p_values.A1",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "整個集合的統計量，不是任一模型各自的分數"
+        },
+        {
+          "kind": "metric",
+          "label": "高波動存活模型",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_conditional_vix.high.M",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "高波動終止統計量",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_conditional_vix.high.p_values.A1",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "中波動存活模型",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_conditional_vix.mid.M",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "中波動終止統計量",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_conditional_vix.mid.p_values.A1",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "低波動存活模型",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_conditional_vix.low.M",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "低波動終止統計量",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_conditional_vix.low.p_values.A1",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "恐慌或平靜都一樣，切開市場狀態也分不出高下"
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "帶得走的判斷力，與這篇的邊界",
+      "alt": "結論與限制：看到模型排行榜該問的三個問題，以及衰退期樣本過少的檢定力限制",
+      "sources": [
+        "k1583"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "下次看到排行榜，問三件事",
+          "body": [
+            "第一，這個排名有沒有做多重比較的校正？",
+            "第二，這個差距經得起重抽樣模擬的考驗嗎？",
+            "第三，換一個時間窗，第一名還是它嗎？"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "衰退期樣本",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_conditional_recession.recession.T",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": "只涵蓋 COVID 崩盤那兩個月，檢定力嚴重不足，只能當描述看，不能當推論用"
+        },
+        {
+          "kind": "metric",
+          "label": "衰退期存活模型",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_conditional_recession.recession.M",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "擴張期樣本",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_conditional_recession.expansion.T",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "擴張期存活模型",
+          "value": {
+            "source": "k1583",
+            "path": "mcs_conditional_recession.expansion.M",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "其他邊界",
+          "body": [
+            "單一資產、單一測試期，推不到台股、外匯或個股。",
+            "按市場狀態切樣本是粗近似；滾動視窗的當期冠軍不等於正式的結構性斷點檢定。"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -117,7 +117,7 @@ def install_lazypack_section(
         errata["update_at"] = now_iso
         errata["update_action"] = update_action
         errata["update_summary"] = update_summary or (
-            f"Installed deterministic data-bound lazypack section ({len(urls)} panels)."
+            f"Installed data-bound lazypack section ({len(urls)} panels)."
         )
         hist = (
             errata.get("update_history")
