@@ -66,6 +66,21 @@ def test_frozen_input_is_unique_hash_pinned_and_one_to_one(k1386) -> None:
         assert source_audit["duplicate_values_identical"] is True
 
 
+def test_frozen_csv_reads_pin_round_trip_float_parser(k1386, monkeypatch) -> None:
+    calls: list[dict] = []
+    original_read_csv = k1386.pd.read_csv
+
+    def recording_read_csv(*args, **kwargs):
+        calls.append(dict(kwargs))
+        return original_read_csv(*args, **kwargs)
+
+    monkeypatch.setattr(k1386.pd, "read_csv", recording_read_csv)
+    k1386.load_data()
+
+    assert len(calls) == 2
+    assert all(call.get("float_precision") == "round_trip" for call in calls)
+
+
 def test_conflicting_duplicate_dates_fail_closed(k1386) -> None:
     frame = pd.DataFrame(
         {
@@ -114,6 +129,9 @@ def test_diagnostics_delegate_exactly_to_canonical_dm(k1386) -> None:
 def test_saved_losses_reproduce_results_and_readme() -> None:
     results = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
     readme = README_PATH.read_text(encoding="utf-8")
+    assert results["data"]["float_parser"] == (
+        'pandas.read_csv(float_precision="round_trip")'
+    )
     losses = {
         "HAR": np.load(RESULTS_PATH.with_name("k1386_loss_har.npy")),
         "fGN_univariate": np.load(

@@ -63,7 +63,10 @@ IS `n=3,021`, OOS origins `n=1,098`, and evaluated forecasts `n=1,097`.
 The shared CSVs now extend beyond the original experiment. The script therefore
 fails the methodology-only comparison closed at `OOS_END=2026-05-19`, records
 both current source hashes, and pins the cleaned analysis slice to
-`sha256=45160dbaf14b010c942af2af1d41cc4477bb166fa76e25b24dd9f91d8a2b5d48`.
+`sha256=9bce8a54db1c822a76b90ace40144757b683e36b9416d74ca1c6430c71b8b567`.
+Both frozen CSVs use pandas `float_precision="round_trip"`; the default C
+parser can differ by one ULP across CPU/OS combinations and previously made the
+slice hash disagree between macOS/ARM and Linux/x86 despite identical files.
 Extending the OOS period is a separate robustness exercise, not part of this
 repair.
 

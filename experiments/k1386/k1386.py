@@ -63,7 +63,7 @@ OOS_END = "2026-05-19"
 FORECAST_HORIZON = 1
 HAC_LAG_SENSITIVITY = (0, 1, 5, 10, 20)
 EXPECTED_ANALYSIS_SLICE_SHA256 = (
-    "45160dbaf14b010c942af2af1d41cc4477bb166fa76e25b24dd9f91d8a2b5d48"
+    "9bce8a54db1c822a76b90ace40144757b683e36b9416d74ca1c6430c71b8b567"
 )
 
 
@@ -138,8 +138,19 @@ def _deduplicate_identical_dates(frame, source_name):
 
 
 def load_data():
-    spy_df = pd.read_csv(DATA_SPY, parse_dates=["date"])
-    gld_df = pd.read_csv(DATA_GLD, parse_dates=["date"])
+    # The default pandas C float parser can differ by one ULP across CPU/OS
+    # combinations.  Pin the round-trip converter so the frozen CSV bytes map
+    # to the same analysis values (and slice hash) on macOS and Linux CI.
+    spy_df = pd.read_csv(
+        DATA_SPY,
+        parse_dates=["date"],
+        float_precision="round_trip",
+    )
+    gld_df = pd.read_csv(
+        DATA_GLD,
+        parse_dates=["date"],
+        float_precision="round_trip",
+    )
     # Audit only the frozen analysis window. Later appended rows must not alter
     # a methodology-repair rerun, while historical changes fail the slice hash.
     spy_df = spy_df[spy_df["date"].between("2010-01-01", OOS_END)].copy()
@@ -771,6 +782,7 @@ def main():
                 str(DATA_SPY.relative_to(ROOT)): file_sha256(DATA_SPY),
                 str(DATA_GLD.relative_to(ROOT)): file_sha256(DATA_GLD),
             },
+            "float_parser": 'pandas.read_csv(float_precision="round_trip")',
             "source_duplicate_audit": source_audit,
             "analysis_slice_sha256": analysis_slice_hash,
             "is_period": (
