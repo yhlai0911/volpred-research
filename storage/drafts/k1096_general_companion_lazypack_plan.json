@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "title": "關掉恐慌溫度計，局部少犯錯但整體沒變準",
+  "subtitle": "同一套未來資料，分開看完整成績與高恐慌區間",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1096/k1096_results.json",
+      "sha256": "d90ebfb8babbecaa23cd9af34e9d8f85fc0bec195ea6758db779c538cb0e8b07",
+      "label": "K1096 certified BTC regime-switching results"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_full_sample",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "完整成績：四種用法都沒過線",
+      "alt": "四種 VIX 用法在完整樣本外期間的比較強度",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "往前驗收樣本",
+          "value": {
+            "source": "result",
+            "path": "metadata.n_oos_actual",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "永遠開著",
+          "value": {
+            "source": "result",
+            "path": "full_oos_vs_gjr.gjr_vs_vix.dm_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "方向較好，但未過嚴格線"
+        },
+        {
+          "kind": "metric",
+          "label": "高恐慌時關掉",
+          "value": {
+            "source": "result",
+            "path": "full_oos_vs_gjr.gjr_vs_reg_voff.dm_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "完整樣本仍未勝出"
+        },
+        {
+          "kind": "metric",
+          "label": "連續調整",
+          "value": {
+            "source": "result",
+            "path": "full_oos_vs_gjr.gjr_vs_adaptive.dm_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "方向反而較差"
+        }
+      ]
+    },
+    {
+      "name": "2_panic_window",
+      "info": "results",
+      "style": "professional",
+      "title": "高恐慌區間：硬開關只消除傷害",
+      "alt": "高恐慌區間四種 VIX 用法的局部比較",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "區間樣本",
+          "value": {
+            "source": "result",
+            "path": "vix_buckets_vs_gjr.High.n",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "永遠開著",
+          "value": {
+            "source": "result",
+            "path": "vix_buckets_vs_gjr.High.models.vix.dm_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "預測明顯受傷"
+        },
+        {
+          "kind": "metric",
+          "label": "高恐慌時關掉",
+          "value": {
+            "source": "result",
+            "path": "vix_buckets_vs_gjr.High.models.reg_voff.dm_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "傷害回到零附近"
+        },
+        {
+          "kind": "metric",
+          "label": "連續調整",
+          "value": {
+            "source": "result",
+            "path": "vix_buckets_vs_gjr.High.models.adaptive.dm_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "錯誤方向越過嚴格線"
+        }
+      ]
+    },
+    {
+      "name": "3_reading_rules",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "讀法：局部修好，不等於整體勝出",
+      "alt": "閱讀狀態開關實驗的三個注意事項",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "先守時間順序",
+          "body": [
+            "每次預測只讀前一日以前的資料，不能偷看當天結果。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "分開兩張成績單",
+          "body": [
+            "高恐慌時少犯錯，只能證明局部傷害降低；完整期間仍要另外驗收。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "保留研究邊界",
+          "body": [
+            "目前只測單一加密資產與固定切點，跨資產效果仍待驗證。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "連動觀察窗口",
+          "value": {
+            "source": "result",
+            "path": "metadata.corr_window",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": "尚未測試其他窗口"
+        }
+      ]
+    }
+  ]
+}
