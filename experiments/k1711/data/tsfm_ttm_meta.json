@@ -1,0 +1,47 @@
+{
+  "model": "ttm",
+  "context": 512,
+  "horizon": 32,
+  "tsfm_start": "2012-01-01",
+  "seed": 20260714,
+  "checkpoint": {
+    "repo": "ibm-granite/granite-timeseries-ttm-r2",
+    "revision": "512-96-ft-r2.1 (selected by the official get_model selector, freq='d')",
+    "params": "0.86M",
+    "pretraining_corpus": [
+      "fully enumerated on the model card; the only financial series is Bitcoin \u2014 no equity or index volatility"
+    ],
+    "documented_data_cutoff": "not stated; corpus fully enumerated instead",
+    "equity_or_index_volatility_in_corpus": "no"
+  },
+  "package_versions": {
+    "torch": "2.10.0",
+    "granite-tsfm": "0.3.6",
+    "transformers": "4.57.6",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1"
+  },
+  "assets": {
+    "SPY": {
+      "n_forecasts": 3650,
+      "first_target": "2012-01-04",
+      "last_target": "2026-07-13",
+      "panel_sha256": "e571215698e75d5b9f89d74c8e52b40d52072e9b757acf07a407647df72998ac",
+      "file": "tsfm_ttm_SPY.csv"
+    },
+    "0050.TW": {
+      "n_forecasts": 3524,
+      "first_target": "2012-01-03",
+      "last_target": "2026-07-13",
+      "panel_sha256": "3334e23e151cee2d39221a01a2eb1d58cd640d2939004652fd8c522365af5b7a",
+      "file": "tsfm_ttm_0050_TW.csv"
+    },
+    "TX": {
+      "n_forecasts": 3033,
+      "first_target": "2014-01-24",
+      "last_target": "2026-07-13",
+      "panel_sha256": "6d7e4b2142e47228143db97a464510ac61b39c1841d785192cb9761ace213dd2",
+      "file": "tsfm_ttm_TX.csv"
+    }
+  }
+}
