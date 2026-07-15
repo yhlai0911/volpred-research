@@ -154,6 +154,10 @@ def test_unlocked_fd_with_copied_token_cannot_impersonate_holder(tmp_path: Path)
                 check=False,
             )
             assert forged.returncode != 0
+            assert "kind=lease_evidence_invalid" in forged.stderr
+            assert "reason=BlockingIOError" in forged.stderr
+            assert "exit_semantics=deny" in forged.stderr
+            assert "dedupe_key=git_writer_lease_verify" in forged.stderr
             assert _git(repo, "rev-parse", "refs/heads/main").stdout.strip() == base
         finally:
             os.close(forged_fd)

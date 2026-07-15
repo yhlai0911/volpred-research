@@ -76,7 +76,15 @@ def main() -> int:
             or metadata.get("capability_ino") != capability.st_ino
         ):
             return 1
-    except (BlockingIOError, OSError, ValueError, json.JSONDecodeError):  # silent-ok: malformed or unlocked lease evidence must collapse to verifier failure.
+    except (BlockingIOError, OSError, ValueError, json.JSONDecodeError) as exc:
+        # Keep the hook standalone and avoid leaking path/token evidence, while
+        # still making fail-closed verifier errors observable to operators.
+        print(
+            "[git-writer-lease-verify] WARN "
+            f"kind=lease_evidence_invalid reason={type(exc).__name__} "
+            "exit_semantics=deny dedupe_key=git_writer_lease_verify",
+            file=sys.stderr,
+        )
         return 1
     return 0
 
